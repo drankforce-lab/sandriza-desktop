@@ -17,6 +17,21 @@
  */
 
 module.exports = {
+  /* ── LE PIED DE LISTE ET L EXPORT (2026-09-19) ─────────────────────────
+     ⚠ LES NUMEROS DE COMMANDE tiennent dans UNE cellule, separes par un
+     point-virgule. A l ecran ce sont des pastilles cote a cote ; dans un
+     fichier il faut qu ils ne cassent pas le CSV — d ou le point-virgule et
+     non la virgule, qui est notre separateur de colonnes.
+     ⚠ << Planifie par >> et << Annule par >> deviennent DEUX colonnes : a
+     l ecran ils se suivent dans la meme phrase, mais on trie par l un OU
+     l autre, jamais par les deux ensemble. */
+  'ramassage': 'pickup',
+  'ramassages': 'pickups',
+  'Confirmation': 'Confirmation',
+  'Planifié par': 'Scheduled by',
+  'Annulé par': 'Cancelled by',
+  'Commandes': 'Orders',
+  'La liste des ramassages': 'The pickup list',
   'Ramassage': 'Pickup',
   'colis': 'parcels',
   /* Les DEUX alternatives en entier — voir tools/banc-pluriel-colle.js. */

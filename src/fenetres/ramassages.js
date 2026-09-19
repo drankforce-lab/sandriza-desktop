@@ -208,9 +208,35 @@ ${JS_ACTIVITE()}${JS_DIRE()}
               : '')
           + '</div>';
       }).join('');
+      /* Le pied ferme la liste et porte l export (2026-09-19). ⚠ Il se pose
+         AVANT la boite de planification, jamais apres : il appartient a la
+         liste. */
+      h += szPied(
+        rows.length + ' ' + (rows.length > 1 ? '${T("ramassages")}' : '${T("ramassage")}'),
+        '<button class="mini" id="rm-exporter"><span class="ic">⬇</span>${T(" Exporter")}</button>');
     }
     if (PLAN) h += boitePlan();
     corps.innerHTML = h;
+
+    /* ⚠ LES NUMEROS DE COMMANDE PARTENT DANS UNE COLONNE, separes par un
+       point-virgule. A l ecran ce sont des pastilles cote a cote ; dans un
+       fichier il faut qu ils tiennent dans UNE cellule sans casser le CSV —
+       d ou le point-virgule et non la virgule, qui est notre separateur. */
+    var exrm = document.getElementById('rm-exporter');
+    if (exrm) exrm.onclick = function(){
+      var lignes = (RAM || []).map(function(r){
+        return [r.date || '', r.transporteur || '', r.colis,
+          r.annule ? '${T("Annulé")}' : '${T("Planifié")}',
+          r.confirmation || '', r.par || '', r.annulePar || '',
+          (r.commandes || []).join(' ; ')];
+      });
+      if (!lignes.length) { dire('${T("Rien à exporter.")}', 'att'); return; }
+      var csv = szCSV(['${T("Date")}', '${T("Transporteur")}', '${T("Colis")}',
+        '${T("Statut")}', '${T("Confirmation")}', '${T("Planifié par")}',
+        '${T("Annulé par")}', '${T("Commandes")}'], lignes);
+      szExporter('ramassages-' + new Date().toISOString().slice(0, 10) + '.csv', csv,
+        '${T("La liste des ramassages")}');
+    };
   }
 
   function boitePlan(){

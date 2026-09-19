@@ -448,9 +448,56 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     }
     h += '</div>';
 
+    /* ⚠⚠ DEUX ONGLETS DE FORMES DIFFERENTES, DONC DEUX FICHIERS. Une offre et
+       une annonce n ont ni les memes colonnes ni le meme sens ; les mettre dans
+       un seul tableau demanderait des cellules vides partout, et une cellule
+       vide dans un export ne dit pas si la donnee manque ou ne s applique pas.
+       ➡ On exporte L ONGLET COURANT, avec SES colonnes — la meme regle que
+       partout : le fichier ressemble a ce qu on regarde. */
+    if (rows.length) {
+      h += szPied(
+        rows.length + ' ' + (ONGLET === 'offres'
+          ? (rows.length > 1 ? '${T("offres")}' : '${T("offre")}')
+          : (rows.length > 1 ? '${T("annonces")}' : '${T("annonce")}')),
+        '<button class="mini" id="pr-exporter"><span class="ic">⬇</span>${T(" Exporter")}</button>');
+    }
+
     if (FORM) h += (ONGLET === 'offres' ? boiteOffre() : boiteAnnonce());
     corps.innerHTML = h;
     brancher();
+
+    var expr = document.getElementById('pr-exporter');
+    if (expr) expr.onclick = function(){
+      var lignes2, entetes, nomFichier, quoi;
+      if (ONGLET === 'offres') {
+        entetes = ['${T("Nom")}', '${T("Rabais")}', '${T("Portée")}',
+          '${T("Début")}', '${T("Fin")}', '${T("État")}'];
+        lignes2 = rows.map(function(o){
+          return [o.nom || '', o.rabais || '', o.portee || '', o.debut || '', o.fin || '',
+            o.enCours ? '${T("En cours")}' : '${T("Hors service")}'];
+        });
+        nomFichier = 'offres-';
+        quoi = '${T("La liste des offres")}';
+      } else {
+        /* ⚠ LE CONTENU PART ENTIER : a l ecran il est tronque a 18rem avec des
+           points de suspension, parce qu une annonce peut faire trois lignes.
+           Dans un fichier, un message coupe est un message perdu. */
+        entetes = ['${T("Nom")}', '${T("Genre")}', '${T("Contenu")}',
+          '${T("Priorité")}', '${T("Début")}', '${T("Fin")}', '${T("État")}'];
+        lignes2 = rows.map(function(a){
+          return [a.nom || '',
+            a.genre === 'announcement' ? '${T("Bandeau")}' : '${T("Badge")}',
+            (a.genre === 'announcement' ? a.message : a.badge) || '',
+            a.priorite, a.debut || '', a.fin || '',
+            a.enCours ? '${T("En cours")}' : '${T("Hors service")}'];
+        });
+        nomFichier = 'annonces-';
+        quoi = '${T("La liste des annonces")}';
+      }
+      if (!lignes2.length) { dire('${T("Rien à exporter.")}', 'att'); return; }
+      szExporter(nomFichier + new Date().toISOString().slice(0, 10) + '.csv',
+        szCSV(entetes, lignes2), quoi);
+    };
   }
 
   function gestes(x){

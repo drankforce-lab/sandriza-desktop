@@ -27,6 +27,18 @@
  */
 
 module.exports = {
+  /* ── LE PIED DE LISTE ET L EXPORT (2026-09-19) ─────────────────────────
+     ⚠ DEUX ONGLETS, DEUX FICHIERS. Une offre et une annonce n ont ni les memes
+     colonnes ni le meme sens ; les reunir demanderait des cellules vides
+     partout, et une cellule vide dans un export ne dit pas si la donnee manque
+     ou ne s applique pas. Le pied compte donc dans le vocabulaire de l onglet
+     courant, et les deux pluriels existent pour chacun. */
+  'offre': 'offer',
+  'offres': 'offers',
+  'annonce': 'announcement',
+  'annonces': 'announcements',
+  'La liste des offres': 'The offer list',
+  'La liste des annonces': 'The announcement list',
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   'Offres et annonces — Administration Sandriza': 'Offers and announcements — Sandriza Administration',
   'Offres et annonces': 'Offers and announcements',
