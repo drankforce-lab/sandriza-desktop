@@ -68,6 +68,43 @@ const PAR_LOT = 18;
 const ELASTIQUE = OPT('--elastique');
 const LARGEURS = ELASTIQUE ? [1100, 1700] : [1100];
 
+/* ── --gros : LA LISTE PLEINE ──────────────────────────────────────────────
+   ⚠⚠ SANS CA, LA MESURE DES COLONNES NE VEUT RIEN DIRE — et elle m a trompe.
+   Les jeux d epreuve portent 1 a 8 elements. Une grille a qui l on donne huit
+   vignettes ne peut PAS en montrer douze par rangee, quelle que soit la
+   largeur : on mesure alors la taille du JEU, pas l elasticite de la grille.
+   `photos` a repondu << 8 -> 8 colonnes >> et j ai failli conclure a une
+   grille figee, alors que son CSS est `auto-fill` et parfaitement correct.
+   ➡ On gonfle donc les tableaux du jeu en repetant leurs entrees, avec des
+   identifiants distincts pour que rien ne se confonde. */
+const GROS = OPT('--gros') ? 120 : 0;
+function gonfler(v, prof) {
+  if (!GROS || prof > 4) return v;
+  if (Array.isArray(v)) {
+    if (!v.length || v.length >= GROS) return v.map((x) => gonfler(x, prof + 1));
+    const out = [];
+    for (let i = 0; i < GROS; i++) {
+      const src = v[i % v.length];
+      if (src && typeof src === 'object' && !Array.isArray(src)) {
+        const c = Object.assign({}, src);
+        /* Les identifiants doivent differer : deux lignes de meme id peuvent
+           etre dedupliquees par la fenetre, et l on remesurerait le jeu court. */
+        for (const k of ['id', 'cle', 'ref', 'sku', 'code']) {
+          if (typeof c[k] === 'string') c[k] = c[k] + '_' + i;
+        }
+        out.push(c);
+      } else out.push(src);
+    }
+    return out;
+  }
+  if (v && typeof v === 'object') {
+    const o = {};
+    for (const k of Object.keys(v)) o[k] = gonfler(v[k], prof + 1);
+    return o;
+  }
+  return v;
+}
+
 /* ── LE GABARIT, DECOUPE COMME DANS LE BANC DE CONTRASTE ─────────────────── */
 const GABARIT = fs.readFileSync(path.join(__dirname, 'banc-contraste-rendu-page.html'), 'utf8');
 const _morceau = (marque) => {
@@ -81,7 +118,8 @@ const EPILOGUE_BRUT = _morceau('EPILOGUE');
 const OPS_SOCLE = { 'session:activite': { ok: true }, 'lots:etat': { ok: true, lots: [] } };
 
 const prologue = (jeu) =>
-  PROLOGUE_BRUT.replace('__REPONSES__', () => JSON.stringify(Object.assign({}, OPS_SOCLE, jeu.reponses || {})));
+  PROLOGUE_BRUT.replace('__REPONSES__',
+    () => JSON.stringify(Object.assign({}, OPS_SOCLE, gonfler(jeu.reponses || {}, 0))));
 
 /* ⚠ REMPLACEMENT PAR FONCTION, ET CE N'EST PAS UN DETAIL : dans une chaine de
    remplacement, `$&` et consorts sont des motifs. Un coeur qui en contiendrait
@@ -273,6 +311,7 @@ function main() {
 function rapport(lignes, nbFenetres, rates, lotsMorts) {
   const mesures = [];
   const vides = [];
+  const grilles = [];
   for (const l of lignes) {
     if (l.startsWith('ZM|')) {
       const p = l.split('|');
@@ -283,6 +322,10 @@ function rapport(lignes, nbFenetres, rates, lotsMorts) {
         bande: +p[9], bandeOu: +p[10], utileL: +p[11], utileH: +p[12], els: +p[13],
         trouL: +p[14], trouH: +p[15], trouX: +p[16], trouY: +p[17],
       });
+    } else if (l.startsWith('GRILLE|')) {
+      const p = l.split('|');
+      if (p.length < 7) continue;
+      grilles.push({ contexte: p[1], rang: +p[2], cols: +p[3], rangees: +p[4], larg: +p[5], n: +p[6] });
     } else if (l.startsWith('ZM-VIDE|')) {
       const p = l.split('|');
       vides.push({ contexte: p[1], pourquoi: p.slice(2).join('|') });
@@ -362,11 +405,44 @@ function rapport(lignes, nbFenetres, rates, lotsMorts) {
       const vd = (r.morta.toFixed(0) + ' -> ' + r.mortb.toFixed(0) + ' %').padEnd(10);
       console.log('   ' + s + '   ' + t + '   ' + ab + '   ' + vd + '   ' + r.cle);
     }
-    const figes = rangs.filter((r) => r.part < 25);
+    /* ⚠⚠ CE TABLEAU-CI EST LE SEUL QUI REPONDE VRAIMENT. Celui du dessus a un
+       BIAIS MECANIQUE : le plus grand trou est presque toujours la zone SOUS le
+       contenu, et elle s elargit avec la fenetre meme quand la grille au-dessus
+       s etire parfaitement. Il accusait 79 ecrans sur 103 — un chiffre qui ne
+       voulait rien dire. On le garde pour decrire le vide, PAS pour conclure. */
+    const parG = {};
+    for (const g of grilles) {
+      if (g.rang !== 0) continue;                 // la plus grosse grille seulement
+      const mm = /^(.+)@(\d+)\/(.+)$/.exec(g.contexte);
+      if (!mm) continue;
+      const cle = mm[1] + '/' + mm[3];
+      (parG[cle] = parG[cle] || {})[+mm[2]] = g;
+    }
+    const gr = [];
+    for (const cle of Object.keys(parG)) {
+      const a = parG[cle][LARGEURS[0]], b = parG[cle][LARGEURS[1]];
+      if (!a || !b) continue;
+      gr.push({ cle, ca: a.cols, cb: b.cols, la: a.larg, lb: b.larg, n: a.n });
+    }
+    /* Figee = la grille garde le MEME nombre de colonnes alors qu on lui a
+       donne 600 px de plus. C est verifiable, et ca ne peut pas vouloir dire
+       autre chose. */
+    const figees = gr.filter((g) => g.cb <= g.ca && g.ca > 1);
+    const etroites = gr.filter((g) => g.lb <= g.la + 20);
     console.log('');
-    console.log('   ⚠ ' + figes.length + ' ecran(s) sur ' + rangs.length
-      + ' rendent MOINS DU QUART de la largeur offerte au contenu.');
-    console.log('     Chez eux, agrandir la fenetre agrandit le VIDE — c est une mise en page figee.');
+    console.log('== LES GRILLES GAGNENT-ELLES DES COLONNES ? (la vraie question) ==');
+    console.log('');
+    console.log('   colonnes     largeur de la grille   elements   ecran');
+    console.log('   ----------   --------------------   --------   -----');
+    for (const g of gr.sort((x, y) => (x.cb - x.ca) - (y.cb - y.ca)).slice(0, 30)) {
+      const c = (g.ca + ' -> ' + g.cb).padEnd(10);
+      const L = (g.la + ' -> ' + g.lb + ' px').padEnd(20);
+      console.log('   ' + c + '   ' + L + '   ' + String(g.n).padStart(8) + '   ' + g.cle);
+    }
+    console.log('');
+    console.log('   ' + figees.length + ' grille(s) sur ' + gr.length
+      + ' NE GAGNENT AUCUNE COLONNE avec 600 px de plus.');
+    console.log('   ' + etroites.length + ' grille(s) ne S ELARGISSENT MEME PAS (largeur figee).');
   }
 
   console.log('');

@@ -102,6 +102,54 @@ function _vivant(el) {
   return false;
 }
 
+/* ── LES GRILLES ET LES TABLEAUX : combien de colonnes SONT PEINTES ? ───────
+   ⚠⚠ C'EST LA SEULE QUESTION QUI REPOND A << ca ne suit pas la fenetre >>, et
+   il a fallu TROIS indicateurs faux pour y arriver :
+     1. << largeur utile >> : incluait les conteneurs -> 1100/1100 partout.
+     2. << largeur peinte >> : une barre d en-tete pleine largeur -> 100 % partout.
+     3. << la largeur offerte va-t-elle au trou ? >> : le plus grand trou est la
+        zone SOUS le contenu, qui s elargit forcement avec la fenetre. Biais
+        mecanique — il accusait 79 ecrans sur 103, ce qui ne voulait rien dire.
+   ➡ On compte donc les ELEMENTS PAR RANGEE. Une grille elastique en gagne
+   quand la fenetre s elargit ; une grille figee garde les memes et laisse le
+   reste vide. C est verifiable, et ca ne peut pas vouloir dire autre chose. */
+function _grilles(racine) {
+  var out = [];
+  var n;
+  try { n = racine.querySelectorAll('*'); } catch (e) { return out; }
+  for (var i = 0; i < n.length; i++) {
+    var el = n[i];
+    var enf = el.children;
+    if (!enf || enf.length < 4) continue;
+    /* Les rangees : on groupe les enfants par leur bord SUPERIEUR arrondi. */
+    var rangees = {};
+    var vus = 0;
+    for (var k = 0; k < enf.length; k++) {
+      var b;
+      try { b = enf[k].getBoundingClientRect(); } catch (e) { continue; }
+      if (b.width < 8 || b.height < 8) continue;
+      var cle = Math.round(b.top / 4);
+      rangees[cle] = (rangees[cle] || 0) + 1;
+      vus++;
+    }
+    if (vus < 4) continue;
+    var maxRang = 0, nbRangees = 0;
+    for (var r in rangees) { nbRangees++; if (rangees[r] > maxRang) maxRang = rangees[r]; }
+    /* Une VRAIE grille : au moins deux rangees, ou au moins deux par rangee.
+       Une pile d un seul element par rangee n est pas une grille, c est une
+       liste — et son nombre de colonnes ne veut rien dire. */
+    if (maxRang < 2 && nbRangees < 2) continue;
+    var rb;
+    try { rb = el.getBoundingClientRect(); } catch (e) { continue; }
+    if (rb.width < 120) continue;
+    out.push({ el: el, cols: maxRang, rangees: nbRangees, larg: Math.round(rb.width), n: vus });
+  }
+  /* La plus grosse : celle qui porte le plus d elements. C est la zone de
+     resultats, pas une barre d outils a quatre boutons. */
+  out.sort(function (a, b) { return b.n - a.n; });
+  return out;
+}
+
 function mesurer(racine, contexte) {
   var vue = { w: window.innerWidth, h: window.innerHeight };
   if (vue.w < 40 || vue.h < 40) { dit('ZM-VIDE|' + contexte + '|fenetre minuscule'); return; }
@@ -225,6 +273,14 @@ function mesurer(racine, contexte) {
     + '|' + Math.round(maxD - minG) + '|' + Math.round(maxB - minH)
     + '|' + vis.length
     + '|' + trou.w + '|' + trou.h + '|' + trou.x + '|' + trou.y);
+
+  /* Les trois plus grosses grilles de l ecran, avec leurs colonnes peintes. */
+  var gs = _grilles(racine);
+  for (var gi = 0; gi < gs.length && gi < 3; gi++) {
+    var g = gs[gi];
+    dit('GRILLE|' + contexte + '|' + gi + '|' + g.cols + '|' + g.rangees
+      + '|' + g.larg + '|' + g.n);
+  }
 
   dit('COMPTES|' + comptes.vus + '|0|0|0|0|0|0|0|0|' + contexte);
 }
