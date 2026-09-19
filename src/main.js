@@ -2350,6 +2350,12 @@ const OPS_PONT = new Set([
   'repertoire:donnees', 'repertoire:ajouter',
   // L explorateur de photos du Studio (#28) : la meme phototheque, filtrable.
   'studio:explorer', 'explorateur:ouvrir',
+  /* Les VIGNETTES de cette phototheque (#143). ⚠ SEPAREE de studio:explorer, et
+     c est le point : la ligne ne porte une adresse que si la photo est rangee
+     sur le reseau. Une photo importee vit en data: URL, donc la case restait sur
+     << en cours... >> pour toujours. On demande les images des cases AFFICHEES,
+     par petits paquets, plutot que de les coudre a chaque page de 500 lignes. */
+  'studio:vignettes',
   // Retirer de la liste un lien PERIME (#30). ⚠ Le journal de ses acces RESTE :
   // on supprime la cle, pas la memoire de ce qu elle a fait.
   'liens:supprimer',
@@ -3264,6 +3270,11 @@ const LIMITES_PONT = {
   /* Parcourt toute la phototheque et rend AUSSI les identifiants du resultat
      complet (pour << tout selectionner >>) : plus lourd qu une page seule. */
   'studio:explorer': 30000, 'explorateur:ouvrir': 15000,
+  /* ⚠ GENEREUX, ET POUR UNE RAISON : chaque vignette peut devoir etre RAPATRIEE
+     du reseau avant d etre reduite. Un paquet de soixante sur une liaison lente
+     depasse largement les 20 s des lectures ordinaires, et une grille qui
+     abandonne a mi-chemin est exactement le defaut qu on repare. */
+  'studio:vignettes': 120000,
   'liens:supprimer': 20000,
   'panier:poser': 20000, 'panier:lire': 20000, 'panier:vider': 15000,
   /* lots:etat est sondee toutes les 2 s par chaque fenetre : elle doit rendre
@@ -6320,6 +6331,33 @@ ipcMain.handle('menu:modele', (e, m) => {
        `_lancementAServi`. Posé ICI parce que c'est le seul endroit où l'état de
        session arrive dans ce processus. */
     if (_modele.connecte) _aServi = true;
+    /* ⚠⚠ LE CADRE NATIF NE SURVIT PAS À UN CHANGEMENT DE PERSONNE (#142).
+       `cadreNatif` vit dans `reglages` — donc DANS LA MACHINE, pas dans le
+       compte —, et `partir()` le lit AVANT toute connexion. Ce qu'il a vécu :
+       un usager tout neuf ouvre l'administration pour la première fois et tombe
+       dans l'aperçu du cadre, la barre à moitié dessinée parce que le modèle
+       n'était pas encore arrivé quand la page est née.
+       ⚠⚠ ET IL NE POUVAIT PAS EN SORTIR PAR LE MENU : l'entrée qui bascule
+       l'interrupteur est `role: 'superadmin'` (appbar.js · cadre-bascule). Une
+       garde posée sur l'INTERRUPTEUR mais pas sur son EFFET n'est qu'un décor :
+       elle empêche d'allumer, pas de subir. Il ne restait que la sortie de
+       secours du cadre — qui est un RECOURS, pas un réglage.
+       ➡ Dès qu'une session s'ouvre pour quelqu'un qui n'est pas
+       super-administrateur, l'aperçu se range et le poste revient au mode
+       classique. Le super-administrateur le rallume d'un clic ; l'autre n'avait
+       aucun moyen de l'éteindre.
+       ⚠ ON EXIGE `_modele.connecte` VRAI AVANT DE TRANCHER. `_estSuperAdmin()`
+       est faux par défaut — la bonne valeur pour ce qu'il garde ailleurs, mais
+       ici elle rangerait le cadre au premier modèle venu, AVANT même l'écran de
+       connexion, et l'aperçu ne s'ouvrirait plus jamais. Hors session, on ne
+       décide rien.
+       ⚠ ON POSE LE RÉGLAGE AVANT DE RELANCER, comme `cadre:eteindre` : si la
+       relance échoue, le prochain lancement est déjà le bon. */
+    if (_modele.connecte && _vivant(vueCadre) && cadreNatifAllume() && !_estSuperAdmin()) {
+      try { reglages.set('cadreNatif', false); } catch (er) {}
+      cnxDire('cadre natif ETEINT : session ouverte par un compte non super-administrateur — retour au mode classique');
+      try { app.relaunch(); app.exit(0); } catch (er) {}
+    }
     if (roleAvant !== String(_modele.role || '') + '|' + (_modele.connecte ? '1' : '0')) {
       try { require('./veilleur').rafraichir(); } catch {}
     }

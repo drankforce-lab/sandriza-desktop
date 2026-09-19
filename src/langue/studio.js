@@ -423,6 +423,7 @@ module.exports = {
   'Aucune photo dans la photothèque. Importez-en depuis l’écran Photothèque.':
     'No photo in the library. Import some from the Photo library screen.',
   'en cours…': 'in progress…',
+  'aperçu indisponible': 'preview unavailable',
   'Produit lié': 'Linked product',
   'Traitement — tous': 'Job — all',
   'Sans «': 'Without «',

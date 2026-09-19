@@ -152,6 +152,33 @@ td.vig img{border:0;outline:0}
   font-size:.81rem;line-height:1.5;cursor:pointer}
 .voile label.rc input{width:auto;margin-top:2px}
 .voile .fin2{display:flex;gap:.45rem;justify-content:flex-end;margin-top:.9rem}
+
+/* ── LA VISIONNEUSE (#143) : la photo en grand, au double-clic ───────────────
+   ⚠ Elle couvre TOUTE la fenetre et se place au-dessus du voile des lots
+   (z-index 60 contre 50) : ouverte par-dessus, elle doit se fermer la premiere,
+   sinon on clique un bouton qu on ne voit plus. */
+.vis{position:fixed;inset:0;z-index:60;background:rgba(6,10,18,.93);
+  display:flex;flex-direction:column}
+.vis .vtete{flex:0 0 auto;display:flex;align-items:center;gap:.5rem;
+  padding:.5rem .8rem;border-bottom:1px solid var(--v08);background:var(--f-carte)}
+.vis .vnom{flex:1 1 auto;font-size:.85rem;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap}
+.vis .vtete button{border:1px solid var(--v12);border-radius:7px;
+  background:var(--v04);color:var(--tx);font:inherit;font-size:.8rem;
+  padding:.24rem .55rem;cursor:pointer}
+.vis .vtete button:hover{background:var(--v10)}
+.vis .vpct{font-variant-numeric:tabular-nums;font-size:.8rem;color:var(--tx2);
+  min-width:3.4rem;text-align:center}
+/* ⚠ overflow:hidden ET NON auto : le deplacement se fait a la souris, par
+   transform. Une barre de defilement par-dessus se disputerait le glisser. */
+.vis .vcadre{flex:1 1 auto;overflow:hidden;position:relative;
+  display:flex;align-items:center;justify-content:center;cursor:grab}
+.vis .vcadre.tire{cursor:grabbing}
+/* ⚠ transform-origin au centre : le zoom part de ce qu on regarde, pas du coin
+   haut-gauche — sinon l image fuit hors de l ecran des le premier cran. */
+.vis .vcadre img{max-width:none;max-height:none;transform-origin:center center;
+  user-select:none;-webkit-user-drag:none}
+.vis .vvide{color:var(--tx2);font-size:.85rem;padding:2rem}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -201,10 +228,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var PAGE = 0, PARPAGE = 25;
   var COURANT = null;      // la photo affichee dans l apercu
   var OCC = false;
+  /* ⚠⚠ LES VIGNETTES SE DEMANDENT A PART (#143). L op studio:explorer ne
+     remplit son champ apercu que pour une photo rangee sur le RESEAU ; une photo
+     importee vit en data: URL cote site, et cette fenetre n affichait alors
+     RIEN — ni la colonne de la liste, ni les tuiles de la grille, ni le volet
+     d apercu. La fenetre paraissait morte alors qu elle recevait bien ses 500
+     lignes.
+     ⚠ ON NE DEMANDE QUE LA PAGE AFFICHEE. La reponse porte jusqu a 500 lignes,
+     mais on n en montre que PARPAGE : rapatrier les 500 images serait payer
+     vingt fois ce qui se voit.
+     ⚠ '' = demandee, rien a montrer. C est indefini qui veut dire jamais
+     demandee — sans cette distinction on redemanderait a chaque repeinture. */
+  var VIGN = {};
+  var VIGN_OCC = false;
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
+  /* L adresse du reseau si la photo en a une, sinon la vignette rapatriee.
+     ⚠ UN SEUL ENDROIT QUI TRANCHE : les trois surfaces (colonne de la liste,
+     tuile de la grille, volet d apercu) l appellent, sinon l une des trois
+     finirait par rester sur l ancien champ — c est exactement ainsi que le
+     defaut a vecu. */
+  function vignetteDe(p){ return (p && (p.apercu || VIGN[p.id])) || ''; }
   /* ⚠ Le tiret quand il n y a rien reste ICI : c est une decision d affichage
      propre a cette fenetre, pas une mesure. Le reste vient de szOctets. */
   function poids(n){
@@ -385,7 +431,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
                          : (COURANT === p.id ? ' class="actif"' : '')) + '>'
             + '<td class="ck"><span class="coche' + (SEL[p.id] ? ' on' : '') + '" data-ck="'
               + esc(p.id) + '">' + (SEL[p.id] ? '✓' : '') + '</span></td>'
-            + '<td class="vig">' + (p.apercu ? '<img src="' + esc(p.apercu) + '" loading="lazy" alt="">' : '') + '</td>'
+            + '<td class="vig">' + (vignetteDe(p) ? '<img src="' + esc(vignetteDe(p)) + '" loading="lazy" alt="">' : '') + '</td>'
             + '<td>' + esc(p.nom) + '</td>'
             + '<td>' + esc(p.code || '') + '</td>'
             + '<td>' + esc(p.lieNom || '—') + '</td>'
@@ -403,8 +449,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '" data-i="' + i + '" data-id="' + esc(p.id) + '" title="' + esc(p.nom) + '">'
         + '<span class="coche flot' + (SEL[p.id] ? ' on' : '') + '" data-ck="' + esc(p.id) + '">'
         + (SEL[p.id] ? '✓' : '') + '</span>'
-        + (p.apercu ? '<img src="' + esc(p.apercu) + '" loading="lazy" alt="">'
-                    : '<div style="height:6rem"></div>')
+        + (vignetteDe(p) ? '<img src="' + esc(vignetteDe(p)) + '" loading="lazy" alt="">'
+                         : '<div style="height:6rem"></div>')
         + '<div class="nm">' + esc(p.nom) + '</div></div>'; }).join('')
       + '</div></div>' + pagerHtml(pc);
   }
@@ -431,8 +477,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return '<div class="l"><span class="k">' + esc(k) + '</span><span class="v">' + esc(v) + '</span></div>';
     };
     apercuEl.innerHTML = '<div class="img">'
-      + (p.apercu ? '<img src="' + esc(p.apercu) + '" alt="' + esc(p.nom) + '">'
-                  : '<div class="vide charge">${T("Téléversement en cours…")}</div>')
+      + (vignetteDe(p)
+          /* ⚠ CLIQUABLE, ET IL FAUT LE DIRE. Le volet montre une image reduite ;
+             sans un curseur qui change et une infobulle, personne ne devine
+             qu elle s ouvre en grand. Le double-clic de la liste fait la meme
+             chose — deux chemins vers le meme geste, aucun des deux cache. */
+          ? '<img src="' + esc(vignetteDe(p)) + '" alt="' + esc(p.nom) + '"'
+            + ' id="ap-img" style="cursor:zoom-in"'
+            + ' title="${T("Cliquez pour voir en grand (zoom)")}">'
+          /* ⚠ DEUX ETATS, PAS UN (#143). Tant que la vignette n est pas
+             revenue, on attend ; quand elle est revenue VIDE, la photo est
+             illisible et le dire vaut mieux que de laisser tourner un
+             << televersement >> qui n aura jamais lieu. */
+          : (VIGN[p.id] === ''
+              ? '<div class="vide">${T("Aperçu indisponible pour cette photo.")}</div>'
+              : '<div class="vide charge">${T("Téléversement en cours…")}</div>'))
       + '</div><div class="infos">'
       + ligne('${T("Nom")}', p.nom)
       + ligne('${T("Code")}', p.code || '—')
@@ -443,6 +502,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + ligne('${T("Poids")}', poids(p.poids))
       + (p.lotNom ? ligne('${T("Lot d’import")}', p.lotNom) : '')
       + '</div>';
+    var ai = document.getElementById('ap-img');
+    if (ai) ai.onclick = function(){ ouvrirGrand(p.id); };
   }
 
   /* ══ LA SELECTION ═══════════════════════════════════════════════════════
@@ -496,10 +557,114 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         surClicLigne(parseInt(el.getAttribute('data-i'), 10), el.getAttribute('data-id'), ev);
       };
     });
+    /* LE DOUBLE-CLIC OUVRE EN GRAND (#143) — sa demande, dans ses mots :
+       << un double clic peux nous ouvrir la photo en plus grand comme un
+       explorateur de fichier >>.
+       ⚠ Il vit A COTE du simple clic, qui garde son role (choisir la photo du
+       volet). Les deux ne se genent pas : le navigateur envoie dblclick APRES
+       les deux click, donc la photo visee est deja celle du volet. */
+    zone.querySelectorAll('[data-i]').forEach(function(el){
+      el.ondblclick = function(ev){
+        ev.preventDefault();
+        ouvrirGrand(el.getAttribute('data-id'));
+      };
+    });
     var pp = document.getElementById('p-prec');
     if (pp) pp.onclick = function(){ PAGE = Math.max(0, PAGE - 1); dessiner(); };
     var ps = document.getElementById('p-suiv');
     if (ps) ps.onclick = function(){ PAGE = PAGE + 1; dessiner(); };
+  }
+
+  /* ══ LA VISIONNEUSE — LA PHOTO EN GRAND, AVEC SON ZOOM (#143) ═════════════
+     ⚠⚠ ELLE DEMANDE L IMAGE ENTIERE, pas la vignette. Agrandir une vignette de
+     320 px donnerait une bouillie a 200 %, et le zoom ne servirait a rien : ce
+     qu on veut voir en grand, c est justement le detail que la reduction a
+     jete. D ou le drapeau plein sur l op des vignettes.
+     ⚠ UNE SEULE PHOTO A LA FOIS, et seulement sur demande : l image entiere
+     peut peser plusieurs megaoctets, on ne la rapatrie donc jamais pour garnir
+     une grille. */
+  var VIS_ID = '', VIS_Z = 1, VIS_X = 0, VIS_Y = 0;
+
+  function visImg(){ var v = document.getElementById('vis-img'); return v; }
+  function visAppliquer(){
+    var im = visImg();
+    if (im) im.style.transform = 'translate(' + VIS_X + 'px,' + VIS_Y + 'px) scale(' + VIS_Z + ')';
+    var pct = document.getElementById('vis-pct');
+    if (pct) pct.textContent = Math.round(VIS_Z * 100) + ' %';
+  }
+  /* ⚠ BORNEE DES DEUX COTES. Sans plancher on atteint une image de zero pixel
+     qu on ne retrouve plus ; sans plafond, un coup de molette appuye fige la
+     fenetre sur une image de trente mille pixels de large. */
+  function visZoom(f, garderCentre){
+    var av = VIS_Z;
+    VIS_Z = Math.max(0.1, Math.min(8, VIS_Z * f));
+    if (!garderCentre && av) { VIS_X = VIS_X * (VIS_Z / av); VIS_Y = VIS_Y * (VIS_Z / av); }
+    visAppliquer();
+  }
+  function visAjuster(){ VIS_Z = 1; VIS_X = 0; VIS_Y = 0; visAppliquer(); }
+
+  function fermerGrand(){
+    VIS_ID = '';
+    var v = document.getElementById('vis');
+    if (v && v.parentNode) v.parentNode.removeChild(v);
+  }
+
+  function ouvrirGrand(id){
+    if (!id) return;
+    var ph = (D && D.photos) || [];
+    var p = null;
+    for (var i = 0; i < ph.length; i++) { if (ph[i].id === id) { p = ph[i]; break; } }
+    if (!p) return;
+    fermerGrand();
+    VIS_ID = id; VIS_Z = 1; VIS_X = 0; VIS_Y = 0;
+
+    var v = document.createElement('div');
+    v.className = 'vis'; v.id = 'vis';
+    v.innerHTML = '<div class="vtete">'
+      + '<span class="vnom">' + esc(p.nom || '') + '</span>'
+      + '<button id="vis-moins" title="${T("Réduire")}">−</button>'
+      + '<span class="vpct" id="vis-pct">100 %</span>'
+      + '<button id="vis-plus" title="${T("Agrandir")}">+</button>'
+      + '<button id="vis-ajuster">${T("Ajuster")}</button>'
+      + '<button id="vis-fermer" title="${T("Fermer")}">✕</button></div>'
+      + '<div class="vcadre" id="vis-cadre">'
+      + '<div class="vvide" id="vis-attente">${T("Chargement de l’image…")}</div></div>';
+    document.body.appendChild(v);
+
+    document.getElementById('vis-fermer').onclick = fermerGrand;
+    document.getElementById('vis-plus').onclick = function(){ visZoom(1.25); };
+    document.getElementById('vis-moins').onclick = function(){ visZoom(0.8); };
+    document.getElementById('vis-ajuster').onclick = visAjuster;
+    /* ⚠ ON NE FERME QUE SUR LE FOND. Sans ce test, relacher un glisser au-dessus
+       de l image refermerait la visionneuse au milieu d un deplacement. */
+    v.onclick = function(ev){ if (ev.target === v) fermerGrand(); };
+
+    var cadre = document.getElementById('vis-cadre');
+    cadre.onwheel = function(ev){ ev.preventDefault(); visZoom(ev.deltaY < 0 ? 1.12 : 0.89); };
+    var tire = false, x0 = 0, y0 = 0;
+    cadre.onmousedown = function(ev){
+      tire = true; x0 = ev.clientX - VIS_X; y0 = ev.clientY - VIS_Y;
+      cadre.classList.add('tire'); ev.preventDefault();
+    };
+    /* ⚠ SUR LA FENETRE, PAS SUR LE CADRE : relacher hors du cadre laisserait
+       sinon l image collee au curseur pour toujours. */
+    window.onmousemove = function(ev){
+      if (!tire) return;
+      VIS_X = ev.clientX - x0; VIS_Y = ev.clientY - y0; visAppliquer();
+    };
+    window.onmouseup = function(){ tire = false; cadre.classList.remove('tire'); };
+
+    // L image entiere, demandee maintenant et pour celle-ci seulement.
+    appeler('studio:vignettes', [{ ids: [id], plein: true }]).then(function(r){
+      if (VIS_ID !== id) return;   // on a change de photo (ou ferme) entre-temps
+      var src = (r && r.ok && r.vignettes && r.vignettes[id]) || vignetteDe(p);
+      var c = document.getElementById('vis-cadre');
+      if (!c) return;
+      if (!src) { c.innerHTML = '<div class="vvide">${T("Cette photo n’a pas pu être lue.")}</div>'; return; }
+      c.innerHTML = '<img id="vis-img" alt="' + esc(p.nom || '') + '">';
+      document.getElementById('vis-img').src = src;
+      visAppliquer();
+    });
   }
 
   /* Combien, parmi les photos choisies, ont vraiment quelque chose à défaire.
@@ -741,6 +906,33 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (VUE === 'liste') {
       szAutoPagination('.liste', function(n){ PARPAGE = n; PAGE = 0; dessiner(); });
     }
+    chargerVignettes();
+  }
+
+  /* La page affichee, plus la photo du volet d apercu — celle-ci en plus grand,
+     puisqu elle occupe 19 rem et non une case de tableau.
+     ⚠ La repeinture rappelle cette fonction : la recursion s arrete quand plus
+     aucune case n est indefinie. ⚠ On marque MEME en cas d echec, sans quoi une
+     reponse en erreur relancerait le meme paquet a chaque dessin. */
+  function chargerVignettes(){
+    if (VIGN_OCC || !D) return;
+    var pc = pageCourante();
+    var manque = [], vus = {};
+    for (var i = 0; i < pc.vue.length; i++) {
+      var p = pc.vue[i];
+      if (!p || p.apercu || VIGN[p.id] !== undefined || vus[p.id]) continue;
+      vus[p.id] = true; manque.push(p.id);
+    }
+    if (!manque.length) return;
+    VIGN_OCC = true;
+    appeler('studio:vignettes', [{ ids: manque, cote: 320 }]).then(function(r){
+      VIGN_OCC = false;
+      var v = (r && r.ok && r.vignettes) ? r.vignettes : {};
+      for (var j = 0; j < manque.length; j++) {
+        if (VIGN[manque[j]] === undefined) VIGN[manque[j]] = v[manque[j]] || '';
+      }
+      dessiner();
+    });
   }
 
   /* ══ LANCER UN LOT ══════════════════════════════════════════════════════
@@ -799,6 +991,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   window.szRevenir = function(){ charger(); };
 
   document.addEventListener('keydown', function(ev){
+    /* ⚠ LA VISIONNEUSE SE FERME LA PREMIERE (#143). Sans ce cas AVANT l autre,
+       Echap fermerait LA FENETRE sous une photo ouverte en grand — on perdrait
+       l explorateur, sa recherche et sa selection pour avoir voulu refermer une
+       image. Meme raison que le test sur la classe voile, juste apres. */
+    if (ev.key === 'Escape' && document.getElementById('vis')) {
+      ev.preventDefault(); fermerGrand(); return;
+    }
     if (ev.key === 'Escape' && !document.querySelector('.voile')) { ev.preventDefault(); P.fermer(); }
     // Ctrl+A : tout selectionner, comme partout ailleurs.
     if ((ev.ctrlKey || ev.metaKey) && (ev.key === 'a' || ev.key === 'A')) {

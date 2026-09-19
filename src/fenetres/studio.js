@@ -606,6 +606,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var PH_TOTAL = 0;      // total correspondant a la recherche
   var PH_FIN = false;    // plus rien a charger
   var PH_OCC = false;    // une page est-elle en cours de chargement ?
+  /* ⚠⚠ LES VIGNETTES NE VIENNENT PAS AVEC LA LIGNE (#143). L op studio:explorer
+     ne remplit son champ apercu que si la photo est rangee sur le reseau ; une
+     photo importee vit en data: URL cote site, et la case restait donc sur
+     << en cours... >> POUR TOUJOURS. On les demande a part, par paquets.
+     ⚠ La valeur '' est une REPONSE, pas un trou : elle dit << demandee, rien a
+     montrer >>. Sans elle on redemanderait la meme case a chaque repeinture.
+     C est undefined qui veut dire << jamais demandee >>. */
+  var VIGN = {};         // id -> data URL recue ('' = demandee et sans image)
+  var VIGN_OCC = false;  // un paquet de vignettes est-il en route ?
   // ⚠ Trois etats : tant qu il est faux, on ne dit PAS << vide >>.
   var PH_CHARGE = false;
   // ── EXPLORATEUR (#28) ──────────────────────────────────────────────────────
@@ -1005,8 +1014,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<span class="dt">' + (n > 1 ? '${T("venues de l’explorateur")}' : '${T("venue de l’explorateur")}') + '</span>'
       + '<button class="mini" id="pn-vider" title="${T("Oublier cette sélection")}">✕</button></div>'
       + '<div class="pv">' + PANIER.slice(0, 8).map(function(p){
-          return p.apercu ? '<img src="' + esc(p.apercu) + '" alt="" loading="lazy">'
-                          : '<span class="tr"></span>'; }).join('')
+          // ⚠ MEME DEFAUT QUE LA GRILLE (#143) : sans vignette demandee a part,
+          // le panier ne montrait que des cases grises.
+          var s = p.apercu || VIGN[p.id] || '';
+          return s ? '<img src="' + esc(s) + '" alt="" loading="lazy">'
+                   : '<span class="tr"></span>'; }).join('')
       + (n > 8 ? '<span class="pl">+' + (n - 8) + '</span>' : '') + '</div>'
       + '<button class="prim" id="pn-lot">${T("⚙ Traiter")} ' + (n > 1 ? ('ces ' + n) : '${T("cette photo")}') + ' ${T("en lot…")}</button>'
       + '</div>';
@@ -1020,6 +1032,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       // On ne redessine que si ca a change : sinon on redessinerait toutes les
       // deux secondes sous les doigts de quelqu un.
       if (PANIER.length !== avant && !PICKER && !LOTS_VUE) dessiner();
+      panierVignettes();
+    });
+  }
+
+  /* Les huit que le panier MONTRE, pas les trois cents qu il contient : on ne
+     rapatrie que ce qui se voit. ⚠ Le meme marquage a '' que la grille, pour la
+     meme raison — une demande sans reponse ne doit pas se rejouer sans fin. */
+  function panierVignettes(){
+    if (VIGN_OCC || RO) return;
+    var manque = [];
+    for (var i = 0; i < PANIER.length && i < 8; i++) {
+      var p = PANIER[i];
+      if (!p || p.apercu || VIGN[p.id] !== undefined) continue;
+      manque.push(p.id);
+    }
+    if (!manque.length) return;
+    VIGN_OCC = true;
+    appeler('studio:vignettes', [{ ids: manque, cote: 120 }]).then(function(r){
+      VIGN_OCC = false;
+      var v = (r && r.ok && r.vignettes) ? r.vignettes : {};
+      for (var j = 0; j < manque.length; j++) {
+        if (VIGN[manque[j]] === undefined) VIGN[manque[j]] = v[manque[j]] || '';
+      }
+      if (!PICKER && !LOTS_VUE) dessiner();
     });
   }
 
@@ -2563,9 +2599,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
                 : '${T("Aucune photo dans la photothèque. Importez-en depuis l’écran Photothèque.")}') + '</div>';
     }
     return PHOTHQ.map(function(p){
-      var img = p.apercu
-        ? '<img src="' + esc(p.apercu) + '" alt="' + esc(p.nom) + '" loading="lazy">'
-        : '<span class="attente">${T("en cours…")}</span>';
+      /* ⚠ LA LIGNE D ABORD, LA VIGNETTE ENSUITE (#143). Le champ apercu de la
+         ligne n existe que pour une photo rangee sur le reseau ; pour toutes les
+         autres, l image arrive par l op studio:vignettes. Et '' ne veut pas dire
+         << en cours >> : il veut dire << demandee, rien a montrer >>, donc on
+         cesse d attendre. */
+      var src = p.apercu || VIGN[p.id] || '';
+      var img = src
+        ? '<img src="' + esc(src) + '" alt="' + esc(p.nom) + '" loading="lazy">'
+        : (VIGN[p.id] === ''
+            ? '<span class="attente">${T("aperçu indisponible")}</span>'
+            : '<span class="attente">${T("en cours…")}</span>');
       var pris = !!SEL[p.id];
       // Les pastilles disent ce qu on ne devine pas d une vignette : deja
       // traitee (donc deja payee), detouree, rattachee a un produit.
@@ -3009,6 +3053,36 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var g = document.getElementById('ph-grille');
     if (g) { g.innerHTML = phVignettesHtml(); phBrancherVignettes(g); }
     majPhInfo();
+    phChargerVignettes();
+  }
+
+  /* ⚠ UN PAQUET A LA FOIS, ET ON RAPPELLE PAR LA REPEINTURE. Chaque reponse
+     repeint la grille, et la repeinture redemande le paquet suivant : la
+     recursion s arrete d elle-meme quand plus aucune case n est indefinie.
+     ⚠ 60 PAR PAQUET, comme la page : au-dela on attend longtemps avant de voir
+     la premiere image, et c est justement l attente qu on corrige.
+     ⚠ ON MARQUE MEME EN CAS D ECHEC. Sans ca, une reponse en erreur laisserait
+     les cases indefinies et la grille redemanderait le meme paquet sans
+     fin — une boucle qui tape sur le pont a chaque repeinture. */
+  function phChargerVignettes(){
+    if (VIGN_OCC || !PICKER || RO) return;
+    var manque = [];
+    for (var i = 0; i < PHOTHQ.length && manque.length < 60; i++) {
+      var p = PHOTHQ[i];
+      if (!p || p.apercu) continue;
+      if (VIGN[p.id] !== undefined) continue;
+      manque.push(p.id);
+    }
+    if (!manque.length) return;
+    VIGN_OCC = true;
+    appeler('studio:vignettes', [{ ids: manque, cote: 240 }]).then(function(r){
+      VIGN_OCC = false;
+      var v = (r && r.ok && r.vignettes) ? r.vignettes : {};
+      for (var j = 0; j < manque.length; j++) {
+        if (VIGN[manque[j]] === undefined) VIGN[manque[j]] = v[manque[j]] || '';
+      }
+      if (PICKER) phMajGrille();
+    });
   }
 
   /* ⚠⚠ LES EN-TETES SE REPEIGNENT AUSSI, ET C EST TOUT LE DEFAUT CORRIGE ICI.
@@ -3177,10 +3251,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var p = null;
     for (var i = 0; i < PHOTHQ.length; i++) { if (PHOTHQ[i].id === id) { p = PHOTHQ[i]; break; } }
     if (!p) return;
-    PHOTO = null; PHOTO_ID = id; PHOTO_URL = p.apercu || ''; PHOTO_NOM = p.nom || '';
+    PHOTO = null; PHOTO_ID = id; PHOTO_URL = p.apercu || VIGN[id] || ''; PHOTO_NOM = p.nom || '';
     PICKER = false; RESULT = null; ENREG = false;
     INTERIEUR = null; INTERIEUR_NOM = '';   // elle appartenait au vêtement précédent
     dessiner(); dire('${T("Photo choisie :")} ' + (p.nom || id) + '.', 'bon');
+    /* ⚠ LA VIGNETTE DE LA GRILLE FAIT 240 px — assez pour une case, trop peu
+       pour le volet de gauche, ou elle serait floue. On en redemande une plus
+       grande une fois le choix fait : une seule image, au moment ou elle sert. */
+    if (!p.apercu) chargerApercuChoisi(id);
+  }
+
+  /* ⚠ ON VERIFIE QUE LE CHOIX N A PAS CHANGE avant d afficher. Deux clics
+     rapides sur deux photos lancent deux demandes ; sans ce garde, la plus
+     lente ecraserait la plus recente et le volet montrerait l autre photo. */
+  function chargerApercuChoisi(id){
+    appeler('studio:vignettes', [{ ids: [id], cote: 900 }]).then(function(r){
+      if (!r || !r.ok || PHOTO_ID !== id) return;
+      var v = (r.vignettes || {})[id] || '';
+      if (!v) return;
+      PHOTO_URL = v;
+      dessiner();
+    });
   }
 
   function occuper(o){

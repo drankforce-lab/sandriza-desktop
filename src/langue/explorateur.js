@@ -250,6 +250,16 @@ module.exports = {
   'Inverser': 'Invert',
   'Vider': 'Clear',
 
+  /* ── LA VISIONNEUSE : LA PHOTO EN GRAND, AVEC SON ZOOM (#143) ───────────── */
+  'Cliquez pour voir en grand (zoom)': 'Click to view large (zoom)',
+  'Aperçu indisponible pour cette photo.': 'Preview unavailable for this photo.',
+  'Réduire': 'Zoom out',
+  'Agrandir': 'Zoom in',
+  'Ajuster': 'Fit',
+  'Fermer': 'Close',
+  'Chargement de l’image…': 'Loading image…',
+  'Cette photo n’a pas pu être lue.': 'This photo could not be read.',
+
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
   'leur dernier traitement': 'their last treatment'
 };

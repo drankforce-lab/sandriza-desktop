@@ -2569,6 +2569,9 @@ const JEU = {
        déjà traitée, une détourée, une liée à un produit, une en attente de
        téléversement — sans quoi ni les pastilles ni les filtres ne seraient
        jamais dessinés sur autre chose que du vide. */
+    /* Un point transparent : assez pour que la balise ait une source valide,
+       sans peser. On ne mesure pas l image ici, on mesure QU ELLE ARRIVE. */
+    const VIGNETTE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
     const EXPLO = {
       ok: true, charge: true, peutModifier: true,
       total: 5, trouvees: 5, page: 0, taille: 60, pages: 1,
@@ -2639,6 +2642,11 @@ const JEU = {
           'studio:presets': PRESETS,
           'studio:compte': COMPTE,
           'studio:explorer': EXPLO,
+          /* ⚠ LE CAS QUI A MOTIVE L OP (#143) : `ph_4` porte `apercu: ''` — une
+             photo rangee en local, que la ligne ne sait pas montrer. Sans cette
+             reponse, le chemin des vignettes ne serait jamais emprunte ici, et
+             c est justement celui qui etait casse. */
+          'studio:vignettes': { ok: true, cote: 320, vignettes: { ph_4: VIGNETTE } },
           'session:activite': { ok: true },
         },
       },
