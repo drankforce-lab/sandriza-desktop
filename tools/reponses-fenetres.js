@@ -275,6 +275,42 @@ const JEU = {
     'identite': { ok: true, nom: 'Essai', role: 'admin' },
   },
 
+  /* ── LE COMPTE DE PAIEMENT (#118) ────────────────────────────────────────
+     ⚠⚠ CET ÉCRAN N'AVAIT AUCUN JEU DE RÉPONSES depuis sa naissance en 6.3.0.
+     `verifier-fenetres` le disait à chaque passage — « compile — exécution NON
+     éprouvée » — et personne ne l'a lu comme ce que c'était : le seul écran qui
+     RACONTE L'ARGENT n'était exécuté par aucun banc. Il a fallu qu'il signale
+     « compte de paiement ne fonctionne pas » pour qu'on y revienne.
+     ⚠ La forme est relevée dans `Payments._comptePaiementDonnees`
+     (assets/js/payments.js), PAS inventée ici : un jeu qui invente sa forme
+     éprouve la fenêtre contre une réponse que le site n'enverra jamais.
+     ⚠ DEUX LIGNES POUR UNE VENTE, c'est la règle de l'écran : le brut entre,
+     les frais sortent. Un jeu à une seule ligne laisserait ce cas jamais
+     dessiné — et c'est justement ce que la fenêtre explique sous son titre. */
+  'comptepaiement.js': {
+    'paiements:compte': {
+      ok: true,
+      annee: 2026, annees: [2026, 2025], connecte: true, charge: true,
+      mode: 'production', bacASable: false,
+      controle: { equilibre: true, ecart: 0 },
+      natures: { vente: 'Vente', frais: 'Frais', remboursement: 'Remboursement',
+        fraisRetenu: 'Frais retenu', depot: 'Dépôt' },
+      mouvements: [
+        { date: '2026-09-02', nature: 'vente', ref: 'sq_8891', libelle: 'Commande ord_0041', effet: 206.85, solde: 206.85 },
+        { date: '2026-09-02', nature: 'frais', ref: 'sq_8891', libelle: 'Frais de traitement', effet: -6.31, solde: 200.54 },
+        { date: '2026-09-07', nature: 'remboursement', ref: 'rb_0012', libelle: 'Retour partiel', effet: -89.95, solde: 110.59 },
+        { date: '2026-09-07', nature: 'fraisRetenu', ref: 'rb_0012', libelle: 'Frais retenus au remboursement', effet: 2.91, solde: 113.50 },
+        { date: '2026-09-12', nature: 'depot', ref: 'dep_0003', libelle: 'Virement vers la banque', effet: -100, solde: 13.50 },
+      ],
+      resume: { solde: 13.50, ventes: 206.85, frais: 6.31, remboursements: 89.95,
+        fraisRetenus: 2.91, depots: 100, soldeIncomplet: false },
+      mois: [
+        { mois: 'Septembre', ventes: 206.85, frais: 6.31, remboursements: 89.95, depots: 100, net: 13.50 },
+      ],
+      nbDepots: 1, peutModifier: false,
+    },
+  },
+
   'affichage.js': {
     'caisse:etat': {
       ok: true,
