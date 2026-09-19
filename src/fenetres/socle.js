@@ -2961,6 +2961,51 @@ const CSS_PIED = `
 .sz-pied{animation:none}
 `;
 
+/* ══ LA PLEINE HAUTEUR ════════════════════════════════════════════════════
+   Sa demande du 2026-09-19, capture a l appui : << je veux que les tableaux
+   soient jusqu en bas dans chacun des modules >>.
+
+   MESURE AVANT DE CORRIGER — la bande morte au bas de la fenetre :
+       clients      446 px        commandes     12 px
+       produits     410 px        inventaire    36 px
+   ➡ Deux ecrans sur quatre n ont DEJA presque aucun vide. La difference n est
+   donc pas le socle : `commandes` et `inventaire` portent une mise en page
+   PLEINE HAUTEUR ecrite chez eux, les autres laissent leur carte se
+   dimensionner sur son contenu — et une liste de trois lignes s arrete a trois
+   lignes, quelle que soit la fenetre.
+
+   ⚠⚠ LE PATRON QUI MARCHE EXISTAIT DEJA DANS LE DEPOT. On ne l invente pas :
+   on le REMONTE ici pour qu il ait UNE definition, au lieu d etre recopie dans
+   vingt fenetres ou il finirait par diverger d une a l autre.
+
+   ── COMMENT UNE FENETRE L ADOPTE ───────────────────────────────────────────
+     <div class="corps plein">          le corps ne defile plus lui-meme
+       <div class="barreoutils">…       (hauteur naturelle)
+       <div class="carte plein">        prend tout le reste
+         <div class="liste">…</div>     c est ELLE qui defile
+         <div class="pagi">…</div>      reste visible, en bas de la carte
+   ⚠ TROIS CLASSES, ET IL LES FAUT TOUTES LES TROIS. Sans `plein` sur le corps,
+   le corps defile et la carte ne sait pas jusqu ou s etendre ; sans `liste`,
+   c est la carte entiere qui deborde et la pagination sort de l ecran.
+
+   ⚠ ON NE TOUCHE PAS AU `.corps` ORDINAIRE. Beaucoup de fenetres sont des
+   FORMULAIRES qui doivent defiler en entier : leur imposer `overflow:hidden`
+   couperait le bas de leur contenu. L adoption est donc un choix, ecran par
+   ecran, et jamais une regle qui s applique toute seule.
+
+   ⚠ AUCUN ACCENT GRAVE : litteral de gabarit. */
+const CSS_HAUTEUR = `
+.corps.plein{overflow:hidden;display:flex;flex-direction:column;min-height:0}
+.corps.plein>*{flex:0 0 auto}
+.corps.plein>.carte.plein{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
+.carte.plein>.liste{flex:1 1 auto;min-height:0;overflow-y:auto}
+.carte.plein>.liste::-webkit-scrollbar{width:8px}
+.carte.plein>.liste::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* La pagination reste COLLEE au bas de la carte, jamais emportee par le
+   defilement : c est elle qui dit ou l on en est. */
+.carte.plein>.pagi{flex:0 0 auto}
+`;
+
 /* ══ LES TRANSITIONS ══════════════════════════════════════════════════════
    Ce que le mouvement doit faire ici : dire qu une chose VIENT D ARRIVER, et
    ou elle se range. Rien de plus. Une interface de gestion n est pas une page
@@ -3049,8 +3094,8 @@ tbody tr{transition:opacity var(--sz-vite) linear,background var(--sz-vite) line
 }
 `;
 
-module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_TRANSITIONS,
-  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_TRANSITIONS,
+module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS,
+  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS,
   JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_THEMES, ICO,
   /* La page, pas son texte : voir l en-tete de ce fichier. */
   TETE, LIEU, SEP_DEC };

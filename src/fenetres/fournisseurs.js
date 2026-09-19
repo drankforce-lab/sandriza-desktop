@@ -89,7 +89,7 @@ function pageFournisseurs() {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.suppliers}</span><h1>${T("Fournisseurs")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
+<div class="corps plein" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -190,6 +190,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function dessiner(){
+    /* ⚠⚠ LA PLEINE HAUTEUR NE VAUT QUE POUR LA LISTE (2026-09-19). Le
+       REPERTOIRE dessine une grille de cartes SANS conteneur defilant : sous
+       << corps plein >> (overflow:hidden) une longue liste de grossistes serait
+       COUPEE, sans barre de defilement et sans que rien ne le dise. On rend
+       donc le corps a son defilement normal des qu on entre dans le repertoire.
+       ⚠ C est la contrepartie annoncee par le socle : l adoption de la pleine
+       hauteur est un choix par ECRAN, et ici par VUE. */
+    corps.className = REP ? 'corps' : 'corps plein';
     if (REP) { corps.innerHTML = vueRepertoire(); brancherRepertoire(); return; }
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var rows = D.lignes || [];
@@ -199,11 +207,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<button class="mini" id="f-repertoire" title="${T("Un carnet de grossistes connus, à ajouter en un clic")}"><span class="ic">🔎</span>${T(" Répertoire")}</button>'
       + '<button class="prim" id="f-nouveau">${T("+ Nouveau fournisseur")}</button></span>'
       + '</div>';
-    h += '<div class="carte">';
+        /* ⚠ PLEINE HAUTEUR (2026-09-19) : la carte prend tout l espace restant et
+       c est la LISTE qui defile. Sans ca, une liste courte s arrete a sa
+       derniere ligne et laisse des centaines de pixels morts sous elle. */
+    h += '<div class="carte plein">';
     if (!rows.length) {
       h += '<div class="vide">' + (D.total ? '${T("Aucun résultat.")}' : '${T("Aucun fournisseur — créez-en un pour commencer.")}') + '</div>';
     } else {
-      h += '<table><thead><tr><th>${T("Fournisseur")}</th><th>${T("Contact")}</th><th>${T("Courriel / Tél.")}</th>'
+      h += '<div class="liste"><table><thead><tr><th>${T("Fournisseur")}</th><th>${T("Contact")}</th><th>${T("Courriel / Tél.")}</th>'
         + '<th>${T("Catégories")}</th><th>${T("Statut")}</th>' + (D.peutSupprimer ? '<th></th>' : '') + '</tr></thead><tbody>'
         + rows.map(function(r){
             return '<tr data-id="' + esc(r.id) + '" title="${T("Ouvrir la fiche fournisseur")}">'
@@ -226,7 +237,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
                   : '')
               + '</tr>';
           }).join('')
-        + '</tbody></table>';
+        + '</tbody></table></div>';
     }
     h += '</div>';
     /* ⚠⚠ LE PIED DE LISTE (mesure du 2026-09-19). Cet écran était le pire du

@@ -350,15 +350,16 @@ function rapport(lignes, nbFenetres, rates, lotsMorts) {
      liste vide ; le meme trou avec 300 elements, c est une mise en page qui
      laisse un vide MALGRE son contenu. Sans ce nombre, on corrigerait la mise
      en page d un ecran dont le seul tort est d avoir peu de donnees. */
-  console.log('   le trou d un seul tenant   ou            vide total   elements   ecran');
-  console.log('   ------------------------   -----------   ----------   --------   -----');
+  console.log('   le trou d un seul tenant   ou            bande BAS   vide total   elements   ecran');
+  console.log('   ------------------------   -----------   ---------   ----------   --------   -----');
   for (const m of mesures.slice(0, 32)) {
     const aire = Math.round(100 * (m.trouL * m.trouH) / (m.w * m.h));
     const t = (m.trouL + ' x ' + m.trouH + ' px  (' + aire + ' % de l ecran)').padEnd(26);
     const ou = ('x' + m.trouX + ' y' + m.trouY).padEnd(13);
     const pct = (m.mort.toFixed(1) + ' %').padStart(8);
     const el = String(m.els).padStart(8);
-    console.log('   ' + t + ' ' + ou + ' ' + pct + '   ' + el + '   ' + m.contexte);
+    const bs = (m.bas + ' px').padStart(9);
+    console.log('   ' + t + ' ' + ou + ' ' + bs + ' ' + pct + '   ' + el + '   ' + m.contexte);
   }
 
   /* ── L ELASTICITE : le contenu suit-il la fenetre ? ───────────────────── */

@@ -74,7 +74,7 @@ function pageCollections() {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.collections}</span><h1>${T("Nos Collections")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
+<div class="corps plein" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -128,11 +128,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (rows.length > 1 ? '${T("collections")}' : '${T("collection")}') + '</span>'
       + '<span class="droite"><button class="prim" id="col-nouvelle">${T("+ Nouvelle collection")}</button></span>'
       + '</div>';
-    h += '<div class="carte">';
+        /* ⚠ PLEINE HAUTEUR (2026-09-19) : la carte prend tout l espace restant et
+       c est la LISTE qui defile. Sans ca, une liste courte s arrete a sa
+       derniere ligne et laisse des centaines de pixels morts sous elle. */
+    h += '<div class="carte plein">';
     if (!rows.length) {
       h += '<div class="vide">${T("Pas de collection en ce moment.")}</div>';
     } else {
-      h += '<table><thead><tr><th>${T("Collection")}</th><th>${T("Saison")}</th>'
+      h += '<div class="liste"><table><thead><tr><th>${T("Collection")}</th><th>${T("Saison")}</th>'
         + '<th style="text-align:center">${T("Articles")}</th><th>${T("Statut")}</th></tr></thead><tbody>'
         + rows.map(function(r){
             return '<tr data-id="' + esc(r.id) + '" title="${T("Ouvrir la collection")}">'
@@ -144,7 +147,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
               + '<td>' + (r.active ? '<span class="pill bon">Active</span>' : '<span class="pill neutre">Inactive</span>') + '</td>'
               + '</tr>';
           }).join('')
-        + '</tbody></table>';
+        + '</tbody></table></div>';
     }
     h += '</div>';
     /* Le pied ferme la liste et porte l export (2026-09-19). Pas de pagination

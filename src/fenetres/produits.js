@@ -87,7 +87,7 @@ function pageProduits() {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.products}</span><h1>${T("Produits en vente")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
+<div class="corps plein" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -180,12 +180,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<button class="prim" id="p-nouveau">${T("+ Nouveau produit")}</button></span>'
       + '</div>';
 
-    h += '<div class="carte">';
+        /* ⚠ PLEINE HAUTEUR (2026-09-19) : la carte prend tout l espace restant et
+       c est la LISTE qui defile. Sans ca, une liste courte s arrete a sa
+       derniere ligne et laisse des centaines de pixels morts sous elle. */
+    h += '<div class="carte plein">';
     var rows = D.lignes || [];
     if (!rows.length) {
       h += '<div class="vide">${T("Aucun produit ne correspond.")}</div>';
     } else {
-      h += '<table><thead><tr><th>${T("Produit")}</th><th>${T("Catégorie")}</th><th>${T("Étiquette")}</th>'
+      h += '<div class="liste"><table><thead><tr><th>${T("Produit")}</th><th>${T("Catégorie")}</th><th>${T("Étiquette")}</th>'
         + '<th>${T("Prix")}</th><th>${T("Inventaire")}</th><th style="text-align:center">${T("Paniers")}</th></tr></thead><tbody>'
         + rows.map(function(r){
             var badges = '';
@@ -206,7 +209,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
               + '<td style="text-align:center">' + (r.panier > 0 ? '<span class="ic">🛒</span> ' + r.panier : '<span class="dt">—</span>') + '</td>'
               + '</tr>';
           }).join('')
-        + '</tbody></table>';
+        + '</tbody></table></div>';
       if ((D.pages || 1) > 1) {
         h += '<div class="pagi">'
           + '<button class="mini" id="p-prec"' + (D.page <= 0 ? ' disabled' : '') + '>◀</button>'
