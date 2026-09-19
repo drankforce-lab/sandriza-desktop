@@ -1627,6 +1627,53 @@ Pagi.prototype.brancher = function(){
   // Redessiner au redimensionnement : le nombre de lignes tenables change.
   window.addEventListener('resize', function(){ self.dessiner(); });
 };
+
+/* ══ szTransition — LE REDESSIN QUI SE VOIT ═══════════════════════════════
+   Passe une fonction qui change le DOM ; le navigateur prend l ecran avant et
+   apres, et fond de l un a l autre. Une fenetre l adopte en remplacant
+   << dessiner() >> par << szTransition(dessiner) >>.
+
+   ⚠⚠ IL NE S ALLUME PAS TOUT SEUL, ET C EST DELIBERE. Une transition de vue
+   FIGE l ecran le temps de la prise : sur un redessin qui arrive toutes les
+   deux secondes (le panier du Studio, le bandeau des lots) elle ferait
+   clignoter l interface en permanence. L imposer aux 102 fenetres sans les
+   avoir regardees une par une, ce serait promettre un effet qu on n a pas
+   mesure — la faute que ce projet a payee cinq fois aujourd hui.
+
+   ⚠ TROIS REPLIS, et chacun a sa raison :
+     . le navigateur ne connait pas startViewTransition -> on appelle la
+       fonction, point. L ecran se redessine comme avant, sans transition.
+     . la personne a demande moins de mouvement -> pareil. On ne lui impose
+       pas une prise d ecran pour un effet qu elle a refuse.
+     . la fonction leve -> on la laisse lever, mais APRES avoir rendu la main
+       au navigateur : une transition de vue qui reste ouverte laisse l ecran
+       fige pour de bon.
+   ⚠ On rend TOUJOURS une promesse, meme sans transition : sans ca, l appelant
+   qui enchaine sur .then() marche dans un cas et pas dans l autre. */
+function szTransition(fn){
+  if (typeof fn !== 'function') return Promise.resolve();
+  var doux = false;
+  try { doux = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  if (doux || !document.startViewTransition) {
+    try { fn(); } catch (e) { return Promise.reject(e); }
+    return Promise.resolve();
+  }
+  try {
+    var t = document.startViewTransition(fn);
+    return t.finished.catch(function(){});
+  } catch (e) {
+    try { fn(); } catch (e2) { return Promise.reject(e2); }
+    return Promise.resolve();
+  }
+}
+/* ⚠ EXPOSITION GARDEE, ET UN BANC L A EXIGEE. Le banc des mesures de langue
+   execute les recettes du socle DANS NODE, ou window n existe pas : une
+   affectation nue au premier niveau leve << window is not defined >> et
+   emporte les quatre recettes avec elle. Le socle tourne donc dans DEUX
+   mondes, et tout ce qui s ecrit a son premier niveau doit valoir dans les
+   deux.
+   ⚠ Et pas d accent grave dans ce commentaire : il vit dans un gabarit. */
+try { if (typeof window !== 'undefined') window.szTransition = szTransition; } catch (e) {}
 `;
 
 
@@ -2764,8 +2811,86 @@ html{scroll-behavior:smooth}
 }
 `;
 
-module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS,
-  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS,
+/* ══ LES TRANSITIONS ══════════════════════════════════════════════════════
+   Ce que le mouvement doit faire ici : dire qu une chose VIENT D ARRIVER, et
+   ou elle se range. Rien de plus. Une interface de gestion n est pas une page
+   de presentation — on y passe des heures, et une animation qu on subit dix
+   fois par minute devient une lenteur.
+
+   ⚠⚠ ON ENTRE PAR UNE TRANSITION, PAS PAR UNE ANIMATION, ET C EST LE POINT.
+   Le socle avait deja << animation:sz-parait .28s ease-out both >>. Le mot
+   << both >> tient l ETAT DE DEPART tant que l animation n a pas commence —
+   donc opacity 0. Sous temps virtuel elle ne commence pas toujours : le banc
+   de contraste au rendu a vu un voile et ECARTE 30 des 32 elements d accueil,
+   en se declarant content. Une transition avec @starting-style n a pas d etat
+   retenu : si rien ne la declenche, l element est a sa valeur normale.
+   ➡ Le meme effet a l oeil, et le banc voit ce qu il doit voir.
+
+   ⚠ Chromium 126 (Electron 31.7.7) : @starting-style demande 117+, les
+   transitions de vue 111+. Mesure faite, pas supposee.
+
+   ⚠ AUCUN ACCENT GRAVE ICI : litteral de gabarit. */
+const CSS_TRANSITIONS = `
+/* ── 1. CE QUI ARRIVE SE POSE, AU LIEU DE CLAQUER ──────────────────────────
+   ⚠ Les CARTES et les TUILES bougent de 4 px ; les LIGNES de tableau, non.
+   Cent vingt lignes qui glissent en meme temps donnent une vague, et sur un
+   tableau de comptabilite c est illisible. Elles se contentent de paraitre. */
+.carte,.tuile{
+  transition:opacity var(--sz-moyen) var(--sz-courbe),
+             transform var(--sz-moyen) var(--sz-courbe)}
+@starting-style{
+  .carte,.tuile{opacity:0;transform:translateY(4px)}
+}
+tbody tr{transition:opacity var(--sz-vite) linear,background var(--sz-vite) linear}
+@starting-style{
+  tbody tr{opacity:0}
+}
+
+/* ── 2. L ONGLET COURANT GLISSE ────────────────────────────────────────────
+   Le trait sous l onglet sautait d un libelle a l autre. Il glisse, et c est
+   ce glissement qui dit d ou l on vient — une information que le saut perd. */
+.onglets button{
+  transition:color var(--sz-vite) linear,
+             border-bottom-color var(--sz-moyen) var(--sz-courbe)}
+
+/* ── 3. LES VOILES ET LES BOITES ───────────────────────────────────────────
+   Une boite de dialogue qui apparait d un coup se lit comme une erreur. */
+.voile{transition:opacity var(--sz-moyen) var(--sz-courbe)}
+.voile .boite{
+  transition:opacity var(--sz-moyen) var(--sz-courbe),
+             transform var(--sz-moyen) var(--sz-courbe)}
+@starting-style{
+  .voile{opacity:0}
+  .voile .boite{opacity:0;transform:translateY(-8px) scale(.985)}
+}
+
+/* ── 4. LA TRANSITION DE VUE, POUR QUI LA DEMANDE ──────────────────────────
+   ⚠ ELLE NE S ALLUME PAS TOUTE SEULE. Une fenetre l obtient en passant son
+   redessin a szTransition() (voir JS_SOCLE) ; sans cet appel, rien ne change.
+   C est voulu : une transition de vue fige l ecran le temps de la prise, et
+   l imposer aux 102 fenetres sans les avoir regardees une par une, c est
+   promettre un effet qu on n a pas mesure. */
+::view-transition-old(root){animation:sz-vt-part .16s ease-in both}
+::view-transition-new(root){animation:sz-vt-vient .22s ease-out both}
+@keyframes sz-vt-part{to{opacity:0}}
+@keyframes sz-vt-vient{from{opacity:0;transform:translateY(6px)}}
+
+/* ── 5. ET TOUT CECI S EFFACE SI LA PERSONNE L A DEMANDE ──────────────────
+   ⚠ Y COMPRIS LES ETATS DE DEPART. Couper la transition sans retirer le
+   @starting-style laisserait l element A SON ETAT DE DEPART, donc invisible :
+   on aurait fabrique exactement le defaut que ce bloc existe pour eviter. */
+@media (prefers-reduced-motion:reduce){
+  .carte,.tuile,tbody tr,.voile,.voile .boite,.onglets button{
+    transition:none!important}
+  @starting-style{
+    .carte,.tuile,tbody tr,.voile,.voile .boite{opacity:1;transform:none}
+  }
+  ::view-transition-old(root),::view-transition-new(root){animation:none!important}
+}
+`;
+
+module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_TRANSITIONS,
+  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_TRANSITIONS,
   JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_THEMES, ICO,
   /* La page, pas son texte : voir l en-tete de ce fichier. */
   TETE, LIEU, SEP_DEC };
