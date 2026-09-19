@@ -24,6 +24,13 @@ module.exports = {
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   'Fournisseurs — Administration Sandriza': 'Suppliers — Sandriza Administration',
   'Fournisseurs': 'Suppliers',
+  /* ⚠ LE PIED DE LISTE (2026-09-19) compte en toutes lettres, et les DEUX
+     formes existent. Un « fournisseur(s) » entre parentheses n existe dans
+     aucune des deux langues, et le banc des pluriels le refuse — a raison :
+     c est la forme qu on ecrit quand on ne veut pas choisir.
+     ⚠ Minuscules : le mot suit un nombre dans une phrase, il ne commence rien. */
+  'fournisseur': 'supplier',
+  'fournisseurs': 'suppliers',
   'Fournisseurs indisponibles': 'Suppliers unavailable',
   'Votre rôle ne donne pas accès aux fournisseurs.':
     'Your role does not give access to the suppliers.',

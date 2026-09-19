@@ -229,6 +229,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '</tbody></table>';
     }
     h += '</div>';
+    /* ⚠⚠ LE PIED DE LISTE (mesure du 2026-09-19). Cet écran était le pire du
+       relevé des zones mortes : un trou de 1100 x 567 px — 75 % de la fenêtre —
+       sous une carte de quelques lignes. Devant ça, l'œil ne sait pas s'il a
+       tout vu ou si le chargement s'est arrêté.
+       ➡ Le pied FERME la liste et porte les gestes suivants là où le regard
+       tombe. Il ne REMPLIT pas le vide : étirer la carte aurait donné une
+       grande carte vide, pire qu'une page vide.
+       ⚠ RIEN SOUS UNE LISTE VIDE : l'état vide a déjà son propre dessin, et
+       « fin de la liste » sous une liste qui n'a jamais commencé serait faux. */
+    if (rows.length) {
+      /* ⚠ LE PLURIEL S ACCORDE, il ne se met pas entre parenthèses. C'est la
+         règle de ce dépôt, et le banc des pluriels la garde : « 1 fournisseur
+         (s) » n'existe dans aucune langue, et l'anglais n'a pas les mêmes
+         formes que le français. */
+      h += szPied(
+        rows.length === (D.total || rows.length)
+          ? rows.length + ' ' + (rows.length > 1 ? '${T("fournisseurs")}' : '${T("fournisseur")}')
+          : rows.length + '${T(" sur ")}' + (D.total || 0),
+        '<button class="mini" id="f-repertoire2"><span class="ic">🔎</span>${T(" Répertoire")}</button>'
+        + '<button class="mini" id="f-nouveau2">${T("+ Nouveau fournisseur")}</button>');
+    }
     corps.innerHTML = h;
     szVerrousPeindre();   // reposer les cadenas connus sur le tableau frais
 
@@ -240,15 +261,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         window._fq = setTimeout(function(){ charger(true); }, 300);
       };
     }
-    var nv = document.getElementById('f-nouveau');
-    if (nv) nv.onclick = function(){
+    /* ⚠ LES DEUX GESTES SONT BRANCHÉS AUX DEUX ENDROITS, par le même
+       gestionnaire. Le pied de liste répète les boutons de la barre d'outils
+       là où le regard tombe après avoir lu la liste ; deux gestionnaires
+       différents pour un même geste finiraient par diverger, et c'est celui
+       qu'on ne lit pas qui déciderait. */
+    var ouvrirNouveau = function(){
       dire('${T("Ouverture…")}');
       appeler('fournisseurs:nouveau', []).then(function(r){
         dire(r.ok ? '${T("Assistant fournisseur ouvert dans sa fenêtre.")}' : expliquer(r), r.ok ? 'bon' : 'err');
       });
     };
-    var rp = document.getElementById('f-repertoire');
-    if (rp) rp.onclick = function(){ REP_Q = ''; REP_CAT = ''; REP_PAYS = ''; chargerRepertoire(); };
+    var ouvrirRepertoire = function(){ REP_Q = ''; REP_CAT = ''; REP_PAYS = ''; chargerRepertoire(); };
+    ['f-nouveau', 'f-nouveau2'].forEach(function(id){
+      var b = document.getElementById(id); if (b) b.onclick = ouvrirNouveau;
+    });
+    ['f-repertoire', 'f-repertoire2'].forEach(function(id){
+      var b = document.getElementById(id); if (b) b.onclick = ouvrirRepertoire;
+    });
   }
 
   function brancherRepertoire(){

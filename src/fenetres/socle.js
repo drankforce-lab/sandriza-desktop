@@ -1402,8 +1402,86 @@ function szOctets(n){
  *
  * Voir `src/langue/libelles.js` et `_traduireLibelles` dans `main.js`. */
 
+/* ══ LES VERBES DE FINITION ═══════════════════════════════════════════════
+   ⚠⚠ ILS VIVENT DANS JS_DIRE, ET PAS DANS JS_SOCLE — mesure du 2026-09-19,
+   faite parce qu un banc a refuse << szPied is not defined >> sur une fenetre
+   qui embarque pourtant le socle :
+
+       JS_SOCLE    embarque par   4 fenetres sur 103
+       JS_DIRE     embarque par 100 fenetres sur 103
+       JS_ACTIVITE embarque par  96 fenetres sur 103
+
+   Le bloc qui s appelle << socle >> n est PAS celui que les fenetres
+   embarquent. Poser un verbe universel dans JS_SOCLE, c est le rendre
+   disponible a quatre ecrans et absent des quatre-vingt-dix-neuf autres — et
+   le defaut ne se voit qu a l execution, une fenetre a la fois.
+   ⚠ Le nom ment, et on ne le renomme pas aujourd hui : 103 fenetres le citent.
+   On ecrit ou ca marche, et on dit pourquoi.
+
+   ⚠ AUCUN ACCENT GRAVE : litteral de gabarit. */
+const JS_FINITIONS = () => `
+/* szTransition(fn) — le redessin qui se voit, par transition de vue.
+   ⚠ IL NE S ALLUME PAS TOUT SEUL : une transition de vue FIGE l ecran le temps
+   de la prise, et sur un redessin qui revient toutes les deux secondes (le
+   panier du Studio, le bandeau des lots) elle ferait clignoter l interface en
+   permanence. Une fenetre l adopte en remplacant dessiner() par
+   szTransition(dessiner), apres qu on l ait regardee.
+   ⚠ TROIS REPLIS : pas de startViewTransition, mouvement reduit demande, ou la
+   fonction leve. Et TOUJOURS une promesse en retour, sans quoi un appelant qui
+   enchaine sur .then() marcherait dans un cas et pas dans l autre. */
+function szTransition(fn){
+  if (typeof fn !== 'function') return Promise.resolve();
+  var doux = false;
+  try { doux = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  if (doux || !document.startViewTransition) {
+    try { fn(); } catch (e) { return Promise.reject(e); }
+    return Promise.resolve();
+  }
+  try {
+    var t = document.startViewTransition(fn);
+    return t.finished.catch(function(){});
+  } catch (e) {
+    try { fn(); } catch (e2) { return Promise.reject(e2); }
+    return Promise.resolve();
+  }
+}
+
+/* szPied(compte, gestes) — ce qui FERME une liste.
+     . compte : ce que la fenetre veut dire du nombre, deja traduit chez elle ;
+     . gestes : le HTML des boutons suivants, ou rien.
+   ⚠ AUCUN TEXTE N EST FABRIQUE ICI. Le socle ne connait ni la langue de la
+   fenetre ni ce qu elle compte — un pluriel decide dans le socle serait faux
+   une fois sur deux, et poser du francais dans un fichier partage par 102
+   fenetres creerait une dette de langue a 102 endroits.
+   ⚠ RIEN N EST RENDU SI L APPELANT N A RIEN A DIRE : un etat vide a deja son
+   propre dessin, et << fin de la liste >> sous une liste qui n a jamais
+   commence serait faux. */
+function szPied(compte, gestes){
+  var c = (compte == null) ? '' : String(compte);
+  var g = gestes || '';
+  if (!c && !g) return '';
+  return '<div class="sz-pied">'
+    + (c ? '<span class="cpt">' + c + '</span>' : '')
+    + (g ? '<span class="gestes">' + g + '</span>' : '')
+    + '</div>';
+}
+
+/* ⚠ EXPOSITION GARDEE, ET UN BANC L A EXIGEE. Le banc des mesures de langue
+   execute les recettes du socle DANS NODE, ou window n existe pas : une
+   affectation nue au premier niveau leve << window is not defined >> et
+   emporte les quatre recettes avec elle. Le socle tourne dans DEUX mondes, et
+   tout ce qui s ecrit a son premier niveau doit valoir dans les deux. */
+try {
+  if (typeof window !== 'undefined') {
+    window.szTransition = szTransition;
+    window.szPied = szPied;
+  }
+} catch (e) {}
+`;
+
 const JS_DIRE = () => JS_DIRE_BASE() + JS_PLEIN() + JS_PLEIN_AUTO() + JS_FENPLEIN()
-  + JS_VERROUS() + JS_LOTS() + JS_AUTOPAGE() + JS_COMPTE() + JS_MESURES();
+  + JS_VERROUS() + JS_LOTS() + JS_AUTOPAGE() + JS_COMPTE() + JS_MESURES()
+  + JS_FINITIONS();
 
 const JS_SOCLE = () => `
 var P = window.szPont;
@@ -1628,52 +1706,6 @@ Pagi.prototype.brancher = function(){
   window.addEventListener('resize', function(){ self.dessiner(); });
 };
 
-/* ══ szTransition — LE REDESSIN QUI SE VOIT ═══════════════════════════════
-   Passe une fonction qui change le DOM ; le navigateur prend l ecran avant et
-   apres, et fond de l un a l autre. Une fenetre l adopte en remplacant
-   << dessiner() >> par << szTransition(dessiner) >>.
-
-   ⚠⚠ IL NE S ALLUME PAS TOUT SEUL, ET C EST DELIBERE. Une transition de vue
-   FIGE l ecran le temps de la prise : sur un redessin qui arrive toutes les
-   deux secondes (le panier du Studio, le bandeau des lots) elle ferait
-   clignoter l interface en permanence. L imposer aux 102 fenetres sans les
-   avoir regardees une par une, ce serait promettre un effet qu on n a pas
-   mesure — la faute que ce projet a payee cinq fois aujourd hui.
-
-   ⚠ TROIS REPLIS, et chacun a sa raison :
-     . le navigateur ne connait pas startViewTransition -> on appelle la
-       fonction, point. L ecran se redessine comme avant, sans transition.
-     . la personne a demande moins de mouvement -> pareil. On ne lui impose
-       pas une prise d ecran pour un effet qu elle a refuse.
-     . la fonction leve -> on la laisse lever, mais APRES avoir rendu la main
-       au navigateur : une transition de vue qui reste ouverte laisse l ecran
-       fige pour de bon.
-   ⚠ On rend TOUJOURS une promesse, meme sans transition : sans ca, l appelant
-   qui enchaine sur .then() marche dans un cas et pas dans l autre. */
-function szTransition(fn){
-  if (typeof fn !== 'function') return Promise.resolve();
-  var doux = false;
-  try { doux = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
-  if (doux || !document.startViewTransition) {
-    try { fn(); } catch (e) { return Promise.reject(e); }
-    return Promise.resolve();
-  }
-  try {
-    var t = document.startViewTransition(fn);
-    return t.finished.catch(function(){});
-  } catch (e) {
-    try { fn(); } catch (e2) { return Promise.reject(e2); }
-    return Promise.resolve();
-  }
-}
-/* ⚠ EXPOSITION GARDEE, ET UN BANC L A EXIGEE. Le banc des mesures de langue
-   execute les recettes du socle DANS NODE, ou window n existe pas : une
-   affectation nue au premier niveau leve << window is not defined >> et
-   emporte les quatre recettes avec elle. Le socle tourne donc dans DEUX
-   mondes, et tout ce qui s ecrit a son premier niveau doit valoir dans les
-   deux.
-   ⚠ Et pas d accent grave dans ce commentaire : il vit dans un gabarit. */
-try { if (typeof window !== 'undefined') window.szTransition = szTransition; } catch (e) {}
 `;
 
 
@@ -2811,6 +2843,46 @@ html{scroll-behavior:smooth}
 }
 `;
 
+/* ══ LE PIED DE LISTE ═════════════════════════════════════════════════════
+   Le defaut mesure par `banc-zones-mortes` : sur presque tous les ecrans, une
+   carte de trois lignes flotte au-dessus d un trou pleine largeur qui descend
+   jusqu en bas — 1100 x 567 px sur `fournisseurs`, 75 % de l ecran.
+
+   ⚠⚠ ON N ETIRE PAS LA CARTE POUR REMPLIR. C est la correction evidente, et
+   elle est mauvaise : une carte vide de 1100 x 567 est PIRE qu une page vide,
+   parce qu elle promet un contenu qui n arrive pas. Le vide honnete vaut mieux
+   que le vide encadre.
+
+   ➡ CE QUI MANQUE VRAIMENT, ce n est pas du remplissage : c est de savoir que
+   LA LISTE EST FINIE. Devant trois lignes et six cents pixels de rien, l oeil
+   ne sait pas s il a tout vu ou si le chargement s est arrete. Le pied de
+   liste repond a cette question-la, et il porte les gestes suivants pendant
+   qu il y est — la ou le regard tombe.
+
+   ⚠ LE SOCLE DONNE LA FORME, LA FENETRE DONNE LES MOTS. Aucun texte francais
+   n est ecrit ici : la fenetre passe ses propres chaines, deja traduites par
+   son T(). Poser du texte dans le socle creerait une dette de langue dans un
+   fichier que 102 fenetres partagent.
+
+   ⚠ AUCUN ACCENT GRAVE : litteral de gabarit. */
+const CSS_PIED = `
+.sz-pied{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;
+  margin:.85rem .15rem 0;padding-top:.8rem;position:relative;
+  font-size:.79rem;color:var(--tx2)}
+/* Le trait qui FERME la liste. Il ne barre rien : il est au-dessus du pied,
+   pas dans le texte — la faute signalee le 2026-09-09 sur le Studio. */
+.sz-pied::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;
+  background:var(--v10)}
+.sz-pied .cpt{white-space:nowrap;font-variant-numeric:tabular-nums}
+.sz-pied .gestes{margin-left:auto;display:flex;align-items:center;gap:.45rem;
+  flex-wrap:wrap}
+/* ⚠ Le pied n entre PAS en fondu comme les cartes : il arrive avec la liste
+   qu il ferme, et le voir paraitre une fraction de seconde apres elle donnerait
+   l impression que quelque chose charge encore. C est exactement le doute que
+   ce bloc existe pour lever. */
+.sz-pied{animation:none}
+`;
+
 /* ══ LES TRANSITIONS ══════════════════════════════════════════════════════
    Ce que le mouvement doit faire ici : dire qu une chose VIENT D ARRIVER, et
    ou elle se range. Rien de plus. Une interface de gestion n est pas une page
@@ -2889,8 +2961,8 @@ tbody tr{transition:opacity var(--sz-vite) linear,background var(--sz-vite) line
 }
 `;
 
-module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_TRANSITIONS,
-  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_TRANSITIONS,
+module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_TRANSITIONS,
+  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_TRANSITIONS,
   JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_THEMES, ICO,
   /* La page, pas son texte : voir l en-tete de ce fichier. */
   TETE, LIEU, SEP_DEC };
