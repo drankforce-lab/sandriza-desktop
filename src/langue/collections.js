@@ -16,6 +16,12 @@
  */
 
 module.exports = {
+  /* ── L EXPORT DE LA LISTE (2026-09-19) ─────────────────────────────────
+     ⚠ La DESCRIPTION part entiere dans le fichier, alors qu elle est coupee a
+     120 caracteres a l ecran. Une description tronquee dans un export est une
+     donnee perdue sans qu on le sache. */
+  'Description': 'Description',
+  'La liste des collections': 'The collection list',
   /* ⚠ LES DEUX ALTERNATIVES EN ENTIER — voir `tools/banc-pluriel-colle.js`. */
   'collection': 'collection',
   'collections': 'collections',

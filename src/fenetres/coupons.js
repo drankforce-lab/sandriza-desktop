@@ -267,9 +267,38 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     }
     h += '</div>';
 
+    /* ⚠ LE PIED SE POSE AVANT LE VOILE DU FORMULAIRE, jamais apres : il
+       appartient a la liste, et un pied dessine par-dessus une boite ouverte
+       flotterait au milieu de rien. */
+    if (rows.length) {
+      h += szPied(
+        rows.length + ' ' + (rows.length > 1 ? '${T("coupons")}' : '${T("coupon")}'),
+        '<button class="mini" id="cp-exporter"><span class="ic">⬇</span>${T(" Exporter")}</button>');
+    }
+
     if (FORM) h += boiteForm();
     corps.innerHTML = h;
     brancher();
+
+    /* ⚠ ON EXPORTE LE RESULTAT DU FILTRE (rows), pas D.lignes : l ecran a des
+       onglets, et le fichier doit ressembler a ce qu on regarde.
+       ⚠ Les dates partent en ISO, pas en << 19 sept. >> : un tableur sait
+       trier du 2026-09-19, il ne sait pas trier un mois abrege. */
+    var exc = document.getElementById('cp-exporter');
+    if (exc) exc.onclick = function(){
+      var lignes = rows.map(function(c){
+        return [c.code || '', c.reduction || '', c.minimum || 0,
+          c.cumulSolde ? '${T("autorisé")}' : '${T("refusé")}',
+          c.utilise, c.maximum || '', c.debut || '', c.fin || '',
+          c.enCours ? '${T("En cours")}' : '${T("Hors service")}'];
+      });
+      if (!lignes.length) { dire('${T("Rien à exporter.")}', 'att'); return; }
+      var csv = szCSV(['${T("Code")}', '${T("Réduction")}', '${T("Minimum")}',
+        '${T("Cumul avec solde")}', '${T("Utilisé")}', '${T("Maximum")}',
+        '${T("Début")}', '${T("Fin")}', '${T("Statut")}'], lignes);
+      szExporter('coupons-' + new Date().toISOString().slice(0, 10) + '.csv', csv,
+        '${T("La liste des coupons")}');
+    };
   }
 
   function brancher(){

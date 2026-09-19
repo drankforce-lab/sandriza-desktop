@@ -23,6 +23,12 @@
  */
 
 module.exports = {
+  /* ── LE PIED DE LISTE ET L EXPORT (2026-09-19) ─────────────────────────
+     ⚠ Le pied n est PAS dessine sous une liste vide : ici l etat vide dit une
+     BONNE nouvelle, et un compte a zero dessous en ferait un constat d echec. */
+  'entrée': 'entry',
+  'entrées': 'entries',
+  'La liste noire': 'The block list',
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   'Liste noire — Administration Sandriza': 'Blocklist — Sandriza Administration',
   'Liste noire': 'Blocklist',

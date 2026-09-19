@@ -147,8 +147,32 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '</tbody></table>';
     }
     h += '</div>';
+    /* Le pied ferme la liste et porte l export (2026-09-19). Pas de pagination
+       ici : ce que l ecran montre EST tout ce qu il y a. */
+    if (rows.length) {
+      h += szPied(
+        rows.length + ' ' + (rows.length > 1 ? '${T("collections")}' : '${T("collection")}'),
+        '<button class="mini" id="col-exporter"><span class="ic">⬇</span>${T(" Exporter")}</button>');
+    }
     corps.innerHTML = h;
     szVerrousPeindre();   // reposer les cadenas connus sur le tableau frais
+
+    /* ⚠ LA DESCRIPTION PART ENTIERE DANS LE FICHIER. A l ecran elle est coupee
+       a 120 caracteres pour que la ligne tienne ; un fichier n a pas cette
+       contrainte, et une description tronquee dans un export est une donnee
+       perdue sans qu on le sache. */
+    var exc = document.getElementById('col-exporter');
+    if (exc) exc.onclick = function(){
+      var lignes = (D.lignes || []).map(function(r){
+        return [r.nom || '', r.saison || '', r.articles,
+          r.active ? '${T("Active")}' : '${T("Inactive")}', r.description || ''];
+      });
+      if (!lignes.length) { dire('${T("Rien à exporter.")}', 'att'); return; }
+      var csv = szCSV(['${T("Collection")}', '${T("Saison")}', '${T("Articles")}',
+        '${T("Statut")}', '${T("Description")}'], lignes);
+      szExporter('collections-' + new Date().toISOString().slice(0, 10) + '.csv', csv,
+        '${T("La liste des collections")}');
+    };
 
     var nv = document.getElementById('col-nouvelle');
     if (nv) nv.onclick = function(){

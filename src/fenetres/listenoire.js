@@ -170,9 +170,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + '</tr>';
       }
       h += '</tbody></table></div>';
+      /* Le pied ferme la liste et porte l export (2026-09-19). ⚠ Il n est PAS
+         dessine sous une liste vide : ici l etat vide dit une bonne nouvelle
+         (<< la liste ne sert qu a ecarter ce qui pose probleme >>), et lui
+         coller un compte a zero dessous en ferait un constat d echec. */
+      h += szPied(
+        l.length + ' ' + (l.length > 1 ? '${T("entrées")}' : '${T("entrée")}'),
+        '<button class="b" id="ln-exporter"><span class="ic">⬇</span>${T(" Exporter")}</button>');
     }
     corps.innerHTML = h;
     lier();
+
+    /* ⚠ LE TYPE PART EN CLAIR (typeLabel), pas en code interne : le fichier
+       se lit par quelqu un qui n a pas l ecran sous les yeux. */
+    var exl = document.getElementById('ln-exporter');
+    if (exl) exl.onclick = function(){
+      var lignes = l.map(function(e){
+        return [e.typeLabel || '', e.valeur || '', e.note || '', e.quand || ''];
+      });
+      if (!lignes.length) { dire('${T("Rien à exporter.")}', 'att'); return; }
+      var csv = szCSV(['${T("Type")}', '${T("Valeur")}', '${T("Note")}', '${T("Ajouté le")}'], lignes);
+      szExporter('liste-noire-' + new Date().toISOString().slice(0, 10) + '.csv', csv,
+        '${T("La liste noire")}');
+    };
   }
 
   function lier(){

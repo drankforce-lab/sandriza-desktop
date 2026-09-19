@@ -22,6 +22,19 @@
  */
 
 module.exports = {
+  /* ── LE PIED DE LISTE ET L EXPORT (2026-09-19) ─────────────────────────
+     ⚠ Les deux formes du pluriel, jamais << coupon(s) >> : cette forme
+     n existe dans aucune des deux langues.
+     ⚠ Et les en-tetes du fichier sont plus DETAILLES que ceux du tableau : a
+     l ecran << Utilise >> tient le compte ET le maximum dans une seule
+     colonne ; un tableur les veut separes pour pouvoir calculer. */
+  'coupon': 'coupon',
+  'coupons': 'coupons',
+  'Cumul avec solde': 'Stacks with sale',
+  'Utilisé': 'Used',
+  'Maximum': 'Maximum',
+  'Statut': 'Status',
+  'La liste des coupons': 'The coupon list',
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   'Coupons — Administration Sandriza': 'Coupons — Sandriza Administration',
   'Coupons': 'Coupons',
