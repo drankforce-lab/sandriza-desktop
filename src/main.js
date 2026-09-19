@@ -657,11 +657,53 @@ ipcMain.on('win:togglemax', (e) => {
    ⚠ Il ne décide RIEN : le minuteur, le seuil et la déconnexion restent au site.
    ═══════════════════════════════════════════════════════════════════════════ */
 let decompteWin = null;
+/* ⚠⚠ LE FILET DE L'ÉCHÉANCE — ET IL NE DÉCIDE TOUJOURS RIEN.
+   Signalé le 2026-09-19 : le décompte arrive à zéro et rien ne se passe. La
+   cause première est l'étranglement de la page du site (voir
+   `backgroundThrottling` sur la fenêtre principale), et elle est corrigée.
+   Mais une échéance de SÉCURITÉ ne doit pas dépendre d'un seul minuteur vivant
+   dans un rendu qu'on peut masquer : c'est ce qui vient d'arriver.
+   ➡ Ce minuteur-ci ne ferme RIEN. Il RAPPELLE au site que son échéance est
+   passée, en empruntant le chemin que le site expose déjà
+   (`Staff.fermerMaintenant`, le même que le bouton « Se déconnecter »). Si le
+   site a déjà fermé, l'appel ne trouve plus de session et ne fait rien.
+   ⚠ C'est la différence entre DEUX HORLOGES QUI DÉCIDENT — ce que ce fichier
+   refuse à juste titre — et une horloge qui en réveille une autre.
+   ⚠ TROIS SECONDES DE GRÂCE : le site doit rester le premier à agir dans le cas
+   normal, sans quoi on ne saurait jamais lequel des deux a fermé. */
+let decompteEcheance = null;
+const annulerEcheance = () => {
+  if (decompteEcheance) { clearTimeout(decompteEcheance); decompteEcheance = null; }
+};
 const fermerDecompte = () => {
+  annulerEcheance();
   if (decompteWin && !decompteWin.isDestroyed()) { try { decompteWin.destroy(); } catch {} }
   decompteWin = null;
 };
+const armerEcheance = (secondes) => {
+  annulerEcheance();
+  const s = Math.max(5, parseInt(secondes, 10) || 60);
+  decompteEcheance = setTimeout(() => {
+    decompteEcheance = null;
+    /* Le site ferme lui-même ; nous ne faisons que le lui redemander.
+       ⚠ `runAdmin` est déclaré BIEN PLUS BAS dans ce fichier, et ce n'est pas
+       une erreur : il n'est APPELÉ qu'ici, dans une minuterie qui part au plus
+       tôt cinq secondes après l'évaluation du module. La zone morte temporelle
+       d'un `const` est refermée depuis longtemps. Écrit pour que la prochaine
+       lecture ne le « corrige » pas en le déplaçant. */
+    try { runAdmin("if(typeof Staff!=='undefined'&&Staff.fermerMaintenant)Staff.fermerMaintenant()"); } catch (e) {}
+    /* ⚠ ET ON REFERME LA FENÊTRE DANS TOUS LES CAS. C'est exactement le tableau
+       qu'il a photographié : un décompte à zéro, au-dessus de tout, sans rien
+       derrière. Même si le rappel échoue, laisser ce reste à l'écran est pire
+       que de le retirer — il fait croire qu'une échéance court encore. */
+    setTimeout(() => { try { fermerDecompte(); } catch (e) {} }, 1200);
+  }, s * 1000 + 3000);
+};
 const ouvrirDecompte = (secondes) => {
+  /* ⚠ L'ÉCHÉANCE S'ARME À CHAQUE APPEL, y compris quand la fenêtre existe déjà.
+     Le site peut rouvrir le décompte après un report ; sans ce ré-armement,
+     le filet garderait l'échéance du PREMIER appel. */
+  armerEcheance(secondes);
   if (decompteWin && !decompteWin.isDestroyed()) { try { decompteWin.show(); } catch {} return; }
   let x, y;
   try {
@@ -1285,6 +1327,20 @@ const createWindow = () => {
       nodeIntegration: false,
       sandbox: true,
       spellcheck: true,
+      /* ⚠⚠ CETTE PAGE PORTE L'HORLOGE DE SESSION, DONC ON NE L'ÉTRANGLE PAS.
+         Signalé le 2026-09-19, capture à l'appui : le décompte d'inactivité
+         arrive à zéro et RIEN ne se passe.
+         La cause : le minuteur de déconnexion (`_idleLogoutTimer`, staff.js)
+         est un `setTimeout` de CETTE page — et la fenêtre du décompte s'ouvre
+         avec `focus()`. La fenêtre principale passe donc à l'arrière-plan, où
+         Chromium étrangle les minuteurs (jusqu'à un par minute après cinq
+         minutes masquée).
+         ➡ LA FENÊTRE DU DÉCOMPTE ÉTRANGLAIT L'HORLOGE QU'ELLE ANNONÇAIT.
+         ⚠ On le pose ICI et nulle part ailleurs : `backgroundThrottling:false`
+         a un coût en énergie, et il ne se justifie que pour la page qui tient
+         une échéance de SÉCURITÉ. Les fenêtres natives, elles, restent
+         étranglées quand on ne les regarde pas — c'est très bien ainsi. */
+      backgroundThrottling: false,
       // ⚠ LA VERSION VOYAGE PAR ICI, ET C'EST LA SEULE VOIE FIABLE. Elle était
       // RECOPIÉE À LA MAIN dans `preload.js` — et elle y annonçait encore 1.18.0
       // alors que la coquille était en 1.19.1. Conséquence : le journal du
@@ -4823,6 +4879,11 @@ const poserCadreNatif = () => {
     vueSite = new WebContentsView({ webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: true,
+      /* ⚠ MÊME RAISON QUE LA FENÊTRE PRINCIPALE : cette vue EST le site quand le
+         cadre est allumé, donc c'est elle qui tient l'horloge de session. Et
+         elle est DERRIÈRE le cadre par construction — l'étranglement y serait
+         donc permanent, pas seulement pendant le décompte. */
+      backgroundThrottling: false,
       /* ⚠ LES MEMES ARGUMENTS QUE LA FENETRE PRINCIPALE, ET C EST OBLIGATOIRE :
          `printagent.js` lit la version et le NOM DU POSTE dans `process.argv`
          pour remplir la colonne << poste >> du journal des impressions. Les
