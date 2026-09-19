@@ -15,6 +15,13 @@
  */
 
 module.exports = {
+  /* ── L EXPORT DE LA LISTE (2026-09-19) ─────────────────────────────────
+     ⚠ DEUX LIBELLES, PARCE QUE L ECRAN EST PAGINE. La fenetre ne detient que
+     SA page : exporter en silence << tous les clients >> serait un mensonge,
+     et exporter la page sans le dire en serait un autre. Le message nomme donc
+     ce qui est parti, et le nom du fichier porte le numero de page. */
+  'La page affichée': 'The page shown',
+  'La liste des clients': 'The client list',
   /* ⚠ LES DEUX ALTERNATIVES EN ENTIER — voir `tools/banc-pluriel-colle.js`.
      ⚠ ET AU MASCULIN : le client est toujours au masculin dans ce dépôt. */
   'client': 'customer',

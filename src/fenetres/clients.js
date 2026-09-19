@@ -188,6 +188,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       }
     }
     h += '</div>';
+    /* ⚠⚠ LE PIED DE LISTE, ET L EXPORT QUI DIT SON PÉRIMÈTRE (2026-09-19).
+       Cet écran est PAGINÉ : la fenêtre ne détient que la page courante
+       (D.lignes, sans accent grave : on est dans un gabarit). Exporter en silence « tous les clients » serait un
+       mensonge ; exporter la page sans le dire en serait un autre. Le pied
+       compte donc ce qui est affiché SUR le total, et le message d'écriture
+       nomme la page quand il y en a plusieurs. */
+    if (rows.length) {
+      var multi = (D.pages || 1) > 1;
+      h += szPied(
+        multi ? (rows.length + '${T(" sur ")}' + (D.total || 0))
+              : (rows.length + ' ' + (rows.length > 1 ? '${T("clients")}' : '${T("client")}')),
+        '<button class="mini" id="c-exporter"><span class="ic">⬇</span>${T(" Exporter")}</button>');
+    }
     corps.innerHTML = h;
     // Reposer les cadenas deja connus sur le tableau frais : sans cela, ils
     // disparaitraient a chaque redessin et ne reviendraient qu au sondage
@@ -206,6 +219,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (bp) bp.onclick = function(){ PAGE = Math.max(0, (D.page || 0) - 1); charger(); };
     var bs = document.getElementById('c-suiv');
     if (bs) bs.onclick = function(){ PAGE = (D.page || 0) + 1; charger(); };
+
+    /* ⚠ LE FICHIER PORTE LE PÉRIMÈTRE DANS SON NOM, pas seulement dans un
+       message qui disparaît. Retrouvé sur un bureau trois semaines plus tard,
+       « clients-2026-09-19-p2.csv » se relit tout seul ; « clients.csv » ne
+       dit pas s'il contient tout ou une page.
+       ⚠ Et la valeur d'achat part en NOMBRE, pas en « 1 234,56 $ » : un
+       montant mis en forme pour l'œil n'est plus additionnable dans un
+       tableur, et c'est précisément ce qu'on va en faire. */
+    var ex = document.getElementById('c-exporter');
+    if (ex) ex.onclick = function(){
+      var lignes = (D.lignes || []).map(function(r){
+        return [r.nom || '', r.courriel || '', r.commandes, r.achats,
+          r.supprime ? '${T("Supprimé")}' : (r.actif ? '${T("Actif")}' : '${T("Inactif")}')];
+      });
+      if (!lignes.length) { dire('${T("Rien à exporter.")}', 'att'); return; }
+      var csv = szCSV(['${T("Nom")}', '${T("Courriel")}', '${T("Commandes")}',
+        '${T("Achat total")}', '${T("Statut")}'], lignes);
+      var jour = new Date().toISOString().slice(0, 10);
+      var multi = (D.pages || 1) > 1;
+      szExporter('clients-' + jour + (multi ? '-p' + ((D.page || 0) + 1) : '') + '.csv', csv,
+        multi ? '${T("La page affichée")}' : '${T("La liste des clients")}');
+    };
   }
 
   corps.onclick = function(ev){
