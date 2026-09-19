@@ -144,4 +144,34 @@ module.exports = {
   'Ouvrir cet écran dans sa propre fenêtre': 'Open this screen in its own window',
   '⚓ Ancrer': '⚓ Dock',
   'Ramener cet écran dans la fenêtre principale': 'Bring this screen back into the main window',
+
+  /* ── LE REMBOURSEMENT SQUARE, LES EN-TETES ET LES COMPTES (2026-09-18) ───
+     ⚠ LES DEUX PHRASES SUR SQUARE SONT COUPEES AUTOUR D UN MONTANT, et c est
+     ce qui compte le plus a l ecran : l argent est deja parti chez la cliente,
+     et remettre la commande ne le rappelle pas. Le montant s intercale ; les
+     recoller obligerait a traduire un chiffre.
+     ⚠⚠ SINGULIER ET PLURIEL ONT CHACUN LEUR ENTREE, et l anglais ne suit PAS le
+     francais : << crédit recréé >> / << crédits recréés >> ne different que par
+     l accord, qui n existe pas en anglais — les deux valeurs anglaises se
+     ressemblent donc, et ce n est pas un copier-coller manque.
+     ⚠ Ces fragments se collent a un NOMBRE ecrit avant eux : minuscule, pas de
+     sujet, pas de point. */
+  'Commande Client': 'Order Customer',
+  'Total Supprimée Par': 'Total Deleted By',
+  'Variante Unités': 'Variant Units',
+  'Un remboursement Square de': 'A Square refund of',
+  'est parti au moment de la suppression. L’argent est chez le client : remettre la commande en place ne le rappellera pas.':
+    'went out at the moment of deletion. The money is with the customer: restoring the order will not bring it back.',
+  'Le remboursement Square de': 'The Square refund of',
+  'ne revient pas : l’argent est chez le client.':
+    'does not come back: the money is with the customer.',
+  'crédit recréé': 'credit recreated',
+  'crédits recréés': 'credits recreated',
+  'crédit repris': 'credit taken back',
+  'crédits repris': 'credits taken back',
+  'unité reprise': 'unit taken back',
+  'unités reprises': 'units taken back',
+  'photo effacée': 'photo deleted',
+  'photos effacées': 'photos deleted',
+  'remise en place': 'restored',
 };

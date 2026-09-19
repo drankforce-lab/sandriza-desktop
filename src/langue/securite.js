@@ -324,5 +324,30 @@ module.exports = {
     'Step 1 — Scan the QR with Google Authenticator, Authy or any compatible TOTP app, or enter the key by hand.',
   'Exempter ce compte Activer sans l’exiger à la connexion.':
     'Exempt this account Turn it on without requiring it at sign-in.',
-  'Annuler ✓ Activer MFA': 'Cancel ✓ Turn MFA on'
+  'Annuler ✓ Activer MFA': 'Cancel ✓ Turn MFA on',
+
+  /* ── LES EXPLICATIONS DU PANNEAU DES DROITS (2026-09-18) ─────────────────
+     ⚠ << MFA >> EST UNE ENTREE, et ce n est pas du zele : le banc compte tout
+     texte visible, et un sigle identique dans les deux langues doit le DIRE —
+     sinon on ne distingue pas << deja juste >> de << jamais regarde >>.
+     ⚠ Les trois fragments entre parentheses et << droits cochés >> se collent a
+     un NOMBRE ecrit avant eux ; ils restent donc en minuscule et sans sujet.
+     ⚠ L espace avant la virgule de << En mode simple , >> est dans la page :
+     la cle doit la reproduire a l identique, sinon elle ne trouve jamais son
+     texte. Ne pas la << corriger >> ici — c est la page qu il faudrait reprendre. */
+  'MFA': 'MFA',
+  'Personne Rôle État': 'Person Role Status',
+  'Courriel *': 'Email *',
+  'droits accordés par défaut': 'rights granted by default',
+  'droits cochés': 'rights ticked',
+  '(modifiés à la main)': '(changed by hand)',
+  '(ceux du rôle)': '(those of the role)',
+  'Le rôle décrit le métier de la personne et coche les droits qui vont avec. C’est la seule question à laquelle il faut répondre neuf fois sur dix.':
+    'The role describes what the person does and ticks the rights that go with it. Nine times out of ten it is the only question you need to answer.',
+  'En mode simple , le rôle décide seul. Passez en avancé (en haut à droite) pour ajouter ou retirer un droit précis.':
+    'In simple mode, the role decides on its own. Switch to advanced (top right) to add or remove a specific right.',
+  'Les droits cochés par le rôle, et ce que vous en changez. Le ? devant un module explique ce qu’il ouvre.':
+    'The rights ticked by the role, and what you change about them. The ? before a module explains what it opens.',
+  'Questions de secours — elles servent à rouvrir le compte si le mot de passe est perdu. Facultatives, mais sans elles la seule issue est de recréer le compte.':
+    'Recovery questions — they are used to reopen the account if the password is lost. Optional, but without them the only way out is to recreate the account.'
 };

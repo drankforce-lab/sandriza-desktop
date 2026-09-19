@@ -267,6 +267,18 @@ module.exports = {
   'SMS': 'SMS',
   'Page': 'Page',
 
+  /* ── LES EN-TETES DE COLONNES, EN UN SEUL TEXTE (2026-09-18) ─────────────
+     ⚠ Ils voyagent groupes parce que la page les ecrit groupes. Les couper en
+     mots isoles donnerait des entrees comme << Date >> que d autres fenetres
+     traduisent deja autrement, et c est ainsi qu un dictionnaire se met a se
+     contredire d un ecran a l autre. */
+  'Date Genre Référence': 'Date Type Reference',
+  'Destinataire Résultat Détail': 'Recipient Result Detail',
+
+  /* ── LE SINGULIER ET LE PLURIEL, CHACUN SON ENTREE ──────────────────────── */
+  'entrée effacée.': 'entry deleted.',
+  'entrées effacées.': 'entries deleted.',
+
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
   '· conservation 30 jours': '· kept for 30 days'
 };

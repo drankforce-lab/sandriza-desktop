@@ -320,5 +320,33 @@ module.exports = {
   'Vous n’avez pas le droit de composer des publications.':
     'You are not allowed to compose posts.',
   'La passerelle d’écriture IA est injoignable.': 'The AI writing gateway cannot be reached.',
-  'La rédaction a échoué.': 'The writing failed.'
+  'La rédaction a échoué.': 'The writing failed.',
+
+  /* ── LES ETIQUETTES DU COMPOSITEUR ET LES COMPTES RENDUS (2026-09-18) ────
+     ⚠ La plupart de ces textes se terminent par deux-points ou une preposition :
+     ce qui suit est une DONNEE ecrite apres (un nom de reseau, une adresse, un
+     nombre, le texte redige). Ils sont donc coupes exprès, et ne doivent pas
+     etre recolles — sinon la donnee passerait par le dictionnaire.
+     ⚠ << px · le format que >> … << montre en entier >> encadrent un nom de
+     reseau : deux entrees pour une phrase, parce que le nom s intercale.
+     ⚠ << ce mois-ci >> existe en deux versions, comme dans campagnes : seule, et
+     suivie de sa parenthese. Ce n est pas un doublon. */
+  'Écrire avec l’IA pour': 'Write with AI for',
+  'Diapo': 'Slide',
+  'Mots de recherche :': 'Search words:',
+  'Mots-clics :': 'Hashtags:',
+  'px · le format que': 'px · the size that',
+  'montre en entier': 'shows in full',
+  'ce mois-ci': 'this month',
+  'ce mois-ci (aucun plafond)': 'this month (no cap)',
+  'Cette adresse ne ressemble pas à une adresse courriel :':
+    'This does not look like an email address:',
+  'L’envoi a échoué :': 'Sending failed:',
+  'Publication rédigée :': 'Post written:',
+  'Lien :': 'Link:',
+  'Texte de remplacement :': 'Alt text:',
+  'Enregistré :': 'Saved:',
+  'Enregistré partiellement :': 'Partly saved:',
+  'image(s) sur': 'image(s) of',
+  'Envoyé à': 'Sent to'
 };

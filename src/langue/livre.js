@@ -193,4 +193,28 @@ module.exports = {
   'le bilan': 'balance sheet',
   'Le document s’ouvre dans la fenêtre principale…': 'The document is opening in the main window…',
   'Document ouvert dans la fenêtre principale.': 'Document opened in the main window.',
+
+  /* ── LA BALANCE, LE JOURNAL ET LES EN-TETES (2026-09-18) ─────────────────
+     ⚠ PLUSIEURS DE CES TEXTES SONT DES MOITIES DE PHRASE, et c est voulu : un
+     MONTANT ou une DATE s intercale, et un nombre ne traverse pas le
+     dictionnaire. << La balance ne balance pas — écart >> est suivi du montant,
+     puis de << . Une écriture bancale… >>. Les recoller ici obligerait a mettre
+     le nombre dans la traduction, donc a traduire une donnee.
+     ⚠ Les en-tetes voyagent PAR LIGNE, comme la page les ecrit — jamais coupes
+     en mots isoles, qui entreraient en conflit avec d autres fenetres. */
+  '· Rapports': '· Reports',
+  '· écart': '· off by',
+  '— un négatif qui n’existe pas dans la réalité.':
+    '— a negative that does not exist in reality.',
+  'La balance ne balance pas — écart': 'The trial balance does not balance — off by',
+  '. Une écriture bancale a franchi le contrôle : signalez-le.':
+    '. An unsound entry got past the check: please report it.',
+  'Journal de l’exercice —': 'Journal for the financial year —',
+  'dérivée(s) ·': 'derived ·',
+  'Date Libellé / compte': 'Date Description / account',
+  'Débit Crédit': 'Debit Credit',
+  'Compte Débit': 'Account Debit',
+  'Crédit Solde': 'Credit Balance',
+  'Compte Débit Crédit': 'Account Debit Credit',
+  '+ Capitaux propres': '+ Equity',
 };

@@ -472,5 +472,14 @@ module.exports = {
   /* ⚠ LES DEUX SEPARATEURS. Ils ne sont pas du decor : sans entree, le releve
      les compte comme du francais laisse sur la page anglaise. */
   ' — ': ' — ',
-  ' · ': ' · '
+  ' · ': ' · ',
+
+  /* ── LE COMPTEUR DU MOIS ET L ECRITURE PAR L IA (2026-09-18) ─────────────
+     ⚠ << ce mois-ci >> existe EN DEUX VERSIONS parce que la page en ecrit deux :
+     seule, et suivie de sa parenthese. Ne pas en supprimer une en croyant a un
+     doublon — la version nue sert quand un plafond est pose. */
+  'ce mois-ci': 'this month',
+  'ce mois-ci (aucun plafond)': 'this month (no cap)',
+  '✶ Écrire avec l’IA': '✶ Write with AI',
+  'Rédigé :': 'Written:'
 };

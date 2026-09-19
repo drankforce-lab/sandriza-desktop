@@ -142,4 +142,22 @@ module.exports = {
   'Motif (obligatoire)': 'Reason (mandatory)',
   'Posée par': 'Set by',
   'Posée le': 'Set on',
+
+  /* ── LE MANDAT, LES EN-TETES ET LES DEUX FINS DE PHRASE (2026-09-18) ─────
+     ⚠ << Ouvrir le dossier de >> et << — adhésion échue le >> se terminent SANS
+     leur complement : un nom de pays, une date. Ce qui suit est une DONNEE, il
+     ne traverse pas le dictionnaire — d ou la coupure, qui n est pas un oubli.
+     ⚠ La phrase de rechargement commence en minuscule : elle suit un sujet
+     ecrit ailleurs (<< Quelqu un a enregistre… >>). La garder telle quelle. */
+  'pendant votre saisie. Le registre affiché vient d’être rechargé — refaites vos changements.':
+    'while you were typing. The register shown has just been reloaded — make your changes again.',
+  'Ouvrir le dossier de': 'Open the file for',
+  'Pays État': 'Country Status',
+  'Bloquants À confirmer Mandats': 'Blocking To confirm Mandates',
+  '— adhésion échue le': '— membership expired on',
+  'Filière du mandat': 'Mandate stream',
+  'Organisme du mandat': 'Mandate body',
+  'Numéro du mandat': 'Mandate number',
+  'Échéance du mandat': 'Mandate expiry',
+  'Retirer le mandat': 'Remove the mandate',
 };

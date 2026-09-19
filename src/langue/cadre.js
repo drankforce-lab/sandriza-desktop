@@ -71,5 +71,16 @@ module.exports = {
   'Densité': 'Density',
   'Densité ×': 'Density ×',
   'Zone mesurée : ': 'Area measured: ',
-  'Zone mesurée :': 'Area measured:'
+  'Zone mesurée :': 'Area measured:',
+
+  /* ── LES DEUX DERNIERS PARAGRAPHES DE LA CARTE (2026-09-18) ──────────────
+     ⚠ L en-tete gras et sa suite sont DEUX textes, parce que la page les ecrit
+     ainsi : <strong>…</strong> puis le reste. Les fondre en un seul obligerait
+     a remettre la balise dans la traduction, donc a traduire du HTML. */
+  'Cette zone est maintenant la vraie :': 'This area is now the real one:',
+  'c’est cette fenêtre qui envoie sa position, et les écrans s’y ancrent. Le site n’a plus ce rôle — tant qu’il l’avait, un écran allait se poser d’après une page cachée derrière celle-ci.':
+    'this window is the one that sends its position, and screens dock into it. The site no longer has that role — as long as it did, a screen would position itself from a page hidden behind this one.',
+  'Ce qui reste à faire :': 'What is left to do:',
+  'cette fenêtre n’a pas encore remplacé la fenêtre principale, et l’interrupteur garde sa position « éteint ». Il ne se retirera qu’une fois ce cadre éprouvé sur un vrai poste.':
+    'this window has not yet replaced the main window, and the switch stays in its “off” position. It will only be removed once this frame has been proven on a real workstation.'
 };

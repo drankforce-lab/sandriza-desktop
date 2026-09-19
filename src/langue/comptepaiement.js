@@ -91,4 +91,19 @@ module.exports = {
   'Frais': 'Fees',
   'Dépôts': 'Deposits',
   'Variation': 'Net change',
+
+  /* ── LES EN-TETES GROUPES ET L AVERTISSEMENT D ECART (2026-09-18) ────────
+     ⚠ Les en-tetes voyagent PAR LIGNE, comme la page les ecrit. Les couper en
+     mots isoles ferait des entrees (<< Date >>, << Solde >>) que d autres
+     fenetres traduisent deja, et un dictionnaire qui se contredit d un ecran a
+     l autre est pire qu un texte non traduit : on ne sait plus lequel fait foi.
+     ⚠ La phrase d ecart se termine SANS son nombre : il est ajoute apres, et il
+     ne se traduit pas. */
+  'Le solde du fil et le total par nature ne concordent pas — écart de':
+    'The running balance and the total by type do not agree — off by',
+  'Date Nature Référence': 'Date Type Reference',
+  'Détail Effet Solde': 'Detail Effect Balance',
+  'Mois Ventes': 'Month Sales',
+  'Frais Remboursements': 'Fees Refunds',
+  'Dépôts Variation': 'Deposits Net change',
 };
