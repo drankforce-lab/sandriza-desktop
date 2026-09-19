@@ -289,6 +289,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
       + '${T("ce sont des éditeurs visuels. Le bouton « Ouvrir l’éditeur » vous y mène.")}'
       + '</div>';
 
+    /* ⚠ UN SEUL ONGLET PORTE UNE LISTE. Les deux autres empilent des cartes qui
+       doivent defiler EN ENTIER : leur imposer overflow:hidden couperait leur
+       bas sans barre de defilement et sans rien dire. */
+    corps.className = (ONGLET === 'modeles') ? 'corps plein' : 'corps';
     corps.innerHTML = h;
     brancher();
   }
@@ -329,7 +333,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
         + '<div class="aide">${T("Besoin d’un autre gabarit ? Ajoutez un format dans l’onglet <strong>Formats</strong>.")}</div></div>';
     }
 
-    h += '<div class="carte">';
+    /* ⚠ PLEINE HAUTEUR (2026-09-19), et SEULEMENT dans cet onglet : la carte
+       prend le reste du corps, la liste defile. Les onglets Formats et
+       Impression par lot sont d autres mises en page — voir dessiner(). */
+    h += '<div class="carte plein">';
     var rows = D.lignes || [];
     if (!rows.length) {
       h += '<div class="vide">' + (!D.charge
@@ -337,7 +344,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
         : (D.total ? '${T("Aucun modèle ne correspond.")}'
                    : '${T("Aucun modèle. Créez-en un depuis l’onglet Formats.")}')) + '</div>';
     } else {
-      h += '<table><thead><tr><th>${T("Aperçu")}</th><th>${T("Nom")}</th><th>${T("Format")}</th>'
+      h += '<div class="liste"><table><thead><tr><th>${T("Aperçu")}</th><th>${T("Nom")}</th><th>${T("Format")}</th>'
         + '<th style="text-align:center">${T("Éléments")}</th><th>${T("Modifié")}</th>'
         + '<th style="text-align:right">Actions</th></tr></thead><tbody>'
         + rows.map(function(r){
@@ -356,7 +363,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
                   + (SUPPR_ARME === r.id ? '${T("Confirmer ?")}' : '✕') + '</button>')
               + '</td></tr>';
           }).join('')
-        + '</tbody></table>';
+        + '</tbody></table></div>';
       if ((D.pages || 1) > 1) {
         h += '<div class="pagi">'
           + '<button class="mini" id="p-prec"' + (D.page <= 0 ? ' disabled' : '') + '>◀</button>'

@@ -142,18 +142,70 @@ function trouverChrome() {
   return null;
 }
 
+/* ⚠⚠ LE MENAGE QUI NE FAISAIT RIEN — MESURE LE 2026-09-19 : apres deux passages
+   de ce banc, 260 processus chrome.exe etaient encore en vie et la machine
+   n'avait plus que 0,33 Go libres sur 15,6.
+   La cause est une PARTICULARITE DE WINDOWS, deja trouvee et deja corrigee dans
+   le banc voisin (banc-contraste-rendu.js) : Chrome s'y RELANCE dans un second
+   processus et le premier rend la main tout de suite. Le numero rendu par
+   `spawn` n'est donc plus celui du navigateur — pire, son `exit` retirait le
+   numero de PIDS, si bien que `tuerNosChrome` parcourait un ensemble VIDE et
+   rapportait un succes sans rien tuer. Un menage qui se termine bien n'est pas
+   un menage qui a eu lieu.
+   ➡ On RETROUVE le vrai navigateur par son dossier temporaire (le jeton), et on
+   tue SON arbre : le pere par sa ligne de commande, les enfants par le pere
+   (les moteurs de rendu ne portent pas `--user-data-dir`, un filtre par dossier
+   ne les verrait jamais). Le balayage par numero reste en premier rideau.
+   ⚠ Le jeton ne vise QUE nos navigateurs : le poste avait 558 processus chrome
+   qui etaient ceux de l'utilisateur, et ils doivent survivre au banc. */
+let JETON = null;                      // nom du dossier temporaire de CETTE execution
 const PIDS = new Set();
-function tuerNosChrome() {
-  for (const pid of [...PIDS]) {
-    try {
-      if (process.platform === 'win32') spawnSync('taskkill', ['/PID', String(pid), '/T', '/F'], { stdio: 'ignore' });
-      else process.kill(-pid, 'SIGKILL');
-    } catch (e) {}
-    PIDS.delete(pid);
-  }
+
+function tuerArbre(pid) {
+  if (!pid) return;
+  try {
+    if (process.platform === 'win32') {
+      /* ⚠ ON VERIFIE QUE C'EST ENCORE UN CHROME. Le lanceur Windows meurt en une
+         fraction de seconde et son numero peut avoir ete REATTRIBUE : tuer un
+         arbre par numero seul, c'est risquer de tuer le processus de quelqu'un
+         d'autre. Les deux filtres se cumulent, et taskkill ne tue que ce qui
+         satisfait les deux. */
+      spawnSync('taskkill', ['/F', '/T', '/FI', 'PID eq ' + pid, '/FI', 'IMAGENAME eq chrome.exe'],
+        { stdio: 'ignore', timeout: 30000 });
+    } else {
+      try { process.kill(-pid, 'SIGKILL'); } catch (e) { try { process.kill(pid, 'SIGKILL'); } catch (e2) {} }
+    }
+  } catch (e) {}
+  PIDS.delete(pid);
 }
-process.on('exit', tuerNosChrome);
-process.on('SIGINT', () => { tuerNosChrome(); process.exit(130); });
+
+function tuerNosChrome() {
+  for (const pid of Array.from(PIDS)) tuerArbre(pid);
+  if (!JETON) return 0;
+  try {
+    if (process.platform === 'win32') {
+      const r = spawnSync('powershell', ['-NoProfile', '-NonInteractive', '-Command',
+        "@(Get-CimInstance Win32_Process -Filter \"Name='chrome.exe'\" | " +
+        "Where-Object { $_.CommandLine -like '*" + JETON + "*' }) | " +
+        'ForEach-Object { $_.ProcessId }',
+      ], { encoding: 'utf8', timeout: 60000 });
+      const pids = String((r && r.stdout) || '').split(/\s+/).map(Number).filter(Boolean);
+      for (const pid of pids) {
+        spawnSync('taskkill', ['/F', '/T', '/PID', String(pid)], { stdio: 'ignore', timeout: 30000 });
+      }
+      return pids.length;
+    }
+    spawnSync('pkill', ['-f', JETON], { stdio: 'ignore', timeout: 30000 });
+  } catch (e) {}
+  return 0;
+}
+
+let menageFait = false;
+const menageFinal = () => { if (menageFait) return; menageFait = true; tuerNosChrome(); };
+process.on('exit', menageFinal);
+process.on('SIGINT', () => { menageFinal(); process.exit(130); });
+process.on('SIGTERM', () => { menageFinal(); process.exit(143); });
+process.on('uncaughtException', (e) => { menageFinal(); console.error(e); process.exit(1); });
 
 /* ── LES FENETRES ────────────────────────────────────────────────────────── */
 /* ⚠ ON ENUMERE LE DOSSIER, on ne recopie pas une liste : une liste ecrite a la
@@ -215,6 +267,7 @@ function main() {
   if (!liste.length) { console.error('✗ aucune fenetre a mesurer.'); process.exit(1); }
 
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'sz-zm-'));
+  JETON = path.basename(tmp);          // ce qui distingue NOS navigateurs des siens
   const adresses = [];
   let rates = 0;
   for (const f of liste) {
@@ -273,7 +326,9 @@ function main() {
       'file:///' + pilote.replace(/\\/g, '/'),
     ], { stdio: 'ignore', detached: process.platform !== 'win32' });
     if (nav && nav.pid) PIDS.add(nav.pid);
-    try { nav.on('exit', () => PIDS.delete(nav.pid)); nav.on('error', () => PIDS.delete(nav.pid)); nav.unref(); } catch (e) {}
+    /* ⚠ ON NE RETIRE PLUS LE NUMERO A LA SORTIE : sous Windows le lanceur meurt
+       aussitot, et le retirer vidait PIDS avant tout menage (voir tuerNosChrome). */
+    try { nav.on('error', () => PIDS.delete(nav.pid)); nav.unref(); } catch (e) {}
 
     /* On attend LE TEMOIN, jamais une duree devinee — et un filet contre le
        silence : plus rien pendant 25 s, le moteur est tombe. */
@@ -311,6 +366,8 @@ function main() {
 function rapport(lignes, nbFenetres, rates, lotsMorts) {
   const mesures = [];
   const vides = [];
+  /* ⚠ LES ECRANS MESURES DERRIERE UN VOILE (voir zones-mortes-coeur.js). */
+  const voiles = {};
   const grilles = [];
   for (const l of lignes) {
     if (l.startsWith('ZM|')) {
@@ -326,6 +383,8 @@ function rapport(lignes, nbFenetres, rates, lotsMorts) {
       const p = l.split('|');
       if (p.length < 7) continue;
       grilles.push({ contexte: p[1], rang: +p[2], cols: +p[3], rangees: +p[4], larg: +p[5], n: +p[6] });
+    } else if (l.startsWith('VOILE|')) {
+      voiles[l.split('|')[1]] = 1;
     } else if (l.startsWith('ZM-VIDE|')) {
       const p = l.split('|');
       vides.push({ contexte: p[1], pourquoi: p.slice(2).join('|') });
@@ -359,7 +418,15 @@ function rapport(lignes, nbFenetres, rates, lotsMorts) {
     const pct = (m.mort.toFixed(1) + ' %').padStart(8);
     const el = String(m.els).padStart(8);
     const bs = (m.bas + ' px').padStart(9);
-    console.log('   ' + t + ' ' + ou + ' ' + bs + ' ' + pct + '   ' + el + '   ' + m.contexte);
+    const vo = voiles[m.contexte] ? '  ⚠ VOILE OUVERT' : '';
+    console.log('   ' + t + ' ' + ou + ' ' + bs + ' ' + pct + '   ' + el + '   ' + m.contexte + vo);
+  }
+  if (Object.keys(voiles).length) {
+    console.log('');
+    console.log('   ⚠ VOILE OUVERT : le jeu d epreuve ouvre une boite modale. Le voile couvre');
+    console.log('     la fenetre, tout ce qui est dessous compte comme mort, et le vide sous la');
+    console.log('     boite se lit comme une << bande basse >>. Ces trois colonnes ne disent RIEN');
+    console.log('     de la mise en page de l ecran — les corriger serait corriger un mirage.');
   }
 
   /* ── L ELASTICITE : le contenu suit-il la fenetre ? ───────────────────── */

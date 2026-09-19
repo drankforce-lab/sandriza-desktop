@@ -285,7 +285,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
       + '<button class="mini' + (VUE === 'annuaire' ? ' actif' : '') + '" data-vue="annuaire">${T("Fournisseurs")}</button>'
       + '</div>';
 
-    if (VUE === 'annuaire') { h += vueAnnuaire(); corps.innerHTML = h; brancherAnnuaire(); return; }
+    /* ⚠ L ANNUAIRE REPREND LE DEFILEMENT NORMAL : c est une grille de cartes
+       sans conteneur defilant, et << corps plein >> (overflow:hidden) la
+       couperait en silence. Meme contrepartie que le repertoire de
+       fournisseurs — la pleine hauteur est un choix par VUE. */
+    if (VUE === 'annuaire') { corps.className = 'corps'; h += vueAnnuaire(); corps.innerHTML = h; brancherAnnuaire(); return; }
 
     h += '<div class="barreoutils">'
       + '<select id="d-annee" aria-label="${T("Filtrer par année")}">' + (D.annees || []).map(function(a){
@@ -341,12 +345,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
        barre d outils, a droite de << Nouvelle depense >>. Ne pas la remettre : sa
        taille etait le probleme, pas sa presence. */
 
-    h += '<div class="carte">';
+    /* ⚠ PLEINE HAUTEUR (2026-09-19) : la carte prend le reste du corps et c est
+       la LISTE qui defile ; la pagination et le rappel sur les frais Square
+       restent colles au bas, toujours visibles. Les deux boites (formulaire,
+       detail) sont des voiles en position:fixed — elles flottent au-dessus et
+       ne sont donc pas coupees par le corps. */
+    h += '<div class="carte plein">';
     var rows = D.lignes || [];
     if (!rows.length) {
       h += '<div class="vide">${T("Aucune dépense pour")} ' + esc(D.periode) + '.</div>';
     } else {
-      h += '<table><thead><tr><th>${T("Date")}</th><th>${T("Catégorie")}</th><th>${T("Description")}</th>'
+      h += '<div class="liste"><table><thead><tr><th>${T("Date")}</th><th>${T("Catégorie")}</th><th>${T("Description")}</th>'
         + '<th>${T("Paiement")}</th><th style="text-align:right">${T("Montant")}</th>'
         + '<th style="text-align:right">${T("Taxes")}</th><th style="text-align:center">${T("Reçu")}</th></tr></thead><tbody>'
         + rows.map(function(r){
@@ -364,7 +373,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
               + '<td style="text-align:center">' + (r.recu ? '<span class="ic">📎</span>' : '<span class="dt">—</span>') + '</td>'
               + '</tr>';
           }).join('')
-        + '</tbody></table>';
+        + '</tbody></table></div>';
       if ((D.pages || 1) > 1) {
         h += '<div class="pagi">'
           + '<button class="mini" id="d-prec"' + (D.page <= 0 ? ' disabled' : '') + '>◀</button>'
@@ -383,6 +392,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
     if (FORM) h += boiteForm();
     else if (DETAIL) h += boiteDetail();
 
+    corps.className = 'corps plein';
     corps.innerHTML = h;
     brancher();
   }

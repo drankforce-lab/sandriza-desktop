@@ -229,13 +229,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (c.publies || 0) + ((c.publies || 0) > 1 ? '${T(" publiés")}' : '${T(" publié")}') + '</span>'
       + '</div>';
 
-    h += '<div class="carte">';
+    /* ⚠ PLEINE HAUTEUR (2026-09-19) : la carte prend le reste du corps, la liste
+       defile, la pagination reste collee au bas. La boite de detail est un
+       voile en position:fixed — elle flotte et n est pas coupee. */
+    h += '<div class="carte plein">';
     var rows = D.lignes || [];
     if (!rows.length) {
       h += '<div class="vide">' + (ONGLET === 'pending'
         ? '${T("Rien à approuver. La file est vide.")}' : '${T("Aucun avis ne correspond à ces filtres.")}') + '</div>';
     } else {
-      h += '<table><thead><tr><th>${T("État")}</th><th>${T("Note")}</th><th>${T("Produit")}</th>'
+      h += '<div class="liste"><table><thead><tr><th>${T("État")}</th><th>${T("Note")}</th><th>${T("Produit")}</th>'
         + '<th>${T("Client")}</th><th>${T("Date")}</th></tr></thead><tbody>'
         + rows.map(function(r){
             return '<tr data-id="' + esc(r.id) + '" title="${T("Ouvrir l’avis")}">'
@@ -245,7 +248,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
               + '<td>' + esc(r.client) + (r.verifie ? ' <span class="pill bon">${T("achat vérifié")}</span>' : '') + '</td>'
               + '<td class="dt">' + esc(r.date) + '</td></tr>';
           }).join('')
-        + '</tbody></table>';
+        + '</tbody></table></div>';
       if ((D.pages || 1) > 1) {
         h += '<div class="pagi">'
           + '<button class="mini" id="a-prec"' + (D.page <= 0 ? ' disabled' : '') + '>◀</button>'
@@ -256,8 +259,35 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     h += '</div>';
 
+    /* ⚠⚠ LE PIED DE LISTE, ET L EXPORT QUI DIT SON PERIMETRE (2026-09-19).
+       Cet ecran est PAGINE et FILTRE par onglet : la fenetre ne detient que la
+       page courante. Annoncer << les avis >> serait un mensonge ; le pied
+       compte donc ce qui est AFFICHE, et nomme la page quand il y en a
+       plusieurs. L etat part en CLAIR (En attente / Publie / Masque), pas en
+       code interne : le fichier se lit sans l ecran sous les yeux. */
+    if (rows.length) {
+      var multiA = (D.pages || 1) > 1;
+      h += szPied(
+        multiA ? (rows.length + '${T(" sur cette page")}')
+               : (rows.length + ' ${T("avis")}'),   /* invariable au pluriel */
+        '<button class="mini" id="a-exporter"><span class="ic">⬇</span>${T(" Exporter")}</button>');
+    }
     if (DETAIL) h += boiteDetail();
+    corps.className = 'corps plein';
     corps.innerHTML = h;
+    var exA = document.getElementById('a-exporter');
+    if (exA) exA.onclick = function(){
+      var lignes = rows.map(function(r){
+        var e = ETATS[r.statut] || ETATS.hidden;
+        return [e[1], String(r.note == null ? '' : r.note), r.produit || '', r.client || '',
+                r.verifie ? '${T("oui")}' : '${T("non")}', r.date || ''];
+      });
+      if (!lignes.length) { szDire('${T("Rien à exporter.")}', 'att'); return; }
+      var csv = szCSV(['${T("État")}', '${T("Note")}', '${T("Produit")}', '${T("Client")}',
+        '${T("Achat vérifié")}', '${T("Date")}'], lignes);
+      szExporter('avis-' + new Date().toISOString().slice(0, 10) + '.csv', csv,
+        (D.pages || 1) > 1 ? '${T("La page affichée")}' : '${T("Les avis affichés")}');
+    };
     brancher();
   }
 

@@ -124,6 +124,14 @@ module.exports = {
   'Photos': 'Photos',
   'Fermer': 'Close',
 
+  /* ── LE PIED DE LISTE ET L EXPORT (2026-09-19). */
+  ' sur cette page': ' on this page',
+  'avis': 'reviews',
+  'Achat vérifié': 'Verified purchase',
+  'oui': 'yes',
+  'non': 'no',
+  'Les avis affichés': 'The reviews shown',
+
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) — collés à une donnée. */
   'sur 5 ·': 'out of 5 ·',
   '(aucun texte)': '(no text)'

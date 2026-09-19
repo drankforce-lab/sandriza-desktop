@@ -166,6 +166,27 @@ function mesurer(racine, contexte) {
     return;
   }
 
+  /* ⚠⚠ UN VOILE OUVERT REND TOUTE LA MESURE ILLISIBLE — et c'est arrive le
+     2026-09-19. Trois ecrans (avis, depenses, fidelisation) affichaient une
+     << bande basse >> de 60 a 121 px APRES avoir recu la pleine hauteur ; on a
+     cherche le defaut dans la mise en page pendant une demi-heure. Il n'y en
+     avait pas : le jeu d'epreuve OUVRAIT UNE BOITE MODALE, et le voile qui la
+     porte couvre la fenetre entiere. Tout ce qui est dessous devient un point
+     mort, et le vide sous la boite devient une << bande basse >>.
+     ➡ Le banc le DIT desormais. Un nombre qu'on ne peut pas lire de travers
+     vaut mieux qu'un nombre exact qu'on lit de travers. */
+  var voile = 0;
+  try {
+    for (var vi = 0; vi < vis.length; vi++) {
+      var ve = vis[vi].el, vb = vis[vi].b;
+      if (!ve || !ve.getBoundingClientRect) continue;
+      var pos = getComputedStyle(ve).position;
+      if (pos !== 'fixed' && pos !== 'absolute') continue;
+      if ((vb.width * vb.height) > 0.7 * vue.w * vue.h) { voile = 1; break; }
+    }
+  } catch (x) {}
+  if (voile) dit('VOILE|' + contexte);
+
   /* ── 1. LA GRILLE : ce qui est peint, point par point ─────────────────── */
   var PAS = 12;
   var nx = Math.max(4, Math.floor(vue.w / PAS));
