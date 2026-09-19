@@ -2679,8 +2679,93 @@ function szTuilesEcouter(){
 }
 `;
 
-module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES,
-  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES,
+/* ══ LES FINITIONS ════════════════════════════════════════════════════════
+   Ce bloc ne redessine rien : il pose ce qui MANQUAIT, et chaque regle est ici
+   parce qu un releve du socle a montre son absence — pas parce qu elle fait
+   partie d une liste de bonnes pratiques.
+
+   ⚠ CE QUI EXISTAIT DEJA N EST PAS REFAIT. Le socle a ses squelettes
+   (.sz-squel, avec miroitement et rail), son entree en fondu (sz-parait), ses
+   etats vides et son respect de prefers-reduced-motion. Doubler tout ca aurait
+   donne deux verites sur le meme element, et c est la plus forte qui aurait
+   gagne — au hasard de l ordre des fichiers.
+
+   ⚠ APPENDU EN DERNIER, DONC GAGNANT. C est voulu pour le focus et le survol,
+   qui doivent valoir partout ; c est pour cette raison exacte que les couleurs
+   litterales des fenetres sont ecrasees par CSS_THEMES (voir #129). On ne
+   redefinit ici AUCUN role de couleur — uniquement des etats d interaction.
+
+   ⚠ AUCUN ACCENT GRAVE ICI, meme en commentaire : ce bloc est un litteral de
+   gabarit, et le premier accent grave le referme. Quatrieme rappel du projet. */
+const CSS_FINITIONS = `
+:root{
+  /* Les durees et la courbe, nommees UNE fois. Elles etaient ecrites en dur a
+     onze endroits, avec sept valeurs differentes — ce qui se voit : deux
+     elements voisins ne repondaient pas au meme rythme. */
+  --sz-vite:.12s; --sz-moyen:.2s; --sz-ample:.34s;
+  --sz-courbe:cubic-bezier(.2,.7,.3,1);
+}
+
+/* ── 1. L ANNEAU DE FOCUS ──────────────────────────────────────────────────
+   Le socle n en avait QU UN, sur le bouton de repli des blocs. Partout
+   ailleurs, se deplacer au clavier ne montrait rien.
+   ⚠ :focus-visible, PAS :focus — sinon chaque clic de souris laisse un anneau
+   derriere lui, et on finit par retirer la regle entiere. */
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,
+textarea:focus-visible,summary:focus-visible,[tabindex]:focus-visible{
+  outline:2px solid var(--sz-accent);outline-offset:2px;border-radius:6px}
+button:focus:not(:focus-visible),a:focus:not(:focus-visible){outline:none}
+
+/* ── 2. LES CHIFFRES D ARGENT S ALIGNENT ───────────────────────────────────
+   Sans tabular-nums, le 1 est plus etroit que le 8 : une colonne de montants
+   ondule, et l oeil ne peut plus comparer deux lignes sans les lire. C est le
+   detail le moins visible et le plus utile d un ecran de comptabilite. */
+td.dr,th.dr,.sol,.mnt,.montant,.prix,.tuile .v{font-variant-numeric:tabular-nums}
+
+/* ── 3. LE SURVOL DES LIGNES, DANS LES DEUX MODES ──────────────────────────
+   Il n existait QU EN MODE JOUR (html.jour tbody tr:hover). La nuit, passer sur
+   une ligne de tableau ne repondait rien — sur des ecrans qui sont presque tous
+   des tableaux.
+   ⚠ On teinte le FOND, jamais le texte : la couleur du texte est ce que le banc
+   de contraste mesure, et la deplacer au survol creerait une paire que personne
+   ne regarde. Le survol du 2026-09-17 etait deja pire que le repos (2,28). */
+tbody tr{transition:background var(--sz-vite) linear}
+tbody tr:hover>td{background:var(--v05)}
+
+/* ── 4. LA CARTE REPOND, SANS SE SOULEVER ──────────────────────────────────
+   ⚠ PAS D ELEVATION AU SURVOL SUR TOUTES LES CARTES : la plupart ne sont pas
+   cliquables, et une ombre qui grandit sous le curseur promet une action qui
+   n existe pas. On ne bouge que la bordure — assez pour dire << je suis une
+   piece >>, pas assez pour dire << clique-moi >>. */
+.carte{transition:border-color var(--sz-moyen) var(--sz-courbe)}
+.carte:hover{border-color:var(--v14)}
+
+/* ── 5. LE BOUTON S ENFONCE ────────────────────────────────────────────────
+   Un bouton qui ne bouge pas sous le doigt laisse douter que le clic a pris —
+   et l on clique deux fois. Sur un bouton qui facture un appel, c est cher. */
+button{transition:background var(--sz-vite) linear,
+  border-color var(--sz-vite) linear,transform var(--sz-vite) var(--sz-courbe)}
+button:active:not(:disabled){transform:translateY(1px)}
+
+/* ── 6. LE DEFILEMENT DOUX ─────────────────────────────────────────────────
+   Un saut d ancre instantane fait perdre le fil : on ne sait pas si la page a
+   bouge ou si elle a change. */
+html{scroll-behavior:smooth}
+
+/* ── 7. ET TOUT CECI S ARRETE SI LA PERSONNE L A DEMANDE ───────────────────
+   ⚠ Le socle respectait deja prefers-reduced-motion pour ses animations ; les
+   regles POSEES ICI doivent s y ranger aussi, sinon on rouvre le trou qu il
+   avait ferme. Le focus, lui, RESTE : ce n est pas du mouvement, c est ce qui
+   dit ou l on est. */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .carte,button,tbody tr{transition:none!important}
+  button:active:not(:disabled){transform:none}
+}
+`;
+
+module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS,
+  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS,
   JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_THEMES, ICO,
   /* La page, pas son texte : voir l en-tete de ce fichier. */
   TETE, LIEU, SEP_DEC };
