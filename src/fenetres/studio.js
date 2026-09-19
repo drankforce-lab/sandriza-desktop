@@ -569,9 +569,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      par choisirPhoto, dans le selecteur. La photo de travail se pose donc
      maintenant par le fichier (glisser-deposer ou choix), et la photothèque par
      le panier. Verifie AVANT de couper : aucune capacite ne se perd.
-     ⚠ L op du pont << studio:phototheque >> n a plus d appelant mais RESTE
-     exposee — la retirer touche les deux listes de main.js et le site, et c est
-     justement l erreur que ce retrait-ci evite. Inscrite comme dette.
+     ⚠⚠ L op du pont << studio:phototheque >> n a plus d appelant ET NE PEUT PAS
+     ETRE RETIREE — verifie le 2026-09-19, ce n est pas une dette remise a plus
+     tard. Deux raisons qui se tiennent l une l autre :
+       . cote SITE elle est gardee EXPRES pour les coquilles DEJA INSTALLEES,
+         qui l appellent encore (pont.js le dit : << une vieille coquille
+         continue de fonctionner sans rien savoir des filtres >>) ;
+       . cote COQUILLE, l etape de parite de verifier-fenetres exige que OPS
+         (site) et OPS_PONT (main.js) soient identiques DANS LES DEUX SENS : la
+         retirer d un seul cote rend << absentes de OPS_PONT >>.
+     ➡ Une op sans appelant dans la DERNIERE coquille n est pas une op morte :
+     le site sert aussi les anciennes.
      ⚠ ET PAS D ACCENT GRAVE DANS CE FICHIER, MEME EN COMMENTAIRE : tout ce
      script vit dans un litteral de gabarit, et un seul le referme. */
   /* ⚠⚠ LES VIGNETTES NE VIENNENT PAS AVEC LA LIGNE (#143). L op studio:explorer

@@ -39,8 +39,12 @@ module.exports = {
   'venues de l’explorateur': 'from the explorer',
   'format enregistré': 'format saved',
   'formats enregistrés': 'formats saved',
+  /* ⚠ 'photo choisie' RESTE, et le singulier SEUL : il est encore rendu, mais
+     par une chaine NUE hors T() — `INTERIEUR_NOM || 'photo choisie'`, le
+     libelle de repli de la photo d interieur. Le pluriel, lui, n appartenait
+     qu au compteur du selecteur retire (#30). Un grep les aurait pris pour une
+     paire ; ils ne le sont pas. */
   'photo choisie': 'photo chosen',
-  'photos choisies': 'photos chosen',
   'appel facturé': 'billed call',
   'appels facturés': 'billed calls',
   'déjà faite, écartée': 'already done, skipped',
@@ -184,7 +188,6 @@ module.exports = {
   'Choisir une autre photo': 'Choose another photo',
   '← Retour': '← Back',
   'Choisissez une photo': 'Choose a photo',
-  'Photo choisie :': 'Photo chosen:',
   'Lecture de la photo…': 'Reading the photo…',
   'Photo prête.': 'Photo ready.',
   'photo prête': 'photo ready',
@@ -415,30 +418,14 @@ module.exports = {
   'Enregistrement du format': 'Saving format',
   'enregistré dans la photothèque.': 'saved in the photo library.',
 
-  /* ── L EXPLORATEUR DE LA PHOTOTHEQUE ────────────────────────────────────── */
+  /* ── L EXPLORATEUR DE LA PHOTOTHEQUE ──────────────────────────────────────
+     ⚠ LES 22 ENTREES DE LA GRILLE INTERNE SONT PARTIES AVEC ELLE (#146, le
+     2026-09-19) : recherche, filtres, tri, pastilles, panier de selection,
+     compteur de defilement. Le selecteur interne du Studio a ete retire par
+     #30 ; ces phrases ne paraissent plus nulle part.
+     ⚠ CE QUI RESTE ICI est la PORTE vers l Explorateur, qui elle est bien
+     vivante — et l Explorateur a son propre dictionnaire. */
   'Explorateur ouvert dans sa fenêtre.': 'Browser opened in its own window.',
-  'Lecture de la photothèque…': 'Reading the photo library…',
-  'Chargement de la photothèque…': 'Loading the photo library…',
-  'Aucune photo ne correspond à «': 'No photo matches «',
-  'Aucune photo dans la photothèque. Importez-en depuis l’écran Photothèque.':
-    'No photo in the library. Import some from the Photo library screen.',
-  'en cours…': 'in progress…',
-  'aperçu indisponible': 'preview unavailable',
-  'Produit lié': 'Linked product',
-  'Traitement — tous': 'Job — all',
-  'Sans «': 'Without «',
-  'Tous les lots': 'All batches',
-  'Plus récentes': 'Most recent',
-  'Liées d’abord': 'Linked first',
-  'Plus lourdes': 'Largest',
-  '✕ Tout effacer': '✕ Clear all',
-  'Aucune sélection': 'No selection',
-  'Tout sélectionner (': 'Select all (',
-  'Ouvrir cette photo →': 'Open this photo →',
-  '⚙ Traiter ces': '⚙ Process these',
-  'photos en lot…': 'photos as a batch…',
-  '0 résultat': '0 result',
-  '— défilez pour en voir plus': '— scroll to see more',
 
   /* ── LA BOITE DU LOT ────────────────────────────────────────────────────── */
   /* ⚠⚠ TROIS PHRASES DE CETTE BOITE EVITENT DE DEPENSER POUR RIEN, et gardent
@@ -683,13 +670,8 @@ module.exports = {
 
   /* ── LES INFOBULLES, LES TEXTES DE REMPLACEMENT ET LES EXEMPLES ──────────── */
   'Parcourir la photothèque en grand, avec aperçu': 'Browse the media library large, with a preview',
-  'Rechercher (nom, code, produit, SKU)': 'Search (name, code, product, SKU)',
-  'Rechercher (nom, code, produit, SKU)…': 'Search (name, code, product, SKU)…',
   'Nom de la recette': 'Recipe name',
   'Télécharger ce format': 'Download this size',
-  'Déjà traitée': 'Already processed',
-  'Détourée': 'Cut out',
-  'Filtrer les photos sans un traitement donné': 'Filter photos without a given treatment',
   'Glissez une photo ici, ou cliquez pour en choisir une':
     'Drop a photo here, or click to choose one',
   'Studio, fond blanc, un vêtement — JPEG ou PNG':
@@ -698,7 +680,6 @@ module.exports = {
   /* ⚠ La forme RENDUE, pour le compteur : le signe vit dans son <span> dans la
      source, mais la page ecrite le lit d un seul tenant. */
   '🗂️ Explorateur…': '🗂️ Browser…',
-  'Recherche…': 'Searching…',
   /* ⚠ Les deux volets du comparateur : leur `alt` est ce que le lecteur d ecran
      annonce pour distinguer la photo d origine du resultat. */
   'avant': 'before',
@@ -730,8 +711,6 @@ module.exports = {
   'Profil': 'Profile',
   'Recadrer': 'Crop',
   'Marges': 'Margins',
-  'Inverser': 'Invert',
-  'Vider': 'Clear',
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
   'le logo': 'the logo',
