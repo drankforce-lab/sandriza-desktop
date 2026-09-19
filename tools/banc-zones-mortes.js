@@ -54,6 +54,20 @@ const CHOISIES = ARGS.filter((a) => !a.startsWith('--'));
 const MODES = OPT('--deux-modes') ? ['nuit', 'jour'] : (OPT('--jour') ? ['jour'] : ['nuit']);
 const PAR_LOT = 18;
 
+/* ── L ELASTICITE ──────────────────────────────────────────────────────────
+   ⚠ LA QUESTION N EST PAS << reste-t-il du vide ? >> MAIS << le contenu
+   SUIT-IL la fenetre ? >>. Ce sont deux defauts differents : un ecran peut
+   etre bien rempli a 1100 px et laisser 600 px morts a 1700 px parce que ses
+   colonnes sont figees. On rend donc le MEME ecran a DEUX largeurs et on
+   compare la largeur REELLEMENT PEINTE. Si elle ne bouge pas, la mise en page
+   est statique — et c est exactement ce qu il signale sur la phototheque et
+   l explorateur.
+   ⚠ On compare la largeur PEINTE (deduite des colonnes vivantes), PAS le cadre
+   des elements : le conteneur exterieur s etend toujours a la fenetre, et une
+   mesure qui l inclut rend 1100/1100 partout — elle ne peut donc RIEN dire. */
+const ELASTIQUE = OPT('--elastique');
+const LARGEURS = ELASTIQUE ? [1100, 1700] : [1100];
+
 /* ── LE GABARIT, DECOUPE COMME DANS LE BANC DE CONTRASTE ─────────────────── */
 const GABARIT = fs.readFileSync(path.join(__dirname, 'banc-contraste-rendu-page.html'), 'utf8');
 const _morceau = (marque) => {
@@ -127,10 +141,10 @@ function fenetres() {
   return out;
 }
 
-function pagePilote(adresses) {
+function pagePilote(adresses, largeur) {
   const liste = JSON.stringify(adresses);
   return '<!doctype html><meta charset="utf-8"><title>banc-zones-mortes</title>\n'
-    + '<style>html,body{margin:0;height:100%}iframe{border:0;width:1100px;height:760px}</style>\n'
+    + '<style>html,body{margin:0;height:100%}iframe{border:0;width:' + largeur + 'px;height:760px}</style>\n'
     + '<iframe id="f"></iframe>\n<script>\n'
     + 'var LISTE = ' + liste + ';\n'
     + 'var i = -1, minuterie = null;\n'
@@ -170,17 +184,19 @@ function main() {
     try { brut = String(f.fabrique(f.jeu.id || '')); }
     catch (e) { rates++; console.error('   ✗ ' + f.nom + ' : la fabrique a leve — ' + e.message); continue; }
     for (const mode of MODES) {
-      let page = brut.replace(/<head([^>]*)>/i, (m) => m + '\n' + prologue(f.jeu));
-      if (!/<head/i.test(brut)) page = prologue(f.jeu) + brut;
-      /* ⚠ LE DERNIER </body>, JAMAIS LE PREMIER : un jeu de reponses peut
-         contenir une page HTML entiere (l apercu d un courriel), et le premier
-         se trouve alors DANS une chaine. */
-      const fin = page.toLowerCase().lastIndexOf('</body>');
-      const ep = epilogue(f.nom, mode);
-      page = (fin >= 0) ? page.slice(0, fin) + ep + page.slice(fin) : page + ep;
-      const nomF = f.nom + '-' + mode + '.html';
-      fs.writeFileSync(path.join(tmp, nomF), page, 'utf8');
-      adresses.push(nomF + '?m=' + mode);
+      for (const L of LARGEURS) {
+        let page = brut.replace(/<head([^>]*)>/i, (m) => m + '\n' + prologue(f.jeu));
+        if (!/<head/i.test(brut)) page = prologue(f.jeu) + brut;
+        /* ⚠ LE DERNIER </body>, JAMAIS LE PREMIER : un jeu de reponses peut
+           contenir une page HTML entiere (l apercu d un courriel), et le premier
+           se trouve alors DANS une chaine. */
+        const fin = page.toLowerCase().lastIndexOf('</body>');
+        const ep = epilogue(f.nom + '@' + L, mode);
+        page = (fin >= 0) ? page.slice(0, fin) + ep + page.slice(fin) : page + ep;
+        const nomF = f.nom + '-' + mode + '-' + L + '.html';
+        fs.writeFileSync(path.join(tmp, nomF), page, 'utf8');
+        adresses.push({ url: nomF + '?m=' + mode, L });
+      }
     }
   }
 
@@ -190,18 +206,28 @@ function main() {
 
   const lignes = [];
   let lots = 0, lotsMorts = 0;
-  for (let d = 0; d < adresses.length; d += PAR_LOT) {
-    const lot = adresses.slice(d, d + PAR_LOT);
+  /* ⚠ UN LOT NE MELANGE PAS DEUX LARGEURS : la taille de l iframe est posee
+     dans la page pilote, une fois pour toutes. Melanger rendrait des mesures
+     faites a une largeur sous l etiquette de l autre — le genre de faute qui
+     ne se voit jamais dans le resultat. */
+  const parLargeur = [];
+  for (const L of LARGEURS) {
+    const s = adresses.filter((a) => a.L === L);
+    for (let d = 0; d < s.length; d += PAR_LOT) parLargeur.push({ L, lot: s.slice(d, d + PAR_LOT) });
+  }
+  const nbLots = parLargeur.length;
+  for (const bloc of parLargeur) {
+    const lot = bloc.lot.map((a) => a.url);
     lots++;
     const pilote = path.join(tmp, '_pilote-' + lots + '.html');
     const journal = path.join(tmp, 'chrome-' + lots + '.log');
     const profil = path.join(tmp, 'profil-' + lots);
-    fs.writeFileSync(pilote, pagePilote(lot), 'utf8');
+    fs.writeFileSync(pilote, pagePilote(lot, bloc.L), 'utf8');
 
     const nav = spawn(chrome, [
       '--headless=new', '--disable-gpu', '--allow-file-access-from-files',
       '--no-first-run', '--no-default-browser-check', '--disable-extensions',
-      '--window-size=1200,900',
+      '--window-size=' + (bloc.L + 100) + ',900',
       '--noerrdialogs', '--disable-crash-reporter', '--disable-breakpad',
       ...(process.env.CI ? ['--no-sandbox'] : []),
       '--enable-logging', '--v=1', '--log-file=' + journal,
@@ -235,7 +261,7 @@ function main() {
     } catch (e) {}
     tuerNosChrome();
     if (!fini) lotsMorts++;
-    process.stdout.write('   lot ' + lots + '/' + Math.ceil(adresses.length / PAR_LOT)
+    process.stdout.write('   lot ' + lots + '/' + nbLots + ' (' + bloc.L + 'px)'
       + (fini ? ' ok' : ' MUET') + '\n');
   }
 
@@ -290,6 +316,57 @@ function rapport(lignes, nbFenetres, rates, lotsMorts) {
     const pct = (m.mort.toFixed(1) + ' %').padStart(8);
     const el = String(m.els).padStart(8);
     console.log('   ' + t + ' ' + ou + ' ' + pct + '   ' + el + '   ' + m.contexte);
+  }
+
+  /* ── L ELASTICITE : le contenu suit-il la fenetre ? ───────────────────── */
+  if (ELASTIQUE) {
+    const par = {};
+    for (const m of mesures) {
+      const mm = /^(.+)@(\d+)\/(.+)mode?$|^(.+)@(\d+)\/(.+)$/.exec(m.contexte);
+      if (!mm) continue;
+      const nom = mm[1] || mm[4];
+      const L = +(mm[2] || mm[5]);
+      const mode = mm[3] || mm[6];
+      const cle = nom + '/' + mode;
+      (par[cle] = par[cle] || {})[L] = m;
+    }
+    const rangs = [];
+    for (const cle of Object.keys(par)) {
+      const a = par[cle][LARGEURS[0]], b = par[cle][LARGEURS[1]];
+      if (!a || !b) continue;
+      /* ⚠⚠ ON NE MESURE PAS LA << LARGEUR PEINTE >>, ET C EST UNE FAUTE DEJA
+         PAYEE DEUX FOIS AUJOURD HUI. La largeur peinte = la fenetre moins ses
+         bords morts : une simple barre d en-tete pleine largeur la met a 100 %
+         alors que la GRILLE en dessous n a pas bouge d un pixel. On mesurerait
+         le DECOR en croyant mesurer le CONTENU — exactement l erreur de la
+         colonne << largeur utile >>, et celle de #129 avant elle.
+         ➡ LA BONNE QUESTION : la largeur qu on vient d offrir, ou est-elle
+         allee ? Si elle finit dans le plus grand trou, le contenu ne suit pas. */
+      const offert = b.w - a.w;
+      const absorbe = Math.max(0, b.trouL - a.trouL);   // ce que le VIDE a pris
+      const part = offert ? Math.max(0, 100 - Math.round(100 * absorbe / offert)) : 100;
+      rangs.push({ cle, part, absorbe, offert, ta: a.trouL, tb: b.trouL,
+        morta: a.mort, mortb: b.mort });
+    }
+    rangs.sort((x, y) => x.part - y.part);
+    console.log('');
+    console.log('== LA LARGEUR OFFERTE VA-T-ELLE AU CONTENU, OU AU VIDE ? ('
+      + LARGEURS[0] + 'px -> ' + LARGEURS[1] + 'px) ==');
+    console.log('');
+    console.log('   au contenu   le trou passe de   absorbe par le vide   vide total   ecran');
+    console.log('   ----------   ----------------   -------------------   ----------   -----');
+    for (const r of rangs.slice(0, 40)) {
+      const s = (r.part + ' %').padStart(10);
+      const t = (r.ta + ' -> ' + r.tb + ' px').padEnd(16);
+      const ab = (r.absorbe + ' / ' + r.offert + ' px').padEnd(19);
+      const vd = (r.morta.toFixed(0) + ' -> ' + r.mortb.toFixed(0) + ' %').padEnd(10);
+      console.log('   ' + s + '   ' + t + '   ' + ab + '   ' + vd + '   ' + r.cle);
+    }
+    const figes = rangs.filter((r) => r.part < 25);
+    console.log('');
+    console.log('   ⚠ ' + figes.length + ' ecran(s) sur ' + rangs.length
+      + ' rendent MOINS DU QUART de la largeur offerte au contenu.');
+    console.log('     Chez eux, agrandir la fenetre agrandit le VIDE — c est une mise en page figee.');
   }
 
   console.log('');
