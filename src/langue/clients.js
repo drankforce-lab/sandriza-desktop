@@ -20,7 +20,6 @@ module.exports = {
      SA page : exporter en silence << tous les clients >> serait un mensonge,
      et exporter la page sans le dire en serait un autre. Le message nomme donc
      ce qui est parti, et le nom du fichier porte le numero de page. */
-  'La page affichée': 'The page shown',
   'La liste des clients': 'The client list',
   /* ⚠ LES DEUX ALTERNATIVES EN ENTIER — voir `tools/banc-pluriel-colle.js`.
      ⚠ ET AU MASCULIN : le client est toujours au masculin dans ce dépôt. */

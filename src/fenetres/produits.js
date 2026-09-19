@@ -216,8 +216,45 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       }
     }
     h += '</div>';
+    /* Le pied ferme la liste et porte l export (2026-09-19). ⚠ Ecran PAGINE :
+       le pied compte ce qui est affiche SUR le total, et le fichier porte le
+       numero de page — la meme regle que sur les clients. */
+    if (rows.length) {
+      var multiP = (D.pages || 1) > 1;
+      h += szPied(
+        multiP ? (rows.length + '${T(" sur ")}' + (D.total || 0))
+               : (rows.length + ' ' + (rows.length > 1 ? '${T("produits")}' : '${T("produit")}')),
+        '<button class="mini" id="p-exporter"><span class="ic">⬇</span>${T(" Exporter")}</button>');
+    }
     corps.innerHTML = h;
     szVerrousPeindre();   // reposer les cadenas connus sur le tableau frais
+
+    /* ⚠⚠ LE PRIX ET LE SOLDE SONT DEUX COLONNES, pas une chaine barree. A
+       l ecran le solde se lit d un coup d oeil par-dessus le prix barre ; dans
+       un fichier, cette mise en forme devient illisible et surtout
+       INCALCULABLE. On envoie les deux nombres nus et le rabais en pourcentage,
+       ce que l ecran n affiche que sous forme de pastille.
+       ⚠ Et les deux etiquettes de vente (finale, liquidation) deviennent des
+       colonnes oui/non : a l ecran ce sont des pastilles, dans un tableur ce
+       sont des criteres de filtre. */
+    var exp = document.getElementById('p-exporter');
+    if (exp) exp.onclick = function(){
+      var lignes = (D.lignes || []).map(function(r){
+        var rabais = (r.solde && r.prix) ? Math.round((1 - r.solde / r.prix) * 100) : '';
+        return [r.nom || '', r.categorie || '', r.tag || '', r.prix, r.solde || '', rabais,
+          r.stockTotal, r.panier || 0,
+          r.finalSale ? '${T("Oui")}' : '${T("Non")}',
+          r.liquidation ? '${T("Oui")}' : '${T("Non")}'];
+      });
+      if (!lignes.length) { dire('${T("Rien à exporter.")}', 'att'); return; }
+      var csv = szCSV(['${T("Produit")}', '${T("Catégorie")}', '${T("Étiquette")}',
+        '${T("Prix")}', '${T("Solde")}', '${T("Rabais %")}', '${T("Inventaire")}',
+        '${T("Paniers")}', '${T("Vente finale")}', '${T("Liquidation")}'], lignes);
+      var jourP = new Date().toISOString().slice(0, 10);
+      var mP = (D.pages || 1) > 1;
+      szExporter('produits-' + jourP + (mP ? '-p' + ((D.page || 0) + 1) : '') + '.csv', csv,
+        mP ? '${T("La page affichée")}' : '${T("La liste des produits")}');
+    };
 
     var q = document.getElementById('p-q');
     if (q) {

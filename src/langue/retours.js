@@ -23,6 +23,25 @@
  */
 
 module.exports = {
+  /* ── LE PIED DE LISTE ET L EXPORT (2026-09-19) ─────────────────────────
+     ⚠ LES PASTILLES DEVIENNENT DES COLONNES. A l ecran, << expiree
+     automatiquement >> et << frais pris en charge >> sont des marques posees a
+     cote du nom ; dans un fichier ce sont les criteres sur lesquels on trie et
+     on compte. Une pastille perdue dans un export, c est une question a
+     laquelle le fichier ne repondra pas.
+     ⚠ Les en-tetes sont ceux du FICHIER : l ecran n est pas un tableau, ses
+     lignes sont riches — le fichier, lui, est tabulaire, et c est justement
+     pour ca qu il sert a autre chose. */
+  'demande': 'request',
+  'demandes': 'requests',
+  'Commande': 'Order',
+  'Client': 'Customer',
+  'Motif': 'Reason',
+  'Statut': 'Status',
+  'Date': 'Date',
+  'Suivi': 'Tracking',
+  'Étiquette': 'Label',
+  'La liste des retours': 'The return list',
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   'Nos Retours — Administration Sandriza': 'Our Returns — Sandriza Administration',
   'Nos Retours': 'Our Returns',

@@ -179,9 +179,38 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + '<div class="droite">' + esc(fmtDate(r.date)) + '</div>'
           + '</div>';
       }).join('');
+      /* Le pied ferme la liste et porte l export (2026-09-19). ⚠ Cet ecran
+         n est PAS un tableau : ce sont des lignes riches. Le fichier, lui, est
+         tabulaire — et c est justement pour ca qu il sert a autre chose. */
+      h += szPied(
+        rows.length + ' ' + (rows.length > 1 ? '${T("demandes")}' : '${T("demande")}'),
+        '<button class="mini" id="r-exporter"><span class="ic">⬇</span>${T(" Exporter")}</button>');
     }
     corps.innerHTML = h;
     szVerrousPeindre();   // reposer les cadenas connus sur la liste fraiche
+
+    /* ⚠ LES PASTILLES DEVIENNENT DES COLONNES. A l ecran, << expiree
+       automatiquement >>, << frais pris en charge >> et le mode d etiquette
+       sont des marques posees a cote du nom ; dans un fichier ce sont les
+       criteres sur lesquels on va trier et compter. Une pastille perdue dans
+       un export, c est une question a laquelle le fichier ne repondra pas. */
+    var exr = document.getElementById('r-exporter');
+    if (exr) exr.onclick = function(){
+      var lignes = (D.lignes || []).map(function(r){
+        return [r.commande || '', r.client || '', r.courriel || '', r.motif || '',
+          r.statutLibelle || '', fmtDate(r.date), r.suivi || '',
+          r.etiquette || '',
+          r.expireAuto ? '${T("Oui")}' : '${T("Non")}',
+          r.fraisBoutique ? '${T("Oui")}' : '${T("Non")}'];
+      });
+      if (!lignes.length) { dire('${T("Rien à exporter.")}', 'att'); return; }
+      var csv = szCSV(['${T("Commande")}', '${T("Client")}', '${T("Courriel")}',
+        '${T("Motif")}', '${T("Statut")}', '${T("Date")}', '${T("Suivi")}',
+        '${T("Étiquette")}', '${T("Expirée automatiquement")}',
+        '${T("Frais pris en charge")}'], lignes);
+      szExporter('retours-' + new Date().toISOString().slice(0, 10) + '.csv', csv,
+        '${T("La liste des retours")}');
+    };
 
     var q = document.getElementById('r-q');
     if (q) {

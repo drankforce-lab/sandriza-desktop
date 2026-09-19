@@ -268,6 +268,13 @@ module.exports = {
      de CHAQUE liste. Une entree par fenetre serait 102 entrees a tenir
      d accord, et c est celle qu on oublie qui sortirait en francais. */
   ' Exporter': ' Export',
+  /* ⚠ AU SOCLE eux aussi : << Oui >> / << Non >> deviennent des colonnes dans
+     CHAQUE export (a l ecran ce sont des pastilles, dans un tableur ce sont des
+     criteres de filtre), et << La page affichee >> sert a tout ecran pagine.
+     Les tenir par fenetre, ce serait la meme paire recopiee vingt fois. */
+  'Oui': 'Yes',
+  'Non': 'No',
+  'La page affichée': 'The page shown',
   'Écriture impossible :': 'Could not write:',
   'le dossier des exports': 'the exports folder',
   'Le fichier': 'The file',

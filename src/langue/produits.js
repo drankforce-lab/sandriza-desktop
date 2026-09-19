@@ -13,6 +13,15 @@
  */
 
 module.exports = {
+  /* ── L EXPORT DE LA LISTE (2026-09-19) ─────────────────────────────────
+     ⚠ LE PRIX ET LE SOLDE SONT DEUX COLONNES dans le fichier, pas une chaine
+     barree. A l ecran le solde se lit d un coup d oeil par-dessus le prix
+     barre ; dans un tableur cette mise en forme est illisible et surtout
+     INCALCULABLE. Le rabais en pourcentage devient une colonne a lui, alors
+     que l ecran n en fait qu une pastille. */
+  'Solde': 'Sale price',
+  'Rabais %': 'Discount %',
+  'La liste des produits': 'The product list',
   /* Les DEUX alternatives en entier — voir tools/banc-pluriel-colle.js. */
   'produit': 'product',
   'produits': 'products',
