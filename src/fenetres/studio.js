@@ -257,64 +257,22 @@ body{background:var(--f-page);color:var(--tx);
 .depot .gros{font-size:1.15rem;filter:grayscale(1) brightness(1.6)}
 .depot img{max-width:100%;max-height:14rem;border-radius:8px}
 .depot .refaire{font-size:.72rem;color:var(--tx2);text-decoration:underline;margin-top:.3rem}
-/* Choix dans la photothèque */
+/* La barre de l ecran plein largeur (le suivi des lots).
+   ⚠ LE RESTE DE CE BLOC EST PARTI AVEC LE SELECTEUR (#30, le 2026-09-19) :
+   grille, vignettes, coches, pastilles, filtres et panier de selection. Du CSS
+   qui habille un ecran retire est exactement ce que ce fichier reproche
+   ailleurs — du code vivant que plus rien ne dessine.
+   ⚠ .jeton RESTE, et il n appartenait PAS au selecteur : les boutons des lots
+   (pause, arreter, reprendre, retirer), les modes de format et la bascule
+   avant/apres s en servent tous. Verifie avant de couper. */
 .phbarre{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem}
 .phbarre .phinfo{font-size:.74rem;color:var(--tx2);margin-left:auto;white-space:nowrap}
-.phbarre #ph-q{flex:1 1 auto;min-width:6rem;max-width:22rem;font:inherit;color:var(--tx);
-  background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;padding:.34rem .55rem}
-.phbarre #ph-q:focus{outline:none;border-color:#c9a97e}
-/* ⚠ 7rem, pas 5,5 : la vignette porte desormais une coche et des pastilles.
-   A l ancienne largeur, le nom passait dessous et devenait illisible. */
-/* ⚠⚠ align-content:start, ET C EST UN CORRECTIF, PAS UNE FINITION. Une grille
-   dont le conteneur est plus haut que son contenu ETIRE ses rangees pour combler
-   le vide : avec deux photos, les deux vignettes devenaient des boites de trois
-   cents pixels de haut, presque vides sous le nom. Le min-height pose avec le
-   passage en plein ecran a rendu le defaut visible tout de suite. Signale en
-   capture le 2026-08-19.
-   ⚠ La vignette passe a 7rem : l ecran est desormais plein, et c est ici qu on
-   choisit CE QU ON VA PAYER — a 4,6rem, une robe entiere tenait dans un timbre. */
-.phgrille{display:grid;grid-template-columns:repeat(auto-fill,minmax(8rem,1fr));gap:.5rem;
-  align-content:start;
-  max-height:calc(100vh - 18rem);min-height:14rem;overflow-y:auto;padding-right:.2rem}
-.phgrille::-webkit-scrollbar{width:8px}
-.phgrille::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
-.phvig{background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;overflow:hidden;cursor:pointer;
-  display:flex;flex-direction:column;align-items:center;transition:border-color .12s}
-.phvig:hover{border-color:#c9a97e}
-/* object-fit:contain : une photo COUCHEE garde ses proportions et se centre dans
-   la boite, elle ne s etale pas pour la remplir. */
-.phvig img{width:100%;height:7rem;object-fit:contain;background:var(--f-pied)}
-.phvig .attente{font-size:.68rem;color:var(--tx3);padding:1.6rem .3rem}
-.phvig .phnom{font-size:.64rem;color:var(--tx2);padding:.15rem .25rem;max-width:100%;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-/* ── Explorateur : filtres, panier de selection, coches et pastilles ─────── */
-.phfiltres{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center;margin-bottom:.45rem}
 .jeton{font:inherit;font-size:.73rem;padding:.16rem .55rem;border-radius:99px;cursor:pointer;
   color:var(--tx-bleute);background:var(--v05);border:1px solid var(--v15)}
 .jeton:hover:not(:disabled){background:var(--v10);border-color:var(--v30)}
 .jeton:disabled{opacity:.4;cursor:default}
 .jeton.on{background:rgba(201,169,126,.2);border-color:#c9a97e;color:var(--tx-creme);font-weight:600}
 .jeton.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
-.phfiltres select{font:inherit;font-size:.73rem;color:var(--tx-bleute);background:var(--f-champ);
-  border:1px solid var(--v15);border-radius:8px;padding:.14rem .4rem;
-  width:auto;max-width:15rem;flex:0 1 auto}
-.phsel{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;margin-bottom:.45rem;
-  padding:.35rem .5rem;border-radius:9px;background:var(--v035);
-  border:1px solid var(--v08)}
-.phsel .cpt{font-size:.76rem;color:var(--tx2)}
-.phsel .cpt.on{color:var(--tx-creme);font-weight:700}
-.phsel .droite{margin-left:auto;display:flex;align-items:center;gap:.4rem}
-.phsel .aide{font-size:.72rem;color:var(--tx2)}
-.phvig{position:relative}
-.phvig.pris{border-color:#c9a97e;box-shadow:0 0 0 1px #c9a97e inset}
-.phcoche{position:absolute;top:.2rem;left:.2rem;width:1.05rem;height:1.05rem;z-index:2;
-  border-radius:5px;border:1px solid var(--v35);background:rgba(8,12,20,.7);
-  display:flex;align-items:center;justify-content:center;font-size:.7rem;color:#17202c}
-.phvig.pris .phcoche{background:#c9a97e;border-color:#c9a97e;font-weight:700}
-.phpast{position:absolute;top:.2rem;right:.2rem;z-index:2;display:flex;gap:.12rem}
-.phpast .pt{font-size:.6rem;line-height:1;padding:.12rem .22rem;border-radius:4px;
-  background:rgba(8,12,20,.75);color:var(--tx2)}
-.phpast .pt.fait{color:var(--tx-ok)}
 /* Le panier venu de l explorateur : ce qu on s apprete a traiter. */
 .panier{margin-top:.55rem;padding:.5rem .6rem;border-radius:10px;
   background:rgba(201,169,126,.1);border:1px solid rgba(201,169,126,.35)}
@@ -518,10 +476,11 @@ button.conf{background:#f0a05a;border-color:#f0a05a;color:#241703;font-weight:70
 `;
 
 function pageStudio(mode) {
-  /* ⚠ IDENTIFIANT D OUVERTURE << explorateur >> : le banc ne clique pas, et le
-     selecteur de photos ne s atteint qu apres un clic. Sans lui, l ECRAN QUI
-     CHOISIT CE QU ON VA PAYER resterait hors de tout controle. Angle mort #32. */
-  const explo = String(mode || '') === 'explorateur';
+  /* ⚠ L IDENTIFIANT D OUVERTURE << explorateur >> EST PARTI AVEC L ECRAN QU IL
+     OUVRAIT (#30, 2026-09-19). Il existait parce que le banc ne clique pas et
+     que le selecteur ne s atteignait qu apres un clic ; il n y a plus de
+     selecteur a atteindre. L ecran qui choisit ce qu on va payer est
+     desormais l EXPLORATEUR, qui a sa propre fenetre et son propre banc. */
   const lotsDep = String(mode || '') === 'lots';
   // Le panneau « Réglages avancés » : replié par défaut, donc invisible au banc.
   const avOuvre = String(mode || '').indexOf('avance') === 0;
@@ -598,14 +557,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var PHOTO_ID = '';     // id d une photo CHOISIE dans la phototheque (l image reste au site)
   var PHOTO_URL = '';    // adresse de la vignette choisie (affichage seulement)
   var PHOTO_NOM = '';    // son nom, dit en tete de l etape 1
-  var PICKER = false;    // le choix dans la phototheque est-il ouvert ?
-  var PHOTHQ = [];       // [{id,nom,apercu,enAttente}] cumule (defilement infini)
-  var PH_Q = '';         // recherche courante (nom / code)
-  var PH_PAGE = 0;       // derniere page chargee
-  var PH_TAILLE = 60;    // photos par page
-  var PH_TOTAL = 0;      // total correspondant a la recherche
-  var PH_FIN = false;    // plus rien a charger
-  var PH_OCC = false;    // une page est-elle en cours de chargement ?
+  /* ⚠⚠ LE SELECTEUR INTERNE PLEIN ECRAN EST RETIRE (#30, le 2026-09-19, sur sa
+     decision #31). Il etait devenu injoignable le 2026-09-09 avec le bouton
+     << Depuis la photothèque >>, et son retrait avait ete inscrit comme tache a
+     part — expressement pour ne pas retirer deux choses d un coup.
+     ➡ LA PHOTOTHEQUE PASSE DESORMAIS PAR L EXPLORATEUR, qui porte la recherche,
+     les filtres, la multi-selection et l apercu, avec de la place en plus. Ce
+     qu il envoie arrive dans PANIER (panier:poser) et se traite en lot — un
+     envoi d UNE photo est un lot d une.
+     ⚠ CE QUI PART AVEC LUI, ET QU IL FAUT SAVOIR : PHOTO_ID n etait ecrit que
+     par choisirPhoto, dans le selecteur. La photo de travail se pose donc
+     maintenant par le fichier (glisser-deposer ou choix), et la photothèque par
+     le panier. Verifie AVANT de couper : aucune capacite ne se perd.
+     ⚠ L op du pont << studio:phototheque >> n a plus d appelant mais RESTE
+     exposee — la retirer touche les deux listes de main.js et le site, et c est
+     justement l erreur que ce retrait-ci evite. Inscrite comme dette.
+     ⚠ ET PAS D ACCENT GRAVE DANS CE FICHIER, MEME EN COMMENTAIRE : tout ce
+     script vit dans un litteral de gabarit, et un seul le referme. */
   /* ⚠⚠ LES VIGNETTES NE VIENNENT PAS AVEC LA LIGNE (#143). L op studio:explorer
      ne remplit son champ apercu que si la photo est rangee sur le reseau ; une
      photo importee vit en data: URL cote site, et la case restait donc sur
@@ -615,16 +583,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      C est undefined qui veut dire << jamais demandee >>. */
   var VIGN = {};         // id -> data URL recue ('' = demandee et sans image)
   var VIGN_OCC = false;  // un paquet de vignettes est-il en route ?
-  // ⚠ Trois etats : tant qu il est faux, on ne dit PAS << vide >>.
-  var PH_CHARGE = false;
-  // ── EXPLORATEUR (#28) ──────────────────────────────────────────────────────
-  var PH_FILTRES = [];   // jetons actifs (traitee, isolee, orpheline...)
-  var PH_SANS = '';      // sans tel traitement precis
-  var PH_LOT = '';       // lot d import
-  var PH_TRI = 'recent';
-  var PH_META = null;    // filtres/traitements/lots disponibles + tousLesIds
+  /* ⚠ SEL RESTE, ET IL N APPARTENAIT PAS QU AU SELECTEUR : c est lui qu on
+     remplit depuis PANIER avant d ouvrir le voile du lot. Les jetons de filtre
+     (PH_FILTRES, PH_SANS, PH_LOT, PH_TRI, PH_META) sont partis avec la grille
+     qu ils filtraient — l Explorateur porte les siens. */
   var SEL = {};          // { <idPhoto>: true } — le panier de selection
-  var PH_DEB = null;     // minuterie anti-rebond de la recherche
   var VOIE = 'humain';   // humain | fantome | plat
   /* ⚠⚠ << MISE EN VALEUR >> A UN DEFAUT, ET UN DEFAUT N EST PAS UN CHOIX.
      C est ce drapeau qui repond au crochet vert, et il existe a cause de mon
@@ -873,11 +836,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   /* ⚠ UNE SEULE VERITE SUR L ETAT << pret a lancer >>, lue par le pied de page
-     ET par le guide du volet de droite. Elle inclut desormais le selecteur et le
-     suivi des lots : quand ils occupent tout l ecran, le volet du resultat
-     n existe plus, et une image generee la n aurait nulle part ou s afficher. */
+     ET par le guide du volet de droite. Elle inclut le suivi des lots : quand il
+     occupe tout l ecran, le volet du resultat n existe plus, et une image
+     generee la n aurait nulle part ou s afficher. */
   function pretALancer(){
-    return aUnePhoto() && !!PRESET && !RO && !PICKER && !LOTS_VUE;
+    return aUnePhoto() && !!PRESET && !RO && !LOTS_VUE;
   }
 
   function majBoutons(){
@@ -1031,7 +994,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       PANIER = r.photos || [];
       // On ne redessine que si ca a change : sinon on redessinerait toutes les
       // deux secondes sous les doigts de quelqu un.
-      if (PANIER.length !== avant && !PICKER && !LOTS_VUE) dessiner();
+      if (PANIER.length !== avant && !LOTS_VUE) dessiner();
       panierVignettes();
     });
   }
@@ -1055,7 +1018,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       for (var j = 0; j < manque.length; j++) {
         if (VIGN[manque[j]] === undefined) VIGN[manque[j]] = v[manque[j]] || '';
       }
-      if (!PICKER && !LOTS_VUE) dessiner();
+      if (!LOTS_VUE) dessiner();
     });
   }
 
@@ -1095,14 +1058,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      recherche, les filtres, la multi-selection au Maj-clic ET le panier
      (panier:poser) : il couvre TOUT ce que faisait le selecteur interne, avec
      de la place et un apercu en plus. Sa premisse etait juste.
-     ⚠⚠ CONSEQUENCE A NE PAS LAISSER DANS L OMBRE : ph-ouvrir etait la SEULE
-     porte vers le selecteur interne plein ecran (ouvrirPicker). Ce selecteur
-     est donc, a partir d ici, INJOIGNABLE — du code vivant que rien n appelle.
-     Il n est PAS retire dans le meme geste : c est une cinquantaine de points
-     d accroche dans ce fichier (grille, filtres, pagination, selection, lancement
-     de lot), et retirer deux choses d un coup, c est ne plus savoir laquelle a
-     casse quelque chose. Le retrait est inscrit comme tache a part, et
-     l utilisateur en est averti. La zone de depot, elle, garde son
+     ⚠⚠ ET LE SELECTEUR INTERNE EST RETIRE DEPUIS (#30, le 2026-09-19). Retirer
+     ph-ouvrir le 2026-09-09 l avait rendu INJOIGNABLE — du code vivant que rien
+     n appelait — et son retrait avait ete inscrit comme tache a part, pour ne
+     pas retirer deux choses d un coup. C est cette tache-la qui est faite ici.
+     ⚠ ET LE COMMENTAIRE D ALORS ETAIT DEJA FAUX QUAND ON L A RELU : entre-temps
+     le bouton << Traitements par lot >> s etait remis a appeler ouvrirPicker sur
+     panier vide. << Plus aucun appelant >> ne se recopie pas, ca se re-verifie.
+     Ce chemin mene desormais a l explorateur. La zone de depot, elle, garde son
      glisser-deposer et son choix de fichier.
      ⚠ << TRAITEMENTS >> MONTE DANS L EN-TETE, en icone discrete. Ce n est pas
      une etape du travail, c est un temoin : sa place n est pas au milieu du
@@ -1137,21 +1100,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return h;
   }
 
-  /* ══ LES DEUX ECRANS PLEIN LARGEUR ════════════════════════════════════════
-     Le selecteur de photos (recherche, filtres, panier, grille chargee par
-     pages) et le suivi des lots. Ce sont des ecrans, pas des encarts. */
+  /* ══ L ECRAN PLEIN LARGEUR ════════════════════════════════════════════════
+     Le suivi des lots. C est un ecran, pas un encart.
+     ⚠ ILS ETAIENT DEUX avant le 2026-09-19 : le selecteur de photos partageait
+     cette barre. Il est parti avec #30, et la fonction ne porte donc plus de
+     branche — une fonction a un seul cas ne garde pas le test de l autre. */
   function pleinHtml(){
-    if (LOTS_VUE) {
-      return '<div class="phbarre"><button id="lots-fermer">${T("← Retour")}</button>'
-        + '<span class="phinfo">${T("Traitements par lot")}</span></div>'
-        + '<div class="lots">' + lotsHtml() + '</div>';
-    }
-    var grille = '<div class="phgrille" id="ph-grille">' + phVignettesHtml() + '</div>';
-    return '<div class="phbarre"><button id="ph-retour">${T("← Retour")}</button>'
-      + '<input type="search" id="ph-q" aria-label="${T("Rechercher (nom, code, produit, SKU)")}" placeholder="${T("Rechercher (nom, code, produit, SKU)…")}" value="' + esc(PH_Q) + '"'
-      + (RO ? ' disabled' : '') + '>'
-      + '<span class="phinfo" id="ph-info"></span></div>'
-      + phFiltresHtml() + phSelectionHtml() + grille;
+    return '<div class="phbarre"><button id="lots-fermer">${T("← Retour")}</button>'
+      + '<span class="phinfo">${T("Traitements par lot")}</span></div>'
+      + '<div class="lots">' + lotsHtml() + '</div>';
   }
 
   function voiesHtml(){
@@ -2332,9 +2289,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function dessiner(){
     var av = document.getElementById('ro'); if (av) av.hidden = !RO;
-    /* Le selecteur de photos et le suivi des lots prennent TOUT l ecran : ils
-       remplacent les deux volets au lieu de se serrer dans l un des deux. */
-    if (PICKER || LOTS_VUE) {
+    /* Le suivi des lots prend TOUT l ecran : il remplace les deux volets au
+       lieu de se serrer dans l un des deux. */
+    if (LOTS_VUE) {
       corps.className = 'corps plein';
       corps.innerHTML = '<div class="carte">' + pleinHtml() + '</div>';
       brancher();
@@ -2377,11 +2334,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        branchement est retiré avec lui — un branchement qui cherche un élément
        absent n est pas une erreur, mais il fait croire que le bouton existe
        encore quelque part.
-       ⚠ CONSEQUENCE ASSUMEE ET INSCRITE : ouvrirPicker — donc tout le
-       sélecteur interne plein écran — n a plus AUCUN appelant. Son retrait est
-       une tâche à part, pas ce même geste : cinquante points d accroche dans ce
-       fichier, et retirer deux choses d un coup c est ne plus savoir laquelle a
-       cassé quelque chose. */
+       ⚠ LA TÂCHE À PART EST FAITE : le sélecteur interne plein écran est retiré
+       le 2026-09-19 (#30), sur sa décision #31. */
     var px = document.getElementById('ph-explorateur');
     if (px) px.onclick = function(){
       appeler('explorateur:ouvrir', []).then(function(r){
@@ -2397,7 +2351,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     };
     var pnl = document.getElementById('pn-lot');
     if (pnl) pnl.onclick = function(){
-      // Le meme voile que depuis le selecteur : une seule facon de lancer.
+      // Une seule facon de lancer un lot, et c est ce voile.
       SEL = {};
       PANIER.forEach(function(p){ SEL[p.id] = true; });
       ouvrirLotVoile();
@@ -2405,22 +2359,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     brancherLots();
     brancherOnglets();
     brancherRecettes();
-    var phR = document.getElementById('ph-retour'); if (phR) phR.onclick = function(){ PICKER = false; PHOTHQ = []; PH_Q = ''; dessiner(); };
-    var phQ = document.getElementById('ph-q');
-    if (phQ) {
-      phQ.oninput = function(){ phRecherche(phQ.value); };
-      phQ.onsearch = function(){ if (PH_DEB) { clearTimeout(PH_DEB); PH_DEB = null; } PH_Q = String(phQ.value || '').trim(); PH_PAGE = 0; PH_FIN = false; phChargerPage(true); };
-    }
-    var phG = document.getElementById('ph-grille');
-    if (phG) {
-      phBrancherVignettes(phG);
-      phG.onscroll = function(){
-        if (PH_OCC || PH_FIN) return;
-        if (phG.scrollTop + phG.clientHeight >= phG.scrollHeight - 120) phChargerPage(false);
-      };
-      majPhInfo();
-    }
-    brancherExplorateur();
+    /* ⚠ LE BRANCHEMENT DU SELECTEUR EST PARTI AVEC LUI (#30, 2026-09-19) :
+       ph-retour, ph-q, ph-grille et la barre de filtres. Un branchement qui
+       cherche un element absent n est pas une erreur, mais il fait croire que
+       l ecran existe encore quelque part — c est la raison meme pour laquelle
+       ph-ouvrir avait ete debranche le 2026-09-09. */
     corps.querySelectorAll('[data-voie]').forEach(function(el){
       el.onclick = function(){ if (RO || OCCUPE) return; VOIE = el.getAttribute('data-voie'); VOIE_CHOISIE = true; RESULT = null; dessiner();
         dire('${T("Voie :")} ' + VOIE + '.', 'att'); };
@@ -2565,7 +2508,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      une autre pièce — un défaut qu on ne verrait qu à l image, sans message. */
   function reinitPhoto(){
     PHOTO = null; PHOTO_ID = ''; PHOTO_URL = ''; PHOTO_NOM = '';
-    PICKER = false; RESULT = null; ENREG = false;
+    RESULT = null; ENREG = false;
     INTERIEUR = null; INTERIEUR_NOM = '';
     dessiner();
   }
@@ -2576,114 +2519,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var fr = new FileReader();
     fr.onload = function(){ reduire(String(fr.result || ''), function(petite){
       PHOTO = petite; PHOTO_ID = ''; PHOTO_URL = ''; PHOTO_NOM = String(f.name || '');
-      PICKER = false; RESULT = null; ENREG = false;
+      RESULT = null; ENREG = false;
       INTERIEUR = null; INTERIEUR_NOM = '';   // elle appartenait au vêtement précédent
       dessiner(); dire('${T("Photo prête.")}', 'bon'); }); };
     fr.onerror = function(){ dire('${T("Lecture impossible.")}', 'err'); };
     fr.readAsDataURL(f);
-  }
-
-  // Grille de vignettes (partagee : rendu initial + rafraichissements de page).
-  function phVignettesHtml(){
-    if (!PHOTHQ.length) {
-      /* ⚠ TROIS ETATS, PAS DEUX. << Pas encore charge >> n est PAS << vide >> :
-         la synchronisation peut n avoir pas encore repondu, et annoncer
-         << Photothèque vide >> a ce moment-la fait croire que la mediatheque a
-         ete perdue — le message le plus inquietant possible sur des photos.
-         Le site fait deja voyager l etat charge ; cette fenetre l ignorait. */
-      if (!PH_CHARGE) {
-        return '<div class="vide" style="grid-column:1/-1">${T("Lecture de la photothèque…")}</div>';
-      }
-      return '<div class="vide" style="grid-column:1/-1">'
-        + (PH_Q ? '${T("Aucune photo ne correspond à «")} ' + esc(PH_Q) + ' ».'
-                : '${T("Aucune photo dans la photothèque. Importez-en depuis l’écran Photothèque.")}') + '</div>';
-    }
-    return PHOTHQ.map(function(p){
-      /* ⚠ LA LIGNE D ABORD, LA VIGNETTE ENSUITE (#143). Le champ apercu de la
-         ligne n existe que pour une photo rangee sur le reseau ; pour toutes les
-         autres, l image arrive par l op studio:vignettes. Et '' ne veut pas dire
-         << en cours >> : il veut dire << demandee, rien a montrer >>, donc on
-         cesse d attendre. */
-      var src = p.apercu || VIGN[p.id] || '';
-      var img = src
-        ? '<img src="' + esc(src) + '" alt="' + esc(p.nom) + '" loading="lazy">'
-        : (VIGN[p.id] === ''
-            ? '<span class="attente">${T("aperçu indisponible")}</span>'
-            : '<span class="attente">${T("en cours…")}</span>');
-      var pris = !!SEL[p.id];
-      // Les pastilles disent ce qu on ne devine pas d une vignette : deja
-      // traitee (donc deja payee), detouree, rattachee a un produit.
-      var pastilles = '';
-      if ((p.faits || []).length) pastilles += '<span class="pt fait" title="${T("Déjà traitée")}">✓</span>';
-      if (p.isole) pastilles += '<span class="pt" title="${T("Détourée")}">◇</span>';
-      if (p.lieId) pastilles += '<span class="pt ic" title="' + esc(p.lieNom || '${T("Produit lié")}') + '"><span class="ic">🔗</span></span>';
-      return '<div class="phvig' + (pris ? ' pris' : '') + '" data-ph="' + esc(p.id) + '"'
-        + ' title="' + esc(p.nom) + (p.lieNom ? ' — ' + esc(p.lieNom) : '') + '">'
-        + '<span class="phcoche" data-sel="' + esc(p.id) + '">' + (pris ? '✓' : '') + '</span>'
-        + (pastilles ? '<span class="phpast">' + pastilles + '</span>' : '')
-        + img + '<span class="phnom">' + esc(p.nom) + '</span></div>';
-    }).join('');
-  }
-
-  /* ══ LES FILTRES (#28) ════════════════════════════════════════════════════
-     Le selecteur n offrait qu une recherche texte : pour choisir vingt photos
-     parmi quatre cents, il fallait les reconnaitre a l oeil. Le coeur du site
-     savait deja tout cela de chaque photo — ce n etait simplement pas offert. */
-  function phFiltresHtml(){
-    if (!PH_META) return '';
-    var jeton = function(cle, nom){
-      return '<button class="jeton' + (PH_FILTRES.indexOf(cle) >= 0 ? ' on' : '') + '"'
-        + ' data-filtre="' + esc(cle) + '">' + esc(nom) + '</button>';
-    };
-    var h = '<div class="phfiltres">'
-      + (PH_META.filtres || []).map(function(f){ return jeton(f.cle, f.nom); }).join('');
-    // Le filtre le plus utile : ce qui n a PAS encore recu tel traitement.
-    // Retraiter une photo deja faite coute un appel pour rien.
-    h += '<select id="ph-sans" aria-label="${T("Filtrer les photos sans un traitement donné")}">'
-      + '<option value="">${T("Traitement — tous")}</option>'
-      + (PH_META.traitements || []).map(function(t){
-          return '<option value="' + esc(t.cle) + '"' + (PH_SANS === t.cle ? ' selected' : '')
-            + '>${T("Sans «")} ' + esc(t.nom) + ' »</option>'; }).join('') + '</select>';
-    if ((PH_META.lots || []).length) {
-      h += '<select id="ph-lot"><option value="">${T("Tous les lots")}</option>'
-        + PH_META.lots.map(function(l){
-            return '<option value="' + esc(l.cle) + '"' + (PH_LOT === l.cle ? ' selected' : '')
-              + '>' + esc(l.nom) + '</option>'; }).join('') + '</select>';
-    }
-    h += '<select id="ph-tri" aria-label="${T("Ordre de tri")}">'
-      + [['recent', '${T("Plus récentes")}'], ['code', 'Code'], ['name', 'Nom'],
-         ['linked', '${T("Liées d’abord")}'], ['size', '${T("Plus lourdes")}']].map(function(t){
-          return '<option value="' + t[0] + '"' + (PH_TRI === t[0] ? ' selected' : '') + '>'
-            + t[1] + '</option>'; }).join('') + '</select>';
-    if (PH_FILTRES.length || PH_SANS || PH_LOT || PH_Q) {
-      h += '<button class="jeton" id="ph-vider">${T("✕ Tout effacer")}</button>';
-    }
-    return h + '</div>';
-  }
-
-  /* Le panier de selection : ce qu on emporte, visible AVANT de lancer quoi
-     que ce soit. ⚠ << Tout selectionner >> porte sur TOUT LE RESULTAT du
-     filtre, pas sur la page affichee — sinon il faudrait defiler six pages
-     pour prendre 340 photos. Le coeur envoie exprès les identifiants. */
-  function phSelectionHtml(){
-    var n = Object.keys(SEL).length;
-    var dispo = (PH_META && PH_META.tousLesIds) ? PH_META.tousLesIds.length : 0;
-    return '<div class="phsel">'
-      + '<span class="cpt' + (n ? ' on' : '') + '">'
-      + (n ? n + ' ' + (n > 1 ? '${T("photos choisies")}' : '${T("photo choisie")}') : '${T("Aucune sélection")}')
-      + '</span>'
-      + '<button class="jeton" id="ph-tout"' + (dispo ? '' : ' disabled') + '>${T("Tout sélectionner (")}' + dispo + ')</button>'
-      + '<button class="jeton" id="ph-inv"' + (dispo ? '' : ' disabled') + '>${T("Inverser")}</button>'
-      + '<button class="jeton" id="ph-rien"' + (n ? '' : ' disabled') + '>${T("Vider")}</button>'
-      + '<span class="droite">'
-      /* ⚠ ph-ouvrir-sel, PAS ph-ouvrir : ce dernier est le bouton
-         « Depuis la photothèque » de l'écran de départ. Le doublon d'identifiant
-         a fait que mon câblage écrasait le sien — et le bouton d'entrée ne
-         faisait plus rien. Un identifiant réutilisé ne casse rien de visible :
-         il détourne, en silence. */
-      + (n === 1 ? '<button class="jeton prim" id="ph-ouvrir-sel">${T("Ouvrir cette photo →")}</button>' : '')
-      + (n > 1 ? '<button class="jeton prim" id="ph-lot">${T("⚙ Traiter ces")} ' + n + ' ${T("photos en lot…")}</button>' : '')
-      + '</span></div>';
   }
 
   /* ══ LANCER UN LOT (#27) ══════════════════════════════════════════════════
@@ -2820,7 +2660,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        tout son sens — il part en arriere-plan et se suit comme les autres. */
     if (!ids.length) return;
     var nP = ids.length;
-    var opts = (PH_META && PH_META.traitements) || [
+    /* ⚠ CETTE LISTE ETAIT UN REPLI, ELLE EST DEVENUE LA SEULE (#30, 2026-09-19).
+       Elle se lisait PH_META.traitements sinon ceci — mais PH_META n etait
+       rempli QUE par la grille du selecteur interne. Le chemin qui survit (le
+       panier venu de l explorateur) prenait donc DEJA ce repli : rien ne change
+       pour lui, et plus personne ne lit une variable qui restait vide. */
+    var opts = [
       { cle: 'detourage', nom: '${T("Détourage")}' }, { cle: 'fantome', nom: '${T("Mannequin retiré")}' },
       { cle: 'humain', nom: '${T("Porté par un mannequin")}' }];
     /* ⚠ ON PRÉSÉLECTIONNE LA VOIE DE L ÉCRAN quand le lot sait la faire : le
@@ -3034,246 +2879,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
               + (r.ignorees ? ' (' + r.ignorees + ' '
                   + (r.ignorees > 1 ? '${T("déjà faites, écartées")}' : '${T("déjà faite, écartée")}') + ')' : '')
               + '${T(". Suivez-le en bas de n’importe quel écran.")}', 'bon');
-            PICKER = false;
             LOTS_VUE = true;
             chargerLots();
           });
         };
       });
   }
-  function majPhInfo(txt){
-    var el = document.getElementById('ph-info');
-    if (!el) return;
-    if (txt != null) { el.textContent = txt; return; }
-    if (PH_TOTAL <= 0) { el.textContent = PH_Q ? '${T("0 résultat")}' : ''; return; }
-    el.textContent = PHOTHQ.length + ' sur ' + PH_TOTAL + (PH_FIN ? '' : ' ${T("— défilez pour en voir plus")}');
-  }
-  // Rafraichit UNIQUEMENT la grille + le compteur (garde le focus dans la recherche).
-  function phMajGrille(){
-    var g = document.getElementById('ph-grille');
-    if (g) { g.innerHTML = phVignettesHtml(); phBrancherVignettes(g); }
-    majPhInfo();
-    phChargerVignettes();
-  }
-
-  /* ⚠ UN PAQUET A LA FOIS, ET ON RAPPELLE PAR LA REPEINTURE. Chaque reponse
-     repeint la grille, et la repeinture redemande le paquet suivant : la
-     recursion s arrete d elle-meme quand plus aucune case n est indefinie.
-     ⚠ 60 PAR PAQUET, comme la page : au-dela on attend longtemps avant de voir
-     la premiere image, et c est justement l attente qu on corrige.
-     ⚠ ON MARQUE MEME EN CAS D ECHEC. Sans ca, une reponse en erreur laisserait
-     les cases indefinies et la grille redemanderait le meme paquet sans
-     fin — une boucle qui tape sur le pont a chaque repeinture. */
-  function phChargerVignettes(){
-    if (VIGN_OCC || !PICKER || RO) return;
-    var manque = [];
-    for (var i = 0; i < PHOTHQ.length && manque.length < 60; i++) {
-      var p = PHOTHQ[i];
-      if (!p || p.apercu) continue;
-      if (VIGN[p.id] !== undefined) continue;
-      manque.push(p.id);
-    }
-    if (!manque.length) return;
-    VIGN_OCC = true;
-    appeler('studio:vignettes', [{ ids: manque, cote: 240 }]).then(function(r){
-      VIGN_OCC = false;
-      var v = (r && r.ok && r.vignettes) ? r.vignettes : {};
-      for (var j = 0; j < manque.length; j++) {
-        if (VIGN[manque[j]] === undefined) VIGN[manque[j]] = v[manque[j]] || '';
-      }
-      if (PICKER) phMajGrille();
-    });
-  }
-
-  /* ⚠⚠ LES EN-TETES SE REPEIGNENT AUSSI, ET C EST TOUT LE DEFAUT CORRIGE ICI.
-     A l ouverture, la fenetre se dessine AVANT que la reponse arrive : les
-     filtres et le panier sont donc rendus avec PH_META encore vide — donc
-     aucun jeton, et << Tout selectionner (0) >> grise. Quand la reponse
-     arrivait, on ne repeignait que la GRILLE : les en-tetes restaient figes
-     sur l etat vide, pour toujours. L explorateur paraissait mort.
-     ⚠ On repeint les DEUX blocs sans redessiner la page, pour ne pas voler le
-     focus de la recherche pendant qu on tape. */
-  function phMajEntetes(){
-    var f = corps.querySelector('.phfiltres');
-    if (f) f.outerHTML = phFiltresHtml();
-    else {
-      // Premiere apparition : le bloc n existait pas encore, on l insere
-      // juste avant le panier.
-      var s0 = corps.querySelector('.phsel');
-      if (s0 && phFiltresHtml()) s0.insertAdjacentHTML('beforebegin', phFiltresHtml());
-    }
-    var s = corps.querySelector('.phsel');
-    if (s) s.outerHTML = phSelectionHtml();
-    brancherExplorateur();
-  }
-  /* ⚠ DEUX GESTES SUR UNE MEME VIGNETTE, ET IL FAUT LES DEUX : la COCHE
-     ajoute au panier (on en prepare plusieurs), le reste de la vignette
-     OUVRE la photo tout de suite (le geste courant, une photo a la fois).
-     Confondre les deux forcerait a cocher puis valider pour un seul clic. */
-  function brancherExplorateur(){
-    // ⚠ RIEN A BRANCHER SI LE SELECTEUR EST FERME. Sans cette garde, on allait
-    // chercher des identifiants qui n existent pas dans cet ecran — et l on
-    // risquait d en accrocher un qui appartient a un autre bouton.
-    if (!PICKER) return;
-    corps.querySelectorAll('[data-filtre]').forEach(function(el){
-      el.onclick = function(){
-        var c = el.getAttribute('data-filtre');
-        var i = PH_FILTRES.indexOf(c);
-        if (i >= 0) PH_FILTRES.splice(i, 1); else PH_FILTRES.push(c);
-        phRelancer();
-      };
-    });
-    var s = document.getElementById('ph-sans');
-    if (s) s.onchange = function(){ PH_SANS = s.value; phRelancer(); };
-    var l = document.getElementById('ph-lot');
-    if (l) l.onchange = function(){ PH_LOT = l.value; phRelancer(); };
-    var t = document.getElementById('ph-tri');
-    if (t) t.onchange = function(){ PH_TRI = t.value; phRelancer(); };
-    var v = document.getElementById('ph-vider');
-    if (v) v.onclick = function(){
-      PH_FILTRES = []; PH_SANS = ''; PH_LOT = ''; PH_Q = '';
-      var q = document.getElementById('ph-q'); if (q) q.value = '';
-      phRelancer();
-    };
-    var tt = document.getElementById('ph-tout');
-    if (tt) tt.onclick = function(){
-      ((PH_META && PH_META.tousLesIds) || []).forEach(function(id){ SEL[id] = true; });
-      phMajSelection();
-    };
-    var iv = document.getElementById('ph-inv');
-    if (iv) iv.onclick = function(){
-      ((PH_META && PH_META.tousLesIds) || []).forEach(function(id){
-        if (SEL[id]) delete SEL[id]; else SEL[id] = true; });
-      phMajSelection();
-    };
-    var rn = document.getElementById('ph-rien');
-    if (rn) rn.onclick = function(){ SEL = {}; phMajSelection(); };
-    var ov = document.getElementById('ph-ouvrir-sel');
-    if (ov) ov.onclick = function(){
-      var ids = Object.keys(SEL);
-      if (ids.length === 1) choisirPhoto(ids[0]);
-    };
-    var lt = document.getElementById('ph-lot');
-    if (lt) lt.onclick = ouvrirLotVoile;
-  }
-
-  /* ⚠ AUCUN REDESSIN COMPLET ICI : il volerait le focus
-     de la recherche pendant qu on tape. Les en-tetes sont repeints par
-     phMajEntetes quand la reponse arrive — ce qui suffit, et ne clignote
-     pas. On repeint tout de suite les jetons pour que le clic se voie. */
-  function phRelancer(){
-    PH_PAGE = 0; PH_FIN = false;
-    var f = corps.querySelector('.phfiltres');
-    if (f) { f.outerHTML = phFiltresHtml(); brancherExplorateur(); }
-    phChargerPage(true);
-  }
-
-  // Repeint le panier ET les coches, sans recharger la page de photos.
-  function phMajSelection(){
-    var z = corps.querySelector('.phsel');
-    if (z) { z.outerHTML = phSelectionHtml(); brancherExplorateur(); }
-    var g = document.getElementById('ph-grille');
-    if (g) { g.innerHTML = phVignettesHtml(); phBrancherVignettes(g); }
-  }
-
-  function phBrancherVignettes(g){
-    g.querySelectorAll('[data-sel]').forEach(function(el){
-      el.onclick = function(ev){
-        ev.stopPropagation();
-        if (OCCUPE) return;
-        var id = el.getAttribute('data-sel');
-        if (SEL[id]) delete SEL[id]; else SEL[id] = true;
-        phMajSelection();
-      };
-    });
-    g.querySelectorAll('[data-ph]').forEach(function(el){
-      el.onclick = function(){ if (OCCUPE) return; choisirPhoto(el.getAttribute('data-ph')); };
-    });
-  }
-  // Charge une page. reset=true : nouvelle recherche (remplace) ; sinon : ajoute la suivante.
-  function phChargerPage(reset){
-    if (PH_OCC || RO) return;
-    if (!reset && PH_FIN) return;
-    PH_OCC = true;
-    var page = reset ? 0 : (PH_PAGE + 1);
-    majPhInfo(reset ? '${T("Recherche…")}' : '${T("Chargement…")}');
-    /* ⚠ studio:explorer D ABORD, studio:phototheque EN REPLI : sur un site
-       plus ancien la nouvelle op n existe pas, et la fenetre doit continuer de
-       marcher — sans filtres, mais elle marche. */
-    var saisie = { q: PH_Q, page: page, taille: PH_TAILLE, tri: PH_TRI,
-      filtres: PH_FILTRES, sansTraitement: PH_SANS, lot: PH_LOT };
-    appeler('studio:explorer', [saisie]).then(function(r){
-      if (r && !r.ok && r.motif === 'operation_inconnue') {
-        return appeler('studio:phototheque', [{ q: PH_Q, page: page, taille: PH_TAILLE }]);
-      }
-      return r;
-    }).then(function(r){
-      PH_OCC = false;
-      if (!PICKER) return;
-      if (!r || !r.ok) { dire(expliquer(r), 'err'); majPhInfo(''); return; }
-      var lot = r.photos || [];
-      PH_CHARGE = (r.charge !== false);
-      if (r.filtres) PH_META = r;   // l explorateur repond ; sinon on garde l ancien
-      PHOTHQ = reset ? lot : PHOTHQ.concat(lot);
-      PH_PAGE = (r.page != null) ? r.page : page;
-      PH_TOTAL = (r.total != null) ? r.total : PHOTHQ.length;
-      PH_FIN = (PHOTHQ.length >= PH_TOTAL) || (lot.length === 0);
-      phMajGrille();
-      phMajEntetes();
-      dire('');
-      // La page etait pleine mais la grille ne deborde pas encore : on tire la suivante.
-      if (!PH_FIN && reset) phPeutEtreEncore();
-    });
-  }
-  // Si la grille n'est pas encore assez remplie pour defiler, charge une page de plus.
-  function phPeutEtreEncore(){
-    var g = document.getElementById('ph-grille');
-    if (g && !PH_FIN && !PH_OCC && g.scrollHeight <= g.clientHeight + 4) phChargerPage(false);
-  }
-  function ouvrirPicker(){
-    if (RO || OCCUPE) return;
-    PICKER = true; PHOTHQ = []; PH_Q = ''; PH_PAGE = 0; PH_TOTAL = 0; PH_FIN = false; PH_OCC = false;
-    dessiner(); dire('${T("Chargement de la photothèque…")}');
-    phChargerPage(true);
-    var q = document.getElementById('ph-q'); if (q) { try { q.focus(); } catch (e) {} }
-  }
-  function phRecherche(v){
-    if (PH_DEB) clearTimeout(PH_DEB);
-    PH_DEB = setTimeout(function(){
-      PH_DEB = null;
-      PH_Q = String(v || '').trim();
-      PH_PAGE = 0; PH_FIN = false;
-      phChargerPage(true);
-    }, 250);
-  }
-
-  function choisirPhoto(id){
-    var p = null;
-    for (var i = 0; i < PHOTHQ.length; i++) { if (PHOTHQ[i].id === id) { p = PHOTHQ[i]; break; } }
-    if (!p) return;
-    PHOTO = null; PHOTO_ID = id; PHOTO_URL = p.apercu || VIGN[id] || ''; PHOTO_NOM = p.nom || '';
-    PICKER = false; RESULT = null; ENREG = false;
-    INTERIEUR = null; INTERIEUR_NOM = '';   // elle appartenait au vêtement précédent
-    dessiner(); dire('${T("Photo choisie :")} ' + (p.nom || id) + '.', 'bon');
-    /* ⚠ LA VIGNETTE DE LA GRILLE FAIT 240 px — assez pour une case, trop peu
-       pour le volet de gauche, ou elle serait floue. On en redemande une plus
-       grande une fois le choix fait : une seule image, au moment ou elle sert. */
-    if (!p.apercu) chargerApercuChoisi(id);
-  }
-
-  /* ⚠ ON VERIFIE QUE LE CHOIX N A PAS CHANGE avant d afficher. Deux clics
-     rapides sur deux photos lancent deux demandes ; sans ce garde, la plus
-     lente ecraserait la plus recente et le volet montrerait l autre photo. */
-  function chargerApercuChoisi(id){
-    appeler('studio:vignettes', [{ ids: [id], cote: 900 }]).then(function(r){
-      if (!r || !r.ok || PHOTO_ID !== id) return;
-      var v = (r.vignettes || {})[id] || '';
-      if (!v) return;
-      PHOTO_URL = v;
-      dessiner();
-    });
-  }
-
   function occuper(o){
     OCCUPE = o;
     corps.querySelectorAll('button, [data-voie], [data-preset], [data-ph], .depot').forEach(function(b){
@@ -3476,10 +3087,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   };
 
   /* ⚠ LE LANCEUR DE LOT EST AU PIED DE PAGE, ET C EST TOUT L INTERET : il ne
-     demande AUCUN defilement, quel que soit l onglet ouvert. Avant, il fallait
-     ouvrir le selecteur de photos et descendre pour le trouver.
-     Sans photo choisie, il ouvre le selecteur — repondre << rien a traiter >>
-     a quelqu un qui vient justement demander a traiter serait un mur. */
+     demande AUCUN defilement, quel que soit l onglet ouvert.
+     ⚠⚠ PANIER VIDE : IL OUVRE L EXPLORATEUR (#30, 2026-09-19). Il ouvrait le
+     selecteur interne, qui n existe plus. Repondre << rien a traiter >> a
+     quelqu un qui vient justement demander a traiter serait un mur — et c est
+     la raison d origine de cette branche, qui reste vraie. On le mene donc la
+     ou les photos se choisissent VRAIMENT : l explorateur les renvoie ici par
+     le panier, et le bouton retrouve son lot. */
   if (bLot) bLot.onclick = function(){
     if (RO || OCCUPE) return;
     if (PANIER && PANIER.length) {
@@ -3488,8 +3102,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       ouvrirLotVoile();
       return;
     }
-    dire('${T("Choisissez les photos du lot.")}', 'att');
-    ouvrirPicker();
+    appeler('explorateur:ouvrir', []).then(function(r){
+      dire(r && r.ok
+        ? '${T("Choisissez les photos du lot dans l’Explorateur, puis « Envoyer au Studio ».")}'
+        : expliquer(r), (r && r.ok) ? 'att' : 'err');
+    });
   };
 
   function telechargerImage(source, nom){
@@ -3622,7 +3239,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   lotsSuivre();
   chargerPanier();
   setInterval(function(){ if (!document.hidden) chargerPanier(); }, 2000);
-  if (${explo ? 'true' : 'false'}) ouvrirPicker();
   if (${lotsDep ? 'true' : 'false'}) { LOTS_VUE = true; chargerLots(); }
 })();
 </script></body></html>`;

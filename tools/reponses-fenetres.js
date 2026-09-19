@@ -2633,23 +2633,15 @@ const JEU = {
                    lumiere: '', upActive: false, upMode: 'ai.fast' },
              fil: { logoId: '', position: 'bd', taille: 20, opacite: 0.8, marge: 3 } } },
     ] };
+    /* ⚠⚠ LE CAS << explorateur de photos >> EST RETIRE (#30, le 2026-09-19).
+       Il ouvrait le Studio en mode 'explorateur', c est-a-dire le SELECTEUR
+       INTERNE plein ecran — un ecran qui n existe plus. Un cas qui vise un
+       identifiant d ouverture disparu ne rend pas une faute : il dessine
+       l ecran par defaut sous le nom de l autre, et l on croit garder une
+       couverture qu on a perdue.
+       ➡ L ecran qui choisit ce qu on va payer est desormais l EXPLORATEUR, qui
+       a sa propre fenetre et ses propres cas ('explorateur.js', plus bas). */
     return [
-      {
-        nom: 'explorateur de photos',
-        id: 'explorateur',
-        reponses: {
-          identite: IDENTITE,
-          'studio:presets': PRESETS,
-          'studio:compte': COMPTE,
-          'studio:explorer': EXPLO,
-          /* ⚠ LE CAS QUI A MOTIVE L OP (#143) : `ph_4` porte `apercu: ''` — une
-             photo rangee en local, que la ligne ne sait pas montrer. Sans cette
-             reponse, le chemin des vignettes ne serait jamais emprunte ici, et
-             c est justement celui qui etait casse. */
-          'studio:vignettes': { ok: true, cote: 320, vignettes: { ph_4: VIGNETTE } },
-          'session:activite': { ok: true },
-        },
-      },
       {
         nom: 'ecran de depart',
         id: '',

@@ -488,7 +488,12 @@ module.exports = {
      en ajoutant une lettre, et un « s » collé à part ne passe pas par ici. */
   'photo en lot': 'photo in a batch',
   'photos en lot': 'photos in a batch',
-  'Choisissez les photos du lot.': 'Choose the photos for the batch.',
+  /* ⚠ LA PHRASE EST ENTIERE, ET ELLE NOMME LES DEUX GESTES. Depuis #30 le
+     bouton du lot n ouvre plus un selecteur interne : il ouvre l Explorateur,
+     et le retour se fait par << Envoyer au Studio >>. Dire seulement
+     << choisissez des photos >> laisserait la moitie du chemin devinee. */
+  'Choisissez les photos du lot dans l’Explorateur, puis « Envoyer au Studio ».':
+    'Choose the batch photos in the Explorer, then « Send to Studio ».',
   'photos ont déjà ce traitement. Cochez « Refaire » pour les repasser.':
     'photos already have this job. Tick « Redo » to run them again.',
   'déjà faite': 'already done',
