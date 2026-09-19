@@ -2927,12 +2927,22 @@ tbody tr{transition:opacity var(--sz-vite) linear,background var(--sz-vite) line
 
 /* ── 3. LES VOILES ET LES BOITES ───────────────────────────────────────────
    Une boite de dialogue qui apparait d un coup se lit comme une erreur. */
-.voile{transition:opacity var(--sz-moyen) var(--sz-courbe)}
+/* ⚠⚠ LE VOILE N A PLUS D ETAT DE DEPART, ET C EST MESURE — le 2026-09-19,
+   par trois constructions a distance apres que << contrastes >> a REFUSE la 6.7.0.
+   Le banc de contraste COMPOSE les couleurs a travers les opacites : son
+   journal compte 1027 couples mesures ainsi, et 4684 elements juges DERRIERE
+   une modale ouverte. Donner au voile un @starting-style{opacity:0} deplace
+   donc TOUTES les couleurs composees derriere lui — des couples declares
+   disparaissent, des couples neufs apparaissent, et la construction refuse.
+   ➡ SYMPTOME A RECONNAITRE : quand des couples declares << ne sont plus
+   rencontres >> PENDANT que des couples neufs apparaissent, ce n est pas un
+   compte qui grossit, c est UNE COULEUR QUI BOUGE.
+   ➡ La boite entre encore en fondu ; le VOILE, lui, reste a son opacite
+   normale. L effet visible est presque le meme, et celui-la est mesure. */
 .voile .boite{
   transition:opacity var(--sz-moyen) var(--sz-courbe),
              transform var(--sz-moyen) var(--sz-courbe)}
 @starting-style{
-  .voile{opacity:0}
   .voile .boite{opacity:0;transform:translateY(-8px) scale(.985)}
 }
 
@@ -2952,10 +2962,10 @@ tbody tr{transition:opacity var(--sz-vite) linear,background var(--sz-vite) line
    @starting-style laisserait l element A SON ETAT DE DEPART, donc invisible :
    on aurait fabrique exactement le defaut que ce bloc existe pour eviter. */
 @media (prefers-reduced-motion:reduce){
-  .carte,.tuile,tbody tr,.voile,.voile .boite,.onglets button{
+  .carte,.tuile,tbody tr,.voile .boite,.onglets button{
     transition:none!important}
   @starting-style{
-    .carte,.tuile,tbody tr,.voile,.voile .boite{opacity:1;transform:none}
+    .carte,.tuile,tbody tr,.voile .boite{opacity:1;transform:none}
   }
   ::view-transition-old(root),::view-transition-new(root){animation:none!important}
 }
