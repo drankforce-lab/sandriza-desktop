@@ -2998,9 +2998,17 @@ const CSS_HAUTEUR = `
 .corps.plein{overflow:hidden;display:flex;flex-direction:column;min-height:0}
 .corps.plein>*{flex:0 0 auto}
 .corps.plein>.carte.plein{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
-.carte.plein>.liste{flex:1 1 auto;min-height:0;overflow-y:auto}
-.carte.plein>.liste::-webkit-scrollbar{width:8px}
-.carte.plein>.liste::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* ⚠ DEUX FORMES, ET IL FAUT LES DEUX. Certains ecrans posent une TABLE dans une
+   carte (clients, produits) ; d autres alignent des LIGNES RICHES sans carte du
+   tout (retours, ramassages). La zone defilante peut donc etre fille de la
+   carte OU du corps — n en couvrir qu une laisserait la moitie des ecrans sans
+   correction, et le defaut ne se verrait qu ecran par ecran. */
+.carte.plein>.liste,.corps.plein>.liste{flex:1 1 auto;min-height:0;overflow-y:auto}
+.carte.plein>.liste::-webkit-scrollbar,.corps.plein>.liste::-webkit-scrollbar{width:8px}
+.carte.plein>.liste::-webkit-scrollbar-thumb,
+.corps.plein>.liste::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* Une liste de lignes riches garde son espacement entre les lignes. */
+.corps.plein>.liste{display:flex;flex-direction:column;gap:.55rem}
 /* La pagination reste COLLEE au bas de la carte, jamais emportee par le
    defilement : c est elle qui dit ou l on en est. */
 .carte.plein>.pagi{flex:0 0 auto}

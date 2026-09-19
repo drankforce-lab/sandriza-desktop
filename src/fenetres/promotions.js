@@ -116,7 +116,7 @@ function pagePromotions() {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.promotions}</span><h1>${T("Offres et annonces")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
+<div class="corps plein" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -410,12 +410,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         + '<button class="mini" id="pr-interv-enr">${T("Enregistrer")}</button></div></div>';
     }
 
-    h += '<div class="carte">';
+    /* ⚠ PLEINE HAUTEUR (2026-09-19) : la carte prend le reste du corps, et c est
+       la LISTE qui defile. La carte << Defilement du bandeau >>, au-dessus,
+       garde sa hauteur naturelle — elle est fille directe du corps. */
+    h += '<div class="carte plein">';
     if (!rows.length) {
       h += '<div class="vide">' + (Q ? '${T("Rien ne correspond.")}'
         : ONGLET === 'offres' ? '${T("Aucune offre. Créez la première.")}' : '${T("Aucune annonce. Créez la première.")}') + '</div>';
     } else if (ONGLET === 'offres') {
-      h += '<table><thead><tr><th>${T("Nom")}</th><th>${T("Rabais")}</th><th>${T("Portée")}</th><th>${T("Période")}</th>'
+      h += '<div class="liste"><table><thead><tr><th>${T("Nom")}</th><th>${T("Rabais")}</th><th>${T("Portée")}</th><th>${T("Période")}</th>'
         + '<th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
         + rows.map(function(o){
             return '<tr><td><strong>' + esc(o.nom) + '</strong></td>'
@@ -427,9 +430,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
               + (o.enCours ? '${T("En cours")}' : '${T("Hors service")}') + '</span></td>'
               + (D.peutModifier ? '<td class="fin">' + gestes(o) + '</td>' : '') + '</tr>';
           }).join('')
-        + '</tbody></table>';
+        + '</tbody></table></div>';
     } else {
-      h += '<table><thead><tr><th>${T("Nom")}</th><th>${T("Genre")}</th><th>${T("Contenu")}</th><th>${T("Priorité")}</th>'
+      h += '<div class="liste"><table><thead><tr><th>${T("Nom")}</th><th>${T("Genre")}</th><th>${T("Contenu")}</th><th>${T("Priorité")}</th>'
         + '<th>${T("Période")}</th><th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
         + rows.map(function(a){
             return '<tr><td><strong>' + esc(a.nom) + '</strong>'
@@ -444,7 +447,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
               + (a.enCours ? '${T("En cours")}' : '${T("Hors service")}') + '</span></td>'
               + (D.peutModifier ? '<td class="fin">' + gestes(a) + '</td>' : '') + '</tr>';
           }).join('')
-        + '</tbody></table>';
+        + '</tbody></table></div>';
     }
     h += '</div>';
 

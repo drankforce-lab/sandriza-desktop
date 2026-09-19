@@ -82,7 +82,7 @@ function pageListeNoire(ouverture) {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.blacklist}</span><h1>${T("Liste noire")}</h1></div>
 <div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter la liste, pas la modifier.")}</div>
-<div class="corps"><div id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
+<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -157,7 +157,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!l.length) {
       h += '<div class="carte"><div class="vide">${T("Aucune entrée.<br>C’est la bonne nouvelle — la liste ne sert qu’à écarter ce qui pose problème.")}</div></div>';
     } else {
-      h += '<div class="carte" style="padding:0;overflow-x:auto"><table class="tb"><thead><tr>'
+      h += '<div class="carte plein" style="padding:0"><div class="liste" style="overflow-x:auto"><table class="tb"><thead><tr>'
         + '<th>${T("Type")}</th><th>${T("Valeur")}</th><th>${T("Note")}</th><th>${T("Ajouté le")}</th>'
         + (D.peutRetirer ? '<th></th>' : '') + '</tr></thead><tbody>';
       for (var i=0;i<l.length;i++){ var e=l[i];
@@ -169,7 +169,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
               +(DELID===e.id?'${T("✓ Confirmer")}':'${T("Retirer")}')+'</button></td>' : '')
           + '</tr>';
       }
-      h += '</tbody></table></div>';
+      h += '</tbody></table></div></div>';
       /* Le pied ferme la liste et porte l export (2026-09-19). ⚠ Il n est PAS
          dessine sous une liste vide : ici l etat vide dit une bonne nouvelle
          (<< la liste ne sert qu a ecarter ce qui pose probleme >>), et lui
@@ -178,6 +178,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         l.length + ' ' + (l.length > 1 ? '${T("entrées")}' : '${T("entrée")}'),
         '<button class="b" id="ln-exporter"><span class="ic">⬇</span>${T(" Exporter")}</button>');
     }
+    /* ⚠⚠ PLEINE HAUTEUR, MAIS PAS TOUJOURS (2026-09-19). Le tableau doit
+       descendre jusqu au bas de la fenetre — sauf que cet ecran est le seul a
+       n avoir AUCUN position:fixed : son formulaire d ajout vit DANS le flux.
+       Sous << corps plein >> (overflow:hidden), une fenetre courte le
+       couperait sans barre de defilement et sans rien dire. Le corps reprend
+       donc son defilement normal tant que le formulaire est ouvert — et aussi
+       sur la liste vide, ou il n y a rien a etirer. Meme regle que le
+       repertoire de fournisseurs : l adoption est un choix par VUE. */
+    corps.className = (l.length && !(AJOUT && D.peutAjouter)) ? 'corps plein' : 'corps';
     corps.innerHTML = h;
     lier();
 

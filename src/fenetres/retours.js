@@ -82,7 +82,7 @@ function pageRetours() {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.returns}</span><h1>${T("Nos Retours")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="vide charge">${T("Chargement… (les demandes se resynchronisent)")}</div></div>
+<div class="corps plein" id="corps"><div class="vide charge">${T("Chargement… (les demandes se resynchronisent)")}</div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -160,7 +160,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + (ONGLET !== 'all' ? '${T("Aucune demande dans cette catégorie.")}' : '${T("Aucune demande.")}')
         + '</div>';
     } else {
-      h += rows.map(function(r){
+      /* ⚠ PLEINE HAUTEUR (2026-09-19) : cet ecran n a PAS de carte, ses lignes
+         sont riches. La zone defilante est donc fille du CORPS, pas d une
+         carte — le socle couvre les deux formes. */
+      h += '<div class="liste">' + rows.map(function(r){
         var badges = '<span class="pill ' + (TONS[r.statut] || 'neutre') + '">' + esc(r.statutLibelle) + '</span>';
         if (r.expireAuto) badges += ' <span class="pill err">${T("Expirée automatiquement")}</span>';
         if (r.expireBientot) badges += ' <span class="pill err">⏳${T(" Expire le ")}' + esc(r.expireLe) + '</span>';
@@ -178,7 +181,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + '</div>'
           + '<div class="droite">' + esc(fmtDate(r.date)) + '</div>'
           + '</div>';
-      }).join('');
+      }).join('') + '</div>';
       /* Le pied ferme la liste et porte l export (2026-09-19). ⚠ Cet ecran
          n est PAS un tableau : ce sont des lignes riches. Le fichier, lui, est
          tabulaire — et c est justement pour ca qu il sert a autre chose. */

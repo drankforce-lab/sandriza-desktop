@@ -109,7 +109,7 @@ function pageRamassages() {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.orders}</span><h1>${T("Ramassages et rapport")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
+<div class="corps plein" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -186,7 +186,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!rows.length) {
       h += '<div class="vide">${T("Aucun ramassage planifié.")}</div>';
     } else {
-      h += rows.map(function(r){
+      /* ⚠ PLEINE HAUTEUR (2026-09-19) : lignes riches, pas de carte — la zone
+         defilante est fille du CORPS. La boite de planification est un voile
+         en position:fixed, elle flotte et n est donc pas coupee. */
+      h += '<div class="liste">' + rows.map(function(r){
         var etat = r.annule ? '<span class="pill err">${T("Annulé")}</span>' : '<span class="pill bon">${T("Planifié")}</span>';
         return '<div class="ligne' + (r.annule ? ' annule' : '') + '">'
           + '<div class="haut">'
@@ -207,7 +210,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
                   return '<span class="pill neutre mono">' + esc(n) + '</span>'; }).join(' ') + '</div>'
               : '')
           + '</div>';
-      }).join('');
+      }).join('') + '</div>';
       /* Le pied ferme la liste et porte l export (2026-09-19). ⚠ Il se pose
          AVANT la boite de planification, jamais apres : il appartient a la
          liste. */

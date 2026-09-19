@@ -105,7 +105,7 @@ function pageCoupons() {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.promotions}</span><h1>${T("Coupons")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
+<div class="corps plein" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -234,11 +234,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '<span>' + rows.length + (rows.length > 1 ? '${T(" coupons")}' : '${T(" coupon")}') + '</span>'
       + '</div></div>';
 
-    h += '<div class="carte">';
+    /* ⚠ PLEINE HAUTEUR (2026-09-19) : la carte prend tout le reste, la liste
+       defile. Le voile du formulaire est en position:fixed — il flotte
+       au-dessus et n est donc pas coupe par overflow:hidden. */
+    h += '<div class="carte plein">';
     if (!rows.length) {
       h += '<div class="vide">' + (Q || ETAT ? '${T("Rien ne correspond.")}' : '${T("Aucun coupon. Créez le premier.")}') + '</div>';
     } else {
-      h += '<table><thead><tr><th>${T("Code")}</th><th>${T("Nom")}</th><th>${T("Réduction")}</th>'
+      h += '<div class="liste"><table><thead><tr><th>${T("Code")}</th><th>${T("Nom")}</th><th>${T("Réduction")}</th>'
         + '<th class="num">${T("Minimum")}</th><th>${T("Cumul soldes")}</th><th class="num">${T("Utilisations")}</th>'
         + '<th>${T("Période")}</th><th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
         + rows.map(function(c){
@@ -263,7 +266,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
               + (c.enCours ? '${T("En cours")}' : '${T("Hors service")}') + '</span></td>'
               + (D.peutModifier ? '<td class="fin">' + gestes + '</td>' : '') + '</tr>';
           }).join('')
-        + '</tbody></table>';
+        + '</tbody></table></div>';
     }
     h += '</div>';
 
