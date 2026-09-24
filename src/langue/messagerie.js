@@ -99,5 +99,25 @@ module.exports = {
   'Fermer': 'Close',
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
-  '(aucun message)': '(no message)'
+  '(aucun message)': '(no message)',
+
+  /* ══ LE PIED DE LISTE ET L EXPORT (2026-09-24) ═════════════════════════════
+     ⚠⚠ SIX PHRASES POUR TROIS PILES, ET PAS DEUX MOTS RECOLLES. Le pied dit
+     << 12 demandes en attente >> ; l anglais dit << 12 pending requests >>.
+     L adjectif passe DEVANT le nom : assembler << demandes >> et << en
+     attente >> a l execution donnerait << requests pending >>. Chaque phrase
+     existe donc en entier, au singulier comme au pluriel. */
+  'demande en attente': 'pending request',
+  'demandes en attente': 'pending requests',
+  'demande répondue': 'answered request',
+  'demandes répondues': 'answered requests',
+  'demande': 'request',
+  'demandes': 'requests',
+
+  /* ⚠ LES COLONNES DU FICHIER. << Déposée le >> est deja declare plus haut
+     pour le panneau d une demande : la meme cle sert aux deux, et c est
+     voulu — deux cles pour le meme mot finiraient par diverger. */
+  'Commande': 'Order',
+  'Statut': 'Status',
+  'La liste des demandes': 'The request list'
 };

@@ -164,6 +164,38 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       : '<span class="pill neutre">' + esc(st) + '</span>';
   }
 
+  /* ⚠ LA PASTILLE EST DU HTML, LE FICHIER VEUT DU TEXTE. Verser la pastille
+     telle quelle mettrait << <span class="pill bon">Répondu</span> >> dans une
+     cellule — et ca ne se voit qu une fois le fichier ouvert. Meme decision,
+     deux rendus : c est pour ca que les deux lisent le MEME statut brut. */
+  function libelleStatut(st){
+    return st === 'answered' ? '${T("Répondu")}'
+      : st === 'pending' ? '${T("En attente")}'
+      : String(st || '');
+  }
+
+  /* ══ LE VOCABULAIRE DE LA PILE — pied et nom de fichier ═══════════════════
+     ⚠ LES DEUX PLURIELS POUR CHACUNE DES TROIS PILES, comme pour les onglets
+     de promotions. Un pluriel decide dans le socle serait faux une fois sur
+     deux, et un fragment recolle (<< demandes >> + << en attente >>) ne se
+     traduit pas : il se PLACE. L anglais dit << pending requests >>, le
+     francais << demandes en attente >> — l ordre des mots change, donc chaque
+     phrase existe en entier dans le dictionnaire.
+     ⚠ LE NOM DU FICHIER PORTE LA PILE, LUI AUSSI. Trois exports faits le meme
+     jour depuis trois onglets se seraient ecrases l un l autre sous le meme
+     nom, et rien ne l aurait dit : le dernier ecrit aurait simplement gagne. */
+  function motsPile(n){
+    var p = (n > 1);
+    if (ONGLET === 'pending')  return p ? '${T("demandes en attente")}' : '${T("demande en attente")}';
+    if (ONGLET === 'answered') return p ? '${T("demandes répondues")}'  : '${T("demande répondue")}';
+    return p ? '${T("demandes")}' : '${T("demande")}';
+  }
+  function nomPile(){
+    return ONGLET === 'pending' ? 'demandes-attente'
+      : ONGLET === 'answered' ? 'demandes-repondues'
+      : 'demandes';
+  }
+
   function dessiner(){
     if (!D) { corps.innerHTML = '<div class="vide charge">${T("Chargement… (les demandes se resynchronisent)")}</div>'; return; }
     var c = D.comptes || {};
@@ -194,6 +226,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + '<div class="dt">${T("Raison : ")}' + esc(r.raison || '–') + '</div>'
           + '</div>';
       }).join('');
+      /* Le pied ferme la liste et porte l export (2026-09-24). ⚠ Le compte se
+         dit dans le VOCABULAIRE DE LA PILE : une demande repondue n est pas
+         une demande en attente, et << 12 demandes >> sous l onglet Archive
+         laisserait croire a douze demandes a traiter. */
+      h += szPied(
+        rows.length + ' ' + motsPile(rows.length),
+        '<button class="mini" id="m-exporter"><span class="ic">⬇</span>${T(" Exporter")}</button>');
     }
     if (DETAIL) h += boiteDetail();
     corps.innerHTML = h;
@@ -231,6 +270,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function brancher(){
+    /* ⚠⚠ LE MESSAGE DE LA CLIENTE N EST PAS DANS LE FICHIER, ET CE N EST PAS UN
+       OUBLI. << messagerie:liste >> ne le rapporte pas : seul << messagerie:lire >> le
+       porte, une demande a la fois. Un fichier de cinquante lignes coutrait
+       donc cinquante allers-retours par le pont, et l export resterait fige le
+       temps qu ils reviennent. Le fichier sert a TRIER (qui a ecrit, quand,
+       pour quel motif, est-ce repondu) ; pour LIRE, on ouvre la demande.
+       ➡ L elargir voudrait dire elargir << _messagerieLigne >> cote site, donc
+       faire voyager chaque message a CHAQUE dessin de la liste. Ce n est pas
+       une ligne a ecrire ici, c est une decision a prendre ailleurs. */
+    var exm = document.getElementById('m-exporter');
+    if (exm) exm.onclick = function(){
+      var lignes = ((D && D.lignes) || []).map(function(r){
+        return [r.commande || '', r.client || '', r.courriel || '',
+          r.raison || '', libelleStatut(r.statut), r.date || ''];
+      });
+      if (!lignes.length) { dire('${T("Rien à exporter.")}', 'att'); return; }
+      var csv = szCSV(['${T("Commande")}', '${T("Client")}', '${T("Courriel")}',
+        '${T("Raison")}', '${T("Statut")}', '${T("Déposée le")}'], lignes);
+      szExporter(nomPile() + '-' + new Date().toISOString().slice(0, 10) + '.csv', csv,
+        '${T("La liste des demandes")}');
+    };
+
     var f = document.getElementById('m-fermer');
     if (f) f.onclick = function(){ DETAIL = null; SUPPR_ARME = false; dessiner(); };
     var su = document.getElementById('m-supprimer');

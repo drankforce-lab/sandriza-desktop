@@ -268,6 +268,15 @@ module.exports = {
      de CHAQUE liste. Une entree par fenetre serait 102 entrees a tenir
      d accord, et c est celle qu on oublie qui sortirait en francais. */
   ' Exporter': ' Export',
+  /* ⚠ ET LA FORME AVEC SON PICTOGRAMME, parce que le banc de langue lit le
+     bouton ASSEMBLE — le pictogramme vit dans son propre <span>, mais le texte
+     visible est << ⬇ Exporter >> d un seul tenant. La cle sans pictogramme ne
+     le couvre donc pas, et les dix ecrans a export la manquaient TOUS : le
+     banc le disait deja sur retours, livre depuis le 2026-09-19.
+     ⚠ Au socle et pas dans une fenetre, pour la meme raison que la ligne du
+     dessus : dix entrees a tenir d accord, c est celle qu on oublie qui sort
+     en francais sur la page anglaise. */
+  '⬇ Exporter': '⬇ Export',
   /* ⚠ AU SOCLE eux aussi : << Oui >> / << Non >> deviennent des colonnes dans
      CHAQUE export (a l ecran ce sont des pastilles, dans un tableur ce sont des
      criteres de filtre), et << La page affichee >> sert a tout ecran pagine.
