@@ -249,5 +249,10 @@ module.exports = {
      deux chiffres (<< 12 / 8 >>) : les lignes du releve et celles des depots.
      Dans un tableur on compte les unes OU les autres — deux colonnes. */
   'Lignes de dépôts': 'Deposit lines',
-  'La liste des conciliations': 'The reconciliation list'
+  'La liste des conciliations': 'The reconciliation list',
+  /* ⚠ Ce qu on annonce comme ecrit, dans le message de szExporter : << La
+     conciliation enregistree : … >>. Le fichier lui-meme est compose PAR LE
+     SITE (une seule definition des colonnes pour les deux surfaces) ; ce
+     libelle-ci n est que la phrase de confirmation. */
+  'La conciliation': 'The reconciliation'
 };

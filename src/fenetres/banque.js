@@ -243,18 +243,65 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
      totaux et leurs ecarts — ne sortait par aucune porte. C est pourtant elle
      qu on tend a un comptable en fin d exercice.
 
-     ⚠⚠ ET UNE DIFFERENCE QU IL FAUT DIRE PLUTOT QUE DE LA LISSER : le bouton
-     CSV existant TELECHARGE par la fenetre principale (_dlBlob), alors que
-     szExporter ECRIT dans le dossier des exports et NOMME le chemin. Deux
-     chemins de sortie dans un meme ecran, ce n est pas ideal — mais unifier
-     voudrait dire toucher _exportCSV cote SITE et changer une sortie dont il se
-     sert peut-etre deja. C est sa decision, pas un menage a faire en passant.
+     ✅ ET LES DEUX SORTIES SONT MAINTENANT LA MEME. Le bouton << CSV >> du
+     detail telechargeait par la fenetre principale ; il ecrit desormais dans le
+     dossier des exports comme celui-ci (sa decision du 2026-09-24, voir
+     exporterDetail juste au-dessus). Un seul endroit ou chercher ses fichiers,
+     et un message qui nomme le vrai chemin dans les deux cas.
 
      ⚠ LES MONTANTS PARTENT EN NOMBRES BRUTS. sou() rend << 1 234,56 $ >> avec
      l espace groupante du francais et un signe moins TYPOGRAPHIQUE — trois
      raisons pour qu un tableur en fasse du texte. Sur un ecran de
      RAPPROCHEMENT BANCAIRE, un montant qu on ne peut pas additionner ne sert a
      rien. */
+  /* ══ LE CSV DU DETAIL — MEME FICHIER, NOUVELLE DESTINATION (2026-09-24) ════
+     ⚠⚠ SA DECISION : une seule convention de sortie dans l application. Ce
+     bouton TELECHARGEAIT par la fenetre principale (banque:document 'csv' ->
+     _exportCSV -> _dlBlob, cote site) ; il ECRIT desormais dans le dossier des
+     exports et NOMME le chemin, comme les dix autres ecrans.
+
+     ⚠⚠⚠ ET LE COTE SITE N EST PAS TOUCHE, POUR DEUX RAISONS MESUREES :
+      ① << _exportCSV >> sert AUSSI l ecran web de conciliation (<< renderAdmin >>,
+         toujours au menu de l administration). Le navigateur n a pas de
+         << dossier des exports >> : lui imposer szExporter casserait sa seule
+         sortie.
+      ② L op << banque:document >> doit continuer de repondre 'csv' : **le site
+         sert aussi les anciennes coquilles**, et une version installee plus
+         ancienne appelle encore ce chemin. Une op sans appelant dans la
+         DERNIERE coquille n est pas morte.
+     ➡ On change ce que la FENETRE fait de son bouton, pas ce que le site sait
+     faire.
+
+     🔴 ET LA FENETRE NE REFABRIQUE PAS LE FICHIER — j avais commence par la,
+     et c etait contre le patron que l en-tete de ce fichier pose lui-meme :
+     << la fenetre COMMANDE >>, parce que deux definitions du meme document
+     comptable finissent par diverger, et << deux rapports comptables qui
+     divergent, c est une piece fausse >>. Recopier les sept colonnes ici en
+     aurait fait une SECONDE definition, qui aurait tenu jusqu au premier
+     changement de colonne fait d un seul cote.
+     ➡ Le site compose le texte (<< _banqueCSVTexte >>, une seule fonction pour
+     les DEUX surfaces), la fenetre l ECRIT. Meme en-tete, meme ordre, meme nom
+     de fichier que ce que l ecran web telecharge. Il a demande a changer la
+     DESTINATION, pas le fichier.
+
+     ⚠ LE BOUTON RESTE DANS L EN-TETE, pas dans un pied : le fichier couvre LES
+     DEUX tables a la fois. Sous l une d elles, il laisserait croire qu il ne
+     sort que celle-la. C est pour ca que les deux pieds n ont qu un compte. */
+  function exporterDetail(){
+    dire('${T("Préparation du document…")}');
+    appeler('banque:document', [ANNEE, REC, 'csvtexte']).then(function(r){
+      /* ⚠ ON VERIFIE LE TEXTE, PAS SEULEMENT LE ok. Une coquille neuve devant
+         un site plus ancien recevrait un ok rendu par le repli PDF, sans csv :
+         ecrire un fichier vide serait pire que de le dire. */
+      if (!r || !r.ok || typeof r.csv !== 'string') {
+        dire(r && r.ok ? '${T("Rien à exporter.")}' : expliquer(r), r && r.ok ? 'att' : 'err');
+        return;
+      }
+      szExporter(r.nom || ('conciliation-' + ANNEE + '.csv'), r.csv,
+        '${T("La conciliation")}');
+    });
+  }
+
   function exporterListe(){
     var liste = (D && D.liste) || [];
     if (!liste.length) { dire('${T("Rien à exporter.")}', 'att'); return; }
@@ -665,8 +712,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function brancherDetail(){
     var ret = document.getElementById('b-retour');
     if (ret) ret.onclick = function(){ REC = ''; ARME = ''; charger(); };
+    /* ⚠ NE VA PLUS CHERCHER LE SITE. Le fichier se fabrique ici et s ecrit dans
+       le dossier des exports — une seule convention de sortie dans toute
+       l application (sa decision du 2026-09-24). L op banque:document 'csv'
+       reste servie par le site pour les anciennes coquilles. */
     var csv = document.getElementById('b-csv');
-    if (csv) csv.onclick = function(){ document_('csv'); };
+    if (csv) csv.onclick = exporterDetail;
     var pdf = document.getElementById('b-pdf');
     if (pdf) pdf.onclick = function(){ document_('pdf'); };
 
