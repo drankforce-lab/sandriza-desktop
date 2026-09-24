@@ -140,9 +140,22 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .rang{display:flex;justify-content:space-between;gap:.6rem;font-size:.8rem;
   padding:.16rem 0;border-bottom:1px solid var(--v055)}
 .rang strong{font-weight:600}
+/* ⚠⚠ LA CARTE D APERCU EST UNE COLONNE FLEXIBLE, ET C EST TOUT LE CORRECTIF DE
+   #151. La grille .deux egalise ses deux colonnes : la carte de droite prenait
+   donc la hauteur de celle de gauche, et son contenu s arretait 130 px plus
+   haut — 130 px de carte grise avec RIEN dedans, mesures au rendu le
+   2026-09-24. On ne rajoute pas de hauteur : on donne celle qui existe deja a
+   l apercu, qui est la seule chose ici qui gagne a etre plus grande. */
+.colapercu{display:flex;flex-direction:column}
+.colapercu .gapercu{flex:1 1 auto;min-height:9rem}
 .gapercu{background:#f2f2f2;border-radius:10px;min-height:9rem;display:flex;
   align-items:center;justify-content:center;padding:.5rem;overflow:hidden}
-.gapercu img{max-width:100%;max-height:16rem;object-fit:contain}
+/* ⚠ << 100% >> ET NON PLUS 16rem. Agrandir le cadre en laissant le plafond a
+   16rem aurait donne une image inchangee au milieu d un plus grand rectangle
+   GRIS — la << grande carte vide >>, pire que le vide qu on corrigeait.
+   ⚠ Un plafond ne GROSSIT rien : une petite etiquette garde sa taille (pas
+   d agrandissement qui la rendrait floue), elle ne se fait juste plus rogner. */
+.gapercu img{max-width:100%;max-height:100%;object-fit:contain}
 .barre{height:9px;background:var(--v08);border-radius:99px;overflow:hidden;margin:.45rem 0}
 .barre i{display:block;height:100%;width:0;background:#c9a97e;transition:width .18s}
 .cal3{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem}
@@ -295,6 +308,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
     corps.className = (ONGLET === 'modeles') ? 'corps plein' : 'corps';
     corps.innerHTML = h;
     brancher();
+    /* ⚠ APRES le dessin, jamais avant : on mesure la boite REELLE. Ca rattrape
+       aussi un redimensionnement de la fenetre, sans ecouter le redimensionnement
+       — le prochain dessin s en charge. */
+    ajusterApercu();
   }
 
   function tuile(n, l){
@@ -492,7 +509,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
     h += '</div>';
 
     //  ── Colonne 2 : aperçu et planche ──
-    h += '<div class="carte"><h2>${T("Aperçu — ce qui sera imprimé")}</h2>'
+    h += '<div class="carte colapercu"><h2>${T("Aperçu — ce qui sera imprimé")}</h2>'
       + '<div class="gapercu">'
       + (APERCU && APERCU.image ? '<img src="' + esc(APERCU.image) + '" alt="">'
           : '<span class="aide" style="text-align:center;color:#6b7280">'
@@ -873,9 +890,34 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
     lireApercu();
     lireImprimante();
   }
-  function lireApercu(){
+  /* ══ LA LARGEUR DU RENDU SUIT LA PLACE, ELLE N EST PLUS ECRITE A LA MAIN ═══
+     🔴 MESURE DU 2026-09-24 : la boite d apercu fait 501 px de large, et la
+     fenetre demandait un rendu de 320. L apercu n occupait donc que 64 % de la
+     largeur qu il avait — AVANT meme qu on parle d etirement. C est le defaut
+     principal de cet onglet, et il ne se voyait pas dans le CSS : il etait dans
+     un nombre passe en argument, a 440 lignes de la.
+     ⚠ UN SEUIL, SANS QUOI C EST UNE BOUCLE : chaque rendu redessine, chaque
+     redessin remesure. On ne redemande que si l ecart se VOIT (48 px).
+     ⚠ UN PLAFOND AUSSI : la fenetre peut etre tres large, et rien ne justifie
+     de peindre une etiquette de 2000 px pour la regarder. */
+  var APERCU_L = 0;
+  function mesurerApercu(){
+    var g = corps.querySelector('.gapercu');
+    if (!g) return 0;
+    /* Le rembourrage de .gapercu, .5rem de chaque cote. */
+    var l = Math.round(g.clientWidth) - 16;
+    return l >= 200 ? Math.min(l, 900) : 0;
+  }
+  function ajusterApercu(){
+    if (!CIBLE || ONGLET !== 'impression' || JOB) return;
+    var l = mesurerApercu();
+    if (!l || Math.abs(l - APERCU_L) < 48) return;
+    lireApercu(l);
+  }
+  function lireApercu(largeur){
     if (!CIBLE) return;
-    appeler('promo:apercu', [CIBLE, 320]).then(function(r){
+    APERCU_L = largeur || APERCU_L || mesurerApercu() || 320;
+    appeler('promo:apercu', [CIBLE, APERCU_L]).then(function(r){
       APERCU = r.ok ? r : { image: '', planches: [] };
       if (r.ok && (r.planches || []).length && !PLANCHE) PLANCHE = r.planches[0].id;
       if (ONGLET === 'impression' && !JOB) dessiner();
