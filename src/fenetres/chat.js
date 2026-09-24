@@ -220,7 +220,71 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
         + (c.telephone ? ' · ' + esc(c.telephone) : '') + '</div>'
         + '</div>';
     }).join('');
+    /* Le pied ferme la file et porte l export (2026-09-24).
+       ⚠ LE COMPTE EST DEJA EN HAUT, dans la barre d outils, et le repeter ici
+       est VOULU : celui du haut est la reponse du filtre (il change quand on
+       tape), celui du bas ferme une liste qu on vient de faire defiler. Ce ne
+       sont pas deux fois la meme phrase, ce sont deux moments. */
+    h += szPied(
+      rows.length + ' ' + (rows.length > 1 ? '${T("conversations")}' : '${T("conversation")}'),
+      '<button class="mini" id="ch-exporter"><span class="ic">⬇</span>${T(" Exporter")}</button>');
     return h;
+  }
+
+  /* ══ LES DEUX REGISTRES DE CET ECRAN ═══════════════════════════════════════
+     ⚠ DEUX ONGLETS, DEUX FICHIERS — et ici ce n est meme pas discutable : une
+     conversation et une evaluation ne partagent AUCUNE colonne. Les reunir
+     donnerait deux moities de tableau vides l une sous l autre.
+
+     ⚠⚠ LE FICHIER PORTE LE RESULTAT FILTRE, pas toute la file. La barre d
+     outils a une recherche ET quatre filtres d etat ; quelqu un qui exporte
+     apres avoir clique << En attente >> veut les conversations en attente. C est
+     la regle posee a la 6.8.0, et le nom du fichier ne peut PAS la dire ici
+     (un filtre libre ne se met pas dans un nom de fichier) — d ou le compte
+     dans le pied, juste au-dessus du bouton : c est lui qui annonce ce qui va
+     partir.
+
+     ⚠ LE CONTENU DES CONVERSATIONS N Y EST PAS. chat:liste ne rapporte que
+     l en-tete de chaque fil (qui, quand, quel etat, combien de messages) ; les
+     messages eux-memes demandent chat:lire, une conversation a la fois. Meme
+     decision que pour messagerie : le fichier sert a TRIER et a RAPPELER, pas
+     a relire. Le nombre de messages est la pour ca. */
+  function exporterFile(){
+    var rows = filtrees();
+    if (!rows.length) { dire('${T("Rien à exporter.")}', 'att'); return; }
+    /* ⚠ LA DATE TRIABLE VIENT DU SITE (dateTri), PAS DE L AFFICHAGE. << 7 sept.,
+       14:30 >> se classe par ordre alphabetique de mois dans un tableur — avril
+       avant janvier. Repli sur la date affichee si une coquille neuve parle a un
+       site plus ancien : mieux vaut une date mal triable qu une colonne vide.
+       ⚠ << Hors ligne >> et le statut deviennent des colonnes : a l ecran ce
+       sont des pastilles, dans un tableur ce sont les criteres de tri. */
+    var lignes = rows.map(function(c){
+      return [c.nom || '', c.courriel || '', c.telephone || '',
+        c.statutLibelle || '', c.horsLigne ? '${T("Oui")}' : '${T("Non")}',
+        Number(c.nbMessages || 0), c.dateTri || c.date || ''];
+    });
+    var csv = szCSV(['${T("Nom")}', '${T("Courriel")}', '${T("Téléphone")}',
+      '${T("État")}', '${T("Hors ligne")}', '${T("Messages")}', '${T("Ouverte le")}'], lignes);
+    szExporter('conversations-' + new Date().toISOString().slice(0, 10) + '.csv', csv,
+      '${T("La file des conversations")}');
+  }
+
+  function exporterSatisfaction(){
+    var cs = ((D && D.satisfaction) || {}).comments || [];
+    if (!cs.length) { dire('${T("Rien à exporter.")}', 'att'); return; }
+    /* ⚠ LE SCORE EST UN BOOLEEN, PAS UNE NOTE. Ecrire << true >> dans une
+       cellule ne dit rien a personne : on sort le mot que l ecran affiche.
+       ⚠ ET LE COMMENTAIRE PART ENTIER. C est la seule colonne qui compte
+       vraiment ici — un avis coupe est un avis perdu. */
+    var lignes = cs.map(function(c){
+      return [c.name || '${T("Visiteur")}',
+        (c.score === true ? '${T("satisfait")}' : '${T("insatisfait")}'),
+        c.comment || '', String(c.ts || '').slice(0, 10)];
+    });
+    var csv = szCSV(['${T("Nom")}', '${T("Évaluation")}', '${T("Commentaire")}',
+      '${T("Le")}'], lignes);
+    szExporter('satisfaction-' + new Date().toISOString().slice(0, 10) + '.csv', csv,
+      '${T("Les évaluations")}');
   }
 
   function vueSatisfaction(){
@@ -251,6 +315,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
           + '<div style="font-size:.86rem;white-space:pre-wrap;overflow-wrap:anywhere">'
           + esc(c.comment || '') + '</div></div>';
       }).join('');
+      /* ⚠ LE PIED FERME LES COMMENTAIRES, PAS LES TUILES. Les tuiles du haut
+         sont des TOTAUX deja calcules (evaluees, satisfaites, taux) : elles
+         n ont rien a exporter que le tableur ne saurait refaire a partir des
+         lignes. Ce qui s exporte, ce sont les commentaires. */
+      h += szPied(
+        (cs.length > 1 ? (cs.length + ' ${T("commentaires")}') : '${T("un commentaire")}'),
+        '<button class="mini" id="ch-exportsat"><span class="ic">⬇</span>${T(" Exporter")}</button>');
     }
     h += '</div>';
     return h;
@@ -403,6 +474,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
     if (!t || !t.closest || t.closest('.boite')) return;
     var og = t.closest('[data-onglet]');
     if (og) { ONGLET = og.getAttribute('data-onglet'); dessiner(); return; }
+    /* ⚠ AVANT le test de la ligne : le pied n est pas une .ligne, mais le
+       bouton y vit et un clic doit trouver son export avant que la delegation
+       ne cherche une conversation a ouvrir. */
+    if (t.closest('#ch-exporter')) { exporterFile(); return; }
+    if (t.closest('#ch-exportsat')) { exporterSatisfaction(); return; }
     var bf = t.closest('[data-filtre]');
     if (bf) { FILTRE = bf.getAttribute('data-filtre'); dessiner(); return; }
     var li = t.closest('.ligne[data-id]');

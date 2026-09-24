@@ -122,5 +122,37 @@ module.exports = {
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
   '· ouverte le': '· opened on',
-  'en attente': 'waiting'
+  'en attente': 'waiting',
+
+  /* ══ LES DEUX PIEDS ET LES DEUX EXPORTS (2026-09-24, #148) ═════════════════
+     ⚠ DEUX ONGLETS, DEUX FICHIERS : une conversation et une evaluation ne
+     partagent AUCUNE colonne. Les reunir donnerait deux moities de tableau
+     vides l une sous l autre. */
+  'un commentaire': 'one comment',
+  'commentaires': 'comments',
+  'La file des conversations': 'The conversation queue',
+  'Les évaluations': 'The ratings',
+
+  /* ── LES COLONNES DES FICHIERS ──────────────────────────────────────────── */
+  /* ⚠ A l ecran, << hors ligne >> est une pastille qui n apparait QUE si c est
+     vrai ; dans un tableur il faut la colonne dans les deux cas, sinon on ne
+     peut pas filtrer sur son absence. D ou Oui/Non (declares au socle). */
+  'Hors ligne': 'Offline',
+  /* ⚠ La date d ouverture, en tete de colonne. Le libelle de l ecran est
+     << · ouverte le >> avec son point median : c est un FRAGMENT de phrase, pas
+     un titre de colonne. Deux usages, deux cles — les confondre donnerait un
+     en-tete qui commence par un point. */
+  'Ouverte le': 'Opened on',
+  'Nom': 'Name',
+  'Courriel': 'Email',
+  'Téléphone': 'Phone',
+  'État': 'Status',
+  'Messages': 'Messages',
+  /* ⚠ LE SCORE EST UN BOOLEEN, PAS UNE NOTE : on sort le mot que l ecran
+     affiche, pas << true >>. */
+  'Évaluation': 'Rating',
+  'satisfait': 'satisfied',
+  'insatisfait': 'unsatisfied',
+  'Commentaire': 'Comment',
+  'Le': 'On'
 };
