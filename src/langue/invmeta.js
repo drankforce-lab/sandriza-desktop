@@ -254,4 +254,42 @@ module.exports = {
      même dans les deux langues ; l'entrée existe pour que ce soit une DÉCISION,
      puisque le compteur voit maintenant les mots seuls. */
   'AUTO': 'AUTO',
+
+  /* ══ LE PIED DE LISTE ET L EXPORT, ONGLET PAR ONGLET (2026-09-24) ══════════
+     ⚠⚠ LES DEUX ALTERNATIVES EN ENTIER POUR CHACUN DES CINQ ONGLETS A LISTE.
+     Ce fichier porte une fonction plur() qui fabrique le pluriel en ajoutant
+     une lettre — elle est anterieure, et le depot a un banc contre ce patron
+     (banc-pluriel-colle). Rien de neuf ne passe par elle.
+     ⚠ Le singulier porte son ARTICLE : << une taille >> / << one size >>. Sans
+     lui, le pied dirait << 1 sizes >>.
+     ⚠ << reachat >> n a pas de ligne ici : ce sont deux champs de reglage, donc
+     ni pied ni export — et rien a compter. */
+  'une taille': 'one size',
+  'tailles': 'sizes',
+  'une étiquette': 'one label',
+  'étiquettes': 'labels',
+  'une couleur': 'one colour',
+  'couleurs': 'colours',
+  'une catégorie': 'one category',
+  'catégories': 'categories',
+  /* ⚠ LE MOT GENERIQUE SERT TROIS ONGLETS (genres, groupes d age, styles) : ils
+     partagent une seule forme de table, donc un seul vocabulaire. C est deja le
+     mot qu emploie leur etat vide (<< Aucun element >>). */
+  'un élément': 'one item',
+  'éléments': 'items',
+
+  /* ── LES COLONNES QUI N EXISTENT QUE DANS LE FICHIER ────────────────────── */
+  /* ⚠ A l ecran, une couleur integree et une personnalisee vivent dans DEUX
+     sections ; le fichier les reunit, donc il lui faut une colonne qui dise
+     laquelle est laquelle. */
+  'Origine': 'Origin',
+  'personnalisée': 'custom',
+  'intégrée': 'built-in',
+  /* ⚠ A l ecran c est une pastille << AUTO >> a cote du nom ; dans un tableur
+     c est un critere sur lequel on filtre, donc une colonne Oui/Non. */
+  'Code attribué automatiquement': 'Code assigned automatically',
+  /* ⚠ Ce qu on annonce comme ecrit dans le message de szExporter. Volontairement
+     neutre : cinq onglets partagent ce verbe, et nommer l onglet ici voudrait
+     dire cinq phrases a tenir d accord avec cinq noms de fichier. */
+  'La liste': 'The list',
 };

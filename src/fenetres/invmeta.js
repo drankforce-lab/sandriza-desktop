@@ -433,6 +433,160 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (D.peut.edit ? '<button class="prim" style="margin-top:.7rem" data-act="reachatbuymax">${T("Enregistrer la limite")}</button>' : '');
   }
 
+  /* ══ LE PIED ET L EXPORT, ONGLET PAR ONGLET (2026-09-24, #148) ═════════════
+     ⚠⚠ HUIT ONGLETS, MAIS PAS HUIT FORMES — ET PAS HUIT REGISTRES NON PLUS.
+     C est le meme cas qu << archives >> (quatre onglets, quatre jeux de
+     colonnes), qui a ete EXCLUE de #148 pour ca. Ici la mesure donne cinq
+     registres et une exception :
+
+       sizes                      des jetons, mais une vraie liste (taille + usage)
+       genres / ageGroups / styles UNE forme pour TROIS onglets
+       labels                     nom FR/EN + couleur + usage
+       colors                     la reference des couleurs (voir plus bas)
+       categories                 la table la plus riche de l ecran
+       reachat                    ❌ DEUX CHAMPS DE REGLAGE — PAS UNE LISTE
+
+     🔴 << reachat >> N A NI PIED NI EXPORT, et ce n est pas un oubli : ce sont
+     un seuil general et une limite d achat. Un fichier de deux reglages n aide
+     personne — c est exactement la raison pour laquelle << apparence >> a ete
+     retiree de #148 le meme jour. Un pied sous deux champs compterait quoi ?
+
+     ⚠ UN SEUL PIED ET UN SEUL EXPORT, PILOTES PAR L ONGLET, plutot que six
+     copies dans six fonctions de vue. Six copies, c est six occasions de
+     diverger — et la sixieme qu on oublie de corriger.
+     ⚠ LE PIED SE POSE APRES LA CARTE ET AVANT LE VOILE : apres la carte comme
+     le font coupons et produits (conformite est l exception, parce qu elle
+     empile quatre cartes) ; avant le voile parce qu un pied dessine par-dessus
+     une boite ouverte flotterait au milieu de rien. */
+  function compteOnglet(){
+    if (TAB === 'sizes')      return (D.sizes || []).length;
+    if (TAB === 'labels')     return (D.labels || []).length;
+    if (TAB === 'colors')     return (D.custom || []).length + (D.builtin || []).length;
+    if (TAB === 'categories') return (D.categories || []).length;
+    return (D[TAB] || []).length;
+  }
+  /* ⚠ LES DEUX ALTERNATIVES EN ENTIER POUR CHAQUE ONGLET. Le depot a un banc
+     pour ca (banc-pluriel-colle) : le pluriel ne se fabrique pas en ajoutant
+     une lettre. La fonction plur() de ce fichier fait exactement ca — elle est
+     anterieure, on ne s en sert pas ici.
+     ⚠ Et le singulier porte son article (<< une taille >>), sinon l anglais
+     dirait << 1 sizes >>. */
+  function motsOnglet(n){
+    var p = (n > 1);
+    if (TAB === 'sizes')      return p ? '${T("tailles")}'     : '${T("une taille")}';
+    if (TAB === 'labels')     return p ? '${T("étiquettes")}'  : '${T("une étiquette")}';
+    if (TAB === 'colors')     return p ? '${T("couleurs")}'    : '${T("une couleur")}';
+    if (TAB === 'categories') return p ? '${T("catégories")}'  : '${T("une catégorie")}';
+    return p ? '${T("éléments")}' : '${T("un élément")}';
+  }
+  function piedOnglet(){
+    if (TAB === 'reachat') return '';
+    var n = compteOnglet();
+    if (!n) return '';
+    return szPied((n > 1 ? (n + ' ' + motsOnglet(n)) : motsOnglet(n)),
+      '<button class="mini" data-act="exporter"><span class="ic">⬇</span>${T(" Exporter")}</button>');
+  }
+
+  /* ⚠ LE NOM DU FICHIER PORTE L ONGLET, et en toutes lettres plutot qu en cle
+     interne : cinq fichiers sortis le meme jour se seraient ecrases sous un
+     meme << invmeta-<date>.csv >>, et rien ne l aurait dit. */
+  var NOMS_ONGLET = { sizes: 'tailles', genres: 'genres', ageGroups: 'groupes-age',
+    styles: 'styles', labels: 'etiquettes', colors: 'couleurs', categories: 'categories' };
+
+  function exporterOnglet(){
+    /* ⚠⚠ LE MEME REFUS QUE piedOnglet, ECRIT ICI AUSSI — et ce n est pas une
+       ceinture de plus. D.reachat est un OBJET (un seuil, une limite), pas un
+       tableau : la branche generique ferait << D[TAB].map is not a function >>
+       et tuerait le dessin. Aujourd hui ce chemin est injoignable puisque
+       l onglet n a pas de bouton — mais faire reposer la surete d une fonction
+       sur l ABSENCE d un bouton ailleurs, c est attendre le jour ou quelqu un
+       ajoutera le bouton. La regle vit aux deux endroits qui l appliquent.
+       ⚠ Trouve par une sonde : exporterOnglet() appele depuis dessiner() le
+       temps d un passage du verificateur, pour executer ce que le controle ne
+       clique jamais. */
+    if (TAB === 'reachat') return;
+    var jour = new Date().toISOString().slice(0, 10);
+    var entetes, lignes;
+
+    if (TAB === 'sizes') {
+      /* ⚠ A L ECRAN C EST UN JETON AVEC UN CADENAS ; dans le fichier, l usage
+         est un NOMBRE. Le cadenas dit << on ne peut pas la retirer >>, le
+         nombre dit COMBIEN — et c est lui qu on trie. */
+      entetes = ['${T("Taille")}', '${T("Produits")}'];
+      lignes = (D.sizes || []).map(function(s){ return [s.nom || '', Number(s.used || 0)]; });
+
+    } else if (TAB === 'labels') {
+      /* ⚠ L APERCU NE PART PAS : c est une pastille coloree, donc une IMAGE du
+         nom qu on a deja en colonne. Ce qui part, c est la COULEUR en clair —
+         elle se compare et se cherche, un carre de couleur non. */
+      entetes = ['${T("Nom FR")}', '${T("Nom EN")}', '${T("Couleur")}', '${T("Produits")}'];
+      lignes = (D.labels || []).map(function(l){
+        return [l.label || '', l.labelEN || '', l.color || '', Number(l.used || 0)];
+      });
+
+    } else if (TAB === 'colors') {
+      /* ⚠⚠ UN SEUL FICHIER POUR LES QUATRE SECTIONS, ET C EST UNE DECISION.
+         L onglet empile un FORMULAIRE d ajout (rien a exporter), les codes SKU,
+         les couleurs personnalisees et les integrees. Les trois dernieres
+         decrivent LA MEME CHOSE — une couleur — vue sous trois angles :
+         personnalisee ou non, son code de variante, son usage. Les separer
+         donnerait trois fichiers qu il faudrait rapprocher a la main sur le
+         nom, alors que c est exactement ce que le fichier doit faire pour lui.
+         ⚠ Et ici la reunion NE CREE PAS de cellule vide ambigue : une couleur
+         sans code SKU est une couleur qu aucun produit n emploie, et la colonne
+         << Produits >> le dit a cote (0).
+         ⚠ LE FILTRE << Utilisees / Non >> N EST PAS APPLIQUE, contrairement a
+         la regle des listes filtrees. Raison : il ne filtre QUE la section des
+         integrees, pas l onglet — l appliquer a un fichier qui porte aussi les
+         personnalisees donnerait un melange que personne n a regarde. Le
+         fichier est la REFERENCE complete, et la colonne << Produits >> permet
+         de refaire le filtre dans le tableur. */
+      var parNom = {};
+      (D.codes || []).forEach(function(c){ parNom[c.nom] = c; });
+      entetes = ['${T("Nom")}', '${T("Valeur hex")}', '${T("Origine")}',
+        '${T("Code SKU")}', '${T("Code attribué automatiquement")}', '${T("Produits")}'];
+      var rang = function(c, origine){
+        var k = parNom[c.nom];
+        return [c.nom || '',
+          /* ⚠ UN DEGRADE N A PAS DE VALEUR HEX, et ecrire son code CSS dans une
+             colonne << hex >> ferait mentir la colonne. On dit ce que c est. */
+          (c.gradient ? '${T("dégradé")}' : (c.hex || '')),
+          origine,
+          k ? (k.code || '') : '',
+          k ? (k.hasCode ? '${T("Non")}' : '${T("Oui")}') : '',
+          Number(c.used || 0)];
+      };
+      lignes = (D.custom || []).map(function(c){ return rang(c, '${T("personnalisée")}'); })
+        .concat((D.builtin || []).map(function(c){ return rang(c, '${T("intégrée")}'); }));
+
+    } else if (TAB === 'categories') {
+      /* ⚠ LES DEUX PICTOGRAMMES DEVIENNENT OUI/NON. A l ecran, << IA >> est un
+         eclair et << Photos >> un crochet ; dans un tableur ce sont deux
+         criteres sur lesquels on filtre. Un eclair ne se filtre pas. */
+      entetes = ['${T("Nom affiché")}', '${T("Nom EN")}', '${T("Slug")}',
+        '${T("Code SKU")}', '${T("Couleur")}', '${T("IA")}', '${T("Photos simples")}',
+        '${T("Produits")}'];
+      lignes = (D.categories || []).map(function(c){
+        return [c.name || '', c.nameEN || '', c.catKey || '', c.code || '', c.color || '',
+          c.aiOn ? '${T("Oui")}' : '${T("Non")}',
+          c.simpleOn ? '${T("Oui")}' : '${T("Non")}',
+          Number(c.used || 0)];
+      });
+
+    } else {
+      /* genres, ageGroups, styles — une seule forme pour trois onglets. */
+      entetes = ['${T("Clé interne")}', '${T("Étiquette FR")}', '${T("Étiquette EN")}',
+        '${T("Produits")}'];
+      lignes = (D[TAB] || []).map(function(it){
+        return [it.key || '', it.label || '', it.labelEN || '', Number(it.used || 0)];
+      });
+    }
+
+    if (!lignes.length) { dire('${T("Rien à exporter.")}', 'att'); return; }
+    szExporter((NOMS_ONGLET[TAB] || 'attributs') + '-' + jour + '.csv',
+      szCSV(entetes, lignes), '${T("La liste")}');
+  }
+
   /* ══ DESSIN ════════════════════════════════════════════════════════════════ */
   function dessiner(){
     if (!D) return;
@@ -445,6 +599,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     else if (TAB === 'colors') h = vueColors();
     else if (TAB === 'categories') h = vueCategories();
     else if (TAB === 'reachat') h = vueReachat();
+    h += piedOnglet();
     if (EDITCOLOR) h += vueEditColor();
     corps.innerHTML = h;
     var sz = document.getElementById('sz-input');
@@ -535,6 +690,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (g('data-attrrm')) { var p = g('data-attrrm').split('|'); ecrire('invmeta:attrRemove', { type: p[0], key: p[1] }, function(){ return '${T("Attribut supprimé.")}'; }); return; }
     if (g('data-labelsave')) { saveLabel(); return; }
     if (g('data-labelrm')) { ecrire('invmeta:labelRemove', { key: g('data-labelrm') }, function(){ return '${T("Étiquette supprimée.")}'; }); return; }
+    if (g('data-act') === 'exporter') { exporterOnglet(); return; }
     if (g('data-act') === 'coloradd') { addColor(); return; }
     if (g('data-act') === 'colorsearch') { searchColor(); return; }
     if (g('data-act') === 'codesassign') { ecrire('invmeta:codesAssign', {}, function(r){ return r.n + ' code' + plur(r.n) + ' ${T("enregistré")}' + plur(r.n) + '.'; }); return; }
