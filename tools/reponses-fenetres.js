@@ -5719,15 +5719,31 @@ const JEU = {
       reponses: {
         'clients:liste': {
           ok: true,
+          /* ⚠ `segment` et `segLabel` VIENNENT DU SITE (Analytics._segmentCoeur,
+             appelé par Admin._clientLigne) — ajoutés au jeu le 2026-09-24 avec
+             la colonne Segment (#150). Sans eux la colonne ne serait jamais
+             dessinée, et le jeu ne porterait pas la réponse qu'on lui demande.
+             ⚠ CINQ LIGNES POUR COUVRIR LES CINQ CLÉS : chacune a sa pastille,
+             et `prospect`/`inactif` partagent le gris — un jeu qui n'en montre
+             qu'une n'éprouve pas le choix de couleur. */
           lignes: [
             { id: 'usr_1', nom: 'Josée Lafleur', courriel: 'josee@exemple.ca', commandes: 12,
-              achats: 1450.25, actif: true, supprime: false, cree: '2025-11-02T10:00:00Z' },
+              achats: 1450.25, segment: 'vip', segLabel: 'VIP',
+              actif: true, supprime: false, cree: '2025-11-02T10:00:00Z' },
             { id: 'usr_2', nom: 'Marc Dubé', courriel: 'marc@exemple.ca', commandes: 1,
-              achats: 89.95, actif: false, supprime: false, cree: '2026-03-14T09:00:00Z' },
+              achats: 89.95, segment: 'nouveau', segLabel: 'Nouveau',
+              actif: false, supprime: false, cree: '2026-03-14T09:00:00Z' },
             { id: 'usr_3', nom: 'Anne Roy', courriel: 'anne@exemple.ca', commandes: 0,
-              achats: 0, actif: false, supprime: true, cree: '2026-01-20T15:00:00Z' },
+              achats: 0, segment: 'prospect', segLabel: 'Prospect',
+              actif: false, supprime: true, cree: '2026-01-20T15:00:00Z' },
+            { id: 'usr_4', nom: 'Paul Gagné', courriel: 'paul@exemple.ca', commandes: 3,
+              achats: 289.50, segment: 'regulier', segLabel: 'Régulier',
+              actif: true, supprime: false, cree: '2026-02-08T11:00:00Z' },
+            { id: 'usr_5', nom: 'Luc Bernard', courriel: 'luc@exemple.ca', commandes: 2,
+              achats: 210.00, segment: 'inactif', segLabel: 'Inactif',
+              actif: true, supprime: false, cree: '2025-08-19T13:00:00Z' },
           ],
-          total: 3, pages: 1, page: 0, onglet: 'active',
+          total: 5, pages: 1, page: 0, onglet: 'active',
           comptes: { actifs: 42, inactifs: 5, supprimes: 2 },
         },
         'clients:ouvrir': { ok: true },

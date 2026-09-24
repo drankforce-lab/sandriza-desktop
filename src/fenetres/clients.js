@@ -105,6 +105,46 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      tout verdict s efface seul apres cinq secondes, sauf ce qui se termine
      par des points de suspension, qui annonce un travail en cours. */
   function dire(t, cl){ szDire(t, cl); }
+  /* ══ LA PASTILLE DE SEGMENT (#150, 2026-09-24) ════════════════════════════
+     ⚠⚠ AUCUNE REGLE ICI, ET AUCUN LIBELLE NON PLUS. Le site envoie << segment >>
+     (la cle) et << segLabel >> (le mot), tous deux issus de la MEME regle qui
+     classe l ecran web — Analytics._segmentCoeur. La fenetre ne fait que
+     peindre. Recopier les cinq seuils ici aurait tenu jusqu au premier seuil
+     change d un seul cote.
+
+     ⚠⚠ ET AUCUNE COULEUR NEUVE, C EST UNE DECISION. Cinq segments, quatre
+     pastilles deja mesurees (bon, att, err, neutre). Inventer une pastille
+     bleue pour << Nouveau >> aurait ajoute un couple de couleurs que le banc
+     de contraste juge — et ce banc-la ne peut PAS tourner sur ce poste (il
+     relance le moteur par scenario). On n ajoute pas une couleur qu on ne peut
+     pas eprouver avant de la pousser.
+     ➡ C est le MOT qui distingue les segments ; la couleur ne fait que separer
+     << ce qu on cherche >> de << l ordinaire >>. << Prospect >> et
+     << Inactif >> partagent donc le gris, et se lisent quand meme.
+
+     ⚠ UNE CLE INCONNUE GARDE SON MOT plutot que de disparaitre : le jour ou un
+     sixieme segment nait cote site, il paraitra en gris au lieu de laisser une
+     cellule vide qu on lirait comme une donnee manquante.
+
+     ⚠⚠ ET LE MOT SE TRADUIT ICI, PAS AU SITE. << segLabel >> arrive en FRANCAIS
+     (SEG_META sert l ecran web, qui n a qu une langue) : l afficher tel quel
+     mettrait << Régulier >> sur la page anglaise. La fenetre traduit donc
+     depuis la CLE, comme le fait deja << libelleStatut >> dans messagerie. Le
+     libellé du site reste le repli — mieux vaut un mot francais qu une cellule
+     vide le jour ou une cle nouvelle arrive. */
+  var TONS_SEG = { vip: 'att', regulier: 'bon', nouveau: 'bon',
+    prospect: 'neutre', inactif: 'neutre' };
+  var MOTS_SEG = {
+    prospect: '${T("Prospect")}', nouveau: '${T("Nouveau")}',
+    regulier: '${T("Régulier")}', vip: '${T("VIP")}', inactif: '${T("Inactif")}',
+  };
+  function pastilleSegment(r){
+    var mot = MOTS_SEG[r.segment] || r.segLabel || '';
+    if (!mot) return '<span class="dt">—</span>';
+    return '<span class="pill ' + (TONS_SEG[r.segment] || 'neutre') + '">'
+      + esc(mot) + '</span>';
+  }
+
   function fmt(n){
     return szArgent(n);   /* voir szArgent (socle) : le repli aussi place le symbole */
   }
@@ -166,7 +206,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     } else {
       h += '<div class="liste"><table><thead><tr><th>${T("Nom")}</th><th>${T("Courriel")}</th>'
         + '<th style="text-align:center">${T("Commandes")}</th><th style="text-align:right">${T("Achat total")}</th>'
-        + '<th>${T("Statut")}</th></tr></thead><tbody>'
+        + '<th>${T("Segment")}</th><th>${T("Statut")}</th></tr></thead><tbody>'
         + rows.map(function(r){
             var st = r.supprime ? '<span class="pill neutre">${T("Supprimé")}</span>'
               : (r.actif ? '<span class="pill bon">${T("Actif")}</span>' : '<span class="pill neutre">${T("Inactif")}</span>');
@@ -179,6 +219,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
               + '<td>' + esc(r.courriel) + '</td>'
               + '<td style="text-align:center;font-weight:600">' + r.commandes + '</td>'
               + '<td style="text-align:right;font-weight:600;white-space:nowrap">' + esc(fmt(r.achats)) + '</td>'
+              + '<td>' + pastilleSegment(r) + '</td>'
               + '<td>' + st + '</td></tr>';
           }).join('')
         + '</tbody></table></div>';
@@ -233,12 +274,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var ex = document.getElementById('c-exporter');
     if (ex) ex.onclick = function(){
       var lignes = (D.lignes || []).map(function(r){
+        /* ⚠ LE SEGMENT PART EN TEXTE, PAS EN PASTILLE, et par le MEME mot que
+           l ecran affiche (MOTS_SEG) : c est un critere de tri dans un tableur
+           — << tous mes VIP >> est exactement la question qu on lui pose. */
         return [r.nom || '', r.courriel || '', r.commandes, r.achats,
+          (MOTS_SEG[r.segment] || r.segLabel || ''),
           r.supprime ? '${T("Supprimé")}' : (r.actif ? '${T("Actif")}' : '${T("Inactif")}')];
       });
       if (!lignes.length) { dire('${T("Rien à exporter.")}', 'att'); return; }
       var csv = szCSV(['${T("Nom")}', '${T("Courriel")}', '${T("Commandes")}',
-        '${T("Achat total")}', '${T("Statut")}'], lignes);
+        '${T("Achat total")}', '${T("Segment")}', '${T("Statut")}'], lignes);
       var jour = new Date().toISOString().slice(0, 10);
       var multi = (D.pages || 1) > 1;
       szExporter('clients-' + jour + (multi ? '-p' + ((D.page || 0) + 1) : '') + '.csv', csv,

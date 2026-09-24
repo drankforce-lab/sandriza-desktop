@@ -60,5 +60,28 @@ module.exports = {
   'Statut': 'Status',
   'Actif': 'Active',
   'Inactif': 'Inactive',
-  'Page': 'Page'
+  'Page': 'Page',
+
+  /* ══ LE SEGMENT (#150, 2026-09-24) ═════════════════════════════════════════
+     ⚠⚠ LES MOTS SONT ICI, PAS AU SITE, ET CE N EST PAS UN DOUBLON DE LA REGLE.
+     Le site envoie la CLE (`vip`, `regulier`…) et un libelle FRANCAIS tire de
+     SEG_META — cette table sert l ecran web, qui n a qu une langue. L afficher
+     tel quel mettrait << Régulier >> sur la page anglaise. La fenetre traduit
+     donc depuis la cle ; la REGLE, elle, reste ecrite une seule fois cote site
+     (Analytics._segmentCoeur).
+     ⚠ << Inactif >> est deja declare juste au-dessus pour l ONGLET, et la meme
+     cle sert au segment : c est le meme mot, et deux entrees finiraient par
+     diverger.
+     ⚠ << VIP >> s ecrit pareil dans les deux langues — l entree existe quand
+     meme, parce qu une DECISION doit exister pour chaque texte lu, sans quoi on
+     ne sait pas si le mot a ete regarde ou oublie. */
+  'Segment': 'Segment',
+  'Prospect': 'Prospect',
+  'Nouveau': 'New',
+  'Régulier': 'Regular',
+  'VIP': 'VIP',
+  /* ⚠ Le banc de langue lit les en-tetes de colonnes ASSEMBLES : deux <th>
+     voisins lui arrivent d un seul tenant. Meme forme que << Pays État >> dans
+     conformite. */
+  'Segment Statut': 'Segment Status'
 };
