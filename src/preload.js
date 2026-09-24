@@ -130,6 +130,20 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   // section — SANS changer l etat retenu de la personne (contrairement a
   // << Ancrer >>) ; le flux d ancrage rouvre ancre ou detache selon l etat.
   onDockNaviguer: (cb) => { ipcRenderer.on('dock:naviguer', (e, cle) => { try { cb(cle); } catch {} }); },
+  /* ══ LA MISE A JOUR QUI SE TELECHARGE DERRIERE (sa demande du 2026-09-24) ═══
+     << quand le telechargement d une mise a jour se fait en background tu
+     pourrais afficher la progression dans la barre d etat >>.
+     ⚠⚠ ON ENVOIE DES NOMBRES, PAS UNE PHRASE : { percent, transferred, total,
+     bytesPerSecond }. La coquille a SA langue, le panneau a la sienne, et une
+     phrase francaise arrivant dans un panneau anglais est le defaut qu on a
+     corrige deux fois aujourd hui. Le mot se fabrique la ou l on connait la
+     langue de l ecran.
+     ⚠ `null` veut dire << c est fini >> (telecharge, ou echoue) : le site remet
+     alors sa barre comme avant. Une barre bloquee a 87 % serait pire que pas de
+     progression du tout. */
+  onMajProgression: (cb) => {
+    ipcRenderer.on('maj:progression', (e, p) => { try { cb(p); } catch {} });
+  },
   // Le voile du menu : masquer (false) puis remontrer (true) la vue ancree
   // sans la recharger — le site le prefere a dockCacher+dockOuvrir.
   dockVoiler: (visible) => ipcRenderer.send('dock:voiler', !!visible),

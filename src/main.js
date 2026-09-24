@@ -5201,6 +5201,26 @@ const getUpdater = () => {
       _majCritique = true;
       majBoutonsFermeture();
       _majDernierOctet = Date.now();
+      /* ⚠⚠ SA DEMANDE DU 2026-09-24 : << quand le telechargement se fait en
+         background tu pourrais afficher la progression dans la barre d etat >>.
+         Il avait raison, et le defaut etait juste en dessous : la ligne
+         `if (!_porteActive) return;` sortait SANS RIEN DIRE des que le
+         telechargement se faisait hors de l ecran d attente. C est-a-dire
+         exactement le cas ou personne ne sait ce qui se passe — et ou l on
+         risque de fermer l application au milieu.
+         ⚠ ON ENVOIE AVANT LA SORTIE, et dans les DEUX cas : pendant l ecran
+         d attente le site n est pas encore la, l envoi ne coute rien ; apres,
+         c est la seule facon de le dire.
+         ⚠ DES NOMBRES, PAS UNE PHRASE — le panneau connait sa langue, pas nous. */
+      try {
+        const wc = siteWC();
+        if (wc) wc.send('maj:progression', {
+          percent: (p && Number.isFinite(p.percent)) ? p.percent : 0,
+          transferred: (p && Number.isFinite(p.transferred)) ? p.transferred : 0,
+          total: (p && Number.isFinite(p.total)) ? p.total : 0,
+          bytesPerSecond: (p && Number.isFinite(p.bytesPerSecond)) ? p.bytesPerSecond : 0,
+        });
+      } catch {}
       if (!_porteActive) return;
       montrerPorte(TP('Téléchargement en cours'), texteProgression(p), Math.round(p && p.percent ? p.percent : 0));
     });
@@ -5222,6 +5242,9 @@ const getUpdater = () => {
 
     autoUpdater.on('update-downloaded', async (info) => {
       _updBusy = false;
+      /* La barre d etat du panneau efface sa progression : c est fini. Une barre
+         restee a << 98 % >> se lirait comme un telechargement bloque. */
+      try { const wc = siteWC(); if (wc) wc.send('maj:progression', null); } catch {}
       const version = (info && info.version) ? info.version : '';
 
       // ⚠ PENDANT LA PORTE : AUCUN CLIC. On redémarre tout seul.
@@ -5273,6 +5296,11 @@ const getUpdater = () => {
 
     autoUpdater.on('error', async (err) => {
       _updBusy = false;
+      /* ⚠ ET LA BARRE D ETAT S EFFACE AUSSI SUR ECHEC — meme raison que la ligne
+         d en dessous : un telechargement qui casse a 60 % laisserait sinon une
+         barre figee a << 60 % >> pour le reste de la journee, qui annoncerait un
+         travail qui n a plus lieu. */
+      try { const wc = siteWC(); if (wc) wc.send('maj:progression', null); } catch {}
       // ⚠ ON LIBÈRE LE VERROU SUR ÉCHEC. Un téléchargement qui casse à 60 % laisse
       // un poste qu'on ne peut plus fermer si l'on oublie cette ligne — la panne
       // de mise à jour deviendrait un poste condamné, exactement ce que le reste
