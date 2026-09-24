@@ -226,6 +226,56 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
 
   // ── LISTE ───────────────────────────────────────────────────────────────
+  /* ══ CE QUI MANQUAIT VRAIMENT A CET ECRAN — ET CE QUI NE MANQUAIT PAS ══════
+     ⚠⚠ J AI FAILLI POSER UN DEUXIEME EXPORT ICI. Le detail d une conciliation
+     EN A DEJA UN : le bouton << CSV >> de l en-tete (banque:document ->
+     _exportCSV) sort les lignes du releve ET les depots dans un seul fichier,
+     avec une colonne << Type >> qui les distingue. C est une reunion legitime —
+     les deux formes partagent date, description, montant, statut et note, donc
+     aucune cellule vide ambigue.
+     ➡ Lui ajouter un export par onglet aurait mis DEUX CONVENTIONS D EXPORT
+     DANS LE MEME ECRAN, exactement ce que le socle refuse en toutes lettres
+     (<< deux conventions seraient pires qu une seule imparfaite : le comptable
+     en apprend UNE >>). On ne double pas ce qui existe.
+
+     ⚠ CE QUI MANQUAIT : LA LISTE DE L ANNEE. Le bouton CSV ne vit que dans le
+     detail d UNE conciliation ; la vue d ensemble — douze conciliations, leurs
+     totaux et leurs ecarts — ne sortait par aucune porte. C est pourtant elle
+     qu on tend a un comptable en fin d exercice.
+
+     ⚠⚠ ET UNE DIFFERENCE QU IL FAUT DIRE PLUTOT QUE DE LA LISSER : le bouton
+     CSV existant TELECHARGE par la fenetre principale (_dlBlob), alors que
+     szExporter ECRIT dans le dossier des exports et NOMME le chemin. Deux
+     chemins de sortie dans un meme ecran, ce n est pas ideal — mais unifier
+     voudrait dire toucher _exportCSV cote SITE et changer une sortie dont il se
+     sert peut-etre deja. C est sa decision, pas un menage a faire en passant.
+
+     ⚠ LES MONTANTS PARTENT EN NOMBRES BRUTS. sou() rend << 1 234,56 $ >> avec
+     l espace groupante du francais et un signe moins TYPOGRAPHIQUE — trois
+     raisons pour qu un tableur en fasse du texte. Sur un ecran de
+     RAPPROCHEMENT BANCAIRE, un montant qu on ne peut pas additionner ne sert a
+     rien. */
+  function exporterListe(){
+    var liste = (D && D.liste) || [];
+    if (!liste.length) { dire('${T("Rien à exporter.")}', 'att'); return; }
+    /* ⚠ << Lignes >> EST UNE CELLULE A DEUX CHIFFRES A L ECRAN (<< 12 / 8 >>) :
+       les lignes de banque et les versements. Dans un fichier ce sont deux
+       colonnes — on compte les unes OU les autres, jamais la chaine. */
+    szExporter('conciliations-' + ANNEE + '-' + new Date().toISOString().slice(0, 10) + '.csv',
+      szCSV(['${T("État")}', '${T("Nom")}', '${T("Relevé")}', '${T("Dépôts")}',
+        '${T("Écart")}', '${T("Lignes du relevé")}', '${T("Lignes de dépôts")}',
+        '${T("Modifié")}'],
+        liste.map(function(c){
+          var s = c.resume || {};
+          return [STATUTS[c.status] || c.status || '', c.label || '',
+            Number(s.bankTotal || 0), Number(s.squareTotal || 0),
+            Number(s.difference || 0),
+            Number(c.nbBanque || 0), Number(c.nbVersements || 0),
+            String(c.updatedAt || '').slice(0, 10)];
+        })),
+      '${T("La liste des conciliations")}');
+  }
+
   function dessinerListe(){
     var h = [];
     h.push('<div class="barreoutils">' + barreAnnees()
@@ -259,6 +309,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           + '</td></tr>');
       });
       h.push('</tbody></table>');
+      /* Le pied ferme la liste de l annee et porte l export (2026-09-24). */
+      h.push(szPied(
+        (D.liste.length > 1 ? (D.liste.length + ' ${T("conciliations")}')
+                            : '${T("une conciliation")}'),
+        '<button class="mini" id="b-exporter"><span class="ic">⬇</span>${T(" Exporter")}</button>'));
     }
     h.push('</div>');
     corps.innerHTML = h.join('');
@@ -274,6 +329,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (rc) rc.onclick = function(){ charger(); };
     var zp = document.getElementById('b-zip');
     if (zp) zp.onclick = function(){ document_(''); };
+    /* ⚠ A COTE DE << Archive de l annee >>, ET CE N EST PAS LA MEME CHOSE :
+       l archive prepare un RAPPORT mis en page dans la fenetre principale (fait
+       pour etre lu et classe), ce bouton-ci ecrit un TABLEAU dans le dossier
+       des exports (fait pour etre trie et additionne). */
+    var ex = document.getElementById('b-exporter');
+    if (ex) ex.onclick = exporterListe;
     Array.prototype.forEach.call(corps.querySelectorAll('[data-ouvrir]'), function(tr){
       tr.onclick = function(ev){
         if (ev.target && ev.target.tagName === 'BUTTON') return;
@@ -338,6 +399,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           + '</td></tr>');
       });
       h.push('</tbody></table>');
+      /* ⚠ COMPTE SEUL, SANS BOUTON : le detail porte deja son bouton << CSV >>
+         dans l en-tete, et szPied rend le compte sans gestes quand on ne lui en
+         donne pas — il est ecrit pour ce cas. Poser un second bouton ici
+         donnerait deux sorties differentes pour la meme table. */
+      h.push(szPied(r.bankEntries.length > 1 ? (r.bankEntries.length + ' ${T("lignes")}')
+                                             : '${T("une ligne")}'));
     }
     h.push('</div>');
     return h.join('');
@@ -403,6 +470,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           + '</td></tr>');
       });
       h.push('</tbody></table>');
+      /* ⚠ Compte seul ici aussi : le bouton << CSV >> de l en-tete sort DEJA
+         les depots, dans le meme fichier que les lignes du releve. */
+      h.push(szPied(r.squarePayouts.length > 1 ? (r.squarePayouts.length + ' ${T("lignes")}')
+                                               : '${T("une ligne")}'));
     }
     h.push('</div>');
     return h.join('');

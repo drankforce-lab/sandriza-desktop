@@ -229,5 +229,25 @@ module.exports = {
   'Clore': 'Close out',
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
-  '· lecture seule': '· read-only'
+  '· lecture seule': '· read-only',
+
+  /* ══ LES PIEDS DE LISTE ET L EXPORT DE L ANNEE (2026-09-24) ════════════════
+     ⚠ LE SINGULIER PORTE SON ARTICLE, le pluriel prend le chiffre : << une
+     conciliation >> / << 12 conciliations >>. Ecrire << 1 conciliation >>
+     aurait marche en francais et donne << 1 reconciliation >> en anglais —
+     juste, mais pas ce qu on dit. Les deux alternatives existent en entier,
+     comme le veut la doctrine du depot. */
+  'une conciliation': 'one reconciliation',
+  'une ligne': 'one line',
+  /* ⚠ ET LE PLURIEL, QUE LE BANC QUI LIT LA PAGE N AVAIT PAS VU : le jeu
+     d epreuve ne rend qu une ligne, donc la branche plurielle n etait jamais
+     DESSINEE. C est banc-langue-appels, qui lit la SOURCE, qui l a accuse.
+     Deux instruments, deux portees — et celui qui regarde le resultat ne voit
+     que les chemins que le jeu emprunte. */
+  'lignes': 'lines',
+  /* ⚠ COLONNE DU FICHIER SEULEMENT. A l ecran, << Lignes >> est UNE cellule a
+     deux chiffres (<< 12 / 8 >>) : les lignes du releve et celles des depots.
+     Dans un tableur on compte les unes OU les autres — deux colonnes. */
+  'Lignes de dépôts': 'Deposit lines',
+  'La liste des conciliations': 'The reconciliation list'
 };
