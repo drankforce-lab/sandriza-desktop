@@ -60,31 +60,27 @@ module.exports = {
     '#1D2433 sur #1A1A2E @4.5': 1,
     // 1.18 · div.pop > button.sz-btnplein.flottant « ⛶ Plein écran » · newsletter_c5/nuit
     '#E8EDF5 sur #FFFFFF @4.5': 1,
-    // 1.39 · div#cmp.cmp > span.cet.g « Avant » · studio_c5/jour studio_c7/jour
+    // 1.39 · div#cmp.cmp > span.cet.g « Avant » · studio_c4/jour studio_c6/jour
     '#5F666C sur #4D5056 @4.5': 4,
     // 1.41 · div.pop > button.x « × » · newsletter_c5/nuit
     '#FFFFFF sur #D9D9D9 @4.5': 1,
-    // 1.42 · span.phpast > span.pt « ◇ » · studio/jour
-    '#56606E sur #46494F @4.5': 4,
     // 1.48 · div.rangee > button#b-bascule.bsc « Repasser en pré-lancement » · lancement_c1/jour
     '#8B5C5C sur #EF4444 @4.5': 1,
-    // 1.49 · tr > th « Facture » · etatcompte/nuit
+    // 1.49 · tr > th « Facture » · etatcompte/nuit etatcompte/nuit/ardoise etatcompte/nuit/emeraude etatcompte/nuit/graphite etatcompte/nuit/ocean etatcompte/nuit/violet
     '#111111 sur #26334A @4.5': 2,
     // 1.66 · div#g-prev-head.head.anim > div.ti « SANDRIZA » · gabarits_c1/jour
     '#1D2433 sur #7C2D12 @4.5': 1,
-    // 1.68 · div.rangee > button#b-bascule.bsc « Lancer le site au public » · lancement/jour
+    // 1.68 · div.rangee > button#b-bascule.bsc « Lancer le site au public » · lancement/jour lancement/jour/ardoise lancement/jour/emeraude lancement/jour/graphite lancement/jour/ocean lancement/jour/violet
     '#8B5C5C sur #16A34A @4.5': 1,
-    // 1.71 · span.phpast > span.pt.fait « ✓ » · studio/jour
-    '#297A46 sur #46494F @4.5': 3,
-    // 2.06 · div.ph > button.phx « ✕ » · avis/jour
+    // 2.06 · div.ph > button.phx « ✕ » · avis/jour avis/jour/ardoise avis/jour/emeraude avis/jour/graphite avis/jour/ocean avis/jour/violet
     '#AB4E4E sur #393C43 @4.5': 2,
-    // 2.13 · span#p-r2 > a#p-mesurer « mesurer l’espace R2 » · photos/jour photos_c1/jour photos_c2/jour photos_c4/jour
+    // 2.13 · span#p-r2 > a#p-mesurer « mesurer l’espace R2 » · photos/jour photos/jour/ardoise photos/jour/emeraude photos/jour/graphite photos/jour/ocean photos/jour/violet photos_c1/jour photos_c2/jour photos_c4/jour
     '#9E9EFF sur #F4F2EC @4.5': 4,
     // 2.13 · span > span.exp « Aucun paiement Square enregistré sur cet » · remboursement_c1/jour
     '#ADB2BA sur #FFFFFF @4.5': 1,
     // 2.42 · td > span.num « CRD-0002-010 » · remboursements_c1/jour
     '#B6A48C sur #FFFFFF @4.5': 1,
-    // 2.43 · span.pastille > span.coche « ✓ » · apparence/jour apparence/nuit
+    // 2.43 · span.pastille > span.coche « ✓ » · apparence/jour apparence/jour/ardoise apparence/jour/emeraude apparence/jour/graphite apparence/jour/ocean apparence/jour/violet apparence/nuit apparence/nuit/ardoise apparence/nuit/emeraude apparence/nuit/graphite apparence/nuit/ocean apparence/nuit/violet
     '#FDF8F5 sur #C49A6C @4.5': 1,
     // 2.47 · div.lgn > div.pastille « S » · marque_c2/jour
     '#1D2433 sur #4F46E5 @4.5': 2,
@@ -96,11 +92,11 @@ module.exports = {
     '#536174 sur #16202F @4.5': 1,
     // 2.62 · td > span.pill.neutre « Expiré » · remboursements_c1/jour
     '#9299A7 sur #F4F5F6 @4.5': 1,
-    // 2.63 · div.g > div.lg « 🔒 Pré-lancement » · lancement/jour
+    // 2.63 · div.g > div.lg « Pré-lancement » · lancement/jour lancement/jour/ardoise lancement/jour/emeraude lancement/jour/graphite lancement/jour/ocean lancement/jour/violet
     '#D97706 sur #F2E8DA @4.5': 1,
     // 2.65 · td > div.mut « ⏳ promesse » · journaux_c11/jour journaux_c4/jour
     '#99A0A9 sur #FFFFFF @4.5': 10,
-    // 2.71 · div.g > div.lg « 🌐 En ligne » · lancement_c1/jour
+    // 2.71 · div.g > div.lg « En ligne » · lancement_c1/jour
     '#16A34A sur #E2ECDF @4.5': 1,
     // 2.71 · tr.eteint > td.dt « 12 mars 2026 » · remboursements_c1/jour
     '#979EAB sur #FFFFFF @4.5': 2,
@@ -114,15 +110,15 @@ module.exports = {
     '#8E9299 sur #FFFFFF @4.5': 1,
     // 3.18 · div.d > div.lg « En vous inscrivant, vous acceptez de rec » · newsletter_c5/jour newsletter_c5/nuit
     '#9A8F7D sur #FFFFFF @4.5': 1,
-    // 3.19 · h2 > span.cpt « 2 » · liquidation/jour liquidation_c2/jour liquidation_c3/jour
+    // 3.19 · h2 > span.cpt « 2 » · liquidation/jour liquidation/jour/ardoise liquidation/jour/emeraude liquidation/jour/graphite liquidation/jour/ocean liquidation/jour/violet liquidation_c2/jour liquidation_c3/jour
     '#D97706 sur #FFFFFF @4.5': 3,
     // 3.24 · td > div.mut « ⏳ promesse » · journaux_c11/nuit journaux_c4/nuit
     '#617084 sur #16202F @4.5': 10,
-    // 3.30 · div.rangee > button#b-bascule.bsc « Lancer le site au public » · lancement/nuit
+    // 3.30 · div.rangee > button#b-bascule.bsc « Lancer le site au public » · lancement/nuit lancement/nuit/ardoise lancement/nuit/emeraude lancement/nuit/graphite lancement/nuit/ocean lancement/nuit/violet
     '#FFFFFF sur #16A34A @4.5': 1,
     // 3.39 · h2 > span.cpt « 1 » · liquidation_c1/nuit
     '#DC2626 sur #16202F @4.5': 1,
-    // 3.49 · div.tete > span#t-av.av « MT » · client/jour client/nuit client_c1/jour client_c1/nuit client_c2/jour client_c2/nuit
+    // 3.49 · div.tete > span#t-av.av « MT » · client/jour client/jour/ardoise client/jour/emeraude client/jour/graphite client/jour/ocean client/jour/violet client/nuit client/nuit/ardoise client/nuit/emeraude client/nuit/graphite client/nuit/ocean client/nuit/violet client_c1/jour client_c1/nuit client_c2/jour client_c2/nuit
     '#17202C sur #8A6F4D @4.5': 3,
     // 3.57 · button.sw > span.nm « rouge » · invmeta_c2/jour
     '#80848B sur #FAF9F6 @4.5': 1,
@@ -138,46 +134,38 @@ module.exports = {
     '#687484 sur #0F1623 @4.5': 3,
     // 3.98 · td > span.pill.neutre « Expiré » · remboursements_c1/nuit
     '#7F8996 sur #212C3B @4.5': 1,
-    // 4.01 · div.afaire > span.titre « À faire maintenant » · tableau/jour
+    // 4.01 · div.afaire > span.titre « À faire maintenant » · tableau/jour tableau/jour/ardoise tableau/jour/emeraude tableau/jour/graphite tableau/jour/ocean tableau/jour/violet
     '#8A6A3E sur #ECE6D9 @4.5': 1,
-    // 4.03 · div.s > div.n « 0.00 $ » · depenses_c2/jour depenses_c3/jour depenses_c4/jour impot/jour promo/jour promo_c1/jour promo_c2/jour remboursements/jour remboursements_c1/jour
+    // 4.03 · div.s > div.n « 0.00 $ » · depenses_c2/jour depenses_c3/jour depenses_c4/jour impot/jour impot/jour/ardoise impot/jour/emeraude impot/jour/graphite impot/jour/ocean impot/jour/violet promo/jour promo/jour/ardoise promo/jour/emeraude promo/jour/graphite promo/jour/ocean promo/jour/violet promo_c1/jour promo_c2/jour remboursements/jour remboursements/jour/ardoise remboursements/jour/emeraude remboursements/jour/graphite remboursements/jour/ocean remboursements/jour/violet remboursements_c1/jour
     '#8A6A3E sur #E9E7E2 @4.5': 35,
-    // 4.09 · button.mini.actif > span.n.hi « 2 » · avis_c2/jour messagerie/jour retours/jour sociaux_c2/jour
+    // 4.09 · button.mini.actif > span.n.hi « 2 » · avis_c2/jour messagerie/jour messagerie/jour/ardoise messagerie/jour/emeraude messagerie/jour/graphite messagerie/jour/ocean messagerie/jour/violet retours/jour retours/jour/ardoise retours/jour/emeraude retours/jour/graphite retours/jour/ocean retours/jour/violet sociaux_c6/jour
     '#83570B sur #DECFB2 @4.5': 4,
-    // 4.16 · div#onglets.onglets > button.actif « ⬇ Exporter » · catalogio/jour catalogio_c1/jour catalogio_c2/jour catalogio_c4/jour invmeta/jour invmeta_c1/jour invmeta_c2/jour invmeta_c3/jour invmeta_c4/jour invmeta_c5/jour invmeta_c6/jour invmeta_c7/jour invmeta_c8/jour newsletter/jour newsletter_c1/jour newsletter_c2/jour newsletter_c3/jour newsletter_c4/jour publicite/jour publicite_c1/jour publicite_c2/jour publicite_c3/jour publicite_c4/jour publicite_c6/jour transferts/jour transferts_c1/jour transferts_c2/jour
+    // 4.16 · div#onglets.onglets > button.actif « ⬇ Exporter » · catalogio/jour catalogio/jour/ardoise catalogio/jour/emeraude catalogio/jour/graphite catalogio/jour/ocean catalogio/jour/violet catalogio_c1/jour catalogio_c2/jour catalogio_c4/jour invmeta/jour invmeta/jour/ardoise invmeta/jour/emeraude invmeta/jour/graphite invmeta/jour/ocean invmeta/jour/violet invmeta_c1/jour invmeta_c2/jour invmeta_c3/jour invmeta_c4/jour invmeta_c5/jour invmeta_c6/jour invmeta_c7/jour invmeta_c8/jour newsletter/jour newsletter/jour/ardoise newsletter/jour/emeraude newsletter/jour/graphite newsletter/jour/ocean newsletter/jour/violet newsletter_c1/jour newsletter_c2/jour newsletter_c3/jour newsletter_c4/jour publicite/jour publicite/jour/ardoise publicite/jour/emeraude publicite/jour/graphite publicite/jour/ocean publicite/jour/violet publicite_c1/jour publicite_c2/jour publicite_c3/jour publicite_c4/jour publicite_c6/jour transferts/jour transferts/jour/ardoise transferts/jour/emeraude transferts/jour/graphite transferts/jour/ocean transferts/jour/violet transferts_c1/jour transferts_c2/jour
     '#6F6A5F sur #E7E2D7 @4.5': 27,
-    // 4.31 · div.etats > span.pill.on « Actif » · securite/jour securite_c1/jour securite_c2/jour sociaux-config/jour sociaux-config_c1/jour sociaux-config_c2/jour
+    // 4.31 · div.etats > span.pill.on « Actif » · securite/jour securite/jour/ardoise securite/jour/emeraude securite/jour/graphite securite/jour/ocean securite/jour/violet securite_c1/jour securite_c2/jour sociaux-config/jour sociaux-config/jour/ardoise sociaux-config/jour/emeraude sociaux-config/jour/graphite sociaux-config/jour/ocean sociaux-config/jour/violet sociaux-config_c1/jour sociaux-config_c2/jour
     '#326A49 sur #C0DBC5 @4.5': 12,
-    // 4.31 · div.etats > span.pill.moi « vous » · securite/jour securite_c1/jour securite_c2/jour
+    // 4.31 · div.etats > span.pill.moi « vous » · securite/jour securite/jour/ardoise securite/jour/emeraude securite/jour/graphite securite/jour/ocean securite/jour/violet securite_c1/jour securite_c2/jour
     '#4A627E sur #CBD7E7 @4.5': 3,
-    // 4.32 · div.etats > span.pill.role « Super-administrateur » · securite/jour securite_c1/jour securite_c2/jour
+    // 4.32 · div.etats > span.pill.role « Super-administrateur » · securite/jour securite/jour/ardoise securite/jour/emeraude securite/jour/graphite securite/jour/ocean securite/jour/violet securite_c1/jour securite_c2/jour
     '#5F666C sur #DDDEDD @4.5': 6,
-    // 4.35 · div.etats > span.pill.warn « MFA exempté » · securite/jour securite_c1/jour securite_c2/jour
+    // 4.35 · div.etats > span.pill.warn « MFA exempté » · securite/jour securite/jour/ardoise securite/jour/emeraude securite/jour/graphite securite/jour/ocean securite/jour/violet securite_c1/jour securite_c2/jour
     '#786426 sur #EBDFBD @4.5': 3,
-    // 4.39 · div.pas > span.on « 1 · Étiquette » · expedition/jour expedition_c1/jour expedition_c2/jour
+    // 4.39 · div.pas > span.on « 1 · Étiquette » · expedition/jour expedition/jour/ardoise expedition/jour/emeraude expedition/jour/graphite expedition/jour/ocean expedition/jour/violet expedition_c1/jour expedition_c2/jour
     '#6C675C sur #EAE3D6 @4.5': 3,
     // 4.40 · div.alerte > code « BL » · invmeta_c2/jour
     '#5E656E sur #F1DAD4 @4.5': 1,
-    // 4.40 · div.tarif > div.r « 2,8 % + 0,30 $ » · paiements-config/jour paiements-config_c1/jour
+    // 4.40 · div.tarif > div.r « 2,8 % + 0,30 $ » · paiements-config/jour paiements-config/jour/ardoise paiements-config/jour/emeraude paiements-config/jour/graphite paiements-config/jour/ocean paiements-config/jour/violet paiements-config_c1/jour
     '#7D694E sur #EEEBE3 @4.5': 8,
-    // 4.40 · div.etats > span.pill.mfa « MFA ✓ » · securite/jour securite_c1/jour securite_c2/jour
+    // 4.40 · div.etats > span.pill.mfa « MFA ✓ » · securite/jour securite/jour/ardoise securite/jour/emeraude securite/jour/graphite securite/jour/ocean securite/jour/violet securite_c1/jour securite_c2/jour
     '#595B79 sur #D2D2E7 @4.5': 3,
-    // 4.41 · div#pas.pas > button.on « La collection » · collection/jour collection_c1/jour commande_c1/jour fournisseur/jour fournisseur_c1/jour produit/jour produit_c1/jour produit_c2/jour produit_c3/jour produit_c4/jour retour/jour retour_c1/jour retour_c2/jour retour_c3/jour retour_c4/jour
+    // 4.41 · div#pas.pas > button.on « La collection » · collection/jour collection/jour/ardoise collection/jour/emeraude collection/jour/graphite collection/jour/ocean collection/jour/violet collection_c1/jour commande_c1/jour fournisseur/jour fournisseur/jour/ardoise fournisseur/jour/emeraude fournisseur/jour/graphite fournisseur/jour/ocean fournisseur/jour/violet fournisseur_c1/jour produit/jour produit/jour/ardoise produit/jour/emeraude produit/jour/graphite produit/jour/ocean produit/jour/violet produit_c1/jour produit_c2/jour produit_c3/jour produit_c4/jour retour/jour retour/jour/ardoise retour/jour/emeraude retour/jour/graphite retour/jour/ocean retour/jour/violet retour_c1/jour retour_c2/jour retour_c3/jour retour_c4/jour
     '#6B665B sur #E9E1D4 @4.5': 15,
     // 4.42 · div#corps.corps > div.avis.att « Un segment ne fait que la liste des abon » · campagnes_c3/jour statistiques_c1/jour statistiques_c2/jour
     '#73693E sur #EEE6D5 @4.5': 7,
     // 4.43 · div#corps > div.avis.non « Aucune clé Groq enregistrée : l’assistan » · chat-config_c3/jour
     '#746845 sur #EEE6D5 @4.5': 2,
-    // 4.44 · div.etat > div.src.warn « Aucune variable dans Render : l’état act » · lancement/jour
+    // 4.44 · div.etat > div.src.warn « Aucune variable dans Render : l’état act » · lancement/jour lancement/jour/ardoise lancement/jour/emeraude lancement/jour/graphite lancement/jour/ocean lancement/jour/violet
     '#80680B sur #F2E8DA @4.5': 1,
-    // ⚠ LIGNE RETIRÉE LE 2026-09-14 (#108) : « #5E656B sur #E5DFD4 @4.5 », 6
-    //   endroits — le jeton d'initiales de l'écran des accès. Elle a disparu
-    //   avec la refonte de cet écran (#103).
-    //   ⚠ RETIRÉE SUR UNE PREUVE, PAS SUR UN SOUVENIR : un relevé complet
-    //   `--themes` (372 scénarios, 98 fenêtres, 2 modes ET les six thèmes) ne la
-    //   rencontre NULLE PART. Le relevé quotidien ne peint aucun thème et ne
-    //   pouvait donc pas conclure — c'est pour ça que le banc refuse désormais
-    //   d'annoncer une dette éteinte sans `--themes`.
     // 4.47 · div.cadre > div.bt « Se connecter » · marque_c2/nuit
     '#FFFFFF sur #6366F1 @4.5': 1,
     // 4.48 · div.pas > span.fait « 1 · Étiquette ✓ » · expedition_c1/jour
