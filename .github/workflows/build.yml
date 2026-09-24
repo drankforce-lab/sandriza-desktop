@@ -45,6 +45,11 @@ on:
         type: boolean
         required: false
         default: false
+      regenerer_reste:
+        description: "Réécrire le bloc RESTE de contraste-rendu-declare.js au lieu de juger ? (à cocher AVEC « les six thèmes » — le job n'échoue plus, il imprime le bloc à coller)"
+        type: boolean
+        required: false
+        default: false
 
 # Aucun droit n'est nécessaire : on ne touche ni au dépôt, ni aux releases.
 permissions:
@@ -152,7 +157,21 @@ jobs:
         # deux fois le 2026-09-05. Sur `run:` d'une ligne, le motif ne mord pas.
         # (Fait et defait le 2026-09-14 : le compte est passe de 39 a 40 bancs,
         # et c'est ce chiffre qui l'a trahi.)
-        run: node tools/banc-contraste-rendu.js ${{ inputs.avec_themes && '--themes' || '' }}
+        # ⚠⚠ `regenerer_reste` — AJOUTE LE 2026-09-24 (#149), ET POUR LA MEME
+        # RAISON QUE `avec_themes` : le seul chemin honnete pour corriger
+        # `contraste-rendu-declare.js` passait par un relevé qu'on ne pouvait pas
+        # OBTENIR. Le banc sait imprimer le bloc RESTE tout fait (`--reste`),
+        # plafonds ET liste des ecrans a jour — mais ce drapeau n'etait joignable
+        # que sur un poste, c'est-a-dire la ou ce banc ne doit PAS tourner (il
+        # relance le moteur par scenario ; deux ecrans noirs le 2026-09-05).
+        # ⚠ IL SE COCHE AVEC `avec_themes`, sans quoi les listes d'ecrans
+        # naitraient d'un relevé qui n'a peint aucun theme — exactement le
+        # relevé amputé que les trois gardes du banc refusent.
+        # ⚠ `--reste` SORT EN 0 SANS JUGER : ce passage-la ne verifie RIEN, il
+        # RECOPIE. Le verdict se relit sur une construction ordinaire.
+        # ⚠ UNE SEULE LIGNE, voir juste au-dessus : `tools/bancs.js` lit la liste
+        # des bancs dans ce fichier avec le motif `^\s*node tools/`.
+        run: node tools/banc-contraste-rendu.js ${{ inputs.avec_themes && '--themes' || '' }} ${{ inputs.regenerer_reste && '--reste' || '' }}
 
   windows:
     needs: menage
