@@ -203,5 +203,19 @@ module.exports = {
   ', inscrit au journal.': ', written to the log.',
   'Réception enregistrée — tout est arrivé.': 'Reception saved — everything arrived.',
   'Transfert annulé — le stock est rendu à l’entrepôt d’origine.':
-    'Transfer cancelled — the stock goes back to the origin warehouse.'
+    'Transfer cancelled — the stock goes back to the origin warehouse.',
+
+  /* ══ LE PIED DE L HISTORIQUE ET L EXPORT (2026-09-24) ══════════════════════
+     ⚠ LES DEUX ALTERNATIVES EN ENTIER, avec leur participe accorde : le pluriel
+     ne se fabrique pas en ajoutant une lettre — ici il en faut DEUX, une a
+     chaque mot, et l anglais n en change aucun. */
+  'transfert terminé': 'completed transfer',
+  'transferts terminés': 'completed transfers',
+  /* ⚠ COLONNES DU FICHIER SEULEMENT. A l ecran, la variante et le SKU sont
+     empiles dans la cellule de l article ; dans un tableur on trie par SKU. */
+  'Variante': 'Variant',
+  'SKU': 'SKU',
+  'Note d’écart': 'Discrepancy note',
+  'Reçu par': 'Received by',
+  'L’historique des transferts': 'The transfer history'
 };

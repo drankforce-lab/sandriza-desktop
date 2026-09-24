@@ -359,7 +359,55 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             +   (t.recuPar ? '<br><span class="qui">' + esc(t.recuPar) + '</span>' : '') + '</td>'
             + '</tr>';
         }).join('')
-      + '</tbody></table></div>';
+      + '</tbody></table>'
+      /* Le pied ferme l historique et porte l export (2026-09-24). ⚠ ICI ET
+         NULLE PART AILLEURS dans cet ecran : << En transit >> est une vue de
+         TRAVAIL (on y recoit, on y annule) et << Nouveau transfert >> un
+         SELECTEUR de variantes. Exporter un selecteur, ce serait exporter une
+         question, pas un registre. L historique, lui, est le registre. */
+      + szPied(
+          l.length + ' ' + (l.length > 1 ? '${T("transferts terminés")}' : '${T("transfert terminé")}'),
+          '<button class="mini" data-act="exporter"><span class="ic">⬇</span>${T(" Exporter")}</button>')
+      + '</div>';
+  }
+
+  /* ══ L HISTORIQUE, EN FICHIER ══════════════════════════════════════════════
+     ⚠ CE QUI EST EMPILE DANS UNE CELLULE DEVIENT DES COLONNES. A l ecran,
+     l article tient nom, variante et SKU sur deux lignes d une meme cellule, et
+     le trajet met une fleche entre deux lieux. Dans un tableur on trie par SKU,
+     on groupe par lieu de depart : cinq colonnes, pas deux cellules.
+
+     ⚠⚠ L ECART PART EN NOMBRE POSITIF, ET LE SIGNE MOINS RESTE A L ECRAN. Le
+     << −3 >> affiché est une AIDE DE LECTURE : la valeur est << 3 unites
+     manquantes >>. Ecrire << −3 >> dans le fichier ferait un texte dans la
+     moitie des tableurs (le signe moins typographique n est pas le trait
+     d union du clavier), et une somme d ecarts deviendrait impossible.
+
+     ⚠ UN TRANSFERT ANNULE LAISSE << recu >> ET << ecart >> VIDES, et c est
+     exact : rien n a ete recu, et un 0 dirait << recu completement, zero
+     manquant >>. La colonne Etat porte << annule >> juste a cote — c est elle
+     qui distingue le vide qui ne s applique pas du vide qui manque. */
+  function exporterHisto(){
+    var l = clos();
+    if (!l.length) { dire('${T("Rien à exporter.")}', 'att'); return; }
+    var lignes = l.map(function(t){
+      var annule = (t.etat === 'annule');
+      return [t.nom || '', t.cle || '', t.sku || '',
+        t.deNom || '', t.versNom || '',
+        annule ? '${T("annulé")}' : '${T("reçu")}',
+        Number(t.quantite || 0),
+        (annule || t.quantiteRecue === null || t.quantiteRecue === undefined)
+          ? '' : Number(t.quantiteRecue),
+        annule ? '' : Number(t.ecart || 0),
+        t.motifLbl || '', t.noteEcart || '',
+        String(t.recuLe || '').slice(0, 10), t.recuPar || ''];
+    });
+    var csv = szCSV(['${T("Article")}', '${T("Variante")}', '${T("SKU")}',
+      '${T("Depuis")}', '${T("Vers")}', '${T("État")}',
+      '${T("Parti")}', '${T("Reçu")}', '${T("Écart")}',
+      '${T("Motif")}', '${T("Note d’écart")}', '${T("Le")}', '${T("Reçu par")}'], lignes);
+    szExporter('transferts-' + new Date().toISOString().slice(0, 10) + '.csv', csv,
+      '${T("L’historique des transferts")}');
   }
 
   function vueNeuf(){
@@ -510,6 +558,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (tab) { TAB = tab; OUVERT = ''; dessiner(); return; }
     var act = b.getAttribute('data-act');
     if (act === 'chercher') { chercher(); return; }
+    if (act === 'exporter') { exporterHisto(); return; }
     var rec = b.getAttribute('data-rec');
     if (rec) { OUVERT = (OUVERT === rec) ? '' : rec; dessiner(); return; }
     var ok = b.getAttribute('data-recok');
