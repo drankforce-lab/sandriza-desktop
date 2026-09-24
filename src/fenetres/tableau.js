@@ -139,6 +139,22 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
+/* ⚠⚠ LE PIED VIDE NE PREND PLUS DE PLACE (2026-09-24, sa deuxieme capture).
+   Une fois les cartes descendues jusqu en bas, il restait 30 px entre elles et
+   la barre d etat de l application : 13 px de rembourrage du corps (normal,
+   symetrique du haut) et **17 px de BARRE DE MESSAGES VIDE**. Sur son ecran a
+   125 %, ca fait la bande qu il a photographiee — et elle se voit d autant plus
+   que les cartes arrivent dessus. Deux barres empilees, dont une vide.
+   ⚠ << :has(.msg:empty) >> ET PAS UNE CLASSE POSEE PAR szDire : szDire n est appele
+   QUE quand un message change, donc au chargement la classe ne serait jamais
+   posee et la bande resterait. Le CSS, lui, suit l etat reel a tout instant.
+   ⚠⚠ ET CETTE REGLE RESTE DANS CE FICHIER, PAS AU SOCLE. Verifie avant
+   d ecrire : << analytics >> et << messagerie >> mettent de VRAIS BOUTONS dans leur
+   pied (Enregistrer, la duree de conservation). Une regle au socle les ferait
+   disparaitre des que le message est vide. Ici le pied ne contient que le
+   message — c est ce qui rend la regle sure, et c est pour ca qu elle est
+   locale. */
+.pied:has(.msg:empty){padding:0;border-top:0}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}
