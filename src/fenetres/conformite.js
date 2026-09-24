@@ -272,7 +272,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<p class="sous">${T("Un pays fermé disparaît du choix à la caisse et la commande y est refusée.")}</p>'
       + '<table><thead><tr><th>${T("Pays")}</th><th>${T("État")}</th>'
       + '<th>${T("Bloquants")}</th><th>${T("À confirmer")}</th><th>${T("Mandats")}</th>'
-      + '<th class="dr">${T("Dossier")}</th></tr></thead><tbody>' + lignes + '</tbody></table></div>';
+      + '<th class="dr">${T("Dossier")}</th></tr></thead><tbody>' + lignes + '</tbody></table>'
+      /* Le pied ferme le tableau et porte l export (2026-09-24). ⚠ IL VA DANS
+         LA CARTE DU TABLEAU, pas au bas du corps : cet ecran empile quatre
+         cartes (echeances, identite, tableau, dossier), et un pied pose tout
+         en bas fermerait le DOSSIER d un pays en ayant l air de compter les
+         pays. Un pied ferme la liste a laquelle il appartient. */
+      /* ⚠ << PAYS >> EST INVARIABLE EN FRANCAIS, PAS EN ANGLAIS. Un
+         dictionnaire est classe par la phrase FRANCAISE : deux entrees
+         << pays >> ne peuvent pas coexister, et une seule sortirait
+         << 1 countries >>. Le singulier porte donc son article
+         (<< un pays >> / << one country >>), le pluriel prend le chiffre. */
+      + szPied(
+          (r.length > 1 ? (r.length + ' ${T("pays")}') : '${T("un pays")}'),
+          '<button class="mini" id="cf-exporter"><span class="ic">⬇</span>${T(" Exporter")}</button>')
+      + '</div>';
   }
 
   function htmlManques(cc){
@@ -360,6 +374,33 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function brancher(){
+    /* ⚠⚠ LES COMPTES PARTENT EN NOMBRES, ET LE TIRET DEVIENT ZERO. A l ecran,
+       un pays sans bloquant affiche << — >> : c est lisible, et ca evite une
+       colonne de zeros. Dans un tableur, ce tiret n est ni triable ni
+       additionnable — << — >> se classe avec le texte, et une somme de
+       bloquants devient impossible. C est exactement pour COMPTER qu on sort
+       ce fichier : 0 est la bonne valeur.
+       ⚠ LE CODE DU PAYS PREND SA PROPRE COLONNE. A l ecran il est colle au nom
+       dans la meme cellule ; dans un fichier c est la cle sur laquelle on
+       rapproche deux tableaux (transporteur, comptable, registre).
+       ⚠ CE FICHIER EST LE RESUME, PAS LE DETAIL. Ce qui manque pays par pays
+       (D.detail) est d une AUTRE forme — un manque a plusieurs lignes par
+       pays. Les melanger demanderait des cellules vides partout, et une
+       cellule vide ne dit pas si la donnee manque ou ne s applique pas. */
+    var exc = document.getElementById('cf-exporter');
+    if (exc) exc.onclick = function(){
+      var r = (D && D.resume) || [];
+      var lignes = r.map(function(l){
+        return [l.nom || '', l.cc || '', (ETATS[l.etat] || l.etat || ''),
+          Number(l.bloquants || 0), Number(l.avertissements || 0), Number(l.mandats || 0)];
+      });
+      if (!lignes.length) { dire('${T("Rien à exporter.")}', 'att'); return; }
+      var csv = szCSV(['${T("Pays")}', '${T("Code")}', '${T("État")}',
+        '${T("Bloquants")}', '${T("À confirmer")}', '${T("Mandats")}'], lignes);
+      szExporter('conformite-' + new Date().toISOString().slice(0, 10) + '.csv', csv,
+        '${T("Le tableau de conformité")}');
+    };
+
     Array.prototype.forEach.call(corps.querySelectorAll('[data-ouvrir]'), function(b){
       b.addEventListener('click', function(){
         var cc = b.getAttribute('data-ouvrir');

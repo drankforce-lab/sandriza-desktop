@@ -160,4 +160,18 @@ module.exports = {
   'Numéro du mandat': 'Mandate number',
   'Échéance du mandat': 'Mandate expiry',
   'Retirer le mandat': 'Remove the mandate',
+
+  /* ══ LE PIED DU TABLEAU ET L EXPORT (2026-09-24) ═══════════════════════════
+     ⚠⚠ << PAYS >> EST INVARIABLE EN FRANCAIS, PAS EN ANGLAIS, et un
+     dictionnaire se classe par la phrase FRANCAISE : deux entrees << pays >>
+     ne peuvent pas coexister. Le singulier porte donc son article, ce qui
+     donne deux cles distinctes et deux traductions justes — sans quoi le pied
+     dirait << 1 countries >>. */
+  'un pays': 'one country',
+  'pays': 'countries',
+  /* ⚠ COLONNE DU FICHIER SEULEMENT. A l ecran le code est colle au nom du pays
+     dans la meme cellule ; dans le fichier il en prend une a lui, parce que
+     c est LA cle sur laquelle on rapproche deux tableaux. */
+  'Code': 'Code',
+  'Le tableau de conformité': 'The compliance table',
 };

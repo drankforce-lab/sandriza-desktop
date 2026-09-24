@@ -5104,6 +5104,134 @@ const JEU = {
   ],
 
   // ── MESSAGERIE CLIENTS ─────────────────────────────────────────────────────
+  // ── CONFORMITE EUROPEENNE ──────────────────────────────────────────────────
+  /* ⚠⚠ CET ECRAN A VECU SANS JEU DE REPONSES JUSQU AU 2026-09-24 : il etait
+     declare << compile — execution NON eprouvee >>, ce qui veut dire que RIEN
+     n executait son dessin. On lui en ecrit un le jour ou on y pose un pied de
+     liste, parce qu un pied pose dans une fenetre que personne n execute ne se
+     verifie nulle part — et szPied absent tue le dessin en entier, pas juste
+     le pied.
+
+     ⚠ FORME REELLE de config:conformite:donnees (Admin._conformiteDonnees) :
+     `resume` vient de Conformite.resume() — une ligne par pays, TRIEE par code,
+     avec les COMPTES (bloquants, avertissements, mandats) et non les listes.
+     `detail` n est present QUE pour les pays qui manquent de quelque chose.
+
+     ⚠ LES QUATRE ETATS SONT REPRESENTES ICI, ET C EST VOULU : pret, avertir,
+     bloque, derogation. Un jeu qui n aurait que des pays prets ne dessinerait
+     jamais les pastilles de refus — celles-la meme qui disent que la caisse se
+     ferme. */
+  'conformite.js': [
+    {
+      nom: 'registre garni — les quatre états, une adhésion échue',
+      id: '',
+      reponses: {
+        'config:conformite:donnees': {
+          ok: true,
+          registre: {
+            responsableUE: { nom: 'Dupont Représentation SARL',
+              adresse: '12 rue des Halles, 75001 Paris, France',
+              courriel: 'ue@exemple.fr', telephone: '+33 1 23 45 67 89' },
+            ioss: { numero: 'IM3720000000', intermediaire: 'Fiscalis Europe BV' },
+            pays: {
+              DE: { mandataire: 'LUCID', notes: '', verifieLe: '2026-09-01',
+                mandats: [{ flux: 'emballages', organisme: 'LUCID',
+                  numero: 'DE1234567890123', valideJusqu: '2026-11-30' }] },
+              FR: { mandataire: 'CITEO', notes: '', verifieLe: '2026-08-15',
+                mandats: [{ flux: 'emballages', organisme: 'CITEO',
+                  numero: 'FR212345_01XYZW', valideJusqu: '2027-12-31' },
+                  { flux: 'textiles', organisme: 'Refashion',
+                    numero: 'FR212345_02ABCD', valideJusqu: '2027-12-31' }] },
+              IE: { mandataire: '', notes: '', verifieLe: '', mandats: [] },
+              ES: { mandataire: '', notes: 'Dérogation le temps du dossier',
+                verifieLe: '2026-07-02', mandats: [] },
+            },
+          },
+          /* ⚠ TRIEE PAR CODE, comme Conformite.resume la rend : le tableau de
+             la fenetre n ordonne pas lui-meme, et un jeu desordonne laisserait
+             croire a un tri qui n existe pas. */
+          resume: [
+            { cc: 'DE', nom: 'Allemagne', etat: 'avertir', bloquants: 0,
+              avertissements: 1, derogation: false, derogationMotif: '',
+              mandats: 1, verifieLe: '2026-09-01' },
+            { cc: 'ES', nom: 'Espagne', etat: 'derogation', bloquants: 2,
+              avertissements: 0, derogation: true,
+              derogationMotif: 'Dérogation le temps du dossier',
+              mandats: 0, verifieLe: '2026-07-02' },
+            { cc: 'FR', nom: 'France', etat: 'pret', bloquants: 0,
+              avertissements: 0, derogation: false, derogationMotif: '',
+              mandats: 2, verifieLe: '2026-08-15' },
+            { cc: 'IE', nom: 'Irlande', etat: 'bloque', bloquants: 3,
+              avertissements: 0, derogation: false, derogationMotif: '',
+              mandats: 0, verifieLe: '' },
+          ],
+          /* ⚠ UNE ADHESION ECHUE ET UNE QUI APPROCHE : le bandeau change de ton
+             entre les deux (<< dur >> si une seule est passee), et sans cas
+             echu ce chemin ne serait jamais dessine. */
+          echeances: [
+            { cc: 'DE', nom: 'Allemagne', flux: 'emballages',
+              valideJusqu: '2026-11-30', expire: false },
+            { cc: 'ES', nom: 'Espagne', flux: 'textiles',
+              valideJusqu: '2026-08-31', expire: true },
+          ],
+          detail: {
+            IE: [
+              { cle: 'rep-ue', gravite: 'bloquant', flux: '', motif: 'absent',
+                quoi: 'Aucun organisme d’emballages déclaré',
+                base: 'Directive (UE) 2018/852, art. 8 bis',
+                pourquoi: 'Sans adhésion, la mise sur le marché est interdite.',
+                valideJusqu: '' },
+            ],
+            ES: [
+              { cle: 'textiles-es', gravite: 'bloquant', flux: 'textiles',
+                motif: 'expire', quoi: 'Adhésion textile',
+                base: 'Ley 7/2022, art. 58',
+                pourquoi: 'Une adhésion expirée vaut une adhésion absente.',
+                valideJusqu: '2026-08-31' },
+            ],
+          },
+          flux: { emballages: 'Emballages', textiles: 'Textiles' },
+          paysNoms: { DE: 'Allemagne', ES: 'Espagne', FR: 'France', IE: 'Irlande' },
+          intlLivraison: true,
+          peutModifier: true,
+        },
+        'config:conformite:ecrire': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    {
+      /* ⚠ LE REGISTRE VIDE EST L ETAT REEL DU DEPOT AUJOURD HUI, pas un cas
+         tordu : les 27 pays sont fermes a la caisse parce que rien n est
+         declare. C est normal, et l ecran doit le dessiner sans broncher. */
+      nom: 'registre vide — les pays fermés',
+      id: '',
+      reponses: {
+        'config:conformite:donnees': {
+          ok: true,
+          registre: { responsableUE: {}, ioss: {}, pays: {} },
+          resume: [
+            { cc: 'DE', nom: 'Allemagne', etat: 'bloque', bloquants: 2,
+              avertissements: 0, derogation: false, derogationMotif: '',
+              mandats: 0, verifieLe: '' },
+          ],
+          echeances: [],
+          detail: {},
+          flux: {}, paysNoms: { DE: 'Allemagne' },
+          intlLivraison: false, peutModifier: false,
+        },
+        identite: IDENTITE,
+      },
+    },
+    {
+      nom: 'rôle sans conformité',
+      id: '',
+      reponses: {
+        'config:conformite:donnees': { ok: false, motif: 'droit' },
+        identite: IDENTITE,
+      },
+    },
+  ],
+
   'messagerie.js': [
     {
       // ⚠ FORME REELLE de messagerie:liste (Admin._messagerieLigne) et :lire.
