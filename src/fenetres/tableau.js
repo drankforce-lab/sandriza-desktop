@@ -5,8 +5,11 @@
  * =============================================================================
  * Le premier écran de la journée, en fenêtre de consultation : les tuiles
  * chiffrées (masquables par personne, comme l'écran du site), l'avis de taux
- * de change s'il y a lieu, et les 10 dernières commandes et factures (la suite
- * vit dans « Tout voir », qui ouvre la fenêtre native dans son état retenu).
+ * de change s'il y a lieu, et les commandes et factures récentes — AUTANT QUE
+ * LA FENÊTRE EN TIENT, dans une zone qui défile (sa décision du 2026-09-24, qui
+ * remplace « les 10 dernières » du 2026-08-08 : une carte étirée que dix lignes
+ * ne remplissent pas reste une carte à moitié vide). La suite vit dans « Tout
+ * voir », qui ouvre la fenêtre native dans son état retenu.
  * AUCUNE écriture ici, sauf le réglage des tuiles (préférence par personne,
  * tableau:tuiles).
  *
@@ -93,7 +96,24 @@ html.jour .afaire .titre{color:#8a6a3e}
 .panneau label{display:flex;align-items:center;gap:.4rem;cursor:pointer}
 .panneau input{width:auto}
 /* ── Les deux cartes récentes ── */
-.deux{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;align-items:start}
+/* ⚠⚠ LES DEUX TABLES DESCENDENT JUSQU EN BAS (2026-09-24, sa capture).
+   Mesure a SA taille de fenetre (1960 x 1190, pas les 1100 x 760 du banc — a
+   1100 le contenu DEBORDE, le defaut n existe pas la) : les cartes finissaient
+   a y=687 et le corps a y=1173. **486 px de vide.**
+   ⚠ << align-items:start >> RETIRE : c est lui qui laissait chaque carte a sa
+   hauteur naturelle. La grille les etire maintenant toutes les deux.
+   ⚠ << flex:1 0 auto >> ET PAS << 1 1 auto >> : elle GRANDIT dans la place libre, mais
+   ne RETRECIT jamais. Sur une fenetre courte (1100 x 760, ou le contenu
+   deborde deja), elle garde sa hauteur naturelle et le corps defile — pas d
+   overflow:hidden, donc rien ne peut etre coupe en silence.
+   ⚠ ET LA CARTE DEVIENT UNE COLONNE dont la LISTE defile : sans ca, une carte
+   plus haute serait une carte plus VIDE — le piege de #151, ou agrandir le
+   cadre sans que rien ne l occupe donne pire que le vide qu on corrigeait. */
+.deux{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;flex:1 0 auto}
+.deux>.carte{display:flex;flex-direction:column;min-height:0}
+.deux>.carte>.liste{flex:1 1 auto;min-height:0;overflow-y:auto}
+.deux>.carte>.liste::-webkit-scrollbar{width:8px}
+.deux>.carte>.liste::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 @media (max-width:900px){.deux{grid-template-columns:1fr}}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
@@ -150,7 +170,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('tableau')}
      parait donc QUE pour un super-administrateur, sans que cette page ait a
      connaitre le role. Sa regle du 2026-09-09 : masquer, pas griser. */
   var MX = null;
-  var PAR_PAGE = 10;       // les 10 dernieres, d un bloc (demande du 2026-08-08)
   /* L etat de la tuile << Derniere sauvegarde >> (#25). null = pas encore lue.
      ⚠ ELLE SE LIT A PART, APRES le premier dessin : c est le seul indicateur du
      tableau de bord qui passe par le RESEAU (backup.php interroge R2). La mettre
@@ -287,15 +306,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('tableau')}
   }
 
   function tableRecent(titre, cibleTout, lignes){
-    // Les 10 dernieres, d un bloc — la suite vit dans la fenetre native de la
-    // chose, ouverte par << Tout voir >> dans son etat retenu (ancre/detache).
-    var vue = lignes.slice(0, PAR_PAGE);
+    /* ⚠⚠ LE PLAFOND DE DIX EST LEVE (2026-09-24), ET C EST UNE DECISION QUI EN
+       REMPLACE UNE AUTRE. Ce commentaire disait << les 10 dernieres, d un bloc
+       (demande du 2026-08-08) >>. Sa capture du 2026-09-24 montre 486 px de vide
+       sous ces tables, et sa consigne est << autant de lignes que ca rentre >> :
+       les deux ne tiennent pas ensemble — une carte etiree que dix lignes ne
+       remplissent pas reste une carte a moitie vide, on aurait deplace le vide
+       au lieu de le supprimer.
+       ➡ On affiche donc TOUT ce que le site envoie (25 depuis ce jour), dans une
+       zone qui DEFILE : la carte se remplit jusqu en bas, et ce qui depasse se
+       fait defiler au lieu d etre coupe. << Tout voir >> garde son role pour la
+       suite. ⚠ L ancienne decision n est pas oubliee, elle est REMPLACEE, et par
+       lui. */
+    var vue = lignes;
     var h = '<div class="carte"><h2>' + esc(titre)
       + '<button class="mini tout" data-ouvre="' + cibleTout + '">${T("Tout voir →")}</button></h2>';
     if (!vue.length) {
       h += '<div class="vide">${T("Aucune entrée.")}</div>';
     } else {
-      h += '<table><thead><tr><th>${T("Numéro")}</th><th>${T("Client")}</th><th>${T("Total")}</th><th>${T("Statut")}</th></tr></thead><tbody>'
+      h += '<div class="liste"><table><thead><tr><th>${T("Numéro")}</th><th>${T("Client")}</th><th>${T("Total")}</th><th>${T("Statut")}</th></tr></thead><tbody>'
         + vue.map(function(r){
             // ⚠ CADENAS DYNAMIQUE (#38) : la case data-cad est remplie/videe par
             // le sondage des verrous, SANS redessiner le tableau. Une commande ET
@@ -307,7 +336,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('tableau')}
               + '<td>' + esc(fmt(r.total)) + '</td>'
               + '<td>' + pilule(r.statut, r.statutLibelle) + '</td></tr>';
           }).join('')
-        + '</tbody></table>';
+        + '</tbody></table></div>';
     }
     return h + '</div>';
   }
