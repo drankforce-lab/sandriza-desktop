@@ -4327,7 +4327,60 @@ const JEU = {
     ];
   })(),
 
+  /* ⚠⚠ LE PREMIER CAS OUVRE UNE BOITE MODALE, ET IL A ETE LE SEUL PENDANT DES
+     MOIS. Consequence mesuree le 2026-09-24 : la VUE LISTE de cet ecran n etait
+     dessinee par personne, et `banc-zones-mortes` ne pouvait lire que le voile.
+     C est de la qu est venu le << fidelisation 121 px >> du 2026-09-19 — un
+     chiffre qui ne decrivait pas la mise en page mais la boite de dialogue
+     posee par-dessus, et qui a ensuite fonde une tache (#151) sur le MAUVAIS
+     ECRAN. → feedback_le_voile_fausse_la_mesure
+     ➡ Un jeu de reponses dont TOUS les cas ouvrent une modale laisse l ecran
+     lui-meme hors de portee. Celui-ci en a donc un qui n en ouvre pas. */
   'fidelisation.js': [
+    { nom: 'liste garnie — les trois onglets ont de quoi dessiner', id: '',
+      reponses: { identite: IDENTITE,
+        'fidelisation:liste': { ok: true, peutModifier: true,
+          courrielNotification: 'info@exemple.ca',
+          tuiles: { invitations: 42, reponses: 17, taux: 40, note: 4.3, nbNotes: 17,
+            codes: 12, codesUtilises: 5 },
+          /* ⚠⚠ QUATORZE LIGNES, ET CE N EST PAS DE LA DECORATION. Avec DEUX
+             lignes, `banc-zones-mortes` lisait 314 px de vide APRES que la
+             pleine hauteur eut ete posee et VERIFIEE correcte (carte 317..730,
+             liste defilante, bande basse 13 px) : le trou n etait pas la mise
+             en page, c etait la LISTE A MOITIE VIDE du jeu d epreuve. Le banc
+             mesure ce qui est PEINT — il ne distingue pas une mise en page
+             morte d un jeu trop court.
+             ➡ Un jeu d epreuve doit pouvoir PORTER la reponse qu on lui
+             demande. Une liste qu on veut voir remplir la fenetre a besoin
+             d assez de lignes pour la remplir. */
+          sondages: (function () {
+            var noms = ['Satisfaction après livraison', 'Première commande',
+              'Retour en boutique', 'Après un échange', 'Essayage en cabine',
+              'Livraison express', 'Ramassage en magasin', 'Programme fidélité',
+              'Nouvelle collection', 'Service en caisse', 'Site web',
+              'Infolettre', 'Cadeau emballé', 'Retour sans frais'];
+            return noms.map(function (n, i) {
+              return { id: 'sd_' + (i + 1), nom: n,
+                declencheur: (i % 2) ? 'Confirmation commande' : 'Livraison',
+                nbQuestions: 2 + (i % 4), invitations: 30 - i, reponses: 12 - (i % 9),
+                taux: 40 - i, recompense: (i % 3) ? '' : 'MERCI10', actif: !(i % 4) };
+            });
+          })(),
+          recompensesTotal: 2,
+          recompenses: [
+            { code: 'MERCI10-4F2A', sondage: 'Satisfaction après livraison',
+              commande: 'CMD-0002-22010', date: '2026-09-12', utilise: true },
+            { code: 'MERCI10-9B71', sondage: 'Satisfaction après livraison',
+              commande: '', date: '2026-09-18', utilise: false },
+          ],
+          invitationsTotal: 2,
+          invitations: [
+            { id: 'iv_1', date: '2026-09-18', sondage: 'Satisfaction après livraison',
+              courriel: 'josee@exemple.ca', declencheur: 'Livraison', repondu: true },
+            { id: 'iv_2', date: '2026-09-19', sondage: 'Première commande',
+              courriel: '', declencheur: 'Confirmation commande', repondu: false },
+          ] },
+      } },
     { nom: 'editeur de sondage', id: 'sondage-nouveau', reponses: { identite: IDENTITE,
       'fidelisation:liste': { ok: true, peutModifier: true, courrielNotification: '',
         tuiles: { invitations: 0, reponses: 0, taux: 0, note: null, nbNotes: 0, codes: 0, codesUtilises: 0 },

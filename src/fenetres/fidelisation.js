@@ -223,14 +223,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
         + '<button class="mini" id="fi-mail-enr">${T("Enregistrer")}</button></div></div>';
     }
 
-    h += '<div class="carte"><h2>${T("Sondages")}</h2>';
+    /* ⚠ LA DERNIERE CARTE PREND LA HAUTEUR QUI RESTE (#151, 2026-09-24). Les
+       tuiles et la carte de notification gardent leur taille naturelle ; c est
+       la LISTE qui s etire, comme sur clients et produits. */
+    h += '<div class="carte plein"><h2>${T("Sondages")}</h2>';
     if (!(D.sondages || []).length) {
       h += '<div class="vide">${T("Aucun sondage configuré.")}'
         + (D.peutModifier
             ? '<div style="margin-top:.45rem"><button class="mini prim" id="fi-premier">${T("Créer le premier")}</button></div>'
             : '') + '</div>';
     } else {
-      h += '<table><thead><tr><th>${T("Nom")}</th><th>${T("Déclencheur")}</th><th class="num">${T("Questions")}</th>'
+      h += '<div class="liste"><table><thead><tr><th>${T("Nom")}</th><th>${T("Déclencheur")}</th><th class="num">${T("Questions")}</th>'
         + '<th class="num">${T("Invitations")}</th><th class="num">${T("Réponses")}</th><th class="num">${T("Taux")}</th>'
         + '<th>${T("Récompense")}</th><th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
         + D.sondages.map(function(s){
@@ -252,7 +255,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
                   : '')
               + '</tr>';
           }).join('')
-        + '</tbody></table>';
+        + '</tbody></table></div>';
     }
     h += '</div>';
     return h;
@@ -275,7 +278,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     var rs = D.recompenses || [];
     var h = '<div class="barreoutils"><div class="droite"><span>'
       + compte(rs.length, D.recompensesTotal, '${T("récompense")}', '${T("récompenses")}') + '</span></div></div>';
-    h += '<div class="carte"><h2>${T("Codes de récompense")}</h2>';
+    h += '<div class="carte plein"><h2>${T("Codes de récompense")}</h2>';
     if (!rs.length) {
       h += '<div class="vide">${T("Aucune récompense générée pour l’instant.")}</div>';
     } else {
@@ -289,7 +292,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
               + '<td>' + (r.utilise ? '<span class="pill bon">${T("utilisé")}</span>'
                                     : '<span class="pill neutre">${T("non")}</span>') + '</td></tr>';
           }).join('')
-        + '</tbody></table>';
+        + '</tbody></table></div>';
     }
     h += '</div>';
     return h;
@@ -302,7 +305,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
           ? '<button class="mini danger" id="fi-vider">'
             + (ARME === '__invites' ? '${T("Confirmer ?")}' : '${T("Tout supprimer")}') + '</button>' : '')
       + '<span>' + compte(iv.length, D.invitationsTotal, '${T("invitation")}', '${T("invitations")}') + '</span></div></div>';
-    h += '<div class="carte">';
+    h += '<div class="carte plein">';
     if (!iv.length) {
       h += '<div class="vide">${T("Aucune invitation.")}'
         + '<div style="margin-top:.35rem">${T("Elles partent d’elles-mêmes à la confirmation d’une commande ")}'
@@ -322,7 +325,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
                   : '')
               + '</tr>';
           }).join('')
-        + '</tbody></table>';
+        + '</tbody></table></div>';
     }
     h += '</div>';
     return h;
@@ -556,10 +559,32 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       + '</div>'
       + '</div>';
 
+    /* 🔴 IL Y AVAIT ICI << ONGLET === '${'$'}{T("invitations")}' >> — une VALEUR
+       INTERNE comparee a sa TRADUCTION. Le bouton pose data-onglet="invitations"
+       en clair ; la comparaison, elle, passait par le dictionnaire.
+       ⚠ Ca ne mord pas AUJOURD HUI parce que les deux mots coincident
+       (<< invitations >> se dit pareil dans les deux langues) — c est bien le
+       probleme : rien ne le signale. Le jour ou ce mot est traduit autrement,
+       l onglet Invitations dessinerait SILENCIEUSEMENT les Sondages, sur la
+       page anglaise seulement.
+       ⚠ La regle du depot est ecrite dans l en-tete de chaque fenetre : on ne
+       traduit QUE ce qui se LIT, jamais une valeur. Trouve le 2026-09-24 en
+       relisant ce repartiteur pour #151. */
     h += ONGLET === 'recompenses' ? vueRecompenses()
-       : ONGLET === '${T("invitations")}' ? vueInvitations() : vueSondages();
+       : ONGLET === 'invitations' ? vueInvitations() : vueSondages();
     if (EDIT) h += boiteEditeur();
     else if (DETAIL) h += boiteDetail();
+    /* ⚠⚠ LA PLEINE HAUTEUR, MESUREE AVANT ET APRES (#151, 2026-09-24). Cet
+       ecran laissait 314 px de bande morte — 41 % de la fenetre. Le chiffre
+       qu on lui attribuait (121 px) etait un MIRAGE : son jeu d epreuve
+       n ouvrait qu une boite modale, et le voile se lisait comme du vide.
+       ⚠ LES TROIS ONGLETS Y ONT DROIT : chacun est une table dans une carte,
+       la forme exacte que CSS_HAUTEUR couvre (comme clients et produits).
+       ⚠ ET LES DEUX BOITES NE CRAIGNENT RIEN : editeur et depouillement sont
+       des .voile en position:fixed — elles flottent au-dessus, donc
+       overflow:hidden ne peut pas les rogner. C est ce qu il fallait verifier
+       avant d adopter, parce qu une vue coupee ne previent jamais. */
+    corps.className = 'corps plein';
     corps.innerHTML = h;
     brancher();
   }
