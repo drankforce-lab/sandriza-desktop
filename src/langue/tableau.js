@@ -151,4 +151,7 @@ module.exports = {
   'aucun colis en route': 'no parcel on its way',
   'aucun avis en attente': 'no review waiting',
   'un collegue': 'a colleague',
+  // La refonte (2026-09-25).
+  'Client et commande': 'Customer and order',
+  'Client et commande Total Statut': 'Customer and order Total Status',
 };

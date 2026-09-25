@@ -187,5 +187,12 @@ module.exports = {
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
   'en brouillon': 'draft',
-  'en attente': 'waiting'
+  'en attente': 'waiting',
+  // La refonte (2026-09-25) : deux formes entieres, plus de HTML dans une cle.
+  'désabonnés': 'unsubscribed',
+  'désabonné': 'unsubscribed',
+  'échoués': 'failed',
+  'échoué': 'failed',
+  'étapes en attente': 'steps pending',
+  'étape en attente': 'step pending',
 };

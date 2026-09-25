@@ -573,5 +573,13 @@ module.exports = {
   'sans mannequin': 'without a model',
   'sur mannequin': 'on a model',
   'en attente': 'waiting',
-  'images du stockage': 'images from storage'
+  'images du stockage': 'images from storage',
+  // La refonte (2026-09-25).
+  ' affichées': ' shown',
+  'liées à un article': 'linked to an item',
+  'Isolées': 'Unattached',
+  'sans article': 'no item',
+  'Espace rangé': 'Space used',
+  'somme des fiches': 'sum of the records',
+  ' sur ': ' of ',
 };

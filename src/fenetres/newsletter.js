@@ -199,10 +199,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('newsletter')}
        quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
        ce poste. Voir JS_TUILES dans socle.js. */
     return szTuiles('<div class="tuiles">'
-      + '<div class="tuile"><div class="k"><span class="ic">👥</span> ${T("Abonnés actifs")}</div><div class="v">' + D.active + '</div><div class="z">' + D.unsub + '${T(" désabonné")}' + plur(D.unsub) + '</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">👥</span> ${T("Abonnés actifs")}</div><div class="v">' + D.active + '</div><div class="z">' + D.unsub + ' ' + (D.unsub > 1 ? '${T("désabonnés")}' : '${T("désabonné")}') + '</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">📣</span> ${T("Campagnes envoyées")}</div><div class="v">' + D.sentCamps + '</div><div class="z">' + D.draftCamps + '${T(" en brouillon")}</div></div>'
-      + '<div class="tuile"><div class="k"><span class="ic">✉</span> ${T("Courriels envoyés")}</div><div class="v">' + D.totalSent + '</div><div class="z">' + D.failedSent + '${T(" échoué")}' + plur(D.failedSent) + '</div></div>'
-      + '<div class="tuile"><div class="k"><span class="ic">🔗</span> ${T("Chaînes actives")}</div><div class="v">' + D.activeChains + '</div><div class="z">' + D.pendingSteps + '${T(" étape")}' + plur(D.pendingSteps) + '${T(" en attente</div>")}</div>'
+      + '<div class="tuile"><div class="k"><span class="ic">✉</span> ${T("Courriels envoyés")}</div><div class="v">' + D.totalSent + '</div><div class="z">' + D.failedSent + ' ' + (D.failedSent > 1 ? '${T("échoués")}' : '${T("échoué")}') + '</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">🔗</span> ${T("Chaînes actives")}</div><div class="v">' + D.activeChains + '</div><div class="z">' + D.pendingSteps + ' ' + (D.pendingSteps > 1 ? '${T("étapes en attente")}' : '${T("étape en attente")}') + '</div></div>'
       + '</div>')
       + (PEUT.edit ? '<div><button class="ghost mini" data-act="chains">${T("⚙ Traiter les chaînes (")}' + D.pendingSteps + ')</button></div>' : '')
       + '<div class="deux">'
@@ -268,8 +268,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('newsletter')}
     var c = D.cfg;
     var stats = D.stats ? szTuiles('<div class="tuiles" style="margin-bottom:.8rem">'
       + '<div class="tuile"><div class="k">${T("Codes générés")}</div><div class="v">' + D.stats.total + '</div></div>'
-      + '<div class="tuile"><div class="k">${T("Codes utilisés")}</div><div class="v" style="color:var(--tx-ok)">' + D.stats.used + '</div></div>'
-      + '<div class="tuile"><div class="k">${T("En attente")}</div><div class="v" style="color:var(--tx-att)">' + D.stats.active + '</div></div>'
+      + '<div class="tuile"><div class="k">${T("Codes utilisés")}</div><div class="v">' + D.stats.used + '</div></div>'
+      + '<div class="tuile"><div class="k">${T("En attente")}</div><div class="v' + (D.stats.active ? '" style="color:var(--tx-att)' : '') + '">' + D.stats.active + '</div></div>'
       + '</div>') : '';
     var img = c.imageUrl ? '<img class="apercu-img" src="' + esc(c.imageUrl) + '" alt="${T("Aperçu")}">' : '';
     var ro = PEUT.edit ? '' : ' readonly';

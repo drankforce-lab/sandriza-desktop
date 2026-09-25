@@ -309,4 +309,7 @@ module.exports = {
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
   '· soumise le': '· submitted on',
   'ouvert par': 'open by',
+  // La refonte (2026-09-25).
+  'Traitement': 'Processing',
+  'Règlement': 'Settlement',
 };

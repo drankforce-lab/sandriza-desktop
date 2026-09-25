@@ -34,7 +34,9 @@ const T = require('../langue').tr('commande');
 
 const CSS_PROPRE = `
 .entete{display:flex;gap:1.1rem;align-items:baseline;flex-wrap:wrap;margin-bottom:.55rem}
-.entete .num{font:700 1.15rem/1 Georgia,serif;color:var(--tx-creme)}
+/* La refonte de l Inventaire (2026-09-25) : le numero et le montant en gras,
+   dans la police de l ecran — plus la Georgia de l ancien dessin. */
+.entete .num{font-weight:800;font-size:1.2rem;line-height:1;color:var(--tx-creme)}
 .entete .cli{font-size:.9rem}
 .entete .adr{font-size:.78rem;color:var(--tx2);flex:1 1 100%}
 .art{display:flex;align-items:center;gap:.6rem;padding:.3rem .35rem;border-radius:7px;
@@ -53,7 +55,7 @@ const CSS_PROPRE = `
 .art .q{flex:0 0 4.4rem}
 .barre{flex:0 0 auto;height:6px;border-radius:6px;background:var(--v09);overflow:hidden;margin:.5rem 0 .2rem}
 .barre span{display:block;height:100%;background:#4ade80;width:0;transition:width .18s}
-.gros{font:700 1.6rem/1 Georgia,serif;color:var(--tx-creme)}
+.gros{font-weight:800;font-size:1.7rem;line-height:1;color:var(--tx-creme)}
 .duo{display:flex;gap:.7rem;flex-wrap:wrap}
 .duo>*{flex:1 1 220px}
 .etat{display:flex;align-items:center;gap:.5rem;font-size:.86rem;padding:.4rem 0}

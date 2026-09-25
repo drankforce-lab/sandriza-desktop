@@ -67,7 +67,8 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
 .tuile .lbl{font-size:.66rem;text-transform:uppercase;letter-spacing:.07em;color:var(--tx2);
   filter:grayscale(1) brightness(1.45);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tuile .val{font:700 1.5rem/1.3 Georgia,serif}
+/* Le chiffre dans la police de l ecran, en gras (refonte du 2026-09-25). */
+.tuile .val{font-weight:800;font-size:1.6rem;line-height:1.15}
 .tuile .val.att{color:var(--tx-att)}.tuile .val.err{color:var(--tx-err)}
 .tuile .sub{font-size:.7rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tuile .sub.att{color:var(--tx-att)}
@@ -127,8 +128,7 @@ tbody td{padding:.3rem .4rem;border-top:1px solid var(--v055);vertical-align:mid
 tbody .num{font-weight:700}
 tbody .dt{font-size:.72rem;color:var(--tx2)}
 .cadslot{display:inline}
-.cad{margin-left:.35rem;font-size:.8rem;color:var(--tx-att);vertical-align:middle;cursor:default}
-.cad.mine{color:var(--tx-or)}
+/* Le cadenas : la pastille du socle (CSS_REFONTE), plus de regle locale. */
 .pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
@@ -317,11 +317,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('tableau')}
     return tuile('sauvegarde', '${T("Dernière sauvegarde")}', val, ton, sous, (j > 7 ? 'att' : ''));
   }
 
+  /* ══ LA PASTILLE A POINT, AUX COULEURS DE LA FENETRE COMMANDES (2026-09-25) ═
+     Une couleur = un sens, et le MEME sens d un ecran a l autre : une commande
+     << Expediee >> etait verte ici et bleue dans Commandes. Vert ce qui est
+     regle (livree, payee), bleu ce qui avance (confirmee, verification,
+     expediee), ambre ce qui attend un geste (en attente, en preparation,
+     impayee), rouge l annule et l en retard. */
   function pilule(statut, libelle){
-    var ton = { paid: 'bon', demo: 'bon', delivered: 'bon', shipped: 'bon',
-      pending: 'att', unpaid: 'att', preparing: 'att', verification: 'att', confirmed: 'att',
-      overdue: 'err', cancelled: 'err' }[statut] || 'neutre';
-    return '<span class="pill ' + ton + '">' + esc(libelle || statut) + '</span>';
+    var ton = { paid: 'vert', demo: 'vert', delivered: 'vert',
+      shipped: 'bleu', confirmed: 'bleu', verification: 'bleu',
+      pending: 'ambre', unpaid: 'ambre', preparing: 'ambre',
+      overdue: 'rouge', cancelled: 'rouge' }[statut] || '';
+    return '<span class="rf-pill ' + ton + '">' + esc(libelle || statut) + '</span>';
+  }
+  function initiales(nom){
+    var m = String(nom || '').trim().split(' ').filter(Boolean);
+    if (!m.length || m[0] === '—') return '?';
+    return ((m[0][0] || '') + (m.length > 1 ? (m[m.length - 1][0] || '') : '')).toUpperCase();
   }
 
   function tableRecent(titre, cibleTout, lignes){
@@ -343,16 +355,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('tableau')}
     if (!vue.length) {
       h += '<div class="vide">${T("Aucune entrée.")}</div>';
     } else {
-      h += '<div class="liste"><table><thead><tr><th>${T("Numéro")}</th><th>${T("Client")}</th><th>${T("Total")}</th><th>${T("Statut")}</th></tr></thead><tbody>'
+      h += '<div class="liste"><table><thead><tr><th>${T("Client et commande")}</th><th>${T("Total")}</th><th>${T("Statut")}</th></tr></thead><tbody>'
         + vue.map(function(r){
             // ⚠ CADENAS DYNAMIQUE (#38) : la case data-cad est remplie/videe par
             // le sondage des verrous, SANS redessiner le tableau. Une commande ET
             // une facture pointent vers le meme ID de commande (r.oid).
-            return '<tr><td><span class="num">' + esc(r.numero) + '</span>'
-              + '<span class="cadslot" data-cad="' + esc(r.oid || '') + '"></span>'
-              + '<div class="dt">' + esc(fmtDate(r.date)) + '</div></td>'
-              + '<td>' + esc(r.client || '—') + '</td>'
-              + '<td>' + esc(fmt(r.total)) + '</td>'
+            /* La ligne riche de l Inventaire : initiales du client, nom en gras,
+               numero et date dessous ; le total en gras. Le cadenas garde sa case. */
+            return '<tr><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(r.client)) + '</span>'
+              + '<div style="min-width:0"><div class="rf-nom">' + esc(r.client || '—')
+              + '<span class="cadslot" data-cad="' + esc(r.oid || '') + '"></span></div>'
+              + '<div class="rf-sous"><span class="rf-code">' + esc(r.numero) + '</span><span>·</span>'
+              + '<span>' + esc(fmtDate(r.date)) + '</span></div></div></div></td>'
+              + '<td><span class="rf-mont">' + esc(fmt(r.total)) + '</span></td>'
               + '<td>' + pilule(r.statut, szTd(r.statutLibelle)) + '</td></tr>';
           }).join('')
         + '</tbody></table></div>';

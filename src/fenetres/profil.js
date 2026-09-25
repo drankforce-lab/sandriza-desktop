@@ -313,7 +313,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="qui">'
         + '<div class="nom">' + esc(D.nom) + '</div>'
         + '<div class="sous2">'
-          + '<span class="pill neutre">' + esc(D.role) + '</span>'
+          + '<span class="rf-pill">' + esc(D.role) + '</span>'
           + (D.identifiant ? '<span class="id">@' + esc(D.identifiant) + '</span>' : '')
           + (D.identifiant && D.courriel ? '<span class="sep" aria-hidden="true">·</span>' : '')
           + (D.courriel ? '<span class="id">' + esc(D.courriel) + '</span>' : '')
@@ -349,11 +349,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="carte">'
         + '<h4>${T("Ce qui protège votre compte")}</h4>'
         + '<div class="prot">'
-          + '<div class="l"><span class="pill bon">${T("Actif")}</span><span class="t">'
+          + '<div class="l"><span class="rf-pill vert">${T("Actif")}</span><span class="t">'
             + '${T("<b>Mot de passe</b><span>Vérifié par le serveur à chaque connexion.</span>")}'
             + '</span></div>'
           + '<div class="l">'
-            + (qOk ? '<span class="pill bon">${T("Prêtes")}</span>' : '<span class="pill att">${T("Absentes")}</span>')
+            + (qOk ? '<span class="rf-pill vert">${T("Prêtes")}</span>' : '<span class="rf-pill ambre">${T("Absentes")}</span>')
             + '<span class="t"><b>${T("Questions de sécurité")}</b><span>'
             + (qOk ? '${T("Elles permettront de retrouver votre accès si vous perdez votre mot de passe.")}'
                    : '${T("Sans elles, votre compte ne pourra pas être récupéré par cette voie.")}')

@@ -66,6 +66,17 @@ button.prim:hover:not(:disabled){background:#a3824f}
 .tuile .lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);margin-top:.12rem}
 .tuile .val.or{color:var(--tx-or)}.tuile .val.bon{color:var(--tx-ok)}.tuile .val.mal{color:var(--tx-err)}
 .tuile .val.att{color:var(--tx-att)}
+/* ── La refonte de l Inventaire (2026-09-25) : onglets et periodes en pastilles
+   de barre, libelle AU-DESSUS du chiffre, une jauge par ligne de tableau. ── */
+.barreoutils .rf-jet{height:2.4rem;padding:0 .75rem;border-radius:10px;font-size:.8rem;background:var(--f-0f1826);
+  border:1px solid var(--v10);color:var(--tx-gris2)}
+.barreoutils .rf-jet.on{background:rgba(201,169,126,.14);border-color:rgba(201,169,126,.55);color:var(--tx-or2);font-weight:700}
+.barreoutils .sep{width:1px;height:1.6rem;background:var(--v10);margin:0 .2rem}
+.tuile{display:flex;flex-direction:column}
+.tuile .lbl{order:0;text-transform:none;letter-spacing:0;font-size:.76rem;font-weight:600;margin:0 0 .2rem}
+.tuile .val{order:1;font-size:1.6rem}
+.jaugel{height:4px;border-radius:3px;background:var(--v10);margin-top:.3rem;overflow:hidden;max-width:18rem}
+.jaugel i{display:block;height:100%;border-radius:3px;background:rgba(201,169,126,.7)}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 .carte h3{margin:0 0 .4rem;font:700 .82rem/1.3 Georgia,serif;color:var(--tx-gris2)}
@@ -183,16 +194,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('statistiques')}
 
   function onglets(){
     var h = '<div class="barreoutils">'
-      + '<button class="mini' + (ONGLET === 'ga' ? ' actif' : '') + '" data-onglet="ga">${T("Google Analytics")}</button>'
-      + '<button class="mini' + (ONGLET === 'tel' ? ' actif' : '') + '" data-onglet="tel">${T("Téléphonie")}</button>';
+      + '<button class="rf-jet' + (ONGLET === 'ga' ? ' on' : '') + '" data-onglet="ga">${T("Google Analytics")}</button>'
+      + '<button class="rf-jet' + (ONGLET === 'tel' ? ' on' : '') + '" data-onglet="tel">${T("Téléphonie")}</button>'
+      + '<span class="sep" aria-hidden="true"></span>';
     if (ONGLET === 'ga') {
       h += [['7d', '${T("7 jours")}'], ['30d', '${T("30 jours")}'], ['90d', '${T("90 jours")}']].map(function(p){
-        return '<button class="mini' + (PLAGE === p[0] ? ' actif' : '') + '" data-plage="' + p[0] + '">'
+        return '<button class="rf-jet' + (PLAGE === p[0] ? ' on' : '') + '" data-plage="' + p[0] + '">'
           + p[1] + '</button>';
       }).join('');
     } else {
       h += [[7, '${T("7 jours")}'], [30, '${T("30 jours")}'], [90, '${T("90 jours")}']].map(function(p){
-        return '<button class="mini' + (JOURS === p[0] ? ' actif' : '') + '" data-jours="' + p[0] + '">'
+        return '<button class="rf-jet' + (JOURS === p[0] ? ' on' : '') + '" data-jours="' + p[0] + '">'
           + p[1] + '</button>';
       }).join('');
     }
@@ -231,10 +243,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('statistiques')}
   }
 
   function tableau(titre, colonne, valeur, lignes, cleNom, cleVal){
+    var maxT = (lignes || []).reduce(function(m, x){ return Math.max(m, Number(x[cleVal]) || 0); }, 0) || 1;
     var corpsT = lignes && lignes.length
       ? lignes.map(function(x){
-          return '<tr><td class="tronq">' + esc(x[cleNom]) + '</td><td class="num">'
-            + nb(x[cleVal]) + '</td></tr>';
+          return '<tr><td class="tronq">' + esc(x[cleNom])
+            + '<div class="jaugel"><i style="width:' + Math.max(3, Math.round(100 * (Number(x[cleVal]) || 0) / maxT)) + '%"></i></div>'
+            + '</td><td class="num"><b>' + nb(x[cleVal]) + '</b></td></tr>';
         }).join('')
       : '<tr><td colspan="2" class="dt" style="text-align:center">—</td></tr>';
     return '<div class="carte"><h3>' + esc(titre) + '</h3><table><thead><tr><th>'

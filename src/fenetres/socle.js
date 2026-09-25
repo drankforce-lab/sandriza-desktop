@@ -3135,6 +3135,33 @@ html.jour thead th{background:var(--f-carte)}
 .tuile{border-radius:13px;padding:.75rem .95rem}
 .tuile .lbl{font-size:.76rem;font-weight:600;text-transform:none;letter-spacing:0;color:var(--tx2)}
 .tuile .val{font-size:1.6rem;font-weight:800;line-height:1.15;margin:.2rem 0 .1rem}
+/* ⚠ LES DEUX AUTRES NOMS DU MEME OBJET (2026-09-25). La tuile a derive en
+   chemin : .lbl/.val/.sub ici, .k/.v/.z dans Newsletter, Publicite et la fiche
+   client, .stat/.l/.v dans Sauvegarde, Incidents et Journaux. Les regles
+   ci-dessus ne voyaient que le premier nom — les deux autres gardaient les
+   capitales et la Georgia de l ancien dessin. */
+.tuile .k,.stat .l{font-size:.76rem;font-weight:600;text-transform:none;letter-spacing:0;color:var(--tx2)}
+.tuile .v,.stat .v{font-family:inherit;font-size:1.6rem;font-weight:800;line-height:1.15;margin:.2rem 0 .1rem}
+.tuile .z{font-size:.72rem;color:var(--tx3)}
+/* ⚠ LA BARRE D ETAPES DES ASSISTANTS (2026-09-25, sa demande : « refaire aussi
+   les fenetres comme ajout de produit, detail de commande »). Une seule piece,
+   .pas (Assist, plus haut), sert tous les assistants : la refaire ICI relooke
+   Produit, Retour, Preparation, Caisse d un coup. Pastilles arrondies aux
+   mesures de la barre d outils ; le numero dans un rond — or pour l etape en
+   cours, vert une fois faite. Le crochet data-etape ne change pas. */
+.pas{gap:.4rem;padding:.6rem 1.1rem}
+.pas button{display:inline-flex;align-items:center;gap:.5rem;height:2.3rem;padding:0 .85rem 0 .4rem;
+  border-radius:99px;border:1px solid var(--v10);background:var(--f-0f1826);color:var(--tx-gris2);font-size:.8rem}
+.pas .n{display:inline-flex;align-items:center;justify-content:center;width:1.55rem;height:1.55rem;
+  min-width:0;border-radius:99px;background:var(--v08);font-weight:800;font-size:.74rem}
+.pas button.on{background:rgba(201,169,126,.14);border-color:rgba(201,169,126,.55);color:var(--tx-or2);font-weight:700}
+.pas button.on .n{background:#c9a97e;color:#17202c}
+.pas button.fait{color:var(--tx-ok)}
+.pas button.fait .n{background:rgba(34,197,94,.18)}
+html.jour .pas button{background:#fff;border-color:rgba(15,23,42,.12);color:#414e66}
+html.jour .pas button.on{background:rgba(201,169,126,.2);border-color:rgba(140,100,45,.45);color:#5c451c}
+html.jour .pas button.fait{color:#326a49}
+.stat{background:var(--f-carte);border-color:var(--v07);border-radius:13px}
 .pill{font-size:.72rem;font-weight:600;padding:.18rem .6rem}
 button{border-radius:9px}
 input,select,textarea{border-radius:9px}

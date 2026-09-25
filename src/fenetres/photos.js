@@ -23,7 +23,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -228,6 +228,12 @@ input.chx{width:auto;cursor:pointer;accent-color:#c9a97e}
 .etat{font-size:.75rem;color:var(--tx2);padding:0 .2rem}
 .etat b{color:var(--tx);font-variant-numeric:tabular-nums}
 .etat .sp{opacity:.4;margin:0 .35rem}
+/* ── La refonte de l Inventaire (2026-09-25) : les comptes en tuiles ── */
+.tuiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.6rem;flex:0 0 auto}
+.tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
+.tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tuile .sub a{color:var(--tx-bleu)}
+.val.att{color:var(--tx-att)}
 /* ── LA GRILLE ─────────────────────────────────────────────────────────── */
 table.grille tbody tr.on td{background:rgba(201,169,126,.1)}
 table.grille tbody td{vertical-align:middle}
@@ -350,7 +356,7 @@ function pagePhotos() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
 
@@ -557,14 +563,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           : '')
       + '</span></div>';
 
+    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE A LA PHOTOTHEQUE (2026-09-25) ══
+       Les comptes de la ligne d etat deviennent quatre tuiles ; l isolee (sans
+       article) s allume en ambre s il y en a. L espace R2 garde sa ligne a lui,
+       son lien de mesure et sa note : c est une MESURE, pas une somme. */
+    var tu = function(lib, val, sous, ton){
+      return '<div class="tuile"><div class="lbl">' + lib + '</div><div class="val' + (val && ton ? ' ' + ton : '') + '">'
+        + val + '</div><div class="sub">' + sous + '</div></div>';
+    };
+    h += szTuiles('<div class="tuiles">'
+      + tu('${T("Photos")}', D.total, D.trouvees + '${T(" affichées")}', '')
+      + tu('${T("Attachées")}', D.liees, '${T("liées à un article")}', '')
+      + tu('${T("Isolées")}', D.isolees, '${T("sans article")}', 'att')
+      + tu('${T("Espace rangé")}', poids(D.poidsTotal), '${T("somme des fiches")}', '')
+      + '</div>');
     h += '<div class="etat">'
       + '<b>' + D.trouvees + '</b> ' + (D.trouvees > 1 ? '${T("affichées")}' : '${T("affichée")}')
-      + ' sur <b>' + D.total + '</b>'
-      + '<span class="sp" aria-hidden="true">·</span> <b>' + D.isolees + '</b> '
-      + (D.isolees > 1 ? '${T("isolées")}' : '${T("isolée")}')
-      + '<span class="sp" aria-hidden="true">·</span> <b>' + D.liees + '</b> '
-      + (D.liees > 1 ? '${T("attachées")}' : '${T("attachée")}')
-      + '<span class="sp" aria-hidden="true">·</span> ' + poids(D.poidsTotal) + ' ${T("rangés")}'
+      + '${T(" sur ")}<b>' + D.total + '</b>'
       /* ⚠⚠ DEUX CHIFFRES DIFFERENTS, ET C EST VOULU. << rangés >> additionne le
          poids inscrit sur chaque fiche ; << dans R2 >> est ce que le stockage
          contient VRAIMENT, mesure en l interrogeant. Les confondre ferait passer

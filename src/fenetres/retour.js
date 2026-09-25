@@ -259,11 +259,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   // ══ DESSIN ════════════════════════════════════════════════════════════════
   function fil(){
-    var t = ['${T("1 Demande")}', '${T("2 Traitement")}', '${T("3 Règlement")}'];
+    /* Le numero dans son rond (.n), comme la barre d etapes du socle
+       (refonte du 2026-09-25) : il n est plus colle au libelle. */
+    var t = ['${T("Demande")}', '${T("Traitement")}', '${T("Règlement")}'];
     document.getElementById('pas').innerHTML = t.map(function(x, k){
       return '<button type="button" data-et="' + k + '" class="' + (k === ETAPE ? 'on' : '') + '"'
         + ((k > 0 && !traitable()) ? ' disabled title="${T("Le dossier doit être approuvé ou reçu")}"' : '')
-        + '>' + esc(x) + '</button>';
+        + '><span class="n">' + (k + 1) + '</span> ' + esc(x) + '</button>';
     }).join('');
   }
 

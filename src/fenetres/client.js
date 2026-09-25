@@ -51,11 +51,18 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem .75rem;flex:0 0 auto}
 .carte h2{margin:0 0 .45rem;font-size:.71rem;text-transform:uppercase;
   letter-spacing:.09em;color:var(--tx2);font-weight:700}
-.tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:.5rem}
-.tuile{background:var(--v03);border:1px solid var(--v07);
-  border-radius:9px;padding:.5rem .65rem}
-.tuile .k{font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
-.tuile .v{font:700 1.15rem/1.3 Georgia,serif;color:var(--tx-creme)}
+/* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE A LA FICHE CLIENT (2026-09-25) ══
+   Sa capture de la fiche restee ouverte montrait encore les tuiles d avant :
+   libelles en capitales, chiffres en Georgia. Memes mesures que partout
+   (libelle net, chiffre en grand, police de l ecran) ; les tuiles se posent
+   directement, sans carte autour ; les retours s allument en rouge s il y en a. */
+.tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:.6rem;flex:0 0 auto}
+.tuile{background:var(--f-carte);border:1px solid var(--v07);border-radius:13px;padding:.75rem .95rem;min-width:0}
+.tuile .k{font-size:.76rem;font-weight:600;color:var(--tx2)}
+.tuile .v{font-size:1.6rem;font-weight:800;line-height:1.15;margin-top:.2rem;color:var(--tx);white-space:nowrap}
+.tuile .v.err{color:var(--tx-err)}
+.tuile .v.date{font-size:1.1rem}
+.cmd .total{font-weight:800;color:var(--tx);font-size:.9rem;white-space:nowrap}
 .ligne{display:flex;justify-content:space-between;gap:1rem;padding:.32rem 0;
   border-bottom:1px solid var(--v06);font-size:.85rem}
 .ligne .k{color:var(--tx2)}
@@ -205,12 +212,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
     /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
        quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
        ce poste. Voir JS_TUILES dans socle.js. */
-    var h = szTuiles('<div class="carte"><div class="tuiles">'
+    var h = szTuiles('<div class="tuiles">'
       + '<div class="tuile"><div class="k">${T("Commandes")}</div><div class="v">' + R.stats.commandes + '</div></div>'
-      + '<div class="tuile"><div class="k">${T("Retours")}</div><div class="v"' + (R.stats.retours ? ' style="color:var(--tx-f6a5a5)"' : '') + '>' + R.stats.retours + '</div></div>'
+      + '<div class="tuile"><div class="k">${T("Retours")}</div><div class="v' + (R.stats.retours ? ' err' : '') + '">' + R.stats.retours + '</div></div>'
       + '<div class="tuile"><div class="k">${T("Total dépensé")}</div><div class="v">' + argent(R.stats.totalDepense) + '</div></div>'
-      + '<div class="tuile"><div class="k">${T("Inscrit le")}</div><div class="v" style="font-size:.92rem">' + esc(dateFr(c.inscritLe)) + '</div></div>'
-      + '</div></div>');
+      + '<div class="tuile"><div class="k">${T("Inscrit le")}</div><div class="v date">' + esc(dateFr(c.inscritLe)) + '</div></div>'
+      + '</div>');
     h += '<div class="carte"><h2>${T("Coordonnées")}</h2>'
       + (c.tel ? '<div class="ligne"><span class="k">${T("Téléphone")}</span><span>' + esc(c.tel) + '</span></div>' : '')
       + '<div class="ligne"><span class="k">${T("Adresse")}</span><span style="text-align:right">'
@@ -223,7 +230,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
       + (R.dernieres.length
         ? R.dernieres.map(function(o){
             return '<div class="cmd"><span class="num">' + esc(o.numero) + '</span>'
-              + '<div class="d"></div><span class="fin">' + esc(dateFr(o.date)) + ' · ' + argent(o.total) + '</span></div>'; }).join('')
+              + '<div class="d"></div><span class="fin">' + esc(dateFr(o.date)) + '</span><span class="total">' + argent(o.total) + '</span></div>'; }).join('')
           + (R.stats.commandes > 6 ? '<div class="aide" style="text-align:center;padding-top:.35rem">+ '
             + (R.stats.commandes - 6) + ' '
             + (R.stats.commandes - 6 > 1 ? '${T("autres")}' : '${T("autre")}')

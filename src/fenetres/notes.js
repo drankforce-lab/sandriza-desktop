@@ -160,7 +160,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       h += liste.map(function(e){
         var ouverte = !!DEPLIE[e.v];
         var ici = (D.installee && e.v === D.installee)
-          ? ' <span class="pill bon">${T('installée ici')}</span>' : '';
+          ? ' <span class="rf-pill vert">${T('installée ici')}</span>' : '';
         var det = '';
         if (ouverte) {
           /* ⚠ LE CORPS D UNE NOTE EST DU HTML, ET IL DOIT LE RESTER.

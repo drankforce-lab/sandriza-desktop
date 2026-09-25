@@ -259,5 +259,7 @@ module.exports = {
      ⚠ « FAQ » est le sigle de l'ONGLET, pas le titre par défaut de la page —
      celui-là est une DONNÉE, déclarée dans SZ_DONNEES et laissée intacte. */
   'FAQ': 'FAQ',
-  'Nouveau': 'New'
+  'Nouveau': 'New',
+  // La refonte (2026-09-25).
+  'Page Type Pied de page': 'Page Type Footer',
 };

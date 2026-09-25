@@ -95,6 +95,16 @@ button.b:disabled{opacity:.4;cursor:default}
 table.tb{width:100%;border-collapse:collapse;font-size:.83rem}
 table.tb th,table.tb td{border:1px solid var(--v12);padding:.25rem}
 table.tb input.t{padding:.3rem .45rem;font-size:.8rem;min-width:70px}
+/* ── La refonte de l Inventaire (2026-09-25) : la LISTE des pages en cartes du
+   socle. ⚠ Seulement elle : le guide des tailles garde son quadrillage, c est
+   une grille a saisir, pas une liste a lire. ── */
+table.tb.lp{border-collapse:separate;font-size:.85rem}
+table.tb.lp th,table.tb.lp td{border-left:0;border-right:0;padding:.62rem .8rem}
+table.tb.lp th{border:0;text-transform:uppercase;font-weight:700}
+table.tb.lp td{border-top:1px solid var(--v08);border-bottom:1px solid var(--v08)}
+table.tb.lp td:first-child{border-left:1px solid var(--v08);border-radius:11px 0 0 11px}
+table.tb.lp td:last-child{border-right:1px solid var(--v08);border-radius:0 11px 11px 0}
+table.tb.lp code{font-family:ui-monospace,monospace;font-size:.72rem;color:var(--tx2);background:none;padding:0}
 .pastille{padding:.15rem .55rem;border-radius:20px;font-size:.7rem;font-weight:700}
 .pastille.int{background:rgba(201,169,126,.18);color:#d9bd94}
 .pastille.perso{background:rgba(99,102,241,.16);color:#a6a8f6}
@@ -350,19 +360,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var cp=D.customPages||[];
     var boutonNouv = (D.peutAjouter && !RO) ? '<button class="prim" id="cp-nouvelle">${T("＋ Nouvelle page")}</button>' : '';
     var h='<div class="carte"><div class="entete"><h3>${T("Toutes les pages")} <span style="font-size:.8rem;font-weight:400;color:var(--tx2)">'+(builtins.length+cp.length)+'${T(" page(s)")}</span></h3>'+boutonNouv+'</div>';
-    h+='<table class="tb"><thead><tr><th style="text-align:left">${T("Page")}</th><th style="text-align:left">${T("Route")}</th><th>${T("Type")}</th><th>${T("Pied de page")}</th><th></th></tr></thead><tbody>';
+    h+='<table class="tb lp"><thead><tr><th style="text-align:left">${T("Page")}</th><th>${T("Type")}</th><th>${T("Pied de page")}</th><th></th></tr></thead><tbody>';
     for (var i=0;i<builtins.length;i++){ var b=builtins[i];
       var coche = f[b.k]!==false;
-      h+='<tr><td style="text-align:left;font-weight:600">'+esc(b.nom)+'</td>'
-        +'<td style="text-align:left"><code>'+esc(b.route)+'</code></td>'
-        +'<td style="text-align:center"><span class="pastille int">${T("Intégrée")}</span></td>'
+      h+='<tr><td style="text-align:left"><div class="rf-nom">'+esc(b.nom)+'</div><div class="rf-sous"><code>'+esc(b.route)+'</code></div></td>'
+        +'<td style="text-align:center"><span class="rf-pill">${T("Intégrée")}</span></td>'
         +'<td style="text-align:center">'+(b.foot?('<label class="chk"><input type="checkbox" data-foot="'+b.k+'" '+(coche?'checked':'')+(RO?' disabled':'')+'></label>'):'—')+'</td>'
         +'<td style="text-align:right"><button class="b" data-go="'+b.onglet+'">${T("Modifier")}</button></td></tr>';
     }
     for (var c=0;c<cp.length;c++){ var p=cp[c];
-      h+='<tr><td style="text-align:left;font-weight:600">'+esc(p.title)+'</td>'
-        +'<td style="text-align:left"><code>#page/'+esc(p.slug)+'</code></td>'
-        +'<td style="text-align:center"><span class="pastille perso">${T("Personnalisée")}</span></td>'
+      h+='<tr><td style="text-align:left"><div class="rf-nom">'+esc(p.title)+'</div><div class="rf-sous"><code>#page/'+esc(p.slug)+'</code></div></td>'
+        +'<td style="text-align:center"><span class="rf-pill bleu">${T("Personnalisée")}</span></td>'
         +'<td style="text-align:center"><label class="chk"><input type="checkbox" data-cfoot="'+esc(p.id)+'" '+(p.footerVisible?'checked':'')+(RO?' disabled':'')+'></label></td>'
         +'<td style="text-align:right;white-space:nowrap"><button class="b" data-cedit="'+esc(p.id)+'">${T("Modifier")}</button>'
         +(D.peutSupprimer && !p.protege ? ' <button class="b dgr" data-cdel="'+esc(p.id)+'">'+(DELP===p.id?'${T("✓ Confirmer")}':'${T("Supprimer")}')+'</button>' : '')+'</td></tr>';
