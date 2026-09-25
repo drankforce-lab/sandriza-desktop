@@ -83,5 +83,11 @@ module.exports = {
   /* ⚠ Le banc de langue lit les en-tetes de colonnes ASSEMBLES : deux <th>
      voisins lui arrivent d un seul tenant. Meme forme que << Pays État >> dans
      conformite. */
-  'Segment Statut': 'Segment Status'
+  'Segment Statut': 'Segment Status',
+  /* La refonte de la liste, comme l'Inventaire (2026-09-25). */
+  'Client': 'Customer',
+  'Cliquer pour afficher': 'Click to show',
+  'comptes en service': 'accounts in use',
+  'sans activité récente': 'no recent activity',
+  'dans la corbeille': 'in the recycle bin',
 };

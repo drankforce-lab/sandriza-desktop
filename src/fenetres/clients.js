@@ -17,7 +17,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit (voir src/langue/clients.js). */
@@ -38,6 +38,14 @@ body{background:var(--f-page);color:var(--tx);
   display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* Les tuiles de tete (refonte du 2026-09-25), aux mesures de l Inventaire.
+   La tuile de la liste affichee porte le cadre or. */
+.tuiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem;flex:0 0 auto;margin-bottom:.6rem}
+.tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
+.tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tuile.cliq{cursor:pointer;user-select:none}
+.tuile.cliq:hover{border-color:rgba(201,169,126,.6)}
+.tuile.on{border-color:#c9a97e}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
@@ -89,7 +97,7 @@ function pageClients() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
 
@@ -132,16 +140,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      depuis la CLE, comme le fait deja << libelleStatut >> dans messagerie. Le
      libellé du site reste le repli — mieux vaut un mot francais qu une cellule
      vide le jour ou une cle nouvelle arrive. */
-  var TONS_SEG = { vip: 'att', regulier: 'bon', nouveau: 'bon',
-    prospect: 'neutre', inactif: 'neutre' };
+  /* Refonte du 2026-09-25 : la pastille a point de l Inventaire (rf-pill).
+     VIP en or-ambre (a soigner), regulier en vert (fidele), nouveau en bleu (en
+     train de venir), prospect et inactif en gris. */
+  var TONS_SEG = { vip: 'ambre', regulier: 'vert', nouveau: 'bleu',
+    prospect: '', inactif: '' };
   var MOTS_SEG = {
     prospect: '${T("Prospect")}', nouveau: '${T("Nouveau")}',
     regulier: '${T("Régulier")}', vip: '${T("VIP")}', inactif: '${T("Inactif")}',
   };
+  /* Les initiales, pour la pastille (Marie Tremblay -> MT). ⚠ Decoupe sur
+     l espace : une expression \s ecrite ici deviendrait s dans le gabarit. */
+  function initiales(nom){
+    var m = String(nom || '').trim().split(' ').filter(Boolean);
+    if (!m.length || m[0] === '—') return '?';
+    return ((m[0][0] || '') + (m.length > 1 ? (m[m.length - 1][0] || '') : '')).toUpperCase();
+  }
   function pastilleSegment(r){
     var mot = MOTS_SEG[r.segment] || r.segLabel || '';
     if (!mot) return '<span class="dt">—</span>';
-    return '<span class="pill ' + (TONS_SEG[r.segment] || 'neutre') + '">'
+    return '<span class="rf-pill ' + (TONS_SEG[r.segment] || '') + '">'
       + esc(mot) + '</span>';
   }
 
@@ -184,17 +202,32 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       ['inactive', '${T("Inactifs")}', c.inactifs || 0],
       ['deleted', '${T("Supprimés")}', c.supprimes || 0]
     ];
-    var h = '<div class="barreoutils">'
-      + onglets.map(function(o){
-          return '<button class="mini' + (ONGLET === o[0] ? ' actif' : '') + '" data-onglet="' + o[0] + '">'
-            + o[1] + ' (' + o[2] + ')</button>';
-        }).join('')
+    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE A CLIENTS (2026-09-25) ═════════
+       Tuiles en tete (les trois comptes, qui basculent la liste comme les
+       onglets), barre sur une ligne a loupe, et la ligne riche : initiales,
+       nom, courriel dessous, total en gras, segment et statut en pastilles a
+       point. Crochets gardes : data-onglet, #c-q, tr[data-id]. */
+    var tuile = function(o, sous, ton){
+      return '<div class="tuile cliq' + (ONGLET === o[0] ? ' on' : '') + '" data-onglet="' + o[0] + '"'
+        + ' title="${T("Cliquer pour afficher")}"><div class="lbl">' + o[1] + '</div>'
+        + '<div class="val' + (ton ? ' ' + ton : '') + '">' + o[2] + '</div><div class="sub">' + sous + '</div></div>';
+    };
+    var h = szTuiles('<div class="tuiles">'
+      + tuile(onglets[0], '${T("comptes en service")}', '')
+      + tuile(onglets[1], '${T("sans activité récente")}', '')
+      + tuile(onglets[2], '${T("dans la corbeille")}', '')
+      + '</div>');
+    h += '<div class="carte"><div class="rf-tb">'
       /* ⚠ L etiquette ENTIERE : une cle courte posee dans une phrase plus
          longue laisse l autre moitie en francais. */
-      + '<input aria-label="${T("Nom ou courriel")}" type="search" id="c-q" placeholder="${T("Nom ou courriel…")}" value="' + esc(Q) + '">'
-      + '<span class="droite">' + (D.total || 0) + ' '
-      + (D.total > 1 ? '${T("clients")}' : '${T("client")}') + '</span>'
-      + '</div>';
+      + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Nom ou courriel")}" type="search" id="c-q" placeholder="${T("Nom ou courriel…")}" value="' + esc(Q) + '"></label>'
+      + onglets.map(function(o){
+          return '<button class="rf-jet' + (ONGLET === o[0] ? ' on' : '') + '" data-onglet="' + o[0] + '">'
+            + o[1] + ' (' + o[2] + ')</button>';
+        }).join('')
+      + '<span class="rf-droite"><span class="dt">' + (D.total || 0) + ' '
+      + (D.total > 1 ? '${T("clients")}' : '${T("client")}') + '</span></span>'
+      + '</div></div>';
 
     /* ⚠ PLEINE HAUTEUR (2026-09-19) : la carte prend tout l espace restant et
        c est la LISTE qui defile, pas le corps. Avant, une liste de trois lignes
@@ -204,21 +237,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!rows.length) {
       h += '<div class="vide">${T("Aucun client ne correspond.")}</div>';
     } else {
-      h += '<div class="liste"><table><thead><tr><th>${T("Nom")}</th><th>${T("Courriel")}</th>'
+      h += '<div class="liste"><table><thead><tr><th>${T("Client")}</th>'
         + '<th style="text-align:center">${T("Commandes")}</th><th style="text-align:right">${T("Achat total")}</th>'
         + '<th>${T("Segment")}</th><th>${T("Statut")}</th></tr></thead><tbody>'
         + rows.map(function(r){
-            var st = r.supprime ? '<span class="pill neutre">${T("Supprimé")}</span>'
-              : (r.actif ? '<span class="pill bon">${T("Actif")}</span>' : '<span class="pill neutre">${T("Inactif")}</span>');
+            var st = r.supprime ? '<span class="rf-pill rouge">${T("Supprimé")}</span>'
+              : (r.actif ? '<span class="rf-pill vert">${T("Actif")}</span>' : '<span class="rf-pill">${T("Inactif")}</span>');
             return '<tr data-id="' + esc(r.id) + '" title="${T("Ouvrir la fiche client")}">'
               // ⚠ LE CADENAS EST SUR LA LIGNE, pas seulement dans la fiche ouverte.
         // Sans lui, un collegue devait CLIQUER pour decouvrir que la fiche
         // etait prise — l information existait, mais pas la ou l on regarde.
-        + '<td><span class="num">' + esc(r.nom || '—') + '</span>'
-        + szVerrouCase('users', r.id) + '</td>'
-              + '<td>' + esc(r.courriel) + '</td>'
-              + '<td style="text-align:center;font-weight:600">' + r.commandes + '</td>'
-              + '<td style="text-align:right;font-weight:600;white-space:nowrap">' + esc(fmt(r.achats)) + '</td>'
+        + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(r.nom)) + '</span>'
+        + '<div style="min-width:0"><div class="rf-nom">' + esc(r.nom || '—') + szVerrouCase('users', r.id) + '</div>'
+        + '<div class="rf-sous">' + esc(r.courriel || '') + '</div></div></div></td>'
+              + '<td style="text-align:center">' + r.commandes + '</td>'
+              + '<td style="text-align:right"><span class="rf-mont">' + esc(fmt(r.achats)) + '</span></td>'
               + '<td>' + pastilleSegment(r) + '</td>'
               + '<td>' + st + '</td></tr>';
           }).join('')
