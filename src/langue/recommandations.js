@@ -204,5 +204,10 @@ module.exports = {
   'Look d’automne': 'Look d’automne',
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
-  '$ au total': '$ in total'
+  '$ au total': '$ in total',
+  // La refonte (2026-09-25).
+  'Active': 'Active',
+  'Inactive': 'Inactive',
+  'consultation seulement': 'view only',
+  'Règle Affichée sur': 'Rule Shown on',
 };

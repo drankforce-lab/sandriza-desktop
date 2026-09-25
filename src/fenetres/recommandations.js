@@ -45,6 +45,12 @@ body{background:var(--f-page);color:var(--tx);
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+/* ── La refonte de l Inventaire (2026-09-25) ── */
+.barreoutils .rf-jet{height:2.4rem;padding:0 .75rem;border-radius:10px;font-size:.8rem;background:var(--f-0f1826);
+  border:1px solid var(--v10);color:var(--tx-gris2)}
+.barreoutils .rf-jet.on{background:rgba(201,169,126,.14);border-color:rgba(201,169,126,.55);color:var(--tx-or2);font-weight:700}
+.rf-jet .n{margin-left:.45rem;font-weight:800;opacity:.8}
+td.rang{font-weight:800;color:var(--tx2);width:2rem}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
 input,select,button{font:inherit;color:var(--tx);background:var(--v05);
@@ -276,7 +282,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       h += '<div class="vide">${T("Aucune règle pour l’instant")}'
         + (D.peutModifier ? ' ${T("— utilisez « + Nouvelle règle » ci-dessus pour en créer une.")}' : '.') + '</div>';
     } else {
-      h += '<table><thead><tr><th></th><th>${T("Règle")}</th><th>${T("Type")}</th><th>${T("Affichée sur")}</th>'
+      h += '<table><thead><tr><th></th><th>${T("Règle")}</th><th>${T("Affichée sur")}</th>'
         + '<th class="num">Max</th><th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
         + D.regles.map(function(r, i){
             var gestes = '';
@@ -292,15 +298,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
                 + (r.pardefaut ? '1' : '0') + '">' + (ARME === r.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
             }
             return '<tr><td class="rang">' + (i + 1) + '</td>'
-              + '<td><strong>' + esc(r.nom) + '</strong>'
-              + (r.pardefaut ? ' <span class="pill neutre">${T("par défaut")}</span>' : '') + '</td>'
-              + '<td class="dt">' + esc(r.typeLibelle) + '</td>'
+              + '<td><div class="rf-nom">' + esc(r.nom)
+              + (r.pardefaut ? ' <span class="rf-pill">${T("par défaut")}</span>' : '') + '</div>'
+              + '<div class="rf-sous">' + esc(r.typeLibelle) + '</div></td>'
               + '<td>' + (r.ou.length
-                  ? r.ou.map(function(x){ return '<span class="pill neutre">' + esc(x) + '</span>'; }).join('')
+                  ? r.ou.map(function(x){ return '<span class="rf-pill bleu">' + esc(x) + '</span>'; }).join(' ')
                   : '<span class="dt">—</span>') + '</td>'
               + '<td class="num">' + (r.max || '—') + '</td>'
-              + '<td><span class="pill ' + (r.active ? 'bon' : 'neutre') + '">'
-              + (r.active ? 'Active' : 'Inactive') + '</span></td>'
+              + '<td><span class="rf-pill ' + (r.active ? 'vert' : '') + '">'
+              + (r.active ? '${T("Active")}' : '${T("Inactive")}') + '</span></td>'
               + (D.peutModifier ? '<td class="fin">' + gestes + '</td>' : '') + '</tr>';
           }).join('')
         + '</tbody></table>';
@@ -370,8 +376,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         + STATS.regles.map(function(r){
             var pc = max ? Math.round(r.couverture / max * 100) : 0;
             return '<tr><td>' + esc(r.nom) + '</td>'
-              + '<td><span class="pill ' + (r.active ? 'bon' : 'neutre') + '">'
-              + (r.active ? 'Active' : 'Inactive') + '</span></td>'
+              + '<td><span class="rf-pill ' + (r.active ? 'vert' : '') + '">'
+              + (r.active ? '${T("Active")}' : '${T("Inactive")}') + '</span></td>'
               + '<td class="num">' + r.couverture + '</td>'
               + '<td><div class="jauge"><i style="width:' + pc + '%"></i></div></td></tr>';
           }).join('')
@@ -430,15 +436,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function dessiner(){
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
-    if (sous) sous.textContent = D.peutModifier ? '' : 'consultation seulement';
+    if (sous) sous.textContent = D.peutModifier ? '' : '${T("consultation seulement")}';
 
     var h = '<div class="barreoutils">'
-      + '<button class="mini' + (ONGLET === 'regles' ? ' actif' : '') + '" data-onglet="regles">${T("Règles")}'
+      + '<button class="rf-jet' + (ONGLET === 'regles' ? ' on' : '') + '" data-onglet="regles">${T("Règles")}'
       + ((D.regles || []).length ? '<span class="n">' + D.regles.length + '</span>' : '') + '</button>'
-      + '<button class="mini' + (ONGLET === 'liaisons' ? ' actif' : '') + '" data-onglet="liaisons">${T("Liaisons manuelles")}'
+      + '<button class="rf-jet' + (ONGLET === 'liaisons' ? ' on' : '') + '" data-onglet="liaisons">${T("Liaisons manuelles")}'
       + ((D.liaisons || []).length ? '<span class="n">' + D.liaisons.length + '</span>' : '') + '</button>'
-      + '<button class="mini' + (ONGLET === 'stats' ? ' actif' : '') + '" data-onglet="stats">${T("Statistiques")}</button>'
-      + '<button class="mini' + (ONGLET === 'agencement' ? ' actif' : '') + '" data-onglet="agencement">${T("Générateur d’agencement")}'
+      + '<button class="rf-jet' + (ONGLET === 'stats' ? ' on' : '') + '" data-onglet="stats">${T("Statistiques")}</button>'
+      + '<button class="rf-jet' + (ONGLET === 'agencement' ? ' on' : '') + '" data-onglet="agencement">${T("Générateur d’agencement")}'
       + (LOOK.length ? '<span class="n hi">' + LOOK.length + '</span>' : '') + '</button>'
       + '</div>';
 
