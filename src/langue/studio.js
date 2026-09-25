@@ -740,6 +740,10 @@ module.exports = {
   'Aperçu en cours…': 'Preview in progress…',
   'Génération en cours…': 'Generating…',
   'Lancement du lot…': 'Starting the batch…',
+  '« Produit à plat » ne se traite pas en lot : choisissez ci-dessous le traitement à appliquer.':
+    '“Flat lay” can’t be run as a batch: choose below the treatment to apply.',
+  '⚠ « Produit à plat » ne se traite pas en lot : choisissez ci-dessous le traitement à appliquer.':
+    '⚠ “Flat lay” can’t be run as a batch: choose below the treatment to apply.',
   'Photo précédente': 'Previous photo',
   'Photo suivante': 'Next photo',
   'photo de départ': 'starting photo',

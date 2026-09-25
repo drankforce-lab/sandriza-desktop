@@ -2895,6 +2895,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     voile('<h3>${T("⚙ Traiter")} ' + nP + ' '
       + (nP > 1 ? '${T("photos en lot")}' : '${T("photo en lot")}') + '</h3>'
       + rcListe
+      /* ⚠ << A PLAT >> NE SE TRAITE PAS EN LOT : le site ne connait que quatre
+         traitements de lot (photos.js, _TRAITEMENTS). Le voile retombait alors
+         sur le premier de la liste SANS LE DIRE — on venait de regler un produit
+         a plat et l on lancait un detourage. On le dit, en tete, avant le choix. */
+      + (VOIE === 'plat'
+          ? '<div class="aidep att" style="margin:0 0 .6rem"><span class="ic">⚠</span> ${T("« Produit à plat » ne se traite pas en lot : choisissez ci-dessous le traitement à appliquer.")}</div>'
+          : '')
       + '<div class="ch"><label for="lot-quoi">${T("Traitement à appliquer")}</label>'
       + '<select id="lot-quoi">' + opts.map(function(t){
           return '<option value="' + esc(t.cle) + '"' + (t.cle === voieDef ? ' selected' : '')
@@ -3380,7 +3387,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         return;
       }
       PRESETS = r.presets || [];
+      /* ⚠ LA LECTURE SEULE SE POSE ENFIN (2026-09-25). RO etait lu a 38
+         endroits et pose par RIEN depuis 2.35.0. Le site dit peutEcrire ; un
+         site plus ancien ne le dit pas, et l on garde alors l ancien
+         comportement plutot que de tout bloquer sur un silence. */
+      RO = (r.peutEcrire === false);
       dessiner();
+      majBoutons();
       if (RES_TEMOIN) posterResultatTemoin();
       dire('');
       chargerCredits();
