@@ -25,6 +25,12 @@ module.exports = {
   'produits': 'products',
   'unités': 'units',
   'variantes': 'variants',
+  // La colonne Variantes de l onglet Produits (refonte du 2026-09-25).
+  'Variantes': 'Variants',
+  'taille': 'size',
+  'tailles': 'sizes',
+  'couleur': 'colour',
+  'couleurs': 'colours',
   'produit sélectionné': 'product selected',
   'produits sélectionnés': 'products selected',
   'article endommagé': 'damaged item',
@@ -120,6 +126,10 @@ module.exports = {
   /* ── LA LISTE DES PRODUITS ──────────────────────────────────────────────── */
   'SKU Produit Cat.': 'SKU Product Cat.',
   'Tailles Couleurs': 'Sizes Colours',
+  // Les en-tetes de la refonte du 2026-09-25 (lus d un bloc, comme ceux du dessus).
+  'Produit Variantes': 'Product Variants',
+  // Le bouton d assignation : le sigle ne se traduit pas, mais il doit etre DECLARE.
+  'SKU': 'SKU',
   'Inventaire Actions': 'Inventory Actions',
   'Cliquer pour sélectionner': 'Click to select',
   'Cliquer pour modifier la fiche produit': 'Click to edit the product record',

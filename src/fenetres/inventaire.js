@@ -177,30 +177,33 @@ td.e select{min-width:8rem}
   background:var(--f-0f1826);border:1px solid var(--v14);border-radius:8px;
   padding:.4rem .5rem;resize:none}
 /* ── Les quatre onglets ───────────────────────────────────────────────────── */
-.onglets{flex:0 0 auto;display:flex;gap:.25rem;padding:.5rem 1.05rem 0;
+.onglets{flex:0 0 auto;display:flex;gap:.3rem;padding:.55rem 1.05rem;
   border-bottom:1px solid var(--v08);background:var(--f-page)}
-.onglets button{border:1px solid transparent;border-bottom:none;
-  border-radius:9px 9px 0 0;background:transparent;color:var(--tx2);
-  padding:.42rem .85rem;font-size:.82rem}
-.onglets button.actif{background:var(--f-carte);border-color:var(--v09);
-  color:var(--tx);font-weight:600}
-.onglets button:hover:not(.actif){background:var(--v05)}
+.onglets button{border:1px solid transparent;
+  border-radius:9px;background:transparent;color:var(--tx2);
+  padding:.45rem .95rem;font-size:.84rem;font-weight:600}
+.onglets button.actif{background:#c9a97e;border-color:#c9a97e;
+  color:#17202c;font-weight:700}
+.onglets button:hover:not(.actif){background:var(--v05);color:var(--tx)}
 
 /* ── Tuiles de statistiques (onglet Produits) ─────────────────────────────── */
-.tuiles{display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem;flex:0 0 auto}
+.tuiles{display:grid;grid-template-columns:repeat(5,1fr);gap:.6rem;flex:0 0 auto}
 .tuile{background:var(--f-carte);border:1px solid var(--v07);
-  border-radius:10px;padding:.45rem .65rem;min-width:0}
-.tuile .lbl{font-size:.64rem;text-transform:uppercase;letter-spacing:.07em;
+  border-radius:13px;padding:.75rem .95rem;min-width:0}
+.tuile .lbl{font-size:.76rem;font-weight:600;
   color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tuile .val{font-size:1.22rem;font-weight:700;line-height:1.25}
+.tuile .val{font-size:1.75rem;font-weight:800;line-height:1.15;margin:.2rem 0 .1rem}
 .tuile .sub{font-size:.67rem;color:var(--tx3);white-space:nowrap;overflow:hidden;
   text-overflow:ellipsis}
-.tuile.att{border-color:rgba(245,158,11,.5)}
-.tuile.err{border-color:rgba(239,68,68,.5)}
-.val.att{color:var(--tx-att)}.val.err{color:var(--tx-err)}.val.bon{color:var(--tx-ok)}
+/* ⚠ La palette du 2026-09-25 : une tuile qui va bien reste GRISE (plus de
+   vert), et le cadre ne se colore plus — seul le chiffre d un probleme le fait. */
+.tuile.att,.tuile.err{border-color:var(--v07)}
+.val.att{color:var(--tx-att)}.val.err{color:var(--tx-err)}.val.bon{color:inherit}
+.tuile .sub{font-size:.72rem}
 /* Une tuile qui FILTRE se reconnait au survol — et au clavier de la souris
    seulement : pas de :hover-only pour l information, juste pour l affordance. */
-.tuile.cliq{cursor:pointer;user-select:none}
+.tuile.cliq{cursor:pointer;user-select:none;position:relative}
+.tuile.cliq::after{content:"›";position:absolute;top:.55rem;right:.8rem;font-size:1.1rem;color:var(--tx3)}
 .tuile.cliq:hover{border-color:#c9a97e}
 /* La ligne entiere ouvre la fiche (demande le 2026-08-08) : la selection de
    texte avalerait le clic (le bug connu des controles cliquables), donc
@@ -224,10 +227,10 @@ tbody tr[data-ligne]:hover td{background:var(--v045)}
 
 /* Barre du mode << vente finale en lot >> */
 .lot{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;
-  background:#241a08;border:1px solid rgba(245,158,11,.4);border-radius:9px;
-  padding:.45rem .7rem;font-size:.8rem}
-/* La bande du lot garde sa teinte chaude, version claire. */
-html.jour .lot{background:#f6efe0}
+  background:var(--v04);border:1px solid rgba(201,169,126,.45);border-radius:11px;
+  padding:.5rem .8rem;font-size:.82rem}
+/* ⚠ Plus de teinte chaude (2026-09-25) : le cadre or suffit a dire << une
+   selection est en cours >>, et un jeton suit les deux modes tout seul. */
 .lot label{display:flex;align-items:center;gap:.4rem;cursor:pointer}
 .lot input{width:auto}
 button.rouge{background:#dc2626;border-color:#dc2626;color:var(--tx-sur-accent);font-weight:600}
@@ -276,6 +279,96 @@ button.vert:hover:not(:disabled){background:#166534;border-color:#166534}
 .toolbar input[type=text]{width:15rem}
 .toolbar select{width:auto}
 .toolbar .droite{margin-left:auto;display:flex;gap:.4rem;align-items:center}
+/* ══ LA REFONTE DE L ONGLET PRODUITS (2026-09-25) ═════════════════════════════
+   Sa demande : << je veux que ce soit beau visuellement, pas que ca ressemble a
+   un fichier Excel >>, puis, sur la maquette : << trop de couleur, ca fait arc
+   en ciel, fais-le plus professionnel >>.
+   ➡ LA REGLE DE PALETTE, qui vaut pour la suite : UN seul accent, l or de la
+   marque (bouton principal, onglet et filtre actifs, selection). Tout le reste
+   en gris. La couleur ne sert plus qu a signaler un PROBLEME : ambre = a
+   commander, rouge = rupture. Ce qui va bien reste gris.
+   ⚠ TOUT EST SOUS .gp, la classe de la grille des PRODUITS : la table de la
+   fiche (les variantes) et celles des autres onglets gardent leur dessin.
+   ⚠ Des JETONS partout (--f-carte, --v06, --tx2...) : les six themes et le
+   mode jour suivent sans une ligne de plus. L or reste #c9a97e, comme le
+   bouton principal de ce fichier.
+   ⚠ LA STRUCTURE DU TABLEAU EST GARDEE (tr[data-ligne], thead, la case du lot)
+   parce que le code s y accroche : clic de ligne, mesure de la pagination
+   Auto, compteur du lot. Seul le dessin change. */
+.gp table{border-collapse:separate;border-spacing:0 6px;font-size:.88rem}
+.gp thead th{background:var(--f-carte);font-size:.66rem;color:var(--tx3);
+  padding:.25rem .8rem .1rem;letter-spacing:.08em}
+.gp tbody td{padding:.62rem .8rem;border-top:1px solid var(--v06);
+  border-bottom:1px solid var(--v06);background:var(--v03);transition:background .13s,border-color .13s}
+.gp tbody td:first-child{border-left:1px solid var(--v06);border-radius:11px 0 0 11px}
+.gp tbody td:last-child{border-right:1px solid var(--v06);border-radius:0 11px 11px 0}
+.gp tbody tr[data-ligne]:hover td{background:var(--v06);border-color:rgba(201,169,126,.35)}
+.gp tbody tr.coche td{background:var(--v06);border-color:rgba(201,169,126,.5)}
+.gp .prod{display:flex;align-items:center;gap:.8rem;min-width:0}
+.gp .cat{width:2.5rem;height:2.5rem;flex:0 0 auto;border-radius:10px;display:flex;
+  align-items:center;justify-content:center;font-weight:800;font-size:.98rem;
+  background:var(--v06);border:1px solid var(--v08);color:var(--tx-gris2)}
+.gp .l1{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.gp .nom{font-size:.95rem;font-weight:700}
+.gp .l2{display:flex;align-items:center;gap:.4rem;font-size:.74rem;color:var(--tx2);margin-top:.15rem}
+.gp .code{font-size:.74rem;color:var(--tx2)}
+.gp .badge{margin-left:0;font-size:.64rem;font-weight:600;padding:.05rem .45rem;
+  border-radius:6px;background:transparent;border:1px solid var(--v14);color:var(--tx2)}
+.gp .badge.finale{background:var(--v08);border-color:var(--v20);color:var(--tx)}
+.gp .vars{font-size:.8rem;color:var(--tx2);white-space:nowrap}
+.gp .vars b{color:var(--tx)}
+.gp .jauge{display:flex;gap:3px;max-width:12rem;margin-top:.4rem}
+.gp .jauge i{flex:1 1 0;height:5px;border-radius:3px;background:var(--v14)}
+.gp .jauge i.bas{background:var(--tx-att)}
+.gp .stk{display:flex;align-items:center;gap:.7rem;white-space:nowrap}
+.gp .stk .n{font-size:1.3rem;font-weight:800;line-height:1}
+.gp .stk .n.zero{color:var(--tx-err)}
+.gp .stk .u{font-size:.78rem;color:var(--tx2);margin-left:.2rem}
+.gp .pill{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:600;
+  padding:.22rem .65rem}
+.gp .pill::before{content:"";width:6px;height:6px;border-radius:99px;background:currentColor}
+.gp .pill.ok,.gp .pill.neutre{background:var(--v05);color:var(--tx2)}
+/* .pill.bas et .pill.rup : les regles de base, et leurs reprises du mode jour
+   (CSS_JOUR_TEXTES), valent telles quelles. */
+.gp td.acts{text-align:right;white-space:nowrap}
+.gp .acts button{height:2.2rem;padding:0 .75rem;font-size:.8rem;font-weight:600;
+  border-radius:9px;vertical-align:middle;margin-left:.25rem}
+.gp .acts button.ico{width:2.2rem;padding:0;display:inline-flex;align-items:center;justify-content:center;
+  background:transparent;color:var(--tx2)}
+.gp .acts button.ico svg{width:17px;height:17px}
+.gp .acts button.ico:hover:not(:disabled){color:var(--tx)}
+/* ⚠ SANS FOND ROSE AU SURVOL : en mode jour, le rouge du texte sur ce rose
+   tombait a 4,23 (banc-texte-sur-fond). Le pictogramme et le cadre rouges
+   suffisent a dire << attention >>. */
+.gp .acts button.ico.sup:hover:not(:disabled){color:var(--tx-err);border-color:rgba(239,68,68,.45)}
+.gp .acts button.inv{display:inline-flex;align-items:center;gap:.45rem}
+.gp .acts button.inv svg{width:16px;height:16px}
+/* La barre d outils de l onglet : champs plus hauts, pastilles d etat. */
+.tb2{gap:.5rem;margin-bottom:.2rem}
+.tb2 .rch{display:flex;align-items:center;gap:.5rem;width:17rem;height:2.4rem;padding:0 .7rem;
+  background:var(--f-0f1826);border:1px solid var(--v14);border-radius:10px;color:var(--tx2)}
+.tb2 .rch:focus-within{border-color:#c9a97e}
+.tb2 .rch svg{width:17px;height:17px;flex:0 0 auto}
+.tb2 .rch input{border:0;background:transparent;padding:0;height:100%;width:100%}
+.tb2 select,.tb2 input#fp-section{height:2.4rem;border-radius:10px}
+.tb2 .droite button{height:2.4rem;padding:0 .9rem;border-radius:10px;font-size:.84rem}
+.tb2 [data-menu-cats]{height:2.4rem;padding:0 .8rem;border-radius:10px;font-size:.82rem}
+.etats{display:flex;gap:.3rem}
+.etats button{height:2.4rem;padding:0 .8rem;border-radius:10px;font-size:.82rem;
+  background:var(--f-0f1826);border-color:var(--v10);color:var(--tx-gris2)}
+.etats button.actif{background:rgba(201,169,126,.14);border-color:rgba(201,169,126,.55);
+  color:var(--tx-or2);font-weight:700}
+/* ── LE MODE JOUR — trois reprises generiques du socle defaisaient le dessin,
+   vues sur la capture du 2026-09-25 :
+   · html.jour button repeint TOUT bouton en boite blanche, onglets compris ;
+   · html.jour .pill.ok remet << Seuil non atteint >> en VERT ;
+   · html.jour thead th pose une bande grise sous les en-tetes.
+   (La classe << danger >> de la poubelle est devenue << sup >> pour la meme
+   raison : html.jour button.danger lui posait un cadre rouge permanent.) */
+html.jour .onglets button{background:transparent;border-color:transparent}
+html.jour .onglets button.actif{background:rgba(138,106,62,.12);border-color:#8a6a3e;color:#1d2433}
+html.jour .gp .pill.ok,html.jour .gp .pill.neutre{color:var(--tx2)}
+html.jour .gp thead th{background:var(--f-carte)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -846,6 +939,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
       + '<div class="sub">' + sousTitre + '</div></div>';
   }
 
+  /* Le crayon de << Modifier >> : ICO n en a pas, et c est le seul endroit qui
+     en demande un. Trace, monochrome, comme les autres pictogrammes. */
+  var CRAYON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+
   function pilule(l){
     if (!l.sku) return '<span class="pill neutre">${T("Non inventorié (sans SKU)")}</span>';
     if (l.unites === 0) return '<span class="pill rup">${T("Rupture")}</span>';
@@ -902,20 +999,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
         + '<span>' + nCoches + ' '
         + (nCoches > 1 ? '${T("produits sélectionnés")}' : '${T("produit sélectionné")}') + '</span>'
         + '<span style="flex:1 1 auto"></span>'
-        + '<button class="mini rouge" id="lot-app"><span class="ic">🔴</span> ${T("Appliquer vente finale")}</button>'
-        + '<button class="mini vert" id="lot-ret"><span class="ic">✅</span> ${T("Retirer vente finale")}</button>'
+        + '<button class="mini prim" id="lot-app">${T("Appliquer vente finale")}</button>'
+        + '<button class="mini" id="lot-ret">${T("Retirer vente finale")}</button>'
         + '<button class="mini" id="lot-annuler">${T("Annuler")}</button></div>';
     }
 
     h += '<div class="carte plein">';
-    h += '<div class="toolbar">'
-      + '<input aria-label="SKU, nom ${T("produit")}" type="text" id="fp-q" autocomplete="off" placeholder="SKU, nom ${T("produit")}…" value="' + esc(FP.q) + '">'
-      + '<select id="fp-etat" aria-label="${T("Filtrer par état du stock")}">'
-      + '<option value=""><span class="ic">📦</span> ${T("Tout l’inventaire")}</option>'
-      + '<option value="rupture"' + (FP.etat === 'rupture' ? ' selected' : '') + '><span class="ic">🔴</span> ${T("En rupture")}</option>'
-      + '<option value="low"' + (FP.etat === 'low' ? ' selected' : '') + '><span class="ic">⚠</span> ${T("À commander")}</option>'
-      + '<option value="ok"' + (FP.etat === 'ok' ? ' selected' : '') + '>${T("✓ Seuil non atteint")}</option>'
-      + '</select>'
+    /* ⚠ L ETAT DU STOCK EN PASTILLES (2026-09-25), plus en liste deroulante :
+       les quatre choix se voient d un coup d oeil, et l actif porte l or. Le
+       geste est le meme qu avant (FP.etat, page 0, rechargement) — voir
+       data-etat dans brancherProduits. */
+    h += '<div class="toolbar tb2">'
+      + '<label class="rch">${ICO.loupe}<input aria-label="SKU, nom ${T("produit")}" type="text" id="fp-q" autocomplete="off" placeholder="SKU, nom ${T("produit")}…" value="' + esc(FP.q) + '"></label>'
+      + '<div class="etats" role="group" aria-label="${T("Filtrer par état du stock")}">'
+      +   [['', '${T("Tout l’inventaire")}'], ['rupture', '${T("En rupture")}'],
+           ['low', '${T("À commander")}'], ['ok', '${T("Seuil non atteint")}']].map(function(e){
+            var on = (FP.etat || '') === e[0];
+            return '<button data-etat="' + e[0] + '" aria-pressed="' + (on ? 'true' : 'false') + '"'
+              + (on ? ' class="actif"' : '') + '>' + e[1] + '</button>';
+          }).join('')
+      + '</div>'
       + menuCats(d.cats || [])
       /* ⚠ FILTRER PAR LIEU MONTRE UN PRODUIT DES QU UNE SEULE de ses variantes
          s y trouve — pas seulement ceux qui y sont en entier. C est la regle
@@ -939,37 +1042,55 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     if (!d.lignes.length) {
       h += '<div class="vide">${T("Aucun produit trouvé.")}</div>';
     } else {
-      h += '<div class="grille"><table><thead><tr>'
+      h += '<div class="grille gp"><table><thead><tr>'
         + (LOT ? '<th class="c" style="width:2rem"></th>' : '')
-        + '<th>SKU</th><th>${T("Produit")}</th><th class="c" title="${T("Catégorie")}">${T("Cat.")}</th>'
-        + '<th class="c">${T("Tailles")}</th><th class="c">${T("Couleurs")}</th>'
-        + '<th>${T("Inventaire")}</th><th class="c">${T("Actions")}</th>'
+        + '<th>${T("Produit")}</th><th>${T("Variantes")}</th>'
+        + '<th>${T("Inventaire")}</th><th style="text-align:right">${T("Actions")}</th>'
         + '</tr></thead><tbody>';
       d.lignes.forEach(function(l){
         // La ligne entiere est cliquable : elle ouvre la fiche (ou coche, en
         // mode lot). Les boutons de la colonne Actions restent prioritaires.
-        h += '<tr data-ligne="' + esc(l.id) + '" title="'
+        /* La JAUGE DES VARIANTES : un trait par variante, gris au-dessus du
+           seuil, ambre sous le seuil. Le nombre vient du pont (variantes) ; un
+           site plus ancien ne l envoie pas, on retombe alors sur tailles x
+           couleurs. Au-dela de 24 variantes, deux traits proportionnels : une
+           barre de soixante crans ne se lirait plus. */
+        var nv = Number(l.variantes) || (l.tailles * l.couleurs) || 0;
+        var nb = Math.min(nv, Number(l.basses) || 0);
+        var jauge = '';
+        if (l.sku && nv > 0) {
+          jauge = '<div class="jauge" title="' + nv + ' ' + (nv > 1 ? '${T("variantes")}' : '${T("variante")}')
+            + (nb ? ' — ' + nb + ' ${T("à commander")}' : '') + '">';
+          if (nv <= 24) { for (var k = 0; k < nv; k++) jauge += '<i' + (k >= nv - nb ? ' class="bas"' : '') + '></i>'; }
+          else {
+            if (nv - nb > 0) jauge += '<i style="flex-grow:' + (nv - nb) + '"></i>';
+            if (nb > 0) jauge += '<i class="bas" style="flex-grow:' + nb + '"></i>';
+          }
+          jauge += '</div>';
+        }
+        var initiale = String(l.categorieNom || l.categorie || '?').charAt(0).toUpperCase();
+        h += '<tr data-ligne="' + esc(l.id) + '"' + (LOT && COCHES[l.id] ? ' class="coche"' : '') + ' title="'
           + (LOT ? '${T("Cliquer pour sélectionner")}' : '${T("Cliquer pour modifier la fiche produit")}') + '">'
           + (LOT ? '<td class="c"><input type="checkbox" data-coche="' + esc(l.id) + '"'
               + ' aria-label="' + esc('${T("Sélectionner")} ' + (l.nom || l.sku || l.id)) + '"'
               + (COCHES[l.id] ? ' checked' : '') + '></td>' : '')
-          + '<td>' + (l.sku ? '<span class="code">' + esc(l.sku) + '</span>'
-                            : '<span class="rien">${T("sans SKU")}</span>') + '</td>'
-          + '<td><span class="nom">' + esc(l.nom) + '</span>'
-          +   (l.enVente ? '<span class="badge vente">${T("En vente")}</span>' : '')
-          +   (l.venteFinale ? '<span class="badge finale">${T("Vente finale")}</span>' : '') + '</td>'
-          + '<td class="c" title="' + esc(l.categorieNom) + '"><span class="puce" style="background:'
-          +   esc(l.couleurCat || '#6d7f96') + '"></span></td>'
-          + '<td class="c">' + l.tailles + '</td>'
-          + '<td class="c">' + l.couleurs + '</td>'
-          + '<td><b' + (l.unites === 0 ? ' style="color:var(--tx-err)"' : '') + '>' + l.unites + '</b> '
-          +   (l.unites > 1 ? '${T("unités")}' : '${T("unité")}') + ' ' + pilule(l) + '</td>'
-          + '<td class="c" style="white-space:nowrap">'
-          +   '<button class="mini" data-inv="' + esc(l.id) + '" title="${T("Gérer l’inventaire")}"><span class="ic">📦</span> ${T("Inventaire")}</button> '
-          +   (!l.sku && d.peutEcrire ? '<button class="mini" data-sku="' + esc(l.id) + '" title="${T("Assigner un SKU")}"><span class="ic">🏷</span> SKU</button> ' : '')
-          +   (d.peutEcrire ? '<button class="mini" data-mod="' + esc(l.id) + '" title="${T("Modifier la fiche produit")}"><span class="ic">✎</span> ${T("Modifier")}</button> ' : '')
-          +   (l.sku && !l.enVente && d.peutEcrire ? '<button class="mini" data-vendre="' + esc(l.id) + '" title="${T("Mettre en vente")}"><span class="ic">🛒</span> ${T("Vendre")}</button> ' : '')
-          +   (d.peutSupprimer ? '<button class="mini" data-suppr="' + esc(l.id) + '" data-nom="' + esc(l.nom) + '" title="${T("Supprimer de l’inventaire")}" style="border-color:rgba(239,68,68,.45)"><span class="ic">🗑</span></button>' : '')
+          + '<td><div class="prod"><span class="cat" title="' + esc(l.categorieNom) + '">' + esc(initiale) + '</span>'
+          +   '<div style="min-width:0"><div class="l1"><span class="nom">' + esc(l.nom) + '</span>'
+          +     (l.enVente ? '<span class="badge vente">${T("En vente")}</span>' : '')
+          +     (l.venteFinale ? '<span class="badge finale">${T("Vente finale")}</span>' : '') + '</div>'
+          +   '<div class="l2">' + (l.sku ? '<span class="code">' + esc(l.sku) + '</span>'
+                                       : '<span class="rien">${T("sans SKU")}</span>')
+          +     (l.categorieNom ? '<span>·</span><span>' + esc(l.categorieNom) + '</span>' : '') + '</div></div></div></td>'
+          + '<td><div class="vars"><b>' + l.tailles + '</b> ' + (l.tailles > 1 ? '${T("tailles")}' : '${T("taille")}')
+          +   ' · <b>' + l.couleurs + '</b> ' + (l.couleurs > 1 ? '${T("couleurs")}' : '${T("couleur")}') + '</div>' + jauge + '</td>'
+          + '<td><div class="stk"><span><span class="n' + (l.unites === 0 ? ' zero' : '') + '">' + l.unites + '</span>'
+          +   '<span class="u">' + (l.unites > 1 ? '${T("unités")}' : '${T("unité")}') + '</span></span>' + pilule(l) + '</div></td>'
+          + '<td class="acts">'
+          +   '<button class="mini inv" data-inv="' + esc(l.id) + '" title="${T("Gérer l’inventaire")}">${ICO.inventory}${T("Inventaire")}</button>'
+          +   (!l.sku && d.peutEcrire ? '<button class="mini" data-sku="' + esc(l.id) + '" title="${T("Assigner un SKU")}">SKU</button>' : '')
+          +   (l.sku && !l.enVente && d.peutEcrire ? '<button class="mini" data-vendre="' + esc(l.id) + '" title="${T("Mettre en vente")}">${T("Vendre")}</button>' : '')
+          +   (d.peutEcrire ? '<button class="mini ico" data-mod="' + esc(l.id) + '" title="${T("Modifier la fiche produit")}" aria-label="${T("Modifier la fiche produit")}">' + CRAYON + '</button>' : '')
+          +   (d.peutSupprimer ? '<button class="mini ico sup" data-suppr="' + esc(l.id) + '" data-nom="' + esc(l.nom) + '" title="${T("Supprimer de l’inventaire")}" aria-label="${T("Supprimer de l’inventaire")}">${ICO.corbeille}</button>' : '')
           + '</td></tr>';
       });
       h += '</tbody></table></div>';
@@ -1015,6 +1136,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     var tr = g.querySelector('tbody tr');
     var hL = tr ? tr.offsetHeight : 0;
     if (!(hL > 0)) hL = 34;
+    /* ⚠ LES LIGNES SONT DES CARTES ESPACEES (border-spacing, 2026-09-25) :
+       offsetHeight ne compte pas l espace entre elles. Sans l ajouter, Auto
+       demanderait une ligne de trop par tranche de huit, et la derniere
+       passerait sous le bas de la carte. */
+    try {
+      var tb = g.querySelector('table');
+      var esp = tb ? parseFloat(String(getComputedStyle(tb).borderSpacing || '').split(' ')[1]) : 0;
+      if (esp > 0) hL += esp;
+    } catch (e) {}
     var dispo = g.clientHeight - ((th && th.offsetHeight) || 30);
     // Un faux document (le banc) mesure NaN : on ne touche a rien dans ce cas.
     if (!(dispo > 0)) return;
@@ -1112,6 +1242,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
       var id = t.getAttribute && t.getAttribute('data-coche');
       if (id) {
         if (t.checked) COCHES[id] = true; else delete COCHES[id];
+        var trc = t.closest && t.closest('tr');
+        if (trc) trc.classList.toggle('coche', !!t.checked);
         // On ne redessine pas : seule la barre compte, et la mettre a jour
         // suffit — redessiner ferait perdre la position de defilement.
         var lot = corps.querySelector('.lot span:nth-child(2)');
@@ -1144,6 +1276,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
         FP.page = 0; chargerOnglet();
         return;
       }
+      var et = t.closest('[data-etat]');
+      if (et) { FP.etat = et.getAttribute('data-etat') || ''; FP.page = 0; chargerOnglet(); return; }
       var b = t.closest('button');
       if (!b) {
         // ⚠ Le clic sur la LIGNE, en dernier : apres les boutons et jamais sur
@@ -1157,6 +1291,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
           if (COCHES[lid]) delete COCHES[lid]; else COCHES[lid] = true;
           var cc = tr.querySelector('[data-coche]');
           if (cc) cc.checked = !!COCHES[lid];
+          tr.classList.toggle('coche', !!COCHES[lid]);
           var lot = corps.querySelector('.lot span:nth-child(2)');
           var nc = Object.keys(COCHES).length;
           if (lot) lot.textContent = nc + ' '
