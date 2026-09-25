@@ -153,7 +153,10 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
    pied (Enregistrer, la duree de conservation). Une regle au socle les ferait
    disparaitre des que le message est vide. Ici le pied ne contient que le
    message — c est ce qui rend la regle sure, et c est pour ca qu elle est
-   locale. */
+   locale.
+   ➡ 2026-09-25 : la regle GENERALE est au socle (CSS_JOUR), et elle regarde
+   tout le pied, pas seulement le message. Celle-ci reste, redondante et sans
+   danger. */
 .pied:has(.msg:empty){padding:0;border-top:0}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}

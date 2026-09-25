@@ -2177,6 +2177,29 @@ html.jour .bloc h3{color:#414e66}
 html.jour .bloc .mut{color:#414e66}
 html.jour tbody tr.attente{background:rgba(124,92,255,.08)}
 html.jour input,html.jour select{background:#ffffff}
+/* == LE PIED VIDE NE PREND PLUS DE PLACE, DANS TOUTES LES FENETRES ==========
+   Sa capture du 2026-09-25, sur un registre a pied de liste : << tu as regle
+   l espace dans les tableaux uniquement pour le tableau de bord, mais tu dois
+   le regler pour toute l application et chacun de ses modules >>. La regle de
+   la 6.13.0 etait restee LOCALE a tableau.js ; 64 fenetres gardaient une barre
+   de messages vide de 17 a 19 px entre leur contenu et la barre d etat.
+   ⚠⚠ LA REGLE NE REGARDE PAS LE MESSAGE, ELLE REGARDE TOUT LE PIED. Une copie
+   de celle du tableau de bord (.pied:has(.msg:empty)) aurait fait disparaitre
+   les VRAIS BOUTONS d une vingtaine de pieds (Enregistrer, Imprimer, Rester
+   connecte...) des que le message est vide. Ici, le pied ne s efface que si
+   CHACUN de ses enfants est vide ; un bouton, un compteur ou un texte le
+   garde tel quel. Les champs et images sont vides au sens CSS : ils sont
+   exclus nommement.
+   ⚠ display:none ET PAS padding:0 COMME AU TABLEAU DE BORD : le .msg du socle
+   porte min-height:1.15em, et un pied sans rembourrage garderait ses 15 px.
+   ⚠ DU CSS, ET AUCUN JAVASCRIPT : szDire n est appele que quand un message
+   change, jamais au chargement. Le CSS suit l etat reel, et le pied reparait
+   de lui-meme des qu un message s y ecrit.
+   ⚠ Limite connue : un texte pose DIRECTEMENT dans le pied, hors de tout
+   element, ne se voit pas d un selecteur. Aucun pied n en porte (mesure au
+   rendu sur les 104 fenetres le 2026-09-25). */
+.pied:not(:has(> :not(:empty))):not(:has(input,select,textarea,img,svg,canvas,progress,meter,iframe)){
+  display:none}
 `;
 
 /* ── PLEIN ÉCRAN DES ASSISTANTS ET DES PANNEAUX (demandé le 2026-08-13) ──────
