@@ -125,5 +125,12 @@ module.exports = {
 
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
   'Ajouter': 'Add',
-  'Importer': 'Import'
+  'Importer': 'Import',
+  // La refonte de la liste, comme l'Inventaire (2026-09-25).
+  'Cliquer pour afficher': 'Click to show',
+  'reçoivent l’infolettre': 'receive the newsletter',
+  'ne reçoivent plus rien': 'receive nothing any more',
+  'toutes les inscriptions': 'all sign-ups',
+  'Tous': 'All',
+  'Actifs': 'Active',
 };

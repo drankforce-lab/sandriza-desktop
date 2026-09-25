@@ -60,6 +60,11 @@ button.prim:hover:not(:disabled){background:#a3824f}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.5rem}
 .tuile{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:.5rem .65rem}
+/* Les tuiles filtrent (refonte du 2026-09-25) : la liste affichee porte le cadre or. */
+.tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tuile.cliq{cursor:pointer;user-select:none}
+.tuile.cliq:hover{border-color:rgba(201,169,126,.6)}
+.tuile.on{border-color:#c9a97e}
 .tuile .lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 .tuile .val{font-size:.95rem;font-weight:800;margin-top:.1rem}
 .tuile .val.bon{color:var(--tx-ok)}.tuile .val.neutre{color:var(--tx2)}
@@ -198,35 +203,43 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('abonnes')}
     /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
        quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
        ce poste. Voir JS_TUILES dans socle.js. */
+    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE AUX ABONNES (2026-09-25) ═══════
+       Les tuiles filtrent la liste d un clic ; barre sur une ligne a loupe ;
+       ligne riche (initiale, prenom, courriel et provenance dessous) ; etat en
+       pastille. Crochets gardes : #ab-q, data-filtre, #ab-import, #ab-nouveau,
+       data-basculer, data-suppr. */
+    var tu = function(f, lib, val, sous){
+      return '<div class="tuile cliq' + (FILTRE === f ? ' on' : '') + '" data-filtre="' + f + '"'
+        + ' title="${T("Cliquer pour afficher")}"><div class="lbl">' + lib + '</div><div class="val">'
+        + val + '</div><div class="sub">' + sous + '</div></div>';
+    };
     var h = szTuiles('<div class="tuiles">'
-      + '<div class="tuile"><div class="lbl">${T("Abonnés actifs")}</div><div class="val bon">'
-      + (D.actifs || 0) + '</div></div>'
-      + '<div class="tuile"><div class="lbl">${T("Désabonnés")}</div><div class="val neutre">'
-      + (D.desabonnes || 0) + '</div></div>'
-      + '<div class="tuile"><div class="lbl">${T("Au total")}</div><div class="val">'
-      + ((D.abonnes || []).length) + '</div></div>'
+      + tu('actifs', '${T("Abonnés actifs")}', D.actifs || 0, '${T("reçoivent l’infolettre")}')
+      + tu('retires', '${T("Désabonnés")}', D.desabonnes || 0, '${T("ne reçoivent plus rien")}')
+      + tu('all', '${T("Au total")}', (D.abonnes || []).length, '${T("toutes les inscriptions")}')
       + '</div>');
 
-    h += '<div class="barreoutils">'
+    h += '<div class="carte"><div class="rf-tb">'
       /* ⚠ L etiquette ENTIERE, pas << Courriel >> + un reste : une cle courte
          posee dans une phrase plus longue laisse l autre moitie en francais. */
-      + '<input aria-label="${T("Courriel ou prénom")}" type="search" id="ab-q" placeholder="${T("Courriel ou prénom…")}" value="' + esc(Q) + '">'
-      + [['all', 'Tous'], ['actifs', 'Actifs'], ['retires', '${T("Désabonnés")}']].map(function(f){
-          return '<button class="mini' + (FILTRE === f[0] ? ' actif' : '') + '" data-filtre="' + f[0] + '">'
+      + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Courriel ou prénom")}" type="search" id="ab-q" placeholder="${T("Courriel ou prénom…")}" value="' + esc(Q) + '"></label>'
+      /* ⚠ << Tous >> et << Actifs >> etaient ecrits en dur : jamais traduits. */
+      + [['all', '${T("Tous")}'], ['actifs', '${T("Actifs")}'], ['retires', '${T("Désabonnés")}']].map(function(f){
+          return '<button class="rf-jet' + (FILTRE === f[0] ? ' on' : '') + '" data-filtre="' + f[0] + '">'
             + f[1] + '</button>';
         }).join('')
-      + '<div class="droite">'
+      + '<span class="rf-droite">'
       + (D.peutModifier
-          ? '<button class="mini" id="ab-import">${T("Importer")}</button>'
-            + '<button class="mini prim" id="ab-nouveau">${T("+ Ajouter")}</button>' : '')
-      + '<span>' + rows.length + (rows.length > 1 ? '${T(" abonnés")}' : '${T(" abonné")}') + '</span>'
-      + '</div></div>';
+          ? '<button class="rf-jet" id="ab-import">${T("Importer")}</button>'
+            + '<button class="prim" id="ab-nouveau" style="height:2.4rem;padding:0 .9rem">${T("+ Ajouter")}</button>' : '')
+      + '<span class="dt">' + rows.length + (rows.length > 1 ? '${T(" abonnés")}' : '${T(" abonné")}') + '</span>'
+      + '</span></div></div>';
 
     h += '<div class="carte">';
     if (!rows.length) {
       h += '<div class="vide">' + (Q || FILTRE !== 'all' ? '${T("Rien ne correspond.")}' : '${T("Aucun abonné.")}') + '</div>';
     } else {
-      h += '<table><thead><tr><th>${T("Courriel")}</th><th>${T("Prénom")}</th><th>${T("Venu par")}</th>'
+      h += '<table><thead><tr><th>${T("Abonné")}</th>'
         + '<th>${T("Inscription")}</th><th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
         + rows.map(function(a){
             var gestes = '';
@@ -236,11 +249,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('abonnes')}
                 + '<button class="mini geste danger" data-suppr="' + esc(a.id) + '">'
                 + (SUPPR_ARME === a.id ? '${T("Confirmer ?")}' : '${T("Retirer")}') + '</button>';
             }
-            return '<tr><td><strong>' + esc(a.courriel) + '</strong></td>'
-              + '<td>' + esc(a.prenom || '—') + '</td>'
-              + '<td class="dt">' + esc(a.sourceLibelle) + '</td>'
+            var ini = String(a.prenom || a.courriel || '?').trim().charAt(0).toUpperCase();
+            return '<tr><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(ini) + '</span>'
+              + '<div style="min-width:0"><div class="rf-nom">' + esc(a.prenom || a.courriel) + '</div>'
+              + '<div class="rf-sous">' + (a.prenom ? '<span>' + esc(a.courriel) + '</span><span>·</span>' : '')
+              + '<span>' + esc(a.sourceLibelle) + '</span></div></div></div></td>'
               + '<td class="dt">' + esc(a.date) + '</td>'
-              + '<td><span class="pill ' + (a.actif ? 'bon' : 'neutre') + '">'
+              + '<td><span class="rf-pill ' + (a.actif ? 'vert' : '') + '">'
               + (a.actif ? '${T("Abonné")}' : '${T("Désabonné")}') + '</span>'
               + (!a.actif && a.retireLe ? '<div class="dt">le ' + esc(a.retireLe) + '</div>' : '') + '</td>'
               + (D.peutModifier ? '<td class="fin">' + gestes + '</td>' : '') + '</tr>';
