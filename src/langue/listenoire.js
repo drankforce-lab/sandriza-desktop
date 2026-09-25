@@ -103,5 +103,20 @@ module.exports = {
   'Échec :': 'Failed:',
 
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
-  'Ajouter': 'Add'
+  'Ajouter': 'Add',
+  // La refonte de la liste, comme l'Inventaire (2026-09-25).
+  'Adresse': 'Address',
+  'Courriels': 'Emails',
+  'refusés à la caisse': 'refused at checkout',
+  'Codes postaux': 'Postal codes',
+  'toute adresse du secteur': 'any address in the area',
+  'Adresses': 'Addresses',
+  'adresse de livraison exacte': 'exact shipping address',
+  'Cliquer pour filtrer': 'Click to filter',
+  'Rechercher dans la liste noire': 'Search the blocklist',
+  'Valeur ou note…': 'Value or note…',
+  'Tous les types': 'All types',
+  'Aucune entrée ne correspond.': 'No entry matches.',
+  'Entrée': 'Entry',
+  'Entrée Ajouté le': 'Entry Added on',
 };

@@ -15,7 +15,7 @@
  * ⚠ ANCRÉE = PLEINE PAGE. ⚠ Aucun accent grave dans la portion de script.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais la valeur d une entree,
@@ -38,6 +38,19 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .entete{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
 .quoi{font-size:.79rem;color:var(--tx2);line-height:1.6;margin:0;max-width:60rem}
 .quoi b{color:var(--tx)}
+/* ── La refonte de l Inventaire (2026-09-25) ── */
+.tuiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem;flex:0 0 auto;margin-bottom:.7rem}
+.tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
+.tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tuile.cliq{cursor:pointer;user-select:none;position:relative}
+.tuile.cliq:hover{border-color:#c9a97e}
+.tuile.cliq::after{content:"›";position:absolute;top:.55rem;right:.8rem;font-size:1.1rem;color:var(--tx3)}
+.tuile.on{border-color:#c9a97e}
+table{width:100%;font-size:.85rem}
+thead th{text-align:left;text-transform:uppercase;font-weight:700;white-space:nowrap}
+tbody td{vertical-align:middle}
+td.acts{text-align:right;white-space:nowrap}
+.rf-nom code{font-family:ui-monospace,monospace;font-size:.88rem;background:none;padding:0;border:0}
 .carte{background:var(--v03);border:1px solid var(--v08);border-radius:12px;padding:1rem 1.1rem;margin:0 0 1rem}
 .carte.ajout{border-color:rgba(201,169,126,.42)}
 .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr));gap:.8rem}
@@ -63,9 +76,6 @@ input.t:focus,select.t:focus{outline:none;border-color:#c9a97e}
 .b.dgr:hover{background:rgba(248,113,113,.16)}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
 .pied2{display:flex;justify-content:flex-end;gap:.5rem;margin-top:.9rem}
-table.tb{width:100%;border-collapse:collapse}
-table.tb th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);padding:.5rem .7rem;border-bottom:1px solid var(--v10);white-space:nowrap}
-table.tb td{padding:.55rem .7rem;border-bottom:1px solid var(--v06);font-size:.85rem;vertical-align:middle}
 code{font-family:Consolas,monospace;font-size:.82rem;background:var(--v05);padding:1px 6px;border-radius:5px}
 .acts{text-align:right;white-space:nowrap}
 .vide{padding:2.2rem 1rem;text-align:center;color:var(--tx2);font-size:.84rem;line-height:1.7}
@@ -96,7 +106,7 @@ function pageListeNoire(ouverture) {
     if (actif) { b.textContent='${T("⧉ Détacher")}'; b.title='${T("Ouvrir cet écran dans sa propre fenêtre")}'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
     else { b.textContent='${T("⚓ Ancrer")}'; b.title='${T("Ramener cet écran dans la fenêtre principale")}'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   var corps = document.getElementById('corps');
   var D = null, RO = true, OCCUPE = false;
   var AJOUT = '${AJOUT0}' === '1';
@@ -126,12 +136,51 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return p.then(function(r){ return r||{ok:false,motif:'echec'}; }).catch(function(e){ return {ok:false,motif:'echec',detail:(e&&e.message)||e}; });
   }
 
+  /* Le type se dit dans la langue du poste : le libelle du site (typeLabel)
+     arrive en francais. On le garde en repli pour un type nouveau. */
+  var LIB_TYPE = { email: '${T("Courriel")}', postal: '${T("Code postal")}', address: '${T("Adresse")}' };
+  var AV_TYPE = { email: '@', postal: '#', address: '⌂' };
+  var FT = '';      // '' | email | postal | address — filtre local (la liste est entiere)
+  var QL = '';      // recherche locale
+  function libType(e){ return LIB_TYPE[e.type] || szTd(e.typeLabel || ''); }
   function dessiner(){
-    var l = D.entrees || [];
+    var toutes = D.entrees || [];
+    var ql = QL.trim().toLowerCase();
+    var l = toutes.filter(function(e){
+      if (FT && e.type !== FT) return false;
+      if (ql && (String(e.valeur || '') + ' ' + String(e.note || '')).toLowerCase().indexOf(ql) < 0) return false;
+      return true;
+    });
+    var compte = function(t){ return toutes.filter(function(e){ return e.type === t; }).length; };
     var h = '<div class="entete">'
       + '<p class="quoi">${T("Une commande dont le <b>courriel</b>, le <b>code postal</b> ou l’<b>adresse de livraison</b> figure ici est refusée à la caisse. Retirer une entrée redonne le droit de commander.")}</p>'
       + (D.peutAjouter && !AJOUT ? '<button class="prim" id="l-nouveau">${T("＋ Ajouter une entrée")}</button>' : '')
       + '</div>';
+    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE A LA LISTE NOIRE (2026-09-25) ══
+       Trois tuiles par type (la liste arrive entiere : le compte est honnete),
+       qui filtrent d un clic ; recherche locale ; ligne riche (la valeur en
+       gras, le type et la note dessous). Crochets gardes : #l-nouveau,
+       #l-type, #l-valeur, #l-ville, #l-note, #l-ajouter, #l-annuler, data-del,
+       #ln-exporter. */
+    if (toutes.length) {
+      var tu = function(t, lib, sous){
+        return '<div class="tuile cliq' + (FT === t ? ' on' : '') + '" data-lnt="' + t + '" title="${T("Cliquer pour filtrer")}">'
+          + '<div class="lbl">' + lib + '</div><div class="val">' + compte(t) + '</div><div class="sub">' + sous + '</div></div>';
+      };
+      h += szTuiles('<div class="tuiles">'
+        + tu('email', '${T("Courriels")}', '${T("refusés à la caisse")}')
+        + tu('postal', '${T("Codes postaux")}', '${T("toute adresse du secteur")}')
+        + tu('address', '${T("Adresses")}', '${T("adresse de livraison exacte")}')
+        + '</div>');
+      h += '<div class="carte" style="margin-bottom:.7rem"><div class="rf-tb">'
+        + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Rechercher dans la liste noire")}" type="search" id="ln-q" placeholder="${T("Valeur ou note…")}" value="' + esc(QL) + '"></label>'
+        + ['', 'email', 'postal', 'address'].map(function(t){
+            return '<button class="rf-jet' + (FT === t ? ' on' : '') + '" data-lnt="' + t + '">'
+              + (t ? LIB_TYPE[t] : '${T("Tous les types")}') + '</button>';
+          }).join('')
+        + '<span class="rf-droite"><span class="dt">' + l.length + ' ' + (l.length > 1 ? '${T("entrées")}' : '${T("entrée")}') + '</span></span>'
+        + '</div></div>';
+    }
 
     if (AJOUT && D.peutAjouter) {
       h += '<div class="carte ajout"><div class="cols">'
@@ -154,16 +203,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<button class="prim" id="l-ajouter">${T("Ajouter")}</button></div></div>';
     }
 
-    if (!l.length) {
+    if (!l.length && toutes.length) {
+      h += '<div class="carte"><div class="vide">${T("Aucune entrée ne correspond.")}</div></div>';
+    } else if (!l.length) {
       h += '<div class="carte"><div class="vide">${T("Aucune entrée.<br>C’est la bonne nouvelle — la liste ne sert qu’à écarter ce qui pose problème.")}</div></div>';
     } else {
-      h += '<div class="carte plein" style="padding:0"><div class="liste" style="overflow-x:auto"><table class="tb"><thead><tr>'
-        + '<th>${T("Type")}</th><th>${T("Valeur")}</th><th>${T("Note")}</th><th>${T("Ajouté le")}</th>'
+      h += '<div class="carte plein"><div class="liste" style="overflow-x:auto"><table><thead><tr>'
+        + '<th>${T("Entrée")}</th><th>${T("Ajouté le")}</th>'
         + (D.peutRetirer ? '<th></th>' : '') + '</tr></thead><tbody>';
       for (var i=0;i<l.length;i++){ var e=l[i];
-        h += '<tr><td style="white-space:nowrap">'+esc(e.typeLabel)+'</td>'
-          + '<td><code>'+esc(e.valeur)+'</code></td>'
-          + '<td style="color:var(--tx2)">'+esc(e.note||'—')+'</td>'
+        h += '<tr><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(AV_TYPE[e.type] || '?') + '</span>'
+          + '<div style="min-width:0"><div class="rf-nom"><code>' + esc(e.valeur) + '</code></div>'
+          + '<div class="rf-sous"><span>' + esc(libType(e)) + '</span>'
+          + (e.note ? '<span>·</span><span>' + esc(e.note) + '</span>' : '') + '</div></div></div></td>'
           + '<td style="white-space:nowrap;color:var(--tx2)">'+esc(e.quand)+'</td>'
           + (D.peutRetirer ? '<td class="acts"><button class="b dgr" data-del="'+esc(e.id)+'">'
               +(DELID===e.id?'${T("✓ Confirmer")}':'${T("Retirer")}')+'</button></td>' : '')
@@ -195,7 +247,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var exl = document.getElementById('ln-exporter');
     if (exl) exl.onclick = function(){
       var lignes = l.map(function(e){
-        return [e.typeLabel || '', e.valeur || '', e.note || '', e.quand || ''];
+        return [libType(e), e.valeur || '', e.note || '', e.quand || ''];
       });
       if (!lignes.length) { dire('${T("Rien à exporter.")}', 'att'); return; }
       var csv = szCSV(['${T("Type")}', '${T("Valeur")}', '${T("Note")}', '${T("Ajouté le")}'], lignes);
@@ -210,6 +262,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var v=document.getElementById('l-valeur'); if (v) try { v.focus(); } catch(e){} };
     b=document.getElementById('l-annuler'); if (b) b.onclick=function(){ AJOUT=false; dessiner(); dire(''); };
     b=document.getElementById('l-ajouter'); if (b) b.onclick=ajouter;
+    var lt=corps.querySelectorAll('[data-lnt]');
+    for (var j=0;j<lt.length;j++) lt[j].onclick=function(){
+      var v=this.getAttribute('data-lnt')||''; FT=(FT===v && this.classList.contains('tuile'))?'':v; dessiner(); };
+    var lq=document.getElementById('ln-q');
+    if (lq) lq.oninput=function(){
+      QL=lq.value; var a=lq.selectionStart, z=lq.selectionEnd; dessiner();
+      var q2=document.getElementById('ln-q'); if (q2) { q2.focus({ preventScroll: true }); try { q2.setSelectionRange(a, z); } catch(e){} }
+    };
     var t=document.getElementById('l-type');
     // ⚠ Changer le type REDESSINE le formulaire : une adresse demande deux
     // champs, un courriel un seul. Garder un champ inadapte inviterait a saisir
