@@ -71,6 +71,12 @@ tbody tr:hover td{background:var(--v04)}
 .num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 .fin{width:1%;white-space:nowrap;text-align:right}
 .dt{font-size:.72rem;color:var(--tx2)}
+/* ── La refonte de l Inventaire (2026-09-25) : la jauge de frequence, comme
+   la jauge de stock de l Inventaire — la plus cherchee remplit la barre. ── */
+.tuile .sub{font-size:.72rem;color:var(--tx3)}
+.rf-tb .rf-jet.danger{color:var(--tx-err2);border-color:rgba(239,68,68,.5)}
+.jaugef{height:5px;border-radius:3px;background:var(--v10);margin-top:.35rem;max-width:14rem;overflow:hidden}
+.jaugef i{display:block;height:100%;border-radius:3px;background:rgba(201,169,126,.7)}
 .mot{display:inline-flex;align-items:center;gap:.35rem;padding:.16rem .6rem;
   border:1px solid var(--v14);border-radius:99px;font-size:.82rem;margin:.15rem}
 .mot strong{font-variant-numeric:tabular-nums;color:var(--tx-or)}
@@ -159,20 +165,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('recherches')}
       + (D.recentes || []).length + '</div><div class="sub">${T("30 derniers jours")}</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Recherches en tout")}</div><div class="val">'
       + (D.total || 0) + '</div><div class="sub">${T("toutes occurrences")}</div></div>'
-      + '<div class="tuile"><div class="lbl">Archive</div><div class="val">'
+      + '<div class="tuile"><div class="lbl">${T("Archive")}</div><div class="val">'
       + (D.archive || []).length + '</div><div class="sub">'
       + (D.etendue ? esc(D.etendue) : '${T("aucun mois archivé")}') + '</div></div>'
       + '</div>');
 
-    h += '<div class="barreoutils">'
-      + '<input aria-label="${T("Chercher dans la liste")}" type="search" id="rs-q" placeholder="${T("Chercher dans la liste…")}" value="' + esc(Q) + '">'
-      + '<div class="droite">'
-      + '<button class="mini" id="rs-vers-journaux" title="${T("Voir ce journal dans le module Journaux")}"><span class="ic">🔎</span>${T(" Dans Journaux")}</button>'
+    /* ══ LA REFONTE DE L INVENTAIRE (2026-09-25) : barre a loupe sur une ligne,
+       chaque requete avec sa jauge de frequence. Crochets gardes : #rs-q,
+       #rs-vers-journaux, #rs-vider, data-retirer. */
+    h += '<div class="carte"><div class="rf-tb">'
+      + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Chercher dans la liste")}" type="search" id="rs-q" placeholder="${T("Chercher dans la liste…")}" value="' + esc(Q) + '"></label>'
+      + '<span class="rf-droite"><span class="dt">' + rows.length + (rows.length > 1 ? '${T(" requêtes")}' : '${T(" requête")}') + '</span>'
+      + '<button class="rf-jet" id="rs-vers-journaux" title="${T("Voir ce journal dans le module Journaux")}">${T("Dans Journaux")}</button>'
       + (D.peutModifier && (D.recentes || []).length
-          ? '<button class="mini danger" id="rs-vider">'
+          ? '<button class="rf-jet danger" id="rs-vider">'
             + (ARME ? '${T("Confirmer ?")}' : '${T("Vider le détail")}') + '</button>' : '')
-      + '<span>' + rows.length + (rows.length > 1 ? '${T(" requêtes")}' : '${T(" requête")}') + '</span>'
-      + '</div></div>';
+      + '</span></div></div>';
+    var max = rows.reduce(function(m, x){ return Math.max(m, Number(x.fois) || 0); }, 0) || 1;
 
     h += '<div class="carte"><h2>${T("Ce qu’on a cherché sans trouver")}</h2>';
     if (!rows.length) {
@@ -182,8 +191,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('recherches')}
       h += '<table><thead><tr><th>${T("Recherche")}</th><th class="num">${T("Fois")}</th>'
         + '<th>${T("Dernière")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
         + rows.map(function(x){
-            return '<tr><td>' + esc(x.q) + '</td>'
-              + '<td class="num">' + x.fois + '</td>'
+            return '<tr><td><div class="rf-nom">' + esc(x.q) + '</div>'
+              + '<div class="jaugef"><i style="width:' + Math.max(4, Math.round(100 * (Number(x.fois) || 0) / max)) + '%"></i></div></td>'
+              + '<td class="num"><span class="rf-mont">' + x.fois + '</span></td>'
               + '<td class="dt">' + esc(x.derniere || '—') + '</td>'
               + (D.peutModifier
                   ? '<td class="fin"><button class="mini danger" data-retirer="' + esc(x.q)

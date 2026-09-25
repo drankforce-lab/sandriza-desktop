@@ -91,5 +91,7 @@ module.exports = {
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
   '30 derniers jours': 'last 30 days',
-  'toutes occurrences': 'all occurrences'
+  'toutes occurrences': 'all occurrences',
+  // La refonte, comme l'Inventaire (2026-09-25).
+  'Dans Journaux': 'In Logs',
 };
