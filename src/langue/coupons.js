@@ -132,5 +132,12 @@ module.exports = {
 
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
   'Actif': 'Active',
-  'Tous': 'All'
+  'Tous': 'All',
+  // La refonte de la liste, comme l'Inventaire (2026-09-25).
+  'utilisables en boutique': 'usable in the shop',
+  'désactivés ou hors période': 'turned off or out of period',
+  'tous coupons confondus': 'across all coupons',
+  'Coupon': 'Coupon',
+  'Coupon Réduction': 'Coupon Discount',
+  'Cliquer pour afficher': 'Click to show',
 };

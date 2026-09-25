@@ -20,7 +20,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -41,7 +41,20 @@ body{background:var(--f-page);color:var(--tx);
   display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* Les tuiles de tete et la jauge d utilisation (refonte du 2026-09-25), aux
+   mesures de l Inventaire. */
+.tuiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem;flex:0 0 auto;margin-bottom:.6rem}
+.tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
+.tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tuile.cliq{cursor:pointer;user-select:none}
+.tuile.cliq:hover{border-color:rgba(201,169,126,.6)}
+.tuile.on{border-color:#c9a97e}
+.jaugeu{height:5px;border-radius:3px;background:var(--v10);margin-top:.35rem;max-width:8rem;overflow:hidden}
+.jaugeu i{display:block;height:100%;border-radius:3px;background:color-mix(in srgb,var(--tx-ok,#4ade80) 55%,transparent)}
+.jaugeu i.plein{background:var(--tx-att)}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+/* Un en-tete de colonne chiffree garde la police des intitules. */
+thead th.num{font-family:inherit}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
 input,select,button{font:inherit;color:var(--tx);background:var(--v05);
@@ -111,7 +124,7 @@ function pageCoupons() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var sous = document.getElementById('sous');
@@ -223,16 +236,37 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var rows = filtres();
 
-    var h = '<div class="barreoutils">'
-      + '<input aria-label="${T("Code ou nom")}" type="search" id="cp-q" placeholder="${T("Code ou nom…")}" value="' + esc(Q) + '">'
-      + '<button class="mini' + (ETAT === '' ? ' actif' : '') + '" data-etat="">${T("Tous")}</button>'
-      + '<button class="mini' + (ETAT === 'actifs' ? ' actif' : '') + '" data-etat="actifs">${T("En cours")}</button>'
-      + '<button class="mini' + (ETAT === 'inactifs' ? ' actif' : '') + '" data-etat="inactifs">${T("Hors service")}</button>'
-      + '<div class="droite">'
-      + (D.peutModifier ? '<button class="mini prim" id="cp-nouveau">${T("+ Nouveau coupon")}</button>' : '')
+    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE A COUPONS (2026-09-25) ═════════
+       Tuiles calculees sur TOUS les coupons (pas sur la recherche) : en cours,
+       hors service, utilisations. Barre sur une ligne a loupe, filtres en
+       pastilles ; ligne riche et jauge d utilisation quand un plafond existe.
+       Crochets gardes : #cp-q, data-etat, #cp-nouveau, data-modifier /
+       data-basculer / data-suppr, #cp-exporter. */
+    var tous = D.coupons || [];
+    var nEnCours = tous.filter(function(c){ return c.enCours; }).length;
+    var nUtil = tous.reduce(function(a, c){ return a + (Number(c.utilise) || 0); }, 0);
+    var tu = function(etat, lib, val, sous){
+      // etat null = un COMPTEUR, pas un filtre : ni clic, ni cadre.
+      var f = etat !== null;
+      return '<div class="tuile' + (f ? ' cliq' + (ETAT === etat ? ' on' : '') + '" data-etat="' + etat + '"'
+        + ' title="${T("Cliquer pour afficher")}' : '') + '"><div class="lbl">' + lib + '</div><div class="val">' + val + '</div>'
+        + '<div class="sub">' + sous + '</div></div>';
+    };
+    var h = szTuiles('<div class="tuiles">'
+      + tu('actifs', '${T("En cours")}', nEnCours, '${T("utilisables en boutique")}')
+      + tu('inactifs', '${T("Hors service")}', tous.length - nEnCours, '${T("désactivés ou hors période")}')
+      + tu(null, '${T("Utilisations")}', nUtil, '${T("tous coupons confondus")}')
+      + '</div>');
+    h += '<div class="carte"><div class="rf-tb">'
+      + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Code ou nom")}" type="search" id="cp-q" placeholder="${T("Code ou nom…")}" value="' + esc(Q) + '"></label>'
+      + '<button class="rf-jet' + (ETAT === '' ? ' on' : '') + '" data-etat="">${T("Tous")}</button>'
+      + '<button class="rf-jet' + (ETAT === 'actifs' ? ' on' : '') + '" data-etat="actifs">${T("En cours")}</button>'
+      + '<button class="rf-jet' + (ETAT === 'inactifs' ? ' on' : '') + '" data-etat="inactifs">${T("Hors service")}</button>'
+      + '<span class="rf-droite">'
+      + (D.peutModifier ? '<button class="prim" id="cp-nouveau" style="height:2.4rem;padding:0 .9rem">${T("+ Nouveau coupon")}</button>' : '')
       /* ⚠ Le singulier et le pluriel, chacun entier. */
-      + '<span>' + rows.length + (rows.length > 1 ? '${T(" coupons")}' : '${T(" coupon")}') + '</span>'
-      + '</div></div>';
+      + '<span class="dt">' + rows.length + (rows.length > 1 ? '${T(" coupons")}' : '${T(" coupon")}') + '</span>'
+      + '</span></div></div>';
 
     /* ⚠ PLEINE HAUTEUR (2026-09-19) : la carte prend tout le reste, la liste
        defile. Le voile du formulaire est en position:fixed — il flotte
@@ -241,7 +275,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (!rows.length) {
       h += '<div class="vide">' + (Q || ETAT ? '${T("Rien ne correspond.")}' : '${T("Aucun coupon. Créez le premier.")}') + '</div>';
     } else {
-      h += '<div class="liste"><table><thead><tr><th>${T("Code")}</th><th>${T("Nom")}</th><th>${T("Réduction")}</th>'
+      h += '<div class="liste"><table><thead><tr><th>${T("Coupon")}</th><th>${T("Réduction")}</th>'
         + '<th class="num">${T("Minimum")}</th><th>${T("Cumul soldes")}</th><th class="num">${T("Utilisations")}</th>'
         + '<th>${T("Période")}</th><th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
         + rows.map(function(c){
@@ -253,16 +287,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
                 + '<button class="mini geste danger" data-suppr="' + esc(c.id) + '">'
                 + (SUPPR_ARME === c.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
             }
-            return '<tr><td><span class="code">' + esc(c.code) + '</span></td>'
-              + '<td>' + esc(c.nom || '—') + '</td>'
-              + '<td style="font-weight:700;color:var(--tx-or)">' + esc(c.reduction) + '</td>'
+            return '<tr><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">%</span>'
+              + '<div style="min-width:0"><div class="rf-nom">' + esc(c.nom || c.code) + '</div>'
+              + '<div class="rf-sous"><span class="rf-code">' + esc(c.code) + '</span></div></div></div></td>'
+              + '<td><span class="rf-mont">' + esc(c.reduction) + '</span></td>'
               + '<td class="num">' + (c.minimum ? fmt(c.minimum) : '—') + '</td>'
-              + '<td>' + (c.cumulSolde ? '<span class="pill bon">${T("autorisé")}</span>'
-                                       : '<span class="pill neutre">${T("refusé")}</span>') + '</td>'
-              + '<td class="num">' + c.utilise + (c.maximum ? ' / ' + c.maximum : ' / ∞') + '</td>'
+              + '<td>' + (c.cumulSolde ? '<span class="rf-pill vert">${T("autorisé")}</span>'
+                                       : '<span class="rf-pill">${T("refusé")}</span>') + '</td>'
+              + '<td class="num">' + c.utilise + (c.maximum ? ' / ' + c.maximum : ' / ∞')
+              /* La jauge d utilisation, quand il y a un plafond : ambre des qu il
+                 est atteint (le coupon ne passera plus). */
+              + (c.maximum ? '<div class="jaugeu" title="' + c.utilise + ' / ' + c.maximum + '"><i'
+                  + (c.utilise >= c.maximum ? ' class="plein"' : '') + ' style="width:'
+                  + Math.min(100, Math.round(100 * c.utilise / c.maximum)) + '%"></i></div>' : '')
+              + '</td>'
               + '<td class="dt">' + (c.debut ? esc(jour(c.debut)) : '—')
               + (c.fin ? ' → ' + esc(jour(c.fin)) : '') + '</td>'
-              + '<td><span class="pill ' + (c.enCours ? 'bon' : 'neutre') + '">'
+              + '<td><span class="rf-pill ' + (c.enCours ? 'vert' : '') + '">'
               + (c.enCours ? '${T("En cours")}' : '${T("Hors service")}') + '</span></td>'
               + (D.peutModifier ? '<td class="fin">' + gestes + '</td>' : '') + '</tr>';
           }).join('')
