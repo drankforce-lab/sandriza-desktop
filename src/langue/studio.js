@@ -729,5 +729,22 @@ module.exports = {
   'photo': 'photo',
   'appels pour une seule photo': 'calls for a single photo',
   /* ⚠ Sans le « $ » : voir la note de « {0} dépensés sur {1} ». */
-  'pour cette': 'for this'
+  'pour cette': 'for this',
+
+  /* ── La photo de l'explorateur dans l'aperçu, et ses flèches (2026-09-25) ── */
+  'Rendu non enregistré': 'Render not saved',
+  'Le rendu affiché n’est pas enregistré dans la photothèque. Passer à une autre photo le fera disparaître.':
+    'The render shown is not saved in the photo library. Switching to another photo will discard it.',
+  'Changer de photo': 'Switch photo',
+  'Photo précédente': 'Previous photo',
+  'Photo suivante': 'Next photo',
+  'photo de départ': 'starting photo',
+  'Chargement de la photo…': 'Loading the photo…',
+  'Ouvrir': 'Open',
+  'Filigrane / logo': 'Watermark / logo',
+  /* Les contrôles de la photo d'intérieur, revenus (emportés en 4.57.0). */
+  'intérieur du vêtement': 'inside of the garment',
+  'Aucune photo d’intérieur.': 'No inside photo.',
+  'Remplacer': 'Replace',
+  'Choisir un fichier': 'Choose a file'
 };

@@ -283,6 +283,15 @@ body{background:var(--f-page);color:var(--tx);
 .panier .pv img{width:2.2rem;height:2.2rem;object-fit:contain;border-radius:5px;background:var(--f-pied)}
 .panier .pv .tr{width:2.2rem;height:2.2rem;border-radius:5px;background:var(--v06)}
 .panier .pv .pl{font-size:.72rem;color:var(--tx2)}
+.panier .pvb{padding:0;border:2px solid transparent;border-radius:7px;background:none;line-height:0}
+.panier .pvb.on{border-color:#c9a97e}
+.panier .pvb:hover:not(.on){border-color:var(--v20)}
+/* L apercu de la photo de depart, a droite, avant tout rendu (2026-09-25). */
+.srcap{display:flex;flex-direction:column;align-items:center;gap:.5rem;width:100%}
+.srcap img{max-width:100%;max-height:52vh;object-fit:contain;border-radius:10px;background:var(--f-pied)}
+.srcap .nm{font-size:.8rem;color:var(--tx2)}
+.navp{display:flex;align-items:center;justify-content:center;gap:.6rem;font-size:.82rem;color:var(--tx2)}
+.navp button{min-width:2.3rem;height:2.1rem;font-size:1.05rem;line-height:1}
 .panier button.prim{width:100%}
 /* ── Suivi des lots ──────────────────────────────────────────────────────── */
 .lots{display:flex;flex-direction:column;gap:.5rem;max-height:calc(100vh - 14rem);overflow-y:auto}
@@ -552,7 +561,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var bFinal = document.getElementById('b-final');
   var bLot = document.getElementById('b-lot');
   var creditsEl = document.getElementById('credits');
-  var RO = false, OCCUPE = false, ARME = false;
+  var RO = false, OCCUPE = false, ARME = false, ARME_T = null;
   var PHOTO = null;      // data URL d une photo importee (fichier), reduite
   var PHOTO_ID = '';     // id d une photo CHOISIE dans la phototheque (l image reste au site)
   var PHOTO_URL = '';    // adresse de la vignette choisie (affichage seulement)
@@ -977,6 +986,81 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      ⚠ ON SONDE, on ne recoit pas : deux fenetres natives ne peuvent pas se
      parler. Le panier vit dans la page, les deux le lisent. */
   var PANIER = [];
+  /* ⚠⚠ LA PHOTO DE L EXPLORATEUR DEVIENT LA PHOTO DE TRAVAIL (2026-09-25). Sa
+     capture : << 1 photo venue de l explorateur >>, la vignette a gauche — et a
+     droite << L image apparaitra ici >>, l etape 1 toujours a faire, les deux
+     boutons de rendu grises. La cause : le panier remplissait PANIER, alors que
+     l apercu, le guide et les boutons ne lisent que PHOTO / PHOTO_ID. Depuis le
+     retrait du selecteur interne (#30), plus RIEN n ecrivait PHOTO_ID : une
+     photo venue de la photothèque ne pouvait donc JAMAIS etre travaillee seule.
+     ➡ PANIER_IDX dit laquelle est ouverte ; PANIER_SIG detecte un envoi NEUF
+     meme a nombre egal (1 photo remplacee par 1 autre ne changeait rien, et
+     << Traiter >> partait avec des ids que l ecran ne montrait pas). */
+  var PANIER_IDX = 0, PANIER_SIG = '', DU_PANIER = false, A_REDESSINER = false;
+  var PLEIN = {};        // id -> image entiere demandee pour l apercu ('' = sans)
+
+  /* Ouvre la i-eme photo du panier comme photo de travail. ⚠ Le fichier importe
+     (PHOTO) est OUBLIE : sinon l ecran montrait la photo de l explorateur et le
+     rendu partait avec l ANCIEN fichier, cache derriere — une photo payee pour
+     une autre. */
+  function choisirDuPanier(i){
+    var n = PANIER.length;
+    if (!n) return;
+    i = ((i % n) + n) % n;
+    var p = PANIER[i];
+    if (!p) return;
+    var meme = (DU_PANIER && PHOTO_ID === p.id);
+    PANIER_IDX = i;
+    DU_PANIER = true;
+    PHOTO = null;
+    PHOTO_ID = p.id;
+    PHOTO_NOM = p.nom || p.code || '';
+    PHOTO_URL = PLEIN[p.id] || p.apercu || VIGN[p.id] || '';
+    if (!meme) { RESULT = null; FORMATS = []; ENREG = false; INTERIEUR = null; INTERIEUR_NOM = ''; }
+    // L apercu du panier est souvent vide (photo pas encore sur le reseau) : on
+    // demande l image entiere, pour celle-ci seulement — comme l explorateur.
+    if (PLEIN[p.id] === undefined) {
+      PLEIN[p.id] = '';
+      var id = p.id;
+      appeler('studio:vignettes', [{ ids: [id], plein: true }]).then(function(r){
+        var src = (r && r.ok && r.vignettes && r.vignettes[id]) || '';
+        PLEIN[id] = src;
+        if (src && PHOTO_ID === id && !PHOTO) { PHOTO_URL = src; redessinerSiLibre(); }
+      });
+    }
+  }
+
+  /* Change de photo depuis les fleches de l apercu. ⚠ Un rendu PAYE et pas
+     encore enregistre serait perdu : on le demande avant, une seule fois. */
+  function panierPasser(d){
+    if (PANIER.length < 2 || OCCUPE) return;
+    confirmerPerte(function(){ choisirDuPanier(PANIER_IDX + d); dessiner(); });
+  }
+
+  /* ⚠ LE VOILE DE LA FENETRE, PAS UNE BOITE DU SYSTEME : celle-ci peut s ouvrir
+     DERRIERE la fenetre (vu sur le decompte d inactivite). Rien a demander si le
+     rendu est un apercu gratuit ou deja enregistre. */
+  function confirmerPerte(suite){
+    if (!(RESULT && !RESULT.essai && !ENREG)) { suite(); return; }
+    voile('<h3>${T("Rendu non enregistré")}</h3>'
+      + '<p>${T("Le rendu affiché n’est pas enregistré dans la photothèque. Passer à une autre photo le fera disparaître.")}</p>'
+      + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
+      + '<button class="prim" id="v-oui">${T("Changer de photo")}</button></div>',
+      function(fermer){
+        document.getElementById('v-non').onclick = fermer;
+        document.getElementById('v-oui').onclick = function(){ fermer(); suite(); };
+      });
+  }
+
+  /* ⚠ LES RAFRAICHISSEMENTS DE FOND NE REDESSINENT PAS PENDANT UN TRAVAIL. Un
+     dessin reconstruit les boutons ACTIFS : pendant un rendu de trente secondes a
+     cinq minutes, ils redevenaient cliquables, et le curseur sautait hors des
+     champs. On note qu il faudra redessiner, et occuper(false) le fera. */
+  function redessinerSiLibre(){
+    if (LOTS_VUE) return;
+    if (OCCUPE) { A_REDESSINER = true; return; }
+    dessiner();
+  }
   function panierHtml(){
     if (!PANIER.length) return '';
     var n = PANIER.length;
@@ -984,12 +1068,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<strong>' + n + ' ' + (n > 1 ? '${T("photos")}' : '${T("photo")}') + '</strong> '
       + '<span class="dt">' + (n > 1 ? '${T("venues de l’explorateur")}' : '${T("venue de l’explorateur")}') + '</span>'
       + '<button class="mini" id="pn-vider" title="${T("Oublier cette sélection")}">✕</button></div>'
-      + '<div class="pv">' + PANIER.slice(0, 8).map(function(p){
+      + '<div class="pv">' + PANIER.slice(0, 8).map(function(p, i){
           // ⚠ MEME DEFAUT QUE LA GRILLE (#143) : sans vignette demandee a part,
           // le panier ne montrait que des cases grises.
           var s = p.apercu || VIGN[p.id] || '';
-          return s ? '<img src="' + esc(s) + '" alt="" loading="lazy">'
-                   : '<span class="tr"></span>'; }).join('')
+          // Chaque vignette OUVRE sa photo dans l apercu (2026-09-25) ; celle qui
+          // est ouverte porte un cadre.
+          var on = (i === PANIER_IDX) ? ' on' : '';
+          return '<button class="pvb' + on + '" data-pn="' + i + '" title="' + esc(p.nom || p.code || '') + '"'
+            + ' aria-label="' + esc('${T("Ouvrir")} ' + (p.nom || p.code || (i + 1))) + '">'
+            + (s ? '<img src="' + esc(s) + '" alt="" loading="lazy">' : '<span class="tr"></span>')
+            + '</button>'; }).join('')
       + (n > 8 ? '<span class="pl">+' + (n - 8) + '</span>' : '') + '</div>'
       + '<button class="prim" id="pn-lot">${T("⚙ Traiter")} ' + (n > 1 ? ('ces ' + n) : '${T("cette photo")}') + ' ${T("en lot…")}</button>'
       + '</div>';
@@ -998,11 +1087,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function chargerPanier(){
     appeler('panier:lire', []).then(function(r){
       if (!r || !r.ok) return;
-      var avant = PANIER.length;
       PANIER = r.photos || [];
+      var sig = PANIER.map(function(p){ return p && p.id; }).join('|');
       // On ne redessine que si ca a change : sinon on redessinerait toutes les
-      // deux secondes sous les doigts de quelqu un.
-      if (PANIER.length !== avant && !LOTS_VUE) dessiner();
+      // deux secondes sous les doigts de quelqu un. ⚠ Change = les IDS, pas le
+      // nombre (voir PANIER_SIG).
+      if (sig !== PANIER_SIG) {
+        PANIER_SIG = sig;
+        if (PANIER.length) {
+          // La photo ouverte reste ouverte si elle fait encore partie de l envoi.
+          var k = -1;
+          for (var i = 0; i < PANIER.length; i++) if (PANIER[i] && PANIER[i].id === PHOTO_ID) k = i;
+          choisirDuPanier(k >= 0 ? k : 0);
+        } else if (DU_PANIER) {
+          // L envoi a ete vide ailleurs : la photo qu il avait ouverte s en va avec.
+          DU_PANIER = false; PHOTO_ID = ''; PHOTO_URL = ''; PHOTO_NOM = ''; PANIER_IDX = 0;
+          RESULT = null; FORMATS = []; ENREG = false;
+        }
+        redessinerSiLibre();
+      }
       panierVignettes();
     });
   }
@@ -1026,7 +1129,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       for (var j = 0; j < manque.length; j++) {
         if (VIGN[manque[j]] === undefined) VIGN[manque[j]] = v[manque[j]] || '';
       }
-      if (!LOTS_VUE) dessiner();
+      // La vignette de la photo ouverte sert d apercu en attendant l image entiere.
+      if (DU_PANIER && !PHOTO_URL && VIGN[PHOTO_ID]) PHOTO_URL = VIGN[PHOTO_ID];
+      redessinerSiLibre();
     });
   }
 
@@ -1347,7 +1452,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function avInterieurHtml(){
     var h = [];
     h.push('<div class="avsec prem">${T("Photo de l’intérieur du vêtement")}</div>');
-    h.push('');
+    /* ⚠⚠ CES CONTROLES AVAIENT DISPARU LE 2026-09-06 (4.57.0) : l outil qui a
+       retire 64 textes d explication a emporte le bloc ENTIER, champ de fichier
+       et boutons compris. brancherAvance cherchait av-int-f, av-int-b, av-int-x
+       — jamais dessines — et la seconde prise de vue du fantome etait morte
+       depuis. Les controles reviennent ; les explications, elles, restent
+       retirees (c etait sa decision). */
+    h.push('<div class="avun">'
+      + '<input type="file" id="av-int-f" hidden accept="image/*">'
+      + '<div class="avint">'
+      + (INTERIEUR ? '<img src="' + INTERIEUR + '" alt="${T("intérieur du vêtement")}">' : '')
+      + '<span class="nm">' + (INTERIEUR ? esc(INTERIEUR_NOM || '${T("photo choisie")}')
+      : '${T("Aucune photo d’intérieur.")}') + '</span>'
+      + '<button id="av-int-b"' + (RO ? ' disabled' : '') + '>'
+      + (INTERIEUR ? '${T("Remplacer")}' : '${T("Choisir un fichier")}') + '</button>'
+      + (INTERIEUR ? '<button id="av-int-x"' + (RO ? ' disabled' : '') + '>${T("Retirer")}</button>' : '')
+      + '</div></div>');
     return '<div class="avgrille">' + h.join('') + '</div>';
   }
 
@@ -2138,7 +2258,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
   }
 
-  function nomFormat(f){ return 'studio-' + VOIE + '-' + PRESET + '-' + f.cle; }
+  function nomRendu(){ return 'studio-' + ((RESULT && RESULT.voie) || VOIE) + '-' + ((RESULT && RESULT.preset) || PRESET); }
+  function nomFormat(f){ return nomRendu() + '-' + f.cle; }
 
   function formatsHtml(){
     if (!RESULT) return '';
@@ -2221,12 +2342,32 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
   }
 
+  /* Les fleches pour passer d une photo du panier a l autre, dans l apercu. */
+  function navPanierHtml(){
+    if (!DU_PANIER || PANIER.length < 2) return '';
+    return '<div class="navp"><button id="pn-prec" aria-label="${T("Photo précédente")}"' + (OCCUPE ? ' disabled' : '') + '>‹</button>'
+      + '<span>' + (PANIER_IDX + 1) + ' / ' + PANIER.length + '</span>'
+      + '<button id="pn-suiv" aria-label="${T("Photo suivante")}"' + (OCCUPE ? ' disabled' : '') + '>›</button></div>';
+  }
+
   function resultatHtml(){
     if (!RESULT) {
+      /* ⚠ LA PHOTO DE DEPART SE MONTRE AVANT TOUT RENDU (2026-09-25). Le volet
+         disait << L image apparaitra ici >> meme une photo choisie : on ne voyait
+         pas CE qu on allait traiter, et rien ne distinguait << pas de photo >> de
+         << photo choisie, pas encore de rendu >>. */
+      var dep = photoAvant();
+      if (aUnePhoto()) {
+        return '<div class="srcap">'
+          + (dep ? '<img src="' + esc(dep) + '" alt="${T("photo de départ")}">'
+                 : '<div class="vide" style="padding:.2rem">${T("Chargement de la photo…")}</div>')
+          + (PHOTO_NOM ? '<span class="nm">' + esc(PHOTO_NOM) + '</span>' : '')
+          + navPanierHtml() + '</div>' + guideHtml();
+      }
       return '<div class="vide" style="padding:.2rem">${T("L’image apparaîtra ici.")}</div>' + guideHtml();
     }
     var av = photoAvant();
-    var h = '';
+    var h = navPanierHtml();
     if (av) {
       h += '<div class="cmpb">'
         + '<button class="jeton' + (CMP ? ' on' : '') + '" id="cmp-on">${T("⇔ Avant / après")}</button>'
@@ -2355,10 +2496,32 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (lv) lv.onclick = function(){ LOTS_VUE = true; chargerLots(); dessiner(); };
     var pnv = document.getElementById('pn-vider');
     if (pnv) pnv.onclick = function(){
-      appeler('panier:vider', []).then(function(){ PANIER = []; dessiner(); });
+      if (OCCUPE) return;
+      // ⚠ On ne vide l ecran que si le site a vide : sinon le sondage suivant
+      // ramenait la liste deux secondes plus tard, sans un mot.
+      appeler('panier:vider', []).then(function(r){
+        if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+        PANIER = []; PANIER_SIG = '';
+        if (DU_PANIER) { DU_PANIER = false; PHOTO_ID = ''; PHOTO_URL = ''; PHOTO_NOM = ''; PANIER_IDX = 0;
+          RESULT = null; FORMATS = []; ENREG = false; }
+        dessiner();
+      });
     };
+    corps.querySelectorAll('[data-pn]').forEach(function(el){
+      el.onclick = function(){
+        if (OCCUPE) return;
+        var i = parseInt(el.getAttribute('data-pn'), 10) || 0;
+        if (i === PANIER_IDX && DU_PANIER) return;
+        confirmerPerte(function(){ choisirDuPanier(i); dessiner(); });
+      };
+    });
+    var pp = document.getElementById('pn-prec');
+    if (pp) pp.onclick = function(){ panierPasser(-1); };
+    var psv = document.getElementById('pn-suiv');
+    if (psv) psv.onclick = function(){ panierPasser(1); };
     var pnl = document.getElementById('pn-lot');
     if (pnl) pnl.onclick = function(){
+      if (OCCUPE) return;
       // Une seule facon de lancer un lot, et c est ce voile.
       SEL = {};
       PANIER.forEach(function(p){ SEL[p.id] = true; });
@@ -2373,7 +2536,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        l ecran existe encore quelque part — c est la raison meme pour laquelle
        ph-ouvrir avait ete debranche le 2026-09-09. */
     corps.querySelectorAll('[data-voie]').forEach(function(el){
-      el.onclick = function(){ if (RO || OCCUPE) return; VOIE = el.getAttribute('data-voie'); VOIE_CHOISIE = true; RESULT = null; dessiner();
+      el.onclick = function(){ if (RO || OCCUPE) return; VOIE = el.getAttribute('data-voie'); VOIE_CHOISIE = true; RESULT = null; FORMATS = []; ENREG = false; dessiner();
         dire('${T("Voie :")} ' + VOIE + '.', 'att'); };
     });
     corps.querySelectorAll('[data-preset]').forEach(function(el){
@@ -2675,7 +2838,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        pour lui, et plus personne ne lit une variable qui restait vide. */
     var opts = [
       { cle: 'detourage', nom: '${T("Détourage")}' }, { cle: 'fantome', nom: '${T("Mannequin retiré")}' },
-      { cle: 'humain', nom: '${T("Porté par un mannequin")}' }];
+      { cle: 'humain', nom: '${T("Porté par un mannequin")}' },
+      /* ⚠ LE FILIGRANE MANQUAIT A LA LISTE (2026-09-25) : le site l accepte, et
+         tout le code qui le traite plus bas (estimation gratuite, logo) etait
+         donc inatteignable. */
+      { cle: 'filigrane', nom: '${T("Filigrane / logo")}' }];
     /* ⚠ ON PRÉSÉLECTIONNE LA VOIE DE L ÉCRAN quand le lot sait la faire : le
        voile s ouvrait toujours sur le premier traitement de la liste, si bien
        qu on venait de régler un fantôme et qu on lançait un détourage. */
@@ -2759,7 +2926,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           var n = Number(v || 0);
           return szArgentNombre(n, (n > 0 && n < 0.01) ? 3 : 2);
         };
+        /* ⚠ UNE ESTIMATION PAR CHANGEMENT, ET SEULE LA DERNIERE COMPTE. Sans ce
+           numero, une reponse lente d un reglage precedent ecrasait la plus
+           recente — et pouvait reactiver << Lancer le lot >> sur un cout qui
+           n etait plus celui affiche. */
+        var ESTIM_N = 0;
         var majEstimation = function(){
+          var nEst = ++ESTIM_N;
           var z = document.getElementById('lot-estim');
           var b = document.getElementById('v-oui');
           if (!z) return;
@@ -2782,6 +2955,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           if (b) b.disabled = true;
           appeler('studio:estimer', [{ geste: (voie || quoi), nb: nP,
             preset: reg.preset || '', finition: reg.finition || {}, options: reg }]).then(function(r){
+            if (nEst !== ESTIM_N) return;   // un reglage plus recent a deja parle
             if (b) b.disabled = false;
             var z2 = document.getElementById('lot-estim');
             if (!z2) return;
@@ -2895,6 +3069,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function occuper(o){
     OCCUPE = o;
+    if (!o && A_REDESSINER) { A_REDESSINER = false; if (!LOTS_VUE) dessiner(); }
     corps.querySelectorAll('button, [data-voie], [data-preset], [data-ph], .depot').forEach(function(b){
       if (b.tagName === 'BUTTON') b.disabled = o; });
     majBoutons();
@@ -2926,7 +3101,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!RESULT || !RESULT.image || OCCUPE) return;
     if (ENREG) { dire('${T("Déjà enregistrée dans la photothèque.")}', 'att'); return; }
     occuper(true); dire('${T("Enregistrement dans la photothèque…")}');
-    appeler('studio:enregistrer', [{ image: RESULT.image, nom: 'studio-' + VOIE + '-' + PRESET }]).then(function(r){
+    appeler('studio:enregistrer', [{ image: RESULT.image, nom: nomRendu() }]).then(function(r){
       occuper(false);
       if (r && r.ok) {
         ENREG = true;
@@ -2949,6 +3124,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         ENREG = false;
         RESULT = { image: r.image, essai: !!r.essai, decorErreur: r.decorErreur || '',
                    ignores: r.ignores || '',
+                   /* ⚠ LA MISE EN SCENE DU RENDU, gardee avec lui : changer
+                      d ambiance apres coup renommait le fichier enregistre
+                      (<< studio-humain-plage >> devenait << -foret >>). */
+                   voie: VOIE, preset: PRESET,
                    upNote: r.upNote || '', largeur: r.largeur || 0, hauteur: r.hauteur || 0 };
         /* ⚠ LE RIDEAU REVIENT AU MILIEU A CHAQUE NOUVELLE IMAGE. Laisse la ou
            on l avait tire, un rideau pousse a fond a gauche montrerait l ANCIENNE
@@ -3088,6 +3267,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!ARME) {
       ARME = true; bFinal.className = 'prim conf'; bFinal.textContent = '${T("Confirmer (consomme des crédits)")}';
       dire('${T("Un clic de plus lance un vrai rendu payant.")}', 'att');
+      /* ⚠ L ARMEMENT EXPIRE : reste arme, un clic distrait une heure plus tard
+         lancait un rendu payant. */
+      clearTimeout(ARME_T);
+      ARME_T = setTimeout(function(){
+        if (!ARME) return;
+        ARME = false; bFinal.className = 'prim'; bFinal.textContent = '${T("Générer en pleine qualité")}';
+      }, 8000);
       return;
     }
     ARME = false; bFinal.className = 'prim'; bFinal.textContent = '${T("Générer en pleine qualité")}';
@@ -3130,7 +3316,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function telecharger(){
     if (!RESULT || !RESULT.image) return;
-    telechargerImage(RESULT.image, 'studio-' + VOIE + '-' + PRESET + '.png');
+    telechargerImage(RESULT.image, nomRendu() + '.png');
   }
 
   function chargerCredits(){
@@ -3246,7 +3432,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   charger();
   lotsSuivre();
   chargerPanier();
-  setInterval(function(){ if (!document.hidden) chargerPanier(); }, 2000);
+  var PANIER_T = setInterval(function(){ if (!document.hidden) chargerPanier(); }, 2000);
+  window.addEventListener('pagehide', function(){ clearInterval(PANIER_T); });
   if (${lotsDep ? 'true' : 'false'}) { LOTS_VUE = true; chargerLots(); }
 })();
 </script></body></html>`;
