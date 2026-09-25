@@ -16,8 +16,13 @@
 const fs = require('fs');
 const path = require('path');
 const RACINE = path.join(__dirname, '..');
-const MAIN = fs.readFileSync(path.join(RACINE, 'src', 'main.js'), 'utf8');
-const PRE = fs.readFileSync(path.join(RACINE, 'src', 'preload.js'), 'utf8');
+/* ⚠ LES FINS DE LIGNE SONT NORMALISEES A LA LECTURE (2026-09-25). La machine de
+   construction Windows extrait le depot en CRLF : les motifs ecrits avec un
+   saut de ligne n y trouvaient plus rien, et ce banc a bloque la construction
+   de la 6.21 alors qu il passait sur le poste. */
+const lire = (f) => fs.readFileSync(f, 'utf8').split(String.fromCharCode(13)).join('');
+const MAIN = lire(path.join(RACINE, 'src', 'main.js'));
+const PRE = lire(path.join(RACINE, 'src', 'preload.js'));
 const STAFF = path.join(RACINE, '..', 'sandriza', 'assets', 'js', 'staff.js');
 
 let fautes = 0;
@@ -79,7 +84,7 @@ if (m) {
 if (!fs.existsSync(STAFF)) {
   console.log('  --   staff.js introuvable (dépôt du site absent) : le maillon 1 n est PAS vérifié ici.');
 } else {
-  const st = fs.readFileSync(STAFF, 'utf8');
+  const st = lire(STAFF);
   const cs = st.match(/const clearSession = \(\) => \{([\s\S]*?)\n  \};/);
   ok(!!cs, 'staff.js : clearSession est trouvée');
   ok(!!cs && /sandrizaDesktop\.sessionFermee\(\)/.test(cs[1]) && /typeof window\.sandrizaDesktop\.sessionFermee === 'function'/.test(cs[1]),
