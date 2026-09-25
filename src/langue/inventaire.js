@@ -115,6 +115,10 @@ module.exports = {
   'Passer à six chiffres': 'Switch to six digits',
   'Passer les SKU à six chiffres': 'Switch SKUs to six digits',
   'numéro à quatre chiffres (': 'four-digit number (',
+  // Trois morceaux restés en français, vus à la capture du 2026-09-25.
+  'portent encore un': 'still carry a',
+  'inventaire = 0': 'stock = 0',
+  'sur': 'of',
   '). Les nouveaux en comptent six': '). New ones have six',
   '. Renuméroter oblige à réimprimer les étiquettes': '. Renumbering forces reprinting the labels',
   'déjà collées.': 'already stuck on.',
@@ -128,6 +132,8 @@ module.exports = {
   'Tailles Couleurs': 'Sizes Colours',
   // Les en-tetes de la refonte du 2026-09-25 (lus d un bloc, comme ceux du dessus).
   'Produit Variantes': 'Product Variants',
+  'SKU ou nom du produit': 'SKU or product name',
+  'SKU ou nom du produit…': 'SKU or product name…',
   // Le bouton d assignation : le sigle ne se traduit pas, mais il doit etre DECLARE.
   'SKU': 'SKU',
   'Inventaire Actions': 'Inventory Actions',

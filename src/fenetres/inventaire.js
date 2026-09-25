@@ -358,18 +358,25 @@ html.jour .gp .cat.tc{color:color-mix(in srgb,var(--cc,#6d7f96) 55%,black);
 .gp .acts button.ico.sup:hover:not(:disabled){color:var(--tx-err);border-color:rgba(239,68,68,.45)}
 .gp .acts button.inv{display:inline-flex;align-items:center;gap:.45rem}
 .gp .acts button.inv svg{width:16px;height:16px}
-/* La barre d outils de l onglet : champs plus hauts, pastilles d etat. */
-.tb2{gap:.5rem;margin-bottom:.2rem}
-.tb2 .rch{display:flex;align-items:center;gap:.5rem;width:17rem;height:2.4rem;padding:0 .7rem;
+/* La barre d outils de l onglet : champs plus hauts, pastilles d etat.
+   ⚠⚠ UNE SEULE LIGNE (sa capture du 2026-09-25, en anglais : les deux boutons
+   de droite passaient dessous). flex-wrap:nowrap, et c est la RECHERCHE qui cede
+   la place en premier (flex 1 1, plancher 8rem) ; tout le reste garde sa taille
+   naturelle et ne se coupe pas. Aucun element retire. */
+.tb2{gap:.4rem;margin-bottom:.2rem;flex-wrap:nowrap}
+.tb2 > *{flex:0 0 auto}
+.tb2 .rch{display:flex;align-items:center;gap:.5rem;flex:1 1 13rem;min-width:8rem;max-width:17rem;height:2.4rem;padding:0 .7rem;
   background:var(--f-0f1826);border:1px solid var(--v14);border-radius:10px;color:var(--tx2)}
 .tb2 .rch:focus-within{border-color:#c9a97e}
 .tb2 .rch svg{width:17px;height:17px;flex:0 0 auto}
 .tb2 .rch input{border:0;background:transparent;padding:0;height:100%;width:100%}
 .tb2 select,.tb2 input#fp-section{height:2.4rem;border-radius:10px}
-.tb2 .droite button{height:2.4rem;padding:0 .9rem;border-radius:10px;font-size:.84rem}
-.tb2 [data-menu-cats]{height:2.4rem;padding:0 .8rem;border-radius:10px;font-size:.82rem}
-.etats{display:flex;gap:.3rem}
-.etats button{height:2.4rem;padding:0 .8rem;border-radius:10px;font-size:.82rem;
+.tb2 input#fp-section{width:6.5rem!important}
+.tb2 .droite{flex:0 0 auto;display:flex;gap:.4rem;white-space:nowrap}
+.tb2 .droite button{height:2.4rem;padding:0 .8rem;border-radius:10px;font-size:.82rem;white-space:nowrap}
+.tb2 [data-menu-cats]{height:2.4rem;padding:0 .7rem;border-radius:10px;font-size:.82rem;white-space:nowrap}
+.etats{display:flex;gap:.25rem}
+.etats button{height:2.4rem;padding:0 .65rem;border-radius:10px;font-size:.8rem;white-space:nowrap;
   background:var(--f-0f1826);border-color:var(--v10);color:var(--tx-gris2)}
 .etats button.actif{background:rgba(201,169,126,.14);border-color:rgba(201,169,126,.55);
   color:var(--tx-or2);font-weight:700}
@@ -981,7 +988,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
       + tuile('${T("Sans code SKU")}', st.sansSku,
           st.sansSku > 0 ? '${T("non disponibles à l’achat")}' : '${T("tous assignés ✓")}',
           st.sansSku > 0 ? 'att' : 'bon')
-      + tuile('${T("En rupture")}', st.rupture, 'inventaire = 0', st.rupture > 0 ? 'err' : 'bon',
+      + tuile('${T("En rupture")}', st.rupture, '${T("inventaire = 0")}', st.rupture > 0 ? 'err' : 'bon',
           st.rupture > 0 ? 'rupture' : '')
       + tuile('${T("À réapprovisionner")}', st.aCommander,
           st.aCommander ? '${T("voir l’onglet Réapprovisionnement")}' : '${T("tout est au-dessus du seuil ✓")}',
@@ -1000,7 +1007,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     }
     if (d.pad6 && d.pad6.n > 0 && d.peutEcrire) {
       h += '<div class="avis" style="display:flex;align-items:center;gap:.8rem;flex-wrap:wrap">'
-        + '<span style="flex:1 1 auto"><span class="ic">🏷</span> <b>' + d.pad6.n + ' ${T("produit(s)")}</b> portent encore un '
+        + '<span style="flex:1 1 auto"><span class="ic">🏷</span> <b>' + d.pad6.n + ' ${T("produit(s)")}</b> ${T("portent encore un")} '
         + '${T("numéro à quatre chiffres (")}' + esc(d.pad6.avant || '') + '${T("). Les nouveaux en comptent six")} '
         + '— ' + esc(d.pad6.apres || '') + '. <em>${T("Renuméroter oblige à réimprimer les étiquettes")} '
         + '${T("déjà collées.")}</em></span>'
@@ -1025,7 +1032,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
        geste est le meme qu avant (FP.etat, page 0, rechargement) — voir
        data-etat dans brancherProduits. */
     h += '<div class="toolbar tb2">'
-      + '<label class="rch">${ICO.loupe}<input aria-label="SKU, nom ${T("produit")}" type="text" id="fp-q" autocomplete="off" placeholder="SKU, nom ${T("produit")}…" value="' + esc(FP.q) + '"></label>'
+      + '<label class="rch">${ICO.loupe}<input aria-label="${T("SKU ou nom du produit")}" type="text" id="fp-q" autocomplete="off" placeholder="${T("SKU ou nom du produit…")}" value="' + esc(FP.q) + '"></label>'
       + '<div class="etats" role="group" aria-label="${T("Filtrer par état du stock")}">'
       +   [['', '${T("Tout l’inventaire")}'], ['rupture', '${T("En rupture")}'],
            ['low', '${T("À commander")}'], ['ok', '${T("Seuil non atteint")}']].map(function(e){
@@ -1123,7 +1130,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
         + [10, 25, 50, 100].map(function(n){
             return '<option value="' + n + '"' + (!FP.auto && FP.parPage === n ? ' selected' : '') + '>' + n + '</option>'; }).join('')
         + '</select><span>${T("par page")}</span>'
-        + '<span class="pos">' + debut + '–' + fin + ' sur ' + d.total + ' '
+        + '<span class="pos">' + debut + '–' + fin + ' ${T("sur")} ' + d.total + ' '
         + (d.pages > 1
             ? '<button class="mini" id="fp-prec"' + (d.page <= 0 ? ' disabled' : '') + '>${T("← Préc.")}</button>'
               + ' Page <strong>' + (d.page + 1) + '</strong> / ' + d.pages + ' '
