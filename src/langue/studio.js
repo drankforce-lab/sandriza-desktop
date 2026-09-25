@@ -736,6 +736,10 @@ module.exports = {
   'Le rendu affiché n’est pas enregistré dans la photothèque. Passer à une autre photo le fera disparaître.':
     'The render shown is not saved in the photo library. Switching to another photo will discard it.',
   'Changer de photo': 'Switch photo',
+  /* Le bouton en attente pendant un rendu (2026-09-25). */
+  'Aperçu en cours…': 'Preview in progress…',
+  'Génération en cours…': 'Generating…',
+  'Lancement du lot…': 'Starting the batch…',
   'Photo précédente': 'Previous photo',
   'Photo suivante': 'Next photo',
   'photo de départ': 'starting photo',

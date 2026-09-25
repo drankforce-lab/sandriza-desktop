@@ -442,6 +442,17 @@ button{font:inherit;color:var(--tx);background:var(--v05);
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.5;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
+/* ⚠ LE BOUTON DIT QU IL TRAVAILLE (2026-09-25, sa demande : << comme dans la
+   connexion a l application, pour desactiver les multiples clics >>). Le meme
+   cercle que .cx-spin de connexion.js. Desactive, il reste LISIBLE : l opacite
+   de 0,4 d un bouton mort effacerait justement ce qu on veut montrer. */
+.sz-spin{width:15px;height:15px;border-radius:50%;flex:0 0 auto;
+  border:2px solid currentColor;border-right-color:transparent;
+  animation:sz-tourne .7s linear infinite;opacity:.9}
+@keyframes sz-tourne{to{transform:rotate(360deg)}}
+button.attente{display:inline-flex;align-items:center;justify-content:center;gap:.5rem}
+button.attente:disabled{opacity:.85;cursor:progress}
+@media (prefers-reduced-motion:reduce){.sz-spin{animation-duration:2.4s}}
 button.prim:hover:not(:disabled){background:#d8bd97}
 /* ⚠ L APERCU EST GRATUIT, ET C EST LE LEVIER CREDITS : la seule facon de juger
    sans depenser. Un bouton gris a cote d un bouton dore se lit comme le choix
@@ -873,6 +884,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function aUnePhoto(){ return !!PHOTO || !!PHOTO_ID; }
+
+  /* Le bouton de rendu en attente : cercle + ce qui se passe. Au retour, il
+     reprend SON libelle (l armement de << Generer >> est remis par majBoutons). */
+  function boutonAttente(b, texte){
+    if (!b) return;
+    if (texte) {
+      b.classList.add('attente');
+      b.innerHTML = '<span class="sz-spin" aria-hidden="true"></span><span>' + texte + '</span>';
+      b.setAttribute('aria-busy', 'true');
+    } else {
+      b.classList.remove('attente');
+      b.removeAttribute('aria-busy');
+      b.textContent = (b === bApercu) ? '${T("Aperçu gratuit")}' : '${T("Générer en pleine qualité")}';
+    }
+  }
 
   /* ══ LE SUIVI DES LOTS ════════════════════════════════════════════════════
      Sa demande : voir << lot xxxxx — photo 15 sur 500 >>, pouvoir arreter,
@@ -3045,6 +3071,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         majEstimation();
         document.getElementById('v-oui').onclick = function(){
           this.disabled = true;
+          // Le meme cercle que les boutons de rendu : le voile se ferme a la reponse.
+          this.classList.add('attente');
+          this.innerHTML = '<span class="sz-spin" aria-hidden="true"></span><span>${T("Lancement du lot…")}</span>';
           appeler('lots:creer', [{ ids: ids, quoi: g('lot-quoi'), nom: g('lot-nom'),
             priorite: c('lot-prio') ? 1 : 0, refaire: c('lot-refaire'),
             options: optionsLot(g('lot-quoi'), c('lot-reglages')) }]).then(function(r){
@@ -3117,8 +3146,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!aUnePhoto()) { dire('${T("Importez d’abord une photo.")}', 'err'); return; }
     if (!PRESET) { dire('${T("Choisissez une ambiance.")}', 'err'); return; }
     occuper(true);
+    var bT = apercu ? bApercu : bFinal;
+    boutonAttente(bT, apercu ? '${T("Aperçu en cours…")}' : '${T("Génération en cours…")}');
     dire(apercu ? '${T("Aperçu gratuit en cours…")}' : '${T("Génération en pleine qualité…")}');
     appeler('studio:traiter', [saisie(apercu)]).then(function(r){
+      boutonAttente(bT, '');
       occuper(false);
       if (r && r.ok) {
         ENREG = false;
@@ -3192,8 +3224,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var fin = finitionPour(VOIE) || {};
     var opt = (VOIE === 'humain') ? optionsPour('humain') : {};
     dire('${T("Calcul du coût…")}');
+    /* ⚠ OCCUPE DES LE PREMIER CLIC : sans lui, deux clics pendant le calcul du
+       cout ouvraient deux voiles de confirmation l un sur l autre. */
+    var bC = apercu ? bApercu : bFinal;
+    occuper(true);
+    boutonAttente(bC, '${T("Calcul du coût…")}');
     appeler('studio:estimer', [{ geste: VOIE, preset: PRESET, nb: 1, finition: fin, options: opt }])
       .then(function(r){
+        boutonAttente(bC, '');
+        occuper(false);
         if (!r || !r.ok) { dire('${T("Coût non estimé — le rendu part quand même.")}', 'att'); suite(); return; }
         var n = r.appelsMax || 1;
         // Un seul appel par image : rien a confirmer, on ne met pas un voile
