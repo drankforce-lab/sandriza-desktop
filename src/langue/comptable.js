@@ -161,5 +161,11 @@ module.exports = {
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) — les durées d'un accès. */
   '24 heures 3 jours': '24 hours 3 days',
-  '7 jours 14 jours': '7 days 14 days'
+  '7 jours 14 jours': '7 days 14 days',
+  // La refonte, comme l'Inventaire (2026-09-25).
+  'Liens actifs': 'Active links',
+  'le comptable peut ouvrir l’exercice': 'the accountant can open the year',
+  'Expirés': 'Expired',
+  'n’ouvrent plus rien': 'no longer open anything',
+  'Créé Échéance État': 'Created Deadline Status',
 };

@@ -25,7 +25,7 @@
  * l'IIFE — concaténation par + comme dans liens.js.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, JS_BROUILLON, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -71,6 +71,10 @@ button.dgr{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
 .duo{display:flex;gap:.65rem;flex-wrap:wrap}
 .duo>div{flex:1 1 10rem;min-width:0}
 .barreoutils{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+/* ── La refonte de l Inventaire (2026-09-25) ── */
+.tuiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem;flex:0 0 auto;margin-bottom:.7rem}
+.tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
+.tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center}
 table{width:100%;border-collapse:collapse;font-size:.79rem}
 thead th{text-align:left;padding:.22rem .35rem;font-size:.65rem;text-transform:uppercase;
@@ -121,7 +125,7 @@ function pageComptable(ouverture) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
   var corps = document.getElementById('corps');
   var sous  = document.getElementById('sous');
   var DEPART = ${dep};
@@ -187,6 +191,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   // ════════════════════════════════════════════════════════════════════════
   function dessinerPartages(){
     var h = [];
+    /* ══ LA REFONTE DE L INVENTAIRE (2026-09-25) : deux tuiles sur la liste
+       ENTIERE, lignes riches, etat en pastille a point. Crochets gardes :
+       #b-nouveau, #b-recharger, data-copier, data-revoquer. */
+    if (ETAT.partages.length) {
+      var nExp = ETAT.partages.filter(function(p){ return p.expire; }).length;
+      h.push(szTuiles('<div class="tuiles">'
+        + '<div class="tuile"><div class="lbl">${T("Liens actifs")}</div><div class="val">' + (ETAT.partages.length - nExp)
+        + '</div><div class="sub">${T("le comptable peut ouvrir l’exercice")}</div></div>'
+        + '<div class="tuile"><div class="lbl">${T("Expirés")}</div><div class="val">' + nExp
+        + '</div><div class="sub">${T("n’ouvrent plus rien")}</div></div>'
+        + '</div>'));
+    }
     h.push('<div class="barreoutils"><button class="prim" id="b-nouveau">${T("+ Nouveau lien de l’exercice")}</button>'
       + '<span class="droite"><button id="b-recharger">${T("Recharger")}</button></span></div>');
 
@@ -202,16 +218,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (!ETAT.partages.length) {
       h.push('<div class="vide">${T("Aucun exercice n’a encore été partagé.")}</div>');
     } else {
-      h.push('<table><thead><tr><th>${T("État")}</th><th>${T("Exercice")}</th><th>${T("Destinataires")}</th>'
-        + '<th>${T("Créé")}</th><th>${T("Échéance")}</th><th></th></tr></thead><tbody>');
+      h.push('<table><thead><tr><th>${T("Exercice")}</th>'
+        + '<th>${T("Créé")}</th><th>${T("Échéance")}</th><th>${T("État")}</th><th></th></tr></thead><tbody>');
       ETAT.partages.forEach(function(p){
         var etat = p.expire ? 'expire' : 'actif';
         h.push('<tr>'
-          + '<td><span class="pill ' + etat + '">' + (p.expire ? '${T("Expiré")}' : '${T("Actif")}') + '</span></td>'
-          + '<td>' + esc(p.label || p.periode || '—') + '</td>'
-          + '<td class="dt">' + esc(p.destinataire || '—') + '</td>'
+          + '<td><div class="rf-nom">' + esc(p.label || p.periode || '—') + '</div>'
+          + '<div class="rf-sous">' + esc(p.destinataire || '—') + '</div></td>'
           + '<td>' + jour(p.creeLe) + '</td>'
           + '<td>' + jour(p.expireLe) + '</td>'
+          + '<td><span class="rf-pill ' + (p.expire ? '' : 'vert') + '">' + (p.expire ? '${T("Expiré")}' : '${T("Actif")}') + '</span></td>'
           + '<td style="white-space:nowrap">'
             + '<button class="mini" data-copier="' + esc(p.url) + '"><span class="ic">📋</span></button> '
             + '<button class="mini dgr" data-revoquer="' + esc(p.token) + '">'
