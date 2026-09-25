@@ -146,5 +146,12 @@ module.exports = {
   'est déconnectée.': 'is signed out.',
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
-  'moins de': 'less than'
+  'moins de': 'less than',
+  // La refonte, comme l'Inventaire (2026-09-25).
+  'Sessions ouvertes': 'Open sessions',
+  'personnes connectées': 'people signed in',
+  'À l’écran': 'On screen',
+  'se sont manifestées à l’instant': 'seen just now',
+  'En retrait': 'In the background',
+  'connectées, fenêtre réduite': 'signed in, window minimized',
 };

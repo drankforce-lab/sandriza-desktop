@@ -41,7 +41,7 @@
  * pair.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -100,6 +100,10 @@ tbody td{padding:.34rem .4rem;border-top:1px solid var(--v05);vertical-align:top
    ⚠ ET .pill.moi A SIMPLEMENT DISPARU : la colonne d'actions écrit déjà « vous »
    pour sa propre ligne. La pastille disait la même chose deux fois. */
 .pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
+/* ── La refonte de l Inventaire (2026-09-25) ── */
+.tuiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem;flex:0 0 auto;margin-bottom:.7rem}
+.tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
+.tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vide{padding:1.4rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 /* La zone d ecriture du message : elle n apparait que pour une personne a la
    fois, sous sa ligne — jamais un formulaire flottant qui masquerait la liste
@@ -135,7 +139,7 @@ function pagePresence() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   var corps = document.getElementById('corps');
   var sousEl = document.getElementById('sous');
 
@@ -259,11 +263,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (ta && ECRIS) BROUILLON[ECRIS] = ta.value;
   }
 
+  function initiales(nom){
+    var m = String(nom || '').trim().split(' ').filter(Boolean);
+    if (!m.length || m[0] === '—') return '?';
+    return ((m[0][0] || '') + (m.length > 1 ? (m[m.length - 1][0] || '') : '')).toUpperCase();
+  }
   function ligne(s){
     var moi = !!s.moi;
     var etat = s.frais
-      ? '<span class="pill bon">${T("à l’écran")}</span>'
-      : '<span class="pill att">' + esc(depuis(s.vuDepuisSec)) + '</span>';
+      ? '<span class="rf-pill vert">${T("à l’écran")}</span>'
+      : '<span class="rf-pill ambre">' + esc(depuis(s.vuDepuisSec)) + '</span>';
     /* ⚠ AUCUN BOUTON SUR SA PROPRE LIGNE, et pas seulement grise : le serveur
        refuse de toute facon (motif soi_meme), donc un bouton la serait une
        porte qui ne mene nulle part. On dit << vous >> et on s arrete la. */
@@ -272,11 +281,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       : '<button class="mini" data-ecrire="' + esc(s.staffId) + '">${T("Message…")}</button>'
         + ' <button class="mini dgr" data-dec="' + esc(s.staffId) + '">'
         + (CONF === s.staffId ? '${T("Confirmer la déconnexion")}' : '${T("Déconnecter")}') + '</button>';
-    var h = '<tr><td><strong>' + esc(s.nom || '—') + '</strong>'
-      + (moi ? '' : '')
-      + (s.courriel ? '<div class="sub">' + esc(s.courriel) + '</div>' : '')
-      + '</td>'
-      + '<td><span class="pill neutre">' + esc(s.role || '—') + '</span></td>'
+    /* La cellule riche (refonte du 2026-09-25) : initiales, nom en gras,
+       courriel dessous ; le role en pastille a point. */
+    var h = '<tr><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(s.nom)) + '</span>'
+      + '<div style="min-width:0"><div class="rf-nom">' + esc(s.nom || '—') + '</div>'
+      + (s.courriel ? '<div class="rf-sous">' + esc(s.courriel) + '</div>' : '')
+      + '</div></div></td>'
+      + '<td><span class="rf-pill">' + esc(szTd(s.role || '—')) + '</span></td>'
       + '<td>' + etat
       + (s.vu ? '<div class="sub">' + esc(fdate(s.vu)) + '</div>' : '<div class="sub mut">${T("pas encore vu")}</div>')
       + '</td>'
@@ -304,7 +315,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       ? (SESS.length + (SESS.length > 1 ? '${T(" sessions ouvertes")}' : '${T(" session ouverte")}'))
       : '${T("personne n’est connecté")}';
 
-    var h = '<div class="barre"><button class="mini" id="p-reload">${T("Actualiser")}</button></div>';
+    /* Trois tuiles sur les sessions ENTIERES (refonte du 2026-09-25). */
+    var nFrais = SESS.filter(function(s){ return s.frais; }).length;
+    var tu = function(lib, val, sous){
+      return '<div class="tuile"><div class="lbl">' + lib + '</div><div class="val">' + val + '</div><div class="sub">' + sous + '</div></div>';
+    };
+    var h = szTuiles('<div class="tuiles">'
+      + tu('${T("Sessions ouvertes")}', SESS.length, '${T("personnes connectées")}')
+      + tu('${T("À l’écran")}', nFrais, '${T("se sont manifestées à l’instant")}')
+      + tu('${T("En retrait")}', SESS.length - nFrais, '${T("connectées, fenêtre réduite")}')
+      + '</div>');
+    h += '<div class="barre"><button class="mini" id="p-reload">${T("Actualiser")}</button></div>';
 
     /* ⚠ CETTE NOTE RESTE, contrairement a celles qu on a retirees ailleurs. Les
        exposes retires expliquaient a quelqu un un mecanisme qu il avait sous les
