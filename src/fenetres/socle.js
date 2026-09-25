@@ -3129,8 +3129,15 @@ html.jour thead th{background:var(--f-carte)}
 .feuille tbody td,.papier tbody td{background:transparent;border-left:0;border-right:0;border-radius:0;
   border-top:1px solid #e3e0d8;border-bottom:0}
 .carte{border-radius:14px}
-.tuile{border-radius:12px}
-.tuile .val{font-size:1.3rem;line-height:1.2}
+/* 3e PASSE (2026-09-25, << continue la refonte en te basant sur l inventaire,
+   partout ou cela peut s appliquer >>) : les tuiles, pastilles, champs et
+   boutons prennent les mesures de l Inventaire. */
+.tuile{border-radius:13px;padding:.75rem .95rem}
+.tuile .lbl{font-size:.76rem;font-weight:600;text-transform:none;letter-spacing:0;color:var(--tx2)}
+.tuile .val{font-size:1.6rem;font-weight:800;line-height:1.15;margin:.2rem 0 .1rem}
+.pill{font-size:.72rem;font-weight:600;padding:.18rem .6rem}
+button{border-radius:9px}
+input,select,textarea{border-radius:9px}
 /* Les onglets : l actif en or, les autres a plat — comme l Inventaire. Les
    fenetres nomment l actif << on >> ou << actif >> : les deux sont couverts. */
 .onglets button{border-radius:9px}
