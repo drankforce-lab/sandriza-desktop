@@ -18,7 +18,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais le motif, qui est ce que
@@ -52,6 +52,13 @@ button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:700;
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
 button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
+/* Les tuiles de tete (refonte du 2026-09-25), aux mesures de l Inventaire. */
+.tuiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.6rem;flex:0 0 auto;margin-bottom:.6rem}
+.tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0;cursor:pointer;user-select:none}
+.tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tuile:hover{border-color:rgba(201,169,126,.6)}
+.tuile.on{border-color:#c9a97e}
+.val.att{color:var(--tx-att)}.val.err{color:var(--tx-err)}
 .ligne{display:flex;align-items:center;gap:.8rem;padding:.6rem .75rem;cursor:pointer;
   background:var(--f-carte);border:1px solid var(--v07);border-radius:11px}
 .ligne:hover{border-color:#c9a97e}
@@ -88,7 +95,7 @@ function pageRetours() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
 
@@ -101,8 +108,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     ['expiring_soon', '${T("Expire bientôt")}'], ['received', '${T("Reçues")}'], ['disputed', '${T("À analyser")}'],
     ['rejected', '${T("Rejetées")}'], ['completed', '${T("Complétées")}'], ['all', '${T("Toutes")}']
   ];
-  var TONS = { pending: 'att', approved: 'bon', in_transit: 'info', received: 'att',
-    refunded: 'bon', completed: 'bon', rejected: 'err', disputed: 'err', awaiting_photo: 'neutre' };
+  /* La pastille a point de l Inventaire (rf-pill, refonte du 2026-09-25) : ambre
+     ce qui attend un geste, bleu ce qui avance, vert ce qui est regle, rouge ce
+     qui est refuse ou conteste, gris le reste. */
+  var TONS = { pending: 'ambre', approved: 'vert', in_transit: 'bleu', received: 'ambre',
+    refunded: 'vert', completed: 'vert', rejected: 'rouge', disputed: 'rouge', awaiting_photo: '' };
+  /* Les cinq etats qui DEMANDENT UN GESTE deviennent des tuiles ; les quatre
+     autres restent en pastilles dans la barre. Neuf pastilles et la recherche
+     ne tenaient pas sur une ligne en anglais. Rien ne se perd : les neuf listes
+     restent a un clic. */
+  var EN_TUILE = { pending: '${T("à traiter")}', in_transit: '${T("en route vers nous")}',
+    received: '${T("à inspecter")}', disputed: '${T("à trancher")}', expiring_soon: '${T("délai qui s’achève")}' };
+  function initiales(nom){
+    var m = String(nom || '').trim().split(' ').filter(Boolean);
+    if (!m.length || m[0] === '—') return '?';
+    return ((m[0][0] || '') + (m.length > 1 ? (m[m.length - 1][0] || '') : '')).toUpperCase();
+  }
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -144,14 +165,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessiner(){
     if (!D) { corps.innerHTML = '<div class="vide charge">${T("Chargement… (les demandes se resynchronisent)")}</div>'; return; }
     var c = D.comptes || {};
-    var h = '<div class="barreoutils">'
-      + ONGLETS.map(function(o){
+    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE A RETOURS (2026-09-25) ═════════
+       Tuiles pour ce qui demande un geste (ambre, ou rouge pour ce qui expire
+       et ce qui est conteste, des qu il y en a), barre sur une ligne a loupe,
+       lignes riches aux initiales. Crochets gardes : data-onglet, #r-q,
+       .ligne[data-id], le verrou, #r-exporter. */
+    var h = szTuiles('<div class="tuiles">' + ONGLETS.filter(function(o){ return EN_TUILE[o[0]]; }).map(function(o){
+        var n = c[o[0]] || 0;
+        var ton = !n ? '' : ((o[0] === 'disputed' || o[0] === 'expiring_soon') ? 'err' : 'att');
+        return '<div class="tuile' + (ONGLET === o[0] ? ' on' : '') + '" data-onglet="' + o[0] + '"'
+          + ' title="${T("Cliquer pour afficher")}"><div class="lbl">' + o[1] + '</div>'
+          + '<div class="val ' + ton + '">' + n + '</div><div class="sub">' + EN_TUILE[o[0]] + '</div></div>';
+      }).join('') + '</div>');
+    h += '<div class="carte"><div class="rf-tb">'
+      + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Nom, courriel, n° commande")}" type="search" id="r-q" placeholder="${T("Nom, courriel, n° commande…")}" value="' + esc(Q) + '"></label>'
+      + ONGLETS.filter(function(o){ return !EN_TUILE[o[0]]; }).map(function(o){
           var n = c[o[0]] || 0;
-          return '<button class="mini' + (ONGLET === o[0] ? ' actif' : '') + '" data-onglet="' + o[0] + '">'
-            + o[1] + '<span class="n' + (o[0] === 'pending' && n > 0 ? ' hi' : '') + '">' + n + '</span></button>';
+          return '<button class="rf-jet' + (ONGLET === o[0] ? ' on' : '') + '" data-onglet="' + o[0] + '">'
+            + o[1] + '<span class="n">' + n + '</span></button>';
         }).join('')
-      + '<input aria-label="${T("Nom, courriel, n° commande")}" type="search" id="r-q" placeholder="${T("Nom, courriel, n° commande…")}" value="' + esc(Q) + '">'
-      + '</div>';
+      + '</div></div>';
 
     var rows = D.lignes || [];
     if (!rows.length) {
@@ -164,19 +197,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          sont riches. La zone defilante est donc fille du CORPS, pas d une
          carte — le socle couvre les deux formes. */
       h += '<div class="liste">' + rows.map(function(r){
-        var badges = '<span class="pill ' + (TONS[r.statut] || 'neutre') + '">' + esc(szTd(r.statutLibelle)) + '</span>';
-        if (r.expireAuto) badges += ' <span class="pill err">${T("Expirée automatiquement")}</span>';
-        if (r.expireBientot) badges += ' <span class="pill err">⏳${T(" Expire le ")}' + esc(r.expireLe) + '</span>';
-        if (r.suivi) badges += ' <span class="pill neutre"><span class="ic">📦</span> ' + esc(r.suivi) + '</span>';
-        if (r.etiquette === 'reelle') badges += ' <span class="pill info"><span class="ic">🏷️</span>${T(" Étiquette réelle")}</span>';
-        else if (r.etiquette === 'generee') badges += ' <span class="pill info"><span class="ic">🏷️</span>${T(" Étiquette générée")}</span>';
-        if (r.fraisBoutique) badges += ' <span class="pill info">${T("Frais pris en charge")}</span>';
+        var badges = '<span class="rf-pill ' + (TONS[r.statut] || '') + '">' + esc(szTd(r.statutLibelle)) + '</span>';
+        if (r.expireAuto) badges += ' <span class="rf-pill rouge">${T("Expirée automatiquement")}</span>';
+        if (r.expireBientot) badges += ' <span class="rf-pill rouge">${T("Expire le ")}' + esc(r.expireLe) + '</span>';
+        if (r.suivi) badges += ' <span class="rf-pill"><span class="rf-code">' + esc(r.suivi) + '</span></span>';
+        if (r.etiquette === 'reelle') badges += ' <span class="rf-pill bleu">${T("Étiquette réelle")}</span>';
+        else if (r.etiquette === 'generee') badges += ' <span class="rf-pill bleu">${T("Étiquette générée")}</span>';
+        if (r.fraisBoutique) badges += ' <span class="rf-pill bleu">${T("Frais pris en charge")}</span>';
         return '<div class="ligne" data-id="' + esc(r.id) + '" title="${T("Ouvrir la demande de retour")}">'
+          + '<span class="rf-av" aria-hidden="true">' + esc(initiales(r.client)) + '</span>'
           + '<div class="gauche">'
-          + '<div class="haut"><span class="num">' + esc(r.commande) + '</span>'
+          + '<div class="haut"><span class="rf-nom">' + esc(r.client || '—') + '</span>'
           + szVerrouCase('return_reqs', r.id) + badges + '</div>'
-          + '<div class="dt"><strong>' + esc(r.client) + '</strong>'
-          + (r.courriel ? ' · ' + esc(r.courriel) : '') + '</div>'
+          + '<div class="rf-sous"><span class="rf-code">' + esc(r.commande) + '</span>'
+          + (r.courriel ? '<span>·</span><span>' + esc(r.courriel) + '</span>' : '') + '</div>'
           + '<div class="dt">${T("Motif : ")}' + esc(r.motif || '–') + '</div>'
           + '</div>'
           + '<div class="droite">' + esc(fmtDate(r.date)) + '</div>'

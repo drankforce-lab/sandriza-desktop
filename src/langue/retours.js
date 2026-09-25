@@ -88,5 +88,16 @@ module.exports = {
   'Motif :': 'Reason:',
 
   /* ── LE VERDICT ─────────────────────────────────────────────────────────── */
-  'Demande ouverte dans sa fenêtre.': 'Request opened in its own window.'
+  'Demande ouverte dans sa fenêtre.': 'Request opened in its own window.',
+  // La refonte de la liste, comme l'Inventaire (2026-09-25).
+  'à traiter': 'to handle',
+  'en route vers nous': 'on the way back',
+  'à inspecter': 'to inspect',
+  'à trancher': 'to decide',
+  'délai qui s’achève': 'deadline ending',
+  'Cliquer pour afficher': 'Click to show',
+  'Expire le ': 'Expires on ',
+  'Expire le': 'Expires on',
+  'Étiquette réelle': 'Real label',
+  'Étiquette générée': 'Generated label',
 };
