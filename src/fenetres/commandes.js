@@ -491,6 +491,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var tr = g.querySelector('tbody tr');
     var hL = tr ? tr.offsetHeight : 0;
     if (!(hL > 0)) hL = 36;
+    /* ⚠ LES LIGNES SONT DES CARTES ESPACEES (border-spacing, refonte du
+       2026-09-25) : offsetHeight ne compte pas l espace entre elles. Sans
+       l ajouter, Auto demanderait une ligne de trop et la derniere passerait
+       sous le bas du cadre. */
+    try {
+      var tbE = g.querySelector('table');
+      var esp = tbE ? parseFloat(String(getComputedStyle(tbE).borderSpacing || '').split(' ')[1]) : 0;
+      if (esp > 0) hL += esp;
+    } catch (e) {}
     var dispo = g.clientHeight - ((th && th.offsetHeight) || 30);
     if (!(dispo > 0)) return; // le banc mesure NaN : on ne touche a rien
     var n = Math.max(5, Math.floor(dispo / hL));
@@ -961,7 +970,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       voile('<h3 style="color:var(--tx-err)"><span class="ic">🗑</span> ${T("Supprimer la commande")}</h3>'
         + '<p><strong>' + esc(ap.numero) + '</strong> — ' + esc(ap.client) + '<br>'
         + '<span style="color:var(--tx2)">' + esc(dateCourte(ap.date)) + ' · ' + argent(ap.total)
-        + ' · ' + esc(ap.statutLibelle) + '</span></p>'
+        + ' · ' + esc(szTd(ap.statutLibelle)) + '</span></p>'
         + '<p style="font-weight:600;margin-top:.6rem">${T("Éléments qui seront supprimés :")}</p>'
         + '<ul style="padding-left:0">' + (ap.elements || []).map(function(x){
             return '<li class="item">' + esc(x) + '</li>'; }).join('') + '</ul>'

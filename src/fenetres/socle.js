@@ -348,7 +348,15 @@ function szPleinReinit(){
    l'assistant des incidents — mais le défaut valait pour TOUTES les fenêtres).
    ⚠ Le repli sur `#msg` est passé APRÈS : il sortait par `return` quand la
    fenêtre n'a pas de pied, ce qui aurait sauté aussi le routage. */
-const JS_DIRE_BASE = () => `
+/* ══ szTd — LE VOCABULAIRE DU SITE, TRADUIT A L AFFICHAGE (2026-09-25) ══════
+   Voir src/vocabulaire-site.js. Pose dans JS_DIRE, donc dans les 100 fenetres
+   qui le chargent. En francais la table est VIDE : szTd rend le texte tel quel.
+   ⚠ A N EMPLOYER QUE SUR CE QUI S AFFICHE — jamais sur une valeur qui repart. */
+const VOCAB_SITE = require('../vocabulaire-site.js');
+const JS_TD = () => 'var SZ_TD = ' + JSON.stringify(LANGUE.langueCourante() === 'en' ? VOCAB_SITE : {}) + ';'
+  + 'function szTd(t){ if (t == null) return ""; var s = String(t);'
+  + ' return Object.prototype.hasOwnProperty.call(SZ_TD, s) ? SZ_TD[s] : s; }';
+const JS_DIRE_BASE = () => JS_TD() + `
 var _szDireT = null;
 function szDire(texte, genre){
   var t = texte == null ? '' : String(texte);
@@ -796,6 +804,15 @@ function szAutoPagination(selecteur, surChangement){
     var tr = g.querySelector('tbody tr');
     var hL = tr ? tr.offsetHeight : 0;
     if (!(hL > 0)) hL = 36;
+    /* ⚠ LES LIGNES SONT DES CARTES ESPACEES (border-spacing, refonte du
+       2026-09-25) : offsetHeight ne compte pas l espace entre elles. Sans
+       l ajouter, Auto demanderait une ligne de trop et la derniere passerait
+       sous le bas du cadre. */
+    try {
+      var tbE = g.querySelector('table');
+      var esp = tbE ? parseFloat(String(getComputedStyle(tbE).borderSpacing || '').split(' ')[1]) : 0;
+      if (esp > 0) hL += esp;
+    } catch (e) {}
     var dispo = g.clientHeight - ((th && th.offsetHeight) || 30);
     if (!(dispo > 0)) return;
     var n = Math.max(5, Math.floor(dispo / hL));
@@ -3077,14 +3094,40 @@ const CSS_REFONTE = `
    possibles. Une fenetre qui quadrille chaque cellule verrait ses traits
    doubler : a surveiller a la planche-contact.
    ⚠ AUCUN ACCENT GRAVE DANS CE BLOC : il vit dans un litteral de gabarit. */
-table{border-collapse:separate;border-spacing:0}
-thead th{padding:.5rem .7rem;font-size:.66rem;letter-spacing:.07em;border-bottom:0}
-thead th:first-child{border-radius:9px 0 0 9px}
-thead th:last-child{border-radius:0 9px 9px 0}
-tbody td{padding:.55rem .7rem}
-tbody tr:first-child>td{border-top:0}
+/* ⚠⚠ 2e PASSE, LE MEME JOUR — << je ne vois pas ou tu as applique la meme
+   refonte que l inventaire, je veux vraiment que tu le fasses partout >>. La
+   1re passe (lignes aerees, bande arrondie) etait trop discrete pour se voir.
+   ➡ LA SIGNATURE DE L INVENTAIRE, TELLE QUELLE (voir .gp dans inventaire.js) :
+     chaque ligne est une CARTE espacee, arrondie, a peine plus claire que le
+     fond ; l en-tete n est plus une bande mais un intitule discret. La bande
+     demandee le 2026-09-04 cede donc la place au dessin qu il a approuve pour
+     l Inventaire et veut partout.
+   ⚠ Les etats de ligne des fenetres (tr.a, tr.attente...) restent visibles : la
+   carte est TRANSLUCIDE (--v03) et se pose par-dessus la teinte de la ligne.
+   ⚠ La pagination Auto compte l espace entre les cartes (szAutoPagination). */
+table{border-collapse:separate;border-spacing:0 6px}
+thead th{background:var(--f-carte);padding:.3rem .8rem .1rem;font-size:.66rem;letter-spacing:.08em;
+  color:var(--tx3);border-bottom:0}
+/* ⚠ LA CARTE SE DESSINE PAR SON CONTOUR, PAS PAR UN FOND : un fond --v03 changeait
+   la surface sous TOUS les textes des tableaux, et le banc des contrastes les a
+   tous revus comme des couples neufs (la dette declaree portait sur l ancienne
+   surface). Le contour arrondi garde le dessin de l Inventaire sans deplacer une
+   seule couleur de texte. Le survol, lui, eclaire la carte. */
+tbody td{padding:.62rem .8rem;border-top:1px solid var(--v08);
+  border-bottom:1px solid var(--v08);transition:background .13s,border-color .13s}
+tbody td:first-child{border-left:1px solid var(--v08);border-radius:11px 0 0 11px}
+tbody td:last-child{border-right:1px solid var(--v08);border-radius:0 11px 11px 0}
+tbody td:only-child{border-radius:11px}
+tbody tr:hover>td{background:var(--v06);border-color:rgba(201,169,126,.35)}
 th:first-child,td:first-child{padding-left:.9rem}
 th:last-child,td:last-child{padding-right:.9rem}
+/* En jour, la bande beige de l en-tete s efface aussi : meme dessin qu en nuit. */
+html.jour thead th{background:var(--f-carte)}
+/* Les feuilles de document (etat de compte, facture) restent des DOCUMENTS :
+   pas de cartes sur le papier. */
+.feuille table,.papier table{border-collapse:collapse;border-spacing:0}
+.feuille tbody td,.papier tbody td{background:transparent;border-left:0;border-right:0;border-radius:0;
+  border-top:1px solid #e3e0d8;border-bottom:0}
 .carte{border-radius:14px}
 .tuile{border-radius:12px}
 .tuile .val{font-size:1.3rem;line-height:1.2}
@@ -3092,10 +3135,27 @@ th:last-child,td:last-child{padding-right:.9rem}
    fenetres nomment l actif << on >> ou << actif >> : les deux sont couverts. */
 .onglets button{border-radius:9px}
 .onglets button.on,.onglets button.actif{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:700}
+/* ⚠ CE QUI EST DANS L ONGLET ACTIF SUIT SA COULEUR. Le banc des contrastes l a
+   refuse a la premiere construction : un sous-titre gris (Studio, << A choisir >>)
+   tombait a 1,19 sur l or, une coche verte a 1,44, et les pastilles << A faire >>
+   et << ✓ >> du Profil passaient sous 4,5 en jour. Sur un onglet choisi, le texte
+   et ses pastilles prennent l encre de l onglet ; la pastille garde sa forme. */
+.onglets button.on *,.onglets button.actif *{color:inherit!important}
+/* ⚠ !important, ET SEULEMENT ICI : les fenetres ont leurs propres regles, plus
+   precises (Studio .ong.on .oe, Profil .pill en jour), qui gagnaient. Sur un
+   fond d or, AUCUNE encre de fenetre n est lisible : celle de l onglet doit
+   passer toujours. */
+.onglets button.on .pill,.onglets button.actif .pill{background:rgba(23,32,44,.14);border-color:transparent}
 /* Le mode jour : html.jour button repeint TOUT bouton en boite blanche, onglets
    compris (vu a l Inventaire). L actif prend l accent du jour. */
-html.jour .onglets button{background:transparent;border-color:transparent}
+html.jour .onglets button{background:transparent;border-color:transparent;color:#414e66}
+/* ⚠ L ENCRE DES ONGLETS NON CHOISIS, EN JOUR : l or pale de la fenetre Marque
+   (#7d694e) posait 4,40 sur la barre creme, une fois la boite blanche retiree. */
+/* Une pastille dans un onglet NON choisi garde un fond blanc : sur la barre grisee
+   des onglets, << A faire >> tombait a 4,26 et << ✓ >> a 4,31 (Profil, en jour). */
+html.jour .onglets button .pill{background:#fff}
 html.jour .onglets button.on,html.jour .onglets button.actif{background:rgba(138,106,62,.12);border-color:#8a6a3e;color:#1d2433}
+html.jour .onglets button.on .pill,html.jour .onglets button.actif .pill{background:rgba(29,36,51,.1);color:#1d2433!important}
 /* ⚠ LES FEUILLES DE DOCUMENT (etat de compte, facture) NE SONT PAS L INTERFACE.
    Elles montrent un document tel qu il s imprime : blanc, encre noire. La bande
    d en-tete de l interface y posait un bandeau SOMBRE sur papier blanc — un
