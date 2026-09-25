@@ -196,8 +196,9 @@ const CSS_PROPRE = `
 .pastille{margin-left:auto;padding:.06rem .4rem;border-radius:99px;background:#c9a97e;
   color:#17202c;font-size:.7rem;font-weight:700;display:none}
 .pastille.on{display:inline-block}
-.rabais{display:flex;gap:.28rem;flex-wrap:wrap;margin-top:.35rem}
-.rabais button{padding:.14rem .4rem;font-size:.72rem;border-radius:6px}
+/* ⚠ UNE SEULE LIGNE (2026-09-25, sa regle : << ca ne doit pas etre sur deux lignes, ramene tout sur une ligne ou propose-moi quelque chose sans perdre le contenu >>). Mesure a 1280 px en ANGLAIS, ou les libelles sont les plus longs. */
+.rabais{display:flex;gap:.2rem;flex-wrap:nowrap;margin-top:.35rem}
+.rabais button{padding:.14rem .3rem;font-size:.7rem;border-radius:6px;white-space:nowrap}
 .rabais button.on{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
 @media (max-width:700px){.prixgrille{grid-template-columns:1fr}}
 .paire{display:flex;gap:.4rem;align-items:center}

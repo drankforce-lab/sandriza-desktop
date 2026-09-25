@@ -135,7 +135,10 @@ body{background:var(--f-page);color:var(--tx);
 .outils,.aides{flex:0 0 auto;display:flex;flex-wrap:wrap;gap:.3rem;padding:.5rem .6rem;
   border-bottom:1px solid var(--v08)}
 .aides{padding-top:.35rem;padding-bottom:.35rem;align-items:center}
+/* ⚠ UNE SEULE LIGNE (2026-09-25, sa regle : << ca ne doit pas etre sur deux lignes, ramene tout sur une ligne ou propose-moi quelque chose sans perdre le contenu >>). Mesure a 1280 px en ANGLAIS, ou les libelles sont les plus longs. */
+.outils{flex-wrap:nowrap!important}
 .outils .btn,.aides .btn{font-size:.75rem;padding:.26rem .48rem}
+.outils .btn{font-size:.72rem;padding:.24rem .36rem;white-space:nowrap}
 /* Un reglage ACTIF doit se voir sans lire : une case a cocher en mots se relit
    a chaque fois, une pastille allumee se reconnait. */
 .btn.on{background:#7AA7FF;border-color:#7AA7FF;color:#0b1220;font-weight:650}

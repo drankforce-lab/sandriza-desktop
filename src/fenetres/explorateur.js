@@ -42,8 +42,17 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.05rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.barre{flex:0 0 auto;display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;
+/* ⚠ UNE SEULE LIGNE (2026-09-25, sa regle : << ca ne doit pas etre sur deux lignes, ramene tout sur une ligne ou propose-moi quelque chose sans perdre le contenu >>). Mesure a 1280 px en ANGLAIS, ou les libelles sont les plus longs. */
+.barre{flex:0 0 auto;display:flex;gap:.4rem;align-items:center;flex-wrap:nowrap;
   padding:.5rem 1.05rem;border-bottom:1px solid var(--v06)}
+/* Tout garde sa taille ; seule la recherche cede (flex 1 1, plancher 9rem). */
+.barre > *{flex:0 0 auto;white-space:nowrap}
+.barre > input[type=search]{flex:1 1 14rem}
+/* Les menus deroulants cedent aussi, apres la recherche : a 1280 px en anglais,
+   le choix de vue sortait sinon par la droite. */
+.barre > select{flex:0 1 auto;min-width:6.5rem}
+.barre > select:last-of-type{min-width:8.5rem}
+.barre > .vues{flex:0 0 auto}
 input[type=search],select,button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.28rem .5rem}
 input[type=search]{flex:1 1 14rem;min-width:9rem}

@@ -43,7 +43,13 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .stitre{font-size:.86rem;font-weight:700;color:var(--tx-bleute);margin:0 0 .5rem}
 .info{color:var(--tx2);font-size:.79rem;line-height:1.6;margin:0 0 .6rem}
 .info b{color:var(--tx-bleute)}
-.gestes{display:flex;gap:.5rem;flex-wrap:wrap;margin:0 0 .6rem}
+/* ⚠ UNE GRILLE 2 x 2, VOULUE (2026-09-25). Les quatre gestes debordaient de la
+   demi-carte et le quatrieme tombait seul a la ligne. Sa regle : << sur une
+   ligne, ou propose-moi quelque chose sans perdre le contenu >>. Quatre libelles
+   longs ne tiennent pas sur une ligne dans une demi-carte : deux rangees EGALES,
+   de meme largeur, se lisent comme une disposition, pas comme un debordement. */
+.gestes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;margin:0 0 .6rem}
+.gestes > *{width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stock{display:flex;gap:1.5rem;flex-wrap:wrap}
 .jauge{flex:1;min-width:15rem}
 .jauge .lg{display:flex;align-items:baseline;gap:.4rem;font-size:.8rem;margin-bottom:.25rem}

@@ -3056,6 +3056,54 @@ const CSS_HAUTEUR = `
    transitions de vue 111+. Mesure faite, pas supposee.
 
    ⚠ AUCUN ACCENT GRAVE ICI : litteral de gabarit. */
+const CSS_REFONTE = `
+/* ══ LA REFONTE VISUELLE, COMMUNE A TOUTES LES FENETRES (2026-09-25) ═════════
+   Sa demande : << continue la refonte visuelle comme tu as fait a l inventaire,
+   mais on doit reviser tous les modules au complet >>. L Inventaire avait ete
+   refait a la main (voir .gp dans inventaire.js) ; cent fenetres ne se refont
+   pas une par une sans diverger. Cette couche porte ce qu elles PARTAGENT.
+   ➡ LES REGLES, les memes qu a l Inventaire :
+     . pas un tableur : de l air dans les lignes, pas de quadrillage ;
+     . la bande d en-tete des tableaux RESTE — elle a ete DEMANDEE le 2026-09-04
+       (voir plus haut << LA BANDE D EN-TETE DES TABLEAUX >>) — mais arrondie ;
+     . une couleur = un sens : l or pour l onglet actif, rien de decoratif.
+   ⚠ POURQUOI EN DERNIER : ce bloc est ajoute APRES toutes les autres feuilles du
+   socle, elles-memes ajoutees apres celle de chaque fenetre. A specificite egale
+   il l emporte donc sur les regles GENERIQUES d une fenetre (thead th, tbody td)
+   — et une fenetre qui a une regle PLUS PRECISE (.grille tbody td...) garde la
+   sienne : c est voulu, ce sont ses cas particuliers.
+   ⚠ border-collapse:separate + border-spacing:0 : meme dessin qu en collapse
+   pour des bordures du haut seulement, mais les coins arrondis deviennent
+   possibles. Une fenetre qui quadrille chaque cellule verrait ses traits
+   doubler : a surveiller a la planche-contact.
+   ⚠ AUCUN ACCENT GRAVE DANS CE BLOC : il vit dans un litteral de gabarit. */
+table{border-collapse:separate;border-spacing:0}
+thead th{padding:.5rem .7rem;font-size:.66rem;letter-spacing:.07em;border-bottom:0}
+thead th:first-child{border-radius:9px 0 0 9px}
+thead th:last-child{border-radius:0 9px 9px 0}
+tbody td{padding:.55rem .7rem}
+tbody tr:first-child>td{border-top:0}
+th:first-child,td:first-child{padding-left:.9rem}
+th:last-child,td:last-child{padding-right:.9rem}
+.carte{border-radius:14px}
+.tuile{border-radius:12px}
+.tuile .val{font-size:1.3rem;line-height:1.2}
+/* Les onglets : l actif en or, les autres a plat — comme l Inventaire. Les
+   fenetres nomment l actif << on >> ou << actif >> : les deux sont couverts. */
+.onglets button{border-radius:9px}
+.onglets button.on,.onglets button.actif{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:700}
+/* Le mode jour : html.jour button repeint TOUT bouton en boite blanche, onglets
+   compris (vu a l Inventaire). L actif prend l accent du jour. */
+html.jour .onglets button{background:transparent;border-color:transparent}
+html.jour .onglets button.on,html.jour .onglets button.actif{background:rgba(138,106,62,.12);border-color:#8a6a3e;color:#1d2433}
+/* ⚠ LES FEUILLES DE DOCUMENT (etat de compte, facture) NE SONT PAS L INTERFACE.
+   Elles montrent un document tel qu il s imprime : blanc, encre noire. La bande
+   d en-tete de l interface y posait un bandeau SOMBRE sur papier blanc — un
+   defaut anterieur a cette refonte, que la planche-contact a montre. Le document
+   garde son propre dessin : trait bas, fond transparent, pas d arrondi. */
+.feuille thead th,.papier thead th{background:transparent;border-radius:0;border-bottom:1px solid #d6d3cc;color:#444}
+`;
+
 const CSS_TRANSITIONS = `
 /* ── 1. CE QUI ARRIVE SE POSE, AU LIEU DE CLAQUER ──────────────────────────
    ⚠ Les CARTES et les TUILES bougent de 4 px ; les LIGNES de tableau, non.
@@ -3125,8 +3173,8 @@ tbody tr{transition:opacity var(--sz-vite) linear,background var(--sz-vite) line
 }
 `;
 
-module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS,
-  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS,
+module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE,
+  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE,
   JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_THEMES, ICO,
   /* La page, pas son texte : voir l en-tete de ce fichier. */
   TETE, LIEU, SEP_DEC };
