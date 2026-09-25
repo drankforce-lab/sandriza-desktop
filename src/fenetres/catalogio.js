@@ -126,12 +126,14 @@ tbody td{padding:.3rem .4rem;border-top:1px solid var(--v055);vertical-align:top
 tbody tr:hover td{background:var(--v04)}
 code{font:.76rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 .dt{font-size:.72rem;color:var(--tx2)}
-.pill{display:inline-block;font-size:.66rem;padding:.05rem .5rem;border-radius:99px;font-weight:700}
+/* La pastille a point de la refonte (2026-09-25) : la forme de rf-pill, les memes sens. */
+.pill{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:600;padding:.22rem .65rem;border-radius:99px;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:99px;background:currentColor;flex:0 0 auto}
 .pill.creation{background:rgba(59,130,246,.2);color:var(--tx-bleu)}
-.pill.maj{background:rgba(217,119,6,.2);color:#fcd34d}
+.pill.maj{background:rgba(217,119,6,.2);color:var(--tx-att)}
 .pill.inchange{background:rgba(148,163,184,.18);color:var(--tx-gris2)}
 .pill.erreur,.pill.conflit,.pill.echec{background:rgba(220,38,38,.2);color:var(--tx-err2)}
-.pill.fait{background:rgba(22,163,74,.2);color:#86efac}
+.pill.fait{background:rgba(22,163,74,.2);color:var(--tx-ok2)}
 .chg{display:inline-block;margin:0 .3rem .22rem 0;padding:.08rem .42rem;border-radius:5px;
   background:var(--v05);border:1px solid var(--v10);font-size:.74rem}
 .chg .de{color:var(--tx2);text-decoration:line-through}
@@ -284,7 +286,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
       +   '<div class="dl">'
       +     '<span class="dk">${T("Les fichiers sortent dans")}</span>'
       +     '<button class="chemin" data-act="dossier" title="' + titre + '"><span class="ic">📂</span> ' + esc(chemin) + '</button>'
-      +     (perso && !repli ? '<span class="pill inchange">dossier choisi</span>' : '')
+      +     (perso && !repli ? '<span class="pill inchange">${T("dossier choisi")}</span>' : '')
       +   '</div>'
       +   (repli
           ? '<div class="avis jaune" style="margin:.45rem 0 .1rem">${T("Votre dossier")} <strong>'

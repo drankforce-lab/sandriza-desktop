@@ -315,4 +315,6 @@ module.exports = {
   'dans votre stockage': 'in your storage',
   'le dossier des exports': 'the exports folder',
   'ce dossier': 'this folder',
+  // La refonte (2026-09-25).
+  'dossier choisi': 'folder chosen',
 };

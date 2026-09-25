@@ -292,4 +292,6 @@ module.exports = {
      neutre : cinq onglets partagent ce verbe, et nommer l onglet ici voudrait
      dire cinq phrases a tenir d accord avec cinq noms de fichier. */
   'La liste': 'The list',
+  // La refonte (2026-09-25).
+  'produits': 'products',
 };

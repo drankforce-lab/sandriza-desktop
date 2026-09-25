@@ -84,8 +84,12 @@ code{font:.77rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 .chip .lock{font-size:.7rem;opacity:.65}
 .chips input{flex:1;min-width:110px;border:none;background:transparent;padding:.26rem .2rem}
 .badge{display:inline-block;font-size:.7rem;font-weight:700;padding:.08rem .5rem;border-radius:99px}
-.pill{display:inline-block;font-size:.64rem;font-weight:700;padding:.05rem .45rem;border-radius:99px}
-.pill.used{background:rgba(99,102,241,.2);color:#c7d2fe}
+/* La pastille a point de la refonte (2026-09-25) : la forme de rf-pill, les memes sens. */
+.pill{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:600;padding:.22rem .65rem;border-radius:99px;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:99px;background:currentColor;flex:0 0 auto}
+.pill.used{background:rgba(99,102,241,.2);color:var(--tx-bleu)}
+/* Un COMPTE (3x) n est pas un etat : pas de point. */
+.pill.used::before{display:none}
 .pill.no{background:rgba(148,163,184,.15);color:var(--tx2)}
 .pill.auto{background:rgba(148,163,184,.18);color:var(--tx-gris2)}
 .pastille{width:20px;height:20px;border-radius:50%;display:inline-block;border:2px solid rgba(0,0,0,.2);vertical-align:middle}
@@ -328,7 +332,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function secCustom(){
     if (!D.custom.length) return '<p class="aide" style="margin:0">${T("Aucune couleur personnalisée. Ajoutez-en via « Ajouter une nouvelle couleur ».")}</p>';
     return D.custom.map(function(c){
-      var use = c.used > 0 ? '<span class="pill used">' + c.used + ' ${T("produit")}' + plur(c.used) + '</span>' : '<span class="pill no">${T("non utilisée")}</span>';
+      var use = c.used > 0 ? '<span class="pill used">' + c.used + ' ' + (c.used > 1 ? '${T("produits")}' : '${T("produit")}') + '</span>' : '<span class="pill no">${T("non utilisée")}</span>';
       var act = D.peut.edit ? '<button class="mini" data-coloredit="' + esc(c.nom) + '|' + esc(c.hex) + '"><span class="ic">✏</span> ${T("Modifier")}</button> <button class="mini danger" data-colorrm="' + esc(c.nom) + '" title="' + (c.used > 0 ? '${T("utilisée — bloqué")}' : '${T("Supprimer")}') + '">${T("Supprimer")}</button>' : '';
       return '<div class="cust"><span class="pastille" style="' + (c.gradient ? 'border-radius:4px;' : '') + 'background:' + esc(c.hex) + '"></span>'
         + '<span class="nm">' + esc(c.nom) + '</span>' + use

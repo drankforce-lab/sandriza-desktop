@@ -82,7 +82,9 @@ button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
 .res{display:inline-flex;gap:.3rem;align-items:center}
 .res span{font-size:1rem}
 .dt{font-size:.72rem;color:var(--tx2)}
-.pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
+/* La pastille a point de la refonte (2026-09-25) : la forme de rf-pill, les memes sens. */
+.pill{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:600;padding:.22rem .65rem;border-radius:99px;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:99px;background:currentColor;flex:0 0 auto}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
 .pill.err{background:rgba(239,68,68,.16);color:var(--tx-err)}
