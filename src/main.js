@@ -5020,6 +5020,8 @@ const MAJ_HEURES = [2, 4, 8];
 const MAJ_GRACE_S = 30;
 let _majMinuterie = null;
 let _majVersionPrete = '';
+// La version annoncee par update-available, pour la barre d etat (majEtat).
+let _majVersionVue = '';
 
 /* ⚠⚠ `_majPage` EST PARTI LE 2026-09-10, AVEC LE TOAST QU IL SERVAIT. Il
    injectait `Admin._majPrete(...)` dans la fenêtre principale et attendait sa
@@ -5145,6 +5147,27 @@ ipcMain.handle('maj:decision', (e, heures) => {
   return { ok: true, quand, heures: h };
 });
 
+/* ══ L ETAT DE LA MISE A JOUR, POUR LA BARRE D ETAT DU PANNEAU (2026-09-25) ══
+   Sa demande : << que le chargement et l installation de la mise a jour
+   apparaissent dans la barre d etat, a droite de Panneau d administration, quand
+   on demande une mise a jour directement de l application >>.
+   ⚠⚠ LA 6.13.0 N ENVOYAIT QUE LA PROGRESSION DU TELECHARGEMENT — et c est
+   justement l etape qui ne se voit pas. Mesure sur son poste le 2026-09-25 : la
+   6.14.0 est descendue en DIFFERENTIEL (quelques centaines de Ko), finie avant
+   le premier evenement de progression, et la barre s effacait aussitot. La
+   recherche, la version prete et l installation ne disaient rien du tout.
+   ➡ On envoie donc CHAQUE ETAPE : verif, telechargement, prete, installation.
+   ⚠ DES DONNEES, PAS UNE PHRASE (meme regle qu en 6.13.0) : le panneau connait
+   sa langue. Et << percent >> reste toujours un nombre, parce que le panneau ne
+   garde un etat que si ce champ est fini — un envoi sans lui serait lu comme
+   << efface >>.
+   ⚠ null efface la barre : a jour, echec. */
+let _majEtape = null;
+const majEtat = (etat) => {
+  _majEtape = etat ? etat.etape : null;
+  try { const wc = siteWC(); if (wc) wc.send('maj:progression', etat); } catch {}
+};
+
 const installerEtRelancer = (autoUpdater) => {
   // ⚠ LE LAISSEZ-PASSER, SANS QUOI LA PROTECTION SE MORD LA QUEUE. Le garde de
   // fermeture bloque tout départ pendant une mise à jour ; or installer EXIGE de
@@ -5152,8 +5175,16 @@ const installerEtRelancer = (autoUpdater) => {
   // jamais pouvoir s'installer.
   _quitAutorise = true;
   majBoutonsFermeture();
-  try { autoUpdater.quitAndInstall(true, true); }
-  catch { autoUpdater.quitAndInstall(); }   // repli : mieux vaut l'assistant que rien
+  /* ⚠ L ANNONCE, PUIS UN TEMPS POUR LA LIRE. quitAndInstall ferme l application
+     sur-le-champ, et l installateur tourne ensuite en silence : c est le DERNIER
+     instant ou la barre d etat existe. Sans ce delai, le message partirait vers
+     une page deja en train de se fermer. Le laissez-passer est pose AVANT, donc
+     rien ne peut bloquer la fermeture pendant ces 1,2 s. */
+  majEtat({ etape: 'installation', version: _majVersionPrete || '', percent: 100 });
+  setTimeout(() => {
+    try { autoUpdater.quitAndInstall(true, true); }
+    catch { autoUpdater.quitAndInstall(); }   // repli : mieux vaut l'assistant que rien
+  }, 1200);
 };
 
 /* ⚠ ON RETIENT L'UPDATER, parce que la minuterie du report se déclenche HORS de
@@ -5186,9 +5217,9 @@ const getUpdater = () => {
        ce qui empêche ce réglage de devenir dangereux. */
     autoUpdater.allowDowngrade = true;
 
-    autoUpdater.on('update-available', () => { _majDispo = true; });
+    autoUpdater.on('update-available', (info) => { _majDispo = true; _majVersionVue = (info && info.version) ? String(info.version) : ''; });
     // Rien à télécharger : aucune raison de retenir quoi que ce soit.
-    autoUpdater.on('update-not-available', () => { _majDispo = false; _majCritique = false; majBoutonsFermeture(); });
+    autoUpdater.on('update-not-available', () => { _majDispo = false; _majCritique = false; majBoutonsFermeture(); majEtat(null); });
 
     // Une barre qui avance est la différence entre « ça travaille » et « c'est
     // planté ». Un téléchargement de 80 Mo sur une ligne lente prend des minutes.
@@ -5213,8 +5244,9 @@ const getUpdater = () => {
          c est la seule facon de le dire.
          ⚠ DES NOMBRES, PAS UNE PHRASE — le panneau connait sa langue, pas nous. */
       try {
-        const wc = siteWC();
-        if (wc) wc.send('maj:progression', {
+        majEtat({
+          etape: 'telechargement',
+          version: _majVersionVue || '',
           percent: (p && Number.isFinite(p.percent)) ? p.percent : 0,
           transferred: (p && Number.isFinite(p.transferred)) ? p.transferred : 0,
           total: (p && Number.isFinite(p.total)) ? p.total : 0,
@@ -5242,10 +5274,13 @@ const getUpdater = () => {
 
     autoUpdater.on('update-downloaded', async (info) => {
       _updBusy = false;
-      /* La barre d etat du panneau efface sa progression : c est fini. Une barre
-         restee a << 98 % >> se lirait comme un telechargement bloque. */
-      try { const wc = siteWC(); if (wc) wc.send('maj:progression', null); } catch {}
       const version = (info && info.version) ? info.version : '';
+      /* La barre d etat passe de la progression a << prete >> : le telechargement
+         est fini, et une barre restee a << 98 % >> se lirait comme un transfert
+         bloque. << Prete >> n est pas une barre figee : c est un etat vrai, qui
+         dure jusqu a l installation (au besoin, jusqu a la fermeture). */
+      _majVersionPrete = version;
+      majEtat({ etape: 'prete', version, percent: 100 });
 
       // ⚠ PENDANT LA PORTE : AUCUN CLIC. On redémarre tout seul.
       // Il y avait ici une fenêtre à un seul bouton « Redémarrer maintenant ».
@@ -5300,7 +5335,7 @@ const getUpdater = () => {
          d en dessous : un telechargement qui casse a 60 % laisserait sinon une
          barre figee a << 60 % >> pour le reste de la journee, qui annoncerait un
          travail qui n a plus lieu. */
-      try { const wc = siteWC(); if (wc) wc.send('maj:progression', null); } catch {}
+      majEtat(null);
       // ⚠ ON LIBÈRE LE VERROU SUR ÉCHEC. Un téléchargement qui casse à 60 % laisse
       // un poste qu'on ne peut plus fermer si l'on oublie cette ligne — la panne
       // de mise à jour deviendrait un poste condamné, exactement ce que le reste
@@ -5360,12 +5395,15 @@ const checkForUpdates = async (manual) => {
   try { updater = getUpdater(); }
   catch { _updBusy = false; return; } // electron-updater absent : sans effet
   getUpdater._manual = !!manual;
+  // La barre d etat le dit des le clic : << Recherche d une mise a jour >>.
+  majEtat({ etape: 'verif', percent: 0 });
   try {
     const res = await updater.checkForUpdates();
     const remote = res && res.updateInfo && res.updateInfo.version;
     const isNew = remote && remote !== app.getVersion();
     if (!isNew) {
       _updBusy = false;
+      majEtat(null);
       if (manual) {
         dialog.showMessageBox(mainWindow, {
           type: 'info',
@@ -5385,8 +5423,14 @@ const checkForUpdates = async (manual) => {
       });
     }
     // Le téléchargement part tout seul (autoDownload) ; `update-downloaded` prend le relais.
+    /* ⚠ LA BARRE PASSE A << TELECHARGEMENT >> SANS ATTENDRE le premier evenement
+       de progression : en differentiel, il n arrive parfois qu a la fin. */
+    /* ⚠ Seulement si rien n a encore parle : un telechargement differentiel peut
+       etre DEJA fini, et l on repasserait alors de << prete >> a << 0 % >>. */
+    if (_majEtape === 'verif') majEtat({ etape: 'telechargement', version: String(remote), percent: 0 });
   } catch (err) {
     _updBusy = false;
+    majEtat(null);
     if (manual) {
       dialog.showMessageBox(mainWindow, {
         type: 'error',
