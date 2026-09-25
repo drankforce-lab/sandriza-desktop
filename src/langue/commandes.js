@@ -307,5 +307,7 @@ module.exports = {
   'en cours': 'in progress',
   'expédiée': 'shipped',
   'article': 'item',
-  'articles': 'items'
+  'articles': 'items',
+  ' par ': ' by ',
+  ' sur ': ' of ',
 };

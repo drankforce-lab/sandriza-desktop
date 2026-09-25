@@ -119,6 +119,10 @@ button.prio.on:hover{background:rgba(245,158,11,.34);border-color:#fbbf24}
 .tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .val.att{color:var(--tx-att)}
 .tuile.cliq{cursor:pointer;user-select:none;position:relative}
+/* Le geste de ligne aux mesures des zones de la barre (2,4rem, coins de 10px) :
+   demande du 2026-09-25, « conforme aux zones ». */
+button.mini.ligne-geste{height:2.4rem;padding:0 1rem;border-radius:10px;font-size:.84rem;font-weight:600;
+  display:inline-flex;align-items:center;gap:.45rem;white-space:nowrap}
 .tuile.cliq:hover{border-color:#c9a97e}
 .tuile.cliq::after{content:"›";position:absolute;top:.55rem;right:.8rem;font-size:1.1rem;color:var(--tx3)}
 .liste{flex:1 1 auto;min-height:0;overflow-y:auto}
@@ -511,9 +515,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
           + '<td class="c">'
           + (expedition || o.statut === 'shipped' || o.statut === 'delivered' ? ''
              : (o.enTraitement
-                ? '<button class="mini traite" disabled><span class="ic">🔒</span> ${T("En traitement")}' + (o.par ? ' par ' + esc(o.par) : '') + '</button>'
+                ? '<button class="mini ligne-geste traite" disabled><span class="ic">🔒</span> ${T("En traitement")}' + (o.par ? '${T(" par ")}' + esc(o.par) : '') + '</button>'
                 : (CTX.peutEditer
-                   ? '<button class="mini" data-prep="' + esc(o.id) + '"><span style="filter:grayscale(1)"><span class="ic">📦</span></span> ${T("Préparer la commande")}</button>' : '')))
+                   ? '<button class="mini ligne-geste" data-prep="' + esc(o.id) + '"><span style="filter:grayscale(1)"><span class="ic">📦</span></span> ${T("Préparer la commande")}</button>' : '')))
           + '</td></tr>';
       });
       h += '</tbody></table></div>';
@@ -528,7 +532,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + '<span class="pos">'
         + '<button class="mini" id="pg-prec"' + (d.page <= 0 ? ' disabled' : '') + '>${T("← Préc.")}</button>'
         + ' ' + (d.page * d.parPage + 1) + '–' + Math.min((d.page + 1) * d.parPage, d.total)
-        + ' sur ' + d.total + ' '
+        + '${T(" sur ")}' + d.total + ' '
         + '<button class="mini" id="pg-suiv"' + (d.page >= d.pages - 1 ? ' disabled' : '') + '>${T("Suiv. →")}</button>'
         + '</span></div>';
     }
