@@ -145,6 +145,7 @@ body{background:var(--f-page);color:var(--tx);
 .ong .ot b{font:600 .79rem/1.25 system-ui;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ong .oe{font-size:.68rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ong.on .oe{color:var(--tx2)}
+.ong .oe.ign{font-style:italic}
 /* ⚠⚠ LE CROCHET EST VERT DEPUIS LE 2026-09-09, sa demande : << mets aussi un
    crochet vert quand la section est remplie, exemple la photo est choisie tu
    coches vert >>.
@@ -1052,6 +1053,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         var src = (r && r.ok && r.vignettes && r.vignettes[id]) || '';
         PLEIN[id] = src;
         if (src && PHOTO_ID === id && !PHOTO) { PHOTO_URL = src; redessinerSiLibre(); }
+        else if (PHOTO_ID === id && ONGLET === 'filigrane') redessinerSiLibre();
       });
     }
   }
@@ -1287,8 +1289,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!PRESETS.length) return '<div class="vide">${T("Aucune ambiance.")}</div>';
     return '<div class="tuiles amb">' + PRESETS.map(function(p){
       return '<div class="tuile' + (PRESET === p.cle ? ' on' : '') + '" data-preset="' + esc(p.cle) + '">'
-        + '<span class="t">' + esc(p.label) + '</span>'
-        + '<span class="d">' + esc(p.desc || '') + '</span></div>';
+        + '<span class="t">' + esc(szTd(p.label)) + '</span>'
+        + '<span class="d">' + esc(szTd(p.desc || '')) + '</span></div>';
     }).join('') + '</div>';
   }
 
@@ -1533,6 +1535,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '" value="' + val + '"' + (RO ? ' disabled' : '') + '></div>';
   }
 
+  /* L image a marquer : le rendu s il existe, sinon la PHOTO choisie (2026-09-25).
+     ⚠ Pour une photo de la photothèque, seulement son image ENTIERE (PLEIN) :
+     marquer la vignette de 120 px produirait une image inutilisable. */
+  function imageAMarquer(){
+    if (RESULT) return RESULT.brut || RESULT.image;
+    if (PHOTO) return PHOTO;
+    if (PHOTO_ID && PLEIN[PHOTO_ID]) return PLEIN[PHOTO_ID];
+    return '';
+  }
+
   function filigraneCorpsHtml(){
     if (!LOGOS.length) {
       return '<div class="avgrille"><div class="aidep att">${T("Aucun logo dans la logothèque.")} '
@@ -1555,9 +1567,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += chRange2('fil-op', '${T("Opacité")}', Math.round(FIL.opacite * 100), 5, 100, 5, ' %');
     h += chRange2('fil-marge', '${T("Marge")}', FIL.marge, 0, 15, 1, ' %');
     h += '<div class="avun"><div class="fbar">'
-      + '<button class="prim" id="fil-go"' + ((RESULT && lg && !RO) ? '' : ' disabled') + '>'
-      + '${T("Appliquer au résultat")}</button>'
+      + '<button class="prim" id="fil-go"' + ((imageAMarquer() && lg && !RO) ? '' : ' disabled') + '>'
+      + (RESULT ? '${T("Appliquer au résultat")}' : '${T("Appliquer à la photo")}') + '</button>'
       + ((RESULT && RESULT.filigrane) ? '<button id="fil-off">${T("Retirer")}</button>' : '')
+      + '</div>'
+      /* ⚠⚠ CETTE LIGNE AVAIT DISPARU (4.57.0, l outil de retrait des textes) : le
+         bouton restait grise SANS DIRE POURQUOI, et il a pense que le filigrane
+         << ne marche pas bien >> (2026-09-25). Un bouton grise dit ce qu il
+         attend. */
+      + '<div class="aidep">'
+      + (!lg ? '${T("Choisissez un logo ci-dessus.")}'
+        : (!imageAMarquer() ? (aUnePhoto() ? '${T("L’image entière de la photo se charge — un instant.")}'
+                                           : '${T("Choisissez d’abord une photo.")}')
+          : (RESULT ? '${T("S’applique à l’image de droite.")}' : '${T("S’applique à la photo choisie, sans rendu et sans crédit.")}')))
       + '</div>'
       /* ⚠ CE QUE ÇA COÛTE, DIT UNE FOIS POUR TOUTES : rien. C est le seul
          traitement de cet écran dont le prix ne dépend pas du nombre de photos. */
@@ -1602,17 +1624,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function appliquerFiligrane(){
     var lg = logoChoisi();
-    if (!RESULT || !lg || OCCUPE || RO) return;
-    /* ⚠⚠ ON REPART TOUJOURS DE L IMAGE NUE. Sans elle, changer de position
-       poserait un second logo SUR le premier : deux marques superposées, et
-       aucun retour possible sans repayer un rendu. */
-    var base = RESULT.brut || RESULT.image;
+    var base = imageAMarquer();
+    if (!base || !lg || OCCUPE || RO) return;
+    /* ⚠⚠ ON REPART TOUJOURS DE L IMAGE NUE (imageAMarquer rend RESULT.brut en
+       premier). Sans elle, changer de position poserait un second logo SUR le
+       premier : deux marques superposées, et aucun retour possible sans repayer
+       un rendu. */
     occuper(true);
     dire('${T("Pose du filigrane…")}');
     appeler('studio:filigraner', [{ image: base, logo: lg.image, position: FIL.position,
       taille: FIL.taille, opacite: FIL.opacite, marge: FIL.marge }]).then(function(r){
       occuper(false);
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+      /* Sans rendu, la photo marquee DEVIENT le resultat : elle s enregistre et
+         se telecharge comme lui. Son image nue reste dans brut, pour Retirer. */
+      if (!RESULT) RESULT = { image: base, essai: false, decorErreur: '', ignores: '', upNote: '',
+        largeur: 0, hauteur: 0, voie: 'filigrane', preset: 'photo' };
       if (!RESULT.brut) RESULT.brut = RESULT.image;
       RESULT.image = r.image;
       RESULT.filigrane = true;
@@ -1642,6 +1669,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('studio:logos', []).then(function(r){
       if (!r || !r.ok) return;          // pas de logos : la section le dira
       LOGOS = r.logos || [];
+      // Un seul logo dans la logothèque : il n y a rien a choisir, il est pris.
+      if (!FIL.logoId && LOGOS.length === 1) FIL.logoId = LOGOS[0].id;
       // La logotheque arrive apres coup : si l onglet du filigrane est ouvert,
       // il montre encore << aucun logo >> — on le repeint.
       if (ONGLET === 'filigrane') majPanneau(); else majAvResume();
@@ -1767,7 +1796,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '"' + (bloque ? ' disabled title="${T("Choisissez d’abord une photo")}"' : '')
         + ' role="tab" aria-selected="' + (o.cle === courant ? 'true' : 'false') + '">'
         + '<span class="ot"><b>' + esc(o.t) + '</b>'
-        + '<span class="oe">' + esc(e || (ongletRequis(o.cle) ? '${T("À choisir")}' : '—')) + '</span></span>'
+        /* ⚠ UNE ETAPE FACULTATIVE VIDE LE DIT (2026-09-25, sa demande : << les
+           options optionnelles devraient avoir une indication si elles sont
+           ignorees >>). Un simple tiret ne disait pas si on avait oublie
+           l etape ou si elle serait sautee. */
+        + '<span class="oe' + (e ? '' : (ongletRequis(o.cle) ? '' : ' ign')) + '">'
+        + esc(e || (ongletRequis(o.cle) ? '${T("À choisir")}' : '${T("Facultatif · ignoré")}')) + '</span></span>'
         + (ok ? '<span class="oc">✓</span>' : '') + '</button>';
     }).join('');
   }
@@ -2417,7 +2451,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function nomPreset(c){
     var x = PRESETS.filter(function(o){ return o.cle === c; })[0];
-    return (x && x.label) || c;
+    return szTd((x && x.label) || c);
   }
   /* ⚠ << etapeFaite >> et << enteteEtape >> ont ete RETIREES a la cloture du
      chantier #29. Elles dessinaient l en-tete des cinq etapes numerotees,

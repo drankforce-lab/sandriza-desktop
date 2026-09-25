@@ -740,6 +740,14 @@ module.exports = {
   'Aperçu en cours…': 'Preview in progress…',
   'Génération en cours…': 'Generating…',
   'Lancement du lot…': 'Starting the batch…',
+  // Les etapes facultatives, et le filigrane qui dit ce qu il attend (2026-09-25).
+  'Facultatif · ignoré': 'Optional · skipped',
+  'Appliquer à la photo': 'Apply to the photo',
+  'Choisissez un logo ci-dessus.': 'Choose a logo above.',
+  'L’image entière de la photo se charge — un instant.': 'The full photo is loading — one moment.',
+  'Choisissez d’abord une photo.': 'Choose a photo first.',
+  'S’applique à l’image de droite.': 'Applies to the image on the right.',
+  'S’applique à la photo choisie, sans rendu et sans crédit.': 'Applies to the chosen photo — no render, no credit.',
   '« Produit à plat » ne se traite pas en lot : choisissez ci-dessous le traitement à appliquer.':
     '“Flat lay” can’t be run as a batch: choose below the treatment to apply.',
   '⚠ « Produit à plat » ne se traite pas en lot : choisissez ci-dessous le traitement à appliquer.':
