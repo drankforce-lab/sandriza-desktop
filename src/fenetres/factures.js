@@ -169,9 +169,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div>';
   }
 
+  /* La pastille a point de l Inventaire (rf-pill, refonte du 2026-09-25) : payee
+     en vert, a recevoir en ambre, en retard en rouge, annulee en gris. */
   function pilule(statut, libelle){
-    var ton = { paid: 'bon', demo: 'bon', unpaid: 'att', overdue: 'err', cancelled: 'err' }[statut] || 'neutre';
-    return '<span class="pill ' + ton + '">' + esc(libelle || statut) + '</span>';
+    var ton = { paid: 'vert', demo: 'vert', unpaid: 'ambre', overdue: 'rouge', cancelled: '' }[statut] || '';
+    return '<span class="rf-pill ' + ton + '">' + esc(libelle || statut) + '</span>';
+  }
+  /* Les initiales du client (Marie Tremblay -> MT) ; decoupe sur l espace. */
+  function initiales(nom){
+    var m = String(nom || '').trim().split(' ').filter(Boolean);
+    if (!m.length || m[0] === '—') return '?';
+    return ((m[0][0] || '') + (m.length > 1 ? (m[m.length - 1][0] || '') : '')).toUpperCase();
   }
 
   function filtrees(){
@@ -215,28 +223,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
         + tuile('${T("Nb factures")}', String(TUILES.nb || 0), '')
         + '</div>');
     }
-    h += '<div class="barreoutils">'
-      + '<input aria-label="${T("Numéro, commande ou client")}" type="search" id="f-q" placeholder="${T("Numéro, commande ou client…")}" value="' + esc(Q) + '">'
-      + '<select id="f-statut">'
-      + '<option value=""' + (STATUT === '' ? ' selected' : '') + '>${T("Tous les statuts")}</option>'
-      + '<option value="paid"' + (STATUT === 'paid' ? ' selected' : '') + '>${T("Payée")}</option>'
-      + '<option value="unpaid"' + (STATUT === 'unpaid' ? ' selected' : '') + '>${T("Non payée")}</option>'
-      + '<option value="overdue"' + (STATUT === 'overdue' ? ' selected' : '') + '>${T("En retard")}</option>'
-      + '<option value="cancelled"' + (STATUT === 'cancelled' ? ' selected' : '') + '>${T("Annulée")}</option>'
-      + '</select>'
-      + '<span class="droite">'
-      + (CLIENTS.length ? '<button class="mini" id="f-etat">${T("État de compte client")}</button>' : '')
-      + rows.length + ' '
-      + (rows.length > 1 ? '${T("factures")}' : '${T("facture")}') + '</span>'
-      + '</div>';
+    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE A FACTURES (2026-09-25) ════════
+       Barre sur une ligne : recherche a loupe, statuts en PASTILLES (plus une
+       liste deroulante : les cinq choix se voient d un coup). Crochets gardes :
+       #f-q, #f-etat, data-payer / data-depayer / data-suppr, tr[data-id]. */
+    var jet = function(v, lib){
+      return '<button class="rf-jet' + (STATUT === v ? ' on' : '') + '" data-fst="' + v + '">' + lib + '</button>';
+    };
+    h += '<div class="carte"><div class="rf-tb">'
+      + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Numéro, commande ou client")}" type="search" id="f-q" placeholder="${T("Numéro, commande ou client…")}" value="' + esc(Q) + '"></label>'
+      + jet('', '${T("Tous les statuts")}') + jet('paid', '${T("Payée")}') + jet('unpaid', '${T("Non payée")}')
+      + jet('overdue', '${T("En retard")}') + jet('cancelled', '${T("Annulée")}')
+      + '<span class="rf-droite">'
+      + (CLIENTS.length ? '<button class="rf-jet" id="f-etat">${T("État de compte client")}</button>' : '')
+      + '<span class="dt">' + rows.length + ' '
+      + (rows.length > 1 ? '${T("factures")}' : '${T("facture")}') + '</span></span>'
+      + '</div></div>';
 
     h += '<div class="carte">';
     if (!vue.length) {
       h += '<div class="vide">${T("Aucune facture ne correspond.")}</div>';
     } else {
       var avecGestes = PEUT_ENC || PEUT_SUP;
-      h += '<table><thead><tr><th>${T("Numéro")}</th><th>${T("Commande")}</th><th>${T("Client")}</th>'
-        + '<th>${T("Échéance")}</th><th>${T("Total")}</th><th>${T("Statut")}</th>' + (avecGestes ? '<th></th>' : '') + '</tr></thead><tbody>'
+      h += '<table><thead><tr><th>${T("Client et facture")}</th>'
+        + '<th>${T("Échéance")}</th><th style="text-align:right">${T("Total")}</th><th>${T("Statut")}</th>' + (avecGestes ? '<th></th>' : '') + '</tr></thead><tbody>'
         + vue.map(function(r){
             var gestes = '';
             if (PEUT_ENC) {
@@ -249,13 +259,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
             return '<tr data-id="' + esc(r.id) + '" title="${T("Ouvrir la facture")}">'
               // ⚠ Le cadenas d une facture est celui de SA COMMANDE : c est
               // elle qui se verrouille (detail, expedition, remboursement).
-              + '<td><span class="num">' + esc(r.numero) + '</span>'
-              + szVerrouCase('orders', r.commandeId || '')
-              + '<div class="dt">' + esc(fmtDate(r.date)) + '</div></td>'
-              + '<td>' + esc(r.commande || '—') + '</td>'
-              + '<td>' + esc(r.client || '—') + '</td>'
+              + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(r.client)) + '</span>'
+              + '<div style="min-width:0"><div class="rf-nom">' + esc(r.client || '—')
+              + szVerrouCase('orders', r.commandeId || '') + '</div>'
+              + '<div class="rf-sous"><span class="rf-code">' + esc(r.numero) + '</span>'
+              + (r.commande ? '<span>·</span><span>' + esc(r.commande) + '</span>' : '')
+              + '<span>·</span><span>' + esc(fmtDate(r.date)) + '</span></div></div></div></td>'
               + '<td>' + esc(fmtDate(r.echeance)) + '</td>'
-              + '<td>' + esc(fmt(r.total)) + '</td>'
+              + '<td style="text-align:right"><span class="rf-mont">' + esc(fmt(r.total)) + '</span></td>'
               + '<td>' + pilule(r.statut, szTd(r.statutLibelle)) + '</td>'
               + (avecGestes ? '<td class="fin">' + gestes + '</td>' : '') + '</tr>';
           }).join('')
@@ -334,6 +345,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
   corps.onclick = function(ev){
     var t = ev.target;
     if (!t || !t.closest) return;
+    var fst = t.closest('[data-fst]');
+    if (fst) { STATUT = fst.getAttribute('data-fst') || ''; PAGE = 0; dessiner(); return; }
     var bpay = t.closest('[data-payer]');
     if (bpay) {
       SUPPR_ARME = '';

@@ -100,5 +100,7 @@ module.exports = {
     'Click « Confirm? » to delete for good — the invoice will be removed from everywhere, including the customer statement.',
 
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
-  'Page': 'Page'
+  'Page': 'Page',
+  // La refonte de la liste, comme l'Inventaire (2026-09-25).
+  'Client et facture': 'Customer and invoice',
 };
