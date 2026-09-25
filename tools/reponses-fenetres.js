@@ -7655,6 +7655,19 @@ const CAS_REPRISE = [
     },
   },
   {
+    /* Le PROJET du Studio (2026-09-25) : comme l editeur promotionnel, son etat
+       vit dans des variables, pas dans des champs. Le brouillon est donc l objet
+       que valeurs() rend — ici une photo de la photothèque (par son identifiant),
+       un fantome sur << Studio epure >>. */
+    fichier: 'studio.js', depuis: 'ecran de depart', quoi: 'Un projet du Studio',
+    brouillon: {
+      v: 1, VOIE: 'fantome', VOIE_CHOISIE: true, PRESET: 'studio-epure',
+      FIL: { logoId: '', position: 'bd', taille: 20, opacite: 0.8, marge: 3 },
+      MODELE_SEL: 'sophia', POSE_SEL: '34turn', AV: {},
+      PHOTO_ID: 'ph1', PHOTO_NOM: 'Robe cintrée — face', PHOTO: '',
+    },
+  },
+  {
     fichier: 'retour.js', depuis: 'photo manquante', quoi: 'Une modification de cette demande',
     /* BR_CHAMPS de retour.js, plus `r-generer` déclaré à part. */
     brouillon: {

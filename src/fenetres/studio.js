@@ -37,7 +37,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, SEP_DEC } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO, TETE, SEP_DEC } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -533,6 +533,7 @@ function pageStudio(mode) {
 <div class="ro" id="ro" hidden>${T("Lecture seule : votre rôle ne permet pas de lancer de traitement.")}</div>
 <div class="corps plein" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
+  <button id="b-reset" title="${T("Tout effacer : photo, réglages et rendu")}">${T("↺ Recommencer")}</button>
   <button id="b-lot">${T("⚙ Traiter en lot…")}</button>
   <button class="gratuit" id="b-apercu" disabled>${T("Aperçu gratuit")}</button>
   <button class="prim" id="b-final" disabled>${T("Générer en pleine qualité")}</button></div>
@@ -567,7 +568,7 @@ function pageStudio(mode) {
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var corps = document.getElementById('corps');
   var bApercu = document.getElementById('b-apercu');
   var bFinal = document.getElementById('b-final');
@@ -1108,7 +1109,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + (s ? '<img src="' + esc(s) + '" alt="" loading="lazy">' : '<span class="tr"></span>')
             + '</button>'; }).join('')
       + (n > 8 ? '<span class="pl">+' + (n - 8) + '</span>' : '') + '</div>'
-      + '<button class="prim" id="pn-lot">${T("⚙ Traiter")} ' + (n > 1 ? ('ces ' + n) : '${T("cette photo")}') + ' ${T("en lot…")}</button>'
+      + '<button class="prim" id="pn-lot">${T("⚙ Traiter")} ' + (n > 1 ? ('${T("ces")} ' + n) : '${T("cette photo")}') + ' ${T("en lot…")}</button>'
       + '</div>';
   }
 
@@ -2497,6 +2498,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function dessiner(){
+    // Le brouillon suit l etat : le Studio se regle au clic, pas a la frappe.
+    try { szBrouillonPoser(); } catch (e) {}
     var av = document.getElementById('ro'); if (av) av.hidden = !RO;
     /* Le suivi des lots prend TOUT l ecran : il remplace les deux volets au
        lieu de se serrer dans l un des deux. */
@@ -2741,7 +2744,51 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     PHOTO = null; PHOTO_ID = ''; PHOTO_URL = ''; PHOTO_NOM = '';
     RESULT = null; ENREG = false;
     INTERIEUR = null; INTERIEUR_NOM = '';
+    /* ⚠ LES OPTIONS PARTENT AVEC LA PHOTO (2026-09-25, sa capture : << si on a
+       selectionne une photo, mis des options, et qu on efface la photo, les
+       options restent cochees >>). Une mise en scene reglee pour une piece ne
+       vaut pas pour la suivante ; la garder cochee la ferait partir sans qu on
+       l ait revue. Un PROFIL, lui, se reapplique d un geste. */
+    reinitOptions();
     dessiner();
+  }
+
+  /* L etat de depart des reglages, photographie a l ouverture (ETAT0, en bas du
+     script) et repris a l identique : aucune liste de defauts recopiee ici. */
+  function reinitOptions(){
+    if (!ETAT0) return;
+    var e = JSON.parse(ETAT0);
+    VOIE = e.VOIE; VOIE_CHOISIE = e.VOIE_CHOISIE; PRESET = e.PRESET;
+    FIL = e.FIL; MODELE_SEL = e.MODELE_SEL; POSE_SEL = e.POSE_SEL; AV = e.AV;
+    RC_SEL = ''; FORMATS = []; ONGLET = 'photo';
+    // Un seul logo dans la logothèque : il reste choisi d office.
+    if (!FIL.logoId && LOGOS.length === 1) FIL.logoId = LOGOS[0].id;
+  }
+
+  /* ↺ RECOMMENCER (sa demande du 2026-09-25) : photo, reglages, rendu,
+     brouillon et compteur du projet — tout repart de zero. Un rendu paye non
+     enregistre se demande avant (voile de la fenetre, pas une boite du systeme). */
+  function recommencer(){
+    if (OCCUPE) return;
+    var faire = function(){
+      if (DU_PANIER || PANIER.length) {
+        appeler('panier:vider', []).then(function(){});
+        PANIER = []; PANIER_SIG = ''; DU_PANIER = false; PANIER_IDX = 0;
+      }
+      reinitPhoto();
+      szBrouillonJeter();
+      PROJET_BASE = null; chargerCredits();
+      dire('${T("Nouveau projet : tout est remis à zéro.")}', 'att');
+    };
+    voile('<h3>${T("Recommencer ?")}</h3>'
+      + '<p>${T("La photo, les réglages et le rendu affiché seront effacés.")}'
+      + ((RESULT && !RESULT.essai && !ENREG) ? ' <strong>${T("Le rendu payé n’est pas enregistré dans la photothèque.")}</strong>' : '')
+      + '</p><div class="fin2"><button id="v-non">${T("Annuler")}</button>'
+      + '<button class="prim" id="v-oui">${T("Recommencer")}</button></div>',
+      function(fermer){
+        document.getElementById('v-non').onclick = fermer;
+        document.getElementById('v-oui').onclick = function(){ fermer(); faire(); };
+      });
   }
 
   function lireFichier(f){
@@ -3178,6 +3225,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         var sv = document.getElementById('b-save');
         if (sv) { sv.textContent = '${T("✓ Dans la photothèque")}'; sv.disabled = true; }
         dire('${T("Enregistrée dans la photothèque — vous pouvez l’attacher à un article de là.")}', 'bon');
+        // Le travail est a l abri : plus rien a proteger a la fermeture.
+        szBrouillonJeter();
       } else dire(expliquer(r), 'err');
     });
   }
@@ -3216,7 +3265,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         // (plein ecran) : sinon l image serait produite, facturee, et jamais vue.
         peindreResultat();
         dire(apercu ? '${T("Aperçu prêt (gratuit).")}' : '${T("Image générée.")}', 'bon');
-        if (!apercu) chargerCredits();
+        chargerCredits();
       } else {
         dire(expliquer(r), 'err');
       }
@@ -3399,14 +3448,31 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     telechargerImage(RESULT.image, nomRendu() + '.png');
   }
 
+  /* ⚠ LE COUT DU PROJET, MESURE ET NON CALCULE (2026-09-25, sa demande :
+     << un indicateur de credits utilises pour le projet, ex. 3 credits (restant
+     997) — pour les payants, se baser sur la lecture des credits reels du
+     compte >>). Le solde est LU au compte a l ouverture (PROJET_BASE), puis
+     apres chaque rendu : la difference est ce que le projet a vraiment coute,
+     reprises et appels caches compris. Les apercus gratuits se comptent de la
+     meme facon, sur le compteur du mois. */
+  var PROJET_BASE = null;   // { dispo, apercus } au debut du projet
   function chargerCredits(){
     appeler('studio:compte').then(function(r){
       if (!r || !r.ok) { creditsEl.textContent = ''; return; }
       var dispo = r.compte && r.compte.available != null ? r.compte.available : null;
       var sb = r.sandbox || {};
+      if (!PROJET_BASE) PROJET_BASE = { dispo: dispo, apercus: sb.utilise };
       var t = '';
-      if (dispo != null) t += '${T("Crédits :")} <b>' + dispo + '</b>';
-      if (sb.utilise != null) t += (t ? ' · ' : '') + '${T("Aperçus ce mois :")} ' + sb.utilise + (sb.quotaMois ? ' / ' + sb.quotaMois : '');
+      if (dispo != null && PROJET_BASE.dispo != null) {
+        var pris = Math.max(0, PROJET_BASE.dispo - dispo);
+        t += '${T("Ce projet :")} <b>' + pris + '</b> ' + (pris > 1 ? '${T("crédits")}' : '${T("crédit")}')
+          + ' (${T("restant")} <b>' + dispo + '</b>)';
+      } else if (dispo != null) t += '${T("Crédits :")} <b>' + dispo + '</b>';
+      if (sb.utilise != null) {
+        var ap = (PROJET_BASE.apercus != null) ? Math.max(0, sb.utilise - PROJET_BASE.apercus) : null;
+        t += (t ? ' · ' : '') + (ap != null ? ap + ' ' + (ap > 1 ? '${T("aperçus gratuits")}' : '${T("aperçu gratuit")}') + ' · ' : '')
+          + '${T("Aperçus ce mois :")} ' + sb.utilise + (sb.quotaMois ? ' / ' + sb.quotaMois : '');
+      }
       creditsEl.innerHTML = t;
     });
   }
@@ -3421,6 +3487,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         return;
       }
       PRESETS = r.presets || [];
+      // Le brouillon se propose une fois les ambiances la : il peut en nommer une.
+      setTimeout(function(){ try { szBrouillonProposer(); } catch (e) {} }, 0);
       /* ⚠ LA LECTURE SEULE SE POSE ENFIN (2026-09-25). RO etait lu a 38
          endroits et pose par RIEN depuis 2.35.0. Le site dit peutEcrire ; un
          site plus ancien ne le dit pas, et l on garde alors l ancien
@@ -3515,6 +3583,59 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      il n existe qu apres un clic sur << Enregistrer... >>, et le banc ne clique
      pas. C est pourtant la que se decide un ECRASEMENT, donc une perte. */
   if (${rcTemoin ? 'true' : 'false'}) RC_VOILE_DEP = true;
+  /* L etat de depart, pour reinitOptions : pris ICI, apres toutes les
+     declarations, jamais recopie. */
+  var ETAT0 = JSON.stringify({ VOIE: VOIE, VOIE_CHOISIE: VOIE_CHOISIE, PRESET: PRESET, FIL: FIL,
+    MODELE_SEL: MODELE_SEL, POSE_SEL: POSE_SEL, AV: AV });
+  var bReset = document.getElementById('b-reset');
+  if (bReset) bReset.onclick = recommencer;
+
+  /* ══ LE BROUILLON DU PROJET (2026-09-25, sa demande : << si on quitte le studio
+     sans avoir genere la photo, donne-nous un avertissement : conserver le
+     brouillon ou l effacer >>). C est le garde du socle, celui de dix-neuf
+     autres fenetres : a la fermeture, la coquille pose la question des qu il y
+     a quelque chose a perdre. ⚠ Une photo de la photothèque voyage par son
+     IDENTIFIANT ; un fichier importe, seulement s il tient (1,2 Mo) — au-dela,
+     le brouillon garde les reglages et le dit. */
+  szBrouillonBrancher({
+    portee: 'studio',
+    libelle: '${T("Un projet du Studio")}',
+    ttlMin: 1440,
+    cle: function(){ return 'projet'; },
+    actif: function(){ return !RO; },
+    rempli: function(){ return aUnePhoto() && !ENREG; },
+    valeurs: function(){
+      return { v: 1, VOIE: VOIE, VOIE_CHOISIE: VOIE_CHOISIE, PRESET: PRESET, FIL: FIL,
+        MODELE_SEL: MODELE_SEL, POSE_SEL: POSE_SEL, AV: AV,
+        PHOTO_ID: PHOTO_ID, PHOTO_NOM: PHOTO_NOM,
+        PHOTO: (PHOTO && PHOTO.length < 1200000) ? PHOTO : '' };
+    },
+    remplir: function(b){
+      if (!b || b.v !== 1) return;
+      VOIE = b.VOIE || VOIE; VOIE_CHOISIE = !!b.VOIE_CHOISIE; PRESET = b.PRESET || '';
+      /* FUSIONNES avec les reglages de depart, jamais remplaces : un brouillon
+         d une version plus ancienne n a peut-etre pas tous les champs, et un
+         reglage manquant serait un reglage indefini. */
+      var e0 = JSON.parse(ETAT0);
+      FIL = Object.assign(e0.FIL, b.FIL || {});
+      AV = Object.assign(e0.AV, b.AV || {});
+      MODELE_SEL = b.MODELE_SEL || MODELE_SEL; POSE_SEL = b.POSE_SEL || POSE_SEL;
+      PHOTO = b.PHOTO || null; PHOTO_ID = b.PHOTO_ID || ''; PHOTO_NOM = b.PHOTO_NOM || '';
+      PHOTO_URL = '';
+      if (PHOTO_ID && !PHOTO) {
+        var id = PHOTO_ID;
+        appeler('studio:vignettes', [{ ids: [id], plein: true }]).then(function(r){
+          var src = (r && r.ok && r.vignettes && r.vignettes[id]) || '';
+          PLEIN[id] = src;
+          if (PHOTO_ID === id && src) { PHOTO_URL = src; redessinerSiLibre(); }
+        });
+      }
+      dessiner();
+      dire('${T("Brouillon repris.")}', 'bon');
+    }
+  });
+  // Les champs de texte (decor decrit, etc.) suivent aussi : a la frappe.
+  szBrouillonEcouter();
   charger();
   lotsSuivre();
   chargerPanier();
