@@ -54,5 +54,17 @@ module.exports = {
 
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
   'Active': 'Active',
-  'Inactive': 'Inactive'
+  'Inactive': 'Inactive',
+  // La refonte de la liste, comme l'Inventaire (2026-09-25).
+  'Collections': 'Collections',
+  'au total': 'in total',
+  'Actives': 'Active',
+  'visibles en boutique': 'visible in the store',
+  'dans l’ensemble des collections': 'across all collections',
+  'Cliquer pour afficher': 'Click to show',
+  'Rechercher une collection': 'Search for a collection',
+  'Nom ou saison…': 'Name or season…',
+  'Toutes': 'All',
+  'Inactives': 'Inactive',
+  'Aucune collection ne correspond.': 'No collection matches.',
 };

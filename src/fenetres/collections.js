@@ -15,7 +15,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit (voir src/langue/collections.js). */
@@ -37,6 +37,14 @@ body{background:var(--f-page);color:var(--tx);
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+/* ── La refonte de l Inventaire (2026-09-25) ── */
+.tuiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem;flex:0 0 auto}
+.tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
+.tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tuile.cliq{cursor:pointer;user-select:none;position:relative}
+.tuile.cliq:hover{border-color:#c9a97e}
+.tuile.cliq::after{content:"›";position:absolute;top:.55rem;right:.8rem;font-size:1.1rem;color:var(--tx3)}
+.tuile.on{border-color:#c9a97e}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
 button{font:inherit;color:var(--tx);background:var(--v05);
@@ -80,7 +88,7 @@ function pageCollections() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
 
@@ -120,31 +128,69 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div>';
   }
 
+  var Q = '';          // recherche (la liste est ENTIERE ici : filtre local)
+  var FILTRE = '';     // '' | actives | inactives
+  function initiales(nom){
+    var m = String(nom || '').trim().split(' ').filter(Boolean);
+    if (!m.length) return '?';
+    return ((m[0][0] || '') + (m.length > 1 ? (m[m.length - 1][0] || '') : '')).toUpperCase();
+  }
   function dessiner(){
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
-    var rows = D.lignes || [];
-    var h = '<div class="barreoutils">'
-      + '<span>' + rows.length + ' '
+    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE AUX COLLECTIONS (2026-09-25) ═══
+       La liste arrive ENTIERE (pas de pagination) : les tuiles la comptent
+       donc honnetement ici, et la recherche comme les pastilles filtrent sur
+       place. Crochets gardes : #col-nouvelle, #col-exporter, tr[data-id]. */
+    var toutes = D.lignes || [];
+    var nAct = toutes.filter(function(r){ return r.active; }).length;
+    var nArt = toutes.reduce(function(s, r){ return s + (Number(r.articles) || 0); }, 0);
+    var q = Q.trim().toLowerCase();
+    var rows = toutes.filter(function(r){
+      if (FILTRE === 'actives' && !r.active) return false;
+      if (FILTRE === 'inactives' && r.active) return false;
+      if (q && (String(r.nom || '') + ' ' + String(r.saison || '')).toLowerCase().indexOf(q) < 0) return false;
+      return true;
+    });
+    var tu = function(f, lib, val, sous){
+      return '<div class="tuile' + (f != null ? ' cliq' + (FILTRE === f ? ' on' : '') + '" data-colf="' + f
+          + '" title="${T("Cliquer pour afficher")}' : '') + '">'
+        + '<div class="lbl">' + lib + '</div><div class="val">' + val + '</div><div class="sub">' + sous + '</div></div>';
+    };
+    var h = szTuiles('<div class="tuiles">'
+      + tu('', '${T("Collections")}', toutes.length, '${T("au total")}')
+      + tu('actives', '${T("Actives")}', nAct, '${T("visibles en boutique")}')
+      + tu(null, '${T("Articles")}', nArt, '${T("dans l’ensemble des collections")}')
+      + '</div>');
+    var jet = function(f, lib){
+      return '<button class="rf-jet' + (FILTRE === f ? ' on' : '') + '" data-colf="' + f + '">' + lib + '</button>';
+    };
+    h += '<div class="carte"><div class="rf-tb">'
+      + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Rechercher une collection")}" type="search" id="col-q" placeholder="${T("Nom ou saison…")}" value="' + esc(Q) + '"></label>'
+      + jet('', '${T("Toutes")}') + jet('actives', '${T("Actives")}') + jet('inactives', '${T("Inactives")}')
+      + '<span class="rf-droite"><span class="dt">' + rows.length + ' '
       + (rows.length > 1 ? '${T("collections")}' : '${T("collection")}') + '</span>'
-      + '<span class="droite"><button class="prim" id="col-nouvelle">${T("+ Nouvelle collection")}</button></span>'
-      + '</div>';
+      + '<button class="prim" id="col-nouvelle" style="height:2.4rem;padding:0 .9rem">${T("+ Nouvelle collection")}</button></span>'
+      + '</div></div>';
         /* ⚠ PLEINE HAUTEUR (2026-09-19) : la carte prend tout l espace restant et
        c est la LISTE qui defile. Sans ca, une liste courte s arrete a sa
        derniere ligne et laisse des centaines de pixels morts sous elle. */
     h += '<div class="carte plein">';
     if (!rows.length) {
-      h += '<div class="vide">${T("Pas de collection en ce moment.")}</div>';
+      h += '<div class="vide">' + (toutes.length ? '${T("Aucune collection ne correspond.")}'
+        : '${T("Pas de collection en ce moment.")}') + '</div>';
     } else {
       h += '<div class="liste"><table><thead><tr><th>${T("Collection")}</th><th>${T("Saison")}</th>'
         + '<th style="text-align:center">${T("Articles")}</th><th>${T("Statut")}</th></tr></thead><tbody>'
         + rows.map(function(r){
             return '<tr data-id="' + esc(r.id) + '" title="${T("Ouvrir la collection")}">'
-              + '<td><span class="num">' + esc(r.nom) + '</span>'
-              + szVerrouCase('collections', r.id)
-              + (r.description ? '<div class="dt">' + esc(r.description).slice(0, 120) + '</div>' : '') + '</td>'
+              + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(r.nom)) + '</span>'
+              + '<div style="min-width:0"><div class="rf-nom">' + esc(r.nom) + szVerrouCase('collections', r.id) + '</div>'
+              + (r.description ? '<div class="rf-sous">' + esc(String(r.description).slice(0, 120)) + '</div>' : '')
+              + '</div></div></td>'
               + '<td>' + esc(r.saison || '—') + '</td>'
-              + '<td style="text-align:center;font-weight:600">' + r.articles + '</td>'
-              + '<td>' + (r.active ? '<span class="pill bon">Active</span>' : '<span class="pill neutre">Inactive</span>') + '</td>'
+              + '<td style="text-align:center"><span class="rf-mont">' + r.articles + '</span></td>'
+              /* ⚠ << Active >> et << Inactive >> etaient ecrits en dur : jamais traduits. */
+              + '<td>' + (r.active ? '<span class="rf-pill vert">${T("Active")}</span>' : '<span class="rf-pill">${T("Inactive")}</span>') + '</td>'
               + '</tr>';
           }).join('')
         + '</tbody></table></div>';
@@ -177,6 +223,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         '${T("La liste des collections")}');
     };
 
+    var qi = document.getElementById('col-q');
+    if (qi) qi.oninput = function(){
+      Q = qi.value;
+      var a = qi.selectionStart, b = qi.selectionEnd;
+      dessiner();
+      var q2 = document.getElementById('col-q');
+      if (q2) { q2.focus({ preventScroll: true }); try { q2.setSelectionRange(a, b); } catch (e) {} }
+    };
+    corps.querySelectorAll('[data-colf]').forEach(function(b){
+      b.onclick = function(){ FILTRE = b.getAttribute('data-colf') || ''; dessiner(); };
+    });
     var nv = document.getElementById('col-nouvelle');
     if (nv) nv.onclick = function(){
       dire('${T("Ouverture…")}');
