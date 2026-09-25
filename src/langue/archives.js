@@ -115,5 +115,20 @@ module.exports = {
     'brought back — in the active orders again for 45 days.',
 
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
-  'Page': 'Page'
+  'Page': 'Page',
+  // La refonte de la liste, comme l'Inventaire (2026-09-25).
+  'livrées depuis 45 jours': 'delivered 45+ days ago',
+  'demandes closes': 'closed requests',
+  'gardées 6 ans': 'kept 6 years',
+  'avec leur commande': 'with their order',
+  'Cliquer pour afficher': 'Click to show',
+  'Numéro, client, courriel…': 'Number, customer, email…',
+  'Voir la commande': 'View the order',
+  'Client et commande': 'Customer and order',
+  'Client et facture': 'Customer and invoice',
+  'Client et remboursement': 'Customer and refund',
+  'Client et commande Total Statut Archivée le': 'Customer and order Total Status Archived on',
+  'Client et commande Statut Motif Archivé le': 'Customer and order Status Reason Archived on',
+  'Client et facture Montant Statut Archivée le': 'Customer and invoice Amount Status Archived on',
+  'Client et remboursement Mode Total Archivé le': 'Customer and refund Method Total Archived on',
 };

@@ -174,4 +174,9 @@ module.exports = {
   'photo effacée': 'photo deleted',
   'photos effacées': 'photos deleted',
   'remise en place': 'restored',
+  // La refonte, comme l'Inventaire (2026-09-25).
+  'Client et commande': 'Customer and order',
+  'par ': 'by ',
+  'Client et commande Total Supprimée': 'Customer and order Total Deleted',
+  'Total Supprimée': 'Total Deleted',
 };

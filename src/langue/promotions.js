@@ -213,5 +213,20 @@ module.exports = {
     'Click « Confirm? » to delete — the storefront banner goes with it.',
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
-  'j par produit': 'd per product'
+  'j par produit': 'd per product',
+  // La refonte de la liste, comme l'Inventaire (2026-09-25).
+  'Offres': 'Offers',
+  'au total': 'in total',
+  'appliquées en boutique': 'applied in the store',
+  'inactives ou hors période': 'inactive or out of period',
+  'Annonces': 'Announcements',
+  'visibles en boutique': 'visible in the store',
+  'Bandeaux': 'Banners',
+  'en haut de la boutique': 'at the top of the store',
+  'Badges': 'Badges',
+  'sur les fiches produit': 'on product pages',
+  'Cliquer pour filtrer': 'Click to filter',
+  'secondes.': 'seconds.',
+  'consultation seulement': 'view only',
+  'Nom Rabais Période': 'Name Discount Period',
 };

@@ -21,7 +21,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
    poste. ⚠⚠⚠ CET ÉCRAN EST DÉJÀ BILINGUE PAR SES CHAMPS : le bandeau et le
    badge portent chacun « Message » ET « Message (anglais) ». Ce que la cliente
@@ -45,6 +45,15 @@ body{background:var(--f-page);color:var(--tx);
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+/* ── La refonte de l Inventaire (2026-09-25) ── */
+.tuiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.6rem;flex:0 0 auto}
+.tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
+.tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tuile.cliq{cursor:pointer;user-select:none;position:relative}
+.tuile.cliq:hover{border-color:#c9a97e}
+.tuile.cliq::after{content:"›";position:absolute;top:.55rem;right:.8rem;font-size:1.1rem;color:var(--tx3)}
+.tuile.on{border-color:#c9a97e}
+.contenu{max-width:22rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
 input,select,button,textarea{font:inherit;color:var(--tx);background:var(--v05);
@@ -122,7 +131,7 @@ function pagePromotions() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var sous = document.getElementById('sous');
@@ -186,8 +195,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function val(id){ var e = document.getElementById(id); return e ? e.value : ''; }
   function coche(id){ var e = document.getElementById(id); return !!(e && e.checked); }
 
+  var ETAT = '';   // '' | encours | hors | announcement | badge — pose par les tuiles
+  function initiales(nom){
+    var m = String(nom || '').trim().split(' ').filter(Boolean);
+    if (!m.length) return '?';
+    return ((m[0][0] || '') + (m.length > 1 ? (m[m.length - 1][0] || '') : '')).toUpperCase();
+  }
   function lignes(){
     var pile = (ONGLET === 'offres' ? (D.offres || []) : (D.annonces || []));
+    if (ETAT === 'encours') pile = pile.filter(function(x){ return x.enCours; });
+    else if (ETAT === 'hors') pile = pile.filter(function(x){ return !x.enCours; });
+    else if (ETAT === 'announcement' || ETAT === 'badge') pile = pile.filter(function(x){ return x.genre === ETAT; });
     var q = Q.trim().toLowerCase();
     if (!q) return pile;
     return pile.filter(function(x){
@@ -392,21 +410,45 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var rows = lignes();
 
-    var h = '<div class="barreoutils">'
-      + '<button class="mini' + (ONGLET === 'offres' ? ' actif' : '') + '" data-onglet="offres">${T("Offres et rabais")}</button>'
-      + '<button class="mini' + (ONGLET === 'annonces' ? ' actif' : '') + '" data-onglet="annonces">${T("Annonces et badges")}</button>'
-      + '<input aria-label="${T("Rechercher")}" type="search" id="pr-q" placeholder="${T("Rechercher…")}" value="' + esc(Q) + '">'
-      + '<div class="droite">'
-      + (D.peutModifier ? '<button class="mini prim" id="pr-nouveau">+ '
+    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE AUX PROMOTIONS (2026-09-25) ════
+       L onglet arrive ENTIER (offres:liste ou annonces:liste) : les tuiles le
+       comptent sur place et filtrent d un clic (un second clic relache).
+       Barre sur une ligne a loupe, onglets en pastilles ; lignes riches.
+       Crochets gardes : data-onglet, #pr-q, #pr-nouveau, #pr-interv,
+       #pr-interv-enr, data-modifier, data-basculer, data-suppr, #pr-exporter. */
+    var pile = (ONGLET === 'offres' ? (D.offres || []) : (D.annonces || []));
+    var nEn = pile.filter(function(x){ return x.enCours; }).length;
+    var tu = function(f, lib, val, sous){
+      return '<div class="tuile cliq' + (ETAT === f ? ' on' : '') + '" data-prt="' + f + '" title="${T("Cliquer pour filtrer")}">'
+        + '<div class="lbl">' + lib + '</div><div class="val">' + val + '</div><div class="sub">' + sous + '</div></div>';
+    };
+    var h = szTuiles('<div class="tuiles">'
+      + (ONGLET === 'offres'
+          ? tu('', '${T("Offres")}', pile.length, '${T("au total")}')
+            + tu('encours', '${T("En cours")}', nEn, '${T("appliquées en boutique")}')
+            + tu('hors', '${T("Hors service")}', pile.length - nEn, '${T("inactives ou hors période")}')
+          : tu('', '${T("Annonces")}', pile.length, '${T("au total")}')
+            + tu('encours', '${T("En cours")}', nEn, '${T("visibles en boutique")}')
+            + tu('announcement', '${T("Bandeaux")}', pile.filter(function(x){ return x.genre === 'announcement'; }).length, '${T("en haut de la boutique")}')
+            + tu('badge', '${T("Badges")}', pile.filter(function(x){ return x.genre === 'badge'; }).length, '${T("sur les fiches produit")}'))
+      + '</div>');
+    h += '<div class="carte"><div class="rf-tb">'
+      + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Rechercher")}" type="search" id="pr-q" placeholder="${T("Rechercher…")}" value="' + esc(Q) + '"></label>'
+      + '<button class="rf-jet' + (ONGLET === 'offres' ? ' on' : '') + '" data-onglet="offres">${T("Offres et rabais")}</button>'
+      + '<button class="rf-jet' + (ONGLET === 'annonces' ? ' on' : '') + '" data-onglet="annonces">${T("Annonces et badges")}</button>'
+      + '<span class="rf-droite"><span class="dt">' + rows.length + ' '
+      + (ONGLET === 'offres' ? (rows.length > 1 ? '${T("offres")}' : '${T("offre")}')
+                             : (rows.length > 1 ? '${T("annonces")}' : '${T("annonce")}')) + '</span>'
+      + (D.peutModifier ? '<button class="prim" id="pr-nouveau" style="height:2.4rem;padding:0 .9rem">+ '
           + (ONGLET === 'offres' ? '${T("Nouvelle offre")}' : '${T("Nouvelle annonce")}') + '</button>' : '')
-      + '<span>' + rows.length + '</span></div></div>';
+      + '</span></div></div>';
 
     if (ONGLET === 'annonces' && D.peutModifier) {
       h += '<div class="carte"><h2>${T("Défilement du bandeau")}</h2>'
         + '<div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">'
         + '<span class="dt">${T("Quand plusieurs bandeaux sont actifs, ils se succèdent toutes les")}</span>'
         + '<input type="number" id="pr-interv" aria-label="${T("Intervalle en secondes")}" min="2" max="60" style="width:5rem" value="' + esc(D.intervalle || 6) + '">'
-        + '<span class="dt">secondes.</span>'
+        + '<span class="dt">${T("secondes.")}</span>'
         + '<button class="mini" id="pr-interv-enr">${T("Enregistrer")}</button></div></div>';
     }
 
@@ -418,15 +460,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       h += '<div class="vide">' + (Q ? '${T("Rien ne correspond.")}'
         : ONGLET === 'offres' ? '${T("Aucune offre. Créez la première.")}' : '${T("Aucune annonce. Créez la première.")}') + '</div>';
     } else if (ONGLET === 'offres') {
-      h += '<div class="liste"><table><thead><tr><th>${T("Nom")}</th><th>${T("Rabais")}</th><th>${T("Portée")}</th><th>${T("Période")}</th>'
+      h += '<div class="liste"><table><thead><tr><th>${T("Nom")}</th><th>${T("Rabais")}</th><th>${T("Période")}</th>'
         + '<th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
         + rows.map(function(o){
-            return '<tr><td><strong>' + esc(o.nom) + '</strong></td>'
-              + '<td style="font-weight:700;color:var(--tx-or)">' + esc(o.rabais) + '</td>'
-              + '<td class="dt">' + esc(o.portee) + '</td>'
+            return '<tr><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(o.nom)) + '</span>'
+              + '<div style="min-width:0"><div class="rf-nom">' + esc(o.nom) + '</div>'
+              + '<div class="rf-sous"><span>' + esc(o.portee) + '</span></div></div></div></td>'
+              + '<td><span class="rf-mont">' + esc(o.rabais) + '</span></td>'
               + '<td class="dt">' + (o.debut ? esc(jour(o.debut)) : '—')
               + (o.fin ? ' → ' + esc(jour(o.fin)) : '') + '</td>'
-              + '<td><span class="pill ' + (o.enCours ? 'bon' : 'neutre') + '">'
+              + '<td><span class="rf-pill ' + (o.enCours ? 'vert' : '') + '">'
               + (o.enCours ? '${T("En cours")}' : '${T("Hors service")}') + '</span></td>'
               + (D.peutModifier ? '<td class="fin">' + gestes(o) + '</td>' : '') + '</tr>';
           }).join('')
@@ -435,15 +478,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       h += '<div class="liste"><table><thead><tr><th>${T("Nom")}</th><th>${T("Genre")}</th><th>${T("Contenu")}</th><th>${T("Priorité")}</th>'
         + '<th>${T("Période")}</th><th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
         + rows.map(function(a){
-            return '<tr><td><strong>' + esc(a.nom) + '</strong>'
-              + (a.expireAuto ? '<div class="dt">${T("expire après")} ' + a.expireJours + ' ${T("j par produit")}</div>' : '') + '</td>'
-              + '<td><span class="pill neutre">' + (a.genre === 'announcement' ? '${T("Bandeau")}' : '${T("Badge")}') + '</span></td>'
-              + '<td class="dt" style="max-width:18rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'
+            return '<tr><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(a.nom)) + '</span>'
+              + '<div style="min-width:0"><div class="rf-nom">' + esc(a.nom) + '</div>'
+              + (a.expireAuto ? '<div class="rf-sous"><span>${T("expire après")} ' + a.expireJours + ' ${T("j par produit")}</span></div>' : '')
+              + '</div></div></td>'
+              + '<td><span class="rf-pill bleu">' + (a.genre === 'announcement' ? '${T("Bandeau")}' : '${T("Badge")}') + '</span></td>'
+              + '<td class="dt contenu">'
               + esc(a.genre === 'announcement' ? a.message : a.badge) + '</td>'
               + '<td>' + a.priorite + '</td>'
               + '<td class="dt">' + (a.debut ? esc(jour(a.debut)) : '—')
               + (a.fin ? ' → ' + esc(jour(a.fin)) : '') + '</td>'
-              + '<td><span class="pill ' + (a.enCours ? 'bon' : 'neutre') + '">'
+              + '<td><span class="rf-pill ' + (a.enCours ? 'vert' : '') + '">'
               + (a.enCours ? '${T("En cours")}' : '${T("Hors service")}') + '</span></td>'
               + (D.peutModifier ? '<td class="fin">' + gestes(a) + '</td>' : '') + '</tr>';
           }).join('')
@@ -764,10 +809,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var t = ev.target;
     if (!t || !t.closest || t.closest('.boite')) return;
 
+    var pt = t.closest('[data-prt]');
+    if (pt) {
+      var f = pt.getAttribute('data-prt') || '';
+      ETAT = (ETAT === f) ? '' : f; SUPPR_ARME = ''; dessiner(); return;
+    }
     var og = t.closest('[data-onglet]');
     if (og) {
       ONGLET = og.getAttribute('data-onglet');
-      Q = ''; FORM = null; SUPPR_ARME = '';
+      Q = ''; FORM = null; SUPPR_ARME = ''; ETAT = '';
       charger();
       return;
     }
@@ -820,7 +870,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     appeler(ONGLET === 'offres' ? 'offres:liste' : 'annonces:liste', []).then(function(r){
       if (!r || !r.ok) { vide('${T("Promotions indisponibles")}', expliquer(r)); return; }
       D = r;
-      if (sous) sous.textContent = D.peutModifier ? '' : 'consultation seulement';
+      if (sous) sous.textContent = D.peutModifier ? '' : '${T("consultation seulement")}';
       dessiner();
     });
   }

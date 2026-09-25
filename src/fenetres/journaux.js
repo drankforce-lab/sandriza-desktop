@@ -47,23 +47,31 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .barre .pousse{flex:1}
 .stat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.8rem;margin:0 0 1rem}
 @media(max-width:820px){.stat-grid{grid-template-columns:repeat(2,1fr)}}
-.stat{background:var(--v03);border:1px solid var(--v08);border-radius:11px;padding:.7rem .85rem}
-.stat .l{font-size:.7rem;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em}
-.stat .v{font:700 1.4rem/1.1 Georgia,serif;margin-top:.2rem}
+/* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE AUX JOURNAUX (2026-09-25) ════════
+   Dix vues, trois pieces communes : on refait les PIECES, pas les dix
+   gabarits — les compteurs (.stat, .kpi) prennent les mesures des tuiles, le
+   tableau (.tb) quitte border-collapse pour les cartes du socle, la pastille
+   (.pill) prend le point et les mesures de rf-pill. Aucun geste, aucun
+   crochet, aucun texte ne change. */
+.stat{background:var(--f-carte);border:1px solid var(--v07);border-radius:14px;padding:.85rem 1rem;min-width:0}
+.stat .l{font-size:.76rem;font-weight:600;color:var(--tx2)}
+.stat .v{font-size:1.75rem;font-weight:800;line-height:1.15;margin-top:.2rem}
 select.t{background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;color:var(--tx);font:inherit;font-size:.82rem;padding:.4rem .6rem}
 .b{font:inherit;font-size:.8rem;border:1px solid var(--v16);border-radius:8px;padding:.42rem .8rem;background:var(--v05);color:var(--tx);cursor:pointer;white-space:nowrap}
 .b:hover{background:var(--v09)}
 .b.dgr{color:var(--tx-f6a6a6);border-color:rgba(248,113,113,.35)}
 .b.dgr:hover{background:rgba(248,113,113,.16)}
-table.tb{width:100%;border-collapse:collapse}
-table.tb th{text-align:left;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);padding:.45rem .6rem;border-bottom:1px solid var(--v10);white-space:nowrap}
-table.tb td{padding:.5rem .6rem;border-bottom:1px solid var(--v06);font-size:.82rem;vertical-align:top}
-.pill{display:inline-block;font-size:.66rem;font-weight:700;padding:2px 7px;border-radius:99px;white-space:nowrap}
+table.tb{width:100%}
+table.tb th{text-align:left;text-transform:uppercase;font-weight:700;white-space:nowrap}
+table.tb td{font-size:.82rem;vertical-align:top}
+.pill{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:600;padding:.22rem .65rem;
+  border-radius:99px;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:99px;background:currentColor;flex:0 0 auto}
 .mono{font-family:ui-monospace,Consolas,monospace;font-size:.78rem}
 .mut{color:var(--tx2)}.sub{font-size:.72rem;color:var(--tx-gris)}
 .kpis{display:flex;gap:.6rem;flex-wrap:wrap;margin:0 0 1rem}
-.kpi{background:var(--v03);border:1px solid var(--v08);border-radius:10px;padding:.55rem .8rem;min-width:110px}
-.kpi .v{font:700 1.2rem/1 Georgia,serif}.kpi .l{font-size:.7rem;color:var(--tx2)}
+.kpi{background:var(--f-carte);border:1px solid var(--v07);border-radius:14px;padding:.7rem .95rem;min-width:120px}
+.kpi .v{font-size:1.45rem;font-weight:800;line-height:1.1}.kpi .l{font-size:.74rem;font-weight:600;color:var(--tx2)}
 .note{background:var(--v04);border:1px solid var(--v10);border-radius:9px;padding:.8rem 1rem;font-size:.82rem;color:var(--tx2);line-height:1.55;margin:0 0 1rem}
 .note b{color:var(--tx)}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}

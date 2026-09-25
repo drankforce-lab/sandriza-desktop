@@ -72,12 +72,16 @@ button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.prim{border-color:rgba(74,222,128,.45);color:var(--tx-ok2)}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
-.tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.5rem}
-.tuile{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:.5rem .65rem}
-.tuile .lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
-.tuile .val{font-size:.95rem;font-weight:800;margin-top:.1rem}
+/* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE A LA CORBEILLE (2026-09-25) ══════
+   Tuiles aux mesures communes (le chiffre en grand, plus de capitales), barre
+   a loupe sur une ligne, ligne riche aux initiales du client ; les pieces
+   gardees en pastilles a point. Crochets gardes : #cb-q, data-ouvrir,
+   data-remettre, data-purger, tr[data-dossier]. */
+.tuiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem}
+.tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
 .tuile .val.att{color:var(--tx-att)}
-.tuile .sub{font-size:.66rem;color:var(--tx2);margin-top:.1rem}
+.tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pieces{display:flex;flex-wrap:wrap;gap:.3rem}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;
@@ -176,6 +180,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('corbeille')}
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div>';
   }
 
+  function initiales(nom){
+    var m = String(nom || '').trim().split(' ').filter(Boolean);
+    if (!m.length || m[0] === '—') return '?';
+    return ((m[0][0] || '') + (m.length > 1 ? (m[m.length - 1][0] || '') : '')).toUpperCase();
+  }
   function filtres(){
     var q = Q.trim().toLowerCase();
     var l = (D && D.dossiers) || [];
@@ -201,7 +210,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('corbeille')}
     if (p.lignesStock)    out.push(p.lignesStock + (p.lignesStock > 1 ? '${T(" variantes")}' : '${T(" variante")}'));
     if (!out.length) return '<span class="dt">${T("la commande seule")}</span>';
     return '<span class="pieces">' + out.map(function(x){
-      return '<span class="pill">' + esc(x) + '</span>'; }).join('') + '</span>';
+      return '<span class="rf-pill">' + esc(x) + '</span>'; }).join('') + '</span>';
   }
 
   function vueListe(){
@@ -224,28 +233,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('corbeille')}
       + '<div class="sub">${T("ne revient pas à la restauration")}</div></div>'
       + '</div>');
 
-    h += '<div class="barreoutils">'
-      + '<input aria-label="${T("Numéro, client, qui a supprimé")}" type="search" id="cb-q" placeholder="${T("Numéro, client, qui a supprimé…")}" value="' + esc(Q) + '">'
-      + '<div class="droite"><span>' + rows.length
-      + (rows.length > 1 ? '${T(" dossiers")}' : '${T(" dossier")}') + '</span></div></div>';
+    h += '<div class="carte"><div class="rf-tb">'
+      + '<label class="rf-rch" style="max-width:none">${ICO.loupe}<input aria-label="${T("Numéro, client, qui a supprimé")}" type="search" id="cb-q" placeholder="${T("Numéro, client, qui a supprimé…")}" value="' + esc(Q) + '"></label>'
+      + '<span class="rf-droite"><span class="dt">' + rows.length
+      + (rows.length > 1 ? '${T(" dossiers")}' : '${T(" dossier")}') + '</span></span></div></div>';
 
     h += '<div class="carte"><h2>${T("Commandes supprimées")}</h2>';
     if (!rows.length) {
       h += '<div class="vide">' + (Q ? '${T("Rien ne correspond.")}'
         : '${T("Aucune commande supprimée. C’est la bonne nouvelle — la corbeille existe pour le jour où ça arrive.")}') + '</div>';
     } else {
-      h += '<table><thead><tr><th>${T("Commande")}</th><th>${T("Client")}</th>'
-        + '<th class="num">${T("Total")}</th><th>${T("Supprimée")}</th><th>${T("Par")}</th>'
+      h += '<table><thead><tr><th>${T("Client et commande")}</th>'
+        + '<th class="num">${T("Total")}</th><th>${T("Supprimée")}</th>'
         + '<th>${T("Ce qui est gardé")}</th><th></th></tr></thead><tbody>'
         + rows.map(function(d){
             return '<tr data-dossier="' + esc(d.id) + '">'
-              + '<td><strong>' + esc(d.orderNumber || d.orderId) + '</strong>'
-              + (d.dejaPresente ? ' <span class="pill bon">${T("recréée")}</span>' : '')
-              + (d.squareRembourse ? ' <span class="pill att">${T("remboursée")}</span>' : '') + '</td>'
-              + '<td>' + esc(d.client || '—') + '</td>'
-              + '<td class="num">' + argent(d.total) + '</td>'
-              + '<td class="dt">' + esc(quand(d.supprimeeLe)) + '</td>'
-              + '<td class="dt">' + esc(d.parNom || '—') + '</td>'
+              + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(d.client)) + '</span>'
+              + '<div style="min-width:0"><div class="rf-nom">' + esc(d.client || '—')
+              + (d.dejaPresente ? ' <span class="rf-pill vert">${T("recréée")}</span>' : '')
+              + (d.squareRembourse ? ' <span class="rf-pill ambre">${T("remboursée")}</span>' : '') + '</div>'
+              + '<div class="rf-sous"><span class="rf-code">' + esc(d.orderNumber || d.orderId) + '</span></div></div></div></td>'
+              + '<td class="num"><span class="rf-mont">' + argent(d.total) + '</span></td>'
+              + '<td><div>' + esc(quand(d.supprimeeLe)) + '</div>'
+              + '<div class="rf-sous">${T("par ")}' + esc(d.parNom || '—') + '</div></td>'
               + '<td>' + pieces(d.pieces) + '</td>'
               + '<td class="fin">'
               + '<button class="mini b" data-ouvrir="' + esc(d.id) + '">${T("Ouvrir")}</button>'

@@ -18,7 +18,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais un numero de commande, un
@@ -41,6 +41,15 @@ body{background:var(--f-page);color:var(--tx);
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+/* ── La refonte de l Inventaire (2026-09-25) ── */
+.tuiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.6rem;flex:0 0 auto}
+.tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
+.tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tuile.cliq{cursor:pointer;user-select:none;position:relative}
+.tuile.cliq:hover{border-color:#c9a97e}
+.tuile.cliq::after{content:"›";position:absolute;top:.55rem;right:.8rem;font-size:1.1rem;color:var(--tx3)}
+.tuile.on{border-color:#c9a97e}
+.motif{max-width:16rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
 input[type=search],button{font:inherit;color:var(--tx);background:var(--v05);
@@ -95,7 +104,7 @@ function pageArchives() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
 
@@ -157,32 +166,42 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
   }
 
+  function initiales(nom){
+    var m = String(nom || '').trim().split(' ').filter(Boolean);
+    if (!m.length || m[0] === '—') return '?';
+    return ((m[0][0] || '') + (m.length > 1 ? (m[m.length - 1][0] || '') : '')).toUpperCase();
+  }
+  // La cellule riche : initiales, nom du client, puis les reperes dessous.
+  function riche(nom, reperes){
+    return '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(nom)) + '</span>'
+      + '<div style="min-width:0"><div class="rf-nom">' + esc(nom || '—') + '</div>'
+      + '<div class="rf-sous">' + reperes.filter(Boolean).join('<span>·</span>') + '</div></div></div></td>';
+  }
+  function code(v){ return v ? '<span class="rf-code">' + esc(v) + '</span>' : ''; }
+  function txt(v){ return v ? '<span>' + esc(v) + '</span>' : ''; }
   function ligneCommande(o){
     var gestes = '<button class="mini geste" data-voir="commande" data-id="' + esc(o.id) + '" title="${T("Détails")}">&#128065;</button>';
     if (D.peutRembourser) gestes += ' <button class="mini geste att" data-rembourser="' + esc(o.id) + '" title="${T("Réactiver 45 jours et traiter le remboursement dans la fenêtre Commande")}">${T("Rembourser")}</button>';
     if (D.peutReactiver) gestes += ' <button class="mini geste" data-reactiver="' + esc(o.id) + '" title="${T("Sortir de l’archive et remettre en commandes actives pour 45 jours")}">${T("Réactiver")}</button>';
-    return '<tr><td class="num">' + esc(o.num) + '<div class="dt">' + esc(o.date) + '</div></td>'
-      + '<td>' + esc(o.client) + '<div class="dt">' + esc(o.courriel) + '</div></td>'
-      + '<td style="white-space:nowrap"><strong>' + esc(o.total) + '</strong></td>'
-      + '<td><span class="pill neutre">' + esc(o.statut) + '</span>'
-      + (o.rembourse ? ' <span class="pill bon">${T("Remboursé")}</span>' : '') + '</td>'
+    return '<tr>' + riche(o.client, [code(o.num), txt(o.date), txt(o.courriel)])
+      + '<td style="white-space:nowrap"><span class="rf-mont">' + esc(o.total) + '</span></td>'
+      + '<td><span class="rf-pill">' + esc(szTd(o.statut)) + '</span>'
+      + (o.rembourse ? ' <span class="rf-pill vert">${T("Remboursé")}</span>' : '') + '</td>'
       + '<td class="dt" style="white-space:nowrap">' + esc(o.archivee) + '</td>'
       + '<td class="fin">' + gestes + '</td></tr>';
   }
   function ligneRetour(r){
-    return '<tr><td class="num">' + esc(r.num) + '<div class="dt">' + esc(r.date) + '</div></td>'
-      + '<td>' + esc(r.client) + '<div class="dt">' + esc(r.courriel) + '</div></td>'
-      + '<td><span class="pill neutre">' + esc(r.statut) + '</span></td>'
-      + '<td class="dt" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(r.motif || '—') + '</td>'
+    return '<tr>' + riche(r.client, [code(r.num), txt(r.date), txt(r.courriel)])
+      + '<td><span class="rf-pill">' + esc(szTd(r.statut)) + '</span></td>'
+      + '<td class="dt motif">' + esc(r.motif || '—') + '</td>'
       + '<td class="dt" style="white-space:nowrap">' + esc(r.archivee) + '</td>'
       + '<td class="fin"><button class="mini geste" data-voir="retour" data-id="' + esc(r.id) + '" title="${T("Détails")}">&#128065;</button></td></tr>';
   }
   function ligneFacture(f){
-    return '<tr><td class="num">' + esc(f.num) + '<div class="dt">' + esc(f.commande || '—') + ' · ' + esc(f.date) + '</div></td>'
-      + '<td>' + esc(f.client) + (f.manuel ? ' <span class="pill neutre" title="${T("Vente saisie à la main dans Vente au comptoir")}">${T("comptoir")}</span>' : '')
-      + '<div class="dt">' + esc(f.courriel) + '</div></td>'
-      + '<td style="white-space:nowrap"><strong>' + esc(f.total) + '</strong></td>'
-      + '<td><span class="pill neutre">' + esc(f.statut) + '</span></td>'
+    return '<tr>' + riche(f.client, [code(f.num), code(f.commande), txt(f.date)])
+      + '<td style="white-space:nowrap"><span class="rf-mont">' + esc(f.total) + '</span></td>'
+      + '<td><span class="rf-pill">' + esc(szTd(f.statut)) + '</span>'
+      + (f.manuel ? ' <span class="rf-pill bleu" title="${T("Vente saisie à la main dans Vente au comptoir")}">${T("comptoir")}</span>' : '') + '</td>'
       + '<td class="dt" style="white-space:nowrap">' + esc(f.archivee) + '</td>'
       + '<td class="fin"><button class="mini geste" data-voir="facture" data-id="' + esc(f.id) + '" title="${T("Détails")}">&#128065;</button></td></tr>';
   }
@@ -203,21 +222,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function typeRemb(t){ return TYPE_REMB[t] || t; }
 
   function ligneRemboursement(r){
-    return '<tr><td class="num" style="font-family:monospace;font-size:.78rem">' + esc(r.num) + '</td>'
-      + '<td class="dt" style="white-space:nowrap">' + esc(r.date) + '</td>'
-      + '<td>' + esc(r.commande) + '</td>'
-      + '<td>' + esc(r.client) + '</td>'
-      + '<td><span class="pill ' + (r.type === SZ_DONNEES.typeFrais ? 'att' : 'neutre') + '">' + esc(typeRemb(r.type)) + '</span></td>'
-      + '<td class="fin" style="font-family:monospace;font-weight:700">' + esc(r.total) + '</td>'
+    return '<tr>' + riche(r.client, [code(r.num), code(r.commande), txt(r.date)])
+      + '<td><span class="rf-pill ' + (r.type === SZ_DONNEES.typeFrais ? 'ambre' : '') + '">' + esc(typeRemb(r.type)) + '</span></td>'
+      + '<td class="fin"><span class="rf-mont">' + esc(r.total) + '</span></td>'
       + '<td class="dt" style="white-space:nowrap">' + esc(r.archivee) + '</td>'
-      + '<td class="fin">' + (r.commandeId ? '<button class="mini geste" data-voir="commande" data-id="' + esc(r.commandeId) + '" title="Voir la commande">&#128065;</button>' : '') + '</td></tr>';
+      + '<td class="fin">' + (r.commandeId ? '<button class="mini geste" data-voir="commande" data-id="' + esc(r.commandeId) + '" title="${T("Voir la commande")}">&#128065;</button>' : '') + '</td></tr>';
   }
 
   var TETES = {
-    commandes: '<th>${T("Commande")}</th><th>${T("Client")}</th><th>${T("Total")}</th><th>${T("Statut")}</th><th>${T("Archivée le")}</th><th></th>',
-    retours: '<th>${T("Commande")}</th><th>${T("Client")}</th><th>${T("Statut")}</th><th>${T("Motif")}</th><th>${T("Archivé le")}</th><th></th>',
-    factures: '<th>${T("Facture")}</th><th>${T("Client")}</th><th>${T("Montant")}</th><th>${T("Statut")}</th><th>${T("Archivée le")}</th><th></th>',
-    remboursements: '<th>N&#176;</th><th>${T("Date")}</th><th>${T("Commande")}</th><th>${T("Client")}</th><th>${T("Mode")}</th><th style="text-align:right">${T("Total")}</th><th>${T("Archivé le")}</th><th></th>'
+    commandes: '<th>${T("Client et commande")}</th><th>${T("Total")}</th><th>${T("Statut")}</th><th>${T("Archivée le")}</th><th></th>',
+    retours: '<th>${T("Client et commande")}</th><th>${T("Statut")}</th><th>${T("Motif")}</th><th>${T("Archivé le")}</th><th></th>',
+    factures: '<th>${T("Client et facture")}</th><th>${T("Montant")}</th><th>${T("Statut")}</th><th>${T("Archivée le")}</th><th></th>',
+    remboursements: '<th>${T("Client et remboursement")}</th><th>${T("Mode")}</th><th style="text-align:right">${T("Total")}</th><th>${T("Archivé le")}</th><th></th>'
   };
   var VIDES = {
     commandes: '${T("Aucune commande archivée.")}',
@@ -234,15 +250,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     PAGE = p;
     var vue = rows.slice(p * PAR_PAGE, p * PAR_PAGE + PAR_PAGE);
 
-    var h = '<div class="barreoutils">';
-    ONGLETS.forEach(function(g){
-      var n = (D[g.k] || []).length;
-      h += '<button class="mini' + (ONGLET === g.k ? ' actif' : '') + '" data-onglet="' + g.k + '">'
-        + g.l + (n ? '<span class="n">' + n + '</span>' : '') + '</button>';
-    });
-    h += '<div class="droite"><input aria-label="${T("Rechercher")}" type="search" id="a-q" placeholder="${T("Rechercher…")}" value="' + esc(Q) + '">'
+    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE AUX ARCHIVES (2026-09-25) ══════
+       Les quatre listes arrivent ENTIERES : quatre tuiles les comptent et
+       ouvrent chacune la sienne (elles portent data-onglet, le meme crochet
+       que les anciens boutons). Barre a loupe sur une ligne ; lignes riches aux
+       initiales du client. Crochets gardes : data-onglet, #a-q, #a-prec,
+       #a-suiv, data-voir, data-rembourser, data-reactiver. */
+    var SOUS = { commandes: '${T("livrées depuis 45 jours")}', retours: '${T("demandes closes")}',
+      factures: '${T("gardées 6 ans")}', remboursements: '${T("avec leur commande")}' };
+    var h = szTuiles('<div class="tuiles">' + ONGLETS.map(function(g){
+        return '<div class="tuile cliq' + (ONGLET === g.k ? ' on' : '') + '" data-onglet="' + g.k + '" title="${T("Cliquer pour afficher")}">'
+          + '<div class="lbl">' + g.l + '</div><div class="val">' + (D[g.k] || []).length + '</div>'
+          + '<div class="sub">' + (SOUS[g.k] || '') + '</div></div>';
+      }).join('') + '</div>');
+    h += '<div class="carte"><div class="rf-tb">'
+      + '<label class="rf-rch" style="max-width:none">${ICO.loupe}<input aria-label="${T("Rechercher")}" type="search" id="a-q" placeholder="${T("Numéro, client, courriel…")}" value="' + esc(Q) + '"></label>'
       /* Deux formes ENTIERES : un << s >> colle a part ne se traduit pas. */
-      + '<span>' + rows.length + (rows.length > 1 ? '${T(" éléments")}' : '${T(" élément")}') + '</span></div></div>';
+      + '<span class="rf-droite"><span class="dt">' + rows.length + (rows.length > 1 ? '${T(" éléments")}' : '${T(" élément")}') + '</span></span>'
+      + '</div></div>';
 
     /* Deux phrases ENTIERES, chacune dans un seul litteral : coupees, elles se
        traduiraient en morceaux qui ne se recollent pas. */

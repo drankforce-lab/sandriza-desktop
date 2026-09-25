@@ -52,9 +52,17 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .stat{background:var(--v03);border:1px solid var(--v08);border-radius:12px;padding:1rem 1.1rem}
 .stat .l{font-size:.74rem;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em}
 .stat .v{font:700 1.7rem/1.1 Georgia,serif;margin-top:.25rem}
-table.tb{width:100%;border-collapse:collapse}
-table.tb th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);padding:.5rem .7rem;border-bottom:1px solid var(--v10);white-space:nowrap}
-table.tb td{padding:.6rem .7rem;border-bottom:1px solid var(--v06);font-size:.85rem;vertical-align:middle}
+/* ── La refonte de l Inventaire (2026-09-25) : le tableau prend les cartes du
+   socle (plus de table.tb a border-collapse), les compteurs deviennent des
+   tuiles, les etats des pastilles a point. ── */
+table{width:100%;font-size:.85rem}
+thead th{text-align:left;text-transform:uppercase;font-weight:700;white-space:nowrap}
+tbody td{vertical-align:middle}
+td.acts{text-align:right;white-space:nowrap}
+.tuiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.6rem;flex:0 0 auto;margin:0 0 .9rem}
+.tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
+.tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.val.att{color:var(--tx-att)}.val.err{color:var(--tx-err)}
 .pill{display:inline-block;font-size:.66rem;font-weight:700;padding:2px 7px;border-radius:99px;white-space:nowrap}
 .pill.grave{background:rgba(220,38,38,.18);color:var(--tx-err2)}
 .pill.eval{background:rgba(234,179,8,.18);color:var(--tx-att)}
@@ -206,15 +214,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
   }
 
   // ── Registre ─────────────────────────────────────────────────────
+  /* Une couleur = un sens (rf-pill, refonte du 2026-09-25) : rouge le
+     prejudice serieux, ambre ce qui attend un geste, bleu ce qui est suivi,
+     vert ce qui est regle ou sans risque. */
   function pilRisque(v){
-    if (v==='oui') return '<span class="pill grave">${T("Préjudice sérieux")}</span>';
-    if (v==='evaluation') return '<span class="pill eval">${T("En évaluation")}</span>';
-    return '<span class="pill sain">${T("Sans risque sérieux")}</span>';
+    if (v==='oui') return '<span class="rf-pill rouge">${T("Préjudice sérieux")}</span>';
+    if (v==='evaluation') return '<span class="rf-pill ambre">${T("En évaluation")}</span>';
+    return '<span class="rf-pill vert">${T("Sans risque sérieux")}</span>';
   }
   function pilEtat(v){
-    if (v==='clos') return '<span class="pill clos">${T("Clôturé")}</span>';
-    if (v==='surveille') return '<span class="pill surveille">${T("Surveillé")}</span>';
-    return '<span class="pill ouvert">${T("Ouvert")}</span>';
+    if (v==='clos') return '<span class="rf-pill vert">${T("Clôturé")}</span>';
+    if (v==='surveille') return '<span class="rf-pill bleu">${T("Surveillé")}</span>';
+    return '<span class="rf-pill ambre">${T("Ouvert")}</span>';
   }
 
   function vueRegistre(){
@@ -226,11 +237,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
     /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
        quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
        ce poste. Voir JS_TUILES dans socle.js. */
-    h += szTuiles('<div class="stat-grid">'
-      + '<div class="stat"><div class="l">${T("Au registre")}</div><div class="v">'+(st.total||0)+'</div></div>'
-      + '<div class="stat"><div class="l">${T("Dossiers ouverts")}</div><div class="v" style="color:var(--tx-att)">'+(st.ouverts||0)+'</div></div>'
-      + '<div class="stat"><div class="l">${T("Préjudice sérieux")}</div><div class="v" style="color:var(--tx-err2)">'+(st.serieux||0)+'</div></div>'
-      + '<div class="stat"><div class="l">${T("Avis CAI à faire")}</div><div class="v" style="color:var(--tx-err2)">'+(st.caiAFaire||0)+'</div></div>'
+    /* La couleur d une tuile ne s allume QUE s il y a quelque chose : un zero
+       rouge ferait chercher une alerte qui n existe pas. */
+    var tu = function(lib, val, sous, ton){
+      return '<div class="tuile"><div class="lbl">' + lib + '</div><div class="val' + (val && ton ? ' ' + ton : '') + '">'
+        + (val || 0) + '</div><div class="sub">' + sous + '</div></div>';
+    };
+    h += szTuiles('<div class="tuiles">'
+      + tu('${T("Au registre")}', st.total, '${T("gardés cinq ans")}', '')
+      + tu('${T("Dossiers ouverts")}', st.ouverts, '${T("à clore")}', 'att')
+      + tu('${T("Préjudice sérieux")}', st.serieux, '${T("risque pour les personnes")}', 'err')
+      + tu('${T("Avis CAI à faire")}', st.caiAFaire, '${T("à la Commission d’accès")}', 'err')
       + '</div>');
 
     if (!lg.length){
@@ -239,8 +256,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
     }
 
     var nc = 7 + (D.peutModifier||D.peutSupprimer ? 1 : 0);
-    h += '<div class="carte" style="padding:0;overflow-x:auto"><table class="tb"><thead><tr>'
-      + '<th>${T("Prise de connaissance")}</th><th>${T("Survenance")}</th><th>${T("Type")}</th><th style="text-align:center">${T("Personnes")}</th>'
+    h += '<div class="carte" style="overflow-x:auto"><table><thead><tr>'
+      + '<th>${T("Incident")}</th><th>${T("Prise de connaissance")}</th><th style="text-align:center">${T("Personnes")}</th>'
       + '<th>${T("Risque")}</th><th>${T("Avis CAI")}</th><th>${T("État")}</th>'
       + ((D.peutModifier||D.peutSupprimer) ? '<th></th>' : '')
       + '</tr></thead><tbody>';
@@ -252,10 +269,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
           + (D.peutSupprimer ? '<button class="b dgr" data-del="'+esc(r.id)+'">'+(DELID===r.id?'${T("✓ Confirmer")}':'${T("Retirer")}')+'</button>' : '')
           + '</td>';
       }
-      h += '<tr><td style="white-space:nowrap;font-weight:600">'+esc(r.knownAt||'—')+'</td>'
-        + '<td style="white-space:nowrap;color:var(--tx2)">'+esc(r.occurredAt||'—')+'</td>'
-        + '<td>'+esc(r.type||'—')+(r.ref?'<div style="font-size:.72rem;color:var(--tx-gris)">'+esc(r.ref)+'</div>':'')+'</td>'
-        + '<td style="text-align:center">'+esc(r.peopleCount||'—')+'</td>'
+      h += '<tr><td><div class="rf-nom">'+esc(r.type||'—')+'</div>'
+        + '<div class="rf-sous">'+(r.ref?'<span class="rf-code">'+esc(r.ref)+'</span><span>·</span>':'')
+        + '<span>${T("survenu le")} '+esc(r.occurredAt||'—')+'</span></div></td>'
+        + '<td style="white-space:nowrap;font-weight:600">'+esc(r.knownAt||'—')+'</td>'
+        + '<td style="text-align:center"><span class="rf-mont">'+esc(r.peopleCount||'—')+'</span></td>'
         + '<td>'+pilRisque(r.seriousRisk)+'</td>'
         + '<td style="white-space:nowrap;color:var(--tx2)">'+esc(r.cai||'—')+'</td>'
         + '<td>'+pilEtat(r.status)+'</td>'

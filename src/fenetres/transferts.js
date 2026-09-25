@@ -28,7 +28,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -70,7 +70,16 @@ button.prim:hover:not(:disabled){background:#a3824f}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
-.carte.transit{border-left:3px solid #fbbf24}
+.carte.transit{border-left:1px solid var(--v07)}
+/* ── La refonte de l Inventaire (2026-09-25) : tuiles, plus de liseré jaune ── */
+.tuiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.6rem;flex:0 0 auto;margin-bottom:.7rem}
+.tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
+.tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tuile.cliq{cursor:pointer;user-select:none;position:relative}
+.tuile.cliq:hover{border-color:#c9a97e}
+.tuile.cliq::after{content:"›";position:absolute;top:.55rem;right:.8rem;font-size:1.1rem;color:var(--tx3)}
+.tuile.on{border-color:#c9a97e}
+.val.att{color:var(--tx-att)}
 .carte h2{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;
   color:var(--tx2);font-weight:700}
 .ligne{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
@@ -168,7 +177,7 @@ function pageTransferts(ouverture) {
   var OUVERT = '';           // id du transfert dont le volet Recevoir est ouvert
   var BUSY = false;
 
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -244,8 +253,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     sousEl.textContent = nT + '${T(" en transit")}'
       + (ecarts ? '  ·  ' + ecarts + (ecarts > 1 ? '${T(" unités d’écart cumulé")}' : '${T(" unité d’écart cumulé")}') : '');
 
-    if (TAB === 'transit') corps.innerHTML = vueTransit();
-    else if (TAB === 'histo') corps.innerHTML = vueHisto();
+    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE AUX TRANSFERTS (2026-09-25) ════
+       Quatre tuiles sur la liste ENTIERE (en transit, recus, annules, ecart
+       cumule) qui menent a l onglet qui les montre ; pas de tuiles sur
+       << Nouveau transfert >>, qui est un selecteur, pas un registre. */
+    var tuiles = '';
+    if (TAB !== 'neuf') {
+      var cl = clos();
+      var nR = cl.filter(function(t){ return t.etat === 'recu'; }).length;
+      var tu = function(onglet, lib, val, sous, ton){
+        return '<div class="tuile cliq' + (TAB === onglet ? ' on' : '') + '" data-trt="' + onglet + '" title="${T("Cliquer pour afficher")}">'
+          + '<div class="lbl">' + lib + '</div><div class="val' + (ton ? ' ' + ton : '') + '">' + val + '</div>'
+          + '<div class="sub">' + sous + '</div></div>';
+      };
+      tuiles = szTuiles('<div class="tuiles">'
+        + tu('transit', '${T("En transit")}', nT, '${T("retirés du stock vendable")}', '')
+        + tu('histo', '${T("Reçus")}', nR, '${T("transferts terminés")}', '')
+        + tu('histo', '${T("Annulés")}', cl.length - nR, '${T("stock rendu à l’origine")}', '')
+        + tu('histo', '${T("Écart cumulé")}', ecarts, (ecarts > 1 ? '${T("unités manquantes")}' : '${T("unité manquante")}'), ecarts ? 'att' : '')
+        + '</div>');
+    }
+    if (TAB === 'transit') corps.innerHTML = tuiles + vueTransit();
+    else if (TAB === 'histo') corps.innerHTML = tuiles + vueHisto();
     else corps.innerHTML = vueNeuf();
   }
 
@@ -292,9 +321,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       +   '<span><span class="nom">' + esc(t.nom) + '</span> · ' + esc(t.cle) + '<br>'
       +     '<span class="sku">' + esc(t.sku) + '</span></span>'
       +   trajet(t)
-      +   '<span class="pill transit">${T("en transit")}</span>'
+      +   '<span class="rf-pill bleu">${T("en transit")}</span>'
       +   '<span style="margin-left:auto;display:flex;gap:.4rem">'
-      +     (D.peutEcrire ? '<button class="prim mini" data-rec="' + t.id + '">' + (ouvert ? 'Fermer' : '${T("✓ Recevoir")}') + '</button>' : '')
+      +     (D.peutEcrire ? '<button class="prim mini" data-rec="' + t.id + '">' + (ouvert ? '${T("Fermer")}' : '${T("✓ Recevoir")}') + '</button>' : '')
       +     (D.peutEcrire ? '<button class="mini danger" data-ann="' + t.id + '">${T("Annuler")}</button>' : '')
       +   '</span>'
       + '</div>'
@@ -349,7 +378,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + '<td class="art"><span class="nom">' + esc(t.nom) + '</span> · ' + esc(t.cle)
             +   '<br><span class="sku">' + esc(t.sku) + '</span></td>'
             + '<td>' + trajet(t) + '</td>'
-            + '<td><span class="pill ' + esc(t.etat) + '">' + (t.etat === 'recu' ? '${T("reçu")}' : '${T("annulé")}') + '</span></td>'
+            + '<td><span class="rf-pill ' + (t.etat === 'recu' ? 'vert' : '') + '">' + (t.etat === 'recu' ? '${T("reçu")}' : '${T("annulé")}') + '</span></td>'
             + '<td class="num">' + t.quantite + '</td>'
             + '<td class="num">' + (t.quantiteRecue === null ? '—' : t.quantiteRecue) + '</td>'
             + '<td class="num ' + (ec ? 'ecart' : 'ecart0') + '">' + (t.etat === 'annule' ? '—' : (ec ? '−' + ec : '0')) + '</td>'
@@ -553,6 +582,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   /* ══ ÉCOUTEURS ═══════════════════════════════════════════════════════════ */
   document.addEventListener('click', function(e){
     var t = e.target; if (!t || !t.closest) return;
+    // Les tuiles (refonte du 2026-09-25) : l onglet qui montre ce qu elles comptent.
+    var tt = t.closest('[data-trt]');
+    if (tt) { TAB = tt.getAttribute('data-trt'); OUVERT = ''; dessiner(); return; }
     var b = t.closest('button'); if (!b) return;
     var tab = b.getAttribute('data-tab');
     if (tab) { TAB = tab; OUVERT = ''; dessiner(); return; }

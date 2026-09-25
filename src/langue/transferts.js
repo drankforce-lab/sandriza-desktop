@@ -217,5 +217,15 @@ module.exports = {
   'SKU': 'SKU',
   'Note d’écart': 'Discrepancy note',
   'Reçu par': 'Received by',
-  'L’historique des transferts': 'The transfer history'
+  'L’historique des transferts': 'The transfer history',
+  // La refonte, comme l'Inventaire (2026-09-25).
+  'Cliquer pour afficher': 'Click to show',
+  'retirés du stock vendable': 'out of sellable stock',
+  'Reçus': 'Received',
+  'Annulés': 'Cancelled',
+  'stock rendu à l’origine': 'stock returned to origin',
+  'Écart cumulé': 'Total shortfall',
+  'unités manquantes': 'units missing',
+  'unité manquante': 'unit missing',
+  'Fermer': 'Close',
 };

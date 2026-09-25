@@ -117,5 +117,15 @@ module.exports = {
   'Entrée retirée du registre.': 'Entry removed from the register.',
 
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
-  'Fermer': 'Close'
+  'Fermer': 'Close',
+  // La refonte, comme l'Inventaire (2026-09-25).
+  'gardés cinq ans': 'kept five years',
+  'à clore': 'to close',
+  'risque pour les personnes': 'risk to the people',
+  'à la Commission d’accès': 'to the Access Commission',
+  'Incident': 'Incident',
+  'survenu le ': 'occurred on ',
+  'Incident Prise de connaissance': 'Incident Discovered on',
+  'Incident Prise de connaissance Personnes': 'Incident Discovered on People',
+  'survenu le': 'occurred on',
 };
