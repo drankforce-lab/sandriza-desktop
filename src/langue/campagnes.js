@@ -481,5 +481,8 @@ module.exports = {
   'ce mois-ci': 'this month',
   'ce mois-ci (aucun plafond)': 'this month (no cap)',
   '✶ Écrire avec l’IA': '✶ Write with AI',
-  'Rédigé :': 'Written:'
+  'Rédigé :': 'Written:',
+  // La refonte, comme l'Inventaire (2026-09-25).
+  'Envoyer': 'Send',
+  'Suspendre': 'Suspend',
 };

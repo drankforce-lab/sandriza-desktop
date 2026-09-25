@@ -1171,7 +1171,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       return h + renvoi();
     }
 
-    h += '<div class="carte"><table><thead><tr><th>${T("Segment")}</th><th>${T("Critères")}</th>'
+    h += '<div class="carte"><table><thead><tr><th>${T("Segment")}</th>'
       + '<th class="num">${T("Portée")}</th><th class="num">${T("Utilisé par")}</th>'
       + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
       + D.segments.map(function(s){
@@ -1182,9 +1182,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
             gestes += '<button class="mini geste danger' + (armeS ? ' arme' : '') + '" data-segsup="'
               + esc(s.id) + '">' + (armeS ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
           }
-          return '<tr><td><strong>' + esc(s.nom) + '</strong></td>'
-            + '<td class="dt">' + esc(s.phrase || '—') + '</td>'
-            + '<td class="num"><span class="pill ' + (s.compte ? 'bon' : 'neutre') + '">'
+          return '<tr><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(s.nom)) + '</span>'
+            + '<div style="min-width:0"><div class="rf-nom">' + esc(s.nom) + '</div>'
+            + '<div class="rf-sous">' + esc(s.phrase || '—') + '</div></div></div></td>'
+            + '<td class="num"><span class="rf-pill ' + (s.compte ? 'vert' : '') + '">'
             + s.compte + '</span></td>'
             + '<td class="num dt">' + (s.utilisePar ? pluriel(s.utilisePar, '${T("campagne")}', '${T("campagnes")}') : '—') + '</td>'
             + (D.peutModifier ? '<td class="fin">' + gestes + '</td>' : '') + '</tr>';
@@ -1319,6 +1320,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
   }
 
   /* ══ ONGLET CAMPAGNES ═══════════════════════════════════════════════════ */
+  function initiales(nom){
+    var m = String(nom || '').trim().split(' ').filter(Boolean);
+    if (!m.length) return '?';
+    return ((m[0][0] || '') + (m.length > 1 ? (m[m.length - 1][0] || '') : '')).toUpperCase();
+  }
   function vueCampagnes(){
     var D = DC;
     if (!D) return '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>';
@@ -1354,10 +1360,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
 
     // La barre qui surplombe la LISTE : creation a gauche, recherche a droite,
     // juste au-dessus de ce sur quoi elles agissent.
-    h += '<div class="barreoutils">'
-      + (D.peutModifier ? '<button class="mini prim" id="cp-nouvelle">${T("+ Nouvelle campagne")}</button>' : '')
-      + '<div class="droite"><input type="search" id="cp-q" aria-label="${T("Nom ou sujet")}" placeholder="${T("Nom ou sujet…")}" value="'
-      + esc(Q) + '"></div></div>';
+    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE AUX CAMPAGNES (2026-09-25) ═════
+       Barre a loupe sur une ligne, le geste de creation a droite ; lignes
+       riches aux initiales ; etats en pastilles a point. Crochets gardes :
+       #cp-q, #cp-nouvelle, data-modif, data-envoyer, data-suppr. */
+    h += '<div class="carte"><div class="rf-tb">'
+      + '<label class="rf-rch" style="max-width:none">${ICO.loupe}<input type="search" id="cp-q" aria-label="${T("Nom ou sujet")}" placeholder="${T("Nom ou sujet…")}" value="'
+      + esc(Q) + '"></label>'
+      + '<span class="rf-droite"><span class="dt">' + pluriel(rows.length, '${T("campagne")}', '${T("campagnes")}') + '</span>'
+      + (D.peutModifier ? '<button class="prim" id="cp-nouvelle" style="height:2.4rem;padding:0 .9rem">${T("+ Nouvelle campagne")}</button>' : '')
+      + '</span></div></div>';
 
     h += '<div class="carte">';
     if (!rows.length) {
@@ -1378,19 +1390,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
                 var armeE = (ARME === 'env:' + c.id);
                 gestes += '<button class="mini geste' + (armeE ? ' arme' : ' prim') + '" data-envoyer="'
                   + esc(c.id) + '"' + (D.resendPret || c.canal === 'sms' ? '' : ' disabled')
-                  + '>' + (armeE ? '${T("Confirmer l’envoi ?")}' : 'Envoyer') + '</button> ';
+                  + '>' + (armeE ? '${T("Confirmer l’envoi ?")}' : '${T("Envoyer")}') + '</button> ';
               }
               var armeS = (ARME === 'sup:' + c.id);
               gestes += '<button class="mini geste danger' + (armeS ? ' arme' : '') + '" data-suppr="'
                 + esc(c.id) + '">' + (armeS ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
             }
-            return '<tr><td><strong>' + esc(c.nom) + '</strong>'
-              + '<div class="dt">' + esc(c.sujet) + '</div></td>'
+            return '<tr><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(c.nom)) + '</span>'
+              + '<div style="min-width:0"><div class="rf-nom">' + esc(c.nom) + '</div>'
+              + '<div class="rf-sous">' + esc(c.sujet) + '</div></div></div></td>'
               + '<td class="dt">' + esc(c.segmentLibelle) + '</td>'
               + '<td class="dt">' + esc(c.canalLibelle) + '</td>'
               + '<td class="num">' + (c.canal === 'sms' ? (D.smsDestinataires || 0) : c.destinataires)
               + (c.canal === 'both' ? ' + ' + (D.smsDestinataires || 0) + ' SMS' : '') + '</td>'
-              + '<td><span class="pill ' + (c.etat === 'sent' ? 'bon' : (c.etat === 'sending' ? 'att' : 'neutre'))
+              + '<td><span class="rf-pill ' + (c.etat === 'sent' ? 'vert' : (c.etat === 'sending' ? 'ambre' : ''))
               + '">' + esc(c.etatLibelle) + '</span>'
               + (c.date ? '<div class="dt">' + esc(c.date) + '</div>' : '') + '</td>'
               + '<td class="num">' + c.envoyes
@@ -1451,7 +1464,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
           var armeB = (ARME === 'bas:' + ch.id);
           gestes += '<button class="mini geste' + (armeB ? ' arme' : '') + '" data-basculer="' + esc(ch.id)
             + '" data-active="' + (ch.active ? '0' : '1') + '">'
-            + (armeB ? '${T("Confirmer ?")}' : (ch.active ? 'Suspendre' : '${T("Activer")}')) + '</button>';
+            + (armeB ? '${T("Confirmer ?")}' : (ch.active ? '${T("Suspendre")}' : '${T("Activer")}')) + '</button>';
           var armeS = (ARME === 'chsup:' + ch.id);
           gestes += '<button class="mini geste danger' + (armeS ? ' arme' : '') + '" data-chsuppr="'
             + esc(ch.id) + '">' + (armeS ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
@@ -1459,9 +1472,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
         return '<div class="carte chaine">'
           + '<div class="entete"><div><h3>' + esc(ch.nom) + '</h3>'
           + (ch.description ? '<div class="desc">' + esc(ch.description) + '</div>' : '') + '</div>'
-          + '<span class="pill ' + (ch.active ? 'bon' : 'neutre') + '">'
+          + '<span class="rf-pill ' + (ch.active ? 'vert' : '') + '">'
           + (ch.active ? '${T("Active")}' : '${T("Suspendue")}') + '</span>'
-          + '<span class="pill acc">' + esc(ch.declencheurLibelle) + '</span>'
+          + '<span class="rf-pill bleu">' + esc(ch.declencheurLibelle) + '</span>'
           + '<div class="gestes">' + gestes + '</div></div>'
           + '<div class="compte">' + pluriel((ch.etapes || []).length, '${T("étape")}', '${T("étapes")}') + ' · '
           + ch.inscriptionsActives + ' ${T("en cours ·")} '
