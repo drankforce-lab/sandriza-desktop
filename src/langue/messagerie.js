@@ -119,5 +119,11 @@ module.exports = {
      voulu — deux cles pour le meme mot finiraient par diverger. */
   'Commande': 'Order',
   'Statut': 'Status',
-  'La liste des demandes': 'The request list'
+  'La liste des demandes': 'The request list',
+  // La refonte, comme l'Inventaire (2026-09-25).
+  'Cliquer pour afficher': 'Click to show',
+  'à répondre': 'to answer',
+  'Archive': 'Archive',
+  'depuis le début': 'since the start',
+  '· Raison :': '· Reason:',
 };

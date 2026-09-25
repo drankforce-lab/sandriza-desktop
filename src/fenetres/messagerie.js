@@ -18,7 +18,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais le message de la cliente
@@ -41,6 +41,17 @@ body{background:var(--f-page);color:var(--tx);
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+/* ── La refonte de l Inventaire (2026-09-25) ── */
+.tuiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem;flex:0 0 auto}
+.tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
+.tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tuile.cliq{cursor:pointer;user-select:none;position:relative}
+.tuile.cliq:hover{border-color:#c9a97e}
+.tuile.cliq::after{content:"›";position:absolute;top:.55rem;right:.8rem;font-size:1.1rem;color:var(--tx3)}
+.tuile.on{border-color:#c9a97e}
+.val.att{color:var(--tx-att)}
+.ligne{display:flex;align-items:center;gap:.8rem}
+.ligne .gauche{flex:1 1 auto;min-width:0}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
 button,textarea{font:inherit;color:var(--tx);background:var(--v05);
@@ -112,7 +123,7 @@ function pageMessagerie() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
 
@@ -158,10 +169,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div>';
   }
 
+  function initiales(nom){
+    var m = String(nom || '').trim().split(' ').filter(Boolean);
+    if (!m.length || m[0] === '—') return '?';
+    return ((m[0][0] || '') + (m.length > 1 ? (m[m.length - 1][0] || '') : '')).toUpperCase();
+  }
   function pastille(st){
-    return st === 'answered' ? '<span class="pill bon">${T("Répondu")}</span>'
-      : st === 'pending' ? '<span class="pill att">${T("En attente")}</span>'
-      : '<span class="pill neutre">' + esc(st) + '</span>';
+    return st === 'answered' ? '<span class="rf-pill vert">${T("Répondu")}</span>'
+      : st === 'pending' ? '<span class="rf-pill ambre">${T("En attente")}</span>'
+      : '<span class="rf-pill">' + esc(st) + '</span>';
   }
 
   /* ⚠ LA PASTILLE EST DU HTML, LE FICHIER VEUT DU TEXTE. Verser la pastille
@@ -199,14 +215,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessiner(){
     if (!D) { corps.innerHTML = '<div class="vide charge">${T("Chargement… (les demandes se resynchronisent)")}</div>'; return; }
     var c = D.comptes || {};
-    var h = '<div class="barreoutils">'
-      + '<button class="mini' + (ONGLET === 'pending' ? ' actif' : '') + '" data-onglet="pending">'
-      + '${T("En attente")}<span class="n' + (c.attente > 0 ? ' hi' : '') + '">' + (c.attente || 0) + '</span></button>'
-      + '<button class="mini' + (ONGLET === 'answered' ? ' actif' : '') + '" data-onglet="answered">'
-      + '<span class="ic">📁</span>${T(" Archive")}<span class="n">' + (c.repondues || 0) + '</span></button>'
-      + '<button class="mini' + (ONGLET === 'all' ? ' actif' : '') + '" data-onglet="all">'
-      + '${T("Toutes")}<span class="n">' + (c.toutes || 0) + '</span></button>'
-      + '</div>';
+    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE A LA MESSAGERIE (2026-09-25) ═══
+       Les trois piles deviennent des tuiles (comptes du SITE, sur toutes les
+       demandes) qui portent data-onglet, le crochet des anciens boutons.
+       Lignes riches aux initiales du client. Crochets gardes : data-onglet,
+       .ligne[data-id], #m-exporter, la boite de detail. */
+    var tu = function(o, lib, val, sous, ton){
+      return '<div class="tuile cliq' + (ONGLET === o ? ' on' : '') + '" data-onglet="' + o + '" title="${T("Cliquer pour afficher")}">'
+        + '<div class="lbl">' + lib + '</div><div class="val' + (val && ton ? ' ' + ton : '') + '">' + (val || 0) + '</div>'
+        + '<div class="sub">' + sous + '</div></div>';
+    };
+    var h = szTuiles('<div class="tuiles">'
+      + tu('pending', '${T("En attente")}', c.attente, '${T("à répondre")}', 'att')
+      + tu('answered', '${T("Archive")}', c.repondues, '${T("demandes répondues")}', '')
+      + tu('all', '${T("Toutes")}', c.toutes, '${T("depuis le début")}', '')
+      + '</div>');
 
     var rows = D.lignes || [];
     if (!rows.length) {
@@ -218,13 +241,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     } else {
       h += rows.map(function(r){
         return '<div class="ligne" data-id="' + esc(r.id) + '" title="${T("Ouvrir la demande")}">'
-          + '<div class="haut"><span class="num">' + esc(r.commande) + '</span>'
+          + '<span class="rf-av" aria-hidden="true">' + esc(initiales(r.client)) + '</span>'
+          + '<div class="gauche">'
+          + '<div class="haut"><span class="rf-nom">' + esc(r.client || '—') + '</span>'
           + pastille(r.statut)
           + '<span class="droite">' + esc(r.date) + '</span></div>'
-          + '<div class="dt"><strong>' + esc(r.client) + '</strong>'
-          + (r.courriel ? ' · ' + esc(r.courriel) : '') + '</div>'
-          + '<div class="dt">${T("Raison : ")}' + esc(r.raison || '–') + '</div>'
-          + '</div>';
+          + '<div class="rf-sous"><span class="rf-code">' + esc(r.commande) + '</span>'
+          + (r.courriel ? '<span>·</span><span>' + esc(r.courriel) + '</span>' : '')
+          + '<span>·</span><span>${T("Raison : ")}' + esc(r.raison || '–') + '</span></div>'
+          + '</div></div>';
       }).join('');
       /* Le pied ferme la liste et porte l export (2026-09-24). ⚠ Le compte se
          dit dans le VOCABULAIRE DE LA PILE : une demande repondue n est pas
