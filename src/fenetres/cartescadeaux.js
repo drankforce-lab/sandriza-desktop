@@ -58,6 +58,12 @@ button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);f
 button.prim:hover:not(:disabled){background:#a3824f}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.5rem}
 .tuile{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:.5rem .65rem}
+/* La jauge de solde restant (refonte du 2026-09-25) : la part de la carte qui
+   reste a depenser. */
+/* Les colonnes chiffrees gardent la police des autres modules refaits. */
+th.num,td.num{font-family:inherit}
+.jaugec{height:5px;border-radius:3px;background:var(--v10);margin-top:.35rem;max-width:7rem;overflow:hidden;margin-left:auto}
+.jaugec i{display:block;height:100%;border-radius:3px;background:color-mix(in srgb,var(--tx-ok,#4ade80) 55%,transparent)}
 .tuile .lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 .tuile .val{font-size:.95rem;font-weight:800;margin-top:.1rem}
 .tuile .val.bon{color:var(--tx-ok)}
@@ -169,7 +175,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div>';
   }
 
-  var TONS = { active: 'bon', used: 'neutre', expired: 'err', pending: 'att' };
+  /* La pastille a point (rf-pill, refonte du 2026-09-25) : active en vert,
+     activation requise en ambre, expiree en rouge, utilisee en gris. */
+  var TONS = { active: 'vert', used: '', expired: 'rouge', pending: 'ambre' };
+  function initiales(nom){
+    var m = String(nom || '').trim().split(' ').filter(Boolean);
+    if (!m.length || m[0] === '—') return '?';
+    return ((m[0][0] || '') + (m.length > 1 ? (m[m.length - 1][0] || '') : '')).toUpperCase();
+  }
 
   function filtrees(){
     var q = Q.trim().toLowerCase();
@@ -297,39 +310,44 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
       + t.utilisees + '</div></div>'
       + '</div>');
 
-    h += '<div class="barreoutils">'
-      + '<input aria-label="${T("Code, destinataire, courriel")}" type="search" id="cc-q" placeholder="${T("Code, destinataire, courriel…")}" value="' + esc(Q) + '">'
-      + '<select id="cc-f-statut">'
-      + '<option value="">${T("Tous les statuts")}</option>'
-      + '<option value="active"' + (STATUT === 'active' ? ' selected' : '') + '>${T("Actives")}</option>'
-      + '<option value="pending"' + (STATUT === 'pending' ? ' selected' : '') + '>${T("Activation requise")}</option>'
-      + '<option value="used"' + (STATUT === 'used' ? ' selected' : '') + '>${T("Utilisées")}</option>'
-      + '<option value="expired"' + (STATUT === 'expired' ? ' selected' : '') + '>${T("Expirées")}</option>'
-      + '</select>'
-      + '<div class="droite">'
-      + '<button class="mini" id="cc-recompense">${T("Récompense à l’achat")}</button>'
-      + (D.peutModifier ? '<button class="mini prim" id="cc-nouvelle">${T("+ Créer une carte")}</button>' : '')
-      /* ⚠ Le singulier et le pluriel, chacun entier. */
-      + '<span>' + rows.length + (rows.length > 1 ? '${T(" cartes")}' : '${T(" carte")}') + '</span>'
-      + '</div></div>';
+    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE AUX CARTES-CADEAUX (2026-09-25) ═
+       Barre sur une ligne : loupe, statuts en PASTILLES (plus une liste
+       deroulante). Ligne riche aux initiales, solde en gras avec sa jauge.
+       Crochets gardes : #cc-q, #cc-recompense, #cc-nouvelle, tr[data-id]. */
+    var jet = function(v, lib){
+      return '<button class="rf-jet' + (STATUT === v ? ' on' : '') + '" data-ccst="' + v + '">' + lib + '</button>';
+    };
+    h += '<div class="carte"><div class="rf-tb">'
+      + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Code, destinataire, courriel")}" type="search" id="cc-q" placeholder="${T("Code, destinataire, courriel…")}" value="' + esc(Q) + '"></label>'
+      + jet('', '${T("Tous les statuts")}') + jet('active', '${T("Actives")}') + jet('pending', '${T("Activation requise")}')
+      + jet('used', '${T("Utilisées")}') + jet('expired', '${T("Expirées")}')
+      + '<span class="rf-droite">'
+      + '<button class="rf-jet" id="cc-recompense">${T("Récompense à l’achat")}</button>'
+      + (D.peutModifier ? '<button class="prim" id="cc-nouvelle" style="height:2.4rem;padding:0 .9rem">${T("+ Créer une carte")}</button>' : '')
+      + '<span class="dt">' + rows.length + (rows.length > 1 ? '${T(" cartes")}' : '${T(" carte")}') + '</span>'
+      + '</span></div></div>';
 
     h += '<div class="carte">';
     if (!rows.length) {
       h += '<div class="vide">' + (Q || STATUT ? '${T("Rien ne correspond.")}' : '${T("Aucune carte-cadeau.")}') + '</div>';
     } else {
-      h += '<table><thead><tr><th>${T("Code")}</th><th>${T("Destinataire")}</th><th class="num">${T("Valeur")}</th>'
+      h += '<table><thead><tr><th>${T("Destinataire")}</th><th class="num">${T("Valeur")}</th>'
         + '<th class="num">${T("Solde")}</th><th>${T("Acheteur")}</th><th>${T("Date")}</th><th>${T("Statut")}</th></tr></thead><tbody>'
         + rows.map(function(g){
             return '<tr data-id="' + esc(g.id) + '" title="${T("Voir le détail")}">'
-              + '<td><span class="code">' + esc(g.code) + '</span></td>'
-              + '<td>' + esc(g.destinataire || '—') + '<div class="dt">' + esc(g.courriel || '') + '</div></td>'
+              + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(g.destinataire)) + '</span>'
+              + '<div style="min-width:0"><div class="rf-nom">' + esc(g.destinataire || '—') + '</div>'
+              + '<div class="rf-sous"><span class="rf-code">' + esc(g.code) + '</span>'
+              + (g.courriel ? '<span>·</span><span>' + esc(g.courriel) + '</span>' : '') + '</div></div></div></td>'
               + '<td class="num">' + fmt(g.initial) + '</td>'
-              + '<td class="num" style="font-weight:700;color:' + (g.solde > 0 ? 'var(--tx-ok)' : 'var(--tx2)') + '">'
-              + fmt(g.solde) + '</td>'
+              + '<td class="num"><span class="rf-mont">' + fmt(g.solde) + '</span>'
+              + (g.initial > 0 ? '<div class="jaugec" title="' + Math.round(100 * g.solde / g.initial) + ' %"><i style="width:'
+                  + Math.max(0, Math.min(100, Math.round(100 * g.solde / g.initial))) + '%"></i></div>' : '')
+              + '</td>'
               + '<td>' + esc(g.expediteur || '—') + '</td>'
               + '<td class="dt">' + esc(g.date) + '</td>'
-              + '<td><span class="pill ' + (TONS[g.statut] || 'neutre') + '">' + esc(szTd(g.statutLibelle)) + '</span>'
-              + (g.courrielEnvoye ? ' <span class="pill neutre">${T("courriel ✓")}</span>' : '') + '</td></tr>';
+              + '<td><span class="rf-pill ' + (TONS[g.statut] || '') + '">' + esc(szTd(g.statutLibelle)) + '</span>'
+              + (g.courrielEnvoye ? ' <span class="rf-pill bleu">${T("courriel ✓")}</span>' : '') + '</td></tr>';
           }).join('')
         + '</tbody></table>';
     }
@@ -348,6 +366,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
     if (q) q.oninput = function(){ Q = q.value; redessinerSansPerdreLaSaisie(); };
     var fs = document.getElementById('cc-f-statut');
     if (fs) fs.onchange = function(){ STATUT = fs.value; dessiner(); };
+    // Les statuts en pastilles (refonte du 2026-09-25).
+    corps.querySelectorAll('[data-ccst]').forEach(function(b){
+      b.onclick = function(){ STATUT = b.getAttribute('data-ccst') || ''; dessiner(); };
+    });
     var bn = document.getElementById('cc-nouvelle');
     if (bn) bn.onclick = function(){ BOITE = 'creer'; dessiner(); szBrouillonProposer(); };
     var br = document.getElementById('cc-recompense');
