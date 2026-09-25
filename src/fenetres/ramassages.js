@@ -17,7 +17,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -39,6 +39,12 @@ body{background:var(--f-page);color:var(--tx);
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+/* ── La refonte de l Inventaire (2026-09-25) ── */
+.tuiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem;flex:0 0 auto;margin-bottom:.6rem}
+.tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
+.tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rf-pill.mono{font-family:ui-monospace,monospace;font-size:.7rem}
+.rf-pill.mono::before{display:none}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
 button{font:inherit;color:var(--tx);background:var(--v05);
@@ -115,7 +121,7 @@ function pageRamassages() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
 
@@ -168,21 +174,37 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div>';
   }
 
+  /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE AUX RAMASSAGES (2026-09-25) ════
+     Tuiles sur la liste ENTIERE, barre sur une ligne (onglets en pastilles,
+     le geste a droite), pastilles a point. Crochets gardes : data-onglet,
+     #rm-planifier, data-annuler, #rm-exporter, la boite de planification. */
   function barre(){
-    return '<div class="barreoutils">'
-      + '<button class="mini' + (ONGLET === 'ramassages' ? ' actif' : '') + '" data-onglet="ramassages"><span class="ic" aria-hidden="true">📅</span> ${T("Ramassages")}</button>'
-      + '<button class="mini' + (ONGLET === 'rapport' ? ' actif' : '') + '" data-onglet="rapport"><span class="ic">📊</span> ${T("Rapport transporteurs")}</button>'
+    return '<div class="carte" style="margin-bottom:.6rem"><div class="rf-tb">'
+      + '<button class="rf-jet' + (ONGLET === 'ramassages' ? ' on' : '') + '" data-onglet="ramassages">${T("Ramassages")}</button>'
+      + '<button class="rf-jet' + (ONGLET === 'rapport' ? ' on' : '') + '" data-onglet="rapport">${T("Rapport transporteurs")}</button>'
       + (ONGLET === 'ramassages'
-          ? '<span class="droite"><button class="prim" id="rm-planifier" '
+          ? '<span class="rf-droite"><button class="prim" id="rm-planifier" style="height:2.4rem;padding:0 .9rem" '
             + 'title="${T("Le choix des colis, de la date et du poids se fait dans la fenêtre principale")}">'
-            + '<span class="ic">📦</span> ${T("Planifier un ramassage")}</button></span>'
+            + '${T("Planifier un ramassage")}</button></span>'
           : '')
-      + '</div>';
+      + '</div></div>';
+  }
+  function tuilesRamassages(rows){
+    var act = rows.filter(function(r){ return !r.annule; });
+    var colis = act.reduce(function(s, r){ return s + (Number(r.colis) || 0); }, 0);
+    var tu = function(lib, val, sous){
+      return '<div class="tuile"><div class="lbl">' + lib + '</div><div class="val">' + val + '</div><div class="sub">' + sous + '</div></div>';
+    };
+    return szTuiles('<div class="tuiles">'
+      + tu('${T("Planifiés")}', act.length, '${T("ramassages à venir ou faits")}')
+      + tu('${T("Colis")}', colis, '${T("dans les ramassages planifiés")}')
+      + tu('${T("Annulés")}', rows.length - act.length, '${T("gardés au registre")}')
+      + '</div>');
   }
 
   function dessinerRamassages(){
-    var h = barre();
     var rows = RAM || [];
+    var h = (rows.length ? tuilesRamassages(rows) : '') + barre();
     if (!rows.length) {
       h += '<div class="vide">${T("Aucun ramassage planifié.")}</div>';
     } else {
@@ -190,12 +212,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          defilante est fille du CORPS. La boite de planification est un voile
          en position:fixed, elle flotte et n est donc pas coupee. */
       h += '<div class="liste">' + rows.map(function(r){
-        var etat = r.annule ? '<span class="pill err">${T("Annulé")}</span>' : '<span class="pill bon">${T("Planifié")}</span>';
+        var etat = r.annule ? '<span class="rf-pill rouge">${T("Annulé")}</span>' : '<span class="rf-pill vert">${T("Planifié")}</span>';
         return '<div class="ligne' + (r.annule ? ' annule' : '') + '">'
           + '<div class="haut">'
-          + '<span>' + r.logo + '</span><span class="num">' + esc(r.transporteur) + '</span>'
+          + '<span>' + r.logo + '</span><span class="rf-nom">' + esc(r.transporteur) + '</span>'
           + '<span class="dt"><span class="ic" aria-hidden="true">📅</span> ' + esc(r.date) + '</span>'
-          + '<span class="pill neutre">' + r.colis + ' colis</span>'
+          + '<span class="rf-pill">' + r.colis + '${T(" colis")}</span>'
           + etat
           + (!r.annule
               ? '<button class="mini danger" style="margin-left:auto" data-annuler="' + esc(r.id) + '">'
@@ -207,7 +229,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + (r.annule && r.annulePar ? ' ${T("· annulé par")} ' + esc(r.annulePar) : '') + '</div>'
           + (r.commandes.length
               ? '<div class="dt">' + r.commandes.map(function(n){
-                  return '<span class="pill neutre mono">' + esc(n) + '</span>'; }).join(' ') + '</div>'
+                  return '<span class="rf-pill mono">' + esc(n) + '</span>'; }).join(' ') + '</div>'
               : '')
           + '</div>';
       }).join('') + '</div>';
@@ -245,7 +267,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function boitePlan(){
     var p = PLAN;
     var h = '<div class="voile" id="rm-voile"><div class="boite">'
-      + '<h3><span class="ic">📦</span> ${T("Planifier les ramassages —")} ' + (p.total || 0) + ' colis</h3>';
+      + '<h3><span class="ic">📦</span> ${T("Planifier les ramassages —")} ' + (p.total || 0) + '${T(" colis")}</h3>';
     if (!p.total) {
       h += '<div class="vide">${T("Aucun colis à ramasser pour l’instant.")}<br>'
         + '${T("Une commande doit être marquée Expédiée et avoir un numéro de suivi.")}</div>'
@@ -257,11 +279,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += (p.groupes || []).map(function(g){
       return '<div class="grp"><div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">'
         + '<span>' + g.logo + '</span><span class="num">' + esc(g.nom) + '</span>'
-        + '<span class="pill neutre">' + g.colis + ' colis</span>'
-        + (g.api ? '<span class="pill bon">${T("API — demande automatique")}</span>'
-                 : '<span class="pill att">${T("à contacter manuellement")}</span>')
+        + '<span class="rf-pill">' + g.colis + '${T(" colis")}</span>'
+        + (g.api ? '<span class="rf-pill vert">${T("API — demande automatique")}</span>'
+                 : '<span class="rf-pill ambre">${T("à contacter manuellement")}</span>')
         + '</div><div class="dt">' + (g.commandes || []).map(function(n){
-            return '<span class="pill neutre mono">' + esc(n) + '</span>'; }).join(' ') + '</div></div>';
+            return '<span class="rf-pill mono">' + esc(n) + '</span>'; }).join(' ') + '</div></div>';
     }).join('');
     h += '<div class="champs">'
       + '<div><div class="l">${T("Poids estimé par colis (kg)")}</div>'
@@ -304,8 +326,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + '<td>' + o.logo + ' ' + esc(o.transporteur) + '</td>'
             + '<td class="mono">' + esc(o.suivi || '—') + '</td>'
             + '<td style="text-align:right">' + esc(fmt(o.frais)) + '</td>'
-            + '<td>' + (o.livree ? '<span class="pill bon">${T("Livrée")}</span>' : '<span class="pill info">${T("Expédiée")}</span>')
-            + (o.ramasse ? ' <span class="pill bon">${T("ramassé")}</span>' : '') + '</td></tr>';
+            + '<td>' + (o.livree ? '<span class="rf-pill vert">${T("Livrée")}</span>' : '<span class="rf-pill bleu">${T("Expédiée")}</span>')
+            + (o.ramasse ? ' <span class="rf-pill vert">${T("ramassé")}</span>' : '') + '</td></tr>';
         }).join('')
       + '</tbody></table></div>';
     corps.innerHTML = h;

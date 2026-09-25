@@ -121,4 +121,11 @@ module.exports = {
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
   'Fermer': 'Close',
   'TOTAL': 'TOTAL',
+  // La refonte, comme l'Inventaire (2026-09-25).
+  'Planifiés': 'Scheduled',
+  'ramassages à venir ou faits': 'pickups upcoming or done',
+  'dans les ramassages planifiés': 'in scheduled pickups',
+  'Annulés': 'Cancelled',
+  'gardés au registre': 'kept on record',
+  ' colis': ' parcels',
 };
