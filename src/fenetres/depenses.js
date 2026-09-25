@@ -28,6 +28,7 @@ const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
 const T = require('../langue').tr('depenses');
+const LANGUE = require('../langue');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -221,6 +222,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
      pour finir refusé plus loin — autant le dire tout de suite, en le nommant. */
   var MAX_OCTETS = 8 * 1024 * 1024;
 
+  /* Le nom d une categorie A L AFFICHAGE : le site envoie aussi son nom anglais
+     (libelleEn, 2026-09-25). ⚠ Lecture seule : l option garde value = c.cle,
+     et c est la cle qui s enregistre, jamais ce nom. */
+  var EN = ${LANGUE.langueCourante() === 'en' ? 'true' : 'false'};
+  function nomCat(c){ return (EN && c && c.libelleEn) ? c.libelleEn : (c ? c.libelle : ''); }
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
@@ -302,7 +308,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
       + '<select id="d-cat"><option value="">${T("Toutes catégories")}</option>'
       + (D.categories || []).map(function(c){
           return '<option value="' + esc(c.cle) + '"' + (D.categorie === c.cle ? ' selected' : '') + '>'
-            + esc(c.libelle) + '</option>';
+            + esc(nomCat(c)) + '</option>';
         }).join('') + '</select>'
       + (D.peutAjouter ? '<button class="prim" id="d-nouvelle">${T("＋ Nouvelle dépense")}</button>' : '')
       + (D.peutAjouter ? '<div class="depot" id="d-depot" title="'
@@ -446,7 +452,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
         + '<div class="champ large"><label for="a-cat">${T("Catégorie (ligne fiscale)")}</label><select id="a-cat">'
         + (ANN.categories || []).map(function(c){
             return '<option value="' + esc(c.cle) + '"' + (ANN_FORM.categorie === c.cle ? ' selected' : '') + '>'
-              + esc(c.libelle) + ' · L.' + esc(c.ligne) + '</option>'; }).join('')
+              + esc(nomCat(c)) + ' · L.' + esc(c.ligne) + '</option>'; }).join('')
         + '</select></div></div>'
         + '<div class="aide" style="margin:.3rem 0 .5rem">${T("Un domaine complet est accepté et réduit")} '
         + '${T("automatiquement : « render.com », « support@render.com » et « Render » désignent le même fournisseur.")}</div>'
@@ -592,7 +598,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
       + '<div class="champ large"><label for="f-cat">${T("Catégorie (ligne fiscale)")}</label><select id="f-cat">'
       + (D.categories || []).map(function(c){
           return '<option value="' + esc(c.cle) + '"' + (f.categorie === c.cle ? ' selected' : '') + '>'
-            + esc(c.libelle) + ' · L.' + esc(c.ligne) + '</option>'; }).join('')
+            + esc(nomCat(c)) + ' · L.' + esc(c.ligne) + '</option>'; }).join('')
       + '</select></div>'
       + champ('${T("Description")}', '<input type="text" id="f-desc" value="' + esc(f.description)
           + '" placeholder="${T("Ex : Publicité Meta juillet")}">', 'f-desc')

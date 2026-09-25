@@ -108,6 +108,13 @@ const fautes = [];
   {
     const rx = /label:\s*'((?:[^'\\]|\\.)*)'/g;
     let m; while ((m = rx.exec(src))) tous.add(m[1].replace(/\\'/g, "'"));
+    /* ⚠⚠ ET LA FORME COURTE S('Libellé', 'section', …) — manquée jusqu'au
+       2026-09-25. Le raccourci d'appbar.js pose `label` lui-même, donc aucun
+       `label:` n'est écrit : « Conciliation bancaire », « Facturation »,
+       « Liens d'installation » et « Traitements d'image (Fal.ai) » sont restés
+       en français dans le menu anglais, sous un banc vert. Il l'a vu à l'écran. */
+    const rxS = /\bS\(\s*'((?:[^'\\]|\\.)*)'/g;
+    while ((m = rxS.exec(src))) tous.add(m[1].replace(/\\'/g, "'"));
   }
   /* La table des jeux de couleurs : `['cle', 'Nom affiché'], …`. */
   {

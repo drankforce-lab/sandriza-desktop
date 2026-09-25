@@ -40,6 +40,7 @@ const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU, SEP_DEC } = 
    (voir src/langue/index.js). Les LIBELLÉS DES POSTES, eux, viennent du site
    avec les chiffres : les recopier ici ferait deux listes qui divergeraient. */
 const T = require('../langue').tr('comptabilite');
+const LANGUE = require('../langue');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -464,15 +465,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
     return h;
   }
 
+  /* Le nom d un poste A L AFFICHAGE : le site envoie aussi son nom anglais
+     (libelleEn, 2026-09-25). ⚠ Lecture seule : la cle reste p.cle, et rien de
+     ce nom ne repart vers le site. Un poste sans nom anglais garde le sien. */
+  var EN = ${LANGUE.langueCourante() === 'en' ? 'true' : 'false'};
+  function nomPoste(p){ return (EN && p && p.libelleEn) ? p.libelleEn : (p ? p.libelle : ''); }
+
   function ligneBudget(p, l){
     var douze = SAISIE[p.cle] || [0,0,0,0,0,0,0,0,0,0,0,0];
     var annuel = douze.reduce(function(s, v){ return s + (parseFloat(v) || 0); }, 0);
     var ouvert = !!OUVERTS[p.cle];
-    var h = '<tr><td>' + esc(p.libelle)
+    var h = '<tr><td>' + esc(nomPoste(p))
       + (p.sens === 'revenu' ? ' <span class="pill g">${T("revenu")}</span>' : '')
       + '</td>'
       + '<td class="n"><input data-an="' + esc(p.cle) + '" value="' + (annuel ? annuel.toFixed(2) : '')
-      + '" placeholder="0,00" aria-label="' + esc(p.libelle) + ' — ${T("budget annuel")}"'
+      + '" placeholder="0${SEP_DEC()}00" aria-label="' + esc(nomPoste(p)) + ' — ${T("budget annuel")}"'
       + (RO ? ' disabled' : '') + ' style="width:6.2rem"></td>'
       + '<td class="n gris">' + (l ? argent(l.prevu) : '—') + '</td>'
       + '<td class="n">' + (l ? argent(l.reel) : '—') + '</td>';
@@ -491,7 +498,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
             return '<div><label for="m_' + esc(p.cle) + '_' + i + '">' + MOIS[i] + '</label>'
               + '<input id="m_' + esc(p.cle) + '_' + i + '" data-m="' + esc(p.cle) + '" data-i="' + i
               + '" value="' + (v ? Number(v).toFixed(2) : '') + '" placeholder="0"'
-              + ' aria-label="' + esc(p.libelle) + ' — ' + MOIS[i] + '"' + (RO ? ' disabled' : '') + '></div>';
+              + ' aria-label="' + esc(nomPoste(p)) + ' — ' + MOIS[i] + '"' + (RO ? ' disabled' : '') + '></div>';
           }).join('')
         + '</div></td></tr>';
     }

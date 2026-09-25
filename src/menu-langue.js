@@ -126,6 +126,11 @@ const MENU_APP_EN = {
   'Dépenses': 'Expenses',
   'Expéditions': 'Shipments',
   'Factures': 'Invoices',
+  /* Les quatre entrées S('…') que le banc ne lisait pas (2026-09-25). */
+  'Facturation': 'Billing',
+  'Conciliation bancaire': 'Bank reconciliation',
+  'Liens d’installation': 'Install links',
+  'Traitements d’image (Fal.ai)': 'Image processing (Fal.ai)',
   'Fenêtre séparée (autre écran)': 'Separate window (other screen)',
   'Fidélisation': 'Loyalty',
 
@@ -304,6 +309,10 @@ const pourLePanneau = (label, langue) => trMenu(origineMenu(label), langue);
 const trItems = (items, langue) => (items || []).map((it) => {
   if (!it || it.sep) return it;
   const n = { ...it, label: trMenu(it.label, langue) };
+  /* Le raccourci s AFFICHE aussi : « Ctrl+Maj+V » dans un menu anglais (sa
+     capture du 2026-09-25). « Maj » est le nom français de Shift. Rien d autre
+     ne lit cette chaine : la touche elle-meme est prise ailleurs. */
+  if (it.accel && langue === 'en') n.accel = String(it.accel).replace(/\bMaj\b/g, 'Shift');
   if (it.items) n.items = trItems(it.items, langue);
   if (it.sub) n.sub = trItems(it.sub, langue);
   return n;
