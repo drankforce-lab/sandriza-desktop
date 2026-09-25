@@ -53,6 +53,10 @@ body{background:var(--f-page);color:var(--tx);
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+/* ── La refonte de l Inventaire (2026-09-25) ── */
+.rf-tb select{height:2.4rem;border-radius:10px;background:var(--f-0f1826);border-color:var(--v10);max-width:13rem}
+.stk{display:flex;align-items:center;gap:.5rem}
+.stk b{min-width:1.6rem;text-align:right}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
 input[type=search],input[type=number],select,button{font:inherit;color:var(--tx);background:var(--v05);
@@ -263,22 +267,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('codesbarres')}
 
   function dessiner(){
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
-    var h = '<div class="barreoutils">'
-      + '<input aria-label="${T("Nom ou SKU")}" type="search" id="cb-q" placeholder="${T("Nom ou SKU…")}" value="' + esc(Q) + '">'
+    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE AUX CODES-BARRES (2026-09-25) ══
+       Barre a loupe sur une ligne ; ligne riche comme a l Inventaire (initiale
+       de la categorie, nom en gras, SKU et categorie dessous) ; le stock en
+       chiffre et en pastille a point. Crochets gardes : #cb-q, #cb-cat,
+       data-choisir, data-toutstock, #cb-prec, #cb-suiv, la file et le voile. */
+    var h = '<div class="carte" style="margin-bottom:.6rem"><div class="rf-tb">'
+      + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Nom ou SKU")}" type="search" id="cb-q" placeholder="${T("Nom ou SKU…")}" value="' + esc(Q) + '"></label>'
       + '<select id="cb-cat"><option value="">${T("Toutes les catégories")}</option>'
       + (D.cats || []).map(function(c){
           return '<option value="' + esc(c.cle) + '"' + (CAT === c.cle ? ' selected' : '') + '>' + esc(c.nom) + '</option>';
         }).join('')
       + '</select>'
-      + '<span class="droite">' + (D.total || 0) + (D.total > 1 ? '${T(" produits")}' : '${T(" produit")}') + '</span>'
-      + '</div>';
+      + '<span class="rf-droite"><span class="dt">' + (D.total || 0) + (D.total > 1 ? '${T(" produits")}' : '${T(" produit")}') + '</span></span>'
+      + '</div></div>';
 
     h += '<div class="deux"><div class="principal"><div class="carte">';
     var rows = D.lignes || [];
     if (!rows.length) {
       h += '<div class="vide">${T("Aucun produit trouvé.")}</div>';
     } else {
-      h += '<table><thead><tr><th>${T("SKU")}</th><th>${T("Produit")}</th><th>${T("Catégorie")}</th>'
+      h += '<table><thead><tr><th>${T("Produit")}</th>'
         + '<th>${T("Stock")}</th><th style="text-align:right">${T("Ajouter")}</th></tr></thead><tbody>'
         + rows.map(function(r){
             var actions = r.sku
@@ -286,11 +295,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('codesbarres')}
                 + (r.stock > 0 ? ' <button class="mini" data-toutstock="' + esc(r.id) + '" title="${T("Ajouter toutes les variantes en stock (quantité = stock)")}">${T("+ Stock")}</button>' : '')
               : '<span class="dt">${T("SKU requis")}</span>';
             return '<tr>'
-              + '<td>' + (r.sku ? '<span class="sku">' + esc(r.sku) + '</span>' : '<span class="dt">${T("sans SKU")}</span>') + '</td>'
-              + '<td><span class="num">' + esc(r.nom) + '</span></td>'
-              + '<td>' + esc(r.categorie || '—') + '</td>'
-              + '<td>' + r.stock + ' ' + (r.stock === 0 ? '<span class="pill err">${T("Rupture")}</span>'
-                : r.bas ? '<span class="pill att">${T("bas")}</span>' : '') + '</td>'
+              + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">'
+              + esc(String(r.categorie || r.nom || '?').charAt(0).toUpperCase()) + '</span>'
+              + '<div style="min-width:0"><div class="rf-nom">' + esc(r.nom) + '</div>'
+              + '<div class="rf-sous">' + (r.sku ? '<span class="rf-code">' + esc(r.sku) + '</span>' : '<span>${T("sans SKU")}</span>')
+              + (r.categorie ? '<span>·</span><span>' + esc(r.categorie) + '</span>' : '') + '</div></div></div></td>'
+              + '<td><div class="stk"><b>' + r.stock + '</b>' + (r.stock === 0 ? '<span class="rf-pill rouge">${T("Rupture")}</span>'
+                : r.bas ? '<span class="rf-pill ambre">${T("bas")}</span>' : '') + '</div></td>'
               + '<td style="text-align:right;white-space:nowrap">' + actions + '</td>'
               + '</tr>';
           }).join('')

@@ -180,5 +180,7 @@ module.exports = {
   'Page': 'Page',
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
-  'modules · il faudrait une': 'modules · you would need a'
+  'modules · il faudrait une': 'modules · you would need a',
+  // La refonte, comme l'Inventaire (2026-09-25).
+  'Produit Stock Ajouter': 'Product Stock Add',
 };
