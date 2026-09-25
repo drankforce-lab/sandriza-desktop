@@ -3155,6 +3155,48 @@ input,select,textarea{border-radius:9px}
 .onglets button.on .pill,.onglets button.actif .pill{background:rgba(23,32,44,.14);border-color:transparent}
 /* Le mode jour : html.jour button repeint TOUT bouton en boite blanche, onglets
    compris (vu a l Inventaire). L actif prend l accent du jour. */
+/* ══ LES BRIQUES DE L INVENTAIRE, POUR LES MODULES REFAITS (2026-09-25) ═════
+   Sa remarque, en 6.18 : << tu n as pas ameliore les autres modules comme tu as
+   fait a l inventaire, je ne vois pas de difference >>. Il a raison : une couche
+   de style ne change pas le CONTENU d un ecran, et c est le contenu qui fait
+   l Inventaire. Chaque module est donc refait, un par un, avec CES briques —
+   les memes partout, pour que les ecrans refaits se ressemblent entre eux :
+     rf-prod / rf-av / rf-nom / rf-sous / rf-code : la cellule principale riche
+       (pastille a l initiale, nom en gras, sous-ligne grise) ;
+     rf-pill (+ vert, ambre, rouge, bleu) : la pastille d etat a point — une
+       couleur = un sens ;
+     rf-tb / rf-rch / rf-jet / rf-droite : la barre d outils sur UNE ligne, la
+       recherche a loupe, les filtres en pastilles. */
+.rf-prod{display:flex;align-items:center;gap:.75rem;min-width:0}
+.rf-av{width:2.4rem;height:2.4rem;flex:0 0 auto;border-radius:99px;display:flex;align-items:center;
+  justify-content:center;font-weight:800;font-size:.86rem;background:var(--v06);border:1px solid var(--v08);color:var(--tx-gris2)}
+.rf-nom{font-size:.93rem;font-weight:700;color:var(--tx)}
+.rf-sous{display:flex;align-items:center;gap:.4rem;font-size:.74rem;color:var(--tx2);margin-top:.12rem;flex-wrap:wrap}
+.rf-code{font-family:ui-monospace,monospace;font-size:.72rem;color:var(--tx2)}
+.rf-pill{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:600;padding:.22rem .65rem;
+  border-radius:99px;background:var(--v05);color:var(--tx2);white-space:nowrap}
+.rf-pill::before{content:"";width:6px;height:6px;border-radius:99px;background:currentColor}
+.rf-pill.vert{background:rgba(34,197,94,.14);color:var(--tx-ok)}
+.rf-pill.ambre{background:rgba(245,158,11,.16);color:var(--tx-att)}
+.rf-pill.rouge{background:rgba(239,68,68,.16);color:var(--tx-err)}
+.rf-pill.bleu{background:rgba(96,165,250,.14);color:var(--tx-bleu)}
+html.jour .rf-pill.vert{color:#326a49}
+html.jour .rf-pill.ambre{color:#806112}
+html.jour .rf-pill.rouge{color:#984545}
+html.jour .rf-pill.bleu{color:#44607e}
+.rf-mont{font-size:1rem;font-weight:800;white-space:nowrap}
+.rf-tb{display:flex;align-items:center;gap:.4rem;flex-wrap:nowrap}
+.rf-tb > *{flex:0 0 auto;white-space:nowrap}
+.rf-rch{display:flex;align-items:center;gap:.5rem;flex:1 1 14rem;min-width:9rem;max-width:22rem;height:2.4rem;
+  padding:0 .7rem;background:var(--f-0f1826);border:1px solid var(--v14);border-radius:10px;color:var(--tx2)}
+.rf-rch:focus-within{border-color:#c9a97e}
+.rf-rch svg{width:17px;height:17px;flex:0 0 auto}
+.rf-rch input{border:0!important;background:transparent!important;padding:0!important;height:100%;width:100%;
+  max-width:none!important;outline:none;font-size:.88rem}
+.rf-tb .rf-jet{height:2.4rem;padding:0 .75rem;border-radius:10px;font-size:.8rem;background:var(--f-0f1826);
+  border:1px solid var(--v10);color:var(--tx-gris2)}
+.rf-tb .rf-jet.on{background:rgba(201,169,126,.14);border-color:rgba(201,169,126,.55);color:var(--tx-or2);font-weight:700}
+.rf-droite{margin-left:auto;display:flex;gap:.4rem;align-items:center}
 html.jour .onglets button{background:transparent;border-color:transparent;color:#414e66}
 /* ⚠ L ENCRE DES ONGLETS NON CHOISIS, EN JOUR : l or pale de la fenetre Marque
    (#7d694e) posait 4,40 sur la barre creme, une fois la boite blanche retiree. */

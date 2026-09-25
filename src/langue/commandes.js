@@ -286,5 +286,26 @@ module.exports = {
      ecran est qu on peut reprendre ce qui y est. */
   'Corbeille': 'Recycle bin',
   'Voir les commandes supprimées et les remettre en place':
-    'View deleted orders and restore them'
+    'View deleted orders and restore them',
+
+  /* ── La refonte de la liste, comme l'Inventaire (2026-09-25) ── */
+  'Client et commande': 'Customer and order',
+  'Cliquer pour filtrer': 'Click to filter',
+  'En attente': 'Pending',
+  'à confirmer': 'to confirm',
+  'En préparation': 'Preparing',
+  'à emballer': 'to pack',
+  'Étiquettes prêtes': 'Labels ready',
+  'pas encore parties': 'not shipped yet',
+  'Expédiées': 'Shipped',
+  'en route': 'on the way',
+  'Livrées': 'Delivered',
+  'reçues par le client': 'received by the customer',
+  'En cours': 'In progress',
+  'au total': 'in total',
+  'Valeur': 'Value',
+  'en cours': 'in progress',
+  'expédiée': 'shipped',
+  'article': 'item',
+  'articles': 'items'
 };

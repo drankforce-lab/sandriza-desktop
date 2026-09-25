@@ -6686,6 +6686,11 @@ const JEU = {
           // ⚠ Une ligne PRIORITAIRE et un compte non nul : sans eux, l'éclair et
           // le compte du bouton « Prioritaires » ne seraient jamais dessinés.
           prioritairesNonTraitees: 1,
+          // Les tuiles de tête (refonte du 2026-09-25) : un compte AMBRE (en
+          // attente) et une tuile qui filtre, sans quoi ni l'un ni l'autre ne
+          // seraient dessinés.
+          tuiles: { compteStatuts: { pending: 1, preparing: 1 }, etiquettesPretes: 1,
+            valeurTotale: 216.91, nombre: 2 },
           lignes: [
             { id: 'ord_0011', numero: 'SZ-100211', prioritaire: true, date: '2026-08-06T15:20:00.000Z',
               client: 'Marie Tremblay', ville: 'Québec', total: 149.41, statut: 'preparing',

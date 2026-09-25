@@ -31,7 +31,7 @@
  * menu entière.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU, SEP_DEC } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU, SEP_DEC } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -113,6 +113,14 @@ button.prio.on:hover{background:rgba(245,158,11,.34);border-color:#fbbf24}
 .eclair{color:var(--tx-att);margin-right:.2rem}
 
 /* La liste : la seule zone qui defile. */
+/* Les tuiles de tete (refonte du 2026-09-25), aux mesures de l Inventaire. */
+.tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:.6rem;flex:0 0 auto;margin-bottom:.6rem}
+.tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
+.tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.val.att{color:var(--tx-att)}
+.tuile.cliq{cursor:pointer;user-select:none;position:relative}
+.tuile.cliq:hover{border-color:#c9a97e}
+.tuile.cliq::after{content:"›";position:absolute;top:.55rem;right:.8rem;font-size:1.1rem;color:var(--tx3)}
 .liste{flex:1 1 auto;min-height:0;overflow-y:auto}
 .liste::-webkit-scrollbar{width:8px}
 .liste::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
@@ -255,7 +263,7 @@ function pageCommandes(mode) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
   var actions = document.getElementById('actions');
@@ -345,6 +353,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     for (var i = 0; i < l.length; i++) if (l[i].cle === cle) return l[i].libelle;
     return cle || '—';
   }
+  /* Les initiales du client, pour sa pastille (Marie Tremblay -> MT). */
+  function initiales(nom){
+    var m = String(nom || '').trim().split(' ').filter(Boolean);
+    if (!m.length || m[0] === '—') return '?';
+    return ((m[0][0] || '') + (m.length > 1 ? (m[m.length - 1][0] || '') : '')).toUpperCase();
+  }
+  /* Une couleur = un sens : ambre ce qui attend un geste, bleu ce qui avance,
+     vert ce qui est fini, rouge ce qui est annule, gris le reste. */
+  function tonStatut(cle){
+    if (cle === 'delivered') return 'vert';
+    if (cle === 'shipped' || cle === 'confirmed' || cle === 'verification') return 'bleu';
+    if (cle === 'cancelled') return 'rouge';
+    if (cle === 'pending' || cle === 'preparing') return 'ambre';
+    return '';
+  }
   function couleurStatut(cle){
     if (cle === 'delivered') return 'vert';
     if (cle === 'shipped') return 'bleu';
@@ -359,21 +382,55 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var d = DONNEES;
     var expedition = MODE === 'expeditions';
 
-    var h = '<div class="carte">'
-      + '<input id="rech" aria-label="${T("Rechercher une commande")}" autocomplete="off" placeholder="${T("Numéro de commande, nom, courriel")}'
-      + (expedition ? '${T(", numéro de suivi")}' : '') + '…" value="' + esc(F.q) + '">'
-      + '<div class="filtres"><span class="lbl">${T("Statut :")}</span><span class="jetons">'
+    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE A COMMANDES (2026-09-25) ═══════
+       Sa capture, en 6.18 : << pourtant cet ecran est natif et rien n a
+       change >>. La couche commune avait mis la ligne en carte, rien de plus.
+       Ici, le CONTENU prend la forme de l Inventaire : tuiles en tete, une
+       barre sur une ligne (recherche a loupe, statuts en pastilles), la cellule
+       principale riche (initiale du client, nom, numero et date dessous), le
+       statut en pastille a point, le total en gras.
+       ⚠ Les tuiles viennent du PONT (tuiles.compteStatuts...), comptees sur la
+       liste ENTIERE, avant recherche : elles disent l etat du magasin, pas de
+       l ecran. Les crochets des gestes (data-st, data-prio, data-prep,
+       tr[data-id], #rech, #c-corbeille) sont tous gardes. */
+    var TU = (d && d.tuiles) || null;
+    var h = '';
+    if (TU) {
+      var cs = TU.compteStatuts || {};
+      var tu = function(lib, val, sous, ton, geste){
+        return '<div class="tuile' + (geste ? ' cliq" data-tuile="' + geste + '" title="${T("Cliquer pour filtrer")}' : '') + '">'
+          + '<div class="lbl">' + lib + '</div><div class="val' + (ton ? ' ' + ton : '') + '">' + val + '</div>'
+          + '<div class="sub">' + sous + '</div></div>';
+      };
+      h += szTuiles('<div class="tuiles">'
+        + (expedition
+          ? tu('${T("Expédiées")}', cs.shipped || 0, '${T("en route")}', '', 'shipped')
+            + tu('${T("Livrées")}', cs.delivered || 0, '${T("reçues par le client")}', '', 'delivered')
+          : tu('${T("En attente")}', cs.pending || 0, '${T("à confirmer")}', (cs.pending ? 'att' : ''), 'pending')
+            + tu('${T("En préparation")}', cs.preparing || 0, '${T("à emballer")}', '', 'preparing')
+            + tu('${T("Prioritaires")}', (d.prioritairesNonTraitees || 0), '${T("non traitées")}',
+                (d.prioritairesNonTraitees ? 'att' : ''), 'prio')
+            + tu('${T("Étiquettes prêtes")}', TU.etiquettesPretes || 0, '${T("pas encore parties")}', '', ''))
+        + tu(expedition ? '${T("Commandes")}' : '${T("En cours")}', TU.nombre || 0, '${T("au total")}', '', '')
+        + tu('${T("Valeur")}', argent(TU.valeurTotale || 0), expedition ? '${T("expédiée")}' : '${T("en cours")}', '', '')
+        + '</div>');
+    }
+    h += '<div class="carte">'
+      + '<div class="rf-tb">'
+      + '<label class="rf-rch">${ICO.loupe}<input id="rech" aria-label="${T("Rechercher une commande")}" autocomplete="off" placeholder="${T("Numéro de commande, nom, courriel")}'
+      + (expedition ? '${T(", numéro de suivi")}' : '') + '…" value="' + esc(F.q) + '"></label>'
+      + '<span class="jetons">'
       + ((CTX && CTX.statuts) || []).filter(function(s){
           // Chaque liste ne propose que SES statuts : offrir << Livrée >> dans
           // Commandes donnerait toujours zero resultat, et l on chercherait pourquoi.
           return expedition ? (s.cle === 'shipped' || s.cle === 'delivered')
                             : (s.cle !== 'shipped' && s.cle !== 'delivered');
         }).map(function(s){
-          return '<button class="mini' + (F.statuts.indexOf(s.cle) >= 0 ? ' on' : '')
-            + '" data-st="' + esc(s.cle) + '">' + esc(s.libelle) + '</button>'; }).join('')
-      + (F.statuts.length ? '<button class="mini" data-vider="1">${T("Tout afficher")}</button>' : '')
+          return '<button class="rf-jet' + (F.statuts.indexOf(s.cle) >= 0 ? ' on' : '')
+            + '" data-st="' + esc(s.cle) + '">' + esc(szTd(s.libelle)) + '</button>'; }).join('')
+      + (F.statuts.length ? '<button class="rf-jet" data-vider="1">${T("Tout afficher")}</button>' : '')
       + '</span>'
-      + '<button class="mini prio' + (F.prioritaires ? ' on' : '') + '" data-prio="1" '
+      + '<button class="rf-jet prio' + (F.prioritaires ? ' on' : '') + '" data-prio="1" '
       + 'title="${T("N’afficher que les commandes prioritaires — le compte est celui des prioritaires pas encore expédiées")}">'
       + '${T("Prioritaires")}' + (d && d.prioritairesNonTraitees
           ? ' · ' + d.prioritairesNonTraitees + ' '
@@ -395,8 +452,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        bouton a qui ne peut pas restaurer l empecherait de CONSTATER qu une
        commande a ete supprimee — ce qui est precisement ce qu on veut pouvoir
        voir. La fenetre le dit alors en clair. */
+    h += '<span class="rf-droite">';
     if (!expedition) {
-      h += '<button class="mini corb" id="c-corbeille" '
+      h += '<button class="rf-jet" id="c-corbeille" '
         + 'title="${T("Voir les commandes supprimées et les remettre en place")}">'
         + '${T("Corbeille")}</button>';
     }
@@ -408,7 +466,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
               + '>' + a + '</option>'; }).join('')
         + '</select>';
     }
-    h += '</div></div>';
+    h += '</span></div></div>';
 
     h += '<div class="carte plein">';
     if (!d || !d.lignes.length) {
@@ -417,9 +475,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         : (expedition ? '${T("Aucune commande expédiée.")}' : '${T("Aucune commande en cours.")}')) + '</div>';
     } else {
       h += '<div class="liste"><table><thead><tr>'
-        + '<th>${T("Commande")}</th><th>${T("Client")}</th><th class="c">${T("Date")}</th>'
+        + '<th>${T("Client et commande")}</th>'
         + (expedition ? '<th>${T("Suivi")}</th>' : '<th class="c">${T("Articles")}</th>')
-        + '<th class="d">${T("Total")}</th><th class="c">${T("Statut")}</th><th class="c"></th>'
+        + '<th class="d">${T("Total")}</th><th>${T("Statut")}</th><th class="c"></th>'
         + '</tr></thead><tbody>';
       d.lignes.forEach(function(o){
         // ⚠ Etiquetee mais pas partie : la ligne se teinte. C est l etat qui se
@@ -427,18 +485,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         var attente = o.aUneEtiquette && o.statut !== 'shipped' && o.statut !== 'delivered';
         h += '<tr class="' + (attente ? 'attente' : '') + '" data-id="' + esc(o.id)
           + '" style="cursor:pointer" title="${T("Clic : détails · clic droit : changer le statut")}">'
-          + '<td>' + (o.prioritaire ? '<span class="eclair" title="${T("Traitement prioritaire")}"><span class="ic">⚡</span></span>' : '')
-          + '<span class="num">' + esc(o.numero) + '</span>'
-          + (attente ? '<div class="det">${T("étiquette prête")}</div>' : '') + '</td>'
-          + '<td>' + esc(o.client) + '</td>'
-          + '<td class="c det">' + esc(dateCourte(o.date)) + '</td>'
+          + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(o.client)) + '</span>'
+          +   '<div style="min-width:0"><div class="rf-nom">' + esc(o.client)
+          +     (o.prioritaire ? ' <span class="rf-pill ambre" title="${T("Traitement prioritaire")}">${T("Prioritaire")}</span>' : '')
+          +     (attente ? ' <span class="rf-pill bleu">${T("étiquette prête")}</span>' : '') + '</div>'
+          +   '<div class="rf-sous"><span class="rf-code">' + esc(o.numero) + '</span><span>·</span><span>'
+          +     esc(dateCourte(o.date)) + '</span>' + (o.ville ? '<span>·</span><span>' + esc(o.ville) + '</span>' : '')
+          +   '</div></div></div></td>'
           + (expedition
-              ? '<td>' + (o.suivi ? '<span class="num">' + esc(o.suivi) + '</span>'
+              ? '<td>' + (o.suivi ? '<span class="rf-code">' + esc(o.suivi) + '</span>'
                                   : '<span class="det">${T("sans numéro")}</span>') + '</td>'
-              : '<td class="c">' + o.articles + '</td>')
-          + '<td class="d">' + argent(o.total) + '</td>'
-          + '<td class="c"><span class="et ' + couleurStatut(o.statut) + '">'
-          + esc(libelleStatut(o.statut)) + '</span></td>'
+              : '<td class="c">' + o.articles + ' ' + (o.articles > 1 ? '${T("articles")}' : '${T("article")}') + '</td>')
+          + '<td class="d"><span class="rf-mont">' + argent(o.total) + '</span></td>'
+          + '<td><span class="rf-pill ' + tonStatut(o.statut) + '">'
+          + esc(szTd(libelleStatut(o.statut))) + '</span></td>'
           /* ⚠ UN SEUL BOUTON, DEUX ETATS (demande le 2026-08-07 : << il y a trop
              de boutons differents a ce niveau >>). Verrou tenu par QUICONQUE —
              soi compris, sa propre fenetre de preparation ouverte est un
@@ -1103,6 +1163,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         return;
       }
       if (t.closest('[data-vider]')) { F.statuts = []; F.page = 0; dessiner(); charger(); return; }
+      // Une tuile filtre la liste sur ce qu elle compte ; recliquer defait.
+      var tuT = t.closest('[data-tuile]');
+      if (tuT) {
+        var gT = tuT.getAttribute('data-tuile');
+        if (gT === 'prio') F.prioritaires = !F.prioritaires;
+        else F.statuts = (F.statuts.length === 1 && F.statuts[0] === gT) ? [] : [gT];
+        F.page = 0; dessiner(); charger();
+        return;
+      }
       if (t.closest('[data-prio]')) { F.prioritaires = !F.prioritaires; F.page = 0; dessiner(); charger(); return; }
       var pr = t.closest('[data-prep]');
       if (pr) {
