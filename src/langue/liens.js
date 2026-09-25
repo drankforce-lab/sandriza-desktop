@@ -247,5 +247,17 @@ module.exports = {
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) — les durées d'un lien. */
   '1 heure 4 heures': '1 hour 4 hours',
   '24 heures 3 jours': '24 hours 3 days',
-  '7 jours 30 jours': '7 days 30 days'
+  '7 jours 30 jours': '7 days 30 days',
+  // La refonte, comme l'Inventaire (2026-09-25).
+  'Actifs': 'Active',
+  'ouvrent encore la porte': 'still open the door',
+  'Épuisés': 'Used up',
+  'tous leurs usages pris': 'all uses taken',
+  'Révoqués': 'Revoked',
+  'fermés à la main': 'closed by hand',
+  'Expirés': 'Expired',
+  'échéance passée': 'past their deadline',
+  ' par ': ' by ',
+  'Pour Compte': 'For Account',
+  'Usages Échéance Créé État': 'Uses Deadline Created Status',
 };

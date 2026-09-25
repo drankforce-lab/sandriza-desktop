@@ -33,7 +33,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
    poste. ⚠⚠⚠ Deux choses ne s'adoucissent pas ici : « Il ne sera plus jamais
    affiché » (la base ne garde que l'empreinte du mot de passe) et l'AVIS DE LA
@@ -79,6 +79,10 @@ button.dgr{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
 .duo{display:flex;gap:.65rem;flex-wrap:wrap}
 .duo>div{flex:1 1 10rem;min-width:0}
 .barreoutils{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+/* ── La refonte de l Inventaire (2026-09-25) ── */
+.tuiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.6rem;flex:0 0 auto;margin-bottom:.7rem}
+.tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
+.tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center}
 table{width:100%;border-collapse:collapse;font-size:.79rem}
 /* La zone mesurable de la pagination auto : une hauteur REELLE a diviser. */
@@ -142,7 +146,7 @@ function pageLiens(ouverture) {
     if (actif) { b.textContent='${T("⧉ Détacher")}'; b.title='${T("Ouvrir cet écran dans sa propre fenêtre")}'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
     else { b.textContent='${T("⚓ Ancrer")}'; b.title='${T("Ramener cet écran dans la fenêtre principale")}'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
-${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
   var corps = document.getElementById('corps');
   var sous  = document.getElementById('sous');
   var DEPART = ${dep};
@@ -230,9 +234,31 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   // ════════════════════════════════════════════════════════════════════════
   // VUE « LIENS »
   // ════════════════════════════════════════════════════════════════════════
+  function initiales(nom){
+    var m = String(nom || '').trim().split(' ').filter(Boolean);
+    if (!m.length || m[0] === '—') return '?';
+    return ((m[0][0] || '') + (m.length > 1 ? (m[m.length - 1][0] || '') : '')).toUpperCase();
+  }
   function dessinerLiens(){
     var h = [];
 
+    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE AUX LIENS (2026-09-25) ═════════
+       Quatre tuiles sur la liste ENTIERE, lignes riches (initiales, pour qui,
+       le genre dessous), etats en pastilles a point : vert actif, ambre
+       epuise, rouge revoque, gris expire. Crochets gardes : #b-nouveau,
+       #b-recharger, data-copier, data-renvoyer, data-revoquer, data-supprimer,
+       data-journal. */
+    var TON_ETAT = { actif: 'vert', epuise: 'ambre', revoque: 'rouge', expire: '' };
+    var cpt = function(e){ return ETAT.liens.filter(function(l){ return l.etat === e; }).length; };
+    var tu = function(lib, val, sous){
+      return '<div class="tuile"><div class="lbl">' + lib + '</div><div class="val">' + val + '</div><div class="sub">' + sous + '</div></div>';
+    };
+    if (ETAT.liens.length) h.push(szTuiles('<div class="tuiles">'
+      + tu('${T("Actifs")}', cpt('actif'), '${T("ouvrent encore la porte")}')
+      + tu('${T("Épuisés")}', cpt('epuise'), '${T("tous leurs usages pris")}')
+      + tu('${T("Révoqués")}', cpt('revoque'), '${T("fermés à la main")}')
+      + tu('${T("Expirés")}', cpt('expire'), '${T("échéance passée")}')
+      + '</div>'));
     h.push('<div class="barreoutils"><button class="prim" id="b-nouveau">${T("+ Nouveau lien")}</button>'
       + '<span class="droite"><button id="b-recharger">${T("Recharger")}</button></span></div>');
 
@@ -243,19 +269,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (!ETAT.liens.length) {
       h.push('<div class="vide">${T("Aucun lien n’a encore été émis.")}</div>');
     } else {
-      h.push('<table><thead><tr><th>${T("État")}</th><th>${T("Pour")}</th><th>${T("Compte")}</th>'
-        + '<th>${T("Usages")}</th><th>${T("Échéance")}</th><th>${T("Créé")}</th><th></th></tr></thead><tbody>');
+      h.push('<table><thead><tr><th>${T("Pour")}</th><th>${T("Compte")}</th>'
+        + '<th>${T("Usages")}</th><th>${T("Échéance")}</th><th>${T("Créé")}</th><th>${T("État")}</th><th></th></tr></thead><tbody>');
       ETAT.liens.forEach(function(l){
         var u = (l.maxUsages > 0) ? (l.usages + ' / ' + l.maxUsages) : (l.usages + ' / ∞');
         h.push('<tr>'
-          + '<td><span class="pill ' + esc(l.etat) + '">' + esc(ETATS[l.etat] || l.etat) + '</span></td>'
-          + '<td>' + esc(l.etiquette || l.destinataire || '—')
-            + (l.destinataire && l.etiquette ? '<div class="dt">' + esc(l.destinataire) + '</div>' : '')
-            + '<div class="dt"><span class="pill g">' + esc(GENRES[l.genre] || l.genre) + '</span></div></td>'
+          + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(l.etiquette || l.destinataire)) + '</span>'
+          + '<div style="min-width:0"><div class="rf-nom">' + esc(l.etiquette || l.destinataire || '—') + '</div>'
+          + '<div class="rf-sous">' + (l.destinataire && l.etiquette ? '<span>' + esc(l.destinataire) + '</span><span>·</span>' : '')
+          + '<span>' + esc(GENRES[l.genre] || l.genre) + '</span></div></div></div></td>'
           + '<td>' + esc(nomCompte(l.staffId) || '—') + '</td>'
-          + '<td class="mono">' + u + '</td>'
+          + '<td class="mono"><b>' + u + '</b></td>'
           + '<td>' + jour(l.expireLe) + '</td>'
-          + '<td>' + jour(l.creeLe) + '<div class="dt">' + esc(l.creePar || '') + '</div></td>'
+          + '<td>' + jour(l.creeLe) + '<div class="rf-sous">' + esc(l.creePar || '') + '</div></td>'
+          + '<td><span class="rf-pill ' + (TON_ETAT[l.etat] || '') + '">' + esc(ETATS[l.etat] || l.etat) + '</span></td>'
           + '<td style="white-space:nowrap">'
             + '<button class="mini" data-copier="' + esc(l.url) + '"><span class="ic">📋</span></button> '
             + (l.etat === 'actif'
@@ -274,7 +301,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         if (RENVOI && RENVOI.id === l.id) h.push(ligneRenvoi(l));
         if (l.revoqueLe) {
           h.push('<tr><td></td><td colspan="6" class="dt">${T("Révoqué le")} ' + quand(l.revoqueLe)
-            + ' par ' + esc(l.revoquePar || '?')
+            + '${T(" par ")}' + esc(l.revoquePar || '?')
             + (l.motif ? ' — ' + esc(l.motif) : '') + '</td></tr>');
         }
       });
