@@ -241,8 +241,17 @@ const chainesProse = (js) => {
  * ⚠ LE BLOC EST PLAT, sans accolade imbriquee — la borne `[^{}]*` le dit, et
  * c est ce qui rend la reconnaissance sure sans analyser du JavaScript. */
 const RE_SZ_DONNEES = /var\s+SZ_DONNEES\s*=\s*\{[^{}]*\}\s*;/g;
+/* ⚠ ET LA TABLE szTd DU SOCLE (2026-09-25) : << var SZ_TD = {...}; >>, posee dans
+   chaque page, porte le vocabulaire du site — ses CLES sont les libelles
+   francais du site, ses valeurs leur anglais. Ce n est pas du texte affiche :
+   c est la table qui le traduit. Sans cette ligne, chaque page anglaise
+   comptait 40 phrases francaises de plus. Elle n entre PAS dans
+   donneesDeclarees : ce ne sont pas des donnees a proteger de la traduction,
+   c est la traduction elle-meme. */
+const RE_SZ_TD = /var\s+SZ_TD\s*=\s*\{[^{}]*\}\s*;/g;
 const sansDonneesDeclarees = (s) => String(s)
-  .replace(RE_SZ_DONNEES, (m) => m.replace(/[^\n]/g, ' '));
+  .replace(RE_SZ_DONNEES, (m) => m.replace(/[^\n]/g, ' '))
+  .replace(RE_SZ_TD, (m) => m.replace(/[^\n]/g, ' '));
 
 /* Les textes declares comme DONNEES dans une fenetre — pour les bancs qui
    doivent les refuser plutot que les ignorer. */

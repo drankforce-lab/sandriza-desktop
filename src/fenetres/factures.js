@@ -256,7 +256,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
               + '<td>' + esc(r.client || '—') + '</td>'
               + '<td>' + esc(fmtDate(r.echeance)) + '</td>'
               + '<td>' + esc(fmt(r.total)) + '</td>'
-              + '<td>' + pilule(r.statut, r.statutLibelle) + '</td>'
+              + '<td>' + pilule(r.statut, szTd(r.statutLibelle)) + '</td>'
               + (avecGestes ? '<td class="fin">' + gestes + '</td>' : '') + '</tr>';
           }).join('')
         + '</tbody></table>';

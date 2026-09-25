@@ -353,7 +353,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('tableau')}
               + '<div class="dt">' + esc(fmtDate(r.date)) + '</div></td>'
               + '<td>' + esc(r.client || '—') + '</td>'
               + '<td>' + esc(fmt(r.total)) + '</td>'
-              + '<td>' + pilule(r.statut, r.statutLibelle) + '</td></tr>';
+              + '<td>' + pilule(r.statut, szTd(r.statutLibelle)) + '</td></tr>';
           }).join('')
         + '</tbody></table></div>';
     }

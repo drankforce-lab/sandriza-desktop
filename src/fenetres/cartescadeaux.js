@@ -328,7 +328,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
               + fmt(g.solde) + '</td>'
               + '<td>' + esc(g.expediteur || '—') + '</td>'
               + '<td class="dt">' + esc(g.date) + '</td>'
-              + '<td><span class="pill ' + (TONS[g.statut] || 'neutre') + '">' + esc(g.statutLibelle) + '</span>'
+              + '<td><span class="pill ' + (TONS[g.statut] || 'neutre') + '">' + esc(szTd(g.statutLibelle)) + '</span>'
               + (g.courrielEnvoye ? ' <span class="pill neutre">${T("courriel ✓")}</span>' : '') + '</td></tr>';
           }).join('')
         + '</tbody></table>';

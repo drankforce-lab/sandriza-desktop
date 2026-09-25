@@ -211,7 +211,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
     h += rows.map(function(c){
       return '<div class="ligne" data-id="' + esc(c.id) + '" title="${T("Ouvrir la conversation")}">'
         + '<div class="haut"><strong>' + esc(c.nom) + '</strong>'
-        + '<span class="pill ' + (TONS[c.statut] || 'neutre') + '">' + esc(c.statutLibelle) + '</span>'
+        + '<span class="pill ' + (TONS[c.statut] || 'neutre') + '">' + esc(szTd(c.statutLibelle)) + '</span>'
         + (c.horsLigne ? '<span class="pill neutre">${T("hors ligne")}</span>' : '')
         + '<span class="droite"><span class="dt">' + esc(c.date) + '</span>'
         + '<div class="dt">' + c.nbMessages + ' '

@@ -164,7 +164,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          sont riches. La zone defilante est donc fille du CORPS, pas d une
          carte — le socle couvre les deux formes. */
       h += '<div class="liste">' + rows.map(function(r){
-        var badges = '<span class="pill ' + (TONS[r.statut] || 'neutre') + '">' + esc(r.statutLibelle) + '</span>';
+        var badges = '<span class="pill ' + (TONS[r.statut] || 'neutre') + '">' + esc(szTd(r.statutLibelle)) + '</span>';
         if (r.expireAuto) badges += ' <span class="pill err">${T("Expirée automatiquement")}</span>';
         if (r.expireBientot) badges += ' <span class="pill err">⏳${T(" Expire le ")}' + esc(r.expireLe) + '</span>';
         if (r.suivi) badges += ' <span class="pill neutre"><span class="ic">📦</span> ' + esc(r.suivi) + '</span>';

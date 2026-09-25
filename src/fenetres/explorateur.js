@@ -301,12 +301,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + esc(Q) + '">';
     h += (D && D.filtres ? D.filtres : []).map(function(f){
       return '<button class="jeton' + (FILTRES.indexOf(f.cle) >= 0 ? ' on' : '') + '"'
-        + ' data-filtre="' + esc(f.cle) + '">' + esc(f.nom) + '</button>'; }).join('');
+        + ' data-filtre="' + esc(f.cle) + '">' + esc(szTd(f.nom)) + '</button>'; }).join('');
     h += '<select id="sans" aria-label="${T("Filtrer les photos sans un traitement donné")}">'
       + '<option value="">${T("Traitement — tous")}</option>'
       + (D && D.traitements ? D.traitements : []).map(function(t){
           return '<option value="' + esc(t.cle) + '"' + (SANS === t.cle ? ' selected' : '')
-            + '>${T("Sans « ")}' + esc(t.nom) + ' »</option>'; }).join('') + '</select>';
+            + '>${T("Sans « ")}' + esc(szTd(t.nom)) + ' »</option>'; }).join('') + '</select>';
     if (D && (D.lots || []).length) {
       h += '<select id="lot"><option value="">${T("Tous les lots")}</option>'
         + D.lots.map(function(l){
@@ -397,7 +397,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function nomTraitement(cle){
     var c = String(cle || '');
     var l = ((D && D.traitements) || []).filter(function(t){ return t.cle === c; })[0];
-    return (l && l.nom) || NOMS_TR[c] || c || '${T("dernier traitement")}';
+    return szTd((l && l.nom) || NOMS_TR[c] || c || '${T("dernier traitement")}');
   }
 
   function pageCourante(){
