@@ -94,7 +94,7 @@ module.exports = {
 
   /* ── LE TABLEAU ─────────────────────────────────────────────────────────── */
   'Produit': 'Product',
-  'Durée': 'Length',
+  'Durée': 'Duration',
   'Stock': 'Stock',
   'Prix': 'Price',
   'Produit Durée Stock': 'Product Length Stock',
@@ -214,5 +214,11 @@ module.exports = {
   'en liquidation': 'on clearance',
   'en vente finale': 'final sale',
   'produit dans': 'product in',
-  'produits dans': 'products in'
+  'produits dans': 'products in',
+  // La refonte de la liste, comme l'Inventaire (2026-09-25).
+  'prix réduits, aucun retour': 'reduced prices, no returns',
+  'ni retour ni échange': 'no returns or exchanges',
+  'Cliquer pour afficher': 'Click to show',
+  'Nom, SKU ou catégorie — les deux régimes…': 'Name, SKU or category — both regimes…',
+  'Rupture': 'Out of stock',
 };

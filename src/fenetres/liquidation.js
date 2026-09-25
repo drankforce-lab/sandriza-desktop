@@ -80,11 +80,20 @@ button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:70
    son contenu collé à droite, sans rien dans son propre bloc pour l'expliquer.
    Deux noms de classe identiques pour deux intentions, c'est le piège CSS du
    projet — et il ne se voit qu'à l'écran. */
-.tuile.liq{border-left-color:#d97706}
-.tuile.vfin{border-left-color:#dc2626}
-.tuile .lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
-.tuile .val{font-size:.95rem;font-weight:800;margin-top:.1rem}
-.tuile .sub{font-size:.66rem;color:var(--tx2);margin-top:.1rem}
+/* La refonte de l Inventaire (2026-09-25) : les tuiles aux mesures communes
+   (plus de liseré de couleur — une couleur = un sens), et elles menent d un
+   clic au regime qu elles comptent. */
+.tuile{border-left-width:1px}
+.tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tuile.cliq{cursor:pointer;user-select:none;position:relative}
+.tuile.cliq:hover{border-color:#c9a97e}
+.tuile.cliq::after{content:"›";position:absolute;top:.55rem;right:.8rem;font-size:1.1rem;color:var(--tx3)}
+.tuile.on{border-color:#c9a97e}
+.rf-av.tc{background:color-mix(in srgb,var(--cc,#6d7f96) 16%,transparent);
+  border-color:color-mix(in srgb,var(--cc,#6d7f96) 34%,transparent);color:color-mix(in srgb,var(--cc,#6d7f96) 72%,white)}
+html.jour .rf-av.tc{color:color-mix(in srgb,var(--cc,#6d7f96) 55%,black);
+  background:color-mix(in srgb,var(--cc,#6d7f96) 14%,white);border-color:color-mix(in srgb,var(--cc,#6d7f96) 32%,white)}
+.carte .soustitre{font-size:.76rem;color:var(--tx2);margin:0 0 .4rem}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;
@@ -264,16 +273,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
         : '<button class="geste" data-retirer="' + esc(l.id) + '" title="${T("Ramener au régime normal")}">${T("✕ Retirer")}</button>';
     }
     var quand = l.au
-      ? '<span class="pill neutre" title="${T("La boutique annonce cette date au client")}">${T("jusqu’au ")}' + esc(l.au) + '</span>'
-      : '<span class="dt">${T("jusqu’à épuisement")}</span>';
+      ? '<span class="rf-pill bleu" title="${T("La boutique annonce cette date au client")}">${T("jusqu’au ")}' + esc(l.au) + '</span>'
+      : '<span class="rf-pill">${T("jusqu’à épuisement")}</span>';
+    var cc = /^#[0-9a-f]{3,8}$/i.test(l.couleur || '') ? l.couleur : '';
     return '<tr>'
-      + '<td><span class="pastille" style="background:' + esc(l.couleur) + '"></span>'
-      +   '<strong>' + esc(l.nom) + '</strong>'
-      +   (l.sku ? ' <span class="dt">· ' + esc(l.sku) + '</span>' : '')
-      +   '<div class="dt">' + esc(l.categorie) + '</div></td>'
+      + '<td><div class="rf-prod"><span class="rf-av' + (cc ? ' tc" style="--cc:' + cc : '') + '" title="' + esc(l.categorie || '')
+      +   '" aria-hidden="true">' + esc(String(l.categorie || l.nom || '?').charAt(0).toUpperCase()) + '</span>'
+      +   '<div style="min-width:0"><div class="rf-nom">' + esc(l.nom) + '</div>'
+      +   '<div class="rf-sous">' + (l.sku ? '<span class="rf-code">' + esc(l.sku) + '</span><span>·</span>' : '')
+      +   '<span>' + esc(l.categorie) + '</span></div></div></div></td>'
       + '<td>' + quand + '</td>'
-      + '<td class="num">' + l.stock + '</td>'
-      + '<td class="num">' + argent(l.prix) + '</td>'
+      + '<td class="num">' + (l.stock === 0 ? '<span class="rf-pill rouge">${T("Rupture")}</span>' : '<b>' + l.stock + '</b>') + '</td>'
+      + '<td class="num"><span class="rf-mont">' + argent(l.prix) + '</span></td>'
       + '<td class="fin">' + geste + '</td>'
       + '</tr>';
   }
@@ -295,15 +306,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
   }
 
   function carte(quel, titre, sousTitre, g){
-    var accent = quel === 'liq' ? '#d97706' : '#dc2626';
     var corpsCarte = g.lignes.length
       ? '<table><thead><tr><th>${T("Produit")}</th><th>${T("Durée")}</th><th class="num">${T("Stock")}</th>'
         + '<th class="num">${T("Prix")}</th><th></th></tr></thead><tbody>'
         + g.lignes.map(ligneProduit).join('') + '</tbody></table>' + pager(g, quel)
       : '<div class="vide">' + esc(sousTitre.vide) + '</div>';
-    return '<div class="carte"><h2><span class="pt" style="background:' + accent + '"></span>'
-      + esc(titre) + '<span class="cpt" style="color:' + accent + '">' + g.total + '</span></h2>'
-      + '<div class="dt" style="margin:-.25rem 0 .5rem">' + esc(sousTitre.texte) + '</div>'
+    /* Plus de pastille ni de compte en couleur d accent : la tuile porte le
+       compte, la carte ne garde que son titre et ce que le regime veut dire. */
+    return '<div class="carte"><h2>' + esc(titre) + '<span class="cpt">' + g.total + '</span></h2>'
+      + '<div class="soustitre">' + esc(sousTitre.texte) + '</div>'
       + corpsCarte + '</div>';
   }
 
@@ -323,21 +334,35 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
     /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
        quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
        ce poste. Voir JS_TUILES dans socle.js. */
+    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE A LIQUIDATION (2026-09-25) ═════
+       Deux tuiles qui menent au regime qu elles comptent, UNE barre a loupe
+       (recherche, les deux regimes en pastilles, les ajouts), lignes riches a
+       la pastille de categorie. Crochets gardes : #rech, data-onglet,
+       data-ouvrir, data-retirer, data-confirmer, data-page, #taille. */
+    var tu = function(o, lib, n, sous){
+      return '<div class="tuile cliq' + (!Q && ONGLET === o ? ' on' : '') + '" data-liqt="' + o + '" title="${T("Cliquer pour afficher")}">'
+        + '<div class="lbl">' + lib + '</div><div class="val">' + n + '</div>'
+        + '<div class="sub">' + sous + '</div></div>';
+    };
     var h = szTuiles('<div class="tuiles">'
-      + '<div class="tuile liq"><div class="lbl"><span class="ic">🟡</span> ${T("En liquidation")}</div><div class="val">'
-      +   c.liquidation + '</div><div class="sub">' + (c.liquidation === 1 ? '${T("produit")}' : '${T("produits")}') + '</div></div>'
-      + '<div class="tuile vfin"><div class="lbl"><span class="ic">🔴</span> ${T("En vente finale")}</div><div class="val">'
-      +   c.finale + '</div><div class="sub">' + (c.finale === 1 ? '${T("produit")}' : '${T("produits")}') + '</div></div>'
+      + tu('liq', '${T("En liquidation")}', c.liquidation, '${T("prix réduits, aucun retour")}')
+      + tu('final', '${T("En vente finale")}', c.finale, '${T("ni retour ni échange")}')
       + '</div>');
 
-    h += '<div class="barreoutils">'
-      + '<input class="rech" id="rech" type="search" aria-label="${T("Rechercher un produit (nom, SKU, catégorie)")}" placeholder="${T("Rechercher un produit (nom, SKU, catégorie) — les deux régimes…")}" value="'
-      +   esc(Q) + '">';
-    if (D.peut.ajout) {
-      h += '<button class="geste" data-ouvrir="lot">${T("＋ Ajouter en lot")}</button>'
-        +  '<button class="geste" data-ouvrir="cat">${T("＋ Par catégorie")}</button>';
+    h += '<div class="carte"><div class="rf-tb">'
+      + '<label class="rf-rch" style="max-width:none">${ICO.loupe}<input id="rech" type="search" aria-label="${T("Rechercher un produit (nom, SKU, catégorie)")}" placeholder="${T("Nom, SKU ou catégorie — les deux régimes…")}" value="'
+      +   esc(Q) + '"></label>';
+    if (!Q) {
+      h += '<button class="rf-jet' + (ONGLET === 'liq' ? ' on' : '') + '" data-onglet="liq">${T("Liquidation")}'
+        +   '<span class="n">' + c.liquidation + '</span></button>'
+        +  '<button class="rf-jet' + (ONGLET === 'final' ? ' on' : '') + '" data-onglet="final">${T("Vente finale")}'
+        +   '<span class="n">' + c.finale + '</span></button>';
     }
-    h += '</div>';
+    if (D.peut.ajout) {
+      h += '<span class="rf-droite"><button class="rf-jet" data-ouvrir="lot">${T("＋ Ajouter en lot")}</button>'
+        +  '<button class="rf-jet" data-ouvrir="cat">${T("＋ Par catégorie")}</button></span>';
+    }
+    h += '</div></div>';
 
     if (!D.peut.ajout && !D.peut.edition) {
       h += '<div class="avis">${T("Lecture seule : votre rôle ne permet ni de mettre des produits ")}'
@@ -353,12 +378,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
         + carte('liq', '${T("Liquidation")}', { texte:TEXTES.liq.texte, vide:'${T("Aucun résultat en liquidation.")}' }, D.liq)
         + carte('final', '${T("Vente finale")}', { texte:TEXTES.final.texte, vide:'${T("Aucun résultat en vente finale.")}' }, D.finale);
     } else {
-      h += '<div class="barreoutils">'
-        + '<button class="geste' + (ONGLET === 'liq' ? ' actif' : '') + '" data-onglet="liq"><span class="ic">🟡</span> ${T("Liquidation")}'
-        +   '<span class="n">' + c.liquidation + '</span></button>'
-        + '<button class="geste' + (ONGLET === 'final' ? ' actif' : '') + '" data-onglet="final"><span class="ic">🔴</span> ${T("Vente finale")}'
-        +   '<span class="n">' + c.finale + '</span></button>'
-        + '</div>';
       h += (ONGLET === 'liq')
         ? carte('liq', '${T("Liquidation")}', TEXTES.liq, D.liq)
         : carte('final', '${T("Vente finale")}', TEXTES.final, D.finale);
@@ -696,6 +715,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
     }
 
     // ── L ecran
+    // Les tuiles (refonte du 2026-09-25) : le regime compte, et la recherche s efface.
+    var tl = t.closest && t.closest('[data-liqt]');
+    if (tl) {
+      ONGLET = tl.getAttribute('data-liqt'); ARME = '';
+      if (Q) { Q = ''; charger(); } else dessiner();
+      return;
+    }
     if (b && b.hasAttribute('data-ouvrir')) {
       if (b.getAttribute('data-ouvrir') === 'lot') ouvrirLot(); else ouvrirCat();
       return;

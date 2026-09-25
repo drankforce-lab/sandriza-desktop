@@ -52,6 +52,6 @@ module.exports = {
      sont passes aux jetons translucides le 2026-09-04 (79 declarations). */
   bordures: {
     'config-navigation.js': { 'button.danger.arme': '#b91c1c' },
-    'liquidation.js': { '.tuile.vfin': '#dc2626', '.resume.vfin': '#dc2626' },
+    'liquidation.js': { '.resume.vfin': '#dc2626' },
   },
 };
