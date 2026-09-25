@@ -25,7 +25,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -76,6 +76,23 @@ tbody td{padding:.34rem .4rem;border-top:1px solid var(--v055);vertical-align:mi
 tbody .num{font-weight:700}
 tbody .dt{font-size:.72rem;color:var(--tx2)}
 .etoile{color:var(--tx-or);font-weight:800}
+/* ── La refonte de l Inventaire (2026-09-25) ── */
+.tuiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.6rem;flex:0 0 auto}
+.tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
+.tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tuile.cliq{cursor:pointer;user-select:none;position:relative}
+.tuile.cliq:hover{border-color:#c9a97e}
+.tuile.cliq::after{content:"›";position:absolute;top:.55rem;right:.8rem;font-size:1.1rem;color:var(--tx3)}
+.tuile.on{border-color:#c9a97e}
+.val.att{color:var(--tx-att)}
+.rf-tb select{height:2.4rem;border-radius:10px;background:var(--f-0f1826);border-color:var(--v10);max-width:12rem}
+/* La note : le chiffre, puis cinq segments dessines (pas de glyphe etoile —
+   un pictogramme hors de .ic enfreint la norme du noir et blanc). */
+.etoiles{display:inline-flex;align-items:center;gap:.5rem;white-space:nowrap}
+.etoiles b{font-size:.95rem}
+.etoiles .seg{display:inline-flex;gap:3px}
+.etoiles .seg i{width:10px;height:6px;border-radius:2px;background:var(--v12)}
+.etoiles .seg i.p{background:#c9a97e}
 .pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
@@ -136,7 +153,7 @@ function pageAvis(ouverture) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
 
@@ -191,19 +208,56 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div>';
   }
 
-  var ETATS = { pending: ['att', '${T("En attente")}'], published: ['bon', '${T("Publié")}'], hidden: ['neutre', '${T("Masqué")}'] };
+  /* La pastille a point (rf-pill, refonte du 2026-09-25) : ambre ce qui attend
+     la moderation, vert ce qui est en boutique, gris ce qui en est retire. */
+  var ETATS = { pending: ['ambre', '${T("En attente")}'], published: ['vert', '${T("Publié")}'], hidden: ['', '${T("Masqué")}'] };
   function pastille(st){
     var e = ETATS[st] || ETATS.hidden;
-    return '<span class="pill ' + e[0] + '">' + e[1] + '</span>';
+    return '<span class="rf-pill ' + e[0] + '">' + e[1] + '</span>';
+  }
+  function initiales(nom){
+    var m = String(nom || '').trim().split(' ').filter(Boolean);
+    if (!m.length) return '?';
+    return ((m[0][0] || '') + (m.length > 1 ? (m[m.length - 1][0] || '') : '')).toUpperCase();
+  }
+  // La note : le chiffre (arrondi pour les segments), puis cinq segments dont n pleins.
+  function etoiles(n, sansChiffre){
+    var r = Math.max(0, Math.min(5, Math.round(Number(n) || 0)));
+    var seg = '';
+    for (var k = 0; k < 5; k++) seg += '<i' + (k < r ? ' class="p"' : '') + '></i>';
+    return '<span class="etoiles" title="' + esc(n) + '${T(" sur 5")}">'
+      + (sansChiffre ? '' : '<b>' + esc(n) + '</b>') + '<span class="seg" aria-hidden="true">' + seg + '</span></span>';
   }
 
   function dessiner(){
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var c = D.comptes || {};
-    var h = '<div class="barreoutils">'
-      + '<button class="mini' + (ONGLET === 'pending' ? ' actif' : '') + '" data-onglet="pending">'
+    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE AUX AVIS (2026-09-25) ══════════
+       Tuiles comptees par le SITE sur TOUS les avis (comptes), qui menent d un
+       clic a la file ou a l etat qu elles comptent ; barre sur une ligne a
+       loupe ; ligne riche (initiales du client, achat verifie, produit
+       dessous), note en etoiles. Crochets gardes : data-onglet, #a-etat, #a-q,
+       #a-note, #a-per, #a-prec, #a-suiv, #a-exporter, tr[data-id]. */
+    var choix = ONGLET === 'pending' ? 'pending' : (ETAT || 'done');
+    var tu = function(g, lib, val, sous, ton){
+      return '<div class="tuile' + (g ? ' cliq' + (choix === g ? ' on' : '') + '" data-avt="' + g
+          + '" title="${T("Cliquer pour afficher")}' : '') + '">'
+        + '<div class="lbl">' + lib + '</div><div class="val' + (ton ? ' ' + ton : '') + '">' + val + '</div>'
+        + '<div class="sub">' + sous + '</div></div>';
+    };
+    var h = szTuiles('<div class="tuiles">'
+      + tu('pending', '${T("En attente")}', c.attente || 0, '${T("à modérer")}', c.attente ? 'att' : '')
+      + tu('published', '${T("Publiés")}', c.publies || 0, '${T("visibles en boutique")}', '')
+      + tu('hidden', '${T("Masqués")}', c.masques || 0, '${T("retirés de la boutique")}', '')
+      + tu('done', '${T("Traités")}', c.traites || 0, '${T("approuvés et refusés")}', '')
+      + tu('', '${T("Note moyenne")}', (c.moyenne != null ? c.moyenne : '—'),
+          (c.moyenne != null ? etoiles(c.moyenne, true) : '${T("aucun avis publié")}'), '')
+      + '</div>');
+    h += '<div class="carte"><div class="rf-tb">'
+      + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Nom ou n° de commande")}" type="search" id="a-q" placeholder="${T("Nom ou n° de commande…")}" value="' + esc(Q) + '"></label>'
+      + '<button class="rf-jet' + (ONGLET === 'pending' ? ' on' : '') + '" data-onglet="pending">'
       + '${T("En attente")}<span class="n' + (c.attente > 0 ? ' hi' : '') + '">' + (c.attente || 0) + '</span></button>'
-      + '<button class="mini' + (ONGLET === 'done' ? ' actif' : '') + '" data-onglet="done">'
+      + '<button class="rf-jet' + (ONGLET === 'done' ? ' on' : '') + '" data-onglet="done">'
       + '${T("Traités")}<span class="n">' + (c.traites || 0) + '</span></button>'
       + (ONGLET === 'done'
           ? '<select id="a-etat" aria-label="${T("Filtrer par état de traitement")}">'
@@ -212,7 +266,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + '<option value="hidden"' + (ETAT === 'hidden' ? ' selected' : '') + '>${T("Refusés / masqués")}</option>'
             + '</select>'
           : '')
-      + '<input aria-label="${T("Nom ou n° de commande")}" type="search" id="a-q" placeholder="${T("Nom ou n° de commande…")}" value="' + esc(Q) + '">'
       + '<select id="a-note"><option value=""' + (NOTE === '' ? ' selected' : '') + '>${T("Toutes les notes")}</option>'
       + [5, 4, 3, 2, 1].map(function(n){
           return '<option value="' + n + '"' + (String(NOTE) === String(n) ? ' selected' : '') + '>' + n + '${T(" sur 5")}</option>';
@@ -224,10 +277,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<option value="90"' + (PER === '90' ? ' selected' : '') + '>${T("90 derniers jours")}</option>'
       + '<option value="365"' + (PER === '365' ? ' selected' : '') + '>${T("Cette année")}</option>'
       + '</select>'
-      + '<span class="droite">'
-      + (c.moyenne != null ? '${T("moyenne ")}' + c.moyenne + '${T(" sur 5")} · ' : '')
-      + (c.publies || 0) + ((c.publies || 0) > 1 ? '${T(" publiés")}' : '${T(" publié")}') + '</span>'
-      + '</div>';
+      + '<span class="rf-droite"><span class="dt">' + (D.total || 0) + ' ${T("avis")}</span></span>'
+      + '</div></div>';
 
     /* ⚠ PLEINE HAUTEUR (2026-09-19) : la carte prend le reste du corps, la liste
        defile, la pagination reste collee au bas. La boite de detail est un
@@ -238,15 +289,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       h += '<div class="vide">' + (ONGLET === 'pending'
         ? '${T("Rien à approuver. La file est vide.")}' : '${T("Aucun avis ne correspond à ces filtres.")}') + '</div>';
     } else {
-      h += '<div class="liste"><table><thead><tr><th>${T("État")}</th><th>${T("Note")}</th><th>${T("Produit")}</th>'
-        + '<th>${T("Client")}</th><th>${T("Date")}</th></tr></thead><tbody>'
+      h += '<div class="liste"><table><thead><tr><th>${T("Client")}</th><th>${T("Note")}</th>'
+        + '<th>${T("Date")}</th><th>${T("État")}</th></tr></thead><tbody>'
         + rows.map(function(r){
             return '<tr data-id="' + esc(r.id) + '" title="${T("Ouvrir l’avis")}">'
-              + '<td>' + pastille(r.statut) + '</td>'
-              + '<td><span class="etoile">' + r.note + '${T(" sur 5")}</span></td>'
-              + '<td><span class="num">' + esc(r.produit) + '</span></td>'
-              + '<td>' + esc(r.client) + (r.verifie ? ' <span class="pill bon">${T("achat vérifié")}</span>' : '') + '</td>'
-              + '<td class="dt">' + esc(r.date) + '</td></tr>';
+              + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(r.client)) + '</span>'
+              + '<div style="min-width:0"><div class="rf-nom">' + esc(r.client || '—')
+              + (r.verifie ? ' <span class="rf-pill bleu">${T("achat vérifié")}</span>' : '') + '</div>'
+              + '<div class="rf-sous"><span>' + esc(r.produit) + '</span></div></div></div></td>'
+              + '<td>' + etoiles(r.note) + '</td>'
+              + '<td class="dt">' + esc(r.date) + '</td>'
+              + '<td>' + pastille(r.statut) + '</td></tr>';
           }).join('')
         + '</tbody></table></div>';
       if ((D.pages || 1) > 1) {
@@ -475,6 +528,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!t || !t.closest) return;
     var og = t.closest('[data-onglet]');
     if (og) { ONGLET = og.getAttribute('data-onglet'); ETAT = ''; PAGE = 0; charger(); return; }
+    // Les tuiles (refonte du 2026-09-25) : la file, ou l onglet Traites sur l etat compte.
+    var av = t.closest('[data-avt]');
+    if (av) {
+      var g = av.getAttribute('data-avt');
+      if (g === 'pending') { ONGLET = 'pending'; ETAT = ''; }
+      else { ONGLET = 'done'; ETAT = (g === 'done' ? '' : g); }
+      PAGE = 0; charger(); return;
+    }
     if (t.closest('.boite')) return;
     var vo = t.closest('#a-voile');
     if (vo) { DETAIL = null; SUPPR_ARME = false; PHOTO_ARMEE = -1; REPONDRE = false; dessiner(); return; }

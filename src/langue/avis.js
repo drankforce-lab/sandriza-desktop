@@ -134,5 +134,17 @@ module.exports = {
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) — collés à une donnée. */
   'sur 5 ·': 'out of 5 ·',
-  '(aucun texte)': '(no text)'
+  '(aucun texte)': '(no text)',
+  // La refonte de la liste, comme l'Inventaire (2026-09-25).
+  'à modérer': 'to moderate',
+  'Publiés': 'Published',
+  'visibles en boutique': 'visible in the store',
+  'Masqués': 'Hidden',
+  'retirés de la boutique': 'removed from the store',
+  'approuvés et refusés': 'approved and rejected',
+  'Note moyenne': 'Average rating',
+  'aucun avis publié': 'no published reviews',
+  'Cliquer pour afficher': 'Click to show',
+  'Client Note': 'Customer Rating',
+  'Date État': 'Date Status',
 };
