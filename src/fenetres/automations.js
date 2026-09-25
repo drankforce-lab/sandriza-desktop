@@ -136,16 +136,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function val(id){ var e = document.getElementById(id); return e ? e.value : ''; }
 
   function badgeDest(rec){
-    if (rec === 'perStaff')    return '<span class="pill">${T("à chaque membre concerné")}</span>';
-    if (rec === 'perCustomer') return '<span class="pill">${T("au client concerné")}</span>';
-    if (rec === 'none')        return '<span class="pill">${T("aucun courriel")}</span>';
+    if (rec === 'perStaff')    return '<span class="rf-pill">${T("à chaque membre concerné")}</span>';
+    if (rec === 'perCustomer') return '<span class="rf-pill">${T("au client concerné")}</span>';
+    if (rec === 'none')        return '<span class="rf-pill">${T("aucun courriel")}</span>';
     return '';
   }
 
   function carteHtml(j){
     var h = '<div class="carte"><div class="th"><span class="em">' + (j.icon || '⚙') + '</span>'
       + '<span class="nom">' + esc(j.name) + '</span>'
-      + '<span class="pill">' + esc(j.schedule) + '</span>' + badgeDest(j.recipient) + '</div>';
+      + '<span class="rf-pill bleu">' + esc(j.schedule) + '</span>' + badgeDest(j.recipient) + '</div>';
     h += '<p class="desc">' + esc(j.desc) + '</p>';
     if (j.recommendation) h += '<div class="reco"><span class="ic">💡</span>${T(" Fréquence recommandée : ")}' + esc(j.recommendation) + '</div>';
     if (j.recipient === 'single') {
