@@ -951,6 +951,11 @@ const JEU = {
         },
         'produits:ouvrir': { ok: true },
         'produits:nouveau': { ok: true },
+        /* Deux cadenas (2026-09-25) : la pastille de verrou n etait mesuree par
+           AUCUN banc — une fiche tenue par une collegue, une par soi-meme. */
+        'verrous:liste': { ok: true, portees: { products: {
+          prod_1: { par: 'Julie Roy', mine: false, depuis: '14 h 02' },
+          prod_3: { par: 'Moi', mine: true, depuis: '14 h 10' } } } },
         identite: IDENTITE,
       },
     },

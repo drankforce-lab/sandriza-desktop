@@ -3198,6 +3198,20 @@ html.jour .rf-pill.bleu{color:#44607e}
 .rf-tb .rf-jet.on{background:rgba(201,169,126,.14);border-color:rgba(201,169,126,.55);color:var(--tx-or2);font-weight:700}
 .rf-droite{margin-left:auto;display:flex;gap:.4rem;align-items:center}
 html.jour .onglets button{background:transparent;border-color:transparent;color:#414e66}
+/* LE CADENAS DE VERROU AUX MESURES DE LA REFONTE (demande du 2026-09-25 :
+   << pas assez gros, pas conforme >>). Meme facture que rf-pill : fond plein,
+   pas de contour, texte gras plus grand, cadenas plus grand. Ambre pour une
+   fiche tenue par un collegue (attente) ; le BLEU d information pour soi-meme,
+   comme rf-pill.bleu (l or translucide se lisait gris sur ce fond).
+   Place ICI, en dernier : il passe devant la reprise de theme (.cad.mine)
+   et les regles locales (tableau.js). */
+.cad{gap:.4em;margin-left:.5em;padding:.26rem .72rem .26rem .58rem;border:0;border-radius:99px;
+  font-size:.78rem;font-weight:700;line-height:1.25;background:rgba(245,158,11,.16);color:var(--tx-att)}
+.cad svg{width:1.1em;height:1.1em}
+.cad .cadn{max-width:14ch}
+.cad.mine{background:rgba(96,165,250,.14);color:var(--tx-bleu)}
+html.jour .cad{background:rgba(245,158,11,.16);color:#806112;border:0}
+html.jour .cad.mine{background:rgba(96,165,250,.14);color:#44607e}
 /* ⚠ L ENCRE DES ONGLETS NON CHOISIS, EN JOUR : l or pale de la fenetre Marque
    (#7d694e) posait 4,40 sur la barre creme, une fois la boite blanche retiree. */
 /* Une pastille dans un onglet NON choisi garde un fond blanc : sur la barre grisee
