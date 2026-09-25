@@ -106,9 +106,14 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
    le 2026-09-14, a sa demande. Une feuille qui garde le dessin d un bloc retire
    fait croire, a la relecture, que le bloc existe encore quelque part. */
 
-.pill{display:inline-block;font-size:.66rem;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
+/* La pastille a point de la refonte (2026-09-25) : meme forme que rf-pill.
+   Un compte DESACTIVE est gris, plus rouge : ce n est pas une erreur, c est
+   un etat voulu. Une couleur = un sens. */
+.pill{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:600;padding:.22rem .65rem;
+  border-radius:99px;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:99px;background:currentColor;flex:0 0 auto}
 .pill.on{background:rgba(22,163,74,.2);color:var(--tx-ok2)}
-.pill.off{background:rgba(220,38,38,.18);color:var(--tx-err2)}
+.pill.off{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
 .pill.mfa{background:rgba(99,102,241,.18);color:var(--tx-bleu)}
 .pill.warn{background:rgba(234,179,8,.18);color:var(--tx-att)}
 .pill.moi{background:rgba(59,130,246,.18);color:var(--tx-bleu)}
@@ -142,12 +147,14 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .fiche .barre{display:flex;gap:.5rem;flex-wrap:wrap;border-top:1px solid var(--v07);padding-top:.65rem;margin-top:auto}
 .fiche .barre .b{font-size:.76rem;padding:.3rem .62rem}
 
-.tbl{width:100%;border-collapse:collapse;font-size:.84rem}
-.tbl th{font-size:.68rem;color:var(--tx2);font-weight:600;text-transform:uppercase;letter-spacing:.05em;
-  padding:.45rem .6rem;text-align:left;border-bottom:1px solid var(--v10);white-space:nowrap}
-.tbl td{padding:.45rem .6rem;border-bottom:1px solid var(--v05);vertical-align:middle}
-.tbl tbody tr:hover{background:var(--v03)}
-.tbl tr.inactif{opacity:.68}
+/* La liste en CARTES du socle (refonte du 2026-09-25) : plus de collapse ni
+   de trait sous chaque cellule. ⚠ Plus d opacite sur un compte desactive :
+   elle rendait ses pastilles illisibles (vu a Remboursements) — la pastille
+   grise << Desactive >> le dit. */
+.tbl{width:100%;font-size:.84rem}
+.tbl th{font-weight:700;text-transform:uppercase;text-align:left;white-space:nowrap}
+.tbl td{vertical-align:middle}
+.tbl tr.inactif .nm b{color:var(--tx2)}
 .tbl .init{width:28px;height:28px;font-size:.74rem}
 .tbl .nm{display:flex;align-items:center;gap:.55rem;min-width:0}
 .tbl .nm b{font-weight:700}
