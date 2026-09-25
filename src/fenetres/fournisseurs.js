@@ -189,6 +189,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
   }
 
+  /* Les initiales, pour la pastille (Tissus Laval -> TL) ; decoupe sur l espace. */
+  function initiales(nom){
+    var m = String(nom || '').trim().split(' ').filter(Boolean);
+    if (!m.length || m[0] === '—') return '?';
+    return ((m[0][0] || '') + (m.length > 1 ? (m[m.length - 1][0] || '') : '')).toUpperCase();
+  }
   function dessiner(){
     /* ⚠⚠ LA PLEINE HAUTEUR NE VAUT QUE POUR LA LISTE (2026-09-19). Le
        REPERTOIRE dessine une grille de cartes SANS conteneur defilant : sous
@@ -201,12 +207,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (REP) { corps.innerHTML = vueRepertoire(); brancherRepertoire(); return; }
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var rows = D.lignes || [];
-    var h = '<div class="barreoutils">'
-      + '<input aria-label="${T("Nom, contact ou courriel")}" type="search" id="f-q" placeholder="${T("Nom, contact ou courriel…")}" value="' + esc(Q) + '">'
-      + '<span class="droite">' + (D.total || 0) + '${T(" au total")}'
-      + '<button class="mini" id="f-repertoire" title="${T("Un carnet de grossistes connus, à ajouter en un clic")}"><span class="ic">🔎</span>${T(" Répertoire")}</button>'
-      + '<button class="prim" id="f-nouveau">${T("+ Nouveau fournisseur")}</button></span>'
-      + '</div>';
+    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE A FOURNISSEURS (2026-09-25) ════
+       Pas de tuiles ici, et c est voulu : le site n envoie que le total, et des
+       comptes tires d une page filtree diraient faux. Barre sur une ligne a
+       loupe ; ligne riche (initiales, nom, site dessous ; contact avec courriel
+       et telephone dessous) ; categories et statut en pastilles. Crochets
+       gardes : #f-q, #f-repertoire, #f-nouveau, data-suppr, tr[data-id]. */
+    var h = '<div class="carte"><div class="rf-tb">'
+      + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Nom, contact ou courriel")}" type="search" id="f-q" placeholder="${T("Nom, contact ou courriel…")}" value="' + esc(Q) + '"></label>'
+      + '<span class="rf-droite"><span class="dt">' + (D.total || 0) + '${T(" au total")}</span>'
+      + '<button class="rf-jet" id="f-repertoire" title="${T("Un carnet de grossistes connus, à ajouter en un clic")}"><span class="ic">🔎</span>${T(" Répertoire")}</button>'
+      + '<button class="prim" id="f-nouveau" style="height:2.4rem;padding:0 .9rem">${T("+ Nouveau fournisseur")}</button></span>'
+      + '</div></div>';
         /* ⚠ PLEINE HAUTEUR (2026-09-19) : la carte prend tout l espace restant et
        c est la LISTE qui defile. Sans ca, une liste courte s arrete a sa
        derniere ligne et laisse des centaines de pixels morts sous elle. */
@@ -214,19 +226,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!rows.length) {
       h += '<div class="vide">' + (D.total ? '${T("Aucun résultat.")}' : '${T("Aucun fournisseur — créez-en un pour commencer.")}') + '</div>';
     } else {
-      h += '<div class="liste"><table><thead><tr><th>${T("Fournisseur")}</th><th>${T("Contact")}</th><th>${T("Courriel / Tél.")}</th>'
+      h += '<div class="liste"><table><thead><tr><th>${T("Fournisseur")}</th><th>${T("Contact")}</th>'
         + '<th>${T("Catégories")}</th><th>${T("Statut")}</th>' + (D.peutSupprimer ? '<th></th>' : '') + '</tr></thead><tbody>'
         + rows.map(function(r){
             return '<tr data-id="' + esc(r.id) + '" title="${T("Ouvrir la fiche fournisseur")}">'
-              + '<td><span class="num">' + esc(r.nom) + '</span>'
-              + szVerrouCase('suppliers', r.id)
-              + (r.site ? '<div class="dt">' + esc(r.site) + '</div>' : '') + '</td>'
-              + '<td>' + esc(r.contact || '—') + '</td>'
-              + '<td>' + esc(r.courriel || '—')
-              + (r.telephone ? '<div class="dt">' + esc(r.telephone) + '</div>' : '') + '</td>'
+              + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(r.nom)) + '</span>'
+              + '<div style="min-width:0"><div class="rf-nom">' + esc(r.nom) + szVerrouCase('suppliers', r.id) + '</div>'
+              + (r.site ? '<div class="rf-sous">' + esc(r.site) + '</div>' : '') + '</div></div></td>'
+              + '<td><div>' + esc(r.contact || '—') + '</div>'
+              + '<div class="rf-sous">' + esc(r.courriel || '—')
+              + (r.telephone ? '<span>·</span><span>' + esc(r.telephone) + '</span>' : '') + '</div></td>'
               + '<td>' + ((r.categories || []).map(function(c){
-                  return '<span class="pill neutre">' + esc(c) + '</span>'; }).join('') || '—') + '</td>'
-              + '<td>' + (r.actif ? '<span class="pill bon">${T("Actif")}</span>' : '<span class="pill neutre">${T("Inactif")}</span>') + '</td>'
+                  return '<span class="rf-pill">' + esc(c) + '</span>'; }).join(' ') || '—') + '</td>'
+              + '<td>' + (r.actif ? '<span class="rf-pill vert">${T("Actif")}</span>' : '<span class="rf-pill">${T("Inactif")}</span>') + '</td>'
               /* ⚠ ARME EN DEUX CLICS, comme partout ailleurs : une fiche
                  supprimee ne se reconstitue pas, et la ligne entiere est deja
                  cliquable pour OUVRIR — un bouton a un seul clic juste a cote

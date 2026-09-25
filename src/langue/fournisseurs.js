@@ -106,5 +106,7 @@ module.exports = {
   'Inactif': 'Inactive',
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
-  'au total': 'in total'
+  'au total': 'in total',
+  // L'en-tête de la liste refaite, lu d'un bloc (2026-09-25).
+  'Fournisseur Contact': 'Supplier Contact',
 };
