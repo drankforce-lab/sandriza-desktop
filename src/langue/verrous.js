@@ -92,5 +92,12 @@ module.exports = {
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
   'fiches en cours de modification': 'records being edited',
-  'fiche en cours de modification': 'record being edited'
+  'fiche en cours de modification': 'record being edited',
+  // La refonte, comme l'Inventaire (2026-09-25).
+  'Actifs': 'Active',
+  'Tenus par vous': 'Held by you',
+  'dans cette session': 'in this session',
+  'Éteints': 'Expired',
+  'ne bloquent personne': 'block no one',
+  'Enregistrement Détenu par': 'Record Held by',
 };

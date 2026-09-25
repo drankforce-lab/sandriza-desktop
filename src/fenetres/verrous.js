@@ -25,7 +25,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais le nom d une section, le
@@ -72,6 +72,11 @@ tbody td{padding:.3rem .4rem;border-top:1px solid var(--v05);vertical-align:top}
 .pill.vif{background:rgba(22,163,74,.2);color:var(--tx-ok2)}
 .pill.mort{background:rgba(220,38,38,.18);color:var(--tx-err2)}
 .pill.moi{background:rgba(201,169,126,.2);color:#dcc39b}
+/* ── La refonte de l Inventaire (2026-09-25) ── */
+.tuiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem;flex:0 0 auto;margin-bottom:.7rem}
+.tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
+.tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.val.att{color:var(--tx-att)}
 .vide{padding:1.4rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
@@ -94,7 +99,7 @@ function pageVerrous() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   var corps = document.getElementById('corps');
   var sousEl = document.getElementById('sous');
 
@@ -134,25 +139,33 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             .catch(function(e){ return { ok: false, motif: 'echec', detail: (e && e.message) || e }; });
   }
 
+  function initiales(nom){
+    var m = String(nom || '').trim().split(' ').filter(Boolean);
+    if (!m.length || m[0] === '—') return '?';
+    return ((m[0][0] || '') + (m.length > 1 ? (m[m.length - 1][0] || '') : '')).toUpperCase();
+  }
   function tableau(liste, vide){
     if (!liste.length) return '<div class="vide">' + vide + '</div>';
-    var h = '<table><thead><tr><th>${T("Section")}</th><th>${T("Enregistrement")}</th><th>${T("Détenu par")}</th>'
+    var h = '<table><thead><tr><th>${T("Enregistrement")}</th><th>${T("Détenu par")}</th>'
       + '<th>${T("Depuis")}</th><th>${T("État")}</th>' + (PEUT ? '<th></th>' : '') + '</tr></thead><tbody>';
     for (var i = 0; i < liste.length; i++) {
       var l = liste[i];
       var mort = l.expired || l.sessionAlive === false;
       var motif = l.expired ? '${T("Périmé")}' : (l.sessionAlive === false ? '${T("Session fermée")}' : '');
       var cle = l.scope + SEP + l.id;
-      h += '<tr><td><strong>' + esc(l.scopeLabel || l.scope) + '</strong>'
-        + '<div class="sub mono">' + esc(l.scope) + '</div></td>'
-        + '<td>' + (l.label ? '<strong>' + esc(l.label) + '</strong>' : '<em class="mut">${T("sans libellé")}</em>')
-        + '<div class="sub mono">' + esc(l.id) + '</div></td>'
-        + '<td>' + esc(l.who || '—') + (l.mine ? ' <span class="pill moi">${T("vous")}</span>' : '') + '</td>'
+      /* La cellule riche : la fiche en gras, sa section et son identifiant
+         dessous ; la personne aux initiales, comme partout. */
+      h += '<tr><td><div class="rf-nom">' + (l.label ? esc(l.label) : '<em class="mut">${T("sans libellé")}</em>') + '</div>'
+        + '<div class="rf-sous"><span>' + esc(l.scopeLabel || l.scope) + '</span><span>·</span>'
+        + '<span class="rf-code">' + esc(l.id) + '</span></div></td>'
+        + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(l.who)) + '</span>'
+        + '<span class="rf-nom">' + esc(l.who || '—') + '</span>'
+        + (l.mine ? '<span class="rf-pill bleu">${T("vous")}</span>' : '') + '</div></td>'
         + '<td style="white-space:nowrap">' + esc(l.age || '')
         + '<div class="sub">' + esc(l.since ? fdate(l.since) : '') + '</div></td>'
         + '<td>' + (mort
-            ? '<span class="pill mort">' + esc(motif) + '</span>'
-            : '<span class="pill vif">${T("actif · ")}' + Math.max(0, l.expiresIn) + ' s</span>') + '</td>'
+            ? '<span class="rf-pill">' + esc(motif) + '</span>'
+            : '<span class="rf-pill ambre">${T("actif · ")}' + Math.max(0, l.expiresIn) + ' s</span>') + '</td>'
         + (PEUT ? '<td style="text-align:right"><button class="mini dgr" data-unl="' + esc(cle) + '">'
             + (CONF === cle ? '${T("✓ Confirmer")}' : '<span class="ic" aria-hidden="true">🔓</span>${T(" Déverrouiller")}') + '</button></td>' : '')
         + '</tr>';
@@ -176,7 +189,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        finissait par « normalement, il n'y a rien à faire ici ».
        Ce qui suit prévient d'une conséquence avant le geste qui la provoque —
        ça, c'est utile au moment où on le lit. */
-    var h = '';
+    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE AUX VERROUS (2026-09-25) ═══════
+       Trois tuiles sur la liste ENTIERE ; l ambre ne s allume que s il y a un
+       verrou actif. Crochets gardes : #v-reload, #v-all, data-unl. */
+    var miens = VERR.filter(function(l){ return l.mine; }).length;
+    var tu = function(lib, val, sous, ton){
+      return '<div class="tuile"><div class="lbl">' + lib + '</div><div class="val' + (val && ton ? ' ' + ton : '') + '">'
+        + val + '</div><div class="sub">' + sous + '</div></div>';
+    };
+    var h = szTuiles('<div class="tuiles">'
+      + tu('${T("Actifs")}', actifs.length, '${T("fiches en cours de modification")}', 'att')
+      + tu('${T("Tenus par vous")}', miens, '${T("dans cette session")}', '')
+      + tu('${T("Éteints")}', morts.length, '${T("ne bloquent personne")}', '')
+      + '</div>');
 
     h += '<div class="barre"><button class="mini" id="v-reload"><span class="ic">🔄</span>${T(" Actualiser")}</button>'
       + (VERR.length && PEUT
