@@ -46,6 +46,10 @@ body{background:var(--f-page);color:var(--tx);
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+/* ── La refonte de l Inventaire (2026-09-25) ── */
+.barreoutils .rf-jet{height:2.4rem;padding:0 .75rem;border-radius:10px;font-size:.8rem;background:var(--f-0f1826);
+  border:1px solid var(--v10);color:var(--tx-gris2)}
+.barreoutils .rf-jet.on{background:rgba(201,169,126,.14);border-color:rgba(201,169,126,.55);color:var(--tx-or2);font-weight:700}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
 input,select,button,textarea{font:inherit;color:var(--tx);background:var(--v05);
@@ -63,11 +67,17 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .5rem;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;
   color:var(--tx2);font-weight:700}
-.stats{display:flex;gap:.5rem;flex-wrap:wrap}
-.stats .s{flex:1 1 8rem;background:var(--v04);border-radius:9px;padding:.4rem .6rem}
-.stats .s .n{font:700 1.05rem/1.2 Georgia,serif;color:var(--tx-or)}
-.stats .s .l{font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
-.stats .s .sub{font-size:.66rem;color:var(--tx3)}
+/* Les compteurs aux mesures des tuiles de l Inventaire (refonte du 2026-09-25),
+   comme Remboursements : meme balisage, le libelle passe AU-DESSUS du chiffre. */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:.6rem}
+.stats .s{display:flex;flex-direction:column;background:var(--f-carte);border:1px solid var(--v07);
+  border-radius:13px;padding:.75rem .95rem;min-width:0}
+.stats .s .l{order:0;font-size:.76rem;font-weight:600;color:var(--tx2)}
+.stats .s .n{order:1;font-size:1.6rem;font-weight:800;line-height:1.15;margin:.2rem 0 .1rem;color:var(--tx)}
+.stats .s .sub{order:2;font-size:.72rem;color:var(--tx3)}
+div.stats .s .n{color:var(--tx)}
+html.jour div.stats .s{background:var(--f-carte)}
+html.jour div.stats .s .n{color:var(--tx)}
 
 /* La zone de depot : c est la porte la plus rapide vers une depense saisie.
    ⚠⚠ ELLE PRENAIT TOUTE LA LARGEUR ET DEUX LIGNES DE HAUT, entre les tuiles et
@@ -287,8 +297,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
     }
 
     h += '<div class="barreoutils">'
-      + '<button class="mini' + (VUE === 'depenses' ? ' actif' : '') + '" data-vue="depenses">${T("Dépenses")}</button>'
-      + '<button class="mini' + (VUE === 'annuaire' ? ' actif' : '') + '" data-vue="annuaire">${T("Fournisseurs")}</button>'
+      + '<button class="rf-jet' + (VUE === 'depenses' ? ' on' : '') + '" data-vue="depenses">${T("Dépenses")}</button>'
+      + '<button class="rf-jet' + (VUE === 'annuaire' ? ' on' : '') + '" data-vue="annuaire">${T("Fournisseurs")}</button>'
       + '</div>';
 
     /* ⚠ L ANNUAIRE REPREND LE DEFILEMENT NORMAL : c est une grille de cartes
@@ -361,19 +371,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
     if (!rows.length) {
       h += '<div class="vide">${T("Aucune dépense pour")} ' + esc(D.periode) + '.</div>';
     } else {
-      h += '<div class="liste"><table><thead><tr><th>${T("Date")}</th><th>${T("Catégorie")}</th><th>${T("Description")}</th>'
+      /* ══ LA REFONTE DE L INVENTAIRE (2026-09-25) : ligne riche (initiale de la
+         categorie, description en gras, categorie, ligne et fournisseur
+         dessous), montant en gras. Crochets gardes : tr[data-id]. */
+      h += '<div class="liste"><table><thead><tr><th>${T("Dépense")}</th><th>${T("Date")}</th>'
         + '<th>${T("Paiement")}</th><th style="text-align:right">${T("Montant")}</th>'
         + '<th style="text-align:right">${T("Taxes")}</th><th style="text-align:center">${T("Reçu")}</th></tr></thead><tbody>'
         + rows.map(function(r){
             return '<tr data-id="' + esc(r.id) + '" title="${T("Voir le détail")}">'
+              + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">'
+              + esc(String(r.categorieLbl || '?').charAt(0).toUpperCase()) + '</span>'
+              + '<div style="min-width:0"><div class="rf-nom">' + esc(r.description || r.fournisseur || '—')
+              + (r.usd ? ' <span class="rf-pill bleu">USD</span>' : '') + '</div>'
+              + '<div class="rf-sous"><span>' + esc(r.categorieLbl) + '</span>'
+              + (r.ligne ? '<span>·</span><span class="rf-code">L.' + esc(r.ligne) + '</span>' : '')
+              + (r.fournisseur && r.description ? '<span>·</span><span>' + esc(r.fournisseur) + '</span>' : '')
+              + '</div></div></div></td>'
               + '<td class="dt" style="white-space:nowrap">' + esc(r.dateFr) + '</td>'
-              + '<td>' + esc(r.categorieLbl)
-              + (r.ligne ? ' <span class="dt">· L.' + esc(r.ligne) + '</span>' : '') + '</td>'
-              + '<td>' + esc(r.description || '—')
-              + (r.fournisseur ? ' <span class="dt">· ' + esc(r.fournisseur) + '</span>' : '')
-              + (r.usd ? ' <span class="pill info">USD</span>' : '') + '</td>'
               + '<td class="dt">' + esc(r.paiement) + '</td>'
-              + '<td class="num">' + esc(r.montant) + '</td>'
+              + '<td class="num"><span class="rf-mont">' + esc(r.montant) + '</span></td>'
               + '<td class="dt" style="text-align:right;white-space:nowrap">'
               + (r.aTaxes ? esc(r.tps) + ' · ' + esc(r.tvq) : '—') + '</td>'
               + '<td style="text-align:center">' + (r.recu ? '<span class="ic">📎</span>' : '<span class="dt">—</span>') + '</td>'
@@ -473,12 +489,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
               + (r.nom ? '<div class="dt">' + esc(r.nom) + '</div>' : '') + '</td>'
               + '<td>' + esc(r.categorieLbl)
               + (r.ligne ? ' <span class="dt">· L.' + esc(r.ligne) + '</span>' : '')
-              + (r.flou ? ' <span class="pill att">polyvalent</span>' : '') + '</td>'
-              + '<td>' + (r.origine === 'integre' ? '<span class="pill neutre">${T("livré")}</span>'
+              + (r.flou ? ' <span class="rf-pill ambre">${T("polyvalent")}</span>' : '') + '</td>'
+              + '<td>' + (r.origine === 'integre' ? '<span class="rf-pill">${T("livré")}</span>'
                   : (r.origine === 'corrige'
-                      ? '<span class="pill bon">${T("corrigé")}</span> <span class="dt">au lieu de '
+                      /* << polyvalent >> et << au lieu de >> etaient ecrits en dur. */
+                      ? '<span class="rf-pill bleu">${T("corrigé")}</span> <span class="dt">${T("au lieu de")} '
                         + esc(r.categorieBaseLbl) + '</span>'
-                      : '<span class="pill bon">${T("ajouté")}</span>')) + '</td>'
+                      : '<span class="rf-pill vert">${T("ajouté")}</span>')) + '</td>'
               + '<td style="text-align:right;white-space:nowrap">'
               + ((ro || (VERROU && !VERROU.obtenu)) ? '<span class="dt">—</span>'
                   : '<button class="mini" data-annmod="' + esc(r.id) + '">${T("Modifier")}</button>'
@@ -505,10 +522,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
     var e = DETAIL;
     var h = '<div class="voile" id="d-voile"><div class="boite">'
       + '<h3>' + esc(e.fournisseur || e.description || '${T("Dépense")}') + '</h3>'
-      + '<div style="text-align:center"><span class="pill neutre">' + esc(e.categorieLbl)
+      + '<div style="text-align:center"><span class="rf-pill">' + esc(e.categorieLbl)
       + (e.ligne ? ' · L.' + esc(e.ligne) : '') + '</span></div>'
       + '<div class="gros-montant">' + esc(e.totalTTC)
-      + (e.usd ? ' <span class="pill info">USD→CAD</span>' : '') + '</div>'
+      + (e.usd ? ' <span class="rf-pill bleu">USD→CAD</span>' : '') + '</div>'
       + '<div class="aide" style="text-align:center;margin-bottom:.5rem">${T("Total payé")}'
       + (e.aTaxes ? ' (taxes incluses)' : '') + '</div>'
       + '<div class="grille">'

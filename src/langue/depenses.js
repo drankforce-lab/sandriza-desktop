@@ -288,4 +288,8 @@ module.exports = {
   'remboursement sur intrants': 'input tax credit',
   '(aucune description)': '(no description)',
   'les montants': 'the amounts',
+  // La refonte, comme l'Inventaire (2026-09-25).
+  'polyvalent': 'multi-purpose',
+  'au lieu de': 'instead of',
+  'Dépense Date': 'Expense Date',
 };
