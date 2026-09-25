@@ -55,13 +55,26 @@ button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:70
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
-.stats{display:flex;gap:.5rem;flex-wrap:wrap}
-.stats .s{flex:1 1 9rem;background:var(--v04);border-radius:9px;padding:.45rem .65rem}
-.stats .s .n{font:700 1.05rem/1.2 Georgia,serif;color:var(--tx-or)}
+/* ⚠ LES TUILES AUX MESURES DE L INVENTAIRE (refonte du 2026-09-25), par la
+   feuille seulement : le balisage (.stats .s .n .l .sub) est garde. Le libelle
+   passe AU-DESSUS du chiffre (order), comme partout ailleurs. Une couleur = un
+   sens : ambre l argent SORTI, vert le solde encore a honorer, le reste neutre. */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:.6rem}
+.stats .s{display:flex;flex-direction:column;background:var(--f-carte);border:1px solid var(--v07);
+  border-radius:13px;padding:.75rem .95rem;min-width:0}
+.stats .s .l{order:0;font-size:.76rem;font-weight:600;color:var(--tx2)}
+.stats .s .n{order:1;font-size:1.6rem;font-weight:800;line-height:1.15;margin:.2rem 0 .1rem;color:var(--tx)}
 .stats .s .n.sort{color:var(--tx-att)}
 .stats .s .n.du{color:var(--tx-ok)}
-.stats .s .l{font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
-.stats .s .sub{font-size:.66rem;color:var(--tx3)}
+.stats .s .sub{order:2;font-size:.72rem;color:var(--tx3)}
+/* ⚠ Deux reprises du socle, chargees APRES cette feuille, repeignaient les
+   tuiles : l accent du theme sur tout chiffre (.stats .s .n) et, en jour, un
+   fond grise et un or. Une tuile neutre reste neutre — plus precis ici. */
+.stats .s .n:not(.sort):not(.du){color:var(--tx)}
+html.jour div.stats .s{background:var(--f-carte)}
+html.jour div.stats .s .n:not(.sort):not(.du){color:var(--tx)}
+/* Le compteur d une pastille de liste. */
+.rf-jet .n{margin-left:.45rem;font-weight:800;opacity:.8}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
@@ -72,7 +85,10 @@ tbody .num{font-weight:700;font-family:ui-monospace,Consolas,monospace;font-size
 tbody .arg{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 tbody .arg.sort{color:var(--tx-att);font-weight:700}
 tbody .dt{font-size:.72rem;color:var(--tx2)}
-tr.eteint td{opacity:.55}
+/* ⚠ UNE LIGNE EXPIREE N EST PLUS ESTOMPEE (refonte du 2026-09-25) : l opacite
+   de .55 rendait sa pastille et son numero illisibles (2,27 en jour, 2,75 la
+   nuit — banc des contrastes). C est la pastille << Expire >> qui dit l etat. */
+tr.eteint td{opacity:1}
 .pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
@@ -157,13 +173,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('remboursements')}
   function dessiner(){
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var t = D.tuiles || {}, c = D.comptes || {};
-    var h = '<div class="barreoutils">'
-      + '<button class="mini' + (ONGLET === 'remboursements' ? ' actif' : '') + '" data-onglet="remboursements">'
+    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE A REMBOURSEMENTS (2026-09-25) ═
+       Barre sur une ligne (loupe, les deux listes en pastilles), tuiles aux
+       mesures de l Inventaire, lignes riches. Crochets gardes : data-onglet,
+       #r-q, tr[data-cmd], le verrou de la commande. */
+    var h = '<div class="carte"><div class="rf-tb">'
+      + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Numéro, commande, client")}" type="search" id="r-q" placeholder="${T("Numéro, commande, client…")}" value="' + esc(Q) + '"></label>'
+      + '<button class="rf-jet' + (ONGLET === 'remboursements' ? ' on' : '') + '" data-onglet="remboursements">'
       + '${T("Remboursements")}<span class="n">' + (c.remboursements || 0) + '</span></button>'
-      + '<button class="mini' + (ONGLET === 'credits' ? ' actif' : '') + '" data-onglet="credits">'
+      + '<button class="rf-jet' + (ONGLET === 'credits' ? ' on' : '') + '" data-onglet="credits">'
       + '${T("Crédits boutique")}<span class="n">' + (c.credits || 0) + '</span></button>'
-      + '<input aria-label="${T("Numéro, commande, client")}" type="search" id="r-q" placeholder="${T("Numéro, commande, client…")}" value="' + esc(Q) + '">'
-      + '</div>';
+      + '</div></div>';
 
     /* ⚠ QUATRE CHIFFRES QUI NE DISENT PAS LA MEME CHOSE. << Rembourse >> est de
        l argent SORTI ; << Solde a honorer >> est de l argent qu on DOIT ENCORE.
@@ -212,12 +232,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('remboursements')}
   }
 
   function typePastille(t){
-    if (t === 'credit') return '<span class="pill info">${T("Crédit")}</span>';
-    if (t === 'fees_refund') return '<span class="pill att">${T("Frais")}</span>';
-    return '<span class="pill neutre">${T("Moyen original")}</span>';
+    if (t === 'credit') return '<span class="rf-pill bleu">${T("Crédit")}</span>';
+    if (t === 'fees_refund') return '<span class="rf-pill ambre">${T("Frais")}</span>';
+    return '<span class="rf-pill">${T("Moyen original")}</span>';
+  }
+  /* Les initiales du client (decoupe sur l espace). */
+  function initiales(nom){
+    var m = String(nom || '').trim().split(' ').filter(Boolean);
+    if (!m.length || m[0] === '—') return '?';
+    return ((m[0][0] || '') + (m.length > 1 ? (m[m.length - 1][0] || '') : '')).toUpperCase();
   }
   function tableRemb(rows){
-    return '<table><thead><tr><th>${T("N°")}</th><th>${T("Date")}</th><th>${T("Commande")}</th><th>${T("Client")}</th>'
+    return '<table><thead><tr><th>${T("Client et remboursement")}</th>'
       + '<th>${T("Mode")}</th><th>${T("Motif")}</th><th style="text-align:right">${T("Sous-total")}</th>'
       + '<th style="text-align:right">TPS</th><th style="text-align:right">TVQ</th>'
       + '<th style="text-align:right">Total</th></tr></thead><tbody>'
@@ -228,31 +254,33 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('remboursements')}
             // qui remboursent la meme, c est un double remboursement). Un
             // cadenas sur une portee << refunds >> ne pourrait jamais
             // s allumer — il a d ailleurs ete retire du site pour cette raison.
-            + '<td><span class="num">' + esc(r.numero) + '</span>'
-            + szVerrouCase('orders', r.commandeId) + '</td>'
-            + '<td class="dt">' + esc(r.date) + '</td>'
-            + '<td>' + esc(r.commande) + '</td>'
-            + '<td>' + esc(r.client) + '</td>'
+            + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(r.client)) + '</span>'
+            + '<div style="min-width:0"><div class="rf-nom">' + esc(r.client || '—')
+            + szVerrouCase('orders', r.commandeId) + '</div>'
+            + '<div class="rf-sous"><span class="rf-code">' + esc(r.numero) + '</span>'
+            + (r.commande ? '<span>·</span><span>' + esc(r.commande) + '</span>' : '')
+            + '<span>·</span><span>' + esc(r.date) + '</span></div></div></div></td>'
             + '<td>' + typePastille(r.type) + '</td>'
             + '<td class="dt" style="max-width:14rem;overflow:hidden;text-overflow:ellipsis;'
             + 'white-space:nowrap" title="' + esc(r.motif) + '">' + esc(r.motif || '—') + '</td>'
             + '<td class="arg">' + esc(r.sousTotal) + '</td>'
             + '<td class="arg">' + esc(r.tps) + '</td>'
             + '<td class="arg">' + esc(r.tvq) + '</td>'
-            + '<td class="arg sort">' + esc(r.total) + '</td></tr>';
+            + '<td class="arg"><span class="rf-mont">' + esc(r.total) + '</span></td></tr>';
         }).join('') + '</tbody></table>';
   }
   function tableCredits(rows){
-    var STATUT = { actif: ['bon', 'Actif'], epuise: ['neutre', '${T("Épuisé")}'], expire: ['neutre', '${T("Expiré")}'] };
-    return '<table><thead><tr><th>${T("N°")}</th><th>${T("Client")}</th><th>${T("Émis le")}</th><th>${T("Expiration")}</th>'
+    var STATUT = { actif: ['vert', '${T("Actif")}'], epuise: ['', '${T("Épuisé")}'], expire: ['', '${T("Expiré")}'] };
+    return '<table><thead><tr><th>${T("Client et crédit")}</th><th>${T("Émis le")}</th><th>${T("Expiration")}</th>'
       + '<th style="text-align:right">${T("Montant")}</th><th style="text-align:right">${T("Utilisé")}</th>'
       + '<th style="text-align:right">${T("Solde")}</th><th>${T("Statut")}</th></tr></thead><tbody>'
       + rows.map(function(c){
           var st = STATUT[c.statut] || STATUT.actif;
           return '<tr class="' + (c.statut === 'expire' ? 'eteint' : '') + '">'
-            + '<td><span class="num">' + esc(c.numero) + '</span>'
-            + (c.refund ? '<div class="dt">' + esc(c.refund) + '</div>' : '') + '</td>'
-            + '<td>' + esc(c.client) + '</td>'
+            + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(c.client)) + '</span>'
+            + '<div style="min-width:0"><div class="rf-nom">' + esc(c.client || '—') + '</div>'
+            + '<div class="rf-sous"><span class="rf-code">' + esc(c.numero) + '</span>'
+            + (c.refund ? '<span>·</span><span>' + esc(c.refund) + '</span>' : '') + '</div></div></div></td>'
             + '<td class="dt">' + esc(c.emisLe)
             + (c.commande ? '<div class="dt">' + esc(c.commande) + '</div>' : '') + '</td>'
             + '<td class="dt">' + esc(c.expiration) + '</td>'
@@ -266,8 +294,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('remboursements')}
                     return '<span>' + esc(u.date) + ' · ' + esc(u.commande)
                       + ' <b>−' + esc(u.montant) + '</b></span>'; }).join('') + '</div>'
                 : '') + '</td>'
-            + '<td class="arg">' + esc(c.solde) + '</td>'
-            + '<td><span class="pill ' + st[0] + '">' + st[1] + '</span></td></tr>';
+            + '<td class="arg"><span class="rf-mont">' + esc(c.solde) + '</span></td>'
+            + '<td><span class="rf-pill ' + st[0] + '">' + st[1] + '</span></td></tr>';
         }).join('') + '</tbody></table>';
   }
 

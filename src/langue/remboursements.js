@@ -101,5 +101,11 @@ module.exports = {
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
   'Page': 'Page',
   'Frais': 'Fees',
-  'Total': 'Total'
+  'Total': 'Total',
+  // La refonte de la liste, comme l'Inventaire (2026-09-25). L'en-tête des
+  // crédits se lit aussi d'un bloc.
+  'Client et remboursement': 'Customer and refund',
+  'Actif': 'Active',
+  'Client et crédit': 'Customer and credit',
+  'Client et crédit Émis le Expiration': 'Customer and credit Issued on Expiry',
 };
