@@ -29,7 +29,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO, TETE, LIEU, SEP_DEC } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU, SEP_DEC } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
    poste. ⚠⚠ On ne traduit QUE ce qui se lit — le nom d'une conciliation, les
    descriptions des lignes du relevé et les notes sont saisis par la
@@ -77,6 +77,11 @@ button.dgr{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
 .duo{display:flex;gap:.65rem;flex-wrap:wrap}
 .duo>div{flex:1 1 9rem;min-width:0}
 .barreoutils{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+/* ── La refonte de l Inventaire (2026-09-25) ── */
+.tuiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.6rem;flex:0 0 auto;margin-bottom:.7rem}
+.tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
+.tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.val.att{color:var(--tx-att)}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center}
 table{width:100%;border-collapse:collapse;font-size:.79rem}
 thead th{text-align:left;padding:.22rem .35rem;font-size:.65rem;text-transform:uppercase;
@@ -140,7 +145,7 @@ function pageBanque(ouverture) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
   var corps = document.getElementById('corps');
   var sous  = document.getElementById('sous');
   var barre = document.getElementById('onglets');
@@ -186,6 +191,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var ARME = '';
 
   var STATUTS = { open: '${T("Ouvert")}', in_progress: '${T("En cours")}', completed: '${T("Complété")}', locked: '${T("Verrouillé")}' };
+  /* Une couleur = un sens (rf-pill, refonte du 2026-09-25) : bleu ouverte,
+     ambre en cours, vert completee, gris verrouillee. */
+  var TON_ST = { open: 'bleu', in_progress: 'ambre', completed: 'vert', locked: '' };
+  function pilStatut(st){ return '<span class="rf-pill ' + (TON_ST[st] || '') + '">' + esc(STATUTS[st] || st) + '</span>'; }
+  function pilApparie(st){
+    return st === 'matched' ? '<span class="rf-pill vert">${T("apparié")}</span>'
+                            : '<span class="rf-pill">${T("seul")}</span>';   /* << seul >> etait ecrit en dur */
+  }
   var ONGLETS = [['releve', '${T("Relevé bancaire")}'], ['depots', '${T("Dépôts et sorties")}'],
                  ['appariement', '${T("Appariement")}'], ['resume', '${T("Résumé")}']];
 
@@ -325,6 +338,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function dessinerListe(){
     var h = [];
+    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE A LA CONCILIATION (2026-09-25) ═
+       Quatre tuiles sur les conciliations de l annee (liste ENTIERE) ; la
+       ligne riche (nom en gras, lignes et modification dessous) ; l ecart en
+       gras dans sa couleur. Crochets gardes : tr[data-ouvrir], data-pdf,
+       data-jeter, #b-nouveau, #b-zip, #b-recharger, #b-exporter. */
+    var L0 = D.liste || [];
+    if (L0.length) {
+      var nEq = L0.filter(function(r){ return (r.resume || {}).isBalanced; }).length;
+      var nVer = L0.filter(function(r){ return r.status === 'locked'; }).length;
+      var tu = function(lib, val, sous, ton){
+        return '<div class="tuile"><div class="lbl">' + lib + '</div><div class="val' + (val && ton ? ' ' + ton : '') + '">'
+          + val + '</div><div class="sub">' + sous + '</div></div>';
+      };
+      h.push(szTuiles('<div class="tuiles">'
+        + tu('${T("Conciliations")}', L0.length, '${T("pour l’année")} ' + ANNEE, '')
+        + tu('${T("Équilibrées")}', nEq, '${T("écart nul")}', '')
+        + tu('${T("À équilibrer")}', L0.length - nEq, '${T("écart non résolu")}', 'att')
+        + tu('${T("Verrouillées")}', nVer, '${T("closes, en lecture seule")}', '')
+        + '</div>'));
+    }
     h.push('<div class="barreoutils">' + barreAnnees()
       + (D.peutEcrire ? '<button class="prim" id="b-nouveau">${T("+ Nouvelle conciliation")}</button>' : '')
       + '<span class="droite">'
@@ -335,18 +368,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (!(D.liste || []).length) {
       h.push('<div class="vide">${T("Aucune conciliation pour cette année.")}</div>');
     } else {
-      h.push('<table><thead><tr><th>${T("État")}</th><th>${T("Nom")}</th><th class="num">${T("Relevé")}</th>'
-        + '<th class="num">${T("Dépôts")}</th><th class="num">${T("Écart")}</th><th>${T("Lignes")}</th><th>${T("Modifié")}</th><th></th></tr></thead><tbody>');
+      h.push('<table><thead><tr><th>${T("Nom")}</th><th class="num">${T("Relevé")}</th>'
+        + '<th class="num">${T("Dépôts")}</th><th class="num">${T("Écart")}</th><th>${T("État")}</th><th></th></tr></thead><tbody>');
       D.liste.forEach(function(r){
         var s = r.resume || {};
         h.push('<tr class="lg" data-ouvrir="' + esc(r.id) + '">'
-          + '<td><span class="pill ' + esc(r.status) + '">' + esc(STATUTS[r.status] || r.status) + '</span></td>'
-          + '<td>' + esc(r.label || '—') + '</td>'
+          + '<td><div class="rf-nom">' + esc(r.label || '—') + '</div>'
+          + '<div class="rf-sous"><span>' + r.nbBanque + ' / ' + r.nbVersements + ' ${T("lignes")}</span><span>·</span>'
+          + '<span>' + jour(r.updatedAt) + '</span></div></td>'
           + '<td class="num">' + sou(s.bankTotal) + '</td>'
           + '<td class="num">' + sou(s.squareTotal) + '</td>'
-          + '<td class="num" style="color:' + (s.isBalanced ? 'var(--tx-ok2)' : 'var(--tx-err2)') + '">' + sou(s.difference) + '</td>'
-          + '<td class="dt">' + r.nbBanque + ' / ' + r.nbVersements + '</td>'
-          + '<td class="dt">' + jour(r.updatedAt) + '</td>'
+          + '<td class="num"><span class="rf-mont" style="color:' + (s.isBalanced ? 'var(--tx-ok2)' : 'var(--tx-err2)') + '">' + sou(s.difference) + '</span></td>'
+          + '<td>' + pilStatut(r.status) + '</td>'
           + '<td style="white-space:nowrap">'
             + '<button class="mini" data-pdf="' + esc(r.id) + '">${T("Rapport")}</button> '
             + (D.peutEcrire
@@ -401,9 +434,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var r = D.rec, s = D.resume || {};
     return '<div class="barreoutils">'
       + '<button id="b-retour">${T("← Toutes les conciliations")}</button>'
-      + '<span class="pill ' + esc(r.status) + '">' + esc(STATUTS[r.status] || r.status) + '</span>'
+      + pilStatut(r.status)
       + '<strong>' + esc(r.label || '') + '</strong>'
-      + (D.verrouille ? '<span class="pill g">${T("verrouillée le")} ' + jour(r.lockedAt) + '</span>' : '')
+      + (D.verrouille ? '<span class="rf-pill">${T("verrouillée le")} ' + jour(r.lockedAt) + '</span>' : '')
       + '<span class="droite">'
       + '<button id="b-csv">${T("CSV")}</button>'
       + '<button id="b-pdf">${T("Rapport")}</button>'
@@ -435,9 +468,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
             + (e.notes ? '<div class="dt">' + esc(e.notes) + '</div>' : '') + '</td>'
           + '<td class="dt">' + esc(e.type || '—') + '</td>'
           + '<td class="num">' + sou(e.amount) + '</td>'
-          + '<td>' + (e.status === 'matched'
-              ? '<span class="pill completed">${T("apparié")}</span>'
-              : '<span class="pill g">seul</span>') + '</td>'
+          + '<td>' + pilApparie(e.status) + '</td>'
           + '<td style="white-space:nowrap">'
             + (D.verrouille || !D.peutEcrire ? ''
                 : '<button class="mini" data-e-mod="' + esc(e.id) + '">${T("Modifier")}</button> '
@@ -503,12 +534,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         h.push('<tr><td class="dt">' + esc(p.arrivalDate || '—') + '</td>'
           + '<td>' + esc(p.description || '—')
             + (p.notes ? '<div class="dt">' + esc(p.notes) + '</div>' : '')
-            + (p.source ? ' <span class="pill g">' + esc(p.source === 'expense' ? '${T("dépense")}' : 'Square') + '</span>' : '') + '</td>'
+            + (p.source ? ' <span class="rf-pill bleu">' + esc(p.source === 'expense' ? '${T("dépense")}' : 'Square') + '</span>' : '') + '</td>'
           + '<td class="dt">' + esc(p.periodFrom || '?') + ' → ' + esc(p.periodTo || '?') + '</td>'
           + '<td class="num">' + sou(p.amount) + '</td>'
-          + '<td>' + (p.status === 'matched'
-              ? '<span class="pill completed">${T("apparié")}</span>'
-              : '<span class="pill g">seul</span>') + '</td>'
+          + '<td>' + pilApparie(p.status) + '</td>'
           + '<td style="white-space:nowrap">'
             + (D.verrouille || !D.peutEcrire ? ''
                 : '<button class="mini" data-v-mod="' + esc(p.id) + '">${T("Modifier")}</button> '

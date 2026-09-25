@@ -254,5 +254,16 @@ module.exports = {
      conciliation enregistree : … >>. Le fichier lui-meme est compose PAR LE
      SITE (une seule definition des colonnes pour les deux surfaces) ; ce
      libelle-ci n est que la phrase de confirmation. */
-  'La conciliation': 'The reconciliation'
+  'La conciliation': 'The reconciliation',
+  // La refonte, comme l'Inventaire (2026-09-25).
+  'seul': 'unmatched',
+  'pour l’année': 'for the year',
+  'Équilibrées': 'Balanced',
+  'écart nul': 'no difference',
+  'À équilibrer': 'To balance',
+  'écart non résolu': 'difference unresolved',
+  'Verrouillées': 'Locked',
+  'closes, en lecture seule': 'closed, read-only',
+  'Nom Relevé': 'Name Statement',
+  'Dépôts Écart État': 'Deposits Difference Status',
 };
