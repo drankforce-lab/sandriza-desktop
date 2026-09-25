@@ -65,6 +65,9 @@ button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:70
 .tuile .lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 .tuile .val{font-size:.95rem;font-weight:800;margin-top:.1rem}
 .tuile .val.bon{color:var(--tx-ok)}
+/* ── La refonte de l Inventaire (2026-09-25) : la jauge de reponse ── */
+.jauger{height:5px;border-radius:3px;background:var(--v10);margin-top:.35rem;max-width:6rem;overflow:hidden;margin-left:auto}
+.jauger i{display:block;height:100%;border-radius:3px;background:color-mix(in srgb,var(--tx-ok,#4ade80) 55%,transparent)}
 .tuile .sub{font-size:.66rem;color:var(--tx2);margin-top:.1rem}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
@@ -198,6 +201,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div>';
   }
 
+  function initiales(nom){
+    var m = String(nom || '').trim().split(' ').filter(Boolean);
+    if (!m.length) return '?';
+    return ((m[0][0] || '') + (m.length > 1 ? (m[m.length - 1][0] || '') : '')).toUpperCase();
+  }
   function vueSondages(){
     var t = D.tuiles || {};
     /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
@@ -233,20 +241,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
             ? '<div style="margin-top:.45rem"><button class="mini prim" id="fi-premier">${T("Créer le premier")}</button></div>'
             : '') + '</div>';
     } else {
-      h += '<div class="liste"><table><thead><tr><th>${T("Nom")}</th><th>${T("Déclencheur")}</th><th class="num">${T("Questions")}</th>'
+      h += '<div class="liste"><table><thead><tr><th>${T("Sondage")}</th>'
         + '<th class="num">${T("Invitations")}</th><th class="num">${T("Réponses")}</th><th class="num">${T("Taux")}</th>'
         + '<th>${T("Récompense")}</th><th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
         + D.sondages.map(function(s){
             return '<tr data-sondage="' + esc(s.id) + '" title="${T("Voir le dépouillement")}">'
-              + '<td><strong>' + esc(s.nom) + '</strong></td>'
-              + '<td class="dt">' + esc(s.declencheur) + '</td>'
-              + '<td class="num">' + s.nbQuestions + '</td>'
+              /* ══ LA REFONTE DE L INVENTAIRE (2026-09-25) : la ligne riche (initiales,
+                 nom, declencheur et nombre de questions dessous) et la jauge du taux
+                 de reponse. Crochets gardes : tr[data-sondage], data-modifier-sondage,
+                 data-suppr-sondage. */
+              + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(s.nom)) + '</span>'
+              + '<div style="min-width:0"><div class="rf-nom">' + esc(s.nom) + '</div>'
+              + '<div class="rf-sous"><span>' + esc(s.declencheur) + '</span><span>·</span><span>' + s.nbQuestions
+              + (s.nbQuestions > 1 ? '${T(" questions")}' : '${T(" question")}') + '</span></div></div></div></td>'
               + '<td class="num">' + s.invitations + '</td>'
               + '<td class="num">' + s.reponses + '</td>'
-              + '<td class="num">' + s.taux + ' %</td>'
-              + '<td>' + (s.recompense ? '<span class="pill bon">' + esc(s.recompense) + '</span>'
+              + '<td class="num"><span class="rf-mont">' + s.taux + ' %</span>'
+              + '<div class="jauger"><i style="width:' + Math.max(0, Math.min(100, Number(s.taux) || 0)) + '%"></i></div></td>'
+              + '<td>' + (s.recompense ? '<span class="rf-pill bleu">' + esc(s.recompense) + '</span>'
                                        : '<span class="dt">${T("aucune")}</span>') + '</td>'
-              + '<td><span class="pill ' + (s.actif ? 'bon' : 'neutre') + '">'
+              + '<td><span class="rf-pill ' + (s.actif ? 'vert' : '') + '">'
               + (s.actif ? '${T("Actif")}' : '${T("Inactif")}') + '</span></td>'
               + (D.peutModifier
                   ? '<td class="fin"><button class="mini geste" data-modifier-sondage="' + esc(s.id) + '">${T("Modifier")}</button> '
@@ -285,12 +299,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       h += '<table><thead><tr><th>${T("Code")}</th><th>${T("Sondage")}</th><th>${T("Commande")}</th>'
         + '<th>${T("Répondu le")}</th><th>${T("Utilisé")}</th></tr></thead><tbody>'
         + rs.map(function(r){
-            return '<tr><td><span class="code">' + esc(r.code) + '</span></td>'
+            return '<tr><td><span class="rf-code" style="font-size:.84rem;color:var(--tx)">' + esc(r.code) + '</span></td>'
               + '<td>' + esc(r.sondage) + '</td>'
               + '<td class="dt">' + esc(r.commande || '—') + '</td>'
               + '<td class="dt">' + esc(r.date) + '</td>'
-              + '<td>' + (r.utilise ? '<span class="pill bon">${T("utilisé")}</span>'
-                                    : '<span class="pill neutre">${T("non")}</span>') + '</td></tr>';
+              + '<td>' + (r.utilise ? '<span class="rf-pill vert">${T("utilisé")}</span>'
+                                    : '<span class="rf-pill">${T("non")}</span>') + '</td></tr>';
           }).join('')
         + '</tbody></table></div>';
     }
@@ -318,7 +332,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
               + '<td>' + esc(i.sondage) + '</td>'
               + '<td>' + esc(i.courriel || '—') + '</td>'
               + '<td class="dt">' + esc(i.declencheur) + '</td>'
-              + '<td><span class="pill ' + (i.repondu ? 'bon' : 'att') + '">'
+              + '<td><span class="rf-pill ' + (i.repondu ? 'vert' : 'ambre') + '">'
               + (i.repondu ? '${T("Répondu")}' : '${T("En attente")}') + '</span></td>'
               + (D.peutModifier
                   ? '<td class="fin"><button class="mini geste danger" data-suppr-invite="' + esc(i.id) + '">${T("Supprimer")}</button></td>'
@@ -518,7 +532,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     if (!s) return '';
     var h = '<div class="voile" id="fi-voile"><div class="boite">'
       + '<h3>' + esc(s.nom)
-      + ' <span class="pill ' + (s.actif ? 'bon' : 'neutre') + '">' + (s.actif ? '${T("Actif")}' : '${T("Inactif")}') + '</span></h3>'
+      + ' <span class="rf-pill ' + (s.actif ? 'vert' : '') + '">' + (s.actif ? '${T("Actif")}' : '${T("Inactif")}') + '</span></h3>'
       + '<div class="dt" style="margin-bottom:.5rem">' + esc(s.declencheur)
       + ' · ' + s.nbReponses + (s.nbReponses > 1 ? '${T(" réponses")}' : '${T(" réponse")}') + '</div>';
     if (!s.questions.length) {

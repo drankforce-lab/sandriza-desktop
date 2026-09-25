@@ -202,5 +202,8 @@ module.exports = {
   'Fermer': 'Close',
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
-  'taux de': 'rate of'
+  'taux de': 'rate of',
+  // La refonte, comme l'Inventaire (2026-09-25).
+  ' questions': ' questions',
+  ' question': ' question',
 };
