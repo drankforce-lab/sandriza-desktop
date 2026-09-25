@@ -154,5 +154,11 @@ module.exports = {
   'satisfait': 'satisfied',
   'insatisfait': 'unsatisfied',
   'Commentaire': 'Comment',
-  'Le': 'On'
+  'Le': 'On',
+  // La refonte, comme l'Inventaire (2026-09-25).
+  'Cliquer pour filtrer': 'Click to filter',
+  'dans la file': 'in the queue',
+  'attendent une réponse': 'awaiting a reply',
+  'en cours': 'in progress',
+  'terminées': 'finished',
 };

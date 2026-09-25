@@ -74,6 +74,14 @@ button .n.hi{background:rgba(239,68,68,.28);color:var(--tx-err2)}
 .tuile .lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 .tuile .val{font-size:.95rem;font-weight:800;margin-top:.1rem}
 .tuile .val.bon{color:var(--tx-ok)}.tuile .val.err{color:var(--tx-err)}
+/* ── La refonte de l Inventaire (2026-09-25) ── */
+.tuile.cliq{cursor:pointer;user-select:none;position:relative}
+.tuile.cliq:hover{border-color:#c9a97e}
+.tuile.cliq::after{content:"›";position:absolute;top:.55rem;right:.8rem;font-size:1.1rem;color:var(--tx3)}
+.tuile.on{border-color:#c9a97e}
+.tuile .val.att{color:var(--tx-att)}
+.ligne{display:flex;align-items:center;gap:.8rem}
+.ligne .gauche{flex:1 1 auto;min-width:0}
 .tuile .sub{font-size:.66rem;color:var(--tx2);margin-top:.1rem}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
@@ -178,7 +186,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div>';
   }
 
-  var TONS = { pending: 'att', open: 'bon', closed: 'neutre' };
+  /* Une couleur = un sens (rf-pill, refonte du 2026-09-25) : ambre ce qui
+     attend une reponse, bleu ce qui est en cours, gris ce qui est ferme. */
+  var TONS = { pending: 'ambre', open: 'bleu', closed: '' };
+  function initiales(nom){
+    var m = String(nom || '').trim().split(' ').filter(Boolean);
+    if (!m.length || m[0] === '—') return '?';
+    return ((m[0][0] || '') + (m.length > 1 ? (m[m.length - 1][0] || '') : '')).toUpperCase();
+  }
 
   function filtrees(){
     var q = Q.trim().toLowerCase();
@@ -192,17 +207,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
 
   function vueFile(){
     var rows = filtrees();
-    var h = '<div class="barreoutils">'
-      + '<input aria-label="${T("Nom, courriel, téléphone")}" type="search" id="ch-q" placeholder="${T("Nom, courriel, téléphone…")}" value="' + esc(Q) + '">'
-      + [['', '${T("Toutes")}'], ['pending', '${T("En attente")}'], ['open', '${T("Ouvertes")}'], ['closed', '${T("Fermées")}']]
-          .map(function(f){
-            return '<button class="mini' + (FILTRE === f[0] ? ' actif' : '') + '" data-filtre="' + f[0] + '">'
-              + f[1] + (f[0] === 'pending' && D.enAttente
-                  ? '<span class="n hi">' + D.enAttente + '</span>' : '') + '</button>';
-          }).join('')
-      + '<div class="droite"><span>' + rows.length + ' '
+    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE AU CLAVARDAGE (2026-09-25) ═════
+       Les trois etats deviennent des tuiles comptees sur la file ENTIERE, qui
+       portent data-filtre (le crochet des anciens boutons) ; barre a loupe ;
+       lignes riches aux initiales. Crochets gardes : #ch-q, data-filtre,
+       .ligne[data-id], #ch-exporter. */
+    var toutes = D.conversations || [];
+    var cpt = function(st){ return toutes.filter(function(c){ return c.statut === st; }).length; };
+    var tu = function(f, lib, val, sous, ton){
+      return '<div class="tuile cliq' + (FILTRE === f ? ' on' : '') + '" data-filtre="' + f + '" title="${T("Cliquer pour filtrer")}">'
+        + '<div class="lbl">' + lib + '</div><div class="val' + (val && ton ? ' ' + ton : '') + '">' + val + '</div>'
+        + '<div class="sub">' + sous + '</div></div>';
+    };
+    var h = szTuiles('<div class="tuiles">'
+      + tu('', '${T("Toutes")}', toutes.length, '${T("dans la file")}', '')
+      + tu('pending', '${T("En attente")}', cpt('pending'), '${T("attendent une réponse")}', 'att')
+      + tu('open', '${T("Ouvertes")}', cpt('open'), '${T("en cours")}', '')
+      + tu('closed', '${T("Fermées")}', cpt('closed'), '${T("terminées")}', '')
+      + '</div>');
+    h += '<div class="carte" style="margin:.6rem 0"><div class="rf-tb">'
+      + '<label class="rf-rch" style="max-width:none">${ICO.loupe}<input aria-label="${T("Nom, courriel, téléphone")}" type="search" id="ch-q" placeholder="${T("Nom, courriel, téléphone…")}" value="' + esc(Q) + '"></label>'
+      + '<span class="rf-droite"><span class="dt">' + rows.length + ' '
       + (rows.length > 1 ? '${T("conversations")}' : '${T("conversation")}')
-      + (D.horsLigne ? ' · ' + D.horsLigne + ' ${T("hors ligne")}' : '') + '</span></div></div>';
+      + (D.horsLigne ? ' · ' + D.horsLigne + ' ${T("hors ligne")}' : '') + '</span></span></div></div>';
 
     if (!rows.length) {
       h += '<div class="vide">' + (Q || FILTRE ? '${T("Rien ne correspond.")}' : '${T("Aucune conversation à traiter.")}') + '</div>';
@@ -210,15 +237,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
     }
     h += rows.map(function(c){
       return '<div class="ligne" data-id="' + esc(c.id) + '" title="${T("Ouvrir la conversation")}">'
-        + '<div class="haut"><strong>' + esc(c.nom) + '</strong>'
-        + '<span class="pill ' + (TONS[c.statut] || 'neutre') + '">' + esc(szTd(c.statutLibelle)) + '</span>'
-        + (c.horsLigne ? '<span class="pill neutre">${T("hors ligne")}</span>' : '')
+        + '<span class="rf-av" aria-hidden="true">' + esc(initiales(c.nom)) + '</span><div class="gauche">'
+        + '<div class="haut"><span class="rf-nom">' + esc(c.nom) + '</span>'
+        + '<span class="rf-pill ' + (TONS[c.statut] || '') + '">' + esc(szTd(c.statutLibelle)) + '</span>'
+        + (c.horsLigne ? '<span class="rf-pill">${T("hors ligne")}</span>' : '')
         + '<span class="droite"><span class="dt">' + esc(c.date) + '</span>'
         + '<div class="dt">' + c.nbMessages + ' '
         + (c.nbMessages > 1 ? '${T("messages")}' : '${T("message")}') + '</div></span></div>'
-        + '<div class="dt">' + esc(c.courriel || '—')
-        + (c.telephone ? ' · ' + esc(c.telephone) : '') + '</div>'
-        + '</div>';
+        + '<div class="rf-sous"><span>' + esc(c.courriel || '—') + '</span>'
+        + (c.telephone ? '<span>·</span><span>' + esc(c.telephone) + '</span>' : '') + '</div>'
+        + '</div></div>';
     }).join('');
     /* Le pied ferme la file et porte l export (2026-09-24).
        ⚠ LE COMPTE EST DEJA EN HAUT, dans la barre d outils, et le repeter ici
@@ -309,8 +337,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
     } else {
       h += cs.map(function(c){
         return '<div style="padding:.35rem 0;border-top:1px solid var(--v055)">'
-          + '<span class="pill ' + (c.score === true ? 'bon' : 'err') + '">'
-          + (c.score === true ? 'satisfait' : 'insatisfait') + '</span> '
+          + '<span class="rf-pill ' + (c.score === true ? 'vert' : 'rouge') + '">'
+          /* ⚠ << satisfait >> et << insatisfait >> etaient ecrits en dur. */
+          + (c.score === true ? '${T("satisfait")}' : '${T("insatisfait")}') + '</span> '
           + '<strong>' + esc(c.name || '${T("Visiteur")}') + '</strong>'
           + '<div style="font-size:.86rem;white-space:pre-wrap;overflow-wrap:anywhere">'
           + esc(c.comment || '') + '</div></div>';
@@ -332,8 +361,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
     if (!c) return '';
     var h = '<div class="voile" id="ch-voile"><div class="boite">'
       + '<h3>' + esc(c.nom)
-      + ' <span class="pill ' + (TONS[c.statut] || 'neutre') + '">' + esc(c.statut) + '</span>'
-      + (c.horsLigne ? ' <span class="pill neutre">${T("hors ligne")}</span>' : '') + '</h3>'
+      /* ⚠ La boite affichait le CODE (pending, open) : on montre le libelle. */
+      + ' <span class="rf-pill ' + (TONS[c.statut] || '') + '">' + esc(szTd(c.statutLibelle || c.statut)) + '</span>'
+      + (c.horsLigne ? ' <span class="rf-pill">${T("hors ligne")}</span>' : '') + '</h3>'
       + '<div class="dt" style="margin-bottom:.5rem">' + esc(c.courriel || '—')
       + (c.telephone ? ' · ' + esc(c.telephone) : '')
       /* Deux phrases ENTIERES : << prefere >> seul ne se traduit pas, il se
