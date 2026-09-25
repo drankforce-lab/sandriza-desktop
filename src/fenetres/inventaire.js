@@ -308,6 +308,20 @@ button.vert:hover:not(:disabled){background:#166534;border-color:#166534}
 .gp .cat{width:2.5rem;height:2.5rem;flex:0 0 auto;border-radius:10px;display:flex;
   align-items:center;justify-content:center;font-weight:800;font-size:.98rem;
   background:var(--v06);border:1px solid var(--v08);color:var(--tx-gris2)}
+/* ⚠ UN PEU DE COULEUR, REMISE LE 2026-09-25 — ses mots, sur la version toute
+   grise : << tu peux mettre un peu de couleur quand meme, la tu en as trop
+   enleve >>. Elle revient LA OU ELLE A UN SENS, et adoucie :
+   · le carre de categorie prend la couleur de SA categorie (celle qu il a
+     reglee), en teinte a 16 % ; la lettre est eclaircie la nuit, foncee le
+     jour, pour rester lisible sur les deux fonds ;
+   · ce qui va bien redevient vert (la pastille et la jauge), mais sourd.
+   L or reste le SEUL accent des boutons et des selections. */
+/* --cc : la couleur de la categorie, posee EN LIGNE par la ligne (style=).
+   Chaque var() porte son repli gris, pour que la propriete reste valide. */
+.gp .cat.tc{background:color-mix(in srgb,var(--cc,#6d7f96) 16%,transparent);
+  border-color:color-mix(in srgb,var(--cc,#6d7f96) 34%,transparent);color:color-mix(in srgb,var(--cc,#6d7f96) 72%,white)}
+html.jour .gp .cat.tc{color:color-mix(in srgb,var(--cc,#6d7f96) 55%,black);
+  background:color-mix(in srgb,var(--cc,#6d7f96) 14%,white);border-color:color-mix(in srgb,var(--cc,#6d7f96) 32%,white)}
 .gp .l1{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
 .gp .nom{font-size:.95rem;font-weight:700}
 .gp .l2{display:flex;align-items:center;gap:.4rem;font-size:.74rem;color:var(--tx2);margin-top:.15rem}
@@ -318,8 +332,9 @@ button.vert:hover:not(:disabled){background:#166534;border-color:#166534}
 .gp .vars{font-size:.8rem;color:var(--tx2);white-space:nowrap}
 .gp .vars b{color:var(--tx)}
 .gp .jauge{display:flex;gap:3px;max-width:12rem;margin-top:.4rem}
-.gp .jauge i{flex:1 1 0;height:5px;border-radius:3px;background:var(--v14)}
+.gp .jauge i{flex:1 1 0;height:5px;border-radius:3px;background:color-mix(in srgb,var(--tx-ok) 45%,transparent)}
 .gp .jauge i.bas{background:var(--tx-att)}
+.gp .jauge i.rup{background:var(--tx-err)}
 .gp .stk{display:flex;align-items:center;gap:.7rem;white-space:nowrap}
 .gp .stk .n{font-size:1.3rem;font-weight:800;line-height:1}
 .gp .stk .n.zero{color:var(--tx-err)}
@@ -327,7 +342,7 @@ button.vert:hover:not(:disabled){background:#166534;border-color:#166534}
 .gp .pill{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:600;
   padding:.22rem .65rem}
 .gp .pill::before{content:"";width:6px;height:6px;border-radius:99px;background:currentColor}
-.gp .pill.ok,.gp .pill.neutre{background:var(--v05);color:var(--tx2)}
+.gp .pill.neutre{background:var(--v05);color:var(--tx2)}
 /* .pill.bas et .pill.rup : les regles de base, et leurs reprises du mode jour
    (CSS_JOUR_TEXTES), valent telles quelles. */
 .gp td.acts{text-align:right;white-space:nowrap}
@@ -367,7 +382,7 @@ button.vert:hover:not(:disabled){background:#166534;border-color:#166534}
    raison : html.jour button.danger lui posait un cadre rouge permanent.) */
 html.jour .onglets button{background:transparent;border-color:transparent}
 html.jour .onglets button.actif{background:rgba(138,106,62,.12);border-color:#8a6a3e;color:#1d2433}
-html.jour .gp .pill.ok,html.jour .gp .pill.neutre{color:var(--tx2)}
+html.jour .gp .pill.neutre{color:var(--tx2)}
 html.jour .gp thead th{background:var(--f-carte)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
@@ -1061,10 +1076,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
         if (l.sku && nv > 0) {
           jauge = '<div class="jauge" title="' + nv + ' ' + (nv > 1 ? '${T("variantes")}' : '${T("variante")}')
             + (nb ? ' — ' + nb + ' ${T("à commander")}' : '') + '">';
-          if (nv <= 24) { for (var k = 0; k < nv; k++) jauge += '<i' + (k >= nv - nb ? ' class="bas"' : '') + '></i>'; }
+          /* Rupture (0 unite) : toute la jauge en rouge. Un seuil a zero ne compte
+             pas la variante << a commander >>, et elle serait sinon toute verte. */
+          var rup = l.unites === 0;
+          if (nv <= 24) { for (var k = 0; k < nv; k++) jauge += '<i' + (rup ? ' class="rup"' : (k >= nv - nb ? ' class="bas"' : '')) + '></i>'; }
           else {
-            if (nv - nb > 0) jauge += '<i style="flex-grow:' + (nv - nb) + '"></i>';
-            if (nb > 0) jauge += '<i class="bas" style="flex-grow:' + nb + '"></i>';
+            if (rup) jauge += '<i class="rup"></i>';
+            else if (nv - nb > 0) jauge += '<i style="flex-grow:' + (nv - nb) + '"></i>';
+            if (!rup && nb > 0) jauge += '<i class="bas" style="flex-grow:' + nb + '"></i>';
           }
           jauge += '</div>';
         }
@@ -1074,7 +1093,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
           + (LOT ? '<td class="c"><input type="checkbox" data-coche="' + esc(l.id) + '"'
               + ' aria-label="' + esc('${T("Sélectionner")} ' + (l.nom || l.sku || l.id)) + '"'
               + (COCHES[l.id] ? ' checked' : '') + '></td>' : '')
-          + '<td><div class="prod"><span class="cat" title="' + esc(l.categorieNom) + '">' + esc(initiale) + '</span>'
+          + '<td><div class="prod"><span class="cat' + (/^#[0-9a-f]{3,8}$/i.test(l.couleurCat || '') ? ' tc" style="--cc:' + l.couleurCat : '')
+          +   '" title="' + esc(l.categorieNom) + '">' + esc(initiale) + '</span>'
           +   '<div style="min-width:0"><div class="l1"><span class="nom">' + esc(l.nom) + '</span>'
           +     (l.enVente ? '<span class="badge vente">${T("En vente")}</span>' : '')
           +     (l.venteFinale ? '<span class="badge finale">${T("Vente finale")}</span>' : '') + '</div>'
