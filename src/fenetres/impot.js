@@ -64,13 +64,21 @@ button.prim:hover:not(:disabled){background:#d8bc95}
 .carte h2{margin:0 0 .5rem;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;
   color:var(--tx2);font-weight:700;display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap}
 .carte h2 .n{font-weight:400;text-transform:none;letter-spacing:0;font-size:.72rem;color:var(--tx3)}
-.stats{display:flex;gap:.5rem;flex-wrap:wrap}
-.stats .s{flex:1 1 8rem;background:var(--v04);border-radius:9px;padding:.45rem .65rem}
-.stats .s .n{font:700 1.05rem/1.2 Georgia,serif;color:var(--tx-or)}
-.stats .s .n.du{color:var(--tx-err)}
-.stats .s .n.ok{color:var(--tx-ok)}
-.stats .s .l{font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
-.stats .s .sub{font-size:.66rem;color:var(--tx3)}
+/* Les compteurs aux mesures des tuiles de l Inventaire (refonte du 2026-09-25),
+   comme Remboursements et Depenses : meme balisage, le libelle passe AU-DESSUS
+   du chiffre, le chiffre neutre sauf s il porte un sens (du, ok). La reprise
+   d accent du theme est surpassee par div.stats. */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:.6rem}
+.stats .s{display:flex;flex-direction:column;background:var(--f-carte);border:1px solid var(--v07);
+  border-radius:13px;padding:.75rem .95rem;min-width:0}
+.stats .s .l{order:0;font-size:.76rem;font-weight:600;color:var(--tx2)}
+.stats .s .n{order:1;font-size:1.6rem;font-weight:800;line-height:1.15;margin:.2rem 0 .1rem}
+.stats .s .sub{order:2;font-size:.72rem;color:var(--tx3)}
+div.stats .s .n:not(.du):not(.ok){color:var(--tx)}
+div.stats .s .n.du{color:var(--tx-err)}
+div.stats .s .n.ok{color:var(--tx-ok)}
+html.jour div.stats .s{background:var(--f-carte)}
+html.jour div.stats .s .n:not(.du):not(.ok){color:var(--tx)}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
@@ -510,7 +518,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
         + '${T("à remettre à CHAQUE province séparément, elles ne sont ni dans les chiffres")} '
         + '${T("ci-dessus ni dans GST34 / FPZ-500-V :")}<br>'
         + t.pst.map(function(p){
-            return '<span class="pill">' + esc(p.province) + ' : ' + esc(p.montant) + '</span>'; }).join('')
+            return '<span class="rf-pill bleu">' + esc(p.province) + ' : ' + esc(p.montant) + '</span>'; }).join('')
       + '</div>';
     }
 

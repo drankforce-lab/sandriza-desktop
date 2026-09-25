@@ -100,10 +100,21 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .5rem;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;
   color:var(--tx2);font-weight:700}
-.stats{display:flex;gap:.5rem;flex-wrap:wrap}
-.stats .s{flex:1 1 7rem;background:var(--v04);border-radius:9px;padding:.4rem .6rem}
-.stats .s .n{font:700 1.05rem/1.2 Georgia,serif;color:var(--tx-or)}
-.stats .s .l{font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
+/* Les compteurs aux mesures des tuiles de l Inventaire (refonte du 2026-09-25),
+   comme Remboursements et Depenses : meme balisage, le libelle passe AU-DESSUS
+   du chiffre, le chiffre neutre sauf s il porte un sens (du, ok). La reprise
+   d accent du theme est surpassee par div.stats. */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:.6rem}
+.stats .s{display:flex;flex-direction:column;background:var(--f-carte);border:1px solid var(--v07);
+  border-radius:13px;padding:.75rem .95rem;min-width:0}
+.stats .s .l{order:0;font-size:.76rem;font-weight:600;color:var(--tx2)}
+.stats .s .n{order:1;font-size:1.6rem;font-weight:800;line-height:1.15;margin:.2rem 0 .1rem}
+.stats .s .sub{order:2;font-size:.72rem;color:var(--tx3)}
+div.stats .s .n:not(.du):not(.ok){color:var(--tx)}
+div.stats .s .n.du{color:var(--tx-err)}
+div.stats .s .n.ok{color:var(--tx-ok)}
+html.jour div.stats .s{background:var(--f-carte)}
+html.jour div.stats .s .n:not(.du):not(.ok){color:var(--tx)}
 
 table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
@@ -369,7 +380,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
               + '<td style="width:84px">' + vignette(r) + '</td>'
               + '<td><span class="num">' + esc(r.nom) + '</span>'
               + '<div class="dt">' + esc(r.type) + (r.rond ? ' · rond' : '') + '</div></td>'
-              + '<td><span class="pill neutre">' + esc(r.dim) + '</span></td>'
+              + '<td><span class="rf-pill">' + esc(r.dim) + '</span></td>'
               + '<td style="text-align:center">' + r.elements + '</td>'
               + '<td class="dt">' + dateFr(r.modifie) + '</td>'
               + '<td style="text-align:right;white-space:nowrap">'
@@ -425,7 +436,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
       + f.map(function(x){
           return '<tr>'
             + '<td><span class="num">' + esc(x.nom) + '</span><div class="dt">' + esc(x.type) + '</div></td>'
-            + '<td><span class="pill neutre">' + esc(x.dim) + '</span></td>'
+            + '<td><span class="rf-pill">' + esc(x.dim) + '</span></td>'
             + '<td class="dt">' + (x.perso ? '${T("personnalisé")}' : '${T("standard")}') + '</td>'
             + '<td class="dt">' + (x.planches
                 ? x.planches + ' ' + (x.planches > 1 ? '${T("gabarits Avery")}' : '${T("gabarit Avery")}')
