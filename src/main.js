@@ -833,6 +833,13 @@ ipcMain.handle('deconnexion:demander', (_e, nom, role) => new Promise((resolve) 
     + encodeURIComponent(pageDeconnexion(String(nom || '') + '|' + String(role || ''))));
 }));
 
+/* La fin de session, dite par la page (Staff.clearSession) — voir la fiche de
+   `_fermerFenetresDeSession`. On n'accepte que de la fenêtre principale : une
+   fenêtre native n'a pas à pouvoir fermer toutes les autres. */
+ipcMain.on('session:fermee', (e) => {
+  if (!_deLaPrincipale(e)) return;
+  try { _fermerFenetresDeSession(); } catch (er) {}
+});
 ipcMain.on('deconnexion:reponse', (e, oui) => {
   if (!deconnexionWin || deconnexionWin.isDestroyed()) return;
   if (e.sender !== deconnexionWin.webContents) return;
@@ -4382,6 +4389,53 @@ const brancherGardeBrouillon = (win, wc) => {
 };
 
 const fenetresNatives = new Map();
+/* ══ À LA DÉCONNEXION, TOUT ÉCRAN DE DONNÉES SE FERME (2026-09-25) ═══════════
+   Sa capture : une « Fiche client » restée ouverte PAR-DESSUS l'écran de
+   connexion, nom, courriel, téléphone et adresse lisibles, alors que plus
+   personne n'était connecté. Ses mots : « tu dois fermer les fenêtres en cours
+   au moment de la déconnexion, cela ne devrait jamais arriver ».
+   ⚠⚠ LE SIGNAL VIENT DE `Staff.clearSession()` (staff.js), PAR LE CANAL
+   `session:fermee`. Une session se termine par CINQ chemins — le bouton,
+   l'inactivité, la déconnexion à distance, l'expiration, la session reprise
+   ailleurs — et TOUS passent par `clearSession`, qui fermait déjà les fenêtres
+   WEB (`closeModal`) depuis le 2026-08-02. Il manquait les fenêtres NATIVES.
+   ⚠⚠ PAS SUR LA BASCULE `connecte: false` DU MODÈLE DU MENU, et c'était mon
+   premier jet : `connecte()` (appbar.js) rend faux aussi tant que le module
+   d'administration n'est pas CHARGÉ — donc à chaque « Recharger », tout se
+   serait fermé sous les doigts de quelqu'un toujours connecté. Un état déduit
+   n'est pas un événement : on écoute l'événement.
+   ⚠ ON DÉTRUIT, ON NE FERME PAS : `close` passe par le garde de brouillon, qui
+   peut RETENIR la fenêtre avec une question (« une saisie non terminée »). Une
+   fenêtre retenue à la déconnexion, c'est exactement le défaut. Et une saisie
+   laissée sur un poste que l'on quitte n'a pas à survivre au départ de
+   la personne qui l'a tapée.
+   ⚠ LES VUES ANCRÉES SUIVENT, détachées comme posées dans la fenêtre
+   principale : elles portent les mêmes données.
+   ⚠ CE QUI RESTE : les notes de version (aucune donnée). Les fenêtres qui ne
+   sont pas dans ces registres (À propos, imprimantes, décompte, boîte de
+   déconnexion) ne montrent rien de l'entreprise. */
+const FENETRES_HORS_SESSION = new Set(['notes']);
+function _fermerFenetresDeSession(){
+  let n = 0;
+  for (const [cle, win] of Array.from(fenetresNatives)) {
+    if (FENETRES_HORS_SESSION.has(cle)) continue;
+    try { if (win && !win.isDestroyed()) { win.destroy(); n++; } } catch (e) {}
+    fenetresNatives.delete(cle);
+  }
+  for (const [c, a] of Array.from(ancrees)) {
+    try {
+      if (a.fenetre && !a.fenetre.isDestroyed()) { a.fenetre.destroy(); n++; }
+      else if (a.view && mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.contentView.removeChildView(a.view); n++;
+      }
+    } catch (e) {}
+    try { if (a.view) a.view.webContents.close(); } catch (e) {}
+    ancrees.delete(c);
+  }
+  ancreeVisible = null; vueVoilee = null;
+  try { cnxDire('deconnexion : ' + n + ' ecran(s) de session ferme(s)'); } catch (e) {}
+  return n;
+}
 /* ⚠⚠ `page` EST UNE CHAÎNE **OU** UNE FABRIQUE (2026-09-13). Une fabrique laisse
    REFABRIQUER la page — c'est ce qu'exige le changement de langue à chaud
    (« les pages ouvertes doivent se recharger dans la bonne langue »). Une page

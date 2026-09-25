@@ -53,6 +53,12 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
     .invoke('deconnexion:demander', String(nom || ''), String(role || ''))
     .catch(() => null),
 
+  /* ⚠ LA FIN DE SESSION, DITE PAR LA PAGE (2026-09-25) : `Staff.clearSession()`
+     l'appelle, et la coquille ferme alors tout écran de données — fenêtres
+     natives et vues ancrées. Sa capture : une fiche client restée ouverte
+     par-dessus l'écran de connexion. Voir `_fermerFenetresDeSession` (main.js). */
+  sessionFermee: () => { try { ipcRenderer.send('session:fermee'); } catch (e) {} },
+
   // ── LA BARRE EST DESSINÉE PAR LE SITE (assets/js/appbar.js) ────────────────
   // Ce drapeau est le POINT DE BASCULE : `appbar.js` reste inerte tant qu'il ne
   // le voit pas. C'est ce qui évite la période à DEUX barres — les postes encore

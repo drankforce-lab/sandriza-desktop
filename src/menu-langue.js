@@ -95,8 +95,6 @@ const MENU_APP_EN = {
   'Barre d’état (bas de l’écran)': 'Status bar (bottom of the screen)',
   'Base de données': 'Database',
   'Boutique': 'Shop',
-  'Cadre de l’administration (aperçu)': 'Administration frame (preview)',
-  'Cadre natif : allumer / éteindre (redémarre)': 'Native frame: on / off (restarts)',
   'Campagnes et chaînes': 'Campaigns and sequences',
   'Cartes-cadeaux': 'Gift cards',
   'Catalogue': 'Catalogue',

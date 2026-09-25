@@ -730,6 +730,12 @@ jobs:
           # personne ne l'attendait, rien n'arrivait : pas d'erreur, pas de
           # fenêtre, pas un mot. Le bouton a l'air cassé, le code a l'air juste.
           node tools/banc-modules-ouvrables.js
+          # ⚠⚠ CELUI-CI GARDE UNE FENÊTRE QUI SURVIVAIT À LA DÉCONNEXION : une fiche
+          # client native, nom et adresse lisibles, posée par-dessus l'écran de
+          # connexion (2026-09-25). Trois maillons dans deux dépôts — clearSession,
+          # le préchargement, le canal qui détruit tout ; qu'un manque, et plus
+          # rien ne le dit.
+          node tools/banc-deconnexion-ferme.js
 
       - name: Construire (${{ matrix.arch }})
         shell: bash
