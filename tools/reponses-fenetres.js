@@ -933,10 +933,10 @@ const JEU = {
         'produits:liste': {
           ok: true,
           lignes: [
-            { id: 'prod_1', nom: 'Robe Élégance mi-longue', categorie: 'Robes', tag: 'Nouveauté',
+            { id: 'prod_1', nom: 'Robe Élégance mi-longue', categorie: 'Robes', couleurCat: '#c97e9a', tag: 'Nouveauté',
               finalSale: false, liquidation: false, prix: 129.99, solde: 89.99,
               stockTotal: 24, variantesBas: 0, bassesDetail: '', panier: 3, cree: '2026-08-05T10:00:00Z' },
-            { id: 'prod_2', nom: 'Manteau d’hiver Aurore', categorie: 'Manteaux', tag: '',
+            { id: 'prod_2', nom: 'Manteau d’hiver Aurore', categorie: 'Manteaux', couleurCat: '#7e9ac9', tag: '',
               finalSale: true, liquidation: false, prix: 249.0, solde: 0,
               stockTotal: 0, variantesBas: 2, bassesDetail: 'S-Noir : 0/2, M-Noir : 0/2', panier: 0, cree: '2026-07-28T09:00:00Z' },
             { id: 'prod_3', nom: 'Jupe plissée Camélia', categorie: 'Jupes', tag: 'Solde',
@@ -947,7 +947,7 @@ const JEU = {
           cats: [{ cle: 'robes', nom: 'Robes' }, { cle: 'manteaux', nom: 'Manteaux' }, { cle: 'jupes', nom: 'Jupes' }],
           etiquettes: ['Nouveauté', 'Solde'],
           aFinal: true, aLiq: true,
-          stats: { actifs: 3, ruptures: 1, venteFinale: 1, categories: 3 },
+          stats: { actifs: 3, ruptures: 1, venteFinale: 1, categories: 3, aCommander: 2 },
         },
         'produits:ouvrir': { ok: true },
         'produits:nouveau': { ok: true },

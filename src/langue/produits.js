@@ -95,4 +95,14 @@ module.exports = {
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
   'en rupture': 'out of stock',
+  // La refonte de la liste, comme l'Inventaire (2026-09-25).
+  'En vente': 'On sale',
+  'produits actifs': 'active products',
+  'seuil atteint': 'threshold reached',
+  'En rupture': 'Out of stock',
+  'aucune unité': 'no units left',
+  'ni retour ni échange': 'no returns or exchanges',
+  'Catégories': 'Categories',
+  'représentées': 'represented',
+  'Cliquer pour filtrer': 'Click to filter',
 };

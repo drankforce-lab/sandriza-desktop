@@ -18,7 +18,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -69,6 +69,23 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .pill.err{background:rgba(239,68,68,.16);color:var(--tx-err)}
 .pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
 .prixbarre{color:var(--tx2);text-decoration:line-through;font-size:.76rem;margin-right:.35rem}
+/* ── La refonte de l Inventaire (2026-09-25) ── */
+.tuiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.6rem;flex:0 0 auto}
+.tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
+.tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tuile.cliq{cursor:pointer;user-select:none;position:relative}
+.tuile.cliq:hover{border-color:#c9a97e}
+.tuile.cliq::after{content:"›";position:absolute;top:.55rem;right:.8rem;font-size:1.1rem;color:var(--tx3)}
+.tuile.on{border-color:#c9a97e}
+.val.att{color:var(--tx-att)}.val.err{color:var(--tx-err)}
+.rf-tb select{height:2.4rem;border-radius:10px;background:var(--f-0f1826);border-color:var(--v10);max-width:12rem}
+/* --cc : la couleur de la categorie, posee EN LIGNE ; chaque var() a son repli. */
+.rf-av.tc{background:color-mix(in srgb,var(--cc,#6d7f96) 16%,transparent);
+  border-color:color-mix(in srgb,var(--cc,#6d7f96) 34%,transparent);color:color-mix(in srgb,var(--cc,#6d7f96) 72%,white)}
+html.jour .rf-av.tc{color:color-mix(in srgb,var(--cc,#6d7f96) 55%,black);
+  background:color-mix(in srgb,var(--cc,#6d7f96) 14%,white);border-color:color-mix(in srgb,var(--cc,#6d7f96) 32%,white)}
+.stk{display:flex;align-items:center;gap:.5rem}
+.stk b{font-size:.95rem;min-width:1.6rem;text-align:right}
 .pagi{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;
   padding-top:.4rem;font-size:.74rem;color:var(--tx2)}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
@@ -93,7 +110,7 @@ function pageProduits() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
 
@@ -144,16 +161,37 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function pilStock(r){
-    if (r.stockTotal === 0) return '<span class="pill err" title="${T("Aucune unité en stock")}">${T("Rupture")}</span>';
-    if (r.variantesBas > 0) return '<span class="pill att" title="' + esc(r.bassesDetail) + '">'
+    if (r.stockTotal === 0) return '<span class="rf-pill rouge" title="${T("Aucune unité en stock")}">${T("Rupture")}</span>';
+    if (r.variantesBas > 0) return '<span class="rf-pill ambre" title="' + esc(r.bassesDetail) + '">'
       + r.variantesBas + ' ${T("cat. à commander")}</span>';
-    return '<span class="pill bon">${T("Seuil non atteint")}</span>';
+    return '<span class="rf-pill vert">${T("Seuil non atteint")}</span>';
   }
 
   function dessiner(){
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
-    var h = '<div class="barreoutils">'
-      + '<input aria-label="${T("Rechercher un produit")}" type="search" id="p-q" placeholder="${T("Rechercher un produit…")}" value="' + esc(Q) + '">'
+    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE AUX PRODUITS (2026-09-25) ══════
+       Tuiles comptees par le SITE sur la liste entiere (stats), dont deux qui
+       filtrent d un clic sur EXACTEMENT ce qu elles comptent (stock low /
+       rupture) ; barre sur une ligne a loupe ; ligne riche a la pastille de
+       categorie, comme l Inventaire. Crochets gardes : #p-q, #p-cat, #p-tag,
+       #p-stock, #p-tri, #p-nouveau, #p-prec, #p-suiv, #p-exporter, tr[data-id]. */
+    var ST = D.stats || {};
+    var tu = function(lib, val, sous, ton, geste){
+      return '<div class="tuile' + (geste != null ? ' cliq' + (STOCK === geste ? ' on' : '') + '" data-tuile="' + geste
+          + '" title="${T("Cliquer pour filtrer")}' : '') + '">'
+        + '<div class="lbl">' + lib + '</div><div class="val' + (ton ? ' ' + ton : '') + '">' + val + '</div>'
+        + '<div class="sub">' + sous + '</div></div>';
+    };
+    var h = szTuiles('<div class="tuiles">'
+      + tu('${T("En vente")}', ST.actifs || 0, '${T("produits actifs")}', '', '')
+      + (ST.aCommander != null
+          ? tu('${T("À commander")}', ST.aCommander, '${T("seuil atteint")}', ST.aCommander ? 'att' : '', 'low') : '')
+      + tu('${T("En rupture")}', ST.ruptures || 0, '${T("aucune unité")}', ST.ruptures ? 'err' : '', 'rupture')
+      + tu('${T("Vente finale")}', ST.venteFinale || 0, '${T("ni retour ni échange")}', '', null)
+      + tu('${T("Catégories")}', ST.categories || 0, '${T("représentées")}', '', null)
+      + '</div>');
+    h += '<div class="carte"><div class="rf-tb">'
+      + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Rechercher un produit")}" type="search" id="p-q" placeholder="${T("Rechercher un produit…")}" value="' + esc(Q) + '"></label>'
       + '<select id="p-cat"><option value="">${T("Toutes les catégories")}</option>'
       + (D.cats || []).map(function(c){
           return '<option value="' + esc(c.cle) + '"' + (CAT === c.cle ? ' selected' : '') + '>' + esc(c.nom) + '</option>';
@@ -170,15 +208,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<option value=""' + (STOCK === '' ? ' selected' : '') + '>${T("Tout l’inventaire")}</option>'
       + '<option value="low"' + (STOCK === 'low' ? ' selected' : '') + '><span class="ic">⚠</span> ${T("À commander")}</option>'
       + '<option value="ok"' + (STOCK === 'ok' ? ' selected' : '') + '>${T("✓ Seuil non atteint")}</option>'
+      + '<option value="rupture"' + (STOCK === 'rupture' ? ' selected' : '') + '>${T("En rupture")}</option>'
       + '</select>'
-      + '<button class="mini' + (TRI === 'cart' ? ' actif' : '') + '" id="p-tri" '
+      + '<button class="rf-jet' + (TRI === 'cart' ? ' on' : '') + '" id="p-tri" '
       + 'title="${T("Mettre en premier les produits présents dans des paniers actifs")}">'
       + (TRI === 'cart' ? '<span class="ic">🛒</span> ${T("Tri panier ✓")}' : '<span class="ic">🛒</span> ${T("Trier par panier")}') + '</button>'
-      + '<span class="droite">' + (D.total || 0) + ' '
-      + (D.total > 1 ? '${T("produits")}' : '${T("produit")}')
-      + ' · ' + (D.stats && D.stats.ruptures || 0) + ' ${T("en rupture")}'
-      + '<button class="prim" id="p-nouveau">${T("+ Nouveau produit")}</button></span>'
-      + '</div>';
+      + '<span class="rf-droite"><span class="dt">' + (D.total || 0) + ' '
+      + (D.total > 1 ? '${T("produits")}' : '${T("produit")}') + '</span>'
+      + '<button class="prim" id="p-nouveau" style="height:2.4rem;padding:0 .9rem">${T("+ Nouveau produit")}</button></span>'
+      + '</div></div>';
 
         /* ⚠ PLEINE HAUTEUR (2026-09-19) : la carte prend tout l espace restant et
        c est la LISTE qui defile. Sans ca, une liste courte s arrete a sa
@@ -188,24 +226,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!rows.length) {
       h += '<div class="vide">${T("Aucun produit ne correspond.")}</div>';
     } else {
-      h += '<div class="liste"><table><thead><tr><th>${T("Produit")}</th><th>${T("Catégorie")}</th><th>${T("Étiquette")}</th>'
+      h += '<div class="liste"><table><thead><tr><th>${T("Produit")}</th>'
         + '<th>${T("Prix")}</th><th>${T("Inventaire")}</th><th style="text-align:center">${T("Paniers")}</th></tr></thead><tbody>'
         + rows.map(function(r){
             var badges = '';
-            if (r.finalSale && !r.liquidation) badges += ' <span class="pill err">${T("Vente finale")}</span>';
-            if (r.liquidation) badges += ' <span class="pill att">${T("Liquidation")}</span>';
+            if (r.finalSale && !r.liquidation) badges += ' <span class="rf-pill rouge">${T("Vente finale")}</span>';
+            if (r.liquidation) badges += ' <span class="rf-pill ambre">${T("Liquidation")}</span>';
             var prix = r.solde
-              ? '<span class="prixbarre">' + esc(fmt(r.prix)) + '</span>' + esc(fmt(r.solde))
-                + ' <span class="pill err">-' + Math.round((1 - r.solde / (r.prix || 1)) * 100) + '%</span>'
-              : esc(fmt(r.prix));
+              ? '<span class="rf-mont">' + esc(fmt(r.solde)) + '</span> <span class="prixbarre">' + esc(fmt(r.prix)) + '</span>'
+                + '<span class="rf-pill rouge">-' + Math.round((1 - r.solde / (r.prix || 1)) * 100) + '%</span>'
+              : '<span class="rf-mont">' + esc(fmt(r.prix)) + '</span>';
+            var ini = String(r.categorie || r.nom || '?').charAt(0).toUpperCase();
+            var cc = /^#[0-9a-f]{3,8}$/i.test(r.couleurCat || '') ? r.couleurCat : '';
             return '<tr data-id="' + esc(r.id) + '" title="${T("Ouvrir la fiche")}">'
-              + '<td><span class="num">' + esc(r.nom) + '</span>'
-              + szVerrouCase('products', r.id) + badges + '</td>'
-              + '<td>' + esc(r.categorie || '—') + '</td>'
-              + '<td>' + (r.tag ? '<span class="pill neutre">' + esc(r.tag) + '</span>'
-                : '<span class="dt">—</span>') + '</td>'
+              + '<td><div class="rf-prod"><span class="rf-av' + (cc ? ' tc" style="--cc:' + cc : '') + '" title="'
+              + esc(r.categorie || '') + '" aria-hidden="true">' + esc(ini) + '</span>'
+              + '<div style="min-width:0"><div class="rf-nom">' + esc(r.nom) + szVerrouCase('products', r.id) + badges + '</div>'
+              + '<div class="rf-sous"><span>' + esc(r.categorie || '—') + '</span>'
+              + (r.tag ? '<span>·</span><span>' + esc(r.tag) + '</span>' : '') + '</div></div></div></td>'
               + '<td>' + prix + '</td>'
-              + '<td>' + r.stockTotal + ' ' + pilStock(r) + '</td>'
+              + '<td><div class="stk"><b>' + r.stockTotal + '</b>' + pilStock(r) + '</div></td>'
               + '<td style="text-align:center">' + (r.panier > 0 ? '<span class="ic">🛒</span> ' + r.panier : '<span class="dt">—</span>') + '</td>'
               + '</tr>';
           }).join('')
@@ -275,6 +315,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     brancher('p-cat', function(v){ CAT = v; });
     brancher('p-tag', function(v){ TAG = v; });
     brancher('p-stock', function(v){ STOCK = v; });
+    // Les tuiles qui filtrent : un second clic sur la tuile choisie la relache.
+    corps.querySelectorAll('[data-tuile]').forEach(function(b){
+      b.onclick = function(){
+        var g = b.getAttribute('data-tuile') || '';
+        STOCK = (STOCK === g) ? '' : g; PAGE = 0; charger();
+      };
+    });
     var tri = document.getElementById('p-tri');
     if (tri) tri.onclick = function(){ TRI = (TRI === 'cart' ? 'recent' : 'cart'); PAGE = 0; charger(); };
     var bp = document.getElementById('p-prec');
