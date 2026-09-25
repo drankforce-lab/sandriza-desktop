@@ -59,9 +59,13 @@ button.mini{padding:.14rem .5rem;font-size:.75rem}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.6rem}
 .tuile{background:var(--f-carte);border:1px solid var(--v07);border-radius:12px;padding:.55rem .75rem}
-.tuile .k{font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
-.tuile .v{font-size:1.35rem;font-weight:800;margin-top:.12rem}
-.tuile .z{font-size:.66rem;color:var(--tx2);margin-top:.08rem}
+/* La refonte de l Inventaire (2026-09-25) : les tuiles de cette fenetre ont
+   leurs propres classes (.k .v .z), que la couche commune ne voit pas — on
+   leur donne ici les memes mesures : libelle net, chiffre en grand. */
+.tuile{border-radius:13px;padding:.75rem .95rem;min-width:0}
+.tuile .k{font-size:.76rem;font-weight:600;color:var(--tx2)}
+.tuile .v{font-size:1.6rem;font-weight:800;line-height:1.15;margin:.2rem 0 .1rem;white-space:nowrap}
+.tuile .z{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:12px;padding:.7rem .8rem}
 .carte h2{margin:0 0 .55rem;font-size:.76rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700;display:flex;justify-content:space-between;align-items:center}
 .deux{display:grid;grid-template-columns:2fr 1fr;gap:1rem;align-items:start}
@@ -163,6 +167,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
   function plur(n){ return n === 1 ? '' : 's'; }
+  /* Deux formes ENTIERES (2026-09-25) : << ' commande' + plur >> ne se
+     traduisait jamais. On garde plur pour les mots qui restent a relire. */
+  function nb2(n, sing, pl){ return n + ' ' + (n === 1 ? sing : pl); }
   /* ⚠ Le symbole change de COTE en anglais : << $12.50 >>. Voir szArgent (socle). */
   function argent(n){ return szArgent(n); }
   function argentK(n){ n = Number(n)||0; return n >= 1000 ? ((n/1000).toFixed(1) + 'k $') : argent(n); }
@@ -205,7 +212,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
     }).join('');
     var tops = D.topProds.length ? D.topProds.map(function(p, i){
       return '<div class="rang"><span class="pos">' + (i + 1) + '</span><div class="nm"><div>' + esc(p.name) + '</div>'
-        + '<div style="font-size:.66rem;color:var(--tx2)">' + p.qty + ' vendu' + plur(p.qty) + '</div></div>'
+        + '<div style="font-size:.66rem;color:var(--tx2)">' + nb2(p.qty, '${T("vendu")}', '${T("vendus")}') + '</div></div>'
         + '<div class="num" style="color:var(--tx-creme);font-weight:700">' + argent(p.rev) + '</div></div>';
     }).join('') : '<div class="vide">${T("Aucune vente.")}</div>';
     var recent = D.recent.length ? D.recent.map(function(o){
@@ -221,11 +228,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
        ce poste. Les TROIS bandeaux de cette fenetre partagent la meme cle et se
        replient ensemble. Voir JS_TUILES dans socle.js. */
     return szTuiles('<div class="tuiles">'
-      + '<div class="tuile"><div class="k"><span class="ic">💰</span> ${T("Revenu total")}</div><div class="v">' + argentK(D.totalRev) + '</div><div class="z">' + D.orderCount + ' commande' + plur(D.orderCount) + '</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">💰</span> ${T("Revenu total")}</div><div class="v">' + argentK(D.totalRev) + '</div><div class="z">' + nb2(D.orderCount, '${T("commande")}', '${T("commandes")}') + '</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">🎯</span> ${T("Revenu promo")}</div><div class="v">' + argentK(D.promoRev) + '</div><div class="z">' + D.pctPromo + '${T("% des commandes")}</div></div>'
-      + '<div class="tuile"><div class="k"><span class="ic">👥</span> ${T("Clients actifs")}</div><div class="v">' + D.activeCustomers + '</div><div class="z">' + D.totalCustomers + ' inscrits</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">👥</span> ${T("Clients actifs")}</div><div class="v">' + D.activeCustomers + '</div><div class="z">' + D.totalCustomers + ' ${T("inscrits")}</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">🛒</span> ${T("Panier moyen")}</div><div class="v">' + argent(D.avgOrder) + '</div><div class="z">${T("par commande")}</div></div>'
-      + (D.loy ? '<div class="tuile"><div class="k"><span class="ic">💌</span> ${T("Réponse sondage")}</div><div class="v">' + D.loy.responseRate + '%</div><div class="z">' + D.loy.totalResponses + '/' + D.loy.totalInvites + (D.loy.avgRating ? ' · ' + D.loy.avgRating + ' sur 5' : '') + '</div></div>' : '')
+      + (D.loy ? '<div class="tuile"><div class="k"><span class="ic">💌</span> ${T("Réponse sondage")}</div><div class="v">' + D.loy.responseRate + '%</div><div class="z">' + D.loy.totalResponses + '/' + D.loy.totalInvites + (D.loy.avgRating ? ' · ' + D.loy.avgRating + '${T(" sur 5")}' : '') + '</div></div>' : '')
       + '</div>')
       + '<div class="deux">'
       +   '<div class="carte"><h2>${T("Revenu mensuel — 6 mois")}<span class="legend"><span><i style="background:#c9a97e"></i>${T("Total")}</span><span><i style="background:#dc2626;opacity:.7"></i>${T("Promo")}</span></span></h2><div class="graph">' + graph + '</div></div>'
@@ -250,7 +257,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
     }).join('') : '<tr><td colspan="7" class="vide">${T("Aucun client dans ce segment.")}</td></tr>';
     var reste = (D.filteredTotal > 50) ? '<tr><td colspan="7" class="vide">+' + (D.filteredTotal - 50) + ' ${T("autres — exportez en CSV pour la liste complète")}</td></tr>' : '';
     return '<div class="segc">' + cards + '</div>'
-      + '<div class="carte"><h2>' + esc(titre) + ' — ' + D.filteredTotal + ' client' + plur(D.filteredTotal) + '<span style="display:flex;gap:.5rem">'
+      + '<div class="carte"><h2>' + esc(titre) + ' — ' + nb2(D.filteredTotal, '${T("client")}', '${T("clients")}') + '<span style="display:flex;gap:.5rem">'
       +   '<button class="ghost mini" data-act="export">${T("⬇ Exporter CSV")}</button>'
       +   (D.avecCourriel > 0 && PEUT.edit ? '<button class="prim mini" data-act="cibler"><span class="ic">📢</span> ${T("Cibler ce segment")}</button>' : '')
       + '</span></h2>'
@@ -262,16 +269,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
     var t = D.totaux;
     var rows = D.perfs.length ? D.perfs.map(function(p){
       return '<tr><td><strong>' + esc(p.name) + '</strong><div style="font-size:.66rem;color:var(--tx2)">' + esc(p.period) + '</div></td>'
-        + '<td><span class="badge ' + (p.type === 'discount' ? 'err' : 'info') + '">' + (p.type === 'discount' ? '${T("Rabais auto")}' : 'Coupon') + '</span></td>'
+        + '<td><span class="badge ' + (p.type === 'discount' ? 'err' : 'info') + '">' + (p.type === 'discount' ? '${T("Rabais auto")}' : '${T("Coupon")}') + '</span></td>'
         + '<td><strong style="color:var(--tx-err2)">' + esc(p.badge) + '</strong></td>'
         + '<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.76rem">' + esc(p.scope) + '</td>'
         + '<td class="ctr" style="font-weight:700">' + p.orders + '</td>'
         + '<td class="num">' + (p.orders > 0 ? argent(p.revenue) : '—') + '</td>'
         + '<td class="num" style="color:var(--tx-err2)">' + (p.savings > 0 ? '-' + argent(p.savings) : '—') + '</td>'
-        + '<td><span class="badge ' + (p.active ? 'ok' : 'def') + '">' + (p.active ? 'Actif' : 'Inactif') + '</span></td></tr>';
+        + '<td><span class="badge ' + (p.active ? 'ok' : 'def') + '">' + (p.active ? '${T("Actif")}' : '${T("Inactif")}') + '</span></td></tr>';
     }).join('') : '<tr><td colspan="8" class="vide">${T("Aucune promotion.")}</td></tr>';
     return szTuiles('<div class="tuiles">'
-      + '<div class="tuile"><div class="k"><span class="ic">📣</span> ${T("Promotions")}</div><div class="v">' + t.count + '</div><div class="z">' + t.active + ' active' + plur(t.active) + '</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">📣</span> ${T("Promotions")}</div><div class="v">' + t.count + '</div><div class="z">' + nb2(t.active, '${T("active")}', '${T("actives")}') + '</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">📦</span> ${T("Cmd sous promo")}</div><div class="v">' + t.promoOrders + '</div><div class="z">' + t.promoConvRate + '${T("% des cmd")}</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">💰</span> ${T("Revenu (promo)")}</div><div class="v">' + argentK(t.totalPromoRev) + '</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">🎁</span> ${T("Économies accordées")}</div><div class="v">' + argentK(t.totalSavings) + '</div></div>'

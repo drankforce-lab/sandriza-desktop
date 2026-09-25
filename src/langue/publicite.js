@@ -243,5 +243,19 @@ module.exports = {
   '% des commandes': '% of orders',
   'par commande': 'per order',
   '% des cmd': '% of ord.',
-  '% de couverture)': '% coverage)'
+  '% de couverture)': '% coverage)',
+  // La refonte, comme l'Inventaire (2026-09-25).
+  'vendu': 'sold',
+  'vendus': 'sold',
+  'commande': 'order',
+  'commandes': 'orders',
+  'inscrits': 'registered',
+  ' sur 5': ' out of 5',
+  'client': 'customer',
+  'clients': 'customers',
+  'Coupon': 'Coupon',
+  'Actif': 'Active',
+  'Inactif': 'Inactive',
+  'active': 'active',
+  'actives': 'active',
 };
