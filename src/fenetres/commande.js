@@ -392,7 +392,7 @@ function pageCommande(id) {
       /* ⚠ LA PHRASE ENTIERE, PAS « Préparation » PUIS « de la commande ». La
          moitie longue etait restee en francais derriere un T() pose sur le seul
          premier mot — « Preparation de la commande » a l ecran anglais. */
-      + '<h3 style="margin:0 0 .6rem;font:700 1.05rem/1.25 Georgia,serif"><span class="ic">🚀</span> ${T("Préparation de la commande")} '
+      + '<h3 style="margin:0 0 .6rem;font:700 1.05rem/1.25 system-ui,sans-serif"><span class="ic">🚀</span> ${T("Préparation de la commande")} '
       + esc(CMD.numero) + '</h3>'
       + '<p style="margin:.35rem 0;font-size:.9rem">' + (deja
           ? '${T("Cette commande est déjà en préparation.")}'
@@ -601,7 +601,7 @@ function pageCommande(id) {
       + 'display:flex;align-items:center;justify-content:center;padding:1.5rem;z-index:60');
     v.innerHTML = '<div style="background:var(--f-carte);border:1px solid var(--v12);'
       + 'border-radius:13px;padding:1.15rem 1.3rem;max-width:30rem;width:100%">'
-      + '<h3 style="margin:0 0 .6rem;font:700 1.05rem/1.25 Georgia,serif">' + titre + '</h3>'
+      + '<h3 style="margin:0 0 .6rem;font:700 1.05rem/1.25 system-ui,sans-serif">' + titre + '</h3>'
       + corps
       + '<div style="display:flex;gap:.45rem;justify-content:flex-end;margin-top:.9rem;flex-wrap:wrap">'
       + '<button type="button" id="ve-non">${T("Annuler")}</button>'

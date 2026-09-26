@@ -259,7 +259,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
   }
   function vide(titre, detail){
     D = null;
-    corps.innerHTML = '<div class="vide"><div style="font:700 1.3rem/1 Georgia,serif;color:var(--tx-creme)">'
+    corps.innerHTML = '<div class="vide"><div style="font:700 1.3rem/1 system-ui,sans-serif;color:var(--tx-creme)">'
       + esc(titre) + '</div><div style="margin-top:.35rem">' + esc(detail || '') + '</div></div>';
   }
 

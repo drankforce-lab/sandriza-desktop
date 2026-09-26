@@ -229,10 +229,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     // Pas-a-pas : ce qui est fait, ce qui reste.
     h += '<div class="pas">'
-      + '<span class="' + (c.aUneEtiquette ? 'fait' : 'on') + '">${T("1 · Étiquette")}'
-      + (c.aUneEtiquette ? ' ✓' : '') + '</span>'
-      + '<span class="' + (c.aUneEtiquette && !expediee ? 'on' : (expediee ? 'fait' : '')) + '">${T("2 · Impression")}</span>'
-      + '<span class="' + (expediee ? 'fait' : '') + '">${T("3 · Expédiée")}' + (expediee ? ' ✓' : '') + '</span>'
+      /* Le numero dans son rond, le libelle a cote — la barre des assistants.
+         La coche est partie : c est la couleur de l etape faite qui la dit. */
+      + '<span class="' + (c.aUneEtiquette ? 'fait' : 'on') + '"><span class="n">1</span>${T("Étiquette")}</span>'
+      + '<span class="' + (c.aUneEtiquette && !expediee ? 'on' : (expediee ? 'fait' : '')) + '"><span class="n">2</span>${T("Impression")}</span>'
+      + '<span class="' + (expediee ? 'fait' : '') + '"><span class="n">3</span>${T("Expédiée")}</span>'
       + '</div>';
 
     h += '<div class="carte"><h2>${T("Commande")} <span class="note">— ' + esc(c.numero)

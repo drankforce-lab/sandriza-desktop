@@ -248,6 +248,7 @@ module.exports = {
   'Frais retenus (': 'Fees kept (',
   'Partiel — remb.': 'Partial — refunded',
   'remb.)': 'refunded)',
+  'remb.': 'refunded',
 
   /* ── LES MOTS SEULS (2026-09-13) ──────────────────────────────────────────
      ⚠ Ils étaient invisibles aux DEUX mesures : le compteur écartait tout texte

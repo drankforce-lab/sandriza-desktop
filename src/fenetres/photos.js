@@ -1642,7 +1642,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     v.innerHTML = '<div style="max-width:30rem;background:var(--f-131c2b);'
       + 'border:1px solid var(--v12);border-radius:13px;padding:1.1rem 1.2rem;'
       + 'box-shadow:0 18px 50px rgba(0,0,0,.5)">'
-      + '<h2 style="margin:0 0 .5rem;font:700 1rem/1.3 Georgia,serif;color:var(--tx-or2)">'
+      + '<h2 style="margin:0 0 .5rem;font:700 1rem/1.3 system-ui,sans-serif;color:var(--tx-or2)">'
       + '${T("Des photos ont déjà été facturées")}</h2>'
       + '<p style="margin:0;color:var(--tx);font-size:.86rem;line-height:1.6"><b>' + n
       + '</b> ' + (n > 1 ? '${T("photos")}' : '${T("photo")}') + ' sur ' + total + ' '
@@ -1698,7 +1698,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     v.style.cssText = 'position:fixed;inset:0;z-index:130;background:rgba(6,10,18,.82);'
       + 'display:flex;flex-direction:column;padding:1rem';
     v.innerHTML = '<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem">'
-      + '<h2 style="margin:0;font:700 1rem/1.2 Georgia,serif;color:var(--tx-or2)">' + esc(titre) + '</h2>'
+      + '<h2 style="margin:0;font:700 1rem/1.2 system-ui,sans-serif;color:var(--tx-or2)">' + esc(titre) + '</h2>'
       + '<span style="font-size:.74rem;color:var(--tx2)">${T("gratuit · filigrané · aucun crédit réel")}</span>'
       + '<button id="apr-x" style="margin-left:auto;font:inherit;color:var(--tx);'
       + 'background:var(--v06);border:1px solid var(--v18);'

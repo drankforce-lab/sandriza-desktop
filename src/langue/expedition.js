@@ -84,6 +84,11 @@ module.exports = {
 
   /* ── L ETIQUETTE, ET LE GARDE DU SECOND ACHAT ───────────────────────────── */
   'Étiquette': 'Label',
+  '1 Étiquette': '1 Label',
+  '2 Impression': '2 Printing',
+  '3 Expédiée': '3 Shipped',
+  'Expédiée': 'Shipped',
+  'Impression': 'Printing',
   'Une étiquette a déjà été créée pour cette commande': 'A label has already been created for this order',
   '⚠ Une étiquette a déjà été créée pour cette commande':
     '⚠ A label has already been created for this order',

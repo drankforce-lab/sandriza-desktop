@@ -44,6 +44,13 @@ body{background:var(--f-page);color:var(--tx);
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+/* Refonte fine (2026-09-26) : la barre d onglets de toutes les fenetres — et
+   non trois petits boutons. L actif prend l or du socle (.onglets .actif). */
+.onglets{display:flex;gap:.25rem;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--v08);padding:0 0 .5rem}
+.onglets button{background:transparent;border:1px solid transparent;color:var(--tx2);padding:.38rem .7rem;
+  font:inherit;font-weight:600;font-size:.82rem;cursor:pointer}
+.onglets button:hover{background:var(--v05);color:var(--tx)}
+.onglets .droite{margin-left:auto}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
 input,button{font:inherit;color:var(--tx);background:var(--v05);
@@ -561,12 +568,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     if (sous) sous.textContent = D.peutModifier ? '' : 'consultation seulement';
 
-    var h = '<div class="barreoutils">'
-      + '<button class="mini' + (ONGLET === 'sondages' ? ' actif' : '') + '" data-onglet="sondages">${T("Sondages")}'
+    var h = '<div class="onglets">'
+      + '<button type="button" class="' + (ONGLET === 'sondages' ? 'actif' : '') + '" data-onglet="sondages">${T("Sondages")}'
       + ((D.sondages || []).length ? '<span class="n">' + D.sondages.length + '</span>' : '') + '</button>'
-      + '<button class="mini' + (ONGLET === 'recompenses' ? ' actif' : '') + '" data-onglet="recompenses">${T("Récompenses")}'
+      + '<button type="button" class="' + (ONGLET === 'recompenses' ? 'actif' : '') + '" data-onglet="recompenses">${T("Récompenses")}'
       + ((D.recompenses || []).length ? '<span class="n">' + (D.recompensesTotal || D.recompenses.length) + '</span>' : '') + '</button>'
-      + '<button class="mini' + (ONGLET === 'invitations' ? ' actif' : '') + '" data-onglet="invitations">${T("Invitations")}'
+      + '<button type="button" class="' + (ONGLET === 'invitations' ? 'actif' : '') + '" data-onglet="invitations">${T("Invitations")}'
       + ((D.invitations || []).length ? '<span class="n">' + (D.invitationsTotal || D.invitations.length) + '</span>' : '') + '</button>'
       + '<div class="droite">'
       + (D.peutModifier ? '<button class="mini prim" id="fi-nouveau">${T("+ Nouveau sondage")}</button>' : '')

@@ -3199,6 +3199,19 @@ html.jour input[type=checkbox],html.jour input[type=radio]{accent-color:#a8864f}
 .aide{line-height:1.45}
 .ch .aide{margin-top:.3rem}
 .note,.avis{border-radius:10px;line-height:1.5}
+/* Les etiquettes de champ EN PHRASE, comme a l Inventaire. Trois pieces les
+   ecrivaient en petites capitales espacees (label.champ .lbl dans huit
+   fenetres, .champ label dans trois, .ch label de la fiche client). */
+label.champ .lbl,.champ label,.ch label{text-transform:none;letter-spacing:0;font-weight:600}
+/* Et les autres etiquettes : intertitres de groupe (.grpH, .vgrp) et cles des
+   grilles cle-valeur des boites (Avis, Messagerie, Photos, Ramassages,
+   Securite). ⚠ PAS les en-tetes de colonnes : l Inventaire les garde en
+   capitales, c est le modele. */
+.grpH,.vgrp,.fgr .lbl,.recap dt,.boite .grille .l,.boite .champs .l,.slot .lbl{text-transform:none;letter-spacing:0;font-weight:600}
+/* La Georgia qui restait : des titres de fenetres qui la reecrivaient par-dessus
+   le socle. ⚠ PAS Marque, Gabarits, Affichage client ni l apercu de Pages : la,
+   c est la typographie de la BOUTIQUE qu on montre, et elle doit y rester. */
+.carte h2,.entete h2,.pop .titre,.pas h4,.pnt h2{font-family:inherit}
 /* L etat d un secret sous son champ : pastille + fin en code, sur une ligne. */
 .ch .etat{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;margin-top:.35rem}
 /* Le titre de section (.stitre, cinq fenetres) : celui des cartes de
@@ -3210,19 +3223,21 @@ html.jour input[type=checkbox],html.jour input[type=radio]{accent-color:#a8864f}
    .pas (Assist, plus haut), sert tous les assistants : la refaire ICI relooke
    Produit, Retour, Preparation, Caisse d un coup. Pastilles arrondies aux
    mesures de la barre d outils ; le numero dans un rond — or pour l etape en
-   cours, vert une fois faite. Le crochet data-etape ne change pas. */
+   cours, vert une fois faite. Le crochet data-etape ne change pas.
+   ⚠ ET LES ETAPES EN <span> (2026-09-26) : Expedition montre ses etapes sans
+   qu on les clique — la meme piece, sans bouton, doit avoir le meme dessin. */
 .pas{gap:.4rem;padding:.6rem 1.1rem}
-.pas button{display:inline-flex;align-items:center;gap:.5rem;height:2.3rem;padding:0 .85rem 0 .4rem;
+.pas button,.pas > span{display:inline-flex;align-items:center;gap:.5rem;height:2.3rem;padding:0 .85rem 0 .4rem;
   border-radius:99px;border:1px solid var(--v10);background:var(--f-0f1826);color:var(--tx-gris2);font-size:.8rem}
 .pas .n{display:inline-flex;align-items:center;justify-content:center;width:1.55rem;height:1.55rem;
   min-width:0;border-radius:99px;background:var(--v08);font-weight:800;font-size:.74rem}
-.pas button.on{background:rgba(201,169,126,.14);border-color:rgba(201,169,126,.55);color:var(--tx-or2);font-weight:700}
-.pas button.on .n{background:#c9a97e;color:#17202c}
-.pas button.fait{color:var(--tx-ok)}
-.pas button.fait .n{background:rgba(34,197,94,.18)}
-html.jour .pas button{background:#fff;border-color:rgba(15,23,42,.12);color:#414e66}
-html.jour .pas button.on{background:rgba(201,169,126,.2);border-color:rgba(140,100,45,.45);color:#5c451c}
-html.jour .pas button.fait{color:#326a49}
+.pas button.on,.pas > span.on{background:rgba(201,169,126,.14);border-color:rgba(201,169,126,.55);color:var(--tx-or2);font-weight:700}
+.pas button.on .n,.pas > span.on .n{background:#c9a97e;color:#17202c}
+.pas button.fait,.pas > span.fait{color:var(--tx-ok)}
+.pas button.fait .n,.pas > span.fait .n{background:rgba(34,197,94,.18)}
+html.jour .pas button,html.jour .pas > span{background:#fff;border-color:rgba(15,23,42,.12);color:#414e66}
+html.jour .pas button.on,html.jour .pas > span.on{background:rgba(201,169,126,.2);border-color:rgba(140,100,45,.45);color:#5c451c}
+html.jour .pas button.fait,html.jour .pas > span.fait{color:#326a49}
 .stat{background:var(--f-carte);border-color:var(--v07);border-radius:13px}
 .pill{font-size:.72rem;font-weight:600;padding:.18rem .6rem}
 button{border-radius:9px}

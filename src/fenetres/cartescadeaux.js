@@ -83,7 +83,9 @@ thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:up
 tbody tr[data-id]{cursor:pointer}
 tbody tr:hover td{background:var(--v04)}
 tbody td{padding:.32rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
-.num{font-family:'Courier New',monospace;text-align:right;white-space:nowrap}
+/* Refonte fine (2026-09-26) : un MONTANT n est pas un code — chiffres alignes
+   dans la police de l ecran ; la chasse fixe reste aux codes (rf-code). */
+.num{font-variant-numeric:tabular-nums;font-weight:700;text-align:right;white-space:nowrap}
 .code{font-family:'Courier New',monospace;letter-spacing:1px;background:var(--v06);
   border-radius:4px;padding:.06rem .35rem}
 .dt{font-size:.72rem;color:var(--tx2)}

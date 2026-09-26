@@ -643,12 +643,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '</div></div></div>';
 
     h += '<div class="carte plein"><div class="liste">'
-      + '<table><thead><tr><th>${T("Article")}</th><th class="c">${T("Taille / Couleur")}</th>'
+      + '<table><thead><tr><th>${T("Article")}</th>'
       + '<th class="c">${T("Qté")}</th><th class="d">${T("Prix")}</th></tr></thead><tbody>'
       + d.articles.map(function(a){
-          return '<tr><td>' + esc(a.nom)
-            + (a.rembourseQte > 0 ? ' <span style="font-size:.7rem;color:var(--tx-att)">(' + a.rembourseQte + ' ${T("remb.)")}</span>' : '')
-            + '</td><td class="c det">' + esc(a.taille) + ' / ' + esc(a.couleur) + '</td>'
+          /* Refonte fine (2026-09-26) : la ligne riche — l initiale, le nom, et la
+             taille / couleur en sous-ligne plutot que dans une colonne a part ;
+             le remboursement partiel se DIT en pastille. */
+          return '<tr><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">'
+            + esc(String(a.nom || '?').trim().charAt(0).toUpperCase() || '?') + '</span><div>'
+            + '<div class="rf-nom">' + esc(a.nom) + '</div>'
+            + '<div class="rf-sous"><span>' + esc(a.taille) + ' / ' + esc(a.couleur) + '</span>'
+            + (a.rembourseQte > 0 ? '<span class="rf-pill ambre">' + a.rembourseQte + ' ${T("remb.")}</span>' : '')
+            + '</div></div></div></td>'
             + '<td class="c">' + a.qte + '</td>'
             + '<td class="d">' + argent(a.montant) + '</td></tr>'; }).join('')
       + '</tbody></table>';

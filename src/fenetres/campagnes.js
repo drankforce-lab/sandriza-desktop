@@ -652,7 +652,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
   function vueFormCampagne(){
     var f = FORM, d = f.d, c = d.campagne || {};
     var h = '<div class="carte form">'
-      + '<h3 style="margin:0 0 .6rem;font:700 .92rem/1.3 Georgia,serif">'
+      + '<h3 style="margin:0 0 .6rem;font:700 .92rem/1.3 system-ui,sans-serif">'
       + (f.id ? '${T("Modifier la campagne")}' : '${T("Nouvelle campagne")}') + '</h3>'
       + '<div class="rang">'
       + '<div class="champ"><span class="lbl">${T("Nom interne")}</span>'
@@ -718,7 +718,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
   function vueFormChaine(){
     var f = FORM, d = f.d, ch = d.chaine || {};
     var h = '<div class="carte form">'
-      + '<h3 style="margin:0 0 .6rem;font:700 .92rem/1.3 Georgia,serif">'
+      + '<h3 style="margin:0 0 .6rem;font:700 .92rem/1.3 system-ui,sans-serif">'
       + (f.id ? '${T("Modifier la chaîne")}' : '${T("Nouvelle chaîne")}') + '</h3>'
       + '<div class="rang">'
       + '<div class="champ"><span class="lbl">${T("Nom")}</span>'
@@ -1197,7 +1197,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
   function vueFormSegment(){
     var f = FORM, d = f.d;
     return '<div class="carte form">'
-      + '<h3 style="margin:0 0 .6rem;font:700 .92rem/1.3 Georgia,serif">'
+      + '<h3 style="margin:0 0 .6rem;font:700 .92rem/1.3 system-ui,sans-serif">'
       + (f.id ? '${T("Modifier le segment")}' : '${T("Nouveau segment")}') + '</h3>'
       + '<div class="champ"><span class="lbl">${T("Nom du segment")}</span>'
       + '<input id="f-nom" aria-label="${T("Nom du segment")}" value="' + esc(f.nom || '') + '" placeholder="${T("Clients robes, 300 $ et plus")}"></div>'
