@@ -281,4 +281,10 @@ module.exports = {
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
   'en attente': 'waiting',
+
+  /* ── LA REFONTE DES BOÎTES (2026-09-26) : l'état se dit en pastille ──────── */
+  'Non lu': 'Unread',
+  'Reçu': 'Received',
+  'Envoyé': 'Sent',
+  'Inconnu': 'Unknown',
 };

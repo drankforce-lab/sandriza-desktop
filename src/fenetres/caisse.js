@@ -436,8 +436,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var corps = LIGNES.map(function(l, i){
       var det = [l.size, l.color].filter(Boolean).join(' / ') || '—';
       return '<tr>'
-        + '<td><strong>' + esc(l.name) + '</strong><span class="det"> · ' + esc(det) + '</span>'
-        + (l.sku ? '<div class="code">' + esc(l.sku) + '</div>' : '') + '</td>'
+        /* Refonte (2026-09-26) : la cellule riche de l Inventaire. */
+        + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">'
+        + esc(String(l.name || '?').trim().charAt(0).toUpperCase() || '?') + '</span><div>'
+        + '<div class="rf-nom">' + esc(l.name) + '</div>'
+        + '<div class="rf-sous"><span>' + esc(det) + '</span>'
+        + (l.sku ? '<span>·</span><span class="rf-code">' + esc(l.sku) + '</span>' : '') + '</div></div></div></td>'
         + '<td class="c"><button data-q="' + i + '" data-d="-1">−</button>'
         + ' <strong>' + l.quantity + '</strong> '
         + '<button data-q="' + i + '" data-d="1">+</button></td>'

@@ -66,11 +66,14 @@ button.paie{background:#7859f7;border-color:#7859f7;color:var(--tx-sur-accent);f
    (0,1,1). Sans cette ligne, ce bouton perd sa couleur en plein jour. */
 html.jour button.paie{background:#7859f7;color:#fff;border-color:#7859f7}
 button.paie:hover:not(:disabled){background:#8f74ff;border-color:#8f74ff}
-.art{display:flex;align-items:center;gap:.6rem;padding:.35rem .45rem;border-radius:8px;
-  background:var(--v03);border:1px solid var(--v06);margin-top:.3rem}
-.art .d{flex:1 1 auto;min-width:0}
-.art .n{font-size:.87rem;font-weight:600}
-.art .v{font-size:.74rem;color:var(--tx2)}
+/* Refonte (2026-09-26) : la ligne d article de l Inventaire — pastille a
+   l initiale, nom, sous-ligne. La carte se dessine par son CONTOUR, pas par un
+   fond (un fond deplace la surface sous les textes : voir CSS_REFONTE). */
+.art{display:flex;align-items:center;gap:.75rem;padding:.55rem .7rem;border-radius:12px;
+  border:1px solid var(--v07);margin-top:.45rem}
+.art.choisi{border-color:rgba(201,169,126,.55)}
+.art .rf-prod{flex:1 1 auto}
+.art .rf-prod > div{min-width:0}
 .art input[type=number]{width:4.4rem;text-align:center}
 .art .max{font-size:.68rem;color:var(--tx3);white-space:nowrap}
 .tot .l{display:flex;justify-content:space-between;padding:.14rem 0;font-size:.85rem}
@@ -219,12 +222,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var h = '<div class="carte"><h2>${T("Articles à rembourser ")}<span class="note">${T("— quantités plafonnées au pas-encore-remboursé")}</span></h2>'
       + R.articles.map(function(a, i){
           var q = QTE[cle(a)] || 0;
-          return '<div class="art"><div class="d"><div class="n">' + esc(a.nom) + '</div>'
-            + '<div class="v">' + esc([a.taille, a.couleur].filter(Boolean).join(' · ') || '—')
-            + ' · ' + argent(a.prix) + '${T(" / unité")}</div></div>'
+          var ini = String(a.nom || '?').trim().charAt(0).toUpperCase() || '?';
+          return '<div class="art' + (q > 0 ? ' choisi' : '') + '"><div class="rf-prod">'
+            + '<span class="rf-av" aria-hidden="true">' + esc(ini) + '</span><div>'
+            + '<div class="rf-nom">' + esc(a.nom) + '</div>'
+            + '<div class="rf-sous"><span>' + esc([a.taille, a.couleur].filter(Boolean).join(' · ') || '—') + '</span>'
+            + '<span>·</span><span>' + argent(a.prix) + '${T(" / unité")}</span></div></div></div>'
             + '<input type="number" min="0" max="' + a.maxQty + '" value="' + q + '" data-q="' + i + '"'
       +   ' aria-label="' + esc('${T("Quantité à rembourser — ")}' + (a.nom || '')) + '">'
-            + '<span class="max">${T("max ")}' + a.maxQty + '</span></div>';
+            + '<span class="rf-pill' + (q > 0 ? ' ambre' : '') + '">${T("max ")}' + a.maxQty + '</span></div>';
         }).join('')
       + '</div>';
 
@@ -333,6 +339,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         if (!a) return;
         var v = Math.min(Math.max(0, parseInt(t.value, 10) || 0), a.maxQty);
         QTE[cle(a)] = v;
+        /* L etat de la carte suit la saisie SUR PLACE : un redessin volerait le
+           focus du champ qu on est en train de taper. */
+        var carte = t.closest ? t.closest('.art') : null;
+        if (carte) {
+          carte.classList.toggle('choisi', v > 0);
+          var pl = carte.querySelector('.rf-pill');
+          if (pl) pl.classList.toggle('ambre', v > 0);
+        }
         majTotaux();
         return;
       }

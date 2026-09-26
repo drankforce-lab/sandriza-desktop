@@ -96,9 +96,15 @@ body{background:var(--f-page);color:var(--tx);
 .smsbox{display:flex;gap:.4rem;flex-wrap:wrap;margin:0 0 .6rem}
 .smsbox input.to{width:11rem}.smsbox input.body{flex:1;min-width:14rem}
 .liste{margin-top:.3rem}
-.item{background:var(--f-champ);border:1px solid var(--v12);border-radius:9px;padding:.55rem .7rem;margin:0 0 .5rem}
-.item.neuf{border-left:3px solid #c9a97e}
+/* Refonte (2026-09-26) : la carte des listes de l Inventaire — pastille ronde,
+   nom, sous-ligne, etat en pastille. Le liseré doré des non-lus est parti :
+   le « Non lu » se DIT, dans une pastille bleue. */
+.item{display:flex;align-items:flex-start;gap:.75rem;background:var(--f-carte);border:1px solid var(--v07);
+  border-radius:12px;padding:.6rem .75rem;margin:0 0 .45rem}
+.item .gauche{flex:1 1 auto;min-width:0}
+.item .rf-av .ic{font-size:1rem}
 .item .haut{display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap}
+.item .haut .qui{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;min-width:0}
 .item .qui{font-size:.83rem}
 .item .meta{font-size:.72rem;color:var(--tx2)}
 .item .corpsmsg{font-size:.82rem;margin-top:.2rem}
@@ -638,14 +644,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var h = '';
     for (var i = 0; i < vms.length; i++) {
       var v = vms[i];
-      h += '<div class="item' + (v.read ? '' : ' neuf') + '"><div class="haut">'
-        + '<div><span class="qui">' + (v.read ? '' : '<span class="ic">🔵</span> ') + '<b>' + esc(v.from || 'Inconnu') + '</b></span>'
-        + ' <span class="meta">· ' + esc(v.duration || '?') + ' s · ' + esc(String(v.date || '').replace('T', ' ').replace('Z', '')) + '</span></div>'
+      h += '<div class="item' + (v.read ? '' : ' neuf') + '">'
+        + '<span class="rf-av" aria-hidden="true"><span class="ic">🎧</span></span><div class="gauche"><div class="haut">'
+        + '<div class="qui"><span class="rf-nom">' + esc(v.from || '${T("Inconnu")}') + '</span>'
+        + (v.read ? '' : '<span class="rf-pill bleu">${T("Non lu")}</span>') + '</div>'
         + '<div class="actes">'
         + (v.read || RO ? '' : '<button class="b" type="button" data-vmlu="' + esc(v.id) + '">${T("✓ Marquer lu")}</button>')
         + (RO ? '' : '<button class="b dgr" type="button" data-vmdel="' + esc(v.id) + '"><span class="ic">🗑</span></button>')
         + '</div></div>'
-        + '<div class="meta" style="margin-top:.25rem">' + (v.emailed === false ? '${T("Échec de l’envoi courriel")}' : '<span class="ic">🎧</span> ${T("Audio envoyé par courriel (MP3), non conservé")}') + '</div></div>';
+        + '<div class="rf-sous"><span>' + esc(v.duration || '?') + ' s</span><span>·</span><span>' + esc(String(v.date || '').replace('T', ' ').replace('Z', '')) + '</span><span>·</span>'
+        + (v.emailed === false ? '<span class="rf-pill rouge">${T("Échec de l’envoi courriel")}</span>' : '<span>${T("Audio envoyé par courriel (MP3), non conservé")}</span>') + '</div></div></div>';
     }
     box.innerHTML = h;
     var lus = box.querySelectorAll('[data-vmlu]'); for (var a = 0; a < lus.length; a++) lus[a].onclick = function(){ vmAction('vm:lu', this.getAttribute('data-vmlu')); };
@@ -664,14 +672,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     for (var i = 0; i < sms.length; i++) {
       var m = sms[i], entrant = (m.direction === 'inbound');
       h += '<div class="item' + (entrant && !m.read ? ' neuf' : '') + '">'
-        + '<div class="meta">' + (entrant ? '${T("Reçu de")} ' : '${T("Envoyé à")} ') + '<b>' + esc(entrant ? m.from : m.to) + '</b> · '
-        + esc(String(m.date || '').replace('T', ' ').replace('Z', '')) + (entrant && !m.read ? ' · <span class="ic">🔵</span>' : '') + '</div>'
+        + '<span class="rf-av" aria-hidden="true"><span class="ic">💬</span></span><div class="gauche"><div class="haut">'
+        + '<div class="qui"><span class="rf-nom">' + esc(entrant ? m.from : m.to) + '</span>'
+        + (entrant ? (m.read ? '<span class="rf-pill">${T("Reçu")}</span>' : '<span class="rf-pill bleu">${T("Non lu")}</span>') : '<span class="rf-pill vert">${T("Envoyé")}</span>')
+        + '</div><span class="meta">' + esc(String(m.date || '').replace('T', ' ').replace('Z', '')) + '</span></div>'
         + '<div class="corpsmsg">' + esc(m.body || '') + '</div>'
-        + '<div class="actes" style="margin-top:.25rem">'
+        + '<div class="actes" style="margin-top:.35rem">'
         + (entrant ? '<button class="b" type="button" data-smsrep="' + esc(m.from) + '">${T("↩ Répondre")}</button>' : '')
         + (entrant && !m.read ? '<button class="b" type="button" data-smslu="' + esc(m.id) + '">✓</button>' : '')
         + (RO ? '' : '<button class="b dgr" type="button" data-smsdel="' + esc(m.id) + '"><span class="ic">🗑</span></button>')
-        + '</div></div>';
+        + '</div></div></div>';
     }
     box.innerHTML = h;
     var reps = box.querySelectorAll('[data-smsrep]'); for (var a = 0; a < reps.length; a++) reps[a].onclick = function(){ var t = document.getElementById('t-sms-to'); if (t) { t.value = this.getAttribute('data-smsrep'); var bd = document.getElementById('t-sms-body'); if (bd) bd.focus(); } };
