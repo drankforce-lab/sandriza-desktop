@@ -173,8 +173,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<input class="mono" id="' + id + '" type="password" value="" placeholder="'
       + (m.defini ? '${T("inchangé")}' : esc(place || '')) + '" autocomplete="off"' + (RO ? ' disabled' : '') + '>'
       + '<div class="etat' + (m.defini ? '' : ' non') + '">'
-      + (m.defini ? '${T("Enregistré (se termine par <b>")}' + esc(m.fin) + '${T("</b>). Vide = conservé.")}'
-                  : '${T("Aucun secret <b>enregistré</b>.")}') + '</div></div>';
+      + (m.defini ? '<span class="rf-pill vert">${T("Enregistré")}</span><span class="rf-code">…' + esc(m.fin) + '</span>'
+                  : '<span class="rf-pill ambre">${T("Aucun secret enregistré")}</span>') + '</div></div>';
   }
   function texteHtml(id, label, v, place, mono, aide){
     return '<div class="ch"><label for="' + id + '">' + esc(label) + '</label>'

@@ -248,14 +248,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '${T("d’elle-même jusqu’au mois suivant. 0 lève la limite.")}</div></div>';
   }
   function etatInterne(k, e){
-    if (!e.defini) return '<span class="txt">${T("Aucune clé <b>enregistrée</b>.")}</span>';
+    /* Refonte fine (2026-09-26) : l etat se DIT en pastille, la fin de la cle
+       en code — la meme forme que Telephonie, Paiements et Transporteurs. */
+    if (!e.defini) return '<span class="rf-pill ambre">${T("Aucune clé enregistrée")}</span>';
     if (ARME[k]) {
       return '<span class="txt">${T("Retirer la clé enregistrée ?")}</span>'
         + '<button class="conf" data-conf="' + k + '"' + (RO ? ' disabled' : '') + '>${T("Confirmer le retrait")}</button>'
         + '<button class="annu" data-annu="' + k + '">${T("Annuler")}</button>';
     }
-    return '<span class="txt">${T("Clé <b>enregistrée</b> (se termine par ")}' + esc(e.fin)
-      + '${T("). Laissez le champ vide pour la conserver.")}</span>'
+    return '<span class="rf-pill vert">${T("Clé enregistrée")}</span>'
+      + '<span class="rf-code">…' + esc(e.fin) + '</span>'
       + '<button data-retirer="' + k + '"' + (RO ? ' disabled' : '') + '>${T("Retirer")}</button>';
   }
 

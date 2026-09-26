@@ -178,5 +178,9 @@ module.exports = {
   /* ── LES VERDICTS ───────────────────────────────────────────────────────── */
   'Aucun changement.': 'No change.',
   'Clés enregistrées.': 'Keys saved.',
-  'Clé retirée.': 'Key removed.'
+  'Clé retirée.': 'Key removed.',
+
+  /* ── REFONTE FINE (2026-09-26) : l etat des secrets en pastille ── */
+  'Aucune clé enregistrée': 'No key saved',
+  'Clé enregistrée': 'Key saved'
 };

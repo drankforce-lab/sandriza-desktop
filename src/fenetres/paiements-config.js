@@ -74,7 +74,7 @@ body{background:var(--f-page);color:var(--tx);
 .note{border-radius:9px;padding:.5rem .7rem;font-size:.78rem;margin:0 0 .8rem;
   border:1px solid rgba(120,160,220,.28);background:rgba(80,120,190,.1);color:#bcd2f0}
 .note.garde{border-color:rgba(240,180,80,.35);background:rgba(200,140,40,.1);color:var(--tx-or2)}
-.jeton{font-size:.76rem;color:var(--tx2);margin-top:.2rem}
+.jeton{font-size:.76rem;color:var(--tx2);margin-top:.35rem;display:flex;align-items:center;gap:.45rem;flex-wrap:wrap}
 .jeton b{color:var(--tx-ok)}
 .jeton.non b{color:var(--tx-jaune)}
 .tarifs{display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));gap:.6rem}
@@ -230,8 +230,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '" autocomplete="off"' + (RO ? ' disabled' : '') + '>'
       + '<div class="jeton' + (e.jeton.defini ? '' : ' non') + '">'
       + (e.jeton.defini
-          ? '${T("Jeton <b>enregistré</b> (se termine par ")}' + esc(e.jeton.fin) + '${T("). Laissez le champ vide pour le conserver.")}'
-          : '${T("Aucun jeton <b>enregistré</b> pour cet environnement.")}')
+          ? '<span class="rf-pill vert">${T("Jeton enregistré")}</span><span class="rf-code">…' + esc(e.jeton.fin) + '</span>'
+          : '<span class="rf-pill ambre">${T("Aucun jeton enregistré")}</span><span>${T("pour cet environnement")}</span>')
       + '</div></div>');
     h.push('<div class="ch"><label>${T("Identifiant d’emplacement")}</label>'
       + '<input id="f-loc" type="text" aria-label="${T("Identifiant d’emplacement")}" value="' + esc(e.locId) + '" placeholder="L…"'

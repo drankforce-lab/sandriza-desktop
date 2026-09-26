@@ -157,5 +157,12 @@ module.exports = {
   'emplacement :': 'location:',
 
   /* ── LES MOTS SEULS (2026-09-13) — nom de produit Square, identique. */
-  'Afterpay': 'Afterpay'
+  'Afterpay': 'Afterpay',
+
+  /* ── REFONTE FINE (2026-09-26) : l etat des secrets en pastille ── */
+  'Jeton enregistré': 'Token saved',
+  'Aucun jeton enregistré': 'No token saved',
+  'pour cet environnement': 'for this environment',
+  'Jeton enregistré …': 'Token saved …',
+  'Aucun jeton enregistré pour cet environnement': 'No token saved for this environment'
 };

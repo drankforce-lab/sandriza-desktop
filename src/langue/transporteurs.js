@@ -141,5 +141,10 @@ module.exports = {
   'Purolator': 'Purolator',
   'FedEx': 'FedEx',
   'UPS': 'UPS',
-  'Canpar': 'Canpar'
+  'Canpar': 'Canpar',
+
+  /* ── REFONTE FINE (2026-09-26) : l etat des secrets en pastille ── */
+  'Enregistré': 'Saved',
+  'Aucun secret enregistré': 'No secret saved',
+  'Enregistré …': 'Saved …'
 };

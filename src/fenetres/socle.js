@@ -3199,6 +3199,8 @@ html.jour input[type=checkbox],html.jour input[type=radio]{accent-color:#a8864f}
 .aide{line-height:1.45}
 .ch .aide{margin-top:.3rem}
 .note,.avis{border-radius:10px;line-height:1.5}
+/* L etat d un secret sous son champ : pastille + fin en code, sur une ligne. */
+.ch .etat{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;margin-top:.35rem}
 /* Le titre de section (.stitre, cinq fenetres) : celui des cartes de
    l Inventaire — en phrase, en gras, dans l encre du texte — et non plus un
    petit libelle bleute. */
