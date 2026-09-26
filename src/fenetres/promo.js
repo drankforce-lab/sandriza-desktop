@@ -176,6 +176,14 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Refonte fine (2026-09-26) : la barre d onglets commune — l actif prend l or
+   du socle (.onglets .actif) ; ce qui suit les onglets reste a droite. */
+.onglets{display:flex;gap:.25rem;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--v08);padding:0 0 .5rem}
+.onglets > button{background:transparent;border:1px solid transparent;color:var(--tx2);padding:.38rem .7rem;
+  font:inherit;font-weight:600;font-size:.82rem;cursor:pointer}
+.onglets > button:hover{background:var(--v05);color:var(--tx)}
+.onglets .droite{margin-left:auto}
 `;
 
 /**
@@ -285,10 +293,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
       h += '<div class="avis"><span class="ic">👁</span> ${T("Lecture seule — votre rôle permet de consulter, pas de modifier ni d’imprimer.")}</div>';
     }
 
-    h += '<div class="barreoutils">'
-      + '<button class="mini' + (ONGLET === 'modeles' ? ' actif' : '') + '" data-onglet="modeles">${T("Modèles")}<span></span></button>'
-      + '<button class="mini' + (ONGLET === 'impression' ? ' actif' : '') + '" data-onglet="impression">${T("Impression par lot")}</button>'
-      + '<button class="mini' + (ONGLET === 'formats' ? ' actif' : '') + '" data-onglet="formats">${T("Formats")}</button>'
+    h += '<div class="onglets">'
+      + '<button type="button" class="' + (ONGLET === 'modeles' ? 'actif' : '') + '" data-onglet="modeles">${T("Modèles")}<span></span></button>'
+      + '<button type="button" class="' + (ONGLET === 'impression' ? 'actif' : '') + '" data-onglet="impression">${T("Impression par lot")}</button>'
+      + '<button type="button" class="' + (ONGLET === 'formats' ? 'actif' : '') + '" data-onglet="formats">${T("Formats")}</button>'
       + '<span class="droite">' + (k.imprimees || 0) + ' '
       + ((k.imprimees || 0) > 1 ? '${T("étiquettes imprimées")}' : '${T("étiquette imprimée")}') + '</span>'
       + '</div>';
@@ -297,8 +305,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
        quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
        ce poste. Voir JS_TUILES dans socle.js. */
     h += szTuiles('<div class="stats">'
-      + tuile(k.modeles, '${T("modèles")}') + tuile(k.formats, 'formats')
-      + tuile(k.logos, 'logos') + tuile(D.trouves, '${T("affichés")}')
+      /* Le libelle d une tuile commence par une majuscule, comme partout. */
+      + tuile(k.modeles, '${T("Modèles")}') + tuile(k.formats, '${T("Formats")}')
+      + tuile(k.logos, '${T("Logos")}') + tuile(D.trouves, '${T("Affichés")}')
       + '</div>');
 
     if (ONGLET === 'modeles') h += vueModeles(ro);

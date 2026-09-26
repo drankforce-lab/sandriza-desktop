@@ -47,9 +47,9 @@ body{background:var(--f-page);color:var(--tx);
 /* Refonte fine (2026-09-26) : la barre d onglets de toutes les fenetres — et
    non trois petits boutons. L actif prend l or du socle (.onglets .actif). */
 .onglets{display:flex;gap:.25rem;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--v08);padding:0 0 .5rem}
-.onglets button{background:transparent;border:1px solid transparent;color:var(--tx2);padding:.38rem .7rem;
+.onglets > button{background:transparent;border:1px solid transparent;color:var(--tx2);padding:.38rem .7rem;
   font:inherit;font-weight:600;font-size:.82rem;cursor:pointer}
-.onglets button:hover{background:var(--v05);color:var(--tx)}
+.onglets > button:hover{background:var(--v05);color:var(--tx)}
 .onglets .droite{margin-left:auto}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}

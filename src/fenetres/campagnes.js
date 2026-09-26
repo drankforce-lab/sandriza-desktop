@@ -192,6 +192,14 @@ tbody tr:hover td{background:var(--v04)}
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Refonte fine (2026-09-26) : la barre d onglets commune — l actif prend l or
+   du socle (.onglets .actif) ; ce qui suit les onglets reste a droite. */
+.onglets{display:flex;gap:.25rem;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--v08);padding:0 0 .5rem}
+.onglets > button{background:transparent;border:1px solid transparent;color:var(--tx2);padding:.38rem .7rem;
+  font:inherit;font-weight:600;font-size:.82rem;cursor:pointer}
+.onglets > button:hover{background:var(--v05);color:var(--tx)}
+.onglets .droite{margin-left:auto}
 `;
 
 /** Page complète de la fenêtre native « Campagnes et chaînes ». */
@@ -605,10 +613,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
   }
 
   function onglets(){
-    return '<div class="barreoutils">'
-      + '<button class="mini' + (ONGLET === 'campagnes' ? ' actif' : '') + '" data-onglet="campagnes">${T("Campagnes")}</button>'
-      + '<button class="mini' + (ONGLET === 'chaines' ? ' actif' : '') + '" data-onglet="chaines">${T("Chaînes automatisées")}</button>'
-      + '<button class="mini' + (ONGLET === 'segments' ? ' actif' : '') + '" data-onglet="segments">Segments</button>'
+    return '<div class="onglets">'
+      + '<button type="button" class="' + (ONGLET === 'campagnes' ? 'actif' : '') + '" data-onglet="campagnes">${T("Campagnes")}</button>'
+      + '<button type="button" class="' + (ONGLET === 'chaines' ? 'actif' : '') + '" data-onglet="chaines">${T("Chaînes automatisées")}</button>'
+      + '<button type="button" class="' + (ONGLET === 'segments' ? 'actif' : '') + '" data-onglet="segments">Segments</button>'
       // ⚠ LA RECHERCHE N EST PLUS ICI (demande du 2026-08-14 : << pas beau a
       // cote des onglets >>). Elle vit desormais dans la barre qui surplombe
       // la liste, la ou porte son effet.

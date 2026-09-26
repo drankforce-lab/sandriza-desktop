@@ -244,4 +244,6 @@ module.exports = {
   'Forme': 'Shape',
   'Rond': 'Round',
   'Fermer': 'Close',
+  'Logos': 'Logos',
+  'Affichés': 'Shown'
 };

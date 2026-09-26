@@ -121,6 +121,14 @@ button .n.hi{background:rgba(239,68,68,.28);color:var(--tx-err2)}
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Refonte fine (2026-09-26) : la barre d onglets commune — l actif prend l or
+   du socle (.onglets .actif) ; ce qui suit les onglets reste a droite. */
+.onglets{display:flex;gap:.25rem;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--v08);padding:0 0 .5rem}
+.onglets > button{background:transparent;border:1px solid transparent;color:var(--tx2);padding:.38rem .7rem;
+  font:inherit;font-weight:600;font-size:.82rem;cursor:pointer}
+.onglets > button:hover{background:var(--v05);color:var(--tx)}
+.onglets .droite{margin-left:auto}
 `;
 
 /** Page complète de la fenêtre native « Chat en ligne ». */
@@ -412,9 +420,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
         ? '<span class="pill att">' + D.enAttente + '${T(" en attente")}</span>'
         : '<span class="pill bon">${T("rien en attente")}</span>';
     }
-    var h = '<div class="barreoutils">'
-      + '<button class="mini' + (ONGLET === 'file' ? ' actif' : '') + '" data-onglet="file">${T("Conversations")}</button>'
-      + '<button class="mini' + (ONGLET === 'satisfaction' ? ' actif' : '') + '" data-onglet="satisfaction">${T("Satisfaction")}</button>'
+    var h = '<div class="onglets">'
+      + '<button type="button" class="' + (ONGLET === 'file' ? 'actif' : '') + '" data-onglet="file">${T("Conversations")}</button>'
+      + '<button type="button" class="' + (ONGLET === 'satisfaction' ? 'actif' : '') + '" data-onglet="satisfaction">${T("Satisfaction")}</button>'
       + '<div class="droite"><span class="dt">${T("Réglages du chat et de l’assistant : ")}'
       + '${T("Configuration → Communications → Chat en ligne")}</span></div></div>';
     h += ONGLET === 'satisfaction' ? vueSatisfaction() : vueFile();

@@ -70,6 +70,14 @@ button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:70
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Refonte fine (2026-09-26) : la barre d onglets commune — l actif prend l or
+   du socle (.onglets .actif) ; ce qui suit les onglets reste a droite. */
+.onglets{display:flex;gap:.25rem;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--v08);padding:0 0 .5rem}
+.onglets > button{background:transparent;border:1px solid transparent;color:var(--tx2);padding:.38rem .7rem;
+  font:inherit;font-weight:600;font-size:.82rem;cursor:pointer}
+.onglets > button:hover{background:var(--v05);color:var(--tx)}
+.onglets .droite{margin-left:auto}
 `;
 
 /** Page complète de la fenêtre native « Notes des mises à jour ». */
@@ -145,10 +153,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var archives = toutes.slice(n);
     var liste = ONGLET === 'archives' ? archives : recentes;
 
-    var h = '<div class="barreoutils">'
-      + '<button class="mini' + (ONGLET === 'recentes' ? ' actif' : '') + '" data-onglet="recentes">'
+    var h = '<div class="onglets">'
+      + '<button type="button" class="' + (ONGLET === 'recentes' ? 'actif' : '') + '" data-onglet="recentes">'
       + '${T("Récentes")}<span class="n">' + recentes.length + '</span></button>'
-      + '<button class="mini' + (ONGLET === 'archives' ? ' actif' : '') + '" data-onglet="archives">'
+      + '<button type="button" class="' + (ONGLET === 'archives' ? 'actif' : '') + '" data-onglet="archives">'
       + '${T("Archives")}<span class="n">' + archives.length + '</span></button>'
       + '</div>';
 

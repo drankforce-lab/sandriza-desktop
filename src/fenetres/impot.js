@@ -49,6 +49,14 @@ body{background:var(--f-page);color:var(--tx);
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+/* Refonte fine (2026-09-26) : la barre d onglets commune — l actif prend l or
+   du socle ; l annee et le nom de l entreprise restent a droite. */
+.onglets{display:flex;gap:.25rem;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--v08);padding:0 0 .5rem}
+.onglets > button{background:transparent;border:1px solid transparent;color:var(--tx2);padding:.38rem .7rem;
+  font:inherit;font-weight:600;font-size:.82rem;cursor:pointer}
+.onglets > button:hover{background:var(--v05);color:var(--tx)}
+.onglets select{margin-left:.4rem}
+.onglets .droite{margin-left:auto}
 .barreoutils .droite{margin-left:auto;font-size:.78rem;color:var(--tx2)}
 select,button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem;cursor:pointer}
@@ -301,13 +309,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
         + '${T("seront pas recevables. ")}<button class="mini" data-onglet="entreprise">${T("Compléter maintenant")}</button></div>';
     }
 
-    h += '<div class="barreoutils">'
-      + '<button class="mini' + (ONGLET === 'taxes' ? ' actif' : '') + '" data-onglet="taxes">TPS / TVQ</button>'
-      + '<button class="mini' + (ONGLET === 'revenus' ? ' actif' : '') + '" data-onglet="revenus">${T("Revenus")}</button>'
-      + '<button class="mini' + (ONGLET === 'documents' ? ' actif' : '') + '" data-onglet="documents">Documents</button>'
-      + '<button class="mini' + (ONGLET === 'entreprise' ? ' actif' : '') + '" data-onglet="entreprise">${T("Mon entreprise")}'
+    h += '<div class="onglets">'
+      + '<button type="button" class="' + (ONGLET === 'taxes' ? 'actif' : '') + '" data-onglet="taxes">TPS / TVQ</button>'
+      + '<button type="button" class="' + (ONGLET === 'revenus' ? 'actif' : '') + '" data-onglet="revenus">${T("Revenus")}</button>'
+      + '<button type="button" class="' + (ONGLET === 'documents' ? 'actif' : '') + '" data-onglet="documents">Documents</button>'
+      + '<button type="button" class="' + (ONGLET === 'entreprise' ? 'actif' : '') + '" data-onglet="entreprise">${T("Mon entreprise")}'
       + (D.profil.complet ? '' : '<span class="n hi">!</span>') + '</button>'
-      + '<button class="mini' + (ONGLET === 'memo' ? ' actif' : '') + '" data-onglet="memo">${T("Aide-mémoire")}</button>'
+      + '<button type="button" class="' + (ONGLET === 'memo' ? 'actif' : '') + '" data-onglet="memo">${T("Aide-mémoire")}</button>'
       /* Le choix d annee n a aucun sens sur le profil ni sur l aide-memoire :
          l un decrit l entreprise, l autre le calendrier a venir. */
       + ((ONGLET === 'entreprise' || ONGLET === 'memo') ? ''

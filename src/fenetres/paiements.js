@@ -94,6 +94,14 @@ tbody td{padding:.3rem .4rem;border-top:1px solid var(--v055);vertical-align:mid
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Refonte fine (2026-09-26) : la barre d onglets commune — l actif prend l or
+   du socle (.onglets .actif) ; ce qui suit les onglets reste a droite. */
+.onglets{display:flex;gap:.25rem;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--v08);padding:0 0 .5rem}
+.onglets > button{background:transparent;border:1px solid transparent;color:var(--tx2);padding:.38rem .7rem;
+  font:inherit;font-weight:600;font-size:.82rem;cursor:pointer}
+.onglets > button:hover{background:var(--v05);color:var(--tx)}
+.onglets .droite{margin-left:auto}
 `;
 
 /** Page complète de la fenêtre native « Paiements Square ». */
@@ -169,9 +177,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('paiements')}
   }
 
   function barre(){
-    var h = '<div class="barreoutils">'
-      + '<button class="mini' + (ONGLET === 'transactions' ? ' actif' : '') + '" data-onglet="transactions">${T("Transactions")}</button>'
-      + '<button class="mini' + (ONGLET === 'reconciliation' ? ' actif' : '') + '" data-onglet="reconciliation">${T("Réconciliation")}</button>'
+    var h = '<div class="onglets">'
+      + '<button type="button" class="' + (ONGLET === 'transactions' ? 'actif' : '') + '" data-onglet="transactions">${T("Transactions")}</button>'
+      + '<button type="button" class="' + (ONGLET === 'reconciliation' ? 'actif' : '') + '" data-onglet="reconciliation">${T("Réconciliation")}</button>'
       + '<select id="p-annee" title="${T("Année")}">'
       + (D.annees || []).map(function(a){
           return '<option value="' + a + '"' + (a === D.annee ? ' selected' : '') + '>' + a + '</option>';
