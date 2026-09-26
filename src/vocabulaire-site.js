@@ -25,6 +25,7 @@
  *     promo.js      LIB (cartes-cadeaux)
  *     photos.js     EXPL_FILTRES, _TRAITEMENTS
  *     photoroom-proxy.php  les ambiances du Studio (label, desc)
+ *     staff.js      ROLES[…].label (les roles du personnel)
  */
 module.exports = {
   // Commandes (ORDER_STATUS)
@@ -78,4 +79,15 @@ module.exports = {
   'Végétation, lumière naturelle, frais et aéré.': 'Plants, natural light, fresh and airy.',
   'Nuit lumières': 'City lights',
   'Lumières de ville floutées, ambiance éditoriale.': 'Blurred city lights, editorial mood.',
+  // Roles du personnel (staff.js, ROLES[…].label) — affiches par Personnel connecte
+  'Super-administrateur': 'Super administrator',
+  'Administrateur': 'Administrator',
+  'Gérant de boutique': 'Store manager',
+  'Comptable': 'Accountant',
+  'Commis à la livraison': 'Shipping clerk',
+  'Commis à la préparation de commandes': 'Order picking clerk',
+  'Commis à l’inventaire': 'Inventory clerk',
+  'Service à la clientèle': 'Customer service',
+  'Marketing': 'Marketing',
+  'Consultation seulement': 'Read-only',
 };

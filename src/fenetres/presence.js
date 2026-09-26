@@ -268,11 +268,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (!m.length || m[0] === '—') return '?';
     return ((m[0][0] || '') + (m.length > 1 ? (m[m.length - 1][0] || '') : '')).toUpperCase();
   }
+  /* Une pastille commence par une majuscule (refonte fine, 2026-09-26). */
+  function cap(x){ x = String(x || ''); return x.charAt(0).toUpperCase() + x.slice(1); }
   function ligne(s){
     var moi = !!s.moi;
     var etat = s.frais
-      ? '<span class="rf-pill vert">${T("à l’écran")}</span>'
-      : '<span class="rf-pill ambre">' + esc(depuis(s.vuDepuisSec)) + '</span>';
+      ? '<span class="rf-pill vert">' + cap('${T("à l’écran")}') + '</span>'
+      : '<span class="rf-pill ambre">' + esc(cap(depuis(s.vuDepuisSec))) + '</span>';
     /* ⚠ AUCUN BOUTON SUR SA PROPRE LIGNE, et pas seulement grise : le serveur
        refuse de toute facon (motif soi_meme), donc un bouton la serait une
        porte qui ne mene nulle part. On dit << vous >> et on s arrete la. */
@@ -287,7 +289,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '<div style="min-width:0"><div class="rf-nom">' + esc(s.nom || '—') + '</div>'
       + (s.courriel ? '<div class="rf-sous">' + esc(s.courriel) + '</div>' : '')
       + '</div></div></td>'
-      + '<td><span class="rf-pill">' + esc(szTd(s.role || '—')) + '</span></td>'
+      /* Le NOM du role quand le site l envoie (roleLabel), le code sinon. */
+      + '<td><span class="rf-pill">' + esc(szTd(s.roleLabel || s.role || '—')) + '</span></td>'
       + '<td>' + etat
       + (s.vu ? '<div class="sub">' + esc(fdate(s.vu)) + '</div>' : '<div class="sub mut">${T("pas encore vu")}</div>')
       + '</td>'

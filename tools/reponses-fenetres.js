@@ -7414,15 +7414,15 @@ const JEU = {
                lit `frais`, la sous-ligne lit `vu`. Les dissocier dessinerait
                « a l ecran » au-dessus d une date de la semaine derniere. */
             { staffId: 'stf_0001', nom: 'Brigitte Brousseau', courriel: 'brigitte@sandriza.com',
-              role: 'superadmin', moi: true, frais: true, vuDepuisSec: 4,
+              role: 'superadmin', roleLabel: 'Super-administrateur', moi: true, frais: true, vuDepuisSec: 4,
               vu: '2026-09-09T14:32:11Z', depuis: '2026-09-09T08:02:00Z' },
             { staffId: 'stf_0002', nom: 'Martin Dubé', courriel: 'martin@sandriza.com',
-              role: 'admin', moi: false, frais: true, vuDepuisSec: 31,
+              role: 'admin', roleLabel: 'Administrateur', moi: false, frais: true, vuDepuisSec: 31,
               vu: '2026-09-09T14:31:44Z', depuis: '2026-09-09T09:15:00Z' },
             /* Réduite dans la zone de notification : connectée, mais son dernier
                passage recule — le cas que la note de la fenêtre explique. */
             { staffId: 'stf_0003', nom: 'Claire Fortin', courriel: '',
-              role: 'employe', moi: false, frais: false, vuDepuisSec: 740,
+              role: 'employe', roleLabel: 'Service à la clientèle', moi: false, frais: false, vuDepuisSec: 740,
               vu: '2026-09-09T14:20:03Z', depuis: '2026-09-09T13:58:00Z' },
             /* ⚠ JAMAIS VUE : `vu` vide prend la branche « pas encore vu », et un
                nom absent la branche du tiret. Deux valeurs que le serveur rend
