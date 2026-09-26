@@ -257,10 +257,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var r = (D && D.resume) || [];
     var lignes = r.map(function(l){
       var sel = (l.cc === OUVERT) ? ' class="sel"' : '';
-      return '<tr' + sel + '><td class="pays">' + esc(l.nom)
+      return '<tr' + sel + '><td class="pays"><span class="rf-nom">' + esc(l.nom) + '</span>'
         + '<span class="cc">' + esc(l.cc) + '</span></td>'
-        + '<td><span class="etat t-' + esc(l.etat) + '"><span class="pastille p-' + esc(l.etat)
-        + '" aria-hidden="true"></span>' + esc(ETATS[l.etat] || l.etat) + '</span></td>'
+        /* La pastille a point de la refonte (2026-09-25) : une couleur = un sens —
+           le violet de la derogation devient le bleu d information. */
+        + '<td><span class="rf-pill ' + ({ pret: 'vert', avertir: 'ambre', bloque: 'rouge', derogation: 'bleu' }[l.etat] || '')
+        + '">' + esc(ETATS[l.etat] || l.etat) + '</span></td>'
         + '<td>' + (l.bloquants ? esc(String(l.bloquants)) : '—') + '</td>'
         + '<td>' + (l.avertissements ? esc(String(l.avertissements)) : '—') + '</td>'
         + '<td>' + (l.mandats ? esc(String(l.mandats)) : '—') + '</td>'
