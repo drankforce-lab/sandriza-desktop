@@ -3168,14 +3168,14 @@ html.jour thead th{background:var(--f-carte)}
    pipettes a leur dessin natif — et donne a ces regles la specificite qu il
    faut pour passer devant celles, generiques, des fenetres. */
 .ch label{font-size:.76rem;font-weight:600;margin-bottom:.3rem}
-.ch input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),.ch select,.ch textarea{
+.ch input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),.ch select,.ch textarea,.champ input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),.champ select,.champ textarea{
   min-height:2.4rem;border-radius:10px;border-width:1px;border-style:solid;border-color:var(--v14);
   padding:.45rem .7rem;font-size:.85rem;transition:border-color .15s,box-shadow .15s}
-.ch textarea{min-height:4.2rem;line-height:1.45}
-.ch input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):hover:not(:disabled),.ch select:hover:not(:disabled),.ch textarea:hover:not(:disabled){border-color:var(--v16)}
-.ch input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):focus,.ch select:focus,.ch textarea:focus{outline:none;border-color:#c9a97e;box-shadow:0 0 0 3px rgba(201,169,126,.18)}
-html.jour .ch input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),html.jour .ch select,html.jour .ch textarea{border-color:rgba(15,23,42,.16)}
-html.jour .ch input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):focus,html.jour .ch select:focus,html.jour .ch textarea:focus{border-color:#a8864f;box-shadow:0 0 0 3px rgba(168,134,79,.2)}
+.ch textarea,.champ textarea{min-height:4.2rem;line-height:1.45}
+.ch input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):hover:not(:disabled),.ch select:hover:not(:disabled),.ch textarea:hover:not(:disabled),.champ input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):hover:not(:disabled),.champ select:hover:not(:disabled),.champ textarea:hover:not(:disabled){border-color:var(--v16)}
+.ch input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):focus,.ch select:focus,.ch textarea:focus,.champ input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):focus,.champ select:focus,.champ textarea:focus{outline:none;border-color:#c9a97e;box-shadow:0 0 0 3px rgba(201,169,126,.18)}
+html.jour .ch input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),html.jour .ch select,html.jour .ch textarea,html.jour .champ input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),html.jour .champ select,html.jour .champ textarea{border-color:rgba(15,23,42,.16)}
+html.jour .ch input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):focus,html.jour .ch select:focus,html.jour .ch textarea:focus,html.jour .champ input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):focus,html.jour .champ select:focus,html.jour .champ textarea:focus{border-color:#a8864f;box-shadow:0 0 0 3px rgba(168,134,79,.2)}
 /* ══ LES FINITIONS DE LA REFONTE FINE (2026-09-26) ═══════════════════════
    Sa demande : « la refonte, c est partout, et ameliore le visuel dans les
    moindres details ». Les pieces que TOUTES les fenetres partagent, reprises
@@ -3192,7 +3192,7 @@ html.jour input[type=checkbox],html.jour input[type=radio]{accent-color:#a8864f}
 /* La liste deroulante d un formulaire : un chevron dessine, a la meme place
    dans toutes les fenetres, plutot que celui du systeme qui change de taille
    avec l echelle d affichage. */
-.ch select{-webkit-appearance:none;appearance:none;padding-right:2rem;
+.ch select,.champ select{-webkit-appearance:none;appearance:none;padding-right:2rem;
   background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .7rem center;background-size:12px}
 /* Les aides, notes et avis : un interligne qui se lit, des coins de la meme
    famille que les cartes. */
@@ -3202,7 +3202,7 @@ html.jour input[type=checkbox],html.jour input[type=radio]{accent-color:#a8864f}
 /* Les etiquettes de champ EN PHRASE, comme a l Inventaire. Trois pieces les
    ecrivaient en petites capitales espacees (label.champ .lbl dans huit
    fenetres, .champ label dans trois, .ch label de la fiche client). */
-label.champ .lbl,.champ label,.ch label{text-transform:none;letter-spacing:0;font-weight:600}
+label.champ .lbl,.champ label,.ch label,.champ .lbl,.form .champ .lbl{text-transform:none;letter-spacing:0;font-weight:600}
 /* Et les autres etiquettes : intertitres de groupe (.grpH, .vgrp) et cles des
    grilles cle-valeur des boites (Avis, Messagerie, Photos, Ramassages,
    Securite). ⚠ PAS les en-tetes de colonnes : l Inventaire les garde en

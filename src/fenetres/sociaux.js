@@ -47,6 +47,13 @@ body{background:var(--f-page);color:var(--tx);
   display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* Refonte fine (2026-09-26) : la barre d onglets de toutes les fenetres — et
+   non quatre petits boutons. L actif prend l or du socle (.onglets .actif). */
+.onglets{display:flex;gap:.25rem;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--v08);padding:0 0 .5rem}
+.onglets button{background:transparent;border:1px solid transparent;color:var(--tx2);padding:.38rem .7rem;
+  font:inherit;font-weight:600;font-size:.82rem;cursor:pointer}
+.onglets button:hover{background:var(--v05);color:var(--tx)}
+.onglets .droite{margin-left:auto;display:flex;align-items:center;gap:.5rem}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
@@ -1033,12 +1040,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       + '<div class="tuile"><div class="lbl">${T("Ignorées")}</div><div class="val">' + (t.ignorees || 0) + '</div></div>'
       + '</div>');
 
-    h += '<div class="barreoutils">'
-      + '<button class="mini' + (ONGLET === 'file' ? ' actif' : '') + '" data-onglet="file">${T("File d’attente")}'
+    h += '<div class="onglets">'
+      + '<button type="button" class="' + (ONGLET === 'file' ? 'actif' : '') + '" data-onglet="file">${T("File d’attente")}'
       + ((D.file || []).length ? '<span class="n hi">' + D.file.length + '</span>' : '') + '</button>'
-      + '<button class="mini' + (ONGLET === 'historique' ? ' actif' : '') + '" data-onglet="historique">${T("Historique")}'
+      + '<button type="button" class="' + (ONGLET === 'historique' ? 'actif' : '') + '" data-onglet="historique">${T("Historique")}'
       + ((D.historique || []).length ? '<span class="n">' + D.historique.length + '</span>' : '') + '</button>'
-      + '<button class="mini' + (ONGLET === 'patrons' ? ' actif' : '') + '" data-onglet="patrons">${T("Patrons")}'
+      + '<button type="button" class="' + (ONGLET === 'patrons' ? 'actif' : '') + '" data-onglet="patrons">${T("Patrons")}'
       + (PAT && (PAT.patrons || []).length
           ? '<span class="n">' + PAT.patrons.filter(function(p){ return p.actif; }).length + '</span>' : '')
       + '</button>'
@@ -1046,7 +1053,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
          deja les publications : on compose, on regarde la file juste a cote.
          Une fenetre separee aurait demande son entree de menu, son droit et son
          lexique — pour le meme sujet, a un clic d ici. */
-      + '<button class="mini' + (ONGLET === 'epingle' ? ' actif' : '') + '" data-onglet="epingle">'
+      + '<button type="button" class="' + (ONGLET === 'epingle' ? 'actif' : '') + '" data-onglet="epingle">'
       + '${T("Publication IA")}</button>'
       + '<div class="droite"><span class="dt">${T("Comptes et jetons des réseaux : ")}'
       + '${T("Configuration → Communications → Réseaux sociaux")}</span>';
