@@ -277,6 +277,7 @@ module.exports = {
   'Action': 'Action',
   'Rediriger': 'Forward',
   'Messagerie': 'Voicemail',
+  'Redirection': 'Forwarding',
   'Envoyer': 'Send',
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
@@ -287,4 +288,22 @@ module.exports = {
   'Reçu': 'Received',
   'Envoyé': 'Sent',
   'Inconnu': 'Unknown',
+
+  /* ── LA REFONTE FINE (2026-09-26) : tuiles, cartes, pastilles ─────────── */
+  'Enregistré': 'Saved',
+  'Aucun secret enregistré': 'No secret saved',
+  '≈ en CAD · ': '≈ in CAD · ',
+  '≈ en CAD ·': '≈ in CAD ·',
+  'Numéro et voix': 'Number and voices',
+  'Le numéro que vos clients composent, et les voix qui leur répondent.': 'The number your customers dial, and the voices that answer them.',
+  'Dans la console Twilio, rubrique Account Info.': 'In the Twilio console, under Account Info.',
+  'À coller dans la fiche de votre numéro, chez Twilio — sans elles, aucun appel ni message n’arrive ici.': 'Paste them on your number’s page, at Twilio — without them, no call or message reaches this screen.',
+  'Messages vocaux': 'Voicemails',
+  'Appels récents': 'Recent calls',
+  'compte Twilio': 'Twilio account',
+  'appel(s) en attente': 'call(s) waiting',
+  'personne n’attend': 'nobody is waiting',
+  'tout est lu': 'all read',
+  'entrants et sortants': 'incoming and outgoing',
+  'Solde': 'Balance',
 };

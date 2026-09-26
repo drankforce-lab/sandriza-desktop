@@ -22,7 +22,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, SEP_DEC } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, SEP_DEC } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -65,7 +65,21 @@ body{background:var(--f-page);color:var(--tx);
 .panneau{width:100%}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.9rem 1rem;margin:0 0 .9rem;min-width:0}
+/* Le solde et la file vivent dans les tuiles : l en-tete ne les repete plus
+   (les elements restent, le code les met toujours a jour). */
+.tete .solde,#t-qlive{display:none}
 .stitre{font-size:.86rem;font-weight:700;color:var(--tx-bleute);margin:0 0 .6rem}
+/* Refonte fine (2026-09-26) : les tuiles de l Inventaire en tete, et chaque
+   section de reglages dans sa carte, titree et expliquee en une phrase. */
+.tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.55rem;margin:0 0 .8rem}
+.tuile{background:var(--f-carte);border:1px solid var(--v07);border-radius:13px;padding:.7rem .9rem;min-width:0}
+.tuile .lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tuile .val.bon{color:var(--tx-ok)}.tuile .val.att{color:var(--tx-att)}.tuile .val.err{color:var(--tx-err)}
+.tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.carte + .carte{margin-top:.8rem}
+.carte > h2{margin:0 0 .2rem}
+.carte > h2 + .aide{margin:0 0 .8rem}
+.ch .etat{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;margin-top:.35rem}
 .info{background:rgba(80,120,190,.1);border:1px solid rgba(120,160,220,.28);color:#bcd2f0;
   border-radius:8px;padding:.55rem .7rem;font-size:.75rem;line-height:1.5;margin:0 0 .8rem}
 .info code{background:var(--f-champ);border:1px solid var(--v12);border-radius:5px;padding:1px 6px;font-size:.72rem}
@@ -150,7 +164,7 @@ function pageTelephonie() {
 </div>
 <div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter, pas modifier.")}</div>
 <div class="onglets" id="onglets"></div>
-<div class="corps"><div class="panneau" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
+<div class="corps"><div id="t-tuiles"></div><div class="panneau" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <button class="prim" id="b-save" disabled>${T("Enregistrer")}</button></div>
 <script>
@@ -174,7 +188,7 @@ function pageTelephonie() {
     else { b.textContent = '${T("⚓ Ancrer")}'; b.title = '${T("Ramener cet écran dans la fenêtre principale")}';
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); }; }
   };
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
   var corps = document.getElementById('corps');
   var ongletsEl = document.getElementById('onglets');
   var bsave = document.getElementById('b-save');
@@ -188,7 +202,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   var ONGLETS = [
     ['general', '${T("Général")}'], ['accueil', '${T("Accueil & routage")}'], ['menu', '${T("Menu IVR")}'],
-    ['redirection', 'Redirection'], ['messagerie', 'Messagerie'], ['sms', 'SMS'], ['file', "${T('File d\'attente')}"],
+    ['redirection', '${T("Redirection")}'], ['messagerie', '${T("Messagerie")}'], ['sms', 'SMS'], ['file', "${T('File d\'attente')}"],
   ];
   var VOIX_FR = [
     ['Polly.Gabrielle-Neural', '${T("Gabrielle — femme, naturelle (neuronale)")}'],
@@ -306,8 +320,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<input class="mono" id="' + id + '" type="password" value="" placeholder="'
       + (defini ? '${T("inchangé (laisser vide pour conserver)")}' : esc(place || '')) + '" autocomplete="off"'
       + (RO ? ' disabled' : '') + '>'
-      + '<div class="etat' + (defini ? '' : ' non') + '">'
-      + (defini ? '${T("Enregistré. <b>Vide = conservé.</b>")}' : '${T("Aucun secret <b>enregistré</b>.")}') + '</div></div>';
+      + '<div class="etat">'
+      + (defini ? '<span class="rf-pill vert">${T("Enregistré")}</span>'
+                : '<span class="rf-pill ambre">${T("Aucun secret enregistré")}</span>') + '</div></div>';
   }
   function selectHtml(id, label, cur, opts, aide){
     var h = '<div class="ch"><label for="' + id + '">' + esc(label) + '</label><select id="' + id + '"' + (RO ? ' disabled' : '') + '>';
@@ -329,7 +344,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   // ── PANNEAUX ────────────────────────────────────────────────────────────────
   function panGeneral(){
-    var h = '<div class="carte">';
+    var h = '<div class="carte"><h2>${T("Numéro et voix")}</h2>'
+      + '<div class="aide">${T("Le numéro que vos clients composent, et les voix qui leur répondent.")}</div>';
     h += '<div class="gr2">'
       + texteHtml('t-number', '${T("Numéro Twilio")}', C.twilioNumber, '+1 514 555 0123', true)
       + selectHtml('t-langmode', '${T("Mode de langue")}', C.langMode || 'fr', [
@@ -342,7 +358,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '<div class="gr2">'
       + selectHtml('t-voice-fr', '${T("Voix française (fr-CA)")}', C.voiceFr || 'Polly.Gabrielle-Neural', VOIX_FR)
       + selectHtml('t-voice-en', '${T("Voix anglaise (en-US)")}', C.voiceEn || 'Polly.Joanna-Neural', VOIX_EN) + '</div>';
-    h += '<hr class="sep"><div class="stitre">${T("Identifiants Twilio")}</div>';
+    h += '</div><div class="carte"><h2>${T("Identifiants Twilio")}</h2>'
+      + '<div class="aide">${T("Dans la console Twilio, rubrique Account Info.")}</div>';
     h += '<div class="gr2">'
       + secretHtml('t-sid', '${T("Account SID")}', !!C.hasAccountSid, 'ACxxxxxxxx')
       + secretHtml('t-token', '${T("Auth Token")}', !!C.hasAuthToken, '${T("votre Auth Token")}') + '</div>';
@@ -354,8 +371,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        / webhookSms) — cette fenetre ne les affichait simplement pas.
        ⚠ Elles se collent sur le NUMERO, pas dans Monitor > Errors : c est
        l erreur qui a fait perdre du temps la premiere fois. */
-    h += '<hr class="sep"><div class="stitre">${T("Adresses de rappel (webhooks)")}</div>'
-      + '';
+    h += '</div><div class="carte"><h2>${T("Adresses de rappel (webhooks)")}</h2>'
+      + '<div class="aide">${T("À coller dans la fiche de votre numéro, chez Twilio — sans elles, aucun appel ni message n’arrive ici.")}</div>';
     h += crochetHtml('${T("A CALL COMES IN (Voice)")}', D.webhookVoice || '', 't-wh-voice');
     h += crochetHtml('${T("A MESSAGE COMES IN (Messaging)")}', D.webhookSms || '', 't-wh-sms');
     return h + '</div>';
@@ -689,7 +706,44 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var dels = box.querySelectorAll('[data-smsdel]'); for (var c = 0; c < dels.length; c++) dels[c].onclick = function(){ smsAction('sms:suppr', this.getAttribute('data-smsdel')); };
   }
 
+  /* Les tuiles : ce que tel:resume sait deja — rien n est invente. Avant la
+     reponse, des points de suspension plutot qu un zero qui mentirait. */
+  function majTuiles(){
+    var z = document.getElementById('t-tuiles'); if (!z) return;
+    function tu(lbl, val, ton, sous){
+      return '<div class="tuile"><div class="lbl">' + lbl + '</div><div class="val' + (ton ? ' ' + ton : '') + '">' + val + '</div>'
+        + '<div class="sub">' + (sous || '&nbsp;') + '</div></div>';
+    }
+    if (!RESUME || RESUME.erreur) {
+      z.innerHTML = szTuiles('<div class="tuiles">' + tu('${T("Solde")}', '…') + tu('${T("File d’attente")}', '…')
+        + tu('${T("Messages vocaux")}', '…') + tu('SMS', '…') + tu('${T("Appels récents")}', '…') + '</div>');
+      return;
+    }
+    /* Le montant en CAD dans la tuile, l USD en sous-ligne : la chaine entiere
+       (≈ 25,24 $ CA (18.42 USD)) passait sur trois lignes. */
+    var b = RESUME.balance, solde = '—', soldeSous = '${T("compte Twilio")}';
+    if (b && b.balance != null && b.balance !== '') {
+      var usd = Number(b.balance);
+      if (String(b.currency || 'USD') === 'USD' && isFinite(usd)) {
+        solde = szArgentSymbole(szArgentNombre(usd * USD_CAD, 2));
+        soldeSous = '${T("≈ en CAD · ")}' + String(b.balance) + ' USD';
+      } else solde = String(b.balance) + ' ' + (b.currency || '');
+    }
+    var qw = (typeof RESUME.queueWaiting === 'number') ? RESUME.queueWaiting : 0;
+    var vms = RESUME.voicemails || [], sms = RESUME.sms || [], calls = RESUME.calls || [];
+    var vmN = 0, smsN = 0, k;
+    for (k = 0; k < vms.length; k++) if (!vms[k].read) vmN++;
+    for (k = 0; k < sms.length; k++) if (sms[k].direction === 'inbound' && !sms[k].read) smsN++;
+    z.innerHTML = szTuiles('<div class="tuiles">'
+      + tu('${T("Solde")}', esc(solde), '', esc(soldeSous))
+      + tu('${T("File d’attente")}', String(qw), qw ? 'att' : '', qw ? '${T("appel(s) en attente")}' : '${T("personne n’attend")}')
+      + tu('${T("Messages vocaux")}', String(vmN), vmN ? 'att' : '', vmN ? '${T("non lus")}' : '${T("tout est lu")}')
+      + tu('SMS', String(smsN), smsN ? 'att' : '', smsN ? '${T("non lus")}' : '${T("tout est lu")}')
+      + tu('${T("Appels récents")}', String(calls.length), '', '${T("entrants et sortants")}')
+      + '</div>');
+  }
   function majBandeau(){
+    majTuiles();
     if (!RESUME) { soldeEl.textContent = '…'; return; }
     if (RESUME.erreur) { soldeEl.innerHTML = '<span style="color:var(--tx-err);font-size:.8rem">indisponible</span>'; qliveEl.innerHTML = ''; return; }
     var b = RESUME.balance;
@@ -702,6 +756,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function chargerResume(){
     soldeEl.textContent = '…';
+    majTuiles();
     appeler('tel:resume').then(function(r){
       if (!r || !r.ok) { RESUME = { erreur: expliquer(r) }; }
       else { RESUME = r; }

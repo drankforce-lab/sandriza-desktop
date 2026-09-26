@@ -3157,6 +3157,52 @@ html.jour thead th{background:var(--f-carte)}
    couleur, donc aucun couple de contraste ne bouge. Memes selecteurs que les
    fenetres, donc meme specificite : ce bloc, pose en dernier, l emporte. */
 .carte h3,.boite h3,.voile h3,.sur .tt h3{font-family:inherit}
+/* ⚠ LES CHAMPS (2026-09-26, sa demande : « tu dois ameliorer les champs aussi »,
+   capture de Telephonie). Trente fenetres de reglages dessinent leurs champs par
+   la meme piece .ch — 8 px d arrondi, bordure pale, etiquette maigre : l air
+   d un formulaire d avant la refonte. Aux mesures de la barre de recherche de
+   l Inventaire : plus hauts, 10 px, bordure nette qui s eclaire au survol,
+   anneau d or a la mise au point, etiquette en gras discret.
+   ⚠ NI LE FOND NI L ENCRE ne changent : chaque fenetre garde les siens, donc
+   aucun couple de contraste ne bouge. Le :not(...) laisse cases, curseurs et
+   pipettes a leur dessin natif — et donne a ces regles la specificite qu il
+   faut pour passer devant celles, generiques, des fenetres. */
+.ch label{font-size:.76rem;font-weight:600;margin-bottom:.3rem}
+.ch input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),.ch select,.ch textarea{
+  min-height:2.4rem;border-radius:10px;border-width:1px;border-style:solid;border-color:var(--v14);
+  padding:.45rem .7rem;font-size:.85rem;transition:border-color .15s,box-shadow .15s}
+.ch textarea{min-height:4.2rem;line-height:1.45}
+.ch input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):hover:not(:disabled),.ch select:hover:not(:disabled),.ch textarea:hover:not(:disabled){border-color:var(--v16)}
+.ch input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):focus,.ch select:focus,.ch textarea:focus{outline:none;border-color:#c9a97e;box-shadow:0 0 0 3px rgba(201,169,126,.18)}
+html.jour .ch input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),html.jour .ch select,html.jour .ch textarea{border-color:rgba(15,23,42,.16)}
+html.jour .ch input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):focus,html.jour .ch select:focus,html.jour .ch textarea:focus{border-color:#a8864f;box-shadow:0 0 0 3px rgba(168,134,79,.2)}
+/* ══ LES FINITIONS DE LA REFONTE FINE (2026-09-26) ═══════════════════════
+   Sa demande : « la refonte, c est partout, et ameliore le visuel dans les
+   moindres details ». Les pieces que TOUTES les fenetres partagent, reprises
+   une fois ici. ⚠ GEOMETRIE ET ACCENTS SEULEMENT : aucune encre, aucun fond
+   de texte ne change, donc aucun couple de contraste ne bouge. */
+/* Le petit bouton (70 fenetres) : une hauteur, un arrondi, un poids — et son
+   icone alignee sur le texte au lieu de flotter au-dessus de la ligne. */
+button.mini,.mini{display:inline-flex;align-items:center;justify-content:center;gap:.35rem;
+  min-height:1.9rem;padding:.25rem .7rem;border-radius:9px;font-size:.76rem;font-weight:600;
+  line-height:1.2;white-space:nowrap;transition:background-color .15s,border-color .15s}
+/* Cases et boutons radio : la teinte de l application, pas le bleu du systeme. */
+input[type=checkbox],input[type=radio]{accent-color:#c9a97e;cursor:pointer}
+html.jour input[type=checkbox],html.jour input[type=radio]{accent-color:#a8864f}
+/* La liste deroulante d un formulaire : un chevron dessine, a la meme place
+   dans toutes les fenetres, plutot que celui du systeme qui change de taille
+   avec l echelle d affichage. */
+.ch select{-webkit-appearance:none;appearance:none;padding-right:2rem;
+  background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .7rem center;background-size:12px}
+/* Les aides, notes et avis : un interligne qui se lit, des coins de la meme
+   famille que les cartes. */
+.aide{line-height:1.45}
+.ch .aide{margin-top:.3rem}
+.note,.avis{border-radius:10px;line-height:1.5}
+/* Le titre de section (.stitre, cinq fenetres) : celui des cartes de
+   l Inventaire — en phrase, en gras, dans l encre du texte — et non plus un
+   petit libelle bleute. */
+.carte .stitre{font-size:.95rem;font-weight:700;color:var(--tx);letter-spacing:0;text-transform:none;margin:0 0 .65rem}
 /* ⚠ LA BARRE D ETAPES DES ASSISTANTS (2026-09-25, sa demande : « refaire aussi
    les fenetres comme ajout de produit, detail de commande »). Une seule piece,
    .pas (Assist, plus haut), sert tous les assistants : la refaire ICI relooke
