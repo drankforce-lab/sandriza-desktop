@@ -4103,6 +4103,19 @@ ipcMain.handle('dock:ouvrir', async (e, cle, etat) => {
   if (b) { try { a.view.setBounds(b); } catch {} }
   try { a.view.setVisible(true); } catch {}
   ancreeVisible = c; vueVoilee = null;
+  /* ⚠ « VISIBLE » N'EST PAS « PEINTE » (2026-09-26, filmé chez lui) : après
+     `setVisible`, une vue restée cachée met ~250 ms à peindre sa première
+     image. Le site, lui, fait tomber son écran de chargement dès notre
+     réponse : on voyait le menu et la barre d'état au-dessus d'une zone VIDE,
+     puis le tableau de bord un quart de seconde plus tard.
+     ➡ On attend deux images d'animation DANS la vue : elles ne tournent que
+     lorsqu'elle est réellement affichée, et la seconde vient après la peinture
+     de la première. Borné à 600 ms, pour ne jamais retenir l'écran. */
+  await Promise.race([
+    Promise.resolve().then(() => a.view.webContents.executeJavaScript(
+      'new Promise(function(r){requestAnimationFrame(function(){requestAnimationFrame(function(){r(1)})})})', true)).catch(() => null),
+    new Promise((r) => setTimeout(r, 600)),
+  ]);
   return { ok: true };
 });
 // Le site navigue vers une section ordinaire : les vues ancrees se cachent
