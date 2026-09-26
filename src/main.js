@@ -604,6 +604,15 @@ ipcMain.on('win:glisse:debut', (e) => {
   const { screen } = require('electron');
   const c = screen.getCursorScreenPoint();
   const b = w.getBounds();
+  /* En PLEINE ZONE (voir _pleineZoneArmer) : on ne touche à RIEN à l'appui.
+     La barre envoie « début » dès le pointerdown, donc aussi pour un simple clic
+     et pour chaque clic d'un double-clic : sortir ici rapetisserait la fenêtre
+     avant que le double-clic ait pu dire ce qu'il voulait. La sortie attend le
+     premier VRAI mouvement (plus de 4 px), dans « bouge ». */
+  if (w._szPleineZone) {
+    _glisseFenetre = { pleine: true, c0: c, b0: b };
+    return;
+  }
   _glisseFenetre = { dx: c.x - b.x, dy: c.y - b.y, width: b.width, height: b.height };
 });
 ipcMain.on('win:glisse:bouge', (e) => {
@@ -611,6 +620,19 @@ ipcMain.on('win:glisse:bouge', (e) => {
   if (!w || w.isDestroyed() || !w.isMovable() || !_glisseFenetre) return;
   const { screen } = require('electron');
   const c = screen.getCursorScreenPoint();
+  /* Sortie de pleine zone au premier vrai mouvement : la taille d'avant revient
+     SOUS le curseur, à la même proportion en largeur — comme une fenêtre
+     agrandie de Windows qu'on détache du haut de l'écran. */
+  if (_glisseFenetre.pleine) {
+    const { c0, b0 } = _glisseFenetre;
+    if (Math.abs(c.x - c0.x) <= 4 && Math.abs(c.y - c0.y) <= 4) return;
+    const av = w._szPleineZone ? w._szPleineZone.avant : null;
+    w._szPleineZone = null;
+    if (!av) { _glisseFenetre = null; return; }
+    const fx = b0.width ? (c0.x - b0.x) / b0.width : 0.5;
+    const dx = Math.round(fx * av.width), dy = Math.min(Math.max(c0.y - b0.y, 0), 20);
+    _glisseFenetre = { dx, dy, width: av.width, height: av.height };
+  }
   // Position qui suit le curseur, TAILLE figée à celle du départ.
   w.setBounds({
     x: c.x - _glisseFenetre.dx,
@@ -626,8 +648,68 @@ ipcMain.on('win:glisse:fin', () => { _glisseFenetre = null; });
 ipcMain.on('win:togglemax', (e) => {
   const w = BrowserWindow.fromWebContents(e.sender);
   if (!w || w.isDestroyed() || !w.isMaximizable()) return;
+  if (w._szPleineZone) { _pleineZoneQuitter(w); return; }
   if (w.isMaximized()) w.unmaximize(); else w.maximize();
 });
+
+/* ══ ⚠⚠⚠ LA FENÊTRE PRINCIPALE N'EST JAMAIS « AGRANDIE » AU SENS DE WINDOWS ═══
+   Signalé le 2026-09-26, capture à l'appui : « agrandie, le bouton pour réduire
+   ne marche pas » — c'était le bouton RESTAURER (le carré double).
+   ⚠ CE N'EST PAS NOTRE CODE, ET C'EST PROUVÉ. Une fenêtre Electron NUE, avec
+   seulement `titleBarStyle:'hidden'` + `titleBarOverlay`, agrandie : un clic sur
+   restaurer ne fait RIEN — Electron 31.7.7, 32.3.3 ET 44.4.5 (la dernière),
+   poste à 200 %, Windows 11. La même fenêtre AVEC le cadre de Windows se
+   restaure. Réduire, lui, marche. `hookWindowMessage` le montre : sur réduire la
+   fenêtre reçoit LBUTTONUP puis SC_MINIMIZE ; sur restaurer, AUCUN message —
+   Windows l'avale (le menu d'accrochage s'ouvre au survol de ce bouton).
+   ➡ Monter d'Electron ne le règle pas, et le clic ne peut pas être rattrapé.
+   ➡ LA PARADE : l'état cassé est « agrandie ». On n'y reste jamais. Quand
+   Windows agrandit (bouton, Win+↑, bord du haut, double-clic), on reprend la
+   fenêtre et on lui donne TOUTE la zone de travail de son écran, sans l'état.
+   Le bouton reste alors celui qui MARCHE (agrandir) : le recliquer — Windows
+   agrandit de nouveau — nous ramène ici, et on repose la taille d'avant.
+   ⚠ Le prix, dit franchement : le bouton garde le dessin « agrandir » (□) même
+   quand la fenêtre remplit l'écran. Un bouton qui marche avec le mauvais dessin
+   vaut mieux qu'un bouton qui a le bon dessin et ne fait rien.
+   ⚠ `setBounds` DOIT attendre : posé dans la même tâche que `unmaximize`, ou
+   même dans son événement, Windows le recouvre avec les bornes d'avant (mesuré :
+   la fenêtre revenait à 1400 × 900). 60 ms après l'événement, il tient. */
+const _pleineZoneSeuil = (a, b) => a && b && Math.abs(a.x - b.x) <= 2 && Math.abs(a.y - b.y) <= 2
+  && Math.abs(a.width - b.width) <= 2 && Math.abs(a.height - b.height) <= 2;
+const _poserApresRetour = (w, bornes) => {
+  w.once('unmaximize', () => setTimeout(() => {
+    try { if (!w.isDestroyed()) w.setBounds(bornes); } catch (e) {}
+  }, 60));
+  w.unmaximize();
+};
+function _pleineZoneQuitter(w) {
+  const avant = w._szPleineZone && w._szPleineZone.avant;
+  w._szPleineZone = null;
+  if (!avant) return;
+  if (w.isMaximized()) _poserApresRetour(w, avant);
+  else { try { w.setBounds(avant); } catch (e) {} }
+}
+const _pleineZoneArmer = (w) => {
+  w.on('maximize', () => {
+    try {
+      const { screen } = require('electron');
+      const pz = w._szPleineZone;
+      /* Déjà en pleine zone ET toujours à sa place : c'est un « restaurer ».
+         Si la personne a entre-temps redimensionné ou déplacé la fenêtre, la
+         pleine zone n'est plus vraie — on traite comme un nouvel agrandissement. */
+      if (pz && _pleineZoneSeuil(pz.zone, w.getNormalBounds())) {
+        w._szPleineZone = null;
+        _poserApresRetour(w, pz.avant);
+        return;
+      }
+      const avant = pz ? pz.avant : w.getNormalBounds();
+      // L'écran où Windows vient d'agrandir — pas forcément celui d'avant (bord du haut d'un autre écran).
+      const zone = screen.getDisplayMatching(w.getBounds()).workArea;
+      w._szPleineZone = { avant, zone: { ...zone } };
+      _poserApresRetour(w, zone);
+    } catch (e) {}
+  });
+};
 
 // ⚠ LE DECOMPTE AVANT DECONNEXION DOIT ETRE VU, sinon il n avertit personne.
 // Il s ouvre dans la fenetre principale, et le travail se fait maintenant dans des
@@ -1588,6 +1670,10 @@ const createWindow = () => {
   mainWindow.on('unmaximize', suivreLeCadre);
   mainWindow.on('enter-full-screen', suivreLeCadre);
   mainWindow.on('leave-full-screen', suivreLeCadre);
+  /* ⚠ LE BOUTON RESTAURER DE WINDOWS NE RÉPOND PAS sur une fenêtre agrandie avec
+     `titleBarOverlay` (défaut d'Electron, prouvé) : la fenêtre n'est donc jamais
+     « agrandie », elle prend la pleine zone. Voir `_pleineZoneArmer`. */
+  _pleineZoneArmer(mainWindow);
   /* ⚠ ET ON LA RETIRE AVEC LA FENÊTRE : une vue dont le parent meurt garde son
      processus de rendu et ses minuteries. */
   mainWindow.on('closed', () => { connexionRetirer(); mainWindow = null; });
