@@ -95,6 +95,39 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
   background:conic-gradient(#3a4354 25%,#2b3444 0 50%,#3a4354 0 75%,#2b3444 0) 0 0/12px 12px}
 .vign img{max-width:100%;max-height:100%;object-fit:contain}
 .vign .att{font-size:.6rem;color:var(--tx-att);text-align:center;line-height:1.1}
+/* ── Les trois modes et la zone qui remplit la hauteur (2026-09-26) ── */
+.carte.pz{flex:1 1 auto;min-height:14rem;display:flex;flex-direction:column}
+/* En Auto la page est taillee pour tenir : rien ne defile. En taille fixe,
+   la zone DEFILE — sinon une page de 500 serait coupee sans recours. */
+.carte.pz .zone{flex:1 1 auto;min-height:0;overflow:auto}
+.carte.pz .zone.auto{overflow:hidden}
+/* ⚠ UNE SEULE LIGNE (la regle de la refonte) : avec les trois modes, la barre
+   passait a la ligne en anglais — « Lots » et « Tout vider » tombaient dessous.
+   C est la recherche qui cede la place : elle retrecit, les boutons non. */
+div.cmd{flex-wrap:nowrap}
+div.cmd > *{flex:0 0 auto}
+.cmd #p-q{flex:1 1 12rem;min-width:7rem;width:auto}
+.vues{display:inline-flex;gap:.25rem;margin-left:.2rem}
+.vues .vue{font:inherit;font-size:.78rem;height:2.1rem;padding:0 .7rem;border-radius:9px;
+  border:1px solid var(--v10);background:var(--f-0f1826);color:var(--tx-gris2);cursor:pointer}
+.vues .vue.on{background:rgba(201,169,126,.14);border-color:rgba(201,169,126,.55);color:var(--tx-or2);font-weight:700}
+table.grille.compacte tbody td{padding-top:.25rem;padding-bottom:.25rem}
+table.grille.compacte .vign{width:28px;height:28px}
+.vtete{padding:.1rem .1rem .5rem}
+.vgrille{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.vcarte{border:1px solid var(--v08);border-radius:12px;overflow:hidden;background:var(--f-carte);cursor:pointer;
+  display:flex;flex-direction:column}
+.vcarte:hover{border-color:rgba(201,169,126,.45)}
+.vcarte.on{border-color:#c9a97e;box-shadow:0 0 0 1px #c9a97e inset}
+.vcarte .vimg{height:130px;display:flex;align-items:center;justify-content:center;
+  background:repeating-conic-gradient(var(--v06) 0% 25%,transparent 0% 50%) 50%/16px 16px}
+.vcarte .vimg img{max-width:100%;max-height:100%;object-fit:contain}
+.vcarte .vimg .att{font-size:.72rem;color:var(--tx-att)}
+.vcarte .vcorps{padding:.45rem .55rem .5rem;display:flex;flex-direction:column;gap:.3rem;min-width:0}
+.vcarte .vhaut{display:flex;align-items:center;gap:.4rem}
+.vcarte .vnom{font-weight:700;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vcarte .vetat{display:flex;flex-wrap:wrap;gap:.25rem}
+.vcarte .act{display:flex;flex-wrap:wrap;gap:.2rem}
 .gain{font-size:.68rem;color:var(--tx-ok);font-weight:700}
 /* La pastille a point de la refonte (2026-09-26) : la forme de rf-pill, les memes sens. */
 .pill{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:600;padding:.22rem .65rem;border-radius:99px;white-space:nowrap}
@@ -391,6 +424,72 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   var CHOIX = {};
   var LOT_NOM = '';         // le nom donne au prochain lot importe
   var TAILLE = 24;          // photos par page
+  /* ══ TROIS MODES D AFFICHAGE ET LA PAGE AUTOMATIQUE (2026-09-26) ══════════
+     Sa demande : « ajoute des modes d affichage style vignettes, liste
+     compacte, liste, et fais une pagination pour eviter qu on doive scroller,
+     ca suppose etre en auto ».
+     • VUE : 'liste' (le tableau d origine), 'compacte' (le meme, serre),
+       'vignettes' (une grille de cartes a grande image). Les GESTES sont les
+       memes partout : case, renommer, traitements, pivoter, fiche, supprimer —
+       ils passent par les memes attributs data-*.
+     • AUTO : la taille de page est CALCULEE pour remplir la hauteur visible —
+       lignes, ou colonnes x rangees de vignettes — puis redemandee au site.
+       Recalculee au redimensionnement. Le choix d un nombre fixe reste offert.
+     ⚠ Retenus sur le POSTE (localStorage, sous garde) : c est l ecran qui
+       decide, et l ecran du comptoir n est pas celui du bureau. */
+  var VUE = 'liste', AUTO = true;
+  try {
+    var _vu = localStorage.getItem('sz-photos-vue');
+    if (_vu === 'liste' || _vu === 'compacte' || _vu === 'vignettes') VUE = _vu;
+    if (localStorage.getItem('sz-photos-auto') === '0') AUTO = false;
+    var _tl = parseInt(localStorage.getItem('sz-photos-taille'), 10);
+    if (!AUTO && _tl > 0) TAILLE = _tl;
+  } catch (e) {}
+  function retenir(){
+    try {
+      localStorage.setItem('sz-photos-vue', VUE);
+      localStorage.setItem('sz-photos-auto', AUTO ? '1' : '0');
+      localStorage.setItem('sz-photos-taille', String(TAILLE));
+    } catch (e) {}
+  }
+  /* Combien d elements tiennent dans la zone, sans defiler. Rien n est fait
+     tant que la zone n a pas de hauteur (fenetre cachee, banc sans rendu). */
+  var _autoT = null;
+  function mesurerAuto(){
+    if (!AUTO || !D) return;
+    var z = document.getElementById('p-zone');
+    if (!z || !(z.clientHeight > 40) || !(z.clientWidth > 40)) return;
+    var n, gap = 10;
+    if (VUE === 'vignettes') {
+      var c = z.querySelector('.vcarte');
+      var w = c ? c.offsetWidth + gap : 190, hC = c ? c.offsetHeight + gap : 250;
+      var cols = Math.max(1, Math.floor((z.clientWidth + gap) / w));
+      var rangs = Math.max(1, Math.floor((z.clientHeight + gap) / hC));
+      n = cols * rangs;
+    } else {
+      var tr = z.querySelector('tbody tr'), th = z.querySelector('thead');
+      var hL = tr ? tr.offsetHeight : (VUE === 'compacte' ? 40 : 62);
+      try {
+        var tb = z.querySelector('table');
+        var esp = tb ? parseFloat(String(getComputedStyle(tb).borderSpacing || '').split(' ')[1]) : 0;
+        if (esp > 0) hL += esp;
+      } catch (e) {}
+      n = Math.max(3, Math.floor((z.clientHeight - ((th && th.offsetHeight) || 32)) / hL));
+    }
+    /* ⚠ LE SITE BORNE LA PAGE ENTRE 5 ET 500 (Photos._photosDonnees) : demander
+       moins rendrait 5 photos dans une zone taillee pour 3, et la derniere serait
+       coupee sans que rien ne le dise. */
+    n = Math.min(500, Math.max(5, n));
+    if (!isFinite(n) || n === TAILLE) return;
+    /* On garde la premiere photo affichee en vue : la page change de taille,
+       pas de contenu. */
+    var premier = PAGE * TAILLE;
+    TAILLE = n; PAGE = Math.floor(premier / n);
+    charger();
+  }
+  window.addEventListener('resize', function(){
+    clearTimeout(_autoT); _autoT = setTimeout(mesurerAuto, 200);
+  });
   var LOTS = null;          // l historique, quand il est ouvert
   /* ══════════════════════════════════════════════════════════════════════════
      L ASSISTANT DE TRAITEMENT EN LOT — trois etapes
@@ -545,11 +644,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       /* ⚠ JUSQU A 500 PAR PAGE. Le plafond de 24 obligeait a paginer pour cocher
          un lot de deux cents, et un choix qui se perd entre deux pages n en est
          pas un. */
-      + '<select id="p-taille" title="${T("Photos")} par page">'
+      + '<select id="p-taille" title="${T("Photos par page")}">'
+      + '<option value="auto"' + (AUTO ? ' selected' : '') + ' title="${T("Autant de photos que l’écran en montre, sans défiler")}">${T("Auto")}</option>'
       + [24, 50, 100, 200, 500].map(function(n){
-          return '<option value="' + n + '"' + (TAILLE === n ? ' selected' : '') + '>' + n + ' / page</option>';
+          return '<option value="' + n + '"' + (!AUTO && TAILLE === n ? ' selected' : '') + '>' + n + '${T(" / page")}</option>';
         }).join('')
       + '</select>'
+      + '<span class="vues" role="group" aria-label="${T("Mode d’affichage")}">'
+      + [['vignettes', '${T("Vignettes")}'], ['compacte', '${T("Liste compacte")}'], ['liste', '${T("Liste")}']].map(function(v){
+          return '<button type="button" class="vue' + (VUE === v[0] ? ' on' : '') + '" data-vue="' + v[0] + '"'
+            + ' aria-pressed="' + (VUE === v[0]) + '">' + v[1] + '</button>';
+        }).join('')
+      + '</span>'
       + '<span class="droite">'
       + (DERNIER_SUIVI && !SUIVI
           ? '<button class="mini" id="p-suivi" title="${T("Revoir le compte rendu du dernier traitement")}">${T("Dernier suivi")}</button>'
@@ -580,21 +686,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + tu('${T("Isolées")}', D.isolees, '${T("sans article")}', 'att')
       + tu('${T("Espace rangé")}', poids(D.poidsTotal), '${T("somme des fiches")}', '')
       + '</div>');
-    h += '<div class="etat">'
-      + '<b>' + D.trouvees + '</b> ' + (D.trouvees > 1 ? '${T("affichées")}' : '${T("affichée")}')
-      + '${T(" sur ")}<b>' + D.total + '</b>'
-      /* ⚠⚠ DEUX CHIFFRES DIFFERENTS, ET C EST VOULU. << rangés >> additionne le
-         poids inscrit sur chaque fiche ; << dans R2 >> est ce que le stockage
-         contient VRAIMENT, mesure en l interrogeant. Les confondre ferait passer
-         pour une mesure ce qui n est qu une somme : elle ignore les objets que
-         plus aucune fiche ne cite, et c est justement ceux-la qu on paie sans
-         les voir. L ecart entre les deux EST l information. */
-      + '<span class="sp" aria-hidden="true">·</span> <span id="p-r2">'
-      + (ESPACE === null ? '<a href="#" id="p-mesurer">${T("mesurer l’espace R2")}</a>'
-         : ESPACE.ok === false ? '<span class="err">${T("espace R2 :")} ' + esc(ESPACE.detail || 'illisible') + '</span>'
-         : espaceTexte(ESPACE))
-      + '</span>'
-      + '</div>';
+    /* ⚠ LA LIGNE D ETAT EST RETIREE (2026-09-26, sa capture : « retire cela
+       aussi » sur « mesurer l espace R2 »). Son « N affichees sur N » repetait la
+       tuile Photos, et il ne restait qu elle autour du lien. La mesure de R2
+       (mesurerEspace) reste dans le code, sans entree a l ecran. */
 
     if (!ro && !D.total) {
       h += '<div class="depot" id="p-depot">'
@@ -603,7 +698,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + (D.bureau ? ' ${T("· ou « Clé USB »")}' : '') + '</div></div>';
     }
 
-    h += '<div class="carte">';
+    h += '<div class="carte pz">';
     var rows = D.lignes || [];
     if (!rows.length) {
       /* ⚠ TROIS ETATS, PAS DEUX. Dire << Aucune photo >> pendant la
@@ -613,16 +708,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         : (D.total ? '${T("Aucune photo ne correspond à cette recherche.")}'
                    : '${T("Aucune photo. Déposez-en ci-dessus.")}')) + '</div>';
     } else {
-      h += '<table class="grille"><thead><tr>'
-        + '<th style="width:26px"><input type="checkbox" id="p-tout" title="${T("Tout choisir sur cette page")}"></th>'
-        + '<th style="width:46px"></th><th>${T("Code")}</th><th>${T("Nom")}</th>'
-        + '<th>${T("Article lié")}</th><th class="num">${T("Poids")}</th><th>${T("État")}</th>'
-        + '<th style="width:1%">Actions</th></tr></thead><tbody>'
-        + rows.map(ligne).join('') + '</tbody></table>';
+      h += '<div class="zone' + (AUTO ? ' auto' : '') + '" id="p-zone">';
+      if (VUE === 'vignettes') {
+        h += '<div class="vtete"><label class="dt"><input type="checkbox" id="p-tout"> ${T("Tout choisir sur cette page")}</label></div>'
+          + '<div class="vgrille">' + rows.map(carteVignette).join('') + '</div>';
+      } else {
+        h += '<table class="grille' + (VUE === 'compacte' ? ' compacte' : '') + '"><thead><tr>'
+          + '<th style="width:26px"><input type="checkbox" id="p-tout" title="${T("Tout choisir sur cette page")}"></th>'
+          + '<th style="width:46px"></th><th>${T("Code")}</th><th>${T("Nom")}</th>'
+          + '<th>${T("Article lié")}</th><th class="num">${T("Poids")}</th><th>${T("État")}</th>'
+          + '<th style="width:1%">${T("Actions")}</th></tr></thead><tbody>'
+          + rows.map(ligne).join('') + '</tbody></table>';
+      }
+      h += '</div>';
       if ((D.pages || 1) > 1) {
         h += '<div class="pagi">'
           + '<button class="mini" id="p-prec"' + (D.page <= 0 ? ' disabled' : '') + '>◀</button>'
-          + '<span>Page ' + (D.page + 1) + ' / ' + D.pages + '</span>'
+          + '<span>${T("Page ")}' + (D.page + 1) + ' / ' + D.pages + '</span>'
           + '<button class="mini" id="p-suiv"' + (D.page >= D.pages - 1 ? ' disabled' : '') + '>▶</button>'
           + '</div>';
       }
@@ -640,6 +742,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     document.body.classList.toggle('insp', !!DETAIL && !ASSIST);
     corps.innerHTML = h;
     brancher();
+    // La page automatique : mesuree une fois la zone dessinee.
+    if (AUTO) { clearTimeout(_autoT); _autoT = setTimeout(mesurerAuto, 30); }
   }
 
   function nbChoisies(){ return Object.keys(CHOIX).length; }
@@ -1845,6 +1949,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
      ⚠ LA SUPPRESSION S ARME sur la ligne meme — le second clic est a l endroit
      ou l on vient de cliquer, pas dans une boite qui parait ailleurs.
      ══════════════════════════════════════════════════════════════════════════ */
+  /* La carte du mode Vignettes : les MEMES attributs que la ligne (data-id,
+     data-chx, data-ren2 et les boutons d action), donc les memes gestes. */
+  function carteVignette(r){
+    var tr = ligne(r);
+    /* Les boutons d action, repris tels quels de la ligne (sans expression reguliere :
+       une barre oblique inverse ne survit pas au gabarit de la page). */
+    var i0 = tr.indexOf('<span class="act">');
+    var act = i0 < 0 ? '' : tr.slice(i0, tr.lastIndexOf('</td></tr>'));
+    return '<div class="vcarte' + (CHOIX[r.id] ? ' on' : '') + '" data-id="' + esc(r.id) + '">'
+      + '<div class="vimg">' + (r.apercu ? '<img src="' + esc(r.apercu) + '" alt="" loading="lazy">'
+          : '<span class="att">${T("non rangée")}</span>') + '</div>'
+      + '<div class="vcorps">'
+      + '<div class="vhaut"><input type="checkbox" class="chx" data-chx="' + esc(r.id) + '"'
+      +   ' aria-label="' + esc('${T("Sélectionner")} ' + (r.nom || r.id)) + '"' + (CHOIX[r.id] ? ' checked' : '') + '>'
+      + '<span class="rf-code">' + esc(r.code) + '</span></div>'
+      + '<div class="vnom" data-ren2="' + esc(r.id) + '" title="' + esc(r.nom) + '">' + esc(r.nom) + '</div>'
+      + '<div class="vetat">' + etat(r) + '</div>'
+      + act + '</div></div>';
+  }
   function ligne(r){
     var ro = !D.peutModifier;
     var arme = (SUPPR_ARME === r.id);
@@ -2592,7 +2715,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     };
 
     var tl = document.getElementById('p-taille');
-    if (tl) tl.onchange = function(){ TAILLE = parseInt(tl.value, 10) || 24; PAGE = 0; charger(); };
+    if (tl) tl.onchange = function(){
+      if (tl.value === 'auto') { AUTO = true; retenir(); mesurerAuto(); return; }
+      AUTO = false; TAILLE = parseInt(tl.value, 10) || 24; PAGE = 0; retenir(); charger();
+    };
+    document.querySelectorAll('[data-vue]').forEach(function(b){
+      b.onclick = function(){
+        VUE = b.getAttribute('data-vue'); retenir(); dessiner();
+      };
+    });
     var bs = document.getElementById('p-suivi');
     if (bs) bs.onclick = suiviRouvrir;
     var bl = document.getElementById('p-lots');
@@ -2795,7 +2926,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
        AUTRE photo, qui prend simplement la place dans l inspecteur. Fermer se
        fait par le bouton, qui est toujours la. */
     if (t.closest('button') || t.closest('input') || t.closest('select')) return;
-    var tr = t.closest('tr[data-id]');
+    var tr = t.closest('tr[data-id]') || t.closest('.vcarte[data-id]');
     if (tr) {
       var id = tr.getAttribute('data-id');
       var r = (D.lignes || []).filter(function(x){ return x.id === id; })[0];

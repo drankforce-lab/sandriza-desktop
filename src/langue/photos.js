@@ -582,4 +582,15 @@ module.exports = {
   'Espace rangé': 'Space used',
   'somme des fiches': 'sum of the records',
   ' sur ': ' of ',
+  // Les modes d'affichage (2026-09-26).
+  'Photos par page': 'Photos per page',
+  'Auto (remplit l’écran)': 'Auto (fills the screen)',
+  ' / page': ' / page',
+  'Mode d’affichage': 'Display mode',
+  'Vignettes': 'Thumbnails',
+  'Liste compacte': 'Compact list',
+  'Liste': 'List',
+  'Page ': 'Page ',
+  'Auto': 'Auto',
+  'Autant de photos que l’écran en montre, sans défiler': 'As many photos as the screen shows, without scrolling',
 };
