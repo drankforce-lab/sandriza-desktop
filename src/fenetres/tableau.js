@@ -629,8 +629,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('tableau')}
     });
   }
 
+  /* ⚠ RENVOIE SA PROMESSE (2026-09-26) : la coquille l attend avant de montrer
+     la vue (dock:ouvrir). Sans elle, la vue paraissait avec son contenu d avant
+     — « l administration n est pas encore chargée », peint au prechauffage —
+     puis les chiffres arrivaient 150 ms plus tard, sous les yeux. */
   function charger(){
-    appeler('tableau:lire', [ANNEE]).then(function(r){
+    return appeler('tableau:lire', [ANNEE]).then(function(r){
       if (!r || !r.ok) { vide('${T("Tableau de bord indisponible")}', expliquer(r)); return; }
       D = r;
       dire('');
@@ -705,10 +709,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('tableau')}
   // Ramenee au premier plan par le menu : les chiffres se relisent.
   window.szRevenir = function(){
     SAUV_QUAND = 0;
-    charger();
+    var p = charger();
     /* ⚠ ET ON RELIT L ETAT DU MODE : quelqu un a pu le poser ou le lever depuis
        l autre fenetre pendant que celle-ci etait derriere. */
     mxLire();
+    return p;   // la coquille attend les chiffres avant de montrer la vue
   };
 
   /* ── MODE ANCRE ── La coquille appelle szModeAncre(true) quand cette page
@@ -732,7 +737,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('tableau')}
 
   var sous = document.getElementById('sous');
   if (sous) sous.textContent = '';
-  charger();
+  window.szPret = charger();   // attendu par dock:ouvrir pour une vue neuve
   demarrerVerrous();   // #38 : cadenas en direct sur les commandes/factures verrouillees
   /* ⚠ APRES « charger() » , ET SANS L ATTENDRE : le tableau de bord ne doit pas
      retarder son affichage pour savoir s il faut dessiner un bouton. Le bouton

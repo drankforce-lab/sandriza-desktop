@@ -3949,6 +3949,20 @@ const boundsAncrage = () => {
            width: Math.max(0, Math.round(zoneAncrage.largeur * f)),
            height: Math.max(0, Math.round(zoneAncrage.hauteur * f)) };
 };
+/* ⚠⚠ UNE VUE NE SE MONTRE QU AVEC SON CONTENU (2026-09-26). Filmé à l'écran,
+   image par image, au démarrage : le menu et la barre d'état paraissent, puis
+   le tableau de bord avec « l'administration n'est pas encore chargée » — le
+   texte peint au PRÉCHAUFFAGE, quand le site n'était pas prêt — puis ses
+   chiffres 150 ms plus tard. `szRevenir` partait sans être attendu.
+   ➡ On attend la promesse que la page rend (ses données dessinées), bornée à
+   1,5 s : une page qui ne répond pas s'affiche quand même, comme avant. Une
+   page qui ne rend rien (la plupart) passe tout de suite. La promesse de
+   `dock:ouvrir` ne se règle qu'après, et c'est elle que le site attend pour
+   faire tomber son écran de chargement : tout paraît ensemble. */
+const _attendreContenu = (view, js) => Promise.race([
+  Promise.resolve().then(() => view.webContents.executeJavaScript(js, true)).catch(() => null),
+  new Promise((r) => setTimeout(r, 1500)),
+]);
 const reposerAncrees = () => {
   const b = boundsAncrage();
   if (!b) return;
@@ -4060,9 +4074,11 @@ ipcMain.handle('dock:ouvrir', async (e, cle, etat) => {
       view.webContents.once('did-fail-load', fini);
       setTimeout(fini, 1500);
     });
+    await _attendreContenu(a.view, 'window.szPret || null');
   } else {
-    // Vue conservee cachee : elle RELIT ses donnees en revenant.
-    a.view.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
+    // Vue conservee cachee : elle RELIT ses donnees en revenant — et on ATTEND
+    // qu elle les ait dessinees avant de la montrer (voir _attendreContenu).
+    await _attendreContenu(a.view, 'window.szRevenir ? window.szRevenir() : null');
   }
   if (etatVoulu === 'detache') {
     // L ecran a ete LAISSE detache : on le rouvre tel quel. Le site montre
