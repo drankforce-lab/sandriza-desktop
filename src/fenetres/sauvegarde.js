@@ -258,8 +258,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('sauvegarde')}
       + '<th>${T("Date")}</th><th>${T("Contenu")}</th><th>${T("Application")}</th><th style="text-align:center">${T("Objets R2")}</th><th>${T("Taille")}</th><th>${T("Note")}</th><th></th>'
       + '</tr></thead><tbody>';
     for (var i=0;i<l.length;i++){ var b=l[i];
-      h += '<tr><td style="white-space:nowrap;font-weight:600">'+esc(b.quand)
-        + (b.commit?'<div class="mono">'+esc(b.commit)+'</div>':'')+'</td>'
+      /* Refonte (2026-09-26) : la cellule riche de l Inventaire. */
+      h += '<tr><td><div class="rf-prod"><span class="rf-av" aria-hidden="true"><span class="ic">💾</span></span><div>'
+        + '<div class="rf-nom" style="white-space:nowrap">'+esc(b.quand)+'</div>'
+        + (b.commit?'<div class="rf-sous"><span class="rf-code">'+esc(b.commit)+'</span></div>':'')+'</div></div></td>'
         + '<td>'+b.total+'${T(" enreg.")}<div style="font-size:.72rem;color:var(--tx-gris)">'+b.produits+'${T(" produits · ")}'+b.commandes+'${T(" cmd · ")}'+b.factures+'${T(" fact.")}</div></td>'
         /* ⚠ L APPLICATION CONSERVEE AVEC CETTE SAUVEGARDE (2026-09-08, sur sa
            demande). Trois etats, et les trois doivent se distinguer d un coup
