@@ -261,5 +261,7 @@ module.exports = {
   'Cette photo n’a pas pu être lue.': 'This photo could not be read.',
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
-  'leur dernier traitement': 'their last treatment'
+  'leur dernier traitement': 'their last treatment',
+  // La refonte (2026-09-25).
+  'Nom Produit lié': 'Name Linked product',
 };

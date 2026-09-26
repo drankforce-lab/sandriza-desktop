@@ -108,5 +108,7 @@ module.exports = {
   'Arrêté : le dernier tour n’a rien fait avancer. Voyez les échecs ci-dessus.':
     'Stopped: the last round moved nothing forward. See the failures above.',
   'Arrêté par sécurité après 400 tours. Relancez pour continuer.':
-    'Stopped as a safety after 400 rounds. Start again to continue.'
+    'Stopped as a safety after 400 rounds. Start again to continue.',
+  // La refonte (2026-09-25).
+  '… et ': '… and ',
 };

@@ -179,12 +179,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     h += '<table><thead><tr><th>${T("Fiche")}</th><th style="text-align:right">${T("Images")}</th><th style="text-align:right">${T("Poids")}</th></tr></thead><tbody>';
     E.fiches.slice(0, 40).forEach(function(f){
-      h += '<tr><td><div>' + esc(f.nom || f.id) + '</div>'
-        + (f.sku ? '<div class="sku">' + esc(f.sku) + '</div>' : '')
+      h += '<tr><td><div class="rf-nom">' + esc(f.nom || f.id) + '</div>'
+        + (f.sku ? '<div class="rf-sous"><span class="rf-code">' + esc(f.sku) + '</span></div>' : '')
         + '</td><td class="n">' + f.champs + '</td><td class="n">' + poids(f.octets) + '</td></tr>';
     });
     h += '</tbody></table>';
-    if (E.fiches.length > 40) h += '<div style="font-size:.72rem;color:var(--tx2);margin-top:.4rem">… et ' + (E.fiches.length - 40) + '${T(" autre(s).")}</div>';
+    if (E.fiches.length > 40) h += '<div style="font-size:.72rem;color:var(--tx2);margin-top:.4rem">${T("… et ")}' + (E.fiches.length - 40) + '${T(" autre(s).")}</div>';
 
     if (ECHECS.length) h += echecsHtml();
     h += '</div>';

@@ -431,7 +431,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       // case par ligne n aiderait pas beaucoup sur une page de trente.
       + '<th class="ck"><span class="coche' + (pageToutePrise(pc) ? ' on' : '')
       + '" id="ck-page" title="${T("Cocher toute la page")}">' + (pageToutePrise(pc) ? '✓' : '') + '</span></th>'
-      + '<th></th><th>${T("Nom")}</th><th>${T("Code")}</th><th>${T("Produit lié")}</th>'
+      + '<th></th><th>${T("Nom")}</th><th>${T("Produit lié")}</th>'
       + '<th>${T("État")}</th><th>${T("Poids")}</th></tr></thead><tbody>'
       + pc.vue.map(function(p, k){
           var i = pc.debut + k;
@@ -441,8 +441,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + '<td class="ck"><span class="coche' + (SEL[p.id] ? ' on' : '') + '" data-ck="'
               + esc(p.id) + '">' + (SEL[p.id] ? '✓' : '') + '</span></td>'
             + '<td class="vig">' + (vignetteDe(p) ? '<img src="' + esc(vignetteDe(p)) + '" loading="lazy" alt="">' : '') + '</td>'
-            + '<td>' + esc(p.nom) + '</td>'
-            + '<td>' + esc(p.code || '') + '</td>'
+            /* La ligne riche de la refonte (2026-09-25) : le nom en gras, le code dessous. */
+            + '<td><div class="rf-nom">' + esc(p.nom) + '</div>'
+            + (p.code ? '<div class="rf-sous"><span class="rf-code">' + esc(p.code) + '</span></div>' : '') + '</td>'
             + '<td>' + esc(p.lieNom || '—') + '</td>'
             + '<td>' + pastilles(p) + '</td>'
             + '<td>' + poids(p.poids) + '</td></tr>'; }).join('')
