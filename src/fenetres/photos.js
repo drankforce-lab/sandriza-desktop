@@ -1923,13 +1923,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   var NOM_TRAIT = { detourage: '${T("détourée")}', fantome: '${T("sans mannequin")}', humain: '${T("sur mannequin")}' };
   function traits(r){ return (r.faits || []).map(function(f){ return NOM_TRAIT[f] || f; }); }
 
+  /* Une pastille commence par une majuscule, comme partout (« Actif », « En
+     attente »). Les memes mots gardent leur minuscule au milieu d une phrase :
+     on ne met la majuscule qu ICI, a l affichage de la pastille. */
+  function cap(x){ x = String(x || ''); return x.charAt(0).toUpperCase() + x.slice(1); }
   function etat(r){
-    if (r.enAttente) return '<span class="pill err">${T("non rangée")}</span>';
+    if (r.enAttente) return '<span class="pill err">' + cap('${T("non rangée")}') + '</span>';
     var t = traits(r);
-    var h = t.map(function(x){ return '<span class="pill info">' + esc(x) + '</span>'; }).join(' ');
-    if (!h && r.isole) h = '<span class="pill info">${T("détourée")}</span>';
-    if (r.lieId) h = '<span class="pill bon">${T("attachée")}</span>' + (h ? ' ' + h : '');
-    return h || '<span class="pill neutre">' + esc(r.statut || '${T("importée")}') + '</span>';
+    var h = t.map(function(x){ return '<span class="pill info">' + esc(cap(x)) + '</span>'; }).join(' ');
+    if (!h && r.isole) h = '<span class="pill info">' + cap('${T("détourée")}') + '</span>';
+    if (r.lieId) h = '<span class="pill bon">' + cap('${T("attachée")}') + '</span>' + (h ? ' ' + h : '');
+    return h || '<span class="pill neutre">' + esc(cap(r.statut || '${T("importée")}')) + '</span>';
   }
   function gain(r){
     var t = poids(r.poids);

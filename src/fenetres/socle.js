@@ -3202,7 +3202,7 @@ html.jour input[type=checkbox],html.jour input[type=radio]{accent-color:#a8864f}
 /* Les etiquettes de champ EN PHRASE, comme a l Inventaire. Trois pieces les
    ecrivaient en petites capitales espacees (label.champ .lbl dans huit
    fenetres, .champ label dans trois, .ch label de la fiche client). */
-label.champ .lbl,.champ label,.ch label,.champ .lbl,.form .champ .lbl{text-transform:none;letter-spacing:0;font-weight:600}
+label.champ .lbl,.champ label,.ch label,.champ .lbl,.form .champ .lbl,.lbl,.dossier .dk{text-transform:none;letter-spacing:0;font-weight:600}
 /* Et les autres etiquettes : intertitres de groupe (.grpH, .vgrp) et cles des
    grilles cle-valeur des boites (Avis, Messagerie, Photos, Ramassages,
    Securite). ⚠ PAS les en-tetes de colonnes : l Inventaire les garde en
