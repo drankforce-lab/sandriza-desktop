@@ -102,8 +102,8 @@ body{background:var(--f-page);color:var(--tx);
 .rcbar{flex:0 0 auto;display:flex;align-items:center;gap:.45rem;
   background:var(--f-carte);border:1px solid var(--v07);border-radius:12px;
   padding:.5rem .6rem}
-.rcbar label{flex:0 0 auto;font:700 .7rem/1 system-ui;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2)}
+.rcbar label{flex:0 0 auto;font:700 .7rem/1 system-ui;text-transform:none;
+  letter-spacing:0;color:var(--tx2)}
 .rcbar select{flex:1 1 auto;min-width:0;font-size:.78rem;padding:.3rem .45rem}
 .rcbar button{flex:0 0 auto;font:inherit;font-size:.73rem;padding:.3rem .55rem;
   border-radius:8px;cursor:pointer;color:var(--tx-bleute);background:var(--v05);
@@ -187,8 +187,8 @@ body{background:var(--f-page);color:var(--tx);
    l image. */
 .bloc{background:var(--f-carte);border:1px solid var(--v07);border-radius:12px;
   padding:.85rem 1rem;min-width:0}
-.recap .rt,.fmt .rt{font:700 .74rem/1.2 system-ui;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2)}
+.recap .rt,.fmt .rt{font:700 .74rem/1.2 system-ui;text-transform:none;
+  letter-spacing:0;color:var(--tx2)}
 .recap .rc2{display:flex;flex-wrap:wrap;gap:.32rem;margin-top:.5rem}
 .recap .jt{font-size:.75rem;padding:.16rem .55rem;border-radius:99px;
   background:rgba(201,169,126,.14);border:1px solid rgba(201,169,126,.3);color:var(--tx-creme)}
@@ -363,7 +363,7 @@ select:focus{outline:none;border-color:#c9a97e}
 .avgrille>*{margin:0}
 .avsec{margin:.4rem 0 -.15rem;padding-top:.65rem;
   border-top:1px solid var(--v08);font:700 .72rem/1.2 system-ui;
-  text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
+  text-transform:none;letter-spacing:0;color:var(--tx2)}
 .avsec.prem{margin-top:0;padding-top:0;border-top:0}
 .aidep{font-size:.71rem;color:var(--tx3);line-height:1.45;margin-top:.22rem}
 .aidep.att{color:var(--tx-or)}
