@@ -123,7 +123,7 @@ module.exports = {
     // 3.57 · button.sw > span.nm « rouge » · invmeta_c2/jour
     '#80848B sur #FAF9F6 @4.5': 1,
     // 3.62 · div > label.bascule « Retirer le fond de l’image » · icones_c1/jour remboursements_c1/jour
-    '#83878F sur #FFFFFF @4.5': 5,
+    '#83878F sur #FFFFFF @4.5': 1,   // resserre le 2026-09-26 (5 -> 1) : la refonte fine l a fait reculer
     // 3.75 · div.lgn > div.ss « Panneau d’administration » · marque_c2/jour marque_c2/nuit
     '#64748B sur #0F172A @4.5': 1,
     // 3.75 · div.vide > span « Non configuré » · modeles_c1/jour

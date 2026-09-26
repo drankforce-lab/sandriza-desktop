@@ -75,8 +75,10 @@ body{background:var(--f-page);color:var(--tx);
    grille de vignettes plus petites et une tuile d'ajout, au lieu de slots fixes. */
 .sect{display:flex;align-items:center;gap:.5rem;margin:1.6rem 0 .5rem}
 .sect:first-of-type{margin-top:0}
-.sect h2{font-size:.82rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
-  color:var(--tx-or);margin:0;flex:0 0 auto}
+/* Refonte fine (2026-09-26) : le titre de section en phrase, dans l encre du
+   texte — celui des cartes — et non plus en capitales dorees. */
+.sect h2{font-size:.95rem;font-weight:700;letter-spacing:0;text-transform:none;
+  color:var(--tx);margin:0;flex:0 0 auto}
 .sect .tr{flex:1 1 auto;height:1px;background:var(--v12)}
 .mqs{display:grid;grid-template-columns:repeat(auto-fill,minmax(8.5rem,1fr));gap:.85rem}
 .mq{display:flex;flex-direction:column;gap:.3rem}

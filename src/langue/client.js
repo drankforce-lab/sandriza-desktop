@@ -160,4 +160,13 @@ module.exports = {
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
   'au total': 'in total',
   'ouverte par': 'open by',
+
+  /* ── REFONTE FINE (2026-09-26) : le statut des commandes recentes ── */
+  'En attente': 'Pending',
+  'Confirmée': 'Confirmed',
+  'En préparation': 'Preparing',
+  'Vérification': 'Verification',
+  'En livraison': 'Out for delivery',
+  'Livrée': 'Delivered',
+  'Annulée': 'Cancelled'
 };

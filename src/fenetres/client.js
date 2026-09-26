@@ -66,8 +66,9 @@ body{background:var(--f-page);color:var(--tx);
 .ligne{display:flex;justify-content:space-between;gap:1rem;padding:.32rem 0;
   border-bottom:1px solid var(--v06);font-size:.85rem}
 .ligne .k{color:var(--tx2)}
-.cmd{display:flex;align-items:center;gap:.6rem;padding:.32rem .4rem;border-radius:7px;
-  border-top:1px solid var(--v05);font-size:.85rem}
+/* La carte de ligne des listes (refonte fine) : contour, coins, un peu d air. */
+.cmd{display:flex;align-items:center;gap:.75rem;padding:.55rem .75rem;border-radius:12px;
+  border:1px solid var(--v07);margin-top:.45rem;font-size:.85rem}
 .cmd .num{font-family:ui-monospace,monospace;font-size:.78rem;color:var(--tx-or)}
 .cmd .d{flex:1 1 auto;min-width:0}
 .cmd .fin{color:var(--tx2);font-size:.78rem;white-space:nowrap}
@@ -144,6 +145,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
   function dire(t, cl){ szDire(t, cl); }
   /* ⚠ Le symbole change de COTE en anglais : << $12.50 >>. Voir szArgent (socle). */
   function argent(n){ return szArgent(n); }
+  /* Les statuts de commande (codes du site -> libelle, teinte de pastille). */
+  var STATUTS_CMD = {
+    pending: [' ambre', '${T("En attente")}'], confirmed: [' bleu', '${T("Confirmée")}'],
+    preparing: [' bleu', '${T("En préparation")}'], verification: [' bleu', '${T("Vérification")}'],
+    shipped: [' bleu', '${T("En livraison")}'], delivered: [' vert', '${T("Livrée")}'], cancelled: [' rouge', '${T("Annulée")}']
+  };
   function dateFr(iso){
     if (!iso) return '—';
     var d = new Date(iso);
@@ -229,8 +236,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
       + R.stats.commandes + ' ${T("au total")}</span></h2>'
       + (R.dernieres.length
         ? R.dernieres.map(function(o){
-            return '<div class="cmd"><span class="num">' + esc(o.numero) + '</span>'
-              + '<div class="d"></div><span class="fin">' + esc(dateFr(o.date)) + '</span><span class="total">' + argent(o.total) + '</span></div>'; }).join('')
+            /* Refonte fine (2026-09-26) : la ligne des autres listes — numero en
+               code et date dessous, statut en pastille (le site l envoyait, on ne
+               l affichait pas), montant a droite. */
+            var st = STATUTS_CMD[o.statut] || ['', o.statut || ''];
+            return '<div class="cmd"><div class="d"><div class="rf-code">' + esc(o.numero) + '</div>'
+              + '<div class="rf-sous">' + esc(dateFr(o.date)) + '</div></div>'
+              + (st[1] ? '<span class="rf-pill' + st[0] + '">' + esc(st[1]) + '</span>' : '')
+              + '<span class="total">' + argent(o.total) + '</span></div>'; }).join('')
           + (R.stats.commandes > 6 ? '<div class="aide" style="text-align:center;padding-top:.35rem">+ '
             + (R.stats.commandes - 6) + ' '
             + (R.stats.commandes - 6 > 1 ? '${T("autres")}' : '${T("autre")}')
