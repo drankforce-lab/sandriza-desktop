@@ -73,6 +73,8 @@ module.exports = {
   'Périmé': 'Expired',
   'Session fermée': 'Session closed',
   'actif · ': 'active · ',
+  'Actif · ': 'Active · ',
+  'Actif ·': 'Active ·',
 
   /* ══ FORCER UN DEVERROUILLAGE ══════════════════════════════════════════════
    * ⚠⚠⚠ C est prendre une fiche a quelqu un. Voir l en-tete. */

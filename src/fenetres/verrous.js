@@ -165,7 +165,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + '<div class="sub">' + esc(l.since ? fdate(l.since) : '') + '</div></td>'
         + '<td>' + (mort
             ? '<span class="rf-pill">' + esc(motif) + '</span>'
-            : '<span class="rf-pill ambre">${T("actif · ")}' + Math.max(0, l.expiresIn) + ' s</span>') + '</td>'
+            : '<span class="rf-pill ambre">${T("Actif · ")}' + Math.max(0, l.expiresIn) + ' s</span>') + '</td>'
         + (PEUT ? '<td style="text-align:right"><button class="mini dgr" data-unl="' + esc(cle) + '">'
             + (CONF === cle ? '${T("✓ Confirmer")}' : '<span class="ic" aria-hidden="true">🔓</span>${T(" Déverrouiller")}') + '</button></td>' : '')
         + '</tr>';

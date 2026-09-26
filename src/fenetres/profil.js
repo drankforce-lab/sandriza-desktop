@@ -125,8 +125,8 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.55 system-ui,-apple-sy
 .carte .intro b{color:var(--tx)}
 .cote{display:flex;flex-direction:column;gap:1.1rem}
 .cote .carte{padding:1.1rem 1.2rem}
-.cote h4{margin:0 0 .85rem;font:700 .72rem/1.2 system-ui;text-transform:uppercase;
-  letter-spacing:.08em;color:var(--tx2)}
+.cote h4{margin:0 0 .85rem;font:700 .72rem/1.2 system-ui;text-transform:none;
+  letter-spacing:0;color:var(--tx2)}
 
 /* Les faits du compte : une ligne = une etiquette et sa valeur. */
 .faits{display:flex;flex-direction:column;gap:.7rem}
