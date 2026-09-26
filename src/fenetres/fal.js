@@ -66,7 +66,7 @@ select{font:inherit;color:var(--tx);background:var(--v05);
 .tuiles{display:flex;gap:.6rem;flex-wrap:wrap}
 .t{flex:1 1 8rem;background:var(--f-carte);border:1px solid var(--v07);
   border-radius:11px;padding:.6rem .75rem}
-.t .n{font:800 1.5rem/1.1 Georgia,serif;font-variant-numeric:tabular-nums}
+.t .n{font-weight:800;font-size:1.5rem;line-height:1.1;font-variant-numeric:tabular-nums}
 .t .l{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700}
 .t .s{font-size:.7rem;color:var(--tx2);margin-top:.15rem}
 table{width:100%;border-collapse:collapse;font-size:.79rem}
@@ -77,12 +77,13 @@ tbody tr:hover td{background:var(--v03)}
 td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .dt{font-size:.7rem;color:var(--tx2)}
 .mono{font-family:ui-monospace,Consolas,monospace;font-size:.74rem}
-.pill{display:inline-block;font-size:.64rem;padding:.05rem .45rem;border-radius:99px;
-  white-space:nowrap;font-weight:700}
+/* La pastille a point de la refonte (2026-09-26) : la forme de rf-pill, les memes sens. */
+.pill{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:600;padding:.22rem .65rem;border-radius:99px;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:99px;background:currentColor;flex:0 0 auto}
 .pill.ok{background:rgba(34,197,94,.15);color:var(--tx-ok)}
 .pill.non{background:rgba(248,113,113,.15);color:var(--tx-err2)}
 .pill.g{background:rgba(148,163,184,.14);color:var(--tx-94a3b8);font-weight:600}
-.pill.apr{background:rgba(201,169,126,.18);color:#d8bd97}
+.pill.apr{background:rgba(96,165,250,.14);color:var(--tx-bleu)}
 /* La barre des jours : un dessin vaut mieux qu une colonne de nombres pour
    reperer une derive avant la facture. */
 .jours{display:flex;align-items:flex-end;gap:2px;height:4.5rem;padding-top:.3rem}

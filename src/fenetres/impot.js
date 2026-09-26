@@ -107,7 +107,7 @@ tbody tr.credit td{color:var(--tx-ok)}
 .frais{border:1px solid rgba(124,92,255,.32);background:rgba(124,92,255,.07);
   border-radius:11px;padding:.7rem .9rem;margin:0 0 .8rem}
 .frais .ft{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#b6a6f7}
-.frais .fv{font:700 1.35rem/1.2 Georgia,serif;margin:.15rem 0 .2rem}
+.frais .fv{font-weight:700;font-size:1.35rem;line-height:1.2;margin:.15rem 0 .2rem}
 .frais .fx{font-size:.78rem;color:var(--tx2);line-height:1.55}
 .frais .fx b{color:var(--tx)}
 .frais .fm{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.5rem}

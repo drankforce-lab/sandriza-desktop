@@ -149,7 +149,7 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
   background:var(--v03);border:1px solid var(--v07);border-radius:9px;
   padding:.5rem .7rem}
 .boite .pied-boite{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem;justify-content:flex-end}
-.gros-montant{font:800 1.7rem/1 Georgia,serif;text-align:center;padding:.3rem 0 .1rem}
+.gros-montant{font-weight:800;font-size:1.7rem;line-height:1;text-align:center;padding:.3rem 0 .1rem}
 .rang{display:flex;justify-content:space-between;gap:1rem;padding:.28rem 0;
   border-bottom:1px solid var(--v06);font-size:.86rem}
 .rang.total{border-bottom:none;border-top:2px solid var(--v18);

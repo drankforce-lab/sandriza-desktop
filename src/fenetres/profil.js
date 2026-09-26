@@ -99,7 +99,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.55 system-ui,-apple-sy
   font:700 1.3rem/1 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.02em;
   -webkit-user-select:none;user-select:none}
 .qui{flex:1 1 16rem;min-width:0}
-.qui .nom{font:700 1.3rem/1.2 Georgia,"Times New Roman",serif;letter-spacing:-.01em}
+.qui .nom{font-weight:700;font-size:1.3rem;line-height:1.2;letter-spacing:-.01em}
 .qui .sous2{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;margin:.42rem 0 0}
 .qui .id{font-size:.84rem;color:var(--tx2)}
 .qui .sep{color:var(--tx3)}

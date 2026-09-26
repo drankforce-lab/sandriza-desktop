@@ -471,8 +471,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
     }).join('');
     var lignes = d.lignes.length ? d.lignes.map(function(l){
       var pris = !!LOT.choix[l.id];
-      var deja = l.regime === 'liq_no' ? '<span class="pill liq"><span class="ic">🟡</span> ${T("déjà")}</span>'
-        : l.regime === 'final' ? '<span class="pill vfin"><span class="ic">🔴</span> ${T("déjà")}</span>' : '';
+      var deja = l.regime === 'liq_no' ? '<span class="rf-pill ambre">${T("déjà")}</span>'
+        : l.regime === 'final' ? '<span class="rf-pill rouge">${T("déjà")}</span>' : '';
       return '<label class="case' + (pris ? ' pris' : '') + '">'
         + '<input type="checkbox" data-lotprod="' + esc(l.id) + '"' + (pris ? ' checked' : '') + '>'
         + '<span class="pastille" style="background:' + esc(l.couleur) + '"></span>'

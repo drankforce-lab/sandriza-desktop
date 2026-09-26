@@ -164,7 +164,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '<div class="repgrille">' + d.entrees.map(function(s){
       return '<div class="repcarte">'
         + '<div class="reptete"><strong>' + esc(s.nom) + '</strong>'
-        + '<span class="pill neutre">' + esc(s.cat) + '</span></div>'
+        + '<span class="rf-pill">' + esc(s.cat) + '</span></div>'
         + '<div class="dt">' + esc(s.paysLibelle) + ' · ' + esc(s.lieu) + '</div>'
         + '<div class="repquoi">' + esc(s.quoi) + '</div>'
         + '<div class="dt">' + (s.courriel ? esc(s.courriel) : '')
@@ -173,7 +173,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<div class="repfin">'
         // ⚠ Deja present : on le DIT au lieu d offrir un bouton qui refuse.
         + (s.dejaAjoute
-            ? '<span class="pill bon">${T("Déjà dans vos fournisseurs")}</span>'
+            ? '<span class="rf-pill vert">${T("Déjà dans vos fournisseurs")}</span>'
             : (d.peutAjouter
                 ? '<button class="mini prim" data-repadd="' + esc(s.nom) + '">${T("+ Ajouter")}</button>'
                 : '<span class="dt">${T("consultation seulement")}</span>'))

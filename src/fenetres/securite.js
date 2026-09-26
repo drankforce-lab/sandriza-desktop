@@ -135,7 +135,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .fiche.inactif{opacity:.72}
 .fiche .haut{display:flex;align-items:center;gap:.75rem;min-width:0}
 .init{flex:0 0 auto;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;
-  justify-content:center;font:700 .95rem/1 Georgia,serif;background:rgba(201,169,126,.16);
+  justify-content:center;font-weight:800;font-size:.9rem;line-height:1;background:rgba(201,169,126,.16);
   color:#e2c79b;border:1px solid rgba(201,169,126,.3);text-transform:uppercase}
 .fiche .qui{min-width:0;flex:1 1 auto}
 .fiche .nom{font-weight:700;font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

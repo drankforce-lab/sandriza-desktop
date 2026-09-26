@@ -96,7 +96,10 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .vign img{max-width:100%;max-height:100%;object-fit:contain}
 .vign .att{font-size:.6rem;color:var(--tx-att);text-align:center;line-height:1.1}
 .gain{font-size:.68rem;color:var(--tx-ok);font-weight:700}
-.pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
+/* La pastille a point de la refonte (2026-09-26) : la forme de rf-pill, les memes sens. */
+.pill{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:600;padding:.22rem .65rem;border-radius:99px;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:99px;background:currentColor;flex:0 0 auto}
+.pill.info{background:rgba(96,165,250,.14);color:var(--tx-bleu)}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
 .pill.err{background:rgba(239,68,68,.14);color:var(--tx-err)}
@@ -319,7 +322,7 @@ html.jour .asst .pi{background:#faf8f3}
 /* Le chargement, au centre, avant la planche. */
 .chargement{display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:.6rem;min-height:16rem;text-align:center}
-.chargement .gros{font:700 1rem/1.3 Georgia,serif}
+.chargement .gros{font-weight:700;font-size:1rem;line-height:1.3}
 .chargement .cpt{font-variant-numeric:tabular-nums;font-size:1.3rem;color:var(--tx-or);font-weight:800}
 .chargement .aide{max-width:26rem}
 .chargement .tourne{width:2.2rem;height:2.2rem;border-radius:50%;
@@ -1819,8 +1822,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   function etat(r){
     if (r.enAttente) return '<span class="pill err">${T("non rangée")}</span>';
     var t = traits(r);
-    var h = t.map(function(x){ return '<span class="pill att">' + esc(x) + '</span>'; }).join(' ');
-    if (!h && r.isole) h = '<span class="pill att">${T("détourée")}</span>';
+    var h = t.map(function(x){ return '<span class="pill info">' + esc(x) + '</span>'; }).join(' ');
+    if (!h && r.isole) h = '<span class="pill info">${T("détourée")}</span>';
     if (r.lieId) h = '<span class="pill bon">${T("attachée")}</span>' + (h ? ' ' + h : '');
     return h || '<span class="pill neutre">' + esc(r.statut || '${T("importée")}') + '</span>';
   }
