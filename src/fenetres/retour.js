@@ -100,11 +100,13 @@ button.mini{padding:.12rem .5rem;font-size:.75rem}
 .avis.bleu{background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.38);color:#a9c9f7}
 .aide{font-size:.73rem;color:var(--tx2);line-height:1.45}
 
-.art{display:flex;align-items:center;gap:.6rem;padding:.4rem .5rem;border-radius:8px;
-  background:var(--v03);border:1px solid var(--v06);margin-top:.35rem}
-.art .d{flex:1 1 auto;min-width:0}
-.art .n{font-size:.88rem;font-weight:600}
-.art .v{font-size:.75rem;color:var(--tx2)}
+/* Refonte (2026-09-26) : la ligne d article de l Inventaire, comme au
+   Remboursement — pastille a l initiale, nom, sous-ligne ; la carte se
+   dessine par son CONTOUR. */
+.art{display:flex;align-items:center;gap:.75rem;padding:.55rem .7rem;border-radius:12px;
+  border:1px solid var(--v07);margin-top:.45rem}
+.art .rf-prod{flex:1 1 auto}
+.art .rf-prod > div{min-width:0}
 .art select{width:auto}
 .ligne{display:flex;align-items:center;justify-content:space-between;gap:.7rem;
   padding:.3rem 0;border-bottom:1px solid var(--v06);font-size:.85rem}
@@ -305,10 +307,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     // Articles
     h += '<div class="carte"><h2>${T("Articles")} <span class="note">— ' + R.articles.length + '</span></h2>'
       + R.articles.map(function(a){
-          return '<div class="art"><div class="d"><div class="n">' + esc(a.nom) + '</div>'
-            + '<div class="v">' + esc([a.taille, a.couleur].filter(Boolean).join(' · ') || '—')
-            + ' · × ' + a.quantite + '</div></div>'
-            + '<div>' + argent(a.prix * a.quantite) + '</div></div>'; }).join('')
+          return '<div class="art"><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(String(a.nom || '?').trim().charAt(0).toUpperCase() || '?') + '</span><div>'
+            + '<div class="rf-nom">' + esc(a.nom) + '</div>'
+            + '<div class="rf-sous"><span>' + esc([a.taille, a.couleur].filter(Boolean).join(' · ') || '—') + '</span><span>·</span><span>× ' + a.quantite + '</span></div></div></div>'
+            + '<div class="rf-mont">' + argent(a.prix * a.quantite) + '</div></div>'; }).join('')
       + '</div>';
 
     // Photo — la demande n est pas actionnable sans elle.
@@ -419,8 +421,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '<div class="aide">${T("La remise en stock incrémente la VARIANTE (taille · couleur) reprise de la commande d’origine.")}</div>'
       + R.articles.map(function(a, i){
           var dec = DECISIONS[a.productId] || { backToStock: true, reason: '' };
-          return '<div class="art"><div class="d"><div class="n">' + esc(a.nom) + '</div>'
-            + '<div class="v">' + esc([a.taille, a.couleur].filter(Boolean).join(' · ') || '—') + ' · × ' + a.quantite + '</div></div>'
+          return '<div class="art"><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(String(a.nom || '?').trim().charAt(0).toUpperCase() || '?') + '</span><div>'
+            + '<div class="rf-nom">' + esc(a.nom) + '</div>'
+            + '<div class="rf-sous"><span>' + esc([a.taille, a.couleur].filter(Boolean).join(' · ') || '—') + '</span><span>·</span><span>× ' + a.quantite + '</span></div></div></div>'
             + '<select data-inv="' + i + '"'
             + ' aria-label="' + esc('${T("Décision inventaire — ")}' + a.nom) + '">'
             + '<option value="1"' + (dec.backToStock ? ' selected' : '') + '><span class="ic">✅</span> ${T("Remettre en inventaire")}</option>'
