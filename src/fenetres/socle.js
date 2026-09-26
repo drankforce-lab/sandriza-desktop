@@ -3143,6 +3143,12 @@ html.jour thead th{background:var(--f-carte)}
 .tuile .k,.stat .l{font-size:.76rem;font-weight:600;text-transform:none;letter-spacing:0;color:var(--tx2)}
 .tuile .v,.stat .v{font-family:inherit;font-size:1.6rem;font-weight:800;line-height:1.15;margin:.2rem 0 .1rem}
 .tuile .z{font-size:.72rem;color:var(--tx3)}
+/* ⚠ LES TITRES DE CARTE EN PHRASE (2026-09-25). Quarante-sept fenetres
+   ecrivaient << .carte h2 >> en petites capitales grises espacees : c est ce
+   qui donnait aux fiches (client, retour, commande, produit) leur air de
+   formulaire administratif. Comme a l Inventaire : le titre tel qu il est
+   ecrit, en gras, dans l encre du texte. */
+.carte h2{text-transform:none;letter-spacing:0;font-size:.95rem;font-weight:700;color:var(--tx)}
 /* ⚠ LA BARRE D ETAPES DES ASSISTANTS (2026-09-25, sa demande : « refaire aussi
    les fenetres comme ajout de produit, detail de commande »). Une seule piece,
    .pas (Assist, plus haut), sert tous les assistants : la refaire ICI relooke
