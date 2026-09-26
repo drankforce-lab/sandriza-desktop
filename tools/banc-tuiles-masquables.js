@@ -55,6 +55,12 @@ const DICO = path.join(__dirname, '..', 'src', 'langue', 'socle.js');
 const DEROGATIONS = {
   journaux: 'garde son propre interrupteur, antérieur et côté site, par profil '
     + '(journaux_stats_hidden) — unification à faire séparément',
+  /* ⚠ SA DEMANDE DU 2026-09-26, capture à l'appui : « retire ça du tableau de
+     bord, c'est pas nécessaire ». Le tableau de bord EST ses tuiles : les
+     replier ne laisse que deux listes, et il a déjà son panneau « Tuiles » pour
+     choisir, une à une, ce qui s'affiche. */
+  tableau: 'retiré à sa demande (2026-09-26) : le bandeau est le sujet de l’écran, '
+    + 'et le panneau « Tuiles » choisit déjà ce qui s’affiche',
 };
 
 /* ══ CE QUI A LA FORME SANS ÊTRE UN BANDEAU ════════════════════════════════

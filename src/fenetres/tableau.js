@@ -26,7 +26,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -177,7 +177,7 @@ function pageTableau() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('tableau')}
+${JS_ACTIVITE()}${JS_DIRE()}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
 
@@ -556,13 +556,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('tableau')}
       // qu elle cherche, plutot que d afficher un zero qui serait un mensonge.
       sauvegarde: tuileSauvegarde()
     };
-    /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
-       quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
-       ce poste. Voir JS_TUILES dans socle.js.
-       ⚠ ET IL NE REMPLACE PAS LE CHOIX TUILE PAR TUILE (voir cfg ci-dessous), qui existe
-       deja ici : celui-la dit QUOI montrer, celui-ci dit S IL FAUT montrer le
-       bandeau du tout. Les deux repondent a deux questions differentes. */
-    h += szTuiles('<div class="tuiles">'
+    /* ⚠ PAS DE « Masquer les totaux » ICI (retiré à sa demande le 2026-09-26 :
+       « c'est pas nécessaire »). Les tuiles SONT le tableau de bord, et le
+       panneau « Tuiles » (cfg ci-dessous) choisit déjà lesquelles s'affichent.
+       ⚠ Un poste qui les avait repliées les retrouve : sans bouton, un repli
+       retenu serait devenu définitif. Dérogation écrite dans
+       banc-tuiles-masquables. */
+    h += ('<div class="tuiles">'
       + TUILES.filter(offerte).filter(function(x){ return cfg[x[0]] !== false; })
           .map(function(x){ return contenu[x[0]]; }).join('')
       + '</div>');
