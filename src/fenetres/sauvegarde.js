@@ -60,9 +60,11 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .stat .l{font-size:.74rem;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em}
 .stat .v{font:700 1.5rem/1.15 Georgia,serif;margin-top:.25rem}
 .stat .s{font-size:.72rem;color:var(--tx-gris);margin-top:.2rem}
-table.tb{width:100%;border-collapse:collapse}
-table.tb th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);padding:.5rem .7rem;border-bottom:1px solid var(--v10);white-space:nowrap}
-table.tb td{padding:.6rem .7rem;border-bottom:1px solid var(--v06);font-size:.85rem;vertical-align:middle}
+/* La liste des sauvegardes en CARTES du socle (refonte du 2026-09-25), comme
+   Liste noire : plus de border-collapse ni de trait sous chaque cellule. */
+table.tb{width:100%}
+table.tb th{text-align:left;text-transform:uppercase;font-weight:700;white-space:nowrap}
+table.tb td{font-size:.85rem;vertical-align:middle}
 .mono{font-family:Consolas,monospace;font-size:.7rem;color:var(--tx-gris)}
 .prim{font:inherit;font-size:.84rem;font-weight:700;border:0;border-radius:8px;padding:.5rem 1rem;background:#c9a97e;color:#1a1408;cursor:pointer}
 .prim:disabled{opacity:.5;cursor:default}
@@ -252,7 +254,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('sauvegarde')}
       corps.innerHTML = h; lier(); return;
     }
 
-    h += '<div class="carte" style="padding:0;overflow-x:auto"><table class="tb"><thead><tr>'
+    h += '<div class="carte" style="overflow-x:auto"><table class="tb"><thead><tr>'
       + '<th>${T("Date")}</th><th>${T("Contenu")}</th><th>${T("Application")}</th><th style="text-align:center">${T("Objets R2")}</th><th>${T("Taille")}</th><th>${T("Note")}</th><th></th>'
       + '</tr></thead><tbody>';
     for (var i=0;i<l.length;i++){ var b=l[i];
