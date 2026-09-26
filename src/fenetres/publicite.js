@@ -77,12 +77,22 @@ tbody td{padding:.32rem .4rem;border-top:1px solid var(--v055)}
 .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .ctr{text-align:center}
 code{font:.75rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
-.badge{display:inline-block;font-size:.66rem;font-weight:700;padding:.05rem .5rem;border-radius:99px}
-.badge.ok{background:rgba(22,163,74,.2);color:#86efac}
-.badge.warn{background:rgba(217,119,6,.2);color:#fcd34d}
-.badge.err{background:rgba(220,38,38,.2);color:var(--tx-err2)}
-.badge.info{background:rgba(59,130,246,.2);color:var(--tx-bleu)}
-.badge.def{background:rgba(148,163,184,.18);color:var(--tx-gris2)}
+/* Refonte (2026-09-26) : .badge prend le dessin de la pastille du socle
+   (.rf-pill) — point de couleur, memes teintes de jour et de nuit. Les cinq
+   tableaux de cette fenetre la partagent : une regle ici plutot que cinq
+   reecritures. */
+.badge{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:600;padding:.22rem .65rem;
+  border-radius:99px;white-space:nowrap;background:var(--v06);color:var(--tx2)}
+.badge::before{content:"";width:6px;height:6px;border-radius:99px;background:currentColor}
+.badge.ok{background:rgba(34,197,94,.14);color:var(--tx-ok)}
+.badge.warn{background:rgba(245,158,11,.16);color:var(--tx-att)}
+.badge.err{background:rgba(239,68,68,.16);color:var(--tx-err)}
+.badge.info{background:rgba(96,165,250,.14);color:var(--tx-bleu)}
+.badge.def{background:var(--v06);color:var(--tx2)}
+html.jour .badge.ok{color:#326a49}
+html.jour .badge.warn{color:#806112}
+html.jour .badge.err{color:#984545}
+html.jour .badge.info{color:#44607e}
 .graph{display:flex;align-items:flex-end;gap:.4rem;height:150px}
 .graph .col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
 .graph .val{font-size:.56rem;color:var(--tx2);font-weight:600;margin-bottom:2px;white-space:nowrap}
@@ -160,6 +170,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
     social:'${T("Attribution sociale")}', campaigns:'${T("Campagnes")}', satisfaction:'${T("Satisfaction")}' };
   var OP = { overview:'analytics:overview', segments:'analytics:segments', promos:'analytics:promos',
     social:'analytics:social', campaigns:'analytics:campaigns', satisfaction:'analytics:satisfaction' };
+  /* Initiales pour la pastille ronde (refonte, 2026-09-26). */
+  function ini(n){ var m = String(n || '').trim().split(' ').filter(Boolean); if (!m.length || m[0] === '—') return '?';
+    return ((m[0][0] || '') + (m.length > 1 ? (m[m.length - 1][0] || '') : '')).toUpperCase(); }
   var STATUTS = { confirmed:['ok','${T("Confirmée")}'], pending:['warn','${T("En attente")}'], shipped:['info','${T("Expédiée")}'],
     delivered:['ok','${T("Livrée")}'], cancelled:['def','${T("Annulée")}'], preparing:['info','${T("Préparation")}'], verification:['warn','${T("Vérif.")}'] };
 
@@ -217,7 +230,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
     }).join('') : '<div class="vide">${T("Aucune vente.")}</div>';
     var recent = D.recent.length ? D.recent.map(function(o){
       var st = STATUTS[o.status] || ['def', o.status];
-      return '<tr><td><code>' + esc(o.num) + '</code></td><td>' + esc(o.client || '—') + '</td>'
+      return '<tr><td><span class="rf-code">' + esc(o.num) + '</span></td><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(ini(o.client)) + '</span>'
+        + '<span class="rf-nom">' + esc(o.client || '—') + '</span></div></td>'
         + '<td style="color:var(--tx2)">' + esc(o.date) + '</td>'
         + '<td>' + (o.promo ? '<span class="badge err">' + esc(o.promo) + '</span>' : '<span style="color:var(--tx2)">—</span>') + '</td>'
         + '<td class="num" style="font-weight:700">' + argent(o.total) + '</td>'
@@ -249,8 +263,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
     var titre = SEGF === 'all' ? '${T("Tous les clients")}' : SEGF === 'promo' ? '${T("Acheteurs promo")}' : (function(){ var mm = D.segMeta.filter(function(x){ return x.key === SEGF; })[0]; return mm ? mm.label : SEGF; })();
     var rows = D.clients.length ? D.clients.map(function(c){
       var col = c.daysSince > 60 ? 'var(--tx-err)' : c.daysSince > 30 ? 'var(--tx-att)' : 'var(--tx-ok)';
-      return '<tr><td><strong>' + esc(c.nom || '—') + '</strong></td><td style="color:var(--tx2)">' + esc(c.email || '—') + '</td>'
-        + '<td><span class="pill">' + esc(c.segLabel) + '</span></td><td class="ctr" style="font-weight:700">' + c.orderCount + '</td>'
+      return '<tr><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(ini(c.nom)) + '</span><span class="rf-nom">' + esc(c.nom || '—') + '</span></div></td><td style="color:var(--tx2)">' + esc(c.email || '—') + '</td>'
+        + '<td><span class="badge def">' + esc(c.segLabel) + '</span></td><td class="ctr" style="font-weight:700">' + c.orderCount + '</td>'
         + '<td class="num" style="color:var(--tx-creme);font-weight:600">' + argent(c.totalSpent) + '</td>'
         + '<td style="color:var(--tx2)">' + esc(c.lastO || '—') + (c.daysSince !== null ? ' <span style="color:' + col + ';font-size:.7rem">(' + c.daysSince + 'j)</span>' : '') + '</td>'
         + '<td class="ctr">' + (c.isPromo ? '<span style="color:var(--tx-err2);font-weight:700">✓</span>' : '<span style="color:var(--tx2)">—</span>') + '</td></tr>';
@@ -268,7 +282,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
   function vuePromos(){
     var t = D.totaux;
     var rows = D.perfs.length ? D.perfs.map(function(p){
-      return '<tr><td><strong>' + esc(p.name) + '</strong><div style="font-size:.66rem;color:var(--tx2)">' + esc(p.period) + '</div></td>'
+      return '<tr><td><div class="rf-nom">' + esc(p.name) + '</div><div class="rf-sous"><span>' + esc(p.period) + '</span></div></td>'
         + '<td><span class="badge ' + (p.type === 'discount' ? 'err' : 'info') + '">' + (p.type === 'discount' ? '${T("Rabais auto")}' : '${T("Coupon")}') + '</span></td>'
         + '<td><strong style="color:var(--tx-err2)">' + esc(p.badge) + '</strong></td>'
         + '<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.76rem">' + esc(p.scope) + '</td>'
@@ -322,7 +336,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
   /* ══ CAMPAGNES ═════════════════════════════════════════════════════════════ */
   function vueCampaigns(){
     var rows = D.camps.length ? D.camps.map(function(c){
-      return '<tr><td><strong>' + esc(c.name) + '</strong>' + (c.promoLabel ? '<div style="font-size:.68rem;color:var(--tx-creme)"><span class="ic">🎯</span> ' + esc(c.promoLabel) + '</div>' : '') + '</td>'
+      return '<tr><td><div class="rf-nom">' + esc(c.name) + '</div>' + (c.promoLabel ? '<div class="rf-sous"><span class="ic">🎯</span><span>' + esc(c.promoLabel) + '</span></div>' : '') + '</td>'
         + '<td>' + esc(c.segLabel) + '</td><td><strong>' + c.audienceCount + '</strong> ${T("contact")}' + plur(c.audienceCount) + '</td>'
         + '<td style="font-size:.74rem;color:var(--tx2)">' + esc(c.channels || '—') + '</td><td style="font-size:.74rem;color:var(--tx2)">' + esc(c.date) + '</td>'
         + '<td><span class="badge ' + (c.status === 'sent' ? 'ok' : 'warn') + '">' + (c.status === 'sent' ? '${T("Envoyée")}' : '${T("Brouillon")}') + '</span></td>'
