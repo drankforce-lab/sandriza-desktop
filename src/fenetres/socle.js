@@ -3149,6 +3149,14 @@ html.jour thead th{background:var(--f-carte)}
    formulaire administratif. Comme a l Inventaire : le titre tel qu il est
    ecrit, en gras, dans l encre du texte. */
 .carte h2{text-transform:none;letter-spacing:0;font-size:.95rem;font-weight:700;color:var(--tx)}
+/* ⚠ ET LES h3 (2026-09-26) : la regle ci-dessus ne voyait que h2. Quarante
+   fenetres gardaient la Georgia sur les titres de leurs boites et voiles
+   (.boite h3, .voile h3, .sur .tt h3) et de quelques cartes — la seule police
+   a empattements restee dans l application, apres son retrait des titres de
+   fenetre et des chiffres. SEULE LA FAMILLE change : ni la taille ni la
+   couleur, donc aucun couple de contraste ne bouge. Memes selecteurs que les
+   fenetres, donc meme specificite : ce bloc, pose en dernier, l emporte. */
+.carte h3,.boite h3,.voile h3,.sur .tt h3{font-family:inherit}
 /* ⚠ LA BARRE D ETAPES DES ASSISTANTS (2026-09-25, sa demande : « refaire aussi
    les fenetres comme ajout de produit, detail de commande »). Une seule piece,
    .pas (Assist, plus haut), sert tous les assistants : la refaire ICI relooke

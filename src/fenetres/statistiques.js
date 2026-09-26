@@ -282,8 +282,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('statistiques')}
 
     var pages = (DGA.pages || []).length
       ? DGA.pages.map(function(p){
-          return '<tr><td class="tronq">' + esc(p.titre)
-            + (p.chemin && p.chemin !== p.titre ? '<div class="chemin">' + esc(p.chemin) + '</div>' : '')
+          return '<tr><td class="tronq"><div class="rf-nom">' + esc(p.titre) + '</div>'
+            + (p.chemin && p.chemin !== p.titre ? '<div class="rf-sous"><span class="rf-code">' + esc(p.chemin) + '</span></div>' : '')
             + '</td><td class="num">' + nb(p.vues) + '</td></tr>';
         }).join('')
       : '<tr><td colspan="2" class="dt" style="text-align:center">—</td></tr>';
@@ -326,10 +326,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('statistiques')}
     h += '<div class="carte"><h3><span class="ic">📈</span>${T(" Appels par jour")}</h3>'
       + graphique(DTEL.serie, '${T("appels")}', '${T("appels")}') + '</div>';
 
+    /* Refonte (2026-09-26) : le statut d un appel se DIT en pastille. Le site
+       l envoie en francais (_PH_STATUTS, admin.js) ; un statut inconnu garde
+       la pastille neutre plutot qu une couleur devinee. */
+    /* ⚠ DES DONNEES, PAS DU TEXTE : ce sont les valeurs que le site envoie
+       (_PH_STATUTS), comparees ici, jamais affichees par cette table. */
+    var SZ_DONNEES = { termine: 'terminé', sansReponse: 'sans réponse', occupe: 'occupé',
+      echec: 'échec', annule: 'annulé', enCours: 'en cours', sonne: 'sonne' };
+    function pastilleAppel(st){
+      var v = String(st || ''), D2 = SZ_DONNEES;
+      var cl = v === D2.termine ? ' vert' : (v === D2.sansReponse || v === D2.occupe) ? ' ambre'
+        : (v === D2.echec || v === D2.annule) ? ' rouge' : (v === D2.enCours || v === D2.sonne) ? ' bleu' : '';
+      return '<span class="rf-pill' + cl + '">' + esc(v || '—') + '</span>';
+    }
     var rows = (DTEL.appels || []).length
       ? DTEL.appels.map(function(c){
-          return '<tr><td>' + esc(c.de) + '</td><td class="dt">' + esc(c.sens) + '</td>'
-            + '<td class="dt">' + esc(c.statut) + '</td><td class="num">' + c.duree + ' s</td>'
+          return '<tr><td><span class="rf-nom">' + esc(c.de) + '</span></td><td class="dt">' + esc(c.sens) + '</td>'
+            + '<td>' + pastilleAppel(c.statut) + '</td><td class="num">' + c.duree + ' s</td>'
             + '<td class="num">' + esc(c.cout || '—') + '</td>'
             + '<td class="dt">' + esc(c.date) + '</td></tr>';
         }).join('')
