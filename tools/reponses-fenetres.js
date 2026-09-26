@@ -6029,6 +6029,12 @@ const JEU = {
       nom: 'modification, avec journal',
       id: 'p_0001',
       reponses: {
+        /* L apercu boutique (2026-09-26) : la FORME de produit:apercu — la carte
+           de la grille, son libelle et les quatre chiffres, avec les classes que
+           pose le site (Admin._pfApercuHtml). Sert a mesurer le fond de l apercu. */
+        'produit:apercu': { ok: true,
+          css: '.pf-prev-card-bg{background:#f5f4f2;padding:1.25rem}.pf-prev-card-label{font-size:.68rem;text-transform:uppercase;letter-spacing:1.5px;color:#686868}.pf-prev-card-wrap{max-width:260px}.pf-prev-stats{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:1rem}.pf-stat{background:#fff;border:1px solid #e5e5e5;border-radius:8px;padding:.6rem .75rem;display:flex;flex-direction:column}.pf-stat span{font-weight:700}.pf-stat small{font-size:.7rem;color:#686868}.carte-b{background:#fff;color:#1a1a1a}.carte-b .img{height:170px;background:linear-gradient(135deg,#c49a6c,#b08a5f);display:flex;align-items:center;justify-content:center;color:#fff;font-style:italic}.carte-b .txt{padding:.5rem .7rem}',
+          html: '<div class="pf-prev-card-bg"><div class="pf-prev-card-label">Grille boutique</div><div class="pf-prev-card-wrap"><div class="carte-b"><div class="img">Ajouter une photo</div><div class="txt">Robes<br><b>Robe cintrée</b><br>129,95 $</div></div></div><div class="pf-prev-stats"><div class="pf-stat"><span>3</span><small>tailles</small></div><div class="pf-stat"><span>2</span><small>couleurs</small></div><div class="pf-stat"><span style="color:var(--c-text)">Régulier</span><small>prix</small></div><div class="pf-stat"><span style="color:var(--c-success)">Actif</span><small>statut</small></div></div></div>' },
         'produit:contexte': _produitContexte(),
         'produit:lire': {
           ok: true,

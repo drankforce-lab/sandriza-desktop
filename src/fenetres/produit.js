@@ -1581,23 +1581,55 @@ function pageProduit(id) {
   function ouvrirApercu(){
     var v = document.createElement('div');
     v.className = 'voile';
-    v.innerHTML = '<div class="boite" style="max-width:36rem">'
+    /* ══ L APERCU BOUTIQUE, REFAIT (2026-09-26) ══════════════════════════════
+       Sa capture : « ameliore cela et retire le fond beige, c est affreux ».
+       • Grille : la carte de la boutique (blanche, telle que la cliente la verra)
+         se pose sur la SURFACE DE LA FENETRE, plus sur du beige ; les quatre
+         chiffres prennent les tuiles de la refonte.
+       • Page produit : c est une page ENTIERE de la boutique, ecrite en encre
+         foncee — elle garde un fond, mais blanc et net.
+       • Le titre dans la police de l ecran, les onglets en pastilles. */
+    v.innerHTML = '<div class="boite ap" style="max-width:44rem">'
+      + '<style>'
+      + '.boite.ap h3{font-family:inherit;font-size:1.1rem;font-weight:800;color:var(--tx)}'
+      + '.ap .ongs{display:flex;gap:.4rem;margin:.5rem 0 .75rem}'
+      + '.ap .ongs button{height:2.3rem;padding:0 .9rem;border-radius:99px;border:1px solid var(--v10);'
+      +   'background:var(--f-0f1826);color:var(--tx-gris2);font-size:.82rem;cursor:pointer}'
+      + '.ap .ongs button.on{background:rgba(201,169,126,.14);border-color:rgba(201,169,126,.55);color:var(--tx-or2);font-weight:700}'
+      + '#ap-zone{border:1px solid var(--v08);border-radius:12px;padding:1rem;max-height:64vh;overflow-y:auto;'
+      +   'background:var(--f-0f1826);color:var(--tx)}'
+      + '#ap-zone.page{background:#fff;color:#1a1a1a}'
+      + '#ap-zone .pf-prev-card-bg,#ap-zone .pf-prev-detail-bg{background:transparent!important;padding:0;min-height:0}'
+      + '#ap-zone .pf-prev-card-label{text-transform:none;letter-spacing:0;font-size:.8rem;font-weight:700;color:var(--tx2);margin:0 0 .6rem}'
+      + '#ap-zone .pf-prev-card-wrap{max-width:280px;border-radius:12px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.28)}'
+      + '#ap-zone:not(.page) .pf-prev-stats{grid-template-columns:repeat(4,minmax(0,1fr));gap:.6rem;margin-top:1rem}'
+      + '#ap-zone:not(.page) .pf-stat{background:var(--f-carte);border:1px solid var(--v07);border-radius:13px;padding:.7rem .85rem;'
+      +   'flex-direction:column-reverse;gap:.15rem;color:var(--tx)}'
+      + '#ap-zone:not(.page) .pf-stat span{font-size:1.15rem;font-weight:800}'
+      + '#ap-zone:not(.page) .pf-stat small{font-size:.76rem;font-weight:600;color:var(--tx2)}'
+      /* Les couleurs de reussite et d erreur que le site pose en ligne (ses
+         variables c-success et c-error) n existent pas dans cette fenetre : on
+         les ramene aux siennes. */
+      + '#ap-zone:not(.page) .pf-stat span[style*="c-success"]{color:var(--tx-ok)!important}'
+      + '#ap-zone:not(.page) .pf-stat span[style*="c-error"]{color:var(--tx-err)!important}'
+      + '</style>'
       + '<h3><span class="ic">👁</span> ${T("Aperçu boutique")}</h3>'
-      + '<div style="display:flex;gap:.4rem;margin:.45rem 0 .6rem">'
+      + '<div class="ongs">'
       + '<button type="button" id="ap-card">${T("Grille boutique")}</button>'
       + '<button type="button" id="ap-detail">${T("Page produit")}</button></div>'
-      + '<div id="ap-zone" style="background:#f6f4ef;border-radius:10px;padding:.85rem;'
-      + 'color:#1a1a1a;max-height:62vh;overflow-y:auto"></div>'
+      + '<div id="ap-zone"></div>'
       + '<div class="pied2"><button type="button" id="ap-non">${T("Fermer")}</button></div></div>';
     document.body.appendChild(v);
     function peindre(){
       var c = document.getElementById('ap-card'), d = document.getElementById('ap-detail');
-      if (c) c.className = APERCU_ONGLET === 'card' ? 'prim' : '';
-      if (d) d.className = APERCU_ONGLET === 'detail' ? 'prim' : '';
+      if (c) c.className = APERCU_ONGLET === 'card' ? 'on' : '';
+      if (d) d.className = APERCU_ONGLET === 'detail' ? 'on' : '';
+      var z0 = document.getElementById('ap-zone');
+      if (z0) z0.className = APERCU_ONGLET === 'detail' ? 'page' : '';
     }
     function chargerApercu(){
       var z = document.getElementById('ap-zone');
-      if (z) z.innerHTML = '<div style="padding:2rem;text-align:center;color:#6b7280">${T("Chargement…")}</div>';
+      if (z) z.innerHTML = '<div style="padding:2rem;text-align:center;opacity:.7">${T("Chargement…")}</div>';
       P.appeler('produit:apercu', saisieApercu(), APERCU_ONGLET).then(function(r){
         var z2 = document.getElementById('ap-zone');
         if (!z2) return;
