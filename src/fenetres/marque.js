@@ -454,7 +454,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     ongl.innerHTML = ONGLETS.map(function(o){
       var att = o.k === 'logos' && Object.keys(ENATTENTE).length
         ? ' (' + Object.keys(ENATTENTE).length + ')' : '';
-      return '<button data-ong="' + o.k + '" aria-selected="' + (ONGLET === o.k ? 'true' : 'false') + '">'
+      return '<button data-ong="' + o.k + '"' + (ONGLET === o.k ? ' class="actif"' : '') + ' aria-selected="' + (ONGLET === o.k ? 'true' : 'false') + '">'
         + esc(o.lib) + att + '</button>';
     }).join('');
     var bs = ongl.querySelectorAll('[data-ong]');
