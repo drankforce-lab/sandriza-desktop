@@ -171,6 +171,10 @@ select.statut{width:auto;font-size:.78rem;padding:.16rem .4rem}
   margin-top:.6rem;border-top:1px solid var(--v08);padding-top:.55rem}
 .totaux .d{text-align:right}
 .totaux .tt{font-weight:700;margin-top:.2rem}
+.bas2{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2.2rem;align-items:start;
+  margin-top:.6rem;border-top:1px solid var(--v08);padding-top:.55rem}
+.bas2 .totaux{margin-top:0;border-top:0;padding-top:0}
+.bas2 .remb{margin-top:0}
 .remb{margin-top:.7rem;border-top:2px dashed rgba(245,158,11,.5);padding-top:.45rem}
 .remb .t{font-size:.69rem;font-weight:700;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx-att);margin-bottom:.25rem}
@@ -660,7 +664,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '</tbody></table>';
 
     var t = d.totaux;
-    h += '<div class="totaux"><div>'
+    /* Totaux a droite, remboursements a gauche, dans la meme bande : la place
+       sous les articles etait vide et le detail defilait (2026-09-26). */
+    var hTot = '<div class="totaux"><div>'
       + '<div>${T("Sous-total")}</div>'
       + t.taxes.map(function(x){ return '<div>' + esc(x.nom) + ' (' + (Math.round(x.taux * 1000000) / 10000) + ' %)</div>'; }).join('')
       + (t.livraison > 0 ? '<div>${T("Livraison")}</div>' : '')
@@ -674,25 +680,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + (t.coupon > 0 ? '<div style="color:var(--tx-ok)">−' + argent(t.coupon) + '</div>' : '')
       + '<div class="tt">' + argent(t.total) + '</div></div></div>';
 
-    var rb = d.remboursements;
+    var rb = d.remboursements, hRemb = '';
     if (rb.lignes.length) {
-      h += '<div class="remb"><div class="t">${T("↩ Remboursements émis")}</div>'
+      hRemb += '<div class="remb"><div class="t">${T("↩ Remboursements émis")}</div>'
         + rb.lignes.map(function(r){
             return '<div class="lg2"><span><strong>' + esc(r.numero) + '</strong> · '
               + esc(dateCourte(r.date)) + ' · <em>' + esc(r.type) + '</em>'
               + (r.fraisRetenus > 0 ? ' <span style="color:var(--tx-att);font-size:.72rem">${T("(frais retenus :")} ' + argent(r.fraisRetenus) + ')</span>' : '')
               + '</span><span style="font-weight:700;color:var(--tx-att)">−' + argent(r.montant) + '</span></div>'; }).join('');
       if (rb.fraisRetenus > 0) {
-        h += '<div class="fin3" style="color:var(--tx-or2);font-weight:400">${T("Frais de service retenus :")} <strong>'
+        hRemb += '<div class="fin3" style="color:var(--tx-or2);font-weight:400">${T("Frais de service retenus :")} <strong>'
           + argent(rb.fraisRetenus) + '</strong> '
           + (rb.fraisRestants < 0.01 ? '<span class="badge2 vertf"><span class="ic">✅</span> ${T("Remboursés au client")}</span>'
              : rb.fraisRembourses > 0
                ? '<span class="badge2 or"><span class="ic" aria-hidden="true">⚠</span> ${T("Partiel — remb.")} ' + argent(rb.fraisRembourses) + ' ${T("· reste")} ' + argent(rb.fraisRestants) + '</span>'
                : '<span class="badge2 or">${T("⏳ Non remboursés")}</span>') + '</div>';
       }
-      h += '<div class="fin3">${T("Total remboursé : −")}' + argent(rb.total)
+      hRemb += '<div class="fin3">${T("Total remboursé : −")}' + argent(rb.total)
         + (rb.complet ? ' <span class="badge2 vertf"><span class="ic">✅</span> ${T("Entièrement remboursée")}</span>' : '') + '</div></div>';
     }
+    h += hRemb ? '<div class="bas2">' + hRemb + hTot + '</div>' : hTot;
     if (c.notes) h += '<div class="mut" style="margin-top:.6rem"><strong>${T("Notes :")}</strong> ' + esc(c.notes) + '</div>';
     h += '</div></div>';
     corps.innerHTML = h;
