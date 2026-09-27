@@ -200,6 +200,11 @@ tbody tr:hover td{background:var(--v04)}
   font:inherit;font-weight:600;font-size:.82rem;cursor:pointer}
 .onglets > button:hover{background:var(--v05);color:var(--tx)}
 .onglets .droite{margin-left:auto}
+
+.etapes-choix{display:flex;gap:.35rem;flex-wrap:wrap;margin:0 0 .6rem}
+.etapes-choix button{font:inherit;font-size:.78rem;font-weight:600;padding:.32rem .75rem;border-radius:99px;
+  border:1px solid var(--v12);background:var(--v05);color:var(--tx2);cursor:pointer}
+.etapes-choix button.on{background:#c9a97e;border-color:#c9a97e;color:#17202c}
 `;
 
 /** Page complète de la fenêtre native « Campagnes et chaînes ». */
@@ -562,6 +567,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
   }
 
   var ETAPES = null;         // etapes en cours d edition (chaine seulement)
+  var ESEL = 0;              // l etape montree (une a la fois)
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -764,7 +770,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
         + '${T("Cliquez « + Ajouter une étape ».")}</div>';
     }
     var mods = (FORM && FORM.d && FORM.d.modeles) || [];
-    return et.map(function(s, i){
+    /* ⚠ UNE ETAPE A LA FOIS (sa demande : aucune barre de defilement) — une rangee
+       de pastilles choisit celle qu on edite ; les autres restent dans ETAPES. */
+    if (ESEL >= et.length) ESEL = et.length - 1;
+    if (ESEL < 0) ESEL = 0;
+    var chips = '<div class="etapes-choix">' + et.map(function(s, i){
+      return '<button type="button" data-etsel="' + i + '" class="' + (i === ESEL ? 'on' : '') + '">${T("Étape")} ' + (i + 1)
+        + (s.sujet ? ' · ' + esc(String(s.sujet).slice(0, 22)) : '') + '</button>'; }).join('') + '</div>';
+    return chips + et.map(function(s, i){
+      if (i !== ESEL) return '';
       return '<div class="etapef"><div class="tete2"><strong>${T("Étape")} ' + (i + 1) + '</strong>'
         + '<div class="gestes">'
         + (i > 0 ? '<button class="mini" data-mont="' + i + '" title="${T("Monter")}">↑</button>' : '')
@@ -799,6 +813,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
      perdu. On releve donc AVANT chaque redessin. */
   function releverEtapes(){
     (ETAPES || []).forEach(function(s, i){
+      /* ⚠ UNE SEULE ETAPE EST A L ECRAN (2026-09-26) : on ne releve QUE celle-la.
+         Relire les autres donnerait des champs absents, donc vides — la saisie
+         des etapes non montrees serait effacee sans un mot. */
+      if (!document.getElementById('e-s-' + i)) return;
       var g = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
       s.sujet = g('e-s-' + i);
       s.html = g('e-b-' + i);
@@ -851,6 +869,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
         BLOCS = htm0 ? [{ type: 'rawHtml', content: htm0 }] : [];
         BMODE = htm0 ? 'html' : 'visuel';
       }
+      ESEL = 0;
       ETAPES = (type === 'chaine')
         ? JSON.parse(JSON.stringify((r.chaine && r.chaine.etapes) || [])) : null;
       CRITERES = null;
@@ -1141,6 +1160,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     if (plus) plus.onclick = function(){
       releverEtapes();
       ETAPES.push({ sujet: '', html: '', jours: ETAPES.length === 0 ? 0 : 3, heures: 0 });
+      ESEL = ETAPES.length - 1;
       var z = document.getElementById('f-etapes');
       if (z) z.innerHTML = vueEtapes();
     };
@@ -1581,10 +1601,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
         redessinerCriteres();
         return;
       }
+      var esl = t.closest('[data-etsel]');
+      if (esl) {
+        releverEtapes();
+        ESEL = parseInt(esl.getAttribute('data-etsel'), 10) || 0;
+        var zs = document.getElementById('f-etapes');
+        if (zs) zs.innerHTML = vueEtapes();
+        return;
+      }
       var sup = t.closest('[data-etsup]');
       if (sup) {
         releverEtapes();
         ETAPES.splice(parseInt(sup.getAttribute('data-etsup'), 10), 1);
+        ESEL = Math.max(0, ESEL - 1);
         var z1 = document.getElementById('f-etapes');
         if (z1) z1.innerHTML = vueEtapes();
         return;
@@ -1596,6 +1625,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
         var i0 = parseInt((mnt || dsc).getAttribute(mnt ? 'data-mont' : 'data-desc'), 10);
         var j0 = mnt ? i0 - 1 : i0 + 1;
         var tmp = ETAPES[i0]; ETAPES[i0] = ETAPES[j0]; ETAPES[j0] = tmp;
+        ESEL = j0;
         var z2 = document.getElementById('f-etapes');
         if (z2) z2.innerHTML = vueEtapes();
         return;
