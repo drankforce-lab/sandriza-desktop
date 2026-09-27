@@ -46,10 +46,15 @@ body{background:var(--f-page);color:var(--tx);
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
-  padding:1rem 1.1rem;min-width:0}
+  padding:.85rem 1.1rem;min-width:0}
 .carte h2{margin:0 0 .2rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2)}
 .carte .sous{margin:0 0 .9rem;font-size:.78rem;color:var(--tx3)}
+/* Titre et phrase d aide sur UNE ligne, et les echeances cote a cote : aucune
+   barre de defilement dans un module (sa demande du 2026-09-26). */
+.carte .tete{display:flex;align-items:baseline;flex-wrap:wrap;gap:.2rem .9rem;margin:0 0 .75rem}
+.carte .tete h2,.carte .tete .sous{margin:0}
+.avis ul.ech{display:flex;flex-wrap:wrap;gap:.15rem 1.8rem;margin:.35rem 0 0;padding-left:1.1rem}
 .avis{border-radius:9px;padding:.5rem .7rem;font-size:.78rem;margin:0 0 .9rem;
   border:1px solid rgba(240,180,80,.3);background:rgba(200,140,40,.09);color:var(--tx-or2)}
 .avis.calme{border-color:rgba(120,160,220,.28);background:rgba(80,120,190,.1);color:var(--tx2)}
@@ -226,8 +231,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function htmlIdentite(){
     var r = D.registre || {};
     var ru = r.responsableUE || {}, io = r.ioss || {};
-    return '<div class="carte"><h2>${T("Identité européenne")}</h2>'
-      + '<p class="sous">${T("Ces deux blocs valent pour les 27 États membres : sans eux, aucun pays de l’Union ne s’ouvre.")}</p>'
+    return '<div class="carte"><div class="tete"><h2>${T("Identité européenne")}</h2>'
+      + '<p class="sous">${T("Ces deux blocs valent pour les 27 États membres : sans eux, aucun pays de l’Union ne s’ouvre.")}</p></div>'
       + '<div class="grille">'
       + champ('r-nom', '${T("Personne responsable dans l’Union — nom")}', ru.nom)
       + champ('r-adr', '${T("Personne responsable — adresse complète")}', ru.adresse)
@@ -250,7 +255,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return '<div class="avis ' + (passees ? 'dur' : '') + '">'
       + (passees ? '${T("Des adhésions sont ÉCHUES. Une adhésion expirée vaut une adhésion absente : le pays se referme.")}'
                  : '${T("Des adhésions arrivent à échéance dans les quatre prochains mois.")}')
-      + '<ul style="margin:.4rem 0 0;padding-left:1.1rem">' + l + '</ul></div>';
+      + '<ul class="ech">' + l + '</ul></div>';
   }
 
   function htmlTableau(){
@@ -270,8 +275,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + esc('${T("Ouvrir le dossier de ")}' + l.nom) + '">'
         + ((l.cc === OUVERT) ? '${T("Fermer")}' : '${T("Ouvrir")}') + '</button></td></tr>';
     }).join('');
-    return '<div class="carte"><h2>${T("Les 27 États membres")}</h2>'
-      + '<p class="sous">${T("Un pays fermé disparaît du choix à la caisse et la commande y est refusée.")}</p>'
+    return '<div class="carte"><div class="tete"><h2>${T("Les 27 États membres")}</h2>'
+      + '<p class="sous">${T("Un pays fermé disparaît du choix à la caisse et la commande y est refusée.")}</p></div>'
       + '<table><thead><tr><th>${T("Pays")}</th><th>${T("État")}</th>'
       + '<th>${T("Bloquants")}</th><th>${T("À confirmer")}</th><th>${T("Mandats")}</th>'
       + '<th class="dr">${T("Dossier")}</th></tr></thead><tbody>' + lignes + '</tbody></table>'

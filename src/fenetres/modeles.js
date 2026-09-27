@@ -53,7 +53,7 @@ body{background:var(--f-page);color:var(--tx);
 .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));gap:1rem}
 .slot{display:flex;flex-direction:column;gap:.35rem}
 .slot .lbl{font-size:.7rem;font-weight:700;color:var(--tx-bleute);text-transform:uppercase;letter-spacing:.05em;text-align:center}
-.cadre{aspect-ratio:3/4;border:1.5px dashed var(--v12);border-radius:9px;cursor:pointer;position:relative;
+.cadre{aspect-ratio:3/4;max-height:max(10rem,calc(100vh - 31rem));border:1.5px dashed var(--v12);border-radius:9px;cursor:pointer;position:relative;
   overflow:hidden;background:var(--f-champ);transition:border-color .15s;display:flex;align-items:center;justify-content:center}
 .cadre:hover{border-color:#c9a97e}
 .cadre.ro{cursor:default;opacity:.7}
