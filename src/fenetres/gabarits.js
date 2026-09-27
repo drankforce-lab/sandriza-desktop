@@ -43,6 +43,9 @@ body{background:var(--f-page);color:var(--tx);
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:1rem 1.1rem;
   margin:0 0 1.1rem;break-inside:avoid;-webkit-column-break-inside:avoid}
 .carte.edit{border-color:#c9a97e}
+.ged{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.1rem;align-items:start}
+.ged .apercu,.ged .gifwrap{max-width:none}
+@media (max-width:900px){.ged{grid-template-columns:1fr}}
 .stitre{font-size:.9rem;font-weight:700;color:var(--tx-bleute);margin:0 0 .1rem;display:flex;align-items:center;justify-content:space-between;gap:.6rem}
 .sdesc{font-size:.76rem;color:var(--tx2);margin:.1rem 0 .8rem}
 .gr2{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
@@ -187,6 +190,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       headerSubtitle: '', footerBg: '#1a1a2e', footerTextColor: '#c4a882', animated: false, gifBanner: false };
     var brand = (D && D.marque) || 'SANDRIZA';
     var h = '<div class="carte edit"><div class="stitre">' + (EDIT ? '${T("Modifier — ")}' + esc(t.name || '') : '${T("Nouveau gabarit")}') + '</div>';
+    /* ⚠ DEUX COLONNES (sa demande : aucune barre de defilement) — reglages a
+       gauche, apercus a droite. Empiles, ils depassaient la fenetre de 466 px. */
+    h += '<div class="ged"><div class="ged-g">';
     h += '<div class="ch"><label for="g-name">${T("Nom du gabarit")}</label><input type="text" id="g-name" value="' + esc(t.name || '') + '"' + (RO ? ' disabled' : '') + '></div>';
     h += '<div class="gr2">' + coulChamp('g-hfrom', '${T("En-tête : couleur de départ")}', t.headerBgFrom || '#1a1a2e')
       + coulChamp('g-hto', '${T("En-tête : couleur de fin")}', t.headerBgTo || '#2d1b69') + '</div>';
@@ -199,6 +205,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '<div class="gr2">' + coulChamp('g-fbg', '${T("Pied : couleur de fond")}', t.footerBg || '#1a1a2e')
       + coulChamp('g-fcol', '${T("Pied : couleur du texte")}', t.footerTextColor || '#c4a882') + '</div>';
     // Aperçu CSS
+    h += '</div><div class="ged-d">';
     h += '<div class="apercu" id="g-prev">'
       + '<div class="head" id="g-prev-head"><div class="ti">' + esc(brand.toUpperCase()) + '</div><div class="su" id="g-prev-sub"></div></div>'
       + '<div class="body">${T("…contenu du courriel…")}</div>'
@@ -207,6 +214,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '<div class="gifwrap" id="g-gifwrap" style="display:' + (t.gifBanner ? 'block' : 'none') + '">'
       + '<div class="lg"><span class="ic">🖼️</span>${T(" Aperçu de la bannière GIF ")}<button class="b" type="button" id="g-gifrefr" style="padding:.1rem .5rem">↻</button></div>'
       + '<img id="g-gifimg" alt="${T("Aperçu bannière")}"></div>';
+    h += '</div></div>';
     if (!RO) {
       h += '<div style="display:flex;gap:.6rem;margin-top:.3rem">'
         + '<button class="prim" id="g-save"><span class="ic">💾</span>${T(" Enregistrer")}</button>'
