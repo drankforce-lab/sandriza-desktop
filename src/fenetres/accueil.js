@@ -83,6 +83,11 @@ button.prim:disabled{opacity:.5;cursor:default}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
 .mini:hover:not(:disabled){background:var(--v10)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.diapos-choix{display:flex;gap:.35rem;flex-wrap:wrap;margin:0 0 .6rem}
+.diapos-choix button{font:inherit;font-size:.78rem;font-weight:600;padding:.32rem .75rem;border-radius:99px;
+  border:1px solid var(--v12);background:var(--v05);color:var(--tx2);cursor:pointer}
+.diapos-choix button.on{background:#c9a97e;border-color:#c9a97e;color:#17202c}
 `;
 
 function pageAccueil(ouverture) {
@@ -229,7 +234,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '<div class="ch"><label>${T("Bouton 2 — Lien")}</label><input aria-label="${T("Bouton 2 — Lien")}" data-sf="cta2Href" data-si="' + i + '" value="' + esc(s.cta2Href||'') + '"' + (RO?' disabled':'') + '></div>'
       + '</div></div>';
   }
-  function slidesListHtml(){ return SLIDES.map(diapoHtml).join('') || '<div class="vide">${T("Aucune diapo.")}</div>'; }
+  /* ⚠ UNE DIAPO A LA FOIS (sa demande : aucune barre de defilement). Toutes les
+     diapos empilees, chacune avec son formulaire complet, depassaient la fenetre
+     des la deuxieme. Une rangee de pastilles choisit celle qu on edite ; les
+     autres restent dans SLIDES (lireDiapos ne relit que ce qui est a l ecran). */
+  var SEL = 0;
+  function slidesListHtml(){
+    if (!SLIDES.length) return '<div class="vide">${T("Aucune diapo.")}</div>';
+    if (SEL >= SLIDES.length) SEL = SLIDES.length - 1;
+    if (SEL < 0) SEL = 0;
+    var chips = '<div class="diapos-choix">' + SLIDES.map(function(d, i){
+      return '<button type="button" data-sch="' + i + '" class="' + (i === SEL ? 'on' : '') + '">${T("Diapo ")}' + (i + 1)
+        + (d.title ? ' · ' + esc(String(d.title).slice(0, 22)) : '') + '</button>'; }).join('') + '</div>';
+    return chips + diapoHtml(SLIDES[SEL], SEL);
+  }
 
   function editeurHtml(){
     var b = BLOCS.filter(function(x){ return x.id === EDIT; })[0]; if (!b) { EDIT=null; return listeHtml(); }
@@ -272,7 +290,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       return;
     }
     var sadd = document.getElementById('a-sadd'); if (sadd) sadd.onclick = ajouterDiapo;
-    corps.querySelectorAll('[data-sdel]').forEach(function(el){ el.onclick = function(){ lireDiapos(); SLIDES.splice(parseInt(el.getAttribute('data-sdel'),10),1); rafraichirDiapos(); }; });
+    corps.querySelectorAll('[data-sch]').forEach(function(el){ el.onclick = function(){ lireDiapos(); SEL = parseInt(el.getAttribute('data-sch'),10) || 0; rafraichirDiapos(); }; });
+    corps.querySelectorAll('[data-sdel]').forEach(function(el){ el.onclick = function(){ lireDiapos(); SLIDES.splice(parseInt(el.getAttribute('data-sdel'),10),1); SEL = Math.max(0, SEL - 1); rafraichirDiapos(); }; });
     corps.querySelectorAll('[data-sup]').forEach(function(el){ el.onclick = function(){ bougerDiapo(parseInt(el.getAttribute('data-sup'),10), -1); }; });
     corps.querySelectorAll('[data-sdn]').forEach(function(el){ el.onclick = function(){ bougerDiapo(parseInt(el.getAttribute('data-sdn'),10), 1); }; });
     var sv = document.getElementById('a-save'); if (sv) sv.onclick = enregistrerBloc;
@@ -297,7 +316,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   // ── Éditeur héro ──
   function ouvrirEdit(id){
     var b = BLOCS.filter(function(x){ return x.id===id; })[0]; if(!b) return;
-    EDIT = id;
+    EDIT = id; SEL = 0;
     if (id === 'hero') {
       var c = b.content || {};
       SLIDES = (c.slides && c.slides.length) ? JSON.parse(JSON.stringify(c.slides))
@@ -323,8 +342,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var cn = document.getElementById('a-scount'); if (cn) cn.textContent = '(' + SLIDES.length + ')';
     brancher();
   }
-  function ajouterDiapo(){ lireDiapos(); SLIDES.push({ id:'s'+SLIDES.length+'_'+SLIDES.length, image:'', gradient:gradVal(SLIDES.length % Math.max(1,GRADS.length)), overlay:0.15, eyebrow:'', title:SZ_DONNEES.diapoTitre, subtitle:'', cta1Text:SZ_DONNEES.diapoBouton, cta1Href:'#shop', cta2Text:'', cta2Href:'' }); rafraichirDiapos(); }
-  function bougerDiapo(i, dir){ lireDiapos(); var ni=i+dir; if(ni<0||ni>=SLIDES.length)return; var t=SLIDES[i]; SLIDES[i]=SLIDES[ni]; SLIDES[ni]=t; rafraichirDiapos(); }
+  function ajouterDiapo(){ lireDiapos(); SEL = SLIDES.length; SLIDES.push({ id:'s'+SLIDES.length+'_'+SLIDES.length, image:'', gradient:gradVal(SLIDES.length % Math.max(1,GRADS.length)), overlay:0.15, eyebrow:'', title:SZ_DONNEES.diapoTitre, subtitle:'', cta1Text:SZ_DONNEES.diapoBouton, cta1Href:'#shop', cta2Text:'', cta2Href:'' }); rafraichirDiapos(); }
+  function bougerDiapo(i, dir){ lireDiapos(); var ni=i+dir; if(ni<0||ni>=SLIDES.length)return; var t=SLIDES[i]; SLIDES[i]=SLIDES[ni]; SLIDES[ni]=t; SEL = ni; rafraichirDiapos(); }
 
   /* == LE BROUILLON DES BLOCS DE LA PAGE D'ACCUEIL ==========================
      Sa consigne, le 2026-08-20 : << garde le texte sans les images >>.
