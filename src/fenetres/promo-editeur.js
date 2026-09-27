@@ -144,6 +144,13 @@ body{background:var(--f-page);color:var(--tx);
 .btn.on{background:#7AA7FF;border-color:#7AA7FF;color:#0b1220;font-weight:650}
 .insp .lst{flex:0 0 auto;max-height:26%;overflow-y:auto;border-bottom:1px solid var(--v08)}
 .insp .prop{flex:1 1 auto;overflow-y:auto;padding:.7rem .8rem}
+/* ⚠ AUCUNE BARRE DE DEFILEMENT DANS UN MODULE (sa demande du 2026-09-26) : les
+   reglages du modele depassaient de ~300 px dans une colonne de 340. Le plan a
+   plus de mille pixels de large — l inspecteur s elargit et range ses blocs sur
+   deux colonnes, un bloc ne se coupant jamais entre deux. */
+.insp{flex-basis:clamp(340px,40%,600px)}
+.insp .prop{columns:2 15rem;column-gap:1rem}
+.insp .prop>*{break-inside:avoid}
 .el{display:flex;align-items:center;gap:.45rem;padding:.34rem .7rem;cursor:pointer;
   border-bottom:1px solid var(--v04);font-size:.79rem}
 .el:hover{background:var(--v04)}
