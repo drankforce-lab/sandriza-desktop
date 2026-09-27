@@ -169,7 +169,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
-  function fdate(ts){ if (!ts) return '—'; try { return new Date(ts).toLocaleString('${LIEU()}'); } catch(e){ return '—'; } }
+  /* « 13 août 2026, 08:00:12 » plutôt que « 2026-08-13 08 h 00 min 12 s » (le format
+     par defaut de fr-CA) : un journal garde ses secondes, mais se lit d un coup d oeil. */
+  function fdate(ts){ if (!ts) return '—'; try { var d = new Date(ts); if (isNaN(d)) return '—';
+    var p = function(n){ return (n < 10 ? '0' : '') + n; };
+    return d.toLocaleDateString('${LIEU()}', { dateStyle: 'medium' }) + ', ' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds()); } catch(e){ return '—'; } }
 
   var MOTIFS = {
     session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',

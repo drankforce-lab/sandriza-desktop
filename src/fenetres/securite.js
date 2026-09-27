@@ -418,7 +418,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return p.then(function(r){ return r||{ok:false,motif:'echec'}; }).catch(function(e){ return {ok:false,motif:'echec',detail:(e&&e.message)||e}; });
   }
 
-  function fmtTs(iso){ if (!iso) return '${T("Jamais connecté")}'; try { return new Date(iso).toLocaleString('${LIEU()}'); } catch(e){ return '—'; } }
+  function fmtTs(iso){ if (!iso) return '${T("Jamais connecté")}'; try { return new Date(iso).toLocaleString('${LIEU()}', { dateStyle: 'medium', timeStyle: 'short' }); } catch(e){ return '—'; } }
   // Les initiales : deux lettres au plus, prises sur le nom, sinon le courriel.
   function initiales(s){
     var src = String(s.nom || s.email || '?').trim();

@@ -267,7 +267,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + ' aria-label="' + esc('${T("Livrer vers ")}' + (p.nom || p.code)) + '"'
         + (p.livre ? ' checked' : '') + dis + '></td></tr>';
     };
-    var maj = PAYS.maj ? new Date(PAYS.maj).toLocaleString('${LIEU()}') : '${T("jamais")}';
+    var maj = PAYS.maj ? new Date(PAYS.maj).toLocaleString('${LIEU()}', { dateStyle: 'medium', timeStyle: 'short' }) : '${T("jamais")}';
     return '<div class="carte large"><h2>${T("Pays desservis")}</h2>'
       + ''
       + '<div class="pbarre">'
