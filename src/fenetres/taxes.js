@@ -58,17 +58,17 @@ th{text-align:left;padding:.35rem .5rem;font-size:.68rem;text-transform:uppercas
   letter-spacing:.06em;color:var(--tx2);border-bottom:1px solid var(--v12)}
 td{padding:.4rem .5rem;border-bottom:1px solid var(--v05);vertical-align:middle}
 tr:last-child td{border-bottom:none}
-td.prov{font-weight:700;white-space:nowrap;width:13rem}
-td.prov .n{font-weight:400;color:var(--tx3);font-size:.75rem}
+td.prov{font-weight:700;width:9rem}
+td.prov .n{font-weight:400;color:var(--tx3);font-size:.72rem;line-height:1.25;white-space:normal}
 td.dr{text-align:right;white-space:nowrap}
-.comp{display:inline-flex;align-items:center;gap:.3rem;margin:.15rem .8rem .15rem 0}
+.comp{display:inline-flex;align-items:center;gap:.3rem;margin:.1rem .6rem .1rem 0}
 .comp .org{font-size:.7rem;color:var(--tx3)}
 input[type=text],input[type=number]{font:inherit;color:var(--tx);background:var(--f-champ);
   border:1px solid var(--v12);border-radius:7px;padding:.25rem .4rem}
 input[type=text]:focus,input[type=number]:focus{outline:none;border-color:#c9a97e}
 input:disabled{opacity:.55}
-.nom{width:5.5rem}
-.taux{width:5.5rem;text-align:right}
+.nom{width:4.2rem}
+.taux{width:4.6rem;text-align:right}
 .cc{width:5rem;text-transform:uppercase}
 .gestes{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.9rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
@@ -90,6 +90,17 @@ button.dgr{color:var(--tx-err);border-color:rgba(248,113,113,.4)}
 .ec .av{color:var(--tx-err);text-align:right;white-space:nowrap}
 .ec .ap{color:var(--tx-ok);font-weight:700;text-align:right;white-space:nowrap}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.deuxT{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.8rem;align-items:start}
+.deuxC{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.8rem;align-items:start}
+.deuxC > .carte{margin:0}
+@media (max-width:1000px){.deuxT,.deuxC{grid-template-columns:1fr}}
+
+.intl{font-size:.76rem;line-height:1.5;color:var(--tx2);border:1px solid var(--v08);border-radius:10px;padding:.5rem .75rem;margin:.1rem 0 0}
+.intl strong{color:var(--tx)}
+.intl br{display:none}
+.voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;align-items:center;justify-content:center;z-index:50;padding:1rem}
+.voile .boite{max-width:44rem;width:100%;max-height:88vh;overflow:auto;margin:0}
 `;
 
 /* ⚠ L ETAT D OUVERTURE EST UN PARAMETRE. Le panneau de comparaison et la ligne
@@ -216,8 +227,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     // ── Canada ─────────────────────────────────────────────────────────────
     h.push('<div class="carte"><h2>${T("Canada — par province de livraison")}</h2>');
-    h.push('<table><thead><tr><th>${T("Province ou territoire")}</th><th>${T("Composantes — nom, taux, organisme")}</th></tr></thead><tbody>');
-    (d.provinces || []).forEach(function(p){
+    /* ⚠ DEUX TABLEAUX COTE A COTE (sa demande : aucune barre de defilement) :
+       treize provinces en une colonne de champs faisaient ~600 px a elles seules. */
+    var provs = d.provinces || [], moitie = Math.ceil(provs.length / 2);
+    var entete = '<table><thead><tr><th>${T("Province ou territoire")}</th><th>${T("Composantes — nom, taux, organisme")}</th></tr></thead><tbody>';
+    h.push('<div class="deuxT">' + entete);
+    provs.forEach(function(p, ip){
+      if (ip === moitie && moitie > 0) h.push('</tbody></table>' + entete);
       h.push('<tr><td class="prov">' + esc(p.code) + '<div class="n">' + esc(p.nom) + '</div></td><td>');
       if (!p.composantes.length) h.push('<span style="color:var(--tx3)">—</span>');
       p.composantes.forEach(function(c, i){
@@ -228,16 +244,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       });
       h.push('</td></tr>');
     });
-    h.push('</tbody></table>');
+    h.push('</tbody></table></div>');
     h.push('<div class="gestes"><button id="b-reinit"' + (RO ? ' disabled' : '') + '>${T("Réinitialiser aux défauts")}</button></div>');
     h.push('</div>');
 
     // ── Écarts avec la référence (seulement si on a demandé la comparaison) ──
+    /* ⚠ LA COMPARAISON EST UNE BOITE PAR-DESSUS L ECRAN (sa demande : aucune barre
+       de defilement). Elle ne vit que le temps de decider — « Appliquer » ou
+       « Fermer » — : dans le flux, sous les treize provinces, elle faisait
+       deborder la fenetre de plus de 300 px. */
+    var hEc = '';
     if (ECARTS) {
       var ec = d.ecarts || [];
-      h.push('<div class="carte"><h2>${T("Comparaison aux taux de référence")}</h2>');
+      var hp = h; h = [];
+      h.push('<div class="voile"><div class="boite carte"><h2>${T("Comparaison aux taux de référence")}</h2>');
       if (!ec.length) {
         h.push('<div class="vide">${T("Vos taux correspondent à la référence.")}</div>');
+        h.push('<div class="gestes"><button id="b-fermer-ecarts">${T("Fermer")}</button></div>');
       } else {
         h.push('<div class="avis">${T("Appliquer remplace les composantes canadiennes par les taux de référence. ")}'
           + '${T("N’appliquez pas si vous avez ajusté un taux selon vos inscriptions.")}</div>');
@@ -253,20 +276,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         h.push('<div class="gestes"><button class="prim" id="b-appliquer"' + (RO ? ' disabled' : '')
           + '>${T("Appliquer la référence")}</button><button id="b-fermer-ecarts">${T("Fermer")}</button></div>');
       }
-      h.push('</div>');
+      h.push('</div></div>');
+      hEc = h.join(''); h = hp;
     }
 
     // ── International ──────────────────────────────────────────────────────
     // ⚠ Table manuelle RETIRÉE (2026-08-12) : Stripe Tax calcule la taxe
     // internationale à la caisse, selon la destination et les inscriptions réelles.
     // Une table saisie à la main ferait double emploi (et pourrait diverger).
-    h.push('<div class="carte"><h2>${T("International")}</h2>'
-      + '<div class="avis">${T("Les taxes internationales sont <strong>gérées automatiquement par Stripe Tax</strong> : ")}'
+    h.push('<div class="intl"><strong>${T("International")}</strong> '
+      + '<span>${T("Les taxes internationales sont <strong>gérées automatiquement par Stripe Tax</strong> : ")}'
       + '${T("le taux exact est calculé <strong>à la caisse</strong> selon la destination, à partir de vos inscriptions ")}'
       + '${T("fiscales réelles — plus rien à saisir ici.")}<br>'
       + '${T("• Les <strong>pays et États desservis</strong> se règlent dans <strong>Livraison ▸ Pays desservis</strong> ")}'
       + '${T("(lus en direct chez Stripe).")}<br>'
-      + '${T("• La <strong>clé Stripe Tax</strong> se règle dans <strong>Clés API</strong>.")}</div></div>');
+      + '${T("• La <strong>clé Stripe Tax</strong> se règle dans <strong>Clés API</strong>.")}</span></div>');
+    h.push(hEc);
 
     corps.innerHTML = h.join('');
     brancher();

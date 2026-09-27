@@ -1722,6 +1722,34 @@ const JEU = {
           { prov: 'NS', code: 'HST', nom: 'TVH', actuel: null, reference: 14 },
         ] },
     } },
+    /* ⚠ LES TREIZE PROVINCES ET TERRITOIRES (2026-09-26) : les autres cas n en ont
+       que trois, et une fenetre qui tient avec trois lignes peut deborder avec
+       treize — exactement ce que la sonde des debordements doit voir. */
+    { nom: 'treize provinces, comparaison ouverte', id: 'ecarts', reponses: {
+      identite: IDENTITE,
+      'config:taxes:donnees': { ok: true, peutModifier: true, intlLivraison: true,
+        lastReviewed: '2026-08-01', updatedBy: 'Benoit Brousseau',
+        provinces: [
+          { code: 'QC', nom: 'Québec', composantes: [{ code: 'GST', name: 'TPS', pct: 5, remitTo: 'ARC' }, { code: 'QST', name: 'TVQ', pct: 9.975, remitTo: 'RQ' }] },
+          { code: 'ON', nom: 'Ontario', composantes: [{ code: 'HST', name: 'TVH', pct: 13, remitTo: 'ARC' }] },
+          { code: 'BC', nom: 'Colombie-Britannique', composantes: [{ code: 'GST', name: 'TPS', pct: 5, remitTo: 'ARC' }, { code: 'PST', name: 'TVP', pct: 7, remitTo: 'BC' }] },
+          { code: 'AB', nom: 'Alberta', composantes: [{ code: 'GST', name: 'TPS', pct: 5, remitTo: 'ARC' }] },
+          { code: 'MB', nom: 'Manitoba', composantes: [{ code: 'GST', name: 'TPS', pct: 5, remitTo: 'ARC' }, { code: 'PST', name: 'TVD', pct: 7, remitTo: 'MB' }] },
+          { code: 'SK', nom: 'Saskatchewan', composantes: [{ code: 'GST', name: 'TPS', pct: 5, remitTo: 'ARC' }, { code: 'PST', name: 'TVP', pct: 6, remitTo: 'SK' }] },
+          { code: 'NS', nom: 'Nouvelle-Écosse', composantes: [{ code: 'HST', name: 'TVH', pct: 14, remitTo: 'ARC' }] },
+          { code: 'NB', nom: 'Nouveau-Brunswick', composantes: [{ code: 'HST', name: 'TVH', pct: 15, remitTo: 'ARC' }] },
+          { code: 'NL', nom: 'Terre-Neuve-et-Labrador', composantes: [{ code: 'HST', name: 'TVH', pct: 15, remitTo: 'ARC' }] },
+          { code: 'PE', nom: 'Île-du-Prince-Édouard', composantes: [{ code: 'HST', name: 'TVH', pct: 15, remitTo: 'ARC' }] },
+          { code: 'NT', nom: 'Territoires du Nord-Ouest', composantes: [{ code: 'GST', name: 'TPS', pct: 5, remitTo: 'ARC' }] },
+          { code: 'NU', nom: 'Nunavut', composantes: [{ code: 'GST', name: 'TPS', pct: 5, remitTo: 'ARC' }] },
+          { code: 'YT', nom: 'Yukon', composantes: [{ code: 'GST', name: 'TPS', pct: 5, remitTo: 'ARC' }] },
+        ],
+        international: [],
+        ecarts: [
+          { prov: 'ON', code: 'HST', nom: 'TVH', actuel: 13, reference: 13.5 },
+          { prov: 'NS', code: 'HST', nom: 'TVH', actuel: null, reference: 14 },
+        ] },
+    } },
     { nom: 'taxes, ajout d’un pays', id: 'pays', reponses: {
       identite: IDENTITE,
       'config:taxes:donnees': { ok: true, peutModifier: true, intlLivraison: true,
