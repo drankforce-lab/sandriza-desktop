@@ -43,20 +43,24 @@ body{background:var(--f-page);color:var(--tx);
 .avert{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(248,113,113,.4);
   background:rgba(248,113,113,.1);color:var(--tx-err2);border-radius:9px;padding:.7rem .85rem;font-size:.8rem;line-height:1.5}
 .avert b{color:var(--tx-err2)}
-.avert .g{margin-top:.55rem}
+/* Sur UNE ligne, le bouton a droite : trois lignes de bandeau poussaient le
+   formulaire hors de la fenetre (2026-09-26). Le texte ne perd rien. */
+.avert{display:flex;align-items:center;gap:.8rem;padding:.45rem .8rem;margin-top:.45rem}
+.avert[hidden]{display:none}
+.avert .g{margin:0 0 0 auto;flex:0 0 auto}
 .avert button{font:inherit;font-size:.78rem;color:var(--tx-err2);background:rgba(248,113,113,.08);
   border:1px solid rgba(248,113,113,.4);border-radius:7px;padding:.24rem .6rem;cursor:pointer}
 .avert button:hover:not(:disabled){background:rgba(248,113,113,.16)}
 /* Disposition en COLONNES (type maçonnerie) : les cartes courtes (Purolator, UPS…)
    s'empilent sous la précédente au lieu de s'aligner par rangée sur la hauteur de
    Postes Canada — plus d'espace mort sous une carte courte. */
-.corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;
-  columns:30rem;column-gap:1rem}
+.corps{flex:1 1 auto;min-height:0;padding:.7rem 1.05rem;overflow-y:auto;
+  columns:24rem;column-gap:.8rem}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
-  padding:.9rem 1rem;min-width:0;display:flex;flex-direction:column;
-  break-inside:avoid;-webkit-column-break-inside:avoid;margin-bottom:1rem}
+  padding:.75rem .9rem;min-width:0;display:flex;flex-direction:column;
+  break-inside:avoid;-webkit-column-break-inside:avoid;margin-bottom:.7rem}
 .carte .th{display:flex;align-items:center;gap:.5rem;margin:0 0 .3rem}
 /* ⚠ Emoji en GRIS, jamais en couleur (préférence 2026-08-11). */
 .carte h2{margin:0;font:700 .85rem/1.2 system-ui}
@@ -245,10 +249,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<option value="sandbox"' + ((pc.mode || 'sandbox') === 'sandbox' ? ' selected' : '') + '>${T("Bac à sable (test)")}</option>'
       + '<option value="production"' + (pc.mode === 'production' ? ' selected' : '') + '>${T("Production")}</option></select></div>';
     // Mapbox (jeton public) + adresse expéditeur.
-    h += '<hr class="sep"><div class="stitre">${T("Autocomplétion d’adresse à la caisse")}</div>';
+    /* ⚠ TROIS CARTES AU LIEU D UNE (sa demande : aucune barre de defilement) :
+       la carte geante de Postes Canada empechait les colonnes de s equilibrer. */
+    h += '</div><div class="carte"><h2>${T("Autocomplétion d’adresse à la caisse")}</h2>';
     h += texteHtml('mapbox', '${T("Jeton Mapbox (public, pk.*)")}', D.mapbox, 'pk.xxxxxxxx', true,
       '${T("Gratuit sur account.mapbox.com. S’il est renseigné, il remplace AddressComplete (plus précis au Canada).")}');
-    h += '<hr class="sep"><div class="stitre">${T("Adresse expéditeur (entrepôt / boutique)")}</div>';
+    h += '</div><div class="carte"><h2>${T("Adresse expéditeur (entrepôt / boutique)")}</h2>';
     h += '<div class="gr2">'
       + texteHtml('cp-oname', '${T("Nom / Boutique")}', pc.originName, 'SANDRIZA', false)
       + texteHtml('cp-ophone', '${T("Téléphone (sans tirets)")}', pc.originPhone, '5140000000', false) + '</div>';
