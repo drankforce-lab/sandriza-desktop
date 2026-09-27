@@ -193,6 +193,20 @@ button .n.hi{background:rgba(245,158,11,.28);color:var(--tx-att)}
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* L onglet TPS / TVQ en deux colonnes (2026-09-26, aucune barre de defilement). */
+.cols-taxes{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.8rem;align-items:start}
+.cols-taxes > .col{display:flex;flex-direction:column;gap:.6rem;min-width:0}
+.cols-taxes .carte{margin:0}
+@media (max-width:1000px){.cols-taxes{grid-template-columns:1fr}}
+.per-tete{display:flex;align-items:center;gap:.6rem;margin:0 0 .3rem}
+.per-tete h2{margin:0}
+.seg{display:inline-flex;gap:.2rem;margin-left:auto;background:var(--v05);border:1px solid var(--v10);border-radius:10px;padding:.15rem}
+.seg button{font:inherit;font-size:.76rem;font-weight:600;border:0;background:transparent;color:var(--tx2);padding:.28rem .65rem;border-radius:8px;cursor:pointer}
+.seg button.on{background:#c9a97e;color:#17202c}
+[data-perv][hidden]{display:none}
+.col-droite{display:flex;flex-direction:column;gap:.8rem;min-width:0}
+.col-droite > .carte{margin:0}
 `;
 
 /**
@@ -384,19 +398,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
       + '</select></label>'
       + '</div>';
 
-    h += '<div class="carte"><h2>${T("Numéros d’inscription aux taxes")}</h2>'
+    /* Coordonnees SOUS les numeros, dans la colonne de droite : en pleine largeur
+       dessous, la carte faisait deborder l onglet (sonde, 2026-09-26). */
+    h += '<div class="col-droite"><div class="carte"><h2>${T("Numéros d’inscription aux taxes")}</h2>'
       + champ('e-tps', 'TPS / TVH (GST/HST)', p.tpsNo, '${T("Format : 123456789 RT0001 · ARC")}', true, true)
       + champ('e-tvq', 'TVQ', p.tvqNo, '${T("Format : 1234567890 TQ0001 · Revenu Québec")}', true, true)
       + '</div>';
 
-    h += '<div class="carte large"><h2>${T("Coordonnées")}</h2>'
+    h += '<div class="carte"><h2>${T("Coordonnées")}</h2>'
       + '<div class="deux">'
       + champ('e-adresse', '${T("Adresse")}', p.address, '', false, false)
       + champ('e-ville', '${T("Ville")}', p.city, '', false, false)
       + champ('e-cp', '${T("Code postal")}', p.postal, '', true, false)
       + champ('e-tel', '${T("Téléphone")}', p.phone, '', false, false)
       + champ('e-courriel', '${T("Courriel professionnel")}', p.email, '', false, false)
-      + '</div></div>';
+      + '</div></div></div>';
     h += '</div>';
 
     if (!RO) h += '<div style="margin-top:1rem"><button class="mini prim" id="e-enr">${T("Enregistrer le profil")}</button></div>';
@@ -451,6 +467,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
     return h;
   }
 
+  var PER = 'tri';   // la periode montree : par trimestre ou par mois
   function vueTaxes(){
     var t = D.taxes;
     /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
@@ -466,7 +483,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
 
     /* ⚠ LE SEUIL DE PETIT FOURNISSEUR EST LA PREMIERE QUESTION qu on se pose
        quand on demarre : sous 30 000 $, l inscription n est pas obligatoire. */
-    h += '<div class="avis ' + (t.souSeuil ? 'bon' : '') + '">'
+    /* ⚠ DEUX COLONNES, PAS SIX ETAGES (sa demande : aucune barre de defilement).
+       A gauche : la taxe nette a remettre, puis les avis ; a droite : UNE carte
+       par periode (trimestre / mois) au lieu de deux tableaux empiles — avec
+       douze mois, l onglet depassait la fenetre de pres de 500 px. */
+    var av = '';
+    av += '<div class="avis ' + (t.souSeuil ? 'bon' : '') + '">'
       + (t.souSeuil
           ? ('${T("Vos ventes (")}' + esc(t.ventesNettes) + '${T(") sont sous le seuil de")} ' + esc(t.seuil)
              + ' ${T(": l’inscription aux taxes n’est pas obligatoire. À confirmer avec votre comptable.")}')
@@ -489,30 +511,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
        deplacement d ECRAN. Le nom d une op dit d ou vient la donnee, pas ou elle
        s affiche. */
     if (FRAIS !== null) {
-      h += '<div class="frais">'
+      av += '<div class="frais">'
         + '<div class="ft">${T("Frais Stripe Tax")} ' + esc(String(FRAIS.annee || ANNEE)) + '</div>';
       if (FRAIS.erreur) {
-        h += '<div class="fx">' + esc(FRAIS.erreur) + '</div>';
+        av += '<div class="fx">' + esc(FRAIS.erreur) + '</div>';
       } else if (!FRAIS.transactions) {
-        h += '<div class="fx">${T("Aucune transaction facturée cette année.")}</div>';
+        av += '<div class="fx">${T("Aucune transaction facturée cette année.")}</div>';
       } else {
-        h += '<div class="fv">' + esc(fmtArgent(FRAIS.total)) + '</div>'
+        av += '<div class="fv">' + esc(fmtArgent(FRAIS.total)) + '</div>'
           + '<div class="fx">' + FRAIS.transactions + ' '
           + (FRAIS.transactions > 1 ? '${T("transactions facturées")}' : '${T("transaction facturée")}')
           + ' ${T("par Stripe.")} '
           + '${T("<b>Notre décompte</b> : à confronter à la facture Stripe avant de le ")}'
           + '${T("saisir en dépense. Rien n’est enregistré automatiquement.")}</div>';
         if ((FRAIS.mois || []).length) {
-          h += '<div class="fm">' + FRAIS.mois.map(function(m){
+          av += '<div class="fm">' + FRAIS.mois.map(function(m){
             return '<span>' + esc(m.mois) + ' · ' + esc(fmtArgent(m.total)) + '</span>';
           }).join('') + '</div>';
         }
       }
-      h += '</div>';
+      av += '</div>';
     }
 
     if (t.nbRemb) {
-      h += '<div class="aide">↩ ' + t.nbRemb + ' '
+      av += '<div class="aide">↩ ' + t.nbRemb + ' '
         + (t.nbRemb > 1 ? '${T("remboursements déduits")}' : '${T("remboursement déduit")}')
         + ' ${T("de ces chiffres : −")}' + esc(t.rembSousTotal)
         + ' ${T("taxable, −")}' + esc(t.rembTps) + ' TPS, −' + esc(t.rembTvq) + ' TVQ.</div>';
@@ -522,7 +544,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
       /* ⚠ LA PST NE SE DECLARE PAS SUR LES MEMES FORMULAIRES : elle se remet a
          CHAQUE province de destination. La taire ferait croire a une remise
          complete alors qu il en manque une par province. */
-      h += '<div class="avis info"><span class="ic">🏛</span> ${T("<strong>Taxes provinciales perçues (PST / RST)</strong> — ")}'
+      av += '<div class="avis info"><span class="ic">🏛</span> ${T("<strong>Taxes provinciales perçues (PST / RST)</strong> — ")}'
         + '${T("à remettre à CHAQUE province séparément, elles ne sont ni dans les chiffres")} '
         + '${T("ci-dessus ni dans GST34 / FPZ-500-V :")}<br>'
         + t.pst.map(function(p){
@@ -530,6 +552,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
       + '</div>';
     }
 
+    h += '<div class="cols-taxes"><div class="col">';
     h += '<div class="carte"><h2>${T("Taxe nette")} ${T("à remettre")} <span class="n">${T("après crédits sur intrants")} (CTI / RTI)</span></h2>'
       + '<table><thead><tr><th></th><th style="text-align:right">TPS</th>'
       + '<th style="text-align:right">TVQ</th><th style="text-align:right">${T("Total")}</th></tr></thead><tbody>'
@@ -546,8 +569,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
           ? '${T("Aucune taxe payée sur des dépenses n’est saisie — vos crédits sur intrants sont donc à zéro. Saisissez vos dépenses avec leur TPS et leur TVQ pour les récupérer.")}'
           : '${T("Un montant négatif est un remboursement de taxe en votre faveur, pas une erreur.")}')
       + '</div></div>';
+    h += av + '</div><div class="col">';
 
-    h += '<div class="carte"><h2>${T("Résumé trimestriel")} <span class="n">${T("fréquence de remise habituelle d’une PME")}</span></h2>'
+    h += '<div class="carte"><div class="per-tete"><h2>${T("Par période")}</h2><div class="seg">'
+      + '<button type="button" data-per="tri" class="' + (PER === 'tri' ? 'on' : '') + '">${T("Par trimestre")}</button>'
+      + '<button type="button" data-per="mois" class="' + (PER === 'mois' ? 'on' : '') + '">${T("Par mois")}</button></div></div>'
+      + '<div data-perv="tri"' + (PER === 'tri' ? '' : ' hidden') + '><div class="aide" style="margin:0 0 .4rem">${T("fréquence de remise habituelle d’une PME")}</div>'
       + '<table><thead><tr><th>${T("Trimestre")}</th><th style="text-align:right">${T("Ventes nettes")}</th>'
       + '<th style="text-align:right">TPS</th><th style="text-align:right">TVQ</th>'
       + '<th style="text-align:right">${T("À remettre")}</th><th style="text-align:right">${T("Cmdes")}</th></tr></thead><tbody>'
@@ -559,23 +586,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
       + '<tr class="total"><td>${T("Année")} ' + D.annee + '</td><td class="arg">' + esc(t.ventesNettes)
       + '</td><td class="arg">' + esc(t.tps) + '</td><td class="arg">' + esc(t.tvq)
       + '</td><td class="arg">' + esc(t.total) + '</td><td class="arg">' + t.nbCommandes + '</td></tr>'
-      + '</tbody></table></div>';
-
-    h += '<div class="carte"><h2>${T("Détail mensuel")}</h2>'
-      + '<table><thead><tr><th>${T("Mois")}</th><th style="text-align:right">${T("Ventes nettes")}</th>'
+      + '</tbody></table></div>'
+      + '<div data-perv="mois"' + (PER === 'mois' ? '' : ' hidden') + '><table><thead><tr><th>${T("Mois")}</th><th style="text-align:right">${T("Ventes nettes")}</th>'
       + '<th style="text-align:right">TPS</th><th style="text-align:right">TVQ</th>'
       + '<th style="text-align:right">${T("Cmdes")}</th></tr></thead><tbody>'
       + (t.mensuel || []).map(function(m){
           return '<tr><td>' + esc(m.mois) + '</td><td class="arg">' + esc(m.net)
             + '</td><td class="arg">' + esc(m.tps) + '</td><td class="arg">' + esc(m.tvq)
             + '</td><td class="arg">' + m.n + '</td></tr>';
-        }).join('') + '</tbody></table></div>';
+        }).join('') + '</tbody></table></div></div>';
+    h += '</div></div>';
     return h;
   }
 
   function vueRevenus(){
     var r = D.revenus;
-    var h = '<div class="carte"><h2>${T("État des résultats")} <span class="n">${T("T2125 fédéral · TP-80-V Québec")}</span></h2>'
+    /* Deux colonnes (aucune barre de defilement) : resultats et encaissements a
+       gauche, depenses et graphique a droite. */
+    var h = '<div class="cols-taxes"><div class="col">' + '<div class="carte"><h2>${T("État des résultats")} <span class="n">${T("T2125 fédéral · TP-80-V Québec")}</span></h2>'
       + rang('${T("Ventes brutes de marchandises")}', r.brut, 'ligne 8000')
       + rang('${T("Remises et coupons")}', '−' + r.remises, '')
       + (r.nbRemb ? rang('${T("Remboursements émis")}', '−' + r.rembourse, r.nbRemb + ' remb.') : '')
@@ -593,6 +621,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
         + '</div>';
     }
 
+    h += '</div><div class="col">';
     if ((r.categories || []).length) {
       h += '<div class="carte"><h2>${T("Dépenses par ligne fiscale")}</h2><table><thead><tr>'
         + '<th>${T("Catégorie")}</th><th>${T("Ligne")}</th><th style="text-align:right">${T("Montant")}</th>'
@@ -615,6 +644,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
             + esc(m.net) + '"></div>'; }).join('') + '</div>'
       + '<div class="mois">' + (r.mensuel || []).map(function(m){
           return '<span>' + esc(m.mois) + '</span>'; }).join('') + '</div></div>';
+    h += '</div></div>';
     return h;
   }
 
@@ -717,6 +747,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
   }
 
   corps.onclick = function(ev){
+    var bp = ev.target && ev.target.closest ? ev.target.closest('[data-per]') : null;
+    if (bp) {   // bascule sur place : rien n est redessine
+      PER = bp.getAttribute('data-per');
+      var bs = corps.querySelectorAll('[data-per]'), vs = corps.querySelectorAll('[data-perv]'), k;
+      for (k = 0; k < bs.length; k++) bs[k].className = bs[k].getAttribute('data-per') === PER ? 'on' : '';
+      for (k = 0; k < vs.length; k++) vs[k].hidden = vs[k].getAttribute('data-perv') !== PER;
+      return;
+    }
     var t = ev.target;
     if (!t || !t.closest) return;
     var og = t.closest('[data-onglet]');

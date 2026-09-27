@@ -297,4 +297,9 @@ module.exports = {
   'des ventes de': 'of sales of',
   'remboursement en votre faveur': 'refund in your favour',
   ') sont sous le seuil de': ') are below the threshold of',
+
+  /* ── TPS / TVQ EN DEUX COLONNES (2026-09-26) ── */
+  'Par période': 'By period',
+  'Par trimestre': 'By quarter',
+  'Par mois': 'By month'
 };
