@@ -63,6 +63,11 @@ button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 button.ic{width:28px;height:28px;padding:0;display:inline-flex;align-items:center;justify-content:center;font-size:1rem;line-height:1}
 button.ic.plus{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent)}
+/* ⚠ UN BOUTON QUI PORTE LA CLASSE .ic HERITE DU FILTRE DES ICONES du socle
+   (gris + assombri en jour) — sur TOUT le bouton, fond compris : il sortait en
+   carre gris fonce (vu le 2026-09-26). Ses glyphes sont du texte, pas des
+   emojis : aucun filtre. */
+button.ic,html.jour button.ic{filter:none}
 .aide{font-size:.79rem;color:var(--tx2);line-height:1.5;margin:0 0 .6rem}
 .avis{background:rgba(148,163,184,.1);border:1px solid rgba(148,163,184,.22);
   border-radius:10px;padding:.5rem .65rem;font-size:.79rem;color:var(--tx-bleute);line-height:1.5}

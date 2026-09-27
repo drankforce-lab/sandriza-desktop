@@ -287,6 +287,11 @@ tr:hover .act .ic{opacity:1}
 .act .ic:hover{background:var(--v14);opacity:1}
 .act .ic.sup:hover{background:rgba(248,113,113,.2);border-color:rgba(248,113,113,.5)}
 .act .ic.sup.arme{opacity:1;background:rgba(248,113,113,.25);border-color:#f87171;color:var(--tx-blanc)}
+/* ⚠ UN BOUTON QUI PORTE LA CLASSE .ic HERITE DU FILTRE DES ICONES du socle
+   (gris + assombri en jour) — sur TOUT le bouton, fond compris : il sortait en
+   carre gris fonce (vu le 2026-09-26). Ses glyphes sont du texte, pas des
+   emojis : aucun filtre. */
+.act .ic,html.jour .act .ic{filter:none}
 /* ── L ASSISTANT ───────────────────────────────────────────────────────── */
 .asst{position:fixed;inset:0;background:rgba(6,10,18,.78);z-index:70;display:flex;
   align-items:center;justify-content:center;padding:1rem}

@@ -120,6 +120,8 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
   border-radius:50%;background:rgba(6,10,18,.78);border:1px solid rgba(239,68,68,.6);
   color:var(--tx-err);font-size:.76rem;font-weight:700;cursor:pointer}
 .boite .phx:hover{background:rgba(239,68,68,.28)}
+/* En jour la pastille passe au CLAIR : le rouge de jour (fonce) tombait a 2:1 sur le rond sombre. */
+html.jour .boite .phx{background:rgba(255,255,255,.94)}
 .boite .phmort{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   color:var(--tx3);font-size:1.5rem}
 .boite .reponse{margin-top:.6rem;border-left:3px solid #c9a97e;padding:.4rem .7rem;

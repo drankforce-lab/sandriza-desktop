@@ -68,8 +68,6 @@ module.exports = {
     '#111111 sur #26334A @4.5': 2,
     // 1.66 · div#g-prev-head.head.anim > div.ti « SANDRIZA » · gabarits_c1/jour
     '#1D2433 sur #7C2D12 @4.5': 1,
-    // 2.06 · div.ph > button.phx « ✕ » · avis/jour avis/jour/ardoise avis/jour/emeraude avis/jour/graphite avis/jour/ocean avis/jour/violet
-    '#AB4E4E sur #393C43 @4.5': 2,
     // 2.13 · span#p-r2 > a#p-mesurer « mesurer l’espace R2 » · photos/jour photos/jour/ardoise photos/jour/emeraude photos/jour/graphite photos/jour/ocean photos/jour/violet photos_c1/jour photos_c2/jour photos_c4/jour
     '#9E9EFF sur #F4F2EC @4.5': 4,
     // 2.13 · span > span.exp « Aucun paiement Square enregistré sur cet » · remboursement_c1/jour
