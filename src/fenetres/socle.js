@@ -3171,7 +3171,10 @@ html.jour thead th{background:var(--f-carte)}
 .ch input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),.ch select,.ch textarea,.champ input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),.champ select,.champ textarea{
   min-height:2.4rem;border-radius:10px;border-width:1px;border-style:solid;border-color:var(--v14);
   padding:.45rem .7rem;font-size:.85rem;transition:border-color .15s,box-shadow .15s}
-.ch textarea,.champ textarea{min-height:4.2rem;line-height:1.45}
+/* 3,2 rem = trois lignes : assez pour ecrire (verifier-mise-en-page refuse la
+   fente de deux lignes), pas assez pour pousser le formulaire hors de la
+   fenetre — 4,2 rem faisait defiler Telephonie et d autres (sonde, 2026-09-26). */
+.ch textarea,.champ textarea{min-height:3.2rem;line-height:1.45}
 .ch input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):hover:not(:disabled),.ch select:hover:not(:disabled),.ch textarea:hover:not(:disabled),.champ input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):hover:not(:disabled),.champ select:hover:not(:disabled),.champ textarea:hover:not(:disabled){border-color:var(--v16)}
 .ch input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):focus,.ch select:focus,.ch textarea:focus,.champ input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):focus,.champ select:focus,.champ textarea:focus{outline:none;border-color:#c9a97e;box-shadow:0 0 0 3px rgba(201,169,126,.18)}
 html.jour .ch input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),html.jour .ch select,html.jour .ch textarea,html.jour .champ input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),html.jour .champ select,html.jour .champ textarea{border-color:rgba(15,23,42,.16)}

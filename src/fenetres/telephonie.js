@@ -51,14 +51,14 @@ body{background:var(--f-page);color:var(--tx);
 .tete button.mini:hover:not(:disabled){background:var(--v10)}
 .tete a.credit{font:inherit;font-size:.74rem;padding:.16rem .55rem;border-radius:7px;
   background:#c9a97e;border:1px solid #c9a97e;color:#1a1208;font-weight:700;text-decoration:none;flex:0 0 auto}
-.ro{flex:0 0 auto;margin:.6rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
-  background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
+.ro{flex:0 0 auto;margin:.45rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
+  background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.28rem .7rem;font-size:.76rem}
 .onglets{flex:0 0 auto;display:flex;gap:.1rem;flex-wrap:wrap;overflow-x:auto;
   padding:.5rem 1rem 0;border-bottom:1px solid var(--v08)}
 .onglets button{font:inherit;font-size:.82rem;white-space:nowrap;background:none;
   border:0;border-bottom:2px solid transparent;color:var(--tx2);padding:.5rem .7rem;cursor:pointer}
 .onglets button.on{color:var(--tx-or);border-bottom-color:#c9a97e;font-weight:700}
-.corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto}
+.corps{flex:1 1 auto;min-height:0;padding:.7rem 1.05rem;overflow-y:auto}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 /* ⚠ ANCRÉE = PLEINE PAGE : pas de cap ; les champs (gr2) s'étendent sur la largeur. */
@@ -76,7 +76,18 @@ body{background:var(--f-page);color:var(--tx);
 .tuile .lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tuile .val.bon{color:var(--tx-ok)}.tuile .val.att{color:var(--tx-att)}.tuile .val.err{color:var(--tx-err)}
 .tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.carte + .carte{margin-top:.8rem}
+.carte + .carte,.duo + .carte{margin-top:.8rem}
+.duo{display:grid;grid-template-columns:1.5fr 1fr;gap:.8rem;align-items:stretch}
+.trio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem;align-items:stretch}
+.trio > .carte{margin:0}
+@media (max-width:1100px){.trio{grid-template-columns:1fr 1fr}}
+/* Tuiles COMPACTES : le bandeau est repete sur chaque onglet, il ne doit pas
+   manger la hauteur des reglages (sa demande : pas de barre de defilement). */
+.tuiles .tuile{padding:.45rem .75rem}
+.tuiles .tuile .val{font-size:1.2rem;margin:.05rem 0 0}
+.tuiles .tuile .sub{margin-top:0}
+.duo > .carte{margin:0}
+@media (max-width:900px){.duo{grid-template-columns:1fr}}
 .carte > h2{margin:0 0 .2rem}
 .carte > h2 + .aide{margin:0 0 .8rem}
 .ch .etat{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;margin-top:.35rem}
@@ -344,7 +355,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
 
   // ── PANNEAUX ────────────────────────────────────────────────────────────────
   function panGeneral(){
-    var h = '<div class="carte"><h2>${T("Numéro et voix")}</h2>'
+    /* ⚠ SANS BARRE DE DEFILEMENT (sa demande du 2026-09-26, capture a l appui).
+       Empilees, les trois cartes depassaient de 148 px a 1400 x 833 : les deux
+       premieres se posent COTE A COTE, les adresses de rappel dessous, en pleine
+       largeur. Mesure par la sonde des debordements, pas a l oeil. */
+    var h = '<div class="duo"><div class="carte"><h2>${T("Numéro et voix")}</h2>'
       + '<div class="aide">${T("Le numéro que vos clients composent, et les voix qui leur répondent.")}</div>';
     h += '<div class="gr2">'
       + texteHtml('t-number', '${T("Numéro Twilio")}', C.twilioNumber, '+1 514 555 0123', true)
@@ -359,10 +374,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
       + selectHtml('t-voice-fr', '${T("Voix française (fr-CA)")}', C.voiceFr || 'Polly.Gabrielle-Neural', VOIX_FR)
       + selectHtml('t-voice-en', '${T("Voix anglaise (en-US)")}', C.voiceEn || 'Polly.Joanna-Neural', VOIX_EN) + '</div>';
     h += '</div><div class="carte"><h2>${T("Identifiants Twilio")}</h2>'
-      + '<div class="aide">${T("Dans la console Twilio, rubrique Account Info.")}</div>';
-    h += '<div class="gr2">'
+      + '<div class="aide">${T("Dans la console Twilio, rubrique Account Info.")}</div>'
       + secretHtml('t-sid', '${T("Account SID")}', !!C.hasAccountSid, 'ACxxxxxxxx')
-      + secretHtml('t-token', '${T("Auth Token")}', !!C.hasAuthToken, '${T("votre Auth Token")}') + '</div>';
+      + secretHtml('t-token', '${T("Auth Token")}', !!C.hasAuthToken, '${T("votre Auth Token")}') + '</div></div>';
 
     /* ⚠ LES DEUX URL DE RAPPEL — SANS ELLES, RIEN NE FONCTIONNE, ET LA
        CONFIGURATION ETAIT IMPOSSIBLE DEPUIS L APPLICATION. Twilio ne devine
@@ -371,7 +385,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
        / webhookSms) — cette fenetre ne les affichait simplement pas.
        ⚠ Elles se collent sur le NUMERO, pas dans Monitor > Errors : c est
        l erreur qui a fait perdre du temps la premiere fois. */
-    h += '</div><div class="carte"><h2>${T("Adresses de rappel (webhooks)")}</h2>'
+    h += '<div class="carte"><h2>${T("Adresses de rappel (webhooks)")}</h2>'
       + '<div class="aide">${T("À coller dans la fiche de votre numéro, chez Twilio — sans elles, aucun appel ni message n’arrive ici.")}</div>';
     h += crochetHtml('${T("A CALL COMES IN (Voice)")}', D.webhookVoice || '', 't-wh-voice');
     h += crochetHtml('${T("A MESSAGE COMES IN (Messaging)")}', D.webhookSms || '', 't-wh-sms');
@@ -394,26 +408,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
     var cm = hr.closedMessage || {};
     var g = C.greeting || {};
     var ni = C.noInputMessage || {};
-    var h = '<div class="carte"><div class="stitre">${T("Message d’accueil")}</div>';
-    h += '<div class="gr2">'
+    /* ⚠ TROIS COLONNES, PAS TROIS ETAGES (sa demande : aucune barre de defilement).
+       Empilees, les trois cartes depassaient de 232 px a 1400 x 833 ; cote a cote,
+       chacune garde ses deux langues l une sous l autre. */
+    var h = '<div class="trio"><div class="carte"><div class="stitre">${T("Message d’accueil")}</div>';
+    h += ''
       + taHtml('t-greet-fr', '${T("Accueil (FR)")}', g.fr, "${T('Bonjour et merci d\'avoir appelé…')}")
-      + taHtml('t-greet-en', '${T("Accueil (EN)")}', g.en, '${T("Hello and thank you for calling…")}') + '</div>';
-    h += '<div class="gr2">'
+      + taHtml('t-greet-en', '${T("Accueil (EN)")}', g.en, '${T("Hello and thank you for calling…")}');
+    h += ''
       + texteHtml('t-greet-pause', "${T('Délai après l\'accueil (secondes)')}", (C.greetingPause != null ? C.greetingPause : 5), '5', false, '', 'number')
-      + texteHtml('t-menu-timeout', '${T("Attente au menu avant de raccrocher (secondes)")}', (C.menuTimeout != null ? C.menuTimeout : 10), '10', false, '', 'number') + '</div>';
+      + texteHtml('t-menu-timeout', '${T("Attente au menu avant de raccrocher (secondes)")}', (C.menuTimeout != null ? C.menuTimeout : 10), '10', false, '', 'number');
     h += '</div><div class="carte"><div class="stitre">${T("Aucun choix au menu")}</div>'
-      + '<div class="note">${T("Si l’appelant ne fait aucun choix après le délai, on joue ce message (FR + EN) puis on raccroche.")}</div>';
-    h += '<div class="gr2">'
+      + '<div class="aide" style="margin:0 0 .6rem">${T("Si l’appelant ne fait aucun choix après le délai, on joue ce message (FR + EN) puis on raccroche.")}</div>';
+    h += ''
       + taHtml('t-noinput-fr', '${T("Message « aucun choix » (FR)")}', ni.fr, "${T('Merci d\'avoir contacté SANDRIZA. Au revoir !')}")
-      + taHtml('t-noinput-en', '${T("Message « aucun choix » (EN)")}', ni.en, '${T("Thank you for contacting SANDRIZA. Goodbye!")}') + '</div>';
+      + taHtml('t-noinput-en', '${T("Message « aucun choix » (EN)")}', ni.en, '${T("Thank you for contacting SANDRIZA. Goodbye!")}');
     h += selectHtml('t-default', "${T('Action par défaut (à l\'ouverture)')}", C.defaultAction || 'menu', [
         ['menu', '${T("Robot / menu (IVR)")}'], ['forward', '${T("Rediriger directement")}'], ['voicemail', '${T("Messagerie vocale")}']]);
     h += '</div><div class="carte"><div class="stitre">${T("Heures d’ouverture")}</div>';
     h += checkHtml('t-usehours', "${T('Utiliser les heures d\'ouverture — hors heures, message + messagerie')}", !!hr.useHours);
-    h += '<div class="gr2">'
+    h += ''
       + taHtml('t-closed-fr', '${T("Message « fermé » (FR)")}', cm.fr, '${T("Nos bureaux sont fermés…")}')
-      + taHtml('t-closed-en', '${T("Message « fermé » (EN)")}', cm.en, '${T("Our offices are closed…")}') + '</div>';
-    return h + '</div>';
+      + taHtml('t-closed-en', '${T("Message « fermé » (EN)")}', cm.en, '${T("Our offices are closed…")}');
+    return h + '</div></div>';
   }
 
   function menuRowHtml(o, i){
@@ -463,7 +480,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
   function panMessagerie(){
     var vp = C.voicemailPrompt || {};
     var vpc = C.voicemailPromptClosed || {};
-    var h = '<div class="carte"><div class="stitre">${T("Messagerie vocale")}</div>'
+    /* Reglages a gauche, boite de reception a droite : empilees, elles
+       depassaient la fenetre (sonde des debordements, 2026-09-26). */
+    var h = '<div class="duo"><div class="carte"><div class="stitre">${T("Messagerie vocale")}</div>'
       + '<div class="note"><span class="ic">🎧</span> ${T("Chaque message vocal est joint en MP3 au courriel ci-dessous, puis supprimé de Twilio. Un courriel valide est requis.")}</div>';
     h += texteHtml('t-vm-email', '${T("Courriel de notification (reçoit le MP3)")}', C.voicemailEmail, '${T("vous@exemple.com")}');
     h += '<div class="gr2">'
@@ -474,7 +493,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
       + taHtml('t-vm-closed-fr', '${T("Invite — hors heures (FR)")}', vpc.fr, '${T("Nos bureaux sont fermés. Laissez un message…")}')
       + taHtml('t-vm-closed-en', '${T("Invite — hors heures (EN)")}', vpc.en, "${T("Our offices are closed. Leave a message…")}") + '</div>';
     h += '</div><div class="carte"><div class="stitre"><span class="ic">🎙️</span> ${T("Boîte de réception vocale")} <span id="t-vm-badge"></span></div>'
-      + '<div class="liste" id="t-vm-inbox"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>';
+      + '<div class="liste" id="t-vm-inbox"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div></div>';
     return h;
   }
 
