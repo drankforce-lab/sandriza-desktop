@@ -133,7 +133,7 @@ label.case input{width:15px;height:15px;accent-color:#c9a97e}
 .epia .tt .ic{font-size:.85rem}
 .epia .tt b{font:700 .8rem/1.2 system-ui;flex:1 1 auto;min-width:0}
 .epia .tt button{font-size:.72rem;padding:.2rem .5rem;border-radius:7px}
-.epg .g{display:grid;grid-template-columns:repeat(auto-fit,minmax(8.5rem,1fr));gap:.35rem;margin-bottom:.35rem}
+.epg .g{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.45rem .6rem;margin-bottom:.35rem}
 .epg .plein{grid-column:1/-1}
 .epg label{font-size:.7rem;color:var(--tx2);display:block;margin-bottom:.1rem}
 .epg input,.epg select,.epg textarea{width:100%;font-size:.8rem;padding:.26rem .4rem}
@@ -145,6 +145,12 @@ label.case input{width:15px;height:15px;accent-color:#c9a97e}
 .epvue{border:1px solid var(--v16);border-radius:9px;overflow:hidden;background:#F8F6F3;
   aspect-ratio:2/3;display:flex;align-items:center;justify-content:center}
 .epvue img{display:block;width:100%;height:100%;object-fit:contain}
+/* ⚠ LA HAUTEUR SUIT LA FENETRE, LA LARGEUR SUIT LE FORMAT (2026-09-26, sa demande :
+   aucune barre de defilement). Un 2:3 de 20 rem de large faisait 30 rem de haut
+   et poussait les boutons hors de l ecran. On fixe la HAUTEUR a ce qui reste, et
+   aspect-ratio en deduit la largeur : la proportion — ce que l apercu doit dire
+   juste — ne bouge pas d un cheveu. */
+.epvue{height:max(12rem, min(calc(100vh - 33rem), 30rem));width:auto;max-width:100%;align-self:center}
 .epvue .rien{font-size:.76rem;color:#4A4A4A;padding:1rem;text-align:center}
 .epinfo{font-size:.7rem;color:var(--tx2);text-align:center}
 .epenv{border-top:1px solid var(--v12);padding-top:.5rem;margin-top:.2rem;
@@ -435,7 +441,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     var corps2 = longue
       ? '<textarea id="' + id + '" data-epc="' + cle + '">' + esc(v) + '</textarea>'
       : '<input id="' + id + '" data-epc="' + cle + '" value="' + esc(v) + '">';
-    return '<div class="plein"><label for="' + id + '">' + esc(lib) + '</label>' + corps2
+    /* Deux par deux (sa demande : aucune barre de defilement) — plus de "plein". */
+    return '<div><label for="' + id + '">' + esc(lib) + '</label>' + corps2
       + (max ? '<div class="cnt' + (trop ? ' trop' : '') + '" id="' + id + '-n">'
                + n + ' / ' + max + '</div>' : '')
       + '</div>';
