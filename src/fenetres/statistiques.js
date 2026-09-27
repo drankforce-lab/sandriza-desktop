@@ -109,6 +109,11 @@ tbody tr:hover td{background:var(--v04)}
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.tuiles.sept{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
+.rang2{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:.7rem;align-items:start}
+.rang2 > .carte{margin:0}
+@media (max-width:1000px){.rang2{grid-template-columns:1fr}}
 `;
 
 /** Page complète de la fenêtre native « Statistiques ». */
@@ -268,15 +273,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('statistiques')}
        quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
        ce poste. Les TROIS bandeaux de cette fenetre partagent la meme cle et se
        replient ensemble. Voir JS_TUILES dans socle.js. */
-    h += szTuiles('<div class="tuiles">' + tuile('${T("Visiteurs")}', nb(t.visiteurs), 'or')
+    /* ⚠ UNE SEULE RANGEE DE TUILES, et le graphique A COTE des pages populaires
+       (sa demande : aucune barre de defilement — deux bandeaux et deux cartes
+       empiles depassaient la fenetre de 142 px). */
+    var tu = tuile('${T("Visiteurs")}', nb(t.visiteurs), 'or')
       + tuile('${T("Sessions")}', nb(t.sessions), 'or')
-      + tuile('${T("Pages vues")}', nb(t.pagesVues), 'or') + '</div>');
+      + tuile('${T("Pages vues")}', nb(t.pagesVues), 'or');
     if (DGA.engagement) {
-      h += szTuiles('<div class="tuiles">' + tuile('${T("Durée moy. session")}', DGA.engagement.dureeMoyenne)
+      tu += tuile('${T("Durée moy. session")}', DGA.engagement.dureeMoyenne)
         + tuile('${T("Taux de rebond")}', DGA.engagement.rebond)
         + tuile('${T("Pages / session")}', DGA.engagement.pagesParSession)
-        + tuile('${T("Taux d’engagement")}', DGA.engagement.engagement) + '</div>');
+        + tuile('${T("Taux d’engagement")}', DGA.engagement.engagement);
     }
+    h += szTuiles('<div class="tuiles sept">' + tu + '</div>');
+    h += '<div class="rang2">';
     h += '<div class="carte"><h3><span class="ic">📈</span>${T(" Pages vues par jour — ")}' + esc(DGA.plageLibelle) + '</h3>'
       + graphique(DGA.serie, 'vues', '${T("pages vues")}') + '</div>';
 
@@ -289,6 +299,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('statistiques')}
       : '<tr><td colspan="2" class="dt" style="text-align:center">—</td></tr>';
     h += '<div class="carte"><h3><span class="ic">🔝</span>${T(" Pages populaires")}</h3><table><thead><tr><th>${T("Page")}</th>'
       + '<th class="num">${T("Vues")}</th></tr></thead><tbody>' + pages + '</tbody></table></div>';
+    h += '</div>';
 
     h += '<div class="grilles">'
       + tableau('${T("Pays")}', '${T("Pays")}', '${T("Visiteurs")}', DGA.pays, 'nom', 'visiteurs')
