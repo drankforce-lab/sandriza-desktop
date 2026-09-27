@@ -105,6 +105,9 @@ html.jour .bascule .piste{background:#cfcabd}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 .vide{padding:1.4rem;text-align:center;color:var(--tx2);font-size:.84rem}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.grc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 .75rem;align-items:start}
+.grc .ctrl{align-self:center}
 `;
 
 /**
@@ -239,20 +242,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('newsletter')}
       : '<div class="champ"><label>${T("Clé API Resend")}</label><input aria-label="${T("Clé API Resend")}" value="' + (c.hasKey ? '••••••••••••' : '') + '" readonly></div>';
     return '<div class="deux">'
       + '<div class="carte"><h2><span class="ic">🔑</span> ${T("API Resend")}</h2>'
+      /* ⚠ LES CHAMPS DEUX PAR DEUX (sa demande : aucune barre de defilement) :
+         onze champs en une colonne depassaient la fenetre de 254 px. */
+      +   '<div class="grc">'
       +   cleField
       +   ligneChamp('${T("Courriel expéditeur *")}', 'nl-from-e', c.fromEmail, 'email', '${T("Le domaine doit être vérifié dans Resend")}')
       +   ligneChamp('${T("Nom expéditeur")}', 'nl-from-n', c.fromName)
       +   ligneChamp('${T("Répondre à (optionnel)")}', 'nl-reply', c.replyTo, 'email')
-      +   '<hr class="sep">'
+      +   '</div><hr class="sep"><div class="grc">'
       +   ligneChamp('${T("Nom de l’entreprise")}', 'nl-co-name', c.companyName)
       +   ligneChamp('${T("Adresse (pied de page)")}', 'nl-co-addr', c.companyAddress)
       +   ligneChamp('${T("Lien site web (pied de page)")}', 'nl-website-url', c.websiteUrl, 'url')
-      +   '<hr class="sep">'
+      +   '</div><hr class="sep"><div class="grc">'
       +   ligneChamp('${T("Courriel expéditeur — transactionnel")}', 'nl-trans-from-e', c.fromEmailTransactional, 'email', '${T("Expédition, cartes-cadeaux, alertes. Vide = courriel infolettre.")}')
       +   ligneChamp('${T("Nom expéditeur — transactionnel")}', 'nl-trans-from-n', c.fromNameTransactional)
-      +   '<hr class="sep">'
+      +   '</div><hr class="sep"><div class="grc">'
       +   '<div class="ctrl" style="border:none;padding:.2rem 0"><div><div class="t">${T("Mode test")}</div><div class="d">${T("Envoyer uniquement à l’adresse de test.")}</div></div>' + bascule('nl-testmode', c.testMode) + '</div>'
       +   ligneChamp('${T("Courriel de test")}', 'nl-test-e', c.testEmail, 'email')
+      +   '</div>'
       +   (PEUT.edit ? '<div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.5rem"><button class="prim" data-act="cfgsave">${T("Enregistrer")}</button><button class="ghost" data-act="testconn">${T("Envoyer un courriel de test")}</button></div>' : '')
       + '</div>'
       + '<div class="carte"><h2><span class="ic">🔕</span> ${T("Contrôle des envois par courriel")}</h2>'
