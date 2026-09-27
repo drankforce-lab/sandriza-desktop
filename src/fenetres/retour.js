@@ -133,6 +133,12 @@ button.mini{padding:.12rem .5rem;font-size:.75rem}
 .voile p{margin:.35rem 0;font-size:.86rem}
 .voile .fin2{display:flex;gap:.45rem;justify-content:flex-end;margin-top:.85rem}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* L etape Demande en deux colonnes (2026-09-26, aucune barre de defilement). */
+.cols-dem{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.8rem;align-items:start}
+.cols-dem > .col{display:flex;flex-direction:column;gap:.7rem;min-width:0}
+.cols-dem .carte{margin:0}
+@media (max-width:1000px){.cols-dem{grid-template-columns:1fr}}
 `;
 
 /** Page complète de la fenêtre native « Demande de retour ». */
@@ -290,7 +296,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function dessinerDemande(){
     var d = R.demande;
-    var h = '<div class="carte"><h2>${T("Demande")} <span class="note">— ' + esc(d.commande)
+    /* ⚠ DEUX COLONNES (sa demande : aucune barre de defilement) : ce qui DECRIT
+       le retour a gauche, la DECISION a droite. Empilees, les cinq cartes
+       depassaient la fenetre de plus de 400 px. */
+    var h = '<div class="cols-dem"><div class="col">' + '<div class="carte"><h2>${T("Demande")} <span class="note">— ' + esc(d.commande)
       + ' ${T("· soumise le")} ' + esc(dateFr(d.creeLe)) + '</span></h2>'
       + '<div class="info">'
       + '<div><div class="k">${T("Client")}</div><div class="v">' + esc(d.client || '—') + '</div></div>'
@@ -338,6 +347,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
     // Statut, note de refus, etiquette, notes — la partie qui S ENREGISTRE.
     var fige = d.statut === 'awaiting_photo' || d.statut === 'completed' || d.statut === 'refunded' || R.archive;
+    h += '</div><div class="col">';
     h += '<div class="carte"><h2>${T("Décision")}</h2>';
     if (R.archive) {
       h += '<div class="aide"><span class="ic">🗄</span> ${T("Demande archivée — lecture seule.")}</div>';
@@ -386,6 +396,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         + '<textarea id="r-notes" rows="3">' + esc(d.notes) + '</textarea></div>';
     }
     h += '</div>';
+    h += '</div></div>';
     corps.innerHTML = h;
 
     var boutons = '';
