@@ -163,10 +163,10 @@ body{background:var(--f-page);color:var(--tx);
 .ong .oc{flex:0 0 auto;color:var(--tx-ok2);font-size:.95rem;font-weight:700;line-height:1}
 .panneau{flex:1 1 auto;min-width:0;min-height:0;overflow-y:auto;
   background:var(--f-carte);border:1px solid var(--v07);border-radius:12px;
-  padding:.85rem .95rem}
+  padding:.72rem .95rem}
 .pnt{display:flex;align-items:center;gap:.55rem}
 .pnt h2{margin:0;font:700 .95rem/1.2 Georgia,serif}
-.panneau .sous{margin:.28rem 0 .7rem;font-size:.74rem;color:var(--tx3);line-height:1.4}
+.panneau .sous{margin:.28rem 0 .5rem;font-size:.74rem;color:var(--tx3);line-height:1.4}
 .onglets::-webkit-scrollbar,.panneau::-webkit-scrollbar{width:8px}
 .onglets::-webkit-scrollbar-thumb,.panneau::-webkit-scrollbar-thumb{
   background:var(--v12);border-radius:8px}
@@ -226,7 +226,7 @@ body{background:var(--f-page);color:var(--tx);
   align-content:start;margin-top:.6rem}
 .fmtc{background:var(--f-pill);border:1px solid var(--v09);border-radius:9px;padding:.45rem;
   display:flex;flex-direction:column;align-items:center;gap:.3rem;min-width:0}
-.fmtc img{width:100%;height:7.5rem;object-fit:contain;background:var(--f-pied);border-radius:6px;
+.fmtc img{width:100%;height:6.5rem;object-fit:contain;background:var(--f-pied);border-radius:6px;
   border:1px solid var(--v07)}
 .fmtc .ft{font-size:.82rem;font-weight:700;line-height:1.1}
 .fmtc .fd{font-size:.68rem;color:var(--tx3);font-variant-numeric:tabular-nums}
