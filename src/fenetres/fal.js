@@ -67,7 +67,7 @@ select{font:inherit;color:var(--tx);background:var(--v05);
 .t{flex:1 1 8rem;background:var(--f-carte);border:1px solid var(--v07);
   border-radius:11px;padding:.6rem .75rem}
 .t .n{font-weight:800;font-size:1.5rem;line-height:1.1;font-variant-numeric:tabular-nums}
-.t .l{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700}
+.t .l{font-size:.74rem;text-transform:none;letter-spacing:0;color:var(--tx2);font-weight:600}
 .t .s{font-size:.7rem;color:var(--tx2);margin-top:.15rem}
 table{width:100%;border-collapse:collapse;font-size:.79rem}
 thead th{text-align:left;padding:.22rem .35rem;font-size:.65rem;text-transform:uppercase;
@@ -101,6 +101,12 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Deux par rangee (2026-09-26, aucune barre de defilement). */
+.rang2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.8rem;align-items:stretch;margin:0 0 .8rem}
+.rang2 > div{min-width:0;display:flex;flex-direction:column}
+.rang2 .carte{margin:0;flex:1 1 auto}
+@media (max-width:1000px){.rang2{grid-template-columns:1fr}}
 `;
 
 /** @param {string} ouverture '' (consommation) ou 'historique' */
@@ -301,14 +307,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
   function vueConso(){
     var h = [];
     h.push(ligneMaj());
-    h.push(carteCredits());
-    h.push(cartePlafond());
+    /* ⚠ EN RANGEES, PAS EN ETAGES (sa demande : aucune barre de defilement) :
+       credits | consommation, puis plafond | trente jours, puis le detail. */
 
     var reussis = 0;
     (D.parModele || []).forEach(function(m){ reussis += m.reussis; });
     var echecs = (D.appels || 0) - reussis;
 
-    h.push(szTuiles('<div class="tuiles">'
+    var tuConso = szTuiles('<div class="tuiles">'
       + '<div class="t"><div class="l">${T("Consommation totale")}</div><div class="n">' + sous_(D.total) + '</div>'
       + '<div class="s">${T("depuis le début du suivi")}</div></div>'
       + '<div class="t"><div class="l">${T("Appels")}</div><div class="n">' + (D.appels || 0) + '</div>'
@@ -316,14 +322,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
       + '<div class="t"><div class="l">${T("Coût moyen")}</div><div class="n">'
       + sous_((D.appels ? (D.total / D.appels) : 0)) + '</div>'
       + '<div class="s">${T("par appel")}</div></div>'
-      + '</div>'));
+      + '</div>');
+    h.push('<div class="rang2"><div>' + carteCredits() + '</div><div>' + tuConso + '</div></div>');
+    var joursH = '';
 
     // Les trente derniers jours
     var j = (D.parJour || []).slice().reverse();
     if (j.length) {
       var max = 0;
       j.forEach(function(x){ if (x.cout > max) max = x.cout; });
-      h.push('<div class="carte"><h2>${T("Trente derniers jours")}</h2><div class="jours">'
+      joursH = ('<div class="carte"><h2>${T("Trente derniers jours")}</h2><div class="jours">'
         + j.map(function(x){
             var ht = max ? Math.max(3, Math.round(x.cout * 100 / max)) : 3;
             return '<div class="b" style="height:' + ht + '%" title="' + esc(x.jour) + ' · '
@@ -332,6 +340,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
         + '</div><p class="dt">${T("Du ")}' + esc(j[0].jour) + '${T(" au ")}' + esc(j[j.length - 1].jour)
         + '${T(". Survolez une barre pour le détail du jour.")}</p></div>');
     }
+    h.push('<div class="rang2"><div>' + cartePlafond() + '</div><div>' + joursH + '</div></div>');
 
     h.push('<div class="carte"><h2>${T("Par traitement")}</h2>');
     if (!(D.parModele || []).length) {
