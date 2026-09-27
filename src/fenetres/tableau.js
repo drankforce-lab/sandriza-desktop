@@ -91,7 +91,7 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
 .afaire button i{font-style:normal;opacity:.45;margin:0 .38rem}
 .afaire button.urgent{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
 html.jour .afaire{background:rgba(180,140,80,.12);border-color:rgba(150,110,50,.35)}
-html.jour .afaire .titre{color:#8a6a3e}
+html.jour .afaire .titre{color:#6f5330}
 .panneau{background:var(--f-carte);border:1px solid var(--v09);border-radius:11px;
   padding:.6rem .8rem;display:flex;gap:1rem;flex-wrap:wrap;font-size:.82rem}
 .panneau label{display:flex;align-items:center;gap:.4rem;cursor:pointer}

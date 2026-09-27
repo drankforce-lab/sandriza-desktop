@@ -2114,7 +2114,7 @@ html.jour button.prim{background:#C49A6C;border-color:#C49A6C;color:#241703}
 html.jour button.prim:hover:not(:disabled){background:#d4ad80}
 html.jour button.danger{border-color:rgba(185,28,28,.45);color:#b91c1c}
 html.jour button .n{background:rgba(15,23,42,.08);color:#1d2433}
-html.jour button .n.hi{background:rgba(180,120,10,.18);color:#83570b}
+html.jour button .n.hi{background:rgba(180,120,10,.18);color:#6e4808}
 html.jour .carte,html.jour .ligne,html.jour .tuile,html.jour .panneau{
   background:#ffffff;border-color:rgba(15,23,42,.12)}
 html.jour .tuile:hover,html.jour .ligne:hover{border-color:#8a6a3e}
@@ -2553,7 +2553,7 @@ html.jour .pill.mort{color:#7a4f4f}
 html.jour .pill.non{color:#865757}
 html.jour .pill.off{color:#7a4f4f}
 html.jour .pill.ok{color:#326a49}
-html.jour .pill.on{color:#326a49}
+html.jour .pill.on{color:#285a3c}
 html.jour .pill.open{color:#4b6380}
 html.jour .pill.ouvert{color:#786426}
 html.jour .pill.recu{color:#3f7051}
