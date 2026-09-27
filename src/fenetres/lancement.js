@@ -53,6 +53,10 @@ button.bsc{font:inherit;border:none;border-radius:8px;padding:.65rem 1.25rem;fon
 /* ⚠ BLANC FIXE, et des fonds assez sombres pour lui (2026-09-26) : --tx-blanc
    devient FONCE en jour, et le bouton qui met le site en ligne tombait a 1,68:1. */
 html.jour button.bsc,html.jour .etat button.bsc{color:var(--tx-sur-accent)}
+/* Le titre d etat, une teinte par mode : la couleur de la bordure, posee telle
+   quelle sur le fond teinte, tombait a 2,6:1 en jour. */
+.lg.pre{color:var(--tx-att)}.lg.on{color:var(--tx-ok)}
+html.jour .lg.on{color:#1f6b3a}
 button.bsc:disabled{opacity:.5;cursor:default}
 .vide{padding:1rem;text-align:center;color:var(--tx2);font-size:.82rem}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
@@ -124,7 +128,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     else src = '<div class="src warn"><span class="ic">⚠</span>${T(" Aucune variable <code>ELG_LAUNCHED</code> dans Render : l’état actuel est un simple fichier, effacé au prochain déploiement. Ajoutez-la dans Render pour le rendre durable.")}</div>';
 
     var h = '<div class="etat" style="border-color:' + coul + ';background:' + fond + '">'
-      + '<div class="rangee"><div class="g"><div class="lg" style="color:' + coul + '">' + lbl + '</div><div class="ds">' + ds + '</div></div>'
+      + '<div class="rangee"><div class="g"><div class="lg ' + (enLigne ? 'on' : 'pre') + '">' + lbl + '</div><div class="ds">' + ds + '</div></div>'
       + (RO ? '' : '<button class="bsc" id="b-bascule" style="background:' + btnCoul + '">' + esc(btnTxt) + '</button>')
       + '</div>' + src + '</div>';
 

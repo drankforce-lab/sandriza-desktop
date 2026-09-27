@@ -88,12 +88,8 @@ module.exports = {
     '#536174 sur #16202F @4.5': 1,
     // 2.62 · td > span.pill.neutre « Expiré » · remboursements_c1/jour
     '#9299A7 sur #F4F5F6 @4.5': 1,
-    // 2.63 · div.g > div.lg « Pré-lancement » · lancement/jour lancement/jour/ardoise lancement/jour/emeraude lancement/jour/graphite lancement/jour/ocean lancement/jour/violet
-    '#D97706 sur #F2E8DA @4.5': 1,
     // 2.65 · td > div.mut « ⏳ promesse » · journaux_c11/jour journaux_c4/jour
     '#99A0A9 sur #FFFFFF @4.5': 10,
-    // 2.71 · div.g > div.lg « En ligne » · lancement_c1/jour
-    '#16A34A sur #E2ECDF @4.5': 1,
     // 2.71 · tr.eteint > td.dt « 12 mars 2026 » · remboursements_c1/jour
     '#979EAB sur #FFFFFF @4.5': 2,
     // 2.75 · div.vig > span.rien « Aucun logo » · marque_c1/jour
