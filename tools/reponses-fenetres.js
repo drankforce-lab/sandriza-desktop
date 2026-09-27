@@ -299,7 +299,7 @@ const JEU = {
         { date: '2026-09-02', nature: 'vente', ref: 'sq_8891', libelle: 'Commande ord_0041', effet: 206.85, solde: 206.85 },
         { date: '2026-09-02', nature: 'frais', ref: 'sq_8891', libelle: 'Frais de traitement', effet: -6.31, solde: 200.54 },
         { date: '2026-09-07', nature: 'remboursement', ref: 'rb_0012', libelle: 'Retour partiel', effet: -89.95, solde: 110.59 },
-        { date: '2026-09-07', nature: 'fraisRetenu', ref: 'rb_0012', libelle: 'Frais retenus au remboursement', effet: 2.91, solde: 113.50 },
+        { date: '2026-09-07', nature: 'frais_retenus', ref: 'rb_0012', libelle: 'Frais retenus au remboursement', effet: 2.91, solde: 113.50 },
         { date: '2026-09-12', nature: 'depot', ref: 'dep_0003', libelle: 'Virement vers la banque', effet: -100, solde: 13.50 },
       ],
       resume: { solde: 13.50, ventes: 206.85, frais: 6.31, remboursements: 89.95,

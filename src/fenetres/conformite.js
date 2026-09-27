@@ -46,13 +46,13 @@ body{background:var(--f-page);color:var(--tx);
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
-  padding:.85rem 1.1rem;min-width:0}
+  padding:.8rem 1.1rem;min-width:0}
 .carte h2{margin:0 0 .2rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2)}
 .carte .sous{margin:0 0 .9rem;font-size:.78rem;color:var(--tx3)}
 /* Titre et phrase d aide sur UNE ligne, et les echeances cote a cote : aucune
    barre de defilement dans un module (sa demande du 2026-09-26). */
-.carte .tete{display:flex;align-items:baseline;flex-wrap:wrap;gap:.2rem .9rem;margin:0 0 .75rem}
+.carte .tete{display:flex;align-items:baseline;flex-wrap:wrap;gap:.2rem .9rem;margin:0 0 .55rem}
 .carte .tete h2,.carte .tete .sous{margin:0}
 .avis ul.ech{display:flex;flex-wrap:wrap;gap:.15rem 1.8rem;margin:.35rem 0 0;padding-left:1.1rem}
 .avis{border-radius:9px;padding:.5rem .7rem;font-size:.78rem;margin:0 0 .9rem;
@@ -68,7 +68,6 @@ table{width:100%;border-collapse:collapse;font-size:.86rem}
 th{text-align:left;padding:.35rem .5rem;font-size:.68rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);border-bottom:1px solid var(--v12)}
 td{padding:.4rem .5rem;border-bottom:1px solid var(--v05);vertical-align:middle}
-tr:last-child td{border-bottom:none}
 td.pays{font-weight:700;white-space:nowrap;width:14rem}
 td.pays .cc{font-weight:400;color:var(--tx3);font-size:.75rem;margin-left:.35rem}
 td.dr{text-align:right;white-space:nowrap}

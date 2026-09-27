@@ -57,7 +57,6 @@ table{width:100%;border-collapse:collapse;font-size:.86rem}
 th{text-align:left;padding:.35rem .5rem;font-size:.68rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);border-bottom:1px solid var(--v12)}
 td{padding:.4rem .5rem;border-bottom:1px solid var(--v05);vertical-align:middle}
-tr:last-child td{border-bottom:none}
 td.prov{font-weight:700;width:9rem}
 td.prov .n{font-weight:400;color:var(--tx3);font-size:.72rem;line-height:1.25;white-space:normal}
 td.dr{text-align:right;white-space:nowrap}

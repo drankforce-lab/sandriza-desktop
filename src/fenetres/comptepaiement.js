@@ -62,7 +62,7 @@ body{background:var(--f-page);color:var(--tx);
 html.jour .avis.dur{color:#9d4848}
 .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr));gap:.7rem}
 .tuile{background:var(--v03);border:1px solid var(--v07);border-radius:10px;padding:.65rem .8rem}
-.tuile .t{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
+.tuile .t{font-size:.72rem;color:var(--tx2)}
 .tuile .v{font-size:1.15rem;font-weight:700;margin-top:.15rem;white-space:nowrap}
 .tuile.fort .v{font-size:1.4rem}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
@@ -70,7 +70,7 @@ th{text-align:left;padding:.35rem .5rem;font-size:.68rem;text-transform:uppercas
   letter-spacing:.06em;color:var(--tx2);border-bottom:1px solid var(--v12);
   position:sticky;top:0;background:var(--f-carte)}
 td{padding:.35rem .5rem;border-bottom:1px solid var(--v05);vertical-align:middle}
-tr:last-child td{border-bottom:none}
+/* (Plus de « tr:last-child td{border-bottom:none} » : chaque ligne est une carte, la derniere garde son bord — 2026-09-26.) */
 td.dr,th.dr{text-align:right;white-space:nowrap}
 td.ref{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.78rem;color:var(--tx3)}
 td.sol{font-weight:700;white-space:nowrap}
