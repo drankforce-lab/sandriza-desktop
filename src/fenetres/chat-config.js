@@ -107,6 +107,9 @@ input.t:disabled,textarea.t:disabled{opacity:.45}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 .vide{padding:2rem 1rem;text-align:center;color:var(--tx2);font-size:.84rem}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.colg{display:flex;flex-direction:column;gap:.9rem;min-width:0}
+.grc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 .75rem;align-items:start}
 `;
 
 function pageChatConfig(onglet) {
@@ -196,7 +199,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     h += '<div class="grille">';
 
-    h += '<div class="carte"><h2>${T("Présence")}</h2>'
+    /* ⚠ DEUX COLONNES PLEINES (sa demande : aucune barre de defilement) :
+       presence et messages a gauche, « qui repond » a droite. La carte des
+       messages, en pleine largeur dessous, faisait depasser de 200 px. */
+    var hPres = '<div class="carte"><h2>${T("Présence")}</h2>'
       + '<div class="bascules">'
       + '<label class="bascule"><input type="checkbox" id="c-actif"'+(d.actif?' checked':'')+dis+'> ${T("Actif")}</label>'
       + '<label class="bascule"><input type="checkbox" id="c-enligne"'+(d.enLigne?' checked':'')+dis+'> ${T("En ligne")}</label>'
@@ -214,7 +220,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        CARTE : ce sont les deux moities d une seule question — qui repond, et
        avec quel visage. Separees, la premiere laissait une carte presque vide
        a cote d une carte pleine, et rien ne disait qu elles s excluent. */
-    h += '<div class="carte"><h2>${T("Qui répond")}</h2>'
+    var hQui = '<div class="carte"><h2>${T("Qui répond")}</h2>'
       + '<label class="champ"><span class="lbl">${T("Photo de l’agent fixe")}</span>'
       + '<span class="rang">'
       + (d.photoAgent
@@ -232,7 +238,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<input type="file" id="c-agent-f" accept="image/*" hidden>'
       + '</div>';
 
-    h += '<div class="carte large"><h2>${T("Messages")}</h2>'
+    var hMsg = '<div class="carte"><h2>${T("Messages")}</h2><div class="grc">'
       + '<label class="champ"><span class="lbl">${T("Accueil — français")}</span>'
       + '<input class="t" id="c-accueil" value="'+esc(d.accueil||'')+'" placeholder="${T("Bonjour ! Mon nom est {{AGENT}}, comment puis-je vous aider ?")}"'+dis+'>'
       + '<span class="sub">${T("Écrivez <b>{{AGENT}}</b> là où le nom de l’agent doit paraître.")}</span></label>'
@@ -242,8 +248,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<textarea class="t" id="c-horsligne"'+dis+'>'+esc(d.horsLigne||'')+'</textarea></label>'
       + '<label class="champ"><span class="lbl">${T("Hors ligne — anglais")}</span>'
       + '<textarea class="t" id="c-horsligne-en" placeholder="We are currently offline. Leave us your contact details and we will get back to you as soon as possible."'+dis+'>'+esc(d.horsLigneEN||'')+'</textarea></label>'
-      + '</div>';
+      + '</div></div>';
 
+    h += '<div class="colg">' + hPres + hMsg + '</div>' + hQui;
     h += '</div>';
     if (!RO) h += '<div style="margin-top:1rem"><button class="b prim" type="button" id="c-enr">${T("Enregistrer les réglages du widget")}</button></div>';
     return h;
