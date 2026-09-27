@@ -35,25 +35,17 @@ module.exports = {
      defaut ne se verrait qu une fois imprime. Le damier autour dit deja ce qui
      est transparent — c est lui qui empeche de confondre blanc et vide. */
   "#fff": 1,              // 1.12  1 fenetre : promo-editeur.js (.scene — le papier)
-  "#d8b57a": 9,           // 1.74  2 fenetre(s) : explorateur.js, studio.js
-  "#f0c987": 9,           // 1.40  7 fenetre(s) : commande.js, commandes.js, expedition.js…
-  "#e6c14a": 8,           // 1.55  6 fenetre(s) : chat-config.js, incidents.js, journaux.js…
-  "#86efac": 6,           // 1.25  5 fenetre(s) : catalogio.js, newsletter.js, produit.js…
+  "#86efac": 4,           // 1.25  5 fenetre(s) : catalogio.js, newsletter.js, produit.js…
   "#bcd2f0": 6,           // 1.38  6 fenetre(s) : analytics.js, images.js, paiements-config.js…
   "#dcc39b": 5,           // 1.52  4 fenetre(s) : campagnes.js, studio.js, telephonie.js…
-  "#fcd34d": 5,           // 1.29  5 fenetre(s) : banque.js, catalogio.js, newsletter.js…
+  "#fcd34d": 3,           // 1.29  5 fenetre(s) : banque.js, catalogio.js, newsletter.js…
   "#fde68a": 5,           // 1.11  3 fenetre(s) : campagnes.js, commandes.js, statistiques.js
-  "#6ee7b7": 4,           // 1.36  1 fenetre(s) : banque.js
   "#86e5a8": 3,           // 1.36  3 fenetre(s) : expedition.js, remboursement.js, retour.js
   "#8a6a3e": 3,           // 4.45  2 fenetre(s) : socle.js, tableau.js
   "#9fb0c4": 3,           // 1.98  1 fenetre(s) : affichage.js
-  "#b6b9f7": 3,           // 1.66  2 fenetre(s) : incidents.js, securite.js
   "#e08a8a": 3,           // 2.30  2 fenetre(s) : fal.js, studio.js
-  "#6b7280": 2,           // 4.32  2 fenetre(s) : produit.js, promo.js
+  "#6b7280": 1,           // 4.32  2 fenetre(s) : produit.js, promo.js
   "#dbe7fb": 2,           // 1.11  2 fenetre(s) : analytics.js, images.js
-  "#f59e0b": 2,           // 1.92  1 fenetre(s) : commandes.js
-  "#15803d": 1,           // 4.48  1 fenetre(s) : socle.js
-  "#6b7787": 1,           // 4.07  1 fenetre(s) : profil.js
   "#93e6b5": 1,           // 1.32  1 fenetre(s) : chat-config.js
   "#9a8f7d": 1,           // 2.84  1 fenetre(s) : newsletter.js
   "#a67c4e": 1,           // 3.34  1 fenetre(s) : pages.js
@@ -63,15 +55,11 @@ module.exports = {
   "#b45309": 1,           // 4.49  1 fenetre(s) : promo.js
   "#b6a6f7": 1,           // 1.92  1 fenetre(s) : depenses.js
   "#b9c6d6": 1,           // 1.55  1 fenetre(s) : affichage.js
-  "#c7d2fe": 1,           // 1.33  1 fenetre(s) : invmeta.js
   "#c9ead6": 1,           // 1.16  1 fenetre(s) : studio.js
   "#cfe0f5": 1,           // 1.20  1 fenetre(s) : icones.js
   "#d3f6e4": 1,           // 1.04  1 fenetre(s) : images.js
-  "#d8bd97": 1,           // 1.61  1 fenetre(s) : fal.js
   "#d9bd94": 1,           // 1.61  1 fenetre(s) : pages.js
-  "#d9bd95": 1,           // 1.61  1 fenetre(s) : profil.js
   "#dcfce7": 1,           // 1.02  1 fenetre(s) : commandes.js
-  "#e0b47a": 1,           // 1.71  1 fenetre(s) : newsletter.js
   "#e0b93a": 1,           // 1.68  1 fenetre(s) : pages.js
   "#e0c49a": 1,           // 1.50  1 fenetre(s) : pages.js
   "#e2c79b": 1,           // 1.46  1 fenetre(s) : securite.js
@@ -83,7 +71,6 @@ module.exports = {
   "#f6bdbd": 1,           // 1.45  1 fenetre(s) : images.js
   "#fbe3b0": 1,           // 1.12  1 fenetre(s) : fal.js
   "#fdba74": 1,           // 1.51  1 fenetre(s) : commande.js
-  "#fecaca": 1,           // 1.29  1 fenetre(s) : transporteurs.js
   "#ffd9d9": 1,           // 1.16  1 fenetre(s) : images.js
   },
 };

@@ -49,7 +49,10 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
-button.bsc{font:inherit;border:none;border-radius:8px;padding:.65rem 1.25rem;font-size:.88rem;font-weight:700;cursor:pointer;color:var(--tx-blanc);white-space:nowrap}
+button.bsc{font:inherit;border:none;border-radius:8px;padding:.65rem 1.25rem;font-size:.88rem;font-weight:700;cursor:pointer;color:var(--tx-sur-accent);white-space:nowrap}
+/* ⚠ BLANC FIXE, et des fonds assez sombres pour lui (2026-09-26) : --tx-blanc
+   devient FONCE en jour, et le bouton qui met le site en ligne tombait a 1,68:1. */
+html.jour button.bsc,html.jour .etat button.bsc{color:var(--tx-sur-accent)}
 button.bsc:disabled{opacity:.5;cursor:default}
 .vide{padding:1rem;text-align:center;color:var(--tx2);font-size:.82rem}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
@@ -113,7 +116,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var ds = enLigne ? '${T("Le site est visible par les moteurs de recherche et les visiteurs.")}'
                      : '${T("Le site est protégé contre l’indexation. Seules les personnes ayant le lien direct peuvent le visiter.")}';
     var btnTxt = enLigne ? '${T("Repasser en pré-lancement")}' : (CONF ? '${T("Confirmer le lancement PUBLIC ?")}' : '${T("Lancer le site au public")}');
-    var btnCoul = enLigne ? '#ef4444' : (CONF ? '#b91c1c' : '#16a34a');
+    var btnCoul = enLigne ? '#dc2626' : (CONF ? '#b91c1c' : '#15803d');
 
     var src;
     if (!D.coherent && D.envPresente) src = '<div class="src err">${T("✗ Incohérence : la variable Render <code>ELG_LAUNCHED=")}' + esc(D.envValeur) + '${T("</code> dit le contraire de l’état actuel. Le prochain déploiement suivra la variable.")}</div>';

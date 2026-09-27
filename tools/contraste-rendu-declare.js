@@ -64,14 +64,10 @@ module.exports = {
     '#5F666C sur #4D5056 @4.5': 4,
     // 1.41 · div.pop > button.x « × » · newsletter_c5/nuit
     '#FFFFFF sur #D9D9D9 @4.5': 1,
-    // 1.48 · div.rangee > button#b-bascule.bsc « Repasser en pré-lancement » · lancement_c1/jour
-    '#8B5C5C sur #EF4444 @4.5': 1,
     // 1.49 · tr > th « Facture » · etatcompte/nuit etatcompte/nuit/ardoise etatcompte/nuit/emeraude etatcompte/nuit/graphite etatcompte/nuit/ocean etatcompte/nuit/violet
     '#111111 sur #26334A @4.5': 2,
     // 1.66 · div#g-prev-head.head.anim > div.ti « SANDRIZA » · gabarits_c1/jour
     '#1D2433 sur #7C2D12 @4.5': 1,
-    // 1.68 · div.rangee > button#b-bascule.bsc « Lancer le site au public » · lancement/jour lancement/jour/ardoise lancement/jour/emeraude lancement/jour/graphite lancement/jour/ocean lancement/jour/violet
-    '#8B5C5C sur #16A34A @4.5': 1,
     // 2.06 · div.ph > button.phx « ✕ » · avis/jour avis/jour/ardoise avis/jour/emeraude avis/jour/graphite avis/jour/ocean avis/jour/violet
     '#AB4E4E sur #393C43 @4.5': 2,
     // 2.13 · span#p-r2 > a#p-mesurer « mesurer l’espace R2 » · photos/jour photos/jour/ardoise photos/jour/emeraude photos/jour/graphite photos/jour/ocean photos/jour/violet photos_c1/jour photos_c2/jour photos_c4/jour
@@ -114,8 +110,6 @@ module.exports = {
     '#D97706 sur #FFFFFF @4.5': 3,
     // 3.24 · td > div.mut « ⏳ promesse » · journaux_c11/nuit journaux_c4/nuit
     '#617084 sur #16202F @4.5': 10,
-    // 3.30 · div.rangee > button#b-bascule.bsc « Lancer le site au public » · lancement/nuit lancement/nuit/ardoise lancement/nuit/emeraude lancement/nuit/graphite lancement/nuit/ocean lancement/nuit/violet
-    '#FFFFFF sur #16A34A @4.5': 1,
     // 3.39 · h2 > span.cpt « 1 » · liquidation_c1/nuit
     '#DC2626 sur #16202F @4.5': 1,
     // 3.49 · div.tete > span#t-av.av « MT » · client/jour client/jour/ardoise client/jour/emeraude client/jour/graphite client/jour/ocean client/jour/violet client/nuit client/nuit/ardoise client/nuit/emeraude client/nuit/graphite client/nuit/ocean client/nuit/violet client_c1/jour client_c1/nuit client_c2/jour client_c2/nuit
@@ -128,8 +122,6 @@ module.exports = {
     '#64748B sur #0F172A @4.5': 1,
     // 3.75 · div.vide > span « Non configuré » · modeles_c1/jour
     '#798292 sur #FCFBF9 @4.5': 3,
-    // 3.76 · div.rangee > button#b-bascule.bsc « Repasser en pré-lancement » · lancement_c1/nuit
-    '#FFFFFF sur #EF4444 @4.5': 1,
     // 3.80 · div.vide > span « Non configuré » · modeles_c1/nuit
     '#687484 sur #0F1623 @4.5': 3,
     // 3.98 · td > span.pill.neutre « Expiré » · remboursements_c1/nuit
