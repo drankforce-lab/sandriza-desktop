@@ -171,7 +171,7 @@ module.exports = {
     'With no style, every active item is offered.',
   'Aucun article actif dans cette catégorie.': 'No active item in this category.',
   'Toutes': 'All',
-  ' $ au total': ' $ total',
+  'au total': 'total',
   'Nom de la suggestion': 'Name of the suggestion',
   'Sur les fiches produit': 'On product pages',
   'Dans le panier': 'In the basket',

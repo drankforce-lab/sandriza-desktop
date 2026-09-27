@@ -50,6 +50,13 @@ body{background:var(--f-page);color:var(--tx);
   border:1px solid var(--v10);color:var(--tx-gris2)}
 .barreoutils .rf-jet.on{background:rgba(201,169,126,.14);border-color:rgba(201,169,126,.55);color:var(--tx-or2);font-weight:700}
 .rf-jet .n{margin-left:.45rem;font-weight:800;opacity:.8}
+/* La barre d onglets commune (2026-09-26) : les quatre vues etaient des puces
+   de filtre, alors que partout ailleurs une vue est un onglet. */
+.onglets{display:flex;gap:.25rem;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--v08);padding:0 0 .5rem}
+.onglets > button{background:transparent;border:1px solid transparent;color:var(--tx2);padding:.38rem .7rem;
+  font:inherit;font-weight:600;font-size:.82rem;cursor:pointer}
+.onglets > button:hover{background:var(--v05);color:var(--tx)}
+.onglets .n{margin-left:.45rem;font-weight:800}
 td.rang{font-weight:800;color:var(--tx2);width:2rem}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
@@ -98,7 +105,7 @@ tbody tr:hover td{background:var(--v04)}
 .choix{flex:1 1 auto;min-height:6rem;overflow:auto;border:1px solid var(--v10);
   border-radius:9px;padding:.4rem .5rem}
 .choix label{display:flex;align-items:center;gap:.45rem;padding:.14rem 0;font-size:.83rem}
-.choix .sku{font-family:'Courier New',monospace;font-size:.72rem;color:var(--tx2);margin-left:auto}
+.choix .sku{font-size:.74rem;color:var(--tx2);margin-left:auto;font-variant-numeric:tabular-nums}
 .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.8rem;flex-wrap:wrap}
 /* ── Generateur d agencement (#33) ── */
 .styles{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center}
@@ -438,13 +445,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     if (sous) sous.textContent = D.peutModifier ? '' : '${T("consultation seulement")}';
 
-    var h = '<div class="barreoutils">'
-      + '<button class="rf-jet' + (ONGLET === 'regles' ? ' on' : '') + '" data-onglet="regles">${T("Règles")}'
+    var h = '<div class="onglets">'
+      + '<button type="button" class="' + (ONGLET === 'regles' ? 'actif' : '') + '" data-onglet="regles">${T("Règles")}'
       + ((D.regles || []).length ? '<span class="n">' + D.regles.length + '</span>' : '') + '</button>'
-      + '<button class="rf-jet' + (ONGLET === 'liaisons' ? ' on' : '') + '" data-onglet="liaisons">${T("Liaisons manuelles")}'
+      + '<button type="button" class="' + (ONGLET === 'liaisons' ? 'actif' : '') + '" data-onglet="liaisons">${T("Liaisons manuelles")}'
       + ((D.liaisons || []).length ? '<span class="n">' + D.liaisons.length + '</span>' : '') + '</button>'
-      + '<button class="rf-jet' + (ONGLET === 'stats' ? ' on' : '') + '" data-onglet="stats">${T("Statistiques")}</button>'
-      + '<button class="rf-jet' + (ONGLET === 'agencement' ? ' on' : '') + '" data-onglet="agencement">${T("Générateur d’agencement")}'
+      + '<button type="button" class="' + (ONGLET === 'stats' ? 'actif' : '') + '" data-onglet="stats">${T("Statistiques")}</button>'
+      + '<button type="button" class="' + (ONGLET === 'agencement' ? 'actif' : '') + '" data-onglet="agencement">${T("Générateur d’agencement")}'
       + (LOOK.length ? '<span class="n hi">' + LOOK.length + '</span>' : '') + '</button>'
       + '</div>';
 
@@ -707,14 +714,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         return '<label><input type="checkbox" data-look="' + esc(p.id) + '"'
           + (LOOK.indexOf(p.id) >= 0 ? ' checked' : '') + (AGEN.peutEcrire ? '' : ' disabled') + '> '
           + esc(p.nom) + '<span class="sku">' + esc(p.categorieLibelle) + ' · '
-          + p.prix.toFixed(2) + ' $</span></label>';
+          + szArgent(p.prix) + '</span></label>';
       }).join('') + '</div>';
     }
     h += '</div>';
 
     var total = (AGEN.produits || []).filter(function(p){ return LOOK.indexOf(p.id) >= 0; })
       .reduce(function(s, p){ return s + p.prix; }, 0);
-    h += '<div class="carte"><h2>${T("3 · Publier")}<span class="n">' + total.toFixed(2) + '${T(" $ au total")}</span></h2>';
+    h += '<div class="carte"><h2>${T("3 · Publier")}<span class="n">' + szArgent(total) + ' ${T("au total")}</span></h2>';
     if (!AGEN.peutEcrire) {
       h += '<div class="vide">${T("Consultation seulement.")}</div></div>';
       return h;
