@@ -168,4 +168,6 @@ module.exports = {
   '(sans nom)': '(no name)',
   'sans courriel': 'no email',
   '· lecture seule': '· read-only',
+  'Province': 'Province',
+  'Les totaux s’afficheront ici.': 'Totals will appear here.'
 };

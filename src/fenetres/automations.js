@@ -51,14 +51,14 @@ body{background:var(--f-page);color:var(--tx);
   border-radius:0 7px 7px 0;padding:.4rem .6rem;margin:0 0 .7rem}
 .rangee{display:flex;gap:.5rem;align-items:flex-end;flex-wrap:wrap;margin:0 0 .6rem}
 .ch{flex:1 1 16rem;min-width:0}
-.ch.plein{flex:1 1 100%}
+.ch.plein{flex:1 1 20rem}
 .ch label{display:block;margin-bottom:.22rem;font-size:.73rem;color:var(--tx2)}
 .ch input{width:100%;font:inherit;font-size:.82rem;color:var(--tx);background:var(--f-champ);
   border:1px solid var(--v12);border-radius:8px;padding:.4rem .5rem}
 .ch input.mono{font-family:ui-monospace,Consolas,monospace;font-size:.76rem}
 .ch input:focus{outline:none;border-color:#c9a97e}
 .ch input:disabled{opacity:.55}
-.metriques{border-top:1px solid var(--v08);margin-top:.4rem;padding-top:.6rem}
+.metriques{border-top:1px solid var(--v08);margin-top:.4rem;padding-top:.6rem;margin-bottom:.8rem}
 .metriques .t{font-size:.78rem;font-weight:700;margin:0 0 .1rem}
 .metriques .s{font-size:.72rem;color:var(--tx3);margin:0 0 .5rem}
 .mgrille{display:grid;grid-template-columns:repeat(auto-fill,minmax(13rem,1fr));gap:.25rem .8rem;margin:0 0 .6rem}

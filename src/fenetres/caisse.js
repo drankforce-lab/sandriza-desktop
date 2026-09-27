@@ -115,6 +115,8 @@ input,select{font:inherit;color:var(--tx);background:var(--f-0f1826);
 input:focus,select:focus{outline:none;border-color:#c9a97e}
 input[type=checkbox]{width:auto}
 .r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.4rem}
+.r3c{display:flex;flex-direction:column;gap:.2rem;min-width:0}
+.r3c>span{font-size:.72rem;color:var(--tx2)}
 /* Les champs du client : empiles, pleine largeur. Voir la note dans le gabarit. */
 .champs{display:flex;flex-direction:column;gap:.28rem}
 .r2{display:grid;grid-template-columns:1fr 1fr;gap:.4rem}
@@ -254,12 +256,13 @@ function pageCaisse(mode) {
         <span>${T("Ouvrir un compte et lui envoyer le lien pour le finaliser")}
         <span class="exp">${T("Courriel requis. Historique et retours pour lui ; aucune inscription à l’infolettre.")}</span></span></label>
       <h2 style="margin-top:.75rem">${T("Vente")}</h2>
+      <!-- Chaque champ porte son etiquette (2026-09-26) : trois cases nues et une
+           legende « Province · Livraison · Rabais » dessous se lisaient mal. -->
       <div class="r3">
-        <select id="v-prov" title="${T("Province — elle détermine les taxes")}"></select>
-        <input id="v-liv" inputmode="decimal" value="0.00" title="${T("Livraison")}" placeholder="${T("Livraison")}">
-        <input id="v-rab" inputmode="decimal" value="0.00" title="${T("Rabais")}" placeholder="${T("Rabais")}">
+        <label class="r3c"><span>${T("Province")}</span><select id="v-prov" title="${T("Province — elle détermine les taxes")}"></select></label>
+        <label class="r3c"><span>${T("Livraison")}</span><input id="v-liv" inputmode="decimal" value="0.00" title="${T("Livraison")}" placeholder="${T("Livraison")}"></label>
+        <label class="r3c"><span>${T("Rabais")}</span><input id="v-rab" inputmode="decimal" value="0.00" title="${T("Rabais")}" placeholder="${T("Rabais")}"></label>
       </div>
-      <div class="sous-ch">${T("Province · Livraison · Rabais")}</div>
       <h2 style="margin-top:.75rem">${T("Facture")}</h2>
       <select id="v-remise" title="${T("Ce qu’on fait de la facture après la vente")}"></select>
       <div class="sous-ch">${T("L’envoi exige une adresse. Toujours consultable dans Facturation.")}</div>
@@ -391,7 +394,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!TOT) {
       z.innerHTML = '<div class="vide">' + (LIGNES.length
         ? '${T("Calcul des totaux…")}'
-        : '${T("Aucun article — scannez un code-barres pour commencer.")}') + '</div>';
+        /* Pas deux fois la meme phrase a l ecran : le volet des articles la dit deja. */
+        : '${T("Les totaux s’afficheront ici.")}') + '</div>';
       return;
     }
     var h = '<div class="l"><span>${T("Sous-total")}</span><span>' + argent(TOT.sousTotal) + '</span></div>';
