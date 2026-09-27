@@ -317,4 +317,10 @@ module.exports = {
   'ce dossier': 'this folder',
   // La refonte (2026-09-25).
   'dossier choisi': 'folder chosen',
+
+  /* ── SANS BARRE DE DEFILEMENT (2026-09-26) ── */
+  'Voir le détail des colonnes': 'See the column details',
+  'Fermer': 'Close',
+  '… et': '… and',
+  'autre(s) — téléchargez le rapport pour la liste complète.': 'more — download the report for the full list.'
 };

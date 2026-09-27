@@ -169,6 +169,9 @@ code{font:.76rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.rap2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.8rem;align-items:start}
+@media (max-width:1000px){.rap2{grid-template-columns:1fr}}
 `;
 
 /**
@@ -395,13 +398,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
       + '<div style="margin-top:1.4rem">'
       +   '<div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">'
       +     '<div class="lbl" style="margin:0">${T("Colonnes de la feuille")} ' + esc(SHEET) + '</div>'
-      +     '<button class="ghost mini" data-act="colrepli">'
-      +       (COL_REPLI ? '${T("▸ Afficher le détail des colonnes")}' : '${T("▾ Masquer le détail des colonnes")}') + '</button>'
+      +     '<button class="ghost mini" data-act="colrepli">${T("Voir le détail des colonnes")}</button>'
       +   '</div>'
-      +   (COL_REPLI ? '' :
-            '<div class="avis" style="margin:.7rem 0">${T("À l’import, <strong>seules les colonnes présentes dans votre fichier sont touchées</strong> : ")}'
+      /* ⚠ LE DETAIL S OUVRE EN BOITE (sa demande du 2026-09-26 : aucune barre de
+         defilement). Deplie dans la page, il poussait l onglet hors de la
+         fenetre — et il grandit avec chaque colonne du catalogue. On le consulte,
+         on le ferme : c est une boite, pas un etage. */
+      +   (!COL_BOITE ? '' :
+            '<div class="voile" id="col-voile"><div class="boite" style="max-width:52rem"><h3>${T("Colonnes de la feuille")} ' + esc(SHEET) + '</h3>'
+          + '<div class="avis" style="margin:.7rem 0">${T("À l’import, <strong>seules les colonnes présentes dans votre fichier sont touchées</strong> : ")}'
           +   '${T("un fichier « SKU ; Prix » ne change que le prix. Les colonnes <em>information</em> sont exportées pour vous repérer et ignorées à la relecture.")}</div>'
-          + '<div class="carte"><table><thead><tr><th>${T("Colonne")}</th><th>${T("Rôle")}</th></tr></thead><tbody>' + lignesCol + '</tbody></table></div>')
+          + '<div class="carte"><table><thead><tr><th>${T("Colonne")}</th><th>${T("Rôle")}</th></tr></thead><tbody>' + lignesCol + '</tbody></table></div>'
+          + '<div style="display:flex;justify-content:flex-end;margin-top:.7rem"><button class="ghost" data-act="colrepli">${T("Fermer")}</button></div></div></div>')
       + '</div>'
       + '</div>';
   }
@@ -525,6 +533,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
       + '</div>';
   }
 
+  /* ⚠ UN RAPPORT D IMPORT PEUT COMPTER DES MILLIERS DE LIGNES (plafond : 5000) :
+     on en MONTRE au plus six par tableau, et on dit combien il en reste — la
+     liste complete est dans le rapport telechargeable, qui existe deja (sa
+     demande du 2026-09-26 : aucune barre de defilement). */
+  var RAP_MAX = 6;
+  function reste(n){
+    return n > RAP_MAX ? '<div class="dt" style="margin-top:.4rem">${T("… et")} ' + (n - RAP_MAX)
+      + ' ${T("autre(s) — téléchargez le rapport pour la liste complète.")}</div>' : '';
+  }
   function vueRapport(){
     var r = RAP, refus = (r.conflits.length + r.echecs.length);
     var cartesPhoto = (r.photos || r.photosEchecs.length)
@@ -533,9 +550,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
     var tblPhotos = r.photosEchecs.length
       ? '<div class="carte" style="margin-top:.8rem"><h2>${T("Photos non reprises — le reste de la ligne est passé")}</h2>'
         + '<table><thead><tr><th style="width:52px">${T("Ligne")}</th><th style="width:120px">${T("SKU")}</th><th>${T("Adresse")}</th><th>${T("Motif")}</th></tr></thead><tbody>'
-        + r.photosEchecs.map(function(x){ return '<tr><td class="dt">' + x.n + '</td><td><code>' + esc(x.sku || '—') + '</code></td>'
+        + r.photosEchecs.slice(0, RAP_MAX).map(function(x){ return '<tr><td class="dt">' + x.n + '</td><td><code>' + esc(x.sku || '—') + '</code></td>'
             + '<td style="word-break:break-all"><code>' + esc(x.src) + '</code></td><td class="rouge">' + esc(x.msg) + '</td></tr>'; }).join('')
-        + '</tbody></table></div>' : '';
+        + '</tbody></table>' + reste(r.photosEchecs.length) + '</div>' : '';
     var noteCrees = r.crees
       ? '<div class="avis" style="margin-top:.8rem">${T("Les")} ' + r.crees + ' produit' + plur(r.crees)
         + '${T(" créés sont <strong>hors vente</strong> : ils attendent dans <strong>Inventaire</strong>. Ajoutez leurs photos, puis mettez-les en vente.")}</div>' : '';
@@ -551,11 +568,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
     var tblRefus = refus
       ? '<div class="carte" style="margin-top:.8rem"><h2>${T("Lignes refusées — rien n’a été écrit pour celles-ci")}</h2>'
         + '<table><thead><tr><th style="width:52px">${T("Ligne")}</th><th style="width:120px">${T("SKU")}</th><th>${T("Produit")}</th><th>${T("Motif")}</th></tr></thead><tbody>'
-        + r.conflits.map(function(c){ return '<tr><td class="dt">' + c.n + '</td><td><code>' + esc(c.sku || '—') + '</code></td><td>' + esc(c.nom || '—') + '</td>'
+        + r.conflits.slice(0, RAP_MAX).map(function(c){ return '<tr><td class="dt">' + c.n + '</td><td><code>' + esc(c.sku || '—') + '</code></td><td>' + esc(c.nom || '—') + '</td>'
             + '<td class="rouge">${T("Un collègue vient de modifier :")} ' + esc((c.champs || []).join(', ')) + '${T(". Valeur actuelle :")} ' + esc(c.actuel || '') + '</td></tr>'; }).join('')
-        + r.echecs.map(function(c){ return '<tr><td class="dt">' + c.n + '</td><td><code>' + esc(c.sku || '—') + '</code></td><td>' + esc(c.nom || '—') + '</td>'
+        + r.echecs.slice(0, Math.max(0, RAP_MAX - r.conflits.length)).map(function(c){ return '<tr><td class="dt">' + c.n + '</td><td><code>' + esc(c.sku || '—') + '</code></td><td>' + esc(c.nom || '—') + '</td>'
             + '<td class="rouge">' + esc(c.msg) + '</td></tr>'; }).join('')
-        + '</tbody></table></div>' : '';
+        + '</tbody></table>' + reste(refus) + '</div>' : '';
     return ''
       + szTuiles('<div class="tuiles">'
       +   '<div class="tuile"><div class="k">${T("Créés")}</div><div class="v">' + r.crees + '</div></div>'
@@ -563,7 +580,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
       +   cartesPhoto
       +   '<div class="tuile' + (refus ? ' err' : '') + '"><div class="k">${T("Refusés")}</div><div class="v">' + refus + '</div></div>'
       + '</div>')
-      + tblPhotos + noteCrees + noteHist + blocNotifs + tblRefus
+      + noteCrees + noteHist + blocNotifs
+      /* Les deux tableaux cote a cote quand il y en a deux. */
+      + ((tblPhotos && tblRefus) ? '<div class="rap2">' + tblPhotos + tblRefus + '</div>' : (tblPhotos + tblRefus))
       + '<div class="barre">'
       +   '<button class="prim" data-act="reinit">${T("Importer un autre fichier")}</button>'
       +   '<button class="ghost" data-act="rapport">${T("⬇ Télécharger le rapport")}</button>'
@@ -841,6 +860,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
   document.addEventListener('keydown', function(e){
     if (e.key !== 'Escape') return;
     if (CONFIRM) { CONFIRM = false; dessiner(); return; }
+    if (COL_BOITE) { COL_BOITE = false; dessiner(); return; }
     if (P && P.fermer) P.fermer();
   });
 
@@ -853,12 +873,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
      attendre le pont : un bouton qui ne réagit qu après un aller-retour réseau
      se lit comme un bouton mort, et on reclique. L écriture suit ; si elle
      échoue, on le DIT plutôt que de laisser croire que c est retenu. */
+  /* Ouvre ou ferme la boite du detail des colonnes. Plus rien a memoriser : la
+     boite est fermee a chaque ouverture de la fenetre (le repli du profil, lu
+     plus bas, ne decide plus d aucun dessin). */
+  var COL_BOITE = false;
   function basculerColonnes(){
-    COL_REPLI = !COL_REPLI;
+    COL_BOITE = !COL_BOITE;
     dessiner();
-    appeler('ui:repli', { nom: 'catalogio_colonnes', replie: COL_REPLI }).then(function(r){
-      if (!r || !r.ok) dire('${T("Le repli n a pas pu être mémorisé :")} ' + expliquer(r), 'err');
-    });
   }
 
   chargerEtat().then(function(ok){
