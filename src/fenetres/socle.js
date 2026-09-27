@@ -3192,6 +3192,11 @@ button.mini,.mini{display:inline-flex;align-items:center;justify-content:center;
 /* Cases et boutons radio : la teinte de l application, pas le bleu du systeme. */
 input[type=checkbox],input[type=radio]{accent-color:#c9a97e;cursor:pointer}
 html.jour input[type=checkbox],html.jour input[type=radio]{accent-color:#a8864f}
+/* ⚠ EN JOUR, LES CONTROLES NATIFS SE DESSINAIENT EN NUIT : la racine porte
+   color-scheme:dark (jetons de nuit) et le theme de jour ne le relevait que pour
+   <select>. Une case NON cochee sortait en carre noir, un calendrier en sombre
+   (vu le 2026-09-26 sur Automatisations). */
+html.jour input,html.jour textarea{color-scheme:light}
 /* La liste deroulante d un formulaire : un chevron dessine, a la meme place
    dans toutes les fenetres, plutot que celui du systeme qui change de taille
    avec l echelle d affichage. */
