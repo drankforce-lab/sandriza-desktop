@@ -214,7 +214,7 @@ tbody tr[data-ligne]:hover td{background:var(--v045)}
 /* Pastilles d etat, badges et puce de categorie */
 .pill{display:inline-block;font-size:.65rem;padding:.05rem .5rem;
   border-radius:99px;white-space:nowrap}
-.pill.rup{background:rgba(239,68,68,.16);color:var(--tx-err)}
+.pill.rup{background:rgba(239,68,68,.16);color:var(--tx-err2)}
 .pill.bas{background:rgba(245,158,11,.16);color:var(--tx-att)}
 .pill.ok{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
@@ -1482,8 +1482,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
       + '<button class="mini" id="dmg-imp"><span class="ic">🖨</span> ${T("Imprimer le rapport")}</button>'
       + '<span class="droite aide"><span class="ic">🔧</span> <b>' + d.totalQte + '</b> '
       + (d.totalQte > 1 ? '${T("articles endommagés")}' : '${T("article endommagé")}')
-      + ' · <span class="ic">💸</span> <b>' + d.totalValeur.toFixed(2)
-      + ' $</b> ${T("valeur perdue (avant taxes)")}</span>'
+      + ' · <span class="ic">💸</span> <b>' + szArgent(d.totalValeur)
+      + '</b> ${T("valeur perdue (avant taxes)")}</span>'
       + '</div>';
 
     if (!d.lignes.length) {
@@ -1500,15 +1500,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
           + '<td><span class="code">' + esc(l.commande) + '</span></td>'
           + '<td>' + esc(l.nom) + '</td>'
           + '<td class="c">' + l.qte + '</td>'
-          + '<td style="text-align:right">' + l.prix.toFixed(2) + ' $</td>'
-          + '<td style="text-align:right;font-weight:600">' + (l.qte * l.prix).toFixed(2) + ' $</td>'
+          + '<td style="text-align:right">' + szArgent(l.prix) + '</td>'
+          + '<td style="text-align:right;font-weight:600">' + szArgent(l.qte * l.prix) + '</td>'
           + '<td>' + esc(l.raison) + '</td></tr>';
       });
       h += '</tbody><tfoot><tr style="font-weight:700">'
         + '<td colspan="3" style="padding:.34rem .5rem;border-top:1px solid var(--v14)">${T("Total")}</td>'
         + '<td class="c" style="border-top:1px solid var(--v14)">' + d.totalQte + '</td>'
         + '<td style="border-top:1px solid var(--v14)"></td>'
-        + '<td style="text-align:right;border-top:1px solid var(--v14)">' + d.totalValeur.toFixed(2) + ' $</td>'
+        + '<td style="text-align:right;border-top:1px solid var(--v14)">' + szArgent(d.totalValeur) + '</td>'
         + '<td style="border-top:1px solid var(--v14)"></td></tr></tfoot></table></div>';
     }
     h += '</div>';

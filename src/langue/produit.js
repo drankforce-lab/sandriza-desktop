@@ -115,7 +115,7 @@ module.exports = {
      et un CODE D AUTORISATION. Les phrases disent le chiffre ET le mot. */
   'sous le coût d’acquisition': 'below the purchase cost',
   'Le prix de vente effectif (': 'The effective selling price (',
-  '$) est inférieur au coût d’acquisition (': '$) is below the purchase cost (',
+  ') est inférieur au coût d’acquisition (': ') is below the purchase cost (',
   'Marge :': 'Margin:',
   '— calculée sur le prix soldé': '— worked out on the sale price',
   '— vente à perte': '— sold at a loss',

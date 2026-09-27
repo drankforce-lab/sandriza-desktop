@@ -638,9 +638,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
             + esc(f.origine.devise || 'USD') + ' ${T("— original :")} '
             + [['montant', 'montant'], ['tps', 'TPS'], ['tvq', 'TVQ']].map(function(p){
                 var v = f.origine[p[0]];
-                return (v == null) ? '' : (p[1] + ' ' + v.toFixed(2) + ' $ US');
+                return (v == null) ? '' : (p[1] + ' ' + szArgentChamp(v) + ' US');
               }).filter(Boolean).join(' · ')
-            + (f.origine.total != null ? ' · total ' + f.origine.total.toFixed(2) + ' $ US' : '')
+            + (f.origine.total != null ? ' · total ' + szArgentChamp(f.origine.total) + ' US' : '')
             + (f.fx ? ' ${T("— taux")} ' + esc(f.fx.taux)
                 + (f.fx.date ? ' du ' + esc(f.fx.date) : '')
                 + (f.fx.approx ? ' ${T("(taux du jour, faute de mieux)")}' : '') : '')

@@ -1016,8 +1016,8 @@ function pageProduit(id) {
     var al = document.getElementById('p-alerte');
     if (al) {
       if (c > 0 && eff > 0 && eff < c) {
-        al.textContent = '${T("Le prix de vente effectif (")}' + eff.toFixed(2) + ' ${T("$) est inférieur au coût d’acquisition (")}'
-          + c.toFixed(2) + ' $).';
+        al.textContent = '${T("Le prix de vente effectif (")}' + szArgent(eff) + '${T(") est inférieur au coût d’acquisition (")}'
+          + szArgent(c) + ').';
         al.style.display = 'block';
       } else { al.style.display = 'none'; }
     }
@@ -1025,7 +1025,7 @@ function pageProduit(id) {
     var el = document.getElementById('p-marge'); if (!el) return;
     if (!(eff > 0) || !(c > 0)) { el.textContent = ''; return; }
     var m = eff - c, pct = Math.round((m / eff) * 100);
-    el.innerHTML = '${T("Marge :")} <strong>' + m.toFixed(2) + ' $</strong> (' + pct + ' %)'
+    el.innerHTML = '${T("Marge :")} <strong>' + szArgent(m) + '</strong> (' + pct + ' %)'
       + (s > 0 && s < p ? ' ${T("— calculée sur le prix soldé")}' : '')
       + (m <= 0 ? ' <span style="color:var(--tx-err)">${T("— vente à perte")}</span>' : '');
   }
@@ -2318,8 +2318,7 @@ function pageProduit(id) {
         var v = document.createElement('div');
         v.className = 'voile';
         v.innerHTML = '<div class="boite"><h3><span class="ic">⚠</span> ${T("Prix inférieur au coût d’acquisition")}</h3>'
-          + '<p>${T("Le prix de vente effectif (")}<strong>' + eff.toFixed(2) + ' $</strong>${T(") est inférieur ")}'
-          + '${T("au coût d’acquisition (")}<strong>' + cout.toFixed(2) + ' $</strong>).</p>'
+          + '<p>${T("Le prix de vente effectif (")}<strong>' + szArgent(eff) + '</strong>${T(") est inférieur au coût d’acquisition (")}<strong>' + szArgent(cout) + '</strong>).</p>'
           + '<div class="ch"><label for="bc-raison">${T("Raison ")}<span class="req">*</span></label>'
           + '<textarea id="bc-raison" rows="3" placeholder="${T("Écoulement de fin de série, article abîmé…")}"></textarea></div>'
           + (exige ? '<div class="ch" style="margin-top:.5rem"><label for="bc-nip">${T("Code d’autorisation ")}<span class="req">*</span></label>'
