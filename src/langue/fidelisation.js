@@ -206,4 +206,9 @@ module.exports = {
   // La refonte, comme l'Inventaire (2026-09-25).
   ' questions': ' questions',
   ' question': ' question',
+
+  /* ── LA PAGINATION DES SONDAGES (2026-09-26) ── */
+  '‹ Précédent': '‹ Previous',
+  'Page': 'Page',
+  'Suivant ›': 'Next ›'
 };

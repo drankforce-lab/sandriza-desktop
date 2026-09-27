@@ -99,6 +99,11 @@ tbody tr[data-sondage]{cursor:pointer}
   align-items:center;justify-content:center;z-index:50;padding:1rem}
 .boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;
   max-width:42rem;width:100%;max-height:88vh;overflow:auto;padding:.9rem 1rem}
+/* L editeur : large et en deux colonnes (2026-09-26). */
+.boite:has(.ed2){max-width:min(74rem,96vw)}
+.ed2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:1rem;align-items:start}
+.ed2 .qs{margin-top:0}
+@media (max-width:900px){.ed2{grid-template-columns:1fr}}
 .boite h3{margin:0 0 .6rem;font:700 .98rem/1.3 Georgia,serif;display:flex;
   align-items:center;gap:.5rem;flex-wrap:wrap}
 .q{border-top:1px solid var(--v07);padding:.5rem 0}
@@ -136,6 +141,8 @@ label.case input{width:15px;height:15px;accent-color:#c9a97e;margin:0}
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.pagi{display:flex;align-items:center;justify-content:center;gap:.6rem;padding:.45rem 0 0;font-size:.78rem;color:var(--tx2)}
 `;
 
 /**
@@ -251,7 +258,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       h += '<div class="liste"><table><thead><tr><th>${T("Sondage")}</th>'
         + '<th class="num">${T("Invitations")}</th><th class="num">${T("Réponses")}</th><th class="num">${T("Taux")}</th>'
         + '<th>${T("Récompense")}</th><th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
-        + D.sondages.map(function(s){
+        + pageSondages().map(function(s){
             return '<tr data-sondage="' + esc(s.id) + '" title="${T("Voir le dépouillement")}">'
               /* ══ LA REFONTE DE L INVENTAIRE (2026-09-25) : la ligne riche (initiales,
                  nom, declencheur et nombre de questions dessous) et la jauge du taux
@@ -277,9 +284,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
               + '</tr>';
           }).join('')
         + '</tbody></table></div>';
+      /* ⚠ PAGINEE, JAMAIS DE GLISSIERE (sa demande du 2026-09-26) : autant de
+         lignes que la hauteur MESUREE en permet (szAutoPagination, socle). */
+      var pages = Math.max(1, Math.ceil(D.sondages.length / SPARPAGE));
+      if (pages > 1) h += '<div class="pagi"><button class="mini" id="fi-prec"' + (SPAGE <= 0 ? ' disabled' : '') + '>${T("‹ Précédent")}</button>'
+        + '<span>${T("Page")} ' + (SPAGE + 1) + ' / ' + pages + '</span>'
+        + '<button class="mini" id="fi-suiv"' + (SPAGE >= pages - 1 ? ' disabled' : '') + '>${T("Suivant ›")}</button></div>';
     }
     h += '</div>';
     return h;
+  }
+  var SPAGE = 0, SPARPAGE = 50;
+  function pageSondages(){
+    var tout = D.sondages || [], pages = Math.max(1, Math.ceil(tout.length / SPARPAGE));
+    if (SPAGE >= pages) SPAGE = pages - 1;
+    return tout.slice(SPAGE * SPARPAGE, SPAGE * SPARPAGE + SPARPAGE);
   }
 
   /* Les listes de ce cœur sont PLAFONNEES a 100 (la reponse traverserait le pont
@@ -368,6 +387,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     var e = EDIT;
     var h = '<div class="voile" id="fi-voile-ed"><div class="boite">'
       + '<h3>' + (e.id ? '${T("Modifier le sondage")}' : '${T("Nouveau sondage")}') + '</h3>'
+      /* ⚠ DEUX COLONNES (sa demande : aucune barre de defilement) — reglages et
+         recompense a gauche, questions a droite. Empilee dans une boite de
+         42 rem, l edition d un sondage depassait l ecran de 312 px. */
+      + '<div class="ed2"><div class="ed-g">'
       + '<label class="champ"><span class="lbl">${T("Nom")}</span>'
       + '<input class="t" id="sd-nom" value="' + esc(e.nom) + '" placeholder="${T("Satisfaction après livraison")}"></label>'
       + '<label class="champ"><span class="lbl">${T("Envoyé quand")}</span><select class="t" id="sd-decl">'
@@ -380,13 +403,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       + '<label class="case"><input type="checkbox" id="sd-actif"' + (e.actif ? ' checked' : '')
       + '> ${T("Sondage actif")}</label>';
 
-    h += '<div class="qs"><div class="qstitre">${T("Questions")}<span class="dt">'
+    var hq = '<div class="qs"><div class="qstitre">${T("Questions")}<span class="dt">'
       + e.questions.length + '</span>'
       + '<button class="mini" id="sd-q-plus">${T("+ Ajouter une question")}</button></div>';
     if (!e.questions.length) {
-      h += '<div class="vide" style="padding:.8rem">${T("Aucune question — un sondage vide partirait quand même par courriel.")}</div>';
+      hq += '<div class="vide" style="padding:.8rem">${T("Aucune question — un sondage vide partirait quand même par courriel.")}</div>';
     }
-    h += e.questions.map(function(q, i){
+    hq += e.questions.map(function(q, i){
       return '<div class="qed">'
         + '<div class="qedh"><span class="dt">${T("Question ")}' + (i + 1) + '</span>'
         + '<button class="mini danger" data-q-suppr="' + i + '">✕</button></div>'
@@ -405,7 +428,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
             : '')
         + '</div>';
     }).join('');
-    h += '</div>';
+    hq += '</div>';
 
     var r = e.recompense;
     h += '<label class="case"><input type="checkbox" id="sd-rec"' + (r.active ? ' checked' : '')
@@ -427,6 +450,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
         + '<input class="t" id="sd-rec-msg" value="' + esc(r.message) + '" placeholder="${T("Merci ! Voici un code pour votre prochaine commande.")}"></label>';
     }
 
+    h += '</div><div class="ed-d">' + hq + '</div></div>';
     h += '<div class="pied-boite">'
       + '<button class="mini" id="sd-annuler">${T("Annuler")}</button>'
       + '<button class="mini prim" id="sd-enr">' + (e.id ? '${T("Enregistrer")}' : '${T("Créer le sondage")}') + '</button>'
@@ -607,6 +631,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
        avant d adopter, parce qu une vue coupee ne previent jamais. */
     corps.className = 'corps plein';
     corps.innerHTML = h;
+    if (ONGLET !== 'recompenses' && ONGLET !== 'invitations') {
+      var bp = document.getElementById('fi-prec'), bs = document.getElementById('fi-suiv');
+      if (bp) bp.onclick = function(){ SPAGE = Math.max(0, SPAGE - 1); dessiner(); };
+      if (bs) bs.onclick = function(){ SPAGE = SPAGE + 1; dessiner(); };
+      /* Une ligne de moins : la place de la barre de pages, qui n existe pas encore
+         au moment ou l on mesure. */
+      szAutoPagination('.liste', function(n){ SPARPAGE = Math.max(3, n - 1); SPAGE = 0; dessiner(); });
+    }
     brancher();
   }
 
