@@ -3911,8 +3911,19 @@ const etatAncragePoser = (cle, etat) => {
 // ecran laisse detache). La vue VOYAGE — jamais rechargee, l etat suit.
 const poserEnFenetre = (c, a) => {
   const defs = PAGES_ANCRABLES();
+  /* ⚠ LA TAILLE DE LA ZONE D ANCRAGE, PAS 1080 x 780 (2026-09-26). Chaque ecran
+     est range pour TENIR sans barre de defilement dans 1400 x 833 — sa regle :
+     aucune barre dans un module. A 1080 x 780, une quarantaine d ecrans
+     redefilaient des qu on les detachait. Borne a l ecran : un petit portable
+     garde une fenetre qui entre, quitte a defiler. */
+  let tl = { l: 1400, h: 833 };
+  try {
+    const { screen } = require('electron');
+    const wa = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workAreaSize;
+    tl = { l: Math.min(1400, wa.width - 40), h: Math.min(833, wa.height - 80) };
+  } catch {}
   const win = new BaseWindow({
-    width: 1080, height: 780, minWidth: 760, minHeight: 520,
+    width: tl.l, height: tl.h, useContentSize: true, minWidth: 760, minHeight: 520,
     title: (defs[c] || [''])[0], autoHideMenuBar: true, backgroundColor: '#0e1522',
   });
   win.contentView.addChildView(a.view);
