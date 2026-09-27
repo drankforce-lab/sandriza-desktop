@@ -3215,6 +3215,10 @@ label.champ .lbl,.champ label,.ch label,.champ .lbl,.form .champ .lbl,.lbl,.doss
    le socle. ⚠ PAS Marque, Gabarits, Affichage client ni l apercu de Pages : la,
    c est la typographie de la BOUTIQUE qu on montre, et elle doit y rester. */
 .carte h2,.entete h2,.pop .titre,.pas h4,.pnt h2{font-family:inherit}
+/* Le bandeau « lecture seule » (.ro, recopie dans une trentaine de fenetres) :
+   une ligne mince, pas un encadre — il poussait les formulaires hors de la
+   fenetre (sonde des debordements, 2026-09-26). */
+.ro{margin-top:.45rem;padding:.28rem .7rem;font-size:.76rem}
 /* L etat d un secret sous son champ : pastille + fin en code, sur une ligne. */
 .ch .etat{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;margin-top:.35rem}
 /* Le titre de section (.stitre, cinq fenetres) : celui des cartes de

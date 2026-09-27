@@ -40,13 +40,20 @@ body{background:var(--f-page);color:var(--tx);
 .ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;
   padding:.5rem .7rem;font-size:.78rem}
-.corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.7rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:1rem}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 /* ⚠ LES CARTES D UNE MEME RANGEE SE TERMINENT A LA MEME HAUTEUR (2026-08-10) :
    pas d align-items:start, sinon la rangee finit en escalier. */
-.rangee{display:grid;grid-template-columns:repeat(auto-fit,minmax(28rem,1fr));gap:1rem}
+/* Colonnes automatiques d au moins 19,5 rem : quatre a 1400 px au lieu de deux —
+   sept cartes sur deux colonnes depassaient la fenetre de 503 px (sonde des
+   debordements, 2026-09-26 : « je ne veux pas de scroll bar »). */
+.rangee{display:block;columns:19.5rem;column-gap:.8rem}
+/* ⚠ EN COLONNES EQUILIBREES (un mur), pas en grille : les cartes ont des
+   hauteurs tres inegales, et une grille donne a chaque rangee la hauteur de sa
+   plus haute — c est ce qui restait de trop (68 px). */
+.rangee > *{break-inside:avoid;margin:0 0 .65rem;display:inline-block;width:100%}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:1rem 1.1rem;min-width:0;display:flex;flex-direction:column}
 .carte .tt{display:flex;align-items:center;gap:.5rem;margin:0 0 .2rem}

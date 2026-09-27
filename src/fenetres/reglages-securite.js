@@ -69,6 +69,13 @@ label.case input{width:16px;height:16px;accent-color:#c9a97e}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* La barre d onglets commune (refonte fine, 2026-09-26). */
+.onglets{display:flex;gap:.25rem;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--v08);padding:0 0 .5rem;margin:0 0 .7rem}
+.onglets > button{background:transparent;border:1px solid transparent;color:var(--tx2);padding:.38rem .7rem;
+  font:inherit;font-weight:600;font-size:.82rem;cursor:pointer}
+.onglets > button:hover{background:var(--v05);color:var(--tx)}
+[data-panneau][hidden]{display:none}
 `;
 
 function pageReglagesSecurite() {
@@ -126,12 +133,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return '<label class="case"><input type="checkbox" id="'+id+'" '+(coche?'checked':'')+(RO?' disabled':'')+'> '+esc(lbl)+'</label>';
   }
 
+  var SEC = 'pw';   // l onglet montre (Mots de passe, Inactivite et session, Restriction)
   function dessiner(){
     var p = D.pwPolicy||{}, c = D.inactivity||{}, g = D.geo||{};
     var comptes = D.comptes||[];
-    var h = '';
+    /* ⚠ TROIS ONGLETS, PAS TROIS ETAGES (sa demande : aucune barre de defilement).
+       Empilees, les trois sections faisaient ~1 400 px pour 726 visibles. Elles
+       restent TOUTES dans la page — l enregistrement lit ses champs par
+       identifiant — et seule celle de l onglet choisi est montree : changer
+       d onglet ne redessine rien, une saisie en cours n est jamais perdue. */
+    var cache = function(k){ return SEC === k ? '' : ' hidden'; };
+    var ong = function(k, lbl){ return '<button type="button" data-sec="' + k + '" class="' + (SEC === k ? 'actif' : '') + '">' + lbl + '</button>'; };
+    var h = '<div class="onglets">' + ong('pw', '${T("Mots de passe")}') + ong('inact', '${T("Inactivité et session")}')
+      + ong('geo', '${T("Restriction géographique")}') + '</div>';
 
-    h += '<div class="carte"><div class="entete"><h3><span class="ic">🔑</span> ${T("Politique des mots de passe")}</h3>'
+    h += '<div class="carte" data-panneau="pw"' + cache('pw') + '><div class="entete"><h3><span class="ic">🔑</span> ${T("Politique des mots de passe")}</h3>'
       + (RO?'':'<button class="prim" id="s-pw">${T("Enregistrer la politique")}</button>')+'</div>'
       + '<div class="hint">${T("Ne s’applique pas au super-administrateur.")}</div>'
       + '<div class="cols3">'
@@ -156,7 +172,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '</div>'
       + '</div></div>';
 
-    h += '<div class="carte"><div class="entete"><h3>${T("⏳ Inactivité &amp; verrouillage de session")}</h3>'
+    h += '<div class="carte" data-panneau="inact"' + cache('inact') + '><div class="entete"><h3>${T("⏳ Inactivité &amp; verrouillage de session")}</h3>'
       + (RO?'':'<button class="prim" id="s-inact">${T("Enregistrer")}</button>')+'</div>'
       + '<div class="cols2">'
       + '<div><div class="grpH">${T("Portail administration — comptes dormants")}</div>'
@@ -187,7 +203,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       }
     } else exempts = '<div class="vide">${T("Aucun compte.")}</div>';
 
-    h += '<div class="carte"><div class="entete"><h3><span class="ic">🌍</span> ${T("Restriction géographique — administration")}</h3>'
+    h += '<div class="carte" data-panneau="geo"' + cache('geo') + '><div class="entete"><h3><span class="ic">🌍</span> ${T("Restriction géographique — administration")}</h3>'
       + (RO?'':'<button class="prim" id="s-geo">${T("Enregistrer la restriction")}</button>')+'</div>'
       + '<div class="hint">${T("N’autorise la connexion au portail d’administration que depuis les pays listés (géolocalisation de l’IP publique). La boutique cliente n’est jamais touchée.")}</div>'
       + caseAC('geo-on', '${T("Activer la restriction géographique")}', g.enabled)
@@ -208,6 +224,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '</div></div>';
 
     corps.innerHTML = h;
+    var obs = corps.querySelectorAll('[data-sec]');
+    for (var i = 0; i < obs.length; i++) obs[i].onclick = function(){
+      SEC = this.getAttribute('data-sec');
+      var bs = corps.querySelectorAll('[data-sec]'), ps = corps.querySelectorAll('[data-panneau]'), k;
+      for (k = 0; k < bs.length; k++) bs[k].className = bs[k].getAttribute('data-sec') === SEC ? 'actif' : '';
+      for (k = 0; k < ps.length; k++) ps[k].hidden = ps[k].getAttribute('data-panneau') !== SEC;
+    };
     lier();
   }
 

@@ -126,5 +126,10 @@ module.exports = {
   'Localisation…': 'Locating…',
   'Votre IP : ': 'Your IP: ',
   'Votre IP :': 'Your IP:',
-  'emplacement inconnu': 'location unknown'
+  'emplacement inconnu': 'location unknown',
+
+  /* ── LES ONGLETS (2026-09-26) ── */
+  'Mots de passe': 'Passwords',
+  'Inactivité et session': 'Inactivity and session',
+  'Restriction géographique': 'Geographic restriction'
 };
