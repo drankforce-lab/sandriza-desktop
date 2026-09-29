@@ -209,7 +209,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('paiements')}
       h += szTuiles('<div class="tuiles">'
         + tuile('${T("Transactions")}', String(t.nb), '', '${T("complétées · ")}' + D.annee)
         + tuile('${T("Revenu brut")}', fmt(t.brut), '', '${T("avant frais")}')
-        + tuile('${T("Frais Square")}', fmt(t.frais), 'err',
+        + tuile('${T("Frais Square")}', fmt(t.frais), '',
             t.fraisRecuperes > 0 ? ('${T("dont ")}' + fmt(t.fraisRecuperes) + '${T(" récupérés · nets ")}' + fmt(t.fraisNets)) : '${T("déductibles d’impôt")}')
         + tuile('${T("Revenu net")}', fmt(t.net), 'bon', '${T("après remb. et frais nets")}')
         + '</div>');

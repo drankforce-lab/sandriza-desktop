@@ -22,6 +22,7 @@
  */
 
 module.exports = {
+  '＋ Ajouter à la file': '＋ Add to the queue',
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   'Impression de codes-barres — Administration Sandriza':
     'Barcode printing — Sandriza Administration',

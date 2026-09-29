@@ -579,7 +579,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
     var f = FORM;
     var neuf = (f.id === '__new__');
     var h = '<div class="voile" id="d-voile"><div class="boite">'
-      + '<h3>' + (neuf ? '${T("➕ Nouvelle dépense")}' : '${T("Modifier la dépense")}') + '</h3>';
+      + '<h3>' + (neuf ? '${T("＋ Nouvelle dépense")}' : '${T("Modifier la dépense")}') + '</h3>';
 
     /* ⚠ LA ZONE DE DEPOT S EFFACE UNE FOIS LA FACTURE PRISE (demande du
        2026-08-09 : << quand on glisse une facture, plus besoin de montrer ca >>).

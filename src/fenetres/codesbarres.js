@@ -337,7 +337,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('codesbarres')}
         + '</div>'
         + '<div class="pied-boite">'
         + '<button id="cb-p-annuler">${T("Annuler")}</button>'
-        + '<button class="prim" id="cb-p-ajouter">${T("➕ Ajouter à la file")}</button>'
+        + '<button class="prim" id="cb-p-ajouter">${T("＋ Ajouter à la file")}</button>'
         + '</div></div></div>';
     }
     corps.innerHTML = h;

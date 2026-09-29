@@ -202,6 +202,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptepaiement')}
     return h;
   }
 
+  /* Tuiles SANS vert ni rouge (2026-09-29) : six couleurs en bandeau faisaient
+     un arc-en-ciel, et un depot a la banque en rouge se lisait comme une perte.
+     Le signe dit le sens ; la colonne Effet du tableau garde ses couleurs. */
   function htmlTuiles(){
     var r = D.resume || {};
     var t = function(cl, lbl, val, sup){
@@ -210,11 +213,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptepaiement')}
     };
     return szTuiles('<div class="stat-grid">'
       + t('fort', '${T("Solde chez le processeur")}', r.solde)
-      + t('', '${T("Ventes")}', r.ventes, ' plus')
-      + t('', '${T("Frais de traitement")}', -r.frais, ' moins')
-      + t('', '${T("Remboursements")}', -r.remboursements, ' moins')
-      + t('', '${T("Frais retenus")}', r.fraisRetenus, ' plus')
-      + t('', '${T("Déposé à la banque")}', -r.depots, ' moins')
+      + t('', '${T("Ventes")}', r.ventes)
+      + t('', '${T("Frais de traitement")}', -r.frais)
+      + t('', '${T("Remboursements")}', -r.remboursements)
+      + t('', '${T("Frais retenus")}', r.fraisRetenus)
+      + t('', '${T("Déposé à la banque")}', -r.depots)
       + '</div>');
   }
 
