@@ -1040,10 +1040,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
        quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
        ce poste. Voir JS_TUILES dans socle.js. */
+    /* La couleur ne dit un etat QUE s il y a quelque chose : « 0 echouee » en
+       rouge se lisait comme une alerte (2026-09-29). */
     var h = szTuiles('<div class="tuiles">'
-      + '<div class="tuile"><div class="lbl">${T("En attente")}</div><div class="val att">' + (t.enAttente || 0) + '</div></div>'
-      + '<div class="tuile"><div class="lbl">${T("Publiées")}</div><div class="val bon">' + (t.publiees || 0) + '</div></div>'
-      + '<div class="tuile"><div class="lbl">${T("Échouées")}</div><div class="val err">' + (t.echouees || 0) + '</div></div>'
+      + '<div class="tuile"><div class="lbl">${T("En attente")}</div><div class="val' + ((t.enAttente || 0) > 0 ? ' att' : '') + '">' + (t.enAttente || 0) + '</div></div>'
+      + '<div class="tuile"><div class="lbl">${T("Publiées")}</div><div class="val' + ((t.publiees || 0) > 0 ? ' bon' : '') + '">' + (t.publiees || 0) + '</div></div>'
+      + '<div class="tuile"><div class="lbl">${T("Échouées")}</div><div class="val' + ((t.echouees || 0) > 0 ? ' err' : '') + '">' + (t.echouees || 0) + '</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Ignorées")}</div><div class="val">' + (t.ignorees || 0) + '</div></div>'
       + '</div>');
 
