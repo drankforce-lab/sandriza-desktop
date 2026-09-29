@@ -234,7 +234,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
             if (r.liquidation) badges += ' <span class="rf-pill ambre">${T("Liquidation")}</span>';
             var prix = r.solde
               ? '<span class="rf-mont">' + esc(fmt(r.solde)) + '</span> <span class="prixbarre">' + esc(fmt(r.prix)) + '</span>'
-                + '<span class="rf-pill rouge">-' + Math.round((1 - r.solde / (r.prix || 1)) * 100) + '%</span>'
+                + '<span class="rf-pill rouge">−' + Math.round((1 - r.solde / (r.prix || 1)) * 100) + ' %</span>'
               : '<span class="rf-mont">' + esc(fmt(r.prix)) + '</span>';
             var ini = String(r.categorie || r.nom || '?').charAt(0).toUpperCase();
             var cc = /^#[0-9a-f]{3,8}$/i.test(r.couleurCat || '') ? r.couleurCat : '';

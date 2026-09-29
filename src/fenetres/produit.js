@@ -990,7 +990,7 @@ function pageProduit(id) {
           + (!p || sousCout ? ' disabled' : '')
           + ' title="' + (sousCout ? '${T("sous le coût d’acquisition")}'
               : (actif ? '${T("recliquez pour retirer le rabais")}' : (sp ? szArgentChamp(sp) : ''))) + '">'
-          + '-' + pct + '%</button>';
+          + '−' + pct + ' %</button>';
       }).join('');
     }
     // La pastille se pose DANS l etiquette du prix solde, a droite : c est la
@@ -998,7 +998,7 @@ function pageProduit(id) {
     var pa = document.getElementById('p-pastille');
     if (pa) {
       var remise = (s > 0 && p > 0 && s < p) ? Math.round((1 - s / p) * 100) : 0;
-      pa.textContent = remise ? '-' + remise + '%' : '';
+      pa.textContent = remise ? '−' + remise + ' %' : '';
       pa.classList.toggle('on', !!remise);
     }
 
