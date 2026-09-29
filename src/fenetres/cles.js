@@ -59,7 +59,7 @@ body{background:var(--f-page);color:var(--tx);
 .carte .tt{display:flex;align-items:center;gap:.5rem;margin:0 0 .2rem}
 .carte h2{margin:0;font:700 .82rem/1.2 system-ui;text-transform:uppercase;
   letter-spacing:.05em;color:var(--tx-bleute)}
-.carte .lien{margin-left:auto;font-size:.72rem;color:var(--tx2);text-decoration:none;
+.carte .lien{margin-left:auto;white-space:nowrap;flex:0 0 auto;font-size:.72rem;color:var(--tx2);text-decoration:none;
   border:1px solid var(--v14);border-radius:7px;padding:.14rem .5rem}
 .carte .lien:hover{color:var(--tx);border-color:var(--v30)}
 .carte .sous{margin:0 0 .9rem;font-size:.78rem;color:var(--tx3)}
@@ -236,7 +236,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function soldeHtml(){
     var sv = (D && D.falSolde) || '';
-    var maj = (D && D.falSoldeMaj) ? ('${T(" — saisi le ")}' + esc(String(D.falSoldeMaj).slice(0, 10))) : '';
+    var maj = (D && D.falSoldeMaj) ? ('${T(" — saisi le ")}' + esc(szJour(String(D.falSoldeMaj).slice(0, 10)))) : '';
     return '<div class="ch"><label for="f-falSolde">${T("Solde du compte (saisi à la main)")}</label>'
       + '<input id="f-falSolde" class="solde" type="number" step="0.01" min="0" value="' + esc(sv) + '"'
       + ' placeholder="${T("ex. 25.00")}"' + (RO ? ' disabled' : '') + '>'
