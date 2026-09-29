@@ -19,7 +19,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -216,12 +216,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (RO ? ' disabled' : '') + '>';
   }
 
+  /* « 1 août 2026 » plutot que « 2026-08-01 » : la date ISO lue comme un jour
+     LOCAL (new Date('2026-08-01') serait minuit UTC, donc la veille ici). */
+  function jourLisible(iso){
+    var m = String(iso || '').slice(0, 10).split('-');
+    if (m.length !== 3 || !(+m[0] > 0)) return String(iso || '');
+    try { return new Date(+m[0], +m[1] - 1, +m[2]).toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'short', year: 'numeric' }); }
+    catch (e) { return String(iso); }
+  }
+
   function dessiner(){
     var av = document.getElementById('ro');
     if (av) av.hidden = !RO;
     var d = D || {};
     rev.textContent = d.lastReviewed
-      ? ('${T("Dernière révision : ")}' + d.lastReviewed + (d.updatedBy ? ' · ' + d.updatedBy : '')) : '';
+      ? ('${T("Dernière révision : ")}' + jourLisible(d.lastReviewed) + (d.updatedBy ? ' · ' + d.updatedBy : '')) : '';
     var h = [];
 
     // ── Canada ─────────────────────────────────────────────────────────────
@@ -265,11 +274,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + '${T("N’appliquez pas si vous avez ajusté un taux selon vos inscriptions.")}</div>');
         h.push('<table class="ec"><thead><tr><th>${T("Prov.")}</th><th>${T("Taxe")}</th><th style="text-align:right">${T("Vos taux")}</th>'
           + '<th style="text-align:right">${T("Référence")}</th></tr></thead><tbody>');
+        /* « 13,5 % » : la virgule du francais (le point sortait tel quel du
+           nombre). Jusqu a trois decimales — la TVQ est a 9,975. */
+        var pct = function(v){
+          var n = Number(v);
+          return (isFinite(n) ? n.toLocaleString('${LIEU()}', { maximumFractionDigits: 3 }) : esc(v)) + ' %';
+        };
         ec.forEach(function(x){
           h.push('<tr><td style="font-weight:700">' + esc(x.prov) + '</td><td>' + esc(x.nom)
             + ' <span style="color:var(--tx3)">(' + esc(x.code) + ')</span></td>'
-            + '<td class="av">' + (x.actuel == null ? '${T("absent")}' : x.actuel + ' %') + '</td>'
-            + '<td class="ap">' + (x.reference == null ? '${T("à retirer")}' : x.reference + ' %') + '</td></tr>');
+            + '<td class="av">' + (x.actuel == null ? '${T("absent")}' : pct(x.actuel)) + '</td>'
+            + '<td class="ap">' + (x.reference == null ? '${T("à retirer")}' : pct(x.reference)) + '</td></tr>');
         });
         h.push('</tbody></table>');
         h.push('<div class="gestes"><button class="prim" id="b-appliquer"' + (RO ? ' disabled' : '')

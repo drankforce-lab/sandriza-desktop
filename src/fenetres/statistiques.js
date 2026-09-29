@@ -90,12 +90,19 @@ tbody tr:hover td{background:var(--v04)}
 .dt{font-size:.72rem;color:var(--tx2)}
 .chemin{font-size:.68rem;color:var(--tx3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tronq{max-width:20rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-/* Graphique : des barres qui montent, une graduation, rien de plus. */
-.graph{display:flex;align-items:flex-end;gap:2px;height:130px;
-  border-left:1px solid var(--v12);border-bottom:1px solid var(--v12);
-  padding:0 .2rem}
-.col{flex:1 1 0;min-width:2px;background:#8f6f42;border-radius:2px 2px 0 0;position:relative}
-.col:hover{background:#c9a97e}
+/* Graphique : des barres qui montent, une graduation, rien de plus.
+   ⚠ LARGEUR BORNEE (2026-09-29) : sur sept jours dont deux seulement ont des
+   chiffres, chaque barre prenait un tiers de la carte — deux blocs bruns qui se
+   lisaient comme un aplat, pas comme un graphique. Une barre ne depasse plus
+   46 px, en or adouci (la couleur ne crie pas, c est la hauteur qui parle), et
+   la date se lit dessous. */
+.graph{display:flex;align-items:flex-end;justify-content:space-around;gap:4px;height:130px;
+  border-bottom:1px solid var(--v12);padding:0 .2rem}
+.col{flex:1 1 0;max-width:46px;min-width:2px;background:rgba(201,169,126,.5);border-radius:4px 4px 0 0;position:relative}
+.col:hover{background:rgba(201,169,126,.85)}
+html.jour .col{background:rgba(168,128,78,.55)}html.jour .col:hover{background:rgba(168,128,78,.85)}
+.axe{display:flex;justify-content:space-around;gap:4px;padding:0 .2rem;margin-top:.25rem}
+.axe span{flex:1 1 0;max-width:46px;min-width:2px;text-align:center;font-size:.64rem;color:var(--tx2);white-space:nowrap}
 .gmax{font-size:.66rem;color:var(--tx2);margin-bottom:.15rem}
 .avis{border-radius:9px;padding:.42rem .65rem;font-size:.78rem;line-height:1.55}
 .avis.att{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.32);color:#fde68a}
@@ -243,8 +250,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('statistiques')}
       return '<div class="col" style="height:' + h + '%" title="' + esc(s.date) + ' — '
         + nb(v) + ' ' + esc(mot) + '"></div>';
     }).join('');
+    /* La date sous la barre ; au-dela d une douzaine de jours, une sur k
+       seulement — les autres cases restent vides pour garder l alignement. */
+    var pas = Math.max(1, Math.ceil(serie.length / 10));
+    var axe = serie.map(function(s, k){
+      return '<span>' + (k % pas === 0 ? esc(jourCourt(s.date)) : '') + '</span>';
+    }).join('');
     return '<div class="gmax">${T("Maximum : ")}' + nb(max) + ' ' + esc(mot) + '${T(" en une journée")}</div>'
-      + '<div class="graph">' + cols + '</div>';
+      + '<div class="graph">' + cols + '</div><div class="axe">' + axe + '</div>';
+  }
+
+  /* « 6 août » : la date ISO (AAAA-MM-JJ) lue comme un jour LOCAL — un
+     new Date('2026-08-06') serait minuit UTC, donc la veille au Quebec. */
+  function jourCourt(iso){
+    var m = String(iso || '').slice(0, 10).split('-');
+    if (m.length !== 3 || !(+m[0] > 0)) return String(iso || '');
+    try { return new Date(+m[0], +m[1] - 1, +m[2]).toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'short' }); }
+    catch (e) { return String(iso); }
   }
 
   function tableau(titre, colonne, valeur, lignes, cleNom, cleVal){

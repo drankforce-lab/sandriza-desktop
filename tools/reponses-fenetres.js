@@ -1249,7 +1249,7 @@ const JEU = {
         'stats:ga': {
           ok: true, plage: '7d', plageLibelle: '7 jours',
           totaux: { visiteurs: 1284, sessions: 1791, pagesVues: 5320 },
-          engagement: { dureeMoyenne: '2m14', rebond: '38,4 %', pagesParSession: '3,0',
+          engagement: { dureeMoyenne: '2 min 14 s', rebond: '38,4 %', pagesParSession: '3,0',
             engagement: '61,6 %' },
           serie: [
             { date: '2026-08-03', vues: 640, visiteurs: 180 },
@@ -1278,7 +1278,7 @@ const JEU = {
         'stats:telephonie': {
           ok: true, jours: 30,
           totaux: { appels: 62, entrants: 48, repondus: 51, manques: 11, minutes: 137,
-            dureeMoyenne: '2m41', cout: '4,18 $US' },
+            dureeMoyenne: '2 min 41 s', cout: '4,18 $US' },
           solde: '18,42 $US',
           serie: [{ date: '2026-08-06', appels: 4 }, { date: '2026-08-07', appels: 9 }],
           appels: [

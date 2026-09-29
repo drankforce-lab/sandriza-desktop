@@ -635,7 +635,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var corpsl='';
     if (!m.length) corpsl='<div class="vide">${T("Aucun message reçu.")}</div>';
     for (var i=m.length-1;i>=0;i--){ var s=m[i];
-      var dt=''; try{ dt=new Date(s.createdAt).toLocaleDateString('${LIEU()}'); }catch(e){}
+      var dt=''; try{ dt=new Date(s.createdAt).toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'short', year: 'numeric' }); }catch(e){}
       corpsl+='<div class="mailmsg"><div class="hh"><div><b>'+esc(s.name)+'</b> <a href="mailto:'+esc(s.email)+'">'+esc(s.email)+'</a></div>'
         +'<div style="display:flex;gap:.5rem;align-items:center">'+(s.status==='new'?'<span class="pastille" style="background:rgba(234,179,8,.2);color:#e0b93a">${T("Nouveau")}</span>':'')
         +'<span style="font-size:.76rem;color:var(--tx2)">'+esc(dt)+'</span>'+(RO?'':'<button class="mini" data-mdel="'+esc(s.id)+'">✕</button>')+'</div></div>'

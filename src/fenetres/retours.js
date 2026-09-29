@@ -132,7 +132,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
      par des points de suspension, qui annonce un travail en cours. */
   function dire(t, cl){ szDire(t, cl); }
   function fmtDate(d){
-    try { return new Date(d).toLocaleDateString('${LIEU()}'); } catch (e) { return String(d || ''); }
+    try { return (String(d).length === 10 && String(d).charAt(4) === '-' ? new Date(+String(d).slice(0, 4), +String(d).slice(5, 7) - 1, +String(d).slice(8, 10)) : new Date(d)).toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'short', year: 'numeric' }); } catch (e) { return String(d || ''); }
   }
 
   var MOTIFS = {

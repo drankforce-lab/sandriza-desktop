@@ -1496,7 +1496,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
         + '</tr></thead><tbody>';
       d.lignes.forEach(function(l){
         h += '<tr>'
-          + '<td>' + new Date(l.date).toLocaleDateString('${LIEU()}') + '</td>'
+          + '<td>' + new Date(l.date).toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'short', year: 'numeric' }) + '</td>'
           + '<td><span class="code">' + esc(l.commande) + '</span></td>'
           + '<td>' + esc(l.nom) + '</td>'
           + '<td class="c">' + l.qte + '</td>'

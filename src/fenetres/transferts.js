@@ -185,7 +185,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   function dateCourte(iso){
     if (!iso) return '';
     try { var d = new Date(iso);
-      return d.toLocaleDateString('${LIEU()}') + ' ' + d.toLocaleTimeString('${LIEU()}', {hour:'2-digit',minute:'2-digit'}); }
+      return d.toLocaleString('${LIEU()}', { dateStyle: 'medium', timeStyle: 'short' }); }
     catch(e){ return String(iso).slice(0,16).replace('T',' '); }
   }
 
