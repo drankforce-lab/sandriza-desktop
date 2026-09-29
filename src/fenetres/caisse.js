@@ -556,7 +556,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
               return '<div class="cli" data-uid="' + esc(u.id) + '">'
                 + '<strong>' + esc(u.nom || '${T("(sans nom)")}') + '</strong>'
                 + '<span class="m"> · ' + esc(u.courriel || '${T("sans courriel")}')
-                + (u.commandes > 0 ? ' · ' + u.commandes + ' commande(s)' : '') + '</span></div>';
+                + (u.commandes > 0 ? ' · ' + u.commandes + ' ' + szPl(u.commandes, '${T("commande")}', '${T("commandes")}') : '') + '</span></div>';
             }).join('') + '</div>'
           : '';
       });

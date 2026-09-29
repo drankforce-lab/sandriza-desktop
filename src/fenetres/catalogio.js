@@ -491,7 +491,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
       ? LIGNES.lignes.map(function(L){ return ligneApercu(L, inv); }).join('')
       : '<tr><td colspan="5" class="vide">${T("Aucune ligne dans ce filtre.")}</td></tr>';
     var noteIgn = (IMP.ignorees && IMP.ignorees.length)
-      ? '<div class="avis" style="margin-bottom:.7rem">${T("Colonne(s) non reconnue(s), donc <strong>ignorée(s)</strong> : ")}'
+      ? '<div class="avis" style="margin-bottom:.7rem">' + szPl(IMP.ignorees.length, '${T("Colonne non reconnue, donc <strong>ignorée</strong> :")}', '${T("Colonnes non reconnues, donc <strong>ignorées</strong> :")}') + ' '
         + esc(IMP.ignorees.slice(0,12).join(', ')) + (IMP.ignorees.length > 12 ? '…' : '') + '</div>' : '';
     var notePhoto = IMP.nbPhotos
       ? '<div class="avis jaune" style="margin-bottom:.7rem"><span class="ic">📷</span> <strong>' + IMP.nbPhotos + ' photo' + plur(IMP.nbPhotos)
@@ -540,7 +540,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
   var RAP_MAX = 6;
   function reste(n){
     return n > RAP_MAX ? '<div class="dt" style="margin-top:.4rem">${T("… et")} ' + (n - RAP_MAX)
-      + ' ${T("autre(s) — téléchargez le rapport pour la liste complète.")}</div>' : '';
+      + ' ' + szPl(n - RAP_MAX, '${T("autre — téléchargez le rapport pour la liste complète.")}', '${T("autres — téléchargez le rapport pour la liste complète.")}') + '</div>' : '';
   }
   function vueRapport(){
     var r = RAP, refus = (r.conflits.length + r.echecs.length);

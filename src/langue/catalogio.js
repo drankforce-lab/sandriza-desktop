@@ -172,6 +172,10 @@ module.exports = {
   'Suivant →': 'Next →',
   'Aucune ligne dans ce filtre.': 'No row in this filter.',
   'Colonne(s) non reconnue(s), donc ignorée(s) :': 'Column(s) not recognised, so ignored:',
+  'Colonne non reconnue, donc <strong>ignorée</strong> :': 'Column not recognised, so <strong>ignored</strong>:',
+  'Colonnes non reconnues, donc <strong>ignorées</strong> :': 'Columns not recognised, so <strong>ignored</strong>:',
+  'autre — téléchargez le rapport pour la liste complète.': 'more — download the report for the full list.',
+  'autres — téléchargez le rapport pour la liste complète.': 'more — download the report for the full list.',
   'seront téléchargées depuis les adresses du fichier et copiées dans votre stockage — la boutique':
     'will be downloaded from the addresses in the file and copied into your storage — the shop',
   'ne pointera jamais sur le site du fournisseur. Une photo introuvable n’empêche pas le reste de sa ligne de passer.':

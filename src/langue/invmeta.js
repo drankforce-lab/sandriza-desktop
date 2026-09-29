@@ -70,6 +70,8 @@ module.exports = {
   'Utilisée — suppression bloquée': 'In use — deletion blocked',
   'utilisée — bloqué': 'in use — blocked',
   'produit(s) — bloqué': 'product(s) — blocked',
+  'produit — bloqué': 'product — blocked',
+  'produits — bloqué': 'products — blocked',
   'non utilisée': 'not used',
   '— non utilisée': '— not used',
   'Aucun élément — cliquez sur + pour en ajouter.': 'No item — click + to add one.',

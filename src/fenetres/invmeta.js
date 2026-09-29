@@ -261,7 +261,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<td style="text-align:right"><button class="ic prim" data-attrsave="' + type + '">✓</button> '
       + '<button class="ic" data-attrcancel="1">×</button></td></tr>' : '';
     var rows = items.map(function(it){
-      var rm = D.peut.edit ? '<button class="mini danger" data-attrrm="' + type + '|' + esc(it.key) + '" title="' + (it.used > 0 ? it.used + ' ${T("produit(s) — bloqué")}' : '${T("Supprimer")}') + '">${T("Retirer")}</button>' : '';
+      var rm = D.peut.edit ? '<button class="mini danger" data-attrrm="' + type + '|' + esc(it.key) + '" title="' + (it.used > 0 ? it.used + ' ' + szPl(it.used, '${T("produit — bloqué")}', '${T("produits — bloqué")}') : '${T("Supprimer")}') + '">${T("Retirer")}</button>' : '';
       return '<tr><td><code>' + esc(it.key) + '</code>' + (it.used > 0 ? ' <span class="pill used">' + it.used + '×</span>' : '') + '</td>'
         + '<td style="font-weight:500">' + esc(it.label) + '</td>'
         + '<td style="color:var(--tx2)">' + esc(it.labelEN || '') + '</td>'
@@ -286,7 +286,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<td style="text-align:right"><button class="ic prim" data-labelsave="1">✓</button> '
       + '<button class="ic" data-attrcancel="1">×</button></td></tr>' : '';
     var rows = items.map(function(l){
-      var rm = D.peut.edit ? '<button class="mini danger" data-labelrm="' + esc(l.key) + '" title="' + (l.used > 0 ? l.used + ' ${T("produit(s) — bloqué")}' : '${T("Supprimer")}') + '">${T("Retirer")}</button>' : '';
+      var rm = D.peut.edit ? '<button class="mini danger" data-labelrm="' + esc(l.key) + '" title="' + (l.used > 0 ? l.used + ' ' + szPl(l.used, '${T("produit — bloqué")}', '${T("produits — bloqué")}') : '${T("Supprimer")}') + '">${T("Retirer")}</button>' : '';
       return '<tr><td><span class="badge" style="background:' + esc(l.color) + ';color:' + esc(l.textColor) + '">' + esc(l.label) + '</span></td>'
         + '<td style="font-weight:500">' + esc(l.label) + (l.used > 0 ? ' <span class="pill used">' + l.used + '×</span>' : '') + '</td>'
         + '<td style="color:var(--tx2)">' + esc(l.labelEN || '') + '</td>'
@@ -405,7 +405,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var rows = cats.map(function(c){
       if (CATEDIT === c.id) return catEditRow(c);
       var edit = D.peut.edit ? '<button class="mini" data-catedit="' + esc(c.id) + '"><span class="ic">✏</span></button>' : '';
-      var del = D.peut.supprime ? ' <button class="mini danger" data-catdel="' + esc(c.id) + '" title="' + (c.used > 0 ? c.used + ' ${T("produit(s) — bloqué")}' : '${T("Supprimer")}') + '"><span class="ic">🗑</span></button>' : '';
+      var del = D.peut.supprime ? ' <button class="mini danger" data-catdel="' + esc(c.id) + '" title="' + (c.used > 0 ? c.used + ' ' + szPl(c.used, '${T("produit — bloqué")}', '${T("produits — bloqué")}') : '${T("Supprimer")}') + '"><span class="ic">🗑</span></button>' : '';
       return '<tr><td><span class="pastille" style="background:' + esc(c.color) + '"></span></td>'
         + '<td style="font-weight:600">' + esc(c.name) + '</td>'
         + '<td style="color:var(--tx2)">' + esc(c.nameEN || '—') + '</td>'

@@ -485,4 +485,11 @@ module.exports = {
   // La refonte, comme l'Inventaire (2026-09-25).
   'Envoyer': 'Send',
   'Suspendre': 'Suspend',
+  /* Accords selon le nombre (2026-09-29) — remplacent les « (s) ». */
+  'bloc': 'block',
+  'blocs': 'blocks',
+  'écarté, hors catalogue': 'set aside, outside the catalogue',
+  'écartés, hors catalogue': 'set aside, outside the catalogue',
+  'client ayant consenti, avec un téléphone.': 'customer who consented, with a phone.',
+  'clients ayant consenti, avec un téléphone.': 'customers who consented, with a phone.',
 };

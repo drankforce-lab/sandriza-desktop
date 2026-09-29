@@ -118,6 +118,8 @@ module.exports = {
   /* ⚠⚠ « il ne disparaît pas de l inventaire tout seul » EST la phrase : sans
      elle, on croit qu un manque avoue se range de lui-meme. */
   ' unité(s). ': ' unit(s). ',
+  'unité': 'unit',
+  'unités': 'units',
   '0 unité(s).': '0 unit(s).',
   'Ce manque sera <strong>inscrit au journal</strong> avec son motif — il ne disparaît pas de l’inventaire tout seul.':
     'This shortfall will be <strong>written to the log</strong> with its reason — it does not leave the inventory on its own.',

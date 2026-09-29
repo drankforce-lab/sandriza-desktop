@@ -351,7 +351,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       +   '<input aria-label="${T("Note (facultative)")}" type="text" id="rn-' + t.id + '" placeholder="${T("Note (facultative)")}" style="flex:1;min-width:12rem">'
       + '</div>'
       + '<div class="rangee" id="rw-' + t.id + '" style="display:none">'
-      +   '<div class="avis jaune" style="flex:1">${T("Il manque ")}<strong id="re-' + t.id + '">0</strong>${T(" unité(s). ")}'
+      +   '<div class="avis jaune" style="flex:1">${T("Il manque ")}<strong id="re-' + t.id + '">0</strong> <span id="reu-' + t.id + '">' + szPl(0, '${T("unité")}', '${T("unités")}') + '</span>. '
       +     '${T("Ce manque sera <strong>inscrit au journal</strong> avec son motif — il ne disparaît pas de l’inventaire tout seul.")}</div>'
       + '</div>'
       + '<div class="rangee">'
@@ -617,6 +617,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (rm) rm.style.display = ecart > 0 ? '' : 'none';
     if (rw) rw.style.display = ecart > 0 ? '' : 'none';
     if (re) re.textContent = ecart > 0 ? ecart : 0;
+    var ru = document.getElementById('reu-' + id);
+    if (ru) ru.textContent = szPl(ecart > 0 ? ecart : 0, '${T("unité")}', '${T("unités")}');
   });
 
   document.addEventListener('keydown', function(e){

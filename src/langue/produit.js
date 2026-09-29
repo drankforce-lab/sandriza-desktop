@@ -351,6 +351,8 @@ module.exports = {
   'Aucune': 'None',
   'Populaire': 'Popular',
   'ignorée(s).': 'ignored.',
+  'ignorée.': 'ignored.',
+  'ignorées.': 'ignored.',
   'Enregistré.': 'Saved.',
   'Glisser pour réordonner, ou déposer sur la principale':
     'Drag to reorder, or drop onto the main one',

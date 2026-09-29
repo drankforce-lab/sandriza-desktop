@@ -864,8 +864,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       ESPACE = r;
       dessiner();
       if (r && r.ok && r.orphelins && r.orphelins.sur && r.orphelins.objets) {
-        dire(r.orphelins.objets + ' ${T("objet(s) ne sont cités par aucune photo :")} '
-          + poids(r.orphelins.octets) + ' ${T("payés pour rien. Le passage de nuit les retire.")}', 'att');
+        dire(r.orphelins.objets + ' ' + szPl(r.orphelins.objets, '${T("objet n’est cité par aucune photo :")}', '${T("objets ne sont cités par aucune photo :")}') + ' '
+          + poids(r.orphelins.octets) + ' ' + szPl(r.orphelins.objets, '${T("payés pour rien. Le passage de nuit le retire.")}', '${T("payés pour rien. Le passage de nuit les retire.")}'), 'att');
       }
     });
   }
@@ -903,6 +903,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + '<th></th></tr></thead><tbody>';
       LOTS.forEach(function(l){
         var arme = (LOT_ARME === l.id);
+        var nLibres = Math.max(0, (l.nombre || 0) - (l.liees || 0));
         h += '<tr>'
           + '<td><b>' + esc(l.nom || '${T("Sans nom")}') + '</b>'
           + (l.source ? '<div class="dt">' + esc(l.source) + '</div>' : '') + '</td>'
@@ -924,8 +925,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
           + '</td></tr>'
           + (arme
               ? '<tr><td colspan="7" class="dt" style="color:var(--tx-jaune)">'
-                + 'Les ' + Math.max(0, (l.nombre || 0) - (l.liees || 0)) + ' ${T("photo(s) non attachées seront retirées.")} '
-                + (l.liees ? ('Les ' + l.liees + ' ${T("attachées à un article sont GARDÉES :")} '
+                + szPl(nLibres, nLibres + ' ${T("photo non attachée sera retirée.")}', '${T("Les")} ' + nLibres + ' ${T("photos non attachées seront retirées.")}') + ' '
+                + (l.liees ? (szPl(l.liees, '${T("La photo attachée à un article est GARDÉE :")}', '${T("Les")} ' + l.liees + ' ${T("attachées à un article sont GARDÉES :")}') + ' '
                               + '${T("retirer la photothèque ne doit jamais dépouiller une fiche produit.")}')
                            : '')
                 + '</td></tr>'
@@ -956,7 +957,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         var lot = LOTS.filter(function(x){ return x.id === id; })[0];
         lotsFermer();
         dire(n
-          ? (n + ' ${T("photo(s) cochée(s)")}'
+          ? (n + ' ' + szPl(n, '${T("photo cochée")}', '${T("photos cochées")}')
              + (lot && lot.nombre > n
                  ? (' ${T("— le lot en compte")} ' + lot.nombre + ' ${T("; augmentez « photos par page » pour toutes les voir.")}')
                  : '.'))
@@ -972,8 +973,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         dire('${T("Suppression du lot…")}');
         appeler('lot:jeter', [id]).then(function(r){
           if (!r.ok) { dire(expliquer(r), 'err'); return; }
-          dire(r.retirees + ' ${T("photo(s) retirée(s)")}'
-            + (r.gardees ? ' · ' + r.gardees + ' ${T("gardée(s) car attachée(s) à un article")}' : '')
+          dire(r.retirees + ' ' + szPl(r.retirees, '${T("photo retirée")}', '${T("photos retirées")}')
+            + (r.gardees ? ' · ' + r.gardees + ' ' + szPl(r.gardees, '${T("gardée car attachée à un article")}', '${T("gardées car attachées à un article")}') : '')
             + (r.echecs ? ' · ' + r.echecs + ' ${T("en échec")}' : '') + '.',
             r.echecs ? 'att' : 'bon');
           LOTS = null;
@@ -1257,8 +1258,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var source = (A.lecteur === '@lib') ? '${T("photothèque")}' : ('${T("clé")} ' + A.lecteur);
     ASSIST = null;
     VIGNETTES = {};
-    occuper(libelle + ' · ' + fichiers.length + ' photo(s)…');
-    suiviOuvrir(titres, libelle + ' · ' + fichiers.length + ' photo(s)');
+    occuper(libelle + ' · ' + fichiers.length + ' ' + szPl(fichiers.length, '${T("photo")}', '${T("photos")}') + '…');
+    suiviOuvrir(titres, libelle + ' · ' + fichiers.length + ' ' + szPl(fichiers.length, '${T("photo")}', '${T("photos")}'));
     dessiner();
 
     /* ⚠⚠ LE LOT S OUVRE AVANT LA PREMIERE PHOTO ET SE CLOT APRES LA DERNIERE.
@@ -1808,7 +1809,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
                    humain: '${T("Mise sur un mannequin")}' }[quoi] || 'Traitement';
     occuper(nomLot + ' de ' + ids.length + ' '
       + (ids.length > 1 ? '${T("photos")}' : '${T("photo")}') + '…');
-    suiviOuvrir(titres, nomLot + ' · ' + ids.length + ' photo(s)');
+    suiviOuvrir(titres, nomLot + ' · ' + ids.length + ' ' + szPl(ids.length, '${T("photo")}', '${T("photos")}'));
     var faites = 0, echecs = 0, replis = 0, abandon = 0;
     var suite = function(k){
       suiviCompte(k, ids.length);
@@ -1865,8 +1866,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       var c = CHOIX[i];
       return (c && c.code) ? (c.code + ' · ' + c.nom) : ((c && c.nom) || i);
     });
-    occuper('${T("Rotation de")} ' + ids.length + ' photo(s)…');
-    suiviOuvrir(titres, '${T("Rotation ·")} ' + ids.length + ' photo(s)');
+    occuper('${T("Rotation de")} ' + ids.length + ' ' + szPl(ids.length, '${T("photo")}', '${T("photos")}') + '…');
+    suiviOuvrir(titres, '${T("Rotation ·")} ' + ids.length + ' ' + szPl(ids.length, '${T("photo")}', '${T("photos")}'));
     var faits = 0, rates = 0, perdus = 0, abandon = 0;
     var pas = function(k){
       suiviCompte(k, ids.length);
@@ -1878,7 +1879,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       if (k >= ids.length) {
         liberer();
         var t = faits + ' ' + (faits > 1 ? '${T("pivotées")}' : '${T("pivotée")}');
-        if (perdus) t += ' · ' + perdus + ' ${T("traitement(s) à refaire")}';
+        if (perdus) t += ' · ' + perdus + ' ' + szPl(perdus, '${T("traitement à refaire")}', '${T("traitements à refaire")}');
         if (rates) t += ' · ' + rates + ' ${T("en échec")}';
         if (abandon) t += ' · ' + abandon + ' ' + (abandon > 1 ? '${T("abandonnées")}' : '${T("abandonnée")}');
         suiviFin(t + '.', abandon ? '${T("Rotation interrompue")}' : '${T("Rotation terminée")}');
@@ -2279,7 +2280,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
        depot fait a la main — c est-a-dire le plus courant. */
     appeler('lot:ouvrir', [LOT_NOM || ('${T("Import du")} ' + new Date().toLocaleDateString('${LIEU()}')), 'fichiers']);
     suiviOuvrir(liste.map(function(f, i){ return nommer(f, i); }),
-      (LOT_NOM ? ('${T("Import ·")} ' + LOT_NOM) : 'Import') + ' · ' + liste.length + ' photo(s)');
+      (LOT_NOM ? ('${T("Import ·")} ' + LOT_NOM) : 'Import') + ' · ' + liste.length + ' ' + szPl(liste.length, '${T("photo")}', '${T("photos")}'));
     var faites = 0, doubles = 0, refuses = 0, echoues = 0;
     var abandonnees = 0;
     var suite = function(k){
@@ -2656,7 +2657,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       if (!SUP_LOT_ARME) {
         SUP_LOT_ARME = true;
         dessiner();
-        dire('${T("Cliquez encore pour supprimer les")} ' + ids.length + ' ${T("photo(s) cochée(s).")} '
+        dire(szPl(ids.length, '${T("Cliquez encore pour supprimer la photo cochée.")}', '${T("Cliquez encore pour supprimer les")} ' + ids.length + ' ${T("photos cochées.")}') + ' '
           + '${T("Les articles liés gardent leur image.")}', 'att');
         setTimeout(function(){ if (SUP_LOT_ARME) { SUP_LOT_ARME = false; dessiner(); } }, 6000);
         return;
@@ -2667,8 +2668,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         var c = CHOIX[i];
         return (c && c.code) ? (c.code + ' · ' + c.nom) : ((c && c.nom) || i);
       });
-      occuper('${T("Suppression de")} ' + ids.length + ' photo(s)…');
-      suiviOuvrir(titres, '${T("Suppression ·")} ' + ids.length + ' photo(s)');
+      occuper('${T("Suppression de")} ' + ids.length + ' ' + szPl(ids.length, '${T("photo")}', '${T("photos")}') + '…');
+      suiviOuvrir(titres, '${T("Suppression ·")} ' + ids.length + ' ' + szPl(ids.length, '${T("photo")}', '${T("photos")}'));
       var faits = 0, rates = 0, abandon = 0;
       var pas = function(k){
         suiviCompte(k, ids.length);
@@ -2792,7 +2793,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         var l = t.photos || [];
         if (!l.length) { liberer(); dire('${T("La photothèque est déjà vide.")}', 'att'); return; }
         var titres = l.map(function(x){ return x.code + ' · ' + x.nom; });
-        suiviOuvrir(titres, '${T("Vidage ·")} ' + l.length + ' photo(s)');
+        suiviOuvrir(titres, '${T("Vidage ·")} ' + l.length + ' ' + szPl(l.length, '${T("photo")}', '${T("photos")}'));
         var faits = 0, rates = 0, abandon = 0;
         var pas = function(k){
           suiviCompte(k, l.length);
@@ -2838,7 +2839,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         liberer();
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
         dire(r.echecs
-          ? (r.retirees + ' ${T("retirée(s), ")}' + r.echecs + ' ${T("refusée(s) par le nuage.")}')
+          ? (r.retirees + ' ' + szPl(r.retirees, '${T("retirée,")}', '${T("retirées,")}') + ' ' + r.echecs + ' ' + szPl(r.echecs, '${T("refusée par le nuage.")}', '${T("refusées par le nuage.")}'))
           : '${T("Photothèque vidée — les fiches produits gardent leurs images.")}',
           r.echecs ? 'att' : 'bon');
         DETAIL = null;
@@ -2978,7 +2979,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     RANGE = true;
     appeler('photos:ranger', []).then(function(r){
       if (r && r.ok && r.repliees) {
-        dire(r.repliees + ' ${T("photo(s) rangée(s) : une seule image conservée par photo.")}', 'bon');
+        dire(r.repliees + ' ' + szPl(r.repliees, '${T("photo rangée : une seule image conservée par photo.")}', '${T("photos rangées : une seule image conservée par photo.")}'), 'bon');
         charger();
       }
     }).catch(function(){});

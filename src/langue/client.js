@@ -89,6 +89,14 @@ module.exports = {
     '🛡 The account goes to the bin and stays restorable at any time.',
   'L’historique de': 'The history of',
   'commande(s) est conservé intégralement.': 'order(s) is kept in full.',
+  'commande est conservé intégralement.': 'order is kept in full.',
+  'commandes est conservé intégralement.': 'orders is kept in full.',
+  'commande — conservation fiscale de 6 ans. Le compte reste en corbeille.':
+    'order — 6-year tax retention. The account stays in the bin.',
+  'commandes — conservation fiscale de 6 ans. Le compte reste en corbeille.':
+    'orders — 6-year tax retention. The account stays in the bin.',
+  'commande — conservation fiscale de 6 ans.': 'order — 6-year tax retention.',
+  'commandes — conservation fiscale de 6 ans.': 'orders — 6-year tax retention.',
   '⚠ Supprimer définitivement ?': '⚠ Delete permanently?',
   ') de la base ?': ') from the database?',
   'Cette action est IRRÉVERSIBLE : le dossier disparaît du nuage, il ne sera plus restaurable.':

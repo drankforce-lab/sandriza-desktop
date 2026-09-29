@@ -565,7 +565,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
     if (!A.length) return '';
     var items = A.map(function(a){
       if (a.code === 'cout-inconnu') {
-        return '<li>' + a.annee + ' — <strong>' + a.nombre + ' ${T("unité(s) vendue(s) sans coût d’acquisition connu")}</strong>. '
+        return '<li>' + a.annee + ' — <strong>' + a.nombre + ' ' + szPl(a.nombre, '${T("unité vendue sans coût d’acquisition connu")}', '${T("unités vendues sans coût d’acquisition connu")}') + '</strong>. '
           + '${T("La marge et le résultat net sont donc SURESTIMÉS : un produit sans coût est compté comme gratuit. Inscrivez le coût d’acquisition sur")} '
           + esc((a.produits || []).join(', ')) + '.</li>';
       }

@@ -808,7 +808,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function majSous(){
     document.getElementById('sous').textContent = M
-      ? (nb(M.w, 0) + ' × ' + nb(M.h, 0) + ' po — ' + els().length + ' ${T("élément(s)")}') : '';
+      ? (nb(M.w, 0) + ' × ' + nb(M.h, 0) + ' po — ' + els().length + ' ' + szPl(els().length, '${T("élément")}', '${T("éléments")}')) : '';
   }
 
   /* ══ CHARGEMENT ══════════════════════════════════════════════════════════ */
@@ -919,7 +919,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
          << reprendre >> un travail qui est deja dans la fiche, et on finirait
          par ecraser une version plus recente avec une plus ancienne. */
       szBrouillonJeter();
-      dire('${T("Enregistré —")} ' + r.elements + ' ${T("élément(s).")}', 'bon');
+      dire('${T("Enregistré —")} ' + r.elements + ' ' + szPl(r.elements, '${T("élément.")}', '${T("éléments.")}'), 'bon');
       var garde = SEL;
       charger();
       setTimeout(function(){ SEL = garde; dessiner(); }, 0);
@@ -1070,9 +1070,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
        le canevas — donc il ne s imprimerait pas non plus ; le taire ferait
        chercher une image qu on croit avoir deposee. Et un plafond atteint se
        dit aussi, sinon on conclut que le reste a disparu. */
-    var etat = r.logos.length + ' image(s)';
+    var etat = r.logos.length + ' ' + szPl(r.logos.length, '${T("image")}', '${T("images")}');
     if (r.ecartes) etat += ' · ' + r.ecartes
-      + ' ${T("écartée(s) : illisibles ici, elles ne sortiraient pas non plus sur le papier")}';
+      + ' ' + szPl(r.ecartes, '${T("écartée : illisible ici, elle ne sortirait pas non plus sur le papier")}', '${T("écartées : illisibles ici, elles ne sortiraient pas non plus sur le papier")}');
     if (r.total > r.plafond) etat += ' · ' + r.total + ' ${T("au total, les")} ' + r.plafond + ' ${T("plus récentes sont montrées")}';
     document.getElementById('choix-etat').textContent = etat;
   }

@@ -257,7 +257,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
           if (cp.length){ groupes.push({ cle:'comptable', label:'${T("Accès comptables")}', onglet:'comptable', total:cp.length, entrees:cp.slice(0,200) }); total+=cp.length; }
         }
         OCCUPE=false; RRES={ ok:true, q:RQ, total:total, groupes:groupes }; peindreResultats();
-        dire(total?(total+' ${T("résultat(s) dans tous les journaux.")}'):'${T("Aucun résultat.")}', 'bon');
+        dire(total?(total+' '+szPl(total,'${T("résultat dans tous les journaux.")}','${T("résultats dans tous les journaux.")}')):'${T("Aucun résultat.")}', 'bon');
       });
     }).catch(function(){ OCCUPE=false; dire('${T("Échec de la recherche.")}', 'err'); });
   }
@@ -471,7 +471,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
     }
     var rows = SMS_D;
     var h = '<div class="note">ℹ ${T("Les SMS reçus et envoyés (Twilio). Leur gestion complète (répondre, marquer lu, supprimer) reste dans ")}<b>${T("Communications → Téléphonie")}</b>.</div>'
-      + '<div class="carte"><div class="barre"><span class="sub">'+rows.length+'${T(" message(s)")}</span><span class="pousse"></span><button class="b" id="sms-reload"><span class="ic">🔄</span> ${T("Actualiser")}</button></div>'
+      + '<div class="carte"><div class="barre"><span class="sub">'+rows.length+' '+szPl(rows.length,'${T("message")}','${T("messages")}')+'</span><span class="pousse"></span><button class="b" id="sms-reload"><span class="ic">🔄</span> ${T("Actualiser")}</button></div>'
       + '<table class="tb"><thead><tr><th>${T("Date")}</th><th>${T("Sens")}</th><th>${T("De")}</th><th>${T("À")}</th><th>${T("Message")}</th></tr></thead><tbody>';
     if (!rows.length) h += '<tr><td colspan="5" class="vide">${T("Aucun SMS.")}</td></tr>';
     for (var i=0;i<rows.length;i++){ var s=rows[i]; var ent=(s.direction==='inbound');
@@ -615,7 +615,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
       + '<option value="comptable"' + (CP_CANAL==='comptable'?' selected':'') + '>${T("Comptable")}</option>'
       + '<option value="courriel"' + (CP_CANAL==='courriel'?' selected':'') + '>${T("Courriel")}</option>'
       + '</select>'
-      + '<span class="sub">'+rows.length+'${T(" événement(s)")}</span><span class="pousse"></span>'
+      + '<span class="sub">'+rows.length+' '+szPl(rows.length,'${T("événement")}','${T("événements")}')+'</span><span class="pousse"></span>'
       + '<button class="b" id="cp-reload"><span class="ic">🔄</span> ${T("Actualiser")}</button></div>'
       + '<div class="liste"><table class="tb"><thead><tr><th>${T("Quand")}</th><th>${T("Canal")}</th><th>${T("Événement")}</th><th>IP</th><th>${T("Lien")}</th><th>${T("Détail")}</th></tr></thead><tbody>';
     if (!vue.length) h += '<tr><td colspan="6" class="vide">${T("Aucun événement.")}</td></tr>';
@@ -681,7 +681,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
          La pastille des non vus, elle, se compte désormais sur TOUT — sinon elle
          cessait de monter au moment exact où la situation empirait. */
       +   '<span class="sub">' + szCompte(rows.length, D.jsErreursTotal, '${T("défaut distinct")}', '${T("défauts distincts")}')
-      +     (neuves ? ' · <b style="color:var(--tx-att)">' + neuves + ' non vu(s)</b>' : '') + '</span>'
+      +     (neuves ? ' · <b style="color:var(--tx-att)">' + neuves + ' ' + szPl(neuves, '${T("non vu")}', '${T("non vus")}') + '</b>' : '') + '</span>'
       +   (D.peutModifier && neuves ? '<button class="mini" id="js-vues">${T("Tout marquer comme vu")}</button>' : '')
       +   (D.peutModifier && rows.length
             ? '<button class="mini" id="js-purge"' + (JS_ARME ? ' style="border-color:rgba(239,68,68,.6);color:var(--tx-err)"' : '') + '>'
@@ -729,7 +729,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
     if (OCCUPE) return; OCCUPE = true; dire('${T("Marquage…")}');
     appeler('journal:jsErreursVues', [null]).then(function(r){
       OCCUPE = false;
-      if (r && r.ok) recharger((r.n || 0) + ' ${T("erreur(s) marquée(s) comme vue(s).")}', 'bon');
+      if (r && r.ok) recharger((r.n || 0) + ' ' + szPl(r.n || 0, '${T("erreur marquée comme vue.")}', '${T("erreurs marquées comme vues.")}'), 'bon');
       else dire('${T("Échec : ")}' + expliquer(r), 'err');
     });
   }
@@ -755,7 +755,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
     JS_ARME = false; OCCUPE = true; dire('${T("Vidage…")}');
     appeler('journal:jsErreursPurger', []).then(function(r){
       OCCUPE = false;
-      if (r && r.ok) recharger('${T("Journal vidé — ")}' + (r.efface || 0) + ' ${T("effacée(s).")}', 'bon');
+      if (r && r.ok) recharger('${T("Journal vidé — ")}' + (r.efface || 0) + ' ' + szPl(r.efface || 0, '${T("effacée.")}', '${T("effacées.")}'), 'bon');
       else dire('${T("Échec : ")}' + expliquer(r), 'err');
     });
   }
@@ -772,7 +772,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
   function purger(op){
     if (OCCUPE) return; OCCUPE=true; dire('${T("Purge…")}');
     appeler(op,[]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ recharger('${T("Purge faite — ")}'+(r.conserves||0)+' ${T("conservée(s).")}', 'bon'); } else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
+      if (r&&r.ok){ recharger('${T("Purge faite — ")}'+(r.conserves||0)+' '+szPl(r.conserves||0,'${T("conservée.")}','${T("conservées.")}'), 'bon'); } else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
   function exporter(op){
     if (OCCUPE) return; OCCUPE=true; dire('${T("Préparation du document…")}');

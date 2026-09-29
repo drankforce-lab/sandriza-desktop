@@ -175,7 +175,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     /* On dit COMBIEN DE TEMPS quand le serveur le sait : « quelques minutes »
        fait réessayer toutes les trente secondes. */
     if ((m === 'bloque' || m === 'nip_bloque') && r.minutes) {
-      return '${T("Trop de tentatives. Réessayez dans {0} minute(s).")}'.split('{0}').join(r.minutes);
+      return szPl(r.minutes, '${T("Trop de tentatives. Réessayez dans {0} minute.")}', '${T("Trop de tentatives. Réessayez dans {0} minutes.")}').split('{0}').join(r.minutes);
     }
     if (r && r.detail) return r.detail;
     return MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');

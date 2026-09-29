@@ -322,5 +322,16 @@ module.exports = {
   'Retouche': 'Retouch',
   'Contenu': 'Content',
   'Nom': 'Name',
-  'Dupliquer': 'Duplicate'
+  'Dupliquer': 'Duplicate',
+  /* ── LES PLURIELS ACCORDES (2026-09-29) : szPl choisit la forme selon le nombre ── */
+  'élément': 'element',
+  'éléments': 'elements',
+  'élément.': 'element.',
+  'éléments.': 'elements.',
+  'image': 'image',
+  'images': 'images',
+  'écartée : illisible ici, elle ne sortirait pas non plus sur le papier':
+    'set aside: unreadable here, it would not come out on paper either',
+  'écartées : illisibles ici, elles ne sortiraient pas non plus sur le papier':
+    'set aside: unreadable here, they would not come out on paper either',
 };

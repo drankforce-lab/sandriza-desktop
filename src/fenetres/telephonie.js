@@ -466,7 +466,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
     var f = C.forward || {};
     var h = '<div class="carte"><div class="stitre">${T("Redirection (transfert d’appel direct)")}</div>';
     h += '<div class="gr2">'
-      + texteHtml('t-forward', '${T("Numéro(s) (séparés par des virgules)")}', (f.numbers || []).join(', '), '+1 514 555 0100, +1 514 555 0101', true)
+      + texteHtml('t-forward', '${T("Numéros (séparés par des virgules)")}', (f.numbers || []).join(', '), '+1 514 555 0100, +1 514 555 0101', true)
       + texteHtml('t-timeout', '${T("Délai de sonnerie (secondes)")}', (f.timeout != null ? f.timeout : 20), '20', false, '', 'number') + '</div>';
     h += selectHtml('t-strategy', '${T("Stratégie (si plusieurs numéros)")}', f.strategy || 'simul', [
         ['simul', '${T("Simultané — tous sonnent en même temps")}'], ['cascade', "${T('Cascade — l\'un après l\'autre')}"]]);
@@ -755,7 +755,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
     for (k = 0; k < sms.length; k++) if (sms[k].direction === 'inbound' && !sms[k].read) smsN++;
     z.innerHTML = szTuiles('<div class="tuiles">'
       + tu('${T("Solde")}', esc(solde), '', esc(soldeSous))
-      + tu('${T("File d’attente")}', String(qw), qw ? 'att' : '', qw ? '${T("appel(s) en attente")}' : '${T("personne n’attend")}')
+      + tu('${T("File d’attente")}', String(qw), qw ? 'att' : '', qw ? szPl(qw, '${T("appel en attente")}', '${T("appels en attente")}') : '${T("personne n’attend")}')
       + tu('${T("Messages vocaux")}', String(vmN), vmN ? 'att' : '', vmN ? '${T("non lus")}' : '${T("tout est lu")}')
       + tu('SMS', String(smsN), smsN ? 'att' : '', smsN ? '${T("non lus")}' : '${T("tout est lu")}')
       + tu('${T("Appels récents")}', String(calls.length), '', '${T("entrants et sortants")}')

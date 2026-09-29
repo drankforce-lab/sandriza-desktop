@@ -146,8 +146,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     if (!E.base64) {
       h += '<div class="carte"><div class="info bien"><span class="ic">✅</span> '
-        + '${T("<b>Rien à déplacer.</b> Les ")}' + E.champs
-        + '${T(" image(s) du catalogue sont déjà dans le seau d’images : le navigateur des clients peut les garder en cache, et le catalogue ne les transporte plus à chaque visite.")}'
+        + szPl(E.champs,
+            '${T("<b>Rien à déplacer.</b>")} ' + E.champs + ' ${T("image du catalogue est déjà dans le seau d’images : le navigateur des clients peut la garder en cache, et le catalogue ne la transporte plus à chaque visite.")}',
+            '${T("<b>Rien à déplacer.</b> Les ")}' + E.champs + ' ${T("images du catalogue sont déjà dans le seau d’images : le navigateur des clients peut les garder en cache, et le catalogue ne les transporte plus à chaque visite.")}')
         + '</div>';
       if (ECHECS.length) h += echecsHtml();
       h += '</div>';
@@ -166,15 +167,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '</div>';
 
     h += '<div class="chiffres">'
-      + '<div class="kpi chaud"><div class="n">' + E.fiches.length + '</div><div class="l">${T("fiche(s) concernée(s)")}</div></div>'
-      + '<div class="kpi chaud"><div class="n">' + E.base64 + '</div><div class="l">${T("image(s) à déplacer")}</div></div>'
+      + '<div class="kpi chaud"><div class="n">' + E.fiches.length + '</div><div class="l">' + szPl(E.fiches.length, '${T("fiche concernée")}', '${T("fiches concernées")}') + '</div></div>'
+      + '<div class="kpi chaud"><div class="n">' + E.base64 + '</div><div class="l">' + szPl(E.base64, '${T("image à déplacer")}', '${T("images à déplacer")}') + '</div></div>'
       + '<div class="kpi chaud"><div class="n">' + poids(E.octets) + '</div><div class="l">${T("transportés à chaque visite")}</div></div>'
       + '</div>';
 
     if (DEPART > 0) {
       var faits = Math.max(0, DEPART - E.fiches.length);
       h += '<div class="jauge"><i style="width:' + Math.round(faits * 100 / DEPART) + '%"></i></div>'
-        + '<div style="font-size:.72rem;color:var(--tx2)">' + faits + ' / ' + DEPART + '${T(" fiche(s) traitée(s)")}</div>';
+        + '<div style="font-size:.72rem;color:var(--tx2)">' + faits + ' / ' + DEPART + ' ' + szPl(DEPART, '${T("fiche traitée")}', '${T("fiches traitées")}') + '</div>';
     }
 
     h += '<table><thead><tr><th>${T("Fiche")}</th><th style="text-align:right">${T("Images")}</th><th style="text-align:right">${T("Poids")}</th></tr></thead><tbody>';
@@ -186,7 +187,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '</div></div></td><td class="n">' + f.champs + '</td><td class="n">' + poids(f.octets) + '</td></tr>';
     });
     h += '</tbody></table>';
-    if (E.fiches.length > 40) h += '<div style="font-size:.72rem;color:var(--tx2);margin-top:.4rem">${T("… et ")}' + (E.fiches.length - 40) + '${T(" autre(s).")}</div>';
+    if (E.fiches.length > 40) h += '<div style="font-size:.72rem;color:var(--tx2);margin-top:.4rem">${T("… et ")}' + (E.fiches.length - 40) + ' ' + szPl(E.fiches.length - 40, '${T("autre.")}', '${T("autres.")}') + '</div>';
 
     if (ECHECS.length) h += echecsHtml();
     h += '</div>';
@@ -198,15 +199,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      de la fiche et le motif, on ne peut rien en faire — et une migration qui se
      bloque toujours sur les deux mêmes fiches passerait pour terminée. */
   function echecsHtml(){
-    var h = '<div class="echec"><b>' + ECHECS.length
-      + '${T(" image(s) n’ont pas pu être déplacées</b> — elles sont <b>restées intactes</b> dans leur fiche, rien n’a été perdu. Vous pouvez relancer.")}'
+    var h = '<div class="echec"><b>' + ECHECS.length + ' '
+      + szPl(ECHECS.length, '${T("image n’a pas pu être déplacée")}', '${T("images n’ont pas pu être déplacées")}') + '</b> '
+      + szPl(ECHECS.length, '${T("— elle est <b>restée intacte</b> dans sa fiche, rien n’a été perdu. Vous pouvez relancer.")}', '${T("— elles sont <b>restées intactes</b> dans leur fiche, rien n’a été perdu. Vous pouvez relancer.")}')
       + '<ul>';
     ECHECS.slice(0, 12).forEach(function(e){
       h += '<li>' + esc(e.nom || e.id) + ' <span class="sku">(' + esc(e.chemin) + ')</span> — '
         + esc(MOTIFS_IMG[e.motif] || e.motif) + '</li>';
     });
     h += '</ul>';
-    if (ECHECS.length > 12) h += '<div style="margin-top:.3rem">… et ' + (ECHECS.length - 12) + '${T(" autre(s).")}</div>';
+    if (ECHECS.length > 12) h += '<div style="margin-top:.3rem">… et ' + (ECHECS.length - 12) + ' ' + szPl(ECHECS.length - 12, '${T("autre.")}', '${T("autres.")}') + '</div>';
     return h + '</div>';
   }
 

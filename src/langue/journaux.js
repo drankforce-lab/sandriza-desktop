@@ -281,5 +281,20 @@ module.exports = {
   'entrées effacées.': 'entries deleted.',
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
-  '· conservation 30 jours': '· kept for 30 days'
+  '· conservation 30 jours': '· kept for 30 days',
+  /* Accords selon le nombre (2026-09-29) — remplacent les « (s) ». */
+  'résultat dans tous les journaux.': 'result across all the logs.',
+  'résultats dans tous les journaux.': 'results across all the logs.',
+  'message': 'message',
+  'messages': 'messages',
+  'événement': 'event',
+  'événements': 'events',
+  'non vu': 'unseen',
+  'non vus': 'unseen',
+  'erreur marquée comme vue.': 'error marked as seen.',
+  'erreurs marquées comme vues.': 'errors marked as seen.',
+  'effacée.': 'cleared.',
+  'effacées.': 'cleared.',
+  'conservée.': 'kept.',
+  'conservées.': 'kept.',
 };

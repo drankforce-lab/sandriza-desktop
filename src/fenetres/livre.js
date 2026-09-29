@@ -350,7 +350,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
              + ' ${T("Une seule écriture manuelle d’ouverture, une fois, et tout le reste devient juste.")}</li>';
       }
       if (a.code === 'cout-inconnu') {
-        return '<li>' + a.nombre + ' ${T("unité(s) vendue(s) sans coût d’acquisition connu : leur sortie de stock n’est PAS écrite, et la marge est incomplète.")} '
+        return '<li>' + a.nombre + ' ' + szPl(a.nombre, '${T("unité vendue sans coût d’acquisition connu : sa sortie de stock n’est PAS écrite, et la marge est incomplète.")}', '${T("unités vendues sans coût d’acquisition connu : leur sortie de stock n’est PAS écrite, et la marge est incomplète.")}') + ' '
              + esc((a.produits || []).join(', ')) + '.</li>';
       }
       if (a.code === 'frais-inconnus') {
@@ -360,18 +360,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
         return '<li>${T("Les frais d’encaissement sont portés en UNE écriture au 31 décembre : l’encaisseur ne rend qu’un total annuel, pas la date de chaque frais.")}</li>';
       }
       if (a.code === 'ecarts-de-total') {
-        return '<li>' + a.nombre + ' ${T("commande(s) dont le total enregistré diffère de quelques cents de la somme de ses composantes (arrondi de la caisse). L’écriture est équilibrée par construction ; aucun total du livre n’en dépend.")}</li>';
+        return '<li>' + a.nombre + ' ' + szPl(a.nombre, '${T("commande dont le total enregistré diffère de quelques cents de la somme de ses composantes (arrondi de la caisse). L’écriture est équilibrée par construction ; aucun total du livre n’en dépend.")}', '${T("commandes dont le total enregistré diffère de quelques cents de la somme de leurs composantes (arrondi de la caisse). Les écritures sont équilibrées par construction ; aucun total du livre n’en dépend.")}') + '</li>';
       }
       if (a.code === 'lignes-hors-plan') {
-        return '<li class="mauvais"><strong>' + a.nombre + ' ${T("ligne(s) posée(s) sur un compte absent du plan.")}</strong> '
-             + '${T("Elles ne sont dans aucun compte : le livre est amputé. C’est un défaut, pas un réglage.")}</li>';
+        return '<li class="mauvais"><strong>' + a.nombre + ' ' + szPl(a.nombre, '${T("ligne posée sur un compte absent du plan.")}', '${T("lignes posées sur un compte absent du plan.")}') + '</strong> '
+             + szPl(a.nombre, '${T("Elle n’est dans aucun compte : le livre est amputé. C’est un défaut, pas un réglage.")}', '${T("Elles ne sont dans aucun compte : le livre est amputé. C’est un défaut, pas un réglage.")}') + '</li>';
       }
       if (a.code === 'balance-desequilibree' || a.code === 'bilan-desequilibre') {
         return '<li class="mauvais"><strong>${T("La balance ne balance pas")}</strong> — ${T("écart")} '
              + argent(a.ecart) + '. ${T("Une écriture bancale a franchi le contrôle : signalez-le.")}</li>';
       }
       if (a.code === 'ecritures-refusees') {
-        return '<li class="mauvais">' + a.nombre + ' ${T("écriture(s) refusée(s) parce qu’elles ne s’équilibraient pas. Elles ne sont dans aucun total.")}</li>';
+        return '<li class="mauvais">' + a.nombre + ' ' + szPl(a.nombre, '${T("écriture refusée parce qu’elle ne s’équilibrait pas. Elle n’est dans aucun total.")}', '${T("écritures refusées parce qu’elles ne s’équilibraient pas. Elles ne sont dans aucun total.")}') + '</li>';
       }
       if (a.code === 'rapprochement-impossible' || a.code === 'rapprochement-diverge') return '';
       return '<li>' + esc(a.code) + '</li>';
@@ -425,7 +425,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
       return h;
     }).join('');
     return '<div class="carte"><h2>${T("Journal de l’exercice")} — ' + D.nbDerivees
-         + ' ${T("dérivée(s)")} · ' + D.nbManuelles + ' ${T("manuelle(s)")}</h2>'
+         + ' ' + szPl(D.nbDerivees, '${T("dérivée")}', '${T("dérivées")}') + ' · ' + D.nbManuelles + ' ' + szPl(D.nbManuelles, '${T("manuelle")}', '${T("manuelles")}') + '</h2>'
          + '<table><thead><tr><th>${T("Date")}</th><th>${T("Libellé / compte")}</th>'
          + '<th class="n">${T("Débit")}</th><th class="n">${T("Crédit")}</th></tr></thead>'
          + '<tbody>' + lignes + '</tbody></table></div>';
@@ -618,7 +618,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
   function dessiner(){
     onglets(); outils();
     if (!D) return;
-    elSous.textContent = ANNEE + ' · ' + (D.journal || []).length + ' ${T("écriture(s)")}';
+    elSous.textContent = ANNEE + ' · ' + (D.journal || []).length + ' ' + szPl((D.journal || []).length, '${T("écriture")}', '${T("écritures")}');
     var h = rapprochement() + avertissements();
     if (ONGLET === 'grandlivre') h += vueGrandLivre();
     else if (ONGLET === 'balance') h += vueBalance();

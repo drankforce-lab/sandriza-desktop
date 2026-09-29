@@ -131,6 +131,28 @@ module.exports = {
   'Débit': 'Debit',
   'Crédit': 'Credit',
   'écriture(s)': 'entry(ies)',
+  'écriture': 'entry',
+  'écritures': 'entries',
+  'dérivée': 'derived',
+  'dérivées': 'derived',
+  'manuelle': 'manual',
+  'manuelles': 'manual',
+  'unité vendue sans coût d’acquisition connu : sa sortie de stock n’est PAS écrite, et la marge est incomplète.':
+    'unit sold with no known acquisition cost: its removal from inventory is NOT recorded, and the margin is incomplete.',
+  'unités vendues sans coût d’acquisition connu : leur sortie de stock n’est PAS écrite, et la marge est incomplète.':
+    'units sold with no known acquisition cost: their removal from inventory is NOT recorded, and the margin is incomplete.',
+  'commande dont le total enregistré diffère de quelques cents de la somme de ses composantes (arrondi de la caisse). L’écriture est équilibrée par construction ; aucun total du livre n’en dépend.':
+    'order whose recorded total differs by a few cents from the sum of its components (checkout rounding). The entry balances by construction; no ledger total depends on it.',
+  'commandes dont le total enregistré diffère de quelques cents de la somme de leurs composantes (arrondi de la caisse). Les écritures sont équilibrées par construction ; aucun total du livre n’en dépend.':
+    'orders whose recorded total differs by a few cents from the sum of their components (checkout rounding). The entries balance by construction; no ledger total depends on them.',
+  'ligne posée sur un compte absent du plan.': 'line posted to an account missing from the chart of accounts.',
+  'lignes posées sur un compte absent du plan.': 'lines posted to an account missing from the chart of accounts.',
+  'Elle n’est dans aucun compte : le livre est amputé. C’est un défaut, pas un réglage.':
+    'It is in no account: the ledger is incomplete. This is a defect, not a setting.',
+  'écriture refusée parce qu’elle ne s’équilibrait pas. Elle n’est dans aucun total.':
+    'entry refused because it did not balance. It is in no total.',
+  'écritures refusées parce qu’elles ne s’équilibraient pas. Elles ne sont dans aucun total.':
+    'entries refused because they did not balance. They are in no total.',
 
   /* ── Le grand livre ─────────────────────────────────────────────────────── */
   'Actif': 'Assets',

@@ -700,7 +700,7 @@ function pageProduit(id) {
           var place = Math.max(0, MAX_PHOTOS - deja);
           if (ds.length > place) {
             dire('Maximum ' + MAX_PHOTOS + ' ${T("photos supplémentaires —")} '
-              + (ds.length - place) + ' ${T("ignorée(s).")}', 'att');
+              + (ds.length - place) + ' ' + szPl(ds.length - place, '${T("ignorée.")}', '${T("ignorées.")}'), 'att');
           }
           ds.slice(0, place).forEach(function(d, i){ VUES['libre' + (deja + i + 1)] = d; });
           dessinerVues();

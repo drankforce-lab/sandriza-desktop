@@ -167,6 +167,8 @@ module.exports = {
   'aucune variante': 'no variant',
   '(sans nom)': '(no name)',
   'sans courriel': 'no email',
+  'commande': 'order',
+  'commandes': 'orders',
   '· lecture seule': '· read-only',
   'Province': 'Province',
   'Les totaux s’afficheront ici.': 'Totals will appear here.'

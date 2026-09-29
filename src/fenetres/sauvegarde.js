@@ -601,7 +601,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('sauvegarde')}
         return;
       }
       var h = g.ok
-        ? '<div class="ch">${T("Sauvegarde vérifiée")}' + (g.lignes ? '${T(" — ")}' + g.lignes + '${T(" enregistrement(s)")}' : '') + '</div>'
+        ? '<div class="ch">${T("Sauvegarde vérifiée")}' + (g.lignes ? '${T(" — ")}' + g.lignes + ' ' + szPl(g.lignes, '${T("enregistrement")}', '${T("enregistrements")}') : '') + '</div>'
         : '<div class="ch ko">${T("Restauration refusée — cette sauvegarde ne peut pas être restaurée")}</div>';
       for (var i=0;i<g.controles.length;i++){
         var c = g.controles[i];
@@ -672,7 +672,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('sauvegarde')}
                + esc(r.app.erreur || '') + '</span>');
         }
         corps.innerHTML = '<div class="carte"><div class="vide"><span class="ic">✅</span> ${T("Restauration terminée — ")}<b>'+(r.total||0)+'</b>${T(" enregistrements rétablis.")}'
-          + ((r && r.sessionsFermees) ? '<br>' + r.sessionsFermees + '${T(" session(s) fermée(s) pendant l’opération.")}' : '')
+          + ((r && r.sessionsFermees) ? '<br>' + r.sessionsFermees + ' ' + szPl(r.sessionsFermees, '${T("session fermée pendant l’opération.")}', '${T("sessions fermées pendant l’opération.")}') : '')
           + appTxt
           + (fil.encKey ? '<br><br><b>${T("Retour en arrière possible")}</b>${T(" — l’état d’avant cette restauration a été sauvegardé sous ")}<span class="mono">' + esc(fil.id) + '</span>.' : '')
           + '<br><br>${T("La fenêtre principale se recharge pour relire la base. Patientez quelques secondes, puis cliquez « ↻ Actualiser ».")}'
@@ -760,7 +760,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('sauvegarde')}
     var go=document.getElementById('s-go'); if (go){ go.disabled=true; go.textContent='${T("⏳ Purge…")}'; }
     appeler('sauvegarde:purger',[]).then(function(r){ OCCUPE=false;
       if (r&&r.ok){ fermerSur(); D=r; RO=!r.peutEcrire; vueListe();
-        dire(r.retirees ? (r.retirees+'${T(" sauvegarde(s) supprimée(s).")}') : '${T("Aucune sauvegarde à purger.")}', 'bon'); }
+        dire(r.retirees ? (r.retirees + ' ' + szPl(r.retirees, '${T("sauvegarde supprimée.")}', '${T("sauvegardes supprimées.")}')) : '${T("Aucune sauvegarde à purger.")}', 'bon'); }
       else { if (go){ go.disabled=false; go.textContent='${T("Purger")}'; } dire('${T("Échec : ")}'+expliquer(r), 'err'); }
     });
   }

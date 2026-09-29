@@ -251,7 +251,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         if (P && P.menuPanneauFermer) P.menuPanneauFermer();
         barreEteindre();
       };
-      document.getElementById('sous').textContent = noms.length + ' menu(s)';
+      document.getElementById('sous').textContent = noms.length + ' ' + szPl(noms.length, '${T("menu")}', '${T("menus")}');
       /* ⚠⚠ LA BARRE VIENT D APPARAITRE, DONC LA ZONE A BOUGE — et l evenement
          de redimensionnement ne se declenche PAS : la fenetre n a pas change de
          taille, c est la mise en page qui s est decalee. Sans ceci, la vue

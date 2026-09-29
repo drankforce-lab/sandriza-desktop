@@ -188,6 +188,12 @@ module.exports = {
   'le serveur a répondu sans rapport d’intégrité': 'the server answered with no integrity report',
   'Sauvegarde vérifiée': 'Backup verified',
   ' enregistrement(s)': ' record(s)',
+  'enregistrement': 'record',
+  'enregistrements': 'records',
+  'session fermée pendant l’opération.': 'session closed during the operation.',
+  'sessions fermées pendant l’opération.': 'sessions closed during the operation.',
+  'sauvegarde supprimée.': 'backup deleted.',
+  'sauvegardes supprimées.': 'backups deleted.',
   'Restauration refusée — cette sauvegarde ne peut pas être restaurée':
     'Restore refused — this backup cannot be restored',
   /* ⚠⚠ CETTE PROMESSE DOIT RESTER ENTIERE : apres un refus, rien n a bouge. */

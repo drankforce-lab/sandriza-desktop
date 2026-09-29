@@ -153,5 +153,8 @@ module.exports = {
   'est.': 'est.',
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
-  'saisi le': 'entered on'
+  'saisi le': 'entered on',
+  /* Accords selon le nombre (2026-09-29) — remplacent les « (s) ». */
+  'appel': 'call',
+  'appels': 'calls',
 };

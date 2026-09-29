@@ -156,6 +156,8 @@ module.exports = {
      trous se lit comme un rapport complet. La traduction doit garder la meme
      FORCE — pas l adoucir en une note de bas de page. */
   'unité(s) vendue(s) sans coût d’acquisition connu': 'unit(s) sold with no known acquisition cost',
+  'unité vendue sans coût d’acquisition connu': 'unit sold with no known acquisition cost',
+  'unités vendues sans coût d’acquisition connu': 'units sold with no known acquisition cost',
   'La marge et le résultat net sont donc SURESTIMÉS : un produit sans coût est compté comme gratuit. Inscrivez le coût d’acquisition sur':
     'Gross profit and net income are therefore OVERSTATED: a product with no cost is counted as free. Enter the acquisition cost on',
   'les frais d’encaissement n’ont pas été rapatriés pour cet exercice : ils comptent pour zéro, ce qui n’est pas la même chose que « aucun frais ». Ouvrez Paiements et actualisez l’année.':

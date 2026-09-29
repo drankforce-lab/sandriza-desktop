@@ -245,5 +245,10 @@ module.exports = {
   'Rond': 'Round',
   'Fermer': 'Close',
   'Logos': 'Logos',
-  'Affichés': 'Shown'
+  'Affichés': 'Shown',
+  /* ── LES PLURIELS ACCORDES (2026-09-29) : szPl choisit la forme selon le nombre ── */
+  'déjà envoyée.': 'already sent.',
+  'déjà envoyées.': 'already sent.',
+  'étiquette déjà envoyée.': 'label already sent.',
+  'étiquettes déjà envoyées.': 'labels already sent.',
 };

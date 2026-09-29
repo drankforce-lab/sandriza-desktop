@@ -346,7 +346,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
         + j.map(function(x){
             var ht = max ? Math.max(3, Math.round(x.cout * 100 / max)) : 3;
             return '<div class="b" style="height:' + ht + '%" title="' + esc(x.jour) + ' · '
-              + x.appels + '${T(" appel(s) · ")}' + sous_(x.cout) + '"></div>';
+              + x.appels + ' ' + szPl(x.appels, '${T("appel")}', '${T("appels")}') + ' · ' + sous_(x.cout) + '"></div>';
           }).join('')
         + '</div><p class="dt">${T("Du ")}' + jourCourt(j[0].jour) + '${T(" au ")}' + jourCourt(j[j.length - 1].jour)
         + '${T(". Survolez une barre pour le détail du jour.")}</p></div>');

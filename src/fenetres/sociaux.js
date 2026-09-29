@@ -669,8 +669,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
             var n = (EP.diapos || []).length;
             var bon = faites === n && !rates && r2 && r2.ok;
             dire(bon
-              ? ('${T("Enregistré : ")}' + faites + ' ${T("image(s) et le texte")}')
-              : ('${T("Enregistré partiellement : ")}' + faites + ' ${T("image(s) sur ")}' + n),
+              ? ('${T("Enregistré : ")}' + faites + ' ' + szPl(faites, '${T("image et le texte")}', '${T("images et le texte")}'))
+              : ('${T("Enregistré partiellement : ")}' + faites + ' ' + szPl(faites, '${T("image sur")}', '${T("images sur")}') + ' ' + n),
               bon ? 'bon' : 'att');
           });
         });
@@ -730,8 +730,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
         note: EP.alt || '', images: images }]).then(function(r){
         if (b) b.disabled = false;
         if (r && r.ok) {
-          dire('${T("Envoyé à ")}' + esc(a) + ' ${T("· ")}' + r.images + ' ${T("image(s)")}'
-            + (rates ? (' ${T(" — ")}' + rates + ' ${T("non rendue(s)")}') : ''),
+          dire('${T("Envoyé à ")}' + esc(a) + ' ${T("· ")}' + r.images + ' ' + szPl(r.images, '${T("image")}', '${T("images")}')
+            + (rates ? (' ${T(" — ")}' + rates + ' ' + szPl(rates, '${T("non rendue")}', '${T("non rendues")}')) : ''),
             rates ? 'att' : 'bon');
         } else dire(epExpliquer(r), 'err');
       });

@@ -306,4 +306,8 @@ module.exports = {
   'tout est lu': 'all read',
   'entrants et sortants': 'incoming and outgoing',
   'Solde': 'Balance',
+  /* Accords selon le nombre (2026-09-29) — remplacent les « (s) ». */
+  'Numéros (séparés par des virgules)': 'Numbers (comma separated)',
+  'appel en attente': 'call waiting',
+  'appels en attente': 'calls waiting',
 };

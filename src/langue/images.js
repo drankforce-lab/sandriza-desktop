@@ -111,4 +111,31 @@ module.exports = {
     'Stopped as a safety after 400 rounds. Start again to continue.',
   // La refonte (2026-09-25).
   '… et ': '… and ',
+
+  /* ── LES PLURIELS ACCORDES (2026-09-29) : szPl choisit la forme selon le nombre ── */
+  '<b>Rien à déplacer.</b>': '<b>Nothing to move.</b>',
+  'Rien à déplacer.': 'Nothing to move.',
+  'image du catalogue est déjà dans le seau d’images : le navigateur des clients peut la garder en cache, et le catalogue ne la transporte plus à chaque visite.':
+    'catalogue image is already in the image bucket: the customers’ browser can keep it in cache, and the catalogue no longer carries it at every visit.',
+  'images du catalogue sont déjà dans le seau d’images : le navigateur des clients peut les garder en cache, et le catalogue ne les transporte plus à chaque visite.':
+    'catalogue images are already in the image bucket: the customers’ browser can keep them in cache, and the catalogue no longer carries them at every visit.',
+  'fiche concernée': 'record concerned',
+  'fiches concernées': 'records concerned',
+  'image à déplacer': 'image to move',
+  'images à déplacer': 'images to move',
+  'fiche traitée': 'record done',
+  'fiches traitées': 'records done',
+  'autre.': 'more.',
+  'autres.': 'more.',
+  'image n’a pas pu être déplacée': 'image could not be moved',
+  'images n’ont pas pu être déplacées': 'images could not be moved',
+  '— elle est <b>restée intacte</b> dans sa fiche, rien n’a été perdu. Vous pouvez relancer.':
+    '— it stayed <b>intact</b> in its record, nothing was lost. You can start again.',
+  '— elles sont <b>restées intactes</b> dans leur fiche, rien n’a été perdu. Vous pouvez relancer.':
+    '— they stayed <b>intact</b> in their record, nothing was lost. You can start again.',
+  /* Les formes RENDUES, pour le compteur. */
+  '— elle est restée intacte dans sa fiche, rien n’a été perdu. Vous pouvez relancer.':
+    '— it stayed intact in its record, nothing was lost. You can start again.',
+  '— elles sont restées intactes dans leur fiche, rien n’a été perdu. Vous pouvez relancer.':
+    '— they stayed intact in their record, nothing was lost. You can start again.',
 };

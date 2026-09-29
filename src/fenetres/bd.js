@@ -194,7 +194,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     occuper(true); dessiner(); dire('${T("Synchronisation vers Turso…")}');
     appeler('config:bd:pousser').then(function(r){
       occuper(false); dessiner();
-      if (r && r.ok) dire(r.pousse + '${T(" clé(s) poussée(s)")}' + (r.retenu ? ' — ' + r.retenu + '${T(" gérée(s) entrée par entrée par le serveur.")}' : '.'), 'bon');
+      if (r && r.ok) dire(r.pousse + ' ' + szPl(r.pousse, '${T("clé poussée")}', '${T("clés poussées")}') + (r.retenu ? ' — ' + r.retenu + ' ' + szPl(r.retenu, '${T("gérée entrée par entrée par le serveur.")}', '${T("gérées entrée par entrée par le serveur.")}') : '.'), 'bon');
       else dire('${T("Échec : ")}' + expliquer(r), 'err');
     });
   }
@@ -209,7 +209,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     occuper(true); dessiner(); dire('${T("Migration des images vers R2… (peut durer)")}');
     appeler('config:bd:migrer').then(function(r){
       occuper(false); dessiner();
-      if (r && r.ok) { dire('${T("Migration terminée : ")}' + (r.migrated || 0) + '${T(" image(s) déplacée(s)")}' + (r.errors ? ', ' + r.errors + '${T(" erreur(s).")}' : '.'), r.errors ? 'att' : 'bon'); chargerStock(); }
+      if (r && r.ok) { dire('${T("Migration terminée : ")}' + (r.migrated || 0) + ' ' + szPl(r.migrated || 0, '${T("image déplacée")}', '${T("images déplacées")}') + (r.errors ? ', ' + r.errors + ' ' + szPl(r.errors, '${T("erreur.")}', '${T("erreurs.")}') : '.'), r.errors ? 'att' : 'bon'); chargerStock(); }
       else dire('${T("Échec : ")}' + expliquer(r), 'err');
     });
   }

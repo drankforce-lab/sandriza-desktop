@@ -191,7 +191,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
     var m = r && r.motif;
     if (m === 'verrou') return MOTIFS.verrou + (r.parQui ? ' (' + r.parQui + ')' : '');
     if (m === 'commandes_presentes') return '${T("Suppression définitive impossible :")} ' + (r.nb || '?')
-      + ' ${T("commande(s) — conservation fiscale de 6 ans. Le compte reste en corbeille.")}';
+      + ' ' + szPl(r.nb || 2, '${T("commande — conservation fiscale de 6 ans. Le compte reste en corbeille.")}', '${T("commandes — conservation fiscale de 6 ans. Le compte reste en corbeille.")}');
     if (r && r.detail) return r.detail;
     return MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
   }
@@ -280,7 +280,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
     }
     actions.innerHTML = b;
     if (c2.supprime && !R.purgeable && R.peutSupprimer) {
-      dire('${T("Suppression définitive impossible :")} ' + R.stats.commandes + ' ${T("commande(s) — conservation fiscale de 6 ans.")}', 'att');
+      dire('${T("Suppression définitive impossible :")} ' + R.stats.commandes + ' ' + szPl(R.stats.commandes, '${T("commande — conservation fiscale de 6 ans.")}', '${T("commandes — conservation fiscale de 6 ans.")}'), 'att');
     }
     brancherFiche();
   }
@@ -350,7 +350,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
       voile('<h3><span class="ic">🗑</span> ${T("Supprimer le client ?")}</h3>'
         + '<p><strong>' + esc(R.client.prenom + ' ' + R.client.nom) + '</strong> (' + esc(R.client.courriel) + ')</p>'
         + '<p class="aide"><span class="ic">🛡</span> ${T("Le compte part dans la corbeille et reste restaurable à tout moment.")} '
-        + (R.stats.commandes ? '${T("L’historique de")} ' + R.stats.commandes + ' ${T("commande(s) est conservé intégralement.")}' : '') + '</p>'
+        + (R.stats.commandes ? '${T("L’historique de")} ' + R.stats.commandes + ' ' + szPl(R.stats.commandes, '${T("commande est conservé intégralement.")}', '${T("commandes est conservé intégralement.")}') : '') + '</p>'
         + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
         + '<button class="danger" id="v-oui">${T("Supprimer")}</button></div>',
         function(fermer){

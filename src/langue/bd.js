@@ -20,8 +20,8 @@
  * R2, base64, et les cles de configuration listees en bas sont des IDENTIFIANTS
  * — elles nomment ce qui est range dans la base.
  *
- * ⚠ « clé(s) », « image(s) », « erreur(s) » gardent leur parenthese : c est la
- * forme que la source ecrit, et elle vaut pour un comme pour plusieurs.
+ * ⚠ « clé », « image », « erreur » s accordent (szPl, 2026-09-29) ; les
+ * anciennes cles « (s) » restent en bas pour memoire.
  */
 
 module.exports = {
@@ -112,5 +112,13 @@ module.exports = {
   'Migration terminée :': 'Move finished:',
   ' image(s) déplacée(s)': ' image(s) moved',
   'image(s) déplacée(s)': 'image(s) moved',
-  ' erreur(s).': ' error(s).'
+  ' erreur(s).': ' error(s).',
+  'clé poussée': 'key pushed',
+  'clés poussées': 'keys pushed',
+  'gérée entrée par entrée par le serveur.': 'handled entry by entry by the server.',
+  'gérées entrée par entrée par le serveur.': 'handled entry by entry by the server.',
+  'image déplacée': 'image moved',
+  'images déplacées': 'images moved',
+  'erreur.': 'error.',
+  'erreurs.': 'errors.'
 };

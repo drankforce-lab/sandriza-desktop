@@ -82,5 +82,7 @@ module.exports = {
     'this window is the one that sends its position, and screens dock into it. The site no longer has that role — as long as it did, a screen would position itself from a page hidden behind this one.',
   'Ce qui reste à faire :': 'What is left to do:',
   'cette fenêtre n’a pas encore remplacé la fenêtre principale, et l’interrupteur garde sa position « éteint ». Il ne se retirera qu’une fois ce cadre éprouvé sur un vrai poste.':
-    'this window has not yet replaced the main window, and the switch stays in its “off” position. It will only be removed once this frame has been proven on a real workstation.'
+    'this window has not yet replaced the main window, and the switch stays in its “off” position. It will only be removed once this frame has been proven on a real workstation.',
+  'menu': 'menu',
+  'menus': 'menus'
 };

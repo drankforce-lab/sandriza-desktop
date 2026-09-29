@@ -661,8 +661,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
           var faites = JOB.faites;
           fini();
           suiviFin('${T("Impression interrompue")}',
-            expliquer(r) + (faites ? ' — ' + faites + ' ${T("déjà envoyée(s).")}' : ''));
-          dire(expliquer(r) + (faites ? ' — ' + faites + ' ${T("étiquette(s) déjà envoyée(s).")}' : ''), 'err');
+            expliquer(r) + (faites ? ' — ' + faites + ' ' + szPl(faites, '${T("déjà envoyée.")}', '${T("déjà envoyées.")}') : ''));
+          dire(expliquer(r) + (faites ? ' — ' + faites + ' ' + szPl(faites, '${T("étiquette déjà envoyée.")}', '${T("étiquettes déjà envoyées.")}') : ''), 'err');
           lireImprimante();
           return;
         }

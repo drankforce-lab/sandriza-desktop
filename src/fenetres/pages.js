@@ -359,7 +359,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     ];
     var cp=D.customPages||[];
     var boutonNouv = (D.peutAjouter && !RO) ? '<button class="prim" id="cp-nouvelle">${T("＋ Nouvelle page")}</button>' : '';
-    var h='<div class="carte"><div class="entete"><h3>${T("Toutes les pages")} <span style="font-size:.8rem;font-weight:400;color:var(--tx2)">'+(builtins.length+cp.length)+'${T(" page(s)")}</span></h3>'+boutonNouv+'</div>';
+    var h='<div class="carte"><div class="entete"><h3>${T("Toutes les pages")} <span style="font-size:.8rem;font-weight:400;color:var(--tx2)">'+(builtins.length+cp.length)+' '+szPl(builtins.length+cp.length, '${T("page")}', '${T("pages")}')+'</span></h3>'+boutonNouv+'</div>';
     h+='<table class="tb lp"><thead><tr><th style="text-align:left">${T("Page")}</th><th>${T("Type")}</th><th>${T("Pied de page")}</th><th></th></tr></thead><tbody>';
     for (var i=0;i<builtins.length;i++){ var b=builtins[i];
       var coche = f[b.k]!==false;
@@ -554,7 +554,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       +champ('faq-title','${T("Titre de la page")}',FAQ.title)
       +champ('faq-sub','${T("Sous-titre")}',FAQ.subtitle)
       +'</div></div>';
-    h+='<div class="carte"><div class="entete"><h3>${T("Questions & réponses")} <span style="font-size:.8rem;font-weight:400;color:var(--tx2)">'+FAQ.items.length+'${T(" entrée(s)")}</span></h3>'+(RO?'':'<button class="b" id="faq-add">${T("＋ Ajouter")}</button>')+'</div><div id="faq-liste">';
+    h+='<div class="carte"><div class="entete"><h3>${T("Questions & réponses")} <span style="font-size:.8rem;font-weight:400;color:var(--tx2)">'+FAQ.items.length+' '+szPl(FAQ.items.length, '${T("entrée")}', '${T("entrées")}')+'</span></h3>'+(RO?'':'<button class="b" id="faq-add">${T("＋ Ajouter")}</button>')+'</div><div id="faq-liste">';
     if (!FAQ.items.length) h+='<div class="vide">${T("Aucune question.")}</div>';
     for (var i=0;i<FAQ.items.length;i++){ var it=FAQ.items[i];
       h+='<div class="qa">'
@@ -629,7 +629,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var l=document.getElementById('ib-liste'); if (!l) return;
     if (!r||!r.ok){ l.innerHTML='<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>'; return; }
     var m=r.messages||[];
-    var tete='<div class="entete" style="margin-bottom:.7rem"><span style="font-size:.82rem;color:var(--tx2)">'+m.length+' message(s)</span>'
+    var tete='<div class="entete" style="margin-bottom:.7rem"><span style="font-size:.82rem;color:var(--tx2)">'+m.length+' '+szPl(m.length, '${T("message")}', '${T("messages")}')+'</span>'
       +(m.length&&!RO?'<button class="b dgr" id="ib-vider">'+(VIDECONF?'${T("✓ Confirmer")}':'${T("Tout supprimer")}')+'</button>':'')+'</div>';
     if (r.etat==='reseau') tete+='<div class="note" style="margin-bottom:.7rem"><span class="ic">⚠</span> ${T("Relecture depuis le nuage impossible (réseau) — rien n’est perdu. Rouvrez pour réessayer.")}</div>';
     var corpsl='';

@@ -348,5 +348,13 @@ module.exports = {
   'Enregistré :': 'Saved:',
   'Enregistré partiellement :': 'Partly saved:',
   'image(s) sur': 'image(s) of',
-  'Envoyé à': 'Sent to'
+  'Envoyé à': 'Sent to',
+  /* Accords selon le nombre (2026-09-29) — remplacent les « (s) ». */
+  'image et le texte': 'image and the text',
+  'images et le texte': 'images and the text',
+  'image sur': 'image out of',
+  'images sur': 'images out of',
+  'images': 'images',
+  'non rendue': 'not rendered',
+  'non rendues': 'not rendered',
 };

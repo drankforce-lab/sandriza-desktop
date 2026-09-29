@@ -482,8 +482,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       // l IA n a pas a l ecraser.
       var su = document.getElementById('f-suj');
       if (su && !su.value.trim() && r.sujet) su.value = r.sujet;
-      var mot = '${T("Rédigé : ")}' + r.blocs.length + ' ${T("bloc(s)")}'
-        + (r.jetes ? (' ${T(" — ")}' + r.jetes + ' ${T("écarté(s), hors catalogue")}') : '')
+      var mot = '${T("Rédigé : ")}' + r.blocs.length + ' ' + szPl(r.blocs.length, '${T("bloc")}', '${T("blocs")}')
+        + (r.jetes ? (' ${T(" — ")}' + r.jetes + ' ' + szPl(r.jetes, '${T("écarté, hors catalogue")}', '${T("écartés, hors catalogue")}')) : '')
         + (r.cout ? (' ${T(" · ")}' + szArgent(r.cout)) : '');
       dire(mot, 'bon');
     });
@@ -693,7 +693,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
             + '>' + esc(x.nom) + '</option>'; }).join('') + '</select></div>'
       + '<div class="champ"><span class="lbl">${T("Destinataires SMS")}</span>'
       + '<div class="aide" style="padding-top:.35rem">' + (d.smsDestinataires || 0)
-      + ' ${T("client(s) ayant consenti, avec un téléphone.")}'
+      + ' ' + szPl(d.smsDestinataires || 0, '${T("client ayant consenti, avec un téléphone.")}', '${T("clients ayant consenti, avec un téléphone.")}')
       + (d.smsPret ? '' : '<br><span style="color:var(--tx-err)"><span class="ic">⚠</span> ${T("Téléphonie non configurée : l’envoi SMS échouera.")}</span>')
       + '</div></div></div>'
       + '<div class="champ" id="f-sms-bloc"><span class="lbl">${T("Message texte (SMS)")}</span>'
