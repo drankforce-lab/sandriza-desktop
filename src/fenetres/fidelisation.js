@@ -22,7 +22,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -177,6 +177,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
   var DETAIL = null;
   var ARME = '';             // id de sondage armé, ou '__invites'
 
+  /* « 4,3 / 5 » : la virgule du francais (le point sortait tel quel du nombre). */
+  function note5(n){
+    var v = Number(n);
+    return (isFinite(v) ? v.toLocaleString('${LIEU()}', { maximumFractionDigits: 1 }) : String(n)) + ' / 5';
+  }
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   /* Le bandeau de message : une seule regle, dans le socle (szDire) —
@@ -230,7 +235,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       + '<div class="tuile"><div class="lbl">${T("Réponses")}</div><div class="val bon">' + (t.reponses || 0) + '</div>'
       + '<div class="sub">${T("taux de ")}' + (t.taux || 0) + ' %</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Note moyenne")}</div><div class="val">'
-      + (t.note == null ? '—' : t.note + ' / 5') + '</div>'
+      + (t.note == null ? '—' : note5(t.note)) + '</div>'
       + '<div class="sub">' + (t.nbNotes || 0) + ((t.nbNotes || 0) > 1 ? '${T(" évaluations")}' : '${T(" évaluation")}') + '</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Codes récompense")}</div><div class="val">' + (t.codes || 0) + '</div>'
       + '<div class="sub">' + (t.codesUtilises || 0) + ((t.codesUtilises || 0) > 1 ? '${T(" utilisés")}' : '${T(" utilisé")}') + '</div></div>'
@@ -572,7 +577,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       h += s.questions.map(function(q){
         var b = '<div class="q"><div class="txt">' + esc(q.texte) + '</div>'
           + '<div class="dt">' + q.nbReponses + (q.nbReponses > 1 ? '${T(" réponses")}' : '${T(" réponse")}')
-          + (q.moyenne != null ? '${T(" · moyenne ")}' + q.moyenne + ' / 5' : '') + '</div>';
+          + (q.moyenne != null ? '${T(" · moyenne ")}' + note5(q.moyenne) : '') + '</div>';
         if (q.textes.length) {
           /* Les mots des clientes, tels qu elles les ont ecrits : c est la
              seule partie d un sondage qui dise pourquoi. */

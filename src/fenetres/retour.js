@@ -64,10 +64,11 @@ body{background:var(--f-page);color:var(--tx);
   letter-spacing:.09em;color:var(--tx2);font-weight:700}
 .carte h2 .note{font-weight:400;text-transform:none;letter-spacing:0;color:var(--tx3)}
 
-.info{display:grid;grid-template-columns:1fr 1fr;gap:.5rem 1.2rem;font-size:.86rem}
-.info .k{font-size:.7rem;color:var(--tx2)}
-.info .v{font-weight:500}
-.info .large{grid-column:1/-1}
+/* ⚠ PAS << .info >> : le socle peint ce nom en panneau BLEU en mode jour (2026-09-29). */
+.dinfo{display:grid;grid-template-columns:1fr 1fr;gap:.5rem 1.2rem;font-size:.86rem}
+.dinfo .k{font-size:.7rem;color:var(--tx2)}
+.dinfo .v{font-weight:500}
+.dinfo .large{grid-column:1/-1}
 
 input,select,textarea{font:inherit;color:var(--tx);background:var(--f-0f1826);
   border:1px solid var(--v14);border-radius:8px;padding:.32rem .5rem;
@@ -301,7 +302,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
        depassaient la fenetre de plus de 400 px. */
     var h = '<div class="cols-dem"><div class="col">' + '<div class="carte"><h2>${T("Demande")} <span class="note">— ' + esc(d.commande)
       + ' ${T("· soumise le")} ' + esc(dateFr(d.creeLe)) + '</span></h2>'
-      + '<div class="info">'
+      + '<div class="dinfo">'
       + '<div><div class="k">${T("Client")}</div><div class="v">' + esc(d.client || '—') + '</div></div>'
       + '<div><div class="k">${T("Courriel")}</div><div class="v">' + esc(d.courriel || '—') + '</div></div>'
       + '<div class="large"><div class="k">${T("Motif")}</div><div class="v">' + esc(d.motif || '—') + '</div></div>'
@@ -330,7 +331,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
     if (d.suivi) {
       h += '<div class="carte"><h2>${T("Retour expédié par le client")}</h2>'
-        + '<div class="info"><div><div class="k">${T("Transporteur")}</div><div class="v">' + esc(d.suiviTransporteur || '—') + '</div></div>'
+        + '<div class="dinfo"><div><div class="k">${T("Transporteur")}</div><div class="v">' + esc(d.suiviTransporteur || '—') + '</div></div>'
         + '<div><div class="k">${T("Numéro de suivi")}</div><div class="v" style="font-family:ui-monospace,monospace">' + esc(d.suivi) + '</div></div></div></div>';
     }
 

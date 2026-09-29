@@ -41,8 +41,9 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:1rem 1.1rem;
   margin:0 0 1.1rem;break-inside:avoid;-webkit-column-break-inside:avoid}
 .stitre{font-size:.86rem;font-weight:700;color:var(--tx-bleute);margin:0 0 .5rem}
-.info{color:var(--tx2);font-size:.79rem;line-height:1.6;margin:0 0 .6rem}
-.info b{color:var(--tx-bleute)}
+/* ⚠ PAS << .info >> : le socle peint ce nom en panneau BLEU en mode jour (2026-09-29). */
+.expl{color:var(--tx2);font-size:.79rem;line-height:1.6;margin:0 0 .6rem}
+.expl b{color:var(--tx-bleute)}
 /* ⚠ UNE GRILLE 2 x 2, VOULUE (2026-09-25). Les quatre gestes debordaient de la
    demi-carte et le quatrieme tombait seul a la ligne. Sa regle : << sur une
    ligne, ou propose-moi quelque chose sans perdre le contenu >>. Quatre libelles
@@ -150,7 +151,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var av = document.getElementById('ro'); if (av) av.hidden = !RO;
     var dis = RO ? ' disabled' : '';
     var h = '<div class="carte"><div class="stitre"><span class="ic">☁</span>${T(" Turso Cloud DB")}</div>'
-      + '<div class="info">${T("Toute la configuration (thèmes, logos, clés API, navigation, profil…) est ")}'
+      + '<div class="expl">${T("Toute la configuration (thèmes, logos, clés API, navigation, profil…) est ")}'
       + '${T("synchronisée vers Turso à <b>chaque sauvegarde</b>. Ces boutons servent à forcer une synchronisation, ")}'
       + '${T("par exemple après avoir vidé le cache du navigateur.")}</div>'
       + '<div class="gestes">'
@@ -159,7 +160,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<button class="b" type="button" data-act="tester">${T("Tester la connexion")}</button>'
       + '<button class="b" type="button" data-act="migrer"' + dis + '>' + (CONF === 'migrer' ? '${T("Confirmer la migration ?")}' : '${T("↦ Migrer les images vers R2")}') + '</button>'
       + '</div>'
-      + '<div class="info" style="margin:0">${T("<b>Pousser</b> : envoie toutes les configs locales vers Turso. ")}'
+      + '<div class="expl" style="margin:0">${T("<b>Pousser</b> : envoie toutes les configs locales vers Turso. ")}'
       + '${T("<b>Restaurer</b> : recharge depuis Turso puis recharge la fenêtre principale (utile après un vidage de cache). ")}'
       + '${T("<b>Migrer</b> : déplace vers R2 les images encore stockées en base64 (à lancer une fois).")}</div></div>';
     h += '<div class="carte"><div class="stitre">${T("Occupation du stockage")}</div>' + stockHtml() + '</div>';
