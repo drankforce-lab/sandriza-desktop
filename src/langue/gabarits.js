@@ -68,13 +68,13 @@ module.exports = {
   ' Bannière animée GIF (compatible Gmail)': ' Animated GIF banner (Gmail friendly)',
   'Remplace l’en-tête par une bannière GIF générée à partir des couleurs. S’anime dans Gmail et Outlook. Nom de marque et sous-titre intégrés à l’image.':
     'Replaces the header with a GIF banner built from the colours. It animates in Gmail and Outlook. Brand name and subtitle are baked into the image.',
-  '🖼️ Bannière animée GIF (compatible Gmail) Remplace l’en-tête par une bannière GIF générée à partir des couleurs. S’anime dans Gmail et Outlook. Nom de marque et sous-titre intégrés à l’image.':
-    '🖼️ Animated GIF banner (Gmail friendly) Replaces the header with a GIF banner built from the colours. It animates in Gmail and Outlook. Brand name and subtitle are baked into the image.',
+  'Bannière animée GIF (compatible Gmail) Remplace l’en-tête par une bannière GIF générée à partir des couleurs. S’anime dans Gmail et Outlook. Nom de marque et sous-titre intégrés à l’image.':
+    'Animated GIF banner (Gmail friendly) Replaces the header with a GIF banner built from the colours. It animates in Gmail and Outlook. Brand name and subtitle are baked into the image.',
   'Pied : couleur de fond': 'Footer: background colour',
   'Pied : couleur du texte': 'Footer: text colour',
   '…contenu du courriel…': '…email content…',
   ' Aperçu de la bannière GIF ': ' Preview of the GIF banner ',
-  '🖼️ Aperçu de la bannière GIF ↻': '🖼️ Preview of the GIF banner ↻',
+  'Aperçu de la bannière GIF ↻': 'Preview of the GIF banner ↻',
   'Aperçu bannière': 'Banner preview',
   'Aperçu GIF indisponible : ': 'GIF preview unavailable: ',
   'Aperçu GIF indisponible :': 'GIF preview unavailable:',
@@ -94,7 +94,7 @@ module.exports = {
   'pied': 'footer',
   ' Modifier': ' Edit',
   ' Supprimer': ' Delete',
-  '✏ Modifier': '✏ Edit',
+  '✎ Modifier': '✎ Edit',
   ' Copier': ' Copy',
   '📋 Copier': '📋 Copy',
   'Confirmer ?': 'Confirm?',

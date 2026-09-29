@@ -127,7 +127,7 @@ module.exports = {
   'Couleurs intégrées (': 'Built-in colours (',
   'Cliquez une couleur pour la sélectionner dans le formulaire d’ajout.':
     'Click a colour to select it in the add form.',
-  '✏ Modifier': '✏ Edit',
+  '✎ Modifier': '✎ Edit',
   'Modifier la couleur': 'Edit the colour',
   'Annuler Enregistrer': 'Cancel Save',
   'Couleur «': 'Colour «',

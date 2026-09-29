@@ -52,6 +52,8 @@ h1{font-size:1rem;margin:0;font-weight:650}
 .info{background:rgba(80,120,190,.1);border:1px solid rgba(120,160,220,.28);color:#bcd2f0;
   border-radius:9px;padding:.7rem .85rem;font-size:.78rem;line-height:1.6;margin:0 0 1rem}
 .info b{color:#dbe7fb}
+.ic-info{vertical-align:-3px;margin-right:.35rem}
+.ic-info svg{width:15px;height:15px}
 .bien{background:rgba(60,160,110,.1);border-color:rgba(90,200,140,.3);color:#a9e6c6}
 .bien b{color:#d3f6e4}
 .chiffres{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin:0 0 .9rem}
@@ -160,7 +162,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '<div class="carte">'
       /* Deux paragraphes ENTIERS, chacun dans un seul litteral : les <b> coupent
          la phrase, pas la pensee — une cle par paragraphe, balises comprises. */
-      + '<div class="info"><span class="ic">🖼️</span> '
+      + '<div class="info"><span class="ico ic-info" aria-hidden="true">${ICO.image}</span>'
       + '${T("Ces fiches portent encore leur image <b>collée dans la fiche</b> plutôt qu’une adresse. Elles s’affichent très bien — c’est pour ça que personne ne les voit passer : leur image voyage <b>entière, à chaque chargement du catalogue</b>, et le navigateur ne peut pas la garder en cache.")}'
       + '<br><br>'
       + '${T("Le déplacement <b>ne perd rien</b> : une image n’est retirée de la fiche que si son dépôt a réussi <b>et</b> qu’elle a pu être relue ensuite. Il peut être interrompu et repris — ce qui est déjà fait ne sera pas refait.")}'

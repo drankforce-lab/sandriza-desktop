@@ -254,7 +254,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('corbeille')}
               + (d.squareRembourse ? ' <span class="rf-pill ambre">${T("remboursée")}</span>' : '') + '</div>'
               + '<div class="rf-sous"><span class="rf-code">' + esc(d.orderNumber || d.orderId) + '</span></div></div></div></td>'
               + '<td class="num"><span class="rf-mont">' + argent(d.total) + '</span></td>'
-              + '<td><div>' + esc(quand(d.supprimeeLe)) + '</div>'
+              + '<td><div style="white-space:nowrap">' + esc(quand(d.supprimeeLe)) + '</div>'
               + '<div class="rf-sous">${T("par ")}' + esc(d.parNom || '—') + '</div></td>'
               + '<td>' + pieces(d.pieces) + '</td>'
               + '<td class="fin">'

@@ -84,7 +84,7 @@ module.exports = {
   ' Détail': ' Detail',
   '👁 Détail': '👁 Detail',
   ' Modifier': ' Edit',
-  '✏ Modifier': '✏ Edit',
+  '✎ Modifier': '✎ Edit',
   'Retirer': 'Remove',
   '✓ Confirmer': '✓ Confirm',
   /* ⚠⚠ CE QU ON N EFFACE PAS : un registre qu on nettoie n est plus un registre. */

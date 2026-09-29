@@ -157,7 +157,7 @@ module.exports = {
   'Désactivé': 'Disabled',
   'MFA à configurer': 'MFA to set up',
   'MFA exempté': 'MFA exempt',
-  '✏ Modifier': '✏ Edit',
+  '✎ Modifier': '✎ Edit',
   'Gérer l’authentification à deux facteurs': 'Manage two-factor authentication',
   /* ⚠ Le pictogramme vit dans son propre <span> : la SOURCE n ecrit que le mot.
      Sans cette cle-la, le bouton restait « 📧 Renvoyer » sur la page anglaise. */

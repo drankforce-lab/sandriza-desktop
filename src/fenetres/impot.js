@@ -579,7 +579,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
       + '<th style="text-align:right">TPS</th><th style="text-align:right">TVQ</th>'
       + '<th style="text-align:right">${T("À remettre")}</th><th style="text-align:right">${T("Cmdes")}</th></tr></thead><tbody>'
       + (t.trimestres || []).map(function(q){
-          return '<tr><td>' + esc(nomTrim(q)) + '</td><td class="arg">' + esc(q.net)
+          return '<tr><td style="white-space:nowrap">' + esc(nomTrim(q)) + '</td><td class="arg">' + esc(q.net)
             + '</td><td class="arg">' + esc(q.tps) + '</td><td class="arg">' + esc(q.tvq)
             + '</td><td class="arg">' + esc(q.total) + '</td><td class="arg">' + q.n + '</td></tr>';
         }).join('')

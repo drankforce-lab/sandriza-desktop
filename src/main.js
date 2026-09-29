@@ -3001,8 +3001,12 @@ ipcMain.handle('fenetre:commandeDetail', (e, id) => {
        corps ne defile pas. Une commande de deux articles ne devrait jamais
        defiler ; a 980 px, il en tient une dizaine.
        La taille est bornee a l ecran par ouvrirNative : sur un portable, elle
-       s ouvre aussi grande que la zone de travail le permet, jamais plus. */
-    { width: 1080, height: 980, minWidth: 720, minHeight: 560 });
+       s ouvre aussi grande que la zone de travail le permet, jamais plus.
+       ⚠ PUIS TROP GRANDE, LE 2026-09-29, sur sa capture : << ouvre trop grand,
+       reduit un peu sa taille >>. Depuis la refonte, une commande d un article
+       finit ses totaux a mi-hauteur de 980 : la moitie basse etait vide. 840
+       garde les totaux en vue jusqu a huit articles environ. */
+    { width: 1000, height: 840, minWidth: 720, minHeight: 560 });
   if (_reutilisee && win && !win.isDestroyed()) {
     win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
   }

@@ -74,6 +74,8 @@ body{background:var(--f-page);color:var(--tx);
 .apercu .foot{padding:10px 24px;text-align:center}
 .apercu .foot .cp{font-size:10px}
 .gifwrap{max-width:420px;margin:0 0 .8rem}
+.ic-lg{vertical-align:-3px}
+.ic-lg svg{width:15px;height:15px}
 .gifwrap .lg{font-size:.73rem;color:var(--tx2);margin-bottom:.3rem;display:flex;align-items:center;gap:.5rem}
 .gifwrap img{display:block;width:100%;border-radius:8px;border:1px solid var(--v12);background:var(--f-champ);min-height:60px}
 @keyframes szshine{0%{background-position:0% 50%}100%{background-position:220% 50%}}
@@ -202,7 +204,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '<label class="bascule"><input type="checkbox" id="g-anim"' + (t.animated ? ' checked' : '') + (RO ? ' disabled' : '') + '>'
       + '<span><span class="t"><span class="ic">✨</span>${T(" Effet animé CSS (en-tête &amp; pied)")}</span><br><span class="d">${T("Léger dégradé chatoyant, sans image. Visible dans Apple Mail / Mail iOS ; ailleurs (Gmail, Outlook) le dégradé reste fixe.")}</span></span></label>';
     h += '<label class="bascule"><input type="checkbox" id="g-gif"' + (t.gifBanner ? ' checked' : '') + (RO ? ' disabled' : '') + '>'
-      + '<span><span class="t"><span class="ic">🖼️</span>${T(" Bannière animée GIF (compatible Gmail)")}</span><br><span class="d">${T("Remplace l’en-tête par une bannière GIF générée à partir des couleurs. S’anime dans Gmail et Outlook. Nom de marque et sous-titre intégrés à l’image.")}</span></span></label>';
+      + '<span><span class="t"><span class="ico ic-lg" aria-hidden="true">${ICO.image}</span>${T(" Bannière animée GIF (compatible Gmail)")}</span><br><span class="d">${T("Remplace l’en-tête par une bannière GIF générée à partir des couleurs. S’anime dans Gmail et Outlook. Nom de marque et sous-titre intégrés à l’image.")}</span></span></label>';
     h += '<div class="gr2">' + coulChamp('g-fbg', '${T("Pied : couleur de fond")}', t.footerBg || '#1a1a2e')
       + coulChamp('g-fcol', '${T("Pied : couleur du texte")}', t.footerTextColor || '#c4a882') + '</div>';
     // Aperçu CSS
@@ -213,7 +215,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="foot" id="g-prev-foot"><div class="cp" id="g-prev-cp">© ' + esc(brand) + '.</div></div></div>';
     // Aperçu GIF (relayé)
     h += '<div class="gifwrap" id="g-gifwrap" style="display:' + (t.gifBanner ? 'block' : 'none') + '">'
-      + '<div class="lg"><span class="ic">🖼️</span>${T(" Aperçu de la bannière GIF ")}<button class="b" type="button" id="g-gifrefr" style="padding:.1rem .5rem">↻</button></div>'
+      + '<div class="lg"><span class="ico ic-lg" aria-hidden="true">${ICO.image}</span>${T(" Aperçu de la bannière GIF ")}<button class="b" type="button" id="g-gifrefr" style="padding:.1rem .5rem">↻</button></div>'
       + '<img id="g-gifimg" alt="${T("Aperçu bannière")}"></div>';
     h += '</div></div>';
     if (!RO) {

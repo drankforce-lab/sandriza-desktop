@@ -255,7 +255,8 @@ body{background:var(--f-page);color:var(--tx);
   min-height:5rem;text-align:center;color:var(--tx2);font-size:.78rem;padding:.6rem .7rem;
   -webkit-user-select:none;user-select:none}
 .depot:hover,.depot.survol{border-color:#c9a97e;color:var(--tx-bleute)}
-.depot .gros{font-size:1.15rem;filter:grayscale(1) brightness(1.6)}
+.depot .gros{font-size:1.15rem}
+.depot .gros svg{width:22px;height:22px}
 .depot img{max-width:100%;max-height:14rem;border-radius:8px}
 .depot .refaire{font-size:.72rem;color:var(--tx2);text-decoration:underline;margin-top:.3rem}
 /* La barre de l ecran plein largeur (le suivi des lots).
@@ -1225,7 +1226,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       var apercu = PHOTO || PHOTO_URL;
       h += '<div class="depot" id="depot">'
         + (apercu ? '<img src="' + apercu + '" alt="photo">'
-                  : '<span class="gros"><span class="ic">🖼</span></span><span>${T("Photo de la photothèque sélectionnée")}</span>')
+                  : '<span class="gros"><span class="ico" aria-hidden="true">${ICO.image}</span></span><span>${T("Photo de la photothèque sélectionnée")}</span>')
         + '<span class="refaire">${T("Choisir une autre photo")}</span></div>'
         + '<input type="file" id="fichier" accept="image/*" hidden>';
       return h;
