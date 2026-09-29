@@ -502,9 +502,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     // Les refus RACONTES du nouvel onglet Produits / Entrepot.
     if (m === 'collision') return '${T("Impossible :")} ' + esc(r.avant) + ' deviendrait ' + esc(r.apres) + '${T(", déjà utilisé.")}';
     if (m === 'emplacement_utilise') return '${T("Suppression impossible —")} ' + (r.n || '?')
-      + ' ${T("variante(s) utilisent l’emplacement")} ' + esc(r.code || '') + '${T(". Réassignez-les d’abord.")}';
+      + ' ' + szPl(r.n, '${T("variante utilise l’emplacement")}', '${T("variantes utilisent l’emplacement")}') + ' ' + esc(r.code || '') + '${T(". Réassignez-les d’abord.")}';
     if (m === 'lieu_utilise') return '${T("Suppression impossible —")} ' + (r.n || '?')
-      + ' ${T("emplacement(s) sont dans le lieu")} ' + esc(r.nom || '') + '${T(". Déplacez-les d’abord.")}';
+      + ' ' + szPl(r.n, '${T("emplacement est dans le lieu")}', '${T("emplacements sont dans le lieu")}') + ' ' + esc(r.nom || '') + '${T(". Déplacez-les d’abord.")}';
     // ⚠ Deux lieux du même nom rendraient les libellés d'emplacement
     // indiscernables — et c'est le libellé que l'import CSV retrouve.
     if (m === 'nom_double') return '${T("Un lieu s’appelle déjà «")} ' + esc(r.nom || '') + ' ».';
@@ -1001,13 +1001,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     // disparaissent d eux-memes une fois la reprise faite.
     if (st.sansSku > 0 && d.peutEcrire) {
       h += '<div class="avis" style="display:flex;align-items:center;gap:.8rem;flex-wrap:wrap">'
-        + '<span style="flex:1 1 auto"><span class="ic">⚠</span> <b>' + st.sansSku + ' ${T("produit(s)")}</b> ${T("sans code SKU")} '
-        + '${T("— ils sont bloqués à l’achat en boutique.")}</span>'
+        + '<span style="flex:1 1 auto"><span class="ic">⚠</span> <b>' + st.sansSku + ' ' + szPl(st.sansSku, '${T("produit")}', '${T("produits")}') + '</b> ${T("sans code SKU")} '
+        + szPl(st.sansSku, '${T("— il est bloqué à l’achat en boutique.")}', '${T("— ils sont bloqués à l’achat en boutique.")}') + '</span>'
         + '<button class="mini" id="btn-skus-tous">${T("Assigner automatiquement")}</button></div>';
     }
     if (d.pad6 && d.pad6.n > 0 && d.peutEcrire) {
       h += '<div class="avis" style="display:flex;align-items:center;gap:.8rem;flex-wrap:wrap">'
-        + '<span style="flex:1 1 auto"><span class="ic">🏷</span> <b>' + d.pad6.n + ' ${T("produit(s)")}</b> ${T("portent encore un")} '
+        + '<span style="flex:1 1 auto"><span class="ic">🏷</span> <b>' + d.pad6.n + ' ' + szPl(d.pad6.n, '${T("produit")}', '${T("produits")}') + '</b> ' + szPl(d.pad6.n, '${T("porte encore un")}', '${T("portent encore un")}') + ' '
         + '${T("numéro à quatre chiffres (")}' + esc(d.pad6.avant || '') + '${T("). Les nouveaux en comptent six")} '
         + '— ' + esc(d.pad6.apres || '') + '. <em>${T("Renuméroter oblige à réimprimer les étiquettes")} '
         + '${T("déjà collées.")}</em></span>'
@@ -1374,7 +1374,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
   function skusTous(b){
     b.disabled = true;
     appeler('stock:skuTous').then(function(r){
-      dire(r.ok ? r.n + ' ${T("SKU assigné(s) automatiquement.")}' : expliquer(r), r.ok ? 'bon' : 'err');
+      dire(r.ok ? r.n + ' ' + szPl(r.n, '${T("SKU assigné automatiquement.")}', '${T("SKU assignés automatiquement.")}') : expliquer(r), r.ok ? 'bon' : 'err');
       if (r.ok) chargerOnglet();
       else b.disabled = false;
     });
@@ -1383,7 +1383,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     var d = PRODS && PRODS.pad6;
     if (!d || !d.n) return;
     voile('<h3>${T("Passer les SKU à six chiffres")}</h3>'
-      + '<p>' + d.n + ' ${T("produit(s) seront renumérotés (ex.")} ' + esc(d.avant || '') + ' → '
+      + '<p>' + d.n + ' ' + szPl(d.n, '${T("produit sera renuméroté (ex.")}', '${T("produits seront renumérotés (ex.")}') + ' ' + esc(d.avant || '') + ' → '
       + esc(d.apres || '') + '${T("). Les étiquettes <strong>déjà imprimées</strong> ne correspondront ")}'
       + '${T("plus au nouveau code — il faudra les réimprimer pour la marchandise concernée.")} '
       + '<strong>${T("Irréversible.")}</strong></p>'
@@ -1395,7 +1395,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
           this.disabled = true;
           appeler('stock:skuPad6').then(function(r){
             fermer();
-            dire(r.ok ? r.n + ' ${T("SKU normalisé(s).")}' : expliquer(r), r.ok ? 'bon' : 'err');
+            dire(r.ok ? r.n + ' ' + szPl(r.n, '${T("SKU normalisé.")}', '${T("SKU normalisés.")}') : expliquer(r), r.ok ? 'bon' : 'err');
             if (r.ok) chargerOnglet();
           });
         };
@@ -1444,7 +1444,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
             appeler('stock:supprimer', [pid, !!(coche && coche.checked)]).then(function(r){
               fermer();
               dire(r.ok ? ('${T("Produit supprimé")}' + (r.photosRetirees
-                  ? ' — ' + r.photosRetirees + ' ${T("photo(s) retirée(s) de la photothèque")}' : '') + '.')
+                  ? ' — ' + r.photosRetirees + ' ' + szPl(r.photosRetirees, '${T("photo retirée de la photothèque")}', '${T("photos retirées de la photothèque")}') : '') + '.')
                 : expliquer(r), r.ok ? 'bon' : 'err');
               if (r.ok) chargerOnglet();
             });
@@ -1458,7 +1458,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     if (!ids.length) { dire(MOTIFS.aucun_produit, 'att'); return; }
     appeler('stock:venteFinale', [ids, activer]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      dire('${T("Vente finale")} ' + (activer ? '${T("activée")}' : '${T("retirée")}') + '${T(" pour ")}' + r.n + ' ${T("produit(s).")}', 'bon');
+      dire('${T("Vente finale")} ' + (activer ? '${T("activée")}' : '${T("retirée")}') + '${T(" pour ")}' + r.n + ' ' + szPl(r.n, '${T("produit.")}', '${T("produits.")}'), 'bon');
       LOT = false; COCHES = {};
       chargerOnglet();
     });
@@ -1589,8 +1589,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     if (d.migre && d.migre.repartis > 0) {
       h += '<div class="carte plein" style="border-color:rgba(201,169,126,.4)">'
         + '<div style="font-size:.84rem;line-height:1.6">'
-        + '<strong>' + d.migre.repartis + ' ${T("emplacement(s) répartis")}</strong> ${T("en lieu, casier et section")}'
-        + (d.migre.crees.length ? ' ${T("— lieu(x) créé(s) :")} <strong>' + d.migre.crees.map(esc).join(', ') + '</strong>' : '')
+        + '<strong>' + d.migre.repartis + ' ' + szPl(d.migre.repartis, '${T("emplacement réparti")}', '${T("emplacements répartis")}') + '</strong> ${T("en lieu, casier et section")}'
+        + (d.migre.crees.length ? ' ' + szPl(d.migre.crees.length, '${T("— lieu créé :")}', '${T("— lieux créés :")}') + ' <strong>' + d.migre.crees.map(esc).join(', ') + '</strong>' : '')
         + '.<br><span class="note">${T("Le libellé affiché n’a pas changé. Il ne manque que l’adresse de chaque lieu.")}</span>'
         + '</div></div>';
     }
@@ -1620,7 +1620,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
         + '<td class="c" style="white-space:nowrap">'
         + (d.peutEcrire ? '<button class="mini" data-lx-mod="' + esc(l.id) + '" title="${T("Modifier")}"><span class="ic">✎</span></button> ' : '')
         + (d.peutSupprimer ? '<button class="mini" data-lx-del="' + esc(l.id) + '" title="'
-            + (n > 0 ? n + ' ${T("emplacement(s)")} dans ce lieu' : '${T("Supprimer")}') + '"><span class="ic">🗑</span></button>' : '')
+            + (n > 0 ? n + ' ' + szPl(n, '${T("emplacement dans ce lieu")}', '${T("emplacements dans ce lieu")}') : '${T("Supprimer")}') + '"><span class="ic">🗑</span></button>' : '')
         + '</td></tr>';
     });
     h += '</tbody></table></div></div>';
@@ -1682,7 +1682,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
         + '<td class="c" style="white-space:nowrap">'
         + (d.peutEcrire ? '<button class="mini" data-wh-mod="' + esc(w.id) + '" title="${T("Modifier")}"><span class="ic">✎</span></button> ' : '')
         + (d.peutSupprimer ? '<button class="mini" data-wh-del="' + esc(w.id) + '" title="'
-            + (w.usage > 0 ? w.usage + ' variante(s) utilisent cet emplacement' : '${T("Supprimer")}') + '"><span class="ic">🗑</span></button>' : '')
+            + (w.usage > 0 ? w.usage + ' ' + szPl(w.usage, '${T("variante utilise cet emplacement")}', '${T("variantes utilisent cet emplacement")}') : '${T("Supprimer")}') + '"><span class="ic">🗑</span></button>' : '')
         + '</td></tr>';
     });
     h += '</tbody></table></div></div>';
@@ -1778,7 +1778,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     if (n > 0) {
       voile('<h3>${T("Suppression impossible")}</h3>'
         + '<p>${T("Le lieu")} <strong>' + esc(l.nom) + '</strong> contient <strong>'
-        + n + ' ${T("emplacement(s)")}</strong>.</p>'
+        + n + ' ' + szPl(n, '${T("emplacement")}', '${T("emplacements")}') + '</strong>.</p>'
         + '<p style="color:var(--tx2);font-size:.8rem">${T("Déplacez ou supprimez ces emplacements")} '
         + '${T("avant de supprimer le lieu.")}</p>'
         + '<div class="fin2"><button class="prim" id="v-ok">${T("Compris")}</button></div>',
@@ -1834,7 +1834,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     if (w.usage > 0) {
       voile('<h3>${T("Suppression impossible")}</h3>'
         + '<p>${T("L’emplacement")} <strong>' + esc(w.code) + '</strong> ${T("est utilisé par")} <strong>'
-        + w.usage + ' ${T("variante(s)</strong> de produit.")}</p>'
+        + w.usage + ' ' + szPl(w.usage, '${T("variante")}', '${T("variantes")}') + '</strong> ${T("de produit.")}</p>'
         + '<p style="color:var(--tx2);font-size:.8rem">${T("Réassignez ces variantes à un autre")} '
         + '${T("emplacement avant de supprimer celui-ci.")}</p>'
         + '<div class="fin2"><button class="prim" id="v-ok">${T("Compris")}</button></div>',
@@ -2114,7 +2114,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
         im.disabled = true; im.textContent = '${T("Impression…")}';
         appeler('stock:etiquettes', [etiq]).then(function(z){
           fermer();
-          dire(z.ok ? (z.envoyees + ' ${T("étiquette(s) envoyée(s) à «")} ' + z.imprimante + ' ».')
+          dire(z.ok ? (z.envoyees + ' ' + szPl(z.envoyees, '${T("étiquette envoyée à «")}', '${T("étiquettes envoyées à «")}') + ' ' + z.imprimante + ' ».')
                     : expliquer(z), z.ok ? 'bon' : 'err');
           retourListe();
         });
@@ -2182,7 +2182,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
   function imprimer(items){
     dire('${T("Impression…")}');
     appeler('stock:etiquettes', [items]).then(function(z){
-      dire(z.ok ? (z.envoyees + ' ${T("étiquette(s) envoyée(s) à «")} ' + z.imprimante + ' ».')
+      dire(z.ok ? (z.envoyees + ' ' + szPl(z.envoyees, '${T("étiquette envoyée à «")}', '${T("étiquettes envoyées à «")}') + ' ' + z.imprimante + ' ».')
                 : expliquer(z), z.ok ? 'bon' : 'err');
     });
   }

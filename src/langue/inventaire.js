@@ -19,6 +19,36 @@
  */
 
 module.exports = {
+  /* Singulier / pluriel (szPl, 2026-09-29) */
+  '— il est bloqué à l’achat en boutique.': '— it cannot be bought in the store.',
+  'porte encore un': 'still carries a',
+  'variante utilise l’emplacement': 'variant uses the location',
+  'variantes utilisent l’emplacement': 'variants use the location',
+  'emplacement est dans le lieu': 'location is in the site',
+  'emplacements sont dans le lieu': 'locations are in the site',
+  'SKU assigné automatiquement.': 'SKU assigned automatically.',
+  'SKU assignés automatiquement.': 'SKUs assigned automatically.',
+  'produit sera renuméroté (ex.': 'product will be renumbered (e.g.',
+  'produits seront renumérotés (ex.': 'products will be renumbered (e.g.',
+  'SKU normalisé.': 'SKU normalized.',
+  'SKU normalisés.': 'SKUs normalized.',
+  'photo retirée de la photothèque': 'photo removed from the library',
+  'photos retirées de la photothèque': 'photos removed from the library',
+  'produit.': 'product.',
+  'produits.': 'products.',
+  'emplacement réparti': 'location split',
+  'emplacements répartis': 'locations split',
+  '— lieu créé :': '— site created:',
+  '— lieux créés :': '— sites created:',
+  'emplacement dans ce lieu': 'location in this site',
+  'emplacements dans ce lieu': 'locations in this site',
+  'variante utilise cet emplacement': 'variant uses this location',
+  'variantes utilisent cet emplacement': 'variants use this location',
+  'emplacement': 'location',
+  'emplacements': 'locations',
+  'de produit.': 'of a product.',
+  'étiquette envoyée à «': 'label sent to “',
+  'étiquettes envoyées à «': 'labels sent to “',
   /* ⚠⚠ LES DEUX FORMES EN ENTIER — voir tools/banc-pluriel-colle.js. C est ici
      que sa capture montrait « 11 variantes to restock » : un « s » colle a un
      mot deja traduit ne fait pas un pluriel anglais. */

@@ -1611,6 +1611,15 @@ function szNombre(n, dec){
   try { return v.toLocaleString('${LIEU()}', { maximumFractionDigits: d }); }
   catch (e) { return String(v); }
 }
+/* Le singulier ou le pluriel, selon la REGLE DE LA LANGUE (2026-09-29) :
+   en francais 0 et 1 sont au singulier (« 0 produit », « 1 produit »), en
+   anglais seul 1 l est (« 0 products »). Remplace les « produit(s) » : une
+   fenetre qui sait compter n a pas a laisser le lecteur accorder. */
+function szPl(n, sing, plur){
+  var v = Math.abs(Number(n) || 0);
+  var en = ${LANGUE.langueCourante() === 'en' ? 'true' : 'false'};
+  return en ? (v === 1 ? sing : plur) : (v < 2 ? sing : plur);
+}
 function szJour(v){
   var x = szDateLue(v);
   if (!x) return v == null ? '' : String(v);
