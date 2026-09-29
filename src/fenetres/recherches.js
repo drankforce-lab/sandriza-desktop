@@ -20,7 +20,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠⚠ On ne traduit QUE ce qui se lit — jamais une requete, qui est le
@@ -111,6 +111,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('recherches')}
   var Q = '';
   var ARME = false;
 
+  /* « janv. 2026 → août 2026 » plutot que « 2026-01 → 2026-08 » (2026-09-29).
+     Chaque morceau AAAA-MM devient un mois lisible ; le reste passe tel quel. */
+  function etendueLisible(t){
+    return String(t || '').split(' ').map(function(m){
+      if (m.length === 7 && m.charAt(4) === '-' && +m.slice(0, 4) > 1900) {
+        try { return new Date(+m.slice(0, 4), +m.slice(5, 7) - 1, 1).toLocaleDateString('${LIEU()}', { month: 'short', year: 'numeric' }); }
+        catch (e) { return m; }
+      }
+      return m;
+    }).join(' ');
+  }
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   /* Le bandeau de message : une seule regle, dans le socle (szDire) —
@@ -167,7 +178,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('recherches')}
       + (D.total || 0) + '</div><div class="sub">${T("toutes occurrences")}</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Archive")}</div><div class="val">'
       + (D.archive || []).length + '</div><div class="sub">'
-      + (D.etendue ? esc(D.etendue) : '${T("aucun mois archivé")}') + '</div></div>'
+      + (D.etendue ? esc(etendueLisible(D.etendue)) : '${T("aucun mois archivé")}') + '</div></div>'
       + '</div>');
 
     /* ══ LA REFONTE DE L INVENTAIRE (2026-09-25) : barre a loupe sur une ligne,
@@ -207,7 +218,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('recherches')}
     /* L ARCHIVE : la seule serie qui dise ce qui REVIENT, saison apres saison.
        Une requete vue une fois n y pese rien ; une demande recurrente ressort. */
     h += '<div class="carte"><h2>${T("Ce qui revient le plus")}'
-      + (D.etendue ? ' <span class="dt">${T("· archive conservée 5 ans ·")} ' + esc(D.etendue) + '</span>' : '')
+      + (D.etendue ? ' <span class="dt">${T("· archive conservée 5 ans ·")} ' + esc(etendueLisible(D.etendue)) + '</span>' : '')
       + '</h2>';
     if (!(D.archive || []).length) {
       h += '<div class="vide">${T("L’archive se remplira au fil des mois.")}</div>';
