@@ -128,6 +128,8 @@ tbody td{padding:.3rem .4rem;border-top:1px solid var(--v055);vertical-align:mid
 tbody .num{font-weight:700}
 tbody .dt{font-size:.72rem;color:var(--tx2)}
 .cadslot{display:inline}
+/* Une ligne recente s ouvre au clic : la main le dit (le survol vient du socle). */
+tbody tr.ouvrable{cursor:pointer}
 /* Le cadenas : la pastille du socle (CSS_REFONTE), plus de regle locale. */
 .pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
@@ -350,6 +352,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        suite. ⚠ L ancienne decision n est pas oubliee, elle est REMPLACEE, et par
        lui. */
     var vue = lignes;
+    var facture = cibleTout === 'billing';
     var h = '<div class="carte"><h2>' + esc(titre)
       + '<button class="mini tout" data-ouvre="' + cibleTout + '">${T("Tout voir →")}</button></h2>';
     if (!vue.length) {
@@ -362,7 +365,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             // une facture pointent vers le meme ID de commande (r.oid).
             /* La ligne riche de l Inventaire : initiales du client, nom en gras,
                numero et date dessous ; le total en gras. Le cadenas garde sa case. */
-            return '<tr><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(r.client)) + '</span>'
+            /* ⚠ LA LIGNE OUVRE SON DETAIL (sa demande du 2026-09-29 : << lon clic
+               sur les commande ou les facture ici on rentre dans les detail >>).
+               Commande : sa fenetre de detail (commandes:ouvrirDetail) ; facture :
+               sa fenetre a elle (factures:ouvrir) — les memes portes que les
+               listes natives, rien de refait ici. Sans ID, la ligne reste inerte
+               plutot que d ouvrir une fenetre vide. */
+            var cibleL = facture ? (r.fid || '') : (r.oid || '');
+            return '<tr' + (cibleL ? ' class="ouvrable" data-ligne="' + (facture ? 'f' : 'c') + ':' + esc(cibleL) + '"'
+                + ' title="' + (facture ? '${T("Ouvrir la facture")}' : '${T("Ouvrir la commande")}') + '"' : '')
+              + '><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(r.client)) + '</span>'
               + '<div style="min-width:0"><div class="rf-nom">' + esc(r.client || '—')
               + '<span class="cadslot" data-cad="' + esc(r.oid || '') + '"></span></div>'
               + '<div class="rf-sous"><span class="rf-code">' + esc(r.numero) + '</span><span>·</span>'
@@ -582,6 +594,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!t || !t.closest) return;
     var ou = t.closest('[data-ouvre]');
     if (ou) { ouvrir(ou.getAttribute('data-ouvre')); return; }
+    var li = t.closest('tr[data-ligne]');
+    if (li) {
+      var v = li.getAttribute('data-ligne'), id = v.slice(2);
+      appeler(v.charAt(0) === 'f' ? 'factures:ouvrir' : 'commandes:ouvrirDetail', [id]).then(function(r){
+        if (!r || !r.ok) dire(expliquer(r), 'err');
+        else dire('');
+      });
+      return;
+    }
     if (t.closest('#tb-tuiles')) { PANNEAU = !PANNEAU; dessiner(); return; }
     /* ⚠ CES QUATRE-LA NE REDESSINENT PAS AVANT D AVOIR LU LES CHAMPS. Un
        redessin efface la saisie et referme le selecteur de date : c est

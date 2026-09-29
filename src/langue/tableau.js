@@ -84,6 +84,8 @@ module.exports = {
   /* ── LES LISTES DU BAS ──────────────────────────────────────────────────── */
   'Commandes récentes': 'Recent orders',
   'Factures récentes': 'Recent invoices',
+  'Ouvrir la commande': 'Open the order',
+  'Ouvrir la facture': 'Open the invoice',
   'Numéro Client Total Statut': 'Number Customer Total Status',
 
   /* ── LE MODE EXCLUSIF ───────────────────────────────────────────────────── */
