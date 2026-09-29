@@ -457,7 +457,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (D.taux) {
       h += '<div class="avis"><span class="ic">💱</span> ' + (D.taux.genre === 'secours'
         ? '<strong>${T("Taux de change indisponible.")}</strong> ${T("Les prix affichés en USD utilisent un taux ")}'
-          + '${T("de secours (1 USD =")} ' + Number(D.taux.rate).toFixed(4) + ' ${T("CAD), donc approximatif.")} '
+          + '${T("de secours (1 USD =")} ' + szNombre(D.taux.rate, 4) + ' ${T("CAD), donc approximatif.")} '
           + '${T("Les commandes, elles, sont toujours facturées en dollars canadiens.")}'
         : '<strong>${T("Taux de change vieux de")} ' + D.taux.ageHeures + ' h</strong> ${T("(relevé du ")}'
           + esc(szQuand(D.taux.quand) || '') + ', 1 USD = ' + szNombre(D.taux.rate, 4) + ' CAD). '

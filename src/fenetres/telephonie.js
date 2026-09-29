@@ -688,7 +688,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
         + (v.read || RO ? '' : '<button class="b" type="button" data-vmlu="' + esc(v.id) + '">${T("✓ Marquer lu")}</button>')
         + (RO ? '' : '<button class="b dgr" type="button" data-vmdel="' + esc(v.id) + '"><span class="ic">🗑</span></button>')
         + '</div></div>'
-        + '<div class="rf-sous"><span>' + esc(v.duration || '?') + ' s</span><span>·</span><span>' + esc(String(v.date || '').replace('T', ' ').replace('Z', '')) + '</span><span>·</span>'
+        + '<div class="rf-sous"><span>' + esc(v.duration || '?') + ' s</span><span>·</span><span>' + esc(szQuand(v.date)) + '</span><span>·</span>'
         + (v.emailed === false ? '<span class="rf-pill rouge">${T("Échec de l’envoi courriel")}</span>' : '<span>${T("Audio envoyé par courriel (MP3), non conservé")}</span>') + '</div></div></div>';
     }
     box.innerHTML = h;
@@ -711,7 +711,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
         + '<span class="rf-av" aria-hidden="true"><span class="ic">💬</span></span><div class="gauche"><div class="haut">'
         + '<div class="qui"><span class="rf-nom">' + esc(entrant ? m.from : m.to) + '</span>'
         + (entrant ? (m.read ? '<span class="rf-pill">${T("Reçu")}</span>' : '<span class="rf-pill bleu">${T("Non lu")}</span>') : '<span class="rf-pill vert">${T("Envoyé")}</span>')
-        + '</div><span class="meta">' + esc(String(m.date || '').replace('T', ' ').replace('Z', '')) + '</span></div>'
+        + '</div><span class="meta">' + esc(szQuand(m.date)) + '</span></div>'
         + '<div class="corpsmsg">' + esc(m.body || '') + '</div>'
         + '<div class="actes" style="margin-top:.35rem">'
         + (entrant ? '<button class="b" type="button" data-smsrep="' + esc(m.from) + '">${T("↩ Répondre")}</button>' : '')

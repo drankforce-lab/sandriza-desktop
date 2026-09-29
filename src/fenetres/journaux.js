@@ -281,7 +281,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
         } else if (grp.cle==='automatisations'){
           h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.ts))+'</td><td><span class="pill" style="background:var(--v06);color:var(--tx-c3cede)">'+esc(SECT[x.section]||x.section||'—')+'</span></td><td>'+esc(x.action||'')+'</td></tr>';
         } else if (grp.cle==='recherches'){
-          h += '<tr><td><strong>'+esc(x.q)+'</strong></td><td style="text-align:center">'+esc(x.fois||0)+' fois</td><td class="mut">'+esc(x.derniere||'—')+'</td></tr>';
+          h += '<tr><td><strong>'+esc(x.q)+'</strong></td><td style="text-align:center">'+esc(x.fois||0)+' fois</td><td class="mut">'+esc(szJour(x.derniere)||'—')+'</td></tr>';
         } else if (grp.cle==='sms'){
           var ent=(x.direction==='inbound');
           h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.date))+'</td><td>'+(ent?'${T("⬇ Reçu")}':'${T("⬆ Envoyé")}')+'</td><td class="mono">'+esc(x.from||'')+'</td><td class="mono">'+esc(x.to||'')+'</td><td>'+esc(x.body||'')+'</td></tr>';
@@ -653,7 +653,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
       + '<table class="tb"><thead><tr><th>${T("Terme cherché")}</th><th style="text-align:center">${T("Fois")}</th><th>${T("Dernière fois")}</th></tr></thead><tbody>';
     if (!rows.length) h += '<tr><td colspan="3" class="vide">${T("Aucune recherche sans résultat.")}</td></tr>';
     for (var i=0;i<rows.length;i++){ var x=rows[i];
-      h += '<tr><td><strong>'+esc(x.q)+'</strong></td><td style="text-align:center">'+esc(x.fois||0)+'</td><td class="mut">'+esc(x.derniere||'—')+'</td></tr>';
+      h += '<tr><td><strong>'+esc(x.q)+'</strong></td><td style="text-align:center">'+esc(x.fois||0)+'</td><td class="mut">'+esc(szJour(x.derniere)||'—')+'</td></tr>';
     }
     h += '</tbody></table></div>';
     corps.innerHTML = h;
@@ -711,7 +711,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
         + '<td style="text-align:center"><b>' + esc(x.n || 1) + '</b></td>'
         + '<td class="mut" style="font-size:.76rem">'
         +   ((x.routes && x.routes.length) ? x.routes.map(esc).join('<br>') : '—') + '</td>'
-        + '<td class="mut" style="font-size:.76rem;white-space:nowrap">' + esc(String(x.dernier || '').slice(0, 16).replace('T', ' '))
+        + '<td class="mut" style="font-size:.76rem;white-space:nowrap">' + esc(szQuand(x.dernier))
         +   (x.premier && x.premier !== x.dernier
                 ? '<br><span style="font-size:.7rem">${T("depuis ")}' + esc(szJour(String(x.premier).slice(0, 10))) + '</span>' : '')
         +   (x.agent ? '<br><span style="font-size:.7rem" title="' + esc(x.agent) + '">navigateur</span>' : '') + '</td>'
