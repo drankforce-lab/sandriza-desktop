@@ -42,6 +42,15 @@
  */
 
 module.exports = {
+  'mouvement': 'entry',
+  'mouvements': 'entries',
+  'Aucun mouvement.': 'No entries.',
+  'Fermer': 'Close',
+  '‹ Précédent': '‹ Previous',
+  'Suivant ›': 'Next ›',
+  'Page': 'Page',
+  'point': 'point',
+  'points': 'points',
   /* ── Titre et cadre ─────────────────────────────────────────────────────── */
   'Livre de comptes — Administration Sandriza': 'General ledger — Sandriza Administration',
   'Livre de comptes': 'General ledger',
@@ -162,7 +171,7 @@ module.exports = {
   'Charges': 'Expenses',
   'Aucun compte mouvementé pour cet exercice.': 'No account had activity this fiscal year.',
   'Compte': 'Account',
-  'Solde': 'Balance',
+  'Solde': 'Closing balance',
   'ligne': 'line',
   'Replier': 'Collapse',
   'Détail': 'Detail',
