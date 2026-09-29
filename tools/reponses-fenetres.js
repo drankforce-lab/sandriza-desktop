@@ -2130,8 +2130,17 @@ const JEU = {
       // ou à activer (QR + clé + code). Atteintes par l'id d'ouverture 'mfa-<id>'.
       { nom: 'MFA — activé (gérer)', id: 'mfa-s1',
         reponses: { identite: IDENTITE, 'securite:donnees': donnees,
-          'securite:mfa:etat': { ok: true, nom: 'Bob Brousseau', mfaEnabled: true, mfaExempt: false },
+          'securite:mfa:etat': { ok: true, nom: 'Bob Brousseau', mfaEnabled: true, mfaExempt: false, mfaReinit: false, soi: true },
           'securite:mfa:exempter': { ok: true, mfaExempt: true },
+          'securite:mfa:desactiver': { ok: true } } },
+      // 2026-09-29 : un AUTRE compte — la case « refaire l'enrôlement » cochée,
+      // et le bouton « Fermer ses sessions » (absent sur son propre compte).
+      { nom: 'MFA — enrôlement à refaire, sessions', id: 'mfa-s2b',
+        reponses: { identite: IDENTITE, 'securite:donnees': donnees,
+          'securite:mfa:etat': { ok: true, nom: 'Marie Tremblay', mfaEnabled: true, mfaExempt: false, mfaReinit: true, soi: false },
+          'securite:mfa:exempter': { ok: true, mfaExempt: false },
+          'securite:mfa:reinit': { ok: true, mfaReinit: false, exempt: false },
+          'securite:mfa:sessions': { ok: true, nom: 'Marie Tremblay' },
           'securite:mfa:desactiver': { ok: true } } },
       { nom: 'MFA — à activer (QR)', id: 'mfa-s2',
         reponses: { identite: IDENTITE, 'securite:donnees': donnees,

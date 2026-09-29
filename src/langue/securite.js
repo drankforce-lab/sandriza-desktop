@@ -349,5 +349,23 @@ module.exports = {
   'Les droits cochés par le rôle, et ce que vous en changez. Le ? devant un module explique ce qu’il ouvre.':
     'The rights ticked by the role, and what you change about them. The ? before a module explains what it opens.',
   'Questions de secours — elles servent à rouvrir le compte si le mot de passe est perdu. Facultatives, mais sans elles la seule issue est de recréer le compte.':
-    'Recovery questions — they are used to reopen the account if the password is lost. Optional, but without them the only way out is to recreate the account.'
+    'Recovery questions — they are used to reopen the account if the password is lost. Optional, but without them the only way out is to recreate the account.',
+  'Pas sur votre propre compte.': 'Not on your own account.',
+  'Réservé au super-administrateur.': 'Super administrator only.',
+  'Service injoignable.': 'Service unreachable.',
+  'MFA à refaire': 'MFA to redo',
+  'Fermer ses sessions': 'Close their sessions',
+  'Sessions ouvertes': 'Open sessions',
+  'Les fermer la déconnecte partout : mot de passe et code redemandés.': 'Closing them signs this person out everywhere: password and code asked again.',
+  'Sessions ouvertes Les fermer la déconnecte partout : mot de passe et code redemandés.': 'Open sessions Closing them signs this person out everywhere: password and code asked again.',
+  'Refaire l’enrôlement à la prochaine connexion': 'Redo enrolment at next sign-in',
+  'Son code actuel reste valide jusque-là ; elle liera ensuite une nouvelle application. Sans effet tant que le compte est exempté.': 'Their current code stays valid until then; they will then link a new app. No effect while the account is exempt.',
+  'Refaire l’enrôlement à la prochaine connexion Son code actuel reste valide jusque-là ; elle liera ensuite une nouvelle application. Sans effet tant que le compte est exempté.': 'Redo enrolment at next sign-in Their current code stays valid until then; they will then link a new app. No effect while the account is exempt.',
+  'Enrôlement à refaire noté — sans effet tant que le compte reste exempté.': 'Re-enrolment noted — no effect while the account stays exempt.',
+  'Enrôlement à refaire à sa prochaine connexion.': 'Enrolment to redo at their next sign-in.',
+  'Réinitialisation du MFA annulée.': 'MFA reset cancelled.',
+  'Cliquez encore une fois pour fermer ses sessions — son travail non enregistré sera perdu.': 'Click once more to close their sessions — their unsaved work will be lost.',
+  'Fermeture des sessions…': 'Closing sessions…',
+  'Sessions fermées — reconnexion exigée pour ': 'Sessions closed — sign-in required again for ',
+  'Sessions fermées — reconnexion exigée pour': 'Sessions closed — sign-in required again for'
 };

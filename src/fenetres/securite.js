@@ -254,6 +254,10 @@ input.t:focus,select.t:focus,textarea.t:focus{outline:none;border-color:#c9a97e}
 label.case{display:flex;align-items:flex-start;gap:.5rem;font-size:.84rem;cursor:pointer;margin:0 0 .55rem;line-height:1.45}
 label.case input{width:16px;height:16px;accent-color:#c9a97e;margin-top:.15rem;flex:0 0 auto}
 label.case .quoi{color:var(--tx2);font-size:.75rem;display:block}
+.sess{display:flex;align-items:center;justify-content:space-between;gap:.8rem;margin:.35rem 0 .2rem;padding:.6rem .7rem;
+  border:1px solid var(--v12);border-radius:9px;font-size:.84rem;line-height:1.45}
+.sess .quoi{color:var(--tx2);font-size:.75rem;display:block}
+.sess .b{flex:0 0 auto}
 .note{background:var(--v04);border:1px solid var(--v10);border-radius:9px;padding:.8rem .95rem;font-size:.81rem;color:var(--tx2);line-height:1.6;margin:0 0 1rem}
 .note b{color:var(--tx)}
 .note.att{background:rgba(200,140,40,.1);border-color:rgba(240,180,80,.35);color:var(--tx-or2)}
@@ -405,6 +409,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     lecture_seule:'${T("Votre rôle est en lecture seule.")}',
     invalide:'${T("Formulaire invalide.")}',
     introuvable:'${T("Compte introuvable.")}',
+    soi:'${T("Pas sur votre propre compte.")}',
+    super:'${T("Réservé au super-administrateur.")}',
+    indisponible:'${T("Service injoignable.")}',
     refus:'${T("Action refusée par le serveur.")}',
     pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
     delai:"${T('La fenêtre principale n\'a pas répondu à temps.')}",
@@ -471,7 +478,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return '<span class="pill role">'+esc(s.roleLabel||s.role||'—')+'</span>'
       + (s.active ? '<span class="pill on">${T("Actif")}</span>' : '<span class="pill off">${T("Désactivé")}</span>')
       + (!s.active ? ''
-         : (s.mfaEnabled ? '<span class="pill mfa">MFA ✓</span>'
+         : (s.mfaReinit && !s.mfaExempt ? '<span class="pill warn">${T("MFA à refaire")}</span>'
+         : s.mfaEnabled ? '<span class="pill mfa">MFA ✓</span>'
          : (s.requireMfaSetup ? '<span class="pill warn">${T("MFA à configurer")}</span>'
          : (s.mfaExempt ? '<span class="pill warn">${T("MFA exempté")}</span>' : ''))))
       + (s.estMoi ? '<span class="pill moi">${T("vous")}</span>' : '');
@@ -568,7 +576,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + '<div class="dt">'+(u.username?'@'+esc(u.username)+' · ':'')+esc(u.email||'')+'</div></span></div></td>'
           + '<td><span class="pill role">'+esc(u.roleLabel||u.role||'—')+'</span></td>'
           + '<td>'+(u.active ? '<span class="pill on">${T("Actif")}</span>' : '<span class="pill off">${T("Désactivé")}</span>')
-          + (u.mfaEnabled ? ' <span class="pill mfa">MFA ✓</span>' : (u.mfaExempt ? ' <span class="pill warn">${T("MFA exempté")}</span>' : ''))
+          + (u.mfaReinit && !u.mfaExempt ? ' <span class="pill warn">${T("MFA à refaire")}</span>' : u.mfaEnabled ? ' <span class="pill mfa">MFA ✓</span>' : (u.mfaExempt ? ' <span class="pill warn">${T("MFA exempté")}</span>' : ''))
           + (u.estMoi ? ' <span class="pill moi">${T("vous")}</span>' : '') + '</td>'
           + '<td class="dt">'+esc(fmtTs(u.derniereConnexion))+'</td>'
           + '<td class="act">'+(D.peutModifier ? gestesDe(u, superActifs) : '')+'</td></tr>';
@@ -665,6 +673,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<button data-c="perms">${T("Gérer ses accès…")}</button>';
     if (s.active) {
       h += '<button data-c="mfa">${T("Gérer le MFA…")}</button>';
+      if (!s.estMoi) h += '<button data-c="sess">${T("Fermer ses sessions")}</button>';
       if (!s.estSuper) h += '<button data-c="invite">${T("Renvoyer l’invitation")}</button>';
     }
     h += '<div class="trait"></div>';
@@ -697,6 +706,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (quoi === 'edit')   { ouvrirEditeurCompte(id); return; }
       if (quoi === 'perms')  { ouvrirEditeurCompte(id, 'droits'); return; }
       if (quoi === 'mfa')    { ouvrirMfa(id); return; }
+      if (quoi === 'sess')   { fermerSessions(id); return; }
       if (quoi === 'invite') { inviterCompte(id); return; }
       if (quoi === 'on')     { basculerActif(id, true); return; }
       if (quoi === 'off')    { basculerActif(id, false); return; }
@@ -1271,15 +1281,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-mfa';
     sur.innerHTML='<div class="boite" style="max-width:520px"><div class="tt"><h3><span class="ic">🔐</span> MFA — '+esc(e.nom||'')+'</h3><button class="mini" id="m-x">${T("Fermer")}</button></div>'
       + '<div class="liste">'
-      + '<div class="note" style="background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.3);color:var(--tx-ok2)"><span class="ic">✅</span> ${T("Authentification à deux facteurs activée pour ce compte.")}</div>'
+      + '<div class="note" style="background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.3);color:var(--tx-ok2)">${T("Authentification à deux facteurs activée pour ce compte.")}</div>'
       + '<label class="case"><input type="checkbox" id="m-exempt" '+(e.mfaExempt?'checked':'')+'> <span><b>${T("Exempter ce compte")}</b><span class="quoi">${T("Connexion autorisée sans code — un rempart en moins.")}</span></span></label>'
+      /* 2026-09-29 — sa demande : « si j active cette option la personne a sa
+         prochaine connexion doit refaire le processus d enrolement MFA
+         obligatoirement sauf si il est exempte ». Un DRAPEAU : rien n est
+         efface avant sa reconnexion, la case se decoche sans degat. */
+      + '<label class="case"><input type="checkbox" id="m-reinit" '+(e.mfaReinit?'checked':'')+'> <span><b>${T("Refaire l’enrôlement à la prochaine connexion")}</b><span class="quoi">${T("Son code actuel reste valide jusque-là ; elle liera ensuite une nouvelle application. Sans effet tant que le compte est exempté.")}</span></span></label>'
+      + (e.soi ? '' : '<div class="sess"><span><b>${T("Sessions ouvertes")}</b><span class="quoi">${T("Les fermer la déconnecte partout : mot de passe et code redemandés.")}</span></span>'
+          + '<button class="b" id="m-sess">${T("Fermer ses sessions")}</button></div>')
       + '</div>'
       + '<div class="tt" style="justify-content:flex-end;gap:.5rem;border-bottom:0;border-top:1px solid var(--v08)">'
       + '<button class="b" id="m-annuler">${T("Annuler")}</button><button class="b dgr" id="m-off">${T("Désactiver MFA")}</button><button class="prim" id="m-save">${T("Enregistrer")}</button></div></div>';
     document.body.appendChild(sur);
+    var bs=document.getElementById('m-sess'); if (bs) bs.onclick=function(){ fermerSessions(id); };
     document.getElementById('m-x').onclick=fermerMfa;
     document.getElementById('m-annuler').onclick=fermerMfa;
-    document.getElementById('m-save').onclick=function(){ mfaExempter(id, chkv('m-exempt')); };
+    document.getElementById('m-save').onclick=function(){ mfaEnregistrer(id, e, chkv('m-exempt'), chkv('m-reinit')); };
     document.getElementById('m-off').onclick=function(){ mfaDesactiver(id); };
   }
   function dessinerMfaSetup(id, s){
@@ -1323,6 +1341,43 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (OCCUPE) return; OCCUPE=true; dire('${T("Enregistrement…")}');
     appeler('securite:mfa:exempter',[id, exempt]).then(function(r){ OCCUPE=false;
       if (r&&r.ok){ fermerMfa(); recharger(exempt?'${T("Compte exempté de MFA.")}':'${T("Exemption retirée.")}', 'bon'); } else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
+  }
+  /* Les deux cases s enregistrent ensemble, et seule celle qui a bouge part :
+     re-ecrire l exemption a l identique ferait une ligne de journal pour rien. */
+  function mfaEnregistrer(id, e, exempt, reinit){
+    if (OCCUPE) return;
+    var chEx = (!!exempt !== !!e.mfaExempt), chRe = (!!reinit !== !!e.mfaReinit);
+    if (!chEx && !chRe){ fermerMfa(); return; }
+    OCCUPE=true; dire('${T("Enregistrement…")}');
+    var p1 = chEx ? appeler('securite:mfa:exempter',[id, exempt]) : Promise.resolve({ ok:true });
+    p1.then(function(r){
+      if (!r||!r.ok){ OCCUPE=false; dire('${T("Échec : ")}'+expliquer(r), 'err'); return; }
+      var p2 = chRe ? appeler('securite:mfa:reinit',[id, reinit]) : Promise.resolve({ ok:true });
+      p2.then(function(r2){ OCCUPE=false;
+        if (!r2||!r2.ok){ dire('${T("Échec : ")}'+expliquer(r2), 'err'); return; }
+        fermerMfa();
+        var msg = chRe
+          ? (reinit
+              ? (exempt ? '${T("Enrôlement à refaire noté — sans effet tant que le compte reste exempté.")}'
+                        : '${T("Enrôlement à refaire à sa prochaine connexion.")}')
+              : '${T("Réinitialisation du MFA annulée.")}')
+          : (exempt ? '${T("Compte exempté de MFA.")}' : '${T("Exemption retirée.")}');
+        recharger(msg, 'bon');
+      });
+    });
+  }
+  /* Fermer TOUTES ses sessions : il n y a pas de « session MFA » a part, le
+     code verifie ouvre une session ordinaire. En deux temps, comme la
+     suppression : le clic d a cote coupe le travail d un collegue. */
+  var SESSU = '';
+  function fermerSessions(id){
+    if (OCCUPE) return;
+    if (SESSU !== id){ SESSU = id; dire('${T("Cliquez encore une fois pour fermer ses sessions — son travail non enregistré sera perdu.")}', 'att');
+      setTimeout(function(){ if (SESSU === id) SESSU = ''; }, 6000); return; }
+    SESSU = ''; OCCUPE=true; dire('${T("Fermeture des sessions…")}');
+    appeler('securite:mfa:sessions',[id]).then(function(r){ OCCUPE=false;
+      if (r&&r.ok){ fermerMfa(); recharger('${T("Sessions fermées — reconnexion exigée pour ")}'+(r.nom||'')+'.', 'bon'); }
+      else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
   function mfaDesactiver(id){
     if (OCCUPE) return; OCCUPE=true; dire('${T("Désactivation…")}');

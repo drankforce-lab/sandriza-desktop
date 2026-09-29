@@ -2654,6 +2654,7 @@ const OPS_PONT = new Set([
   'securite:compte:actif', 'securite:compte:invitation',
   // MFA (2.67.0, #6 Lot B2) — activation TOTP, exemption, desactivation.
   'securite:mfa:etat', 'securite:mfa:init', 'securite:mfa:confirmer', 'securite:mfa:exempter', 'securite:mfa:desactiver',
+  'securite:mfa:reinit', 'securite:mfa:sessions',
   // Journaux (2.68.0, #7 Lot 7a) — acces / automatisations / impressions / verrous.
   'journal:donnees', 'journal:verrous', 'journal:purger:acces', 'journal:purger:prints',
   'journal:stats', 'journal:deverrouiller', 'journal:deverrouiller:tout',
@@ -3228,7 +3229,7 @@ const LIMITES_PONT = {
   /* ⚠ 30 s comme la suppression : c'est une écriture courte d'un seul champ,
      pas un formulaire complet. */
   'securite:compte:actif': 30000, 'securite:compte:invitation': 60000,
-  'securite:mfa:etat': 20000, 'securite:mfa:init': 30000, 'securite:mfa:confirmer': 30000, 'securite:mfa:exempter': 20000, 'securite:mfa:desactiver': 20000,
+  'securite:mfa:etat': 20000, 'securite:mfa:init': 30000, 'securite:mfa:confirmer': 30000, 'securite:mfa:exempter': 20000, 'securite:mfa:desactiver': 20000, 'securite:mfa:reinit': 20000, 'securite:mfa:sessions': 20000,
   /* Journaux : lecture locale rapide ; les verrous et le deverrouillage passent
      par le serveur (lock_admin). */
   'journal:donnees': 40000, 'journal:verrous': 30000, 'journal:purger:acces': 20000, 'journal:purger:prints': 20000,
