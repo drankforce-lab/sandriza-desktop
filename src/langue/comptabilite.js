@@ -131,6 +131,7 @@ module.exports = {
 
   /* ── Le budget ──────────────────────────────────────────────────────────── */
   'Le prévu est comparé au réel jusqu’au mois': 'Budget is compared with actual up to and including',
+  'Le prévu est comparé au réel jusqu’à': 'Budget is compared with actual up to and including',
   'inclusivement — comparer douze mois de budget à quelques mois de ventes annoncerait une catastrophe tous les printemps.':
     '— comparing twelve months of budget with a few months of sales would announce a disaster every spring.',
   'Prévu (année)': 'Budget (year)',

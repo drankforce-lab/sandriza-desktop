@@ -100,7 +100,7 @@ tbody td{padding:.26rem .35rem;border-top:1px solid var(--v055);vertical-align:m
 tbody tr:hover td{background:var(--v03)}
 tbody tr.tot td{border-top:1px solid var(--v16);font-weight:700}
 tbody tr.sous td{color:var(--tx2)}
-.bon{color:var(--tx-ok)}.mauvais{color:var(--tx-err2)}.gris{color:var(--tx2)}
+.bon{color:var(--tx-ok)}.mauvais{color:var(--tx-err)}.gris{color:var(--tx2)}
 .pill{display:inline-block;font-size:.64rem;padding:.05rem .45rem;border-radius:99px;
   white-space:nowrap;font-weight:700}
 .pill.g{background:rgba(148,163,184,.14);color:var(--tx-94a3b8);font-weight:600}
@@ -116,6 +116,11 @@ tbody tr.sous td{color:var(--tx2)}
 .mois12{display:grid;grid-template-columns:repeat(12,1fr);gap:.25rem;margin-top:.3rem}
 .mois12 label{display:block;font-size:.6rem;color:var(--tx3);text-align:center}
 .mois12 input{width:100%;padding:.18rem .2rem;font-size:.7rem}
+/* EN LECTURE SEULE, UN CHAMP DESACTIVE SE LIT COMME UNE VALEUR (2026-09-29) :
+   les boutons d enregistrement disparaissent, mais un champ qui garde son cadre
+   invite a taper — et rien ne se passe. Sans cadre ni fond, c est un chiffre. */
+td.n input:disabled,.mois12 input:disabled,html.jour td.n input:disabled,html.jour .mois12 input:disabled{
+  background:transparent;border-color:transparent;box-shadow:none;color:var(--tx);opacity:1;cursor:default;text-align:right}
 .vide{padding:1.3rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
@@ -165,7 +170,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
-  function argent(n){ return szArgent(n); }
+  /* « 0,00 $ » et jamais « −0,00 $ » : un montant nul negatif (livraison
+     remboursee quand il n y en a pas) sortait avec son signe (2026-09-29). */
+  function argent(n){ var v = Number(n) || 0; return szArgent(v === 0 ? 0 : v); }
+  /* Un montant SAISI se relit avec virgule ou point, et SANS les espaces de
+     milliers que l affichage y met (« 28 800,00 ») : sans ca, parseFloat
+     s arrete au premier espace et lit 28. Pas d expression reguliere ici. */
+  function nbLu(t){
+    var s = String(t == null ? '' : t), o = '';
+    for (var k = 0; k < s.length; k++) {
+      var c = s.charCodeAt(k);
+      if (c === 32 || c === 160 || c === 8239 || c === 8201) continue;
+      o += (s.charAt(k) === ',') ? '.' : s.charAt(k);
+    }
+    return parseFloat(o) || 0;
+  }
   function pct(n){
     if (n === null || n === undefined) return '—';
     return (n > 0 ? '+' : '') + String(n).replace('.', '${SEP_DEC()}') + ' %';
@@ -449,7 +468,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
     var h = '';
     h += '<div class="carte"><h2>${T("Budget")} ' + (D.budget ? D.budget.annee : '') + '</h2>'
       + '<div class="gris" style="font-size:.75rem;margin-bottom:.5rem">'
-      + '${T("Le prévu est comparé au réel jusqu’au mois")} ' + MOIS[(e.jusquAuMois || 12) - 1]
+      + '${T("Le prévu est comparé au réel jusqu’à")} ' + new Date(2000, (e.jusquAuMois || 12) - 1, 1).toLocaleDateString('${LIEU()}', { month: 'long' })
       + ' ${T("inclusivement — comparer douze mois de budget à quelques mois de ventes annoncerait une catastrophe tous les printemps.")}'
       + '</div>'
       + '<table><thead><tr><th>${T("Poste")}</th><th class="n">${T("Prévu (année)")}</th>'
@@ -478,7 +497,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
     var h = '<tr><td>' + esc(nomPoste(p))
       + (p.sens === 'revenu' ? ' <span class="pill g">${T("revenu")}</span>' : '')
       + '</td>'
-      + '<td class="n"><input data-an="' + esc(p.cle) + '" value="' + (annuel ? annuel.toFixed(2) : '')
+      + '<td class="n"><input data-an="' + esc(p.cle) + '" value="' + (annuel ? szArgentNombre(annuel, 2) : '')
       + '" placeholder="0${SEP_DEC()}00" aria-label="' + esc(nomPoste(p)) + ' — ${T("budget annuel")}"'
       + (RO ? ' disabled' : '') + ' style="width:6.2rem"></td>'
       + '<td class="n gris">' + (l ? argent(l.prevu) : '—') + '</td>'
@@ -497,7 +516,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
         + douze.map(function(v, i){
             return '<div><label for="m_' + esc(p.cle) + '_' + i + '">' + MOIS[i] + '</label>'
               + '<input id="m_' + esc(p.cle) + '_' + i + '" data-m="' + esc(p.cle) + '" data-i="' + i
-              + '" value="' + (v ? Number(v).toFixed(2) : '') + '" placeholder="0"'
+              + '" value="' + (v ? szArgentNombre(v, 2) : '') + '" placeholder="0"'
               + ' aria-label="' + esc(nomPoste(p)) + ' — ' + MOIS[i] + '"' + (RO ? ' disabled' : '') + '></div>';
           }).join('')
         + '</div></td></tr>';
@@ -512,7 +531,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
     if (!SAISIE) return;
     Array.prototype.forEach.call(corps.querySelectorAll('input[data-an]'), function(inp){
       var cle = inp.getAttribute('data-an');
-      var v = parseFloat(String(inp.value).replace(',', '.')) || 0;
+      var v = nbLu(inp.value);
       var actuel = (SAISIE[cle] || []).reduce(function(s, x){ return s + (parseFloat(x) || 0); }, 0);
       if (Math.abs(v - actuel) < 0.005) return;   /* inchange : on garde le detail mensuel */
       /* Le total annuel a change : on repartit egalement, c est le geste attendu. */
@@ -523,7 +542,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
     Array.prototype.forEach.call(corps.querySelectorAll('input[data-m]'), function(inp){
       var cle = inp.getAttribute('data-m'), i = parseInt(inp.getAttribute('data-i'), 10);
       if (!SAISIE[cle]) SAISIE[cle] = [0,0,0,0,0,0,0,0,0,0,0,0];
-      SAISIE[cle][i] = parseFloat(String(inp.value).replace(',', '.')) || 0;
+      SAISIE[cle][i] = nbLu(inp.value);
     });
   }
 
