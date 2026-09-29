@@ -49,7 +49,7 @@ body{background:var(--f-page);color:var(--tx);
   border:1px solid var(--v12);border-radius:8px;padding:.42rem .55rem}
 .ch input:focus{outline:none;border-color:#c9a97e}
 .ch input:disabled{opacity:.55}
-.bascule{display:flex;align-items:flex-start;gap:.6rem;font-size:.86rem;cursor:pointer;
+.bascule,.ch label.bascule{display:flex;align-items:flex-start;gap:.6rem;font-size:.86rem;cursor:pointer;
   -webkit-user-select:none;user-select:none}
 .bascule input{width:1.1rem;height:1.1rem;accent-color:#c9a97e;cursor:pointer;margin-top:.15rem;flex:0 0 auto}
 .bascule .d{font-size:.74rem;color:var(--tx3);display:block;margin-top:.1rem}

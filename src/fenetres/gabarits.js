@@ -61,7 +61,7 @@ body{background:var(--f-page);color:var(--tx);
 .coul{display:flex;gap:.5rem;align-items:center}
 .coul input[type=color]{height:36px;width:48px;padding:0;border:1px solid var(--v12);border-radius:8px;background:var(--f-champ);cursor:pointer;flex:0 0 auto}
 .coul input[type=text]{flex:1;font-family:ui-monospace,Consolas,monospace}
-.bascule{display:flex;align-items:flex-start;gap:.6rem;cursor:pointer;padding:.55rem .7rem;background:var(--f-champ);
+.bascule,.ch label.bascule{display:flex;align-items:flex-start;gap:.6rem;cursor:pointer;padding:.55rem .7rem;background:var(--f-champ);
   border:1px solid var(--v12);border-radius:9px;margin:0 0 .7rem;-webkit-user-select:none;user-select:none}
 .bascule input{margin-top:.15rem;accent-color:#c9a97e;cursor:pointer;flex:0 0 auto}
 .bascule .t{font-size:.82rem;font-weight:600}

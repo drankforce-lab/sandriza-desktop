@@ -65,7 +65,7 @@ body{background:var(--f-page);color:var(--tx);
 .ch input[type=text]{width:100%;font:inherit;color:var(--tx);background:var(--f-champ);
   border:1px solid var(--v12);border-radius:8px;padding:.42rem .55rem}
 .ch input[type=text]:focus{outline:none;border-color:#c9a97e}
-.bascule{display:flex;align-items:center;gap:.5rem;font-size:.82rem;cursor:pointer;
+.bascule,.ch label.bascule{display:flex;align-items:center;gap:.5rem;font-size:.82rem;cursor:pointer;
   margin:0 0 .8rem;-webkit-user-select:none;user-select:none}
 .bascule input{width:1rem;height:1rem;accent-color:#c9a97e;cursor:pointer}
 .bascule:has(input:disabled){opacity:.55;cursor:default}
