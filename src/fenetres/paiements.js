@@ -232,7 +232,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('paiements')}
         + '<tr class="tot"><td colspan="3">${T("Total ")}' + D.annee + '</td>'
         + '<td class="num">' + fmt(t.brut) + '</td>'
         + '<td class="num err">−' + fmt(t.frais) + '</td>'
-        + '<td class="num bon">' + fmt(t.net + t.rembourse) + '</td></tr>'
+        /* Le total d une colonne est la somme de SES lignes (2026-09-29) : t.net +
+           t.rembourse y ajoutait les frais recuperes sur remboursement, que les
+           lignes n ont pas - 238,06 $ sous 149,49 + 87,47. Le recupere est dit
+           dans la tuile << Frais Square >>. */
+        + '<td class="num bon">' + fmt(Math.round((t.brut - t.frais) * 100) / 100) + '</td></tr>'
         + '</tbody></table>';
     }
     h += '</div>';
