@@ -243,7 +243,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('sauvegarde')}
        ce poste. Voir JS_TUILES dans socle.js. */
     h += szTuiles('<div class="stat-grid">'
       + '<div class="stat"><div class="l">${T("Sauvegardes")}</div><div class="v">'+l.length+'</div><div class="s">${T("rétention ")}'+(D.retentionMois||12)+'${T(" mois")}</div></div>'
-      + '<div class="stat"><div class="l">${T("La plus récente")}</div><div class="v" style="font-size:1.05rem;color:'+(l.length?'var(--tx-ok2)':'var(--tx-att)')+'">'+(l.length?esc(l[0].quand):'${T("aucune")}')+'</div><div class="s">'+(l.length?esc(l[0].taille):'${T("le registre est vide")}')+'</div></div>'
+      + '<div class="stat"><div class="l">${T("La plus récente")}</div><div class="v" style="font-size:1.05rem;color:'+(l.length?'var(--tx-ok2)':'var(--tx-att)')+'">'+(l.length?esc(l[0].createdAt ? szQuand(l[0].createdAt) : l[0].quand):'${T("aucune")}')+'</div><div class="s">'+(l.length?esc((typeof (l[0].totalBytes == null ? l[0].blobBytes : l[0].totalBytes) === 'number') ? szOctets(l[0].totalBytes == null ? l[0].blobBytes : l[0].totalBytes) : l[0].taille):'${T("le registre est vide")}')+'</div></div>'
       + '<div class="stat"><div class="l">${T("Espace occupé")}</div><div class="v" style="font-size:1.3rem">'+fmtO(octets)+'</div><div class="s">${T("dans Cloudflare R2")}</div></div>'
       + '</div>');
 
@@ -260,7 +260,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('sauvegarde')}
     for (var i=0;i<l.length;i++){ var b=l[i];
       /* Refonte (2026-09-26) : la cellule riche de l Inventaire. */
       h += '<tr><td><div class="rf-prod"><span class="rf-av" aria-hidden="true"><span class="ic">💾</span></span><div>'
-        + '<div class="rf-nom" style="white-space:nowrap">'+esc(b.quand)+'</div>'
+        + '<div class="rf-nom" style="white-space:nowrap">'+esc(b.createdAt ? szQuand(b.createdAt) : b.quand)+'</div>'
         + (b.commit?'<div class="rf-sous"><span class="rf-code">'+esc(b.commit)+'</span></div>':'')+'</div></div></td>'
         + '<td>'+b.total+'${T(" enreg.")}<div style="font-size:.72rem;color:var(--tx-gris)">'+b.produits+'${T(" produits · ")}'+b.commandes+'${T(" cmd · ")}'+b.factures+'${T(" fact.")}</div></td>'
         /* ⚠ L APPLICATION CONSERVEE AVEC CETTE SAUVEGARDE (2026-09-08, sur sa
@@ -309,7 +309,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('sauvegarde')}
            pour de vieilles sauvegardes dont on ne sait rien serait pire qu une
            mention honnete — c est la lecon du 2026-09-08, la meme semaine. */
         + '<td style="white-space:nowrap">'
-        +   (b.tailleAuMoins ? '${T("au moins ")}' : '') + esc(b.taille)
+        +   (b.tailleAuMoins ? '${T("au moins ")}' : '') + esc((typeof (b.totalBytes == null ? b.blobBytes : b.totalBytes) === 'number') ? szOctets(b.totalBytes == null ? b.blobBytes : b.totalBytes) : b.taille)
         +   (b.tailleIncomplete
               ? '<div style="font-size:.7rem;color:var(--tx-att)">${T("base seule — installateurs non comptés")}</div>'
               : (b.tailleApp

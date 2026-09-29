@@ -608,7 +608,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
             return ['pending', 'cancelled'].indexOf(x.cle) < 0 || x.cle === c.statut;
           }).map(function(x){
             return '<option value="' + esc(x.cle) + '"' + (x.cle === c.statut ? ' selected' : '')
-              + '>' + esc(x.libelle) + '</option>'; }).join('')
+              + '>' + esc(szTd(x.libelle)) + '</option>'; }).join('')
         + '</select>';
     } else {
       h += '<span class="et ' + couleurStatut(c.statut) + '">' + esc(libelleStatut(c.statut)) + '</span>';

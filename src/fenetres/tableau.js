@@ -315,7 +315,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       : (j === 1 ? '${T("hier")}'
         : '${T("{0} jours")}'.split('{0}').join(j));
     var ton = (j > 30) ? 'err' : (j > 7 ? 'att' : '');
-    var sous = esc(SAUV.quand) + (SAUV.taille ? ' · ' + esc(SAUV.taille) : '');
+    /* La date et la taille BRUTES quand le site les envoie : mises en forme ici,
+       dans la langue du poste (le texte « 13 août 2026 · 17,4 Mo » du site
+       restait en francais dans l interface anglaise). Repli : le texte du site. */
+    var sous = esc(SAUV.createdAt ? szQuand(SAUV.createdAt) : SAUV.quand)
+      + ((typeof SAUV.octets === 'number') ? ' · ' + esc(szOctets(SAUV.octets)) : (SAUV.taille ? ' · ' + esc(SAUV.taille) : ''));
     return tuile('sauvegarde', '${T("Dernière sauvegarde")}', val, ton, sous, (j > 7 ? 'att' : ''));
   }
 

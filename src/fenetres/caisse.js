@@ -749,7 +749,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     s.innerHTML = options.map(function(o){
       var v = (o.cle != null) ? o.cle : o;
       var t = (o.libelle != null) ? o.libelle : o;
-      return '<option value="' + esc(v) + '"' + (v === defaut ? ' selected' : '') + '>' + esc(t) + '</option>';
+      // Le LIBELLE se traduit (szTd), jamais la valeur envoyee au site.
+      return '<option value="' + esc(v) + '"' + (v === defaut ? ' selected' : '') + '>' + esc(szTd(t)) + '</option>';
     }).join('');
   }
 

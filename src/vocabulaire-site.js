@@ -28,6 +28,16 @@
  *     staff.js      ROLES[…].label (les roles du personnel)
  */
 module.exports = {
+  /* Caisse (pont.js, caisse:contexte — paiements et remises), 2026-09-29 */
+  'Terminal Square (reçu)': 'Square terminal (receipt)',
+  'Comptant (reçu)': 'Cash (receipt)',
+  'Interac (reçu)': 'Interac (receipt)',
+  'Autre (reçu)': 'Other (receipt)',
+  'Lien de paiement (téléphone)': 'Payment link (phone)',
+  '✉ Envoyer par courriel': '✉ Send by email',
+  '🖨 Imprimer seulement': '🖨 Print only',
+  '✉ + 🖨 Courriel et impression': '✉ + 🖨 Email and print',
+  'Ne rien faire': 'Do nothing',
   // Commandes (ORDER_STATUS)
   'En attente': 'Pending',
   'Confirmée': 'Confirmed',
