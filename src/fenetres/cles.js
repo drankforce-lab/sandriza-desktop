@@ -274,7 +274,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var h = ['<div class="rangee">'];
     SERVICES.forEach(function(s){
       h.push('<div class="carte"><div class="tt"><h2>' + esc(s.titre) + '</h2>'
-        + '<a class="lien" href="' + esc(s.lien[1]) + '" target="_blank" rel="noopener">' + esc(s.lien[0]) + ' &rarr;</a></div>');
+        + '<a class="lien" href="' + esc(s.lien[1]) + '" target="_blank" rel="noopener">' + esc(s.lien[0]) + '</a></div>');
       h.push('<p class="sous">' + esc(s.sous) + '</p>');
       s.champs.forEach(function(c){ h.push(champHtml(c)); });
       if (s.solde) h.push(soldeHtml()); // le solde fal.ai, sous sa cle, dans la meme carte
