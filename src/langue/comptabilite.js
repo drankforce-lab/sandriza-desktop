@@ -31,6 +31,13 @@
  */
 
 module.exports = {
+  'Lecture seule': 'Read only',
+  'Masquer les postes sans budget ni dépense': 'Hide the lines with no budget or spending',
+  'Afficher les': 'Show the',
+  'poste sans budget ni dépense': 'line with no budget or spending',
+  'postes sans budget ni dépense': 'lines with no budget or spending',
+  'point': 'point',
+  'points': 'points',
   /* ── Titre et cadre ─────────────────────────────────────────────────────── */
   'Rapports et budget — Administration Sandriza': 'Reports and budget — Sandriza Administration',
   'Rapports et budget': 'Reports and budget',

@@ -93,6 +93,17 @@ button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 .chiffre.neg .val{color:var(--tx-err2)}
 /* ── Tableaux ────────────────────────────────────────────────────────────── */
 table{width:100%;border-collapse:collapse;font-size:.79rem}
+/* ⚠⚠ UN ETAT FINANCIER EST UN DOCUMENT, PAS UNE LISTE (2026-09-29) — la meme
+   lecon que le Livre de comptes : la couche commune (CSS_REFONTE) faisait de
+   chaque ligne une carte espacee, et l etat des resultats plus les douze mois
+   debordaient de 880 px. Ces regles plus precises rendent le tableau serre. */
+.corps table{border-collapse:collapse;border-spacing:0}
+.corps tbody td{padding:.26rem .35rem;border:0;border-top:1px solid var(--v055);border-radius:0;background:transparent}
+.corps tbody tr:hover>td{background:var(--v03);border-color:var(--v055)}
+.corps thead th{padding:.22rem .35rem;background:transparent}
+.duo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:.7rem;align-items:start}
+.avert summary{cursor:pointer;list-style-position:inside}
+.info-bulle{cursor:help;color:var(--tx2);font-weight:400;text-transform:none;letter-spacing:0}
 thead th{text-align:left;padding:.22rem .35rem;font-size:.65rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 thead th.n,tbody td.n{text-align:right;font-family:ui-monospace,Consolas,monospace}
@@ -116,6 +127,8 @@ tbody tr.sous td{color:var(--tx2)}
 .mois12{display:grid;grid-template-columns:repeat(12,1fr);gap:.25rem;margin-top:.3rem}
 .mois12 label{display:block;font-size:.6rem;color:var(--tx3);text-align:center}
 .mois12 input{width:100%;padding:.18rem .2rem;font-size:.7rem}
+.corps td.n input{padding:.12rem .45rem;min-height:0;height:auto}
+.corps td button.mini{padding:0 .45rem;line-height:1.45;min-height:0;height:auto}
 /* EN LECTURE SEULE, UN CHAMP DESACTIVE SE LIT COMME UNE VALEUR (2026-09-29) :
    les boutons d enregistrement disparaissent, mais un champ qui garde son cadre
    invite a taper — et rien ne se passe. Sans cadre ni fond, c est un chiffre. */
@@ -166,6 +179,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
   var OCCUPE = false;
   var SAISIE = null;         /* le budget en cours d edition : { cle: [12] } */
   var OUVERTS = {};          /* postes dont les douze mois sont deplies */
+  var VOIR_VIDES = false;    /* montrer les postes sans budget ni activite */
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -273,6 +287,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
       h += '<button class="mini" id="egal">${T("Répartir également")}</button>'
          + '<button class="prim" id="enr">${T("Enregistrer le budget")}</button>';
     }
+    /* En lecture seule, la raison se dit a la place des boutons absents — une
+       pastille dans la barre plutot qu un bloc sous le tableau. */
+    if (ONGLET === 'budget' && RO) {
+      h += '<span class="pill att" title="${T("Lecture seule — votre rôle ne permet pas de poser un budget.")}">${T("Lecture seule")}</span>';
+    }
     h += '</span>';
     elOutils.innerHTML = h;
 
@@ -329,10 +348,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
       + tuile('${T("Résultat net")}', argent(r.resultatNet), '${T("Avant impôt")}', r.resultatNet >= 0 ? 'pos' : 'neg')
       + '</div>');
 
-    h += avertissements();
+    h += avertissements(r);
 
     /* ── L état des résultats, ligne par ligne ───────────────────────────── */
-    h += '<div class="carte"><h2>${T("État des résultats")} ' + r.annee + '</h2><table><tbody>'
+    /* L etat et les douze mois COTE A COTE : empiles, ils depassaient la
+       fenetre (sa regle : aucune barre de defilement). */
+    h += '<div class="duo">';
+    /* La LIMITE du rapport (texte fixe) en bulle sur le titre : un paragraphe
+       identique a chaque ouverture poussait les tableaux hors de la fenetre. */
+    var lim = (D && D.limite) ? '${T("Ces chiffres se calculent sur ce que la boutique enregistre : ventes, remboursements, dépenses, encaissements et stock. Un apport du propriétaire, un prêt, un amortissement, une paie hors dépenses ou un ajustement demandé par votre comptable n’y figurent pas — ce sera l’objet du livre de comptes complet.")}' : '';
+    h += '<div class="carte"><h2>${T("État des résultats")} ' + r.annee
+      + (lim ? ' <span class="info-bulle" title="' + esc(lim) + '" aria-label="' + esc(lim) + '">ⓘ</span>' : '') + '</h2><table><tbody>'
       + lig('${T("Ventes brutes de marchandise")}', r.ventesBrutes)
       + lig('${T("Moins : rabais et coupons")}', -r.rabais, 'sous')
       + lig('${T("Moins : retours de marchandise")}', -r.retoursMarchandise, 'sous')
@@ -347,11 +373,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
       + lig('${T("Dépenses d’exploitation")}', -r.depensesExploitation)
       + lig('${T("RÉSULTAT NET")}', r.resultatNet, 'tot')
       + '</tbody></table>'
-      + (r.achatsMarchandise
-          ? '<div class="gris" style="font-size:.73rem;margin-top:.5rem">'
-            + '${T("Achats de marchandise saisis dans les Dépenses :")} ' + argent(r.achatsMarchandise)
-            + ' — ${T("écartés des charges à dessein : ils appartiennent au coût des marchandises, déjà calculé ci-dessus sur les unités vendues. Les additionner facturerait la même marchandise deux fois.")}</div>'
-          : '')
       + '</div>';
 
     /* ── Les douze mois ──────────────────────────────────────────────────── */
@@ -368,8 +389,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
             + '<td class="n ' + (m.resultat >= 0 ? 'bon' : 'mauvais') + '">' + argent(m.resultat) + '</td></tr>';
         }).join('')
       + '</tbody></table></div>';
-
-    h += limite();
+    h += '</div>';
     return h;
   }
 
@@ -464,6 +484,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
     var postes = D.postes || [];
     var reelPar = {};
     e.lignes.forEach(function(l){ reelPar[l.cle] = l; });
+    /* ⚠ UN POSTE SANS BUDGET NI ACTIVITE SE REPLIE (2026-09-29, sa regle : aucune
+       barre de defilement) : une ligne de « — » ne dit rien et en poussait vingt
+       sous le bas de la fenetre. Un clic les montre ; un poste deplie, ou qui a
+       une saisie en cours, ne se cache jamais. */
+    var nbVides = postes.filter(function(p){ return posteVide(p, reelPar[p.cle]); }).length;
 
     var h = '';
     h += '<div class="carte"><h2>${T("Budget")} ' + (D.budget ? D.budget.annee : '') + '</h2>'
@@ -474,12 +499,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
       + '<table><thead><tr><th>${T("Poste")}</th><th class="n">${T("Prévu (année)")}</th>'
       + '<th class="n">${T("Prévu à ce jour")}</th><th class="n">${T("Réel")}</th>'
       + '<th class="n">${T("Écart")}</th><th></th></tr></thead><tbody>'
-      + postes.map(function(p){ return ligneBudget(p, reelPar[p.cle]); }).join('')
-      + '</tbody></table></div>';
+      + postes.filter(function(p){ return VOIR_VIDES || !posteVide(p, reelPar[p.cle]); })
+          .map(function(p){ return ligneBudget(p, reelPar[p.cle]); }).join('')
+      + '</tbody></table>'
+      + (nbVides ? '<div style="margin-top:.45rem"><button class="mini" id="voir-vides">'
+          + (VOIR_VIDES ? '${T("Masquer les postes sans budget ni dépense")}'
+                        : '${T("Afficher les")} ' + nbVides + ' ' + szPl(nbVides, '${T("poste sans budget ni dépense")}', '${T("postes sans budget ni dépense")}'))
+          + '</button></div>' : '')
+      + '</div>';
 
-    if (RO) {
-      h += '<div class="avert">${T("Lecture seule — votre rôle ne permet pas de poser un budget.")}</div>';
-    }
     h += avertissements();
     return h;
   }
@@ -490,6 +518,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
   var EN = ${LANGUE.langueCourante() === 'en' ? 'true' : 'false'};
   function nomPoste(p){ return (EN && p && p.libelleEn) ? p.libelleEn : (p ? p.libelle : ''); }
 
+  function posteVide(p, l){
+    if (OUVERTS[p.cle]) return false;
+    var douze = SAISIE && SAISIE[p.cle];
+    var budg = (douze || []).reduce(function(a, v){ return a + (parseFloat(v) || 0); }, 0);
+    return !budg && (!l || (!l.reel && !l.prevu));
+  }
   function ligneBudget(p, l){
     var douze = SAISIE[p.cle] || [0,0,0,0,0,0,0,0,0,0,0,0];
     var annuel = douze.reduce(function(s, v){ return s + (parseFloat(v) || 0); }, 0);
@@ -579,9 +613,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
      ⚠⚠ C EST LA PARTIE LA PLUS IMPORTANTE DE L ECRAN, et c est pour ca qu elle
      n est pas en bas en petit. Un rapport muet sur ses trous se lit comme un
      rapport complet. */
-  function avertissements(){
+  function avertissements(r){
     var A = (D && D.avertissements) || [];
-    if (!A.length) return '';
+    /* La note des achats et la limite du rapport SONT des « ce que ces chiffres
+       ne disent pas » : elles vivaient sous les tableaux et les poussaient hors
+       de la fenetre ; elles rejoignent la liste (onglet Resultats). */
+    var extra = '';
+    if (r && r.achatsMarchandise) {
+      extra += '<li>${T("Achats de marchandise saisis dans les Dépenses :")} ' + argent(r.achatsMarchandise)
+        + ' — ${T("écartés des charges à dessein : ils appartiennent au coût des marchandises, déjà calculé ci-dessus sur les unités vendues. Les additionner facturerait la même marchandise deux fois.")}</li>';
+    }
+    if (!A.length && !extra) return '';
     var items = A.map(function(a){
       if (a.code === 'cout-inconnu') {
         return '<li>' + a.annee + ' — <strong>' + a.nombre + ' ' + szPl(a.nombre, '${T("unité vendue sans coût d’acquisition connu")}', '${T("unités vendues sans coût d’acquisition connu")}') + '</strong>. '
@@ -595,8 +637,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
         return '<li>' + a.annee + ' — ${T("aucun budget n’a été posé : la colonne « écart » ne compare rien.")}</li>';
       }
       return '<li>' + esc(a.code) + '</li>';
-    }).join('');
-    return '<div class="avert"><strong>${T("Ce que ces chiffres ne disent pas")}</strong><ul>' + items + '</ul></div>';
+    }).join('') + extra;
+    var nbPts = A.length + (extra ? extra.split('<li').length - 1 : 0);
+    /* REPLIE quand rien n est grave ; ⚠ OUVERT des qu un point dit que le
+       resultat est SURESTIME (cout inconnu) : on ne replie pas ce qui fausse le
+       chiffre qu on est en train de lire. */
+    /* Ouvert d office seulement sous l etat des RESULTATS (r fourni) : c est la
+       que le chiffre surestime se lit. Sous le budget, replie. */
+    var grave = !!r && A.some(function(a){ return a.code === 'cout-inconnu'; });
+    return '<details class="avert"' + (grave ? ' open' : '') + '><summary><strong>${T("Ce que ces chiffres ne disent pas")}</strong>'
+      + ' <span class="gris">— ' + nbPts + ' ' + szPl(nbPts, '${T("point")}', '${T("points")}') + '</span></summary><ul>' + items + '</ul></details>';
   }
 
   /* ⚠ LA LIMITE VIENT DU RAPPORT (champ << limite >>), PAS D UNE CHAINE ECRITE
@@ -628,6 +678,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
         dessiner();
       };
     });
+    var vv = document.getElementById('voir-vides');
+    if (vv) vv.onclick = function(){ ramasser(); VOIR_VIDES = !VOIR_VIDES; dessiner(); };
   }
 
   /* ⚠ ON RECHARGE QUAND LA FENETRE REVIENT AU PREMIER PLAN : les depenses et les
