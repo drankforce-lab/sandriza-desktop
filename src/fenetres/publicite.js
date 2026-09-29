@@ -98,7 +98,10 @@ html.jour .badge.info{color:#44607e}
 .graph .val{font-size:.56rem;color:var(--tx2);font-weight:600;margin-bottom:2px;white-space:nowrap}
 .graph .barz{width:100%;display:flex;gap:2px;align-items:flex-end;height:110px}
 .graph .b1{flex:1;background:#c9a97e;border-radius:3px 3px 0 0}
-.graph .b2{flex:1;background:#dc2626;opacity:.7;border-radius:3px 3px 0 0}
+/* La part PROMO en or clair, pas en rouge (2026-09-29) : le rouge dit un PROBLEME,
+   et une vente en promotion n en est pas un. */
+.graph .b2{flex:1;background:rgba(201,169,126,.42);border-radius:3px 3px 0 0}
+html.jour .graph .b2{background:rgba(168,128,78,.38)}
 .graph .lbl{font-size:.64rem;color:var(--tx2);margin-top:.3rem}
 .legend{display:flex;gap:1rem;font-size:.68rem;color:var(--tx2)}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:middle}
@@ -185,7 +188,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
   function nb2(n, sing, pl){ return n + ' ' + (n === 1 ? sing : pl); }
   /* ⚠ Le symbole change de COTE en anglais : << $12.50 >>. Voir szArgent (socle). */
   function argent(n){ return szArgent(n); }
-  function argentK(n){ n = Number(n)||0; return n >= 1000 ? ((n/1000).toFixed(1) + 'k $') : argent(n); }
+  /* Au-dela de mille : le montant ARRONDI au dollar, « 18 400 $ » — et non
+     « 18.4k $ » (point decimal et abreviation anglaise, 2026-09-29). */
+  function argentK(n){
+    n = Number(n)||0;
+    if (n < 1000) return argent(n);
+    return szArgentSymbole(szArgentNombre(Math.round(n), 0));
+  }
   function val(id){ var e = document.getElementById(id); return e ? e.value : ''; }
   function chk(id){ var e = document.getElementById(id); return e ? e.checked : false; }
 
@@ -243,14 +252,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
        replient ensemble. Voir JS_TUILES dans socle.js. */
     return szTuiles('<div class="tuiles">'
       + '<div class="tuile"><div class="k"><span class="ic">💰</span> ${T("Revenu total")}</div><div class="v">' + argentK(D.totalRev) + '</div><div class="z">' + nb2(D.orderCount, '${T("commande")}', '${T("commandes")}') + '</div></div>'
-      + '<div class="tuile"><div class="k"><span class="ic">🎯</span> ${T("Revenu promo")}</div><div class="v">' + argentK(D.promoRev) + '</div><div class="z">' + D.pctPromo + '${T("% des commandes")}</div></div>'
+      + '<div class="tuile"><div class="k"><span class="ic">🎯</span> ${T("Revenu promo")}</div><div class="v">' + argentK(D.promoRev) + '</div><div class="z">' + D.pctPromo + ' ${T("% des commandes")}</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">👥</span> ${T("Clients actifs")}</div><div class="v">' + D.activeCustomers + '</div><div class="z">' + D.totalCustomers + ' ${T("inscrits")}</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">🛒</span> ${T("Panier moyen")}</div><div class="v">' + argent(D.avgOrder) + '</div><div class="z">${T("par commande")}</div></div>'
       + (D.loy ? '<div class="tuile"><div class="k"><span class="ic">💌</span> ${T("Réponse sondage")}</div><div class="v">' + D.loy.responseRate + ' %</div><div class="z">' + D.loy.totalResponses + '/' + D.loy.totalInvites + (D.loy.avgRating ? ' · ' + Number(D.loy.avgRating).toLocaleString('${LIEU()}', { maximumFractionDigits: 1 }) + '${T(" sur 5")}' : '') + '</div></div>' : '')
       + '</div>')
       + '<div class="deux">'
-      +   '<div class="carte"><h2>${T("Revenu mensuel — 6 mois")}<span class="legend"><span><i style="background:#c9a97e"></i>${T("Total")}</span><span><i style="background:#dc2626;opacity:.7"></i>${T("Promo")}</span></span></h2><div class="graph">' + graph + '</div></div>'
-      +   '<div class="carte"><h2><span class="ic">🏆</span> ${T("Top 5 produits")}</h2>' + tops + '</div>'
+      +   '<div class="carte"><h2>${T("Revenu mensuel — 6 mois")}<span class="legend"><span><i style="background:#c9a97e"></i>${T("Total")}</span><span><i style="background:rgba(201,169,126,.42)"></i>${T("Promo")}</span></span></h2><div class="graph">' + graph + '</div></div>'
+      +   '<div class="carte"><h2><span><span class="ic">🏆</span> ${T("Top 5 produits")}</span></h2>' + tops + '</div>'
       + '</div>'
       + '<div class="carte"><h2>${T("Commandes récentes")}</h2><table><thead><tr><th>${T("Commande")}</th><th>${T("Client")}</th><th>${T("Date")}</th><th>${T("Promo")}</th><th class="num">${T("Total")}</th><th>${T("Statut")}</th></tr></thead><tbody>' + recent + '</tbody></table></div>';
   }
@@ -322,14 +331,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
       +   '<div style="font-size:.72rem;color:var(--tx2);margin:-.3rem 0 .4rem">${T("Commandes passées dans les 48 h suivant chaque publication")}</div>'
       +   '<table><thead><tr><th>${T("Date")}</th><th>${T("Réseaux")}</th><th>${T("Contenu")}</th><th class="ctr">${T("Cmd 48h")}</th><th class="num">${T("Revenu 48h")}</th></tr></thead><tbody>' + posts + '</tbody></table></div>'
       + '<div style="display:flex;flex-direction:column;gap:.85rem">'
-      +   '<div class="carte"><h2><span class="ic">🔗</span> ${T("Liens UTM trackés")}</h2>'
+      +   '<div class="carte"><h2><span><span class="ic">🔗</span> ${T("Liens UTM trackés")}</span></h2>'
       +     '<div class="champ"><label for="utm-source">${T("Source")}</label><select id="utm-source" data-utm="source">' + src + '</select></div>'
       +     '<div class="champ"><label for="utm-campaign">${T("Campagne")}</label><input id="utm-campaign" data-utm="campaign" value="' + esc(UTM.campaign) + '"></div>'
       +     '<div class="champ"><label for="utm-dest">${T("Destination")}</label><select id="utm-dest" data-utm="dest">' + dst + '</select></div>'
       +     '<div class="champ" style="margin-bottom:0"><label for="utm-result">${T("Lien généré")}</label><div style="display:flex;gap:.35rem">'
       +       '<input id="utm-result" readonly class="mono" style="font-size:.66rem" value="' + esc(lienUtm()) + '"><button class="ghost mini" data-act="copyutm">${T("Copier")}</button></div></div>'
       +   '</div>'
-      +   '<div class="carte"><h2><span class="ic">💡</span> ${T("Recommandations")}</h2>' + recs + '</div>'
+      +   '<div class="carte"><h2><span><span class="ic">💡</span> ${T("Recommandations")}</span></h2>' + recs + '</div>'
       + '</div></div>';
   }
 

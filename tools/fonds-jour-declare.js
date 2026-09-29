@@ -42,7 +42,6 @@ module.exports = {
     'invmeta.js': { 'button.ic.plus': '#8f6f42' },
     'newsletter.js': { '.pop .cta': '#8f6f42' },
     'produit.js': { '.vue .x:hover,.vign .x:hover': '#e04141' },
-    'publicite.js': { '.graph .b2': '#dc2626' },
     'studio.js': { '.jeton.prim': '#8f6f42' },
   },
 
