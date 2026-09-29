@@ -86,9 +86,13 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
 .pill.apr{background:rgba(96,165,250,.14);color:var(--tx-bleu)}
 /* La barre des jours : un dessin vaut mieux qu une colonne de nombres pour
    reperer une derive avant la facture. */
-.jours{display:flex;align-items:flex-end;gap:2px;height:4.5rem;padding-top:.3rem}
-.jours .b{flex:1 1 auto;min-width:3px;background:rgba(201,169,126,.55);border-radius:2px 2px 0 0}
+/* Barres bornees a 46 px (2026-09-29) : trois jours de donnees prenaient
+   chacun un tiers de la carte — un aplat, pas un graphique. */
+.jours{display:flex;align-items:flex-end;justify-content:space-around;gap:3px;height:4.5rem;padding-top:.3rem;
+  border-bottom:1px solid var(--v12)}
+.jours .b{flex:1 1 0;max-width:46px;min-width:3px;background:rgba(201,169,126,.55);border-radius:2px 2px 0 0}
 .jours .b:hover{background:#c9a97e}
+html.jour .jours .b{background:rgba(168,128,78,.55)}html.jour .jours .b:hover{background:rgba(168,128,78,.85)}
 .vide{padding:1.1rem .6rem;text-align:center;color:var(--tx2);font-size:.82rem}
 /* L avertissement d honnetete : ni replie, ni en gris pale. Il doit se lire. */
 .franc{border:1px solid rgba(240,180,80,.35);background:rgba(200,140,40,.1);
@@ -197,7 +201,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
   }
   function jourCourt(iso){
     if (!iso) return '';
-    var d = new Date(iso);
+    /* Une date SEULE (AAAA-MM-JJ) est un jour LOCAL : new Date('2026-08-07')
+       serait minuit UTC, donc le 6 au Quebec. */
+    var z = String(iso);
+    var d = (z.length === 10 && z.charAt(4) === '-')
+      ? new Date(+z.slice(0, 4), +z.slice(5, 7) - 1, +z.slice(8, 10)) : new Date(iso);
     if (isNaN(d.getTime())) return esc(iso);
     return d.toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'short', year: 'numeric' });
   }
@@ -286,8 +294,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
       h += '<p class="dt" style="color:#e08a8a">${T("Plafond actif mais fixé à 0 : <strong>tout traitement ")}'
         + '${T("payant est refusé</strong>. Posez un montant, ou décochez.")}</p>';
     } else {
-      h += '<p class="dt">' + sous_(b.depense) + '${T(" dépensés ce mois-ci (")}' + esc(b.mois || '')
-        + '${T("). Aucun plafond n’est appliqué : rien n’arrêtera un lot.")}</p>';
+      /* Le mois entre parentheses SEULEMENT s il est connu : sans lui, la phrase
+         affichait << () >>, deux parentheses vides. */
+      h += '<p class="dt">' + sous_(b.depense) + '${T(" dépensés ce mois-ci")}'
+        + (b.mois ? ' (' + esc(b.mois) + ')' : '')
+        + '${T(". Aucun plafond n’est appliqué : rien n’arrêtera un lot.")}</p>';
     }
     h += '<div class="fin2" style="margin-top:.6rem"><button class="prim" id="pl-poser">${T("Enregistrer le plafond")}</button>'
       + ' <span id="pl-dit" class="dt"></span></div>';
@@ -337,7 +348,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
             return '<div class="b" style="height:' + ht + '%" title="' + esc(x.jour) + ' · '
               + x.appels + '${T(" appel(s) · ")}' + sous_(x.cout) + '"></div>';
           }).join('')
-        + '</div><p class="dt">${T("Du ")}' + esc(j[0].jour) + '${T(" au ")}' + esc(j[j.length - 1].jour)
+        + '</div><p class="dt">${T("Du ")}' + jourCourt(j[0].jour) + '${T(" au ")}' + jourCourt(j[j.length - 1].jour)
         + '${T(". Survolez une barre pour le détail du jour.")}</p></div>');
     }
     h.push('<div class="rang2"><div>' + cartePlafond() + '</div><div>' + joursH + '</div></div>');
@@ -522,7 +533,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
      menu d'opération a le foyer, on saute ce tour — sinon la frappe serait
      avalée. */
   function _horoNow(){
-    try { return new Date().toLocaleString('${LIEU()}', { dateStyle: 'short', timeStyle: 'short' }); }
+    try { return new Date().toLocaleString('${LIEU()}', { dateStyle: 'medium', timeStyle: 'short' }); }
     catch (e) { return ''; }
   }
   /* La signature dit « quelque chose a-t-il bougé ». ⚠ LE PLAFOND EN FAIT PARTIE :

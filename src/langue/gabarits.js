@@ -93,6 +93,7 @@ module.exports = {
   'en-tête': 'header',
   'pied': 'footer',
   ' Modifier': ' Edit',
+  ' Supprimer': ' Delete',
   '✏ Modifier': '✏ Edit',
   ' Copier': ' Copy',
   '📋 Copier': '📋 Copy',

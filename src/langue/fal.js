@@ -84,6 +84,8 @@ module.exports = {
     'treatment is refused . Set an amount, or untick.',
   /* ⚠⚠ ET SANS PLAFOND, RIEN N ARRETE UN LOT. */
   ' dépensés ce mois-ci (': ' spent this month (',
+  ' dépensés ce mois-ci': ' spent this month',
+  '. Aucun plafond n’est appliqué : rien n’arrêtera un lot.': '. No cap is applied: nothing will stop a batch.',
   'dépensés ce mois-ci (': 'spent this month (',
   '). Aucun plafond n’est appliqué : rien n’arrêtera un lot.':
     '). No cap is applied: nothing will stop a batch.',

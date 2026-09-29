@@ -46,7 +46,8 @@ body{background:var(--f-page);color:var(--tx);
 .ged{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.1rem;align-items:start}
 .ged .apercu,.ged .gifwrap{max-width:none}
 @media (max-width:900px){.ged{grid-template-columns:1fr}}
-.stitre{font-size:.9rem;font-weight:700;color:var(--tx-bleute);margin:0 0 .1rem;display:flex;align-items:center;justify-content:space-between;gap:.6rem}
+/* Le titre suit son icone (2026-09-29) : << space-between >> l envoyait a l autre bout de la carte. */
+.stitre{font-size:.9rem;font-weight:700;color:var(--tx-bleute);margin:0 0 .1rem;display:flex;align-items:center;gap:.45rem}
 .sdesc{font-size:.76rem;color:var(--tx2);margin:.1rem 0 .8rem}
 .gr2{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
 @media (max-width:640px){.gr2{grid-template-columns:1fr}}
@@ -235,7 +236,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<div style="display:flex;gap:.35rem">'
         + '<button class="b" type="button" data-edit="' + esc(t.id) + '"><span class="ic">✏</span>${T(" Modifier")}</button>'
         + (RO ? '' : '<button class="b" type="button" data-copy="' + esc(t.id) + '"><span class="ic">📋</span>${T(" Copier")}</button>')
-        + ((!RO && t.supprimable) ? ('<button class="b dgr" type="button" data-del="' + esc(t.id) + '">' + (DELCONF === t.id ? '${T("Confirmer ?")}' : '<span class="ic">🗑</span>') + '</button>') : '')
+        + ((!RO && t.supprimable) ? ('<button class="b dgr" type="button" data-del="' + esc(t.id) + '">' + (DELCONF === t.id ? '${T("Confirmer ?")}' : '<span class="ic">🗑</span>${T(" Supprimer")}') + '</button>') : '')
         + '</div></div>';
     }
     h += '</div>';

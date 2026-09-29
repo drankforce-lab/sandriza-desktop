@@ -17,7 +17,7 @@
  * compris : tout ce script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
    poste. ⚠⚠ Le contenu de l'offre de bienvenue (titre, sous-titre, bouton,
    mention légale) est TAPÉ ici et LU PAR LA VISITEUSE : c'est de la donnée, pas
@@ -182,6 +182,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('newsletter')}
       .map(function(t){ return '<button data-tab="' + t[0] + '" class="' + (TAB === t[0] ? 'actif' : '') + '">' + t[1] + '</button>'; }).join('');
   }
 
+  /* « 10 août 2026 » : le site envoie AAAA-MM-JJ (jour LOCAL, pas minuit UTC). */
+  function jourLisible(z){
+    z = String(z || '');
+    if (!(z.length === 10 && z.charAt(4) === '-')) return z;
+    try { return new Date(+z.slice(0, 4), +z.slice(5, 7) - 1, +z.slice(8, 10)).toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'short', year: 'numeric' }); }
+    catch (e) { return z; }
+  }
+
   /* ══ TABLEAU DE BORD ═══════════════════════════════════════════════════════ */
   function vueDash(){
     if (!D.hasKey) {
@@ -191,7 +199,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('newsletter')}
     }
     var recents = D.recents.length ? D.recents.map(function(c){
       var st = c.status === 'sent' ? '<span class="badge ok">${T("Envoyée")}</span>' : c.status === 'sending' ? '<span class="badge warn">${T("En cours")}</span>' : '<span class="badge draft">${T("Brouillon")}</span>';
-      return '<tr><td><strong>' + esc(c.name) + '</strong><div style="font-size:.72rem;color:var(--tx2)">' + esc(c.sentAt || '—') + '</div></td>'
+      return '<tr><td><strong>' + esc(c.name) + '</strong><div style="font-size:.72rem;color:var(--tx2)">' + esc(c.sentAt ? jourLisible(c.sentAt) : '—') + '</div></td>'
         + '<td>' + c.sent + (c.failed ? ' / <span style="color:var(--tx-err)">' + c.failed + '</span>' : '') + '</td><td>' + st + '</td></tr>';
     }).join('') : '<tr><td colspan="3" class="vide">${T("Aucune campagne")}</td></tr>';
     var srcs = D.sources.length ? D.sources.map(function(s){
