@@ -21,7 +21,7 @@
  * compris : tout ce script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
    poste. ⚠⚠ Le MESSAGE d'une campagne est PUBLIÉ sur les réseaux et envoyé par
    infolettre : c'est de la donnée, et son exemple reste en français. Le NOM de
@@ -246,7 +246,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
       + '<div class="tuile"><div class="k"><span class="ic">🎯</span> ${T("Revenu promo")}</div><div class="v">' + argentK(D.promoRev) + '</div><div class="z">' + D.pctPromo + '${T("% des commandes")}</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">👥</span> ${T("Clients actifs")}</div><div class="v">' + D.activeCustomers + '</div><div class="z">' + D.totalCustomers + ' ${T("inscrits")}</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">🛒</span> ${T("Panier moyen")}</div><div class="v">' + argent(D.avgOrder) + '</div><div class="z">${T("par commande")}</div></div>'
-      + (D.loy ? '<div class="tuile"><div class="k"><span class="ic">💌</span> ${T("Réponse sondage")}</div><div class="v">' + D.loy.responseRate + '%</div><div class="z">' + D.loy.totalResponses + '/' + D.loy.totalInvites + (D.loy.avgRating ? ' · ' + D.loy.avgRating + '${T(" sur 5")}' : '') + '</div></div>' : '')
+      + (D.loy ? '<div class="tuile"><div class="k"><span class="ic">💌</span> ${T("Réponse sondage")}</div><div class="v">' + D.loy.responseRate + ' %</div><div class="z">' + D.loy.totalResponses + '/' + D.loy.totalInvites + (D.loy.avgRating ? ' · ' + Number(D.loy.avgRating).toLocaleString('${LIEU()}', { maximumFractionDigits: 1 }) + '${T(" sur 5")}' : '') + '</div></div>' : '')
       + '</div>')
       + '<div class="deux">'
       +   '<div class="carte"><h2>${T("Revenu mensuel — 6 mois")}<span class="legend"><span><i style="background:#c9a97e"></i>${T("Total")}</span><span><i style="background:#dc2626;opacity:.7"></i>${T("Promo")}</span></span></h2><div class="graph">' + graph + '</div></div>'
@@ -381,7 +381,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
         + '<div style="flex:1;min-width:0"><div style="font-size:.83rem">"' + esc(c.comment) + '"</div><div style="font-size:.7rem;color:var(--tx2);margin-top:.1rem">' + esc(c.name) + ' · ' + esc(c.date) + '</div></div></div>';
     }).join('') + '</div>' : '';
     return szTuiles('<div class="tuiles">'
-      + '<div class="tuile" style="text-align:center"><div class="v" style="color:' + (D.rate >= 70 ? 'var(--tx-ok)' : 'var(--tx-err)') + ';font-size:2rem">' + D.rate + '%</div><div class="z">${T("Taux de satisfaction")}</div></div>'
+      + '<div class="tuile" style="text-align:center"><div class="v" style="color:' + (D.rate >= 70 ? 'var(--tx-ok)' : 'var(--tx-err)') + ';font-size:2rem">' + D.rate + ' %</div><div class="z">${T("Taux de satisfaction")}</div></div>'
       + '<div class="carte" style="grid-column:span 2"><h2>${T("Répartition des évaluations")}</h2>'
       +   '<div style="font-size:.8rem;margin-bottom:.2rem"><span class="ic">👍</span> ${T("Satisfaits")}</div>' + bar(D.satisfied, D.rated, '#4ade80')
       +   '<div style="font-size:.8rem;margin-bottom:.2rem"><span class="ic">👎</span> ${T("Insatisfaits")}</div>' + bar(D.unsatisfied, D.rated, '#f87171')
