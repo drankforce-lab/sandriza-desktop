@@ -40,6 +40,14 @@
  *   « Expédiée »…) que le site n envoie jamais : on ne les met PAS ici.
  */
 module.exports = {
+  /* Reseaux sociaux — configuration des jetons (social.js, _SOC_CLES), 2026-09-29 */
+  'Jeton de longue durée (Page Access Token) — Meta for Developers → Graph API Explorer.': 'Long-lived token (Page Access Token) — Meta for Developers → Graph API Explorer.',
+  'Jeton Instagram Business — même application Meta, avec l’API Instagram Graph activée.': 'Instagram Business token — same Meta app, with the Instagram Graph API enabled.',
+  'Jeton Pinterest v5 — developers.pinterest.com → Mon application.': 'Pinterest v5 token — developers.pinterest.com → My app.',
+  'Jeton TikTok for Business — developers.tiktok.com (validation de l’application requise).': 'TikTok for Business token — developers.tiktok.com (app review required).',
+  'Identifiant de la Page': 'Page ID',
+  'Identifiant du compte professionnel': 'Business account ID',
+  'Identifiant du tableau': 'Board ID',
   /* Journaux — groupes de la recherche (staff.js, journaux:recherche), 2026-09-29 */
   '🔐 Accès': '🔐 Access',
   '🖨 Impressions': '🖨 Prints',

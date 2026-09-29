@@ -139,8 +139,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<span class="rang"><input class="t" type="password" id="tok-'+esc(r.cle)+'" autocomplete="new-password" placeholder="'
         + (r.jetonPose ? '${T("laisser vide = jeton conservé")}' : '${T("coller le jeton ici")}') + '"'+(RO?' disabled':'')+'>'
         + (RO?'':'<button class="b" data-tok="'+esc(r.cle)+'">${T("Enregistrer")}</button>')+'</span>'
-        + '<span class="sub">'+esc(r.aide)+'</span></label>'
-        + '<label class="champ"><span class="lbl">'+esc(r.extraLabel)+'</span>'
+        + '<span class="sub">'+esc(szTd(r.aide))+'</span></label>'
+        + '<label class="champ"><span class="lbl">'+esc(szTd(r.extraLabel))+'</span>'
         + '<span class="rang"><input class="t" id="ext-'+esc(r.cle)+'" value="'+esc(r.extraValeur)+'" placeholder="${T("identifiant numérique")}"'+(RO?' disabled':'')+'>'
         + (RO?'':'<button class="b" data-ext="'+esc(r.cle)+'">${T("Enregistrer")}</button>')+'</span></label>'
         + (r.testable && r.jetonPose ? '<button class="b" data-test="'+esc(r.cle)+'"><span class="ic">🔗</span>${T(" Tester la connexion")}</button>' : '')
