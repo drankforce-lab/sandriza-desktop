@@ -2477,7 +2477,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
           var t = b.getAttribute('data-sugg') || '';
           var cur = ex.value.trim();
           if (cur.toLowerCase().indexOf(t.toLowerCase()) >= 0) { ex.focus(); return; }
-          ex.value = cur ? (cur.replace(/[,\s]+$/, '') + ', ' + t) : t;
+          ex.value = cur ? (cur.replace(/[,\\s]+$/, '') + ', ' + t) : t;
           ex.focus();
         };
       });

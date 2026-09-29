@@ -797,7 +797,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (f.size>600000){ dire('${T("Image trop grande (600 Ko maximum).")}', 'err'); return; }
     var fr=new FileReader();
     fr.onload=function(e){
-      var nom=String(f.name||'image').replace(/\.[^.]+$/,'');
+      var nom=String(f.name||'image').replace(/\\.[^.]+$/,'');
       var html='<img src="'+e.target.result+'" alt="'+esc(nom)+'" style="max-width:100%;height:auto;border-radius:4px;display:block;margin:.5rem 0"><p><br></p>';
       var z=edRendre(id); if (!z) return;
       document.execCommand('insertHTML',false,html);

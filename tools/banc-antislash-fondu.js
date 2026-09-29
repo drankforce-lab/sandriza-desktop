@@ -70,6 +70,51 @@ for (const f of fichiers) {
   }
 }
 
+/* ══ 2e FORME : L ANTISLASH QUI FOND A LA GENERATION (2026-09-29) ══════════
+   ⚠⚠ LE CINQUIEME COUP, ET LE PREMIER BANC L A LAISSE PASSER. Dans
+   `profil.js`, le script de page — un litteral de gabarit — portait
+   `split(/[\s._\-]+/)`. Le SOURCE est juste ; la PAGE engendree recoit
+   `/[s._-]+/`, qui coupe sur la LETTRE s : « Bob Brousseau » devenait « BE ».
+   La 1re forme ne cherche que les expressions deja reduites a une lettre ; ici
+   le corps garde ses crochets et sa ponctuation, et rien ne crie.
+   ➡ On ENGENDRE chaque fenetre et, pour chaque expression du source qui porte
+   un `\s \d \w \b \S \D \W \B \. \- \/`, on regarde si la page contient
+   sa forme AMPUTEE (antislashs retires) et pas sa forme entiere. C est
+   exactement le defaut, et rien d autre : une expression ecrite `\\s` dans le
+   source arrive `\s` dans la page et ne correspond pas a la forme amputee. */
+const RXL = /\.(replace|test|match|exec|split|search|matchAll)\(\s*\/((?:[^\/\n\\]|\\.)+)\/([gimsuy]*)/g;
+const DOS_F = path.join(RACINE, 'fenetres');
+for (const nom of fs.readdirSync(DOS_F).filter((x) => x.endsWith('.js') && x !== 'socle.js')) {
+  const fic = path.join(DOS_F, nom);
+  const src = fs.readFileSync(fic, 'utf8');
+  let page = null;
+  try {
+    const mod = require(fic);
+    const fab = Object.values(mod).find((v) => typeof v === 'function');
+    if (fab) page = String(fab(''));
+  } catch (e) { page = null; }
+  if (!page) continue;
+  let m;
+  RXL.lastIndex = 0;
+  while ((m = RXL.exec(src))) {
+    const corps = m[2];
+    if (!/\\[sdwbSDWB.\-\/]/.test(corps)) continue;
+    // Double antislash dans le source = voulu (il arrive simple dans la page).
+    if (/\\\\/.test(corps)) continue;
+    const ampute = corps.split(String.fromCharCode(92)).join('');
+    const entier = '/' + corps + '/';
+    if (page.indexOf('/' + ampute + '/') >= 0 && page.indexOf(entier) < 0) {
+      const no = src.slice(0, m.index).split('\n').length;
+      fautes.push({
+        f: path.relative(path.join(__dirname, '..'), fic), no,
+        vu: '/' + ampute + '/' + m[3] + '  (dans la page engendree)',
+        voulu: '/' + corps + '/' + m[3],
+        ligne: String(src.split('\n')[no - 1] || '').trim().slice(0, 110),
+      });
+    }
+  }
+}
+
 if (fautes.length) {
   console.error('✗ ' + fautes.length + ' antislash fondu(s) — l’expression est valide, '
     + 'mais elle ne cherche plus ce qu’elle croit chercher :');

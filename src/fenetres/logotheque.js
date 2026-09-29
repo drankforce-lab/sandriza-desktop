@@ -303,7 +303,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var im = new Image();
       im.onerror = function(){ dire('${T("Ce fichier n’est pas une image lisible.")}', 'err'); };
       im.onload = function(){
-        IMP = { dataUrl: dataUrl, img: im, name: (f.name||'image').replace(/\.[a-z0-9]+$/i, ''),
+        IMP = { dataUrl: dataUrl, img: im, name: (f.name||'image').replace(/\\.[a-z0-9]+$/i, ''),
           natW: im.naturalWidth||im.width, natH: im.naturalHeight||im.height, bytes: f.size||0, mime: f.type||'image/*',
           alpha: detecterAlpha(im), mode: 'keep', ratio: [0,0], maxW: 0 };
         VUE = 'import'; dessiner(); dire('');

@@ -1398,7 +1398,7 @@ ${JS_DIRE()}
     var our = el('sl-oubli-retour');
     if (our) our.onclick = function(){ dessiner('login'); apresLogin(); };
     var code = el('sl-mfa-code');
-    if (code) code.oninput = function(){ code.value = code.value.replace(/\D/g, '').slice(0, 6); };
+    if (code) code.oninput = function(){ code.value = code.value.replace(/\\D/g, '').slice(0, 6); };
     /* Le seuil du casse-tete depend du NOM D UTILISATEUR : deux comptes sur le
        meme poste n ont pas le meme compte d echecs, et exiger le casse-tete a
        l un parce que l autre s est trompe serait faux dans les deux sens. */
@@ -1407,7 +1407,7 @@ ${JS_DIRE()}
     var fw = el('cx-form-wz');
     if (fw) fw.onsubmit = function(e){ e.preventDefault(); mfaConfigEnvoyer(); };
     var wc = el('wz-code');
-    if (wc) wc.oninput = function(){ wc.value = wc.value.replace(/\D/g, '').slice(0, 6); };
+    if (wc) wc.oninput = function(){ wc.value = wc.value.replace(/\\D/g, '').slice(0, 6); };
     var wcp = el('wz-copier');
     if (wcp) wcp.onclick = function(){
       var z = el('wz-cle');
@@ -1416,7 +1416,7 @@ ${JS_DIRE()}
          de quatre), et les applications TOTP refusent la plupart du temps une
          cle qui en contient. Copier ce qu on voit aurait fait echouer le
          collage sans dire pourquoi. */
-      var v = String(z.textContent || '').replace(/\s+/g, '');
+      var v = String(z.textContent || '').replace(/\\s+/g, '');
       try { navigator.clipboard.writeText(v); szDire(T('Clé copiée (sans les espaces).'), 'bon'); }
       catch (e) { szDire(T('La copie a échoué — recopiez la clé à la main.'), 'att'); }
     };
