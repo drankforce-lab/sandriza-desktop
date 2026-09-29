@@ -237,6 +237,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
      et c est la cle qui s enregistre, jamais ce nom. */
   var EN = ${LANGUE.langueCourante() === 'en' ? 'true' : 'false'};
   function nomCat(c){ return (EN && c && c.libelleEn) ? c.libelleEn : (c ? c.libelle : ''); }
+  /* Le nom d une categorie d apres sa CLE, pour une ligne de depense (le site y
+     met categorieLbl, en francais) : on retrouve la categorie dans la liste
+     recue et on prend son nom dans la langue du poste (2026-09-29). */
+  function catLbl(cle, lbl){
+    var L = ((typeof D !== 'undefined' && D && D.categories) || []).concat((typeof ANN !== 'undefined' && ANN && ANN.categories) || []);
+    for (var i = 0; i < L.length; i++) if (L[i].cle === cle) return nomCat(L[i]) || lbl || '';
+    return lbl || '';
+  }
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
@@ -380,10 +388,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
         + rows.map(function(r){
             return '<tr data-id="' + esc(r.id) + '" title="${T("Voir le détail")}">'
               + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">'
-              + esc(String(r.categorieLbl || '?').charAt(0).toUpperCase()) + '</span>'
+              + esc(String(catLbl(r.categorie, r.categorieLbl) || '?').charAt(0).toUpperCase()) + '</span>'
               + '<div style="min-width:0"><div class="rf-nom">' + esc(r.description || r.fournisseur || '—')
               + (r.usd ? ' <span class="rf-pill bleu">USD</span>' : '') + '</div>'
-              + '<div class="rf-sous"><span>' + esc(r.categorieLbl) + '</span>'
+              + '<div class="rf-sous"><span>' + esc(catLbl(r.categorie, r.categorieLbl)) + '</span>'
               + (r.ligne ? '<span>·</span><span class="rf-code">L.' + esc(r.ligne) + '</span>' : '')
               + (r.fournisseur && r.description ? '<span>·</span><span>' + esc(r.fournisseur) + '</span>' : '')
               + '</div></div></div></td>'
@@ -487,7 +495,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
             return '<tr data-ann="' + esc(r.id) + '">'
               + '<td><span class="num">' + esc(r.id) + '</span>'
               + (r.nom ? '<div class="dt">' + esc(r.nom) + '</div>' : '') + '</td>'
-              + '<td>' + esc(r.categorieLbl)
+              + '<td>' + esc(catLbl(r.categorie, r.categorieLbl))
               + (r.ligne ? ' <span class="dt">· L.' + esc(r.ligne) + '</span>' : '')
               + (r.flou ? ' <span class="rf-pill ambre">${T("polyvalent")}</span>' : '') + '</td>'
               + '<td>' + (r.origine === 'integre' ? '<span class="rf-pill">${T("livré")}</span>'
@@ -522,7 +530,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
     var e = DETAIL;
     var h = '<div class="voile" id="d-voile"><div class="boite">'
       + '<h3>' + esc(e.fournisseur || e.description || '${T("Dépense")}') + '</h3>'
-      + '<div style="text-align:center"><span class="rf-pill">' + esc(e.categorieLbl)
+      + '<div style="text-align:center"><span class="rf-pill">' + esc(catLbl(e.categorie, e.categorieLbl))
       + (e.ligne ? ' · L.' + esc(e.ligne) : '') + '</span></div>'
       + '<div class="gros-montant">' + esc(e.totalTTC)
       + (e.usd ? ' <span class="rf-pill bleu">USD→CAD</span>' : '') + '</div>'

@@ -375,6 +375,7 @@ ${JS_DIRE()}
       "motif.a2": "Answer 2 must be at least 3 characters long.",
       "motif.a1nom": "Answer 1: cannot contain your name or username.",
       "motif.a2nom": "Answer 2: cannot contain your name or username.",
+      "Panneau d’administration": "Administration panel",
     }
   };
   function T(k, a){
@@ -454,7 +455,9 @@ ${JS_DIRE()}
       + '<span class="admlogin-orb o3"></span>'
       + '<div class="admlogin-brand-inner">' + logo + nom
       + '<div class="admlogin-eyebrow"><span class="al-line"></span><span>'
-      + esc(t.sousTexte) + '</span></div>'
+      /* Le sous-titre par DEFAUT du site se traduit ; un sous-titre personnalise
+         (absent du dictionnaire) passe tel quel. */
+      + esc(T(t.sousTexte || '')) + '</span></div>'
       + '<ul class="admlogin-feats">'
       + f(IC.verrouSm, T('Connexion chiffrée de bout en bout (HTTPS)'))
       + f(IC.bouclier, T('Accès renforcé par mot de passe et authentification MFA'))
@@ -1532,7 +1535,7 @@ ${JS_DIRE()}
   var REPLI = {
     ok: true,
     theme: { bgFrom: '#191238', bgMid: '#2b2262', logoFrom: '#4f46e5', logoTo: '#7c3aed',
-      titre: '#f5e6d0', sous: 'rgba(236,229,217,0.92)', sousTexte: 'Panneau d’administration',
+      titre: '#f5e6d0', sous: 'rgba(236,229,217,0.92)', sousTexte: T('Panneau d’administration'),
       btnFrom: '#1a1207', btnTo: '#3d2810', btnTexte: '#f5e6d0' },
     marque: { nom: 'SANDRIZA', lettre: 'É', logo: '' },
     prefill: '', souvenir: false, captchaRequis: false, verrouille: false

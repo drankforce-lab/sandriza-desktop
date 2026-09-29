@@ -40,6 +40,11 @@
  *   « Expédiée »…) que le site n envoie jamais : on ne les met PAS ici.
  */
 module.exports = {
+  /* Journaux — groupes de la recherche (staff.js, journaux:recherche), 2026-09-29 */
+  '🔐 Accès': '🔐 Access',
+  '🖨 Impressions': '🖨 Prints',
+  '🤖 Automatisations': '🤖 Automations',
+  '🔎 Recherches sans résultat': '🔎 Searches with no result',
   /* Caisse (pont.js, caisse:contexte — paiements et remises), 2026-09-29 */
   'Terminal Square (reçu)': 'Square terminal (receipt)',
   'Comptant (reçu)': 'Cash (receipt)',

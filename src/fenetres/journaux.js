@@ -268,7 +268,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
     if (!groupes.length) return '<div class="vide">${T("Aucun résultat pour «")} '+esc(RRES?RRES.q:'')+' ».</div>';
     var h='';
     for (var g=0;g<groupes.length;g++){ var grp=groupes[g], e=grp.entrees||[];
-      h += '<div class="barre" style="margin:.9rem 0 .3rem"><strong>'+esc(grp.label)+' <span class="mut">('+(grp.total||e.length)+')</span></strong>'
+      h += '<div class="barre" style="margin:.9rem 0 .3rem"><strong>'+esc(szTd(grp.label))+' <span class="mut">('+(grp.total||e.length)+')</span></strong>'
         + '<span class="pousse"></span><button class="b" data-goto="'+esc(grp.onglet)+'">${T("Ouvrir cet onglet")}</button></div>';
       h += '<table class="tb"><tbody>';
       for (var i=0;i<e.length;i++){ var x=e[i];
