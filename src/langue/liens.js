@@ -28,6 +28,8 @@
  */
 
 module.exports = {
+  'Copier l’adresse du lien': 'Copy the link address',
+  'Supprimer': 'Delete',
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   'Liens d’installation — Administration Sandriza':
     'Install links — Sandriza Administration',

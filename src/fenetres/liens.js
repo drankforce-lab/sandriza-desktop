@@ -284,7 +284,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
           + '<td>' + jour(l.creeLe) + '<div class="rf-sous">' + esc(l.creePar || '') + '</div></td>'
           + '<td><span class="rf-pill ' + (TON_ETAT[l.etat] || '') + '">' + esc(ETATS[l.etat] || l.etat) + '</span></td>'
           + '<td style="white-space:nowrap">'
-            + '<button class="mini" data-copier="' + esc(l.url) + '"><span class="ic">📋</span></button> '
+            + '<button class="mini" data-copier="' + esc(l.url) + '" title="${T("Copier l’adresse du lien")}"><span class="ic">📋</span> ${T("Copier")}</button> '
             + (l.etat === 'actif'
                 ? '<button class="mini" data-renvoyer="' + esc(l.id) + '"><span class="ic">✉</span> ${T("Renvoyer")}</button> '
                   + '<button class="mini dgr" data-revoquer="' + esc(l.id) + '">'
@@ -295,7 +295,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
                    qu on ne voit plus. Il faut le revoquer d abord. */
                 : '<button class="mini dgr" data-supprimer="' + esc(l.id) + '" '
                   + 'title="${T("Retirer de la liste — le journal de ses accès est conservé")}">'
-                  + (ARME === 'sup:' + l.id ? '${T("Confirmer ?")}' : '<span class="ic">🗑</span>') + '</button> ')
+                  + (ARME === 'sup:' + l.id ? '${T("Confirmer ?")}' : '<span class="ic">🗑</span> ${T("Supprimer")}') + '</button> ')
             + '<button class="mini" data-journal="' + esc(l.id) + '">${T("Journal")}</button>'
           + '</td></tr>');
         if (RENVOI && RENVOI.id === l.id) h.push(ligneRenvoi(l));
