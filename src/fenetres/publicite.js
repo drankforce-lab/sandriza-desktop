@@ -390,7 +390,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
         + '<div style="flex:1;min-width:0"><div style="font-size:.83rem">"' + esc(c.comment) + '"</div><div style="font-size:.7rem;color:var(--tx2);margin-top:.1rem">' + esc(c.name) + ' · ' + esc(szQuand(c.date)) + '</div></div></div>';
     }).join('') + '</div>' : '';
     return szTuiles('<div class="tuiles">'
-      + '<div class="tuile" style="text-align:center"><div class="v" style="color:' + (D.rate >= 70 ? 'var(--tx-ok)' : 'var(--tx-err)') + ';font-size:2rem">' + D.rate + ' %</div><div class="z">${T("Taux de satisfaction")}</div></div>'
+      + '<div class="tuile" style="text-align:center"><div class="v" style="color:' + (D.rate >= 70 ? 'var(--tx-ok)' : 'var(--tx-err)') + ';font-size:2rem">' + szNombre(D.rate, 1) + ' %</div><div class="z">${T("Taux de satisfaction")}</div></div>'
       + '<div class="carte" style="grid-column:span 2"><h2>${T("Répartition des évaluations")}</h2>'
       +   '<div style="font-size:.8rem;margin-bottom:.2rem"><span class="ic">👍</span> ${T("Satisfaits")}</div>' + bar(D.satisfied, D.rated, '#4ade80')
       +   '<div style="font-size:.8rem;margin-bottom:.2rem"><span class="ic">👎</span> ${T("Insatisfaits")}</div>' + bar(D.unsatisfied, D.rated, '#f87171')

@@ -399,12 +399,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return;
     }
     var h = '<div class="l"><span>${T("Sous-total")}</span><span>' + argent(TOT.sousTotal) + '</span></div>';
-    if (TOT.rabais > 0) h += '<div class="l bon"><span>${T("Rabais")}</span><span>-' + argent(TOT.rabais) + '</span></div>';
+    if (TOT.rabais > 0) h += '<div class="l bon"><span>${T("Rabais")}</span><span>−' + argent(TOT.rabais) + '</span></div>';
     if (TOT.livraison > 0) h += '<div class="l"><span>${T("Livraison")}</span><span>' + argent(TOT.livraison) + '</span></div>';
     (TOT.taxes || []).forEach(function(x){
       // Le taux est affiche : c est ce qui permet de verifier une taxe d un coup
       // d oeil quand une vente part vers une autre province.
-      var taux = (Math.round((x.taux || 0) * 1000000) / 10000);
+      var taux = szNombre(Math.round((x.taux || 0) * 1000000) / 10000, 4);
       h += '<div class="l"><span>' + esc(x.nom) + ' (' + taux + ' %)</span><span>'
         + argent(x.montant) + '</span></div>';
     });

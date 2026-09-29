@@ -1025,7 +1025,7 @@ function pageProduit(id) {
     var el = document.getElementById('p-marge'); if (!el) return;
     if (!(eff > 0) || !(c > 0)) { el.textContent = ''; return; }
     var m = eff - c, pct = Math.round((m / eff) * 100);
-    el.innerHTML = '${T("Marge :")} <strong>' + szArgent(m) + '</strong> (' + pct + ' %)'
+    el.innerHTML = '${T("Marge :")} <strong>' + szArgent(m) + '</strong> (' + szNombre(pct, 1) + ' %)'
       + (s > 0 && s < p ? ' ${T("— calculée sur le prix soldé")}' : '')
       + (m <= 0 ? ' <span style="color:var(--tx-err)">${T("— vente à perte")}</span>' : '');
   }

@@ -334,7 +334,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
       + '<div class="tuile"><div class="lbl">${T("Satisfaites")}</div><div class="val bon">' + (s.satisfied || 0) + '</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Insatisfaites")}</div><div class="val err">' + (s.unsatisfied || 0) + '</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Taux")}</div><div class="val">'
-      + (s.rate == null ? '—' : s.rate + ' %') + '</div>'
+      + (s.rate == null ? '—' : szNombre(s.rate, 1) + ' %') + '</div>'
       + '<div class="sub">' + (s.rate == null ? '${T("aucune évaluation")}' : '${T("des évaluations")}') + '</div></div>'
       + '</div>');
 

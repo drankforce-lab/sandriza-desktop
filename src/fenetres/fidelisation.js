@@ -275,7 +275,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
               + (s.nbQuestions > 1 ? '${T(" questions")}' : '${T(" question")}') + '</span></div></div></div></td>'
               + '<td class="num">' + s.invitations + '</td>'
               + '<td class="num">' + s.reponses + '</td>'
-              + '<td class="num"><span class="rf-mont">' + s.taux + ' %</span>'
+              + '<td class="num"><span class="rf-mont">' + szNombre(s.taux, 1) + ' %</span>'
               + '<div class="jauger"><i style="width:' + Math.max(0, Math.min(100, Number(s.taux) || 0)) + '%"></i></div></td>'
               + '<td>' + (s.recompense ? '<span class="rf-pill bleu">' + esc(s.recompense) + '</span>'
                                        : '<span class="dt">${T("aucune")}</span>') + '</td>'
