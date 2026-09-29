@@ -62,6 +62,12 @@
  * éprouve une fenêtre qui n'existe pas. Si une opération change de forme là-bas,
  * elle doit changer ici : c'est le prix de l'outil, et il est plus bas que celui
  * d'une fenêtre morte en production.
+ *
+ * ⚠ LES LIBELLÉS AUSSI (2026-09-29). Un statut, un nom de bloc, un déclencheur
+ * ou une ambiance inventés ici (« Diaporama héro », « Fermée », « Expédiée »…)
+ * font mesurer un écran qui n'existe pas, et `src/vocabulaire-site.js` ne les
+ * traduit pas en anglais. Les libellés ont été recopiés du site ; chaque entrée
+ * corrigée nomme sa source (« libellés recopiés de <fichier du site> »).
  */
 
 // ── PIÈCES COMMUNES ─────────────────────────────────────────────────────────
@@ -118,7 +124,8 @@ const IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAA
 // Verrou obtenu. ⚠ La forme est { obtenu, horsLigne, parQui } — PAS un booléen :
 // `_lockTake` du site rend un objet, et le pont le traduit ainsi.
 const VERROU = { ok: true, obtenu: true, horsLigne: false, parQui: '' };
-const IDENTITE = { ok: true, nom: 'Brigitte Brousseau', role: 'Administratrice' };
+// libellé du rôle recopié de staff.js (ROLES.admin.label) — « Administratrice » n'existe pas au site.
+const IDENTITE = { ok: true, nom: 'Brigitte Brousseau', role: 'Administrateur' };
 
 /* La table des reseaux, telle que `nl:epingleDonnees` la rend (#115).
    ⚠ LES TROIS SONT PRESENTS, ET PAS SEULEMENT LE PREMIER. Instagram y est pour
@@ -255,10 +262,11 @@ const JEU = {
       // Les TROIS usages, dont un sans imprimante associée et un au format Lettre :
       // c'est le cas qui a cassé, et un jeu d'essai qui n'a qu'un service ne
       // l'aurait pas reproduit.
+      // libellés recopiés de printagent.js (KINDS[…].label, via pont.js imprimantesEtat)
       services: [
         { cle: 'barcode', titre: 'Codes-barres', imprimante: 'Zebra ZD220', largeurPo: 2, hauteurPo: 1 },
-        { cle: 'shipping', titre: 'Expédition', imprimante: '', largeurPo: 4, hauteurPo: 6 },
-        { cle: 'invoice', titre: 'Factures', imprimante: 'HP LaserJet', largeurPo: 8.5, hauteurPo: 11 },
+        { cle: 'shipping', titre: "Étiquettes d'expédition", imprimante: '', largeurPo: 4, hauteurPo: 6 },
+        { cle: 'invoice', titre: 'Factures (8,5 × 11 po)', imprimante: 'HP LaserJet', largeurPo: 8.5, hauteurPo: 11 },
       ],
     },
     'imprimantes:liste': {
@@ -293,8 +301,9 @@ const JEU = {
       annee: 2026, annees: [2026, 2025], connecte: true, charge: true,
       mode: 'production', bacASable: false,
       controle: { equilibre: true, ecart: 0 },
-      natures: { vente: 'Vente', frais: 'Frais', remboursement: 'Remboursement',
-        fraisRetenu: 'Frais retenu', depot: 'Dépôt' },
+      // libellés recopiés de comptepaiement.js (NATURES[…].fr)
+      natures: { vente: 'Vente', frais: 'Frais de traitement', remboursement: 'Remboursement',
+        fraisRetenu: 'Frais retenus', depot: 'Dépôt à la banque' },
       mouvements: [
         { date: '2026-09-02', nature: 'vente', ref: 'sq_8891', libelle: 'Commande ord_0041', effet: 206.85, solde: 206.85 },
         { date: '2026-09-02', nature: 'frais', ref: 'sq_8891', libelle: 'Frais de traitement', effet: -6.31, solde: 200.54 },
@@ -797,7 +806,7 @@ const JEU = {
           },
           recentesCommandes: [
             { oid: 'o251', numero: 'SZ-100251', date: '2026-08-08T14:00:00Z', client: 'Josée Lafleur', total: 302.96, statut: 'pending', statutLibelle: 'En attente' },
-            { oid: 'o249', numero: 'SZ-100249', date: '2026-08-08T11:00:00Z', client: 'Marc Dubé', total: 89.95, statut: 'shipped', statutLibelle: 'Expédiée' },
+            { oid: 'o249', numero: 'SZ-100249', date: '2026-08-08T11:00:00Z', client: 'Marc Dubé', total: 89.95, statut: 'shipped', statutLibelle: 'En livraison' }, // libellé recopié de admin.js (ORDER_STATUS)
             { oid: 'o242', numero: 'SZ-100242', date: '2026-08-07T16:00:00Z', client: 'Anne Roy', total: 145.0, statut: 'delivered', statutLibelle: 'Livrée' },
             { oid: 'o238', numero: 'SZ-100238', date: '2026-08-07T09:00:00Z', client: 'Luc Simard', total: 45.0, statut: 'cancelled', statutLibelle: 'Annulée' },
           ],
@@ -1073,7 +1082,7 @@ const JEU = {
             { cle: 'clients', nom: 'Clients avec commandes' }],
           canaux: [{ cle: 'email', nom: 'Courriel' }, { cle: 'both', nom: 'Courriel + SMS' },
             { cle: 'sms', nom: 'SMS' }],
-          modeles: [{ cle: 'welcome', nom: '🌸 Bienvenue' }, { cle: 'promo', nom: '🎁 Promotion' }],
+          modeles: [{ cle: 'welcome', nom: '🌸 Bienvenue' }, { cle: 'promo', nom: '🔥 Promotion & Soldes' }] /* noms recopiés de newsletter.js (modèles) */,
           abonnesActifs: 412, smsDestinataires: 88, smsPret: true,
         },
         'nl:modele': { ok: true, nom: '🌸 Bienvenue', sujet: 'Bienvenue chez SANDRIZA !',
@@ -1320,7 +1329,7 @@ const JEU = {
                   tvqNo: '1234567890 TQ0001', sinBn: '123456789', type: 'inc',
                   address: '12 rue de la Mode', city: 'Montreal', postal: 'H2X 1Y4',
                   phone: '514 555-0123', email: 'info@sandriza.com' },
-        types: [{ v: 'autonome', l: 'Travailleur(se) autonome' }, { v: 'inc', l: 'Societe par actions' }] },
+        types: [{ v: 'autonome', l: 'Travailleur(se) autonome' }, { v: 'inc', l: 'Société par actions / Corporation' } /* libellés recopiés de admin.js (_IMPOT_TYPES) */] },
       'impot:profil:ecrire': { ok: true, peutEcrire: true, complet: true, profil: {}, types: [] } } },
     { nom: 'profil incomplet', id: 'entreprise', reponses: { identite: IDENTITE,
       'impot:donnees': DONNEES_IMPOT,
@@ -1330,12 +1339,13 @@ const JEU = {
         types: [{ v: 'autonome', l: 'Travailleur(se) autonome' }] } } },
     { nom: 'aide-memoire', id: 'memo', reponses: { identite: IDENTITE,
       'impot:donnees': DONNEES_IMPOT,
+      // libellés recopiés de admin.js (_impotMemoDonnees)
       'impot:memo': { ok: true, annee: 2026, marque: 'SANDRIZA',
-        remises: [{ date: '15 janv. 2026', libelle: 'Remise TPS/TVQ — T4', note: 'Oct–Dec', passee: true }],
-        declarations: [{ date: '30 avr. 2026', libelle: 'Declaration T1', note: 'Particulier', passee: false }],
-        deductions: [{ libelle: 'Cout des marchandises vendues', detail: 'Factures fournisseurs' }],
-        formulaires: [{ code: 'T2125', quoi: 'Etat des resultats', lien: '' },
-                      { code: 'T1', quoi: 'Declaration federale', lien: 'https://exemple.ca/t1' }] } } },
+        remises: [{ date: '15 janv. 2026', libelle: 'Remise TPS/TVQ — T4 année précédente', note: 'Oct–Déc de l’année passée', passee: true }],
+        declarations: [{ date: '30 avr. 2026', libelle: 'Déclaration impôt fédéral (T1)', note: 'Particulier — date limite sans pénalité', passee: false }],
+        deductions: [{ libelle: 'Coût des marchandises vendues', detail: 'Factures fournisseurs · inventaire vendu · livraisons reçues' }],
+        formulaires: [{ code: 'T2125', quoi: 'État des résultats des activités d’une entreprise (fédéral)', lien: '' },
+                      { code: 'T1', quoi: 'Déclaration de revenus fédérale — particulier', lien: 'https://exemple.ca/t1' }] } } },
     { nom: 'revenus', id: 'revenus',
       reponses: { 'impot:donnees': Object.assign({}, DONNEES_IMPOT, { onglet: 'revenus' }), identite: IDENTITE } },
     { nom: 'documents', id: 'documents',
@@ -1883,18 +1893,19 @@ const JEU = {
   },
 
   // Automatisations (palier 5, famille Communications). Pas de secret.
+  // libellés recopiés de admin.js (_AUTOMATION_JOBS : name, schedule, desc, recommendation ; _STATS_METRICS[…].label)
   'automations.js': {
     identite: IDENTITE,
     'config:automations:donnees': { ok: true, peutModifier: true,
       jobs: [
-        { key: 'stats', name: 'Statistiques quotidiennes', icon: '📊', schedule: 'Quotidien',
-          desc: 'Envoie le résumé de la veille.', recommendation: 'Une fois par jour, tôt le matin.',
+        { key: 'stats', name: 'Statistiques quotidiennes', icon: '📊', schedule: 'Une fois par jour',
+          desc: "Commandes d'hier, revenu brut, variantes à réapprovisionner et retours en attente.", recommendation: 'Une fois par jour, idéalement en soirée pour couvrir toute la journée précédente.',
           recipient: 'single', url: 'https://www.sandriza.com/cron-daily-stats.php?token=abc123', email: 'admin@ex.com' },
-        { key: 'deliveries', name: 'Vérification des livraisons', icon: '📦', schedule: 'Toutes les heures',
-          desc: 'Suit les colis et avance les statuts.', recommendation: 'Toutes les heures.',
+        { key: 'delivery', name: 'Suivi de livraison automatique', icon: '📦', schedule: 'Aux 30 minutes',
+          desc: "Vérifie le statut auprès du transporteur et confirme la livraison au client dès qu'elle est détectée.", recommendation: 'Aux 30 minutes, pour détecter rapidement une livraison confirmée par le transporteur.',
           recipient: 'perCustomer', url: 'https://www.sandriza.com/cron-check-deliveries.php?token=def456', email: '' },
       ],
-      statsMetrics: [ { key: 'ventes', label: 'Ventes', actif: true }, { key: 'visites', label: 'Visites', actif: false } ] },
+      statsMetrics: [ { key: 'orders', label: 'Commandes', actif: true }, { key: 'revenue', label: 'Revenu brut', actif: false } ] },
   },
 
   // Transporteurs (palier 5, famille Livraison). ⚠ Aucun secret entier dans le
@@ -2001,7 +2012,7 @@ const JEU = {
       },
       variables: [
         { groupe: 'Liens — Pages', vars: [ { code: '{{BOUTIQUE}}', desc: 'Lien vers la boutique' }, { code: '{{CONTACT}}', desc: 'Page Contact' } ] },
-        { groupe: 'Infos boutique', vars: [ { code: '{{MARQUE}}', desc: 'Nom de la marque' }, { code: '{{JOURS_RETOUR}}', desc: 'Délai de retour' } ] }
+        { groupe: 'Infos boutique', vars: [ { code: '{{MARQUE}}', desc: 'Nom de la marque' }, { code: '{{JOURS_RETOUR}}', desc: 'Nombre de jours autorisés pour un retour' } /* libellé recopié de admin.js (_politiqueVariables) */ ] }
       ]
     };
     // ⚠ UN CAS PAR ÉTAT D'OUVERTURE. Les deux premiers ouvrent sur la LISTE.
@@ -2064,6 +2075,7 @@ const JEU = {
   // d'ouverture (le clic ne navigue pas sur le DOM factice du banc) : 'securite'
   // (les 4 blocs de réglages) et 'users' (la liste en lecture). Un contenu d'essai
   // riche : deux comptes, l'un superadmin/MFA, l'autre admin exempté.
+  // rôles, groupes de permissions et questions recopiés de staff.js (ROLES, _SEC_PERM_GROUPS, PERMISSION_DEFS, SECURITY_QUESTIONS)
   'securite.js': (function(){
     var donnees = {
       ok: true, peutModifier: true,
@@ -2072,8 +2084,8 @@ const JEU = {
       geo: { enabled: false, allowedCountries: ['CA'], ipExceptions: ['203.0.113.7'], exemptStaffIds: ['s1'] },
       stats: { total: 2, actifs: 2, mfa: 1 },
       comptes: [
-        { id: 's1', nom: 'Bob Brousseau', username: 'brousseau', email: 'bob@sandriza.com', role: 'superadmin', roleLabel: 'Super-administrateur', roleColor: '#7c3aed', roleIcon: '👑', active: true, mfaEnabled: true, requireMfaSetup: false, mfaExempt: false, estSuper: true, estMoi: true, derniereConnexion: '2026-08-13T12:00:00Z', nbConnexions: 42 },
-        { id: 's2', nom: 'Marie Tremblay', username: 'marie', email: 'marie@sandriza.com', role: 'admin', roleLabel: 'Administratrice', roleColor: '#2563eb', roleIcon: '🛠', active: true, mfaEnabled: false, requireMfaSetup: false, mfaExempt: true, estSuper: false, estMoi: false, derniereConnexion: '', nbConnexions: 0 }
+        { id: 's1', nom: 'Bob Brousseau', username: 'brousseau', email: 'bob@sandriza.com', role: 'superadmin', roleLabel: 'Super-administrateur', roleColor: '#dc2626', roleIcon: '👑', active: true, mfaEnabled: true, requireMfaSetup: false, mfaExempt: false, estSuper: true, estMoi: true, derniereConnexion: '2026-08-13T12:00:00Z', nbConnexions: 42 },
+        { id: 's2', nom: 'Marie Tremblay', username: 'marie', email: 'marie@sandriza.com', role: 'admin', roleLabel: 'Administrateur', roleColor: '#7c3aed', roleIcon: '🛡', active: true, mfaEnabled: false, requireMfaSetup: false, mfaExempt: true, estSuper: false, estMoi: false, derniereConnexion: '', nbConnexions: 0 }
       ]
     };
     var ro = { peutModifier: false };
@@ -2090,13 +2102,13 @@ const JEU = {
       (function(){
         var form = {
           ok: true, mode: 'create',
-          roles: [ { key: 'admin', label: 'Administratrice', icon: '🛠', permissions: ['dashboard:view','orders:view','orders:edit'] }, { key: 'superadmin', label: 'Super-administrateur', icon: '👑', permissions: [] } ],
+          roles: [ { key: 'admin', label: 'Administrateur', icon: '🛡', permissions: ['dashboard:view','orders:view','orders:edit'] }, { key: 'superadmin', label: 'Super-administrateur', icon: '👑', permissions: [] } ],
           permModel: [
             { label: '🛍 Boutique', modules: [ { key: 'dashboard', label: 'Tableau de bord', actions: ['view'] }, { key: 'orders', label: 'Commandes', actions: ['view','add','edit','delete'] } ] },
-            { label: '⚙ Système', modules: [ { key: 'staff', label: 'Personnel & journaux', actions: ['view','add','edit','delete'] } ] }
+            { label: '🔐 Système', modules: [ { key: 'staff', label: 'Personnel et journaux', actions: ['view','add','edit','delete'] } ] }
           ],
           actions: ['view','add','edit','delete'], actionLabels: { view: 'Voir', add: 'Ajouter', edit: 'Modifier', delete: 'Supprimer' },
-          questions: ['Ville de naissance ?', 'Nom du premier animal ?'],
+          questions: ['Dans quelle ville êtes-vous né(e) ?', 'Quel était le nom de votre premier animal de compagnie ?'],
           compte: { role: 'admin', active: true, effectivePerms: ['dashboard:view','orders:view'] }
         };
         return { nom: 'compte — nouveau', id: 'user-new',
@@ -2106,11 +2118,11 @@ const JEU = {
       { nom: 'compte — modifier', id: 'user-s2',
         reponses: { identite: IDENTITE, 'securite:donnees': donnees,
           'securite:form': { ok: true, mode: 'edit',
-            roles: [ { key: 'admin', label: 'Administratrice', icon: '🛠', permissions: ['dashboard:view'] } ],
+            roles: [ { key: 'admin', label: 'Administrateur', icon: '🛡', permissions: ['dashboard:view'] } ],
             permModel: [ { label: '🛍 Boutique', modules: [ { key: 'dashboard', label: 'Tableau de bord', actions: ['view'] } ] } ],
             actions: ['view','add','edit','delete'], actionLabels: { view: 'Voir', add: 'Ajouter', edit: 'Modifier', delete: 'Supprimer' },
-            questions: ['Ville de naissance ?', 'Nom du premier animal ?'],
-            compte: { id: 's2', firstName: 'Marie', lastName: 'Tremblay', username: 'marie', email: 'marie@sandriza.com', role: 'admin', active: true, requireMfaSetup: false, mfaExempt: true, mfaEnabled: false, estSuper: false, securityQ1: 'Ville de naissance ?', securityQ2: '', securityAnswersSet: true, effectivePerms: ['dashboard:view'] } },
+            questions: ['Dans quelle ville êtes-vous né(e) ?', 'Quel était le nom de votre premier animal de compagnie ?'],
+            compte: { id: 's2', firstName: 'Marie', lastName: 'Tremblay', username: 'marie', email: 'marie@sandriza.com', role: 'admin', active: true, requireMfaSetup: false, mfaExempt: true, mfaEnabled: false, estSuper: false, securityQ1: 'Dans quelle ville êtes-vous né(e) ?', securityQ2: '', securityAnswersSet: true, effectivePerms: ['dashboard:view'] } },
           'securite:compte:ecrire': { ok: true, id: 's2', mode: 'edit' },
           'securite:compte:supprimer': { ok: true },
           'securite:compte:invitation': { ok: true, email: 'marie@sandriza.com' } } },
@@ -2263,15 +2275,15 @@ const JEU = {
       reseaux: [
         { cle: 'facebook', nom: 'Facebook', actif: true, jetonPose: true,
           extraLabel: 'Identifiant de la Page', extraValeur: '1234567890',
-          aide: 'Jeton de longue duree (Page Access Token).', testable: true },
+          aide: 'Jeton de longue durée (Page Access Token) — Meta for Developers → Graph API Explorer.', testable: true }, // aides recopiées de social.js (_SOC_CLES)
         { cle: 'instagram', nom: 'Instagram', actif: true, jetonPose: false,
           extraLabel: 'Identifiant du compte professionnel', extraValeur: '',
-          aide: 'Jeton Instagram Business.', testable: true },
+          aide: 'Jeton Instagram Business — même application Meta, avec l’API Instagram Graph activée.', testable: true },
         { cle: 'pinterest', nom: 'Pinterest', actif: false, jetonPose: false,
           extraLabel: 'Identifiant du tableau', extraValeur: '',
-          aide: 'Jeton Pinterest v5.', testable: false },
+          aide: 'Jeton Pinterest v5 — developers.pinterest.com → Mon application.', testable: false },
         { cle: 'tiktok', nom: 'TikTok', actif: false, jetonPose: true,
-          extraLabel: 'Open ID', extraValeur: 'tt_9f3c', aide: 'Jeton TikTok for Business.', testable: false }
+          extraLabel: 'Open ID', extraValeur: 'tt_9f3c', aide: 'Jeton TikTok for Business — developers.tiktok.com (validation de l’application requise).', testable: false }
       ]
     };
     return [
@@ -2360,19 +2372,19 @@ const JEU = {
       ok: true, nom: 'Bob Brousseau', role: 'Super-administrateur', roleIcone: '👑',
       identifiant: 'brousseau', courriel: 'bob@sandriza.com',
       derniereConnexion: '2026-08-13T12:00:00Z',
-      questions: ['Ville de naissance ?', 'Nom du premier animal ?', 'Nom de votre école primaire ?']
+      questions: ['Dans quelle ville êtes-vous né(e) ?', 'Quel était le nom de votre premier animal de compagnie ?', 'Quel est le nom de votre école primaire ?']
     };
     return [
       { nom: 'questions configurées', reponses: { identite: IDENTITE,
-        'profil:donnees': Object.assign({ questionsPosees: true, q1: 'Ville de naissance ?', q2: 'Nom du premier animal ?' }, base),
+        'profil:donnees': Object.assign({ questionsPosees: true, q1: 'Dans quelle ville êtes-vous né(e) ?', q2: 'Quel était le nom de votre premier animal de compagnie ?' }, base),
         'profil:motdepasse': { ok: true },
-        'profil:questions': Object.assign({ questionsPosees: true, q1: 'Ville de naissance ?', q2: 'Nom du premier animal ?' }, base) } },
+        'profil:questions': Object.assign({ questionsPosees: true, q1: 'Dans quelle ville êtes-vous né(e) ?', q2: 'Quel était le nom de votre premier animal de compagnie ?' }, base) } },
       // ⚠ L'etat le plus grave : aucune reponse enregistree, donc aucune
       // recuperation possible par cette voie. L'ecran doit le DIRE.
       { nom: 'aucune question', reponses: { identite: IDENTITE,
         'profil:donnees': Object.assign({ questionsPosees: false, q1: '', q2: '' }, base) } },
       { nom: 'mot de passe refuse', reponses: { identite: IDENTITE,
-        'profil:donnees': Object.assign({ questionsPosees: true, q1: 'Ville de naissance ?', q2: 'Nom du premier animal ?' }, base),
+        'profil:donnees': Object.assign({ questionsPosees: true, q1: 'Dans quelle ville êtes-vous né(e) ?', q2: 'Quel était le nom de votre premier animal de compagnie ?' }, base),
         'profil:motdepasse': { ok: false, motif: 'refus', detail: 'Mot de passe actuel incorrect.' } } }
     ];
   })(),
@@ -2411,14 +2423,14 @@ const JEU = {
       ok: true, isSuper: true, peutModifier: true, statsHidden: false,
       acces: [
         { ts: '2026-08-13T12:00:00Z', type: 'login_ok', nom: 'Bob Brousseau', email: 'bob@sandriza.com', ip: '203.0.113.7', cc: 'CA', pays: 'Canada', ville: 'Québec', action: 'Connexion réussie' },
-        { ts: '2026-08-13T11:00:00Z', type: 'login_fail', nom: '', email: 'x@y.com', ip: '198.51.100.9', cc: 'US', pays: 'États-Unis', ville: '', action: 'Mot de passe invalide' }
+        { ts: '2026-08-13T11:00:00Z', type: 'login_fail', nom: '', email: 'x@y.com', ip: '198.51.100.9', cc: 'US', pays: 'États-Unis', ville: '', action: 'Identifiants invalides — x@y.com' } // actions recopiées de staff.js (addLog) et cron-daily-stats.php
       ],
-      automations: [ { ts: '2026-08-13T06:00:00Z', section: 'stats', action: 'Courriel de statistiques envoyé' } ],
+      automations: [ { ts: '2026-08-13T06:00:00Z', section: 'stats', action: 'Résumé statistiques quotidien envoyé à admin@sandriza.com.' } ],
       prints: [
-        { at: 1723545600000, kind: 'commande', kindLabel: 'Bon de commande', label: 'CMD-1042', size: '4x6', dpi: 203, qty: 1, printer: 'Phomemo', via: 'agent', who: 'Bob', poste: 'A1', ok: true, note: '' },
-        { at: 1723542000000, kind: 'etiquette', kindLabel: 'Étiquette', label: 'Colis', size: '', dpi: '', qty: 2, printer: 'Zebra', via: 'navigateur', who: 'Marie', poste: '', ok: false, note: 'Bourrage' }
+        { at: 1723545600000, kind: 'order', kindLabel: 'Bon de commande', label: 'CMD-1042', size: '4x6', dpi: 203, qty: 1, printer: 'Phomemo', via: 'agent', who: 'Bob', poste: 'A1', ok: true, note: '' },
+        { at: 1723542000000, kind: 'shipping', kindLabel: "Étiquette d'expédition", label: 'Colis', size: '', dpi: '', qty: 2, printer: 'Zebra', via: 'navigateur', who: 'Marie', poste: '', ok: false, note: 'Bourrage' }
       ],
-      printKinds: [ { key: 'commande', label: 'Bon de commande' }, { key: 'etiquette', label: 'Étiquette' } ],
+      printKinds: [ { key: 'order', label: 'Bon de commande' }, { key: 'shipping', label: "Étiquette d'expédition" } ], // printagent.js (PRINT_KINDS)
       recherches: [ { q: 'robe rouge taille 12', fois: 8, derniere: '2026-08-13' }, { q: 'bottes hiver', fois: 3, derniere: '2026-08-12' } ],
       /* ⚠ TROIS FORMES, parce que l'onglet en dessine trois : une erreur NON VUE
          avec sa pile et plusieurs routes, une VUE (ligne estompée), et un échec
@@ -2488,8 +2500,8 @@ const JEU = {
       // faux pont renvoie des résultats groupés, ce qui éprouve le rendu des groupes.
       { nom: 'recherche (résultats groupés)', id: 'q-203', reponses: { identite: IDENTITE, 'journal:donnees': donnees,
         'journal:recherche': { ok: true, q: '203', total: 2, groupes: [
-          { cle: 'acces', label: '🔐 Accès', onglet: 'acces', total: 1, entrees: [ { ts: '2026-08-13T12:00:00Z', type: 'login_ok', nom: 'Bob Brousseau', email: 'bob@sandriza.com', ip: '203.0.113.7', cc: 'CA', pays: 'Canada', ville: 'Québec', action: 'Connexion' } ] },
-          { cle: 'impressions', label: '🖨 Impressions', onglet: 'impressions', total: 1, entrees: [ { at: 1723545600000, kind: 'commande', kindLabel: 'Bon de commande', label: 'CMD-203', printer: 'Phomemo', who: 'Bob', qty: 1, ok: true } ] },
+          { cle: 'acces', label: '🔐 Accès', onglet: 'acces', total: 1, entrees: [ { ts: '2026-08-13T12:00:00Z', type: 'login_ok', nom: 'Bob Brousseau', email: 'bob@sandriza.com', ip: '203.0.113.7', cc: 'CA', pays: 'Canada', ville: 'Québec', action: 'Connexion réussie' } ] },
+          { cle: 'impressions', label: '🖨 Impressions', onglet: 'impressions', total: 1, entrees: [ { at: 1723545600000, kind: 'order', kindLabel: 'Bon de commande', label: 'CMD-203', printer: 'Phomemo', who: 'Bob', qty: 1, ok: true } ] },
           { cle: 'recherches', label: '🔎 Recherches sans résultat', onglet: 'recherches', total: 1, entrees: [ { q: 'article 203', fois: 2, derniere: '2026-08-13' } ] }
         ] },
         'journal:sms': { ok: true, sms: [ { id: 's1', from: '+1203', to: '+14185550000', body: 'test 203', direction: 'inbound', date: '2026-08-13T12:00:00Z' } ] },
@@ -2510,14 +2522,15 @@ const JEU = {
   // éditeur héro (le plus complexe), lecture seule.
   'accueil.js': (() => {
     const GRADS = [{ label: 'Nuit bleue', value: 'linear-gradient(135deg,#1a1a2e,#0f3460)' }, { label: 'Violet royal', value: 'linear-gradient(135deg,#2d1040,#7c3aed)' }];
+    // noms des blocs recopiés de data.js (_HP_DEFAULTS), descriptions de admin.js (_HP_DESC)
     const BLOCS = (peut) => ({ ok: true, peutModifier: peut, gradients: GRADS, blocs: [
-      { id: 'hero', label: 'Diaporama héro', order: 0, visible: true, icon: '🖼️', desc: 'Diaporama plein écran',
+      { id: 'hero', label: 'Bannière héros', order: 0, visible: true, icon: '🖼️', desc: 'Diaporama plein écran avec transitions',
         content: { sliderEffect: 'fade', sliderInterval: 6, sliderAutoplay: true, slides: [
           { id: 's1', image: '', gradient: GRADS[0].value, overlay: 0.4, eyebrow: 'Nouvelle Collection', title: 'L’élégance au quotidien', subtitle: 'Découvrez notre sélection.', cta1Text: 'Découvrir', cta1Href: '#shop', cta2Text: '', cta2Href: '' },
           { id: 's2', image: 'https://exemple.r2.dev/divers/h2.jpg', gradient: GRADS[1].value, overlay: 0.3, eyebrow: 'Soldes', title: 'Jusqu’à -50%', subtitle: '', cta1Text: 'Voir', cta1Href: '#shop?finalSale=1', cta2Text: '', cta2Href: '' },
         ] } },
-      { id: 'categories', label: 'Catégories', order: 1, visible: true, icon: '🗂️', desc: 'Grille des catégories', content: { eyebrow: 'Explorer', title: 'Nos catégories' } },
-      { id: 'banner', label: 'Bannière', order: 2, visible: false, icon: '📢', desc: 'Bannière bas de page', content: { eyebrow: '', title: 'Infolettre', subtitle: 'Inscrivez-vous.', ctaText: 'S’abonner', ctaHref: '#shop' } },
+      { id: 'categories', label: 'Grille catégories', order: 1, visible: true, icon: '🗂️', desc: 'Grille des catégories', content: { eyebrow: 'Explorer', title: 'Nos catégories' } },
+      { id: 'banner', label: 'Bannière livraison', order: 2, visible: false, icon: '📢', desc: 'Bannière bas de page avec CTA', content: { eyebrow: '', title: 'Infolettre', subtitle: 'Inscrivez-vous.', ctaText: 'S’abonner', ctaHref: '#shop' } },
     ] });
     return [
       { nom: 'liste des blocs', reponses: { identite: IDENTITE, 'config:accueil:donnees': BLOCS(true) } },
@@ -2565,7 +2578,7 @@ const JEU = {
     const DONNEES = (peut) => ({ ok: true, peutModifier: peut, marque: 'SANDRIZA', tagline: 'ÉLÉGANCE · RAFFINEMENT · STYLE',
       fonctions: [
         { key: 'order_confirm', label: '🛒 Confirmation de commande', module: 'Panier' },
-        { key: 'shipping',      label: '🚚 Avis d’expédition',        module: 'Expédition' },
+        { key: 'shipping',      label: "🚚 Avis d'expédition",        module: 'Expédition' }, // libellés recopiés de admin.js (_EMAIL_FUNCTIONS)
         { key: 'newsletter',    label: '📧 Campagnes infolettre',      module: 'Newsletter' },
       ],
       gabarits: [
@@ -2626,11 +2639,11 @@ const JEU = {
      mannequins »). Un seul jeu n'aurait dessiné qu'une des deux branches. */
   'studio.js': (() => {
     const PRESETS = { ok: true, presets: [
-      { cle: 'studio-epure',  label: 'Studio épuré',  emoji: '🕊️', desc: 'Fond neutre, lumière douce.' },
-      { cle: 'plage-doree',   label: 'Plage dorée',   emoji: '🏖️', desc: 'Sable, mer, lumière dorée.' },
-      { cle: 'beton-chic',    label: 'Béton chic',    emoji: '🏙️', desc: 'Béton clair, urbain minimal.' },
-      { cle: 'verdure',       label: 'Verdure',       emoji: '🌿', desc: 'Végétation, lumière naturelle.' },
-      { cle: 'nuit-lumieres', label: 'Nuit lumières', emoji: '🌃', desc: 'Lumières de ville floutées.' },
+      { cle: 'studio-epure',  label: 'Studio épuré',  emoji: '🕊️', desc: 'Fond neutre, lumière douce — l’article seul, net.' }, // label et desc recopiés de photoroom-proxy.php
+      { cle: 'plage-doree',   label: 'Plage dorée',   emoji: '🏖️', desc: 'Sable, mer, lumière dorée de fin de journée.' },
+      { cle: 'beton-chic',    label: 'Béton chic',    emoji: '🏙️', desc: 'Béton clair, urbain minimal, ombre franche.' },
+      { cle: 'verdure',       label: 'Verdure',       emoji: '🌿', desc: 'Végétation, lumière naturelle, frais et aéré.' },
+      { cle: 'nuit-lumieres', label: 'Nuit lumières', emoji: '🌃', desc: 'Lumières de ville floutées, ambiance éditoriale.' },
     ] };
     const COMPTE = { ok: true, compte: { available: 842, subscription: 1000, plan: 'plus' },
       sandbox: { utilise: 37, quotaMois: 1000, quotaJour: 100, estime: true }, prixEdit: 0.10 };
@@ -4236,11 +4249,11 @@ const JEU = {
      controle, l angle mort exact de #32. */
   'catalogio.js': (function(){
     var COLS = [
-      { lbl: 'SKU', key: true, info: false, req: false, priv: false, aide: 'Retrouve le produit.' },
+      { lbl: 'SKU', key: true, info: false, req: false, priv: false, aide: 'Retrouve le produit. Un SKU inconnu crée un nouveau produit ; laissé vide à la création, il est généré (ROB-0001…).' }, // aides recopiées de catalogio.js (_AIDE)
       { lbl: 'Nom', key: false, info: false, req: true, priv: false, aide: 'Nom affiché en boutique.' },
-      { lbl: 'Prix régulier', key: false, info: false, req: true, priv: false, aide: 'Supérieur à 0.' },
-      { lbl: 'Coût d’acquisition', key: false, info: false, req: true, priv: true, aide: 'Donnée de marge.' },
-      { lbl: 'Stock total', key: false, info: true, req: false, priv: false, aide: 'Somme des variantes.' },
+      { lbl: 'Prix régulier', key: false, info: false, req: true, priv: false, aide: 'Prix régulier, supérieur à 0.' },
+      { lbl: 'Coût d’acquisition', key: false, info: false, req: true, priv: true, aide: 'Coût réel d’acquisition. Obligatoire à la création.' },
+      { lbl: 'Stock total', key: false, info: true, req: false, priv: false, aide: 'Somme des variantes. Passe par la feuille Inventaire pour être modifiée.' },
     ];
     var IMP = { feuille: 'catalogue', fichier: 'fournisseur-automne.csv', sep: ';', total: 4,
       ignorees: ['Notes internes'], nbPhotos: 2, compte: { creation: 1, maj: 2, inchange: 1, erreur: 0 } };
@@ -4389,7 +4402,7 @@ const JEU = {
     var social = { ok: true, peut: PEUT, base: 'https://www.sandriza.com/',
       posts: [{ date: '2026-08-05', networks: 'facebook, instagram', content: 'Nouvelle collection automne 🍂', orders48h: 4, revenue48h: 512 }],
       recs: [{ icon: '⚠️', txt: '8 clients inactifs depuis 90j+. Une offre de réactivation pourrait les relancer.', seg: 'inactif' },
-        { icon: '⭐', txt: '10 VIP — offre exclusive pour les fidéliser.', seg: 'vip' }] };
+        { icon: '⭐', txt: '10 VIP — offre exclusive ou accès avant-première pour les fidéliser.' /* recopié de analytics.js */, seg: 'vip' }] };
     var campaigns = { ok: true, peut: PEUT,
       camps: [{ id: 'camp_0001', name: 'Promo été VIP', promoLabel: 'Soldes automne (-20%)', segLabel: 'VIP', audienceCount: 10, channels: 'facebook, instagram', date: '2026-08-01', status: 'sent' },
         { id: 'camp_0002', name: 'Relance inactifs', promoLabel: '', segLabel: 'Inactif', audienceCount: 8, channels: 'newsletter', date: '2026-08-10', status: 'draft' }] };
@@ -4570,55 +4583,55 @@ const JEU = {
       'sociaux:liste': { ok: true, peutModifier: true, tuiles: { enAttente: 0, publiees: 0, echouees: 0, ignorees: 0 },
         reseauxActifs: [], file: [], historique: [] },
       'patrons:liste': { ok: true, peutEcrire: true,
-          declencheurs: [{ v: 'new_product', l: 'Nouveau produit ajouté' }, { v: 'manual', l: 'Publication manuelle' }],
+          declencheurs: [{ v: 'new_product', l: '🆕 Nouveau produit ajouté' }, { v: 'manual', l: '✋ Publication manuelle' }], // social.js (TRIGGERS, VARIABLES)
           reseaux: [{ v: 'facebook', l: 'Facebook', icone: 'f' }, { v: 'instagram', l: 'Instagram', icone: 'i' }],
-          variables: [{ v: '{{product.name}}', l: 'Nom du produit' }, { v: '{{hashtags}}', l: 'Mots-clics' }],
+          variables: [{ v: '{{product.name}}', l: 'Nom du produit' }, { v: '{{hashtags}}', l: 'Hashtags' }],
           patrons: [
             { id: 'new-prod', nom: 'Nouveau produit', gabarit: 'Nouveaute : {{product.name}}',
-              declencheur: 'new_product', declencheurLibelle: 'Nouveau produit ajouté',
+              declencheur: 'new_product', declencheurLibelle: '🆕 Nouveau produit ajouté',
               reseaux: ['facebook', 'instagram'], motsCles: ['mode', 'quebec'], image: true,
               actif: true, defaut: true },
             { id: 'pat-maison', nom: 'Annonce maison', gabarit: 'Passez nous voir !',
-              declencheur: 'manual', declencheurLibelle: 'Publication manuelle',
+              declencheur: 'manual', declencheurLibelle: '✋ Publication manuelle',
               reseaux: [], motsCles: [], image: false, actif: false, defaut: false }
           ] },
       'patrons:basculer': { ok: true, peutEcrire: true,
-          declencheurs: [{ v: 'new_product', l: 'Nouveau produit ajouté' }, { v: 'manual', l: 'Publication manuelle' }],
+          declencheurs: [{ v: 'new_product', l: '🆕 Nouveau produit ajouté' }, { v: 'manual', l: '✋ Publication manuelle' }], // social.js (TRIGGERS, VARIABLES)
           reseaux: [{ v: 'facebook', l: 'Facebook', icone: 'f' }, { v: 'instagram', l: 'Instagram', icone: 'i' }],
-          variables: [{ v: '{{product.name}}', l: 'Nom du produit' }, { v: '{{hashtags}}', l: 'Mots-clics' }],
+          variables: [{ v: '{{product.name}}', l: 'Nom du produit' }, { v: '{{hashtags}}', l: 'Hashtags' }],
           patrons: [
             { id: 'new-prod', nom: 'Nouveau produit', gabarit: 'Nouveaute : {{product.name}}',
-              declencheur: 'new_product', declencheurLibelle: 'Nouveau produit ajouté',
+              declencheur: 'new_product', declencheurLibelle: '🆕 Nouveau produit ajouté',
               reseaux: ['facebook', 'instagram'], motsCles: ['mode', 'quebec'], image: true,
               actif: true, defaut: true },
             { id: 'pat-maison', nom: 'Annonce maison', gabarit: 'Passez nous voir !',
-              declencheur: 'manual', declencheurLibelle: 'Publication manuelle',
+              declencheur: 'manual', declencheurLibelle: '✋ Publication manuelle',
               reseaux: [], motsCles: [], image: false, actif: false, defaut: false }
           ] },
       'patrons:supprimer': { ok: true, peutEcrire: true,
-          declencheurs: [{ v: 'new_product', l: 'Nouveau produit ajouté' }, { v: 'manual', l: 'Publication manuelle' }],
+          declencheurs: [{ v: 'new_product', l: '🆕 Nouveau produit ajouté' }, { v: 'manual', l: '✋ Publication manuelle' }], // social.js (TRIGGERS, VARIABLES)
           reseaux: [{ v: 'facebook', l: 'Facebook', icone: 'f' }, { v: 'instagram', l: 'Instagram', icone: 'i' }],
-          variables: [{ v: '{{product.name}}', l: 'Nom du produit' }, { v: '{{hashtags}}', l: 'Mots-clics' }],
+          variables: [{ v: '{{product.name}}', l: 'Nom du produit' }, { v: '{{hashtags}}', l: 'Hashtags' }],
           patrons: [
             { id: 'new-prod', nom: 'Nouveau produit', gabarit: 'Nouveaute : {{product.name}}',
-              declencheur: 'new_product', declencheurLibelle: 'Nouveau produit ajouté',
+              declencheur: 'new_product', declencheurLibelle: '🆕 Nouveau produit ajouté',
               reseaux: ['facebook', 'instagram'], motsCles: ['mode', 'quebec'], image: true,
               actif: true, defaut: true },
             { id: 'pat-maison', nom: 'Annonce maison', gabarit: 'Passez nous voir !',
-              declencheur: 'manual', declencheurLibelle: 'Publication manuelle',
+              declencheur: 'manual', declencheurLibelle: '✋ Publication manuelle',
               reseaux: [], motsCles: [], image: false, actif: false, defaut: false }
           ] },
       'patrons:ecrire': { ok: true, peutEcrire: true,
-          declencheurs: [{ v: 'new_product', l: 'Nouveau produit ajouté' }, { v: 'manual', l: 'Publication manuelle' }],
+          declencheurs: [{ v: 'new_product', l: '🆕 Nouveau produit ajouté' }, { v: 'manual', l: '✋ Publication manuelle' }], // social.js (TRIGGERS, VARIABLES)
           reseaux: [{ v: 'facebook', l: 'Facebook', icone: 'f' }, { v: 'instagram', l: 'Instagram', icone: 'i' }],
-          variables: [{ v: '{{product.name}}', l: 'Nom du produit' }, { v: '{{hashtags}}', l: 'Mots-clics' }],
+          variables: [{ v: '{{product.name}}', l: 'Nom du produit' }, { v: '{{hashtags}}', l: 'Hashtags' }],
           patrons: [
             { id: 'new-prod', nom: 'Nouveau produit', gabarit: 'Nouveaute : {{product.name}}',
-              declencheur: 'new_product', declencheurLibelle: 'Nouveau produit ajouté',
+              declencheur: 'new_product', declencheurLibelle: '🆕 Nouveau produit ajouté',
               reseaux: ['facebook', 'instagram'], motsCles: ['mode', 'quebec'], image: true,
               actif: true, defaut: true },
             { id: 'pat-maison', nom: 'Annonce maison', gabarit: 'Passez nous voir !',
-              declencheur: 'manual', declencheurLibelle: 'Publication manuelle',
+              declencheur: 'manual', declencheurLibelle: '✋ Publication manuelle',
               reseaux: [], motsCles: [], image: false, actif: false, defaut: false }
           ] },
       'patrons:apercu': { ok: true, nom: 'Nouveau produit', texte: 'Nouveaute : Robe Aurore',
@@ -4627,16 +4640,16 @@ const JEU = {
       'sociaux:liste': { ok: true, peutModifier: false, tuiles: { enAttente: 0, publiees: 0, echouees: 0, ignorees: 0 },
         reseauxActifs: [], file: [], historique: [] },
       'patrons:liste': Object.assign({}, { ok: true, peutEcrire: true,
-          declencheurs: [{ v: 'new_product', l: 'Nouveau produit ajouté' }, { v: 'manual', l: 'Publication manuelle' }],
+          declencheurs: [{ v: 'new_product', l: '🆕 Nouveau produit ajouté' }, { v: 'manual', l: '✋ Publication manuelle' }], // social.js (TRIGGERS, VARIABLES)
           reseaux: [{ v: 'facebook', l: 'Facebook', icone: 'f' }, { v: 'instagram', l: 'Instagram', icone: 'i' }],
-          variables: [{ v: '{{product.name}}', l: 'Nom du produit' }, { v: '{{hashtags}}', l: 'Mots-clics' }],
+          variables: [{ v: '{{product.name}}', l: 'Nom du produit' }, { v: '{{hashtags}}', l: 'Hashtags' }],
           patrons: [
             { id: 'new-prod', nom: 'Nouveau produit', gabarit: 'Nouveaute : {{product.name}}',
-              declencheur: 'new_product', declencheurLibelle: 'Nouveau produit ajouté',
+              declencheur: 'new_product', declencheurLibelle: '🆕 Nouveau produit ajouté',
               reseaux: ['facebook', 'instagram'], motsCles: ['mode', 'quebec'], image: true,
               actif: true, defaut: true },
             { id: 'pat-maison', nom: 'Annonce maison', gabarit: 'Passez nous voir !',
-              declencheur: 'manual', declencheurLibelle: 'Publication manuelle',
+              declencheur: 'manual', declencheurLibelle: '✋ Publication manuelle',
               reseaux: [], motsCles: [], image: false, actif: false, defaut: false }
           ] }, { peutEcrire: false }) } },
     /* ══ LES PUBLICATIONS SOCIALES (#115, 2026-09-14) ═════════════════════════
@@ -4794,7 +4807,7 @@ const JEU = {
               statut: 'pending', statutLibelle: 'En attente', horsLigne: false,
               nbMessages: 3, date: '7 août 14:22' },
             { id: 's2', nom: 'Visiteur', courriel: '', telephone: '(418) 555-0199',
-              statut: 'closed', statutLibelle: 'Fermée', horsLigne: true,
+              statut: 'closed', statutLibelle: 'Fermé', horsLigne: true, // livechat.js (_STATUS)
               nbMessages: 5, date: '5 août 09:10' },
           ],
         },
@@ -4852,7 +4865,7 @@ const JEU = {
             { id: 'p2', nom: 'Blouse en soie', sku: 'HT-0002', categorie: 'hauts' },
           ],
           offres: [
-            { id: 'd1', nom: 'Solde du printemps', rabais: '20 %', portee: 'Robes',
+            { id: 'd1', nom: 'Solde du printemps', rabais: '20% de rabais', portee: 'Robes', // promo.js (_discountLabel)
               genre: 'percent', valeur: 20, bogoAchat: 0, bogoGratuit: 0, paliers: [],
               parClient: false, appliqueA: 'category', categoriesChoisies: ['robes'],
               produitsChoisis: [], bandeau: 'Jusqu’à 20 % sur les robes', bandeauEN: '',
@@ -5314,9 +5327,10 @@ const JEU = {
           detail: {
             IE: [
               { cle: 'rep-ue', gravite: 'bloquant', flux: '', motif: 'absent',
-                quoi: 'Aucun organisme d’emballages déclaré',
-                base: 'Directive (UE) 2018/852, art. 8 bis',
-                pourquoi: 'Sans adhésion, la mise sur le marché est interdite.',
+                // textes recopiés de conformite.js (EXIGENCES_UE, gpsr)
+                quoi: "Personne responsable établie dans l'Union",
+                base: 'Règlement (UE) 2023/988 sur la sécurité générale des produits, art. 16 — applicable depuis le 13 décembre 2024',
+                pourquoi: "Aucun produit ne peut être offert à un consommateur de l'Union si aucun opérateur économique établi dans l'Union n'en répond. Son nom et son adresse doivent accompagner l'offre.",
                 valideJusqu: '' },
             ],
             ES: [
@@ -7189,7 +7203,7 @@ const JEU = {
         'connexion:contexte': { ok: true,
           theme: { bgFrom: '#191238', bgMid: '#2b2262', logoFrom: '#4f46e5',
             logoTo: '#7c3aed', titre: '#f5e6d0', sous: 'rgba(236,229,217,0.92)',
-            sousTexte: 'Administration panel', btnFrom: '#1a1207',
+            sousTexte: 'Panneau d’administration', /* staff.js : le site envoie le français, même en anglais */ btnFrom: '#1a1207',
             btnTo: '#3d2810', btnTexte: '#f5e6d0' },
           marque: { nom: 'SANDRIZA', lettre: 'S', logo: '' },
           prefill: '', souvenir: false, captchaRequis: false, verrouille: false },
@@ -7373,10 +7387,10 @@ const JEU = {
           prefill: '', souvenir: false, captchaRequis: false, verrouille: false },
         'connexion:maintenance': { ok: true, actif: false, phrase: '' },
         'connexion:questionsDonnees': { ok: true, prenom: 'Bruno',
-          questions: ['Quel est le nom de votre premier animal ?',
+          questions: ['Quel était le nom de votre premier animal de compagnie ?', /* recopiées de staff.js (SECURITY_QUESTIONS) */
             'Quel est le nom de jeune fille de votre mère ?',
-            'Dans quelle ville êtes-vous né ?',
-            'Quel était le modèle de votre première voiture ?'] },
+            'Dans quelle ville êtes-vous né(e) ?',
+            'Quelle était la marque de votre première voiture ?'] },
         'connexion:questionsEcrire': { ok: false, motif: 'memea',
           message: 'Les deux réponses doivent être différentes.' },
         identite: IDENTITE,
