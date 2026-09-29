@@ -26,6 +26,8 @@
  */
 
 module.exports = {
+  '✓ Marquer payée': '✓ Mark paid',
+  'Annuler le paiement': 'Undo payment',
   /* ⚠ LES DEUX ALTERNATIVES EN ENTIER — voir `tools/banc-pluriel-colle.js`. */
   'facture': 'invoice',
   'factures': 'invoices',

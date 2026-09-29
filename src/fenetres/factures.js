@@ -219,8 +219,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
         /* Deux formes ENTIERES : un << s >> colle a part ne se traduit pas. */
         + tuile('${T("Remboursé")}', fmt(TUILES.rembourse), 'att',
             nbR + (nbR > 1 ? '${T(" remboursements")}' : '${T(" remboursement")}'))
-        + tuile('${T("Dépenses ")}' + (TUILES.annee || ''), fmt(TUILES.depenses), 'err')
-        + tuile('${T("Nb factures")}', String(TUILES.nb || 0), '')
+        + tuile('${T("Dépenses ")}' + (TUILES.annee || ''), fmt(TUILES.depenses), '')
+        + tuile('${T("Factures")}', String(TUILES.nb || 0), '')
         + '</div>');
     }
     /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE A FACTURES (2026-09-25) ════════
@@ -250,10 +250,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
         + vue.map(function(r){
             var gestes = '';
             if (PEUT_ENC) {
-              if (r.statut === 'unpaid' || r.statut === 'overdue') gestes += '<button class="mini geste bon" data-payer="' + esc(r.id) + '" title="${T("Marquer la facture comme payée")}">${T("Payée")}</button> ';
+              if (r.statut === 'unpaid' || r.statut === 'overdue') gestes += '<button class="mini geste bon" data-payer="' + esc(r.id) + '" title="${T("Marquer la facture comme payée")}">${T("✓ Marquer payée")}</button> ';
               /* ⚠ L infobulle ENTIERE : une cle courte posee dans une phrase
                  plus longue laisse l autre moitie en francais. */
-              else if (r.statut === 'paid') gestes += '<button class="mini geste" data-depayer="' + esc(r.id) + '" title="${T("Annuler le statut de paiement")}">${T("Annuler")}</button> ';
+              else if (r.statut === 'paid') gestes += '<button class="mini geste" data-depayer="' + esc(r.id) + '" title="${T("Annuler le statut de paiement")}">${T("Annuler le paiement")}</button> ';
             }
             if (PEUT_SUP) gestes += '<button class="mini geste danger" data-suppr="' + esc(r.id) + '">' + (SUPPR_ARME === r.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
             return '<tr data-id="' + esc(r.id) + '" title="${T("Ouvrir la facture")}">'
