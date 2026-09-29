@@ -168,13 +168,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var bord = sel ? th.accent : 'transparent';
     var ombre = sel ? OMBRE_CHOIX.replace('@', th.accent) : '';
     return '<button type="button" class="th" data-champ="' + esc(champ) + '" data-id="' + esc(th.id) + '"'
-      + ' aria-pressed="' + (sel ? 'true' : 'false') + '" title="' + esc(th.label) + '"'
+      + ' aria-pressed="' + (sel ? 'true' : 'false') + '" title="' + esc(szTd(th.label)) + '"'
       + (RO ? ' disabled' : '') + '>'
       + '<span class="pastille" style="background:' + esc(th.bg) + ';border-color:' + esc(bord) + ';'
       + (ombre ? 'box-shadow:' + ombre + ';' : '') + '">'
       + '<span class="barre" style="background:' + esc(th.accent) + '"></span>'
       + (sel ? '<span class="coche" style="background:' + esc(th.accent) + ';color:' + esc(th.bg) + '">✓</span>' : '')
-      + '</span><span class="nom">' + esc(th.label) + '</span></button>';
+      + '</span><span class="nom">' + esc(szTd(th.label)) + '</span></button>';
   }
 
   function dessiner(){

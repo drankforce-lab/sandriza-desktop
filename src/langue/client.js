@@ -136,6 +136,7 @@ module.exports = {
   'Supprimer': 'Delete',
   'Générer': 'Generate',
   'Français (par défaut)': 'French (default)',
+  'Français': 'French',
   'Le compte part dans la corbeille et reste restaurable à tout moment.':
     'The account goes to the bin and stays restorable at any time.',
   'Ce compte n’a aucune commande — rien de comptable n’est perdu.':

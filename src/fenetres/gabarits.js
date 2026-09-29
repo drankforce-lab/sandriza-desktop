@@ -251,11 +251,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          dans les deux premieres cellules, << Gabarit >> dans l en-tete. En
          tabulant, le lecteur d ecran n annonce ni l un ni l autre. */
       var sel = '<select data-assign="' + esc(f.key) + '"'
-        + ' aria-label="' + esc('${T("Gabarit de ")}' + f.label + ' — ' + f.module) + '"'
+        + ' aria-label="' + esc('${T("Gabarit de ")}' + szTd(f.label) + ' — ' + szTd(f.module)) + '"'
         + (RO ? ' disabled' : '') + '>';
       for (var k = 0; k < opts.length; k++) sel += '<option value="' + esc(opts[k].id) + '"' + (cur === opts[k].id ? ' selected' : '') + '>' + esc(opts[k].name) + '</option>';
       sel += '</select>';
-      h += '<tr><td class="mod">' + esc(f.module) + '</td><td>' + esc(f.label) + '</td><td>' + sel + '</td></tr>';
+      h += '<tr><td class="mod">' + esc(szTd(f.module)) + '</td><td>' + esc(szTd(f.label)) + '</td><td>' + sel + '</td></tr>';
     }
     h += '</tbody></table>';
     if (!RO) h += '<div style="margin-top:.8rem"><button class="prim" id="g-assign-save"><span class="ic">💾</span>${T(" Enregistrer les attributions")}</button></div>';

@@ -297,4 +297,7 @@ module.exports = {
   'effacées.': 'cleared.',
   'conservée.': 'kept.',
   'conservées.': 'kept.',
+  // Tuile des impressions et compte des recherches (2026-09-29)
+  'travaux (30 j)': 'jobs (30 d)',
+  ' fois': ' times',
 };

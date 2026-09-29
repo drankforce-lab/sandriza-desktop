@@ -388,7 +388,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
               + (r.fournisseur && r.description ? '<span>·</span><span>' + esc(r.fournisseur) + '</span>' : '')
               + '</div></div></div></td>'
               + '<td class="dt" style="white-space:nowrap">' + esc(r.dateFr) + '</td>'
-              + '<td class="dt">' + esc(r.paiement) + '</td>'
+              + '<td class="dt">' + esc(szTd(r.paiement)) + '</td>'
               + '<td class="num"><span class="rf-mont">' + esc(r.montant) + '</span></td>'
               + '<td class="dt" style="text-align:right;white-space:nowrap">'
               + (r.aTaxes ? esc(r.tps) + ' · ' + esc(r.tvq) : '—') + '</td>'
@@ -530,7 +530,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
       + (e.aTaxes ? ' (taxes incluses)' : '') + '</div>'
       + '<div class="grille">'
       + '<div><div class="l">${T("Date")}</div><div class="v">' + esc(e.dateFr) + '</div></div>'
-      + '<div><div class="l">${T("Mode de paiement")}</div><div class="v">' + esc(e.paiementLbl) + '</div></div>'
+      + '<div><div class="l">${T("Mode de paiement")}</div><div class="v">' + esc(szTd(e.paiementLbl)) + '</div></div>'
       + '</div>'
       + '<div class="texte">' + esc(e.description || '${T("(aucune description)")}') + '</div>';
 
@@ -611,7 +611,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
       + champ('${T("Date")}', '<input type="date" id="f-date" value="' + esc(f.date) + '">', 'f-date')
       + champ('${T("Mode de paiement")}', '<select id="f-pay" aria-label="${T("Mode de paiement")}">' + (D.paiements || []).map(function(p){
           return '<option value="' + esc(p.cle) + '"' + (f.paiement === p.cle ? ' selected' : '') + '>'
-            + esc(p.libelle) + '</option>'; }).join('') + '</select>')
+            + esc(szTd(p.libelle)) + '</option>'; }).join('') + '</select>')
       + '<div class="champ large"><label for="f-cat">${T("Catégorie (ligne fiscale)")}</label><select id="f-cat">'
       + (D.categories || []).map(function(c){
           return '<option value="' + esc(c.cle) + '"' + (f.categorie === c.cle ? ' selected' : '') + '>'

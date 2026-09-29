@@ -188,8 +188,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     BLOCS.forEach(function(b, i){
       h += '<div class="bloc' + (b.visible ? '' : ' off') + '">'
         + '<span class="em">' + esc(b.icon) + '</span>'
-        + '<div class="nom"><b>' + esc(b.label) + '</b>' + (b.visible ? '' : '<span class="masq">${T("(masqué)")}</span>')
-        + '<div class="d">' + esc(b.desc) + '</div></div>'
+        + '<div class="nom"><b>' + esc(szTd(b.label)) + '</b>' + (b.visible ? '' : '<span class="masq">${T("(masqué)")}</span>')
+        + '<div class="d">' + esc(szTd(b.desc)) + '</div></div>'
         + '<div class="actes">'
         + '<button class="b" type="button" data-ed="' + esc(b.id) + '" title="${T("Modifier")}"><span class="ic">✎</span></button>'
         + (RO ? '' : '<button class="b" type="button" data-vis="' + esc(b.id) + '" title="' + (b.visible ? '${T("Masquer")}' : '${T("Afficher")}') + '">' + (b.visible ? '<span class="ic">👁</span>' : '<span class="ic">🚫</span>') + '</button>'
@@ -211,7 +211,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function chAire(id, label, v, ph){ return '<div class="ch"><label for="' + id + '">' + esc(label) + '</label><textarea id="' + id + '" rows="2" placeholder="' + esc(ph||'') + '"' + (RO?' disabled':'') + '>' + esc(v||'') + '</textarea></div>'; }
 
   function diapoHtml(s, i){
-    var opts = GRADS.map(function(g, gi){ return '<option value="' + gi + '"' + ((s.gradient||gradVal(0))===g.value?' selected':'') + '>' + esc(g.label) + '</option>'; }).join('');
+    var opts = GRADS.map(function(g, gi){ return '<option value="' + gi + '"' + ((s.gradient||gradVal(0))===g.value?' selected':'') + '>' + esc(szTd(g.label)) + '</option>'; }).join('');
     return '<div class="diapo"><div class="tete2">'
       + '<div class="apercu" style="' + swatch(s) + '"><span style="position:absolute;inset:0;background:rgba(0,0,0,' + (s.overlay!=null?s.overlay:0) + ')"></span><span class="t">' + esc(s.title||('${T("Diapo ")}'+(i+1))) + '</span></div>'
       + '<span class="nm">${T("Diapo ")}' + (i+1) + '</span>'
@@ -254,7 +254,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function editeurHtml(){
     var b = BLOCS.filter(function(x){ return x.id === EDIT; })[0]; if (!b) { EDIT=null; return listeHtml(); }
     var c = b.content || {};
-    var h = '<div class="carte edit"><div class="stitre">${T("Modifier : ")}' + esc(b.label) + '</div>';
+    var h = '<div class="carte edit"><div class="stitre">${T("Modifier : ")}' + esc(szTd(b.label)) + '</div>';
     if (b.id === 'hero') {
       h += '<div class="gr2">'
         + '<div class="ch"><label for="a-effect">${T("Effet de transition")}</label><select id="a-effect"' + (RO?' disabled':'') + '>'

@@ -880,7 +880,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
         + '<div class="haut"><strong>' + esc(p.nom) + '</strong>'
         + '<span class="pill ' + (p.actif ? 'bon' : 'neutre') + '">' + (p.actif ? '${T("actif")}' : '${T("inactif")}') + '</span>'
         + (p.defaut ? '<span class="pill neutre">${T("fourni")}</span>' : '')
-        + '<span class="droite"><span class="dt">' + esc(p.declencheurLibelle) + '</span></span></div>'
+        + '<span class="droite"><span class="dt">' + esc(szTd(p.declencheurLibelle)) + '</span></span></div>'
         + '<div class="dt" style="white-space:pre-wrap;overflow-wrap:anywhere">'
         /* ⚠ DOUBLE ANTISLASH OBLIGATOIRE : ce script vit dans un litteral de
            gabarit, ou un antislash-n simple devient un VRAI saut de ligne. La
@@ -921,7 +921,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       + '<label class="champ"><span class="lbl">${T("Déclencheur")}</span><select class="t" id="pa-decl">'
       + (PAT.declencheurs || []).map(function(d){
           return '<option value="' + esc(d.v) + '"' + (p.declencheur === d.v ? ' selected' : '') + '>'
-            + esc(d.l) + '</option>'; }).join('')
+            + esc(szTd(d.l)) + '</option>'; }).join('')
       + '</select></label>'
       + '<label class="champ"><span class="lbl">${T("Réseaux")}</span><span class="cases">'
       + (PAT.reseaux || []).map(function(r){
@@ -932,7 +932,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       + '<label class="champ"><span class="lbl">${T("Texte publié")}</span>'
       + '<textarea class="t" id="pa-gab" rows="5">' + esc(p.gabarit) + '</textarea>'
       + '<span class="sub">${T("Variables : ")}'
-      + (PAT.variables || []).map(function(v){ return esc(v.v) + ' (' + esc(v.l) + ')'; }).join(' · ')
+      + (PAT.variables || []).map(function(v){ return esc(v.v) + ' (' + esc(szTd(v.l)) + ')'; }).join(' · ')
       + '</span></label>'
       + '<label class="champ"><span class="lbl">${T("Mots-clics")}</span>'
       + '<input class="t" id="pa-tags" value="' + esc(p.motsCles.join(', ')) + '" placeholder="${T("mode, quebec, nouveaute")}">'

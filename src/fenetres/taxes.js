@@ -58,7 +58,9 @@ th{text-align:left;padding:.35rem .5rem;font-size:.68rem;text-transform:uppercas
   letter-spacing:.06em;color:var(--tx2);border-bottom:1px solid var(--v12)}
 td{padding:.4rem .5rem;border-bottom:1px solid var(--v05);vertical-align:middle}
 td.prov{font-weight:700;width:9rem}
-td.prov .n{font-weight:400;color:var(--tx3);font-size:.72rem;line-height:1.25;white-space:normal}
+/* Le nom sur UNE ligne (entier au survol) : « Terre-Neuve-et-Labrador » passait sur deux
+   lignes et la colonne de droite depassait la fenetre en anglais (2026-09-29). */
+td.prov .n{font-weight:400;color:var(--tx3);font-size:.72rem;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:8.2rem}
 td.dr{text-align:right;white-space:nowrap}
 .comp{display:inline-flex;align-items:center;gap:.3rem;margin:.1rem .6rem .1rem 0}
 .comp .org{font-size:.7rem;color:var(--tx3)}
@@ -117,6 +119,7 @@ function pageTaxes(ouverture) {
 <div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter les taux, pas les modifier.")}</div>
 <div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
+  <button id="b-reinit">${T("Réinitialiser aux défauts")}</button>
   <button id="b-verifier">${T("Comparer à la référence")}</button>
   <button class="prim" id="b-save" disabled>${T("Enregistrer les taux")}</button></div>
 <script>
@@ -218,6 +221,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   /* « 1 août 2026 » plutot que « 2026-08-01 » : la date ISO lue comme un jour
      LOCAL (new Date('2026-08-01') serait minuit UTC, donc la veille ici). */
+  /* Le nom de la province DANS LA LANGUE DU POSTE, d apres son code : le site
+     l envoie en francais (« Colombie-Britannique ») ; l anglais dit « British
+     Columbia ». Affichage seulement — le code reste la cle. */
+  var PROV_EN = ${JSON.stringify(require('../langue').langueCourante() === 'en' ? { QC: 'Quebec', ON: 'Ontario', BC: 'British Columbia', AB: 'Alberta', MB: 'Manitoba', SK: 'Saskatchewan', NS: 'Nova Scotia', NB: 'New Brunswick', NL: 'Newfoundland and Labrador', PE: 'Prince Edward Island', NT: 'Northwest Territories', NU: 'Nunavut', YT: 'Yukon' } : {})};
+  function provNom(p){ return PROV_EN[p.code] || p.nom || ''; }
+
   function jourLisible(iso){
     var m = String(iso || '').slice(0, 10).split('-');
     if (m.length !== 3 || !(+m[0] > 0)) return String(iso || '');
@@ -237,12 +246,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h.push('<div class="carte"><h2>${T("Canada — par province de livraison")}</h2>');
     /* ⚠ DEUX TABLEAUX COTE A COTE (sa demande : aucune barre de defilement) :
        treize provinces en une colonne de champs faisaient ~600 px a elles seules. */
-    var provs = d.provinces || [], moitie = Math.ceil(provs.length / 2);
+    var provs = d.provinces || [];
+    /* ⚠ LA COUPE SUIT LA HAUTEUR (2026-09-29) : une province a deux composantes
+       (TPS + TVQ, TVP, TVD) est ~1,4 fois plus haute qu une province a une seule.
+       Couper au NOMBRE laissait la colonne de gauche deborder en anglais. On coupe
+       la ou les deux colonnes ont la hauteur estimee la plus proche, dans l ordre. */
+    var poids = provs.map(function(p){ var n = (p.composantes || []).length || 1; return 1 + 0.4 * (n - 1); });
+    var totalP = poids.reduce(function(a, b){ return a + b; }, 0), cumul = 0;
+    var moitie = Math.ceil(provs.length / 2), meilleur = Infinity;
+    for (var ic = 1; ic < provs.length; ic++) {
+      cumul += poids[ic - 1];
+      var hautP = Math.max(cumul, totalP - cumul);
+      if (hautP < meilleur) { meilleur = hautP; moitie = ic; }
+    }
     var entete = '<table><thead><tr><th>${T("Province ou territoire")}</th><th>${T("Composantes — nom, taux, organisme")}</th></tr></thead><tbody>';
     h.push('<div class="deuxT">' + entete);
     provs.forEach(function(p, ip){
       if (ip === moitie && moitie > 0) h.push('</tbody></table>' + entete);
-      h.push('<tr><td class="prov">' + esc(p.code) + '<div class="n">' + esc(p.nom) + '</div></td><td>');
+      var nomP = provNom(p);
+      h.push('<tr><td class="prov">' + esc(p.code) + '<div class="n" title="' + esc(nomP) + '">' + esc(nomP) + '</div></td><td>');
       if (!p.composantes.length) h.push('<span style="color:var(--tx3)">—</span>');
       p.composantes.forEach(function(c, i){
         var prov = (p.nom || p.code);
@@ -253,7 +275,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       h.push('</td></tr>');
     });
     h.push('</tbody></table></div>');
-    h.push('<div class="gestes"><button id="b-reinit"' + (RO ? ' disabled' : '') + '>${T("Réinitialiser aux défauts")}</button></div>');
+
     h.push('</div>');
 
     // ── Écarts avec la référence (seulement si on a demandé la comparaison) ──
@@ -310,6 +332,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     corps.innerHTML = h.join('');
     brancher();
     bsave.disabled = RO || OCCUPE;
+    /* Dans la barre du bas avec les autres gestes (2026-09-29) : sous le tableau,
+       il faisait deborder la fenetre en anglais. */
+    var brz = document.getElementById('b-reinit'); if (brz) brz.disabled = RO || OCCUPE;
   }
 
   function sur(id, gest){ var e = document.getElementById(id); if (e) e.onclick = gest; }

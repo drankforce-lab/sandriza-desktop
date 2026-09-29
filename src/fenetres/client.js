@@ -240,7 +240,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
       + (c.tel ? '<div class="ligne"><span class="k">${T("Téléphone")}</span><span>' + esc(c.tel) + '</span></div>' : '')
       + '<div class="ligne"><span class="k">${T("Adresse")}</span><span style="text-align:right">'
       + esc([a.rue, a.ville, a.province, a.codePostal, a.pays].filter(Boolean).join(', ') || '—') + '</span></div>'
-      + '<div class="ligne"><span class="k">${T("Langue des courriels")}</span><span>' + (c.langue === 'en' ? 'English' : 'Français') + '</span></div>'
+      + '<div class="ligne"><span class="k">${T("Langue des courriels")}</span><span>' + (c.langue === 'en' ? 'English' : '${T("Français")}') + '</span></div>'
       + (c.supprime && c.supprimeLe ? '<div class="ligne"><span class="k">${T("Supprimé le")}</span><span>' + esc(dateFr(c.supprimeLe)) + '</span></div>' : '')
       + '</div>';
     h += '<div class="carte"><h2>${T("Commandes récentes")} <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--tx3)">— '

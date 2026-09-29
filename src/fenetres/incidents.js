@@ -269,13 +269,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
           + (D.peutSupprimer ? '<button class="b dgr" data-del="'+esc(r.id)+'">'+(DELID===r.id?'${T("✓ Confirmer")}':'${T("Retirer")}')+'</button>' : '')
           + '</td>';
       }
-      h += '<tr><td><div class="rf-nom">'+esc(r.type||'—')+'</div>'
+      h += '<tr><td><div class="rf-nom">'+esc(szTd(r.type)||'—')+'</div>'
         + '<div class="rf-sous">'+(r.ref?'<span class="rf-code">'+esc(r.ref)+'</span><span>·</span>':'')
         + '<span>${T("survenu le")} '+esc(szQuand(r.occurredAt)||'—')+'</span></div></td>'
         + '<td style="white-space:nowrap;font-weight:600">'+esc(szQuand(r.knownAt)||'—')+'</td>'
         + '<td style="text-align:center"><span class="rf-mont">'+esc(r.peopleCount||'—')+'</span></td>'
         + '<td>'+pilRisque(r.seriousRisk)+'</td>'
-        + '<td style="white-space:nowrap;color:var(--tx2)">'+esc(r.cai||'—')+'</td>'
+        + '<td style="white-space:nowrap;color:var(--tx2)">'+esc(szTd(r.cai)||'—')+'</td>'
         + '<td>'+pilEtat(r.status)+'</td>'
         + acts + '</tr>';
     }
@@ -307,7 +307,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
       ctrl = '<textarea class="t" id="f-'+esc(c.cle)+'" rows="3" placeholder="'+esc(c.exemple||'')+'"'+(RO?' disabled':'')+'>'+esc(v)+'</textarea>';
     } else if (c.type==='select'){
       var o='', opts=c.options||[];
-      for (var i=0;i<opts.length;i++) o += '<option value="'+esc(opts[i][0])+'"'+(String(v)===String(opts[i][0])?' selected':'')+'>'+esc(opts[i][1])+'</option>';
+      for (var i=0;i<opts.length;i++) o += '<option value="'+esc(opts[i][0])+'"'+(String(v)===String(opts[i][0])?' selected':'')+'>'+esc(szTd(opts[i][1]))+'</option>';
       ctrl = '<select class="t" id="f-'+esc(c.cle)+'"'+(RO?' disabled':'')+'>'+o+'</select>';
     } else {
       ctrl = '<input class="t" type="'+esc(c.type||'text')+'" id="f-'+esc(c.cle)+'" value="'+esc(v)+'" placeholder="'+esc(c.exemple||'')+'"'+(RO?' disabled':'')+'>';
@@ -490,7 +490,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
       for (var j=0;j<et[i].champs.length;j++){
         var c=et[i].champs[j], v=inc[c.cle];
         if (v==null||v==='') continue;
-        if (c.type==='select') v=libelleOption(c, v);
+        if (c.type==='select') v=szTd(libelleOption(c, v));
         lignes += '<div class="li"><div class="k">'+esc(c.label)+'</div><div class="v">'+esc(v)+'</div></div>';
       }
       if (lignes) h += '<div class="grp"><div class="grpT">'+esc(et[i].icone||'')+' '+esc(et[i].label)+'</div>'+lignes+'</div>';

@@ -184,10 +184,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var h = '';
     for (var i = 0; i < vues.length; i++) {
       var v = vues[i];
-      h += '<div class="slot"><div class="lbl">' + esc(v.label) + '</div>'
+      h += '<div class="slot"><div class="lbl">' + esc(szTd(v.label)) + '</div>'
         + '<div class="cadre' + (RO ? ' ro' : '') + '" data-vue="' + esc(v.key) + '">'
         + (v.src
-            ? '<img src="' + esc(v.src) + '" alt="' + esc(v.label) + '">'
+            ? '<img src="' + esc(v.src) + '" alt="' + esc(szTd(v.label)) + '">'
               + (RO ? '' : '<div class="surv"><span class="ic">📸</span>${T(" Changer")}</div>')
             : '<div class="vide"><span class="em"><span class="ic">📸</span></span><span>' + (RO ? '${T("Non configuré")}' : '${T("Cliquer ou glisser")}') + '</span></div>')
         + '</div>'

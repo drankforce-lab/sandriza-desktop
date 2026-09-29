@@ -144,10 +144,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function carteHtml(j){
     var h = '<div class="carte"><div class="th"><span class="em">' + (j.icon || '⚙') + '</span>'
-      + '<span class="nom">' + esc(j.name) + '</span>'
-      + '<span class="rf-pill bleu">' + esc(j.schedule) + '</span>' + badgeDest(j.recipient) + '</div>';
-    h += '<p class="desc">' + esc(j.desc) + '</p>';
-    if (j.recommendation) h += '<div class="reco"><span class="ic">💡</span>${T(" Fréquence recommandée : ")}' + esc(j.recommendation) + '</div>';
+      + '<span class="nom">' + esc(szTd(j.name)) + '</span>'
+      + '<span class="rf-pill bleu">' + esc(szTd(j.schedule)) + '</span>' + badgeDest(j.recipient) + '</div>';
+    h += '<p class="desc">' + esc(szTd(j.desc)) + '</p>';
+    if (j.recommendation) h += '<div class="reco"><span class="ic">💡</span>${T(" Fréquence recommandée : ")}' + esc(szTd(j.recommendation)) + '</div>';
     if (j.recipient === 'single') {
       h += '<div class="rangee"><div class="ch"><label>${T("Courriel destinataire")}</label>'
         /* Un attribut par litteral : colles, l etiquette et la valeur se lisent
@@ -163,11 +163,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       h += '<div class="metriques"><div class="t"><span class="ic">📋</span>${T(" Métriques du courriel")}</div>'
         + '<div class="s">${T("Cochez ce que vous voulez recevoir (données de la veille).")}</div><div class="mgrille">'
         + D.statsMetrics.map(function(m){ return '<label><input type="checkbox" id="mt-' + m.key + '"'
-            + (m.actif ? ' checked' : '') + (RO ? ' disabled' : '') + '> ' + esc(m.label) + '</label>'; }).join('')
+            + (m.actif ? ' checked' : '') + (RO ? ' disabled' : '') + '> ' + esc(szTd(m.label)) + '</label>'; }).join('')
         + '</div><button class="prim" id="b-stats"' + (RO ? ' disabled' : '') + '>${T("Enregistrer les métriques")}</button></div>';
     }
     h += '<div class="rangee" style="margin:0"><div class="ch plein"><label>${T("URL à configurer (")}'
-      + esc(String(j.schedule).toLowerCase()) + ')</label>'
+      + esc(szTd(j.schedule).toLowerCase()) + ')</label>'
       + '<input class="mono" aria-label="${T("Adresse de rappel à copier")}" readonly value="' + esc(j.url) + '" data-url="1"></div>'
       + '<button data-copier="' + esc(j.url) + '"><span class="ic">📋</span>${T(" Copier")}</button></div>';
     return h + '</div>';

@@ -325,7 +325,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
   function blocsHtml(){
     var pal = '<div class="bqbar">' + BTYPES.map(function(t){
       return '<button class="mini" data-bajout="' + esc(t.cle) + '" title="${T("Ajouter : ")}'
-        + esc(t.label) + '"><span class="ic">' + esc(t.icone) + '</span> ' + esc(t.label) + '</button>';
+        + esc(szTd(t.label)) + '"><span class="ic">' + esc(t.icone) + '</span> ' + esc(szTd(t.label)) + '</button>';
     }).join('') + '</div>';
     if (!BLOCS.length) {
       return pal + '<div class="bvide">${T("Aucun bloc. Ajoutez-en un ci-dessus, ou chargez un modèle.")}</div>';

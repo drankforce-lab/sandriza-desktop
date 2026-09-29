@@ -196,7 +196,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<span><b>${T("Taille")}</b> ' + Math.round(r.width) + ' × ' + Math.round(r.height) + ' px</span>'
       + '<span><b>${T("Densité")}</b> ×' + (Math.round(d * 100) / 100) + '</span>';
     szDire('${T("Zone mesurée : ")}' + Math.round(r.width) + ' × ' + Math.round(r.height)
-      + ' px à ' + Math.round(r.left) + ', ' + Math.round(r.top) + '.', 'bon');
+      + '${T(" px à ")}' + Math.round(r.left) + ', ' + Math.round(r.top) + '.', 'bon');
   }
 
   /* ══ LA BARRE DE MENUS ═══════════════════════════════════════════════════

@@ -277,18 +277,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
           h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.ts))+'</td>'
             + '<td><span class="pill '+(t.k||'')+'">'+esc(t.l)+'</span></td>'
             + '<td>'+esc(x.nom||'—')+'<div class="sub">'+esc(x.email)+'</div></td>'
-            + '<td class="mono">'+esc(x.ip||'—')+'</td><td>'+esc(x.pays||'')+'</td><td>'+esc(x.action||'')+'</td></tr>';
+            + '<td class="mono">'+esc(x.ip||'—')+'</td><td>'+esc(x.pays||'')+'</td><td>'+esc(szTd(x.action||''))+'</td></tr>';
         } else if (grp.cle==='automatisations'){
           h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.ts))+'</td><td><span class="pill" style="background:var(--v06);color:var(--tx-c3cede)">'+esc(SECT[x.section]||x.section||'—')+'</span></td><td>'+esc(x.action||'')+'</td></tr>';
         } else if (grp.cle==='recherches'){
-          h += '<tr><td><strong>'+esc(x.q)+'</strong></td><td style="text-align:center">'+esc(x.fois||0)+' fois</td><td class="mut">'+esc(szJour(x.derniere)||'—')+'</td></tr>';
+          h += '<tr><td><strong>'+esc(x.q)+'</strong></td><td style="text-align:center">'+esc(x.fois||0)+'${T(" fois")}</td><td class="mut">'+esc(szJour(x.derniere)||'—')+'</td></tr>';
         } else if (grp.cle==='sms'){
           var ent=(x.direction==='inbound');
           h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.date))+'</td><td>'+(ent?'${T("⬇ Reçu")}':'${T("⬆ Envoyé")}')+'</td><td class="mono">'+esc(x.from||'')+'</td><td class="mono">'+esc(x.to||'')+'</td><td>'+esc(x.body||'')+'</td></tr>';
         } else if (grp.cle==='comptable'){
           h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.au))+'</td><td>'+esc(CANAUX[x.canal]||x.canal||'')+'</td><td>'+esc(EVEN[x.genre]||x.genre||'')+'</td><td class="mono">'+esc(x.ip||'—')+'</td><td>'+esc(x.detail||'')+'</td></tr>';
         } else {
-          h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.at))+'</td><td><span class="pill" style="background:var(--v06);color:var(--tx-c3cede)">'+esc(x.kindLabel||x.kind)+'</span></td><td>'+esc(x.label||'—')+'</td><td>'+esc(x.printer||'')+'</td><td class="sub">'+esc(x.who||'')+'</td><td>'+(x.ok===false?'<span class="pill err">${T("Échec")}</span>':'<span class="pill bon">${T("Imprimé")}</span>')+'</td></tr>';
+          h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.at))+'</td><td><span class="pill" style="background:var(--v06);color:var(--tx-c3cede)">'+esc(szTd(x.kindLabel||x.kind))+'</span></td><td>'+esc(x.label||'—')+'</td><td>'+esc(x.printer||'')+'</td><td class="sub">'+esc(x.who||'')+'</td><td>'+(x.ok===false?'<span class="pill err">${T("Échec")}</span>':'<span class="pill bon">${T("Imprimé")}</span>')+'</td></tr>';
         }
       }
       h += '</tbody></table>';
@@ -363,7 +363,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
         + '<td>'+esc(l.nom||'—')+'<div class="sub">'+esc(l.email)+'</div></td>'
         + '<td class="mono">'+esc(l.ip||'—')+'</td>'
         + '<td style="white-space:nowrap">'+esc(drapeau(l.cc))+' '+esc(l.pays||'—')+(l.ville?'<div class="sub">'+esc(l.ville)+'</div>':'')+'</td>'
-        + '<td>'+esc(l.action||'—')+'</td></tr>';
+        + '<td>'+esc(szTd(l.action)||'—')+'</td></tr>';
     }
     h += '</tbody></table></div>';
     if (apages > 1) {
@@ -429,11 +429,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
        ⚠ Les DOCUMENTS, eux, restent comptés sur ce qui est là : on ne peut pas
        additionner les copies d'un travail qu'on n'a pas reçu. Un nombre qu'on ne
        peut pas connaître ne s'invente pas — il se laisse tel quel. */
-    var kpis = '<div class="kpis"><div class="kpi"><div class="v">'+(D.printsTotal||all.length)+'</div><div class="l">travaux (30 j)</div></div>'
+    var kpis = '<div class="kpis"><div class="kpi"><div class="v">'+(D.printsTotal||all.length)+'</div><div class="l">${T("travaux (30 j)")}</div></div>'
       + '<div class="kpi"><div class="v">'+totalDocs+'</div><div class="l">${T("documents imprimés")}</div></div></div>';
     var kLbl = {}; for (var z=0;z<kinds.length;z++) kLbl[kinds[z].key]=kinds[z].label;
     var typeOpts = '<option value="all"'+(PF_TYPE==='all'?' selected':'')+'>${T("Tous les types")}</option>';
-    for (var t=0;t<kinds.length;t++) typeOpts += '<option value="'+esc(kinds[t].key)+'"'+(PF_TYPE===kinds[t].key?' selected':'')+'>'+esc(kinds[t].label)+'</option>';
+    for (var t=0;t<kinds.length;t++) typeOpts += '<option value="'+esc(kinds[t].key)+'"'+(PF_TYPE===kinds[t].key?' selected':'')+'>'+esc(szTd(kinds[t].label))+'</option>';
     var viaKeys = ['all','agent','navigateur','bluetooth'];
     var viaOpts = ''; for (var v=0;v<viaKeys.length;v++) viaOpts += '<option value="'+viaKeys[v]+'"'+(PF_VIA===viaKeys[v]?' selected':'')+'>'+(viaKeys[v]==='all'?'${T("Toutes les voies")}':VIA[viaKeys[v]])+'</option>';
 
@@ -447,7 +447,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
     if (!rows.length) h += '<tr><td colspan="7" class="vide">'+(all.length?'${T("Aucune impression ne correspond à ces filtres.")}':'${T("Aucune impression depuis 30 jours.")}')+'</td></tr>';
     for (var i=0;i<rows.length;i++){ var r=rows[i];
       h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(r.at))+'</td>'
-        + '<td><span class="pill" style="background:var(--v06);color:var(--tx-c3cede)">'+esc(r.kindLabel||r.kind)+'</span></td>'
+        + '<td><span class="pill" style="background:var(--v06);color:var(--tx-c3cede)">'+esc(szTd(r.kindLabel||r.kind))+'</span></td>'
         + '<td>'+esc(r.label||'—')+(r.size?'<div class="sub">'+esc(r.size)+(r.dpi?' · '+esc(r.dpi)+' dpi':'')+'</div>':'')+'</td>'
         + '<td style="text-align:center"><strong>'+esc(r.qty||1)+'</strong></td>'
         + '<td>'+esc(r.printer||'—')+'<div class="sub">'+esc(VIA[r.via]||r.via||'')+'</div></td>'

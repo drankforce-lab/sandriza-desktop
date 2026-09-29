@@ -251,4 +251,6 @@ module.exports = {
   'déjà envoyées.': 'already sent.',
   'étiquette déjà envoyée.': 'label already sent.',
   'étiquettes déjà envoyées.': 'labels already sent.',
+  // Forme ronde d un modele, dans la liste (2026-09-29)
+  ' · rond': ' · round',
 };

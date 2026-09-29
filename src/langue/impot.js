@@ -215,6 +215,7 @@ module.exports = {
   'T2 — avr · juin': 'Q2 — Apr · Jun',
   'T3 — juil · sep': 'Q3 — Jul · Sep',
   'T4 — oct · déc': 'Q4 — Oct · Dec',
+  ' — T': ' — Q',
 
   /* ── L ETAT DES RESULTATS ───────────────────────────────────────────────── */
   'État des résultats T2125 fédéral · TP-80-V Québec':

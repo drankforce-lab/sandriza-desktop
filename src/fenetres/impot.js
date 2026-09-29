@@ -579,7 +579,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
       + '<th style="text-align:right">TPS</th><th style="text-align:right">TVQ</th>'
       + '<th style="text-align:right">${T("À remettre")}</th><th style="text-align:right">${T("Cmdes")}</th></tr></thead><tbody>'
       + (t.trimestres || []).map(function(q){
-          return '<tr><td>' + esc(q.libelle) + '</td><td class="arg">' + esc(q.net)
+          return '<tr><td>' + esc(nomTrim(q)) + '</td><td class="arg">' + esc(q.net)
             + '</td><td class="arg">' + esc(q.tps) + '</td><td class="arg">' + esc(q.tvq)
             + '</td><td class="arg">' + esc(q.total) + '</td><td class="arg">' + q.n + '</td></tr>';
         }).join('')
@@ -590,8 +590,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
       + '<div data-perv="mois"' + (PER === 'mois' ? '' : ' hidden') + '><table><thead><tr><th>${T("Mois")}</th><th style="text-align:right">${T("Ventes nettes")}</th>'
       + '<th style="text-align:right">TPS</th><th style="text-align:right">TVQ</th>'
       + '<th style="text-align:right">${T("Cmdes")}</th></tr></thead><tbody>'
-      + (t.mensuel || []).map(function(m){
-          return '<tr><td>' + esc(m.mois) + '</td><td class="arg">' + esc(m.net)
+      + (t.mensuel || []).map(function(m, i){
+          return '<tr><td>' + esc(nomMois(m.mois, i, 'long')) + '</td><td class="arg">' + esc(m.net)
             + '</td><td class="arg">' + esc(m.tps) + '</td><td class="arg">' + esc(m.tvq)
             + '</td><td class="arg">' + m.n + '</td></tr>';
         }).join('') + '</tbody></table></div></div>';
@@ -638,12 +638,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
 
     var mx = r.maxMois || 1;
     h += '<div class="carte"><h2>${T("Ventes nettes par mois")}</h2>'
-      + '<div class="graphe">' + (r.mensuel || []).map(function(m){
+      + '<div class="graphe">' + (r.mensuel || []).map(function(m, i){
           var p = Math.max(2, Math.round((m.brutN / mx) * 100));
-          return '<div class="b" style="height:' + p + '%" title="' + esc(m.mois) + ' : '
+          return '<div class="b" style="height:' + p + '%" title="' + esc(nomMois(m.mois, i, 'short')) + ' : '
             + esc(m.net) + '"></div>'; }).join('') + '</div>'
-      + '<div class="mois">' + (r.mensuel || []).map(function(m){
-          return '<span>' + esc(m.mois) + '</span>'; }).join('') + '</div></div>';
+      + '<div class="mois">' + (r.mensuel || []).map(function(m, i){
+          return '<span>' + esc(nomMois(m.mois, i, 'short')) + '</span>'; }).join('') + '</div></div>';
     h += '</div></div>';
     return h;
   }
@@ -661,12 +661,32 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
           + '<div class="d">' + esc(d.desc) + '</div>'
           + '<div class="b"><button class="prim" data-doc="' + esc(d.cle) + '"'
           + (OCCUPE ? ' disabled' : '') + '>${T("Ouvrir")}'
-          + (d.trim ? ' — T' + (TRIM + 1) : '') + '</button></div></div>';
+          + (d.trim ? '${T(" — T")}' + (TRIM + 1) : '') + '</button></div></div>';
       }).join('') + '</div>';
     h += '<div class="aide">${T("Le <strong>profil d’entreprise</strong> (nom, NEQ, numéros de TPS et ")}'
       + '${T("de TVQ, adresse) se remplit à l’écran de la fenêtre principale — c’est lui qui garnit")} '
       + '${T("l’en-tête de ces documents.")}</div>';
     return h;
+  }
+
+  /* Trimestres et mois A L AFFICHAGE (2026-09-29). Le site les envoie deja en
+     mots francais (T1 — jan · fev · mar, Janvier…) mais aussi leur rang (indice
+     du trimestre, ordre des douze mois) : en anglais on les remet en forme dans
+     la langue du poste ; en francais on garde son texte tel quel. */
+  var EN_TRIM = ('${LIEU()}' === 'en-CA');
+  function nomMoisLieu(i, forme){
+    var s = new Date(2000, i, 1).toLocaleDateString('${LIEU()}', { month: forme });
+    return s.replace('.', '');
+  }
+  function nomMois(txt, i, forme){
+    if (!EN_TRIM || typeof i !== 'number' || i < 0 || i > 11) return txt;
+    return nomMoisLieu(i, forme);
+  }
+  function nomTrim(q){
+    if (!q) return '';
+    if (!EN_TRIM || typeof q.indice !== 'number' || q.indice < 0 || q.indice > 3) return q.libelle;
+    var k = q.indice;
+    return 'Q' + (k + 1) + ' — ' + [0, 1, 2].map(function(j){ return nomMoisLieu(k * 3 + j, 'short'); }).join(' · ');
   }
 
   function tuile(v, l, sub, cl){

@@ -281,11 +281,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           }
         }
         h.push('<div class="svc"><div class="d">'
-          + '<div class="n">' + esc(s.titre) + '</div>'
+          + '<div class="n">' + esc(szTd(s.titre)) + '</div>'
           + '<div class="m">' + esc(fmtFormat(s.largeurPo, s.hauteurPo))
           + (s.imprimante ? '' : ' · <span class="att">${T("aucune imprimante choisie")}</span>') + '</div>'
           + '<select data-svc="' + esc(s.cle) + '"'
-          + ' aria-label="' + esc('${T("Imprimante pour ")}' + s.titre) + '"'
+          + ' aria-label="' + esc('${T("Imprimante pour ")}' + szTd(s.titre)) + '"'
           + (dispo && IMPRS ? '' : ' disabled') + '>' + opts + '</select>'
           + '</div><div class="a">'
           + '<button data-tester="' + esc(s.cle) + '"' + (dispo && s.imprimante ? '' : ' disabled') + '>${T("Test d’impression")}</button>'

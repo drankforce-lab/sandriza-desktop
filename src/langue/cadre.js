@@ -72,6 +72,7 @@ module.exports = {
   'Densité ×': 'Density ×',
   'Zone mesurée : ': 'Area measured: ',
   'Zone mesurée :': 'Area measured:',
+  ' px à ': ' px at ',
 
   /* ── LES DEUX DERNIERS PARAGRAPHES DE LA CARTE (2026-09-18) ──────────────
      ⚠ L en-tete gras et sa suite sont DEUX textes, parce que la page les ecrit

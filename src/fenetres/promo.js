@@ -388,7 +388,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
             return '<tr data-mod="' + esc(r.id) + '">'
               + '<td style="width:84px">' + vignette(r) + '</td>'
               + '<td><span class="num">' + esc(r.nom) + '</span>'
-              + '<div class="dt">' + esc(r.type) + (r.rond ? ' · rond' : '') + '</div></td>'
+              + '<div class="dt">' + esc(szTd(r.type)) + (r.rond ? '${T(" · rond")}' : '') + '</div></td>'
               + '<td><span class="rf-pill">' + esc(r.dim) + '</span></td>'
               + '<td style="text-align:center">' + r.elements + '</td>'
               + '<td class="dt">' + dateFr(r.modifie) + '</td>'
@@ -444,7 +444,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
       + '<th style="text-align:right">Actions</th></tr></thead><tbody>'
       + f.map(function(x){
           return '<tr>'
-            + '<td><span class="num">' + esc(x.nom) + '</span><div class="dt">' + esc(x.type) + '</div></td>'
+            + '<td><span class="num">' + esc(x.perso ? x.nom : szTd(x.nom)) + '</span><div class="dt">' + esc(szTd(x.type)) + '</div></td>'
             + '<td><span class="rf-pill">' + esc(x.dim) + '</span></td>'
             + '<td class="dt">' + (x.perso ? '${T("personnalisé")}' : '${T("standard")}') + '</td>'
             + '<td class="dt">' + (x.planches
