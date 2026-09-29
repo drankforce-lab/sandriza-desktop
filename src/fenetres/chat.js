@@ -331,7 +331,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
     var h = szTuiles('<div class="tuiles">'
       + '<div class="tuile"><div class="lbl">${T("Conversations")}</div><div class="val">' + (s.total || 0) + '</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Évaluées")}</div><div class="val">' + (s.rated || 0) + '</div></div>'
-      + '<div class="tuile"><div class="lbl">${T("Satisfaites")}</div><div class="val bon">' + (s.satisfied || 0) + '</div></div>'
+      + '<div class="tuile"><div class="lbl">${T("Satisfaites")}</div><div class="val' + ((s.satisfied || 0) > 0 ? ' bon' : '') + '">' + (s.satisfied || 0) + '</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Insatisfaites")}</div><div class="val' + ((s.unsatisfied || 0) > 0 ? ' err' : '') + '">' + (s.unsatisfied || 0) + '</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Taux")}</div><div class="val">'
       + (s.rate == null ? '—' : szNombre(s.rate, 1) + ' %') + '</div>'

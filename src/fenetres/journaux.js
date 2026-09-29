@@ -332,11 +332,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
        se défend — la question que règle un repli de tuiles est LA HAUTEUR DE
        L ÉCRAN, qui appartient à la machine. Le réglage enregistré se perd une
        fois ; le bandeau reparaît, et se replie d un clic. */
+    /* Une tuile a ZERO ne s allume pas (2026-09-29) : « 0 echec » en rouge se lit
+       comme une alerte. */
     h += szTuiles('<div class="stat-grid">'
-      + '<div class="stat"><div class="l">${T("Connexions auj.")}</div><div class="v" style="color:var(--tx-ok2)">'+(st.loginOk||0)+'</div></div>'
-      + '<div class="stat"><div class="l">${T("Échecs auj.")}</div><div class="v" style="color:var(--tx-err2)">'+(st.loginFail||0)+'</div></div>'
-      + '<div class="stat"><div class="l">${T("Échecs MFA")}</div><div class="v" style="color:var(--tx-att)">'+(st.mfaFail||0)+'</div></div>'
-      + '<div class="stat"><div class="l">${T("Bloqués géo")}</div><div class="v" style="color:var(--tx-fda4af)">'+(st.geoBlocked||0)+'</div></div>'
+      + '<div class="stat"><div class="l">${T("Connexions auj.")}</div><div class="v"'+((st.loginOk||0)>0?' style="color:var(--tx-ok2)"':'')+'>'+(st.loginOk||0)+'</div></div>'
+      + '<div class="stat"><div class="l">${T("Échecs auj.")}</div><div class="v"'+((st.loginFail||0)>0?' style="color:var(--tx-err2)"':'')+'>'+(st.loginFail||0)+'</div></div>'
+      + '<div class="stat"><div class="l">${T("Échecs MFA")}</div><div class="v"'+((st.mfaFail||0)>0?' style="color:var(--tx-att)"':'')+'>'+(st.mfaFail||0)+'</div></div>'
+      + '<div class="stat"><div class="l">${T("Bloqués géo")}</div><div class="v"'+((st.geoBlocked||0)>0?' style="color:var(--tx-fda4af)"':'')+'>'+(st.geoBlocked||0)+'</div></div>'
       + '<div class="stat"><div class="l">${T("IPs uniques")}</div><div class="v">'+(st.ips||0)+'</div></div>'
       + '</div>');
     h += '<div class="carte"><div class="barre"><span class="sub">'+szCompte(rows.length, D.accesTotal, '${T("entrée")}', '${T("entrées")}')+'${T(" · conservation 30 jours")}</span><span class="pousse"></span>'
