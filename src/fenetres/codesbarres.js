@@ -531,7 +531,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('codesbarres')}
   function avertirLisibilite(v){
     var p = v.problemes;
     var h = '<h3 style="color:var(--tx-att)"><span class="ic">⚠</span> ${T("Ces codes ne se scanneront pas")}</h3>'
-      + '<p>${T("Sur une étiquette de <strong>")}' + v.largeurPo + '${T(" po</strong> à <strong>")}'
+      + '<p>${T("Sur une étiquette de <strong>")}' + szNombre(v.largeurPo) + '${T(" po</strong> à <strong>")}'
       + v.dpi + '${T(" ppp</strong>, ")}' + (p.length > 1 ? '${T("ces codes sont trop longs")}' : '${T("ce code est trop long")}')
       + '${T(" : la barre la plus fine tomberait à ")}'
       + '${T("<strong>1 point</strong>, sous le seuil de lecture des lecteurs. ")}'
@@ -540,7 +540,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('codesbarres')}
           return '<li class="item"><strong>' + esc(x.sku) + '</strong>'
             + (x.nom ? ' — ' + esc(x.nom) : '')
             + '<br><span style="color:var(--tx2)">' + x.modules + '${T(" modules · il faudrait une ")}'
-            + '${T("étiquette d’au moins ")}' + x.largeurMiniPo + '${T(" po")}</span></li>'; }).join('')
+            + '${T("étiquette d’au moins ")}' + szNombre(x.largeurMiniPo) + '${T(" po")}</span></li>'; }).join('')
       + '</ul>'
       + '<p style="color:var(--tx2)">${T("Deux leviers : raccourcir le <strong>code couleur</strong> ")}'
       + '${T("(Inventaire → Attributs → Couleurs) ou passer à une étiquette plus large. ")}'

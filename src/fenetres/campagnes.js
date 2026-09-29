@@ -1433,7 +1433,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
               + (c.canal === 'both' ? ' + ' + (D.smsDestinataires || 0) + ' SMS' : '') + '</td>'
               + '<td><span class="rf-pill ' + (c.etat === 'sent' ? 'vert' : (c.etat === 'sending' ? 'ambre' : ''))
               + '">' + esc(c.etatLibelle) + '</span>'
-              + (c.date ? '<div class="dt">' + esc(c.date) + '</div>' : '') + '</td>'
+              + (c.date ? '<div class="dt">' + esc(szQuand(c.date)) + '</div>' : '') + '</td>'
               + '<td class="num">' + c.envoyes
               + (c.echecs ? ' / <span style="color:var(--tx-err)">' + c.echecs + '</span>' : '') + '</td>'
               + (D.peutModifier ? '<td class="fin">' + gestes + '</td>' : '') + '</tr>';

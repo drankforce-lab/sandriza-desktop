@@ -546,7 +546,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
       h += '<div class="avis" style="margin-top:.6rem">${T("Facture en dollars US — origine")} <strong>'
         + esc(e.origine || '—') + '</strong>'
         + (e.fxTaux ? ' ${T("× taux")} <strong>' + esc(e.fxTaux) + '</strong>'
-            + (e.fxDate ? ' (' + esc(e.fxDate) + ')' : '')
+            + (e.fxDate ? ' (' + esc(szQuand(e.fxDate)) + ')' : '')
             + (e.fxApprox ? ' approximatif' : '') : '') + '.</div>';
     }
     if (e.aRecu) {
@@ -642,7 +642,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
               }).filter(Boolean).join(' · ')
             + (f.origine.total != null ? ' · total ' + szArgentChamp(f.origine.total) + ' US' : '')
             + (f.fx ? ' ${T("— taux")} ' + esc(f.fx.taux)
-                + (f.fx.date ? ' du ' + esc(f.fx.date) : '')
+                + (f.fx.date ? ' du ' + esc(szQuand(f.fx.date)) : '')
                 + (f.fx.approx ? ' ${T("(taux du jour, faute de mieux)")}' : '') : '')
             + '</div>'
           : '')
@@ -824,7 +824,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
             + (r.preuve && !r.verifie ? ' ${T("Lu : «")} ' + esc(r.preuve) + ' »' : '')
             + (r.devise === 'USD' && r.fxTaux
                 ? ' ${T("Montants convertis depuis le dollar US au taux")} ' + esc(r.fxTaux)
-                  + (r.fxDate ? ' du ' + esc(r.fxDate) : '') + (r.fxApprox ? ' (approximatif)' : '') + '.'
+                  + (r.fxDate ? ' du ' + esc(szQuand(r.fxDate)) : '') + (r.fxApprox ? ' (approximatif)' : '') + '.'
                 : '');
           dire(complet
             ? '${T("Facture lue — vérifiez les informations, puis enregistrez.")}'

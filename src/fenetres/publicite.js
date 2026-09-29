@@ -241,7 +241,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
       var st = STATUTS[o.status] || ['def', o.status];
       return '<tr><td><span class="rf-code">' + esc(o.num) + '</span></td><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(ini(o.client)) + '</span>'
         + '<span class="rf-nom">' + esc(o.client || '—') + '</span></div></td>'
-        + '<td style="color:var(--tx2)">' + esc(o.date) + '</td>'
+        + '<td style="color:var(--tx2)">' + esc(szQuand(o.date)) + '</td>'
         + '<td>' + (o.promo ? '<span class="badge err">' + esc(o.promo) + '</span>' : '<span style="color:var(--tx2)">—</span>') + '</td>'
         + '<td class="num" style="font-weight:700">' + argent(o.total) + '</td>'
         + '<td><span class="badge ' + st[0] + '">' + esc(st[1]) + '</span></td></tr>';
@@ -316,7 +316,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
   }
   function vueSocial(){
     var posts = D.posts.length ? D.posts.map(function(p){
-      return '<tr><td style="white-space:nowrap;font-size:.74rem">' + esc(p.date) + '</td><td style="font-size:.74rem">' + esc(p.networks) + '</td>'
+      return '<tr><td style="white-space:nowrap;font-size:.74rem">' + esc(szQuand(p.date)) + '</td><td style="font-size:.74rem">' + esc(p.networks) + '</td>'
         + '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.76rem" title="' + esc(p.content) + '">' + esc(p.content || '—') + '</td>'
         + '<td class="ctr"><strong style="color:' + (p.orders48h > 0 ? 'var(--tx-ok)' : 'var(--tx2)') + '">' + p.orders48h + '</strong></td>'
         + '<td class="num" style="color:' + (p.revenue48h > 0 ? 'var(--tx-creme)' : 'var(--tx2)') + '">' + (p.revenue48h > 0 ? argent(p.revenue48h) : '—') + '</td></tr>';
@@ -347,7 +347,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
     var rows = D.camps.length ? D.camps.map(function(c){
       return '<tr><td><div class="rf-nom">' + esc(c.name) + '</div>' + (c.promoLabel ? '<div class="rf-sous"><span class="ic">🎯</span><span>' + esc(c.promoLabel) + '</span></div>' : '') + '</td>'
         + '<td>' + esc(c.segLabel) + '</td><td><strong>' + c.audienceCount + '</strong> ${T("contact")}' + plur(c.audienceCount) + '</td>'
-        + '<td style="font-size:.74rem;color:var(--tx2)">' + esc(c.channels || '—') + '</td><td style="font-size:.74rem;color:var(--tx2)">' + esc(c.date) + '</td>'
+        + '<td style="font-size:.74rem;color:var(--tx2)">' + esc(c.channels || '—') + '</td><td style="font-size:.74rem;color:var(--tx2)">' + esc(szQuand(c.date)) + '</td>'
         + '<td><span class="badge ' + (c.status === 'sent' ? 'ok' : 'warn') + '">' + (c.status === 'sent' ? '${T("Envoyée")}' : '${T("Brouillon")}') + '</span></td>'
         + '<td class="num">' + (PEUT.edit ? ((c.status !== 'sent' ? '<button class="prim mini" data-launch="' + esc(c.id) + '">${T("Lancer")}</button> ' : '') + '<button class="ghost mini" data-del="' + esc(c.id) + '" style="color:var(--tx-err)">✕</button>') : '') + '</td></tr>';
     }).join('') : '<tr><td colspan="7" class="vide">${T("Aucune campagne. Créez la première !")}</td></tr>';
@@ -387,7 +387,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
     var bar = function(v, tot, col){ var pct = tot ? Math.round(v / tot * 100) : 0; return '<div class="satbar"><div class="track"><div style="width:' + pct + '%;background:' + col + '"></div></div><span style="font-size:.78rem;color:var(--tx2);width:66px;text-align:right">' + v + ' (' + pct + '%)</span></div>'; };
     var comments = D.comments.length ? '<div class="carte"><h2>${T("Commentaires récents")}</h2>' + D.comments.map(function(c){
       return '<div style="display:flex;gap:.7rem;padding:.4rem 0;border-bottom:1px solid var(--v055)"><span style="font-size:1.1rem">' + (c.score ? '<span class="ic">👍</span>' : '<span class="ic">👎</span>') + '</span>'
-        + '<div style="flex:1;min-width:0"><div style="font-size:.83rem">"' + esc(c.comment) + '"</div><div style="font-size:.7rem;color:var(--tx2);margin-top:.1rem">' + esc(c.name) + ' · ' + esc(c.date) + '</div></div></div>';
+        + '<div style="flex:1;min-width:0"><div style="font-size:.83rem">"' + esc(c.comment) + '"</div><div style="font-size:.7rem;color:var(--tx2);margin-top:.1rem">' + esc(c.name) + ' · ' + esc(szQuand(c.date)) + '</div></div></div>';
     }).join('') + '</div>' : '';
     return szTuiles('<div class="tuiles">'
       + '<div class="tuile" style="text-align:center"><div class="v" style="color:' + (D.rate >= 70 ? 'var(--tx-ok)' : 'var(--tx-err)') + ';font-size:2rem">' + D.rate + ' %</div><div class="z">${T("Taux de satisfaction")}</div></div>'

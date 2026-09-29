@@ -224,7 +224,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptepaiement')}
       + '<div class="vide">${T("Aucun mouvement pour cette année.")}</div></div>';
     var lignes = l.map(function(m){
       var signe = (m.effet >= 0) ? 'plus' : 'moins';
-      return '<tr><td>' + esc(m.date || '${T("(date illisible)")}') + '</td>'
+      return '<tr><td>' + esc(szQuand(m.date) || '${T("(date illisible)")}') + '</td>'
         + '<td><span class="nat"><span class="pt n-' + esc(m.nature) + '" aria-hidden="true"></span>'
         + esc(NATURES[m.nature] || m.nature) + '</span></td>'
         + '<td class="ref">' + esc(m.ref) + '</td>'

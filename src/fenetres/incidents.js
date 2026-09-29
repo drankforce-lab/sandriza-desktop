@@ -271,8 +271,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
       }
       h += '<tr><td><div class="rf-nom">'+esc(r.type||'—')+'</div>'
         + '<div class="rf-sous">'+(r.ref?'<span class="rf-code">'+esc(r.ref)+'</span><span>·</span>':'')
-        + '<span>${T("survenu le")} '+esc(r.occurredAt||'—')+'</span></div></td>'
-        + '<td style="white-space:nowrap;font-weight:600">'+esc(r.knownAt||'—')+'</td>'
+        + '<span>${T("survenu le")} '+esc(szQuand(r.occurredAt)||'—')+'</span></div></td>'
+        + '<td style="white-space:nowrap;font-weight:600">'+esc(szQuand(r.knownAt)||'—')+'</td>'
         + '<td style="text-align:center"><span class="rf-mont">'+esc(r.peopleCount||'—')+'</span></td>'
         + '<td>'+pilRisque(r.seriousRisk)+'</td>'
         + '<td style="white-space:nowrap;color:var(--tx2)">'+esc(r.cai||'—')+'</td>'
@@ -498,7 +498,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
     if (!h) h = '<div class="vide">${T("Aucun détail saisi.")}</div>';
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-vue';
     sur.innerHTML = '<div class="boite" style="max-width:720px"><div class="tt">'
-      + '<h3>${T("Incident — ")}'+esc(inc.knownAt||'')+' '+pilRisque(inc.seriousRisk)+'</h3>'
+      + '<h3>${T("Incident — ")}'+esc(szQuand(inc.knownAt)||'')+' '+pilRisque(inc.seriousRisk)+'</h3>'
       + '<div><button class="sz-btnplein" id="v-plein" title="${T("Occuper toute la fenêtre")}">${T("⛶ Plein écran")}</button>'
       + '<button class="mini" id="v-x">${T("Fermer")}</button></div></div>'
       + '<div class="liste fiche">'+h+'</div>'

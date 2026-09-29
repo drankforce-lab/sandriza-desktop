@@ -460,7 +460,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + '${T("de secours (1 USD =")} ' + Number(D.taux.rate).toFixed(4) + ' ${T("CAD), donc approximatif.")} '
           + '${T("Les commandes, elles, sont toujours facturées en dollars canadiens.")}'
         : '<strong>${T("Taux de change vieux de")} ' + D.taux.ageHeures + ' h</strong> ${T("(relevé du ")}'
-          + esc(D.taux.quand || '') + ', 1 USD = ' + Number(D.taux.rate).toFixed(4) + ' CAD). '
+          + esc(szQuand(D.taux.quand) || '') + ', 1 USD = ' + szNombre(D.taux.rate, 4) + ' CAD). '
           + '${T("Les prix en USD peuvent s’écarter du marché.")}') + '</div>';
     }
 

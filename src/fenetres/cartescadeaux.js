@@ -260,7 +260,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
       + '<div class="ch"><label>${T("Solde restant")}</label>'
       + '<div style="font-weight:800;color:' + (g.solde > 0 ? 'var(--tx-ok)' : 'var(--tx2)') + '">'
       + fmt(g.solde) + '</div></div>'
-      + '<div class="ch"><label>${T("Émise le")}</label><div>' + esc(g.date) + '</div></div>'
+      + '<div class="ch"><label>${T("Émise le")}</label><div>' + esc(szQuand(g.date)) + '</div></div>'
       + '</div>';
     if (g.message) {
       h += '<div class="ch"><label>${T("Message")}</label><div style="font-style:italic;color:var(--tx2)">'
@@ -281,7 +281,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
       h += '<table><thead><tr><th>${T("Date")}</th><th>${T("Commande")}</th>'
         + '<th class="num">${T("Montant")}</th><th class="num">${T("Solde après")}</th></tr></thead><tbody>'
         + g.transactions.map(function(x){
-            return '<tr><td>' + esc(x.date) + '</td><td>' + esc(x.commande || '—') + '</td>'
+            return '<tr><td>' + esc(szQuand(x.date)) + '</td><td>' + esc(x.commande || '—') + '</td>'
               + '<td class="num" style="color:var(--tx-err)">−' + fmt(x.montant) + '</td>'
               + '<td class="num">' + fmt(x.soldeApres) + '</td></tr>';
           }).join('')
@@ -347,7 +347,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
                   + Math.max(0, Math.min(100, Math.round(100 * g.solde / g.initial))) + '%"></i></div>' : '')
               + '</td>'
               + '<td>' + esc(g.expediteur || '—') + '</td>'
-              + '<td class="dt">' + esc(g.date) + '</td>'
+              + '<td class="dt">' + esc(szQuand(g.date)) + '</td>'
               + '<td><span class="rf-pill ' + (TONS[g.statut] || '') + '">' + esc(szTd(g.statutLibelle)) + '</span>'
               + (g.courrielEnvoye ? ' <span class="rf-pill bleu">${T("courriel ✓")}</span>' : '') + '</td></tr>';
           }).join('')

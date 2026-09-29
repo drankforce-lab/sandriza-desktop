@@ -216,7 +216,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
           + '<div style="min-width:0"><div class="rf-nom"><code>' + esc(e.valeur) + '</code></div>'
           + '<div class="rf-sous"><span>' + esc(libType(e)) + '</span>'
           + (e.note ? '<span>·</span><span>' + esc(e.note) + '</span>' : '') + '</div></div></div></td>'
-          + '<td style="white-space:nowrap;color:var(--tx2)">'+esc(e.quand)+'</td>'
+          + '<td style="white-space:nowrap;color:var(--tx2)">'+esc(szQuand(e.quand))+'</td>'
           + (D.peutRetirer ? '<td class="acts"><button class="b dgr" data-del="'+esc(e.id)+'">'
               +(DELID===e.id?'${T("✓ Confirmer")}':'${T("Retirer")}')+'</button></td>' : '')
           + '</tr>';

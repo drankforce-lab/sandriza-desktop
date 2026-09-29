@@ -745,7 +745,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
       var usd = Number(b.balance);
       if (String(b.currency || 'USD') === 'USD' && isFinite(usd)) {
         solde = szArgentSymbole(szArgentNombre(usd * USD_CAD, 2));
-        soldeSous = '${T("≈ en CAD · ")}' + String(b.balance) + ' USD';
+        soldeSous = '${T("≈ en CAD · ")}' + szArgentNombre(b.balance, 2) + ' USD';
       } else solde = String(b.balance) + ' ' + (b.currency || '');
     }
     var qw = (typeof RESUME.queueWaiting === 'number') ? RESUME.queueWaiting : 0;

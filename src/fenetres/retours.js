@@ -199,7 +199,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       h += '<div class="liste">' + rows.map(function(r){
         var badges = '<span class="rf-pill ' + (TONS[r.statut] || '') + '">' + esc(szTd(r.statutLibelle)) + '</span>';
         if (r.expireAuto) badges += ' <span class="rf-pill rouge">${T("Expirée automatiquement")}</span>';
-        if (r.expireBientot) badges += ' <span class="rf-pill rouge">${T("Expire le ")}' + esc(r.expireLe) + '</span>';
+        if (r.expireBientot) badges += ' <span class="rf-pill rouge">${T("Expire le ")}' + esc(szQuand(r.expireLe)) + '</span>';
         if (r.suivi) badges += ' <span class="rf-pill"><span class="rf-code">' + esc(r.suivi) + '</span></span>';
         if (r.etiquette === 'reelle') badges += ' <span class="rf-pill bleu">${T("Étiquette réelle")}</span>';
         else if (r.etiquette === 'generee') badges += ' <span class="rf-pill bleu">${T("Étiquette générée")}</span>';

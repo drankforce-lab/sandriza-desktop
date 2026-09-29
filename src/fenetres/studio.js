@@ -1384,7 +1384,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
   function chRange(id, lab, val){
     return '<div class="ch"><label class="avlab" for="' + id + '">' + lab
-      + ' <b id="' + id + '-v">' + Number(val).toFixed(2) + '</b></label>'
+      + ' <b id="' + id + '-v">' + szArgentNombre(val, 2) + '</b></label>'
       + '<input type="range" id="' + id + '" min="0" max="1" step="0.05" value="' + Number(val)
       + '"' + (RO ? ' disabled' : '') + '></div>';
   }
@@ -2139,7 +2139,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       var e = document.getElementById(id), v = document.getElementById(id + '-v');
       if (!e) return;
       e.oninput = function(){ AV[cle] = Number(e.value);
-        if (v) v.textContent = Number(e.value).toFixed(2); };
+        if (v) v.textContent = szArgentNombre(e.value, 2); };
     };
     g('av-oi', 'ombreIntensite'); g('av-od', 'ombreDouceur');
     // Ces deux-là font apparaître ou disparaître des contrôles : ils repeignent.

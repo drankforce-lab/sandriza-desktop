@@ -245,7 +245,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
           + '<div class="gauche">'
           + '<div class="haut"><span class="rf-nom">' + esc(r.client || '—') + '</span>'
           + pastille(r.statut)
-          + '<span class="droite">' + esc(r.date) + '</span></div>'
+          + '<span class="droite">' + esc(szQuand(r.date)) + '</span></div>'
           + '<div class="rf-sous"><span class="rf-code">' + esc(r.commande) + '</span>'
           + (r.courriel ? '<span>·</span><span>' + esc(r.courriel) + '</span>' : '')
           + '<span>·</span><span>${T("Raison : ")}' + esc(r.raison || '–') + '</span></div>'
@@ -272,15 +272,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '<div><div class="l">${T("Client")}</div><div class="v">' + esc(r.client) + '</div></div>'
       + '<div><div class="l">${T("Courriel")}</div><div class="v">' + esc(r.courriel || '–') + '</div></div>'
       + '<div><div class="l">${T("Raison")}</div><div class="v">' + esc(r.raison || '–') + '</div></div>'
-      + '<div><div class="l">${T("Déposée le")}</div><div class="v">' + esc(r.date) + '</div></div>'
-      + (r.reponduLe ? '<div><div class="l">${T("Répondu le")}</div><div class="v">' + esc(r.reponduLe) + '</div></div>' : '')
+      + '<div><div class="l">${T("Déposée le")}</div><div class="v">' + esc(szQuand(r.date)) + '</div></div>'
+      + (r.reponduLe ? '<div><div class="l">${T("Répondu le")}</div><div class="v">' + esc(szQuand(r.reponduLe)) + '</div></div>' : '')
       + '</div>'
       + '<div class="l" style="font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);'
       + 'margin-bottom:.25rem">${T("Message du client")}</div>'
       + '<div class="texte">' + esc(r.message || '${T("(aucun message)")}') + '</div>'
       + (r.reponse && r.statut === 'answered'
           ? '<div class="reponse"><div style="font-size:.68rem;color:var(--tx2);text-transform:uppercase;'
-            + 'letter-spacing:.05em">${T("Votre réponse")}' + (r.reponduLe ? ' · ' + esc(r.reponduLe) : '') + '</div>'
+            + 'letter-spacing:.05em">${T("Votre réponse")}' + (r.reponduLe ? ' · ' + esc(szQuand(r.reponduLe)) : '') + '</div>'
             + esc(r.reponse) + '</div>'
           : '')
       + '<div style="margin-top:.6rem"><div class="l" style="font-size:.62rem;text-transform:uppercase;'

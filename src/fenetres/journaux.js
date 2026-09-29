@@ -534,7 +534,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
       h += '<table class="tb"><thead><tr><th>${T("Date")}</th><th>${T("Genre")}</th><th>${T("Référence")}</th>'
         + '<th>${T("Destinataire")}</th><th>${T("Résultat")}</th><th>${T("Détail")}</th></tr></thead><tbody>';
       for (var i=0;i<rows.length;i++){ var l=rows[i];
-        h += '<tr><td class="mut" style="white-space:nowrap">'+esc(l.date)+'</td>'
+        h += '<tr><td class="mut" style="white-space:nowrap">'+esc(szQuand(l.date, true))+'</td>'
           + '<td><span class="pill" style="background:var(--v10);color:var(--tx2)">'+esc(l.genre)+'</span></td>'
           + '<td>'+esc(l.reference || '—')+'</td>'
           + '<td>'+esc(l.courriel)+'</td>'
@@ -713,7 +713,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
         +   ((x.routes && x.routes.length) ? x.routes.map(esc).join('<br>') : '—') + '</td>'
         + '<td class="mut" style="font-size:.76rem;white-space:nowrap">' + esc(String(x.dernier || '').slice(0, 16).replace('T', ' '))
         +   (x.premier && x.premier !== x.dernier
-                ? '<br><span style="font-size:.7rem">depuis ' + esc(String(x.premier).slice(0, 10)) + '</span>' : '')
+                ? '<br><span style="font-size:.7rem">${T("depuis ")}' + esc(szJour(String(x.premier).slice(0, 10))) + '</span>' : '')
         +   (x.agent ? '<br><span style="font-size:.7rem" title="' + esc(x.agent) + '">navigateur</span>' : '') + '</td>'
         + '</tr>';
     }

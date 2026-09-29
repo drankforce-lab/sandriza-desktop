@@ -194,7 +194,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('recherches')}
             return '<tr><td><div class="rf-nom">' + esc(x.q) + '</div>'
               + '<div class="jaugef"><i style="width:' + Math.max(4, Math.round(100 * (Number(x.fois) || 0) / max)) + '%"></i></div></td>'
               + '<td class="num"><span class="rf-mont">' + x.fois + '</span></td>'
-              + '<td class="dt">' + esc(x.derniere || '—') + '</td>'
+              + '<td class="dt">' + esc(szQuand(x.derniere) || '—') + '</td>'
               + (D.peutModifier
                   ? '<td class="fin"><button class="mini danger" data-retirer="' + esc(x.q)
                     + '" title="${T("Traitée — retirer de la liste")}">&#10005;</button></td>'

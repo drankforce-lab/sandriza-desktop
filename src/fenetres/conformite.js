@@ -249,7 +249,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var passees = e.filter(function(x){ return x.expire; }).length;
     var l = e.map(function(x){
       return '<li>' + esc(x.nom) + ' — ' + esc(FLUX_NOMS[x.flux] || x.flux)
-        + ' — ' + esc(x.valideJusqu) + (x.expire ? ' ${T("(échue)")}' : '') + '</li>';
+        + ' — ' + esc(szJour(x.valideJusqu)) + (x.expire ? ' ${T("(échue)")}' : '') + '</li>';
     }).join('');
     return '<div class="avis ' + (passees ? 'dur' : '') + '">'
       + (passees ? '${T("Des adhésions sont ÉCHUES. Une adhésion expirée vaut une adhésion absente : le pays se referme.")}'
@@ -301,7 +301,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return d.map(function(m){
       return '<div class="manque ' + esc(m.gravite) + '">'
         + '<div class="q">' + esc(m.quoi)
-        + (m.motif === 'expire' ? ' ${T("— adhésion échue le ")}' + esc(m.valideJusqu) : '')
+        + (m.motif === 'expire' ? ' ${T("— adhésion échue le ")}' + esc(szJour(m.valideJusqu)) : '')
         + '</div>'
         + '<div class="p">' + esc(m.pourquoi) + '</div>'
         + '<div class="b">' + esc(m.base) + '</div></div>';

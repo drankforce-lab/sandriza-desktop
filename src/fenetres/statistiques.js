@@ -247,7 +247,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('statistiques')}
     var cols = serie.map(function(s){
       var v = Number(s[cle]) || 0;
       var h = Math.max(v > 0 ? 3 : 0, Math.round(v / max * 100));
-      return '<div class="col" style="height:' + h + '%" title="' + esc(s.date) + ' — '
+      return '<div class="col" style="height:' + h + '%" title="' + esc(szQuand(s.date)) + ' — '
         + nb(v) + ' ' + esc(mot) + '"></div>';
     }).join('');
     /* La date sous la barre ; au-dela d une douzaine de jours, une sur k
@@ -377,7 +377,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('statistiques')}
           return '<tr><td><span class="rf-nom">' + esc(c.de) + '</span></td><td class="dt">' + esc(c.sens) + '</td>'
             + '<td>' + pastilleAppel(c.statut) + '</td><td class="num">' + c.duree + ' s</td>'
             + '<td class="num">' + esc(c.cout || '—') + '</td>'
-            + '<td class="dt">' + esc(c.date) + '</td></tr>';
+            + '<td class="dt">' + esc(szQuand(c.date)) + '</td></tr>';
         }).join('')
       : '<tr><td colspan="6" class="dt" style="text-align:center">${T("Aucun appel.")}</td></tr>';
     h += '<div class="carte"><h3><span class="ic">📋</span>${T(" Appels récents")}</h3><table><thead><tr><th>${T("Appelant")}</th>'

@@ -463,7 +463,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
       h.push('<table><thead><tr><th>${T("Date")}</th><th>${T("Description")}</th><th>${T("Type")}</th>'
         + '<th class="num">${T("Montant")}</th><th>${T("État")}</th><th></th></tr></thead><tbody>');
       r.bankEntries.forEach(function(e){
-        h.push('<tr><td class="dt">' + esc(e.date || '—') + '</td>'
+        h.push('<tr><td class="dt">' + esc(szQuand(e.date) || '—') + '</td>'
           + '<td>' + esc(e.description || '—')
             + (e.notes ? '<div class="dt">' + esc(e.notes) + '</div>' : '') + '</td>'
           + '<td class="dt">' + esc(e.type || '—') + '</td>'
@@ -531,11 +531,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
       h.push('<table><thead><tr><th>${T("Arrivée")}</th><th>${T("Description")}</th><th>${T("Période")}</th>'
         + '<th class="num">${T("Montant")}</th><th>${T("État")}</th><th></th></tr></thead><tbody>');
       r.squarePayouts.forEach(function(p){
-        h.push('<tr><td class="dt">' + esc(p.arrivalDate || '—') + '</td>'
+        h.push('<tr><td class="dt">' + esc(szQuand(p.arrivalDate) || '—') + '</td>'
           + '<td>' + esc(p.description || '—')
             + (p.notes ? '<div class="dt">' + esc(p.notes) + '</div>' : '')
             + (p.source ? ' <span class="rf-pill bleu">' + esc(p.source === 'expense' ? '${T("dépense")}' : 'Square') + '</span>' : '') + '</td>'
-          + '<td class="dt">' + esc(p.periodFrom || '?') + ' → ' + esc(p.periodTo || '?') + '</td>'
+          + '<td class="dt">' + esc(szJour(p.periodFrom) || '?') + ' → ' + esc(szJour(p.periodTo) || '?') + '</td>'
           + '<td class="num">' + sou(p.amount) + '</td>'
           + '<td>' + pilApparie(p.status) + '</td>'
           + '<td style="white-space:nowrap">'
@@ -591,14 +591,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     if (!seulesB.length) h.push('<div class="vide">${T("Toutes les lignes du relevé sont appariées ✓")}</div>');
     seulesB.forEach(function(e){
       h.push('<div class="seule"><div class="d"><div>' + esc(e.description || '—') + '</div>'
-        + '<div class="dt">' + esc(e.date || '—') + ' · ' + esc(e.type || '—') + '</div></div>'
+        + '<div class="dt">' + esc(szQuand(e.date) || '—') + ' · ' + esc(e.type || '—') + '</div></div>'
         + '<div style="font-variant-numeric:tabular-nums;font-weight:700">' + sou(e.amount) + '</div>'
         + (D.verrouille || !D.peutEcrire || !seulesV.length ? ''
             : '<select data-app="' + esc(e.id) + '" aria-label="${T("Apparier cette écriture avec un versement")}"'
               + ' style="width:auto;max-width:11rem">'
               + '<option value="">${T("— apparier avec…")}</option>'
               + seulesV.map(function(p){
-                  return '<option value="' + esc(p.id) + '">' + esc(p.arrivalDate || '?') + ' · ' + sou(p.amount) + '</option>';
+                  return '<option value="' + esc(p.id) + '">' + esc(szQuand(p.arrivalDate) || '?') + ' · ' + sou(p.amount) + '</option>';
                 }).join('') + '</select>')
         + '</div>');
     });
@@ -608,7 +608,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     if (!seulesV.length) h.push('<div class="vide">${T("Tout est apparié ✓")}</div>');
     seulesV.forEach(function(p){
       h.push('<div class="seule"><div class="d"><div>' + esc(p.description || '—') + '</div>'
-        + '<div class="dt">' + esc(p.arrivalDate || '—') + '</div></div>'
+        + '<div class="dt">' + esc(szQuand(p.arrivalDate) || '—') + '</div></div>'
         + '<div style="font-variant-numeric:tabular-nums;font-weight:700">' + sou(p.amount) + '</div></div>');
     });
     h.push('</div></div>');
@@ -625,7 +625,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
         h.push('<div class="paire"><div class="d">'
           + '<div>' + esc(e.description || '—') + ' <span style="color:var(--tx-ok2)">→</span> '
           + esc((p && p.description) || '—') + '</div>'
-          + '<div class="dt">' + esc(e.date || '—') + ' ${T("· relevé")} ' + sou(e.amount)
+          + '<div class="dt">' + esc(szQuand(e.date) || '—') + ' ${T("· relevé")} ' + sou(e.amount)
           + ' ${T("· dépôt")} ' + sou(p ? p.amount : 0) + ' · '
           + (ec !== null && Math.abs(ec) > 0.005
               ? '<span style="color:var(--tx-err2)">${T("écart ")}' + sou(ec) + '</span>'

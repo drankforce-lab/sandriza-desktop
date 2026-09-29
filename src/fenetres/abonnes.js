@@ -254,10 +254,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('abonnes')}
               + '<div style="min-width:0"><div class="rf-nom">' + esc(a.prenom || a.courriel) + '</div>'
               + '<div class="rf-sous">' + (a.prenom ? '<span>' + esc(a.courriel) + '</span><span>·</span>' : '')
               + '<span>' + esc(a.sourceLibelle) + '</span></div></div></div></td>'
-              + '<td class="dt">' + esc(a.date) + '</td>'
+              + '<td class="dt">' + esc(szQuand(a.date)) + '</td>'
               + '<td><span class="rf-pill ' + (a.actif ? 'vert' : '') + '">'
               + (a.actif ? '${T("Abonné")}' : '${T("Désabonné")}') + '</span>'
-              + (!a.actif && a.retireLe ? '<div class="dt">le ' + esc(a.retireLe) + '</div>' : '') + '</td>'
+              + (!a.actif && a.retireLe ? '<div class="dt">${T("le ")}' + esc(szJour(a.retireLe)) + '</div>' : '') + '</td>'
               + (D.peutModifier ? '<td class="fin">' + gestes + '</td>' : '') + '</tr>';
           }).join('')
         + '</tbody></table>';

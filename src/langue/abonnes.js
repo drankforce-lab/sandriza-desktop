@@ -24,6 +24,7 @@
  */
 
 module.exports = {
+  'le ': 'on ',
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   'Abonnés de l’infolettre — Administration Sandriza':
     'Newsletter subscribers — Sandriza Administration',

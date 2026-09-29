@@ -668,7 +668,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
        sous les articles etait vide et le detail defilait (2026-09-26). */
     var hTot = '<div class="totaux"><div>'
       + '<div>${T("Sous-total")}</div>'
-      + t.taxes.map(function(x){ return '<div>' + esc(x.nom) + ' (' + (Math.round(x.taux * 1000000) / 10000) + ' %)</div>'; }).join('')
+      + t.taxes.map(function(x){ return '<div>' + esc(x.nom) + ' (' + szNombre(Math.round(x.taux * 1000000) / 10000, 4) + ' %)</div>'; }).join('')
       + (t.livraison > 0 ? '<div>${T("Livraison")}</div>' : '')
       + (t.prioritaire > 0 ? '<div><span class="ic">⚡</span> ${T("Traitement prioritaire")}</div>' : '')
       + (t.coupon > 0 ? '<div style="color:var(--tx-ok)">Coupon</div>' : '')

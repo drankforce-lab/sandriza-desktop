@@ -278,7 +278,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
         + (ARME === e.id ? '${T("Confirmer l’envoi ?")}' : '${T("Publier")}') + '</button>'
         + '<button class="mini geste" data-ignorer="' + esc(e.id) + '">${T("Ignorer")}</button>';
     }
-    h += '<span class="dt">' + esc(e.partie || e.creee) + '</span>'
+    h += '<span class="dt">' + esc(szQuand(e.partie || e.creee)) + '</span>'
       + '</span></div>'
       + '<div class="texte">' + esc(e.contenu || '') + '</div>'
       + detailResultats(e.resultats)

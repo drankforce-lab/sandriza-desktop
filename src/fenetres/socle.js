@@ -1574,9 +1574,66 @@ try {
 } catch (e) {}
 `;
 
+/* ══ LES DATES LISIBLES — szJour / szQuand (2026-09-29) ══════════════════════
+   Le site envoie souvent ses dates DEJA mises en forme par
+   toLocaleDateString('fr-CA') — ce qui donne « 2026-08-22 », la forme ISO. Une
+   sonde passee sur les 1116 rendus en a trouve dans plus de vingt fenetres.
+   ➡ szJour(v)  : « 22 août 2026 »            (date seule)
+     szQuand(v) : « 22 août 2026, 10 h 05 »   (avec l heure s il y en a une)
+     szQuand(v, true) garde les secondes (journaux) : « 22 août 2026, 10:05:33 »
+   ⚠ CE QUI NE RESSEMBLE PAS A UNE DATE REVIENT TEL QUEL : on ne devine rien.
+   ⚠ UNE DATE SEULE EST UN JOUR LOCAL : new Date('2026-08-22') serait minuit
+     UTC, donc le 21 au Quebec.
+   ⚠ AUCUNE EXPRESSION REGULIERE : ce script vit dans un litteral de gabarit,
+     ou un antislash se perd. On lit les positions a la main. */
+const JS_DATES = () => `
+function szDateLue(v){
+  if (v == null || v === '') return null;
+  if (v instanceof Date) return isNaN(v.getTime()) ? null : { d: v, h: true };
+  if (typeof v === 'number') { var dn = new Date(v); return isNaN(dn.getTime()) ? null : { d: dn, h: true }; }
+  var s = String(v).trim();
+  if (s.length < 10 || s.charAt(4) !== '-' || s.charAt(7) !== '-') return null;
+  var a = +s.slice(0, 4), m = +s.slice(5, 7), j = +s.slice(8, 10);
+  if (!(a > 1900) || !(m >= 1 && m <= 12) || !(j >= 1 && j <= 31)) return null;
+  if (s.length === 10) return { d: new Date(a, m - 1, j), h: false };
+  var c = s.charAt(10);
+  if ((c === 'T' || c === ' ') && s.charAt(13) === ':') {
+    var d = new Date(c === ' ' ? s.slice(0, 10) + 'T' + s.slice(11) : s);
+    if (!isNaN(d.getTime())) return { d: d, h: true };
+  }
+  return null;
+}
+/* Un nombre a la francaise : « 0,9 », « 8,5 », « 4,25 » — au plus << dec >>
+   decimales (2 par defaut), sans zeros inutiles. Pour les MONTANTS : szArgent. */
+function szNombre(n, dec){
+  var v = Number(n); if (!isFinite(v)) return n == null ? '' : String(n);
+  var d = (dec === 0 || dec) ? Number(dec) : 2;
+  try { return v.toLocaleString('${LIEU()}', { maximumFractionDigits: d }); }
+  catch (e) { return String(v); }
+}
+function szJour(v){
+  var x = szDateLue(v);
+  if (!x) return v == null ? '' : String(v);
+  try { return x.d.toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'short', year: 'numeric' }); }
+  catch (e) { return String(v); }
+}
+function szQuand(v, secondes){
+  var x = szDateLue(v);
+  if (!x) return v == null ? '' : String(v);
+  if (!x.h) return szJour(v);
+  try {
+    if (secondes) {
+      var p2 = function(n){ return (n < 10 ? '0' : '') + n; };
+      return szJour(v) + ', ' + p2(x.d.getHours()) + ':' + p2(x.d.getMinutes()) + ':' + p2(x.d.getSeconds());
+    }
+    return x.d.toLocaleString('${LIEU()}', { dateStyle: 'medium', timeStyle: 'short' });
+  } catch (e) { return String(v); }
+}
+`;
+
 const JS_DIRE = () => JS_DIRE_BASE() + JS_PLEIN() + JS_PLEIN_AUTO() + JS_FENPLEIN()
   + JS_VERROUS() + JS_LOTS() + JS_AUTOPAGE() + JS_COMPTE() + JS_MESURES()
-  + JS_FINITIONS();
+  + JS_DATES() + JS_FINITIONS();
 
 const JS_SOCLE = () => `
 var P = window.szPont;

@@ -191,7 +191,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         return '<div class="ligne" data-v="' + esc(e.v) + '">'
           + '<div class="haut"><span class="num">' + esc(e.v) + '</span>' + ici
           + '<span class="titre">' + esc(e.t || '') + '</span>'
-          + '<span class="droite">' + esc(e.d || '') + ' ' + (ouverte ? '▾' : '▸') + '</span></div>'
+          + '<span class="droite">' + esc(szJour(e.d) || '') + ' ' + (ouverte ? '▾' : '▸') + '</span></div>'
           + det + '</div>';
       }).join('');
     }

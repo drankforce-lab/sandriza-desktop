@@ -27,6 +27,7 @@
  */
 
 module.exports = {
+  'depuis ': 'since ',
   /* ══ L ONGLET « JOURNAL D ENVOI » (venu de sa fenetre propre, 2026-09-13) ══
    * ⚠⚠ CE JOURNAL REPOND A UNE SEULE QUESTION, et elle vaut de l argent :
    * « je n ai jamais recu votre courriel ». Les echecs sont comptes a part et

@@ -252,7 +252,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + tu('published', '${T("Publiés")}', c.publies || 0, '${T("visibles en boutique")}', '')
       + tu('hidden', '${T("Masqués")}', c.masques || 0, '${T("retirés de la boutique")}', '')
       + tu('done', '${T("Traités")}', c.traites || 0, '${T("approuvés et refusés")}', '')
-      + tu('', '${T("Note moyenne")}', (c.moyenne != null ? c.moyenne : '—'),
+      + tu('', '${T("Note moyenne")}', (c.moyenne != null ? szNombre(c.moyenne) : '—'),
           (c.moyenne != null ? etoiles(c.moyenne, true) : '${T("aucun avis publié")}'), '')
       + '</div>');
     h += '<div class="carte"><div class="rf-tb">'
@@ -300,7 +300,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
               + (r.verifie ? ' <span class="rf-pill bleu">${T("achat vérifié")}</span>' : '') + '</div>'
               + '<div class="rf-sous"><span>' + esc(r.produit) + '</span></div></div></div></td>'
               + '<td>' + etoiles(r.note) + '</td>'
-              + '<td class="dt">' + esc(r.date) + '</td>'
+              + '<td class="dt">' + esc(szQuand(r.date)) + '</td>'
               + '<td>' + pastille(r.statut) + '</td></tr>';
           }).join('')
         + '</tbody></table></div>';
@@ -357,7 +357,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + (r.commande ? '<div><div class="l">${T("Commande")}</div><div class="v">' + esc(r.commande) + '</div></div>' : '')
       + (r.taille ? '<div><div class="l">${T("Taille achetée")}</div><div class="v">' + esc(r.taille) + '</div></div>' : '')
       + '<div><div class="l">${T("Langue")}</div><div class="v">' + esc(r.langue) + '</div></div>'
-      + '<div><div class="l">${T("Déposé le")}</div><div class="v">' + esc(r.date) + '</div></div>'
+      + '<div><div class="l">${T("Déposé le")}</div><div class="v">' + esc(szQuand(r.date)) + '</div></div>'
       + (r.approuveLe ? '<div><div class="l">${T("Approuvé le")}</div><div class="v">' + esc(r.approuveLe) + '</div></div>' : '')
       + (r.photos ? '<div><div class="l">Photos</div><div class="v">' + r.photos + '</div></div>' : '')
       + '</div>'
@@ -385,7 +385,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '<div class="texte">' + esc(r.texte || '${T("(aucun texte)")}') + '</div>'
       + (r.reponse
           ? '<div class="reponse"><div class="dt" style="font-size:.68rem;color:var(--tx2);text-transform:uppercase;'
-            + 'letter-spacing:.05em">${T("Votre réponse")}' + (r.reponduLe ? ' · ' + esc(r.reponduLe) : '') + '</div>'
+            + 'letter-spacing:.05em">${T("Votre réponse")}' + (r.reponduLe ? ' · ' + esc(szQuand(r.reponduLe)) : '') + '</div>'
             + esc(r.reponse) + '</div>'
           : '');
     if (REPONDRE) {

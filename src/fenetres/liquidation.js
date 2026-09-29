@@ -273,7 +273,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
         : '<button class="geste" data-retirer="' + esc(l.id) + '" title="${T("Ramener au régime normal")}">${T("✕ Retirer")}</button>';
     }
     var quand = l.au
-      ? '<span class="rf-pill bleu" title="${T("La boutique annonce cette date au client")}">${T("jusqu’au ")}' + esc(l.au) + '</span>'
+      ? '<span class="rf-pill bleu" title="${T("La boutique annonce cette date au client")}">${T("jusqu’au ")}' + esc(szQuand(l.au)) + '</span>'
       : '<span class="rf-pill">${T("jusqu’à épuisement")}</span>';
     var cc = /^#[0-9a-f]{3,8}$/i.test(l.couleur || '') ? l.couleur : '';
     return '<tr>'
@@ -554,7 +554,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
   function vueLotResume(){
     var estLiq = LOT.mode === 'liq_no';
     var quand = LOT.duree === 'period'
-      ? '${T("Du ")}' + esc(LOT.du) + '${T(" au ")}' + esc(LOT.au)
+      ? '${T("Du ")}' + esc(szQuand(LOT.du)) + '${T(" au ")}' + esc(szQuand(LOT.au))
       : '${T("Jusqu’à épuisement de l’inventaire")}';
     var liste = LOT.ordre.map(function(id){
       return '<div class="choisi"><span class="nom">' + esc(LOT.choix[id].nom) + '</span></div>'; }).join('');

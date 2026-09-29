@@ -184,7 +184,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function fmtFormat(l, h){
     if (!l || !h) return '${T("format non défini")}';
-    return '${T("format ")}' + l + ' × ' + h + '${T(" po")}';
+    return '${T("format ")}' + szNombre(l) + ' × ' + szNombre(h) + '${T(" po")}';
   }
 
   function dessiner(e){

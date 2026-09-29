@@ -216,7 +216,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         return '<div class="ligne' + (r.annule ? ' annule' : '') + '">'
           + '<div class="haut">'
           + '<span>' + r.logo + '</span><span class="rf-nom">' + esc(r.transporteur) + '</span>'
-          + '<span class="dt"><span class="ic" aria-hidden="true">📅</span> ' + esc(r.date) + '</span>'
+          + '<span class="dt"><span class="ic" aria-hidden="true">📅</span> ' + esc(szQuand(r.date)) + '</span>'
           + '<span class="rf-pill">' + r.colis + '${T(" colis")}</span>'
           + etat
           + (!r.annule
@@ -274,7 +274,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + '<div class="pied-boite"><button id="rm-p-annuler">${T("Fermer")}</button></div></div></div>';
       return h;
     }
-    h += '<div class="dt"><span class="ic" aria-hidden="true">📅</span>${T(" Prévu le ")}<strong>' + esc(p.date) + '</strong>${T(", entre 09 h et 17 h")}'
+    h += '<div class="dt"><span class="ic" aria-hidden="true">📅</span>${T(" Prévu le ")}<strong>' + esc(szQuand(p.date)) + '</strong>${T(", entre 09 h et 17 h")}'
       + (p.adresse ? ' · ' + esc(p.adresse) : '') + '</div>';
     h += (p.groupes || []).map(function(g){
       return '<div class="grp"><div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">'
