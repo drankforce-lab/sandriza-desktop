@@ -69,6 +69,8 @@ body{background:var(--f-page);color:var(--tx);
 /* La carte de ligne des listes (refonte fine) : contour, coins, un peu d air. */
 .cmd{display:flex;align-items:center;gap:.75rem;padding:.55rem .75rem;border-radius:12px;
   border:1px solid var(--v07);margin-top:.45rem;font-size:.85rem}
+/* La commande s ouvre au clic (2026-09-29, comme au tableau de bord). */
+.cmd.ouvrable{cursor:pointer}.cmd.ouvrable:hover{border-color:var(--v12);background:var(--v03)}
 .cmd .num{font-family:ui-monospace,monospace;font-size:.78rem;color:var(--tx-or)}
 .cmd .d{flex:1 1 auto;min-width:0}
 .cmd .fin{color:var(--tx2);font-size:.78rem;white-space:nowrap}
@@ -129,6 +131,15 @@ function pageClient(id) {
 ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
   var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
+  /* Une commande recente s ouvre dans SA fenetre de detail — la meme porte que
+     la liste Commandes et le tableau de bord (commandes:ouvrirDetail). */
+  corps.addEventListener('click', function(ev){
+    var li = ev.target && ev.target.closest ? ev.target.closest('[data-cmd]') : null;
+    if (!li) return;
+    appeler('commandes:ouvrirDetail', [li.getAttribute('data-cmd')]).then(function(r){
+      if (!r || !r.ok) dire(expliquer(r), 'err');
+    });
+  });
   var actions = document.getElementById('actions');
   var sous = document.getElementById('sous');
 
@@ -240,7 +251,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
                code et date dessous, statut en pastille (le site l envoyait, on ne
                l affichait pas), montant a droite. */
             var st = STATUTS_CMD[o.statut] || ['', o.statut || ''];
-            return '<div class="cmd"><div class="d"><div class="rf-code">' + esc(o.numero) + '</div>'
+            return '<div class="cmd' + (o.id ? ' ouvrable" data-cmd="' + esc(o.id) + '" title="${T("Ouvrir la commande")}' : '') + '"><div class="d"><div class="rf-code">' + esc(o.numero) + '</div>'
               + '<div class="rf-sous">' + esc(dateFr(o.date)) + '</div></div>'
               + (st[1] ? '<span class="rf-pill' + st[0] + '">' + esc(st[1]) + '</span>' : '')
               + '<span class="total">' + argent(o.total) + '</span></div>'; }).join('')

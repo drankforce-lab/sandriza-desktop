@@ -209,6 +209,10 @@ module.exports = {
   'Préparation': 'Preparation',
   'Détail': 'Detail',
   'invité': 'guest',
+  'membre': 'member',
+  'Paiement Square': 'Square payment',
+  'Montant': 'Amount',
+  'ch.': 'each',
 
   /* ══ LE TITRE DES DEUX ECRANS ══════════════════════════════════════════════
    * ⚠⚠ CE FICHIER DESSINE DEUX ECRANS, et son titre se CALCULE avant le

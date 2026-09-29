@@ -175,7 +175,9 @@ select.statut{width:auto;font-size:.78rem;padding:.16rem .4rem}
   margin-top:.6rem;border-top:1px solid var(--v08);padding-top:.55rem}
 .bas2 .totaux{margin-top:0;border-top:0;padding-top:0}
 .bas2 .remb{margin-top:0}
-.remb{margin-top:.7rem;border-top:2px dashed rgba(245,158,11,.5);padding-top:.45rem}
+/* Un trait discret, pas un pointille AMBRE : un remboursement n est pas une
+   alerte (la couleur ne dit qu un probleme — 2026-09-29). */
+.remb{margin-top:.7rem;border-top:1px solid var(--v10);padding-top:.45rem}
 .remb .t{font-size:.69rem;font-weight:700;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx-att);margin-bottom:.25rem}
 .remb .lg2{display:flex;justify-content:space-between;gap:1rem;font-size:.8rem;
@@ -614,13 +616,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     h += (c.prioritaire ? '<span class="badge2 or"><span class="ic" aria-hidden="true">⚡</span> ${T("Prioritaire")}</span>' : '')
       + (d.remboursements.complet ? '<span class="badge2 vertf"><span class="ic">✅</span> ${T("Remboursée")}</span>'
           : (d.remboursements.lignes.length
-              ? '<span class="badge2 or">↩ ' + d.remboursements.lignes.length + ' remb.</span>' : ''))
+              ? '<span class="badge2 or">↩ ' + d.remboursements.lignes.length + ' ${T("remb.")}</span>' : ''))
       + '<span style="margin-left:auto" class="mut">' + esc(dateCourte(c.creeLe)) + '</span>'
       + '</div>';
     h += '<div class="det2">'
       + '<div class="bloc"><h3>${T("Client")}</h3>'
       + '<div class="l"><strong>' + esc(c.client.nom || '—') + '</strong>'
-      + '<span class="badge2">' + (c.membre ? 'membre' : '${T("invité")}') + '</span>'
+      + '<span class="badge2">' + (c.membre ? '${T("membre")}' : '${T("invité")}') + '</span>'
       // Rattacher la commande a un COMPTE : possible meme sur une commande
       // invitee (c est justement le cas a corriger le plus souvent).
       + (d.droits.lier && !ro
@@ -633,7 +635,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + (c.client.entreprise ? '<div class="l">' + esc(c.client.entreprise) + '</div>' : '')
       + '<div class="mut">' + esc(c.client.courriel) + (c.client.tel ? '<br>' + esc(c.client.tel) : '') + '</div>'
       + '<div class="mut" style="margin-top:.4rem"><span class="ic">💳</span> '
-      + (c.paiementSquare ? '<span class="num">' + esc(c.paiementSquare) + '</span>'
+      + (c.paiementSquare ? '${T("Paiement Square")} <span class="num">' + esc(c.paiementSquare) + '</span>'
                           : '<span style="color:var(--tx-att)">${T("Commande démo — aucun paiement Square")}</span>')
       + (c.afterpay ? '<span class="badge2">AFTERPAY</span>' : '') + '</div></div>'
       + '<div class="bloc"><h3>${T("Livraison")}</h3>'
@@ -648,7 +650,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 
     h += '<div class="carte plein"><div class="liste">'
       + '<table><thead><tr><th>${T("Article")}</th>'
-      + '<th class="c">${T("Qté")}</th><th class="d">${T("Prix")}</th></tr></thead><tbody>'
+      + '<th class="c">${T("Qté")}</th><th class="d">${T("Montant")}</th></tr></thead><tbody>'
       + d.articles.map(function(a){
           /* Refonte fine (2026-09-26) : la ligne riche — l initiale, le nom, et la
              taille / couleur en sous-ligne plutot que dans une colonne a part ;
@@ -660,7 +662,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
             + (a.rembourseQte > 0 ? '<span class="rf-pill ambre">' + a.rembourseQte + ' ${T("remb.")}</span>' : '')
             + '</div></div></div></td>'
             + '<td class="c">' + a.qte + '</td>'
-            + '<td class="d">' + argent(a.montant) + '</td></tr>'; }).join('')
+            + '<td class="d">' + argent(a.montant)
+            /* Le prix a l unite sous le montant de la ligne, des qu il y en a plus
+               d une : « 179,98 $ » seul ne disait pas que c etait deux robes. */
+            + (a.qte > 1 ? '<div class="dt">' + argent(a.montant / a.qte) + ' ${T("ch.")}</div>' : '')
+            + '</td></tr>'; }).join('')
       + '</tbody></table>';
 
     var t = d.totaux;
@@ -671,13 +677,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + t.taxes.map(function(x){ return '<div>' + esc(x.nom) + ' (' + szNombre(Math.round(x.taux * 1000000) / 10000, 4) + ' %)</div>'; }).join('')
       + (t.livraison > 0 ? '<div>${T("Livraison")}</div>' : '')
       + (t.prioritaire > 0 ? '<div><span class="ic">⚡</span> ${T("Traitement prioritaire")}</div>' : '')
-      + (t.coupon > 0 ? '<div style="color:var(--tx-ok)">Coupon</div>' : '')
+      + (t.coupon > 0 ? '<div>${T("Coupon")}</div>' : '')
       + '<div class="tt">${T("Total")}</div></div>'
       + '<div class="d"><div>' + argent(t.sousTotal) + '</div>'
       + t.taxes.map(function(x){ return '<div>' + argent(x.montant) + '</div>'; }).join('')
       + (t.livraison > 0 ? '<div>' + argent(t.livraison) + '</div>' : '')
       + (t.prioritaire > 0 ? '<div>' + argent(t.prioritaire) + '</div>' : '')
-      + (t.coupon > 0 ? '<div style="color:var(--tx-ok)">−' + argent(t.coupon) + '</div>' : '')
+      + (t.coupon > 0 ? '<div>−' + argent(t.coupon) + '</div>' : '')
       + '<div class="tt">' + argent(t.total) + '</div></div></div>';
 
     var rb = d.remboursements, hRemb = '';

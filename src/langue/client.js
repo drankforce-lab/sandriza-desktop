@@ -18,6 +18,7 @@
  */
 
 module.exports = {
+  'Ouvrir la commande': 'Open the order',
   /* ⚠ LES DEUX ALTERNATIVES EN ENTIER — voir tools/banc-pluriel-colle.js. */
   'autres': 'others',
   'autre': 'other',
