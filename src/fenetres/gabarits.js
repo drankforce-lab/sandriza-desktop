@@ -234,7 +234,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<div class="swatch"><div class="b1" style="background:linear-gradient(90deg,' + esc(t.headerBgFrom) + ',' + esc(t.headerBgTo) + ')"></div>'
         + '<span class="lb">${T("en-tête")}</span><div class="b2" style="background:' + esc(t.footerBg) + '"></div><span class="lb">${T("pied")}</span></div></div>'
         + '<div style="display:flex;gap:.35rem">'
-        + '<button class="b" type="button" data-edit="' + esc(t.id) + '"><span class="ic">✏</span>${T(" Modifier")}</button>'
+        + '<button class="b" type="button" data-edit="' + esc(t.id) + '"><span class="ic">✎</span>${T(" Modifier")}</button>'
         + (RO ? '' : '<button class="b" type="button" data-copy="' + esc(t.id) + '"><span class="ic">📋</span>${T(" Copier")}</button>')
         + ((!RO && t.supprimable) ? ('<button class="b dgr" type="button" data-del="' + esc(t.id) + '">' + (DELCONF === t.id ? '${T("Confirmer ?")}' : '<span class="ic">🗑</span>${T(" Supprimer")}') + '</button>') : '')
         + '</div></div>';

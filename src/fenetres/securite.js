@@ -501,7 +501,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function gestesDe(s, superActifs){
     var peutSuppr = !s.estMoi && (!s.estSuper || superActifs > 1);
-    return '<button class="b" data-edit="'+esc(s.id)+'"><span class="ic">✏</span> ${T("Modifier")}</button>'
+    return '<button class="b" data-edit="'+esc(s.id)+'"><span class="ic">✎</span> ${T("Modifier")}</button>'
       + (s.active ? '<button class="b" data-mfa="'+esc(s.id)+'" title="${T("Gérer l’authentification à deux facteurs")}"><span class="ic">🔐</span> MFA</button>' : '')
       + (s.active && !s.estSuper ? '<button class="b" data-invite="'+esc(s.id)+'" title="${T("Renvoyer un mot de passe temporaire par courriel")}"><span class="ic">📧</span> ${T("Renvoyer")}</button>' : '')
       + (peutSuppr ? '<button class="b dgr" data-del="'+esc(s.id)+'">'+(DELU===s.id?'${T("✓ Confirmer")}':'${T("Supprimer")}')+'</button>' : '');

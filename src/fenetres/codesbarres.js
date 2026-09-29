@@ -100,8 +100,9 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .stats .s .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .fileligne{display:flex;align-items:center;gap:.45rem;padding:.3rem 0;
   border-top:1px solid var(--v055);font-size:.8rem}
-.fileligne .info{flex:1 1 auto;min-width:0}
-.fileligne .info .dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* PAS << .info >> : le socle le peint en panneau BLEU en mode jour. */
+.fileligne .finfo{flex:1 1 auto;min-width:0}
+.fileligne .finfo .dt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
   align-items:center;justify-content:center;z-index:50;padding:1rem}
 .boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;
@@ -230,7 +231,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('codesbarres')}
     } else {
       h += FILE.map(function(it, i){
         return '<div class="fileligne">'
-          + '<div class="info"><div class="dt"><strong>' + esc(it.name) + '</strong></div>'
+          + '<div class="finfo"><div class="dt"><strong>' + esc(it.name) + '</strong></div>'
           + '<div class="dt">' + esc(it.size) + ' / ' + esc(it.color)
           + ' · <span class="sku">' + esc(it.sku) + '</span></div></div>'
           + '<button class="mini" data-fmoins="' + i + '" title="${T("Moins")}">−</button>'

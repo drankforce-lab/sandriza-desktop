@@ -338,7 +338,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!D.custom.length) return '<p class="aide" style="margin:0">${T("Aucune couleur personnalisée. Ajoutez-en via « Ajouter une nouvelle couleur ».")}</p>';
     return D.custom.map(function(c){
       var use = c.used > 0 ? '<span class="pill used">' + c.used + ' ' + (c.used > 1 ? '${T("produits")}' : '${T("produit")}') + '</span>' : '<span class="pill no">${T("non utilisée")}</span>';
-      var act = D.peut.edit ? '<button class="mini" data-coloredit="' + esc(c.nom) + '|' + esc(c.hex) + '"><span class="ic">✏</span> ${T("Modifier")}</button> <button class="mini danger" data-colorrm="' + esc(c.nom) + '" title="' + (c.used > 0 ? '${T("utilisée — bloqué")}' : '${T("Supprimer")}') + '">${T("Supprimer")}</button>' : '';
+      var act = D.peut.edit ? '<button class="mini" data-coloredit="' + esc(c.nom) + '|' + esc(c.hex) + '"><span class="ic">✎</span> ${T("Modifier")}</button> <button class="mini danger" data-colorrm="' + esc(c.nom) + '" title="' + (c.used > 0 ? '${T("utilisée — bloqué")}' : '${T("Supprimer")}') + '">${T("Supprimer")}</button>' : '';
       return '<div class="cust"><span class="pastille" style="' + (c.gradient ? 'border-radius:4px;' : '') + 'background:' + esc(c.hex) + '"></span>'
         + '<span class="nm">' + esc(c.nom) + '</span>' + use
         + '<span class="mono" style="color:var(--tx2);font-size:.72rem">' + (c.gradient ? '${T("dégradé")}' : esc(c.hex)) + '</span>' + act + '</div>';
@@ -404,7 +404,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var cats = D.categories || [];
     var rows = cats.map(function(c){
       if (CATEDIT === c.id) return catEditRow(c);
-      var edit = D.peut.edit ? '<button class="mini" data-catedit="' + esc(c.id) + '"><span class="ic">✏</span></button>' : '';
+      var edit = D.peut.edit ? '<button class="mini" data-catedit="' + esc(c.id) + '"><span class="ic">✎</span></button>' : '';
       var del = D.peut.supprime ? ' <button class="mini danger" data-catdel="' + esc(c.id) + '" title="' + (c.used > 0 ? c.used + ' ' + szPl(c.used, '${T("produit — bloqué")}', '${T("produits — bloqué")}') : '${T("Supprimer")}') + '"><span class="ic">🗑</span></button>' : '';
       return '<tr><td><span class="pastille" style="background:' + esc(c.color) + '"></span></td>'
         + '<td style="font-weight:600">' + esc(c.name) + '</td>'

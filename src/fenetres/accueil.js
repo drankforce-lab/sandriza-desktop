@@ -42,6 +42,8 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .sdesc{font-size:.76rem;color:var(--tx2);margin:0 0 .8rem}
 .bloc{display:flex;align-items:center;gap:.7rem;padding:.6rem .7rem;background:var(--f-champ);border:1px solid var(--v12);border-radius:9px;margin:0 0 .5rem}
 .bloc .em{font-size:1.3rem;filter:grayscale(1) brightness(1.5)}
+/* En jour, l eclaircissement de nuit rendait l icone blanche sur blanc (2026-09-29). */
+html.jour .bloc .em{filter:grayscale(1) brightness(.4)}
 .bloc .nom{flex:1;min-width:0}
 .bloc .nom b{font-size:.88rem}
 .bloc .nom .d{font-size:.73rem;color:var(--tx2)}
@@ -189,7 +191,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         + '<div class="nom"><b>' + esc(b.label) + '</b>' + (b.visible ? '' : '<span class="masq">${T("(masqué)")}</span>')
         + '<div class="d">' + esc(b.desc) + '</div></div>'
         + '<div class="actes">'
-        + '<button class="b" type="button" data-ed="' + esc(b.id) + '" title="${T("Modifier")}"><span class="ic">✏</span></button>'
+        + '<button class="b" type="button" data-ed="' + esc(b.id) + '" title="${T("Modifier")}"><span class="ic">✎</span></button>'
         + (RO ? '' : '<button class="b" type="button" data-vis="' + esc(b.id) + '" title="' + (b.visible ? '${T("Masquer")}' : '${T("Afficher")}') + '">' + (b.visible ? '<span class="ic">👁</span>' : '<span class="ic">🚫</span>') + '</button>'
           + '<button class="b" type="button" data-up="' + esc(b.id) + '"' + (i===0?' disabled':'') + '>↑</button>'
           + '<button class="b" type="button" data-down="' + esc(b.id) + '"' + (i===BLOCS.length-1?' disabled':'') + '>↓</button>')

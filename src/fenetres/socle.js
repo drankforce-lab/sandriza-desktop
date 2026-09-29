@@ -3199,6 +3199,12 @@ html.jour thead th{background:var(--f-carte)}
    partout ou cela peut s appliquer >>) : les tuiles, pastilles, champs et
    boutons prennent les mesures de l Inventaire. */
 .tuile{border-radius:13px;padding:.75rem .95rem}
+/* LA TUILE CHOISIE SE VOIT (2026-09-29). Dix fenetres filtrent en cliquant une
+   tuile (Retours, Clients, Avis, Coupons...) et posent << .on >> sur la tuile
+   active — mais la reprise de jour (html.jour .tuile{border-color}) l ecrasait :
+   le filtre en cours ne se voyait plus. Un contour or, dans les deux modes. */
+.tuile.on,html.jour .tuile.on{border-color:rgba(201,169,126,.9);box-shadow:inset 0 0 0 1px rgba(201,169,126,.6)}
+html.jour .tuile.on{border-color:#a8804e;box-shadow:inset 0 0 0 1px rgba(168,128,78,.55)}
 .tuile .lbl{font-size:.76rem;font-weight:600;text-transform:none;letter-spacing:0;color:var(--tx2)}
 .tuile .val{font-size:1.6rem;font-weight:800;line-height:1.15;margin:.2rem 0 .1rem}
 /* ⚠ LES DEUX AUTRES NOMS DU MEME OBJET (2026-09-25). La tuile a derive en

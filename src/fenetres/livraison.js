@@ -68,7 +68,8 @@ button.prim:hover:not(:disabled){background:#d8bd97}
    tiennent pas dans une demi-colonne. */
 .carte.large{grid-column:1/-1}
 .pbarre{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;flex-wrap:wrap}
-.pbarre .info{font-size:.74rem;color:var(--tx2);flex:1 1 12rem;min-width:0}
+/* PAS << .info >> : le socle le peint en panneau BLEU en mode jour. */
+.pbarre .pinfo{font-size:.74rem;color:var(--tx2);flex:1 1 12rem;min-width:0}
 .ptab{max-height:22rem;overflow-y:auto;border:1px solid var(--v07);border-radius:9px}
 .ptab::-webkit-scrollbar{width:8px}
 .ptab::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
@@ -273,7 +274,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="pbarre">'
       + '<input aria-label="${T("Filtrer")}" class="pfiltre" id="p-filtre" type="search" placeholder="${T("Filtrer…")}" value="' + esc(FILTRE) + '">'
       /* Deux formes ENTIERES : un << s >> colle a part ne se traduit pas. */
-      + '<span class="info">' + PAYS.nbInscrits
+      + '<span class="pinfo">' + PAYS.nbInscrits
       + (PAYS.nbInscrits > 1 ? '${T(" pays inscrits")}' : '${T(" pays inscrit")}')
       + '${T(" · dernière lecture : ")}' + esc(maj) + '</span>'
       + '<button id="p-relire"' + (OCCUPE ? ' disabled' : '') + '>${T("↻ Relire Stripe")}</button></div>'
