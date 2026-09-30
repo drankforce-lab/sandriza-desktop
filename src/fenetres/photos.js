@@ -280,6 +280,16 @@ table.grille input.ren{width:100%;min-width:10rem;font:inherit;padding:.15rem .3
 table.grille td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 /* Les actions : toujours visibles, jamais a chercher. Elles s eclairent au
    survol de la ligne pour ne pas crier en permanence. */
+.ctx{position:fixed;z-index:60;min-width:14rem;background:var(--f-carte);border:1px solid var(--v16);
+  border-radius:10px;padding:.3rem;box-shadow:0 12px 32px rgba(0,0,0,.45)}
+.ctx .tt{font-size:.7rem;color:var(--tx2);padding:.3rem .55rem .35rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:18rem}
+.ctx button{display:block;width:100%;text-align:left;font:inherit;font-size:.82rem;background:none;border:0;
+  color:var(--tx);padding:.42rem .6rem;border-radius:6px;cursor:pointer}
+.ctx button:hover,.ctx button:focus{background:var(--v09);outline:none}
+.ctx button.dgr{color:var(--tx-f6a6a6)}
+html.jour .ctx button.dgr{color:#b91c1c}
+.ctx .trait{height:1px;background:var(--v08);margin:.25rem .2rem}
+tr.arme td,tr[data-arme] td{background:rgba(248,113,113,.12)}
 .act{display:flex;gap:.12rem;white-space:nowrap}
 .act .ic{width:1.7rem;height:1.7rem;padding:0;font-size:.85rem;line-height:1;
   border-radius:6px;opacity:.55;transition:opacity .12s ease,background .12s ease}
@@ -722,7 +732,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
           + '<th style="width:26px"><input type="checkbox" id="p-tout" title="${T("Tout choisir sur cette page")}"></th>'
           + '<th style="width:46px"></th><th>${T("Code")}</th><th>${T("Nom")}</th>'
           + '<th>${T("Article lié")}</th><th class="num">${T("Poids")}</th><th>${T("État")}</th>'
-          + '<th style="width:1%">${T("Actions")}</th></tr></thead><tbody>'
+          + '</tr></thead><tbody>'
           + rows.map(ligne).join('') + '</tbody></table>';
       }
       h += '</div>';
@@ -1962,11 +1972,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   /* La carte du mode Vignettes : les MEMES attributs que la ligne (data-id,
      data-chx, data-ren2 et les boutons d action), donc les memes gestes. */
   function carteVignette(r){
-    var tr = ligne(r);
-    /* Les boutons d action, repris tels quels de la ligne (sans expression reguliere :
-       une barre oblique inverse ne survit pas au gabarit de la page). */
-    var i0 = tr.indexOf('<span class="act">');
-    var act = i0 < 0 ? '' : tr.slice(i0, tr.lastIndexOf('</td></tr>'));
+    var act = '';   // les gestes : clic droit (menuPhoto), comme sur la ligne
     return '<div class="vcarte' + (CHOIX[r.id] ? ' on' : '') + '" data-id="' + esc(r.id) + '">'
       + '<div class="vimg">' + (r.apercu ? '<img src="' + esc(r.apercu) + '" alt="" loading="lazy">'
           : '<span class="att">${T("non rangée")}</span>') + '</div>'
@@ -1978,21 +1984,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '<div class="vetat">' + etat(r) + '</div>'
       + act + '</div></div>';
   }
+  /* ⚠ PLUS DE RANGÉE DE BOUTONS SUR LA PHOTO (2026-09-29). Sa demande, sur sa
+     capture des sept petits carrés : « ses options doivent être disponibles via
+     un clic droit sur la photo uniquement via le menu contextuel ». Les gestes
+     n'ont pas changé : ils vivent dans menuPhoto, et passent par les MEMES
+     fonctions (geste*) qu avant. */
   function ligne(r){
-    var ro = !D.peutModifier;
-    var arme = (SUPPR_ARME === r.id);
-    var act = ro ? '' : ('<span class="act">'
-      + '<button class="ic" data-ren="' + esc(r.id) + '" title="${T("Renommer")}">✎</button>'
-      + '<button class="ic" data-t1="' + esc(r.id) + '" title="${T("Détourer le vêtement")}">✂</button>'
-      + '<button class="ic" data-t2="' + esc(r.id) + '" title="${T("Retirer le mannequin")}">◍</button>'
-      + '<button class="ic" data-t3="' + esc(r.id) + '" title="${T("Mettre sur un mannequin")}">☖</button>'
-      + '<button class="ic" data-piv="' + esc(r.id) + '" title="${T("Pivoter d’un quart de tour")}">⟳</button>'
-      + '<button class="ic" data-ouvre="' + esc(r.id) + '" title="${T("Ouvrir la fiche (fond, article, export)")}">⋯</button>'
-      + '<button class="ic sup' + (arme ? ' arme' : '') + '" data-sup="' + esc(r.id) + '"'
-      + ' title="' + (arme ? '${T("Cliquez encore pour supprimer")}' : '${T("Supprimer")}') + '">'
-      + (arme ? '!' : '✕') + '</button>'
-      + '</span>');
-    return '<tr data-id="' + esc(r.id) + '"' + (CHOIX[r.id] ? ' class="on"' : '') + '>'
+    return '<tr data-id="' + esc(r.id) + '"' + (CHOIX[r.id] ? ' class="on"' + (SUPPR_ARME === r.id ? ' data-arme="1"' : '') : (SUPPR_ARME === r.id ? ' class="arme"' : '')) + '>'
       + '<td><input type="checkbox" class="chx" data-chx="' + esc(r.id) + '"'
       +   ' aria-label="' + esc('${T("Sélectionner")} ' + (r.nom || r.id)) + '"'
       + (CHOIX[r.id] ? ' checked' : '') + '></td>'
@@ -2006,8 +2004,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
           ? esc(r.lieNom) + (r.lieSku ? ' <span class="dt">· ' + esc(r.lieSku) + '</span>' : '')
           : '<span class="dt">—</span>') + '</td>'
       + '<td class="num">' + gain(r) + '</td>'
-      + '<td>' + etat(r) + '</td>'
-      + '<td>' + act + '</td></tr>';
+      + '<td>' + etat(r) + '</td></tr>';
   }
 
   /* ── LE PANNEAU DE DETAIL ──────────────────────────────────────────────── */
@@ -2525,15 +2522,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var stop = function(ev){ ev.stopPropagation(); };
 
     // Renommer sur place : le champ remplace le texte, entree valide, echap renonce.
-    Array.prototype.forEach.call(corps.querySelectorAll('[data-ren],[data-ren2]'), function(b){
-      b.onclick = function(ev){
-        stop(ev);
-        RENOMME = b.getAttribute('data-ren') || b.getAttribute('data-ren2');
-        SUPPR_ARME = '';
-        dessiner();
-        var c = document.getElementById('p-ren');
-        if (c) { c.focus(); c.select(); }
-      };
+    Array.prototype.forEach.call(corps.querySelectorAll('[data-ren2]'), function(b){
+      b.onclick = function(ev){ stop(ev); gesteRenommer(b.getAttribute('data-ren2')); };
     });
     var champRen = document.getElementById('p-ren');
     if (champRen) {
@@ -2556,66 +2546,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       champRen.onblur = function(){ if (RENOMME) { RENOMME = ''; dessiner(); } };
     }
 
-    // Les trois traitements, directement sur la ligne.
-    [['data-t1', 'detourage'], ['data-t2', 'fantome'], ['data-t3', 'humain']].forEach(function(x){
-      Array.prototype.forEach.call(corps.querySelectorAll('[' + x[0] + ']'), function(b){
-        b.onclick = function(ev){
-          stop(ev);
-          var id = b.getAttribute(x[0]);
-          var l = null;
-          (D.lignes || []).forEach(function(y){ if (y.id === id) l = y; });
-          CHOIX = {};
-          CHOIX[id] = l ? { code: l.code, nom: l.nom } : { code: '', nom: id };
-          lancerLot(x[1]);
-        };
-      });
-    });
-
-    // La fiche complete (fond, article, export) reste derriere un bouton.
-    Array.prototype.forEach.call(corps.querySelectorAll('[data-ouvre]'), function(b){
-      b.onclick = function(ev){
-        stop(ev);
-        var id = b.getAttribute('data-ouvre');
-        var t = (D.lignes || []).filter(function(x){ return x.id === id; })[0];
-        if (t) { DETAIL = t; dessiner(); }
-      };
-    });
-
-    /* ⚠ LA SUPPRESSION S ARME SUR LA LIGNE, et se desarme seule au bout de cinq
-       secondes : une corbeille qui reste armee est une corbeille sur laquelle on
-       reclique par reflexe. */
-    Array.prototype.forEach.call(corps.querySelectorAll('[data-piv]'), function(b){
-      b.onclick = function(ev){
-        stop(ev);
-        var id = b.getAttribute('data-piv');
-        var l = null;
-        (D.lignes || []).forEach(function(y){ if (y.id === id) l = y; });
-        CHOIX = {};
-        CHOIX[id] = l ? { code: l.code, nom: l.nom } : { code: '', nom: id };
-        lancerPivot([id]);
-      };
-    });
-    Array.prototype.forEach.call(corps.querySelectorAll('[data-sup]'), function(b){
-      b.onclick = function(ev){
-        stop(ev);
-        var id = b.getAttribute('data-sup');
-        if (SUPPR_ARME !== id) {
-          SUPPR_ARME = id;
-          dessiner();
-          dire('${T("Cliquez encore sur la corbeille pour supprimer — l’article lié, lui, garde son image.")}', 'att');
-          setTimeout(function(){ if (SUPPR_ARME === id) { SUPPR_ARME = ''; dessiner(); } }, 5000);
-          return;
-        }
-        SUPPR_ARME = '';
-        dire('${T("Suppression…")}');
-        appeler('photos:supprimer', [id]).then(function(r){
-          if (!r.ok) { dire(expliquer(r), 'err'); return; }
-          delete CHOIX[id];
-          dire('${T("Photo retirée de la photothèque.")}', 'bon');
-          charger();
-        });
-      };
-    });
 
 
     /* ⚠ LA CASE NE DOIT PAS OUVRIR LA PHOTO : la ligne entiere est cliquable,
@@ -2919,6 +2849,96 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     SUPPR_ARME = ''; SUPPR_ARME_INSP = false;
     dessiner();
   }
+
+  /* ══ LES GESTES D'UNE PHOTO — appelés par le menu du clic droit ═══════════ */
+  function lignePar(id){ var l = null; (D.lignes || []).forEach(function(y){ if (y.id === id) l = y; }); return l; }
+  function choisirSeule(id){ var l = lignePar(id); CHOIX = {}; CHOIX[id] = l ? { code: l.code, nom: l.nom } : { code: '', nom: id }; }
+  function gesteRenommer(id){
+    RENOMME = id; SUPPR_ARME = '';
+    dessiner();
+    var c = document.getElementById('p-ren');
+    if (c) { c.focus(); c.select(); }
+  }
+  function gesteTraiter(id, quoi){ choisirSeule(id); lancerLot(quoi); }
+  function gestePivoter(id){ choisirSeule(id); lancerPivot([id]); }
+  function gesteOuvrir(id){ var t = lignePar(id); if (t) { DETAIL = t; dessiner(); } }
+  /* ⚠ LA SUPPRESSION GARDE SES DEUX TEMPS : le premier choix l'ARME (la ligne se
+     teinte, et l'entrée du menu devient « Confirmer la suppression »), le second
+     la fait. Elle se désarme seule au bout de cinq secondes. */
+  function gesteSupprimer(id){
+    if (SUPPR_ARME !== id) {
+      SUPPR_ARME = id;
+      dessiner();
+      dire('${T("Clic droit → « Confirmer la suppression » pour la retirer — l’article lié, lui, garde son image.")}', 'att');
+      setTimeout(function(){ if (SUPPR_ARME === id) { SUPPR_ARME = ''; dessiner(); } }, 5000);
+      return;
+    }
+    SUPPR_ARME = '';
+    dire('${T("Suppression…")}');
+    appeler('photos:supprimer', [id]).then(function(r){
+      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      delete CHOIX[id];
+      dire('${T("Photo retirée de la photothèque.")}', 'bon');
+      charger();
+    });
+  }
+
+  function fermerMenuPhoto(){ var m = document.getElementById('p-ctx'); if (m && m.parentNode) m.parentNode.removeChild(m); }
+  function menuPhoto(ev, id){
+    fermerMenuPhoto();
+    var l = lignePar(id); if (!l) return;
+    var ro = !D.peutModifier;
+    var arme = (SUPPR_ARME === id);
+    var h = '<div class="tt">' + esc(l.nom || l.code || '') + '</div>';
+    if (!ro) {
+      h += '<button data-g="ren">${T("Renommer")}</button>'
+        + '<div class="trait"></div>'
+        + '<button data-g="detourage">${T("Détourer le vêtement")}</button>'
+        + '<button data-g="fantome">${T("Retirer le mannequin")}</button>'
+        + '<button data-g="humain">${T("Mettre sur un mannequin")}</button>'
+        + '<button data-g="piv">${T("Pivoter d’un quart de tour")}</button>'
+        + '<div class="trait"></div>';
+    }
+    h += '<button data-g="ouvre">${T("Ouvrir la fiche (fond, article, export)")}</button>';
+    if (!ro) h += '<div class="trait"></div><button class="dgr" data-g="sup">'
+      + (arme ? '${T("Confirmer la suppression")}' : '${T("Supprimer…")}') + '</button>';
+    var m = document.createElement('div');
+    m.className = 'ctx'; m.id = 'p-ctx'; m.setAttribute('role', 'menu'); m.innerHTML = h;
+    document.body.appendChild(m);
+    // Replié dans la fenêtre APRÈS l'avoir posé : sa hauteur dépend des droits.
+    var rc = m.getBoundingClientRect();
+    m.style.left = Math.max(8, Math.min(ev.clientX, window.innerWidth - rc.width - 8)) + 'px';
+    m.style.top  = Math.max(8, Math.min(ev.clientY, window.innerHeight - rc.height - 8)) + 'px';
+    Array.prototype.forEach.call(m.querySelectorAll('button'), function(b){
+      b.onclick = function(e){
+        e.stopPropagation();
+        var g = b.getAttribute('data-g');
+        fermerMenuPhoto();
+        if (g === 'ren') gesteRenommer(id);
+        else if (g === 'detourage' || g === 'fantome' || g === 'humain') gesteTraiter(id, g);
+        else if (g === 'piv') gestePivoter(id);
+        else if (g === 'ouvre') gesteOuvrir(id);
+        else if (g === 'sup') gesteSupprimer(id);
+      };
+    });
+    var b0 = m.querySelector('button'); if (b0) b0.focus();
+  }
+  /* Trois façons de le refermer : un menu resté ouvert finit par recevoir un
+     clic qu'on ne lui destinait pas — et une de ses entrées supprime. */
+  document.addEventListener('mousedown', function(e){ var m = document.getElementById('p-ctx'); if (m && !m.contains(e.target)) fermerMenuPhoto(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') fermerMenuPhoto(); });
+  window.addEventListener('blur', fermerMenuPhoto);
+  window.addEventListener('resize', fermerMenuPhoto);
+  corps.addEventListener('scroll', fermerMenuPhoto, true);
+  corps.oncontextmenu = function(ev){
+    var t = ev.target;
+    if (!t || !t.closest) return;
+    if (t.closest('input') || t.closest('textarea')) return;   // le menu du champ reste celui du champ
+    var tr = t.closest('tr[data-id]') || t.closest('.vcarte[data-id]');
+    if (!tr) return;
+    ev.preventDefault();
+    menuPhoto(ev, tr.getAttribute('data-id'));
+  };
 
   /* ⚠ UN CLIC SUR UNE COMMANDE EST TRAITE PAR SA COMMANDE, jamais par ce
      gestionnaire general : sans cette garde, le clic qui vient d ARMER un bouton

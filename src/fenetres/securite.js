@@ -176,6 +176,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .ctx button:hover{background:var(--v09)}
 .ctx button.dgr{color:var(--tx-f6a6a6)}
 .ctx button.dgr:hover{background:rgba(248,113,113,.16)}
+html.jour .ctx button.dgr{color:#b91c1c}
 .ctx .trait{height:1px;background:var(--v08);margin:.25rem .3rem}
 .tbl .act{text-align:right;white-space:nowrap}
 .tbl .act .mini{margin-left:.2rem}
