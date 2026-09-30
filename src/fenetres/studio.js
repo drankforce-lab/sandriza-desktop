@@ -158,6 +158,7 @@ html.jour .onglets .ong.on,html.jour .onglets .ong.on .ot b{color:#3d3526}
 .ong .oe{font-size:.68rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ong.on .oe{color:var(--tx2)}
 .ong .oe.ign{font-style:italic}
+.ongsep{margin:.7rem .6rem .25rem;font:700 .64rem/1 system-ui;letter-spacing:.09em;text-transform:uppercase;color:var(--tx3)}
 /* ⚠⚠ LE CROCHET EST VERT DEPUIS LE 2026-09-09, sa demande : << mets aussi un
    crochet vert quand la section est remplie, exemple la photo est choisie tu
    coches vert >>.
@@ -911,6 +912,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
        photothèque. L exiger prete a l ecran priverait du lot celui qui n a
        justement pas ouvert de photo — le cas le plus courant. */
     if (bLot) bLot.disabled = RO || OCCUPE;
+    /* Le suivi des lots n'a rien à générer ni à recommencer : ses boutons de
+       rendu restaient au pied, grisés, sans rapport avec l'écran. */
+    bApercu.hidden = bFinal.hidden = !!LOTS_VUE;
+    var br = document.getElementById('b-reset'); if (br) br.hidden = !!LOTS_VUE;
     if (!pret && ARME) { ARME = false; bFinal.className = 'prim'; bFinal.textContent = '${T("Générer en pleine qualité")}'; }
   }
 
@@ -1815,7 +1820,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function ongletsHtml(){
     var courant = ongletSur().cle;
     var fermes = ongletsFermes();
+    /* REFONTE 2026-09-29 : « Facultatif » se dit UNE fois, en intertitre, au lieu
+       d'être répété sous chaque étape. L'indication « ignoré » reste sous chacune
+       (sa demande du 2026-09-25 : dire qu'une option vide sera sautée). */
+    var avant = true;
     return ongletsDispo().map(function(o){
+      var tete = '';
+      if (avant && !ongletRequis(o.cle) && o.cle !== 'valeur') { avant = false; tete = '<div class="ongsep">${T("Facultatif")}</div>'; }
+      return tete + ongletBouton(o, courant, fermes);
+    }).join('');
+  }
+  function ongletBouton(o, courant, fermes){
       var e = ongletEtat(o.cle);
       var ok = ongletFait(o.cle);
       var bloque = fermes && o.cle !== 'photo';
@@ -1831,9 +1846,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
            ignorees >>). Un simple tiret ne disait pas si on avait oublie
            l etape ou si elle serait sautee. */
         + '<span class="oe' + (e ? '' : (ongletRequis(o.cle) ? '' : ' ign')) + '">'
-        + esc(e || (ongletRequis(o.cle) ? '${T("À choisir")}' : '${T("Facultatif · ignoré")}')) + '</span></span>'
+        + esc(e || (ongletRequis(o.cle) ? '${T("À choisir")}' : '${T("ignoré")}')) + '</span></span>'
         + (ok ? '<span class="oc">✓</span>' : '') + '</button>';
-    }).join('');
   }
   // Le contenu du groupe affiché, et lui seul.
   function panneauHtml(){

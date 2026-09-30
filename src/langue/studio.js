@@ -780,5 +780,7 @@ module.exports = {
   'intérieur du vêtement': 'inside of the garment',
   'Aucune photo d’intérieur.': 'No inside photo.',
   'Remplacer': 'Replace',
-  'Choisir un fichier': 'Choose a file'
+  'Choisir un fichier': 'Choose a file',
+  'Facultatif': 'Optional',
+  'ignoré': 'skipped'
 };
