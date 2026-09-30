@@ -149,6 +149,7 @@ body{background:var(--f-page);color:var(--tx);
 .onglets .ong.on::before{content:'';position:absolute;left:-.45rem;top:.45rem;bottom:.45rem;
   width:3px;border-radius:0 3px 3px 0;background:#c9a97e}
 .onglets .ong.on .ot b{color:var(--tx-creme)}
+html.jour .onglets .ong.on,html.jour .onglets .ong.on .ot b{color:#3d3526}
 /* ⚠ L ONGLET OUVERT SE MARQUE PAR SON FOND ET SON LISERE DORES, jamais par un
    pictogramme. Il en portait un, grise ; les pictogrammes ont ete retires le
    2026-09-05 et les regles .oi / .pi sont parties avec eux. */
