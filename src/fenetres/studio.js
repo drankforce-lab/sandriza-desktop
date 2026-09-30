@@ -53,7 +53,9 @@ body{background:var(--f-page);color:var(--tx);
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .credits{margin-left:auto;font-size:.74rem;color:var(--tx2)}
+.tete .credits{margin-left:auto;font-size:.72rem;color:var(--tx2);
+  padding:.22rem .7rem;border-radius:99px;background:var(--v04);border:1px solid var(--v08)}
+.tete .credits:empty{display:none}
 /* Le temoin des traitements, dans l en-tete (2026-09-09). Discret : pas de fond,
    pas de cadre, la couleur du texte secondaire — il ne reclame rien tant qu on
    ne le cherche pas. Il s eclaire au survol, comme tout ce qui se clique.
@@ -99,9 +101,9 @@ body{background:var(--f-page);color:var(--tx);
    filigrane sous la ligne de flottaison — le defaut meme qu on vient de corriger
    en separant les deux volets. Une recette n ajoute rien a la commande, elle
    REMPLIT les cinq etapes d un coup : sa place est donc au-dessus d elles. */
-.rcbar{flex:0 0 auto;display:flex;align-items:center;gap:.45rem;
-  background:var(--f-carte);border:1px solid var(--v07);border-radius:12px;
-  padding:.5rem .6rem}
+/* REFONTE 2026-09-29 (« plus moderne et simple ») : une LIGNE, plus une carte.
+   Trois cartes empilées à gauche faisaient trois cadres pour un seul travail. */
+.rcbar{flex:0 0 auto;display:flex;align-items:center;gap:.45rem;padding:0 .15rem}
 .rcbar label{flex:0 0 auto;font:700 .7rem/1 system-ui;text-transform:none;
   letter-spacing:0;color:var(--tx2)}
 .rcbar select{flex:1 1 auto;min-width:0;font-size:.78rem;padding:.3rem .45rem}
@@ -122,12 +124,16 @@ body{background:var(--f-page);color:var(--tx);
    defaut de retrecir sous la hauteur de son contenu : sans eux, le volet
    repousse le pied de page hors de la fenetre et la barre de defilement qu on
    vient de retirer revient par l autre bout. */
-.railc{flex:1 1 auto;min-height:0;display:flex;gap:.7rem}
-.onglets{flex:0 0 10.5rem;min-width:0;display:flex;flex-direction:column;gap:.25rem;
-  overflow-y:auto}
+/* ⚠ REFONTE 2026-09-29 : les onglets et leur panneau forment UNE carte. Les
+   onglets RESTENT À GAUCHE — c'était sa demande du lot 3g, et « plus simple »
+   ne la défait pas : on retire le cadre en trop, pas l'orientation. */
+.railc{flex:1 1 auto;min-height:0;display:flex;gap:0;
+  background:var(--f-carte);border:1px solid var(--v07);border-radius:14px;overflow:hidden}
+.onglets{flex:0 0 11rem;min-width:0;display:flex;flex-direction:column;gap:.2rem;
+  overflow-y:auto;padding:.55rem .45rem;background:var(--v03);border-right:1px solid var(--v07)}
 .ong{display:flex;align-items:center;gap:.5rem;width:100%;text-align:left;
-  padding:.42rem .5rem;border-radius:9px;border:1px solid transparent;
-  background:transparent;color:var(--tx-bleute);cursor:pointer}
+  padding:.5rem .6rem;border-radius:9px;border:1px solid transparent;
+  background:transparent;color:var(--tx-bleute);cursor:pointer;position:relative}
 .ong:hover:not(.on):not(:disabled){background:var(--v05)}
 /* ⚠ L ONGLET FERME TANT QU IL N Y A PAS DE PHOTO (2026-09-09, sa demande).
    ⚠ LE CURSEUR INTERDIT ET PAS SEULEMENT L OPACITE : c est le curseur qui dit
@@ -137,7 +143,12 @@ body{background:var(--f-page);color:var(--tx);
    illisible ne dit plus ce qui attend, et c est justement ce qu on regarde en
    arrivant sur cet ecran. */
 .ong:disabled{opacity:.55;cursor:not-allowed}
-.ong.on{background:var(--f-carte);border-color:rgba(201,169,126,.45)}
+/* L'onglet ouvert : une teinte et un filet d'or à gauche — plus la pastille
+   pleine du socle (button.on), qui criait plus fort que le bouton « Générer ». */
+.onglets .ong.on{background:rgba(201,169,126,.12);border-color:transparent;color:var(--tx-creme)}
+.onglets .ong.on::before{content:'';position:absolute;left:-.45rem;top:.45rem;bottom:.45rem;
+  width:3px;border-radius:0 3px 3px 0;background:#c9a97e}
+.onglets .ong.on .ot b{color:var(--tx-creme)}
 /* ⚠ L ONGLET OUVERT SE MARQUE PAR SON FOND ET SON LISERE DORES, jamais par un
    pictogramme. Il en portait un, grise ; les pictogrammes ont ete retires le
    2026-09-05 et les regles .oi / .pi sont parties avec eux. */
@@ -162,10 +173,9 @@ body{background:var(--f-page);color:var(--tx);
    d oeil. */
 .ong .oc{flex:0 0 auto;color:var(--tx-ok2);font-size:.95rem;font-weight:700;line-height:1}
 .panneau{flex:1 1 auto;min-width:0;min-height:0;overflow-y:auto;
-  background:var(--f-carte);border:1px solid var(--v07);border-radius:12px;
-  padding:.72rem .95rem}
+  background:transparent;border:0;padding:.9rem 1.1rem}
 .pnt{display:flex;align-items:center;gap:.55rem}
-.pnt h2{margin:0;font:700 .95rem/1.2 Georgia,serif}
+.pnt h2{margin:0;font:700 1.05rem/1.2 Georgia,serif}
 .panneau .sous{margin:.28rem 0 .5rem;font-size:.74rem;color:var(--tx3);line-height:1.4}
 .onglets::-webkit-scrollbar,.panneau::-webkit-scrollbar{width:8px}
 .onglets::-webkit-scrollbar-thumb,.panneau::-webkit-scrollbar-thumb{
@@ -189,7 +199,11 @@ body{background:var(--f-page);color:var(--tx);
   padding:.85rem 1rem;min-width:0}
 .recap .rt,.fmt .rt{font:700 .74rem/1.2 system-ui;text-transform:none;
   letter-spacing:0;color:var(--tx2)}
-.recap .rc2{display:flex;flex-wrap:wrap;gap:.32rem;margin-top:.5rem}
+/* REFONTE 2026-09-29 : le résumé n'est plus une carte — une ligne au-dessus de
+   l'image, qui dit ce qu'on va obtenir sans prendre la place de l'image. */
+.bloc.recap{display:flex;align-items:center;flex-wrap:wrap;gap:.45rem;
+  background:transparent;border:0;padding:.1rem .2rem}
+.recap .rc2{display:flex;flex-wrap:wrap;gap:.32rem;margin-top:0}
 .recap .jt{font-size:.75rem;padding:.16rem .55rem;border-radius:99px;
   background:rgba(201,169,126,.14);border:1px solid rgba(201,169,126,.3);color:var(--tx-creme)}
 .recap .jt.gris{background:var(--v05);border-color:var(--v14);color:var(--tx2)}
@@ -252,11 +266,11 @@ body{background:var(--f-page);color:var(--tx);
    affichage. */
 .depot{border:1.5px dashed var(--v12);border-radius:10px;background:var(--f-champ);cursor:pointer;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;
-  min-height:5rem;text-align:center;color:var(--tx2);font-size:.78rem;padding:.6rem .7rem;
+  min-height:11rem;text-align:center;color:var(--tx2);font-size:.82rem;padding:1rem;
   -webkit-user-select:none;user-select:none}
 .depot:hover,.depot.survol{border-color:#c9a97e;color:var(--tx-bleute)}
-.depot .gros{font-size:1.15rem}
-.depot .gros svg{width:22px;height:22px}
+.depot .gros{font-size:1.15rem;margin-bottom:.35rem}
+.depot .gros svg{width:34px;height:34px;opacity:.8}
 .depot img{max-width:100%;max-height:14rem;border-radius:8px}
 .depot .refaire{font-size:.72rem;color:var(--tx2);text-decoration:underline;margin-top:.3rem}
 /* La barre de l ecran plein largeur (le suivi des lots).
@@ -426,7 +440,20 @@ input[type=range]{width:100%;accent-color:#c9a97e;margin:.3rem 0 0;cursor:pointe
    etaient coupes net. Le volet de droite defile deja (.scene) — c est a lui de
    defiler, pas au bloc de se comprimer. */
 .res{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  min-height:15rem;text-align:center;color:var(--tx2)}
+  min-height:15rem;text-align:center;color:var(--tx2);border-radius:14px;
+  background:radial-gradient(circle at 50% 38%,rgba(201,169,126,.07),transparent 62%),var(--f-carte)}
+/* Les mises en garde d'un rendu, regroupées dans UNE note au lieu de quatre
+   lignes jaunes empilées sous l'image. */
+.res .notes{margin-top:.6rem;max-width:34rem;text-align:left;padding:.55rem .75rem;border-radius:10px;
+  background:var(--v04);border:1px solid var(--v08)}
+.res .notes .filig,.res .notes .avis{margin:.12rem 0}
+/* ⚠ EN JOUR, PAS DE VOILE SUR CES SURFACES : le dégradé et les fonds v04 assombrissent
+   le blanc juste assez pour faire passer sous 4.5 les textes dorés et gris qui
+   y sont posés (banc de contraste au rendu, 2026-09-29). Fond plein, comme avant. */
+html.jour .res{background:var(--f-carte)}
+html.jour .res .notes,html.jour .tete .credits{background:#fff;border-color:rgba(20,30,50,.12)}
+/* Le résumé n'a plus de carte blanche sous lui : ses pastilles portent leur fond. */
+html.jour .recap .jt.gris{background:#fff;color:#4a5260}
 .res.garni{flex:0 0 auto;justify-content:flex-start;min-height:0}
 .res img{max-width:100%;max-height:min(58vh,32rem);border-radius:9px;
   border:1px solid var(--v10)}
@@ -1232,7 +1259,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       return h;
     }
     // ③ Rien de choisi : la zone de dépôt, et l explorateur.
-    h += '<div class="depot" id="depot"><span class="gros"><span class="ic">📷</span></span>'
+    h += '<div class="depot" id="depot"><span class="gros"><span class="ico" aria-hidden="true">${ICO.image}</span></span>'
       + '<span>${T("Glissez une photo ici, ou cliquez pour en choisir une")}</span>'
       + '<span class="pt2">${T("Studio, fond blanc, un vêtement — JPEG ou PNG")}</span></div>'
       + '<input type="file" id="fichier" accept="image/*" hidden>'
@@ -2436,11 +2463,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         + '<button class="jeton' + (CMP ? '' : ' on') + '" id="cmp-off">${T("Résultat seul")}</button></div>';
     }
     h += (av && CMP) ? comparateurHtml(av) : ('<img src="' + RESULT.image + '" alt="${T("résultat")}">');
-    if (RESULT.essai) h += '<div class="filig"><span class="ic">⚠</span> ${T("Aperçu filigrané (sandbox) — gratuit. « Générer en pleine qualité » retire le filigrane.")}</div>';
-    if (RESULT.decorErreur) h += '<div class="filig"><span class="ic">⚠</span> ${T("Le décor n’a pas pu être appliqué :")} ' + esc(RESULT.decorErreur) + '</div>';
-    if (RESULT.ignores) h += '<div class="filig"><span class="ic">⚠</span> ${T("Le service a <strong>ignoré</strong> : ")}'
+    var nt = '';
+    if (RESULT.essai) nt += '<div class="filig"><span class="ic">⚠</span> ${T("Aperçu filigrané (sandbox) — gratuit. « Générer en pleine qualité » retire le filigrane.")}</div>';
+    if (RESULT.decorErreur) nt += '<div class="filig"><span class="ic">⚠</span> ${T("Le décor n’a pas pu être appliqué :")} ' + esc(RESULT.decorErreur) + '</div>';
+    if (RESULT.ignores) nt += '<div class="filig"><span class="ic">⚠</span> ${T("Le service a <strong>ignoré</strong> : ")}'
       + esc(ignoresLisible(RESULT.ignores)) + '${T(". Le reste du traitement a bien eu lieu.")}</div>';
-    if (RESULT.upNote) h += '<div class="avis">' + esc(RESULT.upNote) + '</div>';
+    if (RESULT.upNote) nt += '<div class="avis">' + esc(RESULT.upNote) + '</div>';
+    if (nt) h += '<div class="notes">' + nt + '</div>';
     if (RESULT.largeur) h += '<div class="dims">' + RESULT.largeur + ' × ' + RESULT.hauteur + ' px</div>';
     h += '<div class="dl"><button id="b-dl">${T("Télécharger l’image")}</button> '
       + '<button id="b-save"' + (ENREG ? ' disabled' : '') + '>' + (ENREG ? '${T("✓ Dans la photothèque")}' : '<span class="ic">💾</span> ${T("Enregistrer dans la photothèque")}') + '</button></div>';
