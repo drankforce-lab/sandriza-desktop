@@ -345,6 +345,8 @@ html.jour .onglets .ong.on,html.jour .onglets .ong.on .ot b{color:#3d3526}
 .tuile.on{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 .tuile .t{font-size:.85rem;font-weight:700;line-height:1.25}
 .tuile .d{font-size:.72rem;color:var(--tx3);line-height:1.32}
+.tuiles.amb{grid-template-columns:repeat(auto-fill,minmax(10.5rem,1fr))}
+.tuiles.amb .tuile .teinte{display:block;height:34px;border-radius:7px;margin-bottom:.45rem;border:1px solid var(--v08)}
 /* Les ambiances passent a deux colonnes DES QUE le volet est assez large, et
    restent sur une seule quand il ne l est pas. C est auto-fill qui en decide,
    pas un nombre de colonnes ecrit en dur. */
@@ -1320,10 +1322,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '${T("poses avant de dépenser un crédit.")}</div>';
     return h;
   }
+  /* REFONTE 2026-09-29 : chaque ambiance porte une BANDE DE COULEUR qui évoque son
+     décor — on la reconnaît avant de lire son nom. Ce n'est pas un pictogramme (la
+     règle du gris ne s'y applique pas) : c'est un échantillon, comme un nuancier.
+     La teinte se déduit de la clé ; une ambiance inconnue garde une bande neutre. */
+  function ambianceTeinte(cle){
+    var c = String(cle || '');
+    if (/epure|studio/.test(c)) return 'linear-gradient(90deg,#e9e6e1,#cfcac2)';
+    if (/plage|sable|dore/.test(c)) return 'linear-gradient(90deg,#e8c48a,#9fc3cf)';
+    if (/beton|urbain/.test(c)) return 'linear-gradient(90deg,#b8b4ad,#7d7a76)';
+    if (/verdure|foret|jardin/.test(c)) return 'linear-gradient(90deg,#8fb47a,#3f6b45)';
+    if (/nuit|ville/.test(c)) return 'linear-gradient(90deg,#27325a,#b58a3c)';
+    return 'linear-gradient(90deg,var(--v10),var(--v05))';
+  }
   function ambiancesHtml(){
     if (!PRESETS.length) return '<div class="vide">${T("Aucune ambiance.")}</div>';
     return '<div class="tuiles amb">' + PRESETS.map(function(p){
       return '<div class="tuile' + (PRESET === p.cle ? ' on' : '') + '" data-preset="' + esc(p.cle) + '">'
+        + '<span class="teinte" aria-hidden="true" style="background:' + ambianceTeinte(p.cle) + '"></span>'
         + '<span class="t">' + esc(szTd(p.label)) + '</span>'
         + '<span class="d">' + esc(szTd(p.desc || '')) + '</span></div>';
     }).join('') + '</div>';
