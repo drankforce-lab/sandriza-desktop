@@ -2490,6 +2490,7 @@ const OPS_PONT = new Set([
      configuration du code à six chiffres, changement de mot de passe imposé,
      questions de sécurité. ⚠ Elles n'ont pas de garde de session non plus. */
   'connexion:mfaConfig', 'connexion:mfaConfigConfirmer',
+  'connexion:cle', 'connexion:cleAjouter', 'connexion:cleDecliner',
   'connexion:mdpDonnees', 'connexion:mdpEcrire',
   'connexion:questionsDonnees', 'connexion:questionsEcrire',
   'presence:liste', 'presence:deconnecter', 'presence:message',
@@ -2654,7 +2655,7 @@ const OPS_PONT = new Set([
   'securite:compte:actif', 'securite:compte:invitation',
   // MFA (2.67.0, #6 Lot B2) — activation TOTP, exemption, desactivation.
   'securite:mfa:etat', 'securite:mfa:init', 'securite:mfa:confirmer', 'securite:mfa:exempter', 'securite:mfa:desactiver',
-  'securite:mfa:reinit', 'securite:mfa:sessions',
+  'securite:mfa:reinit', 'securite:mfa:sessions', 'securite:mfa:clesRetirer', 'securite:mfa:cleReproposer',
   // Journaux (2.68.0, #7 Lot 7a) — acces / automatisations / impressions / verrous.
   'journal:donnees', 'journal:verrous', 'journal:purger:acces', 'journal:purger:prints',
   'journal:stats', 'journal:deverrouiller', 'journal:deverrouiller:tout',
@@ -3098,6 +3099,9 @@ const LIMITES_PONT = {
      retrouverait configuré ET refusé — et l'écran redemanderait ce qui vient
      d'être fait. */
   'connexion:mfaConfigConfirmer': 30000, 'connexion:mdpEcrire': 30000,
+  // La clé d'identification attend la PERSONNE (Windows Hello, téléphone, clé) :
+  // le navigateur lui laisse 120 s, on laisse 10 s de plus pour répondre.
+  'connexion:cle': 130000, 'connexion:cleAjouter': 130000, 'connexion:cleDecliner': 20000,
   'connexion:questionsEcrire': 30000,
   // Depot des photos dans le stockage : le plus long de tous.
   'produit:enregistrer': 90000,
@@ -3229,7 +3233,7 @@ const LIMITES_PONT = {
   /* ⚠ 30 s comme la suppression : c'est une écriture courte d'un seul champ,
      pas un formulaire complet. */
   'securite:compte:actif': 30000, 'securite:compte:invitation': 60000,
-  'securite:mfa:etat': 20000, 'securite:mfa:init': 30000, 'securite:mfa:confirmer': 30000, 'securite:mfa:exempter': 20000, 'securite:mfa:desactiver': 20000, 'securite:mfa:reinit': 20000, 'securite:mfa:sessions': 20000,
+  'securite:mfa:etat': 20000, 'securite:mfa:init': 30000, 'securite:mfa:confirmer': 30000, 'securite:mfa:exempter': 20000, 'securite:mfa:desactiver': 20000, 'securite:mfa:reinit': 20000, 'securite:mfa:sessions': 20000, 'securite:mfa:clesRetirer': 20000, 'securite:mfa:cleReproposer': 20000,
   /* Journaux : lecture locale rapide ; les verrous et le deverrouillage passent
      par le serveur (lock_admin). */
   'journal:donnees': 40000, 'journal:verrous': 30000, 'journal:purger:acces': 20000, 'journal:purger:prints': 20000,
@@ -3664,6 +3668,12 @@ ipcMain.handle('pont:appeler', async (e, op, args) => {
   // et la personne recommencait, fabriquant un doublon. 8 s reste le defaut ;
   // les operations legitimement longues ont leur limite (liste jumelle dans
   // pont-preload.js, qui laisse 5 s de plus a celui-ci pour repondre).
+  /* ⚠ LA CLÉ D'IDENTIFICATION EXIGE UNE PAGE QUI A LE FOCUS (2026-09-29).
+     Chromium refuse navigator.credentials à un document qui ne l'a pas
+     (NotAllowedError) — or c'est la fenêtre native de connexion qui l'a, pas la
+     page du site qui exécute la cérémonie. On le lui donne le temps du geste ;
+     la boîte de Windows (Hello, téléphone, clé) passe de toute façon devant. */
+  if (nom === 'connexion:cle' || nom === 'connexion:cleAjouter') { try { wc.focus(); } catch {} }
   try {
     let fini = false;
     const travail = wc.executeJavaScript(code, true).then((r) => { fini = true; return r; });

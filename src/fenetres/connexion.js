@@ -118,6 +118,8 @@ input:focus{border-color:#C49A6C;box-shadow:0 0 0 3px rgba(196,154,108,0.18)}
    peut encore agir ; le sombre annonce un courriel parti, pas un refus. */
 .cx-err.orange{background:#fff7ed;border-color:#fdba74;color:#9a3412}
 .cx-err.sombre{background:#172033;border-color:#C49A6C;color:#f5e6d0}
+.cx-ou{display:flex;align-items:center;gap:.7rem;margin:1.1rem 0 .8rem;font-size:.74rem;color:#6b5c48;text-transform:uppercase;letter-spacing:.12em}
+.cx-ou::before,.cx-ou::after{content:'';flex:1 1 auto;height:1px;background:rgba(196,154,108,.3)}
 .cx-btn{width:100%;min-height:46px;padding:0.78rem 1rem;border-radius:12px;
   display:inline-flex;align-items:center;justify-content:center;gap:0.5rem;
   font:600 0.92rem/1.2 inherit;cursor:pointer;letter-spacing:0.01em;
@@ -310,6 +312,16 @@ ${JS_DIRE()}
       "Chaque tentative journalisée (adresse IP et pays)": "Every attempt logged (IP address and country)",
       "Version ": "Version ",
       "Vérification en deux étapes": "Two-step verification",
+      "ou": "or",
+      "Utiliser ma clé d’identification": "Use my passkey",
+      "En attente de la clé…": "Waiting for the passkey…",
+      "Une clé d’identification ?": "A passkey?",
+      "Pour entrer sans taper de code : Windows Hello (visage, empreinte ou NIP), votre téléphone par code QR, ou une clé de sécurité. Facultatif — le code reste toujours possible.": "Sign in without typing a code: Windows Hello (face, fingerprint or PIN), your phone via QR code, or a security key. Optional — the code always remains available.",
+      "Nom de la clé": "Passkey name",
+      "Ce poste": "This computer",
+      "Ajouter une clé": "Add a passkey",
+      "Plus tard": "Later",
+      "Clé d’identification ajoutée.": "Passkey added.",
       "Entrez le code de votre application d’authentification": "Enter the code from your authenticator app",
       "⏱ Temps restant : ": "⏱ Time remaining: ",
       "Code à 6 chiffres": "6-digit code",
@@ -397,6 +409,8 @@ ${JS_DIRE()}
   var MAINT = null;        // dernier etat de maintenance connu
   var MAINT_T = null;
   var MFA_T = null, MFA_FIN = 0;
+  // La clé d'identification est-elle offerte pour ce compte ? (réponse de connexion:entrer)
+  var MFA_CLE = false;
   var CTX_Q = null;        // les questions de securite, pour les listes croisees
   var DEPART = '${_dep}';
   var VERSION = '${SZ_VERSION}';
@@ -635,6 +649,31 @@ ${JS_DIRE()}
       + '<div class="cx-err" id="sl-mfa-error"></div>'
       + '<button type="submit" class="cx-btn" id="sl-mfa-btn" style="' + btnStyle() + '">' + T('Vérifier') + '</button>'
       + '</form>'
+      /* 2026-09-29 — « activée, tu dois permettre le choix entre le code ou une
+         autre méthode (clé d identification) ». Le code reste là, toujours : la
+         clé est un second chemin, pas un remplacement. */
+      + (MFA_CLE ? '<div class="cx-ou">' + T('ou') + '</div>'
+          + '<div style="text-align:center"><button type="button" class="admlogin-back" id="sl-mfa-cle">'
+          + T('Utiliser ma clé d’identification') + '</button></div>' : '')
+      + '</div>';
+  }
+
+  /* ══ LA PROPOSITION DE CLÉ — une fois, juste après le code ═══════════════
+     « optionnelle mais proposée lors de l enrôlement une fois ». « Plus tard »
+     l écarte pour de bon ; Accès Utilisateurs peut la reproposer. */
+  function ecranCle(prenom){
+    return '<div>'
+      + '<div style="margin-bottom:1.4rem">'
+      + '<div class="cx-titre">' + T('Une clé d’identification ?') + '</div>'
+      + '<div class="cx-sous">' + T('Pour entrer sans taper de code : Windows Hello (visage, empreinte ou NIP), votre téléphone par code QR, ou une clé de sécurité. Facultatif — le code reste toujours possible.') + '</div>'
+      + '</div>'
+      + '<div style="margin-bottom:1.1rem">'
+      + '<label class="cx-lbl" for="sl-cle-nom">' + T('Nom de la clé') + '</label>'
+      + '<input type="text" id="sl-cle-nom" maxlength="60" value="' + T('Ce poste') + '">'
+      + '</div>'
+      + '<div class="cx-err" id="sl-cle-error"></div>'
+      + '<button type="button" class="cx-btn" id="sl-cle-oui" style="' + btnStyle() + '">' + T('Ajouter une clé') + '</button>'
+      + '<div style="margin-top:.9rem;text-align:center"><button type="button" class="admlogin-back" id="sl-cle-non">' + T('Plus tard') + '</button></div>'
       + '</div>';
   }
 
@@ -848,8 +887,8 @@ ${JS_DIRE()}
     if (r.suite === 'motdepasse') { chargerMdp(); return; }
     /* 2026-09-29 : le mot de passe imposé et les questions menaient au panneau
        SANS le code, pour un compte qui en a un. Le serveur l exige maintenant. */
-    if (r.suite === 'mfa')        { mfaDemarrer(r.secondes || 60); return; }
-    reussi(r.prenom);
+    if (r.suite === 'mfa')        { MFA_CLE = !!r.cle; mfaDemarrer(r.secondes || 60); return; }
+    finir(r);
   }
 
   function chargerMfaConfig(){
@@ -978,6 +1017,7 @@ ${JS_DIRE()}
     else if (quoi === 'mfaConfig') z.innerHTML = ecranMfaConfig(donnee || {});
     else if (quoi === 'mdp')       z.innerHTML = ecranMdp(donnee || {});
     else if (quoi === 'questions') z.innerHTML = ecranQuestions(donnee || {});
+    else if (quoi === 'cle')       z.innerHTML = ecranCle(donnee || '');
     else                           z.innerHTML = ecranLogin();
     brancher();
   }
@@ -1189,7 +1229,7 @@ ${JS_DIRE()}
           var pw = el('sl-password'); if (pw) { pw.value = ''; pw.focus(); }
           return;
         }
-        if (r.suite === 'mfa')   { mfaDemarrer(r.secondes || 60); return; }
+        if (r.suite === 'mfa')   { MFA_CLE = !!r.cle; mfaDemarrer(r.secondes || 60); return; }
         if (r.suite === 'expire') {
           if (b2) { b2.disabled = false; b2.textContent = T('Se connecter'); }
           faute('sl-error', { message: r.message, ton: 'sombre' });
@@ -1251,7 +1291,7 @@ ${JS_DIRE()}
     b.innerHTML = '<span class="cx-spin"></span><span>' + T('Vérification…') + '</span>';
     c.disabled = true;
     appeler('connexion:mfa', [c.value]).then(function(r){
-      if (r.ok) { reussi(r.prenom); return; }
+      if (r.ok) { finir(r); return; }
       var c2 = el('sl-mfa-code'), b2 = el('sl-mfa-btn');
       if (b2) { b2.disabled = false; b2.textContent = T('Vérifier'); }
       if (c2) { c2.disabled = false; c2.value = ''; c2.focus(); }
@@ -1278,6 +1318,41 @@ ${JS_DIRE()}
      cette fenetre QU APRES : la fermer d abord laisserait voir l ecran de
      connexion web une fraction de seconde, juste avant le panneau - exactement
      le clignotement du #38, mais a l entree. */
+  function finir(r){
+    if (r && r.proposerCle) { if (MFA_T) { clearInterval(MFA_T); MFA_T = null; } dessiner('cle', r.prenom || ''); return; }
+    reussi(r && r.prenom);
+  }
+  function cleProposee(ajouter){
+    var b = el('sl-cle-oui'), n = el('sl-cle-non'), prenom = ECRAN_DONNEE || '';
+    fauteEffacer('sl-cle-error');
+    if (!ajouter) {
+      if (n) n.disabled = true;
+      appeler('connexion:cleDecliner').then(function(){ reussi(prenom); });
+      return;
+    }
+    if (b) { b.disabled = true; b.innerHTML = '<span class="cx-spin"></span><span>' + T('En attente de la clé…') + '</span>'; }
+    if (n) n.disabled = true;
+    var nom = (el('sl-cle-nom') && el('sl-cle-nom').value) || '';
+    appeler('connexion:cleAjouter', [nom]).then(function(r){
+      if (r && r.ok) { szDire(T('Clé d’identification ajoutée.'), 'bon'); reussi(prenom); return; }
+      if (b) { b.disabled = false; b.textContent = T('Ajouter une clé'); }
+      if (n) n.disabled = false;
+      faute('sl-cle-error', r || {});
+    });
+  }
+  function mfaCle(){
+    var b = el('sl-mfa-cle');
+    fauteEffacer('sl-mfa-error');
+    // Le chrono s'arrête : la boîte de Windows peut prendre plus que ce qui reste.
+    if (MFA_T) { clearInterval(MFA_T); MFA_T = null; }
+    var ch = el('sl-mfa-timer'); if (ch && ch.parentElement) ch.parentElement.style.display = 'none';
+    if (b) { b.disabled = true; b.textContent = T('En attente de la clé…'); }
+    appeler('connexion:cle').then(function(r){
+      if (r && r.ok) { reussi(r.prenom); return; }
+      if (b) { b.disabled = false; b.textContent = T('Utiliser ma clé d’identification'); }
+      faute('sl-mfa-error', r || {});
+    });
+  }
   function reussi(prenom){
     szDire('Bienvenue' + (prenom ? ', ' + prenom : '') + '.', 'bon');
     appeler('connexion:ouvrir').then(function(){ setTimeout(partir, 220); });
@@ -1380,6 +1455,9 @@ ${JS_DIRE()}
     if (f) f.onsubmit = function(e){ e.preventDefault(); entrer(); };
     var fm = el('cx-form-mfa');
     if (fm) fm.onsubmit = function(e){ e.preventDefault(); mfaEnvoyer(); };
+    var mc = el('sl-mfa-cle'); if (mc) mc.onclick = mfaCle;
+    var co = el('sl-cle-oui'); if (co) co.onclick = function(){ cleProposee(true); };
+    var cn = el('sl-cle-non'); if (cn) cn.onclick = function(){ cleProposee(false); };
     var oeil = el('sl-oeil');
     if (oeil) oeil.onclick = function(){
       var p2 = el('sl-password');
@@ -1676,6 +1754,8 @@ ${JS_DIRE()}
       /* ⚠ LE DEPART EST HONORE APRES LE SOCLE, PAS AVANT : les assistants ont
          besoin du panneau de marque et de la zone de message deja en place. */
       if (DEPART === 'mfa')            { mfaDemarrer(60); }
+      else if (DEPART === 'mfaCle')    { MFA_CLE = true; mfaDemarrer(60); }
+      else if (DEPART === 'cle')       { dessiner('cle', 'Bob'); }
       else if (DEPART === 'mfaConfig') { chargerMfaConfig(); }
       else if (DEPART === 'mdp')       { chargerMdp(); }
       else if (DEPART === 'questions') { chargerQuestions(); }

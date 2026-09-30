@@ -1289,6 +1289,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          obligatoirement sauf si il est exempte ». Un DRAPEAU : rien n est
          efface avant sa reconnexion, la case se decoche sans degat. */
       + '<label class="case"><input type="checkbox" id="m-reinit" '+(e.mfaReinit?'checked':'')+'> <span><b>${T("Refaire l’enrôlement à la prochaine connexion")}</b><span class="quoi">${T("Son code actuel reste valide jusque-là ; elle liera ensuite une nouvelle application. Sans effet tant que le compte est exempté.")}</span></span></label>'
+      + cleSectionHtml(e)
       + (e.soi ? '' : '<div class="sess"><span><b>${T("Sessions ouvertes")}</b><span class="quoi">${T("Les fermer la déconnecte partout : mot de passe et code redemandés.")}</span></span>'
           + '<button class="b" id="m-sess">${T("Fermer ses sessions")}</button></div>')
       + '</div>'
@@ -1296,6 +1297,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<button class="b" id="m-annuler">${T("Annuler")}</button><button class="b dgr" id="m-off">${T("Désactiver MFA")}</button><button class="prim" id="m-save">${T("Enregistrer")}</button></div></div>';
     document.body.appendChild(sur);
     var bs=document.getElementById('m-sess'); if (bs) bs.onclick=function(){ fermerSessions(id); };
+    var kr=document.getElementById('m-cle-ret'); if (kr) kr.onclick=function(){ cleGeste(id, 'securite:mfa:clesRetirer', '${T("Clés d’identification retirées.")}'); };
+    var kp=document.getElementById('m-cle-rep'); if (kp) kp.onclick=function(){ cleGeste(id, 'securite:mfa:cleReproposer', '${T("La clé lui sera proposée à sa prochaine connexion.")}'); };
     document.getElementById('m-x').onclick=fermerMfa;
     document.getElementById('m-annuler').onclick=fermerMfa;
     document.getElementById('m-save').onclick=function(){ mfaEnregistrer(id, e, chkv('m-exempt'), chkv('m-reinit')); };
@@ -1345,6 +1348,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   /* Les deux cases s enregistrent ensemble, et seule celle qui a bouge part :
      re-ecrire l exemption a l identique ferait une ligne de journal pour rien. */
+  /* ══ LA CLÉ D IDENTIFICATION (2026-09-29) ══════════════════════════════
+     « retirable ou réamorçable directement de la gestion du personnel ».
+     Retirer : toutes ses clés partent, le code reste. Reproposer : la
+     proposition revient à sa prochaine connexion, une fois. */
+  function cleSectionHtml(e){
+    var cles = e.cles || [];
+    var noms = cles.map(function(c){ return esc(c.nom || '${T("Clé")}') + (c.vuLe ? ' <span class="quoi" style="display:inline">· ${T("vue le ")}' + esc(szJour(c.vuLe)) + '</span>' : ''); });
+    return '<div class="sess"><span><b>${T("Clé d’identification")}</b><span class="quoi">'
+      + (cles.length ? cles.length + ' ' + szPl(cles.length, '${T("clé enregistrée")}', '${T("clés enregistrées")}') + ' : ' + noms.join(', ')
+                     : (e.cleProposee ? '${T("Aucune — la proposition a été déclinée ou ses clés retirées.")}' : '${T("Aucune — elle lui sera proposée à sa prochaine connexion.")}'))
+      + '</span></span><span style="display:flex;gap:.4rem;flex:0 0 auto">'
+      + (cles.length ? '<button class="b" id="m-cle-ret">${T("Retirer")}</button>' : '')
+      + (e.cleProposee ? '<button class="b" id="m-cle-rep">${T("Reproposer")}</button>' : '')
+      + '</span></div>';
+  }
+  function cleGeste(id, op, msg){
+    if (OCCUPE) return; OCCUPE=true; dire('${T("Enregistrement…")}');
+    appeler(op,[id]).then(function(r){ OCCUPE=false;
+      if (r&&r.ok){ fermerMfa(); recharger(msg, 'bon'); } else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
+  }
   function mfaEnregistrer(id, e, exempt, reinit){
     if (OCCUPE) return;
     var chEx = (!!exempt !== !!e.mfaExempt), chRe = (!!reinit !== !!e.mfaReinit);

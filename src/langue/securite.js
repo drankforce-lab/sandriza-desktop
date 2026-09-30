@@ -367,5 +367,16 @@ module.exports = {
   'Cliquez encore une fois pour fermer ses sessions — son travail non enregistré sera perdu.': 'Click once more to close their sessions — their unsaved work will be lost.',
   'Fermeture des sessions…': 'Closing sessions…',
   'Sessions fermées — reconnexion exigée pour ': 'Sessions closed — sign-in required again for ',
-  'Sessions fermées — reconnexion exigée pour': 'Sessions closed — sign-in required again for'
+  'Sessions fermées — reconnexion exigée pour': 'Sessions closed — sign-in required again for',
+  'Clés d’identification retirées.': 'Passkeys removed.',
+  'La clé lui sera proposée à sa prochaine connexion.': 'A passkey will be offered at their next sign-in.',
+  'Clé d’identification': 'Passkey',
+  'Clé': 'Passkey',
+  'clé enregistrée': 'passkey registered',
+  'clés enregistrées': 'passkeys registered',
+  'Aucune — la proposition a été déclinée ou ses clés retirées.': 'None — the offer was declined or their passkeys removed.',
+  'Aucune — elle lui sera proposée à sa prochaine connexion.': 'None — one will be offered at their next sign-in.',
+  'Reproposer': 'Offer again',
+  'Retirer': 'Remove',
+  'vue le ': 'last used '
 };

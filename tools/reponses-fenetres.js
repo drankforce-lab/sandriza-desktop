@@ -2137,7 +2137,10 @@ const JEU = {
       // et le bouton « Fermer ses sessions » (absent sur son propre compte).
       { nom: 'MFA — enrôlement à refaire, sessions', id: 'mfa-s2b',
         reponses: { identite: IDENTITE, 'securite:donnees': donnees,
-          'securite:mfa:etat': { ok: true, nom: 'Marie Tremblay', mfaEnabled: true, mfaExempt: false, mfaReinit: true, soi: false },
+          'securite:mfa:etat': { ok: true, nom: 'Marie Tremblay', mfaEnabled: true, mfaExempt: false, mfaReinit: true, soi: false,
+            cles: [{ id: 'k1', nom: 'Poste de la boutique', creeLe: '2026-09-20T14:02:00Z', vuLe: '2026-09-28T09:15:00Z' }], cleProposee: true },
+          'securite:mfa:clesRetirer': { ok: true },
+          'securite:mfa:cleReproposer': { ok: true },
           'securite:mfa:exempter': { ok: true, mfaExempt: false },
           'securite:mfa:reinit': { ok: true, mfaReinit: false, exempt: false },
           'securite:mfa:sessions': { ok: true, nom: 'Marie Tremblay' },
@@ -7324,6 +7327,59 @@ const JEU = {
           prefill: '', souvenir: false, captchaRequis: false, verrouille: false },
         'connexion:maintenance': { ok: true, actif: false, phrase: '' },
         'connexion:mfa': { ok: false, motif: 'refus', message: 'Code invalide.' },
+        identite: IDENTITE,
+      },
+    },
+    {
+      /* ⚠⚠ CINQ CAS DE PLUS, ET C EST UN TROU QUI ETAIT LA DEPUIS 5.9.0. Le
+         harnais CHARGE la page, il ne CLIQUE pas : les quatre cas d origine
+         dessinaient donc tous le meme ecran de connexion, et le code a six
+         chiffres — pourtant porte en 5.9.0 — n a JAMAIS ete execute une seule
+         fois. C est exactement ce qui a laisse passer un `dire()` inexistant
+         dans la fenetre du mode exclusif : compile, jamais joue.
+         ⚠ L ecran de depart (`id`) est ce qui rend ces cas possibles. Voir le
+         commentaire de `pageConnexion(depart)`. */
+      nom: 'le code, OU la cle d identification',
+      id: 'mfaCle',
+      exige: ['id="sl-mfa-code"', 'id="sl-mfa-cle"'],
+      reponses: {
+        'connexion:contexte': { ok: true,
+          theme: { bgFrom: '#191238', bgMid: '#2b2262', logoFrom: '#4f46e5',
+            logoTo: '#7c3aed', titre: '#f5e6d0', sous: 'rgba(236,229,217,0.92)',
+            sousTexte: 'Panneau d’administration', btnFrom: '#1a1207',
+            btnTo: '#3d2810', btnTexte: '#f5e6d0' },
+          marque: { nom: 'SANDRIZA', lettre: 'É', logo: '' },
+          prefill: '', souvenir: false, captchaRequis: false, verrouille: false },
+        'connexion:maintenance': { ok: true, actif: false, phrase: '' },
+        'connexion:mfa': { ok: false, motif: 'refus', message: 'Code invalide.' },
+        'connexion:cle': { ok: false, motif: 'annule', message: 'Opération annulée, ou délai dépassé.' },
+        identite: IDENTITE,
+      },
+    },
+    {
+      /* ⚠⚠ CINQ CAS DE PLUS, ET C EST UN TROU QUI ETAIT LA DEPUIS 5.9.0. Le
+         harnais CHARGE la page, il ne CLIQUE pas : les quatre cas d origine
+         dessinaient donc tous le meme ecran de connexion, et le code a six
+         chiffres — pourtant porte en 5.9.0 — n a JAMAIS ete execute une seule
+         fois. C est exactement ce qui a laisse passer un `dire()` inexistant
+         dans la fenetre du mode exclusif : compile, jamais joue.
+         ⚠ L ecran de depart (`id`) est ce qui rend ces cas possibles. Voir le
+         commentaire de `pageConnexion(depart)`. */
+      nom: 'la proposition de cle, apres le code',
+      id: 'cle',
+      exige: ['id="sl-cle-oui"', 'id="sl-cle-non"'],
+      reponses: {
+        'connexion:contexte': { ok: true,
+          theme: { bgFrom: '#191238', bgMid: '#2b2262', logoFrom: '#4f46e5',
+            logoTo: '#7c3aed', titre: '#f5e6d0', sous: 'rgba(236,229,217,0.92)',
+            sousTexte: 'Panneau d’administration', btnFrom: '#1a1207',
+            btnTo: '#3d2810', btnTexte: '#f5e6d0' },
+          marque: { nom: 'SANDRIZA', lettre: 'É', logo: '' },
+          prefill: '', souvenir: false, captchaRequis: false, verrouille: false },
+        'connexion:maintenance': { ok: true, actif: false, phrase: '' },
+        'connexion:cleAjouter': { ok: false, motif: 'annule', message: 'Opération annulée, ou délai dépassé.' },
+        'connexion:cleDecliner': { ok: true },
+        'connexion:ouvrir': { ok: true },
         identite: IDENTITE,
       },
     },
