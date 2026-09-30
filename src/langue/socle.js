@@ -167,6 +167,7 @@ module.exports = {
   'Revenir au formulaire': 'Back to the form',
   'Conserver le brouillon': 'Keep the draft',
   'a été laissée en cours': 'was left in progress',
+  'a été laissé en cours': 'was left in progress',
   '. La reprendre, ou repartir à neuf ?': '. Resume it, or start over?',
   'Un brouillon disparaît de lui-même après': 'A draft disappears on its own after',
   'heures, et il est jeté dès que la fiche est enregistrée.':

@@ -1217,7 +1217,9 @@ function szBrouillonProposer(){
       var quoi = (_BR.libelle ? _BR.libelle : '${T("Une saisie")}');
       v.innerHTML = '<div class="szbr-boite" role="dialog" aria-modal="true">'
         + '<h3><span class="ico">${ICO.gabarit}</span> ${T("Une saisie non terminée")}</h3>'
-        + '<p>' + quoi + ' ${T("a été laissée en cours")} <strong>'
+        /* L accord suit le libelle (2026-09-30) : << Un coupon >>, << Un projet du
+           Studio >>, << Un sondage >>... six fenetres ecrivaient << laissee >>. */
+        + '<p>' + quoi + ' ' + (/^Un /.test(quoi) ? '${T("a été laissé en cours")}' : '${T("a été laissée en cours")}') + ' <strong>'
         + _brIlYa(r.ilYaMin) + '</strong>${T(". La reprendre, ou repartir à neuf ?")}</p>'
         + '<p class="szbr-note">${T("Un brouillon disparaît de lui-même après")} '
         + Math.round((_BR.ttlMin || 720) / 60) + ' ${T("heures, et il est jeté dès que la fiche est enregistrée.")}</p>'
@@ -3291,7 +3293,7 @@ label.champ .lbl,.champ label,.ch label,.champ .lbl,.form .champ .lbl,.lbl,.doss
 /* La Georgia qui restait : des titres de fenetres qui la reecrivaient par-dessus
    le socle. ⚠ PAS Marque, Gabarits, Affichage client ni l apercu de Pages : la,
    c est la typographie de la BOUTIQUE qu on montre, et elle doit y rester. */
-.carte h2,.entete h2,.pop .titre,.pas h4,.pnt h2{font-family:inherit}
+.carte h2,.entete h2,.pop .titre,.pas h4,.pnt h2,.szbr-boite h3{font-family:inherit}
 /* Le bandeau « lecture seule » (.ro, recopie dans une trentaine de fenetres) :
    une ligne mince, pas un encadre — il poussait les formulaires hors de la
    fenetre (sonde des debordements, 2026-09-26). */

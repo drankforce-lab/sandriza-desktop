@@ -371,6 +371,7 @@ module.exports = {
   'L’image apparaîtra ici.': 'The image will appear here.',
   '⇔ Avant / après': '⇔ Before / after',
   'Résultat seul': 'Result only',
+  'Résultat': 'Result',
   'Ce qui sera généré': 'What will be generated',
   'Cliquez « Aperçu gratuit », en bas de la fenêtre':
     'Click « Free preview », at the bottom of the window',

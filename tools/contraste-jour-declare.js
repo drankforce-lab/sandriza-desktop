@@ -35,6 +35,13 @@ module.exports = {
      defaut ne se verrait qu une fois imprime. Le damier autour dit deja ce qui
      est transparent — c est lui qui empeche de confondre blanc et vide. */
   "#fff": 1,              // 1.12  1 fenetre : promo-editeur.js (.scene — le papier)
+  /* ⚠ LES ETIQUETTES « AVANT » / « APRES » DU RIDEAU DU STUDIO (2026-09-30) : elles
+     sont posees sur une PASTILLE SOMBRE fixe (rgba(8,12,20,.72)) par-dessus la photo,
+     dans les deux modes. Le banc les mesure contre le fond de jour, qu elles ne
+     touchent jamais. Elles prenaient --tx-bleute, qui vaut #5f666c EN JOUR : du gris
+     fonce sur presque noir, illisible (vu a la capture). Encre claire dans les deux
+     modes, donc ecrite en dur. */
+  "#f1ece4": 1,           // 1.05  1 fenetre : studio.js (.cmp .cet — sur pastille sombre)
   "#86efac": 4,           // 1.25  5 fenetre(s) : catalogio.js, newsletter.js, produit.js…
   "#bcd2f0": 6,           // 1.38  6 fenetre(s) : analytics.js, images.js, paiements-config.js…
   "#dcc39b": 5,           // 1.52  4 fenetre(s) : campagnes.js, studio.js, telephonie.js…

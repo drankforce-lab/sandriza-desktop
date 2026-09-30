@@ -411,7 +411,7 @@ input[type=range]{width:100%;accent-color:#c9a97e;margin:.3rem 0 0;cursor:pointe
    ⚠ POINTER EVENTS et touch-action:none : son poste est une Surface, ecran
    tactile ET souris. Un rideau qui ne repond qu a la souris ne s ouvre pas au
    doigt (voir la regle des deux entrees). */
-.cmpb{display:flex;gap:.3rem;justify-content:center;margin-bottom:.55rem}
+.cmpb{display:contents}
 .cmp{position:relative;display:inline-block;max-width:100%;line-height:0;
   touch-action:none;-webkit-user-select:none;user-select:none;cursor:ew-resize}
 .cmp img{display:block;max-width:100%;max-height:min(56vh,31rem);border-radius:9px;
@@ -433,7 +433,7 @@ input[type=range]{width:100%;accent-color:#c9a97e;margin:.3rem 0 0;cursor:pointe
   display:flex;align-items:center;justify-content:center;font:700 .82rem/1 system-ui;
   border:2px solid #fff}
 .cmp .cet{position:absolute;bottom:.5rem;font-size:.68rem;line-height:1;padding:.22rem .45rem;
-  border-radius:5px;background:rgba(8,12,20,.72);color:var(--tx-bleute);pointer-events:none}
+  border-radius:5px;background:rgba(8,12,20,.72);color:#f1ece4;pointer-events:none}
 .cmp .cet.g{left:.5rem}
 .cmp .cet.d{right:.5rem}
 /* Résultat — VIDE, il occupe tout ce qui reste du volet de droite et centre son
@@ -458,7 +458,31 @@ html.jour .res{background:var(--f-carte)}
 html.jour .res .notes,html.jour .tete .credits{background:#fff;border-color:rgba(20,30,50,.12)}
 /* Le résumé n'a plus de carte blanche sous lui : ses pastilles portent leur fond. */
 html.jour .recap .jt.gris{background:#fff;color:#4a5260}
-.res.garni{flex:0 0 auto;justify-content:flex-start;min-height:0}
+.res.garni{flex:1 1 0;justify-content:flex-start;align-items:stretch;min-height:0;overflow:hidden}
+/* ══ LE RÉSULTAT TIENT DANS SON VOLET (2026-09-30) ══════════════════════════
+   Avec une VRAIE photo (1200 × 1600), l image poussait les remarques, les deux
+   boutons et les formats hors de la fenetre : le volet defilait, contre sa
+   regle « aucune barre de defilement ». Aucun banc ne l a vu — le jeu d essai
+   n a que des images d un pixel. Desormais : l image a GAUCHE, a la hauteur
+   exacte du volet (--rh, mesuree par un ResizeObserver) ; a DROITE une colonne
+   qui porte ce qu on fait du rendu ; les formats deviennent une VUE, choisie
+   dans la meme barre que « Avant / apres ». */
+.rbar{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:.3rem;margin-bottom:.55rem}
+.rbar .navp{margin:0 .4rem 0 0}
+.resg{flex:1 1 0;min-height:0;display:flex;gap:1rem;width:100%}
+.rimg{flex:1 1 auto;min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.rimg.fmtv{align-items:stretch;justify-content:flex-start;flex-direction:column;text-align:left}
+.rimg > img,.rimg .cmp img{max-height:var(--rh,52vh)}
+.rcol{flex:0 0 14rem;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:.55rem;text-align:left}
+.rcol .dims{margin:0;font-size:.74rem}
+.rcol .notes{margin:0;max-width:none}
+.rcol .dl{margin:0;display:flex;flex-direction:column;gap:.4rem}
+.rcol .dl button{width:100%;justify-content:center}
+/* Vue des formats : le titre est deja sur le bouton qui l ouvre ; les quatre
+   sur UNE rangee — la vue est large, et quatre formats se comparent cote a cote. */
+.rimg.fmtv > .rt{display:none}
+.rimg.fmtv .note{margin-top:0}
+.rimg.fmtv .fmtg{grid-template-columns:repeat(4,minmax(0,1fr))}
 .res img{max-width:100%;max-height:min(58vh,32rem);border-radius:9px;
   border:1px solid var(--v10)}
 .res .filig{margin-top:.5rem;font-size:.74rem;color:var(--tx-jaune)}
@@ -524,6 +548,8 @@ button.conf{background:#f0a05a;border-color:#f0a05a;color:#241703;font-weight:70
   .onglets .oe{display:none}
   .panneau{overflow:visible;min-height:auto}
   .scene{overflow:visible}
+  .resg{flex-direction:column}
+  .rcol{flex:0 0 auto}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
@@ -702,6 +728,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     { cle: '9x16', t: '9:16', v: 9 / 16 }
   ];
   var CMP = true;        // volet de droite : rideau avant/apres, ou resultat seul
+  var VUE_RES = 'image'; // volet de droite garni : 'image' ou 'formats' (2026-09-30)
+  var OBS_RES = null;    // le ResizeObserver qui donne a l image la hauteur du volet
   var CMP_POS = 50;      // position du rideau, en pour-cent
   var RES_TEMOIN = false;// mode de controle : poser un resultat inerte (voir plus bas)
   var ENREG = false;     // le resultat a-t-il ete enregistre dans la phototheque ?
@@ -844,6 +872,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   // Une image d un pixel, transparente : le porteur du mode de contrôle.
   var PIXEL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+  /* ⚠ LA PHOTO TÉMOIN A LA TAILLE D UNE VRAIE PHOTO (2026-09-30). Un pixel ne
+     montrait RIEN de la mise en page : avec une vraie photo de 1200 × 1600, le
+     résultat poussait boutons et formats hors de la fenêtre, et aucun banc ne
+     pouvait le voir. Un SVG déclaré en 1200 × 1600 : quelques octets, et pas de
+     canevas (le contexte de contrôle n en a pas). */
+  var PHOTO_TEMOIN = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1600">'
+    + '<rect width="1200" height="1600" fill="#d9ccb9"/>'
+    + '<ellipse cx="600" cy="820" rx="250" ry="560" fill="#3a2d22"/></svg>');
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -2487,24 +2524,32 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       return '<div class="vide" style="padding:.2rem">${T("L’image apparaîtra ici.")}</div>' + guideHtml();
     }
     var av = photoAvant();
-    var h = navPanierHtml();
+    var enImg = VUE_RES !== 'formats';
+    var h = '<div class="rbar">' + navPanierHtml();
     if (av) {
       h += '<div class="cmpb">'
-        + '<button class="jeton' + (CMP ? ' on' : '') + '" id="cmp-on">${T("⇔ Avant / après")}</button>'
-        + '<button class="jeton' + (CMP ? '' : ' on') + '" id="cmp-off">${T("Résultat seul")}</button></div>';
+        + '<button class="jeton' + (enImg && CMP ? ' on' : '') + '" id="cmp-on">${T("⇔ Avant / après")}</button>'
+        + '<button class="jeton' + (enImg && !CMP ? ' on' : '') + '" id="cmp-off">${T("Résultat seul")}</button></div>';
+    } else {
+      h += '<button class="jeton' + (enImg ? ' on' : '') + '" id="cmp-off">${T("Résultat")}</button>';
     }
-    h += (av && CMP) ? comparateurHtml(av) : ('<img src="' + RESULT.image + '" alt="${T("résultat")}">');
+    h += '<button class="jeton' + (enImg ? '' : ' on') + '" id="vue-fmt">${T("Formats de sortie")}'
+      + (FORMATS.length ? ' · ' + FORMATS.length : '') + '</button></div>';
+    h += '<div class="resg"><div class="rimg' + (enImg ? '' : ' fmtv') + '" id="rimg">'
+      + (enImg ? ((av && CMP) ? comparateurHtml(av) : ('<img src="' + RESULT.image + '" alt="${T("résultat")}">'))
+               : formatsHtml())
+      + '</div><div class="rcol">';
     var nt = '';
     if (RESULT.essai) nt += '<div class="filig"><span class="ic">⚠</span> ${T("Aperçu filigrané (sandbox) — gratuit. « Générer en pleine qualité » retire le filigrane.")}</div>';
     if (RESULT.decorErreur) nt += '<div class="filig"><span class="ic">⚠</span> ${T("Le décor n’a pas pu être appliqué :")} ' + esc(RESULT.decorErreur) + '</div>';
     if (RESULT.ignores) nt += '<div class="filig"><span class="ic">⚠</span> ${T("Le service a <strong>ignoré</strong> : ")}'
       + esc(ignoresLisible(RESULT.ignores)) + '${T(". Le reste du traitement a bien eu lieu.")}</div>';
     if (RESULT.upNote) nt += '<div class="avis">' + esc(RESULT.upNote) + '</div>';
-    if (nt) h += '<div class="notes">' + nt + '</div>';
     if (RESULT.largeur) h += '<div class="dims">' + RESULT.largeur + ' × ' + RESULT.hauteur + ' px</div>';
-    h += '<div class="dl"><button id="b-dl">${T("Télécharger l’image")}</button> '
+    if (nt) h += '<div class="notes">' + nt + '</div>';
+    h += '<div class="dl"><button id="b-dl">${T("Télécharger l’image")}</button>'
       + '<button id="b-save"' + (ENREG ? ' disabled' : '') + '>' + (ENREG ? '${T("✓ Dans la photothèque")}' : '<span class="ic">💾</span> ${T("Enregistrer dans la photothèque")}') + '</button></div>';
-    return h;
+    return h + '</div></div>';
   }
 
   function nomVoie(v){
@@ -2579,12 +2624,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '<div class="railc"><div class="onglets" id="onglets" role="tablist">' + ongletsHtml() + '</div>'
       + '<section class="panneau" id="panneau">' + panneauHtml() + '</section></div></div>'
       + '<div class="scene">' + recapHtml()
-      + '<div class="bloc res' + (RESULT ? ' garni' : '') + '" id="res">' + resultatHtml() + '</div>'
-      /* Le bloc est TOUJOURS posé, même vide et caché : sans lui, il n existerait
-         pas au moment où la première image arrive, et peindreResultat n aurait
-         rien à remplir — les formats ne paraîtraient qu au redessin suivant. */
-      + '<div class="bloc fmt" id="fmt"' + (RESULT ? '' : ' hidden') + '>'
-      + formatsHtml() + '</div></div>';
+      + '<div class="bloc res' + (RESULT ? ' garni' : '') + '" id="res">' + resultatHtml() + '</div></div>';
     brancher();
     majBoutons();
   }
@@ -2689,10 +2729,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (!res) { dessiner(); return; }
     res.className = 'bloc res' + (RESULT ? ' garni' : '');
     res.innerHTML = resultatHtml();
-    // Le bloc des formats vit à côté du résultat, jamais dedans : le résultat est
-    // centré dans ce qui reste du volet, et une liste de vignettes s y battrait.
-    var fz = document.getElementById('fmt');
-    if (fz) { fz.hidden = !RESULT; fz.innerHTML = formatsHtml(); }
+    // Les formats sont une VUE du résultat (2026-09-30) : plus de bloc à part.
     brancherResultat();
   }
 
@@ -2702,9 +2739,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var sv = document.getElementById('b-save');
     if (sv && RESULT) sv.onclick = enregistrerResultat;
     var c1 = document.getElementById('cmp-on');
-    if (c1) c1.onclick = function(){ if (CMP) return; CMP = true; peindreResultat(); };
+    if (c1) c1.onclick = function(){ if (CMP && VUE_RES === 'image') return; CMP = true; VUE_RES = 'image'; peindreResultat(); };
     var c0 = document.getElementById('cmp-off');
-    if (c0) c0.onclick = function(){ if (!CMP) return; CMP = false; peindreResultat(); };
+    if (c0) c0.onclick = function(){ if (!CMP && VUE_RES === 'image') return; CMP = false; VUE_RES = 'image'; peindreResultat(); };
+    var vf = document.getElementById('vue-fmt');
+    if (vf) vf.onclick = function(){ if (VUE_RES === 'formats') return; VUE_RES = 'formats'; peindreResultat(); };
+    /* L image prend la hauteur EXACTE de sa zone : un pourcentage ne suffit pas
+       (le rideau est un inline-block sans hauteur propre), d ou la mesure. */
+    var ri = document.getElementById('rimg');
+    if (OBS_RES) { try { OBS_RES.disconnect(); } catch (e) {} OBS_RES = null; }
+    if (ri && typeof ResizeObserver !== 'undefined') {
+      OBS_RES = new ResizeObserver(function(){
+        var hh = ri.clientHeight;
+        if (hh > 40) ri.style.setProperty('--rh', (hh - 2) + 'px');
+      });
+      OBS_RES.observe(ri);
+    }
     brancherComparateur();
     brancherFormats();
   }
@@ -2878,9 +2928,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
      selecteur) — le lot n a jamais pu partir depuis l ecran.
      ⚠ LECON : un helper copie d une fenetre a l autre se copie ENTIER, code
      ET habillage. Ici seuls les appels avaient suivi. */
-  function voile(html, apres){
+  /* << plein >> (2026-09-30) : seule la boite du lot a de quoi remplir toute la
+     fenetre. Sur les petites (nom de profil, confirmations), le << Plein ecran >>
+     que le socle pose partout n avait aucun sens — il se refuse par data-szplein,
+     pose AVANT l insertion pour que le socle ne le voie jamais. */
+  function voile(html, apres, plein){
     var v = document.createElement('div');
     v.className = 'voile';
+    if (!plein) v.setAttribute('data-szplein', '1');
     v.innerHTML = '<div class="boite">' + html + '</div>';
     document.body.appendChild(v);
     var fermer = function(){ if (v.parentNode) v.parentNode.removeChild(v); };
@@ -3243,7 +3298,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
             chargerLots();
           });
         };
-      });
+      }, true);   // la boite du lot garde son << Plein ecran >>
   }
   function occuper(o){
     OCCUPE = o;
@@ -3570,11 +3625,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
      refusé, réglages ignorés, note d agrandissement) — sinon ces quatre lignes
      ne seraient dessinées nulle part. */
   function posterResultatTemoin(){
-    PHOTO = PIXEL;
+    PHOTO = PHOTO_TEMOIN;
     PHOTO_NOM = '${T("photo témoin")}';
     if (!PRESET) PRESET = (PRESETS[0] || {}).cle || '';
     ENREG = false;
-    RESULT = { image: PIXEL, essai: true,
+    RESULT = { image: PHOTO_TEMOIN, essai: true,
                decorErreur: '${T("le décor n’a pas pu être appliqué (témoin)")}',
                ignores: 'background.prompt,shadow.mode',
                upNote: '${T("Agrandissement ignoré : l’entrée dépasse 1000 px (témoin).")}',
@@ -3622,8 +3677,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
      tout ce qu on lui demande.
      ⚠ Trouve en relisant l effet de mon changement sur les bancs, pas par les
      bancs eux-memes. Les bancs passaient. */
-  if (${avOuvre ? 'true' : 'false'}) { PHOTO = PIXEL; PHOTO_NOM = '${T("photo témoin")}'; ONGLET = 'decor'; }
-  if (${avPlein ? 'true' : 'false'}) { PHOTO = PIXEL; PHOTO_NOM = '${T("photo témoin")}';
+  if (${avOuvre ? 'true' : 'false'}) { PHOTO = PHOTO_TEMOIN; PHOTO_NOM = '${T("photo témoin")}'; ONGLET = 'decor'; }
+  if (${avPlein ? 'true' : 'false'}) { PHOTO = PHOTO_TEMOIN; PHOTO_NOM = '${T("photo témoin")}';
     VOIE = 'fantome'; VOIE_CHOISIE = true; AV.ombreActive = true; AV.upActive = true;
     ONGLET = 'ombres'; }
   /* ⚠⚠ IDENTIFIANT D OUVERTURE << resultat >>. Tout le volet de droite garni — le
