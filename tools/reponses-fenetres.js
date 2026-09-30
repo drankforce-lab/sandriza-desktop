@@ -7384,6 +7384,28 @@ const JEU = {
       },
     },
     {
+      /* 2026-09-30 — le nom retenu a une cle sur ce poste : le mot de passe se
+         REPLIE et le bouton dit << Se connecter avec ma cle >>. Refusee, elle
+         ramene le champ (connexion:cleEntrer rend motDePasse). */
+      nom: 'nom retenu avec une cle : sans mot de passe',
+      id: '',
+      exige: ['id="sl-clepret"', 'id="sl-mdp-bloc"', 'id="sl-bascule"'],
+      reponses: {
+        'connexion:contexte': { ok: true,
+          theme: { bgFrom: '#191238', bgMid: '#2b2262', logoFrom: '#4f46e5',
+            logoTo: '#7c3aed', titre: '#f5e6d0', sous: 'rgba(236,229,217,0.92)',
+            sousTexte: 'Panneau d’administration', btnFrom: '#1a1207',
+            btnTo: '#3d2810', btnTexte: '#f5e6d0' },
+          marque: { nom: 'SANDRIZA', lettre: 'É', logo: '' },
+          prefill: 'bob', souvenir: true, captchaRequis: false, verrouille: false, cle: true },
+        'connexion:maintenance': { ok: true, actif: false, phrase: '' },
+        'connexion:captcha': { ok: true, requis: false, verrouille: false, cle: true },
+        'connexion:cleEntrer': { ok: false, motif: 'cleAnnule', motDePasse: true, ton: 'sombre',
+          message: 'Opération annulée, ou délai dépassé. Vous pouvez aussi entrer votre mot de passe.' },
+        identite: IDENTITE,
+      },
+    },
+    {
       /* ⚠ LA CLE MANUELLE EST EXIGEE, PAS LE QR : le QR vient d un service
          externe et ne se dessine pas dans le harnais, alors qu il vaut mieux
          garantir la voie qui marche HORS RESEAU — celle qui ne fait pas sortir

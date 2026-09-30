@@ -256,6 +256,53 @@ select{width:100%;box-sizing:border-box;padding:0.7rem 1rem;
 select:focus{border-color:#C49A6C;box-shadow:0 0 0 3px rgba(196,154,108,0.18)}
 .cx-bloc{margin-bottom:1rem}
 .admlogin-formwrap.large{max-width:460px}
+/* LA CLE D IDENTIFICATION (2026-09-30). Sa demande : << un plus beau visuel au
+   moment de la creation >>, et << si une cle est creee on ne devrait plus avoir
+   besoin du mot de passe >> : le champ se replie, et revient si la cle echoue.
+   ⚠ LE CHAMP SE REPLIE, IL NE DISPARAIT PAS DU DOCUMENT : le gestionnaire de
+   mots de passe et le retour au champ gardent la meme balise. */
+.cx-mdp{overflow:hidden;max-height:140px;opacity:1;
+  transition:max-height .32s cubic-bezier(.2,.8,.2,1),opacity .22s ease,margin .32s cubic-bezier(.2,.8,.2,1)}
+.cx-mdp.cache{max-height:0;opacity:0;margin-bottom:0!important;pointer-events:none}
+.cx-clepret{display:none;align-items:center;gap:0.8rem;padding:0.8rem 0.95rem;
+  margin-bottom:1.1rem;border-radius:12px;
+  background:linear-gradient(135deg,rgba(196,154,108,0.16),rgba(196,154,108,0.05));
+  border:1px solid rgba(196,154,108,0.34)}
+.cx-clepret.on{display:flex;animation:cx-apparait .3s cubic-bezier(.2,.8,.2,1)}
+.cx-clepret .em{position:relative;flex:0 0 auto;width:40px;height:40px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;background:#fff;
+  border:1px solid rgba(196,154,108,0.45);color:#7d5f3c}
+.cx-clepret b{display:block;font-size:0.84rem;color:#3d2810;margin-bottom:0.1rem}
+.cx-clepret span.t{display:block;font-size:0.74rem;color:#6b5a48;line-height:1.4}
+.cx-clepret.attente .em::after,.cx-embleme.attente::after{content:'';position:absolute;
+  inset:-5px;border-radius:50%;border:2px solid rgba(196,154,108,0.55);
+  animation:cx-onde 1.4s cubic-bezier(.2,.8,.2,1) infinite}
+.cx-bascule{display:block;margin:0.85rem auto 0}
+@keyframes cx-apparait{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@keyframes cx-onde{from{opacity:1;transform:scale(.92)}to{opacity:0;transform:scale(1.25)}}
+/* L ecran de creation : un embleme, trois facons de faire, un nom, un geste. */
+.cx-embleme{position:relative;width:78px;height:78px;margin:0 auto 1rem;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;color:#7d5f3c;
+  background:radial-gradient(circle at 32% 26%,#ffffff 0%,#f7eee2 62%,#efe1cd 100%);
+  border:1.5px solid rgba(196,154,108,0.6);
+  box-shadow:0 10px 26px rgba(125,95,60,0.18),inset 0 1px 0 #fff;
+  transition:background .3s ease,border-color .3s ease,color .3s ease}
+.cx-embleme.bon{background:radial-gradient(circle at 32% 26%,#ffffff 0%,#e9f7ee 70%);
+  border-color:#4f9a6a;color:#1f6b3d}
+.cx-embleme.bon svg{animation:cx-apparait .35s cubic-bezier(.2,.8,.2,1)}
+.cx-cle-tete{text-align:center;margin-bottom:1.15rem}
+.cx-cle-tete .cx-sous{max-width:330px;margin-left:auto;margin-right:auto}
+.cx-methodes{display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin:0 0 1.15rem}
+.cx-methode{text-align:center;padding:0.7rem 0.4rem 0.6rem;border-radius:11px;background:#fff;
+  border:1px solid rgba(196,154,108,0.3);color:#7d5f3c}
+.cx-methode svg{display:block;margin:0 auto 0.35rem}
+.cx-methode b{display:block;font-size:0.74rem;color:#3d2810;line-height:1.25}
+.cx-methode span{display:block;font-size:0.66rem;color:#6b5a48;line-height:1.3;margin-top:0.1rem}
+.cx-cle-plus{display:flex;align-items:flex-start;gap:0.5rem;font-size:0.76rem;color:#5a4a3a;
+  line-height:1.45;margin:0 0 1.05rem;padding:0.55rem 0.7rem;border-radius:9px;
+  background:rgba(79,154,106,0.08);border:1px solid rgba(79,154,106,0.25)}
+.cx-cle-plus svg{flex:0 0 auto;color:#1f6b3d;margin-top:1px}
+@media (prefers-reduced-motion:reduce){.cx-clepret.attente .em::after,.cx-embleme.attente::after{animation:none}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -316,7 +363,6 @@ ${JS_DIRE()}
       "Utiliser ma clé d’identification": "Use my passkey",
       "En attente de la clé…": "Waiting for the passkey…",
       "Une clé d’identification ?": "A passkey?",
-      "Pour entrer sans taper de code : Windows Hello (visage, empreinte ou NIP), votre téléphone par code QR, ou une clé de sécurité. Facultatif — le code reste toujours possible.": "Sign in without typing a code: Windows Hello (face, fingerprint or PIN), your phone via QR code, or a security key. Optional — the code always remains available.",
       "Nom de la clé": "Passkey name",
       "Ce poste": "This computer",
       "Ajouter une clé": "Add a passkey",
@@ -369,6 +415,22 @@ ${JS_DIRE()}
       "L’opération a échoué.": "The operation failed.",
       "Attention — il vous reste <strong>{0}</strong> tentative avant un verrouillage de 15 minutes.": "Careful — you have <strong>{0}</strong> attempt left before a 15-minute lockout.",
       "Attention — il vous reste <strong>{0}</strong> tentatives avant un verrouillage de 15 minutes.": "Careful — you have <strong>{0}</strong> attempts left before a 15-minute lockout.",
+      "Clé d’identification reconnue": "Passkey recognized",
+      "Pas de mot de passe à taper : Windows Hello, votre téléphone ou votre clé de sécurité suffit.": "No password to type: Windows Hello, your phone or your security key is enough.",
+      "Se connecter avec ma clé": "Sign in with my passkey",
+      "Utiliser mon mot de passe": "Use my password",
+      "Entrez votre nom d’utilisateur.": "Enter your username.",
+      "Entrez d’un seul geste, sans mot de passe ni code. Facultatif — le mot de passe reste toujours possible.": "Sign in with a single gesture, no password or code. Optional — your password always remains available.",
+      "Visage, empreinte ou NIP": "Face, fingerprint or PIN",
+      "Téléphone": "Phone",
+      "Par code QR": "With a QR code",
+      "Clé de sécurité": "Security key",
+      "USB ou sans contact": "USB or contactless",
+      "La prochaine fois, votre nom d’utilisateur suffira : le champ du mot de passe se retire de lui-même.": "Next time, your username is enough: the password field steps aside on its own.",
+      "Clé ajoutée": "Passkey added",
+      "motif.cleVide": "Enter your username.",
+      "motif.cleAnnule": "Cancelled, or timed out. You can also enter your password.",
+      "motif.cleRefus": "This passkey was not accepted. Enter your password.",
       "motif.vide": "Username and password are required.",
       "motif.captcha": "Please complete the security check.",
       "motif.verrou": "Account locked — try again in a few minutes.",
@@ -445,7 +507,12 @@ ${JS_DIRE()}
     oeilBarre:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-10-8-10-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><path d="m2 2 20 20"/></svg>',
     verrouSm: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>',
     bouclier: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6z"/><path d="m9 12 2 2 4-4"/></svg>',
-    epingle:  '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>'
+    epingle:  '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+    empreinte: function(t){ return '<svg width="' + t + '" height="' + t + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/><path d="M14 13.12c0 2.38 0 6.38-1 8.88"/><path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/><path d="M2 12a10 10 0 0 1 18-6"/><path d="M2 16h.01"/><path d="M21.8 16c.2-2 .131-5.354 0-6"/><path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2"/><path d="M8.65 22c.21-.66.45-1.32.57-2"/><path d="M9 6.8a6 6 0 0 1 9 5.2v2"/></svg>'; },
+    visage:   '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/></svg>',
+    telephone:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></svg>',
+    cleUsb:   '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></svg>',
+    coche:    '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
   };
 
   /* ══ LE PANNEAU DE MARQUE — la moitie gauche, identique au web ═══════════
@@ -616,7 +683,10 @@ ${JS_DIRE()}
       + '<input type="checkbox" id="sl-remember"' + (CTX.souvenir ? ' checked' : '') + '>'
       + '<label for="sl-remember">' + T('Se souvenir de mon nom d’utilisateur') + '</label>'
       + '</div>'
-      + '<div style="margin-bottom:1.25rem">'
+      + '<div class="cx-clepret" id="sl-clepret"><span class="em">' + IC.empreinte(22) + '</span>'
+      + '<div><b>' + T('Clé d’identification reconnue') + '</b>'
+      + '<span class="t">' + T('Pas de mot de passe à taper : Windows Hello, votre téléphone ou votre clé de sécurité suffit.') + '</span></div></div>'
+      + '<div class="cx-mdp" id="sl-mdp-bloc" style="margin-bottom:1.25rem">'
       + '<label class="cx-lbl" for="sl-password">' + T('Mot de passe') + '</label>'
       + '<div class="cx-champ"><span class="cx-ic">' + IC.cadenas + '</span>'
       + '<input type="password" id="sl-password" class="pad padd" autocomplete="current-password">'
@@ -626,6 +696,7 @@ ${JS_DIRE()}
       + '<div class="cx-err" id="sl-error"></div>'
       + '<div id="cap-zone"></div>'
       + '<button type="submit" class="cx-btn" id="sl-btn" style="' + btnStyle() + '">' + T('Se connecter') + '</button>'
+      + '<button type="button" class="admlogin-back cx-bascule" id="sl-bascule" style="display:none"></button>'
       + '</form>'
       + '<div class="cx-centre cx-recours' + (DEJA_RATE ? '' : ' cx-voile') + '">'
       + '<button type="button" class="admlogin-forgot" id="sl-oubli">' + T('Mot de passe oublié ?') + '</button>'
@@ -661,12 +732,23 @@ ${JS_DIRE()}
   /* ══ LA PROPOSITION DE CLÉ — une fois, juste après le code ═══════════════
      « optionnelle mais proposée lors de l enrôlement une fois ». « Plus tard »
      l écarte pour de bon ; Accès Utilisateurs peut la reproposer. */
+  /* 2026-09-30 — << un plus beau visuel au moment de la creation >> : un
+     embleme qui respire pendant que Windows attend et passe au vert quand la
+     cle est prise, les trois facons de faire nommees par ce qu on a sous la
+     main, et ce que la cle change, dit en une ligne. */
   function ecranCle(prenom){
     return '<div>'
-      + '<div style="margin-bottom:1.4rem">'
+      + '<div class="cx-cle-tete">'
+      + '<div class="cx-embleme" id="sl-cle-em">' + IC.empreinte(38) + '</div>'
       + '<div class="cx-titre">' + T('Une clé d’identification ?') + '</div>'
-      + '<div class="cx-sous">' + T('Pour entrer sans taper de code : Windows Hello (visage, empreinte ou NIP), votre téléphone par code QR, ou une clé de sécurité. Facultatif — le code reste toujours possible.') + '</div>'
+      + '<div class="cx-sous">' + T('Entrez d’un seul geste, sans mot de passe ni code. Facultatif — le mot de passe reste toujours possible.') + '</div>'
       + '</div>'
+      + '<div class="cx-methodes">'
+      + '<div class="cx-methode">' + IC.visage + '<b>Windows Hello</b><span>' + T('Visage, empreinte ou NIP') + '</span></div>'
+      + '<div class="cx-methode">' + IC.telephone + '<b>' + T('Téléphone') + '</b><span>' + T('Par code QR') + '</span></div>'
+      + '<div class="cx-methode">' + IC.cleUsb + '<b>' + T('Clé de sécurité') + '</b><span>' + T('USB ou sans contact') + '</span></div>'
+      + '</div>'
+      + '<div class="cx-cle-plus">' + IC.bouclier + '<div>' + T('La prochaine fois, votre nom d’utilisateur suffira : le champ du mot de passe se retire de lui-même.') + '</div></div>'
       + '<div style="margin-bottom:1.1rem">'
       + '<label class="cx-lbl" for="sl-cle-nom">' + T('Nom de la clé') + '</label>'
       + '<input type="text" id="sl-cle-nom" maxlength="60" value="' + T('Ce poste') + '">'
@@ -1249,6 +1331,62 @@ ${JS_DIRE()}
       });
   }
 
+  /* ══ LA CLE SANS MOT DE PASSE (2026-09-30) ════════════════════════════════
+     Sa demande : << si un compte est detecte en tapant le username ou en
+     memoire il devrait retirer le champ mot de passe et le ramener si jamais
+     la cle ne passe pas >>.
+     ⚠ C EST LE POSTE QUI SAIT, PAS LE SERVEUR : la page retient les comptes
+     qui ont cree ou utilise une cle ICI (voir clePosteConnue dans staff.js).
+     Demander au serveur a chaque frappe laisserait sonder les noms du
+     personnel depuis cet ecran.
+     ⚠ LE CHOIX DE LA PERSONNE TIENT : apres << Utiliser mon mot de passe >>,
+     la frappe suivante ne replie pas le champ sous ses doigts. */
+  var CLE_CONNUE = false, MODE_CLE = false, MDP_CHOISI = '', NOM_T = null, NOM_N = 0;
+  function modeCle(connue, actif){
+    CLE_CONNUE = !!connue;
+    MODE_CLE = CLE_CONNUE && actif !== false;
+    var m = el('sl-mdp-bloc'), c = el('sl-clepret'), b = el('sl-btn'), bs = el('sl-bascule'), pw = el('sl-password');
+    if (m) m.className = 'cx-mdp' + (MODE_CLE ? ' cache' : '');
+    if (pw) pw.tabIndex = MODE_CLE ? -1 : 0;
+    if (c) c.className = 'cx-clepret' + (MODE_CLE ? ' on' : '');
+    if (b && !b.disabled) b.innerHTML = MODE_CLE ? (IC.empreinte(18) + '<span>' + T('Se connecter avec ma clé') + '</span>') : T('Se connecter');
+    if (bs) {
+      bs.style.display = CLE_CONNUE ? '' : 'none';
+      bs.textContent = MODE_CLE ? T('Utiliser mon mot de passe') : T('Utiliser ma clé d’identification');
+    }
+  }
+  function nomVerifier(){
+    var idc = el('sl-email');
+    if (!idc) return;
+    var v = idc.value.trim(), n = ++NOM_N;
+    if (!v) { modeCle(false); captchaRetirer(); return; }
+    appeler('connexion:captcha', [v]).then(function(r){
+      if (n !== NOM_N || !r || !r.ok) return;   // une frappe plus recente a gagne
+      if (r.requis && !r.verrouille) captchaPoser(); else captchaRetirer();
+      modeCle(!!r.cle, MDP_CHOISI !== v.toLowerCase());
+    });
+  }
+  function cleEntrer(){
+    var idc = el('sl-email'), b = el('sl-btn');
+    if (!idc || !b) return;
+    fauteEffacer('sl-error');
+    if (manque(['sl-email'])) { faute('sl-error', { message: T('Entrez votre nom d’utilisateur.') }); return; }
+    b.disabled = true;
+    b.innerHTML = '<span class="cx-spin"></span><span>' + T('En attente de la clé…') + '</span>';
+    var c = el('sl-clepret'); if (c) c.className = 'cx-clepret on attente';
+    var sv = el('sl-remember'), v = idc.value.trim();
+    appeler('connexion:cleEntrer', [v, !!(sv && sv.checked)]).then(function(r){
+      var b2 = el('sl-btn');
+      if (r && r.ok) { suivre(r); return; }
+      if (b2) b2.disabled = false;
+      /* La cle n a pas passe : le mot de passe REVIENT, le curseur dedans. */
+      MDP_CHOISI = v.toLowerCase();
+      modeCle(true, false);
+      faute('sl-error', r || {});
+      var pw = el('sl-password'); if (pw) pw.focus();
+    });
+  }
+
   /* ══ LE CODE A SIX CHIFFRES ══════════════════════════════════════════════
      ⚠ LE DECOMPTE EST DESSINE ICI, MAIS L ECHEANCE RESTE CELLE DE LA PAGE.
      _mfaTimeout y revoque le jeton en attente et purge le sessionStorage. Si
@@ -1332,9 +1470,21 @@ ${JS_DIRE()}
     }
     if (b) { b.disabled = true; b.innerHTML = '<span class="cx-spin"></span><span>' + T('En attente de la clé…') + '</span>'; }
     if (n) n.disabled = true;
+    var em = el('sl-cle-em'); if (em) em.className = 'cx-embleme attente';
     var nom = (el('sl-cle-nom') && el('sl-cle-nom').value) || '';
     appeler('connexion:cleAjouter', [nom]).then(function(r){
-      if (r && r.ok) { szDire(T('Clé d’identification ajoutée.'), 'bon'); reussi(prenom); return; }
+      var em2 = el('sl-cle-em');
+      if (r && r.ok) {
+        /* Le vert se VOIT avant que la fenetre parte : sans ce temps, la
+           reussite ne serait qu un message qu on n a pas eu le temps de lire. */
+        if (em2) { em2.className = 'cx-embleme bon'; em2.innerHTML = IC.coche; }
+        if (b) { b.style.opacity = '1'; b.innerHTML = '<span style="display:inline-flex;transform:scale(.55);margin:-8px -6px">' + IC.coche + '</span><span>' + T('Clé ajoutée') + '</span>'; }
+        if (n) n.style.visibility = 'hidden';
+        szDire(T('Clé d’identification ajoutée.'), 'bon');
+        setTimeout(function(){ reussi(prenom); }, 900);
+        return;
+      }
+      if (em2) em2.className = 'cx-embleme';
       if (b) { b.disabled = false; b.textContent = T('Ajouter une clé'); }
       if (n) n.disabled = false;
       faute('sl-cle-error', r || {});
@@ -1452,7 +1602,15 @@ ${JS_DIRE()}
     var prims = document.querySelectorAll('.cx-btn');
     for (var pi = 0; pi < prims.length; pi++) btnSurvol(prims[pi]);
     var f = el('cx-form');
-    if (f) f.onsubmit = function(e){ e.preventDefault(); entrer(); };
+    if (f) f.onsubmit = function(e){ e.preventDefault(); if (MODE_CLE) cleEntrer(); else entrer(); };
+    var bsc = el('sl-bascule');
+    if (bsc) bsc.onclick = function(){
+      var nn = el('sl-email'), vv = nn ? nn.value.trim().toLowerCase() : '';
+      fauteEffacer('sl-error');
+      MDP_CHOISI = MODE_CLE ? vv : '';
+      modeCle(true, !MODE_CLE);
+      var zz = el(MODE_CLE ? 'sl-btn' : 'sl-password'); if (zz) zz.focus();
+    };
     var fm = el('cx-form-mfa');
     if (fm) fm.onsubmit = function(e){ e.preventDefault(); mfaEnvoyer(); };
     var mc = el('sl-mfa-cle'); if (mc) mc.onclick = mfaCle;
@@ -1534,12 +1692,12 @@ ${JS_DIRE()}
     if (sqa) sqa.onclick = function(){ dessiner('login'); apresLogin(); };
 
     var idc = el('sl-email');
-    if (idc) idc.onchange = function(){
-      appeler('connexion:captcha', [idc.value.trim()]).then(function(r){
-        if (!r || !r.ok) return;
-        if (r.requis && !r.verrouille) captchaPoser(); else captchaRetirer();
-      });
-    };
+    if (idc) {
+      idc.onchange = nomVerifier;
+      /* A la frappe aussi, et pas seulement en quittant le champ : sinon le mot
+         de passe ne se retirerait qu apres qu on a deja clique dedans. */
+      idc.oninput = function(){ if (NOM_T) clearTimeout(NOM_T); NOM_T = setTimeout(nomVerifier, 280); };
+    }
   }
 
   /* Le curseur va DIRECTEMENT au mot de passe quand le nom est deja connu :
@@ -1596,7 +1754,12 @@ ${JS_DIRE()}
 
   function apresLogin(){
     if (CTX.captchaRequis && !CTX.verrouille) captchaPoser();
-    var z = el(CTX.prefill ? 'sl-password' : 'sl-email');
+    var n = el('sl-email'), v = n ? n.value.trim() : '';
+    /* Le nom retenu a une cle : replie TOUT DE SUITE, sans aller-retour, pour
+       que le champ ne paraisse pas une fraction de seconde puis s en aille. */
+    if (v && v === CTX.prefill && CTX.cle) modeCle(true, MDP_CHOISI !== v.toLowerCase());
+    else if (v) nomVerifier();
+    var z = el(MODE_CLE ? 'sl-btn' : (v ? 'sl-password' : 'sl-email'));
     if (z) z.focus();
   }
 
@@ -1619,7 +1782,7 @@ ${JS_DIRE()}
       titre: '#f5e6d0', sous: 'rgba(236,229,217,0.92)', sousTexte: T('Panneau d’administration'),
       btnFrom: '#1a1207', btnTo: '#3d2810', btnTexte: '#f5e6d0' },
     marque: { nom: 'SANDRIZA', lettre: 'É', logo: '' },
-    prefill: '', souvenir: false, captchaRequis: false, verrouille: false
+    prefill: '', souvenir: false, captchaRequis: false, verrouille: false, cle: false
   };
 
   /* ══ LES INTITULÉS ARRIVENT DE LA COQUILLE, LE POPUP AUSSI ══════════════

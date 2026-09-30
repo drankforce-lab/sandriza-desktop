@@ -2490,7 +2490,7 @@ const OPS_PONT = new Set([
      configuration du code à six chiffres, changement de mot de passe imposé,
      questions de sécurité. ⚠ Elles n'ont pas de garde de session non plus. */
   'connexion:mfaConfig', 'connexion:mfaConfigConfirmer',
-  'connexion:cle', 'connexion:cleAjouter', 'connexion:cleDecliner',
+  'connexion:cle', 'connexion:cleEntrer', 'connexion:cleAjouter', 'connexion:cleDecliner',
   'connexion:mdpDonnees', 'connexion:mdpEcrire',
   'connexion:questionsDonnees', 'connexion:questionsEcrire',
   'presence:liste', 'presence:deconnecter', 'presence:message',
@@ -3101,7 +3101,7 @@ const LIMITES_PONT = {
   'connexion:mfaConfigConfirmer': 30000, 'connexion:mdpEcrire': 30000,
   // La clé d'identification attend la PERSONNE (Windows Hello, téléphone, clé) :
   // le navigateur lui laisse 120 s, on laisse 10 s de plus pour répondre.
-  'connexion:cle': 130000, 'connexion:cleAjouter': 130000, 'connexion:cleDecliner': 20000,
+  'connexion:cle': 130000, 'connexion:cleEntrer': 130000, 'connexion:cleAjouter': 130000, 'connexion:cleDecliner': 20000,
   'connexion:questionsEcrire': 30000,
   // Depot des photos dans le stockage : le plus long de tous.
   'produit:enregistrer': 90000,
@@ -3673,7 +3673,7 @@ ipcMain.handle('pont:appeler', async (e, op, args) => {
      (NotAllowedError) — or c'est la fenêtre native de connexion qui l'a, pas la
      page du site qui exécute la cérémonie. On le lui donne le temps du geste ;
      la boîte de Windows (Hello, téléphone, clé) passe de toute façon devant. */
-  if (nom === 'connexion:cle' || nom === 'connexion:cleAjouter') { try { wc.focus(); } catch {} }
+  if (nom === 'connexion:cle' || nom === 'connexion:cleEntrer' || nom === 'connexion:cleAjouter') { try { wc.focus(); } catch {} }
   try {
     let fini = false;
     const travail = wc.executeJavaScript(code, true).then((r) => { fini = true; return r; });
