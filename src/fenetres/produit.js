@@ -38,6 +38,62 @@ const { CSS_SOCLE, CSS_JOUR, JS_SOCLE, ICO, TETE, LIEU } = require('./socle');
 const T = require('../langue').tr('produit');
 
 const CSS_PROPRE = `
+/* ══ LA NOUVELLE REFONTE (2026-09-30, sa demande : « refaire aussi les ajouts
+   de produit en nouvelle refonte ») ═════════════════════════════════════════
+   ① LE VOLET « FICHE », a droite de chaque etape : la photo principale, le nom,
+   le prix et la marge, les tailles, les couleurs, le stock, la visibilite — et
+   ce qui MANQUE pour enregistrer. Les etapes 2 et 4 laissaient la moitie de la
+   fenetre vide ; on y voit maintenant le produit se construire, et on sait a
+   tout moment pourquoi « Enregistrer » refuserait.
+   ② L ETAPE 1 TIENT ENTIERE : la rangee Etiquette / Fournisseur passait sous le
+   pied de la fenetre, sans barre pour l atteindre. */
+#corps{gap:1rem}
+.pf-fiche{flex:0 0 17.5rem;min-width:0;min-height:0;display:flex;flex-direction:column;gap:.7rem;
+  background:var(--f-carte);border:1px solid var(--v08);border-radius:12px;padding:.85rem;overflow:hidden}
+.pf-fiche .ph{position:relative;aspect-ratio:1/1;max-height:13.5rem;border-radius:10px;overflow:hidden;
+  background:var(--f-pied);display:flex;align-items:center;justify-content:center;color:var(--tx3);
+  font-size:.76rem;text-align:center}
+.pf-fiche .ph img{width:100%;height:100%;object-fit:cover}
+.pf-fiche .ph .ico svg{width:26px;height:26px;opacity:.6}
+.pf-fiche .nm{font-size:1rem;font-weight:800;line-height:1.25;color:var(--tx);word-break:break-word}
+.pf-fiche .nm.sansnom{color:var(--tx3);font-weight:600}
+.pf-fiche .sk{font:600 .72rem/1.2 ui-monospace,Consolas,monospace;color:var(--tx-or);margin-top:.15rem}
+.pf-fiche .px{display:flex;align-items:baseline;gap:.45rem;flex-wrap:wrap}
+.pf-fiche .px .v{font-size:1.15rem;font-weight:800;color:var(--tx)}
+.pf-fiche .px .b{font-size:.8rem;color:var(--tx3);text-decoration:line-through}
+.pf-fiche .px .m{font-size:.72rem;color:var(--tx2);flex:1 1 100%}
+.pf-fiche .l{display:flex;justify-content:space-between;gap:.5rem;font-size:.78rem;align-items:center}
+.pf-fiche .l .k{color:var(--tx2);flex:0 0 auto}
+.pf-fiche .l .v{text-align:right;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pf-fiche .pts{display:inline-flex;gap:.2rem;vertical-align:middle}
+.pf-fiche .pts i{width:.7rem;height:.7rem;border-radius:50%;border:1px solid var(--v25);display:inline-block}
+.pf-fiche .etat{display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;font-weight:700;
+  padding:.1rem .5rem;border-radius:99px}
+.pf-fiche .etat.on{background:rgba(74,222,128,.14);color:var(--tx-ok)}
+.pf-fiche .etat.off{background:var(--v06);color:var(--tx2)}
+html.jour .pf-fiche .etat.on{color:#1f6b3d}
+.pf-fiche .reste{margin-top:auto;border-top:1px solid var(--v08);padding-top:.6rem}
+.pf-fiche .reste .t{font-size:.72rem;font-weight:700;color:var(--tx2);margin-bottom:.35rem}
+.pf-fiche .reste button{display:flex;align-items:center;gap:.45rem;width:100%;text-align:left;
+  background:none;border:0;padding:.18rem .1rem;font:inherit;font-size:.78rem;color:var(--tx);cursor:pointer;border-radius:6px}
+.pf-fiche .reste button:hover{background:var(--v05)}
+.pf-fiche .reste button .o{flex:0 0 auto;width:.95rem;height:.95rem;border-radius:50%;
+  border:1.5px solid var(--tx-att)}
+.pf-fiche .reste .ok{font-size:.78rem;color:var(--tx-ok);font-weight:600}
+/* L etape 1 : Identification en quatre colonnes, Classement en trois. */
+.pf-id{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.6rem .75rem}
+.pf-id .l2{grid-column:span 2}
+.pf-id .l4{grid-column:1 / -1}
+.pf-cl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem .75rem}
+.cote.pf-bas{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}
+@media (max-width:1100px){.pf-fiche{display:none}}
+/* Les tailles : de vraies touches, pas des pastilles de 1,75 rem. */
+#p-tailles .jeton{height:2.4rem;min-width:3.1rem;justify-content:center;font-weight:700;border-radius:10px;font-size:.88rem}
+#p-tailles .jeton.on{background:#c9a97e;border-color:#c9a97e;color:#1a1208}
+/* Un emplacement de photo vide DIT qu il attend : un signe plus, pas un mot seul. */
+.vue .cadre:not(.pleine)::before{content:'+';display:block;font-size:1.5rem;line-height:1;color:var(--tx3);margin-bottom:.15rem}
+.vue .cadre:not(.pleine){flex-direction:column}
+.ligne-photos .lgd-principale{text-transform:none;letter-spacing:0;font-size:.72rem}
 .jetons{display:flex;flex-wrap:wrap;gap:.35rem;align-content:flex-start;
   flex:1 1 auto;min-height:0;overflow:hidden}
 .jeton{display:inline-flex;align-items:center;gap:.32rem;padding:.2rem .55rem;
@@ -160,6 +216,8 @@ const CSS_PROPRE = `
 .lgstk.enstock{background:rgba(34,197,94,.10)}
 .lgstk.enstock:hover{background:rgba(34,197,94,.15)}
 .lgstk.enstock .c1,.lgstk.enstock .c2{color:#86efac;font-weight:600}
+/* ⚠ EN JOUR, le vert pale sur la teinte verte etait illisible (vu a la capture). */
+html.jour .lgstk.enstock .c1,html.jour .lgstk.enstock .c2{color:#166534}
 /* ⚠ EMPLACEMENT OBLIGATOIRE DES QUE LA QUANTITE DEPASSE ZERO — et depuis le
    2026-08-08, une CREATION exige au moins une variante avec une quantite
    (une fiche entiere a zero se creait sans un mot). Sans ce rappel on
@@ -185,7 +243,7 @@ const CSS_PROPRE = `
   background:rgba(8,12,18,.6);padding:1.2rem}
 .voile .boite{width:100%;max-width:460px;background:var(--f-carte);border:1px solid var(--v10);
   border-radius:12px;padding:1rem 1.1rem;box-shadow:0 24px 64px rgba(0,0,0,.5)}
-.voile h3{margin:0 0 .5rem;font:700 1rem/1.3 Georgia,serif;color:var(--tx-err2)}
+.voile h3{margin:0 0 .5rem;font:700 1rem/1.3 inherit;color:var(--tx-err2)}
 .voile p{margin:0 0 .7rem;font-size:.86rem;line-height:1.5;color:var(--tx-bleute)}
 .voile .pied2{display:flex;justify-content:flex-end;gap:.45rem;margin-top:.8rem}
 .cote{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;align-items:start}
@@ -375,8 +433,8 @@ function pageProduit(id) {
     // 1 — Identité ET classement (fusionnées : elles décrivent la même chose,
     // et les séparer obligeait à un aller-retour pour une poignée de listes).
     h.push('<div class="etape">'
-      + '<div class="carte"><h2>${T("Identification")}</h2><div class="grille">'
-      + ch('p-nom', '${T("Nom du produit")}', { requis: true, large: true, placeholder: '${T("Ex : Robe fleurie été")}' })
+      + '<div class="carte"><h2>${T("Identification")}</h2><div class="pf-id">'
+      + '<div class="l2">' + ch('p-nom', '${T("Nom du produit")}', { requis: true, placeholder: '${T("Ex : Robe fleurie été")}' }) + '</div>'
       + sel('p-cat', '${T("Catégorie")}', rien.concat(opt(CTX.categories, 'cle', 'libelle')), { requis: true })
       // ⚠ LE SKU EST VISIBLE, en lecture seule. Un code attribué « quelque part
       // plus tard » ne peut ni être lu, ni recopié sur une étiquette, ni
@@ -392,17 +450,17 @@ function pageProduit(id) {
       + '<select id="p-unite" aria-label="${T("Unité du poids")}"><option value="g">g</option><option value="kg">kg</option>'
       + '<option value="lb">lb</option></select></div>'
       + '<div class="aide" style="margin-top:.2rem">${T("Sert au calcul des frais d’expédition.")}</div></div>'
-      + '<div class="ch large"><label for="p-desc">${T("Description")}'
+      + '<div class="ch l2"><label for="p-desc">${T("Description")}'
       + '<span id="p-desc-etat" style="float:right;color:var(--tx2);font-size:.72rem"></span></label>'
-      + '<textarea id="p-desc" rows="3"></textarea>'
+      + '<textarea id="p-desc" rows="2"></textarea>'
       // La redaction par IA passe par le PONT : la fenetre envoie la photo et les
       // renseignements, le SITE interroge le service avec sa cle. Rien ne sort
       // d ici, aucune cle ne voyage.
       + '<div style="margin-top:.35rem">'
       + '<button type="button" id="p-ia"><span class="ic">✨</span> ${T("Rédiger avec l’IA")}</button></div></div>'
       + '</div></div>'
-      + '<div class="cote">'
-      + '<div class="carte"><h2>${T("Classement")}</h2><div class="grille">'
+      + '<div class="cote pf-bas">'
+      + '<div class="carte"><h2>${T("Classement")}</h2><div class="pf-cl">'
       + sel('p-genre', '${T("Genre")}', rien.concat(opt(CTX.genres, 'cle', 'libelle')))
       + sel('p-age', '${T("Groupe d’âge")}', rien.concat(opt(CTX.groupesAge, 'cle', 'libelle')))
       + sel('p-style', '${T("Style")}', rien.concat(opt(CTX.styles, 'cle', 'libelle')))
@@ -427,10 +485,12 @@ function pageProduit(id) {
       + ch('p-prix', '${T("Prix de vente ($)")}', { requis: true, argent: true })
       + '<div class="ch"><label for="p-solde">${T("Prix soldé ($)")}'
       + '<span id="p-pastille" class="pastille"></span></label>'
-      + '<input id="p-solde" type="text" inputmode="decimal" class="argent" placeholder="${T("aucun")}">'
-      + '<div id="p-rabais" class="rabais"></div></div>'
+      + '<input id="p-solde" type="text" inputmode="decimal" class="argent" placeholder="${T("aucun")}"></div>'
       + ch('p-cout', '${T("Coût d’acquisition ($)")}', { requis: true, argent: true })
       + '</div>'
+      // Les rabais rapides sous TOUTE la carte (2026-09-30) : sous le seul champ
+      // du prix solde, la carte plus etroite les coupait au cinquieme.
+      + '<div id="p-rabais" class="rabais"></div>'
       + '<div class="aide" id="p-marge" style="margin-top:.5rem"></div>'
       + '<div id="p-alerte" style="display:none;color:var(--tx-err);font-size:.78rem;margin-top:.4rem"></div></div>'
       + '</div></div>');
@@ -567,8 +627,15 @@ function pageProduit(id) {
       + '<span class="c3">${T("Quantité")}</span><span class="c4">${T("Entrepôt")}</span></div>'
       + '<div class="liste"></div><div class="pagi"></div></div></div>');
 
-    document.getElementById('corps').innerHTML = h.join('');
+    document.getElementById('corps').innerHTML = h.join('')
+      + '<aside class="pf-fiche" id="pf-fiche" aria-label="${T("Fiche du produit")}"></aside>';
     brancher();
+    // Le volet suit CHAQUE saisie, et les gestes qui ne passent pas par un champ
+    // (tailles, couleurs, photos, stock) le rappellent eux-memes.
+    var corpsEl = document.getElementById('corps');
+    corpsEl.addEventListener('input', majFicheBientot);
+    corpsEl.addEventListener('change', majFicheBientot);
+    corpsEl.addEventListener('click', majFicheBientot);
     if (FICHE) remplir(FICHE);
     else {
       document.getElementById('p-actif').checked = true;
@@ -581,6 +648,7 @@ function pageProduit(id) {
     }
     dessinerJetons();
     majMarge();
+    majFiche();
 
     Assist.poser([
       // ⚠ Les obligations du prix rejoignent la PREMIERE etape avec ses champs :
@@ -595,6 +663,61 @@ function pageProduit(id) {
 
     bEnr.disabled = !(ID ? CTX.peutModifier : CTX.peutAjouter);
     if (bEnr.disabled) dire('${T("Consultation seulement — votre rôle ne permet pas d’enregistrer.")}', 'att');
+  }
+
+  /* ══ LE VOLET « FICHE » (2026-09-30) ═══════════════════════════════════
+     ⚠ IL NE DECIDE RIEN : il relit les champs, CHOIX, IMAGE et STOCK — les
+     memes sources que l enregistrement. La liste « Pour enregistrer » reprend
+     les gardes d enregistrer() dans le meme ordre ; un clic mene a l etape. */
+  var FICHE_T = null;
+  function majFicheBientot(){ clearTimeout(FICHE_T); FICHE_T = setTimeout(majFiche, 60); }
+  function majFiche(){
+    var z = document.getElementById('pf-fiche');
+    if (!z || !CTX) return;
+    var nom = String(val('p-nom') || '').trim();
+    var sku = String(val('p-sku') || '').trim();
+    var p = argentNombre(val('p-prix')) || 0, so = argentNombre(val('p-solde')) || 0, co = argentNombre(val('p-cout')) || 0;
+    var eff = (so > 0 && so < p) ? so : p;
+    var t = tailles(), c = couleurs();
+    var tot = 0; Object.keys(STOCK).forEach(function(k){ tot += (+STOCK[k] || 0); });
+    var actif = !!(document.getElementById('p-actif') || {}).checked;
+    var h = '<div class="ph">' + (IMAGE ? '<img src="' + esc(IMAGE) + '" alt="">'
+          : '<span><span class="ico">${ICO.image}</span><br>${T("Aucune photo principale")}</span>') + '</div>';
+    h += '<div><div class="nm' + (nom ? '' : ' sansnom') + '">' + esc(nom || '${T("Sans nom")}') + '</div>'
+      + (sku ? '<div class="sk">' + esc(sku) + '</div>' : '') + '</div>';
+    if (p > 0) {
+      h += '<div class="px"><span class="v">' + esc(szArgent(eff)) + '</span>'
+        + (eff < p ? '<span class="b">' + esc(szArgent(p)) + '</span>' : '')
+        + (co > 0 ? '<span class="m">${T("Marge :")} ' + esc(szArgent(eff - co)) + ' (' + Math.round((eff - co) / eff * 100) + ' %)</span>' : '')
+        + '</div>';
+    }
+    var ligne = function(k, v){ return '<div class="l"><span class="k">' + k + '</span><span class="v">' + v + '</span></div>'; };
+    h += ligne('${T("Catégorie")}', esc(libCat(val('p-cat')) || '—'));
+    h += ligne('${T("Tailles")}', esc(t.length ? t.join(' · ') : '—'));
+    h += ligne('${T("Couleurs")}', c.length
+      ? '<span class="pts">' + c.slice(0, 8).map(function(n){ return '<i style="background:' + esc(teinte(n)) + '" title="' + esc(couleurLue(n)) + '"></i>'; }).join('') + '</span>'
+        + (c.length > 8 ? ' +' + (c.length - 8) : '')
+      : '—');
+    h += ligne('${T("Stock")}', tot ? szNombre(tot) + ' ' + (tot > 1 ? '${T("unités")}' : '${T("unité")}') : '—');
+    h += ligne('${T("Boutique")}', '<span class="etat ' + (actif ? 'on">${T("Visible")}' : 'off">${T("Masqué")}') + '</span>');
+    // Ce qui manque — les gardes d enregistrer(), dans leur ordre.
+    var manque = [];
+    if (!nom) manque.push([0, '${T("Nom du produit")}']);
+    if (!val('p-cat')) manque.push([0, '${T("Catégorie")}']);
+    if (!String(val('p-poids') || '').trim()) manque.push([0, '${T("Poids unitaire")}']);
+    if (!(p > 0)) manque.push([0, '${T("Prix de vente")}']);
+    if (!(co > 0)) manque.push([0, '${T("Coût d’acquisition")}']);
+    if (!t.length || !c.length) manque.push([1, '${T("Au moins une taille et une couleur")}']);
+    if (!IMAGE) manque.push([2, '${T("Photo principale")}']);
+    if (!ID && !tot && t.length && c.length) manque.push([4, '${T("Une quantité en stock")}']);
+    h += '<div class="reste">' + (manque.length
+      ? '<div class="t">${T("Pour enregistrer")}</div>' + manque.map(function(m){
+          return '<button type="button" data-pfaller="' + m[0] + '"><span class="o"></span>' + m[1] + '</button>'; }).join('')
+      : '<div class="ok"><span class="ic">✓</span> ${T("Prête à enregistrer")}</div>') + '</div>';
+    z.innerHTML = h;
+    z.querySelectorAll('[data-pfaller]').forEach(function(b){
+      b.onclick = function(){ Assist.aller(parseInt(b.getAttribute('data-pfaller'), 10) || 0); };
+    });
   }
 
   function brancher(){
@@ -886,6 +1009,7 @@ function pageProduit(id) {
     var v = document.getElementById('p-coul-vide');
     if (v) v.style.display = CHOIX.length ? 'none' : '';
     dessinerVues();
+    majFicheBientot();
   }
   function ajouterCouleur(nom){
     var e = document.getElementById('p-coul-libre');
@@ -1032,6 +1156,7 @@ function pageProduit(id) {
 
   // Un cadre par vue : on clique, on choisit un fichier. Le « x » retire.
   function dessinerVues(){
+    majFicheBientot();   // la photo principale a pu changer (volet « Fiche »)
     var t = document.getElementById('p-vues-titre');
     if (t) t.textContent = modeStandard()
       ? '${T("Photos — 1 principale +")} ' + MAX_PHOTOS + ' ${T("supplémentaires maximum")}'

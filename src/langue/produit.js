@@ -445,5 +445,21 @@ module.exports = {
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
   'recliquez pour retirer le rabais': 'click again to remove the discount',
-  'ouverte par': 'open by'
+  'ouverte par': 'open by',
+  'Fiche du produit': 'Product sheet',
+  'Aucune photo principale': 'No main photo',
+  'Sans nom': 'Untitled',
+  'Tailles': 'Sizes',
+  'Couleurs': 'Colours',
+  'unités': 'units',
+  'unité': 'unit',
+  'Boutique': 'Shop',
+  'Visible': 'Visible',
+  'Masqué': 'Hidden',
+  'Poids unitaire': 'Unit weight',
+  'Prix de vente': 'Selling price',
+  'Au moins une taille et une couleur': 'At least one size and one colour',
+  'Une quantité en stock': 'A quantity in stock',
+  'Pour enregistrer': 'To save',
+  'Prête à enregistrer': 'Ready to save',
 };
