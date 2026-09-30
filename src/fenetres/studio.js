@@ -275,6 +275,20 @@ html.jour .onglets .ong.on,html.jour .onglets .ong.on .ot b{color:#3d3526}
 .depot .gros svg{width:34px;height:34px;opacity:.8}
 .depot img{max-width:100%;max-height:14rem;border-radius:8px}
 .depot .refaire{font-size:.72rem;color:var(--tx2);text-decoration:underline;margin-top:.3rem}
+/* ══ PLUS DE ZONE DE DEPOT — sa demande du 2026-09-30, capture a l appui :
+   « retire cela ». La photo vient de la PHOTOTHEQUE, par l explorateur : c est
+   la ou elles sont toutes, rangees, et c est lui qui porte la recherche, les
+   filtres et la multi-selection. Un seul chemin, dit clairement. */
+.choixph{display:flex;flex-wrap:wrap;align-items:center;gap:.8rem .9rem;padding:1rem 1.1rem;border-radius:12px;
+  background:var(--f-champ);border:1px solid var(--v10)}
+.choixph .ico{flex:0 0 auto;width:2.6rem;height:2.6rem;border-radius:10px;display:flex;
+  align-items:center;justify-content:center;background:rgba(201,169,126,.14);color:var(--tx-or)}
+.choixph .ico svg{width:22px;height:22px}
+html.jour .choixph .ico{color:#6a5840}
+.choixph .tx{flex:1 1 auto;min-width:0}
+.choixph .tx b{display:block;font-size:.88rem;color:var(--tx)}
+.choixph .tx span{display:block;font-size:.74rem;color:var(--tx2);margin-top:.1rem}
+.choixph button{flex:1 1 100%;justify-content:center;padding:.6rem 1rem}
 /* La barre de l ecran plein largeur (le suivi des lots).
    ⚠ LE RESTE DE CE BLOC EST PARTI AVEC LE SELECTEUR (#30, le 2026-09-19) :
    grille, vignettes, coches, pastilles, filtres et panier de selection. Du CSS
@@ -1303,15 +1317,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         + '<input type="file" id="fichier" accept="image/*" hidden>';
       return h;
     }
-    // ③ Rien de choisi : la zone de dépôt, et l explorateur.
-    h += '<div class="depot" id="depot"><span class="gros"><span class="ico" aria-hidden="true">${ICO.image}</span></span>'
-      + '<span>${T("Glissez une photo ici, ou cliquez pour en choisir une")}</span>'
-      + '<span class="pt2">${T("Studio, fond blanc, un vêtement — JPEG ou PNG")}</span></div>'
-      + '<input type="file" id="fichier" accept="image/*" hidden>'
-      + '<div class="pbtn">'
-      + '<button id="ph-explorateur" title="${T("Parcourir la photothèque en grand, avec aperçu")}">'
-      + '<span class="ic">🗂️</span> ${T("Explorateur…")}</button>'
-      + '</div>';
+    // ③ Rien de choisi : l explorateur, seul chemin (plus de zone de dépôt — 2026-09-30).
+    h += '<div class="choixph"><span class="ico" aria-hidden="true">${ICO.image}</span>'
+      + '<div class="tx"><b>${T("Choisissez la photo dans la photothèque")}</b>'
+      + '<span>${T("Une ou plusieurs — studio, fond blanc, un vêtement.")}</span></div>'
+      + '<button class="prim" id="ph-explorateur" title="${T("Parcourir la photothèque en grand, avec aperçu")}">'
+      + '${T("Ouvrir l’explorateur…")}</button></div>';
     return h;
   }
 

@@ -372,6 +372,9 @@ module.exports = {
   '⇔ Avant / après': '⇔ Before / after',
   'Résultat seul': 'Result only',
   'Résultat': 'Result',
+  'Choisissez la photo dans la photothèque': 'Choose the photo from the photo library',
+  'Une ou plusieurs — studio, fond blanc, un vêtement.': 'One or several — studio, white background, one garment.',
+  'Ouvrir l’explorateur…': 'Open the explorer…',
   'Ce qui sera généré': 'What will be generated',
   'Cliquez « Aperçu gratuit », en bas de la fenêtre':
     'Click « Free preview », at the bottom of the window',

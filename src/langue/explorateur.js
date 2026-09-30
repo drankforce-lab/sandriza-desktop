@@ -49,6 +49,12 @@ module.exports = {
   'Explorateur de photos': 'Photo browser',
   'Lecture de la photothèque…': 'Reading the media library…',
   'Cliquez une photo pour la voir ici.': 'Click a photo to see it here.',
+  'Rechercher…': 'Search…',
+  'Filtres': 'Filters',
+  'Retirer les filtres': 'Clear filters',
+  'Un clic coche la photo, un autre la décoche.': 'One click ticks the photo, another unticks it.',
+  'clic : toute la plage depuis la dernière.': 'click: the whole range since the last one.',
+  'Double-clic : la photo en grand.': 'Double-click: the photo full size.',
 
   /* ── LES MOTIFS DE REFUS ────────────────────────────────────────────────── */
   'Aucune session ouverte dans l’application.': 'No session open in the application.',

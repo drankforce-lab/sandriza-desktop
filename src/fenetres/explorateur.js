@@ -99,14 +99,51 @@ th.ck,td.ck{width:1.9rem;max-width:1.9rem;padding:.12rem .2rem;text-align:center
 .coche.flot{position:absolute;top:.25rem;left:.25rem;z-index:2;
   background:rgba(8,12,20,.72);color:var(--tx)}
 .coche.flot.on{background:#c9a97e;color:#17202c}
-.liste{max-height:calc(100vh - 15rem);overflow-y:auto}
+/* ⚠ LA LISTE NE DEFILE PLUS (2026-09-30, sa capture : une barre de defilement
+   dans la liste, contre sa regle). La pagination mesurait la hauteur des lignes
+   AVANT l arrivee des vignettes ; les images chargees, les lignes grandissaient
+   et la page debordait. Les lignes ont maintenant une hauteur FIXE (td.vg) : la
+   mesure dit vrai, et ce qui depasserait encore est coupe plutot que defile. */
+.liste{max-height:calc(100vh - 13rem);overflow:hidden}
 .pagi{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;
   padding:.45rem .2rem 0;font-size:.75rem;color:var(--tx2)}
-td.vig{width:2.4rem;max-width:2.4rem;padding:.1rem .2rem}
-td.vig img{width:2rem;height:2rem;object-fit:contain;border-radius:4px;background:var(--f-pied);display:block}
-/* La vignette de liste ne porte NI cadre NI contour : c est une image, pas un
-   bouton — l encadrer ajoutait un rectangle de plus a une ligne deja chargee. */
-td.vig img{border:0;outline:0}
+/* ⚠ td.vg ET NON td.vig (2026-09-30) : la cellule portait la classe des TUILES
+   de la grille (.vig) et en heritait le cadre, le fond sombre et l arrondi —
+   c est le carre noir autour de chaque vignette, sur sa capture. */
+td.vg{width:3.3rem;max-width:3.3rem;padding:.25rem .35rem;height:3.35rem}
+td.vg img,td.vg .ph0{width:2.6rem;height:2.6rem;object-fit:cover;border-radius:8px;display:block;
+  background:var(--f-pied);border:0;outline:0}
+td.vg .ph0{display:flex;align-items:center;justify-content:center;color:var(--tx3)}
+td.vg .ph0 svg{width:16px;height:16px;opacity:.6}
+tbody td{height:3.35rem}
+td.pd{text-align:right;font-variant-numeric:tabular-nums;color:var(--tx2)}
+th.pd{text-align:right}
+/* LES FILTRES DANS UN MENU (2026-09-30) : ils etaient des jetons alignes dans la
+   barre, et avec les vrais filtres de la phototheque la barre sortait de la
+   fenetre (« Traitement » coupe, sur sa capture). Un bouton qui dit combien sont
+   actifs, et la liste complete a cocher : rien de perdu, une seule ligne. */
+.fm{position:relative}
+/* A la hauteur des listes deroulantes voisines : un jeton de .73rem y faisait figure de bouton oublie. */
+.fm > button{font-size:.86rem;padding:.28rem .75rem;border-radius:8px}
+.fm .menu{position:absolute;top:calc(100% + .3rem);left:0;z-index:30;min-width:17rem;
+  background:var(--f-carte);border:1px solid var(--v14);border-radius:11px;padding:.35rem;
+  box-shadow:0 12px 32px rgba(0,0,0,.35)}
+.fm .menu label{display:flex;align-items:center;gap:.55rem;padding:.4rem .5rem;border-radius:7px;
+  font-size:.82rem;cursor:pointer;white-space:nowrap}
+.fm .menu label:hover{background:var(--v05)}
+.fm .menu input{width:auto;margin:0;accent-color:#c9a97e}
+.fm .menu .raz{display:block;width:100%;margin-top:.25rem;text-align:center;font-size:.76rem}
+/* Le volet vide dit a quoi il sert ET comment choisir. */
+.apercu .accueil{margin:auto;padding:1.4rem 1rem;text-align:center;color:var(--tx2);font-size:.82rem}
+.apercu .accueil .ico{display:inline-flex;width:3rem;height:3rem;border-radius:12px;align-items:center;
+  justify-content:center;background:rgba(201,169,126,.12);color:var(--tx-or);margin-bottom:.6rem}
+.apercu .accueil .ico svg{width:22px;height:22px}
+html.jour .apercu .accueil .ico{color:#6a5840}
+.apercu .accueil b{display:block;color:var(--tx);font-size:.88rem;margin-bottom:.35rem}
+.apercu .accueil ul{list-style:none;padding:0;margin:.7rem 0 0;text-align:left;display:flex;flex-direction:column;gap:.35rem}
+.apercu .accueil li{font-size:.76rem;line-height:1.4}
+.apercu .accueil kbd{font:600 .7rem/1 system-ui;padding:.12rem .35rem;border-radius:5px;
+  border:1px solid var(--v16);background:var(--v05);color:var(--tx)}
 /* Affichage GRILLE : quand on cherche a l oeil plutot qu au nom. */
 .grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(8rem,1fr));gap:.5rem}
 .vig{background:var(--f-carte);border:1px solid var(--v10);border-radius:9px;
@@ -132,7 +169,7 @@ td.vig img{border:0;outline:0}
 .apercu{flex:0 0 19rem;border-left:1px solid var(--v08);
   background:var(--f-pill);display:flex;flex-direction:column;overflow-y:auto}
 .apercu .img{padding:.6rem;text-align:center;background:var(--f-pied)}
-.apercu .img img{max-width:100%;max-height:15rem;border-radius:8px}
+.apercu .img img{max-width:100%;max-height:19rem;border-radius:8px}
 .apercu .vide{padding:2rem .8rem;text-align:center;color:var(--tx2);font-size:.82rem}
 .apercu .infos{padding:.55rem .7rem;font-size:.78rem;display:flex;flex-direction:column;gap:.3rem}
 .apercu .infos .l{display:flex;gap:.5rem;justify-content:space-between}
@@ -152,7 +189,7 @@ td.vig img{border:0;outline:0}
   align-items:center;justify-content:center;z-index:50;padding:1rem}
 .voile .boite{background:var(--f-carte);border:1px solid var(--v12);
   border-radius:13px;max-width:30rem;width:100%;padding:.9rem 1rem}
-.voile h3{margin:0 0 .55rem;font:700 1.02rem/1.25 Georgia,serif}
+.voile h3{margin:0 0 .55rem;font:700 1.02rem/1.25 inherit}
 .voile p{margin:.35rem 0;font-size:.85rem;line-height:1.5}
 .voile .ch{margin:.5rem 0}
 .voile .ch label{display:block;font-size:.72rem;color:var(--tx2);margin-bottom:.15rem}
@@ -211,7 +248,7 @@ function pageExplorateur(mode) {
 <div class="barre" id="barre"></div>
 <div class="corps" id="corps">
   <div class="zone" id="liste"><div class="vide charge">${T("Lecture de la photothèque…")}</div></div>
-  <div class="apercu" id="apercu"><div class="vide">${T("Cliquez une photo pour la voir ici.")}</div></div>
+  <div class="apercu" id="apercu"></div>
 </div>
 <div class="pied"><span class="msg" id="msg"></span>
   <span class="cpt" id="cpt"></span>
@@ -230,6 +267,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var D = null;            // derniere reponse de studio:explorer
   var VUE = 'liste';       // liste | grille
   var Q = '', FILTRES = [], SANS = '', LOT = '', TRI = 'recent';
+  var MENU_F = false;      // le menu des filtres est-il ouvert ?
+  document.addEventListener('click', function(){ if (MENU_F) { MENU_F = false; dessinerBarre(); } });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && MENU_F) { MENU_F = false; dessinerBarre(); } });
   var SEL = {};            // { id: true }
   var ANCRE = null;        // index de depart pour la selection Maj-clic
   // Pagination (#30) : le nombre de lignes est MESURE sur la hauteur reelle.
@@ -297,11 +337,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   /* ══ LA BARRE ═══════════════════════════════════════════════════════════ */
   function dessinerBarre(){
-    var h = '<input type="search" id="q" aria-label="${T("Rechercher (nom, code, produit, ")}${T("SKU")})" placeholder="${T("Rechercher (nom, code, produit, SKU)…")}" value="'
+    var h = '<input type="search" id="q" aria-label="${T("Rechercher (nom, code, produit, ")}${T("SKU")})"'
+      + ' title="${T("Rechercher (nom, code, produit, SKU)…")}" placeholder="${T("Rechercher…")}" value="'
       + esc(Q) + '">';
-    h += (D && D.filtres ? D.filtres : []).map(function(f){
-      return '<button class="jeton' + (FILTRES.indexOf(f.cle) >= 0 ? ' on' : '') + '"'
-        + ' data-filtre="' + esc(f.cle) + '">' + esc(szTd(f.nom)) + '</button>'; }).join('');
+    var fl = (D && D.filtres) ? D.filtres : [];
+    if (fl.length) {
+      h += '<span class="fm"><button class="jeton' + (FILTRES.length ? ' on' : '') + '" id="flt" aria-haspopup="true"'
+        + ' aria-expanded="' + (MENU_F ? 'true' : 'false') + '">${T("Filtres")}'
+        + (FILTRES.length ? ' · ' + FILTRES.length : '') + ' ▾</button>'
+        + '<div class="menu" id="flt-menu"' + (MENU_F ? '' : ' hidden') + '>'
+        + fl.map(function(f){
+            return '<label><input type="checkbox" data-filtre="' + esc(f.cle) + '"'
+              + (FILTRES.indexOf(f.cle) >= 0 ? ' checked' : '') + '> ' + esc(szTd(f.nom)) + '</label>'; }).join('')
+        + (FILTRES.length ? '<button class="jeton raz" id="flt-raz">${T("Retirer les filtres")}</button>' : '')
+        + '</div></span>';
+    }
     h += '<select id="sans" aria-label="${T("Filtrer les photos sans un traitement donné")}">'
       + '<option value="">${T("Traitement — tous")}</option>'
       + (D && D.traitements ? D.traitements : []).map(function(t){
@@ -335,13 +385,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       };
     }
     barreEl.querySelectorAll('[data-filtre]').forEach(function(el){
-      el.onclick = function(){
+      el.onchange = function(){
         var c = el.getAttribute('data-filtre');
         var i = FILTRES.indexOf(c);
         if (i >= 0) FILTRES.splice(i, 1); else FILTRES.push(c);
-        charger();
+        charger();   // le menu reste ouvert : on coche souvent deux filtres de suite
       };
     });
+    var fb = document.getElementById('flt');
+    if (fb) fb.onclick = function(e){ e.stopPropagation(); MENU_F = !MENU_F; dessinerBarre(); };
+    var fr = document.getElementById('flt-raz');
+    if (fr) fr.onclick = function(){ FILTRES = []; charger(); };
+    var fmn = document.getElementById('flt-menu');
+    if (fmn) fmn.onclick = function(e){ e.stopPropagation(); };
     var s = document.getElementById('sans');
     if (s) s.onchange = function(){ SANS = s.value; charger(); };
     var l = document.getElementById('lot');
@@ -432,7 +488,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<th class="ck"><span class="coche' + (pageToutePrise(pc) ? ' on' : '')
       + '" id="ck-page" title="${T("Cocher toute la page")}">' + (pageToutePrise(pc) ? '✓' : '') + '</span></th>'
       + '<th></th><th>${T("Nom")}</th><th>${T("Produit lié")}</th>'
-      + '<th>${T("État")}</th><th>${T("Poids")}</th></tr></thead><tbody>'
+      + '<th>${T("État")}</th><th class="pd">${T("Poids")}</th></tr></thead><tbody>'
       + pc.vue.map(function(p, k){
           var i = pc.debut + k;
           return '<tr data-i="' + i + '" data-id="' + esc(p.id) + '"'
@@ -440,13 +496,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
                          : (COURANT === p.id ? ' class="actif"' : '')) + '>'
             + '<td class="ck"><span class="coche' + (SEL[p.id] ? ' on' : '') + '" data-ck="'
               + esc(p.id) + '">' + (SEL[p.id] ? '✓' : '') + '</span></td>'
-            + '<td class="vig">' + (vignetteDe(p) ? '<img src="' + esc(vignetteDe(p)) + '" loading="lazy" alt="">' : '') + '</td>'
+            + '<td class="vg">' + (vignetteDe(p) ? '<img src="' + esc(vignetteDe(p)) + '" loading="lazy" alt="">'
+                : '<span class="ph0">${ICO.image}</span>') + '</td>'
             /* La ligne riche de la refonte (2026-09-25) : le nom en gras, le code dessous. */
             + '<td><div class="rf-nom">' + esc(p.nom) + '</div>'
             + (p.code ? '<div class="rf-sous"><span class="rf-code">' + esc(p.code) + '</span></div>' : '') + '</td>'
             + '<td>' + esc(p.lieNom || '—') + '</td>'
             + '<td>' + pastilles(p) + '</td>'
-            + '<td>' + poids(p.poids) + '</td></tr>'; }).join('')
+            + '<td class="pd">' + poids(p.poids) + '</td></tr>'; }).join('')
       + '</tbody></table></div>' + pagerHtml(pc);
   }
 
@@ -477,7 +534,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessinerApercu(){
     var p = null;
     ((D && D.photos) || []).forEach(function(x){ if (x.id === COURANT) p = x; });
-    if (!p) { apercuEl.innerHTML = '<div class="vide">${T("Cliquez une photo pour la voir ici.")}</div>'; return; }
+    if (!p) {
+      apercuEl.innerHTML = '<div class="accueil"><span class="ico">${ICO.image}</span>'
+        + '<b>${T("Cliquez une photo pour la voir ici.")}</b>'
+        + '<ul><li>${T("Un clic coche la photo, un autre la décoche.")}</li>'
+        + '<li><kbd>Maj</kbd> + ${T("clic : toute la plage depuis la dernière.")}</li>'
+        + '<li>${T("Double-clic : la photo en grand.")}</li></ul></div>';
+      return;
+    }
     var faits = (p.faits || []).map(function(f){
       var n = f;
       ((D && D.traitements) || []).forEach(function(t){ if (t.cle === f) n = t.nom; });

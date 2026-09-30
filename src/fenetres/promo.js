@@ -159,6 +159,11 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
    l apercu, qui est la seule chose ici qui gagne a etre plus grande. */
 .colapercu{display:flex;flex-direction:column}
 .colapercu .gapercu{flex:1 1 auto;min-height:9rem}
+/* ⚠ L APERCU A UNE HAUTEUR BORNEE (2026-09-30). Une etiquette 2 x 1 po tient,
+   mais un format EN PORTRAIT (4 x 6 po d expedition, par exemple) prenait toute
+   sa hauteur a pleine largeur et poussait la planche et ses boutons hors de la
+   fenetre (+528 px a la sonde, des que son image temoin a eu une vraie taille). */
+.colapercu .gapercu img{max-height:19rem;width:auto;max-width:100%;object-fit:contain}
 .gapercu{background:#f2f2f2;border-radius:10px;min-height:9rem;display:flex;
   align-items:center;justify-content:center;padding:.5rem;overflow:hidden}
 /* ⚠ << 100% >> ET NON PLUS 16rem. Agrandir le cadre en laissant le plafond a

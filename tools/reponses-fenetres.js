@@ -118,9 +118,15 @@ const DONNEES_IMPOT = {
           square: { brut: '48 200,00 $', frais: '1 410,00 $', net: '46 790,00 $', n: 131 },
         };
 
-// Une image minuscule mais VALIDE : plusieurs fenêtres posent la source d'une
-// photo dans un attribut, et une chaîne quelconque y passerait pour une adresse.
-const IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+// Une image VALIDE, À LA TAILLE D'UNE VRAIE PHOTO (1200 × 1600, 2026-09-30).
+// Elle valait un pixel : plusieurs fenêtres posent la source d'une photo dans un
+// attribut, et c'était assez pour qu'elle « arrive ». Mais un pixel ne montre RIEN
+// de la mise en page — le Studio débordait de 447 px avec une vraie photo, et
+// aucune sonde ne pouvait le voir. Un SVG déclaré en 1200 × 1600 pèse quelques octets.
+const IMAGE = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1600">'
+  + '<rect width="1200" height="1600" fill="#d9ccb9"/>'
+  + '<ellipse cx="600" cy="820" rx="250" ry="560" fill="#3a2d22"/></svg>');
 // Verrou obtenu. ⚠ La forme est { obtenu, horsLigne, parQui } — PAS un booléen :
 // `_lockTake` du site rend un objet, et le pont le traduit ainsi.
 const VERROU = { ok: true, obtenu: true, horsLigne: false, parQui: '' };
@@ -2665,7 +2671,7 @@ const JEU = {
        jamais dessinés sur autre chose que du vide. */
     /* Un point transparent : assez pour que la balise ait une source valide,
        sans peser. On ne mesure pas l image ici, on mesure QU ELLE ARRIVE. */
-    const VIGNETTE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    const VIGNETTE = IMAGE;   // à la taille d'une vraie photo (voir IMAGE, 2026-09-30)
     const EXPLO = {
       ok: true, charge: true, peutModifier: true,
       total: 5, trouvees: 5, page: 0, taille: 60, pages: 1,
@@ -5573,10 +5579,10 @@ const JEU = {
       reponses: {
         'studio:explorer': {
           ok: true, charge: true, peutModifier: true,
-          total: 4, trouvees: 4, page: 0, taille: 500, pages: 1,
+          total: 34, trouvees: 34, page: 0, taille: 500, pages: 1,
           photos: [
             { id: 'ph_1', code: 'PH-000101', nom: 'Robe noire — face',
-              apercu: 'https://img.sandriza.com/divers/p1.jpg', enAttente: false, isole: true,
+              apercu: IMAGE, enAttente: false, isole: true,
               fond: 'studio', lieId: 'prod_1', lieNom: 'Robe Élégance', lieSku: 'ROB-0001',
               poids: 184320, statut: 'pret', lotId: 'lot_a', lotNom: 'Import du 12 août',
               /* ⚠ CELLE-CI EST ANNULABLE (lot 3e). Sans au moins une photo qui
@@ -5591,11 +5597,11 @@ const JEU = {
                  << Mettre a jour la fiche >> ne seraient dessines nulle part. */
               produitPoussee: true, produitLe: 1755500000000, produitEnRetard: true },
             { id: 'ph_2', code: 'PH-000102', nom: 'Robe noire — dos',
-              apercu: 'https://img.sandriza.com/divers/p2.jpg', enAttente: false, isole: false,
+              apercu: IMAGE, enAttente: false, isole: false,
               fond: '', lieId: 'prod_1', lieNom: 'Robe Élégance', lieSku: 'ROB-0001',
               poids: 2201400, statut: 'pret', lotId: 'lot_a', lotNom: 'Import du 12 août', faits: [] },
             { id: 'ph_3', code: 'PH-000103', nom: 'Manteau beige',
-              apercu: 'https://img.sandriza.com/divers/p3.jpg', enAttente: false, isole: false,
+              apercu: IMAGE, enAttente: false, isole: false,
               fond: '', lieId: null, lieNom: '', lieSku: '', poids: 310000, statut: 'pret',
               /* Celle-ci vient d un RETOUR : son bouton dit << Retablir >>, pas
                  << Annuler >> — deux libelles, deux chemins a eprouver. */
@@ -5605,13 +5611,25 @@ const JEU = {
             { id: 'ph_4', code: 'PH-000104', nom: 'Foulard gris', apercu: '', enAttente: true,
               isole: false, fond: '', lieId: null, lieNom: '', lieSku: '', poids: 0,
               statut: 'televersement', lotId: '', lotNom: '', faits: [] },
-          ],
-          tousLesIds: ['ph_1', 'ph_2', 'ph_3', 'ph_4'],
+            /* ⚠ TRENTE PHOTOS DE PLUS, AVEC UNE VRAIE VIGNETTE (2026-09-30). Quatre
+               lignes a image cassee ne montraient ni la pagination ni la hauteur
+               reelle d une ligne : sa phototheque de 64 photos DEFILAIT (capture),
+               et aucun banc ne pouvait le voir. */
+          ].concat(Array.from({ length: 30 }, function(_, k){
+            return { id: 'ph_x' + k, code: 'PH-0000' + (60 - k), nom: 'IMG_0' + (204 - k) + '.JPG',
+              apercu: IMAGE, enAttente: false, isole: false, fond: '', lieId: null, lieNom: '', lieSku: '',
+              poids: 55000 + k * 3700, statut: 'pret', lotId: '', lotNom: '', faits: [] };
+          })),
+          tousLesIds: ['ph_1', 'ph_2', 'ph_3', 'ph_4'].concat(Array.from({ length: 30 }, function(_, k){ return 'ph_x' + k; })),
           filtres: [
             { cle: 'traitee', nom: 'A déjà reçu un traitement' },
             { cle: 'nonTraitee', nom: 'Jamais traitée' },
             { cle: 'isolee', nom: 'Détourée (fond transparent)' },
+            // Les sept que le site envoie vraiment (photos.js, EXPL_FILTRES).
+            { cle: 'nonIsolee', nom: 'Fond d’origine' },
+            { cle: 'liee', nom: 'Rattachée à un produit' },
             { cle: 'orpheline', nom: 'Aucun produit' },
+            { cle: 'enAttente', nom: 'Téléversement en cours' },
           ],
           traitements: [
             { cle: 'detourage', nom: 'Détourage' },

@@ -112,7 +112,15 @@ button.mini{padding:.12rem .5rem;font-size:.75rem}
 .ligne{display:flex;align-items:center;justify-content:space-between;gap:.7rem;
   padding:.3rem 0;border-bottom:1px solid var(--v06);font-size:.85rem}
 .ligne input{width:6.2rem;text-align:right}
-.photo{max-width:200px;max-height:200px;border-radius:8px;border:1px solid var(--v14)}
+.photo{max-width:200px;max-height:120px;border-radius:8px;border:1px solid var(--v14);cursor:zoom-in}
+/* La case a cocher d une ligne a libelle : sa largeur, pas celle d un champ (la
+   regle generale des champs l etirait au milieu de la ligne, loin de son texte). */
+#r-generer{width:auto;flex:0 0 auto;margin:0}
+/* La photo en grand, au clic (2026-09-30) : la vignette reste petite pour que la
+   fiche tienne dans la fenetre, sans rien perdre de ce que le client a envoye. */
+.agrand{position:fixed;inset:0;z-index:60;background:rgba(6,10,18,.78);display:flex;
+  align-items:center;justify-content:center;cursor:zoom-out;padding:1.2rem}
+.agrand img{max-width:100%;max-height:100%;border-radius:10px;box-shadow:0 12px 40px rgba(0,0,0,.5)}
 .jetons{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.4rem}
 .jetons button{font-size:.72rem;padding:.14rem .5rem}
 
@@ -323,8 +331,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
             + '<div class="rf-mont">' + argent(a.prix * a.quantite) + '</div></div>'; }).join('')
       + '</div>';
 
+    /* ⚠ LES DEUX CARTES A PHOTO VONT A DROITE, SOUS LA DECISION (2026-09-30).
+       Avec une vraie photo de client (souvent en portrait), la colonne de gauche
+       depassait la fenetre de 150 a 340 px pendant que celle de droite restait
+       a moitie vide — la sonde ne le voyait pas, son image temoin n avait qu un
+       pixel. On les compose ici et on les pose apres la decision. */
+    var hPhotos = '';
     // Photo — la demande n est pas actionnable sans elle.
-    h += '<div class="carte"><h2>${T("Photo de l’article")}</h2>'
+    hPhotos += '<div class="carte"><h2>${T("Photo de l’article")}</h2>'
       + (d.photo ? '<img class="photo" src="' + esc(d.photo) + '">'
                  : '<div class="aide">${T("⏳ Le client n’a pas encore téléversé de photo — la demande n’est pas actionnable.")}</div>')
       + '</div>';
@@ -336,7 +350,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     }
 
     if (d.litige) {
-      h += '<div class="carte"><h2>${T("Réponse du client ")}<span class="note">${T("— suite au rejet automatique")}</span></h2>'
+      hPhotos += '<div class="carte"><h2>${T("Réponse du client ")}<span class="note">${T("— suite au rejet automatique")}</span></h2>'
         + (d.litige.message ? '<div style="white-space:pre-wrap;font-size:.87rem">' + esc(d.litige.message) + '</div>'
                             : '<div class="aide">${T("(aucun message écrit)")}</div>')
         + (d.litige.preuve ? '<div style="margin-top:.5rem"><img class="photo" src="' + esc(d.litige.preuve) + '"></div>' : '')
@@ -397,6 +411,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         + '<textarea id="r-notes" rows="3">' + esc(d.notes) + '</textarea></div>';
     }
     h += '</div>';
+    h += hPhotos;
     h += '</div></div>';
     corps.innerHTML = h;
 
@@ -537,6 +552,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (ro) ro.onclick = function(){ litige('reopen'); };
     var rj = document.getElementById('btn-rejeter');
     if (rj) rj.onclick = function(){ litige('confirm'); };
+    // La vignette s agrandit au clic ; un clic n importe ou (ou Echap) la referme.
+    document.querySelectorAll('img.photo').forEach(function(im){
+      im.onclick = function(){
+        var v = document.createElement('div');
+        v.className = 'agrand';
+        v.innerHTML = '<img alt="">';
+        v.firstChild.src = im.src;
+        var fermer = function(){ if (v.parentNode) v.parentNode.removeChild(v); document.removeEventListener('keydown', ech); };
+        var ech = function(e){ if (e.key === 'Escape') fermer(); };
+        v.onclick = fermer;
+        document.addEventListener('keydown', ech);
+        document.body.appendChild(v);
+      };
+    });
   }
 
   function brancherTraitement(){
