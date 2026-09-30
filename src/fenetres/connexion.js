@@ -846,6 +846,9 @@ ${JS_DIRE()}
     if (r.suite === 'questions')  { chargerQuestions(); return; }
     if (r.suite === 'mfaConfig')  { chargerMfaConfig(); return; }
     if (r.suite === 'motdepasse') { chargerMdp(); return; }
+    /* 2026-09-29 : le mot de passe imposé et les questions menaient au panneau
+       SANS le code, pour un compte qui en a un. Le serveur l exige maintenant. */
+    if (r.suite === 'mfa')        { mfaDemarrer(r.secondes || 60); return; }
     reussi(r.prenom);
   }
 
