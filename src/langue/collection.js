@@ -95,5 +95,17 @@ module.exports = {
   'Produits': 'Products',
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
-  'ouverte par': 'open by'
+  'ouverte par': 'open by',
+  'Fiche de la collection': 'Collection sheet',
+  'Aucune image de couverture': 'No cover image',
+  'Sans nom': 'Untitled',
+  'produit': 'product',
+  'produits': 'products',
+  'Boutique': 'Shop',
+  'Dans la collection': 'In the collection',
+  'autre': 'other',
+  'autres': 'others',
+  'Nom de la collection': 'Collection name',
+  'Pour enregistrer': 'To save',
+  'Prête à enregistrer': 'Ready to save',
 };

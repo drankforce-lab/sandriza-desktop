@@ -3486,8 +3486,60 @@ tbody tr{transition:opacity var(--sz-vite) linear,background var(--sz-vite) line
 }
 `;
 
+/* ══ LE VOLET « FICHE » DES ASSISTANTS (2026-09-30, Produit ; partage le
+   2026-10-01 avec Collection et Fournisseur) — un corps #corps en rangee :
+   l etape a gauche, le volet <aside class="pf-fiche" id="pf-fiche"> a droite. */
+const CSS_FICHE = `
+#corps{gap:1rem}
+.pf-fiche{flex:0 0 17.5rem;min-width:0;min-height:0;display:flex;flex-direction:column;gap:.7rem;
+  background:var(--f-carte);border:1px solid var(--v08);border-radius:12px;padding:.85rem;overflow:hidden}
+.pf-fiche .ph{position:relative;aspect-ratio:1/1;max-height:13.5rem;border-radius:10px;overflow:hidden;
+  background:var(--f-pied);display:flex;align-items:center;justify-content:center;color:var(--tx3);
+  font-size:.76rem;text-align:center}
+.pf-fiche .ph img{width:100%;height:100%;object-fit:cover}
+.pf-fiche .ph .ico svg{width:26px;height:26px;opacity:.6}
+.pf-fiche .nm{font-size:1rem;font-weight:800;line-height:1.25;color:var(--tx);word-break:break-word}
+.pf-fiche .nm.sansnom{color:var(--tx3);font-weight:600}
+.pf-fiche .sk{font:600 .72rem/1.2 ui-monospace,Consolas,monospace;color:var(--tx-or);margin-top:.15rem}
+.pf-fiche .px{display:flex;align-items:baseline;gap:.45rem;flex-wrap:wrap}
+.pf-fiche .px .v{font-size:1.15rem;font-weight:800;color:var(--tx)}
+.pf-fiche .px .b{font-size:.8rem;color:var(--tx3);text-decoration:line-through}
+.pf-fiche .px .m{font-size:.72rem;color:var(--tx2);flex:1 1 100%}
+.pf-fiche .l{display:flex;justify-content:space-between;gap:.5rem;font-size:.78rem;align-items:center}
+.pf-fiche .l .k{color:var(--tx2);flex:0 0 auto}
+.pf-fiche .l .v{text-align:right;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pf-fiche .pts{display:inline-flex;gap:.2rem;vertical-align:middle}
+.pf-fiche .pts i{width:.7rem;height:.7rem;border-radius:50%;border:1px solid var(--v25);display:inline-block}
+.pf-fiche .etat{display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;font-weight:700;
+  padding:.1rem .5rem;border-radius:99px}
+.pf-fiche .etat.on{background:rgba(74,222,128,.14);color:var(--tx-ok)}
+.pf-fiche .etat.off{background:var(--v06);color:var(--tx2)}
+html.jour .pf-fiche .etat.on{color:#1f6b3d}
+.pf-fiche .reste{margin-top:auto;border-top:1px solid var(--v08);padding-top:.6rem}
+.pf-fiche .reste .t{font-size:.72rem;font-weight:700;color:var(--tx2);margin-bottom:.35rem}
+.pf-fiche .reste button{display:flex;align-items:center;gap:.45rem;width:100%;text-align:left;
+  background:none;border:0;padding:.18rem .1rem;font:inherit;font-size:.78rem;color:var(--tx);cursor:pointer;border-radius:6px}
+.pf-fiche .reste button:hover{background:var(--v05)}
+.pf-fiche .reste button .o{flex:0 0 auto;width:.95rem;height:.95rem;border-radius:50%;
+  border:1.5px solid var(--tx-att)}
+.pf-fiche .reste .ok{font-size:.78rem;color:var(--tx-ok);font-weight:600}
+@media (max-width:1100px){.pf-fiche{display:none}}
+/* Ajouts pour Collection et Fournisseur (2026-10-01) : un monogramme quand
+   la fiche n a pas de photo par nature, des puces pour une liste courte, et
+   les premieres lignes d une selection. */
+.pf-fiche .ph.mono{aspect-ratio:auto;height:6.5rem;font-size:2rem;font-weight:800;line-height:1;color:var(--tx-or);letter-spacing:.02em}
+.pf-fiche .so{font-size:.76rem;color:var(--tx2);margin-top:.15rem;word-break:break-word}
+.pf-fiche .tags{display:flex;flex-wrap:wrap;gap:.25rem;justify-content:flex-end}
+.pf-fiche .tags span{font-size:.7rem;padding:.05rem .45rem;border-radius:99px;background:var(--v06);color:var(--tx2)}
+.pf-fiche .sel{display:flex;flex-direction:column;gap:.15rem;font-size:.76rem;min-height:0;overflow:hidden}
+.pf-fiche .sel .t{font-size:.72rem;font-weight:700;color:var(--tx2);margin-bottom:.1rem}
+.pf-fiche .sel div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--tx)}
+.pf-fiche .sel .plus{color:var(--tx3)}
+.pf-fiche .sel .tags{justify-content:flex-start;white-space:normal}
+`;
+
 module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE,
   CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE,
-  JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_THEMES, ICO,
+  JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_THEMES, CSS_FICHE, ICO,
   /* La page, pas son texte : voir l en-tete de ce fichier. */
   TETE, LIEU, SEP_DEC };

@@ -31,7 +31,7 @@
  * ⚠ LE COIN DROIT DE L'EN-TÊTE EST RÉSERVÉ AU VERROU, et à rien d'autre.
  */
 
-const { CSS_SOCLE, CSS_JOUR, JS_SOCLE, ICO, TETE, LIEU } = require('./socle');
+const { CSS_SOCLE, CSS_JOUR, CSS_FICHE, JS_SOCLE, ICO, TETE, LIEU } = require('./socle');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -47,46 +47,12 @@ const CSS_PROPRE = `
    tout moment pourquoi « Enregistrer » refuserait.
    ② L ETAPE 1 TIENT ENTIERE : la rangee Etiquette / Fournisseur passait sous le
    pied de la fenetre, sans barre pour l atteindre. */
-#corps{gap:1rem}
-.pf-fiche{flex:0 0 17.5rem;min-width:0;min-height:0;display:flex;flex-direction:column;gap:.7rem;
-  background:var(--f-carte);border:1px solid var(--v08);border-radius:12px;padding:.85rem;overflow:hidden}
-.pf-fiche .ph{position:relative;aspect-ratio:1/1;max-height:13.5rem;border-radius:10px;overflow:hidden;
-  background:var(--f-pied);display:flex;align-items:center;justify-content:center;color:var(--tx3);
-  font-size:.76rem;text-align:center}
-.pf-fiche .ph img{width:100%;height:100%;object-fit:cover}
-.pf-fiche .ph .ico svg{width:26px;height:26px;opacity:.6}
-.pf-fiche .nm{font-size:1rem;font-weight:800;line-height:1.25;color:var(--tx);word-break:break-word}
-.pf-fiche .nm.sansnom{color:var(--tx3);font-weight:600}
-.pf-fiche .sk{font:600 .72rem/1.2 ui-monospace,Consolas,monospace;color:var(--tx-or);margin-top:.15rem}
-.pf-fiche .px{display:flex;align-items:baseline;gap:.45rem;flex-wrap:wrap}
-.pf-fiche .px .v{font-size:1.15rem;font-weight:800;color:var(--tx)}
-.pf-fiche .px .b{font-size:.8rem;color:var(--tx3);text-decoration:line-through}
-.pf-fiche .px .m{font-size:.72rem;color:var(--tx2);flex:1 1 100%}
-.pf-fiche .l{display:flex;justify-content:space-between;gap:.5rem;font-size:.78rem;align-items:center}
-.pf-fiche .l .k{color:var(--tx2);flex:0 0 auto}
-.pf-fiche .l .v{text-align:right;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pf-fiche .pts{display:inline-flex;gap:.2rem;vertical-align:middle}
-.pf-fiche .pts i{width:.7rem;height:.7rem;border-radius:50%;border:1px solid var(--v25);display:inline-block}
-.pf-fiche .etat{display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;font-weight:700;
-  padding:.1rem .5rem;border-radius:99px}
-.pf-fiche .etat.on{background:rgba(74,222,128,.14);color:var(--tx-ok)}
-.pf-fiche .etat.off{background:var(--v06);color:var(--tx2)}
-html.jour .pf-fiche .etat.on{color:#1f6b3d}
-.pf-fiche .reste{margin-top:auto;border-top:1px solid var(--v08);padding-top:.6rem}
-.pf-fiche .reste .t{font-size:.72rem;font-weight:700;color:var(--tx2);margin-bottom:.35rem}
-.pf-fiche .reste button{display:flex;align-items:center;gap:.45rem;width:100%;text-align:left;
-  background:none;border:0;padding:.18rem .1rem;font:inherit;font-size:.78rem;color:var(--tx);cursor:pointer;border-radius:6px}
-.pf-fiche .reste button:hover{background:var(--v05)}
-.pf-fiche .reste button .o{flex:0 0 auto;width:.95rem;height:.95rem;border-radius:50%;
-  border:1.5px solid var(--tx-att)}
-.pf-fiche .reste .ok{font-size:.78rem;color:var(--tx-ok);font-weight:600}
 /* L etape 1 : Identification en quatre colonnes, Classement en trois. */
 .pf-id{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.6rem .75rem}
 .pf-id .l2{grid-column:span 2}
 .pf-id .l4{grid-column:1 / -1}
 .pf-cl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem .75rem}
 .cote.pf-bas{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}
-@media (max-width:1100px){.pf-fiche{display:none}}
 /* Les tailles : de vraies touches, pas des pastilles de 1,75 rem. */
 #p-tailles .jeton{height:2.4rem;min-width:3.1rem;justify-content:center;font-weight:700;border-radius:10px;font-size:.88rem}
 #p-tailles .jeton.on{background:#c9a97e;border-color:#c9a97e;color:#1a1208}
@@ -243,7 +209,7 @@ html.jour .lgstk.enstock .c1,html.jour .lgstk.enstock .c2{color:#166534}
   background:rgba(8,12,18,.6);padding:1.2rem}
 .voile .boite{width:100%;max-width:460px;background:var(--f-carte);border:1px solid var(--v10);
   border-radius:12px;padding:1rem 1.1rem;box-shadow:0 24px 64px rgba(0,0,0,.5)}
-.voile h3{margin:0 0 .5rem;font:700 1rem/1.3 inherit;color:var(--tx-err2)}
+.voile h3{margin:0 0 .5rem;font-size:1rem;font-weight:700;line-height:1.3;color:var(--tx-err2)}
 .voile p{margin:0 0 .7rem;font-size:.86rem;line-height:1.5;color:var(--tx-bleute)}
 .voile .pied2{display:flex;justify-content:flex-end;gap:.45rem;margin-top:.8rem}
 .cote{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;align-items:start}
@@ -308,7 +274,7 @@ function pageProduit(id) {
   const ident = JSON.stringify(String(id || ''));
   return `${TETE()}
 <title>${T("Produit — Administration Sandriza")}</title>
-<style>${CSS_SOCLE}${CSS_PROPRE}${CSS_JOUR}</style></head><body>
+<style>${CSS_SOCLE}${CSS_FICHE}${CSS_PROPRE}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.products}</span><h1 id="titre">${T("Produit")}</h1>
   <span class="outils">
     <button type="button" id="btn-jrn" title="${T("Modifications de cette fiche")}" style="display:none"><span class="ic">🕘</span> <span class="n" id="jrn-n">0</span></button>

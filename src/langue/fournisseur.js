@@ -56,4 +56,11 @@ module.exports = {
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
   'ouverte par': 'open by',
+  'Fiche du fournisseur': 'Supplier sheet',
+  'Sans nom': 'Untitled',
+  'Courriel': 'Email',
+  'Ville': 'City',
+  'Délai': 'Lead time',
+  'Pour enregistrer': 'To save',
+  'Prêt à enregistrer': 'Ready to save',
 };

@@ -17,7 +17,7 @@
  * est-ce que quelqu'un d'autre tient cette fiche.
  */
 
-const { CSS_SOCLE, CSS_JOUR, JS_SOCLE, JS_BROUILLON, ICO, TETE } = require('./socle');
+const { CSS_SOCLE, CSS_JOUR, CSS_FICHE, JS_SOCLE, JS_BROUILLON, ICO, TETE } = require('./socle');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -28,7 +28,7 @@ function pageFournisseur(id) {
   const ident = JSON.stringify(String(id || ''));
   return `${TETE()}
 <title>${T("Fournisseur — Administration Sandriza")}</title>
-<style>${CSS_SOCLE}${CSS_JOUR}</style></head><body>
+<style>${CSS_SOCLE}${CSS_FICHE}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.suppliers}</span><h1 id="titre">${T("Fournisseur")}</h1>
   <span class="sous" id="sous"></span></div>
 <div class="pas" id="pas"></div>
@@ -106,7 +106,11 @@ function pageFournisseur(id) {
       + ch('f-notes', '${T("Notes internes")}', { multi: true, large: true, rows: 3 })
       + '</div></div></div>');
 
-    document.getElementById('corps').innerHTML = h.join('');
+    document.getElementById('corps').innerHTML = h.join('')
+      + '<aside class="pf-fiche" id="pf-fiche" aria-label="${T("Fiche du fournisseur")}"></aside>';
+    var corpsEl = document.getElementById('corps');
+    corpsEl.addEventListener('input', majFicheBientot);
+    corpsEl.addEventListener('change', majFicheBientot);
 
     if (fiche) {
       poser('f-nom', fiche.name); poser('f-contact', fiche.contactName);
@@ -130,9 +134,57 @@ function pageFournisseur(id) {
       { t: '${T("Adresse")}',        obl: [] },
       { t: '${T("Approvisionnement")}', obl: [] }
     ]);
+    majFiche();
 
     bEnr.disabled = !(ID ? CTX.peutModifier : CTX.peutAjouter);
     if (bEnr.disabled) dire('${T("Consultation seulement — votre rôle ne permet pas d’enregistrer.")}', 'att');
+  }
+
+  /* ══ LE VOLET « FICHE » (2026-10-01, le meme que celui du Produit) ══════
+     ⚠ IL NE DECIDE RIEN : il relit les champs, comme enregistrer(). « Pour
+     enregistrer » reprend son seul garde (le nom, exige aussi par le pont).
+     Un fournisseur n a pas de photo : son monogramme en tient lieu. */
+  var FICHE_T = null;
+  function majFicheBientot(){ clearTimeout(FICHE_T); FICHE_T = setTimeout(majFiche, 60); }
+  function initiales(n){
+    var m = String(n || '').trim().split(/[\\s'’-]+/).filter(Boolean);
+    return ((m[0] || '').charAt(0) + (m.length > 1 ? m[m.length - 1].charAt(0) : (m[0] || '').charAt(1))).toUpperCase();
+  }
+  function majFiche(){
+    var z = document.getElementById('pf-fiche');
+    if (!z || !CTX) return;
+    var nom = String(val('f-nom') || '').trim();
+    var contact = String(val('f-contact') || '').trim();
+    var ville = [String(val('f-ville') || '').trim(), val('f-prov')].filter(Boolean).join(', ');
+    var libs = {}; (CTX.categories || []).forEach(function(c){ libs[c.cle] = c.libelle; });
+    var cats = Array.prototype.filter.call(document.querySelectorAll('.f-cat'), function(c){ return c.checked; })
+      .map(function(c){ return libs[c.value] || c.value; });
+    var actif = val('f-actif') !== '0';
+    var h = '<div class="ph mono">' + (nom ? esc(initiales(nom)) : '<span class="ico">${ICO.suppliers}</span>') + '</div>';
+    h += '<div><div class="nm' + (nom ? '' : ' sansnom') + '">' + esc(nom || '${T("Sans nom")}') + '</div>'
+      + (contact ? '<div class="so">' + esc(contact) + '</div>' : '') + '</div>';
+    var ligne = function(k, v){ return '<div class="l"><span class="k">' + k + '</span><span class="v" title="' + v + '">' + v + '</span></div>'; };
+    var champ = function(id){ var v = String(val(id) || '').trim(); return v ? esc(v) : '—'; };
+    h += ligne('${T("Courriel")}', champ('f-courriel'));
+    h += ligne('${T("Téléphone")}', champ('f-tel'));
+    h += ligne('${T("Ville")}', ville ? esc(ville) : '—');
+    h += ligne('${T("Délai")}', champ('f-delai'));
+    h += '<div class="l"><span class="k">${T("Statut")}</span><span class="v"><span class="etat '
+      + (actif ? 'on">${T("Actif")}' : 'off">${T("Inactif")}') + '</span></span></div>';
+    if (cats.length) {
+      h += '<div class="sel"><div class="t">${T("Catégories fournies")}</div><div class="tags">'
+        + cats.map(function(c){ return '<span>' + esc(c) + '</span>'; }).join('') + '</div></div>';
+    }
+    var manque = [];
+    if (!nom) manque.push([0, '${T("Nom du fournisseur")}']);
+    h += '<div class="reste">' + (manque.length
+      ? '<div class="t">${T("Pour enregistrer")}</div>' + manque.map(function(m){
+          return '<button type="button" data-pfaller="' + m[0] + '"><span class="o"></span>' + m[1] + '</button>'; }).join('')
+      : '<div class="ok"><span class="ic">✓</span> ${T("Prêt à enregistrer")}</div>') + '</div>';
+    z.innerHTML = h;
+    z.querySelectorAll('[data-pfaller]').forEach(function(b){
+      b.onclick = function(){ Assist.aller(parseInt(b.getAttribute('data-pfaller'), 10) || 0); };
+    });
   }
 
   // ⚠ LE VERROU EST PRIS A L OUVERTURE, pas seulement a l enregistrement.
@@ -209,6 +261,7 @@ function pageFournisseur(id) {
       Array.prototype.forEach.call(document.querySelectorAll('.f-cat'), function(c){
         c.checked = cats.indexOf(c.value) >= 0;
       });
+      majFicheBientot();
     },
   });
   szBrouillonEcouter();

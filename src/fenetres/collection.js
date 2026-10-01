@@ -20,7 +20,7 @@
  * ⚠ LE COIN DROIT DE L'EN-TÊTE EST RÉSERVÉ AU VERROU.
  */
 
-const { CSS_SOCLE, CSS_JOUR, JS_SOCLE, JS_BROUILLON, ICO, TETE } = require('./socle');
+const { CSS_SOCLE, CSS_JOUR, CSS_FICHE, JS_SOCLE, JS_BROUILLON, ICO, TETE } = require('./socle');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais le nom, la description ni
@@ -41,7 +41,7 @@ function pageCollection(id) {
   const ident = JSON.stringify(String(id || ''));
   return `${TETE()}
 <title>${T("Collection — Administration Sandriza")}</title>
-<style>${CSS_SOCLE}${CSS_PROPRE}${CSS_JOUR}</style></head><body>
+<style>${CSS_SOCLE}${CSS_FICHE}${CSS_PROPRE}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.collections}</span><h1 id="titre">${T("Collection")}</h1>
   <span class="sous" id="sous"></span></div>
 <div class="pas" id="pas"></div>
@@ -109,7 +109,13 @@ function pageCollection(id) {
       + '<div class="rech"><input aria-label="${T("Filtrer par nom")}" placeholder="${T("Filtrer par nom…")}"><span class="cpt" id="c-cpt"></span></div>'
       + '<div class="liste"></div><div class="pagi"></div></div></div>');
 
-    document.getElementById('corps').innerHTML = h.join('');
+    document.getElementById('corps').innerHTML = h.join('')
+      + '<aside class="pf-fiche" id="pf-fiche" aria-label="${T("Fiche de la collection")}"></aside>';
+    // Le volet suit chaque saisie ; l image et le choix des produits, qui ne
+    // passent pas tous par un champ, le rappellent eux-memes.
+    var corpsEl = document.getElementById('corps');
+    corpsEl.addEventListener('input', majFicheBientot);
+    corpsEl.addEventListener('change', majFicheBientot);
 
     if (fiche) {
       poser('c-nom', fiche.name); poser('c-desc', fiche.description);
@@ -155,6 +161,7 @@ function pageCollection(id) {
       var c = ev.target.closest('.c-prod'); if (!c) return;
       CHOISIS[c.value] = c.checked;
       PAGI.surMaj();
+      majFicheBientot();
     });
 
     Assist.poser([
@@ -162,9 +169,54 @@ function pageCollection(id) {
       { t: 'Image',         obl: [] },
       { t: '${T("Produits")}',      obl: [] }
     ], function(i){ if (i === 2 && PAGI) PAGI.dessiner(); });
+    majFiche();
 
     bEnr.disabled = !(ID ? CTX.peutModifier : CTX.peutAjouter);
     if (bEnr.disabled) dire('${T("Consultation seulement — votre rôle ne permet pas d’enregistrer.")}', 'att');
+  }
+
+  /* ══ LE VOLET « FICHE » (2026-10-01, le meme que celui du Produit) ══════
+     ⚠ IL NE DECIDE RIEN : il relit les champs, IMAGE et CHOISIS — les memes
+     sources que enregistrer(). « Pour enregistrer » reprend son seul garde
+     (le nom, exige aussi par le pont) ; un clic mene a l etape. */
+  var FICHE_T = null;
+  function majFicheBientot(){ clearTimeout(FICHE_T); FICHE_T = setTimeout(majFiche, 60); }
+  function majFiche(){
+    var z = document.getElementById('pf-fiche');
+    if (!z || !CTX) return;
+    var nom = String(val('c-nom') || '').trim();
+    var quand = [val('c-saison'), val('c-annee')].filter(Boolean).join(' ');
+    var ids = Object.keys(CHOISIS).filter(function(k){ return CHOISIS[k]; });
+    var parId = {}; (CTX.produits || []).forEach(function(p){ parId[p.id] = p; });
+    var actif = val('c-actif') !== '0';
+    var h = '<div class="ph">' + (IMAGE ? '<img src="' + esc(IMAGE) + '" alt="">'
+          : '<span><span class="ico">${ICO.image}</span><br>${T("Aucune image de couverture")}</span>') + '</div>';
+    h += '<div><div class="nm' + (nom ? '' : ' sansnom') + '">' + esc(nom || '${T("Sans nom")}') + '</div>'
+      + (quand ? '<div class="so">' + esc(quand) + '</div>' : '') + '</div>';
+    var ligne = function(k, v){ return '<div class="l"><span class="k">' + k + '</span><span class="v">' + v + '</span></div>'; };
+    h += ligne('${T("Produits")}', ids.length ? esc(szNombre(ids.length) + ' ' + szPl(ids.length, '${T("produit")}', '${T("produits")}')) : '—');
+    h += ligne('${T("Boutique")}', '<span class="etat ' + (actif ? 'on">${T("Active")}' : 'off">${T("Inactive")}') + '</span>');
+    // Les premiers produits choisis, dans l ordre du catalogue : on voit la
+    // collection prendre forme sans retourner a l etape 3.
+    var noms = (CTX.produits || []).filter(function(p){ return CHOISIS[p.id]; }).map(function(p){ return p.nom; });
+    var hors = ids.filter(function(k){ return !parId[k]; }).length;
+    if (noms.length || hors) {
+      var MAXL = 6, vus = noms.slice(0, MAXL), reste = noms.length - vus.length + hors;
+      h += '<div class="sel"><div class="t">${T("Dans la collection")}</div>'
+        + vus.map(function(n){ return '<div>' + esc(n) + '</div>'; }).join('')
+        + (reste > 0 ? '<div class="plus">+ ' + esc(szNombre(reste) + ' ' + szPl(reste, '${T("autre")}', '${T("autres")}')) + '</div>' : '')
+        + '</div>';
+    }
+    var manque = [];
+    if (!nom) manque.push([0, '${T("Nom de la collection")}']);
+    h += '<div class="reste">' + (manque.length
+      ? '<div class="t">${T("Pour enregistrer")}</div>' + manque.map(function(m){
+          return '<button type="button" data-pfaller="' + m[0] + '"><span class="o"></span>' + m[1] + '</button>'; }).join('')
+      : '<div class="ok"><span class="ic">✓</span> ${T("Prête à enregistrer")}</div>') + '</div>';
+    z.innerHTML = h;
+    z.querySelectorAll('[data-pfaller]').forEach(function(b){
+      b.onclick = function(){ Assist.aller(parseInt(b.getAttribute('data-pfaller'), 10) || 0); };
+    });
   }
 
   // Le bouton n a de sens qu avec une image : le service la regarde. On le DIT
@@ -191,6 +243,7 @@ function pageCollection(id) {
   function montrerImage(src){
     var v = document.getElementById('c-vign'); if (!v) return;
     v.innerHTML = src ? '<img src="' + esc(src) + '" alt="">' : '${T("aucune image")}';
+    majFicheBientot();
   }
 
   // ⚠ UNE BORNE SUR LA TAILLE, ET ELLE EST DITE. Sans elle, une photo d appareil
@@ -283,6 +336,7 @@ function pageCollection(id) {
          rappeler les poserait une seconde fois — un clic compterait double. C est
          dessiner qui repeint les lignes, donc les cases cochees. */
       if (PAGI && PAGI.dessiner) PAGI.dessiner();
+      majFicheBientot();
     },
   });
   szBrouillonEcouter();
