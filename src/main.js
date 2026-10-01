@@ -3057,6 +3057,31 @@ ipcMain.handle('fenetre:explorateur', () => {
   return true;
 });
 
+/* LA PHOTO EN GRAND (2026-10-01, sa demande : « en plus grand mais dans une
+   fenetre separee »). UNE seule visionneuse : un second double-clic la ramene
+   devant sur l autre photo (szVoir) au lieu d en empiler une deuxieme. La page
+   est refaite depuis VISION, pour qu un changement de langue la redessine sur
+   la photo affichee et non sur la premiere. */
+let VISION = { id: '', liste: [] };
+ipcMain.handle('fenetre:visionneuse', (e, id, liste) => {
+  const sid = String(id || '').slice(0, 80);
+  if (!sid) return false;
+  const l = (Array.isArray(liste) ? liste : []).slice(0, 200).map((p) => ({
+    id: String((p && p.id) || '').slice(0, 80), nom: String((p && p.nom) || '').slice(0, 200),
+    code: String((p && p.code) || '').slice(0, 40) })).filter((p) => p.id);
+  VISION = { id: sid, liste: l };
+  const deja = fenetresNatives.get('visionneuse');
+  if (deja && !deja.isDestroyed()) {
+    if (deja.isMinimized()) deja.restore();
+    deja.focus();
+    deja.webContents.executeJavaScript('window.szVoir && window.szVoir(' + JSON.stringify(VISION) + ')', true).catch(() => {});
+    return true;
+  }
+  ouvrirNative('visionneuse', TF('Photo en grand'), () => pageVisionneuse(VISION.id, VISION.liste),
+    { width: 1100, height: 820, minWidth: 560, minHeight: 420 });
+  return true;
+});
+
 ipcMain.handle('fenetre:client', (e, id) => {
   const cle = 'client-' + String(id || '').replace(/[^\w-]/g, '');
   const _avant = fenetresNatives.get(cle);
@@ -5803,6 +5828,7 @@ const { pagePaiementsConfig } = require('./fenetres/paiements-config');
 const { pageClesConfig } = require('./fenetres/cles');
 const { pageStudio } = require('./fenetres/studio');
 const { pageExplorateur } = require('./fenetres/explorateur');
+const { pageVisionneuse } = require('./fenetres/visionneuse');
 const { pageLivraison } = require('./fenetres/livraison');
 const { pageConfigRetours } = require('./fenetres/config-retours');
 const { pageConfigNavigation } = require('./fenetres/config-navigation');

@@ -182,6 +182,11 @@ contextBridge.exposeInMainWorld('szPont', {
     String(label || ''), Math.round(x) || 0, Math.round(y) || 0, 'bas'),
   menuPanneauFermer: () => ipcRenderer.send('menu:panneau:fermer'),
   fermer: () => ipcRenderer.send('pont:fermer'),
+  /* LA PHOTO EN GRAND, DANS SA PROPRE FENETRE (2026-10-01, sa demande). Un canal
+     etroit : un identifiant et la liste de la page (id, nom, code) — jamais
+     l image elle-meme, que la fenetre demande seule par studio:vignettes. */
+  ouvrirVisionneuse: (id, liste) => ipcRenderer.invoke('fenetre:visionneuse', String(id || ''),
+    Array.isArray(liste) ? liste.slice(0, 200) : []).catch(() => false),
   /* ⚠ << J'AI UNE SAISIE EN COURS >>. Le bouton de fermeture DESSINÉ dans la page
      passe par `fermer` ci-dessus, donc la page peut demander avant de partir.
      Mais le bouton X du CADRE DE WINDOWS, lui, ne traverse pas la page : le

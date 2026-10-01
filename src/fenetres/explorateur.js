@@ -96,6 +96,16 @@ th.ck,td.ck{width:1.9rem;max-width:1.9rem;padding:.12rem .2rem;text-align:center
   font-size:.72rem;line-height:1;color:#17202c}
 .coche:hover{border-color:#c9a97e}
 .coche.on{background:#c9a97e;border-color:#c9a97e;font-weight:700}
+/* ⚠ LA COLONNE DES CASES (2026-10-01, sa capture : « les cases a cocher, regarde,
+   ca s empile »). La regle th:first-child du socle (padding-left .9rem, posee
+   APRES celle-ci) mangeait les 1,9 rem de la colonne : la case se serrait
+   contre la vignette, et l en-tete — rembourre .3rem en haut, .1rem en bas —
+   la remontait au-dessus de « Nom ». Une largeur vraie et le meme rembourrage
+   partout, en specificite superieure. */
+.liste thead th{padding-top:.3rem;padding-bottom:.3rem;vertical-align:middle}
+.liste th.ck,.liste td.ck{width:2.7rem;min-width:2.7rem;max-width:2.7rem;
+  padding-left:.85rem;padding-right:.35rem;text-align:left}
+.liste td.vg{padding-left:.2rem}
 .coche.flot{position:absolute;top:.25rem;left:.25rem;z-index:2;
   background:rgba(8,12,20,.72);color:var(--tx)}
 .coche.flot.on{background:#c9a97e;color:#17202c}
@@ -539,7 +549,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<b>${T("Cliquez une photo pour la voir ici.")}</b>'
         + '<ul><li>${T("Un clic coche la photo, un autre la décoche.")}</li>'
         + '<li><kbd>Maj</kbd> + ${T("clic : toute la plage depuis la dernière.")}</li>'
-        + '<li>${T("Double-clic : la photo en grand.")}</li></ul></div>';
+        + '<li>${T("Double-clic : la photo en grand, dans sa propre fenêtre.")}</li></ul></div>';
       return;
     }
     var faits = (p.faits || []).map(function(f){
@@ -603,7 +613,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       ANCRE = i;
     }
     COURANT = id;
-    dessiner();
+    majSelection();
+  }
+
+  /* ⚠⚠ UN CLIC NE REDESSINE PLUS LA LISTE (2026-10-01). Il la reconstruisait
+     entiere : la ligne sous la souris etait REMPLACEE entre les deux clics d un
+     double-clic, le second clic tombait sur une ligne neuve (et decochait), et
+     l evenement dblclick ne retrouvait plus celle d origine — « si on double
+     clique sur une photo on devrait l avoir en plus grand… ce n est pas le cas ».
+     On ne touche plus qu aux classes et aux cases ; le volet et le pied suivent. */
+  function majSelection(){
+    zone.querySelectorAll('[data-id]').forEach(function(el){
+      var id = el.getAttribute('data-id');
+      el.classList.toggle('pris', !!SEL[id]);
+      el.classList.toggle('actif', COURANT === id);
+      var c = el.querySelector('[data-ck]');
+      if (c) { c.classList.toggle('on', !!SEL[id]); c.textContent = SEL[id] ? '✓' : ''; }
+    });
+    var ckp = document.getElementById('ck-page');
+    if (ckp) {
+      var tout = pageToutePrise(pageCourante());
+      ckp.classList.toggle('on', tout); ckp.textContent = tout ? '✓' : '';
+    }
+    dessinerApercu();
+    dessinerPied();
   }
 
   function brancherZone(){
@@ -615,7 +648,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         ev.stopPropagation();
         var id = el.getAttribute('data-ck');
         if (SEL[id]) delete SEL[id]; else SEL[id] = true;
-        dessiner();
+        majSelection();
       };
     });
     var ckp = document.getElementById('ck-page');
@@ -624,7 +657,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var pc = pageCourante();
       var tout = pageToutePrise(pc);
       pc.vue.forEach(function(p){ if (tout) delete SEL[p.id]; else SEL[p.id] = true; });
-      dessiner();
+      majSelection();
     };
     zone.querySelectorAll('[data-i]').forEach(function(el){
       el.onclick = function(ev){
@@ -640,8 +673,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     zone.querySelectorAll('[data-i]').forEach(function(el){
       el.ondblclick = function(ev){
         ev.preventDefault();
-        ouvrirGrand(el.getAttribute('data-id'));
+        var id = el.getAttribute('data-id');
+        /* Le double-clic a coche puis decoche : il ne doit rien changer a la
+           selection, seulement ouvrir. On remet la case comme avant le geste. */
+        if (DBL_AVANT && DBL_AVANT.id === id) {
+          if (DBL_AVANT.pris) SEL[id] = true; else delete SEL[id];
+          majSelection();
+        }
+        DBL_AVANT = null;
+        /* DANS SA PROPRE FENETRE (2026-10-01, sa demande). Les photos de la page
+           l accompagnent : les fleches de la visionneuse passent de l une a
+           l autre sans revenir ici. Le voile reste le repli d une coquille qui
+           ne connaitrait pas ce canal. */
+        if (P && typeof P.ouvrirVisionneuse === 'function') {
+          var liste = pageCourante().vue.map(function(p){ return { id: p.id, nom: p.nom || '', code: p.code || '' }; });
+          P.ouvrirVisionneuse(id, liste);
+        } else ouvrirGrand(id);
       };
+      // L etat de la case AVANT le premier clic du double-clic.
+      el.addEventListener('mousedown', function(ev){
+        if (ev.detail === 1) { var id = el.getAttribute('data-id'); DBL_AVANT = { id: id, pris: !!SEL[id] }; }
+      });
     });
     var pp = document.getElementById('p-prec');
     if (pp) pp.onclick = function(){ PAGE = Math.max(0, PAGE - 1); dessiner(); };
@@ -658,6 +710,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      peut peser plusieurs megaoctets, on ne la rapatrie donc jamais pour garnir
      une grille. */
   var VIS_ID = '', VIS_Z = 1, VIS_X = 0, VIS_Y = 0;
+  var DBL_AVANT = null;
 
   function visImg(){ var v = document.getElementById('vis-img'); return v; }
   function visAppliquer(){

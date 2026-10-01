@@ -53,6 +53,7 @@ module.exports = {
   /* ── LES OUTILS ─────────────────────────────────────────────────────────── */
   'Editeur visuel': 'Visual editor',
   'Explorateur de photos': 'Photo explorer',
+  'Photo en grand': 'Photo, full size',
   'Affichage client': 'Customer display',
   'Notes des mises à jour': 'Release notes',
 

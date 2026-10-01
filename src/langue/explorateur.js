@@ -54,7 +54,7 @@ module.exports = {
   'Retirer les filtres': 'Clear filters',
   'Un clic coche la photo, un autre la décoche.': 'One click ticks the photo, another unticks it.',
   'clic : toute la plage depuis la dernière.': 'click: the whole range since the last one.',
-  'Double-clic : la photo en grand.': 'Double-click: the photo full size.',
+  'Double-clic : la photo en grand, dans sa propre fenêtre.': 'Double-click: the photo full size, in its own window.',
 
   /* ── LES MOTIFS DE REFUS ────────────────────────────────────────────────── */
   'Aucune session ouverte dans l’application.': 'No session open in the application.',

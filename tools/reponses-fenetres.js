@@ -5589,6 +5589,23 @@ const JEU = {
      traitée et liée, une vierge, une détourée, une en téléversement — sinon ni
      les pastilles, ni les colonnes, ni le volet d'aperçu ne seraient dessinés
      sur autre chose que du vide. */
+  /* LA PHOTO EN GRAND (2026-10-01). Une IMAGE de vraie taille (1200 × 1600) :
+     c est elle qui dit si l ajustement a la fenetre tient, et une image d un
+     pixel aurait laisse croire que tout tenait. */
+  'visionneuse.js': [
+    {
+      nom: 'photo ajustee a la fenetre',
+      id: 'ph_1',
+      exige: ['Photo'],
+      reponses: { 'studio:vignettes': { ok: true, vignettes: { ph_1: IMAGE } } },
+    },
+    {
+      nom: 'photo illisible',
+      id: 'ph_x',
+      exige: ['pas pu être lue'],
+      reponses: { 'studio:vignettes': { ok: true, vignettes: {} } },
+    },
+  ],
   'explorateur.js': [
     {
       nom: 'liste garnie',
