@@ -223,6 +223,7 @@ button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
 .pagi{flex:0 0 auto;display:flex;align-items:center;gap:.5rem;padding-top:.5rem;
   margin-top:.35rem;border-top:1px solid var(--v08);font-size:.78rem;color:var(--tx2)}
 .pagi button{padding:.2rem .55rem;font-size:.78rem}
+.pagi button.pgf{min-width:2rem;padding:.15rem .5rem;font-size:1rem;line-height:1.1}
 .pagi .pos{margin-left:auto}
 
 .rech{display:flex;gap:.5rem;align-items:center;margin-bottom:.5rem;flex:0 0 auto}
@@ -1849,10 +1850,17 @@ Pagi.prototype.dessiner = function(){
     : '<div class="aide" style="padding:.4rem .3rem">${T("Aucun résultat.")}</div>';
   var p = this.zone.querySelector('.pagi');
   if (p) {
-    p.innerHTML = '<button type="button" data-pg="-1"' + (this.page === 0 ? ' disabled' : '') + '>${T("Précédent")}</button>'
-      + '<button type="button" data-pg="1"' + (this.page >= nb - 1 ? ' disabled' : '') + '>${T("Suivant")}</button>'
+    /* ⚠ DES FLECHES, PAS « PRECEDENT / SUIVANT » (2026-10-01). Cette liste ne vit
+       que dans les assistants, dont le pied porte deja Precedent / Suivant pour
+       les ETAPES : deux paires des memes mots, l une qui change de page et
+       l autre d etape, se confondaient. Le nom complet reste dans le titre. */
+    /* Une seule page : pas de fleches grisees qui ne menent nulle part. */
+    p.innerHTML = (nb > 1
+      ? '<button type="button" class="pgf" data-pg="-1" title="${T("Page précédente")}" aria-label="${T("Page précédente")}"' + (this.page === 0 ? ' disabled' : '') + '>‹</button>'
+      + '<button type="button" class="pgf" data-pg="1" title="${T("Page suivante")}" aria-label="${T("Page suivante")}"' + (this.page >= nb - 1 ? ' disabled' : '') + '>›</button>'
+      : '')
       + '<span class="pos">' + (f.length ? (deb + 1) + '–' + Math.min(deb + pp, f.length) : 0)
-      + ' sur ' + f.length + (nb > 1 ? '  ·  page ' + (this.page + 1) + ' / ' + nb : '') + '</span>';
+      + ' ${T("sur")} ' + f.length + (nb > 1 ? '  ·  ${T("page")} ' + (this.page + 1) + ' / ' + nb : '') + '</span>';
   }
   if (this.surMaj) this.surMaj();
 };

@@ -291,4 +291,8 @@ module.exports = {
   'enregistré :': 'saved:',
   '— dans': '— in',
   'Votre dossier ne répondait pas.': 'Your folder was not responding.',
+  "Page précédente": "Previous page",
+  "Page suivante": "Next page",
+  "sur": "of",
+  "page": "page",
 };
