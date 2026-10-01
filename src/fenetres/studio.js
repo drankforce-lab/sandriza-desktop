@@ -134,7 +134,12 @@ body{background:var(--f-page);color:var(--tx);
 .ong{display:flex;align-items:center;gap:.5rem;width:100%;text-align:left;
   padding:.5rem .6rem;border-radius:9px;border:1px solid transparent;
   background:transparent;color:var(--tx-bleute);cursor:pointer;position:relative}
-.ong:hover:not(.on):not(:disabled){background:var(--v05)}
+/* ⚠⚠ LE RAIL N EST PLUS CLIQUABLE (2026-10-01, sa demande : « comme tu mets un
+   suivant et precedent, desactive les clics sur cette section »). Il dit ou l on
+   en est — etape ouverte, coches, « ignore » —, et l on avance par le pied
+   Precedent / Suivant, qui est le geste qui valide. Des blocs, plus des boutons :
+   pas de curseur de clic, pas de survol, pas de focus qui promettrait un geste. */
+.onglets .ong{cursor:default;-webkit-user-select:none;user-select:none}
 /* ⚠ L ONGLET FERME TANT QU IL N Y A PAS DE PHOTO (2026-09-09, sa demande).
    ⚠ LE CURSEUR INTERDIT ET PAS SEULEMENT L OPACITE : c est le curseur qui dit
    << ce n est pas encore le moment >> avant meme le clic. L opacite seule se lit
@@ -142,7 +147,11 @@ body{background:var(--f-page);color:var(--tx);
    ⚠ 55 % et non 40 % : on doit encore POUVOIR LIRE les noms des etapes. Un rail
    illisible ne dit plus ce qui attend, et c est justement ce qu on regarde en
    arrivant sur cet ecran. */
-.ong:disabled{opacity:.55;cursor:not-allowed}
+/* Une etape pas encore ouverte (aucune photo) : en couleur secondaire, et non
+   a 55 % d opacite — un bloc n est pas un controle inactif, il doit se LIRE
+   (le banc des contrastes le mesure comme du texte, 2026-10-01). */
+.ong.ferme .ot b,.ong.ferme .oe{color:var(--tx2)}
+.ong.ferme .oe.ign{color:var(--tx2)}
 /* L'onglet ouvert : une teinte et un filet d'or à gauche — plus la pastille
    pleine du socle (button.on), qui criait plus fort que le bouton « Générer ». */
 .onglets .ong.on{background:rgba(201,169,126,.12);border-color:transparent;color:var(--tx-creme)}
@@ -732,6 +741,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
      donc studio:filigraner, qui partage son code avec le moteur de lots. */
   var LOGOS = [];        // [{id,nom,image}] — les logos EN PIXELS (studio:logos)
   var FIL = { logoId: '', position: 'bd', taille: 20, opacite: 0.8, marge: 3 };
+  /* ⚠⚠ LE FILIGRANE POSE SUIT LES RENDUS (2026-10-01, sa capture : « le
+     filigrane du logo n apparait plus sur l apercu une fois genere »). Un rendu
+     REMPLACE le resultat : la marque posee sur la photo disparaissait avec elle.
+     Ce drapeau retient le GESTE (« Appliquer ») ; chaque nouveau rendu la repose,
+     depuis l image nue. « Retirer » et « Recommencer » le levent. */
+  var FIL_POSE = false;
   /* Les valeurs de depart, mises de cote AVANT que quoi que ce soit y touche.
      ⚠ Elles servent a APPLIQUER une recette : voir fusionner(). Une recette
      ecrite avant l ajout d un reglage doit remettre ce reglage a son defaut, pas
@@ -1780,6 +1795,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       if (!RESULT.brut) RESULT.brut = RESULT.image;
       RESULT.image = r.image;
       RESULT.filigrane = true;
+      FIL_POSE = true;
       /* Les formats avaient été tirés de l image NUE : les garder ferait
          enregistrer quatre cadrages SANS la marque, sous le même nom. */
       FORMATS = [];
@@ -1795,6 +1811,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     RESULT.image = RESULT.brut;
     RESULT.brut = '';
     RESULT.filigrane = false;
+    FIL_POSE = false;
     FORMATS = [];
     ENREG = false;
     peindreResultat();
@@ -1947,9 +1964,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       /* ⚠ LE TITRE DIT POURQUOI. Un bouton grise sans explication se clique deux
          fois, puis on cherche la panne ailleurs — c est la regle appliquee le
          meme jour aux boutons verrouilles de la sauvegarde. */
-      return '<button class="ong' + (o.cle === courant ? ' on' : '') + '" data-ong="' + o.cle
-        + '"' + (bloque ? ' disabled title="${T("Choisissez d’abord une photo")}"' : '')
-        + ' role="tab" aria-selected="' + (o.cle === courant ? 'true' : 'false') + '">'
+      return '<div class="ong' + (o.cle === courant ? ' on' : '') + (bloque ? ' ferme' : '') + '" data-ong="' + o.cle + '"'
+        + (o.cle === courant ? ' aria-current="step"' : '') + '>'
         + '<span class="ot"><b>' + esc(o.t) + '</b>'
         /* ⚠ UNE ETAPE FACULTATIVE VIDE LE DIT (2026-09-25, sa demande : << les
            options optionnelles devraient avoir une indication si elles sont
@@ -1957,7 +1973,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
            l etape ou si elle serait sautee. */
         + '<span class="oe' + (e ? '' : (ongletRequis(o.cle) ? '' : ' ign')) + '">'
         + esc(e || (ongletRequis(o.cle) ? '${T("À choisir")}' : '${T("ignoré")}')) + '</span></span>'
-        + (ok ? '<span class="oc">✓</span>' : '') + '</button>';
+        + (ok ? '<span class="oc">✓</span>' : '') + '</div>';
   }
   // Le contenu du groupe affiché, et lui seul.
   function panneauHtml(){
@@ -2053,15 +2069,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (b) b.innerHTML = ongletsHtml();
     brancherOnglets();
   }
-  function brancherOnglets(){
-    corps.querySelectorAll('[data-ong]').forEach(function(el){
-      el.onclick = function(){
-        if (OCCUPE) return;   // pendant un traitement, changer d onglet n a pas de sens
-        ONGLET = el.getAttribute('data-ong');
-        majPanneau();
-      };
-    });
-  }
+  /* Le rail ne se clique plus (2026-10-01) : voir .onglets .ong. La fonction
+     reste, vide, parce que les deux repeintures l appellent encore. */
+  function brancherOnglets(){}
 
   /* ══ LES RECETTES DE MISE EN SCÈNE (lot 3d du #29) ═════════════════════════
      Sa demande : << enregistrer des presets d option, les nommer, les reutiliser
@@ -2409,11 +2419,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + ' aria-label="${T("Position du rideau entre l’avant et l’après")}"'
       + ' aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(CMP_POS) + '">'
       + '<span class="cph">⇔</span></div>'
-      + '<span class="cet g">${T("Avant")}</span><span class="cet d">${T("Après")}</span></div>'
-      + (!PHOTO && PHOTO_URL
-          ? '<div class="avis">${T("L’« avant » est la vignette de la photothèque : un repère de")} '
-            + '${T("cadrage et de couleur, pas un juge de netteté.")}</div>'
-          : '');
+      + '<span class="cet g">${T("Avant")}</span><span class="cet d">${T("Après")}</span></div>';
+  }
+  /* ⚠ LA REMARQUE SUR L « AVANT » N EST PLUS A COTE DU COMPARATEUR (2026-10-01,
+     sa capture : « c est trop serre, tu dois pouvoir positionner ca autrement »).
+     Rendue dans le meme rang que l image, elle formait une TROISIEME colonne
+     etroite entre l image et les boutons. Elle rejoint les autres remarques, dans
+     la colonne de droite, au-dessus des boutons. */
+  function avantRemarque(){
+    return (!PHOTO && PHOTO_URL)
+      ? '<div class="avis">${T("L’« avant » est la vignette de la photothèque : un repère de")} '
+        + '${T("cadrage et de couleur, pas un juge de netteté.")}</div>'
+      : '';
   }
 
   /* ══ LES FORMATS DE SORTIE (lot 3b) ═══════════════════════════════════════
@@ -2643,6 +2660,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (RESULT.ignores) nt += '<div class="filig"><span class="ic">⚠</span> ${T("Le service a <strong>ignoré</strong> : ")}'
       + esc(ignoresLisible(RESULT.ignores)) + '${T(". Le reste du traitement a bien eu lieu.")}</div>';
     if (RESULT.upNote) nt += '<div class="avis">' + esc(RESULT.upNote) + '</div>';
+    if (enImg && av && CMP) nt += avantRemarque();
     if (RESULT.largeur) h += '<div class="dims">' + RESULT.largeur + ' × ' + RESULT.hauteur + ' px</div>';
     if (nt) h += '<div class="notes">' + nt + '</div>';
     h += '<div class="dl"><button id="b-dl">${T("Télécharger l’image")}</button>'
@@ -2972,6 +2990,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (!ETAT0) return;
     var e = JSON.parse(ETAT0);
     VOIE = e.VOIE; VOIE_CHOISIE = e.VOIE_CHOISIE; PRESET = e.PRESET;
+    FIL_POSE = false;
     FIL = e.FIL; MODELE_SEL = e.MODELE_SEL; POSE_SEL = e.POSE_SEL; AV = e.AV;
     RC_SEL = ''; FORMATS = []; ONGLET = 'photo';
     // Un seul logo dans la logothèque : il reste choisi d office.
@@ -3113,7 +3132,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       var lg = logoChoisi();
       if (!lg) {
         return '<p style="color:#e08a8a;margin:.6rem 0 0"><span class="ic">⚠</span> <strong>${T("Aucun logo choisi.")}</strong> '
-          + '${T("Ouvrez « Filigrane » dans la colonne de gauche et choisissez-en un : sans logo,")} '
+          + '${T("Allez à l’étape « Filigrane » et choisissez-en un : sans logo,")} '
           + '${T("le lot échouerait photo après photo.")}</p>';
       }
       return '<label class="rc"><input type="checkbox" id="lot-reglages"'
@@ -3484,6 +3503,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         peindreResultat();
         dire(apercu ? '${T("Aperçu prêt (gratuit).")}' : '${T("Image générée.")}', 'bon');
         chargerCredits();
+        // Le filigrane pose avant ce rendu se repose sur la nouvelle image.
+        if (FIL_POSE && logoChoisi()) appliquerFiligrane();
       } else {
         dire(expliquer(r), 'err');
       }

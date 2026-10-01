@@ -437,8 +437,7 @@ module.exports = {
      photo deja traitee coute un appel pour un resultat identique ; chaque photo
      est un appel facture. */
   '⚠ Aucun logo choisi.': '⚠ No logo chosen.',
-  'Ouvrez « Filigrane » dans la colonne de gauche et choisissez-en un : sans logo,':
-    'Open « Watermark » in the left column and choose one: without a logo,',
+  'Allez à l’étape « Filigrane » et choisissez-en un : sans logo,': 'Go to the « Watermark » step and choose one: without a logo,',
   'le lot échouerait photo après photo.': 'the batch would fail photo after photo.',
   'Poser le filigrane réglé à l’écran —': 'Place the watermark as set on screen —',
   '% d’opacité.': '% opacity.',
