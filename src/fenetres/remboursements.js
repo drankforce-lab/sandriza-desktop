@@ -64,8 +64,6 @@ button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:70
   border-radius:13px;padding:.75rem .95rem;min-width:0}
 .stats .s .l{order:0;font-size:.76rem;font-weight:600;color:var(--tx2)}
 .stats .s .n{order:1;font-size:1.6rem;font-weight:800;line-height:1.15;margin:.2rem 0 .1rem;color:var(--tx)}
-.stats .s .n.sort{color:var(--tx-att)}
-.stats .s .n.du{color:var(--tx-ok)}
 .stats .s .sub{order:2;font-size:.72rem;color:var(--tx3)}
 /* ⚠ Deux reprises du socle, chargees APRES cette feuille, repeignaient les
    tuiles : l accent du theme sur tout chiffre (.stats .s .n) et, en jour, un
@@ -193,7 +191,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('remboursements')}
        quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
        ce poste. Voir JS_TUILES dans socle.js. */
     h += szTuiles('<div class="stats">'
-      + '<div class="s"><div class="n sort">' + esc(t.rembourse) + '</div>'
+      /* ⚠ CHIFFRES NEUTRES (2026-10-01, regle de la palette) : le total rembourse
+         etait OR (la couleur du bouton principal) et le solde a honorer VERT —
+         or c est une DETTE envers les clients, pas un « ca va ». */
+      + '<div class="s"><div class="n">' + esc(t.rembourse) + '</div>'
       /* Deux formes ENTIERES : un << s >> colle a part ne se traduit pas. */
       + '<div class="l">${T("Total remboursé")}</div><div class="sub">' + (t.nbRemb || 0)
       + ((t.nbRemb || 0) > 1 ? '${T(" remboursements")}' : '${T(" remboursement")}') + '</div></div>'
@@ -202,7 +203,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('remboursements')}
       + ((t.nbCredits || 0) > 1 ? '${T(" crédits")}' : '${T(" crédit")}') + '</div></div>'
       + '<div class="s"><div class="n">' + esc(t.utilise) + '</div>'
       + '<div class="l">${T("Crédits utilisés")}</div><div class="sub">${T("déjà dépensés")}</div></div>'
-      + '<div class="s"><div class="n du">' + esc(t.solde) + '</div>'
+      + '<div class="s"><div class="n">' + esc(t.solde) + '</div>'
       + '<div class="l">${T("Solde à honorer")}</div><div class="sub">${T("passif · ")}' + (t.nbActifs || 0)
       + ((t.nbActifs || 0) > 1 ? '${T(" actifs")}' : '${T(" actif")}') + '</div></div>'
       + '</div>');

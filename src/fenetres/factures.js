@@ -217,7 +217,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
         + tuile('${T("Encaissé")}', fmt(TUILES.encaisse), 'bon')
         + tuile('${T("À recevoir")}', fmt(TUILES.aRecevoir), 'att')
         /* Deux formes ENTIERES : un << s >> colle a part ne se traduit pas. */
-        + tuile('${T("Remboursé")}', fmt(TUILES.rembourse), 'att',
+        + tuile('${T("Remboursé")}', fmt(TUILES.rembourse), '',
             nbR + (nbR > 1 ? '${T(" remboursements")}' : '${T(" remboursement")}'))
         + tuile('${T("Dépenses ")}' + (TUILES.annee || ''), fmt(TUILES.depenses), '')
         + tuile('${T("Factures")}', String(TUILES.nb || 0), '')
