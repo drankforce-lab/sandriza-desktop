@@ -26,9 +26,9 @@ module.exports = {
   'collection': 'collection',
   'collections': 'collections',
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
-  'Nos Collections — Administration Sandriza':
-    'Our Collections — Sandriza Administration',
-  'Nos Collections': 'Our Collections',
+  'Nos collections — Administration Sandriza':
+    'Our collections — Sandriza Administration',
+  'Nos collections': 'Our collections',
   'Collections indisponibles': 'Collections unavailable',
   'Votre rôle ne donne pas accès aux collections.':
     'Your role does not give access to the collections.',

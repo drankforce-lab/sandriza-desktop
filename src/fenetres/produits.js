@@ -163,7 +163,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   function pilStock(r){
     if (r.stockTotal === 0) return '<span class="rf-pill rouge" title="${T("Aucune unité en stock")}">${T("Rupture")}</span>';
     if (r.variantesBas > 0) return '<span class="rf-pill ambre" title="' + esc(r.bassesDetail) + '">'
-      + r.variantesBas + ' ${T("cat. à commander")}</span>';
+      + r.variantesBas + ' ' + szPl(r.variantesBas, '${T("variante à commander")}', '${T("variantes à commander")}') + '</span>';
     return '<span class="rf-pill vert">${T("Seuil non atteint")}</span>';
   }
 
@@ -230,11 +230,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + '<th>${T("Prix")}</th><th>${T("Inventaire")}</th><th style="text-align:center">${T("Paniers")}</th></tr></thead><tbody>'
         + rows.map(function(r){
             var badges = '';
-            if (r.finalSale && !r.liquidation) badges += ' <span class="rf-pill rouge">${T("Vente finale")}</span>';
+            if (r.finalSale && !r.liquidation) badges += ' <span class="rf-pill ambre">${T("Vente finale")}</span>';
             if (r.liquidation) badges += ' <span class="rf-pill ambre">${T("Liquidation")}</span>';
             var prix = r.solde
               ? '<span class="rf-mont">' + esc(fmt(r.solde)) + '</span> <span class="prixbarre">' + esc(fmt(r.prix)) + '</span>'
-                + '<span class="rf-pill rouge">−' + Math.round((1 - r.solde / (r.prix || 1)) * 100) + ' %</span>'
+                + '<span class="rf-pill">−' + Math.round((1 - r.solde / (r.prix || 1)) * 100) + ' %</span>'
               : '<span class="rf-mont">' + esc(fmt(r.prix)) + '</span>';
             var ini = String(r.categorie || r.nom || '?').charAt(0).toUpperCase();
             var cc = /^#[0-9a-f]{3,8}$/i.test(r.couleurCat || '') ? r.couleurCat : '';

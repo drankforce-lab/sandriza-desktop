@@ -44,7 +44,8 @@ module.exports = {
      « To reorder » dit l action ; « Low stock » dirait l etat sans dire quoi
      faire, et c est une liste sur laquelle on AGIT. */
   '⚠ À commander': '⚠ To reorder',
-  'cat. à commander': 'cat. to reorder',
+  'variante à commander': 'variant to reorder',
+  'variantes à commander': 'variants to reorder',
   /* ⚠ « Seuil non atteint » = le seuil n a PAS ete franchi, donc rien a faire.
      Traduit par la situation, pas mot a mot : « Above threshold » se lit d un
      coup d oeil, « Threshold not reached » se relit deux fois. */

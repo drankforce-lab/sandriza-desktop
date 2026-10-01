@@ -270,9 +270,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         rows.length === (D.total || rows.length)
           ? rows.length + ' ' + (rows.length > 1 ? '${T("fournisseurs")}' : '${T("fournisseur")}')
           : rows.length + '${T(" sur ")}' + (D.total || 0),
-        '<button class="mini" id="f-exporter"><span class="ic">⬇</span>${T(" Exporter")}</button>'
-        + '<button class="mini" id="f-repertoire2"><span class="ic">🔎</span>${T(" Répertoire")}</button>'
-        + '<button class="mini" id="f-nouveau2">${T("+ Nouveau fournisseur")}</button>');
+        /* Le pied ne repete plus « Repertoire » et « + Nouveau fournisseur » (2026-10-01) :
+           ils sont deja dans la barre du haut, comme dans toutes les autres listes. */
+        '<button class="mini" id="f-exporter"><span class="ic">⬇</span>${T(" Exporter")}</button>');
     }
     corps.innerHTML = h;
     szVerrousPeindre();   // reposer les cadenas connus sur le tableau frais
@@ -297,10 +297,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       });
     };
     var ouvrirRepertoire = function(){ REP_Q = ''; REP_CAT = ''; REP_PAYS = ''; chargerRepertoire(); };
-    ['f-nouveau', 'f-nouveau2'].forEach(function(id){
+    ['f-nouveau'].forEach(function(id){
       var b = document.getElementById(id); if (b) b.onclick = ouvrirNouveau;
     });
-    ['f-repertoire', 'f-repertoire2'].forEach(function(id){
+    ['f-repertoire'].forEach(function(id){
       var b = document.getElementById(id); if (b) b.onclick = ouvrirRepertoire;
     });
 

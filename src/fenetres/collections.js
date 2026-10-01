@@ -75,12 +75,12 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
-/** Page complète de la fenêtre native « Nos Collections ». */
+/** Page complète de la fenêtre native « Nos collections ». */
 function pageCollections() {
   return `${TETE()}
-<title>${T("Nos Collections — Administration Sandriza")}</title>
+<title>${T("Nos collections — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.collections}</span><h1>${T("Nos Collections")}</h1>
+<div class="tete"><span class="ico">${ICO.collections}</span><h1>${T("Nos collections")}</h1>
   <span class="sous" id="sous"></span></div>
 <div class="corps plein" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
