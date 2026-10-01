@@ -202,5 +202,19 @@ module.exports = {
   'Service': 'Service',
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
-  'en traitement par': 'being edited by'
+  'en traitement par': 'being edited by',
+  "Le colis": "The parcel",
+  "unité confirmée": "unit confirmed",
+  "unité confirmée.": "unit confirmed.",
+  "Articles": "Items",
+  "ligne": "line",
+  "lignes": "lines",
+  "Suivi": "Tracking",
+  "Prête": "Ready",
+  "En préparation": "Being prepared",
+  "Vérifier le colis": "Check the parcel",
+  "L’étiquette, ou « sans numéro de suivi »": "The label, or « no tracking number »",
+  "Pour expédier": "To ship",
+  "Prête à expédier": "Ready to ship",
+  "Statut": "Status",
 };

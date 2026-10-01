@@ -26,7 +26,7 @@
  * pages auraient compté pour zéro — un colis déclaré vérifié sans l'être.
  */
 
-const { CSS_SOCLE, CSS_JOUR, JS_SOCLE, ICO, TETE } = require('./socle');
+const { CSS_SOCLE, CSS_JOUR, CSS_FICHE, JS_SOCLE, ICO, TETE } = require('./socle');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -59,6 +59,20 @@ const CSS_PROPRE = `
 .duo{display:flex;gap:.7rem;flex-wrap:wrap}
 .duo>*{flex:1 1 220px}
 .etat{display:flex;align-items:center;gap:.5rem;font-size:.86rem;padding:.4rem 0}
+/* ══ LA NOUVELLE REFONTE (2026-10-01) — le volet « Colis », comme la « Fiche »
+   du Produit : le numero, le client et l adresse quittent le haut de la liste
+   (qui gagne sa hauteur), la verification se suit en direct, et « Pour
+   expedier » dit ce qui manque — les memes gardes que majExpedier(). */
+.pf-fiche .num{font-size:1.15rem;font-weight:800;color:var(--tx-creme);line-height:1.1}
+.pf-fiche .prio{display:inline-flex;align-items:center;gap:.25rem;font-size:.7rem;font-weight:700;
+  padding:.08rem .5rem;border-radius:99px;background:#7c2d12;color:#fdba74;margin-top:.3rem}
+html.jour .pf-fiche .prio{background:#fde7d6;color:#7c2d12;border:1px solid rgba(124,45,18,.25)}
+.pf-fiche .adr{font-size:.76rem;color:var(--tx2);line-height:1.4;margin-top:.15rem}
+.pf-fiche .note{font-size:.76rem;color:var(--tx-or2);line-height:1.4}
+.pf-fiche .prog{display:flex;align-items:baseline;gap:.4rem}
+.pf-fiche .prog b{font-size:1.5rem;font-weight:800;color:var(--tx-creme);line-height:1}
+.pf-fiche .prog span{font-size:.76rem;color:var(--tx2)}
+.pf-fiche .barre{margin:.35rem 0 0}
 `;
 
 /** Page complète de l'assistant. `id` = commande à préparer. */
@@ -66,7 +80,7 @@ function pageCommande(id) {
   const ident = JSON.stringify(String(id || ''));
   return `${TETE()}
 <title>${T("Préparation — Administration Sandriza")}</title>
-<style>${CSS_SOCLE}${CSS_PROPRE}${CSS_JOUR}</style></head><body>
+<style>${CSS_SOCLE}${CSS_FICHE}${CSS_PROPRE}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.orders}</span><h1 id="titre">${T("Préparation")}</h1>
   <span class="sous" id="sous"></span></div>
 <div class="pas" id="pas"></div>
@@ -130,13 +144,6 @@ function pageCommande(id) {
 
   function dessiner(){
     var h = [];
-    var enTete = '<div class="entete"><span class="num">' + esc(CMD.numero) + '</span>'
-      + (CMD.prioritaire ? '<span style="font-size:.76rem;background:#7c2d12;color:#fdba74;'
-          + 'border-radius:99px;padding:.12rem .55rem;font-weight:700"><span class="ic" aria-hidden="true">⚡</span> ${T("Prioritaire")}</span>' : '')
-      + '<span class="cli">' + esc(CMD.client) + '</span>'
-      + '<span class="adr">' + esc(CMD.adresse) + '</span>'
-      + (CMD.notes ? '<span class="adr" style="color:var(--tx-or2)"><span class="ic">📝</span> ' + esc(CMD.notes) + '</span>' : '')
-      + '</div>';
 
     /* 1 — Vérification.
        ⚠ L ETAPE << PREPARATION >> A ETE RETIREE (demande le 2026-08-07 : << elle
@@ -146,11 +153,10 @@ function pageCommande(id) {
        ⚠ RIEN N EST PERDU : l en-tete (numero, client, adresse) et les DEUX
        boutons d impression (Bon de commande, Bordereau) ont migre dans cette
        etape — ils n ont pas disparu avec elle. */
-    h.push('<div class="etape"><div class="carte plein" id="c-zone2">' + enTete
+    /* ⚠ L EN-TETE ET LE COMPTEUR VIVENT DANS LE VOLET « COLIS » (2026-10-01) :
+       visibles aux trois etapes, et non plus seulement a la premiere. */
+    h.push('<div class="etape"><div class="carte plein" id="c-zone2">'
       + '<h2>${T("Vérification du colis")}</h2>'
-      + '<div class="etat"><span class="gros" id="c-prog">0</span>'
-      + '<span style="color:var(--tx2)">${T("sur")} ' + attendus() + ' ${T("unités confirmées")}</span></div>'
-      + '<div class="barre"><span id="c-barre"></span></div>'
       /* ⚠ LE CHAMP DE SCAN, ET IL EST EN PREMIER. On verifie un colis un lecteur
          a la main, sans regarder l ecran : le champ doit avoir le focus, avaler
          le retour du lecteur, se vider et le reprendre aussitot. Un champ qu il
@@ -210,7 +216,11 @@ function pageCommande(id) {
       + '<div class="aide" style="margin-top:.5rem">${T("« Expédier » écrit le statut, envoie le courriel de suivi")} '
       + '${T("au client et referme cette fenêtre.")}</div></div></div>');
 
-    document.getElementById('corps').innerHTML = h.join('');
+    document.getElementById('corps').innerHTML = h.join('')
+      + '<aside class="pf-fiche" id="pf-fiche" aria-label="${T("Le colis")}"></aside>';
+    var corpsEl = document.getElementById('corps');
+    corpsEl.addEventListener('input', majFicheBientot);
+    corpsEl.addEventListener('change', majFicheBientot);
     document.getElementById('c-pret').checked = !!CMD.dejaPret;
     /* ⚠ LA CASE S ENREGISTRE AU CLIC, PAS A L EXPEDITION. Elle n etait poussee
        qu au moment d expedier : cocher << prete >> puis fermer la fenetre perdait
@@ -238,7 +248,7 @@ function pageCommande(id) {
          pas etre disponible tant que la verification n est pas complete >>. */
       { t: '${T("Vérification")}', obl: [],
         fait: toutVerifie,
-        refus: function(){ return '${T("Vérifiez le colis d’abord —")} ' + comptes() + ' ${T("sur")} ' + attendus() + ' ${T("unités confirmées.")}'; } },
+        refus: function(){ return '${T("Vérifiez le colis d’abord —")} ' + comptes() + ' ${T("sur")} ' + attendus() + ' ' + szPl(attendus(), '${T("unité confirmée.")}', '${T("unités confirmées.")}'); } },
       /* ⚠ << suivi rempli OU envoi sans numero assume >>. L ancienne forme
          (obl: c-suivi) rendait l etape Expedition INATTEIGNABLE pour une remise
          en main propre : la case cochee ne remplit aucun champ, et le fil comme
@@ -254,7 +264,52 @@ function pageCommande(id) {
     });
 
     majExpedier();
+    majFiche();
     if (!CTX.peutExpedier) dire('${T("Votre rôle ne permet pas d’expédier.")}', 'att');
+  }
+
+  /* ══ LE VOLET « COLIS » ══════════════════════════════════════════════════
+     ⚠ IL NE DECIDE RIEN : il relit CMD, COMPTES et les champs — les memes
+     sources que majExpedier(), dont « Pour expedier » reprend les gardes dans
+     le meme ordre. Un clic mene a l etape. */
+  var FICHE_T = null;
+  function majFicheBientot(){ clearTimeout(FICHE_T); FICHE_T = setTimeout(majFiche, 60); }
+  function majFiche(){
+    var z = document.getElementById('pf-fiche');
+    if (!z || !CMD || !CTX) return;
+    var att = attendus(), f = comptes(), complet = toutVerifie();
+    var lignes = CMD.articles.length;
+    var t = (CTX.transporteurs.find(function(x){ return x.cle === val('c-transp'); }) || {}).nom || val('c-transp');
+    var suivi = String(val('c-suivi') || '').trim(), sans = coché('c-sans');
+    var ligne = function(k, v){ return '<div class="l"><span class="k">' + k + '</span><span class="v">' + v + '</span></div>'; };
+    var h = '<div><div class="num">' + esc(CMD.numero) + '</div>'
+      + (CMD.prioritaire ? '<span class="prio">${T("Prioritaire")}</span>' : '')
+      + '<div class="nm" style="margin-top:.45rem">' + esc(CMD.client || '—') + '</div>'
+      + (CMD.adresse ? '<div class="adr">' + esc(CMD.adresse) + '</div>' : '') + '</div>'
+      + (CMD.notes ? '<div class="note"><span class="ic">📝</span> ' + esc(CMD.notes) + '</div>' : '');
+    h += '<div><div class="prog"><b id="c-prog">' + f + '</b><span>${T("sur")} ' + att + ' '
+      + szPl(att, '${T("unité confirmée")}', '${T("unités confirmées")}') + '</span></div>'
+      + '<div class="barre"><span id="c-barre" style="width:' + (att ? Math.round(f / att * 100) : 100) + '%"></span></div></div>';
+    h += ligne('${T("Articles")}', szNombre(lignes) + ' ' + szPl(lignes, '${T("ligne")}', '${T("lignes")}'));
+    h += ligne('${T("Transporteur")}', esc(t || '—'));
+    h += ligne('${T("Suivi")}', suivi ? esc(suivi) : (sans ? '${T("aucun — assumé")}' : '—'));
+    h += ligne('${T("Statut")}', '<span class="etat ' + (coché('c-pret') ? 'on">${T("Prête")}' : 'off">${T("En préparation")}') + '</span>');
+    var manque = [];
+    if (LECTURE) manque.push([-1, '${T("Commande en traitement ailleurs — lecture seule.")}']);
+    else if (!CTX.peutExpedier) manque.push([-1, '${T("Votre rôle ne permet pas d’expédier.")}']);
+    else {
+      if (!complet) manque.push([0, '${T("Vérifier le colis")} (' + f + ' / ' + att + ')']);
+      if (!suivi && !sans) manque.push([1, '${T("L’étiquette, ou « sans numéro de suivi »")}']);
+    }
+    h += '<div class="reste">' + (manque.length
+      ? '<div class="t">${T("Pour expédier")}</div>' + manque.map(function(m){
+          return m[0] < 0 ? '<div class="aide">' + m[1] + '</div>'
+            : '<button type="button" data-pfaller="' + m[0] + '"><span class="o"></span>' + m[1] + '</button>'; }).join('')
+      : '<div class="ok"><span class="ic">✓</span> ${T("Prête à expédier")}</div>') + '</div>';
+    z.innerHTML = h;
+    z.querySelectorAll('[data-pfaller]').forEach(function(b){
+      b.onclick = function(){ Assist.aller(parseInt(b.getAttribute('data-pfaller'), 10) || 0); };
+    });
   }
 
   /* ⚠ LE STATUT SUIT LES GESTES, PLUS LES INDEX D ETAPES (revu au retrait de
@@ -316,6 +371,7 @@ function pageCommande(id) {
   }
 
   function majProgres(){
+    majFicheBientot();
     var att = attendus(), f = comptes();
     var g = document.getElementById('c-prog'); if (g) g.textContent = f;
     var b = document.getElementById('c-barre');
@@ -739,9 +795,10 @@ function pageCommande(id) {
     var pourquoi = '';
     if (LECTURE) pourquoi = '${T("Commande en traitement ailleurs — lecture seule.")}';
     else if (!CTX || !CTX.peutExpedier) pourquoi = '${T("Votre rôle ne permet pas d’expédier.")}';
-    else if (!verifOk) pourquoi = '${T("Vérifiez le colis d’abord —")} ' + comptes() + ' ${T("sur")} ' + attendus() + ' ${T("unités confirmées.")}';
+    else if (!verifOk) pourquoi = '${T("Vérifiez le colis d’abord —")} ' + comptes() + ' ${T("sur")} ' + attendus() + ' ' + szPl(attendus(), '${T("unité confirmée.")}', '${T("unités confirmées.")}');
     else if (!etiqOk) pourquoi = '${T("Générez l’étiquette (étape 2), ou cochez « Expédier sans numéro de suivi ».")}';
     bEnr.title = pourquoi || '${T("Marquer la commande expédiée et prévenir le client")}';
+    majFicheBientot();
     return pourquoi;
   }
 
