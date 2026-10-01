@@ -35,7 +35,7 @@ module.exports = {
   'Revenus (payés)': 'Revenue (paid)',
   'Revenus (net)': 'Revenue (net)',
   'Nouveaux retours': 'New returns',
-  'Retours sur le point d’expirer': 'Returns about to expire',
+  'Retours qui expirent': 'Returns expiring',
   'En livraison': 'In transit',
   'Ruptures de stock': 'Out of stock',
   'Avis à modérer': 'Reviews to moderate',

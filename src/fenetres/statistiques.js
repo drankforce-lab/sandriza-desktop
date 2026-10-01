@@ -153,9 +153,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('statistiques')}
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function nb(n){ return Number(n || 0).toLocaleString('${LIEU()}'); }
+  /* « 16 h 06 » en francais, et non « 16:06 » (2026-10-01). ⚠ Toujours AVEC les
+     options : sans elles, fr-CA ecrit « 16 h 06 min 00 s ». */
   function heure(){
     var d = new Date();
-    return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    try { return d.toLocaleTimeString('${LIEU()}', { hour: '2-digit', minute: '2-digit' }); }
+    catch (e) { return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
   }
 
   /* Le bandeau de message : une seule regle, dans le socle (szDire) —
@@ -298,11 +301,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('statistiques')}
     /* ⚠ UNE SEULE RANGEE DE TUILES, et le graphique A COTE des pages populaires
        (sa demande : aucune barre de defilement — deux bandeaux et deux cartes
        empiles depassaient la fenetre de 142 px). */
-    var tu = tuile('${T("Visiteurs")}', nb(t.visiteurs), 'or')
-      + tuile('${T("Sessions")}', nb(t.sessions), 'or')
-      + tuile('${T("Pages vues")}', nb(t.pagesVues), 'or');
+    /* ⚠ CHIFFRES NEUTRES (2026-10-01) : l or est la couleur du bouton principal
+       et de la selection, pas d un compte de visiteurs. */
+    var tu = tuile('${T("Visiteurs")}', nb(t.visiteurs), '')
+      + tuile('${T("Sessions")}', nb(t.sessions), '')
+      + tuile('${T("Pages vues")}', nb(t.pagesVues), '');
     if (DGA.engagement) {
-      tu += tuile('${T("Durée moy. session")}', DGA.engagement.dureeMoyenne)
+      tu += tuile('${T("Durée moyenne")}', DGA.engagement.dureeMoyenne)
         + tuile('${T("Taux de rebond")}', DGA.engagement.rebond)
         + tuile('${T("Pages / session")}', DGA.engagement.pagesParSession)
         + tuile('${T("Taux d’engagement")}', DGA.engagement.engagement);
@@ -349,12 +354,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('statistiques')}
       + '${T("Coûts en dollars US, la devise de facturation.")}</span>'
       + '<span>' + (DTEL.solde ? '<span class="ic">💰</span>${T(" Solde restant : <strong>")}' + esc(DTEL.solde) + '</strong>'
                                : '${T("Solde indisponible")}') + '</span></div>';
-    h += szTuiles('<div class="tuiles">' + tuile('${T("Appels")}', nb(t.appels), 'or')
+    h += szTuiles('<div class="tuiles">' + tuile('${T("Appels")}', nb(t.appels), '')
       + tuile('${T("Entrants")}', nb(t.entrants))
       + tuile('${T("Répondus")}', nb(t.repondus), 'bon')
       + tuile('${T("Manqués")}', nb(t.manques), t.manques ? 'mal' : '')
       + tuile('${T("Minutes")}', nb(t.minutes))
-      + tuile('${T("Durée moy.")}', t.dureeMoyenne)
+      + tuile('${T("Durée moyenne")}', t.dureeMoyenne)
       + tuile('${T("Coût total")}', t.cout, 'att') + '</div>');
     h += '<div class="carte"><h3><span class="ic">📈</span>${T(" Appels par jour")}</h3>'
       + graphique(DTEL.serie, '${T("appels")}', '${T("appels")}') + '</div>';

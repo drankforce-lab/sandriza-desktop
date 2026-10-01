@@ -257,7 +257,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     ['revenue', '${T("Revenus (payés)")}'],
     ['messagerie', 'Messagerie'],
     ['returns_new', '${T("Nouveaux retours")}'],
-    ['returns_expiring', '${T("Retours sur le point d’expirer")}'],
+    ['returns_expiring', '${T("Retours qui expirent")}'],
     ['en_livraison', '${T("En livraison")}'],
     ['ruptures', '${T("Ruptures de stock")}'],
     ['avis', '${T("Avis à modérer")}'],
@@ -538,7 +538,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         t.retoursNouveaux > 0
           ? (t.retoursNouveaux > 1 ? '${T("demandes à traiter")}' : '${T("demande à traiter")}')
           : '${T("aucune demande en attente")}', ''),
-      returns_expiring: tuile('returns_expiring', '${T("Retours sur le point d’expirer")}', t.retoursExpirent,
+      returns_expiring: tuile('returns_expiring', '${T("Retours qui expirent")}', t.retoursExpirent,
         t.retoursExpirent > 0 ? 'err' : '',
         t.retoursExpirent > 0 ? '${T("colis pas encore reçu")}' : '${T("aucun retour à risque")}', ''),
       // ── Ce qu il reste a faire (#25) ──────────────────────────────

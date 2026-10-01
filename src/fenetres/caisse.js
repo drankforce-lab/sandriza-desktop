@@ -260,8 +260,8 @@ function pageCaisse(mode) {
            legende « Province · Livraison · Rabais » dessous se lisaient mal. -->
       <div class="r3">
         <label class="r3c"><span>${T("Province")}</span><select id="v-prov" title="${T("Province — elle détermine les taxes")}"></select></label>
-        <label class="r3c"><span>${T("Livraison")}</span><input id="v-liv" inputmode="decimal" value="0.00" title="${T("Livraison")}" placeholder="${T("Livraison")}"></label>
-        <label class="r3c"><span>${T("Rabais")}</span><input id="v-rab" inputmode="decimal" value="0.00" title="${T("Rabais")}" placeholder="${T("Rabais")}"></label>
+        <label class="r3c"><span>${T("Livraison")}</span><input id="v-liv" inputmode="decimal" value="0${SEP_DEC()}00" title="${T("Livraison")}" placeholder="${T("Livraison")}"></label>
+        <label class="r3c"><span>${T("Rabais")}</span><input id="v-rab" inputmode="decimal" value="0${SEP_DEC()}00" title="${T("Rabais")}" placeholder="${T("Rabais")}"></label>
       </div>
       <h2 style="margin-top:.75rem">${T("Facture")}</h2>
       <select id="v-remise" title="${T("Ce qu’on fait de la facture après la vente")}"></select>
@@ -626,8 +626,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       document.getElementById('c-tel').value = '';
       document.getElementById('v-note').value = '';
       document.getElementById('c-creer').checked = false;
-      document.getElementById('v-liv').value = '0.00';
-      document.getElementById('v-rab').value = '0.00';
+      document.getElementById('v-liv').value = szArgentChamp(0);
+      document.getElementById('v-rab').value = szArgentChamp(0);
       majLie(); dessinerLignes(); dessinerTotaux(); majBouton(); dire('');
       diffuser();
       compteRendu(r);
