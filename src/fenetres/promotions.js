@@ -47,6 +47,10 @@ body{background:var(--f-page);color:var(--tx);
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 /* ── La refonte de l Inventaire (2026-09-25) ── */
 .tuiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.6rem;flex:0 0 auto}
+/* ⚠ LES TUILES SE PARTAGENT TOUTE LA LARGEUR, quel qu en soit le nombre
+   (2026-10-01) : trois tuiles n en occupaient que les trois cinquiemes, un
+   vide a droite. Specificite doublee : la grille du socle passe apres. */
+.tuiles.tuiles{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}
 .tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
 .tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tuile.cliq{cursor:pointer;user-select:none;position:relative}

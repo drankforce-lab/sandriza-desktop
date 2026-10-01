@@ -306,7 +306,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
     var h = szTuiles('<div class="tuiles">'
       + '<div class="tuile"><div class="lbl">${T("Cartes actives")}</div><div class="val">' + t.actives
       + '</div><div class="sub">' + t.total + '${T(" au total")}</div></div>'
-      + '<div class="tuile"><div class="lbl">${T("Solde en circulation")}</div><div class="val bon">'
+      + '<div class="tuile"><div class="lbl">${T("Solde en circulation")}</div><div class="val">'
       + fmt(t.enCirculation) + '</div><div class="sub">${T("sur ")}' + fmt(t.emis) + '${T(" émis")}</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Entièrement utilisées")}</div><div class="val">'
       + t.utilisees + '</div></div>'
@@ -325,8 +325,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
       + jet('used', '${T("Utilisées")}') + jet('expired', '${T("Expirées")}')
       + '<span class="rf-droite">'
       + '<button class="rf-jet" id="cc-recompense">${T("Récompense à l’achat")}</button>'
-      + (D.peutModifier ? '<button class="prim" id="cc-nouvelle" style="height:2.4rem;padding:0 .9rem">${T("+ Créer une carte")}</button>' : '')
       + '<span class="dt">' + rows.length + (rows.length > 1 ? '${T(" cartes")}' : '${T(" carte")}') + '</span>'
+      + (D.peutModifier ? '<button class="prim" id="cc-nouvelle" style="height:2.4rem;padding:0 .9rem">${T("+ Créer une carte")}</button>' : '')
       + '</span></div></div>';
 
     h += '<div class="carte">';

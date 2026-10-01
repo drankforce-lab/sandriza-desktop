@@ -4900,7 +4900,7 @@ const JEU = {
             { id: 'p2', nom: 'Blouse en soie', sku: 'HT-0002', categorie: 'hauts' },
           ],
           offres: [
-            { id: 'd1', nom: 'Solde du printemps', rabais: '20% de rabais', portee: 'Robes', // promo.js (_discountLabel)
+            { id: 'd1', nom: 'Solde du printemps', rabais: '20 % de rabais', portee: 'Robes', // promo.js (_discountLabel)
               genre: 'percent', valeur: 20, bogoAchat: 0, bogoGratuit: 0, paliers: [],
               parClient: false, appliqueA: 'category', categoriesChoisies: ['robes'],
               produitsChoisis: [], bandeau: 'Jusqu’à 20 % sur les robes', bandeauEN: '',

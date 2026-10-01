@@ -265,9 +265,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
       + '<button class="rf-jet' + (ETAT === 'actifs' ? ' on' : '') + '" data-etat="actifs">${T("En cours")}</button>'
       + '<button class="rf-jet' + (ETAT === 'inactifs' ? ' on' : '') + '" data-etat="inactifs">${T("Hors service")}</button>'
       + '<span class="rf-droite">'
-      + (D.peutModifier ? '<button class="prim" id="cp-nouveau" style="height:2.4rem;padding:0 .9rem">${T("+ Nouveau coupon")}</button>' : '')
-      /* ⚠ Le singulier et le pluriel, chacun entier. */
+      /* ⚠ Le singulier et le pluriel, chacun entier. Le compte AVANT le bouton,
+         comme dans toutes les autres listes (2026-10-01). */
       + '<span class="dt">' + rows.length + (rows.length > 1 ? '${T(" coupons")}' : '${T(" coupon")}') + '</span>'
+      + (D.peutModifier ? '<button class="prim" id="cp-nouveau" style="height:2.4rem;padding:0 .9rem">${T("+ Nouveau coupon")}</button>' : '')
       + '</span></div></div>';
 
     /* ⚠ PLEINE HAUTEUR (2026-09-19) : la carte prend tout le reste, la liste

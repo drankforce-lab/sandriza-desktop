@@ -232,7 +232,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
        ce poste. Voir JS_TUILES dans socle.js. */
     var h = szTuiles('<div class="tuiles">'
       + '<div class="tuile"><div class="lbl">${T("Invitations")}</div><div class="val">' + (t.invitations || 0) + '</div></div>'
-      + '<div class="tuile"><div class="lbl">${T("Réponses")}</div><div class="val' + ((t.reponses || 0) > 0 ? ' bon' : '') + '">' + (t.reponses || 0) + '</div>'
+      + '<div class="tuile"><div class="lbl">${T("Réponses")}</div><div class="val">' + (t.reponses || 0) + '</div>'
       + '<div class="sub">${T("taux de ")}' + (t.taux || 0) + ' %</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Note moyenne")}</div><div class="val">'
       + (t.note == null ? '—' : note5(t.note)) + '</div>'
