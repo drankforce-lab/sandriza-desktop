@@ -97,6 +97,12 @@ button.mini{padding:.14rem .5rem;font-size:.76rem}
 
 /* Le pas-a-pas : cree, imprime, expedie. Il dit ce qui est FAIT. */
 .pas{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:.5rem}
+/* ⚠ CETTE RANGEE VIT DANS LE CORPS (2026-10-01) : le socle lui donnait le
+   rembourrage d une rangee posee SOUS l en-tete (1,1 rem a gauche), et elle se
+   decalait de 12 px par rapport aux cartes. */
+.corps .pas{padding:0 0 .55rem}
+/* Le bouton a sa taille, pas la moitie de la fenetre. */
+#btn-expedier{width:auto;align-self:flex-start;padding-left:1rem;padding-right:1rem}
 .pas span{font-size:.72rem;padding:.16rem .5rem;border-radius:99px;
   border:1px solid var(--v14);color:var(--tx2)}
 .pas span.fait{border-color:rgba(74,222,128,.45);color:var(--tx-ok)}

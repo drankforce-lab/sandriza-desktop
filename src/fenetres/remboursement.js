@@ -76,6 +76,19 @@ button.paie:hover:not(:disabled){background:#8f74ff;border-color:#8f74ff}
 .art .rf-prod > div{min-width:0}
 .art input[type=number]{width:4.4rem;text-align:center}
 .art .max{font-size:.68rem;color:var(--tx3);white-space:nowrap}
+/* Le plafond n est pas un etat : pas de point de pastille devant « max 2 ». */
+.art .rf-pill::before{display:none}
+/* ══ NOUVELLE REFONTE (2026-10-01) : DEUX COLONNES. Tout etait empile sur une
+   colonne, la moitie droite de la fenetre vide, et les Totaux tout en bas —
+   loin des quantites qui les font bouger. A gauche ce qu on saisit, a droite
+   ce que ca donne et ce qui manque encore. */
+.grid2{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:.55rem;align-items:start}
+.grid2 > div{display:flex;flex-direction:column;gap:.55rem;min-width:0}
+@media (max-width:860px){.grid2{grid-template-columns:1fr}}
+.reste .t{font-size:.72rem;font-weight:700;color:var(--tx2);margin-bottom:.3rem}
+.reste .r{display:flex;align-items:center;gap:.45rem;font-size:.8rem;padding:.12rem 0}
+.reste .r .o{flex:0 0 auto;width:.9rem;height:.9rem;border-radius:50%;border:1.5px solid var(--tx-att)}
+.reste .ok{font-size:.8rem;color:var(--tx-ok);font-weight:600}
 .tot .l{display:flex;justify-content:space-between;padding:.14rem 0;font-size:.85rem}
 .tot .l.grand{font-size:1.02rem;font-weight:700;border-top:1px solid var(--v14);
   margin-top:.3rem;padding-top:.4rem}
@@ -219,7 +232,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       actions.innerHTML = '';
       return;
     }
-    var h = '<div class="carte"><h2>${T("Articles à rembourser ")}<span class="note">${T("— quantités plafonnées au pas-encore-remboursé")}</span></h2>'
+    var h = '<div class="grid2"><div>'
+      + '<div class="carte"><h2>${T("Articles à rembourser ")}<span class="note">${T("— quantités plafonnées au pas-encore-remboursé")}</span></h2>'
       + R.articles.map(function(a, i){
           var q = QTE[cle(a)] || 0;
           var ini = String(a.nom || '?').trim().charAt(0).toUpperCase() || '?';
@@ -274,12 +288,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<textarea id="m-motif" aria-label="${T("Motif du remboursement")}" rows="3" placeholder="${T("Ex : article défectueux, mauvaise taille reçue, retour volontaire…")}"></textarea>'
       + '</div>';
 
-    h += '<div class="carte tot" id="z-totaux"><h2>${T("Totaux")} <span class="note">${T("— calculés par le site")}</span></h2>'
-      + '<div class="vide" style="padding:.6rem">${T("Choisissez des articles…")}</div></div>';
+    h += '</div><div>'
+      + '<div class="carte tot" id="z-totaux"><h2>${T("Totaux")} <span class="note">${T("— calculés par le site")}</span></h2>'
+      + '<div class="vide" style="padding:.6rem">${T("Choisissez des articles…")}</div></div>'
+      + '<div class="carte reste" id="z-reste"></div>'
+      + '</div></div>';
     corps.innerHTML = h;
 
     actions.innerHTML = '<button class="paie" id="btn-rembourser" disabled>${T("Confirmer le remboursement")}</button>';
     brancher();
+    majReste();
   }
 
   function dessinerTotaux(){
@@ -308,10 +326,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     majBouton();
   }
 
+  /* « Pour rembourser » : les gardes de confirmer(), dans leur ordre — au
+     moins une unite, puis le motif. Il ne decide rien, il relit. */
+  function majReste(){
+    var z = document.getElementById('z-reste');
+    if (!z) return;
+    var manque = [];
+    if (!(TOT && TOT.nbArticles)) manque.push('${T("Au moins un article, avec sa quantité")}');
+    if (!String(val('m-motif') || '').trim()) manque.push('${T("Le motif du remboursement")}');
+    z.innerHTML = manque.length
+      ? '<div class="t">${T("Pour rembourser")}</div>' + manque.map(function(m){
+          return '<div class="r"><span class="o"></span>' + m + '</div>'; }).join('')
+      : '<div class="ok"><span class="ic">✓</span> ${T("Prêt à rembourser")}</div>';
+  }
+
   function majBouton(){
     var b = document.getElementById('btn-rembourser');
+    majReste();
     if (!b) return;
-    var pret = !!(TOT && TOT.nbArticles && TOT.total > 0) && !enCours;
+    /* ⚠ LE MOTIF EST OBLIGATOIRE, DONC LE BOUTON L ATTEND (2026-10-01) : on
+       pouvait cliquer « Rembourser — 129,95 $ » motif vide, et la fenetre
+       refusait APRES le clic. Le garde de confirmer() reste, en filet. */
+    var motifOk = !!String(val('m-motif') || '').trim();
+    var pret = !!(TOT && TOT.nbArticles && TOT.total > 0) && motifOk && !enCours;
+    b.title = (TOT && TOT.nbArticles && !motifOk) ? '${T("Écrivez d’abord le motif du remboursement.")}' : '';
     b.disabled = !pret;
     b.textContent = enCours ? '${T("Remboursement…")}'
       : (pret ? '${T("Rembourser — ")}' + argent(TOT.retenu ? TOT.net : TOT.total) : '${T("Confirmer le remboursement")}');
@@ -333,6 +371,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function brancher(){
     corps.oninput = function(ev){
       var t = ev.target;
+      if (t && t.id === 'm-motif') majBouton();
       var iq = t.getAttribute && t.getAttribute('data-q');
       if (iq !== null && iq !== undefined) {
         var a = R.articles[parseInt(iq, 10)];

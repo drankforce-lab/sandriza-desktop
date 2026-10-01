@@ -192,5 +192,10 @@ module.exports = {
   'Rembourser': 'Refund',
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
-  'ouverte par': 'open by'
+  'ouverte par': 'open by',
+  "Au moins un article, avec sa quantité": "At least one item, with its quantity",
+  "Le motif du remboursement": "The reason for the refund",
+  "Pour rembourser": "To refund",
+  "Prêt à rembourser": "Ready to refund",
+  "Écrivez d’abord le motif du remboursement.": "Write the reason for the refund first.",
 };
