@@ -43,8 +43,8 @@ module.exports = {
   'Étiquette': 'Label',
   'La liste des retours': 'The return list',
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
-  'Nos Retours — Administration Sandriza': 'Our Returns — Sandriza Administration',
-  'Nos Retours': 'Our Returns',
+  'Nos retours — Administration Sandriza': 'Our returns — Sandriza Administration',
+  'Nos retours': 'Our returns',
   'Retours indisponibles': 'Returns unavailable',
   'Chargement… (les demandes se resynchronisent)':
     'Loading… (the requests are resynchronising)',

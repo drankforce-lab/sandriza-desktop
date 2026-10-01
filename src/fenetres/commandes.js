@@ -161,6 +161,10 @@ tbody tr.attente{background:rgba(124,92,255,.09)}
 .bloc h3{margin:0 0 .25rem;font-size:.67rem;text-transform:uppercase;
   letter-spacing:.08em;color:var(--tx2);font-weight:700}
 .bloc .l{font-size:.85rem}
+/* Le nom, la pastille et « Changer » sur UNE ligne alignee (2026-10-01) : le
+   bouton, plus haut que la ligne, mordait sur celle d en dessous. */
+.bloc .l:has(#det-lier){display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+#det-lier{padding:.1rem .5rem;font-size:.72rem;line-height:1.3}
 .bloc .mut{color:var(--tx2);font-size:.8rem;line-height:1.5}
 .badge2{display:inline-block;font-size:.62rem;padding:.04rem .45rem;border-radius:99px;
   margin-left:.4rem;vertical-align:1px;background:rgba(148,163,184,.18);color:var(--tx-bleute)}
@@ -616,7 +620,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     h += (c.prioritaire ? '<span class="badge2 or"><span class="ic" aria-hidden="true">⚡</span> ${T("Prioritaire")}</span>' : '')
       + (d.remboursements.complet ? '<span class="badge2 vertf"><span class="ic">✅</span> ${T("Remboursée")}</span>'
           : (d.remboursements.lignes.length
-              ? '<span class="badge2 or">↩ ' + d.remboursements.lignes.length + ' ${T("remb.")}</span>' : ''))
+              ? '<span class="badge2 or">↩ ' + d.remboursements.lignes.length + ' ' + szPl(d.remboursements.lignes.length, '${T("remboursement")}', '${T("remboursements")}') + '</span>' : ''))
       + '<span style="margin-left:auto" class="mut">' + esc(dateCourte(c.creeLe)) + '</span>'
       + '</div>';
     h += '<div class="det2">'
@@ -659,13 +663,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
             + esc(String(a.nom || '?').trim().charAt(0).toUpperCase() || '?') + '</span><div>'
             + '<div class="rf-nom">' + esc(a.nom) + '</div>'
             + '<div class="rf-sous"><span>' + esc(a.taille) + ' / ' + esc(a.couleur) + '</span>'
-            + (a.rembourseQte > 0 ? '<span class="rf-pill ambre">' + a.rembourseQte + ' ${T("remb.")}</span>' : '')
+            + (a.rembourseQte > 0 ? '<span class="rf-pill ambre">' + a.rembourseQte + ' ' + szPl(a.rembourseQte, '${T("unité remboursée")}', '${T("unités remboursées")}') + '</span>' : '')
             + '</div></div></div></td>'
             + '<td class="c">' + a.qte + '</td>'
             + '<td class="d">' + argent(a.montant)
             /* Le prix a l unite sous le montant de la ligne, des qu il y en a plus
                d une : « 179,98 $ » seul ne disait pas que c etait deux robes. */
-            + (a.qte > 1 ? '<div class="dt">' + argent(a.montant / a.qte) + ' ${T("ch.")}</div>' : '')
+            + (a.qte > 1 ? '<div class="dt">' + argent(a.montant / a.qte) + ' ${T("/ unité")}</div>' : '')
             + '</td></tr>'; }).join('')
       + '</tbody></table>';
 
@@ -699,7 +703,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
           + argent(rb.fraisRetenus) + '</strong> '
           + (rb.fraisRestants < 0.01 ? '<span class="badge2 vertf"><span class="ic">✅</span> ${T("Remboursés au client")}</span>'
              : rb.fraisRembourses > 0
-               ? '<span class="badge2 or"><span class="ic" aria-hidden="true">⚠</span> ${T("Partiel — remb.")} ' + argent(rb.fraisRembourses) + ' ${T("· reste")} ' + argent(rb.fraisRestants) + '</span>'
+               ? '<span class="badge2 or"><span class="ic" aria-hidden="true">⚠</span> ${T("Partiel — remboursé")} ' + argent(rb.fraisRembourses) + ' ${T("· reste")} ' + argent(rb.fraisRestants) + '</span>'
                : '<span class="badge2 or">${T("⏳ Non remboursés")}</span>') + '</div>';
       }
       hRemb += '<div class="fin3">${T("Total remboursé : −")}' + argent(rb.total)

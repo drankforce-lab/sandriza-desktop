@@ -82,12 +82,12 @@ button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
-/** Page complète de la fenêtre native « Nos Retours ». */
+/** Page complète de la fenêtre native « Nos retours ». */
 function pageRetours() {
   return `${TETE()}
-<title>${T("Nos Retours — Administration Sandriza")}</title>
+<title>${T("Nos retours — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.returns}</span><h1>${T("Nos Retours")}</h1>
+<div class="tete"><span class="ico">${ICO.returns}</span><h1>${T("Nos retours")}</h1>
   <span class="sous" id="sous"></span></div>
 <div class="corps plein" id="corps"><div class="vide charge">${T("Chargement… (les demandes se resynchronisent)")}</div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>

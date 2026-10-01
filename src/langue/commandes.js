@@ -212,7 +212,6 @@ module.exports = {
   'membre': 'member',
   'Paiement Square': 'Square payment',
   'Montant': 'Amount',
-  'ch.': 'each',
 
   /* ══ LE TITRE DES DEUX ECRANS ══════════════════════════════════════════════
    * ⚠⚠ CE FICHIER DESSINE DEUX ECRANS, et son titre se CALCULE avant le
@@ -250,9 +249,7 @@ module.exports = {
   'Bon de commande': 'Picking slip',
   'Facture': 'Invoice',
   'Frais retenus (': 'Fees kept (',
-  'Partiel — remb.': 'Partial — refunded',
   'remb.)': 'refunded)',
-  'remb.': 'refunded',
 
   /* ── LES MOTS SEULS (2026-09-13) ──────────────────────────────────────────
      ⚠ Ils étaient invisibles aux DEUX mesures : le compteur écartait tout texte
@@ -315,4 +312,10 @@ module.exports = {
   'articles': 'items',
   ' par ': ' by ',
   ' sur ': ' of ',
+  "remboursement": "refund",
+  "remboursements": "refunds",
+  "unité remboursée": "unit refunded",
+  "unités remboursées": "units refunded",
+  "/ unité": "/ unit",
+  "Partiel — remboursé": "Partial — refunded",
 };
