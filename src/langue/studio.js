@@ -796,4 +796,7 @@ module.exports = {
   "Une ou plusieurs, dans la photothèque — studio, fond blanc, un vêtement.": "One or more, from the photo library — studio, white background, one garment.",
   "photos choisies": "photos chosen",
   "Ajouter ou changer des photos": "Add or change photos",
+  "Enregistrer et formats": "Save and formats",
+  "Original": "Original",
+  "cadrage du rendu": "as rendered",
 };

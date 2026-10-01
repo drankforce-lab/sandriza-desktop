@@ -521,7 +521,7 @@ html.jour .recap .jt.gris{background:#fff;color:#4a5260}
    sur UNE rangee — la vue est large, et quatre formats se comparent cote a cote. */
 .rimg.fmtv > .rt{display:none}
 .rimg.fmtv .note{margin-top:0}
-.rimg.fmtv .fmtg{grid-template-columns:repeat(4,minmax(0,1fr))}
+.rimg.fmtv .fmtg{grid-template-columns:repeat(5,minmax(0,1fr))}
 .res img{max-width:100%;max-height:min(58vh,32rem);border-radius:9px;
   border:1px solid var(--v10)}
 .res .filig{margin-top:.5rem;font-size:.74rem;color:var(--tx-jaune)}
@@ -2421,17 +2421,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '<span class="cph">⇔</span></div>'
       + '<span class="cet g">${T("Avant")}</span><span class="cet d">${T("Après")}</span></div>';
   }
-  /* ⚠ LA REMARQUE SUR L « AVANT » N EST PLUS A COTE DU COMPARATEUR (2026-10-01,
-     sa capture : « c est trop serre, tu dois pouvoir positionner ca autrement »).
-     Rendue dans le meme rang que l image, elle formait une TROISIEME colonne
-     etroite entre l image et les boutons. Elle rejoint les autres remarques, dans
-     la colonne de droite, au-dessus des boutons. */
-  function avantRemarque(){
-    return (!PHOTO && PHOTO_URL)
-      ? '<div class="avis">${T("L’« avant » est la vignette de la photothèque : un repère de")} '
-        + '${T("cadrage et de couleur, pas un juge de netteté.")}</div>'
-      : '';
-  }
 
   /* ══ LES FORMATS DE SORTIE (lot 3b) ═══════════════════════════════════════
      ⚠⚠ TOUT SE PASSE DANS LA PAGE. Couper et border une image qu on a deja ne
@@ -2535,7 +2524,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function formatsHtml(){
     if (!RESULT) return '';
-    var h = '<span class="rt">${T("Formats de sortie")}</span>'
+    var h = '<span class="rt">${T("Enregistrer et formats")}</span>'
       + '<div class="note">${T("La même image en 3:4, 1:1, 4:5 et 9:16, préparés ici même —")} '
       + '<strong>${T("aucun appel, aucun crédit")}</strong>.</div>'
       + '<div class="fbar">'
@@ -2548,9 +2537,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
        centré COUPE — sur une silhouette entière, le 1:1 emporte forcément le haut
        et le bas. Le taire ferait découvrir la coupe une fois les quatre images
        enregistrées dans la photothèque. */
-    h += '';
+    /* La carte « Original » : l image telle que rendue, a son cadrage, prete a
+       telecharger ou a ranger sans rien preparer (2026-10-01). Son etat
+       d enregistrement est ENREG, le meme que le garde de fermeture lit. */
+    var orig = '<div class="fmtc orig"><img src="' + RESULT.image + '" alt="${T("Original")}" loading="lazy">'
+      + '<span class="ft">${T("Original")}</span>'
+      + '<span class="fd">' + (RESULT.largeur ? RESULT.largeur + ' × ' + RESULT.hauteur : '${T("cadrage du rendu")}') + '</span>'
+      + '<span class="fb">'
+      + '<button id="o-dl" title="${T("Télécharger l’image")}">⤓</button>'
+      + '<button id="o-sv"' + (ENREG || RO ? ' disabled' : '') + ' title="${T("Enregistrer dans la photothèque")}">'
+      + (ENREG ? '✓' : '<span class="ic">💾</span>') + '</button>'
+      + '</span></div>';
+    if (!FORMATS.length) h += '<div class="fmtg">' + orig + '</div>';
     if (FORMATS.length) {
-      h += '<div class="fmtg">' + FORMATS.map(function(f){
+      h += '<div class="fmtg">' + orig + FORMATS.map(function(f){
         return '<div class="fmtc"><img src="' + f.image + '" alt="' + esc(f.label) + '" loading="lazy">'
           + '<span class="ft">' + esc(f.label) + '</span>'
           + '<span class="fd">' + f.largeur + ' × ' + f.hauteur + '</span>'
@@ -2648,7 +2648,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     } else {
       h += '<button class="jeton' + (enImg ? ' on' : '') + '" id="cmp-off">${T("Résultat")}</button>';
     }
-    h += '<button class="jeton' + (enImg ? '' : ' on') + '" id="vue-fmt">${T("Formats de sortie")}'
+    h += '<button class="jeton' + (enImg ? '' : ' on') + '" id="vue-fmt">${T("Enregistrer et formats")}'
       + (FORMATS.length ? ' · ' + FORMATS.length : '') + '</button></div>';
     h += '<div class="resg"><div class="rimg' + (enImg ? '' : ' fmtv') + '" id="rimg">'
       + (enImg ? ((av && CMP) ? comparateurHtml(av) : ('<img src="' + RESULT.image + '" alt="${T("résultat")}">'))
@@ -2660,11 +2660,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (RESULT.ignores) nt += '<div class="filig"><span class="ic">⚠</span> ${T("Le service a <strong>ignoré</strong> : ")}'
       + esc(ignoresLisible(RESULT.ignores)) + '${T(". Le reste du traitement a bien eu lieu.")}</div>';
     if (RESULT.upNote) nt += '<div class="avis">' + esc(RESULT.upNote) + '</div>';
-    if (enImg && av && CMP) nt += avantRemarque();
     if (RESULT.largeur) h += '<div class="dims">' + RESULT.largeur + ' × ' + RESULT.hauteur + ' px</div>';
     if (nt) h += '<div class="notes">' + nt + '</div>';
-    h += '<div class="dl"><button id="b-dl">${T("Télécharger l’image")}</button>'
-      + '<button id="b-save"' + (ENREG ? ' disabled' : '') + '>' + (ENREG ? '${T("✓ Dans la photothèque")}' : '<span class="ic">💾</span> ${T("Enregistrer dans la photothèque")}') + '</button></div>';
+    /* ⚠ PLUS DE BOUTONS ICI (2026-10-01, sa demande : « retire ces options, et le
+       texte aussi »). Telecharger et enregistrer l image a son cadrage d ORIGINE
+       vivent dans « Enregistrer et formats », carte « Original » — sans elle,
+       un rendu PAYE n aurait plus eu aucun moyen d etre garde. */
     return h + '</div></div>';
   }
 
@@ -2854,9 +2855,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
 
   function brancherResultat(){
-    var dl = document.getElementById('b-dl');
+    var dl = document.getElementById('o-dl');
     if (dl && RESULT) dl.onclick = telecharger;
-    var sv = document.getElementById('b-save');
+    var sv = document.getElementById('o-sv');
     if (sv && RESULT) sv.onclick = enregistrerResultat;
     var c1 = document.getElementById('cmp-on');
     if (c1) c1.onclick = function(){ if (CMP && VUE_RES === 'image') return; CMP = true; VUE_RES = 'image'; peindreResultat(); };
@@ -3459,8 +3460,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       occuper(false);
       if (r && r.ok) {
         ENREG = true;
-        var sv = document.getElementById('b-save');
-        if (sv) { sv.textContent = '${T("✓ Dans la photothèque")}'; sv.disabled = true; }
+        var sv = document.getElementById('o-sv');
+        if (sv) { sv.textContent = '✓'; sv.disabled = true; }
         dire('${T("Enregistrée dans la photothèque — vous pouvez l’attacher à un article de là.")}', 'bon');
         // Le travail est a l abri : plus rien a proteger a la fermeture.
         szBrouillonJeter();
