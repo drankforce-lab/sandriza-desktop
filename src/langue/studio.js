@@ -786,5 +786,15 @@ module.exports = {
   'Remplacer': 'Replace',
   'Choisir un fichier': 'Choose a file',
   'Facultatif': 'Optional',
-  'ignoré': 'skipped'
+  'ignoré': 'skipped',
+  "posé": "applied",
+  "Précédent": "Previous",
+  "Suivant": "Next",
+  "Passer": "Skip",
+  "Choisissez d’abord une ambiance": "Choose a mood first",
+  "Dernière étape — l’aperçu se lance en bas de la fenêtre.": "Last step — the preview starts at the bottom of the window.",
+  "Aucune photo choisie": "No photo chosen",
+  "Une ou plusieurs, dans la photothèque — studio, fond blanc, un vêtement.": "One or more, from the photo library — studio, white background, one garment.",
+  "photos choisies": "photos chosen",
+  "Ajouter ou changer des photos": "Add or change photos",
 };

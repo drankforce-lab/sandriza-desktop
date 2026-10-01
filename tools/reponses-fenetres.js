@@ -2751,12 +2751,15 @@ const JEU = {
            `panierHtml()` rendait la chaîne VIDE. Tout le bandeau — le compte, la
            rangée de vignettes, le bouton « Traiter en lot » — n’était dessiné par
            aucun banc. */
-        exige: ['venues de l’explorateur', 'Traiter ces 3 en lot'],
+        exige: ['photos choisies', 'Traiter ces 3 en lot', 'Suivant'],
         reponses: {
           /* ⚠ Forme relevée dans `Photos._panierLireCoeur` et `_photoLigne`
-             (assets/js/photos.js) — pas inventée ici. `apercu` doit être une
-             ADRESSE http pour que la vignette se dessine : sans elle la fenêtre
-             pose un carré d’attente, et l’on éprouverait l’autre chemin.
+             (assets/js/photos.js) — pas inventée ici. `apercu` doit être NON
+             VIDE pour que la vignette se dessine : sans elle la fenêtre pose un
+             carré d’attente, et l’on éprouverait l’autre chemin.
+             ⚠ IMAGE et non une adresse factice (2026-10-01) : `exemple.test` se
+             dessinait en IMAGE CASSÉE, et la capture ne montrait rien de la
+             sélection que la refonte venait de rendre plus visible.
              ⚠ TROIS photos, pas une : le bandeau accorde son texte au pluriel
              (« venues », « ces 3 photos »), et un jeu à une seule photo laisserait
              l’accord jamais éprouvé. */
@@ -2764,19 +2767,33 @@ const JEU = {
             ok: true, quand: 1757000000000,
             photos: [
               { id: 'ph_001', code: 'P-1001', nom: 'Robe cintrée — face',
-                apercu: 'https://exemple.test/ph_001.jpg', enAttente: false, isole: false,
+                apercu: IMAGE, enAttente: false, isole: false,
                 fond: '', lieId: null, lieNom: '', lieSku: '', poids: 412000, poidsSrc: 980000,
                 statut: 'pret', lotId: '', lotNom: '', faits: [] },
               { id: 'ph_002', code: 'P-1002', nom: 'Robe cintrée — dos',
-                apercu: 'https://exemple.test/ph_002.jpg', enAttente: false, isole: true,
+                apercu: IMAGE, enAttente: false, isole: true,
                 fond: 'studio-clair', lieId: 'p_0001', lieNom: 'Robe cintrée', lieSku: 'RB-001',
                 poids: 388000, poidsSrc: 910000, statut: 'pret', lotId: '', lotNom: '', faits: ['detoure'] },
               { id: 'ph_003', code: 'P-1003', nom: 'Chemisier de soie',
-                apercu: 'https://exemple.test/ph_003.jpg', enAttente: false, isole: false,
+                apercu: IMAGE, enAttente: false, isole: false,
                 fond: '', lieId: null, lieNom: '', lieSku: '', poids: 401000, poidsSrc: 955000,
                 statut: 'pret', lotId: '', lotNom: '', faits: [] },
             ],
           },
+          identite: IDENTITE,
+          'studio:presets': PRESETS,
+          'studio:compte': COMPTE,
+        },
+      },
+      /* ⚠ L'ÉTAT VIDE, QU'AUCUN CAS NE DESSINAIT (2026-10-01). Tous les autres
+         ont une sélection ou une photo : l'invitation « Aucune photo choisie »,
+         refaite à sa demande, n'était vue par aucune sonde ni aucun banc. */
+      {
+        nom: 'aucune photo choisie',
+        id: '',
+        exige: ['Aucune photo choisie', 'Ouvrir l’explorateur'],
+        reponses: {
+          'panier:lire': { ok: true, quand: 1757000000000, photos: [] },
           identite: IDENTITE,
           'studio:presets': PRESETS,
           'studio:compte': COMPTE,

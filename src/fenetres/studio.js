@@ -177,6 +177,17 @@ html.jour .onglets .ong.on,html.jour .onglets .ong.on .ot b{color:#3d3526}
 .panneau{flex:1 1 auto;min-width:0;min-height:0;overflow-y:auto;
   background:transparent;border:0;padding:.9rem 1.1rem}
 .pnt{display:flex;align-items:center;gap:.55rem}
+/* Le pied Précédent / Suivant (2026-10-01) : toujours au bas du panneau, quelle
+   que soit la hauteur de l étape — on le cherche au même endroit à chaque fois. */
+.panneau{display:flex;flex-direction:column}
+.panneau .pnc{flex:1 1 auto;min-height:0}
+.pnav{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:.6rem;
+  margin-top:.9rem;padding-top:.7rem;border-top:1px solid var(--v07)}
+.pnav button{padding:.42rem .85rem;font-size:.8rem}
+.pnav .pnp{background:transparent;border-color:transparent;color:var(--tx2)}
+.pnav .pnp:hover{color:var(--tx);background:var(--v05)}
+.pnav .pnn{font-weight:400;opacity:.8}
+.pnav .pnf{font-size:.72rem;color:var(--tx3);text-align:right}
 .pnt h2{margin:0;font:700 1.05rem/1.2 Georgia,serif}
 .panneau .sous{margin:.28rem 0 .5rem;font-size:.74rem;color:var(--tx3);line-height:1.4}
 .onglets::-webkit-scrollbar,.panneau::-webkit-scrollbar{width:8px}
@@ -279,16 +290,15 @@ html.jour .onglets .ong.on,html.jour .onglets .ong.on .ot b{color:#3d3526}
    « retire cela ». La photo vient de la PHOTOTHEQUE, par l explorateur : c est
    la ou elles sont toutes, rangees, et c est lui qui porte la recherche, les
    filtres et la multi-selection. Un seul chemin, dit clairement. */
-.choixph{display:flex;flex-wrap:wrap;align-items:center;gap:.8rem .9rem;padding:1rem 1.1rem;border-radius:12px;
-  background:var(--f-champ);border:1px solid var(--v10)}
-.choixph .ico{flex:0 0 auto;width:2.6rem;height:2.6rem;border-radius:10px;display:flex;
-  align-items:center;justify-content:center;background:rgba(201,169,126,.14);color:var(--tx-or)}
-.choixph .ico svg{width:22px;height:22px}
+.choixph{display:flex;flex-direction:column;align-items:center;text-align:center;gap:.35rem;
+  padding:1.6rem 1.2rem 1.4rem;border-radius:12px;background:transparent;border:1.5px dashed var(--v20)}
+.choixph .ico{width:2.4rem;height:2.4rem;border-radius:50%;display:flex;margin-bottom:.25rem;
+  align-items:center;justify-content:center;background:rgba(201,169,126,.12);color:var(--tx-or)}
+.choixph .ico svg{width:19px;height:19px}
 html.jour .choixph .ico{color:#6a5840}
-.choixph .tx{flex:1 1 auto;min-width:0}
-.choixph .tx b{display:block;font-size:.88rem;color:var(--tx)}
-.choixph .tx span{display:block;font-size:.74rem;color:var(--tx2);margin-top:.1rem}
-.choixph button{flex:1 1 100%;justify-content:center;padding:.6rem 1rem}
+.choixph b{font-size:.86rem;font-weight:700;color:var(--tx)}
+.choixph .ds{font-size:.74rem;color:var(--tx2);max-width:19rem;line-height:1.45}
+.choixph button{margin-top:.6rem;padding:.45rem 1rem;font-size:.8rem}
 /* La barre de l ecran plein largeur (le suivi des lots).
    ⚠ LE RESTE DE CE BLOC EST PARTI AVEC LE SELECTEUR (#30, le 2026-09-19) :
    grille, vignettes, coches, pastilles, filtres et panier de selection. Du CSS
@@ -306,16 +316,18 @@ html.jour .choixph .ico{color:#6a5840}
 .jeton.on{background:rgba(201,169,126,.2);border-color:#c9a97e;color:var(--tx-creme);font-weight:600}
 .jeton.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
 /* Le panier venu de l explorateur : ce qu on s apprete a traiter. */
-.panier{margin-top:.55rem;padding:.5rem .6rem;border-radius:10px;
-  background:rgba(201,169,126,.1);border:1px solid rgba(201,169,126,.35)}
-.panier .pt{display:flex;align-items:center;gap:.4rem;font-size:.8rem;margin-bottom:.4rem}
-.panier .pt .dt{color:var(--tx2);font-size:.74rem}
-.panier .pt button{margin-left:auto}
-.panier .pv{display:flex;gap:.25rem;align-items:center;flex-wrap:wrap;margin-bottom:.45rem}
-.panier .pv img{width:2.2rem;height:2.2rem;object-fit:contain;border-radius:5px;background:var(--f-pied)}
-.panier .pv .tr{width:2.2rem;height:2.2rem;border-radius:5px;background:var(--v06)}
+.panier{padding:.75rem .8rem;border-radius:12px;background:var(--f-champ);border:1px solid var(--v10)}
+.panier .pt{display:flex;align-items:flex-start;gap:.5rem;font-size:.84rem;margin-bottom:.6rem}
+.panier .pt .pti{display:flex;flex-direction:column;min-width:0;gap:.1rem}
+.panier .pt .dt{color:var(--tx2);font-size:.74rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.panier .pt button{margin-left:auto;flex:0 0 auto}
+.panier .pv{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;margin-bottom:.7rem}
+.panier .pv img{width:3.6rem;height:3.6rem;object-fit:cover;border-radius:7px;background:var(--f-pied);display:block}
+.panier .pv .tr{display:block;width:3.6rem;height:3.6rem;border-radius:7px;background:var(--v06)}
+.panier .pnl{display:flex;gap:.4rem;flex-wrap:wrap}
+.panier .pnl button{flex:1 1 auto;font-size:.78rem;padding:.4rem .7rem}
 .panier .pv .pl{font-size:.72rem;color:var(--tx2)}
-.panier .pvb{padding:0;border:2px solid transparent;border-radius:7px;background:none;line-height:0}
+.panier .pvb{padding:0;border:2px solid transparent;border-radius:9px;background:none;line-height:0}
 .panier .pvb.on{border-color:#c9a97e}
 .panier .pvb:hover:not(.on){border-color:var(--v20)}
 /* L apercu de la photo de depart, a droite, avant tout rendu (2026-09-25). */
@@ -324,7 +336,6 @@ html.jour .choixph .ico{color:#6a5840}
 .srcap .nm{font-size:.8rem;color:var(--tx2)}
 .navp{display:flex;align-items:center;justify-content:center;gap:.6rem;font-size:.82rem;color:var(--tx2)}
 .navp button{min-width:2.3rem;height:2.1rem;font-size:1.05rem;line-height:1}
-.panier button.prim{width:100%}
 /* ── Suivi des lots ──────────────────────────────────────────────────────── */
 .lots{display:flex;flex-direction:column;gap:.5rem;max-height:calc(100vh - 14rem);overflow-y:auto}
 .lotc{background:var(--f-pill);border:1px solid var(--v09);border-radius:10px;padding:.5rem .65rem}
@@ -1180,10 +1191,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function panierHtml(){
     if (!PANIER.length) return '';
     var n = PANIER.length;
+    /* REFONTE 2026-10-01 : la sélection se VOIT — des vignettes de vraie taille,
+       le nom de celle qui est ouverte, et « Retirer » en mots plutôt qu une
+       croix. Le lot devient un geste secondaire : le chemin principal est
+       « Suivant », au pied de l étape. */
+    var ouverte = PANIER[PANIER_IDX] || PANIER[0] || {};
     return '<div class="panier"><div class="pt">'
-      + '<strong>' + n + ' ' + (n > 1 ? '${T("photos")}' : '${T("photo")}') + '</strong> '
-      + '<span class="dt">' + (n > 1 ? '${T("venues de l’explorateur")}' : '${T("venue de l’explorateur")}') + '</span>'
-      + '<button class="mini" id="pn-vider" title="${T("Oublier cette sélection")}">✕</button></div>'
+      + '<span class="pti"><strong>' + n + ' ' + (n > 1 ? '${T("photos choisies")}' : '${T("photo choisie")}') + '</strong>'
+      + '<span class="dt">' + esc(ouverte.nom || ouverte.code || '') + (n > 1 ? ' · ' + (PANIER_IDX + 1) + ' / ' + n : '') + '</span></span>'
+      + '<button class="mini" id="pn-vider" title="${T("Oublier cette sélection")}">${T("Retirer")}</button></div>'
       + '<div class="pv">' + PANIER.slice(0, 8).map(function(p, i){
           // ⚠ MEME DEFAUT QUE LA GRILLE (#143) : sans vignette demandee a part,
           // le panier ne montrait que des cases grises.
@@ -1196,7 +1212,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
             + (s ? '<img src="' + esc(s) + '" alt="" loading="lazy">' : '<span class="tr"></span>')
             + '</button>'; }).join('')
       + (n > 8 ? '<span class="pl">+' + (n - 8) + '</span>' : '') + '</div>'
-      + '<button class="prim" id="pn-lot">${T("⚙ Traiter")} ' + (n > 1 ? ('${T("ces")} ' + n) : '${T("cette photo")}') + ' ${T("en lot…")}</button>'
+      + '<div class="pnl"><button id="pn-lot">${T("⚙ Traiter")} ' + (n > 1 ? ('${T("ces")} ' + n) : '${T("cette photo")}') + ' ${T("en lot…")}</button>'
+      + '<button id="pn-plus" title="${T("Ajouter ou changer des photos")}">${T("Ouvrir l’explorateur…")}</button></div>'
       + '</div>';
   }
 
@@ -1318,9 +1335,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       return h;
     }
     // ③ Rien de choisi : l explorateur, seul chemin (plus de zone de dépôt — 2026-09-30).
+    /* REFONTE 2026-10-01 (sa capture : « plus discret quand aucune photo n est
+       sélectionnée ») : un cadre en pointillé, sans fond, et un bouton à sa
+       taille — l invitation se voit, elle ne crie pas. */
     h += '<div class="choixph"><span class="ico" aria-hidden="true">${ICO.image}</span>'
-      + '<div class="tx"><b>${T("Choisissez la photo dans la photothèque")}</b>'
-      + '<span>${T("Une ou plusieurs — studio, fond blanc, un vêtement.")}</span></div>'
+      + '<b>${T("Aucune photo choisie")}</b>'
+      + '<span class="ds">${T("Une ou plusieurs, dans la photothèque — studio, fond blanc, un vêtement.")}</span>'
       + '<button class="prim" id="ph-explorateur" title="${T("Parcourir la photothèque en grand, avec aperçu")}">'
       + '${T("Ouvrir l’explorateur…")}</button></div>';
     return h;
@@ -1835,7 +1855,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (cle === 'lumiere')   return AV.lumiere ? 'active' : '';
     if (cle === 'interieur') return INTERIEUR ? (INTERIEUR_NOM || 'photo choisie') : '';
     if (cle === 'agrandir')  return AV.upActive ? '×4' : '';
-    if (cle === 'filigrane') { var l = logoChoisi(); return l ? l.nom : ''; }
+    /* ⚠⚠ LE FILIGRANE SE DIT POSÉ, PAS PRÉSÉLECTIONNÉ (2026-10-01, sa capture :
+       « Filigrane se marque en vert » alors qu il n avait rien fait). Un logo
+       seul dans la logothèque est pris d office (chargerLogos) — c est un
+       raccourci de réglage, pas un geste : tant que « Appliquer » n a pas
+       posé la marque, l étape est « ignorée », et le dit. */
+    if (cle === 'filigrane') {
+      if (!(RESULT && RESULT.filigrane)) return '';
+      var l = logoChoisi(); return l ? l.nom : '${T("posé")}';
+    }
     return '';
   }
   /* Les deux onglets qu il FAUT remplir pour lancer quoi que ce soit. Les autres
@@ -1928,7 +1956,46 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     else if (o.cle === 'filigrane') corpsG = filigraneCorpsHtml();
     return '<div class="pnt"><h2>' + esc(o.t) + '</h2></div>'
       + '<p class="sous">' + panneauSousHtml(o.cle) + '</p>'
-      + '<div class="pnc">' + corpsG + '</div>';
+      + '<div class="pnc">' + corpsG + '</div>'
+      + pnavHtml(o.cle);
+  }
+  /* ══ PRÉCÉDENT / SUIVANT, AU PIED DE CHAQUE ÉTAPE (2026-10-01, sa demande :
+     « tu vois un genre de suivant et précédent dans le studio ») ══════════════
+     ⚠ « SUIVANT » EST LE GESTE QUI VALIDE. Une étape dont la valeur est un
+     DÉFAUT (la mise en valeur part sur « mannequin virtuel ») ne se coche
+     qu ici : passer à la suite, c est dire « c est ce que je veux ».
+     ⚠ Il se GRISE sur une étape obligatoire vide (et le titre dit pourquoi),
+     et devient « Passer » sur une facultative vide : on ne valide pas un vide,
+     on le saute — l onglet reste « ignoré », sans coche. */
+  function pnavHtml(cle){
+    var d = ongletsDispo(), i = -1;
+    for (var k = 0; k < d.length; k++) if (d[k].cle === cle) i = k;
+    if (i < 0) return '';
+    var prec = d[i - 1], suiv = d[i + 1];
+    var h = '<div class="pnav">';
+    h += prec ? '<button type="button" class="pnp" data-pnav="' + prec.cle + '">‹ ${T("Précédent")}</button>' : '<span></span>';
+    if (suiv) {
+      var vide = !ongletEtat(cle) && cle !== 'valeur';
+      var bloque = (ongletRequis(cle) && vide) || ongletsFermes();
+      var pourquoi = cle === 'photo' ? '${T("Choisissez d’abord une photo")}' : '${T("Choisissez d’abord une ambiance")}';
+      h += '<button type="button" class="pns' + (vide ? '' : ' prim') + '" data-pnav="' + suiv.cle + '" data-pval="' + cle + '"'
+        + (bloque ? ' disabled title="' + pourquoi + '"' : '') + '>'
+        + (vide && !ongletRequis(cle) ? '${T("Passer")}' : '${T("Suivant")}')
+        + ' <span class="pnn">· ' + esc(suiv.t) + '</span> ›</button>';
+    } else {
+      h += '<span class="pnf">${T("Dernière étape — l’aperçu se lance en bas de la fenêtre.")}</span>';
+    }
+    return h + '</div>';
+  }
+  function brancherPnav(){
+    corps.querySelectorAll('[data-pnav]').forEach(function(el){
+      el.onclick = function(){
+        if (OCCUPE || el.disabled) return;
+        if (el.getAttribute('data-pval') === 'valeur') VOIE_CHOISIE = true;
+        ONGLET = el.getAttribute('data-pnav');
+        majPanneau();
+      };
+    });
   }
   function panneauSousHtml(cle){
     if (cle === 'photo')     return '${T("Celle de départ, prise en studio sur fond blanc.")}';
@@ -2641,6 +2708,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
 
   function brancher(){
+    brancherPnav();
     var depot = document.getElementById('depot');
     var fichier = document.getElementById('fichier');
     if (depot && fichier && !RO && !aUnePhoto()) {
@@ -2661,12 +2729,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
        ⚠ LA TÂCHE À PART EST FAITE : le sélecteur interne plein écran est retiré
        le 2026-09-19 (#30), sur sa décision #31. */
     var px = document.getElementById('ph-explorateur');
-    if (px) px.onclick = function(){
+    var pxp = document.getElementById('pn-plus');
+    if (pxp) pxp.onclick = ouvrirExplorateur;
+    if (px) px.onclick = ouvrirExplorateur;
+    function ouvrirExplorateur(){
       appeler('explorateur:ouvrir', []).then(function(r){
         dire(r && r.ok ? '${T("Explorateur ouvert dans sa fenêtre.")}' : expliquer(r),
           (r && r.ok) ? 'bon' : 'err');
       });
-    };
+    }
     var lv = document.getElementById('lots-voir');
     if (lv) lv.onclick = function(){ LOTS_VUE = true; chargerLots(); dessiner(); };
     var pnv = document.getElementById('pn-vider');
