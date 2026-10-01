@@ -232,7 +232,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
        ce poste. Voir JS_TUILES dans socle.js. */
     var h = szTuiles('<div class="tuiles">'
       + '<div class="tuile"><div class="k">${T("Commandes")}</div><div class="v">' + R.stats.commandes + '</div></div>'
-      + '<div class="tuile"><div class="k">${T("Retours")}</div><div class="v' + (R.stats.retours ? ' err' : '') + '">' + R.stats.retours + '</div></div>'
+      + '<div class="tuile"><div class="k">${T("Retours")}</div><div class="v">' + R.stats.retours + '</div></div>'
       + '<div class="tuile"><div class="k">${T("Total dépensé")}</div><div class="v">' + argent(R.stats.totalDepense) + '</div></div>'
       + '<div class="tuile"><div class="k">${T("Inscrit le")}</div><div class="v date">' + esc(dateFr(c.inscritLe)) + '</div></div>'
       + '</div>');
@@ -255,9 +255,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
               + '<div class="rf-sous">' + esc(dateFr(o.date)) + '</div></div>'
               + (st[1] ? '<span class="rf-pill' + st[0] + '">' + esc(st[1]) + '</span>' : '')
               + '<span class="total">' + argent(o.total) + '</span></div>'; }).join('')
-          + (R.stats.commandes > 6 ? '<div class="aide" style="text-align:center;padding-top:.35rem">+ '
-            + (R.stats.commandes - 6) + ' '
-            + (R.stats.commandes - 6 > 1 ? '${T("autres")}' : '${T("autre")}')
+          /* ⚠ LE RESTE SE COMPTE SUR CE QUI EST AFFICHE (2026-10-01), pas sur un 6 ecrit
+             en dur : avec 2 commandes recues sur 8, l ecran disait « + 2 autres ». */
+          + (R.stats.commandes > R.dernieres.length ? '<div class="aide" style="text-align:center;padding-top:.35rem">+ '
+            + (R.stats.commandes - R.dernieres.length) + ' '
+            + (R.stats.commandes - R.dernieres.length > 1 ? '${T("autres")}' : '${T("autre")}')
             + ' ${T("— voir la fenêtre Commandes")}</div>' : '')
         : '<div class="aide">${T("Aucune commande.")}</div>')
       + '</div>';
