@@ -23,7 +23,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU, SEP_DEC } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -631,11 +631,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
           + '" placeholder="Ex : Meta Platforms">', 'f-four')
       + '<div class="bloc-montants"><div class="trois">'
       + '<div class="champ"><label for="f-montant">${T("Montant (hors taxes)")}</label>'
-      + '<input type="number" step="0.01" min="0" id="f-montant" value="' + esc(f.montant) + '" placeholder="0.00"></div>'
+      + '<input type="number" step="0.01" min="0" id="f-montant" value="' + esc(f.montant) + '" placeholder="0${SEP_DEC()}00"></div>'
       + '<div class="champ"><label for="f-tps">${T("TPS payée")}</label>'
-      + '<input type="number" step="0.01" min="0" id="f-tps" value="' + esc(f.tps) + '" placeholder="0.00"></div>'
+      + '<input type="number" step="0.01" min="0" id="f-tps" value="' + esc(f.tps) + '" placeholder="0${SEP_DEC()}00"></div>'
       + '<div class="champ"><label for="f-tvq">${T("TVQ payée")}</label>'
-      + '<input type="number" step="0.01" min="0" id="f-tvq" value="' + esc(f.tvq) + '" placeholder="0.00"></div>'
+      + '<input type="number" step="0.01" min="0" id="f-tvq" value="' + esc(f.tvq) + '" placeholder="0${SEP_DEC()}00"></div>'
       + '<button id="f-taxes" title="${T("Déduire TPS et TVQ d’un total payé saisi dans ")}${T("Montant")}">${T("↧ Calc. taxes")}</button>'
       + '</div>'
       /* ⚠ LE MONTANT D ORIGINE RESTE SOUS LES YEUX pendant la saisie : c est la

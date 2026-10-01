@@ -229,10 +229,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('abonnes')}
             + f[1] + '</button>';
         }).join('')
       + '<span class="rf-droite">'
+      // Le compte AVANT les boutons, comme dans toutes les autres listes (2026-10-01).
+      + '<span class="dt">' + rows.length + (rows.length > 1 ? '${T(" abonnés")}' : '${T(" abonné")}') + '</span>'
       + (D.peutModifier
           ? '<button class="rf-jet" id="ab-import">${T("Importer")}</button>'
             + '<button class="prim" id="ab-nouveau" style="height:2.4rem;padding:0 .9rem">${T("+ Ajouter")}</button>' : '')
-      + '<span class="dt">' + rows.length + (rows.length > 1 ? '${T(" abonnés")}' : '${T(" abonné")}') + '</span>'
       + '</span></div></div>';
 
     h += '<div class="carte">';
