@@ -5610,7 +5610,11 @@ const JEU = {
     {
       nom: 'liste garnie',
       id: '',
+      /* ⚠ LE PANIER DU STUDIO EST DEJA GARNI (2026-10-01) : l explorateur doit
+         rouvrir avec ces photos COCHEES — c etait le defaut, il repartait vide. */
+      exige: ['déjà au Studio'],
       reponses: {
+        'panier:lire': { ok: true, quand: 1757000000000, photos: [{ id: 'ph_1' }, { id: 'ph_3' }] },
         'studio:explorer': {
           ok: true, charge: true, peutModifier: true,
           total: 34, trouvees: 34, page: 0, taille: 500, pages: 1,

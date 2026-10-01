@@ -281,6 +281,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   document.addEventListener('click', function(){ if (MENU_F) { MENU_F = false; dessinerBarre(); } });
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && MENU_F) { MENU_F = false; dessinerBarre(); } });
   var SEL = {};            // { id: true }
+  /* ⚠⚠ LA SELECTION DU STUDIO EST LE POINT DE DEPART (2026-10-01, sa demande :
+     « quand on reclique sur Ouvrir l explorateur, les photos choisies devraient
+     rester cochees, et si j en rajoute elles devraient se rajouter »).
+     L explorateur repartait d une selection VIDE, et « Envoyer » REMPLACAIT le
+     panier : rouvrir pour ajouter une photo faisait perdre les dix d avant.
+     On relit donc le panier a l ouverture et on le coche ; ce qu on coche en
+     plus s y AJOUTE, et « Envoyer » remet l ensemble. Decocher une photo du
+     Studio ici l en retire — c est la meme selection, vue d ici.
+     AU_STUDIO garde ce que le Studio a deja : le pied dit combien sont neuves. */
+  var AU_STUDIO = {};
+  function reprendrePanier(){
+    appeler('panier:lire', []).then(function(r){
+      if (!r || !r.ok) return;
+      AU_STUDIO = {};
+      (r.photos || []).forEach(function(p){ if (p && p.id) { AU_STUDIO[p.id] = true; SEL[p.id] = true; } });
+      if (D) majSelection();
+    });
+  }
   var ANCRE = null;        // index de depart pour la selection Maj-clic
   // Pagination (#30) : le nombre de lignes est MESURE sur la hauteur reelle.
   // ⚠ SEL est keye par IDENTIFIANT : changer de page n y touche pas.
@@ -954,8 +972,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var n = Object.keys(SEL).length;
     var dispo = (D && D.tousLesIds) ? D.tousLesIds.length : 0;
     cptEl.className = 'cpt' + (n ? ' on' : '');
+    var neuves = Object.keys(SEL).filter(function(id){ return !AU_STUDIO[id]; }).length;
+    var deja = n - neuves;
     cptEl.textContent = n
-      ? (n + ' ' + (n > 1 ? '${T("sélectionnées")}' : '${T("sélectionnée")}'))
+      ? (n + ' ' + (n > 1 ? '${T("sélectionnées")}' : '${T("sélectionnée")}')
+         + (deja ? ' — ' + deja + ' ' + '${T("déjà au Studio")}' + (neuves ? ', ' + neuves + ' ' + (neuves > 1 ? '${T("nouvelles")}' : '${T("nouvelle")}') : '') : ''))
       : '${T("Aucune sélection")}';
     actionsEl.innerHTML =
       '<button class="jeton" id="a-tout"' + (dispo ? '' : ' disabled') + '>${T("Tout (")}' + dispo + ')</button>'
@@ -1005,6 +1026,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         dire(r.combien + ' '
           + (r.combien > 1 ? '${T("photos envoyées")}' : '${T("photo envoyée")}')
           + '${T(" au Studio — le traitement se lance là-bas.")}', 'bon');
+        AU_STUDIO = {}; ids.forEach(function(id){ AU_STUDIO[id] = true; });
         /* ⚠ ON FERME, ET C EST LE GESTE JUSTE (demande du 2026-08-14 : << quand
            on fait envoyer au studio ca devrait fermer l explorateur
            automatiquement >>). L explorateur est un SELECTEUR : une fois la
@@ -1115,7 +1137,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (q && document.activeElement === q && q.value) return;
     charger();
   };
-  window.szRevenir = function(){ charger(); };
+  // Rouverte depuis le Studio : on recoche ce qu il a (sans rien decocher de ce
+  // qu on avait commence a choisir ici).
+  window.szRevenir = function(){ reprendrePanier(); charger(); };
 
   document.addEventListener('keydown', function(ev){
     /* ⚠ LA VISIONNEUSE SE FERME LA PREMIERE (#143). Sans ce cas AVANT l autre,
@@ -1134,6 +1158,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
   });
 
+  reprendrePanier();
   charger();
   if (${annulerTemoin ? 'true' : 'false'}) {
     /* On attend que la photothèque soit là : ouvert avant, le voile ne saurait
