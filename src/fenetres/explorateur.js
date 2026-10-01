@@ -171,6 +171,14 @@ html.jour .apercu .accueil .ico{color:#6a5840}
 .pt{font-size:.62rem;padding:.02rem .26rem;border-radius:4px;
   background:var(--v08);color:var(--tx-bleute)}
 .pt.fait{color:var(--tx-ok)}
+/* ⚠ DE JOUR, SUR UNE LIGNE COCHEE (fond beige), le vert du socle tombait a 4.33
+   (mesure au rendu, 2026-10-01) : aucun cas ne dessinait de ligne cochee avant
+   que le panier du Studio n arrive coche. Un vert plus fonce, partout de jour. */
+html.jour .pt.fait{color:#17582f}
+html.jour tr.pris .pt{color:#39414c}
+html.jour tr.pris .pt.fait{color:#17582f}
+html.jour tr.pris .pt.ret{color:#5c4318}
+html.jour tr.pris .pt.retard{color:#8a3d0a}
 /* Le retour en arriere possible — dore, comme tout ce qui se decide ici. */
 .pt.ret{color:var(--tx-or)}
 /* La fiche produit en retard : c est un avertissement, pas un etat neutre. */
