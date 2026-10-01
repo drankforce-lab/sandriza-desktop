@@ -285,7 +285,7 @@ module.exports = {
   /* ⚠ IL NE COUTE RIEN, ET L ECRAN LE DIT DEUX FOIS : c est ce qui distingue ce
      geste de tous les autres de cette fenetre. La phrase se traduit sans perdre
      le « aucun appel, aucun credit ». */
-  'Mise en valeur': 'Branding',
+  'Mise en valeur': 'Presentation',
   'Aucun logo dans la logothèque.': 'No logo in the logo library.',
   'Ajoutez-en un dans Configuration ▸ Logothèque , puis rouvrez cet écran.':
     'Add one under Configuration ▸ Logo library , then reopen this screen.',

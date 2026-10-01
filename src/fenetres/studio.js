@@ -180,10 +180,15 @@ html.jour .onglets .ong.on,html.jour .onglets .ong.on .ot b{color:#3d3526}
 /* Le pied Précédent / Suivant (2026-10-01) : toujours au bas du panneau, quelle
    que soit la hauteur de l étape — on le cherche au même endroit à chaque fois. */
 .panneau{display:flex;flex-direction:column}
-.panneau .pnc{flex:1 1 auto;min-height:0}
+/* ⚠ overflow-y:auto ET NON visible (2026-10-01) : un contenu trop haut passait
+   SOUS le pied sans que rien ne defile — donc sans qu aucune sonde le voie. Il
+   defile maintenant, ce que sonde-debord.js mesure (0 exige a 1400 x 833 ;
+   en dessous, defiler reste admis, chevaucher jamais). */
+.panneau .pnc{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden}
 .pnav{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:.6rem;
   margin-top:.9rem;padding-top:.7rem;border-top:1px solid var(--v07)}
-.pnav button{padding:.42rem .85rem;font-size:.8rem}
+.pnav button{padding:.42rem .85rem;font-size:.8rem;white-space:nowrap;flex:0 0 auto}
+.pnav .pnact{display:flex;gap:.4rem;margin-left:auto}
 .pnav .pnp{background:transparent;border-color:transparent;color:var(--tx2)}
 .pnav .pnp:hover{color:var(--tx);background:var(--v05)}
 .pnav .pnn{font-weight:400;opacity:.8}
@@ -238,12 +243,12 @@ html.jour .onglets .ong.on,html.jour .onglets .ong.on .ot b{color:#3d3526}
 .logv.on{border-color:#c9a97e;box-shadow:0 0 0 1px #c9a97e inset;background:rgba(201,169,126,.1)}
 /* ⚠ Fond CLAIR sous le logo : la plupart sont noirs sur transparent, et sur le
    fond sombre de cet ecran ils seraient invisibles — on choisirait a l aveugle. */
-.logv img{width:100%;height:3.4rem;object-fit:contain;background:#e8edf5;border-radius:5px;padding:.15rem}
+.logv img{width:100%;height:2.55rem;object-fit:contain;background:#e8edf5;border-radius:5px;padding:.15rem}
 .logv .ln{font-size:.66rem;color:var(--tx2);max-width:100%;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Les neuf ancrages, disposes comme ils le seront sur l image. */
-.posgr{display:grid;grid-template-columns:repeat(3,2.3rem);gap:.25rem}
-.posc{padding:0;width:2.3rem;height:2.3rem;display:flex;align-items:center;justify-content:center}
+.posgr{display:grid;grid-template-columns:repeat(3,2rem);gap:.2rem}
+.posc{padding:0;width:2rem;height:2rem;display:flex;align-items:center;justify-content:center}
 .posc span{display:block;width:.6rem;height:.6rem;border-radius:2px;background:var(--v35)}
 .posc.on{border-color:#c9a97e;background:rgba(201,169,126,.16)}
 .posc.on span{background:#c9a97e}
@@ -1685,11 +1690,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     h += chRange2('fil-taille', '${T("Largeur du logo")}', FIL.taille, 5, 60, 1, ' ${T("% de l’image")}');
     h += chRange2('fil-op', '${T("Opacité")}', Math.round(FIL.opacite * 100), 5, 100, 5, ' %');
     h += chRange2('fil-marge', '${T("Marge")}', FIL.marge, 0, 15, 1, ' %');
-    h += '<div class="avun"><div class="fbar">'
-      + '<button class="prim" id="fil-go"' + ((imageAMarquer() && lg && !RO) ? '' : ' disabled') + '>'
-      + (RESULT ? '${T("Appliquer au résultat")}' : '${T("Appliquer à la photo")}') + '</button>'
-      + ((RESULT && RESULT.filigrane) ? '<button id="fil-off">${T("Retirer")}</button>' : '')
-      + '</div>'
+    /* ⚠ LES BOUTONS « APPLIQUER » / « RETIRER » SONT AU PIED (2026-10-01) — voir
+       filigraneActionsHtml. Ici ne reste que la phrase qui dit ce qu ils feront. */
+    h += '<div class="avun">'
       /* ⚠⚠ CETTE LIGNE AVAIT DISPARU (4.57.0, l outil de retrait des textes) : le
          bouton restait grise SANS DIRE POURQUOI, et il a pense que le filigrane
          << ne marche pas bien >> (2026-09-25). Un bouton grise dit ce qu il
@@ -1704,6 +1707,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
          traitement de cet écran dont le prix ne dépend pas du nombre de photos. */
       + '</div>';
     return h + '</div>';
+  }
+
+  /* ⚠⚠ L ACTION DE LA DERNIERE ETAPE VIT DANS LE PIED (2026-10-01). Le pied
+     Precedent / Suivant (6.44) avait pris sa hauteur au panneau : avec deux
+     logos, « Appliquer » passait 81 px SOUS lui a 1400 x 833 — injoignable, et
+     aucune sonde ne le voyait (rien ne defilait : ca chevauchait). La derniere
+     etape n a pas de « Suivant » : son geste prend sa place, a l endroit ou l on
+     cherche le bouton qui fait avancer. */
+  function filigraneActionsHtml(){
+    if (!LOGOS.length) return '';
+    var lg = logoChoisi();
+    return '<span class="pnact">'
+      + ((RESULT && RESULT.filigrane) ? '<button type="button" id="fil-off">${T("Retirer")}</button>' : '')
+      + '<button type="button" class="prim" id="fil-go"' + ((imageAMarquer() && lg && !RO) ? '' : ' disabled') + '>'
+      + (RESULT ? '${T("Appliquer au résultat")}' : '${T("Appliquer à la photo")}') + '</button></span>';
   }
 
   // Le filigrane est devenu un ONGLET (lot 3g) : il n a plus de section repliée
@@ -1982,6 +2000,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         + (bloque ? ' disabled title="' + pourquoi + '"' : '') + '>'
         + (vide && !ongletRequis(cle) ? '${T("Passer")}' : '${T("Suivant")}')
         + ' <span class="pnn">· ' + esc(suiv.t) + '</span> ›</button>';
+    } else if (cle === 'filigrane' && LOGOS.length) {
+      h += filigraneActionsHtml();
     } else {
       h += '<span class="pnf">${T("Dernière étape — l’aperçu se lance en bas de la fenêtre.")}</span>';
     }
