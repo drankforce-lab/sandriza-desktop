@@ -49,7 +49,7 @@ body{background:var(--f-page);color:var(--tx);
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.85rem 1.05rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#1b2233,#0e1522)}
-.tete h1{margin:0;font:700 .98rem/1.3 inherit;color:var(--tx)}
+.tete h1{margin:0;font-weight:700;font-size:.98rem;line-height:1.3;font-family:inherit;color:var(--tx)}
 /* La pastille porte le seul accent de couleur de la boîte. Elle ne crie pas :
    une déconnexion demandée n'est pas un incident, c'est une fin de journée. */
 .rond{flex:0 0 auto;width:30px;height:30px;border-radius:50%;
@@ -64,7 +64,7 @@ body{background:var(--f-page);color:var(--tx);
 html.jour .rond{background:rgba(125,95,60,0.14);color:#6f5535}
 .corps{flex:1 1 auto;min-height:0;overflow-y:auto;padding:1.05rem;
   display:flex;flex-direction:column;justify-content:center}
-.q{margin:0;font:600 1rem/1.45 inherit;color:var(--tx)}
+.q{margin:0;font-weight:600;font-size:1rem;line-height:1.45;font-family:inherit;color:var(--tx)}
 .qui{margin:.55rem 0 0;font-size:.85rem;color:var(--tx2)}
 .qui b{color:var(--tx);font-weight:600}
 .note{margin:.85rem 0 0;font-size:.79rem;color:var(--tx2)}

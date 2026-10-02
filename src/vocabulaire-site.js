@@ -40,6 +40,18 @@
  *   « Expédiée »…) que le site n envoie jamais : on ne les met PAS ici.
  */
 module.exports = {
+  /* Categories de la boutique (admin.js CAT_LABELS, _NAV_CAT_LABELS ; DB.getInvCats) —
+     elles arrivent en `categorie: "Hauts & Blouses"` dans Codes-barres, Produits,
+     Liquidation et Collection. Sa capture du 2026-10-02 (Codes-barres en anglais).
+     Memes mots que src/langue/libelles.js. */
+  'Robes': 'Dresses',
+  'Hauts & Blouses': 'Tops & Blouses',
+  'Pantalons & Jeans': 'Trousers & Jeans',
+  'Pantalons': 'Trousers',
+  'Jupes': 'Skirts',
+  'Manteaux & Vestes': 'Coats & Jackets',
+  'Chaussures': 'Shoes',
+  'Accessoires': 'Accessories',
   /* Reseaux sociaux — configuration des jetons (social.js, _SOC_CLES), 2026-09-29 */
   'Jeton de longue durée (Page Access Token) — Meta for Developers → Graph API Explorer.': 'Long-lived token (Page Access Token) — Meta for Developers → Graph API Explorer.',
   'Jeton Instagram Business — même application Meta, avec l’API Instagram Graph activée.': 'Instagram Business token — same Meta app, with the Instagram Graph API enabled.',

@@ -2881,13 +2881,16 @@ const CSS_TUILES = `
    ⚠ L OPACITE EST LE PIEGE, pas la teinte. Elle donne une couleur qu AUCUNE
    ligne du fichier n ecrit : on relit var(--tx3) et on croit lire #8e9cad.
    La discretion vient maintenant du CORPS et du POIDS, pas d un voile. */
-.szbd-b{align-self:flex-end;font:inherit;font-size:.68rem;line-height:1.25;
-  cursor:pointer;color:var(--tx2);background:transparent;border:0;
-  border-radius:7px;padding:.12rem .4rem}
+/* Deploye : une fleche seule, sans texte, collee sous le coin du bandeau —
+   la marge negative lui rend la ligne qu occupait « Masquer les totaux ». */
+.szbd-b{align-self:flex-end;display:inline-flex;align-items:center;justify-content:center;gap:.35rem;
+  font:inherit;font-size:.68rem;line-height:1.25;cursor:pointer;color:var(--tx3);
+  background:transparent;border:0;border-radius:6px;padding:.05rem .3rem;margin:-.2rem 0 -.25rem}
+.szbd-b svg{display:block;flex:0 0 auto}
 .szbd-b:hover{color:var(--tx);background:var(--v08)}
 .szbd-b:focus-visible{outline:1px solid #c9a97e;outline-offset:1px}
 .szbd.szplie>.szbd-c{display:none}
-.szbd.szplie>.szbd-b{align-self:stretch;text-align:left;
+.szbd.szplie>.szbd-b{align-self:stretch;justify-content:flex-start;margin:0;
   color:var(--tx2);border:1px dashed var(--v12);padding:.24rem .55rem}
 `;
 
@@ -2911,13 +2914,29 @@ var _SZBD_MASQ = ${JSON.stringify(T('Masquer les totaux'))};
 var _SZBD_AFF = ${JSON.stringify(T('Afficher les totaux'))};
 var _SZBD_ECOUTE = false;
 
+/* ⚠ TOTAUX VISIBLES, UN BOUTON DISCRET POUR LES CACHER (2026-10-02, sa
+   reponse : « ne pas masquer les totaux mais mettre un bouton plus discret pour
+   les cacher, et ce partout »). Deploye : une petite fleche, le mot dans
+   l infobulle et le nom accessible. Replie : le TEXTE reste — une fleche seule
+   sur une barre vide ne se retrouverait pas. */
+var _SZBD_HAUT = '<svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l4-4 4 4"/></svg>';
+var _SZBD_BAS = '<svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l4 4 4-4"/></svg>';
+function _szbdDedans(){ return _SZBD_OFF ? _SZBD_BAS + '<span>' + _SZBD_AFF + '</span>' : _SZBD_HAUT; }
+function _szbdAttrs(b){
+  var t = _SZBD_OFF ? _SZBD_AFF : _SZBD_MASQ;
+  b.setAttribute('aria-label', t); b.setAttribute('title', t);
+  b.setAttribute('aria-expanded', _SZBD_OFF ? 'false' : 'true');
+}
+
 /* Enveloppe un bandeau de tuiles. Rend TOUJOURS le bouton. */
 function szTuiles(html){
   szTuilesEcouter();
+  var t = _SZBD_OFF ? _SZBD_AFF : _SZBD_MASQ;
   return '<div class="szbd' + (_SZBD_OFF ? ' szplie' : '') + '">'
     + '<div class="szbd-c">' + html + '</div>'
-    + '<button type="button" class="szbd-b">'
-    + (_SZBD_OFF ? _SZBD_AFF : _SZBD_MASQ) + '</button></div>';
+    + '<button type="button" class="szbd-b" aria-label="' + t + '" title="' + t + '"'
+    + ' aria-expanded="' + (_SZBD_OFF ? 'false' : 'true') + '">'
+    + _szbdDedans() + '</button></div>';
 }
 
 function szTuilesMasque(){ return _SZBD_OFF; }
@@ -2943,7 +2962,8 @@ function szTuilesEcouter(){
     }
     var bs = document.querySelectorAll('.szbd-b');
     for (var j = 0; j < bs.length; j++) {
-      bs[j].textContent = _SZBD_OFF ? _SZBD_AFF : _SZBD_MASQ;
+      bs[j].innerHTML = _szbdDedans();
+      _szbdAttrs(bs[j]);
     }
     /* ⚠ ON N ATTEND PAS LA REPONSE. L ecran a deja bouge ; si l ecriture
        echoue, le pire est que le bandeau revienne a la prochaine ouverture —

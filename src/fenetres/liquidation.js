@@ -276,11 +276,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
       : '<span class="rf-pill">${T("jusqu’à épuisement")}</span>';
     var cc = /^#[0-9a-f]{3,8}$/i.test(l.couleur || '') ? l.couleur : '';
     return '<tr>'
-      + '<td><div class="rf-prod"><span class="rf-av' + (cc ? ' tc" style="--cc:' + cc : '') + '" title="' + esc(l.categorie || '')
-      +   '" aria-hidden="true">' + esc(String(l.categorie || l.nom || '?').charAt(0).toUpperCase()) + '</span>'
+      + '<td><div class="rf-prod"><span class="rf-av' + (cc ? ' tc" style="--cc:' + cc : '') + '" title="' + esc(szTd(l.categorie || ''))
+      +   '" aria-hidden="true">' + esc(String(szTd(l.categorie) || l.nom || '?').charAt(0).toUpperCase()) + '</span>'
       +   '<div style="min-width:0"><div class="rf-nom">' + esc(l.nom) + '</div>'
       +   '<div class="rf-sous">' + (l.sku ? '<span class="rf-code">' + esc(l.sku) + '</span><span>·</span>' : '')
-      +   '<span>' + esc(l.categorie) + '</span></div></div></div></td>'
+      +   '<span>' + esc(szTd(l.categorie)) + '</span></div></div></div></td>'
       + '<td>' + quand + '</td>'
       + '<td class="num">' + (l.stock === 0 ? '<span class="rf-pill rouge">${T("Rupture")}</span>' : '<b>' + l.stock + '</b>') + '</td>'
       + '<td class="num"><span class="rf-mont">' + argent(l.prix) + '</span></td>'
@@ -476,7 +476,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
         + '<input type="checkbox" data-lotprod="' + esc(l.id) + '"' + (pris ? ' checked' : '') + '>'
         + '<span class="pastille" style="background:' + esc(l.couleur) + '"></span>'
         + '<span class="nom">' + esc(l.nom) + '</span>'
-        + '<span class="app">' + esc(l.categorie) + (l.sku ? ' · ' + esc(l.sku) : '') + ' ' + deja + '</span>'
+        + '<span class="app">' + esc(szTd(l.categorie)) + (l.sku ? ' · ' + esc(l.sku) : '') + ' ' + deja + '</span>'
         + '</label>';
     }).join('') : '<div class="vide">${T("Aucun produit trouvé.")}</div>';
     var nav = d.pages > 1

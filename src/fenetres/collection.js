@@ -144,7 +144,7 @@ function pageCollection(id) {
       ligne: function(p){
         return '<label class="lg"><input type="checkbox" class="c-prod" value="' + esc(p.id) + '"'
           + (CHOISIS[p.id] ? ' checked' : '') + '>'
-          + '<span>' + esc(p.nom) + '</span><span class="fin">' + esc(p.categorie) + '</span></label>';
+          + '<span>' + esc(p.nom) + '</span><span class="fin">' + esc(szTd(p.categorie)) + '</span></label>';
       },
       surMaj: function(){
         var n = nbChoisis();

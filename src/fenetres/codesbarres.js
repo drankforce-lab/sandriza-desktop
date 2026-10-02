@@ -301,10 +301,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('codesbarres')}
               : '<span class="dt">${T("SKU requis")}</span>';
             return '<tr>'
               + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">'
-              + esc(String(r.categorie || r.nom || '?').charAt(0).toUpperCase()) + '</span>'
+              + esc(String(szTd(r.categorie) || r.nom || '?').charAt(0).toUpperCase()) + '</span>'
               + '<div style="min-width:0"><div class="rf-nom">' + esc(r.nom) + '</div>'
               + '<div class="rf-sous">' + (r.sku ? '<span class="rf-code">' + esc(r.sku) + '</span>' : '<span>${T("sans SKU")}</span>')
-              + (r.categorie ? '<span>·</span><span>' + esc(r.categorie) + '</span>' : '') + '</div></div></div></td>'
+              + (r.categorie ? '<span>·</span><span>' + esc(szTd(r.categorie)) + '</span>' : '') + '</div></div></div></td>'
               + '<td><div class="stk"><b>' + r.stock + '</b>' + (r.stock === 0 ? '<span class="rf-pill rouge">${T("Rupture")}</span>'
                 : r.bas ? '<span class="rf-pill ambre">${T("bas")}</span>' : '') + '</div></td>'
               + '<td style="text-align:right;white-space:nowrap">' + actions + '</td>'

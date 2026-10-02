@@ -240,9 +240,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
             var cc = /^#[0-9a-f]{3,8}$/i.test(r.couleurCat || '') ? r.couleurCat : '';
             return '<tr data-id="' + esc(r.id) + '" title="${T("Ouvrir la fiche")}">'
               + '<td><div class="rf-prod"><span class="rf-av' + (cc ? ' tc" style="--cc:' + cc : '') + '" title="'
-              + esc(r.categorie || '') + '" aria-hidden="true">' + esc(ini) + '</span>'
+              + esc(szTd(r.categorie || '')) + '" aria-hidden="true">' + esc(ini) + '</span>'
               + '<div style="min-width:0"><div class="rf-nom">' + esc(r.nom) + szVerrouCase('products', r.id) + badges + '</div>'
-              + '<div class="rf-sous"><span>' + esc(r.categorie || '—') + '</span>'
+              + '<div class="rf-sous"><span>' + esc(szTd(r.categorie || '—')) + '</span>'
               + (r.tag ? '<span>·</span><span>' + esc(r.tag) + '</span>' : '') + '</div></div></div></td>'
               + '<td>' + prix + '</td>'
               + '<td><div class="stk"><b>' + r.stockTotal + '</b>' + pilStock(r) + '</div></td>'
