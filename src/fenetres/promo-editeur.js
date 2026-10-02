@@ -219,6 +219,10 @@ body{background:var(--f-page);color:var(--tx);
   font-size:.76rem;min-height:1.9rem;background:var(--f-carte)}
 
 /* ── LE SELECTEUR DE LA LOGOTHEQUE ────────────────────────────────────────── */
+/* ⚠⚠ hidden DOIT GAGNER (2026-10-02) : display:flex ci-dessous l emportait sur
+   l attribut hidden — l editeur s ouvrait avec la boite « Choisir une image »,
+   VIDE, posee par-dessus tout, qui bloquait les clics. */
+.voile[hidden]{display:none}
 .voile{position:fixed;inset:0;background:rgba(4,8,14,.72);display:flex;
   align-items:center;justify-content:center;padding:1.4rem;z-index:40}
 .cadre{background:var(--f-carte);border:1px solid var(--v12);border-radius:13px;
@@ -1056,6 +1060,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
   function dessinerChoix(){
     var r = LOGOS, corps = document.getElementById('choix-corps');
+    /* Une reponse sans liste vaut une logotheque vide (2026-10-02) : lire
+       r.logos.length sur rien plantait, et la boite restait MUETTE, corps vide. */
+    if (!Array.isArray(r.logos)) r.logos = [];
     if (!r.logos.length) {
       corps.innerHTML = '<div class="vide">${T("La logothèque est vide. Utilisez « Importer une image… »")}'
         + ' ${T("pour y déposer un premier fichier.")}</div>';
