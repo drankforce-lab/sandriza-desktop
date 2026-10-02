@@ -39,7 +39,10 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .barre{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin:0 0 1rem}
 .grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(11rem,1fr));gap:.9rem}
 .lcard{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;overflow:hidden;display:flex;flex-direction:column}
-.lcard .th{height:110px;background:var(--f-champ) url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22><rect width=%228%22 height=%228%22 fill=%22%23172233%22/><rect x=%228%22 y=%228%22 width=%228%22 height=%228%22 fill=%22%23172233%22/></svg>');display:flex;align-items:center;justify-content:center}
+/* ⚠ UN DAMIER GRIS MOYEN-CLAIR, plus le damier sombre (2026-10-01) : un logo
+   FONCE (le bleu marine de la marque) y etait presque invisible. Gris moyen et
+   non blanc : un logo BLANC doit se voir aussi. */
+.lcard .th{height:110px;background:#d3d8df url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22><rect width=%228%22 height=%228%22 fill=%22%23c2c8d1%22/><rect x=%228%22 y=%228%22 width=%228%22 height=%228%22 fill=%22%23c2c8d1%22/></svg>');display:flex;align-items:center;justify-content:center}
 .lcard .th img{max-width:100%;max-height:100%;object-fit:contain;display:block}
 .lcard .bd{padding:.5rem .6rem;display:flex;flex-direction:column;gap:.25rem}
 .lcard .nm{font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

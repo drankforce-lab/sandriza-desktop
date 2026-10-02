@@ -123,6 +123,8 @@ const DONNEES_IMPOT = {
 // attribut, et c'était assez pour qu'elle « arrive ». Mais un pixel ne montre RIEN
 // de la mise en page — le Studio débordait de 447 px avec une vraie photo, et
 // aucune sonde ne pouvait le voir. Un SVG déclaré en 1200 × 1600 pèse quelques octets.
+const LOGO_BANDEAU = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="240"><text x="400" y="150" font-family="Georgia" font-size="110" text-anchor="middle" fill="#2d3a6b" letter-spacing="18">SANDRIZA</text></svg>');
+const LOGO_CARRE = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512"><circle cx="256" cy="256" r="200" fill="none" stroke="#2d3a6b" stroke-width="18"/><text x="256" y="300" font-family="Georgia" font-size="170" text-anchor="middle" fill="#b0303f">S</text></svg>');
 const IMAGE = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1600">'
   + '<rect width="1200" height="1600" fill="#d9ccb9"/>'
@@ -2580,13 +2582,16 @@ const JEU = {
   // Logothèque (palier 5, Configuration). Images R2 ; pas de secret. Deux états :
   // liste garnie (modifiable) et lecture seule. L'import/recadrage se déclenche au
   // choix d'un fichier (non simulable ici — le rendu de la liste suffit au banc).
+  /* ⚠ DES LOGOS DE VRAIE FORME (2026-10-01) : des adresses factices se dessinaient
+     en images CASSEES, et la capture ne montrait rien des vignettes. Un bandeau
+     800 × 240 et un carre 512 × 512, transparents, comme les vrais. */
   'logotheque.js': [
     { nom: 'liste garnie', reponses: { identite: IDENTITE, 'config:logotheque:donnees': { ok: true, peutModifier: true, logos: [
-      { id: 'lg1', name: 'Logo principal', url: 'https://exemple.r2.dev/logos/logo.png', w: 800, h: 240, alpha: true, printW: 2, printH: 0.6, dpi: 400, mode: 'keep' },
-      { id: 'lg2', name: 'Filigrane', url: 'https://exemple.r2.dev/logos/wm.png', w: 512, h: 512, alpha: true, printW: 0, printH: 0, dpi: 0, mode: 'crop' },
+      { id: 'lg1', name: 'Logo principal', url: LOGO_BANDEAU, w: 800, h: 240, alpha: true, printW: 2, printH: 0.6, dpi: 400, mode: 'keep' },
+      { id: 'lg2', name: 'Filigrane', url: LOGO_CARRE, w: 512, h: 512, alpha: true, printW: 0, printH: 0, dpi: 0, mode: 'crop' },
     ] } } },
     { nom: 'lecture seule', reponses: { identite: IDENTITE, 'config:logotheque:donnees': { ok: true, peutModifier: false, logos: [
-      { id: 'lg1', name: 'Logo principal', url: 'https://exemple.r2.dev/logos/logo.png', w: 800, h: 240, alpha: true, printW: 2, printH: 0.6, dpi: 400, mode: 'keep' },
+      { id: 'lg1', name: 'Logo principal', url: LOGO_BANDEAU, w: 800, h: 240, alpha: true, printW: 2, printH: 0.6, dpi: 400, mode: 'keep' },
     ] } } },
   ],
 
