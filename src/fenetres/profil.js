@@ -168,6 +168,10 @@ input.t:focus,select.t:focus{outline:none;border-color:#c9a97e;box-shadow:0 0 0 
    INDICATIVE et le dit — c est le serveur qui accepte ou refuse. */
 .jauge{display:flex;gap:.28rem;margin:.55rem 0 .3rem}
 .jauge i{flex:1 1 0;height:4px;border-radius:99px;background:var(--v12);transition:background .18s ease}
+/* ⚠ VIDE = GRIS (2026-10-01) : la regle des themes du socle (.jauge i, couleur
+   d accent) passait apres et peignait les quatre segments en OR, mot de passe
+   vide compris — « robuste » sur rien. Specificite doublee, AVANT les niveaux. */
+.jauge.jauge i{background:var(--v12)}
 .jauge.n1 i:nth-child(-n+1),.jauge.n2 i:nth-child(-n+2){background:var(--tx-err2)}
 .jauge.n3 i:nth-child(-n+3){background:var(--tx-att)}
 .jauge.n4 i{background:var(--tx-ok2)}
