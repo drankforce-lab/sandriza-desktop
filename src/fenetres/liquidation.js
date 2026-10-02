@@ -99,7 +99,6 @@ html.jour .rf-av.tc{color:color-mix(in srgb,var(--cc,#6d7f96) 55%,black);
 .carte h2{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;
   letter-spacing:.07em;color:var(--tx2);font-weight:700;display:flex;align-items:center;gap:.5rem}
 .carte h2 .pt{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
-.carte h2 .cpt{margin-left:auto;font-weight:800;font-size:.8rem}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
