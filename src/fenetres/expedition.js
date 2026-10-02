@@ -273,7 +273,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="ch"><label for="e-service">${T("Service")}</label>'
       +   '<select id="e-service"' + (t && t.pret && t.services.length ? '' : ' disabled') + '>'
       +   ((t && t.services) || []).map(function(s){
-            return '<option value="' + esc(s.cle) + '">' + esc(s.libelle) + '</option>'; }).join('')
+            // Le service choisi par le client à la caisse, s'il est de ce transporteur.
+            var cc = CMD && CMD.commande && CMD.commande.choixClient;
+            var pris = cc && cc.transporteur === TRANSPORTEUR && cc.service === s.cle;
+            return '<option value="' + esc(s.cle) + '"' + (pris ? ' selected' : '') + '>' + esc(s.libelle) + '</option>'; }).join('')
       +   ((t && t.services.length) ? '' : '<option value="">—</option>')
       +   '</select></div>'
       // ⚠ LE POIDS EST MODIFIABLE, ET PRE-REMPLI PAR LE CALCUL : c est lui qui
@@ -282,6 +285,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       +   '<input id="e-poids" type="number" min="0.001" step="0.001" value="'
       +   esc(pw.calcule > 0 ? pw.calcule : 0.5) + '"></div>'
       + '</div>';
+    /* ⚠ LE CHOIX DU CLIENT (2026-10-02) : le transporteur coté et payé à la caisse.
+       Le coût réel est lu pour le personnel seulement — le client a payé le prix
+       majoré, et c'est l'écart qu'on veut voir ici. */
+    var cc = CMD && CMD.commande && CMD.commande.choixClient;
+    if (cc) {
+      var nomT = { 'postes-canada': '${T("Postes Canada")}', fedex: 'FedEx' }[cc.transporteur] || cc.transporteur;
+      h += '<div class="avis"><span class="ic">🚚</span> ${T("Choix du client : ")}<strong>' + esc(nomT) + '</strong>'
+        + ' · ${T("payé ")}' + szArgent(cc.prix)
+        + (cc.coutReel && cc.coutReel.reel ? ' · ${T("coût coté ")}' + szArgent(cc.coutReel.reel) : '')
+        + (cc.transporteur !== TRANSPORTEUR ? ' <span class="att">${T("— autre transporteur sélectionné")}</span>' : '')
+        + '</div>';
+    }
     h += pw.estime
       ? '<div class="avis jaune"><span class="ic">⚠</span> ${T("Certains articles n’ont pas de poids configuré — estimation à ")}'
         + '${T("300 g par article. Vérifiez avant de commander : c’est le poids qui fixe le prix.")}</div>'

@@ -6613,8 +6613,12 @@ const JEU = {
         },
         'expedition:lire': {
           ok: true,
+          /* Le client a choisi Postes Canada, Colis standard, à la caisse
+             (2026-10-02) : la fenêtre le présélectionne et montre le coût coté. */
           commande: { id: 'ord_0007', numero: 'SZ-100207', statut: 'preparing',
-            transporteur: '', suivi: '', etiquetteLe: '', aUneEtiquette: false, articles: 3 },
+            transporteur: 'postes-canada', service: 'DOM.RP', suivi: '', etiquetteLe: '', aUneEtiquette: false, articles: 3,
+            choixClient: { transporteur: 'postes-canada', service: 'DOM.RP', nomService: 'Colis standard',
+              prix: 23.0, coutReel: { reel: 20.0, facture: 23.0 } } },
           destinataire: { nom: 'Marie Tremblay', rue: '12 rue des Érables',
             ville: 'Québec', province: 'QC', codePostal: 'G1R 2B5', pays: 'CA', tel: '418 555-0142' },
           // ⚠ `estime: true` est le cas à éprouver : c'est le poids qui fixe le

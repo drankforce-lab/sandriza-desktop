@@ -584,7 +584,10 @@ function pageCommande(id) {
     (CTX.transporteurs || []).forEach(function(t){ if (t.cle === tr && t.pret === false) pret = false; });
     var utilisable = liste.length > 0 && pret;
     sel.innerHTML = liste.length
-      ? liste.map(function(x){ return '<option value="' + esc(x.cle) + '">' + esc(x.libelle) + '</option>'; }).join('')
+      ? liste.map(function(x){
+          // Le service choisi par le client à la caisse est présélectionné (2026-10-02).
+          var pris = CMD && CMD.service && CMD.transporteur === tr && CMD.service === x.cle;
+          return '<option value="' + esc(x.cle) + '"' + (pris ? ' selected' : '') + '>' + esc(x.libelle) + '</option>'; }).join('')
       : '<option value="">${T("— transporteur non configuré —")}</option>';
     sel.disabled = !utilisable;
     var b = document.getElementById('c-etiq');

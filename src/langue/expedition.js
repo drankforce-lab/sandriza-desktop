@@ -32,6 +32,16 @@
  */
 
 module.exports = {
+  /* Le choix du client à la caisse (2026-10-02) — le coût coté est pour le personnel. */
+  'Postes Canada': 'Canada Post',
+  'Choix du client : ': 'Customer’s choice: ',
+  'Choix du client :': 'Customer’s choice:',
+  'payé ': 'paid ',
+  'payé': 'paid',
+  'coût coté ': 'quoted cost ',
+  'coût coté': 'quoted cost',
+  '— autre transporteur sélectionné': '— another carrier is selected',
+  ' — autre transporteur sélectionné': ' — another carrier is selected',
   /* ⚠ LES DEUX ALTERNATIVES EN ENTIER — voir tools/banc-pluriel-colle.js. */
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   'Expédier une commande — Administration Sandriza': 'Ship an order — Sandriza Administration',
