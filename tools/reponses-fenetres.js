@@ -2332,7 +2332,7 @@ const JEU = {
       courrielAvis: 'boutique@sandriza.com',
       accueil: 'Bonjour ! Mon nom est {{AGENT}}, comment puis-je vous aider ?',
       accueilEN: 'Hello! My name is {{AGENT}}, how can I help you today?',
-      horsLigne: 'Nous sommes presentement hors ligne.',
+      horsLigne: 'Nous sommes présentement hors ligne.',
       horsLigneEN: 'We are currently offline.',
       agents: [
         { nom: 'Sophie', photo: 'https://img.sandriza.com/divers/sophie.jpg', actif: true },
