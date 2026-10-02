@@ -2342,6 +2342,11 @@ html.jour .sz-btnplein:hover{background:#efece4}
    ⚠ « user-select:none » comme tous les contrôles cliquables : la sélection du
    texte avalait le clic de la souris (le clic sur le libellé ne faisait rien,
    à côté du libellé fonctionnait). */
+/* Quand rien ne le pousse a droite (pas de .sous entre le titre et lui), le
+   bouton se collait au titre — Configuration de la livraison, 2026-10-01. Pas
+   de margin-left:auto pour tous : avec un .sous deja pousse, les deux marges
+   se partageraient l espace et le .sous partirait au milieu. */
+.tete > h1 + .sz-btnfen{margin-left:auto}
 .sz-btnfen{flex:0 0 auto;font:inherit;font-size:.78rem;line-height:1.35;padding:.14rem .45rem;
   margin-left:.4rem;border:1px solid var(--v16);border-radius:7px;
   background:var(--v05);color:var(--tx);cursor:pointer;
