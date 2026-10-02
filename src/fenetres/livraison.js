@@ -18,7 +18,7 @@ const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js'
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais le nom d un pays ou d un
-   Etat, qui vient de Stripe, ni la devise CA$ (voir src/langue/livraison.js). */
+   Etat, qui vient de la liste des pays du site, ni la devise CA$ (voir src/langue/livraison.js). */
 const T = require('../langue').tr('livraison');
 
 const CSS = `
@@ -146,7 +146,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
   var bsave = document.getElementById('b-save');
   var D = null, RO = false, OCCUPE = false;
-  var PAYS = null;      // { pays:[...], nbInscrits, maj } — lu chez Stripe, jamais recopie
+  var PAYS = null;      // { pays:[...], nbLivres } — tous les pays, moins les exclusions
   var FILTRE = '';      // filtre de la liste (deux cents lignes)
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
@@ -212,18 +212,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       D.international = fintl.checked;
       dessiner();
       dire(fintl.checked
-        ? '${T("Enregistrez pour activer, puis relisez vos inscriptions Stripe.")}'
+        ? '${T("Enregistrez pour activer la livraison internationale.")}'
         : '${T("Enregistrez pour désactiver.")}', 'att');
     };
     brancherPays();
   }
 
   /* ══ PAYS DESSERVIS ════════════════════════════════════════════════════════
-     ⚠ CE TABLEAU N EST PAS UNE LISTE D AUTORISATIONS. La colonne << Inscription
-     Stripe >> est LUE CHEZ STRIPE, pas conservee chez nous : une copie
-     vieillirait, et un pays retire la-bas resterait propose ici. La seule chose
-     qu on enregistre est l inverse — les pays ou l on ne veut PAS livrer malgre
-     l inscription. Ajouter un pays chez Stripe l ouvre tout seul. */
+     ⚠ DEPUIS LE 2026-10-02 : TOUS LES PAYS, SAUF CEUX QU ON DECOCHE. Aucune taxe
+     n est percue hors du Canada, donc les inscriptions Stripe ne decident plus
+     de rien (la colonne << Inscription Stripe >> et << Relire Stripe >> sont
+     parties). On n enregistre que les EXCLUSIONS, par pays ou par Etat (US). */
   function paysHtml(){
     if (!PAYS) {
       return '<div class="carte large"><h2>${T("Pays desservis")}</h2>'
@@ -233,56 +232,40 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var l = PAYS.pays.filter(function(p){
       return !q || p.nom.toLowerCase().indexOf(q) !== -1 || p.code.toLowerCase().indexOf(q) !== -1;
     });
-    // Les pays inscrits d abord : c est la seule partie actionnable.
-    var inscrits = l.filter(function(p){ return p.inscrit; });
-    var autres = l.filter(function(p){ return !p.inscrit; });
     var dis = RO ? ' disabled' : '';
-    // ⚠ UNE LIGNE PAR ÉTAT pour les pays inscrits par sous-territoire (US) : ligne
-    // d'en-tete du pays, puis un etat par ligne avec son NOM complet et SA case.
-    // (36 cases sur une rangee seraient illisibles — demande du 2026-08-12.)
+    // ⚠ UNE LIGNE PAR ÉTAT pour les États-Unis : ligne d en-tete du pays (avec
+    // sa case), puis un etat par ligne avec son NOM complet et SA case.
     var ligne = function(p){
       var ets = p.etats || [];
       var nomCol = esc(p.nom) + '<span class="code">' + esc(p.code) + '</span>';
-      if (!p.inscrit) {
-        return '<tr class="off"><td>' + nomCol + '</td>'
-          + '<td><span class="non">—</span></td>'
-          + '<td class="mid"><span class="verrou" title="${T("Ajoutez l inscription fiscale dans Stripe pour ouvrir ce pays")}">${T("verrouillé")}</span></td></tr>';
-      }
-      if (ets.length) {
-        var h = '<tr class="paystete"><td><strong>' + nomCol + '</strong></td>'
-          + '<td><span class="oui">${T("✓ inscrit")}</span> <span class="ets">${T("— livraison par État (")}' + ets.length + ')</span></td><td></td></tr>';
+      var cl = (ets.length ? 'paystete' : '') + (p.livre ? '' : (ets.length ? ' off' : 'off'));
+      var h = '<tr' + (cl ? ' class="' + cl + '"' : '') + '><td>'
+        + (ets.length ? '<strong>' + nomCol + '</strong>' : nomCol) + '</td>'
+        + '<td class="mid"><input type="checkbox" data-pays="' + esc(p.code) + '"'
+        + ' aria-label="' + esc('${T("Livrer vers ")}' + (p.nom || p.code)) + '"'
+        + (p.livre ? ' checked' : '') + dis + '></td></tr>';
+      if (ets.length && p.livre) {
         h += ets.map(function(e){
           return '<tr><td class="etatnom">↳ ' + esc(e.name || e.code) + ' <span class="code">' + esc(e.code) + '</span></td>'
-            + '<td></td>'
-            /* ⚠ Meme motif que la matrice des droits : le territoire est dans la
-               premiere cellule, << Livre >> dans l en-tete. En tabulant, rien.
-               On coche ou decoche une destination de livraison a l aveugle. */
             + '<td class="mid"><input type="checkbox" data-pays="' + esc(p.code) + '" data-etat="' + esc(e.code) + '"'
             + ' aria-label="' + esc('${T("Livrer vers ")}' + (e.name || e.code) + ', ' + (p.nom || p.code)) + '"'
             + (e.livre ? ' checked' : '') + dis + '></td></tr>';
         }).join('');
-        return h;
       }
-      return '<tr><td>' + nomCol + '</td><td><span class="oui">${T("✓ inscrit")}</span></td>'
-        + '<td class="mid"><input type="checkbox" data-pays="' + esc(p.code) + '"'
-        + ' aria-label="' + esc('${T("Livrer vers ")}' + (p.nom || p.code)) + '"'
-        + (p.livre ? ' checked' : '') + dis + '></td></tr>';
+      return h;
     };
-    var maj = PAYS.maj ? new Date(PAYS.maj).toLocaleString('${LIEU()}', { dateStyle: 'medium', timeStyle: 'short' }) : '${T("jamais")}';
     return '<div class="carte large"><h2>${T("Pays desservis")}</h2>'
-      + ''
       + '<div class="pbarre">'
       + '<input aria-label="${T("Filtrer")}" class="pfiltre" id="p-filtre" type="search" placeholder="${T("Filtrer…")}" value="' + esc(FILTRE) + '">'
       /* Deux formes ENTIERES : un << s >> colle a part ne se traduit pas. */
-      + '<span class="pinfo">' + PAYS.nbInscrits
-      + (PAYS.nbInscrits > 1 ? '${T(" pays inscrits")}' : '${T(" pays inscrit")}')
-      + '${T(" · dernière lecture : ")}' + esc(maj) + '</span>'
-      + '<button id="p-relire"' + (OCCUPE ? ' disabled' : '') + '>${T("↻ Relire Stripe")}</button></div>'
+      + '<span class="pinfo">' + PAYS.nbLivres
+      + (PAYS.nbLivres > 1 ? '${T(" pays desservis")}' : '${T(" pays desservi")}')
+      + '${T(" · aucune taxe hors du Canada")}</span></div>'
       + '<div class="ptab"><table class="pays"><thead><tr>'
-      + '<th>${T("Pays")}</th><th>${T("Inscription Stripe")}</th><th style="text-align:center">${T("On livre")}</th>'
+      + '<th>${T("Pays")}</th><th style="text-align:center">${T("On livre")}</th>'
       + '</tr></thead><tbody>'
-      + (l.length ? inscrits.map(ligne).join('') + autres.map(ligne).join('')
-                  : '<tr><td colspan="3" class="vide">${T("Aucun pays ne correspond.")}</td></tr>')
+      + (l.length ? l.map(ligne).join('')
+                  : '<tr><td colspan="2" class="vide">${T("Aucun pays ne correspond.")}</td></tr>')
       + '</tbody></table></div></div>';
   }
 
@@ -303,8 +286,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         if (f2) { f2.focus(); try { f2.setSelectionRange(f2.value.length, f2.value.length); } catch (e) {} }
       };
     }
-    var b = document.getElementById('p-relire');
-    if (b) b.onclick = relirePays;
     corps.querySelectorAll('input[data-pays]').forEach(function(el){
       el.onchange = function(){ exclurePays(el); };
     });
@@ -315,19 +296,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (!r || !r.ok) return;      // la livraison reste utilisable sans le tableau
       PAYS = r;
       if (D && D.international) dessiner();
-    });
-  }
-
-  function relirePays(){
-    if (OCCUPE) return;
-    OCCUPE = true; dire('${T("Lecture des inscriptions chez Stripe…")}');
-    appeler('config:pays:relire').then(function(r){
-      OCCUPE = false;
-      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
-      PAYS = r; dessiner();
-      dire(r.nbInscrits ? (r.nbInscrits + ' '
-        + (r.nbInscrits > 1 ? '${T("pays inscrits")}' : '${T("pays inscrit")}') + '.')
-                        : '${T("Aucune inscription active dans Stripe.")}', r.nbInscrits ? 'bon' : 'att');
     });
   }
 
@@ -346,6 +314,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       el.disabled = false;
       if (!r || !r.ok) { el.checked = !veut; dire(expliquer(r), 'err'); return; }
       PAYS = r;
+      // Le compte change, et les États des États-Unis paraissent ou disparaissent.
+      dessiner();
       /* Quatre phrases ENTIERES : un mot recolle a un fragment ne se traduit
          pas, il se devine — et pas dans toutes les langues. */
       dire(etat
@@ -378,10 +348,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         return;
       }
       D = r; RO = !r.peutModifier; dessiner(); dire('');
-      // ⚠ RELECTURE AUTOMATIQUE a l'ouverture : on lit les inscriptions chez Stripe
-      // tout de suite (et pas seulement le miroir local), pour un tableau a jour des
-      // l'entree — demande expresse. relirePays force le cache du relais.
-      if (r.international) relirePays();
+      if (r.international) chargerPays();
     });
   }
 

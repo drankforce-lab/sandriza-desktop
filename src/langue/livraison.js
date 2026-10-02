@@ -3,13 +3,10 @@
 /*
  * CONFIGURATION DE LA LIVRAISON — les deux langues
  * =============================================================================
- * ⚠⚠⚠ CE TABLEAU N EST PAS UNE LISTE D AUTORISATIONS. La colonne « Inscription
- * Stripe » est LUE CHEZ STRIPE a chaque fois, pas conservee chez nous : un pays
- * retire la-bas cesse d etre propose ici. La seule chose enregistree est
- * l INVERSE — les pays ou l on ne veut PAS livrer malgre l inscription. Les mots
- * « inscrit », « verrouillé » et « On livre » disent donc trois choses
- * differentes ; les confondre ferait croire qu on ouvre un pays en cochant une
- * case, alors que cela se fait chez Stripe.
+ * ⚠⚠⚠ DEPUIS LE 2026-10-02, TOUS LES PAYS SONT DESSERVIS, SAUF CEUX QU ON
+ * DECOCHE. Aucune taxe n est percue hors du Canada : les inscriptions Stripe ne
+ * decident plus de rien (colonne « Inscription Stripe », « verrouillé » et
+ * « Relire Stripe » retires). On n enregistre que les exclusions.
  *
  * ⚠⚠ LES TROIS MONTANTS SONT DES REGLAGES QUI COUTENT DE L ARGENT A CHAQUE
  * COMMANDE : frais standard, seuil de gratuite, supplement prioritaire. Chacun
@@ -19,11 +16,10 @@
  *
  * ⚠⚠ LE TABLEAU DES PAYS N EXISTE QUE SI L INTERNATIONAL EST ALLUME, et les deux
  * verdicts de la bascule disent qu il faut ENREGISTRER avant que quoi que ce
- * soit change : « Enregistrez pour activer, puis relisez vos inscriptions
- * Stripe. »
+ * soit change : « Enregistrez pour activer la livraison internationale. »
  *
  * ⚠ CA$ EST UNE DEVISE, pas un mot : elle reste telle quelle dans les deux
- * langues. Le nom des pays et des Etats vient de Stripe, le code aussi.
+ * langues. Le nom des pays et des Etats vient de la liste du site, le code aussi.
  */
 
 module.exports = {
@@ -49,8 +45,8 @@ module.exports = {
   'La recherche d’adresse s’adapte au monde entier et un champ Pays apparaît à la caisse.':
     'The address lookup opens to the whole world and a Country field appears at checkout.',
   /* ⚠⚠ Rien ne change avant l ENREGISTREMENT. */
-  'Enregistrez pour activer, puis relisez vos inscriptions Stripe.':
-    'Save to turn it on, then read your Stripe registrations again.',
+  'Enregistrez pour activer la livraison internationale.':
+    'Save to turn on international shipping.',
   'Enregistrez pour désactiver.': 'Save to turn it off.',
 
   /* ══ LA TARIFICATION ═══════════════════════════════════════════════════════
@@ -75,32 +71,19 @@ module.exports = {
    * ⚠⚠⚠ Voir l en-tete : ce n est pas une liste d autorisations. */
   'Pays desservis': 'Countries served',
   'Lecture des destinations…': 'Reading the destinations…',
-  'Lecture des inscriptions chez Stripe…': 'Reading the registrations at Stripe…',
-  'Aucune inscription active dans Stripe.': 'No active registration in Stripe.',
   'Aucun pays ne correspond.': 'No country matches.',
-  '↻ Relire Stripe': '↻ Read Stripe again',
-  ' pays inscrit': ' registered country',
-  ' pays inscrits': ' registered countries',
-  'pays inscrit': 'registered country',
-  'pays inscrits': 'registered countries',
-  ' · dernière lecture : ': ' · last read: ',
-  '· dernière lecture :': '· last read:',
-  'jamais': 'never',
+  ' pays desservi': ' country served',
+  ' pays desservis': ' countries served',
+  'pays desservi': 'country served',
+  'pays desservis': 'countries served',
+  ' · aucune taxe hors du Canada': ' · no tax outside Canada',
+  '· aucune taxe hors du Canada': '· no tax outside Canada',
 
   /* ── LE TABLEAU ─────────────────────────────────────────────────────────── */
   'Pays': 'Country',
-  'Inscription Stripe': 'Stripe registration',
   'On livre': 'We ship',
-  'Pays Inscription Stripe On livre': 'Country Stripe registration We ship',
-  '✓ inscrit': '✓ registered',
-  '— livraison par État (': '— shipping by state (',
-  '✓ inscrit — livraison par État (': '✓ registered — shipping by state (',
-  /* ⚠⚠ « verrouillé » ne veut pas dire « refusé par nous » : le pays n est pas
-     inscrit CHEZ STRIPE. L infobulle dit ou aller le debloquer. */
-  'verrouillé': 'locked',
-  'Ajoutez l inscription fiscale dans Stripe pour ouvrir ce pays':
-    'Add the tax registration in Stripe to open this country',
-  /* L etiquette lue par un lecteur d ecran : le nom du pays vient de Stripe. */
+  'Pays On livre': 'Country We ship',
+  /* L etiquette lue par un lecteur d ecran : le nom du pays vient du site. */
   'Livrer vers ': 'Ship to ',
   'Livrer vers': 'Ship to',
   'Filtrer': 'Filter',

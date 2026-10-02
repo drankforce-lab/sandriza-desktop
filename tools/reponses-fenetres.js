@@ -1845,13 +1845,14 @@ const JEU = {
      (il ne doit rien y avoir). Un seul jeu n'aurait éprouvé qu'une des deux
      branches — or c'est justement la disparition complète qui a été exigée. */
   'livraison.js': (() => {
-    const PAYS = { ok: true, peutModifier: true, international: true,
-      maj: '2026-08-11T12:00:00Z', nbInscrits: 2,
+    /* Forme du 2026-10-02 : tous les pays desservis sauf les exclusions (FR exclu,
+       Alaska exclu), plus de colonne « inscrit ». */
+    const PAYS = { ok: true, peutModifier: true, international: true, nbLivres: 3,
       pays: [
-        { code: 'US', nom: 'États-Unis', inscrit: true, etats: [{ code: 'NY', name: 'New York', livre: true }, { code: 'AK', name: 'Alaska', livre: false }], livre: true },
-        { code: 'FR', nom: 'France', inscrit: true, etats: [], livre: false },
-        { code: 'DE', nom: 'Allemagne', inscrit: false, etats: [], livre: false },
-        { code: 'JP', nom: 'Japon', inscrit: false, etats: [], livre: false },
+        { code: 'US', nom: 'États-Unis', etats: [{ code: 'NY', name: 'New York', livre: true }, { code: 'AK', name: 'Alaska', livre: false }], livre: true },
+        { code: 'FR', nom: 'France', etats: [], livre: false },
+        { code: 'DE', nom: 'Allemagne', etats: [], livre: true },
+        { code: 'JP', nom: 'Japon', etats: [], livre: true },
       ] };
     return [
       {
