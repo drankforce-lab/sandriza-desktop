@@ -619,5 +619,7 @@ module.exports = {
   'refusées par le nuage.': 'refused by the cloud.',
   'Clic droit → « Confirmer la suppression » pour la retirer — l’article lié, lui, garde son image.': 'Right-click → “Confirm deletion” to remove it — the linked item keeps its image.',
   'Confirmer la suppression': 'Confirm deletion',
-  'Supprimer…': 'Delete…'
+  'Supprimer…': 'Delete…',
+  "retenue par la recherche": "matching the search",
+  "retenues par la recherche": "matching the search",
 };

@@ -696,7 +696,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + val + '</div><div class="sub">' + sous + '</div></div>';
     };
     h += szTuiles('<div class="tuiles">'
-      + tu('${T("Photos")}', D.total, D.trouvees + '${T(" affichées")}', '')
+      + tu('${T("Photos")}', D.total,
+          /* « 80 affichées » quand la page en montre 6 : le mot etait faux (2026-10-02).
+             C est ce que la RECHERCHE retient, pas ce que l ecran affiche. */
+          (D.trouvees < D.total
+            ? D.trouvees + ' ' + szPl(D.trouvees, '${T("retenue par la recherche")}', '${T("retenues par la recherche")}')
+            : '${T("dans la photothèque")}'), '')
       + tu('${T("Attachées")}', D.liees, '${T("liées à un article")}', '')
       + tu('${T("Isolées")}', D.isolees, '${T("sans article")}', 'att')
       + tu('${T("Espace rangé")}', poids(D.poidsTotal), '${T("somme des fiches")}', '')
