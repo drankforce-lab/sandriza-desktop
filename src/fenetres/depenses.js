@@ -131,9 +131,6 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .avis{background:rgba(180,120,10,.1);border:1px solid rgba(180,120,10,.4);color:var(--tx-att);
   border-radius:9px;padding:.45rem .65rem;font-size:.79rem;line-height:1.5}
 
-/* Le CSS de l encart << Frais Stripe Tax >> est parti AVEC lui vers impot.js
-   le 2026-09-08 : une regle qui ne peint plus rien est une regle qui trompe le
-   prochain lecteur. */
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
   align-items:center;justify-content:center;z-index:50;padding:1rem}
 .boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;
@@ -352,18 +349,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
       + '<div class="s"><div class="n">' + D.nombre + '</div><div class="l">${T("Dépenses")}</div>'
       + '<div class="sub">' + esc(D.periode) + '</div></div>'
       + '</div>');
-
-    /* ── FRAIS STRIPE TAX (#22) — PARTI VERS L IMPOT LE 2026-09-08 ───────────
-       Ses mots : << cela a rien a voir dans les depenses, cela devrait plutot
-       etre dans les impots >>. L encart vit maintenant dans l onglet TAXES de la
-       fenetre Impot, avec son etat, son chargement et son habillage.
-       ⚠ NE PAS LE REMETTRE ICI : ce n est pas une depense saisie, c est ce que
-       le service de CALCUL DE TAXE facture — sa place est a cote des taxes qu il
-       calcule, pas au milieu des factures de fournisseurs.
-       ⚠ L op depenses:fraisStripe GARDE SON NOM, appelee depuis impot.js : le
-       nom d une op dit d OU VIENT la donnee (le relais), pas ou elle s affiche.
-       La renommer pour un deplacement d ecran casserait la liste blanche du pont
-       et la parite des deux listes, pour rien. */
 
     /* ⚠ La zone de depot vivait ICI, pleine largeur. Elle est remontee dans la
        barre d outils, a droite de << Nouvelle depense >>. Ne pas la remettre : sa

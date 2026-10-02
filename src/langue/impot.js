@@ -28,10 +28,6 @@
  * seulement… faites confirmer votre situation par un comptable agree »).
  * Les affaiblir ferait deposer une declaration sur des chiffres non verifies.
  *
- * ⚠ « Notre decompte : a confronter a la facture Stripe avant de le saisir en
- * depense. Rien n est enregistre automatiquement. » — sans cette phrase on
- * deduit deux fois, ou pas du tout.
- *
  * ⚠ LES TYPES D ENTREPRISE viennent du SERVEUR (`PROFIL.types`) : leurs
  * libelles sont ses mots, pas les notres.
  */
@@ -42,8 +38,6 @@ module.exports = {
   'commandes': 'orders',
   'transaction': 'transaction',
   'transactions': 'transactions',
-  'transaction facturée': 'transaction billed',
-  'transactions facturées': 'transactions billed',
   'remboursement déduit': 'refund deducted',
   'remboursements déduits': 'refunds deducted',
   /* ── L EN-TETE ──────────────────────────────────────────────────────────── */
@@ -184,15 +178,6 @@ module.exports = {
     'to remit to EACH province separately; they are in neither the figures',
   'ci-dessus ni dans GST34 / FPZ-500-V :': 'above nor in GST34 / FPZ-500-V:',
 
-  /* ── LES FRAIS STRIPE ───────────────────────────────────────────────────── */
-  /* ⚠ « RIEN N EST ENREGISTRE AUTOMATIQUEMENT » evite de deduire deux fois. */
-  'Frais Stripe Tax': 'Stripe Tax fees',
-  'Aucune transaction facturée cette année.': 'No transaction billed this year.',
-  'par Stripe.': 'by Stripe.',
-  'Notre décompte : à confronter à la facture Stripe avant de le':
-    'Our count: to be checked against the Stripe invoice before',
-  'saisir en dépense. Rien n’est enregistré automatiquement.':
-    'entering it as an expense. Nothing is recorded automatically.',
   'de ces chiffres : −': 'of these figures: −',
   'taxable, −': 'taxable, −',
 
@@ -255,10 +240,6 @@ module.exports = {
   'Année': 'Year',
   '<strong>À titre indicatif seulement.</strong> Les lois fiscales changent ':
     '<strong>For guidance only.</strong> Tax laws change ',
-  'Aucune transaction facturée cette année.': 'No transaction billed this year.',
-  'facturée': 'billed',
-  '<b>Notre décompte</b> : à confronter à la facture Stripe avant de le ':
-    '<b>Our count</b>: to be checked against the Stripe invoice before ',
   'déduit': 'deducted',
   '<strong>Taxes provinciales perçues (PST / RST)</strong> — ':
     '<strong>Provincial taxes collected (PST / RST)</strong> — ',

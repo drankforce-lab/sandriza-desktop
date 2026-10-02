@@ -10,27 +10,19 @@
  * « garde la cle enregistree », jamais « efface-la ». C est la phrase
  * « Laissez le champ vide pour la conserver » qui le dit.
  *
- * ⚠⚠ LES FORMATS NE SE TRADUISENT PAS : `gsk_…`, `re_…`, `hf_…`, `rk_…`,
- * `sk_…`, `sandbox_…`, `xxxxxxxx:xxxx…` decrivent a quoi ressemble la cle du
+ * ⚠⚠ LES FORMATS NE SE TRADUISENT PAS : `gsk_…`, `re_…`, `hf_…`,
+ * `sk-ant-…`, `sandbox_…`, `xxxxxxxx:xxxx…` decrivent a quoi ressemble la cle du
  * service. Les traduire ferait chercher un prefixe qui n existe pas. Seuls les
  * mots francais qui les accompagnent (« clé de production (sans préfixe) »,
  * « (facultatif) ») se lisent.
  *
  * ⚠⚠ LES NOMS DE SERVICES ET LEURS ECRANS RESTENT TELS QUELS : Fal.ai,
- * Photoroom, Groq, Resend, Hugging Face, Stripe Tax, et les chemins qu on suit
+ * Photoroom, Groq, Anthropic, Resend, Hugging Face, et les chemins qu on suit
  * chez eux (« Dashboard puis API Keys », « Settings, Access Tokens, New token »)
  * — ces menus-la sont en anglais chez le fournisseur, meme pour un poste
  * francais. Les traduire enverrait chercher un bouton qui n existe pas.
  * Le modele `llama-3.3-70b-versatile` et `segformer_b2_clothes` sont des
  * identifiants.
- *
- * ⚠⚠ LA PHRASE DE STRIPE TAX porte une regle fiscale qu on ne resume pas :
- * Stripe ne perçoit QUE dans les pays ou l on est inscrit, ailleurs c est 0 et
- * LA CLIENTE PAIE A LA FRONTIERE, et les droits de douane ne sont pas couverts.
- *
- * ⚠ « Aucune inscription — aucune destination hors Canada ne peut être
- * ouverte » : c est le verdict qui explique pourquoi une destination refuse de
- * s ouvrir. Il garde sa cause.
  */
 
 module.exports = {
@@ -99,16 +91,6 @@ module.exports = {
   'Gratuit — Settings, Access Tokens, New token (Read). Modèle segformer_b2_clothes.':
     'Free — Settings, Access Tokens, New token (Read). segformer_b2_clothes model.',
 
-  /* ⚠⚠ UNE REGLE FISCALE, PAS UNE DESCRIPTION : ce qui n est pas perçu ici est
-     paye a la frontiere par la cliente. */
-  'Stripe Tax — Taxes internationales': 'Stripe Tax — International taxes',
-  'Calcul auto de la TVA/TPS à l’international (le Canada garde la table manuelle). Stripe ne perçoit que dans les pays où vous êtes inscrit ; ailleurs 0 (le client paie à la frontière). Ne couvre pas les droits de douane.':
-    'Automatic VAT/GST calculation abroad (Canada keeps the manual table). Stripe only collects in the countries where you are registered; elsewhere 0 (the customer pays at the border). Does not cover customs duties.',
-  'Clé secrète Stripe': 'Stripe secret key',
-  'rk_… (clé restreinte Tax) ou sk_…': 'rk_… (restricted Tax key) or sk_…',
-  'Recommandé : une clé RESTREINTE (rk_) limitée à la permission Tax. La clé reste au serveur.':
-    'Recommended: a RESTRICTED key (rk_) limited to the Tax permission. The key stays on the server.',
-
   /* ── LE SOLDE FAL.AI, SAISI A LA MAIN ───────────────────────────────────── */
   'Solde du compte (saisi à la main)': 'Account balance (entered by hand)',
   'ex. 25.00': 'e.g. 25.00',
@@ -149,31 +131,6 @@ module.exports = {
   'Retirer la clé enregistrée ?': 'Remove the saved key?',
   'Confirmer le retrait': 'Confirm the removal',
   'Retrait…': 'Removing…',
-
-  /* ══ LE TEST DE LA CLE STRIPE TAX ══════════════════════════════════════════ */
-  'Tester la clé &amp; voir mes inscriptions': 'Test the key &amp; see my registrations',
-  'Tester la clé voir mes inscriptions': 'Test the key see my registrations',
-  'Test en cours…': 'Testing…',
-  '✓ Clé valide (': '✓ Valid key (',
-  '). <b>Aucune inscription</b> — ': '). <b>No registration</b> — ',
-  '). Aucune inscription —': '). No registration —',
-  'aucune destination hors Canada ne peut être ouverte.':
-    'no destination outside Canada can be opened.',
-  '). Inscrit dans : <b>': '). Registered in: <b>',
-  '). Inscrit dans :': '). Registered in:',
-  ' non actives': ' not active',
-  ' non active': ' not active',
-  /* ⚠ LA CLE COMMENCE APRES L ATTRIBUT. Ecrite depuis le « . » qui precede, elle
-     traversait le style="opacity:.75" : une fois posee, l attribut est echappe
-     et les bancs qui le cherchent litteralement ne le voient plus. Le poseur
-     refuse — a raison. */
-  'Les pays desservis se règlent dans ': 'The countries served are set in ',
-  '. Les pays desservis se règlent dans': '. The countries served are set in',
-  '<b>Configuration ▸ Livraison</b>.': '<b>Configuration ▸ Shipping</b>.',
-  'Configuration ▸ Livraison .': 'Configuration ▸ Shipping .',
-  'Échec du test.': 'The test failed.',
-  ' (enregistrez la clé d’abord)': ' (save the key first)',
-  '(enregistrez la clé d’abord)': '(save the key first)',
 
   /* ── LES VERDICTS ───────────────────────────────────────────────────────── */
   'Aucun changement.': 'No change.',

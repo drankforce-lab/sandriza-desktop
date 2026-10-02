@@ -2600,13 +2600,13 @@ const OPS_PONT = new Set([
   'config:conformite:donnees', 'config:conformite:ecrire',
   'paiements:compte',
   'config:taxes:donnees', 'config:taxes:ecrire', 'config:taxes:reinit',
-  'config:taxes:reference', 'config:taxes:revision', 'config:taxes:pays', 'config:taxes:paysoter',
+  'config:taxes:reference', 'config:taxes:revision',
   'config:paiements:donnees', 'config:paiements:ecrire', 'config:paiements:options',
   'config:paiements:mode', 'config:paiements:tester',
   // Cles API (fenetre Cles, 2.34.0) — dernier onglet de << Paiement & taxes >>.
   // ⚠ AUCUNE CLE NE TRAVERSE LE PONT : << donnees >> ne rend que l existence et
   // les 4 derniers caracteres. << retirer >> est le geste explicite de retrait.
-  'config:cles:donnees', 'config:cles:ecrire', 'config:cles:retirer', 'config:cles:teststripe',
+  'config:cles:donnees', 'config:cles:ecrire', 'config:cles:retirer',
   // Configuration de la livraison (fenetre Livraison, 2.37.0) — pas de secret.
   'config:livraison:donnees', 'config:livraison:ecrire',
   // Les pays desservis, dans la meme fenetre que la livraison.
@@ -2746,8 +2746,7 @@ const OPS_PONT = new Set([
   // canevas et le taux de change restent au site. La fenetre envoie un fichier et
   // recoit des champs — rien n est enregistre sans confirmation.
   'depenses:donnees', 'depenses:lire', 'depenses:taxes',
-  // Frais Stripe Tax en comptabilite (#22) — lecture seule.
-  'depenses:fraisStripe', 'depenses:enregistrer',
+  'depenses:enregistrer',
   'depenses:supprimer', 'depenses:recu', 'depenses:recuOuvrir', 'depenses:facture',
   // Le BROUILLON : rien de ce qui est saisi ne doit pouvoir disparaitre, quelle
   // que soit la maniere dont la fenetre se ferme (meme patron que l assistant
@@ -3207,15 +3206,14 @@ const LIMITES_PONT = {
   'paiements:compte': 20000,
   'config:taxes:donnees': 15000, 'config:taxes:ecrire': 30000, 'config:taxes:reinit': 30000,
   'config:taxes:reference': 30000, 'config:taxes:revision': 30000,
-  'config:taxes:pays': 30000, 'config:taxes:paysoter': 30000,
   // Le test de connexion part chez Square : il depend d un tiers.
   'config:paiements:donnees': 15000, 'config:paiements:ecrire': 45000,
   'config:paiements:options': 30000, 'config:paiements:mode': 15000, 'config:paiements:tester': 45000,
   // Cles API : chaque ecriture pousse plusieurs cles vers le nuage, awaitees.
-  'config:cles:donnees': 15000, 'config:cles:ecrire': 30000, 'config:cles:retirer': 20000, 'config:cles:teststripe': 30000,
+  'config:cles:donnees': 15000, 'config:cles:ecrire': 30000, 'config:cles:retirer': 20000,
   'config:livraison:donnees': 15000, 'config:livraison:ecrire': 30000,
-  // ⚠ 'relire' interroge Stripe en court-circuitant le cache : c est un appel
-  // reseau vers l exterieur, pas une lecture locale.
+  // 'relire' relit la liste des pays desservis (lecture locale, plus aucun
+  // appel exterieur depuis le retrait de Stripe Tax le 2026-10-02).
   'config:pays:donnees': 15000, 'config:pays:relire': 45000, 'config:pays:exclure': 30000,
   'config:retours:donnees': 15000, 'config:retours:ecrire': 30000,
   'config:nav:donnees': 15000, 'config:nav:ecrire': 30000, 'config:nav:reinit': 30000,
@@ -3278,10 +3276,6 @@ const LIMITES_PONT = {
      comme elle est lue APRES le premier dessin, elle ne retarde rien. */
   'tableau:sauvegarde': 60000,
   'tableau:verrous': 15000,
-  /* Frais Stripe Tax (#22) : le relais interroge Turso puis agrege par mois.
-     C est un aller-retour RESEAU, pas une lecture locale — le plafond ordinaire
-     de 8 s le ferait passer pour un echec sur une liaison lente. */
-  'depenses:fraisStripe': 45000,
   'sauvegarde:donnees': 60000, 'sauvegarde:creer': 600000, 'sauvegarde:telecharger': 180000,
   /* ⚠ COURT, ET C EST VOULU : une lecture d etat qui traine bloquerait le
      sondage suivant, et un etat en retard vaut moins que pas d etat. */

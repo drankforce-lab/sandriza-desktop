@@ -215,13 +215,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       sous: '${T("Isole le vêtement avant correction de couleur (exclut peau, visage, cheveux).")}',
       lien: ['huggingface.co', 'https://huggingface.co/settings/tokens'],
       champs: [{ k: 'hf', label: '${T("Token d’accès")}', place: 'hf_…',
-        aide: '${T("Gratuit — Settings, Access Tokens, New token (Read). Modèle segformer_b2_clothes.")}' }] },
-    { titre: '${T("Stripe Tax — Taxes internationales")}',
-      sous: '${T("Calcul auto de la TVA/TPS à l’international (le Canada garde la table manuelle). Stripe ne perçoit que dans les pays où vous êtes inscrit ; ailleurs 0 (le client paie à la frontière). Ne couvre pas les droits de douane.")}',
-      lien: ['dashboard.stripe.com', 'https://dashboard.stripe.com/tax'],
-      champs: [{ k: 'stripeTax', label: '${T("Clé secrète Stripe")}', place: '${T("rk_… (clé restreinte Tax) ou sk_…")}',
-        aide: '${T("Recommandé : une clé RESTREINTE (rk_) limitée à la permission Tax. La clé reste au serveur.")}' }],
-      test: true }
+        aide: '${T("Gratuit — Settings, Access Tokens, New token (Read). Modèle segformer_b2_clothes.")}' }] }
   ];
 
   function champHtml(c){
@@ -279,9 +273,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       s.champs.forEach(function(c){ h.push(champHtml(c)); });
       if (s.solde) h.push(soldeHtml()); // le solde fal.ai, sous sa cle, dans la meme carte
       if (s.budget) h.push(budgetHtml()); // le plafond IA, sous sa cle, meme principe
-      if (s.test) h.push('<div class="ch"><button id="b-teststripe"' + (RO ? ' disabled' : '')
-        + '>${T("Tester la clé &amp; voir mes inscriptions")}</button>'
-        + '<div class="etat" id="stripe-res" style="margin-top:.4rem"></div></div>');
       h.push('</div>');
     });
     h.push('</div>');
@@ -301,55 +292,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     corps.querySelectorAll('[data-conf]').forEach(function(b){
       b.onclick = function(){ retirer(b.getAttribute('data-conf')); };
     });
-    var bt = document.getElementById('b-teststripe');
-    if (bt) bt.onclick = testerStripe;
   }
 
-  // Test de la clé Stripe Tax : valide + montre les inscriptions. ⚠ Enregistrer
-  // la clé D'ABORD (le relais lit la clé enregistrée, pas le champ).
-  function testerStripe(){
-    if (OCCUPE) return;
-    var res = document.getElementById('stripe-res');
-    if (res) { res.className = 'etat'; res.innerHTML = '<span class="txt">${T("Test en cours…")}</span>'; }
-    occuper(true);
-    appeler('config:cles:teststripe').then(function(r){
-      occuper(false);
-      if (!res) return;
-      if (r && r.ok) {
-        /* ⚠ ON AFFICHAIT le champ pays, D'OÙ LE FAMEUX << US, US >>. Deux
-           inscriptions dans le meme pays donnaient deux fois le meme mot, et l on
-           ne pouvait pas savoir DE QUEL ETAT il s agissait — or c est tout ce qui
-           compte : etre inscrit a New York n autorise pas le Texas. Le relais rend
-           deja le territoire (US-NY) et le statut ; on montre ca.
-           ⚠ ET ON NE REFAIT PAS LE TABLEAU ICI. Il vit dans Configuration ▸
-           Livraison, ou il sert a decider ou l on livre — le dupliquer ferait deux
-           ecrans a tenir d accord, et c est deja ce genre de doublon qui a coute
-           une journee. On renvoie donc vers lui. */
-        var lst = (r.inscriptions || []);
-        var actives = lst.filter(function(i){ return i.statut === 'active'; });
-        var noms = actives.map(function(i){ return i.territoire || i.pays; });
-        var enPlus = lst.length - actives.length;
-        var txt;
-        if (!lst.length) {
-          txt = '${T("✓ Clé valide (")}' + esc(r.mode) + '${T("). <b>Aucune inscription</b> — ")}'
-              + '${T("aucune destination hors Canada ne peut être ouverte.")}';
-        } else {
-          txt = '${T("✓ Clé valide (")}' + esc(r.mode) + '${T("). Inscrit dans : <b>")}' + esc(noms.join(', ')) + '</b>'
-              /* ⚠ Le singulier et le pluriel, chacun entier. */
-              + (enPlus > 0 ? ' <span style="opacity:.7">(+ ' + enPlus
-                              + (enPlus > 1 ? '${T(" non actives")}' : '${T(" non active")}') + ')</span>' : '')
-              + '. <span style="opacity:.75">${T("Les pays desservis se règlent dans ")}'
-              + '${T("<b>Configuration ▸ Livraison</b>.")}</span>';
-        }
-        res.className = 'etat';
-        res.innerHTML = '<span class="txt">' + txt + '</span>';
-      } else {
-        res.className = 'etat non';
-        res.innerHTML = '<span class="txt">✗ ' + esc((r && (r.error || r.detail)) || '${T("Échec du test.")}')
-          + (r && r.motif === 'non_configure' ? '${T(" (enregistrez la clé d’abord)")}' : '') + '</span>';
-      }
-    });
-  }
   function rafraichirEtat(k){
     var el = document.getElementById('etat-' + k);
     if (!el) return;

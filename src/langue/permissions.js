@@ -181,8 +181,8 @@ const PERMISSIONS_EN = {
     'The theme and colours, the home page, the logo and brand, the icons, the shop menu, the footer, the opening hours, the display templates and the logo library. <b>Everything shows, nothing costs</b> — this is the part of the configuration that can be handed over without worry.',
 
   'Clés de paiement et taxes': 'Payment keys and taxes',
-  '⚠⚠⚠ <b>Les clés d’interface (Square, Stripe, Resend…) et les taux de taxe.</b> Changer une clé change <b>où l’argent est encaissé</b> ; changer un taux change ce que le client paie et ce qu’on remet au gouvernement. À réserver à qui répond de l’argent de la boutique.':
-    '⚠⚠⚠ <b>The interface keys (Square, Stripe, Resend…) and the tax rates.</b> Changing a key changes <b>where the money lands</b>; changing a rate changes what the customer pays and what is remitted to the government. Reserve it for whoever answers for the shop’s money.',
+  '⚠⚠⚠ <b>Les clés d’interface (Square, Resend…) et les taux de taxe.</b> Changer une clé change <b>où l’argent est encaissé</b> ; changer un taux change ce que le client paie et ce qu’on remet au gouvernement. À réserver à qui répond de l’argent de la boutique.':
+    '⚠⚠⚠ <b>The interface keys (Square, Resend…) and the tax rates.</b> Changing a key changes <b>where the money lands</b>; changing a rate changes what the customer pays and what is remitted to the government. Reserve it for whoever answers for the shop’s money.',
 
   'Livraison, retours et transporteurs': 'Shipping, returns and carriers',
   'Les frais et zones de livraison, les pays desservis, les règles de retour, les comptes de transporteur et les imprimantes d’étiquettes. ⚠ Les frais réglés ici sont <b>facturés au client à chaque commande</b>.':

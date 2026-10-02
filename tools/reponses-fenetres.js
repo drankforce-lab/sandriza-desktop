@@ -1721,7 +1721,7 @@ const JEU = {
   'taxes.js': [
     { nom: 'taxes avec écarts', id: 'ecarts', reponses: {
       identite: IDENTITE,
-      'config:taxes:donnees': { ok: true, peutModifier: true, intlLivraison: true,
+      'config:taxes:donnees': { ok: true, peutModifier: true,
         lastReviewed: '2026-08-01', updatedBy: 'Benoit Brousseau',
         provinces: [
           { code: 'QC', nom: 'Québec', composantes: [
@@ -1731,9 +1731,6 @@ const JEU = {
             { code: 'HST', name: 'TVH', pct: 13, remitTo: 'ARC' } ] },
           { code: 'AB', nom: 'Alberta', composantes: [
             { code: 'GST', name: 'TPS', pct: 5, remitTo: 'ARC' } ] },
-        ],
-        international: [
-          { cc: 'FR', composantes: [{ code: 'VAT', name: 'TVA', pct: 20, remitTo: 'FR' }] },
         ],
         ecarts: [
           { prov: 'ON', code: 'HST', nom: 'TVH', actuel: 13, reference: 13.5 },
@@ -1745,7 +1742,7 @@ const JEU = {
        treize — exactement ce que la sonde des debordements doit voir. */
     { nom: 'treize provinces, comparaison ouverte', id: 'ecarts', reponses: {
       identite: IDENTITE,
-      'config:taxes:donnees': { ok: true, peutModifier: true, intlLivraison: true,
+      'config:taxes:donnees': { ok: true, peutModifier: true,
         lastReviewed: '2026-08-01', updatedBy: 'Benoit Brousseau',
         provinces: [
           { code: 'QC', nom: 'Québec', composantes: [{ code: 'GST', name: 'TPS', pct: 5, remitTo: 'ARC' }, { code: 'QST', name: 'TVQ', pct: 9.975, remitTo: 'RQ' }] },
@@ -1762,27 +1759,18 @@ const JEU = {
           { code: 'NU', nom: 'Nunavut', composantes: [{ code: 'GST', name: 'TPS', pct: 5, remitTo: 'ARC' }] },
           { code: 'YT', nom: 'Yukon', composantes: [{ code: 'GST', name: 'TPS', pct: 5, remitTo: 'ARC' }] },
         ],
-        international: [],
         ecarts: [
           { prov: 'ON', code: 'HST', nom: 'TVH', actuel: 13, reference: 13.5 },
           { prov: 'NS', code: 'HST', nom: 'TVH', actuel: null, reference: 14 },
         ] },
     } },
-    { nom: 'taxes, ajout d’un pays', id: 'pays', reponses: {
-      identite: IDENTITE,
-      'config:taxes:donnees': { ok: true, peutModifier: true, intlLivraison: true,
-        lastReviewed: '2026-08-01', updatedBy: '',
-        provinces: [{ code: 'QC', nom: 'Québec', composantes: [
-          { code: 'GST', name: 'TPS', pct: 5, remitTo: 'ARC' } ] }],
-        international: [], ecarts: [] },
-    } },
     { nom: 'taxes sans écart, lecture seule', reponses: {
       identite: IDENTITE,
-      'config:taxes:donnees': { ok: true, peutModifier: false, intlLivraison: false,
+      'config:taxes:donnees': { ok: true, peutModifier: false,
         lastReviewed: '2026-08-10', updatedBy: '',
         provinces: [{ code: 'QC', nom: 'Québec', composantes: [
           { code: 'GST', name: 'TPS', pct: 5, remitTo: 'ARC' } ] }],
-        international: [], ecarts: [] },
+        ecarts: [] },
     } },
   ],
 
@@ -3154,9 +3142,6 @@ const JEU = {
       nom: 'liste garnie + formulaire ouvert',
       id: 'nouvelle',
       reponses: {
-        // Frais Stripe Tax (#22) : NOTRE decompte, jamais une depense ecrite.
-        'depenses:fraisStripe': { ok: true, annee: 2026, transactions: 3, total: 1.5, devise: 'CAD',
-          mois: [{ mois: '2026-07', n: 1, total: 0.5 }, { mois: '2026-08', n: 2, total: 1 }] },
         'depenses:donnees': {
           ok: true, annee: 2026, mois: 0, categorie: '', periode: '2026',
           annees: ['2026', '2025'],
@@ -3235,9 +3220,6 @@ const JEU = {
       nom: 'question de fermeture',
       id: 'fermeture',
       reponses: {
-        // Frais Stripe Tax (#22) : NOTRE decompte, jamais une depense ecrite.
-        'depenses:fraisStripe': { ok: true, annee: 2026, transactions: 3, total: 1.5, devise: 'CAD',
-          mois: [{ mois: '2026-07', n: 1, total: 0.5 }, { mois: '2026-08', n: 2, total: 1 }] },
         'depenses:donnees': {
           ok: true, annee: 2026, mois: 0, categorie: '', periode: '2026',
           annees: ['2026'], moisNoms: ['Janvier'],
@@ -3262,9 +3244,6 @@ const JEU = {
       nom: 'periode vide',
       id: '',
       reponses: {
-        // Frais Stripe Tax (#22) : NOTRE decompte, jamais une depense ecrite.
-        'depenses:fraisStripe': { ok: true, annee: 2026, transactions: 3, total: 1.5, devise: 'CAD',
-          mois: [{ mois: '2026-07', n: 1, total: 0.5 }, { mois: '2026-08', n: 2, total: 1 }] },
         'depenses:donnees': {
           ok: true, annee: 2026, mois: 2, categorie: '', periode: 'Février 2026',
           annees: ['2026'], moisNoms: ['Janvier', 'Février'],
@@ -3285,9 +3264,6 @@ const JEU = {
       nom: 'annuaire des fournisseurs',
       id: 'annuaire',
       reponses: {
-        // Frais Stripe Tax (#22) : NOTRE decompte, jamais une depense ecrite.
-        'depenses:fraisStripe': { ok: true, annee: 2026, transactions: 3, total: 1.5, devise: 'CAD',
-          mois: [{ mois: '2026-07', n: 1, total: 0.5 }, { mois: '2026-08', n: 2, total: 1 }] },
         'depenses:donnees': {
           ok: true, annee: 2026, mois: 0, categorie: '', periode: '2026',
           annees: ['2026'], moisNoms: ['Janvier'],
@@ -3331,9 +3307,6 @@ const JEU = {
       nom: 'lecture seule',
       id: '',
       reponses: {
-        // Frais Stripe Tax (#22) : NOTRE decompte, jamais une depense ecrite.
-        'depenses:fraisStripe': { ok: true, annee: 2026, transactions: 3, total: 1.5, devise: 'CAD',
-          mois: [{ mois: '2026-07', n: 1, total: 0.5 }, { mois: '2026-08', n: 2, total: 1 }] },
         'depenses:donnees': {
           ok: true, annee: 2026, mois: 0, categorie: '', periode: '2026',
           annees: ['2026'], moisNoms: ['Janvier'],
@@ -3354,9 +3327,6 @@ const JEU = {
       nom: 'module absent',
       id: '',
       reponses: {
-        // Frais Stripe Tax (#22) : NOTRE decompte, jamais une depense ecrite.
-        'depenses:fraisStripe': { ok: true, annee: 2026, transactions: 3, total: 1.5, devise: 'CAD',
-          mois: [{ mois: '2026-07', n: 1, total: 0.5 }, { mois: '2026-08', n: 2, total: 1 }] },
         'depenses:donnees': { ok: false, motif: 'module_depenses' },
         identite: IDENTITE,
       },

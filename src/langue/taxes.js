@@ -18,8 +18,7 @@
  * « N’appliquez pas si vous avez ajusté un taux selon vos inscriptions. » Un
  * taux ajuste pour une inscription fiscale particuliere serait perdu.
  *
- * ⚠ LES CODES DE PROVINCE (QC, ON…) et les codes de pays a deux lettres sont des
- * valeurs. Les NOMS de provinces viennent du coeur.
+ * ⚠ LES CODES DE PROVINCE (QC, ON…) sont des valeurs. Les NOMS de provinces viennent du coeur.
  */
 
 module.exports = {
@@ -36,10 +35,7 @@ module.exports = {
   /* ── LES MOTIFS DE REFUS ────────────────────────────────────────────────── */
   'Votre rôle est en lecture seule : les taux ne peuvent pas être modifiés.':
     'Your role is read only: the rates cannot be changed.',
-  'Code de pays requis (deux lettres, par exemple US).':
-    'Country code required (two letters, for example US).',
   'Ce taux n’est pas un nombre valide.': 'This rate is not a valid number.',
-  'Ce pays n’est plus dans la grille.': 'This country is no longer in the table.',
   'La configuration n’est pas prête dans la fenêtre principale.':
     'The configuration is not ready in the main window.',
   'Taux NON enregistrés. Rien n’a été modifié — réessayez.':
@@ -93,29 +89,6 @@ module.exports = {
   'Fermer': 'Close',
   'Appliquer la référence Fermer': 'Apply the reference Close',
 
-  /* ══ L INTERNATIONAL — PLUS RIEN A SAISIR ══════════════════════════════════
-   * ⚠ Le <strong> coupe ces phrases : les cles portent la balise, et les formes
-   * rendues suivent. */
-  'International': 'International',
-  'Les taxes internationales sont <strong>gérées automatiquement par Stripe Tax</strong> : ':
-    'International taxes are <strong>handled automatically by Stripe Tax</strong>: ',
-  'Les taxes internationales sont gérées automatiquement par Stripe Tax :':
-    'International taxes are handled automatically by Stripe Tax:',
-  'le taux exact est calculé <strong>à la caisse</strong> selon la destination, à partir de vos inscriptions ':
-    'the exact rate is worked out <strong>at checkout</strong> from the destination and your real tax ',
-  'le taux exact est calculé à la caisse selon la destination, à partir de vos inscriptions':
-    'the exact rate is worked out at checkout from the destination and your real tax',
-  'fiscales réelles — plus rien à saisir ici.': 'registrations — nothing left to enter here.',
-  '• Les <strong>pays et États desservis</strong> se règlent dans <strong>Livraison ▸ Pays desservis</strong> ':
-    '• The <strong>countries and states served</strong> are set in <strong>Shipping ▸ Countries served</strong> ',
-  '• Les pays et États desservis se règlent dans Livraison ▸ Pays desservis':
-    '• The countries and states served are set in Shipping ▸ Countries served',
-  '(lus en direct chez Stripe).': '(read live from Stripe).',
-  '• La <strong>clé Stripe Tax</strong> se règle dans <strong>Clés API</strong>.':
-    '• The <strong>Stripe Tax key</strong> is set in <strong>API keys</strong>.',
-  '• La clé Stripe Tax se règle dans Clés API .':
-    '• The Stripe Tax key is set in API keys .',
-
   /* ── LES VERDICTS ───────────────────────────────────────────────────────── */
   'Taux enregistrés.': 'Rates saved.',
   'Taux réinitialisés aux valeurs par défaut.': 'Rates reset to the default values.',
@@ -126,13 +99,7 @@ module.exports = {
   'Marquage de la révision…': 'Marking the review…',
   'Vos taux correspondent à la référence. Date de révision actualisée.':
     'Your rates match the reference. Review date updated.',
-  'Ajout du pays…': 'Adding the country…',
-  'Pays ajouté.': 'Country added.',
   'Réinitialisation…': 'Resetting…',
-  'Retrait…': 'Removing…',
-  'Pays ': 'Country ',
-  ' retiré.': ' removed.',
-  'retiré.': 'removed.',
   ' écarts': ' gaps',
   ' écart': ' gap',
   'écarts': 'gaps',

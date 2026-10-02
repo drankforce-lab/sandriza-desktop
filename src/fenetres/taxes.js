@@ -3,7 +3,8 @@
 /*
  * FENÊTRE « GESTION DES TAXES » — NATIVE (Configuration, palier 5, 6e onglet)
  * =============================================================================
- * Les taux perçus par province de livraison, et par pays pour l'international.
+ * Les taux perçus par province de livraison. Aucune taxe n'est perçue hors du
+ * Canada (décision du 2026-10-02) : il n'y a plus de table internationale.
  * Aucun secret — mais c'est la grille qui décide de ce que la cliente PAIE.
  *
  * ⚠ AUCUNE RÈGLE FISCALE ICI. Ni les taux de référence, ni l'ordre des
@@ -70,7 +71,6 @@ input[type=text]:focus,input[type=number]:focus{outline:none;border-color:#c9a97
 input:disabled{opacity:.55}
 .nom{width:4.2rem}
 .taux{width:4.6rem;text-align:right}
-.cc{width:5rem;text-transform:uppercase}
 .gestes{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.9rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
@@ -97,20 +97,16 @@ button.dgr{color:var(--tx-err);border-color:rgba(248,113,113,.4)}
 .deuxC > .carte{margin:0}
 @media (max-width:1000px){.deuxT,.deuxC{grid-template-columns:1fr}}
 
-.intl{font-size:.76rem;line-height:1.5;color:var(--tx2);border:1px solid var(--v08);border-radius:10px;padding:.5rem .75rem;margin:.1rem 0 0}
-.intl strong{color:var(--tx)}
-.intl br{display:none}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;align-items:center;justify-content:center;z-index:50;padding:1rem}
 .voile .boite{max-width:44rem;width:100%;max-height:88vh;overflow:auto;margin:0}
 `;
 
-/* ⚠ L ETAT D OUVERTURE EST UN PARAMETRE. Le panneau de comparaison et la ligne
-   d ajout d un pays ne s atteignent qu au CLIC : sans cela, aucun jeu d essai ne
-   les dessine et ils resteraient hors du garde-fou. */
+/* ⚠ L ETAT D OUVERTURE EST UN PARAMETRE. Le panneau de comparaison ne
+   s atteint qu au CLIC : sans cela, aucun jeu d essai ne le dessine et il
+   resterait hors du garde-fou. */
 function pageTaxes(ouverture) {
   const o = String(ouverture || '');
   const ecartsDepart = o === 'ecarts' ? 'true' : 'false';
-  const ajoutDepart = o === 'pays' ? 'true' : 'false';
   return `${TETE()}
 <title>${T("Gestion des taxes — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -158,7 +154,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var rev = document.getElementById('rev');
   var bsave = document.getElementById('b-save');
   var bver = document.getElementById('b-verifier');
-  var D = null, RO = false, OCCUPE = false, AJOUT = ${ajoutDepart}, ECARTS = ${ecartsDepart};
+  var D = null, RO = false, OCCUPE = false, ECARTS = ${ecartsDepart};
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -168,9 +164,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
     droit:              '${T("Votre rôle ne donne pas accès à la configuration.")}',
     lecture_seule:      '${T("Votre rôle est en lecture seule : les taux ne peuvent pas être modifiés.")}',
-    pays_requis:        '${T("Code de pays requis (deux lettres, par exemple US).")}',
     taux_invalide:      '${T("Ce taux n’est pas un nombre valide.")}',
-    introuvable:        '${T("Ce pays n’est plus dans la grille.")}',
     indisponible:       '${T("La configuration n’est pas prête dans la fenêtre principale.")}',
     pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
     delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
@@ -316,17 +310,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       hEc = h.join(''); h = hp;
     }
 
-    // ── International ──────────────────────────────────────────────────────
-    // ⚠ Table manuelle RETIRÉE (2026-08-12) : Stripe Tax calcule la taxe
-    // internationale à la caisse, selon la destination et les inscriptions réelles.
-    // Une table saisie à la main ferait double emploi (et pourrait diverger).
-    h.push('<div class="intl"><strong>${T("International")}</strong> '
-      + '<span>${T("Les taxes internationales sont <strong>gérées automatiquement par Stripe Tax</strong> : ")}'
-      + '${T("le taux exact est calculé <strong>à la caisse</strong> selon la destination, à partir de vos inscriptions ")}'
-      + '${T("fiscales réelles — plus rien à saisir ici.")}<br>'
-      + '${T("• Les <strong>pays et États desservis</strong> se règlent dans <strong>Livraison ▸ Pays desservis</strong> ")}'
-      + '${T("(lus en direct chez Stripe).")}<br>'
-      + '${T("• La <strong>clé Stripe Tax</strong> se règle dans <strong>Clés API</strong>.")}</span></div>');
     h.push(hEc);
 
     corps.innerHTML = h.join('');
@@ -342,17 +325,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     sur('b-reinit', reinit);
     sur('b-appliquer', appliquer);
     sur('b-fermer-ecarts', function(){ ECARTS = false; dessiner(); });
-    sur('b-ajout', function(){ AJOUT = true; dessiner();
-      var e = document.getElementById('a-cc'); if (e) e.focus(); });
-    sur('b-ajout-non', function(){ AJOUT = false; dessiner(); });
-    sur('b-ajout-ok', ajouterPays);
-    var n = corps.querySelectorAll('[data-oter]');
-    for (var i = 0; i < n.length; i++) n[i].onclick = function(e){ oterPays(e.currentTarget.getAttribute('data-oter')); };
   }
 
   // Simple LECTEUR de la grille : la regle d ecriture vit au coeur.
   function lire(){
-    var canada = {}, international = {};
+    var canada = {};
     var ch = corps.querySelectorAll('[data-c]');
     for (var k = 0; k < ch.length; k++) {
       var el = ch[k];
@@ -360,13 +337,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var i = parseInt(el.getAttribute('data-i'), 10);
       var f = el.getAttribute('data-f');
       if (isNaN(i)) continue;
-      var cible = cle.indexOf('ca:') === 0 ? canada : international;
+      if (cle.indexOf('ca:') !== 0) continue;
+      var cible = canada;
       var nom = cle.slice(3);
       if (!cible[nom]) cible[nom] = [];
       if (!cible[nom][i]) cible[nom][i] = {};
       cible[nom][i][f] = el.value;
     }
-    return { canada: canada, international: international };
+    return { canada: canada };
   }
 
   function occuper(o){
@@ -386,7 +364,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     if (r && r.motif === 'concurrence') {
       D = r; RO = !r.peutModifier;
-      AJOUT = false;
       dessiner();
       dire(expliquer(r), 'err');
       return;
@@ -425,24 +402,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     occuper(true); dire('${T("Marquage de la révision…")}');
     appeler('config:taxes:revision').then(function(r){ verdict(r, '${T("Vos taux correspondent à la référence. Date de révision actualisée.")}'); });
   };
-  function ajouterPays(){
-    if (RO || OCCUPE) return;
-    var cc = (document.getElementById('a-cc') || {}).value || '';
-    var nom = (document.getElementById('a-nom') || {}).value || '';
-    var pct = (document.getElementById('a-pct') || {}).value || '';
-    occuper(true); dire('${T("Ajout du pays…")}');
-    appeler('config:taxes:pays', [{ cc: cc, nom: nom, pct: pct }]).then(function(r){
-      if (r && r.ok) AJOUT = false;
-      verdict(r, '${T("Pays ajouté.")}');
-    });
-  }
-  function oterPays(cc){
-    if (RO || OCCUPE) return;
-    occuper(true); dire('${T("Retrait…")}');
-    appeler('config:taxes:paysoter', [cc]).then(function(r){
-      verdict(r, '${T("Pays ")}' + cc + '${T(" retiré.")}'); });
-  }
-
   function charger(){
     dire('${T("Lecture…")}');
     appeler('config:taxes:donnees').then(function(r){
