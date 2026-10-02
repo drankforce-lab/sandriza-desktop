@@ -242,7 +242,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
       return '<tr><td><span class="rf-code">' + esc(o.num) + '</span></td><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(ini(o.client)) + '</span>'
         + '<span class="rf-nom">' + esc(o.client || '—') + '</span></div></td>'
         + '<td style="color:var(--tx2)">' + esc(szQuand(o.date)) + '</td>'
-        + '<td>' + (o.promo ? '<span class="badge err">' + esc(o.promo) + '</span>' : '<span style="color:var(--tx2)">—</span>') + '</td>'
+        + '<td>' + (o.promo ? '<span class="badge">' + esc(o.promo) + '</span>' : '<span style="color:var(--tx2)">—</span>') + '</td>'
         + '<td class="num" style="font-weight:700">' + argent(o.total) + '</td>'
         + '<td><span class="badge ' + st[0] + '">' + esc(st[1]) + '</span></td></tr>';
     }).join('') : '<tr><td colspan="6" class="vide">${T("Aucune commande.")}</td></tr>';
@@ -268,7 +268,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
   function vueSegments(){
     var cards = D.segMeta.map(function(m){
       return '<div class="seg' + (SEGF === m.key ? ' pris' : '') + '" data-seg="' + m.key + '"><div class="n">' + (D.segCounts[m.key] || 0) + '</div><div class="l">' + esc(m.label) + '</div><div class="d">' + esc(m.desc) + '</div></div>';
-    }).join('') + '<div class="seg' + (SEGF === 'promo' ? ' pris' : '') + '" data-seg="promo"><div class="n" style="color:var(--tx-err2)">' + D.promoCnt + '</div><div class="l">${T("Acheteurs promo")}</div><div class="d">${T("Ont utilisé une offre")}</div></div>';
+    }).join('') + '<div class="seg' + (SEGF === 'promo' ? ' pris' : '') + '" data-seg="promo"><div class="n">' + D.promoCnt + '</div><div class="l">${T("Acheteurs promo")}</div><div class="d">${T("Ont utilisé une offre")}</div></div>';
     var titre = SEGF === 'all' ? '${T("Tous les clients")}' : SEGF === 'promo' ? '${T("Acheteurs promo")}' : (function(){ var mm = D.segMeta.filter(function(x){ return x.key === SEGF; })[0]; return mm ? mm.label : SEGF; })();
     var rows = D.clients.length ? D.clients.map(function(c){
       var col = c.daysSince > 60 ? 'var(--tx-err)' : c.daysSince > 30 ? 'var(--tx-att)' : 'var(--tx-ok)';
