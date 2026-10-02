@@ -168,4 +168,5 @@ module.exports = {
   'Expirés': 'Expired',
   'n’ouvrent plus rien': 'no longer open anything',
   'Créé Échéance État': 'Created Deadline Status',
+  "Copier le lien pour le comptable": "Copy the link for the accountant",
 };

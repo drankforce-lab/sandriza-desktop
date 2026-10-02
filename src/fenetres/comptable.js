@@ -203,8 +203,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
         + '</div><div class="sub">${T("n’ouvrent plus rien")}</div></div>'
         + '</div>'));
     }
-    h.push('<div class="barreoutils"><button class="prim" id="b-nouveau">${T("+ Nouveau lien de l’exercice")}</button>'
-      + '<span class="droite"><button id="b-recharger">${T("Recharger")}</button></span></div>');
+    // Le bouton de creation a DROITE, comme dans toutes les autres listes (2026-10-02).
+    h.push('<div class="barreoutils"><span class="droite"><button id="b-recharger">${T("Recharger")}</button>'
+      + '<button class="prim" id="b-nouveau">${T("+ Nouveau lien de l’exercice")}</button></span></div>');
 
     if (ETAT.avert) {
       h.push('<div class="carte" style="border-color:rgba(234,179,8,.4)"><div class="dt">'
@@ -229,7 +230,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
           + '<td>' + jour(p.expireLe) + '</td>'
           + '<td><span class="rf-pill ' + (p.expire ? '' : 'vert') + '">' + (p.expire ? '${T("Expiré")}' : '${T("Actif")}') + '</span></td>'
           + '<td style="white-space:nowrap">'
-            + '<button class="mini" data-copier="' + esc(p.url) + '"><span class="ic">📋</span></button> '
+            + '<button class="mini" data-copier="' + esc(p.url) + '" title="${T("Copier le lien pour le comptable")}">${T("Copier")}</button> '
             + '<button class="mini dgr" data-revoquer="' + esc(p.token) + '">'
             + (ARME_REV === p.token ? '${T("Confirmer ?")}' : '${T("Révoquer")}') + '</button>'
           + '</td></tr>');
@@ -391,8 +392,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
   // ════════════════════════════════════════════════════════════════════════
   function dessinerCarnet(){
     var h = [];
-    h.push('<div class="barreoutils"><button class="prim" id="c-ajouter">${T("+ Ajouter un comptable")}</button>'
-      + '<span class="droite"><button id="c-recharger">${T("Recharger")}</button></span></div>');
+    h.push('<div class="barreoutils"><span class="droite"><button id="c-recharger">${T("Recharger")}</button>'
+      + '<button class="prim" id="c-ajouter">${T("+ Ajouter un comptable")}</button></span></div>');
 
     if (ETAT.contactForm) h.push(contactForm());
 
