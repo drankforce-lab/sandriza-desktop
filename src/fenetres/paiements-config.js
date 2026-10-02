@@ -80,7 +80,7 @@ body{background:var(--f-page);color:var(--tx);
 .tarifs{display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));gap:.6rem}
 .tarif{background:var(--f-pill);border:1px solid var(--v07);border-radius:9px;padding:.55rem .7rem}
 .tarif .t{font-size:.76rem;font-weight:700}
-.tarif .r{font-size:.95rem;font-weight:700;color:var(--tx-or);margin:.1rem 0}
+.tarif .r{font-size:.95rem;font-weight:700;color:var(--tx);margin:.1rem 0}
 .tarif .n{font-size:.7rem;color:var(--tx3)}
 .res{font-size:.8rem;margin-top:.6rem;line-height:1.6}
 .res.bon{color:var(--tx-ok)}.res.err{color:var(--tx-err)}.res.att{color:var(--tx-jaune)}

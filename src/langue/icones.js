@@ -98,5 +98,6 @@ module.exports = {
   'Icône supprimée.': 'Icon deleted.',
 
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
-  'Nom': 'Name'
+  'Nom': 'Name',
+  "Aucune image : l’icône ne s’affichera pas": "No image: the icon will not show",
 };

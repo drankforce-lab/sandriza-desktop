@@ -91,6 +91,10 @@ body{background:var(--f-page);color:var(--tx);
 .ico .im{width:3.4rem;height:3.4rem;border-radius:8px;background:#f5f2ec;display:flex;
   align-items:center;justify-content:center;padding:.3rem;overflow:hidden}
 .ico .im img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+/* Sans image, la case le DIT (2026-10-01) : un carre blanc muet laissait croire a
+   une icone blanche, ou a un chargement en cours. */
+.ico .im .sansimg{display:flex;color:#8a8f99}
+.ico .im .sansimg svg{width:20px;height:20px}
 .ico .nm{font-size:.84rem;font-weight:700;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ico .gestes{display:flex;gap:.35rem;flex-wrap:wrap;align-items:center;margin-top:.3rem}
 code{font-family:ui-monospace,Consolas,monospace;font-size:.75rem;color:#cfe0f5;
@@ -261,7 +265,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       h.push('<div class="grille">');
       liste.forEach(function(ic){
         h.push('<div class="ico"><div class="im">'
-          + (ic.url ? '<img src="' + esc(ic.url) + '" alt="">' : '') + '</div><div style="min-width:0">'
+          + (ic.url ? '<img src="' + esc(ic.url) + '" alt="">' : '<span class="sansimg" title="${T("Aucune image : l’icône ne s’affichera pas")}">'+'${ICO.image}'+'</span>') + '</div><div style="min-width:0">'
           + '<p class="nm" title="' + esc(ic.name) + '">' + esc(ic.name) + '</p>'
           + '<div class="gestes"><code data-copier="' + esc(ic.tag) + '" title="${T("Copier le code")}">[icon:'
           + esc(ic.tag) + ']</code>'

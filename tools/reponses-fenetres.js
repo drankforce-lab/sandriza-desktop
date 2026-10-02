@@ -1706,8 +1706,8 @@ const JEU = {
     { nom: 'icones garnies', reponses: {
       identite: IDENTITE,
       'config:icones:donnees': { ok: true, peutModifier: true, icones: [
-        { id: 'ico_1', tag: 'coeur', name: 'Cœur', url: 'https://exemple.test/coeur.png' },
-        { id: 'ico_2', tag: 'etoile', name: 'Étoile', url: 'https://exemple.test/etoile.png' },
+        { id: 'ico_1', tag: 'coeur', name: 'Cœur', url: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><path d="M32 56 8 32a13 13 0 0 1 24-16 13 13 0 0 1 24 16z" fill="#c0304a"/></svg>') },
+        { id: 'ico_2', tag: 'etoile', name: 'Étoile', url: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><path d="m32 6 8 18 20 2-15 13 5 20-18-11-18 11 5-20L4 26l20-2z" fill="#c9a97e"/></svg>') },
         { id: 'ico_3', tag: 'feu', name: 'Feu', url: '' },
       ] },
     } },
