@@ -259,8 +259,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
       + tu('${T("Révoqués")}', cpt('revoque'), '${T("fermés à la main")}')
       + tu('${T("Expirés")}', cpt('expire'), '${T("échéance passée")}')
       + '</div>'));
-    h.push('<div class="barreoutils"><button class="prim" id="b-nouveau">${T("+ Nouveau lien")}</button>'
-      + '<span class="droite"><button id="b-recharger">${T("Recharger")}</button></span></div>');
+    // Le bouton de creation a DROITE, comme dans toutes les autres listes (2026-10-01).
+    h.push('<div class="barreoutils"><span class="droite"><button id="b-recharger">${T("Recharger")}</button>'
+      + '<button class="prim" id="b-nouveau">${T("+ Nouveau lien")}</button></span></div>');
 
     if (ETAT.neuf) h.push(carteNeuf());
     if (ETAT.formulaire) h.push(formulaire());

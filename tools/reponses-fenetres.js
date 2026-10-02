@@ -4035,9 +4035,9 @@ const JEU = {
     { nom: 'generateur', id: 'agencement', reponses: { identite: IDENTITE,
       'reco:liste': { ok: true, peutModifier: true, regles: [], liaisons: [], retirees: [] },
       'reco:agencement': { ok: true, peutEcrire: true, style: 'casual', nbActifs: 3,
-          styles: [{ v: 'casual', nom: 'Casual', icone: 'C', quoi: 'Decontracte',
+          styles: [{ v: 'casual', nom: 'Casual', icone: '👟', quoi: 'Décontracté et confortable pour le quotidien',
                      recette: 'Haut + Pantalon', categories: ['Hauts', 'Pantalons'] },
-                   { v: 'elegant', nom: 'Elegant', icone: 'E', quoi: 'Raffine',
+                   { v: 'elegant', nom: 'Élégant', icone: '✨', quoi: 'Raffiné et sophistiqué pour toutes occasions spéciales',
                      recette: 'Robe + Accessoires', categories: ['Robes'] }],
           categories: [{ v: 'hauts', l: 'Hauts' }, { v: 'pantalons', l: 'Pantalons' }],
           produits: [
@@ -4048,9 +4048,9 @@ const JEU = {
     { nom: 'generateur sans style', id: 'agencement', reponses: { identite: IDENTITE,
       'reco:liste': { ok: true, peutModifier: true, regles: [], liaisons: [], retirees: [] },
       'reco:agencement': Object.assign({}, { ok: true, peutEcrire: true, style: 'casual', nbActifs: 3,
-          styles: [{ v: 'casual', nom: 'Casual', icone: 'C', quoi: 'Decontracte',
+          styles: [{ v: 'casual', nom: 'Casual', icone: '👟', quoi: 'Décontracté et confortable pour le quotidien',
                      recette: 'Haut + Pantalon', categories: ['Hauts', 'Pantalons'] },
-                   { v: 'elegant', nom: 'Elegant', icone: 'E', quoi: 'Raffine',
+                   { v: 'elegant', nom: 'Élégant', icone: '✨', quoi: 'Raffiné et sophistiqué pour toutes occasions spéciales',
                      recette: 'Robe + Accessoires', categories: ['Robes'] }],
           categories: [{ v: 'hauts', l: 'Hauts' }, { v: 'pantalons', l: 'Pantalons' }],
           produits: [
