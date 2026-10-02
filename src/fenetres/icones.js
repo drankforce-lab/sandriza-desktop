@@ -93,7 +93,7 @@ body{background:var(--f-page);color:var(--tx);
 .ico .im img{max-width:100%;max-height:100%;object-fit:contain;display:block}
 /* Sans image, la case le DIT (2026-10-01) : un carre blanc muet laissait croire a
    une icone blanche, ou a un chargement en cours. */
-.ico .im .sansimg{display:flex;color:#8a8f99}
+.ico .im .sansimg{display:flex;color:#5f6670}
 .ico .im .sansimg svg{width:20px;height:20px}
 .ico .nm{font-size:.84rem;font-weight:700;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ico .gestes{display:flex;gap:.35rem;flex-wrap:wrap;align-items:center;margin-top:.3rem}
