@@ -404,7 +404,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var cats = D.categories || [];
     var rows = cats.map(function(c){
       if (CATEDIT === c.id) return catEditRow(c);
-      var edit = D.peut.edit ? '<button class="mini" data-catedit="' + esc(c.id) + '"><span class="ic">✎</span></button>' : '';
+      var edit = D.peut.edit ? '<button class="mini" data-catedit="' + esc(c.id) + '" title="${T("Modifier")}" aria-label="${T("Modifier")}"><span class="ic">✎</span></button>' : '';
       var del = D.peut.supprime ? ' <button class="mini danger" data-catdel="' + esc(c.id) + '" title="' + (c.used > 0 ? c.used + ' ' + szPl(c.used, '${T("produit — bloqué")}', '${T("produits — bloqué")}') : '${T("Supprimer")}') + '"><span class="ic">🗑</span></button>' : '';
       return '<tr><td><span class="pastille" style="background:' + esc(c.color) + '"></span></td>'
         + '<td style="font-weight:600">' + esc(c.name) + '</td>'

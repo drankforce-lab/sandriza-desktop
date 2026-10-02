@@ -775,10 +775,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
        sert vraiment sur une etiquette, ou tout se centre par rapport au papier. */
     h += '<div class="bloc"><label>${T("Aligner sur le support")}</label><div class="acts">'
       + '<button class="btn" type="button" data-aligner="l" title="${T("Gauche")}">⇤</button>'
-      + '<button class="btn" type="button" data-aligner="cx" title="Centrer horizontalement">↔</button>'
+      + '<button class="btn" type="button" data-aligner="cx" title="${T("Centrer horizontalement")}">↔</button>'
       + '<button class="btn" type="button" data-aligner="r" title="${T("Droite")}">⇥</button>'
       + '<button class="btn" type="button" data-aligner="t" title="${T("Haut")}">⇧</button>'
-      + '<button class="btn" type="button" data-aligner="cy" title="Centrer verticalement">↕</button>'
+      + '<button class="btn" type="button" data-aligner="cy" title="${T("Centrer verticalement")}">↕</button>'
       + '<button class="btn" type="button" data-aligner="b" title="${T("Bas")}">⇩</button>'
       + '</div></div>';
     h += '<div class="bloc"><label>${T("État")}</label><div class="acts">'

@@ -334,4 +334,6 @@ module.exports = {
     'set aside: unreadable here, it would not come out on paper either',
   'écartées : illisibles ici, elles ne sortiraient pas non plus sur le papier':
     'set aside: unreadable here, they would not come out on paper either',
+  "Centrer horizontalement": "Centre horizontally",
+  "Centrer verticalement": "Centre vertically",
 };

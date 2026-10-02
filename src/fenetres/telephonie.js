@@ -686,7 +686,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
         + (v.read ? '' : '<span class="rf-pill bleu">${T("Non lu")}</span>') + '</div>'
         + '<div class="actes">'
         + (v.read || RO ? '' : '<button class="b" type="button" data-vmlu="' + esc(v.id) + '">${T("✓ Marquer lu")}</button>')
-        + (RO ? '' : '<button class="b dgr" type="button" data-vmdel="' + esc(v.id) + '"><span class="ic">🗑</span></button>')
+        + (RO ? '' : '<button class="b dgr" type="button" data-vmdel="' + esc(v.id) + '" title="${T("Supprimer")}" aria-label="${T("Supprimer")}"><span class="ic">🗑</span></button>')
         + '</div></div>'
         + '<div class="rf-sous"><span>' + esc(v.duration || '?') + ' s</span><span>·</span><span>' + esc(szQuand(v.date)) + '</span><span>·</span>'
         + (v.emailed === false ? '<span class="rf-pill rouge">${T("Échec de l’envoi courriel")}</span>' : '<span>${T("Audio envoyé par courriel (MP3), non conservé")}</span>') + '</div></div></div>';
@@ -716,7 +716,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
         + '<div class="actes" style="margin-top:.35rem">'
         + (entrant ? '<button class="b" type="button" data-smsrep="' + esc(m.from) + '">${T("↩ Répondre")}</button>' : '')
         + (entrant && !m.read ? '<button class="b" type="button" data-smslu="' + esc(m.id) + '">✓</button>' : '')
-        + (RO ? '' : '<button class="b dgr" type="button" data-smsdel="' + esc(m.id) + '"><span class="ic">🗑</span></button>')
+        + (RO ? '' : '<button class="b dgr" type="button" data-smsdel="' + esc(m.id) + '" title="${T("Supprimer")}" aria-label="${T("Supprimer")}"><span class="ic">🗑</span></button>')
         + '</div></div></div>';
     }
     box.innerHTML = h;

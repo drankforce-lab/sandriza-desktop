@@ -222,7 +222,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '<span class="nm">${T("Diapo ")}' + (i+1) + '</span>'
       + (RO ? '' : '<button class="b" type="button" data-sup="' + i + '"' + (i===0?' disabled':'') + '>↑</button>'
         + '<button class="b" type="button" data-sdn="' + i + '"' + (i===SLIDES.length-1?' disabled':'') + '>↓</button>'
-        + '<button class="b dgr" type="button" data-sdel="' + i + '"><span class="ic">🗑</span></button>')
+        + '<button class="b dgr" type="button" data-sdel="' + i + '" title="${T("Supprimer")}" aria-label="${T("Supprimer")}"><span class="ic">🗑</span></button>')
       + '</div>'
       + '<div class="gr2">'
       + '<div class="ch"><label>${T("Image URL (vide = dégradé)")}</label><input aria-label="${T("Image URL (vide = dégradé)")}" data-sf="image" data-si="' + i + '" value="' + esc(s.image||'') + '" placeholder="https://…"' + (RO?' disabled':'') + '></div>'

@@ -268,4 +268,7 @@ module.exports = {
   'Nouveau': 'New',
   // La refonte (2026-09-25).
   'Page Type Pied de page': 'Page Type Footer',
+  "Aligner à gauche": "Align left",
+  "Centrer": "Centre",
+  "Aligner à droite": "Align right",
 };

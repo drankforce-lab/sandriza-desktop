@@ -296,4 +296,5 @@ module.exports = {
   'La liste': 'The list',
   // La refonte (2026-09-25).
   'produits': 'products',
+  "Modifier": "Edit",
 };

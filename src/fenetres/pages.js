@@ -875,7 +875,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       '<button data-l="25">25 %</button><button data-l="50">50 %</button>'
       +'<button data-l="75">75 %</button><button data-l="100">100 %</button>'
       +'<span class="fil"></span>'
-      +'<button data-a="left"><span class="ic">⯇</span></button><button data-a="center"><span class="ic">⬍</span></button><button data-a="right"><span class="ic">⯈</span></button>'
+      +'<button data-a="left" title="${T("Aligner à gauche")}" aria-label="${T("Aligner à gauche")}"><span class="ic">⯇</span></button><button data-a="center" title="${T("Centrer")}" aria-label="${T("Centrer")}"><span class="ic">⬍</span></button><button data-a="right" title="${T("Aligner à droite")}" aria-label="${T("Aligner à droite")}"><span class="ic">⯈</span></button>'
       +'<span class="fil"></span><button class="dgr" data-sup>${T("Supprimer")}</button>');
     IMGSEL=img; img.classList.add('imgsel');
     var ls=f.querySelectorAll('[data-l]');

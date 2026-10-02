@@ -102,5 +102,6 @@ module.exports = {
   'Une modification de ce bloc': 'A change to this block',
 
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
-  'Diapo': 'Slide'
+  'Diapo': 'Slide',
+  "Supprimer": "Delete",
 };

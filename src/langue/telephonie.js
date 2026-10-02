@@ -310,4 +310,5 @@ module.exports = {
   'Numéros (séparés par des virgules)': 'Numbers (comma separated)',
   'appel en attente': 'call waiting',
   'appels en attente': 'calls waiting',
+  "Supprimer": "Delete",
 };
