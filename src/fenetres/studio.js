@@ -1733,8 +1733,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function filigraneActionsHtml(){
     if (!LOGOS.length) return '';
     var lg = logoChoisi();
+    /* « PASSER » AUSSI ICI (2026-10-01, sa demande) : l etape est facultative,
+       comme les autres, et le pied doit le dire de la meme facon. C est la
+       derniere : passer ne mene a aucune etape, il laisse le filigrane de cote
+       et donne la main a « Apercu gratuit » — la suite. */
+    var pose = !!(RESULT && RESULT.filigrane);
     return '<span class="pnact">'
-      + ((RESULT && RESULT.filigrane) ? '<button type="button" id="fil-off">${T("Retirer")}</button>' : '')
+      + (pose ? '<button type="button" id="fil-off">${T("Retirer")}</button>'
+              : '<button type="button" class="pns" id="fil-passer">${T("Passer")}</button>')
       + '<button type="button" class="prim" id="fil-go"' + ((imageAMarquer() && lg && !RO) ? '' : ' disabled') + '>'
       + (RESULT ? '${T("Appliquer au résultat")}' : '${T("Appliquer à la photo")}') + '</button></span>';
   }
@@ -1772,6 +1778,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (go) go.onclick = appliquerFiligrane;
     var off = document.getElementById('fil-off');
     if (off) off.onclick = retirerFiligrane;
+    var pas = document.getElementById('fil-passer');
+    if (pas) pas.onclick = function(){
+      if (OCCUPE) return;
+      FIL_POSE = false;
+      var b = (bApercu && !bApercu.disabled) ? bApercu : ((bFinal && !bFinal.disabled) ? bFinal : null);
+      dire(b ? '${T("Filigrane ignoré — lancez l’aperçu en bas de la fenêtre.")}' : '${T("Filigrane ignoré.")}', 'bon');
+      if (b) b.focus();
+    };
   }
 
   function appliquerFiligrane(){

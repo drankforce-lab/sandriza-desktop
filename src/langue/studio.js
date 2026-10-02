@@ -799,4 +799,6 @@ module.exports = {
   "Enregistrer et formats": "Save and formats",
   "Original": "Original",
   "cadrage du rendu": "as rendered",
+  "Filigrane ignoré — lancez l’aperçu en bas de la fenêtre.": "Watermark skipped — start the preview at the bottom of the window.",
+  "Filigrane ignoré.": "Watermark skipped.",
 };
