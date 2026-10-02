@@ -451,9 +451,15 @@ input[type=range]{width:100%;accent-color:#c9a97e;margin:.3rem 0 0;cursor:pointe
    tactile ET souris. Un rideau qui ne repond qu a la souris ne s ouvre pas au
    doigt (voir la regle des deux entrees). */
 .cmpb{display:contents}
-.cmp{position:relative;display:inline-block;max-width:100%;line-height:0;
+.cmp{position:relative;display:block;flex:0 0 auto;max-width:100%;line-height:0;
   touch-action:none;-webkit-user-select:none;user-select:none;cursor:ew-resize}
-.cmp img{display:block;max-width:100%;max-height:min(56vh,31rem);border-radius:9px;
+/* ⚠ LE CADRE A LA FORME DU RÉSULTAT, PAS DE L AVANT (2026-10-02, sa capture).
+   Il prenait la forme de la photo de départ (paysage) : un rendu portrait y
+   tombait en << contain >> entre deux bandes noires, et le cadre, aussi large
+   que la zone, collait l image à gauche. Sa taille est maintenant CALCULÉE
+   (cadrerResultat) : le plus grand rectangle au ratio du rendu qui tient dans
+   la zone, centré ; l avant est rogné (cover) pour remplir le même cadre. */
+.cmp img{display:block;width:100%;height:100%;object-fit:cover;border-radius:9px;
   border:1px solid var(--v10)}
 /* ⚠ La couche du DESSUS est l APRES, rognee par la GAUCHE : ce qui reste
    visible a gauche est donc l avant, pose dessous. Un fond opaque, sinon un
@@ -461,7 +467,7 @@ input[type=range]{width:100%;accent-color:#c9a97e;margin:.3rem 0 0;cursor:pointe
    l on croirait le detourage rate. */
 .cmp .cb{position:absolute;inset:0;overflow:hidden;background:var(--f-pied);border-radius:9px;
   clip-path:inset(0 0 0 var(--x,50%))}
-.cmp .cb img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;
+.cmp .cb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
   max-height:none;border:0;border-radius:9px}
 .cmp .cpg{position:absolute;top:0;bottom:0;left:var(--x,50%);width:2px;margin-left:-1px;
   background:var(--v90);box-shadow:0 0 6px rgba(0,0,0,.6)}
@@ -511,7 +517,7 @@ html.jour .recap .jt.gris{background:#fff;color:#4a5260}
 .resg{flex:1 1 0;min-height:0;display:flex;gap:1rem;width:100%}
 .rimg{flex:1 1 auto;min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .rimg.fmtv{align-items:stretch;justify-content:flex-start;flex-direction:column;text-align:left}
-.rimg > img,.rimg .cmp img{max-height:var(--rh,52vh)}
+.rimg > img{max-height:var(--rh,52vh);object-fit:contain}
 .rcol{flex:0 0 14rem;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:.55rem;text-align:left}
 .rcol .dims{margin:0;font-size:.74rem}
 .rcol .notes{margin:0;max-width:none}
@@ -524,6 +530,8 @@ html.jour .recap .jt.gris{background:#fff;color:#4a5260}
 .rimg.fmtv .fmtg{grid-template-columns:repeat(5,minmax(0,1fr))}
 .res img{max-width:100%;max-height:min(58vh,32rem);border-radius:9px;
   border:1px solid var(--v10)}
+/* Le cadre du rideau a sa taille calculée : ses deux images le remplissent. */
+.res .cmp img{max-width:none;max-height:none}
 .res .filig{margin-top:.5rem;font-size:.74rem;color:var(--tx-jaune)}
 .res .avis{margin-top:.4rem;font-size:.74rem;color:var(--tx2)}
 .res .dims{font-size:.7rem;color:var(--tx3);margin-top:.2rem}
@@ -2668,8 +2676,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + (enImg ? ((av && CMP) ? comparateurHtml(av) : ('<img src="' + RESULT.image + '" alt="${T("résultat")}">'))
                : formatsHtml())
       + '</div><div class="rcol">';
+    /* ⚠ La remarque « Aperçu filigrané (sandbox) » est RETIRÉE (2026-10-02, sa
+       demande) : le filigrane Photoroom se voit sur l image, la phrase n ajoutait rien. */
     var nt = '';
-    if (RESULT.essai) nt += '<div class="filig"><span class="ic">⚠</span> ${T("Aperçu filigrané (sandbox) — gratuit. « Générer en pleine qualité » retire le filigrane.")}</div>';
     if (RESULT.decorErreur) nt += '<div class="filig"><span class="ic">⚠</span> ${T("Le décor n’a pas pu être appliqué :")} ' + esc(RESULT.decorErreur) + '</div>';
     if (RESULT.ignores) nt += '<div class="filig"><span class="ic">⚠</span> ${T("Le service a <strong>ignoré</strong> : ")}'
       + esc(ignoresLisible(RESULT.ignores)) + '${T(". Le reste du traitement a bien eu lieu.")}</div>';
@@ -2887,11 +2896,34 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       OBS_RES = new ResizeObserver(function(){
         var hh = ri.clientHeight;
         if (hh > 40) ri.style.setProperty('--rh', (hh - 2) + 'px');
+        cadrerResultat(ri);
       });
       OBS_RES.observe(ri);
     }
     brancherComparateur();
     brancherFormats();
+  }
+
+  /* Le résultat REMPLIT sa zone, centré, à son propre ratio — agrandi au besoin
+     (un rendu de 832 px restait petit au milieu d un grand volet). Le ratio vient
+     de l image elle-même une fois chargée ; RESULT.largeur n est qu un premier jet. */
+  function cadrerResultat(ri){
+    if (!ri || ri.classList.contains('fmtv')) return;
+    var cible = document.getElementById('cmp') || ri.querySelector(':scope > img');
+    if (!cible) return;
+    var apres = cible.id === 'cmp' ? cible.querySelector('.cb img') : cible;
+    var w = (apres && apres.naturalWidth) || (RESULT && RESULT.largeur) || 0;
+    var h = (apres && apres.naturalHeight) || (RESULT && RESULT.hauteur) || 0;
+    if (apres && !apres._szCadre) {
+      apres._szCadre = 1;
+      apres.addEventListener('load', function(){ cadrerResultat(ri); });
+    }
+    var W = ri.clientWidth - 2, H = ri.clientHeight - 2;
+    if (!w || !h || W < 40 || H < 40) return;
+    var k = Math.min(W / w, H / h);
+    cible.style.width = Math.floor(w * k) + 'px';
+    cible.style.height = Math.floor(h * k) + 'px';
+    cible.style.maxHeight = 'none';
   }
 
   function brancherFormats(){

@@ -382,10 +382,6 @@ module.exports = {
   'Pose :': 'Pose:',
   'Modèle :': 'Model:',
   'Modèle': 'Model',
-  /* ⚠⚠ PHRASE A CREDITS : elle dit pourquoi l image porte un filigrane et
-     comment l enlever — sans elle, on relance un rendu PAYANT pour comprendre. */
-  '⚠ Aperçu filigrané (sandbox) — gratuit. « Générer en pleine qualité » retire le filigrane.':
-    '⚠ Watermarked preview (sandbox) — free. « Generate at full quality » removes the watermark.',
   '⚠ Le décor n’a pas pu être appliqué :': '⚠ The scene could not be applied:',
   '⚠ Le service a ignoré :': '⚠ The service ignored:',
   '. Le reste du traitement a bien eu lieu.': '. The rest of the job did take place.',
@@ -609,8 +605,6 @@ module.exports = {
   'Le décor n’a pas pu être appliqué :': 'The scene could not be applied:',
   'Ce traitement ne passe pas par Photoroom :': 'This job does not go through Photoroom:',
   'La photo d’intérieur ne suit pas un lot :': 'The inside photo does not follow a batch:',
-  'Aperçu filigrané (sandbox) — gratuit. « Générer en pleine qualité » retire le filigrane.':
-    'Watermarked preview (sandbox) — free. « Generate at full quality » removes the watermark.',
 
   /* ── CE QUE LE PICTOGRAMME SEPARE DE SON TEXTE ──────────────────────────── */
   'Enregistrer…': 'Save…',
