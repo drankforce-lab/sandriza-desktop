@@ -358,11 +358,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
         + tu('${T("Verrouillées")}', nVer, '${T("closes, en lecture seule")}', '')
         + '</div>'));
     }
+    // Le bouton de creation a DROITE, apres les autres, comme dans toutes les
+    // listes (2026-10-01) ; l annee reste a gauche, c est un filtre.
     h.push('<div class="barreoutils">' + barreAnnees()
-      + (D.peutEcrire ? '<button class="prim" id="b-nouveau">${T("+ Nouvelle conciliation")}</button>' : '')
       + '<span class="droite">'
       + '<button id="b-zip">${T("Archive de l’année")}</button>'
-      + '<button id="b-recharger">${T("Recharger")}</button></span></div>');
+      + '<button id="b-recharger">${T("Recharger")}</button>'
+      + (D.peutEcrire ? '<button class="prim" id="b-nouveau">${T("+ Nouvelle conciliation")}</button>' : '')
+      + '</span></div>');
 
     h.push('<div class="carte"><h2>${T("Conciliations")} ' + ANNEE + '</h2>');
     if (!(D.liste || []).length) {
