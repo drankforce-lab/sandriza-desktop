@@ -1667,8 +1667,8 @@ const JEU = {
         marque: { name: 'SANDRIZA', sub: 'ÉLÉGANCE · RAFFINEMENT · STYLE',
           slogan: 'RAFFINEMENT · STYLE', sloganEN: 'REFINEMENT · STYLE', letter: 'S',
           gradient: { enabled: true, from: '#ec4899', to: '#3b82f6', dir: '135deg' } },
-        logos: { store: 'https://exemple.test/logo.png', store_en: '', admin: '',
-          login: 'https://exemple.test/login.png', transparent: '', transparent_en: '' },
+        logos: { store: LOGO_BANDEAU, store_en: '', admin: '',
+          login: LOGO_BANDEAU, transparent: '', transparent_en: '' },
         clientLogin: { bgFrom: '#1a1a2e', bgTo: '#16213e', textColor: '#ffffff' },
         loginTheme: { bgFrom: '#0f172a', bgMid: '#1e1b4b', logoGradFrom: '#4f46e5',
           logoGradTo: '#7c3aed', btnGradFrom: '#4f46e5', btnGradTo: '#6366f1',
@@ -2627,24 +2627,24 @@ const JEU = {
   'modeles.js': [
     { nom: 'garni, modifiable', reponses: { identite: IDENTITE,
       'config:modeles:donnees': { ok: true, peutModifier: true, vues: [
-        { key: 'devant',   label: 'Face',     src: 'https://exemple.r2.dev/divers/face.jpg' },
+        { key: 'devant',   label: 'Face',     src: IMAGE },
         { key: 'derriere', label: 'Derrière', src: '' },
-        { key: 'coteG',    label: 'Gauche',   src: 'https://exemple.r2.dev/divers/gauche.jpg' },
+        { key: 'coteG',    label: 'Gauche',   src: IMAGE },
         { key: 'coteD',    label: 'Droit',    src: '' },
       ] },
       'config:mannequins:donnees': { ok: true, peutModifier: true, cleConfiguree: true, mannequins: [
-        { id: 'vm_a1', nom: 'Ana',  image: 'https://exemple.r2.dev/divers/ana.jpg' },
-        { id: 'vm_b2', nom: 'Lia',  image: 'https://exemple.r2.dev/divers/lia.jpg' },
+        { id: 'vm_a1', nom: 'Ana',  image: IMAGE },
+        { id: 'vm_b2', nom: 'Lia',  image: IMAGE },
       ] } } },
     { nom: 'lecture seule', reponses: { identite: IDENTITE,
       'config:modeles:donnees': { ok: true, peutModifier: false, vues: [
-        { key: 'devant',   label: 'Face',     src: 'https://exemple.r2.dev/divers/face.jpg' },
+        { key: 'devant',   label: 'Face',     src: IMAGE },
         { key: 'derriere', label: 'Derrière', src: '' },
         { key: 'coteG',    label: 'Gauche',   src: '' },
         { key: 'coteD',    label: 'Droit',    src: '' },
       ] },
       'config:mannequins:donnees': { ok: true, peutModifier: false, cleConfiguree: true, mannequins: [
-        { id: 'vm_a1', nom: 'Ana', image: 'https://exemple.r2.dev/divers/ana.jpg' },
+        { id: 'vm_a1', nom: 'Ana', image: IMAGE },
       ] } } },
     { nom: 'aucun mannequin, clé fal.ai absente', reponses: { identite: IDENTITE,
       'config:modeles:donnees': { ok: true, peutModifier: true, vues: [

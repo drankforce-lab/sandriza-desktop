@@ -59,7 +59,9 @@ body{background:var(--f-page);color:var(--tx);
 .cadre.ro{cursor:default;opacity:.7}
 .cadre img{width:100%;height:100%;object-fit:cover;display:block}
 .cadre .vide{display:flex;flex-direction:column;align-items:center;gap:.3rem;color:var(--tx3);font-size:.72rem;text-align:center}
-.cadre .vide .em{font-size:1.4rem;filter:grayscale(1) brightness(1.6)}
+/* Pictogramme au trait du socle (2026-10-01) : le 📸 passe au gris faisait une tache blanche. */
+.cadre .vide .em,.ajout .em{display:flex;color:var(--tx2)}
+.cadre .vide .em svg,.ajout .em svg{width:24px;height:24px}
 .cadre .surv{position:absolute;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;
   color:var(--tx-blanc);font-size:.72rem;font-weight:600;opacity:0;transition:opacity .15s}
 .cadre:hover .surv{opacity:1}
@@ -92,7 +94,6 @@ body{background:var(--f-page);color:var(--tx);
   background:var(--f-champ);display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:.3rem;color:var(--tx3);font-size:.72rem;text-align:center;padding:.4rem;transition:border-color .15s}
 .ajout:hover{border-color:#c9a97e}
-.ajout .em{font-size:1.4rem;filter:grayscale(1) brightness(1.6)}
 .nomq{width:100%;font:inherit;font-size:.74rem;padding:.2rem .35rem;margin-top:.3rem;
   border:1px solid var(--v16);border-radius:6px;background:var(--f-pied);color:var(--tx)}
 button.mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;
@@ -189,7 +190,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + (v.src
             ? '<img src="' + esc(v.src) + '" alt="' + esc(szTd(v.label)) + '">'
               + (RO ? '' : '<div class="surv"><span class="ic">📸</span>${T(" Changer")}</div>')
-            : '<div class="vide"><span class="em"><span class="ic">📸</span></span><span>' + (RO ? '${T("Non configuré")}' : '${T("Cliquer ou glisser")}') + '</span></div>')
+            : '<div class="vide"><span class="em" aria-hidden="true">${ICO.image}</span><span>' + (RO ? '${T("Non configuré")}' : '${T("Cliquer ou glisser")}') + '</span></div>')
         + '</div>'
         + '<div class="souspied">'
         + ((v.src && !RO) ? '<button class="retirer" data-del="' + esc(v.key) + '">${T("✕ Supprimer")}</button>' : '')
@@ -280,7 +281,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     if (!ROM) {
       h += '<div class="mq"><div class="ajout" id="mq-plus">'
-        + '<span class="em"><span class="ic">📸</span></span><span>${T("Ajouter un mannequin")}</span></div>'
+        + '<span class="em" aria-hidden="true">${ICO.image}</span><span>${T("Ajouter un mannequin")}</span></div>'
         + '<input aria-label="${T("Nom (ex : Ana)")}" class="nomq" id="mq-nom" type="text" maxlength="40" placeholder="${T("Nom (ex : Ana)")}"></div>';
     }
     if (!l.length && ROM) h = '<div class="vide-page">${T("Aucun mannequin enregistré.")}</div>';
