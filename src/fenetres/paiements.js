@@ -190,7 +190,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('paiements')}
       h += '<button class="mini" id="p-reafficher" title="${T("Réafficher les transactions masquées (bac à sable seulement)")}">${T("↺ Réafficher (")}' + D.masquees + ')</button>';
     }
     if (D.bacASable && D.charge && D.tuiles && D.tuiles.nb > 0) {
-      h += '<button class="mini danger" id="p-masquer" title="${T("Masquer ces transactions d’essai — bac à sable seulement")}">${T("Masquer tout")}</button>';
+      h += '<button class="mini" id="p-masquer" title="${T("Masquer ces transactions d’essai — bac à sable seulement")}">${T("Masquer tout")}</button>';
     }
     h += '<button class="mini prim" id="p-charger"' + (OCCUPE ? ' disabled' : '') + '>'
       + (OCCUPE ? '${T("Lecture chez Square…")}' : (D.charge ? '${T("↻ Actualiser")}' : '${T("⬇ Charger les transactions")}'))

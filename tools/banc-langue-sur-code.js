@@ -208,6 +208,14 @@ for (const f of fs.readdirSync(DOS).filter((x) => x.endsWith('.js')).sort()) {
              && CLE_ENTRE_GUILLEMETS.test(s.slice(fin + 1, fin + 6))
              && OUVRE_OBJET.test(s.slice(Math.max(0, i - 41), i - 1)))
       raison = 'entre guillemets et suivie d un : — c est une CLE DE TABLE, pas un texte';
+    /* 7. DANS UN NOM D OPERATION  'codesbarres:${T("produit")}' — trouve le
+       2026-10-01 en relisant Codes-barres : « produit » se traduit « product »,
+       l operation devenait 'codesbarres:product' en anglais, inconnue du pont,
+       et l ajout d etiquettes mourait DANS CETTE LANGUE SEULEMENT. Les six
+       signatures ne la voyaient pas : avant l enveloppe, un « : » colle a un
+       identifiant entre guillemets — un nom d operation (famille:verbe). */
+    else if (/['"][a-z][\w-]*:$/i.test(s.slice(Math.max(0, i - 40), i)))
+      raison = 'dans un NOM D OPERATION (famille:verbe) — un identifiant, jamais un texte';
     else if (IDENT.test(avant) || IDENT.test(apres)) raison = 'collee a un identifiant — c est un morceau de nom';
     if (!raison) continue;
     const ligne = s.slice(0, i).split('\n').length;

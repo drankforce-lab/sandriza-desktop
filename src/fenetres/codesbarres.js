@@ -96,7 +96,11 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .stats{display:flex;gap:.45rem;margin-bottom:.5rem}
 .stats .s{flex:1;text-align:center;background:var(--v04);border-radius:9px;padding:.4rem .3rem}
-.stats .s .n{font-weight:800;font-size:1.15rem;line-height:1.2;color:var(--tx-or)}
+.stats .s .n{font-weight:800;font-size:1.15rem;line-height:1.2;color:var(--tx)}
+/* Des comptes, pas une selection : neutres (2026-10-01). Specificite haussee :
+   la regle des themes (.stats .s .n, couleur d accent) passe apres celle-ci. */
+.carte .stats .s .n{color:var(--tx)}
+html.jour .carte .stats .s .n{color:#1d2433}
 .stats .s .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .fileligne{display:flex;align-items:center;gap:.45rem;padding:.3rem 0;
   border-top:1px solid var(--v055);font-size:.8rem}
@@ -454,7 +458,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('codesbarres')}
      les variantes en stock partent dans la file, quantite = stock, sans boite. */
   function ouvrirPicker(pid, toutStock){
     dire('${T("Lecture des variantes…")}');
-    appeler('codesbarres:${T("produit")}', [pid]).then(function(r){
+    appeler('codesbarres:produit', [pid]).then(function(r){
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       dire('');
       if (toutStock) {
