@@ -41,9 +41,12 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .stitre{font-size:.9rem;font-weight:700;color:var(--tx-bleute);margin:0 0 .2rem}
 .sdesc{font-size:.76rem;color:var(--tx2);margin:0 0 .8rem}
 .bloc{display:flex;align-items:center;gap:.7rem;padding:.6rem .7rem;background:var(--f-champ);border:1px solid var(--v12);border-radius:9px;margin:0 0 .5rem}
-.bloc .em{font-size:1.3rem;filter:grayscale(1) brightness(1.5)}
-/* En jour, l eclaircissement de nuit rendait l icone blanche sur blanc (2026-09-29). */
-html.jour .bloc .em{filter:grayscale(1) brightness(.4)}
+/* ⚠ DES PICTOGRAMMES DU SOCLE, PLUS LES EMOJIS DU SITE (2026-10-01). Passes au
+   gris puis eclaircis, 🖼️ 🗂️ 📢 devenaient des TACHES BLANCHES (le piege du
+   « carre blanc » de la refonte fine). Au trait, ils suivent la couleur du
+   texte, de nuit comme de jour. */
+.bloc .em{flex:0 0 auto;width:1.6rem;display:flex;align-items:center;justify-content:center;color:var(--tx2)}
+.bloc .em svg{width:20px;height:20px}
 .bloc .nom{flex:1;min-width:0}
 .bloc .nom b{font-size:.88rem}
 .bloc .nom .d{font-size:.73rem;color:var(--tx2)}
@@ -103,6 +106,8 @@ function pageAccueil(ouverture) {
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
+  var ICOB = ${JSON.stringify({ hero: ICO.image, categories: ICO.collections, collections: ICO.collections,
+    featured: ICO.star, banner: ICO.shipping, _: ICO.homepage })};
   'use strict';
   var P = window.szPont;
 
@@ -187,7 +192,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '<div class="sdesc">${T("↑ ↓ pour réorganiser · l’œil masque un bloc sans le supprimer · le crayon modifie le contenu.")}</div>';
     BLOCS.forEach(function(b, i){
       h += '<div class="bloc' + (b.visible ? '' : ' off') + '">'
-        + '<span class="em">' + esc(b.icon) + '</span>'
+        + '<span class="em" aria-hidden="true">' + (ICOB[b.id] || ICOB._) + '</span>'
         + '<div class="nom"><b>' + esc(szTd(b.label)) + '</b>' + (b.visible ? '' : '<span class="masq">${T("(masqué)")}</span>')
         + '<div class="d">' + esc(szTd(b.desc)) + '</div></div>'
         + '<div class="actes">'

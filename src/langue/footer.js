@@ -41,7 +41,7 @@ module.exports = {
   /* ══ LA COLONNE MARQUE ═════════════════════════════════════════════════════
    * ⚠ Les etiquettes seulement : ce qui est tape s affiche dans la boutique. */
   'Colonne marque': 'Brand column',
-  'Tagline': 'Tagline',
+  'Slogan': 'Tagline',
   /* ⚠⚠ Deux adresses, pas un doublon : FR et EN nomment des LANGUES. */
   'Adresse complète (FR)': 'Full address (FR)',
   'Adresse complète (EN)': 'Full address (EN)',

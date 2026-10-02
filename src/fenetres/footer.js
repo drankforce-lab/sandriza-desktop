@@ -164,7 +164,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var av = document.getElementById('ro');
     if (av) av.hidden = !RO;
     h.push('<div class="carte"><h2>${T("Colonne marque")}</h2>');
-    h.push(champ('fc-tagline', '${T("Tagline")}', c.tagline));
+    h.push(champ('fc-tagline', '${T("Slogan")}', c.tagline));
     h.push(champ('fc-address', '${T("Adresse complète (FR)")}', c.address));
     h.push(champ('fc-address-en', '${T("Adresse complète (EN)")}', c.addressEN, '${T("affichée en mode anglais")}'));
     h.push('<div class="deux">' + champ('fc-email', '${T("Courriel de contact")}', c.email, '', 'email')
