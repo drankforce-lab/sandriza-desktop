@@ -281,7 +281,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           }
         }
         h.push('<div class="svc"><div class="d">'
-          + '<div class="n">' + esc(szTd(s.titre)) + '</div>'
+          /* Le titre du site porte parfois le format (« Factures (8,5 × 11 po) ») : la
+             ligne du dessous le dit deja, on ne le repete pas (2026-10-01). */
+          + '<div class="n">' + esc(szTd(String(s.titre || '').replace(/\\s*\\([^)]*×[^)]*\\)\\s*$/, ''))) + '</div>'
           + '<div class="m">' + esc(fmtFormat(s.largeurPo, s.hauteurPo))
           + (s.imprimante ? '' : ' · <span class="att">${T("aucune imprimante choisie")}</span>') + '</div>'
           + '<select data-svc="' + esc(s.cle) + '"'
