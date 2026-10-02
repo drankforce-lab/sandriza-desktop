@@ -48,7 +48,7 @@ module.exports = {
   "#fcd34d": 3,           // 1.29  5 fenetre(s) : banque.js, catalogio.js, newsletter.js…
   "#fde68a": 5,           // 1.11  3 fenetre(s) : campagnes.js, commandes.js, statistiques.js
   "#86e5a8": 3,           // 1.36  3 fenetre(s) : expedition.js, remboursement.js, retour.js
-  "#8a6a3e": 3,           // 4.45  2 fenetre(s) : socle.js, tableau.js
+  "#8a6a3e": 2,           // 4.45  2 fenetre(s) : socle.js, tableau.js
   "#9fb0c4": 3,           // 1.98  1 fenetre(s) : affichage.js
   "#e08a8a": 3,           // 2.30  2 fenetre(s) : fal.js, studio.js
   "#6b7280": 1,           // 4.32  2 fenetre(s) : produit.js, promo.js
