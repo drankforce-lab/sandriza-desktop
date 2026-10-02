@@ -114,11 +114,10 @@ function pageGabarits(ouverture) {
   return `${TETE()}
 <title>${T("Gabarits courriel — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.gabarit}</span><h1>${T("Gabarits courriel")}</h1><span class="droite"></span></div>
+<div class="tete"><span class="ico">${ICO.gabarit}</span><h1>${T("Gabarits courriel")}</h1><span class="droite"><button class="prim" id="b-nouveau" style="display:none">${T("+ Nouveau gabarit")}</button></span></div>
 <div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter, pas modifier.")}</div>
 <div class="corps"><div class="zone" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
-<div class="pied"><span class="msg" id="msg"></span>
-  <button class="prim" id="b-nouveau" style="display:none">${T("+ Nouveau gabarit")}</button></div>
+<div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
   'use strict';
@@ -232,7 +231,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var h = '<div class="carte"><div class="stitre"><span class="ic">🎨</span>${T(" Gabarits disponibles")}</div><div class="sdesc">${T("Le style (couleurs, sous-titre, bannière) partagé par les courriels.")}</div>';
     for (var i = 0; i < g.length; i++) {
       var t = g[i];
-      h += '<div class="ligne"><div class="nom">' + esc(t.name) + (t.id === 'default' ? '<span class="def">${T("(défaut)")}</span>' : '')
+      h += '<div class="ligne"><div class="nom">' + esc(t.name)
+        /* « (defaut) » seulement si le nom ne le dit pas deja — « Defaut (defaut) » (2026-10-01). */
+        + ((t.id === 'default' && !/^(d[ée]faut|default)$/i.test(String(t.name || '').trim())) ? '<span class="def">${T("(défaut)")}</span>' : '')
         + '<div class="swatch"><div class="b1" style="background:linear-gradient(90deg,' + esc(t.headerBgFrom) + ',' + esc(t.headerBgTo) + ')"></div>'
         + '<span class="lb">${T("en-tête")}</span><div class="b2" style="background:' + esc(t.footerBg) + '"></div><span class="lb">${T("pied")}</span></div></div>'
         + '<div style="display:flex;gap:.35rem">'
