@@ -313,7 +313,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
       : '<div class="vide">' + esc(sousTitre.vide) + '</div>';
     /* Plus de pastille ni de compte en couleur d accent : la tuile porte le
        compte, la carte ne garde que son titre et ce que le regime veut dire. */
-    return '<div class="carte"><h2>' + esc(titre) + '<span class="cpt">' + g.total + '</span></h2>'
+    return '<div class="carte"><h2>' + esc(titre) + '</h2>'
       + '<div class="soustitre">' + esc(sousTitre.texte) + '</div>'
       + corpsCarte + '</div>';
   }
