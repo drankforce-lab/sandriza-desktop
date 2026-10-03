@@ -433,4 +433,36 @@ module.exports = {
   'Montant illisible : des chiffres seulement.': 'Unreadable amount: digits only.',
   'DPA ramenée au maximum pour': 'CCA set back to the maximum for',
   'DPA demandée enregistrée pour': 'CCA claimed saved for',
+
+  /* ── Les marques et modèles (2026-10-02) — la liste de la NHTSA ──────────── */
+  'Le service de la NHTSA est injoignable : vérifiez la connexion Internet, puis réessayez. La liste actuelle reste en place.':
+    'The NHTSA service cannot be reached: check the Internet connection, then try again. The current list stays in place.',
+  'La NHTSA n’a pas rendu de liste exploitable. La liste actuelle reste en place ; réessayez plus tard.':
+    'The NHTSA did not return a usable list. The current list stays in place; try again later.',
+  'La liste est à jour sur ce poste, mais le nuage a refusé l’écriture : les autres postes ne la verront pas. Réessayez.':
+    'The list is updated on this workstation, but the cloud refused the write: other workstations will not see it. Try again.',
+  'Année du modèle invalide : quatre chiffres.': 'Invalid model year: four digits.',
+  'Votre rôle ne permet pas de mettre la liste à jour.': 'Your role does not allow updating the list.',
+  'La mise à jour a dépassé 90 secondes. Elle s’est peut-être terminée : rouvrez la fiche pour voir la liste.':
+    'The update took more than 90 seconds. It may have finished: reopen the record to see the list.',
+  'Autre…': 'Other…',
+  'Marque (autre)': 'Make (other)',
+  'La marque, en toutes lettres': 'The make, spelled out',
+  'Le modèle, en toutes lettres': 'The model, spelled out',
+  '— d’abord la marque —': '— choose the make first —',
+  'Modèle (autre)': 'Model (other)',
+  'NHTSA, modèles': 'NHTSA, models',
+  'NHTSA, année la plus proche :': 'NHTSA, nearest year:',
+  'Liste de base': 'Built-in list',
+  'mise à jour le': 'updated on',
+  'Demande à la NHTSA les marques et modèles de cette année de modèle. Les nouveaux modèles de l’année apparaissent dans la liste.':
+    'Asks the NHTSA for the makes and models of this model year. The year’s new models appear in the list.',
+  'Mise à jour en cours… (jusqu’à 30 s)': 'Updating… (up to 30 s)',
+  '↻ Mettre à jour la liste': '↻ Update the list',
+  'Mise à jour de la liste des modèles…': 'Updating the model list…',
+  'modèles de': 'models from',
+  'marques pour': 'makes for',
+  'marque sans réponse :': 'make did not answer:',
+  'marques sans réponse :': 'makes did not answer:',
+  'Laissé vide, le nom proposé en gris sera retenu.': 'If left empty, the name suggested in grey will be used.',
 };

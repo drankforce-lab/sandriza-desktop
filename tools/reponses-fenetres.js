@@ -3343,10 +3343,46 @@ const JEU = {
         total: { kmTotal: 0, kmAffaires: 0, part: null, depenses: 0, deductible: 0, tpsAdmissible: 0, tvqAdmissible: 0, nDeplacements: 0 } },
       types: TYPES, raisons: RAISONS, peutAjouter: true, peutModifier: true, peutSupprimer: true };
 
+    // ═══ LES MARQUES ET MODÈLES (2026-10-02) — forme de vehiculesDonnees :
+    // catalogue: { base, annees: { AAAA: {…} }, maj }. Extrait de CATALOGUE_BASE
+    // (vehicules.js), mot pour mot.
+    var CAT_BASE = {
+      'Chevrolet': ['Blazer', 'Bolt EUV', 'Colorado', 'Equinox', 'Malibu', 'Silverado 1500', 'Silverado 2500HD', 'Suburban', 'Tahoe', 'Trailblazer', 'Traverse', 'Trax'],
+      'Ford': ['Bronco', 'Bronco Sport', 'Edge', 'Escape', 'Expedition', 'Explorer', 'F-150', 'F-150 Lightning', 'Maverick', 'Mustang', 'Mustang Mach-E', 'Ranger', 'Transit', 'Transit Connect'],
+      'Honda': ['Accord', 'Civic', 'CR-V', 'HR-V', 'Odyssey', 'Passport', 'Pilot', 'Prologue', 'Ridgeline'],
+      'Hyundai': ['Elantra', 'Ioniq 5', 'Ioniq 6', 'Kona', 'Palisade', 'Santa Cruz', 'Santa Fe', 'Sonata', 'Tucson', 'Venue'],
+      'Kia': ['Carnival', 'EV6', 'EV9', 'Forte', 'K5', 'Niro', 'Seltos', 'Sorento', 'Soul', 'Sportage', 'Telluride'],
+      'Tesla': ['Cybertruck', 'Model 3', 'Model S', 'Model X', 'Model Y'],
+      'Toyota': ['4Runner', 'bZ4X', 'Camry', 'Corolla', 'Corolla Cross', 'Grand Highlander', 'Highlander', 'Prius', 'RAV4', 'RAV4 Prime', 'Sequoia', 'Sienna', 'Tacoma', 'Tundra', 'Venza'],
+    };
+    // Une année mise à jour depuis la NHTSA : de nouveaux modèles 2026 (Prelude,
+    // EV3, bZ) et une marque absente de la base (Rivian).
+    var CAT_2026 = {
+      'Honda': ['Accord', 'Civic', 'CR-V', 'HR-V', 'Odyssey', 'Passport', 'Pilot', 'Prelude', 'Prologue', 'Ridgeline'],
+      'Kia': ['Carnival', 'EV3', 'EV6', 'EV9', 'K4', 'K5', 'Niro', 'Seltos', 'Sorento', 'Soul', 'Sportage', 'Telluride'],
+      'Toyota': ['4Runner', 'bZ', 'Camry', 'Corolla', 'Corolla Cross', 'Crown', 'Grand Highlander', 'Highlander', 'Prius', 'RAV4', 'Sequoia', 'Sienna', 'Tacoma', 'Tundra'],
+      'Rivian': ['R1S', 'R1T', 'R2'],
+    };
+    var CATALOGUE_BASE_SEULE = { base: CAT_BASE, annees: {}, maj: '' };
+    var CATALOGUE_2026 = { base: CAT_BASE, annees: { '2026': CAT_2026 }, maj: '2026-09-30T14:12:00.000Z' };
+    GARNI.catalogue = CATALOGUE_BASE_SEULE;
+    VIDE.catalogue = CATALOGUE_BASE_SEULE;
+    DPA_ETATS.catalogue = CATALOGUE_2026;
+    var vehiculeSimple = function(id, nom, marque, modele, annee){
+      return Object.assign({}, base26, { id: id, nom: nom, marque: marque, modele: modele, annee: annee, acquisLe: '2026-04-01',
+        modeAcquisition: 'achat', prixAvantTaxes: null, classeDeduite: '10',
+        odometre: { debut: 5, fin: null, km: null, source: { debut: 'acquisition', fin: '' }, manque: ['fin'], saisi: {} },
+        dpa: { applicable: false, raison: 'cout-manquant', classe: '', cout: 0, plafond: null, miseEnService: '', lignes: [] } });
+    };
+    // Le dernier véhicule est celui qu'ouvre « vehicule-modifier ».
+    var AVEC_EV3 = Object.assign({}, DPA_ETATS, { vehicules: VEH_ETATS.concat([vehiculeSimple('veh_ev3', 'EV3 2026', 'Kia', 'EV3', '2026')]) });
+    var AVEC_AUTRE = Object.assign({}, DPA_ETATS, { vehicules: VEH_ETATS.concat([vehiculeSimple('veh_gr', 'Corolla GR', 'Toyota', 'GR Corolla Morizo', '2025')]) });
+    var AVEC_MARQUE_AUTRE = Object.assign({}, DPA_ETATS, { vehicules: VEH_ETATS.concat([vehiculeSimple('veh_lada', 'Niva', 'Lada', 'Niva Legend', '2024')]) });
+
     var avec = function(donnees){
       return Object.assign({ 'vehicules:donnees': donnees, identite: IDENTITE }, ECRITURES);
     };
-    var cas = function(nom, id, donnees, exige){ return { nom: nom, id: id, reponses: avec(donnees), exige: exige }; };
+    var cas = function(nom, id, donnees, exige, plus){ return { nom: nom, id: id, reponses: Object.assign(avec(donnees), plus || {}), exige: exige }; };
     return [
       cas('registre garni (12 déplacements, plusieurs pages)', '', GARNI, ['data-dep="dep01"', 'id="d-ok"', 'id="f-veh"']),
       cas('déplacement ouvert en modification', 'deplacement-modifier', GARNI, ['id="d-annuler"']),
@@ -3378,6 +3414,15 @@ const JEU = {
       cas('boîte — véhicule en location', 'vehicule-modifier', DPA_ETATS, ['id="v-mode"']),
       cas('DPA — tableau, plafond à confirmer', 'dpa-tableau', DPA_ETATS, ['id="dpa-voile"']),
       cas('DPA — lecture seule', 'vehicules', Object.assign({}, DPA_ETATS, { peutAjouter: false, peutModifier: false, peutSupprimer: false }), ['data-dpa-tab="veh_civic"']),
+      // ── Les marques et modèles ──
+      cas('boîte — liste de base seulement (aucune année à jour)', 'vehicule-nouveau', VIDE, ['id="v-marque-l"', 'id="v-modele-l"', 'id="v-cat"']),
+      cas('boîte — catalogue NHTSA 2026 (EV3, nouveau modèle)', 'vehicule-modifier', AVEC_EV3, ['value="EV3" selected', 'value="Rivian"']),
+      cas('boîte — modèle hors liste (« Autre… » rempli)', 'vehicule-modifier', AVEC_AUTRE, ['id="v-modele"', 'GR Corolla Morizo']),
+      cas('boîte — marque hors liste (« Autre… » rempli)', 'vehicule-modifier', AVEC_MARQUE_AUTRE, ['id="v-marque"', 'Niva Legend']),
+      cas('mise à jour de la liste — verdict', 'catalogue-maj', GARNI, ['marques pour'],
+        { 'vehicules:catalogue': { ok: true, annee: 2026, marques: 37, modeles: 612, echecs: ['Polestar', 'MINI'] } }),
+      cas('mise à jour de la liste — NHTSA injoignable', 'catalogue-maj', GARNI, ['injoignable'],
+        { 'vehicules:catalogue': { ok: false, motif: 'reseau' } }),
       { nom: 'module des dépenses absent', id: '', reponses: { 'vehicules:donnees': { ok: false, motif: 'module_depenses' }, identite: IDENTITE } },
     ];
   })(),
@@ -3790,6 +3835,68 @@ const JEU = {
           fxTaux: null, fxDate: '', fxApprox: false, origine: '',
         },
         'depenses:recuOuvrir': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    // ── LA PART D'AFFAIRES D'UNE DÉPENSE À USAGE MIXTE (2026-10-02) ──────────
+    // Un forfait cellulaire à 70 % : la fiche dit « Part déductible : 70 % → … »
+    // (expenses.js, _depenseLire : partAffaires, part, deductible).
+    {
+      nom: 'fiche d’une dépense à usage mixte (70 %)',
+      id: 'fiche',
+      exige: ['Part déductible', 'Usage mixte'],
+      reponses: {
+        'depenses:donnees': {
+          ok: true, annee: 2026, mois: 0, categorie: '', periode: '2026',
+          annees: ['2026'], moisNoms: ['Janvier'],
+          categories: [{ cle: 'telecom', libelle: 'Télécom, électricité (services)', libelleEn: 'Telephone and utilities', ligne: '9220' }],
+          paiements: [{ cle: 'card', libelle: 'Carte de crédit / débit' }],
+          vehicules: [], typesVehicule: TYPES_VEHICULE,
+          peutAjouter: true, peutModifier: true, peutSupprimer: true, lectureAuto: false,
+          total: '65,00 $', totalTps: '3,25 $', totalTvq: '6,48 $',
+          nombre: 1, page: 0, pages: 1, taille: 25,
+          lignes: [{ id: 't1', date: '2026-09-05', dateFr: '2026-09-05', categorie: 'telecom',
+            categorieLbl: 'Télécom, électricité (services)', ligne: '9220', description: 'Forfait cellulaire septembre',
+            fournisseur: 'Fizz', paiement: 'Carte de crédit / débit', montant: '65,00 $',
+            montantN: 65, tps: '3,25 $', tvq: '6,48 $', aTaxes: true, recu: false, usd: false }],
+        },
+        'depenses:lire': {
+          ok: true, id: 't1', date: '2026-09-05', dateFr: '2026-09-05',
+          categorie: 'telecom', categorieLbl: 'Télécom, électricité (services)', ligne: '9220',
+          paiement: 'card', paiementLbl: 'Carte de crédit / débit',
+          description: 'Forfait cellulaire septembre', fournisseur: 'Fizz',
+          vehiculeId: '', typeVehicule: '', partAffaires: 70, part: 0.7, deductible: '45,50 $',
+          montantN: 65, tpsN: 3.25, tvqN: 6.48,
+          montant: '65,00 $', tps: '3,25 $', tvq: '6,48 $', totalTTC: '74,73 $',
+          aTaxes: true, recu: '', recuPdf: false, aRecu: false, usd: false,
+          fxTaux: null, fxDate: '', fxApprox: false, origine: '',
+        },
+        identite: IDENTITE,
+      },
+    },
+    {
+      // Le formulaire, avec la part d'affaires reprise du brouillon.
+      nom: 'nouvelle dépense à usage mixte (part d’affaires 70 %)',
+      id: 'nouvelle',
+      exige: ['id="f-part"', 'avec-part'],
+      reponses: {
+        'depenses:donnees': {
+          ok: true, annee: 2026, mois: 0, categorie: '', periode: '2026',
+          annees: ['2026'], moisNoms: ['Janvier'],
+          categories: [{ cle: 'telecom', libelle: 'Télécom, électricité (services)', libelleEn: 'Telephone and utilities', ligne: '9220' },
+            { cle: 'autre', libelle: 'Autres dépenses', ligne: '9270' }],
+          paiements: [{ cle: 'card', libelle: 'Carte de crédit / débit' }],
+          vehicules: [], typesVehicule: TYPES_VEHICULE,
+          peutAjouter: true, peutModifier: true, peutSupprimer: true, lectureAuto: false,
+          total: '0,00 $', totalTps: '0,00 $', totalTvq: '0,00 $',
+          nombre: 0, page: 0, pages: 1, taille: 25, lignes: [],
+        },
+        'depenses:brouillonLire': { ok: true, ilYaMin: 1, recu: false,
+          brouillon: { date: '2026-09-05', categorie: 'telecom', paiement: 'card',
+            description: 'Forfait cellulaire septembre', fournisseur: 'Fizz',
+            montant: '65.00', tps: '3.25', tvq: '6.48', recu: false, vehiculeId: '', typeVehicule: '', partAffaires: '70' } },
+        'depenses:brouillonEcrire': { ok: true, recu: false },
+        'depenses:brouillonJeter': { ok: true },
         identite: IDENTITE,
       },
     },

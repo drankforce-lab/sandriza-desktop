@@ -201,6 +201,8 @@ tbody tr.ligne.mod{cursor:pointer}
 .coches{flex-direction:row;gap:1.1rem;flex-wrap:wrap}
 .dpa-l{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:.35rem;align-items:center;margin:.2rem 0}
 .dpa-l label{font-size:.74rem;color:var(--tx2)}
+.champ input.autre{margin-top:.25rem}
+.catligne{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;font-size:.72rem;margin-top:-.1rem}
 .dpa-l input{min-width:0;width:100%}
 .bascule{display:inline-flex;gap:.25rem;margin-left:auto;text-transform:none;letter-spacing:0;font-weight:400}
 .bascule button.on{border-color:#c9a97e;background:rgba(201,169,126,.14)}
@@ -228,10 +230,10 @@ tbody tr.ligne.mod{cursor:pointer}
  */
 function pageVehicules(ouverture) {
   const onglets = ['registre', 'vehicules', 'changements', 'depenses', 'bilan'];
-  const etats = ['vehicule-nouveau', 'vehicule-modifier', 'deplacement-modifier', 'dpa-tableau', 'bilan-dpa'];
+  const etats = ['vehicule-nouveau', 'vehicule-modifier', 'catalogue-maj', 'deplacement-modifier', 'dpa-tableau', 'bilan-dpa'];
   const o = String(ouverture || '');
   const depart = onglets.indexOf(o) >= 0 ? o
-    : ((o === 'vehicule-nouveau' || o === 'vehicule-modifier' || o === 'dpa-tableau') ? 'vehicules' : (o === 'bilan-dpa' ? 'bilan' : 'registre'));
+    : ((o === 'vehicule-nouveau' || o === 'vehicule-modifier' || o === 'catalogue-maj' || o === 'dpa-tableau') ? 'vehicules' : (o === 'bilan-dpa' ? 'bilan' : 'registre'));
   const etat = etats.indexOf(o) >= 0 ? o : '';
   return `${TETE()}
 <title>${T("Véhicules et déplacements — Administration Sandriza")}</title>
@@ -265,6 +267,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
   var DPAS = {};              /* les DPA demandees tapees et pas encore appliquees */
   var DPATAB = '';            /* le vehicule dont le tableau de DPA est ouvert */
   var DPAPG = 0;
+  var CATMAJ = false;          /* la liste des modeles est en cours de mise a jour */
+  var CATMSG = null;          /* le verdict de la derniere mise a jour { texte, genre } */
   var BVUE = '';              /* le bilan : '' (depenses et km) ou 'dpa' */
   var FVEH = '';              /* filtre du registre : un vehicule, ou tous */
   var PG = { reg: 0, veh: 0, chg: 0, dep: 0, bil: 0 };
@@ -345,6 +349,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
   };
   /* ⚠ Un meme motif ne dit pas la meme chose selon le geste : << vehicule >>
      sur un changement veut dire qu AUCUN des deux cotes n est choisi. */
+  var CAT_MOTIFS = {
+    reseau:       '${T("Le service de la NHTSA est injoignable : vérifiez la connexion Internet, puis réessayez. La liste actuelle reste en place.")}',
+    indisponible: '${T("La NHTSA n’a pas rendu de liste exploitable. La liste actuelle reste en place ; réessayez plus tard.")}',
+    nuage:        '${T("La liste est à jour sur ce poste, mais le nuage a refusé l’écriture : les autres postes ne la verront pas. Réessayez.")}',
+    annee:        '${T("Année du modèle invalide : quatre chiffres.")}',
+    droit:        '${T("Votre rôle ne permet pas de mettre la liste à jour.")}',
+    delai:        '${T("La mise à jour a dépassé 90 secondes. Elle s’est peut-être terminée : rouvrez la fiche pour voir la liste.")}'
+  };
   function expliquer(r, geste){
     var m = r && r.motif;
     if (m === 'utilise') {
@@ -353,6 +365,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
         + ' ${T("et")} ' + ne + ' ' + szPl(ne, '${T("dépense")}', '${T("dépenses")}')
         + ' ${T(": ils justifient des déductions, on ne le supprime pas. Donnez-lui plutôt une date de retrait (bouton Modifier).")}';
     }
+    if (geste === 'catalogue' && CAT_MOTIFS[m]) return CAT_MOTIFS[m];
     if (m === 'dpa-depasse') return '${T("La DPA demandée dépasse le maximum permis pour l’année :")} ' + argent(r.max) + '.';
     if (m === 'montant') return '${T("Montant de DPA illisible : des chiffres seulement.")}';
     if (m === 'vehicule' && geste === 'changement') return '${T("Choisissez au moins un véhicule : le sortant, l’entrant, ou les deux.")}';
@@ -442,7 +455,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
         var vd = (r.vehicules || []).filter(function(x){ return x.dpa && x.dpa.applicable && (x.dpa.lignes || []).length; });
         if (vd.length) { DPATAB = vd[vd.length - 1].id; ONGLET = 'vehicules'; }
       }
-      if (ETAT === 'vehicule-modifier' && PM && (r.vehicules || []).length) { VFORM = depuisVehicule(r.vehicules[r.vehicules.length - 1]); ONGLET = 'vehicules'; }
+      if (ETAT === 'vehicule-modifier' && PM && (r.vehicules || []).length) { VFORM = poserAutres(depuisVehicule(r.vehicules[r.vehicules.length - 1])); ONGLET = 'vehicules'; }
+      if (ETAT === 'catalogue-maj' && PA) { VFORM = vehiculeVierge(); VFORM.annee = '2026'; ONGLET = 'vehicules'; ETAT = ''; dessiner(); majCatalogue(); return; }
       if (ETAT === 'bilan-dpa') { BVUE = 'dpa'; ONGLET = 'bilan'; }
       if (ETAT === 'deplacement-modifier' && PM && (r.deplacements || []).length) {
         SAISIE = depuisDeplacement(r.deplacements[0]); ONGLET = 'registre';
@@ -884,6 +898,115 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
       + '<div class="vgrille">' + t.vue.map(carteVehicule).join('') + '</div>'
       + boiteVehicule();
   }
+  /* ══ LES MARQUES ET MODELES (2026-10-02) ══════════════════════════════════
+     Sa demande : « des listes deroulantes, la marque puis les modeles associes,
+     et un bouton pour mettre la liste a jour chaque annee ». La liste vient du
+     site (vehicules:donnees, catalogue) : une liste de BASE integree, et les
+     annees mises a jour depuis la NHTSA. ⚠ Meme regle que catalogueAnnee du
+     site : l annee du modele si elle est a jour, sinon la plus proche, sinon la
+     base — et les marques de la base restent toujours (une marque sans reponse
+     ce jour-la ne disparait pas). ⚠ Ce qui s enregistre reste du TEXTE
+     (marque, modele) : « Autre… » laisse saisir ce que la liste ignore. */
+  var AUTRE = '__autre';
+  function catalogueAnnee(anneeModele){
+    var c = (D && D.catalogue) || {};
+    var base = c.base || {}, annees = c.annees || {};
+    var ans = Object.keys(annees).filter(function(y){ return y.length === 4 && parseInt(y, 10) > 1900; });
+    var voulu = parseInt(anneeModele, 10) || 0, an = '';
+    if (voulu && annees[String(voulu)]) an = String(voulu);
+    else if (ans.length) an = ans.sort(function(a, b){ return Math.abs(a - (voulu || 9999)) - Math.abs(b - (voulu || 9999)); })[0];
+    var fusion = {};
+    Object.keys(base).forEach(function(m){ fusion[m] = base[m]; });
+    if (!an) return { annee: '', source: 'base', marques: fusion, maj: c.maj || '' };
+    Object.keys(annees[an] || {}).forEach(function(m){ fusion[m] = annees[an][m]; });
+    return { annee: an, source: an === String(voulu) ? 'nhtsa' : 'nhtsa-proche', marques: fusion, maj: c.maj || '' };
+  }
+  function trie(L){ return L.slice().sort(function(a, b){ return String(a).localeCompare(String(b), '${LIEU()}', { sensitivity: 'base' }); }); }
+  /* La marque connue de la liste qui correspond au texte (sans tenir compte de la casse). */
+  function marqueDe(cat, txt){
+    var t = String(txt || '').trim().toLowerCase(); if (!t) return '';
+    var k = Object.keys(cat.marques); for (var i = 0; i < k.length; i++) if (k[i].toLowerCase() === t) return k[i];
+    return '';
+  }
+  function modeleDe(cat, marque, txt){
+    var t = String(txt || '').trim().toLowerCase(); if (!t || !marque) return '';
+    var L = cat.marques[marque] || []; for (var i = 0; i < L.length; i++) if (String(L[i]).toLowerCase() === t) return L[i];
+    return '';
+  }
+  /* A l ouverture d une fiche : une marque ou un modele hors liste ouvre sur
+     « Autre… », le texte rempli. */
+  function poserAutres(f){
+    var cat = catalogueAnnee(f.annee);
+    var m = marqueDe(cat, f.marque);
+    f.marqueAutre = !!(String(f.marque || '').trim() && !m);
+    if (m) f.marque = m;
+    var mo = f.marqueAutre ? '' : modeleDe(cat, m, f.modele);
+    f.modeleAutre = !!(String(f.modele || '').trim() && !mo);
+    if (mo) f.modele = mo;
+    return f;
+  }
+  function nomSuggere(f){
+    if (String(f.nom || '').trim()) return '';
+    var base = String(f.modele || '').trim() || String(f.marque || '').trim();
+    return base ? (base + (String(f.annee || '').length === 4 ? ' ' + f.annee : '')).slice(0, 60) : '';
+  }
+  function champsMarqueModele(f){
+    var cat = catalogueAnnee(f.annee);
+    var marques = trie(Object.keys(cat.marques));
+    var mAutre = !!f.marqueAutre, moAutre = mAutre || !!f.modeleAutre;
+    var modeles = (!mAutre && f.marque && cat.marques[f.marque]) ? trie(cat.marques[f.marque]) : [];
+    var h = '<div class="champ"><label for="v-marque-l">${T("Marque")}</label>'
+      + '<select id="v-marque-l" aria-label="${T("Marque")}">'
+      + '<option value=""' + (!f.marque && !mAutre ? ' selected' : '') + '>${T("— choisir —")}</option>'
+      + marques.map(function(m){ return '<option value="' + esc(m) + '"' + (!mAutre && f.marque === m ? ' selected' : '') + '>' + esc(m) + '</option>'; }).join('')
+      + '<option value="' + AUTRE + '"' + (mAutre ? ' selected' : '') + '>${T("Autre…")}</option></select>'
+      + (mAutre ? '<input type="text" id="v-marque" class="autre" aria-label="${T("Marque (autre)")}" maxlength="40" value="' + esc(f.marque) + '" placeholder="${T("La marque, en toutes lettres")}">' : '')
+      + '</div>';
+    h += '<div class="champ"><label for="v-modele-l">${T("Modèle")}</label>';
+    if (mAutre) {
+      h += '<input type="text" id="v-modele" aria-label="${T("Modèle")}" maxlength="40" value="' + esc(f.modele) + '" placeholder="${T("Le modèle, en toutes lettres")}">';
+    } else {
+      h += '<select id="v-modele-l" aria-label="${T("Modèle")}"' + (f.marque ? '' : ' disabled') + '>'
+        + '<option value=""' + (!f.modele && !moAutre ? ' selected' : '') + '>' + (f.marque ? '${T("— choisir —")}' : '${T("— d’abord la marque —")}') + '</option>'
+        + modeles.map(function(m){ return '<option value="' + esc(m) + '"' + (!moAutre && f.modele === m ? ' selected' : '') + '>' + esc(m) + '</option>'; }).join('')
+        + (f.marque ? '<option value="' + AUTRE + '"' + (moAutre ? ' selected' : '') + '>${T("Autre…")}</option>' : '')
+        + '</select>'
+        + (moAutre ? '<input type="text" id="v-modele" class="autre" aria-label="${T("Modèle (autre)")}" maxlength="40" value="' + esc(f.modele) + '" placeholder="${T("Le modèle, en toutes lettres")}">' : '');
+    }
+    h += '</div>';
+    /* La source de la liste, sa date, et le bouton qui la met a jour. */
+    var anMaj = (String(f.annee || '').length === 4 && parseInt(f.annee, 10) > 1900) ? parseInt(f.annee, 10) : new Date().getFullYear();
+    var src = cat.source === 'nhtsa' ? '${T("NHTSA, modèles")} ' + cat.annee
+      : (cat.source === 'nhtsa-proche' ? '${T("NHTSA, année la plus proche :")} ' + cat.annee : '${T("Liste de base")}');
+    h += '<div class="catligne large"><span class="gris">' + esc(src)
+      + (cat.maj && cat.source !== 'base' ? ' · ${T("mise à jour le")} ' + esc(szJour(cat.maj)) : '') + '</span>'
+      + '<button type="button" class="mini" id="v-cat"' + ((PA || PM) && !CATMAJ ? '' : ' disabled')
+      + ' title="${T("Demande à la NHTSA les marques et modèles de cette année de modèle. Les nouveaux modèles de l’année apparaissent dans la liste.")}">'
+      + (CATMAJ ? '${T("Mise à jour en cours… (jusqu’à 30 s)")}' : '${T("↻ Mettre à jour la liste")} (' + anMaj + ')') + '</button>'
+      + (CATMSG ? '<span class="' + (CATMSG.genre === 'err' ? 'mauvais' : (CATMSG.genre === 'att' ? 'attn' : 'bon')) + '" aria-live="polite">' + esc(CATMSG.texte) + '</span>' : '')
+      + '</div>';
+    return h;
+  }
+  /* Le bouton « Mettre a jour la liste » : 10 a 30 secondes (37 demandes a
+     la NHTSA). La boite reste ouverte, sa saisie gardee ; on recharge ensuite
+     le registre (qui porte le catalogue) et on redessine. */
+  function majCatalogue(){
+    if (CATMAJ || !VFORM) return;
+    ramasser();
+    var an = (String(VFORM.annee || '').length === 4 && parseInt(VFORM.annee, 10) > 1900) ? parseInt(VFORM.annee, 10) : new Date().getFullYear();
+    CATMAJ = true; CATMSG = null; dessiner();
+    szDire('${T("Mise à jour de la liste des modèles…")}');
+    appeler('vehicules:catalogue', [an]).then(function(r){
+      CATMAJ = false;
+      if (!r || !r.ok) { CATMSG = { texte: expliquer(r, 'catalogue'), genre: 'err' }; szDire(CATMSG.texte, 'err'); dessiner(); return; }
+      var ec = (r.echecs || []);
+      var t = (Number(r.modeles) || 0) + ' ${T("modèles de")} ' + (Number(r.marques) || 0) + ' ${T("marques pour")} ' + (r.annee || an) + '.'
+        + (ec.length ? ' ' + ec.length + ' ' + szPl(ec.length, '${T("marque sans réponse :")}', '${T("marques sans réponse :")}') + ' ' + ec.join(', ') + '.' : '');
+      CATMSG = { texte: t, genre: ec.length ? 'att' : 'bon' };
+      szDire(t, CATMSG.genre);
+      charger().then(function(){ if (VFORM) { poserAutres(VFORM); dessiner(); } });
+    });
+  }
   function boiteVehicule(){
     if (!VFORM) return '';
     var f = VFORM, modif = !!f.id;
@@ -926,11 +1049,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
       + '<h3 id="v-titre">' + (modif ? '${T("Modifier le véhicule")}' : '${T("Inscrire un véhicule")}') + '</h3>'
       + '<div class="deuxcol"><div>'
       + '<div class="form2">'
-      + ch('v-nom', '${T("Nom (obligatoire)")}', '<input type="text" id="v-nom" aria-label="${T("Nom (obligatoire)")}" maxlength="60" value="' + esc(f.nom) + '" placeholder="${T("Ex. : Civic grise")}">', true)
-      + ch('v-marque', '${T("Marque")}', '<input type="text" id="v-marque" aria-label="${T("Marque")}" maxlength="40" value="' + esc(f.marque) + '">')
-      + ch('v-modele', '${T("Modèle")}', '<input type="text" id="v-modele" aria-label="${T("Modèle")}" maxlength="40" value="' + esc(f.modele) + '">')
+      + ch('v-nom', '${T("Nom (obligatoire)")}', '<input type="text" id="v-nom" aria-label="${T("Nom (obligatoire)")}" maxlength="60" value="' + esc(f.nom) + '" placeholder="' + esc(nomSuggere(f) || '${T("Ex. : Civic grise")}') + '"'
+          + (nomSuggere(f) ? ' title="${T("Laissé vide, le nom proposé en gris sera retenu.")}"' : '') + '>', true)
       + ch('v-annee', '${T("Année du modèle")}', '<input type="text" inputmode="numeric" maxlength="4" id="v-annee" aria-label="${T("Année du modèle")}" value="' + esc(f.annee) + '" placeholder="2021">')
       + ch('v-plaque', '${T("Plaque")}', '<input type="text" id="v-plaque" aria-label="${T("Plaque")}" maxlength="12" value="' + esc(f.plaque) + '">')
+      + champsMarqueModele(f)
       + ch('v-acq', '${T("Acquis le")}', '<input type="date" id="v-acq" aria-label="${T("Acquis le")}" value="' + esc(f.acquisLe) + '">')
       + ch('v-oacq', '${T("Odomètre à l’acquisition")}', '<input type="text" inputmode="decimal" class="n" id="v-oacq" aria-label="${T("Odomètre à l’acquisition")}" value="' + esc(f.odometreAcquis) + '">')
       + ch('v-ret', '${T("Retiré le (vendu, remplacé)")}', '<input type="date" id="v-ret" aria-label="${T("Retiré le (vendu, remplacé)")}" value="' + esc(f.retireLe) + '">')
@@ -1262,6 +1385,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
        ['v-pv', 'prixDisposition']].forEach(function(p){
         v = lu(p[0]); if (v != null) VFORM[p[1]] = v;
       });
+      /* Les listes : « Autre… » garde le texte tape ; une marque ou un modele
+         choisi le remplace. Passer a « Autre… » repart d un champ vide. */
+      v = lu('v-marque-l');
+      if (v != null) {
+        if (v === AUTRE) { if (!VFORM.marqueAutre) { VFORM.marque = ''; VFORM.modele = ''; VFORM.modeleAutre = false; } VFORM.marqueAutre = true; }
+        else { if (VFORM.marqueAutre || VFORM.marque !== v) { VFORM.modeleAutre = false; if (!modeleDe(catalogueAnnee(VFORM.annee), v, VFORM.modele)) VFORM.modele = ''; } VFORM.marqueAutre = false; VFORM.marque = v; }
+      }
+      v = lu('v-modele-l');
+      if (v != null) {
+        if (v === AUTRE) { if (!VFORM.modeleAutre) VFORM.modele = ''; VFORM.modeleAutre = true; }
+        else { VFORM.modeleAutre = false; VFORM.modele = v; }
+      }
       v = coche('v-tour'); if (v != null) VFORM.tourisme = v;
       v = coche('v-zero'); if (v != null) VFORM.zeroEmission = v;
     }
@@ -1286,8 +1421,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
 
   /* ── LES GESTES ─────────────────────────────────────────────────────── */
   function ouvrirVehicule(id){
-    if (id) { var v = vehicule(id); if (!v) return; VFORM = depuisVehicule(v); }
+    if (id) { var v = vehicule(id); if (!v) return; VFORM = poserAutres(depuisVehicule(v)); }
     else VFORM = vehiculeVierge();
+    CATMSG = null;
     ECHAP = false;
     dessiner();
   }
@@ -1331,6 +1467,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     if ([prix, tx, plaf, pv].some(function(n){ return n != null && !isFinite(n); })) {
       szDire('${T("Montant illisible : des chiffres seulement.")}', 'err'); return;
     }
+    if (!String(f.nom || '').trim() && nomSuggere(f)) f.nom = nomSuggere(f);
     if (!String(f.nom || '').trim()) { szDire(MOTIFS.nom, 'err'); var n = document.getElementById('v-nom'); if (n) n.focus(); return; }
     var charge = { id: f.id || undefined, nom: f.nom, marque: f.marque, modele: f.modele, annee: f.annee,
       plaque: f.plaque, acquisLe: f.acquisLe, odometreAcquis: oa, retireLe: f.retireLe,
@@ -1505,6 +1642,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     if (id === 'c-ok') { enregistrerChangement(t); return; }
     if (id === 'v-ok') { enregistrerVehicule(t); return; }
     if (id === 'v-annuler') { fermerVehicule(); return; }
+    if (id === 'v-cat') { majCatalogue(); return; }
     if (id === 'dpa-fermer') { DPATAB = ''; dessiner(); return; }
     /* Un clic sur une ligne la MARQUE, sans redessiner (voir l en-tete). */
     var tr = t.closest('tr[data-dep]');
@@ -1536,6 +1674,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     var t = ev.target;
     if (!t || !t.closest) return;
     ramasser();
+    if (VFORM && (t.id === 'v-nom' || t.id === 'v-marque' || t.id === 'v-modele' || t.id === 'v-annee')) {
+      var nn = document.getElementById('v-nom');
+      if (nn) nn.placeholder = nomSuggere(VFORM) || '${T("Ex. : Civic grise")}';
+    }
     if (t.closest('#f-dep')) {
       var c = document.getElementById('d-calc');
       if (c) c.textContent = apercuKm(SAISIE);
@@ -1548,6 +1690,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     ramasser();
     /* Le mode et la date de retrait changent les champs de la DPA (location :
        aucun ; vendu : le prix de vente). */
+    if (t.id === 'v-marque-l' || t.id === 'v-modele-l' || t.id === 'v-annee') {
+      dessiner();
+      var suite = (t.id === 'v-marque-l' && VFORM && VFORM.marqueAutre) ? 'v-marque'
+        : ((t.id === 'v-modele-l' && VFORM && VFORM.modeleAutre) ? 'v-modele' : (t.id === 'v-marque-l' ? 'v-modele-l' : t.id));
+      var e3 = document.getElementById(suite); if (e3) e3.focus();
+      return;
+    }
     if (t.id === 'v-mode' || t.id === 'v-ret') { dessiner(); var e2 = document.getElementById(t.id); if (e2) e2.focus(); return; }
     if (t.closest && t.closest('#f-dep')) {
       var c = document.getElementById('d-calc');

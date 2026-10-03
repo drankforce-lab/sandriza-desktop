@@ -165,6 +165,10 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .bloc-montants{grid-column:1/-1;background:var(--v04);
   border:1px solid var(--v09);border-radius:10px;padding:.55rem .7rem}
 .trois{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:.5rem;align-items:end}
+/* La part d affaires (usage mixte, 2026-10-02) entre dans le MEME rang que les
+   montants : une colonne etroite, pas une ligne de plus (aucune barre de
+   defilement). */
+.trois.avec-part{grid-template-columns:1fr 1fr 1fr 6.5rem auto}
 @media (max-width:620px){.form,.trois{grid-template-columns:1fr}}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
@@ -575,7 +579,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
         + '<div class="rang"><span>${T("Part déductible :")} ' + esc(pctPart(e.part)) + '</span><strong>→ ' + esc(e.deductible) + '</strong></div>'
         + '<div class="aide" style="margin-top:.3rem">' + (e.categorie === CAT_VEHICULE
             ? '${T("La part d’affaires du véhicule (km d’affaires ÷ km totaux de l’année), établie par le registre « Véhicules et déplacements ». Elle s’applique aussi à la TPS et à la TVQ récupérables.")}'
-            : '${T("Seule cette part se déclare ; elle s’applique aussi à la TPS et à la TVQ récupérables.")}') + '</div>'
+            : ((e.partAffaires !== '' && e.partAffaires != null)
+                ? '${T("Usage mixte : part d’affaires de")} ' + esc(pctPart(Number(e.partAffaires) / 100)) + '. '
+                : '')
+              + '${T("Seule cette part se déclare ; elle s’applique aussi à la TPS et à la TVQ récupérables.")}') + '</div>'
         + '</div>';
     }
     if (e.usd) {
@@ -661,13 +668,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
           + '" placeholder="${T("Ex : Publicité Meta juillet")}">', 'f-desc')
       + champ('${T("Fournisseur")}', '<input type="text" id="f-four" value="' + esc(f.fournisseur)
           + '" placeholder="Ex : Meta Platforms">', 'f-four')
-      + '<div class="bloc-montants"><div class="trois">'
+      + '<div class="bloc-montants"><div class="trois' + (f.categorie === CAT_VEHICULE ? '' : ' avec-part') + '">'
       + '<div class="champ"><label for="f-montant">${T("Montant (hors taxes)")}</label>'
       + '<input type="number" step="0.01" min="0" id="f-montant" value="' + esc(f.montant) + '" placeholder="0${SEP_DEC()}00"></div>'
       + '<div class="champ"><label for="f-tps">${T("TPS payée")}</label>'
       + '<input type="number" step="0.01" min="0" id="f-tps" value="' + esc(f.tps) + '" placeholder="0${SEP_DEC()}00"></div>'
       + '<div class="champ"><label for="f-tvq">${T("TVQ payée")}</label>'
       + '<input type="number" step="0.01" min="0" id="f-tvq" value="' + esc(f.tvq) + '" placeholder="0${SEP_DEC()}00"></div>'
+      /* ⚠ PAS POUR UN VEHICULE : sa part vient du registre des deplacements. */
+      + (f.categorie === CAT_VEHICULE ? ''
+          : '<div class="champ"><label for="f-part">${T("Part d’affaires (%)")}</label>'
+            + '<input type="number" step="1" min="0" max="100" id="f-part" value="' + esc(f.partAffaires) + '" placeholder="100"'
+            + ' title="${T("Usage mixte (ex. cellulaire) : seule la part d’affaires se déduit, taxes comprises. Vide : 100 %.")}"></div>')
       + '<button id="f-taxes" title="${T("Déduire TPS et TVQ d’un total payé saisi dans ")}${T("Montant")}">${T("↧ Calc. taxes")}</button>'
       + '</div>'
       /* ⚠ LE MONTANT D ORIGINE RESTE SOUS LES YEUX pendant la saisie : c est la
@@ -691,7 +703,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
       + '<div class="aide-usd" style="margin-top:.3rem;display:flex;align-items:center;gap:.6rem">'
       + '<div class="aide" style="flex:1;margin:0">${T("Saisissez le <strong>total payé</strong> dans ")}'
       + '${T("« Montant » puis « Calc. taxes » pour en déduire la TPS et la TVQ.")} '
-      + '${T("Une facture en dollars US se convertit avec « ⇄ Convertir ».")}</div>'
+      + '${T("Une facture en dollars US se convertit avec « ⇄ Convertir ».")}'
+      + (f.categorie === CAT_VEHICULE ? '' : ' ${T("Usage mixte (ex. cellulaire) : seule la part d’affaires se déduit, taxes comprises.")}')
+      + '</div>'
       + '<button id="f-convertir" style="flex:0 0 auto" title="${T("Convertir les montants saisis depuis le dollar US, au taux de la date")}">'
       + '${T("⇄ Convertir depuis USD")}</button></div></div>'
       + '<div class="champ large"><label>${T("Reçu (image ou PDF — facultatif)")}</label>'
@@ -786,7 +800,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
     return { date: FORM.date, categorie: FORM.categorie, paiement: FORM.paiement,
       description: FORM.description, fournisseur: FORM.fournisseur,
       montant: FORM.montant, tps: FORM.tps, tvq: FORM.tvq, recu: !!FORM.recu,
-      vehiculeId: FORM.vehiculeId || '', typeVehicule: FORM.typeVehicule || '' };
+      vehiculeId: FORM.vehiculeId || '', typeVehicule: FORM.typeVehicule || '',
+      partAffaires: FORM.partAffaires == null ? '' : String(FORM.partAffaires) };
   }
   function brouillonEcrire(v){
     return appeler('depenses:brouillonEcrire', [v]).then(function(r){
@@ -841,6 +856,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
        garde ce qui etait choisi (revenir a la categorie le retrouve). */
     if (document.getElementById('f-veh')) FORM.vehiculeId = g('f-veh');
     if (document.getElementById('f-tveh')) FORM.typeVehicule = g('f-tveh');
+    if (document.getElementById('f-part')) FORM.partAffaires = g('f-part');
   }
 
   function importerFacture(file){
@@ -938,7 +954,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
     var pay = ((D.paiements || [])[0] || {}).cle || 'card';
     return { id: '__new__', date: auj, categorie: cat, paiement: pay,
       description: '', fournisseur: '', montant: '', tps: '', tvq: '', recu: false,
-      vehiculeId: '', typeVehicule: '',
+      vehiculeId: '', typeVehicule: '', partAffaires: '',
       lecture: '', lectureErr: false, origine: null, fx: null };
   }
 
@@ -955,6 +971,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
       /* Le site ne les garde que pour la categorie << vehicule >>. */
       vehiculeId: FORM.categorie === CAT_VEHICULE ? (FORM.vehiculeId || '') : '',
       typeVehicule: FORM.categorie === CAT_VEHICULE ? (FORM.typeVehicule || '') : '',
+      /* Vide = 100 %. La virgule decimale devient un point : le site lit parseFloat. */
+      partAffaires: FORM.categorie === CAT_VEHICULE ? '' : String(FORM.partAffaires == null ? '' : FORM.partAffaires).split(',').join('.').trim(),
     }]).then(function(r){
       OCCUPE = false;
       if (!r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
@@ -1053,7 +1071,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
         paiement: DETAIL.paiement, description: DETAIL.description, fournisseur: DETAIL.fournisseur,
         montant: DETAIL.montantN ? String(DETAIL.montantN) : '',
         tps: DETAIL.tpsN ? String(DETAIL.tpsN) : '', tvq: DETAIL.tvqN ? String(DETAIL.tvqN) : '',
-        recu: DETAIL.aRecu, vehiculeId: DETAIL.vehiculeId || '', typeVehicule: DETAIL.typeVehicule || '' };
+        recu: DETAIL.aRecu, vehiculeId: DETAIL.vehiculeId || '', typeVehicule: DETAIL.typeVehicule || '',
+        partAffaires: (DETAIL.partAffaires === '' || DETAIL.partAffaires == null) ? '' : String(DETAIL.partAffaires) };
       dessiner();
     };
     var rc = document.getElementById('d-recu');

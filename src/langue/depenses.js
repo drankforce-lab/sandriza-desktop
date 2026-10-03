@@ -313,4 +313,11 @@ module.exports = {
   '— choisir —': '— choose —',
   'Ouvrir « Véhicules et déplacements »': 'Open “Vehicles and mileage”',
   'Le registre des véhicules s’ouvre…': 'Opening the vehicle logbook…',
+  /* ── La part d’affaires d’une dépense à usage mixte (2026-10-02) ───────── */
+  'Usage mixte : part d’affaires de': 'Mixed use: business share of',
+  'Part d’affaires (%)': 'Business use (%)',
+  'Usage mixte (ex. cellulaire) : seule la part d’affaires se déduit, taxes comprises. Vide : 100 %.':
+    'Mixed use (e.g. cell phone): only the business share is deductible, taxes included. Empty: 100%.',
+  'Usage mixte (ex. cellulaire) : seule la part d’affaires se déduit, taxes comprises.':
+    'Mixed use (e.g. cell phone): only the business share is deductible, taxes included.',
 };

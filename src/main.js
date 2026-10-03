@@ -2797,6 +2797,8 @@ const OPS_PONT = new Set([
   'vehicules:deplacement', 'vehicules:deplacementOter', 'vehicules:changement',
   // La DPA demandee d une annee : moins que le maximum, ou retour au maximum.
   'vehicules:dpa',
+  // La liste des marques et modeles d une annee, demandee a la NHTSA (vPIC).
+  'vehicules:catalogue',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
@@ -3402,6 +3404,9 @@ const LIMITES_PONT = {
   'vehicules:ecrire': 30000, 'vehicules:odometre': 30000, 'vehicules:supprimer': 30000,
   'vehicules:deplacement': 30000, 'vehicules:deplacementOter': 30000, 'vehicules:changement': 30000,
   'vehicules:dpa': 30000,
+  /* 37 demandes paralleles a la NHTSA (une par marque), puis l ecriture de la
+     configuration partagee : 10 a 30 s d habitude, davantage sur un reseau lent. */
+  'vehicules:catalogue': 90000,
   /* Un repli : une lecture ou une ecriture d un seul booleen dans le profil. */
   'ui:repli': 15000,
   'patrons:liste': 20000, 'patrons:ecrire': 30000, 'patrons:basculer': 30000,
