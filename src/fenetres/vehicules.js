@@ -86,6 +86,7 @@ input,textarea{cursor:text}
 input[type=checkbox]{width:auto;padding:0;cursor:pointer}
 textarea{resize:none}
 input.n{text-align:right;font-family:ui-monospace,Consolas,monospace;font-size:.8rem}
+input.n.auto{color:var(--tx2);font-style:italic}
 select:focus,input:focus,button:focus,textarea:focus{outline:none;border-color:#c9a97e}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.45;cursor:default}
@@ -113,6 +114,7 @@ table{width:100%;border-collapse:collapse;font-size:.79rem}
 thead th{text-align:left;padding:.22rem .35rem;font-size:.64rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 thead th.n,tbody td.n{text-align:right;font-family:ui-monospace,Consolas,monospace;white-space:nowrap}
+.bilan td.n small{white-space:normal}
 tbody td{padding:.24rem .35rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody tr.ligne{cursor:default}
 tbody tr.ligne.mod{cursor:pointer}
@@ -230,10 +232,10 @@ tbody tr.ligne.mod{cursor:pointer}
  */
 function pageVehicules(ouverture) {
   const onglets = ['registre', 'vehicules', 'changements', 'depenses', 'bilan'];
-  const etats = ['vehicule-nouveau', 'vehicule-modifier', 'catalogue-maj', 'deplacement-modifier', 'dpa-tableau', 'bilan-dpa'];
+  const etats = ['vehicule-nouveau', 'vehicule-modifier', 'catalogue-maj', 'deplacement-km', 'bilan-plafonds', 'deplacement-modifier', 'dpa-tableau', 'bilan-dpa'];
   const o = String(ouverture || '');
   const depart = onglets.indexOf(o) >= 0 ? o
-    : ((o === 'vehicule-nouveau' || o === 'vehicule-modifier' || o === 'catalogue-maj' || o === 'dpa-tableau') ? 'vehicules' : (o === 'bilan-dpa' ? 'bilan' : 'registre'));
+    : ((o === 'vehicule-nouveau' || o === 'vehicule-modifier' || o === 'catalogue-maj' || o === 'dpa-tableau') ? 'vehicules' : ((o === 'bilan-dpa' || o === 'bilan-plafonds') ? 'bilan' : 'registre'));
   const etat = etats.indexOf(o) >= 0 ? o : '';
   return `${TETE()}
 <title>${T("Véhicules et déplacements — Administration Sandriza")}</title>
@@ -425,6 +427,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     s = String(s || '');
     if (!s) return '';
     var c = s.charAt(0), an = parseInt(s.slice(-4), 10);
+    if (s === 'auto') return '${T("clôture automatique")}';
     if (c === 's') return '${T("saisi")}';
     if (c === 'f' && an > 1900) return '${T("repris de la fin")} ' + an;
     if (c === 'a') return '${T("relevé à l’acquisition")}';
@@ -449,6 +452,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
       PA = !!r.peutAjouter; PM = !!r.peutModifier; PS = !!r.peutSupprimer;
       if (FVEH && !vehicule(FVEH)) FVEH = '';
       if (!SAISIE) SAISIE = nouveauDeplacement(null);
+      else if (!SAISIE.id && (SAISIE.odoDebutAuto || !String(SAISIE.odoDebut || '').trim()) && !String(SAISIE.km || '').trim() && !String(SAISIE.odoFin || '').trim()) {
+        SAISIE.odoDebut = odoDepart(SAISIE.vehiculeId); SAISIE.odoDebutAuto = SAISIE.odoDebut !== '';
+      }
+      if (ETAT === 'deplacement-km' && SAISIE && !SAISIE.id) { SAISIE.km = '24'; SAISIE.allerRetour = true; calculOdo('d-km'); }
       if (!CHG) CHG = nouveauChangement();
       if (ETAT === 'vehicule-nouveau' && PA) { VFORM = vehiculeVierge(); ONGLET = 'vehicules'; }
       if (ETAT === 'dpa-tableau') {
@@ -458,6 +465,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
       if (ETAT === 'vehicule-modifier' && PM && (r.vehicules || []).length) { VFORM = poserAutres(depuisVehicule(r.vehicules[r.vehicules.length - 1])); ONGLET = 'vehicules'; }
       if (ETAT === 'catalogue-maj' && PA) { VFORM = vehiculeVierge(); VFORM.annee = '2026'; ONGLET = 'vehicules'; ETAT = ''; dessiner(); majCatalogue(); return; }
       if (ETAT === 'bilan-dpa') { BVUE = 'dpa'; ONGLET = 'bilan'; }
+      if (ETAT === 'bilan-plafonds') { BVUE = 'plafonds'; ONGLET = 'bilan'; }
       if (ETAT === 'deplacement-modifier' && PM && (r.deplacements || []).length) {
         SAISIE = depuisDeplacement(r.deplacements[0]); ONGLET = 'registre';
       }
@@ -555,7 +563,58 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
          du dernier deplacement inscrit. */
       depart: (avant && avant.depart) || (deps[0] && deps[0].depart) || '',
       destination: '', raison: '', detail: '', km: '', allerRetour: false,
-      odoDebut: '', odoFin: '', commande: '' };
+      odoDebut: odoDepart(veh), odoDebutAuto: odoDepart(veh) !== '', odoSource: 'km', odoFin: '', commande: '' };
+  }
+  /* ══ L ODOMETRE CALCULE (2026-10-02) ═══════════════════════════════════════
+     Sa demande : « fais le calcul automatique au niveau de l odometre ; si tu
+     as deja la valeur de depart, deduis-la simplement ». Le DEPART d un
+     nouveau deplacement est le dernier odometre connu du vehicule (le site le
+     donne : arrivee du dernier deplacement, releve d annee, acquisition). Puis :
+       · on tape les km (x 2 si aller-retour) → l arrivee = depart + km ;
+       · on tape l arrivee → les km = arrivee - depart (l aller-retour se decoche).
+     Le DERNIER champ tape gagne (odoSource), et l on n ecrit jamais dans le
+     champ ou l on tape. ⚠ Le site retient l odometre des qu il a les deux
+     releves : l apercu dit donc la meme chose que ce qui part. */
+  function odoDepart(vid){
+    var v = vehicule(vid);
+    return (v && v.dernierOdometre != null && isFinite(Number(v.dernierOdometre))) ? champNombre(v.dernierOdometre) : '';
+  }
+  function rond1(n){ return Math.round(n * 10) / 10; }
+  function poserChamp(id, cle, v){
+    SAISIE[cle] = v;
+    var e = document.getElementById(id);
+    if (e && document.activeElement !== e && typeof e.value === 'string') e.value = v;
+  }
+  function calculOdo(champ){
+    var s = SAISIE; if (!s) return;
+    if (champ === 'd-km' || champ === 'd-ar') s.odoSource = 'km';
+    if (champ === 'd-odo2') s.odoSource = 'odo';
+    if (champ === 'd-odo1') { s.odoDebutAuto = false; var e1 = document.getElementById('d-odo1'); if (e1 && e1.classList) e1.classList.remove('auto'); }
+    var a = lireNombre(s.odoDebut);
+    if (a == null || !isFinite(a)) return;
+    if (s.odoSource === 'odo') {
+      var b = lireNombre(s.odoFin);
+      if (b != null && isFinite(b) && b > a) {
+        poserChamp('d-km', 'km', champNombre(rond1(b - a)));
+        if (s.allerRetour) { s.allerRetour = false; var c = document.getElementById('d-ar'); if (c && typeof c.checked === 'boolean') c.checked = false; }
+      }
+      return;
+    }
+    var k = lireNombre(s.km);
+    if (k != null && isFinite(k) && k > 0) poserChamp('d-odo2', 'odoFin', champNombre(rond1(a + k * (s.allerRetour ? 2 : 1))));
+    else if (k == null) poserChamp('d-odo2', 'odoFin', '');
+  }
+  /* Un autre vehicule : un autre depart — sauf si on l a tape soi-meme. */
+  function changerVehiculeSaisie(){
+    var s = SAISIE; if (!s || s.id) return;
+    if (s.odoDebutAuto || !String(s.odoDebut || '').trim()) {
+      var d = odoDepart(s.vehiculeId);
+      poserChamp('d-odo1', 'odoDebut', d);
+      s.odoDebutAuto = d !== '';
+      var e1 = document.getElementById('d-odo1');
+      if (e1 && e1.classList) { if (s.odoDebutAuto) e1.classList.add('auto'); else e1.classList.remove('auto'); }
+      calculOdo('');
+    }
   }
   function depuisDeplacement(d){
     var parOdo = d.odoDebut != null && d.odoFin != null;
@@ -563,7 +622,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
       destination: d.destination || '', raison: d.raison || '', detail: d.detail || '',
       km: parOdo ? '' : champNombre(d.kmSaisis != null ? d.kmSaisis : d.km),
       allerRetour: !parOdo && !!d.allerRetour,
-      odoDebut: champNombre(d.odoDebut), odoFin: champNombre(d.odoFin), commande: d.commande || '' };
+      odoDebut: champNombre(d.odoDebut), odoFin: champNombre(d.odoFin), commande: d.commande || '',
+      odoDebutAuto: false, odoSource: parOdo ? 'odo' : 'km' };
   }
   /* L APERCU des kilometres retenus — le site refait le calcul et fait foi. */
   function apercuKm(s){
@@ -572,7 +632,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     if (a != null && b != null) {
       if (!isFinite(a) || !isFinite(b)) return '${T("Odomètre illisible : des chiffres seulement.")}';
       if (b <= a) return '${T("L’odomètre d’arrivée doit dépasser celui du départ.")}';
-      return '${T("Kilomètres retenus :")} ' + km(Math.round((b - a) * 10) / 10) + ' ${T("(lus à l’odomètre, ils l’emportent)")}';
+      var ar = (s.odoSource === 'km' && s.allerRetour && k != null && isFinite(k) && rond1(k * 2) === rond1(b - a))
+        ? ' (' + szNombre(k, 1) + ' × 2, ${T("aller-retour")})' : '';
+      return '${T("Kilomètres retenus :")} ' + km(rond1(b - a)) + ar + ' — ${T("odomètre")} ' + szNombre(a, 1) + ' → ' + szNombre(b, 1);
     }
     if (k != null) {
       if (!isFinite(k) || k <= 0) return '${T("Kilomètres illisibles : un nombre plus grand que zéro.")}';
@@ -686,7 +748,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
       + '<div class="champ"><label for="d-km">${T("Kilomètres parcourus")}</label><input type="text" inputmode="decimal" class="n" id="d-km" value="' + esc(s.km) + '" placeholder="0${SEP_DEC()}0">'
       + '<label class="ar" for="d-ar"><input type="checkbox" id="d-ar"' + (s.allerRetour ? ' checked' : '') + '> ${T("Aller-retour (× 2)")}</label></div>'
       + '<div class="champ"><label for="d-cmd">${T("N° de commande (facultatif)")}</label><input type="text" id="d-cmd" maxlength="40" value="' + esc(s.commande) + '" placeholder="${T("pour une livraison")}"></div>'
-      + '<div class="champ"><label for="d-odo1">${T("ou odomètre au départ")}</label><input type="text" inputmode="decimal" class="n" id="d-odo1" value="' + esc(s.odoDebut) + '"></div>'
+      + '<div class="champ"><label for="d-odo1">${T("Odomètre au départ")}</label><input type="text" inputmode="decimal" class="n' + (s.odoDebutAuto ? ' auto' : '') + '" id="d-odo1" value="' + esc(s.odoDebut) + '"'
+        + (s.odoDebutAuto ? ' title="${T("Dernier odomètre connu de ce véhicule — modifiez-le au besoin.")}"' : '') + '></div>'
       + '<div class="champ"><label for="d-odo2">${T("odomètre à l’arrivée")}</label><input type="text" inputmode="decimal" class="n" id="d-odo2" value="' + esc(s.odoFin) + '"></div>'
       + '<div class="calc large" id="d-calc" aria-live="polite">' + esc(apercuKm(s)) + '</div>'
       + '</div>'
@@ -704,7 +767,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     return { id: '', nom: '', marque: '', modele: '', annee: '', plaque: '', acquisLe: '',
       odometreAcquis: '', retireLe: '', odometreRetrait: '', notes: '',
       modeAcquisition: 'achat', prixAvantTaxes: '', taxesNonRecuperees: '', miseEnService: '',
-      tourisme: true, zeroEmission: false, classeDpa: '', classeDeduite: '', plafondDpa: '', prixDisposition: '' };
+      tourisme: true, zeroEmission: false, classeDpa: '', classeDeduite: '', plafondDpa: '', prixDisposition: '', prixDetailSuggere: '' };
   }
   function depuisVehicule(v){
     return { id: v.id, nom: v.nom || '', marque: v.marque || '', modele: v.modele || '', annee: v.annee || '',
@@ -714,7 +777,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
       prixAvantTaxes: champNombre(v.prixAvantTaxes), taxesNonRecuperees: champNombre(v.taxesNonRecuperees),
       miseEnService: v.miseEnService || '', tourisme: v.tourisme !== false, zeroEmission: !!v.zeroEmission,
       classeDpa: v.classeDpa || '', classeDeduite: v.classeDeduite || '', plafondDpa: champNombre(v.plafondDpa),
-      prixDisposition: champNombre(v.prixDisposition), plafondConnu: (v.dpa && v.dpa.plafond) || null };
+      prixDisposition: champNombre(v.prixDisposition), prixDetailSuggere: champNombre(v.prixDetailSuggere), plafondConnu: (v.dpa && v.dpa.plafond) || null };
   }
 
   /* ══ LA DPA (deduction pour amortissement) ═══════════════════════════════
@@ -842,11 +905,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     var ph = (saisi == null && deduit != null) ? champNombre(deduit) : '';
     var lbl = champ === 'debut' ? '${T("Début")}' : '${T("Fin")}';
     var id = 'o-' + champ + '-' + v.id;
-    var note = (saisi == null && deduit != null) ? source(src)
-      : (saisi != null ? '' : (champ === 'debut' ? '${T("à saisir : le compteur au 1er janvier")}' : '${T("à saisir : le compteur au 31 décembre")}'));
+    /* ⚠ LA CLOTURE AUTOMATIQUE (2026-10-02) : le site releve lui-meme le dernier
+       odometre connu au 31 decembre, 23 h 59, et le pose en fin d annee (et en
+       debut de la suivante). La valeur se montre comme une vraie, avec une
+       etiquette ; la taper la remplace (le site efface alors la marque). */
+    var auto = (src === 'auto') || !!(o.auto && o.auto[champ]) || !!(o.saisi && o.saisi[champ + 'Auto']);
+    if (auto && val === '' && deduit != null) val = champNombre(deduit);
+    var aideAuto = '${T("Relevé automatique au 31 décembre, 23 h 59 (dernier odomètre connu) — corrigez s’il diffère du compteur.")}';
+    var note = auto ? '' : ((saisi == null && deduit != null) ? source(src)
+      : (saisi != null ? '' : (champ === 'debut' ? '${T("à saisir : le compteur au 1er janvier")}' : '${T("à saisir : le compteur au 31 décembre")}')));
     return '<label for="' + esc(id) + '">' + lbl + '</label>'
       + '<input type="text" inputmode="decimal" class="n" id="' + esc(id) + '" data-odo="' + esc(v.id) + '" data-champ="' + champ + '"'
-      + ' value="' + esc(val) + '" placeholder="' + esc(ph) + '"' + (PM ? '' : ' disabled') + '>'
+      + ' data-orig="' + esc(val) + '" value="' + esc(val) + '" placeholder="' + esc(ph) + '"' + (auto ? ' title="' + aideAuto + '"' : '') + (PM ? '' : ' disabled') + '>'
+      + (auto ? '<div class="src"><span class="pill g" title="' + aideAuto + '">${T("auto · 31 déc.")}</span></div>' : '')
       + (note ? '<div class="src">' + esc(note) + '</div>' : '');
   }
   function carteVehicule(v){
@@ -893,7 +964,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     if (!L.length) return appelPremierVehicule() + boiteVehicule();
     var t = tranche(L, 'veh');
     return '<div class="aide" style="display:flex;gap:.8rem;align-items:center">'
-      + '<span>${T("L’odomètre de début d’une année se reprend tout seul de la fin de l’année précédente : relevez le compteur au 31 décembre et saisissez-le en « Fin » — l’année suivante démarre d’elle-même. Une valeur en gris est déduite ; tapez par-dessus pour la remplacer.")}</span>'
+      + '<span>${T("L’année se ferme d’elle-même le 31 décembre à 23 h 59 quand des déplacements avec odomètre ont été inscrits : le dernier relevé devient la fin de l’année et le début de la suivante (étiquette « auto »). Sinon, relevez le compteur au 31 décembre et saisissez-le en « Fin ». Une valeur en gris est déduite ; tapez par-dessus pour la remplacer.")}</span>'
       + nav('veh', t.nbp) + '</div>'
       + '<div class="vgrille">' + t.vue.map(carteVehicule).join('') + '</div>'
       + boiteVehicule();
@@ -1023,7 +1094,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
           + '<option value="achat"' + (loc ? '' : ' selected') + '>${T("Achat")}</option>'
           + '<option value="location"' + (loc ? ' selected' : '') + '>${T("Location (crédit-bail)")}</option></select>', true);
     if (loc) {
-      dpa += '<div class="aide large">${T("Un véhicule loué n’a pas de DPA : les loyers se déclarent comme frais de véhicule, dans les Dépenses, avec le type « Location (crédit-bail) ». Ils suivent la part d’affaires comme les autres frais.")}</div>';
+      dpa += '<div class="aide large">${T("Un véhicule loué n’a pas de DPA : les loyers se déclarent comme frais de véhicule, dans les Dépenses, avec le type « Location (crédit-bail) ». Ils suivent la part d’affaires comme les autres frais.")}</div>'
+        + ch('v-pds', '${T("Prix de détail suggéré (location)")}', '<input type="text" inputmode="decimal" class="n" id="v-pds" aria-label="${T("Prix de détail suggéré (location)")}" value="' + esc(f.prixDetailSuggere) + '"'
+          + ' title="${T("Le prix de détail suggéré par le fabricant, avant taxes.")}">')
+        + '<div class="aide">${T("Sert au plafond de location (tableau C) d’une voiture de tourisme.")}</div>'
+        + '<div class="champ large coches"><label class="ar" for="v-tour"><input type="checkbox" id="v-tour"' + (f.tourisme ? ' checked' : '') + '> ${T("Voiture de tourisme")}</label></div>';
     } else {
       dpa += ch('v-prix', '${T("Prix avant taxes")}', '<input type="text" inputmode="decimal" class="n" id="v-prix" aria-label="${T("Prix avant taxes")}" value="' + esc(f.prixAvantTaxes) + '">')
         + ch('v-taxes', '${T("Taxes non récupérées")}', '<input type="text" inputmode="decimal" class="n" id="v-taxes" aria-label="${T("Taxes non récupérées")}" value="' + esc(f.taxesNonRecuperees) + '"'
@@ -1123,6 +1198,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
   }
 
   /* ══ ONGLET DEPENSES ═══════════════════════════════════════════════════ */
+  /* Une depense d interets ou de location d une voiture de tourisme dont le
+     plafond (tableau B ou C) a mordu : sa part affichee le comprend deja. */
+  function plafonne(e){
+    if (e.type !== 'interets' && e.type !== 'location') return false;
+    var v = vehicule(e.vehiculeId), t = v && v.tableaux;
+    var x = t ? (e.type === 'interets' ? t.b : t.c) : null;
+    return !!(x && x.rapport < 1);
+  }
   function vueDepenses(){
     var L = (D.depenses || []);
     var h = '<div class="aide">${T("Les dépenses de véhicule se saisissent dans la fenêtre Dépenses, catégorie « Frais de véhicule à moteur » (ligne 9281) : on y choisit le véhicule et le type de frais. Ce registre en établit la part d’affaires ; la comptabilité, elle, garde la dépense entière.")}</div>';
@@ -1151,7 +1234,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
           var type = nomType(e.type) || szTd(e.typeNom) || '';
           var part = !e.partEtablie
             ? '<span class="pill att" title="${T("Odomètre de l’année incomplet : la dépense se déclare en entier.")}">${T("non établie")}</span>'
-            : (pct(e.part) + (typeEntier(e.type) ? '<div class="sous2">${T("toujours 100 %")}</div>' : ''));
+            : (pct(e.part) + (typeEntier(e.type) ? '<div class="sous2">${T("toujours 100 %")}</div>' : '')
+              + (plafonne(e) ? '<div class="sous2"><span class="pill g" title="${T("Voiture de tourisme : la part comprend le plafond des intérêts (tableau B) ou de la location (tableau C).")}">${T("plafonné")}</span></div>' : ''));
           return '<tr class="ligne"><td class="nowrap">' + esc(szJour(e.date)) + '</td>'
             + '<td>' + (e.vehiculeId ? esc(nomVeh(e.vehiculeId)) : '<span class="pill g">${T("non rattachée")}</span>') + '</td>'
             + '<td>' + (type ? esc(type) : '<span class="gris">${T("non précisé")}</span>') + '</td>'
@@ -1175,6 +1259,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     'aucun-deplacement':     '${T("Des dépenses sont rattachées à ce véhicule, mais aucun déplacement n’est inscrit : sans registre, la part d’affaires ne se défend pas. Inscrivez les déplacements de l’année.")}',
     'depenses-non-rattachees': '${T("Des dépenses de véhicule ne sont rattachées à aucun véhicule : elles prennent la part globale de l’année (ou 100 % si elle n’est pas établie). Rattachez-les dans la fenêtre Dépenses.")}',
     'dpa-cout':              '${T("Coût d’achat manquant : la DPA ne peut pas se calculer. Saisissez le prix avant taxes et la date de mise en service sur la fiche du véhicule (onglet Véhicules, Modifier).")}',
+    'location-pds':          '${T("Voiture de tourisme louée sans prix de détail suggéré : le troisième plafond du tableau C ne peut pas se calculer. Saisissez-le sur la fiche du véhicule (Mode : Location).")}',
     'dpa-plafond':           '${T("Le plafond de coût (catégorie 10.1 ou 54) de l’année de mise en service n’est pas connu avec certitude : le dernier plafond connu sert en attendant. Vérifiez-le auprès de l’ARC et saisissez-le sur la fiche du véhicule (champ « Plafond »).")}'
   };
   function nomLigne(l){ return l.id ? (l.nom || nomVeh(l.id)) : '${T("Non rattachées")}'; }
@@ -1206,19 +1291,62 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
       var s = source((l.odometre.source || {})[c]);
       return szNombre(v, 1) + (s && s !== '${T("saisi")}' ? '<small>' + esc(s) + '</small>' : '');
     }
+    /* ══ VOITURE DE TOURISME — LES TABLEAUX B ET C (T2125 / TP-80) ══════════
+       Calcules par le site (tableauxBC) : on montre le paye, l admissible et le
+       plafond qui l a borne. Seule la part ADMISSIBLE, multipliee par la part
+       d affaires, va a la ligne 9281. */
+    var aB = L.some(function(l){ return l.tableaux && l.tableaux.b; });
+    var aC = L.some(function(l){ return l.tableaux && l.tableaux.c; });
+    /* ⚠ UNE VUE A PART, COMME LA DPA (2026-10-02). Posees sous le tableau
+       general, ces lignes le faisaient deborder de 300 a 400 px (sa regle :
+       aucune barre de defilement). Ici, elles ont la place de montrer le calcul
+       entier : paye, plafond mensuel, jours, plafond(s), admissible. */
+    function lignesPlafonds(){
+      function de(k, f){ return function(l){ var x = l.tableaux && l.tableaux[k]; return x ? f(x, l) : '<span class="gris">—</span>'; }; }
+      function tot(k, c){ return function(){ return argent(somme(function(l){ return l.tableaux && l.tableaux[k] ? l.tableaux[k][c] : 0; })); }; }
+      function vide(){ return ''; }
+      function mensuel(x){ return argent(x.plafondMensuel) + (x.aConfirmer ? '<small class="attn">${T("plafond à confirmer")}</small>' : ''); }
+      var h = '';
+      if (aB) {
+        h += grp('${T("Tableau B — intérêts (voiture de tourisme)")}')
+          + rang('${T("Intérêts payés")}', de('b', function(x){ return argent(x.paye); }), tot('b', 'paye'))
+          + rang('${T("Plafond mensuel")}', de('b', mensuel), vide)
+          + rang('${T("Jours dans l’année")}', de('b', function(x, l){ return String(l.tableaux.jours || 0); }), vide)
+          + rang('${T("Plafond de l’année (mensuel × jours ÷ 30)")}', de('b', function(x){ return argent(x.plafond); }), vide)
+          + rang('${T("Intérêts admissibles")}', de('b', function(x){ return argent(x.admis); }), tot('b', 'admis'), 'cle');
+      }
+      if (aC) {
+        h += grp('${T("Tableau C — location (voiture de tourisme)")}')
+          + rang('${T("Loyers payés")}', de('c', function(x){ return argent(x.paye); }), tot('c', 'paye'))
+          + rang('${T("Plafond mensuel")}', de('c', mensuel), vide)
+          + rang('${T("Jours de bail dans l’année")}', de('c', function(x, l){ return String(l.tableaux.jours || 0); }), vide)
+          + rang('${T("Plafond (mensuel × jours ÷ 30)")}', de('c', function(x){ return argent(x.plafondB); }), vide)
+          + rang('${T("Plafond selon le prix de détail suggéré")}', de('c', function(x){
+              return x.plafondC != null ? argent(x.plafondC) + '<small>${T("prix")} ' + argent(x.prixDetailSuggere) + '</small>'
+                : '<span class="attn">${T("prix de détail suggéré manquant")}</span>'; }), vide)
+          + rang('${T("Location admissible (le moindre des trois)")}', de('c', function(x){ return argent(x.admis); }), tot('c', 'admis'), 'cle');
+      }
+      return h;
+    }
     var kmPersoTot = (T0.kmTotal ? Math.max(0, Math.round((T0.kmTotal - (T0.kmAffaires || 0)) * 10) / 10) : null);
-    var dpaV = (BVUE === 'dpa');
     var aDpa = L.some(function(l){ return l.dpa; });
+    var dpaV = (BVUE === 'dpa') && aDpa;
+    var plafV = (BVUE === 'plafonds') && (aB || aC);
+    var genV = !dpaV && !plafV;
+    function bouton(cle, lbl, on){ return '<button type="button" class="mini' + (on ? ' on' : '') + '" data-bvue="' + cle + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + lbl + '</button>'; }
     var h = '<div class="duo"><div><div class="carte"><h2>${T("Bilan")} ' + ANNEE
-      + (aDpa ? '<span class="bascule" role="group" aria-label="${T("Vue du bilan")}">'
-          + '<button type="button" class="mini' + (dpaV ? '' : ' on') + '" data-bvue="" aria-pressed="' + (dpaV ? 'false' : 'true') + '">${T("Dépenses et kilométrage")}</button>'
-          + '<button type="button" class="mini' + (dpaV ? ' on' : '') + '" data-bvue="dpa" aria-pressed="' + (dpaV ? 'true' : 'false') + '">${T("Amortissement (DPA)")}</button></span>' : '')
+      + ((aDpa || aB || aC) ? '<span class="bascule" role="group" aria-label="${T("Vue du bilan")}">'
+          + bouton('', '${T("Dépenses et kilométrage")}', genV)
+          + (aDpa ? bouton('dpa', '${T("Amortissement (DPA)")}', dpaV) : '')
+          + ((aB || aC) ? bouton('plafonds', '${T("Plafonds B / C")}', plafV) : '')
+          + '</span>' : '')
       + nav('bil', t.nbp) + '</h2>'
       + '<table class="bilan"><thead><tr><th></th>'
       + cols.map(function(l){ return '<th class="n">' + esc(nomLigne(l)) + '</th>'; }).join('')
       + '<th class="n">${T("Total")}</th></tr></thead><tbody>'
       + (dpaV ? lignesDpa() : '')
-      + (dpaV ? '' : grp('${T("Kilométrage")}')
+      + (plafV ? lignesPlafonds() : '')
+      + (!genV ? '' : grp('${T("Kilométrage")}')
       + rang('${T("Odomètre au début")}', function(l){ return odo(l, 'debut'); }, function(){ return ''; })
       + rang('${T("Odomètre à la fin")}', function(l){ return odo(l, 'fin'); }, function(){ return ''; })
       + rang('${T("Km totaux")}', function(l){ return l.kmTotal == null ? (l.id ? '<span class="attn">${T("à établir")}</span>' : '—') : km(l.kmTotal); }, function(){ return T0.kmTotal ? km(T0.kmTotal) : '—'; })
@@ -1238,7 +1366,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
       + rang('${T("CTI admissibles — ligne 106")}', function(l){ return argent(l.tpsAdmissible); }, function(){ return argent(T0.tpsAdmissible || 0); }, 'cle')
       + rang('${T("TVQ payée")}', function(l){ return argent(l.tvq); }, function(){ return argent(somme(function(l){ return l.tvq; })); })
       + rang('${T("RTI admissibles — ligne 206")}', function(l){ return argent(l.tvqAdmissible); }, function(){ return argent(T0.tvqAdmissible || 0); }, 'cle')
-      + (aDpa ? rang('${T("DPA déductible — ligne 9936")}', function(l){ var g = l.dpa && l.dpa.ligne; return g ? argent(g.deductible) : '—'; }, function(){ return argent(T0.dpaDeductible || 0); }, 'cle') : ''))
+      + (L.some(function(l){ return l.dpa && l.dpa.applicable; }) ? rang('${T("DPA déductible — ligne 9936")}', function(l){ var g = l.dpa && l.dpa.ligne; return g ? argent(g.deductible) : '—'; }, function(){ return argent(T0.dpaDeductible || 0); }, 'cle') : ''))
       + '</tbody></table></div></div><div>';
     /* ══ LA VUE DPA : une colonne par vehicule, la ligne de l annee. */
     function lignesDpa(){
@@ -1304,6 +1432,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
         : '<div class="carte"><h2>${T("La règle")}</h2><div class="aide">'
           + '${T("Part d’affaires = km d’affaires de l’année ÷ km totaux à l’odomètre (ARC, guide T4002 ; Revenu Québec). Elle s’applique aux dépenses ET aux taxes récupérables.")} '
           + '<strong>${T("Stationnement et péages d’affaires : 100 %")}</strong>${T(", hors de la répartition.")} '
+          + ((aB || aC) ? '${T("Voiture de tourisme : les intérêts (tableau B) et la location (tableau C) sont plafonnés ; seule la part admissible, × la part d’affaires, va à la ligne 9281. Un camion ou une camionnette n’a pas ces plafonds.")} ' + (plafV ? '' : '${T("Le calcul : vue « Plafonds B / C ».")} ') : '')
           + '${T("La comptabilité garde la dépense entière ; seule la déclaration applique la part.")}'
           + '</div></div>')
       + '</div></div>';
@@ -1382,7 +1511,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
        ['v-plaque', 'plaque'], ['v-acq', 'acquisLe'], ['v-oacq', 'odometreAcquis'], ['v-ret', 'retireLe'],
        ['v-oret', 'odometreRetrait'], ['v-notes', 'notes'], ['v-mode', 'modeAcquisition'], ['v-prix', 'prixAvantTaxes'],
        ['v-taxes', 'taxesNonRecuperees'], ['v-mes', 'miseEnService'], ['v-classe', 'classeDpa'], ['v-plafond', 'plafondDpa'],
-       ['v-pv', 'prixDisposition']].forEach(function(p){
+       ['v-pv', 'prixDisposition'], ['v-pds', 'prixDetailSuggere']].forEach(function(p){
         v = lu(p[0]); if (v != null) VFORM[p[1]] = v;
       });
       /* Les listes : « Autre… » garde le texte tape ; une marque ou un modele
@@ -1463,8 +1592,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
       szDire('${T("Odomètre illisible : des chiffres seulement.")}', 'err'); return;
     }
     var prix = lireNombre(f.prixAvantTaxes), tx = lireNombre(f.taxesNonRecuperees),
-        plaf = lireNombre(f.plafondDpa), pv = lireNombre(f.prixDisposition);
-    if ([prix, tx, plaf, pv].some(function(n){ return n != null && !isFinite(n); })) {
+        plaf = lireNombre(f.plafondDpa), pv = lireNombre(f.prixDisposition), pds = lireNombre(f.prixDetailSuggere);
+    if ([prix, tx, plaf, pv, pds].some(function(n){ return n != null && !isFinite(n); })) {
       szDire('${T("Montant illisible : des chiffres seulement.")}', 'err'); return;
     }
     if (!String(f.nom || '').trim() && nomSuggere(f)) f.nom = nomSuggere(f);
@@ -1475,7 +1604,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
       modeAcquisition: f.modeAcquisition === 'location' ? 'location' : 'achat',
       prixAvantTaxes: prix, taxesNonRecuperees: tx, miseEnService: f.miseEnService || '',
       tourisme: f.tourisme !== false, zeroEmission: !!f.zeroEmission, classeDpa: f.classeDpa || '',
-      plafondDpa: plaf, prixDisposition: f.retireLe ? pv : null };
+      plafondDpa: plaf, prixDisposition: f.retireLe ? pv : null,
+      prixDetailSuggere: f.modeAcquisition === 'location' ? pds : null };
     if (b) b.disabled = true;
     szDire('${T("Enregistrement…")}');
     appeler('vehicules:ecrire', [charge]).then(function(r){
@@ -1493,17 +1623,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     var v = vehicule(id);
     if (!v) return;
     var saisi = (v.odometre && v.odometre.saisi) || {};
-    function valeur(c){
-      var t = o[c] != null ? o[c] : (saisi[c] != null ? String(saisi[c]) : '');
-      return lireNombre(t);
-    }
-    var deb = valeur('debut'), fin = valeur('fin');
-    if ((deb != null && !isFinite(deb)) || (fin != null && !isFinite(fin))) {
-      szDire('${T("Odomètre illisible : des chiffres seulement.")}', 'err'); return;
-    }
+    /* ⚠ SEULS LES CHAMPS CHANGES PARTENT. Renvoyer un releve qu on n a pas
+       touche le ferait passer pour une saisie — et une cloture automatique
+       perdrait sa marque sans que personne l ait corrigee. */
+    var charge = {}, illisible = false;
+    ['debut', 'fin'].forEach(function(c){
+      var el = document.getElementById('o-' + c + '-' + id);
+      var t = (el && typeof el.value === 'string') ? el.value : (o[c] != null ? o[c] : null);
+      var orig = el && el.getAttribute ? el.getAttribute('data-orig') : (saisi[c] != null ? champNombre(saisi[c]) : '');
+      if (t == null || t === orig) return;
+      var n = lireNombre(t);
+      if (n != null && !isFinite(n)) illisible = true;
+      charge[c] = n;
+    });
+    if (illisible) { szDire('${T("Odomètre illisible : des chiffres seulement.")}', 'err'); return; }
+    if (!('debut' in charge) && !('fin' in charge)) { szDire('${T("Rien à enregistrer : les deux relevés sont inchangés.")}', 'att'); return; }
     if (b) b.disabled = true;
     szDire('${T("Enregistrement…")}');
-    appeler('vehicules:odometre', [id, ANNEE, { debut: deb, fin: fin }]).then(function(r){
+    appeler('vehicules:odometre', [id, ANNEE, charge]).then(function(r){
       if (b) b.disabled = false;
       if (!r || !r.ok) { szDire(expliquer(r, 'odometre'), 'err'); return; }
       delete ODO[id];
@@ -1679,6 +1816,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
       if (nn) nn.placeholder = nomSuggere(VFORM) || '${T("Ex. : Civic grise")}';
     }
     if (t.closest('#f-dep')) {
+      if (t.id === 'd-km' || t.id === 'd-odo1' || t.id === 'd-odo2') calculOdo(t.id);
       var c = document.getElementById('d-calc');
       if (c) c.textContent = apercuKm(SAISIE);
     }
@@ -1699,6 +1837,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     }
     if (t.id === 'v-mode' || t.id === 'v-ret') { dessiner(); var e2 = document.getElementById(t.id); if (e2) e2.focus(); return; }
     if (t.closest && t.closest('#f-dep')) {
+      if (t.id === 'd-ar') calculOdo('d-ar');
+      if (t.id === 'd-veh') changerVehiculeSaisie();
       var c = document.getElementById('d-calc');
       if (c) c.textContent = apercuKm(SAISIE);
       if (t.id === 'd-raison') {

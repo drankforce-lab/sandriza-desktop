@@ -3379,6 +3379,74 @@ const JEU = {
     var AVEC_AUTRE = Object.assign({}, DPA_ETATS, { vehicules: VEH_ETATS.concat([vehiculeSimple('veh_gr', 'Corolla GR', 'Toyota', 'GR Corolla Morizo', '2025')]) });
     var AVEC_MARQUE_AUTRE = Object.assign({}, DPA_ETATS, { vehicules: VEH_ETATS.concat([vehiculeSimple('veh_lada', 'Niva', 'Lada', 'Niva Legend', '2024')]) });
 
+    // ═══ L ODOMETRE PROPOSE (2026-10-02) : le site donne `dernierOdometre`
+    // (vehicules.js, dernierOdometre). Et les tableaux B / C, absents ici.
+    var DERNIER = { veh_civic: 49852, veh_transit: 22510, veh_corolla: 182390 };
+    VEH_2025.forEach(function(v){
+      v.dernierOdometre = DERNIER[v.id];
+      v.tableaux = { tourisme: v.tourisme !== false, jours: 365, b: null, c: null };
+      v.prixDetailSuggere = null;
+    });
+
+    // ═══ LES TABLEAUX B ET C (voiture de tourisme), 2026 — formes de
+    // tableauxBC (vehicules.js) : une voiture FINANCÉE dont les intérêts dépassent
+    // le plafond (B), une voiture LOUÉE dont la location est bornée par le prix de
+    // détail suggéré (C), et une autre louée SANS ce prix (manque location-pds).
+    var nuDpa = function(raison){ return { applicable: false, raison: raison, classe: '', cout: 0, plafond: null, miseEnService: '', lignes: [] }; };
+    var TB = { paye: 4200, plafondMensuel: 300, aConfirmer: false, plafond: 3650, admis: 3650, rapport: 3650 / 4200 };
+    var TC = { paye: 9600, plafondMensuel: 950, aConfirmer: true, plafondB: 11558.33, plafondC: 8036.2, prixDetailSuggere: 52000, admis: 8036.2, rapport: 8036.2 / 9600 };
+    var TC2 = { paye: 6000, plafondMensuel: 950, aConfirmer: true, plafondB: 11558.33, plafondC: null, prixDetailSuggere: null, admis: 6000, rapport: 1 };
+    var VEH_BC = [
+      Object.assign({}, base26, { id: 'veh_cfin', nom: 'Civic financée', marque: 'Honda', modele: 'Civic', annee: '2024', acquisLe: '2024-03-01',
+        modeAcquisition: 'achat', prixAvantTaxes: null, classeDeduite: '10', dernierOdometre: 31840,
+        odometre: odo26(18200, 31840), dpa: nuDpa('cout-manquant'),
+        tableaux: { tourisme: true, jours: 365, b: TB, c: null } }),
+      Object.assign({}, base26, { id: 'veh_esc', nom: 'Escape louée', marque: 'Ford', modele: 'Escape', annee: '2025', acquisLe: '2025-09-01',
+        modeAcquisition: 'location', prixDetailSuggere: 52000, classeDeduite: '10', dernierOdometre: 21400,
+        odometre: odo26(6400, 21400), dpa: nuDpa('location'),
+        tableaux: { tourisme: true, jours: 365, b: null, c: TC } }),
+      Object.assign({}, base26, { id: 'veh_cx5', nom: 'CX-5 louée', marque: 'Mazda', modele: 'CX-5', annee: '2026', acquisLe: '2026-01-15',
+        modeAcquisition: 'location', prixDetailSuggere: null, classeDeduite: '10', dernierOdometre: 14300,
+        odometre: { debut: 20, fin: 14300, km: 14280, source: { debut: 'acquisition', fin: 'saisi' }, manque: [], saisi: { fin: 14300 } },
+        dpa: nuDpa('location'), tableaux: { tourisme: true, jours: 351, b: null, c: TC2 } }),
+    ];
+    var depBC = function(id, date, four, veh, type, typeNom, m, part){
+      return { id: id, date: date, fournisseur: four, description: '', montant: m, tps: 0, tvq: 0, vehiculeId: veh,
+        type: type, typeNom: typeNom, part: part, partEtablie: true, deductible: Math.round(m * part * 100) / 100 };
+    };
+    var DEP_BC = [
+      depBC('b1', '2026-09-01', 'Banque Nationale', 'veh_cfin', 'interets', 'Intérêts sur le prêt auto', 4200, 0.4 * TB.rapport),
+      depBC('c1', '2026-09-01', 'Ford Crédit', 'veh_esc', 'location', 'Location (crédit-bail)', 9600, 0.5 * TC.rapport),
+      depBC('c2', '2026-09-01', 'Mazda Crédit', 'veh_cx5', 'location', 'Location (crédit-bail)', 6000, 0.45),
+    ];
+    var ligneBC = function(v, kmA, part, type, m, manque){
+      var l = ligneEtat(v, v.odometre.km, kmA, part, { n: 1, total: m, parType: (function(o){ o[type] = m; return o; })({}) }, manque);
+      l.tableaux = v.tableaux;
+      l.deductible = Math.round(m * part * (type === 'interets' ? TB.rapport : (v.tableaux.c ? v.tableaux.c.rapport : 1)) * 100) / 100;
+      return l;
+    };
+    var BILAN_BC = { ok: true, annee: 2026, complet: false, vehicules: [
+      ligneBC(VEH_BC[0], 5456, 0.4, 'interets', 4200, []),
+      ligneBC(VEH_BC[1], 7500, 0.5, 'location', 9600, []),
+      ligneBC(VEH_BC[2], 6426, 0.45, 'location', 6000, ['location-pds']),
+    ] };
+    BILAN_BC.total = { kmTotal: 42920, kmAffaires: 19382, part: 0.4516, depenses: 19800,
+      deductible: r2(BILAN_BC.vehicules.reduce(function(s, l){ return s + l.deductible; }, 0)),
+      tpsAdmissible: 0, tvqAdmissible: 0, nDeplacements: 0, dpaDeductible: 0, recuperation: 0, perteFinale: 0 };
+    var TAB_BC = { ok: true, annee: 2026, annees: ['2026', '2025'], vehicules: VEH_BC, deplacements: [], changements: [],
+      depenses: DEP_BC, bilan: BILAN_BC, types: TYPES, raisons: RAISONS, catalogue: CATALOGUE_2026,
+      peutAjouter: true, peutModifier: true, peutSupprimer: true };
+
+    // ═══ L ANNEE FERMEE AUTOMATIQUEMENT (2026-10-02) : le site a releve le
+    // dernier odometre connu au 31 decembre 2025, 23 h 59 — source 'auto',
+    // odometre.auto, saisi.finAuto (vehicules.js, la cloture automatique).
+    var CIVIC_AUTO = Object.assign({}, VEH_2025[0], {
+      odometre: { debut: 48210, fin: 49852, km: 1642, source: { debut: 'fin 2024', fin: 'auto' },
+        auto: { debut: false, fin: true }, manque: [], saisi: { fin: 49852, finAuto: true } } });
+    var AUTO_2025 = Object.assign({}, GARNI, { vehicules: [CIVIC_AUTO].concat(VEH_2025.slice(1)),
+      bilan: Object.assign({}, BILAN_2025, { vehicules: [Object.assign({}, BILAN_2025.vehicules[0],
+        { odometre: { debut: 48210, fin: 49852, source: { debut: 'fin 2024', fin: 'auto' } } })].concat(BILAN_2025.vehicules.slice(1)) }) });
+
     var avec = function(donnees){
       return Object.assign({ 'vehicules:donnees': donnees, identite: IDENTITE }, ECRITURES);
     };
@@ -3423,6 +3491,15 @@ const JEU = {
         { 'vehicules:catalogue': { ok: true, annee: 2026, marques: 37, modeles: 612, echecs: ['Polestar', 'MINI'] } }),
       cas('mise à jour de la liste — NHTSA injoignable', 'catalogue-maj', GARNI, ['injoignable'],
         { 'vehicules:catalogue': { ok: false, motif: 'reseau' } }),
+      // ── L odometre calcule, et les tableaux B / C ──
+      cas('registre — départ proposé (dernier odomètre du véhicule)', '', GARNI, ['n auto"', 'value="49852"']),
+      cas('registre — arrivée calculée depuis les km (aller-retour)', 'deplacement-km', GARNI, ['value="49900"', '× 2']),
+      cas('tableaux B et C — bilan général (prix de détail manquant)', 'bilan', TAB_BC, ['data-bvue="plafonds"', 'class="manque"']),
+      cas('tableaux B et C — vue Plafonds B / C', 'bilan-plafonds', TAB_BC, ['Tableau B', 'Tableau C', 'prix de détail suggéré manquant']),
+      cas('tableaux B et C — dépenses plafonnées', 'depenses', TAB_BC, ['plafonné']),
+      cas('boîte — voiture louée (prix de détail suggéré)', 'vehicule-modifier', TAB_BC, ['id="v-pds"']),
+      cas('année fermée automatiquement — véhicules', 'vehicules', AUTO_2025, ['auto · 31 déc.']),
+      cas('année fermée automatiquement — bilan', 'bilan', AUTO_2025, ['clôture automatique']),
       { nom: 'module des dépenses absent', id: '', reponses: { 'vehicules:donnees': { ok: false, motif: 'module_depenses' }, identite: IDENTITE } },
     ];
   })(),

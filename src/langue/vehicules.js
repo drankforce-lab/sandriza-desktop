@@ -159,7 +159,6 @@ module.exports = {
   'Aller-retour (× 2)': 'Round trip (× 2)',
   'N° de commande (facultatif)': 'Order no. (optional)',
   'pour une livraison': 'for a delivery',
-  'ou odomètre au départ': 'or odometer at departure',
   'odomètre à l’arrivée': 'odometer at arrival',
   'Annuler la modification': 'Cancel the edit',
   'Vider': 'Clear',
@@ -188,8 +187,6 @@ module.exports = {
   'Enregistrer l’odomètre': 'Save the odometer',
   'Ce véhicule n’était pas en service en': 'This vehicle was not in service in',
   ' : aucun odomètre à relever cette année-là.': ': no odometer to record that year.',
-  'L’odomètre de début d’une année se reprend tout seul de la fin de l’année précédente : relevez le compteur au 31 décembre et saisissez-le en « Fin » — l’année suivante démarre d’elle-même. Une valeur en gris est déduite ; tapez par-dessus pour la remplacer.':
-    'Each year’s starting odometer carries over automatically from the previous year’s end: read the odometer on December 31 and enter it as “End” — the next year starts by itself. A greyed value is inferred; type over it to replace it.',
   'Modifier le véhicule': 'Edit the vehicle',
   'Inscrire un véhicule': 'Add a vehicle',
   'Nom (obligatoire)': 'Name (required)',
@@ -465,4 +462,43 @@ module.exports = {
   'marque sans réponse :': 'make did not answer:',
   'marques sans réponse :': 'makes did not answer:',
   'Laissé vide, le nom proposé en gris sera retenu.': 'If left empty, the name suggested in grey will be used.',
+
+  /* ── L odometre calcule, et les tableaux B / C (2026-10-02) ───────────── */
+  'odomètre': 'odometer',
+  'Odomètre au départ': 'Odometer at departure',
+  'Dernier odomètre connu de ce véhicule — modifiez-le au besoin.': 'Last known odometer of this vehicle — change it if needed.',
+  'Prix de détail suggéré (location)': 'Manufacturer’s suggested list price (lease)',
+  'Le prix de détail suggéré par le fabricant, avant taxes.': 'The manufacturer’s suggested list price, before tax.',
+  'Sert au plafond de location (tableau C) d’une voiture de tourisme.': 'Used for the lease limit (chart C) of a passenger vehicle.',
+  'Voiture de tourisme : la part comprend le plafond des intérêts (tableau B) ou de la location (tableau C).':
+    'Passenger vehicle: the share includes the interest limit (chart B) or the lease limit (chart C).',
+  'Voiture de tourisme louée sans prix de détail suggéré : le troisième plafond du tableau C ne peut pas se calculer. Saisissez-le sur la fiche du véhicule (Mode : Location).':
+    'Leased passenger vehicle without a suggested list price: the third limit of chart C cannot be calculated. Enter it on the vehicle record (Acquisition: Lease).',
+  'Voiture de tourisme : les intérêts (tableau B) et la location (tableau C) sont plafonnés ; seule la part admissible, × la part d’affaires, va à la ligne 9281. Un camion ou une camionnette n’a pas ces plafonds.':
+    'Passenger vehicle: interest (chart B) and lease costs (chart C) are capped; only the eligible part, × the business share, goes to line 9281. A truck or van has no such limits.',
+
+  /* ── La clôture automatique de l odomètre au 31 décembre (2026-10-02) ──── */
+  'clôture automatique': 'automatic year-end close',
+  'Relevé automatique au 31 décembre, 23 h 59 (dernier odomètre connu) — corrigez s’il diffère du compteur.':
+    'Automatic reading on December 31, 11:59 p.m. (last known odometer) — correct it if it differs from the odometer.',
+  'auto · 31 déc.': 'auto · Dec 31',
+  'L’année se ferme d’elle-même le 31 décembre à 23 h 59 quand des déplacements avec odomètre ont été inscrits : le dernier relevé devient la fin de l’année et le début de la suivante (étiquette « auto »). Sinon, relevez le compteur au 31 décembre et saisissez-le en « Fin ». Une valeur en gris est déduite ; tapez par-dessus pour la remplacer.':
+    'The year closes by itself on December 31 at 11:59 p.m. when trips with odometer readings were logged: the last reading becomes the end of the year and the start of the next (“auto” tag). Otherwise, read the odometer on December 31 and enter it as “End”. A greyed value is inferred; type over it to replace it.',
+  'Rien à enregistrer : les deux relevés sont inchangés.': 'Nothing to save: both readings are unchanged.',
+  'prix de détail suggéré manquant': 'suggested list price missing',
+  'Tableau B — intérêts (voiture de tourisme)': 'Chart B — interest (passenger vehicle)',
+  'Intérêts payés': 'Interest paid',
+  'Plafond mensuel': 'Monthly limit',
+  'Jours dans l’année': 'Days in the year',
+  'Plafond de l’année (mensuel × jours ÷ 30)': 'Limit for the year (monthly × days ÷ 30)',
+  'Intérêts admissibles': 'Eligible interest',
+  'Tableau C — location (voiture de tourisme)': 'Chart C — lease (passenger vehicle)',
+  'Loyers payés': 'Lease payments made',
+  'Jours de bail dans l’année': 'Lease days in the year',
+  'Plafond (mensuel × jours ÷ 30)': 'Limit (monthly × days ÷ 30)',
+  'Plafond selon le prix de détail suggéré': 'Limit based on the suggested list price',
+  'prix': 'price',
+  'Location admissible (le moindre des trois)': 'Eligible lease costs (the least of the three)',
+  'Plafonds B / C': 'Limits B / C',
+  'Le calcul : vue « Plafonds B / C ».': 'The calculation: “Limits B / C” view.',
 };
