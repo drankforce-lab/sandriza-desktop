@@ -71,6 +71,27 @@
  */
 
 // ── PIÈCES COMMUNES ─────────────────────────────────────────────────────────
+// Les frais de véhicule des Dépenses (2026-10-02) : les véhicules inscrits au
+// registre et les types de frais, dans la forme de `_depensesDonnees`
+// (expenses.js) — `{ id, nom, retire }` et `{ cle, nom }`, noms recopiés de
+// vehicules.js (TYPES). Partagés par les cas de depenses.js.
+const VEH_DEPENSES = [
+  { id: 'veh_civic', nom: 'Civic 2021', retire: false },
+  { id: 'veh_transit', nom: 'Transit Connect', retire: false },
+  { id: 'veh_corolla', nom: 'Corolla 2015', retire: true },
+];
+const TYPES_VEHICULE = [
+  { cle: 'essence', nom: 'Essence / recharge' },
+  { cle: 'entretien', nom: 'Entretien (huile, pneus, lavage)' },
+  { cle: 'reparations', nom: 'Réparations' },
+  { cle: 'assurance', nom: 'Assurance' },
+  { cle: 'immatriculation', nom: 'Immatriculation et permis' },
+  { cle: 'interets', nom: 'Intérêts sur le prêt auto' },
+  { cle: 'location', nom: 'Location (crédit-bail)' },
+  { cle: 'stationnement', nom: 'Stationnement (affaires)' },
+  { cle: 'peage', nom: 'Péages (affaires)' },
+  { cle: 'autre', nom: 'Autre frais de véhicule' },
+];
 // Les chiffres fiscaux d'une annee garnie, partages par les cas de impot.js.
 const DONNEES_IMPOT = {
           ok: true, annee: 2026, annees: [2026, 2025], onglet: 'taxes', peutModifier: true,
@@ -3045,6 +3066,200 @@ const JEU = {
     ];
   })(),
 
+  // ── VÉHICULES ET DÉPLACEMENTS (2026-10-02) ─────────────────────────────────
+  // ⚠ LES FORMES SONT CELLES DE `vehiculesDonnees` (assets/js/pont.js) et des
+  // cœurs de assets/js/vehicules.js ; les types de frais et les raisons sont
+  // recopiés mot pour mot de vehicules.js (TYPES, RAISONS) — src/vocabulaire-site.js
+  // les traduit à l'affichage.
+  // ⚠ CHAQUE ONGLET A SON CAS : le garde-fou ne simule aucun clic, et un onglet
+  // jamais dessiné par un jeu d'essai peut mourir en silence (leçon de #116).
+  // Les deux ÉTATS qui ne s'atteignent qu'au clic (la boîte du véhicule, un
+  // déplacement ouvert en modification) ont leur ouverture directe.
+  'vehicules.js': (function(){
+    var TYPES = [
+      { cle: 'essence', nom: 'Essence / recharge', entiere: false },
+      { cle: 'entretien', nom: 'Entretien (huile, pneus, lavage)', entiere: false },
+      { cle: 'reparations', nom: 'Réparations', entiere: false },
+      { cle: 'assurance', nom: 'Assurance', entiere: false },
+      { cle: 'immatriculation', nom: 'Immatriculation et permis', entiere: false },
+      { cle: 'interets', nom: 'Intérêts sur le prêt auto', entiere: false },
+      { cle: 'location', nom: 'Location (crédit-bail)', entiere: false },
+      { cle: 'stationnement', nom: 'Stationnement (affaires)', entiere: true },
+      { cle: 'peage', nom: 'Péages (affaires)', entiere: true },
+      { cle: 'autre', nom: 'Autre frais de véhicule', entiere: false },
+    ];
+    var RAISONS = [
+      { cle: 'fournisseur', nom: 'Visite fournisseur' },
+      { cle: 'livraison', nom: 'Livraison à un client' },
+      { cle: 'poste', nom: 'Bureau de poste / transporteur' },
+      { cle: 'achats', nom: 'Achats pour l’entreprise' },
+      { cle: 'banque', nom: 'Banque' },
+      { cle: 'evenement', nom: 'Salon, marché, événement' },
+      { cle: 'photos', nom: 'Séance photo' },
+      { cle: 'client', nom: 'Rencontre client' },
+      { cle: 'autre', nom: 'Autre raison d’affaires' },
+    ];
+    var ecrit = { ok: true, id: 'veh_mh8k2a' };
+    var ECRITURES = {
+      'vehicules:ecrire': ecrit, 'vehicules:odometre': ecrit, 'vehicules:supprimer': { ok: true, id: '' },
+      'vehicules:deplacement': { ok: true, id: 'dep_mh8k2b' }, 'vehicules:deplacementOter': { ok: true, id: '' },
+      'vehicules:changement': { ok: true, id: 'chg_mh8k2c' },
+    };
+    // Un déplacement, dans la forme exacte du cœur (deplacementEcrireCoeur).
+    var dep = function(id, date, veh, depart, dest, raison, detail, km, ar, odo, cmd){
+      return { id: id, date: date, vehiculeId: veh, depart: depart, destination: dest, raison: raison,
+        detail: detail, km: km, allerRetour: !!ar, kmSaisis: odo ? null : (ar ? km / 2 : km),
+        odoDebut: odo ? odo[0] : null, odoFin: odo ? odo[1] : null, commande: cmd || '' };
+    };
+    // ═══ L'ANNÉE GARNIE : 2025, trois véhicules dont un retiré en cours d'année,
+    // douze déplacements (plus d'une page), un changement, six dépenses dont une
+    // non rattachée — donc un bilan qui a UN point à compléter.
+    var VEH_2025 = [
+      { id: 'veh_civic', nom: 'Civic 2021', marque: 'Honda', modele: 'Civic', annee: '2021', plaque: 'F12 ABC',
+        acquisLe: '2021-05-14', odometreAcquis: 12, retireLe: '', odometreRetrait: null, notes: 'Auto principale — pneus d’hiver au garage Lachance.',
+        enService: true, odometre: { debut: 48210, fin: 49852, km: 1642, source: { debut: 'fin 2024', fin: 'saisi' },
+          manque: [], saisi: { fin: 49852 } } },
+      { id: 'veh_transit', nom: 'Transit Connect', marque: 'Ford', modele: 'Transit Connect', annee: '2023', plaque: 'G45 KLM',
+        acquisLe: '2025-06-02', odometreAcquis: 21500, retireLe: '', odometreRetrait: null, notes: '',
+        enService: true, odometre: { debut: 21500, fin: 22510, km: 1010, source: { debut: 'acquisition', fin: 'début 2026' },
+          manque: [], saisi: {} } },
+      { id: 'veh_corolla', nom: 'Corolla 2015', marque: 'Toyota', modele: 'Corolla', annee: '2015', plaque: 'B77 XYZ',
+        acquisLe: '2015-03-01', odometreAcquis: 0, retireLe: '2025-06-01', odometreRetrait: 182390, notes: 'Vendue en juin 2025.',
+        enService: true, odometre: { debut: 181990, fin: 182390, km: 400, source: { debut: 'saisi', fin: 'retrait' },
+          manque: [], saisi: { debut: 181990 } } },
+    ];
+    var DEP_2025 = [
+      dep('dep01', '2025-12-18', 'veh_civic', 'Boutique Sandriza', 'Entrepôt Textiles Laval', 'fournisseur', 'Commande de tissus d’hiver', 42.6, false),
+      dep('dep02', '2025-12-02', 'veh_transit', 'Boutique Sandriza', 'Mme Tremblay, Boucherville', 'livraison', '', 46, true, null, '10482'),
+      dep('dep03', '2025-11-20', 'veh_civic', 'Boutique Sandriza', 'Salon Mode Québec, Québec', 'evenement', 'Kiosque au salon', 310, true),
+      dep('dep04', '2025-11-04', 'veh_transit', 'Boutique Sandriza', 'Studio Lumière, Montréal', 'photos', 'Collection hiver', 88, false, [22390, 22478]),
+      dep('dep05', '2025-10-21', 'veh_civic', 'Boutique Sandriza', 'Postes Canada, Longueuil', 'poste', '', 23.4, true),
+      dep('dep06', '2025-10-09', 'veh_transit', 'Boutique Sandriza', 'Costco, Brossard', 'achats', 'Emballages et cintres', 31.6, true),
+      dep('dep07', '2025-09-15', 'veh_civic', 'Boutique Sandriza', 'Banque Nationale, centre-ville', 'banque', '', 12.2, true),
+      dep('dep08', '2025-08-27', 'veh_transit', 'Boutique Sandriza', 'Marché Jean-Talon', 'evenement', 'Marché d’été', 205.4, false),
+      dep('dep09', '2025-07-30', 'veh_civic', 'Boutique Sandriza', 'Bureau du comptable, Saint-Lambert', 'autre', 'Revue des états financiers', 64.8, true),
+      dep('dep10', '2025-07-08', 'veh_civic', 'Boutique Sandriza', 'Atelier Rivière, Saint-Hyacinthe', 'fournisseur', 'Échantillons', 118, true),
+      dep('dep11', '2025-05-12', 'veh_corolla', 'Boutique Sandriza', 'Cliente corporative, Laval', 'client', 'Présentation de la collection', 96, true),
+      dep('dep12', '2025-03-03', 'veh_corolla', 'Boutique Sandriza', 'Imprimerie Dumont', 'fournisseur', 'Étiquettes et cartes', 54, true),
+    ];
+    var CHG = [
+      { id: 'chg01', date: '2025-06-02', ancienId: 'veh_corolla', odoAncien: 182390, nouveauId: 'veh_transit',
+        odoNouveau: 21500, motif: 'Vente — remplacée par la fourgonnette' },
+    ];
+    var DEPENSES_2025 = [
+      { id: 'e1', date: '2025-11-28', fournisseur: 'Petro-Canada', description: 'Plein d’essence', montant: 72.40, tps: 3.62, tvq: 7.22,
+        vehiculeId: 'veh_civic', type: 'essence', typeNom: 'Essence / recharge', part: 0.3477, partEtablie: true, deductible: 25.17 },
+      { id: 'e2', date: '2025-10-15', fournisseur: 'Canadian Tire', description: 'Changement d’huile', montant: 89.95, tps: 4.50, tvq: 8.97,
+        vehiculeId: 'veh_civic', type: 'entretien', typeNom: 'Entretien (huile, pneus, lavage)', part: 0.3477, partEtablie: true, deductible: 31.28 },
+      { id: 'e3', date: '2025-09-01', fournisseur: 'Intact Assurance', description: 'Prime annuelle', montant: 1240, tps: 0, tvq: 0,
+        vehiculeId: 'veh_transit', type: 'assurance', typeNom: 'Assurance', part: 0.3673, partEtablie: true, deductible: 455.45 },
+      { id: 'e4', date: '2025-08-12', fournisseur: 'Indigo', description: 'Stationnement — Marché Jean-Talon', montant: 18, tps: 0.78, tvq: 1.56,
+        vehiculeId: 'veh_transit', type: 'stationnement', typeNom: 'Stationnement (affaires)', part: 1, partEtablie: true, deductible: 18 },
+      { id: 'e5', date: '2025-07-07', fournisseur: 'Esso', description: '', montant: 55, tps: 2.75, tvq: 5.49,
+        vehiculeId: '', type: 'essence', typeNom: 'Essence / recharge', part: 0.3578, partEtablie: true, deductible: 19.68 },
+      { id: 'e6', date: '2025-04-03', fournisseur: 'SAAQ', description: 'Immatriculation 2025', montant: 312.50, tps: 0, tvq: 0,
+        vehiculeId: 'veh_corolla', type: 'immatriculation', typeNom: 'Immatriculation et permis', part: 0.375, partEtablie: true, deductible: 117.19 },
+    ];
+    var BILAN_2025 = { ok: true, annee: 2025, complet: false,
+      vehicules: [
+        { id: 'veh_civic', nom: 'Civic 2021', kmTotal: 1642, kmAffaires: 571, kmPersonnels: 1071, part: 0.3477,
+          odometre: { debut: 48210, fin: 49852, source: { debut: 'fin 2024', fin: 'saisi' } },
+          depenses: { n: 2, total: 162.35, parType: { essence: 72.40, entretien: 89.95 } },
+          deductible: 56.45, tps: 8.12, tvq: 16.19, tpsAdmissible: 2.82, tvqAdmissible: 5.63, manque: [] },
+        { id: 'veh_transit', nom: 'Transit Connect', kmTotal: 1010, kmAffaires: 371, kmPersonnels: 639, part: 0.3673,
+          odometre: { debut: 21500, fin: 22510, source: { debut: 'acquisition', fin: 'début 2026' } },
+          depenses: { n: 2, total: 1258, parType: { assurance: 1240, stationnement: 18 } },
+          deductible: 473.45, tps: 0.78, tvq: 1.56, tpsAdmissible: 0.78, tvqAdmissible: 1.56, manque: [] },
+        { id: 'veh_corolla', nom: 'Corolla 2015', kmTotal: 400, kmAffaires: 150, kmPersonnels: 250, part: 0.375,
+          odometre: { debut: 181990, fin: 182390, source: { debut: 'saisi', fin: 'retrait' } },
+          depenses: { n: 1, total: 312.50, parType: { immatriculation: 312.50 } },
+          deductible: 117.19, tps: 0, tvq: 0, tpsAdmissible: 0, tvqAdmissible: 0, manque: [] },
+        // La ligne des dépenses NON RATTACHÉES (bilanCoeur, ligne(null)).
+        { id: '', nom: '', kmTotal: null, kmAffaires: 0, kmPersonnels: null, part: 0.3578, odometre: null,
+          depenses: { n: 1, total: 55, parType: { essence: 55 } },
+          deductible: 19.68, tps: 2.75, tvq: 5.49, tpsAdmissible: 0.98, tvqAdmissible: 1.96, manque: ['depenses-non-rattachees'] },
+      ],
+      total: { kmTotal: 3052, kmAffaires: 1092, part: 0.3578, depenses: 1787.85, deductible: 666.77,
+        tpsAdmissible: 4.58, tvqAdmissible: 9.15, nDeplacements: 12 } };
+    var GARNI = { ok: true, annee: 2025, annees: ['2026', '2025', '2024'],
+      vehicules: VEH_2025, deplacements: DEP_2025, changements: CHG, depenses: DEPENSES_2025,
+      bilan: BILAN_2025, types: TYPES, raisons: RAISONS, peutAjouter: true, peutModifier: true, peutSupprimer: true };
+    var LECTURE = Object.assign({}, GARNI, { peutAjouter: false, peutModifier: false, peutSupprimer: false });
+
+    // ═══ L'ANNÉE EN COURS, ODOMÈTRE INCOMPLET : la fin 2026 n'est pas relevée, et
+    // un véhicule acquis cette année n'a AUCUN odomètre. Les parts ne sont pas
+    // établies — les dépenses se déclarent en entier, et le bilan le DIT.
+    var SANS_ODO = { ok: true, annee: 2026, annees: ['2026', '2025'],
+      vehicules: [
+        { id: 'veh_civic', nom: 'Civic 2021', marque: 'Honda', modele: 'Civic', annee: '2021', plaque: 'F12 ABC',
+          acquisLe: '2021-05-14', odometreAcquis: 12, retireLe: '', odometreRetrait: null, notes: '', enService: true,
+          odometre: { debut: 49852, fin: null, km: null, source: { debut: 'fin 2025', fin: '' }, manque: ['fin'], saisi: {} } },
+        { id: 'veh_soul', nom: 'Kia Soul', marque: 'Kia', modele: 'Soul', annee: '2024', plaque: '',
+          acquisLe: '2026-02-10', odometreAcquis: null, retireLe: '', odometreRetrait: null, notes: '', enService: true,
+          odometre: { debut: null, fin: null, km: null, source: { debut: '', fin: '' }, manque: ['debut', 'fin'], saisi: {} } },
+      ],
+      deplacements: [
+        dep('dep21', '2026-09-24', 'veh_civic', 'Boutique Sandriza', 'Entrepôt Textiles Laval', 'fournisseur', '', 42.6, false),
+        dep('dep22', '2026-09-03', 'veh_civic', 'Boutique Sandriza', 'Postes Canada, Longueuil', 'poste', '', 23.4, true),
+      ],
+      changements: [],
+      depenses: [
+        { id: 'e21', date: '2026-09-12', fournisseur: 'Shell', description: '', montant: 64.10, tps: 3.21, tvq: 6.39,
+          vehiculeId: 'veh_civic', type: 'essence', typeNom: 'Essence / recharge', part: 1, partEtablie: false, deductible: 64.10 },
+        { id: 'e22', date: '2026-03-01', fournisseur: 'SAAQ', description: 'Immatriculation 2026', montant: 298.00, tps: 0, tvq: 0,
+          vehiculeId: 'veh_soul', type: 'immatriculation', typeNom: 'Immatriculation et permis', part: 1, partEtablie: false, deductible: 298 },
+      ],
+      bilan: { ok: true, annee: 2026, complet: false,
+        vehicules: [
+          { id: 'veh_civic', nom: 'Civic 2021', kmTotal: null, kmAffaires: 66, kmPersonnels: null, part: null,
+            odometre: { debut: 49852, fin: null, source: { debut: 'fin 2025', fin: '' } },
+            depenses: { n: 1, total: 64.10, parType: { essence: 64.10 } },
+            deductible: 64.10, tps: 3.21, tvq: 6.39, tpsAdmissible: 3.21, tvqAdmissible: 6.39, manque: ['odometre-fin'] },
+          { id: 'veh_soul', nom: 'Kia Soul', kmTotal: null, kmAffaires: 0, kmPersonnels: null, part: null,
+            odometre: { debut: null, fin: null, source: { debut: '', fin: '' } },
+            depenses: { n: 1, total: 298, parType: { immatriculation: 298 } },
+            deductible: 298, tps: 0, tvq: 0, tpsAdmissible: 0, tvqAdmissible: 0,
+            manque: ['odometre-debut', 'odometre-fin', 'aucun-deplacement'] },
+        ],
+        total: { kmTotal: 0, kmAffaires: 66, part: null, depenses: 362.10, deductible: 362.10,
+          tpsAdmissible: 3.21, tvqAdmissible: 6.39, nDeplacements: 2 } },
+      types: TYPES, raisons: RAISONS, peutAjouter: true, peutModifier: true, peutSupprimer: true };
+
+    // ═══ AUCUN VÉHICULE : l'écran vide doit APPELER à inscrire le premier.
+    var VIDE = { ok: true, annee: 2026, annees: ['2026'], vehicules: [], deplacements: [], changements: [], depenses: [],
+      bilan: { ok: true, annee: 2026, complet: true, vehicules: [],
+        total: { kmTotal: 0, kmAffaires: 0, part: null, depenses: 0, deductible: 0, tpsAdmissible: 0, tvqAdmissible: 0, nDeplacements: 0 } },
+      types: TYPES, raisons: RAISONS, peutAjouter: true, peutModifier: true, peutSupprimer: true };
+
+    var avec = function(donnees){
+      return Object.assign({ 'vehicules:donnees': donnees, identite: IDENTITE }, ECRITURES);
+    };
+    var cas = function(nom, id, donnees, exige){ return { nom: nom, id: id, reponses: avec(donnees), exige: exige }; };
+    return [
+      cas('registre garni (12 déplacements, plusieurs pages)', '', GARNI, ['data-dep="dep01"', 'id="d-ok"', 'id="f-veh"']),
+      cas('déplacement ouvert en modification', 'deplacement-modifier', GARNI, ['id="d-annuler"']),
+      cas('véhicules (dont un retiré)', 'vehicules', GARNI, ['data-odo-enr="veh_civic"', 'data-sup-veh="veh_corolla"']),
+      cas('boîte d’inscription d’un véhicule', 'vehicule-nouveau', GARNI, ['id="v-ok"', 'id="v-nom"']),
+      cas('changements de véhicule', 'changements', GARNI, ['id="c-ok"', 'id="c-anc"']),
+      cas('dépenses du véhicule (une non rattachée)', 'depenses', GARNI, ['data-act="ouvrir-depenses"']),
+      cas('bilan fiscal garni', 'bilan', GARNI, ['class="bilan"', 'class="manque"']),
+      cas('odomètre incomplet — bilan', 'bilan', SANS_ODO, ['class="manque"']),
+      cas('odomètre incomplet — véhicules', 'vehicules', SANS_ODO, ['data-odo="veh_soul"']),
+      cas('odomètre incomplet — dépenses', 'depenses', SANS_ODO, ['class="pill att"']),
+      cas('odomètre incomplet — registre', '', SANS_ODO, ['id="d-ok"']),
+      cas('aucun véhicule — registre', '', VIDE, ['data-act="veh-nouveau"']),
+      cas('aucun véhicule — véhicules', 'vehicules', VIDE, ['data-act="veh-nouveau"']),
+      cas('aucun véhicule — changements', 'changements', VIDE, ['data-act="veh-nouveau"']),
+      cas('aucun véhicule — dépenses', 'depenses', VIDE, ['data-act="ouvrir-depenses"']),
+      cas('aucun véhicule — bilan', 'bilan', VIDE, ['data-act="veh-nouveau"']),
+      cas('aucun véhicule — boîte ouverte', 'vehicule-nouveau', VIDE, ['id="v-ok"']),
+      cas('lecture seule — registre', '', LECTURE, ['class="avis"']),
+      cas('lecture seule — véhicules', 'vehicules', LECTURE, ['class="avis"']),
+      cas('lecture seule — changements', 'changements', LECTURE, ['class="avis"']),
+      { nom: 'module des dépenses absent', id: '', reponses: { 'vehicules:donnees': { ok: false, motif: 'module_depenses' }, identite: IDENTITE } },
+    ];
+  })(),
+
   // ── DÉCOMPTE D'INACTIVITÉ ──────────────────────────────────────────────────
   // ⚠ Cette fenêtre n'INTERROGE rien : elle reçoit sa durée par son paramètre
   // d'ouverture et n'appelle le pont qu'au CLIC. Le jeu d'essai ne prouve donc
@@ -3151,7 +3366,11 @@ const JEU = {
             { cle: 'pub', libelle: 'Publicité', ligne: '8521' },
             { cle: 'web', libelle: 'Site web, logiciels (SaaS)', ligne: '9270' },
             { cle: 'bureau', libelle: 'Fournitures et frais de bureau', ligne: '8811' },
+            { cle: 'vehicule', libelle: 'Frais de véhicule à moteur', libelleEn: 'Motor vehicle expenses', ligne: '9281' },
           ],
+          // Le registre des déplacements (expenses.js, 2026-10-02) : les véhicules
+          // inscrits et les types de frais — libellés recopiés de vehicules.js.
+          vehicules: VEH_DEPENSES, typesVehicule: TYPES_VEHICULE,
           paiements: [
             { cle: 'card', libelle: 'Carte de crédit / débit' },
             { cle: 'transfer', libelle: 'Virement / prélèvement' },
@@ -3320,6 +3539,135 @@ const JEU = {
             fournisseur: '', paiement: 'Carte de crédit / débit', montant: '120,00 $',
             montantN: 120, tps: '6,00 $', tvq: '11,97 $', aTaxes: true, recu: false, usd: false }],
         },
+        identite: IDENTITE,
+      },
+    },
+    // ── LES FRAIS DE VÉHICULE (2026-10-02) ──────────────────────────────────
+    // ⚠ La catégorie « vehicule » fait paraître DEUX champs (véhicule, type de
+    // frais) qui n'existent pour aucune autre : sans un cas qui ouvre le
+    // formulaire SUR cette catégorie, ils ne seraient dessinés par rien. Le
+    // brouillon repris porte la catégorie — c'est le seul chemin sans clic.
+    {
+      nom: 'nouvelle dépense de véhicule (brouillon repris)',
+      id: 'nouvelle',
+      exige: ['id="f-veh"', 'id="f-tveh"', 'id="f-vehicules"'],
+      reponses: {
+        'depenses:donnees': {
+          ok: true, annee: 2025, mois: 0, categorie: '', periode: '2025',
+          annees: ['2025'], moisNoms: ['Janvier'],
+          categories: [{ cle: 'vehicule', libelle: 'Frais de véhicule à moteur', libelleEn: 'Motor vehicle expenses', ligne: '9281' },
+            { cle: 'autre', libelle: 'Autres dépenses', ligne: '9270' }],
+          paiements: [{ cle: 'card', libelle: 'Carte de crédit / débit' }],
+          vehicules: VEH_DEPENSES, typesVehicule: TYPES_VEHICULE,
+          peutAjouter: true, peutModifier: true, peutSupprimer: true, lectureAuto: false,
+          total: '0,00 $', totalTps: '0,00 $', totalTvq: '0,00 $',
+          nombre: 0, page: 0, pages: 1, taille: 25, lignes: [],
+        },
+        'depenses:brouillonLire': { ok: true, ilYaMin: 4, recu: false,
+          brouillon: { date: '2025-11-28', categorie: 'vehicule', paiement: 'card',
+            description: 'Plein d’essence', fournisseur: 'Petro-Canada',
+            montant: '72.40', tps: '3.62', tvq: '7.22', recu: false,
+            vehiculeId: 'veh_civic', typeVehicule: 'essence' } },
+        'depenses:brouillonEcrire': { ok: true, recu: false },
+        'depenses:brouillonJeter': { ok: true },
+        'depenses:enregistrer': { ok: true, neuf: true, montant: '72,40 $', categorie: 'Frais de véhicule à moteur' },
+        identite: IDENTITE,
+      },
+    },
+    {
+      // Aucun véhicule inscrit : la liste est vide, et le formulaire le DIT —
+      // la dépense se déclarera en entier.
+      nom: 'nouvelle dépense de véhicule — aucun véhicule inscrit',
+      id: 'nouvelle',
+      exige: ['id="f-veh"', 'id="f-vehicules"'],
+      reponses: {
+        'depenses:donnees': {
+          ok: true, annee: 2026, mois: 0, categorie: '', periode: '2026',
+          annees: ['2026'], moisNoms: ['Janvier'],
+          categories: [{ cle: 'vehicule', libelle: 'Frais de véhicule à moteur', libelleEn: 'Motor vehicle expenses', ligne: '9281' }],
+          paiements: [{ cle: 'card', libelle: 'Carte de crédit / débit' }],
+          vehicules: [], typesVehicule: TYPES_VEHICULE,
+          peutAjouter: true, peutModifier: true, peutSupprimer: true, lectureAuto: false,
+          total: '0,00 $', totalTps: '0,00 $', totalTvq: '0,00 $',
+          nombre: 0, page: 0, pages: 1, taille: 25, lignes: [],
+        },
+        'depenses:brouillonLire': { ok: true, ilYaMin: 2, recu: false,
+          brouillon: { date: '2026-09-12', categorie: 'vehicule', paiement: 'card',
+            description: '', fournisseur: 'Shell', montant: '64.10', tps: '', tvq: '', recu: false,
+            vehiculeId: '', typeVehicule: 'essence' } },
+        'depenses:brouillonEcrire': { ok: true, recu: false },
+        'depenses:brouillonJeter': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    {
+      // ⚠ LA FICHE NE S'ATTEINT QU'AU CLIC : l'ouverture 'fiche' ouvre celle de
+      // la première ligne. Une dépense de véhicule à 34,8 % — la fiche doit dire
+      // le véhicule, le type, et la part déductible (expenses.js, _depenseLire).
+      nom: 'fiche d’une dépense de véhicule (part d’affaires)',
+      id: 'fiche',
+      exige: ['Part déductible', 'Civic 2021'],
+      reponses: {
+        'depenses:donnees': {
+          ok: true, annee: 2025, mois: 0, categorie: '', periode: '2025',
+          annees: ['2025'], moisNoms: ['Janvier'],
+          categories: [{ cle: 'vehicule', libelle: 'Frais de véhicule à moteur', libelleEn: 'Motor vehicle expenses', ligne: '9281' }],
+          paiements: [{ cle: 'card', libelle: 'Carte de crédit / débit' }],
+          vehicules: VEH_DEPENSES, typesVehicule: TYPES_VEHICULE,
+          peutAjouter: true, peutModifier: true, peutSupprimer: true, lectureAuto: false,
+          total: '72,40 $', totalTps: '3,62 $', totalTvq: '7,22 $',
+          nombre: 1, page: 0, pages: 1, taille: 25,
+          lignes: [{ id: 'e1', date: '2025-11-28', dateFr: '2025-11-28', categorie: 'vehicule',
+            categorieLbl: 'Frais de véhicule à moteur', ligne: '9281', description: 'Plein d’essence',
+            fournisseur: 'Petro-Canada', paiement: 'Carte de crédit / débit', montant: '72,40 $',
+            montantN: 72.4, tps: '3,62 $', tvq: '7,22 $', aTaxes: true, recu: false, usd: false }],
+        },
+        'depenses:lire': {
+          ok: true, id: 'e1', date: '2025-11-28', dateFr: '2025-11-28',
+          categorie: 'vehicule', categorieLbl: 'Frais de véhicule à moteur', ligne: '9281',
+          paiement: 'card', paiementLbl: 'Carte de crédit / débit',
+          description: 'Plein d’essence', fournisseur: 'Petro-Canada',
+          vehiculeId: 'veh_civic', typeVehicule: 'essence', part: 0.3477, deductible: '25,17 $',
+          montantN: 72.4, tpsN: 3.62, tvqN: 7.22,
+          montant: '72,40 $', tps: '3,62 $', tvq: '7,22 $', totalTTC: '83,24 $',
+          aTaxes: true, recu: '', recuPdf: false, aRecu: false, usd: false,
+          fxTaux: null, fxDate: '', fxApprox: false, origine: '',
+        },
+        identite: IDENTITE,
+      },
+    },
+    {
+      // Un repas : 50 %, sans aucun véhicule — la même ligne de part, l'autre raison.
+      nom: 'fiche d’un repas (50 %)',
+      id: 'fiche',
+      exige: ['Part déductible'],
+      reponses: {
+        'depenses:donnees': {
+          ok: true, annee: 2026, mois: 0, categorie: '', periode: '2026',
+          annees: ['2026'], moisNoms: ['Janvier'],
+          categories: [{ cle: 'repas', libelle: 'Repas et représentation (50 %)', libelleEn: 'Meals and entertainment (50%)', ligne: '8523' }],
+          paiements: [{ cle: 'card', libelle: 'Carte de crédit / débit' }],
+          vehicules: [], typesVehicule: TYPES_VEHICULE,
+          peutAjouter: true, peutModifier: true, peutSupprimer: true, lectureAuto: false,
+          total: '86,50 $', totalTps: '4,33 $', totalTvq: '8,63 $',
+          nombre: 1, page: 0, pages: 1, taille: 25,
+          lignes: [{ id: 'r1', date: '2026-05-14', dateFr: '2026-05-14', categorie: 'repas',
+            categorieLbl: 'Repas et représentation (50 %)', ligne: '8523', description: 'Dîner avec un fournisseur',
+            fournisseur: 'Le Café du Marché', paiement: 'Carte de crédit / débit', montant: '86,50 $',
+            montantN: 86.5, tps: '4,33 $', tvq: '8,63 $', aTaxes: true, recu: true, usd: false }],
+        },
+        'depenses:lire': {
+          ok: true, id: 'r1', date: '2026-05-14', dateFr: '2026-05-14',
+          categorie: 'repas', categorieLbl: 'Repas et représentation (50 %)', ligne: '8523',
+          paiement: 'card', paiementLbl: 'Carte de crédit / débit',
+          description: 'Dîner avec un fournisseur', fournisseur: 'Le Café du Marché',
+          vehiculeId: '', typeVehicule: '', part: 0.5, deductible: '43,25 $',
+          montantN: 86.5, tpsN: 4.33, tvqN: 8.63,
+          montant: '86,50 $', tps: '4,33 $', tvq: '8,63 $', totalTTC: '99,46 $',
+          aTaxes: true, recu: 'https://exemple.invalid/receipts/r2.webp', recuPdf: false, aRecu: true, usd: false,
+          fxTaux: null, fxDate: '', fxApprox: false, origine: '',
+        },
+        'depenses:recuOuvrir': { ok: true },
         identite: IDENTITE,
       },
     },

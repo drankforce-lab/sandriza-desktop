@@ -157,6 +157,7 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 
 /* Le formulaire : deux colonnes, et le bloc des montants mis en evidence. */
 .form{display:grid;grid-template-columns:1fr 1fr;gap:.5rem .8rem}
+.form .aide-veh{align-self:end;font-size:.72rem;line-height:1.35}
 .form .large{grid-column:1/-1}
 .champ{display:flex;flex-direction:column;gap:.2rem}
 .champ label{font-size:.7rem;color:var(--tx2)}
@@ -188,7 +189,10 @@ function pageDepenses(ouverture) {
      autrement qu'après deux clics. Un panneau jamais dessiné par un jeu d'essai
      est un panneau qui peut mourir en silence — la leçon a déjà coûté quatre
      versions publiées sur ce projet. */
-  const ok = ['nouvelle', 'fermeture', 'annuaire'];
+  /* ⚠ 'fiche' (2026-10-02) ouvre la fiche de la PREMIERE ligne au chargement :
+     la part deductible d une depense (vehicule, repas) ne se lit que la, et la
+     fiche ne s atteint autrement qu au clic. */
+  const ok = ['nouvelle', 'fermeture', 'annuaire', 'fiche'];
   const depart = (ok.indexOf(String(ouverture || '')) >= 0) ? String(ouverture) : 'liste';
   return `${TETE()}
 <title>${T("Dépenses d’entreprise — Administration Sandriza")}</title>
@@ -245,6 +249,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
+  /* ══ LES FRAIS DE VEHICULE (2026-10-02) ═══════════════════════════════════
+     Une depense de la categorie << vehicule >> se RATTACHE a un vehicule du
+     registre et porte un TYPE de frais : c est ce qui lui donne sa part
+     d affaires sur les formulaires fiscaux (km d affaires / km totaux). La
+     part elle-meme est calculee par le site, jamais ici.
+     ⚠ On AFFICHE le nom du type (szTd) ; on ENVOIE sa cle. */
+  var CAT_VEHICULE = 'vehicule';
+  function nomVehicule(id){
+    var L = (D && D.vehicules) || [];
+    for (var i = 0; i < L.length; i++) if (L[i].id === id) return L[i].nom;
+    return '';
+  }
+  function nomTypeVehicule(cle){
+    var L = (D && D.typesVehicule) || [];
+    for (var i = 0; i < L.length; i++) if (L[i].cle === cle) return szTd(L[i].nom);
+    return '';
+  }
+  function pctPart(p){
+    try { return Number(p).toLocaleString('${LIEU()}', { style: 'percent', maximumFractionDigits: 1 }); }
+    catch (e) { return Math.round(Number(p) * 100) + ' %'; }
+  }
 
   var MOTIFS = {
     session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
@@ -524,6 +549,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
       + '<div class="grille">'
       + '<div><div class="l">${T("Date")}</div><div class="v">' + esc(e.dateFr) + '</div></div>'
       + '<div><div class="l">${T("Mode de paiement")}</div><div class="v">' + esc(szTd(e.paiementLbl)) + '</div></div>'
+      + (e.categorie === CAT_VEHICULE
+          ? '<div><div class="l">${T("Véhicule")}</div><div class="v">'
+            + esc(e.vehiculeId ? (nomVehicule(e.vehiculeId) || '${T("Véhicule retiré du registre")}') : '${T("Non rattachée")}') + '</div></div>'
+            + '<div><div class="l">${T("Type de frais")}</div><div class="v">'
+            + esc(nomTypeVehicule(e.typeVehicule) || '${T("Non précisé")}') + '</div></div>'
+          : '')
       + '</div>'
       + '<div class="texte">' + esc(e.description || '${T("(aucune description)")}') + '</div>';
 
@@ -533,6 +564,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
         + '<div class="rang"><span>${T("TPS payée")}</span><strong>' + esc(e.tps) + '</strong></div>'
         + '<div class="rang"><span>${T("TVQ payée")}</span><strong>' + esc(e.tvq) + '</strong></div>'
         + '<div class="rang total"><span>${T("Total payé")}</span><strong>' + esc(e.totalTTC) + '</strong></div>'
+        + '</div>';
+    }
+    /* ⚠ LA PART DEDUCTIBLE SE DIT DES QU ELLE N EST PAS ENTIERE : repas a 50 %,
+       vehicule a sa part d affaires. Le montant ci-dessus reste ce qui a ete
+       PAYE (la comptabilite le garde entier) ; la declaration n en reprend que
+       la part — et la meme part s applique aux taxes recuperables. */
+    if (typeof e.part === 'number' && e.part < 1) {
+      h += '<div class="carte" style="margin-top:.6rem">'
+        + '<div class="rang"><span>${T("Part déductible :")} ' + esc(pctPart(e.part)) + '</span><strong>→ ' + esc(e.deductible) + '</strong></div>'
+        + '<div class="aide" style="margin-top:.3rem">' + (e.categorie === CAT_VEHICULE
+            ? '${T("La part d’affaires du véhicule (km d’affaires ÷ km totaux de l’année), établie par le registre « Véhicules et déplacements ». Elle s’applique aussi à la TPS et à la TVQ récupérables.")}'
+            : '${T("Seule cette part se déclare ; elle s’applique aussi à la TPS et à la TVQ récupérables.")}') + '</div>'
         + '</div>';
     }
     if (e.usd) {
@@ -605,11 +648,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
       + champ('${T("Mode de paiement")}', '<select id="f-pay" aria-label="${T("Mode de paiement")}">' + (D.paiements || []).map(function(p){
           return '<option value="' + esc(p.cle) + '"' + (f.paiement === p.cle ? ' selected' : '') + '>'
             + esc(szTd(p.libelle)) + '</option>'; }).join('') + '</select>')
-      + '<div class="champ large"><label for="f-cat">${T("Catégorie (ligne fiscale)")}</label><select id="f-cat">'
+      /* ⚠ Une dépense de VÉHICULE ajoute deux champs : la catégorie cède alors sa
+         pleine largeur (Catégorie | Véhicule, puis Type | aide) — sinon le pied du
+         formulaire passait 85 px sous le bord (sonde des débordements, 2026-10-02). */
+      + '<div class="champ' + (f.categorie === CAT_VEHICULE ? '' : ' large') + '"><label for="f-cat">${T("Catégorie (ligne fiscale)")}</label><select id="f-cat">'
       + (D.categories || []).map(function(c){
           return '<option value="' + esc(c.cle) + '"' + (f.categorie === c.cle ? ' selected' : '') + '>'
             + esc(nomCat(c)) + ' · L.' + esc(c.ligne) + '</option>'; }).join('')
       + '</select></div>'
+      + (f.categorie === CAT_VEHICULE ? champsVehicule(f) : '')
       + champ('${T("Description")}', '<input type="text" id="f-desc" value="' + esc(f.description)
           + '" placeholder="${T("Ex : Publicité Meta juillet")}">', 'f-desc')
       + champ('${T("Fournisseur")}', '<input type="text" id="f-four" value="' + esc(f.fournisseur)
@@ -639,11 +686,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
                 + (f.fx.approx ? ' ${T("(taux du jour, faute de mieux)")}' : '') : '')
             + '</div>'
           : '')
-      + '<div class="aide" style="margin-top:.3rem">${T("Saisissez le <strong>total payé</strong> dans ")}'
+      /* L aide et le bouton USD sur UNE rangée (2026-10-02) : la dépense de
+         véhicule ajoute une rangée de champs, et le pied passait sous le bord. */
+      + '<div class="aide-usd" style="margin-top:.3rem;display:flex;align-items:center;gap:.6rem">'
+      + '<div class="aide" style="flex:1;margin:0">${T("Saisissez le <strong>total payé</strong> dans ")}'
       + '${T("« Montant » puis « Calc. taxes » pour en déduire la TPS et la TVQ.")} '
       + '${T("Une facture en dollars US se convertit avec « ⇄ Convertir ».")}</div>'
-      + '<div class="barreoutils" style="margin-top:.4rem">'
-      + '<button id="f-convertir" title="${T("Convertir les montants saisis depuis le dollar US, au taux de la date")}">'
+      + '<button id="f-convertir" style="flex:0 0 auto" title="${T("Convertir les montants saisis depuis le dollar US, au taux de la date")}">'
       + '${T("⇄ Convertir depuis USD")}</button></div></div>'
       + '<div class="champ large"><label>${T("Reçu (image ou PDF — facultatif)")}</label>'
       + '<button id="f-recu">' + (f.recu ? '${T("✓ Reçu joint — remplacer")}' : '<span class="ic">📎</span> ${T("Joindre un reçu")}') + '</button></div>'
@@ -674,6 +723,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
      peut les rapprocher, et aucun for= ne pouvait donc etre pose par outil.
      L identifiant se donne maintenant en 3e argument — un seul endroit a
      changer, et les quatre appels en profitent. */
+  /* Les deux champs d une depense de vehicule. ⚠ Un vehicule RETIRE reste
+     proposable : une facture d entretien arrive souvent apres la vente, et elle
+     appartient a l annee ou il roulait. Il est marque, pas cache. */
+  function champsVehicule(f){
+    var vs = (D.vehicules || []);
+    var types = (D.typesVehicule || []);
+    var h = champ('${T("Véhicule")}', '<select id="f-veh" aria-label="${T("Véhicule")}">'
+        + '<option value="">' + (vs.length ? '${T("— non rattachée (part globale) —")}' : '${T("— aucun véhicule inscrit —")}') + '</option>'
+        + vs.map(function(v){
+            return '<option value="' + esc(v.id) + '"' + (f.vehiculeId === v.id ? ' selected' : '') + '>'
+              + esc(v.nom) + (v.retire ? ' ${T("(retiré)")}' : '') + '</option>'; }).join('')
+        + '</select>', 'f-veh')
+      + champ('${T("Type de frais")}', '<select id="f-tveh" aria-label="${T("Type de frais")}">'
+        + '<option value="">${T("— choisir —")}</option>'
+        + types.map(function(t){
+            return '<option value="' + esc(t.cle) + '"' + (f.typeVehicule === t.cle ? ' selected' : '') + '>'
+              + esc(szTd(t.nom)) + '</option>'; }).join('')
+        + '</select>', 'f-tveh');
+    h += '<div class="aide aide-veh">' + (vs.length
+        ? '${T("Part d’affaires : celle du registre du véhicule (stationnement et péages : 100 %).")}'
+        : '${T("Aucun véhicule inscrit : la dépense se déclarera en entier.")}')
+      + ' <button type="button" class="mini" id="f-vehicules">${T("Ouvrir « Véhicules et déplacements »")}</button></div>';
+    return h;
+  }
   function champ(l, ctrl, id){
     return '<div class="champ"><label' + (id ? ' for="' + id + '"' : '') + '>' + esc(l) + '</label>' + ctrl + '</div>';
   }
@@ -712,7 +785,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
     memoriserForm();
     return { date: FORM.date, categorie: FORM.categorie, paiement: FORM.paiement,
       description: FORM.description, fournisseur: FORM.fournisseur,
-      montant: FORM.montant, tps: FORM.tps, tvq: FORM.tvq, recu: !!FORM.recu };
+      montant: FORM.montant, tps: FORM.tps, tvq: FORM.tvq, recu: !!FORM.recu,
+      vehiculeId: FORM.vehiculeId || '', typeVehicule: FORM.typeVehicule || '' };
   }
   function brouillonEcrire(v){
     return appeler('depenses:brouillonEcrire', [v]).then(function(r){
@@ -763,6 +837,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
     FORM.date = g('f-date'); FORM.paiement = g('f-pay'); FORM.categorie = g('f-cat');
     FORM.description = g('f-desc'); FORM.fournisseur = g('f-four');
     FORM.montant = g('f-montant'); FORM.tps = g('f-tps'); FORM.tvq = g('f-tvq');
+    /* ⚠ Les champs du vehicule n existent que pour sa categorie : absents, on
+       garde ce qui etait choisi (revenir a la categorie le retrouve). */
+    if (document.getElementById('f-veh')) FORM.vehiculeId = g('f-veh');
+    if (document.getElementById('f-tveh')) FORM.typeVehicule = g('f-tveh');
   }
 
   function importerFacture(file){
@@ -860,6 +938,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
     var pay = ((D.paiements || [])[0] || {}).cle || 'card';
     return { id: '__new__', date: auj, categorie: cat, paiement: pay,
       description: '', fournisseur: '', montant: '', tps: '', tvq: '', recu: false,
+      vehiculeId: '', typeVehicule: '',
       lecture: '', lectureErr: false, origine: null, fx: null };
   }
 
@@ -873,6 +952,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
       id: FORM.id, date: FORM.date, categorie: FORM.categorie, paiement: FORM.paiement,
       description: FORM.description, fournisseur: FORM.fournisseur,
       montant: FORM.montant, tps: FORM.tps, tvq: FORM.tvq,
+      /* Le site ne les garde que pour la categorie << vehicule >>. */
+      vehiculeId: FORM.categorie === CAT_VEHICULE ? (FORM.vehiculeId || '') : '',
+      typeVehicule: FORM.categorie === CAT_VEHICULE ? (FORM.typeVehicule || '') : '',
     }]).then(function(r){
       OCCUPE = false;
       if (!r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
@@ -971,7 +1053,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
         paiement: DETAIL.paiement, description: DETAIL.description, fournisseur: DETAIL.fournisseur,
         montant: DETAIL.montantN ? String(DETAIL.montantN) : '',
         tps: DETAIL.tpsN ? String(DETAIL.tpsN) : '', tvq: DETAIL.tvqN ? String(DETAIL.tvqN) : '',
-        recu: DETAIL.aRecu };
+        recu: DETAIL.aRecu, vehiculeId: DETAIL.vehiculeId || '', typeVehicule: DETAIL.typeVehicule || '' };
       dessiner();
     };
     var rc = document.getElementById('d-recu');
@@ -1029,6 +1111,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
     };
     var ok = document.getElementById('f-ok');
     if (ok) ok.onclick = enregistrer;
+    /* ⚠ LA CATEGORIE REDESSINE LE FORMULAIRE : les champs du vehicule ne
+       paraissent que pour elle. On memorise AVANT, sinon le redessin rend
+       chaque champ a sa valeur d origine. Le brouillon suit (ecouteur de la
+       boite, plus haut). */
+    var fc = document.getElementById('f-cat');
+    if (fc) fc.addEventListener('change', function(){ memoriserForm(); dessiner(); });
+    var fv = document.getElementById('f-vehicules');
+    if (fv) fv.onclick = function(){
+      if (P && P.ouvrirModule) { P.ouvrirModule('vehicules'); dire('${T("Le registre des véhicules s’ouvre…")}'); }
+    };
     var tx = document.getElementById('f-taxes');
     if (tx) tx.onclick = function(){
       memoriserForm();
@@ -1263,6 +1355,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
          donc le brouillon. Poser un formulaire vierge ici aurait ecrase en
          silence ce qui avait ete commence. */
       if (OUVERTURE === 'annuaire') { OUVERTURE = 'liste'; dessiner(); chargerAnnuaire(); prendreVerrou(); return; }
+      if (OUVERTURE === 'fiche') {
+        OUVERTURE = 'liste'; dessiner();
+        if ((D.lignes || []).length) ouvrirDetail(D.lignes[0].id);
+        return;
+      }
       var ouvrirApres = ((OUVERTURE === 'nouvelle' || OUVERTURE === 'fermeture')
         && D.peutAjouter && !FORM);
       var poserQuestion = (OUVERTURE === 'fermeture');

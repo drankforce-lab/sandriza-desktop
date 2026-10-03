@@ -220,6 +220,10 @@ const MENU_APP_EN = {
   'Téléphonie': 'Telephony',
   'Veille des commandes (icône)': 'Order watch (icon)',
   'Vente au comptoir': 'Counter sale',
+  // Registre des deplacements (2026-10-02). « mileage » : le mot du guide T4002
+  // de l ARC en anglais (« mileage log »), plus juste que « trips » pour un ecran
+  // qui sert d abord a etablir une part d utilisation.
+  'Véhicules et déplacements': 'Vehicles and mileage',
   'Verrous (fiches en cours)': 'Locks (records in progress)',
   /* ⚠ LES SIX JEUX DE COULEURS viennent d'une TABLE d'`appbar.js`
      (`THEMES_COULEUR`) et non d'un `label:` écrit à la main — c'est pour ça que

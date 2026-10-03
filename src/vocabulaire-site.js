@@ -336,4 +336,26 @@ module.exports = {
   'Nom de la boutique': 'Store name',
   'URL de la boutique': 'Store URL',
   'Hashtags': 'Hashtags',
+  // Registre des deplacements (vehicules.js, TYPES[…].nom et RAISONS[…].nom) — ops vehicules:donnees
+  // et depenses:donnees (typesVehicule). Les memes mots que la colonne `en` du site.
+  // ⚠ Lecture seule : ce qui repart au site est la CLE (essence, fournisseur…), jamais ce nom.
+  'Essence / recharge': 'Fuel / charging',
+  'Entretien (huile, pneus, lavage)': 'Maintenance (oil, tires, washing)',
+  'Réparations': 'Repairs',
+  'Assurance': 'Insurance',
+  'Immatriculation et permis': 'Registration and licence',
+  'Intérêts sur le prêt auto': 'Car loan interest',
+  'Location (crédit-bail)': 'Leasing',
+  'Stationnement (affaires)': 'Parking (business)',
+  'Péages (affaires)': 'Tolls (business)',
+  'Autre frais de véhicule': 'Other vehicle expense',
+  'Visite fournisseur': 'Supplier visit',
+  'Livraison à un client': 'Customer delivery',
+  'Bureau de poste / transporteur': 'Post office / carrier',
+  'Achats pour l’entreprise': 'Business purchases',
+  'Banque': 'Bank',
+  'Salon, marché, événement': 'Fair, market, event',
+  'Séance photo': 'Photo shoot',
+  'Rencontre client': 'Client meeting',
+  'Autre raison d’affaires': 'Other business purpose',
 };

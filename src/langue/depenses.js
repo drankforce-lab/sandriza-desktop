@@ -21,6 +21,10 @@
  */
 
 module.exports = {
+  'Part d’affaires : celle du registre du véhicule (stationnement et péages : 100 %).':
+    'Business share: the vehicle’s mileage log (parking and tolls: 100%).',
+  'Aucun véhicule inscrit : la dépense se déclarera en entier.':
+    'No vehicle registered: the expense will be claimed in full.',
   /* ⚠ LES DEUX ALTERNATIVES EN ENTIER — voir tools/banc-pluriel-colle.js. */
   'affichés': 'shown',
   'Dépenses d’entreprise — Administration Sandriza': 'Business expenses — Sandriza Administration',
@@ -292,4 +296,21 @@ module.exports = {
   'polyvalent': 'multi-purpose',
   'au lieu de': 'instead of',
   'Dépense Date': 'Expense Date',
+  /* ── Les frais de véhicule (2026-10-02) — le registre des déplacements ──── */
+  'Véhicule': 'Vehicle',
+  'Véhicule retiré du registre': 'Vehicle removed from the logbook',
+  'Non rattachée': 'Not linked',
+  'Type de frais': 'Expense type',
+  'Non précisé': 'Not specified',
+  'Part déductible :': 'Deductible share:',
+  'La part d’affaires du véhicule (km d’affaires ÷ km totaux de l’année), établie par le registre « Véhicules et déplacements ». Elle s’applique aussi à la TPS et à la TVQ récupérables.':
+    'The vehicle’s business-use percentage (business km ÷ total km for the year), set by the “Vehicles and mileage” logbook. It also applies to the recoverable GST and QST.',
+  'Seule cette part se déclare ; elle s’applique aussi à la TPS et à la TVQ récupérables.':
+    'Only this share is claimed; it also applies to the recoverable GST and QST.',
+  '— non rattachée (part globale) —': '— not linked (overall share) —',
+  '— aucun véhicule inscrit —': '— no vehicle registered —',
+  '(retiré)': '(retired)',
+  '— choisir —': '— choose —',
+  'Ouvrir « Véhicules et déplacements »': 'Open “Vehicles and mileage”',
+  'Le registre des véhicules s’ouvre…': 'Opening the vehicle logbook…',
 };

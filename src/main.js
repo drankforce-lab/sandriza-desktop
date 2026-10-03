@@ -2787,6 +2787,14 @@ const OPS_PONT = new Set([
   // ici, ce serait l ecrire deux fois, et deux versions d un livre de comptes
   // qui divergent, c est un document qu on remet a un comptable et qui ment.
   'compta:livreDocument',
+  // Registre des deplacements et des vehicules (fenetre Vehicules, 2026-10-02).
+  // ⚠ UNE SEULE PORTE DE LECTURE, qui rend le registre, les odometres, les
+  // depenses de vehicule ET le bilan fiscal d un coup : la part d affaires est
+  // calculee par le site (Vehicules.bilanCoeur), jamais par la fenetre.
+  // ⚠ Elle se nomme <<donnees>> pour la meme raison que <<livreDonnees>> : l etape
+  // 2 du verificateur du site repere les ops de LECTURE par leur nom.
+  'vehicules:donnees', 'vehicules:ecrire', 'vehicules:odometre', 'vehicules:supprimer',
+  'vehicules:deplacement', 'vehicules:deplacementOter', 'vehicules:changement',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
@@ -3385,6 +3393,12 @@ const LIMITES_PONT = {
   'compta:ecritureAjouter': 20000, 'compta:ecritureSupprimer': 20000,
   /* L imprime relit tout l exercice ET compose plusieurs pages de HTML. */
   'compta:livreDocument': 30000,
+  /* Le registre relit TOUTES les depenses pour en tirer celles du vehicule, et
+     refait le bilan de l annee : une lecture longue. Les ecritures passent par
+     le nuage (entree par entree) ; un changement de vehicule en fait TROIS. */
+  'vehicules:donnees': 15000,
+  'vehicules:ecrire': 30000, 'vehicules:odometre': 30000, 'vehicules:supprimer': 30000,
+  'vehicules:deplacement': 30000, 'vehicules:deplacementOter': 30000, 'vehicules:changement': 30000,
   /* Un repli : une lecture ou une ecriture d un seul booleen dans le profil. */
   'ui:repli': 15000,
   'patrons:liste': 20000, 'patrons:ecrire': 30000, 'patrons:basculer': 30000,
@@ -3819,6 +3833,7 @@ const PAGES_ANCRABLES = () => ({
   impot: ['Fiscalité et impôt', () => pageImpot()],
   compta: ['Rapports et budget', () => pageComptabilite()],
   livre: ['Livre de comptes', () => pageLivre()],
+  vehicules: ['Véhicules et déplacements', () => pageVehicules()],
   liens: ['Liens d’installation', () => pageLiens('')],
   comptable: ['Liens comptables', () => pageComptable('')],
   bankrec: ['Conciliation bancaire', () => pageBanque('')],
@@ -5805,6 +5820,7 @@ const { pageRemboursements } = require('./fenetres/remboursements');
 const { pageImpot } = require('./fenetres/impot');
 const { pageComptabilite } = require('./fenetres/comptabilite');
 const { pageLivre } = require('./fenetres/livre');
+const { pageVehicules } = require('./fenetres/vehicules');
 const { pageLiens } = require('./fenetres/liens');
 const { pageComptable } = require('./fenetres/comptable');
 const { pageInactivite } = require('./fenetres/inactivite');
@@ -6016,6 +6032,9 @@ const actionApp = (nom, arg) => {
     // Livre de comptes (#128 phase 2) : meme cas que <<compta>>, nee native,
     // sa section hote cote site n existe que pour porter la zone d ancrage.
     case 'livre':
+    // Vehicules et deplacements (2026-10-02) : meme cas que <<livre>>, nee native,
+    // sa section hote cote site (admin.js, _DOCKABLES) ne porte que la zone.
+    case 'vehicules':
     case 'config-heures': case 'config-footer': case 'config-apparence':
     case 'config-marque': case 'config-icones': case 'config-taxes': case 'config-conformite':
     case 'compte-paiement':
@@ -6310,7 +6329,10 @@ ipcMain.handle('journaux:ouvrir', (e, onglet) => {
    Commandes, par ce canal — c est la bonne place : on la cherche au moment ou
    l on vient de comprendre qu on a supprime la mauvaise ligne, sans quitter des
    yeux l ecran d ou l on vient. */
-const _MODULES_OUVRABLES = ['verrous', 'journaux', 'securite', 'incidents', 'config-logotheque', 'corbeille'];
+/* ⚠ 'depenses' et 'vehicules' (2026-10-02) : chacune ouvre l autre — les depenses
+   de vehicule se SAISISSENT dans Depenses et se REPARTISSENT dans Vehicules.
+   Les deux ont leur section hote cote site : le chemin d ancrage les trouve. */
+const _MODULES_OUVRABLES = ['verrous', 'journaux', 'securite', 'incidents', 'config-logotheque', 'corbeille', 'depenses', 'vehicules'];
 ipcMain.handle('module:ouvrir', (e, nom) => {
   const n = String(nom || '').toLowerCase();
   if (_MODULES_OUVRABLES.indexOf(n) < 0) return false;
