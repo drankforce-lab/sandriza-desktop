@@ -358,4 +358,15 @@ module.exports = {
   'Séance photo': 'Photo shoot',
   'Rencontre client': 'Client meeting',
   'Autre raison d’affaires': 'Other business purpose',
+  // Les regles de premiere annee de la DPA (vehicules.js, dpaCoeur, `regle`) — op vehicules:donnees.
+  // IIA = incitatif a l investissement accelere = AII (Accelerated Investment Incentive).
+  'IIA 100 %': 'AII 100%',
+  'IIA 75 %': 'AII 75%',
+  'IIA 55 %': 'AII 55%',
+  'demi-année': 'half-year rule',
+  'IIA × 1,5': 'AII × 1.5',
+  'sans demi-année': 'no half-year rule',
+  '30 %': '30%',
+  'vente': 'sale',
+  'vente 10.1 (½)': 'sale, class 10.1 (½)',
 };

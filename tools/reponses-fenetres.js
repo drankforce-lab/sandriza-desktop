@@ -3186,6 +3186,118 @@ const JEU = {
       bilan: BILAN_2025, types: TYPES, raisons: RAISONS, peutAjouter: true, peutModifier: true, peutSupprimer: true };
     var LECTURE = Object.assign({}, GARNI, { peutAjouter: false, peutModifier: false, peutSupprimer: false });
 
+    // ═══ LA DPA (2026-10-02) — mêmes formes que pont.js (vehiculesDonnees) et
+    // vehicules.js (dpaCoeur) : une ligne par année, de la mise en service à
+    // l'année affichée. ⚠ Le tableau est RECALCULÉ ici selon les règles du cœur
+    // (30 % dégressif, première année, vente) plutôt que tapé à la main : douze
+    // lignes recopiées à la main finissent par ne plus s'additionner.
+    var r2 = function(n){ return Math.round(n * 100) / 100; };
+    var tableDpa = function(o){
+      // o : { cout, an0, anFin, premiere: [taux, regle], parts: {an: part}, vente: { an, prix }, demandee: {an: x} }
+      var L = [], fnacc = 0;
+      for (var an = o.an0; an <= o.anFin; an++) {
+        var debut = fnacc, ajout = an === o.an0 ? o.cout : 0;
+        var vendu = !!(o.vente && o.vente.an === an);
+        var max, regle, rec = 0, pf = 0;
+        if (vendu) { var reste = debut + ajout - Math.min(o.vente.prix, o.cout); max = 0; regle = 'vente';
+          if (reste < 0) rec = -reste; else pf = reste; }
+        else if (an === o.an0) { max = o.premiere[0] * ajout; regle = o.premiere[1]; }
+        else { max = 0.3 * debut; regle = '30 %'; }
+        max = r2(max);
+        var voulu = o.demandee && o.demandee[an] != null ? o.demandee[an] : null;
+        var dpa = voulu != null ? Math.min(voulu, max) : max;
+        var part = (o.parts && o.parts[an] != null) ? o.parts[an] : null, f = part == null ? 1 : part;
+        var fin = vendu ? 0 : r2(debut + ajout - dpa);
+        L.push({ annee: an, fnaccDebut: r2(debut), ajout: ajout, dpaMax: max, dpaDemandee: dpa,
+          reduite: voulu != null && voulu < max, regle: regle, part: part, partEtablie: part != null,
+          deductible: r2(dpa * f), recuperation: r2(rec * f), perteFinale: r2(pf * f), fnaccFin: fin, vendu: vendu });
+        fnacc = fin;
+      }
+      return L;
+    };
+    var dpaDe = function(classe, cout, plafond, mes, lignes){
+      return { applicable: true, raison: '', classe: classe, cout: cout, plafond: plafond, miseEnService: mes, lignes: lignes };
+    };
+    var ligneAn = function(d, an){ var l = null; (d.lignes || []).forEach(function(x){ if (x.annee === an) l = x; }); return l; };
+    var pourBilan = function(d, an){
+      return { applicable: d.applicable, raison: d.raison, classe: d.classe || '', cout: d.cout || 0,
+        plafond: d.plafond || null, miseEnService: d.miseEnService || '', ligne: ligneAn(d, an) };
+    };
+    // Civic : voiture de tourisme achetée 38 500 $ en 2021, au-dessus du plafond → 10.1, coût ramené à 30 000 $.
+    var DPA_CIVIC_2025 = dpaDe('10.1', 30000, { montant: 30000, source: 'table', aConfirmer: false }, '2021-05-14',
+      tableDpa({ cout: 30000, an0: 2021, anFin: 2025, premiere: [0.45, 'IIA × 1,5'],
+        parts: { 2021: 0.31, 2022: 0.33, 2023: 0.36, 2024: 0.34, 2025: 0.3477 } }));
+    // Transit : camionnette (pas une voiture de tourisme) → 10, mise en service en 2025, sans demi-année.
+    var DPA_TRANSIT_2025 = dpaDe('10', 42000, null, '2025-06-02',
+      tableDpa({ cout: 42000, an0: 2025, anFin: 2025, premiere: [0.3, 'sans demi-année'], parts: { 2025: 0.3673 } }));
+    // Corolla : achetée 21 000 $ en 2015 (demi-année), vendue 400 $ en 2025 → PERTE FINALE.
+    var DPA_COROLLA_2025 = dpaDe('10', 21000, null, '2015-03-01',
+      tableDpa({ cout: 21000, an0: 2015, anFin: 2025, premiere: [0.15, 'demi-année'],
+        parts: { 2015: 0.4, 2016: 0.4, 2017: 0.42, 2018: 0.41, 2019: 0.4, 2020: 0.22, 2021: 0.3, 2022: 0.35, 2023: 0.38, 2024: 0.37, 2025: 0.375 },
+        vente: { an: 2025, prix: 400 } }));
+    var FICHE_DPA = {
+      veh_civic: { modeAcquisition: 'achat', prixAvantTaxes: 38500, taxesNonRecuperees: 0, classeDpa: '', classeDeduite: '10.1',
+        tourisme: true, zeroEmission: false, miseEnService: '', prixDisposition: null, plafondDpa: null, dpaDemandee: {}, dpa: DPA_CIVIC_2025 },
+      veh_transit: { modeAcquisition: 'achat', prixAvantTaxes: 42000, taxesNonRecuperees: 0, classeDpa: '', classeDeduite: '10',
+        tourisme: false, zeroEmission: false, miseEnService: '', prixDisposition: null, plafondDpa: null, dpaDemandee: {}, dpa: DPA_TRANSIT_2025 },
+      veh_corolla: { modeAcquisition: 'achat', prixAvantTaxes: 21000, taxesNonRecuperees: 0, classeDpa: '', classeDeduite: '10',
+        tourisme: true, zeroEmission: false, miseEnService: '', prixDisposition: 400, plafondDpa: null, dpaDemandee: {}, dpa: DPA_COROLLA_2025 },
+    };
+    VEH_2025.forEach(function(v){ Object.assign(v, FICHE_DPA[v.id]); });
+    BILAN_2025.vehicules.forEach(function(l){ l.dpa = l.id ? pourBilan(FICHE_DPA[l.id].dpa, 2025) : null; });
+    var sommeDpa = function(bil, k){ return r2(bil.vehicules.reduce(function(s, l){ return s + ((l.dpa && l.dpa.ligne) ? l.dpa.ligne[k] : 0); }, 0)); };
+    BILAN_2025.total.dpaDeductible = sommeDpa(BILAN_2025, 'deductible');
+    BILAN_2025.total.recuperation = sommeDpa(BILAN_2025, 'recuperation');
+    BILAN_2025.total.perteFinale = sommeDpa(BILAN_2025, 'perteFinale');
+
+    // ═══ LES ÉTATS DE LA DPA, 2026 : une DPA demandée RÉDUITE (Civic), un véhicule
+    // zéro émission dont le plafond est À CONFIRMER, un COÛT MANQUANT, et une
+    // LOCATION (le dernier : c'est lui qu'ouvre « vehicule-modifier »).
+    var odo26 = function(d, f){ return { debut: d, fin: f, km: f - d, source: { debut: 'fin 2025', fin: 'saisi' }, manque: [], saisi: { fin: f } }; };
+    var DPA_CIVIC_2026 = dpaDe('10.1', 30000, { montant: 30000, source: 'table', aConfirmer: false }, '2021-05-14',
+      tableDpa({ cout: 30000, an0: 2021, anFin: 2026, premiere: [0.45, 'IIA × 1,5'],
+        parts: { 2021: 0.31, 2022: 0.33, 2023: 0.36, 2024: 0.34, 2025: 0.3477, 2026: 0.35 }, demandee: { 2026: 500 } }));
+    var DPA_M3_2026 = dpaDe('54', 55000, { montant: 61000, source: 'dernier-connu', aConfirmer: true }, '2026-03-15',
+      tableDpa({ cout: 55000, an0: 2026, anFin: 2026, premiere: [0.55, 'IIA 55 %'], parts: { 2026: 0.42 } }));
+    var base26 = { marque: '', modele: '', annee: '', plaque: '', odometreAcquis: null, retireLe: '', odometreRetrait: null,
+      notes: '', enService: true, taxesNonRecuperees: 0, classeDpa: '', tourisme: true, zeroEmission: false,
+      miseEnService: '', prixDisposition: null, plafondDpa: null, dpaDemandee: {} };
+    var VEH_ETATS = [
+      Object.assign({}, base26, { id: 'veh_civic', nom: 'Civic 2021', marque: 'Honda', modele: 'Civic', annee: '2021', acquisLe: '2021-05-14',
+        modeAcquisition: 'achat', prixAvantTaxes: 38500, classeDeduite: '10.1', dpaDemandee: { 2026: 500 },
+        odometre: odo26(49852, 51302), dpa: DPA_CIVIC_2026 }),
+      Object.assign({}, base26, { id: 'veh_m3', nom: 'Model 3', marque: 'Tesla', modele: 'Model 3', annee: '2026', acquisLe: '2026-03-15',
+        modeAcquisition: 'achat', prixAvantTaxes: 55000, zeroEmission: true, classeDeduite: '54',
+        odometre: { debut: 12, fin: 9812, km: 9800, source: { debut: 'acquisition', fin: 'saisi' }, manque: [], saisi: { fin: 9812 } },
+        dpa: DPA_M3_2026 }),
+      Object.assign({}, base26, { id: 'veh_soul', nom: 'Kia Soul', marque: 'Kia', modele: 'Soul', annee: '2024', acquisLe: '2026-02-10',
+        modeAcquisition: 'achat', prixAvantTaxes: null, classeDeduite: '10',
+        odometre: { debut: 30100, fin: 34100, km: 4000, source: { debut: 'saisi', fin: 'saisi' }, manque: [], saisi: { debut: 30100, fin: 34100 } },
+        dpa: { applicable: false, raison: 'cout-manquant', classe: '', cout: 0, plafond: null, miseEnService: '', lignes: [] } }),
+      Object.assign({}, base26, { id: 'veh_loc', nom: 'Escape louée', marque: 'Ford', modele: 'Escape', annee: '2025', acquisLe: '2025-09-01',
+        modeAcquisition: 'location', prixAvantTaxes: null, classeDeduite: '10',
+        odometre: { debut: 6400, fin: 21400, km: 15000, source: { debut: 'fin 2025', fin: 'saisi' }, manque: [], saisi: { fin: 21400 } },
+        dpa: { applicable: false, raison: 'location', classe: '', cout: 0, plafond: null, miseEnService: '', lignes: [] } }),
+    ];
+    var ligneEtat = function(v, kmT, kmA, part, dep, manque){
+      return { id: v.id, nom: v.nom, kmTotal: kmT, kmAffaires: kmA, kmPersonnels: kmT - kmA, part: part,
+        odometre: { debut: v.odometre.debut, fin: v.odometre.fin, source: v.odometre.source },
+        depenses: dep, deductible: r2(dep.total * part), tps: 0, tvq: 0, tpsAdmissible: 0, tvqAdmissible: 0,
+        manque: manque, dpa: pourBilan(v.dpa, 2026) };
+    };
+    var BILAN_ETATS = { ok: true, annee: 2026, complet: false, vehicules: [
+      ligneEtat(VEH_ETATS[0], 1450, 507.5, 0.35, { n: 1, total: 64.10, parType: { essence: 64.10 } }, []),
+      ligneEtat(VEH_ETATS[1], 9800, 4116, 0.42, { n: 1, total: 1450, parType: { assurance: 1450 } }, ['dpa-plafond']),
+      ligneEtat(VEH_ETATS[2], 4000, 1200, 0.30, { n: 1, total: 298, parType: { immatriculation: 298 } }, ['dpa-cout']),
+      ligneEtat(VEH_ETATS[3], 15000, 6000, 0.40, { n: 1, total: 4200, parType: { location: 4200 } }, []),
+    ] };
+    BILAN_ETATS.total = { kmTotal: 30250, kmAffaires: 11823.5, part: 0.3909, depenses: 6012.10,
+      deductible: r2(BILAN_ETATS.vehicules.reduce(function(s, l){ return s + l.deductible; }, 0)),
+      tpsAdmissible: 0, tvqAdmissible: 0, nDeplacements: 0,
+      dpaDeductible: sommeDpa(BILAN_ETATS, 'deductible'), recuperation: 0, perteFinale: 0 };
+    var DPA_ETATS = { ok: true, annee: 2026, annees: ['2026', '2025'], vehicules: VEH_ETATS, deplacements: [], changements: [],
+      depenses: [], bilan: BILAN_ETATS, types: TYPES, raisons: RAISONS, peutAjouter: true, peutModifier: true, peutSupprimer: true };
+
     // ═══ L'ANNÉE EN COURS, ODOMÈTRE INCOMPLET : la fin 2026 n'est pas relevée, et
     // un véhicule acquis cette année n'a AUCUN odomètre. Les parts ne sont pas
     // établies — les dépenses se déclarent en entier, et le bilan le DIT.
@@ -3256,6 +3368,16 @@ const JEU = {
       cas('lecture seule — registre', '', LECTURE, ['class="avis"']),
       cas('lecture seule — véhicules', 'vehicules', LECTURE, ['class="avis"']),
       cas('lecture seule — changements', 'changements', LECTURE, ['class="avis"']),
+      // ── La DPA ──
+      cas('tableau DPA ouvert (Corolla vendue : onze années, perte finale)', 'dpa-tableau', GARNI, ['id="dpa-voile"', 'id="dpa-fermer"']),
+      cas('bilan — vue DPA garnie (10.1 plafonnée, 10, perte finale)', 'bilan-dpa', GARNI, ['data-bvue="dpa"', 'ligne 9270']),
+      cas('boîte — véhicule vendu (prix de vente)', 'vehicule-modifier', GARNI, ['id="v-pv"', 'id="v-classe"']),
+      cas('DPA — demandée réduite, plafond à confirmer, coût manquant, location', 'vehicules', DPA_ETATS, ['data-dpa-max="veh_civic"', 'data-dpa="veh_m3"']),
+      cas('DPA — bilan, vue DPA des états', 'bilan-dpa', DPA_ETATS, ['class="manque"']),
+      cas('DPA — bilan général des états', 'bilan', DPA_ETATS, ['ligne 9936']),
+      cas('boîte — véhicule en location', 'vehicule-modifier', DPA_ETATS, ['id="v-mode"']),
+      cas('DPA — tableau, plafond à confirmer', 'dpa-tableau', DPA_ETATS, ['id="dpa-voile"']),
+      cas('DPA — lecture seule', 'vehicules', Object.assign({}, DPA_ETATS, { peutAjouter: false, peutModifier: false, peutSupprimer: false }), ['data-dpa-tab="veh_civic"']),
       { nom: 'module des dépenses absent', id: '', reponses: { 'vehicules:donnees': { ok: false, motif: 'module_depenses' }, identite: IDENTITE } },
     ];
   })(),

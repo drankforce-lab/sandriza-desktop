@@ -209,6 +209,10 @@ const LIBELLES_EN = {
   'Inactif (aucun achat depuis 90 j)': 'Inactive (no purchase in 90 days)',
   'Tous les abonnés': 'All subscribers',
   'Clients avec commandes': 'Customers with orders',
+  /* ── Les lignes fiscales des vehicules (admin.js, rapport d impot : DPA et
+     perte finale, 2026-10-02). Memes mots que le labelEn de backup.js. */
+  'DPA — véhicules': 'CCA — vehicles',
+  'Perte finale — véhicule': 'Terminal loss — vehicle',
 };
 
 /* ══ LE MODÈLE DES PERMISSIONS VIENT DE SON PROPRE FICHIER ══════════════════

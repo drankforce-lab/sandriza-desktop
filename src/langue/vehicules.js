@@ -331,4 +331,106 @@ module.exports = {
   'Appuyez de nouveau sur Échap pour fermer sans enregistrer.': 'Press Esc again to close without saving.',
   'Une saisie est en cours : enregistrez-la ou videz le formulaire avant de fermer.':
     'An entry is in progress: save it or clear the form before closing.',
+
+  /* ── La DPA (2026-10-02) ────────────────────────────────────────────────────
+     DPA = CCA (capital cost allowance) ; FNACC = UCC (undepreciated capital
+     cost) ; récupération = recapture ; perte finale = terminal loss ; IIA =
+     AII (Accelerated Investment Incentive) — les termes du guide T4002. */
+  'La DPA demandée dépasse le maximum permis pour l’année :': 'The CCA claimed exceeds the maximum allowed for the year:',
+  'Montant de DPA illisible : des chiffres seulement.': 'Unreadable CCA amount: digits only.',
+  'catégorie': 'class',
+  'plafond inconnu': 'unknown limit',
+  'saisi sur la fiche': 'entered on the record',
+  'plafond de l’ARC': 'CRA limit',
+  'dernier plafond connu, à confirmer': 'last known limit, to be confirmed',
+  'Amortissement (DPA)': 'Capital cost allowance (CCA)',
+  'Véhicule loué : pas de DPA. Les loyers se déclarent en frais de véhicule (type « Location »).':
+    'Leased vehicle: no CCA. Lease payments are claimed as vehicle expenses (type “Leasing”).',
+  'Coût d’achat manquant : saisissez le prix avant taxes et la date de mise en service (Modifier) pour calculer la DPA.':
+    'Purchase cost missing: enter the price before tax and the date available for use (Edit) to calculate CCA.',
+  'Coût en capital': 'Capital cost',
+  'plafonné': 'capped',
+  'plafond à confirmer': 'limit to confirm',
+  'Aucune DPA en': 'No CCA in',
+  'mise en service le': 'available for use on',
+  'FNACC': 'UCC',
+  'max.': 'max.',
+  'Vendu : récupération de': 'Sold: recapture of',
+  '(un revenu, ligne 8230)': '(income, line 8230)',
+  'Vendu : perte finale de': 'Sold: terminal loss of',
+  '(une déduction, ligne 9270)': '(a deduction, line 9270)',
+  'DPA demandée': 'CCA claimed',
+  'Laissez vide pour demander le maximum. On peut demander moins et garder la FNACC pour plus tard.':
+    'Leave empty to claim the maximum. You may claim less and keep the UCC for later years.',
+  'Appliquer': 'Apply',
+  'Maximum': 'Maximum',
+  'DPA déductible': 'Deductible CCA',
+  'réduite': 'reduced',
+  'Tableau de DPA': 'CCA schedule',
+  'Plafond': 'Limit',
+  'Mise en service': 'Available for use',
+  'FNACC début': 'Opening UCC',
+  'Ajout': 'Addition',
+  'DPA max.': 'Max. CCA',
+  'Règle': 'Rule',
+  'Récupération / perte': 'Recapture / loss',
+  'FNACC fin': 'Closing UCC',
+  'La FNACC baisse de la DPA entière ; seule la part d’affaires se déduit. Une part non établie vaut 100 % en attendant l’odomètre.':
+    'The UCC drops by the full CCA; only the business share is deducted. A share not yet established counts as 100% until the odometer is complete.',
+  'Fermer': 'Close',
+  'Tableau DPA': 'CCA schedule',
+  'Automatique': 'Automatic',
+  'Mode d’acquisition': 'Acquisition',
+  'Achat': 'Purchase',
+  'Location (crédit-bail)': 'Lease',
+  'Un véhicule loué n’a pas de DPA : les loyers se déclarent comme frais de véhicule, dans les Dépenses, avec le type « Location (crédit-bail) ». Ils suivent la part d’affaires comme les autres frais.':
+    'A leased vehicle has no CCA: lease payments are claimed as vehicle expenses, in Expenses, with the “Leasing” type. They follow the business share like the other expenses.',
+  'Prix avant taxes': 'Price before tax',
+  'Taxes non récupérées': 'Unrecovered taxes',
+  'La TPS et la TVQ payées à l’achat qui n’ont PAS été demandées en CTI / RTI. Elles s’ajoutent au coût en capital.':
+    'The GST and QST paid on purchase that were NOT claimed as ITCs / ITRs. They are added to the capital cost.',
+  'Vide : la date d’acquisition. Elle décide de la règle de première année.':
+    'Empty: the acquisition date. It decides the first-year rule.',
+  'Catégorie': 'Class',
+  'Voiture de tourisme': 'Passenger vehicle',
+  'Zéro émission (catégorie 54)': 'Zero-emission (class 54)',
+  'Plafond (facultatif)': 'Limit (optional)',
+  'Le plafond de coût des catégories 10.1 et 54 pour l’année de mise en service. À saisir quand il est marqué « à confirmer ».':
+    'The cost limit of classes 10.1 and 54 for the year the vehicle became available for use. Enter it when it is marked “to confirm”.',
+  'Prix de vente': 'Sale price',
+  'Plafond à confirmer.': 'Limit to confirm.',
+  'Voiture de tourisme au-dessus du plafond : catégorie 10.1, coût ramené au plafond. Camionnette ou véhicule de travail : catégorie 10.':
+    'Passenger vehicle above the limit: class 10.1, cost brought down to the limit. Van or work vehicle: class 10.',
+  'Coût d’achat manquant : la DPA ne peut pas se calculer. Saisissez le prix avant taxes et la date de mise en service sur la fiche du véhicule (onglet Véhicules, Modifier).':
+    'Purchase cost missing: CCA cannot be calculated. Enter the price before tax and the date available for use on the vehicle record (Vehicles tab, Edit).',
+  'Le plafond de coût (catégorie 10.1 ou 54) de l’année de mise en service n’est pas connu avec certitude : le dernier plafond connu sert en attendant. Vérifiez-le auprès de l’ARC et saisissez-le sur la fiche du véhicule (champ « Plafond »).':
+    'The cost limit (class 10.1 or 54) for the year the vehicle became available for use is not known for certain: the last known limit is used meanwhile. Check it with the CRA and enter it on the vehicle record (“Limit” field).',
+  'Vue du bilan': 'Summary view',
+  'Dépenses et kilométrage': 'Expenses and mileage',
+  'DPA déductible — ligne 9936': 'Deductible CCA — line 9936',
+  'location — sans DPA': 'lease — no CCA',
+  'coût manquant': 'cost missing',
+  'à confirmer': 'to confirm',
+  'FNACC au début': 'Opening UCC',
+  'Ajout de l’année': 'Addition for the year',
+  'DPA maximale': 'Maximum CCA',
+  'DPA déductible — T2125 ligne 9936 / TP-80': 'Deductible CCA — T2125 line 9936 / TP-80',
+  'Récupération — un revenu, ligne 8230': 'Recapture — income, line 8230',
+  'Perte finale — ligne 9270': 'Terminal loss — line 9270',
+  'FNACC à la fin (reportée)': 'Closing UCC (carried forward)',
+  'T2125, ligne 9936 « Déduction pour amortissement » : la DPA déductible (le détail va à la partie de la DPA du formulaire).':
+    'T2125, line 9936 “Capital cost allowance”: the deductible CCA (the details go in the CCA part of the form).',
+  'T2125, ligne 8230 « Autres revenus » : la récupération d’amortissement.': 'T2125, line 8230 “Other income”: the recapture of CCA.',
+  'T2125, ligne 9270 « Autres dépenses » : la perte finale.': 'T2125, line 9270 “Other expenses”: the terminal loss.',
+  'Les règles de la DPA': 'CCA rules',
+  'Taux de 30 % dégressif sur la FNACC (catégories 10, 10.1 et 54).': '30% declining balance on the UCC (classes 10, 10.1 and 54).',
+  'Première année selon la mise en service : demi-année avant le 21 nov. 2018 et dès 2028 ; × 1,5 de 2019 à 2023 ; sans demi-année de 2024 à 2027 (catégorie 54 : 100 %, 75 %, puis 55 %).':
+    'First year depends on when it became available for use: half-year rule before Nov. 21, 2018 and from 2028; × 1.5 from 2019 to 2023; no half-year rule from 2024 to 2027 (class 54: 100%, 75%, then 55%).',
+  'Catégorie 10.1 : voiture de tourisme au-dessus du plafond — coût ramené au plafond, une catégorie par véhicule, ni récupération ni perte finale ; la moitié de la DPA l’année de la vente.':
+    'Class 10.1: passenger vehicle above the limit — cost brought down to the limit, one class per vehicle, no recapture and no terminal loss; half the CCA in the year of sale.',
+  'Seule la part d’affaires se déduit ; la FNACC baisse de la DPA entière. Un véhicule loué n’a pas de DPA : ses loyers sont des frais de véhicule.':
+    'Only the business share is deducted; the UCC drops by the full CCA. A leased vehicle has no CCA: its lease payments are vehicle expenses.',
+  'Montant illisible : des chiffres seulement.': 'Unreadable amount: digits only.',
+  'DPA ramenée au maximum pour': 'CCA set back to the maximum for',
+  'DPA demandée enregistrée pour': 'CCA claimed saved for',
 };

@@ -180,6 +180,8 @@ tbody tr.ligne.mod{cursor:pointer}
 
 /* ── Bilan ───────────────────────────────────────────────────────────────── */
 .bilan td:first-child{color:var(--tx2)}
+.corps .bilan tbody td{padding-top:.17rem;padding-bottom:.17rem}
+.corps .bilan tbody tr.grp>td{padding-top:.38rem}
 .bilan td.n small{display:block;font:400 .64rem/1.2 system-ui;color:var(--tx3)}
 .bilan thead th.n{text-transform:none;letter-spacing:0;font-size:.72rem;color:var(--tx)}
 .bilan tr.cle>td{font-weight:700;color:var(--tx)}
@@ -193,6 +195,15 @@ tbody tr.ligne.mod{cursor:pointer}
 .boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;
   max-width:44rem;width:100%;max-height:92vh;overflow:hidden;padding:.9rem 1rem}
 .boite h3{margin:0 0 .6rem;font:700 .98rem/1.3 system-ui}
+.boite.large{max-width:66rem}
+.deuxcol{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;align-items:start}
+.ot2{font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700;margin-bottom:.35rem}
+.coches{flex-direction:row;gap:1.1rem;flex-wrap:wrap}
+.dpa-l{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:.35rem;align-items:center;margin:.2rem 0}
+.dpa-l label{font-size:.74rem;color:var(--tx2)}
+.dpa-l input{min-width:0;width:100%}
+.bascule{display:inline-flex;gap:.25rem;margin-left:auto;text-transform:none;letter-spacing:0;font-weight:400}
+.bascule button.on{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
@@ -208,16 +219,19 @@ tbody tr.ligne.mod{cursor:pointer}
  * 'bilan' — ou deux états qui ne s'atteignent autrement qu'au clic :
  * 'vehicule-nouveau' (la boîte d'inscription d'un véhicule) et
  * 'deplacement-modifier' (le premier déplacement ouvert en modification).
+ * Et, pour la DPA : 'vehicule-modifier' (la fiche du DERNIER véhicule ouverte
+ * dans la boîte), 'dpa-tableau' (le tableau année par année du dernier véhicule
+ * qui en a un) et 'bilan-dpa' (le bilan sur sa vue Amortissement).
  * ⚠ Ils existent pour le garde-fou de rendu, qui ne simule aucun clic : un
  * panneau jamais dessiné par un jeu d'essai est un panneau qui peut mourir en
  * silence.
  */
 function pageVehicules(ouverture) {
   const onglets = ['registre', 'vehicules', 'changements', 'depenses', 'bilan'];
-  const etats = ['vehicule-nouveau', 'deplacement-modifier'];
+  const etats = ['vehicule-nouveau', 'vehicule-modifier', 'deplacement-modifier', 'dpa-tableau', 'bilan-dpa'];
   const o = String(ouverture || '');
   const depart = onglets.indexOf(o) >= 0 ? o
-    : (o === 'vehicule-nouveau' ? 'vehicules' : 'registre');
+    : ((o === 'vehicule-nouveau' || o === 'vehicule-modifier' || o === 'dpa-tableau') ? 'vehicules' : (o === 'bilan-dpa' ? 'bilan' : 'registre'));
   const etat = etats.indexOf(o) >= 0 ? o : '';
   return `${TETE()}
 <title>${T("Véhicules et déplacements — Administration Sandriza")}</title>
@@ -248,6 +262,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
   var CHG = null;             /* le changement de vehicule en cours de saisie */
   var VFORM = null;           /* la fiche de vehicule ouverte dans la boite */
   var ODO = {};               /* les odometres tapes et pas encore enregistres */
+  var DPAS = {};              /* les DPA demandees tapees et pas encore appliquees */
+  var DPATAB = '';            /* le vehicule dont le tableau de DPA est ouvert */
+  var DPAPG = 0;
+  var BVUE = '';              /* le bilan : '' (depenses et km) ou 'dpa' */
   var FVEH = '';              /* filtre du registre : un vehicule, ou tous */
   var PG = { reg: 0, veh: 0, chg: 0, dep: 0, bil: 0 };
   var BU = { reg: 0, veh: 0, chg: 0, dep: 0, bil: 4 };   /* lignes par page, MESUREES */
@@ -335,6 +353,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
         + ' ${T("et")} ' + ne + ' ' + szPl(ne, '${T("dépense")}', '${T("dépenses")}')
         + ' ${T(": ils justifient des déductions, on ne le supprime pas. Donnez-lui plutôt une date de retrait (bouton Modifier).")}';
     }
+    if (m === 'dpa-depasse') return '${T("La DPA demandée dépasse le maximum permis pour l’année :")} ' + argent(r.max) + '.';
+    if (m === 'montant') return '${T("Montant de DPA illisible : des chiffres seulement.")}';
     if (m === 'vehicule' && geste === 'changement') return '${T("Choisissez au moins un véhicule : le sortant, l’entrant, ou les deux.")}';
     if (m === 'odometre' && geste === 'vehicule') return '${T("L’odomètre au retrait doit dépasser celui de l’acquisition.")}';
     var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + (m || '?') + ').');
@@ -418,6 +438,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
       if (!SAISIE) SAISIE = nouveauDeplacement(null);
       if (!CHG) CHG = nouveauChangement();
       if (ETAT === 'vehicule-nouveau' && PA) { VFORM = vehiculeVierge(); ONGLET = 'vehicules'; }
+      if (ETAT === 'dpa-tableau') {
+        var vd = (r.vehicules || []).filter(function(x){ return x.dpa && x.dpa.applicable && (x.dpa.lignes || []).length; });
+        if (vd.length) { DPATAB = vd[vd.length - 1].id; ONGLET = 'vehicules'; }
+      }
+      if (ETAT === 'vehicule-modifier' && PM && (r.vehicules || []).length) { VFORM = depuisVehicule(r.vehicules[r.vehicules.length - 1]); ONGLET = 'vehicules'; }
+      if (ETAT === 'bilan-dpa') { BVUE = 'dpa'; ONGLET = 'bilan'; }
       if (ETAT === 'deplacement-modifier' && PM && (r.deplacements || []).length) {
         SAISIE = depuisDeplacement(r.deplacements[0]); ONGLET = 'registre';
       }
@@ -662,12 +688,127 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
   /* ══ ONGLET VEHICULES ══════════════════════════════════════════════════ */
   function vehiculeVierge(){
     return { id: '', nom: '', marque: '', modele: '', annee: '', plaque: '', acquisLe: '',
-      odometreAcquis: '', retireLe: '', odometreRetrait: '', notes: '' };
+      odometreAcquis: '', retireLe: '', odometreRetrait: '', notes: '',
+      modeAcquisition: 'achat', prixAvantTaxes: '', taxesNonRecuperees: '', miseEnService: '',
+      tourisme: true, zeroEmission: false, classeDpa: '', classeDeduite: '', plafondDpa: '', prixDisposition: '' };
   }
   function depuisVehicule(v){
     return { id: v.id, nom: v.nom || '', marque: v.marque || '', modele: v.modele || '', annee: v.annee || '',
       plaque: v.plaque || '', acquisLe: v.acquisLe || '', odometreAcquis: champNombre(v.odometreAcquis),
-      retireLe: v.retireLe || '', odometreRetrait: champNombre(v.odometreRetrait), notes: v.notes || '' };
+      retireLe: v.retireLe || '', odometreRetrait: champNombre(v.odometreRetrait), notes: v.notes || '',
+      modeAcquisition: v.modeAcquisition === 'location' ? 'location' : 'achat',
+      prixAvantTaxes: champNombre(v.prixAvantTaxes), taxesNonRecuperees: champNombre(v.taxesNonRecuperees),
+      miseEnService: v.miseEnService || '', tourisme: v.tourisme !== false, zeroEmission: !!v.zeroEmission,
+      classeDpa: v.classeDpa || '', classeDeduite: v.classeDeduite || '', plafondDpa: champNombre(v.plafondDpa),
+      prixDisposition: champNombre(v.prixDisposition), plafondConnu: (v.dpa && v.dpa.plafond) || null };
+  }
+
+  /* ══ LA DPA (deduction pour amortissement) ═══════════════════════════════
+     ⚠ CALCULEE PAR LE SITE (Vehicules.dpaCoeur), ligne par ligne, annee par
+     annee : la fenetre affiche, et ne modifie qu une chose — la DPA DEMANDEE
+     d une annee (on peut en prendre moins que le maximum et garder la FNACC
+     pour plus tard). La regle de chaque ligne arrive en francais (« demi-annee »,
+     « IIA x 1,5 »…) et se traduit a l affichage (szTd). */
+  function ligneDpa(v){
+    var L = (v && v.dpa && v.dpa.lignes) || [];
+    for (var i = 0; i < L.length; i++) if (L[i].annee === ANNEE) return L[i];
+    return null;
+  }
+  function nomClasse(c){ return c ? '${T("catégorie")} ' + c : '—'; }
+  function plafondTexte(p){
+    if (!p || p.montant == null) return '${T("plafond inconnu")}';
+    var s = String(p.source || '').charAt(0);
+    return argent(p.montant) + ' — ' + (s === 's' ? '${T("saisi sur la fiche")}'
+      : (s === 't' ? '${T("plafond de l’ARC")}' : '${T("dernier plafond connu, à confirmer")}'));
+  }
+  function regle(r){ return r ? szTd(r) : ''; }
+  function blocDpa(v){
+    var d = v.dpa || {};
+    var h = '<div class="odo"><div class="ot">${T("Amortissement (DPA)")} ' + ANNEE
+      + (d.applicable ? ' · ' + esc(nomClasse(d.classe)) : '') + '</div>';
+    if (!d.applicable) {
+      if (d.raison === 'location') return h + '<div class="sous2">${T("Véhicule loué : pas de DPA. Les loyers se déclarent en frais de véhicule (type « Location »).")}</div></div>';
+      return h + '<div class="sous2 attn">${T("Coût d’achat manquant : saisissez le prix avant taxes et la date de mise en service (Modifier) pour calculer la DPA.")}</div></div>';
+    }
+    var l = ligneDpa(v);
+    var plaf = d.plafond && d.plafond.montant != null && (d.classe === '10.1' || d.classe === '54');
+    h += '<div class="kv"><span>${T("Coût en capital")} <b>' + argent(d.cout) + '</b>'
+      + (plaf ? ' <span class="pill g" title="' + esc(plafondTexte(d.plafond)) + '">${T("plafonné")}</span>' : '') + '</span>'
+      + (d.plafond && d.plafond.aConfirmer ? '<span class="pill att" title="' + esc(plafondTexte(d.plafond)) + '">${T("plafond à confirmer")}</span>' : '')
+      + '</div>';
+    if (!l) {
+      return h + '<div class="sous2">${T("Aucune DPA en")} ' + ANNEE + ' (${T("mise en service le")} ' + esc(szJour(d.miseEnService)) + ').</div></div>';
+    }
+    h += '<div class="kv"><span>${T("FNACC")} <b>' + argent(l.fnaccDebut + (l.ajout || 0)) + '</b> → <b>' + argent(l.fnaccFin) + '</b></span>'
+      + '<span>${T("max.")} <b>' + argent(l.dpaMax) + '</b></span>'
+      + '<span class="gris">' + esc(regle(l.regle)) + '</span></div>';
+    if (l.vendu) {
+      h += '<div class="sous2">' + (l.recuperation
+        ? '${T("Vendu : récupération de")} <b class="attn">' + argent(l.recuperation) + '</b> ${T("(un revenu, ligne 8230)")}'
+        : '${T("Vendu : perte finale de")} <b>' + argent(l.perteFinale) + '</b> ${T("(une déduction, ligne 9270)")}') + '</div>';
+    }
+    if (PM && !l.vendu && l.dpaMax > 0) {
+      var tape = DPAS[v.id];
+      var val = tape != null ? tape : (l.reduite ? champNombre(l.dpaDemandee) : '');
+      h += '<div class="dpa-l"><label for="dpa-' + esc(v.id) + '">${T("DPA demandée")}</label>'
+        + '<input type="text" inputmode="decimal" class="n" id="dpa-' + esc(v.id) + '" data-dpa="' + esc(v.id) + '"'
+        + ' value="' + esc(val) + '" placeholder="' + esc(champNombre(l.dpaMax)) + '"'
+        + ' title="${T("Laissez vide pour demander le maximum. On peut demander moins et garder la FNACC pour plus tard.")}">'
+        + '<button type="button" class="mini" data-dpa-enr="' + esc(v.id) + '">${T("Appliquer")}</button>'
+        + (l.reduite ? '<button type="button" class="mini" data-dpa-max="' + esc(v.id) + '">${T("Maximum")}</button>' : '')
+        + '</div>';
+    } else {
+      h += '<div class="kv"><span>${T("DPA demandée")} <b>' + argent(l.dpaDemandee) + '</b></span></div>';
+    }
+    h += '<div class="kv"><span>${T("part")} <b>' + (l.partEtablie ? pct(l.part) : '<span class="attn">${T("non établie")}</span>') + '</b></span>'
+      + '<span>${T("DPA déductible")} <b>' + argent(l.deductible) + '</b></span>'
+      + (l.reduite ? '<span class="pill g">${T("réduite")}</span>' : '') + '</div>';
+    return h + '</div>';
+  }
+  /* Le tableau annee par annee, dans une boite — la carte n a de place que pour
+     l annee affichee (sa regle : aucune barre de defilement). */
+  function boiteDpa(){
+    if (!DPATAB) return '';
+    var v = vehicule(DPATAB);
+    if (!v || !v.dpa || !v.dpa.applicable) return '';
+    var d = v.dpa, L = d.lignes || [];
+    var parPage = 10, nbp = Math.max(1, Math.ceil(L.length / parPage));
+    if (DPAPG >= nbp) DPAPG = nbp - 1;
+    if (DPAPG < 0) DPAPG = 0;
+    var vue = L.slice(DPAPG * parPage, (DPAPG + 1) * parPage);
+    var vente = L.some(function(l){ return l.vendu; });
+    var navb = nbp > 1 ? '<span class="pages">'
+      + '<button type="button" class="mini pgf" data-dpg="-1" title="${T("Page précédente")}" aria-label="${T("Page précédente")}"' + (DPAPG <= 0 ? ' disabled' : '') + '>‹</button>'
+      + '<span>${T("Page")} ' + (DPAPG + 1) + ' / ' + nbp + '</span>'
+      + '<button type="button" class="mini pgf" data-dpg="1" title="${T("Page suivante")}" aria-label="${T("Page suivante")}"' + (DPAPG >= nbp - 1 ? ' disabled' : '') + '>›</button></span>' : '';
+    return '<div class="voile" id="dpa-voile"><div class="boite large" role="dialog" aria-modal="true" aria-labelledby="dpa-titre">'
+      + '<h3 id="dpa-titre" style="display:flex;align-items:center;gap:.6rem">${T("Tableau de DPA")} — ' + esc(v.nom) + navb + '</h3>'
+      + '<div class="kv" style="margin-bottom:.5rem"><span>' + esc(nomClasse(d.classe)) + '</span>'
+      + '<span>${T("Coût en capital")} <b>' + argent(d.cout) + '</b></span>'
+      + (d.plafond ? '<span>${T("Plafond")} <b>' + esc(plafondTexte(d.plafond)) + '</b></span>' : '')
+      + '<span>${T("Mise en service")} <b>' + esc(szJour(d.miseEnService)) + '</b></span></div>'
+      + '<table><thead><tr><th>${T("Année")}</th><th class="n">${T("FNACC début")}</th><th class="n">${T("Ajout")}</th>'
+      + '<th class="n">${T("DPA max.")}</th><th class="n">${T("DPA demandée")}</th><th>${T("Règle")}</th>'
+      + '<th class="n">${T("Part")}</th><th class="n">${T("Déductible")}</th>'
+      + (vente ? '<th class="n">${T("Récupération / perte")}</th>' : '')
+      + '<th class="n">${T("FNACC fin")}</th></tr></thead><tbody>'
+      + vue.map(function(l){
+          return '<tr class="ligne' + (l.annee === ANNEE ? ' sel' : '') + '"><td>' + l.annee + '</td>'
+            + '<td class="n">' + argent(l.fnaccDebut) + '</td>'
+            + '<td class="n">' + (l.ajout ? argent(l.ajout) : '—') + '</td>'
+            + '<td class="n">' + argent(l.dpaMax) + '</td>'
+            + '<td class="n">' + argent(l.dpaDemandee) + (l.reduite ? ' <span class="pill g">${T("réduite")}</span>' : '') + '</td>'
+            + '<td>' + esc(regle(l.regle)) + '</td>'
+            + '<td class="n">' + (l.partEtablie ? pct(l.part) : '<span class="attn">${T("non établie")}</span>') + '</td>'
+            + '<td class="n">' + argent(l.deductible) + '</td>'
+            + (vente ? '<td class="n">' + (l.recuperation ? '<span class="attn">+' + argent(l.recuperation) + '</span>'
+                : (l.perteFinale ? '−' + argent(l.perteFinale) : '—')) + '</td>' : '')
+            + '<td class="n">' + argent(l.fnaccFin) + '</td></tr>';
+        }).join('')
+      + '</tbody></table>'
+      + '<div class="aide" style="margin-top:.5rem">${T("La FNACC baisse de la DPA entière ; seule la part d’affaires se déduit. Une part non établie vaut 100 % en attendant l’odomètre.")}</div>'
+      + '<div class="boutons"><button type="button" id="dpa-fermer">${T("Fermer")}</button></div>'
+      + '</div></div>';
   }
   function etatVehicule(v){
     if (v.retireLe && v.retireLe.slice(0, 4) <= String(ANNEE)) {
@@ -721,9 +862,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     } else {
       h += '<div class="odo"><div class="aide">${T("Ce véhicule n’était pas en service en")} ' + ANNEE + '${T(" : aucun odomètre à relever cette année-là.")}</div></div>';
     }
+    if (v.dpa && (v.enService || ligneDpa(v))) h += blocDpa(v);
     if (v.notes) h += '<div class="sous2" title="' + esc(v.notes) + '" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(v.notes) + '</div>';
-    if (PM || PS) {
+    var aTab = !!(v.dpa && v.dpa.applicable && (v.dpa.lignes || []).length);
+    if (PM || PS || aTab) {
       h += '<div class="vact">'
+        + (aTab ? '<button type="button" class="mini" data-dpa-tab="' + esc(v.id) + '">${T("Tableau DPA")}</button>' : '')
         + (PM ? '<button type="button" class="mini" data-veh-mod="' + esc(v.id) + '">${T("Modifier")}</button>' : '')
         + (PS ? '<button type="button" class="mini danger" data-sup-veh="' + esc(v.id) + '">${T("Supprimer")}</button>' : '')
         + '</div>';
@@ -746,8 +890,41 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     function ch(id, lbl, ctrl, large){
       return '<div class="champ' + (large ? ' large' : '') + '"><label for="' + id + '">' + lbl + '</label>' + ctrl + '</div>';
     }
-    return '<div class="voile" id="v-voile"><div class="boite" role="dialog" aria-modal="true" aria-labelledby="v-titre">'
+    var loc = f.modeAcquisition === 'location';
+    var auto = '${T("Automatique")}' + (f.classeDeduite ? ' (' + esc(nomClasse(f.classeDeduite)) + ')' : '');
+    var pc = f.plafondConnu;
+    /* ⚠ DEUX COLONNES : la fiche a gauche, la DPA a droite. Empilees, les deux
+       depassaient la hauteur de l ecran (sa regle : aucune barre de defilement). */
+    var dpa = '<div class="ot2">${T("Amortissement (DPA)")}</div><div class="form2">'
+      + ch('v-mode', '${T("Mode d’acquisition")}', '<select id="v-mode" aria-label="${T("Mode d’acquisition")}">'
+          + '<option value="achat"' + (loc ? '' : ' selected') + '>${T("Achat")}</option>'
+          + '<option value="location"' + (loc ? ' selected' : '') + '>${T("Location (crédit-bail)")}</option></select>', true);
+    if (loc) {
+      dpa += '<div class="aide large">${T("Un véhicule loué n’a pas de DPA : les loyers se déclarent comme frais de véhicule, dans les Dépenses, avec le type « Location (crédit-bail) ». Ils suivent la part d’affaires comme les autres frais.")}</div>';
+    } else {
+      dpa += ch('v-prix', '${T("Prix avant taxes")}', '<input type="text" inputmode="decimal" class="n" id="v-prix" aria-label="${T("Prix avant taxes")}" value="' + esc(f.prixAvantTaxes) + '">')
+        + ch('v-taxes', '${T("Taxes non récupérées")}', '<input type="text" inputmode="decimal" class="n" id="v-taxes" aria-label="${T("Taxes non récupérées")}" value="' + esc(f.taxesNonRecuperees) + '"'
+          + ' title="${T("La TPS et la TVQ payées à l’achat qui n’ont PAS été demandées en CTI / RTI. Elles s’ajoutent au coût en capital.")}">')
+        + ch('v-mes', '${T("Mise en service")}', '<input type="date" id="v-mes" aria-label="${T("Mise en service")}" value="' + esc(f.miseEnService) + '"'
+          + ' title="${T("Vide : la date d’acquisition. Elle décide de la règle de première année.")}">')
+        + ch('v-classe', '${T("Catégorie")}', '<select id="v-classe" aria-label="${T("Catégorie")}">'
+          + '<option value=""' + (f.classeDpa ? '' : ' selected') + '>' + auto + '</option>'
+          + ['10', '10.1', '54'].map(function(c){ return '<option value="' + c + '"' + (f.classeDpa === c ? ' selected' : '') + '>' + esc(nomClasse(c)) + '</option>'; }).join('')
+          + '</select>')
+        + '<div class="champ large coches">'
+        + '<label class="ar" for="v-tour"><input type="checkbox" id="v-tour"' + (f.tourisme ? ' checked' : '') + '> ${T("Voiture de tourisme")}</label>'
+        + '<label class="ar" for="v-zero"><input type="checkbox" id="v-zero"' + (f.zeroEmission ? ' checked' : '') + '> ${T("Zéro émission (catégorie 54)")}</label></div>'
+        + ch('v-plafond', '${T("Plafond (facultatif)")}', '<input type="text" inputmode="decimal" class="n" id="v-plafond" aria-label="${T("Plafond (facultatif)")}" value="' + esc(f.plafondDpa) + '"'
+          + ' placeholder="' + esc(pc && pc.montant != null ? champNombre(pc.montant) : '') + '"'
+          + ' title="${T("Le plafond de coût des catégories 10.1 et 54 pour l’année de mise en service. À saisir quand il est marqué « à confirmer ».")}">')
+        + (f.retireLe ? ch('v-pv', '${T("Prix de vente")}', '<input type="text" inputmode="decimal" class="n" id="v-pv" aria-label="${T("Prix de vente")}" value="' + esc(f.prixDisposition) + '">') : '')
+        + '<div class="aide large">' + (pc && pc.aConfirmer ? '<strong>${T("Plafond à confirmer.")}</strong> ' : '')
+        + '${T("Voiture de tourisme au-dessus du plafond : catégorie 10.1, coût ramené au plafond. Camionnette ou véhicule de travail : catégorie 10.")}</div>';
+    }
+    dpa += '</div>';
+    return '<div class="voile" id="v-voile"><div class="boite large" role="dialog" aria-modal="true" aria-labelledby="v-titre">'
       + '<h3 id="v-titre">' + (modif ? '${T("Modifier le véhicule")}' : '${T("Inscrire un véhicule")}') + '</h3>'
+      + '<div class="deuxcol"><div>'
       + '<div class="form2">'
       + ch('v-nom', '${T("Nom (obligatoire)")}', '<input type="text" id="v-nom" aria-label="${T("Nom (obligatoire)")}" maxlength="60" value="' + esc(f.nom) + '" placeholder="${T("Ex. : Civic grise")}">', true)
       + ch('v-marque', '${T("Marque")}', '<input type="text" id="v-marque" aria-label="${T("Marque")}" maxlength="40" value="' + esc(f.marque) + '">')
@@ -761,6 +938,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
       + ch('v-notes', '${T("Notes")}', '<textarea id="v-notes" aria-label="${T("Notes")}" rows="2" maxlength="400">' + esc(f.notes) + '</textarea>', true)
       + '</div>'
       + '<div class="aide" style="margin-top:.5rem">${T("L’odomètre à l’acquisition sert de début d’année l’année où le véhicule entre au registre. Le retrait ne supprime rien : le véhicule reste au registre avec ses kilomètres et ses dépenses, qui justifient les déductions passées.")}</div>'
+      + '</div><div>' + dpa + '</div></div>'
       + '<div class="boutons"><button type="button" id="v-annuler">${T("Annuler")}</button>'
       + '<button type="button" class="prim" id="v-ok">' + (modif ? '${T("Enregistrer")}' : '${T("+ Inscrire le véhicule")}') + '</button></div>'
       + '</div></div>';
@@ -872,7 +1050,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     'odometre-incoherent':   '${T("L’odomètre de fin est inférieur à celui du début : l’un des deux est faux. Corrigez-le dans l’onglet Véhicules.")}',
     'km-affaires-depassent': '${T("Les km d’affaires du registre dépassent les km totaux à l’odomètre : un déplacement est sans doute mal saisi (un zéro de trop ?), ou l’odomètre est faux. La part est plafonnée à 100 % en attendant.")}',
     'aucun-deplacement':     '${T("Des dépenses sont rattachées à ce véhicule, mais aucun déplacement n’est inscrit : sans registre, la part d’affaires ne se défend pas. Inscrivez les déplacements de l’année.")}',
-    'depenses-non-rattachees': '${T("Des dépenses de véhicule ne sont rattachées à aucun véhicule : elles prennent la part globale de l’année (ou 100 % si elle n’est pas établie). Rattachez-les dans la fenêtre Dépenses.")}'
+    'depenses-non-rattachees': '${T("Des dépenses de véhicule ne sont rattachées à aucun véhicule : elles prennent la part globale de l’année (ou 100 % si elle n’est pas établie). Rattachez-les dans la fenêtre Dépenses.")}',
+    'dpa-cout':              '${T("Coût d’achat manquant : la DPA ne peut pas se calculer. Saisissez le prix avant taxes et la date de mise en service sur la fiche du véhicule (onglet Véhicules, Modifier).")}',
+    'dpa-plafond':           '${T("Le plafond de coût (catégorie 10.1 ou 54) de l’année de mise en service n’est pas connu avec certitude : le dernier plafond connu sert en attendant. Vérifiez-le auprès de l’ARC et saisissez-le sur la fiche du véhicule (champ « Plafond »).")}'
   };
   function nomLigne(l){ return l.id ? (l.nom || nomVeh(l.id)) : '${T("Non rattachées")}'; }
   function vueBilan(){
@@ -904,11 +1084,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
       return szNombre(v, 1) + (s && s !== '${T("saisi")}' ? '<small>' + esc(s) + '</small>' : '');
     }
     var kmPersoTot = (T0.kmTotal ? Math.max(0, Math.round((T0.kmTotal - (T0.kmAffaires || 0)) * 10) / 10) : null);
-    var h = '<div class="duo"><div><div class="carte"><h2>${T("Bilan")} ' + ANNEE + nav('bil', t.nbp) + '</h2>'
+    var dpaV = (BVUE === 'dpa');
+    var aDpa = L.some(function(l){ return l.dpa; });
+    var h = '<div class="duo"><div><div class="carte"><h2>${T("Bilan")} ' + ANNEE
+      + (aDpa ? '<span class="bascule" role="group" aria-label="${T("Vue du bilan")}">'
+          + '<button type="button" class="mini' + (dpaV ? '' : ' on') + '" data-bvue="" aria-pressed="' + (dpaV ? 'false' : 'true') + '">${T("Dépenses et kilométrage")}</button>'
+          + '<button type="button" class="mini' + (dpaV ? ' on' : '') + '" data-bvue="dpa" aria-pressed="' + (dpaV ? 'true' : 'false') + '">${T("Amortissement (DPA)")}</button></span>' : '')
+      + nav('bil', t.nbp) + '</h2>'
       + '<table class="bilan"><thead><tr><th></th>'
       + cols.map(function(l){ return '<th class="n">' + esc(nomLigne(l)) + '</th>'; }).join('')
       + '<th class="n">${T("Total")}</th></tr></thead><tbody>'
-      + grp('${T("Kilométrage")}')
+      + (dpaV ? lignesDpa() : '')
+      + (dpaV ? '' : grp('${T("Kilométrage")}')
       + rang('${T("Odomètre au début")}', function(l){ return odo(l, 'debut'); }, function(){ return ''; })
       + rang('${T("Odomètre à la fin")}', function(l){ return odo(l, 'fin'); }, function(){ return ''; })
       + rang('${T("Km totaux")}', function(l){ return l.kmTotal == null ? (l.id ? '<span class="attn">${T("à établir")}</span>' : '—') : km(l.kmTotal); }, function(){ return T0.kmTotal ? km(T0.kmTotal) : '—'; })
@@ -928,7 +1115,35 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
       + rang('${T("CTI admissibles — ligne 106")}', function(l){ return argent(l.tpsAdmissible); }, function(){ return argent(T0.tpsAdmissible || 0); }, 'cle')
       + rang('${T("TVQ payée")}', function(l){ return argent(l.tvq); }, function(){ return argent(somme(function(l){ return l.tvq; })); })
       + rang('${T("RTI admissibles — ligne 206")}', function(l){ return argent(l.tvqAdmissible); }, function(){ return argent(T0.tvqAdmissible || 0); }, 'cle')
+      + (aDpa ? rang('${T("DPA déductible — ligne 9936")}', function(l){ var g = l.dpa && l.dpa.ligne; return g ? argent(g.deductible) : '—'; }, function(){ return argent(T0.dpaDeductible || 0); }, 'cle') : ''))
       + '</tbody></table></div></div><div>';
+    /* ══ LA VUE DPA : une colonne par vehicule, la ligne de l annee. */
+    function lignesDpa(){
+      function g(l){ return l.dpa && l.dpa.applicable ? l.dpa.ligne : null; }
+      function m(f){ return function(l){ var x = g(l); return x ? argent(f(x)) : '—'; }; }
+      function tot(f){ return function(){ return argent(somme(function(l){ var x = g(l); return x ? f(x) : 0; })); }; }
+      var rec = Number(T0.recuperation) || 0, pf = Number(T0.perteFinale) || 0;
+      return grp('${T("Amortissement (DPA)")}')
+        + rang('${T("Catégorie")}', function(l){
+            if (!l.dpa) return '—';
+            if (!l.dpa.applicable) return l.dpa.raison === 'location' ? '<span class="gris">${T("location — sans DPA")}</span>' : '<span class="attn">${T("coût manquant")}</span>';
+            return esc(l.dpa.classe); }, function(){ return ''; })
+        + rang('${T("Coût en capital")}', function(l){ return l.dpa && l.dpa.applicable ? argent(l.dpa.cout) : '—'; }, function(){ return ''; })
+        + rang('${T("Plafond")}', function(l){
+            var pl = l.dpa && l.dpa.applicable ? l.dpa.plafond : null;
+            if (!pl || pl.montant == null) return '—';
+            return argent(pl.montant) + (pl.aConfirmer ? '<small class="attn">${T("à confirmer")}</small>' : ''); }, function(){ return ''; })
+        + rang('${T("Mise en service")}', function(l){ return l.dpa && l.dpa.applicable ? esc(szJour(l.dpa.miseEnService)) : '—'; }, function(){ return ''; })
+        + rang('${T("FNACC au début")}', m(function(x){ return x.fnaccDebut; }), tot(function(x){ return x.fnaccDebut; }))
+        + rang('${T("Ajout de l’année")}', m(function(x){ return x.ajout; }), tot(function(x){ return x.ajout; }))
+        + rang('${T("DPA maximale")}', function(l){ var x = g(l); return x ? argent(x.dpaMax) + '<small>' + esc(regle(x.regle)) + '</small>' : '—'; }, tot(function(x){ return x.dpaMax; }))
+        + rang('${T("DPA demandée")}', function(l){ var x = g(l); return x ? argent(x.dpaDemandee) + (x.reduite ? '<small>${T("réduite")}</small>' : '') : '—'; }, tot(function(x){ return x.dpaDemandee; }))
+        + rang('${T("Part d’affaires")}', function(l){ var x = g(l); return x ? (x.partEtablie ? pct(x.part) : '<span class="attn">${T("non établie")}</span>') : '—'; }, function(){ return ''; })
+        + rang('${T("DPA déductible — T2125 ligne 9936 / TP-80")}', m(function(x){ return x.deductible; }), function(){ return argent(T0.dpaDeductible || 0); }, 'cle')
+        + (rec ? rang('${T("Récupération — un revenu, ligne 8230")}', m(function(x){ return x.recuperation; }), function(){ return argent(rec); }, 'cle') : '')
+        + (pf ? rang('${T("Perte finale — ligne 9270")}', m(function(x){ return x.perteFinale; }), function(){ return argent(pf); }, 'cle') : '')
+        + rang('${T("FNACC à la fin (reportée)")}', m(function(x){ return x.fnaccFin; }), tot(function(x){ return x.fnaccFin; }));
+    }
     /* Ce qui manque, vehicule par vehicule, avec le geste qui le corrige. */
     var items = [];
     L.forEach(function(l){
@@ -952,12 +1167,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
       + '<li>${T("Québec — formulaire TP-80, frais de véhicule à moteur : le même déductible.")}</li>'
       + '<li>${T("Déclaration de TPS — ligne 106 : les CTI admissibles.")}</li>'
       + '<li>${T("Déclaration de TVQ — ligne 206 : les RTI admissibles.")}</li>'
+      + (aDpa ? '<li>${T("T2125, ligne 9936 « Déduction pour amortissement » : la DPA déductible (le détail va à la partie de la DPA du formulaire).")}</li>' : '')
+      + (Number(T0.recuperation) ? '<li>${T("T2125, ligne 8230 « Autres revenus » : la récupération d’amortissement.")}</li>' : '')
+      + (Number(T0.perteFinale) ? '<li>${T("T2125, ligne 9270 « Autres dépenses » : la perte finale.")}</li>' : '')
       + '</ul></div>'
-      + '<div class="carte"><h2>${T("La règle")}</h2><div class="aide">'
-      + '${T("Part d’affaires = km d’affaires de l’année ÷ km totaux à l’odomètre (ARC, guide T4002 ; Revenu Québec). Elle s’applique aux dépenses ET aux taxes récupérables.")} '
-      + '<strong>${T("Stationnement et péages d’affaires : 100 %")}</strong>${T(", hors de la répartition.")} '
-      + '${T("La comptabilité garde la dépense entière ; seule la déclaration applique la part.")}'
-      + '</div></div></div></div>';
+      + (dpaV
+        ? '<div class="carte"><h2>${T("Les règles de la DPA")}</h2><ul class="lignes">'
+          + '<li>${T("Taux de 30 % dégressif sur la FNACC (catégories 10, 10.1 et 54).")}</li>'
+          + '<li>${T("Première année selon la mise en service : demi-année avant le 21 nov. 2018 et dès 2028 ; × 1,5 de 2019 à 2023 ; sans demi-année de 2024 à 2027 (catégorie 54 : 100 %, 75 %, puis 55 %).")}</li>'
+          + '<li>${T("Catégorie 10.1 : voiture de tourisme au-dessus du plafond — coût ramené au plafond, une catégorie par véhicule, ni récupération ni perte finale ; la moitié de la DPA l’année de la vente.")}</li>'
+          + '<li>${T("Seule la part d’affaires se déduit ; la FNACC baisse de la DPA entière. Un véhicule loué n’a pas de DPA : ses loyers sont des frais de véhicule.")}</li>'
+          + '</ul></div>'
+        : '<div class="carte"><h2>${T("La règle")}</h2><div class="aide">'
+          + '${T("Part d’affaires = km d’affaires de l’année ÷ km totaux à l’odomètre (ARC, guide T4002 ; Revenu Québec). Elle s’applique aux dépenses ET aux taxes récupérables.")} '
+          + '<strong>${T("Stationnement et péages d’affaires : 100 %")}</strong>${T(", hors de la répartition.")} '
+          + '${T("La comptabilité garde la dépense entière ; seule la déclaration applique la part.")}'
+          + '</div></div>')
+      + '</div></div>';
     return h;
   }
 
@@ -970,6 +1196,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     else if (ONGLET === 'bilan') h += vueBilan();
     else h += vueRegistre();
     if (ONGLET !== 'vehicules' && VFORM) h += boiteVehicule();
+    if (ONGLET === 'vehicules' && !VFORM) h += boiteDpa();
     return h;
   }
   function cleListe(){
@@ -1030,10 +1257,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     if (VFORM && document.getElementById('v-ok')) {
       [['v-nom', 'nom'], ['v-marque', 'marque'], ['v-modele', 'modele'], ['v-annee', 'annee'],
        ['v-plaque', 'plaque'], ['v-acq', 'acquisLe'], ['v-oacq', 'odometreAcquis'], ['v-ret', 'retireLe'],
-       ['v-oret', 'odometreRetrait'], ['v-notes', 'notes']].forEach(function(p){
+       ['v-oret', 'odometreRetrait'], ['v-notes', 'notes'], ['v-mode', 'modeAcquisition'], ['v-prix', 'prixAvantTaxes'],
+       ['v-taxes', 'taxesNonRecuperees'], ['v-mes', 'miseEnService'], ['v-classe', 'classeDpa'], ['v-plafond', 'plafondDpa'],
+       ['v-pv', 'prixDisposition']].forEach(function(p){
         v = lu(p[0]); if (v != null) VFORM[p[1]] = v;
       });
+      v = coche('v-tour'); if (v != null) VFORM.tourisme = v;
+      v = coche('v-zero'); if (v != null) VFORM.zeroEmission = v;
     }
+    Array.prototype.forEach.call(corps.querySelectorAll('input[data-dpa]') || [], function(el){
+      if (typeof el.value === 'string') DPAS[el.getAttribute('data-dpa')] = el.value;
+    });
     Array.prototype.forEach.call(corps.querySelectorAll('input[data-odo]') || [], function(el){
       var id = el.getAttribute('data-odo'), c = el.getAttribute('data-champ');
       if (typeof el.value !== 'string') return;
@@ -1092,10 +1326,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     if ((oa != null && !isFinite(oa)) || (orr != null && !isFinite(orr))) {
       szDire('${T("Odomètre illisible : des chiffres seulement.")}', 'err'); return;
     }
+    var prix = lireNombre(f.prixAvantTaxes), tx = lireNombre(f.taxesNonRecuperees),
+        plaf = lireNombre(f.plafondDpa), pv = lireNombre(f.prixDisposition);
+    if ([prix, tx, plaf, pv].some(function(n){ return n != null && !isFinite(n); })) {
+      szDire('${T("Montant illisible : des chiffres seulement.")}', 'err'); return;
+    }
     if (!String(f.nom || '').trim()) { szDire(MOTIFS.nom, 'err'); var n = document.getElementById('v-nom'); if (n) n.focus(); return; }
     var charge = { id: f.id || undefined, nom: f.nom, marque: f.marque, modele: f.modele, annee: f.annee,
       plaque: f.plaque, acquisLe: f.acquisLe, odometreAcquis: oa, retireLe: f.retireLe,
-      odometreRetrait: orr, notes: f.notes };
+      odometreRetrait: orr, notes: f.notes,
+      modeAcquisition: f.modeAcquisition === 'location' ? 'location' : 'achat',
+      prixAvantTaxes: prix, taxesNonRecuperees: tx, miseEnService: f.miseEnService || '',
+      tourisme: f.tourisme !== false, zeroEmission: !!f.zeroEmission, classeDpa: f.classeDpa || '',
+      plafondDpa: plaf, prixDisposition: f.retireLe ? pv : null };
     if (b) b.disabled = true;
     szDire('${T("Enregistrement…")}');
     appeler('vehicules:ecrire', [charge]).then(function(r){
@@ -1128,6 +1371,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
       if (!r || !r.ok) { szDire(expliquer(r, 'odometre'), 'err'); return; }
       delete ODO[id];
       szDire('${T("Odomètre enregistré pour")} ' + v.nom + ' (' + ANNEE + ').', 'bon');
+      charger();
+    });
+  }
+  /* La DPA demandee d une annee. Vide ou << Maximum >> : on revient au maximum
+     (null). Un montant superieur au maximum est refuse par le site, qui dit lequel. */
+  function enregistrerDpa(id, maximum, b){
+    ramasser();
+    var v = vehicule(id);
+    if (!v) return;
+    var m = maximum ? null : lireNombre(DPAS[id] != null ? DPAS[id] : '');
+    if (m != null && !isFinite(m)) { szDire('${T("Montant de DPA illisible : des chiffres seulement.")}', 'err'); return; }
+    if (b) b.disabled = true;
+    szDire('${T("Enregistrement…")}');
+    appeler('vehicules:dpa', [id, ANNEE, m]).then(function(r){
+      if (b) b.disabled = false;
+      if (!r || !r.ok) { szDire(expliquer(r, 'dpa'), 'err'); return; }
+      delete DPAS[id];
+      szDire(m == null ? '${T("DPA ramenée au maximum pour")} ' + v.nom + ' (' + ANNEE + ').'
+        : '${T("DPA demandée enregistrée pour")} ' + v.nom + ' (' + ANNEE + ') : ' + argent(m) + '.', 'bon');
       charger();
     });
   }
@@ -1222,6 +1484,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     if (sv) { var idv = sv.getAttribute('data-sup-veh'); armer(sv, 'veh:' + idv, function(){ supprimerVehicule(idv); }); return; }
     var mv = t.closest('[data-veh-mod]');
     if (mv) { ouvrirVehicule(mv.getAttribute('data-veh-mod')); return; }
+    var dt = t.closest('[data-dpa-tab]');
+    if (dt) { DPATAB = dt.getAttribute('data-dpa-tab'); DPAPG = 0; dessiner(); var bf = document.getElementById('dpa-fermer'); if (bf) bf.focus(); return; }
+    var de = t.closest('[data-dpa-enr]');
+    if (de) { enregistrerDpa(de.getAttribute('data-dpa-enr'), false, de); return; }
+    var dm = t.closest('[data-dpa-max]');
+    if (dm) { enregistrerDpa(dm.getAttribute('data-dpa-max'), true, dm); return; }
+    var dg = t.closest('[data-dpg]');
+    if (dg) { DPAPG += parseInt(dg.getAttribute('data-dpg'), 10) || 0; dessiner(); return; }
+    var bv = t.closest('[data-bvue]');
+    if (bv) { BVUE = bv.getAttribute('data-bvue'); dessiner(); return; }
+    var vv = document.getElementById('dpa-voile');
+    if (vv && t === vv) { DPATAB = ''; dessiner(); return; }
     var oe = t.closest('[data-odo-enr]');
     if (oe) { enregistrerOdometre(oe.getAttribute('data-odo-enr'), oe); return; }
     var id = t.id || '';
@@ -1231,6 +1505,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     if (id === 'c-ok') { enregistrerChangement(t); return; }
     if (id === 'v-ok') { enregistrerVehicule(t); return; }
     if (id === 'v-annuler') { fermerVehicule(); return; }
+    if (id === 'dpa-fermer') { DPATAB = ''; dessiner(); return; }
     /* Un clic sur une ligne la MARQUE, sans redessiner (voir l en-tete). */
     var tr = t.closest('tr[data-dep]');
     if (tr && !t.closest('button')) {
@@ -1271,6 +1546,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     if (!t) return;
     if (t.id === 'f-veh') { FVEH = t.value; PG.reg = 0; dessiner(); return; }
     ramasser();
+    /* Le mode et la date de retrait changent les champs de la DPA (location :
+       aucun ; vendu : le prix de vente). */
+    if (t.id === 'v-mode' || t.id === 'v-ret') { dessiner(); var e2 = document.getElementById(t.id); if (e2) e2.focus(); return; }
     if (t.closest && t.closest('#f-dep')) {
       var c = document.getElementById('d-calc');
       if (c) c.textContent = apercuKm(SAISIE);
@@ -1287,11 +1565,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
       if (t.closest('#f-dep')) { ev.preventDefault(); enregistrerDeplacement(document.getElementById('d-ok')); return; }
       if (t.closest('#f-chg')) { ev.preventDefault(); enregistrerChangement(document.getElementById('c-ok')); return; }
       if (t.closest('#v-voile')) { ev.preventDefault(); enregistrerVehicule(document.getElementById('v-ok')); return; }
+      if (t.getAttribute && t.getAttribute('data-dpa')) { ev.preventDefault(); enregistrerDpa(t.getAttribute('data-dpa'), false, null); return; }
       if (t.getAttribute && t.getAttribute('data-odo')) { ev.preventDefault(); enregistrerOdometre(t.getAttribute('data-odo'), null); return; }
     }
     if (ev.key !== 'Escape') return;
     ev.preventDefault();
     if (ARME) { desarmer(); return; }
+    if (DPATAB) { DPATAB = ''; dessiner(); return; }
     if (VFORM) {
       ramasser();
       var rempli = !!(String(VFORM.nom || '').trim() && !VFORM.id);
