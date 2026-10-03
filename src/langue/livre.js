@@ -248,4 +248,32 @@ module.exports = {
   'Crédit Solde': 'Credit Balance',
   'Compte Débit Crédit': 'Account Debit Credit',
   '+ Capitaux propres': '+ Equity',
+
+  /* ── L'IGRF (2026-10-03) — en anglais, c'est le GIFI de l'ARC
+     (General Index of Financial Information). ── */
+  'IGRF': 'GIFI',
+  'Exporter le tableau (.csv)': 'Export the table (.csv)',
+  'Fichier d’import IGRF': 'GIFI import file',
+  'Le tableau IGRF': 'The GIFI table',
+  'Le fichier d’import IGRF': 'The GIFI import file',
+  'IGRF indisponible': 'GIFI unavailable',
+  'Le site n’a pas rendu l’IGRF : mettez la boutique à jour, puis rouvrez cette fenêtre.':
+    'The site did not return the GIFI: update the store, then reopen this window.',
+  'Code': 'Code',
+  'Poste': 'Item',
+  'Montant': 'Amount',
+  '9999 — bénéfice net': '9999 — net income',
+  'égale le résultat du livre': 'equals the ledger’s net income',
+  'DIFFÈRE du livre :': 'DIFFERS from the ledger:',
+  '2599 — total de l’actif': '2599 — total assets',
+  'égale 3585, passif et capital': 'equals 3585, liabilities and capital',
+  'DIFFÈRE de 3585 :': 'DIFFERS from 3585:',
+  'aucun code IGRF : ce solde manque au fichier.': 'no GIFI code: this balance is missing from the file.',
+  'État des résultats': 'Income statement',
+  'Charges d’exploitation': 'Operating expenses',
+  'À savoir avant de l’envoyer': 'Before you send it',
+  'Montants comptables : repas à 100 %, véhicule au montant payé. Les 50 %, la part d’affaires et la DPA vont dans la déclaration.':
+    'Accounting amounts: meals at 100%, vehicle at the amount paid. The 50% limit, business-use share and CCA go in the tax return.',
+  'Entreprise individuelle : capital en 3551 à 3585 (série des associés), retraits négatifs en 3553.':
+    'Sole proprietorship: capital in 3551 to 3585 (the partners’ series), drawings negative in 3553.',
 };

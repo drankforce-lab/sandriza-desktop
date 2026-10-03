@@ -44,7 +44,8 @@ const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, SEP_DEC } = requir
    lit — jamais une valeur enregistrable. Les NOMS DE COMPTES viennent du site
    avec les chiffres (le plan comptable déduit des catégories de dépenses) : les
    recopier ici ferait deux listes qui divergeraient au premier poste ajouté. */
-const T = require('../langue').tr('livre');
+const LANGUE = require('../langue');
+const T = LANGUE.tr('livre');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -164,6 +165,8 @@ tbody tr.ligne td:first-child{padding-left:1.4rem}
    Deux colonnes la ou un ecran de 1400 px en tient deux ; le journal se PAGINE
    par ecriture entiere (jamais une ecriture coupee entre deux pages). */
 .duo{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;align-items:start}
+.trio{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7rem;align-items:start}
+.trio>div>.carte+.carte{margin-top:.7rem}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;align-items:center;justify-content:center;z-index:50;padding:1rem}
 .voile .boite{max-width:52rem;width:100%;max-height:88vh;overflow:hidden;margin:0}
 .duo>div{display:flex;flex-direction:column;gap:.7rem;min-width:0}
@@ -197,7 +200,7 @@ tbody tr.ligne td:first-child{padding-left:1.4rem}
  * être regardé (leçon de #116).
  */
 function pageLivre(onglet) {
-  const ok = ['grandlivre', 'balance', 'bilan', 'ecritures'];
+  const ok = ['grandlivre', 'balance', 'bilan', 'ecritures', 'igrf'];
   const depart = (ok.indexOf(String(onglet || '')) >= 0) ? String(onglet) : 'journal';
   return `${TETE()}
 <title>${T("Livre de comptes — Administration Sandriza")}</title>
@@ -221,6 +224,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
   var D = null;              /* le livre, tel que le site le rend */
   var ONGLET = '${depart}';
   var ANNEE = 0;
+  var EN = ${LANGUE.langueCourante() === 'en' ? 'true' : 'false'};  /* l IGRF porte ses deux noms : nom et nomEn */
   var RO = true;             /* pas de droit d ecriture tant qu on ne l a pas lu */
   var OCCUPE = false;
   var OUVERT = null;         /* le compte deplie dans le grand livre */
@@ -287,7 +291,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
     ['grandlivre', '${T("Grand livre")}'],
     ['balance',    '${T("Balance")}'],
     ['bilan',      '${T("Bilan")}'],
-    ['ecritures',  '${T("Écritures manuelles")}']
+    ['ecritures',  '${T("Écritures manuelles")}'],
+    ['igrf',       '${T("IGRF")}']
   ];
   /* Quel document sort de quel onglet. ⚠ << Écritures manuelles >> n en a pas :
      elles sont DANS le journal, et un imprimé qui ne porterait qu elles se
@@ -330,12 +335,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
     if (ONGLET === 'ecritures' && !RO) {
       h += '<button class="prim" id="neuve">${T("Nouvelle écriture")}</button>';
     }
+    /* L IGRF SORT EN DEUX FICHIERS, composes par le site (GrandLivre.igrfCsv,
+       igrfImport) : celui qui se LIT (Excel, avec les comptes d origine) et
+       celui qui s IMPORTE tel quel dans le logiciel d impot du comptable. */
+    if (ONGLET === 'igrf' && D.igrf) {
+      h += '<button class="mini" id="igrf-csv">${T("Exporter le tableau (.csv)")}</button>'
+         + '<button class="prim" id="igrf-imp">${T("Fichier d’import IGRF")}</button>';
+    }
     h += '</span>';
     elOutils.innerHTML = h;
     var sel = document.getElementById('an');
     if (sel) sel.onchange = function(){ ANNEE = parseInt(sel.value, 10); charger(); };
     var nv = document.getElementById('neuve');
     if (nv) nv.onclick = function(){ SAISIE = ecritureNeuve(); dessiner(); };
+    var ic = document.getElementById('igrf-csv');
+    if (ic) ic.onclick = function(){
+      szExporter(D.igrf.nomCsv || ('igrf-' + ANNEE + '.csv'), D.igrf.csv, '${T("Le tableau IGRF")}');
+    };
+    var ii = document.getElementById('igrf-imp');
+    if (ii) ii.onclick = function(){
+      szExporter(D.igrf.nomImport || ('igrf-' + ANNEE + '-import.txt'), D.igrf.importTxt, '${T("Le fichier d’import IGRF")}');
+    };
     var im = document.getElementById('imprimer');
     if (im) im.onclick = function(){
       var d = IMPRIMABLE[ONGLET];
@@ -663,6 +683,61 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
     return h;
   }
 
+  /* ══ ONGLET IGRF (2026-10-03) ═════════════════════════════════════════════
+     Les soldes du livre regroupes sous les codes de l ARC (guide RC4088), que
+     le comptable importe dans son logiciel d impot. ⚠ RIEN N EST CALCULE ICI :
+     codes, montants, totaux et controles viennent de GrandLivre.igrfCoeur, dont
+     le banc exige que 9999 retombe sur le resultat du livre. L ecran montre les
+     deux controles EN TETE pour la meme raison que le rapprochement : s ils
+     divergent, le fichier ne doit pas partir. */
+  function vueIgrf(){
+    var g = D.igrf;
+    if (!g) return '<div class="vide"><strong>${T("IGRF indisponible")}</strong><div style="margin-top:.4rem">'
+      + '${T("Le site n’a pas rendu l’IGRF : mettez la boutique à jour, puis rouvrez cette fenêtre.")}</div></div>';
+    var c = g.controles || {};
+    var okR = c.resultat && c.resultat.concorde, okB = c.bilan && c.bilan.concorde;
+    function lg(l){
+      return '<tr' + (l.total ? ' class="tot"' : '') + ' title="' + esc((EN ? l.nom : (l.nomEn || '')) + ((l.comptes || []).length ? ' · ' + l.comptes.join(' · ') : '')) + '">'
+        + '<td class="n" style="width:3.6rem;text-align:left">' + esc(l.code) + '</td>'
+        + '<td>' + esc(EN && l.nomEn ? l.nomEn : l.nom) + '</td><td class="n">' + argent(l.montant) + '</td></tr>';
+    }
+    var tete = '<thead><tr><th>${T("Code")}</th><th>${T("Poste")}</th><th class="n">${T("Montant")}</th></tr></thead>';
+    var h = szTuiles('<div class="chiffres">'
+      + '<div class="chiffre ' + (okR ? 'pos' : 'neg') + '"><div class="lbl">${T("9999 — bénéfice net")}</div>'
+      + '<div class="val">' + argent(c.resultat ? c.resultat.igrf : 0) + '</div>'
+      + '<div class="sous">' + (okR ? '${T("égale le résultat du livre")}' : '${T("DIFFÈRE du livre :")} ' + argent(c.resultat ? c.resultat.livre : 0)) + '</div></div>'
+      + '<div class="chiffre ' + (okB ? 'pos' : 'neg') + '"><div class="lbl">${T("2599 — total de l’actif")}</div>'
+      + '<div class="val">' + argent(c.bilan ? c.bilan.actif : 0) + '</div>'
+      + '<div class="sous">' + (okB ? '${T("égale 3585, passif et capital")}' : '${T("DIFFÈRE de 3585 :")} ' + argent(c.bilan ? c.bilan.passifEtCapital : 0)) + '</div></div>'
+      + '</div>');
+    var notes = [];
+    (g.aReclasser || []).forEach(function(x){
+      notes.push('<li><b>' + esc(x.igrf) + '</b> ' + esc(x.nom) + ' (' + argent(x.montant) + ') — ' + esc(x.motif) + '</li>');
+    });
+    (g.nonClasses || []).forEach(function(x){
+      notes.push('<li class="mauvais"><b>' + esc(x.code) + '</b> ' + esc(x.nom) + ' — ${T("aucun code IGRF : ce solde manque au fichier.")}</li>');
+    });
+    /* TROIS COLONNES, PAS DEUX (sa regle : aucune barre de defilement). L etat
+       des resultats en une colonne debordait de 300 px a 1400 x 833 ; on le
+       coupe la ou un comptable le coupe : le sommaire (ventes, cout des
+       ventes, totaux) d un cote, le detail des charges d exploitation de
+       l autre. C est un tri d AFFICHAGE par code, aucun montant n est refait. */
+    var res = g.resultats || [];
+    var charges = res.filter(function(l){ var n = +l.code; return n >= 8520 && n <= 9366; });
+    var sommaire = res.filter(function(l){ var n = +l.code; return !(n >= 8520 && n <= 9366); });
+    h += '<div class="trio">'
+      + '<div class="carte"><h2>${T("Bilan")}</h2><table>' + tete + '<tbody>' + (g.bilan || []).map(lg).join('') + '</tbody></table></div>'
+      + '<div><div class="carte"><h2>${T("État des résultats")}</h2><table>' + tete + '<tbody>' + sommaire.map(lg).join('') + '</tbody></table></div>'
+      + '<div class="carte"><h2>${T("À savoir avant de l’envoyer")}</h2><ul class="gris" style="margin:.2rem 0 0;padding-left:1.1rem;font-size:.76rem;line-height:1.5">'
+      + notes.join('')
+      + '<li>${T("Montants comptables : repas à 100 %, véhicule au montant payé. Les 50 %, la part d’affaires et la DPA vont dans la déclaration.")}</li>'
+      + '<li>${T("Entreprise individuelle : capital en 3551 à 3585 (série des associés), retraits négatifs en 3553.")}</li>'
+      + '</ul></div></div>'
+      + '<div class="carte"><h2>${T("Charges d’exploitation")}</h2><table>' + tete + '<tbody>' + charges.map(lg).join('') + '</tbody></table></div>'
+      + '</div>';
+    return h;
+  }
+
   /* ══ ONGLET ÉCRITURES MANUELLES ══════════════════════════════════════════
      ⚠⚠ ON NE MODIFIE PAS UNE ÉCRITURE, ON LA CONTRE-PASSE. Un livre dont on
      peut reecrire une ecriture passee n est pas un livre : on ne peut plus dire
@@ -745,6 +820,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
     else if (ONGLET === 'balance') h += vueBalance();
     else if (ONGLET === 'bilan') h += vueBilan();
     else if (ONGLET === 'ecritures') h += vueEcritures();
+    else if (ONGLET === 'igrf') h += vueIgrf();
     else h += vueJournal();
     if (ONGLET === 'grandlivre') h += boiteMouvements();
     corps.innerHTML = h;
@@ -757,7 +833,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
     }
     /* LE BUDGET SE MESURE : si la page deborde, une ligne de moins et on
        redessine (quelques tours au plus) ; jamais de glissiere. */
-    if (ONGLET !== 'grandlivre' && ONGLET !== 'balance' && ONGLET !== 'bilan' && ONGLET !== 'ecritures'
+    if (ONGLET !== 'grandlivre' && ONGLET !== 'balance' && ONGLET !== 'bilan' && ONGLET !== 'ecritures' && ONGLET !== 'igrf'
         && D.journal && D.journal.length) {
       var tours = 0;
       while (corps.scrollHeight > corps.clientHeight + 1 && JBUDGET > 4 && tours < 60) {
