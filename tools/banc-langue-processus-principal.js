@@ -99,6 +99,17 @@ const TABLES = [
     sources: ['src/veilleur.js'],
     plancher: 15,
   },
+  {
+    nom: 'rappelsnotif',
+    titre: 'LES NOTIFICATIONS DE RAPPELS',
+    /* ⚠ QUATRIEME TABLE (2026-10-02) : les notifications de bureau des rappels
+       sont baties dans le processus principal (`src/rappels-notif.js`) — aucune
+       fenetre ne les dessine, donc aucun autre banc ne les lirait. `TR(...)` a
+       son propre prefixe, comme `TA` et `TV`. */
+    appel: /\bTR\(\s*(?:'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)")/g,
+    sources: ['src/rappels-notif.js'],
+    plancher: 10,
+  },
 ];
 
 const sansCommentaires = (s) => s

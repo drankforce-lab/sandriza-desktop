@@ -81,6 +81,11 @@ const DEFAUTS = {
      visible. Écrire `false` partout ferait grossir le fichier d'une ligne par
      fenêtre pour dire « rien de spécial ». */
   tuilesMasquees: {},
+  /* Les notifications de bureau des RAPPELS (2026-10-02) : un interrupteur, et
+     le releve de ceux deja annonces AUJOURD HUI — relancer l application le
+     meme jour ne les re-annonce pas. Voir src/rappels-notif.js. */
+  notifRappels: true,
+  rappelsNotifies: { jour: '', ids: [] },
 };
 
 let _cache = null;

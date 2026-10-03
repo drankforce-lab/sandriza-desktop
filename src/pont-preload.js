@@ -263,6 +263,12 @@ contextBridge.exposeInMainWorld('szPont', {
      ouvre dans l'application, elle le demande. */
   ouvrirModule: (nom) => ipcRenderer.invoke('module:ouvrir', String(nom || '')).catch(() => false),
 
+  /* Les notifications de bureau des rappels (2026-10-02) : sans argument, LIT
+     l interrupteur ; avec true / false, le pose. Rend toujours l etat en
+     vigueur (null si le principal ne repond pas). Le reglage vit dans le
+     POSTE (reglages.json), pas dans le site. */
+  rappelsNotif: (v) => ipcRenderer.invoke('rappels:notif', (v === true || v === false) ? v : null).catch(() => null),
+
   /* ══ ÉCRIRE UN FICHIER D EXPORT — DEPUIS LA FENÊTRE QUI L A DEMANDÉ ════════
      ⚠⚠ POURQUOI CE CANAL EXISTE (2026-08-20, signalé : « ça apparaît dans les
      Import mais rien ne se télécharge »). Une fenêtre native qui demandait un

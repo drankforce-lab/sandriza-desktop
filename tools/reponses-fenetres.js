@@ -3427,6 +3427,98 @@ const JEU = {
     ];
   })(),
 
+  // ── RAPPELS (2026-10-02) ───────────────────────────────────────────────────
+  // ⚠ FORMES DE `rappelsDonnees` (assets/js/pont.js) ; fréquences, modules et
+  // rappels proposés recopiés mot pour mot de assets/js/rappels.js (FREQUENCES,
+  // MODULES, MODELES) — src/vocabulaire-site.js les traduit à l'affichage.
+  // Le jour du jeu : 2026-10-02.
+  'rappels.js': (function(){
+    var FREQ = [
+      { cle: 'unique', nom: 'Une seule fois' }, { cle: 'quotidien', nom: 'Chaque jour' },
+      { cle: 'hebdomadaire', nom: 'Chaque semaine' }, { cle: 'mensuel', nom: 'Chaque mois' },
+      { cle: 'trimestriel', nom: 'Chaque trimestre' }, { cle: 'annuel', nom: 'Chaque année' },
+    ];
+    var MODS = [
+      { cle: '', nom: '— aucun —' }, { cle: 'depenses', nom: 'Dépenses' },
+      { cle: 'vehicules', nom: 'Véhicules et déplacements' }, { cle: 'impot', nom: 'Fiscalité et impôt' },
+      { cle: 'bankrec', nom: 'Conciliation bancaire' }, { cle: 'livre', nom: 'Livre de comptes' },
+      { cle: 'compta', nom: 'Rapports et budget' }, { cle: 'factures', nom: 'Factures' },
+      { cle: 'inventaire', nom: 'Inventaire' }, { cle: 'commandes', nom: 'Commandes' },
+    ];
+    var modele = function(cle, titre, module, frequence, prochaine, note, deja){
+      return { cle: cle, titre: titre, note: note, module: module, frequence: frequence, prochaine: prochaine, deja: !!deja };
+    };
+    var MODELES = function(pris){
+      pris = pris || {};
+      return [
+        modele('depenses-semaine', 'Saisir les dépenses de la semaine', 'depenses', 'hebdomadaire', '2026-10-02',
+          'Factures, reçus, relevés : une dépense saisie tout de suite garde sa pièce et ses taxes.', pris['depenses-semaine']),
+        modele('deplacements-semaine', 'Inscrire les déplacements de la semaine', 'vehicules', 'hebdomadaire', '2026-10-02',
+          'Le registre fait la part d’affaires du véhicule : un déplacement oublié est une déduction perdue.', pris['deplacements-semaine']),
+        modele('conciliation-mois', 'Conciliation bancaire du mois', 'bankrec', 'mensuel', '2026-10-05',
+          'Rapprocher le relevé du mois précédent.', pris['conciliation-mois']),
+        modele('tps-tvq-trimestre', 'Remise TPS/TVQ du trimestre', 'impot', 'trimestriel', '2026-10-31',
+          'Déclaration et paiement un mois après la fin du trimestre (30 avril, 31 juillet, 31 octobre, 31 janvier). Lignes 106 et 206 : les CTI/RTI des dépenses.', pris['tps-tvq-trimestre']),
+        modele('acomptes', 'Acompte provisionnel (impôt fédéral et du Québec)', 'impot', 'trimestriel', '2026-12-15',
+          '15 mars, 15 juin, 15 septembre, 15 décembre.', pris['acomptes']),
+        modele('odometre', 'Relever l’odomètre de chaque véhicule', 'vehicules', 'annuel', '2026-12-31',
+          'Le compteur au 31 décembre ferme l’année et ouvre la suivante : sans lui, la part d’affaires n’est pas établie.', pris['odometre']),
+        modele('impot-paiement', 'Payer le solde d’impôt de l’année', 'impot', 'annuel', '2027-04-30',
+          'Le solde est dû le 30 avril, même si la déclaration d’un travailleur autonome peut attendre au 15 juin.', pris['impot-paiement']),
+        modele('impot-declaration', 'Déposer la déclaration de revenus (T1 et TP-1)', 'impot', 'annuel', '2027-06-15',
+          'Travailleur autonome : au plus tard le 15 juin. Imprimez la T2125 et le TP-80 depuis Fiscalité et impôt.', pris['impot-declaration']),
+      ];
+    };
+    var rap = function(id, titre, etat, prochaine, frequence, module, o){
+      return Object.assign({ id: id, titre: titre, note: '', frequence: frequence, prochaine: prochaine, jour: null,
+        module: module, courriel: false, actif: etat !== 'termine', modele: '', dernierFait: '', etat: etat, historique: [] }, o || {});
+    };
+    var LISTE = [
+      rap('r1', 'Saisir les dépenses de la semaine', 'retard', '2026-09-25', 'hebdomadaire', 'depenses',
+        { modele: 'depenses-semaine', note: 'Factures, reçus, relevés : une dépense saisie tout de suite garde sa pièce et ses taxes.',
+          dernierFait: '2026-09-19', courriel: true,
+          historique: [{ le: '2026-09-19T16:42:00.000Z', geste: 'fait', echeance: '2026-09-18', par: 'Brigitte Brousseau' },
+            { le: '2026-09-11T13:05:00.000Z', geste: 'reporte', echeance: '2026-09-11', vers: '2026-09-12', par: 'Brigitte Brousseau' }] }),
+      rap('r2', 'Conciliation bancaire du mois', 'retard', '2026-09-05', 'mensuel', 'bankrec', { modele: 'conciliation-mois', jour: 5 }),
+      rap('r3', 'Inscrire les déplacements de la semaine', 'aujourdhui', '2026-10-02', 'hebdomadaire', 'vehicules', { modele: 'deplacements-semaine' }),
+      rap('r4', 'Renouveler l’assurance de la boutique', 'bientot', '2026-10-06', 'unique', '', { courriel: true, note: 'Appeler le courtier avant le 10.' }),
+      rap('r5', 'Commander les sacs et le papier de soie', 'bientot', '2026-10-08', 'mensuel', 'inventaire', { jour: 8 }),
+      rap('r6', 'Remise TPS/TVQ du trimestre', 'avenir', '2026-10-31', 'trimestriel', 'impot', { modele: 'tps-tvq-trimestre', jour: 31 }),
+      rap('r7', 'Relever l’odomètre de chaque véhicule', 'avenir', '2026-12-31', 'annuel', 'vehicules', { modele: 'odometre', jour: 31 }),
+      rap('r8', 'Commander les étiquettes de Noël', 'termine', '2026-09-15', 'unique', 'commandes', { dernierFait: '2026-09-15' }),
+      rap('r9', 'Vérifier les factures impayées', 'termine', '', 'unique', 'factures', { dernierFait: '2026-08-30' }),
+    ];
+    var pris = { 'depenses-semaine': 1, 'conciliation-mois': 1, 'deplacements-semaine': 1, 'tps-tvq-trimestre': 1, 'odometre': 1 };
+    var donnees = function(liste, modeles, droits){
+      return Object.assign({ ok: true, aujourdhui: '2026-10-02', rappels: liste,
+        nbDus: liste.filter(function(r){ return r.etat === 'retard' || r.etat === 'aujourdhui'; }).length,
+        modeles: modeles, frequences: FREQ, modules: MODS,
+        peutAjouter: true, peutModifier: true, peutSupprimer: true }, droits || {});
+    };
+    var GARNI = donnees(LISTE, MODELES(pris));
+    var VIDE = donnees([], MODELES({}));
+    var LECTURE = donnees(LISTE, MODELES(pris), { peutAjouter: false, peutModifier: false, peutSupprimer: false });
+    var rep = function(d){
+      return { 'rappels:donnees': d, identite: IDENTITE,
+        'rappels:etat': { ok: true, aujourdhui: '2026-10-02', dus: (d.rappels || []).filter(function(r){ return r.etat === 'retard' || r.etat === 'aujourdhui'; }) },
+        'rappels:ecrire': { ok: true, id: 'rap_mh9a1' }, 'rappels:modele': { ok: true, id: 'rap_mh9a2' },
+        'rappels:fait': { ok: true, id: 'r1' }, 'rappels:reporter': { ok: true, id: 'r1' }, 'rappels:supprimer': { ok: true, id: '' } };
+    };
+    var cas = function(nom, id, d, exige){ return { nom: nom, id: id, reponses: rep(d), exige: exige }; };
+    return [
+      cas('liste garnie (retard, aujourd’hui, semaine, à venir, terminés)', '', GARNI,
+        ['data-fait="r1"', 'data-rep="r3"', 'data-ouvrir="depenses"', 'data-modele="acomptes"']),
+      cas('terminés repliés sous une liste courte', '', donnees([LISTE[2], LISTE[7], LISTE[8]], MODELES(pris)), ['data-repli="termine"']),
+      cas('modèle déjà ajouté (pastille, pas de bouton)', '', GARNI, ['déjà ajouté']),
+      cas('aucun rappel — appel aux rappels proposés', '', VIDE, ['data-act="tout"', 'data-modele="depenses-semaine"']),
+      cas('formulaire — nouveau rappel (mensuel : jour du mois)', 'nouveau', GARNI, ['id="r-ok"', 'id="r-jour"', 'id="r-courriel"']),
+      cas('formulaire — modification (historique, actif)', 'modifier', GARNI, ['id="r-actif"', 'class="hist"']),
+      cas('menu « Reporter » ouvert', 'reporter', GARNI, ['id="r-repdate"', 'data-repj="7"']),
+      cas('lecture seule', '', LECTURE, ['class="avis"']),
+      { nom: 'module des rappels absent', id: '', reponses: { 'rappels:donnees': { ok: false, motif: 'indisponible' }, identite: IDENTITE } },
+    ];
+  })(),
+
   // ── DÉCOMPTE D'INACTIVITÉ ──────────────────────────────────────────────────
   // ⚠ Cette fenêtre n'INTERROGE rien : elle reçoit sa durée par son paramètre
   // d'ouverture et n'appelle le pont qu'au CLIC. Le jeu d'essai ne prouve donc

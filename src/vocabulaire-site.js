@@ -369,4 +369,43 @@ module.exports = {
   '30 %': '30%',
   'vente': 'sale',
   'vente 10.1 (½)': 'sale, class 10.1 (½)',
+  // Rappels (rappels.js : FREQUENCES[…].nom, MODULES[…].nom, MODELES[…].titre et .note) — op rappels:donnees.
+  // ⚠ Lecture seule : ce qui repart au site est la CLE (mensuel, depenses, acomptes…), jamais ce texte.
+  // « Inventaire » et « Commandes » sont deja plus haut.
+  'Une seule fois': 'Once',
+  'Chaque jour': 'Every day',
+  'Chaque semaine': 'Every week',
+  'Chaque mois': 'Every month',
+  'Chaque trimestre': 'Every quarter',
+  'Chaque année': 'Every year',
+  '— aucun —': '— none —',
+  'Dépenses': 'Expenses',
+  'Véhicules et déplacements': 'Vehicles and mileage',
+  'Fiscalité et impôt': 'Tax',
+  'Conciliation bancaire': 'Bank reconciliation',
+  'Livre de comptes': 'General ledger',
+  'Rapports et budget': 'Reports and budget',
+  'Factures': 'Invoices',
+  'Saisir les dépenses de la semaine': 'Enter this week’s expenses',
+  'Factures, reçus, relevés : une dépense saisie tout de suite garde sa pièce et ses taxes.':
+    'Invoices, receipts, statements: an expense entered right away keeps its receipt and its taxes.',
+  'Inscrire les déplacements de la semaine': 'Log this week’s trips',
+  'Le registre fait la part d’affaires du véhicule : un déplacement oublié est une déduction perdue.':
+    'The logbook sets the vehicle’s business share: a forgotten trip is a lost deduction.',
+  'Conciliation bancaire du mois': 'Monthly bank reconciliation',
+  'Rapprocher le relevé du mois précédent.': 'Reconcile the previous month’s statement.',
+  'Remise TPS/TVQ du trimestre': 'Quarterly GST/QST remittance',
+  'Déclaration et paiement un mois après la fin du trimestre (30 avril, 31 juillet, 31 octobre, 31 janvier). Lignes 106 et 206 : les CTI/RTI des dépenses.':
+    'Return and payment one month after the end of the quarter (April 30, July 31, October 31, January 31). Lines 106 and 206: the ITCs/ITRs on expenses.',
+  'Acompte provisionnel (impôt fédéral et du Québec)': 'Tax instalment (federal and Quebec)',
+  '15 mars, 15 juin, 15 septembre, 15 décembre.': 'March 15, June 15, September 15, December 15.',
+  'Relever l’odomètre de chaque véhicule': 'Read each vehicle’s odometer',
+  'Le compteur au 31 décembre ferme l’année et ouvre la suivante : sans lui, la part d’affaires n’est pas établie.':
+    'The odometer on December 31 closes the year and opens the next: without it, the business share is not established.',
+  'Payer le solde d’impôt de l’année': 'Pay the year’s balance of tax',
+  'Le solde est dû le 30 avril, même si la déclaration d’un travailleur autonome peut attendre au 15 juin.':
+    'The balance is due April 30, even though a self-employed person’s return can wait until June 15.',
+  'Déposer la déclaration de revenus (T1 et TP-1)': 'File the income tax return (T1 and TP-1)',
+  'Travailleur autonome : au plus tard le 15 juin. Imprimez la T2125 et le TP-80 depuis Fiscalité et impôt.':
+    'Self-employed: by June 15 at the latest. Print the T2125 and the TP-80 from Tax.',
 };

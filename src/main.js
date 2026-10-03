@@ -2799,6 +2799,11 @@ const OPS_PONT = new Set([
   'vehicules:dpa',
   // La liste des marques et modeles d une annee, demandee a la NHTSA (vPIC).
   'vehicules:catalogue',
+  // Rappels (fenetre Rappels, 2026-10-02). ⚠ `rappels:etat` sert AUSSI au
+  // processus principal : c est lui que src/rappels-notif.js interroge pour
+  // les notifications de bureau, par la meme porte (executerOpSite).
+  'rappels:donnees', 'rappels:etat', 'rappels:ecrire', 'rappels:modele',
+  'rappels:fait', 'rappels:reporter', 'rappels:supprimer',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
@@ -3407,6 +3412,10 @@ const LIMITES_PONT = {
   /* 37 demandes paralleles a la NHTSA (une par marque), puis l ecriture de la
      configuration partagee : 10 a 30 s d habitude, davantage sur un reseau lent. */
   'vehicules:catalogue': 90000,
+  /* Les rappels se lisent en local ; les ecritures passent par le nuage. */
+  'rappels:donnees': 15000, 'rappels:etat': 15000,
+  'rappels:ecrire': 30000, 'rappels:modele': 30000, 'rappels:fait': 30000,
+  'rappels:reporter': 30000, 'rappels:supprimer': 30000,
   /* Un repli : une lecture ou une ecriture d un seul booleen dans le profil. */
   'ui:repli': 15000,
   'patrons:liste': 20000, 'patrons:ecrire': 30000, 'patrons:basculer': 30000,
@@ -3682,8 +3691,14 @@ const _traduireLibelles = (x, prof) => {
   return x;
 };
 
-ipcMain.handle('pont:appeler', async (e, op, args) => {
-  const nom = String(op || '');
+ipcMain.handle('pont:appeler', (e, op, args) => executerOpSite(String(op || ''), args, e.sender));
+/* ⚠⚠ LA PORTE DU SITE, UNE SEULE (2026-10-02). Elle vivait DANS le gestionnaire
+   `pont:appeler` ; les notifications de rappels (src/rappels-notif.js) ont
+   besoin de la meme — meme liste blanche, meme plafond, meme traduction des
+   libelles. La recopier aurait fait une seconde porte qui divergerait au
+   premier correctif. `emetteur` : la fenetre qui appelle (null depuis le
+   processus principal) — elle n est pas rafraichie par sa propre ecriture. */
+async function executerOpSite(nom, args, emetteur) {
   if (!OPS_PONT.has(nom)) return { ok: false, motif: 'operation_inconnue' };
   const wc = siteWC();
   if (!wc) return { ok: false, motif: 'pont_indisponible' };
@@ -3734,7 +3749,7 @@ ipcMain.handle('pont:appeler', async (e, op, args) => {
       // Les assistants collection et fournisseur previennent leur liste.
       if (nom === 'collection:enregistrer') fenetres.push('collections');
       if (nom === 'fournisseur:enregistrer') fenetres.push('fournisseurs');
-      if (fenetres.length) actualiserFenetres(fenetres, e.sender);
+      if (fenetres.length) actualiserFenetres(fenetres, emetteur);
     }
     /* ⚠⚠ LA DERNIÈRE CHOSE AVANT QUE LA RÉPONSE N'ENTRE DANS LA FENÊTRE : les
        libellés composés par le site passent en anglais ici, et NULLE PART
@@ -3746,7 +3761,7 @@ ipcMain.handle('pont:appeler', async (e, op, args) => {
     if (r && typeof r === 'object') { try { _traduireLibelles(r, 0); } catch (er) {} }
     return (r && typeof r === 'object') ? r : { ok: false, motif: 'erreur' };
   } catch { return { ok: false, motif: 'pont_indisponible' }; }
-});
+}
 
 // ── RELAIS DE L'AFFICHAGE CLIENT ────────────────────────────────────────────
 // La caisse (fenêtre principale) pousse son état ; on le porte à la fenêtre
@@ -3842,6 +3857,7 @@ const PAGES_ANCRABLES = () => ({
   compta: ['Rapports et budget', () => pageComptabilite()],
   livre: ['Livre de comptes', () => pageLivre()],
   vehicules: ['Véhicules et déplacements', () => pageVehicules()],
+  rappels: ['Rappels', () => pageRappels()],
   liens: ['Liens d’installation', () => pageLiens('')],
   comptable: ['Liens comptables', () => pageComptable('')],
   bankrec: ['Conciliation bancaire', () => pageBanque('')],
@@ -5829,6 +5845,7 @@ const { pageImpot } = require('./fenetres/impot');
 const { pageComptabilite } = require('./fenetres/comptabilite');
 const { pageLivre } = require('./fenetres/livre');
 const { pageVehicules } = require('./fenetres/vehicules');
+const { pageRappels } = require('./fenetres/rappels');
 const { pageLiens } = require('./fenetres/liens');
 const { pageComptable } = require('./fenetres/comptable');
 const { pageInactivite } = require('./fenetres/inactivite');
@@ -5898,6 +5915,25 @@ const { pageRetour } = require('./fenetres/retour');
 const { pageRemboursement } = require('./fenetres/remboursement');
 const { pageClient } = require('./fenetres/client');
 const reglages = require('./reglages');
+/* ══ LES NOTIFICATIONS DE RAPPELS (2026-10-02) — voir src/rappels-notif.js.
+   Armees a l ouverture de session (le modele du menu, plus bas), puis toutes
+   les 15 minutes ; par la porte du site, comme les fenetres. */
+const rappelsNotif = require('./rappels-notif').creer({
+  executerOp: (nom, args) => executerOpSite(nom, args, null),
+  notifier: (titre, corps, options) => notifier(titre, corps, options),
+  sessionOuverte: () => _sessionOuverte(),
+  reglages,
+});
+/* Le reglage « Notifications de rappels », lu et change depuis la fenetre
+   Rappels. Rend toujours l etat en vigueur. A la remise en marche, on
+   verifie tout de suite. */
+ipcMain.handle('rappels:notif', (e, v) => {
+  if (v === true || v === false) {
+    try { reglages.set('notifRappels', v); } catch (er) {}
+    if (v) rappelsNotif.verifier().catch(() => {});
+  }
+  return rappelsNotif.actif();
+});
 
 // Dernier modèle reçu du site. Vide tant que la page n'a rien envoyé (site pas
 // encore chargé, ou version du site antérieure à appbar.js).
@@ -6043,6 +6079,8 @@ const actionApp = (nom, arg) => {
     // Vehicules et deplacements (2026-10-02) : meme cas que <<livre>>, nee native,
     // sa section hote cote site (admin.js, _DOCKABLES) ne porte que la zone.
     case 'vehicules':
+    // Rappels (2026-10-02) : meme cas, sa section hote cote site ne porte que la zone.
+    case 'rappels':
     case 'config-heures': case 'config-footer': case 'config-apparence':
     case 'config-marque': case 'config-icones': case 'config-taxes': case 'config-conformite':
     case 'compte-paiement':
@@ -6340,7 +6378,10 @@ ipcMain.handle('journaux:ouvrir', (e, onglet) => {
 /* ⚠ 'depenses' et 'vehicules' (2026-10-02) : chacune ouvre l autre — les depenses
    de vehicule se SAISISSENT dans Depenses et se REPARTISSENT dans Vehicules.
    Les deux ont leur section hote cote site : le chemin d ancrage les trouve. */
-const _MODULES_OUVRABLES = ['verrous', 'journaux', 'securite', 'incidents', 'config-logotheque', 'corbeille', 'depenses', 'vehicules'];
+/* ⚠ Les modules qu un RAPPEL peut ouvrir (bouton « Ouvrir » de la fenetre
+   Rappels, 2026-10-02) : les cles de `Rappels.MODULES` du site. */
+const _MODULES_OUVRABLES = ['verrous', 'journaux', 'securite', 'incidents', 'config-logotheque', 'corbeille', 'depenses', 'vehicules',
+  'rappels', 'impot', 'bankrec', 'livre', 'compta', 'factures', 'inventaire', 'commandes'];
 ipcMain.handle('module:ouvrir', (e, nom) => {
   const n = String(nom || '').toLowerCase();
   if (_MODULES_OUVRABLES.indexOf(n) < 0) return false;
@@ -6709,6 +6750,8 @@ ipcMain.handle('menu:modele', (e, m) => {
        `_lancementAServi`. Posé ICI parce que c'est le seul endroit où l'état de
        session arrive dans ce processus. */
     if (_modele.connecte) _aServi = true;
+    /* Les rappels s arment a l ouverture de session et se taisent a sa fermeture. */
+    try { rappelsNotif.surSession(!!_modele.connecte); } catch (er) {}
     /* ⚠⚠ LE CADRE NATIF NE SURVIT PAS À UN CHANGEMENT DE PERSONNE (#142).
        `cadreNatif` vit dans `reglages` — donc DANS LA MACHINE, pas dans le
        compte —, et `partir()` le lit AVANT toute connexion. Ce qu'il a vécu :

@@ -193,6 +193,8 @@ const MENU_APP_EN = {
   'Produits en vente': 'Products on sale',
   'Publicité ciblée et statistiques': 'Targeted advertising and statistics',
   'Ramassages et rapport': 'Pickups and report',
+  // Rappels (2026-10-02).
+  'Rappels': 'Reminders',
   'Recherches sans résultat': 'Searches with no result',
   'Recommandations': 'Recommendations',
   'Remboursements': 'Refunds',
