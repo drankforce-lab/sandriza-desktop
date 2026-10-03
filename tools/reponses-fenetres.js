@@ -3139,7 +3139,7 @@ const JEU = {
       dep('dep08', '2025-08-27', 'veh_transit', 'Boutique Sandriza', 'Marché Jean-Talon', 'evenement', 'Marché d’été', 205.4, false),
       dep('dep09', '2025-07-30', 'veh_civic', 'Boutique Sandriza', 'Bureau du comptable, Saint-Lambert', 'autre', 'Revue des états financiers', 64.8, true),
       dep('dep10', '2025-07-08', 'veh_civic', 'Boutique Sandriza', 'Atelier Rivière, Saint-Hyacinthe', 'fournisseur', 'Échantillons', 118, true),
-      dep('dep11', '2025-05-12', 'veh_corolla', 'Boutique Sandriza', 'Cliente corporative, Laval', 'client', 'Présentation de la collection', 96, true),
+      dep('dep11', '2025-05-12', 'veh_corolla', 'Boutique Sandriza', 'Client corporatif, Laval', 'client', 'Présentation de la collection', 96, true),
       dep('dep12', '2025-03-03', 'veh_corolla', 'Boutique Sandriza', 'Imprimerie Dumont', 'fournisseur', 'Étiquettes et cartes', 54, true),
     ];
     var CHG = [
