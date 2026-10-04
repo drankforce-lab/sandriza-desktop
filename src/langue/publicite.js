@@ -258,4 +258,12 @@ module.exports = {
   'Inactif': 'Inactive',
   'active': 'active',
   'actives': 'active',
+  /* ── RELOOKING 2026 (2026-10-04) ── */
+  'Une publication sociale et un courriel pour un segment de clients.': 'A social post and an email for a customer segment.',
+  'La campagne': 'The campaign',
+  'Message': 'Message',
+  'Publication sur la page de la boutique.': 'Post on the store page.',
+  'Publication sur le compte de la boutique.': 'Post on the store account.',
+  'Courriel aux abonnés du segment.': 'Email to the segment subscribers.',
+  'Épingle sur le tableau de la boutique.': 'Pin on the store board.',
 };

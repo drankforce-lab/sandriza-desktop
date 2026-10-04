@@ -360,20 +360,32 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
     var segs = [['all','${T("Tous les clients")}'],['nouveau','${T("Nouveaux (1 cmd)")}'],['regulier','${T("Réguliers (2-4 cmd)")}'],['vip','${T("VIP (5+ cmd ou 500 $+)")}'],['inactif','${T("Inactifs (90j+)")}'],['promo','${T("Acheteurs promo")}']]
       .map(function(s){ return '<option value="' + s[0] + '"' + (FORM.seg0 === s[0] ? ' selected' : '') + '>' + s[1] + '</option>'; }).join('');
     var promos = '<option value="">${T("Aucune promotion liée")}</option>' + FORM.promos.map(function(p){ return '<option value="' + esc(p.id) + '">' + esc(p.label) + '</option>'; }).join('');
-    return '<div class="voile" id="cf-voile"><div class="boite"><h3>${T("Nouvelle campagne ciblée")}</h3>'
+    /* RELOOKING 2026 (2026-10-04) : la campagne et son audience a gauche, le
+       message et les canaux a droite ; chaque canal est un interrupteur (les
+       identifiants cf-ch-* et leur .checked ne changent pas). */
+    var canal = function(id, nom, aide, on){ return szInter('cf-ch-' + id, nom, aide, on); };
+    return '<div class="voile" id="cf-voile"><div class="boite sz-fiche" role="dialog" aria-modal="true">'
+      + '<div class="sz-fiche-tete"><h3>${T("Nouvelle campagne ciblée")}</h3>'
+      + '<span class="st">${T("Une publication sociale et un courriel pour un segment de clients.")}</span></div>'
+      + '<div class="sz-fiche-corps"><div class="sz-fiche-col">'
+      + '<section class="sz-sect"><h4>${T("La campagne")}</h4>'
       + '<div class="champ"><label for="cf-name">${T("Nom de la campagne *")}</label><input id="cf-name" placeholder="${T("Promo Été 2026")}"></div>'
-      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">'
+      + '<div class="champ"><label for="cf-promo">${T("Promotion associée (optionnel)")}</label><select id="cf-promo">' + promos + '</select></div>'
+      + '</section>'
+      + '<section class="sz-sect"><h4>${T("Audience")}</h4><div class="sz-g2">'
       +   '<div class="champ"><label for="cf-seg">${T("Segment ciblé")}</label><select id="cf-seg">' + segs + '</select></div>'
       +   '<div class="champ"><label>${T("Audience estimée")}</label><div class="aud" id="cf-aud">' + FORM.audienceCount + ' ${T("contact")}' + plur(FORM.audienceCount) + '</div></div>'
-      + '</div>'
-      + '<div class="champ"><label for="cf-promo">${T("Promotion associée (optionnel)")}</label><select id="cf-promo">' + promos + '</select></div>'
-      + '<div class="champ"><label for="cf-msg">${T("Message *")}</label><textarea id="cf-msg" rows="3" placeholder="${T("Découvrez nos offres exclusives !")}"></textarea></div>'
-      + '<div class="champ"><label>${T("Canaux de diffusion")}</label><div class="chans">'
-      +   '<label><input type="checkbox" id="cf-ch-facebook" checked> <span class="ic">📘</span> ${T("Facebook")}</label>'
-      +   '<label><input type="checkbox" id="cf-ch-instagram" checked> <span class="ic">📷</span> ${T("Instagram")}</label>'
-      +   '<label><input type="checkbox" id="cf-ch-newsletter"> <span class="ic">📧</span> ${T("Infolettre")}</label>'
-      +   '<label><input type="checkbox" id="cf-ch-pinterest"> <span class="ic">📌</span> ${T("Pinterest")}</label>'
-      + '</div></div>'
+      + '</div></section>'
+      + '</div><div class="sz-fiche-col">'
+      + '<section class="sz-sect"><h4>${T("Message")}</h4>'
+      + '<div class="champ"><label for="cf-msg">${T("Message *")}</label><textarea id="cf-msg" rows="4" placeholder="${T("Découvrez nos offres exclusives !")}"></textarea></div>'
+      + '</section>'
+      + '<section class="sz-sect"><h4>${T("Canaux de diffusion")}</h4>'
+      +   canal('facebook', '${T("Facebook")}', '${T("Publication sur la page de la boutique.")}', true)
+      +   canal('instagram', '${T("Instagram")}', '${T("Publication sur le compte de la boutique.")}', true)
+      +   canal('newsletter', '${T("Infolettre")}', '${T("Courriel aux abonnés du segment.")}', false)
+      +   canal('pinterest', '${T("Pinterest")}', '${T("Épingle sur le tableau de la boutique.")}', false)
+      + '</section></div></div>'
       + '<div class="pied-boite"><button class="gauche" data-cf="annuler">${T("Annuler")}</button>'
       +   '<button data-cf="brouillon">${T("Sauvegarder brouillon")}</button>'
       +   '<button class="prim" data-cf="lancer">${T("Sauvegarder")} &amp; ${T("Lancer")}</button></div>'
