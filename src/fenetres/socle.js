@@ -469,8 +469,29 @@ function _szPoserBouton(v){
   btn.onclick = function(){ szPleinBasculer(b, btn); };
 }
 var _szAutoEnCours = false;
+/* ── LES « ACTIVER » EN INTERRUPTEUR, PARTOUT (2026-10-04) ────────────────
+   Sa consigne : relooking 2026 de TOUTES les fenetres. Une vingtaine ont leur
+   oui/non en case a cocher posee en premier dans un label de classe bascule.
+   On pose le curseur juste apres la case (qui reste dessous, meme id, meme
+   .checked : lecture, brouillons et enregistrement ne changent pas) et la
+   classe .sz-inter-mini. ⚠ Seulement quand la case est le PREMIER enfant du
+   label : un autre montage n est pas le meme objet. */
+function _szInterAuto(){
+  // Les noms de classes des fenetres (des noms de code, pas du texte).
+  var sel = ['bascule', 'actif', 'auto'].map(function(c){ return 'label.' + c + ':not(.sz-inter-mini):not(.sz-inter)'; }).join(',');
+  var l = document.querySelectorAll(sel);
+  for (var i = 0; i < l.length; i++) {
+    var lb = l[i], c = lb.firstElementChild;
+    if (!c || c.tagName !== 'INPUT' || c.type !== 'checkbox') continue;
+    var g = document.createElement('span'); g.className = 'sz-inter-g'; g.setAttribute('aria-hidden', 'true');
+    c.insertAdjacentElement('afterend', g);
+    c.setAttribute('role', 'switch');
+    lb.classList.add('sz-inter-mini');
+  }
+}
 function _szAutoPasse(){
   _szAutoEnCours = false;
+  try { _szInterAuto(); } catch (e) {}
   var l = document.querySelectorAll(SZ_VOILES);
   for (var i = 0; i < l.length; i++) _szPoserBouton(l[i]);
   if (!l.length && szPleinEtat()) szPleinReinit();
@@ -3512,6 +3533,9 @@ html body .sz-inter-mini input[type=checkbox]{position:absolute;opacity:0;width:
 .sz-inter-mini input:checked + .sz-inter-g::after{transform:translateX(.9rem)}
 .sz-inter-mini input:focus-visible + .sz-inter-g{outline:2px solid #c9a97e;outline-offset:2px}
 .sz-inter-mini input:checked ~ .lbl-on{color:var(--tx)}
+.sz-inter-mini{align-items:flex-start}
+.sz-inter-mini > .sz-inter-g{margin-top:.08rem}
+.sz-inter-mini > span:not(.sz-inter-g){min-width:0}
 /* La boite de formulaire en deux colonnes (Offres, Coupons, ...) :
    en-tete (titre + sous-titre), corps en deux colonnes, pied separe.
    ⚠ .voile > .boite.sz-fiche : la largeur, la hauteur et le padding de la
