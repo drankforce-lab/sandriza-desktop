@@ -1659,6 +1659,18 @@ function szQuand(v, secondes){
     return x.d.toLocaleString('${LIEU()}', { dateStyle: 'medium', timeStyle: 'short' });
   } catch (e) { return String(v); }
 }
+/* ── L INTERRUPTEUR DU RELOOKING 2026 (2026-10-04) ───────────────────────────
+   Un oui/non pleine ligne : un titre, une phrase qui dit ce qu il change, et
+   le curseur a droite. C est un <input type=checkbox> : << .checked >>, les
+   brouillons et les lecteurs d ecran le lisent comme avant. Styles : .sz-inter
+   dans CSS_REFONTE. ⚠ Nom NEUF expres : une vingtaine de fenetres ont deja
+   leur propre << .bascule >>, chacune differente. */
+function szInter(id, titre, aide, on, attrs){
+  return '<label class="sz-inter" for="' + id + '"><span class="sz-inter-t"><span class="t1">' + titre + '</span>'
+    + (aide ? '<span class="t2">' + aide + '</span>' : '') + '</span>'
+    + '<input type="checkbox" role="switch" id="' + id + '"' + (on ? ' checked' : '') + (attrs ? ' ' + attrs : '') + '>'
+    + '<span class="sz-inter-g" aria-hidden="true"></span></label>';
+}
 `;
 
 const JS_DIRE = () => JS_DIRE_BASE() + JS_PLEIN() + JS_PLEIN_AUTO() + JS_FENPLEIN()
@@ -3473,6 +3485,39 @@ html.jour .onglets button.on .pill,html.jour .onglets button.actif .pill{backgro
    fenetres ont une telle regle. Un PLAFOND plutot qu une largeur : les deux
    fenetres qui donnent volontairement 1 rem a leurs cases les gardent. */
 html body input[type=checkbox],html body input[type=radio]{max-width:1.4rem;flex:0 0 auto}
+/* ── PIECES DU RELOOKING 2026 (2026-10-04) : section en carte, interrupteur ── */
+.sz-sect{background:var(--v03);border:1px solid var(--v07);border-radius:12px;padding:.8rem .9rem .9rem}
+.sz-sect > h4{margin:0 0 .65rem;font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--tx-or);font-weight:700}
+.sz-inter{position:relative;display:flex;align-items:center;gap:.8rem;padding:.55rem .75rem;min-height:2.45rem;
+  border:1px solid var(--v10);border-radius:10px;cursor:pointer;background:var(--v04)}
+.sz-inter:hover{border-color:var(--v16)}
+.sz-inter-t{display:flex;flex-direction:column;gap:.12rem;flex:1 1 auto;min-width:0}
+.sz-inter-t .t1{font-size:.84rem;font-weight:600;color:var(--tx)}
+.sz-inter-t .t2{font-size:.72rem;color:var(--tx3);line-height:1.35}
+html body .sz-inter input[type=checkbox]{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+.sz-inter-g{flex:0 0 auto;width:2.45rem;height:1.4rem;border-radius:99px;background:var(--v16);position:relative;transition:background .2s ease}
+.sz-inter-g::after{content:"";position:absolute;top:.17rem;left:.17rem;width:1.06rem;height:1.06rem;border-radius:50%;
+  background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s ease}
+.sz-inter input:checked + .sz-inter-g{background:#a3824f}
+.sz-inter input:checked + .sz-inter-g::after{transform:translateX(1.05rem)}
+.sz-inter input:focus-visible + .sz-inter-g{outline:2px solid #c9a97e;outline-offset:2px}
+.sz-inter input:disabled + .sz-inter-g{opacity:.45}
+/* La boite de formulaire en deux colonnes (Offres, Coupons, ...) :
+   en-tete (titre + sous-titre), corps en deux colonnes, pied separe.
+   ⚠ .voile > .boite.sz-fiche : la largeur, la hauteur et le padding de la
+   boite de chaque fenetre sont repris ici. */
+.boite.sz-fiche{max-width:62rem;width:100%;max-height:96vh;padding:0;display:flex;flex-direction:column;overflow:hidden}
+.sz-fiche-tete{flex:0 0 auto;display:flex;flex-direction:column;gap:.12rem;padding:.85rem 1.2rem .7rem;border-bottom:1px solid var(--v08)}
+.sz-fiche-tete h3{margin:0;font:600 1.05rem/1.3 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.sz-fiche-tete .st{font-size:.74rem;color:var(--tx3)}
+.sz-fiche-corps{flex:1 1 auto;min-height:0;overflow:auto;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);
+  gap:.9rem;padding:.9rem 1.2rem;align-items:start}
+.sz-fiche-col{display:flex;flex-direction:column;gap:.9rem;min-width:0}
+.sz-g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem .7rem}
+.sz-fiche-col .sz-inter + .sz-inter{margin-top:.5rem}
+.boite.sz-fiche .pied-boite{flex:0 0 auto;margin:0;padding:.7rem 1.2rem;border-top:1px solid var(--v08)}
+.boite.sz-fiche .pied-boite button{min-height:2.2rem;padding:0 1rem}
+@media (max-width:900px){.sz-fiche-corps{grid-template-columns:minmax(0,1fr)}}
 `;
 
 const CSS_TRANSITIONS = `

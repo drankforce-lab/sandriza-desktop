@@ -25,6 +25,9 @@ const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
 const T = require('../langue').tr('coupons');
+const LANGUE = require('../langue');
+// Le separateur decimal de la langue du poste (apercu du coupon, 2026-10-04).
+const SEP_DEC = () => (LANGUE.langueCourante() === 'en' ? '.' : ',');
 
 const CSS = `
 :root{color-scheme:dark}
@@ -111,6 +114,12 @@ tbody tr:hover td{background:var(--v04)}
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* L apercu du coupon (2026-10-04) : ce que le client tape -> ce qu il obtient. */
+.cp-apercu{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-top:.75rem;padding:.55rem .75rem;
+  border:1px dashed var(--v16);border-radius:10px;font-size:.84rem;color:var(--tx2)}
+.cp-apercu .cp-code{font-family:'Courier New',monospace;font-weight:700;letter-spacing:1px;color:var(--tx);
+  padding:.15rem .55rem;border-radius:6px;background:var(--v06)}
+.cp-apercu .cp-fl{color:var(--tx3)}
 `;
 
 /** Page complète de la fenêtre native « Coupons ». */
@@ -192,17 +201,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
     });
   }
 
+  /* ══ RELOOKING 2026 (2026-10-04) : la meme facture que les Offres ══════════
+     A gauche ce que fait le coupon (code, reduction, conditions), a droite sa
+     validite et ses trois oui/non en interrupteurs, avec l apercu de ce que le
+     client tape et obtient. Les identifiants des champs ne changent pas : le
+     branchement, le brouillon et l enregistrement les lisent tels quels. */
+  function apercuCoupon(code, type, val){
+    var r = type === 'freeshipping' ? '${T("Livraison gratuite")}'
+      : type === 'fixed' ? (val ? ${LANGUE.langueCourante() === 'en' ? "'$' + String(val) + ' off'" : "String(val).replace('.', '${SEP_DEC()}') + ' $ de rabais'"} : '${T("un montant de rabais")}')
+      : (val ? val + ' % ${T("de rabais")}' : '${T("un pourcentage de rabais")}');
+    return '<span class="cp-code">' + esc(String(code || '${T("CODE")}').toUpperCase()) + '</span><span class="cp-fl">→</span><span>' + esc(r) + '</span>';
+  }
   function boiteForm(){
     var c = FORM || {};
     var creation = !c.id;
     var type = c.type || 'percent';
-    return '<div class="voile" id="cp-voile"><div class="boite">'
-      + '<h3>' + (creation ? '${T("Nouveau coupon")}' : '${T("Modifier le coupon")}') + '</h3>'
-      + '<div class="grille">'
+    var valeur = type === 'freeshipping' ? '' : (c.valeur != null ? c.valeur : '');
+    return '<div class="voile" id="cp-voile"><div class="boite sz-fiche" role="dialog" aria-modal="true">'
+      + '<div class="sz-fiche-tete"><h3>' + (creation ? '${T("Nouveau coupon")}' : '${T("Modifier le coupon")}') + '</h3>'
+      + '<span class="st">${T("Un code que le client tape au paiement pour obtenir une réduction.")}</span></div>'
+      + '<div class="sz-fiche-corps"><div class="sz-fiche-col">'
+      + '<section class="sz-sect"><h4>${T("Le coupon")}</h4><div class="sz-g2">'
       + '<div class="ch"><label>${T("Code ")}<span class="req">*</span></label>'
       + '<input id="cp-code" aria-label="${T("Code du coupon")}" value="' + esc(c.code || '') + '" placeholder="${T("PROMO20")}" '
-      + 'style="font-family:Courier New,monospace;letter-spacing:1px;text-transform:uppercase">'
-      + '<span class="aide">${T("Ce que le client tape au paiement.")}</span></div>'
+      + 'style="font-family:Courier New,monospace;letter-spacing:1px;text-transform:uppercase"></div>'
       + '<div class="ch"><label for="cp-nom">${T("Nom interne")}</label>'
       + '<input id="cp-nom" value="' + esc(c.nom || '') + '" placeholder="${T("Promo printemps")}"></div>'
       + '<div class="ch"><label for="cp-type">${T("Type de réduction")}</label><select id="cp-type">'
@@ -210,28 +232,46 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
       + '<option value="fixed"' + (type === 'fixed' ? ' selected' : '') + '>${T("Montant fixe ($)")}</option>'
       + '<option value="freeshipping"' + (type === 'freeshipping' ? ' selected' : '') + '>${T("Livraison gratuite")}</option>'
       + '</select></div>'
-      + '<div class="ch" id="cp-ch-val"' + (type === 'freeshipping' ? ' style="display:none"' : '') + '>'
+      + '<div class="ch" id="cp-ch-val"' + (type === 'freeshipping' ? ' style="visibility:hidden"' : '') + '>'
       + '<label>${T("Valeur ")}<span class="req">*</span></label>'
       /* ⚠ LA PHRASE ENTIERE : deux cles voisines (<< Valeur >> et << coupon >>)
          avaient laisse le << du >> nu au milieu, et le banc sur-code a lu un
          morceau de nom. Un nom accessible se traduit d un seul tenant. */
-      + '<input type="number" id="cp-val" aria-label="${T("Valeur du coupon")}" min="0" step="0.01" value="' + esc(type === 'freeshipping' ? '' : (c.valeur != null ? c.valeur : '')) + '"></div>'
+      + '<input type="number" id="cp-val" aria-label="${T("Valeur du coupon")}" min="0" step="0.01" value="' + esc(valeur) + '"></div>'
+      + '</div>'
+      + '<div class="cp-apercu" id="cp-apercu" aria-live="polite">' + apercuCoupon(c.code, type, valeur) + '</div>'
+      + '</section>'
+      + '<section class="sz-sect"><h4>${T("Conditions")}</h4><div class="sz-g2">'
       + '<div class="ch"><label for="cp-min">${T("Sous-total minimum")}</label>'
       + '<input type="number" id="cp-min" min="0" step="0.01" value="' + esc(c.minimum || 0) + '">'
       + '<span class="aide">${T("0 = aucun minimum.")}</span></div>'
       + '<div class="ch"><label for="cp-max">${T("Nombre d’utilisations maximum")}</label>'
       + '<input type="number" id="cp-max" min="0" step="1" value="' + esc(c.maximum || '') + '" placeholder="${T("illimité")}"></div>'
+      + '</div></section>'
+      + '</div><div class="sz-fiche-col">'
+      + '<section class="sz-sect"><h4>${T("Validité")}</h4><div class="sz-g2">'
       + '<div class="ch"><label for="cp-sd">${T("Début")}</label><input type="date" id="cp-sd" value="' + esc(c.debut || '') + '"></div>'
       + '<div class="ch"><label for="cp-ed">${T("Fin")}</label><input type="date" id="cp-ed" value="' + esc(c.fin || '') + '"></div>'
-      + '</div>'
-      + '<div class="cases">'
-      + '<label><input type="checkbox" id="cp-per"' + (c.parClient ? ' checked' : '') + '> ${T("Une seule fois par client")}</label>'
-      + '<label><input type="checkbox" id="cp-onsale"' + (c.cumulSolde ? ' checked' : '') + '> ${T("Cumulable avec les soldes et promotions")}</label>'
-      + '<label><input type="checkbox" id="cp-act"' + (c.actif !== false ? ' checked' : '') + '> ${T("Actif")}</label>'
-      + '</div>'
+      + '</div></section>'
+      + '<section class="sz-sect"><h4>${T("Règles")}</h4>'
+      + szInter('cp-act', '${T("Actif")}', '${T("Le code est accepté au paiement pendant sa période.")}', c.actif !== false)
+      + szInter('cp-per', '${T("Une seule fois par client")}', '${T("Un même client ne peut l’utiliser qu’une fois.")}', !!c.parClient)
+      + szInter('cp-onsale', '${T("Cumulable avec les soldes et promotions")}', '${T("Sinon, le code est refusé si le panier contient un article en solde ou en promotion.")}', !!c.cumulSolde)
+      + '</section></div></div>'
       + '<div class="pied-boite"><button class="mini" id="cp-annuler">${T("Annuler")}</button>'
       + '<button class="mini prim" id="cp-enr">' + (creation ? '${T("Créer le coupon")}' : '${T("Enregistrer")}') + '</button></div>'
       + '</div></div>';
+  }
+  function brancherApercuCoupon(){
+    var val = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
+    var maj = function(){
+      var z = document.getElementById('cp-apercu'); if (!z) return;
+      var t = val('cp-type');
+      z.innerHTML = apercuCoupon(val('cp-code'), t, t === 'freeshipping' ? '' : val('cp-val'));
+      var cv = document.getElementById('cp-ch-val'); if (cv) cv.style.visibility = t === 'freeshipping' ? 'hidden' : '';
+    };
+    ['cp-code', 'cp-val'].forEach(function(id){ var e = document.getElementById(id); if (e) e.addEventListener('input', maj); });
+    var ty = document.getElementById('cp-type'); if (ty) ty.addEventListener('change', maj);
   }
 
   function dessiner(){
@@ -363,12 +403,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
     var vo = document.getElementById('cp-voile');
     if (vo) vo.onclick = function(ev){ if (ev.target === vo) { szBrouillonMaintenant(); FORM = null; dessiner(); } };
 
-    // « Livraison gratuite » : le champ de valeur se retire de lui-meme.
-    var ty = document.getElementById('cp-type');
-    if (ty) ty.onchange = function(){
-      var ch = document.getElementById('cp-ch-val');
-      if (ch) ch.style.display = (ty.value === 'freeshipping') ? 'none' : '';
-    };
+    // « Livraison gratuite » : le champ de valeur s efface (sans decaler la grille),
+    // et l apercu suit la saisie.
+    brancherApercuCoupon();
 
     var be = document.getElementById('cp-enr');
     if (be) be.onclick = function(){

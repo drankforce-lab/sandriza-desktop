@@ -140,4 +140,17 @@ module.exports = {
   'Coupon': 'Coupon',
   'Coupon Réduction': 'Coupon Discount',
   'Cliquer pour afficher': 'Click to show',
+  /* ── RELOOKING 2026 DU FORMULAIRE (2026-10-04) ── */
+  'de rabais': 'off',
+  'un montant de rabais': 'an amount off',
+  'un pourcentage de rabais': 'a percentage off',
+  'CODE': 'CODE',
+  'Un code que le client tape au paiement pour obtenir une réduction.': 'A code the customer types at checkout to get a discount.',
+  'Le coupon': 'The coupon',
+  'Conditions': 'Conditions',
+  'Validité': 'Validity',
+  'Règles': 'Rules',
+  'Le code est accepté au paiement pendant sa période.': 'The code is accepted at checkout during its period.',
+  'Un même client ne peut l’utiliser qu’une fois.': 'A customer can use it only once.',
+  'Sinon, le code est refusé si le panier contient un article en solde ou en promotion.': 'Otherwise the code is refused when the cart holds a sale or promotion item.',
 };
