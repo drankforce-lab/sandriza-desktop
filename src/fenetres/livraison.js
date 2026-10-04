@@ -34,7 +34,7 @@ body{background:var(--f-page);color:var(--tx);
 .ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
 .corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(26rem,1fr));gap:1rem;align-content:start}
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:1rem;align-content:start}  /* deux cartes en haut, sans troisieme piste vide (2026-10-04) */
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
@@ -100,6 +100,12 @@ table.pays input[type=checkbox]{width:1rem;height:1rem;accent-color:#c9a97e;curs
   border-radius:8px;padding:.32rem .5rem;width:12rem}
 .pfiltre:focus{outline:none;border-color:#c9a97e}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* Relooking 2026 (2026-10-04) : tarifs cote a cote, resume en une phrase. */
+.tarifs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem}
+.tarifs .ch{margin:0}
+.resume-liv{margin-top:.8rem;padding:.6rem .8rem;border-radius:10px;background:var(--v04);border:1px solid var(--v08);
+  font-size:.82rem;color:var(--tx2);line-height:1.5}
+.resume-liv strong{color:var(--tx)}
 `;
 
 function pageLivraison() {
@@ -178,18 +184,35 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             .catch(function(e){ return { ok: false, motif: 'echec', detail: (e && e.message) || e }; });
   }
   function num(v){ return (v == null || v === '') ? '' : String(v); }
+  // Le montant dans la phrase : szArgent du socle (symbole devant en anglais).
+  function argentCourt(v){
+    var n = parseFloat(String(v == null ? '' : v).replace(',', '.'));
+    return szArgent(isNaN(n) ? 0 : n);
+  }
+  /* Ce que le client paie, en une phrase (2026-10-04). */
+  function resumeLivraison(cout, seuil, prio){
+    var c = parseFloat(cout) || 0, sl = parseFloat(seuil) || 0, pr = parseFloat(prio) || 0;
+    var t = sl > 0
+      ? '${T("Sous")} <strong>' + argentCourt(sl) + '</strong>${T(", la livraison coûte")} <strong>' + argentCourt(c) + '</strong>${T(" ; dès")} <strong>' + argentCourt(sl) + '</strong>${T(", elle est gratuite.")}'
+      : '${T("La livraison coûte toujours")} <strong>' + argentCourt(c) + '</strong>${T(" — aucun seuil de gratuité.")}';
+    if (pr > 0) t += ' ${T("Traitement prioritaire :")} <strong>+' + argentCourt(pr) + '</strong>.';
+    return t;
+  }
 
   function dessiner(){
     var av = document.getElementById('ro'); if (av) av.hidden = !RO;
     var d = D || {};
     var dis = RO ? ' disabled' : '';
     var h = [];
+    /* RELOOKING 2026 (2026-10-04) : l international en interrupteur (f-intl,
+       lu par .checked comme avant), les trois tarifs cote a cote, et une phrase
+       qui dit ce que le client paie — le seuil s ajuste, la phrase suit. */
     h.push('<div class="carte"><h2>${T("Livraison internationale")}</h2>'
       + '<p class="sous">${T("Permet aux clients de saisir une adresse hors Canada.")}</p>'
-      + '<label class="bascule"><input type="checkbox" id="f-intl"' + (d.international ? ' checked' : '') + dis + '>'
-      + '<span><strong>${T("Activer la livraison internationale")}</strong>'
-      + '<span class="d">${T("La recherche d’adresse s’adapte au monde entier et un champ Pays apparaît à la caisse.")}</span></span></label></div>');
-    h.push('<div class="carte"><h2>${T("Tarification")}</h2>'
+      + szInter('f-intl', '${T("Activer la livraison internationale")}',
+          '${T("La recherche d’adresse s’adapte au monde entier et un champ Pays apparaît à la caisse.")}', !!d.international, RO ? 'disabled' : '')
+      + '</div>');
+    h.push('<div class="carte"><h2>${T("Tarification")}</h2><div class="tarifs">'
       + '<div class="ch"><label for="f-cost">${T("Frais de livraison standard (CA$)")}</label>'
       + '<input id="f-cost" type="number" min="0" step="0.01" value="' + esc(num(d.shippingCost)) + '"' + dis + '>'
       + '<div class="aide">${T("Facturé quand la commande n’atteint pas le seuil de livraison gratuite.")}</div></div>'
@@ -198,7 +221,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="aide">${T("Au-dessus de ce montant, la livraison est gratuite. <strong>0</strong> désactive.")}</div></div>'
       + '<div class="ch"><label for="f-prio">${T("Frais traitement prioritaire (CA$)")}</label>'
       + '<input id="f-prio" type="number" min="0" step="0.01" value="' + esc(num(d.priorityCost)) + '"' + dis + '>'
-      + '<div class="aide">${T("Supplément si le client choisit le traitement prioritaire. <strong>0</strong> masque l’option.")}</div></div></div>');
+      + '<div class="aide">${T("Supplément si le client choisit le traitement prioritaire. <strong>0</strong> masque l’option.")}</div></div></div>'
+      + '<div class="resume-liv" id="f-resume">' + resumeLivraison(d.shippingCost, d.freeThreshold, d.priorityCost) + '</div></div>');
     /* ⚠ LE TABLEAU N EXISTE QUE SI L INTERNATIONAL EST ALLUME. Demande expresse :
        decoche, on ne doit plus rien voir ni toucher de ce qui a trait a
        l international. On lit l etat REEL de la case a l ecran (pas seulement
@@ -216,6 +240,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         : '${T("Enregistrez pour désactiver.")}', 'att');
     };
     brancherPays();
+    var majResume = function(){
+      var z = document.getElementById('f-resume'); if (!z) return;
+      var v = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
+      z.innerHTML = resumeLivraison(v('f-cost'), v('f-thr'), v('f-prio'));
+    };
+    ['f-cost', 'f-thr', 'f-prio'].forEach(function(id){ var e = document.getElementById(id); if (e) e.addEventListener('input', majResume); });
   }
 
   /* ══ PAYS DESSERVIS ════════════════════════════════════════════════════════

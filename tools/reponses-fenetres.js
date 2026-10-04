@@ -1870,7 +1870,7 @@ const JEU = {
         reponses: {
           identite: IDENTITE,
           'config:livraison:donnees': { ok: true, peutModifier: true, international: true,
-            shippingCost: 14.99, freeThreshold: 75, priorityCost: 9.99 },
+            shippingCost: 14.99, freeThreshold: 150, priorityCost: 9.99 },
           'config:pays:donnees': PAYS,
           'config:pays:relire': PAYS,
           'config:pays:exclure': PAYS,

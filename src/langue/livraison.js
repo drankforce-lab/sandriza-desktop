@@ -95,5 +95,13 @@ module.exports = {
   'Pays retiré.': 'Country removed.',
   'État desservi.': 'State served.',
   'État retiré.': 'State removed.',
-  'Livraison enregistrée.': 'Shipping saved.'
+  'Livraison enregistrée.': 'Shipping saved.',
+  /* ── RELOOKING 2026 (2026-10-04) ── */
+  'Sous': 'Under',
+  ', la livraison coûte': ', shipping costs',
+  ' ; dès': '; from',
+  ', elle est gratuite.': ', it is free.',
+  'La livraison coûte toujours': 'Shipping always costs',
+  ' — aucun seuil de gratuité.': ' — no free-shipping threshold.',
+  'Traitement prioritaire :': 'Priority handling:',
 };
