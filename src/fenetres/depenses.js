@@ -154,6 +154,10 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .recu{background:#f2f2f2;border-radius:10px;margin-top:.6rem;padding:.4rem;
   display:flex;align-items:center;justify-content:center;max-height:22rem;overflow:hidden}
 .recu img{max-width:100%;max-height:21rem;object-fit:contain}
+.boite.large{max-width:62rem}
+.det-duo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.8fr);gap:.9rem;align-items:start}
+.det-duo .recu{margin-top:0;display:flex;align-items:center;justify-content:center}
+.det-duo .recu img{max-height:24rem}
 
 /* Le formulaire : deux colonnes, et le bloc des montants mis en evidence. */
 .form{display:grid;grid-template-columns:1fr 1fr;gap:.5rem .8rem}
@@ -541,8 +545,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
   }
 
   function boiteDetail(){
-    var e = DETAIL;
-    var h = '<div class="voile" id="d-voile"><div class="boite">'
+    var e = DETAIL, recuHtml = '';
+    var h = '<div class="voile" id="d-voile"><div class="boite' + (e.aRecu && e.recu && !e.recuPdf ? ' large' : '') + '">'
       + '<h3>' + esc(e.fournisseur || e.description || '${T("Dépense")}') + '</h3>'
       + '<div style="text-align:center"><span class="rf-pill">' + esc(catLbl(e.categorie, e.categorieLbl))
       + (e.ligne ? ' · L.' + esc(e.ligne) : '') + '</span></div>'
@@ -600,7 +604,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
          en PDF — il s ouvre dans la fenetre principale >> : le bouton
          << Ouvrir le recu >> juste en dessous le dit deja, et mieux. Une phrase
          qui repete un bouton n informe pas, elle encombre. */
-      if (e.recu && !e.recuPdf) h += '<div class="recu"><img src="' + esc(e.recu) + '" alt=""></div>';
+      if (e.recu && !e.recuPdf) recuHtml = '<div class="recu"><img src="' + esc(e.recu) + '" alt=""></div>';
+    }
+    /* ⚠ LE RECU A COTE, PAS DESSOUS (2026-10-04) : une vraie photo de recu
+       (21 rem de haut) poussait les boutons hors de la boite, qui defilait de
+       55 a 139 px. La fiche passe en deux colonnes quand il y a une image. */
+    if (recuHtml) {
+      var iCorps = h.indexOf('<div class="grille">');
+      if (iCorps > 0) h = h.slice(0, iCorps) + '<div class="det-duo"><div class="det-info">' + h.slice(iCorps) + '</div>' + recuHtml + '</div>';
+      else h += recuHtml;
     }
 
     h += '<div class="pied-boite">'

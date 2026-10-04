@@ -443,7 +443,20 @@ function _szPoserBouton(v){
   btn.textContent = '${T("⛶ Plein écran")}';
   btn.title = '${T("Occuper toute la fenêtre")}';
   var tt = b.querySelector('.tt');
-  if (tt) { tt.appendChild(btn); }
+  if (tt) {
+    /* ⚠ AVANT LES BOUTONS DEJA LA, ET TOUS A DROITE (2026-10-04). Pose en
+       dernier dans une barre en << space-between >>, il repoussait le << Fermer >>
+       de la fenetre AU MILIEU de l en-tete (Pages, sa planche). Il se range
+       maintenant avant le premier element qui n est pas le titre, et c est lui
+       qui porte la marge automatique. */
+    var apres = null;
+    for (var k = 0; k < tt.children.length; k++) {
+      if (!/^H[1-6]$/.test(tt.children[k].tagName)) { apres = tt.children[k]; break; }
+    }
+    btn.style.marginLeft = 'auto';
+    if (apres) { tt.insertBefore(btn, apres); try { apres.style.marginLeft = '0'; } catch (e) {} }
+    else tt.appendChild(btn);
+  }
   else {
     // Pas de barre d'en-tête : on le pose en surimpression au coin, et on
     // RÉSERVE la place à droite du titre — sinon un titre long passe dessous.
