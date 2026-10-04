@@ -66,7 +66,6 @@ module.exports = {
   "#a9c9f7": 1,           // 1.51  1 fenetre(s) : retour.js
   "#a9e6c6": 1,           // 1.27  1 fenetre(s) : images.js
   "#b45309": 1,           // 4.49  1 fenetre(s) : promo.js
-  "#b6a6f7": 1,           // 1.92  1 fenetre(s) : depenses.js
   "#b9c6d6": 1,           // 1.55  1 fenetre(s) : affichage.js
   "#c9ead6": 1,           // 1.16  1 fenetre(s) : studio.js
   "#cfe0f5": 1,           // 1.20  1 fenetre(s) : icones.js
