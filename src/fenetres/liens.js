@@ -116,6 +116,14 @@ tbody tr:hover td{background:var(--v03)}
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* Le formulaire du nouveau lien, en boite (2026-10-04). */
+.voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;align-items:center;justify-content:center;z-index:50;padding:1rem}
+.boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;width:100%;max-width:52rem;max-height:96vh;display:flex;flex-direction:column;overflow:hidden}
+.bt-tete{padding:.85rem 1.2rem .7rem;border-bottom:1px solid var(--v08)}
+.bt-tete h3{margin:0;font-size:1.05rem;font-weight:600}
+.bt-corps{padding:.9rem 1.2rem;overflow:auto;display:flex;flex-direction:column;gap:.6rem}
+.pied-boite{display:flex;gap:.5rem;justify-content:flex-end;padding:.7rem 1.2rem;border-top:1px solid var(--v08)}
+.pied-boite button{min-height:2.2rem;padding:0 1rem}
 `;
 
 /**
@@ -419,7 +427,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     var opts = ETAT.comptes.map(function(c){
       return '<option value="' + esc(c.id) + '">' + esc(c.nom) + (c.courriel ? ' — ' + esc(c.courriel) : '') + '</option>';
     }).join('');
-    return '<div class="carte"><h2>${T("Nouveau lien")}</h2>'
+    /* ⚠ DANS UNE BOITE (2026-10-04) : pose au-dessus de la liste, il la
+       poussait hors de vue et la fenetre defilait (sonde des formulaires). */
+    return '<div class="voile" id="f-voile"><div class="boite" role="dialog" aria-modal="true" aria-label="${T("Nouveau lien")}">'
+      + '<div class="bt-tete"><h3>${T("Nouveau lien")}</h3></div><div class="bt-corps">'
       + '<div class="duo">'
       + '<div><label for="f-etiquette">${T("Pour qui / pourquoi")}</label>'
       + '<input id="f-etiquette" type="text" placeholder="${T("ex. Poste de la boutique")}"></div>'
@@ -440,10 +451,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
       + '</div>'
       + '<p class="aide">${T("Un mot de passe d’ouverture est engendré au hasard&nbsp;: il ne sera ")}'
       + '${T("affiché qu’une seule fois, juste après la création.")}</p>'
-      + '<div class="barreoutils" style="margin-top:.5rem">'
-      + '<button class="prim" id="f-creer">${T("Fabriquer")}</button>'
-      + '<span class="droite"><button id="f-annuler">${T("Annuler")}</button></span></div>'
-      + '</div>';
+      + '</div><div class="pied-boite"><button id="f-annuler">${T("Annuler")}</button>'
+      + '<button class="prim" id="f-creer">${T("Fabriquer")}</button></div>'
+      + '</div></div>';
   }
 
   /* ══ LE BROUILLON DU FORMULAIRE DE LIEN ═══════════════════════
@@ -485,6 +495,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     if (fc) fc.onclick = creer;
     var fa = document.getElementById('f-annuler');
     if (fa) fa.onclick = function(){ szBrouillonMaintenant(); ETAT.formulaire = false; dessinerLiens(); };
+    var fv = document.getElementById('f-voile');
+    if (fv && fa) fv.onclick = function(ev){ if (ev.target === fv) fa.click(); };
 
     var nc = document.getElementById('n-copier');
     if (nc) nc.onclick = function(){ copier(document.getElementById('n-url'), nc); };

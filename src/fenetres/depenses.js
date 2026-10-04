@@ -409,7 +409,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
               + (r.ligne ? '<span>·</span><span class="rf-code">L.' + esc(r.ligne) + '</span>' : '')
               + (r.fournisseur && r.description ? '<span>·</span><span>' + esc(r.fournisseur) + '</span>' : '')
               + '</div></div></div></td>'
-              + '<td class="dt" style="white-space:nowrap">' + esc(r.dateFr) + '</td>'
+              + '<td class="dt" style="white-space:nowrap">' + esc(szJour(r.date) || r.dateFr) + '</td>'
               + '<td class="dt">' + esc(szTd(r.paiement)) + '</td>'
               + '<td class="num"><span class="rf-mont">' + esc(r.montant) + '</span></td>'
               + '<td class="dt" style="text-align:right;white-space:nowrap">'
@@ -551,7 +551,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
       + '<div class="aide" style="text-align:center;margin-bottom:.5rem">${T("Total payé")}'
       + (e.aTaxes ? ' (taxes incluses)' : '') + '</div>'
       + '<div class="grille">'
-      + '<div><div class="l">${T("Date")}</div><div class="v">' + esc(e.dateFr) + '</div></div>'
+      + '<div><div class="l">${T("Date")}</div><div class="v">' + esc(szJour(e.date) || e.dateFr) + '</div></div>'
       + '<div><div class="l">${T("Mode de paiement")}</div><div class="v">' + esc(szTd(e.paiementLbl)) + '</div></div>'
       + (e.categorie === CAT_VEHICULE
           ? '<div><div class="l">${T("Véhicule")}</div><div class="v">'

@@ -114,6 +114,13 @@ tbody tr:hover td{background:var(--v04)}
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* La fiche et le contenu du dossier, cote a cote (2026-10-04). */
+.duo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:.7rem;align-items:stretch}
+.duo > .fiche,.duo > .carte{margin:0}
+.pieces{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.4rem}
+.pieces .pc{display:flex;justify-content:space-between;align-items:center;gap:.6rem;padding:.42rem .65rem;
+  border:1px solid var(--v07);border-radius:8px;background:var(--v03);font-size:.8rem}
+.pieces .pc strong{font-variant-numeric:tabular-nums}
 `;
 
 /** Page complète de la fenêtre native « Corbeille des commandes ». */
@@ -297,7 +304,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('corbeille')}
         + '${T(" est parti au moment de la suppression. L’argent est chez le client : remettre la commande en place ne le rappellera pas.")}</div>';
     }
 
-    h += '<div class="fiche">'
+    /* ⚠ LA FICHE ET LE CONTENU DU DOSSIER COTE A COTE (2026-10-04) : empiles,
+       ils faisaient defiler la fenetre de 135 px (sonde des formulaires). */
+    h += '<div class="duo"><div class="fiche">'
       + '<div class="lgn"><span class="k">${T("Commande")}</span><strong>' + esc(d.orderNumber || d.orderId) + '</strong></div>'
       + '<div class="lgn"><span class="k">${T("Client")}</span><span>'
       + esc([(c.shipping || {}).firstName, (c.shipping || {}).lastName].filter(Boolean).join(' ') || '—')
@@ -311,7 +320,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('corbeille')}
       + '</div>';
 
     /* CE QUI EST AU DOSSIER — la liste exacte de ce qui reviendra. */
-    h += '<div class="carte"><h2>${T("Ce que le dossier conserve")}</h2><table><tbody>'
+    h += '<div class="carte"><h2>${T("Ce que le dossier conserve")}</h2><div class="pieces">'
       + lgnPiece('${T("Articles de la commande")}', (c.items || []).length)
       + lgnPiece('${T("Factures")}', (d.factures || []).length)
       + lgnPiece('${T("Remboursements")}', (d.remboursements || []).length)
@@ -321,7 +330,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('corbeille')}
       + lgnPiece('${T("Demandes de retour")}', (d.retoursActifs || []).length)
       + lgnPiece('${T("Retours archivés")}', (d.retoursArchives || []).length)
       + lgnPiece('${T("Variantes dont le stock a été rendu")}', (d.stock || []).length)
-      + '</tbody></table></div>';
+      + '</div></div></div>';
 
     if ((d.stock || []).length) {
       h += '<div class="carte"><h2>${T("Stock rendu à la suppression")}</h2>'
@@ -338,7 +347,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('corbeille')}
 
   function lgnPiece(nom, n){
     if (!n) return '';
-    return '<tr><td>' + esc(nom) + '</td><td class="num">' + n + '</td></tr>';
+    return '<div class="pc"><span>' + esc(nom) + '</span><strong>' + n + '</strong></div>';
   }
 
   function dessiner(){

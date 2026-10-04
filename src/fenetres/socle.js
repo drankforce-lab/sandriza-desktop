@@ -3453,6 +3453,13 @@ html.jour .onglets button.on .pill,html.jour .onglets button.actif .pill{backgro
    defaut anterieur a cette refonte, que la planche-contact a montre. Le document
    garde son propre dessin : trait bas, fond transparent, pas d arrondi. */
 .feuille thead th,.papier thead th{background:transparent;border-radius:0;border-bottom:1px solid #d6d3cc;color:#444}
+/* ⚠ UNE CASE A COCHER N EST JAMAIS ETIREE (2026-10-04, sa capture des Offres).
+   << input[type=checkbox]{width:auto} >> ci-dessus perd contre toute regle de
+   fenetre du genre << .ch input{width:100%} >> (meme poids, ecrite apres) : la
+   case partait au milieu de la ligne et poussait son libelle a droite. 41
+   fenetres ont une telle regle. Un PLAFOND plutot qu une largeur : les deux
+   fenetres qui donnent volontairement 1 rem a leurs cases les gardent. */
+html body input[type=checkbox],html body input[type=radio]{max-width:1.4rem;flex:0 0 auto}
 `;
 
 const CSS_TRANSITIONS = `

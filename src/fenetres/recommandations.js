@@ -134,6 +134,9 @@ label.case input{width:15px;height:15px;accent-color:#c9a97e}
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* La regle en edition : deux colonnes (2026-10-04). */
+.reg-grille{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.45rem .9rem;align-items:end}
+.reg-grille .champ{margin:0}
 `;
 
 /**
@@ -229,18 +232,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         + (D.types || []).map(function(ty){ return '<option value="' + esc(ty.v) + '">' + esc(ty.l) + '</option>'; }).join('')
         + '</select></label>'
       : '';
+    /* ⚠ DEUX COLONNES (2026-10-04) : empiles sur toute la largeur, les quatre
+       champs poussaient la liste des regles hors de vue (+102 px). */
     return '<div class="carte"><h2>' + (creer ? '${T("Nouvelle règle")}' : '${T("Modifier la règle")}') + '</h2>'
-      + '<label class="champ"><span class="lbl">${T("Nom interne *")}</span><input class="t" id="reg-nom" placeholder="${T("Ex : Accessoires tendance")}" value="' + esc(creer ? '' : (r.nom || '')) + '"></label>'
+      + '<div class="reg-grille"><label class="champ"><span class="lbl">${T("Nom interne *")}</span><input class="t" id="reg-nom" placeholder="${T("Ex : Accessoires tendance")}" value="' + esc(creer ? '' : (r.nom || '')) + '"></label>'
       + typeSel
       + '<label class="champ"><span class="lbl">${T("Titre affiché *")}</span><input class="t" id="reg-titre" placeholder="${T("Ex : Vous aimerez aussi")}" value="' + esc(creer ? '' : (r.titre || '')) + '"></label>'
       + '<label class="champ"><span class="lbl">${T("Sous-titre (optionnel)")}</span><input class="t" id="reg-sous" placeholder="${T("Description courte")}" value="' + esc(creer ? '' : (r.soustitre || '')) + '"></label>'
-      + '<label class="champ"><span class="lbl">${T("Articles max (1 à 16)")}</span><input class="t" type="number" id="reg-max" min="1" max="16" value="' + esc(creer ? '4' : String(r.max || 4)) + '" style="max-width:120px"></label>'
-      + '<div class="lbl" style="margin:.35rem 0 .2rem">${T("Afficher sur")}</div>'
+      + '<label class="champ"><span class="lbl">${T("Articles max (1 à 16)")}</span><input class="t" type="number" id="reg-max" min="1" max="16" value="' + esc(creer ? '4' : String(r.max || 4)) + '" ></label>'
+      + '<div class="champ"><span class="lbl">${T("Afficher sur")}</span>'
       + '<div class="styles">'
       + '<label class="case"><input type="checkbox" id="reg-on-product"' + (sur.indexOf('product') >= 0 ? ' checked' : '') + '> ${T("Fiche produit")}</label>'
       + '<label class="case"><input type="checkbox" id="reg-on-cart"' + (sur.indexOf('cart') >= 0 ? ' checked' : '') + '> ${T("Panier")}</label>'
       + '<label class="case"><input type="checkbox" id="reg-on-home"' + (sur.indexOf('home') >= 0 ? ' checked' : '') + '> ${T("Accueil")}</label>'
-      + '</div>'
+      + '</div></div></div>'
       + '<div class="pied-boite"><button class="mini" id="reg-annuler">${T("Annuler")}</button> '
       + '<button class="mini prim" id="reg-ok">' + (creer ? '${T("Créer la règle")}' : '${T("Enregistrer")}') + '</button></div>'
       + '</div>';

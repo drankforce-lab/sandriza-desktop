@@ -174,4 +174,7 @@ module.exports = {
      c est LA cle sur laquelle on rapproche deux tableaux. */
   'Code': 'Code',
   'Le tableau de conformité': 'The compliance table',
+  // Le dossier d un pays, en boite (2026-10-04).
+  'Ce qui manque': 'What is missing',
+  'Mandataire': 'Authorised representative',
 };

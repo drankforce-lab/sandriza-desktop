@@ -84,6 +84,24 @@ input:focus{outline:none;border-color:#c9a97e}
 input:disabled{opacity:.55}
 label.ch{display:block;font-size:.72rem;color:var(--tx2);margin:0 0 .18rem}
 .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:.7rem}
+/* ── Le dossier d un pays, en boite (2026-10-04) ── */
+.voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;align-items:center;
+  justify-content:center;z-index:50;padding:1rem}
+.boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;width:100%;
+  max-width:74rem;max-height:96vh;display:flex;flex-direction:column;overflow:hidden}
+.bt-tete{flex:0 0 auto;display:flex;flex-direction:column;gap:.12rem;padding:.85rem 1.2rem .7rem;
+  border-bottom:1px solid var(--v08)}
+.bt-tete h3{margin:0;font-size:1.05rem;font-weight:600}
+.bt-tete h3 .cc{font-size:.72rem;color:var(--tx3);font-weight:500;margin-left:.3rem}
+.bt-sous{font-size:.74rem;color:var(--tx3)}
+.bt-corps{flex:1 1 auto;min-height:0;overflow:auto;display:grid;
+  grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:.9rem;padding:.9rem 1.2rem;align-items:start}
+.bt-col{display:flex;flex-direction:column;gap:.9rem;min-width:0}
+.sect{background:var(--v03);border:1px solid var(--v07);border-radius:12px;padding:.8rem .9rem .9rem}
+.sect h4{margin:0 0 .6rem;font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--tx-or);font-weight:700}
+.pied-boite{flex:0 0 auto;display:flex;gap:.5rem;justify-content:flex-end;padding:.7rem 1.2rem;
+  border-top:1px solid var(--v08)}
+.pied-boite button{min-height:2.2rem;padding:0 1rem}
 .manque{border-left:3px solid var(--v16);padding:.45rem .7rem;margin:.45rem 0;
   background:var(--v03);border-radius:0 8px 8px 0}
 .manque.bloquant{border-left-color:#f87171}
@@ -345,18 +363,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var p = entree(OUVERT);
     var nom = (D.paysNoms && D.paysNoms[OUVERT]) || OUVERT;
     var der = p.derogation;
-    return '<div class="carte"><h2>' + esc(nom) + '</h2>'
-      + '<p class="sous">${T("Ce qui manque, la base légale qui l’exige, et les mandats détenus.")}</p>'
-      + htmlManques(OUVERT)
-      + '<h2 style="margin-top:1rem">${T("Mandats détenus")}</h2>'
+    /* ⚠ LE DOSSIER S OUVRE DANS UNE BOITE (2026-10-04). Il se depliait SOUS le
+       tableau et faisait defiler la fenetre de 483 px (sonde des formulaires) :
+       on cliquait << Ouvrir >> et rien ne semblait se passer, le dossier etait
+       hors de vue. Deux colonnes : ce qui manque et les mandats a gauche, le
+       mandataire et la derogation a droite. */
+    return '<div class="voile" id="cf-voile"><div class="boite" role="dialog" aria-modal="true" aria-label="' + esc(nom) + '">'
+      + '<div class="bt-tete"><h3>' + esc(nom) + ' <span class="cc">' + esc(OUVERT) + '</span></h3>'
+      + '<span class="bt-sous">${T("Ce qui manque, la base légale qui l’exige, et les mandats détenus.")}</span></div>'
+      + '<div class="bt-corps"><div class="bt-col">'
+      + '<section class="sect"><h4>${T("Ce qui manque")}</h4>' + htmlManques(OUVERT) + '</section>'
+      + '<section class="sect"><h4>${T("Mandats détenus")}</h4>'
       + htmlMandats(OUVERT, p)
       + '<div class="gestes"><button class="pt" id="b-mandat" aria-label="${T("Ajouter un mandat")}"'
-      + (RO ? ' disabled' : '') + '>${T("Ajouter un mandat")}</button></div>'
-      + '<div class="grille" style="margin-top:.9rem">'
+      + (RO ? ' disabled' : '') + '>${T("Ajouter un mandat")}</button></div></section>'
+      + '</div><div class="bt-col"><section class="sect"><h4>${T("Mandataire")}</h4>'
+      + '<div class="grille">'
       + champ('p-mandataire', '${T("Mandataire dans le pays")}', p.mandataire)
       + champ('p-verifie', '${T("Vérifié le")}', p.verifieLe, 'date')
       + '</div>'
-      + '<h2 style="margin-top:1rem">${T("Dérogation")}</h2>'
+      + '</section><section class="sect"><h4>${T("Dérogation")}</h4>'
       + '<p class="sous">${T("Laisse passer un pays fermé — pour un dossier déposé et en attente. Le motif est obligatoire : sans lui, la dérogation ne vaut rien, et une case verte deviendrait indiscernable d’une adhésion réelle.")}</p>'
       + '<label class="coche"><input type="checkbox" id="d-active"' + (der.active ? ' checked' : '')
       + (RO ? ' disabled' : '') + ' aria-label="${T("Activer la dérogation pour ce pays")}">'
@@ -365,6 +391,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + champ('d-motif', '${T("Motif (obligatoire)")}', der.motif)
       + champ('d-qui', '${T("Posée par")}', der.parQui)
       + champ('d-le', '${T("Posée le")}', der.le, 'date')
+      + '</div></section></div></div>'
+      + '<div class="pied-boite"><button class="pt" id="cf-fermer">${T("Fermer")}</button>'
+      + '<button class="prim" id="cf-enr"' + (RO ? ' disabled' : '') + '>${T("Enregistrer le registre")}</button></div>'
       + '</div></div>';
   }
 
@@ -422,6 +451,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         lireIdentite(); dessiner();
       });
     });
+    /* Fermer garde la saisie (elle part avec << Enregistrer le registre >>) ;
+       le clic a cote et Echap font de meme. */
+    var fermerDossier = function(){ lireIdentite(); OUVERT = ''; dessiner(); };
+    var bf = document.getElementById('cf-fermer'); if (bf) bf.onclick = fermerDossier;
+    var be = document.getElementById('cf-enr'); if (be) be.onclick = function(){ lireIdentite(); bsave.click(); };
+    var vo = document.getElementById('cf-voile');
+    if (vo) vo.onclick = function(ev){ if (ev.target === vo) fermerDossier(); };
+    if (!window.__cfEchap) { window.__cfEchap = 1; document.addEventListener('keydown', function(ev){ if (ev.key === 'Escape' && OUVERT) { lireIdentite(); OUVERT = ''; dessiner(); } }); }
     var bm = document.getElementById('b-mandat');
     if (bm) bm.addEventListener('click', function(){
       if (RO) return;
