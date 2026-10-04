@@ -110,6 +110,18 @@ tbody td{padding:.32rem .4rem;border-top:1px solid var(--v055);vertical-align:mi
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* La carte-cadeau en apercu (2026-10-04). */
+.gc-rapides{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:.3rem;margin-top:.45rem}
+.gc-rapide{min-width:0;padding-left:.2rem!important;padding-right:.2rem!important;font-size:.72rem!important}
+.gc-carte{position:relative;border-radius:14px;padding:1.1rem 1.2rem 1rem;min-height:11rem;color:#f7efe2;
+  background:linear-gradient(135deg,#1c2541 0%,#2a3358 55%,#8f6f42 140%);box-shadow:0 8px 24px rgba(0,0,0,.35);
+  display:flex;flex-direction:column;gap:.35rem;overflow:hidden}
+.gc-carte::after{content:"";position:absolute;right:-2.5rem;top:-2.5rem;width:9rem;height:9rem;border-radius:50%;
+  border:1px solid rgba(240,214,160,.35)}
+.gc-marque{font:700 .78rem/1 Georgia,serif;letter-spacing:.32em;color:#f0d6a0}
+.gc-montant{font-size:2rem;font-weight:800;margin-top:auto;font-variant-numeric:tabular-nums}
+.gc-pour{font-size:.84rem}
+.gc-de{font-size:.74rem;color:rgba(247,239,226,.75)}
 `;
 
 /** Page complète de la fenêtre native « Cartes-cadeaux ». */
@@ -196,41 +208,71 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
     });
   }
 
+  /* ══ RELOOKING 2026 (2026-10-04) ══════════════════════════════════════════
+     Creation : la carte a gauche (montant avec montants rapides, statut, note),
+     le destinataire a droite, et l APERCU de la carte telle qu elle partira.
+     Recompense : << Activer >> devient un interrupteur. Les identifiants des
+     champs ne changent pas (lecture, brouillon) ; cc-r-on est lu par .checked. */
+  var MONTANTS_RAPIDES = [25, 50, 75, 100, 150, 200];
+  function apercuCarte(montant, dest, exp){
+    var m = parseFloat(String(montant || '').replace(',', '.'));
+    return '<div class="gc-carte"><div class="gc-marque">SANDRIZA</div>'
+      + '<div class="gc-montant">' + (m > 0 ? fmt(m) : '— $') + '</div>'
+      + '<div class="gc-pour">${T("Pour")} <strong>' + esc(dest || '${T("le destinataire")}') + '</strong></div>'
+      + '<div class="gc-de">${T("De la part de")} ' + esc(exp || '${T("la boutique")}') + '</div></div>';
+  }
   function boiteCreer(){
-    return '<div class="voile" id="cc-voile"><div class="boite">'
-      + '<h3>${T("Créer une carte-cadeau")}</h3>'
-      + '<div class="grille">'
+    return '<div class="voile" id="cc-voile"><div class="boite sz-fiche" role="dialog" aria-modal="true" style="max-width:56rem">'
+      + '<div class="sz-fiche-tete"><h3>${T("Créer une carte-cadeau")}</h3>'
+      + '<span class="st">${T("Le code est engendré à la création et envoyé au destinataire.")}</span></div>'
+      + '<div class="sz-fiche-corps"><div class="sz-fiche-col">'
+      + '<section class="sz-sect"><h4>${T("La carte")}</h4>'
       + '<div class="ch"><label>${T("Montant")} <span class="req">*</span></label>'
       /* ⚠ L etiquette porte un <span class="req">*</span> : elle N EST PAS un
          texte pur, et aucune lecture par motif ne pouvait la reprendre. Le nom
          est ecrit ici, sans l asterisque — << obligatoire >> se dit au champ par
          l attribut required, pas dans son nom. */
       + '<input type="number" id="cc-montant" aria-label="${T("Montant")}" min="1" max="5000" step="0.01" placeholder="50.00"></div>'
+      + '<div class="gc-rapides">' + MONTANTS_RAPIDES.map(function(v){
+          return '<button type="button" class="mini gc-rapide" data-montant="' + v + '">' + fmt(v) + '</button>'; }).join('') + '</div>'
+      + '<div class="sz-g2" style="margin-top:.6rem">'
       + '<div class="ch"><label for="cc-statut">${T("Statut")}</label><select id="cc-statut">'
       + '<option value="active">${T("Active (prête à utiliser)")}</option>'
       + '<option value="pending">${T("En attente d’activation")}</option></select></div>'
+      + '<div class="ch"><label for="cc-note">${T("Note interne")}</label><input id="cc-note" placeholder="${T("Cadeau, correction…")}"></div>'
+      + '</div></section>'
+      + '<section class="sz-sect"><h4>${T("Le destinataire")}</h4><div class="sz-g2">'
       + '<div class="ch"><label>${T("Nom du destinataire")} <span class="req">*</span></label>'
       + '<input id="cc-dest" aria-label="${T("Nom du destinataire")}" placeholder="${T("Marie")}"></div>'
       + '<div class="ch"><label>${T("Courriel du destinataire")} <span class="req">*</span></label>'
       + '<input type="email" id="cc-mail" aria-label="${T("Courriel du destinataire")}" placeholder="${T("marie@exemple.com")}"></div>'
       + '<div class="ch"><label for="cc-exp">${T("Expéditeur")}</label><input id="cc-exp" placeholder="${T("la boutique")}"></div>'
-      + '<div class="ch"><label for="cc-note">${T("Note interne")}</label><input id="cc-note" placeholder="${T("Cadeau, correction…")}"></div>'
-      + '</div>'
+      + '</div></section>'
+      + '</div><div class="sz-fiche-col">'
+      + '<section class="sz-sect"><h4>${T("Aperçu")}</h4><div id="cc-apercu">' + apercuCarte('', '', '') + '</div></section>'
+      + '</div></div>'
       + '<div class="pied-boite"><button class="mini" id="cc-annuler">${T("Annuler")}</button>'
       + '<button class="mini prim" id="cc-creer">${T("Créer la carte")}</button></div>'
       + '</div></div>';
   }
+  function brancherApercuCarte(){
+    var v = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
+    var maj = function(){ var z = document.getElementById('cc-apercu'); if (z) z.innerHTML = apercuCarte(v('cc-montant'), v('cc-dest'), v('cc-exp')); };
+    ['cc-montant', 'cc-dest', 'cc-exp'].forEach(function(id){ var e = document.getElementById(id); if (e) e.addEventListener('input', maj); });
+    [].forEach.call(document.querySelectorAll('.gc-rapide'), function(bt){
+      bt.onclick = function(){ var m = document.getElementById('cc-montant'); if (m) { m.value = bt.getAttribute('data-montant'); m.dispatchEvent(new Event('input')); } };
+    });
+    maj();
+  }
 
   function boiteRecompense(){
     var c = D.recompense || {};
-    return '<div class="voile" id="cc-voile"><div class="boite">'
-      + '<h3>${T("Récompense à l’achat d’une carte")}</h3>'
-      + '<div style="font-size:.8rem;color:var(--tx2);margin-bottom:.6rem">'
-      + '${T("Un code promotionnel est remis à qui achète une carte-cadeau.")}</div>'
-      + '<div class="grille">'
-      + '<div class="ch"><label for="cc-r-on">${T("Activer")}</label><select id="cc-r-on">'
-      + '<option value="1"' + (c.enabled ? ' selected' : '') + '>${T("Oui")}</option>'
-      + '<option value="0"' + (!c.enabled ? ' selected' : '') + '>${T("Non")}</option></select></div>'
+    return '<div class="voile" id="cc-voile"><div class="boite sz-fiche" role="dialog" aria-modal="true" style="max-width:38rem">'
+      + '<div class="sz-fiche-tete"><h3>${T("Récompense à l’achat d’une carte")}</h3>'
+      + '<span class="st">${T("Un code promotionnel est remis à qui achète une carte-cadeau.")}</span></div>'
+      + '<div class="sz-fiche-corps" style="grid-template-columns:minmax(0,1fr)"><div class="sz-fiche-col">'
+      + szInter('cc-r-on', '${T("Activer")}', '${T("Chaque achat de carte-cadeau en boutique reçoit un code de réduction.")}', !!c.enabled)
+      + '<section class="sz-sect"><h4>${T("Le code remis")}</h4><div class="sz-g2">'
       + '<div class="ch"><label for="cc-r-type">${T("Type")}</label><select id="cc-r-type">'
       + '<option value="percent"' + ((c.type || 'percent') === 'percent' ? ' selected' : '') + '>${T("Pourcentage (%)")}</option>'
       + '<option value="fixed"' + (c.type === 'fixed' ? ' selected' : '') + '>${T("Montant fixe ($)")}</option></select></div>'
@@ -238,7 +280,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
       + '<input type="number" id="cc-r-val" min="1" value="' + esc(c.value || 10) + '"></div>'
       + '<div class="ch"><label for="cc-r-exp">${T("Validité du code (jours)")}</label>'
       + '<input type="number" id="cc-r-exp" min="1" value="' + esc(c.expiryDays || 30) + '"></div>'
-      + '</div>'
+      + '</div></section></div></div>'
       + '<div class="pied-boite"><button class="mini" id="cc-annuler">${T("Annuler")}</button>'
       + '<button class="mini prim" id="cc-r-enr">${T("Enregistrer")}</button></div>'
       + '</div></div>';
@@ -381,6 +423,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
     var vo = document.getElementById('cc-voile');
     if (vo) vo.onclick = function(ev){ if (ev.target === vo) fermerBoite(); };
 
+    if (document.getElementById('cc-apercu')) brancherApercuCarte();
     var bc = document.getElementById('cc-creer');
     if (bc) bc.onclick = function(){
       bc.disabled = true;
@@ -405,7 +448,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
     if (bre) bre.onclick = function(){
       bre.disabled = true;
       appeler('cartescadeaux:recompense', [{
-        enabled: (document.getElementById('cc-r-on') || {}).value === '1',
+        enabled: !!(document.getElementById('cc-r-on') || {}).checked,
         type: (document.getElementById('cc-r-type') || {}).value,
         value: (document.getElementById('cc-r-val') || {}).value,
         expiryDays: (document.getElementById('cc-r-exp') || {}).value

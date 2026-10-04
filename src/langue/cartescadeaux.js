@@ -141,4 +141,16 @@ module.exports = {
   'au total': 'in total',
   // L'en-tête de la liste refaite, lu d'un bloc (2026-09-25).
   'Destinataire Valeur': 'Recipient Value',
+  /* ── RELOOKING 2026 (2026-10-04) ── */
+  'Pour': 'For',
+  'le destinataire': 'the recipient',
+  'De la part de': 'From',
+  'Le code est engendré à la création et envoyé au destinataire.': 'The code is generated on creation and sent to the recipient.',
+  'La carte': 'The card',
+  'Le destinataire': 'The recipient',
+  'Aperçu': 'Preview',
+  'Annuler': 'Cancel',
+  'Chaque achat de carte-cadeau en boutique reçoit un code de réduction.': 'Every gift card bought in the store earns a discount code.',
+  'Le code remis': 'The code given',
+  'Enregistrer': 'Save',
 };

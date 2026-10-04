@@ -42,6 +42,12 @@ module.exports = {
      fonce sur presque noir, illisible (vu a la capture). Encre claire dans les deux
      modes, donc ecrite en dur. */
   "#f1ece4": 1,           // 1.05  1 fenetre : studio.js (.cmp .cet — sur pastille sombre)
+  /* ⚠ LA CARTE-CADEAU EN APERCU (2026-10-04) : un OBJET dessine, sur son propre
+     degrade marine fixe, comme la carte que le client recoit — il ne change pas
+     avec le mode. Le banc mesure ces encres contre le fond de jour, qu elles ne
+     touchent jamais (contraste reel sur le degrade : > 9). */
+  "#f7efe2": 1,           // 1.02  1 fenetre : cartescadeaux.js (.gc-carte)
+  "#f0d6a0": 1,           // 1.26  1 fenetre : cartescadeaux.js (.gc-marque)
   "#86efac": 4,           // 1.25  5 fenetre(s) : catalogio.js, newsletter.js, produit.js…
   "#bcd2f0": 6,           // 1.38  6 fenetre(s) : analytics.js, images.js, paiements-config.js…
   "#dcc39b": 5,           // 1.52  4 fenetre(s) : campagnes.js, studio.js, telephonie.js…
