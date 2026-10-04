@@ -3502,6 +3502,16 @@ html body .sz-inter input[type=checkbox]{position:absolute;opacity:0;width:1px;h
 .sz-inter input:checked + .sz-inter-g::after{transform:translateX(1.05rem)}
 .sz-inter input:focus-visible + .sz-inter-g{outline:2px solid #c9a97e;outline-offset:2px}
 .sz-inter input:disabled + .sz-inter-g{opacity:.45}
+/* Le mini-interrupteur d en-tete de carte (« Activer », 2026-10-04) : la case
+   dessous, le curseur et son mot a cote. */
+.sz-inter-mini{position:relative;display:inline-flex;align-items:center;gap:.45rem;cursor:pointer;font-size:.78rem;color:var(--tx2);user-select:none}
+html body .sz-inter-mini input[type=checkbox]{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+.sz-inter-mini .sz-inter-g{width:2.1rem;height:1.2rem}
+.sz-inter-mini .sz-inter-g::after{width:.86rem;height:.86rem}
+.sz-inter-mini input:checked + .sz-inter-g{background:#a3824f}
+.sz-inter-mini input:checked + .sz-inter-g::after{transform:translateX(.9rem)}
+.sz-inter-mini input:focus-visible + .sz-inter-g{outline:2px solid #c9a97e;outline-offset:2px}
+.sz-inter-mini input:checked ~ .lbl-on{color:var(--tx)}
 /* La boite de formulaire en deux colonnes (Offres, Coupons, ...) :
    en-tete (titre + sous-titre), corps en deux colonnes, pied separe.
    ⚠ .voile > .boite.sz-fiche : la largeur, la hauteur et le padding de la

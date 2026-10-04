@@ -186,9 +186,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + esc(place || '') + '"' + (RO ? ' disabled' : '') + '>'
       + (aide ? '<div class="aide">' + aide + '</div>' : '') + '</div>';
   }
+  /* Mini-interrupteur (2026-10-04) : la case reste dessous, lue par .checked. */
   function basculeHtml(id, actif){
-    return '<label class="bascule"><input type="checkbox" id="' + id + '"' + (actif ? ' checked' : '')
-      + (RO ? ' disabled' : '') + '> ${T("Activer")}</label>';
+    return '<label class="bascule sz-inter-mini"><input type="checkbox" role="switch" id="' + id + '"' + (actif ? ' checked' : '')
+      + (RO ? ' disabled' : '') + '><span class="sz-inter-g" aria-hidden="true"></span><span class="lbl-on">${T("Activer")}</span></label>';
   }
 
   // Les quatre transporteurs « simples » (identifiant + secret + n° de compte).
