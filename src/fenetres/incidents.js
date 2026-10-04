@@ -491,6 +491,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
         var c=et[i].champs[j], v=inc[c.cle];
         if (v==null||v==='') continue;
         if (c.type==='select') v=szTd(libelleOption(c, v));
+        else if (c.type==='date') v=szJour(v)||v;   // « 8 août 2026 », pas « 2026-08-08 » (2026-10-04)
         lignes += '<div class="li"><div class="k">'+esc(c.label)+'</div><div class="v">'+esc(v)+'</div></div>';
       }
       if (lignes) h += '<div class="grp"><div class="grpT">'+esc(et[i].icone||'')+' '+esc(et[i].label)+'</div>'+lignes+'</div>';

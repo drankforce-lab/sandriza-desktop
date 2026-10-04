@@ -509,9 +509,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
       + '<div><label for="e-mnt">${T("Montant")}</label><input id="e-mnt" type="number" step="0.01" value="' + esc(e.amount != null ? e.amount : '') + '"></div>'
       + '</div>'
       + '<label for="e-notes">${T("Note")}</label><input id="e-notes" type="text" value="' + esc(e.notes || '') + '">'
-      + '<p class="aide">${T("Une SORTIE se saisit en négatif — c’est ce qui fait que l’écart tombe à zéro quand elle est appariée.")}</p>'
-      + '<div class="barreoutils" style="margin-top:.5rem"><button class="prim" id="e-enregistrer">${T("Enregistrer")}</button>'
-      + '<span class="droite"><button id="e-annuler">${T("Annuler")}</button></span></div></div>';
+      + '<div class="barreoutils" style="margin-top:.5rem"><span class="aide" style="margin:0;flex:1 1 auto">${T("Une SORTIE se saisit en négatif — c’est ce qui fait que l’écart tombe à zéro quand elle est appariée.")}</span>'
+      + '<span class="droite"><button id="e-annuler">${T("Annuler")}</button><button class="prim" id="e-enregistrer">${T("Enregistrer")}</button></span></div></div>';
   }
 
   // ── ONGLET DÉPÔTS ET SORTIES ────────────────────────────────────────────
@@ -574,11 +573,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
       + '<div><label for="v-au">au</label><input id="v-au" type="date" value="' + esc(p.periodTo || '') + '"></div>'
       + '<div><label for="v-mnt">${T("Montant")}</label><input id="v-mnt" type="number" step="0.01" value="' + esc(p.amount != null ? p.amount : '') + '"></div>'
       + '</div>'
-      + '<label for="v-desc">${T("Description")}</label><input id="v-desc" type="text" value="' + esc(p.description || '') + '">'
-      + '<label for="v-notes">${T("Note")}</label><input id="v-notes" type="text" value="' + esc(p.notes || '') + '">'
-      + '<p class="aide">${T("Une SORTIE (dépense payée) se saisit en négatif.")}</p>'
-      + '<div class="barreoutils" style="margin-top:.5rem"><button class="prim" id="v-enregistrer">${T("Enregistrer")}</button>'
-      + '<span class="droite"><button id="v-annuler">${T("Annuler")}</button></span></div></div>';
+      /* ⚠ DESCRIPTION ET NOTE COTE A COTE, l aide sur la ligne des boutons
+         (2026-10-04) : la ligne en edition faisait defiler l onglet de 27 px. */
+      + '<div class="duo"><div style="flex:2 1 16rem"><label for="v-desc">${T("Description")}</label><input id="v-desc" type="text" value="' + esc(p.description || '') + '"></div>'
+      + '<div style="flex:2 1 16rem"><label for="v-notes">${T("Note")}</label><input id="v-notes" type="text" value="' + esc(p.notes || '') + '"></div></div>'
+      + '<div class="barreoutils" style="margin-top:.5rem"><span class="aide" style="margin:0">${T("Une SORTIE (dépense payée) se saisit en négatif.")}</span>'
+      + '<span class="droite"><button id="v-annuler">${T("Annuler")}</button><button class="prim" id="v-enregistrer">${T("Enregistrer")}</button></span></div></div>';
   }
 
   // ── ONGLET APPARIEMENT ──────────────────────────────────────────────────

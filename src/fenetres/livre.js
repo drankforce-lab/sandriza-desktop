@@ -154,7 +154,9 @@ tbody tr.ligne td:first-child{padding-left:1.4rem}
 .avert:not([open]){padding:.4rem .75rem}
 
 /* ── Le formulaire d'écriture ────────────────────────────────────────────── */
-.form{display:grid;grid-template-columns:auto 1fr;gap:.45rem .7rem;align-items:center}
+/* Date et libelle sur UNE rangee (2026-10-04) : empiles, la saisie faisait
+   defiler l onglet. */
+.form{display:grid;grid-template-columns:auto 11rem auto 1fr;gap:.45rem .7rem;align-items:center}
 .form label{font-size:.74rem;color:var(--tx2)}
 .lignes{margin-top:.55rem}
 .lignes .l{display:grid;grid-template-columns:1fr 7rem 7rem auto;gap:.35rem;margin-bottom:.3rem}
@@ -795,7 +797,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
       + '<th class="n">${T("Débit")}</th><th class="n">${T("Crédit")}</th><th></th></tr></thead><tbody>';
     man.forEach(function(e){
       /* ⚠ Les deux colonnes, comme au journal — voir la note de vueJournal. */
-      h += '<tr class="ecr"><td>' + esc(e.date) + '</td><td>' + esc(e.libelle) + '</td>'
+      h += '<tr class="ecr"><td>' + esc(szJour(e.date) || e.date) + '</td><td>' + esc(e.libelle) + '</td>'
          + '<td class="n">' + argent(e.total) + '</td>'
          + '<td class="n">' + argent(e.total) + '</td><td class="n">'
          + (RO ? '' : '<button class="mini danger" data-sup="' + esc(e.ref) + '">${T("Supprimer")}</button>')

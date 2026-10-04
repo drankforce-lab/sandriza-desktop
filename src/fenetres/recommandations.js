@@ -137,6 +137,7 @@ label.case input{width:15px;height:15px;accent-color:#c9a97e}
 /* La regle en edition : deux colonnes (2026-10-04). */
 .reg-grille{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.45rem .9rem;align-items:end}
 .reg-grille .champ{margin:0}
+.reg-grille .champ select,.reg-grille .champ input{width:100%;min-height:2.2rem}
 `;
 
 /**

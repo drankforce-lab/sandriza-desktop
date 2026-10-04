@@ -277,6 +277,12 @@ button.vert:hover:not(:disabled){background:#166534;border-color:#166534}
 .toolbar{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;
   margin-bottom:.45rem}
 .toolbar input[type=text]{width:15rem}
+/* Entrepot (2026-10-04) : la recherche des emplacements partage la rangee du
+   filtre et du bouton (elle passait seule sur sa ligne) ; le bouton des lieux
+   vit dans le titre. */
+.toolbar input[type=search]{flex:1 1 14rem;width:auto;min-width:0}
+.h2-act{display:flex;align-items:center;gap:.4rem}
+.h2-act > button{margin-left:auto}
 .toolbar select{width:auto}
 .toolbar .droite{margin-left:auto;display:flex;gap:.4rem;align-items:center}
 /* ══ LA REFONTE DE L ONGLET PRODUITS (2026-09-25) ═════════════════════════════
@@ -1596,13 +1602,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     }
 
     // ── LES LIEUX ────────────────────────────────────────────────────────────
+    /* ⚠ LE BOUTON SUR LA LIGNE DU TITRE (2026-10-04) : seul sur sa rangee, il
+       volait la hauteur de la liste, qui defilait des qu on ajoutait un lieu. */
     h += '<div class="carte plein">'
-      + '<h2>${T("Lieux")} <span class="note">${T("— les bâtiments, avec leur adresse")}</span></h2>';
-    if (d.peutAjouter) {
-      h += '<div class="toolbar"><span class="droite">'
-        + '<button class="mini" id="lx-ajouter"' + (LX_EDIT && LX_EDIT.id === '' ? ' disabled' : '')
-        + '>${T("+ Ajouter un lieu")}</button></span></div>';
-    }
+      + '<h2 class="h2-act">${T("Lieux")} <span class="note">${T("— les bâtiments, avec leur adresse")}</span>'
+      + (d.peutAjouter ? '<button class="mini" id="lx-ajouter"' + (LX_EDIT && LX_EDIT.id === '' ? ' disabled' : '')
+        + '>${T("+ Ajouter un lieu")}</button>' : '')
+      + '</h2>';
     h += '<div class="grille"><table><thead><tr>'
       + '<th>${T("Lieu")}</th><th colspan="2">${T("Adresse")}</th><th class="c">${T("Actions")}</th>'
       + '</tr></thead><tbody>';
