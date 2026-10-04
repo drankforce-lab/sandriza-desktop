@@ -5633,9 +5633,15 @@ const JEU = {
         'offres:liste': {
           ok: true, peutModifier: true,
           categories: [{ cle: 'robes', libelle: 'Robes' }, { cle: 'hauts', libelle: 'Hauts & Blouses' }],
+          // ⚠ Six produits, dont des noms sur deux mots : sa capture du 2026-10-04
+          // montrait la liste de choix cassée, invisible avec deux lignes courtes.
           catalogue: [
             { id: 'p1', nom: 'Robe fleurie', sku: 'RB-0001', categorie: 'robes' },
             { id: 'p2', nom: 'Blouse en soie', sku: 'HT-0002', categorie: 'hauts' },
+            { id: 'p3', nom: 'Robe ZENXAS', sku: 'ROB-000001', categorie: 'robes' },
+            { id: 'p4', nom: 'Pentalon Yaolin', sku: 'PAN-000001', categorie: 'pantalons' },
+            { id: 'p5', nom: 'Chemise Walla', sku: 'HAU-000001', categorie: 'hauts' },
+            { id: 'p6', nom: 'T-shirt St-Viateur Bagel', sku: 'TSH-000001', categorie: 'hauts' },
           ],
           offres: [
             { id: 'd1', nom: 'Solde du printemps', rabais: '20 % de rabais', portee: 'Robes', // promo.js (_discountLabel)
@@ -5647,7 +5653,7 @@ const JEU = {
               debut: '2026-03-01', fin: '2026-06-30', actif: true, enCours: true },
             { id: 'd2', nom: '2 pour 1 accessoires', rabais: '3 pour 2', portee: 'Tous les produits',
               genre: 'bogo', valeur: 0, bogoAchat: 3, bogoGratuit: 1, paliers: [],
-              parClient: true, appliqueA: 'all', categoriesChoisies: [], produitsChoisis: [],
+              parClient: true, appliqueA: 'products', categoriesChoisies: [], produitsChoisis: ['p3'],
               bandeau: '', bandeauEN: '', bandeauFond: '#1a1a2e', bandeauTexte: '#ffffff',
               bandeauCta: '', bandeauCtaEN: '', bandeauUrl: '#shop', priorite: 5,
               debut: '', fin: '', actif: false, enCours: false },
@@ -5664,6 +5670,9 @@ const JEU = {
       nom: 'annonces garnies',
       id: '',
       reponses: {
+        // ⚠ La fenetre s ouvre sur l onglet Offres : sans cette reponse, le
+        // scenario ne dessinait qu une erreur << sans_jeu >> (vu le 2026-10-04).
+        'offres:liste': { ok: true, peutModifier: true, categories: [], catalogue: [], offres: [] },
         'annonces:liste': {
           ok: true, peutModifier: true, intervalle: 6,
           categories: [{ cle: 'robes', libelle: 'Robes' }],

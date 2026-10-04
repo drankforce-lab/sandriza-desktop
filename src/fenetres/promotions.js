@@ -102,14 +102,78 @@ tbody tr:hover td{background:var(--v04)}
 .ch.large{grid-column:1/-1}
 .ch label{font-size:.72rem;color:var(--tx2)}
 .ch input,.ch select,.ch textarea{width:100%}
+/* ⚠ (2026-10-04) La regle ci-dessus etirait AUSSI les cases a cocher : la case
+   au milieu de la ligne, le nom et le SKU coinces a droite (sa capture). */
+.ch input[type=checkbox],.ch input[type=radio]{width:auto}
+input[type=checkbox]{accent-color:#c9a97e}
+[hidden]{display:none!important}
 .ch .req{color:var(--tx-or)}
 .ch .aide{font-size:.68rem;color:var(--tx3)}
 .cases{display:flex;flex-wrap:wrap;gap:.4rem 1rem;margin-top:.45rem}
 .cases label{display:inline-flex;align-items:center;gap:.4rem;font-size:.83rem;cursor:pointer}
-.choix{max-height:11rem;overflow:auto;border:1px solid var(--v10);
-  border-radius:9px;padding:.4rem .5rem;margin-top:.3rem}
-.choix .lg{display:flex;align-items:center;gap:.45rem;padding:.12rem 0;font-size:.82rem}
-.choix .lg .sku{font-family:'Courier New',monospace;font-size:.72rem;color:var(--tx2);margin-left:auto}
+/* ── RELOOKING 2026 DES FORMULAIRES (2026-10-04) ── */
+.boite.fiche{max-width:76rem;max-height:96vh;padding:0;display:flex;flex-direction:column;overflow:hidden}
+.boite.fiche .bt-tete{flex:0 0 auto;display:flex;flex-direction:column;gap:.12rem;
+  padding:.85rem 1.2rem .7rem;border-bottom:1px solid var(--v08)}
+.ch input[type=color]{height:2.45rem;padding:.22rem;border-radius:8px}
+.ch input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+.ch input[type=color]::-webkit-color-swatch{border:0;border-radius:6px}
+.ch .bascule{padding:.42rem .65rem;min-height:2.45rem}
+.boite.fiche .bt-tete h3{margin:0;font:600 1.05rem/1.3 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.bt-sous{font-size:.74rem;color:var(--tx3)}
+.fiche2{flex:1 1 auto;min-height:0;overflow:auto;display:grid;
+  grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);gap:.9rem;padding:.9rem 1.2rem;align-items:start}
+.fiche2 .col{display:flex;flex-direction:column;gap:.9rem;min-width:0}
+.sect{background:var(--v03);border:1px solid var(--v07);border-radius:12px;padding:.8rem .9rem .9rem}
+.boite .sect h4{margin:0 0 .65rem}
+.ecart{margin-top:.7rem}
+.grille.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grille.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.ch.large2{grid-column:span 2}
+.ch label .cpt{font-weight:400;color:var(--tx3);margin-left:.35rem}
+.aide-bas{align-self:end;padding-bottom:.55rem;line-height:1.35}
+.boite.fiche .pied-boite{flex:0 0 auto;margin:0;padding:.7rem 1.2rem;border-top:1px solid var(--v08)}
+.boite.fiche .pied-boite button{min-height:2.2rem;padding:0 1rem}
+/* L interrupteur : toute la ligne se clique, la phrase dit ce qu il change. */
+.bascule{position:relative;display:flex;align-items:center;gap:.8rem;padding:.6rem .75rem;
+  border:1px solid var(--v10);border-radius:10px;cursor:pointer;background:var(--v04)}
+.bascule:hover{border-color:var(--v16)}
+.bascule .bt{display:flex;flex-direction:column;gap:.12rem;flex:1 1 auto;min-width:0}
+.bascule .bt1{font-size:.84rem;font-weight:600;color:var(--tx)}
+.bascule .bt2{font-size:.72rem;color:var(--tx3);line-height:1.35}
+.bascule input{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+.glis{flex:0 0 auto;width:2.45rem;height:1.4rem;border-radius:99px;background:var(--v16);
+  position:relative;transition:background .2s ease}
+.glis::after{content:"";position:absolute;top:.17rem;left:.17rem;width:1.06rem;height:1.06rem;
+  border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s ease}
+.bascule input:checked + .glis{background:#a3824f}
+.bascule input:checked + .glis::after{transform:translateX(1.05rem)}
+.bascule input:focus-visible + .glis{outline:2px solid #c9a97e;outline-offset:2px}
+/* L apercu du bandeau, tel que la boutique le peindra. */
+.ap-lbl{font-size:.66rem;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);margin:.8rem 0 .3rem}
+.apercu{display:flex;align-items:center;justify-content:center;gap:.75rem;flex-wrap:wrap;
+  padding:.6rem .9rem;border-radius:9px;font-size:.83rem;font-weight:600;min-height:2.5rem;
+  text-align:center;margin-bottom:.75rem;box-shadow:inset 0 0 0 1px var(--v08)}
+.apercu .ap-msg.auto{font-weight:500;font-style:italic;opacity:.85}
+.apercu .ap-cta{font-size:.72rem;padding:.16rem .7rem;border:1px solid currentColor;border-radius:99px;white-space:nowrap}
+.aide-off{font-size:.79rem;color:var(--tx2);margin:.75rem .1rem 0;line-height:1.45}
+.ap-badge{padding:.4rem 0 .1rem}
+.bdg{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  padding:.28rem .7rem;border-radius:99px;color:var(--tx-sur-accent);background:#7d5f36}
+.bdg.success{background:#15803d}.bdg.error{background:#b91c1c}.bdg.info{background:#1d4ed8}.bdg.warning{background:#c2410c}
+/* La liste de choix : case, nom, SKU — sans barre de defilement. */
+.choix{border:1px solid var(--v10);border-radius:10px;padding:.25rem;margin-top:.4rem;
+  display:flex;flex-direction:column;gap:1px}
+.choix .lg{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:.65rem;
+  padding:.4rem .6rem;border-radius:7px;font-size:.83rem;cursor:pointer}
+.choix .lg:hover{background:var(--v05)}
+.choix .lg.on{background:rgba(201,169,126,.13)}
+.choix .lg .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.choix .lg .sku{font-family:ui-monospace,Consolas,monospace;font-size:.72rem;color:var(--tx2)}
+.choix .plus{font-size:.74rem;color:var(--tx3);padding:.35rem .6rem}
+.cases .puce-cas{padding:.3rem .65rem;border:1px solid var(--v10);border-radius:99px;background:var(--v04)}
+.cases .puce-cas:has(input:checked){border-color:#c9a97e;background:rgba(201,169,126,.13)}
+@media (max-width:900px){.fiche2{grid-template-columns:minmax(0,1fr)}}
 .paliers .lg{display:flex;gap:.4rem;align-items:center;margin-bottom:.3rem}
 .paliers .lg input{width:6rem}
 .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.9rem;flex-wrap:wrap}
@@ -218,9 +282,49 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     });
   }
 
-  /* ── Le choix de la portée : catégories ou produits ── */
+  /* ══ RELOOKING 2026 DES DEUX FORMULAIRES (2026-10-04, sa capture) ══════════
+     Sa capture : la case a cocher etiree sur toute la largeur (la regle
+     << .ch input{width:100%} >> l attrapait aussi), le nom et le SKU coinces a
+     droite, une liste a barre de defilement, << Une fois par client >> perdue
+     au bout d une rangee. ➡ Deux colonnes : a gauche CE QUE L OFFRE FAIT
+     (regle, periode, portee), a droite CE QUE LA CLIENTE VOIT (le bandeau,
+     avec son apercu en direct). Les oui/non sont des interrupteurs pleine
+     largeur, avec une phrase qui dit ce qu ils changent.
+     ⚠ Le bandeau d une offre a maintenant un INTERRUPTEUR : sans lui, toute
+     offre active devenait un bandeau des que plus aucune annonce n etait
+     active — le << 2 pour 1 >> qu il ne pouvait pas retirer. */
+  function interrupteur(id, titre, aide, on){
+    return '<label class="bascule" for="' + id + '"><span class="bt"><span class="bt1">' + titre + '</span>'
+      + (aide ? '<span class="bt2">' + aide + '</span>' : '') + '</span>'
+      + '<input type="checkbox" role="switch" id="' + id + '"' + (on ? ' checked' : '') + '>'
+      + '<span class="glis" aria-hidden="true"></span></label>';
+  }
+  function ch(id, libelle, champ, cl){
+    return '<div class="ch' + (cl ? ' ' + cl : '') + '"' + (id ? ' id="' + id + '"' : '') + '><label>' + libelle + '</label>' + champ + '</div>';
+  }
+  function apercu(pr, msg, fond, texte, cta, auto){
+    return '<div class="ap-lbl">${T("Aperçu dans la boutique")}</div>'
+      + '<div class="apercu" id="' + pr + '-apercu" data-auto="' + esc(auto) + '" style="background:' + esc(fond) + ';color:' + esc(texte) + '">'
+      + '<span class="ap-msg' + (msg ? '' : ' auto') + '">' + esc(msg || auto) + '</span>'
+      + '<span class="ap-cta"' + (cta ? '' : ' hidden') + '>' + esc(cta) + '</span></div>';
+  }
+  /* L apercu suit la saisie, sans redessiner la boite (on perdrait le curseur). */
+  function brancherApercu(pr){
+    var ids = pr === 'of' ? ['of-bandeau', 'of-fond', 'of-texte', 'of-cta'] : ['an-message', 'an-fond', 'an-texte', 'an-cta'];
+    var maj = function(){
+      var ap = document.getElementById(pr + '-apercu'); if (!ap) return;
+      var m = val(ids[0]).trim(), c = val(ids[3]).trim();
+      ap.style.background = val(ids[1]); ap.style.color = val(ids[2]);
+      var sm = ap.querySelector('.ap-msg'), sc = ap.querySelector('.ap-cta');
+      sm.textContent = m || ap.getAttribute('data-auto'); sm.className = 'ap-msg' + (m ? '' : ' auto');
+      sc.textContent = c; sc.hidden = !c;
+    };
+    ids.forEach(function(id){ var e = document.getElementById(id); if (e) e.oninput = maj; });
+  }
+
+  /* ── Le choix de la portee : categories ou produits ── */
   function blocPortee(prefixe, appliqueA, cats){
-    var h = '<div class="ch large"><label>${T("S’applique à")}</label>'
+    var h = '<div class="ch large"><label for="' + prefixe + '-appli">${T("S’applique à")}</label>'
       + '<select aria-label="${T("S’applique à")}" id="' + prefixe + '-appli">'
       + '<option value="all"' + (appliqueA === 'all' ? ' selected' : '') + '>${T("Tous les produits")}</option>'
       + '<option value="category"' + (appliqueA === 'category' ? ' selected' : '') + '>${T("Certaines catégories")}</option>'
@@ -231,25 +335,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
       + (appliqueA === 'category' ? '' : ' style="display:none"') + '>'
       + '<label>${T("Catégories")}</label><div class="cases">'
       + (D.categories || []).map(function(c){
-          return '<label><input type="checkbox" class="' + prefixe + '-cat" value="' + esc(c.cle) + '"'
+          return '<label class="puce-cas"><input type="checkbox" class="' + prefixe + '-cat" value="' + esc(c.cle) + '"'
             + (cats.indexOf(c.cle) >= 0 ? ' checked' : '') + '> ' + esc(c.libelle) + '</label>';
         }).join('')
       + '</div></div>';
 
     h += '<div class="ch large" id="' + prefixe + '-bloc-prods"'
       + (appliqueA === 'products' ? '' : ' style="display:none"') + '>'
-      + '<label>${T("Produits ")}<span class="req">*</span></label>'
+      + '<label>${T("Produits ")}<span class="req">*</span> <span class="cpt" id="' + prefixe + '-cpt">' + compteChoisis() + '</span></label>'
       + '<input type="search" id="' + prefixe + '-qprod" aria-label="${T("Chercher un produit par nom ou SKU")}" placeholder="${T("Chercher un nom ou un SKU…")}" value="' + esc(QPROD) + '">'
-      + '<div class="choix" id="' + prefixe + '-choix">' + listeCatalogue(prefixe) + '</div>'
-      + '<span class="aide" id="' + prefixe + '-cpt">' + CHOISIS.length + ' produit'
-      + (CHOISIS.length > 1 ? 's choisis' : ' choisi') + '</span></div>';
+      + '<div class="choix" id="' + prefixe + '-choix">' + listeCatalogue(prefixe) + '</div></div>';
     return h;
   }
+  function compteChoisis(){
+    return CHOISIS.length + (CHOISIS.length > 1 ? '${T(" produits choisis")}' : '${T(" produit choisi")}');
+  }
 
+  /* ⚠ AUCUNE BARRE DE DEFILEMENT (sa regle) : la liste montre les produits
+     choisis puis les premiers qui repondent, CINQ lignes en tout ; le reste se
+     trouve en precisant la recherche (quatre lignes), et la ligne du bas le dit. */
+  var CHOIX_MAX = 4;
   function listeCatalogue(prefixe){
     var q = QPROD.trim().toLowerCase();
-    /* Les produits DEJA CHOISIS restent en tete, meme hors recherche : sans
-       cela, chercher autre chose donnait l impression de les avoir perdus. */
     var tout = (D.catalogue || []);
     var choisis = tout.filter(function(p){ return CHOISIS.indexOf(p.id) >= 0; });
     var reste = tout.filter(function(p){
@@ -257,77 +364,88 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
       if (!q) return true;
       return (String(p.nom) + ' ' + String(p.sku)).toLowerCase().indexOf(q) !== -1;
     });
-    // Sans recherche, on ne deverse pas tout le catalogue : les 40 premiers.
-    var vus = choisis.concat(q ? reste.slice(0, 120) : reste.slice(0, 40));
-    if (!vus.length) return '<div class="dt">${T("Aucun produit ne correspond.")}</div>';
+    var place = Math.max(0, CHOIX_MAX - choisis.length);
+    var vus = choisis.concat(reste.slice(0, place));
+    var autres = reste.length - Math.min(reste.length, place);
+    if (!vus.length) return '<div class="plus">${T("Aucun produit ne correspond.")}</div>';
     return vus.map(function(p){
-      return '<label class="lg"><input type="checkbox" class="' + prefixe + '-prod" value="' + esc(p.id) + '"'
-        + (CHOISIS.indexOf(p.id) >= 0 ? ' checked' : '') + '> ' + esc(p.nom)
+      var on = CHOISIS.indexOf(p.id) >= 0;
+      return '<label class="lg' + (on ? ' on' : '') + '"><input type="checkbox" class="' + prefixe + '-prod" value="' + esc(p.id) + '"'
+        + (on ? ' checked' : '') + '><span class="nm">' + esc(p.nom) + '</span>'
         + '<span class="sku">' + esc(p.sku || '') + '</span></label>';
-    }).join('');
+    }).join('')
+      + (autres > 0 ? '<div class="plus">' + autres + (autres > 1 ? '${T(" autres produits — précisez la recherche")}' : '${T(" autre produit — précisez la recherche")}') + '</div>' : '');
   }
 
   function boiteOffre(){
     var o = FORM || {};
     var genre = o.genre || 'percent';
-    var h = '<div class="voile" id="pr-voile"><div class="boite">'
-      + '<h3>' + (o.id ? '${T("Modifier l’offre")}' : '${T("Nouvelle offre")}') + '</h3>'
-      + '<div class="grille">'
-      + '<div class="ch"><label>${T("Nom interne ")}<span class="req">*</span></label>'
-      + '<input id="of-nom" aria-label="${T("Nom interne de l’offre")}" value="' + esc(o.nom || '') + '" placeholder="${T("Solde du printemps")}"></div>'
-      + '<div class="ch"><label for="of-actif">${T("Statut")}</label><select id="of-actif">'
-      + '<option value="1"' + (o.actif !== false ? ' selected' : '') + '>${T("Actif")}</option>'
-      + '<option value="0"' + (o.actif === false ? ' selected' : '') + '>${T("Inactif")}</option></select></div>'
-      + '<div class="ch"><label for="of-genre">${T("Type de rabais")}</label><select id="of-genre">'
-      + '<option value="percent"' + (genre === 'percent' ? ' selected' : '') + '>${T("Pourcentage (%)")}</option>'
-      + '<option value="fixed"' + (genre === 'fixed' ? ' selected' : '') + '>${T("Montant fixe ($)")}</option>'
-      + '<option value="bogo"' + (genre === 'bogo' ? ' selected' : '') + '>${T("« 2 pour 1 » (quantité)")}</option>'
-      + '<option value="tiered"' + (genre === 'tiered' ? ' selected' : '') + '>${T("Paliers de quantité")}</option>'
-      + '</select></div>'
-      + '<div class="ch" id="of-bloc-val"' + (genre === 'bogo' || genre === 'tiered' ? ' style="display:none"' : '') + '>'
-      + '<label>${T("Valeur ")}<span class="req">*</span></label>'
-      + '<input type="number" id="of-valeur" aria-label="${T("Valeur de l’offre")}" min="0" step="0.01" value="' + esc(o.valeur || '') + '"></div>'
+    var affiche = o.bandeauAffiche !== false;
+    var h = '<div class="voile" id="pr-voile"><div class="boite fiche" role="dialog" aria-modal="true">'
+      + '<div class="bt-tete"><h3>' + (o.id ? '${T("Modifier l’offre")}' : '${T("Nouvelle offre")}') + '</h3>'
+      + '<span class="bt-sous">${T("Rabais appliqué automatiquement à la caisse")}</span></div>'
+      + '<div class="fiche2"><div class="col">';
+
+    h += '<section class="sect"><h4>${T("L’offre")}</h4><div class="grille g3">'
+      + ch('', '${T("Nom interne ")}<span class="req">*</span>',
+          '<input id="of-nom" aria-label="${T("Nom interne de l’offre")}" value="' + esc(o.nom || '') + '" placeholder="${T("Solde du printemps")}">')
+      + ch('', '${T("Statut")}', '<select id="of-actif" aria-label="${T("Statut")}">'
+          + '<option value="1"' + (o.actif !== false ? ' selected' : '') + '>${T("Actif")}</option>'
+          + '<option value="0"' + (o.actif === false ? ' selected' : '') + '>${T("Inactif")}</option></select>')
+      + ch('', '${T("Type de rabais")}', '<select id="of-genre" aria-label="${T("Type de rabais")}">'
+          + '<option value="percent"' + (genre === 'percent' ? ' selected' : '') + '>${T("Pourcentage (%)")}</option>'
+          + '<option value="fixed"' + (genre === 'fixed' ? ' selected' : '') + '>${T("Montant fixe ($)")}</option>'
+          + '<option value="bogo"' + (genre === 'bogo' ? ' selected' : '') + '>${T("« 2 pour 1 » (quantité)")}</option>'
+          + '<option value="tiered"' + (genre === 'tiered' ? ' selected' : '') + '>${T("Paliers de quantité")}</option>'
+          + '</select>')
       + '</div>';
 
-    h += '<div id="of-bloc-bogo"' + (genre === 'bogo' ? '' : ' style="display:none"') + '>'
-      + '<h4>${T("« 2 pour 1 »")}</h4><div class="grille">'
-      + '<div class="ch"><label for="of-bogo-achat">${T("Quantité achetée")}</label>'
-      + '<input type="number" id="of-bogo-achat" min="2" step="1" value="' + esc(o.bogoAchat || 2) + '"></div>'
-      + '<div class="ch"><label for="of-bogo-gratuit">${T("Quantité gratuite")}</label>'
-      + '<input type="number" id="of-bogo-gratuit" min="1" step="1" value="' + esc(o.bogoGratuit || 1) + '">'
-      + '<span class="aide">${T("Doit rester inférieure à la quantité achetée.")}</span></div>'
-      + '<div class="ch"><label for="of-parclient">&nbsp;</label><label style="display:inline-flex;align-items:center;gap:.4rem">'
-      + '<input type="checkbox" id="of-parclient"' + (o.parClient ? ' checked' : '') + '> ${T("Une fois par client")}</label></div>'
+    h += '<div class="grille g3 ecart" id="of-bloc-val"' + (genre === 'bogo' || genre === 'tiered' ? ' style="display:none"' : '') + '>'
+      + ch('', '${T("Valeur ")}<span class="req">*</span>',
+          '<input type="number" id="of-valeur" aria-label="${T("Valeur de l’offre")}" min="0" step="0.01" value="' + esc(o.valeur || '') + '">')
+      + '</div>';
+
+    h += '<div id="of-bloc-bogo" class="ecart"' + (genre === 'bogo' ? '' : ' style="display:none"') + '>'
+      + '<div class="grille g3">'
+      + ch('', '${T("Quantité achetée")}', '<input type="number" id="of-bogo-achat" aria-label="${T("Quantité achetée")}" min="2" step="1" value="' + esc(o.bogoAchat || 2) + '">')
+      + ch('', '${T("Quantité gratuite")}', '<input type="number" id="of-bogo-gratuit" aria-label="${T("Quantité gratuite")}" title="${T("La quantité gratuite reste inférieure à la quantité achetée.")}" min="1" step="1" value="' + esc(o.bogoGratuit || 1) + '">')
+      + ch('', '${T("Limite")}', interrupteur('of-parclient', '${T("Une fois par client")}', '', !!o.parClient))
       + '</div></div>';
 
-    h += '<div id="of-bloc-paliers"' + (genre === 'tiered' ? '' : ' style="display:none"') + '>'
-      + '<h4>${T("Paliers de quantité")}</h4><div class="paliers" id="of-paliers">' + listePaliers() + '</div>'
+    h += '<div id="of-bloc-paliers" class="ecart"' + (genre === 'tiered' ? '' : ' style="display:none"') + '>'
+      + '<div class="paliers" id="of-paliers">' + listePaliers() + '</div>'
       + '<button class="mini" id="of-palier-plus">${T("+ Ajouter un palier")}</button></div>';
 
-    h += '<h4>${T("Portée")}</h4><div class="grille">'
-      + blocPortee('of', o.appliqueA || 'all', o.categoriesChoisies || [])
-      + '</div>';
+    h += '</section>';
 
-    h += '<h4>${T("Bandeau de la boutique")}</h4><div class="grille">'
-      + '<div class="ch large"><label for="of-bandeau">${T("Message")}</label>'
-      + '<input id="of-bandeau" value="' + esc(o.bandeau || '') + '" placeholder="${T("Jusqu’à 30 % sur les robes")}"></div>'
-      + '<div class="ch large"><label for="of-bandeau-en">${T("Message (anglais)")}</label>'
-      + '<input id="of-bandeau-en" value="' + esc(o.bandeauEN || '') + '"></div>'
-      + '<div class="ch"><label for="of-fond">${T("Couleur du fond")}</label>'
-      + '<input type="color" id="of-fond" value="' + esc(o.bandeauFond || '#1a1a2e') + '"></div>'
-      + '<div class="ch"><label for="of-texte">${T("Couleur du texte")}</label>'
-      + '<input type="color" id="of-texte" value="' + esc(o.bandeauTexte || '#ffffff') + '"></div>'
-      + '<div class="ch"><label for="of-cta">${T("Texte du bouton")}</label>'
-      + '<input id="of-cta" value="' + esc(o.bandeauCta || '') + '" placeholder="${T("Voir les articles")}"></div>'
-      + '<div class="ch"><label for="of-cta-en">${T("Texte du bouton (anglais)")}</label>'
-      + '<input id="of-cta-en" value="' + esc(o.bandeauCtaEN || '') + '"></div>'
-      + '<div class="ch"><label for="of-url">${T("Lien du bouton")}</label>'
-      + '<input id="of-url" value="' + esc(o.bandeauUrl || '#shop') + '"></div>'
-      + '<div class="ch"><label for="of-priorite">${T("Priorité d’affichage")}</label>'
-      + '<input type="number" id="of-priorite" min="1" max="99" value="' + esc(o.priorite || 5) + '"></div>'
-      + '<div class="ch"><label for="of-debut">${T("Début")}</label><input type="date" id="of-debut" value="' + esc(o.debut || '') + '"></div>'
-      + '<div class="ch"><label for="of-fin">${T("Fin")}</label><input type="date" id="of-fin" value="' + esc(o.fin || '') + '"></div>'
-      + '</div>';
+    h += '<section class="sect"><h4>${T("Portée")}</h4><div class="grille">'
+      + blocPortee('of', o.appliqueA || 'all', o.categoriesChoisies || [])
+      + '</div></section>';
+
+    h += '</div><div class="col">'
+      + '<section class="sect"><h4>${T("Bandeau de la boutique")}</h4>'
+      + interrupteur('of-bandeau-affiche', '${T("Annoncer cette offre dans un bandeau")}',
+          '${T("Il paraît en haut de la boutique quand aucune annonce n’est active.")}', affiche)
+      + '<div id="of-bloc-bandeau"' + (affiche ? '' : ' hidden') + '>'
+      + apercu('of', o.bandeau || '', o.bandeauFond || '#1a1a2e', o.bandeauTexte || '#ffffff', o.bandeauCta || '',
+          '${T("Message automatique : ")}' + (o.rabais || '${T("le rabais et sa portée")}'))
+      + '<div class="grille g2">'
+      + ch('', '${T("Message")}', '<input id="of-bandeau" aria-label="${T("Message")}" value="' + esc(o.bandeau || '') + '" placeholder="${T("Laisser vide pour le message automatique")}">', 'large')
+      + ch('', '${T("Message (anglais)")}', '<input id="of-bandeau-en" aria-label="${T("Message (anglais)")}" value="' + esc(o.bandeauEN || '') + '">', 'large')
+      + ch('', '${T("Texte du bouton")}', '<input id="of-cta" aria-label="${T("Texte du bouton")}" value="' + esc(o.bandeauCta || '') + '" placeholder="${T("Voir les articles")}">')
+      + ch('', '${T("Texte du bouton (anglais)")}', '<input id="of-cta-en" aria-label="${T("Texte du bouton (anglais)")}" value="' + esc(o.bandeauCtaEN || '') + '">')
+      + '</div><div class="grille g3 ecart">'
+      + ch('', '${T("Lien du bouton")}', '<input id="of-url" aria-label="${T("Lien du bouton")}" value="' + esc(o.bandeauUrl || '#shop') + '">')
+      + ch('', '${T("Couleur du fond")}', '<input type="color" id="of-fond" aria-label="${T("Couleur du fond")}" value="' + esc(o.bandeauFond || '#1a1a2e') + '">')
+      + ch('', '${T("Couleur du texte")}', '<input type="color" id="of-texte" aria-label="${T("Couleur du texte")}" value="' + esc(o.bandeauTexte || '#ffffff') + '">')
+      + '</div></div>'
+      + '<p class="aide-off" id="of-bandeau-off"' + (affiche ? ' hidden' : '') + '>${T("Aucun bandeau : l’offre s’applique à la caisse sans être annoncée.")}</p>'
+      + '</section>'
+      + '<section class="sect"><h4>${T("Période")}</h4><div class="grille g3">'
+      + ch('', '${T("Début")}', '<input type="date" id="of-debut" aria-label="${T("Début")}" value="' + esc(o.debut || '') + '">')
+      + ch('', '${T("Fin")}', '<input type="date" id="of-fin" aria-label="${T("Fin")}" value="' + esc(o.fin || '') + '">')
+      + ch('', '${T("Priorité d’affichage")}', '<input type="number" id="of-priorite" aria-label="${T("Priorité d’affichage")}" min="1" max="99" value="' + esc(o.priorite || 5) + '">')
+      + '</div></section></div></div>';
 
     h += '<div class="pied-boite"><button class="mini" id="pr-annuler">${T("Annuler")}</button>'
       + '<button class="mini prim" id="of-enr">' + (o.id ? '${T("Enregistrer")}' : '${T("Créer l’offre")}') + '</button></div>'
@@ -353,55 +471,65 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
   function boiteAnnonce(){
     var a = FORM || {};
     var genre = a.genre || 'announcement';
-    var h = '<div class="voile" id="pr-voile"><div class="boite">'
-      + '<h3>' + (a.id ? '${T("Modifier")}' : '${T("Nouvelle annonce")}') + '</h3>'
-      + '<div class="grille">'
-      + '<div class="ch"><label>${T("Nom interne ")}<span class="req">*</span></label>'
-      + '<input id="an-nom" aria-label="${T("Nom interne de l’annonce")}" value="' + esc(a.nom || '') + '"></div>'
-      + '<div class="ch"><label for="an-genre">${T("Genre")}</label><select id="an-genre">'
-      + '<option value="announcement"' + (genre === 'announcement' ? ' selected' : '') + '>${T("Bandeau de la boutique")}</option>'
-      + '<option value="badge"' + (genre === 'badge' ? ' selected' : '') + '>${T("Badge de fiche produit")}</option>'
-      + '</select></div>'
-      + '<div class="ch"><label for="an-actif">${T("Statut")}</label><select id="an-actif">'
-      + '<option value="1"' + (a.actif !== false ? ' selected' : '') + '>${T("Actif")}</option>'
-      + '<option value="0"' + (a.actif === false ? ' selected' : '') + '>${T("Inactif")}</option></select></div>'
-      + '<div class="ch"><label for="an-priorite">${T("Priorité")}</label>'
-      + '<input type="number" id="an-priorite" min="1" max="99" value="' + esc(a.priorite || 5) + '"></div>'
-      + '<div class="ch"><label for="an-debut">${T("Début")}</label><input type="date" id="an-debut" value="' + esc(a.debut || '') + '"></div>'
-      + '<div class="ch"><label for="an-fin">${T("Fin")}</label><input type="date" id="an-fin" value="' + esc(a.fin || '') + '"></div>'
-      + '</div>';
+    var h = '<div class="voile" id="pr-voile"><div class="boite fiche" role="dialog" aria-modal="true">'
+      + '<div class="bt-tete"><h3>' + (a.id ? '${T("Modifier")}' : '${T("Nouvelle annonce")}') + '</h3>'
+      + '<span class="bt-sous">${T("Bandeau en haut de la boutique ou badge sur les fiches produit")}</span></div>'
+      + '<div class="fiche2"><div class="col">'
+      + '<section class="sect"><h4>${T("L’annonce")}</h4><div class="grille g2">'
+      + ch('', '${T("Nom interne ")}<span class="req">*</span>',
+          '<input id="an-nom" aria-label="${T("Nom interne de l’annonce")}" value="' + esc(a.nom || '') + '">', 'large')
+      + ch('', '${T("Genre")}', '<select id="an-genre" aria-label="${T("Genre")}">'
+          + '<option value="announcement"' + (genre === 'announcement' ? ' selected' : '') + '>${T("Bandeau de la boutique")}</option>'
+          + '<option value="badge"' + (genre === 'badge' ? ' selected' : '') + '>${T("Badge de fiche produit")}</option>'
+          + '</select>')
+      + ch('', '${T("Statut")}', '<select id="an-actif" aria-label="${T("Statut")}">'
+          + '<option value="1"' + (a.actif !== false ? ' selected' : '') + '>${T("Actif")}</option>'
+          + '<option value="0"' + (a.actif === false ? ' selected' : '') + '>${T("Inactif")}</option></select>')
+      + '</div><div class="grille g3 ecart">'
+      + ch('', '${T("Début")}', '<input type="date" id="an-debut" aria-label="${T("Début")}" value="' + esc(a.debut || '') + '">')
+      + ch('', '${T("Fin")}', '<input type="date" id="an-fin" aria-label="${T("Fin")}" value="' + esc(a.fin || '') + '">')
+      + ch('', '${T("Priorité")}', '<input type="number" id="an-priorite" aria-label="${T("Priorité")}" min="1" max="99" value="' + esc(a.priorite || 5) + '">')
+      + '</div></section>';
 
-    h += '<div id="an-bloc-bandeau"' + (genre === 'announcement' ? '' : ' style="display:none"') + '>'
-      + '<h4>${T("Bandeau")}</h4><div class="grille">'
-      + '<div class="ch large"><label>${T("Message ")}<span class="req">*</span></label>'
-      + '<input id="an-message" aria-label="${T("Message")} de l’annonce" value="' + esc(a.message || '') + '"></div>'
-      + '<div class="ch large"><label for="an-message-en">${T("Message (anglais)")}</label>'
-      + '<input id="an-message-en" value="' + esc(a.messageEN || '') + '"></div>'
-      + '<div class="ch"><label for="an-fond">${T("Couleur du fond")}</label>'
-      + '<input type="color" id="an-fond" value="' + esc(a.fond || '#1a1a2e') + '"></div>'
-      + '<div class="ch"><label for="an-texte">${T("Couleur du texte")}</label>'
-      + '<input type="color" id="an-texte" value="' + esc(a.texte || '#ffffff') + '"></div>'
-      + '<div class="ch"><label for="an-cta">${T("Texte du bouton")}</label><input id="an-cta" value="' + esc(a.cta || '') + '"></div>'
-      + '<div class="ch"><label for="an-cta-en">${T("Texte du bouton (anglais)")}</label><input id="an-cta-en" value="' + esc(a.ctaEN || '') + '"></div>'
-      + '<div class="ch large"><label for="an-url">${T("Lien du bouton")}</label><input id="an-url" value="' + esc(a.url || '#shop') + '"></div>'
-      + '</div></div>';
-
-    h += '<div id="an-bloc-badge"' + (genre === 'badge' ? '' : ' style="display:none"') + '>'
-      + '<h4>${T("Badge")}</h4><div class="grille">'
-      + '<div class="ch"><label>${T("Texte ")}<span class="req">*</span></label>'
-      + '<input id="an-badge" aria-label="${T("Texte de l’emblème")}" value="' + esc(a.badge || '') + '" placeholder="${T("Nouveauté")}"></div>'
-      + '<div class="ch"><label for="an-badge-en">${T("Texte (anglais)")}</label><input id="an-badge-en" value="' + esc(a.badgeEN || '') + '"></div>'
-      + '<div class="ch"><label for="an-badge-couleur">${T("Couleur")}</label><select id="an-badge-couleur">'
-      + [['accent', '${T("Or (accent)")}'], ['success', '${T("Vert")}'], ['error', '${T("Rouge")}'], ['info', '${T("Bleu")}'], ['warning', '${T("Orange")}']]
-          .map(function(c){
-            return '<option value="' + c[0] + '"' + ((a.badgeCouleur || 'accent') === c[0] ? ' selected' : '') + '>' + c[1] + '</option>';
-          }).join('')
-      + '</select></div>'
+    /* Le badge vit A DROITE, apercu en tete : c est ce que la cliente verra,
+       comme le bandeau. Sa portee (quels produits le portent) l accompagne. */
+    var badge = '<section class="sect" id="an-bloc-badge"' + (genre === 'badge' ? '' : ' style="display:none"') + '>'
+      + '<h4>${T("Badge")}</h4>'
+      + '<div class="ap-lbl">${T("Aperçu sur la fiche produit")}</div><div class="ap-badge"><span class="bdg ' + esc(a.badgeCouleur || 'accent') + '" id="an-badge-ap">'
+      + esc(a.badge || '${T("Nouveauté")}') + '</span></div>'
+      + '<div class="grille g3 ecart">'
+      + ch('', '${T("Texte ")}<span class="req">*</span>',
+          '<input id="an-badge" aria-label="${T("Texte de l’emblème")}" value="' + esc(a.badge || '') + '" placeholder="${T("Nouveauté")}">')
+      + ch('', '${T("Texte (anglais)")}', '<input id="an-badge-en" aria-label="${T("Texte (anglais)")}" value="' + esc(a.badgeEN || '') + '">')
+      + ch('', '${T("Couleur")}', '<select id="an-badge-couleur" aria-label="${T("Couleur")}">'
+          + [['accent', '${T("Or (accent)")}'], ['success', '${T("Vert")}'], ['error', '${T("Rouge")}'], ['info', '${T("Bleu")}'], ['warning', '${T("Orange")}']]
+              .map(function(c){
+                return '<option value="' + c[0] + '"' + ((a.badgeCouleur || 'accent') === c[0] ? ' selected' : '') + '>' + c[1] + '</option>';
+              }).join('')
+          + '</select>')
+      + '</div><div class="grille ecart">'
       + blocPortee('an', a.appliqueA || 'all', a.categoriesChoisies || [])
-      + '<div class="ch"><label for="an-expire">&nbsp;</label><label style="display:inline-flex;align-items:center;gap:.4rem">'
-      + '<input type="checkbox" id="an-expire"' + (a.expireAuto ? ' checked' : '') + '> ${T("Expire par produit")}</label></div>'
-      + '<div class="ch"><label for="an-expire-jours">${T("Après (jours)")}</label>'
-      + '<input type="number" id="an-expire-jours" min="1" value="' + esc(a.expireJours || 7) + '"></div>'
+      + '</div><div class="grille g3 ecart">'
+      + '<div class="ch large2">' + interrupteur('an-expire', '${T("Expire par produit")}',
+          '${T("Le badge quitte chaque produit après le nombre de jours choisi.")}', !!a.expireAuto) + '</div>'
+      + ch('', '${T("Après (jours)")}', '<input type="number" id="an-expire-jours" aria-label="${T("Après (jours)")}" min="1" value="' + esc(a.expireJours || 7) + '">')
+      + '</div></section>';
+
+    h += '</div><div class="col">'
+      + '<section class="sect" id="an-bloc-bandeau"' + (genre === 'announcement' ? '' : ' style="display:none"') + '>'
+      + '<h4>${T("Bandeau")}</h4>'
+      + apercu('an', a.message || '', a.fond || '#1a1a2e', a.texte || '#ffffff', a.cta || '', '${T("Votre message")}')
+      + '<div class="grille g2">'
+      + ch('', '${T("Message ")}<span class="req">*</span>', '<input id="an-message" aria-label="${T("Message")}" value="' + esc(a.message || '') + '">', 'large')
+      + ch('', '${T("Message (anglais)")}', '<input id="an-message-en" aria-label="${T("Message (anglais)")}" value="' + esc(a.messageEN || '') + '">', 'large')
+      + ch('', '${T("Texte du bouton")}', '<input id="an-cta" aria-label="${T("Texte du bouton")}" value="' + esc(a.cta || '') + '">')
+      + ch('', '${T("Texte du bouton (anglais)")}', '<input id="an-cta-en" aria-label="${T("Texte du bouton (anglais)")}" value="' + esc(a.ctaEN || '') + '">')
+      + '</div><div class="grille g3 ecart">'
+      + ch('', '${T("Lien du bouton")}', '<input id="an-url" aria-label="${T("Lien du bouton")}" value="' + esc(a.url || '#shop') + '">')
+      + ch('', '${T("Couleur du fond")}', '<input type="color" id="an-fond" aria-label="${T("Couleur du fond")}" value="' + esc(a.fond || '#1a1a2e') + '">')
+      + ch('', '${T("Couleur du texte")}', '<input type="color" id="an-texte" aria-label="${T("Couleur du texte")}" value="' + esc(a.texte || '#ffffff') + '">')
+      + '</div></section>'
+      + badge
       + '</div></div>';
 
     h += '<div class="pied-boite"><button class="mini" id="pr-annuler">${T("Annuler")}</button>'
@@ -469,7 +597,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
         + rows.map(function(o){
             return '<tr><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(o.nom)) + '</span>'
               + '<div style="min-width:0"><div class="rf-nom">' + esc(o.nom) + '</div>'
-              + '<div class="rf-sous"><span>' + esc(o.portee) + '</span></div></div></div></td>'
+              + '<div class="rf-sous"><span>' + esc(o.portee) + '</span>'
+              + (o.bandeauAffiche === false ? '<span>${T("sans bandeau")}</span>' : '<span>${T("avec bandeau")}</span>')
+              + '</div></div></div></td>'
               + '<td><span class="rf-mont">' + esc(o.rabais) + '</span></td>'
               + '<td class="dt">' + (o.debut ? esc(jour(o.debut)) : '—')
               + (o.fin ? ' → ' + esc(jour(o.fin)) : '') + '</td>'
@@ -584,7 +714,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
         var i = CHOISIS.indexOf(cb.value);
         if (cb.checked && i < 0) CHOISIS.push(cb.value);
         if (!cb.checked && i >= 0) CHOISIS.splice(i, 1);
-        if (cpt) cpt.textContent = CHOISIS.length + ' produit' + (CHOISIS.length > 1 ? 's choisis' : ' choisi');
+        if (cpt) cpt.textContent = compteChoisis();
+        var lg = cb.closest('.lg'); if (lg) lg.classList.toggle('on', cb.checked);
       };
     });
   }
@@ -615,7 +746,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
   var BR_OF = ['of-nom', 'of-actif', 'of-genre', 'of-valeur', 'of-bogo-achat',
     'of-bogo-gratuit', 'of-appli', 'of-bandeau', 'of-bandeau-en', 'of-fond',
     'of-texte', 'of-cta', 'of-cta-en', 'of-url', 'of-priorite', 'of-debut', 'of-fin'];
-  var BR_OF_CASES = ['of-parclient'];
+  var BR_OF_CASES = ['of-parclient', 'of-bandeau-affiche'];
   var BR_AN = ['an-nom', 'an-genre', 'an-actif', 'an-priorite', 'an-debut', 'an-fin',
     'an-message', 'an-message-en', 'an-fond', 'an-texte', 'an-cta', 'an-cta-en',
     'an-url', 'an-badge', 'an-badge-en', 'an-badge-couleur', 'an-appli', 'an-expire-jours'];
@@ -715,6 +846,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
       if (bpl) bpl.onclick = function(){ lirePaliers(); PALIERS.push({ qty: '', percent: '' }); redessinerPaliers(); };
       brancherPaliers();
       brancherPortee('of');
+      brancherApercu('of');
+      var baf = document.getElementById('of-bandeau-affiche');
+      if (baf) baf.onchange = function(){
+        var bl = document.getElementById('of-bloc-bandeau'), bo = document.getElementById('of-bandeau-off');
+        if (bl) bl.hidden = !baf.checked;
+        if (bo) bo.hidden = baf.checked;
+      };
 
       var be = document.getElementById('of-enr');
       if (be) be.onclick = function(){
@@ -729,6 +867,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
           bandeau: val('of-bandeau'), bandeauEN: val('of-bandeau-en'),
           bandeauFond: val('of-fond'), bandeauTexte: val('of-texte'),
           bandeauCta: val('of-cta'), bandeauCtaEN: val('of-cta-en'), bandeauUrl: val('of-url'),
+          bandeauAffiche: coche('of-bandeau-affiche'),
           priorite: val('of-priorite'), debut: val('of-debut'), fin: val('of-fin')
         }]).then(function(r){
           be.disabled = false;
@@ -747,6 +886,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
         if (ban) ban.style.display = ag.value === 'announcement' ? '' : 'none';
         if (bad) bad.style.display = ag.value === 'badge' ? '' : 'none';
       };
+      brancherApercu('an');
+      var majBadge = function(){
+        var b = document.getElementById('an-badge-ap'); if (!b) return;
+        b.textContent = val('an-badge').trim() || '${T("Nouveauté")}';
+        b.className = 'bdg ' + (val('an-badge-couleur') || 'accent');
+      };
+      var eb = document.getElementById('an-badge'); if (eb) eb.oninput = majBadge;
+      var ec = document.getElementById('an-badge-couleur'); if (ec) ec.onchange = majBadge;
       brancherPortee('an');
 
       var ae = document.getElementById('an-enr');
