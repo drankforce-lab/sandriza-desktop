@@ -115,7 +115,7 @@ input.t.manque{border-color:#f87171;background:rgba(248,113,113,.08)}
 .fil .rang{display:flex;align-items:center;width:100%;height:26px}
 .fil .tr{flex:1;height:2px;background:var(--v14)}
 .fil .tr.fait{background:#4ade80}
-.fil .tr.vide{background:transparent}
+.fil .tr.vide{background:transparent;visibility:hidden}  /* un trait parasite de 43 px y etait peint (2026-10-04) */
 .fil .rond{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
   font-size:.75rem;font-weight:700;flex-shrink:0;border:2px solid var(--v18);
   background:transparent;color:var(--tx2);box-sizing:border-box}
