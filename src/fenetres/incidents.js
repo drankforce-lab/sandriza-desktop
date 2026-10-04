@@ -126,8 +126,11 @@ input.t.manque{border-color:#f87171;background:rgba(248,113,113,.08)}
 .fil .et.ici .nom{color:var(--tx);font-weight:700}
 .fil .et.fait .nom{color:var(--tx)}
 .pas{display:none}
-.pas.ici{display:block}
-.pas h4{margin:0 0 .9rem;font:700 .95rem/1.2 Georgia,serif}
+/* RELOOKING 2026 (2026-10-04) : les champs d une etape sur deux colonnes ;
+   une zone de texte prend toute la largeur. Intertitre au style du reste. */
+.pas.ici{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.15rem 1rem;align-items:start}
+.pas h4{grid-column:1/-1;margin:0 0 .7rem;font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--tx-or);font-weight:700}
+.pas .champ:has(textarea){grid-column:1/-1}
 .nav{display:flex;justify-content:space-between;align-items:center;gap:.75rem;width:100%}
 /* ⚠ LE MESSAGE DE L'ASSISTANT VIT DANS L'ASSISTANT. Il partait au pied de la
    FENÊTRE, c'est-à-dire DERRIÈRE le voile de la surcouche : l'avertissement
@@ -386,7 +389,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
     for (var i=0;i<et.length;i++){
       var ch='';
       for (var j=0;j<et[i].champs.length;j++) ch += champHtml(et[i].champs[j], inc);
-      pasH += '<div class="pas'+(i===0?' ici':'')+'"><h4>'+esc(et[i].icone||'')+' '+esc(et[i].label)+'</h4>'+ch+'</div>';
+      pasH += '<div class="pas'+(i===0?' ici':'')+'"><h4>'+esc(et[i].label)+'</h4>'+ch+'</div>';
     }
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-inc';
     sur.innerHTML = '<div class="boite"><div class="tt"><h3><span class="ic">🛡</span> '+(id?'${T("Modifier l’incident")}':'${T("Consigner un incident")}')+'</h3>'
@@ -494,7 +497,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
         else if (c.type==='date') v=szJour(v)||v;   // « 8 août 2026 », pas « 2026-08-08 » (2026-10-04)
         lignes += '<div class="li"><div class="k">'+esc(c.label)+'</div><div class="v">'+esc(v)+'</div></div>';
       }
-      if (lignes) h += '<div class="grp"><div class="grpT">'+esc(et[i].icone||'')+' '+esc(et[i].label)+'</div>'+lignes+'</div>';
+      if (lignes) h += '<div class="grp"><div class="grpT">'+esc(et[i].label)+'</div>'+lignes+'</div>';
     }
     if (!h) h = '<div class="vide">${T("Aucun détail saisi.")}</div>';
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-vue';
