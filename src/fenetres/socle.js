@@ -3552,6 +3552,15 @@ html body .sz-inter-mini input[type=checkbox]{position:absolute;opacity:0;width:
 .boite.sz-fiche .pied-boite{flex:0 0 auto;margin:0;padding:.7rem 1.2rem;border-top:1px solid var(--v08)}
 .boite.sz-fiche .pied-boite button{min-height:2.2rem;padding:0 1rem}
 @media (max-width:900px){.sz-fiche-corps{grid-template-columns:minmax(0,1fr)}}
+/* ── LES BOITES DE L ANCIENNE FACTURE, AU MEME DESSIN (2026-10-04) ──────────
+   Une trentaine de fenetres ont leur boite << h3 + champs + pied-boite >>.
+   Sans les reecrire : le titre se separe du contenu par un trait, le pied
+   aussi, et les boutons du pied prennent la meme hauteur partout. Le titre
+   quitte la Georgia (il etait le seul endroit de l interface a la garder). */
+.voile > .boite:not(.sz-fiche) > h3:first-child{padding-bottom:.65rem;margin-bottom:.85rem;border-bottom:1px solid var(--v08);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-weight:600;font-size:1.02rem}
+.voile > .boite:not(.sz-fiche) > .pied-boite{padding-top:.75rem;border-top:1px solid var(--v08)}
+.voile > .boite > .pied-boite button{min-height:2.15rem;padding-left:.95rem;padding-right:.95rem}
 `;
 
 const CSS_TRANSITIONS = `

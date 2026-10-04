@@ -218,7 +218,8 @@ table.tb.lp code{font-family:ui-monospace,monospace;font-size:.72rem;color:var(-
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 /* L adresse de la page dans l editeur (2026-10-04). */
-.cp-url{font-size:.74rem;color:var(--tx3);margin:-.35rem 0 .7rem}
+.cp-ligne{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin:.1rem 0 .7rem}
+.cp-url{font-size:.74rem;color:var(--tx3);margin-left:auto}
 .cp-url code{font-family:ui-monospace,Consolas,monospace;color:var(--tx2);background:var(--v05);padding:.08rem .4rem;border-radius:5px}
 `;
 
@@ -498,8 +499,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       +'</div>'
       /* RELOOKING 2026 (2026-10-04) : l adresse que la page aura, et le pied de
          page en interrupteur (cp-foot, lu par .checked comme avant). */
-      +'<div class="cp-url">${T("Adresse de la page :")} <code id="cp-url">#page/'+esc(p.slug||'…')+'</code></div>'
-      +'<div style="margin:.2rem 0 .9rem">'+szInter('cp-foot', '${T("Afficher dans le pied de page")}', '${T("Un lien vers cette page apparaît en bas de chaque écran de la boutique.")}', !!p.footerVisible, RO?'disabled':'')+'</div>'
+      /* UNE ligne (la boite ne doit pas defiler) : le pied de page en
+         mini-interrupteur, l adresse de la page a droite. */
+      +'<div class="cp-ligne"><label class="bascule" title="${T("Un lien vers cette page apparaît en bas de chaque écran de la boutique.")}"><input type="checkbox" id="cp-foot"'+(p.footerVisible?' checked':'')+(RO?' disabled':'')+'> <span>${T("Afficher dans le pied de page")}</span></label>'
+      +'<span class="cp-url">${T("Adresse de la page :")} <code id="cp-url">#page/'+esc(p.slug||'…')+'</code></span></div>'
       +'<label class="champ" style="margin:0"><span class="lbl">${T("Contenu de la page")}</span></label>'
       +edHtml('cp-ed', p.content)
       +'</div>'

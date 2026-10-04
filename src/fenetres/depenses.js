@@ -134,7 +134,7 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
   align-items:center;justify-content:center;z-index:50;padding:1rem}
 .boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;
-  max-width:44rem;width:100%;max-height:90vh;overflow:auto;padding:.9rem 1rem}
+  max-width:44rem;width:100%;max-height:96vh;overflow:auto;padding:.9rem 1rem}
 .boite h3{margin:0 0 .5rem;font:700 .98rem/1.3 Georgia,serif;display:flex;
   align-items:center;gap:.5rem;flex-wrap:wrap}
 .boite .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.5rem;
