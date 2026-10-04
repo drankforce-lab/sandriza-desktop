@@ -325,11 +325,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     var pret = !!(t && t.pret) && !!CTX.peutExpedier && !expediee;
     actions.innerHTML =
-        '<button id="btn-apercu"' + (c.aUneEtiquette ? '' : ' disabled') + '><span class="ic">👁</span> ${T("Aperçu")}</button>'
-      + '<button id="btn-imprimer"' + (c.aUneEtiquette ? '' : ' disabled') + '><span class="ic">🖨</span> ${T("Étiquette + bordereau")}</button>'
-      + '<button id="btn-bordereau"><span class="ic">🧾</span> ${T("Bordereau seul")}</button>'
-      + '<button class="paie" id="btn-etiquette"' + (pret ? '' : ' disabled') + '>'
-      + (c.aUneEtiquette ? '<span class="ic">💳</span> ${T("Créer une AUTRE étiquette")}' : '<span class="ic">💳</span> ${T("Créer l’étiquette")}') + '</button>';
+        /* RELOOKING 2026 (2026-10-04) : un seul accent, l or, pour l action
+           principale (le violet « paiement » etait la seule autre couleur du
+           pied) ; plus d emoji dans les boutons (regle de la palette). */
+        '<button id="btn-apercu"' + (c.aUneEtiquette ? '' : ' disabled') + '>${T("Aperçu")}</button>'
+      + '<button id="btn-imprimer"' + (c.aUneEtiquette ? '' : ' disabled') + '>${T("Étiquette + bordereau")}</button>'
+      + '<button id="btn-bordereau">${T("Bordereau seul")}</button>'
+      + '<button class="prim" id="btn-etiquette"' + (pret ? '' : ' disabled') + '>'
+      + (c.aUneEtiquette ? '${T("Créer une AUTRE étiquette")}' : '${T("Créer l’étiquette")}') + '</button>';
     brancher();
   }
 
@@ -390,7 +393,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           ? '<p style="color:var(--tx-att)"><span class="ic">⚠</span> ${T("Une étiquette existe déjà pour cette commande. ")}'
             + '${T("En commander une seconde sera facturé une seconde fois.")}</p>' : '')
       + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
-      + '<button class="paie" id="v-oui">${T("Commander")}</button></div>',
+      + '<button class="prim" id="v-oui">${T("Commander")}</button></div>',
       function(fermer){
         document.getElementById('v-non').onclick = fermer;
         document.getElementById('v-oui').onclick = function(){

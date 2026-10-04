@@ -279,7 +279,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
     var teinte = pct >= 100 ? '#e08a8a' : pct >= 80 ? '#d8b57a' : '#6ea8a1';
     var h = '<div class="carte"><h2>${T("Plafond mensuel de dépense")}</h2>';
     h += '';
-    h += '<label class="rc" style="display:flex;gap:.5rem;align-items:center;margin:.6rem 0">'
+    h += '<label class="rc bascule" style="display:flex;gap:.5rem;align-items:center;margin:.6rem 0">'  // bascule : interrupteur (socle, 2026-10-04)
       + '<input type="checkbox" id="pl-actif"' + (b.actif ? ' checked' : '') + '> '
       + '<span><strong>${T("Appliquer un plafond mensuel")}</strong></span></label>';
     h += '<div class="ch" style="max-width:16rem"><label for="pl-montant">${T("Montant autorisé par mois ($US)")}</label>'
