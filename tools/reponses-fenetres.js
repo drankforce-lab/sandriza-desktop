@@ -7885,6 +7885,11 @@ const JEU = {
       dernieres: [
         { id: 'ord_0011', numero: 'SZ-100211', date: '2026-08-06T15:20:00.000Z', total: 149.41, statut: 'preparing' },
         { id: 'ord_0009', numero: 'SZ-100209', date: '2026-07-28T09:00:00.000Z', total: 89.95, statut: 'delivered' },
+        // ⚠ Le site en envoie SIX (admin.js, orders.slice(0, 6)) : le jeu n en avait que deux.
+        { id: 'ord_0007', numero: 'SZ-100207', date: '2026-07-11T13:40:00.000Z', total: 214.5, statut: 'delivered' },
+        { id: 'ord_0005', numero: 'SZ-100205', date: '2026-06-22T10:05:00.000Z', total: 67.5, statut: 'delivered' },
+        { id: 'ord_0004', numero: 'SZ-100204', date: '2026-06-02T18:30:00.000Z', total: 312.0, statut: 'cancelled' },
+        { id: 'ord_0002', numero: 'SZ-100202', date: '2026-05-14T08:15:00.000Z', total: 129.95, statut: 'delivered' },
       ],
       provinces: ['QC','ON','BC','AB','MB','SK','NS','NB','NL','PE','NT','NU','YT'],
       purgeable: false,

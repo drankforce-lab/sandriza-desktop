@@ -109,6 +109,11 @@ button.mini{padding:.14rem .5rem;font-size:.75rem}
 .voile p{margin:.35rem 0;font-size:.86rem}
 .voile .fin2{display:flex;gap:.45rem;justify-content:flex-end;margin-top:.85rem}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* La fiche en deux colonnes (2026-10-04). */
+.duo-fiche{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:.7rem;align-items:start}
+.duo-fiche > .carte{margin:0}
+.coord .ligne{flex-direction:column;align-items:flex-start;gap:.12rem;padding:.42rem 0}
+.coord .ligne .k{font-size:.7rem}
 `;
 
 /** Page complète de la fenêtre native « Fiche client ». `id` = client. */
@@ -236,9 +241,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
       + '<div class="tuile"><div class="k">${T("Total dépensé")}</div><div class="v">' + argent(R.stats.totalDepense) + '</div></div>'
       + '<div class="tuile"><div class="k">${T("Inscrit le")}</div><div class="v date">' + esc(dateFr(c.inscritLe)) + '</div></div>'
       + '</div>');
-    h += '<div class="carte"><h2>${T("Coordonnées")}</h2>'
+    /* ⚠ DEUX COLONNES (2026-10-04) : les coordonnees a gauche, etiquette AU-DESSUS
+       de la valeur (elle etait rejetee a l autre bout de la ligne) ; les commandes
+       a droite. Empilees, la moitie basse de la fiche restait vide. */
+    h += '<div class="duo-fiche"><div class="carte coord"><h2>${T("Coordonnées")}</h2>'
       + (c.tel ? '<div class="ligne"><span class="k">${T("Téléphone")}</span><span>' + esc(c.tel) + '</span></div>' : '')
-      + '<div class="ligne"><span class="k">${T("Adresse")}</span><span style="text-align:right">'
+      + '<div class="ligne"><span class="k">${T("Adresse")}</span><span>'
       + esc([a.rue, a.ville, a.province, a.codePostal, a.pays].filter(Boolean).join(', ') || '—') + '</span></div>'
       + '<div class="ligne"><span class="k">${T("Langue des courriels")}</span><span>' + (c.langue === 'en' ? 'English' : '${T("Français")}') + '</span></div>'
       + (c.supprime && c.supprimeLe ? '<div class="ligne"><span class="k">${T("Supprimé le")}</span><span>' + esc(dateFr(c.supprimeLe)) + '</span></div>' : '')
@@ -262,7 +270,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
             + (R.stats.commandes - R.dernieres.length > 1 ? '${T("autres")}' : '${T("autre")}')
             + ' ${T("— voir la fenêtre Commandes")}</div>' : '')
         : '<div class="aide">${T("Aucune commande.")}</div>')
-      + '</div>';
+      + '</div></div>';
     corps.innerHTML = h;
 
     var c2 = R.client;
