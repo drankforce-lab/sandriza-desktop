@@ -210,5 +210,10 @@ module.exports = {
   /* ── LA PAGINATION DES SONDAGES (2026-09-26) ── */
   '‹ Précédent': '‹ Previous',
   'Page': 'Page',
-  'Suivant ›': 'Next ›'
+  'Suivant ›': 'Next ›',
+  /* ── RELOOKING 2026 (2026-10-04) ── */
+  'Un courriel de questions envoyé au client au moment choisi.': 'A questions email sent to the customer at the chosen moment.',
+  'Le sondage': 'The survey',
+  'Il part tout seul à chaque déclenchement.': 'It goes out on its own at every trigger.',
+  'Un code de réduction est envoyé à qui répond.': 'A discount code is sent to whoever answers.',
 };

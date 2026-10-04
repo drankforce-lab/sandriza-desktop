@@ -390,12 +390,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
 
   function boiteEditeur(){
     var e = EDIT;
-    var h = '<div class="voile" id="fi-voile-ed"><div class="boite">'
-      + '<h3>' + (e.id ? '${T("Modifier le sondage")}' : '${T("Nouveau sondage")}') + '</h3>'
+    /* RELOOKING 2026 (2026-10-04) : en-tete et pied separes, sections en cartes,
+       « actif » et « recompense » en interrupteurs. Identifiants inchanges. */
+    var h = '<div class="voile" id="fi-voile-ed"><div class="boite sz-fiche" role="dialog" aria-modal="true" style="max-width:66rem">'
+      + '<div class="sz-fiche-tete"><h3>' + (e.id ? '${T("Modifier le sondage")}' : '${T("Nouveau sondage")}') + '</h3>'
+      + '<span class="st">${T("Un courriel de questions envoyé au client au moment choisi.")}</span></div>'
       /* ⚠ DEUX COLONNES (sa demande : aucune barre de defilement) — reglages et
          recompense a gauche, questions a droite. Empilee dans une boite de
          42 rem, l edition d un sondage depassait l ecran de 312 px. */
-      + '<div class="ed2"><div class="ed-g">'
+      + '<div class="sz-fiche-corps"><div class="sz-fiche-col"><section class="sz-sect"><h4>${T("Le sondage")}</h4>'
       + '<label class="champ"><span class="lbl">${T("Nom")}</span>'
       + '<input class="t" id="sd-nom" value="' + esc(e.nom) + '" placeholder="${T("Satisfaction après livraison")}"></label>'
       + '<label class="champ"><span class="lbl">${T("Envoyé quand")}</span><select class="t" id="sd-decl">'
@@ -405,10 +408,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       + '</select></label>'
       + '<label class="champ"><span class="lbl">${T("Texte d’introduction du courriel")}</span>'
       + '<textarea class="t" id="sd-intro" rows="3">' + esc(e.intro) + '</textarea></label>'
-      + '<label class="case"><input type="checkbox" id="sd-actif"' + (e.actif ? ' checked' : '')
-      + '> ${T("Sondage actif")}</label>';
+      + szInter('sd-actif', '${T("Sondage actif")}', '${T("Il part tout seul à chaque déclenchement.")}', !!e.actif)
+      + '</section>';
 
-    var hq = '<div class="qs"><div class="qstitre">${T("Questions")}<span class="dt">'
+    var hq = '<section class="sz-sect qs"><div class="qstitre">${T("Questions")}<span class="dt">'
       + e.questions.length + '</span>'
       + '<button class="mini" id="sd-q-plus">${T("+ Ajouter une question")}</button></div>';
     if (!e.questions.length) {
@@ -433,11 +436,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
             : '')
         + '</div>';
     }).join('');
-    hq += '</div>';
+    hq += '</section>';
 
     var r = e.recompense;
-    h += '<label class="case"><input type="checkbox" id="sd-rec"' + (r.active ? ' checked' : '')
-      + '> ${T("Offrir une récompense pour la réponse")}</label>';
+    h += '<section class="sz-sect"><h4>${T("Récompense")}</h4>'
+      + szInter('sd-rec', '${T("Offrir une récompense pour la réponse")}', '${T("Un code de réduction est envoyé à qui répond.")}', !!r.active);
     if (r.active) {
       h += '<div class="qedr">'
         + '<label class="champ" style="flex:1 1 10rem"><span class="lbl">${T("Type")}</span>'
@@ -455,7 +458,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
         + '<input class="t" id="sd-rec-msg" value="' + esc(r.message) + '" placeholder="${T("Merci ! Voici un code pour votre prochaine commande.")}"></label>';
     }
 
-    h += '</div><div class="ed-d">' + hq + '</div></div>';
+    h += '</section></div><div class="sz-fiche-col">' + hq + '</div></div>';
     h += '<div class="pied-boite">'
       + '<button class="mini" id="sd-annuler">${T("Annuler")}</button>'
       + '<button class="mini prim" id="sd-enr">' + (e.id ? '${T("Enregistrer")}' : '${T("Créer le sondage")}') + '</button>'
