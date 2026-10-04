@@ -181,7 +181,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
     courriel_invalide: '${T("Adresse courriel invalide.")}',
     courriel_pris: '${T("Cette adresse courriel est déjà utilisée par un autre compte.")}',
     tel_invalide: '${T("Numéro de téléphone invalide.")}',
-    mdp_court: '${T("Le nouveau mot de passe doit contenir au moins 6 caractères.")}',
+    mdp_court: '${T("Le nouveau mot de passe doit contenir au moins 8 caractères.")}',
     mdp_echec: '${T("Mot de passe NON changé — réessayez.")}',
     pas_en_corbeille: '${T("Le compte doit d’abord être mis à la corbeille.")}',
     refus_serveur: '${T("Suppression refusée par le serveur — le compte est intact.")}',

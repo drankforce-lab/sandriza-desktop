@@ -37,8 +37,8 @@ module.exports = {
   'Cette adresse courriel est déjà utilisée par un autre compte.':
     'This email address is already used by another account.',
   'Numéro de téléphone invalide.': 'Invalid phone number.',
-  'Le nouveau mot de passe doit contenir au moins 6 caractères.':
-    'The new password must be at least 6 characters long.',
+  'Le nouveau mot de passe doit contenir au moins 8 caractères.':
+    'The new password must be at least 8 characters long.',
   'Mot de passe NON changé — réessayez.': 'Password NOT changed — try again.',
 
   /* ── LA FICHE ───────────────────────────────────────────────────────────── */
