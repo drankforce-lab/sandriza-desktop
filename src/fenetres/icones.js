@@ -68,7 +68,7 @@ body{background:var(--f-page);color:var(--tx);
 .bascule,.ch label.bascule{display:flex;align-items:center;gap:.5rem;font-size:.82rem;cursor:pointer;
   margin:0 0 .8rem;-webkit-user-select:none;user-select:none}
 .bascule input{width:1rem;height:1rem;accent-color:#c9a97e;cursor:pointer}
-.bascule:has(input:disabled){opacity:.55;cursor:default}
+.bascule:has(input:disabled){cursor:default;color:var(--tx3)}  /* le texte reste lisible ; seul le curseur s estompe (socle) — 2026-10-04 */
 /* Le bloc de depot : vignette a gauche, formulaire a droite. */
 .pose{display:grid;grid-template-columns:7rem 1fr;gap:1rem;align-items:start}
 @media (max-width:620px){.pose{grid-template-columns:1fr}}
