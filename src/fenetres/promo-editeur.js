@@ -141,7 +141,8 @@ body{background:var(--f-page);color:var(--tx);
 .outils .btn{font-size:.72rem;padding:.24rem .36rem;white-space:nowrap}
 /* Un reglage ACTIF doit se voir sans lire : une case a cocher en mots se relit
    a chaque fois, une pastille allumee se reconnait. */
-.btn.on{background:#7AA7FF;border-color:#7AA7FF;color:#0b1220;font-weight:650}
+/* L etat actif en OR, l accent unique (2026-10-04) — il etait bleu vif. */
+.btn.on{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:650}
 .insp .lst{flex:0 0 auto;max-height:26%;overflow-y:auto;border-bottom:1px solid var(--v08)}
 .insp .prop{flex:1 1 auto;overflow-y:auto;padding:.7rem .8rem}
 /* ⚠ AUCUNE BARRE DE DEFILEMENT DANS UN MODULE (sa demande du 2026-09-26) : les
@@ -192,7 +193,7 @@ body{background:var(--f-page);color:var(--tx);
 .seg{display:inline-flex;border:1px solid var(--v12);border-radius:7px;overflow:hidden}
 .seg button{padding:.26rem .55rem;background:transparent;color:var(--tx2);border:0;
   font:inherit;font-size:.76rem;cursor:pointer}
-.seg button.on{background:#7AA7FF;color:#0b1220;font-weight:650}
+.seg button.on{background:#c9a97e;color:#17202c;font-weight:650}
 .seg button:hover:not(.on){background:var(--v08);color:var(--tx)}
 /* Les teintes n ont AUCUN texte : rien a mesurer au contraste, et un liset
    suffit a distinguer un blanc d un fond clair. */
@@ -258,8 +259,8 @@ html.jour .btn.plein{background:#1f5a3d;border-color:#1f5a3d;color:#fff}
 html.jour .poi{background:#2f5fb5;border-color:#ffffff}
 html.jour .etiq{background:#2f5fb5;color:#fff}
 html.jour .boite.sel{border-color:#2f5fb5}
-html.jour .seg button.on{background:#2f5fb5;color:#ffffff}
-html.jour .btn.on{background:#2f5fb5;border-color:#2f5fb5;color:#ffffff}
+html.jour .seg button.on{background:#C49A6C;color:#241703}
+html.jour .btn.on{background:#C49A6C;border-color:#C49A6C;color:#241703}
 html.jour .lg:hover{border-color:#2f5fb5}
 /* Le voile reste sombre de jour — c est SA fonction : eteindre la page derriere.
    Mais il est DECLARE, et non herite d un oubli. */

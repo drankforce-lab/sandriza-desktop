@@ -215,6 +215,11 @@ tbody tr.ligne.mod{cursor:pointer}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media (max-width:980px){.duo{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* Un « Supprimer » par ligne : neutre au repos, rouge au survol et quand il
+   demande confirmation — douze boutons rouges faisaient une liste en alerte
+   (regle de la palette : le rouge signale un probleme, 2026-10-04). */
+button[data-sup-dep]:not(.aconf),button[data-sup-veh]:not(.aconf){border-color:var(--v16);color:var(--tx2);background:transparent}
+button[data-sup-dep]:not(.aconf):hover,button[data-sup-veh]:not(.aconf):hover{border-color:rgba(239,68,68,.55);color:var(--tx-err2)}
 `;
 
 /**
