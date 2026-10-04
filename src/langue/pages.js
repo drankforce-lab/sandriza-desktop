@@ -271,4 +271,7 @@ module.exports = {
   "Aligner à gauche": "Align left",
   "Centrer": "Centre",
   "Aligner à droite": "Align right",
+  /* ── RELOOKING 2026 (2026-10-04) ── */
+  'Adresse de la page :': 'Page address:',
+  'Un lien vers cette page apparaît en bas de chaque écran de la boutique.': 'A link to this page appears at the bottom of every store screen.',
 };

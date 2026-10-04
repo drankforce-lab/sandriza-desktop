@@ -217,6 +217,9 @@ table.tb.lp code{font-family:ui-monospace,monospace;font-size:.72rem;color:var(-
 .vbtn span{font-size:.77rem;color:var(--tx2)}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* L adresse de la page dans l editeur (2026-10-04). */
+.cp-url{font-size:.74rem;color:var(--tx3);margin:-.35rem 0 .7rem}
+.cp-url code{font-family:ui-monospace,Consolas,monospace;color:var(--tx2);background:var(--v05);padding:.08rem .4rem;border-radius:5px}
 `;
 
 /* ⚠ LA FENETRE ACCEPTE UN ONGLET D OUVERTURE, et ce n est pas un ajout pour le
@@ -493,7 +496,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       +'<label class="champ"><span class="lbl">${T("Sous-titre")}</span><input class="t" id="cp-sub" value="'+esc(p.subtitle)+'"'+dis+'></label>'
       +'<label class="champ"><span class="lbl">${T("Libellé pied de page")}</span><input class="t" id="cp-flabel" value="'+esc(p.footerLabel)+'"'+dis+'></label>'
       +'</div>'
-      +'<label class="chk" style="margin:.2rem 0 .9rem"><input type="checkbox" id="cp-foot" '+(p.footerVisible?'checked':'')+dis+'>${T(" Afficher dans le pied de page")}</label>'
+      /* RELOOKING 2026 (2026-10-04) : l adresse que la page aura, et le pied de
+         page en interrupteur (cp-foot, lu par .checked comme avant). */
+      +'<div class="cp-url">${T("Adresse de la page :")} <code id="cp-url">#page/'+esc(p.slug||'…')+'</code></div>'
+      +'<div style="margin:.2rem 0 .9rem">'+szInter('cp-foot', '${T("Afficher dans le pied de page")}', '${T("Un lien vers cette page apparaît en bas de chaque écran de la boutique.")}', !!p.footerVisible, RO?'disabled':'')+'</div>'
       +'<label class="champ" style="margin:0"><span class="lbl">${T("Contenu de la page")}</span></label>'
       +edHtml('cp-ed', p.content)
       +'</div>'
@@ -514,10 +520,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     // touche (nouvelle page seulement). NFD par point de code pour eviter tout
     // caractere accentue dans le script (les accents graves fermeraient le gabarit).
     var sl=document.getElementById('cp-slug');
-    if (sl && !p.protege) sl.oninput=function(){ sl._touche=true; sl.value=sl.value.toLowerCase().replace(/[^a-z0-9-]/g,''); };
+    var majUrl=function(){ var u=document.getElementById('cp-url'); if (u&&sl) u.textContent='#page/'+(sl.value||'…'); };
+    if (sl && !p.protege) sl.oninput=function(){ sl._touche=true; sl.value=sl.value.toLowerCase().replace(/[^a-z0-9-]/g,''); majUrl(); };
     if (nouv){ var ti=document.getElementById('cp-title');
       if (ti && sl) ti.oninput=function(){ if (sl._touche) return;
-        sl.value=String(ti.value||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }; }
+        sl.value=String(ti.value||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); majUrl(); }; }
   }
   function enregistrerPage(nouv){
     if (RO||OCCUPE) return;
