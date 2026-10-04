@@ -232,8 +232,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var e = (D.cotation || {})[cle];
     if (!e || e.actif === false) return '';
     var quand = e.au ? ' · ' + esc(szQuand(e.au)) : '';
-    var env = e.mode === 'production' ? '' : ' <span class="rf-pill ambre">${T("identifiants d’essai")}</span>';
-    if (e.jamais) return '<div class="cot neutre">${T("Aucune cotation à la caisse depuis la mise en service de ce suivi.")}' + env + '</div>';
+    /* Le mode test est un CHOIX, pas une faute (sa question du 2026-10-04) :
+       pastille neutre, et l etat « jamais » dit quoi faire. */
+    var env = e.mode === 'production' ? '' : ' <span class="rf-pill bleu">${T("mode test (sandbox)")}</span>';
+    if (e.jamais) return '<div class="cot neutre">${T("Pas encore coté — cliquez « Tester la cotation » en bas de la fenêtre.")}' + env + '</div>';
     if (e.ok) return '<div class="cot bon"><span class="pt"></span>${T("Cote à la caisse")}'
       + (e.essai ? ' — ' + esc(e.essai.service || '') + ' : ' + esc(szArgent(e.essai.prix)) : '') + quand + env + '</div>';
     // Une seule ligne (la colonne ne doit pas defiler) ; le motif entier au survol.

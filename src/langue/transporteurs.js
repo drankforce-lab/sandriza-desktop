@@ -157,4 +157,6 @@ module.exports = {
   'Cotation d’essai en cours… (jusqu’à 30 s)': 'Test quote in progress… (up to 30 s)',
   'Un transporteur actif n’a pas coté — voir sa carte.': 'An active carrier did not quote — see its card.',
   'Tous les transporteurs actifs ont coté.': 'All active carriers quoted.',
+  'mode test (sandbox)': 'test mode (sandbox)',
+  'Pas encore coté — cliquez « Tester la cotation » en bas de la fenêtre.': 'Not quoted yet — click “Test the quote” at the bottom of the window.',
 };
