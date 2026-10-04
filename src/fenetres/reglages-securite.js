@@ -130,7 +130,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (sub?'<span class="sub">'+esc(sub)+'</span>':'')+'</label>';
   }
   function caseAC(id, lbl, coche){
-    return '<label class="case"><input type="checkbox" id="'+id+'" '+(coche?'checked':'')+(RO?' disabled':'')+'> '+esc(lbl)+'</label>';
+    // Un reglage oui/non : la classe bascule le fait passer en interrupteur (socle, 2026-10-04).
+    return '<label class="case bascule"><input type="checkbox" id="'+id+'" '+(coche?'checked':'')+(RO?' disabled':'')+'> <span>'+esc(lbl)+'</span></label>';
   }
 
   var SEC = 'pw';   // l onglet montre (Mots de passe, Inactivite et session, Restriction)

@@ -146,5 +146,15 @@ module.exports = {
   /* ── REFONTE FINE (2026-09-26) : l etat des secrets en pastille ── */
   'Enregistré': 'Saved',
   'Aucun secret enregistré': 'No secret saved',
-  'Enregistré …': 'Saved …'
+  'Enregistré …': 'Saved …',
+  /* ── ETAT DE LA COTATION (2026-10-04) ── */
+  'Une vraie cotation vers Québec, 1 kg, pour chaque transporteur actif': 'A real quote to Quebec City, 1 kg, for each active carrier',
+  'Tester la cotation': 'Test the quote',
+  'identifiants d’essai': 'test credentials',
+  'Aucune cotation à la caisse depuis la mise en service de ce suivi.': 'No checkout quote since this tracking was turned on.',
+  'Cote à la caisse': 'Quotes at checkout',
+  'Absent de la caisse': 'Missing from checkout',
+  'Cotation d’essai en cours… (jusqu’à 30 s)': 'Test quote in progress… (up to 30 s)',
+  'Un transporteur actif n’a pas coté — voir sa carte.': 'An active carrier did not quote — see its card.',
+  'Tous les transporteurs actifs ont coté.': 'All active carriers quoted.',
 };

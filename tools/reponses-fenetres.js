@@ -1934,6 +1934,13 @@ const JEU = {
       identite: IDENTITE,
       'config:transporteurs:donnees': { ok: true, charge: true, raison: '', peutModifier: true,
         mapbox: 'pk.abc123',
+        // ⚠ L ETAT REEL DU 2026-10-04 : FedEx actif mais refuse a la cotation
+        // (identifiants d essai), Postes Canada qui cote. Forme : tarifs-livraison.php « etat ».
+        cotation: {
+          'postes-canada': { actif: true, mode: 'production', ok: true, au: '2026-10-04T19:55:31Z' },
+          fedex: { actif: true, mode: 'sandbox', ok: false, code: 403, au: '2026-10-04T19:55:32Z',
+            message: 'cotation refusée : FORBIDDEN.ERROR — We could not authorize your credentials. Please check your permissions and try again.' },
+        },
         carriers: {
           'postes-canada': { enabled: true, cle: { defini: true, fin: '7a2c' },
             customerNumber: '2004381', contractId: '42708517', mode: 'production',

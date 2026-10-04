@@ -96,6 +96,16 @@ button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:70
 button.prim:hover:not(:disabled){background:#d8bd97}
 .vide{padding:1rem;text-align:center;color:var(--tx2);font-size:.82rem}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* L etat de la cotation a la caisse (2026-10-04). */
+.cot{display:flex;align-items:center;flex-wrap:wrap;gap:.4rem;font-size:.74rem;line-height:1.3;margin:-.2rem 0 .4rem;
+  padding:.25rem .55rem;border-radius:8px;border:1px solid var(--v08);background:var(--v03);color:var(--tx2)}
+.cot .pt{width:.5rem;height:.5rem;border-radius:50%;background:var(--tx3);flex:0 0 auto}
+.cot.bon .pt{background:var(--tx-ok)}
+.cot.mal{border-color:rgba(239,68,68,.35);color:var(--tx-err2)}
+.cot.mal .pt{background:var(--tx-err)}
+.cot.mal b{color:var(--tx-err)}
+.cot.mal{flex-wrap:nowrap}
+.cot .mt{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 `;
 
 function pageTransporteurs() {
@@ -107,6 +117,7 @@ function pageTransporteurs() {
 <div class="avert" id="avert" hidden></div>
 <div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
+  <button id="b-tester" title="${T("Une vraie cotation vers Québec, 1 kg, pour chaque transporteur actif")}">${T("Tester la cotation")}</button>
   <button class="prim" id="b-save" disabled>${T("Enregistrer")}</button></div>
 <script>
 (function(){
@@ -213,10 +224,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       acct: { id: 'can-acct', label: '${T("Numéro de compte (optionnel)")}', place: '${T("Ex : 99999")}' } },
   ];
 
+  /* ── L ETAT DE LA COTATION A LA CAISSE (2026-10-04) ─────────────────────
+     FedEx etait active et rempli, mais absent de la caisse : ses identifiants
+     d essai etaient refuses a la cotation, et rien ne le disait. La carte dit
+     maintenant le dernier resultat — et le motif du transporteur, tel quel. */
+  function etatCotationHtml(cle){
+    var e = (D.cotation || {})[cle];
+    if (!e || e.actif === false) return '';
+    var quand = e.au ? ' · ' + esc(szQuand(e.au)) : '';
+    var env = e.mode === 'production' ? '' : ' <span class="rf-pill ambre">${T("identifiants d’essai")}</span>';
+    if (e.jamais) return '<div class="cot neutre">${T("Aucune cotation à la caisse depuis la mise en service de ce suivi.")}' + env + '</div>';
+    if (e.ok) return '<div class="cot bon"><span class="pt"></span>${T("Cote à la caisse")}'
+      + (e.essai ? ' — ' + esc(e.essai.service || '') + ' : ' + esc(szArgent(e.essai.prix)) : '') + quand + env + '</div>';
+    // Une seule ligne (la colonne ne doit pas defiler) ; le motif entier au survol.
+    var motif = (e.code ? e.code + ' · ' : '') + (e.message || '');
+    return '<div class="cot mal" title="' + esc(motif) + '"><span class="pt"></span><b>${T("Absent de la caisse")}</b>'
+      + env + '<span class="mt">' + esc(motif) + '</span></div>';
+  }
   function carteSimpleHtml(sp){
     var d = (D.carriers || {})[sp.cle] || {};
     var h = '<div class="carte"><div class="th">'
-      + '<h2>' + esc(sp.titre) + '</h2>' + basculeHtml(sp.enId, d.enabled) + '</div>';
+      + '<h2>' + esc(sp.titre) + '</h2>' + basculeHtml(sp.enId, d.enabled) + '</div>'
+      + etatCotationHtml(sp.cle);
     h += '<div class="gr2">'
       + texteHtml(sp.user.id, sp.user.label, d[sp.user.champ], sp.user.place, true)
       + secretHtml(sp.sec.id, sp.sec.label, d[sp.sec.champ], sp.sec.place) + '</div>';
@@ -237,7 +266,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var pc = (D.carriers || {})['postes-canada'] || {};
     var m = pc.cle || { defini: false, fin: '' };
     var h = '<div class="carte"><div class="th">'
-      + '<h2>${T("Postes Canada")}</h2>' + basculeHtml('cp-en', pc.enabled) + '</div>';
+      + '<h2>${T("Postes Canada")}</h2>' + basculeHtml('cp-en', pc.enabled) + '</div>'
+      + etatCotationHtml('postes-canada');
     h += '<div class="info">${T("Identifiants sur <b>developer.canadapost-postescanada.ca</b>. La clé API est au ")}'
       + '${T("format <b>utilisateur:motdepasse</b>. Valeurs de test : ")}'
       + '${T("6e93d53968881714:0bfa9fcb9853d1f51ee57a · client 2004381 · contrat 42708517.")}</div>';
@@ -291,6 +321,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function brancher(){
     var r = document.getElementById('b-retry');
     if (r) r.onclick = reessayer;
+    var bt = document.getElementById('b-tester');
+    if (bt) { bt.disabled = RO; bt.onclick = function(){
+      bt.disabled = true; dire('${T("Cotation d’essai en cours… (jusqu’à 30 s)")}');
+      appeler('config:transporteurs:tester').then(function(x){
+        bt.disabled = false;
+        if (!x || !x.ok) { dire(expliquer(x), 'err'); return; }
+        D.cotation = x.cotation || {};
+        dessiner();
+        var mal = Object.keys(D.cotation).filter(function(k){ var e = D.cotation[k]; return e && e.actif !== false && !e.ok; });
+        dire(mal.length ? '${T("Un transporteur actif n’a pas coté — voir sa carte.")}' : '${T("Tous les transporteurs actifs ont coté.")}', mal.length ? 'err' : 'bon');
+      });
+    }; }
   }
 
   function saisie(){

@@ -2617,6 +2617,7 @@ const OPS_PONT = new Set([
   // carriers_fetch_full : donnees/ecrire peuvent RECHARGER la config depuis le
   // nuage (reseau), d ou des plafonds larges.
   'config:transporteurs:donnees', 'config:transporteurs:ecrire', 'config:transporteurs:reessayer',
+  'config:transporteurs:tester',
   // Automatisations (fenetre Automations, 2.40.0) — pas de secret.
   'config:automations:donnees', 'config:automations:email', 'config:automations:stats',
   'config:telephonie:donnees', 'config:telephonie:ecrire',
@@ -3235,7 +3236,7 @@ const LIMITES_PONT = {
   'config:pays:donnees': 15000, 'config:pays:relire': 45000, 'config:pays:exclure': 30000,
   'config:retours:donnees': 15000, 'config:retours:ecrire': 30000,
   'config:nav:donnees': 15000, 'config:nav:ecrire': 30000, 'config:nav:reinit': 30000,
-  'config:transporteurs:donnees': 30000, 'config:transporteurs:ecrire': 45000, 'config:transporteurs:reessayer': 30000,
+  'config:transporteurs:donnees': 30000, 'config:transporteurs:ecrire': 45000, 'config:transporteurs:reessayer': 30000, 'config:transporteurs:tester': 70000,
   'config:automations:donnees': 15000, 'config:automations:email': 20000, 'config:automations:stats': 20000,
   'config:telephonie:donnees': 15000, 'config:telephonie:ecrire': 30000,
   'tel:resume': 20000, 'tel:sms:envoyer': 20000, 'tel:sms:lu': 15000, 'tel:sms:suppr': 15000, 'tel:vm:lu': 15000, 'tel:vm:suppr': 15000,
