@@ -100,7 +100,7 @@ function pageJournaux(onglet) {
      l'onglet « Accès » sans explication serait pire que d'arriver au bon
      endroit. Même égard que pour 'securite' dans la fenêtre des accès. */
   if (brut === 'journal') brut = 'envois';
-  const ONGLET0 = (['recherche','acces','automatisations','envois','impressions','sms','comptable','recherches','jserreurs'].indexOf(brut) >= 0) ? brut : 'acces';
+  const ONGLET0 = (['recherche','acces','automatisations','envois','impressions','sms','appels','comptable','recherches','jserreurs'].indexOf(brut) >= 0) ? brut : 'acces';
   return `${TETE()}
 <title>${T("Journaux — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -157,8 +157,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
      ⚠ IL EST PLACÉ APRÈS « Automatisations » et non en fin de liste : les deux
      racontent la même histoire (ce que la boutique a envoyé toute seule), et
      on passe de l'un à l'autre en enquêtant. */
-  var ONGLETS = [ ['recherche','${T("Recherche")}'], ['acces','${T("Accès")}'], ['automatisations','${T("Automatisations")}'], ['envois','${T("Journal d’envoi")}'], ['impressions','${T("Impressions")}'], ['sms','SMS'], ['comptable','${T("Accès aux liens")}'], ['recherches','${T("Sans résultat")}'], ['jserreurs','${T("Erreurs des clients")}'] ];
-  var SMS_D = null, COMPTA_D = null;   // journaux SERVEUR (chargés à la visite de l'onglet)
+  var ONGLETS = [ ['recherche','${T("Recherche")}'], ['acces','${T("Accès")}'], ['automatisations','${T("Automatisations")}'], ['envois','${T("Journal d’envoi")}'], ['impressions','${T("Impressions")}'], ['sms','SMS'], ['appels','${T("Appels")}'], ['comptable','${T("Accès aux liens")}'], ['recherches','${T("Sans résultat")}'], ['jserreurs','${T("Erreurs des clients")}'] ];
+  var SMS_D = null, COMPTA_D = null, APP_D = null;   /* APP_D : appels Twilio (2026-10-03) */   // journaux SERVEUR (chargés à la visite de l'onglet)
   /* ⚠ L'ÉTAT DU JOURNAL D'ENVOI, chargé à la visite de l'onglet comme les deux
      ci-dessus : le coeur journal:liste exige le droit newsletter, qui n'est
      pas celui qui ouvre cette fenêtre. On ne va donc pas le chercher tant que
@@ -487,6 +487,59 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
     var rl=document.getElementById('sms-reload'); if (rl) rl.onclick=function(){ SMS_D=null; vueSms(); };
   }
 
+  /* ══ APPELS (Twilio) — sa demande du 2026-10-03 ══════════════════════════
+     « Je ne trouve pas les journaux de mes appels Twilio. » L'historique des
+     90 derniers jours, lu chez Twilio par le serveur (action calllog) : sens,
+     numéros, issue, durée, coût. Un appel renvoyé vers un cellulaire le DIT
+     (la jambe de renvoi n'est pas montrée deux fois). La gestion — rappeler,
+     messagerie vocale — reste dans Communications → Téléphonie. */
+  var APP_ISSUE = { 'completed':'${T("Répondu")}', 'no-answer':'${T("Sans réponse")}', 'busy':'${T("Occupé")}',
+    'failed':'${T("Échoué")}', 'canceled':'${T("Annulé")}', 'in-progress':'${T("En cours")}', 'ringing':'${T("Sonne")}', 'queued':'${T("En attente")}' };
+  /* Par pages de 8 : sa règle, aucune barre de défilement dans les modules. */
+  var APP_PAGE = 0, APP_PAR = 8;
+  function appDuree(s){ s = parseInt(s, 10) || 0; var m = Math.floor(s / 60), r = s % 60; return m + ':' + (r < 10 ? '0' : '') + r; }
+  function vueAppels(){
+    if (APP_D===null){
+      corps.innerHTML='<div class="vide charge">${T("Lecture des appels…")}</div>'; OCCUPE=true;
+      appeler('journal:appels',[90]).then(function(r){ OCCUPE=false;
+        if (r&&r.ok){ APP_D=r; APP_PAGE=0; if (ONGLET==='appels') vueAppels(); }
+        else { APP_D={ appels: [] }; if (ONGLET==='appels') corps.innerHTML='<div class="carte"><div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div></div>'; dire('${T("Échec : ")}'+expliquer(r), 'err'); } });
+      return;
+    }
+    var rows = APP_D.appels || [];
+    var sec = 0, cout = 0, unite = '', manques = 0;
+    for (var k=0;k<rows.length;k++){ var a=rows[k];
+      if (a.status==='completed') sec += (parseInt(a.duration,10)||0);
+      if (a.status==='no-answer'||a.status==='busy'||a.status==='failed'||a.status==='canceled') manques++;
+      if (a.price!=null){ cout += +a.price; if (!unite) unite = a.priceUnit||''; } }
+    var h = '<div class="note">ℹ ${T("Les appels reçus et émis (Twilio) des 90 derniers jours. Rappeler ou écouter la messagerie se fait dans ")}<b>${T("Communications → Téléphonie")}</b>.</div>'
+      + '<div class="carte"><div class="barre"><span class="sub">'+rows.length+' '+szPl(rows.length,'${T("appel")}','${T("appels")}')
+      + ' · '+manques+' '+szPl(manques,'${T("manqué")}','${T("manqués")}')+' · '+Math.round(sec/60)+' min'
+      + (cout ? ' · '+cout.toFixed(2)+' '+esc(unite) : '')
+      + (APP_D.tronque ? ' · <b>${T("liste coupée à 5 000 appels")}</b>' : '')
+      + '</span><span class="pousse"></span>'
+      + (rows.length > APP_PAR ? '<button class="b" id="app-prec" aria-label="${T("Page précédente")}"'+(APP_PAGE<=0?' disabled':'')+'>‹</button><span class="sub" style="margin:0 .4rem">'+(APP_PAGE+1)+' / '+Math.ceil(rows.length/APP_PAR)+'</span><button class="b" id="app-suiv" aria-label="${T("Page suivante")}"'+((APP_PAGE+1)*APP_PAR>=rows.length?' disabled':'')+'>›</button> ' : '')
+      + '<button class="b" id="app-reload"><span class="ic">🔄</span> ${T("Actualiser")}</button></div>'
+      + '<table class="tb"><thead><tr><th>${T("Date")}</th><th>${T("Sens")}</th><th>${T("De")}</th><th>${T("À")}</th><th>${T("Issue")}</th><th>${T("Durée")}</th><th>${T("Coût")}</th></tr></thead><tbody>';
+    if (!rows.length) h += '<tr><td colspan="7" class="vide">${T("Aucun appel.")}</td></tr>';
+    var _d0 = APP_PAGE*APP_PAR, _d1 = Math.min(rows.length, _d0+APP_PAR);
+    for (var i=_d0;i<_d1;i++){ var c=rows[i]; var ent=String(c.direction||'').indexOf('inbound')===0;
+      var issue = APP_ISSUE[c.status] || esc(c.status||'—');
+      var rate = (c.status==='no-answer'||c.status==='busy'||c.status==='failed'||c.status==='canceled');
+      h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(c.startTime))+'</td>'
+        + '<td><span class="pill" style="background:'+(ent?'rgba(14,165,233,.18)':'rgba(22,163,74,.2)')+';color:'+(ent?'var(--tx-bleu)':'var(--tx-ok2)')+'">'+(ent?'${T("⬇ Reçu")}':'${T("⬆ Émis")}')+'</span></td>'
+        + '<td class="mono">'+esc(c.from||'—')+'</td><td class="mono">'+esc(c.to||'—')+(c.renvoyeA?'<div class="mut" style="font-size:.72rem">${T("renvoyé à ")}'+esc(c.renvoyeA)+'</div>':'')+'</td>'
+        + '<td'+(rate?' style="color:var(--tx-err2)"':'')+'>'+issue+'</td>'
+        + '<td class="mono">'+appDuree(c.duration)+'</td>'
+        + '<td class="mono mut">'+(c.price!=null ? (+c.price).toFixed(4)+' '+esc(c.priceUnit||'') : '—')+'</td></tr>';
+    }
+    h += '</tbody></table></div>';
+    corps.innerHTML = h;
+    var rl=document.getElementById('app-reload'); if (rl) rl.onclick=function(){ APP_D=null; vueAppels(); };
+    var pp=document.getElementById('app-prec'); if (pp) pp.onclick=function(){ if (APP_PAGE>0){ APP_PAGE--; vueAppels(); } };
+    var ps=document.getElementById('app-suiv'); if (ps) ps.onclick=function(){ if ((APP_PAGE+1)*APP_PAR<rows.length){ APP_PAGE++; vueAppels(); } };
+  }
+
   /* ══ JOURNAL D'ENVOI (venu de sa fenêtre propre, 2026-09-13) ═══════════════
      ⚠⚠ C'EST LA SEULE PIÈCE qui permette de répondre à « je n'ai jamais reçu
      votre courriel ». Les échecs sont donc comptés à part et gardent leur
@@ -789,6 +842,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
     else if (ONGLET==='envois') vueEnvois();
     else if (ONGLET==='impressions') vuePrints();
     else if (ONGLET==='sms') vueSms();
+    else if (ONGLET==='appels') vueAppels();
     else if (ONGLET==='comptable') vueComptable();
     else if (ONGLET==='recherches') vueRecherchesRatees();
     else if (ONGLET==='jserreurs') vueJsErreurs();

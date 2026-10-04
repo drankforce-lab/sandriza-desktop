@@ -2669,6 +2669,7 @@ const OPS_PONT = new Set([
   'journal:recherche',
   // SMS dans les journaux (2.72.0, #7 Lot 7b-2). Comptable reutilise liens:journal.
   'journal:sms',
+  'journal:appels',
   // Incidents de securite (fenetre Incidents, 2.75.0, #26) — registre Loi 25.
   'incidents:donnees', 'incidents:ecrire', 'incidents:supprimer',
   // Sauvegarde & restauration (fenetre Sauvegarde, 2.76.0, #27) — backup.php.
@@ -3280,7 +3281,7 @@ const LIMITES_PONT = {
   'journal:stats': 20000, 'journal:deverrouiller': 30000, 'journal:deverrouiller:tout': 30000,
   'journal:export:acces': 30000, 'journal:export:prints': 30000,
   'journal:purger:auto': 20000, 'journal:export:auto': 30000,
-  'journal:recherche': 30000, 'journal:sms': 30000,
+  'journal:recherche': 30000, 'journal:sms': 30000, 'journal:appels': 60000,
   /* Incidents : registre local pousse vers Turso a l ecriture (syncPrivateList),
      donc l ecriture attend le reseau — plus large que la lecture. */
   'incidents:donnees': 40000, 'incidents:ecrire': 60000, 'incidents:supprimer': 30000,
