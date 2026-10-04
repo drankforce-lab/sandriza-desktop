@@ -3561,6 +3561,13 @@ html body .sz-inter-mini input[type=checkbox]{position:absolute;opacity:0;width:
   font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-weight:600;font-size:1.02rem}
 .voile > .boite:not(.sz-fiche) > .pied-boite{padding-top:.75rem;border-top:1px solid var(--v08)}
 .voile > .boite > .pied-boite button{min-height:2.15rem;padding-left:.95rem;padding-right:.95rem}
+/* ⚠ LA FLECHE DES LISTES DISPARAISSAIT EN MODE JOUR (2026-10-04, vu a la capture
+   du Produit) : << html.jour select{background:#ffffff} >> est un RACCOURCI, il
+   remet aussi background-image a zero — et il est plus specifique que
+   << .ch select >>. Un menu deroulant sans fleche ne se reconnait plus. */
+html.jour .ch select,html.jour .champ select{background-color:#ffffff;
+  background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235a6574' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right .7rem center;background-size:12px}
 `;
 
 const CSS_TRANSITIONS = `
