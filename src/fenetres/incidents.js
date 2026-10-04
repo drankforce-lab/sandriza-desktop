@@ -131,6 +131,7 @@ input.t.manque{border-color:#f87171;background:rgba(248,113,113,.08)}
 .pas.ici{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.15rem 1rem;align-items:start}
 .pas h4{grid-column:1/-1;margin:0 0 .7rem;font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--tx-or);font-weight:700}
 .pas .champ:has(textarea){grid-column:1/-1}
+html.jour .pas h4{color:#6b5a40}   /* l or du jour tombait a 4,44 sur le fond beige */
 .nav{display:flex;justify-content:space-between;align-items:center;gap:.75rem;width:100%}
 /* ⚠ LE MESSAGE DE L'ASSISTANT VIT DANS L'ASSISTANT. Il partait au pied de la
    FENÊTRE, c'est-à-dire DERRIÈRE le voile de la surcouche : l'avertissement
