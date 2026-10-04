@@ -154,6 +154,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
+    secret_egal_id: '${T("Le Client Secret est identique au Client ID — il a sans doute été collé dans la mauvaise case.")}',
     session:            '${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
     droit:              '${T("Votre rôle ne donne pas accès à la configuration.")}',
     lecture_seule:      '${T("Votre rôle est en lecture seule.")}',

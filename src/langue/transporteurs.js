@@ -158,5 +158,6 @@ module.exports = {
   'Un transporteur actif n’a pas coté — voir sa carte.': 'An active carrier did not quote — see its card.',
   'Tous les transporteurs actifs ont coté.': 'All active carriers quoted.',
   'mode test (sandbox)': 'test mode (sandbox)',
+  'Le Client Secret est identique au Client ID — il a sans doute été collé dans la mauvaise case.': 'The Client Secret is identical to the Client ID — it was probably pasted in the wrong box.',
   'Pas encore coté — cliquez « Tester la cotation » en bas de la fenêtre.': 'Not quoted yet — click “Test the quote” at the bottom of the window.',
 };
