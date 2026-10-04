@@ -364,7 +364,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     occuper(true); dire('${T("Enregistrement…")}');
     appeler('config:transporteurs:ecrire', [saisie()]).then(function(r){
       occuper(false);
-      if (r && r.ok) { D = r; RO = !r.peutModifier; dessiner(); dire('${T("Transporteurs enregistrés.")}', 'bon'); }
+      /* ⚠ APRES L ENREGISTREMENT, ON RE-TESTE (2026-10-04) : la carte gardait
+         l etat lu a l ouverture — « Absent de la caisse, 401 » alors que le
+         nouveau secret fonctionnait deja. Une cotation d essai la met a jour. */
+      if (r && r.ok) { D = r; RO = !r.peutModifier; dessiner(); dire('${T("Transporteurs enregistrés — vérification de la cotation…")}', 'bon');
+        appeler('config:transporteurs:tester').then(function(x){
+          if (!x || !x.ok) { dire('${T("Transporteurs enregistrés.")}', 'bon'); return; }
+          D.cotation = x.cotation || {}; dessiner();
+          var mal = Object.keys(D.cotation).filter(function(k){ var e = D.cotation[k]; return e && e.actif !== false && !e.ok; });
+          dire(mal.length ? '${T("Enregistré — mais un transporteur actif ne cote pas : voir sa carte.")}' : '${T("Enregistré — tous les transporteurs actifs cotent.")}', mal.length ? 'err' : 'bon');
+        }); }
       else if (r && r.motif === 'non_charge') { charger(); dire('${T("Identifiants non chargés — rechargez puis réessayez.")}', 'err'); }
       else dire(expliquer(r), 'err');
     });
