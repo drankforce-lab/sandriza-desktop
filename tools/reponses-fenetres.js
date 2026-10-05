@@ -443,6 +443,9 @@ const JEU = {
         'caisse:client': { ok: true, exact: null, trouves: [
           { id: 'u_0001', nom: 'Marie Tremblay', courriel: 'marie@example.com', tel: '418 555-0142',
             province: 'QC', commandes: 3 },
+          { id: 'u_0002', nom: 'Marie-Ève Gagnon', courriel: 'meve.gagnon@example.com', tel: '514 555-0199',
+            province: 'QC', commandes: 1 },
+          { id: 'u_0003', nom: 'Marielle Côté', courriel: '', tel: '819 555-0107', province: 'ON', commandes: 0 },
         ] },
         'caisse:vendre': { ok: true, numero: 'SZ-100250', commandeId: 'ord_0003',
           factureId: 'inv_0003', total: 149.41, stockOk: true, nuageOk: true,

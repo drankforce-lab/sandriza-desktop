@@ -150,10 +150,13 @@ input[type=checkbox]{width:auto;min-height:0}
 .pct-champ i{position:absolute;right:.7rem;top:50%;transform:translateY(-50%);font-style:normal;color:var(--tx2);font-size:.85rem;pointer-events:none}
 
 /* Bascule $ / % du rabais sur la vente. */
-.seg{display:inline-flex;border:1px solid var(--v12);border-radius:10px;overflow:hidden;min-height:38px;flex:0 0 auto}
-.seg button{border:0;border-radius:0;background:none;padding:0 .8rem;font-weight:600;color:var(--tx2)}
+/* La bascule REMPLIT sa colonne (sa capture du 2026-10-04 : un vide a droite du
+   <<  % >>). Deux moitiés égales, la choisie en pastille arrondie a l interieur. */
+.seg{display:flex;width:100%;gap:3px;padding:3px;border:1px solid var(--v12);border-radius:10px;min-height:38px;background:var(--f-champ)}
+.seg button{flex:1 1 0;border:0;border-radius:7px;background:none;padding:0;font-weight:700;color:var(--tx2);min-height:0}
+.seg button:hover:not(.on){background:var(--v06);color:var(--tx)}
 .seg button.on{background:#c9a97e;color:#17202c}
-.rab-vente{display:grid;grid-template-columns:auto 6.5rem minmax(0,1fr);gap:.5rem;align-items:end}
+.rab-vente{display:grid;grid-template-columns:8.5rem 6.5rem minmax(0,1fr);gap:.5rem;align-items:end}
 
 /* Totaux : la ligne du total ne peut pas se confondre avec une taxe. */
 .tot .l{display:flex;justify-content:space-between;gap:1rem;padding:.08rem 0;font-size:.86rem}
@@ -171,11 +174,24 @@ button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
 button.large{width:100%;padding:.75rem .9rem;font-size:1.05rem;margin-top:.6rem;border-radius:12px}
 button.mini{padding:.22rem .6rem;font-size:.78rem}
 
-.cli{padding:.45rem .7rem;cursor:pointer;font-size:.85rem;border-top:1px solid var(--v06)}
-.cli:first-child{border-top:0}
-.cli:hover{background:var(--v05)}
-.cli .m{color:var(--tx2);font-size:.77rem}
-.liste-cli{margin-top:.45rem;border:1px solid var(--v10);border-radius:10px;overflow:hidden}
+/* ⚠ LA LISTE DES CLIENTS FLOTTE (sa demande du 2026-10-04 : << une liste
+   flottante des noms sans nous deformer la zone >>). Glissee dans la carte, elle
+   repoussait tout ce qui suit. Elle est en position FIXE, calee sous le champ
+   tape : la colonne de droite defile, une liste absolue y serait coupee. */
+#c-res{position:fixed;z-index:40;display:none}
+#c-res.ouverte{display:block}
+.liste-cli{background:var(--f-carte);border:1px solid var(--v14);border-radius:12px;overflow:hidden;
+  box-shadow:0 14px 36px rgba(0,0,0,.45);max-height:18rem;overflow-y:auto}
+.liste-cli .tete-l{padding:.4rem .75rem;font-size:.72rem;color:var(--tx2);border-bottom:1px solid var(--v07)}
+.cli{display:flex;align-items:center;gap:.6rem;padding:.5rem .75rem;cursor:pointer;border-top:1px solid var(--v06)}
+.cli:first-of-type{border-top:0}
+.cli:hover,.cli.on{background:var(--v06)}
+.cli .av{width:2rem;height:2rem;flex:0 0 auto;border-radius:99px;display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:.8rem;background:var(--v06);color:var(--tx-gris2)}
+.cli .t{min-width:0}
+.cli .n{font-weight:700;font-size:.86rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cli .m{color:var(--tx2);font-size:.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.jour .liste-cli{box-shadow:0 14px 36px rgba(15,23,42,.18)}
 
 .case{display:flex;align-items:flex-start;gap:.5rem;margin-top:.5rem;font-size:.8rem;cursor:pointer}
 .case .exp{display:block;color:var(--tx2);font-size:.73rem;line-height:1.45}
@@ -257,7 +273,7 @@ function pageCaisse(mode) {
         </div>
       </div>
       <div id="c-res"></div>
-      <label class="case"><input type="checkbox" id="c-creer">
+      <label class="case" id="c-creer-zone"><input type="checkbox" id="c-creer">
         <span>${T("Ouvrir un compte et lui envoyer le lien pour le finaliser")}
         <span class="exp">${T("Courriel requis. Historique et retours pour lui ; aucune inscription à l’infolettre.")}</span></span></label>
       <div class="sep"></div>
@@ -570,23 +586,67 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     CLI = null;
     majLie();
     var q = String(texte || '').trim();
-    if (q.length < 3) { document.getElementById('c-res').innerHTML = ''; return; }
+    if (q.length < 3) { fermerListeCli(); return; }
+    var champ = document.activeElement;
     cliT = setTimeout(function(){
       appeler('caisse:client', [q]).then(function(r){
         if (!r.ok) { dire(expliquer(r.motif), 'err'); return; }
         if (r.exact) { remplirClient(r.exact); return; }
-        var l = r.trouves || [];
-        TROUVES = l;
-        document.getElementById('c-res').innerHTML = l.length
-          ? '<div class="liste-cli">' + l.map(function(u){
-              return '<div class="cli" data-uid="' + esc(u.id) + '">'
-                + '<strong>' + esc(u.nom || '${T("(sans nom)")}') + '</strong>'
-                + '<span class="m"> · ' + esc(u.courriel || '${T("sans courriel")}')
-                + (u.commandes > 0 ? ' · ' + u.commandes + ' ' + szPl(u.commandes, '${T("commande")}', '${T("commandes")}') : '') + '</span></div>';
-            }).join('') + '</div>'
-          : '';
+        TROUVES = r.trouves || [];
+        CLI_SEL = -1;
+        dessinerListeCli(champ);
       });
     }, 160);
+  }
+
+  /* La liste flottante : sous le champ ou l on tape, de la largeur du bloc client. */
+  var CLI_SEL = -1, CLI_ANCRE = null;
+  function dessinerListeCli(ancre){
+    var z = document.getElementById('c-res');
+    if (!TROUVES.length) { fermerListeCli(); return; }
+    CLI_ANCRE = (ancre && ancre.id && /^c-/.test(ancre.id)) ? ancre : document.getElementById('c-nom');
+    z.innerHTML = '<div class="liste-cli" role="listbox" aria-label="${T("Clients trouvés")}">'
+      + '<div class="tete-l">' + TROUVES.length + ' ' + szPl(TROUVES.length, '${T("client trouvé")}', '${T("clients trouvés")}') + '</div>'
+      + TROUVES.map(function(u, i){
+          var nom = u.nom || '${T("(sans nom)")}';
+          var det = [u.courriel || '${T("sans courriel")}', u.tel || '']
+            .concat(u.commandes > 0 ? [u.commandes + ' ' + szPl(u.commandes, '${T("commande")}', '${T("commandes")}')] : [])
+            .filter(Boolean).join(' · ');
+          return '<div class="cli' + (i === CLI_SEL ? ' on' : '') + '" role="option" aria-selected="' + (i === CLI_SEL) + '" data-uid="' + esc(u.id) + '">'
+            + '<span class="av" aria-hidden="true">' + esc(String(nom).trim().charAt(0).toUpperCase() || '?') + '</span>'
+            + '<span class="t"><div class="n">' + esc(nom) + '</div><div class="m">' + esc(det) + '</div></span></div>';
+        }).join('') + '</div>';
+    z.className = 'ouverte';
+    placerListeCli();
+  }
+  function placerListeCli(){
+    var z = document.getElementById('c-res');
+    if (!z.className || !CLI_ANCRE) return;
+    var bloc = CLI_ANCRE.closest('.champs') || CLI_ANCRE;
+    var rb = bloc.getBoundingClientRect(), ra = CLI_ANCRE.getBoundingClientRect();
+    z.style.left = rb.left + 'px';
+    z.style.width = rb.width + 'px';
+    z.style.top = (ra.bottom + 4) + 'px';
+  }
+  function fermerListeCli(){
+    var z = document.getElementById('c-res');
+    z.className = ''; z.innerHTML = ''; CLI_SEL = -1;
+  }
+  // Fleches, Entree, Echap dans les trois champs du client.
+  function clavierCli(ev){
+    var z = document.getElementById('c-res');
+    if (!z.className || !TROUVES.length) return;
+    if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
+      ev.preventDefault();
+      CLI_SEL = (CLI_SEL + (ev.key === 'ArrowDown' ? 1 : -1) + TROUVES.length) % TROUVES.length;
+      dessinerListeCli(CLI_ANCRE);
+    } else if (ev.key === 'Enter' && CLI_SEL >= 0) {
+      ev.preventDefault();
+      remplirClient(TROUVES[CLI_SEL]);
+    } else if (ev.key === 'Escape') {
+      ev.preventDefault(); ev.stopPropagation();
+      fermerListeCli();
+    }
   }
 
   function remplirClient(u){
@@ -603,13 +663,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         if (s.options[i].value === u.province) { s.value = u.province; break; }
       }
     }
-    document.getElementById('c-res').innerHTML = '';
+    fermerListeCli();
     majLie();
     majTotaux();
     dire('${T("Fiche de")} ' + (u.nom || u.courriel) + ' ${T("reprise.")}', 'bon');
   }
 
-  function majLie(){ document.getElementById('lie').textContent = CLI ? '${T("✓ compte lié")}' : ''; }
+  /* ⚠ UN CLIENT DÉJÀ INSCRIT NE SE VOIT PAS PROPOSER UN COMPTE (sa demande du
+     2026-10-04). La case disparaît dès que la fiche est reprise, et se décoche :
+     cochée puis cachée, elle partirait quand même avec la vente. Elle revient
+     si l on change d identité (le lien au compte est alors rompu). */
+  function majLie(){
+    document.getElementById('lie').textContent = CLI ? '${T("✓ compte lié")}' : '';
+    var zc = document.getElementById('c-creer-zone');
+    if (zc) zc.style.display = CLI ? 'none' : '';
+    if (CLI) document.getElementById('c-creer').checked = false;
+  }
 
   /* ⚠ MASQUE DU TELEPHONE — 000 000-0000. Il ne reformate que si le curseur est
      AU BOUT du champ : corriger un chiffre au milieu ne doit pas le renvoyer a la fin. */
@@ -809,6 +878,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   ['c-nom','c-mail'].forEach(function(id){
     document.getElementById(id).oninput = function(){ chercherClient(this.value); majBouton(); };
   });
+  ['c-nom', 'c-mail', 'c-tel'].forEach(function(id){ document.getElementById(id).addEventListener('keydown', clavierCli); });
+  document.addEventListener('mousedown', function(ev){
+    var t = ev.target;
+    if (!t || !t.closest) return;
+    if (t.closest('#c-res') || (t.id && /^c-(nom|mail|tel)$/.test(t.id))) return;
+    fermerListeCli();
+  });
+  // ⚠ La liste est en position fixe : elle suit son champ quand la colonne defile.
+  document.addEventListener('scroll', placerListeCli, true);
+  window.addEventListener('resize', placerListeCli);
   document.getElementById('c-tel').oninput = function(){
     masquerTel(this);
     chercherClient(this.value);
@@ -912,6 +991,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     P.fermer();
   });
 
+  (function(){ var z = document.getElementById('c-res'); if (z && z.parentNode !== document.body) document.body.appendChild(z); })();
+  // Le clic sur un client : la liste n est plus dans #corps, elle a son propre ecouteur.
+  document.getElementById('c-res').addEventListener('click', function(ev){
+    var c = ev.target && ev.target.closest ? ev.target.closest('.cli') : null;
+    if (!c) return;
+    var uid = c.getAttribute('data-uid');
+    for (var n = 0; n < TROUVES.length; n++) { if (TROUVES[n].id === uid) { remplirClient(TROUVES[n]); return; } }
+    dire('${T("Fiche introuvable — relancez la recherche.")}', 'err');
+  });
   demarrer();
   if (${attenteTemoin ? 'true' : 'false'}) {
     /* Un compte rendu TEMOIN, avec un paiement en attente : le seul etat qui

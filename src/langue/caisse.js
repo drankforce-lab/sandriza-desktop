@@ -205,5 +205,8 @@ module.exports = {
   'Commande': 'Order',
   'Rabais accordés': 'Discounts given',
   'oui': 'yes',
-  'raison inconnue': 'unknown reason'
+  'raison inconnue': 'unknown reason',
+  'Clients trouvés': 'Customers found',
+  'client trouvé': 'customer found',
+  'clients trouvés': 'customers found'
 };
