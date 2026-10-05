@@ -280,10 +280,6 @@ function pageCaisse(mode) {
         <span>${T("Ouvrir un compte et lui envoyer le lien pour le finaliser")}
         <span class="exp">${T("Courriel requis. Historique et retours pour lui ; aucune inscription à l’infolettre.")}</span></span></label>
       <div class="sep"></div>
-      <div class="g2">
-        <label class="ch"><span>${T("Livraison")}</span><input id="v-liv" class="num" inputmode="decimal" value="0${SEP_DEC()}00" title="${T("Livraison")}"></label>
-      </div>
-      <div class="sep"></div>
       <div class="rab-vente">
         <div class="ch"><span>${T("Rabais sur la vente")}</span>
           <div class="seg" role="group" aria-label="${T("Rabais en dollars ou en pourcentage")}">
@@ -378,6 +374,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      la liste « Province » est partie, et les taxes sont celles du Québec quelle
      que soit l adresse du client — elle ne sert plus à rien ici. */
   var PROV = 'QC';
+  /* ⚠ ET SANS LIVRAISON (sa décision, 2026-10-05) : le client repart avec
+     l article. Le champ est parti ; le coeur reçoit toujours 0. */
+  var LIV = '0';
   function val(id){ var e = document.getElementById(id); return e ? e.value : ''; }
 
   // ══ TOTAUX ════════════════════════════════════════════════════════════════
@@ -388,7 +387,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // Anti-rebond : plusieurs changements a la suite, un seul aller-retour.
     totT = setTimeout(function(){
       if (!LIGNES.length) { TOT = null; dessinerTotaux(); dessinerLignes(); majBouton(); return; }
-      appeler('caisse:totaux', [LIGNES, PROV, val('v-liv'), val('v-rab'), RABTYPE]).then(function(r){
+      appeler('caisse:totaux', [LIGNES, PROV, LIV, val('v-rab'), RABTYPE]).then(function(r){
         if (!r.ok) { TOT = null; dire(expliquer(r.motif), 'err'); }
         else { TOT = r; dire(''); }
         dessinerTotaux(); dessinerLignes(); majBouton(); diffuser();
@@ -400,7 +399,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      (caisse:diffuser) : son canal n accepte qu elle. Vide quand la vente est vide :
      le client suivant ne doit pas voir le panier du precedent. */
   function diffuser(){
-    appeler('caisse:diffuser', [LIGNES, PROV, val('v-liv'), val('v-rab'), RABTYPE])
+    appeler('caisse:diffuser', [LIGNES, PROV, LIV, val('v-rab'), RABTYPE])
       .then(function(){ /* l afficheur ne doit jamais faire tomber la caisse */ });
   }
 
@@ -416,7 +415,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (TOT.rabaisArticles > 0) h += '<div class="l rab"><span>${T("Rabais sur les articles")}</span><span>−' + argent(TOT.rabaisArticles) + '</span></div>';
     if (TOT.rabais > 0) h += '<div class="l rab"><span>${T("Rabais sur la vente")}'
       + (TOT.rabaisType === 'pct' ? ' (' + pctTxt(TOT.rabaisValeur) + ')' : '') + '</span><span>−' + argent(TOT.rabais) + '</span></div>';
-    if (TOT.livraison > 0) h += '<div class="l"><span>${T("Livraison")}</span><span>' + argent(TOT.livraison) + '</span></div>';
     (TOT.taxes || []).forEach(function(x){
       // Le taux est affiche : il permet de verifier une taxe d un coup d oeil.
       var taux = szNombre(Math.round((x.taux || 0) * 1000000) / 10000, 4);
@@ -711,7 +709,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     enVente = true; majBouton(); dire('${T("Enregistrement…")}', 'att');
     appeler('caisse:vendre', [{
       lignes: LIGNES,
-      prov: PROV, liv: val('v-liv'), rab: val('v-rab'),
+      prov: PROV, liv: LIV, rab: val('v-rab'),
       rabType: RABTYPE, rabNote: val('v-rabnote').trim(),
       nom: val('c-nom').trim(), courriel: val('c-mail').trim(), tel: val('c-tel').trim(),
       moyen: val('v-paie'), note: val('v-note').trim(), remise: val('v-remise'),
@@ -724,7 +722,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       LIGNES = []; CLI = null; TOT = null; EDIT = -1;
       ['c-nom', 'c-mail', 'c-tel', 'v-note', 'v-rabnote'].forEach(function(id){ document.getElementById(id).value = ''; });
       document.getElementById('c-creer').checked = false;
-      document.getElementById('v-liv').value = szArgentChamp(0);
       document.getElementById('v-rab').value = szArgentChamp(0);
       poserRabType('montant');
       majLie(); dessinerLignes(); dessinerTotaux(); majBouton(); dire('');
@@ -901,7 +898,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     masquerTel(this);
     chercherClient(this.value);
   };
-  ['v-liv','v-rab'].forEach(function(id){
+  ['v-rab'].forEach(function(id){
     document.getElementById(id).onchange = function(){ majTotaux(); };
   });
   document.getElementById('rt-montant').onclick = function(){ if (RABTYPE !== 'montant') { poserRabType('montant'); majTotaux(); } };

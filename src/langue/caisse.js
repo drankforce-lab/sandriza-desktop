@@ -62,7 +62,6 @@ module.exports = {
   'ouvert · lien de finalisation envoyé': 'opened · completion link sent',
 
   /* ── LA VENTE ───────────────────────────────────────────────────────────── */
-  'Livraison': 'Shipping',
   'Rabais': 'Discount',
   'Calcul des totaux…': 'Calculating totals…',
   'Total invalide — la vente n’a pas été enregistrée.':
