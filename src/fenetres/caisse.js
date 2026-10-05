@@ -277,7 +277,6 @@ function pageCaisse(mode) {
         <span class="exp">${T("Courriel requis. Historique et retours pour lui ; aucune inscription à l’infolettre.")}</span></span></label>
       <div class="sep"></div>
       <div class="g2">
-        <label class="ch"><span>${T("Province")}</span><select id="v-prov" title="${T("Province — elle détermine les taxes")}"></select></label>
         <label class="ch"><span>${T("Livraison")}</span><input id="v-liv" class="num" inputmode="decimal" value="0${SEP_DEC()}00" title="${T("Livraison")}"></label>
       </div>
       <div class="sep"></div>
@@ -372,6 +371,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             .catch(function(e){ return { ok: false, motif: 'echec', detail: (e && e.message) || e }; });
   }
 
+  /* ⚠ UNE VENTE AU COMPTOIR SE FAIT TOUJOURS AU QUÉBEC (sa décision, 2026-10-05) :
+     la liste « Province » est partie, et les taxes sont celles du Québec quelle
+     que soit l adresse du client — elle ne sert plus à rien ici. */
+  var PROV = 'QC';
   function val(id){ var e = document.getElementById(id); return e ? e.value : ''; }
 
   // ══ TOTAUX ════════════════════════════════════════════════════════════════
@@ -382,7 +385,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // Anti-rebond : plusieurs changements a la suite, un seul aller-retour.
     totT = setTimeout(function(){
       if (!LIGNES.length) { TOT = null; dessinerTotaux(); dessinerLignes(); majBouton(); return; }
-      appeler('caisse:totaux', [LIGNES, val('v-prov'), val('v-liv'), val('v-rab'), RABTYPE]).then(function(r){
+      appeler('caisse:totaux', [LIGNES, PROV, val('v-liv'), val('v-rab'), RABTYPE]).then(function(r){
         if (!r.ok) { TOT = null; dire(expliquer(r.motif), 'err'); }
         else { TOT = r; dire(''); }
         dessinerTotaux(); dessinerLignes(); majBouton(); diffuser();
@@ -394,7 +397,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      (caisse:diffuser) : son canal n accepte qu elle. Vide quand la vente est vide :
      le client suivant ne doit pas voir le panier du precedent. */
   function diffuser(){
-    appeler('caisse:diffuser', [LIGNES, val('v-prov'), val('v-liv'), val('v-rab'), RABTYPE])
+    appeler('caisse:diffuser', [LIGNES, PROV, val('v-liv'), val('v-rab'), RABTYPE])
       .then(function(){ /* l afficheur ne doit jamais faire tomber la caisse */ });
   }
 
@@ -655,13 +658,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var tel = document.getElementById('c-tel');
     tel.value = u.tel || '';
     masquerTel(tel);
-    // ⚠ LA PROVINCE SUIT LE CLIENT : c est elle qui determine les taxes.
-    if (u.province) {
-      var s = document.getElementById('v-prov');
-      for (var i = 0; i < s.options.length; i++) {
-        if (s.options[i].value === u.province) { s.value = u.province; break; }
-      }
-    }
     fermerListeCli();
     majLie();
     majTotaux();
@@ -707,7 +703,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     enVente = true; majBouton(); dire('${T("Enregistrement…")}', 'att');
     appeler('caisse:vendre', [{
       lignes: LIGNES,
-      prov: val('v-prov'), liv: val('v-liv'), rab: val('v-rab'),
+      prov: PROV, liv: val('v-liv'), rab: val('v-rab'),
       rabType: RABTYPE, rabNote: val('v-rabnote').trim(),
       nom: val('c-nom').trim(), courriel: val('c-mail').trim(), tel: val('c-tel').trim(),
       moyen: val('v-paie'), note: val('v-note').trim(), remise: val('v-remise'),
@@ -846,7 +842,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         return;
       }
       CTX = r;
-      remplirListe('v-prov', r.provinces, 'QC');
       remplirListe('v-paie', r.paiements, 'terminal');
       remplirListe('v-remise', r.remises, 'courriel');
       document.getElementById('sous').textContent = r.par
@@ -891,7 +886,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     masquerTel(this);
     chercherClient(this.value);
   };
-  ['v-prov','v-liv','v-rab'].forEach(function(id){
+  ['v-liv','v-rab'].forEach(function(id){
     document.getElementById(id).onchange = function(){ majTotaux(); };
   });
   document.getElementById('rt-montant').onclick = function(){ if (RABTYPE !== 'montant') { poserRabType('montant'); majTotaux(); } };

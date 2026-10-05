@@ -13,8 +13,6 @@
  * une faute d argent :
  *   · « Cet ecran n encaisse jamais la carte. » — il le dit pour qu on ne croie
  *     pas avoir encaisse. La version anglaise doit etre aussi nette.
- *   · « Province — elle determine les taxes » — l etiquette explique POURQUOI le
- *     champ existe. La reduire a « Province » ferait perdre l avertissement.
  *
  * ⚠ « Square » est un nom de service : il ne se traduit pas.
  */
@@ -69,9 +67,6 @@ module.exports = {
   'ouvert · lien de finalisation envoyé': 'opened · completion link sent',
 
   /* ── LA VENTE ───────────────────────────────────────────────────────────── */
-  /* ⚠ L etiquette dit POURQUOI le champ existe : la reduire a « Province »
-     ferait perdre l avertissement. */
-  'Province — elle détermine les taxes': 'Province — it determines the taxes',
   'Livraison': 'Shipping',
   'Rabais': 'Discount',
   'Calcul des totaux…': 'Calculating totals…',
@@ -169,7 +164,6 @@ module.exports = {
   'commande': 'order',
   'commandes': 'orders',
   '· lecture seule': '· read-only',
-  'Province': 'Province',
   'Les totaux s’afficheront ici.': 'Totals will appear here.',
 
   /* ── LES RABAIS DU COMPTOIR (2026-10-04) ──────────────────────────────────
