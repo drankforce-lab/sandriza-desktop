@@ -7,19 +7,20 @@
  * aucune page du site et ne fait aucun appel web : tout passe par le pont, qui
  * interroge la fenêtre principale — seule porteuse de la session.
  *
- * ⚠ ELLE VIT À CÔTÉ DE L'ÉCRAN DU SITE, PAS À SA PLACE (décision du 2026-08-07).
- * Les deux coexistent le temps que la caisse native soit éprouvée en boutique.
- * Ce n'est pas de la prudence de principe : si cette fenêtre a un défaut le jour
- * d'un marché, il doit rester un écran qui encaisse. L'écran du site sera retiré
- * quand celle-ci aura fait ses preuves, pas avant.
- *
  * ⚠⚠ AUCUNE RÈGLE DE VENTE N'EST ÉCRITE ICI. Ni taxes, ni prix, ni rabais, ni
  * statut de commande, ni décompte de stock. Tout cela vit dans le site
- * (`Admin._posVente`, `Cart.calcTotals`) et n'existe qu'en UN exemplaire. Cette
- * fenêtre SAISIT et AFFICHE ; elle ne calcule rien. En recopier ne serait-ce que
- * le calcul de taxes garantirait qu'un jour les deux écrans ne donnent plus le
- * même total pour le même panier — et la différence se verrait en comptabilité,
- * des semaines plus tard, sans qu'on sache lequel a raison.
+ * (`Admin._posVente`, `Admin._posTotauxDe`, `Cart.calcTotals`) et n'existe qu'en
+ * UN exemplaire. Cette fenêtre SAISIT et AFFICHE ; elle ne calcule rien. En
+ * recopier ne serait-ce que le calcul de taxes — ou d'un pourcentage de rabais —
+ * garantirait qu'un jour les deux écrans ne donnent plus le même total pour le
+ * même panier, et la différence se verrait en comptabilité, des semaines plus
+ * tard, sans qu'on sache lequel a raison.
+ *
+ * LES RABAIS DU COMPTOIR (2026-10-04, sa demande) : un pourcentage PAR ARTICLE
+ * (« 25 % sur ce chandail — petit défaut »), et un rabais SUR LA VENTE en dollars
+ * ou en pourcentage. Chacun peut porter une REMARQUE. La fenêtre envoie le
+ * pourcentage et la remarque tels quels ; le site calcule le prix net, l'écrit
+ * sur la facture et en garde la trace — le registre de l'Inventaire les relit.
  *
  * ⚠ ELLE N'ENCAISSE JAMAIS UNE CARTE. Saisir un numéro ici ferait basculer la
  * boutique en PCI SAQ-D. On enregistre un paiement DÉJÀ REÇU (comptant, Interac,
@@ -27,8 +28,7 @@
  *
  * ⚠ AUCUN CARACTÈRE ` (accent grave) dans la portion de script, COMMENTAIRES
  * COMPRIS : le script vit dans un littéral de gabarit, et un accent grave égaré
- * referme la chaîne et casse toute la fenêtre. C'est arrivé six fois sur ce
- * projet, dont deux fois dans un commentaire.
+ * referme la chaîne et casse toute la fenêtre.
  */
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, SEP_DEC } = require('./socle.js');
@@ -45,239 +45,248 @@ body{background:var(--f-page);color:var(--tx);
   font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column;overflow:hidden}
 
+/* ── RELOOKING 2026 (2026-10-04) : cartes arrondies, champs plus hauts, une seule
+   couleur d action (l or), les montants en chiffres tabulaires. */
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
-  padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
-  background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:.6rem}
+  padding:.7rem 1.2rem;border-bottom:1px solid var(--v08);background:var(--f-carte2)}
+.tete h1{margin:0;font-size:1.08rem;font-weight:700;letter-spacing:.01em}
+.tete .sous{font-size:.76rem;color:var(--tx2);margin-left:.2rem}
+.tete .pastille-par{display:inline-flex;align-items:center;gap:.4rem;padding:.2rem .65rem;border-radius:99px;
+  background:var(--v05);font-size:.74rem;color:var(--tx2)}
+.tete .pastille-par:empty{display:none}
 
-/* ⚠ DEUX COLONNES, ET LE CORPS NE DEFILE PAS. La regle du projet : un ecran de
-   travail qui defile cache son bouton d action. Seule la LISTE DES ARTICLES a le
-   droit de defiler — elle peut grandir, le reste non. */
-.corps{flex:1 1 auto;min-height:0;padding:.85rem 1.05rem;overflow:hidden;
-  display:grid;grid-template-columns:minmax(0,1.25fr) minmax(340px,.85fr);gap:.85rem}
-.col{min-width:0;min-height:0;display:flex;flex-direction:column;gap:.55rem}
-
-/* ⚠⚠ TROIS ETATS SUCCESSIFS SUR CETTE COLONNE — ET LES DEUX PREMIERS ETAIENT
-   FAUX, CHACUN A SA MANIERE. A lire avant d y toucher une quatrieme fois.
-   1) overflow:hidden, au nom de la regle << un ecran de travail ne defile pas >>.
-      Resultat inverse de l intention : sur un ecran de 1350 px de haut, le bouton
-      << Enregistrer la vente >> etait COUPE, donc INATTEIGNABLE. La regle existe
-      pour que l action reste a portee ; la elle la cachait.
-   2) Totaux et encaissement ANCRES en bas, le reste defilant. Le bouton etait
-      atteignable, mais la zone defilante s etirait pour remplir la colonne : entre
-      la carte Facture et le sous-total s ouvrait un trou de cent soixante pixels.
-      Signale par l utilisateur le 2026-08-07, capture a l appui : sur une caisse,
-      un grand vide au milieu de l ecran de l argent ne se justifie par rien.
-   3) CE QUI EST EN PLACE : tout est empile a la suite, sans trou, et c est la
-      COLONNE ENTIERE qui defile quand elle deborde. On ne perd pas ce que
-      l etat 2 protegeait — le bouton reste atteignable, puisqu on peut toujours
-      l atteindre en defilant, alors que l etat 1 le coupait pour de bon.
-   ⚠ CONSEQUENCE ASSUMEE : sur une fenetre tres courte, le total peut sortir du
-   champ. Le bouton PORTE LE TOTAL (<< Enregistrer la vente — 77,61 $ >>) : le
-   chiffre reste donc sous les yeux au moment ou il compte, c est-a-dire au moment
-   de presser. */
-.col.droite{min-height:0}
-.defile{flex:1 1 auto;min-height:0;overflow-y:auto;display:flex;
-  flex-direction:column;gap:.55rem;padding-right:.2rem;
-  /* Les cartes se suivent en haut : sans ceci, une colonne plus haute que son
-     contenu les etirerait et le trou reviendrait, ailleurs. */
-  justify-content:flex-start}
-.defile::-webkit-scrollbar{width:8px}
-.defile::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
-
-/* Sous 1000 px on repasse en UNE colonne et on autorise le defilement general :
-   ecraser un champ de montant est plus risque que faire defiler. */
+/* ⚠ DEUX COLONNES, ET LE CORPS NE DEFILE PAS. Seule la LISTE DES ARTICLES a le
+   droit de defiler — elle peut grandir, le reste non. A droite, tout est empile
+   SANS TROU et c est la colonne entiere qui defile si elle deborde : le bouton
+   reste atteignable, et il PORTE LE TOTAL (<< Enregistrer la vente — 77,61 $ >>). */
+.corps{flex:1 1 auto;min-height:0;padding:1rem 1.2rem;overflow:hidden;
+  display:grid;grid-template-columns:minmax(0,1.3fr) minmax(360px,.8fr);gap:1rem}
+.col{min-width:0;min-height:0;display:flex;flex-direction:column;gap:.75rem}
+.defile{flex:1 1 auto;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:.75rem;
+  justify-content:flex-start;scrollbar-width:thin}
 @media (max-width:1000px){
   .corps{grid-template-columns:1fr;overflow-y:auto}
   .col{min-height:auto}
   .defile{overflow:visible;min-height:auto}
 }
 
-/* ⚠ RESSERRE (2026-08-07) : meme en plein ecran une glissiere apparaissait dans la
-   colonne de droite. Chaque carte y perdait une dizaine de pixels en remplissage et
-   les textes d aide en prenaient deux ou trois lignes — cumule, cela depassait la
-   hauteur d un ecran. Compacte, mais rien n a ete retire. */
-.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
-  padding:.6rem .75rem;flex:0 0 auto;min-height:0}
-.carte.plein{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
-.carte h2{margin:0 0 .4rem;font-size:.71rem;text-transform:uppercase;
-  letter-spacing:.09em;color:var(--tx2);font-weight:700}
-.carte h2 .note{font-weight:400;text-transform:none;letter-spacing:0;color:var(--tx3)}
-/* << requis >> se voit : une vente anonyme est refusee par le site, autant le dire
-   AVANT d avoir tout saisi plutot qu au moment d encaisser. */
-.carte h2 .req{font-weight:700;text-transform:none;letter-spacing:0;color:var(--tx-or)}
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:16px;
+  padding:.85rem 1rem;flex:0 0 auto;min-height:0}
+.carte.plein{flex:1 1 auto;display:flex;flex-direction:column;min-height:0;padding:.85rem 0 .4rem}
+.carte.plein > .entete{padding:0 1rem .55rem}
+.carte h2{margin:0 0 .55rem;font-size:.78rem;font-weight:700;color:var(--tx2);letter-spacing:.02em;
+  display:flex;align-items:center;gap:.45rem}
+.carte h2 .req{font-weight:600;color:var(--tx-or);font-size:.72rem}
+.carte h2 .lie{color:var(--tx-ok);font-size:.72rem;margin-left:auto}
+.carte h2 .compte{margin-left:auto;font-weight:600;font-size:.72rem;padding:.12rem .55rem;border-radius:99px;background:var(--v06);color:var(--tx2)}
+.carte h2 .compte:empty{display:none}
+.entete h2{margin:0}
+
+input,select{font:inherit;color:var(--tx);background:var(--f-champ);
+  border:1px solid var(--v12);border-radius:10px;padding:.45rem .65rem;
+  width:100%;min-width:0;min-height:38px}
+input:focus,select:focus{outline:none;border-color:#c9a97e;box-shadow:0 0 0 3px rgba(201,169,126,.18)}
 input.manque{border-color:#f87171}
-.carte h2 .lie{color:var(--tx-ok);font-size:.68rem;margin-left:.4rem}
+input[type=checkbox]{width:auto;min-height:0}
+.ch{display:flex;flex-direction:column;gap:.25rem;min-width:0}
+.ch > span{font-size:.74rem;color:var(--tx2);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:.55rem}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.55rem}
+.champs{display:flex;flex-direction:column;gap:.4rem}
+.sep{height:1px;background:var(--v07);margin:.65rem 0}
+.num{font-variant-numeric:tabular-nums}
 
-input,select{font:inherit;color:var(--tx);background:var(--f-0f1826);
-  border:1px solid var(--v14);border-radius:8px;padding:.32rem .5rem;
-  width:100%;min-width:0}
-input:focus,select:focus{outline:none;border-color:#c9a97e}
-input[type=checkbox]{width:auto}
-.r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.4rem}
-.r3c{display:flex;flex-direction:column;gap:.2rem;min-width:0}
-.r3c>span{font-size:.72rem;color:var(--tx2)}
-/* Les champs du client : empiles, pleine largeur. Voir la note dans le gabarit. */
-.champs{display:flex;flex-direction:column;gap:.28rem}
-.r2{display:grid;grid-template-columns:1fr 1fr;gap:.4rem}
-.sous-ch{font-size:.7rem;color:var(--tx3);margin-top:.16rem}
+/* Le champ de scan : la porte d entree, avec sa loupe. */
+.scan{position:relative}
+.scan svg{position:absolute;left:.9rem;top:50%;transform:translateY(-50%);width:18px;height:18px;
+  fill:none;stroke:var(--tx2);stroke-width:1.8;stroke-linecap:round;pointer-events:none}
+#scan{font-size:1rem;padding:.65rem .9rem .65rem 2.6rem;border-radius:12px;min-height:46px}
 
-/* Le champ de scan : plus grand que les autres, c est la porte d entree. */
-#scan{font-size:1.02rem;padding:.5rem .65rem}
-
-/* Resultats de recherche : hauteur bornee. Huit articles et leurs variantes
-   repousseraient les totaux hors de l ecran. */
-.res{margin-top:.55rem;border:1px solid var(--v10);border-radius:9px;
-  max-height:32vh;overflow-y:auto}
-.res .art{padding:.5rem .65rem;border-top:1px solid var(--v06)}
+/* Resultats de recherche : hauteur bornee, sinon les articles fileraient hors ecran. */
+.res{margin-top:.6rem;border:1px solid var(--v10);border-radius:12px;max-height:32vh;overflow-y:auto}
+.res .art{padding:.55rem .75rem;border-top:1px solid var(--v06)}
 .res .art:first-child{border-top:0}
-.res .nom{font-weight:600;font-size:.87rem}
-.res .code{font-family:ui-monospace,monospace;font-size:.73rem;opacity:.55;margin-left:.35rem}
-.res .vars{display:flex;flex-wrap:wrap;gap:.28rem;margin-top:.3rem}
-.res .vars button{font-size:.74rem;padding:.14rem .5rem}
-.res .vars button .q{opacity:.6}
+.res .nom{font-weight:600;font-size:.88rem}
+.res .code{font-family:ui-monospace,monospace;font-size:.73rem;color:var(--tx2);margin-left:.4rem}
+.res .vars{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.35rem}
+.res .vars button{font-size:.76rem;padding:.2rem .6rem;border-radius:99px}
+.res .vars button .q{color:var(--tx2)}
 
-/* Liste des articles vendus : la seule zone qui defile. */
-.lignes{flex:1 1 auto;min-height:0;overflow-y:auto}
-table{width:100%;border-collapse:collapse;font-size:.86rem}
-thead th{position:sticky;top:0;background:var(--f-bande);text-align:left;
-  padding:.35rem .5rem;font-size:.72rem;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2);font-weight:700}
-thead th.d{text-align:right}
-tbody td{padding:.3rem .5rem;border-top:1px solid var(--v055);vertical-align:middle}
-tbody td.d{text-align:right;white-space:nowrap}
-tbody td.c{text-align:center;white-space:nowrap}
-tbody .det{font-size:.74rem;color:var(--tx2)}
-/* Le code de variante : c est ce qu on lit sur l etiquette du vetement, donc
-   la seule facon de verifier a l ecran qu on a scanne le bon article. */
-tbody .code{font-family:ui-monospace,monospace;font-size:.72rem;color:var(--tx3)}
-tbody button{padding:.05rem .42rem;font-size:.9rem;line-height:1.3}
+/* ── LES ARTICLES : une ligne par article, le rabais visible sur la ligne. */
+.lignes{flex:1 1 auto;min-height:0;overflow-y:auto;padding:0 .5rem}
+.lg{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;align-items:center;gap:.8rem;
+  padding:.6rem .5rem;border-top:1px solid var(--v06);border-radius:10px}
+.lg:first-child{border-top:0}
+.lg.ouverte{background:var(--v03)}
+.lg .px{text-align:right;min-width:5.6rem}
+.lg .px .net{font-weight:600}
+.lg .px .barre{display:block;font-size:.74rem;color:var(--tx2);text-decoration:line-through}
+.lg .tot{text-align:right;min-width:5.6rem;font-weight:700}
+.lg .act{display:flex;gap:.3rem;align-items:center}
+.lg .act .tot{margin-right:.45rem}
+.qte{display:inline-flex;align-items:center;border:1px solid var(--v12);border-radius:99px;overflow:hidden}
+.qte{padding:2px}
+.qte button{border:0;border-radius:99px;background:none;width:28px;height:28px;min-height:0;padding:0;font-size:1rem;line-height:1}
+.qte button:hover:not(:disabled){background:var(--v08)}
+.qte strong{min-width:1.8rem;text-align:center;font-size:.9rem}
+.rab-pill{display:inline-flex;align-items:center;gap:.3rem;padding:.08rem .5rem;border-radius:99px;
+  background:rgba(201,169,126,.16);color:var(--tx-or);font-size:.72rem;font-weight:700}
+.rab-note{font-size:.74rem;color:var(--tx2);font-style:italic}
+.ico-btn{width:32px;height:32px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:99px}
+.ico-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ico-btn.on{border-color:#c9a97e;color:var(--tx-or)}
+
+/* L editeur de rabais d un article : sous sa ligne, jamais une autre fenetre. */
+.edit{grid-column:1 / -1;margin-top:.5rem;padding:.75rem .8rem;border:1px solid var(--v10);border-radius:12px;background:var(--f-carte2)}
+.edit .titre{font-size:.76rem;font-weight:700;color:var(--tx2);margin-bottom:.45rem}
+.puces{display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.55rem}
+.puces button{border-radius:99px;padding:.22rem .7rem;font-size:.8rem}
+.puces button.on{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:700}
+.edit .g-ed{display:grid;grid-template-columns:7rem minmax(0,1fr);gap:.5rem;align-items:end}
+.edit .fin{display:flex;justify-content:flex-end;gap:.4rem;margin-top:.6rem;align-items:center}
+.edit .apercu{margin-right:auto;font-size:.8rem;color:var(--tx2)}
+.pct-champ{position:relative}
+.pct-champ input{padding-right:1.8rem}
+.pct-champ i{position:absolute;right:.7rem;top:50%;transform:translateY(-50%);font-style:normal;color:var(--tx2);font-size:.85rem;pointer-events:none}
+
+/* Bascule $ / % du rabais sur la vente. */
+.seg{display:inline-flex;border:1px solid var(--v12);border-radius:10px;overflow:hidden;min-height:38px;flex:0 0 auto}
+.seg button{border:0;border-radius:0;background:none;padding:0 .8rem;font-weight:600;color:var(--tx2)}
+.seg button.on{background:#c9a97e;color:#17202c}
+.rab-vente{display:grid;grid-template-columns:auto 6.5rem minmax(0,1fr);gap:.5rem;align-items:end}
 
 /* Totaux : la ligne du total ne peut pas se confondre avec une taxe. */
-.tot .l{display:flex;justify-content:space-between;gap:1rem;padding:.12rem 0;font-size:.86rem}
-.tot .l.grand{margin-top:.28rem;padding-top:.35rem;
-  border-top:1px solid var(--v14);font-size:1.12rem;font-weight:700}
-.tot .l.bon{color:var(--tx-ok)}
+.tot .l{display:flex;justify-content:space-between;gap:1rem;padding:.08rem 0;font-size:.86rem}
+.tot .l > span:last-child{font-variant-numeric:tabular-nums}
+.tot .l.rab{color:var(--tx-or)}
+.tot .l.grand{margin-top:.35rem;padding-top:.4rem;border-top:1px solid var(--v12);font-size:1.22rem;font-weight:800}
 
-button{font:inherit;cursor:pointer;border-radius:8px;padding:.36rem .8rem;
-  border:1px solid var(--v16);background:var(--v05);
+button{font:inherit;cursor:pointer;border-radius:10px;padding:.4rem .85rem;
+  border:1px solid var(--v14);background:var(--v04);
   color:var(--tx);transition:background .13s,border-color .13s}
-button:hover:not(:disabled){background:var(--v10);border-color:var(--v30)}
+button:hover:not(:disabled){background:var(--v08);border-color:var(--v28)}
 button:disabled{opacity:.4;cursor:default}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
+button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
-button.large{width:100%;padding:.5rem .8rem;font-size:1rem;margin-top:.4rem}
-button.mini{padding:.16rem .45rem;font-size:.75rem}
+button.large{width:100%;padding:.75rem .9rem;font-size:1.05rem;margin-top:.6rem;border-radius:12px}
+button.mini{padding:.22rem .6rem;font-size:.78rem}
 
-.cli{padding:.38rem .6rem;cursor:pointer;font-size:.84rem;
-  border-top:1px solid var(--v06)}
+.cli{padding:.45rem .7rem;cursor:pointer;font-size:.85rem;border-top:1px solid var(--v06)}
 .cli:first-child{border-top:0}
 .cli:hover{background:var(--v05)}
 .cli .m{color:var(--tx2);font-size:.77rem}
-.liste-cli{margin-top:.4rem;border:1px solid var(--v10);border-radius:9px;overflow:hidden}
+.liste-cli{margin-top:.45rem;border:1px solid var(--v10);border-radius:10px;overflow:hidden}
 
-.case{display:flex;align-items:flex-start;gap:.45rem;margin-top:.4rem;
-  font-size:.78rem;cursor:pointer}
-.case .exp{display:block;color:var(--tx3);font-size:.72rem;line-height:1.45}
+.case{display:flex;align-items:flex-start;gap:.5rem;margin-top:.5rem;font-size:.8rem;cursor:pointer}
+.case .exp{display:block;color:var(--tx2);font-size:.73rem;line-height:1.45}
 
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
-  gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid var(--v08);
-  background:var(--f-pied)}
-.msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
+  gap:.6rem;padding:.6rem 1.2rem;border-top:1px solid var(--v08);background:var(--f-pied)}
+.msg{font-size:.8rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 .actions{flex:0 0 auto;display:flex;gap:.4rem}
 
-.aide{font-size:.71rem;color:var(--tx3);line-height:1.4;margin-top:.3rem}
-.vide{padding:1.6rem 1rem;text-align:center;color:var(--tx2);font-size:.86rem}
+.aide{font-size:.73rem;color:var(--tx2);line-height:1.4;margin-top:.4rem}
+.vide{padding:2.2rem 1rem;text-align:center;color:var(--tx2);font-size:.88rem}
+.vide svg{display:block;margin:0 auto .6rem;width:34px;height:34px;fill:none;stroke:var(--tx3);stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
 
-/* Le compte rendu de vente : un voile, pas une autre fenetre. Une boite de
-   dialogue du systeme se serait ouverte derriere, comme le decompte d inactivite. */
+/* Le compte rendu de vente : un voile, pas une autre fenetre. */
 .voile{position:fixed;inset:0;background:rgba(8,12,20,.82);display:flex;
   align-items:center;justify-content:center;padding:1.5rem;z-index:50}
 .voile .boite{background:var(--f-carte);border:1px solid var(--v12);
-  border-radius:13px;padding:1.15rem 1.3rem;max-width:34rem;width:100%}
-.voile h3{margin:0 0 .6rem;font:700 1.06rem/1.25 Georgia,serif}
+  border-radius:16px;padding:1.2rem 1.35rem;max-width:34rem;width:100%}
+.voile h3{margin:0 0 .6rem;font-size:1.08rem;font-weight:700}
 .voile .rangee{display:flex;justify-content:space-between;gap:1rem;
-  padding:.26rem 0;font-size:.86rem;border-top:1px solid var(--v06)}
+  padding:.3rem 0;font-size:.87rem;border-top:1px solid var(--v06)}
 .voile .rangee:first-of-type{border-top:0}
 .voile .fin{display:flex;gap:.45rem;justify-content:flex-end;margin-top:.9rem}
 .voile .lien{display:flex;gap:.4rem;margin-top:.55rem}
 .voile .lien input{font-family:ui-monospace,monospace;font-size:.78rem}
+
+html.jour .tete{background:#faf8f3}
+html.jour .rab-pill{background:rgba(138,106,62,.12);color:#6f5530}
+html.jour .tot .l.rab{color:#6f5530}
+html.jour .ico-btn.on{border-color:#8a6a3e;color:#6f5530}
+html.jour .puces button.on,html.jour .seg button.on{background:#8a6a3e;border-color:#8a6a3e;color:#ffffff}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
-/** Page complète de la fenêtre native « Vente au comptoir ». */
+/* Les icones au trait de la fenetre. */
+const SVG_LOUPE = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>';
+const SVG_PCT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 5L5 19"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/></svg>';
+const SVG_X = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+const SVG_SAC = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>';
+
+/** Page complète de la fenêtre native « Vente au comptoir ».
+ *  `mode` : '' (normal) ; 'attente' = compte rendu temoin d un paiement en
+ *  attente ; 'rabais' = une vente temoin avec un article rabaisse et l editeur
+ *  ouvert. Les deux temoins sont INERTES (aucune vente) et servent aux bancs :
+ *  ces etats n existent qu apres des clics, que le banc ne fait pas. */
 function pageCaisse(mode) {
-  /* ⚠⚠ IDENTIFIANT D OUVERTURE << attente >>. Le compte rendu de vente est un
-     VOILE : il n existe qu APRES un clic sur << Encaisser >>, et le banc ne
-     clique pas. Or c est l ecran ou l on lit le lien de paiement, ou l on
-     reconcilie une vente DEJA PAYEE chez Square, et ou vit desormais le bouton
-     << Verifier le paiement >> — de l argent, donc, et pas un affichage. Il
-     serait reste hors de tout controle, exactement comme le lanceur de lot mort
-     pendant deux versions. Ce mode pose un compte rendu temoin, inerte : aucun
-     appel, aucune vente. La coquille ne l ouvre jamais. */
   const attenteTemoin = String(mode || '') === 'attente';
+  const rabaisTemoin = String(mode || '') === 'rabais';
   return `${TETE()}
 <title>${T("Vente au comptoir — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.payments}</span><h1>${T("Vente au comptoir")}</h1>
+  <span class="pastille-par" id="sous"></span>
   <button id="btn-afficheur" class="mini" style="margin-left:auto"
-    title="${T("Ouvrir l’écran tourné vers le client, à poser sur un second moniteur")}"><span class="ic">🖥</span> ${T("Affichage client")}</button>
-  <span class="sous" id="sous"></span></div>
+    title="${T("Ouvrir l’écran tourné vers le client, à poser sur un second moniteur")}">${T("Affichage client")}</button></div>
 <div class="corps" id="corps">
   <div class="col">
     <div class="carte">
-      <input aria-label="${T("Scannez le code-barres, ou tapez un nom d’article")}" id="scan" autocomplete="off" placeholder="${T("Scannez le code-barres, ou tapez un nom d’article…")}">
+      <div class="scan">${SVG_LOUPE}<input aria-label="${T("Scannez le code-barres, ou tapez un nom d’article")}" id="scan" autocomplete="off" placeholder="${T("Scannez le code-barres, ou tapez un nom d’article…")}"></div>
       <div id="res"></div>
     </div>
     <div class="carte plein">
-      <h2>${T("Articles")}</h2>
+      <div class="entete"><h2>${T("Articles")} <span class="compte num" id="nb-art"></span></h2></div>
       <div class="lignes" id="lignes"></div>
     </div>
+    <div class="carte tot" id="totaux"></div>
   </div>
   <div class="col droite">
    <div class="defile">
     <div class="carte">
       <h2>${T("Client")} <span class="req">${T("— requis")}</span><span class="lie" id="lie"></span></h2>
-      <!-- ⚠ TROIS CHAMPS EN COLONNE, ET NON SUR UNE LIGNE. Sur une ligne, dans une
-           colonne de 380 px, chacun faisait 120 px : un nom complet et une adresse
-           de courriel y etaient coupes, donc illisibles — on ne pouvait pas
-           verifier ce qu on venait de saisir. Signale a l usage le 2026-08-07.
-           La zone de droite defile maintenant, la hauteur est donc disponible ;
-           la lisibilite d une adresse de courriel, elle, ne se negocie pas. -->
       <div class="champs">
         <input aria-label="${T("Nom")}" id="c-nom" autocomplete="off" placeholder="${T("Nom")}">
-        <input aria-label="${T("Courriel")}" id="c-mail" autocomplete="off" inputmode="email" placeholder="${T("Courriel")}">
-        <input aria-label="${T("Téléphone — 000 000-0000")}" id="c-tel" autocomplete="off" inputmode="tel" placeholder="${T("Téléphone — 000 000-0000")}">
+        <div class="g2">
+          <input aria-label="${T("Courriel")}" id="c-mail" autocomplete="off" inputmode="email" placeholder="${T("Courriel")}">
+          <input aria-label="${T("Téléphone — 000 000-0000")}" id="c-tel" autocomplete="off" inputmode="tel" placeholder="${T("Téléphone — 000 000-0000")}">
+        </div>
       </div>
       <div id="c-res"></div>
       <label class="case"><input type="checkbox" id="c-creer">
         <span>${T("Ouvrir un compte et lui envoyer le lien pour le finaliser")}
         <span class="exp">${T("Courriel requis. Historique et retours pour lui ; aucune inscription à l’infolettre.")}</span></span></label>
-      <h2 style="margin-top:.75rem">${T("Vente")}</h2>
-      <!-- Chaque champ porte son etiquette (2026-09-26) : trois cases nues et une
-           legende « Province · Livraison · Rabais » dessous se lisaient mal. -->
-      <div class="r3">
-        <label class="r3c"><span>${T("Province")}</span><select id="v-prov" title="${T("Province — elle détermine les taxes")}"></select></label>
-        <label class="r3c"><span>${T("Livraison")}</span><input id="v-liv" inputmode="decimal" value="0${SEP_DEC()}00" title="${T("Livraison")}" placeholder="${T("Livraison")}"></label>
-        <label class="r3c"><span>${T("Rabais")}</span><input id="v-rab" inputmode="decimal" value="0${SEP_DEC()}00" title="${T("Rabais")}" placeholder="${T("Rabais")}"></label>
+      <div class="sep"></div>
+      <div class="g2">
+        <label class="ch"><span>${T("Province")}</span><select id="v-prov" title="${T("Province — elle détermine les taxes")}"></select></label>
+        <label class="ch"><span>${T("Livraison")}</span><input id="v-liv" class="num" inputmode="decimal" value="0${SEP_DEC()}00" title="${T("Livraison")}"></label>
       </div>
-      <h2 style="margin-top:.75rem">${T("Facture")}</h2>
-      <select id="v-remise" title="${T("Ce qu’on fait de la facture après la vente")}"></select>
-      <div class="sous-ch">${T("L’envoi exige une adresse. Toujours consultable dans Facturation.")}</div>
+      <div class="sep"></div>
+      <div class="rab-vente">
+        <div class="ch"><span>${T("Rabais sur la vente")}</span>
+          <div class="seg" role="group" aria-label="${T("Rabais en dollars ou en pourcentage")}">
+            <button type="button" id="rt-montant" class="on" aria-pressed="true">$</button>
+            <button type="button" id="rt-pct" aria-pressed="false">%</button>
+          </div></div>
+        <label class="ch"><span>${T("Valeur")}</span><input id="v-rab" class="num" inputmode="decimal" value="0${SEP_DEC()}00" title="${T("Rabais")}"></label>
+        <label class="ch"><span>${T("Remarque")}</span><input id="v-rabnote" list="sugg-rab" maxlength="200" autocomplete="off" placeholder="${T("ex. : client fidèle")}"></label>
+      </div>
+      <datalist id="sugg-rab">
+        <option value="${T("Petit défaut")}"><option value="${T("Fin de série")}"><option value="${T("Article de démonstration")}">
+        <option value="${T("Dernier en stock")}"><option value="${T("Geste commercial")}"><option value="${T("Client fidèle")}"><option value="${T("Rabais employé")}">
+      </datalist>
     </div>
-    <!-- ⚠ LES TOTAUX ET L ENCAISSEMENT SONT DANS LE FLUX, a la suite de la carte
-         du client — plus ancres en bas. C est ce qui referme le trou de cent
-         soixante pixels signale le 2026-08-07 ; voir la note des trois etats dans
-         la feuille de style avant de les redescendre. -->
-    <div class="carte tot" id="totaux"></div>
     <div class="carte">
       <h2>${T("Encaissement")}</h2>
-      <div class="r2">
-        <select id="v-paie" aria-label="${T("Mode de paiement")}"></select>
-        <input aria-label="${T("Note interne (facultatif)")}" id="v-note" placeholder="${T("Note interne (facultatif)")}">
+      <div class="g2">
+        <label class="ch"><span>${T("Mode de paiement")}</span><select id="v-paie"></select></label>
+        <label class="ch"><span>${T("Facture")}</span><select id="v-remise" title="${T("Ce qu’on fait de la facture après la vente")}"></select></label>
       </div>
+      <input aria-label="${T("Note interne (facultatif)")}" id="v-note" placeholder="${T("Note interne (facultatif)")}" style="margin-top:.55rem">
       <button class="prim large" id="btn-vendre" disabled>${T("Enregistrer la vente")}</button>
       <div class="aide">${T("Cet écran n’encaisse jamais la carte.")}</div>
     </div>
@@ -295,36 +304,31 @@ function pageCaisse(mode) {
   window.szModeAncre = function(actif){
     var t = document.querySelector('.tete'); if (!t) return;
     var b = document.getElementById('sz-detacher');
-    if (!b) { b = document.createElement('button'); b.id='sz-detacher'; b.type='button'; b.className='mini'; b.style.marginLeft='auto'; t.appendChild(b); }
+    if (!b) { b = document.createElement('button'); b.id='sz-detacher'; b.type='button'; b.className='mini'; t.appendChild(b); }
     if (actif) { b.textContent='${T("⧉ Détacher")}'; b.title='${T("Ouvrir cet écran dans sa propre fenêtre")}'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
     else { b.textContent='${T("⚓ Ancrer")}'; b.title='${T("Ramener cet écran dans la fenêtre principale")}'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
 ${JS_ACTIVITE()}${JS_DIRE()}
-  var msg = document.getElementById('msg');
   var CTX = null;            // contexte recu du site (provinces, moyens, droits)
-  var LIGNES = [];           // { productId, name, size, color, price, quantity }
+  // { productId, name, sku, size, color, price, quantity, rabaisPct?, rabaisNote? }
+  // ⚠ price reste le PRIX COURANT recu du site ; le pourcentage voyage a cote et
+  // c est le site qui en tire le prix net (TOT.lignes).
+  var LIGNES = [];
   var CLI = null;            // identifiant du compte lie, s il y en a un
   var TOT = null;            // dernier compte rendu de totaux, venu du SITE
-  // ⚠ LES FICHES TROUVEES SONT RETENUES, ET C EST LA CORRECTION D UN VRAI
-  // DEFAUT (2026-08-07) : au clic, je reconstruisais une fiche a partir des
-  // champs de l ecran — qui sont VIDES pour le courriel et le telephone, puisque
-  // c est justement ce qu on attend de la recherche. Le nom se remplissait, le
-  // reste non, et la vente partait sans adresse : donc sans facture par courriel.
-  var TROUVES = [];
+  var TROUVES = [];          // fiches clientes trouvees, retenues entieres
+  var EDIT = -1;             // ligne dont l editeur de rabais est ouvert
+  var RABTYPE = 'montant';   // rabais sur la vente : 'montant' | 'pct'
   var enVente = false;
+  var PUCES = [10, 15, 20, 25, 30, 40, 50];
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  /* Le bandeau de message : une seule regle, dans le socle (szDire) —
-     tout verdict s efface seul apres cinq secondes, sauf ce qui se termine
-     par des points de suspension, qui annonce un travail en cours. */
   function dire(t, cl){ szDire(t, cl); }
   /* ⚠ Le symbole change de COTE en anglais : << $12.50 >>. Voir szArgent (socle). */
   function argent(n){ return szArgent(n); }
+  function pctTxt(n){ return szNombre(n, 2).replace(/[.,]00$/, '') + ' %'; }
 
-  // ⚠ CHAQUE REFUS DU PONT A SA PHRASE. Un ecran muet sur un refus de droit
-  // ressemble a une panne, et on cherche au mauvais endroit — chez l imprimante,
-  // dans le reseau, partout sauf dans les permissions.
   var MOTIFS = {
     session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
     droit:              '${T("Votre rôle ne permet pas d’encaisser une vente.")}',
@@ -342,11 +346,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   };
   function expliquer(m){ return MOTIFS[m] || '${T("Erreur inattendue (")}' + esc(m || '?') + ').'; }
 
-  // ⚠ UN SEUL POINT D APPEL, avec le rattrapage CHAINE. Le second argument de
-  // << then >> ne rattrape que le rejet de la promesse d avant : ce que le premier
-  // LEVE lui passe a cote et devient un rejet non traite, invisible dans une
-  // fenetre native. Cette nuance a couche la fenetre Imprimantes pendant quatre
-  // versions publiees (2026-08-07). Ici, tout passe par appeler().
+  // ⚠ UN SEUL POINT D APPEL, avec le rattrapage CHAINE : ce que le premier << then >>
+  // LEVE deviendrait sinon un rejet non traite, invisible dans une fenetre native.
   function appeler(op, args){
     var p;
     try { p = P.appeler.apply(P, [op].concat(args || [])); }
@@ -356,57 +357,49 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             .catch(function(e){ return { ok: false, motif: 'echec', detail: (e && e.message) || e }; });
   }
 
+  function val(id){ var e = document.getElementById(id); return e ? e.value : ''; }
+
   // ══ TOTAUX ════════════════════════════════════════════════════════════════
-  // ⚠ ILS VIENNENT DU SITE, TOUJOURS. Additionner ici serait plus simple et plus
-  // rapide — et ce serait la faute la plus couteuse possible : deux calculs de
-  // taxes qui divergent d un ecran a l autre, decouverts en comptabilite des
-  // semaines plus tard, sans savoir lequel a raison.
+  // ⚠ ILS VIENNENT DU SITE, TOUJOURS — rabais compris.
   var totT = null;
   function majTotaux(){
     clearTimeout(totT);
-    // Anti-rebond : changer la province, la livraison et le rabais a la suite ne
-    // doit pas declencher trois allers-retours vers la fenetre principale.
+    // Anti-rebond : plusieurs changements a la suite, un seul aller-retour.
     totT = setTimeout(function(){
-      if (!LIGNES.length) { TOT = null; dessinerTotaux(); majBouton(); return; }
-      appeler('caisse:totaux', [LIGNES, val('v-prov'), val('v-liv'), val('v-rab')]).then(function(r){
+      if (!LIGNES.length) { TOT = null; dessinerTotaux(); dessinerLignes(); majBouton(); return; }
+      appeler('caisse:totaux', [LIGNES, val('v-prov'), val('v-liv'), val('v-rab'), RABTYPE]).then(function(r){
         if (!r.ok) { TOT = null; dire(expliquer(r.motif), 'err'); }
         else { TOT = r; dire(''); }
-        dessinerTotaux(); majBouton(); diffuser();
+        dessinerTotaux(); dessinerLignes(); majBouton(); diffuser();
       });
     }, 150);
   }
 
-  /* ⚠ L AFFICHEUR SUIT LE PANIER, ET LE MESSAGE PART DE LA FENETRE PRINCIPALE.
-     Le canal de l afficheur n accepte qu elle : cette fenetre ne peut donc pas lui
-     parler directement, elle demande au site de le faire (caisse:diffuser). Sans
-     cela, l afficheur montrerait au client le panier de l ECRAN DE LA PAGE — un
-     ecran vide pendant qu on scanne, ce qui est pire qu un afficheur eteint parce
-     qu on le croirait juste.
-     ⚠ ET IL EST VIDE QUAND LA VENTE EST VIDE, volontairement : le client suivant
-     ne doit pas voir le panier du precedent. */
+  /* ⚠ L AFFICHEUR SUIT LE PANIER, ET LE MESSAGE PART DE LA FENETRE PRINCIPALE
+     (caisse:diffuser) : son canal n accepte qu elle. Vide quand la vente est vide :
+     le client suivant ne doit pas voir le panier du precedent. */
   function diffuser(){
-    appeler('caisse:diffuser', [LIGNES, val('v-prov'), val('v-liv'), val('v-rab')])
+    appeler('caisse:diffuser', [LIGNES, val('v-prov'), val('v-liv'), val('v-rab'), RABTYPE])
       .then(function(){ /* l afficheur ne doit jamais faire tomber la caisse */ });
   }
 
   function dessinerTotaux(){
     var z = document.getElementById('totaux');
     if (!TOT) {
-      z.innerHTML = '<div class="vide">' + (LIGNES.length
-        ? '${T("Calcul des totaux…")}'
-        /* Pas deux fois la meme phrase a l ecran : le volet des articles la dit deja. */
-        : '${T("Les totaux s’afficheront ici.")}') + '</div>';
+      z.innerHTML = '<div class="vide" style="padding:1rem">' + (LIGNES.length
+        ? '${T("Calcul des totaux…")}' : '${T("Les totaux s’afficheront ici.")}') + '</div>';
       return;
     }
-    var h = '<div class="l"><span>${T("Sous-total")}</span><span>' + argent(TOT.sousTotal) + '</span></div>';
-    if (TOT.rabais > 0) h += '<div class="l bon"><span>${T("Rabais")}</span><span>−' + argent(TOT.rabais) + '</span></div>';
+    var brut = (TOT.sousTotalBrut != null) ? TOT.sousTotalBrut : TOT.sousTotal;
+    var h = '<div class="l"><span>${T("Sous-total")}</span><span>' + argent(brut) + '</span></div>';
+    if (TOT.rabaisArticles > 0) h += '<div class="l rab"><span>${T("Rabais sur les articles")}</span><span>−' + argent(TOT.rabaisArticles) + '</span></div>';
+    if (TOT.rabais > 0) h += '<div class="l rab"><span>${T("Rabais sur la vente")}'
+      + (TOT.rabaisType === 'pct' ? ' (' + pctTxt(TOT.rabaisValeur) + ')' : '') + '</span><span>−' + argent(TOT.rabais) + '</span></div>';
     if (TOT.livraison > 0) h += '<div class="l"><span>${T("Livraison")}</span><span>' + argent(TOT.livraison) + '</span></div>';
     (TOT.taxes || []).forEach(function(x){
-      // Le taux est affiche : c est ce qui permet de verifier une taxe d un coup
-      // d oeil quand une vente part vers une autre province.
+      // Le taux est affiche : il permet de verifier une taxe d un coup d oeil.
       var taux = szNombre(Math.round((x.taux || 0) * 1000000) / 10000, 4);
-      h += '<div class="l"><span>' + esc(x.nom) + ' (' + taux + ' %)</span><span>'
-        + argent(x.montant) + '</span></div>';
+      h += '<div class="l"><span>' + esc(x.nom) + ' (' + taux + ' %)</span><span>' + argent(x.montant) + '</span></div>';
     });
     h += '<div class="l grand"><span>${T("Total")}</span><span>' + argent(TOT.total) + '</span></div>';
     z.innerHTML = h;
@@ -414,9 +407,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function majBouton(){
     var b = document.getElementById('btn-vendre');
-    // ⚠ LE NOM DU CLIENT FAIT PARTIE DES CONDITIONS. Le site refuse une vente
-    // anonyme (motif client_requis) : laisser le bouton actif ferait scanner,
-    // encaisser, presser — et decouvrir le refus a la fin, devant le client.
+    // ⚠ LE NOM DU CLIENT FAIT PARTIE DES CONDITIONS : le site refuse une vente
+    // anonyme, autant le dire avant d avoir tout saisi.
     var nomOk = !!val('c-nom').trim();
     var champ = document.getElementById('c-nom');
     if (champ) champ.className = (!nomOk && LIGNES.length) ? 'manque' : '';
@@ -428,35 +420,79 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     document.getElementById('btn-vider').disabled = !LIGNES.length || enVente;
   }
 
-  function val(id){ var e = document.getElementById(id); return e ? e.value : ''; }
-
   // ══ ARTICLES ══════════════════════════════════════════════════════════════
+  // Le prix NET d une ligne : celui que le site a rendu. Tant qu il n est pas
+  // arrive, on montre le prix courant — jamais un pourcentage calcule ici.
+  function netDe(i){
+    var t = TOT && TOT.lignes && TOT.lignes[i];
+    return t ? t.prix : LIGNES[i].price;
+  }
+
   function dessinerLignes(){
     var z = document.getElementById('lignes');
+    var nb = 0; LIGNES.forEach(function(l){ nb += l.quantity; });
+    document.getElementById('nb-art').textContent = nb ? String(nb) : '';
     if (!LIGNES.length) {
-      z.innerHTML = '<div class="vide">${T("Aucun article — scannez un code-barres pour commencer.")}</div>';
+      z.innerHTML = '<div class="vide">${SVG_SAC}${T("Aucun article — scannez un code-barres pour commencer.")}</div>';
       return;
     }
-    var corps = LIGNES.map(function(l, i){
+    var garder = document.activeElement && document.activeElement.id;
+    z.innerHTML = LIGNES.map(function(l, i){
       var det = [l.size, l.color].filter(Boolean).join(' / ') || '—';
-      return '<tr>'
-        /* Refonte (2026-09-26) : la cellule riche de l Inventaire. */
-        + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">'
-        + esc(String(l.name || '?').trim().charAt(0).toUpperCase() || '?') + '</span><div>'
+      var pct = parseFloat(String(l.rabaisPct || '').replace(',', '.')) || 0;
+      var net = netDe(i);
+      var h = '<div class="lg' + (EDIT === i ? ' ouverte' : '') + '">'
+        + '<div class="rf-prod"><span class="rf-av" aria-hidden="true">'
+        + esc(String(l.name || '?').trim().charAt(0).toUpperCase() || '?') + '</span><div style="min-width:0">'
         + '<div class="rf-nom">' + esc(l.name) + '</div>'
         + '<div class="rf-sous"><span>' + esc(det) + '</span>'
-        + (l.sku ? '<span>·</span><span class="rf-code">' + esc(l.sku) + '</span>' : '') + '</div></div></div></td>'
-        + '<td class="c"><button data-q="' + i + '" data-d="-1">−</button>'
-        + ' <strong>' + l.quantity + '</strong> '
-        + '<button data-q="' + i + '" data-d="1">+</button></td>'
-        + '<td class="d">' + argent(l.price) + '</td>'
-        + '<td class="d"><strong>' + argent(l.price * l.quantity) + '</strong></td>'
-        + '<td class="c"><button data-retirer="' + i + '" title="${T("Retirer")}">✕</button></td>'
-        + '</tr>';
+        + (l.sku ? '<span>·</span><span class="rf-code">' + esc(l.sku) + '</span>' : '')
+        + (pct > 0 ? '<span class="rab-pill">−' + esc(pctTxt(pct)) + '</span>' : '')
+        + (pct > 0 && l.rabaisNote ? '<span class="rab-note">' + esc(l.rabaisNote) + '</span>' : '')
+        + '</div></div></div>'
+        + '<span class="qte"><button data-q="' + i + '" data-d="-1" aria-label="${T("Retirer un")}">−</button>'
+        + '<strong class="num">' + l.quantity + '</strong>'
+        + '<button data-q="' + i + '" data-d="1" aria-label="${T("Ajouter un")}">+</button></span>'
+        + '<span class="px num"><span class="net">' + argent(net) + '</span>'
+        + (pct > 0 ? '<span class="barre">' + argent(l.price) + '</span>' : '') + '</span>'
+        + '<span class="act"><span class="tot num">' + argent(net * l.quantity) + '</span>'
+        + '<button class="ico-btn' + (pct > 0 ? ' on' : '') + '" data-rab="' + i + '" title="${T("Rabais sur cet article")}" aria-label="${T("Rabais sur cet article")}">${SVG_PCT}</button>'
+        + '<button class="ico-btn" data-retirer="' + i + '" title="${T("Retirer")}" aria-label="${T("Retirer")}">${SVG_X}</button></span>';
+      if (EDIT === i) h += editeur(l, i, pct);
+      return h + '</div>';
     }).join('');
-    z.innerHTML = '<table><thead><tr><th>${T("Article")}</th><th class="c">${T("Qté")}</th>'
-      + '<th class="d">${T("Prix")}</th><th class="d">${T("Total")}</th><th></th></tr></thead>'
-      + '<tbody>' + corps + '</tbody></table>';
+    if (garder && EDIT >= 0) { var g = document.getElementById(garder); if (g) g.focus(); }
+  }
+
+  /* L editeur de rabais d un article : pourcentage (puces ou saisie libre) et
+     REMARQUE. ⚠ Il ne calcule rien : l apercu du prix vient du site au prochain
+     aller-retour, apres << Appliquer >>. */
+  function editeur(l, i, pct){
+    return '<div class="edit">'
+      + '<div class="titre">${T("Rabais sur cet article, pour cette vente seulement")}</div>'
+      + '<div class="puces">' + PUCES.map(function(p){
+          return '<button type="button" data-puce="' + p + '"' + (pct === p ? ' class="on"' : '') + '>' + p + ' %</button>'; }).join('') + '</div>'
+      + '<div class="g-ed">'
+      + '<label class="ch"><span>${T("Pourcentage")}</span><span class="pct-champ"><input id="ed-pct" class="num" inputmode="decimal" value="' + (pct > 0 ? esc(String(l.rabaisPct)) : '') + '" placeholder="0"><i>%</i></span></label>'
+      + '<label class="ch"><span>${T("Remarque")}</span><input id="ed-note" list="sugg-rab" maxlength="200" autocomplete="off" value="' + esc(l.rabaisNote || '') + '" placeholder="${T("ex. : petit défaut à la manche")}"></label>'
+      + '</div>'
+      + '<div class="fin"><span class="apercu">' + (pct > 0 ? '${T("Prix courant")} ' + argent(l.price) + ' → ' + argent(netDe(i)) : '${T("Prix courant")} ' + argent(l.price)) + '</span>'
+      + (pct > 0 ? '<button type="button" class="mini" data-rab-retirer="' + i + '">${T("Retirer le rabais")}</button>' : '')
+      + '<button type="button" class="mini" data-rab-fermer="1">${T("Fermer")}</button>'
+      + '<button type="button" class="mini prim" data-rab-appliquer="' + i + '">${T("Appliquer")}</button></div>'
+      + '</div>';
+  }
+
+  function appliquerRabais(i){
+    var l = LIGNES[i]; if (!l) return;
+    var brut = String(val('ed-pct') || '').trim();
+    var n = parseFloat(brut.replace(',', '.'));
+    if (brut && !(n >= 0 && n <= 100)) { dire('${T("Le pourcentage doit être entre 0 et 100.")}', 'err'); return; }
+    if (!(n > 0)) { delete l.rabaisPct; delete l.rabaisNote; }
+    else { l.rabaisPct = brut; l.rabaisNote = String(val('ed-note') || '').trim(); }
+    EDIT = -1;
+    dessinerLignes(); majTotaux();
+    var s = document.getElementById('scan'); if (s) s.focus();
   }
 
   function ajouter(pid, taille, couleur){
@@ -467,8 +503,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     if (ex) { ex.quantity++; apresAjout(); return; }
     // ⚠ LE PRIX EST DEMANDE AU SITE, jamais devine ici : c est lui qui connait les
-    // promotions en cours. Un prix recopie dans cette fenetre vendrait au plein
-    // tarif un article en solde, et personne ne s en apercevrait avant la facture.
+    // promotions en cours.
     appeler('caisse:article', [pid, taille, couleur]).then(function(r){
       if (!r.ok) { dire(expliquer(r.motif), 'err'); return; }
       LIGNES.push(r.ligne);
@@ -487,24 +522,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function videRecherche(){ document.getElementById('res').innerHTML = ''; }
 
   // ══ RECHERCHE ET SCAN ═════════════════════════════════════════════════════
-  // ⚠ ON NE REDESSINE QUE #res. Reconstruire la carte entiere detruirait le champ
-  // ou l on vient de taper : curseur perdu, focus perdu, saisie impossible. Le
-  // lecteur de codes-barres enchaine parfois deux articles sans qu on touche au
-  // clavier — il ne doit rien perdre.
+  // ⚠ ON NE REDESSINE QUE #res : reconstruire la carte detruirait le champ ou
+  // l on tape, et le lecteur enchaine parfois deux articles.
   var rechT = null;
   function chercher(texte, entree){
     clearTimeout(rechT);
     var q = String(texte || '').trim();
     if (!q) { videRecherche(); return; }
-    // Trois caracteres minimum, la regle de toutes les recherches du projet. En
-    // dessous on n affiche RIEN plutot que tout le catalogue.
     if (!entree && q.length < 3) { videRecherche(); return; }
     rechT = setTimeout(function(){
       appeler('caisse:chercher', [q]).then(function(r){
         if (!r.ok) { dire(expliquer(r.motif), 'err'); return; }
         dire('');
-        // ⚠ LE CODE EXACT GAGNE TOUJOURS. C est ce que le lecteur envoie, et il
-        // doit ajouter l article sans passer par une liste d un seul element.
+        // ⚠ LE CODE EXACT GAGNE TOUJOURS : c est ce que le lecteur envoie.
         if (r.sku) { ajouter(r.sku.produitId, r.sku.taille, r.sku.couleur); return; }
         if (r.court) { videRecherche(); dire('${T("Trois caractères minimum pour chercher.")}', 'att'); return; }
         dessinerResultats(r.articles || [], q);
@@ -515,13 +545,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessinerResultats(articles, q){
     var z = document.getElementById('res');
     if (!articles.length) {
-      z.innerHTML = '<div class="res"><div class="art">${T("Aucun article ne correspond à «")} '
-        + esc(q) + ' ».</div></div>';
+      z.innerHTML = '<div class="res"><div class="art">${T("Aucun article ne correspond à «")} ' + esc(q) + ' ».</div></div>';
       return;
     }
     z.innerHTML = '<div class="res">' + articles.map(function(a){
-      // ⚠ ON NE PROPOSE PAS UNE TAILLE ABSENTE. Le bouton est grise : vendre ce
-      // qu on n a pas creerait un stock negatif que personne n a demande.
+      // ⚠ ON NE PROPOSE PAS UNE TAILLE ABSENTE : bouton grise.
       var vars = (a.variantes || []).map(function(v){
         return '<button data-pid="' + esc(a.id) + '" data-sz="' + esc(v.taille) + '"'
           + ' data-col="' + esc(v.couleur) + '"'
@@ -538,9 +566,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var cliT = null;
   function chercherClient(texte){
     clearTimeout(cliT);
-    // ⚠ MODIFIER L IDENTITE ROMPT LE LIEN AU COMPTE. Enregistrer la vente sous le
-    // compte du client precedent serait la pire erreur de cet ecran, et elle
-    // serait invisible.
+    // ⚠ MODIFIER L IDENTITE ROMPT LE LIEN AU COMPTE.
     CLI = null;
     majLie();
     var q = String(texte || '').trim();
@@ -570,8 +596,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var tel = document.getElementById('c-tel');
     tel.value = u.tel || '';
     masquerTel(tel);
-    // ⚠ LA PROVINCE SUIT LE CLIENT : c est elle qui determine les taxes, et la
-    // ressaisir a la main est l erreur la plus couteuse de cet ecran.
+    // ⚠ LA PROVINCE SUIT LE CLIENT : c est elle qui determine les taxes.
     if (u.province) {
       var s = document.getElementById('v-prov');
       for (var i = 0; i < s.options.length; i++) {
@@ -581,20 +606,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     document.getElementById('c-res').innerHTML = '';
     majLie();
     majTotaux();
-    dire('${T("Fiche de")} ' + (u.nom || u.courriel) + ' reprise.', 'bon');
+    dire('${T("Fiche de")} ' + (u.nom || u.courriel) + ' ${T("reprise.")}', 'bon');
   }
 
   function majLie(){ document.getElementById('lie').textContent = CLI ? '${T("✓ compte lié")}' : ''; }
 
-  /* ⚠ MASQUE DU TELEPHONE — 000 000-0000, la forme deja utilisee dans les fiches.
-     Il ne gene PAS la recherche : celle-ci compare des chiffres, jamais la mise en
-     forme. Et il ne reformate que si le curseur est AU BOUT du champ : sinon,
-     corriger un chiffre au milieu renverrait le curseur a la fin a chaque frappe,
-     ce qui est plus penible que l absence de masque. */
+  /* ⚠ MASQUE DU TELEPHONE — 000 000-0000. Il ne reformate que si le curseur est
+     AU BOUT du champ : corriger un chiffre au milieu ne doit pas le renvoyer a la fin. */
   function masquerTel(el){
     var auBout = (el.selectionStart == null) || (el.selectionStart === el.value.length);
     var d = String(el.value || '').replace(/[^0-9]/g, '');
-    // Un 1 de tete (indicatif pays) est retire : personne ne le note dans une fiche.
     if (d.length === 11 && d.charAt(0) === '1') d = d.slice(1);
     d = d.slice(0, 10);
     var s = d;
@@ -605,6 +626,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (auBout) { try { el.selectionStart = el.selectionEnd = s.length; } catch (e) {} }
   }
 
+  function poserRabType(t){
+    RABTYPE = (t === 'pct') ? 'pct' : 'montant';
+    var a = document.getElementById('rt-montant'), b = document.getElementById('rt-pct');
+    a.className = RABTYPE === 'montant' ? 'on' : ''; a.setAttribute('aria-pressed', String(RABTYPE === 'montant'));
+    b.className = RABTYPE === 'pct' ? 'on' : ''; b.setAttribute('aria-pressed', String(RABTYPE === 'pct'));
+  }
+
   // ══ ENREGISTRER LA VENTE ══════════════════════════════════════════════════
   function vendre(){
     if (enVente || !LIGNES.length || !TOT || !(TOT.total > 0)) return;
@@ -612,6 +640,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('caisse:vendre', [{
       lignes: LIGNES,
       prov: val('v-prov'), liv: val('v-liv'), rab: val('v-rab'),
+      rabType: RABTYPE, rabNote: val('v-rabnote').trim(),
       nom: val('c-nom').trim(), courriel: val('c-mail').trim(), tel: val('c-tel').trim(),
       moyen: val('v-paie'), note: val('v-note').trim(), remise: val('v-remise'),
       veutCompte: !!document.getElementById('c-creer').checked,
@@ -620,34 +649,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       enVente = false;
       if (!r.ok) { majBouton(); dire(expliquer(r.motif), 'err'); return; }
       // La vente est en base : on peut vider CETTE fenetre.
-      LIGNES = []; CLI = null; TOT = null;
-      document.getElementById('c-nom').value = '';
-      document.getElementById('c-mail').value = '';
-      document.getElementById('c-tel').value = '';
-      document.getElementById('v-note').value = '';
+      LIGNES = []; CLI = null; TOT = null; EDIT = -1;
+      ['c-nom', 'c-mail', 'c-tel', 'v-note', 'v-rabnote'].forEach(function(id){ document.getElementById(id).value = ''; });
       document.getElementById('c-creer').checked = false;
       document.getElementById('v-liv').value = szArgentChamp(0);
       document.getElementById('v-rab').value = szArgentChamp(0);
+      poserRabType('montant');
       majLie(); dessinerLignes(); dessinerTotaux(); majBouton(); dire('');
       diffuser();
       compteRendu(r);
     });
   }
 
-  /* ⚠ LE COMPTE RENDU EST UN VOILE DANS CETTE FENETRE, pas une boite du systeme.
-     Une boite de dialogue se serait ouverte derriere la fenetre principale ou sur
-     l autre ecran — exactement ce qui a rendu le decompte d inactivite invisible.
-     Et il DIT ce qui n a pas marche : stock non decompte, base non confirmee,
-     facture non partie. Une vente << reussie >> qui n a pas atteint la base est le
-     genre de silence qu on paie a l inventaire. */
+  /* ⚠ LE COMPTE RENDU EST UN VOILE DANS CETTE FENETRE, pas une boite du systeme,
+     et il DIT ce qui n a pas marche : stock non decompte, base non confirmee,
+     facture non partie. */
   function compteRendu(r){
     var lignes = '';
-    lignes += rangee('Commande', esc(r.numero || '—'));
+    lignes += rangee('${T("Commande")}', esc(r.numero || '—'));
     lignes += rangee('${T("Total")}', argent(r.total));
+    if (r.rabaisTotal > 0) lignes += rangee('${T("Rabais accordés")}', '−' + argent(r.rabaisTotal));
     if (r.enAttente) {
       lignes += rangee('${T("Paiement")}', '<span style="color:var(--tx-att)">${T("en attente — lien à envoyer")}</span>');
     } else {
-      lignes += rangee('${T("Stock décompté")}', r.stockOk ? 'oui'
+      lignes += rangee('${T("Stock décompté")}', r.stockOk ? '${T("oui")}'
         : '<strong style="color:var(--tx-err)">${T("NON — à vérifier")}</strong>');
     }
     lignes += rangee('${T("Enregistrement en base")}', r.nuageOk ? '${T("confirmé")}'
@@ -660,19 +685,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (r.enAttente) {
       lien = r.lien && r.lien.url
         ? '<div class="lien"><input id="lien-url" aria-label="${T("Lien de paiement à copier")}" readonly value="' + esc(r.lien.url) + '">'
-          + '<button class="mini" id="btn-copier"><span class="ic">📋</span> ${T("Copier")}</button>'
-          /* ⚠ LE RECOURS QUAND LA CONFIRMATION AUTOMATIQUE N ARRIVE PAS. Le
-             client ferme son onglet, le retour rate : la vente est PAYEE chez
-             Square et la facture reste impayee chez nous. Sans ce bouton, il n y
-             avait aucun moyen de les reconcilier au comptoir — il n existait que
-             dans l ecran web, retire en 3.54.0. */
+          + '<button class="mini" id="btn-copier">${T("Copier")}</button>'
+          /* ⚠ LE RECOURS QUAND LA CONFIRMATION AUTOMATIQUE N ARRIVE PAS : une vente
+             PAYEE chez Square et une facture restee impayee chez nous. */
           + '<button class="mini" id="btn-verif" data-hc="' + esc((r.lien && r.lien.hcId) || '')
           + '" data-cmd="' + esc(r.commandeId || '') + '">${T("↻ Vérifier le paiement")}</button></div>'
           + '<div class="aide">${T("Le stock sera décompté et la facture marquée payée quand Square")} '
           + '${T("confirmera — automatiquement au retour du client. Rien n’est encaissé par cet écran.")} '
           + '${T("S’il a payé mais que rien ne bouge, pressez ")}<strong>${T("Vérifier le paiement")}</strong>.</div>'
         : '<div class="aide" style="color:var(--tx-err)">${T("La commande est enregistrée, mais Square a refusé")} '
-          + '${T("de créer le lien :")} ' + esc(r.lienMotif || 'raison inconnue') + '${T(". Réessayez depuis la")} '
+          + '${T("de créer le lien :")} ' + esc(r.lienMotif || '${T("raison inconnue")}') + '${T(". Réessayez depuis la")} '
           + '${T("commande, ou encaissez autrement.")}</div>';
     }
 
@@ -683,14 +705,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     var v = document.createElement('div');
     v.className = 'voile';
-    v.innerHTML = '<div class="boite"><h3>' + (r.enAttente ? '<span class="ic">🔗</span> ${T("Vente")}${T(" en attente de paiement")}'
+    v.innerHTML = '<div class="boite"><h3>' + (r.enAttente ? '${T("Vente")}${T(" en attente de paiement")}'
       : '${T("Vente enregistrée")}') + '</h3>' + lignes + lien + avis
       + '<div class="fin"><button class="prim" id="btn-ok">${T("Continuer")}</button></div></div>';
     document.body.appendChild(v);
-    /* ⚠ LE VERDICT EST DIT DANS LES MOTS DE CET ECRAN, pas herite du site : le
-       coeur rend un etat (paye / annule / insuffisant / attente), et c est ici
-       qu on choisit la phrase et le ton. Un << underpaid >> brut ne dirait rien
-       a quelqu un devant un client. */
     var bvf = document.getElementById('btn-verif');
     if (bvf) bvf.onclick = function(){
       var hc = bvf.getAttribute('data-hc');
@@ -699,7 +717,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       dire('${T("Vérification auprès de Square…")}');
       appeler('caisse:verifierPaiement', [hc, bvf.getAttribute('data-cmd')]).then(function(res){
         bvf.disabled = false;
-        if (!res || !res.ok) { dire(expliquer(res), 'err'); return; }
+        if (!res || !res.ok) { dire(expliquer(res && res.motif), 'err'); return; }
         if (res.etat === 'paye') {
           dire('${T("Paiement confirmé")}' + (res.numero ? ' — ' + res.numero : '')
             + (res.stockOk ? ' ${T("· stock décompté.")}' : ' ${T("· stock à vérifier.")}'),
@@ -710,10 +728,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           return;
         }
         if (res.etat === 'annule') { dire('${T("Paiement annulé par le client.")}', 'att'); return; }
-        if (res.etat === 'insuffisant') {
-          dire('${T("Montant reçu INFÉRIEUR au total — à vérifier dans Square.")}', 'err');
-          return;
-        }
+        if (res.etat === 'insuffisant') { dire('${T("Montant reçu INFÉRIEUR au total — à vérifier dans Square.")}', 'err'); return; }
         dire('${T("Pas encore payé. Le lien reste valide — réessayez plus tard.")}', 'att');
       });
     };
@@ -729,10 +744,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (cp) cp.onclick = function(){
       var i = document.getElementById('lien-url');
       i.select();
-      // ⚠ execCommand ET NON navigator.clipboard : une fenetre native est
-      // chargee en data:, son origine est nulle, donc elle n est PAS un contexte
-      // securise — l API moderne du presse-papiers y est refusee. Mesure sur ce
-      // projet ; le vieil appel, lui, fonctionne.
+      // ⚠ execCommand ET NON navigator.clipboard : une fenetre chargee en data:
+      // n est pas un contexte securise, l API moderne y est refusee.
       var fait = false;
       try { fait = document.execCommand('copy'); } catch (e) { fait = false; }
       cp.textContent = fait ? '${T("✓ Copié")}' : '${T("Ctrl+C pour copier")}';
@@ -771,6 +784,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       document.getElementById('sous').textContent = r.par
         ? (r.par + (r.peutVendre ? '' : ' ${T("· lecture seule")}')) : '';
       if (!r.peutVendre) dire('${T("Votre rôle ne permet pas d’enregistrer une vente.")}', 'att');
+      if (${rabaisTemoin ? 'true' : 'false'}) {
+        /* Une vente TEMOIN, inerte : deux articles, le premier rabaisse de 25 %
+           avec sa remarque, et son editeur ouvert. Rien n est enregistre. */
+        LIGNES = [
+          { productId: 'p_0001', name: 'Aurora', sku: 'ROB-0001-M-NOI', size: 'M', color: 'Noir', price: 129.95, quantity: 1, rabaisPct: '25', rabaisNote: '${T("Petit défaut")}' },
+          { productId: 'p_0002', name: 'Lina', sku: 'HAU-0007-S-IVO', size: 'S', color: 'Ivoire', price: 89, quantity: 2 }
+        ];
+        EDIT = 0;
+        document.getElementById('c-nom').value = 'Marie Tremblay';
+        majTotaux();
+      }
       dessinerLignes(); dessinerTotaux(); majBouton();
       var s = document.getElementById('scan');
       if (s) s.focus();
@@ -792,9 +816,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   ['v-prov','v-liv','v-rab'].forEach(function(id){
     document.getElementById(id).onchange = function(){ majTotaux(); };
   });
+  document.getElementById('rt-montant').onclick = function(){ if (RABTYPE !== 'montant') { poserRabType('montant'); majTotaux(); } };
+  document.getElementById('rt-pct').onclick = function(){ if (RABTYPE !== 'pct') { poserRabType('pct'); majTotaux(); } };
   document.getElementById('btn-vendre').onclick = vendre;
   document.getElementById('btn-vider').onclick = function(){
-    LIGNES = []; TOT = null; videRecherche();
+    LIGNES = []; TOT = null; EDIT = -1; videRecherche();
+    document.getElementById('v-rab').value = szArgentChamp(0);
+    document.getElementById('v-rabnote').value = '';
+    poserRabType('montant');
     dessinerLignes(); dessinerTotaux(); majBouton(); dire(''); diffuser();
     var s = document.getElementById('scan'); if (s) s.focus();
   };
@@ -804,64 +833,89 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('caisse:affichage').then(function(r){
       b.disabled = false;
       if (!r.ok) { dire(expliquer(r.motif), 'err'); return; }
-      // ⚠ ON DIFFUSE TOUT DE SUITE APRES L OUVERTURE. L afficheur demande bien
-      // l etat courant a son ouverture, mais il le demande a la CAISSE DU SITE :
-      // ouvert depuis cette fenetre, il afficherait un panier vide devant le
-      // client alors que la vente est en cours.
+      // ⚠ ON DIFFUSE TOUT DE SUITE APRES L OUVERTURE, sinon l afficheur montrerait
+      // le panier vide de la caisse du site pendant la vente en cours.
       diffuser();
       dire('${T("Affichage client ouvert.")}', 'bon');
     });
   };
 
-  // ⚠ ECOUTEURS DELEGUES. Les boutons de variante, de quantite et de retrait sont
-  // redessines a chaque changement : un ecouteur pose sur chacun serait reperdu
-  // aussitot. On ecoute une fois, sur le corps, en remontant depuis la cible.
+  // ⚠ ECOUTEURS DELEGUES : les boutons sont redessines a chaque changement.
   document.getElementById('corps').addEventListener('click', function(ev){
     var t = ev.target;
     if (!t || !t.closest) return;
     var v = t.closest('.vars button');
-    if (v && !v.disabled) {
-      ajouter(v.getAttribute('data-pid'), v.getAttribute('data-sz'), v.getAttribute('data-col'));
-      return;
-    }
+    if (v && !v.disabled) { ajouter(v.getAttribute('data-pid'), v.getAttribute('data-sz'), v.getAttribute('data-col')); return; }
     var q = t.closest('[data-q]');
     if (q) {
       var i = parseInt(q.getAttribute('data-q'), 10);
       var d = parseInt(q.getAttribute('data-d'), 10);
-      if (LIGNES[i]) {
-        LIGNES[i].quantity = Math.max(1, LIGNES[i].quantity + d);
-        dessinerLignes(); majTotaux();
-      }
+      if (LIGNES[i]) { LIGNES[i].quantity = Math.max(1, LIGNES[i].quantity + d); dessinerLignes(); majTotaux(); }
       return;
     }
+    var rb = t.closest('[data-rab]');
+    if (rb) {
+      var k = parseInt(rb.getAttribute('data-rab'), 10);
+      EDIT = (EDIT === k) ? -1 : k;
+      dessinerLignes();
+      var ep = document.getElementById('ed-pct'); if (ep) ep.focus();
+      return;
+    }
+    var pu = t.closest('[data-puce]');
+    if (pu) {
+      var champ = document.getElementById('ed-pct');
+      if (champ) champ.value = pu.getAttribute('data-puce');
+      var tous = document.querySelectorAll('[data-puce]');
+      for (var m = 0; m < tous.length; m++) tous[m].className = (tous[m] === pu) ? 'on' : '';
+      var en = document.getElementById('ed-note'); if (en) en.focus();
+      return;
+    }
+    var ap = t.closest('[data-rab-appliquer]');
+    if (ap) { appliquerRabais(parseInt(ap.getAttribute('data-rab-appliquer'), 10)); return; }
+    var rr2 = t.closest('[data-rab-retirer]');
+    if (rr2) {
+      var j = parseInt(rr2.getAttribute('data-rab-retirer'), 10);
+      if (LIGNES[j]) { delete LIGNES[j].rabaisPct; delete LIGNES[j].rabaisNote; }
+      EDIT = -1; dessinerLignes(); majTotaux();
+      return;
+    }
+    if (t.closest('[data-rab-fermer]')) { EDIT = -1; dessinerLignes(); return; }
     var rr = t.closest('[data-retirer]');
     if (rr) {
       LIGNES.splice(parseInt(rr.getAttribute('data-retirer'), 10), 1);
+      EDIT = -1;
       dessinerLignes(); majTotaux();
       return;
     }
     var c = t.closest('.cli');
     if (c) {
       var uid = c.getAttribute('data-uid');
-      // La fiche COMPLETE est deja la, retenue au moment du dessin : courriel,
-      // telephone et province comprises. Aucun aller-retour, et surtout aucune
-      // reconstruction a partir de l ecran.
-      for (var k = 0; k < TROUVES.length; k++) {
-        if (TROUVES[k].id === uid) { remplirClient(TROUVES[k]); return; }
+      // La fiche COMPLETE est deja la, retenue au moment du dessin.
+      for (var n = 0; n < TROUVES.length; n++) {
+        if (TROUVES[n].id === uid) { remplirClient(TROUVES[n]); return; }
       }
       dire('${T("Fiche introuvable — relancez la recherche.")}', 'err');
     }
   });
+  // Entree dans l editeur de rabais = Appliquer.
+  document.getElementById('corps').addEventListener('keydown', function(ev){
+    if (ev.key !== 'Enter' || EDIT < 0) return;
+    var id = ev.target && ev.target.id;
+    if (id === 'ed-pct' || id === 'ed-note') { ev.preventDefault(); appliquerRabais(EDIT); }
+  });
 
-  // Ctrl+S n a pas de sens ici, mais Echap doit fermer comme partout ailleurs.
+  // Echap ferme d abord l editeur de rabais, puis la fenetre — jamais un voile ouvert.
   document.addEventListener('keydown', function(ev){
-    if (ev.key === 'Escape' && !document.querySelector('.voile')) { ev.preventDefault(); P.fermer(); }
+    if (ev.key !== 'Escape' || document.querySelector('.voile')) return;
+    ev.preventDefault();
+    if (EDIT >= 0) { EDIT = -1; dessinerLignes(); return; }
+    P.fermer();
   });
 
   demarrer();
   if (${attenteTemoin ? 'true' : 'false'}) {
-    /* Un compte rendu TEMOIN, avec un paiement en attente : c est le seul etat
-       qui dessine le lien, le bouton << Copier >> et celui de verification. */
+    /* Un compte rendu TEMOIN, avec un paiement en attente : le seul etat qui
+       dessine le lien, << Copier >> et << Verifier le paiement >>. */
     compteRendu({ numero: 'SZ-100252', total: 149.95, enAttente: true,
       commandeId: 'ord_temoin', paiement: 'lien',
       lien: { url: 'https://square.link/u/TEMOIN', hcId: 'hc_temoin' },

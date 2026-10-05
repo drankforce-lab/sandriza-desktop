@@ -3676,6 +3676,10 @@ html.jour .pf-fiche .etat.on{color:#1f6b3d}
 .pf-fiche .reste button .o{flex:0 0 auto;width:.95rem;height:.95rem;border-radius:50%;
   border:1.5px solid var(--tx-att)}
 .pf-fiche .reste .ok{font-size:.78rem;color:var(--tx-ok);font-weight:600}
+.pf-fiche .reste .ok{margin-bottom:.35rem}
+.pf-fiche .reste button.fait{color:var(--tx2)}
+.pf-fiche .reste button.fait .o{border-color:var(--tx-ok);background:var(--tx-ok);display:flex;align-items:center;justify-content:center}
+.pf-fiche .reste button.fait .o svg{width:.7rem;height:.7rem;fill:none;stroke:var(--f-carte);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 @media (max-width:1100px){.pf-fiche{display:none}}
 /* Ajouts pour Collection et Fournisseur (2026-10-01) : un monogramme quand
    la fiche n a pas de photo par nature, des puces pour une liste courte, et

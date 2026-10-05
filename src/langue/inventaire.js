@@ -562,5 +562,31 @@ module.exports = {
   'emplacement(s) dans ce lieu': 'location(s) in this place',
   'ouverte par': 'open by',
   'ces variantes': 'these variants',
-  'cette variante': 'this variant'
+  'cette variante': 'this variant',
+
+  /* ── L'ONGLET « VENTES À RABAIS » (2026-10-04) ───────────────────────────── */
+  'Ventes à rabais': 'Discounted sales',
+  '— rabais accordés à la vente au comptoir': '— discounts given at the counter',
+  'Année': 'Year',
+  'Filtrer le registre': 'Filter the register',
+  'Article, code, facture, client, remarque…': 'Item, code, invoice, customer, remark…',
+  'Imprimer le registre': 'Print the register',
+  'vente': 'sale',
+  'ventes': 'sales',
+  'article rabaissé': 'discounted item',
+  'articles rabaissés': 'discounted items',
+  'accordés (avant taxes)': 'given (before taxes)',
+  'Aucune ligne ne correspond au filtre.': 'No line matches the filter.',
+  'Aucun rabais accordé au comptoir': 'No discount given at the counter',
+  'Facture': 'Invoice',
+  'Prix courant': 'Regular price',
+  'Rabais': 'Discount',
+  'Prix vendu': 'Sold at',
+  'Remarque': 'Remark',
+  'Client': 'Customer',
+  'Toute la vente': 'Whole sale',
+  'Ouvrir la facture': 'Open the invoice',
+  'par': 'by',
+  'Registre envoyé à l’impression.': 'Register sent to the printer.',
+  'Aucune facture liée à cette vente.': 'No invoice linked to this sale.'
 };

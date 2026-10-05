@@ -171,5 +171,39 @@ module.exports = {
   'commandes': 'orders',
   '· lecture seule': '· read-only',
   'Province': 'Province',
-  'Les totaux s’afficheront ici.': 'Totals will appear here.'
+  'Les totaux s’afficheront ici.': 'Totals will appear here.',
+
+  /* ── LES RABAIS DU COMPTOIR (2026-10-04) ──────────────────────────────────
+     ⚠ Les suggestions de remarque (« Petit défaut »…) ne sont que des MODÈLES
+     proposés à la saisie : la remarque est un texte libre, écrit dans la langue
+     de la personne au comptoir, puis conservé tel quel sur la facture. */
+  'Rabais sur la vente': 'Discount on the sale',
+  'Rabais en dollars ou en pourcentage': 'Discount in dollars or as a percentage',
+  'Valeur': 'Value',
+  'Remarque': 'Remark',
+  'ex. : client fidèle': 'e.g. loyal customer',
+  'Petit défaut': 'Minor defect',
+  'Fin de série': 'End of line',
+  'Article de démonstration': 'Display item',
+  'Dernier en stock': 'Last one in stock',
+  'Geste commercial': 'Goodwill gesture',
+  'Client fidèle': 'Loyal customer',
+  'Rabais employé': 'Staff discount',
+  'Rabais sur les articles': 'Item discounts',
+  'Retirer un': 'Remove one',
+  'Ajouter un': 'Add one',
+  'Rabais sur cet article': 'Discount on this item',
+  'Rabais sur cet article, pour cette vente seulement': 'Discount on this item, for this sale only',
+  'Pourcentage': 'Percentage',
+  'ex. : petit défaut à la manche': 'e.g. minor defect on the sleeve',
+  'Prix courant': 'Regular price',
+  'Retirer le rabais': 'Remove discount',
+  'Fermer': 'Close',
+  'Appliquer': 'Apply',
+  'Le pourcentage doit être entre 0 et 100.': 'The percentage must be between 0 and 100.',
+  'reprise.': 'loaded.',
+  'Commande': 'Order',
+  'Rabais accordés': 'Discounts given',
+  'oui': 'yes',
+  'raison inconnue': 'unknown reason'
 };

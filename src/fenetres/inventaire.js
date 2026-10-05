@@ -457,6 +457,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
   // ── Onglet Produits endommages ──
   var DMG = null, DMG_AN = 'all';
 
+  // ── Onglet Ventes a rabais (2026-10-04) : le registre des rabais du comptoir ──
+  var RAB = null, RAB_AN = 'all', RAB_Q = '', rabT = null;
+
   // ── Onglet Entrepot ──
   var WHS = null;
   var WH_EDIT = null;  // null | { id:'' (ajout) | id (edition) }
@@ -548,6 +551,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     dessinerOnglets();
     if (ONGLET === 'produits') { dessinerProduits(); return; }
     if (ONGLET === 'endommages') { dessinerEndommages(); return; }
+    if (ONGLET === 'rabais') { dessinerRabais(); return; }
     if (ONGLET === 'entrepots') { dessinerEntrepots(); return; }
     dessinerListe();
   }
@@ -558,6 +562,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
       ['produits', '${T("Produits")}'],
       ['reappro', '${T("Réapprovisionnement")}' + reappro],
       ['endommages', '${T("Produits endommagés")}'],
+      ['rabais', '${T("Ventes à rabais")}'],
       ['entrepots', '${T("Entrepôt")}']
     ];
     onglets.innerHTML = defs.map(function(d){
@@ -1546,6 +1551,103 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     };
   }
 
+  // ══ ONGLET VENTES A RABAIS ═══════════════════════════════════════════════
+  /* Le registre des articles vendus a rabais au COMPTOIR (sa demande du
+     2026-10-04) : qui, quoi, combien, pourquoi, et sur quelle facture.
+     ⚠ IL EST LU DANS LES COMMANDES par le site (stock:rabaisComptoir) : rien
+     n est stocke a part, donc rien ne peut diverger de la facture. Une ligne par
+     article rabaisse, plus une ligne << toute la vente >> pour un rabais global.
+     Cliquer une ligne ouvre sa facture. */
+  function dessinerRabais(){
+    var d = RAB;
+    if (!d) {
+      corps.innerHTML = '<div class="carte plein"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>';
+      actions.innerHTML = '';
+      return;
+    }
+    var h = '<div class="carte plein">'
+      + '<h2>${T("Ventes à rabais")} <span class="note">${T("— rabais accordés à la vente au comptoir")}</span></h2>'
+      + '<div class="toolbar">'
+      + '<select id="rab-an" aria-label="${T("Année")}"><option value="all">${T("Tout cumulé")}</option>'
+      + (d.annees || []).map(function(a){
+          return '<option value="' + a + '"' + (String(RAB_AN) === String(a) ? ' selected' : '') + '>' + a + '</option>'; }).join('')
+      + '</select>'
+      + '<input id="rab-q" autocomplete="off" style="max-width:20rem" value="' + esc(RAB_Q) + '" aria-label="${T("Filtrer le registre")}" placeholder="${T("Article, code, facture, client, remarque…")}">'
+      + '<button class="mini" id="rab-imp">${T("Imprimer le registre")}</button>'
+      + '<span class="droite aide"><b>' + d.nbVentes + '</b> ' + szPl(d.nbVentes, '${T("vente")}', '${T("ventes")}')
+      + ' · <b>' + d.nbArticles + '</b> ' + szPl(d.nbArticles, '${T("article rabaissé")}', '${T("articles rabaissés")}')
+      + ' · <b>' + szArgent(d.totalRabais) + '</b> ${T("accordés (avant taxes)")}</span>'
+      + '</div>';
+
+    if (!d.lignes.length) {
+      h += '<div class="vide">' + (RAB_Q ? '${T("Aucune ligne ne correspond au filtre.")}'
+        : '${T("Aucun rabais accordé au comptoir")}' + (RAB_AN === 'all' ? '' : '${T(" pour ")}' + esc(String(RAB_AN))) + '.') + '</div>';
+    } else {
+      h += '<div class="grille"><table><thead><tr>'
+        + '<th>${T("Date")}</th><th>${T("Facture")}</th><th>${T("Article")}</th><th class="c">${T("Qté")}</th>'
+        + '<th style="text-align:right">${T("Prix courant")}</th><th style="text-align:right">${T("Rabais")}</th>'
+        + '<th style="text-align:right">${T("Prix vendu")}</th><th>${T("Remarque")}</th><th>${T("Client")}</th>'
+        + '</tr></thead><tbody>';
+      d.lignes.forEach(function(l){
+        var art = l.type === 'vente'
+          ? '<span class="rf-nom">${T("Toute la vente")}</span>'
+          : '<div class="rf-nom">' + esc(l.nom) + '</div><div class="rf-sous">'
+            + esc([l.taille, l.couleur].filter(Boolean).join(' / ') || '—')
+            + (l.sku ? ' · <span class="rf-code">' + esc(l.sku) + '</span>' : '') + '</div>';
+        var rab = (l.pct > 0 ? '−' + szNombre(l.pct, 2).replace(/[.,]00$/, '') + ' % · ' : '') + '−' + szArgent(l.rabais);
+        h += '<tr data-fac="' + esc(l.factureId || '') + '" title="${T("Ouvrir la facture")}" style="cursor:pointer">'
+          + '<td style="white-space:nowrap">' + new Date(l.date).toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'short', year: 'numeric' }) + '</td>'
+          + '<td><div class="code">' + esc(l.facture || '—') + '</div><div class="rf-sous">' + esc(l.commande || '') + '</div></td>'
+          + '<td>' + art + '</td>'
+          + '<td class="c">' + l.qte + '</td>'
+          + '<td style="text-align:right;white-space:nowrap">' + (l.type === 'vente' ? '—' : szArgent(l.prixOriginal)) + '</td>'
+          + '<td style="text-align:right;white-space:nowrap;font-weight:600">' + rab + '</td>'
+          + '<td style="text-align:right;white-space:nowrap">' + (l.type === 'vente' ? '—' : szArgent(l.prixVendu)) + '</td>'
+          + '<td>' + (l.remarque ? esc(l.remarque) : '<span class="rf-sous">—</span>') + '</td>'
+          + '<td>' + esc(l.client || '—') + (l.par ? '<div class="rf-sous">${T("par")} ' + esc(l.par) + '</div>' : '') + '</td></tr>';
+      });
+      h += '</tbody><tfoot><tr style="font-weight:700">'
+        + '<td colspan="5" style="padding:.34rem .5rem;border-top:1px solid var(--v14)">${T("Total")}</td>'
+        + '<td style="text-align:right;white-space:nowrap;padding:.34rem 1.25rem .34rem .5rem;border-top:1px solid var(--v14)">−' + szArgent(d.totalRabais) + '</td>'
+        + '<td colspan="3" style="border-top:1px solid var(--v14)"></td></tr></tfoot></table></div>';
+    }
+    h += '</div>';
+    corps.innerHTML = h;
+    actions.innerHTML = '';
+    brancherRabais();
+  }
+
+  function brancherRabais(){
+    corps.onkeydown = null;
+    corps.onchange = function(ev){
+      if (ev.target && ev.target.id === 'rab-an') { RAB_AN = ev.target.value; chargerOnglet(); }
+    };
+    // ⚠ Le filtre se tape : on redessine SANS voler le focus (garderFocus).
+    corps.oninput = function(ev){
+      if (!ev.target || ev.target.id !== 'rab-q') return;
+      RAB_Q = ev.target.value;
+      clearTimeout(rabT);
+      rabT = setTimeout(function(){ chargerOnglet(true); }, 220);
+    };
+    corps.onclick = function(ev){
+      var b = ev.target && ev.target.closest ? ev.target.closest('button') : null;
+      if (b && b.id === 'rab-imp') {
+        b.disabled = true;
+        dire('${T("Impression…")}');
+        appeler('stock:rabaisComptoirRapport', [RAB_AN, RAB_Q]).then(function(r){
+          b.disabled = false;
+          dire(r.ok ? '${T("Registre envoyé à l’impression.")}' : expliquer(r), r.ok ? 'bon' : 'err');
+        });
+        return;
+      }
+      var tr = ev.target && ev.target.closest ? ev.target.closest('tr[data-fac]') : null;
+      if (!tr) return;
+      var id = tr.getAttribute('data-fac');
+      if (!id) { dire('${T("Aucune facture liée à cette vente.")}', 'att'); return; }
+      appeler('factures:ouvrir', [id]).then(function(r){ if (!r || !r.ok) dire(expliquer(r), 'err'); });
+    };
+  }
+
   // ══ ONGLET ENTREPOT ═══════════════════════════════════════════════════════
   function dessinerEntrepots(){
     var d = WHS;
@@ -1977,6 +2079,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
       });
       return;
     }
+    if (ONGLET === 'rabais') {
+      appeler('stock:rabaisComptoir', [RAB_AN, RAB_Q]).then(function(r){
+        if (!r || !r.ok) { vide('${T("Inventaire indisponible")}', expliquer(r)); return; }
+        RAB = r;
+        var av = document.getElementById('rab-q');
+        var focus = garderFocus && av && document.activeElement === av;
+        var pos = focus ? av.selectionStart : null;
+        dessiner();
+        if (focus) { var n = document.getElementById('rab-q'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} } }
+      });
+      return;
+    }
     appeler('stock:entrepots').then(function(r){
       if (!r || !r.ok) { vide('${T("Inventaire indisponible")}', expliquer(r)); return; }
       WHS = r;
@@ -2260,7 +2374,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
   // est un produit dont on ouvre la grille directement.
   if (DEPART.indexOf('onglet:') === 0) {
     var ong = DEPART.slice(7);
-    if (['produits', 'reappro', 'endommages', 'entrepots'].indexOf(ong) >= 0) ONGLET = ong;
+    if (['produits', 'reappro', 'endommages', 'rabais', 'entrepots'].indexOf(ong) >= 0) ONGLET = ong;
     DEPART = '';
   }
   dessiner();

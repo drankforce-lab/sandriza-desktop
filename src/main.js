@@ -2268,7 +2268,7 @@ const OPS_PONT = new Set([
   // Inventaire COMPLET (les 4 onglets). La pagination et les filtres vivent
   // dans le site ; les lots recoivent des IDENTIFIANTS, jamais des cases.
   'stock:produits', 'stock:skuUn', 'stock:skuTous', 'stock:skuPad6',
-  'stock:venteFinale', 'stock:vendre', 'stock:endommages',
+  'stock:venteFinale', 'stock:vendre', 'stock:endommages', 'stock:rabaisComptoir', 'stock:rabaisComptoirRapport',
   'stock:endommagesRapport', 'stock:entrepots', 'stock:entrepotEcrire',
   // Les LIEUX (batiment + adresse) au-dessus des emplacements — 2026-08-22.
   'stock:lieuEcrire', 'stock:lieuSupprimer',
@@ -3322,7 +3322,7 @@ const LIMITES_PONT = {
   // Detourage, impressions et rapports.
   'produit:photoIa': 120000,
   'produit:detourer': 30000, 'produit:teinter': 30000, 'stock:etiquettes': 30000,
-  'stock:endommagesRapport': 30000, 'facture:imprimer': 30000, 'commande:bon': 30000,
+  'stock:endommagesRapport': 30000, 'stock:rabaisComptoirRapport': 30000, 'facture:imprimer': 30000, 'commande:bon': 30000,
   // La liste des retours RESYNCHRONISE les demandes avant de repondre (la
   // meme fraicheur que l ecran du site) : laisser le temps du nuage.
   'retours:liste': 20000,

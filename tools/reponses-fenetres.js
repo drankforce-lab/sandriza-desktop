@@ -366,6 +366,41 @@ const JEU = {
   // rôle qui peut vendre, et un rôle en lecture seule qui doit voir l'écran
   // désarmé plutôt qu'un bouton qui ne répond pas.
   'caisse.js': [
+    /* ⚠ LES RABAIS DU COMPTOIR (2026-10-04) : l'éditeur de rabais d'un article et
+       les totaux à deux rabais n'existent qu'APRÈS des clics. Le mode « rabais »
+       pose une vente témoin inerte — un article à −25 % (petit défaut), un autre
+       au prix courant, 10 % sur la vente — et ouvre l'éditeur. */
+    {
+      nom: 'rabais au comptoir',
+      id: 'rabais',
+      reponses: {
+        'caisse:contexte': {
+          ok: true,
+          provinces: ['QC', 'ON', 'BC', 'AB', 'MB', 'SK', 'NS', 'NB', 'NL', 'PE', 'NT', 'NU', 'YT'],
+          paiements: [
+            { cle: 'terminal', libelle: 'Terminal Square (reçu)' },
+            { cle: 'comptant', libelle: 'Comptant (reçu)' },
+            { cle: 'lien', libelle: 'Lien de paiement (téléphone)' },
+          ],
+          remises: [
+            { cle: 'courriel', libelle: '✉ Envoyer par courriel' },
+            { cle: 'impression', libelle: '🖨 Imprimer seulement' },
+            { cle: 'aucun', libelle: 'Ne rien faire' },
+          ],
+          peutVendre: true,
+          par: 'Brigitte Brousseau',
+        },
+        'caisse:totaux': { ok: true, sousTotalBrut: 307.95, rabaisArticles: 32.49, sousTotal: 275.46,
+          rabais: 27.55, rabaisType: 'pct', rabaisValeur: 10, livraison: 0,
+          lignes: [{ prixOriginal: 129.95, prix: 97.46, pct: 25 }, { prixOriginal: 89, prix: 89, pct: 0 }],
+          taxes: [{ nom: 'TPS', taux: 0.05, montant: 12.40 }, { nom: 'TVQ', taux: 0.09975, montant: 24.73 }],
+          total: 285.04 },
+        'caisse:diffuser': { ok: true },
+        'caisse:affichage': { ok: true },
+        'session:activite': { ok: true },
+        identite: IDENTITE,
+      },
+    },
     {
       nom: 'caissier',
       id: '',
@@ -400,7 +435,9 @@ const JEU = {
         },
         'caisse:article': { ok: true, ligne: { productId: 'p_0001', name: 'Robe cintrée',
           sku: 'ROB-0001-M-NOI', size: 'M', color: 'Noir', price: 129.95, quantity: 1 } },
-        'caisse:totaux': { ok: true, sousTotal: 129.95, rabais: 0, livraison: 0,
+        'caisse:totaux': { ok: true, sousTotalBrut: 129.95, rabaisArticles: 0, sousTotal: 129.95,
+          rabais: 0, rabaisType: 'montant', rabaisValeur: 0, livraison: 0,
+          lignes: [{ prixOriginal: 129.95, prix: 129.95, pct: 0 }],
           taxes: [{ nom: 'TPS', taux: 0.05, montant: 6.5 }, { nom: 'TVQ', taux: 0.09975, montant: 12.96 }],
           total: 149.41 },
         'caisse:client': { ok: true, exact: null, trouves: [
@@ -7201,6 +7238,37 @@ const JEU = {
               qte: 2, prix: 62.5, raison: 'Couture déchirée au retour' },
             { date: '2026-03-02T10:00:00Z', commande: 'SZ-100122', nom: 'Cardigan côtelé',
               qte: 1, prix: 62.5, raison: 'Taché — non revendable' },
+          ],
+        },
+        'session:activite': { ok: true },
+        identite: IDENTITE,
+      },
+    },
+    /* Le registre des ventes à rabais du comptoir (2026-10-04) : une ligne
+       d'article à −25 % avec sa remarque, et une ligne « toute la vente ». */
+    {
+      nom: 'ventes à rabais',
+      id: 'onglet:rabais',
+      reponses: {
+        'stock:contexte': {
+          ok: true, peutEcrire: true, seuilGeneral: 3, par: 'Brigitte Brousseau',
+          entrepots: [
+            { id: 'wh_0001', code: 'MTL-A', nom: 'Entrepôt principal' },
+          ],
+        },
+        'stock:rabaisComptoir': {
+          ok: true, annees: [2026, 2025], totalRabais: 60.04, nbArticles: 1, nbVentes: 1,
+          lignes: [
+            { type: 'article', date: '2026-10-04T15:12:00Z', commande: 'SZ-100250', commandeId: 'ord_0003',
+              facture: 'FAC-2026-0042', factureId: 'inv_0003', client: 'Marie Tremblay', courriel: 'marie@example.com',
+              par: 'Brigitte Brousseau', paiement: 'terminal', statut: 'confirmed',
+              produitId: 'p_0001', nom: 'Aurora', sku: 'ROB-0001-M-NOI', taille: 'M', couleur: 'Noir', qte: 1,
+              prixOriginal: 129.95, prixVendu: 97.46, pct: 25, rabais: 32.49, remarque: 'Petit défaut' },
+            { type: 'vente', date: '2026-10-04T15:12:00Z', commande: 'SZ-100250', commandeId: 'ord_0003',
+              facture: 'FAC-2026-0042', factureId: 'inv_0003', client: 'Marie Tremblay', courriel: 'marie@example.com',
+              par: 'Brigitte Brousseau', paiement: 'terminal', statut: 'confirmed',
+              produitId: '', nom: '', sku: '', taille: '', couleur: '', qte: 3,
+              prixOriginal: 0, prixVendu: 0, pct: 10, rabais: 27.55, remarque: 'Client fidèle' },
           ],
         },
         'session:activite': { ok: true },

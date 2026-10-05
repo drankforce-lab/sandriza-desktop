@@ -219,7 +219,7 @@ html.jour .lgstk.enstock .c1,html.jour .lgstk.enstock .c2{color:#166534}
 /* ALIGNEMENT (2026-10-04, sa capture) : le libelle etait un flex — l etoile partait au bout de la colonne et un libelle sur deux lignes descendait son champ. Libelle en texte, et les trois champs partagent leurs RANGEES (subgrid) : les cases restent sur une meme ligne. */
 .prixgrille{grid-template-rows:auto auto}
 .prixgrille .ch{display:grid;grid-row:span 2;grid-template-rows:subgrid;row-gap:.3rem}
-.prixgrille .ch label{display:block;align-self:end;margin-bottom:0}
+.prixgrille .ch label{display:block;align-self:end;margin-bottom:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .prixgrille .ch label .pastille{margin-left:.4rem;vertical-align:middle}
 .pastille{margin-left:auto;padding:.06rem .4rem;border-radius:99px;background:#c9a97e;
   color:#17202c;font-size:.7rem;font-weight:700;display:none}
@@ -456,7 +456,7 @@ function pageProduit(id) {
       + '<div class="ch"><label for="p-solde">${T("Prix soldé ($)")}'
       + '<span id="p-pastille" class="pastille"></span></label>'
       + '<input id="p-solde" type="text" inputmode="decimal" class="argent" placeholder="${T("aucun")}"></div>'
-      + ch('p-cout', '${T("Coût d’acquisition ($)")}', { requis: true, argent: true })
+      + ch('p-cout', '${T("Coût d’achat ($)")}', { requis: true, argent: true })
       + '</div>'
       // Les rabais rapides sous TOUTE la carte (2026-09-30) : sous le seul champ
       // du prix solde, la carte plus etroite les coupait au cinquieme.
@@ -670,20 +670,28 @@ function pageProduit(id) {
       : '—');
     h += ligne('${T("Stock")}', tot ? szNombre(tot) + ' ' + (tot > 1 ? '${T("unités")}' : '${T("unité")}') : '—');
     h += ligne('${T("Boutique")}', '<span class="etat ' + (actif ? 'on">${T("Visible")}' : 'off">${T("Masqué")}') + '</span>');
-    // Ce qui manque — les gardes d enregistrer(), dans leur ordre.
-    var manque = [];
-    if (!nom) manque.push([0, '${T("Nom du produit")}']);
-    if (!val('p-cat')) manque.push([0, '${T("Catégorie")}']);
-    if (!String(val('p-poids') || '').trim()) manque.push([0, '${T("Poids unitaire")}']);
-    if (!(p > 0)) manque.push([0, '${T("Prix de vente")}']);
-    if (!(co > 0)) manque.push([0, '${T("Coût d’acquisition")}']);
-    if (!t.length || !c.length) manque.push([1, '${T("Au moins une taille et une couleur")}']);
-    if (!IMAGE) manque.push([2, '${T("Photo principale")}']);
-    if (!ID && !tot && t.length && c.length) manque.push([4, '${T("Une quantité en stock")}']);
-    h += '<div class="reste">' + (manque.length
-      ? '<div class="t">${T("Pour enregistrer")}</div>' + manque.map(function(m){
-          return '<button type="button" data-pfaller="' + m[0] + '"><span class="o"></span>' + m[1] + '</button>'; }).join('')
-      : '<div class="ok"><span class="ic">✓</span> ${T("Prête à enregistrer")}</div>') + '</div>';
+    // Les gardes d enregistrer(), dans leur ordre. ⚠ TOUTES restent affichees
+    // (2026-10-04, sa demande) : celle qui est remplie prend un crochet vert au lieu
+    // de disparaitre — on voit ce qui est fait, pas seulement ce qui reste.
+    var exig = [
+      [0, '${T("Nom du produit")}', !!nom],
+      [0, '${T("Catégorie")}', !!val('p-cat')],
+      [0, '${T("Poids unitaire")}', !!String(val('p-poids') || '').trim()],
+      [0, '${T("Prix de vente")}', p > 0],
+      [0, '${T("Coût d’achat")}', co > 0],
+      [1, '${T("Au moins une taille et une couleur")}', !!(t.length && c.length)],
+      [2, '${T("Photo principale")}', !!IMAGE]
+    ];
+    if (!ID && t.length && c.length) exig.push([4, '${T("Une quantité en stock")}', tot > 0]);
+    var nManque = exig.filter(function(m){ return !m[2]; }).length;
+    h += '<div class="reste">' + (nManque
+      ? '<div class="t">${T("Pour enregistrer")}</div>'
+      : '<div class="ok"><span class="ic">✓</span> ${T("Prête à enregistrer")}</div>')
+      + exig.map(function(m){
+          return '<button type="button" data-pfaller="' + m[0] + '"' + (m[2] ? ' class="fait"' : '') + '><span class="o">'
+            + (m[2] ? '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 8.5l2.6 2.5L12 5.5"/></svg>' : '')
+            + '</span>' + m[1] + '</button>'; }).join('')
+      + '</div>';
     // ⚠ RIEN DE CHANGE, RIEN DE REECRIT (2026-10-04). Le volet suit chaque CLIC du
     // formulaire : le reecrire a l identique declenchait l observateur de hauteur,
     // la fenetre se redimensionnait — et Windows ferme une liste deroulante ouverte
