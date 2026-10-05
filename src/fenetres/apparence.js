@@ -50,21 +50,44 @@ body{background:var(--f-page);color:var(--tx);
 .carte h2{margin:0 0 .25rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2)}
 .carte p{margin:0 0 .9rem;font-size:.79rem;color:var(--tx3)}
-.rang{display:flex;flex-wrap:wrap;gap:1rem}
-.th{display:flex;flex-direction:column;align-items:center;gap:.4rem;
-  background:none;border:none;padding:0;cursor:pointer;font:inherit;color:inherit;
-  -webkit-user-select:none;user-select:none}
-.th:disabled{cursor:default;opacity:.55}
-.th .pastille{width:56px;height:56px;border-radius:12px;position:relative;overflow:hidden;
-  display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;
-  border:3px solid transparent;box-shadow:0 2px 8px rgba(0,0,0,.25);transition:box-shadow .2s}
-.th .barre{width:70%;height:6px;border-radius:4px;opacity:.9}
-.th .coche{position:absolute;top:4px;right:4px;width:14px;height:14px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;font-size:8px;line-height:1}
-.th .nom{font-size:.72rem;color:var(--tx2);white-space:nowrap}
-.th[aria-pressed="true"] .nom{color:var(--tx);font-weight:700}
-.th:hover:not(:disabled) .pastille{box-shadow:0 4px 14px rgba(0,0,0,.4)}
-.th:focus-visible .pastille{outline:2px solid #c9a97e;outline-offset:3px}
+/* ── RELOOKING (2026-10-04) : chaque palette est un APERCU de la vitrine (barre,
+   photo, prix, bouton), assez grand pour juger, au lieu d une pastille de 56 px.
+   ⚠ L APERCU NE PORTE AUCUN TEXTE : ses couleurs sont celles du theme (donnees),
+   et un mot pose dessus serait juge au contraste sans qu on choisisse ses
+   couleurs. Le nom et l etat vivent SOUS l apercu, dans les couleurs de la fenetre. */
+.rang{display:grid;grid-template-columns:repeat(auto-fill,minmax(15rem,1fr));gap:1rem}
+.th{display:flex;flex-direction:column;gap:.55rem;text-align:left;
+  background:var(--f-carte2);border:1px solid var(--v08);border-radius:14px;padding:.7rem;
+  cursor:pointer;font:inherit;color:inherit;-webkit-user-select:none;user-select:none;
+  transition:border-color .15s,box-shadow .15s,transform .15s}
+.th:hover:not(:disabled){border-color:var(--v28);transform:translateY(-1px)}
+.th:disabled{cursor:default;opacity:.6}
+.th[aria-pressed="true"]{border-color:#c9a97e;box-shadow:0 0 0 1px #c9a97e}
+.th:focus-visible{outline:2px solid #c9a97e;outline-offset:3px}
+.vit{border-radius:10px;overflow:hidden;border:1px solid rgba(0,0,0,.18);aspect-ratio:16/10;display:flex;flex-direction:column}
+.vit .bar{height:16%;background:#ffffff;display:flex;align-items:center;gap:6%;padding:0 7%;border-bottom:1px solid rgba(0,0,0,.08)}
+.vit .bar i{display:block;height:28%;border-radius:3px;background:#1d2433;opacity:.75}
+.vit .bar i:first-child{width:22%}.vit .bar i:nth-child(2){width:9%;opacity:.25;margin-left:auto}.vit .bar i:nth-child(3){width:9%;opacity:.25}
+.vit .bas{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:6%;padding:6% 7%}
+.vit .prod{display:flex;flex-direction:column;gap:7%}
+.vit .photo{flex:1;border-radius:6px;background:rgba(0,0,0,.08)}
+.vit .l1{height:7%;width:70%;border-radius:3px;background:rgba(0,0,0,.35)}
+.vit .l2{height:7%;width:40%;border-radius:3px}
+.vit .btn{height:14%;border-radius:99px}
+.th .pied-th{display:flex;align-items:center;gap:.5rem}
+.th .nom{font-size:.88rem;font-weight:600;color:var(--tx)}
+.th .pastille-etat{margin-left:auto;font-size:.7rem;font-weight:700;padding:.12rem .55rem;border-radius:99px;
+  background:rgba(201,169,126,.18);color:var(--tx-or)}
+.th .gouttes{display:flex;gap:.3rem;margin-left:auto}
+.th .gouttes span{width:14px;height:14px;border-radius:99px;border:1px solid var(--v16)}
+.note{display:flex;gap:.8rem;align-items:flex-start}
+.note .ic-note{flex:0 0 auto;width:2.2rem;height:2.2rem;border-radius:10px;background:var(--v06);display:flex;align-items:center;justify-content:center;color:var(--tx2)}
+.note .ic-note svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.note p{margin:0 0 .35rem}
+html.jour .th[aria-pressed="true"]{border-color:#8a6a3e;box-shadow:0 0 0 1px #8a6a3e}
+html.jour .th .pastille-etat{background:rgba(138,106,62,.12);color:#6f5530}
+/* L apercu est une VITRINE : sa barre reste blanche et ses traits sombres, de jour comme de nuit. */
+html.jour .vit .bar i{background:#1d2433}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
@@ -155,26 +178,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             .catch(function(e){ return { ok: false, motif: 'echec', detail: (e && e.message) || e }; });
   }
 
-  /* ⚠ L OMBRE DU THEME CHOISI EST UNE VALEUR CSS, ECRITE D UN SEUL TENANT.
-     Composee par concatenation autour de la couleur d accent, elle laissait un
-     morceau << ,0 4px 12px rgba(0,0,0,.25) >> que l inventaire de la langue
-     prenait pour une phrase a traduire. Le @ marque la place de la couleur. */
-  var OMBRE_CHOIX = '0 0 0 2px @,0 4px 12px rgba(0,0,0,.25)';
 
-  // Une pastille = un bouton. Le champ (adm / store) et l identifiant du theme
-  // voyagent en attributs : le gestionnaire est pose UNE fois, apres le dessin.
-  function pastille(champ, th, choisi){
+  // Un apercu = un bouton. Le champ (store) et l identifiant du theme voyagent en
+  // attributs : le gestionnaire est pose UNE fois, apres le dessin.
+  function apercu(champ, th, choisi){
     var sel = th.id === choisi;
-    var bord = sel ? th.accent : 'transparent';
-    var ombre = sel ? OMBRE_CHOIX.replace('@', th.accent) : '';
     return '<button type="button" class="th" data-champ="' + esc(champ) + '" data-id="' + esc(th.id) + '"'
-      + ' aria-pressed="' + (sel ? 'true' : 'false') + '" title="' + esc(szTd(th.label)) + '"'
+      + ' aria-pressed="' + (sel ? 'true' : 'false') + '" aria-label="' + esc(szTd(th.label)) + '"'
       + (RO ? ' disabled' : '') + '>'
-      + '<span class="pastille" style="background:' + esc(th.bg) + ';border-color:' + esc(bord) + ';'
-      + (ombre ? 'box-shadow:' + ombre + ';' : '') + '">'
-      + '<span class="barre" style="background:' + esc(th.accent) + '"></span>'
-      + (sel ? '<span class="coche" style="background:' + esc(th.accent) + ';color:' + esc(th.bg) + '">✓</span>' : '')
-      + '</span><span class="nom">' + esc(szTd(th.label)) + '</span></button>';
+      + '<span class="vit" aria-hidden="true" style="background:' + esc(th.bg) + '">'
+      + '<span class="bar"><i></i><i></i><i></i></span>'
+      + '<span class="bas">'
+      + '<span class="prod"><span class="photo"></span><span class="l1"></span><span class="l2" style="background:' + esc(th.accent) + '"></span></span>'
+      + '<span class="prod"><span class="photo"></span><span class="l1"></span><span class="btn" style="background:' + esc(th.accent) + '"></span></span>'
+      + '</span></span>'
+      + '<span class="pied-th"><span class="nom">' + esc(szTd(th.label)) + '</span>'
+      + (sel ? '<span class="pastille-etat">${T("Active")}</span>'
+             : '<span class="gouttes" aria-hidden="true"><span style="background:' + esc(th.bg) + '"></span><span style="background:' + esc(th.accent) + '"></span></span>')
+      + '</span></button>';
   }
 
   function dessiner(){
@@ -182,25 +203,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var h = [];
     var av = document.getElementById('ro');
     if (av) av.hidden = !RO;
-    /* ⚠ CE RÉGLAGE NE S APPLIQUE PLUS, ET ON LE DIT (#26). Il teintait la
-       BARRE LATÉRALE de l écran web — disparue avec le lot 5 de #10. Le laisser
-       cliquable laissait croire qu il faisait quelque chose : c est ce qui a
-       fait dire << ça ne s applique plus >>. Le jeu de couleurs de
-       l application vit maintenant dans le MENU, et il est PAR POSTE — donc il
-       n a pas sa place ici, où tout est partagé par toute l équipe. */
-    h.push('<div class="carte"><h2>${T("Panneau d’administration")}</h2>');
-    /* Deux paragraphes ENTIERS, chacun dans un seul litteral : coupes, ils se
-       traduiraient en morceaux qui ne se recollent pas. */
-    h.push('<p>'
-      + '${T("Le jeu de couleurs de l’application a déménagé : <strong>menu « Affichage » → « Jeu de couleurs »</strong>. Il habille les fenêtres entières — fonds, cartes, boutons, survol et menus — et il est réglé <strong>par poste</strong> : votre choix ne s’impose pas à vos collègues.")}'
-      + '</p>');
-    h.push('<p class="aide">'
-      + '${T("L’ancien réglage ne teintait que la barre latérale de l’écran web, qui n’existe plus.")}'
-      + '</p></div>');
-    h.push('<div class="carte"><h2>${T("Boutique")}</h2>');
+    h.push('<div class="carte pleine"><h2>${T("Boutique")}</h2>');
     h.push('<p>${T("Palette de couleurs vue par la clientèle. Visible immédiatement dans la boutique.")}</p>');
     h.push('<div class="rang">' + (d.storeThemes || []).map(function(t){
-      return pastille('store', t, d.store || ''); }).join('') + '</div></div>');
+      return apercu('store', t, d.store || ''); }).join('') + '</div></div>');
+    /* ⚠ CE REGLAGE NE S APPLIQUE PLUS ICI, ET ON LE DIT (#26) : le jeu de couleurs
+       de l application vit dans le MENU, et il est PAR POSTE. Deux paragraphes
+       ENTIERS, chacun dans un seul litteral : coupes, ils se traduiraient en
+       morceaux qui ne se recollent pas. */
+    h.push('<div class="carte pleine note"><span class="ic-note"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 8h18M8 21h8"/></svg></span><div>'
+      + '<h2>${T("Panneau d’administration")}</h2>'
+      + '<p>${T("Le jeu de couleurs de l’application a déménagé : <strong>menu « Affichage » → « Jeu de couleurs »</strong>. Il habille les fenêtres entières — fonds, cartes, boutons, survol et menus — et il est réglé <strong>par poste</strong> : votre choix ne s’impose pas à vos collègues.")}</p>'
+      + '<p class="aide">${T("L’ancien réglage ne teintait que la barre latérale de l’écran web, qui n’existe plus.")}</p>'
+      + '</div></div>');
     corps.innerHTML = h.join('');
     var bs = corps.querySelectorAll('button.th');
     for (var i = 0; i < bs.length; i++) bs[i].onclick = surClic;

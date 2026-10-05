@@ -54,5 +54,6 @@ module.exports = {
     'Colour palette seen by the customers. Visible right away in the shop.',
 
   /* ── LE VERDICT ─────────────────────────────────────────────────────────── */
-  'Thème appliqué.': 'Theme applied.'
+  'Thème appliqué.': 'Theme applied.',
+  'Active': 'Active'
 };
