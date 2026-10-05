@@ -216,7 +216,11 @@ html.jour .lgstk.enstock .c1,html.jour .lgstk.enstock .c2{color:#166534}
 .cote .grille{grid-template-columns:repeat(2,minmax(0,1fr))}
 .prixgrille{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem .9rem;align-items:start}
 @media (max-width:980px){.cote{grid-template-columns:1fr}}
-.prixgrille .ch label{display:flex;align-items:center;gap:.4rem}
+/* ALIGNEMENT (2026-10-04, sa capture) : le libelle etait un flex — l etoile partait au bout de la colonne et un libelle sur deux lignes descendait son champ. Libelle en texte, et les trois champs partagent leurs RANGEES (subgrid) : les cases restent sur une meme ligne. */
+.prixgrille{grid-template-rows:auto auto}
+.prixgrille .ch{display:grid;grid-row:span 2;grid-template-rows:subgrid;row-gap:.3rem}
+.prixgrille .ch label{display:block;align-self:end;margin-bottom:0}
+.prixgrille .ch label .pastille{margin-left:.4rem;vertical-align:middle}
 .pastille{margin-left:auto;padding:.06rem .4rem;border-radius:99px;background:#c9a97e;
   color:#17202c;font-size:.7rem;font-weight:700;display:none}
 .pastille.on{display:inline-block}
@@ -680,6 +684,12 @@ function pageProduit(id) {
       ? '<div class="t">${T("Pour enregistrer")}</div>' + manque.map(function(m){
           return '<button type="button" data-pfaller="' + m[0] + '"><span class="o"></span>' + m[1] + '</button>'; }).join('')
       : '<div class="ok"><span class="ic">✓</span> ${T("Prête à enregistrer")}</div>') + '</div>';
+    // ⚠ RIEN DE CHANGE, RIEN DE REECRIT (2026-10-04). Le volet suit chaque CLIC du
+    // formulaire : le reecrire a l identique declenchait l observateur de hauteur,
+    // la fenetre se redimensionnait — et Windows ferme une liste deroulante ouverte
+    // quand sa fenetre change de taille. La Categorie se refermait seule.
+    if (z.getAttribute('data-h') === h) return;
+    z.setAttribute('data-h', h);
     z.innerHTML = h;
     z.querySelectorAll('[data-pfaller]').forEach(function(b){
       b.onclick = function(){ Assist.aller(parseInt(b.getAttribute('data-pfaller'), 10) || 0); };
@@ -2600,8 +2610,21 @@ function pageProduit(id) {
        tient pas (petit ecran), on REDUIT LE RENDU (zoom) plutot que de couper
        ou de faire apparaitre une glissiere. */
   var calT = null, calDern = 0;
+  // ⚠ JAMAIS DE REDIMENSIONNEMENT PENDANT QU UNE LISTE EST OUVERTE (2026-10-04) :
+  // la liste native se refermerait sous le doigt. On attend le choix (ou la sortie).
+  function listeActive(){
+    var a = document.activeElement;
+    if (!a || a.tagName !== 'SELECT') return false;
+    if (!a._szCaler) {
+      a._szCaler = true;
+      var apres = function(){ a._szCaler = false; a.removeEventListener('change', apres); a.removeEventListener('blur', apres); calerBientot(); };
+      a.addEventListener('change', apres); a.addEventListener('blur', apres);
+    }
+    return true;
+  }
   function caler(){
     if (!P || !P.ajusterHauteur) return;
+    if (listeActive()) return;
     var corps = document.getElementById('corps');
     if (!corps || !corps.style) return;
     corps.style.zoom = '';
@@ -2614,6 +2637,7 @@ function pageProduit(id) {
     P.ajusterHauteur(besoin + 2, true);
   }
   function secours(){
+    if (listeActive()) return;
     var corps = document.getElementById('corps');
     if (!corps || !corps.style) return;
     corps.style.zoom = '';
