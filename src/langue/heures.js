@@ -75,5 +75,9 @@ module.exports = {
   'Heures enregistrées.': 'Hours saved.',
 
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
-  'Afficher': 'Show'
+  'Afficher': 'Show',
+  'Ouvert': 'Open',
+  'Heures': 'Hours',
+  'Ouvert le ': 'Open on ',
+  'Fermé': 'Closed'
 };

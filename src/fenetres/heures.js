@@ -47,6 +47,15 @@ input[type=checkbox]{accent-color:#c9a97e;width:1.1rem;height:1.1rem;cursor:poin
 input[type=time]{font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);
   border-radius:8px;padding:.3rem .5rem;width:9rem}
 input[type=time]:disabled{opacity:.4}
+/* ── RELOOKING (2026-10-04) : un jour FERMÉ ne montre plus deux champs vides
+   « --:-- » — il dit « Fermé ». L interrupteur « Ouvert » remplace la case
+   « Fermé ce jour » (le sens se lit dans le geste : allumé = ouvert). */
+tr.ferme td.h input[type=time],tr.ferme td.h .sep-h{display:none}
+td.h .ferme-txt{display:none;font-size:.78rem;font-weight:600;color:var(--tx2);padding:.32rem .7rem;border-radius:99px;background:var(--v05)}
+tr.ferme td.h .ferme-txt{display:inline-block}
+tr.ferme td.jour{color:var(--tx2)}
+td.h{white-space:nowrap}
+.sep-h{color:var(--tx3);margin:0 .5rem}
 table{width:100%;border-collapse:collapse;font-size:.86rem}
 th{text-align:left;padding:.4rem .5rem;font-size:.68rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);border-bottom:1px solid var(--v12)}
@@ -154,35 +163,40 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<p>${T("Statut « ouvert / fermé » calculé en temps réel à l’heure de l’Est.")}</p></div>'
       + '<label class="bascule"><input type="checkbox" id="h-on"' + (CFG && CFG.enabled ? ' checked' : '')
       + (RO ? ' disabled' : '') + '> ${T("Afficher")}</label></div>');
-    h.push('<table><thead><tr><th>${T("Jour")}</th><th>${T("Ouverture")}</th><th>${T("Fermeture")}</th>'
-      + '<th class="c">${T("Fermé ce jour")}</th></tr></thead><tbody>');
+    h.push('<table><thead><tr><th>${T("Jour")}</th><th>${T("Ouvert")}</th><th>${T("Heures")}</th>'
+      + '</tr></thead><tbody>');
     JOURS.forEach(function(nom, i){
       var d = days[i] || {};
       var fer = !!d.closed, dis = (RO || fer) ? ' disabled' : '';
-      h.push('<tr>'
+      h.push('<tr id="h-r' + i + '"' + (fer ? ' class="ferme"' : '') + '>'
         + '<td class="jour">' + esc(nom) + '</td>'
+        + '<td><label class="bascule"><input type="checkbox" id="h-v' + i + '"'
+        + ' aria-label="' + esc('${T("Ouvert le ")}' + nom) + '"' + (fer ? '' : ' checked')
+        + (RO ? ' disabled' : '') + '></label></td>'
+        + '<td class="h">'
         /* ⚠ SEPT LIGNES DE TROIS CHAMPS, ET AUCUN NE DIT SON JOUR. Le jour est
            dans la premiere cellule, le sujet dans l en-tete de colonne : a
            l oeil c est limpide. En tabulant, le lecteur d ecran annonce vingt
            et une fois << heure >> ou << case a cocher >>, sans jamais dire
            lequel des sept jours on modifie. Le nom se compose ligne + colonne. */
-        + '<td><input type="time" id="h-o' + i + '" value="' + esc(d.open || '') + '"'
-        + ' aria-label="' + esc('${T("Heure d’ouverture — ")}' + nom) + '"' + dis + '></td>'
-        + '<td><input type="time" id="h-c' + i + '" value="' + esc(d.close || '') + '"'
-        + ' aria-label="' + esc('${T("Heure de fermeture — ")}' + nom) + '"' + dis + '></td>'
-        + '<td class="c"><input type="checkbox" id="h-x' + i + '"'
-        + ' aria-label="' + esc('${T("Fermé le ")}' + nom) + '"' + (fer ? ' checked' : '')
-        + (RO ? ' disabled' : '') + '></td>'
-        + '</tr>');
+        + '<input type="time" id="h-o' + i + '" value="' + esc(d.open || '') + '"'
+        + ' aria-label="' + esc('${T("Heure d’ouverture — ")}' + nom) + '"' + dis + '>'
+        + '<span class="sep-h" aria-hidden="true">→</span>'
+        + '<input type="time" id="h-c' + i + '" value="' + esc(d.close || '') + '"'
+        + ' aria-label="' + esc('${T("Heure de fermeture — ")}' + nom) + '"' + dis + '>'
+        + '<span class="ferme-txt">${T("Fermé")}</span>'
+        + '</td></tr>');
     });
     h.push('</tbody></table></div>');
     corps.innerHTML = h.join('');
-    // Fermer un jour grise ses heures, sur-le-champ.
+    // Éteindre « Ouvert » ferme le jour sur-le-champ : les heures cèdent la place à « Fermé ».
     JOURS.forEach(function(nom, i){
-      var x = document.getElementById('h-x' + i);
-      if (x) x.onchange = function(){
+      var v = document.getElementById('h-v' + i);
+      if (v) v.onchange = function(){
         var o = document.getElementById('h-o' + i), c = document.getElementById('h-c' + i);
-        if (o) o.disabled = x.checked; if (c) c.disabled = x.checked;
+        var r = document.getElementById('h-r' + i);
+        if (o) o.disabled = !v.checked; if (c) c.disabled = !v.checked;
+        if (r) r.className = v.checked ? '' : 'ferme';
       };
     });
     bsave.disabled = RO;
@@ -190,9 +204,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function lire(){
     var days = JOURS.map(function(nom, i){
-      var x = document.getElementById('h-x' + i);
+      var v = document.getElementById('h-v' + i);
       return {
-        closed: !!(x && x.checked),
+        closed: !(v && v.checked),
         open: (document.getElementById('h-o' + i) || {}).value || '',
         close: (document.getElementById('h-c' + i) || {}).value || ''
       };
