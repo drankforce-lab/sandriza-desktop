@@ -51,7 +51,6 @@ module.exports = {
   /* ── LE CLIENT ──────────────────────────────────────────────────────────── */
   'Nom': 'Name',
   'Courriel': 'Email',
-  '— requis': '— required',
   'Nom du client requis': 'Customer name required',
   'Le nom du client est obligatoire — aucune vente anonyme.':
     'A customer name is required — no anonymous sale.',

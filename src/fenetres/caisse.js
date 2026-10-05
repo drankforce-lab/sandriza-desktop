@@ -76,7 +76,6 @@ body{background:var(--f-page);color:var(--tx);
 .carte.plein > .entete{padding:0 1rem .55rem}
 .carte h2{margin:0 0 .55rem;font-size:.78rem;font-weight:700;color:var(--tx2);letter-spacing:.02em;
   display:flex;align-items:center;gap:.45rem}
-.carte h2 .req{font-weight:600;color:var(--tx-or);font-size:.72rem}
 .carte h2 .lie{color:var(--tx-ok);font-size:.72rem;margin-left:auto}
 .carte h2 .compte{margin-left:auto;font-weight:600;font-size:.72rem;padding:.12rem .55rem;border-radius:99px;background:var(--v06);color:var(--tx2)}
 .carte h2 .compte:empty{display:none}
@@ -264,7 +263,7 @@ function pageCaisse(mode) {
   <div class="col droite">
    <div class="defile">
     <div class="carte">
-      <h2>${T("Client")} <span class="req">${T("— requis")}</span><span class="lie" id="lie"></span></h2>
+      <h2>${T("Client")}<span class="lie" id="lie"></span></h2>
       <div class="champs">
         <input aria-label="${T("Nom")}" id="c-nom" autocomplete="off" placeholder="${T("Nom")}">
         <div class="g2">
