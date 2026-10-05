@@ -58,7 +58,7 @@ body{background:var(--f-page);color:var(--tx);
 /* ⚠ DEUX COLONNES, ET LE CORPS NE DEFILE PAS. Seule la LISTE DES ARTICLES a le
    droit de defiler — elle peut grandir, le reste non. A droite, tout est empile
    SANS TROU et c est la colonne entiere qui defile si elle deborde : le bouton
-   reste atteignable, et il PORTE LE TOTAL (<< Enregistrer la vente — 77,61 $ >>). */
+   reste atteignable, et il PORTE LE TOTAL (<< Effectuer la vente (77,61 $) >>). */
 .corps{flex:1 1 auto;min-height:0;padding:1rem 1.2rem;overflow:hidden;
   display:grid;grid-template-columns:minmax(0,1.3fr) minmax(360px,.8fr);gap:1rem}
 .col{min-width:0;min-height:0;display:flex;flex-direction:column;gap:.75rem}
@@ -171,6 +171,10 @@ button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
 button.large{width:100%;padding:.75rem .9rem;font-size:1.05rem;margin-top:.6rem;border-radius:12px}
+button.large .tourne{display:inline-block;width:1em;height:1em;margin-right:.55rem;vertical-align:-.15em;
+  border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:tourne .8s linear infinite}
+@keyframes tourne{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){button.large .tourne{animation-duration:2.4s}}
 button.mini{padding:.22rem .6rem;font-size:.78rem}
 
 /* ⚠ LA LISTE DES CLIENTS FLOTTE (sa demande du 2026-10-04 : << une liste
@@ -301,8 +305,7 @@ function pageCaisse(mode) {
         <label class="ch"><span>${T("Facture")}</span><select id="v-remise" title="${T("Ce qu’on fait de la facture après la vente")}"></select></label>
       </div>
       <input aria-label="${T("Note interne (facultatif)")}" id="v-note" placeholder="${T("Note interne (facultatif)")}" style="margin-top:.55rem">
-      <button class="prim large" id="btn-vendre" disabled>${T("Enregistrer la vente")}</button>
-      <div class="aide">${T("Cet écran n’encaisse jamais la carte.")}</div>
+      <button class="prim large" id="btn-vendre" disabled>${T("Effectuer la vente")}</button>
     </div>
    </div>
   </div>
@@ -432,9 +435,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (champ) champ.className = (!nomOk && LIGNES.length) ? 'manque' : '';
     var pret = !!(TOT && TOT.total > 0 && LIGNES.length && nomOk && CTX && CTX.peutVendre && !enVente);
     b.disabled = !pret;
-    b.textContent = enVente ? '${T("Enregistrement…")}'
-      : (pret ? '${T("Enregistrer la vente —")} ' + argent(TOT.total)
-              : (LIGNES.length && !nomOk ? '${T("Nom du client requis")}' : '${T("Enregistrer la vente")}'));
+    /* Pendant l enregistrement : bouton FERME et un cercle qui tourne — un second
+       clic ne doit pas pouvoir creer une seconde vente. */
+    if (enVente) {
+      b.innerHTML = '<span class="tourne" aria-hidden="true"></span>${T("Commande en traitement…")}';
+    } else {
+      b.textContent = pret ? '${T("Effectuer la vente")} (' + argent(TOT.total) + ')'
+        : (LIGNES.length && !nomOk ? '${T("Nom du client requis")}' : '${T("Effectuer la vente")}');
+    }
     document.getElementById('btn-vider').disabled = !LIGNES.length || enVente;
   }
 
@@ -843,7 +851,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       }
       CTX = r;
       remplirListe('v-paie', r.paiements, 'terminal');
-      remplirListe('v-remise', r.remises, 'courriel');
+      /* ⚠ LA FACTURE S IMPRIME A CHAQUE VENTE (sa demande, 2026-10-05) : on la remet
+         au client sur place. Il ne reste a choisir que le courriel EN PLUS — sans
+         courriel saisi, « deux » imprime seulement (le coeur ne l envoie qu a une
+         adresse valide). */
+      remplirListe('v-remise', [
+        { cle: 'deux', libelle: '${T("Imprimer + courriel")}' },
+        { cle: 'impression', libelle: '${T("Imprimer seulement")}' }
+      ], 'deux');
       document.getElementById('sous').textContent = r.par
         ? (r.par + (r.peutVendre ? '' : ' ${T("· lecture seule")}')) : '';
       if (!r.peutVendre) dire('${T("Votre rôle ne permet pas d’enregistrer une vente.")}', 'att');

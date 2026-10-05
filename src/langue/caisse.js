@@ -9,11 +9,6 @@
  * (codes de province, cle du mode de paiement) partent dans la facture et dans
  * le calcul des taxes — `banc-langue-donnees` refuserait de les voir ici.
  *
- * ⚠⚠ DEUX PHRASES NE DOIVENT RIEN PERDRE EN TRADUISANT, parce qu elles evitent
- * une faute d argent :
- *   · « Cet ecran n encaisse jamais la carte. » — il le dit pour qu on ne croie
- *     pas avoir encaisse. La version anglaise doit etre aussi nette.
- *
  * ⚠ « Square » est un nom de service : il ne se traduit pas.
  */
 
@@ -81,11 +76,11 @@ module.exports = {
   'Note interne (facultatif)': 'Internal note (optional)',
 
   /* ── LES BOUTONS ────────────────────────────────────────────────────────── */
-  'Enregistrer la vente': 'Record the sale',
-  'Enregistrer la vente —': 'Record the sale —',
+  'Effectuer la vente': 'Complete the sale',
+  'Commande en traitement…': 'Processing the order…',
+  'Imprimer + courriel': 'Print + email',
+  'Imprimer seulement': 'Print only',
   'Vider la vente': 'Clear the sale',
-  /* ⚠⚠ CETTE PHRASE EVITE UNE FAUTE D ARGENT : elle dit qu on n a PAS encaisse. */
-  'Cet écran n’encaisse jamais la carte.': 'This screen never charges the card.',
   'Ouvrir l’écran tourné vers le client, à poser sur un second moniteur':
     'Open the customer-facing screen, to place on a second monitor',
   'Affichage client ouvert.': 'Customer display opened.',
