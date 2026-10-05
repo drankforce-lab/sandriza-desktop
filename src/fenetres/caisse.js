@@ -171,6 +171,10 @@ button:disabled{opacity:.4;cursor:default}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
 button.large{width:100%;padding:.75rem .9rem;font-size:1.05rem;margin-top:.6rem;border-radius:12px}
+.rang-vente{display:flex;gap:.5rem}
+.rang-vente #btn-vider{width:auto;flex:0 0 auto;font-size:.92rem}
+.rang-vente #btn-vider.arme{border-color:rgba(230,110,90,.7);color:var(--tx-err2)}
+.rang-vente #btn-vendre{flex:1 1 auto;min-width:0}
 button.large .tourne{display:inline-block;width:1em;height:1em;margin-right:.55rem;vertical-align:-.15em;
   border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:tourne .8s linear infinite}
 @keyframes tourne{to{transform:rotate(360deg)}}
@@ -301,15 +305,19 @@ function pageCaisse(mode) {
         <label class="ch"><span>${T("Facture")}</span><select id="v-remise" title="${T("Ce qu’on fait de la facture après la vente")}"></select></label>
       </div>
       <input aria-label="${T("Note interne (facultatif)")}" id="v-note" placeholder="${T("Note interne (facultatif)")}" style="margin-top:.55rem">
-      <button class="prim large" id="btn-vendre" disabled>${T("Effectuer la vente")}</button>
+      <!-- Reinitialiser a cote de Effectuer la vente, sur la MEME rangee : sa
+           demande du 2026-10-05. L ancien << Vider la vente >> du pied passait
+           inapercu et laissait le client, la remarque et la note en place.
+           Meme rangee = aucune hauteur ajoutee (regle : pas de defilement). -->
+      <div class="rang-vente">
+        <button class="large" id="btn-vider" disabled title="${T("Tout effacer : articles, rabais, client et note")}">${T("Réinitialiser la vente")}</button>
+        <button class="prim large" id="btn-vendre" disabled>${T("Effectuer la vente")}</button>
+      </div>
     </div>
    </div>
   </div>
 </div>
-<div class="pied"><span class="msg" id="msg"></span>
-  <span class="actions">
-    <button id="btn-vider">${T("Vider la vente")}</button>
-  </span></div>
+<div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
   'use strict';
@@ -441,7 +449,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       b.textContent = pret ? '${T("Effectuer la vente")} (' + argent(TOT.total) + ')'
         : (LIGNES.length && !nomOk ? '${T("Nom du client requis")}' : '${T("Effectuer la vente")}');
     }
-    document.getElementById('btn-vider').disabled = !LIGNES.length || enVente;
+    // Actif des que QUOI QUE CE SOIT est saisi, pas seulement des articles : un
+    // client ou un rabais laisse d une vente abandonnee se reinitialise aussi.
+    document.getElementById('btn-vider').disabled = enVente || !(LIGNES.length || CLI
+      || ['c-nom', 'c-mail', 'c-tel', 'v-note', 'v-rabnote'].some(function(id){ return val(id).trim(); })
+      || (parseFloat(String(val('v-rab')).replace(',', '.')) || 0) > 0);
   }
 
   // ══ ARTICLES ══════════════════════════════════════════════════════════════
@@ -703,6 +715,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     b.className = RABTYPE === 'pct' ? 'on' : ''; b.setAttribute('aria-pressed', String(RABTYPE === 'pct'));
   }
 
+  // ══ REINITIALISER ═════════════════════════════════════════════════════════
+  // UNE seule remise a zero pour les deux usages (apres une vente, et le bouton
+  // Reinitialiser) : deux listes de champs a vider finiraient par diverger.
+  // ⚠ Rien n est encore en base tant que la vente n est pas effectuee : le stock
+  // n est pas touche, il n y a rien a defaire cote site.
+  function reinitialiser(){
+    LIGNES = []; CLI = null; TOT = null; EDIT = -1; TROUVES = [];
+    videRecherche(); fermerListeCli();
+    ['c-nom', 'c-mail', 'c-tel', 'v-note', 'v-rabnote'].forEach(function(id){ document.getElementById(id).value = ''; });
+    document.getElementById('c-creer').checked = false;
+    document.getElementById('v-rab').value = szArgentChamp(0);
+    poserRabType('montant');
+    majLie(); dessinerLignes(); dessinerTotaux(); majBouton(); dire('');
+    diffuser();
+  }
+
   // ══ ENREGISTRER LA VENTE ══════════════════════════════════════════════════
   function vendre(){
     if (enVente || !LIGNES.length || !TOT || !(TOT.total > 0)) return;
@@ -719,13 +747,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       enVente = false;
       if (!r.ok) { majBouton(); dire(expliquer(r.motif), 'err'); return; }
       // La vente est en base : on peut vider CETTE fenetre.
-      LIGNES = []; CLI = null; TOT = null; EDIT = -1;
-      ['c-nom', 'c-mail', 'c-tel', 'v-note', 'v-rabnote'].forEach(function(id){ document.getElementById(id).value = ''; });
-      document.getElementById('c-creer').checked = false;
-      document.getElementById('v-rab').value = szArgentChamp(0);
-      poserRabType('montant');
-      majLie(); dessinerLignes(); dessinerTotaux(); majBouton(); dire('');
-      diffuser();
+      reinitialiser();
       compteRendu(r);
     });
   }
@@ -901,15 +923,31 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   ['v-rab'].forEach(function(id){
     document.getElementById(id).onchange = function(){ majTotaux(); };
   });
+  // La remarque et la note ne changent aucun total, mais elles suffisent a rendre
+  // « Reinitialiser » utile : le bouton doit s allumer des la frappe.
+  ['v-note', 'v-rabnote', 'v-rab'].forEach(function(id){
+    document.getElementById(id).addEventListener('input', majBouton);
+  });
   document.getElementById('rt-montant').onclick = function(){ if (RABTYPE !== 'montant') { poserRabType('montant'); majTotaux(); } };
   document.getElementById('rt-pct').onclick = function(){ if (RABTYPE !== 'pct') { poserRabType('pct'); majTotaux(); } };
   document.getElementById('btn-vendre').onclick = vendre;
+  /* ⚠ DEUX CLICS, pas une boite de confirmation : le premier ARME le bouton
+     (« Confirmer ? ») pendant 4 s, le second efface. Un clic egare a cote de
+     « Effectuer la vente » ne doit pas faire perdre une vente saisie. */
+  var viderArme = null;
+  function desarmerVider(){
+    var b = document.getElementById('btn-vider');
+    clearTimeout(viderArme); viderArme = null;
+    b.classList.remove('arme'); b.textContent = '${T("Réinitialiser la vente")}';
+  }
   document.getElementById('btn-vider').onclick = function(){
-    LIGNES = []; TOT = null; EDIT = -1; videRecherche();
-    document.getElementById('v-rab').value = szArgentChamp(0);
-    document.getElementById('v-rabnote').value = '';
-    poserRabType('montant');
-    dessinerLignes(); dessinerTotaux(); majBouton(); dire(''); diffuser();
+    if (!viderArme) {
+      this.classList.add('arme'); this.textContent = '${T("Confirmer ?")}';
+      viderArme = setTimeout(desarmerVider, 4000);
+      return;
+    }
+    desarmerVider();
+    reinitialiser();
     var s = document.getElementById('scan'); if (s) s.focus();
   };
   document.getElementById('btn-afficheur').onclick = function(){

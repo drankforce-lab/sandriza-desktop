@@ -62,6 +62,9 @@ body{background:linear-gradient(160deg,#0d1420 0%,#141d2c 55%,#0d1420 100%);
 .ln .n{font-size:1.12rem;font-weight:600;line-height:1.3}
 .ln .v{font-size:.82rem;color:#9fb0c4;margin-top:.15rem}
 .ln .p{flex:0 0 auto;font-variant-numeric:tabular-nums;font-size:1.12rem;font-weight:600}
+.ln .p s{font-size:.88rem;font-weight:400;color:var(--tx2);margin-right:.6rem}
+.ln .p .rb{display:inline-block;font-size:.8rem;font-weight:700;color:var(--tx-or);
+  border:1px solid rgba(201,169,126,.45);border-radius:99px;padding:.05rem .5rem;margin-right:.6rem;vertical-align:.1em}
 /* Le dernier article scanne se signale une seconde : la cliente voit CE qu'on
    vient d'ajouter, sans avoir a comparer deux listes. */
 .ln.neuf{animation:surligne 1.4s ease-out}
@@ -162,7 +165,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<div class="d"><div class="n">' + esc(l.name) + '</div>'
         + (variante ? '<div class="v">' + esc(variante) + '</div>' : '')
         + '</div>'
-        + '<div class="p">' + fmt((l.price || 0) * (l.quantity || 1)) + '</div></div>');
+        // Rabais d'article : prix d'origine barre + pastille. La caisse n'envoie
+        // JAMAIS la remarque de la caissiere (note interne) : rien a filtrer ici.
+        + '<div class="p">'
+        + (l.rabaisPct > 0 && l.prixOriginal > (l.price || 0)
+            ? '<span class="rb">−' + Math.round(l.rabaisPct) + ' %</span>'
+              + '<s>' + fmt(l.prixOriginal * (l.quantity || 1)) + '</s>'
+            : '')
+        + fmt((l.price || 0) * (l.quantity || 1)) + '</div></div>');
     });
     h.push('</div><div class="bas">');
     if (t.sousTotal != null) h.push('<div class="sl"><span>${T("Sous-total")}</span><b>' + fmt(t.sousTotal) + '</b></div>');

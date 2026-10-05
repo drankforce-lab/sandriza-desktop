@@ -79,7 +79,9 @@ module.exports = {
   'Commande en traitement…': 'Processing the order…',
   'Imprimer + courriel': 'Print + email',
   'Imprimer seulement': 'Print only',
-  'Vider la vente': 'Clear the sale',
+  'Réinitialiser la vente': 'Reset the sale',
+  'Tout effacer : articles, rabais, client et note': 'Clear everything: items, discounts, customer and note',
+  'Confirmer ?': 'Confirm?',
   'Ouvrir l’écran tourné vers le client, à poser sur un second moniteur':
     'Open the customer-facing screen, to place on a second monitor',
   'Affichage client ouvert.': 'Customer display opened.',
