@@ -80,6 +80,11 @@ module.exports = {
   'Imprimer + courriel': 'Print + email',
   'Imprimer seulement': 'Print only',
   'Réinitialiser la vente': 'Reset the sale',
+  'Imprimer la facture': 'Print the invoice',
+  'Impression': 'Printing',
+  'envoi à l’imprimante…': 'sending to the printer…',
+  'échec': 'failed',
+  'lancée': 'started',
   'Tout effacer : articles, rabais, client et note': 'Clear everything: items, discounts, customer and note',
   'Confirmer ?': 'Confirm?',
   'Ouvrir l’écran tourné vers le client, à poser sur un second moniteur':

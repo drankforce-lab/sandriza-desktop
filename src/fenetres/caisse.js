@@ -290,7 +290,7 @@ function pageCaisse(mode) {
             <button type="button" id="rt-montant" class="on" aria-pressed="true">$</button>
             <button type="button" id="rt-pct" aria-pressed="false">%</button>
           </div></div>
-        <label class="ch"><span>${T("Valeur")}</span><input id="v-rab" class="num" inputmode="decimal" value="0${SEP_DEC()}00" title="${T("Rabais")}"></label>
+        <label class="ch"><span>${T("Valeur")}</span><input id="v-rab" class="num" inputmode="decimal" value="" placeholder="0${SEP_DEC()}00" title="${T("Rabais")}"></label>
         <label class="ch"><span>${T("Remarque")}</span><input id="v-rabnote" list="sugg-rab" maxlength="200" autocomplete="off" placeholder="${T("ex. : client fidèle")}"></label>
       </div>
       <datalist id="sugg-rab">
@@ -713,6 +713,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var a = document.getElementById('rt-montant'), b = document.getElementById('rt-pct');
     a.className = RABTYPE === 'montant' ? 'on' : ''; a.setAttribute('aria-pressed', String(RABTYPE === 'montant'));
     b.className = RABTYPE === 'pct' ? 'on' : ''; b.setAttribute('aria-pressed', String(RABTYPE === 'pct'));
+    // Le filigrane suit l unite choisie : « 0,00 $ » ou « 0 % ».
+    var c = document.getElementById('v-rab');
+    if (c) c.placeholder = RABTYPE === 'pct' ? '0 %' : szArgentChamp(0);
   }
 
   // ══ REINITIALISER ═════════════════════════════════════════════════════════
@@ -725,7 +728,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     videRecherche(); fermerListeCli();
     ['c-nom', 'c-mail', 'c-tel', 'v-note', 'v-rabnote'].forEach(function(id){ document.getElementById(id).value = ''; });
     document.getElementById('c-creer').checked = false;
-    document.getElementById('v-rab').value = szArgentChamp(0);
+    // VIDE, avec l indication en filigrane (2026-10-05) : un « 0,00 $ » ecrit
+    // dans le champ devait etre efface a la main avant de taper un pourcentage.
+    // Vide vaut 0 pour le site (_posMontant / _posPct).
+    document.getElementById('v-rab').value = '';
     poserRabType('montant');
     majLie(); dessinerLignes(); dessinerTotaux(); majBouton(); dire('');
     diffuser();
@@ -742,20 +748,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       nom: val('c-nom').trim(), courriel: val('c-mail').trim(), tel: val('c-tel').trim(),
       moyen: val('v-paie'), note: val('v-note').trim(), remise: val('v-remise'),
       veutCompte: !!document.getElementById('c-creer').checked,
-      cliId: CLI
+      cliId: CLI,
+      // ⚠ C EST CETTE FENETRE QUI IMPRIME (voir compteRendu) : lancee par le site,
+      // l impression partait dans la page CACHEE derriere nous et n apparaissait
+      // jamais (2026-10-05, « je n ai pas eu l invite pour lancer l impression »).
+      imprimeParAppelant: true
     }]).then(function(r){
       enVente = false;
       if (!r.ok) { majBouton(); dire(expliquer(r.motif), 'err'); return; }
+      // Lu AVANT la remise a zero, qui ramene la liste a son choix par defaut.
+      var remise = val('v-remise');
       // La vente est en base : on peut vider CETTE fenetre.
       reinitialiser();
-      compteRendu(r);
+      compteRendu(r, remise === 'impression' || remise === 'deux');
     });
   }
 
   /* ⚠ LE COMPTE RENDU EST UN VOILE DANS CETTE FENETRE, pas une boite du systeme,
      et il DIT ce qui n a pas marche : stock non decompte, base non confirmee,
      facture non partie. */
-  function compteRendu(r){
+  function compteRendu(r, imprimer){
     var lignes = '';
     lignes += rangee('${T("Commande")}', esc(r.numero || '—'));
     lignes += rangee('${T("Total")}', argent(r.total));
@@ -771,6 +783,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (r.envoiCourriel === true)  lignes += rangee('${T("Facture")}', '${T("envoyée par courriel")}');
     if (r.envoiCourriel === false) lignes += rangee('${T("Facture")}', '<strong style="color:var(--tx-err)">${T("NON envoyée")}</strong>');
     if (r.compteNeuf) lignes += rangee('${T("Compte client")}', '${T("ouvert · lien de finalisation envoyé")}');
+    if (imprimer && r.factureId) lignes += rangee('${T("Impression")}', '<span id="imp-etat">${T("envoi à l’imprimante…")}</span>');
 
     var lien = '';
     if (r.enAttente) {
@@ -798,8 +811,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     v.className = 'voile';
     v.innerHTML = '<div class="boite"><h3>' + (r.enAttente ? '${T("Vente")}${T(" en attente de paiement")}'
       : '${T("Vente enregistrée")}') + '</h3>' + lignes + lien + avis
-      + '<div class="fin"><button class="prim" id="btn-ok">${T("Continuer")}</button></div></div>';
+      + '<div class="fin">'
+      // Toujours offert, choisi ou non : c est aussi le RECOURS quand l impression
+      // automatique echoue — un clic ici est un vrai geste dans cette fenetre.
+      + (r.factureId ? '<button id="btn-imp">${T("Imprimer la facture")}</button>' : '')
+      + '<button class="prim" id="btn-ok">${T("Continuer")}</button></div></div>';
     document.body.appendChild(v);
+    var bimp = document.getElementById('btn-imp');
+    function imprimerFacture(){
+      var et = document.getElementById('imp-etat');
+      if (bimp) bimp.disabled = true;
+      appeler('facture:imprimer', [r.factureId]).then(function(res){
+        if (bimp) bimp.disabled = false;
+        var echec = !res || !res.ok;
+        // ⚠ ON DIT L ECHEC, AVEC SA RAISON : c est exactement ce qui manquait.
+        var txt = echec ? '${T("échec")} — ' + esc((res && (res.detail || expliquer(res.motif))) || '?')
+          : '${T("lancée")}';
+        if (et) { et.innerHTML = echec ? '<strong style="color:var(--tx-err)">' + txt + '</strong>' : txt; }
+        else dire('${T("Impression")} ' + txt, echec ? 'err' : 'bon');
+      });
+    }
+    if (bimp) bimp.onclick = imprimerFacture;
+    if (imprimer && r.factureId) imprimerFacture();
     var bvf = document.getElementById('btn-verif');
     if (bvf) bvf.onclick = function(){
       var hc = bvf.getAttribute('data-hc');
