@@ -79,6 +79,9 @@ body{background:var(--f-page);color:var(--tx);
 .ch input:focus,.ch select:focus{outline:none;border-color:#c9a97e}
 .ch input:disabled,.ch select:disabled{opacity:.55}
 .ch .etat{font-size:.72rem;color:var(--tx2);margin-top:.2rem}
+.ch .secret{display:flex;gap:.35rem;align-items:center}
+.ch .secret input{flex:1 1 auto;min-width:0}
+.ch .secret .voir{flex:0 0 auto}
 .ch .etat b{color:var(--tx-ok)}
 .ch .etat.non b{color:var(--tx-jaune)}
 .ch .aide{font-size:.7rem;color:var(--tx3);margin-top:.18rem}
@@ -180,14 +183,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             .catch(function(e){ return { ok: false, motif: 'echec', detail: (e && e.message) || e }; });
   }
   function val(id){ var e = document.getElementById(id); return e ? e.value : ''; }
+  // « Afficher » / « Masquer » : une seule écoute pour tous les champs secrets.
+  document.addEventListener('click', function(ev){
+    var b = ev.target && ev.target.closest ? ev.target.closest('[data-voir]') : null;
+    if (!b) return;
+    var i = document.getElementById(b.getAttribute('data-voir'));
+    if (!i) return;
+    var montre = i.type === 'password';
+    i.type = montre ? 'text' : 'password';
+    b.textContent = montre ? '${T("Masquer")}' : '${T("Afficher")}';
+  });
   function chk(id){ var e = document.getElementById(id); return !!(e && e.checked); }
 
   // Un champ SECRET (masqué) : « inchangé » si déjà défini, vide = conservé.
   function secretHtml(id, label, mask, place){
     var m = mask || { defini: false, fin: '' };
     return '<div class="ch"><label for="' + id + '">' + esc(label) + '</label>'
-      + '<input class="mono" id="' + id + '" type="password" value="" placeholder="'
-      + (m.defini ? '${T("inchangé")}' : esc(place || '')) + '" autocomplete="off"' + (RO ? ' disabled' : '') + '>'
+      /* ⚠ « AFFICHER » (2026-10-05) : coller une clé dans un champ masqué, c'est
+         l'enregistrer sans l'avoir vue — la clé de test a été recollée à la place
+         de celle de production sans que rien ne le montre. Le bouton ne montre
+         QUE ce qui vient d'être tapé : la valeur enregistrée ne quitte jamais le
+         site (« défini + 4 derniers »). */
+      + '<div class="secret"><input class="mono" id="' + id + '" type="password" value="" placeholder="'
+      + (m.defini ? '${T("inchangé")}' : esc(place || '')) + '" autocomplete="new-password"' + (RO ? ' disabled' : '') + '>'
+      + '<button type="button" class="mini voir" data-voir="' + id + '"' + (RO ? ' disabled' : '') + '>${T("Afficher")}</button></div>'
       + '<div class="etat' + (m.defini ? '' : ' non') + '">'
       + (m.defini ? '<span class="rf-pill vert">${T("Enregistré")}</span><span class="rf-code">…' + esc(m.fin) + '</span>'
                   : '<span class="rf-pill ambre">${T("Aucun secret enregistré")}</span>') + '</div></div>';
@@ -271,14 +290,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var h = '<div class="carte"><div class="th">'
       + '<h2>${T("Postes Canada")}</h2>' + basculeHtml('cp-en', pc.enabled) + '</div>'
       + etatCotationHtml('postes-canada');
-    h += '<div class="info">${T("Identifiants sur <b>developer.canadapost-postescanada.ca</b>. La clé API est au ")}'
-      + '${T("format <b>utilisateur:motdepasse</b>. Valeurs de test : ")}'
-      + '${T("6e93d53968881714:0bfa9fcb9853d1f51ee57a · client 2004381 · contrat 42708517.")}</div>';
-    // La clé API complète = utilisateur:motdepasse ; secret (vide = conservé).
-    h += secretHtml('cp-cle', '${T("Clé API complète (utilisateur:motdepasse)")}', m, '6e93…:0bfa…');
+    /* ⚠ LA NOUVELLE PLATEFORME (2026-10-05). Le portail developer-developpeur
+       donne une Clé API et un Secret (32 caractères chacun) : on les colle
+       ensemble, « clé:secret ». Les anciennes valeurs de test affichées ici
+       (6e93…:0bfa…, client 2004381, contrat 42708517) étaient celles de
+       l'ANCIENNE plateforme — collées, elles ne donnaient que des prix fictifs. */
+    h += '<div class="info">${T("Sur <b>developer-developpeur.canadapost-postescanada.ca</b>, ouvrez votre projet de ")}'
+      + '${T("<b>production</b> : collez sa <b>Clé API</b> et son <b>Secret</b> ensemble, séparés par un deux-points ")}'
+      + '${T("(clé:secret). Une clé de test ne donne que des prix d’exemple. L’ID contrat est à laisser vide sans entente commerciale.")}</div>';
+    // « clé:secret » ; secret (vide = conservé).
+    h += secretHtml('cp-cle', '${T("Clé API:Secret")}', m, '${T("clé:secret")}');
     h += '<div class="gr2">'
-      + texteHtml('cp-cust', '${T("Numéro client")}', pc.customerNumber, '${T("Ex : 2004381")}', false)
-      + texteHtml('cp-contract', '${T("ID contrat")}', pc.contractId, '${T("Ex : 42708517")}', false) + '</div>';
+      + texteHtml('cp-cust', '${T("Numéro client")}', pc.customerNumber, '${T("Ex : 0001234567")}', false)
+      + texteHtml('cp-contract', '${T("ID contrat")}', pc.contractId, '${T("Vide sans entente commerciale")}', false) + '</div>';
     h += '<div class="ch"><label for="cp-mode">${T("Environnement")}</label><select id="cp-mode"' + (RO ? ' disabled' : '') + '>'
       + '<option value="sandbox"' + ((pc.mode || 'sandbox') === 'sandbox' ? ' selected' : '') + '>${T("Bac à sable (test)")}</option>'
       + '<option value="production"' + (pc.mode === 'production' ? ' selected' : '') + '>${T("Production")}</option></select></div>';

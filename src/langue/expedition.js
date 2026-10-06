@@ -233,5 +233,19 @@ module.exports = {
      de coller un nom ; le compteur, lui, lit le texte RENDU, donc rogné. Les
      deux formes ont leur entrée — c'est la distinction source/rendu déjà connue
      du dépôt, et elle se paie à chaque texte qui touche une donnée. */
-  'ouverte par': 'open by'
+  'ouverte par': 'open by',
+  /* La comparaison des transporteurs (2026-10-05). */
+  'Transporteur le moins cher': 'Cheapest carrier',
+  'livraison offerte au client': 'free shipping for the customer',
+  'Interrogation des transporteurs…': 'Asking the carriers…',
+  'Comparaison impossible : ': 'Comparison unavailable: ',
+  'Comparaison impossible :': 'Comparison unavailable:',
+  'Aucun transporteur actif.': 'No active carrier.',
+  'pas de tarif': 'no rate',
+  'j': 'd',
+  'Le moins cher': 'Cheapest',
+  'Coût réel hors taxes, pour ': 'Actual cost before taxes, for ',
+  'Coût réel hors taxes, pour': 'Actual cost before taxes, for',
+  'Cliquez une ligne pour la choisir.': 'Click a line to choose it.',
+  'Recomparer': 'Compare again'
 };

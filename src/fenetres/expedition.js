@@ -90,6 +90,19 @@ button.mini{padding:.14rem .5rem;font-size:.76rem}
 .ch label{font-size:.72rem;color:var(--tx2)}
 
 .avis{font-size:.78rem;line-height:1.45;border-radius:9px;padding:.45rem .7rem;margin-top:.4rem}
+/* La comparaison des transporteurs (2026-10-05) : une ligne par transporteur,
+   le moins cher en tete et marque. Une ligne se choisit d un clic. */
+.cmp{display:flex;flex-direction:column;gap:.3rem}
+.cmp .l{display:grid;grid-template-columns:1fr auto auto;gap:.6rem;align-items:center;padding:.45rem .65rem;
+  border:1px solid var(--v08);border-radius:9px;cursor:pointer;font-size:.82rem;background:transparent;color:inherit;text-align:left;font:inherit}
+.cmp .l:hover{border-color:var(--v20)}
+.cmp .l.sel{border-color:var(--tx-or);background:rgba(201,169,126,.08)}
+.cmp .l .nm{font-weight:600}
+.cmp .l .sv{color:var(--tx3);font-size:.76rem}
+.cmp .l .px{font-variant-numeric:tabular-nums;font-weight:700}
+.cmp .l .mc{font-size:.68rem;font-weight:700;color:var(--tx-or);border:1px solid rgba(201,169,126,.45);border-radius:99px;padding:.05rem .45rem}
+.cmp .l.ko{cursor:default;opacity:.75}
+.cmp .l.ko .px{font-weight:400;color:var(--tx3)}
 .avis.jaune{background:rgba(245,158,11,.11);border:1px solid rgba(245,158,11,.42);color:var(--tx-or2)}
 .avis.vert{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.35);color:#86e5a8}
 .avis.rouge{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.38);color:var(--tx-f6a5a5)}
@@ -163,6 +176,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var PDF = null;        // etiquette en base64, gardee pour imprimer sans repasser par le nuage
   var enCours = false;
   var aveuSansSuivi = false;   // second geste avant d expedier sans numero
+  /* ⚠ LE POIDS SAISI SURVIT AU REDESSIN. dessiner() reconstruit toute la carte :
+     sans cette variable, changer de transporteur (ou recevoir la comparaison)
+     ramenait le poids calcule — et une etiquette se commandait au mauvais poids. */
+  var POIDS = null;
+  /* LA COMPARAISON DES TRANSPORTEURS (2026-10-05, sa demande) : null = jamais
+     demandee ; { etat:'attente'|'pret'|'echec', resultats, motif }. */
+  var CMP = null;
+  var SERVICE_PREF = '';       // service retenu par la comparaison
+  var CMP_AUTO_FAIT = false;   // la presélection automatique n a lieu qu UNE fois
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -254,6 +276,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     h += '</div>';
 
+    // ── Le transporteur le moins cher ───────────────────────────────────────
+    h += carteComparaison(c);
+
     // ── Etiquette ───────────────────────────────────────────────────────────
     h += '<div class="carte"><h2>${T("Étiquette")}</h2>';
     if (c.aUneEtiquette) {
@@ -275,7 +300,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       +   ((t && t.services) || []).map(function(s){
             // Le service choisi par le client à la caisse, s'il est de ce transporteur.
             var cc = CMD && CMD.commande && CMD.commande.choixClient;
-            var pris = cc && cc.transporteur === TRANSPORTEUR && cc.service === s.cle;
+            var pris = SERVICE_PREF ? (s.cle === SERVICE_PREF)
+              : (cc && cc.transporteur === TRANSPORTEUR && cc.service === s.cle);
             return '<option value="' + esc(s.cle) + '"' + (pris ? ' selected' : '') + '>' + esc(s.libelle) + '</option>'; }).join('')
       +   ((t && t.services.length) ? '' : '<option value="">—</option>')
       +   '</select></div>'
@@ -283,7 +309,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       // decide du prix. Le figer serait aussi faux que le deviner.
       + '<div class="ch"><label for="e-poids">${T("Poids du colis (kg)")}</label>'
       +   '<input id="e-poids" type="number" min="0.001" step="0.001" value="'
-      +   esc(pw.calcule > 0 ? pw.calcule : 0.5) + '"></div>'
+      +   esc(POIDS != null ? POIDS : (pw.calcule > 0 ? pw.calcule : 0.5)) + '"></div>'
       + '</div>';
     /* ⚠ LE CHOIX DU CLIENT (2026-10-02) : le transporteur coté et payé à la caisse.
        Le coût réel est lu pour le personnel seulement — le client a payé le prix
@@ -339,7 +365,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   // ══ ECOUTEURS ═════════════════════════════════════════════════════════════
   function brancher(){
     var tr = document.getElementById('e-transporteur');
-    if (tr) tr.onchange = function(){ TRANSPORTEUR = this.value; dessiner(); };
+    if (tr) tr.onchange = function(){ TRANSPORTEUR = this.value; SERVICE_PREF = prefDe(TRANSPORTEUR); dessiner(); };
+    var po = document.getElementById('e-poids');
+    // Le poids decide du prix : on recompare quand il change.
+    if (po) po.onchange = function(){ var v = parseFloat(this.value); if (v > 0) { POIDS = v; comparer(); } };
+    var lc = document.querySelectorAll('.cmp .l[data-t]');
+    for (var k = 0; k < lc.length; k++) lc[k].onclick = function(){
+      TRANSPORTEUR = this.getAttribute('data-t'); SERVICE_PREF = this.getAttribute('data-s') || ''; dessiner(); };
+    var rc = document.getElementById('btn-recomparer');
+    if (rc) rc.onclick = function(){ comparer(); };
     var su = document.getElementById('e-suivi');
     // Retaper le numero annule l aveu : on ne veut pas expedier sans numero
     // alors que la personne vient d en saisir un.
@@ -362,6 +396,67 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function val(id){ var e = document.getElementById(id); return e ? e.value : ''; }
+
+  // ══ LE TRANSPORTEUR LE MOINS CHER ═════════════════════════════════════════
+  var NOMS_T = { 'postes-canada': '${T("Postes Canada")}', fedex: 'FedEx', ups: 'UPS' };
+  function prefDe(t){
+    var l = (CMP && CMP.resultats) || [];
+    for (var i = 0; i < l.length; i++) if (l[i].transporteur === t && l[i].ok) return l[i].service;
+    return '';
+  }
+  function carteComparaison(c){
+    var h = '<div class="carte"><h2>${T("Transporteur le moins cher")}'
+      + (CMP && CMP.livraisonOfferte ? ' <span class="note">— ${T("livraison offerte au client")}</span>' : '') + '</h2>';
+    if (!CMP || CMP.etat === 'attente') {
+      h += '<div class="aide">${T("Interrogation des transporteurs…")}</div>';
+    } else if (CMP.etat === 'echec') {
+      h += '<div class="avis jaune"><span class="ic">⚠</span> ${T("Comparaison impossible : ")}' + esc(CMP.motif || '') + '</div>';
+    } else {
+      var l = CMP.resultats || [];
+      if (!l.length) h += '<div class="aide">${T("Aucun transporteur actif.")}</div>';
+      h += '<div class="cmp">';
+      l.forEach(function(x, i){
+        var nom = NOMS_T[x.transporteur] || x.transporteur;
+        if (!x.ok) {
+          h += '<div class="l ko"><div><div class="nm">' + esc(nom) + '</div><div class="sv">' + esc(x.motif || '') + '</div></div>'
+            + '<span></span><span class="px">${T("pas de tarif")}</span></div>';
+          return;
+        }
+        h += '<button type="button" class="l' + (x.transporteur === TRANSPORTEUR ? ' sel' : '') + '" data-t="' + esc(x.transporteur)
+          + '" data-s="' + esc(x.service) + '"><div><div class="nm">' + esc(nom) + '</div><div class="sv">' + esc(x.nomService || x.service)
+          + (x.jours ? ' · ' + x.jours + ' ${T("j")}' : '') + '</div></div>'
+          + (i === 0 ? '<span class="mc">${T("Le moins cher")}</span>' : '<span></span>')
+          + '<span class="px">' + szArgent(x.reel) + '</span></button>';
+      });
+      h += '</div><div class="aide" style="margin-top:.35rem">${T("Coût réel hors taxes, pour ")}' + esc(String(CMP.poidsKg || ''))
+        + ' kg. ${T("Cliquez une ligne pour la choisir.")} <button class="mini" id="btn-recomparer" type="button">${T("Recomparer")}</button></div>';
+    }
+    return h + '</div>';
+  }
+  /* Interroge les transporteurs. La PREMIERE reponse presélectionne le moins
+     cher — sauf si une etiquette existe deja (on ne change pas de transporteur
+     sous une etiquette payee). Ensuite, on ne deplace plus le choix de la
+     personne : on met seulement les prix a jour. */
+  function comparer(){
+    if (!CMD) return;
+    var v = parseFloat(val('e-poids'));
+    if (v > 0) POIDS = v;
+    CMP = { etat: 'attente' }; dessiner();
+    var pour = CMD.commande.id;
+    appeler('expedition:comparer', [pour, POIDS]).then(function(r){
+      if (!CMD || CMD.commande.id !== pour) return;
+      if (!r || !r.ok) { CMP = { etat: 'echec', motif: expliquer(r) }; dessiner(); return; }
+      CMP = { etat: 'pret', resultats: r.resultats || [], poidsKg: r.poidsKg, livraisonOfferte: !!r.livraisonOfferte };
+      var meilleur = (CMP.resultats || []).filter(function(x){ return x.ok; })[0];
+      if (meilleur && !CMP_AUTO_FAIT && !CMD.commande.aUneEtiquette) {
+        TRANSPORTEUR = meilleur.transporteur; SERVICE_PREF = meilleur.service;
+      } else if (!SERVICE_PREF) {
+        SERVICE_PREF = prefDe(TRANSPORTEUR);
+      }
+      CMP_AUTO_FAIT = true;
+      dessiner();
+    });
+  }
 
   function majBoutonExpedier(){
     var b = document.getElementById('btn-expedier');
@@ -524,6 +619,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         if (r.commande.transporteur) TRANSPORTEUR = r.commande.transporteur;
         document.getElementById('titre').textContent = '${T("Expédier ")}' + r.commande.numero;
         dessiner();
+        comparer();
         prendreVerrou(depart);
       });
     });

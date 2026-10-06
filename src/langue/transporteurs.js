@@ -108,6 +108,23 @@ module.exports = {
   '6e93d53968881714:0bfa9fcb9853d1f51ee57a · client 2004381 · contrat 42708517.':
     '6e93d53968881714:0bfa9fcb9853d1f51ee57a · customer 2004381 · contract 42708517.',
   'Clé API complète (utilisateur:motdepasse)': 'Full API key (username:password)',
+  /* La nouvelle plateforme (2026-10-05). */
+  'Sur <b>developer-developpeur.canadapost-postescanada.ca</b>, ouvrez votre projet de ':
+    'On <b>developer-developpeur.canadapost-postescanada.ca</b>, open your ',
+  '<b>production</b> : collez sa <b>Clé API</b> et son <b>Secret</b> ensemble, séparés par un deux-points ':
+    '<b>production</b> project: paste its <b>API Key</b> and <b>Secret</b> together, separated by a colon ',
+  '(clé:secret). Une clé de test ne donne que des prix d’exemple. L’ID contrat est à laisser vide sans entente commerciale.':
+    '(key:secret). A test key only returns sample prices. Leave the contract ID empty without a commercial agreement.',
+  'Sur developer-developpeur.canadapost-postescanada.ca , ouvrez votre projet de':
+    'On developer-developpeur.canadapost-postescanada.ca , open your',
+  'production : collez sa Clé API et son Secret ensemble, séparés par un deux-points':
+    'production project: paste its API Key and Secret together, separated by a colon',
+  'Clé API:Secret': 'API Key:Secret',
+  'clé:secret': 'key:secret',
+  'Ex : 0001234567': 'E.g.: 0001234567',
+  'Vide sans entente commerciale': 'Empty without a commercial agreement',
+  'Afficher': 'Show',
+  'Masquer': 'Hide',
   'Numéro client': 'Customer number',
   'Ex : 2004381': 'E.g.: 2004381',
   'ID contrat': 'Contract ID',

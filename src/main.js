@@ -2280,7 +2280,7 @@ const OPS_PONT = new Set([
   // facturée dès sa création. Toute la règle (garde anti-double-achat, secrets
   // transporteurs, XML) reste dans le site ; le pont ne porte que le service et
   // le poids, qui sont précisément ce que la fenêtre doit pouvoir choisir.
-  'expedition:contexte', 'expedition:lire', 'expedition:etiquette',
+  'expedition:contexte', 'expedition:lire', 'expedition:comparer', 'expedition:etiquette',
   'expedition:pdf', 'expedition:imprimer', 'expedition:bordereau',
   'expedition:confirmer',
   // Les deux listes. ⚠ `commandes:liste` sert les DEUX vues (en cours / parties) :
@@ -3322,7 +3322,7 @@ const LIMITES_PONT = {
   // Detourage, impressions et rapports.
   'produit:photoIa': 120000,
   'produit:detourer': 30000, 'produit:teinter': 30000, 'stock:etiquettes': 30000,
-  'stock:endommagesRapport': 30000, 'stock:rabaisComptoirRapport': 30000, 'facture:imprimer': 30000, 'commande:bon': 30000,
+  'stock:endommagesRapport': 30000, 'stock:rabaisComptoirRapport': 30000, 'facture:imprimer': 30000, 'expedition:comparer': 30000, 'commande:bon': 30000,
   // La liste des retours RESYNCHRONISE les demandes avant de repondre (la
   // meme fraicheur que l ecran du site) : laisser le temps du nuage.
   'retours:liste': 20000,
