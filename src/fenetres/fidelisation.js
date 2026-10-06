@@ -29,6 +29,17 @@ const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU
 const T = require('../langue').tr('fidelisation');
 
 const CSS = `
+/* L'onglet Points (2026-10-06) */
+.pt-ligne{display:flex;align-items:center;gap:.5rem;margin:.2rem 0 .9rem}
+.pt-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.8rem 1rem}
+.pt-grille label{display:flex;flex-direction:column;gap:.3rem;font-size:.8rem;color:var(--tx2)}
+.pt-grille input{font:inherit;color:var(--tx);background:var(--v05);border:1px solid var(--v16);border-radius:8px;padding:.4rem .55rem}
+.pt-exemple{margin:.9rem 0;padding:.7rem .85rem;border-radius:10px;background:var(--v05);font-size:.86rem;line-height:1.5}
+.pt-ajust{display:flex;gap:.5rem;flex-wrap:wrap;margin:.4rem 0 .9rem}
+.pt-ajust select{flex:1 1 220px;min-width:0}
+.pt-ajust input[type=number]{width:7rem}
+.pt-ajust input[type=text]{flex:1 1 200px;min-width:0}
+
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
@@ -319,6 +330,84 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
      renommer cinq appels pour le plaisir n'apporte rien. */
   function compte(n, tot, sing, plur){ return szCompte(n, tot, sing, plur); }
 
+  /* ── L'ONGLET « POINTS » (2026-10-06, son cahier des charges) ───────────────────────────────
+     Ses mots : « configurable de notre côté : le nombre de points gagnés par dollar dépensé, et
+     l'échelle d'utilisation — seulement 25 % du total de la commande retiré en points ».
+     Les réglages, un exemple chiffré qui se recalcule en tapant, les soldes, l'ajustement manuel.
+     ⚠ Le serveur décide de tout (lib-points.php) : cette fenêtre ne fait qu'écrire les réglages. */
+  var PTS = null;
+  function chargerPoints(){
+    appeler('fidelisation:points', []).then(function(r){
+      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      PTS = r; if (ONGLET === 'points') dessiner();
+    });
+  }
+  function ptsExemple(){
+    var v = function(id, d){ var e = document.getElementById(id); var x = e ? parseFloat(String(e.value).replace(',', '.')) : NaN; return isFinite(x) ? x : d; };
+    var ppd = v('pt-ppd', 1), vp = v('pt-vp', 0.01), pl = v('pt-pl', 25);
+    var gagne = Math.floor(100 * ppd), valeur = Math.round(gagne * vp * 100) / 100;
+    var max = Math.round(100 * pl) / 100;
+    return '${T("Exemple : 100 $ d’articles donnent")} <b>' + gagne + ' ${T("points")}</b> (' + valeur.toFixed(2) + ' $). '
+      + '${T("Un client qui a 100 $ en points ne peut en utiliser que")} <b>' + max.toFixed(2) + ' $</b> ${T("sur une commande de 100 $")} (' + pl + ' %).';
+  }
+  function vuePoints(){
+    if (!PTS) return '<div class="carte plein"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i></div></div>';
+    var cf = PTS.cfg || {}, ro = !PTS.peutModifier;
+    var dis = ro ? ' disabled' : '';
+    var h = '<div class="carte"><h2>${T("Réglages du programme")}</h2>'
+      + '<label class="pt-ligne"><input type="checkbox" id="pt-actif"' + (cf.actif ? ' checked' : '') + dis + '> <b>${T("Programme actif")}</b> <span class="dt">${T("— les clients gagnent et utilisent des points")}</span></label>'
+      + '<div class="pt-grille">'
+      + '<label>${T("Points gagnés par dollar")}<input type="number" id="pt-ppd" min="0" max="100" step="0.1" value="' + esc(cf.ptsParDollar) + '"' + dis + '><span class="dt">${T("sur les articles, après rabais, sans taxes ni livraison")}</span></label>'
+      + '<label>${T("Valeur d’un point ($)")}<input type="number" id="pt-vp" min="0.001" max="10" step="0.001" value="' + esc(cf.valeurPoint) + '"' + dis + '><span class="dt">${T("0,01 = 100 points pour 1 $")}</span></label>'
+      + '<label>${T("Plafond par commande (%)")}<input type="number" id="pt-pl" min="0" max="100" step="1" value="' + esc(cf.plafondPct) + '"' + dis + '><span class="dt">${T("part maximale du total payable en points")}</span></label>'
+      + '<label>${T("Solde minimal pour utiliser")}<input type="number" id="pt-min" min="0" step="1" value="' + esc(cf.minPoints) + '"' + dis + '><span class="dt">${T("en points (0 = dès le premier)")}</span></label>'
+      + '</div>'
+      + '<p class="pt-exemple" id="pt-exemple">' + ptsExemple() + '</p>'
+      + (ro ? '' : '<button class="prim" id="pt-enr">${T("Enregistrer les réglages")}</button>')
+      + '<p class="dt">${T("Les points sont attribués quand la commande passe « livrée », une seule fois. Le solde de chaque client est tenu par le serveur.")}</p>'
+      + '</div>';
+    var cl = PTS.clients || [];
+    h += '<div class="carte plein"><h2>${T("Soldes des clients")}</h2>'
+      + '<p class="dt">' + (PTS.enCirculation || 0) + ' ${T("points en circulation")} (' + (PTS.valeurEnCirculation || 0).toFixed(2) + ' $)</p>';
+    if (!ro) {
+      h += '<div class="pt-ajust"><select id="pt-client" aria-label="${T("Client")}"><option value="">${T("Choisir un client…")}</option>'
+        + (PTS.tousClients || []).map(function(u){ return '<option value="' + esc(u.id) + '">' + esc(u.nom || u.courriel) + (u.courriel ? ' · ' + esc(u.courriel) : '') + '</option>'; }).join('')
+        + '</select><input type="number" id="pt-delta" step="1" aria-label="${T("Points à ajouter ou retirer")}" placeholder="${T("+100 ou −50")}">'
+        + '<input type="text" id="pt-motif" maxlength="120" aria-label="${T("Motif de l’ajustement")}" placeholder="${T("Motif (obligatoire)")}">'
+        + '<button class="mini" id="pt-ajuster">${T("Ajuster le solde")}</button></div>';
+    }
+    h += cl.length
+      ? '<table><thead><tr><th>${T("Client")}</th><th>${T("Courriel")}</th><th class="num">${T("Points")}</th><th class="num">${T("Valeur")}</th></tr></thead><tbody>'
+        + cl.map(function(u){ return '<tr><td>' + esc(u.nom) + '</td><td class="dt">' + esc(u.courriel) + '</td><td class="num">' + u.points + '</td><td class="num">' + (u.points * (cf.valeurPoint || 0)).toFixed(2) + ' $</td></tr>'; }).join('')
+        + '</tbody></table>'
+      : '<div class="vide">${T("Aucun client n’a encore de points.")}</div>';
+    return h + '</div>';
+  }
+  function brancherPoints(){
+    ['pt-ppd', 'pt-vp', 'pt-pl'].forEach(function(id){ var e = document.getElementById(id); if (e) e.oninput = function(){ var x = document.getElementById('pt-exemple'); if (x) x.innerHTML = ptsExemple(); }; });
+    var be = document.getElementById('pt-enr');
+    if (be) be.onclick = function(){
+      var g = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
+      be.disabled = true;
+      appeler('fidelisation:points:ecrire', [{ actif: !!(document.getElementById('pt-actif') || {}).checked, ptsParDollar: g('pt-ppd'), valeurPoint: g('pt-vp'), plafondPct: g('pt-pl'), minPoints: g('pt-min') }]).then(function(r){
+        be.disabled = false;
+        if (!r.ok) { dire(r.motif === 'pts_par_dollar' ? '${T("Points par dollar : entre 0 et 100.")}' : r.motif === 'valeur_point' ? '${T("Valeur d’un point : plus de 0 et au plus 10 $.")}' : r.motif === 'plafond' ? '${T("Plafond : entre 0 et 100 %.")}' : expliquer(r), 'err'); return; }
+        dire('${T("Réglages enregistrés.")}', 'bon'); chargerPoints();
+      });
+    };
+    var ba = document.getElementById('pt-ajuster');
+    if (ba) ba.onclick = function(){
+      var u = (document.getElementById('pt-client') || {}).value, d = parseInt((document.getElementById('pt-delta') || {}).value, 10), m = ((document.getElementById('pt-motif') || {}).value || '').trim();
+      if (!u || !d || !m) { dire('${T("Choisissez un client, un nombre de points et un motif.")}', 'att'); return; }
+      ba.disabled = true;
+      appeler('fidelisation:points:ajuster', [u, d, m]).then(function(r){
+        ba.disabled = false;
+        if (!r.ok) { dire(expliquer(r), 'err'); return; }
+        dire('${T("Solde ajusté : ")}' + r.solde + ' ${T("points au total")}', 'bon'); chargerPoints();
+      });
+    };
+  }
+
   function vueRecompenses(){
     var rs = D.recompenses || [];
     var h = '<div class="barreoutils"><div class="droite"><span>'
@@ -607,6 +696,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       + ((D.recompenses || []).length ? '<span class="n">' + (D.recompensesTotal || D.recompenses.length) + '</span>' : '') + '</button>'
       + '<button type="button" class="' + (ONGLET === 'invitations' ? 'actif' : '') + '" data-onglet="invitations">${T("Invitations")}'
       + ((D.invitations || []).length ? '<span class="n">' + (D.invitationsTotal || D.invitations.length) + '</span>' : '') + '</button>'
+      + '<button type="button" class="' + (ONGLET === 'points' ? 'actif' : '') + '" data-onglet="points">${T("Points")}</button>'
       + '<div class="droite">'
       + (D.peutModifier ? '<button class="mini prim" id="fi-nouveau">${T("+ Nouveau sondage")}</button>' : '')
       + '</div>'
@@ -624,7 +714,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
        traduit QUE ce qui se LIT, jamais une valeur. Trouve le 2026-09-24 en
        relisant ce repartiteur pour #151. */
     h += ONGLET === 'recompenses' ? vueRecompenses()
-       : ONGLET === 'invitations' ? vueInvitations() : vueSondages();
+       : ONGLET === 'invitations' ? vueInvitations()
+       : ONGLET === 'points' ? vuePoints() : vueSondages();
     if (EDIT) h += boiteEditeur();
     else if (DETAIL) h += boiteDetail();
     /* ⚠⚠ LA PLEINE HAUTEUR, MESUREE AVANT ET APRES (#151, 2026-09-24). Cet
@@ -639,7 +730,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
        avant d adopter, parce qu une vue coupee ne previent jamais. */
     corps.className = 'corps plein';
     corps.innerHTML = h;
-    if (ONGLET !== 'recompenses' && ONGLET !== 'invitations') {
+    if (ONGLET !== 'recompenses' && ONGLET !== 'invitations' && ONGLET !== 'points') {
       var bp = document.getElementById('fi-prec'), bs = document.getElementById('fi-suiv');
       if (bp) bp.onclick = function(){ SPAGE = Math.max(0, SPAGE - 1); dessiner(); };
       if (bs) bs.onclick = function(){ SPAGE = SPAGE + 1; dessiner(); };
@@ -648,6 +739,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       szAutoPagination('.liste', function(n){ SPARPAGE = Math.max(3, n - 1); SPAGE = 0; dessiner(); });
     }
     brancher();
+    if (ONGLET === 'points') brancherPoints();
   }
 
   function brancher(){
@@ -689,7 +781,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     if (!t || !t.closest || t.closest('.boite')) return;
 
     var og = t.closest('[data-onglet]');
-    if (og) { ONGLET = og.getAttribute('data-onglet'); ARME = ''; dessiner(); return; }
+    if (og) { ONGLET = og.getAttribute('data-onglet'); ARME = ''; dessiner(); if (ONGLET === 'points') chargerPoints(); return; }
 
     var bs = t.closest('[data-suppr-sondage]');
     if (bs) {

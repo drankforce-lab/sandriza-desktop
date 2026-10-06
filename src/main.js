@@ -2527,6 +2527,8 @@ const OPS_PONT = new Set([
   // resynchronisation : un taux de reponse perime est un chiffre FAUX.
   'fidelisation:liste', 'fidelisation:sondage', 'fidelisation:supprimerSondage',
   'fidelisation:supprimerInvite', 'fidelisation:viderInvites', 'fidelisation:notification',
+  // Le programme de points (2026-10-06) : réglages, soldes, ajustement manuel (le serveur décide).
+  'fidelisation:points', 'fidelisation:points:ecrire', 'fidelisation:points:ajuster',
   // Recommandations (fenetre Recommandations, 1.72.0) : l ORDRE des regles
   // decide de ce que la cliente voit en premier sur une fiche.
   'reco:liste', 'reco:stats', 'reco:basculer', 'reco:deplacer', 'reco:supprimer',
@@ -3339,6 +3341,7 @@ const LIMITES_PONT = {
   'cartescadeaux:liste': 20000,
   'chat:liste': 20000,
   'fidelisation:liste': 20000,
+  'fidelisation:points': 20000, 'fidelisation:points:ecrire': 30000, 'fidelisation:points:ajuster': 30000,
   'abonnes:liste': 20000,
   // L import cree un abonne par ligne : une longue liste prend du temps.
   'abonnes:importer': 60000,
