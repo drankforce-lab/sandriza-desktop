@@ -290,8 +290,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
                    ['label2', '${T("Sous-titre")}', 'texte']],
     highlightBox: [['title', '${T("Titre")}', 'texte'], ['desc', '${T("Description")}', 'texte'],
                    ['code', '${T("Code (facultatif)")}', 'texte'], ['icon', '${T("Pictogramme")}', 'texte']],
-    rawHtml:      [['content', 'HTML', 'long']]
+    rawHtml:      [['content', 'HTML', 'long']],
+    // 2026-10-06 : l'image d'ambiance et les pièces du catalogue (photo, nom, prix lus par le site).
+    image:        [['url', '${T("Adresse de l’image (https)")}', 'texte'], ['lien', '${T("Lien")}', 'texte'],
+                   ['alt', '${T("Description de l’image")}', 'texte']],
+    produits:     [['titre', '${T("Titre (facultatif)")}', 'texte'], ['refs', '${T("Pièces")}', 'produits'],
+                   ['colonnes', '${T("Colonnes")}', '${T("choix:2=Deux,3=Trois")}']]
   };
+  var BPRODUITS = [];     // les pieces du catalogue, pour le bloc produits — venues du site
 
   function champBloc(i, cle, lib, genre, val){
     var id = 'b-' + i + '-' + cle;
@@ -309,6 +315,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       return '<div><label for="' + id + '">' + esc(lib) + '</label>'
         + '<input type="number" min="4" max="200" id="' + id + '" data-bi="' + i + '" data-bc="' + cle
         + '" value="' + esc(v || '24') + '"></div>';
+    }
+    if (genre === 'produits') {
+      // Choix multiple (Ctrl + clic) : la valeur gardee est la liste des references.
+      var pris = v.split(/[,;\\s]+/).filter(Boolean);
+      return '<div><label for="' + id + '">' + esc(lib) + ' <span style="opacity:.7">${T("(Ctrl + clic pour en choisir plusieurs)")}</span></label>'
+        + '<select multiple size="6" id="' + id + '" data-bi="' + i + '" data-bc="' + cle + '">'
+        + BPRODUITS.map(function(p){
+            return '<option value="' + esc(p.ref) + '"' + (pris.indexOf(p.ref) >= 0 ? ' selected' : '') + '>'
+              + esc(p.nom) + ' — ' + esc(szArgent(Number(p.prix) || 0)) + '</option>';
+          }).join('') + '</select></div>';
     }
     if (genre.indexOf('choix:') === 0) {
       var opts = genre.slice(6).split(',').map(function(o){
@@ -559,7 +575,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       var i = Number(el.getAttribute('data-bi')), c = el.getAttribute('data-bc');
       var poser = function(){
         if (!BLOCS[i]) return;
-        BLOCS[i][c] = (el.type === 'number') ? (Number(el.value) || 24) : el.value;
+        BLOCS[i][c] = (el.type === 'number') ? (Number(el.value) || 24)
+          : el.multiple ? Array.prototype.filter.call(el.options, function(o){ return o.selected; }).map(function(o){ return o.value; }).join(',')
+          : el.value;
       };
       el.oninput = poser;
       el.onchange = poser;
@@ -843,6 +861,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       }
       BTYPES = r.types || [];
       BMODELES = r.modeles || {};
+      BPRODUITS = r.produits || [];
       // La palette n existe qu une fois le formulaire ouvert : on la repeint si
       // elle est deja a l ecran.
       if (document.getElementById('f-blocs')) majBlocs();
@@ -1478,7 +1497,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
 
     if (D.peutModifier) {
       h += '<div class="barreoutils"><button class="mini prim" id="cp-nouvchaine">'
-        + '${T("+ Nouvelle chaîne")}</button></div>';
+        + '${T("+ Nouvelle chaîne")}</button>'
+        + '<button class="mini" id="cp-seqpanier" title="${T("Panier abandonné : 1 h, 24 h, 72 h (avec 10 %) — créée en pause, à relire")}">'
+        + '${T("Créer la séquence panier en 3 temps")}</button></div>';
     }
 
     if (!(D.chaines || []).length) {
@@ -1548,6 +1569,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     if (bn) bn.onclick = function(){ ouvrirForm('campagne', ''); };
     var bnc = document.getElementById('cp-nouvchaine');
     if (bnc) bnc.onclick = function(){ ouvrirForm('chaine', ''); };
+    /* LA SÉQUENCE PANIER EN TROIS TEMPS (2026-10-06, son choix « B ») : trois modèles du site
+       (cartSeq1..3), à 1 h, 24 h et 72 h. Créée EN PAUSE : on la relit, puis on l'active. */
+    var bsp = document.getElementById('cp-seqpanier');
+    if (bsp) bsp.onclick = function(){
+      if (OCCUPE) return; OCCUPE = true; bsp.disabled = true;
+      dire('${T("Création de la séquence…")}');
+      var cles = ['cartSeq1', 'cartSeq2', 'cartSeq3'], heures = [1, 24, 72];
+      Promise.all(cles.map(function(c){ return appeler('nl:modele', [c]); })).then(function(rs){
+        if (rs.some(function(r){ return !r || !r.ok; })) throw new Error('${T("modèle introuvable — le site doit être à jour")}');
+        var etapes = rs.map(function(r, i){
+          return { sujet: r.sujet, html: r.html, jours: Math.floor(heures[i] / 24), heures: heures[i] % 24 };
+        });
+        return appeler('chaines:ecrire', ['', { nom: '${T("Panier abandonné — séquence en 3 temps")}',
+          description: '${T("1 h : rappel · 24 h : avis et rareté · 72 h : 10 % pendant 48 h")}',
+          declencheur: 'abandoned_cart', statut: 'paused', etapes: etapes }]);
+      }).then(function(r){
+        OCCUPE = false; bsp.disabled = false;
+        if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+        dire('${T("Séquence créée, en pause : relisez-la puis activez-la.")}', 'bon');
+        charger();
+      }).catch(function(e){ OCCUPE = false; bsp.disabled = false; dire(String((e && e.message) || e), 'err'); });
+    };
     var bns = document.getElementById('cp-nouvseg');
     if (bns) bns.onclick = function(){ ouvrirForm('segment', ''); };
     var bt = document.getElementById('cp-traiter');
