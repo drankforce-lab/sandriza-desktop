@@ -240,6 +240,15 @@ module.exports = {
   /* ⚠⚠ C EST LA SEULE COPIE DU MOT DE PASSE TEMPORAIRE quand le courriel n est
      pas parti : la phrase doit rester aussi nette en anglais. */
   ' Mot de passe temporaire : ': ' Temporary password: ',
+  'Nouveau mot de passe temporaire': 'New temporary password',
+  'Copier': 'Copy',
+  '✓ Copié': '✓ Copied',
+  'Ctrl+C pour copier': 'Ctrl+C to copy',
+  'Mot de passe temporaire': 'Temporary password',
+  'Le courriel envoyé à ': 'The email sent to ',
+  ' donne le nom d’utilisateur et le lien de l’application, mais PAS ce mot de passe : remettez-le en personne, par téléphone ou par texto.': ' gives the username and the app link, but NOT this password: hand it over in person, by phone or by text message.',
+  'Aucun courriel n’est parti : remettez ce mot de passe en personne, par téléphone ou par texto.': 'No email was sent: hand this password over in person, by phone or by text message.',
+  'Valide 24 heures. Il devra être changé à la première connexion. Il ne sera plus affiché après la fermeture de cette boîte.': 'Valid for 24 hours. It must be changed at first sign-in. It will not be shown again once this box is closed.',
   'Mot de passe temporaire :': 'Temporary password:',
   ' (courriel non envoyé).': ' (email not sent).',
   '(courriel non envoyé).': '(email not sent).',

@@ -262,4 +262,11 @@ module.exports = {
   ' par ': ' by ',
   'Pour Compte': 'For Account',
   'Usages Échéance Créé État': 'Uses Deadline Created Status',
+  ' (le lien seul). L’ancien mot de passe ne fonctionne plus.': ' (link only). The old password no longer works.',
+  'Le lien, et un nouveau mot de passe ': 'The link, and a new password ',
+  'affiché ici': 'shown here',
+  'Nouveau mot de passe d’ouverture': 'New access password',
+  ' contient le lien seul. Remettez ce mot de passe en personne, par téléphone ou par texto.': ' contains the link only. Hand this password over in person, by phone or by text message.',
+  'Mot de passe d’ouverture': 'Access password',
+  'Le courriel envoyé à ': 'The email sent to ',
 };

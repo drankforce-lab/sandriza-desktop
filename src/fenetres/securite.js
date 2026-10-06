@@ -1079,8 +1079,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         fermerAssistant();
         var msg = '${T("Compte créé.")}' + (r.courrielEnvoye
           ? '${T(" Courriel d’accueil envoyé à ")}'+(r.courriel||'')+'.'
-          : (r.tempPassword ? '${T(" Mot de passe temporaire : ")}'+r.tempPassword+'${T(" (courriel non envoyé).")}' : '${T(" (courriel non envoyé).")}'));
+          : '${T(" (courriel non envoyé).")}');
         recharger(msg, 'bon');
+        if (r.tempPassword) montrerMdp(r.tempPassword, r.courriel||'', !!r.courrielEnvoye, false);
       } else aerr(expliquer(r));
     });
   }
@@ -1249,9 +1250,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (r&&r.ok){
         fermerEditeurCompte();
         var msg = (r.mode==='create')
-          ? ('${T("Compte créé.")}' + (r.courrielEnvoye ? '${T(" Courriel d’accueil envoyé à ")}'+(r.courriel||'')+'.' : (r.tempPassword ? '${T(" Mot de passe temporaire : ")}'+r.tempPassword+'${T(" (courriel non envoyé).")}' : '${T(" (courriel non envoyé).")}')))
+          ? ('${T("Compte créé.")}' + (r.courrielEnvoye ? '${T(" Courriel d’accueil envoyé à ")}'+(r.courriel||'')+'.' : '${T(" (courriel non envoyé).")}'))
           : '${T("Compte modifié.")}';
         recharger(msg, 'bon');
+        if (r.mode==='create' && r.tempPassword) montrerMdp(r.tempPassword, r.courriel||'', !!r.courrielEnvoye, false);
       } else ferr(expliquer(r), 'identite');
     });
   }
@@ -1263,7 +1265,43 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function inviterCompte(id){
     if (OCCUPE) return; OCCUPE=true; dire('${T("Envoi de l’invitation…")}');
     appeler('securite:compte:invitation',[id]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok) dire('${T("Invitation renvoyée à ")}'+(r.email||'')+'.', 'bon'); else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
+      if (r&&r.ok){
+        dire('${T("Invitation renvoyée à ")}'+(r.email||'')+'.', 'bon');
+        if (r.tempPassword) montrerMdp(r.tempPassword, r.email||'', true, true);
+      } else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
+  }
+
+  /* ⚠ LE MOT DE PASSE TEMPORAIRE N'EST PLUS DANS LE COURRIEL (sa demande du 2026-10-06).
+     Un courriel se transfère, se relit sur un téléphone perdu, dort dans une boîte des
+     années : il ne portait plus que le nom d'utilisateur. Le mot de passe se lit ICI,
+     une seule fois, et se remet de vive voix ou par texto. Avant, cette fenêtre ne le
+     montrait que si le courriel avait échoué — il fallait donc la changer en même temps
+     que le courriel, sinon plus personne ne l'aurait connu. */
+  function montrerMdp(mdp, courriel, envoye, renvoi){
+    var vieux=document.getElementById('sur-mdp'); if (vieux) vieux.remove();
+    var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-mdp';
+    sur.innerHTML='<div class="boite" style="max-width:500px"><div class="tt"><h3><span class="ic">🔑</span> '
+      + (renvoi?'${T("Nouveau mot de passe temporaire")}':'${T("Mot de passe temporaire")}')+'</h3><button class="mini" id="mdp-x">${T("Fermer")}</button></div>'
+      + '<div class="liste">'
+      + '<div class="note">'+(envoye
+          ? '${T("Le courriel envoyé à ")}'+esc(courriel)+'${T(" donne le nom d’utilisateur et le lien de l’application, mais PAS ce mot de passe : remettez-le en personne, par téléphone ou par texto.")}'
+          : '${T("Aucun courriel n’est parti : remettez ce mot de passe en personne, par téléphone ou par texto.")}')+'</div>'
+      + '<label for="mdp-val" style="display:block;margin:12px 0 6px;color:var(--tx2)">${T("Mot de passe temporaire :")}</label>'
+      + '<div style="display:flex;gap:8px"><input id="mdp-val" readonly value="'+esc(mdp)+'" style="flex:1;font-family:Consolas,monospace;font-size:18px;letter-spacing:.06em" aria-label="${T("Mot de passe temporaire")}">'
+      + '<button class="b" id="mdp-copier">${T("Copier")}</button></div>'
+      + '<p style="margin:10px 0 0;color:var(--tx2);font-size:12.5px">${T("Valide 24 heures. Il devra être changé à la première connexion. Il ne sera plus affiché après la fermeture de cette boîte.")}</p>'
+      + '</div></div>';
+    document.body.appendChild(sur);
+    var fermer=function(){ var x=document.getElementById('sur-mdp'); if (x) x.remove(); };
+    document.getElementById('mdp-x').onclick=fermer;
+    var cp=document.getElementById('mdp-copier');
+    cp.onclick=function(){
+      var i=document.getElementById('mdp-val'); i.focus(); i.select();
+      // execCommand ET NON navigator.clipboard : la fenêtre est chargée en data:, pas un contexte sécurisé.
+      var fait=false; try { fait=document.execCommand('copy'); } catch (e) { fait=false; }
+      cp.textContent = fait ? '${T("✓ Copié")}' : '${T("Ctrl+C pour copier")}';
+    };
+    cp.focus();
   }
 
   // ── MFA — activation TOTP / exemption / désactivation ────────────
