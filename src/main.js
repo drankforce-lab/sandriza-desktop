@@ -2582,6 +2582,9 @@ const OPS_PONT = new Set([
   // ⚠ Jamais automatique : c est une mise EN VITRINE.
   'photos:appliquer', 'photos:appliquerLot',
   'photos:apercu',
+  // Retirer le fond uni du CATALOGUE (2026-10-06) : apercu avant / apres, puis
+  // seules les photos cochees remplacent celles des fiches (originales gardees).
+  'photos:fondApercu', 'photos:fondAppliquer',
   // L assistant de traitement en lot : lire une source SANS importer, montrer,
   // importer ce qui est choisi, puis traiter — chaine imposee par le coeur.
   'lot:sources', 'lot:vignette', 'lot:importer', 'lot:traiter',
@@ -3195,6 +3198,9 @@ const LIMITES_PONT = {
   // Un apercu sandbox = un appel Photoroom complet (comme un traitement) : meme
   // ordre de grandeur, on lui laisse la meme marge qu'a photos:isoler.
   'photos:apercu': 180000,
+  /* Le fond uni du catalogue : un detourage LOCAL par photo de fiche, toutes a la
+     suite, puis un televersement par photo cochee — l ordre de grandeur d un lot. */
+  'photos:fondApercu': 600000, 'photos:fondAppliquer': 600000,
   /* ⚠⚠ ET VOICI POURQUOI << TOUT VIDER >> LAISSAIT 32 PHOTOS (2026-08-09).
      `photos:vider` n etait pas dans cette table : elle heritait du plafond
      ordinaire de 8 SECONDES, alors qu elle supprime les photos UNE A UNE avec
@@ -3510,6 +3516,7 @@ const LIMITES_PONT = {
   // Le detourage est un calcul local sur un million de pixels, suivi de deux
   // depots (la transparente et le rendu).
   'photos:isoler': 60000, 'photos:fond': 45000,
+  'photos:fondApercu': 600000, 'photos:fondAppliquer': 600000,
   // Attacher reencode, depose dans products/ ET ecrit la fiche.
   'photos:attacher': 60000,
   // Le catalogue complet peut etre relu avant la premiere recherche.

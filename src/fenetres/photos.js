@@ -368,6 +368,24 @@ html.jour .asst .pi{background:#faf8f3}
   display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--tx-or)}
 .pl .v.on .ck{background:#c9a97e;color:#1a1208;border-color:#c9a97e}
 /* Le chargement, au centre, avant la planche. */
+/* Le fond uni du catalogue (2026-10-06) : une ligne par photo de fiche, avant / apres. */
+.fd-l{display:grid;grid-template-columns:1.6rem 9rem 9rem 1fr;gap:.7rem;align-items:center;
+  padding:.5rem .6rem;border:1px solid var(--v10);border-radius:10px;margin-bottom:.45rem}
+.fd-ch{cursor:pointer}
+.fd-ch.on{border-color:#c9a97e;background:rgba(201,169,126,.08)}
+.fd-ch .ck{width:1.3rem;height:1.3rem;border:1px solid var(--v16);border-radius:5px;display:inline-flex;
+  align-items:center;justify-content:center;font-size:.8rem;color:#1a1208}
+.fd-ch.on .ck{background:#c9a97e;border-color:#c9a97e}
+.fd-im{display:flex;flex-direction:column;gap:.2rem}
+.fd-im img{width:9rem;height:9rem;object-fit:contain;border-radius:8px;background-color:#ecd9d4;
+  background-image:linear-gradient(45deg,#f6eeeb 25%,transparent 25%,transparent 75%,#f6eeeb 75%),
+  linear-gradient(45deg,#f6eeeb 25%,transparent 25%,transparent 75%,#f6eeeb 75%);
+  background-size:18px 18px;background-position:0 0,9px 9px}
+.fd-mute{display:block;color:var(--tx2);font-size:.84rem}
+.fd-t{font-size:.84rem}
+.fd-pied{display:flex;align-items:center;gap:.5rem;justify-content:flex-end;padding:.65rem .9rem;
+  border-top:1px solid var(--v08)}
+.fd-pied .aide{margin-right:auto}
 .chargement{display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:.6rem;min-height:16rem;text-align:center}
 .chargement .gros{font-weight:700;font-size:1rem;line-height:1.3}
@@ -514,6 +532,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
        3. LE TRAITEMENT : nommer le lot et choisir ce qu on veut en faire.
      ⚠ LIRE N EST PAS IMPORTER : rien n entre dans la photothèque avant l etape 3.
      ══════════════════════════════════════════════════════════════════════════ */
+  /* Le fond uni du catalogue : null, ou { etape: 'calcul'|'choix'|'envoi', lignes, choix }. */
+  var FOND = null;
   var ASSIST = null;        // { etape, sources, lecteur, fichiers, choix, tri, nom, but }
   var VIGNETTES = {};       // chemin -> data URL, chargees a la demande
   var ORIENT = {};          // chemin -> orientation EXIF (1 a 8)
@@ -581,6 +601,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
     module_photos:      '${T("La photothèque n’a pas pu être chargée dans la fenêtre principale. Rechargez-la (Ctrl+R) ; si le message revient, la session du personnel a peut-être expiré.")}',
     introuvable:        '${T("Cette photo n’existe plus.")}',
+    version_site:       '${T("Le site chargé dans la fenêtre principale est trop ancien pour ce geste. Rechargez-la (Ctrl+R).")}',
     produit_introuvable:'${T("Cet article n’existe plus.")}',
     image_absente:      '${T("Aucune image lisible dans ce fichier.")}',
     non_isolee:         '${T("Isolez d’abord le vêtement : un fond se pose derrière un détourage.")}',
@@ -649,6 +670,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
           + '${T("⚙ Traitement en lot")}</button>')
       // Studio virtuel : mise en scène guidée (Photoroom). On y choisit une photo
       // de la photothèque directement, d'où l'entrée ici.
+      /* Retirer le fond uni des photos des FICHES (2026-10-06) : le meme geste que
+         Photos > Retirer le fond uni du catalogue de l ecran web, memes coeurs. */
+      + (ro ? '' : '<button id="p-fondcat" title="${T("Détourer les photos des fiches produits (fond gris ou blanc uni) — avant / après à vérifier")}">'
+          + '${T("Fond uni du catalogue")}</button>')
       + '<button id="p-studio" title="${T("Mise en scène guidée : mannequin virtuel, fantôme habillé, produit à plat")}"><span class="ic">🎨</span> ${T("Studio virtuel")}</button>'
       + '<span class="sep"></span>'
       + '<input aria-label="${T("Code")}, nom, article" type="search" id="p-q" placeholder="${T("Code")}, nom, article…" value="' + esc(Q) + '">'
@@ -755,7 +780,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (DETAIL) h += boiteDetail();
     // ⚠ La classe se pose sur BODY et non sur le corps : c est elle qui decale
     // a la fois le tableau et le panneau de suivi, qui vit hors du corps.
-    if (ASSIST) h += assistHtml();
+    if (FOND) h += fondHtml();
+    else if (ASSIST) h += assistHtml();
     else if (SCENE_OUVERT) h += sceneHtml();
     else if (RETRAIT_OUVERT) h += retraitHtml();
     else if (LOTS) h += lotsHtml();
@@ -997,6 +1023,90 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         });
       };
     });
+  }
+
+  /* ── LE FOND UNI DU CATALOGUE (2026-10-06) ─────────────────────────────────
+     RIEN N EST REMPLACE SANS ETRE VU : l apercu montre avant / apres, et seules
+     les photos cochees partent — comme l ecran web, avec les MEMES coeurs
+     (photos:fondApercu / photos:fondAppliquer). L originale reste citee dans la
+     fiche. L APRES arrive en VIGNETTE (320 px) : il n a pas encore d adresse. */
+  function fondOuvrir(){
+    FOND = { etape: 'calcul', lignes: [], choix: {} };
+    dessiner();
+    appeler('photos:fondApercu', []).then(function(r){
+      if (!FOND) return; // fermee pendant le calcul
+      if (!r.ok) { FOND = null; dessiner(); dire(expliquer(r), 'err'); return; }
+      FOND.lignes = r.lignes || [];
+      FOND.etape = 'choix';
+      FOND.lignes.forEach(function(l){ if (l.statut === 'pret') FOND.choix[l.i] = true; });
+      dessiner();
+    });
+  }
+  function fondHtml(){
+    var F = FOND;
+    var h = '<div class="asst"><div class="bo">'
+      + '<div class="tt"><h3>${T("Retirer le fond uni du catalogue")}</h3>'
+      + '<button class="mini" id="f-fermer" style="margin-left:auto" title="${T("Fermer")}"' + (F.etape === 'envoi' ? ' disabled' : '') + '>✕</button></div>'
+      + '<div class="co">';
+    if (F.etape !== 'choix') {
+      h += '<div class="chargement"><div class="tourne"></div><div class="gros">'
+        + (F.etape === 'calcul' ? '${T("Détourage des photos des fiches…")}' : '${T("Remplacement des photos cochées…")}')
+        + '</div><div class="aide">${T("Le calcul se fait dans la fenêtre principale : laissez-la ouverte.")}</div></div>';
+    } else {
+      h += '<p class="aide" style="margin:0 0 .6rem">${T("Vérifiez chaque photo : le vêtement doit être intact et le fond disparu. Décochez celles qui ne vous plaisent pas. Les originales restent conservées dans la fiche.")}</p>';
+      if (!F.lignes.length) h += '<div class="vide">${T("Aucune photo sur les fiches produits.")}</div>';
+      F.lignes.forEach(function(l){
+        var titre = esc(l.nom) + (l.champ === 'additionalImages' ? ' · ${T("photo")} ' + (l.index + 2) : ' · ${T("photo principale")}');
+        if (l.statut !== 'pret') {
+          h += '<div class="fd-l fd-mute">' + titre + ' — '
+            + (l.statut === 'deja' ? '${T("déjà sans fond, laissée telle quelle")}' : '${T("échec :")} ' + esc(l.detail || '')) + '</div>';
+          return;
+        }
+        var on = !!F.choix[l.i];
+        h += '<div class="fd-l fd-ch' + (on ? ' on' : '') + '" data-fi="' + l.i + '" role="checkbox" aria-checked="' + on + '" tabindex="0">'
+          + '<span class="ck">' + (on ? '✓' : '') + '</span>'
+          + '<span class="fd-im"><span class="aide">${T("Avant")}</span>' + (l.avant ? '<img src="' + esc(l.avant) + '" alt="">' : '') + '</span>'
+          + '<span class="fd-im"><span class="aide">${T("Après")}</span>' + (l.apres ? '<img src="' + esc(l.apres) + '" alt="">' : '') + '</span>'
+          + '<span class="fd-t">' + titre + '</span></div>';
+      });
+    }
+    h += '</div>';
+    if (F.etape === 'choix') {
+      var n = Object.keys(F.choix).length;
+      h += '<div class="fd-pied"><span class="aide">' + n + ' ' + (n > 1 ? '${T("photos cochées")}' : '${T("photo cochée")}') + '</span>'
+        + '<button id="f-annuler">${T("Annuler")}</button>'
+        + '<button class="prim" id="f-ok"' + (n ? '' : ' disabled') + '>${T("Remplacer les photos cochées")}</button></div>';
+    }
+    return h + '</div></div>';
+  }
+  function fondBrancher(){
+    var fermer = function(){ if (FOND && FOND.etape === 'envoi') return; FOND = null; dessiner(); };
+    var x = document.getElementById('f-fermer'); if (x) x.onclick = fermer;
+    var an = document.getElementById('f-annuler'); if (an) an.onclick = fermer;
+    Array.prototype.forEach.call(document.querySelectorAll('.fd-ch'), function(el){
+      var basculer = function(){
+        var i = +el.getAttribute('data-fi');
+        if (FOND.choix[i]) delete FOND.choix[i]; else FOND.choix[i] = true;
+        dessiner();
+      };
+      el.onclick = basculer;
+      el.onkeydown = function(ev){ if (ev.key === ' ' || ev.key === 'Enter') { ev.preventDefault(); basculer(); } };
+    });
+    var ok = document.getElementById('f-ok');
+    if (ok) ok.onclick = function(){
+      var idx = Object.keys(FOND.choix).map(Number);
+      if (!idx.length) return;
+      FOND.etape = 'envoi'; dessiner();
+      appeler('photos:fondAppliquer', [idx]).then(function(r){
+        FOND = null; dessiner();
+        if (!r.ok) { dire(expliquer(r), 'err'); return; }
+        var ech = r.echecs || [];
+        dire(r.faits + ' ' + (r.faits > 1 ? '${T("photos remplacées")}' : '${T("photo remplacée")}')
+          + (ech.length ? ' · ${T("échec pour :")} ' + ech.join(', ') : '')
+          + ' — ${T("originales conservées.")}', ech.length ? 'att' : 'bon');
+        charger();
+      });
+    };
   }
 
   function assistOuvrir(){
@@ -2441,6 +2551,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 
   /* ── BRANCHEMENTS ──────────────────────────────────────────────────────── */
   function brancher(){
+    if (FOND) { fondBrancher(); return; }
     if (ASSIST) { assistBrancher(); return; }
     if (SCENE_OUVERT) {
       var non = document.getElementById('sc-non');
@@ -2676,6 +2787,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 
     var asst = document.getElementById('p-assistant');
     if (asst) asst.onclick = assistOuvrir;
+
+    var fcat = document.getElementById('p-fondcat');
+    if (fcat) fcat.onclick = fondOuvrir;
 
     var stud = document.getElementById('p-studio');
     if (stud) stud.onclick = function(){
