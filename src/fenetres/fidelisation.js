@@ -35,10 +35,27 @@ const CSS = `
 .pt-grille label{display:flex;flex-direction:column;gap:.3rem;font-size:.8rem;color:var(--tx2)}
 .pt-grille input{font:inherit;color:var(--tx);background:var(--v05);border:1px solid var(--v16);border-radius:8px;padding:.4rem .55rem}
 .pt-exemple{margin:.9rem 0;padding:.7rem .85rem;border-radius:10px;background:var(--v05);font-size:.86rem;line-height:1.5}
-.pt-ajust{display:flex;gap:.5rem;flex-wrap:wrap;margin:.4rem 0 .9rem}
-.pt-ajust select{flex:1 1 220px;min-width:0}
-.pt-ajust input[type=number]{width:7rem}
-.pt-ajust input[type=text]{flex:1 1 200px;min-width:0}
+/* Les soldes (2026-10-06, refaits pour des centaines de clients) : recherche, filtre, tri,
+   pages ; l ajustement s ouvre SOUS la ligne, avec la bascule Ajouter / Retirer. */
+.pt-outils{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin:.1rem 0 .6rem}
+.pt-outils input[type=search]{flex:1 1 260px;min-width:0;padding:.42rem .7rem}
+.pt-outils select,.pt-pages select{font:inherit;color:var(--tx);background:var(--v05);border:1px solid var(--v16);border-radius:8px;padding:.36rem .5rem}
+.pt-nom{font-weight:600}
+.pt-zero{color:var(--tx2)}
+tr.pt-ouvert td,tr.pt-ligne-ouverte td{background:var(--v04)}
+.pt-panneau{display:flex;flex-wrap:wrap;gap:.55rem;align-items:center;padding:.35rem .1rem}
+.pt-sens{display:inline-flex;border:1px solid var(--v16);border-radius:99px;padding:2px;background:var(--v05)}
+.pt-sens button{border:0;border-radius:99px;background:transparent;padding:.26rem .85rem;font-weight:600;color:var(--tx2)}
+.pt-sens button.on-plus{background:rgba(34,197,94,.18);color:var(--tx-ok)}
+html.jour .pt-sens button.on-plus{color:#1f5f37}
+.pt-sens button.on-moins{background:rgba(239,68,68,.16);color:var(--tx-err2)}
+html.jour .pt-sens button.on-moins{color:#7a2a24}
+.pt-panneau input[type=number]{width:6.5rem}
+.pt-panneau input[type=text]{flex:1 1 220px;min-width:0}
+.pt-vite{display:inline-flex;gap:.25rem}
+.pt-apres{font-size:.8rem;color:var(--tx2);white-space:nowrap}
+.pt-apres b{color:var(--tx)}
+.pt-pages{display:flex;gap:.5rem;align-items:center;justify-content:flex-end;margin-top:.55rem;font-size:.78rem;color:var(--tx2)}
 
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -377,24 +394,166 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       + (ro ? '' : '<button class="prim" id="pt-enr">${T("Enregistrer les réglages")}</button>')
       + '<p class="dt">${T("Les points sont attribués quand la commande passe « livrée », une seule fois. Le solde de chaque client est tenu par le serveur.")}</p>'
       + '</div>';
-    var cl = PTS.clients || [];
+    var tous = ptsListe();
+    var avec = tous.filter(function(u){ return u.points > 0; }).length;
     h += '<div class="carte plein"><h2>${T("Soldes des clients")}</h2>'
-      + '<p class="dt">' + (PTS.enCirculation || 0) + ' ${T("points en circulation")} (' + (PTS.valeurEnCirculation || 0).toFixed(2) + ' $)</p>';
-    if (!ro) {
-      h += '<div class="pt-ajust"><select id="pt-client" aria-label="${T("Client")}"><option value="">${T("Choisir un client…")}</option>'
-        + (PTS.tousClients || []).map(function(u){ return '<option value="' + esc(u.id) + '">' + esc(u.nom || u.courriel) + (u.courriel ? ' · ' + esc(u.courriel) : '') + '</option>'; }).join('')
-        + '</select><input type="number" id="pt-delta" step="1" aria-label="${T("Points à ajouter ou retirer")}" placeholder="${T("+100 ou −50")}">'
-        + '<input type="text" id="pt-motif" maxlength="120" aria-label="${T("Motif de l’ajustement")}" placeholder="${T("Motif (obligatoire)")}">'
-        + '<button class="mini" id="pt-ajuster">${T("Ajuster le solde")}</button></div>';
-    }
-    h += cl.length
-      ? '<table><thead><tr><th>${T("Client")}</th><th>${T("Courriel")}</th><th class="num">${T("Points")}</th><th class="num">${T("Valeur")}</th></tr></thead><tbody>'
-        + cl.map(function(u){ return '<tr><td>' + esc(u.nom) + '</td><td class="dt">' + esc(u.courriel) + '</td><td class="num">' + u.points + '</td><td class="num">' + (u.points * (cf.valeurPoint || 0)).toFixed(2) + ' $</td></tr>'; }).join('')
-        + '</tbody></table>'
-      : '<div class="vide">${T("Aucun client n’a encore de points.")}</div>';
+      + '<div class="tuiles" style="margin-bottom:.7rem">'
+      + '<div class="tuile"><div class="lbl">${T("Clients")}</div><div class="val">' + szNombre(tous.length, 0) + '</div></div>'
+      + '<div class="tuile"><div class="lbl">${T("Avec des points")}</div><div class="val">' + szNombre(avec, 0) + '</div></div>'
+      + '<div class="tuile"><div class="lbl">${T("Points en circulation")}</div><div class="val">' + szNombre(PTS.enCirculation || 0, 0) + '</div></div>'
+      + '<div class="tuile"><div class="lbl">${T("Valeur")}</div><div class="val">' + szArgent(PTS.valeurEnCirculation || 0) + '</div></div>'
+      + '</div>'
+      + '<div class="pt-outils">'
+      + '<input type="search" id="pt-q" value="' + esc(PQ) + '" placeholder="${T("Rechercher un client : nom ou courriel")}" aria-label="${T("Rechercher un client")}">'
+      + '<select id="pt-filtre" aria-label="${T("Filtrer")}">'
+      + '<option value="tous"' + (PF === 'tous' ? ' selected' : '') + '>${T("Tous les clients")}</option>'
+      + '<option value="avec"' + (PF === 'avec' ? ' selected' : '') + '>${T("Avec des points")}</option>'
+      + '<option value="sans"' + (PF === 'sans' ? ' selected' : '') + '>${T("Sans points")}</option></select>'
+      + '<select id="pt-tri" aria-label="${T("Trier")}">'
+      + '<option value="pts"' + (PTRI === 'pts' ? ' selected' : '') + '>${T("Plus de points d’abord")}</option>'
+      + '<option value="nom"' + (PTRI === 'nom' ? ' selected' : '') + '>${T("Nom (A à Z)")}</option></select>'
+      + '</div>'
+      + '<div id="pt-table">' + ptsTable() + '</div>';
     return h + '</div>';
   }
+  /* ── LES SOLDES : une liste qui tient des centaines de clients ──────────────────────────────
+     Tous les clients (pas seulement ceux qui ont des points : on ajuste aussi un solde à zéro),
+     filtrés et triés ici, par pages. L ajustement s ouvre SOUS la ligne choisie : une bascule
+     Ajouter / Retirer au lieu d un signe à taper, des montants rapides, le nouveau solde annoncé. */
+  var PQ = '', PF = 'tous', PTRI = 'pts', PPAGE = 0, PPARPAGE = 25, POUV = '', PSENS = 1;
+  function ptsListe(){
+    var parId = {};
+    (PTS.clients || []).forEach(function(u){ parId[u.id] = u.points || 0; });
+    var tous = (PTS.tousClients && PTS.tousClients.length) ? PTS.tousClients : (PTS.clients || []);
+    return tous.map(function(u){
+      return { id: u.id, nom: u.nom || '', courriel: u.courriel || '', points: u.points != null ? (u.points || 0) : (parId[u.id] || 0) };
+    });
+  }
+  function ptsPlier(x){ return String(x || '').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, ''); }
+  function ptsFiltres(){
+    var q = ptsPlier(PQ).trim();
+    var l = ptsListe().filter(function(u){
+      if (PF === 'avec' && !(u.points > 0)) return false;
+      if (PF === 'sans' && u.points > 0) return false;
+      return !q || ptsPlier(u.nom + ' ' + u.courriel).indexOf(q) >= 0;
+    });
+    l.sort(PTRI === 'nom'
+      ? function(a, b){ return (a.nom || a.courriel).localeCompare(b.nom || b.courriel, '${LIEU()}'); }
+      : function(a, b){ return (b.points - a.points) || (a.nom || a.courriel).localeCompare(b.nom || b.courriel, '${LIEU()}'); });
+    return l;
+  }
+  function ptsPanneau(u){
+    var vp = (PTS.cfg || {}).valeurPoint || 0;
+    return '<tr class="pt-ouvert"><td colspan="4"><div class="pt-panneau">'
+      + '<div class="pt-sens" role="radiogroup" aria-label="${T("Sens de l’ajustement")}">'
+      + '<button type="button" role="radio" aria-checked="' + (PSENS > 0) + '" data-pt-sens="1" class="' + (PSENS > 0 ? 'on-plus' : '') + '">${T("Ajouter")}</button>'
+      + '<button type="button" role="radio" aria-checked="' + (PSENS < 0) + '" data-pt-sens="-1" class="' + (PSENS < 0 ? 'on-moins' : '') + '">${T("Retirer")}</button></div>'
+      + '<input type="number" id="pt-n" min="1" step="1" inputmode="numeric" aria-label="${T("Nombre de points")}" placeholder="${T("Points")}">'
+      + '<span class="pt-vite">' + [25, 50, 100, 250, 500].map(function(n){ return '<button type="button" class="mini" data-pt-vite="' + n + '">' + szNombre(n, 0) + '</button>'; }).join('') + '</span>'
+      + '<input type="text" id="pt-motif" maxlength="120" list="pt-motifs" aria-label="${T("Motif de l’ajustement")}" placeholder="${T("Motif (obligatoire)")}">'
+      + '<datalist id="pt-motifs"><option value="${T("Geste commercial")}"><option value="${T("Correction d’erreur")}"><option value="${T("Retour de commande")}"><option value="${T("Concours")}"><option value="${T("Anniversaire")}"></datalist>'
+      + '<span class="pt-apres" id="pt-apres" data-solde="' + u.points + '" data-vp="' + vp + '">${T("Solde actuel :")} <b>' + szNombre(u.points, 0) + '</b></span>'
+      + '<button type="button" class="prim" id="pt-ok" data-pt-id="' + esc(u.id) + '">${T("Confirmer")}</button>'
+      + '<button type="button" id="pt-annuler">${T("Annuler")}</button>'
+      + '</div></td></tr>';
+  }
+  function ptsTable(){
+    var ro = !PTS.peutModifier, vp = (PTS.cfg || {}).valeurPoint || 0;
+    var l = ptsFiltres(), n = l.length;
+    var pages = Math.max(1, Math.ceil(n / PPARPAGE));
+    if (PPAGE >= pages) PPAGE = pages - 1;
+    if (PPAGE < 0) PPAGE = 0;
+    var de = PPAGE * PPARPAGE, morceau = l.slice(de, de + PPARPAGE);
+    if (!n) return '<div class="vide">' + (PQ ? '${T("Aucun client ne correspond à cette recherche.")}' : '${T("Aucun client dans cette liste.")}') + '</div>';
+    var h = '<table><thead><tr><th>${T("Client")}</th><th class="num">${T("Points")}</th><th class="num">${T("Valeur")}</th><th></th></tr></thead><tbody>'
+      + morceau.map(function(u){
+          var ouvert = POUV === u.id;
+          return '<tr' + (ouvert ? ' class="pt-ligne-ouverte"' : '') + '><td><div class="pt-nom">' + esc(u.nom || u.courriel) + '</div>'
+            + (u.nom && u.courriel ? '<div class="dt">' + esc(u.courriel) + '</div>' : '') + '</td>'
+            + '<td class="num' + (u.points > 0 ? '' : ' pt-zero') + '"><b>' + szNombre(u.points, 0) + '</b></td>'
+            + '<td class="num dt">' + szArgent(u.points * vp) + '</td>'
+            + '<td class="fin">' + (ro ? '' : '<button type="button" class="mini geste' + (ouvert ? ' actif' : '') + '" data-pt-ouvrir="' + esc(u.id) + '">${T("Ajuster")}</button>') + '</td></tr>'
+            + (ouvert && !ro ? ptsPanneau(u) : '');
+        }).join('')
+      + '</tbody></table>';
+    h += '<div class="pt-pages"><span>' + szNombre(de + 1, 0) + '–' + szNombre(Math.min(n, de + PPARPAGE), 0) + ' ${T("sur")} ' + szNombre(n, 0) + '</span>'
+      + '<select id="pt-parpage" aria-label="${T("Clients par page")}">' + [25, 50, 100].map(function(k){ return '<option value="' + k + '"' + (k === PPARPAGE ? ' selected' : '') + '>' + k + ' ${T("par page")}</option>'; }).join('') + '</select>'
+      + '<button type="button" class="mini" data-pt-page="-1"' + (PPAGE ? '' : ' disabled') + ' aria-label="${T("Page précédente")}">‹</button>'
+      + '<span>' + (PPAGE + 1) + ' / ' + pages + '</span>'
+      + '<button type="button" class="mini" data-pt-page="1"' + (PPAGE < pages - 1 ? '' : ' disabled') + ' aria-label="${T("Page suivante")}">›</button></div>';
+    return h;
+  }
+  function ptsRedessinerTable(focus){
+    var z = document.getElementById('pt-table'); if (!z) return;
+    z.innerHTML = ptsTable();
+    if (focus) { var e = document.getElementById(focus); if (e) e.focus(); }
+  }
+  function ptsApres(){
+    var a = document.getElementById('pt-apres'); if (!a) return;
+    var solde = Number(a.getAttribute('data-solde')) || 0, vp = Number(a.getAttribute('data-vp')) || 0;
+    var n = parseInt((document.getElementById('pt-n') || {}).value, 10);
+    if (!(n > 0)) { a.innerHTML = '${T("Solde actuel :")} <b>' + szNombre(solde, 0) + '</b>'; return; }
+    var nouv = PSENS > 0 ? solde + n : Math.max(0, solde - n);
+    a.innerHTML = '${T("Nouveau solde :")} <b>' + szNombre(nouv, 0) + '</b> (' + szArgent(nouv * vp) + ')'
+      + (PSENS < 0 && n > solde ? ' — ${T("on ne retire pas plus que le solde")}' : '');
+  }
+  function ptsConfirmer(){
+    var ok = document.getElementById('pt-ok'); if (!ok || ok.disabled) return;
+    var a = document.getElementById('pt-apres');
+    var solde = a ? Number(a.getAttribute('data-solde')) || 0 : 0;
+    var n = parseInt((document.getElementById('pt-n') || {}).value, 10);
+    var m = ((document.getElementById('pt-motif') || {}).value || '').trim();
+    if (!(n > 0)) { dire('${T("Indiquez un nombre de points.")}', 'att'); return; }
+    if (!m) { dire('${T("Le motif est obligatoire.")}', 'att'); var em = document.getElementById('pt-motif'); if (em) em.focus(); return; }
+    if (PSENS < 0) n = Math.min(n, solde);
+    if (!n) { dire('${T("Ce client n’a aucun point à retirer.")}', 'att'); return; }
+    ok.disabled = true;
+    appeler('fidelisation:points:ajuster', [ok.getAttribute('data-pt-id'), PSENS * n, m]).then(function(r){
+      ok.disabled = false;
+      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      dire('${T("Solde ajusté : ")}' + szNombre(r.solde, 0) + ' ${T("points au total")}', 'bon');
+      POUV = ''; chargerPoints();
+    });
+  }
   function brancherPoints(){
+    var q = document.getElementById('pt-q');
+    if (q) q.oninput = function(){ PQ = q.value; PPAGE = 0; POUV = ''; ptsRedessinerTable(); };
+    var f = document.getElementById('pt-filtre');
+    if (f) f.onchange = function(){ PF = f.value; PPAGE = 0; POUV = ''; ptsRedessinerTable(); };
+    var t = document.getElementById('pt-tri');
+    if (t) t.onchange = function(){ PTRI = t.value; PPAGE = 0; ptsRedessinerTable(); };
+    var z = document.getElementById('pt-table');
+    if (z) {
+      z.onclick = function(e){
+        var b = e.target.closest ? e.target.closest('button') : null; if (!b || b.disabled) return;
+        if (b.hasAttribute('data-pt-ouvrir')) {
+          var id = b.getAttribute('data-pt-ouvrir');
+          POUV = POUV === id ? '' : id; PSENS = 1;
+          ptsRedessinerTable(POUV ? 'pt-n' : '');
+        } else if (b.hasAttribute('data-pt-sens')) {
+          PSENS = Number(b.getAttribute('data-pt-sens')) < 0 ? -1 : 1;
+          z.querySelectorAll('[data-pt-sens]').forEach(function(x){
+            var on = (Number(x.getAttribute('data-pt-sens')) < 0 ? -1 : 1) === PSENS;
+            x.className = on ? (PSENS > 0 ? 'on-plus' : 'on-moins') : '';
+            x.setAttribute('aria-checked', String(on));
+          });
+          ptsApres();
+        } else if (b.hasAttribute('data-pt-vite')) {
+          var en = document.getElementById('pt-n'); if (en) { en.value = b.getAttribute('data-pt-vite'); ptsApres(); }
+        } else if (b.hasAttribute('data-pt-page')) {
+          PPAGE += Number(b.getAttribute('data-pt-page')); POUV = ''; ptsRedessinerTable();
+        } else if (b.id === 'pt-ok') { ptsConfirmer(); }
+        else if (b.id === 'pt-annuler') { POUV = ''; ptsRedessinerTable(); }
+      };
+      z.oninput = function(e){ if (e.target && e.target.id === 'pt-n') ptsApres(); };
+      z.onchange = function(e){ if (e.target && e.target.id === 'pt-parpage') { PPARPAGE = Number(e.target.value) || 25; PPAGE = 0; ptsRedessinerTable(); } };
+      z.onkeydown = function(e){
+        if (!e.target || (e.target.id !== 'pt-n' && e.target.id !== 'pt-motif')) return;
+        if (e.key === 'Enter') { e.preventDefault(); ptsConfirmer(); }
+        else if (e.key === 'Escape') { POUV = ''; ptsRedessinerTable(); }
+      };
+    }
+
     ['pt-ppd', 'pt-vp', 'pt-pl'].forEach(function(id){ var e = document.getElementById(id); if (e) e.oninput = function(){ var x = document.getElementById('pt-exemple'); if (x) x.innerHTML = ptsExemple(); }; });
     var be = document.getElementById('pt-enr');
     if (be) be.onclick = function(){
@@ -404,17 +563,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
         be.disabled = false;
         if (!r.ok) { dire(r.motif === 'pts_par_dollar' ? '${T("Points par dollar : entre 0 et 100.")}' : r.motif === 'valeur_point' ? '${T("Valeur d’un point : plus de 0 et au plus 10 $.")}' : r.motif === 'plafond' ? '${T("Plafond : entre 0 et 100 %.")}' : expliquer(r), 'err'); return; }
         dire('${T("Réglages enregistrés.")}', 'bon'); chargerPoints();
-      });
-    };
-    var ba = document.getElementById('pt-ajuster');
-    if (ba) ba.onclick = function(){
-      var u = (document.getElementById('pt-client') || {}).value, d = parseInt((document.getElementById('pt-delta') || {}).value, 10), m = ((document.getElementById('pt-motif') || {}).value || '').trim();
-      if (!u || !d || !m) { dire('${T("Choisissez un client, un nombre de points et un motif.")}', 'att'); return; }
-      ba.disabled = true;
-      appeler('fidelisation:points:ajuster', [u, d, m]).then(function(r){
-        ba.disabled = false;
-        if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        dire('${T("Solde ajusté : ")}' + r.solde + ' ${T("points au total")}', 'bon'); chargerPoints();
       });
     };
   }
