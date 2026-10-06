@@ -42,6 +42,7 @@ function curseurSuivant(actuel, rep) {
   const vus = [
     rep.commandes && rep.commandes.dernier,
     rep.retours && rep.retours.dernier,
+    rep.clavardage && rep.clavardage.dernier,
   ].filter((v) => typeof v === 'string' && v !== '');
 
   if (!vus.length) {
@@ -75,6 +76,9 @@ function aAnnoncer(rep) {
   const r = Number((rep.retours && rep.retours.nouvelles) || 0);
   if (Number.isFinite(c) && c > 0) out.push({ type: 'commande', n: c });
   if (Number.isFinite(r) && r > 0) out.push({ type: 'retour', n: r });
+  // Le clavardage (2026-10-06) : une conversation qui attend NOTRE réponse.
+  const ch = Number((rep.clavardage && rep.clavardage.nouvelles) || 0);
+  if (Number.isFinite(ch) && ch > 0) out.push({ type: 'clavardage', n: ch });
   return out;
 }
 

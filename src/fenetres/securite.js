@@ -1284,7 +1284,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (renvoi?'${T("Nouveau mot de passe temporaire")}':'${T("Mot de passe temporaire")}')+'</h3><button class="mini" id="mdp-x">${T("Fermer")}</button></div>'
       + '<div class="liste">'
       + '<div class="note">'+(envoye
-          ? '${T("Le courriel envoyé à ")}'+esc(courriel)+'${T(" donne le nom d’utilisateur et le lien de l’application, mais PAS ce mot de passe : remettez-le en personne, par téléphone ou par texto.")}'
+          ? '${T("Le courriel envoyé à ")}'+esc(courriel)+'${T(" contient un lien sécurisé vers ce mot de passe (chiffré, une seule lecture, 24 heures, après confirmation de son adresse). Il s’affiche aussi ici.")}'
           : '${T("Aucun courriel n’est parti : remettez ce mot de passe en personne, par téléphone ou par texto.")}')+'</div>'
       + '<label for="mdp-val" style="display:block;margin:12px 0 6px;color:var(--tx2)">${T("Mot de passe temporaire :")}</label>'
       + '<div style="display:flex;gap:8px"><input id="mdp-val" readonly value="'+esc(mdp)+'" style="flex:1;font-family:Consolas,monospace;font-size:18px;letter-spacing:.06em" aria-label="${T("Mot de passe temporaire")}">'

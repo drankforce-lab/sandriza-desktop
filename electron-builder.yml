@@ -96,3 +96,8 @@ nsis:
   createDesktopShortcut: true
   createStartMenuShortcut: true
   shortcutName: Administration Sandriza
+# Les liens sandriza://ouvrir/<section> des avis internes (2026-10-06).
+protocols:
+  - name: SANDRIZA
+    schemes:
+      - sandriza

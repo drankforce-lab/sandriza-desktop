@@ -559,6 +559,9 @@ async function unTour() {
     if (a.type === 'commande') {
       toast(pluriel(a.n, TV('nouvelle commande'), TV('nouvelles commandes')),
         TV('Ouvrez l’administration pour la traiter.'), 'commande');
+    } else if (a.type === 'clavardage') {
+      toast(pluriel(a.n, TV('conversation attend votre réponse'), TV('conversations attendent votre réponse')),
+        TV('Ouvrez le clavardage pour répondre.'), 'commande');
     } else {
       toast(pluriel(a.n, TV('nouvelle demande de retour'), TV('nouvelles demandes de retour')),
         TV('Ouvrez l’administration pour la traiter.'), 'retour');

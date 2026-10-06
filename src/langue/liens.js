@@ -269,4 +269,6 @@ module.exports = {
   ' contient le lien seul. Remettez ce mot de passe en personne, par téléphone ou par texto.': ' contains the link only. Hand this password over in person, by phone or by text message.',
   'Mot de passe d’ouverture': 'Access password',
   'Le courriel envoyé à ': 'The email sent to ',
+  ' avec un lien sécurisé vers le nouveau mot de passe. L’ancien ne fonctionne plus.': ' with a secure link to the new password. The old one no longer works.',
+  ' contient un lien sécurisé (une seule lecture, 24 heures) vers ce mot de passe.': ' contains a secure link (one view, 24 hours) to this password.',
 };

@@ -156,4 +156,10 @@ module.exports = {
   // La refonte (2026-09-25).
   'Client et commande': 'Customer and order',
   'Client et commande Total Statut': 'Customer and order Total Status',
+  'Clavardage': 'Chat',
+  'conversation en attente de réponse': 'conversation awaiting a reply',
+  'conversations en attente de réponse': 'conversations awaiting a reply',
+  'conversations attendent votre réponse': 'conversations await your reply',
+  'conversation attend votre réponse': 'conversation awaits your reply',
+  'aucune conversation en attente': 'no conversation waiting',
 };

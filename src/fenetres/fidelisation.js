@@ -252,14 +252,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       + '<div class="sub">' + (t.codesUtilises || 0) + ((t.codesUtilises || 0) > 1 ? '${T(" utilisés")}' : '${T(" utilisé")}') + '</div></div>'
       + '</div>');
 
-    if (D.peutModifier) {
-      h += '<div class="carte"><h2>${T("Notification des commentaires")}</h2>'
-        + '<div class="dt" style="margin-bottom:.4rem">${T("Quand un client laisse un commentaire, ")}'
-        + '${T("il vous est transféré à cette adresse. Laissez vide pour ne rien recevoir.")}</div>'
-        + '<div style="display:flex;gap:.5rem;flex-wrap:wrap">'
-        + '<input type="email" id="fi-mail" aria-label="${T("Courriel de notification des sondages")}" style="flex:1 1 16rem" value="' + esc(D.courrielNotification || '') + '" placeholder="${T("sondages@exemple.com")}">'
-        + '<button class="mini" id="fi-mail-enr">${T("Enregistrer")}</button></div></div>';
+    /* LE JOURNAL DES COMMENTAIRES (2026-10-06, sa demande) : plus de courriel à chaque
+       commentaire — ils se lisent ICI, les 365 derniers jours ; le serveur efface les plus
+       anciens chaque nuit. Les avis sur les articles ne sont pas concernés. */
+    var com = D.commentaires || [];
+    h += '<div class="carte"><h2>${T("Journal des commentaires")}</h2>'
+      + '<div class="dt" style="margin-bottom:.4rem">${T("Les commentaires des 365 derniers jours. Plus anciens : effacés automatiquement.")}</div>';
+    if (!com.length) {
+      h += '<div class="vide">${T("Aucun commentaire pour l’instant.")}</div>';
+    } else {
+      h += '<div class="journal-com" style="max-height:16rem;overflow:auto"><table><thead><tr><th>${T("Date")}</th><th>${T("Client")}</th><th>${T("Note")}</th><th>${T("Commentaire")}</th></tr></thead><tbody>'
+        + com.map(function(c){
+            return '<tr><td style="white-space:nowrap">' + esc(String(c.date || '').slice(0, 10)) + '</td>'
+              + '<td>' + esc(c.client || '—') + (c.commande ? '<div class="dt">' + esc(c.commande) + '</div>' : '') + '</td>'
+              + '<td style="white-space:nowrap">' + (c.note == null ? '—' : note5(c.note)) + '</td>'
+              + '<td>' + esc(c.texte) + '<div class="dt">' + esc(c.sondage || '') + '</div></td></tr>';
+          }).join('')
+        + '</tbody></table></div>';
     }
+    h += '</div>';
 
     /* ⚠ LA DERNIERE CARTE PREND LA HAUTEUR QUI RESTE (#151, 2026-09-24). Les
        tuiles et la carte de notification gardent leur taille naturelle ; c est

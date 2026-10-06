@@ -372,17 +372,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     dire(avecMdp ? '${T("Nouveau mot de passe…")}' : '${T("Envoi du courriel…")}');
     neuf.then(function(r){
       if (!r.ok) { b.disabled = false; dire(expliquer(r), 'err'); return; }
-      /* ⚠ LE MOT DE PASSE NE PART PLUS PAR COURRIEL (sa demande du 2026-10-06) : le
-         courriel porte le lien seul, et le nouveau mot de passe s'affiche ICI, à
-         remettre en personne, par téléphone ou par texto. */
+      /* ⚠ LE MOT DE PASSE N'EST JAMAIS ÉCRIT DANS LE COURRIEL (sa règle du 2026-10-06) : le
+         site le dépose au COFFRE et le courriel porte un lien chiffré, une seule lecture,
+         24 heures, ouvert après confirmation de l'adresse. Il s'affiche aussi ici. */
       return appeler('liens:courriel', [{
-        destinataire: adresse, url: l.url, echeance: jour(l.expireLe)
+        destinataire: adresse, url: l.url, mdp: r.mdp || '', echeance: jour(l.expireLe)
       }]).then(function(e){
         b.disabled = false;
         if (!e.ok) { dire(expliquer(e), 'err'); return; }
         RENVOI = null;
         dire(avecMdp
-          ? ('${T("Courriel envoyé à ")}' + adresse + '${T(" (le lien seul). L’ancien mot de passe ne fonctionne plus.")}')
+          ? ('${T("Courriel envoyé à ")}' + adresse + '${T(" avec un lien sécurisé vers le nouveau mot de passe. L’ancien ne fonctionne plus.")}')
           : ('${T("Courriel envoyé à ")}' + adresse + '.'), 'bon');
         charger(false);
         if (avecMdp && r.mdp) montrerMdpLien(r.mdp, adresse);
@@ -397,7 +397,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     sur.setAttribute('style', 'position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:50');
     sur.innerHTML = '<div style="background:var(--bg2,#fff);color:var(--tx,#111);border-radius:10px;padding:18px 20px;max-width:460px;width:92%;box-shadow:0 10px 40px rgba(0,0,0,.3)">'
       + '<h3 style="margin:0 0 8px">${T("Nouveau mot de passe d’ouverture")}</h3>'
-      + '<p style="margin:0 0 10px;font-size:.85rem">${T("Le courriel envoyé à ")}' + esc(adresse) + '${T(" contient le lien seul. Remettez ce mot de passe en personne, par téléphone ou par texto.")}</p>'
+      + '<p style="margin:0 0 10px;font-size:.85rem">${T("Le courriel envoyé à ")}' + esc(adresse) + '${T(" contient un lien sécurisé (une seule lecture, 24 heures) vers ce mot de passe.")}</p>'
       + '<div style="display:flex;gap:8px"><input id="mdp-l" readonly value="' + esc(mdp) + '" aria-label="${T("Mot de passe d’ouverture")}" style="flex:1;font-family:Consolas,monospace;font-size:18px;letter-spacing:.06em">'
       + '<button id="mdp-l-copier"><span class="ic">📋</span> ${T("Copier")}</button></div>'
       + '<div class="barreoutils" style="margin-top:12px"><span class="droite"><button id="mdp-l-x">${T("Fermer")}</button></span></div></div>';
@@ -609,7 +609,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     b.disabled = true;
     dire('${T("Envoi du courriel…")}');
     appeler('liens:courriel', [{
-      destinataire: a.value.trim(), url: ETAT.neuf.url, echeance: jour(ETAT.neuf.expire)
+      destinataire: a.value.trim(), url: ETAT.neuf.url, mdp: ETAT.neuf.mdpCompte ? '' : (ETAT.neuf.mdp || ''), echeance: jour(ETAT.neuf.expire)
     }]).then(function(r){
       b.disabled = false;
       dire(r.ok ? ('${T("Courriel envoyé à ")}' + a.value.trim() + '.') : expliquer(r), r.ok ? 'bon' : 'err');

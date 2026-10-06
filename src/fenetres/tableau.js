@@ -256,6 +256,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     ['customers', '${T("Clients actifs")}'],
     ['revenue', '${T("Revenus (payés)")}'],
     ['messagerie', 'Messagerie'],
+    ['clavardage', '${T("Clavardage")}'],
     ['returns_new', '${T("Nouveaux retours")}'],
     ['returns_expiring', '${T("Retours qui expirent")}'],
     ['en_livraison', '${T("En livraison")}'],
@@ -478,6 +479,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var files = [
       ['orders', f.aTraiter, '${T("commande à traiter")}', '${T("commandes à traiter")}', false],
       ['support-mgmt', t.messagerie, '${T("message sans réponse")}', '${T("messages sans réponse")}', false],
+      ['chat', t.clavardage, '${T("conversation en attente de réponse")}', '${T("conversations en attente de réponse")}', false],
       ['returns-pending', t.retoursNouveaux, '${T("retour à traiter")}', '${T("retours à traiter")}', false],
       ['returns-expiring', t.retoursExpirent, '${T("retour sur le point d’expirer")}', '${T("retours sur le point d’expirer")}', true],
       ['reviews', f.avis, '${T("avis à modérer")}', '${T("avis à modérer")}', false],
@@ -533,6 +535,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         t.messagerie > 0
           ? (t.messagerie > 1 ? '${T("nouveaux messages en attente")}' : '${T("nouveau message en attente")}')
           : '${T("aucun message en attente")}', ''),
+      clavardage: tuile('clavardage', '${T("Clavardage")}', t.clavardage || 0, (t.clavardage || 0) > 0 ? 'att' : '',
+        (t.clavardage || 0) > 0
+          ? ((t.clavardage > 1) ? '${T("conversations attendent votre réponse")}' : '${T("conversation attend votre réponse")}')
+          : '${T("aucune conversation en attente")}', ''),
       returns_new: tuile('returns_new', '${T("Nouveaux retours")}', t.retoursNouveaux,
         t.retoursNouveaux > 0 ? 'att' : '',
         t.retoursNouveaux > 0
@@ -621,7 +627,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var tu = t.closest('[data-tuile]');
     if (tu) {
       var cibles = { products: 'products', orders: 'orders', customers: 'customers',
-        revenue: 'billing', messagerie: 'support-mgmt',
+        revenue: 'billing', messagerie: 'support-mgmt', clavardage: 'chat',
         returns_new: 'returns-pending', returns_expiring: 'returns-expiring',
         a_traiter: 'orders', en_livraison: 'orders', ruptures: 'inventory',
         avis: 'reviews', factures_retard: 'billing',

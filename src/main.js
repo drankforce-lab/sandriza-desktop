@@ -7251,6 +7251,23 @@ const appliquerModeMenu = () => {
 
 const dessinerMenus = () => { buildMenu(); appliquerModeMenu(); };
 
+/* ══ LES LIENS « sandriza:// » (2026-10-06, sa demande) ══════════════════════════════
+   « Mettre un lien qui appelle l'administration » dans les avis internes (taxes…). Un
+   courriel ne peut pas ouvrir une application avec un lien https ; il mène donc à une
+   page du site (#ouvrir) dont le bouton porte `sandriza://ouvrir/<section>`. Windows
+   (ligne de commande de la seconde instance) et macOS (`open-url`) remettent le lien
+   ICI. ⚠ Liste BLANCHE : un lien venu de l'extérieur ne peut ouvrir que ce qui est
+   nommé ci-dessous — jamais une action arbitraire de `actionApp` (quitter, recharger…). */
+const LIENS_OUVRABLES = new Set(['config-taxes', 'rappels', 'journaux', 'securite', 'config-automations', 'chat-config', 'sauvegarde', 'incidents', 'config-telephonie']);
+const ouvrirLienSandriza = (url) => {
+  montrerAdministration();
+  const m = String(url || '').match(/^sandriza:\/\/ouvrir\/([a-z0-9-]+)/i);
+  const nom = m ? m[1].toLowerCase() : '';
+  if (!LIENS_OUVRABLES.has(nom)) return;
+  // Laisser la fenêtre principale se montrer (et la session se relire) avant d'ouvrir la section.
+  setTimeout(() => { try { actionApp(nom); } catch (e) {} }, 900);
+};
+
 // ── Une seule instance ────────────────────────────────────────────────────────
 if (!app.requestSingleInstanceLock()) {
   app.quit();
@@ -7275,7 +7292,13 @@ if (!app.requestSingleInstanceLock()) {
        qui marche déjà (« sa marche bien », ses mots). Sans raison : cliquer le
        raccourci de l'application et arriver sur son écran de connexion n'a rien
        d'inexpliqué — le toast est là pour le clic sur une NOTIFICATION. */
-  app.on('second-instance', () => { montrerAdministration(); });
+  app.on('second-instance', (ev, argv) => {
+    const lien = (argv || []).find((x) => /^sandriza:\/\//i.test(String(x)));
+    if (lien) { ouvrirLienSandriza(lien); return; }
+    montrerAdministration();
+  });
+  // macOS : le lien arrive par cet événement, et non par la ligne de commande.
+  app.on('open-url', (ev, url) => { ev.preventDefault(); ouvrirLienSandriza(url); });
 
   /* ⚠ QUIRK WINDOWS (releve DEUX FOIS le 2026-08-09, fenetre A propos —
      qui n est PAS une fenetre ouvrirNative, d ou le premier correctif rate) :
@@ -7297,6 +7320,10 @@ if (!app.requestSingleInstanceLock()) {
   });
 
   app.whenReady().then(() => {
+    // L'application répond aux liens sandriza:// (avis internes). Sans effet si déjà inscrite.
+    try { if (!app.isDefaultProtocolClient('sandriza')) app.setAsDefaultProtocolClient('sandriza'); } catch (e) {}
+    // Lancée PAR un lien (Windows, premier démarrage) : le lien est sur la ligne de commande.
+    try { const lien0 = process.argv.find((x) => /^sandriza:\/\//i.test(String(x))); if (lien0) setTimeout(() => ouvrirLienSandriza(lien0), 2500); } catch (e) {}
     /* ⚠⚠ L'IDENTITÉ DE L'APPLICATION, ET C'EST CE QUI ÉCRIVAIT
        « electron.app.Administration Sandriza » EN TÊTE DE CHAQUE NOTIFICATION.
        Sans AppUserModelID, Windows en fabrique un à partir du binaire — d'où ce

@@ -253,4 +253,10 @@ module.exports = {
   "Réglages enregistrés.": "Settings saved.",
   "Choisissez un client, un nombre de points et un motif.": "Choose a customer, a number of points and a reason.",
   "Solde ajusté : ": "Balance adjusted: ",
+  'Journal des commentaires': 'Comments log',
+  'Les commentaires des 365 derniers jours. Plus anciens : effacés automatiquement.': 'Comments from the last 365 days. Older ones are deleted automatically.',
+  'Aucun commentaire pour l’instant.': 'No comment yet.',
+  'Commentaire': 'Comment',
+  'Client': 'Customer',
+  'Note': 'Rating',
 };

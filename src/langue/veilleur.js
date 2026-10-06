@@ -100,4 +100,7 @@ module.exports = {
   'nouvelle demande de retour': 'new return request',
   'nouvelles demandes de retour': 'new return requests',
   'Ouvrez l’administration pour la traiter.': 'Open the administration to handle it.',
+  'conversation attend votre réponse': 'conversation awaits your reply',
+  'conversations attendent votre réponse': 'conversations await your reply',
+  'Ouvrez le clavardage pour répondre.': 'Open the chat to reply.',
 };

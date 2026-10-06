@@ -387,5 +387,6 @@ module.exports = {
   'Aucune — elle lui sera proposée à sa prochaine connexion.': 'None — one will be offered at their next sign-in.',
   'Reproposer': 'Offer again',
   'Retirer': 'Remove',
-  'vue le ': 'last used '
+  'vue le ': 'last used ',
+  ' contient un lien sécurisé vers ce mot de passe (chiffré, une seule lecture, 24 heures, après confirmation de son adresse). Il s’affiche aussi ici.': ' contains a secure link to this password (encrypted, one view, 24 hours, after confirming their address). It is also shown here.',
 };
