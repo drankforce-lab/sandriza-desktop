@@ -7093,6 +7093,8 @@ const JEU = {
             ] },
           ],
         },
+        // L ajustement propose d apres les retours (2026-10-07) : une tendance nette.
+        'produit:ajustement': { ok: true, actuel: '', total: 4, petit: 3, grand: 0, seuil: 3, suggestion: 'petit' },
         'produit:historique': {
           ok: true,
           entrees: [

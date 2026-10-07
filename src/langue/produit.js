@@ -509,4 +509,21 @@ module.exports = {
   'Mo — déposée à l’enregistrement.': 'MB — uploaded when saved.',
   'Mo (maximum 5,5 Mo — raccourcissez-la ou réduisez sa résolution).': 'MB (maximum 5.5 MB — shorten it or lower its resolution).',
   'Mo — rien n’a été ajouté.': 'MB — nothing was added.',
+  /* ── L AJUSTEMENT DU MODELE (2026-10-07) ── les VALEURS (petit, grand) sont de
+     la donnee et ne passent jamais ici ; seuls les libelles se traduisent. */
+  'Ajustement': 'Fit',
+  'Taille petit (conseiller la taille au-dessus)': 'Runs small (recommend one size up)',
+  'Taille grand (conseiller la taille au-dessous)': 'Runs large (recommend one size down)',
+  'Auto d’après les retours : aucune donnée pour une fiche neuve.': 'Auto from returns: no data for a new product.',
+  'Auto d’après les retours : aucun retour « taille incorrecte » pour ce produit.': 'Auto from returns: no “wrong size” return for this product.',
+  'Auto d’après les retours : aucune tendance nette': 'Auto from returns: no clear trend',
+  'Auto d’après les retours :': 'Auto from returns:',
+  'taille petit': 'runs small',
+  'taille grand': 'runs large',
+  'vers une taille au-dessus': 'towards a larger size',
+  'vers une taille au-dessous': 'towards a smaller size',
+  'retour « taille incorrecte »': '“wrong size” return',
+  'retours « taille incorrecte »': '“wrong size” returns',
+  'seuil': 'threshold',
+  'Appliquer': 'Apply',
 };

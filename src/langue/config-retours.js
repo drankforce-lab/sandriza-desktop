@@ -79,5 +79,10 @@ module.exports = {
      ete prise. */
   'Enregistré — jours ajustés au pair supérieur (':
     'Saved — days rounded up to the next even number (',
-  'Retours enregistrés.': 'Returns saved.'
+  'Retours enregistrés.': 'Returns saved.',
+  /* Le conseil de taille (2026-10-07). */
+  'Conseil de taille': 'Size advice',
+  'Proposé dans la fenêtre Produit d’après les retours « taille incorrecte ».': 'Suggested in the Product window from “wrong size” returns.',
+  'Nombre minimal de retours': 'Minimum number of returns',
+  'Au moins 60 % de ces retours doivent aller dans le même sens (taille au-dessus ou au-dessous).': 'At least 60% of these returns must point the same way (one size up or down).'
 };

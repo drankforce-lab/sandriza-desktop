@@ -189,6 +189,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="ch"><label for="f-country">${T("Pays")}</label><input type="text" id="f-country" value="' + esc(d.country) + '"' + dis + '></div>'
       + '</div></div>');
 
+    /* LE CONSEIL DE TAILLE (2026-10-07) : a partir de combien de retours
+       << taille incorrecte >> la fenetre Produit propose << taille petit >> ou
+       << taille grand >> (60 % des retours dans le meme sens). La proposition
+       reste une proposition : rien ne s affiche en boutique sans qu on la pose. */
+    h.push('<div class="carte"><h2>${T("Conseil de taille")}</h2>'
+      + '<p class="sous">${T("Proposé dans la fenêtre Produit d’après les retours « taille incorrecte ».")}</p>'
+      + '<div class="ch"><label for="f-ajseuil">${T("Nombre minimal de retours")}</label>'
+      + '<input id="f-ajseuil" type="number" min="1" max="50" step="1" value="' + esc(d.ajustementSeuil == null ? 3 : d.ajustementSeuil) + '"' + dis + '>'
+      + '<div class="aide">${T("Au moins 60 % de ces retours doivent aller dans le même sens (taille au-dessus ou au-dessous).")}</div></div></div>');
+
     corps.innerHTML = h.join('');
     var fd = document.getElementById('f-days');
     if (fd) fd.oninput = majMoitie;
@@ -201,7 +211,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var val = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
     OCCUPE = true; bsave.disabled = true; dire('${T("Enregistrement…")}');
     appeler('config:retours:ecrire', [{
-      windowDays: val('f-days'), splitRefundEnabled: chk('f-split'),
+      windowDays: val('f-days'), splitRefundEnabled: chk('f-split'), ajustementSeuil: val('f-ajseuil'),
       name: val('f-name'), street: val('f-street'), city: val('f-city'),
       province: val('f-province'), postal: val('f-postal'), country: val('f-country') }]).then(function(r){
       OCCUPE = false;

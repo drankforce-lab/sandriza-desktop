@@ -257,4 +257,11 @@ module.exports = {
   'Message automatique :': 'Automatic message:',
   'sans bandeau': 'no banner',
   'avec bandeau': 'with banner',
+  /* ── LOOK COMPLET (offre « ensemble », 2026-10-07) ── les chiffres restent :
+     ce sont des regles (1 a 90 %, 2 a 6 produits). */
+  'Look complet (ensemble)': 'Complete look (bundle)',
+  'Pourcentage (1 à 90 %) appliqué à chaque pièce quand toutes les pièces choisies sont au panier. Choisissez de 2 à 6 produits dans la portée.':
+    'Percentage (1 to 90%) applied to each piece when all the chosen pieces are in the cart. Choose 2 to 6 products in the scope.',
+  'Le rabais d’un look complet va de 1 à 90 %.': 'A complete-look discount ranges from 1 to 90%.',
+  'Un look complet nomme de 2 à 6 produits.': 'A complete look names 2 to 6 products.',
 };

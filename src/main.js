@@ -2237,7 +2237,7 @@ const OPS_PONT = new Set([
   // Le brouillon GENERIQUE de n importe quelle fenetre d edition (portee + cle).
   'brouillon:lire', 'brouillon:ecrire', 'brouillon:jeter',
   'produit:brouillonLire', 'produit:brouillonEcrire', 'produit:brouillonJeter',
-  'produit:changements', 'produit:historique',
+  'produit:changements', 'produit:historique', 'produit:ajustement',
   'caisse:etat',
   'commande:contexte', 'commande:lire', 'commande:bon',
   'commande:etiquette', 'commande:prete', 'commande:expedier',

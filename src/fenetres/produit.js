@@ -61,6 +61,9 @@ html.jour .pf-med-l video{background:#1d2433}
 #p-360-bande{display:flex;gap:4px;flex-wrap:wrap;margin-top:.4rem}
 #p-360-bande img{width:40px;height:52px;object-fit:cover;border-radius:5px;border:1px solid var(--v22)}
 .cote.pf-bas{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}
+/* L ajustement du modele, sous les tailles (2026-10-07). */
+.pf-aj{margin-top:.7rem;max-width:30rem}
+.pf-aj .aide .mini{margin-left:.4rem}
 /* Les tailles : de vraies touches, pas des pastilles de 1,75 rem. */
 #p-tailles .jeton{height:2.4rem;min-width:3.1rem;justify-content:center;font-weight:700;border-radius:10px;font-size:.88rem}
 #p-tailles .jeton.on{background:#c9a97e;border-color:#c9a97e;color:#1a1208}
@@ -485,7 +488,19 @@ function pageProduit(id) {
       + (CTX.tailles.length
           ? CTX.tailles.map(function(t){ return '<span class="jeton" data-t="' + esc(t) + '">' + esc(t) + '</span>'; }).join('')
           : '<span class="aide">${T("Aucune taille au référentiel.")}</span>')
-      + '</div></div>'
+      + '</div>'
+      // L AJUSTEMENT DU MODELE (2026-10-07) : un champ PUBLIC de la fiche, que la
+      // boutique affiche sous le choix de la taille. Pose A LA MAIN ; la ligne
+      // dessous PROPOSE une valeur calculee d apres les retours << taille
+      // incorrecte >> (produit:ajustement) — les retours ne quittent jamais
+      // l administration. ⚠ Les valeurs (petit, grand) sont de la DONNEE : seuls
+      // les libelles se traduisent.
+      + '<div class="pf-aj">'
+      + sel('p-ajust', '${T("Ajustement")}', [{ v: '', l: '${T("Normal")}' },
+            { v: 'petit', l: '${T("Taille petit (conseiller la taille au-dessus)")}' },
+            { v: 'grand', l: '${T("Taille grand (conseiller la taille au-dessous)")}' }])
+      + '<div class="aide" id="p-ajust-sug"></div></div>'
+      + '</div>'
       + '<div class="carte plein"><h2>${T("Couleurs offertes")}</h2>'
       // ⚠ UNE RECHERCHE, PAS UN MUR DE JETONS. Le moteur de couleurs en propose
       // des centaines : les afficher toutes etait impossible, et c est
@@ -1765,6 +1780,7 @@ function pageProduit(id) {
     poser('p-genre', p.genre || ''); poser('p-age', p.ageGroup || '');
     poser('p-style', p.style || ''); poser('p-guide', p.sizeGuideId || '');
     poser('p-etiq', p.tag || ''); poser('p-fourn', p.supplierId || '');
+    poser('p-ajust', (p.ajustement === 'petit' || p.ajustement === 'grand') ? p.ajustement : '');
     poser('p-prix', p.price != null ? szArgentChamp(p.price) : '');
     poser('p-solde', p.salePrice != null ? szArgentChamp(p.salePrice) : '');
     poser('p-cout', p.acquisitionCost != null ? szArgentChamp(p.acquisitionCost) : '');
@@ -2466,7 +2482,7 @@ function pageProduit(id) {
       f: {
         nom: val('p-nom'), cat: val('p-cat'), sku: val('p-sku'), marque: val('p-marque'),
         desc: val('p-desc'), genre: val('p-genre'), age: val('p-age'), style: val('p-style'),
-        guide: val('p-guide'), etiq: val('p-etiq'), fourn: val('p-fourn'),
+        guide: val('p-guide'), etiq: val('p-etiq'), fourn: val('p-fourn'), ajust: val('p-ajust'),
         prix: val('p-prix'), solde: val('p-solde'), cout: val('p-cout'),
         poids: val('p-poids'), unite: val('p-unite'), seuil: val('p-seuil'),
         limclient: val('p-limclient'),
@@ -2510,6 +2526,7 @@ function pageProduit(id) {
     poser('p-marque', f.marque); poser('p-desc', f.desc);
     poser('p-genre', f.genre); poser('p-age', f.age); poser('p-style', f.style);
     poser('p-guide', f.guide); poser('p-etiq', f.etiq); poser('p-fourn', f.fourn);
+    poser('p-ajust', f.ajust || '');
     poser('p-prix', f.prix); poser('p-solde', f.solde); poser('p-cout', f.cout);
     poser('p-poids', f.poids); poser('p-seuil', f.seuil);
     poser('p-limclient', f.limclient || '');
@@ -2589,6 +2606,39 @@ function pageProduit(id) {
     });
   }
 
+  /* La proposition << Auto d apres les retours >> sous le choix de l ajustement.
+     Une fiche neuve n a aucun retour : la ligne le dit, sans appel. Un echec du
+     pont n est pas grave ici — la ligne se tait, le choix manuel reste. */
+  function chargerAjustement(){
+    var z = document.getElementById('p-ajust-sug');
+    if (!z) return;
+    if (!ID) { z.textContent = '${T("Auto d’après les retours : aucune donnée pour une fiche neuve.")}'; return; }
+    P.appeler('produit:ajustement', ID).then(function(r){
+      if (!r || !r.ok) { z.textContent = ''; return; }
+      var lib = { petit: '${T("taille petit")}', grand: '${T("taille grand")}' };
+      var dec = szNombre(r.petit) + ' ' + '${T("vers une taille au-dessus")}' + ', ' + szNombre(r.grand) + ' ' + '${T("vers une taille au-dessous")}';
+      if (!r.total) { z.textContent = '${T("Auto d’après les retours : aucun retour « taille incorrecte » pour ce produit.")}'; return; }
+      if (!r.suggestion) {
+        z.textContent = '${T("Auto d’après les retours : aucune tendance nette")}' + ' (' + szNombre(r.total) + ' ' + szPl(r.total, '${T("retour « taille incorrecte »")}', '${T("retours « taille incorrecte »")}') + ' — ' + dec
+          + ' ; ' + '${T("seuil")}' + ' ' + szNombre(r.seuil) + ', 60 %).';
+        return;
+      }
+      z.innerHTML = '';
+      z.appendChild(document.createTextNode('${T("Auto d’après les retours :")}' + ' ' + lib[r.suggestion] + ' (' + szNombre(r.total)
+        + ' ' + szPl(r.total, '${T("retour « taille incorrecte »")}', '${T("retours « taille incorrecte »")}') + ' — ' + dec + '). '));
+      if (val('p-ajust') !== r.suggestion) {
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'mini'; b.textContent = '${T("Appliquer")}';
+        b.onclick = function(){
+          poser('p-ajust', r.suggestion);
+          b.remove();
+          try { document.getElementById('p-ajust').dispatchEvent(new Event('change', { bubbles: true })); } catch (e) {}
+        };
+        z.appendChild(b);
+      }
+    });
+  }
+
   function charger(){
     P.appeler('produit:contexte').then(function(c){
       if (!c || !c.ok) { vide('${T("Formulaire indisponible")}', expliquer(c)); return; }
@@ -2599,6 +2649,7 @@ function pageProduit(id) {
         document.getElementById('titre').textContent = ID ? '${T("Modifier le produit")}' : '${T("Nouveau produit")}';
         dessiner();
         brancherApercu();
+        chargerAjustement();
         if (ID) {
           // ⚠ L INSTANTANÉ SE PREND APRÈS remplir, jamais avant : pris trop tôt
           // il serait vide, et la fiche entière passerait pour « modifiée » dès
@@ -2756,6 +2807,7 @@ function pageProduit(id) {
       brand: val('p-marque'), description: val('p-desc'),
       genre: val('p-genre'), ageGroup: val('p-age'), style: val('p-style'),
       sizeGuideId: val('p-guide'), tag: val('p-etiq'), supplierId: val('p-fourn'),
+      ajustement: val('p-ajust') || null,
       price: argentNombre(val('p-prix')),
       salePrice: argentNombre(val('p-solde')),
       acquisitionCost: argentNombre(val('p-cout')),

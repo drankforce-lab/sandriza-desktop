@@ -236,6 +236,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     valeur:             '${T("La valeur du rabais doit être supérieure à zéro.")}',
     bogo:               '${T("Quantités « 2 pour 1 » invalides — la quantité gratuite doit être inférieure à la quantité achetée, qui vaut au moins 2.")}',
     paliers:            '${T("Ajoutez au moins un palier valable : quantité d’au moins 2, rabais entre 1 et 100 %.")}',
+    ensemble_pct:       '${T("Le rabais d’un look complet va de 1 à 90 %.")}',
+    ensemble_produits:  '${T("Un look complet nomme de 2 à 6 produits.")}',
     categories:         '${T("Choisissez au moins une catégorie.")}',
     produits:           '${T("Choisissez au moins un produit.")}',
     message:            '${T("Le message du bandeau est requis.")}',
@@ -397,13 +399,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
           + '<option value="fixed"' + (genre === 'fixed' ? ' selected' : '') + '>${T("Montant fixe ($)")}</option>'
           + '<option value="bogo"' + (genre === 'bogo' ? ' selected' : '') + '>${T("« 2 pour 1 » (quantité)")}</option>'
           + '<option value="tiered"' + (genre === 'tiered' ? ' selected' : '') + '>${T("Paliers de quantité")}</option>'
+          + '<option value="ensemble"' + (genre === 'ensemble' ? ' selected' : '') + '>${T("Look complet (ensemble)")}</option>'
           + '</select>')
       + '</div>';
 
     h += '<div class="grille g3 ecart" id="of-bloc-val"' + (genre === 'bogo' || genre === 'tiered' ? ' style="display:none"' : '') + '>'
       + ch('', '${T("Valeur ")}<span class="req">*</span>',
           '<input type="number" id="of-valeur" aria-label="${T("Valeur de l’offre")}" min="0" step="0.01" value="' + esc(o.valeur || '') + '">')
-      + '</div>';
+      + '</div>'
+      /* LOOK COMPLET (2026-10-07) : la valeur est un POURCENTAGE (1 a 90), applique
+         a chaque piece quand TOUTES les pieces choisies sont au panier ; la portee
+         est forcee a << Des produits nommes >> (2 a 6). */
+      + '<p class="aide-off" id="of-aide-ens"' + (genre === 'ensemble' ? '' : ' hidden') + '>'
+      + '${T("Pourcentage (1 à 90 %) appliqué à chaque pièce quand toutes les pièces choisies sont au panier. Choisissez de 2 à 6 produits dans la portée.")}</p>';
 
     h += '<div id="of-bloc-bogo" class="ecart"' + (genre === 'bogo' ? '' : ' style="display:none"') + '>'
       + '<div class="grille g3">'
@@ -690,6 +698,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
       + (SUPPR_ARME === x.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
   }
 
+  /* Look complet : la portee est la liste de ses pieces — << Des produits
+     nommes >>, verrouillee tant que ce type est choisi. */
+  function porteeEnsemble(oui){
+    var ap = document.getElementById('of-appli');
+    var ai = document.getElementById('of-aide-ens');
+    if (ai) ai.hidden = !oui;
+    if (!ap) return;
+    if (oui && ap.value !== 'products') { ap.value = 'products'; if (ap.onchange) ap.onchange(); }
+    ap.disabled = !!oui;
+  }
   function brancherPortee(prefixe){
     var ap = document.getElementById(prefixe + '-appli');
     if (ap) ap.onchange = function(){
@@ -841,11 +859,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
         if (bv) bv.style.display = (g === 'bogo' || g === 'tiered') ? 'none' : '';
         if (bb) bb.style.display = g === 'bogo' ? '' : 'none';
         if (bp) bp.style.display = g === 'tiered' ? '' : 'none';
+        porteeEnsemble(g === 'ensemble');
       };
       var bpl = document.getElementById('of-palier-plus');
       if (bpl) bpl.onclick = function(){ lirePaliers(); PALIERS.push({ qty: '', percent: '' }); redessinerPaliers(); };
       brancherPaliers();
       brancherPortee('of');
+      porteeEnsemble((gr && gr.value) === 'ensemble');
       brancherApercu('of');
       var baf = document.getElementById('of-bandeau-affiche');
       if (baf) baf.onchange = function(){
