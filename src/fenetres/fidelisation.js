@@ -213,7 +213,7 @@ label.case input{width:15px;height:15px;accent-color:#c9a97e;margin:0}
  */
 function pageFidelisation(ouverture) {
   const ouv = String(ouverture || '');
-  const depart = (['recompenses', 'invitations', 'ambassadrices'].indexOf(ouv) >= 0) ? ouv : 'sondages';
+  const depart = (['recompenses', 'invitations', 'ambassadrices', 'parrainage', 'paliers'].indexOf(ouv) >= 0) ? ouv : 'sondages';
   const editeur = (ouv === 'sondage-nouveau');
   return `${TETE()}
 <title>${T("Fidélisation et sondages — Administration Sandriza")}</title>
@@ -964,6 +964,295 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     }
   }
 
+  /* ══ L ONGLET PARRAINAGE (2026-10-07) ══════════════════════════════════════
+     « Offrez 10 $ a une amie, recevez 10 $ a sa premiere commande. » Deux vues :
+     les amies invitees (chaque coupon emis, sa commande, son verdict) et les
+     reglages. ⚠ LE SERVEUR DECIDE (lib-parrainage.php) : qui est nouvelle, ce
+     qui est un abus, ce qui est du — et une commande n est jamais payee deux
+     fois. Le versement exige en plus admin ou super-admin ET la boutique lancee ;
+     le cron des livraisons verse aussi, de lui-meme.
+     ⚠ Les saisies vivent dans PARCFG (moissonnees a chaque frappe) : un redessin ne perd rien. */
+  var PAR = null, PARCHARGE = false, PARV = 'liste', PARCFG = null, PARARME = '', PARPAGE = 0, PARPP = 12;
+  var PARMOTIFS = {
+    role:             '${T("Réservé à l’administration (rôle admin ou super-admin).")}',
+    pas_lance:        '${T("Les versements commencent au lancement de la boutique.")}',
+    inactif:          '${T("Le programme est inactif : rien ne se verse.")}',
+    reseau:           '${T("Le serveur ne répond pas — rien n’a été écrit. Réessayez.")}',
+    version_site:     '${T("Le site ne connaît pas encore ce programme : rechargez la fenêtre principale.")}',
+    montant_amie:     '${T("Rabais de l’amie : entre 1 et 500 $.")}',
+    montant_marraine: '${T("Récompense de la marraine : entre 0 et 500 $.")}',
+    minimum:          '${T("Commande minimale : entre 0 et 5 000 $.")}',
+    delai:            '${T("Délai : entre 0 et 365 jours.")}'
+  };
+  function parExpliquer(r){ return PARMOTIFS[r && r.motif] || expliquer(r); }
+  function chargerPar(){
+    PARCHARGE = true;
+    appeler('fidelisation:par:donnees', []).then(function(r){
+      PARCHARGE = false;
+      PAR = r.ok ? r : { erreur: parExpliquer(r) };
+      if (r.ok) PARCFG = null;
+      if (ONGLET === 'parrainage') dessiner();
+    });
+  }
+  function parOccupe(){ return !!((PARCFG && !PARCFG._vierge) || PARARME); }
+  function parRaisonVerser(){
+    var t = PAR.totaux || {};
+    if (!(PAR.cfg && PAR.cfg.actif)) return PARMOTIFS.inactif;
+    if (!PAR.lance) return PARMOTIFS.pas_lance;
+    if (!PAR.peutVerser) return PARMOTIFS.role;
+    if (!t.nbDues) return '${T("Aucune récompense due pour l’instant.")}';
+    return '';
+  }
+  var PARETATS = {
+    emis: '${T("Code émis, pas encore de commande")}', due: '${T("Due")}', versee: '${T("Versée")}',
+    annulee: '${T("Annulée")}', remboursee: '${T("Remboursée")}', sous_minimum: '${T("Sous le minimum après retour")}',
+    soi_meme: '${T("Commande de la marraine")}', meme_adresse: '${T("Adresse de la marraine")}',
+    pas_premiere: '${T("Pas sa première commande")}', non_livree: '${T("Pas encore livrée")}',
+    date_livraison: '${T("Date de livraison inconnue")}', zero: '${T("Aucune récompense")}',
+    marraine_introuvable: '${T("Marraine introuvable")}'
+  };
+  function parEtat(l){
+    if (l.etat === 'attente' && l.motif === 'delai') return '${T("Délai de retour jusqu’au")}' + ' ' + esc(l.disponibleLe);
+    var k = (l.etat === 'due' || l.etat === 'versee' || l.etat === 'emis') ? l.etat : l.motif;
+    return PARETATS[k] || esc(l.motif || l.etat);
+  }
+  function parPill(l){
+    return l.etat === 'versee' ? 'vert' : l.etat === 'due' ? 'ambre' : l.etat === 'attente' ? 'bleu' : '';
+  }
+  function parPages(n){
+    var pp = Math.max(1, PARPP), pages = Math.max(1, Math.ceil(n / pp));
+    if (PARPAGE >= pages) PARPAGE = pages - 1;
+    if (PARPAGE < 0) PARPAGE = 0;
+    if (pages < 2) return '';
+    return '<div class="amb-pages"><button type="button" class="mini" data-par-page="-1"' + (PARPAGE ? '' : ' disabled') + ' aria-label="${T("Page précédente")}">‹</button>'
+      + '<span>' + (PARPAGE + 1) + ' / ' + pages + '</span>'
+      + '<button type="button" class="mini" data-par-page="1"' + (PARPAGE < pages - 1 ? '' : ' disabled') + ' aria-label="${T("Page suivante")}">›</button></div>';
+  }
+  function parVueListe(){
+    var l = PAR.lignes || [], ro = !PAR.peutModifier, t = PAR.totaux || {}, raison = parRaisonVerser();
+    var h = '<div class="barreoutils"><span class="dt">' + szNombre(t.invitees || 0, 0) + ' ${T("code(s) émis")}' + ' · ' + szNombre(t.commandes || 0, 0) + ' ${T("commande(s)")}' + '</span>'
+      + '<div class="droite"><span>${T("En attente :")} <b>' + szArgent(t.attente || 0) + '</b></span>'
+      + '<span>${T("Dû :")} <b>' + szArgent(t.du || 0) + '</b></span>'
+      + '<span>${T("Versé :")} <b>' + szArgent(t.verse || 0) + '</b></span>'
+      + (ro ? '' : '<button type="button" class="mini ' + (PARARME === 'verser' ? 'danger' : 'prim') + '" data-par="verser"'
+          + (raison ? ' disabled title="' + esc(raison) + '"' : '') + '>'
+          + (PARARME === 'verser' ? '${T("Confirmer le versement ?")}' : '${T("Verser les récompenses dues")}') + '</button>')
+      + '</div></div>';
+    if (raison && !ro) h += '<div class="dt amb-raison">' + esc(raison) + '</div>';
+    h += '<div class="carte plein"><h2>${T("Amies invitées")}</h2>';
+    if (!l.length) {
+      return h + '<div class="vide">${T("Aucune amie invitée pour l’instant.")}' + '<div style="margin-top:.35rem">${T("Un code s’émet quand une amie arrivée par un lien de parrainage demande son rabais à la caisse.")}</div></div></div>';
+    }
+    var pp = Math.max(1, PARPP), morceau = l.slice(PARPAGE * pp, PARPAGE * pp + pp);
+    h += '<div id="par-table" class="liste"><table><thead><tr><th>${T("Émis le")}</th>' + '<th>${T("Marraine")}</th>' + '<th>${T("Amie")}</th>'
+      + '<th>${T("Commande")}</th>' + '<th class="num">${T("Récompense")}</th>' + '<th>${T("État")}</th></tr></thead><tbody>'
+      + morceau.map(function(x){
+          return '<tr><td class="dt" style="white-space:nowrap">' + esc(x.emisLe) + '</td>'
+            + '<td><div class="pt-nom">' + esc(x.marraine || '—') + '</div><div class="dt">' + esc(x.marraineCourriel) + '</div></td>'
+            + '<td>' + esc(x.amie) + '<div class="dt"><span class="code">' + esc(x.coupon) + '</span></div></td>'
+            + '<td>' + (x.commande ? esc(x.commande) + '<div class="dt">' + esc(x.date) + '</div>' : '<span class="dt">—</span>') + '</td>'
+            + '<td class="num">' + (x.montant ? szArgent(x.montant) : '—') + '</td>'
+            + '<td><span class="rf-pill ' + parPill(x) + '">' + parEtat(x) + '</span></td></tr>';
+        }).join('')
+      + '</tbody></table></div>' + parPages(l.length);
+    return h + '</div>';
+  }
+  function parExemple(c){
+    var a = parseFloat(String(c.montantAmie).replace(',', '.')) || 0, m = parseFloat(String(c.montantMarraine).replace(',', '.')) || 0;
+    var mi = parseFloat(String(c.minimumCommande).replace(',', '.')) || 0, dl = parseInt(c.delaiJours, 10) || 0;
+    return '${T("Exemple : une amie arrive par le lien, commande pour")} <b>' + szArgent(Math.max(mi, 60)) + '</b> ${T("d’articles et paie")} <b>' + szArgent(Math.max(0, Math.max(mi, 60) - a)) + '</b>. '
+      + '${T("Sa commande livrée, après")} ' + szNombre(dl, 0) + ' ${T("jours sans retour, la marraine reçoit")} <b>' + szArgent(m) + '</b> ${T("en crédit boutique.")}';
+  }
+  function parVueProgramme(){
+    var ro = !PAR.peutModifier, dis = ro ? ' disabled' : '';
+    if (!PARCFG) {
+      var s = PAR.cfg || {};
+      PARCFG = { actif: !!s.actif, montantAmie: s.montantAmie, montantMarraine: s.montantMarraine, minimumCommande: s.minimumCommande, delaiJours: s.delaiJours, _vierge: true };
+    }
+    var c = PARCFG;
+    return '<div class="carte"><h2>${T("Le programme")}</h2>'
+      + szInter('par-actif', '${T("Programme actif")}', '${T("Le lien de chaque compte client, le rabais de l’amie à la caisse et la récompense de la marraine.")}', !!c.actif, ro ? 'disabled' : '')
+      + '<div class="amb-grille" style="margin-top:.6rem">'
+      + '<label>${T("Rabais offert à l’amie ($)")}<input type="number" data-par-cfg="montantAmie" min="1" max="500" step="1" value="' + esc(c.montantAmie) + '"' + dis + '></label>'
+      + '<label>${T("Commande minimale de l’amie ($)")}<input type="number" data-par-cfg="minimumCommande" min="0" max="5000" step="1" value="' + esc(c.minimumCommande) + '"' + dis + '><span class="dt">${T("articles, avant taxes et livraison")}</span></label>'
+      + '<label>${T("Récompense de la marraine ($)")}<input type="number" data-par-cfg="montantMarraine" min="0" max="500" step="1" value="' + esc(c.montantMarraine) + '"' + dis + '><span class="dt">${T("en crédit boutique")}</span></label>'
+      + '<label>${T("Délai avant de verser (jours)")}<input type="number" data-par-cfg="delaiJours" min="0" max="365" step="1" value="' + esc(c.delaiJours) + '"' + dis + '><span class="dt">${T("après la livraison — la fenêtre de retour")}</span></label>'
+      + '</div>'
+      + '<p class="amb-exemple" id="par-exemple">' + parExemple(c) + '</p>'
+      + (ro ? '' : '<div class="amb-actions"><button type="button" class="prim" data-par="cfg-enr">${T("Enregistrer les réglages")}</button>'
+          + (c._vierge ? '' : '<button type="button" data-par="cfg-annuler">${T("Annuler les changements")}</button>') + '</div>')
+      + '<p class="dt">${T("Le rabais de l’amie est un coupon à usage unique, réservé à son courriel et non cumulable. Refusés par le serveur : la marraine elle-même, son adresse de livraison, et toute personne qui a déjà commandé.")}</p>'
+      + '</div>';
+  }
+  function vuePar(){
+    if (!PAR) {
+      if (!PARCHARGE) chargerPar();
+      return '<div class="carte plein"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i></div></div>';
+    }
+    if (PAR.erreur) return '<div class="carte plein"><div class="vide">' + esc(PAR.erreur) + '</div></div>';
+    var actif = !!(PAR.cfg && PAR.cfg.actif);
+    var sous = function(v, lib, n){ return '<button type="button" class="' + (PARV === v ? 'actif' : '') + '" data-par-vue="' + v + '">' + lib + (n ? '<span class="n">' + n + '</span>' : '') + '</button>'; };
+    return '<div class="amb-zone" id="par-zone"><div class="amb-sous">'
+      + sous('liste', '${T("Amies invitées et bilan")}', (PAR.totaux || {}).nbDues || 0)
+      + sous('programme', '${T("Programme")}', 0)
+      + '<span class="droite"><span class="rf-pill ' + (actif ? 'vert' : '') + '">' + (actif ? '${T("Programme actif")}' : '${T("Programme inactif")}') + '</span></span></div>'
+      + (PARV === 'programme' ? parVueProgramme() : parVueListe())
+      + '</div>';
+  }
+  function parVerser(b){
+    if (PARARME !== 'verser') {
+      PARARME = 'verser'; dessiner();
+      dire('${T("Cliquez « Confirmer le versement ? » —")}' + ' ' + szArgent((PAR.totaux || {}).du || 0) + ' ${T("en crédit boutique. Ce geste ne se défait pas.")}', 'att');
+      return;
+    }
+    PARARME = ''; if (b) b.disabled = true;
+    dire('${T("Versement en cours…")}');
+    appeler('fidelisation:par:verser', []).then(function(r){
+      if (!r.ok) { dire(parExpliquer(r), 'err'); dessiner(); return; }
+      var res = r.resultat || {}, v = res.verse || [], s = res.sautees || [];
+      PAR = r; dessiner();
+      dire('${T("Récompenses versées :")}' + ' ' + szNombre(v.length, 0) + (s.length ? ' · ' + '${T("non versées :")}' + ' ' + szNombre(s.length, 0) : '') + '.', s.length ? 'att' : 'bon');
+    });
+  }
+  function brancherPar(){
+    var z = document.getElementById('par-zone'); if (!z) return;
+    z.onclick = function(ev){
+      var b = ev.target.closest ? ev.target.closest('button') : null; if (!b || b.disabled) return;
+      var vue = b.getAttribute('data-par-vue'), g = b.getAttribute('data-par'), pg = b.getAttribute('data-par-page');
+      if (vue) { PARV = vue; PARPAGE = 0; PARARME = ''; dessiner(); return; }
+      if (pg) { PARPAGE += Number(pg); dessiner(); return; }
+      if (g !== 'verser' && PARARME) PARARME = '';
+      if (g === 'verser') { parVerser(b); }
+      else if (g === 'cfg-annuler') { PARCFG = null; dessiner(); }
+      else if (g === 'cfg-enr') {
+        b.disabled = true;
+        var c = PARCFG || {};
+        appeler('fidelisation:par:reglages', [{ actif: !!c.actif, montantAmie: c.montantAmie, montantMarraine: c.montantMarraine,
+          minimumCommande: c.minimumCommande, delaiJours: c.delaiJours }]).then(function(r){
+          b.disabled = false;
+          if (!r.ok) { dire(parExpliquer(r), 'err'); return; }
+          PARCFG = null; PAR = r; dessiner(); dire('${T("Réglages du parrainage enregistrés.")}', 'bon');
+        });
+      }
+    };
+    var moissonner = function(ev){
+      var t = ev.target; if (!t || !t.getAttribute) return;
+      var k = t.getAttribute('data-par-cfg') || (t.id === 'par-actif' ? 'actif' : '');
+      if (k && PARCFG) {
+        PARCFG[k] = t.type === 'checkbox' ? t.checked : t.value; PARCFG._vierge = false;
+        var ex = document.getElementById('par-exemple'); if (ex) ex.innerHTML = parExemple(PARCFG);
+      }
+    };
+    z.oninput = moissonner; z.onchange = moissonner;
+    if (document.getElementById('par-table')) {
+      _szAutoDernier = 0;
+      szAutoPagination('#par-table', function(n){ var m = Math.max(3, n - 1); if (m !== PARPP) { PARPP = m; PARPAGE = 0; dessiner(); } });
+    }
+  }
+
+  /* ══ L ONGLET PALIERS (2026-10-07) ═════════════════════════════════════════
+     Les statuts de fidelite (« Initiee », puis « Privilege » des 500 $ d achats
+     sur 12 mois) et leurs avantages : livraison gratuite sans minimum, acces
+     anticipe aux nouveautes, points en prime. ⚠ LE PALIER SE CALCULE AU SERVEUR
+     (lib-paliers.php) ; ici on ne regle que la grille. La liste des paliers vit
+     dans PALED pendant l edition (moissonnee a chaque frappe).
+     ⚠ Les produits en acces anticipe se marquent dans la fenetre Produit. */
+  var PAL = null, PALED = null, PALMAX = 6;
+  var PALMOTIFS = {
+    aucun_palier:     '${T("Il faut au moins un palier.")}',
+    trop_de_paliers:  '${T("Six paliers au plus.")}',
+    nom:              '${T("Chaque palier a besoin d’un nom (français).")}',
+    seuil:            '${T("Seuil : entre 0 et 100 000 $.")}',
+    seuil_double:     '${T("Deux paliers ne peuvent pas avoir le même seuil.")}',
+    bonus:            '${T("Points en prime : entre 0 et 100 %.")}',
+    version_site:     '${T("Le site ne connaît pas encore ce programme : rechargez la fenêtre principale.")}'
+  };
+  function palExpliquer(r){ return PALMOTIFS[r && r.motif] || expliquer(r); }
+  function chargerPal(){
+    appeler('fidelisation:pal:donnees', []).then(function(r){
+      PAL = r.ok ? r : { erreur: palExpliquer(r) };
+      if (r.ok) PALED = null;
+      if (ONGLET === 'paliers') dessiner();
+    });
+  }
+  function palOccupe(){ return !!(PALED && !PALED._vierge); }
+  function palCopie(){
+    var c = PAL.cfg || {};
+    return { actif: !!c.actif, _vierge: true, paliers: (c.paliers || []).map(function(p){
+      var a = p.avantages || {};
+      return { nom: p.nom || '', nomEN: p.nomEN || '', seuil: p.seuil, livraisonGratuite: !!a.livraisonGratuite, accesAnticipe: !!a.accesAnticipe, bonusPointsPct: a.bonusPointsPct || 0 };
+    }) };
+  }
+  function vuePal(){
+    if (!PAL) { chargerPal(); return '<div class="carte plein"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i></div></div>'; }
+    if (PAL.erreur) return '<div class="carte plein"><div class="vide">' + esc(PAL.erreur) + '</div></div>';
+    if (!PALED) PALED = palCopie();
+    var ro = !PAL.peutModifier, dis = ro ? ' disabled' : '', e = PALED;
+    var h = '<div class="amb-zone" id="pal-zone"><div class="carte"><h2>${T("Les paliers")}</h2>'
+      + szInter('pal-actif', '${T("Paliers actifs")}', '${T("Le statut dans le compte client, la livraison gratuite à la caisse, l’accès anticipé et les points en prime.")}', !!e.actif, ro ? 'disabled' : '')
+      + '<table style="margin-top:.6rem"><thead><tr><th>${T("Nom (français)")}</th>' + '<th>${T("Nom (anglais)")}</th>' + '<th class="num">${T("Dès ($ sur 12 mois)")}</th>'
+      + '<th>${T("Livraison gratuite")}</th>' + '<th>${T("Accès anticipé")}</th>' + '<th class="num">${T("Points en prime (%)")}</th><th></th></tr></thead><tbody>'
+      + e.paliers.map(function(p, i){
+          return '<tr>'
+            + '<td><input data-pal-i="' + i + '" data-pal-k="nom" maxlength="40" value="' + esc(p.nom) + '" aria-label="${T("Nom (français)")}"' + dis + '></td>'
+            + '<td><input data-pal-i="' + i + '" data-pal-k="nomEN" maxlength="40" value="' + esc(p.nomEN) + '" aria-label="${T("Nom (anglais)")}"' + dis + '></td>'
+            + '<td class="num"><input type="number" style="width:7rem" data-pal-i="' + i + '" data-pal-k="seuil" min="0" max="100000" step="10" value="' + esc(p.seuil) + '" aria-label="${T("Dès ($ sur 12 mois)")}"' + dis + '></td>'
+            + '<td><input type="checkbox" data-pal-i="' + i + '" data-pal-k="livraisonGratuite"' + (p.livraisonGratuite ? ' checked' : '') + ' aria-label="${T("Livraison gratuite")}"' + dis + '></td>'
+            + '<td><input type="checkbox" data-pal-i="' + i + '" data-pal-k="accesAnticipe"' + (p.accesAnticipe ? ' checked' : '') + ' aria-label="${T("Accès anticipé")}"' + dis + '></td>'
+            + '<td class="num"><input type="number" style="width:5.5rem" data-pal-i="' + i + '" data-pal-k="bonusPointsPct" min="0" max="100" step="1" value="' + esc(p.bonusPointsPct) + '" aria-label="${T("Points en prime (%)")}"' + dis + '></td>'
+            + '<td class="fin">' + (ro || e.paliers.length < 2 ? '' : '<button type="button" class="mini geste danger" data-pal="retirer" data-i="' + i + '">${T("Retirer")}</button>') + '</td></tr>';
+        }).join('')
+      + '</tbody></table>'
+      + (ro ? '' : '<div class="amb-actions">'
+          + (e.paliers.length < PALMAX ? '<button type="button" class="mini" data-pal="ajouter">${T("+ Ajouter un palier")}</button>' : '')
+          + '<button type="button" class="prim" data-pal="enr">${T("Enregistrer les paliers")}</button>'
+          + (e._vierge ? '' : '<button type="button" data-pal="annuler">${T("Annuler les changements")}</button>') + '</div>')
+      + '<p class="dt">${T("Le palier d’un client se calcule au serveur sur ses achats des 12 derniers mois : articles après rabais, sans taxes ni livraison, commandes payées et non annulées, moins les remboursements. Les points en prime s’ajoutent au gel des points d’une commande.")}</p>'
+      + '<p class="dt">${T("La livraison gratuite et l’accès anticipé s’appliquent dans la boutique, à partir du palier calculé par le serveur ; les frais de livraison d’une commande ne sont pas revérifiés au serveur.")}</p>'
+      + '</div>';
+    var an = PAL.anticipes || [];
+    h += '<div class="carte"><h2>${T("Produits en accès anticipé")}</h2>';
+    if (!an.length) h += '<div class="vide">${T("Aucun produit marqué.")}' + '<div style="margin-top:.35rem">${T("Cochez « Accès anticipé » dans la fenêtre Produit et donnez la date d’ouverture à tous.")}</div></div>';
+    else h += '<table><thead><tr><th>${T("Produit")}</th>' + '<th>${T("Ouvert à tous le")}</th>' + '<th>${T("État")}</th></tr></thead><tbody>'
+      + an.map(function(p){
+          return '<tr><td>' + esc(p.nom) + (p.actif ? '' : ' <span class="dt">${T("(inactif)")}</span>') + '</td><td class="dt">' + esc(p.publieLe || '—') + '</td>'
+            + '<td><span class="rf-pill ' + (p.enCours ? 'ambre' : 'vert') + '">' + (p.enCours ? '${T("Réservé aux paliers")}' : '${T("Ouvert à tous")}') + '</span></td></tr>';
+        }).join('') + '</tbody></table>';
+    return h + '</div></div>';
+  }
+  function brancherPal(){
+    var z = document.getElementById('pal-zone'); if (!z) return;
+    z.onclick = function(ev){
+      var b = ev.target.closest ? ev.target.closest('button') : null; if (!b || b.disabled) return;
+      var g = b.getAttribute('data-pal');
+      if (g === 'ajouter' && PALED.paliers.length < PALMAX) {
+        var dernier = PALED.paliers[PALED.paliers.length - 1];
+        PALED.paliers.push({ nom: '', nomEN: '', seuil: (dernier ? (Number(dernier.seuil) || 0) + 500 : 0), livraisonGratuite: false, accesAnticipe: false, bonusPointsPct: 0 });
+        PALED._vierge = false; dessiner();
+      }
+      else if (g === 'retirer') { PALED.paliers.splice(Number(b.getAttribute('data-i')), 1); PALED._vierge = false; dessiner(); }
+      else if (g === 'annuler') { PALED = null; dessiner(); }
+      else if (g === 'enr') {
+        b.disabled = true;
+        appeler('fidelisation:pal:reglages', [{ actif: !!PALED.actif, paliers: PALED.paliers.map(function(p){
+          return { nom: p.nom, nomEN: p.nomEN, seuil: p.seuil, avantages: { livraisonGratuite: !!p.livraisonGratuite, accesAnticipe: !!p.accesAnticipe, bonusPointsPct: p.bonusPointsPct } };
+        }) }]).then(function(r){
+          b.disabled = false;
+          if (!r.ok) { dire(palExpliquer(r), 'err'); return; }
+          PAL = r; PALED = null; dessiner(); dire('${T("Paliers enregistrés.")}', 'bon');
+        });
+      }
+    };
+    var moissonner = function(ev){
+      var t = ev.target; if (!t || !t.getAttribute || !PALED) return;
+      if (t.id === 'pal-actif') { PALED.actif = t.checked; PALED._vierge = false; return; }
+      var i = t.getAttribute('data-pal-i'), k = t.getAttribute('data-pal-k');
+      if (i === null || !k || !PALED.paliers[Number(i)]) return;
+      PALED.paliers[Number(i)][k] = t.type === 'checkbox' ? t.checked : t.value; PALED._vierge = false;
+    };
+    z.oninput = moissonner; z.onchange = moissonner;
+  }
+
   function vueRecompenses(){
     var rs = D.recompenses || [];
     var h = '<div class="barreoutils"><div class="droite"><span>'
@@ -1254,6 +1543,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       + ((D.invitations || []).length ? '<span class="n">' + (D.invitationsTotal || D.invitations.length) + '</span>' : '') + '</button>'
       + '<button type="button" class="' + (ONGLET === 'points' ? 'actif' : '') + '" data-onglet="points">${T("Points")}</button>'
       + '<button type="button" class="' + (ONGLET === 'ambassadrices' ? 'actif' : '') + '" data-onglet="ambassadrices">${T("Ambassadrices")}</button>'
+      + '<button type="button" class="' + (ONGLET === 'parrainage' ? 'actif' : '') + '" data-onglet="parrainage">${T("Parrainage")}</button>'
+      + '<button type="button" class="' + (ONGLET === 'paliers' ? 'actif' : '') + '" data-onglet="paliers">${T("Paliers")}</button>'
       + '<div class="droite">'
       + (D.peutModifier ? '<button class="mini prim" id="fi-nouveau">${T("+ Nouveau sondage")}</button>' : '')
       + '</div>'
@@ -1273,7 +1564,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     h += ONGLET === 'recompenses' ? vueRecompenses()
        : ONGLET === 'invitations' ? vueInvitations()
        : ONGLET === 'points' ? vuePoints()
-       : ONGLET === 'ambassadrices' ? vueAmb() : vueSondages();
+       : ONGLET === 'ambassadrices' ? vueAmb()
+       : ONGLET === 'parrainage' ? vuePar()
+       : ONGLET === 'paliers' ? vuePal() : vueSondages();
     if (EDIT) h += boiteEditeur();
     else if (DETAIL) h += boiteDetail();
     /* ⚠⚠ LA PLEINE HAUTEUR, MESUREE AVANT ET APRES (#151, 2026-09-24). Cet
@@ -1288,7 +1581,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
        avant d adopter, parce qu une vue coupee ne previent jamais. */
     corps.className = 'corps plein';
     corps.innerHTML = h;
-    if (ONGLET !== 'recompenses' && ONGLET !== 'invitations' && ONGLET !== 'points' && ONGLET !== 'ambassadrices') {
+    if (ONGLET !== 'recompenses' && ONGLET !== 'invitations' && ONGLET !== 'points' && ONGLET !== 'ambassadrices' && ONGLET !== 'parrainage' && ONGLET !== 'paliers') {
       var bp = document.getElementById('fi-prec'), bs = document.getElementById('fi-suiv');
       if (bp) bp.onclick = function(){ SPAGE = Math.max(0, SPAGE - 1); dessiner(); };
       if (bs) bs.onclick = function(){ SPAGE = SPAGE + 1; dessiner(); };
@@ -1298,6 +1591,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     }
     brancher();
     if (ONGLET === 'ambassadrices') brancherAmb();
+    if (ONGLET === 'parrainage') brancherPar();
+    if (ONGLET === 'paliers') brancherPal();
     if (ONGLET === 'points') {
       brancherPoints();
       /* Remis à zéro : la mesure d un autre onglet garderait sinon le même compte, et le rappel
@@ -1346,7 +1641,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     if (!t || !t.closest || t.closest('.boite')) return;
 
     var og = t.closest('[data-onglet]');
-    if (og) { ONGLET = og.getAttribute('data-onglet'); ARME = ''; AMBARME = ''; dessiner(); if (ONGLET === 'points') chargerPoints(); return; }
+    if (og) { ONGLET = og.getAttribute('data-onglet'); ARME = ''; AMBARME = ''; PARARME = ''; dessiner(); if (ONGLET === 'points') chargerPoints(); return; }
 
     var bs = t.closest('[data-suppr-sondage]');
     if (bs) {
@@ -1461,6 +1756,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     if (ONGLET === 'ambassadrices' && ambOccupe()) return;
     charger();
     if (ONGLET === 'ambassadrices' && AMB && !AMBCHARGE) chargerAmb();
+    // Parrainage et paliers (2026-10-07) : même règle — une saisie ou une confirmation en cours reste.
+    if (ONGLET === 'parrainage' && PAR && !PARCHARGE && !parOccupe()) chargerPar();
+    if (ONGLET === 'paliers' && PAL && !palOccupe()) chargerPal();
   };
   window.szRevenir = function(){ if (!DETAIL) charger(); };
 
@@ -1495,6 +1793,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       if (DETAIL) { DETAIL = null; dessiner(); return; }
       if (ARME) { ARME = ''; dessiner(); return; }
       if (AMBARME || AMBED) { AMBARME = ''; AMBED = null; dessiner(); return; }
+      if (PARARME) { PARARME = ''; dessiner(); return; }
       P.fermer();
     }
   });

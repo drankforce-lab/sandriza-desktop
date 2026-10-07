@@ -2539,6 +2539,9 @@ const OPS_PONT = new Set([
   // Le programme Ambassadrices (2026-10-07) : réglages, ambassadrices, candidatures, bilan et versement.
   'fidelisation:amb:donnees', 'fidelisation:amb:reglages', 'fidelisation:amb:ecrire',
   'fidelisation:amb:demande', 'fidelisation:amb:verser',
+  // Le parrainage et les paliers de fidélité (2026-10-07) : réglages, bilan et versement (le serveur décide).
+  'fidelisation:par:donnees', 'fidelisation:par:reglages', 'fidelisation:par:verser',
+  'fidelisation:pal:donnees', 'fidelisation:pal:reglages',
   // Recommandations (fenetre Recommandations, 1.72.0) : l ORDRE des regles
   // decide de ce que la cliente voit en premier sur une fiche.
   'reco:liste', 'reco:stats', 'reco:basculer', 'reco:deplacer', 'reco:supprimer',
@@ -3360,6 +3363,9 @@ const LIMITES_PONT = {
   // Le bilan relit toutes les commandes à code ; le versement écrit une requête par ambassadrice.
   'fidelisation:amb:donnees': 30000, 'fidelisation:amb:reglages': 30000, 'fidelisation:amb:ecrire': 30000,
   'fidelisation:amb:demande': 30000, 'fidelisation:amb:verser': 120000,
+  // Le bilan du parrainage relit les commandes de chaque amie ; le versement écrit une requête par commande.
+  'fidelisation:par:donnees': 45000, 'fidelisation:par:reglages': 45000, 'fidelisation:par:verser': 120000,
+  'fidelisation:pal:donnees': 20000, 'fidelisation:pal:reglages': 30000,
   'abonnes:liste': 20000,
   // L import cree un abonne par ligne : une longue liste prend du temps.
   'abonnes:importer': 60000,

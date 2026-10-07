@@ -327,6 +327,7 @@ function pageProduit(id) {
   MOTIFS.video_format = '${T("Format refusé — MP4 ou WebM seulement.")}';
   MOTIFS.vue360_nombre = '${T("La vue 360° demande de 8 à 36 images.")}';
   MOTIFS.vue360_format = '${T("Vue 360° : une des images est illisible.")}';
+  MOTIFS.anticipe_date = '${T("Accès anticipé : indiquez la date d’ouverture à tous.")}';
   MOTIFS.non_enregistre ='${T("La fiche n’a PAS été enregistrée. Voyez l’avis dans la fenêtre principale — le plus souvent, un collègue vient de modifier la même fiche.")}';
 
   var ID   = ${ident};
@@ -630,7 +631,13 @@ function pageProduit(id) {
       + '<div class="ch"><label for="p-limclient">${T("Limite par client")}</label>'
       + '<input id="p-limclient" type="number" min="1" step="1" placeholder="${T("aucune")}" '
       + 'title="${T("Unités de ce produit qu’un même client peut acheter, toutes commandes confondues (par adresse courriel).")}"></div>'
-      + '</div></div></div>');
+      + '</div>'
+      // L ACCES ANTICIPE DES PALIERS DE FIDELITE (2026-10-07) : avant la date, le
+      // produit n est visible qu aux paliers qui y ont droit (Fidelisation > Paliers).
+      // Paliers eteints : la marque est ignoree, le produit est visible de tous.
+      + '<div class="pf-aj">' + bascule('p-anticipe', '${T("Accès anticipé (paliers de fidélité)")}')
+      + ch('p-publie', '${T("Ouvert à tous le")}', { type: 'date' }) + '</div>'
+      + '</div></div>');
 
     // 7 — Stock
     h.push('<div class="etape"><div class="carte plein" id="p-zone"><h2>${T("Stock par variante")}</h2>'
@@ -1791,6 +1798,9 @@ function pageProduit(id) {
     poser('p-seuil', p.lowStock != null ? String(p.lowStock) : String(CTX.seuilDefaut));
     poser('p-limclient', (Number(p.buyMaxClient) >= 1) ? String(Math.floor(Number(p.buyMaxClient))) : '');
     document.getElementById('p-actif').checked = p.active !== false;
+    // L acces anticipe (2026-10-07) : absent d une fiche ancienne = non marque.
+    document.getElementById('p-anticipe').checked = !!p.accesAnticipe;
+    poser('p-publie', /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(String(p.publieLe || '')) ? String(p.publieLe) : '');
     // ⚠ LES DEUX AXES SE LISENT SEPAREMENT, comme dans l editeur du site : la
     // liquidation et la vente finale sont des REGIMES, noReturn est la politique
     // de retour d un article par ailleurs normal. Les confondre ferait perdre
@@ -2815,6 +2825,8 @@ function pageProduit(id) {
       lowStock: parseInt(val('p-seuil'), 10),
       buyMaxClient: (parseInt(val('p-limclient'), 10) >= 1) ? parseInt(val('p-limclient'), 10) : null,
       active: coché('p-actif'), regime: val('p-regime'), retours: val('p-retours'),
+      // L acces anticipe des paliers (2026-10-07) : le pont exige la date quand il est coche.
+      accesAnticipe: coché('p-anticipe'), publieLe: val('p-publie') || null,
       sizes: tailles(), colors: couleurs(),
       image: IMAGE,
       belowCost: !!SOUSCOUT,

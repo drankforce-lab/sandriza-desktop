@@ -526,4 +526,8 @@ module.exports = {
   'retours « taille incorrecte »': '“wrong size” returns',
   'seuil': 'threshold',
   'Appliquer': 'Apply',
+  /* L'accès anticipé des paliers de fidélité (2026-10-07). */
+  'Accès anticipé (paliers de fidélité)': 'Early access (loyalty tiers)',
+  'Ouvert à tous le': 'Open to everyone on',
+  'Accès anticipé : indiquez la date d’ouverture à tous.': 'Early access: enter the date it opens to everyone.',
 };
