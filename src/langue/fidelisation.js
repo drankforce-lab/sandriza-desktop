@@ -427,6 +427,7 @@ module.exports = {
   'Adresse de la marraine': 'Referrer’s address',
   'Pas sa première commande': 'Not her first order',
   'Marraine introuvable': 'Referrer not found',
+  'Compte de la marraine supprimé': 'Referrer’s account deleted',
   'code(s) émis': 'code(s) issued',
   'commande(s)': 'order(s)',
   'Versé :': 'Paid:',

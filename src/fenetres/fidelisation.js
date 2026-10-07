@@ -1009,7 +1009,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     soi_meme: '${T("Commande de la marraine")}', meme_adresse: '${T("Adresse de la marraine")}',
     pas_premiere: '${T("Pas sa première commande")}', non_livree: '${T("Pas encore livrée")}',
     date_livraison: '${T("Date de livraison inconnue")}', zero: '${T("Aucune récompense")}',
-    marraine_introuvable: '${T("Marraine introuvable")}'
+    marraine_introuvable: '${T("Marraine introuvable")}',
+    marraine_supprimee: '${T("Compte de la marraine supprimé")}'
   };
   function parEtat(l){
     if (l.etat === 'attente' && l.motif === 'delai') return '${T("Délai de retour jusqu’au")}' + ' ' + esc(l.disponibleLe);
