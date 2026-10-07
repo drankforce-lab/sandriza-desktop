@@ -289,4 +289,6 @@ module.exports = {
   "Indiquez un nombre de points.": "Enter a number of points.",
   "Le motif est obligatoire.": "The reason is required.",
   "Ce client n’a aucun point à retirer.": "This customer has no points to remove.",
+  "Masquer les tuiles": "Hide the tiles",
+  "Afficher les tuiles": "Show the tiles",
 };

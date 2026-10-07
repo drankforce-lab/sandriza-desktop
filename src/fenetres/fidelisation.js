@@ -40,6 +40,8 @@ const CSS = `
 .pt-outils{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin:.1rem 0 .6rem}
 .pt-outils input[type=search]{flex:1 1 260px;min-width:0;padding:.42rem .7rem}
 .pt-outils select,.pt-pages select{font:inherit;color:var(--tx);background:var(--v05);border:1px solid var(--v16);border-radius:8px;padding:.36rem .5rem}
+.pt-tete{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.5rem}
+.pt-tete h2{margin:0}
 .pt-nom{font-weight:600}
 .pt-zero{color:var(--tx2)}
 tr.pt-ouvert td,tr.pt-ligne-ouverte td{background:var(--v04)}
@@ -396,8 +398,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       + '</div>';
     var tous = ptsListe();
     var avec = tous.filter(function(u){ return u.points > 0; }).length;
-    h += '<div class="carte plein"><h2>${T("Soldes des clients")}</h2>'
-      + '<div class="tuiles" style="margin-bottom:.7rem">'
+    /* Les tuiles se MASQUENT (2026-10-06, sa demande) : le choix reste sur ce poste. */
+    var tuilesVues = true; try { tuilesVues = localStorage.getItem('fid_pts_tuiles') !== 'non'; } catch (e) {}
+    h += '<div class="carte plein"><div class="pt-tete"><h2>${T("Soldes des clients")}</h2>'
+      + '<button type="button" class="mini" id="pt-tuiles">' + (tuilesVues ? '${T("Masquer les tuiles")}' : '${T("Afficher les tuiles")}') + '</button></div>'
+      + '<div class="tuiles" style="margin-bottom:.7rem' + (tuilesVues ? '' : ';display:none') + '">'
       + '<div class="tuile"><div class="lbl">${T("Clients")}</div><div class="val">' + szNombre(tous.length, 0) + '</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Avec des points")}</div><div class="val">' + szNombre(avec, 0) + '</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Points en circulation")}</div><div class="val">' + szNombre(PTS.enCirculation || 0, 0) + '</div></div>'
@@ -516,6 +521,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     });
   }
   function brancherPoints(){
+    var bt = document.getElementById('pt-tuiles');
+    if (bt) bt.onclick = function(){
+      var vues = true; try { vues = localStorage.getItem('fid_pts_tuiles') !== 'non'; localStorage.setItem('fid_pts_tuiles', vues ? 'non' : 'oui'); } catch (e) {}
+      dessiner();
+    };
     var q = document.getElementById('pt-q');
     if (q) q.oninput = function(){ PQ = q.value; PPAGE = 0; POUV = ''; ptsRedessinerTable(); };
     var f = document.getElementById('pt-filtre');
