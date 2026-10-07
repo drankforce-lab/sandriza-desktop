@@ -1179,7 +1179,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
   function palOccupe(){ return !!(PALED && !PALED._vierge); }
   function palCopie(){
     var c = PAL.cfg || {};
-    return { actif: !!c.actif, _vierge: true, paliers: (c.paliers || []).map(function(p){
+    return { actif: !!c.actif, _vierge: true,
+      /* L acces anticipe AUTOMATIQUE (2026-10-07) : tout produit mis en vente y entre d office. */
+      anticipeAuto: c.anticipeAuto !== false, anticipeJours: c.anticipeJours || 7,
+      paliers: (c.paliers || []).map(function(p){
       var a = p.avantages || {};
       return { nom: p.nom || '', nomEN: p.nomEN || '', seuil: p.seuil, livraisonGratuite: !!a.livraisonGratuite, accesAnticipe: !!a.accesAnticipe, bonusPointsPct: a.bonusPointsPct || 0 };
     }) };
@@ -1212,11 +1215,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       + '<p class="dt">${T("La livraison gratuite et l’accès anticipé s’appliquent dans la boutique, à partir du palier calculé par le serveur ; les frais de livraison d’une commande ne sont pas revérifiés au serveur.")}</p>'
       + '</div>';
     var an = PAL.anticipes || [];
-    h += '<div class="carte"><h2>${T("Produits en accès anticipé")}</h2>';
-    if (!an.length) h += '<div class="vide">${T("Aucun produit marqué.")}' + '<div style="margin-top:.35rem">${T("Cochez « Accès anticipé » dans la fenêtre Produit et donnez la date d’ouverture à tous.")}</div></div>';
-    else h += '<table><thead><tr><th>${T("Produit")}</th>' + '<th>${T("Ouvert à tous le")}</th>' + '<th>${T("État")}</th></tr></thead><tbody>'
+    h += '<div class="carte"><h2>${T("Produits en accès anticipé")}</h2>'
+      /* Sa demande du 2026-10-07 : << des que j ajoute de nouveaux produits, ils doivent tomber dans cet acces >>. */
+      + szInter('pal-anticipe-auto', '${T("Les nouveaux produits passent d’office en accès anticipé")}',
+          '${T("Dès sa mise en vente, un produit est réservé aux paliers qui ont droit à l’accès anticipé, puis il s’ouvre à tous après le délai ci-dessous. La page « Accès anticipé » de la boutique les présente.")}', !!e.anticipeAuto, ro ? 'disabled' : '')
+      + '<div class="ch" style="max-width:16rem;margin-top:.5rem"><label for="pal-anticipe-jours">${T("Durée de l’accès anticipé (jours)")}</label>'
+      + '<input id="pal-anticipe-jours" type="number" min="1" max="60" step="1" value="' + esc(e.anticipeJours) + '"' + dis + '></div>'
+      + '<p class="dt">${T("Un produit coché « Accès anticipé » dans la fenêtre Produit garde la date que vous lui donnez. Le changement s’applique quand vous enregistrez les paliers.")}</p>';
+    if (!an.length) h += '<div class="vide">${T("Aucun produit en accès anticipé pour le moment.")}</div>';
+    else h += '<table><thead><tr><th>${T("Produit")}</th>' + '<th>${T("Ouvert à tous le")}</th>' + '<th>${T("Origine")}</th>' + '<th>${T("État")}</th></tr></thead><tbody>'
       + an.map(function(p){
           return '<tr><td>' + esc(p.nom) + (p.actif ? '' : ' <span class="dt">${T("(inactif)")}</span>') + '</td><td class="dt">' + esc(p.publieLe || '—') + '</td>'
+            + '<td class="dt">' + (p.auto ? '${T("Automatique")}' : '${T("Date choisie")}') + '</td>'
             + '<td><span class="rf-pill ' + (p.enCours ? 'ambre' : 'vert') + '">' + (p.enCours ? '${T("Réservé aux paliers")}' : '${T("Ouvert à tous")}') + '</span></td></tr>';
         }).join('') + '</tbody></table>';
     return h + '</div></div>';
@@ -1235,7 +1245,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       else if (g === 'annuler') { PALED = null; dessiner(); }
       else if (g === 'enr') {
         b.disabled = true;
-        appeler('fidelisation:pal:reglages', [{ actif: !!PALED.actif, paliers: PALED.paliers.map(function(p){
+        appeler('fidelisation:pal:reglages', [{ actif: !!PALED.actif, anticipeAuto: !!PALED.anticipeAuto, anticipeJours: PALED.anticipeJours, paliers: PALED.paliers.map(function(p){
           return { nom: p.nom, nomEN: p.nomEN, seuil: p.seuil, avantages: { livraisonGratuite: !!p.livraisonGratuite, accesAnticipe: !!p.accesAnticipe, bonusPointsPct: p.bonusPointsPct } };
         }) }]).then(function(r){
           b.disabled = false;
@@ -1247,6 +1257,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     var moissonner = function(ev){
       var t = ev.target; if (!t || !t.getAttribute || !PALED) return;
       if (t.id === 'pal-actif') { PALED.actif = t.checked; PALED._vierge = false; return; }
+      if (t.id === 'pal-anticipe-auto') { PALED.anticipeAuto = t.checked; PALED._vierge = false; return; }
+      if (t.id === 'pal-anticipe-jours') { PALED.anticipeJours = t.value; PALED._vierge = false; return; }
       var i = t.getAttribute('data-pal-i'), k = t.getAttribute('data-pal-k');
       if (i === null || !k || !PALED.paliers[Number(i)]) return;
       PALED.paliers[Number(i)][k] = t.type === 'checkbox' ? t.checked : t.value; PALED._vierge = false;
