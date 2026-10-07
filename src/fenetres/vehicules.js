@@ -297,12 +297,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
      ⚠ SANS EXPRESSION REGULIERE : un antislash se perd dans ce gabarit. On garde
      les chiffres, le premier separateur et un signe ; le reste tombe.
      Rend null pour un champ vide, NaN pour un champ illisible. */
+  /* ⚠ LES SEPARATEURS DE MILLIERS (2026-10-06) : « 125,300 » tape en anglais donnait 125,3 km, et
+     « 125.300,5 » etait refuse. Regle : avec deux sortes de separateurs, le DERNIER est la decimale ;
+     une seule sorte repetee = des milliers ; une virgule seule suivie de trois chiffres = des
+     milliers en anglais. Sinon, le separateur unique est la decimale, comme avant. */
+  var LIRE_EN = '${LIEU()}'.indexOf('en') === 0;
   function lireNombre(v){
-    var s = String(v == null ? '' : v), t = '', sep = false;
+    var s = String(v == null ? '' : v), t = '', virg = 0, pts = 0, dern = -1;
+    for (var j = 0; j < s.length; j++) {
+      var cj = s.charAt(j);
+      if (cj === ',') { virg++; dern = j; } else if (cj === '.') { pts++; dern = j; }
+    }
+    var dec = -1;
+    if (virg && pts) dec = dern;
+    else if (virg + pts === 1) {
+      var apres = 0;
+      for (var k = dern + 1; k < s.length; k++) { var ck = s.charAt(k); if (ck >= '0' && ck <= '9') apres++; }
+      dec = (LIRE_EN && s.charAt(dern) === ',' && apres === 3) ? -1 : dern;
+    }
     for (var i = 0; i < s.length; i++) {
       var c = s.charAt(i);
       if (c >= '0' && c <= '9') t += c;
-      else if ((c === ',' || c === '.') && !sep) { t += '.'; sep = true; }
+      else if (c === ',' || c === '.') { if (i === dec) t += '.'; }
       else if (c === '-' && !t) t = '-';
       else if (c === ' ' || s.charCodeAt(i) === 160 || s.charCodeAt(i) === 8239) continue;
       else return NaN;
@@ -458,7 +474,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
       if (FVEH && !vehicule(FVEH)) FVEH = '';
       if (!SAISIE) SAISIE = nouveauDeplacement(null);
       else if (!SAISIE.id && (SAISIE.odoDebutAuto || !String(SAISIE.odoDebut || '').trim()) && !String(SAISIE.km || '').trim() && !String(SAISIE.odoFin || '').trim()) {
-        SAISIE.odoDebut = odoDepart(SAISIE.vehiculeId); SAISIE.odoDebutAuto = SAISIE.odoDebut !== '';
+        SAISIE.odoDebut = odoDepart(SAISIE.vehiculeId, SAISIE.date); SAISIE.odoDebutAuto = SAISIE.odoDebut !== '';
       }
       if (ETAT === 'deplacement-km' && SAISIE && !SAISIE.id) { SAISIE.km = '24'; SAISIE.allerRetour = true; calculOdo('d-km'); }
       if (!CHG) CHG = nouveauChangement();
@@ -563,12 +579,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     var veh = (avant && avant.vehiculeId && vehicule(avant.vehiculeId) && vehicule(avant.vehiculeId).enService) ? avant.vehiculeId
       : (actifs.length === 1 ? actifs[0].id
         : ((deps[0] && vehicule(deps[0].vehiculeId) && vehicule(deps[0].vehiculeId).enService) ? deps[0].vehiculeId : ''));
-    return { id: '', date: dateDefaut(), vehiculeId: veh,
+    var _dj = dateDefaut();
+    return { id: '', date: _dj, vehiculeId: veh,
       /* Le point de depart revient presque toujours le meme : on reprend celui
          du dernier deplacement inscrit. */
       depart: (avant && avant.depart) || (deps[0] && deps[0].depart) || '',
       destination: '', raison: '', detail: '', km: '', allerRetour: false,
-      odoDebut: odoDepart(veh), odoDebutAuto: odoDepart(veh) !== '', odoSource: 'km', odoFin: '', commande: '' };
+      odoDebut: odoDepart(veh, _dj), odoDebutAuto: odoDepart(veh, _dj) !== '', odoSource: 'km', odoFin: '', commande: '' };
   }
   /* ══ L ODOMETRE CALCULE (2026-10-02) ═══════════════════════════════════════
      Sa demande : « fais le calcul automatique au niveau de l odometre ; si tu
@@ -580,9 +597,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
      Le DERNIER champ tape gagne (odoSource), et l on n ecrit jamais dans le
      champ ou l on tape. ⚠ Le site retient l odometre des qu il a les deux
      releves : l apercu dit donc la meme chose que ce qui part. */
-  function odoDepart(vid){
+  /* ⚠ LE DEPART A LA DATE DU TRAJET (2026-10-06) : le plus grand releve AU PLUS TARD ce jour-la.
+     Avant, un trajet antidate prenait le dernier releve, venu de l avenir, et gonflait l odometre. */
+  function odoDepart(vid, date){
     var v = vehicule(vid);
-    return (v && v.dernierOdometre != null && isFinite(Number(v.dernierOdometre))) ? champNombre(v.dernierOdometre) : '';
+    if (!v) return '';
+    var L = String(date || '').slice(0, 10);
+    if (L && v.releves && v.releves.length) {
+      var m = null;
+      for (var i = 0; i < v.releves.length; i++) { var r = v.releves[i]; if (r[0] <= L && (m == null || r[1] > m)) m = r[1]; }
+      return m == null ? '' : champNombre(m);
+    }
+    return (v.dernierOdometre != null && isFinite(Number(v.dernierOdometre))) ? champNombre(v.dernierOdometre) : '';
   }
   function rond1(n){ return Math.round(n * 10) / 10; }
   function poserChamp(id, cle, v){
@@ -613,7 +639,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
   function changerVehiculeSaisie(){
     var s = SAISIE; if (!s || s.id) return;
     if (s.odoDebutAuto || !String(s.odoDebut || '').trim()) {
-      var d = odoDepart(s.vehiculeId);
+      var ed = document.getElementById('d-date'); if (ed && ed.value) s.date = ed.value;
+      var d = odoDepart(s.vehiculeId, s.date);
       poserChamp('d-odo1', 'odoDebut', d);
       s.odoDebutAuto = d !== '';
       var e1 = document.getElementById('d-odo1');
@@ -1843,7 +1870,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     if (t.id === 'v-mode' || t.id === 'v-ret') { dessiner(); var e2 = document.getElementById(t.id); if (e2) e2.focus(); return; }
     if (t.closest && t.closest('#f-dep')) {
       if (t.id === 'd-ar') calculOdo('d-ar');
-      if (t.id === 'd-veh') changerVehiculeSaisie();
+      if (t.id === 'd-veh' || t.id === 'd-date') changerVehiculeSaisie();   // une autre date : un autre depart
       var c = document.getElementById('d-calc');
       if (c) c.textContent = apercuKm(SAISIE);
       if (t.id === 'd-raison') {

@@ -95,17 +95,24 @@ function creer(o) {
       const auj = String(r.aujourdhui || '');
       const vus = deja(auj);
       const neufs = r.dus.filter((x) => x && x.id && vus.indexOf(x.id) < 0);
-      neufs.slice(0, neufs.length > MAX_DETAIL + 1 ? MAX_DETAIL : neufs.length).forEach((x) => {
-        o.notifier(TR('Rappel : {0}', titreLu(x.titre)),
+      /* ⚠ SEULS LES RAPPELS RÉELLEMENT ANNONCÉS SONT RETENUS (2026-10-06). Avant, un rappel dont la
+         notification avait échoué (notifier → false) était marqué « vu » quand même : il se taisait
+         toute la journée, sans trace. Un échec le laisse au passage suivant (15 min). */
+      const annonces = [];
+      const detail = neufs.slice(0, neufs.length > MAX_DETAIL + 1 ? MAX_DETAIL : neufs.length);
+      detail.forEach((x) => {
+        const ok = o.notifier(TR('Rappel : {0}', titreLu(x.titre)),
           TR('{0} — cliquez pour ouvrir {1}', echeance(x, auj), nomModule(x.module)),
           { aller: x.module || 'rappels' });
+        if (ok !== false) annonces.push(x.id);
       });
       if (neufs.length > MAX_DETAIL + 1) {
         const reste = neufs.length - MAX_DETAIL;
-        o.notifier(TR('{0} autres rappels à faire', reste), TR('Cliquez pour ouvrir les Rappels'), { aller: 'rappels' });
+        const ok = o.notifier(TR('{0} autres rappels à faire', reste), TR('Cliquez pour ouvrir les Rappels'), { aller: 'rappels' });
+        if (ok !== false) neufs.slice(MAX_DETAIL).forEach((x) => annonces.push(x.id));
       }
-      if (neufs.length) {
-        try { o.reglages.set('rappelsNotifies', { jour: auj, ids: vus.concat(neufs.map((x) => x.id)).slice(-200) }); } catch (e) {}
+      if (annonces.length) {
+        try { o.reglages.set('rappelsNotifies', { jour: auj, ids: vus.concat(annonces).slice(-200) }); } catch (e) {}
       }
       return { ok: true, nouveaux: neufs.length, dus: r.dus.length };
     } catch (e) {

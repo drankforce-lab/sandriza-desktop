@@ -979,6 +979,10 @@ const ICON_PATH = [
  * ⚠ UN CLIC RAMÈNE LA FENÊTRE. Une notification qu'on ne peut pas suivre oblige
  * à retrouver l'application à la main, et l'on a déjà oublié pourquoi.
  */
+/* ⚠ LES NOTIFICATIONS VIVANTES (2026-10-06). Un objet Notification que plus rien ne retient peut
+   être ramassé par le nettoyage de mémoire, et Windows perd alors son clic (surtout depuis le Centre
+   de notifications, plus tard). On les garde ici jusqu'au clic ou à la fermeture. */
+const _notifsVivantes = new Set();
 const notifier = (titre, corps, options = {}) => {
   try {
     const n = new Notification({
@@ -994,6 +998,9 @@ const notifier = (titre, corps, options = {}) => {
       mainWindow.focus();
       if (options.aller) { try { cadreWC().send('dock:naviguer', options.aller); } catch {} }
     });
+    _notifsVivantes.add(n);
+    const lacher = () => _notifsVivantes.delete(n);
+    n.on('click', lacher); n.on('close', lacher); n.on('failed', lacher);
     n.show();
     return true;
   } catch { return false; }
