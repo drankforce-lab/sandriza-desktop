@@ -71,8 +71,8 @@ body{background:var(--f-page);color:var(--tx);
 .apercu .head .ti{font-family:Georgia,serif;font-size:16px;font-weight:700;letter-spacing:4px;color:var(--tx-blanc)}
 .apercu .head .su{font-size:8px;letter-spacing:2px;text-transform:uppercase;margin-top:4px}
 .apercu .body{background:#fff;padding:10px 20px;color:#555;font-size:11px}
-.apercu .foot{padding:10px 24px;text-align:center}
-.apercu .foot .cp{font-size:10px}
+.apercu .foot{padding:10px 24px;text-align:center;background:#FAF7F2;border-top:1px solid #EFE7DA}
+.apercu .foot .cp{font-size:10px;color:#565B6B;letter-spacing:.04em}
 .gifwrap{max-width:420px;margin:0 0 .8rem}
 .ic-lg{vertical-align:-3px}
 .ic-lg svg{width:15px;height:15px}
@@ -201,17 +201,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '<div class="ch"><label for="g-sub">${T("Sous-titre (vide = tagline du pied de page)")}</label>'
       + '<input type="text" id="g-sub" value="' + esc(t.headerSubtitle || '') + '" placeholder="${T("ÉLÉGANCE · RAFFINEMENT · STYLE")}"' + (RO ? ' disabled' : '') + '></div>';
     h += '<label class="bascule"><input type="checkbox" id="g-anim"' + (t.animated ? ' checked' : '') + (RO ? ' disabled' : '') + '>'
-      + '<span><span class="t"><span class="ic">✨</span>${T(" Effet animé CSS (en-tête &amp; pied)")}</span><br><span class="d">${T("Léger dégradé chatoyant, sans image. Visible dans Apple Mail / Mail iOS ; ailleurs (Gmail, Outlook) le dégradé reste fixe.")}</span></span></label>';
+      + '<span><span class="t"><span class="ic">✨</span>${T(" Effet animé CSS (en-tête)")}</span><br><span class="d">${T("Léger dégradé chatoyant, sans image. Visible dans Apple Mail / Mail iOS ; ailleurs (Gmail, Outlook) le dégradé reste fixe.")}</span></span></label>';
     h += '<label class="bascule"><input type="checkbox" id="g-gif"' + (t.gifBanner ? ' checked' : '') + (RO ? ' disabled' : '') + '>'
       + '<span><span class="t"><span class="ico ic-lg" aria-hidden="true">${ICO.image}</span>${T(" Bannière animée GIF (compatible Gmail)")}</span><br><span class="d">${T("Remplace l’en-tête par une bannière GIF générée à partir des couleurs. S’anime dans Gmail et Outlook. Nom de marque et sous-titre intégrés à l’image.")}</span></span></label>';
-    h += '<div class="gr2">' + coulChamp('g-fbg', '${T("Pied : couleur de fond")}', t.footerBg || '#1a1a2e')
-      + coulChamp('g-fcol', '${T("Pied : couleur du texte")}', t.footerTextColor || '#c4a882') + '</div>';
+    /* LE PIED N'A PLUS DE COULEUR À RÉGLER (2026-10-06, sa demande) : il est clair dans tous les
+       courriels (lib-courriel.php). La « couleur du texte » ne colore plus que le SOUS-TITRE de
+       l'en-tête (et de la bannière GIF) : le champ porte désormais ce nom-là. */
+    h += '<div class="gr2">' + coulChamp('g-fcol', '${T("En-tête : couleur du sous-titre")}', t.footerTextColor || '#c4a882') + '</div>';
     // Aperçu CSS
     h += '</div><div class="ged-d">';
     h += '<div class="apercu" id="g-prev">'
       + '<div class="head" id="g-prev-head"><div class="ti">' + esc(brand.toUpperCase()) + '</div><div class="su" id="g-prev-sub"></div></div>'
       + '<div class="body">${T("…contenu du courriel…")}</div>'
-      + '<div class="foot" id="g-prev-foot"><div class="cp" id="g-prev-cp">© ' + esc(brand) + '.</div></div></div>';
+      + '<div class="foot" id="g-prev-foot"><div class="cp" id="g-prev-cp">' + esc(brand.toUpperCase()) + ' · © ' + esc(brand) + '</div></div></div>';
     // Aperçu GIF (relayé)
     h += '<div class="gifwrap" id="g-gifwrap" style="display:' + (t.gifBanner ? 'block' : 'none') + '">'
       + '<div class="lg"><span class="ico ic-lg" aria-hidden="true">${ICO.image}</span>${T(" Aperçu de la bannière GIF ")}<button class="b" type="button" id="g-gifrefr" style="padding:.1rem .5rem">↻</button></div>'
@@ -235,7 +237,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         /* « (defaut) » seulement si le nom ne le dit pas deja — « Defaut (defaut) » (2026-10-01). */
         + ((t.id === 'default' && !/^(d[ée]faut|default)$/i.test(String(t.name || '').trim())) ? '<span class="def">${T("(défaut)")}</span>' : '')
         + '<div class="swatch"><div class="b1" style="background:linear-gradient(90deg,' + esc(t.headerBgFrom) + ',' + esc(t.headerBgTo) + ')"></div>'
-        + '<span class="lb">${T("en-tête")}</span><div class="b2" style="background:' + esc(t.footerBg) + '"></div><span class="lb">${T("pied")}</span></div></div>'
+        + '<span class="lb">${T("en-tête")}</span></div></div>'
         + '<div style="display:flex;gap:.35rem">'
         + '<button class="b" type="button" data-edit="' + esc(t.id) + '"><span class="ic">✎</span>${T(" Modifier")}</button>'
         + (RO ? '' : '<button class="b" type="button" data-copy="' + esc(t.id) + '"><span class="ic">📋</span>${T(" Copier")}</button>')
@@ -282,7 +284,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return;
     }
     // Éditeur : synchro couleur + aperçu
-    ['g-hfrom','g-hto','g-fbg','g-fcol'].forEach(function(id){
+    ['g-hfrom','g-hto','g-fcol'].forEach(function(id){
       var c = document.getElementById(id), tx = document.getElementById(id + '-t');
       if (c) c.oninput = function(){ var tt = document.getElementById(this.id + '-t'); if (tt) tt.value = this.value; majApercu(); planGif(); };
       if (tx) tx.oninput = function(){ var cc = document.getElementById(this.id.replace('-t','')); if (cc && /^#[0-9a-fA-F]{6}$/.test(this.value)) cc.value = this.value; majApercu(); planGif(); };
@@ -297,19 +299,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function majApercu(){
     var hFrom = val('g-hfrom') || '#1a1a2e', hTo = val('g-hto') || '#2d1b69';
-    var fBg = val('g-fbg') || '#1a1a2e', fCol = val('g-fcol') || '#c4a882';
+    var fCol = val('g-fcol') || '#c4a882';
     var sub = val('g-sub'), anim = chk('g-anim');
-    var head = document.getElementById('g-prev-head'), foot = document.getElementById('g-prev-foot');
+    var head = document.getElementById('g-prev-head');
     if (head) {
       head.style.background = anim ? ('linear-gradient(120deg,' + hFrom + ' 0%,' + hTo + ' 45%,' + hFrom + ' 90%)') : ('linear-gradient(135deg,' + hFrom + ' 0%,' + hTo + ' 100%)');
       head.style.backgroundSize = anim ? '220% 220%' : ''; if (anim) head.classList.add('anim'); else head.classList.remove('anim');
     }
-    if (foot) {
-      foot.style.background = anim ? ('linear-gradient(120deg,' + fBg + ' 0%,' + hTo + ' 50%,' + fBg + ' 100%)') : fBg;
-      foot.style.backgroundSize = anim ? '220% 220%' : ''; if (anim) foot.classList.add('anim'); else foot.classList.remove('anim');
-    }
     var ps = document.getElementById('g-prev-sub'); if (ps) { ps.style.color = fCol; ps.textContent = sub; }
-    var cp = document.getElementById('g-prev-cp'); if (cp) cp.style.color = fCol;
   }
   function planGif(){ if (!chk('g-gif')) return; if (gifTimer) clearTimeout(gifTimer); gifTimer = setTimeout(rafraichirGif, 600); }
   function rafraichirGif(){
@@ -326,7 +323,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function saisieEditeur(){
     return { id: (EDIT || '__new__'), name: val('g-name'),
       headerBgFrom: val('g-hfrom'), headerBgTo: val('g-hto'), headerSubtitle: val('g-sub'),
-      footerBg: val('g-fbg'), footerTextColor: val('g-fcol'), animated: chk('g-anim'), gifBanner: chk('g-gif') };
+      footerTextColor: val('g-fcol'), animated: chk('g-anim'), gifBanner: chk('g-gif') };
   }
   function adopter(r){ D = r; RO = !r.peutModifier; }
 

@@ -119,5 +119,7 @@ module.exports = {
   'Gabarit supprimé — attributions au défaut.':
     'Template deleted — assignments back to the default.',
   'Enregistrement des attributions…': 'Saving the assignments…',
-  'Attributions enregistrées.': 'Assignments saved.'
+  'Attributions enregistrées.': 'Assignments saved.',
+  "En-tête : couleur du sous-titre": "Header: subtitle colour",
+  " Effet animé CSS (en-tête)": " Animated CSS effect (header)",
 };
