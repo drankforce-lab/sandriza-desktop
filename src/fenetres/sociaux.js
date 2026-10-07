@@ -953,7 +953,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     /* ⚠ << Annuler >> N EFFACE PAS LE BROUILLON : la personne ferme son
        formulaire, elle ne declare pas jeter son texte. Il lui sera propose a la
        reouverture, et la boite de reprise a son bouton pour repartir a neuf. */
-    if (a) a.onclick = function(){ szBrouillonMaintenant(); EDIT = null; dessiner(); dire(''); };
+    if (a) a.onclick = function(){ szFermerBoite(function(){ EDIT = null; dessiner(); dire(''); }); };
     var e = document.getElementById('pa-enr');
     if (e) e.onclick = enregistrerPatron;
   }

@@ -378,7 +378,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       return;
     }
     if (t.closest('.boite')) return;
-    if (t.closest('#rm-voile')) { PLAN = null; dessiner(); return; }
+    if (t.closest('#rm-voile')) return;   // le voile ne ferme plus (2026-10-07) : seulement Fermer
     var an = t.closest('[data-annuler]');
     if (an) {
       var id = an.getAttribute('data-annuler');

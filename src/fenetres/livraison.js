@@ -190,11 +190,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return szArgent(isNaN(n) ? 0 : n);
   }
   /* Ce que le client paie, en une phrase (2026-10-04). */
-  function resumeLivraison(cout, seuil, prio){
+  function resumeLivraison(cout, seuil, prio, seuilIntl){
     var c = parseFloat(cout) || 0, sl = parseFloat(seuil) || 0, pr = parseFloat(prio) || 0;
+    var si = (seuilIntl == null) ? 0 : (parseFloat(seuilIntl) || 0);
     var t = sl > 0
       ? '${T("Sous")} <strong>' + argentCourt(sl) + '</strong>${T(", la livraison coûte")} <strong>' + argentCourt(c) + '</strong>${T(" ; dès")} <strong>' + argentCourt(sl) + '</strong>${T(", elle est gratuite.")}'
       : '${T("La livraison coûte toujours")} <strong>' + argentCourt(c) + '</strong>${T(" — aucun seuil de gratuité.")}';
+    /* LE SEUIL INTERNATIONAL (2026-10-07) : 100 $ au Canada, 150 $ ailleurs. */
+    if (seuilIntl != null) t += ' ' + (si > 0
+      ? '${T("À l’international, la livraison est gratuite dès")} <strong>' + argentCourt(si) + '</strong>.'
+      : '${T("À l’international, la livraison n’est jamais gratuite.")}');
     if (pr > 0) t += ' ${T("Traitement prioritaire :")} <strong>+' + argentCourt(pr) + '</strong>.';
     return t;
   }
@@ -216,13 +221,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="ch"><label for="f-cost">${T("Frais de livraison standard (CA$)")}</label>'
       + '<input id="f-cost" type="number" min="0" step="0.01" value="' + esc(num(d.shippingCost)) + '"' + dis + '>'
       + '<div class="aide">${T("Facturé quand la commande n’atteint pas le seuil de livraison gratuite.")}</div></div>'
-      + '<div class="ch"><label for="f-thr">${T("Seuil pour la livraison gratuite (CA$)")}</label>'
+      + '<div class="ch"><label for="f-thr">${T("Seuil de livraison gratuite au Canada (CA$)")}</label>'
       + '<input id="f-thr" type="number" min="0" step="1" value="' + esc(num(d.freeThreshold)) + '"' + dis + '>'
       + '<div class="aide">${T("Au-dessus de ce montant, la livraison est gratuite. <strong>0</strong> désactive.")}</div></div>'
+      /* Le seuil INTERNATIONAL n existe que si l international est allume (2026-10-07). */
+      + (d.international ? '<div class="ch"><label for="f-thr-intl">${T("Seuil de livraison gratuite à l’international (CA$)")}</label>'
+      + '<input id="f-thr-intl" type="number" min="0" step="1" value="' + esc(num(d.freeThresholdIntl)) + '"' + dis + '>'
+      + '<div class="aide">${T("Hors du Canada, au-dessus de ce montant, la livraison est gratuite. <strong>0</strong> désactive.")}</div></div>' : '')
       + '<div class="ch"><label for="f-prio">${T("Frais traitement prioritaire (CA$)")}</label>'
       + '<input id="f-prio" type="number" min="0" step="0.01" value="' + esc(num(d.priorityCost)) + '"' + dis + '>'
       + '<div class="aide">${T("Supplément si le client choisit le traitement prioritaire. <strong>0</strong> masque l’option.")}</div></div></div>'
-      + '<div class="resume-liv" id="f-resume">' + resumeLivraison(d.shippingCost, d.freeThreshold, d.priorityCost) + '</div></div>');
+      + '<div class="resume-liv" id="f-resume">' + resumeLivraison(d.shippingCost, d.freeThreshold, d.priorityCost, d.international ? d.freeThresholdIntl : null) + '</div></div>');
     /* ⚠ LE TABLEAU N EXISTE QUE SI L INTERNATIONAL EST ALLUME. Demande expresse :
        decoche, on ne doit plus rien voir ni toucher de ce qui a trait a
        l international. On lit l etat REEL de la case a l ecran (pas seulement
@@ -243,9 +252,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var majResume = function(){
       var z = document.getElementById('f-resume'); if (!z) return;
       var v = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
-      z.innerHTML = resumeLivraison(v('f-cost'), v('f-thr'), v('f-prio'));
+      var ei = document.getElementById('f-thr-intl');
+      z.innerHTML = resumeLivraison(v('f-cost'), v('f-thr'), v('f-prio'), ei ? ei.value : null);
     };
-    ['f-cost', 'f-thr', 'f-prio'].forEach(function(id){ var e = document.getElementById(id); if (e) e.addEventListener('input', majResume); });
+    ['f-cost', 'f-thr', 'f-thr-intl', 'f-prio'].forEach(function(id){ var e = document.getElementById(id); if (e) e.addEventListener('input', majResume); });
   }
 
   /* ══ PAYS DESSERVIS ════════════════════════════════════════════════════════
@@ -359,9 +369,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var chk = function(id){ var e = document.getElementById(id); return !!(e && e.checked); };
     var val = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
     OCCUPE = true; bsave.disabled = true; dire('${T("Enregistrement…")}');
-    appeler('config:livraison:ecrire', [{
-      international: chk('f-intl'), shippingCost: val('f-cost'),
-      freeThreshold: val('f-thr'), priorityCost: val('f-prio') }]).then(function(r){
+    var saisie = { international: chk('f-intl'), shippingCost: val('f-cost'),
+      freeThreshold: val('f-thr'), priorityCost: val('f-prio') };
+    // Absent quand l international est eteint : le coeur garde alors la valeur enregistree.
+    if (document.getElementById('f-thr-intl')) saisie.freeThresholdIntl = val('f-thr-intl');
+    appeler('config:livraison:ecrire', [saisie]).then(function(r){
       OCCUPE = false;
       if (r && r.ok) { D = r; RO = !r.peutModifier; dessiner(); dire('${T("Livraison enregistrée.")}', 'bon'); }
       else { bsave.disabled = RO; dire(expliquer(r), 'err'); }

@@ -56,6 +56,15 @@ module.exports = {
   'Facturé quand la commande n’atteint pas le seuil de livraison gratuite.':
     'Charged when the order does not reach the free shipping threshold.',
   'Seuil pour la livraison gratuite (CA$)': 'Free shipping threshold (CA$)',
+  /* ── DEUX SEUILS (2026-10-07) : Canada et international ── */
+  'Seuil de livraison gratuite au Canada (CA$)': 'Free shipping threshold in Canada (CA$)',
+  'Seuil de livraison gratuite à l’international (CA$)': 'International free shipping threshold (CA$)',
+  'Hors du Canada, au-dessus de ce montant, la livraison est gratuite. <strong>0</strong> désactive.':
+    'Outside Canada, above this amount, shipping is free. <strong>0</strong> turns it off.',
+  'Hors du Canada, au-dessus de ce montant, la livraison est gratuite. 0 désactive.':
+    'Outside Canada, above this amount, shipping is free. 0 turns it off.',
+  'À l’international, la livraison est gratuite dès': 'Internationally, shipping is free from',
+  'À l’international, la livraison n’est jamais gratuite.': 'Internationally, shipping is never free.',
   /* ⚠⚠ CE QUE FAIT LE ZERO. Le <strong> coupe la phrase : les deux formes. */
   'Au-dessus de ce montant, la livraison est gratuite. <strong>0</strong> désactive.':
     'Above this amount, shipping is free. <strong>0</strong> turns it off.',

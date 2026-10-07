@@ -476,7 +476,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var ba = document.getElementById('rc-annuler');
     if (ba) ba.onclick = function(){ LIAISON = null; dessiner(); };
     var vo = document.getElementById('rc-voile');
-    if (vo) vo.onclick = function(ev){ if (ev.target === vo) { LIAISON = null; dessiner(); } };
 
     var src = document.getElementById('rc-source');
     if (src) src.onchange = function(){
@@ -594,7 +593,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
        ⚠ ET L ECRITURE EST IMMEDIATE, avec les valeurs prises MAINTENANT : trois
        lignes plus bas le formulaire n existe plus. C est le defaut n°1 des
        Depenses, qui ne gardait que la categorie. */
-    if (t.closest('#reg-annuler')) { szBrouillonMaintenant(); REG_FORM = null; dessiner(); return; }
+    if (t.closest('#reg-annuler')) { szFermerBoite(function(){ REG_FORM = null; dessiner(); }); return; }
     if (t.closest('#reg-ok')) { soumettreRegle(); return; }
 
     var bm = t.closest('[data-monter]');

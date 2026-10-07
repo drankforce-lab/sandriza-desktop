@@ -409,7 +409,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
        formulaire n existe plus. C est le defaut n°1 des Depenses, qui ne gardait
        que la categorie. */
     var an = document.getElementById('btn-annuler');
-    if (an) an.onclick = function(){ szBrouillonMaintenant(); EDITION = false; dessiner(); };
+    if (an) an.onclick = function(){ szFermerBoite(function(){ EDITION = false; dessiner(); }); };
     var bv = document.getElementById('btn-voir');
     if (bv) bv.onclick = function(){
       var i = document.getElementById('e-mdp');

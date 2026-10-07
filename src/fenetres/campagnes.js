@@ -960,8 +960,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
          ca ne devrait pas arriver — mais un brouillon ecrit par une version
          anterieure pourrait ne pas la porter, et remplir une chaine avec les etapes
          d une campagne ferait un formulaire incoherent. On refuse plutot. */
-      if (v._type && FORM && v._type !== FORM.type) return;
-      szBrouillonAuDom(v);
+      if (v._type && FORM && v._type !== FORM.type) return false;
       if (FORM && FORM.type === 'chaine') ETAPES = v._etapes || [];
       if (FORM && FORM.type === 'segment') CRITERES = v._criteres || [];
       if (FORM && FORM.type === 'campagne') {
@@ -969,9 +968,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
         if (v._bmode) BMODE = v._bmode;
       }
       /* Les etapes, les criteres et les blocs sont DESSINES a partir de ces
-         variables : les reposer sans redessiner donnerait un ecran qui ne montre
-         pas ce qui sera enregistre. */
+         variables ; la saisie se repose APRES le dessin (2026-10-07 : avant, elle
+         etait posee puis effacee par dessiner(), qui rebatit depuis FORM). */
       dessiner();
+      szBrouillonAuDom(v);
     },
   });
   szBrouillonEcouter();
@@ -979,7 +979,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
   /* ⚠ UN SEUL CHEMIN FERME CE FORMULAIRE (le bouton Annuler et l enregistrement
      reussi passent tous deux par ici), donc une seule ligne suffit — et l ecriture
      est IMMEDIATE, avant que charger() ne redessine tout. */
-  function fermerForm(){ szBrouillonMaintenant(); FORM = null; ETAPES = null; CRITERES = null; charger(); }
+  function fermerForm(){ szFermerBoite(function(){ FORM = null; ETAPES = null; CRITERES = null; charger(); }); }
 
   function apercuDans(html){
     var bloc = document.getElementById('f-apercu-bloc');

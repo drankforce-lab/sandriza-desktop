@@ -871,7 +871,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
     var fm = document.getElementById('mv-fermer');
     if (fm) fm.onclick = function(){ OUVERT = null; dessiner(); };
     var vm = document.getElementById('v-mv');
-    if (vm) vm.onclick = function(ev){ if (ev.target === vm) { OUVERT = null; dessiner(); } };
     if (!SAISIE) { brancherSup(); return; }
     /* ⚠ ON RAMASSE LA SAISIE À CHAQUE FRAPPE. Redessiner sans la relire d abord
        rendrait les champs a leur valeur d origine — la faute qu on ne voit

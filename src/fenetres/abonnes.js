@@ -302,9 +302,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('abonnes')}
     szBrouillonEcouter();
 
     var ba = document.getElementById('ab-annuler');
-    if (ba) ba.onclick = function(){ szBrouillonMaintenant(); BOITE = null; dessiner(); };
+    if (ba) ba.onclick = function(){ szFermerBoite(function(){ BOITE = null; dessiner(); }); };
     var vo = document.getElementById('ab-voile');
-    if (vo) vo.onclick = function(ev){ if (ev.target === vo) { szBrouillonMaintenant(); BOITE = null; dessiner(); } };
 
     var bAjout = document.getElementById('ab-ajouter');
     if (bAjout) bAjout.onclick = function(){

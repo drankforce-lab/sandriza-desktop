@@ -1372,7 +1372,7 @@ function pageProduit(id) {
         v.remove(); choisirFichier(surChoix, multiple);
       };
       v.addEventListener('click', function(ev){
-        if (ev.target === v) { v.remove(); return; }
+        if (ev.target === v) return;   // le voile ne ferme plus (2026-10-07) : seulement Fermer
         var p2 = ev.target.closest('.ph'); if (!p2) return;
         v.remove();
         surChoix([p2.getAttribute('data-src')]);
@@ -2416,7 +2416,7 @@ function pageProduit(id) {
     dessinerJournal();
     document.getElementById('jrn-non').onclick = function(){ v.remove(); };
     v.addEventListener('click', function(ev){
-      if (ev.target === v) { v.remove(); return; }
+      if (ev.target === v) return;   // le voile ne ferme plus (2026-10-07) : seulement Fermer
       if (ev.target.closest('#jrn-retry')) { chargerRecent(); dessinerJournal(); return; }
       if (ev.target.closest('#jrn-tout')) { v.remove(); ouvrirHistorique(); return; }
       // L'auteur n'est PAS montré d'office : on le révèle au clic sur le bloc
@@ -2440,7 +2440,6 @@ function pageProduit(id) {
       + '<div class="pied2"><button type="button" id="hist-non">${T("Fermer")}</button></div></div>';
     document.body.appendChild(v);
     document.getElementById('hist-non').onclick = function(){ v.remove(); };
-    v.addEventListener('click', function(ev){ if (ev.target === v) v.remove(); });
     P.appeler('produit:historique', ID).then(function(r){
       var z = document.getElementById('hist-corps');
       if (!z) return;

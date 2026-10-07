@@ -441,7 +441,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
     var bf = document.getElementById('ch-fermer-b');
     if (bf) bf.onclick = function(){ DETAIL = null; SUPPR_ARME = false; dessiner(); };
     var vo = document.getElementById('ch-voile');
-    if (vo) vo.onclick = function(ev){ if (ev.target === vo) { DETAIL = null; SUPPR_ARME = false; dessiner(); } };
 
     var be = document.getElementById('ch-envoyer');
     if (be) be.onclick = function(){

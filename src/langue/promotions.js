@@ -264,4 +264,10 @@ module.exports = {
     'Percentage (1 to 90%) applied to each piece when all the chosen pieces are in the cart. Choose 2 to 6 products in the scope.',
   'Le rabais d’un look complet va de 1 à 90 %.': 'A complete-look discount ranges from 1 to 90%.',
   'Un look complet nomme de 2 à 6 produits.': 'A complete look names 2 to 6 products.',
+  /* ── PRIORITES UNIQUES (2026-10-07) ── */
+  'Cette priorité est déjà prise par une autre offre ou annonce. Choisissez un numéro libre.':
+    'This priority is already used by another offer or announcement. Choose a free number.',
+  'Premier numéro libre :': 'First free number:',
+  'La priorité': 'Priority',
+  'est déjà prise par': 'is already used by',
 };

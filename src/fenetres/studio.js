@@ -3109,7 +3109,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var fermer = function(){ if (v.parentNode) v.parentNode.removeChild(v); };
     // Clic hors de la boite = annuler (rien n est lance tant qu on n a pas
     // clique << Lancer le lot >>).
-    v.onclick = function(ev){ if (ev.target === v) fermer(); };
     if (apres) apres(fermer);
     return fermer;
   }

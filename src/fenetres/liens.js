@@ -511,9 +511,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     var fc = document.getElementById('f-creer');
     if (fc) fc.onclick = creer;
     var fa = document.getElementById('f-annuler');
-    if (fa) fa.onclick = function(){ szBrouillonMaintenant(); ETAT.formulaire = false; dessinerLiens(); };
+    if (fa) fa.onclick = function(){ szFermerBoite(function(){ ETAT.formulaire = false; dessinerLiens(); }); };
     var fv = document.getElementById('f-voile');
-    if (fv && fa) fv.onclick = function(ev){ if (ev.target === fv) fa.click(); };
 
     var nc = document.getElementById('n-copier');
     if (nc) nc.onclick = function(){ copier(document.getElementById('n-url'), nc); };

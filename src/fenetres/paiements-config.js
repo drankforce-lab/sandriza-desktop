@@ -260,8 +260,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<span class="d">${T("Visible seulement dans Safari, sur un appareil compatible.")}</span></span></label>');
     h.push('<label class="bascule"><input type="checkbox" id="o-express"' + (d.express ? ' checked' : '')
       + (RO ? ' disabled' : '') + '><span><strong>${T("Paiement express sur la fiche et le panier")}</strong>'
-      + '<span class="d">${T("Le client paie sans passer par le tunnel de commande. À éprouver en bac à sable ")}'
-      + '${T("avant de l’offrir.")}</span></span></label>');
+      /* 2026-10-07 : « ne fait rien sur le site » — c est un bouton APPLE PAY, et il ne
+         parait que sur iPhone ou iPad (ecran de 1024 px ou moins, Safari, carte dans
+         Wallet) et si Apple Pay ci-dessus est active. La phrase le dit desormais. */
+      + '<span class="d">${T("Un bouton Apple Pay sur la fiche produit et le panier. Il ne paraît que sur iPhone ou iPad, dans Safari, avec une carte dans Wallet, et seulement si Apple Pay est activé ci-dessus.")}</span></span></label>');
     h.push('<div class="gestes"><button class="prim" id="b-options"' + (RO ? ' disabled' : '')
       + '>${T("Enregistrer les modes de paiement")}</button></div>');
     h.push('</div>');

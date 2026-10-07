@@ -399,9 +399,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
        les valeurs prises avant que la boite ne disparaisse. En oublier un, c est
        exactement le defaut n°1 des Depenses — et le clic a cote est celui qui
        arrive le plus souvent par accident, donc celui qui cout le plus cher. */
-    if (ba) ba.onclick = function(){ szBrouillonMaintenant(); FORM = null; dessiner(); };
+    if (ba) ba.onclick = function(){ szFermerBoite(function(){ FORM = null; dessiner(); }); };
     var vo = document.getElementById('cp-voile');
-    if (vo) vo.onclick = function(ev){ if (ev.target === vo) { szBrouillonMaintenant(); FORM = null; dessiner(); } };
 
     // « Livraison gratuite » : le champ de valeur s efface (sans decaler la grille),
     // et l apercu suit la saisie.
@@ -569,7 +568,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
   document.addEventListener('keydown', function(ev){
     if (ev.key === 'Escape') {
       ev.preventDefault();
-      if (FORM) { szBrouillonMaintenant(); FORM = null; dessiner(); return; }
+      if (FORM) { szFermerBoite(function(){ FORM = null; dessiner(); }); return; }
       P.fermer();
     }
   });

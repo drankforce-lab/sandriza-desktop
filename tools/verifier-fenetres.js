@@ -432,7 +432,11 @@ console.log('=== Ce que la coquille appelle dans la page existe ===');
   let socle = null;
   try { socle = require(path.join(__dirname, '..', 'src', 'fenetres', 'socle.js')); }
   catch (e) { dire(false, 'socle.js', 'illisible : ' + e.message); ok = false; }
-  if (ok && socle && typeof socle.JS_BROUILLON === 'string') {
+  /* ⚠ JS_BROUILLON est une FONCTION depuis le bilingue integral : ce garde testait
+     === 'string' et se sautait SANS UN MOT (constat du 2026-10-07). */
+  const JSB = socle && (typeof socle.JS_BROUILLON === 'function' ? socle.JS_BROUILLON() : socle.JS_BROUILLON);
+  if (ok && socle && typeof JSB !== 'string') { dire(false, 'JS_BROUILLON', 'introuvable — le garde ne mesure rien'); ok = false; }
+  if (ok && socle && typeof JSB === 'string') {
     const appeles = new Set();
     const r = /window\.(szBrouillon[A-Za-z]+)/g;
     let m;
@@ -442,7 +446,7 @@ console.log('=== Ce que la coquille appelle dans la page existe ===');
     try {
       // Exactement comme une fenetre : le bloc vit DANS une IIFE.
       new Function('window', 'document', 'setTimeout', 'clearTimeout',
-        '(function(){' + socle.JS_BROUILLON + '})();')(
+        '(function(){' + JSB + '})();')(
         faux,
         { addEventListener() {}, removeEventListener() {}, getElementById: () => null,
           createElement: () => ({ style: {} }), body: { appendChild() {} } },

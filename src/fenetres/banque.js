@@ -735,7 +735,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
       /* Un brouillon de l'AUTRE formulaire ne se repose pas : ses champs n'ont
          rien a voir, et remplir une ligne de releve avec un depot ferait un
          formulaire incoherent. La cle l'evite deja ; ceci est la ceinture. */
-      if (v._quel && v._quel !== brQuel()) return;
+      if (v._quel && v._quel !== brQuel()) return false;
       szBrouillonAuDom(v);
     },
   });
@@ -760,7 +760,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     var en = document.getElementById('e-annuler');
     /* ⚠ IMMEDIAT, valeurs prises MAINTENANT : le formulaire disparait a la ligne
        suivante. */
-    if (en) en.onclick = function(){ szBrouillonMaintenant(); EDIT_E = null; dessiner(); };
+    if (en) en.onclick = function(){ szFermerBoite(function(){ EDIT_E = null; dessiner(); }); };
     Array.prototype.forEach.call(corps.querySelectorAll('[data-e-mod]'), function(b){
       b.onclick = function(){ EDIT_E = b.getAttribute('data-e-mod'); dessiner(); szBrouillonProposer(); };
     });

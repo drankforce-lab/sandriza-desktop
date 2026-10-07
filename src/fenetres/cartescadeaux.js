@@ -421,7 +421,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
     var ba = document.getElementById('cc-annuler');
     if (ba) ba.onclick = fermerBoite;
     var vo = document.getElementById('cc-voile');
-    if (vo) vo.onclick = function(ev){ if (ev.target === vo) fermerBoite(); };
 
     if (document.getElementById('cc-apercu')) brancherApercuCarte();
     var bc = document.getElementById('cc-creer');
@@ -506,7 +505,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
      l ecriture est IMMEDIATE, avec les valeurs prises AVANT que la boite ne
      disparaisse. C est le defaut n°1 des Depenses, qui ne gardait que la
      categorie parce que l ecriture etait differee de trois secondes. */
-  function fermerBoite(){ szBrouillonMaintenant(); BOITE = null; DETAIL = null; dessiner(); }
+  function fermerBoite(){ szFermerBoite(function(){ BOITE = null; DETAIL = null; dessiner(); }); }
 
   /* ⚠ NE JAMAIS REDESSINER LE CHAMP SOUS LES DOIGTS. */
   function redessinerSansPerdreLaSaisie(){

@@ -431,6 +431,10 @@ jobs:
           node tools/verifier-mise-en-page.js
           node tools/banc-dossier-exports.js
           node tools/banc-brouillon-garde.js
+          # ⚠ ET « REPRENDRE » DOIT RENDRE LA SAISIE (2026-10-07) : les Offres et les
+          # Campagnes posaient les champs PUIS redessinaient depuis un état vide —
+          # la boîte paraissait, tout était vert, et le formulaire revenait VIDE.
+          node tools/banc-brouillon-reprendre.js
           # ⚠⚠ ET CELUI-CI GARDE UNE BOÎTE QUI NE SE DESSINE PAS SANS RIEN CASSER.
           # `szBrouillonProposer` sort par `return false` quand la réponse n'a pas
           # de brouillon : aucune erreur, aucune trace, un écran normal. Dix-huit

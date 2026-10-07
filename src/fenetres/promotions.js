@@ -233,6 +233,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
     introuvable:        '${T("Cet élément n’existe plus.")}',
     nom:                '${T("Un nom interne est requis.")}',
+    /* 2026-10-07, sa regle : deux priorites egales n existent jamais. */
+    priorite:           '${T("Cette priorité est déjà prise par une autre offre ou annonce. Choisissez un numéro libre.")}',
     valeur:             '${T("La valeur du rabais doit être supérieure à zéro.")}',
     bogo:               '${T("Quantités « 2 pour 1 » invalides — la quantité gratuite doit être inférieure à la quantité achetée, qui vaut au moins 2.")}',
     paliers:            '${T("Ajoutez au moins un palier valable : quantité d’au moins 2, rabais entre 1 et 100 %.")}',
@@ -248,6 +250,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     var m = r && r.motif;
     var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
     if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 140)) + ')';
+    if (r && m === 'priorite' && r.libre) t += ' ${T("Premier numéro libre :")} ' + esc(String(r.libre)) + '.';
     return t;
   }
   function appeler(op, args){
@@ -257,6 +260,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     if (!p || typeof p.then !== 'function') return Promise.resolve({ ok: false, motif: 'pont_indisponible' });
     return p.then(function(r){ return r || { ok: false, motif: 'echec' }; })
             .catch(function(e){ return { ok: false, motif: 'echec' }; });
+  }
+  /* La priorite tapee est-elle deja prise ? Nomme la ligne, propose le premier
+     numero libre (2026-10-07). Le serveur refuse de toute facon : ceci previent. */
+  function brancherPriorite(idChamp){
+    var e = document.getElementById(idChamp); if (!e) return;
+    e.addEventListener('input', function(){
+      var n = parseInt(e.value, 10) || 0, soi = (FORM && FORM.id) || '';
+      var pris = ((D && D.prioritesPrises) || []).filter(function(x){ return x.id !== soi && x.n === n; })[0];
+      if (pris) dire('${T("La priorité")} ' + n + ' ${T("est déjà prise par")} « ' + esc(pris.nom) + ' ». ${T("Premier numéro libre :")} ' + ((D && D.prioriteLibre) || '?') + '.', 'att');
+      else dire('');
+    });
   }
   function vide(titre, detail){
     corps.innerHTML = '<div class="vide"><strong>' + esc(titre)
@@ -452,7 +466,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
       + '<section class="sect"><h4>${T("Période")}</h4><div class="grille g3">'
       + ch('', '${T("Début")}', '<input type="date" id="of-debut" aria-label="${T("Début")}" value="' + esc(o.debut || '') + '">')
       + ch('', '${T("Fin")}', '<input type="date" id="of-fin" aria-label="${T("Fin")}" value="' + esc(o.fin || '') + '">')
-      + ch('', '${T("Priorité d’affichage")}', '<input type="number" id="of-priorite" aria-label="${T("Priorité d’affichage")}" min="1" max="99" value="' + esc(o.priorite || 5) + '">')
+      + ch('', '${T("Priorité d’affichage")}', '<input type="number" id="of-priorite" aria-label="${T("Priorité d’affichage")}" min="1" max="99" value="' + esc(o.priorite || (D && D.prioriteLibre) || 5) + '">')
       + '</div></section></div></div>';
 
     h += '<div class="pied-boite"><button class="mini" id="pr-annuler">${T("Annuler")}</button>'
@@ -496,7 +510,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
       + '</div><div class="grille g3 ecart">'
       + ch('', '${T("Début")}', '<input type="date" id="an-debut" aria-label="${T("Début")}" value="' + esc(a.debut || '') + '">')
       + ch('', '${T("Fin")}', '<input type="date" id="an-fin" aria-label="${T("Fin")}" value="' + esc(a.fin || '') + '">')
-      + ch('', '${T("Priorité")}', '<input type="number" id="an-priorite" aria-label="${T("Priorité")}" min="1" max="99" value="' + esc(a.priorite || 5) + '">')
+      + ch('', '${T("Priorité")}', '<input type="number" id="an-priorite" aria-label="${T("Priorité")}" min="1" max="99" value="' + esc(a.priorite || (D && D.prioriteLibre) || 5) + '">')
       + '</div></section>';
 
     /* Le badge vit A DROITE, apercu en tete : c est ce que la cliente verra,
@@ -807,17 +821,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
       return (PALIERS && PALIERS.length > 0) || (CHOISIS && CHOISIS.length > 0);
     },
     remplir: function(v){
+      /* ⚠ L ETAT D ABORD, LE DESSIN, PUIS LA SAISIE (2026-10-07). Avant, les
+         champs etaient poses PUIS dessiner() rebatissait la boite depuis FORM
+         (vide en creation) : << Reprendre >> rendait un formulaire vide. */
+      PALIERS = v._paliers || [];
+      CHOISIS = v._prods || [];
+      dessiner();
       szBrouillonAuDom(v);
       var pr = brPrefixe(), cats = v._cats || [];
       [].forEach.call(document.querySelectorAll('.' + pr + '-cat'), function(c){
         c.checked = cats.indexOf(c.value) >= 0;
       });
-      PALIERS = v._paliers || [];
-      CHOISIS = v._prods || [];
-      /* Les blocs qui s'affichent selon le type de rabais, et la liste des
-         paliers, sont dessines a partir de ces valeurs : les reposer sans
-         redessiner donnerait un ecran qui ne montre pas ce qui sera enregistre. */
-      dessiner();
     },
   });
   szBrouillonEcouter();
@@ -832,9 +846,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
        trois ecrivent MAINTENANT, avec les valeurs prises avant qu'elle ne
        disparaisse. Le clic a cote est celui qui arrive le plus par accident,
        donc celui qui coute le plus cher. */
-    if (ba) ba.onclick = function(){ szBrouillonMaintenant(); FORM = null; dessiner(); };
+    if (ba) ba.onclick = function(){ szFermerBoite(function(){ FORM = null; dessiner(); }); };
     var vo = document.getElementById('pr-voile');
-    if (vo) vo.onclick = function(ev){ if (ev.target === vo) { szBrouillonMaintenant(); FORM = null; dessiner(); } };
 
     var bi = document.getElementById('pr-interv-enr');
     if (bi) bi.onclick = function(){
@@ -867,6 +880,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
       brancherPortee('of');
       porteeEnsemble((gr && gr.value) === 'ensemble');
       brancherApercu('of');
+      brancherPriorite('of-priorite');
       var baf = document.getElementById('of-bandeau-affiche');
       if (baf) baf.onchange = function(){
         var bl = document.getElementById('of-bloc-bandeau'), bo = document.getElementById('of-bandeau-off');
@@ -907,6 +921,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
         if (bad) bad.style.display = ag.value === 'badge' ? '' : 'none';
       };
       brancherApercu('an');
+      brancherPriorite('an-priorite');
       var majBadge = function(){
         var b = document.getElementById('an-badge-ap'); if (!b) return;
         b.textContent = val('an-badge').trim() || '${T("Nouveauté")}';
@@ -1003,6 +1018,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
         CHOISIS = (x.produitsChoisis || []).slice();
         QPROD = ''; SUPPR_ARME = '';
         dessiner();
+        /* Le brouillon d une offre EXISTANTE (of:<id>) etait ecrit a la fermeture
+           mais jamais propose : Modifier ne le demandait pas (2026-10-07). */
+        szBrouillonProposer();
       }
       return;
     }
@@ -1082,7 +1100,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
   document.addEventListener('keydown', function(ev){
     if (ev.key === 'Escape') {
       ev.preventDefault();
-      if (FORM) { szBrouillonMaintenant(); FORM = null; dessiner(); return; }
+      if (FORM) { szFermerBoite(function(){ FORM = null; dessiner(); }); return; }
       P.fermer();
     }
   });

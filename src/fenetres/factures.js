@@ -313,7 +313,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
       });
     };
     var vo = document.getElementById('f-voile');
-    if (vo) vo.onclick = function(ev){ if (ev.target === vo) { ETAT_OUVERT = false; dessiner(); } };
 
     var q = document.getElementById('f-q');
     if (q) {

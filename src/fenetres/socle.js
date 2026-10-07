@@ -1141,6 +1141,23 @@ function szBrouillonDuDom(champs, cases){
   c.forEach(function(id){ var e = document.getElementById(id); if (e) v._c[id] = !!e.checked; });
   return v;
 }
+/* ⚠ LES CHAMPS SE REPOSENT APRES remplir, PAS SEULEMENT DEDANS (2026-10-07).
+   Un remplir qui redessine depuis l etat (Offres, Campagnes) effacait ce qu il
+   venait de poser : << Reprendre >> rendait un formulaire VIDE, et le geste
+   suivant ecrivait ce vide par-dessus le bon brouillon. Seulement pour un releve
+   de champs (signature _c de szBrouillonDuDom) : un brouillon-modele (Studio,
+   editeur promo, sondage) n a pas d identifiants a poser.
+   Puis un change par champ : les blocs qui dependent d une liste (type de rabais,
+   portee, statut d un retour, type de coupon) suivent la valeur reposee. */
+function _brReposerDom(v){
+  if (!v || typeof v !== 'object' || !v._c || typeof v._c !== 'object') return;
+  szBrouillonAuDom(v);
+  Object.keys(v).concat(Object.keys(v._c)).forEach(function(id){
+    if (id.charAt(0) === '_') return;
+    var e = document.getElementById(id); if (!e) return;
+    try { e.dispatchEvent(new Event('change', { bubbles: true })); } catch (x) {}
+  });
+}
 function szBrouillonAuDom(v){
   if (!v) return;
   Object.keys(v).forEach(function(k){
@@ -1240,6 +1257,23 @@ function szBrouillonDemander(){
   });
 }
 
+/* == FERMER UNE BOITE PAR SON BOUTON, ET DEMANDER SI QUELQUE CHOSE A ETE TAPE ==
+   Sa regle du 2026-10-07 : << une fenetre ne doit se fermer que par son bouton
+   Fermer ; si des donnees ont ete tapees, proposer une sauvegarde dans les
+   brouillons avant de quitter ; si rien n a ete tape, ne pas le proposer >>.
+   Avant, Fermer gardait le brouillon EN SILENCE, et un clic a cote fermait tout.
+   << Quelque chose a ete tape >> = le drapeau _BR_SALE, leve par la frappe (et
+   par une reprise) quand le formulaire porte une valeur. Conserver ecrit le
+   brouillon MAINTENANT et l attend ; Jeter l efface ; Revenir ne fait rien. */
+function szFermerBoite(fermer){
+  var go = function(){ try { fermer(); } catch (e) {} };
+  if (!_BR_SALE || !_brActif() || !_brRempli()) { clearTimeout(_BR_T); _BR_T = null; go(); return; }
+  szBrouillonDemander().then(function(c){
+    if (c === 0) szBrouillonMaintenant().then(function(){ _brSale(false); go(); }, function(){ go(); });
+    else if (c === 1) { szBrouillonJeter(); go(); }
+  });
+}
+
 /* La question de la REOUVERTURE. Rend une promesse resolue a true si la saisie a
    ete reprise. ⚠ Rien n est restaure sans le demander : un formulaire qui se
    remplirait tout seul de la saisie d hier est aussi surprenant qu un formulaire
@@ -1270,7 +1304,11 @@ function szBrouillonProposer(){
       document.body.appendChild(v);
       var fini = function(repris){ if (v.parentNode) v.parentNode.removeChild(v); resoudre(repris); };
       document.getElementById('szbr-oui').onclick = function(){
-        try { if (_BR.remplir) _BR.remplir(r.brouillon); } catch (e) {}
+        /* remplir rend false pour REFUSER (brouillon d un autre bloc, type ou
+           formulaire) : on ne repose alors rien, sinon on contournerait sa ceinture. */
+        var refuse = false;
+        try { if (_BR.remplir) refuse = (_BR.remplir(r.brouillon) === false); } catch (e) {}
+        if (!refuse) _brReposerDom(r.brouillon);
         /* La valeur restauree EST celle du stockage : sans cette ligne, le
            premier geste reecrirait a l identique un brouillon deja la. */
         try { _BR_DERNIER = JSON.stringify(r.brouillon); } catch (e) { _BR_DERNIER = ''; }
@@ -1694,9 +1732,11 @@ function szInter(id, titre, aide, on, attrs){
 }
 `;
 
+/* La traduction pendant la frappe (2026-10-07) : aucune chaine visible, donc pas une fabrique. */
+const JS_JUMEAUX = "/* == CHAMP FRANCAIS -> CHAMP ANGLAIS, PENDANT LA FRAPPE (2026-10-07) ==========\n   Sa demande : << on tape en francais et ca traduit en anglais >>, partout ou un\n   couple FR / (anglais) existe. Pose UNE fois, ici, pour toutes les fenetres :\n   un ecouteur delegue sur document survit aux redessins (paliers, menus IVR).\n   Le jumeau anglais se trouve :\n     A. par l identifiant : x -> x-en (ou x-fr -> x-en), x -> xEN / xEn / xen ;\n     B. par un attribut data- dans la meme ligne : v -> vEN / vEn, vFr -> vEn,\n        ou l attribut N -> Nen de meme valeur (guides de tailles) ;\n     C. ou par data-jumeau-fr=\"<id du champ francais>\" pose sur le champ anglais.\n   On ne remplit QUE si le champ anglais est vide ou porte encore la derniere\n   traduction automatique ; des qu on y tape soi-meme, il n est plus touche.\n   Le champ rempli recoit un evenement input : le brouillon et l etat << modifie >>\n   le voient. La traduction passe par le pont (langue:traduire) ; un echec ne\n   recopie JAMAIS le francais. */\n(function(){\n  if (window.__szJumeaux) return; window.__szJumeaux = true;\n  function estTexte(e){\n    return !!(e && !e.disabled && !e.readOnly && (e.tagName === 'TEXTAREA'\n      || (e.tagName === 'INPUT' && /^(text|search|)$/i.test(e.type || ''))));\n  }\n  function estAnglais(e){\n    if (e.hasAttribute && e.hasAttribute('data-jumeau-fr')) return true;\n    if (/(-en|EN|En)$/.test(e.id || '') || /^(.+)(en)$/.test(e.id || '') && document.getElementById((e.id || '').slice(0, -2))) return true;\n    for (var i = 0; i < e.attributes.length; i++) {\n      var a = e.attributes[i];\n      if (a.name.indexOf('data-') === 0 && (/(EN|En)$/.test(a.value) || /en$/.test(a.name))) return true;\n    }\n    return false;\n  }\n  function parId(id){ return id ? document.getElementById(id) : null; }\n  function jumeau(fr){\n    var id = fr.id || '', c;\n    if (id) {\n      var base = id.replace(/-fr$/, '');\n      c = parId(base + '-en') || parId(id + 'EN') || parId(id + 'En') || parId(id + 'en');\n      if (c && c !== fr) return c;\n      c = document.querySelector('[data-jumeau-fr=\"' + id + '\"]');\n      if (c) return c;\n    }\n    var cands = [];\n    for (var i = 0; i < fr.attributes.length; i++) {\n      var a = fr.attributes[i];\n      if (a.name.indexOf('data-') !== 0 || !a.value || a.name === 'data-jumeau-fr') continue;\n      var v = a.value.replace(/\"/g, '');\n      cands.push('[' + a.name + '=\"' + v + 'EN\"]', '[' + a.name + '=\"' + v + 'En\"]',\n        '[' + a.name + 'en=\"' + v + '\"]');\n      if (/Fr$/.test(v)) cands.push('[' + a.name + '=\"' + v.slice(0, -2) + 'En\"]');\n    }\n    if (!cands.length) return null;\n    var sel = cands.join(','), p = fr.parentElement, n = 0;\n    while (p && n < 6) { c = p.querySelector(sel); if (c && c !== fr) return c; p = p.parentElement; n++; }\n    return null;\n  }\n  var MIN = new WeakMap(), JET = new WeakMap();\n  document.addEventListener('input', function(ev){\n    var e = ev.target;\n    if (!estTexte(e)) return;\n    if (estAnglais(e)) {\n      if (ev.isTrusted && e.value !== (e.getAttribute('data-sz-auto') || '')) e.setAttribute('data-sz-manuel', '1');\n      return;\n    }\n    var en = jumeau(e);\n    if (!estTexte(en) || en.getAttribute('data-sz-manuel') === '1') return;\n    var auto = en.getAttribute('data-sz-auto') || '';\n    if (en.value && en.value !== auto) return;\n    clearTimeout(MIN.get(e));\n    var src = e.value;\n    if (!src.trim()) {\n      if (en.value && en.value === auto) { en.value = ''; en.setAttribute('data-sz-auto', ''); en.dispatchEvent(new Event('input', { bubbles: true })); }\n      return;\n    }\n    MIN.set(e, setTimeout(function(){\n      if (!window.szPont || !window.szPont.appeler) return;\n      var n = (JET.get(e) || 0) + 1; JET.set(e, n);\n      Promise.resolve(window.szPont.appeler('langue:traduire', src)).then(function(r){\n        if (JET.get(e) !== n || !r || !r.ok || !r.texte) return;\n        if (en.getAttribute('data-sz-manuel') === '1') return;\n        var a2 = en.getAttribute('data-sz-auto') || '';\n        if (en.value && en.value !== a2) return;\n        en.value = r.texte; en.setAttribute('data-sz-auto', r.texte);\n        en.dispatchEvent(new Event('input', { bubbles: true }));\n      }, function(){});\n    }, 700));\n  }, true);\n})();\n";
 const JS_DIRE = () => JS_DIRE_BASE() + JS_PLEIN() + JS_PLEIN_AUTO() + JS_FENPLEIN()
   + JS_VERROUS() + JS_LOTS() + JS_AUTOPAGE() + JS_COMPTE() + JS_MESURES()
-  + JS_DATES() + JS_FINITIONS();
+  + JS_DATES() + JS_FINITIONS() + JS_JUMEAUX;
 
 const JS_SOCLE = () => `
 var P = window.szPont;

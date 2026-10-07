@@ -419,7 +419,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
   /* ⚠ L ECRITURE EST IMMEDIATE ET AVANT LE remove() : une ligne plus bas la
      surcouche n existe plus, donc ses champs non plus, et il n y aurait plus rien
      a garder. C est exactement le defaut n°1 des Depenses. */
-  function fermerAssistant(){ szBrouillonMaintenant(); szPleinReinit(); var s=document.getElementById('sur-inc'); if (s) s.remove(); DELID=''; }
+  function fermerAssistant(){ szFermerBoite(function(){ szPleinReinit(); var s=document.getElementById('sur-inc'); if (s) s.remove(); DELID=''; }); }
 
   /* ══ LE BROUILLON DU REGISTRE DES INCIDENTS ════════════════════
      Un incident se consigne en plusieurs etapes, avec des recits en texte libre —

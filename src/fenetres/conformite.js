@@ -457,7 +457,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var bf = document.getElementById('cf-fermer'); if (bf) bf.onclick = fermerDossier;
     var be = document.getElementById('cf-enr'); if (be) be.onclick = function(){ lireIdentite(); bsave.click(); };
     var vo = document.getElementById('cf-voile');
-    if (vo) vo.onclick = function(ev){ if (ev.target === vo) fermerDossier(); };
     if (!window.__cfEchap) { window.__cfEchap = 1; document.addEventListener('keydown', function(ev){ if (ev.key === 'Escape' && OUVERT) { lireIdentite(); OUVERT = ''; dessiner(); } }); }
     var bm = document.getElementById('b-mandat');
     if (bm) bm.addEventListener('click', function(){

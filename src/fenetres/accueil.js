@@ -307,7 +307,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
        boite de reprise a son bouton pour repartir a neuf. L'ecriture est IMMEDIATE,
        avec les valeurs prises MAINTENANT : deux appels plus loin, les champs
        n'existent plus. */
-    var cn = document.getElementById('a-cancel'); if (cn) cn.onclick = function(){ szBrouillonMaintenant(); EDIT=null; SLIDES=[]; dessiner(); dire(''); };
+    var cn = document.getElementById('a-cancel'); if (cn) cn.onclick = function(){ szFermerBoite(function(){ EDIT=null; SLIDES=[]; dessiner(); dire(''); }); };
   }
 
   // ── Actions liste ──
@@ -429,7 +429,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     remplir: function(v){
       /* Un brouillon d'un AUTRE bloc ne se repose pas : ses champs n'ont rien a
          voir. La cle l'evite deja ; ceci est la ceinture. */
-      if (v._bloc && v._bloc !== EDIT) return;
+      if (v._bloc && v._bloc !== EDIT) return false;
       szBrouillonAuDom(v);
       if (EDIT === 'hero' && v._slides) {
         SLIDES = v._slides;

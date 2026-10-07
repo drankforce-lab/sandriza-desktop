@@ -1287,8 +1287,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
       /* ⚠ LE VOILE NE JETTE PLUS RIEN : sous un formulaire il POSE LA QUESTION,
          il ne decide pas. Il ne ferme directement que les fiches, qui ne
          contiennent aucune saisie. */
-      if (FORM) { demanderFermeture(); return; }
-      fermer(); return;
+      return;   // le voile ne ferme plus (2026-10-07) : seulement Fermer
     }
     if (t.closest('button') || t.closest('input') || t.closest('select')) return;
     var tr = t.closest('tr[data-id]');

@@ -790,7 +790,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     document.getElementById('vis-ajuster').onclick = visAjuster;
     /* ⚠ ON NE FERME QUE SUR LE FOND. Sans ce test, relacher un glisser au-dessus
        de l image refermerait la visionneuse au milieu d un deplacement. */
-    v.onclick = function(ev){ if (ev.target === v) fermerGrand(); };
 
     var cadre = document.getElementById('vis-cadre');
     cadre.onwheel = function(ev){ ev.preventDefault(); visZoom(ev.deltaY < 0 ? 1.12 : 0.89); };

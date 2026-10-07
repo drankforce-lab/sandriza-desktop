@@ -846,7 +846,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   /* ⚠ APPELE PAR LA COQUILLE quand le bouton du site rouvre une fenetre DEJA
      ouverte (ouvrirNative = restore + focus, rien de plus) : on RELIT le dossier
      plutot que de montrer l etat d avant — la lecon de la preparation. */
-  window.szRevenir = function(){ recharger(); };
+  /* ⚠ LA SAISIE EN COURS SURVIT AU RECHARGEMENT (2026-10-07) : recharger() redessine
+     depuis R et effacait ce qui etait tape, sans rien proposer (BR_PROPOSE deja
+     vrai). On ecrit le brouillon AVANT de relire, puis on le repropose. */
+  window.szRevenir = function(){
+    try { szBrouillonMaintenant(); } catch (e) {}
+    BR_PROPOSE = false;
+    recharger();
+  };
 
   function voile(html, apres){
     var v = document.createElement('div');

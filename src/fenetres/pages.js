@@ -483,7 +483,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
      ⚠ edGarder est aussi appele sur un simple deplacement de la selection (keyup,
      mouseup, blur). C'est sans consequence : l'ecriture est etranglee a 3 s, et une
      valeur identique a la derniere ecrite n'est pas renvoyee. */
-  function fermerEditeurPage(){ szBrouillonMaintenant(); var s=document.getElementById('sur-cp'); if (s) s.remove(); fermerFlot(); CPSEL=''; }
+  function fermerEditeurPage(){ szFermerBoite(function(){ var s=document.getElementById('sur-cp'); if (s) s.remove(); fermerFlot(); CPSEL=''; }); }
   function dessinerEditeurPage(page){
     fermerFlot();
     var nouv=!page;
@@ -642,7 +642,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-inbox';
     sur.innerHTML='<div class="boite"><div class="tt"><h3>${T("Messages reçus")}</h3><button class="mini" id="ib-x">${T("Fermer")}</button></div><div class="liste" id="ib-liste"><div class="vide charge">${T("Chargement…")}</div></div></div>';
     document.body.appendChild(sur);
-    sur.addEventListener('click', function(e){ if (e.target===sur) fermerBoite(); });
     document.getElementById('ib-x').onclick=fermerBoite;
     VIDECONF=false;
     appeler('pages:inbox',[]).then(function(r){ peindreBoite(r); });
@@ -959,7 +958,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     h+='</div></div>';
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-vars'; sur.innerHTML=h;
     document.body.appendChild(sur);
-    sur.addEventListener('click', function(e){ if (e.target===sur) sur.remove(); });
     document.getElementById('v-x').onclick=function(){ sur.remove(); };
     var bs=sur.querySelectorAll('[data-code]');
     for (var k=0;k<bs.length;k++) bs[k].onclick=function(){
@@ -982,7 +980,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       +'<button class="mini" id="a-x">${T("Fermer")}</button></div>'
       +'<div class="apr" id="a-corps"><div class="vide charge">${T("Résolution des variables…")}</div></div></div>';
     document.body.appendChild(sur);
-    sur.addEventListener('click', function(e){ if (e.target===sur) sur.remove(); });
     document.getElementById('a-x').onclick=function(){ sur.remove(); };
     // La résolution se fait DANS LA PAGE : elle a besoin du nom de marque, du
     // courriel, du délai de retour et des collections. Les recopier ici ferait

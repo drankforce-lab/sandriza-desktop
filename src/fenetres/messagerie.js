@@ -362,7 +362,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (og) { ONGLET = og.getAttribute('data-onglet'); charger(); return; }
     if (t.closest('.boite')) return;
     var vo = t.closest('#m-voile');
-    if (vo) { DETAIL = null; SUPPR_ARME = false; dessiner(); return; }
+    if (vo) return;   // le voile ne ferme plus (2026-10-07) : seulement Fermer
     var li = t.closest('.ligne[data-id]');
     if (li) ouvrirDetail(li.getAttribute('data-id'));
   };

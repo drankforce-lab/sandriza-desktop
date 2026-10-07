@@ -1792,7 +1792,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var oui = document.getElementById('frais-oui');
     if (non) non.onclick = function(){ fermer(); dire('${T("Traitement annulé : rien n’a été refait ni facturé.")}', 'att'); };
     if (oui) oui.onclick = function(){ fermer(); onOui(); };
-    v.onclick = function(ev){ if (ev.target === v) fermer(); };
     if (oui) oui.focus();
   }
 
@@ -1845,7 +1844,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + 'Photoroom.</div>';
     document.body.appendChild(v);
     document.getElementById('apr-x').onclick = apercuFermer;
-    v.onclick = function(ev){ if (ev.target === v) apercuFermer(); };
   }
   function apercuRemplir(i, r){
     var c = document.getElementById('apr-c' + i);

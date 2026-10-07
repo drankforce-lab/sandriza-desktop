@@ -2236,6 +2236,8 @@ const OPS_PONT = new Set([
   'produit:decrire', 'produit:lire', 'produit:enregistrer',
   // Le brouillon GENERIQUE de n importe quelle fenetre d edition (portee + cle).
   'brouillon:lire', 'brouillon:ecrire', 'brouillon:jeter',
+  // La traduction pendant la frappe (champ FR -> champ anglais), 2026-10-07.
+  'langue:traduire',
   'produit:brouillonLire', 'produit:brouillonEcrire', 'produit:brouillonJeter',
   'produit:changements', 'produit:historique', 'produit:ajustement',
   'caisse:etat',
@@ -3142,6 +3144,8 @@ const LIMITES_PONT = {
      redessine un écran. Au plafond ordinaire de 8 s, on obtiendrait un << délai >>
      sur la seule écriture qui n'a pas droit à l'échec. */
   'brouillon:ecrire': 20000, 'brouillon:lire': 20000,
+  // Groq a 6 s de delai cote site : 10 s couvre l aller-retour.
+  'langue:traduire': 10000,
   /* ⚠⚠ LA CONNEXION A UN PLAFOND LARGE, ET C EST LE CAS OU UN DELAI COUTE LE
      PLUS CHER (#57). `connexion:entrer` fait un aller-retour au serveur pour
      verifier le mot de passe, PUIS lit la fiche complete du compte, PUIS ouvre

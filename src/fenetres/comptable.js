@@ -494,7 +494,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     var ce = document.getElementById('ct-enregistrer');
     if (ce) ce.onclick = enregistrerContact;
     var ca = document.getElementById('ct-annuler');
-    if (ca) ca.onclick = function(){ szBrouillonMaintenant(); ETAT.contactForm = false; ETAT.edition = ''; dessinerCarnet(); };
+    if (ca) ca.onclick = function(){ szFermerBoite(function(){ ETAT.contactForm = false; ETAT.edition = ''; dessinerCarnet(); }); };
 
     Array.prototype.forEach.call(corps.querySelectorAll('[data-modifier]'), function(b){
       b.onclick = function(){

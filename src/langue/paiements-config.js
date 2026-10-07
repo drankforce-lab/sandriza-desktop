@@ -164,5 +164,7 @@ module.exports = {
   'Aucun jeton enregistré': 'No token saved',
   'pour cet environnement': 'for this environment',
   'Jeton enregistré …': 'Token saved …',
-  'Aucun jeton enregistré pour cet environnement': 'No token saved for this environment'
+  'Aucun jeton enregistré pour cet environnement': 'No token saved for this environment',
+  'Un bouton Apple Pay sur la fiche produit et le panier. Il ne paraît que sur iPhone ou iPad, dans Safari, avec une carte dans Wallet, et seulement si Apple Pay est activé ci-dessus.':
+    'An Apple Pay button on the product page and the cart. It only appears on iPhone or iPad, in Safari, with a card in Wallet, and only if Apple Pay is turned on above.',
 };

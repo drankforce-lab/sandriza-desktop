@@ -541,7 +541,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     }
     if (t.closest('.boite')) return;
     var vo = t.closest('#a-voile');
-    if (vo) { DETAIL = null; SUPPR_ARME = false; PHOTO_ARMEE = -1; REPONDRE = false; dessiner(); return; }
+    if (vo) return;   // le voile ne ferme plus (2026-10-07) : seulement Fermer
     if (t.closest('button') || t.closest('input') || t.closest('select')) return;
     var tr = t.closest('tr[data-id]');
     if (tr) ouvrirDetail(tr.getAttribute('data-id'));

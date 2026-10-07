@@ -1619,7 +1619,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     var bf = document.getElementById('fi-fermer');
     if (bf) bf.onclick = function(){ DETAIL = null; dessiner(); };
     var vo = document.getElementById('fi-voile');
-    if (vo) vo.onclick = function(ev){ if (ev.target === vo) { DETAIL = null; dessiner(); } };
 
     var bv = document.getElementById('fi-vider');
     if (bv) bv.onclick = function(){
@@ -1688,7 +1687,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       /* ⚠ << Annuler >> N'EFFACE PAS LE BROUILLON : on ferme un editeur, on ne
          declare pas jeter son texte. L'ecriture est immediate, valeurs prises
          maintenant. */
-      if (t.closest('#sd-annuler')) { szBrouillonMaintenant(); EDIT = null; FORM = null; dessiner(); dire(''); return; }
+      if (t.closest('#sd-annuler')) { szFermerBoite(function(){ EDIT = null; FORM = null; dessiner(); dire(''); }); return; }
       if (t.closest('#sd-enr')) { enregistrerSondage(); return; }
       if (t.closest('#sd-q-plus')) {
         moissonner();
