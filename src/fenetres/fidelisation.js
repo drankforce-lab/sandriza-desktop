@@ -38,8 +38,16 @@ const CSS = `
 /* Les soldes (2026-10-06, refaits pour des centaines de clients) : recherche, filtre, tri,
    pages ; l ajustement s ouvre SOUS la ligne, avec la bascule Ajouter / Retirer. */
 .pt-outils{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin:.1rem 0 .6rem}
-.pt-outils input[type=search]{flex:1 1 260px;min-width:0;padding:.42rem .7rem}
-.pt-outils select,.pt-pages select{font:inherit;color:var(--tx);background:var(--v05);border:1px solid var(--v16);border-radius:8px;padding:.36rem .5rem}
+.pt-outils input[type=search]{flex:1 1 260px;min-width:0;padding:0 .7rem}
+.pt-outils select{color:var(--tx);background:var(--v05);border:1px solid var(--v16);border-radius:8px;padding:0 .5rem}
+/* Même hauteur et même police pour la recherche et les deux listes (elles différaient). */
+.pt-outils input[type=search],.pt-outils select{height:2.15rem;box-sizing:border-box;font:inherit;font-size:.84rem}
+.pt-zone{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+.pt-zone>.liste{flex:1 1 auto;min-height:0;overflow:hidden}
+.pt-zone>.pt-pages{flex:0 0 auto}
+table.pt-soldes col.pt-c-num{width:8.5rem}
+table.pt-soldes col.pt-c-geste{width:7.5rem}
+.pt-valeur{color:var(--tx2)}
 .pt-tete{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.5rem}
 .pt-tete h2{margin:0}
 .pt-nom{font-weight:600}
@@ -418,7 +426,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       + '<option value="pts"' + (PTRI === 'pts' ? ' selected' : '') + '>${T("Plus de points d’abord")}</option>'
       + '<option value="nom"' + (PTRI === 'nom' ? ' selected' : '') + '>${T("Nom (A à Z)")}</option></select>'
       + '</div>'
-      + '<div id="pt-table">' + ptsTable() + '</div>';
+      + '<div id="pt-zone" class="pt-zone"><div id="pt-table" class="liste">' + ptsTable() + '</div>'
+      + '<div id="pt-pages" class="pt-pages">' + ptsPages() + '</div></div>';
     return h + '</div>';
   }
   /* ── LES SOLDES : une liste qui tient des centaines de clients ──────────────────────────────
@@ -464,33 +473,50 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
   }
   function ptsTable(){
     var ro = !PTS.peutModifier, vp = (PTS.cfg || {}).valeurPoint || 0;
-    var l = ptsFiltres(), n = l.length;
-    var pages = Math.max(1, Math.ceil(n / PPARPAGE));
+    var l = ptsFiltres(), n = l.length, pp = ptsParPage();
+    var pages = Math.max(1, Math.ceil(n / pp));
     if (PPAGE >= pages) PPAGE = pages - 1;
     if (PPAGE < 0) PPAGE = 0;
-    var de = PPAGE * PPARPAGE, morceau = l.slice(de, de + PPARPAGE);
+    var de = PPAGE * pp, morceau = l.slice(de, de + pp);
     if (!n) return '<div class="vide">' + (PQ ? '${T("Aucun client ne correspond à cette recherche.")}' : '${T("Aucun client dans cette liste.")}') + '</div>';
-    var h = '<table><thead><tr><th>${T("Client")}</th><th class="num">${T("Points")}</th><th class="num">${T("Valeur")}</th><th></th></tr></thead><tbody>'
+    /* ⚠ LES COLONNES SONT TENUES (2026-10-07, sa capture : « affreux et tout déformé ») : sans
+       largeur, le tableau répartissait la place libre entre les quatre colonnes — 300 px de vide
+       entre Points, Valeur et Ajuster sur une fenêtre large. Le client prend le reste. */
+    var h = '<table class="pt-soldes"><colgroup><col><col class="pt-c-num"><col class="pt-c-num"><col class="pt-c-geste"></colgroup>'
+      + '<thead><tr><th>${T("Client")}</th><th class="num">${T("Points")}</th><th class="num">${T("Valeur")}</th><th></th></tr></thead><tbody>'
       + morceau.map(function(u){
           var ouvert = POUV === u.id;
           return '<tr' + (ouvert ? ' class="pt-ligne-ouverte"' : '') + '><td><div class="pt-nom">' + esc(u.nom || u.courriel) + '</div>'
             + (u.nom && u.courriel ? '<div class="dt">' + esc(u.courriel) + '</div>' : '') + '</td>'
             + '<td class="num' + (u.points > 0 ? '' : ' pt-zero') + '"><b>' + szNombre(u.points, 0) + '</b></td>'
-            + '<td class="num dt">' + szArgent(u.points * vp) + '</td>'
+            + '<td class="num pt-valeur">' + szArgent(u.points * vp) + '</td>'
             + '<td class="fin">' + (ro ? '' : '<button type="button" class="mini geste' + (ouvert ? ' actif' : '') + '" data-pt-ouvrir="' + esc(u.id) + '">${T("Ajuster")}</button>') + '</td></tr>'
             + (ouvert && !ro ? ptsPanneau(u) : '');
         }).join('')
       + '</tbody></table>';
-    h += '<div class="pt-pages"><span>' + szNombre(de + 1, 0) + '–' + szNombre(Math.min(n, de + PPARPAGE), 0) + ' ${T("sur")} ' + szNombre(n, 0) + '</span>'
-      + '<select id="pt-parpage" aria-label="${T("Clients par page")}">' + [25, 50, 100].map(function(k){ return '<option value="' + k + '"' + (k === PPARPAGE ? ' selected' : '') + '>' + k + ' ${T("par page")}</option>'; }).join('') + '</select>'
-      + '<button type="button" class="mini" data-pt-page="-1"' + (PPAGE ? '' : ' disabled') + ' aria-label="${T("Page précédente")}">‹</button>'
-      + '<span>' + (PPAGE + 1) + ' / ' + pages + '</span>'
-      + '<button type="button" class="mini" data-pt-page="1"' + (PPAGE < pages - 1 ? '' : ' disabled') + ' aria-label="${T("Page suivante")}">›</button></div>';
     return h;
+  }
+  /* ⚠ AUTANT DE LIGNES QUE LA HAUTEUR EN PERMET (szAutoPagination), jamais de glissière : la
+     3e ligne passait sous le bas de la fenêtre. Le panneau d ajustement prend la place d une ligne. */
+  function ptsParPage(){
+    var pp = Math.max(1, PPARPAGE);
+    var l = ptsFiltres(), de = PPAGE * pp;
+    var ouvertIci = POUV && l.slice(de, de + pp).some(function(u){ return u.id === POUV; });
+    return ouvertIci ? Math.max(1, pp - 1) : pp;
+  }
+  function ptsPages(){
+    var n = ptsFiltres().length, pp = ptsParPage();
+    if (!n) return '';
+    var pages = Math.max(1, Math.ceil(n / pp)), de = PPAGE * pp;
+    return '<span>' + szNombre(de + 1, 0) + '–' + szNombre(Math.min(n, de + pp), 0) + ' ${T("sur")} ' + szNombre(n, 0) + '</span>'
+      + (pages > 1 ? '<button type="button" class="mini" data-pt-page="-1"' + (PPAGE ? '' : ' disabled') + ' aria-label="${T("Page précédente")}">‹</button>'
+        + '<span>' + (PPAGE + 1) + ' / ' + pages + '</span>'
+        + '<button type="button" class="mini" data-pt-page="1"' + (PPAGE < pages - 1 ? '' : ' disabled') + ' aria-label="${T("Page suivante")}">›</button>' : '');
   }
   function ptsRedessinerTable(focus){
     var z = document.getElementById('pt-table'); if (!z) return;
     z.innerHTML = ptsTable();
+    var pg = document.getElementById('pt-pages'); if (pg) pg.innerHTML = ptsPages();
     if (focus) { var e = document.getElementById(focus); if (e) e.focus(); }
   }
   function ptsApres(){
@@ -532,7 +558,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     if (f) f.onchange = function(){ PF = f.value; PPAGE = 0; POUV = ''; ptsRedessinerTable(); };
     var t = document.getElementById('pt-tri');
     if (t) t.onchange = function(){ PTRI = t.value; PPAGE = 0; ptsRedessinerTable(); };
-    var z = document.getElementById('pt-table');
+    var z = document.getElementById('pt-zone');
     if (z) {
       z.onclick = function(e){
         var b = e.target.closest ? e.target.closest('button') : null; if (!b || b.disabled) return;
@@ -556,7 +582,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
         else if (b.id === 'pt-annuler') { POUV = ''; ptsRedessinerTable(); }
       };
       z.oninput = function(e){ if (e.target && e.target.id === 'pt-n') ptsApres(); };
-      z.onchange = function(e){ if (e.target && e.target.id === 'pt-parpage') { PPARPAGE = Number(e.target.value) || 25; PPAGE = 0; ptsRedessinerTable(); } };
       z.onkeydown = function(e){
         if (!e.target || (e.target.id !== 'pt-n' && e.target.id !== 'pt-motif')) return;
         if (e.key === 'Enter') { e.preventDefault(); ptsConfirmer(); }
@@ -908,7 +933,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       szAutoPagination('.liste', function(n){ SPARPAGE = Math.max(3, n - 1); SPAGE = 0; dessiner(); });
     }
     brancher();
-    if (ONGLET === 'points') brancherPoints();
+    if (ONGLET === 'points') {
+      brancherPoints();
+      /* Remis à zéro : la mesure d un autre onglet garderait sinon le même compte, et le rappel
+         ne serait pas appelé — la liste resterait à 25 lignes, coupée. */
+      _szAutoDernier = 0;
+      szAutoPagination('#pt-table', function(n){ if (n !== PPARPAGE) { PPARPAGE = n; PPAGE = 0; ptsRedessinerTable(); } });
+    }
   }
 
   function brancher(){
