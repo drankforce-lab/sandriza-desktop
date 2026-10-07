@@ -2646,6 +2646,8 @@ const OPS_PONT = new Set([
   'config:bd:donnees', 'config:bd:tester', 'config:bd:pousser', 'config:bd:restaurer', 'config:bd:migrer', 'config:bd:stockage',
   'config:accueil:donnees', 'config:accueil:ecrire', 'config:accueil:reinit',
   'config:lancement:donnees', 'config:lancement:basculer',
+  // Liste VIP du prelancement (carte de la fenetre Mode lancement, 2026-10-07).
+  'config:vip:donnees', 'config:vip:ecrire', 'config:vip:envoyer',
   // Pages du site (fenetre Pages, 2.61.0, #5, etape 5a) — editeurs structures.
   'pages:donnees', 'pages:faq:ecrire', 'pages:contact:ecrire', 'pages:sizes:ecrire',
   'pages:vedette:ajouter', 'pages:vedette:retirer', 'pages:footer', 'pages:custom:footer',
@@ -3266,6 +3268,9 @@ const LIMITES_PONT = {
   'config:bd:donnees': 15000, 'config:bd:tester': 30000, 'config:bd:pousser': 120000, 'config:bd:restaurer': 60000, 'config:bd:migrer': 300000, 'config:bd:stockage': 30000,
   'config:accueil:donnees': 15000, 'config:accueil:ecrire': 30000, 'config:accueil:reinit': 20000,
   'config:lancement:donnees': 20000, 'config:lancement:basculer': 20000,
+  /* Liste VIP : l envoi des codes enchaine des lots de courriels cote serveur
+     (~35 s chacun) et s arrete de lui-meme apres 7 minutes : plafond de 9 min. */
+  'config:vip:donnees': 20000, 'config:vip:ecrire': 30000, 'config:vip:envoyer': 540000,
   'pages:donnees': 60000, 'pages:faq:ecrire': 200000, 'pages:contact:ecrire': 40000, 'pages:sizes:ecrire': 200000,
   'pages:vedette:ajouter': 20000, 'pages:vedette:retirer': 20000, 'pages:footer': 20000, 'pages:custom:footer': 20000,
   'pages:custom:supprimer': 20000, 'pages:inbox': 60000, 'pages:inbox:supprimer': 20000, 'pages:inbox:vider': 20000,

@@ -59,6 +59,22 @@ html.jour button.bsc,html.jour .etat button.bsc{color:var(--tx-sur-accent)}
 html.jour .lg.on{color:#1f6b3a}
 button.bsc:disabled{opacity:.5;cursor:default}
 .vide{padding:1rem;text-align:center;color:var(--tx2);font-size:.82rem}
+/* La carte « Liste VIP » (2026-10-07). */
+.vip{margin:1.4rem 0 0;border:1px solid var(--v12);border-radius:12px;padding:1rem 1.1rem;background:var(--v04)}
+.vip .bascule{display:flex;align-items:center;gap:.6rem;font-size:.86rem;margin:0 0 .9rem;cursor:pointer}
+.vip .bascule input{width:1.05rem;height:1.05rem}
+.vip .grille{display:grid;grid-template-columns:1fr 1fr;gap:.7rem .9rem}
+.vip label.ch{display:flex;flex-direction:column;gap:.25rem;font-size:.74rem;color:var(--tx2)}
+.vip input[type=text],.vip input[type=number],.vip textarea{font:inherit;font-size:.84rem;color:var(--tx);background:var(--f-champ);
+  border:1px solid var(--v12);border-radius:7px;padding:.4rem .55rem}
+.vip textarea{min-height:5.2rem;resize:vertical}
+.vip .comptes{display:flex;gap:1.2rem;flex-wrap:wrap;font-size:.82rem;margin:.9rem 0 .2rem;color:var(--tx2)}
+.vip .comptes b{color:var(--tx)}
+.vip .actions{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin:.8rem 0 0}
+.vip .pourquoi{font-size:.78rem;color:var(--tx2);margin:.5rem 0 0}
+.vip .resultat{font-size:.8rem;margin:.5rem 0 0;color:var(--tx)}
+.vip .note{font-size:.76rem;color:var(--tx2);margin:.7rem 0 0;line-height:1.55}
+@media (max-width:640px){.vip .grille{grid-template-columns:1fr}}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
@@ -86,6 +102,8 @@ function pageLancement() {
 ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
   var D = null, RO = false, OCCUPE = false, CONF = false;
+  // La carte « Liste VIP » : ses données, son armement (confirmation), son occupation.
+  var V = null, VCONF = false, VOCC = false, VRES = '';
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
@@ -101,6 +119,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     refus:'${T("Le serveur a refusé le changement.")}',
     reseau:'${T("Erreur réseau en joignant le serveur.")}',
     echec:"${T('L\'opération a échoué.')}",
+    pas_lance:'${T("Le site n’est pas lancé : le serveur refuse l’envoi des codes.")}',
+    role:'${T("L’envoi des codes est réservé aux administrateurs.")}',
+    resend:'${T("Aucune clé Resend configurée (Infolettre) : aucun courriel ne peut partir.")}',
+    essai:'${T("Déploiement d’essai : aucun courriel ne part d’ici.")}',
   };
   function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+esc(m||'?')+').'))+(r&&r.detail?' — '+esc(r.detail):''); }
   function appeler(op, args){
@@ -147,9 +169,108 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '${T("elle. Pour lancer <b>pour de bon</b> : <code>ELG_LAUNCHED=1</code> dans Render. Sans elle, le défaut est ")}'
       + '${T("« pré-lancement ».")}</div>';
 
+    h += '<div class="vip" id="vip-zone"></div>';
+    relever();
     corps.innerHTML = h;
     var b = document.getElementById('b-bascule');
     if (b) b.onclick = function(){ cliquer(); };
+    dessinerVip();
+  }
+
+  /* ── LISTE VIP DU PRELANCEMENT (2026-10-07) ─────────────────────────────────
+     Sa decision : 15 % sur la premiere commande, par un code UNIQUE envoye par
+     courriel le jour de l ouverture — rien ne part avant. Le bouton d envoi ne
+     s allume que si le SERVEUR dit le site lance (launch.flag) ; il refuse de
+     toute facon tant que ce n est pas le cas. Confirmation en deux temps, comme
+     le lancement : c est un courriel a chaque inscrite. */
+  function relever(){
+    if (!V || !V.cfg || !document.getElementById('v-titre')) return;
+    var g = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
+    var a = document.getElementById('v-actif');
+    V.cfg.actif = !!(a && a.checked);
+    V.cfg.titre = g('v-titre'); V.cfg.titreEN = g('v-titre-en');
+    V.cfg.texte = g('v-texte'); V.cfg.texteEN = g('v-texte-en');
+    V.cfg.rabaisPct = g('v-pct'); V.cfg.validiteJours = g('v-jours');
+  }
+  function dessinerVip(){
+    var z = document.getElementById('vip-zone'); if (!z) return;
+    var h = '<div class="h4">${T("Liste VIP")}</div>';
+    if (!V) { z.innerHTML = h + '<div class="vide">${T("Lecture de la liste VIP…")}</div>'; return; }
+    if (!V.ok) { z.innerHTML = h + '<div class="vide">' + expliquer(V) + '</div>'; return; }
+    var c = V.cfg || {}, ro = !V.peutModifier, dis = ro ? ' disabled' : '';
+    h += '<label class="bascule"><input type="checkbox" id="v-actif"' + (c.actif ? ' checked' : '') + dis + '>'
+      + '<span>${T("Page « Liste VIP » active — le lien paraît dans le pied de page de la boutique.")}</span></label>'
+      + '<div class="grille">'
+      + '<label class="ch">${T("Titre (français)")}<input type="text" id="v-titre" maxlength="120" value="' + esc(c.titre) + '"' + dis + '></label>'
+      + '<label class="ch">${T("Titre (anglais)")}<input type="text" id="v-titre-en" maxlength="120" value="' + esc(c.titreEN) + '"' + dis + '></label>'
+      + '<label class="ch">${T("Texte (français)")}<textarea id="v-texte" maxlength="1200"' + dis + '>' + esc(c.texte) + '</textarea></label>'
+      + '<label class="ch">${T("Texte (anglais)")}<textarea id="v-texte-en" maxlength="1200"' + dis + '>' + esc(c.texteEN) + '</textarea></label>'
+      + '<label class="ch">${T("Rabais (%)")}<input type="number" id="v-pct" min="1" max="90" step="1" value="' + esc(c.rabaisPct) + '"' + dis + '></label>'
+      + '<label class="ch">${T("Validité du code (jours)")}<input type="number" id="v-jours" min="1" max="365" step="1" value="' + esc(c.validiteJours) + '"' + dis + '></label>'
+      + '</div>';
+    var k = V.compte;
+    if (k) {
+      h += '<div class="comptes"><span>${T("Inscrites VIP :")} <b>' + (k.vips || 0) + '</b></span>'
+        + '<span>${T("Codes envoyés :")} <b>' + (k.envoyes || 0) + '</b></span>'
+        + '<span>${T("À envoyer :")} <b>' + (k.aEnvoyer || 0) + '</b></span></div>';
+    } else {
+      h += '<div class="comptes">${T("Comptes indisponibles :")} ' + expliquer({ motif: V.compteMotif || 'echec' }) + '</div>';
+    }
+    var peutEnvoyer = !ro && V.lance && k && k.aEnvoyer > 0 && !VOCC;
+    var pourquoi = ro ? '${T("Lecture seule : vous pouvez consulter, pas modifier.")}'
+      : !V.lance ? '${T("Le site n’est pas encore lancé : les codes partent le jour de l’ouverture, une fois le site en ligne.")}'
+      : (k && !k.aEnvoyer) ? '${T("Aucun code à envoyer : chaque inscrite a déjà reçu le sien.")}'
+      : '';
+    if (!ro) {
+      h += '<div class="actions"><button class="bsc" id="v-ecrire" style="background:#1C2541"' + (VOCC ? ' disabled' : '') + '>${T("Enregistrer")}</button>'
+        + '<button class="bsc" id="v-envoyer" style="background:' + (VCONF ? '#b91c1c' : '#9B2335') + '"' + (peutEnvoyer ? '' : ' disabled') + '>'
+        + (VCONF ? '${T("Confirmer l’envoi des codes ?")}' : '${T("Envoyer les codes VIP")}') + '</button></div>';
+    }
+    if (pourquoi) h += '<div class="pourquoi">' + pourquoi + '</div>';
+    if (VRES) h += '<div class="resultat">' + VRES + '</div>';
+    h += '<div class="note">${T("Chaque code est unique, à usage unique et valable sur une commande. Il ne part qu’une fois par adresse, même si vous recliquez.")}</div>';
+    z.innerHTML = h;
+    var be = document.getElementById('v-ecrire'); if (be) be.onclick = function(){ ecrireVip(); };
+    var bv = document.getElementById('v-envoyer'); if (bv) bv.onclick = function(){ envoyerVip(); };
+  }
+  function ecrireVip(){
+    if (!V || !V.peutModifier || VOCC) return;
+    relever();
+    VOCC = true; VCONF = false; dessinerVip(); dire('${T("Enregistrement de la liste VIP…")}');
+    appeler('config:vip:ecrire', [V.cfg]).then(function(r){
+      VOCC = false;
+      if (r && r.ok) {
+        V = r; dessinerVip();
+        dire(r.nuage === false ? '${T("Enregistrée sur ce poste, mais pas dans le nuage : réessayez.")}' : '${T("Liste VIP enregistrée.")}', r.nuage === false ? 'att' : 'bon');
+      } else { dessinerVip(); dire('${T("Échec : ")}' + expliquer(r), 'err'); }
+    });
+  }
+  function envoyerVip(){
+    if (!V || !V.peutModifier || VOCC) return;
+    if (!VCONF) {
+      relever(); VCONF = true; dessinerVip();
+      dire('${T("Cliquez encore pour envoyer un courriel à chaque inscrite VIP.")}', 'att');
+      setTimeout(function(){ if (VCONF) { relever(); VCONF = false; dessinerVip(); } }, 6000);
+      return;
+    }
+    relever(); VCONF = false; VOCC = true; VRES = ''; dessinerVip();
+    dire('${T("Envoi des codes VIP… cela peut prendre quelques minutes.")}');
+    appeler('config:vip:envoyer').then(function(r){
+      VOCC = false;
+      if (r && r.ok) {
+        var cfg = V.cfg; V = r; V.cfg = cfg;   // la saisie non enregistree reste a l ecran
+        var t = r.resultat || {};
+        VRES = '${T("Codes envoyés :")} <b>' + (t.envoyes || 0) + '</b> ${T("· déjà reçus :")} <b>' + (t.deja || 0)
+          + '</b> ${T("· échecs :")} <b>' + (t.echecs || 0) + '</b> ${T("· restants :")} <b>' + (t.restants || 0) + '</b>';
+        dessinerVip();
+        dire(t.echecs || t.restants ? '${T("Envoi partiel : cliquez de nouveau pour reprendre ce qui reste.")}' : '${T("Codes VIP envoyés.")}', t.echecs || t.restants ? 'att' : 'bon');
+      } else { dessinerVip(); dire('${T("Échec : ")}' + expliquer(r), 'err'); }
+    });
+  }
+  function chargerVip(){
+    appeler('config:vip:donnees').then(function(r){
+      V = r || { ok: false, motif: 'echec' }; VCONF = false; dessinerVip();
+    });
   }
 
   function cliquer(){
@@ -172,6 +293,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       OCCUPE = false;
       if (r && r.ok) {
         D = r; RO = !r.peutModifier; dessiner();
+        chargerVip();   // le bouton des codes VIP suit l etat du lancement
         dire(r.enLigne ? '${T("Site EN LIGNE au public.")}' : '${T("Mode pré-lancement activé.")}', r.enLigne ? 'att' : 'bon');
       } else dire('${T("Échec : ")}' + expliquer(r), 'err');
     });
@@ -182,6 +304,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('config:lancement:donnees').then(function(r){
       if (!r || !r.ok) { corps.innerHTML = '<div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div>'; dire(expliquer(r), 'err'); return; }
       D = r; RO = !r.peutModifier; CONF = false; dessiner(); dire('');
+      chargerVip();
     });
   }
 

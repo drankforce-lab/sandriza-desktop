@@ -125,5 +125,54 @@ module.exports = {
     'it. To launch <b>for good</b>: <code>ELG_LAUNCHED=1</code> in Render. Without it, the default is ',
   'elle. Pour lancer pour de bon : ELG_LAUNCHED=1 dans Render. Sans elle, le défaut est':
     'it. To launch for good: ELG_LAUNCHED=1 in Render. Without it, the default is',
-  '« pré-lancement ».': '« pre-launch ».'
+  '« pré-lancement ».': '« pre-launch ».',
+
+  /* ── LA LISTE VIP DU PRELANCEMENT (2026-10-07) ─────────────────────────────
+     ⚠ Aucune apostrophe DROITE dans ces valeurs : elles sont posees entre
+     guillemets simples dans le script de la fenetre. « Inscrites » : la
+     clientele est feminine, l anglais dit simplement « sign-ups ». */
+  'Liste VIP': 'VIP list',
+  'Lecture de la liste VIP…': 'Reading the VIP list…',
+  'Page « Liste VIP » active — le lien paraît dans le pied de page de la boutique.':
+    '« VIP list » page active — the link appears in the shop footer.',
+  'Titre (français)': 'Title (French)',
+  'Titre (anglais)': 'Title (English)',
+  'Texte (français)': 'Text (French)',
+  'Texte (anglais)': 'Text (English)',
+  'Rabais (%)': 'Discount (%)',
+  'Validité du code (jours)': 'Code validity (days)',
+  'Inscrites VIP :': 'VIP sign-ups:',
+  'Codes envoyés :': 'Codes sent:',
+  'À envoyer :': 'To send:',
+  'Comptes indisponibles :': 'Counts unavailable:',
+  'Le site n’est pas encore lancé : les codes partent le jour de l’ouverture, une fois le site en ligne.':
+    'The site is not launched yet: the codes go out on opening day, once the site is live.',
+  'Aucun code à envoyer : chaque inscrite a déjà reçu le sien.':
+    'No codes to send: every sign-up has already received hers.',
+  'Envoyer les codes VIP': 'Send the VIP codes',
+  'Confirmer l’envoi des codes ?': 'Confirm sending the codes?',
+  'Chaque code est unique, à usage unique et valable sur une commande. Il ne part qu’une fois par adresse, même si vous recliquez.':
+    'Each code is unique, single-use and valid on one order. It is sent only once per address, even if you click again.',
+  'Enregistrement de la liste VIP…': 'Saving the VIP list…',
+  'Enregistrée sur ce poste, mais pas dans le nuage : réessayez.':
+    'Saved on this computer, but not in the cloud: try again.',
+  'Liste VIP enregistrée.': 'VIP list saved.',
+  'Cliquez encore pour envoyer un courriel à chaque inscrite VIP.':
+    'Click again to send an email to every VIP sign-up.',
+  'Envoi des codes VIP… cela peut prendre quelques minutes.':
+    'Sending the VIP codes… this may take a few minutes.',
+  '· déjà reçus :': '· already received:',
+  '· échecs :': '· failures:',
+  '· restants :': '· remaining:',
+  'Envoi partiel : cliquez de nouveau pour reprendre ce qui reste.':
+    'Partial send: click again to resume what remains.',
+  'Codes VIP envoyés.': 'VIP codes sent.',
+  'Le site n’est pas lancé : le serveur refuse l’envoi des codes.':
+    'The site is not launched: the server refuses to send the codes.',
+  'L’envoi des codes est réservé aux administrateurs.':
+    'Sending the codes is reserved for administrators.',
+  'Aucune clé Resend configurée (Infolettre) : aucun courriel ne peut partir.':
+    'No Resend key configured (Newsletter): no email can be sent.',
+  'Déploiement d’essai : aucun courriel ne part d’ici.':
+    'Test deployment: no email is sent from here.'
 };

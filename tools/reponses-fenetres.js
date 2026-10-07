@@ -2605,9 +2605,11 @@ const JEU = {
   // pré-lancement (protégé, variable absente) et en ligne (piloté par ELG_LAUNCHED).
   'lancement.js': [
     { nom: 'pré-lancement (protégé)', reponses: { identite: IDENTITE,
-      'config:lancement:donnees': { ok: true, peutModifier: true, enLigne: false, envPresente: false, envValeur: '', coherent: true } } },
+      'config:lancement:donnees': { ok: true, peutModifier: true, enLigne: false, envPresente: false, envValeur: '', coherent: true },
+      'config:vip:donnees': { ok: true, peutModifier: true, lance: false, compteMotif: '', compte: { vips: 12, envoyes: 0, aEnvoyer: 12, retirees: 0 }, cfg: { actif: true, titre: 'Soyez la première', titreEN: 'Be the first', texte: 'Inscrivez-vous.', texteEN: 'Sign up.', rabaisPct: 15, validiteJours: 30 } } } },
     { nom: 'en ligne (variable Render)', reponses: { identite: IDENTITE,
-      'config:lancement:donnees': { ok: true, peutModifier: true, enLigne: true, envPresente: true, envValeur: '1', coherent: true } } },
+      'config:lancement:donnees': { ok: true, peutModifier: true, enLigne: true, envPresente: true, envValeur: '1', coherent: true },
+      'config:vip:donnees': { ok: true, peutModifier: true, lance: true, compteMotif: '', compte: { vips: 12, envoyes: 0, aEnvoyer: 12, retirees: 0 }, cfg: { actif: true, titre: 'Soyez la première', titreEN: 'Be the first', texte: 'Inscrivez-vous.', texteEN: 'Sign up.', rabaisPct: 15, validiteJours: 30 } } } },
   ],
 
   // Page d'accueil (palier 5). Pas de secret ; images = URL. Trois états : liste,
