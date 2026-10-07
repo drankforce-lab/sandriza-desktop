@@ -29,12 +29,33 @@ const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU
 const T = require('../langue').tr('fidelisation');
 
 const CSS = `
+/* L'onglet Ambassadrices (2026-10-07) : trois vues (ambassadrices et bilan, programme, candidatures). */
+.amb-zone{display:flex;flex-direction:column;gap:.7rem;flex:1 1 auto;min-height:0}
+.amb-sous{display:flex;gap:.3rem;align-items:center;flex-wrap:wrap}
+.amb-sous button{padding:.26rem .8rem;border-radius:99px;font-size:.8rem;font-weight:600;color:var(--tx2);background:transparent}
+.amb-sous button.actif{color:var(--tx)}
+.amb-sous .droite{margin-left:auto}
+.amb-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.7rem 1rem}
+.amb-deux{display:grid;grid-template-columns:1fr 1fr;gap:.7rem 1rem;margin-top:.7rem}
+.amb-grille label,.amb-deux label{display:flex;flex-direction:column;gap:.3rem;font-size:.8rem;color:var(--tx2)}
+.amb-grille input,.amb-grille select,.amb-deux input,.amb-deux textarea{font:inherit;font-size:.85rem;color:var(--tx);background:var(--v05);border:1px solid var(--v16);border-radius:8px;padding:.4rem .55rem}
+.amb-deux textarea{resize:vertical;min-height:5.2rem;line-height:1.45}
+.amb-exemple{margin:.8rem 0;padding:.6rem .8rem;border-radius:10px;background:var(--v05);font-size:.86rem;line-height:1.5}
+.amb-raison{text-align:right}
+.amb-zone .carte.plein{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+.amb-zone .liste{flex:1 1 auto;min-height:0;overflow:hidden}
+tr.amb-detail td{background:var(--v04);font-size:.78rem}
+.amb-pages{display:flex;gap:.5rem;align-items:center;justify-content:flex-end;margin-top:.5rem;font-size:.78rem;color:var(--tx2)}
+.amb-actions{display:flex;gap:.5rem;align-items:center;margin-top:.7rem}
+
 /* L'onglet Points (2026-10-06) */
 .pt-ligne{display:flex;align-items:center;gap:.5rem;margin:.2rem 0 .9rem}
 .pt-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.8rem 1rem}
 .pt-grille label{display:flex;flex-direction:column;gap:.3rem;font-size:.8rem;color:var(--tx2)}
 .pt-grille input{font:inherit;color:var(--tx);background:var(--v05);border:1px solid var(--v16);border-radius:8px;padding:.4rem .55rem}
 .pt-exemple{margin:.9rem 0;padding:.7rem .85rem;border-radius:10px;background:var(--v05);font-size:.86rem;line-height:1.5}
+/* Les avis récompensés (2026-10-07) : un sous-titre dans la même carte. */
+.pt-sous{margin:1rem 0 .5rem;font-size:.92rem;font-weight:600}
 /* Les soldes (2026-10-06, refaits pour des centaines de clients) : recherche, filtre, tri,
    pages ; l ajustement s ouvre SOUS la ligne, avec la bascule Ajouter / Retirer. */
 .pt-outils{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin:.1rem 0 .6rem}
@@ -192,7 +213,7 @@ label.case input{width:15px;height:15px;accent-color:#c9a97e;margin:0}
  */
 function pageFidelisation(ouverture) {
   const ouv = String(ouverture || '');
-  const depart = (['recompenses', 'invitations'].indexOf(ouv) >= 0) ? ouv : 'sondages';
+  const depart = (['recompenses', 'invitations', 'ambassadrices'].indexOf(ouv) >= 0) ? ouv : 'sondages';
   const editeur = (ouv === 'sondage-nouveau');
   return `${TETE()}
 <title>${T("Fidélisation et sondages — Administration Sandriza")}</title>
@@ -401,6 +422,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       + '<label>${T("Solde minimal pour utiliser")}<input type="number" id="pt-min" min="0" step="1" value="' + esc(cf.minPoints) + '"' + dis + '><span class="dt">${T("en points (0 = dès le premier)")}</span></label>'
       + '</div>'
       + '<p class="pt-exemple" id="pt-exemple">' + ptsExemple() + '</p>'
+      /* LES AVIS RÉCOMPENSÉS (2026-10-07) : un avis publié verse ses points une seule fois (le
+         serveur décide, à la publication). Avec photo : le second nombre REMPLACE le premier. */
+      + '<h3 class="pt-sous">${T("Avis récompensés")}</h3>'
+      + '<label class="pt-ligne"><input type="checkbox" id="pt-avis"' + (cf.avisActif ? ' checked' : '') + dis + '> <b>${T("Récompenser les avis publiés")}</b></label>'
+      + '<div class="pt-grille">'
+      + '<label>${T("Points par avis")}<input type="number" id="pt-avis-pts" min="0" max="100000" step="1" value="' + esc(cf.avisPts != null ? cf.avisPts : 100) + '"' + dis + '><span class="dt">${T("avis publié sans photo")}</span></label>'
+      + '<label>${T("Points par avis avec photo")}<input type="number" id="pt-avis-photo" min="0" max="100000" step="1" value="' + esc(cf.avisPhotoPts != null ? cf.avisPhotoPts : 200) + '"' + dis + '><span class="dt">${T("au moins une photo — remplace le nombre sans photo")}</span></label>'
+      + '</div>'
+      + '<p class="dt">${T("Ne s’applique qu’une fois la boutique lancée.")}</p>'
       + (ro ? '' : '<button class="prim" id="pt-enr">${T("Enregistrer les réglages")}</button>')
       + '<p class="dt">${T("Les points sont attribués quand la commande passe « livrée », une seule fois. Le solde de chaque client est tenu par le serveur.")}</p>'
       + '</div>';
@@ -594,12 +624,344 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     if (be) be.onclick = function(){
       var g = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
       be.disabled = true;
-      appeler('fidelisation:points:ecrire', [{ actif: !!(document.getElementById('pt-actif') || {}).checked, ptsParDollar: g('pt-ppd'), valeurPoint: g('pt-vp'), plafondPct: g('pt-pl'), minPoints: g('pt-min') }]).then(function(r){
+      appeler('fidelisation:points:ecrire', [{ actif: !!(document.getElementById('pt-actif') || {}).checked, ptsParDollar: g('pt-ppd'), valeurPoint: g('pt-vp'), plafondPct: g('pt-pl'), minPoints: g('pt-min'),
+        avisActif: !!(document.getElementById('pt-avis') || {}).checked, avisPts: g('pt-avis-pts'), avisPhotoPts: g('pt-avis-photo') }]).then(function(r){
         be.disabled = false;
-        if (!r.ok) { dire(r.motif === 'pts_par_dollar' ? '${T("Points par dollar : entre 0 et 100.")}' : r.motif === 'valeur_point' ? '${T("Valeur d’un point : plus de 0 et au plus 10 $.")}' : r.motif === 'plafond' ? '${T("Plafond : entre 0 et 100 %.")}' : expliquer(r), 'err'); return; }
+        if (!r.ok) { dire(r.motif === 'pts_par_dollar' ? '${T("Points par dollar : entre 0 et 100.")}' : r.motif === 'valeur_point' ? '${T("Valeur d’un point : plus de 0 et au plus 10 $.")}' : r.motif === 'plafond' ? '${T("Plafond : entre 0 et 100 %.")}' : (r.motif === 'avis_pts' || r.motif === 'avis_photo_pts') ? '${T("Points d’un avis : un nombre entier de 0 à 100 000.")}' : expliquer(r), 'err'); return; }
         dire('${T("Réglages enregistrés.")}', 'bon'); chargerPoints();
       });
     };
+  }
+
+  /* ── L'ONGLET « AMBASSADRICES » (2026-10-07, sa demande) ────────────────────────────────────
+     Le programme (interrupteur, textes FR/EN, rabais offert, récompense, délai), les ambassadrices
+     avec leur bilan, les candidatures reçues par la boutique, et le versement des récompenses dues.
+     ⚠ Le SERVEUR décide de tout (lib-ambassadrices.php) : quelle commande compte, ce qui est dû, et
+     qu une commande n est jamais payée deux fois. Le versement exige en plus le rôle admin ou
+     super-admin ET la boutique lancée — le bouton le dit au lieu de se taire.
+     ⚠ Les saisies vivent dans AMBED / AMBCFG (moissonnées à chaque frappe) : un redessin ne perd rien. */
+  var AMB = null, AMBCHARGE = false, AMBV = 'liste', AMBED = null, AMBCFG = null, AMBARME = '', AMBOUV = '';
+  var AMBPAGE = 0, AMBPP = 12;
+  var AMBMOTIFS = {
+    role:        '${T("Réservé à l’administration (rôle admin ou super-admin).")}',
+    pas_lance:   '${T("Les versements commencent au lancement de la boutique.")}',
+    reseau:      '${T("Le serveur ne répond pas — rien n’a été écrit. Réessayez.")}',
+    version_site:'${T("Le site ne connaît pas encore ce programme : rechargez la fenêtre principale.")}',
+    nom:         '${T("Le nom est obligatoire.")}',
+    courriel:    '${T("Adresse courriel invalide.")}',
+    code:        '${T("Code promo invalide : 3 à 24 lettres, chiffres, tirets.")}',
+    code_pris:   '${T("Ce code appartient déjà à une autre ambassadrice ou à un autre coupon.")}',
+    titre:       '${T("Le titre (français) est obligatoire.")}',
+    rabais:      '${T("Rabais : entre 1 et 90 %.")}',
+    valeur:      '${T("Valeur de la récompense hors limites.")}',
+    delai:       '${T("Délai : entre 0 et 365 jours.")}'
+  };
+  function ambExpliquer(r){ return AMBMOTIFS[r && r.motif] || expliquer(r); }
+  var AMBTYPES = [
+    { v: 'credit',      l: '${T("Crédit boutique (% des articles)")}',            u: '${T("% des articles")}' },
+    { v: 'points',      l: '${T("Points de fidélité (par dollar)")}',             u: '${T("points par dollar")}' },
+    { v: 'pourcentage', l: '${T("Commission en % (payée à la main)")}',           u: '${T("% des articles")}' },
+    { v: 'fixe',        l: '${T("Montant fixe par commande (payé à la main)")}',  u: '${T("$ par commande")}' }
+  ];
+  function ambType(v){ return AMBTYPES.filter(function(t){ return t.v === v; })[0] || AMBTYPES[0]; }
+  function chargerAmb(){
+    AMBCHARGE = true;
+    appeler('fidelisation:amb:donnees', []).then(function(r){
+      AMBCHARGE = false;
+      AMB = r.ok ? r : { erreur: ambExpliquer(r) };
+      if (r.ok) AMBCFG = null;
+      if (ONGLET === 'ambassadrices') dessiner();
+    });
+  }
+  function ambVal(m, p){
+    var t = [];
+    if (p) t.push(szNombre(p, 0) + ' ${T("points")}');
+    if (m || !p) t.push(szArgent(m || 0));
+    return t.join(' · ');
+  }
+  function ambOccupe(){ return !!(AMBED || AMBCFG || AMBARME); }
+  function ambTotaux(){
+    var t = { du: 0, duP: 0, att: 0, attP: 0, ver: 0, verP: 0, nb: 0 };
+    (AMB.ambassadrices || []).forEach(function(a){
+      var b = a.bilan || {};
+      t.du += b.du || 0; t.duP += b.duPoints || 0; t.att += b.attente || 0; t.attP += b.attentePoints || 0;
+      t.ver += b.verse || 0; t.verP += b.versePoints || 0; t.nb += b.nbDues || 0;
+    });
+    return t;
+  }
+  function ambRaisonVerser(t){
+    if (!AMB.lance) return AMBMOTIFS.pas_lance;
+    if (!AMB.peutVerser) return AMBMOTIFS.role;
+    if (!t.nb) return '${T("Aucune récompense due pour l’instant.")}';
+    return '';
+  }
+  function ambPages(n){
+    var pp = Math.max(1, AMBPP), pages = Math.max(1, Math.ceil(n / pp));
+    if (AMBPAGE >= pages) AMBPAGE = pages - 1;
+    if (AMBPAGE < 0) AMBPAGE = 0;
+    if (pages < 2) return '';
+    return '<div class="amb-pages"><button type="button" class="mini" data-amb-page="-1"' + (AMBPAGE ? '' : ' disabled') + ' aria-label="${T("Page précédente")}">‹</button>'
+      + '<span>' + (AMBPAGE + 1) + ' / ' + pages + '</span>'
+      + '<button type="button" class="mini" data-amb-page="1"' + (AMBPAGE < pages - 1 ? '' : ' disabled') + ' aria-label="${T("Page suivante")}">›</button></div>';
+  }
+  function ambMorceau(l){ var pp = Math.max(1, AMBPP); return l.slice(AMBPAGE * pp, AMBPAGE * pp + pp); }
+  var AMBETATS = {
+    due: '${T("Due")}', versee: '${T("Versée")}', annulee: '${T("Annulée")}', remboursee: '${T("Remboursée")}',
+    propre_code: '${T("Sa propre commande")}', non_livree: '${T("Pas encore livrée")}',
+    date_livraison: '${T("Date de livraison inconnue")}', zero: '${T("Aucune récompense")}'
+  };
+  function ambEtat(d){
+    if (d.etat === 'attente' && d.motif === 'delai') return '${T("Délai de retour jusqu’au")}' + ' ' + esc(d.disponibleLe);
+    return AMBETATS[d.etat === 'due' || d.etat === 'versee' ? d.etat : d.motif] || esc(d.motif || d.etat);
+  }
+  function ambFormulaire(){
+    var e = AMBED;
+    return '<div class="carte"><h2>' + (e.id ? '${T("Modifier l’ambassadrice")}' : '${T("Nouvelle ambassadrice")}') + '</h2>'
+      + '<div class="amb-grille">'
+      + '<label>${T("Nom")}<input data-amb-champ="nom" id="amb-ed-nom" maxlength="120" value="' + esc(e.nom) + '"></label>'
+      + '<label>${T("Courriel")}<input data-amb-champ="courriel" type="email" maxlength="160" value="' + esc(e.courriel) + '"></label>'
+      + '<label>${T("Code promo")}<input data-amb-champ="code" maxlength="24" value="' + esc(e.code) + '" placeholder="SOPHIE15" style="text-transform:uppercase"></label>'
+      + '</div><div class="amb-deux">'
+      + '<label>${T("Liens des réseaux sociaux")}<textarea data-amb-champ="reseaux" maxlength="600">' + esc(e.reseaux) + '</textarea></label>'
+      + '<label>${T("Notes internes")}<textarea data-amb-champ="notes" maxlength="2000">' + esc(e.notes) + '</textarea></label>'
+      + '</div>'
+      + '<label class="pt-ligne"><input type="checkbox" data-amb-champ="actif"' + (e.actif !== false ? ' checked' : '') + '> <b>${T("Active")}</b>' + ' <span class="dt">${T("— désactivée, son code ne fonctionne plus à la caisse")}</span></label>'
+      + '<p class="dt">${T("Le coupon est créé ou mis à jour : le rabais du programme, une fois par client. Le crédit et les points se versent au compte client qui porte ce courriel.")}</p>'
+      + '<div class="amb-actions"><button type="button" class="prim" data-amb="enregistrer-ed">${T("Enregistrer")}</button>'
+      + '<button type="button" data-amb="annuler-ed">${T("Annuler")}</button></div></div>';
+  }
+  function ambVueListe(){
+    var l = AMB.ambassadrices || [], ro = !AMB.peutModifier, t = ambTotaux(), raison = ambRaisonVerser(t);
+    var compte = (AMB.cfg && (AMB.cfg.recompense || {}).type) || 'credit';
+    var h = '<div class="barreoutils">'
+      + (ro ? '' : '<button type="button" class="mini prim" data-amb="ajouter">${T("+ Ajouter une ambassadrice")}</button>')
+      + '<div class="droite"><span>${T("En attente :")} <b>' + ambVal(t.att, t.attP) + '</b></span>'
+      + '<span>${T("Dû :")} <b>' + ambVal(t.du, t.duP) + '</b></span>'
+      + (ro ? '' : '<button type="button" class="mini ' + (AMBARME === 'verser' ? 'danger' : 'prim') + '" data-amb="verser"'
+          + (raison ? ' disabled title="' + esc(raison) + '"' : '') + '>'
+          + (AMBARME === 'verser' ? '${T("Confirmer le versement ?")}' : '${T("Verser les récompenses dues")}') + '</button>')
+      + '</div></div>';
+    if (raison && !ro) h += '<div class="dt amb-raison">' + esc(raison) + '</div>';
+    if (AMBED) h += ambFormulaire();
+    h += '<div class="carte plein"><h2>${T("Ambassadrices")}</h2>';
+    if (!l.length) {
+      h += '<div class="vide">${T("Aucune ambassadrice pour l’instant.")}' + '<div style="margin-top:.35rem">${T("Ajoutez-en une, ou créez-la depuis une candidature.")}</div></div>';
+      return h + '</div>';
+    }
+    /* Une cellule d en-tete par chaine : le banc des langues lit chaque chaine comme un texte. */
+    h += '<div id="amb-table" class="liste"><table><thead><tr><th>${T("Ambassadrice")}</th>' + '<th>${T("Code")}</th>'
+      + '<th class="num">${T("Commandes")}</th>' + '<th class="num">${T("Ventes")}</th>' + '<th class="num">${T("En attente")}</th>'
+      + '<th class="num">${T("Dû")}</th>' + '<th class="num">${T("Versé")}</th>' + '<th>${T("État")}</th><th></th></tr></thead><tbody>'
+      + ambMorceau(l).map(function(a){
+          var b = a.bilan || {};
+          var sansCompte = !a.userId && (compte === 'credit' || compte === 'points');
+          var ligne = '<tr><td><div class="pt-nom">' + esc(a.nom) + '</div>'
+            + (a.courriel ? '<div class="dt">' + esc(a.courriel) + '</div>' : '')
+            + (sansCompte ? '<span class="rf-pill ambre" title="${T("Aucun compte client ne porte ce courriel : rien ne peut lui être versé.")}">${T("sans compte")}</span>' : '') + '</td>'
+            + '<td><span class="code">' + esc(a.code) + '</span></td>'
+            + '<td class="num">' + szNombre(b.commandes || 0, 0) + '</td>'
+            + '<td class="num">' + szArgent(b.ventes || 0) + '</td>'
+            + '<td class="num">' + ambVal(b.attente, b.attentePoints) + '</td>'
+            + '<td class="num"><b>' + ambVal(b.du, b.duPoints) + '</b></td>'
+            + '<td class="num">' + ambVal(b.verse, b.versePoints) + '</td>'
+            + '<td><span class="rf-pill ' + (a.actif ? 'vert' : '') + '">' + (a.actif ? '${T("Active")}' : '${T("Inactive")}') + '</span></td>'
+            + '<td class="fin"><button type="button" class="mini geste' + (AMBOUV === a.id ? ' actif' : '') + '" data-amb="detail" data-id="' + esc(a.id) + '">${T("Détail")}</button>'
+            + (ro ? '' : ' <button type="button" class="mini geste" data-amb="modifier" data-id="' + esc(a.id) + '">${T("Modifier")}</button>'
+              + ' <button type="button" class="mini geste" data-amb="basculer" data-id="' + esc(a.id) + '">' + (a.actif ? '${T("Désactiver")}' : '${T("Réactiver")}') + '</button>')
+            + '</td></tr>';
+          if (AMBOUV === a.id) {
+            var det = (b.detail || []).slice(0, 8);
+            ligne += '<tr class="amb-detail"><td colspan="9">'
+              + (det.length ? '<table><thead><tr><th>${T("Commande")}</th>' + '<th>${T("Date")}</th>' + '<th class="num">${T("Base")}</th>' + '<th class="num">${T("Récompense")}</th>' + '<th>${T("État")}</th></tr></thead><tbody>'
+                  + det.map(function(d){
+                      return '<tr><td>' + esc(d.commande) + '</td><td class="dt">' + esc(d.date) + '</td><td class="num">' + szArgent(d.base || 0) + '</td>'
+                        + '<td class="num">' + ambVal(d.montant, d.points) + '</td><td>' + ambEtat(d) + '</td></tr>';
+                    }).join('') + '</tbody></table>'
+                  : '<div class="dt">${T("Aucune commande avec son code pour l’instant.")}</div>')
+              + ((a.versements || []).length ? '<div class="dt" style="margin-top:.35rem">${T("Dernier versement :")} ' + esc(String(a.versements[0].at || '').slice(0, 10)) + ' — ' + ambVal(a.versements[0].montant, a.versements[0].points) + '</div>' : '')
+              + '</td></tr>';
+          }
+          return ligne;
+        }).join('')
+      + '</tbody></table></div>' + ambPages(l.length);
+    return h + '</div>';
+  }
+  function ambExemple(c){
+    var v = parseFloat(String(c.valeur).replace(',', '.')) || 0, pct = parseFloat(String(c.rabaisClientPct).replace(',', '.')) || 0;
+    var base = Math.round((100 - pct) * 100) / 100, rec;
+    if (c.type === 'points') rec = szNombre(Math.floor(base * v), 0) + ' ${T("points")}';
+    else if (c.type === 'fixe') rec = szArgent(v);
+    else rec = szArgent(Math.floor(base * v) / 100);
+    return '${T("Exemple : un client achète 100 $ d’articles avec un code ; après son rabais, la base est de")} <b>' + szArgent(base) + '</b>. '
+      + '${T("L’ambassadrice reçoit")} <b>' + rec + '</b>' + ((c.type === 'pourcentage' || c.type === 'fixe') ? ' ${T("(à payer à la main)")}' : '') + '.';
+  }
+  function ambVueProgramme(){
+    var ro = !AMB.peutModifier, dis = ro ? ' disabled' : '';
+    if (!AMBCFG) {
+      var s = AMB.cfg || {}, r = s.recompense || {};
+      AMBCFG = { actif: !!s.actif, titre: s.titre || '', titreEN: s.titreEN || '', texte: s.texte || '', texteEN: s.texteEN || '',
+        rabaisClientPct: s.rabaisClientPct, type: r.type || 'credit', valeur: r.valeur, delaiJours: s.delaiJours, _vierge: true };
+    }
+    var c = AMBCFG;
+    return '<div class="carte"><h2>${T("Le programme")}</h2>'
+      + szInter('amb-actif', '${T("Programme actif")}', '${T("La page de la boutique, le lien du pied de page et les codes des ambassadrices.")}', !!c.actif, ro ? 'disabled' : '')
+      + '<div class="amb-grille" style="margin-top:.6rem">'
+      + '<label>${T("Rabais offert à la clientèle (%)")}<input type="number" data-amb-cfg="rabaisClientPct" min="1" max="90" step="1" value="' + esc(c.rabaisClientPct) + '"' + dis + '></label>'
+      + '<label>${T("Récompense")}<select data-amb-cfg="type"' + dis + '>'
+      + AMBTYPES.map(function(t){ return '<option value="' + t.v + '"' + (c.type === t.v ? ' selected' : '') + '>' + t.l + '</option>'; }).join('')
+      + '</select></label>'
+      + '<label>${T("Valeur")}<input type="number" data-amb-cfg="valeur" min="0" step="0.5" value="' + esc(c.valeur) + '"' + dis + '><span class="dt" id="amb-unite">' + ambType(c.type).u + '</span></label>'
+      + '<label>${T("Délai avant de compter (jours)")}<input type="number" data-amb-cfg="delaiJours" min="0" max="365" step="1" value="' + esc(c.delaiJours) + '"' + dis + '><span class="dt">${T("après la livraison — la fenêtre de retour")}</span></label>'
+      + '</div>'
+      + '<p class="amb-exemple" id="amb-exemple">' + ambExemple(c) + '</p>'
+      + '<div class="amb-deux">'
+      + '<label>${T("Titre (français)")}<input data-amb-cfg="titre" maxlength="120" value="' + esc(c.titre) + '"' + dis + '></label>'
+      + '<label>${T("Titre (anglais)")}<input data-amb-cfg="titreEN" maxlength="120" value="' + esc(c.titreEN) + '"' + dis + '></label>'
+      + '<label>${T("Description du programme (français)")}<textarea data-amb-cfg="texte" maxlength="4000"' + dis + '>' + esc(c.texte) + '</textarea></label>'
+      + '<label>${T("Description du programme (anglais)")}<textarea data-amb-cfg="texteEN" maxlength="4000"' + dis + '>' + esc(c.texteEN) + '</textarea></label>'
+      + '</div>'
+      + (ro ? '' : '<div class="amb-actions"><button type="button" class="prim" data-amb="cfg-enr">${T("Enregistrer les réglages")}</button>'
+          + (c._vierge ? '' : '<button type="button" data-amb="cfg-annuler">${T("Annuler les changements")}</button>') + '</div>')
+      + '<p class="dt">${T("La page Ambassadrices de la boutique et la politique du programme suivent ces réglages. Éteindre le programme éteint aussi les codes des ambassadrices.")}</p>'
+      + '</div>';
+  }
+  function ambVueDemandes(){
+    var l = AMB.demandes || [], ro = !AMB.peutModifier;
+    var h = '<div class="carte plein"><h2>${T("Candidatures reçues")}</h2>';
+    if (!l.length) return h + '<div class="vide">${T("Aucune candidature pour l’instant.")}' + '<div style="margin-top:.35rem">${T("Elles arrivent par le formulaire de la page Ambassadrices de la boutique.")}</div></div></div>';
+    var PILL = { nouvelle: 'ambre', acceptee: 'vert', refusee: '' };
+    var LIB = { nouvelle: '${T("Nouvelle")}', acceptee: '${T("Acceptée")}', refusee: '${T("Refusée")}' };
+    h += '<div id="amb-table" class="liste"><table><thead><tr><th>${T("Date")}</th>' + '<th>${T("Candidate")}</th>' + '<th>${T("Réseaux")}</th>'
+      + '<th>${T("Message")}</th>' + '<th>${T("État")}</th><th></th></tr></thead><tbody>'
+      + ambMorceau(l).map(function(d){
+          var msg = String(d.message || '');
+          return '<tr><td class="dt" style="white-space:nowrap">' + esc(String(d.createdAt || '').slice(0, 10)) + '</td>'
+            + '<td><div class="pt-nom">' + esc(d.nom) + '</div><div class="dt">' + esc(d.courriel) + (d.lang === 'en' ? ' · EN' : '') + '</div></td>'
+            + '<td class="dt" style="overflow-wrap:anywhere">' + esc(d.reseaux).replace(/\\n/g, '<br>') + '</td>'
+            + '<td class="dt" title="' + esc(msg) + '">' + esc(msg.length > 140 ? msg.slice(0, 140) + '…' : msg) + '</td>'
+            + '<td><span class="rf-pill ' + (PILL[d.statut] || '') + '">' + (LIB[d.statut] || esc(d.statut)) + '</span></td>'
+            + '<td class="fin">' + (ro ? '' : (d.statut !== 'acceptee' ? '<button type="button" class="mini geste" data-amb="creer-de" data-id="' + esc(d.id) + '">${T("Créer l’ambassadrice")}</button> ' : '')
+              + (d.statut === 'nouvelle' ? '<button type="button" class="mini geste" data-amb="refuser" data-id="' + esc(d.id) + '">${T("Refuser")}</button> ' : '')
+              + '<button type="button" class="mini geste danger" data-amb="suppr-dem" data-id="' + esc(d.id) + '">' + (AMBARME === 'sup:' + d.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>') + '</td></tr>';
+        }).join('')
+      + '</tbody></table></div>' + ambPages(l.length);
+    return h + '</div>';
+  }
+  function vueAmb(){
+    if (!AMB) {
+      if (!AMBCHARGE) chargerAmb();
+      return '<div class="carte plein"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i></div></div>';
+    }
+    if (AMB.erreur) return '<div class="carte plein"><div class="vide">' + esc(AMB.erreur) + '</div></div>';
+    var nouv = (AMB.demandes || []).filter(function(d){ return d.statut === 'nouvelle'; }).length;
+    var actif = !!(AMB.cfg && AMB.cfg.actif);
+    var sous = function(v, lib, n){ return '<button type="button" class="' + (AMBV === v ? 'actif' : '') + '" data-amb-vue="' + v + '">' + lib + (n ? '<span class="n">' + n + '</span>' : '') + '</button>'; };
+    return '<div class="amb-zone" id="amb-zone"><div class="amb-sous">'
+      + sous('liste', '${T("Ambassadrices et bilan")}', (AMB.ambassadrices || []).length)
+      + sous('programme', '${T("Programme")}', 0)
+      + sous('demandes', '${T("Candidatures")}', nouv)
+      + '<span class="droite"><span class="rf-pill ' + (actif ? 'vert' : '') + '">' + (actif ? '${T("Programme actif")}' : '${T("Programme inactif")}') + '</span></span></div>'
+      + (AMBV === 'programme' ? ambVueProgramme() : AMBV === 'demandes' ? ambVueDemandes() : ambVueListe())
+      + '</div>';
+  }
+  function ambApres(r, bon){
+    if (!r.ok) { dire(ambExpliquer(r), 'err'); return false; }
+    AMB = r; if (bon) dire(bon, 'bon');
+    dessiner();
+    return true;
+  }
+  function ambEnregistrer(e, bouton){
+    if (!String(e.nom || '').trim()) { dire(AMBMOTIFS.nom, 'att'); return; }
+    if (!String(e.code || '').trim()) { dire(AMBMOTIFS.code, 'att'); return; }
+    if (bouton) bouton.disabled = true;
+    var dem = e.demandeId || '';
+    appeler('fidelisation:amb:ecrire', [e]).then(function(r){
+      if (bouton) bouton.disabled = false;
+      if (!r.ok) { dire(ambExpliquer(r), 'err'); return; }
+      AMBED = null;
+      var type = (r.cfg && (r.cfg.recompense || {}).type) || 'credit';
+      ambApres(r);
+      if (r.sansCompte && (type === 'credit' || type === 'points')) dire('${T("Enregistrée. Aucun compte client ne porte ce courriel : le crédit ou les points ne pourront pas lui être versés.")}', 'att');
+      else dire('${T("Ambassadrice enregistrée — son code est prêt.")}', 'bon');
+      if (dem) appeler('fidelisation:amb:demande', [dem, 'acceptee']).then(function(r2){ if (r2.ok) { AMB = r2; dessiner(); } });
+    });
+  }
+  function ambVerser(b){
+    var t = ambTotaux();
+    if (AMBARME !== 'verser') {
+      AMBARME = 'verser'; dessiner();
+      dire('${T("Cliquez « Confirmer le versement ? » —")}' + ' ' + ambVal(t.du, t.duP) + ' ${T("pour")} ' + t.nb + ' ${T("commande(s). Ce geste ne se défait pas.")}', 'att');
+      return;
+    }
+    AMBARME = ''; if (b) b.disabled = true;
+    dire('${T("Versement en cours…")}');
+    appeler('fidelisation:amb:verser', []).then(function(r){
+      if (!r.ok) { dire(ambExpliquer(r), 'err'); dessiner(); return; }
+      var res = r.resultat || {}, v = res.verse || [], s = res.sautees || [];
+      var RAISONS = { sans_compte: '${T("sans compte client")}', compte_introuvable: '${T("compte introuvable")}', reseau: '${T("erreur réseau")}' };
+      AMB = r; dessiner();
+      dire('${T("Récompenses versées :")}' + ' ' + v.length + ' ${T("ambassadrice(s).")}'
+        + (s.length ? ' ${T("Non versées :")} ' + s.map(function(x){ return esc(x.nom) + ' (' + (RAISONS[x.motif] || esc(x.motif)) + ')'; }).join(', ') + '.' : ''), s.length ? 'att' : 'bon');
+    });
+  }
+  function brancherAmb(){
+    var z = document.getElementById('amb-zone'); if (!z) return;
+    z.onclick = function(ev){
+      var b = ev.target.closest ? ev.target.closest('button') : null; if (!b || b.disabled) return;
+      var vue = b.getAttribute('data-amb-vue'), g = b.getAttribute('data-amb'), id = b.getAttribute('data-id') || '';
+      var pg = b.getAttribute('data-amb-page');
+      if (vue) { AMBV = vue; AMBPAGE = 0; AMBARME = ''; AMBOUV = ''; dessiner(); return; }
+      if (pg) { AMBPAGE += Number(pg); AMBOUV = ''; dessiner(); return; }
+      if (g !== 'verser' && g !== 'suppr-dem' && AMBARME) AMBARME = '';
+      var parId = function(l){ return (l || []).filter(function(x){ return x.id === id; })[0]; };
+      if (g === 'ajouter') { AMBED = { id: '', nom: '', courriel: '', code: '', reseaux: '', notes: '', actif: true }; dessiner(); var n = document.getElementById('amb-ed-nom'); if (n) n.focus(); }
+      else if (g === 'modifier') { var a = parId(AMB.ambassadrices); if (a) { AMBED = { id: a.id, nom: a.nom, courriel: a.courriel, code: a.code, reseaux: a.reseaux, notes: a.notes, actif: a.actif, userId: a.userId }; dessiner(); } }
+      else if (g === 'basculer') { var x = parId(AMB.ambassadrices); if (x) ambEnregistrer({ id: x.id, nom: x.nom, courriel: x.courriel, code: x.code, reseaux: x.reseaux, notes: x.notes, userId: x.userId, actif: !x.actif }, b); }
+      else if (g === 'detail') { AMBOUV = AMBOUV === id ? '' : id; dessiner(); }
+      else if (g === 'annuler-ed') { AMBED = null; dessiner(); }
+      else if (g === 'enregistrer-ed') { ambEnregistrer(AMBED, b); }
+      else if (g === 'verser') { ambVerser(b); }
+      else if (g === 'cfg-annuler') { AMBCFG = null; dessiner(); }
+      else if (g === 'cfg-enr') {
+        b.disabled = true;
+        var c = AMBCFG || {};
+        appeler('fidelisation:amb:reglages', [{ actif: !!c.actif, titre: c.titre, titreEN: c.titreEN, texte: c.texte, texteEN: c.texteEN,
+          rabaisClientPct: c.rabaisClientPct, type: c.type, valeur: c.valeur, delaiJours: c.delaiJours }]).then(function(r){
+          b.disabled = false;
+          if (!r.ok) { dire(ambExpliquer(r), 'err'); return; }
+          AMBCFG = null; ambApres(r, '${T("Réglages du programme enregistrés.")}');
+        });
+      }
+      else if (g === 'creer-de') {
+        var d = parId(AMB.demandes);
+        if (d) { AMBED = { id: '', nom: d.nom, courriel: d.courriel, code: '', reseaux: d.reseaux, notes: d.message || '', actif: true, demandeId: d.id }; AMBV = 'liste'; AMBPAGE = 0; dessiner(); dire('${T("Choisissez son code promo, puis enregistrez.")}', 'att'); }
+      }
+      else if (g === 'refuser') {
+        b.disabled = true;
+        appeler('fidelisation:amb:demande', [id, 'refusee']).then(function(r){ b.disabled = false; ambApres(r, '${T("Candidature refusée.")}'); });
+      }
+      else if (g === 'suppr-dem') {
+        if (AMBARME !== 'sup:' + id) { AMBARME = 'sup:' + id; dessiner(); dire('${T("Cliquez « Confirmer ? » — la candidature sera effacée.")}', 'att'); return; }
+        AMBARME = ''; b.disabled = true;
+        appeler('fidelisation:amb:demande', [id, 'supprimer']).then(function(r){ ambApres(r, '${T("Candidature supprimée.")}'); });
+      }
+    };
+    var moissonner = function(ev){
+      var t = ev.target; if (!t || !t.getAttribute) return;
+      var k = t.getAttribute('data-amb-champ');
+      if (k && AMBED) { AMBED[k] = t.type === 'checkbox' ? t.checked : (k === 'code' ? String(t.value).toUpperCase() : t.value); return; }
+      k = t.getAttribute('data-amb-cfg') || (t.id === 'amb-actif' ? 'actif' : '');
+      if (k && AMBCFG) {
+        AMBCFG[k] = t.type === 'checkbox' ? t.checked : t.value; AMBCFG._vierge = false;
+        if (k === 'type') { var u = document.getElementById('amb-unite'); if (u) u.textContent = ambType(t.value).u; }
+        var ex = document.getElementById('amb-exemple'); if (ex) ex.innerHTML = ambExemple(AMBCFG);
+      }
+    };
+    z.oninput = moissonner; z.onchange = moissonner;
+    if (document.getElementById('amb-table')) {
+      _szAutoDernier = 0;
+      szAutoPagination('#amb-table', function(n){ var m = Math.max(3, n - 1); if (m !== AMBPP) { AMBPP = m; AMBPAGE = 0; dessiner(); } });
+    }
   }
 
   function vueRecompenses(){
@@ -891,6 +1253,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       + '<button type="button" class="' + (ONGLET === 'invitations' ? 'actif' : '') + '" data-onglet="invitations">${T("Invitations")}'
       + ((D.invitations || []).length ? '<span class="n">' + (D.invitationsTotal || D.invitations.length) + '</span>' : '') + '</button>'
       + '<button type="button" class="' + (ONGLET === 'points' ? 'actif' : '') + '" data-onglet="points">${T("Points")}</button>'
+      + '<button type="button" class="' + (ONGLET === 'ambassadrices' ? 'actif' : '') + '" data-onglet="ambassadrices">${T("Ambassadrices")}</button>'
       + '<div class="droite">'
       + (D.peutModifier ? '<button class="mini prim" id="fi-nouveau">${T("+ Nouveau sondage")}</button>' : '')
       + '</div>'
@@ -909,7 +1272,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
        relisant ce repartiteur pour #151. */
     h += ONGLET === 'recompenses' ? vueRecompenses()
        : ONGLET === 'invitations' ? vueInvitations()
-       : ONGLET === 'points' ? vuePoints() : vueSondages();
+       : ONGLET === 'points' ? vuePoints()
+       : ONGLET === 'ambassadrices' ? vueAmb() : vueSondages();
     if (EDIT) h += boiteEditeur();
     else if (DETAIL) h += boiteDetail();
     /* ⚠⚠ LA PLEINE HAUTEUR, MESUREE AVANT ET APRES (#151, 2026-09-24). Cet
@@ -924,7 +1288,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
        avant d adopter, parce qu une vue coupee ne previent jamais. */
     corps.className = 'corps plein';
     corps.innerHTML = h;
-    if (ONGLET !== 'recompenses' && ONGLET !== 'invitations' && ONGLET !== 'points') {
+    if (ONGLET !== 'recompenses' && ONGLET !== 'invitations' && ONGLET !== 'points' && ONGLET !== 'ambassadrices') {
       var bp = document.getElementById('fi-prec'), bs = document.getElementById('fi-suiv');
       if (bp) bp.onclick = function(){ SPAGE = Math.max(0, SPAGE - 1); dessiner(); };
       if (bs) bs.onclick = function(){ SPAGE = SPAGE + 1; dessiner(); };
@@ -933,6 +1297,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       szAutoPagination('.liste', function(n){ SPARPAGE = Math.max(3, n - 1); SPAGE = 0; dessiner(); });
     }
     brancher();
+    if (ONGLET === 'ambassadrices') brancherAmb();
     if (ONGLET === 'points') {
       brancherPoints();
       /* Remis à zéro : la mesure d un autre onglet garderait sinon le même compte, et le rappel
@@ -981,7 +1346,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     if (!t || !t.closest || t.closest('.boite')) return;
 
     var og = t.closest('[data-onglet]');
-    if (og) { ONGLET = og.getAttribute('data-onglet'); ARME = ''; dessiner(); if (ONGLET === 'points') chargerPoints(); return; }
+    if (og) { ONGLET = og.getAttribute('data-onglet'); ARME = ''; AMBARME = ''; dessiner(); if (ONGLET === 'points') chargerPoints(); return; }
 
     var bs = t.closest('[data-suppr-sondage]');
     if (bs) {
@@ -1092,7 +1457,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     var e = document.getElementById('fi-mail');
     if (e && document.activeElement === e) return;
     if (DETAIL || ARME) return;
+    // L onglet Ambassadrices : une saisie ou une confirmation en cours n est pas redessinée.
+    if (ONGLET === 'ambassadrices' && ambOccupe()) return;
     charger();
+    if (ONGLET === 'ambassadrices' && AMB && !AMBCHARGE) chargerAmb();
   };
   window.szRevenir = function(){ if (!DETAIL) charger(); };
 
@@ -1126,6 +1494,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       ev.preventDefault();
       if (DETAIL) { DETAIL = null; dessiner(); return; }
       if (ARME) { ARME = ''; dessiner(); return; }
+      if (AMBARME || AMBED) { AMBARME = ''; AMBED = null; dessiner(); return; }
       P.fermer();
     }
   });

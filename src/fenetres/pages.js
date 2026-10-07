@@ -373,7 +373,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         +'<td style="text-align:right"><button class="b" data-go="'+b.onglet+'">${T("Modifier")}</button></td></tr>';
     }
     for (var c=0;c<cp.length;c++){ var p=cp[c];
-      h+='<tr><td style="text-align:left"><div class="rf-nom">'+esc(p.title)+'</div><div class="rf-sous"><code>#page/'+esc(p.slug)+'</code></div></td>'
+      /* BROUILLON / PUBLIEE (2026-10-07) : l etat de chaque page, a cote de son nom.
+         publie absent = publiee (pages d avant le drapeau). */
+      var pub = p.publie!==false;
+      h+='<tr><td style="text-align:left"><div class="rf-nom">'+esc(p.title)+' '+pilEtat(pub)+'</div><div class="rf-sous"><code>#page/'+esc(p.slug)+'</code></div></td>'
         +'<td style="text-align:center"><span class="rf-pill bleu">${T("Personnalisée")}</span></td>'
         +'<td style="text-align:center"><label class="chk"><input type="checkbox" data-cfoot="'+esc(p.id)+'" '+(p.footerVisible?'checked':'')+(RO?' disabled':'')+'></label></td>'
         +'<td style="text-align:right;white-space:nowrap"><button class="b" data-cedit="'+esc(p.id)+'">${T("Modifier")}</button>'
@@ -384,6 +387,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     corps.innerHTML=h;
     brancherListe();
   }
+  function pilEtat(pub){ return pub ? '<span class="rf-pill vert">${T("Publiée")}</span>' : '<span class="rf-pill ambre">${T("Brouillon")}</span>'; }
   function brancherListe(){
     var fts=corps.querySelectorAll('[data-foot]');
     for (var i=0;i<fts.length;i++) fts[i].onchange=function(){ var k=this.getAttribute('data-foot'); enregistrer('pages:footer',[k,this.checked],'${T("Pied de page mis à jour.")}'); };
@@ -444,14 +448,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     cle: function(){ return CPSEL ? ('p:' + CPSEL) : '__new__'; },
     actif: function(){ return !!document.getElementById('sur-cp'); },
     valeurs: function(){
-      var v = szBrouillonDuDom(BR_CHAMPS, ['cp-foot']);
+      var v = szBrouillonDuDom(BR_CHAMPS, ['cp-foot', 'cp-pub']);
       if (!v) return null;
       var z = document.getElementById('cp-ed');
       v._contenu = (z && z.innerHTML) || '';
       return v;
     },
     rempli: function(){
-      var v = szBrouillonDuDom(BR_CHAMPS, ['cp-foot']); if (!v) return false;
+      var v = szBrouillonDuDom(BR_CHAMPS, ['cp-foot', 'cp-pub']); if (!v) return false;
       if (szBrouillonQuelqueChose(v, BR_CHAMPS)) return true;
       var z = document.getElementById('cp-ed');
       /* Un editeur << vide >> contient souvent un paragraphe vide ou un saut de
@@ -483,7 +487,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function dessinerEditeurPage(page){
     fermerFlot();
     var nouv=!page;
-    var p=page||{ id:'', slug:'', title:'', subtitle:'', footerLabel:'', footerVisible:false, content:'', protege:false };
+    /* Une page NEUVE nait BROUILLON (publie:false) : on la prepare avant le
+       lancement, on la publie quand elle est prete. */
+    var p=page||{ id:'', slug:'', title:'', subtitle:'', footerLabel:'', footerVisible:false, publie:false, content:'', protege:false };
+    var pub=!!p.protege || p.publie!==false;
     CPSEL=p.id||'';
     var dis=RO?' disabled':'';
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-cp';
@@ -503,6 +510,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
          mini-interrupteur, l adresse de la page a droite. */
       +'<div class="cp-ligne"><label class="bascule" title="${T("Un lien vers cette page apparaît en bas de chaque écran de la boutique.")}"><input type="checkbox" id="cp-foot"'+(p.footerVisible?' checked':'')+(RO?' disabled':'')+'> <span>${T("Afficher dans le pied de page")}</span></label>'
       +'<span class="cp-url">${T("Adresse de la page :")} <code id="cp-url">#page/'+esc(p.slug||'…')+'</code></span></div>'
+      /* L ETAT : brouillon ou publiee. La page protegee (Loi 25) est toujours publiee. */
+      +'<div class="cp-ligne"><label class="bascule"><input type="checkbox" id="cp-pub"'+(pub?' checked':'')+((RO||p.protege)?' disabled':'')+'> <span>${T("Publier sur la boutique")}</span></label>'
+      +'<span id="cp-etat">'+pilEtat(pub)+'</span>'
+      +'<span class="cp-url" style="margin-left:0">${T("Un brouillon n’est visible que dans l’administration.")}</span></div>'
       +'<label class="champ" style="margin:0"><span class="lbl">${T("Contenu de la page")}</span></label>'
       +edHtml('cp-ed', p.content)
       +'</div>'
@@ -519,6 +530,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var bx=document.getElementById('cp-x'); if (bx) bx.onclick=fermerEditeurPage;
     var ba=document.getElementById('cp-annuler'); if (ba) ba.onclick=fermerEditeurPage;
     var be=document.getElementById('cp-enr'); if (be) be.onclick=function(){ enregistrerPage(nouv); };
+    var bp=document.getElementById('cp-pub'); if (bp) bp.onchange=function(){ var et=document.getElementById('cp-etat'); if (et) et.innerHTML=pilEtat(bp.checked); };
     // Slug : nettoye a la frappe ; se remplit depuis le titre tant qu on n y a pas
     // touche (nouvelle page seulement). NFD par point de code pour eviter tout
     // caractere accentue dans le script (les accents graves fermeraient le gabarit).
@@ -537,10 +549,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var subtitle=val('cp-sub');
     var flabel=val('cp-flabel');
     var fe=document.getElementById('cp-foot'); var foot=!!(fe&&fe.checked);
+    var pe=document.getElementById('cp-pub'); var publie=!!(pe&&pe.checked);
     var ze=document.getElementById('cp-ed'); var content=(ze&&ze.innerHTML)||'';
     if (!title || !slug){ dire('${T("Titre et slug sont requis.")}', 'err'); return; }
     OCCUPE=true; dire('${T("Enregistrement… (dépôt des images dans le nuage si besoin)")}');
-    var d={ title:title, slug:slug, subtitle:subtitle, footerLabel:flabel, footerVisible:foot, content:content };
+    var d={ title:title, slug:slug, subtitle:subtitle, footerLabel:flabel, footerVisible:foot, publie:publie, content:content };
     appeler('pages:custom:ecrire',[CPSEL||'', d]).then(function(r){ OCCUPE=false;
       if (r && r.ok){
         if (r.customPages) D.customPages=r.customPages;
@@ -549,7 +562,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         szBrouillonJeter();
         fermerEditeurPage();
         if (ONGLET==='list') vueListe();
-        dire(nouv?'${T("Page créée.")}':'${T("Page modifiée.")}', 'bon');
+        dire((nouv?'${T("Page créée.")}':'${T("Page modifiée.")}')+(publie?'':' ${T("(brouillon)")}'), 'bon');
       } else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
 

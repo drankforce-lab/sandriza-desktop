@@ -52,6 +52,14 @@ const CSS_PROPRE = `
 .pf-id .l2{grid-column:span 2}
 .pf-id .l4{grid-column:1 / -1}
 .pf-cl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem .75rem}
+/* La carte « Médias » (2026-10-07) : le mannequin sur une rangée de trois, puis
+   la vidéo et la vue 360 chacune sur sa ligne, avec leur bouton de retrait. */
+.pf-med{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem .75rem}
+.pf-med-l{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-top:.65rem}
+.pf-med-l video{height:96px;max-width:170px;border-radius:8px;background:#000}
+html.jour .pf-med-l video{background:#1d2433}
+#p-360-bande{display:flex;gap:4px;flex-wrap:wrap;margin-top:.4rem}
+#p-360-bande img{width:40px;height:52px;object-fit:cover;border-radius:5px;border:1px solid var(--v22)}
 .cote.pf-bas{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}
 /* Les tailles : de vraies touches, pas des pastilles de 1,75 rem. */
 #p-tailles .jeton{height:2.4rem;min-width:3.1rem;justify-content:center;font-weight:700;border-radius:10px;font-size:.88rem}
@@ -310,7 +318,13 @@ function pageProduit(id) {
   MOTIFS.emplacement_requis = '${T("Un emplacement d’entrepôt manque pour des variantes en stock.")}';
   MOTIFS.stock_requis = '${T("Saisissez une quantité pour au moins une variante.")}';
   MOTIFS.couleur_non_mappee = '${T("Cette couleur n’a pas de teinte unie attribuée.")}';
-  MOTIFS.non_enregistre = '${T("La fiche n’a PAS été enregistrée. Voyez l’avis dans la fenêtre principale — le plus souvent, un collègue vient de modifier la même fiche.")}';
+  MOTIFS.mannequin_incomplet = '${T("Mannequin : le prénom, la taille (120 à 220 cm) et la taille portée vont ensemble.")}';
+  MOTIFS.mannequin_taille = '${T("Mannequin : la taille portée doit être une des tailles offertes.")}';
+  MOTIFS.video_trop_lourde = '${T("Vidéo trop lourde (maximum 5,5 Mo).")}';
+  MOTIFS.video_format = '${T("Format refusé — MP4 ou WebM seulement.")}';
+  MOTIFS.vue360_nombre = '${T("La vue 360° demande de 8 à 36 images.")}';
+  MOTIFS.vue360_format = '${T("Vue 360° : une des images est illisible.")}';
+  MOTIFS.non_enregistre ='${T("La fiche n’a PAS été enregistrée. Voyez l’avis dans la fenêtre principale — le plus souvent, un collègue vient de modifier la même fiche.")}';
 
   var ID   = ${ident};
   var bEnr = document.getElementById('btn-enr');
@@ -519,7 +533,31 @@ function pageProduit(id) {
       + '<div class="vues" id="p-parcoul"></div>'
       + '<div style="margin-top:.5rem"><button type="button" id="p-cv-gen" style="display:none" '
       + 'title="${T("Teinter les photos du produit pour chaque couleur — local, sans crédit ni service")}">'
-      + '${T("Tout générer")}</button></div></div></div>');
+      + '${T("Tout générer")}</button></div></div>'
+      /* ⚠ LES MÉDIAS (2026-10-07, sa demande : « Sophie mesure 1,68 m et porte
+         un S », « une courte vidéo de 5 secondes qui montre le tombé », « un 360
+         degrés »). Tout est FACULTATIF : une fiche sans médias s affiche en
+         boutique exactement comme avant. La taille portée se CHOISIT parmi les
+         tailles offertes — tapée, elle finirait par annoncer une taille que la
+         fiche ne vend pas. */
+      + '<div class="carte plein"><h2>${T("Médias")}</h2>'
+      + '<div class="pf-med">'
+      + ch('p-mq-prenom', '${T("Prénom du mannequin")}', { placeholder: '${T("Ex : Sophie")}' })
+      + ch('p-mq-cm', '${T("Taille du mannequin (cm)")}', { type: 'number', min: 120, pas: '1', placeholder: '${T("Ex : 168")}' })
+      + sel('p-mq-taille', '${T("Taille portée")}', [{ v: '', l: '—' }])
+      + '</div>'
+      + '<div class="aide" id="p-mq-apercu" style="margin-top:.35rem"></div>'
+      + '<div class="pf-med-l">'
+      + '<button type="button" id="p-vid-choisir"><span class="ic">🎬</span> ${T("Choisir une vidéo (MP4, WebM)")}</button>'
+      + '<span id="p-vid-apercu"></span>'
+      + '<span class="aide" id="p-vid-etat"></span>'
+      + '<button type="button" id="p-vid-retirer" style="display:none">${T("Retirer la vidéo")}</button></div>'
+      + '<div class="pf-med-l">'
+      + '<button type="button" id="p-360-choisir"><span class="ic">🔄</span> ${T("Choisir les vues 360° (8 à 36 images)")}</button>'
+      + '<span class="aide" id="p-360-etat"></span>'
+      + '<button type="button" id="p-360-retirer" style="display:none">${T("Tout retirer")}</button></div>'
+      + '<div id="p-360-bande"></div>'
+      + '</div></div>');
 
     // 6 — Détails
     // ⚠ LE REGIME DE VENTE N EST PAS UN JEU DE CASES INDEPENDANTES. Mes cases
@@ -600,6 +638,7 @@ function pageProduit(id) {
     document.getElementById('corps').innerHTML = h.join('')
       + '<aside class="pf-fiche" id="pf-fiche" aria-label="${T("Fiche du produit")}"></aside>';
     brancher();
+    brancherMedias();
     // Le volet suit CHAQUE saisie, et les gestes qui ne passent pas par un champ
     // (tailles, couleurs, photos, stock) le rappellent eux-memes.
     var corpsEl = document.getElementById('corps');
@@ -629,7 +668,7 @@ function pageProduit(id) {
       { t: 'Photo',                   obl: [] },
       { t: '${T("Mise en marché")}',          obl: [] },
       { t: 'Stock',                   obl: [] }
-    ], function(i){ if (i === 2) dessinerVues(); if (i === 4) majStock(); });
+    ], function(i){ if (i === 2) { dessinerVues(); dessinerMedias(); } if (i === 4) majStock(); });
 
     bEnr.disabled = !(ID ? CTX.peutModifier : CTX.peutAjouter);
     if (bEnr.disabled) dire('${T("Consultation seulement — votre rôle ne permet pas d’enregistrer.")}', 'att');
@@ -1442,6 +1481,166 @@ function pageProduit(id) {
   });
   var MAX_MO = 8;
 
+  /* ══ LES MÉDIAS DE LA FICHE (2026-10-07) ══════════════════════════════════
+     Trois champs facultatifs : mannequin { prenom, tailleCm, taillePortee },
+     video (une adresse) et vue360 (8 à 36 adresses). La fenêtre ne garde que
+     des data URL NEUVES ou des adresses déjà en ligne ; c est le site
+     (_pfDoSave) qui dépose les neuves dans R2, par le même chemin que les
+     photos — la fiche ne porte JAMAIS de data URL.
+     ⚠ LE PLAFOND DE LA VIDÉO EST 5,5 Mo, ET IL NE SE DÉCIDE PAS ICI : le dépôt
+     voyage en base64 (+33 %) dans une requête que PHP borne à 8 Mo
+     (post_max_size, php.ini-production du Dockerfile). Au-delà, le serveur jette
+     le corps sans un mot — d où le refus AVANT la lecture du fichier. */
+  var VIDEO = '', VIDEO_OCTETS = 0, VUE360 = [], MQ_TAILLE = '';
+  var MAX_VIDEO_MO = 5.5;
+
+  // La phrase de la boutique, montrée telle qu elle paraîtra : c est le moyen le
+  // plus sûr de voir une taille en pouces au lieu de centimètres.
+  function lireMannequin(){
+    var prenom = val('p-mq-prenom').trim();
+    var brut = val('p-mq-cm').trim();
+    var cm = Math.round(Number(brut));
+    var t = val('p-mq-taille') || '';
+    if (!prenom && !brut && !t) return null;
+    if (!prenom || !(cm >= 120 && cm <= 220) || !t) return false;
+    return { prenom: prenom, tailleCm: cm, taillePortee: t };
+  }
+  function apercuMannequin(){
+    var z = document.getElementById('p-mq-apercu');
+    if (!z) return;
+    var m = lireMannequin();
+    if (m === null) { z.textContent = '${T("Facultatif — les trois champs ensemble, ou aucun.")}'; z.style.color = ''; return; }
+    if (m === false) { z.textContent = '${T("Incomplet : prénom, taille de 120 à 220 cm et taille portée.")}'; z.style.color = 'var(--tx-att)'; return; }
+    z.style.color = '';
+    // Le modèle de phrase suit la langue du poste, comme la boutique : mètres
+    // en français, pieds et pouces en anglais.
+    var po = Math.round(m.tailleCm / 2.54);
+    z.textContent = '${T("En boutique :")} « ' + '${T("{p} mesure {m} m et porte un {t}")}'
+      .replace('{p}', m.prenom).replace('{t}', m.taillePortee).replace('{cm}', String(m.tailleCm))
+      .replace('{m}', szNombre(m.tailleCm / 100, 2))
+      .replace('{pi}', Math.floor(po / 12) + '′' + (po % 12) + '″') + ' »';
+  }
+
+  function dessinerMedias(){
+    // La taille portée suit les tailles COCHÉES à l étape 2 ; une taille retirée
+    // depuis vide le choix plutôt que d annoncer une taille que la fiche ne vend pas.
+    var s = document.getElementById('p-mq-taille');
+    if (s) {
+      var ts = tailles();
+      s.innerHTML = '<option value="">—</option>' + ts.map(function(t){
+        return '<option value="' + esc(t) + '">' + esc(t) + '</option>'; }).join('');
+      s.value = (ts.indexOf(MQ_TAILLE) >= 0) ? MQ_TAILLE : '';
+    }
+    apercuMannequin();
+    var ve = document.getElementById('p-vid-etat'), va = document.getElementById('p-vid-apercu');
+    var vr = document.getElementById('p-vid-retirer');
+    if (va) va.innerHTML = VIDEO ? '<video src="' + esc(VIDEO) + '" muted loop playsinline controls preload="metadata"></video>' : '';
+    if (ve) {
+      ve.textContent = !VIDEO ? '${T("Aucune vidéo.")}'
+        : (VIDEO.indexOf('data:') === 0
+            ? szOctets(VIDEO_OCTETS) + ' — ${T("déposée à l’enregistrement.")}'
+            : '${T("Vidéo en ligne.")}');
+      var v = va && va.querySelector('video');
+      if (v) v.addEventListener('loadedmetadata', function(){
+        if (v.duration && isFinite(v.duration)) ve.textContent += ' ' + szNombre(Math.round(v.duration * 10) / 10, 1) + ' s.';
+      });
+    }
+    if (vr) vr.style.display = VIDEO ? '' : 'none';
+    var e3 = document.getElementById('p-360-etat'), b3 = document.getElementById('p-360-bande');
+    var r3 = document.getElementById('p-360-retirer');
+    if (e3) e3.textContent = VUE360.length ? (VUE360.length + ' ${T("vues, dans l’ordre des noms de fichier.")}') : '${T("Aucune vue 360°.")}';
+    if (b3) b3.innerHTML = VUE360.map(function(src, i){
+      return '<img src="' + esc(src) + '" alt="" title="' + (i + 1) + '">'; }).join('');
+    if (r3) r3.style.display = VUE360.length ? '' : 'none';
+  }
+
+  function choisirVideo(){
+    var e = document.createElement('input');
+    e.type = 'file'; e.accept = 'video/mp4,video/webm';
+    e.onchange = function(){
+      var f = e.files && e.files[0];
+      if (!f) return;
+      if (['video/mp4', 'video/webm'].indexOf(String(f.type || '').toLowerCase()) < 0) { dire('${T("Format refusé — MP4 ou WebM seulement.")}', 'err'); return; }
+      if (f.size > MAX_VIDEO_MO * 1024 * 1024) {
+        dire('${T("Vidéo trop lourde :")} ' + szOctets(f.size) + ' (${T("maximum 5,5 Mo — raccourcissez-la ou réduisez sa résolution")}).', 'err');
+        return;
+      }
+      var l = new FileReader();
+      l.onload = function(){ VIDEO = String(l.result || ''); VIDEO_OCTETS = f.size; dessinerMedias(); dire(''); majFicheBientot(); };
+      l.onerror = function(){ dire('${T("Lecture de la vidéo impossible.")}', 'err'); };
+      l.readAsDataURL(f);
+    };
+    e.click();
+  }
+
+  // ⚠ LES VUES SONT RÉDUITES ICI (1000 px, WebP) AVANT DE PASSER LE PONT : 36
+  // photos d appareil de 5 Mo chacune feraient 180 Mo à traverser, pour une
+  // image que la boutique montre en 600 px. Le site recompresse de toute façon.
+  function reduireVue(src, fini){
+    var im = new Image();
+    im.onload = function(){
+      var w = im.naturalWidth, h = im.naturalHeight;
+      if (!w || !h) { fini(src); return; }
+      var r = Math.min(1, 1000 / Math.max(w, h));
+      var c = document.createElement('canvas');
+      c.width = Math.round(w * r); c.height = Math.round(h * r);
+      var o = '';
+      try { c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); o = c.toDataURL('image/webp', 0.85); } catch (er) { o = ''; }
+      fini((o && o.indexOf('data:image/webp') === 0 && o.length < src.length) ? o : src);
+    };
+    im.onerror = function(){ fini(''); };
+    im.src = src;
+  }
+  function choisir360(){
+    var e = document.createElement('input');
+    e.type = 'file'; e.accept = 'image/*'; e.multiple = true;
+    e.onchange = function(){
+      // L ORDRE EST CELUI DES NOMS DE FICHIER (vue-01, vue-02… ou IMG_0001…),
+      // en comparant les nombres comme des nombres : « vue-10 » vient après
+      // « vue-9 », pas après « vue-1 ».
+      var fs = Array.prototype.slice.call(e.files || []).sort(function(a, b){
+        return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }); });
+      if (!fs.length) return;
+      if (fs.length < 8 || fs.length > 36) {
+        dire('${T("La vue 360° demande de 8 à 36 images —")} ' + fs.length + ' ${T("choisie(s).")}', 'err');
+        return;
+      }
+      var trop = fs.filter(function(f){ return f.size > MAX_MO * 1024 * 1024; });
+      if (trop.length) { dire(trop.length + ' ${T("image(s) de plus de")} ' + MAX_MO + ' Mo — ${T("rien n’a été ajouté.")}', 'err'); return; }
+      var lues = new Array(fs.length), reste = fs.length, rates = 0;
+      dire('${T("Préparation des vues 360°…")}');
+      fs.forEach(function(f, i){
+        var l = new FileReader();
+        var fin = function(r){
+          if (r) lues[i] = r; else rates++;
+          if (--reste === 0) {
+            if (rates) { dire(rates + ' ${T("image(s) illisible(s) — rien n’a été ajouté.")}', 'err'); return; }
+            VUE360 = lues; dessinerMedias(); dire(''); majFicheBientot();
+          }
+        };
+        l.onload = function(){ reduireVue(String(l.result || ''), fin); };
+        l.onerror = function(){ fin(''); };
+        l.readAsDataURL(f);
+      });
+    };
+    e.click();
+  }
+
+  function brancherMedias(){
+    ['p-mq-prenom', 'p-mq-cm'].forEach(function(i){
+      var e = document.getElementById(i); if (e) e.addEventListener('input', apercuMannequin);
+    });
+    var pr = document.getElementById('p-mq-prenom'); if (pr) pr.setAttribute('maxlength', '40');
+    var s = document.getElementById('p-mq-taille');
+    if (s) s.addEventListener('change', function(){ MQ_TAILLE = s.value; apercuMannequin(); });
+    var a = document.getElementById('p-vid-choisir'); if (a) a.onclick = choisirVideo;
+    var b = document.getElementById('p-vid-retirer');
+    if (b) b.onclick = function(){ VIDEO = ''; VIDEO_OCTETS = 0; dessinerMedias(); };
+    var c = document.getElementById('p-360-choisir'); if (c) c.onclick = choisir360;
+    var d = document.getElementById('p-360-retirer');
+    if (d) d.onclick = function(){ VUE360 = []; dessinerMedias(); };
+  }
+
   function tailles(){
     return Array.prototype.filter.call(document.querySelectorAll('#p-tailles .jeton'), function(j){
       return j.classList.contains('on'); }).map(function(j){ return j.getAttribute('data-t'); });
@@ -1602,6 +1801,16 @@ function pageProduit(id) {
     // surface les partagerait avec la fiche d origine, et retirer une photo ici
     // la retirerait aussi de la reference qui sert a detecter les conflits.
     PARCOUL = parcoulDepuisFiche(p.colorVariants);
+    // Les médias : la taille portée attend que la liste des tailles soit posée,
+    // elle est donc gardée de côté (MQ_TAILLE) et choisie au dessin.
+    var mq = (p.mannequin && typeof p.mannequin === 'object') ? p.mannequin : {};
+    poser('p-mq-prenom', mq.prenom || '');
+    poser('p-mq-cm', mq.tailleCm ? String(mq.tailleCm) : '');
+    MQ_TAILLE = String(mq.taillePortee || '');
+    VIDEO = (typeof p.video === 'string') ? p.video : '';
+    VIDEO_OCTETS = 0;
+    VUE360 = Array.isArray(p.vue360) ? p.vue360.filter(Boolean).map(String) : [];
+    dessinerMedias();
   }
 
   // ⚠ LA FICHE PEUT PORTER TROIS FORMES de photos supplémentaires : un TABLEAU
@@ -2465,6 +2674,19 @@ function pageProduit(id) {
       dire('${T("La photo principale est obligatoire.")}', 'err');
       return;
     }
+    // Les médias sont facultatifs, mais un mannequin à moitié décrit ou une
+    // vue 360 trop courte se refusent ICI, l étape sous les yeux.
+    var MQ = lireMannequin();
+    if (MQ === false) {
+      Assist.aller(2); dessinerMedias();
+      dire('${T("Mannequin : le prénom, la taille (120 à 220 cm) et la taille portée vont ensemble.")}', 'err');
+      return;
+    }
+    if (VUE360.length && (VUE360.length < 8 || VUE360.length > 36)) {
+      Assist.aller(2);
+      dire('${T("La vue 360° demande de 8 à 36 images.")}', 'err');
+      return;
+    }
     // ⚠ REGLE ARRETEE le 2026-08-08 (2e passe, a sa demande) : l emplacement
     // suit la QUANTITE — une variante a zero n en exige pas — mais une
     // CREATION doit porter du stock : au moins une variante avec une
@@ -2526,7 +2748,9 @@ function pageProduit(id) {
     Object.keys(LOCS).forEach(function(k){ if (valides[k] && LOCS[k]) locs[k] = LOCS[k]; });
 
     bEnr.disabled = true;
-    dire(IMAGE && IMAGE.indexOf('data:') === 0 ? '${T("Dépôt de la photo et enregistrement…")}' : '${T("Enregistrement…")}');
+    var medNeufs = VIDEO.indexOf('data:') === 0 || VUE360.some(function(x){ return String(x).indexOf('data:') === 0; });
+    dire(medNeufs ? '${T("Dépôt des médias et enregistrement…")}'
+      : (IMAGE && IMAGE.indexOf('data:') === 0 ? '${T("Dépôt de la photo et enregistrement…")}' : '${T("Enregistrement…")}'));
     P.appeler('produit:enregistrer', ID, {
       name: val('p-nom').trim(), category: val('p-cat'), sku: val('p-sku'),
       brand: val('p-marque'), description: val('p-desc'),
@@ -2552,7 +2776,12 @@ function pageProduit(id) {
         cs.forEach(function(c){ if (PARCOUL[c]) g[c] = PARCOUL[c]; });
         return g;
       })(),
-      stock: stock, stockLoc: locs
+      stock: stock, stockLoc: locs,
+      // Les médias : null = aucun (ou retiré). Le pont ne les écrit que parce
+      // que la clé est envoyée — une coquille plus ancienne ne les efface pas.
+      mannequin: MQ || null,
+      video: VIDEO || null,
+      vue360: VUE360.length ? VUE360.slice() : null
     }).then(function(r){
       // Le prochain envoi repart de zéro : les photos ont pu changer entre-temps.
       VAR_FAITES = false;
@@ -2571,6 +2800,7 @@ function pageProduit(id) {
         // yeux oblige à chercher ce qui manque.
         if (r && r.motif === 'tailles_couleurs_requises') Assist.aller(1);
         if (r && r.motif === 'photo_requise') Assist.aller(2);
+        if (r && /^(mannequin_|video_|vue360_)/.test(String(r.motif || ''))) Assist.aller(2);
         if (r && r.motif === 'stock_requis') Assist.aller(4);
         if (r && r.motif === 'emplacement_requis') {
           Assist.aller(4);

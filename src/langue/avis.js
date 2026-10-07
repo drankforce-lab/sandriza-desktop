@@ -113,6 +113,8 @@ module.exports = {
     'Review approved — it is now visible in the storefront.',
   'Avis republié.': 'Review published again.',
   'Avis masqué.': 'Review hidden.',
+  // Les avis récompensés (2026-10-07) : suit le nombre de points que le serveur vient de verser.
+  'points versés au client.': 'points credited to the customer.',
   'Avis supprimé définitivement.': 'Review deleted for good.',
   'Retrait…': 'Removing…',
   'Réponse enregistrée.': 'Answer saved.',

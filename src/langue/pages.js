@@ -274,4 +274,10 @@ module.exports = {
   /* ── RELOOKING 2026 (2026-10-04) ── */
   'Adresse de la page :': 'Page address:',
   'Un lien vers cette page apparaît en bas de chaque écran de la boutique.': 'A link to this page appears at the bottom of every store screen.',
+  /* ── BROUILLON / PUBLIÉE (2026-10-07) ── */
+  'Publiée': 'Published',
+  'Brouillon': 'Draft',
+  'Publier sur la boutique': 'Publish on the store',
+  'Un brouillon n’est visible que dans l’administration.': 'A draft is only visible in the admin.',
+  '(brouillon)': '(draft)',
 };

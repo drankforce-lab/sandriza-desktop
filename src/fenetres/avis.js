@@ -444,7 +444,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     dire('…');
     appeler(op, [DETAIL.id]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      dire(apres, 'bon');
+      /* Les avis récompensés (2026-10-07) : le serveur dit ce qu il vient de verser. */
+      dire(apres + (r.points > 0 ? ' ' + szNombre(r.points, 0) + ' ${T("points versés au client.")}' : ''), 'bon');
       DETAIL = null; SUPPR_ARME = false; PHOTO_ARMEE = -1; REPONDRE = false;
       charger();
     });
