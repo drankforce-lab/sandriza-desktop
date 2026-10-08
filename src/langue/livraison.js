@@ -113,4 +113,7 @@ module.exports = {
   'La livraison coûte toujours': 'Shipping always costs',
   ' — aucun seuil de gratuité.': ' — no free-shipping threshold.',
   'Traitement prioritaire :': 'Priority handling:',
+  // Les onglets (7.10.0)
+  'Sections de la livraison': 'Shipping sections',
+  'Tarifs': 'Rates',
 };

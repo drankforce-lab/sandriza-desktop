@@ -6,6 +6,12 @@
  * La livraison internationale et la tarification (frais standard, seuil de
  * livraison gratuite, supplément de traitement prioritaire).
  *
+ * DEUX ONGLETS depuis 7.10.0 (2026-10-09, sa demande : « crée-moi un onglet
+ * particulier pour les pays, c'est tout déformé ») : « Tarifs » et « Pays
+ * desservis ». La liste des pays avait sa propre zone qui défilait DANS la
+ * fenêtre qui défile, et son en-tête collant passait par-dessus les lignes.
+ * Dans son onglet, elle prend toute la hauteur et l'en-tête a un fond plein.
+ *
  * ⚠ AUCUN SECRET ICI : ce ne sont que des montants. Les identifiants des
  * transporteurs vivent dans une AUTRE fenêtre (Transporteurs), avec leur propre
  * discipline anti-perte.
@@ -67,6 +73,18 @@ button.prim:hover:not(:disabled){background:#d8bd97}
 /* Pays desservis — la carte occupe toute la largeur : deux cents lignes ne
    tiennent pas dans une demi-colonne. */
 .carte.large{grid-column:1/-1}
+/* LES ONGLETS : hors de la zone qui défile. */
+.onglets{flex:0 0 auto;display:flex;gap:.25rem;align-items:center;flex-wrap:wrap;
+  padding:.5rem 1.05rem;border-bottom:1px solid var(--v08);background:var(--f-page)}
+.onglets > button{background:transparent;border:1px solid transparent;color:var(--tx2);padding:.36rem .8rem;
+  display:inline-flex;align-items:center;gap:.4rem;font-weight:600}
+.onglets > button:hover{background:var(--v05);color:var(--tx)}
+.onglets .nb{font-size:.68rem;font-weight:700;padding:.04rem .4rem;border-radius:999px;background:var(--v08);color:var(--tx2)}
+html.jour .onglets .nb{color:#3f4955}
+/* L onglet des pays : une seule carte qui remplit la fenêtre, le tableau défile seul. */
+.corps.plein{display:flex;flex-direction:column;overflow:hidden}
+.corps.plein .carte.large{flex:1 1 auto;min-height:0}
+.corps.plein .ptab{flex:1 1 auto;min-height:0;max-height:none}
 .pbarre{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;flex-wrap:wrap}
 /* PAS << .info >> : le socle le peint en panneau BLEU en mode jour. */
 .pbarre .pinfo{font-size:.74rem;color:var(--tx2);flex:1 1 12rem;min-width:0}
@@ -74,7 +92,7 @@ button.prim:hover:not(:disabled){background:#d8bd97}
 .ptab::-webkit-scrollbar{width:8px}
 .ptab::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 table.pays{width:100%;border-collapse:collapse}
-table.pays th{position:sticky;top:0;background:var(--f-131c2b);text-align:left;font:700 .68rem/1.3 system-ui;
+table.pays th{position:sticky;top:0;z-index:1;background:var(--f-carte);box-shadow:0 1px 0 var(--v10);text-align:left;font:700 .68rem/1.3 system-ui;
   text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);padding:.45rem .7rem;
   border-bottom:1px solid var(--v10)}
 table.pays td{padding:.38rem .7rem;border-bottom:1px solid var(--v05);font-size:.84rem}
@@ -113,6 +131,7 @@ function pageLivraison() {
 <title>${T("Configuration de la livraison — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.shipping}</span><h1>${T("Configuration de la livraison")}</h1></div>
+<nav class="onglets" id="ong" role="tablist" aria-label="${T("Sections de la livraison")}" hidden></nav>
 <div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter les réglages, pas les modifier.")}</div>
 <div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
@@ -154,6 +173,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var D = null, RO = false, OCCUPE = false;
   var PAYS = null;      // { pays:[...], nbLivres } — tous les pays, moins les exclusions
   var FILTRE = '';      // filtre de la liste (deux cents lignes)
+  var ONG = 'tarifs';   // 'tarifs' | 'pays'
+  var ongEl = document.getElementById('ong');
+  var piedBtn = bsave;
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -204,9 +226,46 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return t;
   }
 
+  function dessinerOnglets(){
+    var d = D || {};
+    if (!d.international) { ongEl.hidden = true; ONG = 'tarifs'; return; }
+    ongEl.hidden = false;
+    var n = PAYS ? PAYS.nbLivres : null;
+    ongEl.innerHTML = [['tarifs', '${T("Tarifs")}'], ['pays', '${T("Pays desservis")}']].map(function(o){
+      var on = o[0] === ONG;
+      return '<button role="tab" data-ong="' + o[0] + '" aria-selected="' + on + '"' + (on ? ' class="on"' : '') + '>' + o[1]
+        + (o[0] === 'pays' && n != null ? '<span class="nb">' + n + '</span>' : '') + '</button>';
+    }).join('');
+    ongEl.querySelectorAll('[data-ong]').forEach(function(b){
+      b.onclick = function(){
+        var k = b.getAttribute('data-ong'); if (k === ONG) return;
+        /* Les tarifs non enregistrés survivent au changement d onglet : on les
+           relit dans D avant de redessiner. */
+        if (ONG === 'tarifs') lireTarifs();
+        ONG = k; dessiner();
+      };
+    });
+  }
+  function lireTarifs(){
+    if (!D) return;
+    var v = function(id){ var e = document.getElementById(id); return e ? e.value : null; };
+    var c = function(id){ var e = document.getElementById(id); return e ? e.checked : null; };
+    var x;
+    if ((x = v('f-cost')) !== null) D.shippingCost = x;
+    if ((x = v('f-thr')) !== null) D.freeThreshold = x;
+    if ((x = v('f-thr-intl')) !== null) D.freeThresholdIntl = x;
+    if ((x = v('f-prio')) !== null) D.priorityCost = x;
+    if ((x = c('f-intl')) !== null) D.international = x;
+  }
   function dessiner(){
     var av = document.getElementById('ro'); if (av) av.hidden = !RO;
     var d = D || {};
+    dessinerOnglets();
+    corps.classList.toggle('plein', ONG === 'pays');
+    /* Les pays s enregistrent case par case : le bouton Enregistrer ne sert
+       qu aux tarifs. */
+    piedBtn.hidden = ONG === 'pays';
+    if (ONG === 'pays') { corps.innerHTML = paysHtml(); brancherPays(); return; }
     var dis = RO ? ' disabled' : '';
     var h = [];
     /* RELOOKING 2026 (2026-10-04) : l international en interrupteur (f-intl,
@@ -236,13 +295,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        decoche, on ne doit plus rien voir ni toucher de ce qui a trait a
        l international. On lit l etat REEL de la case a l ecran (pas seulement
        celui charge) pour que le tableau apparaisse et disparaisse tout de suite. */
-    if (d.international) h.push(paysHtml());
     corps.innerHTML = h.join('');
     bsave.disabled = RO || OCCUPE;
     var fintl = document.getElementById('f-intl');
     if (fintl) fintl.onchange = function(){
       if (!D) D = {};
+      lireTarifs();
       D.international = fintl.checked;
+      if (fintl.checked && !PAYS) chargerPays();
       dessiner();
       dire(fintl.checked
         ? '${T("Enregistrez pour activer la livraison internationale.")}'
@@ -316,11 +376,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         FILTRE = f.value;
         // On ne redessine QUE le tableau : redessiner la fenetre entiere
         // ferait perdre le focus a chaque frappe.
-        var c = corps.querySelector('.carte.large');
+        var c = corps.querySelector('.carte.large .ptab');
         if (!c) return;
         var neuf = document.createElement('div');
         neuf.innerHTML = paysHtml();
-        c.parentNode.replaceChild(neuf.firstChild, c);
+        var t = neuf.querySelector('.ptab'), info = neuf.querySelector('.pinfo'), i0 = corps.querySelector('.pinfo');
+        if (t) c.parentNode.replaceChild(t, c);
+        if (info && i0) i0.innerHTML = info.innerHTML;
         brancherPays();
         var f2 = document.getElementById('p-filtre');
         if (f2) { f2.focus(); try { f2.setSelectionRange(f2.value.length, f2.value.length); } catch (e) {} }
@@ -335,7 +397,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('config:pays:donnees').then(function(r){
       if (!r || !r.ok) return;      // la livraison reste utilisable sans le tableau
       PAYS = r;
-      if (D && D.international) dessiner();
+      if (D && D.international) { if (ONG === 'pays') dessiner(); else dessinerOnglets(); }
     });
   }
 
