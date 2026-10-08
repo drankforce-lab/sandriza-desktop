@@ -175,6 +175,9 @@ contextBridge.exposeInMainWorld('szPont', {
      simple qui n'a rien à attendre ne doit pas ouvrir de promesse — c'est une
      promesse de plus qui peut rester en l'air. */
   deconnexionReponse: (oui) => ipcRenderer.send('deconnexion:reponse', !!oui),
+  /* Le code à 6 chiffres avant une exportation (fenetres/code-export.js) : le code tapé, ou
+     null pour « annuler ». C'est le principal qui le fait vérifier par le serveur. */
+  codeExportReponse: (code) => ipcRenderer.send('codeexport:reponse', code == null ? null : String(code)),
   langue: () => ipcRenderer.invoke('langue:lire').catch(() => 'fr'),
   langueEcrire: (l) => ipcRenderer.invoke('langue:ecrire', String(l || 'fr'))
     .catch(() => 'fr'),

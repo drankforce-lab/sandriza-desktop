@@ -8118,6 +8118,24 @@ const JEU = {
     },
   ],
 
+  /* ══ LE CODE AVANT D'EXPORTER (palier 2c, 2026-10-08) ═════════════════════════
+     ⚠ Elle doit s'ouvrir MÊME SANS NOM DE FICHIER : un téléchargement dont le moteur
+     ne donne pas le nom ne doit pas devenir une exportation impossible. */
+  'code-export.js': [
+    {
+      nom: 'le code, avec le nom du fichier',
+      exige: ['id="oui"', 'id="non"', 'id="code"', 'clients-2026-10.csv'],
+      id: 'clients-2026-10.csv',
+      reponses: { identite: IDENTITE },
+    },
+    {
+      nom: 'le code, sans nom de fichier',
+      exige: ['id="oui"', 'id="non"', 'id="code"'],
+      id: '',
+      reponses: { identite: IDENTITE },
+    },
+  ],
+
   'connexion.js': [
     {
       /* Le cas de tous les jours : personne n est memorise, pas de casse-tete,

@@ -1130,7 +1130,104 @@ const EXPORT_INFO = () => {
 };
 const EXPORT_DIR = () => EXPORT_INFO().dir;
 const _safeName = (n) => String(n || 'export').replace(/[^A-Za-z0-9._-]+/g, '_').slice(0, 120) || 'export';
-ipcMain.handle('export:save', (e, name, dataUrlOrText) => {
+
+/* ══ LE CODE À 6 CHIFFRES AVANT D'EXPORTER UN FICHIER (2026-10-08, palier 2c, sa décision) ══════
+   Les DEUX portes par lesquelles un fichier sort de l'application — `export:save` (toutes les
+   fenêtres) et les téléchargements du moteur (`will-download`, les liens « télécharger » des
+   pages) — demandent d'abord le code à 6 chiffres. Le SERVEUR le vérifie (op `export_autoriser`,
+   appelée par la page du site, qui porte la session) ; l'autorisation vaut 5 minutes, ici, en
+   mémoire. Un refus n'écrit rien.
+   ⚠ UNE SEULE BOÎTE À LA FOIS : deux exportations lancées ensemble attendent la même réponse
+   (une promesse partagée) au lieu d'empiler deux fenêtres. */
+const CODE_EXPORT_MS = 5 * 60 * 1000;
+let exportAutoriseJusqua = 0;
+let codeExportWin = null;
+let codeExportPromesse = null;
+let codeExportResoudre = null;
+let codeExportQuoi = '';
+const { pageCodeExport } = require('./fenetres/code-export');
+const codeExportFinir = (ok) => {
+  const r = codeExportResoudre;
+  codeExportResoudre = null; codeExportPromesse = null;
+  const w = codeExportWin; codeExportWin = null;
+  if (w && !w.isDestroyed()) { try { w.destroy(); } catch (e) {} }
+  if (r) r(!!ok);
+};
+const exigerCodeExport = (quoi, parent) => {
+  if (Date.now() < exportAutoriseJusqua) return Promise.resolve(true);
+  if (codeExportPromesse) { try { codeExportWin && codeExportWin.focus(); } catch (e) {} return codeExportPromesse; }
+  const par = (parent && !parent.isDestroyed()) ? parent : mainWindow;
+  if (!par || par.isDestroyed()) return Promise.resolve(false);
+  codeExportQuoi = String(quoi || '');
+  codeExportPromesse = new Promise((resolve) => {
+    codeExportResoudre = resolve;
+    const L = 520, H = 330;
+    let x, y;
+    try { const b = par.getBounds(); x = Math.round(b.x + (b.width - L) / 2); y = Math.round(b.y + (b.height - H) / 3); } catch (e) {}
+    codeExportWin = new BrowserWindow({
+      width: L, height: H, ...(Number.isFinite(x) && Number.isFinite(y) ? { x, y } : {}),
+      parent: par, modal: true, resizable: false, minimizable: false, maximizable: false, fullscreenable: false,
+      skipTaskbar: true, show: false, autoHideMenuBar: true, backgroundColor: '#0e1522',
+      webPreferences: { preload: path.join(__dirname, 'pont-preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true },
+    });
+    // La fermeture (croix, parent fermé, plantage) vaut « non » : rien n'est écrit.
+    codeExportWin.on('closed', () => { codeExportWin = null; codeExportFinir(false); });
+    codeExportWin.once('ready-to-show', () => { try { codeExportWin.show(); codeExportWin.focus(); } catch (e) {} });
+    try { appliquerTheme(codeExportWin.webContents); } catch (e) {}
+    codeExportWin.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(pageCodeExport(codeExportQuoi)));
+  });
+  return codeExportPromesse;
+};
+ipcMain.on('codeexport:reponse', async (e, code) => {
+  const w = codeExportWin;
+  if (!w || w.isDestroyed() || e.sender !== w.webContents) return;
+  if (code == null) { codeExportFinir(false); return; }
+  const wc = siteWC();
+  let r = { ok: false, motif: 'reseau' };
+  try {
+    const brut = wc ? await wc.executeJavaScript('(async function(){try{var r=await TursoDB.exportAutoriser('
+      + JSON.stringify(String(code)) + ',' + JSON.stringify(codeExportQuoi) + ');return JSON.stringify(r||{});}'
+      + 'catch(x){return JSON.stringify({ok:false,motif:(x&&x.status===401)?"session":"reseau"});}})()', true) : '';
+    r = JSON.parse(String(brut || '{}'));
+  } catch (er) {}
+  if (!codeExportWin || codeExportWin.isDestroyed()) return;
+  if (r && r.ok) {
+    exportAutoriseJusqua = Date.now() + CODE_EXPORT_MS;
+    try { await codeExportWin.webContents.executeJavaScript('window.szCodeAccepte && szCodeAccepte()', true); } catch (er) {}
+    setTimeout(() => codeExportFinir(true), 900);
+    return;
+  }
+  const motif = String((r && r.motif) || 'reseau');
+  try { await codeExportWin.webContents.executeJavaScript('window.szCodeRefus && szCodeRefus(' + JSON.stringify(motif) + ',' + (parseInt(r && r.restant, 10) || 0) + ')', true); } catch (er) {}
+  if (motif === 'essais') setTimeout(() => codeExportFinir(false), 2500);
+});
+
+/* Les téléchargements du moteur (un lien « télécharger » dans une page, un fichier CSV fabriqué
+   dans le navigateur) : sans autorisation, on ANNULE, on demande le code, puis on relance le même
+   téléchargement — qui passe, puisque l'autorisation court. Un lien de type blob: déjà libéré par
+   la page ne se relance pas : la boîte le dit (« relancez l'exportation, vous avez 5 minutes »). */
+const _gardeTelechargements = (ses) => {
+  if (!ses || ses.__szCodeExport) return;
+  ses.__szCodeExport = true;
+  ses.on('will-download', (ev, item, wc) => {
+    if (Date.now() < exportAutoriseJusqua) return;
+    let url = '', nom = '';
+    try { url = item.getURL(); nom = item.getFilename(); } catch (e) {}
+    ev.preventDefault();
+    let parent = null;
+    try { parent = BrowserWindow.fromWebContents(wc) || null; } catch (e) {}
+    exigerCodeExport(nom, parent).then((ok) => {
+      if (ok && url) { try { if (wc && !wc.isDestroyed()) wc.downloadURL(url); } catch (e) {} }
+    });
+  });
+};
+app.whenReady().then(() => { try { _gardeTelechargements(session.defaultSession); } catch (e) {} });
+app.on('session-created', (ses) => { try { _gardeTelechargements(ses); } catch (e) {} });
+
+ipcMain.handle('export:save', async (e, name, dataUrlOrText) => {
+  let parent = null;
+  try { parent = BrowserWindow.fromWebContents(e.sender) || null; } catch (er) {}
+  if (!(await exigerCodeExport(_safeName(name), parent))) return { ok: false, annule: true, error: 'code_requis' };
   try {
     const p = path.join(EXPORT_DIR(), _safeName(name));
     const s = String(dataUrlOrText || '');
