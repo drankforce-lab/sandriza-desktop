@@ -68,6 +68,8 @@ body{background:var(--f-page);color:var(--tx);
 .onglets .nb{font-size:.68rem;font-weight:700;min-width:1.35rem;text-align:center;padding:.04rem .38rem;border-radius:999px;
   background:var(--v08);color:var(--tx2)}
 .onglets .nb.att{background:rgba(251,191,36,.18);color:var(--tx-att)}
+/* Mode jour : la pastille grise tombait à 4,27 (banc-texte-sur-fond) — encre assombrie. */
+html.jour .onglets .nb{color:#3f4955}
 .onglets .droite{margin-left:auto}
 .onglets .droite button{font-weight:400}
 .tuiles.tuiles4{grid-template-columns:repeat(4,minmax(0,1fr))}
