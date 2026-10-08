@@ -258,6 +258,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '</div><div class="grille" style="margin-top:.7rem">'
       + champ('i-num', '${T("Numéro IOSS (guichet TVA à l’importation)")}', io.numero)
       + champ('i-int', '${T("Intermédiaire établi dans l’Union")}', io.intermediaire)
+      + '</div>'
+      /* IOSS PRÉPARÉ, ÉTEINT (2026-10-07) : la TVA de l Union perçue à la caisse sur les commandes de
+         150 € d articles et moins ; au-delà, DAP par Postes Canada. Sans numéro, la case ne fait rien. */
+      + '<div class="grille" style="margin-top:.7rem">'
+      + '<label class="ch" style="display:flex;gap:.5rem;align-items:flex-start"><input type="checkbox" id="i-actif"' + (io.actif ? ' checked' : '') + (RO ? ' disabled' : '') + '>'
+      + '<span><b>${T("Percevoir la TVA de l’Union à la caisse (IOSS)")}</b><br><span class="sous">${T("Commandes de 150 € d’articles et moins : la TVA du pays est ajoutée au total. Au-delà, la commande part en DAP par Postes Canada et la cliente paie à l’arrivée. Sans numéro IOSS, rien ne s’applique.")}</span></span></label>'
+      + '<div class="ch"><label for="i-taux">${T("Taux de change : 1 $ CA = … €")}</label><input id="i-taux" type="number" min="0.1" max="2" step="0.001" value="' + esc(io.tauxEUR != null ? io.tauxEUR : 0.66) + '"' + (RO ? ' disabled' : '') + '></div>'
       + '</div></div>';
   }
 
@@ -483,6 +490,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     Object.keys(m).forEach(function(id){
       var x = v(id); if (x !== undefined) r[m[id][0]][m[id][1]] = x;
     });
+    var ia = document.getElementById('i-actif'); if (ia) r.ioss.actif = !!ia.checked;
+    var it = v('i-taux'); if (it !== undefined) r.ioss.tauxEUR = it;
     if (!OUVERT) return;
     var p = entree(OUVERT);
     var pm = v('p-mandataire'); if (pm !== undefined) p.mandataire = pm;

@@ -177,4 +177,9 @@ module.exports = {
   // Le dossier d un pays, en boite (2026-10-04).
   'Ce qui manque': 'What is missing',
   'Mandataire': 'Authorised representative',
+  /* ── IOSS préparé (2026-10-07) ── */
+  'Percevoir la TVA de l’Union à la caisse (IOSS)': 'Collect EU VAT at checkout (IOSS)',
+  'Commandes de 150 € d’articles et moins : la TVA du pays est ajoutée au total. Au-delà, la commande part en DAP par Postes Canada et la cliente paie à l’arrivée. Sans numéro IOSS, rien ne s’applique.':
+    'Orders of €150 of items or less: the country’s VAT is added to the total. Above that, the order ships DAP by Canada Post and the customer pays on arrival. Without an IOSS number, nothing applies.',
+  'Taux de change : 1 $ CA = … €': 'Exchange rate: CA$1 = … €',
 };
