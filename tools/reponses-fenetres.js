@@ -8537,6 +8537,31 @@ const JEU = {
     },
   ],
 
+  /* Le GARDIEN (7.5.0) — trois cas : un compte verrouille (et le sien, qui ne
+     se deverrouille pas d ici), le gardien ETEINT sans rien a montrer, le refus. */
+  'gardien.js': (function(){
+    var cfg = { actif: true, fenetreMin: 10,
+      seuils: { finances: 10, inventaire: 20, clients: 10, photos: 40, donnees: 30, export: 40 },
+      alerteTel: ['+14188580455'], alerteCourriel: ['drankforce@gmail.com'] };
+    var etat = { ok: true, cfg: cfg,
+      verrous: [
+        { user_id: 'stf_0002', le: 1791460000, cat: 'finances', total: 11, detail: 'remove invoices', nom: 'Martin Dubé', courriel: 'martin@sandriza.com', moi: false },
+        { user_id: 'stf_0001', le: 1791450000, cat: 'photos', total: 41, detail: '', nom: 'Brigitte Brousseau', courriel: '', moi: true }
+      ],
+      evenements: [
+        { ts: 1791460000, user_id: 'stf_0002', cat: 'finances', n: 1, detail: 'remove invoices INV-1042', ip: '203.0.113.7', nom: 'Martin Dubé', courriel: 'martin@sandriza.com' },
+        { ts: 1791459000, user_id: 'stf_9999', cat: 'donnees', n: 12, detail: 'config_list_remove coupons', ip: '', nom: '', courriel: '' }
+      ] };
+    return [
+      { nom: 'un compte verrouille', id: '', reponses: { identite: IDENTITE, 'gardien:etat': etat,
+        'gardien:deverrouiller': { ok: true, cfg: cfg, verrous: [], evenements: [] },
+        'gardien:regler': etat } },
+      { nom: 'gardien eteint, rien a montrer', id: '', reponses: { identite: IDENTITE,
+        'gardien:etat': { ok: true, cfg: Object.assign({}, cfg, { actif: false }), verrous: [], evenements: [] } } },
+      { nom: 'refus (pas super-admin)', id: '', reponses: { identite: IDENTITE, 'gardien:etat': { ok: false, motif: 'droit' } } }
+    ];
+  })(),
+
   'presence.js': [
     {
       nom: 'sessions ouvertes, dont la sienne',

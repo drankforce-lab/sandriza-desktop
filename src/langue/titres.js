@@ -61,5 +61,6 @@ module.exports = {
   'Cadre de l administration': 'Administration frame',
   'Verrous': 'Locks',
   'Mode usage exclusif': 'Exclusive use mode',
-  'Personnel connecté': 'Staff signed in'
+  'Personnel connecté': 'Staff signed in',
+  'Gardien': 'Guard'
 };

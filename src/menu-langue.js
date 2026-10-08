@@ -147,6 +147,7 @@ const MENU_APP_EN = {
   'Rapports et budget': 'Reports and budget',
   'Fournisseurs': 'Suppliers',
   'Gabarits courriel': 'Email templates',
+  'Gardien': 'Guard',
   'Gestion des taxes': 'Tax management',
   'Conformité internationale': 'International compliance',
   'Compte de paiement': 'Payment account',

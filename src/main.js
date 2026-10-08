@@ -2688,6 +2688,8 @@ const OPS_PONT = new Set([
      tout le journal (courriels, IP, ville du personnel) et sa purge annoncait
      le total de TOUT le journal sur un onglet qui montre trente lignes. */
   'journal:purger:auto', 'journal:export:auto',
+  // Le GARDIEN (7.5.0, 2026-10-08) : super-administrateur, verifie au coeur ET au serveur.
+  'gardien:etat', 'gardien:deverrouiller', 'gardien:regler',
   // Recherche inter-journaux (2.69.0, #7 Lot 7c).
   'journal:recherche',
   // SMS dans les journaux (2.72.0, #7 Lot 7b-2). Comptable reutilise liens:journal.
@@ -3313,6 +3315,7 @@ const LIMITES_PONT = {
   'journal:export:acces': 30000, 'journal:export:prints': 30000,
   'journal:purger:auto': 20000, 'journal:export:auto': 30000,
   'journal:recherche': 30000, 'journal:sms': 30000, 'journal:appels': 60000,
+  'gardien:etat': 30000, 'gardien:deverrouiller': 30000, 'gardien:regler': 30000,
   /* Incidents : registre local pousse vers Turso a l ecriture (syncPrivateList),
      donc l ecriture attend le reseau — plus large que la lecture. */
   'incidents:donnees': 40000, 'incidents:ecrire': 60000, 'incidents:supprimer': 30000,
@@ -3960,6 +3963,8 @@ const PAGES_ANCRABLES = () => ({
      fenetre ne decide de rien, elle ne dessine pas ce qu elle n a pas le droit
      de montrer. */
   'presence': ['Personnel connecté', () => pagePresence()],
+  /* Le GARDIEN (7.5.0) : ne natif, sans jumeau web, comme << presence >>. */
+  'gardien': ['Gardien', () => pageGardien()],
   'maintenance': ['Mode usage exclusif', () => pageMaintenance()],
   'connexion': ['Connexion', () => pageConnexion()],
   'maj': ['Mise à jour', (id) => pageMaj(id)],
@@ -5927,6 +5932,7 @@ const { pageProfil } = require('./fenetres/profil');
 const { pageJournaux } = require('./fenetres/journaux');
 const { pageVerrous } = require('./fenetres/verrous');
 const { pagePresence } = require('./fenetres/presence');
+const { pageGardien } = require('./fenetres/gardien');
 const { pageMaintenance } = require('./fenetres/maintenance');
 const { pageConnexion } = require('./fenetres/connexion');
 const { pageMaj } = require('./fenetres/maj');
@@ -6223,6 +6229,17 @@ const actionApp = (nom, arg) => {
          de cette fenêtre, et il vient d'un geste — jamais d'une minuterie. */
       if (_reuM && winM && !winM.isDestroyed()) {
         winM.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
+      }
+      break;
+    }
+    /* Le GARDIEN (7.5.0, 2026-10-08) : meme montage que << Verrous >>. */
+    case 'gardien': {
+      const _avG = fenetresNatives.get('gardien');
+      const _reuG = !!(_avG && !_avG.isDestroyed());
+      const winG = ouvrirNative('gardien', TF('Gardien'), () => pageGardien(),
+        { width: 980, height: 760, minWidth: 720, minHeight: 480 });
+      if (_reuG && winG && !winG.isDestroyed()) {
+        winG.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
       }
       break;
     }
