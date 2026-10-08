@@ -70,8 +70,8 @@ module.exports = {
   'Cliquez encore pour rouvrir ce compte.': 'Click again to reopen this account.',
   'Déverrouillage…': 'Unlocking…',
   'Compte rouvert : il peut se connecter de nouveau.': 'Account reopened: it can sign in again.',
-  'Déverrouiller rouvre la connexion de ce compte et remet son compteur à zéro. Vérifiez d’abord, dans les événements ci-dessous, que les gestes étaient bien les siens.':
-    'Unlocking reopens sign-in for this account and resets its counter. First check, in the events below, that the actions were really its own.',
+  'Déverrouiller rouvre la connexion de ce compte et remet son compteur à zéro. Vérifiez d’abord, dans l’onglet Activité, que les gestes étaient bien les siens.':
+    'Unlocking reopens sign-in for this account and resets its counter. First check, in the Activity tab, that the actions were really its own.',
 
   /* ── LES ÉVÉNEMENTS ─────────────────────────────────────────────────────── */
   'Derniers gestes comptés (': 'Latest counted actions (',
@@ -177,5 +177,19 @@ module.exports = {
   'Gardez au moins un destinataire : sans lui, une alerte ne partirait que vers le courriel de l’entreprise.':
     'Keep at least one recipient: without one, an alert would only go to the business email.',
   'Enregistrement…': 'Saving…',
-  'Réglages enregistrés — l’alerte de changement est partie.': 'Settings saved — the change alert was sent.'
+  'Réglages enregistrés — l’alerte de changement est partie.': 'Settings saved — the change alert was sent.',
+
+  /* ── LES ONGLETS (7.9.0) ────────────────────────────────────────────────── */
+  'Sections du gardien': 'Guard sections',
+  'Tableau de bord': 'Dashboard',
+  'Activité': 'Activity',
+  'Journal inviolable': 'Tamper-proof log',
+  'Corbeille': 'Recycle bin',
+  'Modifications des réglages abandonnées.': 'Settings changes discarded.',
+  'Gestes comptés': 'Counted actions',
+  'fenêtre de ': 'window of ',
+  ' jours avant effacement': ' days before deletion',
+  'Général': 'General',
+  'Seuils': 'Thresholds',
+  'Destinataires des alertes': 'Alert recipients'
 };

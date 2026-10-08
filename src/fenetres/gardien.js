@@ -9,11 +9,17 @@
  * fenêtre glissante. Au-delà du seuil, il refuse, ferme les sessions du compte,
  * le VERROUILLE et envoie une alerte par texto et par courriel.
  *
- * Cette fenêtre en montre trois choses, et n en décide aucune :
- *   1. les comptes verrouillés — et le geste qui les rouvre (deux clics) ;
- *   2. les 50 derniers gestes comptés (les lectures complètes exceptées : elles
- *      sont trop nombreuses et noieraient le reste) ;
- *   3. les réglages : interrupteur, fenêtre, seuils, destinataires des alertes.
+ * Cette fenêtre en montre l état, et n en décide aucune. CINQ ONGLETS depuis
+ * la 7.9.0 (2026-10-09, sa demande : « que la fenêtre soit ancrée, et fais-moi
+ * des onglets comme Réglages… que ça soit beau ») — tout empilé, il fallait
+ * défiler quatre tableaux pour trouver les réglages :
+ *   1. Tableau de bord : l état, les comptes verrouillés (et le geste qui les
+ *      rouvre, deux clics), puis le bouton panique en zone de danger ;
+ *   2. Activité : les 50 derniers gestes comptés (lectures complètes exceptées) ;
+ *   3. Journal inviolable ; 4. Corbeille du serveur ;
+ *   5. Réglages : interrupteur, fenêtre, seuils, destinataires des alertes.
+ * Elle s ANCRE dans la fenêtre principale comme les autres écrans de Sécurité
+ * (section hôte « gardien » côté site, _DOCKABLES dans admin.js).
  *
  * ⚠⚠ ENREGISTRER LES RÉGLAGES DÉCLENCHE UNE ALERTE, vers les ANCIENS et les
  * NOUVEAUX destinataires. C est voulu (turso-proxy.php, gardien_regler) : un
@@ -47,7 +53,32 @@ body{background:var(--f-page);color:var(--tx);
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.05rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
+.tete .etat{display:inline-flex;align-items:center;gap:.45rem;margin-left:auto;font-size:.74rem;color:var(--tx2);
+  padding:.2rem .65rem;border:1px solid var(--v10);border-radius:999px;background:var(--v03)}
+.tete .etat i{width:8px;height:8px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 3px rgba(74,222,128,.18)}
+.tete .etat.att i{background:#fbbf24;box-shadow:0 0 0 3px rgba(251,191,36,.2)}
+.tete .etat.err i{background:#f87171;box-shadow:0 0 0 3px rgba(248,113,113,.2)}
+/* LES ONGLETS : hors de la zone qui défile, ils restent sous les yeux. */
+.onglets{flex:0 0 auto;display:flex;gap:.25rem;align-items:center;flex-wrap:wrap;
+  padding:.5rem 1.05rem;border-bottom:1px solid var(--v08);background:var(--f-page)}
+.onglets > button{background:transparent;border:1px solid transparent;color:var(--tx2);padding:.36rem .75rem;
+  display:inline-flex;align-items:center;gap:.4rem;font-weight:600}
+.onglets > button:hover{background:var(--v05);color:var(--tx)}
+.onglets > button:focus-visible{border-color:#c9a97e}
+.onglets .nb{font-size:.68rem;font-weight:700;min-width:1.35rem;text-align:center;padding:.04rem .38rem;border-radius:999px;
+  background:var(--v08);color:var(--tx2)}
+.onglets .nb.att{background:rgba(251,191,36,.18);color:var(--tx-att)}
+.onglets .droite{margin-left:auto}
+.onglets .droite button{font-weight:400}
+.tuiles.tuiles4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.carte h3{display:flex;align-items:center;gap:.5rem}
+.intro{font-size:.78rem;color:var(--tx2);margin:-.2rem 0 .6rem}
+tbody tr:hover td{background:var(--v03)}
+.danger{border-color:rgba(239,68,68,.45);background:linear-gradient(180deg,rgba(239,68,68,.06),transparent 70%),var(--f-carte)}
+.danger h3{color:var(--tx-err)}
+.section{padding:.15rem 0 .8rem;margin-bottom:.8rem;border-bottom:1px solid var(--v06)}
+.section:last-of-type{border-bottom:0;margin-bottom:.2rem}
+.section h4{margin:0 0 .45rem;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--tx2)}
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar{width:8px}
@@ -95,6 +126,7 @@ tbody td{padding:.3rem .4rem;border-top:1px solid var(--v05);vertical-align:top}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
+@media (max-width:820px){.tuiles.tuiles4{grid-template-columns:repeat(2,minmax(0,1fr))}.grille{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -104,7 +136,8 @@ function pageGardien() {
 <title>${T("Gardien — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.securite}</span><h1>${T("Gardien")}</h1>
-  <span class="sous" id="sous"></span></div>
+  <span class="etat" id="sous"><i></i><span id="sous-t"></span></span></div>
+<nav class="onglets" id="ong" role="tablist" aria-label="${T("Sections du gardien")}"></nav>
 <div class="corps" id="corps"><div class="vide charge">${T("Lecture du gardien…")}</div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
@@ -114,6 +147,17 @@ function pageGardien() {
 ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   var corps = document.getElementById('corps');
   var sousEl = document.getElementById('sous');
+  var sousT = document.getElementById('sous-t');
+  var ongEl = document.getElementById('ong');
+  /* L onglet ouvert survit aux rafraîchissements et à la fermeture (confort de
+     ce poste : rien de grave si la préférence se perd). */
+  var ONGLETS = [
+    ['bord', '${T("Tableau de bord")}'], ['activite', '${T("Activité")}'],
+    ['journal', '${T("Journal inviolable")}'], ['corbeille', '${T("Corbeille")}'],
+    ['reglages', '${T("Réglages")}']
+  ];
+  var ONG = 'bord';
+  try { var _o = localStorage.getItem('sz-gardien-onglet'); if (_o && ONGLETS.some(function(x){ return x[0] === _o; })) ONG = _o; } catch (e) {}
 
   var ETAT = null;      // null = pas encore lu ; sinon { cfg, verrous, evenements }
   var CONF = '';        // confirmation deux clics : '' | 'regler' | user_id
@@ -179,7 +223,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   /* ── LES COMPTES VERROUILLÉS ─────────────────────────────────────────── */
   function zoneVerrous(){
     var v = ETAT.verrous || [];
-    var h = '<div class="carte"><h3>${T("Comptes verrouillés (")}' + v.length + ')</h3>';
+    var h = '<div class="carte" id="z-verrous"><h3>${T("Comptes verrouillés (")}' + v.length + ')</h3>';
     if (!v.length) return h + '<div class="vide">${T("Aucun compte verrouillé.")}</div></div>';
     /* Tous d un coup : l issue normale après le bouton panique (le même
        geste armé en deux clics, la clé « * » est comprise par le serveur). */
@@ -200,14 +244,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
               + '</button>') + '</td></tr>';
     }
     return h + '</tbody></table>'
-      + '<div class="sub" style="margin-top:.45rem">${T("Déverrouiller rouvre la connexion de ce compte et remet son compteur à zéro. Vérifiez d’abord, dans les événements ci-dessous, que les gestes étaient bien les siens.")}</div></div>';
+      + '<div class="sub" style="margin-top:.45rem">${T("Déverrouiller rouvre la connexion de ce compte et remet son compteur à zéro. Vérifiez d’abord, dans l’onglet Activité, que les gestes étaient bien les siens.")}</div></div>';
   }
 
   /* ── LES DERNIERS ÉVÉNEMENTS ─────────────────────────────────────────── */
   function zoneEvenements(){
     var e = ETAT.evenements || [];
     var h = '<div class="carte"><h3>${T("Derniers gestes comptés (")}' + e.length + ')</h3>'
-      + '<div class="sub" style="margin:0 0 .5rem">${T("Les 50 plus récents. Les lectures complètes n’y figurent pas : trop nombreuses, elles noieraient le reste.")}</div>';
+      + '<div class="intro">${T("Les 50 plus récents. Les lectures complètes n’y figurent pas : trop nombreuses, elles noieraient le reste.")}</div>';
     if (!e.length) return h + '<div class="vide">${T("Aucun geste compté.")}</div></div>';
     h += '<table><thead><tr><th>${T("Quand")}</th><th>${T("Compte")}</th><th>${T("Catégorie")}</th><th>${T("Nombre")}</th><th>${T("Détail")}</th><th>${T("Adresse IP")}</th></tr></thead><tbody>';
     for (var i = 0; i < e.length; i++) {
@@ -234,7 +278,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var j = ETAT.journal || [];
     var touches = j.filter(function(l){ return l.src === 'reecrit' || l.src === 'retrait' || l.src === 'bloc'; }).length;
     var h = '<div class="carte"><h3>${T("Journal inviolable (")}' + j.length + ')</h3>'
-      + '<div class="sub" style="margin:0 0 .5rem">${T("Les 100 dernières entrées. Écrit par le serveur seul : aucune session, même super-administrateur, ne peut le modifier ni le vider. Une entrée du journal d’accès réécrite ou retirée y laisse une trace.")}</div>';
+      + '<div class="intro">${T("Les 100 dernières entrées. Écrit par le serveur seul : aucune session, même super-administrateur, ne peut le modifier ni le vider. Une entrée du journal d’accès réécrite ou retirée y laisse une trace.")}</div>';
     if (touches) h += '<div class="note" style="margin:0 0 .5rem;color:var(--tx-att)">' + touches
       + (touches > 1 ? '${T(" modifications du journal d’accès dans ces entrées — vérifiez qui les a faites.")}'
                      : '${T(" modification du journal d’accès dans ces entrées — vérifiez qui l’a faite.")}') + '</div>';
@@ -271,7 +315,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   function zoneCorbeille(){
     var c = ETAT.corbeille || [];
     var h = '<div class="carte"><h3>${T("Corbeille du serveur (")}' + c.length + ')</h3>'
-      + '<div class="sub" style="margin:0 0 .5rem">${T("Ce qui a été supprimé dort ici pendant ")}' + esc(ETAT.corbeilleJours || 30)
+      + '<div class="intro">${T("Ce qui a été supprimé dort ici pendant ")}' + esc(ETAT.corbeilleJours || 30)
       + '${T(" jours avant d’être effacé pour de bon. Restaurer remet la fiche telle qu’elle était au moment de la suppression, ou le fichier à son adresse d’origine.")}</div>';
     if (!c.length) return h + '<div class="vide">${T("La corbeille est vide.")}</div></div>';
     h += '<table><thead><tr><th>${T("Supprimé le")}</th><th>${T("Quoi")}</th><th>${T("Par")}</th><th></th></tr></thead><tbody>';
@@ -292,8 +336,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
      le mot PANIQUE tapé en toutes lettres (le serveur l exige aussi) — un
      clic égaré mettrait toute l équipe dehors. */
   function zonePanique(){
-    return '<div class="carte" id="z-pan" style="border-color:rgba(239,68,68,.45)"><h3>${T("Bouton panique")}</h3>'
-      + '<div class="sub" style="margin:0 0 .5rem">${T("En cas d’intrusion : toutes les sessions du personnel sont fermées, sauf celle-ci, et tous les autres comptes sont verrouillés. Personne ne peut se reconnecter tant que vous ne rouvrez pas les comptes ici. Une alerte part par texto et par courriel.")}</div>'
+    return '<div class="carte danger" id="z-pan"><h3><span class="ic" aria-hidden="true">⚠</span>${T("Bouton panique")}</h3>'
+      + '<div class="intro">${T("En cas d’intrusion : toutes les sessions du personnel sont fermées, sauf celle-ci, et tous les autres comptes sont verrouillés. Personne ne peut se reconnecter tant que vous ne rouvrez pas les comptes ici. Une alerte part par texto et par courriel.")}</div>'
       + '<div class="barre" style="align-items:flex-end"><div class="champ" style="max-width:17rem">'
       + '<label for="g-pan">${T("Tapez PANIQUE pour armer le bouton")}</label><input id="g-pan" autocomplete="off" spellcheck="false"></div>'
       + '<button class="dgr" id="g-pan-go" disabled>${T("Activer le bouton panique")}</button></div></div>';
@@ -304,22 +348,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var c = ETAT.cfg || {};
     var s = c.seuils || {};
     var h = '<div class="carte" id="z-cfg"><h3>${T("Réglages")}</h3>'
+      + '<div class="section"><h4>${T("Général")}</h4>'
       + '<label class="inter"><input type="checkbox" id="g-actif"' + (c.actif !== false ? ' checked' : '') + '> '
       + '${T("Gardien actif")}</label>'
       + '<div class="grille"><div class="champ"><label for="g-fen">${T("Fenêtre de comptage (minutes)")}</label>'
-      + '<input id="g-fen" type="number" min="1" max="1440" value="' + esc(c.fenetreMin || 10) + '"></div></div>'
-      + '<div class="sub" style="margin:.6rem 0 .35rem">${T("Seuils : au-delà, dans la fenêtre, le geste est refusé et le compte verrouillé.")}</div>'
+      + '<input id="g-fen" type="number" min="1" max="1440" value="' + esc(c.fenetreMin || 10) + '"></div></div></div>'
+      + '<div class="section"><h4>${T("Seuils")}</h4>'
+      + '<div class="intro">${T("Seuils : au-delà, dans la fenêtre, le geste est refusé et le compte verrouillé.")}</div>'
       + '<div class="grille">';
     for (var i = 0; i < CATS.length; i++) {
       h += '<div class="champ"><label for="g-s-' + CATS[i] + '">' + NOMS[CATS[i]] + '</label>'
         + '<input id="g-s-' + CATS[i] + '" type="number" min="1" max="100000" value="' + esc(s[CATS[i]] || '') + '"></div>';
     }
-    h += '</div><div class="deux">'
+    h += '</div></div><div class="section"><h4>${T("Destinataires des alertes")}</h4><div class="deux" style="margin-top:0">'
       + '<div class="champ"><label for="g-tel">${T("Textos d’alerte (un numéro par ligne, ex. +14185551234)")}</label>'
       + '<textarea id="g-tel">' + esc((c.alerteTel || []).join('\\n')) + '</textarea></div>'
       + '<div class="champ"><label for="g-mel">${T("Courriels d’alerte (un par ligne)")}</label>'
       + '<textarea id="g-mel">' + esc((c.alerteCourriel || []).join('\\n')) + '</textarea></div></div>'
-      + '<div class="sub" style="margin-top:.45rem">${T("Le courriel de l’entreprise reçoit aussi chaque alerte.")}</div>'
+      + '<div class="sub" style="margin-top:.45rem">${T("Le courriel de l’entreprise reçoit aussi chaque alerte.")}</div></div>'
       + '<div class="barre" style="margin-top:.6rem"><button class="prim" id="g-save">'
       + (CONF === 'regler' ? '${T("✓ Confirmer — une alerte partira")}' : '${T("Enregistrer les réglages")}') + '</button>'
       + (SALE ? '<button id="g-annuler">${T("Annuler les modifications")}</button>' : '') + '</div>'
@@ -355,37 +401,102 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     return { cfg: cfg };
   }
 
-  function dessiner(){
-    if (ETAT === null) { corps.innerHTML = '<div class="vide charge">${T("Lecture du gardien…")}</div>'; return; }
-    var c = ETAT.cfg || {};
-    var nv = (ETAT.verrous || []).length;
-    sousEl.textContent = c.actif === false ? '${T("gardien ÉTEINT")}'
-      : (nv ? (nv + (nv > 1 ? '${T(" comptes verrouillés")}' : '${T(" compte verrouillé")}')) : '${T("actif · aucun compte verrouillé")}');
+  function nbJournalTouche(){
+    return (ETAT.journal || []).filter(function(l){ return l.src === 'reecrit' || l.src === 'retrait' || l.src === 'bloc'; }).length;
+  }
+  function dessinerOnglets(){
+    var nb = {
+      bord: [(ETAT.verrous || []).length, true],
+      activite: [(ETAT.evenements || []).length, false],
+      journal: [nbJournalTouche(), true],
+      corbeille: [(ETAT.corbeille || []).length, false]
+    };
+    var h = '';
+    for (var i = 0; i < ONGLETS.length; i++) {
+      var k = ONGLETS[i][0], on = k === ONG, n = nb[k];
+      h += '<button role="tab" data-ong="' + k + '" id="o-' + k + '" aria-selected="' + on + '" tabindex="' + (on ? '0' : '-1') + '"'
+        + (on ? ' class="on"' : '') + '>' + ONGLETS[i][1]
+        + (n && n[0] ? '<span class="nb' + (n[1] ? ' att' : '') + '">' + n[0] + '</span>' : '') + '</button>';
+    }
+    h += '<span class="droite"><button class="mini" id="g-reload"><span class="ic" aria-hidden="true">🔄</span>${T(" Actualiser")}</button></span>';
+    ongEl.innerHTML = h;
+    var bs = ongEl.querySelectorAll('[data-ong]');
+    for (var j = 0; j < bs.length; j++) bs[j].onclick = function(){ choisir(this.getAttribute('data-ong')); };
+    var gr = document.getElementById('g-reload');
+    if (gr) gr.onclick = function(){ CONF = ''; charger(true); };
+  }
+  /* Changer d onglet abandonne un formulaire de réglages entamé : on le DIT
+     (il ne disparaît pas en silence), on ne bloque pas. */
+  function choisir(k){
+    if (k === ONG) return;
+    if (ONG === 'reglages' && SALE) dire('${T("Modifications des réglages abandonnées.")}', 'att');
+    PANIQ = false; SALE = false; CONF = ''; ONG = k;
+    try { localStorage.setItem('sz-gardien-onglet', k); } catch (e) {}
+    dessiner(); corps.scrollTop = 0;
+    var o = document.getElementById('o-' + k); if (o) o.focus();
+  }
+  ongEl.addEventListener('keydown', function(ev){
+    if (ev.key !== 'ArrowRight' && ev.key !== 'ArrowLeft') return;
+    if (!ev.target || !ev.target.getAttribute || !ev.target.getAttribute('data-ong')) return;
+    var i = 0; for (; i < ONGLETS.length; i++) if (ONGLETS[i][0] === ONG) break;
+    i = (i + (ev.key === 'ArrowRight' ? 1 : ONGLETS.length - 1)) % ONGLETS.length;
+    ev.preventDefault(); choisir(ONGLETS[i][0]);
+  });
 
+  function tuilesBord(){
+    var c = ETAT.cfg || {};
+    var nv = (ETAT.verrous || []).length, ne = (ETAT.evenements || []).length, nc = (ETAT.corbeille || []).length;
     var tu = function(lib, val, sous, ton){
       return '<div class="tuile"><div class="lbl">' + lib + '</div><div class="val' + (ton ? ' ' + ton : '') + '">'
         + val + '</div><div class="sub">' + sous + '</div></div>';
     };
-    var h = szTuiles('<div class="tuiles">'
+    return szTuiles('<div class="tuiles tuiles4" id="z-tuiles">'
       + tu('${T("État")}', c.actif === false ? '${T("Éteint")}' : '${T("Actif")}', '${T("le serveur compte les gestes lourds")}', c.actif === false ? 'err' : '')
       + tu('${T("Comptes verrouillés")}', nv, '${T("connexion refusée")}', nv ? 'att' : '')
-      + tu('${T("Fenêtre")}', esc(c.fenetreMin || 10) + ' min', '${T("durée de comptage")}', '')
+      + tu('${T("Gestes comptés")}', ne, '${T("fenêtre de ")}' + esc(c.fenetreMin || 10) + ' min', '')
+      + tu('${T("Corbeille")}', nc, esc(ETAT.corbeilleJours || 30) + '${T(" jours avant effacement")}', '')
       + '</div>');
-    if (c.actif === false) h += '<div class="note">${T("Le gardien est éteint : aucun geste n’est compté, aucun compte ne sera verrouillé, aucune alerte ne partira.")}</div>';
-    h += '<div class="barre"><button class="mini" id="g-reload"><span class="ic">🔄</span>${T(" Actualiser")}</button></div>';
-    h += zonePanique();
-    h += '<div id="z-vivant">' + zoneVerrous() + '<div style="height:.7rem"></div>' + zoneEvenements() + '<div style="height:.7rem"></div>' + zoneCorbeille() + '<div style="height:.7rem"></div>' + zoneJournal() + '</div>';
-    h += zoneReglages();
-    corps.innerHTML = h;
+  }
+  function contenu(){
+    var c = ETAT.cfg || {};
+    if (ONG === 'activite') return zoneEvenements();
+    if (ONG === 'journal') return zoneJournal();
+    if (ONG === 'corbeille') return zoneCorbeille();
+    if (ONG === 'reglages') return zoneReglages();
+    return tuilesBord()
+      + (c.actif === false ? '<div class="note">${T("Le gardien est éteint : aucun geste n’est compté, aucun compte ne sera verrouillé, aucune alerte ne partira.")}</div>' : '')
+      + zoneVerrous() + zonePanique();
+  }
+  function dessinerEtat(){
+    var c = ETAT.cfg || {};
+    var nv = (ETAT.verrous || []).length;
+    sousEl.className = 'etat' + (c.actif === false ? ' err' : (nv ? ' att' : ''));
+    sousT.textContent = c.actif === false ? '${T("gardien ÉTEINT")}'
+      : (nv ? (nv + (nv > 1 ? '${T(" comptes verrouillés")}' : '${T(" compte verrouillé")}')) : '${T("actif · aucun compte verrouillé")}');
+  }
+  function dessiner(){
+    if (ETAT === null) { corps.innerHTML = '<div class="vide charge">${T("Lecture du gardien…")}</div>'; return; }
+    dessinerEtat(); dessinerOnglets();
+    corps.innerHTML = contenu();
     brancher();
   }
-  /* Le rafraîchissement automatique ne touche QUE la partie vivante : un
-     formulaire qu on est en train de remplir ne se réécrit pas sous les doigts. */
+  /* Le rafraîchissement automatique ne touche pas un formulaire qu on est en
+     train de remplir : Réglages modifiés → rien ; case PANIQUE remplie → seuls
+     les tuiles et les verrous du tableau de bord bougent. */
   function redessinerVivant(){
-    var z = document.getElementById('z-vivant');
-    if (!z || (!SALE && !PANIQ)) { dessiner(); return; }
-    z.innerHTML = zoneVerrous() + '<div style="height:.7rem"></div>' + zoneEvenements() + '<div style="height:.7rem"></div>' + zoneCorbeille() + '<div style="height:.7rem"></div>' + zoneJournal();
-    brancherVivant();
+    if (ETAT === null) { dessiner(); return; }
+    dessinerEtat(); dessinerOnglets();
+    if (ONG === 'reglages' && SALE) return;
+    if (ONG === 'bord' && PANIQ) {
+      var zt = document.getElementById('z-tuiles'), zv = document.getElementById('z-verrous');
+      if (zt) zt.outerHTML = tuilesBord();
+      if (zv) zv.outerHTML = zoneVerrous();
+      brancherVivant(); return;
+    }
+    var y = corps.scrollTop;
+    corps.innerHTML = contenu();
+    brancher();
+    corps.scrollTop = y;
   }
 
   function brancherVivant(){
@@ -408,8 +519,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   }
   function brancher(){
     brancherVivant();
-    var gr = document.getElementById('g-reload');
-    if (gr) gr.onclick = function(){ CONF = ''; charger(true); };
     var gp = document.getElementById('g-pan'), gpb = document.getElementById('g-pan-go');
     if (gp && gpb) {
       gp.oninput = function(){ PANIQ = gp.value !== ''; gpb.disabled = gp.value.trim() !== 'PANIQUE'; };

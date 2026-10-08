@@ -6228,7 +6228,7 @@ const actionApp = (nom, arg) => {
     case 'config-marque': case 'config-icones': case 'config-taxes': case 'config-conformite':
     case 'compte-paiement':
     case 'config-paiements': case 'config-cles': case 'studio':
-    case 'config-livraison': case 'config-retours': case 'config-navigation': case 'config-carriers': case 'config-automations': case 'config-telephonie': case 'config-models': case 'config-gabarits': case 'config-logotheque': case 'config-analytics': case 'config-turso': case 'config-homepage': case 'config-launch': case 'pages': case 'securite': case 'reglages-securite': case 'sociaux-config': case 'chat-config': case 'listenoire': case 'profil': case 'journaux': case 'incidents': case 'sauvegarde': {
+    case 'config-livraison': case 'config-retours': case 'config-navigation': case 'config-carriers': case 'config-automations': case 'config-telephonie': case 'config-models': case 'config-gabarits': case 'config-logotheque': case 'config-analytics': case 'config-turso': case 'config-homepage': case 'config-launch': case 'pages': case 'securite': case 'reglages-securite': case 'sociaux-config': case 'chat-config': case 'listenoire': case 'profil': case 'journaux': case 'incidents': case 'sauvegarde': case 'gardien': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);
@@ -6329,17 +6329,9 @@ const actionApp = (nom, arg) => {
       }
       break;
     }
-    /* Le GARDIEN (7.5.0, 2026-10-08) : meme montage que << Verrous >>. */
-    case 'gardien': {
-      const _avG = fenetresNatives.get('gardien');
-      const _reuG = !!(_avG && !_avG.isDestroyed());
-      const winG = ouvrirNative('gardien', TF('Gardien'), () => pageGardien(),
-        { width: 980, height: 760, minWidth: 720, minHeight: 480 });
-      if (_reuG && winG && !winG.isDestroyed()) {
-        winG.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
-      }
-      break;
-    }
+    /* Le GARDIEN : fenetre a part de 7.5.0 a 7.8.x ; ANCRABLE depuis 7.9.0
+       (2026-10-09, sa demande) — il est dans le bloc ancrable plus haut, avec
+       sa section hote << gardien >> cote site. */
     case 'presence': {
       const _avP = fenetresNatives.get('presence');
       const _reuP = !!(_avP && !_avP.isDestroyed());
