@@ -434,6 +434,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       + (ro ? '' : '<button class="prim" id="pt-enr">${T("Enregistrer les réglages")}</button>')
       + '<p class="dt">${T("Les points sont attribués quand la commande passe « livrée », une seule fois. Le solde de chaque client est tenu par le serveur.")}</p>'
       + '</div>';
+    /* DEUX SOUS-ONGLETS (2026-10-07, sa capture : la liste des soldes débordait sous les réglages) :
+       « Soldes des clients » (le geste de tous les jours, ouvert par défaut) et « Réglages ». */
+    var actifPts = !!cf.actif;
+    var sous = function(v, lib){ return '<button type="button" class="' + (PTSV === v ? 'actif' : '') + '" data-pt-vue="' + v + '">' + lib + '</button>'; };
+    var barre = '<div class="amb-sous" id="pt-sous" style="margin-bottom:.7rem">'
+      + sous('soldes', '${T("Soldes des clients")}') + sous('reglages', '${T("Réglages")}')
+      + '<span class="droite"><span class="rf-pill ' + (actifPts ? 'vert' : '') + '">' + (actifPts ? '${T("Programme actif")}' : '${T("Programme inactif")}') + '</span></span></div>';
+    if (PTSV === 'reglages') return barre + h;
+    h = '';
     var tous = ptsListe();
     var avec = tous.filter(function(u){ return u.points > 0; }).length;
     /* Les tuiles se MASQUENT (2026-10-06, sa demande) : le choix reste sur ce poste. */
@@ -458,13 +467,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       + '</div>'
       + '<div id="pt-zone" class="pt-zone"><div id="pt-table" class="liste">' + ptsTable() + '</div>'
       + '<div id="pt-pages" class="pt-pages">' + ptsPages() + '</div></div>';
-    return h + '</div>';
+    return barre + h + '</div>';
   }
   /* ── LES SOLDES : une liste qui tient des centaines de clients ──────────────────────────────
      Tous les clients (pas seulement ceux qui ont des points : on ajuste aussi un solde à zéro),
      filtrés et triés ici, par pages. L ajustement s ouvre SOUS la ligne choisie : une bascule
      Ajouter / Retirer au lieu d un signe à taper, des montants rapides, le nouveau solde annoncé. */
   var PQ = '', PF = 'tous', PTRI = 'pts', PPAGE = 0, PPARPAGE = 25, POUV = '', PSENS = 1;
+  var PTSV = 'soldes'; try { if (localStorage.getItem('fid_pts_vue') === 'reglages') PTSV = 'reglages'; } catch (e) {}
   function ptsListe(){
     var parId = {};
     (PTS.clients || []).forEach(function(u){ parId[u.id] = u.points || 0; });
@@ -577,6 +587,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     });
   }
   function brancherPoints(){
+    var ps = document.getElementById('pt-sous');
+    if (ps) ps.onclick = function(e){
+      var b = e.target.closest ? e.target.closest('[data-pt-vue]') : null; if (!b) return;
+      PTSV = b.getAttribute('data-pt-vue') === 'reglages' ? 'reglages' : 'soldes';
+      try { localStorage.setItem('fid_pts_vue', PTSV); } catch (x) {}
+      dessiner();
+    };
     var bt = document.getElementById('pt-tuiles');
     if (bt) bt.onclick = function(){
       var vues = true; try { vues = localStorage.getItem('fid_pts_tuiles') !== 'non'; localStorage.setItem('fid_pts_tuiles', vues ? 'non' : 'oui'); } catch (e) {}

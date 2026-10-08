@@ -500,4 +500,6 @@ module.exports = {
   'Origine': 'Origin',
   'Automatique': 'Automatic',
   'Date choisie': 'Chosen date',
+  // Sous-onglet de Points (2026-10-07).
+  'Réglages': 'Settings',
 };
