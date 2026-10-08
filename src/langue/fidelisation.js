@@ -493,7 +493,7 @@ module.exports = {
   'Les nouveaux produits passent d’office en accès anticipé': 'New products automatically go into early access',
   'Dès sa mise en vente, un produit est réservé aux paliers qui ont droit à l’accès anticipé, puis il s’ouvre à tous après le délai ci-dessous. La page « Accès anticipé » de la boutique les présente.':
     'As soon as it goes on sale, a product is reserved for the tiers entitled to early access, then opens to everyone after the delay below. The shop’s “Early access” page showcases them.',
-  'Durée de l’accès anticipé (jours)': 'Early-access duration (days)',
+  'Durée de l’accès anticipé (heures)': 'Early-access duration (hours)',
   'Un produit coché « Accès anticipé » dans la fenêtre Produit garde la date que vous lui donnez. Le changement s’applique quand vous enregistrez les paliers.':
     'A product checked “Early access” in the Product window keeps the date you give it. The change applies when you save the tiers.',
   'Aucun produit en accès anticipé pour le moment.': 'No product in early access right now.',

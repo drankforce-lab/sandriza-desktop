@@ -258,12 +258,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h.push('<label class="bascule"><input type="checkbox" id="o-apple"' + (d.applepay ? ' checked' : '')
       + (RO ? ' disabled' : '') + '><span><strong>${T("Apple Pay")}</strong>'
       + '<span class="d">${T("Visible seulement dans Safari, sur un appareil compatible.")}</span></span></label>');
+    /* GOOGLE PAY (2026-10-07, sa demande) : meme jeton Square, a la caisse et en express. */
+    h.push('<label class="bascule"><input type="checkbox" id="o-google"' + (d.googlepay ? ' checked' : '')
+      + (RO ? ' disabled' : '') + '><span><strong>${T("Google Pay")}</strong>'
+      + '<span class="d">${T("Visible dans Chrome et sur Android, avec une carte enregistrée dans un compte Google.")}</span></span></label>');
     h.push('<label class="bascule"><input type="checkbox" id="o-express"' + (d.express ? ' checked' : '')
       + (RO ? ' disabled' : '') + '><span><strong>${T("Paiement express sur la fiche et le panier")}</strong>'
       /* 2026-10-07 : « ne fait rien sur le site » — c est un bouton APPLE PAY, et il ne
          parait que sur iPhone ou iPad (ecran de 1024 px ou moins, Safari, carte dans
          Wallet) et si Apple Pay ci-dessus est active. La phrase le dit desormais. */
-      + '<span class="d">${T("Un bouton Apple Pay sur la fiche produit et le panier. Il ne paraît que sur iPhone ou iPad, dans Safari, avec une carte dans Wallet, et seulement si Apple Pay est activé ci-dessus.")}</span></span></label>');
+      + '<span class="d">${T("Des boutons Apple Pay et Google Pay sur la fiche produit et le panier, pour ceux activés ci-dessus. Apple Pay ne paraît que sur iPhone ou iPad (Safari, carte dans Wallet) ; Google Pay dans Chrome et sur Android.")}</span></span></label>');
     h.push('<div class="gestes"><button class="prim" id="b-options"' + (RO ? ' disabled' : '')
       + '>${T("Enregistrer les modes de paiement")}</button></div>');
     h.push('</div>');
@@ -359,7 +363,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var c = function(id){ var e = document.getElementById(id); return !!(e && e.checked); };
     occuper(true); dire('${T("Enregistrement…")}');
     appeler('config:paiements:options', [{ hebergee: c('o-heb'), afterpay: c('o-after'),
-      applepay: c('o-apple'), express: c('o-express') }]).then(function(r){
+      applepay: c('o-apple'), googlepay: c('o-google'), express: c('o-express') }]).then(function(r){
       occuper(false);
       if (r && r.ok) { D = r; RO = !r.peutModifier; dessiner(); dire('${T("Modes de paiement enregistrés.")}', 'bon'); }
       else dire(expliquer(r), 'err');

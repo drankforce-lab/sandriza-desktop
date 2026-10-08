@@ -167,4 +167,8 @@ module.exports = {
   'Aucun jeton enregistré pour cet environnement': 'No token saved for this environment',
   'Un bouton Apple Pay sur la fiche produit et le panier. Il ne paraît que sur iPhone ou iPad, dans Safari, avec une carte dans Wallet, et seulement si Apple Pay est activé ci-dessus.':
     'An Apple Pay button on the product page and the cart. It only appears on iPhone or iPad, in Safari, with a card in Wallet, and only if Apple Pay is turned on above.',
+  'Google Pay': 'Google Pay',
+  'Visible dans Chrome et sur Android, avec une carte enregistrée dans un compte Google.': 'Shown in Chrome and on Android, with a card saved in a Google account.',
+  'Des boutons Apple Pay et Google Pay sur la fiche produit et le panier, pour ceux activés ci-dessus. Apple Pay ne paraît que sur iPhone ou iPad (Safari, carte dans Wallet) ; Google Pay dans Chrome et sur Android.':
+    'Apple Pay and Google Pay buttons on the product page and the cart, for those turned on above. Apple Pay only appears on iPhone or iPad (Safari, card in Wallet); Google Pay in Chrome and on Android.',
 };
