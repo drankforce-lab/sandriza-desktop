@@ -409,6 +409,8 @@ module.exports = {
   "Le motif est obligatoire.": "The reason is required.",
   "Ce client n’a aucun point à retirer.": "This customer has no points to remove.",
   "Masquer les tuiles": "Hide the tiles",
+  "Affichage compact": "Compact view",
+  "Affichage aéré": "Spacious view",
   "Afficher les tuiles": "Show the tiles",
 
   /* ── LES ONGLETS « PARRAINAGE » ET « PALIERS » (2026-10-07) ───────────────────

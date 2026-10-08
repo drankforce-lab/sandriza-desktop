@@ -86,7 +86,20 @@ html.jour .pt-sens button.on-moins{color:#7a2a24}
 .pt-vite{display:inline-flex;gap:.25rem}
 .pt-apres{font-size:.8rem;color:var(--tx2);white-space:nowrap}
 .pt-apres b{color:var(--tx)}
-.pt-pages{display:flex;gap:.5rem;align-items:center;justify-content:flex-end;margin-top:.55rem;font-size:.78rem;color:var(--tx2)}
+.pt-pages{display:flex;gap:.35rem;align-items:center;justify-content:flex-end;margin-top:.55rem;font-size:.78rem;color:var(--tx2)}
+/* La barre de pages (2026-10-08, sa demande : « cette liste va vite exploser en quantité ») :
+   le compte à gauche, les numéros à droite — premier, voisins, dernier, le reste en « … ». */
+.pt-pages .pt-compte{margin-right:auto}
+.pt-pages button.mini{min-width:2rem;justify-content:center}
+.pt-pages button.mini.actif{background:var(--v16);color:var(--tx);font-weight:700}
+.pt-pages .pt-saut{padding:0 .15rem}
+/* L AFFICHAGE COMPACT (2026-10-08, sa demande : « pour maximiser l espace ») : une ligne par client,
+   le courriel à côté du nom, des cartes serrées — deux fois plus de clients par page. */
+table.pt-soldes.pt-compact{border-spacing:0 2px}
+table.pt-soldes.pt-compact tbody td{padding-top:.22rem;padding-bottom:.22rem}
+table.pt-soldes.pt-compact .pt-nom{display:inline;margin-right:.6rem}
+table.pt-soldes.pt-compact .dt{display:inline}
+table.pt-soldes.pt-compact button.geste{padding-top:.12rem;padding-bottom:.12rem}
 
 :root{color-scheme:dark}
 *{box-sizing:border-box}
@@ -448,7 +461,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     /* Les tuiles se MASQUENT (2026-10-06, sa demande) : le choix reste sur ce poste. */
     var tuilesVues = true; try { tuilesVues = localStorage.getItem('fid_pts_tuiles') !== 'non'; } catch (e) {}
     h += '<div class="carte plein"><div class="pt-tete"><h2>${T("Soldes des clients")}</h2>'
-      + '<button type="button" class="mini" id="pt-tuiles">' + (tuilesVues ? '${T("Masquer les tuiles")}' : '${T("Afficher les tuiles")}') + '</button></div>'
+      + '<span style="display:flex;gap:.4rem"><button type="button" class="mini" id="pt-compact" aria-pressed="' + PCOMPACT + '">' + (PCOMPACT ? '${T("Affichage aéré")}' : '${T("Affichage compact")}') + '</button>'
+      + '<button type="button" class="mini" id="pt-tuiles">' + (tuilesVues ? '${T("Masquer les tuiles")}' : '${T("Afficher les tuiles")}') + '</button></span></div>'
       + '<div class="tuiles" style="margin-bottom:.7rem' + (tuilesVues ? '' : ';display:none') + '">'
       + '<div class="tuile"><div class="lbl">${T("Clients")}</div><div class="val">' + szNombre(tous.length, 0) + '</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Avec des points")}</div><div class="val">' + szNombre(avec, 0) + '</div></div>'
@@ -474,6 +488,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
      filtrés et triés ici, par pages. L ajustement s ouvre SOUS la ligne choisie : une bascule
      Ajouter / Retirer au lieu d un signe à taper, des montants rapides, le nouveau solde annoncé. */
   var PQ = '', PF = 'tous', PTRI = 'pts', PPAGE = 0, PPARPAGE = 25, POUV = '', PSENS = 1;
+  var PCOMPACT = true; try { PCOMPACT = localStorage.getItem('fid_pts_compact') !== 'non'; } catch (e) {}
+  var PMESURER = null;
   var PTSV = 'soldes'; try { if (localStorage.getItem('fid_pts_vue') === 'reglages') PTSV = 'reglages'; } catch (e) {}
   function ptsListe(){
     var parId = {};
@@ -522,12 +538,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     /* ⚠ LES COLONNES SONT TENUES (2026-10-07, sa capture : « affreux et tout déformé ») : sans
        largeur, le tableau répartissait la place libre entre les quatre colonnes — 300 px de vide
        entre Points, Valeur et Ajuster sur une fenêtre large. Le client prend le reste. */
-    var h = '<table class="pt-soldes"><colgroup><col><col class="pt-c-num"><col class="pt-c-num"><col class="pt-c-geste"></colgroup>'
+    var h = '<table class="pt-soldes' + (PCOMPACT ? ' pt-compact' : '') + '"><colgroup><col><col class="pt-c-num"><col class="pt-c-num"><col class="pt-c-geste"></colgroup>'
       + '<thead><tr><th>${T("Client")}</th><th class="num">${T("Points")}</th><th class="num">${T("Valeur")}</th><th></th></tr></thead><tbody>'
       + morceau.map(function(u){
           var ouvert = POUV === u.id;
-          return '<tr' + (ouvert ? ' class="pt-ligne-ouverte"' : '') + '><td><div class="pt-nom">' + esc(u.nom || u.courriel) + '</div>'
-            + (u.nom && u.courriel ? '<div class="dt">' + esc(u.courriel) + '</div>' : '') + '</td>'
+          return '<tr' + (ouvert ? ' class="pt-ligne-ouverte"' : '') + '><td>' + (PCOMPACT ? '<span class="pt-nom">' + esc(u.nom || u.courriel) + '</span>' : '<div class="pt-nom">' + esc(u.nom || u.courriel) + '</div>')
+            + (u.nom && u.courriel ? (PCOMPACT ? '<span class="dt">' + esc(u.courriel) + '</span>' : '<div class="dt">' + esc(u.courriel) + '</div>') : '') + '</td>'
             + '<td class="num' + (u.points > 0 ? '' : ' pt-zero') + '"><b>' + szNombre(u.points, 0) + '</b></td>'
             + '<td class="num pt-valeur">' + szArgent(u.points * vp) + '</td>'
             + '<td class="fin">' + (ro ? '' : '<button type="button" class="mini geste' + (ouvert ? ' actif' : '') + '" data-pt-ouvrir="' + esc(u.id) + '">${T("Ajuster")}</button>') + '</td></tr>'
@@ -548,10 +564,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     var n = ptsFiltres().length, pp = ptsParPage();
     if (!n) return '';
     var pages = Math.max(1, Math.ceil(n / pp)), de = PPAGE * pp;
-    return '<span>' + szNombre(de + 1, 0) + '–' + szNombre(Math.min(n, de + pp), 0) + ' ${T("sur")} ' + szNombre(n, 0) + '</span>'
-      + (pages > 1 ? '<button type="button" class="mini" data-pt-page="-1"' + (PPAGE ? '' : ' disabled') + ' aria-label="${T("Page précédente")}">‹</button>'
-        + '<span>' + (PPAGE + 1) + ' / ' + pages + '</span>'
-        + '<button type="button" class="mini" data-pt-page="1"' + (PPAGE < pages - 1 ? '' : ' disabled') + ' aria-label="${T("Page suivante")}">›</button>' : '');
+    var h = '<span class="pt-compte">' + szNombre(de + 1, 0) + '–' + szNombre(Math.min(n, de + pp), 0) + ' ${T("sur")} ' + szNombre(n, 0) + '</span>';
+    if (pages < 2) return h;
+    var bouton = function(i){ return '<button type="button" class="mini' + (i === PPAGE ? ' actif' : '') + '" data-pt-aller="' + i + '"' + (i === PPAGE ? ' aria-current="page"' : '') + '>' + szNombre(i + 1, 0) + '</button>'; };
+    h += '<button type="button" class="mini" data-pt-page="-1"' + (PPAGE ? '' : ' disabled') + ' aria-label="${T("Page précédente")}">‹</button>';
+    var vus = {}, avant = -1;
+    [0, PPAGE - 1, PPAGE, PPAGE + 1, pages - 1].forEach(function(i){ if (i >= 0 && i < pages) vus[i] = 1; });
+    Object.keys(vus).map(Number).sort(function(a, b){ return a - b; }).forEach(function(i){
+      if (avant >= 0 && i > avant + 1) h += '<span class="pt-saut">…</span>';
+      h += bouton(i); avant = i;
+    });
+    return h + '<button type="button" class="mini" data-pt-page="1"' + (PPAGE < pages - 1 ? '' : ' disabled') + ' aria-label="${T("Page suivante")}">›</button>';
   }
   function ptsRedessinerTable(focus){
     var z = document.getElementById('pt-table'); if (!z) return;
@@ -594,6 +617,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       try { localStorage.setItem('fid_pts_vue', PTSV); } catch (x) {}
       dessiner();
     };
+    var bc = document.getElementById('pt-compact');
+    if (bc) bc.onclick = function(){
+      PCOMPACT = !PCOMPACT; try { localStorage.setItem('fid_pts_compact', PCOMPACT ? 'oui' : 'non'); } catch (e) {}
+      bc.setAttribute('aria-pressed', String(PCOMPACT));
+      bc.textContent = PCOMPACT ? '${T("Affichage aéré")}' : '${T("Affichage compact")}';
+      /* La hauteur d une ligne change : on remesure, sinon la page garderait l ancien compte. */
+      PPAGE = 0; ptsRedessinerTable(); _szAutoDernier = 0; if (PMESURER) PMESURER();
+    };
     var bt = document.getElementById('pt-tuiles');
     if (bt) bt.onclick = function(){
       var vues = true; try { vues = localStorage.getItem('fid_pts_tuiles') !== 'non'; localStorage.setItem('fid_pts_tuiles', vues ? 'non' : 'oui'); } catch (e) {}
@@ -623,6 +654,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
           ptsApres();
         } else if (b.hasAttribute('data-pt-vite')) {
           var en = document.getElementById('pt-n'); if (en) { en.value = b.getAttribute('data-pt-vite'); ptsApres(); }
+        } else if (b.hasAttribute('data-pt-aller')) {
+          PPAGE = Number(b.getAttribute('data-pt-aller')) || 0; POUV = ''; ptsRedessinerTable();
         } else if (b.hasAttribute('data-pt-page')) {
           PPAGE += Number(b.getAttribute('data-pt-page')); POUV = ''; ptsRedessinerTable();
         } else if (b.id === 'pt-ok') { ptsConfirmer(); }
@@ -1628,7 +1661,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       /* Remis à zéro : la mesure d un autre onglet garderait sinon le même compte, et le rappel
          ne serait pas appelé — la liste resterait à 25 lignes, coupée. */
       _szAutoDernier = 0;
-      szAutoPagination('#pt-table', function(n){ if (n !== PPARPAGE) { PPARPAGE = n; PPAGE = 0; ptsRedessinerTable(); } });
+      PMESURER = szAutoPagination('#pt-table', function(n){ if (n !== PPARPAGE) { PPARPAGE = n; PPAGE = 0; ptsRedessinerTable(); } });
     }
   }
 
