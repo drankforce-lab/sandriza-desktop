@@ -2689,7 +2689,7 @@ const OPS_PONT = new Set([
      le total de TOUT le journal sur un onglet qui montre trente lignes. */
   'journal:purger:auto', 'journal:export:auto',
   // Le GARDIEN (7.5.0, 2026-10-08) : super-administrateur, verifie au coeur ET au serveur.
-  'gardien:etat', 'gardien:deverrouiller', 'gardien:regler',
+  'gardien:etat', 'gardien:deverrouiller', 'gardien:regler', 'gardien:panique', 'gardien:restaurer',
   // Recherche inter-journaux (2.69.0, #7 Lot 7c).
   'journal:recherche',
   // SMS dans les journaux (2.72.0, #7 Lot 7b-2). Comptable reutilise liens:journal.
@@ -3315,7 +3315,7 @@ const LIMITES_PONT = {
   'journal:export:acces': 30000, 'journal:export:prints': 30000,
   'journal:purger:auto': 20000, 'journal:export:auto': 30000,
   'journal:recherche': 30000, 'journal:sms': 30000, 'journal:appels': 60000,
-  'gardien:etat': 30000, 'gardien:deverrouiller': 30000, 'gardien:regler': 30000,
+  'gardien:etat': 30000, 'gardien:deverrouiller': 30000, 'gardien:regler': 30000, 'gardien:panique': 45000, 'gardien:restaurer': 30000,
   /* Incidents : registre local pousse vers Turso a l ecriture (syncPrivateList),
      donc l ecriture attend le reseau — plus large que la lecture. */
   'incidents:donnees': 40000, 'incidents:ecrire': 60000, 'incidents:supprimer': 30000,

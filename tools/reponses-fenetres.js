@@ -8555,6 +8555,11 @@ const JEU = {
       /* Le journal INVIOLABLE : une entree du serveur, une d un poste, et un
          RETRAIT du journal d acces — la ligne mise en avant. Une entree sans
          compte (tache planifiee) prend la branche du tiret. */
+      corbeilleJours: 30,
+      corbeille: [
+        { id: 12, quand: 1791460050, source: 'invoices', rec_id: 'inv_88', libelle: 'FAC-2026-0412', user_id: 'stf_0002', nom: 'Martin Dubé', courriel: 'martin@sandriza.com' },
+        { id: 11, quand: 1791459950, source: 'cfg:giftcards', rec_id: 'gc_3', libelle: '', user_id: '', nom: '', courriel: '' }
+      ],
       journal: [
         { ts: 1791460100, user_id: 'stf_0002', type: 'securite', action: 'ENTRÉE RETIRÉE du journal d’accès (log_1) : Connexion', section: 'securite', ip: '203.0.113.7', src: 'retrait', nom: 'Martin Dubé', courriel: 'martin@sandriza.com' },
         { ts: 1791460000, user_id: 'stf_0001', type: 'login', action: 'Connexion réussie', section: null, ip: '198.51.100.4', src: 'poste', nom: 'Brigitte Brousseau', courriel: '' },
@@ -8563,7 +8568,7 @@ const JEU = {
     return [
       { nom: 'un compte verrouille', id: '', reponses: { identite: IDENTITE, 'gardien:etat': etat,
         'gardien:deverrouiller': { ok: true, cfg: cfg, verrous: [], evenements: [] },
-        'gardien:regler': etat } },
+        'gardien:regler': etat, 'gardien:panique': etat } },
       { nom: 'gardien eteint, rien a montrer', id: '', reponses: { identite: IDENTITE,
         'gardien:etat': { ok: true, cfg: Object.assign({}, cfg, { actif: false }), verrous: [], evenements: [] } } },
       { nom: 'refus (pas super-admin)', id: '', reponses: { identite: IDENTITE, 'gardien:etat': { ok: false, motif: 'droit' } } }

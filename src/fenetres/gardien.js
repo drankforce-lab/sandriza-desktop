@@ -118,6 +118,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   var ETAT = null;      // null = pas encore lu ; sinon { cfg, verrous, evenements }
   var CONF = '';        // confirmation deux clics : '' | 'regler' | user_id
   var SALE = false;     // le formulaire des réglages a été touché : on ne le redessine pas
+  var PANIQ = false;    // un mot est tapé dans la case du bouton panique : on ne l efface pas
   var OCC = false;
   var TIMER = null;
   var CATS = ['finances', 'inventaire', 'clients', 'photos', 'donnees', 'export'];
@@ -131,7 +132,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   };
   var COURTS = {
     finances: '${T("Finances")}', inventaire: '${T("Inventaire")}', clients: '${T("Clients")}',
-    photos: '${T("Photos")}', donnees: '${T("Configuration")}', export: '${T("Lectures complètes")}'
+    photos: '${T("Photos")}', donnees: '${T("Configuration")}', export: '${T("Lectures complètes")}',
+    panique: '${T("Bouton panique")}'
   };
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
@@ -179,6 +181,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var v = ETAT.verrous || [];
     var h = '<div class="carte"><h3>${T("Comptes verrouillés (")}' + v.length + ')</h3>';
     if (!v.length) return h + '<div class="vide">${T("Aucun compte verrouillé.")}</div></div>';
+    /* Tous d un coup : l issue normale après le bouton panique (le même
+       geste armé en deux clics, la clé « * » est comprise par le serveur). */
+    if (v.length > 1) h += '<div class="barre" style="margin:0 0 .5rem"><button class="mini dgr" data-dev="*">'
+      + (CONF === '*' ? '${T("✓ Confirmer — tout rouvrir")}' : '<span class="ic" aria-hidden="true">🔓</span>${T(" Tout déverrouiller (")}' + v.length + ')')
+      + '</button></div>';
     h += '<table><thead><tr><th>${T("Compte")}</th><th>${T("Depuis")}</th><th>${T("Motif")}</th><th></th></tr></thead><tbody>';
     for (var i = 0; i < v.length; i++) {
       var l = v[i];
@@ -244,6 +251,51 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + '<td class="mono">' + esc(l.ip || '') + '</td></tr>';
     }
     return h + '</tbody></table></div>';
+  }
+
+  /* ── LA CORBEILLE DU SERVEUR (palier 3) ───────────────────────────────
+     Toute fiche supprimée (commande, facture, produit, client…) et toute
+     entrée retirée d une liste qui vaut quelque chose y dort 30 jours. Le
+     serveur refuse de restaurer par-dessus une fiche qui existe de nouveau. */
+  var SRC = {
+    orders: '${T("Commande")}', invoices: '${T("Facture")}', refunds: '${T("Remboursement")}',
+    store_credits: '${T("Crédit en magasin")}', products: '${T("Produit")}', users: '${T("Client")}'
+  };
+  function nomSource(s){
+    s = String(s || '');
+    if (SRC[s]) return SRC[s];
+    if (s.indexOf('cfg:') === 0) return '${T("Liste : ")}' + esc(s.slice(4));
+    return esc(s);
+  }
+  function zoneCorbeille(){
+    var c = ETAT.corbeille || [];
+    var h = '<div class="carte"><h3>${T("Corbeille du serveur (")}' + c.length + ')</h3>'
+      + '<div class="sub" style="margin:0 0 .5rem">${T("Ce qui a été supprimé dort ici pendant ")}' + esc(ETAT.corbeilleJours || 30)
+      + '${T(" jours avant d’être effacé pour de bon. Restaurer remet la fiche telle qu’elle était au moment de la suppression.")}</div>';
+    if (!c.length) return h + '<div class="vide">${T("La corbeille est vide.")}</div></div>';
+    h += '<table><thead><tr><th>${T("Supprimé le")}</th><th>${T("Quoi")}</th><th>${T("Par")}</th><th></th></tr></thead><tbody>';
+    for (var i = 0; i < c.length; i++) {
+      var l = c[i], cle = 'r' + l.id;
+      h += '<tr><td style="white-space:nowrap">' + esc(fdate(l.quand)) + '</td>'
+        + '<td><div class="rf-nom">' + (l.libelle ? esc(l.libelle) : '<em class="mut">${T("sans libellé")}</em>') + '</div>'
+        + '<div class="sub">' + nomSource(l.source) + ' · <span class="mono">' + esc(l.rec_id || '') + '</span></div></td>'
+        + '<td>' + (l.user_id ? qui(l) : '<span class="mut">—</span>') + '</td>'
+        + '<td style="text-align:right"><button class="mini" data-rest="' + esc(l.id) + '">'
+        + (CONF === cle ? '${T("✓ Confirmer")}' : '<span class="ic" aria-hidden="true">↩</span>${T(" Restaurer")}') + '</button></td></tr>';
+    }
+    return h + '</tbody></table></div>';
+  }
+
+  /* ── LE BOUTON PANIQUE (palier 3) ──────────────────────────────────────
+     En haut de la fenêtre : en cas d intrusion, on ne cherche pas. Armé par
+     le mot PANIQUE tapé en toutes lettres (le serveur l exige aussi) — un
+     clic égaré mettrait toute l équipe dehors. */
+  function zonePanique(){
+    return '<div class="carte" id="z-pan" style="border-color:rgba(239,68,68,.45)"><h3>${T("Bouton panique")}</h3>'
+      + '<div class="sub" style="margin:0 0 .5rem">${T("En cas d’intrusion : toutes les sessions du personnel sont fermées, sauf celle-ci, et tous les autres comptes sont verrouillés. Personne ne peut se reconnecter tant que vous ne rouvrez pas les comptes ici. Une alerte part par texto et par courriel.")}</div>'
+      + '<div class="barre" style="align-items:flex-end"><div class="champ" style="max-width:17rem">'
+      + '<label for="g-pan">${T("Tapez PANIQUE pour armer le bouton")}</label><input id="g-pan" autocomplete="off" spellcheck="false"></div>'
+      + '<button class="dgr" id="g-pan-go" disabled>${T("Activer le bouton panique")}</button></div></div>';
   }
 
   /* ── LES RÉGLAGES ────────────────────────────────────────────────────── */
@@ -320,7 +372,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '</div>');
     if (c.actif === false) h += '<div class="note">${T("Le gardien est éteint : aucun geste n’est compté, aucun compte ne sera verrouillé, aucune alerte ne partira.")}</div>';
     h += '<div class="barre"><button class="mini" id="g-reload"><span class="ic">🔄</span>${T(" Actualiser")}</button></div>';
-    h += '<div id="z-vivant">' + zoneVerrous() + '<div style="height:.7rem"></div>' + zoneEvenements() + '<div style="height:.7rem"></div>' + zoneJournal() + '</div>';
+    h += zonePanique();
+    h += '<div id="z-vivant">' + zoneVerrous() + '<div style="height:.7rem"></div>' + zoneEvenements() + '<div style="height:.7rem"></div>' + zoneCorbeille() + '<div style="height:.7rem"></div>' + zoneJournal() + '</div>';
     h += zoneReglages();
     corps.innerHTML = h;
     brancher();
@@ -329,18 +382,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
      formulaire qu on est en train de remplir ne se réécrit pas sous les doigts. */
   function redessinerVivant(){
     var z = document.getElementById('z-vivant');
-    if (!z || !SALE) { dessiner(); return; }
-    z.innerHTML = zoneVerrous() + '<div style="height:.7rem"></div>' + zoneEvenements() + '<div style="height:.7rem"></div>' + zoneJournal();
+    if (!z || (!SALE && !PANIQ)) { dessiner(); return; }
+    z.innerHTML = zoneVerrous() + '<div style="height:.7rem"></div>' + zoneEvenements() + '<div style="height:.7rem"></div>' + zoneCorbeille() + '<div style="height:.7rem"></div>' + zoneJournal();
     brancherVivant();
   }
 
   function brancherVivant(){
+    var rs = corps.querySelectorAll('[data-rest]');
+    for (var q = 0; q < rs.length; q++) {
+      rs[q].onclick = function(){
+        var id = this.getAttribute('data-rest');
+        if (CONF === 'r' + id) { CONF = ''; restaurer(id); }
+        else { CONF = 'r' + id; redessinerVivant(); dire('${T("Cliquez encore pour restaurer cette fiche.")}', 'att'); }
+      };
+    }
     var us = corps.querySelectorAll('[data-dev]');
     for (var u = 0; u < us.length; u++) {
       us[u].onclick = function(){
         var id = this.getAttribute('data-dev');
         if (CONF === id) { CONF = ''; deverrouiller(id); }
-        else { CONF = id; redessinerVivant(); dire('${T("Cliquez encore pour rouvrir ce compte.")}', 'att'); }
+        else { CONF = id; redessinerVivant(); dire(id === '*' ? '${T("Cliquez encore pour rouvrir tous les comptes.")}' : '${T("Cliquez encore pour rouvrir ce compte.")}', 'att'); }
       };
     }
   }
@@ -348,6 +409,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     brancherVivant();
     var gr = document.getElementById('g-reload');
     if (gr) gr.onclick = function(){ CONF = ''; charger(true); };
+    var gp = document.getElementById('g-pan'), gpb = document.getElementById('g-pan-go');
+    if (gp && gpb) {
+      gp.oninput = function(){ PANIQ = gp.value !== ''; gpb.disabled = gp.value.trim() !== 'PANIQUE'; };
+      gpb.onclick = function(){ if (gp.value.trim() === 'PANIQUE') panique(); };
+    }
     var zc = document.getElementById('z-cfg');
     if (zc) zc.addEventListener('input', function(){
       if (!SALE) { SALE = true; var b = document.getElementById('g-save'); if (b && b.parentNode && !document.getElementById('g-annuler')) {
@@ -374,9 +440,37 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     appeler('gardien:deverrouiller', [id]).then(function(r){
       OCC = false;
       if (!r.ok) { dire(expliquer(r), 'err'); redessinerVivant(); return; }
-      ETAT = { cfg: SALE ? ETAT.cfg : r.cfg, verrous: r.verrous || [], evenements: r.evenements || [], journal: r.journal || [] };
+      ETAT = { cfg: SALE ? ETAT.cfg : r.cfg, verrous: r.verrous || [], evenements: r.evenements || [], journal: r.journal || [], corbeille: r.corbeille || [], corbeilleJours: r.corbeilleJours };
       redessinerVivant();
-      dire('${T("Compte rouvert : il peut se connecter de nouveau.")}', 'bon');
+      dire(id === '*' ? '${T("Tous les comptes sont rouverts.")}' : '${T("Compte rouvert : il peut se connecter de nouveau.")}', 'bon');
+    });
+  }
+  var REFUS_REST = {
+    existe_deja: '${T("Une fiche porte de nouveau cet identifiant : la restaurer l’écraserait. Rien n’a été changé.")}',
+    introuvable: '${T("Cette entrée n’est plus dans la corbeille.")}'
+  };
+  function restaurer(id){
+    if (OCC) return; OCC = true; dire('${T("Restauration…")}');
+    appeler('gardien:restaurer', [id]).then(function(r){
+      OCC = false;
+      if (!r.ok) {
+        var d = String((r && r.detail) || '');
+        dire(REFUS_REST[d] || (d.indexOf('existe_deja') >= 0 ? REFUS_REST.existe_deja : expliquer(r)), 'err');
+        redessinerVivant(); return;
+      }
+      ETAT = { cfg: SALE ? ETAT.cfg : r.cfg, verrous: r.verrous || [], evenements: r.evenements || [], journal: r.journal || [], corbeille: r.corbeille || [], corbeilleJours: r.corbeilleJours };
+      redessinerVivant();
+      dire('${T("Restauré. Rechargez l’écran concerné pour le revoir.")}', 'bon');
+    });
+  }
+  function panique(){
+    if (OCC) return; OCC = true; dire('${T("Bouton panique : fermeture des sessions…")}', 'att');
+    appeler('gardien:panique', ['PANIQUE']).then(function(r){
+      OCC = false;
+      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      ETAT = { cfg: SALE ? ETAT.cfg : r.cfg, verrous: r.verrous || [], evenements: r.evenements || [], journal: r.journal || [], corbeille: r.corbeille || [], corbeilleJours: r.corbeilleJours };
+      PANIQ = false; CONF = ''; dessiner();
+      dire('${T("Fait : les autres sessions sont fermées et les comptes verrouillés. Changez les mots de passe avant de rouvrir.")}', 'bon');
     });
   }
   function regler(cfg){
@@ -384,7 +478,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     appeler('gardien:regler', [cfg]).then(function(r){
       OCC = false;
       if (!r.ok) { dire(expliquer(r), 'err'); dessinerBouton(); return; }
-      ETAT = { cfg: r.cfg, verrous: r.verrous || [], evenements: r.evenements || [], journal: r.journal || [] };
+      ETAT = { cfg: r.cfg, verrous: r.verrous || [], evenements: r.evenements || [], journal: r.journal || [], corbeille: r.corbeille || [], corbeilleJours: r.corbeilleJours };
       SALE = false; dessiner();
       dire('${T("Réglages enregistrés — l’alerte de changement est partie.")}', 'bon');
     });
@@ -400,7 +494,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         return;
       }
       var premier = ETAT === null;
-      ETAT = { cfg: (SALE && ETAT) ? ETAT.cfg : r.cfg, verrous: r.verrous || [], evenements: r.evenements || [], journal: r.journal || [] };
+      ETAT = { cfg: (SALE && ETAT) ? ETAT.cfg : r.cfg, verrous: r.verrous || [], evenements: r.evenements || [], journal: r.journal || [], corbeille: r.corbeille || [], corbeilleJours: r.corbeilleJours };
       if (premier || (fort && !SALE)) dessiner(); else redessinerVivant();
       if (fort) dire('');
     });

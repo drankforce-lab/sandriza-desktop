@@ -101,6 +101,40 @@ module.exports = {
   'Entrée retirée': 'Entry removed',
   'Journal remplacé': 'Log replaced',
 
+  /* ── LA CORBEILLE DU SERVEUR ────────────────────────────────────────────── */
+  'Commande': 'Order', 'Facture': 'Invoice', 'Remboursement': 'Refund', 'Crédit en magasin': 'Store credit',
+  'Produit': 'Product', 'Client': 'Customer', 'Liste : ': 'List: ',
+  'Corbeille du serveur (': 'Server trash (',
+  'Ce qui a été supprimé dort ici pendant ': 'What was deleted stays here for ',
+  ' jours avant d’être effacé pour de bon. Restaurer remet la fiche telle qu’elle était au moment de la suppression.':
+    ' days before being erased for good. Restoring puts the record back as it was when it was deleted.',
+  'La corbeille est vide.': 'The trash is empty.',
+  'Supprimé le': 'Deleted on', 'Quoi': 'What', 'Par': 'By',
+  'sans libellé': 'no label',
+  ' Restaurer': ' Restore',
+  'Cliquez encore pour restaurer cette fiche.': 'Click again to restore this record.',
+  'Une fiche porte de nouveau cet identifiant : la restaurer l’écraserait. Rien n’a été changé.':
+    'A record carries this identifier again: restoring would overwrite it. Nothing was changed.',
+  'Cette entrée n’est plus dans la corbeille.': 'This entry is no longer in the trash.',
+  'Restauration…': 'Restoring…',
+  'Restauré. Rechargez l’écran concerné pour le revoir.': 'Restored. Reload the related screen to see it again.',
+
+  /* ── LE BOUTON PANIQUE ──────────────────────────────────────────────────── */
+  /* ⚠ « PANIQUE » reste en français dans la phrase anglaise : c est le mot que
+     le serveur exige, et l écran doit dire exactement ce qu il faut taper. */
+  'Bouton panique': 'Panic button',
+  'En cas d’intrusion : toutes les sessions du personnel sont fermées, sauf celle-ci, et tous les autres comptes sont verrouillés. Personne ne peut se reconnecter tant que vous ne rouvrez pas les comptes ici. Une alerte part par texto et par courriel.':
+    'In case of intrusion: closes every staff session except this one and locks every other account. Nobody can sign in again until you reopen the accounts here. An alert is sent by text and email.',
+  'Tapez PANIQUE pour armer le bouton': 'Type PANIQUE to arm the button',
+  'Activer le bouton panique': 'Press the panic button',
+  'Bouton panique : fermeture des sessions…': 'Panic button: closing sessions…',
+  'Fait : les autres sessions sont fermées et les comptes verrouillés. Changez les mots de passe avant de rouvrir.':
+    'Done: the other sessions are closed and the accounts locked. Change the passwords before reopening.',
+  '✓ Confirmer — tout rouvrir': '✓ Confirm — reopen all',
+  ' Tout déverrouiller (': ' Unlock all (',
+  'Cliquez encore pour rouvrir tous les comptes.': 'Click again to reopen every account.',
+  'Tous les comptes sont rouverts.': 'Every account is reopened.',
+
   /* ── LES CATÉGORIES ─────────────────────────────────────────────────────── */
   'Finances (factures, remboursements, crédits)': 'Finances (invoices, refunds, credits)',
   'Inventaire (produits, stock mis à zéro)': 'Inventory (products, stock set to zero)',
