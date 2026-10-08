@@ -8558,7 +8558,8 @@ const JEU = {
       corbeilleJours: 30,
       corbeille: [
         { id: 12, quand: 1791460050, source: 'invoices', rec_id: 'inv_88', libelle: 'FAC-2026-0412', user_id: 'stf_0002', nom: 'Martin Dubé', courriel: 'martin@sandriza.com' },
-        { id: 11, quand: 1791459950, source: 'cfg:giftcards', rec_id: 'gc_3', libelle: '', user_id: '', nom: '', courriel: '' }
+        { id: 11, quand: 1791459950, source: 'cfg:giftcards', rec_id: 'gc_3', libelle: '', user_id: '', nom: '', courriel: '' },
+        { id: 10, quand: 1791459900, source: 'r2', rec_id: 'phototheque/2026/20261008_101500_a1b2c3d4e5.jpg', libelle: '20261008_101500_a1b2c3d4e5.jpg', user_id: 'stf_0002', nom: 'Martin Dubé', courriel: 'martin@sandriza.com' }
       ],
       journal: [
         { ts: 1791460100, user_id: 'stf_0002', type: 'securite', action: 'ENTRÉE RETIRÉE du journal d’accès (log_1) : Connexion', section: 'securite', ip: '203.0.113.7', src: 'retrait', nom: 'Martin Dubé', courriel: 'martin@sandriza.com' },

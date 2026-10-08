@@ -106,8 +106,15 @@ module.exports = {
   'Produit': 'Product', 'Client': 'Customer', 'Liste : ': 'List: ',
   'Corbeille du serveur (': 'Server trash (',
   'Ce qui a été supprimé dort ici pendant ': 'What was deleted stays here for ',
-  ' jours avant d’être effacé pour de bon. Restaurer remet la fiche telle qu’elle était au moment de la suppression.':
-    ' days before being erased for good. Restoring puts the record back as it was when it was deleted.',
+  ' jours avant d’être effacé pour de bon. Restaurer remet la fiche telle qu’elle était au moment de la suppression, ou le fichier à son adresse d’origine.':
+    ' days before being erased for good. Restoring puts the record back as it was when it was deleted, or the file back at its original address.',
+  'Fichier (photo, reçu…)': 'File (photo, receipt…)',
+  'La copie de ce fichier n’existe plus dans le stockage : il ne peut pas être remis.':
+    'The copy of this file no longer exists in storage: it cannot be put back.',
+  'Le stockage a refusé de remettre le fichier. Réessayez dans un moment.':
+    'Storage refused to put the file back. Try again in a moment.',
+  'Le stockage des fichiers n’est pas configuré sur ce serveur.':
+    'File storage is not configured on this server.',
   'La corbeille est vide.': 'The trash is empty.',
   'Supprimé le': 'Deleted on', 'Quoi': 'What', 'Par': 'By',
   'sans libellé': 'no label',

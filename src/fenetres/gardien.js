@@ -259,7 +259,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
      serveur refuse de restaurer par-dessus une fiche qui existe de nouveau. */
   var SRC = {
     orders: '${T("Commande")}', invoices: '${T("Facture")}', refunds: '${T("Remboursement")}',
-    store_credits: '${T("Crédit en magasin")}', products: '${T("Produit")}', users: '${T("Client")}'
+    store_credits: '${T("Crédit en magasin")}', products: '${T("Produit")}', users: '${T("Client")}',
+    r2: '${T("Fichier (photo, reçu…)")}'
   };
   function nomSource(s){
     s = String(s || '');
@@ -271,7 +272,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var c = ETAT.corbeille || [];
     var h = '<div class="carte"><h3>${T("Corbeille du serveur (")}' + c.length + ')</h3>'
       + '<div class="sub" style="margin:0 0 .5rem">${T("Ce qui a été supprimé dort ici pendant ")}' + esc(ETAT.corbeilleJours || 30)
-      + '${T(" jours avant d’être effacé pour de bon. Restaurer remet la fiche telle qu’elle était au moment de la suppression.")}</div>';
+      + '${T(" jours avant d’être effacé pour de bon. Restaurer remet la fiche telle qu’elle était au moment de la suppression, ou le fichier à son adresse d’origine.")}</div>';
     if (!c.length) return h + '<div class="vide">${T("La corbeille est vide.")}</div></div>';
     h += '<table><thead><tr><th>${T("Supprimé le")}</th><th>${T("Quoi")}</th><th>${T("Par")}</th><th></th></tr></thead><tbody>';
     for (var i = 0; i < c.length; i++) {
@@ -447,7 +448,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   }
   var REFUS_REST = {
     existe_deja: '${T("Une fiche porte de nouveau cet identifiant : la restaurer l’écraserait. Rien n’a été changé.")}',
-    introuvable: '${T("Cette entrée n’est plus dans la corbeille.")}'
+    introuvable: '${T("Cette entrée n’est plus dans la corbeille.")}',
+    copie_disparue: '${T("La copie de ce fichier n’existe plus dans le stockage : il ne peut pas être remis.")}',
+    stockage_refuse: '${T("Le stockage a refusé de remettre le fichier. Réessayez dans un moment.")}',
+    stockage_non_configure: '${T("Le stockage des fichiers n’est pas configuré sur ce serveur.")}'
   };
   function restaurer(id){
     if (OCC) return; OCC = true; dire('${T("Restauration…")}');
