@@ -263,7 +263,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          150 € d articles et moins ; au-delà, DAP par Postes Canada. Sans numéro, la case ne fait rien. */
       + '<div class="grille" style="margin-top:.7rem">'
       + '<label class="ch" style="display:flex;gap:.5rem;align-items:flex-start"><input type="checkbox" id="i-actif"' + (io.actif ? ' checked' : '') + (RO ? ' disabled' : '') + '>'
-      + '<span><b>${T("Percevoir la TVA de l’Union à la caisse (IOSS)")}</b><br><span class="sous">${T("Commandes de 150 € d’articles et moins : la TVA du pays est ajoutée au total. Au-delà, la commande part en DAP par Postes Canada et la cliente paie à l’arrivée. Sans numéro IOSS, rien ne s’applique.")}</span></span></label>'
+      + '<span><b>${T("Percevoir la TVA de l’Union à la caisse (IOSS)")}</b><br><span class="sous">${T("Commandes de 150 € d’articles et moins : la TVA du pays est ajoutée au total. Au-delà, la commande part en DAP par Postes Canada et le client paie à l’arrivée. Sans numéro IOSS, rien ne s’applique.")}</span></span></label>'
       + '<div class="ch"><label for="i-taux">${T("Taux de change : 1 $ CA = … €")}</label><input id="i-taux" type="number" min="0.1" max="2" step="0.001" value="' + esc(io.tauxEUR != null ? io.tauxEUR : 0.66) + '"' + (RO ? ' disabled' : '') + '></div>'
       + '</div></div>';
   }
