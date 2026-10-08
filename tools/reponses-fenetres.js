@@ -8551,6 +8551,14 @@ const JEU = {
       evenements: [
         { ts: 1791460000, user_id: 'stf_0002', cat: 'finances', n: 1, detail: 'remove invoices INV-1042', ip: '203.0.113.7', nom: 'Martin Dubé', courriel: 'martin@sandriza.com' },
         { ts: 1791459000, user_id: 'stf_9999', cat: 'donnees', n: 12, detail: 'config_list_remove coupons', ip: '', nom: '', courriel: '' }
+      ],
+      /* Le journal INVIOLABLE : une entree du serveur, une d un poste, et un
+         RETRAIT du journal d acces — la ligne mise en avant. Une entree sans
+         compte (tache planifiee) prend la branche du tiret. */
+      journal: [
+        { ts: 1791460100, user_id: 'stf_0002', type: 'securite', action: 'ENTRÉE RETIRÉE du journal d’accès (log_1) : Connexion', section: 'securite', ip: '203.0.113.7', src: 'retrait', nom: 'Martin Dubé', courriel: 'martin@sandriza.com' },
+        { ts: 1791460000, user_id: 'stf_0001', type: 'login', action: 'Connexion réussie', section: null, ip: '198.51.100.4', src: 'poste', nom: 'Brigitte Brousseau', courriel: '' },
+        { ts: 1791459900, user_id: '', type: 'securite', action: 'Tentative de tout effacer (clear_all) — refusée', section: 'securite', ip: '', src: 'serveur', nom: '', courriel: '' }
       ] };
     return [
       { nom: 'un compte verrouille', id: '', reponses: { identite: IDENTITE, 'gardien:etat': etat,

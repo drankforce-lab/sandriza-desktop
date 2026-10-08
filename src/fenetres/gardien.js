@@ -215,6 +215,37 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     return h + '</tbody></table></div>';
   }
 
+  /* ── LE JOURNAL INVIOLABLE (palier 3) ─────────────────────────────────
+     Écrit par le serveur seul, jamais réécrit. Les lignes qui disent qu on a
+     TOUCHÉ au journal d accès (entrée réécrite, retirée, journal remplacé en
+     bloc) sont mises en avant : c est exactement ce qu un intrus ferait. */
+  var SOURCES = {
+    serveur: '${T("Serveur")}', poste: '${T("Poste")}',
+    reecrit: '${T("Entrée réécrite")}', retrait: '${T("Entrée retirée")}', bloc: '${T("Journal remplacé")}'
+  };
+  function zoneJournal(){
+    var j = ETAT.journal || [];
+    var touches = j.filter(function(l){ return l.src === 'reecrit' || l.src === 'retrait' || l.src === 'bloc'; }).length;
+    var h = '<div class="carte"><h3>${T("Journal inviolable (")}' + j.length + ')</h3>'
+      + '<div class="sub" style="margin:0 0 .5rem">${T("Les 100 dernières entrées. Écrit par le serveur seul : aucune session, même super-administrateur, ne peut le modifier ni le vider. Une entrée du journal d’accès réécrite ou retirée y laisse une trace.")}</div>';
+    if (touches) h += '<div class="note" style="margin:0 0 .5rem;color:var(--tx-att)">' + touches
+      + (touches > 1 ? '${T(" modifications du journal d’accès dans ces entrées — vérifiez qui les a faites.")}'
+                     : '${T(" modification du journal d’accès dans ces entrées — vérifiez qui l’a faite.")}') + '</div>';
+    if (!j.length) return h + '<div class="vide">${T("Aucune entrée pour l’instant.")}</div></div>';
+    h += '<table><thead><tr><th>${T("Quand")}</th><th>${T("Compte")}</th><th>${T("Action")}</th><th>${T("Origine")}</th><th>${T("Adresse IP")}</th></tr></thead><tbody>';
+    for (var i = 0; i < j.length; i++) {
+      var l = j[i];
+      var vif = l.src === 'reecrit' || l.src === 'retrait' || l.src === 'bloc';
+      h += '<tr><td style="white-space:nowrap">' + esc(fdate(l.ts)) + '</td>'
+        + '<td>' + (l.user_id ? qui(l) : '<span class="mut">—</span>') + '</td>'
+        + '<td>' + esc(String(l.action || '').slice(0, 220))
+        + (l.section ? '<div class="sub">' + esc(l.section) + '</div>' : '') + '</td>'
+        + '<td style="white-space:nowrap' + (vif ? ';color:var(--tx-att);font-weight:700' : '') + '">' + (vif ? '<span class="ic" aria-hidden="true">⚠</span> ' : '') + esc(SOURCES[l.src] || l.src || '') + '</td>'
+        + '<td class="mono">' + esc(l.ip || '') + '</td></tr>';
+    }
+    return h + '</tbody></table></div>';
+  }
+
   /* ── LES RÉGLAGES ────────────────────────────────────────────────────── */
   function zoneReglages(){
     var c = ETAT.cfg || {};
@@ -289,7 +320,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '</div>');
     if (c.actif === false) h += '<div class="note">${T("Le gardien est éteint : aucun geste n’est compté, aucun compte ne sera verrouillé, aucune alerte ne partira.")}</div>';
     h += '<div class="barre"><button class="mini" id="g-reload"><span class="ic">🔄</span>${T(" Actualiser")}</button></div>';
-    h += '<div id="z-vivant">' + zoneVerrous() + '<div style="height:.7rem"></div>' + zoneEvenements() + '</div>';
+    h += '<div id="z-vivant">' + zoneVerrous() + '<div style="height:.7rem"></div>' + zoneEvenements() + '<div style="height:.7rem"></div>' + zoneJournal() + '</div>';
     h += zoneReglages();
     corps.innerHTML = h;
     brancher();
@@ -299,7 +330,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   function redessinerVivant(){
     var z = document.getElementById('z-vivant');
     if (!z || !SALE) { dessiner(); return; }
-    z.innerHTML = zoneVerrous() + '<div style="height:.7rem"></div>' + zoneEvenements();
+    z.innerHTML = zoneVerrous() + '<div style="height:.7rem"></div>' + zoneEvenements() + '<div style="height:.7rem"></div>' + zoneJournal();
     brancherVivant();
   }
 
@@ -343,7 +374,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     appeler('gardien:deverrouiller', [id]).then(function(r){
       OCC = false;
       if (!r.ok) { dire(expliquer(r), 'err'); redessinerVivant(); return; }
-      ETAT = { cfg: SALE ? ETAT.cfg : r.cfg, verrous: r.verrous || [], evenements: r.evenements || [] };
+      ETAT = { cfg: SALE ? ETAT.cfg : r.cfg, verrous: r.verrous || [], evenements: r.evenements || [], journal: r.journal || [] };
       redessinerVivant();
       dire('${T("Compte rouvert : il peut se connecter de nouveau.")}', 'bon');
     });
@@ -353,7 +384,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     appeler('gardien:regler', [cfg]).then(function(r){
       OCC = false;
       if (!r.ok) { dire(expliquer(r), 'err'); dessinerBouton(); return; }
-      ETAT = { cfg: r.cfg, verrous: r.verrous || [], evenements: r.evenements || [] };
+      ETAT = { cfg: r.cfg, verrous: r.verrous || [], evenements: r.evenements || [], journal: r.journal || [] };
       SALE = false; dessiner();
       dire('${T("Réglages enregistrés — l’alerte de changement est partie.")}', 'bon');
     });
@@ -369,7 +400,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         return;
       }
       var premier = ETAT === null;
-      ETAT = { cfg: (SALE && ETAT) ? ETAT.cfg : r.cfg, verrous: r.verrous || [], evenements: r.evenements || [] };
+      ETAT = { cfg: (SALE && ETAT) ? ETAT.cfg : r.cfg, verrous: r.verrous || [], evenements: r.evenements || [], journal: r.journal || [] };
       if (premier || (fort && !SALE)) dessiner(); else redessinerVivant();
       if (fort) dire('');
     });

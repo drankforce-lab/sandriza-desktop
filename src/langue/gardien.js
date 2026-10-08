@@ -84,6 +84,23 @@ module.exports = {
   'Détail': 'Detail',
   'Adresse IP': 'IP address',
 
+  /* ── LE JOURNAL INVIOLABLE ──────────────────────────────────────────────── */
+  'Journal inviolable (': 'Tamper-proof log (',
+  'Les 100 dernières entrées. Écrit par le serveur seul : aucune session, même super-administrateur, ne peut le modifier ni le vider. Une entrée du journal d’accès réécrite ou retirée y laisse une trace.':
+    'The 100 latest entries. Written by the server alone: no session, not even a super-administrator, can change or empty it. An access-log entry that is rewritten or removed leaves a trace here.',
+  ' modification du journal d’accès dans ces entrées — vérifiez qui l’a faite.':
+    ' change to the access log in these entries — check who made it.',
+  ' modifications du journal d’accès dans ces entrées — vérifiez qui les a faites.':
+    ' changes to the access log in these entries — check who made them.',
+  'Aucune entrée pour l’instant.': 'No entry yet.',
+  'Action': 'Action',
+  'Origine': 'Origin',
+  'Serveur': 'Server',
+  'Poste': 'Workstation',
+  'Entrée réécrite': 'Entry rewritten',
+  'Entrée retirée': 'Entry removed',
+  'Journal remplacé': 'Log replaced',
+
   /* ── LES CATÉGORIES ─────────────────────────────────────────────────────── */
   'Finances (factures, remboursements, crédits)': 'Finances (invoices, refunds, credits)',
   'Inventaire (produits, stock mis à zéro)': 'Inventory (products, stock set to zero)',
