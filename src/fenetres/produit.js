@@ -150,6 +150,12 @@ html.jour .pf-med-l video{background:#1d2433}
 /* Photo de couleur OBLIGATOIRE encore vide (2026-10-09) : le contour or la signale. */
 .vue .cadre.requise{border-color:#c9a97e;color:var(--tx2)}
 .vue img{width:100%;height:100%;object-fit:cover}
+/* La grille des photos par couleur (étape à part) : autant de colonnes que la largeur en
+   permet, cases au format portrait — dix couleurs ne déforment rien, elles passent à la ligne. */
+#p-parcoul{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:.75rem;overflow:visible}
+#p-parcoul .vue{width:auto}
+#p-parcoul .vue .cadre{width:100%;height:auto;aspect-ratio:3/4;font-size:.78rem}
+#p-parcoul .lgd{text-align:center;font-weight:600;margin-top:.3rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vue .lgd{font-size:.68rem;color:var(--tx2);text-align:center;margin-top:.18rem;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vue .x,.vign .x{position:absolute;top:3px;right:3px;width:20px;height:20px;padding:0;
@@ -540,18 +546,6 @@ function pageProduit(id) {
       + 'title="${T("Faire porter le vêtement par un modèle (IA Fal.ai — chaque génération consomme des crédits)")}"><span class="ic">✨</span> ${T("Mannequin IA")}</button></div>'
       + '<div class="vues" id="p-vues"></div>'
       + '</div></div>'
-      /* ⚠ DEUX MODES, DÉCIDÉS PAR LA CATÉGORIE, comme l’éditeur du site :
-         AUTO (aiColorGen) = les variantes se GÉNÈRENT en teintant les photos
-         du produit au canevas — par le site, via le pont — et se régénèrent à
-         l’enregistrement ; MANUEL = on dépose une photo par couleur. La
-         1ʳᵉ couleur n’a jamais de variante : ses photos SONT celles du
-         produit (la boutique ne lit une variante que pour les autres). */
-      + '<div class="carte plein"><h2 id="p-parcoul-titre">${T("Photo par couleur")}</h2>'
-      + '<div class="aide" id="p-parcoul-aide" style="margin-bottom:.5rem"></div>'
-      + '<div class="vues" id="p-parcoul"></div>'
-      + '<div style="margin-top:.5rem"><button type="button" id="p-cv-gen" style="display:none" '
-      + 'title="${T("Teinter les photos du produit pour chaque couleur — local, sans crédit ni service")}">'
-      + '${T("Tout générer")}</button></div></div>'
       /* ⚠ LES MÉDIAS (2026-10-07, sa demande : « Sophie mesure 1,68 m et porte
          un S », « une courte vidéo de 5 secondes qui montre le tombé », « un 360
          degrés »). Tout est FACULTATIF : une fiche sans médias s affiche en
@@ -576,6 +570,26 @@ function pageProduit(id) {
       + '<button type="button" id="p-360-retirer" style="display:none">${T("Tout retirer")}</button></div>'
       + '<div id="p-360-bande"></div>'
       + '</div></div>');
+
+    /* 5 bis — PHOTOS PAR COULEUR, ÉTAPE À PART (2026-10-09, sa demande : « que les espaces pour
+       les photos puissent prendre plusieurs couleurs sans déformer l’assistant ; au besoin ajoute
+       des étapes »). Coincée sous les vues et les médias, la rangée de cases débordait dès cinq ou
+       six couleurs. Ici : une grille qui se remplit à la largeur de la fenêtre, une case par
+       couleur, au format portrait d’une photo de vêtement. */
+    h.push('<div class="etape">'
+      /* ⚠ DEUX MODES, DÉCIDÉS PAR LA CATÉGORIE, comme l’éditeur du site :
+         AUTO (aiColorGen) = les variantes se GÉNÈRENT en teintant les photos
+         du produit au canevas — par le site, via le pont — et se régénèrent à
+         l’enregistrement ; MANUEL = on dépose une photo par couleur. La
+         1ʳᵉ couleur n’a jamais de variante : ses photos SONT celles du
+         produit (la boutique ne lit une variante que pour les autres). */
+      + '<div class="carte plein" id="p-parcoul-carte"><h2 id="p-parcoul-titre">${T("Photo par couleur")}</h2>'
+      + '<div class="aide" id="p-parcoul-aide" style="margin-bottom:.5rem"></div>'
+      + '<div class="vues" id="p-parcoul"></div>'
+      + '<div style="margin-top:.5rem"><button type="button" id="p-cv-gen" style="display:none" '
+      + 'title="${T("Teinter les photos du produit pour chaque couleur — local, sans crédit ni service")}">'
+      + '${T("Tout générer")}</button></div></div>'
+      + '</div>');
 
     // 6 — Détails
     // ⚠ LE REGIME DE VENTE N EST PAS UN JEU DE CASES INDEPENDANTES. Mes cases
@@ -690,9 +704,10 @@ function pageProduit(id) {
       { t: '${T("Identité, prix et poids")}', obl: ['p-nom', 'p-cat', 'p-poids', 'p-prix', 'p-cout'] },
       { t: '${T("Tailles et couleurs")}',     obl: [] },
       { t: 'Photo',                   obl: [] },
+      { t: '${T("Couleurs")}',                obl: [] },
       { t: '${T("Mise en marché")}',          obl: [] },
       { t: 'Stock',                   obl: [] }
-    ], function(i){ if (i === 2) { dessinerVues(); dessinerMedias(); } if (i === 4) majStock(); });
+    ], function(i){ if (i === 2) { dessinerVues(); dessinerMedias(); } if (i === 3) dessinerVues(); if (i === 5) majStock(); });
 
     bEnr.disabled = !(ID ? CTX.peutModifier : CTX.peutAjouter);
     if (bEnr.disabled) dire('${T("Consultation seulement — votre rôle ne permet pas d’enregistrer.")}', 'att');
@@ -745,7 +760,9 @@ function pageProduit(id) {
       [1, '${T("Au moins une taille et une couleur")}', !!(t.length && c.length)],
       [2, '${T("Photo principale")}', !!IMAGE]
     ];
-    if (!ID && t.length && c.length) exig.push([4, '${T("Une quantité en stock")}', tot > 0]);
+    if (c.length > 1) exig.push([3, '${T("Une photo par couleur secondaire")}',
+      c.slice(1).every(function(x){ return !!(PARCOUL[x] && (PARCOUL[x].main || PARCOUL[x].principale)); })]);
+    if (!ID && t.length && c.length) exig.push([5, '${T("Une quantité en stock")}', tot > 0]);
     var nManque = exig.filter(function(m){ return !m[2]; }).length;
     h += '<div class="reste">' + (nManque
       ? '<div class="t">${T("Pour enregistrer")}</div>'
@@ -2567,7 +2584,7 @@ function pageProduit(id) {
     dessinerJetons(); majMarge(); majIa(); majNom();
     // On repart de l'étape où la personne s'était arrêtée : la ramener à la
     // première l'obligerait à retraverser ce qu'elle avait déjà rempli.
-    if (typeof d.etape === 'number') Assist.aller(Math.max(0, Math.min(4, d.etape)));
+    if (typeof d.etape === 'number') Assist.aller(Math.max(0, Math.min(5, d.etape)));
     else Assist.fil();
     // Le brouillon restauré est déjà celui du stockage : sans cette ligne, le
     // premier tic le réécrirait à l'identique.
@@ -2757,14 +2774,14 @@ function pageProduit(id) {
       if ((STOCK[t + '-' + c] || 0) > 0) enStock.push(t + '-' + c);
     }); });
     if (!ID && !enStock.length) {
-      Assist.aller(4);
+      Assist.aller(5);
       dire('${T("Saisissez une quantité pour au moins une variante avant d’enregistrer.")}', 'err');
       return;
     }
     if (CTX && (CTX.entrepots || []).length) {
       var sansLieu = enStock.filter(function(k){ return !LOCS[k]; });
       if (sansLieu.length) {
-        Assist.aller(4);
+        Assist.aller(5);
         dire('${T("Sélectionnez un emplacement d’entrepôt pour :")} '
           + sansLieu.slice(0, 3).join(', ')
           + (sansLieu.length > 3 ? '… (' + sansLieu.length + ' variantes)' : '') + '.', 'err');
@@ -2803,7 +2820,7 @@ function pageProduit(id) {
     var sansPhoto = couleurs().slice(1).filter(function(c){ return !(PARCOUL[c] && (PARCOUL[c].main || PARCOUL[c].principale)); });
     if (sansPhoto.length) {
       VAR_FAITES = false;
-      Assist.aller(2); dessinerVues();
+      Assist.aller(3); dessinerVues();
       dire('${T("Photo obligatoire pour chaque couleur secondaire — manquante :")} ' + sansPhoto.join(', ') + '.', 'err');
       return;
     }
@@ -2873,9 +2890,9 @@ function pageProduit(id) {
         if (r && r.motif === 'tailles_couleurs_requises') Assist.aller(1);
         if (r && r.motif === 'photo_requise') Assist.aller(2);
         if (r && /^(mannequin_|video_|vue360_)/.test(String(r.motif || ''))) Assist.aller(2);
-        if (r && r.motif === 'stock_requis') Assist.aller(4);
+        if (r && r.motif === 'stock_requis') Assist.aller(5);
         if (r && r.motif === 'emplacement_requis') {
-          Assist.aller(4);
+          Assist.aller(5);
           dire('${T("Sélectionnez un emplacement d’entrepôt pour :")} '
             + (r.manquants || []).join(', ') + '.', 'err');
           return;

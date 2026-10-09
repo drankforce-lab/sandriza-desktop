@@ -539,4 +539,5 @@ module.exports = {
     'In the store, it replaces the main photo when the customer picks this colour; the additional photos stay the same.',
   'ajouter *': 'add *',
   'Photo obligatoire pour chaque couleur secondaire — manquante :': 'A photo is required for each secondary colour — missing:',
+  'Une photo par couleur secondaire': 'One photo per secondary colour',
 };
