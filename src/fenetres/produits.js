@@ -95,6 +95,22 @@ html.jour .rf-av.tc{color:color-mix(in srgb,var(--cc,#6d7f96) 55%,black);
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* « Vérifier mes marges » (7.16.0) */
+.voile{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;
+  background:rgba(4,8,14,.62);padding:1rem}
+.voile .boite{width:100%;max-width:70rem;max-height:92vh;display:flex;flex-direction:column;gap:.6rem;
+  background:var(--f-carte);border:1px solid var(--v10);border-radius:12px;padding:1rem 1.1rem}
+.voile h3{margin:0;font-size:1.02rem}
+.mg-res{font-size:.8rem;color:var(--tx2);line-height:1.5}
+.mg-tab{overflow:auto;min-height:0;flex:1 1 auto;border:1px solid var(--v08);border-radius:9px}
+.mg-tab table thead th{position:sticky;top:0;background:var(--f-carte);z-index:1}
+.mg-tab tbody tr{cursor:default}
+.mg-tab td.r,.mg-tab th.r{text-align:right;white-space:nowrap}
+.mg-tab input[type=number]{width:6.5rem;font:inherit;color:var(--tx);background:var(--v05);border:1px solid var(--v16);border-radius:7px;padding:.18rem .4rem;text-align:right}
+.mg-tab .sous{display:block;font-size:.7rem;color:var(--tx3)}
+.mg-pied{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.mg-pied .droite{margin-left:auto;display:flex;gap:.5rem}
+html.jour .voile{background:rgba(20,24,30,.35)}
 `;
 
 /** Page complète de la fenêtre native « Produits en vente ». */
@@ -129,6 +145,89 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
      tout verdict s efface seul apres cinq secondes, sauf ce qui se termine
      par des points de suspension, qui annonce un travail en cours. */
   function dire(t, cl){ szDire(t, cl); }
+
+  /* ══ « VÉRIFIER MES MARGES » (7.16.0, 2026-10-09, sa demande) ══════════════════════════════
+     Le pont (marges:analyser) compare chaque produit, coûts numériques compris (Fal.ai, Photoroom,
+     aperçus 3D, répartis sur ses unités), à la marge des produits qui ont coûté le moins en
+     technologie, et propose un prix. Ici on montre, on laisse modifier, et l'on applique à UN
+     article ou à la SÉLECTION (marges:appliquer — inscrit à l'historique de chaque produit). */
+  function argent(n){ return (typeof szArgent === 'function') ? szArgent(+n || 0) : ((+n || 0).toFixed(2) + ' $'); }
+  function pct(x){ return Math.round((+x || 0) * 100) + ' %'; }
+  function ouvrirMarges(){
+    var v = document.createElement('div');
+    v.className = 'voile';
+    v.innerHTML = '<div class="boite" role="dialog" aria-modal="true" aria-label="${T("Vérifier mes marges")}">'
+      + '<h3>${T("Vérifier mes marges")}</h3><div class="mg-res" id="mg-res">${T("Analyse en cours…")}</div>'
+      + '<div class="mg-tab" id="mg-tab"></div>'
+      + '<div class="mg-pied"><button id="mg-tout">${T("Cocher les propositions")}</button><button id="mg-rien">${T("Tout décocher")}</button>'
+      + '<span class="droite"><button id="mg-fermer">${T("Fermer")}</button><button class="prim" id="mg-appliquer" disabled>${T("Appliquer à la sélection")}</button></span></div></div>';
+    document.body.appendChild(v);
+    var L = [];
+    function fermer(){ v.remove(); }
+    function selection(){
+      return L.filter(function(l){ var c = v.querySelector('input[data-c="' + l.id + '"]'); return c && c.checked; })
+        .map(function(l){ var i = v.querySelector('input[data-p="' + l.id + '"]'); return { id: l.id, prix: parseFloat(String(i ? i.value : '').replace(',', '.')) }; })
+        .filter(function(x){ return x.prix > 0; });
+    }
+    function majBouton(){ var n = selection().length; var b = document.getElementById('mg-appliquer');
+      b.disabled = !n; b.textContent = n > 1 ? '${T("Appliquer aux ")}' + n + '${T(" articles")}' : '${T("Appliquer à la sélection")}'; }
+    function appliquer(liste){
+      if (!liste.length) return;
+      dire('${T("Application des nouveaux prix…")}');
+      appeler('marges:appliquer', [liste]).then(function(r){
+        if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+        dire(r.faits + (r.faits > 1 ? '${T(" prix ajustés — inscrits à l’historique de chaque produit.")}' : '${T(" prix ajusté — inscrit à l’historique du produit.")}')
+          + (r.refus && r.refus.length ? ' ' + r.refus.length + '${T(" refusé(s) (prix invalide ou plus du triple).")}' : ''), 'bon');
+        analyser(); try { charger(); } catch (e) {}
+      });
+    }
+    function dessiner(d){
+      L = d.lignes || [];
+      var rs = d.resume || {};
+      document.getElementById('mg-res').innerHTML = '${T("Marge de référence (produits qui ont le moins coûté en technologie) :")} <b>' + pct(d.reference) + '</b> · '
+        + rs.produits + '${T(" produits")} · ${T("coûts numériques au total :")} <b>' + argent(rs.coutsTotal) + '</b> · '
+        + '<b>' + rs.aAjuster + '</b>${T(" ajustement(s) proposé(s)")}'
+        + (rs.sansAchat ? ' · ' + rs.sansAchat + '${T(" sans coût d’achat (non analysés)")}' : '');
+      if (!L.length) { document.getElementById('mg-tab').innerHTML = '<div class="vide">${T("Aucun produit actif à analyser.")}</div>'; return; }
+      document.getElementById('mg-tab').innerHTML = '<table><thead><tr><th></th><th>${T("Produit")}</th><th class="r">${T("Prix")}</th><th class="r">${T("Coût d’achat")}</th>'
+        + '<th class="r">${T("Coûts numériques")}</th><th class="r">${T("Coût / unité")}</th><th class="r">${T("Marge")}</th><th class="r">${T("Prix proposé")}</th><th class="r">${T("Marge après")}</th><th></th></tr></thead><tbody>'
+        + L.map(function(l){
+          var prop = l.proposition;
+          var det = (l.detail || []).map(function(x){ return x.n + ' × ' + (x.geste || x.modele) + ' (' + argent(x.cout) + ')'; }).join(' · ');
+          return '<tr><td><input type="checkbox" data-c="' + esc(l.id) + '"' + (prop ? ' checked' : '') + (l.sansAchat ? ' disabled' : '') + '></td>'
+            + '<td>' + esc(l.nom) + '<span class="sous">' + esc(l.sku || '') + (det ? ' — ' + esc(det) : '') + '</span></td>'
+            + '<td class="r">' + argent(l.prix) + '</td><td class="r">' + (l.sansAchat ? '<span class="pill neutre">${T("inconnu")}</span>' : argent(l.achat)) + '</td>'
+            + '<td class="r">' + (l.ia > 0 ? argent(l.ia) + '<span class="sous">' + l.iaN + '${T(" appel(s) · ")}' + l.unites + '${T(" unité(s)")}</span>' : '—') + '</td>'
+            + '<td class="r">' + argent(l.coutUnite) + '</td>'
+            + '<td class="r"><span class="pill ' + (l.marge < d.reference - 0.005 ? 'att' : 'bon') + '">' + pct(l.marge) + '</span></td>'
+            + '<td class="r"><input type="number" min="0" step="1" data-p="' + esc(l.id) + '" value="' + (prop ? prop.prix : l.prix) + '"' + (l.sansAchat ? ' disabled' : '') + '></td>'
+            + '<td class="r" data-ma="' + esc(l.id) + '">' + (prop ? pct(prop.margeApres) : '—') + '</td>'
+            + '<td class="r"><button class="mini" data-un="' + esc(l.id) + '"' + (l.sansAchat ? ' disabled' : '') + '>${T("Appliquer")}</button></td></tr>';
+        }).join('') + '</tbody></table>';
+      v.querySelectorAll('input[data-c]').forEach(function(c){ c.onchange = majBouton; });
+      v.querySelectorAll('input[data-p]').forEach(function(i){ i.oninput = function(){
+        var l = L.find(function(x){ return x.id === i.getAttribute('data-p'); }); var n = parseFloat(String(i.value).replace(',', '.'));
+        var c = v.querySelector('[data-ma="' + l.id + '"]'); if (c) c.textContent = n > 0 ? pct((n - l.coutUnite) / n) : '—';
+        var cc = v.querySelector('input[data-c="' + l.id + '"]'); if (cc && n > 0 && n !== l.prix) cc.checked = true;
+        majBouton(); }; });
+      v.querySelectorAll('button[data-un]').forEach(function(b){ b.onclick = function(){
+        var id = b.getAttribute('data-un'); var i = v.querySelector('input[data-p="' + id + '"]');
+        appliquer([{ id: id, prix: parseFloat(String(i.value).replace(',', '.')) }]); }; });
+      majBouton();
+    }
+    function analyser(){
+      appeler('marges:analyser', []).then(function(r){
+        if (!r || !r.ok) { document.getElementById('mg-res').textContent = expliquer(r); return; }
+        dessiner(r);
+      });
+    }
+    document.getElementById('mg-fermer').onclick = fermer;
+    document.getElementById('mg-tout').onclick = function(){ L.forEach(function(l){ var c = v.querySelector('input[data-c="' + l.id + '"]'); if (c && !c.disabled) c.checked = !!l.proposition; }); majBouton(); };
+    document.getElementById('mg-rien').onclick = function(){ v.querySelectorAll('input[data-c]').forEach(function(c){ c.checked = false; }); majBouton(); };
+    document.getElementById('mg-appliquer').onclick = function(){ appliquer(selection()); };
+    v.addEventListener('keydown', function(ev){ if (ev.key === 'Escape') { ev.stopPropagation(); fermer(); } });
+    analyser();
+  }
   function fmt(n){
     return szArgent(n);   /* voir szArgent (socle) : le repli aussi place le symbole */
   }
@@ -215,6 +314,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + (TRI === 'cart' ? '<span class="ic">🛒</span> ${T("Tri panier ✓")}' : '<span class="ic">🛒</span> ${T("Trier par panier")}') + '</button>'
       + '<span class="rf-droite"><span class="dt">' + (D.total || 0) + ' '
       + (D.total > 1 ? '${T("produits")}' : '${T("produit")}') + '</span>'
+      + '<button id="p-marges" style="height:2.4rem;padding:0 .9rem" title="${T("Comparer les marges en tenant compte des coûts numériques (photos, IA, 3D)")}">${T("Vérifier mes marges")}</button>'
       + '<button class="prim" id="p-nouveau" style="height:2.4rem;padding:0 .9rem">${T("+ Nouveau produit")}</button></span>'
       + '</div></div>';
 
@@ -328,6 +428,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (bp) bp.onclick = function(){ PAGE = Math.max(0, (D.page || 0) - 1); charger(); };
     var bs = document.getElementById('p-suiv');
     if (bs) bs.onclick = function(){ PAGE = (D.page || 0) + 1; charger(); };
+    var bm = document.getElementById('p-marges');
+    if (bm) bm.onclick = ouvrirMarges;
     var nv = document.getElementById('p-nouveau');
     if (nv) nv.onclick = function(){
       dire('${T("Ouverture…")}');

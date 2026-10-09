@@ -2943,6 +2943,8 @@ const OPS_PONT = new Set([
   // Variantes par couleur : teinte au CANEVAS par le site (une image, une
   // couleur par appel — la fenetre boucle), aucun service externe.
   'produit:teinter',
+  // L'aperçu 3D (Hunyuan3D par Fal.ai), les coûts par article et le contrôle des marges (7.16.0).
+  'produit:apercu3dLancer', 'produit:apercu3dSuivre', 'produit:couts', 'marges:analyser', 'marges:appliquer',
   'commandes:preparer', 'commandes:expedier',
   // Retours. ⚠ retour:finaliser peut REMBOURSER (Square ou credit boutique) et
   // retour:enregistrer peut generer une etiquette FACTUREE : toute la regle vit
@@ -3459,6 +3461,8 @@ const LIMITES_PONT = {
   // Detourage, impressions et rapports.
   'produit:photoIa': 120000,
   'produit:detourer': 30000, 'produit:teinter': 30000, 'stock:etiquettes': 30000,
+  'produit:apercu3dLancer': 90000, 'produit:apercu3dSuivre': 60000, 'produit:couts': 30000,
+  'marges:analyser': 60000, 'marges:appliquer': 90000,
   'stock:endommagesRapport': 30000, 'stock:rabaisComptoirRapport': 30000, 'facture:imprimer': 30000, 'expedition:comparer': 30000, 'commande:bon': 30000,
   // La liste des retours RESYNCHRONISE les demandes avant de repondre (la
   // meme fraicheur que l ecran du site) : laisser le temps du nuage.
@@ -3839,6 +3843,24 @@ const _traduireLibelles = (x, prof) => {
 };
 
 ipcMain.handle('pont:appeler', (e, op, args) => executerOpSite(String(op || ''), args, e.sender));
+// L'APERÇU 3D, PRÉPARÉ AU POSTE (7.16.0) : le modèle rendu par Fal.ai (17 à 20 Mo) est téléchargé
+// ICI puis compressé (modele3d.js : matière mate, textures 1024 px, géométrie simplifiée + Draco),
+// et rendu en donnée à la fenêtre Produit, qui le dépose à l'enregistrement. Domaines de Fal.ai
+// seulement ; 60 Mo au plus.
+ipcMain.handle('modele3d:preparer', async (_e, url) => {
+  try {
+    const u = new URL(String(url || ''));
+    if (u.protocol !== 'https:' || !/(^|\.)(fal\.media|fal\.run|fal\.ai)$/i.test(u.hostname)) return { ok: false, detail: 'adresse refusée' };
+    const r = await fetch(u.href, { signal: AbortSignal.timeout(120000) });
+    if (!r.ok) return { ok: false, detail: 'téléchargement ' + r.status };
+    const buf = Buffer.from(await r.arrayBuffer());
+    if (buf.length > 60 * 1024 * 1024) return { ok: false, detail: 'modèle trop lourd' };
+    const { compresserGlb } = require('./modele3d');
+    const c = await compresserGlb(buf);
+    if (c.apres > 5.5 * 1024 * 1024) return { ok: false, detail: 'modèle compressé encore trop lourd' };
+    return { ok: true, dataUrl: 'data:model/gltf-binary;base64,' + c.glb.toString('base64'), avant: c.avant, apres: c.apres };
+  } catch (e) { return { ok: false, detail: String((e && e.message) || e).slice(0, 200) }; }
+});
 // LA PHOTO EN LIGNE RENDUE EN DONNEE (voir imageLocale, pont-preload.js). HTTPS, domaines de la
 // boutique et de son stockage seulement, une image, 15 Mo au plus, 15 s au plus.
 ipcMain.handle('image:locale', async (_e, url) => {

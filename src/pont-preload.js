@@ -47,6 +47,8 @@ contextBridge.exposeInMainWorld('szPont', {
      lui, n a pas cette regle : il rend la photo en donnee. Domaines de la boutique seulement ;
      null si refuse ou illisible (la page garde alors l adresse et mesure a la main). */
   imageLocale: (url) => ipcRenderer.invoke('image:locale', String(url || '')).catch(() => null),
+  // L'aperçu 3D de Fal.ai, téléchargé et compressé par le processus principal (modele3d.js).
+  modele3dPreparer: (url) => ipcRenderer.invoke('modele3d:preparer', String(url || '')).catch(() => ({ ok: false, detail: 'pont' })),
   // Rend toujours un objet : { ok:true, … } ou { ok:false, motif:'…' }.
   // ⚠ Jamais d'exception vers la page : une fenêtre qui plante sur un refus de
   // droit est plus difficile à comprendre qu'une fenêtre qui l'affiche.

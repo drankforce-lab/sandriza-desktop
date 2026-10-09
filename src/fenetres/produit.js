@@ -350,6 +350,11 @@ function pageProduit(id) {
   MOTIFS.emplacement_requis = '${T("Un emplacement d’entrepôt manque pour des variantes en stock.")}';
   MOTIFS.stock_requis = '${T("Saisissez une quantité pour au moins une variante.")}';
   MOTIFS.couleur_non_mappee = '${T("Cette couleur n’a pas de teinte unie attribuée.")}';
+  MOTIFS.fal = '${T("Fal.ai a refusé la demande.")}';
+  MOTIFS.limite3d = '${T("Trois aperçus 3D déjà générés pour cet article dans les dernières 24 heures : réessayez demain.")}';
+  MOTIFS.photo_format = '${T("La photo principale n’est pas dans un format accepté.")}';
+  MOTIFS.modele3d_trop_lourd = '${T("L’aperçu 3D est trop lourd (plus de 5,5 Mo).")}';
+  MOTIFS.modele3d_format = '${T("L’aperçu 3D n’est pas dans un format accepté.")}';
   MOTIFS.mannequin_incomplet = '${T("Mannequin : le prénom, la taille (120 à 220 cm) et la taille portée vont ensemble.")}';
   MOTIFS.mannequin_taille = '${T("Mannequin : la taille portée doit être une des tailles offertes.")}';
   MOTIFS.video_trop_lourde = '${T("Vidéo trop lourde (maximum 5,5 Mo).")}';
@@ -588,6 +593,12 @@ function pageProduit(id) {
       + '<span class="aide" id="p-360-etat"></span>'
       + '<button type="button" id="p-360-retirer" style="display:none">${T("Tout retirer")}</button></div>'
       + '<div id="p-360-bande"></div>'
+      /* L'APERÇU 3D (7.16.0) : Hunyuan3D par Fal.ai, ~0,38 $, ~2 minutes, confirmé en deux clics. */
+      + '<div class="pf-med-l" id="p-3d-l">'
+      + '<button type="button" id="p-3d-gen"><span class="ic">🧊</span> ${T("Générer l’aperçu 3D (≈ 0,38 $)")}</button>'
+      + '<img id="p-3d-vign" alt="" style="display:none;width:52px;height:52px;object-fit:contain;border-radius:7px;background:var(--v05)">'
+      + '<span class="aide" id="p-3d-etat"></span>'
+      + '<button type="button" id="p-3d-retirer" style="display:none">${T("Retirer l’aperçu 3D")}</button></div>'
       + '</div></div>');
 
     /* 5 bis — PHOTOS PAR COULEUR, ÉTAPE À PART (2026-10-09, sa demande : « que les espaces pour
@@ -740,6 +751,7 @@ function pageProduit(id) {
     ], function(i){ if (i === 2) { dessinerVues(); dessinerMedias(); } if (i === 3) dessinerVues(); if (i === 4) dessinerMesures(); if (i === 6) majStock(); });
 
     bEnr.disabled = !(ID ? CTX.peutModifier : CTX.peutAjouter);
+    chargerCouts();   // les coûts numériques de l'article (journal des appels payants)
     if (bEnr.disabled) dire('${T("Consultation seulement — votre rôle ne permet pas d’enregistrer.")}', 'att');
   }
 
@@ -770,6 +782,16 @@ function pageProduit(id) {
         + '</div>';
     }
     var ligne = function(k, v){ return '<div class="l"><span class="k">' + k + '</span><span class="v">' + v + '</span></div>'; };
+    /* LES COÛTS NUMÉRIQUES DE L'ARTICLE (7.16.0) : ce que le journal a facturé pour lui (Fal.ai,
+       Photoroom, 3D), et la marge une fois ce coût réparti sur ses unités en stock. */
+    var totU = 0; Object.keys(STOCK).forEach(function(k){ totU += (+STOCK[k] || 0); });
+    if (COUTS && COUTS.total > 0) {
+      var det = (COUTS.detail || []).map(function(x){ return x.n + ' × ' + (x.geste || x.modele) + ' : ' + szArgent(x.cout); }).join(' · ');
+      var parU = COUTS.total / Math.max(1, totU);
+      h += '<div class="l" title="' + esc(det) + '"><span class="k">${T("Coûts numériques")}</span><span class="v">' + esc(szArgent(COUTS.total))
+        + ' <span class="sous" style="font-size:.72rem;color:var(--tx3)">(' + COUTS.n + '${T(" appel(s)")})</span></span></div>';
+      if (p > 0 && co > 0) h += ligne('${T("Marge après coûts numériques")}', esc(szArgent(eff - co - parU)) + ' (' + Math.round((eff - co - parU) / eff * 100) + ' %)');
+    }
     h += ligne('${T("Catégorie")}', esc(libCat(val('p-cat')) || '—'));
     h += ligne('${T("Tailles")}', esc(t.length ? t.join(' · ') : '—'));
     h += ligne('${T("Couleurs")}', c.length
@@ -1870,6 +1892,88 @@ function pageProduit(id) {
      (post_max_size, php.ini-production du Dockerfile). Au-delà, le serveur jette
      le corps sans un mot — d où le refus AVANT la lecture du fichier. */
   var VIDEO = '', VIDEO_OCTETS = 0, VUE360 = [], MQ_TAILLE = '';
+
+  /* ══ L'APERÇU 3D ET LES COÛTS DE L'ARTICLE (7.16.0, 2026-10-09) ═════════════════════════════
+     MOD3D : le modèle (adresse déposée, ou donnée compressée au poste en attente de dépôt).
+     CLE_COUTS : la clé sous laquelle le journal des appels payants range ce qu'on dépense ICI —
+     l'identifiant du produit, ou « brouillon:… » pendant une création (rattaché au vrai produit à
+     l'enregistrement). COUTS : ce que le journal dit avoir dépensé pour cet article. */
+  var MOD3D = '', CLE_COUTS = '', COUTS = null;
+  var G3D = { conf: false, forcer: false, enCours: false, vignette: '', poids: 0, avert: null };
+  function cleCouts(){
+    if (ID) return String(ID);
+    if (!CLE_COUTS) CLE_COUTS = 'brouillon:' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    return CLE_COUTS;
+  }
+  function chargerCouts(){
+    appeler('produit:couts', [[cleCouts()]]).then(function(r){
+      COUTS = (r && r.ok) ? ((r.couts || {})[cleCouts()] || { total: 0, n: 0, detail: [] }) : null;
+      majFicheBientot();
+    });
+  }
+  function dessiner3d(){
+    var b = document.getElementById('p-3d-gen'), e = document.getElementById('p-3d-etat');
+    var vg = document.getElementById('p-3d-vign'), rt = document.getElementById('p-3d-retirer');
+    if (!b) return;
+    b.disabled = G3D.enCours || !IMAGE;
+    b.innerHTML = G3D.enCours ? '<span class="ic">⏳</span> ${T("Génération en cours…")}'
+      : G3D.conf ? '${T("✓ Confirmer — environ 0,38 $ facturés par Fal.ai")}'
+      : G3D.forcer ? '<span class="ic">⚠</span> ${T("Regénérer quand même (≈ 0,38 $)")}'
+      : (MOD3D ? '<span class="ic">🧊</span> ${T("Regénérer l’aperçu 3D (≈ 0,38 $)")}' : '<span class="ic">🧊</span> ${T("Générer l’aperçu 3D (≈ 0,38 $)")}');
+    if (vg) { vg.style.display = (MOD3D && G3D.vignette) ? '' : 'none'; if (G3D.vignette) vg.src = G3D.vignette; }
+    if (rt) rt.style.display = (MOD3D && !G3D.enCours) ? '' : 'none';
+    if (rt) rt.onclick = function(){ MOD3D = ''; G3D.vignette = ''; dessiner3d(); dire('${T("Aperçu 3D retiré — enregistrez pour l’enlever de la boutique.")}', 'att'); };
+    if (e && !G3D.enCours) e.textContent = MOD3D
+      ? (/^data:/.test(MOD3D) ? '${T("Aperçu prêt")} (' + Math.round(G3D.poids / 1024) + ' Ko) — ${T("déposé à l’enregistrement")}' : '${T("Aperçu 3D en ligne sur la fiche.")}')
+      : (IMAGE ? '' : '${T("Choisissez d’abord la photo principale.")}');
+    b.onclick = lancer3d;
+  }
+  function lancer3d(){
+    if (G3D.enCours || !IMAGE) return;
+    if (!G3D.conf) {
+      G3D.conf = true; dessiner3d();
+      dire(G3D.forcer ? '${T("Cliquez encore : un aperçu de plus sera facturé (≈ 0,38 $).")}' : '${T("Cliquez encore pour confirmer : environ 0,38 $ facturés par Fal.ai, 2 minutes environ.")}', 'att');
+      return;
+    }
+    G3D.conf = false; G3D.enCours = true; dessiner3d();
+    var e = document.getElementById('p-3d-etat'); if (e) e.textContent = '${T("Envoi de la photo à Fal.ai…")}';
+    appeler('produit:apercu3dLancer', [IMAGE, cleCouts(), G3D.forcer]).then(function(r){
+      if (!r || !r.ok) {
+        G3D.enCours = false;
+        if (r && r.motif === 'avertir') {
+          // ⚠ LE GARDE-FOU ANTI-BOUCLE : le serveur a déjà des aperçus 3D pour cet article.
+          G3D.forcer = true; dessiner3d();
+          dire('${T("Cet article a déjà ")}' + r.deja + '${T(" aperçu(s) 3D (")}' + szArgent(r.dejaCout || 0) + '${T("). Un autre coûtera ≈ 0,38 $ : cliquez « Regénérer quand même » si c’est voulu.")}', 'att');
+          return;
+        }
+        dessiner3d(); dire(expliquer(r), 'err'); return;
+      }
+      G3D.forcer = false; chargerCouts();
+      suivre3d(r.etat_url, r.resultat_url, Date.now());
+    });
+  }
+  function suivre3d(eu, ru, t0){
+    var e = document.getElementById('p-3d-etat');
+    appeler('produit:apercu3dSuivre', [eu, ru]).then(function(r){
+      if (!r || !r.ok) { G3D.enCours = false; dessiner3d(); dire(expliquer(r), 'err'); return; }
+      if (!r.pret) {
+        var sec = Math.round((Date.now() - t0) / 1000);
+        if (sec > 600) { G3D.enCours = false; dessiner3d(); dire('${T("Fal.ai n’a pas fini en 10 minutes. Le coût est engagé : réessayez plus tard, sans regénérer.")}', 'err'); return; }
+        if (e) e.textContent = '${T("Génération 3D en cours… ")}' + sec + ' s';
+        setTimeout(function(){ suivre3d(eu, ru, t0); }, 6000);
+        return;
+      }
+      if (e) e.textContent = '${T("Compression du modèle…")}';
+      var prep = (P && P.modele3dPreparer) ? P.modele3dPreparer(r.glb) : Promise.resolve(null);
+      prep.then(function(m){
+        G3D.enCours = false;
+        if (!m || !m.ok) { dessiner3d(); dire('${T("Le modèle 3D n’a pas pu être préparé.")}' + (m && m.detail ? ' (' + m.detail + ')' : ''), 'err'); return; }
+        MOD3D = m.dataUrl; G3D.vignette = r.vignette || ''; G3D.poids = m.apres || 0;
+        dessiner3d(); majFicheBientot();
+        dire('${T("Aperçu 3D prêt (")}' + Math.round((m.apres || 0) / 1024) + '${T(" Ko) — il sera déposé à l’enregistrement.")}', 'bon');
+      });
+    });
+  }
   var MAX_VIDEO_MO = 5.5;
 
   // La phrase de la boutique, montrée telle qu elle paraîtra : c est le moyen le
@@ -1900,6 +2004,7 @@ function pageProduit(id) {
   }
 
   function dessinerMedias(){
+    dessiner3d();
     // La taille portée suit les tailles COCHÉES à l étape 2 ; une taille retirée
     // depuis vide le choix plutôt que d annoncer une taille que la fiche ne vend pas.
     var s = document.getElementById('p-mq-taille');
@@ -2191,6 +2296,7 @@ function pageProduit(id) {
     poser('p-mq-cm', mq.tailleCm ? String(mq.tailleCm) : '');
     MQ_TAILLE = String(mq.taillePortee || '');
     VIDEO = (typeof p.video === 'string') ? p.video : '';
+    MOD3D = (typeof p.modele3d === 'string') ? p.modele3d : '';
     VIDEO_OCTETS = 0;
     VUE360 = Array.isArray(p.vue360) ? p.vue360.filter(Boolean).map(String) : [];
     dessinerMedias();
@@ -3110,7 +3216,10 @@ function pageProduit(id) {
       // que la clé est envoyée — une coquille plus ancienne ne les efface pas.
       mannequin: MQ || null,
       video: VIDEO || null,
-      vue360: VUE360.length ? VUE360.slice() : null
+      vue360: VUE360.length ? VUE360.slice() : null,
+      // L'aperçu 3D, et la clé des coûts engagés pendant la création (rattachés au produit).
+      modele3d: MOD3D || null,
+      brouillonCouts: (!ID && CLE_COUTS) ? CLE_COUTS : ''
     }).then(function(r){
       // Le prochain envoi repart de zéro : les photos ont pu changer entre-temps.
       VAR_FAITES = false;
