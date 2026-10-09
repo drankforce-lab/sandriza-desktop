@@ -644,4 +644,8 @@ module.exports = {
   "Le modèle 3D n’a pas pu être préparé.": "The 3D model could not be prepared.",
   "Aperçu 3D prêt (": "3D preview ready (",
   " Ko) — il sera déposé à l’enregistrement.": " KB) — it will be uploaded when saving.",
+  "Tapez sa longueur réelle, puis Entrée — UNE seule fois : toutes les autres mesures se calculeront ensuite toutes seules.": "Type its real length, then Enter — ONCE only: every other measurement is then calculated automatically.",
+  "Une seule fois : tracez une mesure que vous connaissez (par exemple la longueur, prise au ruban). Ensuite, chaque trait se mesure tout seul.": "Once only: draw a measurement you know (for example the length, taken with a tape). After that, every line measures itself.",
+  "Cliquez maintenant vos mesures : elles se calculent toutes seules.": "Now click your measurements: they are calculated automatically.",
+  "Pas de feuille dans cette photo : il faut UN repère connu pour donner l’échelle — tracez une mesure que vous connaissez, une seule fois.": "No sheet in this photo: ONE known reference is needed for the scale — draw a measurement you know, once only.",
 };

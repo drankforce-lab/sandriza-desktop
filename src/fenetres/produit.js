@@ -1489,7 +1489,7 @@ function pageProduit(id) {
         clics = [];
         $('mv-f-l').hidden = !(mode === 'feuille' || mode === 'main');
         if (!echelle) {
-          if (mode === 'connue') q(segment ? '${T("Tapez la longueur réelle de ce segment, puis « Poser l’échelle ».")}' : '${T("Cliquez les deux bouts d’une mesure que vous connaissez (par exemple la longueur, prise au ruban).")}');
+          if (mode === 'connue') q(segment ? '${T("Tapez sa longueur réelle, puis Entrée — UNE seule fois : toutes les autres mesures se calculeront ensuite toutes seules.")}' : '${T("Une seule fois : tracez une mesure que vous connaissez (par exemple la longueur, prise au ruban). Ensuite, chaque trait se mesure tout seul.")}');
           else q('${T("Cliquez les deux bouts du GRAND côté de la feuille.")}');
           return;
         }
@@ -1500,7 +1500,7 @@ function pageProduit(id) {
       function poserEchelle(px, message){
         echelle = px; segment = null; $('mv-connue').hidden = true;
         if ($('mv-ret').checked) memoEcrire();
-        dire(message, 'bon'); peindre(); suivante();
+        dire(message + ' ${T("Cliquez maintenant vos mesures : elles se calculent toutes seules.")}', 'bon'); peindre(); suivante();
       }
       // Le mode choisi ; « feuille » cherche, et se rabat sur l'échelle retenue puis sur la mesure connue.
       function appliquerMode(m){
@@ -1511,7 +1511,7 @@ function pageProduit(id) {
           var mm = memoLire();
           if (mm) { mode = 'memo'; $('mv-mode').value = 'memo'; poserEchelle(mm * r, '${T("Pas de feuille : l’échelle retenue du poste photo est utilisée.")}'); return; }
           mode = 'connue'; $('mv-mode').value = 'connue';
-          dire('${T("Pas de feuille dans la photo : posez l’échelle avec une mesure que vous connaissez.")}', 'att');
+          dire('${T("Pas de feuille dans cette photo : il faut UN repère connu pour donner l’échelle — tracez une mesure que vous connaissez, une seule fois.")}', 'att');
         } else if (m === 'memo') {
           var m2 = memoLire();
           if (m2) { poserEchelle(m2 * r, '${T("Échelle retenue du poste photo utilisée.")}'); return; }
@@ -1537,6 +1537,7 @@ function pageProduit(id) {
       $('mv-mode').onchange = function(){ appliquerMode($('mv-mode').value); };
       $('mv-f').onchange = function(){ if (mode === 'feuille') appliquerMode('feuille'); };
       $('mv-ret').onchange = function(){ if ($('mv-ret').checked && echelle) { memoEcrire(); dire('${T("Échelle retenue pour ce format de photo.")}', 'bon'); } };
+      $('mv-cm').onkeydown = function(ev){ if (ev.key === 'Enter') { ev.preventDefault(); $('mv-cm-ok').click(); } };
       $('mv-cm-ok').onclick = function(){
         var cm = parseFloat(String($('mv-cm').value).replace(',', '.'));
         if (!segment || !(cm > 0)) { dire('${T("Tapez la longueur réelle du segment, en centimètres.")}', 'err'); return; }
