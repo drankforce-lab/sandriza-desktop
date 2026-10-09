@@ -593,9 +593,9 @@ function pageProduit(id) {
       + '<span class="aide" id="p-360-etat"></span>'
       + '<button type="button" id="p-360-retirer" style="display:none">${T("Tout retirer")}</button></div>'
       + '<div id="p-360-bande"></div>'
-      /* L'APERÇU 3D (7.16.0) : Hunyuan3D par Fal.ai, ~0,38 $, ~2 minutes, confirmé en deux clics. */
+      /* L'APERÇU 3D (7.16.0) : Hunyuan3D par Fal.ai, ~0,68 $ US, ~2 minutes, confirmé en deux clics. */
       + '<div class="pf-med-l" id="p-3d-l">'
-      + '<button type="button" id="p-3d-gen"><span class="ic">🧊</span> ${T("Générer l’aperçu 3D (≈ 0,38 $)")}</button>'
+      + '<button type="button" id="p-3d-gen"><span class="ic">🧊</span> ${T("Générer l’aperçu 3D (≈ 0,68 $ US)")}</button>'
       + '<img id="p-3d-vign" alt="" style="display:none;width:52px;height:52px;object-fit:contain;border-radius:7px;background:var(--v05)">'
       + '<span class="aide" id="p-3d-etat"></span>'
       + '<button type="button" id="p-3d-retirer" style="display:none">${T("Retirer l’aperçu 3D")}</button></div>'
@@ -1918,9 +1918,9 @@ function pageProduit(id) {
     if (!b) return;
     b.disabled = G3D.enCours || !IMAGE;
     b.innerHTML = G3D.enCours ? '<span class="ic">⏳</span> ${T("Génération en cours…")}'
-      : G3D.conf ? '${T("✓ Confirmer — environ 0,38 $ facturés par Fal.ai")}'
-      : G3D.forcer ? '<span class="ic">⚠</span> ${T("Regénérer quand même (≈ 0,38 $)")}'
-      : (MOD3D ? '<span class="ic">🧊</span> ${T("Regénérer l’aperçu 3D (≈ 0,38 $)")}' : '<span class="ic">🧊</span> ${T("Générer l’aperçu 3D (≈ 0,38 $)")}');
+      : G3D.conf ? '${T("✓ Confirmer — environ 0,68 $ US facturés par Fal.ai")}'
+      : G3D.forcer ? '<span class="ic">⚠</span> ${T("Regénérer quand même (≈ 0,68 $ US)")}'
+      : (MOD3D ? '<span class="ic">🧊</span> ${T("Regénérer l’aperçu 3D (≈ 0,68 $ US)")}' : '<span class="ic">🧊</span> ${T("Générer l’aperçu 3D (≈ 0,68 $ US)")}');
     if (vg) { vg.style.display = (MOD3D && G3D.vignette) ? '' : 'none'; if (G3D.vignette) vg.src = G3D.vignette; }
     if (rt) rt.style.display = (MOD3D && !G3D.enCours) ? '' : 'none';
     if (rt) rt.onclick = function(){ MOD3D = ''; G3D.vignette = ''; dessiner3d(); dire('${T("Aperçu 3D retiré — enregistrez pour l’enlever de la boutique.")}', 'att'); };
@@ -1933,7 +1933,7 @@ function pageProduit(id) {
     if (G3D.enCours || !IMAGE) return;
     if (!G3D.conf) {
       G3D.conf = true; dessiner3d();
-      dire(G3D.forcer ? '${T("Cliquez encore : un aperçu de plus sera facturé (≈ 0,38 $).")}' : '${T("Cliquez encore pour confirmer : environ 0,38 $ facturés par Fal.ai, 2 minutes environ.")}', 'att');
+      dire(G3D.forcer ? '${T("Cliquez encore : un aperçu de plus sera facturé (≈ 0,68 $ US).")}' : '${T("Cliquez encore pour confirmer : environ 0,68 $ US facturés par Fal.ai, 2 minutes environ.")}', 'att');
       return;
     }
     G3D.conf = false; G3D.enCours = true; dessiner3d();
@@ -1944,7 +1944,7 @@ function pageProduit(id) {
         if (r && r.motif === 'avertir') {
           // ⚠ LE GARDE-FOU ANTI-BOUCLE : le serveur a déjà des aperçus 3D pour cet article.
           G3D.forcer = true; dessiner3d();
-          dire('${T("Cet article a déjà ")}' + r.deja + '${T(" aperçu(s) 3D (")}' + szArgent(r.dejaCout || 0) + '${T("). Un autre coûtera ≈ 0,38 $ : cliquez « Regénérer quand même » si c’est voulu.")}', 'att');
+          dire('${T("Cet article a déjà ")}' + r.deja + '${T(" aperçu(s) 3D (")}' + szArgent(r.dejaCout || 0) + '${T("). Un autre coûtera ≈ 0,68 $ US : cliquez « Regénérer quand même » si c’est voulu.")}', 'att');
           return;
         }
         dessiner3d(); dire(expliquer(r), 'err'); return;
