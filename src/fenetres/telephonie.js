@@ -214,6 +214,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
   var ONGLETS = [
     ['general', '${T("Général")}'], ['accueil', '${T("Accueil & routage")}'], ['menu', '${T("Menu IVR")}'],
     ['redirection', '${T("Redirection")}'], ['messagerie', '${T("Messagerie")}'], ['sms', 'SMS'], ['file', "${T('File d\'attente')}"],
+    ['bloques', '${T("Numéros bloqués")}'],
   ];
   var VOIX_FR = [
     ['Polly.Gabrielle-Neural', '${T("Gabrielle — femme, naturelle (neuronale)")}'],
@@ -275,7 +276,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
     return '+' + d;
   }
   function brancherTels(){
-    var sels = corps.querySelectorAll('[data-mf="number"], #t-number, #t-sms-to');
+    var sels = corps.querySelectorAll('[data-mf="number"], #t-number, #t-sms-to, #t-bl-num');
     for (var i = 0; i < sels.length; i++) {
       (function(el){
         el.value = fmtTel(el.value);
@@ -295,6 +296,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
     operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
     nuage:              "${T('L\'enregistrement dans le nuage a échoué. Réessayez.')}",
     tel_desactive:      '${T("La téléphonie est désactivée.")}',
+    numero_invalide:    '${T("Numéro invalide.")}',
     tel_sans_compte:    '${T("Aucun identifiant Twilio enregistré (onglet Général).")}',
     refus:              '${T("Twilio a refusé la requête. Vérifiez les identifiants.")}',
     reseau:             '${T("Erreur réseau en joignant Twilio.")}',
@@ -540,8 +542,74 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
     return h + '</div>';
   }
 
+  /* NUMÉROS BLOQUÉS (2026-10-09, sa demande) : Twilio refuse les appels de ces numéros sans sonner
+     et ignore leurs textos (site : twilio-voice.php / twilio-sms.php). La liste s'écrit par
+     config:telephonie:bloquer / debloquer — effet immédiat, sans le bouton Enregistrer. */
+  function estBloque(num){
+    var n = telE164(num); if (!n) return false;
+    var l = Array.isArray(C.bloques) ? C.bloques : [];
+    for (var i = 0; i < l.length; i++) if (telE164(l[i].numero) === n) return true;
+    return false;
+  }
+  function panBloques(){
+    var l = Array.isArray(C.bloques) ? C.bloques : [];
+    var h = '<div class="carte"><div class="stitre">${T("Bloquer un numéro")}</div>'
+      + '<div class="aide" style="margin:0 0 .7rem">${T("Twilio refuse les appels de ces numéros sans faire sonner (l’appelant entend « occupé ») et ignore leurs textos : aucune messagerie, aucune réponse automatique.")}</div>';
+    if (!RO) {
+      h += '<div class="gr2">'
+        + texteHtml('t-bl-num', '${T("Numéro de téléphone")}', '', '(514) 555-1234', false, '', 'tel')
+        + texteHtml('t-bl-note', '${T("Note (facultatif)")}', '', '${T("ex. démarcheur, harcèlement")}')
+        + '</div><button class="b" type="button" id="t-bl-add">${T("Bloquer")}</button>';
+    }
+    h += '</div><div class="carte"><div class="stitre">${T("Numéros bloqués")} <span class="rf-pill">' + l.length + '</span></div>';
+    if (!l.length) h += '<div class="vide">${T("Aucun numéro bloqué.")}</div>';
+    else {
+      h += '<div class="liste">';
+      for (var i = 0; i < l.length; i++) {
+        var b = l[i];
+        h += '<div class="item"><span class="rf-av" aria-hidden="true"><span class="ic">⛔</span></span><div class="gauche"><div class="haut">'
+          + '<div class="qui"><span class="rf-nom mono">' + esc(fmtTel(b.numero) || b.numero) + '</span>'
+          + (b.note ? '<span class="rf-pill">' + esc(b.note) + '</span>' : '') + '</div>'
+          + '<div class="actes">' + (RO ? '' : '<button class="b" type="button" data-bldel="' + esc(b.numero) + '">${T("Débloquer")}</button>') + '</div></div>'
+          + (b.le ? '<div class="rf-sous"><span>${T("Bloqué le")} ' + esc(szQuand(b.le)) + '</span></div>' : '')
+          + '</div></div>';
+      }
+      h += '</div>';
+    }
+    return h + '</div>';
+  }
+  function bloquesAppel(op, args, msgBon){
+    occuper(true);
+    return appeler(op, args).then(function(r){
+      occuper(false);
+      if (r && r.ok) { adopter(r); dessinerOnglets(); dessinerCorps(); dire(msgBon, 'bon'); }
+      else dire(expliquer(r), 'err');
+      return r;
+    });
+  }
+  function bloquer(num, note){ return bloquesAppel('config:telephonie:bloquer', [num, note || ''], '${T("Numéro bloqué.")}'); }
+  function debloquer(num){ return bloquesAppel('config:telephonie:debloquer', [num], '${T("Numéro débloqué.")}'); }
+  // Un bouton « Bloquer » (textos, messages vocaux) : deux clics, le premier demande confirmation.
+  function boutonBloquer(num){
+    if (RO || !num) return '';
+    if (estBloque(num)) return '<span class="rf-pill rouge">${T("Bloqué")}</span>';
+    return '<button class="b" type="button" data-bloquer="' + esc(num) + '" title="${T("Bloquer ce numéro")}"><span class="ic">⛔</span> ${T("Bloquer")}</button>';
+  }
+  function brancherBloquer(box){
+    var bs = box.querySelectorAll('[data-bloquer]');
+    for (var i = 0; i < bs.length; i++) bs[i].onclick = function(){
+      var el = this;
+      if (el.getAttribute('data-ok') !== '1') {
+        el.setAttribute('data-ok', '1'); el.textContent = '${T("Confirmer le blocage ?")}';
+        setTimeout(function(){ if (el.isConnected) { el.removeAttribute('data-ok'); el.innerHTML = '<span class="ic">⛔</span> ${T("Bloquer")}'; } }, 4000);
+        return;
+      }
+      bloquer(el.getAttribute('data-bloquer'), '').then(function(){ rendreVm(); rendreSms(); });
+    };
+  }
+
   var PANNEAUX = { general: panGeneral, accueil: panAccueil, menu: panMenu,
-    redirection: panRedirection, messagerie: panMessagerie, sms: panSms, file: panFile };
+    redirection: panRedirection, messagerie: panMessagerie, sms: panSms, file: panFile, bloques: panBloques };
 
   // ── LECTURE DES CHAMPS DU PANNEAU ACTIF vers la config en memoire ────────────
   function lireMenuDom(){
@@ -641,6 +709,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
       var sel = document.getElementById('t-q-music-preset');
       if (sel) sel.onchange = function(){ var w = document.getElementById('t-q-music-wrap'); if (w) w.style.display = (this.value === 'custom' ? 'block' : 'none'); };
     }
+    if (ONGLET === 'bloques') {
+      var ba = document.getElementById('t-bl-add');
+      if (ba) ba.onclick = function(){
+        var n = telE164(val('t-bl-num'));
+        if (!n || n.replace(/[^0-9]/g, '').length < 8) { dire('${T("Numéro invalide.")}', 'err'); return; }
+        bloquer(n, val('t-bl-note'));
+      };
+      var bd = corps.querySelectorAll('[data-bldel]');
+      for (var j = 0; j < bd.length; j++) bd[j].onclick = function(){ debloquer(this.getAttribute('data-bldel')); };
+    }
     if (ONGLET === 'sms') {
       var sb = document.getElementById('t-sms-send'); if (sb) sb.onclick = smsEnvoyer;
       var sj = document.getElementById('t-sms-journaux'); if (sj) sj.onclick = function(){ if (P && P.ouvrirJournaux) P.ouvrirJournaux('sms'); };
@@ -685,6 +763,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
         + '<div class="qui"><span class="rf-nom">' + esc(v.from || '${T("Inconnu")}') + '</span>'
         + (v.read ? '' : '<span class="rf-pill bleu">${T("Non lu")}</span>') + '</div>'
         + '<div class="actes">'
+        + boutonBloquer(v.from)
         + (v.read || RO ? '' : '<button class="b" type="button" data-vmlu="' + esc(v.id) + '">${T("✓ Marquer lu")}</button>')
         + (RO ? '' : '<button class="b dgr" type="button" data-vmdel="' + esc(v.id) + '" title="${T("Supprimer")}" aria-label="${T("Supprimer")}"><span class="ic">🗑</span></button>')
         + '</div></div>'
@@ -694,6 +773,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
     box.innerHTML = h;
     var lus = box.querySelectorAll('[data-vmlu]'); for (var a = 0; a < lus.length; a++) lus[a].onclick = function(){ vmAction('vm:lu', this.getAttribute('data-vmlu')); };
     var dels = box.querySelectorAll('[data-vmdel]'); for (var b = 0; b < dels.length; b++) dels[b].onclick = function(){ vmAction('vm:suppr', this.getAttribute('data-vmdel')); };
+    brancherBloquer(box);
   }
   function rendreSms(){
     var box = document.getElementById('t-sms-inbox'); if (!box) return;
@@ -714,7 +794,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
         + '</div><span class="meta">' + esc(szQuand(m.date)) + '</span></div>'
         + '<div class="corpsmsg">' + esc(m.body || '') + '</div>'
         + '<div class="actes" style="margin-top:.35rem">'
-        + (entrant ? '<button class="b" type="button" data-smsrep="' + esc(m.from) + '">${T("↩ Répondre")}</button>' : '')
+        + (entrant ? '<button class="b" type="button" data-smsrep="' + esc(m.from) + '">${T("↩ Répondre")}</button>' + boutonBloquer(m.from) : '')
         + (entrant && !m.read ? '<button class="b" type="button" data-smslu="' + esc(m.id) + '">✓</button>' : '')
         + (RO ? '' : '<button class="b dgr" type="button" data-smsdel="' + esc(m.id) + '" title="${T("Supprimer")}" aria-label="${T("Supprimer")}"><span class="ic">🗑</span></button>')
         + '</div></div></div>';
@@ -723,6 +803,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
     var reps = box.querySelectorAll('[data-smsrep]'); for (var a = 0; a < reps.length; a++) reps[a].onclick = function(){ var t = document.getElementById('t-sms-to'); if (t) { t.value = this.getAttribute('data-smsrep'); var bd = document.getElementById('t-sms-body'); if (bd) bd.focus(); } };
     var lus = box.querySelectorAll('[data-smslu]'); for (var b = 0; b < lus.length; b++) lus[b].onclick = function(){ smsAction('sms:lu', this.getAttribute('data-smslu')); };
     var dels = box.querySelectorAll('[data-smsdel]'); for (var c = 0; c < dels.length; c++) dels[c].onclick = function(){ smsAction('sms:suppr', this.getAttribute('data-smsdel')); };
+    brancherBloquer(box);
   }
 
   /* Les tuiles : ce que tel:resume sait deja — rien n est invente. Avant la
