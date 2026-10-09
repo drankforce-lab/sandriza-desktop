@@ -147,6 +147,8 @@ html.jour .pf-med-l video{background:#1d2433}
   background:var(--f-0f1826);color:var(--tx2);font-size:.68rem;text-align:center;padding:.2rem}
 .vue .cadre:hover{border-color:#c9a97e}
 .vue .cadre.pleine{border-style:solid;border-color:var(--v22)}
+/* Photo de couleur OBLIGATOIRE encore vide (2026-10-09) : le contour or la signale. */
+.vue .cadre.requise{border-color:#c9a97e;color:var(--tx2)}
 .vue img{width:100%;height:100%;object-fit:cover}
 .vue .lgd{font-size:.68rem;color:var(--tx2);text-align:center;margin-top:.18rem;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1222,21 +1224,21 @@ function pageProduit(id) {
     // ⚠ ON MASQUE LA CARTE ENTIERE, on n y met pas un message d excuse. Une carte
     // qui explique pourquoi elle est vide occupe la place d une carte utile, et
     // laisse croire qu il manque quelque chose alors que le reglage est respecte.
+    /* ⚠ OBLIGATOIRE DANS TOUTES LES CATÉGORIES (2026-10-09, sa demande : « une photo pour chaque
+       couleur secondaire, et cette photo est obligatoire ; les autres photos ne changent pas de
+       couleur, elles restent liées à la photo principale »). Avant : la carte disparaissait en mode
+       « standard » et la photo était facultative. Chaque case reste cliquable, même en mode auto :
+       une couleur que la teinte ne sait pas faire doit pouvoir recevoir sa photo à la main. */
     var carte = p.closest('.carte');
-    if (modeStandard()) {
-      if (carte) carte.style.display = 'none';
-      return;
-    }
     if (carte) carte.style.display = '';
-    var auto = modeAutoCouleur();
+    var auto = modeAutoCouleur() && !modeStandard();
     var titre = document.getElementById('p-parcoul-titre');
-    if (titre) titre.textContent = auto ? '${T("Variantes de couleur (Auto)")}' : '${T("Photo par couleur (Manuel)")}';
+    if (titre) titre.textContent = '${T("Photo par couleur (obligatoire)")}';
     var aide = document.getElementById('p-parcoul-aide');
-    if (aide) aide.textContent = auto
-      ? '${T("Générées en teintant les photos du produit — et régénérées automatiquement")} '
-        + '${T("à l’enregistrement. Le client voit la photo de la couleur qu’il choisit.")}'
-      : '${T("Ajoutez une photo par couleur. Le client voit la photo de la couleur qu’il")} '
-        + '${T("choisit ; sans photo, c’est la photo principale qui s’affiche.")}';
+    if (aide) aide.textContent = (auto
+      ? '${T("Générée en teintant la photo principale à l’enregistrement, si la case est vide — ou déposez-la vous-même.")} '
+      : '${T("Une photo pour chaque couleur secondaire.")} ')
+      + '${T("Sur la boutique, elle remplace la photo principale quand le client choisit cette couleur ; les photos supplémentaires restent les mêmes.")}';
     var cs = couleurs();
     var bg = document.getElementById('p-cv-gen');
     // ⚠ LA 1ʳᵉ COULEUR N’A PAS DE CASE : ses photos sont celles du produit, et
@@ -1255,13 +1257,10 @@ function pageProduit(id) {
     }
     p.innerHTML = variantes.map(function(c){
       var src = (PARCOUL[c] && (PARCOUL[c].main || PARCOUL[c].principale)) || '';
-      // En mode AUTO la case ne se clique pas : un dépôt manuel serait écrasé
-      // par la régénération de l’enregistrement, sans un mot.
-      return '<div class="vue"><div class="cadre' + (src ? ' pleine' : '')
-        + (auto ? '" style="cursor:default" title="${T("Générée par « Tout générer » et à l’enregistrement")}"'
-                : '" data-coul="' + esc(c) + '"')
-        + '>' + (src ? '<img src="' + esc(src) + '" alt="">' : (auto ? '${T("à générer")}' : 'ajouter')) + '</div>'
-        + (src && !auto ? '<button type="button" class="x" data-coulx="' + esc(c) + '" title="${T("Retirer")}">×</button>' : '')
+      /* Une case vide se MARQUE (obligatoire) ; en mode auto elle dit qu’elle sera générée. */
+      return '<div class="vue"><div class="cadre' + (src ? ' pleine' : ' requise') + '" data-coul="' + esc(c) + '">'
+        + (src ? '<img src="' + esc(src) + '" alt="">' : (auto ? '${T("à générer")}' : '${T("ajouter *")}')) + '</div>'
+        + (src ? '<button type="button" class="x" data-coulx="' + esc(c) + '" title="${T("Retirer")}">×</button>' : '')
         + '<div class="lgd">' + esc(c) + '</div></div>';
     }).join('');
   }
@@ -2170,17 +2169,18 @@ function pageProduit(id) {
      sans teinte attribuée est sautée EN LE DISANT. Et comme l’éditeur du
      site, tout se REGÉNÈRE à l’enregistrement en mode auto. */
   var GEN_ENCOURS = false;
+  /* ⚠ LA PHOTO PRINCIPALE SEULEMENT (2026-10-09) : les photos supplémentaires ne changent plus
+     de couleur — elles restent celles du produit, quelle que soit la couleur choisie. Teinter
+     chaque vue coûtait du temps pour des images que la boutique n’affiche plus. */
   function slotsSources(){
     var l = [];
     if (IMAGE) l.push({ cle: 'main', src: IMAGE });
-    if (!modeStandard()) {
-      (CTX.vuesAngles || []).forEach(function(k){ if (VUES[k]) l.push({ cle: k, src: VUES[k] }); });
-    }
     return l;
   }
-  function genererVariantes(fini){
+  // seulementVides (à l’enregistrement) : une photo déposée ou déjà générée n’est pas refaite.
+  function genererVariantes(fini, seulementVides){
     if (GEN_ENCOURS) { if (fini) fini(); return; }
-    var cibles = couleurs().slice(1);
+    var cibles = couleurs().slice(1).filter(function(c){ return !seulementVides || !(PARCOUL[c] && PARCOUL[c].main); });
     var slots = slotsSources();
     if (!cibles.length || !slots.length) { if (fini) fini(); return; }
     GEN_ENCOURS = true;
@@ -2789,13 +2789,22 @@ function pageProduit(id) {
     // « ⏳ Génération… » avant d’écrire). Après la question du sous-coût, pour
     // ne pas faire attendre la personne avant de l’interroger. Un échec de
     // teinte n’empêche PAS d’enregistrer : générer est un plus, pas une porte.
-    if (!VAR_FAITES && modeAutoCouleur() && IMAGE && couleurs().length > 1) {
+    if (!VAR_FAITES && modeAutoCouleur() && !modeStandard() && IMAGE && couleurs().length > 1) {
       bEnr.disabled = true;
       genererVariantes(function(){
         bEnr.disabled = false;
         VAR_FAITES = true;
         enregistrer();
-      });
+      }, true);
+      return;
+    }
+    // ⚠ CHAQUE COULEUR SECONDAIRE A SA PHOTO — sinon on ne part pas (sa règle du 2026-10-09).
+    // Après la teinte automatique : ce qu’elle n’a pas su faire se dit ici, couleur par couleur.
+    var sansPhoto = couleurs().slice(1).filter(function(c){ return !(PARCOUL[c] && (PARCOUL[c].main || PARCOUL[c].principale)); });
+    if (sansPhoto.length) {
+      VAR_FAITES = false;
+      Assist.aller(2); dessinerVues();
+      dire('${T("Photo obligatoire pour chaque couleur secondaire — manquante :")} ' + sansPhoto.join(', ') + '.', 'err');
       return;
     }
     // Le stock est purge des variantes qui n existent plus : garder une quantite
