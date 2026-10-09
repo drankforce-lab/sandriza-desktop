@@ -542,7 +542,7 @@ module.exports = {
   'Une photo par couleur secondaire': 'One photo per secondary colour',
   // Mesures du vêtement (7.13.0)
   "Mesures du vêtement": "Garment measurements",
-  "Facultatif, mais c’est ce qui permet de suggérer la bonne taille à chaque cliente d’après ses propres mesures — et d’éviter les retours. Photographiez le vêtement à plat sur un fond NON blanc, avec une feuille lettre posée à côté.": "Optional, but this is what lets the store suggest the right size to each customer from her own measurements — and avoid returns. Photograph the garment flat on a NON-white surface, with a letter sheet next to it.",
+  "Facultatif, mais c’est ce qui permet de suggérer la bonne taille à chaque client d’après ses propres mesures — et d’éviter les retours. Photographiez le vêtement à plat sur un fond NON blanc, avec une feuille lettre posée à côté.": "Optional, but this is what lets the store suggest the right size to each customer from their own measurements — and avoid returns. Photograph the garment flat on a NON-white surface, with a letter sheet next to it.",
   "Type": "Type",
   "Haut (chandail, chemisier, veste)": "Top (sweater, blouse, jacket)",
   "Bas (pantalon, jupe, short)": "Bottom (pants, skirt, shorts)",
