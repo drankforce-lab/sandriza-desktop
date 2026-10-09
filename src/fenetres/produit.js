@@ -150,6 +150,22 @@ html.jour .pf-med-l video{background:#1d2433}
 /* Photo de couleur OBLIGATOIRE encore vide (2026-10-09) : le contour or la signale. */
 .vue .cadre.requise{border-color:#c9a97e;color:var(--tx2)}
 .vue img{width:100%;height:100%;object-fit:cover}
+/* Mesures du vêtement (7.13.0) */
+.mesv-barre{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin-bottom:.7rem}
+.mesv-barre select{min-width:14rem}
+table.mesv{width:100%;border-collapse:collapse;font-size:.84rem}
+table.mesv th{text-align:left;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);padding:.35rem .4rem;border-bottom:1px solid var(--v10)}
+table.mesv tbody th{font-size:.84rem;text-transform:none;letter-spacing:0;color:var(--tx);font-weight:700}
+table.mesv td{padding:.25rem .4rem;border-bottom:1px solid var(--v05)}
+table.mesv input{width:100%;max-width:7rem}
+.mv-boite{max-width:62rem!important}
+.mv-barre{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-bottom:.5rem;font-size:.82rem}
+.mv-q{font-weight:600;color:var(--tx)!important}
+.mv-zone{max-height:62vh;overflow:auto;border:1px solid var(--v10);border-radius:9px;background:#000;display:flex;justify-content:center}
+.mv-zone canvas{display:block;max-width:100%;height:auto;cursor:crosshair}
+.mv-res{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem;font-size:.8rem}
+.mv-res span{padding:.2rem .55rem;border:1px solid var(--v12);border-radius:999px;cursor:pointer;color:var(--tx2)}
+.mv-res span.fait{border-color:#c9a97e;color:var(--tx)}
 /* La grille des photos par couleur (étape à part) : autant de colonnes que la largeur en
    permet, cases au format portrait — dix couleurs ne déforment rien, elles passent à la ligne. */
 #p-parcoul{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:.75rem;overflow:visible}
@@ -591,6 +607,16 @@ function pageProduit(id) {
       + '${T("Tout générer")}</button></div></div>'
       + '</div>');
 
+    /* 5 ter — MESURES DU VÊTEMENT (7.13.0) : facultatives, elles font la taille suggérée. */
+    h.push('<div class="etape"><div class="carte plein"><h2>${T("Mesures du vêtement")}</h2>'
+      + '<div class="aide" style="margin-bottom:.6rem">${T("Facultatif, mais c’est ce qui permet de suggérer la bonne taille à chaque cliente d’après ses propres mesures — et d’éviter les retours. Photographiez le vêtement à plat sur un fond NON blanc, avec une feuille lettre posée à côté.")}</div>'
+      + '<div class="mesv-barre"><label for="p-mesv-type">${T("Type")}</label><select id="p-mesv-type">'
+      + '<option value="haut">${T("Haut (chandail, chemisier, veste)")}</option><option value="bas">${T("Bas (pantalon, jupe, short)")}</option>'
+      + '<option value="robe">${T("Robe ou combinaison")}</option><option value="aucun">${T("Aucune mesure")}</option></select>'
+      + '<button type="button" id="p-mesv-photo" class="prim"><span class="ic">📏</span> ${T("Mesurer sur une photo")}</button>'
+      + '<button type="button" id="p-mesv-grad">${T("Compléter les autres tailles")}</button></div>'
+      + '<div id="p-mesv-table"></div></div></div>');
+
     // 6 — Détails
     // ⚠ LE REGIME DE VENTE N EST PAS UN JEU DE CASES INDEPENDANTES. Mes cases
     // permettaient « vente finale ET aucun retour ET liquidation » — une
@@ -705,9 +731,10 @@ function pageProduit(id) {
       { t: '${T("Tailles et couleurs")}',     obl: [] },
       { t: 'Photo',                   obl: [] },
       { t: '${T("Couleurs")}',                obl: [] },
+      { t: '${T("Mesures")}',                 obl: [] },
       { t: '${T("Mise en marché")}',          obl: [] },
       { t: 'Stock',                   obl: [] }
-    ], function(i){ if (i === 2) { dessinerVues(); dessinerMedias(); } if (i === 3) dessinerVues(); if (i === 5) majStock(); });
+    ], function(i){ if (i === 2) { dessinerVues(); dessinerMedias(); } if (i === 3) dessinerVues(); if (i === 4) dessinerMesures(); if (i === 6) majStock(); });
 
     bEnr.disabled = !(ID ? CTX.peutModifier : CTX.peutAjouter);
     if (bEnr.disabled) dire('${T("Consultation seulement — votre rôle ne permet pas d’enregistrer.")}', 'att');
@@ -762,7 +789,7 @@ function pageProduit(id) {
     ];
     if (c.length > 1) exig.push([3, '${T("Une photo par couleur secondaire")}',
       c.slice(1).every(function(x){ return !!(PARCOUL[x] && (PARCOUL[x].main || PARCOUL[x].principale)); })]);
-    if (!ID && t.length && c.length) exig.push([5, '${T("Une quantité en stock")}', tot > 0]);
+    if (!ID && t.length && c.length) exig.push([6, '${T("Une quantité en stock")}', tot > 0]);
     var nManque = exig.filter(function(m){ return !m[2]; }).length;
     h += '<div class="reste">' + (nManque
       ? '<div class="t">${T("Pour enregistrer")}</div>'
@@ -1219,6 +1246,254 @@ function pageProduit(id) {
   }
 
   // Un cadre par vue : on clique, on choisit un fichier. Le « x » retire.
+  /* ══ MESURES DU VÊTEMENT (7.13.0, 2026-10-09) ═══════════════════════════════════════════
+     Sa demande : « un système automatisé qui, à partir de la photo du vêtement, donne les
+     mesures de taille… le tout pour réduire les retours au maximum ». Gratuit, sans service :
+     on photographie le vêtement À PLAT à côté d une feuille LETTRE (ou A4) ; la fenêtre trouve
+     la feuille toute seule (la plus grande zone blanche au bon rapport de côtés) et en tire
+     l échelle ; on clique ensuite le début et la fin de chaque mesure. La gradation standard
+     complète les autres tailles, à corriger au besoin. La boutique compare ces mesures à
+     celles de la cliente (taille suggérée).
+     Les mesures de tour sont prises À PLAT (moitié du tour), comme on mesure un vêtement posé.
+     ⚠ La détection de la feuille veut un fond qui n est PAS blanc : sur un drap blanc, elle
+     échoue et le dit — on clique alors les deux bouts du grand côté de la feuille. */
+  var MESV = { type: '', tailles: {} };
+  var MV_TYPES = {
+    haut: [['poitrine', '${T("Poitrine (à plat)")}', '${T("d’une aisselle à l’autre")}'],
+           ['longueur', '${T("Longueur")}', '${T("du haut de l’épaule jusqu’au bas")}'],
+           ['manche', '${T("Manche")}', '${T("de la couture d’épaule au poignet")}'],
+           ['epaules', '${T("Épaules")}', '${T("d’une couture d’épaule à l’autre")}']],
+    bas:  [['taille', '${T("Taille (à plat)")}', '${T("d’un côté à l’autre de la ceinture")}'],
+           ['hanches', '${T("Hanches (à plat)")}', '${T("au plus large, sous la braguette")}'],
+           ['longueur', '${T("Longueur")}', '${T("de la ceinture jusqu’au bas")}'],
+           ['entrejambe', '${T("Entrejambe")}', '${T("de l’entrejambe jusqu’au bas")}']],
+    robe: [['poitrine', '${T("Poitrine (à plat)")}', '${T("d’une aisselle à l’autre")}'],
+           ['taille', '${T("Taille (à plat)")}', '${T("au plus étroit")}'],
+           ['hanches', '${T("Hanches (à plat)")}', '${T("au plus large")}'],
+           ['longueur', '${T("Longueur")}', '${T("du haut de l’épaule jusqu’au bas")}']]
+  };
+  // Le pas de gradation entre deux tailles voisines (cm) — l usage courant du prêt-à-porter.
+  var MV_PAS = { poitrine: 2.5, taille: 2.5, hanches: 2.5, epaules: 1, longueur: 1.5, manche: 1, entrejambe: 0 };
+  function mvTypeDefaut(){
+    var c = String(val('p-cat') || '').toLowerCase();
+    if (/robe|combin/.test(c)) return 'robe';
+    if (/pantalon|jean|jupe|short|legging/.test(c)) return 'bas';
+    if (/accessoire|chaussure|bijou|sac/.test(c)) return '';
+    return 'haut';
+  }
+  function mvType(){ return MESV.type === 'aucun' ? '' : (MESV.type || mvTypeDefaut()); }
+  function mvDepuisFiche(m){
+    var o = { type: '', tailles: {} };
+    if (!m || typeof m !== 'object') return o;
+    o.type = MV_TYPES[m.type] ? m.type : '';
+    Object.keys(m.tailles || {}).forEach(function(t){
+      var src = m.tailles[t] || {}, d = {};
+      Object.keys(src).forEach(function(k){ var n = parseFloat(src[k]); if (n > 0) d[k] = n; });
+      if (Object.keys(d).length) o.tailles[t] = d;
+    });
+    return o;
+  }
+  function mvPourEnvoi(){
+    var ty = mvType(); if (!ty) return null;
+    var cles = MV_TYPES[ty].map(function(x){ return x[0]; }), out = {};
+    tailles().forEach(function(t){
+      var src = MESV.tailles[t] || {}, d = {};
+      cles.forEach(function(k){ var n = parseFloat(src[k]); if (n > 0) d[k] = Math.round(n * 2) / 2; });
+      if (Object.keys(d).length) out[t] = d;
+    });
+    return Object.keys(out).length ? { type: ty, unite: 'cm', tailles: out } : null;
+  }
+  function dessinerMesures(){
+    var z = document.getElementById('p-mesv-table'); if (!z) return;
+    var sel = document.getElementById('p-mesv-type');
+    var ty = mvType();
+    if (sel) { sel.value = ty || 'aucun'; sel.onchange = function(){ MESV.type = sel.value; dessinerMesures(); }; }
+    var bp = document.getElementById('p-mesv-photo'); if (bp) bp.onclick = mvOutilPhoto;
+    var bg = document.getElementById('p-mesv-grad'); if (bg) bg.onclick = mvGraduer;
+    var ts = tailles();
+    if (!ty) { z.innerHTML = '<div class="aide">${T("Aucune mesure pour ce type d’article. Choisissez un type ci-dessus si le vêtement en a besoin.")}</div>'; return; }
+    if (!ts.length) { z.innerHTML = '<div class="aide">${T("Choisissez d’abord les tailles à l’étape « Tailles et couleurs ».")}</div>'; return; }
+    var cols = MV_TYPES[ty];
+    z.innerHTML = '<table class="mesv"><thead><tr><th>${T("Taille")}</th>'
+      + cols.map(function(c){ return '<th title="' + esc(c[2]) + '">' + c[1] + '</th>'; }).join('') + '</tr></thead><tbody>'
+      + ts.map(function(t){
+          var r = MESV.tailles[t] || {};
+          return '<tr><th>' + esc(t) + '</th>' + cols.map(function(c){
+            return '<td><input type="number" min="0" step="0.5" inputmode="decimal" data-mvt="' + esc(t) + '" data-mvk="' + c[0] + '" value="' + (r[c[0]] || '') + '" aria-label="' + esc(t + ' — ' + c[1]) + '"></td>';
+          }).join('') + '</tr>';
+        }).join('') + '</tbody></table>'
+      + '<div class="aide" style="margin-top:.4rem">${T("En centimètres, vêtement posé à plat. Les tours (poitrine, taille, hanches) se mesurent d’un côté à l’autre : la boutique les double.")}</div>';
+    z.querySelectorAll('input[data-mvt]').forEach(function(el){
+      el.oninput = function(){
+        var t = el.getAttribute('data-mvt'), k = el.getAttribute('data-mvk'), n = parseFloat(String(el.value).replace(',', '.'));
+        MESV.tailles[t] = MESV.tailles[t] || {};
+        if (n > 0) MESV.tailles[t][k] = n; else delete MESV.tailles[t][k];
+      };
+    });
+  }
+  // Complète les cases VIDES à partir de la taille la mieux remplie (gradation standard).
+  function mvGraduer(){
+    var ty = mvType(), ts = tailles(); if (!ty || !ts.length) return;
+    var cles = MV_TYPES[ty].map(function(x){ return x[0]; });
+    var ref = null, max = 0;
+    ts.forEach(function(t){ var n = Object.keys(MESV.tailles[t] || {}).length; if (n > max) { max = n; ref = t; } });
+    if (!ref) { dire('${T("Mesurez d’abord au moins une taille.")}', 'att'); return; }
+    var iRef = ts.indexOf(ref), faits = 0;
+    ts.forEach(function(t, i){
+      if (t === ref) return;
+      MESV.tailles[t] = MESV.tailles[t] || {};
+      cles.forEach(function(k){
+        var base = MESV.tailles[ref][k];
+        if (!(base > 0) || MESV.tailles[t][k] > 0) return;
+        MESV.tailles[t][k] = Math.round((base + (i - iRef) * (MV_PAS[k] || 0)) * 2) / 2; faits++;
+      });
+    });
+    dessinerMesures();
+    dire(faits ? '${T("Autres tailles complétées d’après la taille ")}' + ref + '${T(" — vérifiez-les si vous avez le vêtement.")}' : '${T("Rien à compléter.")}', faits ? 'bon' : '');
+  }
+
+  /* LA FEUILLE, TROUVÉE TOUTE SEULE : la plus grande zone blanche (claire et peu colorée),
+     d un seul tenant, pleine, au rapport de côtés d une feuille. Ses dimensions viennent de
+     ses moments (un rectangle plein de côté L a une variance L²/12 le long de son axe). */
+  function mvTrouverFeuille(cv, format){
+    var W = cv.width, H = cv.height, pas = Math.max(1, Math.round(Math.max(W, H) / 420));
+    var w = Math.floor(W / pas), h = Math.floor(H / pas);
+    var px = cv.getContext('2d').getImageData(0, 0, W, H).data;
+    var blanc = new Uint8Array(w * h), lum = [];
+    for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
+      var i = ((y * pas) * W + x * pas) * 4, r = px[i], g = px[i + 1], b = px[i + 2];
+      var l = (r + g + b) / 3; lum.push(l);
+      blanc[y * w + x] = (l > 0 && (Math.max(r, g, b) - Math.min(r, g, b)) < 34) ? Math.round(l) : 0;
+    }
+    lum.sort(function(a, b){ return a - b; });
+    var seuil = Math.max(170, lum[Math.floor(lum.length * 0.97)] - 32);
+    var vu = new Uint8Array(w * h), meilleur = null;
+    for (var s0 = 0; s0 < w * h; s0++) {
+      if (vu[s0] || blanc[s0] < seuil) continue;
+      var pile = [s0], n = 0, sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0; vu[s0] = 1;
+      while (pile.length) {
+        var c = pile.pop(), cx = c % w, cy = (c - cx) / w;
+        n++; sx += cx; sy += cy; sxx += cx * cx; syy += cy * cy; sxy += cx * cy;
+        var v = [c - 1, c + 1, c - w, c + w];
+        for (var k = 0; k < 4; k++) {
+          var q = v[k]; if (q < 0 || q >= w * h || vu[q]) continue;
+          if ((k === 0 && cx === 0) || (k === 1 && cx === w - 1)) continue;
+          if (blanc[q] >= seuil) { vu[q] = 1; pile.push(q); }
+        }
+      }
+      if (n < w * h * 0.01 || n > w * h * 0.5) continue;
+      var mx = sx / n, my = sy / n, a = sxx / n - mx * mx, d = syy / n - my * my, bb = sxy / n - mx * my;
+      var t2 = (a + d) / 2, del = Math.sqrt(Math.max(0, (a - d) * (a - d) / 4 + bb * bb));
+      var L = Math.sqrt(12 * (t2 + del)), l2 = Math.sqrt(12 * Math.max(0, t2 - del));
+      if (!(l2 > 0)) continue;
+      var ratio = L / l2, cible = format === 'a4' ? 297 / 210 : 279.4 / 215.9;
+      var plein = n / (L * l2);
+      if (Math.abs(ratio - cible) > 0.16 || plein < 0.82) continue;
+      if (!meilleur || n > meilleur.n) meilleur = { n: n, L: L * pas, l: l2 * pas, cx: mx * pas, cy: my * pas,
+        ang: 0.5 * Math.atan2(2 * bb, a - d) };
+    }
+    if (!meilleur) return null;
+    var dims = format === 'a4' ? [29.7, 21] : [27.94, 21.59];
+    meilleur.pxParCm = (meilleur.L / dims[0] + meilleur.l / dims[1]) / 2;
+    return meilleur;
+  }
+
+  function mvOutilPhoto(){
+    var ty = mvType(), ts = tailles();
+    if (!ty) { dire('${T("Choisissez d’abord le type de vêtement.")}', 'att'); return; }
+    if (!ts.length) { dire('${T("Choisissez d’abord les tailles à l’étape « Tailles et couleurs ».")}', 'att'); return; }
+    choisirFichier(function(ds){
+      if (!ds || !ds[0]) return;
+      var cols = MV_TYPES[ty];
+      var v = document.createElement('div');
+      v.className = 'voile';
+      v.innerHTML = '<div class="boite mv-boite"><h3 style="color:var(--tx)">${T("Mesurer sur la photo")}</h3>'
+        + '<div class="mv-barre"><label>${T("Taille photographiée")} <select id="mv-t">' + ts.map(function(t){ return '<option>' + esc(t) + '</option>'; }).join('') + '</select></label>'
+        + '<label>${T("Feuille")} <select id="mv-f"><option value="lettre">${T("Lettre (8,5 × 11 po)")}</option><option value="a4">A4</option></select></label>'
+        + '<button type="button" id="mv-ech">${T("Refaire l’échelle à la main")}</button></div>'
+        + '<p id="mv-q" class="mv-q"></p><div class="mv-zone"><canvas id="mv-cv"></canvas></div>'
+        + '<div class="mv-res" id="mv-res"></div>'
+        + '<div class="pied2"><button type="button" id="mv-annuler">${T("Annuler")}</button>'
+        + '<button type="button" id="mv-recommencer">${T("Recommencer les mesures")}</button>'
+        + '<button type="button" class="prim" id="mv-ok" disabled>${T("✓ Garder ces mesures")}</button></div></div>';
+      document.body.appendChild(v);
+      var cv = document.getElementById('mv-cv'), ctx = cv.getContext('2d');
+      var img = new Image(), echelle = null, feuille = null, clics = [], iDim = 0, res = {}, modeEch = false;
+      function q(t){ document.getElementById('mv-q').textContent = t; }
+      function fermer(){ v.remove(); }
+      function peindre(){
+        ctx.drawImage(img, 0, 0, cv.width, cv.height);
+        if (feuille) {
+          ctx.save(); ctx.translate(feuille.cx, feuille.cy); ctx.rotate(feuille.ang);
+          ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 3; ctx.strokeRect(-feuille.L / 2, -feuille.l / 2, feuille.L, feuille.l); ctx.restore();
+        }
+        ctx.lineWidth = 3; ctx.font = 'bold 15px system-ui';
+        Object.keys(res).forEach(function(k){ var s = res[k];
+          ctx.strokeStyle = '#c9a97e'; ctx.beginPath(); ctx.moveTo(s.a[0], s.a[1]); ctx.lineTo(s.b[0], s.b[1]); ctx.stroke();
+          ctx.fillStyle = '#000'; ctx.fillRect((s.a[0] + s.b[0]) / 2 - 4, (s.a[1] + s.b[1]) / 2 - 18, 74, 22);
+          ctx.fillStyle = '#fff'; ctx.fillText(s.cm + ' cm', (s.a[0] + s.b[0]) / 2, (s.a[1] + s.b[1]) / 2 - 2); });
+        clics.forEach(function(c){ ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(c[0], c[1], 5, 0, 7); ctx.fill(); });
+      }
+      function resume(){
+        document.getElementById('mv-res').innerHTML = cols.map(function(c){
+          return '<span class="' + (res[c[0]] ? 'fait' : '') + '">' + c[1] + ' : <b>' + (res[c[0]] ? res[c[0]].cm + ' cm' : '—') + '</b></span>'; }).join('');
+        document.getElementById('mv-ok').disabled = !Object.keys(res).length;
+      }
+      function suivante(){
+        clics = [];
+        if (modeEch || !echelle) { q('${T("Cliquez les deux bouts du GRAND côté de la feuille.")}'); return; }
+        while (iDim < cols.length && res[cols[iDim][0]]) iDim++;
+        if (iDim >= cols.length) { q('${T("Toutes les mesures sont prises. Gardez-les, ou cliquez une ligne pour la refaire.")}'); return; }
+        q('${T("Cliquez le début puis la fin : ")}' + cols[iDim][1] + ' — ' + cols[iDim][2] + '.');
+      }
+      function auto(){
+        feuille = mvTrouverFeuille(cv, document.getElementById('mv-f').value);
+        if (feuille) { echelle = feuille.pxParCm; modeEch = false; dire('${T("Feuille trouvée : l’échelle est posée.")}', 'bon'); }
+        else { echelle = null; modeEch = true; dire('${T("Feuille introuvable (fond trop clair ?) : cliquez les deux bouts de son grand côté.")}', 'att'); }
+        peindre(); suivante();
+      }
+      img.onload = function(){
+        var r = Math.min(1, 980 / img.naturalWidth, 600 / img.naturalHeight);
+        cv.width = Math.round(img.naturalWidth * r); cv.height = Math.round(img.naturalHeight * r);
+        peindre(); auto(); resume();
+      };
+      img.src = ds[0];
+      cv.onclick = function(ev){
+        var b = cv.getBoundingClientRect();
+        var p = [(ev.clientX - b.left) * cv.width / b.width, (ev.clientY - b.top) * cv.height / b.height];
+        clics.push(p);
+        if (clics.length < 2) { peindre(); return; }
+        var dpx = Math.hypot(clics[1][0] - clics[0][0], clics[1][1] - clics[0][1]);
+        if (modeEch || !echelle) {
+          var lg = document.getElementById('mv-f').value === 'a4' ? 29.7 : 27.94;
+          echelle = dpx / lg; modeEch = false; feuille = null;
+          dire('${T("Échelle posée à la main.")}', 'bon');
+        } else if (iDim < cols.length) {
+          res[cols[iDim][0]] = { a: clics[0], b: clics[1], cm: Math.round(dpx / echelle * 2) / 2 };
+          iDim++;
+        }
+        peindre(); resume(); suivante();
+      };
+      document.getElementById('mv-res').onclick = function(ev){
+        var sp = ev.target.closest('span'); if (!sp) return;
+        var i = Array.prototype.indexOf.call(this.children, sp); if (i < 0) return;
+        delete res[cols[i][0]]; iDim = i; peindre(); resume(); suivante();
+      };
+      document.getElementById('mv-f').onchange = auto;
+      document.getElementById('mv-ech').onclick = function(){ modeEch = true; feuille = null; peindre(); suivante(); };
+      document.getElementById('mv-recommencer').onclick = function(){ res = {}; iDim = 0; peindre(); resume(); suivante(); };
+      document.getElementById('mv-annuler').onclick = fermer;
+      document.getElementById('mv-ok').onclick = function(){
+        var t = document.getElementById('mv-t').value;
+        MESV.type = ty;
+        MESV.tailles[t] = MESV.tailles[t] || {};
+        Object.keys(res).forEach(function(k){ MESV.tailles[t][k] = res[k].cm; });
+        fermer(); dessinerMesures();
+        dire('${T("Mesures de la taille ")}' + t + '${T(" enregistrées dans le tableau. « Compléter les autres tailles » remplit le reste.")}', 'bon');
+      };
+    }, false);
+  }
+
   function dessinerVues(){
     majFicheBientot();   // la photo principale a pu changer (volet « Fiche »)
     var t = document.getElementById('p-vues-titre');
@@ -1843,6 +2118,7 @@ function pageProduit(id) {
     // surface les partagerait avec la fiche d origine, et retirer une photo ici
     // la retirerait aussi de la reference qui sert a detecter les conflits.
     PARCOUL = parcoulDepuisFiche(p.colorVariants);
+    MESV = mvDepuisFiche(p.mesuresVetement);
     // Les médias : la taille portée attend que la liste des tailles soit posée,
     // elle est donc gardée de côté (MQ_TAILLE) et choisie au dessin.
     var mq = (p.mannequin && typeof p.mannequin === 'object') ? p.mannequin : {};
@@ -2515,7 +2791,7 @@ function pageProduit(id) {
         regime: val('p-regime'), retours: val('p-retours'), actif: coché('p-actif')
       },
       tailles: tailles(), couleurs: couleurs(),
-      image: IMAGE || '', vues: VUES, parcoul: PARCOUL, stock: STOCK, locs: LOCS
+      image: IMAGE || '', vues: VUES, parcoul: PARCOUL, stock: STOCK, locs: LOCS, mesv: MESV
     };
   }
   // « Utile » = la personne a réellement saisi quelque chose. On EXCLUT les
@@ -2578,13 +2854,15 @@ function pageProduit(id) {
     VUES = Object.assign({}, d.vues || {});
     // Un brouillon d’une version antérieure porte encore la clé « principale ».
     PARCOUL = parcoulDepuisFiche(d.parcoul);
+    MESV = mvDepuisFiche(d.mesv);
+    if (d.mesv && d.mesv.type === 'aucun') MESV.type = 'aucun';
     STOCK = Object.assign({}, d.stock || {});
     LOCS = Object.assign({}, d.locs || {});
     montrerImage(IMAGE);
     dessinerJetons(); majMarge(); majIa(); majNom();
     // On repart de l'étape où la personne s'était arrêtée : la ramener à la
     // première l'obligerait à retraverser ce qu'elle avait déjà rempli.
-    if (typeof d.etape === 'number') Assist.aller(Math.max(0, Math.min(5, d.etape)));
+    if (typeof d.etape === 'number') Assist.aller(Math.max(0, Math.min(6, d.etape)));
     else Assist.fil();
     // Le brouillon restauré est déjà celui du stockage : sans cette ligne, le
     // premier tic le réécrirait à l'identique.
@@ -2774,14 +3052,14 @@ function pageProduit(id) {
       if ((STOCK[t + '-' + c] || 0) > 0) enStock.push(t + '-' + c);
     }); });
     if (!ID && !enStock.length) {
-      Assist.aller(5);
+      Assist.aller(6);
       dire('${T("Saisissez une quantité pour au moins une variante avant d’enregistrer.")}', 'err');
       return;
     }
     if (CTX && (CTX.entrepots || []).length) {
       var sansLieu = enStock.filter(function(k){ return !LOCS[k]; });
       if (sansLieu.length) {
-        Assist.aller(5);
+        Assist.aller(6);
         dire('${T("Sélectionnez un emplacement d’entrepôt pour :")} '
           + sansLieu.slice(0, 3).join(', ')
           + (sansLieu.length > 3 ? '… (' + sansLieu.length + ' variantes)' : '') + '.', 'err');
@@ -2857,6 +3135,8 @@ function pageProduit(id) {
       belowCost: !!SOUSCOUT,
       belowCostReason: SOUSCOUT ? SOUSCOUT.raison : '',
       additionalImages: VUES,
+      // Les mesures du vêtement (7.13.0) : null = aucune. Le pont ne les écrit que si la clé est envoyée.
+      mesuresVetement: mvPourEnvoi(),
       // Les photos des couleurs RETIREES ne partent pas : le site les
       // televerserait puis les garderait dans le stockage sans que rien ne les
       // affiche jamais.
@@ -2890,9 +3170,9 @@ function pageProduit(id) {
         if (r && r.motif === 'tailles_couleurs_requises') Assist.aller(1);
         if (r && r.motif === 'photo_requise') Assist.aller(2);
         if (r && /^(mannequin_|video_|vue360_)/.test(String(r.motif || ''))) Assist.aller(2);
-        if (r && r.motif === 'stock_requis') Assist.aller(5);
+        if (r && r.motif === 'stock_requis') Assist.aller(6);
         if (r && r.motif === 'emplacement_requis') {
-          Assist.aller(5);
+          Assist.aller(6);
           dire('${T("Sélectionnez un emplacement d’entrepôt pour :")} '
             + (r.manquants || []).join(', ') + '.', 'err');
           return;
