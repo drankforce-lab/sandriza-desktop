@@ -162,6 +162,7 @@ table.mesv input{width:100%;max-width:7rem}
 .mv-barre{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-bottom:.5rem;font-size:.82rem}
 .mv-q{font-weight:600;color:var(--tx)!important}
 .mv-zone{max-height:62vh;overflow:auto;border:1px solid var(--v10);border-radius:9px;background:#000;display:flex;justify-content:center}
+html.jour .mv-zone{background:#e9e6df}
 .mv-zone canvas{display:block;max-width:100%;height:auto;cursor:crosshair}
 .mv-res{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem;font-size:.8rem}
 .mv-res span{padding:.2rem .55rem;border:1px solid var(--v12);border-radius:999px;cursor:pointer;color:var(--tx2)}
