@@ -1906,7 +1906,7 @@ function pageProduit(id) {
     return CLE_COUTS;
   }
   function chargerCouts(){
-    appeler('produit:couts', [[cleCouts()]]).then(function(r){
+    P.appeler('produit:couts', [cleCouts()]).then(function(r){
       COUTS = (r && r.ok) ? ((r.couts || {})[cleCouts()] || { total: 0, n: 0, detail: [] }) : null;
       majFicheBientot();
     });
@@ -1937,7 +1937,7 @@ function pageProduit(id) {
     }
     G3D.conf = false; G3D.enCours = true; dessiner3d();
     var e = document.getElementById('p-3d-etat'); if (e) e.textContent = '${T("Envoi de la photo à Fal.ai…")}';
-    appeler('produit:apercu3dLancer', [IMAGE, cleCouts(), G3D.forcer]).then(function(r){
+    P.appeler('produit:apercu3dLancer', IMAGE, cleCouts(), G3D.forcer).then(function(r){
       if (!r || !r.ok) {
         G3D.enCours = false;
         if (r && r.motif === 'avertir') {
@@ -1954,7 +1954,7 @@ function pageProduit(id) {
   }
   function suivre3d(eu, ru, t0){
     var e = document.getElementById('p-3d-etat');
-    appeler('produit:apercu3dSuivre', [eu, ru]).then(function(r){
+    P.appeler('produit:apercu3dSuivre', eu, ru).then(function(r){
       if (!r || !r.ok) { G3D.enCours = false; dessiner3d(); dire(expliquer(r), 'err'); return; }
       if (!r.pret) {
         var sec = Math.round((Date.now() - t0) / 1000);

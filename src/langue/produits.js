@@ -136,4 +136,6 @@ module.exports = {
   " unité(s)": " unit(s)",
   "Appliquer": "Apply",
   "Comparer les marges en tenant compte des coûts numériques (photos, IA, 3D)": "Compare margins including digital costs (photos, AI, 3D)",
+  "Sélectionner": "Select",
+  "Nouveau prix de": "New price for",
 };

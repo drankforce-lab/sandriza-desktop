@@ -194,13 +194,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + L.map(function(l){
           var prop = l.proposition;
           var det = (l.detail || []).map(function(x){ return x.n + ' × ' + (x.geste || x.modele) + ' (' + argent(x.cout) + ')'; }).join(' · ');
-          return '<tr><td><input type="checkbox" data-c="' + esc(l.id) + '"' + (prop ? ' checked' : '') + (l.sansAchat ? ' disabled' : '') + '></td>'
+          return '<tr><td><input type="checkbox" aria-label="' + esc('${T("Sélectionner")} ' + l.nom) + '" data-c="' + esc(l.id) + '"' + (prop ? ' checked' : '') + (l.sansAchat ? ' disabled' : '') + '></td>'
             + '<td>' + esc(l.nom) + '<span class="sous">' + esc(l.sku || '') + (det ? ' — ' + esc(det) : '') + '</span></td>'
             + '<td class="r">' + argent(l.prix) + '</td><td class="r">' + (l.sansAchat ? '<span class="pill neutre">${T("inconnu")}</span>' : argent(l.achat)) + '</td>'
             + '<td class="r">' + (l.ia > 0 ? argent(l.ia) + '<span class="sous">' + l.iaN + '${T(" appel(s) · ")}' + l.unites + '${T(" unité(s)")}</span>' : '—') + '</td>'
             + '<td class="r">' + argent(l.coutUnite) + '</td>'
             + '<td class="r"><span class="pill ' + (l.marge < d.reference - 0.005 ? 'att' : 'bon') + '">' + pct(l.marge) + '</span></td>'
-            + '<td class="r"><input type="number" min="0" step="1" data-p="' + esc(l.id) + '" value="' + (prop ? prop.prix : l.prix) + '"' + (l.sansAchat ? ' disabled' : '') + '></td>'
+            + '<td class="r"><input type="number" min="0" step="1" aria-label="' + esc('${T("Nouveau prix de")} ' + l.nom) + '" data-p="' + esc(l.id) + '" value="' + (prop ? prop.prix : l.prix) + '"' + (l.sansAchat ? ' disabled' : '') + '></td>'
             + '<td class="r" data-ma="' + esc(l.id) + '">' + (prop ? pct(prop.margeApres) : '—') + '</td>'
             + '<td class="r"><button class="mini" data-un="' + esc(l.id) + '"' + (l.sansAchat ? ' disabled' : '') + '>${T("Appliquer")}</button></td></tr>';
         }).join('') + '</tbody></table>';
