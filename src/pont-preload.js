@@ -41,6 +41,12 @@ contextBridge.exposeInMainWorld('szPont', {
      se contredire, et c est la vue VISIBLE qui a raison.
      ⚠ Inerte dans une fenetre native ordinaire : elle n est le cadre de rien. */
   dockZone: (rect) => ipcRenderer.send('dock:zone', rect || {}),
+  /* UNE PHOTO EN LIGNE, LUE PAR L APPLICATION (2026-10-09). Le stockage des photos (R2) ne
+     donne pas d en-tete CORS : une page ne peut pas lire les pixels d une photo deja en ligne
+     (canevas « sali »), et l outil de mesure ne trouvait pas la feuille. Le processus principal,
+     lui, n a pas cette regle : il rend la photo en donnee. Domaines de la boutique seulement ;
+     null si refuse ou illisible (la page garde alors l adresse et mesure a la main). */
+  imageLocale: (url) => ipcRenderer.invoke('image:locale', String(url || '')).catch(() => null),
   // Rend toujours un objet : { ok:true, … } ou { ok:false, motif:'…' }.
   // ⚠ Jamais d'exception vers la page : une fenêtre qui plante sur un refus de
   // droit est plus difficile à comprendre qu'une fenêtre qui l'affiche.

@@ -1153,7 +1153,13 @@ const codeExportFinir = (ok) => {
   if (w && !w.isDestroyed()) { try { w.destroy(); } catch (e) {} }
   if (r) r(!!ok);
 };
+/* ⚠ UNE PHOTO NE DEMANDE PAS LE CODE (2026-10-09, sa demande : « quand on exporte une photo, pas
+   besoin du MFA »). Le code protège les DONNÉES (clients, commandes, rapports, sauvegardes) ; une
+   photo de produit est déjà publique sur la boutique. Reconnue à son extension ou à son type. */
+const _estPhoto = (nom, mime) => /\.(jpe?g|png|webp|gif|avif|heic|heif|bmp|tiff?)$/i.test(String(nom || ''))
+  || /^image\//i.test(String(mime || ''));
 const exigerCodeExport = (quoi, parent) => {
+  if (_estPhoto(quoi)) return Promise.resolve(true);
   if (Date.now() < exportAutoriseJusqua) return Promise.resolve(true);
   if (codeExportPromesse) { try { codeExportWin && codeExportWin.focus(); } catch (e) {} return codeExportPromesse; }
   const par = (parent && !parent.isDestroyed()) ? parent : mainWindow;
@@ -1211,8 +1217,9 @@ const _gardeTelechargements = (ses) => {
   ses.__szCodeExport = true;
   ses.on('will-download', (ev, item, wc) => {
     if (Date.now() < exportAutoriseJusqua) return;
-    let url = '', nom = '';
-    try { url = item.getURL(); nom = item.getFilename(); } catch (e) {}
+    let url = '', nom = '', mime = '';
+    try { url = item.getURL(); nom = item.getFilename(); mime = item.getMimeType(); } catch (e) {}
+    if (_estPhoto(nom, mime)) return;   // une photo passe sans code
     ev.preventDefault();
     let parent = null;
     try { parent = BrowserWindow.fromWebContents(wc) || null; } catch (e) {}
@@ -3832,6 +3839,22 @@ const _traduireLibelles = (x, prof) => {
 };
 
 ipcMain.handle('pont:appeler', (e, op, args) => executerOpSite(String(op || ''), args, e.sender));
+// LA PHOTO EN LIGNE RENDUE EN DONNEE (voir imageLocale, pont-preload.js). HTTPS, domaines de la
+// boutique et de son stockage seulement, une image, 15 Mo au plus, 15 s au plus.
+ipcMain.handle('image:locale', async (_e, url) => {
+  try {
+    const u = new URL(String(url || ''));
+    if (u.protocol !== 'https:') return null;
+    if (!/(^|\.)(r2\.dev|r2\.cloudflarestorage\.com|sandriza\.com|sandriza\.ca)$/i.test(u.hostname)) return null;
+    const r = await fetch(u.href, { signal: AbortSignal.timeout(15000) });
+    if (!r.ok) return null;
+    const type = String(r.headers.get('content-type') || '').split(';')[0].trim();
+    if (!/^image\//i.test(type)) return null;
+    const buf = Buffer.from(await r.arrayBuffer());
+    if (buf.length > 15 * 1024 * 1024) return null;
+    return 'data:' + type + ';base64,' + buf.toString('base64');
+  } catch (e) { return null; }
+});
 /* ⚠⚠ LA PORTE DU SITE, UNE SEULE (2026-10-02). Elle vivait DANS le gestionnaire
    `pont:appeler` ; les notifications de rappels (src/rappels-notif.js) ont
    besoin de la meme — meme liste blanche, meme plafond, meme traduction des

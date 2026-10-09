@@ -167,6 +167,10 @@ html.jour .mv-zone{background:#e9e6df}
 .mv-res{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem;font-size:.8rem}
 .mv-res span{padding:.2rem .55rem;border:1px solid var(--v12);border-radius:999px;cursor:pointer;color:var(--tx2)}
 .mv-res span.fait{border-color:#c9a97e;color:var(--tx)}
+.mv-connue{display:flex;gap:.5rem;align-items:center;margin:0 0 .5rem;font-size:.84rem}
+.mv-connue[hidden],#mv-f-l[hidden]{display:none}
+.mv-connue input{width:6rem}
+.mv-retenir{display:flex;gap:.45rem;align-items:center;margin-top:.5rem;font-size:.8rem;color:var(--tx2)}
 /* La grille des photos par couleur (étape à part) : autant de colonnes que la largeur en
    permet, cases au format portrait — dix couleurs ne déforment rien, elles passent à la ligne. */
 #p-parcoul{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:.75rem;overflow:visible}
@@ -1400,24 +1404,45 @@ function pageProduit(id) {
     var ty = mvType(), ts = tailles();
     if (!ty) { dire('${T("Choisissez d’abord le type de vêtement.")}', 'att'); return; }
     if (!ts.length) { dire('${T("Choisissez d’abord les tailles à l’étape « Tailles et couleurs ».")}', 'att'); return; }
-    choisirFichier(function(ds){
-      if (!ds || !ds[0]) return;
+    /* LA PHOTO PRINCIPALE D'ABORD (2026-10-09, sa demande : « le bouton doit lire la photo
+       principale de l'article »). « Autre photo… » en ouvre une autre ; sans photo principale,
+       le sélecteur. Une photo DÉJÀ EN LIGNE (stockage R2, sans en-tête CORS) est récupérée par
+       l'application elle-même (szPont.imageLocale) : sinon ses pixels ne se lisent pas.
+       ⚠ TROIS FAÇONS DE POSER L'ÉCHELLE (même jour, sa question : « pour éviter la feuille de papier,
+       tu ne peux pas faire autrement ? ») — une photo seule ne dit pas sa taille, il faut UN repère :
+         · la feuille lettre/A4, trouvée toute seule (inchangé) ;
+         · UNE MESURE CONNUE : on clique ses deux bouts et on tape sa valeur (la longueur prise au
+           ruban, ou celle de la fiche du fournisseur) — plus de feuille du tout ;
+         · L'ÉCHELLE RETENUE d'un poste photo fixe (même appareil, même hauteur) : posée une fois,
+           réutilisée pour toute photo de même format. */
+    var ouvrir = function(src0){
       var cols = MV_TYPES[ty];
       var v = document.createElement('div');
       v.className = 'voile';
       v.innerHTML = '<div class="boite mv-boite"><h3 style="color:var(--tx)">${T("Mesurer sur la photo")}</h3>'
         + '<div class="mv-barre"><label>${T("Taille photographiée")} <select id="mv-t">' + ts.map(function(t){ return '<option>' + esc(t) + '</option>'; }).join('') + '</select></label>'
-        + '<label>${T("Feuille")} <select id="mv-f"><option value="lettre">${T("Lettre (8,5 × 11 po)")}</option><option value="a4">A4</option></select></label>'
-        + '<button type="button" id="mv-ech">${T("Refaire l’échelle à la main")}</button></div>'
-        + '<p id="mv-q" class="mv-q"></p><div class="mv-zone"><canvas id="mv-cv"></canvas></div>'
+        + '<label>${T("Échelle")} <select id="mv-mode"><option value="feuille">${T("Feuille dans la photo (automatique)")}</option>'
+        + '<option value="connue">${T("Une mesure que je connais")}</option><option value="memo">${T("Échelle retenue du poste photo")}</option>'
+        + '<option value="main">${T("Feuille, à la main")}</option></select></label>'
+        + '<label id="mv-f-l">${T("Feuille")} <select id="mv-f"><option value="lettre">${T("Lettre (8,5 × 11 po)")}</option><option value="a4">A4</option></select></label>'
+        + '<button type="button" id="mv-autre">${T("Autre photo…")}</button></div>'
+        + '<p id="mv-q" class="mv-q"></p>'
+        + '<div class="mv-connue" id="mv-connue" hidden><label>${T("Ce segment mesure")} <input id="mv-cm" type="number" min="1" step="0.5" inputmode="decimal"> cm</label>'
+        + '<button type="button" class="prim" id="mv-cm-ok">${T("Poser l’échelle")}</button></div>'
+        + '<div class="mv-zone"><canvas id="mv-cv"></canvas></div>'
+        + '<label class="mv-retenir"><input type="checkbox" id="mv-ret"> ${T("Retenir cette échelle pour mes photos de même format (poste photo fixe)")}</label>'
         + '<div class="mv-res" id="mv-res"></div>'
         + '<div class="pied2"><button type="button" id="mv-annuler">${T("Annuler")}</button>'
         + '<button type="button" id="mv-recommencer">${T("Recommencer les mesures")}</button>'
         + '<button type="button" class="prim" id="mv-ok" disabled>${T("✓ Garder ces mesures")}</button></div></div>';
       document.body.appendChild(v);
-      var cv = document.getElementById('mv-cv'), ctx = cv.getContext('2d');
-      var img = new Image(), echelle = null, feuille = null, clics = [], iDim = 0, res = {}, modeEch = false;
-      function q(t){ document.getElementById('mv-q').textContent = t; }
+      var $ = function(id){ return document.getElementById(id); };
+      var cv = $('mv-cv'), ctx = cv.getContext('2d');
+      var img = new Image(), r = 1, echelle = null, feuille = null, clics = [], iDim = 0, res = {}, mode = 'feuille', segment = null;
+      var CLE_MEMO = 'sz-mesure-echelle';
+      function memoLire(){ try { var o = JSON.parse(localStorage.getItem(CLE_MEMO) || '{}'); return o[img.naturalWidth + 'x' + img.naturalHeight] || null; } catch (e) { return null; } }
+      function memoEcrire(){ try { var o = JSON.parse(localStorage.getItem(CLE_MEMO) || '{}'); o[img.naturalWidth + 'x' + img.naturalHeight] = echelle / r; localStorage.setItem(CLE_MEMO, JSON.stringify(o)); } catch (e) {} }
+      function q(t){ $('mv-q').textContent = t; }
       function fermer(){ v.remove(); }
       function peindre(){
         ctx.drawImage(img, 0, 0, cv.width, cv.height);
@@ -1426,6 +1451,7 @@ function pageProduit(id) {
           ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 3; ctx.strokeRect(-feuille.L / 2, -feuille.l / 2, feuille.L, feuille.l); ctx.restore();
         }
         ctx.lineWidth = 3; ctx.font = 'bold 15px system-ui';
+        if (segment) { ctx.strokeStyle = '#22c55e'; ctx.beginPath(); ctx.moveTo(segment[0][0], segment[0][1]); ctx.lineTo(segment[1][0], segment[1][1]); ctx.stroke(); }
         Object.keys(res).forEach(function(k){ var s = res[k];
           ctx.strokeStyle = '#c9a97e'; ctx.beginPath(); ctx.moveTo(s.a[0], s.a[1]); ctx.lineTo(s.b[0], s.b[1]); ctx.stroke();
           ctx.fillStyle = '#000'; ctx.fillRect((s.a[0] + s.b[0]) / 2 - 4, (s.a[1] + s.b[1]) / 2 - 18, 74, 22);
@@ -1433,63 +1459,106 @@ function pageProduit(id) {
         clics.forEach(function(c){ ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(c[0], c[1], 5, 0, 7); ctx.fill(); });
       }
       function resume(){
-        document.getElementById('mv-res').innerHTML = cols.map(function(c){
+        $('mv-res').innerHTML = cols.map(function(c){
           return '<span class="' + (res[c[0]] ? 'fait' : '') + '">' + c[1] + ' : <b>' + (res[c[0]] ? res[c[0]].cm + ' cm' : '—') + '</b></span>'; }).join('');
-        document.getElementById('mv-ok').disabled = !Object.keys(res).length;
+        $('mv-ok').disabled = !Object.keys(res).length;
       }
       function suivante(){
         clics = [];
-        if (modeEch || !echelle) { q('${T("Cliquez les deux bouts du GRAND côté de la feuille.")}'); return; }
+        $('mv-f-l').hidden = !(mode === 'feuille' || mode === 'main');
+        if (!echelle) {
+          if (mode === 'connue') q(segment ? '${T("Tapez la longueur réelle de ce segment, puis « Poser l’échelle ».")}' : '${T("Cliquez les deux bouts d’une mesure que vous connaissez (par exemple la longueur, prise au ruban).")}');
+          else q('${T("Cliquez les deux bouts du GRAND côté de la feuille.")}');
+          return;
+        }
         while (iDim < cols.length && res[cols[iDim][0]]) iDim++;
         if (iDim >= cols.length) { q('${T("Toutes les mesures sont prises. Gardez-les, ou cliquez une ligne pour la refaire.")}'); return; }
         q('${T("Cliquez le début puis la fin : ")}' + cols[iDim][1] + ' — ' + cols[iDim][2] + '.');
       }
-      function auto(){
-        feuille = mvTrouverFeuille(cv, document.getElementById('mv-f').value);
-        if (feuille) { echelle = feuille.pxParCm; modeEch = false; dire('${T("Feuille trouvée : l’échelle est posée.")}', 'bon'); }
-        else { echelle = null; modeEch = true; dire('${T("Feuille introuvable (fond trop clair ?) : cliquez les deux bouts de son grand côté.")}', 'att'); }
+      function poserEchelle(px, message){
+        echelle = px; segment = null; $('mv-connue').hidden = true;
+        if ($('mv-ret').checked) memoEcrire();
+        dire(message, 'bon'); peindre(); suivante();
+      }
+      // Le mode choisi ; « feuille » cherche, et se rabat sur l'échelle retenue puis sur la mesure connue.
+      function appliquerMode(m){
+        mode = m; $('mv-mode').value = m; echelle = null; feuille = null; segment = null; $('mv-connue').hidden = true;
+        if (m === 'feuille') {
+          try { feuille = mvTrouverFeuille(cv, $('mv-f').value); } catch (e) { feuille = null; }
+          if (feuille) { poserEchelle(feuille.pxParCm, '${T("Feuille trouvée : l’échelle est posée.")}'); return; }
+          var mm = memoLire();
+          if (mm) { mode = 'memo'; $('mv-mode').value = 'memo'; poserEchelle(mm * r, '${T("Pas de feuille : l’échelle retenue du poste photo est utilisée.")}'); return; }
+          mode = 'connue'; $('mv-mode').value = 'connue';
+          dire('${T("Pas de feuille dans la photo : posez l’échelle avec une mesure que vous connaissez.")}', 'att');
+        } else if (m === 'memo') {
+          var m2 = memoLire();
+          if (m2) { poserEchelle(m2 * r, '${T("Échelle retenue du poste photo utilisée.")}'); return; }
+          dire('${T("Aucune échelle retenue pour ce format de photo : posez-la une fois, cochez « Retenir ».")}', 'att');
+          mode = 'connue'; $('mv-mode').value = 'connue';
+        }
         peindre(); suivante();
       }
       img.onload = function(){
-        var r = Math.min(1, 980 / img.naturalWidth, 600 / img.naturalHeight);
+        r = Math.min(1, 980 / img.naturalWidth, 600 / img.naturalHeight);
         cv.width = Math.round(img.naturalWidth * r); cv.height = Math.round(img.naturalHeight * r);
-        peindre(); auto(); resume();
+        res = {}; iDim = 0; resume(); appliquerMode('feuille');
       };
-      img.src = ds[0];
+      img.onerror = function(){ dire('${T("Impossible d’ouvrir cette photo.")}', 'err'); };
+      // Une photo en ligne passe par l'application (pixels lisibles) ; une photo locale est déjà une donnée.
+      function charger(src){
+        if (/^data:/.test(src) || !(P && P.imageLocale)) { img.src = src; return; }
+        dire('${T("Lecture de la photo…")}');
+        P.imageLocale(src).then(function(d){ img.src = d || src; });
+      }
+      charger(src0);
+      $('mv-autre').onclick = function(){ choisirFichier(function(ds){ if (ds && ds[0]) charger(ds[0]); }, false); };
+      $('mv-mode').onchange = function(){ appliquerMode($('mv-mode').value); };
+      $('mv-f').onchange = function(){ if (mode === 'feuille') appliquerMode('feuille'); };
+      $('mv-ret').onchange = function(){ if ($('mv-ret').checked && echelle) { memoEcrire(); dire('${T("Échelle retenue pour ce format de photo.")}', 'bon'); } };
+      $('mv-cm-ok').onclick = function(){
+        var cm = parseFloat(String($('mv-cm').value).replace(',', '.'));
+        if (!segment || !(cm > 0)) { dire('${T("Tapez la longueur réelle du segment, en centimètres.")}', 'err'); return; }
+        poserEchelle(Math.hypot(segment[1][0] - segment[0][0], segment[1][1] - segment[0][1]) / cm, '${T("Échelle posée d’après votre mesure.")}');
+      };
       cv.onclick = function(ev){
         var b = cv.getBoundingClientRect();
         var p = [(ev.clientX - b.left) * cv.width / b.width, (ev.clientY - b.top) * cv.height / b.height];
+        if (!echelle && mode === 'connue' && segment) return;   // on attend la valeur tapée
         clics.push(p);
         if (clics.length < 2) { peindre(); return; }
         var dpx = Math.hypot(clics[1][0] - clics[0][0], clics[1][1] - clics[0][1]);
-        if (modeEch || !echelle) {
-          var lg = document.getElementById('mv-f').value === 'a4' ? 29.7 : 27.94;
-          echelle = dpx / lg; modeEch = false; feuille = null;
-          dire('${T("Échelle posée à la main.")}', 'bon');
-        } else if (iDim < cols.length) {
+        if (!echelle && mode === 'connue') {
+          segment = [clics[0], clics[1]]; clics = [];
+          $('mv-connue').hidden = false; peindre(); suivante(); $('mv-cm').focus(); return;
+        }
+        if (!echelle) {
+          var lg = $('mv-f').value === 'a4' ? 29.7 : 27.94;
+          clics = []; poserEchelle(dpx / lg, '${T("Échelle posée à la main.")}'); return;
+        }
+        if (iDim < cols.length) {
           res[cols[iDim][0]] = { a: clics[0], b: clics[1], cm: Math.round(dpx / echelle * 2) / 2 };
           iDim++;
         }
         peindre(); resume(); suivante();
       };
-      document.getElementById('mv-res').onclick = function(ev){
+      $('mv-res').onclick = function(ev){
         var sp = ev.target.closest('span'); if (!sp) return;
         var i = Array.prototype.indexOf.call(this.children, sp); if (i < 0) return;
         delete res[cols[i][0]]; iDim = i; peindre(); resume(); suivante();
       };
-      document.getElementById('mv-f').onchange = auto;
-      document.getElementById('mv-ech').onclick = function(){ modeEch = true; feuille = null; peindre(); suivante(); };
-      document.getElementById('mv-recommencer').onclick = function(){ res = {}; iDim = 0; peindre(); resume(); suivante(); };
-      document.getElementById('mv-annuler').onclick = fermer;
-      document.getElementById('mv-ok').onclick = function(){
-        var t = document.getElementById('mv-t').value;
+      $('mv-recommencer').onclick = function(){ res = {}; iDim = 0; peindre(); resume(); suivante(); };
+      $('mv-annuler').onclick = fermer;
+      $('mv-ok').onclick = function(){
+        var t = $('mv-t').value;
         MESV.type = ty;
         MESV.tailles[t] = MESV.tailles[t] || {};
         Object.keys(res).forEach(function(k){ MESV.tailles[t][k] = res[k].cm; });
         fermer(); dessinerMesures();
         dire('${T("Mesures de la taille ")}' + t + '${T(" enregistrées dans le tableau. « Compléter les autres tailles » remplit le reste.")}', 'bon');
       };
-    }, false);
+    };
+    if (IMAGE) ouvrir(IMAGE);
+    else choisirFichier(function(ds){ if (ds && ds[0]) ouvrir(ds[0]); }, false);
   }
 
   function dessinerVues(){
