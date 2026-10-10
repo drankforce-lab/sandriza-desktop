@@ -401,14 +401,20 @@ function toast(titre, corps, sonNom) {
          · le TITRE porte le nombre, en gros, parce que c'est la seule ligne que
            le système affiche en gras.
        ⚠ Et la PASTILLE de l'icône est la vraie réponse au reste : elle, elle
-       attend indéfiniment. */
+       attend indéfiniment.
+       ⚠⚠ RENVERSÉ LE 2026-10-10 (sa demande) : « la notification quand on a une
+       nouvelle commande devrait se fermer toute seule après quelques secondes ».
+       `timeoutType: 'default'` — Windows l'efface après quelques secondes et la
+       range dans le Centre de notifications (rien n'est perdu) ; la pastille et
+       le son restent pour « je n'étais pas devant l'écran ». Ne PAS remettre
+       'never' sans qu'il le redemande. */
     const n = new Notification({
       title: titre,
       body: corps,
       icon: fs.existsSync(ICON_PATH) ? ICON_PATH : undefined,
       silent: true,
-      timeoutType: 'never',
-      urgency: 'critical',
+      timeoutType: 'default',
+      urgency: 'normal',
     });
     /* Un clic ouvre l'administration : une notification qu'on ne peut pas suivre
        oblige à retrouver l'application à la main, et on a déjà oublié pourquoi.
