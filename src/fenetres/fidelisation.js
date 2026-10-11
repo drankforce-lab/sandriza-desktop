@@ -226,7 +226,7 @@ label.case input{width:15px;height:15px;accent-color:#c9a97e;margin:0}
  */
 function pageFidelisation(ouverture) {
   const ouv = String(ouverture || '');
-  const depart = (['recompenses', 'invitations', 'ambassadrices', 'parrainage', 'paliers'].indexOf(ouv) >= 0) ? ouv : 'sondages';
+  const depart = (['recompenses', 'invitations', 'ambassadrices', 'parrainage', 'paliers', 'anticipe'].indexOf(ouv) >= 0) ? ouv : 'sondages';
   const editeur = (ouv === 'sondage-nouveau');
   return `${TETE()}
 <title>${T("Fidélisation et sondages — Administration Sandriza")}</title>
@@ -1223,7 +1223,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     appeler('fidelisation:pal:donnees', []).then(function(r){
       PAL = r.ok ? r : { erreur: palExpliquer(r) };
       if (r.ok) PALED = null;
-      if (ONGLET === 'paliers') dessiner();
+      if (ONGLET === 'paliers' || ONGLET === 'anticipe') dessiner();
     });
   }
   function palOccupe(){ return !!(PALED && !PALED._vierge); }
@@ -1264,6 +1264,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       + '<p class="dt">${T("Le palier d’un client se calcule au serveur sur ses achats des 12 derniers mois : articles après rabais, sans taxes ni livraison, commandes payées et non annulées, moins les remboursements. Les points en prime s’ajoutent au gel des points d’une commande.")}</p>'
       + '<p class="dt">${T("La livraison gratuite et l’accès anticipé s’appliquent dans la boutique, à partir du palier calculé par le serveur ; les frais de livraison d’une commande ne sont pas revérifiés au serveur.")}</p>'
       + '</div>';
+    return h + '</div>';
+  }
+  /* ══ L ONGLET ACCÈS ANTICIPÉ (2026-10-10, sa demande : « fais un onglet pour ça ») ═════════════
+     La carte vivait sous les paliers ; elle a maintenant son onglet. Mêmes données (PAL) et même
+     édition (PALED) que l'onglet Paliers — un seul enregistrement serveur, « fidelisation:pal:reglages » —
+     d'où le même conteneur #pal-zone, branché par brancherPal(). */
+  function vueAnticipe(){
+    if (!PAL) { chargerPal(); return '<div class="carte plein"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i></div></div>'; }
+    if (PAL.erreur) return '<div class="carte plein"><div class="vide">' + esc(PAL.erreur) + '</div></div>';
+    if (!PALED) PALED = palCopie();
+    var ro = !PAL.peutModifier, dis = ro ? ' disabled' : '', e = PALED;
+    var h = '<div class="amb-zone" id="pal-zone">';
     var an = PAL.anticipes || [];
     h += '<div class="carte"><h2>${T("Produits en accès anticipé")}</h2>'
       /* Sa demande du 2026-10-07 : << des que j ajoute de nouveaux produits, ils doivent tomber dans cet acces >>. */
@@ -1271,7 +1283,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
           '${T("Dès sa mise en vente, un produit est réservé aux paliers qui ont droit à l’accès anticipé, puis il s’ouvre à tous après le délai ci-dessous. La page « Accès anticipé » de la boutique les présente.")}', !!e.anticipeAuto, ro ? 'disabled' : '')
       + '<div class="ch" style="max-width:16rem;margin-top:.5rem"><label for="pal-anticipe-heures">${T("Durée de l’accès anticipé (heures)")}</label>'
       + '<input id="pal-anticipe-heures" type="number" min="1" max="720" step="1" value="' + esc(e.anticipeHeures) + '"' + dis + '></div>'
-      + '<p class="dt">${T("Un produit coché « Accès anticipé » dans la fenêtre Produit garde la date que vous lui donnez. Le changement s’applique quand vous enregistrez les paliers.")}</p>';
+      + '<p class="dt">${T("Un produit coché « Accès anticipé » dans la fenêtre Produit garde la date que vous lui donnez. Les paliers qui y ont droit se cochent dans l’onglet Paliers.")}</p>'
+      + (ro ? '' : '<div class="amb-actions"><button type="button" class="prim" data-pal="enr">${T("Enregistrer")}</button>'
+          + (e._vierge ? '' : '<button type="button" data-pal="annuler">${T("Annuler les changements")}</button>') + '</div>');
     if (!an.length) h += '<div class="vide">${T("Aucun produit en accès anticipé pour le moment.")}</div>';
     else h += '<table><thead><tr><th>${T("Produit")}</th>' + '<th>${T("Ouvert à tous le")}</th>' + '<th>${T("Origine")}</th>' + '<th>${T("État")}</th></tr></thead><tbody>'
       + an.map(function(p){
@@ -1300,7 +1314,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
         }) }]).then(function(r){
           b.disabled = false;
           if (!r.ok) { dire(palExpliquer(r), 'err'); return; }
-          PAL = r; PALED = null; dessiner(); dire('${T("Paliers enregistrés.")}', 'bon');
+          PAL = r; PALED = null; dessiner(); dire(ONGLET === 'anticipe' ? '${T("Accès anticipé enregistré.")}' : '${T("Paliers enregistrés.")}', 'bon');
         });
       }
     };
@@ -1608,6 +1622,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       + '<button type="button" class="' + (ONGLET === 'ambassadrices' ? 'actif' : '') + '" data-onglet="ambassadrices">${T("Ambassadrices")}</button>'
       + '<button type="button" class="' + (ONGLET === 'parrainage' ? 'actif' : '') + '" data-onglet="parrainage">${T("Parrainage")}</button>'
       + '<button type="button" class="' + (ONGLET === 'paliers' ? 'actif' : '') + '" data-onglet="paliers">${T("Paliers")}</button>'
+      + '<button type="button" class="' + (ONGLET === 'anticipe' ? 'actif' : '') + '" data-onglet="anticipe">${T("Accès anticipé")}</button>'
       + '<div class="droite">'
       + (D.peutModifier ? '<button class="mini prim" id="fi-nouveau">${T("+ Nouveau sondage")}</button>' : '')
       + '</div>'
@@ -1629,7 +1644,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
        : ONGLET === 'points' ? vuePoints()
        : ONGLET === 'ambassadrices' ? vueAmb()
        : ONGLET === 'parrainage' ? vuePar()
-       : ONGLET === 'paliers' ? vuePal() : vueSondages();
+       : ONGLET === 'paliers' ? vuePal()
+       : ONGLET === 'anticipe' ? vueAnticipe() : vueSondages();
     if (EDIT) h += boiteEditeur();
     else if (DETAIL) h += boiteDetail();
     /* ⚠⚠ LA PLEINE HAUTEUR, MESUREE AVANT ET APRES (#151, 2026-09-24). Cet
@@ -1644,7 +1660,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
        avant d adopter, parce qu une vue coupee ne previent jamais. */
     corps.className = 'corps plein';
     corps.innerHTML = h;
-    if (ONGLET !== 'recompenses' && ONGLET !== 'invitations' && ONGLET !== 'points' && ONGLET !== 'ambassadrices' && ONGLET !== 'parrainage' && ONGLET !== 'paliers') {
+    if (ONGLET !== 'recompenses' && ONGLET !== 'invitations' && ONGLET !== 'points' && ONGLET !== 'ambassadrices' && ONGLET !== 'parrainage' && ONGLET !== 'paliers' && ONGLET !== 'anticipe') {
       var bp = document.getElementById('fi-prec'), bs = document.getElementById('fi-suiv');
       if (bp) bp.onclick = function(){ SPAGE = Math.max(0, SPAGE - 1); dessiner(); };
       if (bs) bs.onclick = function(){ SPAGE = SPAGE + 1; dessiner(); };
@@ -1655,7 +1671,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     brancher();
     if (ONGLET === 'ambassadrices') brancherAmb();
     if (ONGLET === 'parrainage') brancherPar();
-    if (ONGLET === 'paliers') brancherPal();
+    if (ONGLET === 'paliers' || ONGLET === 'anticipe') brancherPal();
     if (ONGLET === 'points') {
       brancherPoints();
       /* Remis à zéro : la mesure d un autre onglet garderait sinon le même compte, et le rappel
@@ -1820,7 +1836,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     if (ONGLET === 'ambassadrices' && AMB && !AMBCHARGE) chargerAmb();
     // Parrainage et paliers (2026-10-07) : même règle — une saisie ou une confirmation en cours reste.
     if (ONGLET === 'parrainage' && PAR && !PARCHARGE && !parOccupe()) chargerPar();
-    if (ONGLET === 'paliers' && PAL && !palOccupe()) chargerPal();
+    if ((ONGLET === 'paliers' || ONGLET === 'anticipe') && PAL && !palOccupe()) chargerPal();
   };
   window.szRevenir = function(){ if (!DETAIL) charger(); };
 

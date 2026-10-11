@@ -496,8 +496,10 @@ module.exports = {
   'Dès sa mise en vente, un produit est réservé aux paliers qui ont droit à l’accès anticipé, puis il s’ouvre à tous après le délai ci-dessous. La page « Accès anticipé » de la boutique les présente.':
     'As soon as it goes on sale, a product is reserved for the tiers entitled to early access, then opens to everyone after the delay below. The shop’s “Early access” page showcases them.',
   'Durée de l’accès anticipé (heures)': 'Early-access duration (hours)',
-  'Un produit coché « Accès anticipé » dans la fenêtre Produit garde la date que vous lui donnez. Le changement s’applique quand vous enregistrez les paliers.':
-    'A product checked “Early access” in the Product window keeps the date you give it. The change applies when you save the tiers.',
+  /* L'onglet « Accès anticipé » (2026-10-10) : la carte a quitté l'onglet Paliers. */
+  'Un produit coché « Accès anticipé » dans la fenêtre Produit garde la date que vous lui donnez. Les paliers qui y ont droit se cochent dans l’onglet Paliers.':
+    'A product checked “Early access” in the Product window keeps the date you give it. The tiers entitled to it are checked in the Tiers tab.',
+  'Accès anticipé enregistré.': 'Early access saved.',
   'Aucun produit en accès anticipé pour le moment.': 'No product in early access right now.',
   'Origine': 'Origin',
   'Automatique': 'Automatic',

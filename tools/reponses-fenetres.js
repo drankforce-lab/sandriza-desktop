@@ -5361,6 +5361,20 @@ const JEU = {
             { nom: 'Privilège', nomEN: 'Privilege', seuil: 500, avantages: { livraisonGratuite: true, accesAnticipe: true, bonusPointsPct: 10 } } ] },
           anticipes: [{ id: 'p1', nom: 'Robe portefeuille en lin', publieLe: '2026-11-01', actif: true, enCours: true }] },
       } },
+    /* L onglet ACCES ANTICIPE (2026-10-10) : la carte sortie de l onglet Paliers ; memes donnees.
+       Un produit reserve (automatique) et un ouvert a tous (date choisie). */
+    { nom: 'onglet Acces anticipe — reglage auto et produits', id: 'anticipe',
+      reponses: { identite: IDENTITE,
+        'fidelisation:liste': { ok: true, peutModifier: true, courrielNotification: '',
+          tuiles: { invitations: 0, reponses: 0, taux: 0, note: null, nbNotes: 0, codes: 0, codesUtilises: 0 },
+          sondages: [], recompenses: [], invitations: [] },
+        'fidelisation:pal:donnees': { ok: true, peutModifier: true,
+          cfg: { actif: true, anticipeAuto: true, anticipeHeures: 48, paliers: [
+            { nom: 'Initiée', nomEN: 'Insider', seuil: 0, avantages: { livraisonGratuite: false, accesAnticipe: false, bonusPointsPct: 0 } },
+            { nom: 'Privilège', nomEN: 'Privilege', seuil: 500, avantages: { livraisonGratuite: true, accesAnticipe: true, bonusPointsPct: 10 } } ] },
+          anticipes: [{ id: 'p1', nom: 'Robe portefeuille en lin', publieLe: '2026-11-01', actif: true, enCours: true, auto: true },
+                      { id: 'p2', nom: 'Chemise Walla', publieLe: '2026-10-08', actif: true, enCours: false, auto: false }] },
+      } },
     { nom: 'editeur de sondage', id: 'sondage-nouveau', reponses: { identite: IDENTITE,
       'fidelisation:liste': { ok: true, peutModifier: true, courrielNotification: '',
         tuiles: { invitations: 0, reponses: 0, taux: 0, note: null, nbNotes: 0, codes: 0, codesUtilises: 0 },
