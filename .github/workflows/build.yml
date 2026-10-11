@@ -740,6 +740,9 @@ jobs:
           # le préchargement, le canal qui détruit tout ; qu'un manque, et plus
           # rien ne le dit.
           node tools/banc-deconnexion-ferme.js
+          # Les cartes de transporteurs gardent leur nom (2026-10-11 : la case « Clé » de
+          # Purolator, nommée `cle`, écrasait le nom du transporteur — rien ne s'enregistrait).
+          node tools/banc-transporteurs-cles.js
 
       - name: Construire (${{ matrix.arch }})
         shell: bash
