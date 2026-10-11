@@ -3735,8 +3735,39 @@ html.jour .pf-fiche .etat.on{color:#1f6b3d}
 .pf-fiche .sel .tags{justify-content:flex-start;white-space:normal}
 `;
 
-module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE,
-  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE,
+
+/* ══ CSS_AIR — ÉTAPE 1 DU PLAN DE LISIBILITÉ (2026-10-11, sa demande : « plus lisible et moins condensé,
+   un travail professionnel, bien utiliser l espace ») ══════════════════════════════════════════════
+   Passe en DERNIER (après CSS_REFONTE) : seule couche qui atteint les 108 fenêtres.
+   ① TYPOGRAPHIE : libellés, aides, pastilles et en-têtes de tableau un cran plus grands — quasi sans
+     effet sur la hauteur (mesuré par tools/banc-debordement.js, 1400 × 833).
+   ② LA DISPOSITION « RÉGLAGES EN SECTIONS » (szr-*) : un en-tête (titre, état, interrupteur), puis des
+     CARTES DE SECTION côte à côte sur toute la largeur (« Identifiants », « Compte »…), chacune avec ses
+     champs EMPILÉS (libellé au-dessus). Remplace la carte unique étroite au centre et les champs
+     répartis sur deux colonnes sans logique. */
+const CSS_AIR = `
+body{line-height:1.55}
+.ch label,label.champ .lbl{font-size:.8rem}
+.aide,.ch .aide{font-size:.78rem;line-height:1.5}
+.pill,.rf-pill{font-size:.75rem}
+thead th{font-size:.7rem}
+.szr-tete{display:flex;align-items:center;gap:.8rem 1rem;flex-wrap:wrap;margin:0 0 1rem}
+.szr-tete h2{margin:0;font:700 1.15rem/1.2 system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--tx)}
+.szr-tete .bascule{margin-left:auto}
+.szr-tete .cot{flex:1 1 100%;margin:0}
+.szr-sections{display:grid;grid-template-columns:repeat(auto-fit,minmax(22rem,1fr));gap:1.1rem;align-items:stretch}
+.szr-sec{background:var(--f-carte);border:1px solid var(--v07);border-radius:12px;padding:1.15rem 1.3rem 1.25rem;min-width:0;display:flex;flex-direction:column}
+.szr-sec > h3{margin:0 0 .25rem;font:700 .95rem/1.25 system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--tx)}
+.szr-sec > .szr-sous{margin:0 0 1rem;font-size:.8rem;color:var(--tx3);line-height:1.5}
+.szr-sec .ch{margin:0 0 1rem}
+.szr-sec .ch:last-child{margin-bottom:0}
+.szr-sec .ch input,.szr-sec .ch select{min-height:2.5rem;font-size:.88rem}
+.szr-sec .info{margin:0 0 1rem}
+.szr-duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 1rem}
+.szr-large{grid-column:1 / -1}
+`;
+module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR,
+  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR,
   JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_THEMES, CSS_FICHE, ICO,
   /* La page, pas son texte : voir l en-tete de ce fichier. */
   TETE, LIEU, SEP_DEC };

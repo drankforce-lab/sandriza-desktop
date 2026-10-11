@@ -72,28 +72,10 @@ body{background:var(--f-page);color:var(--tx);
 .tr-ong .pt{width:.5rem;height:.5rem;border-radius:50%;background:var(--v16);flex:0 0 auto}
 .tr-ong .pt.actif{background:#c9a97e}.tr-ong .pt.bon{background:var(--tx-ok)}.tr-ong .pt.mal{background:var(--tx-err)}
 .pan[hidden]{display:none}
-/* TOUTE LA LARGEUR, CHAMPS SUR DEUX COLONNES (2026-10-11, sa capture : « tu ne prends pas l espace de
-   l application, tu as condense tout dans le centre »). La carte occupe la fenetre ; ses lignes se
-   rangent sur deux colonnes (une seule sous 1100 px). Titre, etat de cotation et encadre d aide
-   traversent les deux colonnes. */
+/* 7.18.4 (2026-10-11, sa capture : « toutes pognées ») : plus de carte unique coupée en deux colonnes.
+   Chaque onglet = un en-tête (szr-tete) + des cartes de section côte à côte (szr-sections, socle). */
 .pan{max-width:none;margin:0}
-.pan .carte{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:2.6rem;align-items:start}
-.pan .carte > .th,.pan .carte > .cot,.pan .carte > .info,.pan .carte > h2,.pan .carte > .sep,.pan .carte > .stitre{grid-column:1 / -1}
-.pan .carte > .gr2{display:contents}
-@media (max-width:1100px){.pan .carte{grid-template-columns:minmax(0,1fr)}}
-.pan .carte{padding:1.1rem 1.4rem 1.2rem;margin-bottom:.9rem;border-radius:12px}
-.pan .carte .th{margin:0 0 .6rem}
-.pan .carte h2{font-size:1rem}
-.pan .carte > h2{margin:0 0 .5rem}
-.pan .info{margin:.2rem 0 .6rem}
-.pan .gr2{display:block}
-.pan .ch{display:grid;grid-template-columns:minmax(10rem,15rem) minmax(0,1fr);align-items:center;
-  column-gap:1.4rem;row-gap:.25rem;margin:0;padding:.75rem 0;border-top:1px solid var(--v07)}
-.pan .ch label{margin:0;font-size:.84rem;color:var(--tx);font-weight:500}
-.pan .ch input,.pan .ch select{padding:.5rem .6rem;font-size:.86rem}
-.pan .ch .etat,.pan .ch .aide{grid-column:2}
-.pan .cot{margin:0 0 .5rem}
-@media (max-width:640px){.pan .ch{grid-template-columns:1fr}.pan .ch .etat,.pan .ch .aide{grid-column:1}}
+.pan .cot{margin:0}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
@@ -315,71 +297,67 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return '<div class="cot mal" title="' + esc(motif) + '"><span class="pt"></span><b>${T("Absent de la caisse")}</b>'
       + env + '<span class="mt">' + esc(motif) + '</span></div>';
   }
+  /* LES ONGLETS EN SECTIONS (7.18.4) : en-tête (nom, interrupteur, état de cotation) puis des cartes
+     par SUJET, côte à côte sur toute la largeur — Identifiants API, Compte et environnement, Comptes
+     d essai. Mêmes ids qu avant : saisie() ne change pas. */
+  function teteHtml(titre, enId, actif, cle){
+    return '<div class="szr-tete"><h2>' + esc(titre) + '</h2>' + basculeHtml(enId, actif) + etatCotationHtml(cle) + '</div>';
+  }
+  function envHtml(id, mode, libTest){
+    return '<div class="ch"><label for="' + id + '">${T("Environnement")}</label><select id="' + id + '"' + (RO ? ' disabled' : '') + '>'
+      + '<option value="sandbox"' + ((mode || 'sandbox') === 'sandbox' ? ' selected' : '') + '>' + libTest + '</option>'
+      + '<option value="production"' + (mode === 'production' ? ' selected' : '') + '>${T("Production")}</option></select></div>';
+  }
   function carteSimpleHtml(sp){
     var d = (D.carriers || {})[sp.cle] || {};
-    var h = '<div class="carte"><div class="th">'
-      + '<h2>' + esc(sp.titre) + '</h2>' + basculeHtml(sp.enId, d.enabled) + '</div>'
-      + etatCotationHtml(sp.cle);
-    h += '<div class="gr2">'
+    var h = teteHtml(sp.titre, sp.enId, d.enabled, sp.cle) + '<div class="szr-sections">';
+    h += '<section class="szr-sec"><h3>${T("Identifiants API")}</h3><p class="szr-sous">${T("Fournis par le portail des développeurs du transporteur.")}</p>'
       + texteHtml(sp.user.id, sp.user.label, d[sp.user.champ], sp.user.place, true)
-      + secretHtml(sp.sec.id, sp.sec.label, d[sp.sec.champ], sp.sec.place) + '</div>';
-    if (sp.cleApi) h += secretHtml(sp.cleApi.id, sp.cleApi.label, d[sp.cleApi.champ], sp.cleApi.place);
-    if (sp.mode) {
-      h += '<div class="gr2">'
-        + texteHtml(sp.acct.id, sp.acct.label, d.accountNumber, sp.acct.place, false)
-        + '<div class="ch"><label>${T("Environnement")}</label><select aria-label="${T("Environnement")}" id="' + sp.mode.id + '"' + (RO ? ' disabled' : '') + '>'
-        + '<option value="sandbox"' + ((d.mode || 'sandbox') === 'sandbox' ? ' selected' : '') + '>${T("Test (sandbox)")}</option>'
-        + '<option value="production"' + (d.mode === 'production' ? ' selected' : '') + '>${T("Production")}</option>'
-        + '</select></div></div>';
-    } else {
-      h += texteHtml(sp.acct.id, sp.acct.label, d.accountNumber, sp.acct.place, false);
-    }
-    if (sp.tests) h += '<div class="gr2">' + sp.tests.map(function(t){ return texteHtml(t.id, t.label, d[t.champ], '', false); }).join('') + '</div>';
+      + secretHtml(sp.sec.id, sp.sec.label, d[sp.sec.champ], sp.sec.place)
+      + (sp.cleApi ? secretHtml(sp.cleApi.id, sp.cleApi.label, d[sp.cleApi.champ], sp.cleApi.place) : '')
+      + '</section>';
+    h += '<section class="szr-sec"><h3>${T("Compte et environnement")}</h3><p class="szr-sous">${T("Le numéro de compte facturé, et l’environnement d’essai ou réel.")}</p>'
+      + texteHtml(sp.acct.id, sp.acct.label, d.accountNumber, sp.acct.place, false)
+      + (sp.mode ? envHtml(sp.mode.id, d.mode, '${T("Test (sandbox)")}') : '')
+      + '</section>';
+    if (sp.tests) h += '<section class="szr-sec"><h3>${T("Comptes d’essai")}</h3><p class="szr-sous">${T("Donnés par le portail pour l’environnement de test : facturation au destinataire et fret.")}</p>'
+      + sp.tests.map(function(t){ return texteHtml(t.id, t.label, d[t.champ], '', false); }).join('') + '</section>';
     return h + '</div>';
   }
 
   function cartePcHtml(){
     var pc = (D.carriers || {})['postes-canada'] || {};
     var m = pc.cle || { defini: false, fin: '' };
-    var h = '<div class="carte"><div class="th">'
-      + '<h2>${T("Postes Canada")}</h2>' + basculeHtml('cp-en', pc.enabled) + '</div>'
-      + etatCotationHtml('postes-canada');
-    /* ⚠ LA NOUVELLE PLATEFORME (2026-10-05). Le portail developer-developpeur
-       donne une Clé API et un Secret (32 caractères chacun) : on les colle
-       ensemble, « clé:secret ». Les anciennes valeurs de test affichées ici
-       (6e93…:0bfa…, client 2004381, contrat 42708517) étaient celles de
-       l'ANCIENNE plateforme — collées, elles ne donnaient que des prix fictifs. */
-    h += '<div class="info">${T("Sur <b>developer-developpeur.canadapost-postescanada.ca</b>, ouvrez votre projet de ")}'
+    var h = teteHtml('${T("Postes Canada")}', 'cp-en', pc.enabled, 'postes-canada') + '<div class="szr-sections">';
+    /* ⚠ LA NOUVELLE PLATEFORME (2026-10-05) : Clé API et Secret collés ensemble, « clé:secret ». */
+    h += '<section class="szr-sec"><h3>${T("Identifiants API")}</h3>'
+      + '<div class="info">${T("Sur <b>developer-developpeur.canadapost-postescanada.ca</b>, ouvrez votre projet de ")}'
       + '${T("<b>production</b> : collez sa <b>Clé API</b> et son <b>Secret</b> ensemble, séparés par un deux-points ")}'
-      + '${T("(clé:secret). Une clé de test ne donne que des prix d’exemple. L’ID contrat est à laisser vide sans entente commerciale.")}</div>';
-    // « clé:secret » ; secret (vide = conservé).
-    h += secretHtml('cp-cle', '${T("Clé API:Secret")}', m, '${T("clé:secret")}');
-    h += '<div class="gr2">'
+      + '${T("(clé:secret). Une clé de test ne donne que des prix d’exemple. L’ID contrat est à laisser vide sans entente commerciale.")}</div>'
+      + secretHtml('cp-cle', '${T("Clé API:Secret")}', m, '${T("clé:secret")}') + '</section>';
+    h += '<section class="szr-sec"><h3>${T("Compte et environnement")}</h3><p class="szr-sous">${T("Le numéro de client Postes Canada et, s’il y a lieu, le contrat commercial.")}</p>'
       + texteHtml('cp-cust', '${T("Numéro client")}', pc.customerNumber, '${T("Ex : 0001234567")}', false)
-      + texteHtml('cp-contract', '${T("ID contrat")}', pc.contractId, '${T("Vide sans entente commerciale")}', false) + '</div>';
-    h += '<div class="ch"><label for="cp-mode">${T("Environnement")}</label><select id="cp-mode"' + (RO ? ' disabled' : '') + '>'
-      + '<option value="sandbox"' + ((pc.mode || 'sandbox') === 'sandbox' ? ' selected' : '') + '>${T("Bac à sable (test)")}</option>'
-      + '<option value="production"' + (pc.mode === 'production' ? ' selected' : '') + '>${T("Production")}</option></select></div>';
+      + texteHtml('cp-contract', '${T("ID contrat")}', pc.contractId, '${T("Vide sans entente commerciale")}', false)
+      + envHtml('cp-mode', pc.mode, '${T("Bac à sable (test)")}') + '</section>';
     return h + '</div>';
   }
-  /* L ONGLET « GÉNÉRAL » (2026-10-11) : ce qui sert à TOUS les transporteurs — l adresse
-     d expédition (enregistrée avec Postes Canada, lue par tous) et l autocomplétion. */
+  /* L ONGLET « GÉNÉRAL » : ce qui sert à TOUS les transporteurs — l adresse d expédition (enregistrée
+     avec Postes Canada, lue par tous) et l autocomplétion d adresse à la caisse. */
   function carteGeneraleHtml(){
     var pc = (D.carriers || {})['postes-canada'] || {};
-    var h = '<div class="carte"><h2>${T("Autocomplétion d’adresse à la caisse")}</h2>';
-    h += texteHtml('mapbox', '${T("Jeton Mapbox (public, pk.*)")}', D.mapbox, 'pk.xxxxxxxx', true,
-      '${T("Gratuit sur account.mapbox.com. S’il est renseigné, il remplace AddressComplete (plus précis au Canada).")}');
-    h += '</div><div class="carte"><h2>${T("Adresse expéditeur (entrepôt / boutique)")}</h2>';
-    h += '<div class="gr2">'
-      + texteHtml('cp-oname', '${T("Nom / Boutique")}', pc.originName, 'SANDRIZA', false)
-      + texteHtml('cp-ophone', '${T("Téléphone (sans tirets)")}', pc.originPhone, '5140000000', false) + '</div>';
-    h += texteHtml('cp-oaddr', '${T("Adresse (rue)")}', pc.originAddress, '', false);
-    h += '<div class="gr2">'
-      + texteHtml('cp-ocity', '${T("Ville")}', pc.originCity, '${T("Montréal")}', false)
+    var h = '<div class="szr-tete"><h2>${T("Général")}</h2></div><div class="szr-sections">';
+    h += '<section class="szr-sec"><h3>${T("Adresse expéditeur (entrepôt / boutique)")}</h3><p class="szr-sous">${T("Le point de départ des colis : il sert à la cotation de tous les transporteurs.")}</p>'
+      + '<div class="szr-duo">' + texteHtml('cp-oname', '${T("Nom / Boutique")}', pc.originName, 'SANDRIZA', false)
+      + texteHtml('cp-ophone', '${T("Téléphone (sans tirets)")}', pc.originPhone, '5140000000', false) + '</div>'
+      + texteHtml('cp-oaddr', '${T("Adresse (rue)")}', pc.originAddress, '', false)
+      + '<div class="szr-duo">' + texteHtml('cp-ocity', '${T("Ville")}', pc.originCity, '${T("Montréal")}', false)
       + '<div class="ch"><label for="cp-oprov">${T("Province")}</label><select id="cp-oprov"' + (RO ? ' disabled' : '') + '>'
       + PROVS.map(function(p){ return '<option' + ((pc.originProvince || 'QC') === p ? ' selected' : '') + '>' + p + '</option>'; }).join('')
-      + '</select></div></div>';
-    h += texteHtml('cp-opostal', '${T("Code postal (sans espace)")}', pc.originPostal, 'H1A1A1', false);
+      + '</select></div></div>'
+      + texteHtml('cp-opostal', '${T("Code postal (sans espace)")}', pc.originPostal, 'H1A1A1', false) + '</section>';
+    h += '<section class="szr-sec"><h3>${T("Autocomplétion d’adresse à la caisse")}</h3><p class="szr-sous">${T("Propose l’adresse complète pendant que la cliente tape la sienne.")}</p>'
+      + texteHtml('mapbox', '${T("Jeton Mapbox (public, pk.*)")}', D.mapbox, 'pk.xxxxxxxx', true,
+      '${T("Gratuit sur account.mapbox.com. S’il est renseigné, il remplace AddressComplete (plus précis au Canada).")}') + '</section>';
     return h + '</div>';
   }
 

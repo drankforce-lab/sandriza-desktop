@@ -799,7 +799,7 @@ const ouvrirDecompte = (secondes) => {
     alwaysOnTop: true, skipTaskbar: false, show: false,
     title: 'Déconnexion imminente', autoHideMenuBar: true, backgroundColor: '#0e1522',
     webPreferences: {
-      preload: path.join(__dirname, 'pont-preload.js'),
+      preload: path.join(__dirname, 'pont-preload.js'), minimumFontSize: 11,
       contextIsolation: true, nodeIntegration: false, sandbox: true,
     },
   });
@@ -893,7 +893,7 @@ ipcMain.handle('deconnexion:demander', (_e, nom, role) => new Promise((resolve) 
     skipTaskbar: true, show: false, autoHideMenuBar: true,
     title: 'Déconnexion', backgroundColor: '#0e1522',
     webPreferences: {
-      preload: path.join(__dirname, 'pont-preload.js'),
+      preload: path.join(__dirname, 'pont-preload.js'), minimumFontSize: 11,
       contextIsolation: true, nodeIntegration: false, sandbox: true,
     },
   });
@@ -1174,7 +1174,7 @@ const exigerCodeExport = (quoi, parent) => {
       width: L, height: H, ...(Number.isFinite(x) && Number.isFinite(y) ? { x, y } : {}),
       parent: par, modal: true, resizable: false, minimizable: false, maximizable: false, fullscreenable: false,
       skipTaskbar: true, show: false, autoHideMenuBar: true, backgroundColor: '#0e1522',
-      webPreferences: { preload: path.join(__dirname, 'pont-preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true },
+      webPreferences: { preload: path.join(__dirname, 'pont-preload.js'), minimumFontSize: 11, contextIsolation: true, nodeIntegration: false, sandbox: true },
     });
     // La fermeture (croix, parent fermé, plantage) vaut « non » : rien n'est écrit.
     codeExportWin.on('closed', () => { codeExportWin = null; codeExportFinir(false); });
@@ -4295,7 +4295,7 @@ ipcMain.handle('dock:ouvrir', async (e, cle, etat) => {
   }
   if (!a || !a.view || a.view.webContents.isDestroyed()) {
     const view = new WebContentsView({ webPreferences: {
-      preload: path.join(__dirname, 'pont-preload.js'),
+      preload: path.join(__dirname, 'pont-preload.js'), minimumFontSize: 11,
       contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: true,
     } });
     a = { view, fenetre: null };
@@ -4878,7 +4878,7 @@ const ouvrirNative = (cle, titre, page, opts = {}) => {
     minWidth: opts.minWidth || 520, minHeight: opts.minHeight || 420, show: false,
     title: titre, autoHideMenuBar: true, backgroundColor: _modele.sombre ? '#0e1522' : '#f4f2ec',
     webPreferences: {
-      preload: path.join(__dirname, 'pont-preload.js'),
+      preload: path.join(__dirname, 'pont-preload.js'), minimumFontSize: 11,
       contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: true,
     },
   });
@@ -4933,7 +4933,7 @@ const ouvrirImprimantes = () => {
     minWidth: 520, minHeight: 420, show: false,
     title: 'Imprimantes', autoHideMenuBar: true, backgroundColor: '#0e1522',
     webPreferences: {
-      preload: path.join(__dirname, 'pont-preload.js'),
+      preload: path.join(__dirname, 'pont-preload.js'), minimumFontSize: 11,
       contextIsolation: true, nodeIntegration: false, sandbox: true,
     },
   });
@@ -5130,7 +5130,7 @@ const connexionMontrer = () => {
   let view;
   try {
     view = new WebContentsView({ webPreferences: {
-      preload: path.join(__dirname, 'pont-preload.js'),
+      preload: path.join(__dirname, 'pont-preload.js'), minimumFontSize: 11,
       contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: true,
     } });
   } catch (e) { return false; }
@@ -5340,7 +5340,7 @@ const poserCadreNatif = () => {
        fenetres, pas celui de la fenetre principale. S y tromper donnerait une
        page sans `szPont`, donc un cadre muet. */
     vueCadre = new WebContentsView({ webPreferences: {
-      preload: path.join(__dirname, 'pont-preload.js'),
+      preload: path.join(__dirname, 'pont-preload.js'), minimumFontSize: 11,
       contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: true,
     } });
     try { vueCadre.setBackgroundColor('#0e1522'); } catch (e) {}
@@ -7532,7 +7532,7 @@ if (!app.requestSingleInstanceLock()) {
       try {
         if (ancrees.get('tableau')) return;
         const view = new WebContentsView({ webPreferences: {
-          preload: path.join(__dirname, 'pont-preload.js'),
+          preload: path.join(__dirname, 'pont-preload.js'), minimumFontSize: 11,
           contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: true,
         } });
         /* ⚠⚠ `refaire` — OUBLIÉ JUSQU'AU 2026-09-14, ET C'EST LA FAUTE QU'IL A

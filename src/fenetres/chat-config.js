@@ -407,6 +407,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     majOnglets();
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     corps.innerHTML = (ONGLET === 'ia') ? vueIa() : vueWidget();
+    /* LE BOUTON D ENREGISTREMENT DANS LE PIED (2026-10-11, etape 1 du plan de lisibilite) : il flottait
+       sous la derniere carte, a gauche ; il rejoint le pied, a droite, comme dans les autres fenetres.
+       Meme id, meme geste : on DEPLACE le bouton de l onglet ouvert, on retire celui de l autre. */
+    var pied = document.querySelector('.pied');
+    if (pied) {
+      Array.prototype.forEach.call(pied.querySelectorAll('#c-enr,#i-enr'), function(x){ x.remove(); });
+      var bm = el(ONGLET === 'ia' ? 'i-enr' : 'c-enr');
+      if (bm) { var hote = bm.parentNode; pied.appendChild(bm); if (hote && !hote.children.length) hote.remove(); }
+    }
     if (ONGLET === 'ia') {
       var bi = el('i-enr'); if (bi) bi.onclick = enregistrerIa;
       return;
