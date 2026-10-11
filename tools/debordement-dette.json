@@ -1,0 +1,4 @@
+{
+  "principal": {},
+  "_note": "Debordements CONNUS le jour de leur releve (banc-debordement.js --dette). Le banc echoue sur tout debordement nouveau ou aggrave."
+}

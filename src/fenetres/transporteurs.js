@@ -55,22 +55,32 @@ body{background:var(--f-page);color:var(--tx);
    s'empilent sous la précédente au lieu de s'aligner par rangée sur la hauteur de
    Postes Canada — plus d'espace mort sous une carte courte. */
 .corps{flex:1 1 auto;min-height:0;padding:1rem 1.05rem 1.2rem;overflow-y:auto}
-/* ══ UN ONGLET PAR TRANSPORTEUR, LES CHAMPS EN TABLEAU (2026-10-11, sa demande : « des onglets
+/* ⚠ CLASSE tr-ong, PAS onglets : le socle (CSS_REFONTE) peint .onglets button.on en pastille or
+   pleine, a specificite egale et APRES nous — l onglet actif perdait son dessin d intercalaire.
+   ══ UN ONGLET PAR TRANSPORTEUR, LES CHAMPS EN TABLEAU (2026-10-11, sa demande : « des onglets
    par transporteur, et espacer les champs dans un beau tableau par onglet ») ══════════════════
    Tous les panneaux restent DANS la page (masqués) : saisie() lit chaque champ par son id,
    quel que soit l'onglet ouvert — passer d'un onglet à l'autre ne perd rien. Chaque champ
    devient une LIGNE : le libellé à gauche, la valeur à droite, l'aide sous la valeur. */
-.onglets{flex:0 0 auto;display:flex;gap:.25rem;flex-wrap:wrap;padding:.55rem 1.05rem 0;
+.tr-ong{flex:0 0 auto;display:flex;gap:.2rem;flex-wrap:wrap;align-items:flex-end;padding:.45rem 1.05rem 0;
   border-bottom:1px solid var(--v08);background:var(--f-page)}
-.onglets button{display:inline-flex;align-items:center;gap:.45rem;border:1px solid transparent;
-  border-bottom:0;border-radius:9px 9px 0 0;background:none;padding:.5rem .95rem;margin-bottom:-1px;
-  color:var(--tx2);font-weight:600;font-size:.82rem}
-.onglets button:hover:not(:disabled){background:var(--v05);color:var(--tx)}
-.onglets button.on{background:var(--f-carte);border-color:var(--v08);color:var(--tx)}
-.onglets .pt{width:.5rem;height:.5rem;border-radius:50%;background:var(--v16);flex:0 0 auto}
-.onglets .pt.actif{background:#c9a97e}.onglets .pt.bon{background:var(--tx-ok)}.onglets .pt.mal{background:var(--tx-err)}
+.tr-ong button{display:inline-flex;align-items:center;gap:.45rem;border:1px solid transparent;
+  border-bottom:0;border-radius:9px 9px 0 0;background:none;padding:.42rem 1rem;margin-bottom:-1px;
+  height:2.3rem;line-height:1;color:var(--tx2);font-weight:600;font-size:.84rem}
+.tr-ong button:hover:not(:disabled){background:var(--v05);color:var(--tx)}
+.tr-ong button.on{background:var(--f-carte);border-color:var(--v08);color:var(--tx)}
+.tr-ong .pt{width:.5rem;height:.5rem;border-radius:50%;background:var(--v16);flex:0 0 auto}
+.tr-ong .pt.actif{background:#c9a97e}.tr-ong .pt.bon{background:var(--tx-ok)}.tr-ong .pt.mal{background:var(--tx-err)}
 .pan[hidden]{display:none}
-.pan{max-width:52rem;margin:0 auto}
+/* TOUTE LA LARGEUR, CHAMPS SUR DEUX COLONNES (2026-10-11, sa capture : « tu ne prends pas l espace de
+   l application, tu as condense tout dans le centre »). La carte occupe la fenetre ; ses lignes se
+   rangent sur deux colonnes (une seule sous 1100 px). Titre, etat de cotation et encadre d aide
+   traversent les deux colonnes. */
+.pan{max-width:none;margin:0}
+.pan .carte{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:2.6rem;align-items:start}
+.pan .carte > .th,.pan .carte > .cot,.pan .carte > .info,.pan .carte > h2,.pan .carte > .sep,.pan .carte > .stitre{grid-column:1 / -1}
+.pan .carte > .gr2{display:contents}
+@media (max-width:1100px){.pan .carte{grid-template-columns:minmax(0,1fr)}}
 .pan .carte{padding:1.1rem 1.4rem 1.2rem;margin-bottom:.9rem;border-radius:12px}
 .pan .carte .th{margin:0 0 .6rem}
 .pan .carte h2{font-size:1rem}
@@ -145,7 +155,7 @@ function pageTransporteurs() {
 <div class="tete"><span class="ico">${ICO.shipping}</span><h1>${T("Transporteurs")}</h1></div>
 <div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter, pas modifier.")}</div>
 <div class="avert" id="avert" hidden></div>
-<div class="onglets" id="onglets" role="tablist" aria-label="${T("Transporteurs")}"></div>
+<div class="tr-ong" id="onglets" role="tablist" aria-label="${T("Transporteurs")}"></div>
 <div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <button id="b-tester" title="${T("Une vraie cotation vers Québec, 1 kg, pour chaque transporteur actif")}">${T("Tester la cotation")}</button>
