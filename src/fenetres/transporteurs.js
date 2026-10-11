@@ -54,13 +54,40 @@ body{background:var(--f-page);color:var(--tx);
 /* Disposition en COLONNES (type maçonnerie) : les cartes courtes (Purolator, UPS…)
    s'empilent sous la précédente au lieu de s'aligner par rangée sur la hauteur de
    Postes Canada — plus d'espace mort sous une carte courte. */
-.corps{flex:1 1 auto;min-height:0;padding:.7rem 1.05rem;overflow-y:auto;
-  columns:24rem;column-gap:.8rem}
+.corps{flex:1 1 auto;min-height:0;padding:1rem 1.05rem 1.2rem;overflow-y:auto}
+/* ══ UN ONGLET PAR TRANSPORTEUR, LES CHAMPS EN TABLEAU (2026-10-11, sa demande : « des onglets
+   par transporteur, et espacer les champs dans un beau tableau par onglet ») ══════════════════
+   Tous les panneaux restent DANS la page (masqués) : saisie() lit chaque champ par son id,
+   quel que soit l'onglet ouvert — passer d'un onglet à l'autre ne perd rien. Chaque champ
+   devient une LIGNE : le libellé à gauche, la valeur à droite, l'aide sous la valeur. */
+.onglets{flex:0 0 auto;display:flex;gap:.25rem;flex-wrap:wrap;padding:.55rem 1.05rem 0;
+  border-bottom:1px solid var(--v08);background:var(--f-page)}
+.onglets button{display:inline-flex;align-items:center;gap:.45rem;border:1px solid transparent;
+  border-bottom:0;border-radius:9px 9px 0 0;background:none;padding:.5rem .95rem;margin-bottom:-1px;
+  color:var(--tx2);font-weight:600;font-size:.82rem}
+.onglets button:hover:not(:disabled){background:var(--v05);color:var(--tx)}
+.onglets button.on{background:var(--f-carte);border-color:var(--v08);color:var(--tx)}
+.onglets .pt{width:.5rem;height:.5rem;border-radius:50%;background:var(--v16);flex:0 0 auto}
+.onglets .pt.actif{background:#c9a97e}.onglets .pt.bon{background:var(--tx-ok)}.onglets .pt.mal{background:var(--tx-err)}
+.pan[hidden]{display:none}
+.pan{max-width:52rem;margin:0 auto}
+.pan .carte{padding:1.1rem 1.4rem 1.2rem;margin-bottom:.9rem;border-radius:12px}
+.pan .carte .th{margin:0 0 .6rem}
+.pan .carte h2{font-size:1rem}
+.pan .carte > h2{margin:0 0 .5rem}
+.pan .info{margin:.2rem 0 .6rem}
+.pan .gr2{display:block}
+.pan .ch{display:grid;grid-template-columns:minmax(10rem,15rem) minmax(0,1fr);align-items:center;
+  column-gap:1.4rem;row-gap:.25rem;margin:0;padding:.75rem 0;border-top:1px solid var(--v07)}
+.pan .ch label{margin:0;font-size:.84rem;color:var(--tx);font-weight:500}
+.pan .ch input,.pan .ch select{padding:.5rem .6rem;font-size:.86rem}
+.pan .ch .etat,.pan .ch .aide{grid-column:2}
+.pan .cot{margin:0 0 .5rem}
+@media (max-width:640px){.pan .ch{grid-template-columns:1fr}.pan .ch .etat,.pan .ch .aide{grid-column:1}}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
-  padding:.75rem .9rem;min-width:0;display:flex;flex-direction:column;
-  break-inside:avoid;-webkit-column-break-inside:avoid;margin-bottom:.7rem}
+  padding:.75rem .9rem;min-width:0;display:flex;flex-direction:column;margin-bottom:.7rem}
 .carte .th{display:flex;align-items:center;gap:.5rem;margin:0 0 .3rem}
 /* ⚠ Emoji en GRIS, jamais en couleur (préférence 2026-08-11). */
 .carte h2{margin:0;font:700 .85rem/1.2 system-ui}
@@ -118,6 +145,7 @@ function pageTransporteurs() {
 <div class="tete"><span class="ico">${ICO.shipping}</span><h1>${T("Transporteurs")}</h1></div>
 <div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter, pas modifier.")}</div>
 <div class="avert" id="avert" hidden></div>
+<div class="onglets" id="onglets" role="tablist" aria-label="${T("Transporteurs")}"></div>
 <div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <button id="b-tester" title="${T("Une vraie cotation vers Québec, 1 kg, pour chaque transporteur actif")}">${T("Tester la cotation")}</button>
@@ -149,7 +177,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
   var bsave = document.getElementById('b-save');
   var avertEl = document.getElementById('avert');
-  var D = null, RO = false, OCCUPE = false;
+  var D = null, RO = false, OCCUPE = false, ONGLET = 'general';
   var PROVS = ['QC','ON','BC','AB','MB','SK','NS','NB','NL','PE','NT','NU','YT'];
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
@@ -322,10 +350,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '<div class="ch"><label for="cp-mode">${T("Environnement")}</label><select id="cp-mode"' + (RO ? ' disabled' : '') + '>'
       + '<option value="sandbox"' + ((pc.mode || 'sandbox') === 'sandbox' ? ' selected' : '') + '>${T("Bac à sable (test)")}</option>'
       + '<option value="production"' + (pc.mode === 'production' ? ' selected' : '') + '>${T("Production")}</option></select></div>';
-    // Mapbox (jeton public) + adresse expéditeur.
-    /* ⚠ TROIS CARTES AU LIEU D UNE (sa demande : aucune barre de defilement) :
-       la carte geante de Postes Canada empechait les colonnes de s equilibrer. */
-    h += '</div><div class="carte"><h2>${T("Autocomplétion d’adresse à la caisse")}</h2>';
+    return h + '</div>';
+  }
+  /* L ONGLET « GÉNÉRAL » (2026-10-11) : ce qui sert à TOUS les transporteurs — l adresse
+     d expédition (enregistrée avec Postes Canada, lue par tous) et l autocomplétion. */
+  function carteGeneraleHtml(){
+    var pc = (D.carriers || {})['postes-canada'] || {};
+    var h = '<div class="carte"><h2>${T("Autocomplétion d’adresse à la caisse")}</h2>';
     h += texteHtml('mapbox', '${T("Jeton Mapbox (public, pk.*)")}', D.mapbox, 'pk.xxxxxxxx', true,
       '${T("Gratuit sur account.mapbox.com. S’il est renseigné, il remplace AddressComplete (plus précis au Canada).")}');
     h += '</div><div class="carte"><h2>${T("Adresse expéditeur (entrepôt / boutique)")}</h2>';
@@ -353,14 +384,40 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '${T("d’effacer vos identifiants.")}<div class="g"><button id="b-retry">${T("↻ Réessayer le chargement")}</button></div>';
     } else { avertEl.hidden = true; }
 
-    var h = [cartePcHtml()];
-    SIMPLES.forEach(function(sp){ h.push(carteSimpleHtml(sp)); });
-    corps.innerHTML = h.join('');
+    var pans = [{ k: 'general', n: '${T("Général")}', h: carteGeneraleHtml() },
+                { k: 'postes-canada', n: '${T("Postes Canada")}', h: cartePcHtml() }];
+    SIMPLES.forEach(function(sp){ pans.push({ k: sp.cle, n: sp.titre, h: carteSimpleHtml(sp) }); });
+    if (!pans.some(function(p){ return p.k === ONGLET; })) ONGLET = 'general';
+    corps.innerHTML = pans.map(function(p){
+      return '<section class="pan" role="tabpanel" id="pan-' + p.k + '" aria-labelledby="ong-' + p.k + '"' + (p.k === ONGLET ? '' : ' hidden') + '>' + p.h + '</section>';
+    }).join('');
+    var ob = document.getElementById('onglets');
+    if (ob) {
+      ob.innerHTML = pans.map(function(p){
+        var c = (D.carriers || {})[p.k], e = (D.cotation || {})[p.k];
+        var pt = p.k === 'general' ? '' : (!c || !c.enabled) ? 'pt' : (e && e.ok) ? 'pt bon' : (e && e.actif !== false && !e.jamais && !e.ok) ? 'pt mal' : 'pt actif';
+        var tit = p.k === 'general' ? '' : (!c || !c.enabled) ? '${T("Désactivé")}' : (e && e.ok) ? '${T("Actif — cote à la caisse")}' : (e && !e.jamais && !e.ok) ? '${T("Actif — ne cote pas")}' : '${T("Actif")}';
+        return '<button type="button" role="tab" id="ong-' + p.k + '" data-ong="' + p.k + '" aria-controls="pan-' + p.k + '" aria-selected="' + (p.k === ONGLET) + '"'
+          + ' class="' + (p.k === ONGLET ? 'on' : '') + '"' + (tit ? ' title="' + esc(tit) + '"' : '') + '>'
+          + (pt ? '<span class="' + pt + '" aria-hidden="true"></span>' : '') + esc(p.n) + '</button>';
+      }).join('');
+      Array.prototype.forEach.call(ob.querySelectorAll('[data-ong]'), function(b){
+        b.onclick = function(){ montrerOnglet(b.getAttribute('data-ong')); };
+      });
+    }
     brancher();
     // On n'autorise l'enregistrement que si la config complète est chargée.
     bsave.disabled = RO || OCCUPE || (D && D.charge === false);
   }
 
+  // Changer d onglet ne redessine rien : les champs gardent ce qui vient d etre tapé.
+  function montrerOnglet(k){
+    ONGLET = k;
+    Array.prototype.forEach.call(document.querySelectorAll('.pan'), function(p){ p.hidden = p.id !== 'pan-' + k; });
+    Array.prototype.forEach.call(document.querySelectorAll('#onglets [data-ong]'), function(b){
+      var on = b.getAttribute('data-ong') === k; b.classList.toggle('on', on); b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+  }
   function brancher(){
     var r = document.getElementById('b-retry');
     if (r) r.onclick = reessayer;

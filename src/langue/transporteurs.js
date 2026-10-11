@@ -189,4 +189,10 @@ module.exports = {
   "Numéro de compte de fret de test": "Test freight account number",
   "Clé": "Key",
   "Clé du portail Purolator": "Key from the Purolator portal",
+  /* ── LES ONGLETS (2026-10-11) */
+  "Général": "General",
+  "Désactivé": "Disabled",
+  "Actif — cote à la caisse": "Active — quotes at checkout",
+  "Actif — ne cote pas": "Active — not quoting",
+  "Actif": "Active",
 };
