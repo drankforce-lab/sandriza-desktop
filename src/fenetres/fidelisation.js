@@ -31,6 +31,10 @@ const T = require('../langue').tr('fidelisation');
 const CSS = `
 /* L'onglet Ambassadrices (2026-10-07) : trois vues (ambassadrices et bilan, programme, candidatures). */
 .amb-zone{display:flex;flex-direction:column;gap:.7rem;flex:1 1 auto;min-height:0}
+/* Etape 3 du plan de lisibilite (2026-10-11) : les cases des paliers faisaient 13 px et les noms
+   n occupaient que la moitie de leur colonne. */
+#pal-zone td input[type="checkbox"]{width:1.2rem;height:1.2rem;cursor:pointer}
+#pal-zone td input[data-pal-k="nom"],#pal-zone td input[data-pal-k="nomEN"]{width:100%;max-width:16rem}
 .amb-sous{display:flex;gap:.3rem;align-items:center;flex-wrap:wrap}
 .amb-sous button{padding:.26rem .8rem;border-radius:99px;font-size:.8rem;font-weight:600;color:var(--tx2);background:transparent}
 .amb-sous button.actif{color:var(--tx)}

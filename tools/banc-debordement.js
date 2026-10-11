@@ -50,6 +50,9 @@ const DETACHE = OPT('--detache');
 const HAUT = DETACHE ? 780 : 833;
 const ECRIRE_DETTE = OPT('--dette');
 const PAR_LOT = 18;
+/* --jeu=N : rend le N-ieme jeu de reponses de la fenetre (0 par defaut) — pour voir un
+   onglet ou un editeur que le premier jeu n'ouvre pas. Ne sert qu'a la main, avec --garder. */
+const JEU_N = Number((ARGS.find((a) => a.startsWith('--jeu=')) || '--jeu=0').slice(6)) || 0;
 
 /* ── L ELASTICITE ──────────────────────────────────────────────────────────
    ⚠ LA QUESTION N EST PAS << reste-t-il du vide ? >> MAIS << le contenu
@@ -219,7 +222,7 @@ function fenetres() {
     if (!fabrique) continue;
     const brut = REPONSES[f];
     let jeu = null;
-    if (Array.isArray(brut) && brut.length) jeu = brut[0];
+    if (Array.isArray(brut) && brut.length) jeu = brut[Math.min(JEU_N, brut.length - 1)];
     else if (brut && typeof brut === 'object') jeu = { id: '', reponses: brut };
     else jeu = { id: '', reponses: {} };
     out.push({ nom, fabrique, jeu });

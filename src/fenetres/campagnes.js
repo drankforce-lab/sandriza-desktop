@@ -112,6 +112,9 @@ tbody tr:hover td{background:var(--v04)}
 .form textarea{resize:vertical;font-family:Consolas,"Courier New",monospace;font-size:.78rem;
   line-height:1.55;min-height:9rem}
 .form textarea.sms{font-family:inherit;font-size:.83rem;min-height:4.5rem}
+/* Etape 3 du plan de lisibilite (2026-10-11) : le corps d une etape de chaine tenait en trois
+   lignes sous 100 px vides ; on lui donne la place (mesure a 1400 x 833, sans barre). */
+.form textarea[id^="e-b-"]{min-height:9rem}
 .form .duo{display:flex;gap:.4rem;align-items:center}
 .form .duo input{width:5rem}
 .form .duo span{font-size:.76rem;color:var(--tx2)}

@@ -48,10 +48,18 @@ const CSS_PROPRE = `
    ② L ETAPE 1 TIENT ENTIERE : la rangee Etiquette / Fournisseur passait sous le
    pied de la fenetre, sans barre pour l atteindre. */
 /* L etape 1 : Identification en quatre colonnes, Classement en trois. */
-.pf-id{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.6rem .75rem}
+/* ⚠ ETAPE 3 DU PLAN DE LISIBILITE (2026-10-11) : quatre colonnes tassaient le nom, la
+   categorie et le SKU sur une ligne et laissaient 170 px vides sous les cartes. Trois
+   colonnes (nom sur deux, puis marque / poids / SKU), la description sur toute la largeur,
+   des ecarts plus francs, et le Classement et le Prix a la meme hauteur. Mesure a
+   1400 x 833 : tout tient, sans barre. */
+.pf-id{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.95rem 1.1rem}
 .pf-id .l2{grid-column:span 2}
 .pf-id .l4{grid-column:1 / -1}
-.pf-cl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem .75rem}
+.pf-id #p-desc{min-height:4.6rem}
+.pf-cl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.95rem 1.1rem}
+.cote.pf-bas{align-items:stretch}
+.cote.pf-bas .prixgrille{gap:.95rem 1.1rem}
 /* La carte « Médias » (2026-10-07) : le mannequin sur une rangée de trois, puis
    la vidéo et la vue 360 chacune sur sa ligne, avec leur bouton de retrait. */
 .pf-med{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem .75rem}
@@ -470,12 +478,6 @@ function pageProduit(id) {
       + '<div class="carte"><h2>${T("Identification")}</h2><div class="pf-id">'
       + '<div class="l2">' + ch('p-nom', '${T("Nom du produit")}', { requis: true, placeholder: '${T("Ex : Robe fleurie été")}' }) + '</div>'
       + sel('p-cat', '${T("Catégorie")}', rien.concat(opt(CTX.categories, 'cle', 'libelle')), { requis: true })
-      // ⚠ LE SKU EST VISIBLE, en lecture seule. Un code attribué « quelque part
-      // plus tard » ne peut ni être lu, ni recopié sur une étiquette, ni
-      // vérifié. Il se calcule dès que la catégorie est choisie.
-      + '<div class="ch"><label for="p-sku">${T("Code (SKU)")}</label>'
-      + '<input id="p-sku" readonly style="font-family:ui-monospace,Consolas,monospace;'
-      + 'background:var(--f-pied);color:var(--tx-or)" placeholder="${T("choisissez une catégorie")}"></div>'
       + ch('p-marque', '${T("Marque")}')
       // Le poids appartient a l identite du vetement, pas au prix : c est une
       // caracteristique de l article, et il tenait seul dans une carte entiere.
@@ -484,9 +486,15 @@ function pageProduit(id) {
       + '<select id="p-unite" aria-label="${T("Unité du poids")}"><option value="g">g</option><option value="kg">kg</option>'
       + '<option value="lb">lb</option></select></div>'
       + '<div class="aide" style="margin-top:.2rem">${T("Sert au calcul des frais d’expédition.")}</div></div>'
-      + '<div class="ch l2"><label for="p-desc">${T("Description")}'
+      // ⚠ LE SKU EST VISIBLE, en lecture seule. Un code attribué « quelque part
+      // plus tard » ne peut ni être lu, ni recopié sur une étiquette, ni
+      // vérifié. Il se calcule dès que la catégorie est choisie.
+      + '<div class="ch"><label for="p-sku">${T("Code (SKU)")}</label>'
+      + '<input id="p-sku" readonly style="font-family:ui-monospace,Consolas,monospace;'
+      + 'background:var(--f-pied);color:var(--tx-or)" placeholder="${T("choisissez une catégorie")}"></div>'
+      + '<div class="ch l4"><label for="p-desc">${T("Description")}'
       + '<span id="p-desc-etat" style="float:right;color:var(--tx2);font-size:.72rem"></span></label>'
-      + '<textarea id="p-desc" rows="2"></textarea>'
+      + '<textarea id="p-desc" rows="3"></textarea>'
       // La redaction par IA passe par le PONT : la fenetre envoie la photo et les
       // renseignements, le SITE interroge le service avec sa cle. Rien ne sort
       // d ici, aucune cle ne voyage.
