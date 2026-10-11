@@ -195,6 +195,12 @@ module.exports = {
   "Actif — cote à la caisse": "Active — quotes at checkout",
   "Actif — ne cote pas": "Active — not quoting",
   "Actif": "Active",
+  /* ── INTELCOM (2026-10-11) */
+  "Code client": "Client code",
+  "Ex : SANDRIZA": "E.g. SANDRIZA",
+  "Clé API (x-api-key)": "API key (x-api-key)",
+  "Préfixe des numéros de suivi": "Tracking number prefix",
+  "Ex : SZ": "E.g. SZ",
   /* ── LES SECTIONS (7.18.4) */
   "Identifiants API": "API credentials",
   "Fournis par le portail des développeurs du transporteur.": "Provided by the carrier’s developer portal.",
@@ -204,5 +210,5 @@ module.exports = {
   "Donnés par le portail pour l’environnement de test : facturation au destinataire et fret.": "Given by the portal for the test environment: receiver billing and freight.",
   "Le numéro de client Postes Canada et, s’il y a lieu, le contrat commercial.": "Your Canada Post customer number and, if any, the commercial contract.",
   "Le point de départ des colis : il sert à la cotation de tous les transporteurs.": "Where parcels leave from: used to quote every carrier.",
-  "Propose l’adresse complète pendant que la cliente tape la sienne.": "Suggests the full address while the customer types hers.",
+  "Propose l’adresse complète pendant que le client tape la sienne.": "Suggests the full address while the customer types theirs.",
 };

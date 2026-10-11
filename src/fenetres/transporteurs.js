@@ -263,6 +263,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       cleApi: { id: 'pur-cle', label: '${T("Clé")}', champ: 'cleApi', place: '${T("Clé du portail Purolator")}' },
       tests: [{ id: 'pur-trecv', champ: 'testReceiverAccount', label: '${T("Compte destinataire de test")}' },
               { id: 'pur-tfret', champ: 'testFreightAccount', label: '${T("Numéro de compte de fret de test")}' }] },
+    /* INTELCOM (2026-10-11, sa demande) : une clé d API (en-tête x-api-key) par environnement, le code
+       client et le PRÉFIXE des numéros de suivi, choisis à l intégration avec Intelcom (le marchand
+       fabrique ses numéros : 18 caractères au plus, préfixe compris). */
+    { cle: 'intelcom', titre: 'Intelcom', enId: 'int-en',
+      user: { id: 'int-client', label: '${T("Code client")}', champ: 'clientCode', place: '${T("Ex : SANDRIZA")}' },
+      sec:  { id: 'int-cle', label: '${T("Clé API (x-api-key)")}', champ: 'cleApi', place: '••••••••' },
+      acct: { id: 'int-prefixe', label: '${T("Préfixe des numéros de suivi")}', place: '${T("Ex : SZ")}' },
+      mode: { id: 'int-mode' } },
     { cle: 'fedex', titre: 'FedEx', enId: 'fdx-en',
       user: { id: 'fdx-cid', label: 'Client ID', champ: 'clientId', place: 'l7xxXXXXXXXX' },
       sec:  { id: 'fdx-sec', label: 'Client Secret', champ: 'clientSecret', place: '••••••••' },
@@ -355,7 +363,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + PROVS.map(function(p){ return '<option' + ((pc.originProvince || 'QC') === p ? ' selected' : '') + '>' + p + '</option>'; }).join('')
       + '</select></div></div>'
       + texteHtml('cp-opostal', '${T("Code postal (sans espace)")}', pc.originPostal, 'H1A1A1', false) + '</section>';
-    h += '<section class="szr-sec"><h3>${T("Autocomplétion d’adresse à la caisse")}</h3><p class="szr-sous">${T("Propose l’adresse complète pendant que la cliente tape la sienne.")}</p>'
+    h += '<section class="szr-sec"><h3>${T("Autocomplétion d’adresse à la caisse")}</h3><p class="szr-sous">${T("Propose l’adresse complète pendant que le client tape la sienne.")}</p>'
       + texteHtml('mapbox', '${T("Jeton Mapbox (public, pk.*)")}', D.mapbox, 'pk.xxxxxxxx', true,
       '${T("Gratuit sur account.mapbox.com. S’il est renseigné, il remplace AddressComplete (plus précis au Canada).")}') + '</section>';
     return h + '</div>';

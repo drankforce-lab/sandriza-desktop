@@ -30,7 +30,7 @@ let SIMPLES = [];
 try { SIMPLES = eval(js.slice(i, j).replace('var SIMPLES =', '(') + ')'); }
 catch (e) { fautes.push('SIMPLES illisible dans la page : ' + e.message); }
 
-const CONNUS = ['purolator', 'fedex', 'ups', 'canpar'];
+const CONNUS = ['purolator', 'intelcom', 'fedex', 'ups', 'canpar'];
 const vus = new Set();
 SIMPLES.forEach((sp, n) => {
   if (typeof sp.cle !== 'string') { fautes.push(`entrée ${n} : « cle » n'est pas un nom de transporteur (${typeof sp.cle})`); return; }
