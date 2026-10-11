@@ -28,6 +28,12 @@ const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU
 const T = require('../langue').tr('cartescadeaux');
 
 const CSS = `
+.sz-fiche-corps:has(.cc-apercu-sect){align-items:stretch!important}
+.sz-fiche-col:has(.cc-apercu-sect){display:flex!important;flex-direction:column;align-self:stretch}
+.cc-apercu-sect{flex:1 1 auto;display:flex;flex-direction:column}
+.cc-apercu-sect #cc-apercu{flex:1 1 auto;display:flex;align-items:center;justify-content:center}
+.cc-apercu-sect #cc-apercu > *{width:100%;max-width:26rem}
+
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
@@ -249,7 +255,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
       + '<div class="ch"><label for="cc-exp">${T("Expéditeur")}</label><input id="cc-exp" placeholder="${T("la boutique")}"></div>'
       + '</div></section>'
       + '</div><div class="sz-fiche-col">'
-      + '<section class="sz-sect"><h4>${T("Aperçu")}</h4><div id="cc-apercu">' + apercuCarte('', '', '') + '</div></section>'
+      /* L APERÇU S ETIRE SUR TOUTE LA HAUTEUR (2026-10-11, lisibilité étape 2) : seul dans sa colonne, il
+         laissait un grand vide sous lui ; la carte est maintenant centrée dans une section aussi haute
+         que la colonne de gauche. */
+      + '<section class="sz-sect cc-apercu-sect"><h4>${T("Aperçu")}</h4><div id="cc-apercu">' + apercuCarte('', '', '') + '</div></section>'
       + '</div></div>'
       + '<div class="pied-boite"><button class="mini" id="cc-annuler">${T("Annuler")}</button>'
       + '<button class="mini prim" id="cc-creer">${T("Créer la carte")}</button></div>'

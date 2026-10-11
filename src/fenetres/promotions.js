@@ -443,6 +443,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     h += '<section class="sect"><h4>${T("Portée")}</h4><div class="grille">'
       + blocPortee('of', o.appliqueA || 'all', o.categoriesChoisies || [])
       + '</div></section>';
+    /* « Période » sous « Portée » (2026-10-11, lisibilité étape 2) : à droite, sous le long bloc du
+       bandeau, elle laissait la colonne de gauche à demi vide. */
+    h += ''
+      + '<section class="sect"><h4>${T("Période")}</h4><div class="grille g3">'
+      + ch('', '${T("Début")}', '<input type="date" id="of-debut" aria-label="${T("Début")}" value="' + esc(o.debut || '') + '">')
+      + ch('', '${T("Fin")}', '<input type="date" id="of-fin" aria-label="${T("Fin")}" value="' + esc(o.fin || '') + '">')
+      + ch('', '${T("Priorité d’affichage")}', '<input type="number" id="of-priorite" aria-label="${T("Priorité d’affichage")}" min="1" max="99" value="' + esc(o.priorite || (D && D.prioriteLibre) || 5) + '">')
+      + '</div></section>';
 
     h += '</div><div class="col">'
       + '<section class="sect"><h4>${T("Bandeau de la boutique")}</h4>'
@@ -463,11 +471,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
       + '</div></div>'
       + '<p class="aide-off" id="of-bandeau-off"' + (affiche ? ' hidden' : '') + '>${T("Aucun bandeau : l’offre s’applique à la caisse sans être annoncée.")}</p>'
       + '</section>'
-      + '<section class="sect"><h4>${T("Période")}</h4><div class="grille g3">'
-      + ch('', '${T("Début")}', '<input type="date" id="of-debut" aria-label="${T("Début")}" value="' + esc(o.debut || '') + '">')
-      + ch('', '${T("Fin")}', '<input type="date" id="of-fin" aria-label="${T("Fin")}" value="' + esc(o.fin || '') + '">')
-      + ch('', '${T("Priorité d’affichage")}', '<input type="number" id="of-priorite" aria-label="${T("Priorité d’affichage")}" min="1" max="99" value="' + esc(o.priorite || (D && D.prioriteLibre) || 5) + '">')
-      + '</div></section></div></div>';
+      + '</div></div>';
 
     h += '<div class="pied-boite"><button class="mini" id="pr-annuler">${T("Annuler")}</button>'
       + '<button class="mini prim" id="of-enr">' + (o.id ? '${T("Enregistrer")}' : '${T("Créer l’offre")}') + '</button></div>'

@@ -173,6 +173,15 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
    montants : une colonne etroite, pas une ligne de plus (aucune barre de
    defilement). */
 .trois.avec-part{grid-template-columns:1fr 1fr 1fr 6.5rem auto}
+/* LISIBILITÉ, ÉTAPE 2 (2026-10-11) : la fiche s élargit (la fenêtre a la place), les montants
+   prennent des colonnes égales et « Calc. taxes » quitte le rang des champs pour sa propre ligne,
+   à droite — il écrasait la part d affaires dans une colonne de 6,5 rem. */
+.boite{max-width:56rem}
+.champ label{font-size:.8rem}
+.bloc-montants{padding:.8rem 1rem}
+.trois,.trois.avec-part{grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem 1rem}
+.trois.avec-part{grid-template-columns:repeat(4,minmax(0,1fr))}
+.trois > #f-taxes{grid-column:1 / -1;justify-self:end}
 @media (max-width:620px){.form,.trois{grid-template-columns:1fr}}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
