@@ -2910,12 +2910,25 @@ const CSS_ETATS = `
   animation:sz-navette 1.25s cubic-bezier(.45,.05,.55,.95) infinite alternate}
 @keyframes sz-navette{from{transform:translateX(0)}to{transform:translateX(78px)}}
 
+/* ⚠ LE MODE JOUR (2026-10-11, son signalement : « les ecrans de chargement ne sont pas
+   visibles en mode jour, c est trop clair »). Les jetons --v08 / --v22 sont des voiles
+   calibres pour la NUIT (blanc sur bleu nuit) ; transposes en jour, ils donnaient des barres
+   #e5e6e8 sur blanc — 1,2:1, un squelette qu on ne voit pas. Et le segment d accent a .6 /
+   .8 d opacite fondait dans le creme. En jour : des barres franchement grises, une lueur
+   plus sombre, le rail et la navette en accent FORT et pleins. La nuit ne change pas. */
+html.jour .sz-squel i{background:linear-gradient(90deg,rgba(15,23,42,.17) 20%,rgba(15,23,42,.34) 38%,rgba(15,23,42,.17) 56%);
+  background-size:340% 100%}
+html.jour .sz-squel::before,html.jour .vide.charge::before{background:rgba(15,23,42,.16)}
+html.jour .sz-squel::after,html.jour .vide.charge::after{background:var(--sz-accent-fort,var(--sz-accent));opacity:1}
+html.jour .vide.charge{color:var(--tx)}
+
 @media (prefers-reduced-motion:reduce){
   .sz-squel,.sz-squel i,.sz-squel::after,.vide,.vide-page,
   .vide.charge::after,.vide:not(.charge)::before{animation:none}
   .vide:not(.charge)::before{opacity:.45}
   .vide.charge::after{width:120px;opacity:.35}
   .sz-squel i{background:var(--v08)}
+  html.jour .sz-squel i{background:rgba(15,23,42,.2)}
   .sz-squel::after{display:none}
 }
 `;
