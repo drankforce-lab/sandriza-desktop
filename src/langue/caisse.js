@@ -202,5 +202,5 @@ module.exports = {
   'raison inconnue': 'unknown reason',
   'Clients trouvés': 'Customers found',
   'client trouvé': 'customer found',
-  'clients trouvés': 'customers found'
+  'clients trouvés': 'customers found',
 };

@@ -273,4 +273,6 @@ module.exports = {
   "déjà au Studio": "already in the Studio",
   "nouvelles": "new",
   "nouvelle": "new",
+  // La touche du clavier : « Maj » au Québec, « Shift » en anglais.
+  "Maj": "Shift",
 };

@@ -50,7 +50,10 @@ global.esc = (s) => String(s == null ? '' : s);
 
 // `eval` en module strict garde sa propre portée : on passe par une fonction qui
 // RETOURNE le moteur.
-const Assist = new Function(JS_SOCLE + '\nreturn Assist;')();
+// ⚠ JS_SOCLE est une FONCTION depuis le passage FR→EN (elle rend le texte dans la langue
+// courante) : concaténer la fonction elle-même collait son SOURCE, et « Assist » n'existait plus.
+const _socle = typeof JS_SOCLE === 'function' ? JS_SOCLE() : JS_SOCLE;
+const Assist = new Function(_socle + '\nreturn Assist;')();
 
 const ETAPES = [
   { t: 'Identité, prix et poids', obl: ['p-nom', 'p-cat', 'p-poids', 'p-prix', 'p-cout'] },

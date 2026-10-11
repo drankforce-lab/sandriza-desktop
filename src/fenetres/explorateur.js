@@ -574,7 +574,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       apercuEl.innerHTML = '<div class="accueil"><span class="ico">${ICO.image}</span>'
         + '<b>${T("Cliquez une photo pour la voir ici.")}</b>'
         + '<ul><li>${T("Un clic coche la photo, un autre la décoche.")}</li>'
-        + '<li><kbd>Maj</kbd> + ${T("clic : toute la plage depuis la dernière.")}</li>'
+        + '<li><kbd>${T("Maj")}</kbd> + ${T("clic : toute la plage depuis la dernière.")}</li>'
         + '<li>${T("Double-clic : la photo en grand, dans sa propre fenêtre.")}</li></ul></div>';
       return;
     }

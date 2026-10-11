@@ -93,6 +93,10 @@ const aTraduire = (t) => {
      plutot que d ecarter « tout ce qui a une parenthese » — une phrase peut
      parfaitement commencer par un mot suivi d une parenthese. */
   if (/^(?:(?:repeating-)?(?:linear|radial|conic)-gradient|url|calc|var|rgba?|hsla?)\(/.test(t)) return false;
+  /* ⚠ ET UNE REQUÊTE MÉDIA (2026-10-10). `matchMedia('(prefers-reduced-motion: reduce)')`, posé au
+     socle, a fait compter cette chaîne dans les 107 fenêtres d'un coup — 107 « textes à traduire »
+     que personne ne lit à l'écran. On nomme les traits de média plutôt qu'« une parenthèse ». */
+  if (/^\((?:prefers-[\w-]+|(?:min|max)-(?:width|height)|hover|pointer|orientation|display-mode)\s*:\s*[\w.-]+\)$/.test(t)) return false;
   const parts = t.split(',').map((p) => p.trim());
   const UNE_PART = /^[a-z][\w-]*$|^[a-z][\w-]*\[[^\]]+\]$|^\[[^\]]+\]$|^[.#][\w-]+$/;
   /* ⚠⚠ ET QUAND AUCUNE PART NE PORTE DE SIGNE : `button, input, select, label`
@@ -137,6 +141,55 @@ if (malDefaut) {
   console.log('>>> LE FRANCAIS N EST PLUS LE DEFAUT — refus.');
   process.exit(1);
 }
+
+/* ⚠⚠ DEUX FAUX MANQUES, MESURÉS LE 2026-10-10 (107 + ~60 « à traduire » qui l'étaient déjà) :
+   · L'ESPACE DE BORD. `T('Le courriel envoyé à ')` porte son espace (la phrase se colle à une
+     donnée), mais le texte visible arrive ROGNÉ : « Le courriel envoyé à » n'avait pas d'entrée
+     exacte. On essaie donc la même chaîne avec une espace d'un côté, de l'autre, des deux.
+   · LES CELLULES COLLÉES. `<th>${T("Date")}</th><th>${T("Client")}</th>` écrit DANS une chaîne de
+     script : le découpeur retire les balises et rend « Date Client », que personne n'a jamais
+     écrit — chaque mot, lui, a son entrée. On accepte un texte SEULEMENT s'il se découpe EN ENTIER,
+     mot à mot, en entrées existantes (fenêtre ou socle). Une phrase réellement oubliée ne se
+     découpe pas ainsi : ses mots-outils (« de », « la », « le ») n'ont pas d'entrée seuls. */
+/* Une clé qui porte du balisage (`donc <strong>ignorée</strong> :`) arrive au banc SANS ses balises :
+   on compare aussi aux clés débalisées. */
+const _sansBalises = new Map();
+const _clesNues = (nom) => {
+  if (!_sansBalises.has(nom)) {
+    const s = new Set();
+    for (const d of [LANGUE.dico(nom), LANGUE.dico('socle')]) {
+      if (d) for (const k of Object.keys(d)) if (/<[a-z]/i.test(k)) s.add(k.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim());
+    }
+    _sansBalises.set(nom, s);
+  }
+  return _sansBalises.get(nom);
+};
+const _aBord1 = (nom, t) => [t, t + ' ', ' ' + t, ' ' + t + ' '].some((v) => LANGUE.aUneDecision(nom, v)) || _clesNues(nom).has(t);
+/* La ponctuation de bord vient du code qui colle la phrase à une donnée : « (mise en service le » +
+   date + « ) ». On essaie la phrase telle quelle, puis débarrassée de sa ponctuation de bord. */
+const _aBord = (nom, t) => {
+  if (_aBord1(nom, t)) return true;
+  const nu = t.replace(/^[^A-Za-zÀ-ÖØ-öø-ɏ]+/, '').replace(/[\s().,;:!?»«—–-]+$/, '');
+  return nu !== t && nu.length > 1 && (_aBord1(nom, nu) || [':', ' :', '.', ')'].some((f) => _aBord1(nom, nu + f)));
+};
+/* Ce qui ne se traduit PAS, nommé un par un (liste FERMÉE — un filtre large rétrécit le banc en
+   silence) : les unités, le format de papier A4, la marque, une route interne (#page/…). */
+const _INTRADUISIBLE = /^(?:\(?(?:kg|g|cm|mm|km|po|Ko|Mo|Go|A4)[.)]*|Sandriza|SANDRIZA|#[a-z]+\/?)$/;
+const _decideParMorceaux = (nom, t) => {
+  if (_aBord(nom, t) || _INTRADUISIBLE.test(t)) return true;
+  const m = t.split(/\s+/).filter(Boolean);
+  if (m.length < 2) return false;
+  const ok = new Array(m.length + 1).fill(false);
+  ok[0] = true;
+  for (let i = 1; i <= m.length; i++) {
+    for (let j = 0; j < i && !ok[i]; j++) {
+      const morceau = m.slice(j, i).join(' ');
+      // Un morceau SANS LETTRE (« ✓ », « ‹ », « — », « 0,68 », « × » — U+00D7 est DANS la plage À-ɏ : exclu) n'a rien à traduire : `'✓ ' + T('Prête')`.
+      if (ok[j] && (!/[A-Za-zÀ-ÖØ-öø-ɏ]/.test(morceau) || _INTRADUISIBLE.test(morceau) || _aBord(nom, morceau))) ok[i] = true;
+    }
+  }
+  return ok[m.length];
+};
 
 const cible = process.argv[2] ? path.basename(process.argv[2]).replace(/\.js$/, '') : '';
 
@@ -184,7 +237,7 @@ for (const f of fs.readdirSync(DOS).filter((x) => x.endsWith('.js')).sort()) {
     const t = c.texte;
     if (!aTraduire(t) || vus.has(t)) continue;
     vus.add(t);
-    if (LANGUE.aUneDecision(nom, t)) { ok++; continue; }
+    if (LANGUE.aUneDecision(nom, t) || _decideParMorceaux(nom, t)) { ok++; continue; }
     manque++;
     if (cible) manquantsCible.push(t);
   }

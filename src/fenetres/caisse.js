@@ -922,7 +922,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           { productId: 'p_0002', name: 'Lina', sku: 'HAU-0007-S-IVO', size: 'S', color: 'Ivoire', price: 89, quantity: 2 }
         ];
         EDIT = 0;
-        document.getElementById('c-nom').value = 'Marie Tremblay';
+        /* Le nom de la vente TÉMOIN est une DONNÉE posée dans un champ : elle ne se traduit pas. */
+        var SZ_DONNEES = { clientTemoin: 'Marie Tremblay' };
+        document.getElementById('c-nom').value = SZ_DONNEES.clientTemoin;
         majTotaux();
       }
       dessinerLignes(); dessinerTotaux(); majBouton();
