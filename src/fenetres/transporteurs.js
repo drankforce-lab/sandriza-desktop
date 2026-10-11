@@ -271,6 +271,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       sec:  { id: 'int-cle', label: '${T("Clé API (x-api-key)")}', champ: 'cleApi', place: '••••••••' },
       acct: { id: 'int-prefixe', label: '${T("Préfixe des numéros de suivi")}', place: '${T("Ex : SZ")}' },
       mode: { id: 'int-mode' } },
+    /* ESHIPPER (2026-10-11, sa décision) : courtier qui revend Purolator, UPS, FedEx, Canpar… à ses
+       tarifs négociés. L API XML s authentifie par le nom d utilisateur et le mot de passe API donnés
+       dans « My Account » du compte eShipper ; test.eshipper.com en essai, web.eshipper.com en réel.
+       Cote au Canada et aux États-Unis ; le moins cher de ses services réguliers l emporte. */
+    { cle: 'eshipper', titre: 'eShipper', enId: 'esh-en',
+      user: { id: 'esh-user', label: '${T("Nom d’utilisateur API")}', champ: 'apiUsername', place: '${T("Dans « My Account » d’eShipper")}' },
+      sec:  { id: 'esh-pass', label: '${T("Mot de passe API")}', champ: 'motDePasse', place: '••••••••' },
+      acct: { id: 'esh-acct', label: '${T("Numéro de client (facultatif)")}', place: '${T("Ex : 123456")}' },
+      mode: { id: 'esh-mode' } },
     { cle: 'fedex', titre: 'FedEx', enId: 'fdx-en',
       user: { id: 'fdx-cid', label: 'Client ID', champ: 'clientId', place: 'l7xxXXXXXXXX' },
       sec:  { id: 'fdx-sec', label: 'Client Secret', champ: 'clientSecret', place: '••••••••' },

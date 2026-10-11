@@ -197,6 +197,11 @@ module.exports = {
   "Actif": "Active",
   /* ── INTELCOM (2026-10-11) */
   "Code client": "Client code",
+  "Nom d’utilisateur API": "API username",
+  "Dans « My Account » d’eShipper": "In eShipper’s “My Account”",
+  "Mot de passe API": "API password",
+  "Numéro de client (facultatif)": "Customer number (optional)",
+  "Ex : 123456": "E.g. 123456",
   "Ex : SANDRIZA": "E.g. SANDRIZA",
   "Clé API (x-api-key)": "API key (x-api-key)",
   "Préfixe des numéros de suivi": "Tracking number prefix",
