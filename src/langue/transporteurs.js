@@ -187,4 +187,6 @@ module.exports = {
   "Numéro de compte (en test : compte expéditeur de test)": "Account number (in test: test shipper account)",
   "Compte destinataire de test": "Test receiver account",
   "Numéro de compte de fret de test": "Test freight account number",
+  "Clé": "Key",
+  "Clé du portail Purolator": "Key from the Purolator portal",
 };

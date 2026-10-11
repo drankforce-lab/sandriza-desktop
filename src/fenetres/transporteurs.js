@@ -236,6 +236,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       sec:  { id: 'pur-pass', label: '${T("Secret (mot de passe de la clé)")}', champ: 'motDePasse', place: '••••••••' },
       acct: { id: 'pur-acct', label: '${T("Numéro de compte (en test : compte expéditeur de test)")}', place: '${T("Ex : 12345678")}' },
       mode: { id: 'pur-mode' },
+      // La CLÉ du portail (3ᵉ identifiant, sa capture du 2026-10-11) : un secret, masqué comme les autres.
+      cle:  { id: 'pur-cle', label: '${T("Clé")}', champ: 'cleApi', place: '${T("Clé du portail Purolator")}' },
       tests: [{ id: 'pur-trecv', champ: 'testReceiverAccount', label: '${T("Compte destinataire de test")}' },
               { id: 'pur-tfret', champ: 'testFreightAccount', label: '${T("Numéro de compte de fret de test")}' }] },
     { cle: 'fedex', titre: 'FedEx', enId: 'fdx-en',
@@ -280,6 +282,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '<div class="gr2">'
       + texteHtml(sp.user.id, sp.user.label, d[sp.user.champ], sp.user.place, true)
       + secretHtml(sp.sec.id, sp.sec.label, d[sp.sec.champ], sp.sec.place) + '</div>';
+    if (sp.cle) h += secretHtml(sp.cle.id, sp.cle.label, d[sp.cle.champ], sp.cle.place);
     if (sp.mode) {
       h += '<div class="gr2">'
         + texteHtml(sp.acct.id, sp.acct.label, d.accountNumber, sp.acct.place, false)
@@ -386,6 +389,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       o[sp.sec.champ] = val(sp.sec.id);
       if (sp.mode) o.mode = val(sp.mode.id);
       (sp.tests || []).forEach(function(t){ o[t.champ] = val(t.id); });
+      if (sp.cle) o[sp.cle.champ] = val(sp.cle.id);
       s[sp.cle] = o;
     });
     s.mapbox = val('mapbox');
