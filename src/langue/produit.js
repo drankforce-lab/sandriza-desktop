@@ -648,4 +648,13 @@ module.exports = {
   "Une seule fois : tracez une mesure que vous connaissez (par exemple la longueur, prise au ruban). Ensuite, chaque trait se mesure tout seul.": "Once only: draw a measurement you know (for example the length, taken with a tape). After that, every line measures itself.",
   "Cliquez maintenant vos mesures : elles se calculent toutes seules.": "Now click your measurements: they are calculated automatically.",
   "Pas de feuille dans cette photo : il faut UN repère connu pour donner l’échelle — tracez une mesure que vous connaissez, une seule fois.": "No sheet in this photo: ONE known reference is needed for the scale — draw a measurement you know, once only.",
+  /* ── COMPOSITION ET ENTRETIEN (2026-10-11) — les consignes elles-mêmes viennent du site, dans les deux langues. */
+  "Composition et entretien": "Composition and care",
+  "Composition": "Composition",
+  "Ex : 95 % polyester, 5 % élasthanne": "E.g. 95% polyester, 5% elastane",
+  "Autre consigne (facultatif)": "Other instruction (optional)",
+  "Mesures et entretien": "Measurements and care",
+  "Liste des consignes indisponible — mettez le site à jour.": "Care instruction list unavailable — update the site.",
+  "Ensembles rapides :": "Quick sets:",
+  "Tout décocher": "Clear all",
 };

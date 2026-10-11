@@ -61,6 +61,18 @@ html.jour .pf-med-l video{background:#1d2433}
 #p-360-bande{display:flex;gap:4px;flex-wrap:wrap;margin-top:.4rem}
 #p-360-bande img{width:40px;height:52px;object-fit:cover;border-radius:5px;border:1px solid var(--v22)}
 .cote.pf-bas{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}
+/* Composition et entretien (2026-10-11) : les consignes en cases, par groupe, le pictogramme
+   de la boutique a cote (il vient du site par le pont, avec la liste). */
+.ent-modeles{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;margin:.55rem 0 .7rem}
+.ent-modeles .aide{margin-right:.2rem}
+.ent-groupe{margin-top:.55rem}
+.ent-groupe h3{font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin:0 0 .3rem;font-weight:700}
+.ent-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:.25rem .9rem}
+.ent-grille label{display:flex;align-items:center;gap:.5rem;font-size:.84rem;cursor:pointer;padding:.18rem .3rem;border-radius:7px}
+.ent-grille label:hover{background:var(--v05)}
+.ent-grille label.on{background:rgba(201,169,126,.14)}
+.ent-grille svg{width:22px;height:22px;flex:0 0 auto;color:var(--tx)}
+.ent-grille input{margin:0;flex:0 0 auto}
 /* L ajustement du modele, sous les tailles (2026-10-07). */
 .pf-aj{margin-top:.7rem;max-width:30rem}
 .pf-aj .aide .mini{margin-left:.4rem}
@@ -629,7 +641,17 @@ function pageProduit(id) {
       + '<option value="robe">${T("Robe ou combinaison")}</option><option value="aucun">${T("Aucune mesure")}</option></select>'
       + '<button type="button" id="p-mesv-photo" class="prim"><span class="ic">📏</span> ${T("Mesurer sur une photo")}</button>'
       + '<button type="button" id="p-mesv-grad">${T("Compléter les autres tailles")}</button></div>'
-      + '<div id="p-mesv-table"></div></div></div>');
+      + '<div id="p-mesv-table"></div></div>'
+      /* COMPOSITION ET ENTRETIEN (2026-10-11, sa demande) : des cases, pas du texte libre — la
+         boutique affiche chaque consigne dans la langue de la cliente, avec son pictogramme. */
+      + '<div class="carte plein" id="p-ent-carte" style="margin-top:.8rem"><h2>${T("Composition et entretien")}</h2>'
+      + '<div class="ch"><label for="p-compo">${T("Composition")}</label>'
+      + '<input id="p-compo" maxlength="200" placeholder="${T("Ex : 95 % polyester, 5 % élasthanne")}"></div>'
+      + '<div class="ent-modeles" id="p-ent-modeles"></div>'
+      + '<div id="p-ent"></div>'
+      + '<div class="ch" style="margin-top:.7rem"><label for="p-ent-autre">${T("Autre consigne (facultatif)")}</label>'
+      + '<textarea id="p-ent-autre" rows="2" maxlength="400"></textarea></div>'
+      + '</div></div>');
 
     // 6 — Détails
     // ⚠ LE REGIME DE VENTE N EST PAS UN JEU DE CASES INDEPENDANTES. Mes cases
@@ -745,10 +767,10 @@ function pageProduit(id) {
       { t: '${T("Tailles et couleurs")}',     obl: [] },
       { t: 'Photo',                   obl: [] },
       { t: '${T("Couleurs")}',                obl: [] },
-      { t: '${T("Mesures")}',                 obl: [] },
+      { t: '${T("Mesures et entretien")}',    obl: [] },
       { t: '${T("Mise en marché")}',          obl: [] },
       { t: 'Stock',                   obl: [] }
-    ], function(i){ if (i === 2) { dessinerVues(); dessinerMedias(); } if (i === 3) dessinerVues(); if (i === 4) dessinerMesures(); if (i === 6) majStock(); });
+    ], function(i){ if (i === 2) { dessinerVues(); dessinerMedias(); } if (i === 3) dessinerVues(); if (i === 4) { dessinerMesures(); dessinerEntretien(); } if (i === 6) majStock(); });
 
     bEnr.disabled = !(ID ? CTX.peutModifier : CTX.peutAjouter);
     chargerCouts();   // les coûts numériques de l'article (journal des appels payants)
@@ -1326,6 +1348,53 @@ function pageProduit(id) {
       if (Object.keys(d).length) out[t] = d;
     });
     return Object.keys(out).length ? { type: ty, unite: 'cm', tailles: out } : null;
+  }
+  /* ══ COMPOSITION ET ENTRETIEN (2026-10-11) ═══════════════════════════════
+     ENT = les CLÉS cochées. La liste et les libellés viennent du site (CTX.entretien) :
+     la fenêtre n'en a pas de copie. Seules les clés partent ; le pont refuse les autres. */
+  var ENT = new Set();
+  var ENT_LG = '${require('../langue').langueCourante() === 'en' ? 'en' : 'fr'}';
+  function dessinerEntretien(){
+    var z = document.getElementById('p-ent'); if (!z || !CTX) return;
+    var liste = CTX.entretien || [], groupes = CTX.entretienGroupes || [], modeles = CTX.entretienModeles || [];
+    if (!liste.length) { z.innerHTML = '<div class="aide">${T("Liste des consignes indisponible — mettez le site à jour.")}</div>'; return; }
+    var zm = document.getElementById('p-ent-modeles');
+    if (zm) {
+      zm.innerHTML = '<span class="aide">${T("Ensembles rapides :")}</span>' + modeles.map(function(m){
+        return '<button type="button" data-ent-modele="' + esc(m.cle) + '">' + esc(m[ENT_LG] || m.fr) + '</button>';
+      }).join('') + (ENT.size ? '<button type="button" data-ent-vider="1">${T("Tout décocher")}</button>' : '');
+      zm.querySelectorAll('[data-ent-modele]').forEach(function(b){
+        b.onclick = function(){
+          var m = modeles.filter(function(x){ return x.cle === b.getAttribute('data-ent-modele'); })[0];
+          if (!m) return;
+          ENT = new Set(m.codes); dessinerEntretien(); majFicheBientot();
+        };
+      });
+      var bv = zm.querySelector('[data-ent-vider]');
+      if (bv) bv.onclick = function(){ ENT = new Set(); dessinerEntretien(); majFicheBientot(); };
+    }
+    z.innerHTML = groupes.map(function(g){
+      var items = liste.filter(function(c){ return c.groupe === g.cle; });
+      if (!items.length) return '';
+      return '<div class="ent-groupe"><h3>' + esc(g[ENT_LG] || g.fr) + '</h3><div class="ent-grille">'
+        + items.map(function(c){
+          var on = ENT.has(c.cle);
+          return '<label class="' + (on ? 'on' : '') + '"><input type="checkbox" data-ent="' + esc(c.cle) + '"' + (on ? ' checked' : '') + '>'
+            + (c.ico || '') + '<span>' + esc(c[ENT_LG] || c.fr) + '</span></label>';
+        }).join('') + '</div></div>';
+    }).join('');
+    z.querySelectorAll('input[data-ent]').forEach(function(cb){
+      cb.onchange = function(){
+        var k = cb.getAttribute('data-ent');
+        if (cb.checked) ENT.add(k); else ENT.delete(k);
+        cb.parentNode.classList.toggle('on', cb.checked);
+        var zm2 = document.getElementById('p-ent-modeles');
+        if (zm2 && !!zm2.querySelector('[data-ent-vider]') !== (ENT.size > 0)) dessinerEntretien();
+      };
+    });
+  }
+  function entPourEnvoi(){
+    return { codes: Array.from(ENT), autre: String(val('p-ent-autre') || '').trim(), composition: String(val('p-compo') || '').trim() };
   }
   function dessinerMesures(){
     var z = document.getElementById('p-mesv-table'); if (!z) return;
@@ -2250,6 +2319,9 @@ function pageProduit(id) {
     poser('p-style', p.style || ''); poser('p-guide', p.sizeGuideId || '');
     poser('p-etiq', p.tag || ''); poser('p-fourn', p.supplierId || '');
     poser('p-ajust', (p.ajustement === 'petit' || p.ajustement === 'grand') ? p.ajustement : '');
+    var _ent = (p.entretien && typeof p.entretien === 'object') ? p.entretien : {};
+    ENT = new Set(Array.isArray(_ent.codes) ? _ent.codes.map(String) : []);
+    poser('p-compo', _ent.composition || ''); poser('p-ent-autre', _ent.autre || '');
     poser('p-prix', p.price != null ? szArgentChamp(p.price) : '');
     poser('p-solde', p.salePrice != null ? szArgentChamp(p.salePrice) : '');
     poser('p-cout', p.acquisitionCost != null ? szArgentChamp(p.acquisitionCost) : '');
@@ -2854,11 +2926,12 @@ function pageProduit(id) {
         guide: val('p-guide'), etiq: val('p-etiq'), fourn: val('p-fourn'), ajust: val('p-ajust'),
         prix: val('p-prix'), solde: val('p-solde'), cout: val('p-cout'),
         poids: val('p-poids'), unite: val('p-unite'), seuil: val('p-seuil'),
-        limclient: val('p-limclient'),
+        limclient: val('p-limclient'), compo: val('p-compo'), entAutre: val('p-ent-autre'),
         regime: val('p-regime'), retours: val('p-retours'), actif: coché('p-actif')
       },
       tailles: tailles(), couleurs: couleurs(),
-      image: IMAGE || '', vues: VUES, parcoul: PARCOUL, stock: STOCK, locs: LOCS, mesv: MESV
+      image: IMAGE || '', vues: VUES, parcoul: PARCOUL, stock: STOCK, locs: LOCS, mesv: MESV,
+      ent: Array.from(ENT)
     };
   }
   // « Utile » = la personne a réellement saisi quelque chose. On EXCLUT les
@@ -2899,6 +2972,8 @@ function pageProduit(id) {
     poser('p-prix', f.prix); poser('p-solde', f.solde); poser('p-cout', f.cout);
     poser('p-poids', f.poids); poser('p-seuil', f.seuil);
     poser('p-limclient', f.limclient || '');
+    poser('p-compo', f.compo || ''); poser('p-ent-autre', f.entAutre || '');
+    ENT = new Set(Array.isArray(d.ent) ? d.ent.map(String) : []);
     // ⚠ UN BROUILLON ECRIT PAR LA VERSION PRECEDENTE ne porte que l ancien code
     // ('0' | '1' | '3' | '4'). On le traduit : sans cela la reprise reposerait
     // << Normal >> sur une fiche mise en vente finale, a l endroit precis ou l on
@@ -3188,6 +3263,7 @@ function pageProduit(id) {
       genre: val('p-genre'), ageGroup: val('p-age'), style: val('p-style'),
       sizeGuideId: val('p-guide'), tag: val('p-etiq'), supplierId: val('p-fourn'),
       ajustement: val('p-ajust') || null,
+      entretien: entPourEnvoi(),
       price: argentNombre(val('p-prix')),
       salePrice: argentNombre(val('p-solde')),
       acquisitionCost: argentNombre(val('p-cout')),

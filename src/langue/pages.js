@@ -280,4 +280,13 @@ module.exports = {
   'Publier sur la boutique': 'Publish on the store',
   'Un brouillon n’est visible que dans l’administration.': 'A draft is only visible in the admin.',
   '(brouillon)': '(draft)',
+  /* ── AFFICHAGE DU GUIDE DES TAILLES (2026-10-11) — les noms des systèmes viennent du site. */
+  "Affichage du guide": "Guide display",
+  "Systèmes de tailles proposés aux clients": "Size systems offered to customers",
+  "Un seul coché : la colonne paraît sans sélecteur. Aucun : seules vos tailles s’affichent. Une colonne « US », « EU »… saisie dans un tableau garde vos valeurs.": "Only one ticked: its column shows without a selector. None: only your own sizes are shown. A “US”, “EU”… column typed into a chart keeps your values.",
+  "Unité par défaut": "Default unit",
+  "pouces": "inches",
+  "Onglet « Comment mesurer » (schémas)": "“How to measure” tab (diagrams)",
+  "Calculateur « Trouvez votre taille »": "“Find your size” calculator",
+  "Conversion US / EU…": "US / EU… conversion",
 };

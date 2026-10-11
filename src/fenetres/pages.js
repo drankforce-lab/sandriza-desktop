@@ -1081,18 +1081,33 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   // ── GUIDE DES TAILLES ────────────────────────────────────────────
   function vueTailles(){
-    if (!GUIDES){ GUIDES=(D.sizeGuides||[]).map(function(g){ return { id:g.id, name:g.name||'', nameEN:g.nameEN||'', headers:(g.headers||[]).slice(), rows:(g.rows||[]).map(function(r){ return r.slice(); }) }; }); }
+    if (!GUIDES){ GUIDES=(D.sizeGuides||[]).map(function(g){ return { id:g.id, name:g.name||'', nameEN:g.nameEN||'', conversion:g.conversion!==false, headers:(g.headers||[]).slice(), rows:(g.rows||[]).map(function(r){ return r.slice(); }) }; }); }
     var sp=D.sizesPage||{};
     var h='<div class="carte"><div class="entete"><h3>${T("Guide des tailles")}</h3>'+boutonEnr('tzEnr')+'</div>'
       +'<div class="grille2">'+champ('tz-title','${T("Titre de la page")}',sp.title||'')+champ('tz-sub','${T("Sous-titre")}',sp.subtitle||'')+'</div>'
       +'<label class="champ" style="margin:0"><span class="lbl">${T("Texte d’introduction")}</span><textarea class="t" id="tz-intro" rows="2"'+(RO?' disabled':'')+'>'+esc(sp.intro||'')+'</textarea></label>'
       +'</div>';
+    /* L AFFICHAGE DU GUIDE (2026-10-11, sa demande : « activer ou pas, n afficher que US ou EU »).
+       Les systemes viennent du site (D.sizeSystems) ; rien de coche = nos tailles seulement. */
+    var LG='${require('../langue').langueCourante() === 'en' ? 'en' : 'fr'}';
+    var sysOn=Array.isArray(sp.systemes)?sp.systemes:['us','uk','eu'];
+    h+='<div class="carte"><div class="entete"><h3>${T("Affichage du guide")}</h3></div>'
+      +'<div class="lbl" style="margin-bottom:.35rem">${T("Systèmes de tailles proposés aux clients")}</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:.4rem 1.2rem;margin-bottom:.4rem">'
+      +(D.sizeSystems||[]).map(function(x){ return '<label style="display:inline-flex;align-items:center;gap:.4rem;cursor:pointer"><input type="checkbox" data-tzsys="'+esc(x.k)+'"'+(sysOn.indexOf(x.k)>=0?' checked':'')+(RO?' disabled':'')+'> '+esc(x[LG]||x.fr)+'</label>'; }).join('')
+      +'</div><div class="aide" style="margin-bottom:.8rem">${T("Un seul coché : la colonne paraît sans sélecteur. Aucun : seules vos tailles s’affichent. Une colonne « US », « EU »… saisie dans un tableau garde vos valeurs.")}</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:.6rem 1.4rem;align-items:center">'
+      +'<label class="champ" style="margin:0;min-width:180px"><span class="lbl">${T("Unité par défaut")}</span><select class="t" id="tz-unite"'+(RO?' disabled':'')+'><option value="cm"'+(sp.uniteDefaut!=='po'?' selected':'')+'>cm</option><option value="po"'+(sp.uniteDefaut==='po'?' selected':'')+'>${T("pouces")}</option></select></label>'
+      +'<label style="display:inline-flex;align-items:center;gap:.4rem;cursor:pointer"><input type="checkbox" id="tz-comment"'+(sp.commentMesurer!==false?' checked':'')+(RO?' disabled':'')+'> ${T("Onglet « Comment mesurer » (schémas)")}</label>'
+      +'<label style="display:inline-flex;align-items:center;gap:.4rem;cursor:pointer"><input type="checkbox" id="tz-calc"'+(sp.calculateur!==false?' checked':'')+(RO?' disabled':'')+'> ${T("Calculateur « Trouvez votre taille »")}</label>'
+      +'</div></div>';
     h+='<div id="tz-guides">';
     if (!GUIDES.length) h+='<div class="vide">${T("Aucun guide.")}</div>';
     for (var gi=0; gi<GUIDES.length; gi++){ var g=GUIDES[gi];
       h+='<div class="carte"><div class="entete" style="margin-bottom:.7rem"><div style="display:flex;gap:.4rem;flex:1;flex-wrap:wrap">'
         +'<input aria-label="Nom du guide" class="t" data-gname="'+gi+'" value="'+esc(g.name)+'" placeholder="Nom du guide" style="max-width:280px;font-weight:600"'+(RO?' disabled':'')+'>'
-        +'<input aria-label="Nom (EN)" class="t" data-gnameen="'+gi+'" value="'+esc(g.nameEN)+'" placeholder="Nom (EN)" style="max-width:240px"'+(RO?' disabled':'')+'></div>'
+        +'<input aria-label="Nom (EN)" class="t" data-gnameen="'+gi+'" value="'+esc(g.nameEN)+'" placeholder="Nom (EN)" style="max-width:240px"'+(RO?' disabled':'')+'>'
+        +'<label style="display:inline-flex;align-items:center;gap:.35rem;font-size:.82rem;cursor:pointer"><input type="checkbox" data-gconv="'+gi+'"'+(g.conversion!==false?' checked':'')+(RO?' disabled':'')+'> ${T("Conversion US / EU…")}</label></div>'
         +(RO?'':'<div style="display:flex;gap:.3rem"><button class="b" data-grow="'+gi+'">${T("＋ Ligne")}</button><button class="b dgr" data-gdel="'+gi+'">${T("Supprimer")}</button></div>')+'</div>';
       h+='<div style="overflow-x:auto"><table class="tb"><thead><tr>';
       /* ⚠ UN TABLEAU DE SAISIE : chaque cellule est un champ, et rien ne les
@@ -1116,6 +1131,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var q=function(sel,fn){ var e=corps.querySelectorAll(sel); for (var i=0;i<e.length;i++) fn(e[i]); };
     q('[data-gname]', function(e){ e.oninput=function(){ GUIDES[+this.getAttribute('data-gname')].name=this.value; }; });
     q('[data-gnameen]', function(e){ e.oninput=function(){ GUIDES[+this.getAttribute('data-gnameen')].nameEN=this.value; }; });
+    q('[data-gconv]', function(e){ e.onchange=function(){ GUIDES[+this.getAttribute('data-gconv')].conversion=this.checked; }; });
     q('[data-gh]', function(e){ e.oninput=function(){ var p=this.getAttribute('data-gh').split('-'); GUIDES[+p[0]].headers[+p[1]]=this.value; }; });
     q('[data-gc]', function(e){ e.oninput=function(){ var p=this.getAttribute('data-gc').split('-'); GUIDES[+p[0]].rows[+p[1]][+p[2]]=this.value; }; });
     q('[data-grow]', function(e){ e.onclick=function(){ syncTailles(); var gi=+this.getAttribute('data-grow'); var n=GUIDES[gi].headers.length; var row=[]; for (var i=0;i<n;i++) row.push(''); GUIDES[gi].rows.push(row); vueTailles(); }; });
@@ -1127,12 +1143,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var q=function(sel,fn){ var e=corps.querySelectorAll(sel); for (var i=0;i<e.length;i++) fn(e[i]); };
     q('[data-gname]', function(e){ GUIDES[+e.getAttribute('data-gname')].name=e.value; });
     q('[data-gnameen]', function(e){ GUIDES[+e.getAttribute('data-gnameen')].nameEN=e.value; });
+    q('[data-gconv]', function(e){ GUIDES[+e.getAttribute('data-gconv')].conversion=e.checked; });
     q('[data-gh]', function(e){ var p=e.getAttribute('data-gh').split('-'); GUIDES[+p[0]].headers[+p[1]]=e.value; });
     q('[data-gc]', function(e){ var p=e.getAttribute('data-gc').split('-'); GUIDES[+p[0]].rows[+p[1]][+p[2]]=e.value; });
   }
   function enregistrerTailles(){ if (RO||OCCUPE) return; syncTailles();
     var guides=GUIDES.filter(function(g){ return String(g.name||'').trim(); });
     var page={ title:val('tz-title'), subtitle:val('tz-sub'), intro:val('tz-intro') };
+    var _sys=[]; var _cs=corps.querySelectorAll('[data-tzsys]'); for (var si=0; si<_cs.length; si++) if (_cs[si].checked) _sys.push(_cs[si].getAttribute('data-tzsys'));
+    if (_cs.length) page.systemes=_sys;
+    var _u=document.getElementById('tz-unite'); if (_u) page.uniteDefaut=_u.value;
+    var _cm=document.getElementById('tz-comment'); if (_cm) page.commentMesurer=_cm.checked;
+    var _ca=document.getElementById('tz-calc'); if (_ca) page.calculateur=_ca.checked;
     OCCUPE=true; dire('${T("Enregistrement…")}');
     appeler('pages:sizes:ecrire',[{page:page,guides:guides}]).then(function(r){ OCCUPE=false;
       if (r&&r.ok){ if (r.sizeGuides) D.sizeGuides=r.sizeGuides; D.sizesPage=page; GUIDES=null; vueTailles(); dire('${T("Guide des tailles enregistré.")}', 'bon'); } else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
