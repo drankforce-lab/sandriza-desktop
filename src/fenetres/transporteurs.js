@@ -225,10 +225,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   // Les quatre transporteurs « simples » (identifiant + secret + n° de compte).
   var SIMPLES = [
+    /* ⚠ PUROLATOR (2026-10-11, sa question : « on me demande un compte et un mot de passe, mais où
+       mettre mon ID client et mon secret ? ») : c'est la MÊME paire sous deux noms. Le portail des
+       développeurs Purolator donne une clé (Client ID / Key) et son mot de passe (Secret / Key
+       Password) ; l'environnement de test fournit en plus trois comptes d'essai. Le compte
+       EXPÉDITEUR de test se met dans « Numéro de compte » en mode test ; les deux autres sont gardés
+       pour les essais (destinataire payeur, fret). */
     { cle: 'purolator', titre: 'Purolator', enId: 'pur-en',
-      user: { id: 'pur-user', label: '${T("Nom d’utilisateur")}', champ: 'apiUsername', place: '${T("votre_identifiant")}' },
-      sec:  { id: 'pur-pass', label: '${T("Mot de passe")}', champ: 'motDePasse', place: '••••••••' },
-      acct: { id: 'pur-acct', label: '${T("Numéro de compte")}', place: '${T("Ex : 12345678")}' } },
+      user: { id: 'pur-user', label: '${T("Client ID (clé)")}', champ: 'apiUsername', place: '${T("Client ID / Key fourni par Purolator")}' },
+      sec:  { id: 'pur-pass', label: '${T("Secret (mot de passe de la clé)")}', champ: 'motDePasse', place: '••••••••' },
+      acct: { id: 'pur-acct', label: '${T("Numéro de compte (en test : compte expéditeur de test)")}', place: '${T("Ex : 12345678")}' },
+      mode: { id: 'pur-mode' },
+      tests: [{ id: 'pur-trecv', champ: 'testReceiverAccount', label: '${T("Compte destinataire de test")}' },
+              { id: 'pur-tfret', champ: 'testFreightAccount', label: '${T("Numéro de compte de fret de test")}' }] },
     { cle: 'fedex', titre: 'FedEx', enId: 'fdx-en',
       user: { id: 'fdx-cid', label: 'Client ID', champ: 'clientId', place: 'l7xxXXXXXXXX' },
       sec:  { id: 'fdx-sec', label: 'Client Secret', champ: 'clientSecret', place: '••••••••' },
@@ -281,6 +290,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     } else {
       h += texteHtml(sp.acct.id, sp.acct.label, d.accountNumber, sp.acct.place, false);
     }
+    if (sp.tests) h += '<div class="gr2">' + sp.tests.map(function(t){ return texteHtml(t.id, t.label, d[t.champ], '', false); }).join('') + '</div>';
     return h + '</div>';
   }
 
@@ -375,6 +385,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       o[sp.user.champ] = val(sp.user.id);
       o[sp.sec.champ] = val(sp.sec.id);
       if (sp.mode) o.mode = val(sp.mode.id);
+      (sp.tests || []).forEach(function(t){ o[t.champ] = val(t.id); });
       s[sp.cle] = o;
     });
     s.mapbox = val('mapbox');

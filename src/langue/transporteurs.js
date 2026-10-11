@@ -180,4 +180,11 @@ module.exports = {
   'Enregistré — tous les transporteurs actifs cotent.': 'Saved — all active carriers quote.',
   'Le Client Secret est identique au Client ID — il a sans doute été collé dans la mauvaise case.': 'The Client Secret is identical to the Client ID — it was probably pasted in the wrong box.',
   'Pas encore coté — cliquez « Tester la cotation » en bas de la fenêtre.': 'Not quoted yet — click “Test the quote” at the bottom of the window.',
+  /* ── PUROLATOR (2026-10-11) : la clé et son mot de passe, l'environnement, les comptes d'essai. */
+  "Client ID (clé)": "Client ID (key)",
+  "Client ID / Key fourni par Purolator": "Client ID / Key provided by Purolator",
+  "Secret (mot de passe de la clé)": "Secret (key password)",
+  "Numéro de compte (en test : compte expéditeur de test)": "Account number (in test: test shipper account)",
+  "Compte destinataire de test": "Test receiver account",
+  "Numéro de compte de fret de test": "Test freight account number",
 };
