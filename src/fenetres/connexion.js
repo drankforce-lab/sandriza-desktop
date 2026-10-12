@@ -264,18 +264,22 @@ select:focus{border-color:#C49A6C;box-shadow:0 0 0 3px rgba(196,154,108,0.18)}
 .cx-mdp{overflow:hidden;max-height:140px;opacity:1;
   transition:max-height .32s cubic-bezier(.2,.8,.2,1),opacity .22s ease,margin .32s cubic-bezier(.2,.8,.2,1)}
 .cx-mdp.cache{max-height:0;opacity:0;margin-bottom:0!important;pointer-events:none}
-.cx-clepret{display:none;align-items:center;gap:0.8rem;padding:0.8rem 0.95rem;
-  margin-bottom:1.1rem;border-radius:12px;
-  background:linear-gradient(135deg,rgba(196,154,108,0.16),rgba(196,154,108,0.05));
-  border:1px solid rgba(196,154,108,0.34)}
+.cx-clepret{display:none;align-items:center;gap:0.75rem;padding:0.6rem 0.7rem 0.6rem 0.6rem;
+  margin-bottom:1.1rem;border-radius:10px;background:#fff;
+  border:1px solid rgba(125,95,60,0.16);box-shadow:0 1px 2px rgba(61,40,16,0.05),0 4px 14px rgba(61,40,16,0.05)}
 .cx-clepret.on{display:flex;animation:cx-apparait .3s cubic-bezier(.2,.8,.2,1)}
-.cx-clepret .em{position:relative;flex:0 0 auto;width:40px;height:40px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;background:#fff;
-  border:1px solid rgba(196,154,108,0.45);color:#7d5f3c}
-.cx-clepret b{display:block;font-size:0.84rem;color:#3d2810;margin-bottom:0.1rem}
-.cx-clepret span.t{display:block;font-size:0.74rem;color:#6b5a48;line-height:1.4}
+.cx-clepret .em{position:relative;flex:0 0 auto;width:36px;height:36px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  background:linear-gradient(145deg,#c49a6c,#8f6a40);box-shadow:inset 0 1px 0 rgba(255,255,255,0.25)}
+.cx-clepret .tx{flex:1 1 auto;min-width:0}
+.cx-clepret b{display:block;font-size:0.82rem;font-weight:600;color:#2b1d0e;letter-spacing:0.005em}
+.cx-clepret span.t{display:block;font-size:0.72rem;color:#7a6a58;margin-top:0.05rem}
+.cx-clepret .etat{flex:0 0 auto;display:inline-flex;align-items:center;gap:0.3rem;padding:0.2rem 0.55rem;
+  border-radius:999px;font-size:0.68rem;font-weight:600;letter-spacing:0.02em;
+  color:#1f6b3d;background:#e9f5ee;border:1px solid rgba(79,154,106,0.35)}
+.cx-clepret .etat::before{content:'';width:6px;height:6px;border-radius:50%;background:#2f8a52}
 .cx-clepret.attente .em::after,.cx-embleme.attente::after{content:'';position:absolute;
-  inset:-5px;border-radius:50%;border:2px solid rgba(196,154,108,0.55);
+  inset:-5px;border-radius:inherit;border:2px solid rgba(196,154,108,0.55);
   animation:cx-onde 1.4s cubic-bezier(.2,.8,.2,1) infinite}
 .cx-bascule{display:block;margin:0.85rem auto 0}
 @keyframes cx-apparait{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
@@ -415,8 +419,9 @@ ${JS_DIRE()}
       "L’opération a échoué.": "The operation failed.",
       "Attention — il vous reste <strong>{0}</strong> tentative avant un verrouillage de 15 minutes.": "Careful — you have <strong>{0}</strong> attempt left before a 15-minute lockout.",
       "Attention — il vous reste <strong>{0}</strong> tentatives avant un verrouillage de 15 minutes.": "Careful — you have <strong>{0}</strong> attempts left before a 15-minute lockout.",
-      "Clé d’identification reconnue": "Passkey recognized",
-      "Pas de mot de passe à taper : Windows Hello, votre téléphone ou votre clé de sécurité suffit.": "No password to type: Windows Hello, your phone or your security key is enough.",
+      "Clé d’accès active": "Passkey active",
+      "Authentification forte · Windows Hello ou clé de sécurité": "Strong authentication · Windows Hello or security key",
+      "Sécurisée": "Secured",
       "Se connecter avec ma clé": "Sign in with my passkey",
       "Utiliser mon mot de passe": "Use my password",
       "Entrez votre nom d’utilisateur.": "Enter your username.",
@@ -683,9 +688,10 @@ ${JS_DIRE()}
       + '<input type="checkbox" id="sl-remember"' + (CTX.souvenir ? ' checked' : '') + '>'
       + '<label for="sl-remember">' + T('Se souvenir de mon nom d’utilisateur') + '</label>'
       + '</div>'
-      + '<div class="cx-clepret" id="sl-clepret"><span class="em">' + IC.empreinte(22) + '</span>'
-      + '<div><b>' + T('Clé d’identification reconnue') + '</b>'
-      + '<span class="t">' + T('Pas de mot de passe à taper : Windows Hello, votre téléphone ou votre clé de sécurité suffit.') + '</span></div></div>'
+      + '<div class="cx-clepret" id="sl-clepret"><span class="em">' + IC.empreinte(19) + '</span>'
+      + '<div class="tx"><b>' + T('Clé d’accès active') + '</b>'
+      + '<span class="t">' + T('Authentification forte · Windows Hello ou clé de sécurité') + '</span></div>'
+      + '<span class="etat">' + T('Sécurisée') + '</span></div>'
       + '<div class="cx-mdp" id="sl-mdp-bloc" style="margin-bottom:1.25rem">'
       + '<label class="cx-lbl" for="sl-password">' + T('Mot de passe') + '</label>'
       + '<div class="cx-champ"><span class="cx-ic">' + IC.cadenas + '</span>'
