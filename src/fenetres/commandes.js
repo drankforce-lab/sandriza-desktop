@@ -326,6 +326,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     return d.toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'long', year: 'numeric' });
   }
 
+
+  /* La preuve de paiement posée par le serveur : vérifiée (vert), en attente (ambre), refusée (rouge). */
+  var PV_MOTIFS = {
+    sans_paiement: '${T("aucun paiement")}', paiement_inferieur: '${T("montant payé inférieur au total")}',
+    sous_plancher: '${T("montant trop bas pour les articles commandés")}', paiement_deja_utilise: '${T("paiement déjà rattaché à une autre commande")}',
+    paiement_introuvable: '${T("paiement introuvable chez Square")}', commande_vide: '${T("commande vide")}',
+    verification_impossible: '${T("vérification impossible pour le moment")}'
+  };
+  function pvHtml(c){
+    var v = c.paiementVerifie;
+    if (v && v.ok) return '<div class="mut" style="margin-top:.35rem;color:var(--tx-ok)"><span class="ic">✓</span> ${T("Paiement vérifié par le serveur")}'
+      + (v.couvert != null ? ' · ' + esc(szArgent(v.couvert)) : '') + '</div>';
+    if (!v && !c.attentePaiement) return '';
+    var motif = v && v.motif ? (PV_MOTIFS[v.motif] || esc(v.motif)) : '${T("pas encore vérifié")}';
+    // Un vrai paiement est inscrit sur une commande refusée : vérifier À QUI il appartient avant de rembourser.
+    var rbm = c.remboursementAVerifier && c.remboursementAVerifier.montant != null ? ' ' + esc(szArgent(c.remboursementAVerifier.montant)) : '';
+    var rb = c.remboursementAVerifier ? ' · <strong>${T("paiement")}' + rbm + ' ${T("à vérifier avant tout remboursement")}</strong>' : '';
+    var annulee = c.statut === 'cancelled';
+    return '<div style="margin-top:.45rem;padding:.5rem .65rem;border-radius:8px;border:1px solid ' + (annulee ? 'var(--tx-err)' : 'var(--tx-att)') + ';color:' + (annulee ? 'var(--tx-err)' : 'var(--tx-att)') + ';font-size:.82rem">'
+      + '<strong>' + (annulee ? '${T("Commande refusée : paiement non vérifié")}' : '${T("Paiement NON vérifié — ne pas expédier")}') + '</strong><br>' + motif + rb + '</div>';
+  }
+
   var MOTIFS = {
     session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
     droit:              '${T("Votre rôle ne donne pas accès aux commandes.")}',
@@ -641,7 +663,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '<div class="mut" style="margin-top:.4rem"><span class="ic">💳</span> '
       + (c.paiementSquare ? '${T("Paiement Square")} <span class="num">' + esc(c.paiementSquare) + '</span>'
                           : '<span style="color:var(--tx-att)">${T("Commande démo — aucun paiement Square")}</span>')
-      + (c.afterpay ? '<span class="badge2">AFTERPAY</span>' : '') + '</div></div>'
+      + (c.afterpay ? '<span class="badge2">AFTERPAY</span>' : '') + '</div>'
+      /* LA PREUVE DE PAIEMENT DU SERVEUR (2026-10-11) : une commande de la boutique n'est confirmée qu'une
+         fois son paiement vérifié chez Square. Ici, ce que le serveur a conclu — en clair, pour ne jamais
+         expédier une commande impayée. */
+      + pvHtml(c) + '</div>'
       + '<div class="bloc"><h3>${T("Livraison")}</h3>'
       + '<div class="mut">' + esc(c.adresse.rue) + '<br>'
       + esc(c.adresse.ville) + (c.adresse.province ? ', ' + esc(c.adresse.province) : '')

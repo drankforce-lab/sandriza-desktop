@@ -318,4 +318,18 @@ module.exports = {
   "unités remboursées": "units refunded",
   "/ unité": "/ unit",
   "Partiel — remboursé": "Partial — refunded",
+  /* ── LA PREUVE DE PAIEMENT DU SERVEUR (2026-10-11) */
+  "aucun paiement": "no payment",
+  "montant payé inférieur au total": "amount paid lower than the total",
+  "montant trop bas pour les articles commandés": "amount too low for the items ordered",
+  "paiement déjà rattaché à une autre commande": "payment already attached to another order",
+  "paiement introuvable chez Square": "payment not found at Square",
+  "commande vide": "empty order",
+  "vérification impossible pour le moment": "verification not possible right now",
+  "Paiement vérifié par le serveur": "Payment verified by the server",
+  "pas encore vérifié": "not verified yet",
+  "paiement": "payment",
+  "à vérifier avant tout remboursement": "to check before any refund",
+  "Commande refusée : paiement non vérifié": "Order refused: payment not verified",
+  "Paiement NON vérifié — ne pas expédier": "Payment NOT verified — do not ship",
 };
