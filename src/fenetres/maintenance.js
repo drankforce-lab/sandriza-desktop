@@ -71,11 +71,11 @@ button{font:inherit;color:var(--tx);background:var(--v05);cursor:pointer;
   border:1px solid var(--v16);border-radius:8px;padding:.34rem .7rem}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
-button:focus{outline:none;border-color:#c9a97e}
+button:focus{outline:none;border-color:var(--or)}
 button.dgr{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 button.dgr:hover:not(:disabled){background:rgba(239,68,68,.14)}
-button.prim{border-color:rgba(201,169,126,.55);color:var(--tx-or2)}
-button.prim:hover:not(:disabled){background:rgba(201,169,126,.14)}
+button.prim{border-color:rgba(var(--or-rgb),.55);color:var(--tx-or2)}
+button.prim:hover:not(:disabled){background:rgba(var(--or-rgb),.14)}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.85rem .95rem}
 .carte.on{border-color:rgba(240,180,80,.45);background:rgba(240,180,80,.08)}
@@ -88,7 +88,7 @@ label{display:block;font-size:.75rem;color:var(--tx2);margin:0 0 .28rem}
 input{width:100%;padding:.52rem .65rem;border-radius:9px;
   border:1px solid var(--v12);background:var(--f-champ);color:var(--tx);
   font:400 .88rem/1.2 system-ui}
-input:focus{outline:none;border-color:#c9a97e}
+input:focus{outline:none;border-color:var(--or)}
 input.manque{border-color:var(--tx-err)}
 .champ{margin-top:.7rem}
 .pieds{display:flex;gap:.55rem;margin:1rem 0 0;flex-wrap:wrap}

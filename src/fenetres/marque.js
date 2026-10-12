@@ -42,7 +42,7 @@ body{background:var(--f-page);color:var(--tx);
   border-bottom:2px solid transparent;padding:.45rem .8rem;cursor:pointer;
   -webkit-user-select:none;user-select:none}
 .onglets button:hover{color:var(--tx)}
-.onglets button[aria-selected="true"]{color:var(--tx-or);border-bottom-color:#c9a97e;font-weight:700}
+.onglets button[aria-selected="true"]{color:var(--tx-or);border-bottom-color:var(--or);font-weight:700}
 /* ⚠ LA ZONE EST PLEINE PAGE, ET LES CARTES DOIVENT LA REMPLIR. Plafonnees en
    largeur, elles laissaient la moitie de l ecran vide une fois la fenetre
    ANCREE (releve le 2026-08-10, capture a l appui). Une colonne unique etiree a
@@ -64,7 +64,7 @@ body{background:var(--f-page);color:var(--tx);
 .ch label .pt{color:var(--tx3);font-size:.72rem}
 .ch input[type=text]{width:100%;box-sizing:border-box;font:inherit;color:var(--tx);background:var(--f-champ);
   border:1px solid var(--v12);border-radius:8px;padding:.42rem .55rem}
-.ch input[type=text]:focus{outline:none;border-color:#c9a97e}
+.ch input[type=text]:focus{outline:none;border-color:var(--or)}
 .deux{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
 .trois{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.8rem}
 @media (max-width:620px){.deux,.trois{grid-template-columns:1fr}}
@@ -75,7 +75,7 @@ input[type=color]{width:100%;height:2.1rem;padding:0;border:1px solid var(--v12)
 input[type=color]:disabled,input[type=text]:disabled,select:disabled{opacity:.55;cursor:default}
 .bascule{display:flex;align-items:center;gap:.5rem;font-size:.82rem;cursor:pointer;
   -webkit-user-select:none;user-select:none}
-.bascule input{width:1rem;height:1rem;accent-color:#c9a97e;cursor:pointer}
+.bascule input{width:1rem;height:1rem;accent-color:var(--or);cursor:pointer}
 /* Un logo : sa vignette, son bouton de choix, son retrait. Les six se
    repartissent en colonnes plutot qu en une pile etiree. */
 .logos{display:grid;grid-template-columns:repeat(auto-fit,minmax(24rem,1fr));gap:.9rem}
@@ -99,8 +99,8 @@ button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.4rem .8rem;cursor:pointer}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.5;cursor:default}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
-button.prim:hover:not(:disabled){background:#d8bd97}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 button.pt{font-size:.76rem;padding:.25rem .55rem}
 button.dgr{color:var(--tx-err);border-color:rgba(248,113,113,.4)}
 .vide{padding:1.1rem .6rem;text-align:center;color:var(--tx2);font-size:.82rem}

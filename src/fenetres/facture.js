@@ -58,12 +58,12 @@ button{font:inherit;cursor:pointer;border-radius:8px;padding:.3rem .7rem;
   color:var(--tx);transition:background .13s,border-color .13s}
 button:hover:not(:disabled){background:var(--v10);border-color:var(--v30)}
 button:disabled{opacity:.4;cursor:default}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
+button.prim{background:var(--or);border-color:var(--or);color:#17202c;font-weight:600}
 /* ⚠ SANS cette regle, le survol GENERIQUE (voile blanc translucide) delavait
    le bouton principal : texte sombre sur beige lave, illisible en sombre
    (capture du 2026-08-08). La meme teinte de survol que toutes les autres
    fenetres (socle, inventaire, produit) : le bouton reste fidele partout. */
-button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
+button.prim:hover:not(:disabled){background:var(--or-clair);border-color:var(--or-clair)}
 
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
   gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid var(--v08);

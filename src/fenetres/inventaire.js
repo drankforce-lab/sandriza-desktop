@@ -76,7 +76,7 @@ body{background:var(--f-page);color:var(--tx);
 input,select{font:inherit;color:var(--tx);background:var(--f-0f1826);
   border:1px solid var(--v14);border-radius:8px;padding:.3rem .45rem;
   width:100%;min-width:0}
-input:focus,select:focus{outline:none;border-color:#c9a97e}
+input:focus,select:focus{outline:none;border-color:var(--or)}
 input.manque,select.manque{border-color:#f87171}
 #rech{font-size:1rem;padding:.45rem .6rem}
 
@@ -85,8 +85,8 @@ button{font:inherit;cursor:pointer;border-radius:8px;padding:.32rem .7rem;
   color:var(--tx);transition:background .13s,border-color .13s}
 button:hover:not(:disabled){background:var(--v10);border-color:var(--v30)}
 button:disabled{opacity:.4;cursor:default}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
-button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
+button.prim{background:var(--or);border-color:var(--or);color:#17202c;font-weight:600}
+button.prim:hover:not(:disabled){background:var(--or-clair);border-color:var(--or-clair)}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 
 /* Encarts d avertissement : le meme jaune que l administration. */
@@ -183,7 +183,7 @@ td.e select{min-width:8rem}
 .onglets button{border:1px solid transparent;
   border-radius:9px;background:transparent;color:var(--tx2);
   padding:.45rem .95rem;font-size:.84rem;font-weight:600}
-.onglets button.actif{background:#c9a97e;border-color:#c9a97e;
+.onglets button.actif{background:var(--or);border-color:var(--or);
   color:#17202c;font-weight:700}
 .onglets button:hover:not(.actif){background:var(--v05);color:var(--tx)}
 
@@ -205,7 +205,7 @@ td.e select{min-width:8rem}
    seulement : pas de :hover-only pour l information, juste pour l affordance. */
 .tuile.cliq{cursor:pointer;user-select:none;position:relative}
 .tuile.cliq::after{content:"›";position:absolute;top:.55rem;right:.8rem;font-size:1.1rem;color:var(--tx3)}
-.tuile.cliq:hover{border-color:#c9a97e}
+.tuile.cliq:hover{border-color:var(--or)}
 /* La ligne entiere ouvre la fiche (demande le 2026-08-08) : la selection de
    texte avalerait le clic (le bug connu des controles cliquables), donc
    user-select:none sur la ligne — les codes se copient depuis la fiche. */
@@ -221,7 +221,7 @@ tbody tr[data-ligne]:hover td{background:var(--v045)}
 .pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
 .badge{display:inline-block;font-size:.6875rem;padding:0 .4rem;border-radius:99px;
   margin-left:.35rem;vertical-align:1px}
-.badge.vente{background:#c9a97e;color:#17202c}
+.badge.vente{background:var(--or);color:#17202c}
 .badge.finale{background:#dc2626;color:var(--tx-sur-accent)}
 .puce{width:10px;height:10px;border-radius:50%;display:inline-block;
   vertical-align:middle}
@@ -289,7 +289,7 @@ button.vert:hover:not(:disabled){background:#166534;border-color:#166534}
    ⚠ TOUT EST SOUS .gp, la classe de la grille des PRODUITS : la table de la
    fiche (les variantes) et celles des autres onglets gardent leur dessin.
    ⚠ Des JETONS partout (--f-carte, --v06, --tx2...) : les six themes et le
-   mode jour suivent sans une ligne de plus. L or reste #c9a97e, comme le
+   mode jour suivent sans une ligne de plus. L or reste var(--or), comme le
    bouton principal de ce fichier.
    ⚠ LA STRUCTURE DU TABLEAU EST GARDEE (tr[data-ligne], thead, la case du lot)
    parce que le code s y accroche : clic de ligne, mesure de la pagination
@@ -301,7 +301,7 @@ button.vert:hover:not(:disabled){background:#166534;border-color:#166534}
   border-bottom:1px solid var(--v06);background:var(--v03);transition:background .13s,border-color .13s}
 .gp tbody td:first-child{border-left:1px solid var(--v06);border-radius:11px 0 0 11px}
 .gp tbody td:last-child{border-right:1px solid var(--v06);border-radius:0 11px 11px 0}
-.gp tbody tr[data-ligne]:hover td{background:var(--v06);border-color:rgba(201,169,126,.35)}
+.gp tbody tr[data-ligne]:hover td{background:var(--v06);border-color:rgba(var(--or-rgb),.35)}
 .gp .prod{display:flex;align-items:center;gap:.8rem;min-width:0}
 .gp .cat{width:2.5rem;height:2.5rem;flex:0 0 auto;border-radius:10px;display:flex;
   align-items:center;justify-content:center;font-weight:800;font-size:.98rem;
@@ -385,7 +385,7 @@ html.jour .gp .cat.tc{color:color-mix(in srgb,var(--cc,#6d7f96) 55%,black);
   border:0!important;border-radius:7px;background:transparent!important;color:var(--tx2);font-size:.8rem;font-weight:600}
 .vue-bascule button svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
 .vue-bascule button:hover:not(.on){color:var(--tx);background:var(--v06)!important}
-.vue-bascule button.on{background:#c9a97e!important;color:#1a1208}
+.vue-bascule button.on{background:var(--or)!important;color:#1a1208}
 /* LA BARRE SUR DEUX RANGEES (2026-10-12) : les filtres en haut ; dessous, les gestes a droite
    (bascule d affichage, ajouter un produit). Une seule rangee ecrasait la recherche. */
 .tb2{flex-wrap:wrap!important;row-gap:.65rem!important}
@@ -405,7 +405,7 @@ html.jour .gp .cat.tc{color:color-mix(in srgb,var(--cc,#6d7f96) 55%,black);
 .tb2 > *{flex:0 0 auto}
 .tb2 .rch{display:flex;align-items:center;gap:.5rem;flex:1 1 13rem;min-width:8rem;max-width:17rem;height:2.4rem;padding:0 .7rem;
   background:var(--f-0f1826);border:1px solid var(--v14);border-radius:10px;color:var(--tx2)}
-.tb2 .rch:focus-within{border-color:#c9a97e}
+.tb2 .rch:focus-within{border-color:var(--or)}
 .tb2 .rch svg{width:17px;height:17px;flex:0 0 auto}
 .tb2 .rch input{border:0;background:transparent;padding:0;height:100%;width:100%}
 .tb2 select,.tb2 input#fp-section{height:2.4rem;border-radius:10px}
@@ -416,7 +416,7 @@ html.jour .gp .cat.tc{color:color-mix(in srgb,var(--cc,#6d7f96) 55%,black);
 .etats{display:flex;gap:.25rem}
 .etats button{height:2.4rem;padding:0 .65rem;border-radius:10px;font-size:.8rem;white-space:nowrap;
   background:var(--f-0f1826);border-color:var(--v10);color:var(--tx-gris2)}
-.etats button.actif{background:rgba(201,169,126,.14);border-color:rgba(201,169,126,.55);
+.etats button.actif{background:rgba(var(--or-rgb),.14);border-color:rgba(var(--or-rgb),.55);
   color:var(--tx-or2);font-weight:700}
 /* ── LE MODE JOUR — trois reprises generiques du socle defaisaient le dessin,
    vues sur la capture du 2026-09-25 :
@@ -426,7 +426,7 @@ html.jour .gp .cat.tc{color:color-mix(in srgb,var(--cc,#6d7f96) 55%,black);
    (La classe << danger >> de la poubelle est devenue << sup >> pour la meme
    raison : html.jour button.danger lui posait un cadre rouge permanent.) */
 html.jour .onglets button{background:transparent;border-color:transparent}
-html.jour .onglets button.actif{background:rgba(138,106,62,.12);border-color:#8a6a3e;color:#1d2433}
+html.jour .onglets button.actif{background:rgba(var(--or-jour-rgb),.12);border-color:var(--or-jour);color:#1d2433}
 html.jour .gp .pill.neutre{color:var(--tx2)}
 html.jour .gp thead th{background:var(--f-carte)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -1652,7 +1652,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     (d.lieux || []).forEach(function(l){ lieuxParId[l.id] = l; });
 
     function ligneLieuEdition(l){
-      return '<tr style="background:rgba(201,169,126,.08)">'
+      return '<tr style="background:rgba(var(--or-rgb),.08)">'
         + '<td><input type="text" id="lx-nom" aria-label="${T("Nom du lieu")}" value="' + esc(l ? l.nom : '') + '" placeholder="${T("Ex : Entrepôt, Maison")}"></td>'
         + '<td colspan="2"><input aria-label="${T("Adresse (optionnel)")}" type="text" id="lx-adr" value="' + esc(l ? l.adresse : '') + '" placeholder="${T("Adresse (optionnel)")}"></td>'
         + '<td class="c" style="white-space:nowrap">'
@@ -1665,7 +1665,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
         + (d.lieux || []).map(function(l){
             return '<option value="' + esc(l.id) + '"' + (w && w.lieuId === l.id ? ' selected' : '') + '>'
               + esc(l.nom) + '</option>'; }).join('');
-      return '<tr style="background:rgba(201,169,126,.08)">'
+      return '<tr style="background:rgba(var(--or-rgb),.08)">'
         + '<td><select id="wh-lieu" aria-label="${T("Lieu de cet emplacement")}">' + opts + '</select></td>'
         + '<td><input type="text" id="wh-casier" aria-label="${T("Casier")}" value="' + esc(w ? w.casier : '') + '" placeholder="${T("Ex : Casier 1")}"></td>'
         + '<td><input type="text" id="wh-section" aria-label="${T("Section")}" value="' + esc(w ? w.section : '') + '" placeholder="${T("Ex : Section A")}"></td>'
@@ -1683,7 +1683,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
        reecrire ses donnees sans le lui montrer serait le laisser decouvrir seul
        que ses lignes ont change de forme. */
     if (d.migre && d.migre.repartis > 0) {
-      h += '<div class="carte plein" style="border-color:rgba(201,169,126,.4)">'
+      h += '<div class="carte plein" style="border-color:rgba(var(--or-rgb),.4)">'
         + '<div style="font-size:.84rem;line-height:1.6">'
         + '<strong>' + d.migre.repartis + ' ' + szPl(d.migre.repartis, '${T("emplacement réparti")}', '${T("emplacements répartis")}') + '</strong> ${T("en lieu, casier et section")}'
         + (d.migre.crees.length ? ' ' + szPl(d.migre.crees.length, '${T("— lieu créé :")}', '${T("— lieux créés :")}') + ' <strong>' + d.migre.crees.map(esc).join(', ') + '</strong>' : '')
@@ -2091,9 +2091,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
       if (!c || !c.ok) { vide('${T("Inventaire indisponible")}', expliquer(c)); return; }
       CTX = c;
       sous.textContent = c.peutEcrire ? '' : '${T("Lecture seule")}';
-      chargerOnglet();
+      lireVoeu().then(function(){ chargerOnglet(); });
     });
   }
+  /* LE VŒU D UN LIEN DU TABLEAU DE BORD (2026-10-12) : « reappro » ouvre le Reapprovisionnement, « rupture »
+     ou « low » la liste des produits filtree. Lu une fois (stock:voeu). Jamais pendant un travail en cours :
+     la grille d un produit ou un voile ouvert se laissent finir. */
+  function lireVoeu(){
+    return appeler('stock:voeu').then(function(r){
+      var v = r && r.ok ? r.voeu : '';
+      if (!v || VUE === '${T("produit")}' || document.querySelector('.voile')) return false;
+      WH_EDIT = null; LX_EDIT = null;
+      if (v === 'reappro') { ONGLET = 'reappro'; VUE = 'reappro'; }
+      else if (v === 'rupture' || v === 'low') { ONGLET = 'produits'; VUE = 'reappro'; FP.etat = v; FP.page = 0; }
+      dire(''); dessiner();
+      return true;
+    });
+  }
+  window.szRevenir = function(){
+    return lireVoeu().then(function(change){ if (change) chargerOnglet(); });
+  };
 
   // ══ ENREGISTREMENT ════════════════════════════════════════════════════════
   function enregistrer(){

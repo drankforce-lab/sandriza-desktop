@@ -61,15 +61,15 @@ body{background:var(--f-page);color:var(--tx);
 input,select{font:inherit;color:var(--tx);background:var(--f-0f1826);
   border:1px solid var(--v14);border-radius:8px;padding:.34rem .5rem;
   width:100%;min-width:0}
-input:focus,select:focus{outline:none;border-color:#c9a97e}
+input:focus,select:focus{outline:none;border-color:var(--or)}
 
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.34rem .75rem;
   border:1px solid var(--v16);background:var(--v05);
   color:var(--tx);transition:background .13s,border-color .13s}
 button:hover:not(:disabled){background:var(--v10);border-color:var(--v30)}
 button:disabled{opacity:.4;cursor:default}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
-button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
+button.prim{background:var(--or);border-color:var(--or);color:#17202c;font-weight:600}
+button.prim:hover:not(:disabled){background:var(--or-clair);border-color:var(--or-clair)}
 /* ⚠ LE BOUTON QUI DEPENSE est d une AUTRE couleur que celui qui confirme : on ne
    doit jamais les confondre du coin de l oeil. */
 button.paie{background:#7859f7;border-color:#7859f7;color:var(--tx-sur-accent);font-weight:600}
@@ -96,11 +96,11 @@ button.mini{padding:.14rem .5rem;font-size:.76rem}
 .cmp .l{display:grid;grid-template-columns:1fr auto auto;gap:.6rem;align-items:center;padding:.45rem .65rem;
   border:1px solid var(--v08);border-radius:9px;cursor:pointer;font-size:.82rem;background:transparent;color:inherit;text-align:left;font:inherit}
 .cmp .l:hover{border-color:var(--v20)}
-.cmp .l.sel{border-color:var(--tx-or);background:rgba(201,169,126,.08)}
+.cmp .l.sel{border-color:var(--tx-or);background:rgba(var(--or-rgb),.08)}
 .cmp .l .nm{font-weight:600}
 .cmp .l .sv{color:var(--tx3);font-size:.76rem}
 .cmp .l .px{font-variant-numeric:tabular-nums;font-weight:700}
-.cmp .l .mc{font-size:.6875rem;font-weight:700;color:var(--tx-or);border:1px solid rgba(201,169,126,.45);border-radius:99px;padding:.05rem .45rem}
+.cmp .l .mc{font-size:.6875rem;font-weight:700;color:var(--tx-or);border:1px solid rgba(var(--or-rgb),.45);border-radius:99px;padding:.05rem .45rem}
 .cmp .l.ko{cursor:default;opacity:.75}
 .cmp .l.ko .px{font-weight:400;color:var(--tx3)}
 .avis.jaune{background:rgba(245,158,11,.11);border:1px solid rgba(245,158,11,.42);color:var(--tx-or2)}
@@ -119,7 +119,7 @@ button.mini{padding:.14rem .5rem;font-size:.76rem}
 .pas span{font-size:.72rem;padding:.16rem .5rem;border-radius:99px;
   border:1px solid var(--v14);color:var(--tx2)}
 .pas span.fait{border-color:rgba(74,222,128,.45);color:var(--tx-ok)}
-.pas span.on{border-color:#c9a97e;color:var(--tx-creme);background:rgba(201,169,126,.14)}
+.pas span.on{border-color:var(--or);color:var(--tx-creme);background:rgba(var(--or-rgb),.14)}
 
 .lignes{display:flex;flex-direction:column;gap:.28rem}
 .lg{display:flex;align-items:center;gap:.6rem;padding:.28rem .4rem;border-radius:7px;

@@ -132,12 +132,12 @@ body{background:var(--f-page);color:var(--tx);
 input,button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem}
 button{cursor:pointer}
-input:focus,button:focus{outline:none;border-color:#c9a97e}
+input:focus,button:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.geste{padding:.14rem .5rem;font-size:.73rem;white-space:nowrap}
-button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
+button.actif{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
 button.prim:hover:not(:disabled){background:#a3824f}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
@@ -196,11 +196,11 @@ label.champ .lbl{display:block;font-size:.6875rem;text-transform:uppercase;lette
 input.t,select.t,textarea.t{width:100%;background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;
   color:var(--tx);font:inherit;font-size:.85rem;padding:.4rem .55rem}
 textarea.t{resize:vertical;line-height:1.5}
-input.t:focus,select.t:focus,textarea.t:focus{outline:none;border-color:#c9a97e}
+input.t:focus,select.t:focus,textarea.t:focus{outline:none;border-color:var(--or)}
 label.case{display:inline-flex;align-items:center;gap:.35rem;font-size:.82rem;cursor:pointer;
   border:1px solid var(--v12);border-radius:9px;padding:.22rem .55rem;margin:0 0 .6rem;
   background:var(--v03);-webkit-user-select:none;user-select:none}
-label.case input{width:15px;height:15px;accent-color:#c9a97e;margin:0}
+label.case input{width:15px;height:15px;accent-color:var(--or);margin:0}
 .qs{border:1px solid var(--v10);border-radius:10px;padding:.5rem .6rem;margin:0 0 .7rem}
 .qstitre{display:flex;align-items:center;gap:.5rem;font-size:.7rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;margin:0 0 .45rem}

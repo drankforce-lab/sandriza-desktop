@@ -57,12 +57,12 @@ input,select,button,textarea{font:inherit;color:var(--tx);background:var(--v05);
 input[type=search]{min-width:190px}
 textarea{width:100%;min-height:4.5em;resize:vertical}
 select,button{cursor:pointer}
-input:focus,select:focus,button:focus,textarea:focus{outline:none;border-color:#c9a97e}
+input:focus,select:focus,button:focus,textarea:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.geste{padding:.14rem .5rem;font-size:.73rem;white-space:nowrap}
-button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
+button.actif{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
 button.prim:hover:not(:disabled){background:#a3824f}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
@@ -76,9 +76,9 @@ button .n.hi{background:rgba(239,68,68,.28);color:var(--tx-err2)}
 .tuile .val.bon{color:var(--tx-ok)}.tuile .val.err{color:var(--tx-err)}
 /* ── La refonte de l Inventaire (2026-09-25) ── */
 .tuile.cliq{cursor:pointer;user-select:none;position:relative}
-.tuile.cliq:hover{border-color:#c9a97e}
+.tuile.cliq:hover{border-color:var(--or)}
 .tuile.cliq::after{content:"›";position:absolute;top:.55rem;right:.8rem;font-size:1.1rem;color:var(--tx3)}
-.tuile.on{border-color:#c9a97e}
+.tuile.on{border-color:var(--or)}
 .tuile .val.att{color:var(--tx-att)}
 .ligne{display:flex;align-items:center;gap:.8rem}
 .ligne .gauche{flex:1 1 auto;min-width:0}
@@ -89,7 +89,7 @@ button .n.hi{background:rgba(239,68,68,.28);color:var(--tx-err2)}
   letter-spacing:.07em;color:var(--tx2);font-weight:700}
 .ligne{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.55rem .75rem;cursor:pointer}
-.ligne:hover{border-color:#c9a97e}
+.ligne:hover{border-color:var(--or)}
 .ligne .haut{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}
 .ligne .droite{margin-left:auto;text-align:right}
 .dt{font-size:.72rem;color:var(--tx2)}
@@ -110,7 +110,7 @@ button .n.hi{background:rgba(239,68,68,.28);color:var(--tx-err2)}
 .bulle{max-width:78%;padding:.4rem .65rem;border-radius:11px;font-size:.86rem;
   white-space:pre-wrap;overflow-wrap:anywhere}
 .bulle.visiteur{align-self:flex-start;background:var(--v07)}
-.bulle.agent{align-self:flex-end;background:rgba(201,169,126,.16);border:1px solid rgba(201,169,126,.3)}
+.bulle.agent{align-self:flex-end;background:rgba(var(--or-rgb),.16);border:1px solid rgba(var(--or-rgb),.3)}
 .bulle.bot{align-self:flex-start;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.25)}
 .bulle .qd{display:block;font-size:.6875rem;color:var(--tx2);margin-top:.15rem}
 .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.7rem;flex-wrap:wrap}

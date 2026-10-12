@@ -35,7 +35,7 @@ body{background:var(--f-page);color:var(--tx);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .av{width:36px;height:36px;border-radius:50%;flex:0 0 auto;
   display:flex;align-items:center;justify-content:center;font-weight:700;
-  background:linear-gradient(135deg,#c9a97e,#8a6f4d);color:#17202c}
+  background:linear-gradient(135deg,var(--or),#8a6f4d);color:#17202c}
 .tete .mail{font-size:.72rem;color:var(--tx2)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .tete .pill{font-size:.6875rem;padding:.12rem .55rem;border-radius:99px;
@@ -77,7 +77,7 @@ body{background:var(--f-page);color:var(--tx);
 input,select{font:inherit;color:var(--tx);background:var(--f-0f1826);
   border:1px solid var(--v14);border-radius:8px;padding:.32rem .5rem;
   width:100%;min-width:0}
-input:focus,select:focus{outline:none;border-color:#c9a97e}
+input:focus,select:focus{outline:none;border-color:var(--or)}
 input[type=checkbox]{width:auto}
 .r2{display:grid;grid-template-columns:1fr 1fr;gap:.5rem .8rem}
 .ch{display:flex;flex-direction:column;gap:.18rem;min-width:0}
@@ -88,7 +88,7 @@ button{font:inherit;cursor:pointer;border-radius:8px;padding:.32rem .7rem;
   color:var(--tx);transition:background .13s,border-color .13s}
 button:hover:not(:disabled){background:var(--v10);border-color:var(--v30)}
 button:disabled{opacity:.4;cursor:default}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
+button.prim{background:var(--or);border-color:var(--or);color:#17202c;font-weight:600}
 button.danger{border-color:rgba(248,113,113,.5);color:var(--tx-f6a5a5)}
 button.danger:hover:not(:disabled){background:rgba(248,113,113,.12)}
 button.mini{padding:.14rem .5rem;font-size:.75rem}

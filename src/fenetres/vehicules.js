@@ -57,14 +57,14 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete h1{margin:0;font:700 .95rem/1.2 system-ui}
-.tete .ico{display:inline-flex;width:19px;height:19px;color:var(--or,#c9a97e)}
+.tete .ico{display:inline-flex;width:19px;height:19px;color:var(--or,var(--or))}
 .tete .ico svg{width:100%;height:100%}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .onglets{flex:0 0 auto;display:flex;gap:.3rem;padding:.5rem 1.05rem 0;
   border-bottom:1px solid var(--v08)}
 .onglets button{background:none;border:0;border-bottom:2px solid transparent;color:var(--tx2);
   font:600 .82rem/1 system-ui;padding:.45rem .7rem;cursor:pointer;border-radius:0}
-.onglets button.on{color:var(--tx);border-bottom-color:#c9a97e}
+.onglets button.on{color:var(--tx);border-bottom-color:var(--or)}
 .onglets .nb{font-weight:400;color:var(--tx3);margin-left:.3rem}
 .onglets .pt{display:inline-block;width:.45rem;height:.45rem;border-radius:99px;
   background:var(--tx-att);margin-left:.35rem;vertical-align:middle}
@@ -87,11 +87,11 @@ input[type=checkbox]{width:auto;padding:0;cursor:pointer}
 textarea{resize:none}
 input.n{text-align:right;font-family:ui-monospace,Consolas,monospace;font-size:.8rem}
 input.n.auto{color:var(--tx2);font-style:italic}
-select:focus,input:focus,button:focus,textarea:focus{outline:none;border-color:#c9a97e}
+select:focus,input:focus,button:focus,textarea:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.45;cursor:default}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
-button.prim:hover:not(:disabled){background:#d8bc95}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 button.mini{padding:.1rem .42rem;font-size:.74rem}
 button.danger{border-color:rgba(248,113,113,.45);color:var(--tx-err2)}
 button.aconf{background:rgba(248,113,113,.16);color:var(--tx-err2)}
@@ -118,7 +118,7 @@ thead th.n,tbody td.n{text-align:right;font-family:ui-monospace,Consolas,monospa
 tbody td{padding:.42rem .5rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody tr.ligne{cursor:default}
 tbody tr.ligne.mod{cursor:pointer}
-.corps tbody tr.sel>td{background:rgba(201,169,126,.10)}
+.corps tbody tr.sel>td{background:rgba(var(--or-rgb),.10)}
 .corps tbody tr.tot>td{border-top:1px solid var(--v16);font-weight:700}
 .corps tbody tr.grp>td{padding-top:.5rem;font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;
   color:var(--tx2);font-weight:700;border-top:0}
@@ -209,7 +209,7 @@ tbody tr.ligne.mod{cursor:pointer}
 .catligne{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;font-size:.72rem;margin-top:-.1rem}
 .dpa-l input{min-width:0;width:100%}
 .bascule{display:inline-flex;gap:.25rem;margin-left:auto;text-transform:none;letter-spacing:0;font-weight:400}
-.bascule button.on{border-color:#c9a97e;background:rgba(201,169,126,.14)}
+.bascule button.on{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;

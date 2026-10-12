@@ -51,7 +51,7 @@ body{background:var(--f-page);color:var(--tx);
   border-bottom:1px solid var(--v07);background:#111a28}
 .pas button{font:inherit;font-size:.76rem;padding:.24rem .6rem;border-radius:7px;
   border:1px solid transparent;background:transparent;color:var(--tx2);cursor:pointer}
-.pas button.on{background:rgba(201,169,126,.16);border-color:rgba(201,169,126,.45);color:var(--tx-creme)}
+.pas button.on{background:rgba(var(--or-rgb),.16);border-color:rgba(var(--or-rgb),.45);color:var(--tx-creme)}
 
 .corps{flex:1 1 auto;min-height:0;padding:.75rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.55rem}
@@ -73,7 +73,7 @@ body{background:var(--f-page);color:var(--tx);
 input,select,textarea{font:inherit;color:var(--tx);background:var(--f-0f1826);
   border:1px solid var(--v14);border-radius:8px;padding:.32rem .5rem;
   width:100%;min-width:0}
-input:focus,select:focus,textarea:focus{outline:none;border-color:#c9a97e}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--or)}
 textarea{resize:none}
 .r2{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
 .r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem}
@@ -85,7 +85,7 @@ button{font:inherit;cursor:pointer;border-radius:8px;padding:.32rem .7rem;
   color:var(--tx);transition:background .13s,border-color .13s}
 button:hover:not(:disabled){background:var(--v10);border-color:var(--v30)}
 button:disabled{opacity:.4;cursor:default}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
+button.prim{background:var(--or);border-color:var(--or);color:#17202c;font-weight:600}
 button.paie{background:#7859f7;border-color:#7859f7;color:var(--tx-sur-accent);font-weight:600}
 /* La reprise generique du mode jour repeint TOUT bouton en blanc
    (html.jour button, specificite 0,1,2) et l'emporte sur button.paie

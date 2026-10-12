@@ -59,12 +59,12 @@ input[type=search]{flex:1 1 14rem;min-width:9rem}
 button{cursor:pointer}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
-input:focus,select:focus,button:focus{outline:none;border-color:#c9a97e}
+input:focus,select:focus,button:focus{outline:none;border-color:var(--or)}
 .jeton{font-size:.73rem;padding:.14rem .5rem;border-radius:99px}
-.jeton.on{background:rgba(201,169,126,.2);border-color:#c9a97e;color:var(--tx-creme);font-weight:600}
+.jeton.on{background:rgba(var(--or-rgb),.2);border-color:var(--or);color:var(--tx-creme);font-weight:600}
 .prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
 .vues{display:flex;gap:.15rem;margin-left:auto}
-.vues button.on{border-color:#c9a97e;background:rgba(201,169,126,.16)}
+.vues button.on{border-color:var(--or);background:rgba(var(--or-rgb),.16)}
 /* Le corps : la liste a gauche, l apercu a droite — comme un explorateur. */
 .corps{flex:1 1 auto;min-height:0;display:flex}
 .zone{flex:1 1 auto;min-width:0;overflow-y:auto;padding:.5rem .7rem}
@@ -86,16 +86,16 @@ tbody tr{cursor:pointer}
 tbody td{padding:.26rem .4rem;border:0;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:16rem}
 tbody tr:hover td{background:var(--v03)}
-tbody tr.pris td{background:rgba(201,169,126,.1)}
-tbody tr.actif td:first-child{box-shadow:inset 2px 0 0 0 #c9a97e}
+tbody tr.pris td{background:rgba(var(--or-rgb),.1)}
+tbody tr.actif td:first-child{box-shadow:inset 2px 0 0 0 var(--or)}
 /* La case a cocher : visible, cliquable, et distincte du clic sur la ligne. */
 th.ck,td.ck{width:1.9rem;max-width:1.9rem;padding:.12rem .2rem;text-align:center}
 .coche{display:inline-flex;align-items:center;justify-content:center;
   width:1.05rem;height:1.05rem;border-radius:5px;cursor:pointer;
   border:1px solid var(--v40);background:var(--v06);
   font-size:.72rem;line-height:1;color:#17202c}
-.coche:hover{border-color:#c9a97e}
-.coche.on{background:#c9a97e;border-color:#c9a97e;font-weight:700}
+.coche:hover{border-color:var(--or)}
+.coche.on{background:var(--or);border-color:var(--or);font-weight:700}
 /* ⚠ LA COLONNE DES CASES (2026-10-01, sa capture : « les cases a cocher, regarde,
    ca s empile »). La regle th:first-child du socle (padding-left .9rem, posee
    APRES celle-ci) mangeait les 1,9 rem de la colonne : la case se serrait
@@ -108,7 +108,7 @@ th.ck,td.ck{width:1.9rem;max-width:1.9rem;padding:.12rem .2rem;text-align:center
 .liste td.vg{padding-left:.2rem}
 .coche.flot{position:absolute;top:.25rem;left:.25rem;z-index:2;
   background:rgba(8,12,20,.72);color:var(--tx)}
-.coche.flot.on{background:#c9a97e;color:#17202c}
+.coche.flot.on{background:var(--or);color:#17202c}
 /* ⚠ LA LISTE NE DEFILE PLUS (2026-09-30, sa capture : une barre de defilement
    dans la liste, contre sa regle). La pagination mesurait la hauteur des lignes
    AVANT l arrivee des vignettes ; les images chargees, les lignes grandissaient
@@ -141,12 +141,12 @@ th.pd{text-align:right}
 .fm .menu label{display:flex;align-items:center;gap:.55rem;padding:.4rem .5rem;border-radius:7px;
   font-size:.82rem;cursor:pointer;white-space:nowrap}
 .fm .menu label:hover{background:var(--v05)}
-.fm .menu input{width:auto;margin:0;accent-color:#c9a97e}
+.fm .menu input{width:auto;margin:0;accent-color:var(--or)}
 .fm .menu .raz{display:block;width:100%;margin-top:.25rem;text-align:center;font-size:.76rem}
 /* Le volet vide dit a quoi il sert ET comment choisir. */
 .apercu .accueil{margin:auto;padding:1.4rem 1rem;text-align:center;color:var(--tx2);font-size:.82rem}
 .apercu .accueil .ico{display:inline-flex;width:3rem;height:3rem;border-radius:12px;align-items:center;
-  justify-content:center;background:rgba(201,169,126,.12);color:var(--tx-or);margin-bottom:.6rem}
+  justify-content:center;background:rgba(var(--or-rgb),.12);color:var(--tx-or);margin-bottom:.6rem}
 .apercu .accueil .ico svg{width:22px;height:22px}
 html.jour .apercu .accueil .ico{color:#6a5840}
 .apercu .accueil b{display:block;color:var(--tx);font-size:.88rem;margin-bottom:.35rem}
@@ -158,8 +158,8 @@ html.jour .apercu .accueil .ico{color:#6a5840}
 .grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(8rem,1fr));gap:.5rem}
 .vig{background:var(--f-carte);border:1px solid var(--v10);border-radius:9px;
   overflow:hidden;cursor:pointer;position:relative}
-.vig.pris{border-color:#c9a97e;box-shadow:0 0 0 1px #c9a97e inset}
-.vig.actif{outline:2px solid #c9a97e;outline-offset:-2px}
+.vig.pris{border-color:var(--or);box-shadow:0 0 0 1px var(--or) inset}
+.vig.actif{outline:2px solid var(--or);outline-offset:-2px}
 .vig img{width:100%;height:6rem;object-fit:contain;background:var(--f-pied);display:block}
 .vig .nm{font-size:.6875rem;color:var(--tx2);padding:.18rem .3rem;white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis}

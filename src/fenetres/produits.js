@@ -49,13 +49,13 @@ input[type=search],select,button{font:inherit;color:var(--tx);background:var(--v
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem}
 input[type=search]{min-width:210px}
 select,button{cursor:pointer}
-input:focus,select:focus,button:focus{outline:none;border-color:#c9a97e}
+input:focus,select:focus,button:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
-button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
-button.prim:hover:not(:disabled){background:#d8bc95}
+button.actif{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
@@ -77,9 +77,9 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
 .tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tuile.cliq{cursor:pointer;user-select:none;position:relative}
-.tuile.cliq:hover{border-color:#c9a97e}
+.tuile.cliq:hover{border-color:var(--or)}
 .tuile.cliq::after{content:"›";position:absolute;top:.55rem;right:.8rem;font-size:1.1rem;color:var(--tx3)}
-.tuile.on{border-color:#c9a97e}
+.tuile.on{border-color:var(--or)}
 .val.att{color:var(--tx-att)}.val.err{color:var(--tx-err)}
 .rf-tb select{height:2.4rem;border-radius:10px;background:var(--f-0f1826);border-color:var(--v10);max-width:12rem}
 /* --cc : la couleur de la categorie, posee EN LIGNE ; chaque var() a son repli. */
@@ -97,13 +97,13 @@ html.jour .rf-av.tc{color:color-mix(in srgb,var(--cc,#6d7f96) 55%,black);
   border:0!important;border-radius:7px;background:transparent!important;color:var(--tx2);font-size:.8rem;font-weight:600}
 .vue-bascule button svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
 .vue-bascule button:hover:not(.on){color:var(--tx);background:var(--v06)!important}
-.vue-bascule button.on{background:#c9a97e!important;color:#1a1208}
+.vue-bascule button.on{background:var(--or)!important;color:#1a1208}
 .lot{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;
-  background:var(--v04);border:1px solid rgba(201,169,126,.45);border-radius:11px;
+  background:var(--v04);border:1px solid rgba(var(--or-rgb),.45);border-radius:11px;
   padding:.5rem .8rem;font-size:.82rem}
 .lot label{display:flex;align-items:center;gap:.4rem;cursor:pointer}
 .lot input{width:auto}
-tbody tr.coche td{background:rgba(201,169,126,.1)}
+tbody tr.coche td{background:rgba(var(--or-rgb),.1)}
 td.c,th.c{width:2rem;text-align:center}
 /* LA BARRE SUR DEUX RANGEES (2026-10-12) : les filtres en haut ; dessous, le compte a gauche et les
    gestes a droite (bascule d affichage, lot, marges, nouveau produit). Une seule rangee ecrasait la recherche. */

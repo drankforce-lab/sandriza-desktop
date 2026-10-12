@@ -46,7 +46,7 @@ body{background:var(--f-page);color:var(--tx);
   border-bottom:1px solid var(--v08)}
 .onglets button{background:none;border:0;border-bottom:2px solid transparent;color:var(--tx2);
   font:600 .82rem/1 system-ui;padding:.45rem .7rem;cursor:pointer;border-radius:0}
-.onglets button.on{color:var(--tx);border-bottom-color:#c9a97e}
+.onglets button.on{color:var(--tx);border-bottom-color:var(--or)}
 /* Aucune glissiere (2026-10-12) : chaque liste se pagine dans la hauteur qui
    reste (data-pages, JS_PAGES du socle). */
 .corps{flex:1 1 auto;min-height:0;padding:.85rem 1.05rem;overflow:hidden;
@@ -61,11 +61,11 @@ input,select,textarea{font:inherit;color:var(--tx);background:var(--v05);
 textarea{resize:vertical;min-height:2.6rem}
 button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.34rem .6rem;cursor:pointer;width:auto}
-input:focus,select:focus,textarea:focus,button:focus{outline:none;border-color:#c9a97e}
+input:focus,select:focus,textarea:focus,button:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.5;cursor:default}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
-button.prim:hover:not(:disabled){background:#d8bc95}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 button.mini{font-size:.72rem;padding:.16rem .45rem}
 button.dgr{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
 .duo{display:flex;gap:.65rem;flex-wrap:wrap}
@@ -88,7 +88,7 @@ tbody tr:hover td{background:var(--v03)}
 .pill.expire{background:rgba(148,163,184,.18);color:var(--tx-gris2)}
 .pill.g{background:rgba(148,163,184,.14);color:var(--tx-94a3b8);font-weight:600}
 .vide{padding:1.1rem .6rem;text-align:center;color:var(--tx2);font-size:.82rem}
-.neuf{border:1px solid rgba(201,169,126,.5);background:rgba(201,169,126,.09)}
+.neuf{border:1px solid rgba(var(--or-rgb),.5);background:rgba(var(--or-rgb),.09)}
 .neuf input{background:var(--f-pied);font-family:ui-monospace,Consolas,monospace;font-size:.78rem}
 .neuf .gros{font-family:ui-monospace,Consolas,monospace;font-size:1.15rem;letter-spacing:.12em;
   color:var(--tx-or2);font-weight:700}

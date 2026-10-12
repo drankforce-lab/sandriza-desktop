@@ -54,10 +54,10 @@ body{background:var(--f-page);color:var(--tx);
    une déconnexion demandée n'est pas un incident, c'est une fin de journée. */
 .rond{flex:0 0 auto;width:30px;height:30px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
-  background:rgba(201,169,126,0.16);color:var(--tx-or2)}
+  background:rgba(var(--or-rgb),0.16);color:var(--tx-or2)}
 .rond svg{width:17px;height:17px}
 /* ⚠ EN MODE JOUR, LA PASTILLE CHANGE DE TON — et ce n'est pas une coquetterie :
-   le bronze clair (#d8bc95) posé sur le fond crème donne 1,47:1, mesuré par
+   le bronze clair (var(--or-clair)) posé sur le fond crème donne 1,47:1, mesuré par
    << banc-texte-sur-fond >> (4,35 puis 5,14 apres correction). Un pictogramme n'est pas du texte, mais il PORTE le
    sens de la boîte, et un sens qu'on ne distingue pas du fond n'est pas porté.
    Le bronze de la marque, lui, tient le seuil sur ce fond-là. */
@@ -80,9 +80,9 @@ button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:9px;padding:.5rem .95rem;cursor:pointer;
   transition:background-color .13s ease,border-color .13s ease}
 button:hover{background:var(--v10)}
-button:focus-visible{outline:2px solid #c9a97e;outline-offset:2px}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
-button.prim:hover{background:#d8bc95}
+button:focus-visible{outline:2px solid var(--or);outline-offset:2px}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
+button.prim:hover{background:var(--or-clair)}
 @media (prefers-reduced-motion:reduce){button{transition:none}}
 `;
 

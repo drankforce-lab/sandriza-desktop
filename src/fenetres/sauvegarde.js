@@ -68,7 +68,7 @@ table.tb{width:100%}
 table.tb th{text-align:left;text-transform:uppercase;font-weight:700;white-space:nowrap}
 table.tb td{font-size:.85rem;vertical-align:middle}
 .mono{font-family:Consolas,monospace;font-size:.7rem;color:var(--tx-gris)}
-.prim{font:inherit;font-size:.84rem;font-weight:700;border:0;border-radius:8px;padding:.5rem 1rem;background:#c9a97e;color:#1a1408;cursor:pointer}
+.prim{font:inherit;font-size:.84rem;font-weight:700;border:0;border-radius:8px;padding:.5rem 1rem;background:var(--or);color:#1a1408;cursor:pointer}
 .prim:disabled{opacity:.5;cursor:default}
 .b{font:inherit;font-size:.8rem;border:1px solid var(--v16);border-radius:8px;padding:.42rem .8rem;background:var(--v05);color:var(--tx);cursor:pointer}
 .b:hover:not(:disabled){background:var(--v09)}
@@ -94,7 +94,7 @@ label.champ{display:block;margin:0 0 .9rem}
 label.champ .lbl{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin:0 0 .25rem}
 label.champ .sub{display:block;font-size:.72rem;color:var(--tx-gris);margin:.25rem 0 0;line-height:1.5}
 input.t{width:100%;background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;color:var(--tx);font:inherit;padding:.5rem .65rem}
-input.t:focus{outline:none;border-color:#c9a97e}
+input.t:focus{outline:none;border-color:var(--or)}
 input.t.manque{border-color:#f87171;background:rgba(248,113,113,.08)}
 .garde{border-radius:9px;padding:.85rem 1rem;font-size:.83rem;line-height:1.6;margin:0 0 1rem}
 .garde.jaune{background:rgba(234,179,8,.12);border:1px solid rgba(234,179,8,.4);color:var(--tx-or2)}
@@ -145,7 +145,7 @@ html.jour .intg{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.12)}
   background:var(--v03);border:1px solid var(--v10)}
 .prog .pg-t{font-size:.82rem;color:var(--tx);margin-bottom:.4rem}
 .prog .pg-b{height:.42rem;border-radius:99px;background:var(--v12);overflow:hidden}
-.prog .pg-b i{display:block;height:100%;background:#c9a97e;transition:width .3s}
+.prog .pg-b i{display:block;height:100%;background:var(--or);transition:width .3s}
 .prog .pg-p{display:flex;align-items:baseline;gap:.6rem;margin-top:.35rem;
   font:700 1.25rem/1.1 system-ui;color:var(--tx-or);font-variant-numeric:tabular-nums}
 .prog .pg-e{font:400 .72rem/1.2 system-ui;color:var(--tx2);margin-left:auto}

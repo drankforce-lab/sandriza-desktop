@@ -51,13 +51,13 @@ input[type=search],select,button,textarea{font:inherit;color:var(--tx);backgroun
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem}
 input[type=search]{min-width:200px}
 select,button{cursor:pointer}
-input:focus,select:focus,button:focus{outline:none;border-color:#c9a97e}
+input:focus,select:focus,button:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
-button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
-button.prim:hover:not(:disabled){background:#d8bc95}
+button.actif{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
@@ -67,8 +67,8 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
   justify-content:center;gap:.3rem;border:2px dashed var(--v20);
   border-radius:12px;padding:1.15rem 1rem;text-align:center;color:var(--tx2);
   cursor:pointer;transition:border-color .13s,background .13s}
-.depot:hover{border-color:#c9a97e}
-.depot.survol{border-color:#c9a97e;background:rgba(201,169,126,.08)}
+.depot:hover{border-color:var(--or)}
+.depot.survol{border-color:var(--or);background:rgba(var(--or-rgb),.08)}
 .depot .gros{font-size:.95rem;font-weight:600;color:var(--tx)}
 .depot .pt{font-size:.76rem}
 
@@ -115,15 +115,15 @@ div.cmd{gap:.35rem}
 .vues{display:inline-flex;gap:.25rem;margin-left:.2rem}
 .vues .vue{font:inherit;font-size:.78rem;height:2.1rem;padding:0 .7rem;border-radius:9px;
   border:1px solid var(--v10);background:var(--f-0f1826);color:var(--tx-gris2);cursor:pointer}
-.vues .vue.on{background:rgba(201,169,126,.14);border-color:rgba(201,169,126,.55);color:var(--tx-or2);font-weight:700}
+.vues .vue.on{background:rgba(var(--or-rgb),.14);border-color:rgba(var(--or-rgb),.55);color:var(--tx-or2);font-weight:700}
 table.grille.compacte tbody td{padding-top:.25rem;padding-bottom:.25rem}
 table.grille.compacte .vign{width:28px;height:28px}
 .vtete{padding:.1rem .1rem .5rem}
 .vgrille{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
 .vcarte{border:1px solid var(--v08);border-radius:12px;overflow:hidden;background:var(--f-carte);cursor:pointer;
   display:flex;flex-direction:column}
-.vcarte:hover{border-color:rgba(201,169,126,.45)}
-.vcarte.on{border-color:#c9a97e;box-shadow:0 0 0 1px #c9a97e inset}
+.vcarte:hover{border-color:rgba(var(--or-rgb),.45)}
+.vcarte.on{border-color:var(--or);box-shadow:0 0 0 1px var(--or) inset}
 .vcarte .vimg{height:130px;display:flex;align-items:center;justify-content:center;
   background:repeating-conic-gradient(var(--v06) 0% 25%,transparent 0% 50%) 50%/16px 16px}
 .vcarte .vimg img{max-width:100%;max-height:100%;object-fit:contain}
@@ -190,13 +190,13 @@ html.jour .boite .apercu{background:conic-gradient(#e6e1d6 25%,#f4f2ec 0 50%,#e6
 .boite .grille .v{font-size:.84rem;font-weight:600;overflow-wrap:anywhere}
 .jetons{display:flex;flex-wrap:wrap;gap:.3rem;margin:.15rem 0 .6rem}
 .jetons button{font-size:.75rem;padding:.16rem .5rem}
-.jetons button.on{border-color:#c9a97e;background:rgba(201,169,126,.16)}
+.jetons button.on{border-color:var(--or);background:rgba(var(--or-rgb),.16)}
 .boite .pied-boite{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem;justify-content:flex-end}
 .choix{max-height:17rem;overflow:auto;margin-top:.5rem;display:flex;
   flex-direction:column;gap:.28rem}
 .choix .p{display:flex;align-items:center;gap:.55rem;padding:.3rem .4rem;
   border:1px solid var(--v09);border-radius:8px;cursor:pointer}
-.choix .p:hover{border-color:#c9a97e;background:var(--v04)}
+.choix .p:hover{border-color:var(--or);background:var(--v04)}
 .choix .p img{width:34px;height:34px;object-fit:cover;border-radius:6px;flex:0 0 auto}
 .choix .p .creux{width:34px;height:34px;border-radius:6px;flex:0 0 auto;
   background:var(--v06)}
@@ -213,7 +213,7 @@ html.jour .boite .apercu{background:conic-gradient(#e6e1d6 25%,#f4f2ec 0 50%,#e6
    qu on veut savoir. */
 .suivi{position:fixed;right:1rem;bottom:3rem;width:min(26rem,calc(100vw - 2rem));
   max-height:60vh;display:flex;flex-direction:column;background:var(--f-carte);
-  border:1px solid rgba(201,169,126,.45);border-radius:11px;
+  border:1px solid rgba(var(--or-rgb),.45);border-radius:11px;
   box-shadow:0 18px 44px rgba(0,0,0,.5);z-index:60}
 .suivi .st{display:flex;align-items:center;gap:.5rem;padding:.55rem .8rem;
   border-bottom:1px solid var(--v08);font:700 .78rem/1.2 system-ui;
@@ -235,7 +235,7 @@ html.jour .boite .apercu{background:conic-gradient(#e6e1d6 25%,#f4f2ec 0 50%,#e6
 .suivi .lg .ep i.encours{color:var(--tx-or2)}
 .suivi .lg .et{flex:0 0 auto;font-size:.6875rem;font-weight:700;padding:.03rem .4rem;border-radius:99px}
 .suivi .lg .et.attente{background:rgba(148,163,184,.16);color:var(--tx-94a3b8)}
-.suivi .lg .et.cours{background:rgba(201,169,126,.2);color:var(--tx-or2)}
+.suivi .lg .et.cours{background:rgba(var(--or-rgb),.2);color:var(--tx-or2)}
 .suivi .lg .et.faite{background:rgba(34,197,94,.15);color:var(--tx-ok)}
 .suivi .lg .et.double{background:rgba(234,179,8,.15);color:var(--tx-jaune)}
 .suivi .lg .et.echec{background:rgba(248,113,113,.15);color:var(--tx-err2)}
@@ -246,7 +246,7 @@ html.jour .boite .apercu{background:conic-gradient(#e6e1d6 25%,#f4f2ec 0 50%,#e6
    Une barre qui glisse pendant qu il ne se passe rien est un mensonge poli. */
 .suivi .jauge{flex:1 0 100%;height:5px;border-radius:99px;background:var(--v10);
   overflow:hidden;margin:0 0 .1rem}
-.suivi .jauge i{display:block;height:100%;background:linear-gradient(90deg,#c9a97e,#e0c9a6);
+.suivi .jauge i{display:block;height:100%;background:linear-gradient(90deg,var(--or),#e0c9a6);
   border-radius:99px;transition:width .25s ease}
 .suivi .pc{font-variant-numeric:tabular-nums;font-weight:700;color:var(--tx)}
 .suivi.annule{border-color:rgba(248,113,113,.5)}
@@ -255,10 +255,10 @@ html.jour .boite .apercu{background:conic-gradient(#e6e1d6 25%,#f4f2ec 0 50%,#e6
    photo, et cela doit se lire avant de cliquer. */
 .lot{position:sticky;bottom:0;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;
   margin-top:.6rem;padding:.5rem .7rem;background:var(--f-carte);
-  border:1px solid rgba(201,169,126,.45);border-radius:11px}
+  border:1px solid rgba(var(--or-rgb),.45);border-radius:11px}
 .lot .cnt{font-weight:700;font-size:.8rem}
 .lot .av{flex:1 0 100%;font-size:.7rem;color:var(--tx2)}
-input.chx{width:auto;cursor:pointer;accent-color:#c9a97e}
+input.chx{width:auto;cursor:pointer;accent-color:var(--or)}
 /* ── LE CENTRE DE COMMANDE ─────────────────────────────────────────────── */
 .cmd{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;
   padding:.5rem .6rem;background:var(--f-carte);border:1px solid var(--v07);
@@ -276,11 +276,11 @@ input.chx{width:auto;cursor:pointer;accent-color:#c9a97e}
 .tuile .sub a{color:var(--tx-bleu)}
 .val.att{color:var(--tx-att)}
 /* ── LA GRILLE ─────────────────────────────────────────────────────────── */
-table.grille tbody tr.on td{background:rgba(201,169,126,.1)}
+table.grille tbody tr.on td{background:rgba(var(--or-rgb),.1)}
 table.grille tbody td{vertical-align:middle}
 table.grille td.nom .txt{display:inline-block;max-width:18rem;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap;cursor:text;border-bottom:1px dashed transparent}
-table.grille td.nom .txt:hover{border-bottom-color:rgba(201,169,126,.6)}
+table.grille td.nom .txt:hover{border-bottom-color:rgba(var(--or-rgb),.6)}
 table.grille input.ren{width:100%;min-width:10rem;font:inherit;padding:.15rem .35rem}
 table.grille td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 /* Les actions : toujours visibles, jamais a chercher. Elles s eclairent au
@@ -318,23 +318,23 @@ tr:hover .act .ic{opacity:1}
 .asst .tt .pas{margin-left:auto;display:flex;gap:.3rem;align-items:center;font-size:.72rem;color:var(--tx2)}
 .asst .tt .pas b{display:inline-flex;width:1.35rem;height:1.35rem;border-radius:50%;
   align-items:center;justify-content:center;background:var(--v08);font-size:.7rem}
-.asst .tt .pas b.on{background:#c9a97e;color:#1a1208}
+.asst .tt .pas b.on{background:var(--or);color:#1a1208}
 .asst .co{flex:1 1 auto;min-height:0;overflow-y:auto;padding:.85rem .9rem}
 /* Le choix de la mise en scene : des couples etiquette/valeur, alignes. */
 .ch{display:flex;align-items:center;gap:.7rem;margin-bottom:.7rem}
 .ch>label:first-child{min-width:7rem;color:var(--tx2);font-size:.78rem}
 .ch select{flex:1;background:var(--f-champ);color:var(--tx);border:1px solid var(--v12);
   border-radius:.4rem;padding:.42rem .55rem;font:inherit}
-.ch input[type=checkbox]{accent-color:#c9a97e;margin-right:.35rem}
+.ch input[type=checkbox]{accent-color:var(--or);margin-right:.35rem}
 .ch.col{display:block}
 .ch.col>label:first-child{display:block;min-width:0;margin-bottom:.35rem}
 .ch textarea{width:100%;box-sizing:border-box;background:var(--f-champ);color:var(--tx);
   border:1px solid var(--v12);border-radius:.4rem;padding:.42rem .55rem;font:inherit;
   resize:vertical;min-height:2.6rem;line-height:1.4}
 .sugg{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.4rem}
-.sugg button{font-size:.72rem;padding:.2rem .55rem;background:rgba(201,169,126,.14);
-  border:1px solid rgba(201,169,126,.35);color:var(--tx-e8dcc4);border-radius:999px;cursor:pointer}
-.sugg button:hover{background:rgba(201,169,126,.24)}
+.sugg button{font-size:.72rem;padding:.2rem .55rem;background:rgba(var(--or-rgb),.14);
+  border:1px solid rgba(var(--or-rgb),.35);color:var(--tx-e8dcc4);border-radius:999px;cursor:pointer}
+.sugg button:hover{background:rgba(var(--or-rgb),.24)}
 .asst .pi{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;
   padding:.6rem .9rem;border-top:1px solid var(--v08);background:#0f1725}
 /* Le panneau de l'assistant est une surface, pas un accent. */
@@ -344,7 +344,7 @@ html.jour .asst .pi{background:#faf8f3}
 .pl{display:grid;grid-template-columns:repeat(auto-fill,minmax(9rem,1fr));gap:.5rem}
 .pl .v{position:relative;border:2px solid var(--v10);border-radius:9px;
   overflow:hidden;cursor:pointer;background:var(--f-pied)}
-.pl .v.on{border-color:#c9a97e;box-shadow:0 0 0 3px rgba(201,169,126,.2)}
+.pl .v.on{border-color:var(--or);box-shadow:0 0 0 3px rgba(var(--or-rgb),.2)}
 /* ⚠⚠ UNE ROTATION CSS NE CHANGE PAS LA BOITE. L image tournait bien, mais son
    encombrement restait celui d avant : elle debordait sur le titre de la case
    d a cote. La boite d apercu est donc CARREE (aspect-ratio:1) et l image y est
@@ -371,16 +371,16 @@ html.jour .asst .pi{background:#faf8f3}
 .pl .v .ck{position:absolute;top:.3rem;left:.3rem;width:1.1rem;height:1.1rem;
   border-radius:4px;background:rgba(11,18,32,.85);border:1px solid var(--v30);
   display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--tx-or)}
-.pl .v.on .ck{background:#c9a97e;color:#1a1208;border-color:#c9a97e}
+.pl .v.on .ck{background:var(--or);color:#1a1208;border-color:var(--or)}
 /* Le chargement, au centre, avant la planche. */
 /* Le fond uni du catalogue (2026-10-06) : une ligne par photo de fiche, avant / apres. */
 .fd-l{display:grid;grid-template-columns:1.6rem 9rem 9rem 1fr;gap:.7rem;align-items:center;
   padding:.5rem .6rem;border:1px solid var(--v10);border-radius:10px;margin-bottom:.45rem}
 .fd-ch{cursor:pointer}
-.fd-ch.on{border-color:#c9a97e;background:rgba(201,169,126,.08)}
+.fd-ch.on{border-color:var(--or);background:rgba(var(--or-rgb),.08)}
 .fd-ch .ck{width:1.3rem;height:1.3rem;border:1px solid var(--v16);border-radius:5px;display:inline-flex;
   align-items:center;justify-content:center;font-size:.8rem;color:#1a1208}
-.fd-ch.on .ck{background:#c9a97e;border-color:#c9a97e}
+.fd-ch.on .ck{background:var(--or);border-color:var(--or)}
 .fd-im{display:flex;flex-direction:column;gap:.2rem}
 .fd-im img{width:9rem;height:9rem;object-fit:contain;border-radius:8px;background-color:#ecd9d4;
   background-image:linear-gradient(45deg,#f6eeeb 25%,transparent 25%,transparent 75%,#f6eeeb 75%),
@@ -397,7 +397,7 @@ html.jour .asst .pi{background:#faf8f3}
 .chargement .cpt{font-variant-numeric:tabular-nums;font-size:1.3rem;color:var(--tx-or);font-weight:800}
 .chargement .aide{max-width:26rem}
 .chargement .tourne{width:2.2rem;height:2.2rem;border-radius:50%;
-  border:3px solid rgba(201,169,126,.25);border-top-color:#c9a97e;
+  border:3px solid rgba(var(--or-rgb),.25);border-top-color:var(--or);
   animation:vire 900ms linear infinite}
 @keyframes vire{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.chargement .tourne{animation:none}}
@@ -405,12 +405,12 @@ html.jour .asst .pi{background:#faf8f3}
 .src .l{display:flex;align-items:center;gap:.6rem;padding:.55rem .7rem;cursor:pointer;
   border:1px solid var(--v12);border-radius:9px}
 .src .l:hover{background:var(--v04)}
-.src .l.on{border-color:#c9a97e;background:rgba(201,169,126,.1)}
+.src .l.on{border-color:var(--or);background:rgba(var(--or-rgb),.1)}
 .src .l b{font-size:.9rem}
 .but{display:flex;flex-direction:column;gap:.4rem;margin-top:.5rem}
 .but label{display:flex;gap:.55rem;align-items:flex-start;padding:.5rem .65rem;
   border:1px solid var(--v12);border-radius:9px;cursor:pointer;margin:0;color:var(--tx);font-size:.84rem}
-.but label.on{border-color:#c9a97e;background:rgba(201,169,126,.1)}
+.but label.on{border-color:var(--or);background:rgba(var(--or-rgb),.1)}
 .but label input{width:auto;margin-top:.15rem}
 .but label .d{display:block;font-size:.72rem;color:var(--tx2);margin-top:.1rem}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}

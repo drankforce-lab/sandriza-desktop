@@ -50,7 +50,7 @@ input[type=search],select,button{font:inherit;color:var(--tx);background:var(--v
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem}
 input[type=search]{min-width:220px}
 select,button{cursor:pointer}
-input:focus,select:focus,button:focus{outline:none;border-color:#c9a97e}
+input:focus,select:focus,button:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}

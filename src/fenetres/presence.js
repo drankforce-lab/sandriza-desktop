@@ -68,7 +68,7 @@ button{font:inherit;color:var(--tx);background:var(--v05);cursor:pointer;
   border:1px solid var(--v16);border-radius:8px;padding:.28rem .55rem}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
-button:focus{outline:none;border-color:#c9a97e}
+button:focus{outline:none;border-color:var(--or)}
 button.dgr{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 button.dgr:hover:not(:disabled){background:rgba(239,68,68,.14)}
 button.mini{font-size:.74rem;padding:.14rem .45rem}
@@ -114,7 +114,7 @@ tbody td{padding:.34rem .4rem;border-top:1px solid var(--v05);vertical-align:top
 .ecrire textarea{width:100%;min-height:4.4rem;resize:vertical;font:inherit;
   color:var(--tx);background:var(--f-page);border:1px solid var(--v16);
   border-radius:8px;padding:.4rem .5rem}
-.ecrire textarea:focus{outline:none;border-color:#c9a97e}
+.ecrire textarea:focus{outline:none;border-color:var(--or)}
 .ecrire .pieds{display:flex;align-items:center;gap:.45rem;margin-top:.4rem}
 .ecrire .cpt{font-size:.71rem;color:var(--tx2);margin-left:auto;font-variant-numeric:tabular-nums}
 .ecrire .cpt.trop{color:var(--tx-err)}

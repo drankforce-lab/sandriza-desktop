@@ -83,12 +83,12 @@ input,button,textarea,select{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem}
 input[type=search]{min-width:200px}
 button{cursor:pointer}
-input:focus,button:focus,select:focus{outline:none;border-color:#c9a97e}
+input:focus,button:focus,select:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.geste{padding:.14rem .5rem;font-size:.73rem;white-space:nowrap}
-button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
+button.actif{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
 button.prim:hover:not(:disabled){background:#a3824f}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
@@ -124,7 +124,7 @@ tbody tr:hover td{background:var(--v04)}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
 .pill.att{background:rgba(251,191,36,.16);color:var(--tx-att)}
-.pill.acc{background:rgba(201,169,126,.16);color:#dcc39b}
+.pill.acc{background:rgba(var(--or-rgb),.16);color:#dcc39b}
 .avis{border-radius:9px;padding:.42rem .65rem;font-size:.78rem;line-height:1.55}
 .avis.att{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.32);color:#fde68a}
 .avis.mal{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.34);color:var(--tx-err2)}
@@ -213,7 +213,7 @@ tbody tr:hover td{background:var(--v04)}
 .critere .u{font-size:.76rem;color:var(--tx2)}
 .critere button{margin-left:auto}
 .portee{margin-top:.6rem;padding:.45rem .65rem;border-radius:9px;font-size:.82rem;
-  background:rgba(201,169,126,.1);border:1px solid rgba(201,169,126,.3);color:var(--tx-creme);
+  background:rgba(var(--or-rgb),.1);border:1px solid rgba(var(--or-rgb),.3);color:var(--tx-creme);
   display:flex;align-items:center;gap:.5rem}
 .portee strong{font-size:.95rem;color:var(--tx-f0e2c8)}
 .portee button{margin-left:auto}
@@ -235,7 +235,7 @@ tbody tr:hover td{background:var(--v04)}
 .etapes-choix{display:flex;gap:.35rem;flex-wrap:wrap;margin:0 0 .6rem}
 .etapes-choix button{font:inherit;font-size:.78rem;font-weight:600;padding:.32rem .75rem;border-radius:99px;
   border:1px solid var(--v12);background:var(--v05);color:var(--tx2);cursor:pointer}
-.etapes-choix button.on{background:#c9a97e;border-color:#c9a97e;color:#17202c}
+.etapes-choix button.on{background:var(--or);border-color:var(--or);color:#17202c}
 `;
 
 /** Page complète de la fenêtre native « Campagnes et chaînes ». */

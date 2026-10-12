@@ -57,7 +57,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .jauge .lg .em{filter:grayscale(1) brightness(1.6)}
 .jauge .lg .v{margin-left:auto;color:var(--tx2);font-size:.74rem}
 .jauge .barre{height:.55rem;background:var(--f-champ);border:1px solid var(--v12);border-radius:99px;overflow:hidden}
-.jauge .barre i{display:block;height:100%;background:#c9a97e}
+.jauge .barre i{display:block;height:100%;background:var(--or)}
 .jauge .sous{font-size:.7rem;color:var(--tx3);margin-top:.2rem}
 .cles{display:flex;flex-wrap:wrap;gap:.3rem}
 .cles code{font-size:.6875rem;background:var(--f-champ);border:1px solid var(--v12);border-radius:4px;padding:.12rem .38rem;color:var(--tx2)}
@@ -70,9 +70,9 @@ button.b{font:inherit;color:var(--tx);background:var(--v05);border:1px solid var
 button.b:hover:not(:disabled){background:var(--v10)}
 button.b:disabled{opacity:.5;cursor:default}
 button.b.dgr{color:var(--tx-err2);border-color:rgba(248,113,113,.4)}
-button.prim{font:inherit;background:#c9a97e;border:1px solid #c9a97e;color:#1a1208;font-weight:700;
+button.prim{font:inherit;background:var(--or);border:1px solid var(--or);color:#1a1208;font-weight:700;
   border-radius:8px;padding:.42rem .8rem;cursor:pointer;font-size:.8rem}
-button.prim:hover:not(:disabled){background:#d8bd97}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 button.prim:disabled{opacity:.5;cursor:default}
 .vide{padding:1rem;text-align:center;color:var(--tx2);font-size:.82rem}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;border:1px solid var(--v16);

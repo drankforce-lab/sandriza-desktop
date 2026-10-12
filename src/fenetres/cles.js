@@ -73,7 +73,7 @@ body{background:var(--f-page);color:var(--tx);
 .ch .aide{font-size:.72rem;color:var(--tx3);margin-top:.2rem}
 .ch input{width:100%;font:inherit;font-family:ui-monospace,Consolas,monospace;font-size:.84rem;
   color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;padding:.42rem .55rem}
-.ch input:focus{outline:none;border-color:#c9a97e}
+.ch input:focus{outline:none;border-color:var(--or)}
 .ch input:disabled{opacity:.55}
 .ch input.solde{font-family:inherit;max-width:12rem}
 .etat{display:flex;align-items:center;gap:.6rem;margin-top:.28rem;flex-wrap:wrap}
@@ -95,8 +95,8 @@ button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.4rem .8rem;cursor:pointer}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.5;cursor:default}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
-button.prim:hover:not(:disabled){background:#d8bd97}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 .vide{padding:1rem .6rem;text-align:center;color:var(--tx2);font-size:.82rem}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;

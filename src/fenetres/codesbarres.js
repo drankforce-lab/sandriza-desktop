@@ -62,12 +62,12 @@ input[type=search],input[type=number],select,button{font:inherit;color:var(--tx)
 input[type=search]{min-width:200px}
 input[type=number]{width:4.2rem;text-align:center;padding:.2rem .3rem}
 select,button{cursor:pointer}
-input:focus,select:focus,button:focus{outline:none;border-color:#c9a97e}
+input:focus,select:focus,button:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
-button.prim:hover:not(:disabled){background:#d8bc95}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 /* << Aucun scroll bar dans l application >> (2026-10-12) : le corps ne defile
    plus. Les deux colonnes prennent la hauteur qui reste ; a gauche, la liste

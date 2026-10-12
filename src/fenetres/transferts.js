@@ -50,9 +50,9 @@ body{background:var(--f-page);color:var(--tx);
 .onglets button{background:transparent;border:none;border-bottom:2px solid transparent;
   color:var(--tx2);padding:.4rem .7rem;font-weight:600;font-size:.86rem;border-radius:6px 6px 0 0}
 .onglets button:hover{background:var(--v05);color:var(--tx)}
-.onglets button.actif{color:var(--tx-creme);border-bottom-color:#c9a97e}
+.onglets button.actif{color:var(--tx-creme);border-bottom-color:var(--or)}
 .onglets .pastille{display:inline-block;min-width:1.15rem;padding:0 .3rem;margin-left:.35rem;
-  border-radius:99px;background:#c9a97e;color:#1a1207;font-size:.6875rem;font-weight:800;text-align:center}
+  border-radius:99px;background:var(--or);color:#1a1207;font-size:.6875rem;font-weight:800;text-align:center}
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
 /* 2026-10-12 : aucune glissiere (sa regle). Les transferts en transit, l historique et les
@@ -62,7 +62,7 @@ input,button,select{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.32rem .55rem}
 input[type=search]{min-width:220px}
 button{cursor:pointer;-webkit-user-select:none;user-select:none}
-input:focus,button:focus,select:focus{outline:none;border-color:#c9a97e}
+input:focus,button:focus,select:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .45rem;font-size:.74rem}
@@ -77,9 +77,9 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 .tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
 .tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tuile.cliq{cursor:pointer;user-select:none;position:relative}
-.tuile.cliq:hover{border-color:#c9a97e}
+.tuile.cliq:hover{border-color:var(--or)}
 .tuile.cliq::after{content:"›";position:absolute;top:.55rem;right:.8rem;font-size:1.1rem;color:var(--tx3)}
-.tuile.on{border-color:#c9a97e}
+.tuile.on{border-color:var(--or)}
 .val.att{color:var(--tx-att)}
 .carte h2{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;
   color:var(--tx2);font-weight:700}

@@ -44,7 +44,7 @@ body{background:var(--f-page);color:var(--tx);
 .onglets button{background:transparent;border:none;border-bottom:2px solid transparent;
   color:var(--tx2);padding:.38rem .6rem;font-weight:600;font-size:.82rem;border-radius:6px 6px 0 0}
 .onglets button:hover{background:var(--v05);color:var(--tx)}
-.onglets button.actif{color:var(--tx-creme);border-bottom-color:#c9a97e}
+.onglets button.actif{color:var(--tx-creme);border-bottom-color:var(--or)}
 .corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar{width:8px}
@@ -52,14 +52,14 @@ body{background:var(--f-page);color:var(--tx);
 input,button,select{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .5rem}
 button{cursor:pointer;-webkit-user-select:none;user-select:none}
-input:focus,button:focus,select:focus{outline:none;border-color:#c9a97e}
+input:focus,button:focus,select:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .45rem;font-size:.74rem}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600;padding:.34rem .7rem}
 button.prim:hover:not(:disabled){background:#a3824f}
 button.ghost{background:transparent}
-button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
+button.actif{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 button.ic{width:28px;height:28px;padding:0;display:inline-flex;align-items:center;justify-content:center;font-size:1rem;line-height:1}
 button.ic.plus{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent)}
@@ -77,12 +77,12 @@ thead th{text-align:left;padding:.28rem .45rem;font-size:.6875rem;text-transform
   letter-spacing:.05em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.32rem .45rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody tr:hover td{background:var(--v03)}
-tr.edit td{background:rgba(201,169,126,.09)}
+tr.edit td{background:rgba(var(--or-rgb),.09)}
 code{font:.77rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 .mono{font-family:Consolas,monospace}
 .chips{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;width:100%;padding:.45rem .5rem;
   border:1px solid var(--v16);border-radius:10px;background:var(--v03);min-height:44px}
-.chip{display:inline-flex;align-items:center;gap:.25rem;background:rgba(201,169,126,.14);
+.chip{display:inline-flex;align-items:center;gap:.25rem;background:rgba(var(--or-rgb),.14);
   border:1px solid var(--v14);border-radius:7px;padding:.24rem .2rem .24rem .55rem;font-weight:600;font-size:.82rem}
 .chip button{background:none;border:none;color:var(--tx2);font-size:1.05rem;line-height:1;padding:0 3px}
 .chip button:hover{color:var(--tx-err);background:none}
@@ -113,7 +113,7 @@ html.jour .reco-head:hover{background:#efece4}
 .swatches{display:flex;flex-wrap:wrap;gap:.4rem}
 .sw{display:flex;flex-direction:column;align-items:center;gap:.2rem;padding:.4rem .3rem;border:1.5px solid var(--v12);
   border-radius:8px;cursor:pointer;width:70px}
-.sw:hover{border-color:#c9a97e}
+.sw:hover{border-color:var(--or)}
 .sw .pt{width:28px;height:28px;border-radius:50%;border:1px solid rgba(0,0,0,.15)}
 .sw .nm{font-size:.6875rem;text-align:center;line-height:1.15;word-break:break-word;max-height:2.3em;overflow:hidden}
 .cc{display:flex;align-items:center;gap:.6rem;padding:.4rem .2rem;border-bottom:1px solid var(--v06)}

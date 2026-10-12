@@ -51,7 +51,7 @@ body{background:var(--f-page);color:var(--tx);
 /* ── La refonte de l Inventaire (2026-09-25) ── */
 .barreoutils .rf-jet{height:2.4rem;padding:0 .75rem;border-radius:10px;font-size:.8rem;background:var(--f-0f1826);
   border:1px solid var(--v10);color:var(--tx-gris2)}
-.barreoutils .rf-jet.on{background:rgba(201,169,126,.14);border-color:rgba(201,169,126,.55);color:var(--tx-or2);font-weight:700}
+.barreoutils .rf-jet.on{background:rgba(var(--or-rgb),.14);border-color:rgba(var(--or-rgb),.55);color:var(--tx-or2);font-weight:700}
 .rf-jet .n{margin-left:.45rem;font-weight:800;opacity:.8}
 /* La barre d onglets commune (2026-09-26) : les quatre vues etaient des puces
    de filtre, alors que partout ailleurs une vue est un onglet. */
@@ -68,12 +68,12 @@ input,select,button{font:inherit;color:var(--tx);background:var(--v05);
 input[type=search]{min-width:190px}
 input[type=checkbox]{width:auto;margin:0}
 select,button{cursor:pointer}
-input:focus,select:focus,button:focus{outline:none;border-color:#c9a97e}
+input:focus,select:focus,button:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.geste{padding:.14rem .5rem;font-size:.73rem;white-space:nowrap}
-button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
+button.actif{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
 button.prim:hover:not(:disabled){background:#a3824f}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
@@ -99,7 +99,7 @@ tbody tr:hover td{background:var(--v04)}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
 .jauge{height:.4rem;border-radius:99px;background:var(--v08);overflow:hidden;min-width:5rem}
-.jauge i{display:block;height:100%;background:#c9a97e}
+.jauge i{display:block;height:100%;background:var(--or)}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
   align-items:center;justify-content:center;z-index:50;padding:1rem}
 .boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;
@@ -120,17 +120,17 @@ button.sty{font:inherit;font-size:.79rem;padding:.24rem .7rem;border-radius:99px
   border:1px solid var(--v16);background:var(--v05);color:var(--tx);
   cursor:pointer;white-space:nowrap;-webkit-user-select:none;user-select:none}
 button.sty:hover{background:var(--v10)}
-button.sty.actif{border-color:#c9a97e;background:rgba(201,169,126,.16);font-weight:700}
+button.sty.actif{border-color:var(--or);background:rgba(var(--or-rgb),.16);font-weight:700}
 label.champ{display:block;margin:0 0 .6rem}
 label.champ .lbl{display:block;font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;
   color:var(--tx2);margin:0 0 .22rem}
 input.t{width:100%;background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;
   color:var(--tx);font:inherit;font-size:.85rem;padding:.4rem .55rem}
-input.t:focus{outline:none;border-color:#c9a97e}
+input.t:focus{outline:none;border-color:var(--or)}
 label.case{display:inline-flex;align-items:center;gap:.35rem;font-size:.82rem;cursor:pointer;
   border:1px solid var(--v12);border-radius:9px;padding:.22rem .55rem;
   background:var(--v03);-webkit-user-select:none;user-select:none}
-label.case input{width:15px;height:15px;accent-color:#c9a97e}
+label.case input{width:15px;height:15px;accent-color:var(--or)}
 .carte h2 .n{margin-left:auto;font-weight:400;text-transform:none;letter-spacing:0;
   font-size:.72rem;color:var(--tx2)}
 .carte h2 .n.hi{color:var(--tx-att)}

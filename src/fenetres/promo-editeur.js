@@ -142,7 +142,7 @@ body{background:var(--f-page);color:var(--tx);
 /* Un reglage ACTIF doit se voir sans lire : une case a cocher en mots se relit
    a chaque fois, une pastille allumee se reconnait. */
 /* L etat actif en OR, l accent unique (2026-10-04) — il etait bleu vif. */
-.btn.on{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:650}
+.btn.on{background:var(--or);border-color:var(--or);color:#17202c;font-weight:650}
 /* Les calques en PAGES (2026-10-12, << aucun scroll bar >>) : la boite garde son plafond de 26 %, ce qui
    depasse passe en page suivante (data-pages, JS_PAGES du socle). */
 .insp .lst{flex:0 0 auto;max-height:26%;overflow:hidden;border-bottom:1px solid var(--v08)}
@@ -200,7 +200,7 @@ body{background:var(--f-page);color:var(--tx);
 .seg{display:inline-flex;border:1px solid var(--v12);border-radius:7px;overflow:hidden}
 .seg button{padding:.26rem .55rem;background:transparent;color:var(--tx2);border:0;
   font:inherit;font-size:.76rem;cursor:pointer}
-.seg button.on{background:#c9a97e;color:#17202c;font-weight:650}
+.seg button.on{background:var(--or);color:#17202c;font-weight:650}
 .seg button:hover:not(.on){background:var(--v08);color:var(--tx)}
 /* Les teintes n ont AUCUN texte : rien a mesurer au contraste, et un liset
    suffit a distinguer un blanc d un fond clair. */

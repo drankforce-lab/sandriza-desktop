@@ -64,7 +64,7 @@ const SEP_DEC = () => (LANGUE.langueCourante() === 'en' ? '.' : ',');
 // Les jetons de couleur, version NUIT. Une seule copie, injectee dans les DEUX
 // feuilles : les fenetres n'incluent pas toutes le meme socle, et une fenetre
 // sans ces jetons rend chaque var() invalide (bandeaux transparents en nuit).
-const JETONS_NUIT = ':root{color-scheme:dark;--f-entete:#26334a;--v15:rgba(255,255,255,.15);--v18:rgba(255,255,255,.18);--v20:rgba(255,255,255,.2);--v25:rgba(255,255,255,.25);--v28:rgba(255,255,255,.28);--tx-sur-accent:#ffffff;--tx:#e8edf5;--tx-blanc:#fff;--tx2:#8fa1b8;--tx-bleute:#cbd8e6;--tx-gris2:#cbd5e1;--tx3:#8e9cad;--tx-gris:#8b9cb4;--tx-ok:#4ade80;--tx-ok2:#6ee7a0;--tx-err:#f87171;--tx-err2:#fca5a5;--tx-att:#fbbf24;--tx-jaune:#facc15;--tx-or:#c9a97e;--tx-or2:#f0d6a0;--tx-creme:#e8dcc6;--tx-creme2:#f7efe2;--tx-bleu:#93c5fd;--tx-f6a5a5:#f6a5a5;--tx-c3cede:#c3cede;--tx-94a3b8:#94a3b8;--tx-f6a6a6:#f6a6a6;--tx-fcd9a6:#fcd9a6;--tx-e6cfa8:#e6cfa8;--tx-f0e4d2:#f0e4d2;--tx-f1ece4:#f1ece4;--tx-e6ded2:#e6ded2;--tx-f0e2c8:#f0e2c8;--tx-f0a0a0:#f0a0a0;--tx-fda4af:#fda4af;--tx-f1f5f9:#f1f5f9;--tx-cdd7e5:#cdd7e5;--tx-cfd8e4:#cfd8e4;--tx-c0cad8:#c0cad8;--tx-e8dcc4:#e8dcc4;--tx-e7cfa8:#e7cfa8;--tx-c3cfdd:#c3cfdd;--f-page:#0e1522;--f-carte:#16202f;--f-pied:#0b1220;--f-champ:#0f1724;--f-carte2:#141d2c;--f-pill:#111a29;--f-0f1826:#0f1826;--f-0f172a:#0f172a;--f-131c2b:#131c2b;--f-16202c:#16202c;--f-bande:#1b2635;--v02:rgba(255,255,255,.02);--v025:rgba(255,255,255,.025);--v03:rgba(255,255,255,.03);--v035:rgba(255,255,255,.035);--v04:rgba(255,255,255,.04);--v045:rgba(255,255,255,.045);--v05:rgba(255,255,255,.05);--v055:rgba(255,255,255,.055);--v06:rgba(255,255,255,.06);--v07:rgba(255,255,255,.07);--v08:rgba(255,255,255,.08);--v09:rgba(255,255,255,.09);--v10:rgba(255,255,255,.1);--v12:rgba(255,255,255,.12);--v13:rgba(255,255,255,.13);--v14:rgba(255,255,255,.14);--v16:rgba(255,255,255,.16);--v22:rgba(255,255,255,.22);--v30:rgba(255,255,255,.3);--v35:rgba(255,255,255,.35);--v40:rgba(255,255,255,.4);--v50:rgba(255,255,255,.5);--v90:rgba(255,255,255,.9)}';
+const JETONS_NUIT = ':root{color-scheme:dark;--or:#c9a97e;--or-rgb:201,169,126;--or-clair:#d8bd97;--or-jour:#8a6a3e;--or-jour-rgb:138,106,62;--f-entete:#26334a;--v15:rgba(255,255,255,.15);--v18:rgba(255,255,255,.18);--v20:rgba(255,255,255,.2);--v25:rgba(255,255,255,.25);--v28:rgba(255,255,255,.28);--tx-sur-accent:#ffffff;--tx:#e8edf5;--tx-blanc:#fff;--tx2:#8fa1b8;--tx-bleute:#cbd8e6;--tx-gris2:#cbd5e1;--tx3:#8e9cad;--tx-gris:#8b9cb4;--tx-ok:#4ade80;--tx-ok2:#6ee7a0;--tx-err:#f87171;--tx-err2:#fca5a5;--tx-att:#fbbf24;--tx-jaune:#facc15;--tx-or:#c9a97e;--tx-or2:#f0d6a0;--tx-creme:#e8dcc6;--tx-creme2:#f7efe2;--tx-bleu:#93c5fd;--tx-f6a5a5:#f6a5a5;--tx-c3cede:#c3cede;--tx-94a3b8:#94a3b8;--tx-f6a6a6:#f6a6a6;--tx-fcd9a6:#fcd9a6;--tx-e6cfa8:#e6cfa8;--tx-f0e4d2:#f0e4d2;--tx-f1ece4:#f1ece4;--tx-e6ded2:#e6ded2;--tx-f0e2c8:#f0e2c8;--tx-f0a0a0:#f0a0a0;--tx-fda4af:#fda4af;--tx-f1f5f9:#f1f5f9;--tx-cdd7e5:#cdd7e5;--tx-cfd8e4:#cfd8e4;--tx-c0cad8:#c0cad8;--tx-e8dcc4:#e8dcc4;--tx-e7cfa8:#e7cfa8;--tx-c3cfdd:#c3cfdd;--f-page:#0e1522;--f-carte:#16202f;--f-pied:#0b1220;--f-champ:#0f1724;--f-carte2:#141d2c;--f-pill:#111a29;--f-0f1826:#0f1826;--f-0f172a:#0f172a;--f-131c2b:#131c2b;--f-16202c:#16202c;--f-bande:#1b2635;--v02:rgba(255,255,255,.02);--v025:rgba(255,255,255,.025);--v03:rgba(255,255,255,.03);--v035:rgba(255,255,255,.035);--v04:rgba(255,255,255,.04);--v045:rgba(255,255,255,.045);--v05:rgba(255,255,255,.05);--v055:rgba(255,255,255,.055);--v06:rgba(255,255,255,.06);--v07:rgba(255,255,255,.07);--v08:rgba(255,255,255,.08);--v09:rgba(255,255,255,.09);--v10:rgba(255,255,255,.1);--v12:rgba(255,255,255,.12);--v13:rgba(255,255,255,.13);--v14:rgba(255,255,255,.14);--v16:rgba(255,255,255,.16);--v22:rgba(255,255,255,.22);--v30:rgba(255,255,255,.3);--v35:rgba(255,255,255,.35);--v40:rgba(255,255,255,.4);--v50:rgba(255,255,255,.5);--v90:rgba(255,255,255,.9)}';
 
 const CSS_SOCLE = `
 /* == LES COULEURS DE TEXTE SONT DES JETONS, PAS DES LITTERAUX ===============
@@ -74,7 +74,7 @@ const CSS_SOCLE = `
    toutes des couleurs de MODE SOMBRE posees sur le fond CLAIR du mode jour.
      #8fa1b8 (texte faible) : 828 endroits, 91 fenetres, ratio 2.36 en jour
      #e8edf5 (texte fort)   : 320 endroits, ratio 1.05 - invisible
-     #4ade80, #f87171, #fbbf24, #c9a97e... meme histoire.
+     #4ade80, #f87171, #fbbf24, var(--or)... meme histoire.
 
    POURQUOI UNE REPRISE html.jour NE POUVAIT PAS SUFFIRE. CSS ne sait pas
    selectionner un element dont la couleur DECLAREE vaut #8fa1b8. Il aurait fallu
@@ -160,7 +160,7 @@ body{background:var(--f-page);color:var(--tx);
   border-radius:7px;border:1px solid transparent;background:transparent;
   color:var(--tx2);cursor:pointer;white-space:nowrap}
 .pas button:hover{color:var(--tx-bleute)}
-.pas button.on{background:rgba(201,169,126,.16);border-color:rgba(201,169,126,.45);color:var(--tx-creme)}
+.pas button.on{background:rgba(var(--or-rgb),.16);border-color:rgba(var(--or-rgb),.45);color:var(--tx-creme)}
 .pas button.fait{color:var(--tx-ok)}
 .pas .n{display:inline-block;min-width:1.05rem;text-align:center;font-variant-numeric:tabular-nums}
 
@@ -189,7 +189,7 @@ body{background:var(--f-page);color:var(--tx);
 input,select,textarea{font:inherit;color:var(--tx);background:var(--f-champ);
   border:1px solid var(--v16);border-radius:8px;padding:.38rem .55rem;
   width:100%;min-width:0}
-input:focus,select:focus,textarea:focus{outline:none;border-color:#c9a97e}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--or)}
 textarea{resize:none}
 input.manque{border-color:#f87171}
 input[type=checkbox]{width:auto}
@@ -202,8 +202,8 @@ button{font:inherit;cursor:pointer;border-radius:8px;padding:.36rem .8rem;
   color:var(--tx);transition:background .13s,border-color .13s}
 button:hover:not(:disabled){background:var(--v10);border-color:var(--v30)}
 button:disabled{opacity:.4;cursor:default}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
-button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
+button.prim{background:var(--or);border-color:var(--or);color:#17202c;font-weight:600}
+button.prim:hover:not(:disabled){background:var(--or-clair);border-color:var(--or-clair)}
 
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
   gap:.6rem;padding:.55rem 1.1rem;border-top:1px solid var(--v08);
@@ -620,7 +620,7 @@ const CSS_VERROUS = `
   background:rgba(217,119,6,.16);border:1px solid rgba(217,119,6,.42);color:var(--tx-att);
   -webkit-user-select:none;user-select:none}
 .cad .cadn{max-width:11ch;overflow:hidden;text-overflow:ellipsis}
-.cad.mine{background:rgba(201,169,126,.16);border-color:rgba(201,169,126,.45);color:var(--tx-or)}
+.cad.mine{background:rgba(var(--or-rgb),.16);border-color:rgba(var(--or-rgb),.45);color:var(--tx-or)}
 /* Mode jour : l ambre translucide sur du blanc perd son fond, et le texte clair
    devient illisible. On fonce les deux — valeurs du meme registre que les
    autres pastilles de ce projet. */
@@ -738,11 +738,11 @@ const CSS_LOTS = `
 .sz-lots{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;align-items:center;
   gap:.6rem;padding:.3rem .8rem;font-size:.76rem;color:var(--tx-creme);
   background:linear-gradient(180deg,#1b2434,#141c29);
-  border-top:1px solid rgba(201,169,126,.45);box-shadow:0 -4px 14px rgba(0,0,0,.35)}
+  border-top:1px solid rgba(var(--or-rgb),.45);box-shadow:0 -4px 14px rgba(0,0,0,.35)}
 .sz-lots .nom{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:16rem}
 .sz-lots .jauge{flex:1 1 auto;min-width:4rem;height:.42rem;border-radius:99px;
   background:var(--v12);overflow:hidden}
-.sz-lots .jauge i{display:block;height:100%;background:#c9a97e;transition:width .3s}
+.sz-lots .jauge i{display:block;height:100%;background:var(--or);transition:width .3s}
 .sz-lots .cpt{white-space:nowrap;font-variant-numeric:tabular-nums}
 .sz-lots .file{white-space:nowrap;color:var(--tx2)}
 /* ⚠⚠ IL RECOUVRAIT LE BAS DE CHAQUE FENETRE. Le bandeau est en position FIXE :
@@ -2431,7 +2431,7 @@ html.jour .barreoutils .droite{color:#414e66}
 html.jour input,html.jour select,html.jour button,html.jour textarea{
   color:#1d2433;background:#ffffff;border-color:rgba(15,23,42,.18)}
 html.jour button:hover:not(:disabled){background:#efece4}
-html.jour button.actif{border-color:#8a6a3e;background:rgba(138,106,62,.12)}
+html.jour button.actif{border-color:var(--or-jour);background:rgba(var(--or-jour-rgb),.12)}
 html.jour button.prim{background:#C49A6C;border-color:#C49A6C;color:#241703}
 html.jour button.prim:hover:not(:disabled){background:#d4ad80}
 html.jour button.danger{border-color:rgba(185,28,28,.45);color:#b91c1c}
@@ -2439,7 +2439,7 @@ html.jour button .n{background:rgba(15,23,42,.08);color:#1d2433}
 html.jour button .n.hi{background:rgba(180,120,10,.18);color:#6e4808}
 html.jour .carte,html.jour .ligne,html.jour .tuile,html.jour .panneau{
   background:#ffffff;border-color:rgba(15,23,42,.12)}
-html.jour .tuile:hover,html.jour .ligne:hover{border-color:#8a6a3e}
+html.jour .tuile:hover,html.jour .ligne:hover{border-color:var(--or-jour)}
 html.jour .carte h2{color:#414e66}
 html.jour thead th{color:#414e66;border-bottom-color:rgba(15,23,42,.14)}
 html.jour tbody td{border-top-color:rgba(15,23,42,.08)}
@@ -2457,7 +2457,7 @@ html.jour .msg.err{color:#b91c1c}
    on ne cree pas une nuance de plus pour la meme intention. */
 html.jour .msg.bon{color:#127136}
 html.jour .num{color:#1d2433}
-html.jour .sku,html.jour .etoile{color:#8a6a3e}
+html.jour .sku,html.jour .etoile{color:var(--or-jour)}
 html.jour .prixbarre{color:#414e66}
 /* ⚠⚠ LES COULEURS DE PASTILLE EXISTENT AUSSI POUR LA NUIT, ICI ET PLUS EN
    STYLE EN LIGNE. Plusieurs fenetres ecrivaient
@@ -2483,10 +2483,10 @@ html.jour .boite{background:#ffffff;border-color:rgba(15,23,42,.16);color:#1d243
 html.jour .boite .grille{border-color:rgba(15,23,42,.1)}
 html.jour .boite .grille .l{color:#414e66}
 html.jour .boite .texte{background:rgba(15,23,42,.03);border-color:rgba(15,23,42,.1)}
-html.jour .boite .reponse{background:rgba(138,106,62,.08);border-left-color:#8a6a3e}
+html.jour .boite .reponse{background:rgba(var(--or-jour-rgb),.08);border-left-color:var(--or-jour)}
 html.jour .boite .rang{border-top-color:rgba(15,23,42,.08)}
 html.jour .stats .s{background:rgba(15,23,42,.05)}
-html.jour .stats .s .n{color:#8a6a3e}
+html.jour .stats .s .n{color:var(--or-jour)}
 html.jour .stats .s .l{color:#414e66}
 html.jour .avis{background:rgba(180,120,10,.1);border-color:rgba(180,120,10,.4);color:#7a5410}
 html.jour .fileligne{border-top-color:rgba(15,23,42,.08)}
@@ -2501,7 +2501,7 @@ html.jour .liste::-webkit-scrollbar-thumb{background:rgba(15,23,42,.22)}
 html.jour tbody .num{color:#7a5a2e}
 html.jour tbody .det,html.jour .det{color:#414e66}
 html.jour .filtres .lbl{color:#414e66}
-html.jour .jetons button.on{background:rgba(138,106,62,.14);border-color:#8a6a3e;color:#5c4620}
+html.jour .jetons button.on{background:rgba(var(--or-jour-rgb),.14);border-color:var(--or-jour);color:#5c4620}
 html.jour button.prio{color:#414e66;border-color:rgba(180,120,10,.5)}
 html.jour button.prio.on{background:rgba(180,120,10,.16);border-color:#b47a0a;color:#7a5410;
   box-shadow:0 0 0 1px rgba(180,120,10,.3) inset}
@@ -2628,7 +2628,7 @@ html.jour .info{background:rgba(30,64,175,.09);border-color:rgba(30,64,175,.28);
    BOUTONS, le SURVOL et les MENUS.
 
    ⚠⚠ LE VRAI TRAVAIL N EST PAS LA PALETTE, C EST L ACCROCHE. Chaque fenetre
-   ecrit ses couleurs EN DUR (#0e1522, #16202f, #c9a97e, rgba blanc
+   ecrit ses couleurs EN DUR (#0e1522, #16202f, var(--or), rgba blanc
    au survol...). Un theme n a d effet que si ces valeurs passent par des
    variables. On ne reecrit pas les quarante fenetres : on REDECLARE ici les
    memes selecteurs avec des variables, et comme ce bloc est appende APRES le
@@ -2651,8 +2651,8 @@ const CSS_THEMES = `
   --sz-surface:#16202f; --sz-surface2:#141d2c;
   --sz-bord:var(--v08); --sz-bord-fort:var(--v16);
   --sz-texte:#e8edf5; --sz-attenue:#8fa1b8;
-  --sz-accent:#c9a97e; --sz-accent-fort:#a3824f; --sz-accent-txt:#17202c;
-  --sz-accent-doux:rgba(201,169,126,.16);
+  --sz-accent:var(--or); --sz-accent-fort:#a3824f; --sz-accent-txt:#17202c;
+  --sz-accent-doux:rgba(var(--or-rgb),.16);
   --sz-btn:var(--v05); --sz-survol:var(--v10);
   --sz-btn-prim:var(--sz-accent); --sz-btn-prim-fort:var(--sz-accent-fort); --sz-btn-prim-txt:var(--sz-accent-txt); --sz-repere:var(--sz-accent);
 }
@@ -2663,6 +2663,9 @@ html[data-sz-theme="carbone"]{
   --sz-accent:#fb7185; --sz-accent-fort:#f43f5e; --sz-accent-txt:#1a0408;
   --sz-accent-doux:rgba(244,63,94,.15);
   --sz-btn-prim:#d6193f; --sz-btn-prim-fort:#be123c; --sz-btn-prim-txt:#ffffff; --sz-repere:#f43f5e;
+  /* L'OR ÉCRIT EN DUR, CONVERTI (2026-10-12) : sous Carbone, l'accent des fenêtres devient le rouge. Texte foncé
+     posé dessus : 5,3 de contraste ; ce rouge comme texte sur la carte sombre : 5,2. */
+  --or:#f43f5e; --or-rgb:244,63,94; --or-clair:#fb7185; --tx-or:#fb7185;
 }
 html[data-sz-theme="ocean"]{
   --sz-fond:#0a1620; --sz-fond2:#0f2030; --sz-pied:#081219;
@@ -2724,7 +2727,7 @@ html.jour{
   --sz-surface:#ffffff; --sz-surface2:#faf8f3;
   --sz-texte:#1d2433; --sz-attenue:#5a6574;
   --sz-accent:#77644a; --sz-accent-fort:#60513c; --sz-accent-txt:#ffffff;
-  --sz-accent-doux:rgba(201,169,126,0.18);
+  --sz-accent-doux:rgba(var(--or-rgb),0.18);
 }
 html.jour[data-sz-theme="carbone"]{
   --sz-fond:#e6e8ec; --sz-fond2:#dfe1e5; --sz-pied:#e2e4e8;
@@ -2733,6 +2736,8 @@ html.jour[data-sz-theme="carbone"]{
   --sz-accent:#b23a0b; --sz-accent-fort:#963009; --sz-accent-txt:#ffffff;
   --sz-accent-doux:rgba(194,65,12,.14);
   --sz-btn-prim:#c2410c; --sz-btn-prim-fort:#a3360a; --sz-btn-prim-txt:#ffffff; --sz-repere:#c2410c;
+  /* Le jour : un orange CLAIR comme fond d'accent (texte foncé dessus : 7,2), et un orange brûlé comme texte (6,0). */
+  --or:#ea8a52; --or-rgb:234,138,82; --or-clair:#f2a273; --tx-or:#b23a0b; --or-jour:#b23a0b; --or-jour-rgb:178,58,11;
 }
 html.jour[data-sz-theme="ocean"]{
   --sz-fond:#ddedf2; --sz-fond2:#d5e5e9; --sz-pied:#d8e8ed;
@@ -3164,7 +3169,7 @@ const CSS_TUILES = `
   background:transparent;border:0;border-radius:6px;padding:.05rem .3rem;margin:-.2rem 0 -.25rem}
 .szbd-b svg{display:block;flex:0 0 auto}
 .szbd-b:hover{color:var(--tx);background:var(--v08)}
-.szbd-b:focus-visible{outline:1px solid #c9a97e;outline-offset:1px}
+.szbd-b:focus-visible{outline:1px solid var(--or);outline-offset:1px}
 .szbd.szplie>.szbd-c{display:none}
 .szbd.szplie>.szbd-b{align-self:stretch;justify-content:flex-start;margin:0;
   color:var(--tx2);border:1px dashed var(--v12);padding:.24rem .55rem}
@@ -3505,7 +3510,7 @@ tbody td{padding:.62rem .8rem;border-top:1px solid var(--v08);
 tbody td:first-child{border-left:1px solid var(--v08);border-radius:11px 0 0 11px}
 tbody td:last-child{border-right:1px solid var(--v08);border-radius:0 11px 11px 0}
 tbody td:only-child{border-radius:11px}
-tbody tr:hover>td{background:var(--v06);border-color:rgba(201,169,126,.35)}
+tbody tr:hover>td{background:var(--v06);border-color:rgba(var(--or-rgb),.35)}
 th:first-child,td:first-child{padding-left:.9rem}
 th:last-child,td:last-child{padding-right:.9rem}
 /* En jour, la bande beige de l en-tete s efface aussi : meme dessin qu en nuit. */
@@ -3524,7 +3529,7 @@ html.jour thead th{background:var(--f-carte)}
    tuile (Retours, Clients, Avis, Coupons...) et posent << .on >> sur la tuile
    active — mais la reprise de jour (html.jour .tuile{border-color}) l ecrasait :
    le filtre en cours ne se voyait plus. Un contour or, dans les deux modes. */
-.tuile.on,html.jour .tuile.on{border-color:rgba(201,169,126,.9);box-shadow:inset 0 0 0 1px rgba(201,169,126,.6)}
+.tuile.on,html.jour .tuile.on{border-color:rgba(var(--or-rgb),.9);box-shadow:inset 0 0 0 1px rgba(var(--or-rgb),.6)}
 html.jour .tuile.on{border-color:#a8804e;box-shadow:inset 0 0 0 1px rgba(168,128,78,.55)}
 .tuile .lbl{font-size:.76rem;font-weight:600;text-transform:none;letter-spacing:0;color:var(--tx2)}
 .tuile .val{font-size:1.6rem;font-weight:800;line-height:1.15;margin:.2rem 0 .1rem}
@@ -3569,7 +3574,7 @@ html.jour .tuile.on{border-color:#a8804e;box-shadow:inset 0 0 0 1px rgba(168,128
    fenetre — 4,2 rem faisait defiler Telephonie et d autres (sonde, 2026-09-26). */
 .ch textarea,.champ textarea{min-height:3.2rem;line-height:1.45}
 .ch input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):hover:not(:disabled),.ch select:hover:not(:disabled),.ch textarea:hover:not(:disabled),.champ input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):hover:not(:disabled),.champ select:hover:not(:disabled),.champ textarea:hover:not(:disabled){border-color:var(--v16)}
-.ch input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):focus,.ch select:focus,.ch textarea:focus,.champ input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):focus,.champ select:focus,.champ textarea:focus{outline:none;border-color:#c9a97e;box-shadow:0 0 0 3px rgba(201,169,126,.18)}
+.ch input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):focus,.ch select:focus,.ch textarea:focus,.champ input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):focus,.champ select:focus,.champ textarea:focus{outline:none;border-color:var(--or);box-shadow:0 0 0 3px rgba(var(--or-rgb),.18)}
 html.jour .ch input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),html.jour .ch select,html.jour .ch textarea,html.jour .champ input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),html.jour .champ select,html.jour .champ textarea{border-color:rgba(15,23,42,.16)}
 html.jour .ch input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):focus,html.jour .ch select:focus,html.jour .ch textarea:focus,html.jour .champ input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):focus,html.jour .champ select:focus,html.jour .champ textarea:focus{border-color:#a8864f;box-shadow:0 0 0 3px rgba(168,134,79,.2)}
 /* ══ LES FINITIONS DE LA REFONTE FINE (2026-09-26) ═══════════════════════
@@ -3583,7 +3588,7 @@ button.mini,.mini{display:inline-flex;align-items:center;justify-content:center;
   min-height:1.9rem;padding:.25rem .7rem;border-radius:9px;font-size:.76rem;font-weight:600;
   line-height:1.2;white-space:nowrap;transition:background-color .15s,border-color .15s}
 /* Cases et boutons radio : la teinte de l application, pas le bleu du systeme. */
-input[type=checkbox],input[type=radio]{accent-color:#c9a97e;cursor:pointer}
+input[type=checkbox],input[type=radio]{accent-color:var(--or);cursor:pointer}
 html.jour input[type=checkbox],html.jour input[type=radio]{accent-color:#a8864f}
 /* ⚠ EN JOUR, LES CONTROLES NATIFS SE DESSINAIENT EN NUIT : la racine porte
    color-scheme:dark (jetons de nuit) et le theme de jour ne le relevait que pour
@@ -3636,12 +3641,12 @@ label.champ .lbl,.champ label,.ch label,.champ .lbl,.form .champ .lbl,.lbl,.doss
   border-radius:99px;border:1px solid var(--v10);background:var(--f-0f1826);color:var(--tx-gris2);font-size:.8rem}
 .pas .n{display:inline-flex;align-items:center;justify-content:center;width:1.55rem;height:1.55rem;
   min-width:0;border-radius:99px;background:var(--v08);font-weight:800;font-size:.74rem}
-.pas button.on,.pas > span.on{background:rgba(201,169,126,.14);border-color:rgba(201,169,126,.55);color:var(--tx-or2);font-weight:700}
-.pas button.on .n,.pas > span.on .n{background:#c9a97e;color:#17202c}
+.pas button.on,.pas > span.on{background:rgba(var(--or-rgb),.14);border-color:rgba(var(--or-rgb),.55);color:var(--tx-or2);font-weight:700}
+.pas button.on .n,.pas > span.on .n{background:var(--or);color:#17202c}
 .pas button.fait,.pas > span.fait{color:var(--tx-ok)}
 .pas button.fait .n,.pas > span.fait .n{background:rgba(34,197,94,.18)}
 html.jour .pas button,html.jour .pas > span{background:#fff;border-color:rgba(15,23,42,.12);color:#414e66}
-html.jour .pas button.on,html.jour .pas > span.on{background:rgba(201,169,126,.2);border-color:rgba(140,100,45,.45);color:#5c451c}
+html.jour .pas button.on,html.jour .pas > span.on{background:rgba(var(--or-rgb),.2);border-color:rgba(140,100,45,.45);color:#5c451c}
 html.jour .pas button.fait,html.jour .pas > span.fait{color:#326a49}
 .stat{background:var(--f-carte);border-color:var(--v07);border-radius:13px}
 .pill{font-size:.72rem;font-weight:600;padding:.18rem .6rem}
@@ -3650,7 +3655,7 @@ input,select,textarea{border-radius:9px}
 /* Les onglets : l actif en or, les autres a plat — comme l Inventaire. Les
    fenetres nomment l actif << on >> ou << actif >> : les deux sont couverts. */
 .onglets button{border-radius:9px}
-.onglets button.on,.onglets button.actif{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:700}
+.onglets button.on,.onglets button.actif{background:var(--or);border-color:var(--or);color:#17202c;font-weight:700}
 /* ⚠ CE QUI EST DANS L ONGLET ACTIF SUIT SA COULEUR. Le banc des contrastes l a
    refuse a la premiere construction : un sous-titre gris (Studio, << A choisir >>)
    tombait a 1,19 sur l or, une coche verte a 1,44, et les pastilles << A faire >>
@@ -3707,13 +3712,13 @@ html.jour .rf-pill.bleu{color:#44607e}
 .rf-tb > *{flex:0 0 auto;white-space:nowrap}
 .rf-rch{display:flex;align-items:center;gap:.5rem;flex:1 1 14rem;min-width:9rem;max-width:22rem;height:2.4rem;
   padding:0 .7rem;background:var(--f-0f1826);border:1px solid var(--v14);border-radius:10px;color:var(--tx2)}
-.rf-rch:focus-within{border-color:#c9a97e}
+.rf-rch:focus-within{border-color:var(--or)}
 .rf-rch svg{width:17px;height:17px;flex:0 0 auto}
 .rf-rch input{border:0!important;background:transparent!important;padding:0!important;height:100%;width:100%;
   max-width:none!important;outline:none;font-size:.88rem}
 .rf-tb .rf-jet{height:2.4rem;padding:0 .75rem;border-radius:10px;font-size:.8rem;background:var(--f-0f1826);
   border:1px solid var(--v10);color:var(--tx-gris2)}
-.rf-tb .rf-jet.on{background:rgba(201,169,126,.14);border-color:rgba(201,169,126,.55);color:var(--tx-or2);font-weight:700}
+.rf-tb .rf-jet.on{background:rgba(var(--or-rgb),.14);border-color:rgba(var(--or-rgb),.55);color:var(--tx-or2);font-weight:700}
 .rf-droite{margin-left:auto;display:flex;gap:.4rem;align-items:center}
 html.jour .onglets button{background:transparent;border-color:transparent;color:#414e66}
 /* LE CADENAS DE VERROU AUX MESURES DE LA REFONTE (demande du 2026-09-25 :
@@ -3735,7 +3740,7 @@ html.jour .cad.mine{background:rgba(96,165,250,.14);color:#44607e}
 /* Une pastille dans un onglet NON choisi garde un fond blanc : sur la barre grisee
    des onglets, << A faire >> tombait a 4,26 et << ✓ >> a 4,31 (Profil, en jour). */
 html.jour .onglets button .pill{background:#fff}
-html.jour .onglets button.on,html.jour .onglets button.actif{background:rgba(138,106,62,.12);border-color:#8a6a3e;color:#1d2433}
+html.jour .onglets button.on,html.jour .onglets button.actif{background:rgba(var(--or-jour-rgb),.12);border-color:var(--or-jour);color:#1d2433}
 html.jour .onglets button.on .pill,html.jour .onglets button.actif .pill{background:rgba(29,36,51,.1);color:#1d2433!important}
 /* ⚠ LES FEUILLES DE DOCUMENT (etat de compte, facture) NE SONT PAS L INTERFACE.
    Elles montrent un document tel qu il s imprime : blanc, encre noire. La bande
@@ -3765,7 +3770,7 @@ html body .sz-inter input[type=checkbox]{position:absolute;opacity:0;width:1px;h
   background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s ease}
 .sz-inter input:checked + .sz-inter-g{background:#a3824f}
 .sz-inter input:checked + .sz-inter-g::after{transform:translateX(1.05rem)}
-.sz-inter input:focus-visible + .sz-inter-g{outline:2px solid #c9a97e;outline-offset:2px}
+.sz-inter input:focus-visible + .sz-inter-g{outline:2px solid var(--or);outline-offset:2px}
 .sz-inter input:disabled + .sz-inter-g{opacity:.45}
 /* Le mini-interrupteur d en-tete de carte (« Activer », 2026-10-04) : la case
    dessous, le curseur et son mot a cote. */
@@ -3775,7 +3780,7 @@ html body .sz-inter-mini input[type=checkbox]{position:absolute;opacity:0;width:
 .sz-inter-mini .sz-inter-g::after{width:.86rem;height:.86rem}
 .sz-inter-mini input:checked + .sz-inter-g{background:#a3824f}
 .sz-inter-mini input:checked + .sz-inter-g::after{transform:translateX(.9rem)}
-.sz-inter-mini input:focus-visible + .sz-inter-g{outline:2px solid #c9a97e;outline-offset:2px}
+.sz-inter-mini input:focus-visible + .sz-inter-g{outline:2px solid var(--or);outline-offset:2px}
 .sz-inter-mini input:checked ~ .lbl-on{color:var(--tx)}
 .sz-inter-mini{align-items:flex-start}
 .sz-inter-mini > .sz-inter-g{margin-top:.08rem}

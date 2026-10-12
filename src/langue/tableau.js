@@ -19,6 +19,17 @@
  */
 
 module.exports = {
+  'Top 100': 'Top 100',
+  'Top 100 des meilleures ventes': 'Top 100 best sellers',
+  'Produit': 'Product',
+  'produit': 'product',
+  'produits': 'products',
+  'Vendus': 'Sold',
+  'Fermer': 'Close',
+  'Ouvrir l’inventaire': 'Open inventory',
+  'Voir le réapprovisionnement': 'See restocking',
+  'Voir les produits en rupture': 'See out-of-stock products',
+  'Ouvrir les produits en vente': 'Open products for sale',
   /* ── LE TABLEAU DE BORD EN DIRECT (2026-10-12) ── */
   'à l’instant': 'just now',
   'il y a {0} min': '{0} min ago',
@@ -89,7 +100,7 @@ module.exports = {
   'Téléphone': 'Phone',
   'Par canal': 'By channel',
   'Aucune commande ce mois-ci.': 'No orders this month.',
-  'sur {0} aujourd’hui': 'of {0} today',
+  '{0} sur {1} dernières': '{0} of the latest {1}',
   'Prioritaire': 'Priority',
   'Traitement prioritaire demandé par le client': 'Priority handling requested by the customer',
   'Lancer la préparation': 'Start preparing',

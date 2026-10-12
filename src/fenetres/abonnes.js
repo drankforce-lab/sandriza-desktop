@@ -47,12 +47,12 @@ input,button,textarea{font:inherit;color:var(--tx);background:var(--v05);
 input[type=search]{min-width:200px}
 textarea{width:100%;min-height:8em;resize:vertical;font-family:'Courier New',monospace;font-size:.84rem}
 button{cursor:pointer}
-input:focus,button:focus,textarea:focus{outline:none;border-color:#c9a97e}
+input:focus,button:focus,textarea:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.geste{padding:.14rem .5rem;font-size:.73rem;white-space:nowrap}
-button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
+button.actif{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
 button.prim:hover:not(:disabled){background:#a3824f}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
@@ -61,8 +61,8 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 /* Les tuiles filtrent (refonte du 2026-09-25) : la liste affichee porte le cadre or. */
 .tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tuile.cliq{cursor:pointer;user-select:none}
-.tuile.cliq:hover{border-color:rgba(201,169,126,.6)}
-.tuile.on{border-color:#c9a97e}
+.tuile.cliq:hover{border-color:rgba(var(--or-rgb),.6)}
+.tuile.on{border-color:var(--or)}
 .tuile .lbl{font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 .tuile .val{font-size:.95rem;font-weight:800;margin-top:.1rem}
 .tuile .val.bon{color:var(--tx-ok)}.tuile .val.neutre{color:var(--tx2)}

@@ -68,14 +68,14 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .carte.large{grid-column:1/-1}
 .bascules{display:flex;gap:1.4rem;flex-wrap:wrap;margin:0 0 .9rem}
 label.bascule{display:flex;align-items:center;gap:.45rem;font-size:.84rem;cursor:pointer;-webkit-user-select:none;user-select:none}
-label.bascule input{width:16px;height:16px;accent-color:#c9a97e;flex:0 0 auto}
+label.bascule input{width:16px;height:16px;accent-color:var(--or);flex:0 0 auto}
 label.champ{display:block;margin:0 0 .8rem}
 label.champ .lbl{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin:0 0 .25rem}
 label.champ .sub{display:block;font-size:.72rem;color:var(--tx-gris);margin:.25rem 0 0;line-height:1.5}
 input.t,textarea.t{width:100%;background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;
   color:var(--tx);font:inherit;font-size:.85rem;padding:.45rem .6rem}
 textarea.t{min-height:4.2em;resize:vertical;line-height:1.5}
-input.t:focus,textarea.t:focus{outline:none;border-color:#c9a97e}
+input.t:focus,textarea.t:focus{outline:none;border-color:var(--or)}
 input.t:disabled,textarea.t:disabled{opacity:.45}
 .rang{display:flex;gap:.45rem;align-items:center}
 .rang input.t{flex:1 1 auto;min-width:0}
@@ -272,7 +272,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
            LISTE : ils n ont pas d etiquette, et le lecteur d ecran annoncait
            trois fois « zone de texte » sans dire de quel agent. Le placeholder
            ne compte pas — il disparait des qu on tape. */
-        + '<input type="checkbox" aria-label="${T("Agent actif")}" data-ag-actif="'+i+'"'+(a.actif?' checked':'')+dis+' style="width:15px;height:15px;accent-color:#c9a97e;flex:0 0 auto">'
+        + '<input type="checkbox" aria-label="${T("Agent actif")}" data-ag-actif="'+i+'"'+(a.actif?' checked':'')+dis+' style="width:15px;height:15px;accent-color:var(--or);flex:0 0 auto">'
         + '<input class="t nom" aria-label="${T("Nom de l’agent")}" data-ag-nom="'+i+'" value="'+esc(a.nom)+'" placeholder="Nom"'+dis+'>'
         + '<input class="t ph" aria-label="${T("URL de la photo de l’agent")}" data-ag-photo="'+i+'" value="'+esc(a.photo)+'" placeholder="${T("URL de la photo (vide = sans photo)")}"'+dis+'>'
         + (RO ? '' : '<button class="mini" type="button" data-ag-imp="'+i+'" title="${T("Importer une photo")}"><span class="ic">📁</span></button>')

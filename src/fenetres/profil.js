@@ -93,8 +93,8 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.55 system-ui,-apple-sy
   background:linear-gradient(135deg,var(--v06),var(--v02));
   border:1px solid var(--v08);border-radius:16px;padding:1.15rem 1.35rem;margin:0 0 1.35rem}
 .mono{width:56px;height:56px;flex:0 0 auto;border-radius:18px;
-  background:linear-gradient(145deg,rgba(201,169,126,.3),rgba(201,169,126,.12));
-  border:1px solid rgba(201,169,126,.45);color:var(--tx-e7cfa8);
+  background:linear-gradient(145deg,rgba(var(--or-rgb),.3),rgba(var(--or-rgb),.12));
+  border:1px solid rgba(var(--or-rgb),.45);color:var(--tx-e7cfa8);
   display:flex;align-items:center;justify-content:center;
   font:700 1.3rem/1 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.02em;
   -webkit-user-select:none;user-select:none}
@@ -116,7 +116,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.55 system-ui,-apple-sy
   transition:background .12s ease,color .12s ease}
 .onglet:hover{color:var(--tx);background:var(--v05)}
 .onglet.on{color:var(--tx);background:var(--v10);box-shadow:0 1px 2px rgba(0,0,0,.25)}
-.onglet:focus-visible{outline:2px solid #c9a97e;outline-offset:2px}
+.onglet:focus-visible{outline:2px solid var(--or);outline-offset:2px}
 
 /* ══ LES CARTES ═════════════════════════════════════════════════════════ */
 .carte{background:var(--v03);border:1px solid var(--v08);border-radius:16px;padding:1.35rem 1.45rem}
@@ -155,14 +155,14 @@ input.t,select.t{width:100%;background:var(--f-champ);border:1px solid var(--v14
 input.t{padding-right:2.9rem}
 select.t{padding-right:.8rem}
 input.t:hover,select.t:hover{border-color:var(--v20)}
-input.t:focus,select.t:focus{outline:none;border-color:#c9a97e;box-shadow:0 0 0 3px rgba(201,169,126,.22)}
+input.t:focus,select.t:focus{outline:none;border-color:var(--or);box-shadow:0 0 0 3px rgba(var(--or-rgb),.22)}
 /* L oeil : il PORTE le sens (il n a pas de libelle a cote), donc il se lit et
    ne se declare pas decoratif. */
 .oeil{position:absolute;top:50%;right:.45rem;transform:translateY(-50%);
   width:2rem;height:2rem;display:flex;align-items:center;justify-content:center;
   background:transparent;border:0;border-radius:8px;color:var(--tx2);cursor:pointer;font-size:.95rem}
 .oeil:hover{background:var(--v08);color:var(--tx)}
-.oeil:focus-visible{outline:2px solid #c9a97e;outline-offset:1px}
+.oeil:focus-visible{outline:2px solid var(--or);outline-offset:1px}
 
 /* La jauge : quatre segments, remplis selon ce qui est saisi. Elle est
    INDICATIVE et le dit — c est le serveur qui accepte ou refuse. */
@@ -179,12 +179,12 @@ input.t:focus,select.t:focus{outline:none;border-color:#c9a97e;box-shadow:0 0 0 
 
 .actions{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin:1.3rem 0 0}
 .prim{font:inherit;font-size:.9rem;font-weight:700;border:0;border-radius:11px;
-  padding:.72rem 1.25rem;background:#c9a97e;color:#1a1408;cursor:pointer;
+  padding:.72rem 1.25rem;background:var(--or);color:#1a1408;cursor:pointer;
   transition:background .12s ease,transform .06s ease}
-.prim:hover:not(:disabled){background:#d8bd97}
+.prim:hover:not(:disabled){background:var(--or-clair)}
 .prim:active:not(:disabled){transform:translateY(1px)}
 .prim:disabled{opacity:.5;cursor:default}
-.prim:focus-visible{outline:2px solid #c9a97e;outline-offset:3px}
+.prim:focus-visible{outline:2px solid var(--or);outline-offset:3px}
 .mini{font:inherit;font-size:.76rem;padding:.2rem .6rem;border:1px solid var(--v16);border-radius:8px;
   background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
 /* ══ L ENCADRE D ERREUR — IL DIT, IL NE DEFORME PAS ══════════════════════

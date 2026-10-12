@@ -53,11 +53,11 @@ body{background:var(--f-page);color:var(--tx);
 .ch .aide{font-size:.72rem;color:var(--tx3);margin-top:.2rem}
 .ch input[type=number]{width:12rem;max-width:100%;font:inherit;color:var(--tx);background:var(--f-champ);
   border:1px solid var(--v12);border-radius:8px;padding:.42rem .55rem}
-.ch input:focus{outline:none;border-color:#c9a97e}
+.ch input:focus{outline:none;border-color:var(--or)}
 .ch input:disabled{opacity:.55}
 .bascule,.ch label.bascule{display:flex;align-items:flex-start;gap:.6rem;font-size:.86rem;cursor:pointer;
   -webkit-user-select:none;user-select:none}
-.bascule input{width:1.1rem;height:1.1rem;accent-color:#c9a97e;cursor:pointer;margin-top:.15rem;flex:0 0 auto}
+.bascule input{width:1.1rem;height:1.1rem;accent-color:var(--or);cursor:pointer;margin-top:.15rem;flex:0 0 auto}
 .bascule .d{font-size:.74rem;color:var(--tx3);display:block;margin-top:.1rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
@@ -67,8 +67,8 @@ button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.42rem .8rem;cursor:pointer}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.5;cursor:default}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
-button.prim:hover:not(:disabled){background:#d8bd97}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 .vide{padding:1rem;text-align:center;color:var(--tx2);font-size:.82rem}
 /* Pays desservis — la carte occupe toute la largeur : deux cents lignes ne
    tiennent pas dans une demi-colonne. */
@@ -113,10 +113,10 @@ table.pays tr.paystete td{background:var(--v03)}
 table.pays td.etatnom{padding-left:1.9rem;font-size:.82rem}
 table.pays .verrou{color:var(--tx3);font-size:.74rem}
 table.pays td.mid{text-align:center}
-table.pays input[type=checkbox]{width:1rem;height:1rem;accent-color:#c9a97e;cursor:pointer}
+table.pays input[type=checkbox]{width:1rem;height:1rem;accent-color:var(--or);cursor:pointer}
 .pfiltre{font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);
   border-radius:8px;padding:.32rem .5rem;width:12rem}
-.pfiltre:focus{outline:none;border-color:#c9a97e}
+.pfiltre:focus{outline:none;border-color:var(--or)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 /* Relooking 2026 (2026-10-04) : tarifs cote a cote, resume en une phrase. */
 .tarifs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem}

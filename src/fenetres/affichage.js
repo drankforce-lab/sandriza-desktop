@@ -64,16 +64,16 @@ body{background:linear-gradient(160deg,#0d1420 0%,#141d2c 55%,#0d1420 100%);
 .ln .p{flex:0 0 auto;font-variant-numeric:tabular-nums;font-size:1.12rem;font-weight:600}
 .ln .p s{font-size:.88rem;font-weight:400;color:var(--tx2);margin-right:.6rem}
 .ln .p .rb{display:inline-block;font-size:.8rem;font-weight:700;color:var(--tx-or);
-  border:1px solid rgba(201,169,126,.45);border-radius:99px;padding:.05rem .5rem;margin-right:.6rem;vertical-align:.1em}
+  border:1px solid rgba(var(--or-rgb),.45);border-radius:99px;padding:.05rem .5rem;margin-right:.6rem;vertical-align:.1em}
 /* Le dernier article scanne se signale une seconde : la cliente voit CE qu'on
    vient d'ajouter, sans avoir a comparer deux listes. */
 .ln.neuf{animation:surligne 1.4s ease-out}
-@keyframes surligne{0%{background:rgba(201,169,126,.22)}100%{background:transparent}}
+@keyframes surligne{0%{background:rgba(var(--or-rgb),.22)}100%{background:transparent}}
 .bas{flex:0 0 auto;border-top:1px solid var(--v10);padding-top:.9rem;margin-top:.6rem}
 .sl{display:flex;justify-content:space-between;font-size:.95rem;color:#b9c6d6;padding:.2rem 0}
 .sl b{font-variant-numeric:tabular-nums;font-weight:600;color:var(--tx-e6ded2)}
 .tot{display:flex;justify-content:space-between;align-items:baseline;margin-top:.7rem;
-  padding-top:.8rem;border-top:2px solid rgba(201,169,126,.45)}
+  padding-top:.8rem;border-top:2px solid rgba(var(--or-rgb),.45)}
 .tot .lb{font-size:1.15rem;letter-spacing:.12em;text-transform:uppercase;color:var(--tx-or);font-weight:700}
 .tot .vl{font-variant-numeric:tabular-nums;font-size:3.1rem;font-weight:800;line-height:1;
   font-family:Georgia,serif;color:var(--tx-blanc)}

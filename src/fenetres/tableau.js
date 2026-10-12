@@ -57,7 +57,7 @@ body{background:var(--f-page);color:var(--tx);
 .corps>*{flex:0 0 auto}
 select,button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem;cursor:pointer}
-select:focus,button:focus{outline:none;border-color:#c9a97e}
+select:focus,button:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .45rem;font-size:.74rem}
@@ -73,7 +73,7 @@ html.jour .direct{color:#22663a}
 @keyframes tb-pouls{0%{box-shadow:0 0 0 0 rgba(34,197,94,.55)}100%{box-shadow:0 0 0 8px rgba(34,197,94,0)}}
 .periode{display:inline-flex;gap:3px;padding:3px;border-radius:9px;background:var(--v04);border:1px solid var(--v10)}
 .periode button{border:0;background:transparent;border-radius:6px;padding:.18rem .65rem;font-size:.76rem;font-weight:600;color:var(--tx2)}
-.periode button.on{background:#c9a97e;color:#1a1208}
+.periode button.on{background:var(--or);color:#1a1208}
 .faire{display:inline-flex;align-items:center;gap:.3rem;font-size:.76rem;padding:.18rem .6rem;border-radius:99px;
   background:var(--v06);border:1px solid var(--v14);white-space:nowrap}
 .faire b{font-weight:800}
@@ -99,7 +99,7 @@ html.jour .direct{color:#22663a}
 .flux{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.5rem}
 .etape{position:relative;text-align:center;padding:.45rem .3rem .55rem;border-radius:10px;border:1px solid var(--v07);
   background:var(--v03);cursor:pointer;transition:border-color .2s}
-.etape:hover{border-color:#c9a97e}
+.etape:hover{border-color:var(--or)}
 .etape .n{font-size:1.75rem;font-weight:300;line-height:1.1;color:inherit;font-variant-numeric:tabular-nums}
 .etape .lib{font-size:.66rem;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
 .etape::after{content:"";position:absolute;left:26%;right:26%;bottom:0;height:3px;border-radius:3px 3px 0 0;background:currentColor;opacity:.8}
@@ -131,7 +131,7 @@ html.jour .direct{color:#22663a}
 .fil{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:6px;overflow:hidden}
 .cmd{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.4rem .55rem;border-radius:10px;background:var(--v03);
   border:1px solid var(--v07);cursor:pointer}
-.cmd:hover{border-color:rgba(201,169,126,.45)}
+.cmd:hover{border-color:rgba(var(--or-rgb),.45)}
 .cmd.neuve{animation:tb-arrive .7s cubic-bezier(.2,.8,.2,1);border-color:rgba(34,197,94,.55)}
 @keyframes tb-arrive{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:none}}
 .cmd.prio{box-shadow:inset 3px 0 0 var(--tx-att)}
@@ -140,27 +140,51 @@ html.jour .direct{color:#22663a}
   font-size:.7rem;font-weight:800;color:#5a6574;border:1px solid var(--v08)}
 .ph img{width:100%;height:100%;object-fit:cover}
 .cmd .t{min-width:0;flex:1 1 auto}
-.cmd .t b{display:flex;align-items:center;gap:.3rem;font-size:.83rem;white-space:nowrap;overflow:hidden}
+.cmd .t b{display:flex;align-items:center;gap:.35rem;font-size:.88rem;white-space:nowrap;overflow:hidden}
+.cmd .a .rf-pill{font-size:.66rem;padding:.08rem .45rem}
 .cmd .t b span.nm{overflow:hidden;text-overflow:ellipsis}
 .cmd .t .a{font-size:.7rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cmd .m{text-align:right;flex:0 0 auto}
-.cmd .m b{font-size:.84rem;font-variant-numeric:tabular-nums}
+.cmd .m b{font-size:.95rem;font-variant-numeric:tabular-nums}
 .cmd .m div{font-size:.66rem;color:var(--tx3);white-space:nowrap}
 .prio-pill{font-size:.6rem;font-weight:800;color:var(--tx-att);background:rgba(245,158,11,.15);padding:.02rem .36rem;border-radius:99px}
 .cadslot{display:inline}
 button.eclair{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:1.9rem;height:1.9rem;padding:0;
-  border-radius:8px;border:1px solid rgba(201,169,126,.6);background:rgba(201,169,126,.2);color:var(--tx-or)}
+  border-radius:8px;border:1px solid rgba(var(--or-rgb),.6);background:rgba(var(--or-rgb),.2);color:var(--tx-or)}
 button.eclair svg{width:15px;height:15px;fill:currentColor}
-button.eclair:hover:not(:disabled){background:#c9a97e;color:#1a1208;border-color:#c9a97e}
+button.eclair:hover:not(:disabled){background:var(--or);color:#1a1208;border-color:var(--or)}
 html.jour button.eclair{color:#6b5940}
 button.eclair:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(1)}
 .fil-pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;font-size:.7rem;color:var(--tx3);
   padding-top:.4rem;margin-top:.4rem;border-top:1px solid var(--v07)}
 .vide{padding:1rem .6rem;text-align:center;color:var(--tx2);font-size:.82rem}
 
+/* LE TOP 100 : une boite au-dessus du tableau de bord, le classement en pages (socle), aucune glissiere. */
+.voile{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:1.2rem;background:rgba(4,8,14,.66)}
+html.jour .voile{background:rgba(20,24,30,.35)}
+.boite{width:100%;max-width:58rem;height:min(46rem,94vh);display:flex;flex-direction:column;gap:.6rem;
+  background:var(--f-carte);border:1px solid var(--v12);border-radius:13px;padding:1rem 1.1rem}
+.boite h3{margin:0;font-size:1.05rem;display:flex;align-items:center;gap:.6rem}
+.boite h3 .aside{margin-left:auto;font-size:.76rem;font-weight:500;color:var(--tx3)}
+.boite .classement{flex:1 1 auto;min-height:0;overflow:hidden}
+.boite table{width:100%;border-collapse:collapse;font-size:.86rem}
+.boite thead th{text-align:left;font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);padding:.3rem .5rem;border-bottom:1px solid var(--v10)}
+.boite th.d,.boite td.d{text-align:right}
+.boite tbody td{padding:.42rem .5rem;border-top:1px solid var(--v05);vertical-align:middle;font-variant-numeric:tabular-nums}
+.boite .rg{width:2.6rem;font-weight:800;color:var(--tx2)}
+.boite tr.podium .rg{color:var(--tx-or)}
+.boite .prd{display:flex;align-items:center;gap:.6rem;min-width:0}
+.boite .prd .rf-av{width:2rem;height:2rem}
+.boite .pied-boite{display:flex;justify-content:flex-end}
 /* rangée 3 : produits, meilleures ventes, canaux */
 .details{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:.5rem;align-items:center}
-.details .r{display:flex;justify-content:space-between;padding:.24rem 0;border-bottom:1px solid var(--v07);font-size:.82rem}
+/* Chaque ligne est un LIEN vers l endroit ou ces elements sont listes (2026-10-12, sa demande). */
+.details .r{display:flex;justify-content:space-between;align-items:center;gap:.4rem;padding:.24rem .3rem;margin:0 -.3rem;border-bottom:1px solid var(--v07);
+  font-size:.82rem;cursor:pointer;border-radius:6px}
+.details .r:hover{background:var(--v05)}
+.details .r:hover span{text-decoration:underline;text-underline-offset:2px}
+.details .r b::after{content:"›";margin-left:.4rem;color:var(--tx3);font-weight:400}
+.inv>div:hover{border-color:var(--or)}
 .details .r:last-child{border-bottom:0}
 .details .r b{font-variant-numeric:tabular-nums}
 .details .r.alerte,.details .r.alerte b{color:var(--tx-err)}
@@ -170,7 +194,7 @@ button.eclair:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(1)}
 .top{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.45rem}
 .top .p{text-align:center;padding:.35rem .3rem .4rem;border-radius:10px;background:var(--v03);border:1px solid var(--v07);position:relative;min-width:0}
 .top .rang{position:absolute;top:5px;left:5px;width:18px;height:18px;border-radius:99px;display:grid;place-items:center;
-  font-size:.62rem;font-weight:800;background:#c9a97e;color:#1a1208}
+  font-size:.62rem;font-weight:800;background:var(--or);color:#1a1208}
 .top .im{height:64px;display:grid;place-items:center;margin-bottom:.15rem}
 .top .im img{max-height:64px;max-width:100%;object-fit:contain;border-radius:5px;background:#fff}
 .top .im span{width:46px;height:46px;border-radius:99px;display:grid;place-items:center;background:var(--v06);color:var(--tx2);font-weight:800}
@@ -366,9 +390,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (pc.parties ? '<i style="background:var(--tx-ok);flex:' + pc.parties + '"></i>' : '') + '</div>'
       + '<span>' + (V.delaiMoyenH != null ? '${T("Délai moyen avant envoi")} <b>' + delai(V.delaiMoyenH) + '</b>' : '${T("Aucun envoi ces 30 derniers jours")}') + '</span></div></section>';
     h += '<section class="carte c4 r1b"><h2>${T("Inventaire")}</h2><div class="inv">'
-      + '<div data-ouvre="inventory"><div class="k">${T("En main")}</div><div class="v">' + (iv.enMain || 0) + '</div></div>'
-      + '<div data-ouvre="inventory"><div class="k">${T("À commander")}</div><div class="v' + (iv.aCommander ? ' att' : '') + '">' + (iv.aCommander || 0) + '</div></div>'
-      + '<div data-ouvre="inventory"><div class="k">${T("En rupture")}</div><div class="v' + (iv.ruptures ? ' err' : '') + '">' + (iv.ruptures || 0) + '</div></div></div>'
+      + '<div data-ouvre="inventory" title="${T("Ouvrir l’inventaire")}"><div class="k">${T("En main")}</div><div class="v">' + (iv.enMain || 0) + '</div></div>'
+      + '<div data-ouvre="inventory-reappro" title="${T("Voir le réapprovisionnement")}"><div class="k">${T("À commander")}</div><div class="v' + (iv.aCommander ? ' att' : '') + '">' + (iv.aCommander || 0) + '</div></div>'
+      + '<div data-ouvre="inventory-rupture" title="${T("Voir les produits en rupture")}"><div class="k">${T("En rupture")}</div><div class="v' + (iv.ruptures ? ' err' : '') + '">' + (iv.ruptures || 0) + '</div></div></div>'
       + '<div class="valeur"><span>${T("Valeur du stock (au coût)")}' + (iv.sansCout ? ' · ' + pl(iv.sansCout, '${T("produit sans coût")}', '${T("produits sans coût")}') : '') + '</span><b>' + fmt(iv.valeur || 0) + '</b></div></section>';
 
     // ── rangée 2 ──
@@ -386,13 +410,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '<section class="carte c4 r2b direct-carte"><h2>${T("En direct")}<span class="aside">${T("dernières commandes")}</span></h2><div class="fil" id="fil">'
       + (fil.length ? fil.map(function(c){
           var preparable = geste && c.oid && !c.comptoir && ['shipped', 'delivered', 'cancelled', 'refunded', 'returned'].indexOf(c.statut) < 0;
-          var a = c.article || {};
+          /* PAS DE PHOTO ICI (2026-10-12, sa demande) : le CLIENT, le MONTANT et la priorite d abord ; dessous,
+             le numero et le statut de la commande. */
+          var ton = { delivered: 'vert', shipped: 'bleu', confirmed: 'bleu', verification: 'bleu', pending: 'ambre', preparing: 'ambre', cancelled: 'rouge' }[c.statut] || '';
           return '<div class="cmd' + (c.prioritaire ? ' prio' : '') + (NEUVES[c.oid] ? ' neuve' : '') + '" data-ligne="' + esc(c.oid) + '" title="${T("Ouvrir la commande")}">'
-            + '<span class="ph">' + image(a.image, a.nom) + '</span>'
             + '<div class="t"><b><span class="nm">' + esc(c.client || c.numero || '—') + '</span>'
             + (c.prioritaire ? '<span class="prio-pill" title="${T("Traitement prioritaire demandé par le client")}">${T("Prioritaire")}</span>' : '')
             + '<span class="cadslot" data-cad="' + esc(c.oid) + '"></span></b>'
-            + '<div class="a">' + (a.nom ? (a.qte || 1) + ' × ' + esc(a.nom) : esc(c.numero)) + (c.autres ? ' ' + '${T("+ {0} autres")}'.split('{0}').join(c.autres) : '') + '</div></div>'
+            + '<div class="a"><span class="rf-code">' + esc(c.numero) + '</span> <span class="rf-pill ' + ton + '">' + esc(szTd(c.statutLibelle || c.statut)) + '</span></div></div>'
             + '<div class="m"><b>' + fmt(c.total) + '</b><div>' + esc(ilYa(c.date)) + '</div></div>'
             + (preparable ? '<button type="button" class="eclair" data-prep="' + esc(c.oid) + '" data-eclair="' + esc(c.oid) + '" title="${T("Lancer la préparation")}" aria-label="'
                 + esc('${T("Lancer la préparation de")} ' + c.numero) + '"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9.2 1 3 9.1h4.1L6.6 15 13 6.6H8.8z"/></svg></button>' : '')
@@ -403,17 +428,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // ── rangée 3 ──
     var pct = pr.variantes ? Math.round(pr.enStock / pr.variantes * 100) : 0;
     h += '<section class="carte c3"><h2>${T("Produits")}</h2><div class="details"><div>'
-      + '<div class="r' + (pr.aCommander ? ' alerte' : '') + '"><span>${T("À commander")}</span><b>' + (pr.aCommander || 0) + '</b></div>'
-      + '<div class="r"><span>${T("En vente")}</span><b>' + (pr.enVente || 0) + '</b></div>'
-      + '<div class="r"><span>${T("Variantes")}</span><b>' + (pr.variantes || 0) + '</b></div>'
-      + '<div class="r' + (pr.ruptures ? ' alerte' : '') + '"><span>${T("En rupture")}</span><b>' + (pr.ruptures || 0) + '</b></div></div>'
+      + '<div class="r' + (pr.aCommander ? ' alerte' : '') + '" data-ouvre="inventory-reappro" title="${T("Voir le réapprovisionnement")}"><span>${T("À commander")}</span><b>' + (pr.aCommander || 0) + '</b></div>'
+      + '<div class="r" data-ouvre="products" title="${T("Ouvrir les produits en vente")}"><span>${T("En vente")}</span><b>' + (pr.enVente || 0) + '</b></div>'
+      + '<div class="r" data-ouvre="inventory" title="${T("Ouvrir l’inventaire")}"><span>${T("Variantes")}</span><b>' + (pr.variantes || 0) + '</b></div>'
+      + '<div class="r' + (pr.ruptures ? ' alerte' : '') + '" data-ouvre="inventory-rupture" title="${T("Voir les produits en rupture")}"><span>${T("En rupture")}</span><b>' + (pr.ruptures || 0) + '</b></div></div>'
       + '<div class="jauge"><svg viewBox="0 0 160 96" aria-hidden="true">'
       + '<path d="M14 86 A66 66 0 0 1 146 86" fill="none" stroke="var(--v10)" stroke-width="16" stroke-linecap="round"/>'
       + '<path d="M14 86 A66 66 0 0 1 146 86" fill="none" stroke="var(--tx-ok)" stroke-width="16" stroke-linecap="round" pathLength="100" stroke-dasharray="' + pct + ' 100"/>'
       + '<text x="80" y="80" text-anchor="middle" font-size="26" font-weight="700" fill="var(--tx)">' + pct + ' %</text></svg>'
       + '<div class="lib">${T("variantes en stock")}</div></div></div></section>';
-    var top = V.top || [];
-    h += '<section class="carte c5"><h2>${T("Meilleures ventes")}<span class="aside">${T("ce mois-ci")}</span></h2>'
+    /* Le PODIUM (les 3 premiers) par defaut ; le bouton ouvre le TOP 100 (2026-10-12, sa demande). */
+    var top = (V.top || []).slice(0, 3);
+    h += '<section class="carte c5"><h2>${T("Meilleures ventes")}<span class="aside">${T("ce mois-ci")}</span>'
+      + ((V.top || []).length ? '<button type="button" class="mini" id="tb-top100">${T("Top 100")} \u2192</button>' : '') + '</h2>'
       + (top.length ? '<div class="top">' + top.map(function(x, i){
           return '<div class="p"><span class="rang">' + (i + 1) + '</span><div class="im">' + image(x.image, x.nom) + '</div>'
             + '<div class="nom" title="' + esc(x.nom) + '">' + esc(x.nom) + '</div><div class="q">' + x.qte + ' <small>' + szPl(x.qte, '${T("vendu")}', '${T("vendus")}') + '</small></div></div>';
@@ -483,8 +510,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var bas = f.getBoundingClientRect().bottom + 0.5;
     Array.prototype.forEach.call(els, function(e){ if (e.getBoundingClientRect().bottom > bas) e.classList.add('cache'); else vus++; });
     var cpt = document.getElementById('fil-compte');
-    var k = (D && D.vivant && D.vivant.parcours) ? (D.vivant.parcours.total || 0) : 0;
-    if (cpt) cpt.textContent = els.length ? (vus + ' ' + '${T("sur {0} aujourd’hui")}'.split('{0}').join(k)) : '';
+    // Le fil montre les DERNIERES commandes (aujourd hui ou avant) : le compte dit combien sont a l ecran.
+    if (cpt) cpt.textContent = els.length ? '${T("{0} sur {1} dernières")}'.split('{0}').join(vus).split('{1}').join(els.length) : '';
   }
   var _tbRedim = null;
   window.addEventListener('resize', function(){ clearTimeout(_tbRedim); _tbRedim = setTimeout(function(){ graphe(); ajusterFil(); }, 120); });
@@ -493,6 +520,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   corps.onclick = function(ev){
     var t = ev.target;
     if (!t || !t.closest) return;
+    if (t.closest('#tb-top100')) { top100(); return; }
     var pe = t.closest('[data-periode]');
     if (pe) { PERIODE = pe.getAttribute('data-periode'); charger(); return; }
     if (t.closest('#tb-zeros')) { ZEROS = !ZEROS; dessiner(); return; }
@@ -512,6 +540,31 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (ev.target && ev.target.closest && ev.target.closest('#tb-mx'))
       appeler('maintenance:ouvrir', []).then(function(r){ if (!r || !r.ok) dire(expliquer(r), 'err'); });
   };
+  /* ══ LE TOP 100 ══════════════════════════════════════════════════════════ */
+  var TOP100 = false;
+  function top100(){
+    var l = (D && D.vivant && D.vivant.top) || [];
+    var v = document.createElement('div');
+    v.className = 'voile'; v.id = 'tb-voile';
+    v.innerHTML = '<div class="boite" role="dialog" aria-modal="true" aria-label="${T("Top 100 des meilleures ventes")}">'
+      + '<h3>${T("Top 100 des meilleures ventes")}<span class="aside">${T("ce mois-ci")} · ' + pl(l.length, '${T("produit")}', '${T("produits")}') + '</span></h3>'
+      + '<div class="classement" data-pages="tb-top100"><table><thead><tr><th>#</th><th>${T("Produit")}</th><th class="d">${T("Vendus")}</th><th class="d">${T("Ventes")}</th></tr></thead><tbody>'
+      + l.map(function(x, i){
+          return '<tr class="' + (i < 3 ? 'podium' : '') + '"><td class="rg">' + (i + 1) + '</td>'
+            + '<td><div class="prd">' + szVignette(x.image, x.nom, '', x.nom) + '<span>' + esc(x.nom) + '</span></div></td>'
+            + '<td class="d"><b>' + x.qte + '</b></td><td class="d">' + fmt(x.ventes || 0) + '</td></tr>';
+        }).join('')
+      + '</tbody></table></div><div class="pied-boite"><button type="button" class="mini" id="tb-top100-fermer">${T("Fermer")}</button></div></div>';
+    document.body.appendChild(v);
+    TOP100 = true;
+    v.addEventListener('click', function(ev){
+      if (ev.target === v || (ev.target.closest && ev.target.closest('#tb-top100-fermer'))) fermerTop100();
+    });
+  }
+  function fermerTop100(){
+    var v = document.getElementById('tb-voile'); if (v) v.remove();
+    TOP100 = false;
+  }
   document.addEventListener('click', function(ev){
     if (ZEROS && ev.target && ev.target.closest && !ev.target.closest('.zeros')) { ZEROS = false; dessiner(); }
   });
@@ -546,7 +599,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      la pastille des zeros est ouverte (on ne redessine pas sous les doigts). */
   function demarrerDirect(){
     if (VIF_TIMER) return;
-    VIF_TIMER = setInterval(function(){ if (!ZEROS) charger(); }, 12000);
+    VIF_TIMER = setInterval(function(){ if (!ZEROS && !TOP100) charger(); }, 12000);
   }
 
   function chargerSauvegarde(forcer){
@@ -643,6 +696,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   };
   document.addEventListener('keydown', function(ev){
     if (ev.key !== 'Escape') return;
+    if (TOP100) { fermerTop100(); return; }
     if (ZEROS) { ZEROS = false; dessiner(); return; }
     ev.preventDefault();
     P.fermer();

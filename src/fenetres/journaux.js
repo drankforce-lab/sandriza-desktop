@@ -39,7 +39,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
   border-bottom:1px solid var(--v08);background:linear-gradient(180deg,#131c2b,#0e1522)}
 .onglets{flex:0 0 auto;display:flex;gap:.1rem;flex-wrap:wrap;padding:.35rem 1rem 0;border-bottom:1px solid var(--v08)}
 .onglets button{font:inherit;font-size:.82rem;white-space:nowrap;background:none;border:none;color:var(--tx2);padding:.5rem .85rem;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
-.onglets button.on{color:var(--tx-or);border-bottom-color:#c9a97e;font-weight:700}
+.onglets button.on{color:var(--tx-or);border-bottom-color:var(--or);font-weight:700}
 /* Aucune glissiere (2026-10-12) : le corps ne defile plus, il se dispose en colonne et la
    carte de chaque onglet (sz-pagee) prend la hauteur qui reste ; sa liste va en PAGES
    mesurees (JS_PAGES du socle). */

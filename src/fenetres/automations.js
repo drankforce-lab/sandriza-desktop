@@ -47,7 +47,7 @@ body{background:var(--f-page);color:var(--tx);
 .pill{font-size:.6875rem;color:var(--tx2);background:var(--f-pill);border:1px solid var(--v08);
   border-radius:99px;padding:.1rem .5rem}
 .desc{font-size:.8rem;color:var(--tx2);margin:0 0 .5rem}
-.reco{font-size:.76rem;color:var(--tx-bleute);background:var(--f-pill);border-left:3px solid #c9a97e;
+.reco{font-size:.76rem;color:var(--tx-bleute);background:var(--f-pill);border-left:3px solid var(--or);
   border-radius:0 7px 7px 0;padding:.4rem .6rem;margin:0 0 .7rem}
 .rangee{display:flex;gap:.5rem;align-items:flex-end;flex-wrap:wrap;margin:0 0 .6rem}
 .ch{flex:1 1 16rem;min-width:0}
@@ -56,7 +56,7 @@ body{background:var(--f-page);color:var(--tx);
 .ch input{width:100%;font:inherit;font-size:.82rem;color:var(--tx);background:var(--f-champ);
   border:1px solid var(--v12);border-radius:8px;padding:.4rem .5rem}
 .ch input.mono{font-family:ui-monospace,Consolas,monospace;font-size:.76rem}
-.ch input:focus{outline:none;border-color:#c9a97e}
+.ch input:focus{outline:none;border-color:var(--or)}
 .ch input:disabled{opacity:.55}
 .metriques{border-top:1px solid var(--v08);margin-top:.4rem;padding-top:.6rem;margin-bottom:.8rem}
 .metriques .t{font-size:.78rem;font-weight:700;margin:0 0 .1rem}
@@ -64,13 +64,13 @@ body{background:var(--f-page);color:var(--tx);
 .mgrille{display:grid;grid-template-columns:repeat(auto-fill,minmax(13rem,1fr));gap:.25rem .8rem;margin:0 0 .6rem}
 .mgrille label{display:flex;align-items:center;gap:.45rem;font-size:.8rem;cursor:pointer;
   -webkit-user-select:none;user-select:none}
-.mgrille input{accent-color:#c9a97e;cursor:pointer}
+.mgrille input{accent-color:var(--or);cursor:pointer}
 button{font:inherit;font-size:.8rem;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.36rem .7rem;cursor:pointer;white-space:nowrap}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.5;cursor:default}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
-button.prim:hover:not(:disabled){background:#d8bd97}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 .pied{flex:0 0 auto;display:flex;align-items:center;padding:.5rem 1.05rem;
   border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

@@ -65,7 +65,7 @@ body{background:var(--f-page);color:var(--tx);
    ══════════════════════════════════════════════════════════════════════════ */
 .suivi{position:fixed;right:1rem;bottom:3rem;width:min(26rem,calc(100vw - 2rem));
   display:flex;flex-direction:column;background:var(--f-carte);
-  border:1px solid rgba(201,169,126,.45);border-radius:11px;
+  border:1px solid rgba(var(--or-rgb),.45);border-radius:11px;
   box-shadow:0 18px 44px rgba(0,0,0,.5);z-index:60}
 .suivi.arret{border-color:rgba(248,113,113,.5)}
 .suivi .st{display:flex;align-items:center;gap:.5rem;padding:.55rem .8rem;
@@ -77,7 +77,7 @@ body{background:var(--f-page);color:var(--tx);
 .suivi .jauge{flex:1 0 100%;height:5px;border-radius:99px;background:var(--v10);
   overflow:hidden}
 .suivi .jauge i{display:block;height:100%;border-radius:99px;
-  background:linear-gradient(90deg,#c9a97e,#e0c9a6);transition:width .25s ease}
+  background:linear-gradient(90deg,var(--or),#e0c9a6);transition:width .25s ease}
 .suivi .pc{font-variant-numeric:tabular-nums;font-weight:700;color:var(--tx)}
 .suivi .bt{margin-left:auto;display:flex;gap:.4rem}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
@@ -88,13 +88,13 @@ input[type=search],input[type=text],input[type=number],select,button{font:inheri
   border-radius:8px;padding:.3rem .55rem}
 input[type=search]{min-width:190px}
 select,button{cursor:pointer}
-input:focus,select:focus,button:focus{outline:none;border-color:#c9a97e}
+input:focus,select:focus,button:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
-button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
-button.prim:hover:not(:disabled){background:#d8bc95}
+button.actif{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.95rem 1.1rem}
@@ -175,7 +175,7 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
    d agrandissement qui la rendrait floue), elle ne se fait juste plus rogner. */
 .gapercu img{max-width:100%;max-height:100%;object-fit:contain}
 .barre{height:9px;background:var(--v08);border-radius:99px;overflow:hidden;margin:.45rem 0}
-.barre i{display:block;height:100%;width:0;background:#c9a97e;transition:width .18s}
+.barre i{display:block;height:100%;width:0;background:var(--or);transition:width .18s}
 .cal3{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}

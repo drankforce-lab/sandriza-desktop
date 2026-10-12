@@ -51,7 +51,7 @@ body{background:var(--f-page);color:var(--tx);
 .ch label .pt{color:var(--tx3);font-size:.72rem}
 .ch input{width:100%;box-sizing:border-box;font:inherit;color:var(--tx);background:var(--f-champ);
   border:1px solid var(--v12);border-radius:8px;padding:.42rem .55rem}
-.ch input:focus{outline:none;border-color:#c9a97e}
+.ch input:focus{outline:none;border-color:var(--or)}
 .deux{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
 @media (max-width:560px){.deux{grid-template-columns:1fr}}
 .apercu{background:var(--f-champ);border:1px solid var(--v07);border-radius:9px;
@@ -65,8 +65,8 @@ button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.4rem .8rem;cursor:pointer}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.5;cursor:default}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
-button.prim:hover:not(:disabled){background:#d8bd97}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 .vide{padding:1.1rem .6rem;text-align:center;color:var(--tx2);font-size:.82rem}
 /* ⚠ LE BANDEAU DE LECTURE SEULE VIT HORS DE LA GRILLE. Place dedans avec
    << grid-column:1/-1 >>, il OCCUPE la derniere piste : auto-fit ne la voit plus

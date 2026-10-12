@@ -67,7 +67,7 @@ td.dr{text-align:right;white-space:nowrap}
 .comp .org{font-size:.7rem;color:var(--tx3)}
 input[type=text],input[type=number]{font:inherit;color:var(--tx);background:var(--f-champ);
   border:1px solid var(--v12);border-radius:7px;padding:.25rem .4rem}
-input[type=text]:focus,input[type=number]:focus{outline:none;border-color:#c9a97e}
+input[type=text]:focus,input[type=number]:focus{outline:none;border-color:var(--or)}
 input:disabled{opacity:.55}
 .nom{width:4.2rem}
 .taux{width:4.6rem;text-align:right}
@@ -81,8 +81,8 @@ button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.4rem .8rem;cursor:pointer}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.5;cursor:default}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
-button.prim:hover:not(:disabled){background:#d8bd97}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 button.pt{font-size:.76rem;padding:.22rem .5rem}
 button.dgr{color:var(--tx-err);border-color:rgba(248,113,113,.4)}
 .vide{padding:1rem .6rem;text-align:center;color:var(--tx2);font-size:.82rem}

@@ -54,10 +54,10 @@ label.champ .sub{display:block;font-size:.72rem;color:var(--tx-gris);margin:.2re
 input.t,textarea.t{width:100%;background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;color:var(--tx);font:inherit;padding:.5rem .65rem}
 input.n{width:120px}
 textarea.t{resize:vertical;min-height:3.4rem;line-height:1.5}
-input.t:focus,textarea.t:focus{outline:none;border-color:#c9a97e}
+input.t:focus,textarea.t:focus{outline:none;border-color:var(--or)}
 label.case{display:flex;align-items:center;gap:.45rem;font-size:.84rem;cursor:pointer;margin:0 0 .45rem}
-label.case input{width:16px;height:16px;accent-color:#c9a97e}
-.prim{font:inherit;font-size:.84rem;font-weight:700;border:0;border-radius:8px;padding:.5rem 1rem;background:#c9a97e;color:#1a1408;cursor:pointer}
+label.case input{width:16px;height:16px;accent-color:var(--or)}
+.prim{font:inherit;font-size:.84rem;font-weight:700;border:0;border-radius:8px;padding:.5rem 1rem;background:var(--or);color:#1a1408;cursor:pointer}
 .prim:disabled{opacity:.5;cursor:default}
 .b{font:inherit;font-size:.8rem;border:1px solid var(--v16);border-radius:8px;padding:.42rem .8rem;background:var(--v05);color:var(--tx);cursor:pointer}
 .b:hover{background:var(--v09)}

@@ -60,13 +60,13 @@ body{background:var(--f-page);color:var(--tx);
 .barreoutils .droite{margin-left:auto;font-size:.78rem;color:var(--tx2)}
 select,button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem;cursor:pointer}
-select:focus,button:focus{outline:none;border-color:#c9a97e}
+select:focus,button:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
-button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
-button.prim:hover:not(:disabled){background:#d8bc95}
+button.actif{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.95rem .8rem}
 .carte h2{margin:0 0 .5rem;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;
@@ -121,8 +121,8 @@ tbody tr.credit td{color:var(--tx-ok)}
 /* Un graphe MINUSCULE, en barres : douze mois se lisent d un coup d oeil, et
    une colonne vide dit tout de suite qu il n y a rien eu ce mois-la. */
 .graphe{display:flex;align-items:flex-end;gap:.25rem;height:5rem;margin-top:.4rem}
-.graphe .b{flex:1 1 0;background:rgba(201,169,126,.5);border-radius:3px 3px 0 0;min-height:2px}
-.graphe .b:hover{background:#c9a97e}
+.graphe .b{flex:1 1 0;background:rgba(var(--or-rgb),.5);border-radius:3px 3px 0 0;min-height:2px}
+.graphe .b:hover{background:var(--or)}
 .mois{display:flex;gap:.25rem;margin-top:.2rem}
 .mois span{flex:1 1 0;text-align:center;font-size:.6875rem;color:var(--tx3)}
 .aide{font-size:.75rem;color:var(--tx2);line-height:1.45}
@@ -138,7 +138,7 @@ label.champ .sub{display:block;font-size:.6875rem;color:var(--tx3);margin:.2rem 
 input.t,select.t{width:100%;background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;
   color:var(--tx);font:inherit;font-size:.85rem;padding:.4rem .55rem}
 input.t.mono{font-family:Consolas,monospace;font-size:.8rem;text-transform:uppercase}
-input.t:focus,select.t:focus{outline:none;border-color:#c9a97e}
+input.t:focus,select.t:focus{outline:none;border-color:var(--or)}
 input.t:disabled,select.t:disabled{opacity:.45}
 button .n{display:inline-block;margin-left:.3rem;font-size:.6875rem;font-weight:700;
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
@@ -149,7 +149,7 @@ button .n.hi{background:rgba(245,158,11,.28);color:var(--tx-att)}
 .sstitre{font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);
   font-weight:700;margin:.6rem 0 .3rem}
 .ech{display:flex;gap:.6rem;align-items:flex-start;padding:.3rem .45rem;margin:0 0 .25rem;
-  border-radius:7px;border:1px solid rgba(201,169,126,.32);background:rgba(201,169,126,.06)}
+  border-radius:7px;border:1px solid rgba(var(--or-rgb),.32);background:rgba(var(--or-rgb),.06)}
 .ech.passe{border-color:transparent;background:transparent;color:var(--tx3)}
 .ech .d{font-family:Consolas,monospace;font-size:.72rem;color:var(--tx-or);white-space:nowrap;min-width:6.6rem}
 .ech.passe .d{color:var(--tx3)}
@@ -189,7 +189,7 @@ button .n.hi{background:rgba(245,158,11,.28);color:var(--tx-att)}
 .per-tete h2{margin:0}
 .seg{display:inline-flex;gap:.2rem;margin-left:auto;background:var(--v05);border:1px solid var(--v10);border-radius:10px;padding:.15rem}
 .seg button{font:inherit;font-size:.76rem;font-weight:600;border:0;background:transparent;color:var(--tx2);padding:.28rem .65rem;border-radius:8px;cursor:pointer}
-.seg button.on{background:#c9a97e;color:#17202c}
+.seg button.on{background:var(--or);color:#17202c}
 [data-perv][hidden]{display:none}
 .col-droite{display:flex;flex-direction:column;gap:.8rem;min-width:0}
 .col-droite > .carte{margin:0}

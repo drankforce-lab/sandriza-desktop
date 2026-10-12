@@ -57,7 +57,7 @@ body{background:var(--f-page);color:var(--tx);
 .slot .lbl{font-size:.7rem;font-weight:700;color:var(--tx-bleute);text-transform:uppercase;letter-spacing:.05em;text-align:center}
 .cadre{aspect-ratio:3/4;max-height:max(10rem,calc(100vh - 33.5rem));border:1.5px dashed var(--v12);border-radius:9px;cursor:pointer;position:relative;
   overflow:hidden;background:var(--f-champ);transition:border-color .15s;display:flex;align-items:center;justify-content:center}
-.cadre:hover{border-color:#c9a97e}
+.cadre:hover{border-color:var(--or)}
 .cadre.ro{cursor:default;opacity:.7}
 .cadre img{width:100%;height:100%;object-fit:cover;display:block}
 .cadre .vide{display:flex;flex-direction:column;align-items:center;gap:.3rem;color:var(--tx3);font-size:.72rem;text-align:center}
@@ -95,7 +95,7 @@ body{background:var(--f-page);color:var(--tx);
 .ajout{aspect-ratio:3/4;border:1.5px dashed var(--v12);border-radius:9px;cursor:pointer;
   background:var(--f-champ);display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:.3rem;color:var(--tx3);font-size:.72rem;text-align:center;padding:.4rem;transition:border-color .15s}
-.ajout:hover{border-color:#c9a97e}
+.ajout:hover{border-color:var(--or)}
 .nomq{width:100%;font:inherit;font-size:.74rem;padding:.2rem .35rem;margin-top:.3rem;
   border:1px solid var(--v16);border-radius:6px;background:var(--f-pied);color:var(--tx)}
 button.mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;
@@ -231,7 +231,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       (function(el){
         var vue = el.getAttribute('data-vue');
         el.onclick = function(){ if (OCCUPE) return; CIBLE = vue; fichier.click(); };
-        el.ondragover = function(e){ e.preventDefault(); el.style.borderColor = '#c9a97e'; };
+        el.ondragover = function(e){ e.preventDefault(); el.style.borderColor = 'var(--or)'; };
         el.ondragleave = function(){ el.style.borderColor = ''; };
         el.ondrop = function(e){ e.preventDefault(); el.style.borderColor = ''; if (OCCUPE) return;
           var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) { CIBLE = vue; deposer(f); } };
@@ -318,7 +318,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var plus = document.getElementById('mq-plus');
     if (plus) {
       plus.onclick = function(){ if (OCCUPE_MQ) return; fichierMq.click(); };
-      plus.ondragover = function(e){ e.preventDefault(); plus.style.borderColor = '#c9a97e'; };
+      plus.ondragover = function(e){ e.preventDefault(); plus.style.borderColor = 'var(--or)'; };
       plus.ondragleave = function(){ plus.style.borderColor = ''; };
       plus.ondrop = function(e){ e.preventDefault(); plus.style.borderColor = '';
         if (OCCUPE_MQ) return;

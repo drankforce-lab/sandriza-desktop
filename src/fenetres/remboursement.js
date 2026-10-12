@@ -51,7 +51,7 @@ body{background:var(--f-page);color:var(--tx);
 input,select,textarea{font:inherit;color:var(--tx);background:var(--f-0f1826);
   border:1px solid var(--v14);border-radius:8px;padding:.32rem .5rem;
   width:100%;min-width:0}
-input:focus,select:focus,textarea:focus{outline:none;border-color:#c9a97e}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--or)}
 textarea{resize:none}
 input[type=checkbox],input[type=radio]{width:auto}
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.32rem .7rem;
@@ -59,7 +59,7 @@ button{font:inherit;cursor:pointer;border-radius:8px;padding:.32rem .7rem;
   color:var(--tx);transition:background .13s,border-color .13s}
 button:hover:not(:disabled){background:var(--v10);border-color:var(--v30)}
 button:disabled{opacity:.4;cursor:default}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
+button.prim{background:var(--or);border-color:var(--or);color:#17202c;font-weight:600}
 button.paie{background:#7859f7;border-color:#7859f7;color:var(--tx-sur-accent);font-weight:600}
 /* La reprise generique du mode jour repeint TOUT bouton en blanc
    (html.jour button, specificite 0,1,2) et l'emporte sur button.paie
@@ -71,7 +71,7 @@ button.paie:hover:not(:disabled){background:#8f74ff;border-color:#8f74ff}
    fond (un fond deplace la surface sous les textes : voir CSS_REFONTE). */
 .art{display:flex;align-items:center;gap:.75rem;padding:.55rem .7rem;border-radius:12px;
   border:1px solid var(--v07);margin-top:.45rem}
-.art.choisi{border-color:rgba(201,169,126,.55)}
+.art.choisi{border-color:rgba(var(--or-rgb),.55)}
 .art .rf-prod{flex:1 1 auto}
 .art .rf-prod > div{min-width:0}
 .art input[type=number]{width:4.4rem;text-align:center}

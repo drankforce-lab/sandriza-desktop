@@ -60,7 +60,7 @@ body{background:var(--f-page);color:var(--tx);
 .item .gestes{display:flex;align-items:center;gap:.3rem;flex:0 0 auto}
 input,select{font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);
   border-radius:7px;padding:.34rem .5rem}
-input:focus,select:focus{outline:none;border-color:#c9a97e}
+input:focus,select:focus{outline:none;border-color:var(--or)}
 input:disabled,select:disabled{opacity:.55}
 input.lab{width:11rem}
 input.href{width:15rem;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.8rem}
@@ -69,8 +69,8 @@ button{font:inherit;color:var(--tx);background:var(--v05);
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.24rem .5rem;font-size:.8rem}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
-button.prim:hover:not(:disabled){background:#d8bd97}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 button.danger{color:#f4b4b4;border-color:rgba(240,120,120,.35)}
 button.danger.arme{background:#7f1d1d;border-color:#b91c1c;color:var(--tx-sur-accent)}
 .sous{background:var(--f-champ);border-top:1px solid var(--v08);padding:.4rem .8rem .55rem}
@@ -80,8 +80,8 @@ button.danger.arme{background:#7f1d1d;border-color:#b91c1c;color:var(--tx-sur-ac
 .enf .fl{color:var(--tx3);font-size:.8rem}
 .enf .el{font-size:.85rem;font-weight:500;flex:1 1 auto;min-width:0}
 .enf .eh{font-size:.76rem;color:var(--tx3);font-family:ui-monospace,Menlo,Consolas,monospace}
-.form{margin-top:.4rem;padding:.6rem .7rem;background:rgba(201,169,126,.08);
-  border:1px solid rgba(201,169,126,.25);border-radius:8px;
+.form{margin-top:.4rem;padding:.6rem .7rem;background:rgba(var(--or-rgb),.08);
+  border:1px solid rgba(var(--or-rgb),.25);border-radius:8px;
   display:flex;gap:.5rem;flex-wrap:wrap;align-items:flex-end}
 .form .ch{display:flex;flex-direction:column;gap:.2rem}
 .form .ch label{font-size:.7rem;color:var(--tx2)}

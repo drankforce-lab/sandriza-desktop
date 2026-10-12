@@ -52,7 +52,7 @@ button{font:inherit;color:var(--tx);background:var(--v05);cursor:pointer;
   border:1px solid var(--v16);border-radius:8px;padding:.28rem .55rem}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
-button:focus{outline:none;border-color:#c9a97e}
+button:focus{outline:none;border-color:var(--or)}
 button.dgr{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 button.dgr:hover:not(:disabled){background:rgba(239,68,68,.14)}
 button.mini{font-size:.74rem;padding:.14rem .45rem}
@@ -71,7 +71,7 @@ tbody td{padding:.3rem .4rem;border-top:1px solid var(--v05);vertical-align:top}
 .pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.vif{background:rgba(22,163,74,.2);color:var(--tx-ok2)}
 .pill.mort{background:rgba(220,38,38,.18);color:var(--tx-err2)}
-.pill.moi{background:rgba(201,169,126,.2);color:#dcc39b}
+.pill.moi{background:rgba(var(--or-rgb),.2);color:#dcc39b}
 /* ── La refonte de l Inventaire (2026-09-25) ── */
 .tuiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem;flex:0 0 auto;margin-bottom:.7rem}
 .tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}

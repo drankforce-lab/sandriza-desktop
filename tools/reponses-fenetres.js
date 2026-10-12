@@ -875,7 +875,7 @@ const JEU = {
               { oid: 'o238', numero: 'SZ-100238', date: '2026-10-11T16:00:00Z', client: 'Luc Simard', total: 45.0, statut: 'delivered', statutLibelle: 'Livrée', prioritaire: false, comptoir: true, article: { nom: 'T-shirt Franklin', qte: 1, image: '' }, autres: 0 },
               { oid: 'o236', numero: 'SZ-100236', date: '2026-10-11T10:00:00Z', client: 'Émilie Gagnon', total: 80.0, statut: 'delivered', statutLibelle: 'Livrée', prioritaire: false, comptoir: false, article: { nom: 'gilet bleu', qte: 1, image: '' }, autres: 0 }
             ],
-            top: [ { id: 'p1', nom: 'T-shirt Franklin', qte: 19, image: '' }, { id: 'p2', nom: 'Robe ZENXAS', qte: 14, image: '' }, { id: 'p3', nom: 'Pantalon Yaolin', qte: 9, image: '' } ],
+            top: Array.from({ length: 40 }, (_, i) => ({ id: 'p' + i, nom: ['T-shirt Franklin', 'Robe ZENXAS', 'Pantalon Yaolin', 'Chemise Walla', 'gilet bleu'][i % 5] + (i > 4 ? ' ' + i : ''), qte: 40 - i, ventes: (40 - i) * 49.5, image: '' })),
             canaux: [ { cle: 'enligne', nom: 'Boutique en ligne', statuts: { pending: 4, confirmed: 18, preparing: 7, shipped: 31, delivered: 112 }, total: 172 },
                       { cle: 'comptoir', nom: 'Vente au comptoir', statuts: { pending: 0, confirmed: 0, preparing: 0, shipped: 0, delivered: 46 }, total: 46 } ],
             inventaire: { enMain: 138, aCommander: 11, ruptures: 1, valeur: 9845, sansCout: 1 },

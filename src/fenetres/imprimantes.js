@@ -66,8 +66,8 @@ body{background:var(--f-page);color:var(--tx);
   color:var(--tx);background:var(--f-0f1826);border:1px solid var(--v16);
   border-radius:10px;padding:.45rem 2rem .45rem .7rem;-webkit-appearance:none;appearance:none;
   background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .7rem center;background-size:12px}
-.svc .d select:focus{box-shadow:0 0 0 3px rgba(201,169,126,.18)}
-.svc .d select:focus{outline:none;border-color:#c9a97e}
+.svc .d select:focus{box-shadow:0 0 0 3px rgba(var(--or-rgb),.18)}
+.svc .d select:focus{outline:none;border-color:var(--or)}
 .svc .d select:disabled{opacity:.5}
 .svc .a{flex:0 0 auto;display:flex;gap:.4rem;align-self:flex-end}
 button{font:inherit;cursor:pointer;border-radius:8px;padding:.36rem .8rem;
@@ -75,8 +75,8 @@ button{font:inherit;cursor:pointer;border-radius:8px;padding:.36rem .8rem;
   color:var(--tx);transition:background .13s,border-color .13s}
 button:hover:not(:disabled){background:var(--v10);border-color:var(--v30)}
 button:disabled{opacity:.45;cursor:default}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
-button.prim:hover:not(:disabled){background:#d8bd97;border-color:#d8bd97}
+button.prim{background:var(--or);border-color:var(--or);color:#17202c;font-weight:600}
+button.prim:hover:not(:disabled){background:var(--or-clair);border-color:var(--or-clair)}
 .pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;
   gap:.6rem;padding:.65rem 1.1rem;border-top:1px solid var(--v08);
   background:var(--f-pied)}

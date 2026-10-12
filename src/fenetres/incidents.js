@@ -72,7 +72,7 @@ td.acts{text-align:right;white-space:nowrap}
 .pill.ouvert{background:rgba(234,179,8,.18);color:var(--tx-att)}
 .pill.surveille{background:rgba(99,102,241,.18);color:var(--tx-bleu)}
 .pill.clos{background:rgba(22,163,74,.2);color:var(--tx-ok2)}
-.prim{font:inherit;font-size:.84rem;font-weight:700;border:0;border-radius:8px;padding:.5rem 1rem;background:#c9a97e;color:#1a1408;cursor:pointer}
+.prim{font:inherit;font-size:.84rem;font-weight:700;border:0;border-radius:8px;padding:.5rem 1rem;background:var(--or);color:#1a1408;cursor:pointer}
 .prim:disabled{opacity:.5;cursor:default}
 .b{font:inherit;font-size:.8rem;border:1px solid var(--v16);border-radius:8px;padding:.42rem .8rem;background:var(--v05);color:var(--tx);cursor:pointer}
 .b:hover{background:var(--v09)}
@@ -99,7 +99,7 @@ label.champ .sub{display:block;font-size:.72rem;color:var(--tx-gris);margin:.25r
 label.champ .req{color:var(--tx-err2)}
 input.t,textarea.t,select.t{width:100%;background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;color:var(--tx);font:inherit;padding:.5rem .65rem}
 textarea.t{resize:vertical;min-height:3.6rem;line-height:1.55}
-input.t:focus,textarea.t:focus,select.t:focus{outline:none;border-color:#c9a97e}
+input.t:focus,textarea.t:focus,select.t:focus{outline:none;border-color:var(--or)}
 input.t.manque{border-color:#f87171;background:rgba(248,113,113,.08)}
 .ferr{display:none;color:var(--tx-err2);font-size:.82rem;padding:.5rem .7rem;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:8px;margin:.3rem 0 .8rem}
 /* Fil des étapes : cliquable, l'étape faite se marque d'un crochet.
@@ -122,7 +122,7 @@ input.t.manque{border-color:#f87171;background:rgba(248,113,113,.08)}
   font-size:.75rem;font-weight:700;flex-shrink:0;border:2px solid var(--v18);
   background:transparent;color:var(--tx2);box-sizing:border-box}
 .fil .et.fait .rond{background:#4ade80;border-color:#4ade80;color:#08240f}
-.fil .et.ici .rond{background:#c9a97e;border-color:#c9a97e;color:#1a1408}
+.fil .et.ici .rond{background:var(--or);border-color:var(--or);color:#1a1408}
 .fil .nom{width:100%;font-size:.6875rem;margin-top:.4rem;text-align:center;color:var(--tx2);
   line-height:1.25;overflow-wrap:break-word;padding:0 .2rem}
 .fil .et.ici .nom{color:var(--tx);font-weight:700}

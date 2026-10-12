@@ -59,9 +59,9 @@ body{background:var(--f-page);color:var(--tx);
 button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.4rem .8rem;cursor:pointer}
 button:hover:not(:disabled){background:var(--v10)}
-button:focus{outline:none;border-color:#c9a97e}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700;margin-left:auto}
-button.prim:hover:not(:disabled){background:#d8bc95}
+button:focus{outline:none;border-color:var(--or)}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700;margin-left:auto}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 button.dgr{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
 .msg{font-size:.75rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}

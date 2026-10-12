@@ -62,8 +62,8 @@ body{background:var(--f-page);color:var(--tx);
   transition:border-color .15s,box-shadow .15s,transform .15s}
 .th:hover:not(:disabled){border-color:var(--v28);transform:translateY(-1px)}
 .th:disabled{cursor:default;opacity:.6}
-.th[aria-pressed="true"]{border-color:#c9a97e;box-shadow:0 0 0 1px #c9a97e}
-.th:focus-visible{outline:2px solid #c9a97e;outline-offset:3px}
+.th[aria-pressed="true"]{border-color:var(--or);box-shadow:0 0 0 1px var(--or)}
+.th:focus-visible{outline:2px solid var(--or);outline-offset:3px}
 .vit{border-radius:10px;overflow:hidden;border:1px solid rgba(0,0,0,.18);aspect-ratio:16/10;display:flex;flex-direction:column}
 .vit .bar{height:16%;background:#ffffff;display:flex;align-items:center;gap:6%;padding:0 7%;border-bottom:1px solid rgba(0,0,0,.08)}
 .vit .bar i{display:block;height:28%;border-radius:3px;background:#1d2433;opacity:.75}
@@ -77,15 +77,15 @@ body{background:var(--f-page);color:var(--tx);
 .th .pied-th{display:flex;align-items:center;gap:.5rem}
 .th .nom{font-size:.88rem;font-weight:600;color:var(--tx)}
 .th .pastille-etat{margin-left:auto;font-size:.7rem;font-weight:700;padding:.12rem .55rem;border-radius:99px;
-  background:rgba(201,169,126,.18);color:var(--tx-or)}
+  background:rgba(var(--or-rgb),.18);color:var(--tx-or)}
 .th .gouttes{display:flex;gap:.3rem;margin-left:auto}
 .th .gouttes span{width:14px;height:14px;border-radius:99px;border:1px solid var(--v16)}
 .note{display:flex;gap:.8rem;align-items:flex-start}
 .note .ic-note{flex:0 0 auto;width:2.2rem;height:2.2rem;border-radius:10px;background:var(--v06);display:flex;align-items:center;justify-content:center;color:var(--tx2)}
 .note .ic-note svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .note p{margin:0 0 .35rem}
-html.jour .th[aria-pressed="true"]{border-color:#8a6a3e;box-shadow:0 0 0 1px #8a6a3e}
-html.jour .th .pastille-etat{background:rgba(138,106,62,.12);color:#6f5530}
+html.jour .th[aria-pressed="true"]{border-color:var(--or-jour);box-shadow:0 0 0 1px var(--or-jour)}
+html.jour .th .pastille-etat{background:rgba(var(--or-jour-rgb),.12);color:#6f5530}
 /* L apercu est une VITRINE : sa barre reste blanche et ses traits sombres, de jour comme de nuit. */
 html.jour .vit .bar i{background:#1d2433}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;

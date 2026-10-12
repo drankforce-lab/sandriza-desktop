@@ -53,19 +53,19 @@ body{background:var(--f-page);color:var(--tx);
 /* ── La refonte de l Inventaire (2026-09-25) ── */
 .barreoutils .rf-jet{height:2.4rem;padding:0 .75rem;border-radius:10px;font-size:.8rem;background:var(--f-0f1826);
   border:1px solid var(--v10);color:var(--tx-gris2)}
-.barreoutils .rf-jet.on{background:rgba(201,169,126,.14);border-color:rgba(201,169,126,.55);color:var(--tx-or2);font-weight:700}
+.barreoutils .rf-jet.on{background:rgba(var(--or-rgb),.14);border-color:rgba(var(--or-rgb),.55);color:var(--tx-or2);font-weight:700}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
 input,select,button,textarea{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem}
 select,button{cursor:pointer}
-input:focus,select:focus,button:focus,textarea:focus{outline:none;border-color:#c9a97e}
+input:focus,select:focus,button:focus,textarea:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
-button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
-button.prim:hover:not(:disabled){background:#d8bc95}
+button.actif{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.95rem 1.1rem}
@@ -98,11 +98,11 @@ html.jour div.stats .s .n{color:var(--tx)}
   border:1px dashed var(--v20);border-radius:9px;padding:.26rem .6rem;
   font-size:.78rem;color:var(--tx2);white-space:nowrap;
   cursor:pointer;transition:border-color .13s,background .13s}
-.depot:hover,.depot.survol{border-color:#c9a97e;background:rgba(201,169,126,.08);color:var(--tx)}
+.depot:hover,.depot.survol{border-color:var(--or);background:rgba(var(--or-rgb),.08);color:var(--tx)}
 /* Au survol d un fichier, elle doit se voir sans changer de taille : la bordure
    s epaissit vers l INTERIEUR (ombre portee interne), jamais en border-width
    qui pousserait les voisins de la barre. */
-.depot.survol{box-shadow:inset 0 0 0 1px #c9a97e}
+.depot.survol{box-shadow:inset 0 0 0 1px var(--or)}
 /* ⚠⚠ LA ZONE DU FORMULAIRE GARDE SA TAILLE, ET CE N EST PAS UN OUBLI. Les deux
    partagent la classe .depot, mais ce sont deux gestes differents : dans la
    barre, c est un raccourci a cote d un bouton ; dans le formulaire d une

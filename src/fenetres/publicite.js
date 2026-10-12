@@ -41,7 +41,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .onglets button{background:transparent;border:none;border-bottom:2px solid transparent;color:var(--tx2);
   padding:.38rem .6rem;font-weight:600;font-size:.82rem;border-radius:6px 6px 0 0}
 .onglets button:hover{background:var(--v05);color:var(--tx)}
-.onglets button.actif{color:var(--tx-creme);border-bottom-color:#c9a97e}
+.onglets button.actif{color:var(--tx-creme);border-bottom-color:var(--or)}
 .corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow:hidden;display:flex;flex-direction:column;gap:.85rem}
 /* 2026-10-12 : aucune glissiere (sa regle). Chaque tableau qui grandit est en PAGES mesurees
    (JS_PAGES du socle) dans une carte .sz-pagee qui prend la hauteur qui reste. Pour l onglet
@@ -52,14 +52,14 @@ input,button,select,textarea{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.36rem .5rem}
 textarea{resize:vertical;min-height:60px;width:100%}
 button{cursor:pointer;-webkit-user-select:none;user-select:none}
-input:focus,button:focus,select:focus,textarea:focus{outline:none;border-color:#c9a97e}
+input:focus,button:focus,select:focus,textarea:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600;padding:.36rem .7rem}
 button.prim:hover:not(:disabled){background:#a3824f}
 button.ghost{background:transparent}
 button.mini{padding:.14rem .5rem;font-size:.75rem}
-button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
+button.actif{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.6rem}
 .tuile{background:var(--f-carte);border:1px solid var(--v07);border-radius:12px;padding:.55rem .75rem}
 /* La refonte de l Inventaire (2026-09-25) : les tuiles de cette fenetre ont
@@ -100,20 +100,20 @@ html.jour .badge.info{color:#44607e}
 .graph .col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
 .graph .val{font-size:.6875rem;color:var(--tx2);font-weight:600;margin-bottom:2px;white-space:nowrap}
 .graph .barz{width:100%;display:flex;gap:2px;align-items:flex-end;height:110px}
-.graph .b1{flex:1;background:#c9a97e;border-radius:3px 3px 0 0}
+.graph .b1{flex:1;background:var(--or);border-radius:3px 3px 0 0}
 /* La part PROMO en or clair, pas en rouge (2026-09-29) : le rouge dit un PROBLEME,
    et une vente en promotion n en est pas un. */
-.graph .b2{flex:1;background:rgba(201,169,126,.42);border-radius:3px 3px 0 0}
+.graph .b2{flex:1;background:rgba(var(--or-rgb),.42);border-radius:3px 3px 0 0}
 html.jour .graph .b2{background:rgba(168,128,78,.38)}
 .graph .lbl{font-size:.6875rem;color:var(--tx2);margin-top:.3rem}
 .legend{display:flex;gap:1rem;font-size:.6875rem;color:var(--tx2)}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:middle}
 .rang{display:flex;align-items:center;gap:.6rem;padding:.4rem 0;border-bottom:1px solid var(--v055)}
-.rang .pos{width:1.3rem;height:1.3rem;border-radius:50%;background:#c9a97e;color:#1a1a1a;font-size:.6875rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rang .pos{width:1.3rem;height:1.3rem;border-radius:50%;background:var(--or);color:#1a1a1a;font-size:.6875rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .rang .nm{flex:1;min-width:0;font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .segc{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.55rem;margin-bottom:.9rem}
 .seg{background:var(--f-carte);border:2px solid transparent;border-radius:11px;padding:.6rem .7rem;cursor:pointer}
-.seg.pris{border-color:#c9a97e}
+.seg.pris{border-color:var(--or)}
 .seg .n{font-size:1.5rem;font-weight:800}
 .seg .l{font-size:.78rem;font-weight:600}
 .seg .d{font-size:.6875rem;color:var(--tx2);margin-top:.1rem}
@@ -121,7 +121,7 @@ html.jour .graph .b2{background:rgba(168,128,78,.38)}
 .champ{margin-bottom:.65rem}
 .champ label{display:block;font-size:.6875rem;text-transform:uppercase;letter-spacing:.04em;color:var(--tx2);margin:0 0 .22rem}
 .champ input,.champ select,.champ textarea{width:100%}
-.aud{background:rgba(201,169,126,.14);border-radius:8px;padding:.5rem;text-align:center;font-weight:800;font-size:1.05rem;color:var(--tx-creme)}
+.aud{background:rgba(var(--or-rgb),.14);border-radius:8px;padding:.5rem;text-align:center;font-weight:800;font-size:1.05rem;color:var(--tx-creme)}
 .chans{display:flex;flex-wrap:wrap;gap:.7rem}
 .chans label{display:flex;align-items:center;gap:.35rem;font-size:.85rem;cursor:pointer}
 .rec{padding:.45rem 0;border-bottom:1px solid var(--v06);font-size:.82rem;line-height:1.5}
@@ -261,7 +261,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
       + (D.loy ? '<div class="tuile"><div class="k"><span class="ic">💌</span> ${T("Réponse sondage")}</div><div class="v">' + D.loy.responseRate + ' %</div><div class="z">' + D.loy.totalResponses + '/' + D.loy.totalInvites + (D.loy.avgRating ? ' · ' + Number(D.loy.avgRating).toLocaleString('${LIEU()}', { maximumFractionDigits: 1 }) + '${T(" sur 5")}' : '') + '</div></div>' : '')
       + '</div>')
       + '<div class="deux">'
-      +   '<div class="carte"><h2>${T("Revenu mensuel — 6 mois")}<span class="legend"><span><i style="background:#c9a97e"></i>${T("Total")}</span><span><i style="background:rgba(201,169,126,.42)"></i>${T("Promo")}</span></span></h2><div class="graph">' + graph + '</div></div>'
+      +   '<div class="carte"><h2>${T("Revenu mensuel — 6 mois")}<span class="legend"><span><i style="background:var(--or)"></i>${T("Total")}</span><span><i style="background:rgba(var(--or-rgb),.42)"></i>${T("Promo")}</span></span></h2><div class="graph">' + graph + '</div></div>'
       +   '<div class="carte"><h2><span><span class="ic">🏆</span> ${T("Top 5 produits")}</span></h2>' + tops + '</div>'
       + '</div>'
       + '<div class="carte sz-pagee"><h2>${T("Commandes récentes")}</h2><div data-pages="publicite-recentes"><table><thead><tr><th>${T("Commande")}</th><th>${T("Client")}</th><th>${T("Date")}</th><th>${T("Promo")}</th><th class="num">${T("Total")}</th><th>${T("Statut")}</th></tr></thead><tbody>' + recent + '</tbody></table></div></div>';

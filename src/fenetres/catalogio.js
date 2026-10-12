@@ -55,7 +55,7 @@ body{background:var(--f-page);color:var(--tx);
 .onglets button{background:transparent;border:none;border-bottom:2px solid transparent;
   color:var(--tx2);padding:.4rem .7rem;font-weight:600;font-size:.86rem;border-radius:6px 6px 0 0}
 .onglets button:hover{background:var(--v05);color:var(--tx)}
-.onglets button.actif{color:var(--tx-creme);border-bottom-color:#c9a97e}
+.onglets button.actif{color:var(--tx-creme);border-bottom-color:var(--or)}
 .corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;
   display:flex;flex-direction:column;gap:.8rem}
 .corps::-webkit-scrollbar{width:8px}
@@ -63,7 +63,7 @@ body{background:var(--f-page);color:var(--tx);
 input,button,select{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.32rem .55rem}
 button{cursor:pointer;-webkit-user-select:none;user-select:none}
-input:focus,button:focus,select:focus{outline:none;border-color:#c9a97e}
+input:focus,button:focus,select:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .45rem;font-size:.74rem}
@@ -71,7 +71,7 @@ button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);f
   padding:.4rem .8rem}
 button.prim:hover:not(:disabled){background:#a3824f}
 button.ghost{background:transparent}
-button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
+button.actif{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
 input[type=file]{padding:.5rem;width:100%;max-width:34rem}
 .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
   gap:1rem;align-items:start}
@@ -80,13 +80,13 @@ input[type=file]{padding:.5rem;width:100%;max-width:34rem}
 .radio{display:flex;gap:.5rem;align-items:flex-start;padding:.5rem .6rem;
   border:1px solid var(--v14);border-radius:9px;cursor:pointer;
   -webkit-user-select:none;user-select:none;margin-bottom:.4rem}
-.radio.pris{border-color:#c9a97e;background:rgba(201,169,126,.1)}
-.radio input{margin-top:.2rem;accent-color:#c9a97e;flex:0 0 auto}
+.radio.pris{border-color:var(--or);background:rgba(var(--or-rgb),.1)}
+.radio input{margin-top:.2rem;accent-color:var(--or);flex:0 0 auto}
 .radio .t{font-weight:600;font-size:.86rem}
 .radio .s{font-size:.74rem;color:var(--tx2);line-height:1.45}
 .case{display:flex;gap:.5rem;align-items:flex-start;font-size:.83rem;cursor:pointer;
   -webkit-user-select:none;user-select:none;margin-bottom:.4rem}
-.case input{margin-top:.15rem;accent-color:#c9a97e;flex:0 0 auto}
+.case input{margin-top:.15rem;accent-color:var(--or);flex:0 0 auto}
 .case .s{font-size:.72rem;color:var(--tx2)}
 .barre{display:flex;gap:.7rem;align-items:center;flex-wrap:wrap;
   padding-top:.9rem;margin-top:.3rem;border-top:1px solid var(--v08)}
@@ -147,7 +147,7 @@ code{font:.76rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 .centre{width:100%}
 .avancement{max-width:32rem;margin:2.5rem auto;text-align:center}
 .avancement .tourne{width:34px;height:34px;margin:1rem auto 0;border-radius:50%;
-  border:3px solid var(--v14);border-top-color:#c9a97e;animation:tr 1s linear infinite}
+  border:3px solid var(--v14);border-top-color:var(--or);animation:tr 1s linear infinite}
 @keyframes tr{to{transform:rotate(360deg)}}
 /* ── Surcouche de confirmation (structure .voile > .boite reconnue par le socle,
    le bouton de plein ecran s y pose tout seul). ─────────────────────────────── */

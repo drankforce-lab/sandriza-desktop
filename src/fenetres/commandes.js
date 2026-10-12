@@ -62,7 +62,7 @@ body{background:var(--f-page);color:var(--tx);
 input,select{font:inherit;color:var(--tx);background:var(--f-0f1826);
   border:1px solid var(--v14);border-radius:8px;padding:.32rem .5rem;
   width:100%;min-width:0}
-input:focus,select:focus{outline:none;border-color:#c9a97e}
+input:focus,select:focus{outline:none;border-color:var(--or)}
 /* ⚠ LE CHAMP DE RECHERCHE NE PREND PLUS TOUTE LA LARGEUR (sa demande du
    2026-09-14 : << reduit le champ des recherche ici ses trop gros >>).
    Il heritait du 100% des champs et portait un corps de 1rem : sur un ecran
@@ -79,7 +79,7 @@ button{font:inherit;cursor:pointer;border-radius:8px;padding:.3rem .7rem;
   color:var(--tx);transition:background .13s,border-color .13s}
 button:hover:not(:disabled){background:var(--v10);border-color:var(--v30)}
 button:disabled{opacity:.4;cursor:default}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:600}
+button.prim{background:var(--or);border-color:var(--or);color:#17202c;font-weight:600}
 button.mini{padding:.1rem .45rem;font-size:.75rem}
 /* En traitement : AMBRE et pleine opacite, comme le bouton verrouille du site —
    griser par transparence le rendait presque invisible sur fond sombre alors
@@ -98,7 +98,7 @@ button.traite{background:#78350f;color:#fde68a;border-color:#b45309;
 .filtres select{width:auto}
 .jetons{display:flex;gap:.28rem;flex-wrap:wrap}
 .jetons button{font-size:.74rem;padding:.1rem .5rem;border-radius:99px}
-.jetons button.on{background:rgba(201,169,126,.18);border-color:#c9a97e;color:var(--tx-creme)}
+.jetons button.on{background:rgba(var(--or-rgb),.18);border-color:var(--or);color:var(--tx-creme)}
 /* Prioritaires : l ambre du site, et un compte qui dit le RESTE-A-FAIRE.
    ⚠ Regles AUTONOMES : le bouton vit HORS du groupe .jetons, une regle
    prefixee .jetons ne l atteignait jamais - le bouton ne s allumait pas
@@ -123,7 +123,7 @@ button.prio.on:hover{background:rgba(245,158,11,.34);border-color:#fbbf24}
    demande du 2026-09-25, « conforme aux zones ». */
 button.mini.ligne-geste{height:2.4rem;padding:0 1rem;border-radius:10px;font-size:.84rem;font-weight:600;
   display:inline-flex;align-items:center;gap:.45rem;white-space:nowrap}
-.tuile.cliq:hover{border-color:#c9a97e}
+.tuile.cliq:hover{border-color:var(--or)}
 .tuile.cliq::after{content:"›";position:absolute;top:.55rem;right:.8rem;font-size:1.1rem;color:var(--tx3)}
 .liste{flex:1 1 auto;min-height:0;overflow-y:auto}
 .liste::-webkit-scrollbar{width:8px}
@@ -228,7 +228,7 @@ button.danger:hover:not(:disabled){background:rgba(239,68,68,.15);border-color:#
 .voile .lres .cli{display:flex;justify-content:space-between;align-items:center;
   gap:.8rem;padding:.45rem .6rem;background:var(--v05);
   border:1px solid var(--v12);border-radius:7px;cursor:pointer}
-.voile .lres .cli:hover{border-color:#c9a97e;background:rgba(201,169,126,.12)}
+.voile .lres .cli:hover{border-color:var(--or);background:rgba(var(--or-rgb),.12)}
 .voile .lres .cli .nm{font-weight:600;font-size:.85rem}
 .voile .lres .cli .em{font-size:.76rem;color:var(--tx2)}
 .voile .lres .cli .fl{font-size:.74rem;color:var(--tx-or);white-space:nowrap}

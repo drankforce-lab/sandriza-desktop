@@ -59,12 +59,12 @@ body{background:var(--f-page);color:var(--tx);
 input,button,select{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem}
 button{cursor:pointer;-webkit-user-select:none;user-select:none}
-input:focus,button:focus,select:focus{outline:none;border-color:#c9a97e}
+input:focus,button:focus,select:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.geste{padding:.14rem .5rem;font-size:.73rem;white-space:nowrap}
-button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
+button.actif{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
 button.prim:hover:not(:disabled){background:#a3824f}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
@@ -86,9 +86,9 @@ button .n{display:inline-block;margin-left:.3rem;font-size:.6875rem;font-weight:
 .tuile{border-left-width:1px}
 .tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tuile.cliq{cursor:pointer;user-select:none;position:relative}
-.tuile.cliq:hover{border-color:#c9a97e}
+.tuile.cliq:hover{border-color:var(--or)}
 .tuile.cliq::after{content:"›";position:absolute;top:.55rem;right:.8rem;font-size:1.1rem;color:var(--tx3)}
-.tuile.on{border-color:#c9a97e}
+.tuile.on{border-color:var(--or)}
 .rf-av.tc{background:color-mix(in srgb,var(--cc,#6d7f96) 16%,transparent);
   border-color:color-mix(in srgb,var(--cc,#6d7f96) 34%,transparent);color:color-mix(in srgb,var(--cc,#6d7f96) 72%,white)}
 html.jour .rf-av.tc{color:color-mix(in srgb,var(--cc,#6d7f96) 55%,black);
@@ -144,19 +144,19 @@ label.case{display:flex;align-items:center;gap:.45rem;font-size:.82rem;cursor:po
   border:1px solid var(--v12);border-radius:9px;padding:.28rem .5rem;
   background:var(--v03);-webkit-user-select:none;user-select:none}
 label.case:hover{background:var(--v07)}
-label.case.pris{border-color:#c9a97e;background:rgba(201,169,126,.13)}
-label.case input{width:15px;height:15px;accent-color:#c9a97e;margin:0;flex:0 0 auto}
+label.case.pris{border-color:var(--or);background:rgba(var(--or-rgb),.13)}
+label.case input{width:15px;height:15px;accent-color:var(--or);margin:0;flex:0 0 auto}
 label.case .nom{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;
   white-space:nowrap;font-weight:500}
 label.case .app{font-size:.71rem;color:var(--tx2);white-space:nowrap}
 label.mode{display:flex;align-items:center;gap:.5rem;font-size:.84rem;cursor:pointer;
   border:2px solid var(--v12);border-radius:9px;padding:.4rem .55rem;
   font-weight:600;-webkit-user-select:none;user-select:none}
-label.mode.pris{border-color:#c9a97e;background:rgba(201,169,126,.1)}
-label.mode input{margin:0;accent-color:#c9a97e}
+label.mode.pris{border-color:var(--or);background:rgba(var(--or-rgb),.1)}
+label.mode input{margin:0;accent-color:var(--or)}
 label.duree{display:flex;align-items:center;gap:.45rem;font-size:.82rem;cursor:pointer;
   -webkit-user-select:none;user-select:none}
-label.duree input{margin:0;accent-color:#c9a97e}
+label.duree input{margin:0;accent-color:var(--or)}
 .dates{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.4rem;padding:.5rem .6rem;
   background:var(--v03);border:1px solid var(--v10);border-radius:9px}
 .dates label{display:block;font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;

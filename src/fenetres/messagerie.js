@@ -46,9 +46,9 @@ body{background:var(--f-page);color:var(--tx);
 .tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
 .tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tuile.cliq{cursor:pointer;user-select:none;position:relative}
-.tuile.cliq:hover{border-color:#c9a97e}
+.tuile.cliq:hover{border-color:var(--or)}
 .tuile.cliq::after{content:"›";position:absolute;top:.55rem;right:.8rem;font-size:1.1rem;color:var(--tx3)}
-.tuile.on{border-color:#c9a97e}
+.tuile.on{border-color:var(--or)}
 .val.att{color:var(--tx-att)}
 .ligne{display:flex;align-items:center;gap:.8rem}
 .ligne .gauche{flex:1 1 auto;min-width:0}
@@ -58,20 +58,20 @@ button,textarea{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem}
 button{cursor:pointer}
 textarea{width:100%;min-height:5em;resize:vertical}
-button:focus,textarea:focus{outline:none;border-color:#c9a97e}
+button:focus,textarea:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
-button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
-button.prim:hover:not(:disabled){background:#d8bc95}
+button.actif{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 button .n{display:inline-block;margin-left:.3rem;font-size:.6875rem;font-weight:700;
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
 button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
 .ligne{padding:.55rem .7rem;background:var(--f-carte);border:1px solid var(--v07);
   border-radius:11px;cursor:pointer}
-.ligne:hover{border-color:#c9a97e}
+.ligne:hover{border-color:var(--or)}
 .ligne .haut{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}
 .ligne .num{font-weight:700}
 .ligne .dt{font-size:.72rem;color:var(--tx2);margin-top:.15rem}
@@ -93,8 +93,8 @@ button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
 .boite .grille .v{font-size:.84rem;font-weight:600;overflow-wrap:anywhere}
 .boite .texte{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.88rem;line-height:1.55;
   background:var(--v03);border:1px solid var(--v07);border-radius:9px;padding:.6rem .7rem}
-.boite .reponse{margin-top:.6rem;border-left:3px solid #c9a97e;padding:.4rem .7rem;
-  background:rgba(201,169,126,.07);border-radius:0 9px 9px 0;font-size:.85rem;white-space:pre-wrap}
+.boite .reponse{margin-top:.6rem;border-left:3px solid var(--or);padding:.4rem .7rem;
+  background:rgba(var(--or-rgb),.07);border-radius:0 9px 9px 0;font-size:.85rem;white-space:pre-wrap}
 .boite .pied-boite{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem;justify-content:flex-end}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}

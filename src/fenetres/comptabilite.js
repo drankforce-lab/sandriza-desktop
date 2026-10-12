@@ -53,14 +53,14 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete h1{margin:0;font:700 .95rem/1.2 system-ui}
-.tete .ico{display:inline-flex;width:19px;height:19px;color:var(--or,#c9a97e)}
+.tete .ico{display:inline-flex;width:19px;height:19px;color:var(--or,var(--or))}
 .tete .ico svg{width:100%;height:100%}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .onglets{flex:0 0 auto;display:flex;gap:.3rem;padding:.5rem 1.05rem 0;
   border-bottom:1px solid var(--v08)}
 .onglets button{background:none;border:0;border-bottom:2px solid transparent;color:var(--tx2);
   font:600 .82rem/1 system-ui;padding:.45rem .7rem;cursor:pointer;border-radius:0}
-.onglets button.on{color:var(--tx);border-bottom-color:#c9a97e}
+.onglets button.on{color:var(--tx);border-bottom-color:var(--or)}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;
   padding:.55rem 1.05rem .1rem}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center}
@@ -75,13 +75,13 @@ body{background:var(--f-page);color:var(--tx);
 select,input,button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem;cursor:pointer}
 input{cursor:text;text-align:right;font-family:ui-monospace,Consolas,monospace;font-size:.78rem}
-select:focus,input:focus,button:focus{outline:none;border-color:#c9a97e}
+select:focus,input:focus,button:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.45;cursor:default}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
-button.prim:hover:not(:disabled){background:#d8bc95}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
-button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
+button.actif{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
 /* ── Les grands chiffres du haut ─────────────────────────────────────────── */
 .chiffres{display:grid;grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr));gap:.6rem}
 .chiffre{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;

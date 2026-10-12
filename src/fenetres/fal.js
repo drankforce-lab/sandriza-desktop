@@ -45,7 +45,7 @@ body{background:var(--f-page);color:var(--tx);
   border-bottom:1px solid var(--v08)}
 .onglets button{background:none;border:0;border-bottom:2px solid transparent;color:var(--tx2);
   font:600 .82rem/1 system-ui;padding:.45rem .7rem;cursor:pointer;border-radius:0}
-.onglets button.on{color:var(--tx);border-bottom-color:#c9a97e}
+.onglets button.on{color:var(--tx);border-bottom-color:var(--or)}
 /* Aucune glissiere (2026-10-12) : le corps ne defile plus, les listes vont en PAGES mesurees (JS_PAGES du socle). */
 .corps{flex:1 1 auto;min-height:0;padding:.85rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.75rem}
@@ -56,7 +56,7 @@ body{background:var(--f-page);color:var(--tx);
 button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.34rem .6rem;cursor:pointer}
 button:hover:not(:disabled){background:var(--v10)}
-button:focus{outline:none;border-color:#c9a97e}
+button:focus{outline:none;border-color:var(--or)}
 button.mini{font-size:.72rem;padding:.16rem .45rem}
 select{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .5rem}
@@ -89,8 +89,8 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
    chacun un tiers de la carte — un aplat, pas un graphique. */
 .jours{display:flex;align-items:flex-end;justify-content:space-around;gap:3px;height:4.5rem;padding-top:.3rem;
   border-bottom:1px solid var(--v12)}
-.jours .b{flex:1 1 0;max-width:46px;min-width:3px;background:rgba(201,169,126,.55);border-radius:2px 2px 0 0}
-.jours .b:hover{background:#c9a97e}
+.jours .b{flex:1 1 0;max-width:46px;min-width:3px;background:rgba(var(--or-rgb),.55);border-radius:2px 2px 0 0}
+.jours .b:hover{background:var(--or)}
 html.jour .jours .b{background:rgba(168,128,78,.55)}html.jour .jours .b:hover{background:rgba(168,128,78,.85)}
 .vide{padding:1.1rem .6rem;text-align:center;color:var(--tx2);font-size:.82rem}
 /* L avertissement d honnetete : ni replie, ni en gris pale. Il doit se lire. */

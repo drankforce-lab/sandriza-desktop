@@ -52,11 +52,11 @@ body{background:var(--f-page);color:var(--tx);
 input,button,select{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem}
 button{cursor:pointer}
-input:focus,button:focus,select:focus{outline:none;border-color:#c9a97e}
+input:focus,button:focus,select:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
-button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
+button.actif{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
 button.prim:hover:not(:disabled){background:#a3824f}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:.5rem}
@@ -70,13 +70,13 @@ button.prim:hover:not(:disabled){background:#a3824f}
    de barre, libelle AU-DESSUS du chiffre, une jauge par ligne de tableau. ── */
 .barreoutils .rf-jet{height:2.4rem;padding:0 .75rem;border-radius:10px;font-size:.8rem;background:var(--f-0f1826);
   border:1px solid var(--v10);color:var(--tx-gris2)}
-.barreoutils .rf-jet.on{background:rgba(201,169,126,.14);border-color:rgba(201,169,126,.55);color:var(--tx-or2);font-weight:700}
+.barreoutils .rf-jet.on{background:rgba(var(--or-rgb),.14);border-color:rgba(var(--or-rgb),.55);color:var(--tx-or2);font-weight:700}
 .barreoutils .sep{width:1px;height:1.6rem;background:var(--v10);margin:0 .2rem}
 .tuile{display:flex;flex-direction:column}
 .tuile .lbl{order:0;text-transform:none;letter-spacing:0;font-size:.76rem;font-weight:600;margin:0 0 .2rem}
 .tuile .val{order:1;font-size:1.6rem}
 .jaugel{height:4px;border-radius:3px;background:var(--v10);margin-top:.3rem;overflow:hidden;max-width:18rem}
-.jaugel i{display:block;height:100%;border-radius:3px;background:rgba(201,169,126,.7)}
+.jaugel i{display:block;height:100%;border-radius:3px;background:rgba(var(--or-rgb),.7)}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 .carte h3{margin:0 0 .4rem;font:700 .82rem/1.3 Georgia,serif;color:var(--tx-gris2)}
@@ -98,8 +98,8 @@ tbody tr:hover td{background:var(--v04)}
    la date se lit dessous. */
 .graph{display:flex;align-items:flex-end;justify-content:space-around;gap:4px;height:130px;
   border-bottom:1px solid var(--v12);padding:0 .2rem}
-.col{flex:1 1 0;max-width:46px;min-width:2px;background:rgba(201,169,126,.5);border-radius:4px 4px 0 0;position:relative}
-.col:hover{background:rgba(201,169,126,.85)}
+.col{flex:1 1 0;max-width:46px;min-width:2px;background:rgba(var(--or-rgb),.5);border-radius:4px 4px 0 0;position:relative}
+.col:hover{background:rgba(var(--or-rgb),.85)}
 html.jour .col{background:rgba(168,128,78,.55)}html.jour .col:hover{background:rgba(168,128,78,.85)}
 .axe{display:flex;justify-content:space-around;gap:4px;padding:0 .2rem;margin-top:.25rem}
 .axe span{flex:1 1 0;max-width:46px;min-width:2px;text-align:center;font-size:.6875rem;color:var(--tx2);white-space:nowrap}

@@ -66,7 +66,7 @@ body{background:var(--f-page);color:var(--tx);
   width:30px;height:30px;padding:0;margin-left:.55rem;border:0;border-radius:8px;
   background:none;color:var(--tx2);cursor:pointer}
 .tete .tj:hover{background:var(--v08);color:var(--tx)}
-.tete .tj:focus-visible{outline:2px solid #c9a97e;outline-offset:1px}
+.tete .tj:focus-visible{outline:2px solid var(--or);outline-offset:1px}
 .tete .tj svg{width:17px;height:17px;display:block}
 .tete .credits b{color:var(--tx-or)}
 .ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
@@ -154,9 +154,9 @@ body{background:var(--f-page);color:var(--tx);
 .ong.ferme .oe.ign{color:var(--tx2)}
 /* L'onglet ouvert : une teinte et un filet d'or à gauche — plus la pastille
    pleine du socle (button.on), qui criait plus fort que le bouton « Générer ». */
-.onglets .ong.on{background:rgba(201,169,126,.12);border-color:transparent;color:var(--tx-creme)}
+.onglets .ong.on{background:rgba(var(--or-rgb),.12);border-color:transparent;color:var(--tx-creme)}
 .onglets .ong.on::before{content:'';position:absolute;left:-.45rem;top:.45rem;bottom:.45rem;
-  width:3px;border-radius:0 3px 3px 0;background:#c9a97e}
+  width:3px;border-radius:0 3px 3px 0;background:var(--or)}
 .onglets .ong.on .ot b{color:var(--tx-creme)}
 html.jour .onglets .ong.on,html.jour .onglets .ong.on .ot b{color:#3d3526}
 /* ⚠ L ONGLET OUVERT SE MARQUE PAR SON FOND ET SON LISERE DORES, jamais par un
@@ -232,7 +232,7 @@ html.jour .onglets .ong.on,html.jour .onglets .ong.on .ot b{color:#3d3526}
   background:transparent;border:0;padding:.1rem .2rem}
 .recap .rc2{display:flex;flex-wrap:wrap;gap:.32rem;margin-top:0}
 .recap .jt{font-size:.75rem;padding:.16rem .55rem;border-radius:99px;
-  background:rgba(201,169,126,.14);border:1px solid rgba(201,169,126,.3);color:var(--tx-creme)}
+  background:rgba(var(--or-rgb),.14);border:1px solid rgba(var(--or-rgb),.3);color:var(--tx-creme)}
 .recap .jt.gris{background:var(--v05);border-color:var(--v14);color:var(--tx2)}
 .recap .note,.fmt .note{margin-top:.55rem;font-size:.73rem;color:var(--tx3);line-height:1.5}
 /* ── FORMATS DE SORTIE (lot 3b) ────────────────────────────────────────────
@@ -248,8 +248,8 @@ html.jour .onglets .ong.on,html.jour .onglets .ong.on .ot b{color:#3d3526}
 .logv{background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;padding:.3rem;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;gap:.2rem;min-width:0;
   -webkit-user-select:none;user-select:none;transition:border-color .12s,background .12s}
-.logv:hover{border-color:rgba(201,169,126,.6)}
-.logv.on{border-color:#c9a97e;box-shadow:0 0 0 1px #c9a97e inset;background:rgba(201,169,126,.1)}
+.logv:hover{border-color:rgba(var(--or-rgb),.6)}
+.logv.on{border-color:var(--or);box-shadow:0 0 0 1px var(--or) inset;background:rgba(var(--or-rgb),.1)}
 /* ⚠ Fond CLAIR sous le logo : la plupart sont noirs sur transparent, et sur le
    fond sombre de cet ecran ils seraient invisibles — on choisirait a l aveugle. */
 .logv img{width:100%;height:2.55rem;object-fit:contain;background:#e8edf5;border-radius:5px;padding:.15rem}
@@ -259,8 +259,8 @@ html.jour .onglets .ong.on,html.jour .onglets .ong.on .ot b{color:#3d3526}
 .posgr{display:grid;grid-template-columns:repeat(3,2rem);gap:.2rem}
 .posc{padding:0;width:2rem;height:2rem;display:flex;align-items:center;justify-content:center}
 .posc span{display:block;width:.6rem;height:.6rem;border-radius:2px;background:var(--v35)}
-.posc.on{border-color:#c9a97e;background:rgba(201,169,126,.16)}
-.posc.on span{background:#c9a97e}
+.posc.on{border-color:var(--or);background:rgba(var(--or-rgb),.16)}
+.posc.on span{background:var(--or)}
 .fmt .fbar{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center;margin-top:.55rem}
 .fmt .fbar .grand{margin-left:auto}
 .fmtg{display:grid;grid-template-columns:repeat(auto-fill,minmax(8.5rem,1fr));gap:.55rem;
@@ -281,9 +281,9 @@ html.jour .onglets .ong.on,html.jour .onglets .ong.on .ot b{color:#3d3526}
   border:1px solid var(--v18);background:var(--v05);
   display:flex;align-items:center;justify-content:center;font:700 .72rem/1 system-ui;color:var(--tx2)}
 .guide .gp.ok{color:var(--tx-bleute)}
-.guide .gp.ok .n{background:#c9a97e;border-color:#c9a97e;color:#1a1208}
+.guide .gp.ok .n{background:var(--or);border-color:var(--or);color:#1a1208}
 .guide .gp.suiv{color:var(--tx-creme);font-weight:600}
-.guide .gp.suiv .n{border-color:#c9a97e;color:var(--tx-or)}
+.guide .gp.suiv .n{border-color:var(--or);color:var(--tx-or)}
 /* Dépôt de photo */
 /* ⚠ ELLE ETAIT TROP GRANDE (sa demande du 2026-08-19, capture a l appui). Neuf
    rem de haut, un pictogramme de 1,6 rem et un texte qui passait sur deux lignes :
@@ -295,7 +295,7 @@ html.jour .onglets .ong.on,html.jour .onglets .ong.on .ot b{color:#3d3526}
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;
   min-height:11rem;text-align:center;color:var(--tx2);font-size:.82rem;padding:1rem;
   -webkit-user-select:none;user-select:none}
-.depot:hover,.depot.survol{border-color:#c9a97e;color:var(--tx-bleute)}
+.depot:hover,.depot.survol{border-color:var(--or);color:var(--tx-bleute)}
 .depot .gros{font-size:1.15rem;margin-bottom:.35rem}
 .depot .gros svg{width:34px;height:34px;opacity:.8}
 .depot img{max-width:100%;max-height:14rem;border-radius:8px}
@@ -307,7 +307,7 @@ html.jour .onglets .ong.on,html.jour .onglets .ong.on .ot b{color:#3d3526}
 .choixph{display:flex;flex-direction:column;align-items:center;text-align:center;gap:.35rem;
   padding:1.6rem 1.2rem 1.4rem;border-radius:12px;background:transparent;border:1.5px dashed var(--v20)}
 .choixph .ico{width:2.4rem;height:2.4rem;border-radius:50%;display:flex;margin-bottom:.25rem;
-  align-items:center;justify-content:center;background:rgba(201,169,126,.12);color:var(--tx-or)}
+  align-items:center;justify-content:center;background:rgba(var(--or-rgb),.12);color:var(--tx-or)}
 .choixph .ico svg{width:19px;height:19px}
 html.jour .choixph .ico{color:#6a5840}
 .choixph b{font-size:.86rem;font-weight:700;color:var(--tx)}
@@ -327,7 +327,7 @@ html.jour .choixph .ico{color:#6a5840}
   color:var(--tx-bleute);background:var(--v05);border:1px solid var(--v15)}
 .jeton:hover:not(:disabled){background:var(--v10);border-color:var(--v30)}
 .jeton:disabled{opacity:.4;cursor:default}
-.jeton.on{background:rgba(201,169,126,.2);border-color:#c9a97e;color:var(--tx-creme);font-weight:600}
+.jeton.on{background:rgba(var(--or-rgb),.2);border-color:var(--or);color:var(--tx-creme);font-weight:600}
 .jeton.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
 /* Le panier venu de l explorateur : ce qu on s apprete a traiter. */
 .panier{padding:.75rem .8rem;border-radius:12px;background:var(--f-champ);border:1px solid var(--v10)}
@@ -342,7 +342,7 @@ html.jour .choixph .ico{color:#6a5840}
 .panier .pnl button{flex:1 1 auto;font-size:.78rem;padding:.4rem .7rem}
 .panier .pv .pl{font-size:.72rem;color:var(--tx2)}
 .panier .pvb{padding:0;border:2px solid transparent;border-radius:9px;background:none;line-height:0}
-.panier .pvb.on{border-color:#c9a97e}
+.panier .pvb.on{border-color:var(--or)}
 .panier .pvb:hover:not(.on){border-color:var(--v20)}
 /* L apercu de la photo de depart, a droite, avant tout rendu (2026-09-25). */
 .srcap{display:flex;flex-direction:column;align-items:center;gap:.5rem;width:100%}
@@ -353,18 +353,18 @@ html.jour .choixph .ico{color:#6a5840}
 /* ── Suivi des lots ──────────────────────────────────────────────────────── */
 .lots{display:flex;flex-direction:column;gap:.5rem;max-height:calc(100vh - 14rem);overflow-y:auto}
 .lotc{background:var(--f-pill);border:1px solid var(--v09);border-radius:10px;padding:.5rem .65rem}
-.lotc.vif{border-color:#c9a97e}
+.lotc.vif{border-color:var(--or)}
 .lott{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;margin-bottom:.35rem}
 .lott strong{font-size:.85rem}
 .lott .dt{font-size:.72rem;color:var(--tx2);margin-left:auto}
 .lotc .jauge{height:.42rem;border-radius:99px;background:var(--v12);overflow:hidden}
-.lotc .jauge i{display:block;height:100%;background:#c9a97e;transition:width .3s}
+.lotc .jauge i{display:block;height:100%;background:var(--or);transition:width .3s}
 .lotd{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-top:.35rem;
   font-size:.76rem;color:var(--tx-bleute)}
 .lotd .mal{color:var(--tx-err)}
 .lotd .droite{margin-left:auto;display:flex;gap:.3rem;flex-wrap:wrap}
 .lote{margin-top:.3rem;font-size:.71rem;color:var(--tx2);line-height:1.5}
-.pill.acc{background:rgba(201,169,126,.18);color:#dcc39b}
+.pill.acc{background:rgba(var(--or-rgb),.18);color:#dcc39b}
 .pill.err{background:rgba(239,68,68,.16);color:var(--tx-err)}
 /* ── VOIES ET AMBIANCES ────────────────────────────────────────────────────
    ⚠⚠ ELLES ETAIENT EN FLEX SUR UNE SEULE LIGNE : le titre et sa description se
@@ -380,8 +380,8 @@ html.jour .choixph .ico{color:#6a5840}
   padding:.58rem .7rem;cursor:pointer;-webkit-user-select:none;user-select:none;
   display:grid;grid-template-columns:1fr;row-gap:.08rem;
   align-items:center;text-align:left;transition:border-color .12s,background .12s}
-.tuile:hover{border-color:rgba(201,169,126,.5)}
-.tuile.on{border-color:#c9a97e;background:rgba(201,169,126,.14)}
+.tuile:hover{border-color:rgba(var(--or-rgb),.5)}
+.tuile.on{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
 .tuile .t{font-size:.85rem;font-weight:700;line-height:1.25}
 .tuile .d{font-size:.72rem;color:var(--tx3);line-height:1.32}
 .tuiles.amb{grid-template-columns:repeat(auto-fill,minmax(10.5rem,1fr))}
@@ -399,10 +399,10 @@ html.jour .choixph .ico{color:#6a5840}
 .ch label{display:block;margin-bottom:.25rem;font-size:.76rem;color:var(--tx2)}
 select{width:100%;font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);
   border-radius:8px;padding:.4rem .5rem}
-select:focus{outline:none;border-color:#c9a97e}
+select:focus{outline:none;border-color:var(--or)}
 .bascule{display:flex;align-items:flex-start;gap:.55rem;font-size:.82rem;cursor:pointer;
   -webkit-user-select:none;user-select:none;margin:.2rem 0 0}
-.bascule input{width:1.05rem;height:1.05rem;accent-color:#c9a97e;cursor:pointer;margin-top:.12rem;flex:0 0 auto}
+.bascule input{width:1.05rem;height:1.05rem;accent-color:var(--or);cursor:pointer;margin-top:.12rem;flex:0 0 auto}
 .bascule .d{font-size:.72rem;color:var(--tx3);display:block;margin-top:.08rem}
 /* ── RÉGLAGES AVANCÉS ─────────────────────────────────────────────────────
    ⚠ CHAQUE VOIE N ACCEPTE PAS LES MEMES REGLAGES, et le panneau ne montre que
@@ -427,11 +427,11 @@ select:focus{outline:none;border-color:#c9a97e}
 .aidep.att{color:var(--tx-or)}
 textarea{width:100%;font:inherit;font-size:.82rem;color:var(--tx);background:var(--f-champ);
   border:1px solid var(--v12);border-radius:8px;padding:.4rem .5rem;resize:vertical;min-height:3.2rem}
-textarea:focus{outline:none;border-color:#c9a97e}
+textarea:focus{outline:none;border-color:var(--or)}
 input[type=text]{width:100%;font:inherit;color:var(--tx);background:var(--f-champ);
   border:1px solid var(--v12);border-radius:8px;padding:.4rem .5rem}
-input[type=text]:focus{outline:none;border-color:#c9a97e}
-input[type=range]{width:100%;accent-color:#c9a97e;margin:.3rem 0 0;cursor:pointer}
+input[type=text]:focus{outline:none;border-color:var(--or)}
+input[type=range]{width:100%;accent-color:var(--or);margin:.3rem 0 0;cursor:pointer}
 .avlab{display:flex;align-items:baseline;gap:.4rem}
 .avlab b{color:var(--tx-or);font-size:.78rem;font-variant-numeric:tabular-nums}
 .avint{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-top:.4rem}
@@ -472,9 +472,9 @@ input[type=range]{width:100%;accent-color:#c9a97e;margin:.3rem 0 0;cursor:pointe
 .cmp .cpg{position:absolute;top:0;bottom:0;left:var(--x,50%);width:2px;margin-left:-1px;
   background:var(--v90);box-shadow:0 0 6px rgba(0,0,0,.6)}
 .cmp .cpg:focus{outline:none}
-.cmp .cpg:focus-visible .cph{box-shadow:0 0 0 3px rgba(201,169,126,.75)}
+.cmp .cpg:focus-visible .cph{box-shadow:0 0 0 3px rgba(var(--or-rgb),.75)}
 .cmp .cph{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  width:1.9rem;height:1.9rem;border-radius:50%;background:#c9a97e;color:#1a1208;
+  width:1.9rem;height:1.9rem;border-radius:50%;background:var(--or);color:#1a1208;
   display:flex;align-items:center;justify-content:center;font:700 .82rem/1 system-ui;
   border:2px solid #fff}
 .cmp .cet{position:absolute;bottom:.5rem;font-size:.68rem;line-height:1;padding:.22rem .45rem;
@@ -490,7 +490,7 @@ input[type=range]{width:100%;accent-color:#c9a97e;margin:.3rem 0 0;cursor:pointe
    defiler, pas au bloc de se comprimer. */
 .res{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;
   min-height:15rem;text-align:center;color:var(--tx2);border-radius:14px;
-  background:radial-gradient(circle at 50% 38%,rgba(201,169,126,.07),transparent 62%),var(--f-carte)}
+  background:radial-gradient(circle at 50% 38%,rgba(var(--or-rgb),.07),transparent 62%),var(--f-carte)}
 /* Les mises en garde d'un rendu, regroupées dans UNE note au lieu de quatre
    lignes jaunes empilées sous l'image. */
 .res .notes{margin-top:.6rem;max-width:34rem;text-align:left;padding:.55rem .75rem;border-radius:10px;
@@ -545,7 +545,7 @@ button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.42rem .8rem;cursor:pointer}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.5;cursor:default}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
 /* ⚠ LE BOUTON DIT QU IL TRAVAILLE (2026-09-25, sa demande : << comme dans la
    connexion a l application, pour desactiver les multiples clics >>). Le meme
    cercle que .cx-spin de connexion.js. Desactive, il reste LISIBLE : l opacite
@@ -557,7 +557,7 @@ button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:70
 button.attente{display:inline-flex;align-items:center;justify-content:center;gap:.5rem}
 button.attente:disabled{opacity:.85;cursor:progress}
 @media (prefers-reduced-motion:reduce){.sz-spin{animation-duration:2.4s}}
-button.prim:hover:not(:disabled){background:#d8bd97}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 /* ⚠ L APERCU EST GRATUIT, ET C EST LE LEVIER CREDITS : la seule facon de juger
    sans depenser. Un bouton gris a cote d un bouton dore se lit comme le choix
    secondaire — exactement l inverse de ce qu on veut. */
@@ -578,10 +578,10 @@ button.conf{background:#f0a05a;border-color:#f0a05a;color:#241703;font-weight:70
 .voile p{margin:.6rem 0 0;font-size:.79rem;line-height:1.55}
 .voile input[type=text],.voile input:not([type]){width:100%;font:inherit;color:var(--tx);
   background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;padding:.4rem .5rem}
-.voile input:focus{outline:none;border-color:#c9a97e}
+.voile input:focus{outline:none;border-color:var(--or)}
 .rc{display:flex;align-items:flex-start;gap:.55rem;font-size:.8rem;line-height:1.5;
   cursor:pointer;-webkit-user-select:none;user-select:none;margin:.6rem 0 0}
-.rc input{width:1.05rem;height:1.05rem;accent-color:#c9a97e;cursor:pointer;
+.rc input{width:1.05rem;height:1.05rem;accent-color:var(--or);cursor:pointer;
   margin-top:.12rem;flex:0 0 auto}
 .fin2{display:flex;gap:.45rem;justify-content:flex-end;margin-top:.9rem}
 @media (max-width:900px){

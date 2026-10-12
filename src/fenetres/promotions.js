@@ -54,9 +54,9 @@ body{background:var(--f-page);color:var(--tx);
 .tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
 .tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tuile.cliq{cursor:pointer;user-select:none;position:relative}
-.tuile.cliq:hover{border-color:#c9a97e}
+.tuile.cliq:hover{border-color:var(--or)}
 .tuile.cliq::after{content:"›";position:absolute;top:.55rem;right:.8rem;font-size:1.1rem;color:var(--tx3)}
-.tuile.on{border-color:#c9a97e}
+.tuile.on{border-color:var(--or)}
 .contenu{max-width:22rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
@@ -66,12 +66,12 @@ input[type=search]{min-width:190px}
 input[type=checkbox]{width:auto;margin:0}
 input[type=color]{padding:.1rem;height:2rem;cursor:pointer}
 select,button{cursor:pointer}
-input:focus,select:focus,button:focus,textarea:focus{outline:none;border-color:#c9a97e}
+input:focus,select:focus,button:focus,textarea:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.geste{padding:.14rem .5rem;font-size:.73rem;white-space:nowrap}
-button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
+button.actif{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
 button.prim:hover:not(:disabled){background:#a3824f}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
@@ -105,7 +105,7 @@ tbody tr:hover td{background:var(--v04)}
 /* ⚠ (2026-10-04) La regle ci-dessus etirait AUSSI les cases a cocher : la case
    au milieu de la ligne, le nom et le SKU coinces a droite (sa capture). */
 .ch input[type=checkbox],.ch input[type=radio]{width:auto}
-input[type=checkbox]{accent-color:#c9a97e}
+input[type=checkbox]{accent-color:var(--or)}
 [hidden]{display:none!important}
 .ch .req{color:var(--tx-or)}
 .ch .aide{font-size:.6875rem;color:var(--tx3)}
@@ -148,7 +148,7 @@ input[type=checkbox]{accent-color:#c9a97e}
   border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s ease}
 .bascule input:checked + .glis{background:#a3824f}
 .bascule input:checked + .glis::after{transform:translateX(1.05rem)}
-.bascule input:focus-visible + .glis{outline:2px solid #c9a97e;outline-offset:2px}
+.bascule input:focus-visible + .glis{outline:2px solid var(--or);outline-offset:2px}
 /* L apercu du bandeau, tel que la boutique le peindra. */
 .ap-lbl{font-size:.6875rem;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);margin:.8rem 0 .3rem}
 .apercu{display:flex;align-items:center;justify-content:center;gap:.75rem;flex-wrap:wrap;
@@ -167,12 +167,12 @@ input[type=checkbox]{accent-color:#c9a97e}
 .choix .lg{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:.65rem;
   padding:.4rem .6rem;border-radius:7px;font-size:.83rem;cursor:pointer}
 .choix .lg:hover{background:var(--v05)}
-.choix .lg.on{background:rgba(201,169,126,.13)}
+.choix .lg.on{background:rgba(var(--or-rgb),.13)}
 .choix .lg .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .choix .lg .sku{font-family:ui-monospace,Consolas,monospace;font-size:.72rem;color:var(--tx2)}
 .choix .plus{font-size:.74rem;color:var(--tx3);padding:.35rem .6rem}
 .cases .puce-cas{padding:.3rem .65rem;border:1px solid var(--v10);border-radius:99px;background:var(--v04)}
-.cases .puce-cas:has(input:checked){border-color:#c9a97e;background:rgba(201,169,126,.13)}
+.cases .puce-cas:has(input:checked){border-color:var(--or);background:rgba(var(--or-rgb),.13)}
 @media (max-width:900px){.fiche2{grid-template-columns:minmax(0,1fr)}}
 .paliers .lg{display:flex;gap:.4rem;align-items:center;margin-bottom:.3rem}
 .paliers .lg input{width:6rem}

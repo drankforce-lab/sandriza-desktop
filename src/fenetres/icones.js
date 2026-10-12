@@ -62,10 +62,10 @@ body{background:var(--f-page);color:var(--tx);
 .ch label{display:block;margin-bottom:.25rem;font-size:.78rem;color:var(--tx2)}
 .ch input[type=text]{width:100%;font:inherit;color:var(--tx);background:var(--f-champ);
   border:1px solid var(--v12);border-radius:8px;padding:.42rem .55rem}
-.ch input[type=text]:focus{outline:none;border-color:#c9a97e}
+.ch input[type=text]:focus{outline:none;border-color:var(--or)}
 .bascule,.ch label.bascule{display:flex;align-items:center;gap:.5rem;font-size:.82rem;cursor:pointer;
   margin:0 0 .8rem;-webkit-user-select:none;user-select:none}
-.bascule input{width:1rem;height:1rem;accent-color:#c9a97e;cursor:pointer}
+.bascule input{width:1rem;height:1rem;accent-color:var(--or);cursor:pointer}
 .bascule:has(input:disabled){cursor:default;color:var(--tx3)}  /* le texte reste lisible ; seul le curseur s estompe (socle) — 2026-10-04 */
 /* Le bloc de depot : vignette a gauche, formulaire a droite. */
 .pose{display:grid;grid-template-columns:7rem 1fr;gap:1rem;align-items:start}
@@ -99,7 +99,7 @@ body{background:var(--f-page);color:var(--tx);
 code{font-family:ui-monospace,Consolas,monospace;font-size:.75rem;color:#cfe0f5;
   background:var(--f-champ);border:1px solid var(--v12);border-radius:5px;padding:.1rem .35rem;
   cursor:pointer;-webkit-user-select:none;user-select:none}
-code:hover{border-color:#c9a97e}
+code:hover{border-color:var(--or)}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
@@ -109,8 +109,8 @@ button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.4rem .8rem;cursor:pointer}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.5;cursor:default}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
-button.prim:hover:not(:disabled){background:#d8bd97}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 button.pt{font-size:.76rem;padding:.25rem .55rem}
 button.dgr{color:var(--tx-err);border-color:rgba(248,113,113,.4)}
 .vide{padding:1.1rem .6rem;text-align:center;color:var(--tx2);font-size:.82rem}

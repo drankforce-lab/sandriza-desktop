@@ -37,7 +37,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .onglets button{background:transparent;border:none;border-bottom:2px solid transparent;color:var(--tx2);
   padding:.4rem .7rem;font-weight:600;font-size:.85rem;border-radius:6px 6px 0 0}
 .onglets button:hover{background:var(--v05);color:var(--tx)}
-.onglets button.actif{color:var(--tx-creme);border-bottom-color:#c9a97e}
+.onglets button.actif{color:var(--tx-creme);border-bottom-color:var(--or)}
 .corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;display:flex;flex-direction:column;gap:.8rem}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
@@ -45,7 +45,7 @@ input,button,select,textarea{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.4rem .55rem}
 textarea{resize:vertical;min-height:56px;width:100%}
 button{cursor:pointer;-webkit-user-select:none;user-select:none}
-input:focus,button:focus,textarea:focus{outline:none;border-color:#c9a97e}
+input:focus,button:focus,textarea:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600;padding:.42rem .8rem}
@@ -76,7 +76,7 @@ tbody td{padding:.34rem .4rem;border-top:1px solid var(--v055)}
 .src{margin-bottom:.6rem}
 .src .l{display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.25rem}
 .src .bar{height:6px;border-radius:99px;background:var(--v10);overflow:hidden}
-.src .bar>div{height:100%;background:#c9a97e}
+.src .bar>div{height:100%;background:var(--or)}
 .ctrl{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;padding:.55rem 0;border-bottom:1px solid var(--v06)}
 .ctrl .t{font-weight:500;font-size:.86rem}
 .ctrl .d{font-size:.74rem;color:var(--tx2);margin-top:.1rem}
@@ -86,7 +86,7 @@ tbody td{padding:.34rem .4rem;border-top:1px solid var(--v055)}
 /* Piste de bascule eteinte : un gris ardoise disparait sur fond clair. */
 html.jour .bascule .piste{background:#cfcabd}
 .bascule .pouce{position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:#fff;transition:left .2s}
-.bascule input:checked ~ .piste{background:#c9a97e}
+.bascule input:checked ~ .piste{background:var(--or)}
 .bascule input:checked ~ .pouce{left:21px}
 .setup{max-width:34rem;margin:2rem auto;text-align:center;color:var(--tx-bleute)}
 .setup .em{font-size:2.6rem;margin-bottom:.8rem}

@@ -73,10 +73,10 @@ body.presse .tete h1{color:var(--tx-err2)}
 button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.45rem .8rem;cursor:pointer}
 button:hover:not(:disabled){background:var(--v10)}
-button:focus{outline:none;border-color:#c9a97e}
+button:focus{outline:none;border-color:var(--or)}
 button:disabled{opacity:.55;cursor:default}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
-button.prim:hover:not(:disabled){background:#d8bc95}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 .ecart{flex:1 1 auto}
 .msg{font-size:.75rem;color:var(--tx2);flex:1 1 100%;min-width:0;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

@@ -58,7 +58,7 @@ body{background:var(--f-page);color:var(--tx);
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .7rem;cursor:pointer}
-button:focus{outline:none;border-color:#c9a97e}
+button:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}

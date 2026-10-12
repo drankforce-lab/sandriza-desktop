@@ -43,7 +43,7 @@ body{background:var(--f-page);color:var(--tx);
 .chef p{margin:.15rem 0 0;font-size:.8rem;color:var(--tx2);max-width:32rem}
 .chef .bascule{margin-left:auto;display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--tx2)}
 label{cursor:pointer}
-input[type=checkbox]{accent-color:#c9a97e;width:1.1rem;height:1.1rem;cursor:pointer}
+input[type=checkbox]{accent-color:var(--or);width:1.1rem;height:1.1rem;cursor:pointer}
 input[type=time]{font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);
   border-radius:8px;padding:.3rem .5rem;width:9rem}
 input[type=time]:disabled{opacity:.4}
@@ -71,8 +71,8 @@ button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.4rem .8rem;cursor:pointer}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.5;cursor:default}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
-button.prim:hover:not(:disabled){background:#d8bd97}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 .vide{padding:1.1rem .6rem;text-align:center;color:var(--tx2);font-size:.82rem}
 .ro{margin:0 0 .8rem;border:1px solid rgba(240,180,80,.35);background:rgba(200,140,40,.1);
   color:var(--tx-or2);border-radius:9px;padding:.5rem .7rem;font-size:.78rem}

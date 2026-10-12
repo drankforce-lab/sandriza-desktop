@@ -37,7 +37,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 /* Aucune glissiere (2026-10-12) : la liste des blocs se pagine dans la hauteur
    qui reste (data-pages, JS_PAGES du socle). */
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:1rem 1.1rem;margin:0 0 1rem}
-.carte.edit{border-color:#c9a97e}
+.carte.edit{border-color:var(--or)}
 .stitre{font-size:.9rem;font-weight:700;color:var(--tx-bleute);margin:0 0 .2rem}
 .sdesc{font-size:.76rem;color:var(--tx2);margin:0 0 .8rem}
 .bloc{display:flex;align-items:center;gap:.7rem;padding:.6rem .7rem;background:var(--f-champ);border:1px solid var(--v12);border-radius:9px;margin:0 0 .5rem}
@@ -67,7 +67,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .ch label{display:block;margin-bottom:.22rem;font-size:.74rem;color:var(--tx2)}
 .ch input,.ch select,.ch textarea{width:100%;font:inherit;font-size:.83rem;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;padding:.4rem .5rem}
 .ch textarea{resize:vertical;min-height:2.6rem}
-.ch input:focus,.ch select:focus,.ch textarea:focus{outline:none;border-color:#c9a97e}
+.ch input:focus,.ch select:focus,.ch textarea:focus{outline:none;border-color:var(--or)}
 .ch input:disabled,.ch select:disabled,.ch textarea:disabled{opacity:.55}
 .diapo{background:var(--f-champ);border:1px solid var(--v12);border-radius:10px;padding:.7rem .8rem;margin:0 0 .7rem}
 .diapo .tete2{display:flex;align-items:center;gap:.5rem;margin:0 0 .5rem}
@@ -81,8 +81,8 @@ button.b{font:inherit;color:var(--tx);background:var(--v05);border:1px solid var
 button.b:hover:not(:disabled){background:var(--v10)}
 button.b:disabled{opacity:.4;cursor:default}
 button.b.dgr{color:var(--tx-err2);border-color:rgba(248,113,113,.4)}
-button.prim{font:inherit;background:#c9a97e;border:1px solid #c9a97e;color:#1a1208;font-weight:700;border-radius:8px;padding:.42rem .9rem;cursor:pointer;font-size:.82rem}
-button.prim:hover:not(:disabled){background:#d8bd97}
+button.prim{font:inherit;background:var(--or);border:1px solid var(--or);color:#1a1208;font-weight:700;border-radius:8px;padding:.42rem .9rem;cursor:pointer;font-size:.82rem}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 button.prim:disabled{opacity:.5;cursor:default}
 .vide{padding:1rem;text-align:center;color:var(--tx2);font-size:.82rem}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
@@ -95,7 +95,7 @@ button.prim:disabled{opacity:.5;cursor:default}
 .diapos-choix[data-pages]{max-height:2.2rem;align-content:flex-start}
 .diapos-choix button{font:inherit;font-size:.78rem;font-weight:600;padding:.32rem .75rem;border-radius:99px;
   border:1px solid var(--v12);background:var(--v05);color:var(--tx2);cursor:pointer}
-.diapos-choix button.on{background:#c9a97e;border-color:#c9a97e;color:#17202c}
+.diapos-choix button.on{background:var(--or);border-color:var(--or);color:#17202c}
 `;
 
 function pageAccueil(ouverture) {
@@ -270,7 +270,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         + '<div class="ch"><label for="a-effect">${T("Effet de transition")}</label><select id="a-effect"' + (RO?' disabled':'') + '>'
         + EFFETS.map(function(e){ return '<option value="' + e[0] + '"' + ((c.sliderEffect||'fade')===e[0]?' selected':'') + '>' + esc(e[1]) + '</option>'; }).join('') + '</select></div>'
         + '<div class="ch"><label for="a-interval">${T("Intervalle (secondes)")}</label><input type="number" min="2" max="30" id="a-interval" value="' + (c.sliderInterval||6) + '"' + (RO?' disabled':'') + '></div></div>'
-        + '<label class="ch" style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox" id="a-autoplay"' + (c.sliderAutoplay!==false?' checked':'') + (RO?' disabled':'') + ' style="width:auto;accent-color:#c9a97e"> ${T("Lecture automatique")}</label>'
+        + '<label class="ch" style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox" id="a-autoplay"' + (c.sliderAutoplay!==false?' checked':'') + (RO?' disabled':'') + ' style="width:auto;accent-color:var(--or)"> ${T("Lecture automatique")}</label>'
         + '<div style="display:flex;align-items:center;justify-content:space-between;margin:.4rem 0 .5rem"><b style="font-size:.82rem">${T("Diapos ")}<span id="a-scount">(' + SLIDES.length + ')</span></b>'
         + (RO ? '' : '<button class="b" type="button" id="a-sadd">${T("+ Ajouter une diapo")}</button>') + '</div>'
         + '<div id="a-slides">' + slidesListHtml() + '</div>';

@@ -49,7 +49,7 @@ input,button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem}
 input[type=search]{min-width:200px}
 button{cursor:pointer}
-input:focus,button:focus{outline:none;border-color:#c9a97e}
+input:focus,button:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
@@ -76,7 +76,7 @@ tbody tr:hover td{background:var(--v04)}
 .tuile .sub{font-size:.72rem;color:var(--tx3)}
 .rf-tb .rf-jet.danger{color:var(--tx-err2);border-color:rgba(239,68,68,.5)}
 .jaugef{height:5px;border-radius:3px;background:var(--v10);margin-top:.35rem;max-width:14rem;overflow:hidden}
-.jaugef i{display:block;height:100%;border-radius:3px;background:rgba(201,169,126,.7)}
+.jaugef i{display:block;height:100%;border-radius:3px;background:rgba(var(--or-rgb),.7)}
 .mot{display:inline-flex;align-items:center;gap:.35rem;padding:.16rem .6rem;
   border:1px solid var(--v14);border-radius:99px;font-size:.82rem;margin:.15rem}
 .mot strong{font-variant-numeric:tabular-nums;color:var(--tx-or)}

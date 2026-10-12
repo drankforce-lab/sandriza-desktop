@@ -52,7 +52,7 @@ body{background:var(--f-page);color:var(--tx);
   border-bottom:1px solid var(--v08)}
 .onglets button{background:none;border:0;border-bottom:2px solid transparent;color:var(--tx2);
   font:600 .82rem/1 system-ui;padding:.45rem .7rem;cursor:pointer;border-radius:0}
-.onglets button.on{color:var(--tx);border-bottom-color:#c9a97e}
+.onglets button.on{color:var(--tx);border-bottom-color:var(--or)}
 /* Aucune glissiere (2026-10-12) : chaque liste se pagine dans la hauteur qui
    reste (data-pages, JS_PAGES du socle). */
 .corps{flex:1 1 auto;min-height:0;padding:.85rem 1.05rem;overflow:hidden;
@@ -67,11 +67,11 @@ input,select,textarea{font:inherit;color:var(--tx);background:var(--v05);
 textarea{resize:vertical;min-height:4rem}
 button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.34rem .6rem;cursor:pointer;width:auto}
-input:focus,select:focus,textarea:focus,button:focus{outline:none;border-color:#c9a97e}
+input:focus,select:focus,textarea:focus,button:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.5;cursor:default}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
-button.prim:hover:not(:disabled){background:#d8bc95}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 button.mini{font-size:.72rem;padding:.16rem .45rem}
 button.dgr{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
 .duo{display:flex;gap:.65rem;flex-wrap:wrap}

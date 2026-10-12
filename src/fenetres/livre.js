@@ -58,14 +58,14 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete h1{margin:0;font:700 .95rem/1.2 system-ui}
-.tete .ico{display:inline-flex;width:19px;height:19px;color:var(--or,#c9a97e)}
+.tete .ico{display:inline-flex;width:19px;height:19px;color:var(--or,var(--or))}
 .tete .ico svg{width:100%;height:100%}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .onglets{flex:0 0 auto;display:flex;gap:.3rem;padding:.5rem 1.05rem 0;
   border-bottom:1px solid var(--v08)}
 .onglets button{background:none;border:0;border-bottom:2px solid transparent;color:var(--tx2);
   font:600 .82rem/1 system-ui;padding:.45rem .7rem;cursor:pointer;border-radius:0}
-.onglets button.on{color:var(--tx);border-bottom-color:#c9a97e}
+.onglets button.on{color:var(--tx);border-bottom-color:var(--or)}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;
   padding:.55rem 1.05rem .1rem}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center}
@@ -82,11 +82,11 @@ select,input,button,textarea{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem;cursor:pointer}
 input,textarea{cursor:text}
 input.n{text-align:right;font-family:ui-monospace,Consolas,monospace;font-size:.78rem}
-select:focus,input:focus,button:focus,textarea:focus{outline:none;border-color:#c9a97e}
+select:focus,input:focus,button:focus,textarea:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.45;cursor:default}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
-button.prim:hover:not(:disabled){background:#d8bc95}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.danger{border-color:rgba(248,113,113,.45);color:var(--tx-err2)}
 
@@ -138,13 +138,13 @@ tbody tr.ligne td:first-child{padding-left:1.4rem}
   white-space:nowrap;font-weight:700}
 .pill.g{background:rgba(148,163,184,.14);color:var(--tx-94a3b8);font-weight:600}
 .pill.att{background:rgba(234,179,8,.16);color:var(--tx-att)}
-/* ⚠⚠ PAS #c9a97e EN COULEUR DE TEXTE — << banc-contraste-jour >> a mordu ici, et il
+/* ⚠⚠ PAS var(--or) EN COULEUR DE TEXTE — << banc-contraste-jour >> a mordu ici, et il
    avait raison : cet or donne 1,98 sur le fond du mode jour, c est-a-dire
    illisible. C est EXACTEMENT la meme faute que la phase 1 a payee en bâtissant
    la fenetre des rapports. L or reste au FOND (un fond n est pas juge au ratio,
    et il tient dans les deux modes) ; le texte prend le jeton, qui a deja sa
    valeur de jour et sa valeur de nuit. */
-.pill.man{background:rgba(201,169,126,.18);color:var(--tx)}
+.pill.man{background:rgba(var(--or-rgb),.18);color:var(--tx)}
 
 /* ── L'avertissement : visible, pas décoratif ────────────────────────────── */
 .avert{border:1px solid rgba(234,179,8,.45);background:rgba(234,179,8,.09);

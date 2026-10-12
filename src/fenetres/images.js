@@ -72,15 +72,15 @@ td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .echec b{color:#ffd9d9}
 .echec ul{margin:.4rem 0 0;padding-left:1.1rem}
 .jauge{height:7px;border-radius:99px;background:var(--f-champ);border:1px solid var(--v12);overflow:hidden;margin:.6rem 0 .3rem}
-.jauge i{display:block;height:100%;background:#c9a97e;width:0;transition:width .25s}
+.jauge i{display:block;height:100%;background:var(--or);width:0;transition:width .25s}
 .vide{padding:1rem;text-align:center;color:var(--tx2);font-size:.82rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.55rem 1.05rem;
   border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
-button.prim{font:inherit;background:#c9a97e;border:1px solid #c9a97e;color:#1a1208;font-weight:700;
+button.prim{font:inherit;background:var(--or);border:1px solid var(--or);color:#1a1208;font-weight:700;
   border-radius:8px;padding:.42rem .9rem;cursor:pointer}
-button.prim:hover:not(:disabled){background:#d8bd97}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 button.prim:disabled{opacity:.5;cursor:default}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;border:1px solid var(--v16);
   border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}

@@ -2948,6 +2948,8 @@ const OPS_PONT = new Set([
   'tableau:lire', 'tableau:tuiles', 'tableau:ouvrir', 'tableau:verrous',
   // Le détail des commandes neuves, pour les annonces du veilleur (2026-10-12).
   'veilleur:annonces',
+  // Le vœu d'ouverture de l'Inventaire (onglet ou filtre), posé par un lien du tableau de bord.
+  'stock:voeu',
   // Derniere sauvegarde : lue A PART, car elle seule passe par le reseau (#25).
   'tableau:sauvegarde',
   // Variantes par couleur : teinte au CANEVAS par le site (une image, une

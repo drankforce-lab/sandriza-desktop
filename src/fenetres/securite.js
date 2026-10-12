@@ -73,7 +73,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .corps>*{flex:0 0 auto}
 .corps>[data-pages]{flex:1 1 0;min-height:7rem}
 .corps>.fiches[data-pages]{align-content:start}
-.prim{font:inherit;font-size:.84rem;font-weight:700;border:0;border-radius:8px;padding:.5rem 1rem;background:#c9a97e;color:#1a1408;cursor:pointer}
+.prim{font:inherit;font-size:.84rem;font-weight:700;border:0;border-radius:8px;padding:.5rem 1rem;background:var(--or);color:#1a1408;cursor:pointer}
 .prim:disabled{opacity:.5;cursor:default}
 .b{font:inherit;font-size:.8rem;border:1px solid var(--v16);border-radius:8px;padding:.42rem .8rem;background:var(--v05);color:var(--tx);cursor:pointer}
 .b:hover:not(:disabled){background:var(--v09)}
@@ -93,16 +93,16 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
   background:var(--v03);border:1px solid var(--v08);border-radius:11px;padding:.6rem .7rem}
 .recherche{flex:1 1 15rem;min-width:11rem;max-width:26rem;background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;
   color:var(--tx);font:inherit;font-size:.84rem;padding:.45rem .7rem}
-.recherche:focus{outline:none;border-color:#c9a97e}
+.recherche:focus{outline:none;border-color:var(--or)}
 .filtres select{font:inherit;font-size:.79rem;background:var(--f-champ);border:1px solid var(--v12);
   border-radius:8px;color:var(--tx);padding:.4rem .55rem;max-width:14rem}
-.filtres select:focus{outline:none;border-color:#c9a97e}
+.filtres select:focus{outline:none;border-color:var(--or)}
 .fgr{display:flex;gap:.25rem;align-items:center}
 .fgr .lbl{font-size:.72rem;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;margin-right:.15rem}
 .jeton{font:inherit;font-size:.75rem;border:1px solid var(--v14);border-radius:99px;padding:.25rem .65rem;
   background:var(--v04);color:var(--tx2);cursor:pointer;white-space:nowrap}
 .jeton:hover{background:var(--v08);color:var(--tx)}
-.jeton.on{background:rgba(201,169,126,.18);border-color:rgba(201,169,126,.55);color:var(--tx-or);font-weight:700}
+.jeton.on{background:rgba(var(--or-rgb),.18);border-color:rgba(var(--or-rgb),.55);color:var(--tx-or);font-weight:700}
 .vues{display:flex;gap:.2rem;border:1px solid var(--v14);border-radius:8px;padding:2px;background:var(--v04)}
 .vues button{font:inherit;font-size:.75rem;border:0;border-radius:6px;padding:.26rem .6rem;background:none;color:var(--tx2);cursor:pointer}
 .vues button.on{background:var(--v12);color:var(--tx);font-weight:700}
@@ -136,12 +136,12 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .fiches{display:grid;grid-template-columns:repeat(auto-fill,minmax(24rem,1fr));gap:.8rem}
 .fiche{background:var(--v03);border:1px solid var(--v09);border-radius:13px;
   padding:.9rem 1rem;display:flex;flex-direction:column;gap:.65rem;transition:border-color .13s}
-.fiche:hover{border-color:rgba(201,169,126,.45)}
+.fiche:hover{border-color:rgba(var(--or-rgb),.45)}
 .fiche.inactif{opacity:.72}
 .fiche .haut{display:flex;align-items:center;gap:.75rem;min-width:0}
 .init{flex:0 0 auto;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;
-  justify-content:center;font-weight:800;font-size:.9rem;line-height:1;background:rgba(201,169,126,.16);
-  color:#e2c79b;border:1px solid rgba(201,169,126,.3);text-transform:uppercase}
+  justify-content:center;font-weight:800;font-size:.9rem;line-height:1;background:rgba(var(--or-rgb),.16);
+  color:#e2c79b;border:1px solid rgba(var(--or-rgb),.3);text-transform:uppercase}
 .fiche .qui{min-width:0;flex:1 1 auto}
 .fiche .nom{font-weight:700;font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fiche .coord{font-size:.75rem;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -218,7 +218,7 @@ html.jour .ctx button.dgr{color:#b91c1c}
 .chemin .pas .n{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;
   font:700 .72rem/1 system-ui;background:var(--v10);color:var(--tx2);flex:0 0 auto}
 .chemin .pas .t{font-size:.78rem;color:var(--tx2);white-space:nowrap}
-.chemin .pas.on .n{background:#c9a97e;color:#1a1408}
+.chemin .pas.on .n{background:var(--or);color:#1a1408}
 .chemin .pas.on .t{color:var(--tx);font-weight:700}
 .chemin .pas.faite .n{background:rgba(22,163,74,.25);color:var(--tx-ok2)}
 .chemin .fleche{color:var(--tx3);font-size:.8rem;margin:0 .1rem}
@@ -240,7 +240,7 @@ html.jour .ctx button.dgr{color:#b91c1c}
 .ongEd button{font:inherit;font-size:.82rem;white-space:nowrap;background:none;border:none;
   color:var(--tx2);padding:.55rem .9rem;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
 .ongEd button:hover{color:var(--tx)}
-.ongEd button.on{color:var(--tx-or);border-bottom-color:#c9a97e;font-weight:700}
+.ongEd button.on{color:var(--tx-or);border-bottom-color:var(--or);font-weight:700}
 
 .mode{display:flex;gap:.2rem;border:1px solid var(--v14);border-radius:8px;padding:2px;background:var(--v04)}
 .mode button{font:inherit;font-size:.75rem;border:0;border-radius:6px;padding:.26rem .66rem;background:none;color:var(--tx2);cursor:pointer}
@@ -256,9 +256,9 @@ label.champ .lbl{display:block;font-size:.74rem;text-transform:uppercase;letter-
 label.champ .sub{display:block;font-size:.72rem;color:var(--tx-gris);margin:.25rem 0 0;line-height:1.5}
 label.champ .req{color:var(--tx-err2)}
 input.t,select.t,textarea.t{width:100%;background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;color:var(--tx);font:inherit;padding:.5rem .65rem}
-input.t:focus,select.t:focus,textarea.t:focus{outline:none;border-color:#c9a97e}
+input.t:focus,select.t:focus,textarea.t:focus{outline:none;border-color:var(--or)}
 label.case{display:flex;align-items:flex-start;gap:.5rem;font-size:.84rem;cursor:pointer;margin:0 0 .55rem;line-height:1.45}
-label.case input{width:16px;height:16px;accent-color:#c9a97e;margin-top:.15rem;flex:0 0 auto}
+label.case input{width:16px;height:16px;accent-color:var(--or);margin-top:.15rem;flex:0 0 auto}
 label.case .quoi{color:var(--tx2);font-size:.75rem;display:block}
 .sess{display:flex;align-items:center;justify-content:space-between;gap:.8rem;margin:.35rem 0 .2rem;padding:.6rem .7rem;
   border:1px solid var(--v12);border-radius:9px;font-size:.84rem;line-height:1.45}
@@ -279,7 +279,7 @@ label.case .quoi{color:var(--tx2);font-size:.75rem;display:block}
 .rcarte{text-align:left;background:var(--v03);border:1px solid var(--v10);border-radius:12px;padding:.8rem .9rem;
   cursor:pointer;font:inherit;color:var(--tx);display:flex;flex-direction:column;gap:.4rem;transition:border-color .13s,background .13s}
 .rcarte:hover{background:var(--v06);border-color:var(--v16)}
-.rcarte.on{border-color:#c9a97e;background:rgba(201,169,126,.09)}
+.rcarte.on{border-color:var(--or);background:rgba(var(--or-rgb),.09)}
 .rcarte .rh{display:flex;align-items:center;gap:.5rem}
 .rcarte .rico{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex:0 0 auto}
 .rcarte .rnom{font-weight:700;font-size:.88rem;line-height:1.25}
@@ -300,7 +300,7 @@ label.case .quoi{color:var(--tx2);font-size:.75rem;display:block}
 .permtb td.mod{text-align:left}
 .permtb tr.grp td{font-size:.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx-or);background:var(--v03);padding:.5rem .5rem .3rem;border-top:1px solid var(--v10);text-align:left}
 .permtb tbody tr:not(.grp):hover{background:var(--v03)}
-.permtb input{accent-color:#c9a97e}
+.permtb input{accent-color:var(--or)}
 .permtb .mnom{display:flex;align-items:center;gap:.4rem}
 /* ⚠ LE POINT D'INTERROGATION EST UN BOUTON, PAS UN attribut title. Une infobulle du
    système n'apparaît qu'au survol, disparaît au clavier, et ne tient pas trois
@@ -309,7 +309,7 @@ label.case .quoi{color:var(--tx2);font-size:.75rem;display:block}
 .expl{font:inherit;font-size:.7rem;width:17px;height:17px;line-height:1;border-radius:50%;
   border:1px solid var(--v16);background:var(--v05);color:var(--tx2);cursor:pointer;flex:0 0 auto;padding:0}
 .expl:hover{background:var(--v12);color:var(--tx)}
-.expl.on{background:rgba(201,169,126,.25);border-color:rgba(201,169,126,.5);color:var(--tx-or)}
+.expl.on{background:rgba(var(--or-rgb),.25);border-color:rgba(var(--or-rgb),.5);color:var(--tx-or)}
 .permtb tr.aide td{padding:.1rem .5rem .6rem 1.4rem;text-align:left;font-size:.75rem;color:var(--tx2);line-height:1.6}
 .permtb tr.aide b{color:var(--tx)}
 .chaud{color:var(--tx-or2);font-size:.72rem;margin-left:.15rem}
@@ -335,7 +335,7 @@ label.case .quoi{color:var(--tx2);font-size:.75rem;display:block}
  * Changer la teinte ferait un ecran qui ne se ressemble plus d un mode a
  * l autre, et l on ne saurait plus lequel est le bon. */
 html.jour .init{color:#5c4620}
-/* ⚠ 2026-09-14 : #3f4855 donnait 4.17 sur l or #c9a97e de l etape EN COURS, sous
+/* ⚠ 2026-09-14 : #3f4855 donnait 4.17 sur l or var(--or) de l etape EN COURS, sous
    le seuil de 4.5. Le banc au rendu le disait depuis la premiere construction du
    2026-09-12 (#103) — et CINQ versions sont parties par-dessus ce rouge, parce
    que -SansRendu ne regarde pas ce terrain et que personne n a ouvert le travail

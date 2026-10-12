@@ -64,7 +64,7 @@ body{background:var(--f-page);color:var(--tx);
 .onglets > button{background:transparent;border:1px solid transparent;color:var(--tx2);padding:.36rem .75rem;
   display:inline-flex;align-items:center;gap:.4rem;font-weight:600}
 .onglets > button:hover{background:var(--v05);color:var(--tx)}
-.onglets > button:focus-visible{border-color:#c9a97e}
+.onglets > button:focus-visible{border-color:var(--or)}
 .onglets .nb{font-size:.6875rem;font-weight:700;min-width:1.35rem;text-align:center;padding:.04rem .38rem;border-radius:999px;
   background:var(--v08);color:var(--tx2)}
 .onglets .nb.att{background:rgba(251,191,36,.18);color:var(--tx-att)}
@@ -90,10 +90,10 @@ button{font:inherit;color:var(--tx);background:var(--v05);cursor:pointer;
   border:1px solid var(--v16);border-radius:8px;padding:.28rem .55rem}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
-button:focus{outline:none;border-color:#c9a97e}
+button:focus{outline:none;border-color:var(--or)}
 button.dgr{border-color:rgba(239,68,68,.5);color:var(--tx-err)}
 button.dgr:hover:not(:disabled){background:rgba(239,68,68,.14)}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d6b98f}
 button.mini{font-size:.74rem;padding:.14rem .45rem}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
@@ -120,7 +120,7 @@ tbody td{padding:.3rem .4rem;border-top:1px solid var(--v05);vertical-align:top}
 .champ input,.champ textarea{font:inherit;font-size:.84rem;color:var(--tx);background:var(--v03);
   border:1px solid var(--v12);border-radius:8px;padding:.3rem .5rem;width:100%}
 .champ textarea{min-height:4.2rem;resize:vertical;font-family:ui-monospace,Consolas,monospace;font-size:.78rem}
-.champ input:focus,.champ textarea:focus{outline:none;border-color:#c9a97e}
+.champ input:focus,.champ textarea:focus{outline:none;border-color:var(--or)}
 .deux{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.55rem .8rem;margin-top:.6rem}
 .inter{display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem;font-size:.86rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;

@@ -49,8 +49,8 @@ body{background:var(--f-page);color:var(--tx);
 .tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
 .tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tuile.cliq{cursor:pointer;user-select:none}
-.tuile.cliq:hover{border-color:rgba(201,169,126,.6)}
-.tuile.on{border-color:#c9a97e}
+.tuile.cliq:hover{border-color:rgba(var(--or-rgb),.6)}
+.tuile.on{border-color:var(--or)}
 .jaugeu{height:5px;border-radius:3px;background:var(--v10);margin-top:.35rem;max-width:8rem;overflow:hidden}
 .jaugeu i{display:block;height:100%;border-radius:3px;background:color-mix(in srgb,var(--tx-ok,#4ade80) 55%,transparent)}
 .jaugeu i.plein{background:var(--tx-att)}
@@ -64,12 +64,12 @@ input,select,button{font:inherit;color:var(--tx);background:var(--v05);
 input[type=search]{min-width:200px}
 input[type=checkbox]{width:auto;margin:0}
 select,button{cursor:pointer}
-input:focus,select:focus,button:focus{outline:none;border-color:#c9a97e}
+input:focus,select:focus,button:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.geste{padding:.14rem .5rem;font-size:.73rem;white-space:nowrap}
-button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
+button.actif{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
 button.prim:hover:not(:disabled){background:#a3824f}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}

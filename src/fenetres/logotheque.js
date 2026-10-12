@@ -66,10 +66,10 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .ch{margin:0 0 .7rem}.ch:last-child{margin-bottom:0}
 .ch label{display:block;margin-bottom:.22rem;font-size:.75rem;color:var(--tx2)}
 .ch input{width:100%;font:inherit;font-size:.83rem;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;padding:.4rem .5rem}
-.ch input:focus{outline:none;border-color:#c9a97e}
+.ch input:focus{outline:none;border-color:var(--or)}
 .modes,.rrow{display:flex;gap:.4rem;flex-wrap:wrap;margin:0 0 .6rem}
 .modes button,.rrow button{font:inherit;font-size:.78rem;color:var(--tx);background:var(--v05);border:1px solid var(--v16);border-radius:8px;padding:.32rem .6rem;cursor:pointer}
-.modes button.on,.rrow button.on{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
+.modes button.on,.rrow button.on{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
 .hint{font-size:.72rem;color:var(--tx3);line-height:1.5;margin:.2rem 0 .6rem}
 .deux{display:flex;gap:.6rem;flex-wrap:wrap}
 .deux .ch{flex:1;min-width:8rem}
@@ -80,8 +80,8 @@ button.b{font:inherit;color:var(--tx);background:var(--v05);border:1px solid var
 button.b:hover:not(:disabled){background:var(--v10)}
 button.b:disabled{opacity:.5;cursor:default}
 button.b.dgr{color:var(--tx-err2);border-color:rgba(248,113,113,.4)}
-button.prim{font:inherit;background:#c9a97e;border:1px solid #c9a97e;color:#1a1208;font-weight:700;border-radius:8px;padding:.42rem .9rem;cursor:pointer;font-size:.82rem}
-button.prim:hover:not(:disabled){background:#d8bd97}
+button.prim{font:inherit;background:var(--or);border:1px solid var(--or);color:#1a1208;font-weight:700;border-radius:8px;padding:.42rem .9rem;cursor:pointer;font-size:.82rem}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 button.prim:disabled{opacity:.5;cursor:default}
 label.upl{display:inline-flex;align-items:center;gap:.4rem;cursor:pointer}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}

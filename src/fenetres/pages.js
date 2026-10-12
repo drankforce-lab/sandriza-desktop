@@ -65,7 +65,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
   padding:.35rem 1rem 0;border-bottom:1px solid var(--v08)}
 .onglets button{font:inherit;font-size:.82rem;white-space:nowrap;background:none;border:none;
   color:var(--tx2);padding:.5rem .85rem;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
-.onglets button.on{color:var(--tx-or);border-bottom-color:#c9a97e;font-weight:700}
+.onglets button.on{color:var(--tx-or);border-bottom-color:var(--or);font-weight:700}
 .corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow:hidden}
 /* 2026-10-12 : AUCUNE GLISSIERE. La liste des pages, les questions de la FAQ, les lignes d un
    guide des tailles, les liens << En vedette >> et la boite de reception sont en PAGES mesurees
@@ -78,7 +78,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .tz-haut{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem}
 .tz-haut>.carte{margin:0}
 .tz-choix{display:flex;gap:.35rem;flex-wrap:wrap;align-items:center}
-.tz-choix button.on{background:rgba(201,169,126,.16);border-color:rgba(201,169,126,.45);color:var(--tx-e6cfa8);font-weight:700}
+.tz-choix button.on{background:rgba(var(--or-rgb),.16);border-color:rgba(var(--or-rgb),.45);color:var(--tx-e6cfa8);font-weight:700}
 /* Mode jour : le brun du jour (#756a56) faisait 4,28 sur ce fond dore — un cran plus sombre, meme teinte. */
 html.jour .tz-choix button.on{color:#5f5442}
 .corps>#corps>.tz-choix[data-pages]{flex:0 0 auto;max-height:5.2rem}
@@ -90,10 +90,10 @@ label.champ .lbl{display:block;font-size:.74rem;text-transform:uppercase;letter-
 input.t,textarea.t,select.t{width:100%;background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;color:var(--tx);
   font:inherit;padding:.5rem .65rem}
 textarea.t{resize:vertical;min-height:3.2rem;line-height:1.5}
-input.t:focus,textarea.t:focus{outline:none;border-color:#c9a97e}
+input.t:focus,textarea.t:focus{outline:none;border-color:var(--or)}
 .grille2{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
 @media(max-width:640px){.grille2{grid-template-columns:1fr}}
-button.prim{font:inherit;font-weight:700;background:#c9a97e;color:#1a1408;border:none;border-radius:8px;padding:.5rem 1rem;cursor:pointer}
+button.prim{font:inherit;font-weight:700;background:var(--or);color:#1a1408;border:none;border-radius:8px;padding:.5rem 1rem;cursor:pointer}
 button.prim:disabled{opacity:.5;cursor:default}
 button.b{font:inherit;font-size:.82rem;background:var(--v05);border:1px solid var(--v16);
   color:var(--tx);border-radius:7px;padding:.35rem .7rem;cursor:pointer}
@@ -119,13 +119,13 @@ table.tb.lp td:first-child{border-left:1px solid var(--v08);border-radius:11px 0
 table.tb.lp td:last-child{border-right:1px solid var(--v08);border-radius:0 11px 11px 0}
 table.tb.lp code{font-family:ui-monospace,monospace;font-size:.72rem;color:var(--tx2);background:none;padding:0}
 .pastille{padding:.15rem .55rem;border-radius:20px;font-size:.7rem;font-weight:700}
-.pastille.int{background:rgba(201,169,126,.18);color:#d9bd94}
+.pastille.int{background:rgba(var(--or-rgb),.18);color:#d9bd94}
 .pastille.perso{background:rgba(99,102,241,.16);color:#a6a8f6}
 .note{background:var(--v04);border:1px solid var(--v10);border-radius:9px;padding:.85rem 1rem;font-size:.82rem;color:var(--tx2);line-height:1.6}
 .note b{color:var(--tx)}
 .chk{display:inline-flex;align-items:center;gap:.4rem;cursor:pointer;font-size:.82rem;color:var(--tx-cdd7e5)}
-.chk input{width:16px;height:16px;accent-color:#c9a97e}
-.badge{display:inline-block;min-width:1.2rem;text-align:center;background:#c9a97e;color:#1a1408;border-radius:20px;font-size:.7rem;font-weight:700;padding:0 .35rem;margin-left:.3rem}
+.chk input{width:16px;height:16px;accent-color:var(--or)}
+.badge{display:inline-block;min-width:1.2rem;text-align:center;background:var(--or);color:#1a1408;border-radius:20px;font-size:.7rem;font-weight:700;padding:0 .35rem;margin-left:.3rem}
 .vide{padding:1rem;text-align:center;color:var(--tx2);font-size:.82rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -154,7 +154,7 @@ table.tb.lp code{font-family:ui-monospace,monospace;font-size:.72rem;color:var(-
 .souso{display:flex;gap:.2rem;margin:0 0 .9rem;flex-wrap:wrap}
 .souso button{font:inherit;font-size:.82rem;background:var(--v04);border:1px solid var(--v10);
   color:var(--tx2);padding:.4rem .8rem;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:.4rem}
-.souso button.on{background:rgba(201,169,126,.16);border-color:rgba(201,169,126,.45);color:var(--tx-e6cfa8);font-weight:700}
+.souso button.on{background:rgba(var(--or-rgb),.16);border-color:rgba(var(--or-rgb),.45);color:var(--tx-e6cfa8);font-weight:700}
 .souso .pt{width:6px;height:6px;border-radius:50%;background:#facc15}
 
 .ed{border:1px solid var(--v12);border-radius:10px;overflow:hidden;background:var(--f-champ);display:flex;flex-direction:column}
@@ -181,8 +181,8 @@ table.tb.lp code{font-family:ui-monospace,monospace;font-size:.72rem;color:var(-
 .ed .zone p{margin:0 0 .7rem}
 .ed .zone ul,.ed .zone ol{margin:0 0 .8rem;padding-left:1.4rem}
 .ed .zone li{margin:0 0 .25rem}
-.ed .zone blockquote{margin:.8rem 0;padding:.5rem .9rem;border-left:3px solid #c9a97e;
-  background:rgba(201,169,126,.07);color:var(--tx-cfd8e4)}
+.ed .zone blockquote{margin:.8rem 0;padding:.5rem .9rem;border-left:3px solid var(--or);
+  background:rgba(var(--or-rgb),.07);color:var(--tx-cfd8e4)}
 .ed .zone a{color:var(--tx-or)}
 .ed .zone img{max-width:100%;height:auto;border-radius:5px;display:block;margin:.6rem 0}
 .ed .zone table{border-collapse:collapse;width:100%;margin:.9rem 0}
@@ -195,7 +195,7 @@ table.tb.lp code{font-family:ui-monospace,monospace;font-size:.72rem;color:var(-
    EN PLUS. Le resolveur du site cherche la chaine class="re-var-token" TELLE
    QUELLE dans le HTML : class="re-var-token jeton" ne correspondrait PAS, et la
    variable partirait sur la boutique sans jamais etre remplacee. */
-.ed .zone .re-var-token{background:rgba(201,169,126,.2);color:#e0c49a;border:1px solid rgba(201,169,126,.35);
+.ed .zone .re-var-token{background:rgba(var(--or-rgb),.2);color:#e0c49a;border:1px solid rgba(var(--or-rgb),.35);
   border-radius:5px;padding:0 .3rem;font-size:.82em;white-space:nowrap}
 .apr .re-var-token{background:rgba(196,154,108,.16);border-radius:4px;padding:0 .25rem}
 
@@ -204,7 +204,7 @@ table.tb.lp code{font-family:ui-monospace,monospace;font-size:.72rem;color:var(-
   border-radius:10px;padding:.55rem;box-shadow:0 12px 34px rgba(0,0,0,.55)}
 .grtb .cases{display:grid;grid-template-columns:repeat(10,15px);gap:2px}
 .grtb .c{width:15px;height:15px;border:1px solid var(--v20);border-radius:2px;cursor:pointer}
-.grtb .c.on{background:rgba(201,169,126,.55);border-color:#c9a97e}
+.grtb .c.on{background:rgba(var(--or-rgb),.55);border-color:var(--or)}
 .grtb .lgd{margin-top:.4rem;font-size:.74rem;color:var(--tx2);text-align:center}
 
 /* Barres flottantes : image selectionnee, cellule de tableau. */
@@ -216,7 +216,7 @@ table.tb.lp code{font-family:ui-monospace,monospace;font-size:.72rem;color:var(-
 .flot button:hover{background:var(--v09)}
 .flot button.dgr:hover{background:rgba(248,113,113,.18);color:var(--tx-f6a6a6)}
 .flot .fil{width:1px;background:var(--v14);margin:.1rem .2rem}
-.imgsel{outline:2px solid #c9a97e;outline-offset:2px}
+.imgsel{outline:2px solid var(--or);outline-offset:2px}
 
 /* Aperçu et liste des variables : memes surfaces que la boite de reception. */
 .apr{padding:1rem 1.15rem;overflow-y:auto;background:#fdfcfa;color:#2c2c2c;line-height:1.7;font-size:.88rem}
@@ -229,7 +229,7 @@ table.tb.lp code{font-family:ui-monospace,monospace;font-size:.72rem;color:var(-
 .vbtn{display:flex;justify-content:space-between;align-items:center;gap:1rem;width:100%;
   padding:.5rem .75rem;background:var(--v04);border:1px solid var(--v10);
   border-radius:8px;cursor:pointer;margin:0 0 .3rem;text-align:left;font:inherit;color:var(--tx)}
-.vbtn:hover{border-color:rgba(201,169,126,.45)}
+.vbtn:hover{border-color:rgba(var(--or-rgb),.45)}
 .vbtn code{font-size:.79rem;color:var(--tx-or);font-weight:600}
 .vbtn span{font-size:.77rem;color:var(--tx2)}
 

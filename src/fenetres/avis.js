@@ -57,13 +57,13 @@ input[type=search],select,button,textarea{font:inherit;color:var(--tx);backgroun
 input[type=search]{min-width:220px}
 select,button{cursor:pointer}
 textarea{width:100%;min-height:4.2em;resize:vertical}
-input:focus,select:focus,button:focus,textarea:focus{outline:none;border-color:#c9a97e}
+input:focus,select:focus,button:focus,textarea:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
-button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
-button.prim:hover:not(:disabled){background:#d8bc95}
+button.actif{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 button .n{display:inline-block;margin-left:.3rem;font-size:.6875rem;font-weight:700;
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
@@ -84,9 +84,9 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
 .tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tuile.cliq{cursor:pointer;user-select:none;position:relative}
-.tuile.cliq:hover{border-color:#c9a97e}
+.tuile.cliq:hover{border-color:var(--or)}
 .tuile.cliq::after{content:"›";position:absolute;top:.55rem;right:.8rem;font-size:1.1rem;color:var(--tx3)}
-.tuile.on{border-color:#c9a97e}
+.tuile.on{border-color:var(--or)}
 .val.att{color:var(--tx-att)}
 .rf-tb select{height:2.4rem;border-radius:10px;background:var(--f-0f1826);border-color:var(--v10);max-width:12rem}
 /* La note : le chiffre, puis cinq segments dessines (pas de glyphe etoile —
@@ -95,7 +95,7 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .etoiles b{font-size:.95rem}
 .etoiles .seg{display:inline-flex;gap:3px}
 .etoiles .seg i{width:10px;height:6px;border-radius:2px;background:var(--v12)}
-.etoiles .seg i.p{background:#c9a97e}
+.etoiles .seg i.p{background:var(--or)}
 .pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
@@ -137,8 +137,8 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 html.jour .boite .phx{background:rgba(255,255,255,.94)}
 .boite .phmort{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   color:var(--tx3);font-size:1.5rem}
-.boite .reponse{margin-top:.6rem;border-left:3px solid #c9a97e;padding:.4rem .7rem;
-  background:rgba(201,169,126,.07);border-radius:0 9px 9px 0;font-size:.85rem}
+.boite .reponse{margin-top:.6rem;border-left:3px solid var(--or);padding:.4rem .7rem;
+  background:rgba(var(--or-rgb),.07);border-radius:0 9px 9px 0;font-size:.85rem}
 /* La reponse publiee se lit sur quatre lignes au plus ; le texte entier est
    dans la bulle, et le bouton Repondre le rouvre en entier dans le champ. */
 .boite .reponse .rtx{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden}

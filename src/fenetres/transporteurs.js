@@ -70,7 +70,7 @@ body{background:var(--f-page);color:var(--tx);
 .tr-ong button:hover:not(:disabled){background:var(--v05);color:var(--tx)}
 .tr-ong button.on{background:var(--f-carte);border-color:var(--v08);color:var(--tx)}
 .tr-ong .pt{width:.5rem;height:.5rem;border-radius:50%;background:var(--v16);flex:0 0 auto}
-.tr-ong .pt.actif{background:#c9a97e}.tr-ong .pt.bon{background:var(--tx-ok)}.tr-ong .pt.mal{background:var(--tx-err)}
+.tr-ong .pt.actif{background:var(--or)}.tr-ong .pt.bon{background:var(--tx-ok)}.tr-ong .pt.mal{background:var(--tx-err)}
 .pan[hidden]{display:none}
 /* 7.18.4 (2026-10-11, sa capture : « toutes pognées ») : plus de carte unique coupée en deux colonnes.
    Chaque onglet = un en-tête (szr-tete) + des cartes de section côte à côte (szr-sections, socle). */
@@ -85,7 +85,7 @@ body{background:var(--f-page);color:var(--tx);
 .carte h2{margin:0;font:700 .85rem/1.2 system-ui}
 .carte .bascule{margin-left:auto;display:flex;align-items:center;gap:.4rem;font-size:.8rem;cursor:pointer;
   -webkit-user-select:none;user-select:none}
-.carte .bascule input{accent-color:#c9a97e;cursor:pointer}
+.carte .bascule input{accent-color:var(--or);cursor:pointer}
 .info{background:rgba(80,120,190,.1);border:1px solid rgba(120,160,220,.28);color:#bcd2f0;
   border-radius:8px;padding:.5rem .65rem;font-size:.74rem;line-height:1.5;margin:0 0 .7rem}
 .gr2{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
@@ -95,7 +95,7 @@ body{background:var(--f-page);color:var(--tx);
 .ch input,.ch select{width:100%;font:inherit;font-size:.83rem;color:var(--tx);background:var(--f-champ);
   border:1px solid var(--v12);border-radius:8px;padding:.4rem .5rem}
 .ch input.mono{font-family:ui-monospace,Consolas,monospace}
-.ch input:focus,.ch select:focus{outline:none;border-color:#c9a97e}
+.ch input:focus,.ch select:focus{outline:none;border-color:var(--or)}
 .ch input:disabled,.ch select:disabled{opacity:.55}
 .ch .etat{font-size:.72rem;color:var(--tx2);margin-top:.2rem}
 .ch .secret{display:flex;gap:.35rem;align-items:center}
@@ -114,8 +114,8 @@ button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.42rem .8rem;cursor:pointer}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.5;cursor:default}
-button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
-button.prim:hover:not(:disabled){background:#d8bd97}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
+button.prim:hover:not(:disabled){background:var(--or-clair)}
 .vide{padding:1rem;text-align:center;color:var(--tx2);font-size:.82rem}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 /* L etat de la cotation a la caisse (2026-10-04). */
