@@ -140,14 +140,16 @@ html.jour .direct{color:#22663a}
   font-size:.7rem;font-weight:800;color:#5a6574;border:1px solid var(--v08)}
 .ph img{width:100%;height:100%;object-fit:cover}
 .cmd .t{min-width:0;flex:1 1 auto}
-.cmd .t b{display:flex;align-items:center;gap:.35rem;font-size:.88rem;white-space:nowrap;overflow:hidden}
+.cmd .t b{display:flex;align-items:center;gap:.3rem;font-size:.8rem;white-space:nowrap;overflow:hidden}
 .cmd .a .rf-pill{font-size:.66rem;padding:.08rem .45rem}
-.cmd .t b span.nm{overflow:hidden;text-overflow:ellipsis}
+/* Un nom trop long se COUPE avec « … » (2026-10-12, sa demande) : le montant et l éclair gardent leur place. */
+.cmd .t b span.nm{min-width:0;flex:0 1 auto;overflow:hidden;text-overflow:ellipsis}
 .cmd .t .a{font-size:.7rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cmd .m{text-align:right;flex:0 0 auto}
-.cmd .m b{font-size:.95rem;font-variant-numeric:tabular-nums}
+.cmd .m b{font-size:.84rem;font-variant-numeric:tabular-nums;white-space:nowrap}
 .cmd .m div{font-size:.66rem;color:var(--tx3);white-space:nowrap}
-.prio-pill{font-size:.6rem;font-weight:800;color:var(--tx-att);background:rgba(245,158,11,.15);padding:.02rem .36rem;border-radius:99px}
+/* Prioritaire : un seul signe, plus de pastille de texte (2026-10-12, sa demande : « ça prend beaucoup d espace »). */
+.prio-pill{flex:0 0 auto;font-size:.8rem;line-height:1}
 .cadslot{display:inline}
 button.eclair{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:1.9rem;height:1.9rem;padding:0;
   border-radius:8px;border:1px solid rgba(var(--or-rgb),.6);background:rgba(var(--or-rgb),.2);color:var(--tx-or)}
@@ -415,7 +417,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           var ton = { delivered: 'vert', shipped: 'bleu', confirmed: 'bleu', verification: 'bleu', pending: 'ambre', preparing: 'ambre', cancelled: 'rouge' }[c.statut] || '';
           return '<div class="cmd' + (c.prioritaire ? ' prio' : '') + (NEUVES[c.oid] ? ' neuve' : '') + '" data-ligne="' + esc(c.oid) + '" title="${T("Ouvrir la commande")}">'
             + '<div class="t"><b><span class="nm">' + esc(c.client || c.numero || '—') + '</span>'
-            + (c.prioritaire ? '<span class="prio-pill" title="${T("Traitement prioritaire demandé par le client")}">${T("Prioritaire")}</span>' : '')
+            + (c.prioritaire ? '<span class="prio-pill" role="img" title="${T("Prioritaire")} — ${T("Traitement prioritaire demandé par le client")}" aria-label="${T("Prioritaire")}">❗</span>' : '')
             + '<span class="cadslot" data-cad="' + esc(c.oid) + '"></span></b>'
             + '<div class="a"><span class="rf-code">' + esc(c.numero) + '</span> <span class="rf-pill ' + ton + '">' + esc(szTd(c.statutLibelle || c.statut)) + '</span></div></div>'
             + '<div class="m"><b>' + fmt(c.total) + '</b><div>' + esc(ilYa(c.date)) + '</div></div>'
