@@ -59,14 +59,14 @@ button.prim:hover:not(:disabled){background:#d8bc95}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
+thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody tr{cursor:pointer}
 tbody tr:hover td{background:var(--v04)}
 tbody td{padding:.34rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody .num{font-weight:700}
 tbody .dt{font-size:.72rem;color:var(--tx2)}
-.pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
+.pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
 .pill.err{background:rgba(239,68,68,.16);color:var(--tx-err)}
@@ -89,6 +89,38 @@ html.jour .rf-av.tc{color:color-mix(in srgb,var(--cc,#6d7f96) 55%,black);
   background:color-mix(in srgb,var(--cc,#6d7f96) 14%,white);border-color:color-mix(in srgb,var(--cc,#6d7f96) 32%,white)}
 .stk{display:flex;align-items:center;gap:.5rem}
 .stk b{font-size:.95rem;min-width:1.6rem;text-align:right}
+/* LA BASCULE D AFFICHAGE (2026-10-12, sa demande : << un genre de bouton toggle >>) : deux positions
+   accolees dans un rail, la position choisie en or. Un bouton d application est PLAT (pas d ombre). */
+.vue-bascule{display:inline-flex;align-items:stretch;gap:2px;padding:3px;border-radius:10px;
+  background:var(--v04);border:1px solid var(--v12);flex:0 0 auto}
+.vue-bascule button{display:inline-flex;align-items:center;gap:.4rem;height:2rem;padding:0 .75rem;
+  border:0!important;border-radius:7px;background:transparent!important;color:var(--tx2);font-size:.8rem;font-weight:600}
+.vue-bascule button svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
+.vue-bascule button:hover:not(.on){color:var(--tx);background:var(--v06)!important}
+.vue-bascule button.on{background:#c9a97e!important;color:#1a1208}
+.lot{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;
+  background:var(--v04);border:1px solid rgba(201,169,126,.45);border-radius:11px;
+  padding:.5rem .8rem;font-size:.82rem}
+.lot label{display:flex;align-items:center;gap:.4rem;cursor:pointer}
+.lot input{width:auto}
+tbody tr.coche td{background:rgba(201,169,126,.1)}
+td.c,th.c{width:2rem;text-align:center}
+/* LA BARRE SUR DEUX RANGEES (2026-10-12) : les filtres en haut ; dessous, le compte a gauche et les
+   gestes a droite (bascule d affichage, lot, marges, nouveau produit). Une seule rangee ecrasait la recherche. */
+.rf-tb{flex-wrap:wrap!important;row-gap:.65rem!important}
+.rf-tb>.rf-rch{flex:1 1 16rem;min-width:12rem}
+.rf-tb>.rf-droite{flex:1 1 100%;display:flex;align-items:center;gap:.5rem;margin-left:0;
+  padding-top:.65rem;border-top:1px solid var(--v07)}
+.rf-tb>.rf-droite>.dt{margin-right:auto}
+/* Les boutons de la barre : meme hauteur que la recherche, libelle net. */
+.rf-droite>button{height:2.4rem;padding:0 .95rem;border-radius:10px;font-weight:600;font-size:.82rem}
+/* L AFFICHAGE COMPACT (2026-10-12, le meme que l Inventaire) : une ligne par produit, nom et categorie
+   cote a cote, pastille plus petite. La pagination mesuree en tire plus de lignes. */
+.liste.compacte tbody td{padding-top:.2rem!important;padding-bottom:.2rem!important}
+.liste.compacte .rf-av{width:1.6rem!important;height:1.6rem!important;font-size:.75rem!important;border-radius:7px!important}
+.liste.compacte .rf-prod>div{display:flex;align-items:baseline;gap:.7rem;min-width:0}
+.liste.compacte .rf-nom{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.liste.compacte .rf-sous{margin-top:0!important;white-space:nowrap}
 .pagi{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;
   padding-top:.4rem;font-size:.74rem;color:var(--tx2)}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
@@ -148,6 +180,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   /* La taille de page est MESUREE (szAutoPagination, apres chaque dessin) :
      25 n est que le repli tant que la liste n a pas encore ete disposee. */
   var TAILLE = 25;
+  /* L AFFICHAGE COMPACT, retenu sur le poste (sous garde), et << VENTE FINALE EN LOT >>, venu de
+     l Inventaire (2026-10-12, sa demande). Les coches vivent ICI, pas dans les cases affichees :
+     une selection posee puis paginee n est pas perdue. */
+  var COMPACT = false;
+  try { COMPACT = localStorage.getItem('sz-prod-compact') === '1'; } catch (e) {}
+  var LOT = false, COCHES = {};
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -324,19 +362,37 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + (TRI === 'cart' ? '<span class="ic">🛒</span> ${T("Tri panier ✓")}' : '<span class="ic">🛒</span> ${T("Trier par panier")}') + '</button>'
       + '<span class="rf-droite"><span class="dt">' + (D.total || 0) + ' '
       + (D.total > 1 ? '${T("produits")}' : '${T("produit")}') + '</span>'
-      + '<button id="p-marges" style="height:2.4rem;padding:0 .9rem" title="${T("Comparer les marges en tenant compte des coûts numériques (photos, IA, 3D)")}">${T("Vérifier mes marges")}</button>'
-      + '<button class="prim" id="p-nouveau" style="height:2.4rem;padding:0 .9rem">${T("+ Nouveau produit")}</button></span>'
+      + '<span class="vue-bascule" role="group" aria-label="${T("Affichage de la liste")}">'
+      +   '<button type="button" data-vue="detail" aria-pressed="' + (!COMPACT) + '" class="' + (!COMPACT ? 'on' : '') + '" title="${T("Affichage détaillé")}">'
+      +     '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="2.5" width="12" height="4.5" rx="1.2"/><rect x="2" y="9" width="12" height="4.5" rx="1.2"/></svg>${T("Détaillé")}</button>'
+      +   '<button type="button" data-vue="compact" aria-pressed="' + COMPACT + '" class="' + (COMPACT ? 'on' : '') + '" title="${T("Affichage compact : une ligne par produit, plus de produits par page")}">'
+      +     '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3.5h12M2 6.5h12M2 9.5h12M2 12.5h12"/></svg>${T("Compact")}</button>'
+      + '</span>'
+      + (D.peutVenteFinale && !LOT ? '<button id="p-lot" title="${T("Appliquer ou retirer la vente finale sur plusieurs produits à la fois")}">${T("Vente finale en lot")}</button>' : '')
+      + '<button id="p-marges" title="${T("Comparer les marges en tenant compte des coûts numériques (photos, IA, 3D)")}">${T("Vérifier mes marges")}</button>'
+      + '<button class="prim" id="p-nouveau">${T("+ Nouveau produit")}</button></span>'
       + '</div></div>';
 
         /* ⚠ PLEINE HAUTEUR (2026-09-19) : la carte prend tout l espace restant et
        c est la LISTE qui defile. Sans ca, une liste courte s arrete a sa
        derniere ligne et laisse des centaines de pixels morts sous elle. */
+    if (LOT) {
+      var nCoches = Object.keys(COCHES).length;
+      h += '<div class="lot">'
+        + '<label><input type="checkbox" id="lot-page"> ${T("Toute la page")}</label>'
+        + '<span id="lot-n">' + nCoches + ' '
+        + (nCoches > 1 ? '${T("produits sélectionnés")}' : '${T("produit sélectionné")}') + '</span>'
+        + '<span style="flex:1 1 auto"></span>'
+        + '<button class="prim" id="lot-app">${T("Appliquer vente finale")}</button>'
+        + '<button id="lot-ret">${T("Retirer vente finale")}</button>'
+        + '<button id="lot-annuler">${T("Annuler")}</button></div>';
+    }
     h += '<div class="carte plein">';
     var rows = D.lignes || [];
     if (!rows.length) {
       h += '<div class="vide">${T("Aucun produit ne correspond.")}</div>';
     } else {
-      h += '<div class="liste"><table><thead><tr><th>${T("Produit")}</th>'
+      h += '<div class="liste' + (COMPACT ? ' compacte' : '') + '"><table><thead><tr>' + (LOT ? '<th class="c"></th>' : '') + '<th>${T("Produit")}</th>'
         + '<th>${T("Prix")}</th><th>${T("Inventaire")}</th><th style="text-align:center">${T("Paniers")}</th></tr></thead><tbody>'
         + rows.map(function(r){
             var badges = '';
@@ -348,7 +404,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
               : '<span class="rf-mont">' + esc(fmt(r.prix)) + '</span>';
             var ini = String(r.categorie || r.nom || '?').charAt(0).toUpperCase();
             var cc = /^#[0-9a-f]{3,8}$/i.test(r.couleurCat || '') ? r.couleurCat : '';
-            return '<tr data-id="' + esc(r.id) + '" title="${T("Ouvrir la fiche")}">'
+            return '<tr data-id="' + esc(r.id) + '"' + (LOT && COCHES[r.id] ? ' class="coche"' : '')
+              + ' title="' + (LOT ? '${T("Cliquer pour sélectionner")}' : '${T("Ouvrir la fiche")}') + '">'
+              + (LOT ? '<td class="c"><input type="checkbox" data-coche="' + esc(r.id) + '" aria-label="' + esc('${T("Sélectionner")} ' + r.nom) + '"'
+                  + (COCHES[r.id] ? ' checked' : '') + '></td>' : '')
               + '<td><div class="rf-prod"><span class="rf-av' + (cc ? ' tc" style="--cc:' + cc : '') + '" title="'
               + esc(szTd(r.categorie || '')) + '" aria-hidden="true">' + esc(ini) + '</span>'
               + '<div style="min-width:0"><div class="rf-nom">' + esc(r.nom) + szVerrouCase('products', r.id) + badges + '</div>'
@@ -442,6 +501,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (bp) bp.onclick = function(){ PAGE = Math.max(0, (D.page || 0) - 1); charger(); };
     var bs = document.getElementById('p-suiv');
     if (bs) bs.onclick = function(){ PAGE = (D.page || 0) + 1; charger(); };
+    corps.querySelectorAll('[data-vue]').forEach(function(b){
+      b.onclick = function(){
+        var c = b.getAttribute('data-vue') === 'compact';
+        if (c === COMPACT) return;
+        COMPACT = c;
+        try { localStorage.setItem('sz-prod-compact', COMPACT ? '1' : '0'); } catch (e) {}
+        dessiner();
+      };
+    });
+    var bl = document.getElementById('p-lot');
+    if (bl) bl.onclick = function(){ LOT = true; COCHES = {}; dessiner(); };
+    var la = document.getElementById('lot-annuler');
+    if (la) la.onclick = function(){ LOT = false; COCHES = {}; dessiner(); };
+    var lap = document.getElementById('lot-app');
+    if (lap) lap.onclick = function(){ venteFinaleLot(true); };
+    var lr = document.getElementById('lot-ret');
+    if (lr) lr.onclick = function(){ venteFinaleLot(false); };
+    var lp = document.getElementById('lot-page');
+    if (lp) lp.onchange = function(){
+      // Coche ou decoche LA PAGE AFFICHEE ; la selection des autres pages reste ce qu elle etait.
+      (D.lignes || []).forEach(function(r){ if (lp.checked) COCHES[r.id] = true; else delete COCHES[r.id]; });
+      dessiner();
+    };
     var bm = document.getElementById('p-marges');
     if (bm) bm.onclick = ouvrirMarges;
     var nv = document.getElementById('p-nouveau');
@@ -453,12 +535,39 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     };
   }
 
+  function compterLot(){
+    var n = Object.keys(COCHES).length, e = document.getElementById('lot-n');
+    if (e) e.textContent = n + ' ' + (n > 1 ? '${T("produits sélectionnés")}' : '${T("produit sélectionné")}');
+  }
+  function cocher(id, oui){
+    if (oui) COCHES[id] = true; else delete COCHES[id];
+    var tr = corps.querySelector('tr[data-id="' + id + '"]');
+    if (tr) { tr.classList.toggle('coche', !!oui); var c = tr.querySelector('[data-coche]'); if (c) c.checked = !!oui; }
+    compterLot();
+  }
+  corps.addEventListener('change', function(ev){
+    var id = ev.target && ev.target.getAttribute && ev.target.getAttribute('data-coche');
+    if (id) cocher(id, ev.target.checked);
+  });
+  function venteFinaleLot(activer){
+    var ids = Object.keys(COCHES);
+    if (!ids.length) { dire('${T("Aucun produit sélectionné.")}', 'att'); return; }
+    appeler('stock:venteFinale', [ids, activer]).then(function(r){
+      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      dire('${T("Vente finale")} ' + (activer ? '${T("activée")}' : '${T("retirée")}') + '${T(" pour ")}' + r.n + ' ' + szPl(r.n, '${T("produit.")}', '${T("produits.")}'), 'bon');
+      LOT = false; COCHES = {};
+      charger();
+    });
+  }
+
   corps.onclick = function(ev){
     var t = ev.target;
     if (!t || !t.closest) return;
-    if (t.closest('button') || t.closest('input') || t.closest('select')) return;
+    if (t.closest('button') || t.closest('input') || t.closest('select') || t.closest('label')) return;
     var tr = t.closest('tr[data-id]');
     if (!tr) return;
+    // En mode lot, la ligne COCHE au lieu d ouvrir la fiche.
+    if (LOT) { var lid = tr.getAttribute('data-id'); cocher(lid, !COCHES[lid]); return; }
     dire('${T("Ouverture…")}');
     appeler('produits:ouvrir', [tr.getAttribute('data-id')]).then(function(r){
       dire(r.ok ? '${T("Fiche ouverte dans l’assistant Produit.")}' : expliquer(r), r.ok ? 'bon' : 'err');

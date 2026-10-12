@@ -242,7 +242,7 @@ body.cx-abarre #corps{padding-top:32px;box-sizing:border-box}
   border-radius:6px;padding:0.6rem;text-align:center}
 .cx-cle code{font:0.88rem/1.4 ui-monospace,Consolas,monospace;letter-spacing:0.15em;
   color:#3d2810;word-break:break-all}
-.cx-cle .fine{font-size:0.68rem;color:#6b5a48;margin-top:0.25rem;line-height:1.4}
+.cx-cle .fine{font-size:.6875rem;color:#6b5a48;margin-top:0.25rem;line-height:1.4}
 .cx-cle button{margin-top:0.5rem;padding:0.35rem 0.8rem;border-radius:99px;
   border:1px solid rgba(196,154,108,0.45);background:rgba(196,154,108,0.14);
   color:#6b4a20;font-weight:600;font-size:0.74rem;line-height:1.2;font-family:inherit;cursor:pointer}
@@ -275,7 +275,7 @@ select:focus{border-color:#C49A6C;box-shadow:0 0 0 3px rgba(196,154,108,0.18)}
 .cx-clepret b{display:block;font-size:0.82rem;font-weight:600;color:#2b1d0e;letter-spacing:0.005em}
 .cx-clepret span.t{display:block;font-size:0.72rem;color:#7a6a58;margin-top:0.05rem}
 .cx-clepret .etat{flex:0 0 auto;display:inline-flex;align-items:center;gap:0.3rem;padding:0.2rem 0.55rem;
-  border-radius:999px;font-size:0.68rem;font-weight:600;letter-spacing:0.02em;
+  border-radius:999px;font-size:.6875rem;font-weight:600;letter-spacing:0.02em;
   color:#1f6b3d;background:#e9f5ee;border:1px solid rgba(79,154,106,0.35)}
 .cx-clepret .etat::before{content:'';width:6px;height:6px;border-radius:50%;background:#2f8a52}
 .cx-clepret.attente .em::after,.cx-embleme.attente::after{content:'';position:absolute;
@@ -301,7 +301,7 @@ select:focus{border-color:#C49A6C;box-shadow:0 0 0 3px rgba(196,154,108,0.18)}
   border:1px solid rgba(196,154,108,0.3);color:#7d5f3c}
 .cx-methode svg{display:block;margin:0 auto 0.35rem}
 .cx-methode b{display:block;font-size:0.74rem;color:#3d2810;line-height:1.25}
-.cx-methode span{display:block;font-size:0.66rem;color:#6b5a48;line-height:1.3;margin-top:0.1rem}
+.cx-methode span{display:block;font-size:.6875rem;color:#6b5a48;line-height:1.3;margin-top:0.1rem}
 .cx-cle-plus{display:flex;align-items:flex-start;gap:0.5rem;font-size:0.76rem;color:#5a4a3a;
   line-height:1.45;margin:0 0 1.05rem;padding:0.55rem 0.7rem;border-radius:9px;
   background:rgba(79,154,106,0.08);border:1px solid rgba(79,154,106,0.25)}

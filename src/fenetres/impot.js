@@ -88,7 +88,7 @@ div.stats .s .n.ok{color:var(--tx-ok)}
 html.jour div.stats .s{background:var(--f-carte)}
 html.jour div.stats .s .n:not(.du):not(.ok){color:var(--tx)}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
+thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.28rem .4rem;border-top:1px solid var(--v055)}
 tbody .arg{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
@@ -96,7 +96,7 @@ tbody tr.total td{border-top:2px solid var(--v22);font-weight:700}
 tbody tr.credit td{color:var(--tx-ok)}
 .rang{display:flex;justify-content:space-between;gap:1rem;padding:.26rem 0;
   border-bottom:1px solid var(--v06);font-size:.86rem}
-.rang .l .sub{font-size:.68rem;color:var(--tx3);margin-left:.4rem}
+.rang .l .sub{font-size:.6875rem;color:var(--tx3);margin-left:.4rem}
 .rang.fort{border-bottom:none;border-top:2px solid var(--v20);
   margin-top:.2rem;font-weight:700;font-size:.95rem}
 .rang b{font-variant-numeric:tabular-nums}
@@ -104,7 +104,7 @@ tbody tr.credit td{color:var(--tx-ok)}
   border-radius:9px;padding:.45rem .65rem;font-size:.79rem;line-height:1.5}
 .avis.bon{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.4);color:var(--tx-ok)}
 .avis.info{background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.4);color:var(--tx-bleu)}
-.pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap;
+.pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap;
   background:rgba(148,163,184,.16);color:var(--tx-gris2);margin:.1rem .25rem 0 0}
 /* La pastille du panneau d'AVIS (fond bleu clair en mode jour) : les gris de la
    charte y tombent tous entre 3.8 et 4.2, parce que ce fond est plus clair
@@ -124,29 +124,29 @@ tbody tr.credit td{color:var(--tx-ok)}
 .graphe .b{flex:1 1 0;background:rgba(201,169,126,.5);border-radius:3px 3px 0 0;min-height:2px}
 .graphe .b:hover{background:#c9a97e}
 .mois{display:flex;gap:.25rem;margin-top:.2rem}
-.mois span{flex:1 1 0;text-align:center;font-size:.6rem;color:var(--tx3)}
+.mois span{flex:1 1 0;text-align:center;font-size:.6875rem;color:var(--tx3)}
 .aide{font-size:.75rem;color:var(--tx2);line-height:1.45}
 /* ── Onglets « Mon entreprise » et « Aide-mémoire » (#33) ── */
 .grillecfg{display:grid;grid-template-columns:repeat(auto-fit,minmax(26rem,1fr));gap:.7rem;align-items:start}
 .carte.large{grid-column:1/-1}
 .deux{display:grid;grid-template-columns:1fr 1fr;gap:0 .7rem}
 label.champ{display:block;margin:0 0 .7rem}
-label.champ .lbl{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;
+label.champ .lbl{display:block;font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;
   color:var(--tx2);margin:0 0 .22rem}
-label.champ .req{color:var(--tx-att);text-transform:none;letter-spacing:0;font-size:.64rem}
-label.champ .sub{display:block;font-size:.68rem;color:var(--tx3);margin:.2rem 0 0;line-height:1.45}
+label.champ .req{color:var(--tx-att);text-transform:none;letter-spacing:0;font-size:.6875rem}
+label.champ .sub{display:block;font-size:.6875rem;color:var(--tx3);margin:.2rem 0 0;line-height:1.45}
 input.t,select.t{width:100%;background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;
   color:var(--tx);font:inherit;font-size:.85rem;padding:.4rem .55rem}
 input.t.mono{font-family:Consolas,monospace;font-size:.8rem;text-transform:uppercase}
 input.t:focus,select.t:focus{outline:none;border-color:#c9a97e}
 input.t:disabled,select.t:disabled{opacity:.45}
-button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:700;
+button .n{display:inline-block;margin-left:.3rem;font-size:.6875rem;font-weight:700;
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
 button .n.hi{background:rgba(245,158,11,.28);color:var(--tx-att)}
 .liens{display:flex;gap:.9rem;flex-wrap:wrap;margin-top:.9rem;font-size:.76rem}
 .liens a{color:var(--tx-or);text-decoration:none}
 .liens a:hover{text-decoration:underline}
-.sstitre{font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);
+.sstitre{font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);
   font-weight:700;margin:.6rem 0 .3rem}
 .ech{display:flex;gap:.6rem;align-items:flex-start;padding:.3rem .45rem;margin:0 0 .25rem;
   border-radius:7px;border:1px solid rgba(201,169,126,.32);background:rgba(201,169,126,.06)}
@@ -155,10 +155,10 @@ button .n.hi{background:rgba(245,158,11,.28);color:var(--tx-att)}
 .ech.passe .d{color:var(--tx3)}
 .ech strong{display:block;font-size:.8rem;font-weight:600}
 .ech.passe strong{font-weight:400}
-.ech .dt{display:block;font-size:.68rem;color:var(--tx3)}
+.ech .dt{display:block;font-size:.6875rem;color:var(--tx3)}
 .ded{padding:.28rem 0;border-bottom:1px solid var(--v055)}
 .ded strong{display:block;font-size:.78rem}
-.ded .dt{display:block;font-size:.68rem;color:var(--tx3)}
+.ded .dt{display:block;font-size:.6875rem;color:var(--tx3)}
 .form{display:flex;align-items:center;gap:.5rem;padding:.28rem 0;
   border-bottom:1px solid var(--v055)}
 .form .code{font-family:Consolas,monospace;font-size:.74rem;font-weight:700;color:var(--tx-or);

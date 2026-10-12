@@ -54,7 +54,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
    une bannière éteinte d'une bannière vivante. --tx-jaune sortait à 4.38 sur
    blanc — juste sous le seuil, donc juste illisible pour qui lit mal. --tx-att
    dit la même chose en un ton plus soutenu. */
-.bloc .masq{font-size:.68rem;color:var(--tx-att);margin-left:.35rem;font-weight:600}
+.bloc .masq{font-size:.6875rem;color:var(--tx-att);margin-left:.35rem;font-weight:600}
 /* ⚠ UN BLOC ÉTEINT SE LIT ENCORE. À .5, le nom de la bannière et sa description
    tombaient sous 2.6 de contraste : on ne pouvait plus savoir LAQUELLE est
    éteinte, ce qui est pourtant la seule raison de regarder cette liste. */
@@ -72,7 +72,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .diapo{background:var(--f-champ);border:1px solid var(--v12);border-radius:10px;padding:.7rem .8rem;margin:0 0 .7rem}
 .diapo .tete2{display:flex;align-items:center;gap:.5rem;margin:0 0 .5rem}
 .diapo .apercu{width:3.4rem;height:2.1rem;border-radius:5px;flex-shrink:0;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
-.diapo .apercu .t{position:relative;color:var(--tx-blanc);font-size:.55rem;text-shadow:0 1px 2px rgba(0,0,0,.7);padding:0 .2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.diapo .apercu .t{position:relative;color:var(--tx-blanc);font-size:.6875rem;text-shadow:0 1px 2px rgba(0,0,0,.7);padding:0 .2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .diapo .tete2 .nm{flex:1;font-size:.82rem;font-weight:600}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

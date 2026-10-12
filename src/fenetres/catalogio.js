@@ -75,7 +75,7 @@ button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 input[type=file]{padding:.5rem;width:100%;max-width:34rem}
 .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
   gap:1rem;align-items:start}
-.lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);
+.lbl{font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);
   font-weight:700;margin:0 0 .35rem}
 .radio{display:flex;gap:.5rem;align-items:flex-start;padding:.5rem .6rem;
   border:1px solid var(--v14);border-radius:9px;cursor:pointer;
@@ -96,7 +96,7 @@ input[type=file]{padding:.5rem;width:100%;max-width:34rem}
   border-radius:11px;padding:.55rem .7rem}
 .dossier.repli{border-color:rgba(217,119,6,.3)}
 .dossier .dl{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
-.dossier .dk{font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
+.dossier .dk{font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 /* ⚠ Le chemin ne coupe pas la fenetre : il s ellipse et le titre porte l entier.
    Un « D:\\Comptabilite\\2026\\Exports SANDRIZA » sur un lecteur reseau depasse
    largement la largeur utile, et un bloc qui s elargit pousse la barre dehors. */
@@ -111,16 +111,16 @@ input[type=file]{padding:.5rem;width:100%;max-width:34rem}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.55rem}
 .tuile{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.5rem .7rem}
-.tuile .k{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
+.tuile .k{font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 .tuile .v{font-size:1.1rem;font-weight:800;margin-top:.1rem}
-.tuile .z{font-size:.66rem;color:var(--tx2);margin-top:.05rem}
+.tuile .z{font-size:.6875rem;color:var(--tx2);margin-top:.05rem}
 .tuile.err .v{color:var(--tx-err)}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;
   color:var(--tx2);font-weight:700}
 table{width:100%;border-collapse:collapse;font-size:.83rem}
-thead th{text-align:left;padding:.26rem .4rem;font-size:.66rem;text-transform:uppercase;
+thead th{text-align:left;padding:.26rem .4rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.05em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.3rem .4rem;border-top:1px solid var(--v055);vertical-align:top}
 tbody tr:hover td{background:var(--v04)}

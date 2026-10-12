@@ -66,12 +66,12 @@ button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
 button.prim:hover:not(:disabled){background:#a3824f}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
-button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:700;
+button .n{display:inline-block;margin-left:.3rem;font-size:.6875rem;font-weight:700;
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
 button .n.hi{background:rgba(239,68,68,.28);color:var(--tx-err2)}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.5rem}
 .tuile{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:.5rem .65rem}
-.tuile .lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
+.tuile .lbl{font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 .tuile .val{font-size:.95rem;font-weight:800;margin-top:.1rem}
 .tuile .val.bon{color:var(--tx-ok)}.tuile .val.err{color:var(--tx-err)}
 /* ── La refonte de l Inventaire (2026-09-25) ── */
@@ -82,7 +82,7 @@ button .n.hi{background:rgba(239,68,68,.28);color:var(--tx-err2)}
 .tuile .val.att{color:var(--tx-att)}
 .ligne{display:flex;align-items:center;gap:.8rem}
 .ligne .gauche{flex:1 1 auto;min-width:0}
-.tuile .sub{font-size:.66rem;color:var(--tx2);margin-top:.1rem}
+.tuile .sub{font-size:.6875rem;color:var(--tx2);margin-top:.1rem}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;
@@ -93,7 +93,7 @@ button .n.hi{background:rgba(239,68,68,.28);color:var(--tx-err2)}
 .ligne .haut{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}
 .ligne .droite{margin-left:auto;text-align:right}
 .dt{font-size:.72rem;color:var(--tx2)}
-.pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
+.pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
 .pill.err{background:rgba(239,68,68,.16);color:var(--tx-err)}
@@ -112,7 +112,7 @@ button .n.hi{background:rgba(239,68,68,.28);color:var(--tx-err2)}
 .bulle.visiteur{align-self:flex-start;background:var(--v07)}
 .bulle.agent{align-self:flex-end;background:rgba(201,169,126,.16);border:1px solid rgba(201,169,126,.3)}
 .bulle.bot{align-self:flex-start;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.25)}
-.bulle .qd{display:block;font-size:.64rem;color:var(--tx2);margin-top:.15rem}
+.bulle .qd{display:block;font-size:.6875rem;color:var(--tx2);margin-top:.15rem}
 .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.7rem;flex-wrap:wrap}
 .vide{padding:1.3rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;

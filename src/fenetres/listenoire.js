@@ -68,7 +68,7 @@ input.t:focus,select.t:focus{outline:none;border-color:#c9a97e}
 .sug-it .r{font-weight:600;font-size:.84rem}
 .sug-it .v{font-size:.72rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sug-vide{padding:.5rem .6rem;font-size:.8rem;color:var(--tx2)}
-.sug-src{padding:.25rem .6rem;font-size:.66rem;color:var(--tx2);border-top:1px solid var(--v06)}
+.sug-src{padding:.25rem .6rem;font-size:.6875rem;color:var(--tx2);border-top:1px solid var(--v06)}
 .prim{font:inherit;font-size:.84rem;font-weight:700;border:0;border-radius:8px;padding:.5rem 1rem;background:#c9a97e;color:#1a1408;cursor:pointer}
 .prim:disabled{opacity:.5;cursor:default}
 .b{font:inherit;font-size:.8rem;border:1px solid var(--v16);border-radius:8px;padding:.42rem .8rem;background:var(--v05);color:var(--tx);cursor:pointer}

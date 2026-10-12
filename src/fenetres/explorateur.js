@@ -74,7 +74,7 @@ input:focus,select:focus,button:focus{outline:none;border-color:#c9a97e}
    parcourir 500 photos sans defiler pendant une minute. */
 table{width:100%;border-collapse:collapse;font-size:.82rem}
 thead th{position:sticky;top:0;z-index:1;text-align:left;padding:.26rem .4rem;
-  font-size:.67rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);
+  font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);
   font-weight:700;background:var(--f-page);border-bottom:1px solid var(--v12)}
 /* ⚠ AUCUNE LIGNE DE TABLEAU, ET UN SURVOL DISCRET (demande du 2026-08-14 :
    << l effet de survol est affreux, on ne devrait pas voir les lignes du
@@ -161,14 +161,14 @@ html.jour .apercu .accueil .ico{color:#6a5840}
 .vig.pris{border-color:#c9a97e;box-shadow:0 0 0 1px #c9a97e inset}
 .vig.actif{outline:2px solid #c9a97e;outline-offset:-2px}
 .vig img{width:100%;height:6rem;object-fit:contain;background:var(--f-pied);display:block}
-.vig .nm{font-size:.68rem;color:var(--tx2);padding:.18rem .3rem;white-space:nowrap;
+.vig .nm{font-size:.6875rem;color:var(--tx2);padding:.18rem .3rem;white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis}
 .pastilles{display:flex;gap:.15rem}
 /* ⚠ CETTE PASTILLE PORTE PARFOIS UN PICTOGRAMME SEUL (le maillon « produit
    lié », dont le sens tient dans son attribut title). On ne peut donc pas la déclarer
    décorative : elle doit se LIRE. --tx2 la laissait à 4.2 sur les fonds des
    thèmes sombres ; --tx-bleute passe partout. */
-.pt{font-size:.62rem;padding:.02rem .26rem;border-radius:4px;
+.pt{font-size:.6875rem;padding:.02rem .26rem;border-radius:4px;
   background:var(--v08);color:var(--tx-bleute)}
 .pt.fait{color:var(--tx-ok)}
 /* ⚠ DE JOUR, SUR UNE LIGNE COCHEE (fond beige), le vert du socle tombait a 4.33

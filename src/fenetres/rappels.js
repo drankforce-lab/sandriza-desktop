@@ -77,9 +77,9 @@ html.jour button.aconf{color:#7f1d1d}
 button.fait{border-color:rgba(74,222,128,.45);color:var(--tx-ok)}
 .chiffres{display:grid;grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));gap:.6rem}
 .chiffre{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:.55rem .75rem}
-.chiffre .lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
+.chiffre .lbl{font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .chiffre .val{font:700 1.15rem/1.25 ui-monospace,Consolas,monospace;margin-top:.12rem}
-.chiffre .sous{font-size:.68rem;color:var(--tx3);margin-top:.08rem}
+.chiffre .sous{font-size:.6875rem;color:var(--tx3);margin-top:.08rem}
 .chiffre.retard .val{color:var(--tx-err2)}
 .chiffre.auj .val{color:var(--tx-att)}
 .duo{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(21rem,1fr);gap:.7rem;align-items:start}
@@ -95,7 +95,7 @@ button.fait{border-color:rgba(74,222,128,.45);color:var(--tx-ok)}
 .pages button.pgf{min-width:1.9rem;padding:.08rem .45rem;font-size:.95rem;line-height:1.1}
 .gris{color:var(--tx2)}.bon{color:var(--tx-ok)}.mauvais{color:var(--tx-err2)}.attn{color:var(--tx-att)}
 .sous2{font-size:.72rem;color:var(--tx2);margin-top:.05rem}
-.pill{display:inline-block;font-size:.63rem;padding:.04rem .45rem;border-radius:99px;
+.pill{display:inline-block;font-size:.6875rem;padding:.04rem .45rem;border-radius:99px;
   white-space:nowrap;font-weight:700;vertical-align:baseline}
 .pill.g{background:rgba(148,163,184,.14);color:var(--tx-94a3b8);font-weight:600}
 .pill.mod{background:rgba(201,169,126,.16);color:var(--tx);font-weight:600}
@@ -110,7 +110,7 @@ button.fait{border-color:rgba(74,222,128,.45);color:var(--tx-ok)}
 .appel .boutons{justify-content:center}
 
 /* ── La liste ────────────────────────────────────────────────────────────── */
-.grp{display:flex;align-items:center;gap:.5rem;font:700 .66rem/1.2 system-ui;text-transform:uppercase;
+.grp{display:flex;align-items:center;gap:.5rem;font:700 .6875rem/1.2 system-ui;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);padding:.45rem .2rem .2rem;border-bottom:1px solid var(--v08)}
 .grp .nb{font-weight:400;color:var(--tx3)}
 .grp.retard{color:var(--tx-err2)}.grp.aujourdhui{color:var(--tx-att)}

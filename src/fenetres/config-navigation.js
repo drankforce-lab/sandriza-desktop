@@ -74,7 +74,7 @@ button.prim:hover:not(:disabled){background:#d8bd97}
 button.danger{color:#f4b4b4;border-color:rgba(240,120,120,.35)}
 button.danger.arme{background:#7f1d1d;border-color:#b91c1c;color:var(--tx-sur-accent)}
 .sous{background:var(--f-champ);border-top:1px solid var(--v08);padding:.4rem .8rem .55rem}
-.sous .tt{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);margin-bottom:.3rem}
+.sous .tt{font-size:.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);margin-bottom:.3rem}
 .enf{display:flex;align-items:center;gap:.5rem;padding:.28rem .5rem;background:var(--f-carte);
   border:1px solid var(--v07);border-radius:6px;margin-bottom:.25rem}
 .enf .fl{color:var(--tx3);font-size:.8rem}

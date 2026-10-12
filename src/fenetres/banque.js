@@ -87,13 +87,13 @@ button.dgr{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
 .val.att{color:var(--tx-att)}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center}
 table{width:100%;border-collapse:collapse;font-size:.79rem}
-thead th{text-align:left;padding:.22rem .35rem;font-size:.65rem;text-transform:uppercase;
+thead th{text-align:left;padding:.22rem .35rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.3rem .35rem;border-top:1px solid var(--v055);vertical-align:top}
 tbody tr:hover td{background:var(--v03)}
 td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .dt{font-size:.7rem;color:var(--tx2)}
-.pill{display:inline-block;font-size:.64rem;padding:.05rem .45rem;border-radius:99px;
+.pill{display:inline-block;font-size:.6875rem;padding:.05rem .45rem;border-radius:99px;
   white-space:nowrap;font-weight:700}
 .pill.open{background:rgba(59,130,246,.16);color:var(--tx-bleu)}
 .pill.in_progress{background:rgba(245,158,11,.16);color:#fcd34d}
@@ -108,7 +108,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
 .ecart.bon{border:2px solid rgba(16,185,129,.5);background:rgba(16,185,129,.08)}
 .ecart.mauvais{border:2px solid rgba(248,113,113,.5);background:rgba(248,113,113,.08)}
 .ecart .col{min-width:7rem}
-.ecart .k{font-size:.64rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700}
+.ecart .k{font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700}
 .ecart .v{font:700 1.05rem/1.2 system-ui;font-variant-numeric:tabular-nums}
 .ecart .verdict{font:700 1rem/1.2 system-ui}
 .ecart.bon .verdict{color:var(--tx-ok2)}.ecart.mauvais .verdict{color:var(--tx-err2)}

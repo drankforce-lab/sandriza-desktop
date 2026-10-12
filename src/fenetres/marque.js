@@ -122,11 +122,11 @@ button.dgr{color:var(--tx-err);border-color:rgba(248,113,113,.4)}
 .lgn .pastille{width:2.4rem;height:2.4rem;border-radius:10px;display:flex;align-items:center;
   justify-content:center;font:800 1.05rem/1 Georgia,serif;color:var(--tx-blanc)}
 .lgn .tt{font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
-.lgn .ss{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase}
+.lgn .ss{font-size:.6875rem;letter-spacing:.1em;text-transform:uppercase}
 .lgn .cadre{border-radius:8px;padding:.6rem;width:100%;max-width:15rem;margin-top:.2rem}
 .lgn .champ{background:var(--f-0f172a);border:1px solid var(--v18);border-radius:4px;
-  padding:.25rem .45rem;margin-bottom:.35rem;color:var(--tx-f1f5f9);font-size:.62rem;text-align:left}
-.lgn .bt{border-radius:4px;padding:.28rem;text-align:center;color:var(--tx-blanc);font-size:.62rem;font-weight:600}
+  padding:.25rem .45rem;margin-bottom:.35rem;color:var(--tx-f1f5f9);font-size:.6875rem;text-align:left}
+.lgn .bt{border-radius:4px;padding:.28rem;text-align:center;color:var(--tx-blanc);font-size:.6875rem;font-weight:600}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -314,7 +314,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += img ? '<img src="' + esc(img) + '" alt="">'
              : '<div class="nm" style="' + (gs || 'color:#1d2433') + '">' + esc(nom) + '</div>';
     var sl = v('m-slogan');
-    if (!img && sl) h += '<div class="st" style="letter-spacing:.18em;font-size:.62rem;text-transform:uppercase">' + esc(sl) + '</div>';
+    if (!img && sl) h += '<div class="st" style="letter-spacing:.18em;font-size:.6875rem;text-transform:uppercase">' + esc(sl) + '</div>';
     h += '</div>';
     el.innerHTML = h;
   }

@@ -79,7 +79,7 @@ button.prim:hover:not(:disabled){background:#d8bd97}
 .onglets > button{background:transparent;border:1px solid transparent;color:var(--tx2);padding:.36rem .8rem;
   display:inline-flex;align-items:center;gap:.4rem;font-weight:600}
 .onglets > button:hover{background:var(--v05);color:var(--tx)}
-.onglets .nb{font-size:.68rem;font-weight:700;padding:.04rem .4rem;border-radius:999px;background:var(--v08);color:var(--tx2)}
+.onglets .nb{font-size:.6875rem;font-weight:700;padding:.04rem .4rem;border-radius:999px;background:var(--v08);color:var(--tx2)}
 html.jour .onglets .nb{color:#3f4955}
 /* L onglet des pays : une seule carte qui remplit la fenêtre, le tableau défile seul. */
 .corps.plein{display:flex;flex-direction:column;overflow:hidden}
@@ -92,7 +92,7 @@ html.jour .onglets .nb{color:#3f4955}
 .ptab::-webkit-scrollbar{width:8px}
 .ptab::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 table.pays{width:100%;border-collapse:collapse}
-table.pays th{position:sticky;top:0;z-index:1;background:var(--f-carte);box-shadow:0 1px 0 var(--v10);text-align:left;font:700 .68rem/1.3 system-ui;
+table.pays th{position:sticky;top:0;z-index:1;background:var(--f-carte);box-shadow:0 1px 0 var(--v10);text-align:left;font:700 .6875rem/1.3 system-ui;
   text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);padding:.45rem .7rem;
   border-bottom:1px solid var(--v10)}
 table.pays td{padding:.38rem .7rem;border-bottom:1px solid var(--v05);font-size:.84rem}

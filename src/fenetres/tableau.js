@@ -62,7 +62,7 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
   padding:.6rem .8rem;min-width:0;cursor:pointer;user-select:none;
   transition:border-color .13s}
 .tuile:hover{border-color:#c9a97e}
-.tuile .lbl{font-size:.66rem;text-transform:uppercase;letter-spacing:.07em;color:var(--tx2);
+.tuile .lbl{font-size:.6875rem;text-transform:uppercase;letter-spacing:.07em;color:var(--tx2);
   filter:grayscale(1) brightness(1.45);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* Le chiffre dans la police de l ecran, en gras (refonte du 2026-09-25). */
@@ -127,16 +127,30 @@ html.jour .afaire .titre{color:#6f5330}
   letter-spacing:.09em;color:var(--tx2);font-weight:700;display:flex;align-items:center;gap:.5rem}
 .carte h2 .tout{margin-left:auto}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
+thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.3rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody .num{font-weight:700}
 tbody .dt{font-size:.72rem;color:var(--tx2)}
 .cadslot{display:inline}
+/* LA COMMANDE PRIORITAIRE (2026-10-12, sa demande) : pastille ambre a cote du nom, et un filet ambre
+   au bord de la ligne — se voit d un coup d oeil dans une liste. */
+tbody tr.prio td:first-child{box-shadow:inset 3px 0 0 var(--tx-att)}
+.prio-pill{display:inline-flex;align-items:center;margin-left:.5rem;padding:.05rem .5rem;border-radius:99px;
+  font-size:.6875rem;font-weight:700;letter-spacing:.02em;background:rgba(245,158,11,.16);color:var(--tx-att);vertical-align:middle}
+/* L ECLAIR : lancer la preparation depuis le tableau de bord. Le verrou d un collegue l eteint en
+   direct (sondage des verrous, 3 s) ; il est RELU au clic avant d ouvrir quoi que ce soit. */
+td.geste{width:2.6rem;text-align:right}
+button.eclair{display:inline-flex;align-items:center;justify-content:center;width:2.1rem;height:2.1rem;padding:0;
+  border-radius:9px;border:1px solid rgba(201,169,126,.6);background:rgba(201,169,126,.2);color:#e2c49a;cursor:pointer}
+button.eclair svg{width:16px;height:16px;fill:currentColor}
+button.eclair:hover:not(:disabled){background:#c9a97e;color:#1a1208;border-color:#c9a97e}
+button.eclair:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(1)}
+html.jour button.eclair{color:#7a5a2c;border-color:rgba(122,90,44,.4);background:rgba(201,169,126,.16)}
 /* Une ligne recente s ouvre au clic : la main le dit (le survol vient du socle). */
 tbody tr.ouvrable{cursor:pointer}
 /* Le cadenas : la pastille du socle (CSS_REFONTE), plus de regle locale. */
-.pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
+.pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
 .pill.err{background:rgba(239,68,68,.16);color:var(--tx-err)}
@@ -380,7 +394,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!vue.length) {
       h += '<div class="vide">${T("Aucune entrée.")}</div>';
     } else {
-      h += '<div class="liste"><table><thead><tr><th>${T("Client et commande")}</th><th>${T("Total")}</th><th>${T("Statut")}</th></tr></thead><tbody>'
+      /* L ECLAIR n existe que pour les COMMANDES, et seulement si le role peut preparer. */
+      var geste = !facture && D && D.peutPreparer;
+      h += '<div class="liste"><table><thead><tr><th>${T("Client et commande")}</th><th>${T("Total")}</th><th>${T("Statut")}</th>'
+        + (geste ? '<th class="geste"></th>' : '') + '</tr></thead><tbody>'
         + vue.map(function(r){
             // ⚠ CADENAS DYNAMIQUE (#38) : la case data-cad est remplie/videe par
             // le sondage des verrous, SANS redessiner le tableau. Une commande ET
@@ -394,15 +411,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}
                listes natives, rien de refait ici. Sans ID, la ligne reste inerte
                plutot que d ouvrir une fenetre vide. */
             var cibleL = facture ? (r.fid || '') : (r.oid || '');
-            return '<tr' + (cibleL ? ' class="ouvrable" data-ligne="' + (facture ? 'f' : 'c') + ':' + esc(cibleL) + '"'
+            var prio = !facture && r.prioritaire;
+            var classes = (cibleL ? 'ouvrable' : '') + (prio ? (cibleL ? ' ' : '') + 'prio' : '');
+            /* Une commande deja partie, livree, annulee ou remboursee n a plus rien a preparer. */
+            var preparable = geste && r.oid && ['shipped', 'delivered', 'cancelled', 'refunded', 'returned'].indexOf(r.statut) < 0;
+            return '<tr' + (classes ? ' class="' + classes + '"' : '') + (cibleL ? ' data-ligne="' + (facture ? 'f' : 'c') + ':' + esc(cibleL) + '"'
                 + ' title="' + (facture ? '${T("Ouvrir la facture")}' : '${T("Ouvrir la commande")}') + '"' : '')
               + '><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(r.client)) + '</span>'
               + '<div style="min-width:0"><div class="rf-nom">' + esc(r.client || '—')
+              + (prio ? '<span class="prio-pill" title="${T("Traitement prioritaire demandé par le client")}">${T("Prioritaire")}</span>' : '')
               + '<span class="cadslot" data-cad="' + esc(r.oid || '') + '"></span></div>'
               + '<div class="rf-sous"><span class="rf-code">' + esc(r.numero) + '</span><span>·</span>'
               + '<span>' + esc(fmtDate(r.date)) + '</span></div></div></div></td>'
               + '<td><span class="rf-mont">' + esc(fmt(r.total)) + '</span></td>'
-              + '<td>' + pilule(r.statut, szTd(r.statutLibelle)) + '</td></tr>';
+              + '<td>' + pilule(r.statut, szTd(r.statutLibelle)) + '</td>'
+              + (geste ? '<td class="geste">' + (preparable
+                  ? '<button type="button" class="eclair" data-prep="' + esc(r.oid) + '" data-eclair="' + esc(r.oid) + '"'
+                    + ' title="${T("Lancer la préparation")}" aria-label="' + esc('${T("Lancer la préparation de")} ' + r.numero) + '">'
+                    + '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9.2 1 3 9.1h4.1L6.6 15 13 6.6H8.8z"/></svg></button>'
+                  : '') + '</td>' : '')
+              + '</tr>';
           }).join('')
         + '</tbody></table></div>';
     }
@@ -652,6 +680,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (pr) { if (pr.disabled) return; var v0 = pr.getAttribute('data-pgr').split(':'); PG[v0[0]] = (PG[v0[0]] || 0) + parseInt(v0[1], 10); dessiner(); return; }
     var ou = t.closest('[data-ouvre]');
     if (ou) { ouvrir(ou.getAttribute('data-ouvre')); return; }
+    var ec = t.closest('button[data-prep]');
+    if (ec) { if (!ec.disabled) lancerPreparation(ec.getAttribute('data-prep'), ec); return; }
     var li = t.closest('tr[data-ligne]');
     if (li) {
       var v = li.getAttribute('data-ligne'), id = v.slice(2);
@@ -763,6 +793,34 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     for (var i = 0; i < slots.length; i++){
       slots[i].innerHTML = cadInner(slots[i].getAttribute('data-cad'));
     }
+    /* L ECLAIR S ETEINT quand un COLLEGUE tient la commande — le meme verrou que la fenetre
+       Commandes (<< En traitement par >>). Sa propre preparation ouverte ne l eteint pas : un clic
+       la ramene simplement au premier plan. */
+    var ecs = document.querySelectorAll('button[data-eclair]');
+    for (var j = 0; j < ecs.length; j++){
+      var v = VERROUS[ecs[j].getAttribute('data-eclair')];
+      var pris = !!(v && !v.mine);
+      ecs[j].disabled = pris;
+      ecs[j].title = pris ? ('${T("En traitement par")} ' + (v.par || '${T("un collegue")}')) : '${T("Lancer la préparation")}';
+    }
+  }
+  /* ⚠ LE VERROU EST RELU AU CLIC : le sondage a jusqu a trois secondes de retard, et un collegue
+     peut avoir pris la commande entre-temps. On ne lance rien tant que la lecture n a pas repondu. */
+  function lancerPreparation(oid, bouton){
+    if (bouton) bouton.disabled = true;
+    appeler('tableau:verrous', []).then(function(r){
+      if (r && r.ok && r.orders) { VERROUS = r.orders; appliquerVerrous(); }
+      var v = VERROUS[oid];
+      if (v && !v.mine) {
+        dire('${T("En traitement par")} ' + (v.par || '${T("un collegue")}') + '${T(" — la préparation reste fermée tant qu’elle n’est pas libérée.")}', 'att');
+        return;
+      }
+      dire('${T("Ouverture…")}');
+      return appeler('commandes:preparer', [oid]).then(function(x){
+        if (bouton) bouton.disabled = false;
+        dire(x && x.ok ? '${T("Préparation ouverte dans sa fenêtre.")}' : expliquer(x), x && x.ok ? 'bon' : 'err');
+      });
+    });
   }
   function chargerVerrous(){
     appeler('tableau:verrous', []).then(function(r){

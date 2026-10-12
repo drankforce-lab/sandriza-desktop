@@ -59,7 +59,7 @@ h1{font-size:1rem;margin:0;font-weight:650}
 .chiffres{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin:0 0 .9rem}
 .kpi{background:var(--f-champ);border:1px solid var(--v12);border-radius:9px;padding:.6rem .7rem;text-align:center}
 .kpi .n{font-size:1.35rem;font-weight:700;line-height:1.15;font-variant-numeric:tabular-nums}
-.kpi .l{font-size:.68rem;color:var(--tx2);margin-top:.15rem}
+.kpi .l{font-size:.6875rem;color:var(--tx2);margin-top:.15rem}
 .kpi.chaud .n{color:var(--tx-jaune)}
 table{width:100%;border-collapse:collapse;font-size:.79rem}
 thead th{text-align:left;font-weight:600;color:var(--tx2);font-size:.71rem;letter-spacing:.04em;

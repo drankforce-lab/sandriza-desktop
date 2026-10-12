@@ -294,11 +294,11 @@ label.case .quoi{color:var(--tx2);font-size:.75rem;display:block}
 
 /* ══ LA MATRICE DES DROITS ══════════════════════════════════════════════════ */
 .permtb{width:100%;border-collapse:collapse}
-.permtb th{font-size:.68rem;color:var(--tx2);font-weight:600;padding:.3rem .5rem;text-align:center;white-space:nowrap}
+.permtb th{font-size:.6875rem;color:var(--tx2);font-weight:600;padding:.3rem .5rem;text-align:center;white-space:nowrap}
 .permtb th.mod{text-align:left}
 .permtb td{padding:.24rem .5rem;text-align:center;font-size:.8rem}
 .permtb td.mod{text-align:left}
-.permtb tr.grp td{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx-or);background:var(--v03);padding:.5rem .5rem .3rem;border-top:1px solid var(--v10);text-align:left}
+.permtb tr.grp td{font-size:.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx-or);background:var(--v03);padding:.5rem .5rem .3rem;border-top:1px solid var(--v10);text-align:left}
 .permtb tbody tr:not(.grp):hover{background:var(--v03)}
 .permtb input{accent-color:#c9a97e}
 .permtb .mnom{display:flex;align-items:center;gap:.4rem}

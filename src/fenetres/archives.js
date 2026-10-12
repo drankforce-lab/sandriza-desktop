@@ -62,20 +62,20 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button.geste{padding:.14rem .5rem;font-size:.73rem;white-space:nowrap}
 button.att{border-color:rgba(245,158,11,.55);color:var(--tx-att)}
-button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:700;
+button .n{display:inline-block;margin-left:.3rem;font-size:.6875rem;font-weight:700;
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 .avis{font-size:.76rem;color:var(--tx2);line-height:1.5;padding:.1rem .15rem}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
+thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.34rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody tr:hover td{background:var(--v04)}
 tbody .num{font-weight:700}
 tbody .dt{font-size:.72rem;color:var(--tx2)}
 tbody .fin{white-space:nowrap;text-align:right}
-.pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
+.pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
 .pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}

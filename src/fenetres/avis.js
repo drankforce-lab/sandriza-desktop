@@ -65,13 +65,13 @@ button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bc95}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
-button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:700;
+button .n{display:inline-block;margin-left:.3rem;font-size:.6875rem;font-weight:700;
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
 button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
+thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody tr{cursor:pointer}
 tbody tr:hover td{background:var(--v04)}
@@ -96,7 +96,7 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .etoiles .seg{display:inline-flex;gap:3px}
 .etoiles .seg i{width:10px;height:6px;border-radius:2px;background:var(--v12)}
 .etoiles .seg i.p{background:#c9a97e}
-.pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
+.pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
 .pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
@@ -121,7 +121,7 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .boite .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.5rem;
   padding:.55rem 0;border-top:1px solid var(--v08);border-bottom:1px solid var(--v08);
   margin-bottom:.6rem}
-.boite .grille .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
+.boite .grille .l{font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .boite .grille .v{font-size:.84rem;font-weight:600}
 .boite .texte{overflow-wrap:anywhere;font-size:.88rem;line-height:1.55;
   background:var(--v03);border:1px solid var(--v07);border-radius:9px;padding:.6rem .7rem}
@@ -432,7 +432,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '<div class="texte" data-pages="avis-texte">' + (morceaux(r.texte).map(function(m){
           return '<p>' + esc(m) + '</p>'; }).join('') || '<p>' + esc('${T("(aucun texte)")}') + '</p>') + '</div>'
       + (r.reponse
-          ? '<div class="reponse"><div class="dt" style="font-size:.68rem;color:var(--tx2);text-transform:uppercase;'
+          ? '<div class="reponse"><div class="dt" style="font-size:.6875rem;color:var(--tx2);text-transform:uppercase;'
             + 'letter-spacing:.05em">${T("Votre réponse")}' + (r.reponduLe ? ' · ' + esc(szQuand(r.reponduLe)) : '') + '</div>'
             + '<div class="rtx" title="' + esc(r.reponse) + '">' + esc(r.reponse) + '</div></div>'
           : '');

@@ -44,7 +44,7 @@ body{background:var(--f-page);color:var(--tx);
 .th{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin:0 0 .3rem}
 .th .em{font-size:1.05rem;filter:grayscale(1) brightness(1.55);opacity:.9}
 .th .nom{font-weight:700;font-size:.9rem}
-.pill{font-size:.68rem;color:var(--tx2);background:var(--f-pill);border:1px solid var(--v08);
+.pill{font-size:.6875rem;color:var(--tx2);background:var(--f-pill);border:1px solid var(--v08);
   border-radius:99px;padding:.1rem .5rem}
 .desc{font-size:.8rem;color:var(--tx2);margin:0 0 .5rem}
 .reco{font-size:.76rem;color:var(--tx-bleute);background:var(--f-pill);border-left:3px solid #c9a97e;

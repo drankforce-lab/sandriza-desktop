@@ -52,7 +52,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .res .nom{font-weight:700;font-size:1rem;line-height:1.2;flex:1 1 auto}
 .res label.bascule{display:flex;align-items:center;gap:.4rem;font-size:.82rem;cursor:pointer}
 .res label.bascule input{width:16px;height:16px;accent-color:#c9a97e}
-.pill{display:inline-block;font-size:.66rem;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.pill{display:inline-block;font-size:.6875rem;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
 .pill.ok{background:rgba(22,163,74,.2);color:var(--tx-ok2)}
 .pill.non{background:rgba(234,179,8,.18);color:var(--tx-att)}
 label.champ{display:block;margin:0 0 .8rem}

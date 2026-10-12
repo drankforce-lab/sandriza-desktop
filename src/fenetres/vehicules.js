@@ -100,9 +100,9 @@ html.jour button.aconf{color:#7f1d1d}
 /* ── Les grands chiffres ─────────────────────────────────────────────────── */
 .chiffres{display:grid;grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));gap:.6rem}
 .chiffre{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:.55rem .75rem}
-.chiffre .lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
+.chiffre .lbl{font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .chiffre .val{font:700 1.15rem/1.25 ui-monospace,Consolas,monospace;margin-top:.12rem}
-.chiffre .sous{font-size:.68rem;color:var(--tx3);margin-top:.08rem}
+.chiffre .sous{font-size:.6875rem;color:var(--tx3);margin-top:.08rem}
 .chiffre.att .val{color:var(--tx-att)}
 
 /* ── Tableaux serres (un registre est un document, pas une liste de cartes) ── */
@@ -111,7 +111,7 @@ html.jour button.aconf{color:#7f1d1d}
 .corps tbody tr:hover>td{background:var(--v03);border-color:var(--v055)}
 .corps thead th{padding:.22rem .35rem;background:transparent}
 table{width:100%;border-collapse:collapse;font-size:.79rem}
-thead th{text-align:left;padding:.22rem .35rem;font-size:.64rem;text-transform:uppercase;
+thead th{text-align:left;padding:.22rem .35rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 thead th.n,tbody td.n{text-align:right;font-family:ui-monospace,Consolas,monospace;white-space:nowrap}
 .bilan td.n small{white-space:normal}
@@ -120,13 +120,13 @@ tbody tr.ligne{cursor:default}
 tbody tr.ligne.mod{cursor:pointer}
 .corps tbody tr.sel>td{background:rgba(201,169,126,.10)}
 .corps tbody tr.tot>td{border-top:1px solid var(--v16);font-weight:700}
-.corps tbody tr.grp>td{padding-top:.5rem;font-size:.64rem;text-transform:uppercase;letter-spacing:.06em;
+.corps tbody tr.grp>td{padding-top:.5rem;font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;
   color:var(--tx2);font-weight:700;border-top:0}
 .nowrap{white-space:nowrap}
 .sous2{font-size:.7rem;color:var(--tx2);margin-top:.05rem}
 .traj{font-weight:600}
 .bon{color:var(--tx-ok)}.mauvais{color:var(--tx-err2)}.gris{color:var(--tx2)}.attn{color:var(--tx-att)}
-.pill{display:inline-block;font-size:.63rem;padding:.04rem .45rem;border-radius:99px;
+.pill{display:inline-block;font-size:.6875rem;padding:.04rem .45rem;border-radius:99px;
   white-space:nowrap;font-weight:700;vertical-align:baseline}
 .pill.g{background:rgba(148,163,184,.14);color:var(--tx-94a3b8);font-weight:600}
 .pill.ok{background:rgba(74,222,128,.14);color:var(--tx-ok)}
@@ -174,10 +174,10 @@ tbody tr.ligne.mod{cursor:pointer}
 .vcarte .vt strong{font-size:.95rem}
 .vcarte .meta{font-size:.74rem;color:var(--tx2)}
 .odo{border-top:1px solid var(--v08);padding-top:.45rem;margin-top:.15rem}
-.odo .ot{font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700;margin-bottom:.3rem}
+.odo .ot{font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700;margin-bottom:.3rem}
 .odo .og{display:grid;grid-template-columns:4.6rem 1fr;gap:.3rem .5rem;align-items:center}
 .odo .og label{font-size:.74rem;color:var(--tx2)}
-.odo .src{grid-column:2;font-size:.68rem;color:var(--tx3);margin-top:-.15rem}
+.odo .src{grid-column:2;font-size:.6875rem;color:var(--tx3);margin-top:-.15rem}
 .kv{display:flex;gap:.9rem;flex-wrap:wrap;font-size:.78rem}
 .kv b{font-family:ui-monospace,Consolas,monospace}
 .vact{display:flex;gap:.4rem;justify-content:flex-end;margin-top:.2rem}
@@ -186,7 +186,7 @@ tbody tr.ligne.mod{cursor:pointer}
 .bilan td:first-child{color:var(--tx2)}
 .corps .bilan tbody td{padding-top:.17rem;padding-bottom:.17rem}
 .corps .bilan tbody tr.grp>td{padding-top:.38rem}
-.bilan td.n small{display:block;font:400 .64rem/1.2 system-ui;color:var(--tx3)}
+.bilan td.n small{display:block;font:400 .6875rem/1.2 system-ui;color:var(--tx3)}
 .bilan thead th.n{text-transform:none;letter-spacing:0;font-size:.72rem;color:var(--tx)}
 .bilan tr.cle>td{font-weight:700;color:var(--tx)}
 .manque{margin:.2rem 0 0;padding-left:1.1rem;font-size:.78rem;line-height:1.45}
@@ -201,7 +201,7 @@ tbody tr.ligne.mod{cursor:pointer}
 .boite h3{margin:0 0 .6rem;font:700 .98rem/1.3 system-ui}
 .boite.large{max-width:66rem}
 .deuxcol{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;align-items:start}
-.ot2{font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700;margin-bottom:.35rem}
+.ot2{font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700;margin-bottom:.35rem}
 .coches{flex-direction:row;gap:1.1rem;flex-wrap:wrap}
 .dpa-l{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:.35rem;align-items:center;margin:.2rem 0}
 .dpa-l label{font-size:.74rem;color:var(--tx2)}

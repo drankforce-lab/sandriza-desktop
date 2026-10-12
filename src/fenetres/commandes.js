@@ -143,7 +143,7 @@ tbody .det{font-size:.75rem;color:var(--tx2)}
 /* Une commande ETIQUETEE mais pas encore expediee : c est exactement celle qu on
    cherche en reprenant le travail. Elle se repere sans lire. */
 tbody tr.attente{background:rgba(124,92,255,.09)}
-.et{font-size:.68rem;padding:.06rem .45rem;border-radius:99px;white-space:nowrap;
+.et{font-size:.6875rem;padding:.06rem .45rem;border-radius:99px;white-space:nowrap;
   border:1px solid var(--v16);color:var(--tx2)}
 .et.vert{border-color:rgba(74,222,128,.45);color:var(--tx-ok)}
 .et.bleu{border-color:rgba(96,165,250,.5);color:var(--tx-bleu)}
@@ -158,7 +158,7 @@ tbody tr.attente{background:rgba(124,92,255,.09)}
 
 /* ── Le detail d une commande ── */
 .det2{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-top:.55rem}
-.bloc h3{margin:0 0 .25rem;font-size:.67rem;text-transform:uppercase;
+.bloc h3{margin:0 0 .25rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.08em;color:var(--tx2);font-weight:700}
 .bloc .l{font-size:.85rem}
 /* Le nom, la pastille et « Changer » sur UNE ligne alignee (2026-10-01) : le
@@ -166,7 +166,7 @@ tbody tr.attente{background:rgba(124,92,255,.09)}
 .bloc .l:has(#det-lier){display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
 #det-lier{padding:.1rem .5rem;font-size:.72rem;line-height:1.3}
 .bloc .mut{color:var(--tx2);font-size:.8rem;line-height:1.5}
-.badge2{display:inline-block;font-size:.62rem;padding:.04rem .45rem;border-radius:99px;
+.badge2{display:inline-block;font-size:.6875rem;padding:.04rem .45rem;border-radius:99px;
   margin-left:.4rem;vertical-align:1px;background:rgba(148,163,184,.18);color:var(--tx-bleute)}
 .badge2.or{background:#f59e0b;color:#1a1a2e;font-weight:700}
 .badge2.vertf{background:#166534;color:#dcfce7;font-weight:700}
@@ -195,7 +195,7 @@ button.danger:hover:not(:disabled){background:rgba(239,68,68,.15);border-color:#
 /* ── Menu contextuel (clic droit sur une ligne) ── */
 .ctx{position:fixed;z-index:60;background:var(--f-carte);border:1px solid var(--v16);
   border-radius:10px;box-shadow:0 14px 34px rgba(0,0,0,.5);padding:.3rem;min-width:210px}
-.ctx .t{font-size:.67rem;text-transform:uppercase;letter-spacing:.07em;
+.ctx .t{font-size:.6875rem;text-transform:uppercase;letter-spacing:.07em;
   color:var(--tx2);padding:.28rem .5rem;font-weight:700}
 .ctx button{display:block;width:100%;text-align:left;border:none;
   background:transparent;padding:.3rem .5rem;border-radius:6px;font-size:.83rem}

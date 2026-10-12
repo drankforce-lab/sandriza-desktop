@@ -54,7 +54,7 @@ button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
-button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:700;
+button .n{display:inline-block;margin-left:.3rem;font-size:.6875rem;font-weight:700;
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.95rem 1.1rem}
@@ -77,7 +77,7 @@ html.jour div.stats .s .n:not(.sort):not(.du){color:var(--tx)}
 /* Le compteur d une pastille de liste. */
 .rf-jet .n{margin-left:.45rem;font-weight:800;opacity:.8}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
+thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody tr{cursor:pointer}
 tbody tr:hover td{background:var(--v04)}
@@ -90,7 +90,7 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
    de .55 rendait sa pastille et son numero illisibles (2,27 en jour, 2,75 la
    nuit — banc des contrastes). C est la pastille << Expire >> qui dit l etat. */
 tr.eteint td{opacity:1}
-.pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
+.pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
 .pill.info{background:rgba(59,130,246,.18);color:var(--tx-bleu)}

@@ -19,6 +19,9 @@
  */
 
 module.exports = {
+  'Affichage de la liste': 'List view',
+  'Affichage détaillé': 'Detailed view',
+  'Détaillé': 'Detailed',
   'Compact': 'Compact',
   'Affichage compact : une ligne par produit, plus de produits par page': 'Compact view: one line per product, more products per page',
   /* Singulier / pluriel (szPl, 2026-09-29) */

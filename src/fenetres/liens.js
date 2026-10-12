@@ -90,13 +90,13 @@ table{width:100%;border-collapse:collapse;font-size:.79rem}
 .liste{flex:1 1 auto;min-height:0;overflow:hidden}
 .pagi{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;
   padding-top:.45rem;font-size:.75rem;color:var(--tx2)}
-thead th{text-align:left;padding:.22rem .35rem;font-size:.65rem;text-transform:uppercase;
+thead th{text-align:left;padding:.22rem .35rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.3rem .35rem;border-top:1px solid var(--v055);vertical-align:top}
 tbody tr:hover td{background:var(--v03)}
 .dt{font-size:.7rem;color:var(--tx2)}
 .mono{font-family:ui-monospace,Consolas,monospace;font-size:.74rem}
-.pill{display:inline-block;font-size:.64rem;padding:.05rem .45rem;border-radius:99px;white-space:nowrap;font-weight:700}
+.pill{display:inline-block;font-size:.6875rem;padding:.05rem .45rem;border-radius:99px;white-space:nowrap;font-weight:700}
 .pill.actif{background:rgba(34,197,94,.15);color:var(--tx-ok)}
 .pill.revoque{background:rgba(248,113,113,.15);color:var(--tx-err2)}
 .pill.expire{background:rgba(148,163,184,.18);color:var(--tx-gris2)}

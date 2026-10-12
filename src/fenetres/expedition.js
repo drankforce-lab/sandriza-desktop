@@ -100,7 +100,7 @@ button.mini{padding:.14rem .5rem;font-size:.76rem}
 .cmp .l .nm{font-weight:600}
 .cmp .l .sv{color:var(--tx3);font-size:.76rem}
 .cmp .l .px{font-variant-numeric:tabular-nums;font-weight:700}
-.cmp .l .mc{font-size:.68rem;font-weight:700;color:var(--tx-or);border:1px solid rgba(201,169,126,.45);border-radius:99px;padding:.05rem .45rem}
+.cmp .l .mc{font-size:.6875rem;font-weight:700;color:var(--tx-or);border:1px solid rgba(201,169,126,.45);border-radius:99px;padding:.05rem .45rem}
 .cmp .l.ko{cursor:default;opacity:.75}
 .cmp .l.ko .px{font-weight:400;color:var(--tx3)}
 .avis.jaune{background:rgba(245,158,11,.11);border:1px solid rgba(245,158,11,.42);color:var(--tx-or2)}

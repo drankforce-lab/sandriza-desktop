@@ -76,7 +76,7 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
+thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.32rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody tr:hover td{background:var(--v04)}
@@ -87,7 +87,7 @@ tbody tr:hover td{background:var(--v04)}
 .code{font-family:'Courier New',monospace;letter-spacing:1px;background:var(--v06);
   border-radius:4px;padding:.06rem .4rem;font-weight:700}
 .dt{font-size:.72rem;color:var(--tx2)}
-.pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
+.pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
 .pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
@@ -102,7 +102,7 @@ tbody tr:hover td{background:var(--v04)}
 .ch label{font-size:.72rem;color:var(--tx2)}
 .ch input,.ch select{width:100%}
 .ch .req{color:var(--tx-or)}
-.ch .aide{font-size:.68rem;color:var(--tx3)}
+.ch .aide{font-size:.6875rem;color:var(--tx3)}
 .cases{display:flex;flex-wrap:wrap;gap:.4rem 1rem;margin-top:.5rem}
 .cases label{display:inline-flex;align-items:center;gap:.4rem;font-size:.83rem;cursor:pointer}
 .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.9rem;flex-wrap:wrap}

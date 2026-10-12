@@ -95,7 +95,7 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 button.arme{border-color:#fbbf24;background:rgba(251,191,36,.16);color:#fde68a}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.5rem}
 .tuile{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:.5rem .65rem}
-.tuile .lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
+.tuile .lbl{font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 .tuile .val{font-size:.95rem;font-weight:800;margin-top:.1rem}
 .tuile .val.bon{color:var(--tx-ok)}.tuile .val.neutre{color:var(--tx2)}
 .tuile .val.att{color:var(--tx-att)}.tuile .val.mal{color:var(--tx-err)}
@@ -113,14 +113,14 @@ button.arme{border-color:#fbbf24;background:rgba(251,191,36,.16);color:#fde68a}
 .etape .no{color:var(--tx-or);font-weight:700}
 .etape .suj{color:var(--tx-gris2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
+thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.3rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody tr:hover td{background:var(--v04)}
 .fin{white-space:nowrap;text-align:right}
 .num{text-align:right;white-space:nowrap}
 .dt{font-size:.72rem;color:var(--tx2)}
-.pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
+.pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
 .pill.att{background:rgba(251,191,36,.16);color:var(--tx-att)}

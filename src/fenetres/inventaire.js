@@ -194,7 +194,7 @@ td.e select{min-width:8rem}
 .tuile .lbl{font-size:.76rem;font-weight:600;
   color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tuile .val{font-size:1.75rem;font-weight:800;line-height:1.15;margin:.2rem 0 .1rem}
-.tuile .sub{font-size:.67rem;color:var(--tx3);white-space:nowrap;overflow:hidden;
+.tuile .sub{font-size:.6875rem;color:var(--tx3);white-space:nowrap;overflow:hidden;
   text-overflow:ellipsis}
 /* ⚠ La palette du 2026-09-25 : une tuile qui va bien reste GRISE (plus de
    vert), et le cadre ne se colore plus — seul le chiffre d un probleme le fait. */
@@ -213,27 +213,19 @@ tbody tr[data-ligne]{cursor:pointer;user-select:none}
 tbody tr[data-ligne]:hover td{background:var(--v045)}
 
 /* Pastilles d etat, badges et puce de categorie */
-.pill{display:inline-block;font-size:.65rem;padding:.05rem .5rem;
+.pill{display:inline-block;font-size:.6875rem;padding:.05rem .5rem;
   border-radius:99px;white-space:nowrap}
 .pill.rup{background:rgba(239,68,68,.16);color:var(--tx-err2)}
 .pill.bas{background:rgba(245,158,11,.16);color:var(--tx-att)}
 .pill.ok{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
-.badge{display:inline-block;font-size:.6rem;padding:0 .4rem;border-radius:99px;
+.badge{display:inline-block;font-size:.6875rem;padding:0 .4rem;border-radius:99px;
   margin-left:.35rem;vertical-align:1px}
 .badge.vente{background:#c9a97e;color:#17202c}
 .badge.finale{background:#dc2626;color:var(--tx-sur-accent)}
 .puce{width:10px;height:10px;border-radius:50%;display:inline-block;
   vertical-align:middle}
 
-/* Barre du mode << vente finale en lot >> */
-.lot{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;
-  background:var(--v04);border:1px solid rgba(201,169,126,.45);border-radius:11px;
-  padding:.5rem .8rem;font-size:.82rem}
-/* ⚠ Plus de teinte chaude (2026-09-25) : le cadre or suffit a dire << une
-   selection est en cours >>, et un jeton suit les deux modes tout seul. */
-.lot label{display:flex;align-items:center;gap:.4rem;cursor:pointer}
-.lot input{width:auto}
 button.rouge{background:#dc2626;border-color:#dc2626;color:var(--tx-sur-accent);font-weight:600}
 /* La reprise generique du mode jour repeint TOUT bouton en blanc
    (html.jour button, specificite 0,1,2) et l'emporte sur button.rouge
@@ -303,14 +295,13 @@ button.vert:hover:not(:disabled){background:#166534;border-color:#166534}
    parce que le code s y accroche : clic de ligne, mesure de la pagination
    Auto, compteur du lot. Seul le dessin change. */
 .gp table{border-collapse:separate;border-spacing:0 6px;font-size:.88rem}
-.gp thead th{background:var(--f-carte);font-size:.66rem;color:var(--tx3);
+.gp thead th{background:var(--f-carte);font-size:.6875rem;color:var(--tx3);
   padding:.25rem .8rem .1rem;letter-spacing:.08em}
 .gp tbody td{padding:.62rem .8rem;border-top:1px solid var(--v06);
   border-bottom:1px solid var(--v06);background:var(--v03);transition:background .13s,border-color .13s}
 .gp tbody td:first-child{border-left:1px solid var(--v06);border-radius:11px 0 0 11px}
 .gp tbody td:last-child{border-right:1px solid var(--v06);border-radius:0 11px 11px 0}
 .gp tbody tr[data-ligne]:hover td{background:var(--v06);border-color:rgba(201,169,126,.35)}
-.gp tbody tr.coche td{background:var(--v06);border-color:rgba(201,169,126,.5)}
 .gp .prod{display:flex;align-items:center;gap:.8rem;min-width:0}
 .gp .cat{width:2.5rem;height:2.5rem;flex:0 0 auto;border-radius:10px;display:flex;
   align-items:center;justify-content:center;font-weight:800;font-size:.98rem;
@@ -333,7 +324,7 @@ html.jour .gp .cat.tc{color:color-mix(in srgb,var(--cc,#6d7f96) 55%,black);
 .gp .nom{font-size:.95rem;font-weight:700}
 .gp .l2{display:flex;align-items:center;gap:.4rem;font-size:.74rem;color:var(--tx2);margin-top:.15rem}
 .gp .code{font-size:.74rem;color:var(--tx2)}
-.gp .badge{margin-left:0;font-size:.64rem;font-weight:600;padding:.05rem .45rem;
+.gp .badge{margin-left:0;font-size:.6875rem;font-weight:600;padding:.05rem .45rem;
   border-radius:6px;background:transparent;border:1px solid var(--v14);color:var(--tx2)}
 .gp .badge.finale{background:var(--v08);border-color:var(--v20);color:var(--tx)}
 .gp .vars{font-size:.8rem;color:var(--tx2);white-space:nowrap}
@@ -377,16 +368,32 @@ html.jour .gp .cat.tc{color:color-mix(in srgb,var(--cc,#6d7f96) 55%,black);
 .gp.compacte .nom{font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gp.compacte .l1{flex-wrap:nowrap;min-width:0}
 .gp.compacte .l2{margin-top:0;white-space:nowrap}
-.gp.compacte .badge{font-size:.6rem;padding:0 .4rem}
+.gp.compacte .badge{font-size:.6875rem;padding:0 .4rem}
 .gp.compacte .jauge{display:none}
 .gp.compacte .stk{gap:.5rem}
 .gp.compacte .stk .n{font-size:1rem}
-.gp.compacte .pill{font-size:.68rem;padding-top:.08rem;padding-bottom:.08rem}
+.gp.compacte .pill{font-size:.6875rem;padding-top:.08rem;padding-bottom:.08rem}
 .gp.compacte .acts button{height:1.75rem;padding:0 .5rem}
 .gp.compacte .acts button.ico{width:1.75rem}
 .gp.compacte .acts button svg,.gp.compacte .acts button.ico svg{width:15px;height:15px}
 .gp.compacte .acts button.inv .tx{display:none}
-button.mini.on{background:rgba(201,169,126,.18);border-color:#c9a97e;color:var(--tx)}
+/* LA BASCULE D AFFICHAGE (2026-10-12, sa demande : << un genre de bouton toggle >>) : deux positions
+   accolees dans un rail, la position choisie en or. Un bouton d application est PLAT (pas d ombre). */
+.vue-bascule{display:inline-flex;align-items:stretch;gap:2px;padding:3px;border-radius:10px;
+  background:var(--v04);border:1px solid var(--v12);flex:0 0 auto}
+.vue-bascule button{display:inline-flex;align-items:center;gap:.4rem;height:2rem;padding:0 .75rem;
+  border:0!important;border-radius:7px;background:transparent!important;color:var(--tx2);font-size:.8rem;font-weight:600}
+.vue-bascule button svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
+.vue-bascule button:hover:not(.on){color:var(--tx);background:var(--v06)!important}
+.vue-bascule button.on{background:#c9a97e!important;color:#1a1208}
+/* LA BARRE SUR DEUX RANGEES (2026-10-12) : les filtres en haut ; dessous, les gestes a droite
+   (bascule d affichage, ajouter un produit). Une seule rangee ecrasait la recherche. */
+.tb2{flex-wrap:wrap!important;row-gap:.65rem!important}
+.tb2>.rch{flex:1 1 14rem;min-width:11rem}
+.tb2>.droite{flex:1 1 100%!important;display:flex;align-items:center;justify-content:flex-end;gap:.5rem;margin-left:0;
+  padding-top:.65rem;border-top:1px solid var(--v07)}
+/* Les boutons de la barre des produits : meme hauteur que la recherche, libelle net. */
+.tb2 .droite>button{height:2.4rem;padding:0 .95rem;border-radius:10px;font-weight:600;font-size:.82rem}
 /* La barre d outils de l onglet : champs plus hauts, pastilles d etat.
    ⚠⚠ UNE SEULE LIGNE (sa capture du 2026-09-25, en anglais : les deux boutons
    de droite passaient dessous). flex-wrap:nowrap, et c est la RECHERCHE qui cede
@@ -476,10 +483,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
   // L affichage compact de la liste des produits, retenu sur le poste (sous garde).
   var COMPACT = false;
   try { COMPACT = localStorage.getItem('sz-inv-compact') === '1'; } catch (e) {}
-  // ⚠ Mode << vente finale en lot >> : les coches vivent ICI, pas dans les cases
-  // affichees — l ecran du site ne lisait que la PAGE VISIBLE de ses cases, une
-  // selection posee puis paginee etait perdue sans un mot.
-  var LOT = false, COCHES = {};
+  /* << Vente finale en lot >> est parti dans la fenetre Produits en vente (2026-10-12, sa demande). */
   var NB_REAPPRO = null; // compte pour le libelle de l onglet (des qu on le sait)
 
   // ── Onglet Produits endommages ──
@@ -610,7 +614,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     // l ecran du site. Quitter Produits sort du mode lot : une selection
     // invisible qui s appliquerait plus tard serait un piege.
     if (cible !== 'entrepots') { WH_EDIT = null; LX_EDIT = null; }
-    if (cible !== 'produits') { LOT = false; COCHES = {}; }
     ONGLET = cible;
     VUE = 'reappro';
     dire('');
@@ -1056,17 +1059,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
         + '<button class="mini" id="btn-pad6">${T("Passer à six chiffres")}</button></div>';
     }
 
-    if (LOT) {
-      var nCoches = Object.keys(COCHES).length;
-      h += '<div class="lot">'
-        + '<label><input type="checkbox" id="lot-page"> ${T("Toute la page")}</label>'
-        + '<span>' + nCoches + ' '
-        + (nCoches > 1 ? '${T("produits sélectionnés")}' : '${T("produit sélectionné")}') + '</span>'
-        + '<span style="flex:1 1 auto"></span>'
-        + '<button class="mini prim" id="lot-app">${T("Appliquer vente finale")}</button>'
-        + '<button class="mini" id="lot-ret">${T("Retirer vente finale")}</button>'
-        + '<button class="mini" id="lot-annuler">${T("Annuler")}</button></div>';
-    }
 
     h += '<div class="carte plein">';
     /* ⚠ L ETAT DU STOCK EN PASTILLES (2026-09-25), plus en liste deroulante :
@@ -1096,20 +1088,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
       + '</select>'
       + '<input aria-label="${T("Section")}" type="text" id="fp-section" autocomplete="off" placeholder="${T("Section")}…" value="' + esc(FP.section) + '" style="width:8rem">'
       + '<span class="droite">'
-      + '<button class="mini' + (COMPACT ? ' on' : '') + '" id="btn-compact" aria-pressed="' + (COMPACT ? 'true' : 'false') + '"'
-      +   ' title="${T("Affichage compact : une ligne par produit, plus de produits par page")}">${T("Compact")}</button>'
+      + '<span class="vue-bascule" role="group" aria-label="${T("Affichage de la liste")}">'
+      +   '<button type="button" data-vue="detail" aria-pressed="' + (!COMPACT) + '" class="' + (!COMPACT ? 'on' : '') + '" title="${T("Affichage détaillé")}">'
+      +     '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="2.5" width="12" height="4.5" rx="1.2"/><rect x="2" y="9" width="12" height="4.5" rx="1.2"/></svg>${T("Détaillé")}</button>'
+      +   '<button type="button" data-vue="compact" aria-pressed="' + COMPACT + '" class="' + (COMPACT ? 'on' : '') + '" title="${T("Affichage compact : une ligne par produit, plus de produits par page")}">'
+      +     '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3.5h12M2 6.5h12M2 9.5h12M2 12.5h12"/></svg>${T("Compact")}</button>'
+      + '</span>'
       // ⚠ CE BOUTON MANQUAIT (#6) : depuis l inventaire, il fallait sortir vers
       // l ecran Produits pour en creer un. L op existait deja cote pont, elle
       // n etait simplement offerte nulle part ici.
       + (d.peutAjouterProduit ? '<button class="mini prim" id="btn-nouveau-${T("produit")}">${T("+ Ajouter un produit")}</button>' : '')
-      + (d.peutEcrire && !LOT ? '<button class="mini" id="btn-lot" title="${T("Appliquer ou retirer la vente finale sur plusieurs produits à la fois")}">${T("Vente finale en lot")}</button>' : '')
       + '</span></div>';
 
     if (!d.lignes.length) {
       h += '<div class="vide">${T("Aucun produit trouvé.")}</div>';
     } else {
       h += '<div class="grille gp' + (COMPACT ? ' compacte' : '') + '" data-pages="inventaire-produits"><table><thead><tr>'
-        + (LOT ? '<th class="c" style="width:2rem"></th>' : '')
         + '<th>${T("Produit")}</th><th>${T("Variantes")}</th>'
         + '<th>${T("Inventaire")}</th><th style="text-align:right">${T("Actions")}</th>'
         + '</tr></thead><tbody>';
@@ -1139,11 +1133,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
           jauge += '</div>';
         }
         var initiale = String(l.categorieNom || l.categorie || '?').charAt(0).toUpperCase();
-        h += '<tr data-ligne="' + esc(l.id) + '"' + (LOT && COCHES[l.id] ? ' class="coche"' : '') + ' title="'
-          + (LOT ? '${T("Cliquer pour sélectionner")}' : '${T("Cliquer pour modifier la fiche produit")}') + '">'
-          + (LOT ? '<td class="c"><input type="checkbox" data-coche="' + esc(l.id) + '"'
-              + ' aria-label="' + esc('${T("Sélectionner")} ' + (l.nom || l.sku || l.id)) + '"'
-              + (COCHES[l.id] ? ' checked' : '') + '></td>' : '')
+        h += '<tr data-ligne="' + esc(l.id) + '" title="${T("Cliquer pour modifier la fiche produit")}">'
           + '<td><div class="prod"><span class="cat' + (/^#[0-9a-f]{3,8}$/i.test(l.couleurCat || '') ? ' tc" style="--cc:' + l.couleurCat : '')
           +   '" title="' + esc(l.categorieNom) + '">' + esc(initiale) + '</span>'
           +   '<div style="min-width:0"><div class="l1"><span class="nom">' + esc(l.nom) + '</span>'
@@ -1301,27 +1291,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
         else { FP.auto = false; FP.parPage = parseInt(t.value, 10) || 25; FP.page = 0; chargerOnglet(); }
         return;
       }
-      if (t.id === 'lot-page') {
-        // Coche ou decoche LA PAGE AFFICHEE — la selection des autres pages
-        // reste ce qu elle etait, et elle est comptee sous les yeux.
-        (PRODS.lignes || []).forEach(function(l){
-          if (t.checked) COCHES[l.id] = true; else delete COCHES[l.id];
-        });
-        dessiner();
-        return;
-      }
-      var id = t.getAttribute && t.getAttribute('data-coche');
-      if (id) {
-        if (t.checked) COCHES[id] = true; else delete COCHES[id];
-        var trc = t.closest && t.closest('tr');
-        if (trc) trc.classList.toggle('coche', !!t.checked);
-        // On ne redessine pas : seule la barre compte, et la mettre a jour
-        // suffit — redessiner ferait perdre la position de defilement.
-        var lot = corps.querySelector('.lot span:nth-child(2)');
-        var nc = Object.keys(COCHES).length;
-        if (lot) lot.textContent = nc + ' '
-          + (nc > 1 ? '${T("produits sélectionnés")}' : '${T("produit sélectionné")}');
-      }
     };
     corps.onclick = function(ev){
       var t = ev.target;
@@ -1335,7 +1304,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
         var geste = tu.getAttribute('data-tuile');
         if (geste === 'rupture') { FP.etat = 'rupture'; FP.page = 0; chargerOnglet(); return; }
         if (geste === 'reappro') {
-          LOT = false; COCHES = {}; ONGLET = 'reappro'; VUE = 'reappro';
+          ONGLET = 'reappro'; VUE = 'reappro';
           dire(''); dessiner(); chargerOnglet();
         }
         return;
@@ -1358,17 +1327,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
         var tr = t.closest('tr[data-ligne]');
         if (!tr) return;
         var lid = tr.getAttribute('data-ligne');
-        if (LOT) {
-          if (COCHES[lid]) delete COCHES[lid]; else COCHES[lid] = true;
-          var cc = tr.querySelector('[data-coche]');
-          if (cc) cc.checked = !!COCHES[lid];
-          tr.classList.toggle('coche', !!COCHES[lid]);
-          var lot = corps.querySelector('.lot span:nth-child(2)');
-          var nc = Object.keys(COCHES).length;
-          if (lot) lot.textContent = nc + ' '
-            + (nc > 1 ? '${T("produits sélectionnés")}' : '${T("produit sélectionné")}');
-          return;
-        }
         // Le geste principal de la ligne : MODIFIER la fiche. En lecture seule
         // on ouvre la grille d inventaire, qui sait se mettre en consultation.
         if (PRODS && PRODS.peutEcrire) modifier(lid); else ouvrirProduit(lid);
@@ -1385,14 +1343,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
         });
         return;
       }
-      if (b.id === 'btn-lot') { LOT = true; COCHES = {}; dessiner(); return; }
-      if (b.id === 'btn-compact') {
-        COMPACT = !COMPACT;
+      if (b.hasAttribute('data-vue')) {
+        var veut = b.getAttribute('data-vue') === 'compact';
+        if (veut === COMPACT) return;
+        COMPACT = veut;
         try { localStorage.setItem('sz-inv-compact', COMPACT ? '1' : '0'); } catch (e) {}
         AUTO_DEMANDE = 0; dessiner(); return;
       }
-      if (b.id === 'lot-annuler') { LOT = false; COCHES = {}; dessiner(); return; }
-      if (b.id === 'lot-app' || b.id === 'lot-ret') { venteFinaleLot(b.id === 'lot-app'); return; }
       if (b.id === 'btn-skus-tous') { skusTous(b); return; }
       if (b.id === 'btn-pad6') { pad6(); return; }
       var pid = b.getAttribute('data-inv');
@@ -1502,16 +1459,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     });
   }
 
-  function venteFinaleLot(activer){
-    var ids = Object.keys(COCHES);
-    if (!ids.length) { dire(MOTIFS.aucun_produit, 'att'); return; }
-    appeler('stock:venteFinale', [ids, activer]).then(function(r){
-      if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      dire('${T("Vente finale")} ' + (activer ? '${T("activée")}' : '${T("retirée")}') + '${T(" pour ")}' + r.n + ' ' + szPl(r.n, '${T("produit.")}', '${T("produits.")}'), 'bon');
-      LOT = false; COCHES = {};
-      chargerOnglet();
-    });
-  }
 
   // ══ ONGLET PRODUITS ENDOMMAGES ════════════════════════════════════════════
   function dessinerEndommages(){

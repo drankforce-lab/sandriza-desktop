@@ -54,22 +54,22 @@ button.ghost{background:transparent}
 button.mini{padding:.16rem .5rem;font-size:.76rem}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.6rem}
 .tuile{background:var(--f-carte);border:1px solid var(--v07);border-radius:12px;padding:.6rem .8rem}
-.tuile .k{font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
+.tuile .k{font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .tuile .v{font-size:1.5rem;font-weight:800;margin-top:.15rem}
-.tuile .z{font-size:.68rem;color:var(--tx2);margin-top:.1rem}
+.tuile .z{font-size:.6875rem;color:var(--tx2);margin-top:.1rem}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:12px;padding:.75rem .85rem}
 .carte h2{margin:0 0 .6rem;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700}
 .deux{display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start}
 @media(max-width:720px){.deux{grid-template-columns:1fr}}
 table{width:100%;border-collapse:collapse;font-size:.83rem}
-thead th{text-align:left;padding:.28rem .4rem;font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
+thead th{text-align:left;padding:.28rem .4rem;font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.34rem .4rem;border-top:1px solid var(--v055)}
 .champ{margin-bottom:.7rem}
 .champ label{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--tx2);margin:0 0 .25rem}
 .champ input,.champ textarea{width:100%}
 .hint{font-size:.72rem;color:var(--tx2);margin:.25rem 0 0;line-height:1.5}
 .sep{border:none;border-top:1px solid var(--v09);margin:.9rem 0}
-.badge{display:inline-block;font-size:.66rem;font-weight:700;padding:.06rem .5rem;border-radius:99px}
+.badge{display:inline-block;font-size:.6875rem;font-weight:700;padding:.06rem .5rem;border-radius:99px}
 .badge.ok{background:rgba(22,163,74,.2);color:#86efac}
 .badge.draft{background:rgba(148,163,184,.18);color:var(--tx-gris2)}
 .badge.warn{background:rgba(217,119,6,.2);color:#fcd34d}
@@ -98,7 +98,7 @@ html.jour .bascule .piste{background:#cfcabd}
 .pop .titre{font:800 1.5rem/1.15 Georgia,serif;white-space:pre-line;color:#3a2f22}
 .pop .st{font-size:.9rem;color:#6b5b45;line-height:1.5}
 .pop .cta{background:#8f6f42;color:var(--tx-sur-accent);border:none;border-radius:8px;padding:.6rem;font-weight:700;margin-top:.4rem}
-.pop .lg{font-size:.66rem;color:#9a8f7d}
+.pop .lg{font-size:.6875rem;color:#9a8f7d}
 .pop .x{position:absolute;top:.5rem;right:.7rem;background:rgba(0,0,0,.15);color:var(--tx-blanc);border:none;border-radius:50%;width:26px;height:26px}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

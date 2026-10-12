@@ -69,7 +69,7 @@ select{font:inherit;color:var(--tx);background:var(--v05);
 .t .l{font-size:.74rem;text-transform:none;letter-spacing:0;color:var(--tx2);font-weight:600}
 .t .s{font-size:.7rem;color:var(--tx2);margin-top:.15rem}
 table{width:100%;border-collapse:collapse;font-size:.79rem}
-thead th{text-align:left;padding:.22rem .35rem;font-size:.65rem;text-transform:uppercase;
+thead th{text-align:left;padding:.22rem .35rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.3rem .35rem;border-top:1px solid var(--v055);vertical-align:top}
 tbody tr:hover td{background:var(--v03)}

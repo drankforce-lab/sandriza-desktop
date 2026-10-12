@@ -91,7 +91,7 @@ body{background:var(--f-page);color:var(--tx);
 .swatch{display:flex;gap:6px;align-items:center;margin-top:4px}
 .swatch .b1{width:44px;height:11px;border-radius:3px}
 .swatch .b2{width:11px;height:11px;border-radius:3px}
-.swatch .lb{font-size:.68rem;color:var(--tx2)}
+.swatch .lb{font-size:.6875rem;color:var(--tx2)}
 .tbl{width:100%;border-collapse:collapse;font-size:.8rem}
 .tbl th{text-align:left;color:var(--tx2);font-weight:600;padding:.45rem .6rem;border-bottom:1px solid var(--v10);font-size:.72rem;text-transform:uppercase}
 .tbl td{padding:.4rem .6rem;border-bottom:1px solid var(--v05);vertical-align:middle}

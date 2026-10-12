@@ -86,7 +86,7 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 .carte h2{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;
   letter-spacing:.07em;color:var(--tx2);font-weight:700}
 table{width:100%;border-collapse:collapse;font-size:.86rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
+thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.34rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody tr:hover td{background:var(--v04)}
@@ -94,7 +94,7 @@ tbody tr:hover td{background:var(--v04)}
 .fin{width:1%;white-space:nowrap;text-align:right}
 .fin .b + .b{margin-left:.45rem}
 .dt{font-size:.72rem;color:var(--tx2)}
-.pill{display:inline-block;padding:.04rem .42rem;border-radius:99px;font-size:.68rem;
+.pill{display:inline-block;padding:.04rem .42rem;border-radius:99px;font-size:.6875rem;
   border:1px solid var(--v16);color:var(--tx2);white-space:nowrap}
 .pill.att{border-color:rgba(251,191,36,.45);color:var(--tx-att)}
 .pill.bon{border-color:rgba(74,222,128,.4);color:var(--tx-ok2)}

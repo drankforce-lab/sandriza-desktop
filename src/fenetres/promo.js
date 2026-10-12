@@ -117,7 +117,7 @@ html.jour div.stats .s{background:var(--f-carte)}
 html.jour div.stats .s .n:not(.du):not(.ok){color:var(--tx)}
 
 table{width:100%;border-collapse:collapse;font-size:.84rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
+thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody tr{cursor:pointer}
 tbody tr:hover td{background:var(--v04)}
@@ -129,8 +129,8 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .vign{width:76px;height:44px;border-radius:6px;overflow:hidden;display:flex;
   align-items:center;justify-content:center;background:#f2f2f2}
 .vign img{max-width:100%;max-height:100%;object-fit:contain}
-.vign .att{font-size:.58rem;color:#b45309;text-align:center;line-height:1.1;padding:2px}
-.pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
+.vign .att{font-size:.6875rem;color:#b45309;text-align:center;line-height:1.1;padding:2px}
+.pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
 .pill.err{background:rgba(239,68,68,.14);color:var(--tx-err)}

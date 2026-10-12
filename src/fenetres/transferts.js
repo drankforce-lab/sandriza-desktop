@@ -52,7 +52,7 @@ body{background:var(--f-page);color:var(--tx);
 .onglets button:hover{background:var(--v05);color:var(--tx)}
 .onglets button.actif{color:var(--tx-creme);border-bottom-color:#c9a97e}
 .onglets .pastille{display:inline-block;min-width:1.15rem;padding:0 .3rem;margin-left:.35rem;
-  border-radius:99px;background:#c9a97e;color:#1a1207;font-size:.68rem;font-weight:800;text-align:center}
+  border-radius:99px;background:#c9a97e;color:#1a1207;font-size:.6875rem;font-weight:800;text-align:center}
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
 /* 2026-10-12 : aucune glissiere (sa regle). Les transferts en transit, l historique et les
@@ -103,7 +103,7 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
   border-radius:10px;padding:.5rem .65rem;font-size:.79rem;color:var(--tx-bleute);line-height:1.55}
 .avis.jaune{background:rgba(217,119,6,.12);border-color:rgba(217,119,6,.3);color:var(--tx-fcd9a6)}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.66rem;text-transform:uppercase;
+thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.05em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.32rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody tr:hover td{background:var(--v04)}
@@ -123,7 +123,7 @@ td.quand .qui{color:var(--tx2);font-size:.72rem}
    il se lit comme un evenement. */
 .ecart{color:var(--tx-err);font-weight:800}
 .ecart0{color:var(--tx-ok)}
-.pill{display:inline-block;font-size:.66rem;padding:.05rem .5rem;border-radius:99px;font-weight:700}
+.pill{display:inline-block;font-size:.6875rem;padding:.05rem .5rem;border-radius:99px;font-weight:700}
 .pill.transit{background:rgba(251,191,36,.2);color:#fcd34d}
 .pill.recu{background:rgba(74,222,128,.18);color:#86efac}
 .pill.annule{background:rgba(148,163,184,.2);color:var(--tx-gris2)}

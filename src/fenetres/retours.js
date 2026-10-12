@@ -47,7 +47,7 @@ input:focus,button:focus{outline:none;border-color:#c9a97e}
 button:hover:not(:disabled){background:var(--v10)}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
-button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:700;
+button .n{display:inline-block;margin-left:.3rem;font-size:.6875rem;font-weight:700;
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
 button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
 /* Les tuiles de tete (refonte du 2026-09-25), aux mesures de l Inventaire. */
@@ -65,7 +65,7 @@ button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
 .ligne .num{font-weight:700}
 .ligne .dt{font-size:.72rem;color:var(--tx2)}
 .ligne .droite{flex:0 0 auto;text-align:right;font-size:.74rem;color:var(--tx2)}
-.pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
+.pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
 .pill.err{background:rgba(239,68,68,.16);color:var(--tx-err)}

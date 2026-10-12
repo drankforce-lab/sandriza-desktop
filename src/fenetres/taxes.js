@@ -55,7 +55,7 @@ body{background:var(--f-page);color:var(--tx);
   border:1px solid rgba(240,180,80,.3);background:rgba(200,140,40,.09);color:var(--tx-or2)}
 .avis.calme{border-color:rgba(120,160,220,.28);background:rgba(80,120,190,.1);color:#bcd2f0}
 table{width:100%;border-collapse:collapse;font-size:.86rem}
-th{text-align:left;padding:.35rem .5rem;font-size:.68rem;text-transform:uppercase;
+th{text-align:left;padding:.35rem .5rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);border-bottom:1px solid var(--v12)}
 td{padding:.4rem .5rem;border-bottom:1px solid var(--v05);vertical-align:middle}
 td.prov{font-weight:700;width:9rem}

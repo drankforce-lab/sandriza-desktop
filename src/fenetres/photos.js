@@ -83,7 +83,7 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
    trouve jamais ce qui a ete a moitie retire. */
 
 table{width:100%;border-collapse:collapse;font-size:.84rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
+thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody tr{cursor:pointer}
 tbody tr:hover td{background:var(--v04)}
@@ -94,7 +94,7 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
   align-items:center;justify-content:center;
   background:conic-gradient(#3a4354 25%,#2b3444 0 50%,#3a4354 0 75%,#2b3444 0) 0 0/12px 12px}
 .vign img{max-width:100%;max-height:100%;object-fit:contain}
-.vign .att{font-size:.6rem;color:var(--tx-att);text-align:center;line-height:1.1}
+.vign .att{font-size:.6875rem;color:var(--tx-att);text-align:center;line-height:1.1}
 /* ── Les trois modes et la zone qui remplit la hauteur (2026-09-26) ── */
 .carte.pz{flex:1 1 auto;min-height:14rem;display:flex;flex-direction:column}
 /* La page est taillee pour tenir : rien ne defile (2026-10-12 : les tailles fixes
@@ -133,7 +133,7 @@ table.grille.compacte .vign{width:28px;height:28px}
 .vcarte .vnom{font-weight:700;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vcarte .vetat{display:flex;flex-wrap:wrap;gap:.25rem}
 .vcarte .act{display:flex;flex-wrap:wrap;gap:.2rem}
-.gain{font-size:.68rem;color:var(--tx-ok);font-weight:700}
+.gain{font-size:.6875rem;color:var(--tx-ok);font-weight:700}
 /* La pastille a point de la refonte (2026-09-26) : la forme de rf-pill, les memes sens. */
 .pill{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:600;padding:.22rem .65rem;border-radius:99px;white-space:nowrap}
 .pill::before{content:"";width:6px;height:6px;border-radius:99px;background:currentColor;flex:0 0 auto}
@@ -186,7 +186,7 @@ html.jour .boite .apercu{background:conic-gradient(#e6e1d6 25%,#f4f2ec 0 50%,#e6
 .boite .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.5rem;
   padding:.55rem 0;border-top:1px solid var(--v08);
   border-bottom:1px solid var(--v08);margin-bottom:.6rem}
-.boite .grille .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
+.boite .grille .l{font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .boite .grille .v{font-size:.84rem;font-weight:600;overflow-wrap:anywhere}
 .jetons{display:flex;flex-wrap:wrap;gap:.3rem;margin:.15rem 0 .6rem}
 .jetons button{font-size:.75rem;padding:.16rem .5rem}
@@ -227,13 +227,13 @@ html.jour .boite .apercu{background:conic-gradient(#e6e1d6 25%,#f4f2ec 0 50%,#e6
 .suivi .lg .nm{flex:1 1 8rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Les etapes, sous le nom : ce que l import a REELLEMENT fait, avec ses
    chiffres. << 6,2 Mo vers 88 Ko >> se verifie ; << compression reussie >> non. */
-.suivi .lg .ep{flex:1 0 100%;font-size:.68rem;color:var(--tx2);padding-left:.1rem;
+.suivi .lg .ep{flex:1 0 100%;font-size:.6875rem;color:var(--tx2);padding-left:.1rem;
   display:flex;gap:.45rem;flex-wrap:wrap}
 .suivi .lg .ep i{font-style:normal}
 .suivi .lg .ep i.ok{color:var(--tx-ok)}
 .suivi .lg .ep i.non{color:var(--tx-err2)}
 .suivi .lg .ep i.encours{color:var(--tx-or2)}
-.suivi .lg .et{flex:0 0 auto;font-size:.68rem;font-weight:700;padding:.03rem .4rem;border-radius:99px}
+.suivi .lg .et{flex:0 0 auto;font-size:.6875rem;font-weight:700;padding:.03rem .4rem;border-radius:99px}
 .suivi .lg .et.attente{background:rgba(148,163,184,.16);color:var(--tx-94a3b8)}
 .suivi .lg .et.cours{background:rgba(201,169,126,.2);color:var(--tx-or2)}
 .suivi .lg .et.faite{background:rgba(34,197,94,.15);color:var(--tx-ok)}
@@ -365,9 +365,9 @@ html.jour .asst .pi{background:#faf8f3}
 .pl .v .im img.o8{transform:translate(-50%,-50%) rotate(270deg)}
 .pl .v .att{display:flex;align-items:center;justify-content:center;height:100%;
   color:var(--tx2);font-size:.72rem}
-.pl .v .lg{padding:.25rem .4rem;font-size:.68rem;color:var(--tx-c3cede);
+.pl .v .lg{padding:.25rem .4rem;font-size:.6875rem;color:var(--tx-c3cede);
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pl .v .dt2{padding:0 .4rem .3rem;font-size:.63rem;color:var(--tx2)}
+.pl .v .dt2{padding:0 .4rem .3rem;font-size:.6875rem;color:var(--tx2)}
 .pl .v .ck{position:absolute;top:.3rem;left:.3rem;width:1.1rem;height:1.1rem;
   border-radius:4px;background:rgba(11,18,32,.85);border:1px solid var(--v30);
   display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--tx-or)}
@@ -2144,7 +2144,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '</div>';
 
     if (!ro && r.isole && (D.fonds || []).length) {
-      h += '<div class="l" style="font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)">${T("Fond")}</div>'
+      h += '<div class="l" style="font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)">${T("Fond")}</div>'
         + '<div class="jetons">'
         + '<button data-fond="__transp" class="' + (!r.fond || r.fond === '__transp' ? 'on' : '') + '">Transparent</button>'
         + D.fonds.map(function(f){

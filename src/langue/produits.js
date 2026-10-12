@@ -13,6 +13,25 @@
  */
 
 module.exports = {
+  'Affichage de la liste': 'List view',
+  'Affichage détaillé': 'Detailed view',
+  'Détaillé': 'Detailed',
+  'Compact': 'Compact',
+  'Affichage compact : une ligne par produit, plus de produits par page': 'Compact view: one line per product, more products per page',
+  'Vente finale en lot': 'Bulk final sale',
+  'Appliquer ou retirer la vente finale sur plusieurs produits à la fois': 'Apply or remove final sale on several products at once',
+  'Toute la page': 'The whole page',
+  'produit sélectionné': 'product selected',
+  'produits sélectionnés': 'products selected',
+  'Appliquer vente finale': 'Apply final sale',
+  'Retirer vente finale': 'Remove final sale',
+  'Cliquer pour sélectionner': 'Click to select',
+  'Aucun produit sélectionné.': 'No product selected.',
+  'activée': 'activated',
+  'retirée': 'removed',
+  ' pour ': ' for ',
+  'produit.': 'product.',
+  'produits.': 'products.',
   /* ── L EXPORT DE LA LISTE (2026-09-19) ─────────────────────────────────
      ⚠ LE PRIX ET LE SOLDE SONT DEUX COLONNES dans le fichier, pas une chaine
      barree. A l ecran le solde se lit d un coup d oeil par-dessus le prix

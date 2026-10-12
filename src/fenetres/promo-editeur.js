@@ -123,7 +123,7 @@ body{background:var(--f-page);color:var(--tx);
 /* La poignee de rotation se tient EN DEHORS de la boite, au-dessus : dans un
    coin elle se confondrait avec celle qui redimensionne. */
 .poi.rot{left:50%;top:-25px;margin-left:-6px;border-radius:50%;cursor:grab}
-.etiq{position:absolute;left:0;top:-19px;font-size:.62rem;white-space:nowrap;
+.etiq{position:absolute;left:0;top:-19px;font-size:.6875rem;white-space:nowrap;
   background:#7AA7FF;color:#0b1220;padding:0 .3rem;border-radius:3px;font-weight:700}
 
 /* ── L INSPECTEUR ─────────────────────────────────────────────────────────── */
@@ -163,7 +163,7 @@ body{background:var(--f-page);color:var(--tx);
   border-bottom:1px solid var(--v04);font-size:.79rem}
 .el:hover{background:var(--v04)}
 .el.sel{background:var(--v08);font-weight:650}
-.el .k{font-size:.66rem;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em}
+.el .k{font-size:.6875rem;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em}
 .el .n{flex:1 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* ⚠ PAS D OPACITE ICI. Ces deux marqueurs disent qu un element est MASQUE ou
    VERROUILLE — c est-a-dire pourquoi il ne bouge pas quand on le tire. Estompes
@@ -174,7 +174,7 @@ body{background:var(--f-page);color:var(--tx);
 .el .oeil{color:var(--tx)}
 .el .mal{color:var(--tx-err2)}
 .bloc{margin-bottom:.7rem}
-.bloc>label{display:block;font-size:.68rem;color:var(--tx2);margin-bottom:.2rem;
+.bloc>label{display:block;font-size:.6875rem;color:var(--tx2);margin-bottom:.2rem;
   text-transform:uppercase;letter-spacing:.04em}
 .bloc input[type=text],.bloc textarea,.bloc select{width:100%;padding:.34rem .45rem;
   background:var(--f-champ);color:var(--tx);border:1px solid var(--v12);border-radius:6px;
@@ -184,7 +184,7 @@ body{background:var(--f-page);color:var(--tx);
 .rang>div{flex:1 1 0;min-width:0}
 .rang input[type=number]{width:100%;padding:.3rem .4rem;background:var(--f-champ);
   color:var(--tx);border:1px solid var(--v12);border-radius:6px;font:inherit;font-size:.8rem}
-.p{font-size:.64rem;color:var(--tx2)}
+.p{font-size:.6875rem;color:var(--tx2)}
 .btn{padding:.34rem .7rem;border-radius:7px;border:1px solid var(--v12);
   background:var(--v04);color:var(--tx);font:inherit;font-size:.8rem;cursor:pointer}
 .btn:hover{background:var(--v08)}

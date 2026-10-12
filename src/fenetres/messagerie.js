@@ -66,7 +66,7 @@ button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bc95}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
-button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:700;
+button .n{display:inline-block;margin-left:.3rem;font-size:.6875rem;font-weight:700;
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
 button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
 .ligne{padding:.55rem .7rem;background:var(--f-carte);border:1px solid var(--v07);
@@ -76,7 +76,7 @@ button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
 .ligne .num{font-weight:700}
 .ligne .dt{font-size:.72rem;color:var(--tx2);margin-top:.15rem}
 .ligne .droite{margin-left:auto;font-size:.74rem;color:var(--tx2)}
-.pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
+.pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
 .pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
@@ -89,7 +89,7 @@ button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
 .boite .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.5rem;
   padding:.55rem 0;border-top:1px solid var(--v08);border-bottom:1px solid var(--v08);
   margin-bottom:.6rem}
-.boite .grille .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
+.boite .grille .l{font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .boite .grille .v{font-size:.84rem;font-weight:600;overflow-wrap:anywhere}
 .boite .texte{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.88rem;line-height:1.55;
   background:var(--v03);border:1px solid var(--v07);border-radius:9px;padding:.6rem .7rem}
@@ -276,15 +276,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '<div><div class="l">${T("Déposée le")}</div><div class="v">' + esc(szQuand(r.date)) + '</div></div>'
       + (r.reponduLe ? '<div><div class="l">${T("Répondu le")}</div><div class="v">' + esc(szQuand(r.reponduLe)) + '</div></div>' : '')
       + '</div>'
-      + '<div class="l" style="font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);'
+      + '<div class="l" style="font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);'
       + 'margin-bottom:.25rem">${T("Message du client")}</div>'
       + '<div class="texte">' + esc(r.message || '${T("(aucun message)")}') + '</div>'
       + (r.reponse && r.statut === 'answered'
-          ? '<div class="reponse"><div style="font-size:.68rem;color:var(--tx2);text-transform:uppercase;'
+          ? '<div class="reponse"><div style="font-size:.6875rem;color:var(--tx2);text-transform:uppercase;'
             + 'letter-spacing:.05em">${T("Votre réponse")}' + (r.reponduLe ? ' · ' + esc(szQuand(r.reponduLe)) : '') + '</div>'
             + esc(r.reponse) + '</div>'
           : '')
-      + '<div style="margin-top:.6rem"><div class="l" style="font-size:.62rem;text-transform:uppercase;'
+      + '<div style="margin-top:.6rem"><div class="l" style="font-size:.6875rem;text-transform:uppercase;'
       + 'letter-spacing:.05em;color:var(--tx2);margin-bottom:.25rem">'
       + (r.statut === 'answered' ? '${T("Modifier la réponse (renvoyée par courriel)")}' : '${T("Votre réponse (envoyée par courriel au client)")}') + '</div>'
       + '<textarea aria-label="${T("Rédigez votre réponse")}" id="m-reptxt" placeholder="${T("Rédigez votre réponse…")}">' + esc(r.reponse || '') + '</textarea></div>'

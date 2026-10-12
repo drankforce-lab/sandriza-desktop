@@ -60,14 +60,14 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 .carte h2{margin:0 0 .45rem;font-size:.71rem;text-transform:uppercase;
   letter-spacing:.09em;color:var(--tx2);font-weight:700}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
+thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.3rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 tfoot td{padding:.34rem .4rem;border-top:2px solid var(--v16);font-weight:800}
 tbody .num{font-weight:700}
 tbody .dt{font-size:.72rem;color:var(--tx2)}
 .mono{font-family:'Courier New',monospace;font-size:.78rem}
-.pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap;
+.pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap;
   margin-right:.2rem}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
@@ -95,7 +95,7 @@ input:focus{outline:none;border-color:#c9a97e}
 .boite h3{margin:0 0 .5rem;font:700 .98rem/1.3 Georgia,serif}
 .boite .grp{border:1px solid var(--v10);border-radius:9px;padding:.5rem .6rem;margin:.4rem 0}
 .boite .champs{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.6rem}
-.boite .champs .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin-bottom:.2rem}
+.boite .champs .l{font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin-bottom:.2rem}
 .boite .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.7rem}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;

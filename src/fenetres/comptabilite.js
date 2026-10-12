@@ -86,9 +86,9 @@ button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 .chiffres{display:grid;grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr));gap:.6rem}
 .chiffre{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
-.chiffre .lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
+.chiffre .lbl{font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .chiffre .val{font:700 1.18rem/1.25 ui-monospace,Consolas,monospace;margin-top:.15rem}
-.chiffre .sous{font-size:.68rem;color:var(--tx3);margin-top:.1rem}
+.chiffre .sous{font-size:.6875rem;color:var(--tx3);margin-top:.1rem}
 .chiffre.pos .val{color:var(--tx-ok)}
 .chiffre.neg .val{color:var(--tx-err2)}
 /* ── Tableaux ────────────────────────────────────────────────────────────── */
@@ -104,7 +104,7 @@ table{width:100%;border-collapse:collapse;font-size:.79rem}
 .duo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:.7rem;align-items:start}
 .avert summary{cursor:pointer;list-style-position:inside}
 .info-bulle{cursor:help;color:var(--tx2);font-weight:400;text-transform:none;letter-spacing:0}
-thead th{text-align:left;padding:.22rem .35rem;font-size:.65rem;text-transform:uppercase;
+thead th{text-align:left;padding:.22rem .35rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 thead th.n,tbody td.n{text-align:right;font-family:ui-monospace,Consolas,monospace}
 tbody td{padding:.26rem .35rem;border-top:1px solid var(--v055);vertical-align:middle}
@@ -114,7 +114,7 @@ tbody tr:hover td{background:var(--v03)}
 tbody tr.tot td{border-top:1px solid var(--v16);font-weight:700}
 tbody tr.sous td{color:var(--tx2)}
 .bon{color:var(--tx-ok)}.mauvais{color:var(--tx-err)}.gris{color:var(--tx2)}
-.pill{display:inline-block;font-size:.64rem;padding:.05rem .45rem;border-radius:99px;
+.pill{display:inline-block;font-size:.6875rem;padding:.05rem .45rem;border-radius:99px;
   white-space:nowrap;font-weight:700}
 .pill.g{background:rgba(148,163,184,.14);color:var(--tx-94a3b8);font-weight:600}
 .pill.att{background:rgba(234,179,8,.16);color:var(--tx-att)}
@@ -127,7 +127,7 @@ tbody tr.sous td{color:var(--tx2)}
   border-left:2px solid var(--v16);padding-left:.6rem}
 /* ── Le budget ───────────────────────────────────────────────────────────── */
 .mois12{display:grid;grid-template-columns:repeat(12,1fr);gap:.25rem;margin-top:.3rem}
-.mois12 label{display:block;font-size:.6rem;color:var(--tx3);text-align:center}
+.mois12 label{display:block;font-size:.6875rem;color:var(--tx3);text-align:center}
 .mois12 input{width:100%;padding:.18rem .2rem;font-size:.7rem}
 .corps td.n input{padding:.12rem .45rem;min-height:0;height:auto}
 .corps td button.mini{padding:0 .45rem;line-height:1.45;min-height:0;height:auto}

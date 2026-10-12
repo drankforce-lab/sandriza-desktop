@@ -90,7 +90,7 @@ input.t:disabled,textarea.t:disabled{opacity:.45}
 .agent .vign{width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--v18);flex:0 0 auto}
 .agent .sansph{width:32px;height:32px;border-radius:50%;background:var(--v08);display:flex;
   align-items:center;justify-content:center;font-size:.95rem;flex:0 0 auto}
-.pill{display:inline-block;font-size:.66rem;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.pill{display:inline-block;font-size:.6875rem;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
 .pill.ok{background:rgba(22,163,74,.2);color:var(--tx-ok2)}
 .pill.non{background:rgba(234,179,8,.18);color:var(--tx-att)}
 .avis{border-radius:9px;padding:.5rem .75rem;font-size:.79rem;margin:0 0 .9rem;line-height:1.5}

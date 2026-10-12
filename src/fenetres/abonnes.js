@@ -63,19 +63,19 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 .tuile.cliq{cursor:pointer;user-select:none}
 .tuile.cliq:hover{border-color:rgba(201,169,126,.6)}
 .tuile.on{border-color:#c9a97e}
-.tuile .lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
+.tuile .lbl{font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 .tuile .val{font-size:.95rem;font-weight:800;margin-top:.1rem}
 .tuile .val.bon{color:var(--tx-ok)}.tuile .val.neutre{color:var(--tx2)}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
+thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.3rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody tr:hover td{background:var(--v04)}
 .fin{white-space:nowrap;text-align:right}
 .dt{font-size:.72rem;color:var(--tx2)}
-.pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
+.pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
@@ -86,7 +86,7 @@ tbody tr:hover td{background:var(--v04)}
 .ch{display:flex;flex-direction:column;gap:.22rem;margin-bottom:.5rem}
 .ch label{font-size:.72rem;color:var(--tx2)}
 .ch input{width:100%}
-.ch .aide{font-size:.68rem;color:var(--tx3)}
+.ch .aide{font-size:.6875rem;color:var(--tx3)}
 .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.8rem;flex-wrap:wrap}
 .vide{padding:1.4rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;

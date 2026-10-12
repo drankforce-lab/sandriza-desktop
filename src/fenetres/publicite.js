@@ -75,7 +75,7 @@ button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 .deuxb{display:grid;grid-template-columns:1fr 340px;gap:1rem;align-items:start}
 @media(max-width:760px){.deux,.deuxb{grid-template-columns:1fr}}
 table{width:100%;border-collapse:collapse;font-size:.82rem}
-thead th{text-align:left;padding:.26rem .4rem;font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
+thead th{text-align:left;padding:.26rem .4rem;font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.32rem .4rem;border-top:1px solid var(--v055)}
 .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .ctr{text-align:center}
@@ -98,28 +98,28 @@ html.jour .badge.err{color:#984545}
 html.jour .badge.info{color:#44607e}
 .graph{display:flex;align-items:flex-end;gap:.4rem;height:150px}
 .graph .col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
-.graph .val{font-size:.56rem;color:var(--tx2);font-weight:600;margin-bottom:2px;white-space:nowrap}
+.graph .val{font-size:.6875rem;color:var(--tx2);font-weight:600;margin-bottom:2px;white-space:nowrap}
 .graph .barz{width:100%;display:flex;gap:2px;align-items:flex-end;height:110px}
 .graph .b1{flex:1;background:#c9a97e;border-radius:3px 3px 0 0}
 /* La part PROMO en or clair, pas en rouge (2026-09-29) : le rouge dit un PROBLEME,
    et une vente en promotion n en est pas un. */
 .graph .b2{flex:1;background:rgba(201,169,126,.42);border-radius:3px 3px 0 0}
 html.jour .graph .b2{background:rgba(168,128,78,.38)}
-.graph .lbl{font-size:.64rem;color:var(--tx2);margin-top:.3rem}
-.legend{display:flex;gap:1rem;font-size:.68rem;color:var(--tx2)}
+.graph .lbl{font-size:.6875rem;color:var(--tx2);margin-top:.3rem}
+.legend{display:flex;gap:1rem;font-size:.6875rem;color:var(--tx2)}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:middle}
 .rang{display:flex;align-items:center;gap:.6rem;padding:.4rem 0;border-bottom:1px solid var(--v055)}
-.rang .pos{width:1.3rem;height:1.3rem;border-radius:50%;background:#c9a97e;color:#1a1a1a;font-size:.6rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rang .pos{width:1.3rem;height:1.3rem;border-radius:50%;background:#c9a97e;color:#1a1a1a;font-size:.6875rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .rang .nm{flex:1;min-width:0;font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .segc{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.55rem;margin-bottom:.9rem}
 .seg{background:var(--f-carte);border:2px solid transparent;border-radius:11px;padding:.6rem .7rem;cursor:pointer}
 .seg.pris{border-color:#c9a97e}
 .seg .n{font-size:1.5rem;font-weight:800}
 .seg .l{font-size:.78rem;font-weight:600}
-.seg .d{font-size:.66rem;color:var(--tx2);margin-top:.1rem}
+.seg .d{font-size:.6875rem;color:var(--tx2);margin-top:.1rem}
 .pill{display:inline-block;padding:.1rem .55rem;border-radius:99px;font-size:.7rem;font-weight:600;background:rgba(148,163,184,.18);color:var(--tx-gris2)}
 .champ{margin-bottom:.65rem}
-.champ label{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;color:var(--tx2);margin:0 0 .22rem}
+.champ label{display:block;font-size:.6875rem;text-transform:uppercase;letter-spacing:.04em;color:var(--tx2);margin:0 0 .22rem}
 .champ input,.champ select,.champ textarea{width:100%}
 .aud{background:rgba(201,169,126,.14);border-radius:8px;padding:.5rem;text-align:center;font-weight:800;font-size:1.05rem;color:var(--tx-creme)}
 .chans{display:flex;flex-wrap:wrap;gap:.7rem}
@@ -237,7 +237,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
     }).join('');
     var tops = D.topProds.length ? D.topProds.map(function(p, i){
       return '<div class="rang"><span class="pos">' + (i + 1) + '</span><div class="nm"><div>' + esc(p.name) + '</div>'
-        + '<div style="font-size:.66rem;color:var(--tx2)">' + nb2(p.qty, '${T("vendu")}', '${T("vendus")}') + '</div></div>'
+        + '<div style="font-size:.6875rem;color:var(--tx2)">' + nb2(p.qty, '${T("vendu")}', '${T("vendus")}') + '</div></div>'
         + '<div class="num" style="color:var(--tx-creme);font-weight:700">' + argent(p.rev) + '</div></div>';
     }).join('') : '<div class="vide">${T("Aucune vente.")}</div>';
     var recent = D.recent.length ? D.recent.map(function(o){
@@ -339,7 +339,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
       +     '<div class="champ"><label for="utm-campaign">${T("Campagne")}</label><input id="utm-campaign" data-utm="campaign" value="' + esc(UTM.campaign) + '"></div>'
       +     '<div class="champ"><label for="utm-dest">${T("Destination")}</label><select id="utm-dest" data-utm="dest">' + dst + '</select></div>'
       +     '<div class="champ" style="margin-bottom:0"><label for="utm-result">${T("Lien généré")}</label><div style="display:flex;gap:.35rem">'
-      +       '<input id="utm-result" readonly class="mono" style="font-size:.66rem" value="' + esc(lienUtm()) + '"><button class="ghost mini" data-act="copyutm">${T("Copier")}</button></div></div>'
+      +       '<input id="utm-result" readonly class="mono" style="font-size:.6875rem" value="' + esc(lienUtm()) + '"><button class="ghost mini" data-act="copyutm">${T("Copier")}</button></div></div>'
       +   '</div>'
       +   '<div class="carte"><h2><span><span class="ic">💡</span> ${T("Recommandations")}</span></h2>' + recs + '</div>'
       + '</div></div>';

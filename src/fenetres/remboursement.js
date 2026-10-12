@@ -75,7 +75,7 @@ button.paie:hover:not(:disabled){background:#8f74ff;border-color:#8f74ff}
 .art .rf-prod{flex:1 1 auto}
 .art .rf-prod > div{min-width:0}
 .art input[type=number]{width:4.4rem;text-align:center}
-.art .max{font-size:.68rem;color:var(--tx3);white-space:nowrap}
+.art .max{font-size:.6875rem;color:var(--tx3);white-space:nowrap}
 /* Le plafond n est pas un etat : pas de point de pastille devant « max 2 ». */
 .art .rf-pill::before{display:none}
 /* ══ NOUVELLE REFONTE (2026-10-01) : DEUX COLONNES. Tout etait empile sur une

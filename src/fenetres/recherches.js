@@ -56,15 +56,15 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.5rem}
 .tuile{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:.5rem .65rem}
-.tuile .lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
+.tuile .lbl{font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 .tuile .val{font-size:.95rem;font-weight:800;margin-top:.1rem}
-.tuile .sub{font-size:.66rem;color:var(--tx2);margin-top:.1rem}
+.tuile .sub{font-size:.6875rem;color:var(--tx2);margin-top:.1rem}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;
   letter-spacing:.07em;color:var(--tx2);font-weight:700}
 table{width:100%;border-collapse:collapse;font-size:.86rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
+thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.3rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody tr:hover td{background:var(--v04)}

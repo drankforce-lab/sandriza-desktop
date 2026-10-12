@@ -68,7 +68,7 @@ button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
 button.prim:hover:not(:disabled){background:#a3824f}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
-button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:700;
+button .n{display:inline-block;margin-left:.3rem;font-size:.6875rem;font-weight:700;
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
 .rech{flex:1 1 16rem;min-width:11rem}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.5rem}
@@ -100,7 +100,7 @@ html.jour .rf-av.tc{color:color-mix(in srgb,var(--cc,#6d7f96) 55%,black);
   letter-spacing:.07em;color:var(--tx2);font-weight:700;display:flex;align-items:center;gap:.5rem}
 .carte h2 .pt{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
+thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.32rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody tr:hover td{background:var(--v04)}
@@ -109,7 +109,7 @@ tbody tr:hover td{background:var(--v04)}
 .pastille{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:.4rem;
   vertical-align:middle}
 .dt{font-size:.72rem;color:var(--tx2)}
-.pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
+.pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.liq{background:rgba(217,119,6,.18);color:var(--tx-att)}
 .pill.vfin{background:rgba(220,38,38,.18);color:var(--tx-err2)}
 .pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
@@ -135,7 +135,7 @@ tbody tr:hover td{background:var(--v04)}
 .deux{display:flex;gap:.7rem;align-items:flex-start;flex-wrap:wrap}
 .deux>.col{flex:1 1 20rem;min-width:0}
 .bloc{border:1px solid var(--v10);border-radius:10px;padding:.5rem .6rem}
-.bloc .titre{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;
+.bloc .titre{font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;
   color:var(--tx2);font-weight:700;margin:0 0 .4rem}
 .liste{max-height:15rem;overflow-y:auto;display:flex;flex-direction:column;gap:.25rem}
 .liste::-webkit-scrollbar{width:8px}
@@ -159,7 +159,7 @@ label.duree{display:flex;align-items:center;gap:.45rem;font-size:.82rem;cursor:p
 label.duree input{margin:0;accent-color:#c9a97e}
 .dates{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.4rem;padding:.5rem .6rem;
   background:var(--v03);border:1px solid var(--v10);border-radius:9px}
-.dates label{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;
+.dates label{display:block;font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;
   color:var(--tx2);margin:0 0 .18rem}
 .dates input{width:11rem}
 .choisi{display:flex;align-items:center;gap:.4rem;padding:.24rem .45rem;border-radius:7px;
@@ -562,7 +562,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
       + '<div class="resume ' + (estLiq ? 'liq' : 'vfin') + '">'
       +   '<div class="quoi">' + (estLiq ? '<span class="ic">🟡</span> ${T("Liquidation — aucun retour")}' : '<span class="ic">🔴</span> ${T("Vente finale — aucun retour")}') + '</div>'
       +   '<div class="quand">⏳ ' + quand + '</div></div>'
-      + '<div class="titre" style="font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700;margin:0 0 .4rem">'
+      + '<div class="titre" style="font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700;margin:0 0 .4rem">'
       +   LOT.ordre.length + (LOT.ordre.length === 1 ? '${T(" produit qui change de régime")}' : '${T(" produits qui changent de régime")}') + '</div>'
       + '<div class="liste">' + liste + '</div>'
       + '<div class="gare"><span class="ic">⚠</span> ${T("Ces produits n’accepteront plus de retour, et la boutique l’annoncera sur ")}'

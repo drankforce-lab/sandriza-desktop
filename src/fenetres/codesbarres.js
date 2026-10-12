@@ -90,13 +90,13 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 .carte h2{margin:0 0 .45rem;font-size:.71rem;text-transform:uppercase;
   letter-spacing:.09em;color:var(--tx2);font-weight:700;display:flex;align-items:center;gap:.5rem}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
+thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.3rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody .num{font-weight:700}
 tbody .dt{font-size:.72rem;color:var(--tx2)}
 .sku{font-family:'Courier New',monospace;font-size:.74rem;font-weight:800;color:var(--tx-or)}
-.pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
+.pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
 .pill.err{background:rgba(239,68,68,.16);color:var(--tx-err)}
@@ -111,7 +111,7 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
    la regle des themes (.stats .s .n, couleur d accent) passe apres celle-ci. */
 .carte .stats .s .n{color:var(--tx)}
 html.jour .carte .stats .s .n{color:#1d2433}
-.stats .s .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
+.stats .s .l{font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .fileligne{display:flex;align-items:center;gap:.45rem;padding:.3rem 0;
   border-top:1px solid var(--v055);font-size:.8rem}
 /* PAS << .info >> : le socle le peint en panneau BLEU en mode jour. */

@@ -78,7 +78,7 @@ button.mini{font-size:.74rem;padding:.14rem .45rem}
 .note{font-size:.78rem;color:var(--tx2);line-height:1.6;background:var(--v03);
   border:1px solid var(--v07);border-radius:10px;padding:.5rem .7rem}
 table{width:100%;border-collapse:collapse;font-size:.82rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.67rem;text-transform:uppercase;
+thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.34rem .4rem;border-top:1px solid var(--v05);vertical-align:top}
 .sub{font-size:.71rem;color:var(--tx2)}
@@ -99,7 +99,7 @@ tbody td{padding:.34rem .4rem;border-top:1px solid var(--v05);vertical-align:top
    dur dans ce fichier — donc plus rien à corriger le jour où le thème bouge.
    ⚠ ET .pill.moi A SIMPLEMENT DISPARU : la colonne d'actions écrit déjà « vous »
    pour sa propre ligne. La pastille disait la même chose deux fois. */
-.pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
+.pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 /* ── La refonte de l Inventaire (2026-09-25) ── */
 .tuiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem;flex:0 0 auto;margin-bottom:.7rem}
 .tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}

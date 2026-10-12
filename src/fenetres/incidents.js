@@ -65,7 +65,7 @@ td.acts{text-align:right;white-space:nowrap}
 .tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
 .tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .val.att{color:var(--tx-att)}.val.err{color:var(--tx-err)}
-.pill{display:inline-block;font-size:.66rem;font-weight:700;padding:2px 7px;border-radius:99px;white-space:nowrap}
+.pill{display:inline-block;font-size:.6875rem;font-weight:700;padding:2px 7px;border-radius:99px;white-space:nowrap}
 .pill.grave{background:rgba(220,38,38,.18);color:var(--tx-err2)}
 .pill.eval{background:rgba(234,179,8,.18);color:var(--tx-att)}
 .pill.sain{background:rgba(22,163,74,.2);color:var(--tx-ok2)}
@@ -123,7 +123,7 @@ input.t.manque{border-color:#f87171;background:rgba(248,113,113,.08)}
   background:transparent;color:var(--tx2);box-sizing:border-box}
 .fil .et.fait .rond{background:#4ade80;border-color:#4ade80;color:#08240f}
 .fil .et.ici .rond{background:#c9a97e;border-color:#c9a97e;color:#1a1408}
-.fil .nom{width:100%;font-size:.68rem;margin-top:.4rem;text-align:center;color:var(--tx2);
+.fil .nom{width:100%;font-size:.6875rem;margin-top:.4rem;text-align:center;color:var(--tx2);
   line-height:1.25;overflow-wrap:break-word;padding:0 .2rem}
 .fil .et.ici .nom{color:var(--tx);font-weight:700}
 .fil .et.fait .nom{color:var(--tx)}
@@ -131,7 +131,7 @@ input.t.manque{border-color:#f87171;background:rgba(248,113,113,.08)}
 /* RELOOKING 2026 (2026-10-04) : les champs d une etape sur deux colonnes ;
    une zone de texte prend toute la largeur. Intertitre au style du reste. */
 .pas.ici{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.15rem 1rem;align-items:start}
-.pas h4{grid-column:1/-1;margin:0 0 .7rem;font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--tx-or);font-weight:700}
+.pas h4{grid-column:1/-1;margin:0 0 .7rem;font-size:.6875rem;text-transform:uppercase;letter-spacing:.07em;color:var(--tx-or);font-weight:700}
 .pas .champ:has(textarea){grid-column:1/-1}
 html.jour .pas h4{color:#6b5a40}   /* l or du jour tombait a 4,44 sur le fond beige */
 .nav{display:flex;justify-content:space-between;align-items:center;gap:.75rem;width:100%}

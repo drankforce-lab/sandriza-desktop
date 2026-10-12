@@ -3128,7 +3128,7 @@ const CSS_TUILES = `
 /* Deploye : une fleche seule, sans texte, collee sous le coin du bandeau —
    la marge negative lui rend la ligne qu occupait « Masquer les totaux ». */
 .szbd-b{align-self:flex-end;display:inline-flex;align-items:center;justify-content:center;gap:.35rem;
-  font:inherit;font-size:.68rem;line-height:1.25;cursor:pointer;color:var(--tx3);
+  font:inherit;font-size:.6875rem;line-height:1.25;cursor:pointer;color:var(--tx3);
   background:transparent;border:0;border-radius:6px;padding:.05rem .3rem;margin:-.2rem 0 -.25rem}
 .szbd-b svg{display:block;flex:0 0 auto}
 .szbd-b:hover{color:var(--tx);background:var(--v08)}
@@ -3451,7 +3451,7 @@ const CSS_REFONTE = `
    carte est TRANSLUCIDE (--v03) et se pose par-dessus la teinte de la ligne.
    ⚠ La pagination Auto compte l espace entre les cartes (szAutoPagination). */
 table{border-collapse:separate;border-spacing:0 6px}
-thead th{background:var(--f-carte);padding:.3rem .8rem .1rem;font-size:.66rem;letter-spacing:.08em;
+thead th{background:var(--f-carte);padding:.3rem .8rem .1rem;font-size:.6875rem;letter-spacing:.08em;
   color:var(--tx3);border-bottom:0}
 /* ⚠ LA CARTE SE DESSINE PAR SON CONTOUR, PAS PAR UN FOND : un fond --v03 changeait
    la surface sous TOUS les textes des tableaux, et le banc des contrastes les a
@@ -3701,7 +3701,7 @@ html.jour .onglets button.on .pill,html.jour .onglets button.actif .pill{backgro
 html body input[type=checkbox],html body input[type=radio]{max-width:1.4rem;flex:0 0 auto}
 /* ── PIECES DU RELOOKING 2026 (2026-10-04) : section en carte, interrupteur ── */
 .sz-sect{background:var(--v03);border:1px solid var(--v07);border-radius:12px;padding:.8rem .9rem .9rem}
-.sz-sect > h4{margin:0 0 .65rem;font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--tx-or);font-weight:700}
+.sz-sect > h4{margin:0 0 .65rem;font-size:.6875rem;text-transform:uppercase;letter-spacing:.07em;color:var(--tx-or);font-weight:700}
 .sz-inter{position:relative;display:flex;align-items:center;gap:.8rem;padding:.55rem .75rem;min-height:2.45rem;
   border:1px solid var(--v10);border-radius:10px;cursor:pointer;background:var(--v04)}
 .sz-inter:hover{border-color:var(--v16)}

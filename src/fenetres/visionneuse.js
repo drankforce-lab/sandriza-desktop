@@ -47,7 +47,7 @@ body{overflow:hidden}
 .cadre .attente{color:var(--tx2);font-size:.85rem}
 .aide{flex:0 0 auto;padding:.35rem .9rem;font-size:.7rem;color:var(--tx3);
   border-top:1px solid var(--v06);text-align:center}
-.aide kbd{font:600 .66rem/1 system-ui;padding:.1rem .32rem;border-radius:4px;
+.aide kbd{font:600 .6875rem/1 system-ui;padding:.1rem .32rem;border-radius:4px;
   border:1px solid var(--v16);background:var(--v05);color:var(--tx2)}
 `;
 

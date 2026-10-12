@@ -69,7 +69,7 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 .carte h2{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;
   letter-spacing:.07em;color:var(--tx2);font-weight:700}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
+thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.3rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 .num{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}

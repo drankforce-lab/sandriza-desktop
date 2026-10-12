@@ -19,6 +19,13 @@
  */
 
 module.exports = {
+  'Prioritaire': 'Priority',
+  'Traitement prioritaire demandé par le client': 'Priority handling requested by the customer',
+  'Lancer la préparation': 'Start preparing',
+  'Lancer la préparation de': 'Start preparing',
+  ' — la préparation reste fermée tant qu’elle n’est pas libérée.': ' — preparation stays closed until it is released.',
+  'Préparation ouverte dans sa fenêtre.': 'Preparation opened in its window.',
+  'Ouverture…': 'Opening…',
   'Tableau de bord — Administration Sandriza': 'Dashboard — Sandriza Administration',
   'Tableau de bord': 'Dashboard',
   'Tableau de bord indisponible': 'Dashboard unavailable',

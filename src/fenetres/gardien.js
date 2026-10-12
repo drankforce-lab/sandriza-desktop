@@ -65,7 +65,7 @@ body{background:var(--f-page);color:var(--tx);
   display:inline-flex;align-items:center;gap:.4rem;font-weight:600}
 .onglets > button:hover{background:var(--v05);color:var(--tx)}
 .onglets > button:focus-visible{border-color:#c9a97e}
-.onglets .nb{font-size:.68rem;font-weight:700;min-width:1.35rem;text-align:center;padding:.04rem .38rem;border-radius:999px;
+.onglets .nb{font-size:.6875rem;font-weight:700;min-width:1.35rem;text-align:center;padding:.04rem .38rem;border-radius:999px;
   background:var(--v08);color:var(--tx2)}
 .onglets .nb.att{background:rgba(251,191,36,.18);color:var(--tx-att)}
 /* Mode jour : la pastille grise tombait à 4,27 (banc-texte-sur-fond) — encre assombrie. */
@@ -102,7 +102,7 @@ button.mini{font-size:.74rem;padding:.14rem .45rem}
 .note{font-size:.78rem;color:var(--tx2);line-height:1.6;background:var(--v03);
   border:1px solid var(--v07);border-radius:10px;padding:.5rem .7rem}
 table{width:100%;border-collapse:collapse;font-size:.82rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.67rem;text-transform:uppercase;
+thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.3rem .4rem;border-top:1px solid var(--v05);vertical-align:top}
 .sub{font-size:.71rem;color:var(--tx2)}

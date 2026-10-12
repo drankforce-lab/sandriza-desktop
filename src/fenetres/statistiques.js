@@ -63,7 +63,7 @@ button.prim:hover:not(:disabled){background:#a3824f}
 .tuile{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.5rem .65rem;text-align:center}
 .tuile .val{font-size:1.15rem;font-weight:800;line-height:1.2;white-space:nowrap}
-.tuile .lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);margin-top:.12rem}
+.tuile .lbl{font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);margin-top:.12rem}
 .tuile .val.or{color:var(--tx-or)}.tuile .val.bon{color:var(--tx-ok)}.tuile .val.mal{color:var(--tx-err)}
 .tuile .val.att{color:var(--tx-att)}
 /* ── La refonte de l Inventaire (2026-09-25) : onglets et periodes en pastilles
@@ -82,13 +82,13 @@ button.prim:hover:not(:disabled){background:#a3824f}
 .carte h3{margin:0 0 .4rem;font:700 .82rem/1.3 Georgia,serif;color:var(--tx-gris2)}
 .grilles{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.55rem}
 table{width:100%;border-collapse:collapse;font-size:.83rem}
-thead th{text-align:left;padding:.22rem .4rem;font-size:.66rem;text-transform:uppercase;
+thead th{text-align:left;padding:.22rem .4rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.26rem .4rem;border-top:1px solid var(--v055);vertical-align:top}
 tbody tr:hover td{background:var(--v04)}
 .num{text-align:right;white-space:nowrap}
 .dt{font-size:.72rem;color:var(--tx2)}
-.chemin{font-size:.68rem;color:var(--tx3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chemin{font-size:.6875rem;color:var(--tx3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tronq{max-width:20rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Graphique : des barres qui montent, une graduation, rien de plus.
    ⚠ LARGEUR BORNEE (2026-09-29) : sur sept jours dont deux seulement ont des
@@ -102,8 +102,8 @@ tbody tr:hover td{background:var(--v04)}
 .col:hover{background:rgba(201,169,126,.85)}
 html.jour .col{background:rgba(168,128,78,.55)}html.jour .col:hover{background:rgba(168,128,78,.85)}
 .axe{display:flex;justify-content:space-around;gap:4px;padding:0 .2rem;margin-top:.25rem}
-.axe span{flex:1 1 0;max-width:46px;min-width:2px;text-align:center;font-size:.64rem;color:var(--tx2);white-space:nowrap}
-.gmax{font-size:.66rem;color:var(--tx2);margin-bottom:.15rem}
+.axe span{flex:1 1 0;max-width:46px;min-width:2px;text-align:center;font-size:.6875rem;color:var(--tx2);white-space:nowrap}
+.gmax{font-size:.6875rem;color:var(--tx2);margin-bottom:.15rem}
 .avis{border-radius:9px;padding:.42rem .65rem;font-size:.78rem;line-height:1.55}
 .avis.att{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.32);color:#fde68a}
 .avis.mal{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.34);color:var(--tx-err2)}

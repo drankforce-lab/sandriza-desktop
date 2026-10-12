@@ -57,7 +57,7 @@ tr.ferme td.jour{color:var(--tx2)}
 td.h{white-space:nowrap}
 .sep-h{color:var(--tx3);margin:0 .5rem}
 table{width:100%;border-collapse:collapse;font-size:.86rem}
-th{text-align:left;padding:.4rem .5rem;font-size:.68rem;text-transform:uppercase;
+th{text-align:left;padding:.4rem .5rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);border-bottom:1px solid var(--v12)}
 th.c,td.c{text-align:center}
 td{padding:.45rem .5rem;border-bottom:1px solid var(--v06)}

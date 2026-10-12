@@ -77,13 +77,13 @@ button.dgr{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
 .tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center}
 table{width:100%;border-collapse:collapse;font-size:.79rem}
-thead th{text-align:left;padding:.22rem .35rem;font-size:.65rem;text-transform:uppercase;
+thead th{text-align:left;padding:.22rem .35rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.3rem .35rem;border-top:1px solid var(--v055);vertical-align:top}
 tbody tr:hover td{background:var(--v03)}
 .dt{font-size:.7rem;color:var(--tx2)}
 .mono{font-family:ui-monospace,Consolas,monospace;font-size:.74rem}
-.pill{display:inline-block;font-size:.64rem;padding:.05rem .45rem;border-radius:99px;white-space:nowrap;font-weight:700}
+.pill{display:inline-block;font-size:.6875rem;padding:.05rem .45rem;border-radius:99px;white-space:nowrap;font-weight:700}
 .pill.actif{background:rgba(34,197,94,.15);color:var(--tx-ok)}
 .pill.expire{background:rgba(148,163,184,.18);color:var(--tx-gris2)}
 .pill.g{background:rgba(148,163,184,.14);color:var(--tx-94a3b8);font-weight:600}

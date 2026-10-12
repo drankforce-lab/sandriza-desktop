@@ -77,7 +77,7 @@ button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
 button.prim:hover:not(:disabled){background:#a3824f}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
-button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:700;
+button .n{display:inline-block;margin-left:.3rem;font-size:.6875rem;font-weight:700;
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.95rem 1.1rem}
@@ -87,7 +87,7 @@ button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:70
      << ARTICLES0 retenu >> en un seul mot (vu en capture). */
   display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
+thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.32rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody tr:hover td{background:var(--v04)}
@@ -95,7 +95,7 @@ tbody tr:hover td{background:var(--v04)}
 .fin{white-space:nowrap;text-align:right}
 .rang{font-family:'Courier New',monospace;color:var(--tx2);width:2.2rem}
 .dt{font-size:.72rem;color:var(--tx2)}
-.pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap;margin-right:.2rem}
+.pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap;margin-right:.2rem}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
 .jauge{height:.4rem;border-radius:99px;background:var(--v08);overflow:hidden;min-width:5rem}
@@ -122,7 +122,7 @@ button.sty{font:inherit;font-size:.79rem;padding:.24rem .7rem;border-radius:99px
 button.sty:hover{background:var(--v10)}
 button.sty.actif{border-color:#c9a97e;background:rgba(201,169,126,.16);font-weight:700}
 label.champ{display:block;margin:0 0 .6rem}
-label.champ .lbl{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;
+label.champ .lbl{display:block;font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;
   color:var(--tx2);margin:0 0 .22rem}
 input.t{width:100%;background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;
   color:var(--tx);font:inherit;font-size:.85rem;padding:.4rem .55rem}

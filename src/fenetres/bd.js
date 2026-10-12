@@ -60,7 +60,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .jauge .barre i{display:block;height:100%;background:#c9a97e}
 .jauge .sous{font-size:.7rem;color:var(--tx3);margin-top:.2rem}
 .cles{display:flex;flex-wrap:wrap;gap:.3rem}
-.cles code{font-size:.66rem;background:var(--f-champ);border:1px solid var(--v12);border-radius:4px;padding:.12rem .38rem;color:var(--tx2)}
+.cles code{font-size:.6875rem;background:var(--f-champ);border:1px solid var(--v12);border-radius:4px;padding:.12rem .38rem;color:var(--tx2)}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.55rem 1.05rem;
   border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

@@ -54,14 +54,14 @@ button.danger:hover:not(:disabled){background:rgba(239,68,68,.12)}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.95rem 1.1rem}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
+thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody tr{cursor:pointer}
 tbody tr:hover td{background:var(--v04)}
 tbody td{padding:.34rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody .num{font-weight:700}
 tbody .dt{font-size:.72rem;color:var(--tx2)}
-.pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap;
+.pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap;
   margin-right:.2rem}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}

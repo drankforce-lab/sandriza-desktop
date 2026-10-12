@@ -141,23 +141,23 @@ button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
 button.prim:hover:not(:disabled){background:#a3824f}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
-button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:700;
+button .n{display:inline-block;margin-left:.3rem;font-size:.6875rem;font-weight:700;
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
 .tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.5rem}
 .tuile{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:.5rem .65rem}
-.tuile .lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
+.tuile .lbl{font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 .tuile .val{font-size:.95rem;font-weight:800;margin-top:.1rem}
 .tuile .val.bon{color:var(--tx-ok)}
 /* ── La refonte de l Inventaire (2026-09-25) : la jauge de reponse ── */
 .jauger{height:5px;border-radius:3px;background:var(--v10);margin-top:.35rem;max-width:6rem;overflow:hidden;margin-left:auto}
 .jauger i{display:block;height:100%;border-radius:3px;background:color-mix(in srgb,var(--tx-ok,#4ade80) 55%,transparent)}
-.tuile .sub{font-size:.66rem;color:var(--tx2);margin-top:.1rem}
+.tuile .sub{font-size:.6875rem;color:var(--tx2);margin-top:.1rem}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;
   letter-spacing:.07em;color:var(--tx2);font-weight:700}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
+thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.32rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody tr:hover td{background:var(--v04)}
@@ -167,7 +167,7 @@ tbody tr[data-sondage]{cursor:pointer}
 .code{font-family:'Courier New',monospace;letter-spacing:1px;font-weight:700;
   background:var(--v06);border-radius:4px;padding:.06rem .4rem}
 .dt{font-size:.72rem;color:var(--tx2)}
-.pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
+.pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
 .pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
@@ -191,7 +191,7 @@ tbody tr[data-sondage]{cursor:pointer}
 .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.85rem;flex-wrap:wrap}
 /* ── Editeur de sondage (#33) ── */
 label.champ{display:block;margin:0 0 .6rem}
-label.champ .lbl{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;
+label.champ .lbl{display:block;font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;
   color:var(--tx2);margin:0 0 .22rem}
 input.t,select.t,textarea.t{width:100%;background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;
   color:var(--tx);font:inherit;font-size:.85rem;padding:.4rem .55rem}

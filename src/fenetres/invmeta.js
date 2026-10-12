@@ -73,7 +73,7 @@ button.ic,html.jour button.ic{filter:none}
   border-radius:10px;padding:.5rem .65rem;font-size:.79rem;color:var(--tx-bleute);line-height:1.5}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:.6rem .75rem}
 table{width:100%;border-collapse:collapse;font-size:.83rem}
-thead th{text-align:left;padding:.28rem .45rem;font-size:.66rem;text-transform:uppercase;
+thead th{text-align:left;padding:.28rem .45rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.05em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.32rem .45rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody tr:hover td{background:var(--v03)}
@@ -108,14 +108,14 @@ html.jour .reco-head:hover{background:#efece4}
 .reco-head .titre{font-weight:700;font-size:.86rem;flex:1}
 .reco-head .outils{display:flex;gap:.3rem}
 .reco-body{padding:.75rem .8rem;border-top:1px solid var(--v06)}
-.champ label{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin:0 0 .25rem}
+.champ label{display:block;font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin:0 0 .25rem}
 .rangee{display:flex;gap:.7rem;flex-wrap:wrap;align-items:flex-end}
 .swatches{display:flex;flex-wrap:wrap;gap:.4rem}
 .sw{display:flex;flex-direction:column;align-items:center;gap:.2rem;padding:.4rem .3rem;border:1.5px solid var(--v12);
   border-radius:8px;cursor:pointer;width:70px}
 .sw:hover{border-color:#c9a97e}
 .sw .pt{width:28px;height:28px;border-radius:50%;border:1px solid rgba(0,0,0,.15)}
-.sw .nm{font-size:.6rem;text-align:center;line-height:1.15;word-break:break-word;max-height:2.3em;overflow:hidden}
+.sw .nm{font-size:.6875rem;text-align:center;line-height:1.15;word-break:break-word;max-height:2.3em;overflow:hidden}
 .cc{display:flex;align-items:center;gap:.6rem;padding:.4rem .2rem;border-bottom:1px solid var(--v06)}
 .cc .nm{flex:1;min-width:0;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cc input{width:84px;text-align:center;text-transform:uppercase;font-family:Consolas,monospace;font-weight:700}
@@ -355,7 +355,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var sw = list.map(function(c){
       return '<button class="sw" data-pick="' + esc(c.nom) + '|' + esc(c.hex) + '" title="' + esc(c.nom) + (c.used ? ' — ' + c.used + ' ${T("produit")}' + plur(c.used) : ' ${T("— non utilisée")}') + '"' + (c.used ? '' : ' style="opacity:.55"') + '>'
         + '<span class="pt" style="background:' + esc(c.hex) + '"></span><span class="nm">' + esc(c.nom) + '</span>'
-        + (c.used ? '<span class="pill used" style="font-size:.55rem">' + c.used + '×</span>' : '') + '</button>';
+        + (c.used ? '<span class="pill used" style="font-size:.6875rem">' + c.used + '×</span>' : '') + '</button>';
     }).join('');
     return '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:.4rem;margin-bottom:.5rem">'
       + '<span class="aide" style="margin:0">' + used + ' ${T("utilisée")}' + plur(used) + ' · ' + dispo + ' ${T("disponible")}' + plur(dispo) + '</span>'

@@ -116,7 +116,7 @@ html.jour .pf-med-l video{background:#1d2433}
   background:var(--f-0f1826);border:2px solid #c9a97e}
 .ligne-photos .vign:hover{border-color:#d8bd97}
 .ligne-photos .vign img{width:100%;height:100%;object-fit:cover}
-.lgd-principale{font-size:.68rem;color:var(--tx-or);text-align:center;margin-top:.22rem;
+.lgd-principale{font-size:.6875rem;color:var(--tx-or);text-align:center;margin-top:.22rem;
   font-weight:700;text-transform:uppercase;letter-spacing:.04em}
 #p-vues .vue .cadre{width:100%;height:160px}
 #p-vues .cadre.pleine{border-style:dashed;border-color:var(--v40)}
@@ -138,7 +138,7 @@ html.jour .pf-med-l video{background:#1d2433}
   border:2px solid var(--v16)}
 .modeles .md.on .cd{border-color:#c9a97e}
 .modeles .md img{width:100%;height:100%;object-fit:cover;display:block}
-.modeles .md .nm{font-size:.62rem;color:var(--tx2);white-space:nowrap;
+.modeles .md .nm{font-size:.6875rem;color:var(--tx2);white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis;margin-top:.1rem}
 [draggable=true]{cursor:grab}
 .photo .vign{position:relative;flex:0 0 auto;width:172px;height:172px;border-radius:10px;
@@ -164,7 +164,7 @@ html.jour .pf-med-l video{background:#1d2433}
 .vue{position:relative;width:88px;flex:0 0 auto}
 .vue .cadre{width:88px;height:88px;border-radius:9px;border:1px dashed var(--v18);
   display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;
-  background:var(--f-0f1826);color:var(--tx2);font-size:.68rem;text-align:center;padding:.2rem}
+  background:var(--f-0f1826);color:var(--tx2);font-size:.6875rem;text-align:center;padding:.2rem}
 .vue .cadre:hover{border-color:#c9a97e}
 .vue .cadre.pleine{border-style:solid;border-color:var(--v22)}
 /* Photo de couleur OBLIGATOIRE encore vide (2026-10-09) : le contour or la signale. */
@@ -197,7 +197,7 @@ html.jour .mv-zone{background:#e9e6df}
 #p-parcoul .vue{width:auto}
 #p-parcoul .vue .cadre{width:100%;height:auto;aspect-ratio:3/4;font-size:.78rem}
 #p-parcoul .lgd{text-align:center;font-weight:600;margin-top:.3rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vue .lgd{font-size:.68rem;color:var(--tx2);text-align:center;margin-top:.18rem;
+.vue .lgd{font-size:.6875rem;color:var(--tx2);text-align:center;margin-top:.18rem;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vue .x,.vign .x{position:absolute;top:3px;right:3px;width:20px;height:20px;padding:0;
   border-radius:50%;font-size:.78rem;line-height:1;font-weight:700;
@@ -231,7 +231,7 @@ html.jour .mv-zone{background:#e9e6df}
    une variante juste sous son seuil — mais on doit le savoir, et savoir combien
    il en manque, sans avoir a faire la soustraction soi-meme. */
 .lgstk .al{flex:0 0 auto;font-size:.86rem;line-height:1;cursor:help;color:var(--tx-att)}
-.lgstk.entete{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);
+.lgstk.entete{font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);
   border-bottom:1px solid var(--v12);padding-bottom:.3rem;margin-bottom:.25rem;flex:0 0 auto}
 .lgstk:not(.entete):hover{background:var(--v04)}
 /* ⚠ UNE LIGNE QUI PORTE DU STOCK SE VOIT, comme dans le tableau d inventaire du
@@ -256,7 +256,7 @@ html.jour .lgstk.enstock .c1,html.jour .lgstk.enstock .c2{color:#166534}
   background:var(--f-0f1826)}
 .theque .ph:hover{border-color:#c9a97e}
 .theque .ph img{width:100%;height:88px;object-fit:cover;display:block}
-.theque .ph .lg{font-size:.66rem;color:var(--tx2);padding:.16rem .25rem;white-space:nowrap;
+.theque .ph .lg{font-size:.6875rem;color:var(--tx2);padding:.16rem .25rem;white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis}
 /* Le code de l article qui se sert deja de la photo — en couleur d accent, pour
    qu il se distingue du code de la photo elle-meme juste au-dessus. */
@@ -309,21 +309,21 @@ html.jour .lgstk.enstock .c1,html.jour .lgstk.enstock .c2{color:#166534}
    d une liste dont on ne connait pas la longueur (meme choix que .theque). */
 .jrn{max-height:52vh;overflow-y:auto;padding-right:.2rem;text-align:left}
 .jrn .sec{display:flex;align-items:center;gap:.4rem;margin:.5rem 0 .5rem}
-.jrn .sec .t{font-size:.66rem;font-weight:800;letter-spacing:.06em;
+.jrn .sec .t{font-size:.6875rem;font-weight:800;letter-spacing:.06em;
   text-transform:uppercase;color:var(--tx-or);flex:0 0 auto}
 .jrn .sec .tr{flex:1 1 auto;height:1px;background:var(--v12)}
 .jrn .bl{padding:.5rem .6rem;border:1px solid var(--v10);border-radius:8px;
   background:var(--f-0f1826);margin-bottom:.45rem}
 .jrn .bl.cliq{cursor:pointer;user-select:none}
 .jrn .bl.cliq:hover{border-color:rgba(201,169,126,.45)}
-.jrn .et{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+.jrn .et{font-size:.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
   color:var(--tx2);margin-bottom:.15rem}
 .jrn .dif{display:flex;align-items:center;gap:.4rem;font-size:.82rem;flex-wrap:wrap}
 .jrn .dif .av{color:var(--tx2);text-decoration:line-through;opacity:.75;word-break:break-word}
 .jrn .dif .fl{color:var(--tx-or);flex:0 0 auto}
 .jrn .dif .ap{color:var(--tx);font-weight:600;word-break:break-word}
 .jrn .qd{display:flex;justify-content:space-between;align-items:center;gap:.4rem;
-  font-size:.68rem;color:var(--tx2);margin-bottom:.35rem}
+  font-size:.6875rem;color:var(--tx2);margin-bottom:.35rem}
 .jrn .qui{margin-top:.45rem;padding-top:.4rem;border-top:1px dashed var(--v14);
   font-size:.72rem;color:var(--tx2);line-height:1.5}
 .jrn .an{font-size:.72rem;font-weight:800;letter-spacing:.06em;color:var(--tx-or);

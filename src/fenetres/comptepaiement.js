@@ -69,7 +69,7 @@ html.jour .avis.dur{color:#9d4848}
 .tuile .v{font-size:1.15rem;font-weight:700;margin-top:.15rem;white-space:nowrap}
 .tuile.fort .v{font-size:1.4rem}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
-th{text-align:left;padding:.35rem .5rem;font-size:.68rem;text-transform:uppercase;
+th{text-align:left;padding:.35rem .5rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);border-bottom:1px solid var(--v12);
   position:sticky;top:0;background:var(--f-carte)}
 td{padding:.35rem .5rem;border-bottom:1px solid var(--v05);vertical-align:middle}

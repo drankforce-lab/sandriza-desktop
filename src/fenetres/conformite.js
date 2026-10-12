@@ -64,7 +64,7 @@ body{background:var(--f-page);color:var(--tx);
    MINIMUM necessaire (92 % de la teinte d origine) : 4.59. */
 html.jour .avis.dur{color:#9d4848}
 table{width:100%;border-collapse:collapse;font-size:.86rem}
-th{text-align:left;padding:.35rem .5rem;font-size:.68rem;text-transform:uppercase;
+th{text-align:left;padding:.35rem .5rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);border-bottom:1px solid var(--v12)}
 td{padding:.4rem .5rem;border-bottom:1px solid var(--v05);vertical-align:middle}
 td.pays{font-weight:700;white-space:nowrap;width:14rem}
@@ -100,7 +100,7 @@ label.ch{display:block;font-size:.72rem;color:var(--tx2);margin:0 0 .18rem}
   grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:.9rem;padding:.9rem 1.2rem;align-items:start}
 .bt-col{display:flex;flex-direction:column;gap:.9rem;min-width:0}
 .sect{background:var(--v03);border:1px solid var(--v07);border-radius:12px;padding:.8rem .9rem .9rem}
-.sect h4{margin:0 0 .6rem;font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--tx-or);font-weight:700}
+.sect h4{margin:0 0 .6rem;font-size:.6875rem;text-transform:uppercase;letter-spacing:.07em;color:var(--tx-or);font-weight:700}
 .pied-boite{flex:0 0 auto;display:flex;gap:.5rem;justify-content:flex-end;padding:.7rem 1.2rem;
   border-top:1px solid var(--v08)}
 .pied-boite button{min-height:2.2rem;padding:0 1rem}

@@ -80,13 +80,13 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 .carte h2{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;
   letter-spacing:.07em;color:var(--tx2);font-weight:700}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
+thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.32rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody tr:hover td{background:var(--v04)}
 .fin{white-space:nowrap;text-align:right}
 .dt{font-size:.72rem;color:var(--tx2)}
-.pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
+.pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
 .pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
@@ -95,7 +95,7 @@ tbody tr:hover td{background:var(--v04)}
 .boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;
   max-width:46rem;width:100%;max-height:90vh;overflow:auto;padding:.9rem 1rem}
 .boite h3{margin:0 0 .7rem;font:700 .98rem/1.3 Georgia,serif}
-.boite h4{margin:.8rem 0 .35rem;font-size:.68rem;text-transform:uppercase;
+.boite h4{margin:.8rem 0 .35rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.07em;color:var(--tx-or);font-weight:700}
 .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.55rem}
 .ch{display:flex;flex-direction:column;gap:.22rem;min-width:0}
@@ -108,7 +108,7 @@ tbody tr:hover td{background:var(--v04)}
 input[type=checkbox]{accent-color:#c9a97e}
 [hidden]{display:none!important}
 .ch .req{color:var(--tx-or)}
-.ch .aide{font-size:.68rem;color:var(--tx3)}
+.ch .aide{font-size:.6875rem;color:var(--tx3)}
 .cases{display:flex;flex-wrap:wrap;gap:.4rem 1rem;margin-top:.45rem}
 .cases label{display:inline-flex;align-items:center;gap:.4rem;font-size:.83rem;cursor:pointer}
 /* ── RELOOKING 2026 DES FORMULAIRES (2026-10-04) ── */
@@ -150,7 +150,7 @@ input[type=checkbox]{accent-color:#c9a97e}
 .bascule input:checked + .glis::after{transform:translateX(1.05rem)}
 .bascule input:focus-visible + .glis{outline:2px solid #c9a97e;outline-offset:2px}
 /* L apercu du bandeau, tel que la boutique le peindra. */
-.ap-lbl{font-size:.66rem;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);margin:.8rem 0 .3rem}
+.ap-lbl{font-size:.6875rem;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);margin:.8rem 0 .3rem}
 .apercu{display:flex;align-items:center;justify-content:center;gap:.75rem;flex-wrap:wrap;
   padding:.6rem .9rem;border-radius:9px;font-size:.83rem;font-weight:600;min-height:2.5rem;
   text-align:center;margin-bottom:.75rem;box-shadow:inset 0 0 0 1px var(--v08)}

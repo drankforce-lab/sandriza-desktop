@@ -38,7 +38,7 @@ body{background:var(--f-page);color:var(--tx);
   background:linear-gradient(135deg,#c9a97e,#8a6f4d);color:#17202c}
 .tete .mail{font-size:.72rem;color:var(--tx2)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.tete .pill{font-size:.68rem;padding:.12rem .55rem;border-radius:99px;
+.tete .pill{font-size:.6875rem;padding:.12rem .55rem;border-radius:99px;
   border:1px solid var(--v20);margin-left:.5rem}
 .pill.vert{border-color:rgba(74,222,128,.5);color:var(--tx-ok)}
 .pill.gris{color:var(--tx2)}

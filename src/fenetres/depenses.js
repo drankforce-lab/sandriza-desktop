@@ -116,14 +116,14 @@ html.jour div.stats .s .n{color:var(--tx)}
 #d-depot-form .pt{font-size:.74rem}
 
 table{width:100%;border-collapse:collapse;font-size:.84rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
+thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody tr{cursor:pointer}
 tbody tr:hover td{background:var(--v04)}
 tbody td{padding:.3rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody .num{font-weight:600;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 tbody .dt{font-size:.72rem;color:var(--tx2)}
-.pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
+.pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
 .pill.info{background:rgba(59,130,246,.18);color:var(--tx-bleu)}
@@ -144,7 +144,7 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .boite .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.5rem;
   padding:.55rem 0;border-top:1px solid var(--v08);
   border-bottom:1px solid var(--v08);margin-bottom:.6rem}
-.boite .grille .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
+.boite .grille .l{font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .boite .grille .v{font-size:.86rem;font-weight:600;overflow-wrap:anywhere}
 .boite .texte{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.88rem;line-height:1.5;
   background:var(--v03);border:1px solid var(--v07);border-radius:9px;

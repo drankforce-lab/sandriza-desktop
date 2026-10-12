@@ -62,13 +62,13 @@ button.mini{font-size:.74rem;padding:.14rem .45rem}
 .note{font-size:.78rem;color:var(--tx2);line-height:1.6;background:var(--v03);
   border:1px solid var(--v07);border-radius:10px;padding:.5rem .7rem}
 table{width:100%;border-collapse:collapse;font-size:.82rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.67rem;text-transform:uppercase;
+thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.3rem .4rem;border-top:1px solid var(--v05);vertical-align:top}
 .sub{font-size:.71rem;color:var(--tx2)}
 .mono{font-family:ui-monospace,Consolas,monospace;font-size:.72rem}
 .mut{color:var(--tx2)}
-.pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
+.pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.vif{background:rgba(22,163,74,.2);color:var(--tx-ok2)}
 .pill.mort{background:rgba(220,38,38,.18);color:var(--tx-err2)}
 .pill.moi{background:rgba(201,169,126,.2);color:#dcc39b}

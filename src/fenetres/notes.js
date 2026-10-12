@@ -44,7 +44,7 @@ button:focus{outline:none;border-color:#c9a97e}
 button:hover:not(:disabled){background:var(--v10)}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
-button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:700;
+button .n{display:inline-block;margin-left:.3rem;font-size:.6875rem;font-weight:700;
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
 .ligne{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.55rem .75rem;cursor:pointer}
@@ -54,7 +54,7 @@ button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:70
 .ligne .titre{font-weight:600}
 .ligne .dt{font-size:.72rem;color:var(--tx2)}
 .ligne .droite{margin-left:auto;font-size:.74rem;color:var(--tx2)}
-.pill{display:inline-block;font-size:.66rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
+.pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
 .detail{margin-top:.5rem;border-top:1px solid var(--v08);padding-top:.5rem;

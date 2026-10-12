@@ -860,6 +860,7 @@ const JEU = {
           annee: 'all',
           annees: [2026, 2025],
           cfgTuiles: { revenue: false },
+          peutPreparer: true,
           tuiles: {
             produits: { actifs: 42, variantesReappro: 12, produitsBas: 4 },
             commandes: { total: 128, enAttente: 3 },
@@ -874,7 +875,7 @@ const JEU = {
             incidentsOuverts: 1, incidentsCai: 1,
           },
           recentesCommandes: [
-            { oid: 'o251', numero: 'SZ-100251', date: '2026-08-08T14:00:00Z', client: 'Josée Lafleur', total: 302.96, statut: 'pending', statutLibelle: 'En attente' },
+            { oid: 'o251', numero: 'SZ-100251', date: '2026-08-08T14:00:00Z', client: 'Josée Lafleur', total: 302.96, statut: 'pending', statutLibelle: 'En attente', prioritaire: true },
             { oid: 'o249', numero: 'SZ-100249', date: '2026-08-08T11:00:00Z', client: 'Marc Dubé', total: 89.95, statut: 'shipped', statutLibelle: 'En livraison' }, // libellé recopié de admin.js (ORDER_STATUS)
             { oid: 'o242', numero: 'SZ-100242', date: '2026-08-07T16:00:00Z', client: 'Anne Roy', total: 145.0, statut: 'delivered', statutLibelle: 'Livrée' },
             { oid: 'o238', numero: 'SZ-100238', date: '2026-08-07T09:00:00Z', client: 'Luc Simard', total: 45.0, statut: 'cancelled', statutLibelle: 'Annulée' },
@@ -1009,7 +1010,7 @@ const JEU = {
       id: '',
       reponses: {
         'produits:liste': {
-          ok: true,
+          ok: true, peutVenteFinale: true,
           lignes: [
             { id: 'prod_1', nom: 'Robe Élégance mi-longue', categorie: 'Robes', couleurCat: '#c97e9a', tag: 'Nouveauté',
               finalSale: false, liquidation: false, prix: 129.99, solde: 89.99,
