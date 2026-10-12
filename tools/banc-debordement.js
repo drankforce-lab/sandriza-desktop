@@ -47,7 +47,9 @@ const GARDER = OPT('--garder');
 const CHOISIES = ARGS.filter((a) => !a.startsWith('--'));
 const MODES = OPT('--jour') ? ['jour'] : ['nuit'];
 const DETACHE = OPT('--detache');
-const HAUT = DETACHE ? 780 : 833;
+/* SZ_DEB_L / SZ_DEB_H (2026-10-12) : une taille a la main, pour garder de la MARGE sur ce poste — sous Linux
+   (travail << contrastes >>) les polices sont plus larges, et ce qui tient ici a 1080 peut y deborder de 47 px. */
+const HAUT = Number(process.env.SZ_DEB_H) || (DETACHE ? 780 : 833);
 const ECRIRE_DETTE = OPT('--dette');
 const PAR_LOT = 18;
 /* --jeu=N : rend le N-ieme jeu de reponses de la fenetre (0 par defaut) — pour voir un
@@ -65,7 +67,7 @@ const JEU_N = Number((ARGS.find((a) => a.startsWith('--jeu=')) || '--jeu=0').sli
    ⚠ On compare la largeur PEINTE (deduite des colonnes vivantes), PAS le cadre
    des elements : le conteneur exterieur s etend toujours a la fenetre, et une
    mesure qui l inclut rend 1100/1100 partout — elle ne peut donc RIEN dire. */
-const LARGEURS = [DETACHE ? 1080 : 1400];
+const LARGEURS = [Number(process.env.SZ_DEB_L) || (DETACHE ? 1080 : 1400)];
 
 /* ── --gros : LA LISTE PLEINE ──────────────────────────────────────────────
    ⚠⚠ SANS CA, LA MESURE DES COLONNES NE VEUT RIEN DIRE — et elle m a trompe.
@@ -284,6 +286,11 @@ function main() {
       for (const L of LARGEURS) {
         let page = brut.replace(/<head([^>]*)>/i, (m) => m + '\n' + prologue(f.jeu));
         if (!/<head/i.test(brut)) page = prologue(f.jeu) + brut;
+        /* SZ_DEB_POLICE (2026-10-12) : imposer une police pour mesurer comme LINUX sur ce poste. Le travail
+           << contrastes >> tourne sous Linux, ou la police par defaut (DejaVu Sans) a presque les metriques de
+           Verdana — plus large que Segoe UI : ce qui tient ici debordait la-bas de 11 a 47 px. Avant de pousser
+           une retouche de mise en page : SZ_DEB_POLICE=Verdana node tools/banc-debordement.js --detache */
+        if (process.env.SZ_DEB_POLICE) page = page.replace(/<\/head>/i, (m) => '<style>*{font-family:' + JSON.stringify(process.env.SZ_DEB_POLICE) + ',sans-serif!important}</style>' + m);
         /* ⚠ LE DERNIER </body>, JAMAIS LE PREMIER : un jeu de reponses peut
            contenir une page HTML entiere (l apercu d un courriel), et le premier
            se trouve alors DANS une chaine. */
@@ -364,12 +371,12 @@ function main() {
       + (fini ? ' ok' : ' MUET') + '\n');
   }
 
-  rapport(lignes, liste.length, rates, lotsMorts);
+  rapport(lignes, liste.length, rates, lotsMorts, liste.map((f) => f.nom));
   if (!GARDER) { try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (e) {} }
   else console.log('   (dossier garde : ' + tmp + ')');
 }
 
-function rapport(lignes, nbFenetres, rates, lotsMorts) {
+function rapport(lignes, nbFenetres, rates, lotsMorts, noms) {
   const mes = [];
   for (const l of lignes) {
     if (!l.startsWith('DEB|')) continue;
@@ -412,6 +419,10 @@ function rapport(lignes, nbFenetres, rates, lotsMorts) {
   console.log('   ' + mes.length + ' fenetre(s) mesuree(s) sur ' + nbFenetres + (rates ? ' — ' + rates + ' fabrique(s) en echec' : '')
     + ' ; ' + fautes.length + ' deborde(nt), dont ' + nouvelles.length + ' nouveau(x) ou aggrave(s).');
   if (gueries.length) console.log('   ✓ revenues dans le cadre (a retirer de la dette) : ' + gueries.join(', '));
+  // Une fenetre NON MESUREE ne se compte pas seulement : on la NOMME (un script mort au chargement s y cache).
+  const vues = new Set(mes.map((m) => m.nom));
+  const manquantes = (noms || []).filter((n) => n !== '_temoin' && !vues.has(n));
+  if (manquantes.length) { console.log('   ⚠ NON MESUREE(S) : ' + manquantes.join(', ') + ' — rien ne s est dessine : ce n est PAS un << zero debordement >>.'); process.exitCode = 1; }
   const pags = lignes.filter((l) => l.startsWith('PAG|') && !/^PAG\|_temoin/.test(l));
   if (pags.length) {
     console.log('');

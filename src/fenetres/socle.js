@@ -3927,9 +3927,10 @@ body{line-height:1.55}
 }
 @media (max-width:1240px){
   .rf-tb{flex-wrap:wrap;row-gap:.4rem}
+  .pas{flex-wrap:wrap;row-gap:.3rem;overflow-x:visible}
   .rf-rch{min-width:7rem}
-  td.fin{white-space:normal!important}
-  td.fin>button,td.fin>.mini{margin:.1rem 0}
+  td.fin,td.acts,td:has(>button~button),td:has(>.mini~.mini){white-space:normal!important}
+  td.fin>button,td.fin>.mini,td.acts>button,td:has(>button~button)>button{margin:.1rem 0}
 }
 /* Onze fenetres dessinent dans un <div id="corps"> NICHE dans .corps : sans cette regle, la carte
    paginee n y est pas bornee (elle prenait 8600 px, et la liste croyait que tout tenait). On ne touche

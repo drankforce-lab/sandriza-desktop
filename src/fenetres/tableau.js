@@ -632,8 +632,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var n = Math.max(1, Math.floor(dispo / hL));
       if (n !== PP[k]) { PP[k] = n; change = true; }
     });
-    if (change) dessiner();
+    /* ⚠ UNE SEULE CORRECTION PAR DESSIN (meme verrou qu Inventaire, grilleAutoAjuste) : la mesure peut
+       osciller entre deux valeurs, et dessiner -> ajusterPages -> dessiner tournait alors sans fin, de facon
+       synchrone — la fenetre ne se dessinait plus (vu au banc, fenetre detachee, police large). */
+    if (change && !_tbAjust) { _tbAjust = true; try { dessiner(); } finally { _tbAjust = false; } }
   }
+  var _tbAjust = false;
   var _tbRedim = null;
   window.addEventListener('resize', function(){
     clearTimeout(_tbRedim);

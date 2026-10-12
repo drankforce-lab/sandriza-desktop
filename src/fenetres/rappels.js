@@ -51,7 +51,7 @@ body{background:var(--f-page);color:var(--tx);
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;
   padding:.55rem 1.05rem .1rem}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.6rem;align-items:center}
-.corps{flex:1 1 auto;min-height:0;padding:.7rem 1.05rem .45rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.7rem 1.05rem .45rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
@@ -84,6 +84,12 @@ button.fait{border-color:rgba(74,222,128,.45);color:var(--tx-ok)}
 .chiffre.auj .val{color:var(--tx-att)}
 .duo{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(21rem,1fr);gap:.7rem;align-items:start}
 .duo>div{display:flex;flex-direction:column;gap:.7rem;min-width:0}
+/* 2026-10-12 (<< aucun scroll bar >>) : la colonne des rappels PROPOSES depassait en bas en fenetre basse — et
+   comme la page de << Mes rappels >> se reduit tant que le corps deborde, elle tombait a UN rappel par page.
+   La duo prend la hauteur qui reste, et les proposes se paginent dans leur carte. */
+.duo{flex:1 1 0;min-height:0;grid-template-rows:minmax(0,1fr);align-items:stretch}
+.duo>div{min-height:0;max-height:100%}
+.duo>div>.sz-pagee{flex:1 1 0;min-height:0}
 .pages{display:flex;align-items:center;gap:.4rem;margin-left:auto;font:400 .74rem/1 system-ui;
   text-transform:none;letter-spacing:0;color:var(--tx2)}
 .pages button.pgf{min-width:1.9rem;padding:.08rem .45rem;font-size:.95rem;line-height:1.1}
@@ -403,7 +409,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('rappels')}
   function proposes(){
     var M = (D.modeles || []);
     if (!M.length) return '';
-    return '<div class="carte"><h2>${T("Rappels proposés")}</h2>'
+    return '<div class="carte sz-pagee"><h2>${T("Rappels proposés")}</h2><div data-pages="rappels-proposes">'
       + M.map(function(m){
           var info = nomFreq(m.frequence) + (m.prochaine ? ' · ${T("prochaine :")} ' + szJour(m.prochaine) : '') + (m.module ? ' · ' + nomModule(m.module) : '');
           return '<div class="mdl"><div style="min-width:0"><div class="t">' + esc(szTd(m.titre)) + '</div>'
@@ -411,7 +417,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('rappels')}
             + (m.deja ? '<span class="pill ok">${T("déjà ajouté")}</span>'
                 : (PA ? '<button type="button" class="mini" data-modele="' + esc(m.cle) + '">${T("Ajouter")}</button>' : ''))
             + '</div>';
-        }).join('')
+        }).join('') + '</div>'
       + '<div class="aide" style="margin-top:.4rem">${T("Dates de l’ARC et de Revenu Québec pour un travailleur autonome qui remet ses taxes au trimestre. Chaque rappel ajouté se modifie ensuite.")}</div>'
       + '</div>';
   }

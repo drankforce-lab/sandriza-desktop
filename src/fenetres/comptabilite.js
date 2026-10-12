@@ -109,7 +109,7 @@ thead th{text-align:left;padding:.22rem .35rem;font-size:.65rem;text-transform:u
 thead th.n,tbody td.n{text-align:right;font-family:ui-monospace,Consolas,monospace}
 tbody td{padding:.26rem .35rem;border-top:1px solid var(--v055);vertical-align:middle}
 /* Fenetre basse (detachee, 2026-10-12 : 52 px de trop) : les douze mois et l etat des resultats se resserrent. */
-@media (max-height:820px){.corps tbody td,tbody td{padding-top:.12rem!important;padding-bottom:.12rem!important}}
+@media (max-height:820px){.corps tbody td,tbody td{padding-top:.06rem!important;padding-bottom:.06rem!important}}
 tbody tr:hover td{background:var(--v03)}
 tbody tr.tot td{border-top:1px solid var(--v16);font-weight:700}
 tbody tr.sous td{color:var(--tx2)}

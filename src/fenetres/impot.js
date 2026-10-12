@@ -183,7 +183,7 @@ button .n.hi{background:rgba(245,158,11,.28);color:var(--tx-att)}
 /* Fenetre etroite (detachee, 2026-10-12 : le tableau << Par periode >> sortait de 69 px de sa colonne) : les
    cellules se resserrent et le tableau tient dans la colonne au lieu de la deborder. */
 @media (max-width:1240px){.cols-taxes>*{min-width:0}.cols-taxes table{table-layout:auto;width:100%}
-  .cols-taxes th,.cols-taxes td{padding-left:.3rem!important;padding-right:.3rem!important;font-size:.8rem}
+  .cols-taxes th,.cols-taxes td{padding-left:.22rem!important;padding-right:.22rem!important;font-size:.74rem}
   .cols-taxes th{white-space:normal}}
 .per-tete{display:flex;align-items:center;gap:.6rem;margin:0 0 .3rem}
 .per-tete h2{margin:0}
