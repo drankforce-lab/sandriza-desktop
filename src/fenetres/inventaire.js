@@ -365,6 +365,28 @@ html.jour .gp .cat.tc{color:color-mix(in srgb,var(--cc,#6d7f96) 55%,black);
 .gp .acts button.ico.sup:hover:not(:disabled){color:var(--tx-err);border-color:rgba(239,68,68,.45)}
 .gp .acts button.inv{display:inline-flex;align-items:center;gap:.45rem}
 .gp .acts button.inv svg{width:16px;height:16px}
+/* ── L AFFICHAGE COMPACT (2026-10-12, sa demande : << un affichage compact que je peux desactiver et
+   activer >>) : une ligne par produit, sans jauge ; le nom, le SKU et la categorie sur la meme ligne,
+   les actions en icones. Retenu sur le POSTE. La pagination Auto remesure la ligne : plus de produits
+   par page, jamais de glissiere. */
+.gp.compacte table{border-spacing:0 3px;font-size:.84rem}
+.gp.compacte tbody td{padding:.3rem .7rem}
+.gp.compacte .prod{gap:.6rem}
+.gp.compacte .prod>div{display:flex;align-items:baseline;gap:.7rem;min-width:0;flex-wrap:nowrap}
+.gp.compacte .cat{width:1.65rem;height:1.65rem;border-radius:7px;font-size:.78rem}
+.gp.compacte .nom{font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gp.compacte .l1{flex-wrap:nowrap;min-width:0}
+.gp.compacte .l2{margin-top:0;white-space:nowrap}
+.gp.compacte .badge{font-size:.6rem;padding:0 .4rem}
+.gp.compacte .jauge{display:none}
+.gp.compacte .stk{gap:.5rem}
+.gp.compacte .stk .n{font-size:1rem}
+.gp.compacte .pill{font-size:.68rem;padding-top:.08rem;padding-bottom:.08rem}
+.gp.compacte .acts button{height:1.75rem;padding:0 .5rem}
+.gp.compacte .acts button.ico{width:1.75rem}
+.gp.compacte .acts button svg,.gp.compacte .acts button.ico svg{width:15px;height:15px}
+.gp.compacte .acts button.inv .tx{display:none}
+button.mini.on{background:rgba(201,169,126,.18);border-color:#c9a97e;color:var(--tx)}
 /* La barre d outils de l onglet : champs plus hauts, pastilles d etat.
    ⚠⚠ UNE SEULE LIGNE (sa capture du 2026-09-25, en anglais : les deux boutons
    de droite passaient dessous). flex-wrap:nowrap, et c est la RECHERCHE qui cede
@@ -451,6 +473,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
   // Maison ? », la question qu on se pose en preparant une commande.
   // ⚠ AUCUN ACCENT GRAVE ICI : ce commentaire vit dans un gabarit.
   var FP = { q: '', etat: '', cats: [], lieuId: '', section: '', page: 0, parPage: 25, menu: false, auto: true };
+  // L affichage compact de la liste des produits, retenu sur le poste (sous garde).
+  var COMPACT = false;
+  try { COMPACT = localStorage.getItem('sz-inv-compact') === '1'; } catch (e) {}
   // ⚠ Mode << vente finale en lot >> : les coches vivent ICI, pas dans les cases
   // affichees — l ecran du site ne lisait que la PAGE VISIBLE de ses cases, une
   // selection posee puis paginee etait perdue sans un mot.
@@ -1071,6 +1096,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
       + '</select>'
       + '<input aria-label="${T("Section")}" type="text" id="fp-section" autocomplete="off" placeholder="${T("Section")}…" value="' + esc(FP.section) + '" style="width:8rem">'
       + '<span class="droite">'
+      + '<button class="mini' + (COMPACT ? ' on' : '') + '" id="btn-compact" aria-pressed="' + (COMPACT ? 'true' : 'false') + '"'
+      +   ' title="${T("Affichage compact : une ligne par produit, plus de produits par page")}">${T("Compact")}</button>'
       // ⚠ CE BOUTON MANQUAIT (#6) : depuis l inventaire, il fallait sortir vers
       // l ecran Produits pour en creer un. L op existait deja cote pont, elle
       // n etait simplement offerte nulle part ici.
@@ -1081,7 +1108,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     if (!d.lignes.length) {
       h += '<div class="vide">${T("Aucun produit trouvé.")}</div>';
     } else {
-      h += '<div class="grille gp" data-pages="inventaire-produits"><table><thead><tr>'
+      h += '<div class="grille gp' + (COMPACT ? ' compacte' : '') + '" data-pages="inventaire-produits"><table><thead><tr>'
         + (LOT ? '<th class="c" style="width:2rem"></th>' : '')
         + '<th>${T("Produit")}</th><th>${T("Variantes")}</th>'
         + '<th>${T("Inventaire")}</th><th style="text-align:right">${T("Actions")}</th>'
@@ -1130,7 +1157,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
           + '<td><div class="stk"><span><span class="n' + (l.unites === 0 ? ' zero' : '') + '">' + l.unites + '</span>'
           +   '<span class="u">' + (l.unites > 1 ? '${T("unités")}' : '${T("unité")}') + '</span></span>' + pilule(l) + '</div></td>'
           + '<td class="acts">'
-          +   '<button class="mini inv" data-inv="' + esc(l.id) + '" title="${T("Gérer l’inventaire")}">${ICO.inventory}${T("Inventaire")}</button>'
+          +   '<button class="mini inv" data-inv="' + esc(l.id) + '" title="${T("Gérer l’inventaire")}" aria-label="${T("Gérer l’inventaire")}">${ICO.inventory}<span class="tx">${T("Inventaire")}</span></button>'
           +   (!l.sku && d.peutEcrire ? '<button class="mini" data-sku="' + esc(l.id) + '" title="${T("Assigner un SKU")}">SKU</button>' : '')
           +   (l.sku && !l.enVente && d.peutEcrire ? '<button class="mini" data-vendre="' + esc(l.id) + '" title="${T("Mettre en vente")}">${T("Vendre")}</button>' : '')
           +   (d.peutEcrire ? '<button class="mini ico" data-mod="' + esc(l.id) + '" title="${T("Modifier la fiche produit")}" aria-label="${T("Modifier la fiche produit")}">' + CRAYON + '</button>' : '')
@@ -1359,6 +1386,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
         return;
       }
       if (b.id === 'btn-lot') { LOT = true; COCHES = {}; dessiner(); return; }
+      if (b.id === 'btn-compact') {
+        COMPACT = !COMPACT;
+        try { localStorage.setItem('sz-inv-compact', COMPACT ? '1' : '0'); } catch (e) {}
+        AUTO_DEMANDE = 0; dessiner(); return;
+      }
       if (b.id === 'lot-annuler') { LOT = false; COCHES = {}; dessiner(); return; }
       if (b.id === 'lot-app' || b.id === 'lot-ret') { venteFinaleLot(b.id === 'lot-app'); return; }
       if (b.id === 'btn-skus-tous') { skusTous(b); return; }

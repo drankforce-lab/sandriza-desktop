@@ -19,6 +19,8 @@
  */
 
 module.exports = {
+  'Compact': 'Compact',
+  'Affichage compact : une ligne par produit, plus de produits par page': 'Compact view: one line per product, more products per page',
   /* Singulier / pluriel (szPl, 2026-09-29) */
   '— il est bloqué à l’achat en boutique.': '— it cannot be bought in the store.',
   'porte encore un': 'still carries a',
