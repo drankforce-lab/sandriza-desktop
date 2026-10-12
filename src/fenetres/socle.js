@@ -2654,6 +2654,15 @@ const CSS_THEMES = `
   --sz-accent:#c9a97e; --sz-accent-fort:#a3824f; --sz-accent-txt:#17202c;
   --sz-accent-doux:rgba(201,169,126,.16);
   --sz-btn:var(--v05); --sz-survol:var(--v10);
+  --sz-btn-prim:var(--sz-accent); --sz-btn-prim-fort:var(--sz-accent-fort); --sz-btn-prim-txt:var(--sz-accent-txt); --sz-repere:var(--sz-accent);
+}
+html[data-sz-theme="carbone"]{
+  --sz-fond:#0d0d10; --sz-fond2:#141417; --sz-pied:#0a0a0c;
+  --sz-surface:#131316; --sz-surface2:#18181c;
+  --sz-bord:var(--v08); --sz-bord-fort:var(--v14);
+  --sz-accent:#fb7185; --sz-accent-fort:#f43f5e; --sz-accent-txt:#1a0408;
+  --sz-accent-doux:rgba(244,63,94,.15);
+  --sz-btn-prim:#d6193f; --sz-btn-prim-fort:#be123c; --sz-btn-prim-txt:#ffffff; --sz-repere:#f43f5e;
 }
 html[data-sz-theme="ocean"]{
   --sz-fond:#0a1620; --sz-fond2:#0f2030; --sz-pied:#081219;
@@ -2716,6 +2725,14 @@ html.jour{
   --sz-texte:#1d2433; --sz-attenue:#5a6574;
   --sz-accent:#77644a; --sz-accent-fort:#60513c; --sz-accent-txt:#ffffff;
   --sz-accent-doux:rgba(201,169,126,0.18);
+}
+html.jour[data-sz-theme="carbone"]{
+  --sz-fond:#e6e8ec; --sz-fond2:#dfe1e5; --sz-pied:#e2e4e8;
+  --sz-surface:#f7f7f8; --sz-surface2:#efeff2;
+  --sz-texte:#1d2433; --sz-attenue:#585c66;
+  --sz-accent:#b23a0b; --sz-accent-fort:#963009; --sz-accent-txt:#ffffff;
+  --sz-accent-doux:rgba(194,65,12,.14);
+  --sz-btn-prim:#c2410c; --sz-btn-prim-fort:#a3360a; --sz-btn-prim-txt:#ffffff; --sz-repere:#c2410c;
 }
 html.jour[data-sz-theme="ocean"]{
   --sz-fond:#ddedf2; --sz-fond2:#d5e5e9; --sz-pied:#d8e8ed;
@@ -3992,8 +4009,46 @@ thead th{font-size:.7rem}
 .szr-duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 1rem}
 .szr-large{grid-column:1 / -1}
 `;
-module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR,
-  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR,
+const CSS_CARBONE = `
+/* ══ LE THÈME CARBONE (2026-10-12, sa décision : « applique carbone partout ») ══════════════════════════
+   Démo approuvée : https://claude.ai/artifact/9h2zUz8KeHf1e1Ms3WKwVi — SANS le halo qui suivait la souris.
+   La NUIT : une vraie trame de fibre de carbone, un reflet rouge discret en haut à droite, accent rouge.
+   Le JOUR : de l'aluminium brossé, accent orange brûlé. Les jetons (fonds, cartes, boutons, onglets)
+   sont dans CSS_THEMES ; ici, la MATIÈRE et les détails : repère devant le titre, relief des cartes,
+   filet sous l'en-tête des tableaux, une ligne sur deux voilée, barre de couleur au survol.
+   ⚠ Les cartes restent OPAQUES : la texture ne passe jamais sous un texte.
+   ⚠ La ligne voilée et la barre de survol passent par :where() — spécificité minimale : la sélection,
+   la ligne prioritaire ou cochée d'une fenêtre gardent TOUJOURS le dernier mot. */
+html[data-sz-theme="carbone"] body{background:
+  radial-gradient(55% 40% at 88% 0%,rgba(244,63,94,.12),transparent 70%),
+  linear-gradient(45deg,var(--v03) 25%,transparent 25% 50%,var(--v03) 50% 75%,transparent 75%) 0 0/8px 8px,
+  linear-gradient(-45deg,rgba(0,0,0,.45) 25%,transparent 25% 50%,rgba(0,0,0,.45) 50% 75%,transparent 75%) 0 0/8px 8px,
+  var(--sz-fond)}
+html.jour[data-sz-theme="carbone"] body{background:
+  radial-gradient(55% 40% at 88% 0%,rgba(194,65,12,.08),transparent 70%),
+  repeating-linear-gradient(90deg,rgba(255,255,255,.55) 0 1px,rgba(0,0,0,.025) 1px 2px,transparent 2px 3px),
+  linear-gradient(180deg,#eceef1,#dcdee3)}
+html[data-sz-theme="carbone"] .tete{background:linear-gradient(180deg,rgba(20,20,24,.94),rgba(13,13,16,.94))}
+html.jour[data-sz-theme="carbone"] .tete{background:linear-gradient(180deg,rgba(236,238,241,.94),rgba(226,228,232,.94))}
+html[data-sz-theme="carbone"] .tete h1::before{content:"";display:inline-block;width:4px;height:1em;margin-right:.5rem;
+  border-radius:2px;background:var(--sz-repere);vertical-align:-.12em}
+html[data-sz-theme="carbone"] .carte,html[data-sz-theme="carbone"] .tuile,html[data-sz-theme="carbone"] .szr-sec{
+  box-shadow:inset 0 1px 0 var(--v05),0 12px 28px rgba(0,0,0,.45)}
+html.jour[data-sz-theme="carbone"] .carte,html.jour[data-sz-theme="carbone"] .tuile,html.jour[data-sz-theme="carbone"] .szr-sec{
+  box-shadow:inset 0 1px 0 #fff,0 8px 20px rgba(0,0,0,.08)}
+html[data-sz-theme="carbone"] button.prim,html[data-sz-theme="carbone"] .jeton.prim,html[data-sz-theme="carbone"] button.paie{
+  background:var(--sz-btn-prim);border-color:var(--sz-btn-prim);color:var(--sz-btn-prim-txt)}
+html[data-sz-theme="carbone"] button.prim:hover:not(:disabled),html[data-sz-theme="carbone"] .jeton.prim:hover:not(:disabled){
+  background:var(--sz-btn-prim-fort);border-color:var(--sz-btn-prim-fort)}
+html[data-sz-theme="carbone"] thead th:first-child{background-image:linear-gradient(var(--sz-repere),var(--sz-repere));
+  background-repeat:no-repeat;background-size:24px 2px;background-position:0 100%}
+:where(html[data-sz-theme="carbone"] tbody tr:nth-child(even))>td{background-color:var(--v02)}
+:where(html.jour[data-sz-theme="carbone"] tbody tr:nth-child(even))>td{background-color:rgba(0,0,0,.022)}
+:where(html[data-sz-theme="carbone"] tbody tr:hover)>td:first-child{box-shadow:inset 3px 0 0 var(--sz-repere)}
+`;
+
+module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_CARBONE,
+  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_CARBONE,
   JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_THEMES, CSS_FICHE, ICO,
   /* La page, pas son texte : voir l en-tete de ce fichier. */
   TETE, LIEU, SEP_DEC };

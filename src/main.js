@@ -4608,10 +4608,21 @@ const brancherOutils = (win) => {
    personnes sur deux postes n ont aucune raison de se l imposer l une a
    l autre. D ou reglages.json et non Turso.
    La feuille CSS_THEMES du socle fait le reste : on ne pose qu un attribut. */
-const THEMES_CONNUS = ['defaut', 'ocean', 'violet', 'ardoise', 'graphite', 'emeraude'];
+const THEMES_CONNUS = ['carbone', 'defaut', 'ocean', 'violet', 'ardoise', 'graphite', 'emeraude'];
+/* ⚠ CARBONE DEVIENT LE THÈME DE TOUT LE MONDE (2026-10-12, sa décision : « applique carbone partout »).
+   ADOPTÉ UNE SEULE FOIS par poste : un poste resté sur l'ancien défaut (doré) passe à Carbone ; celui
+   qui avait CHOISI un autre jeu (océan, violet…) le garde. Après l'adoption, revenir au doré reste
+   possible par le menu, et la coquille ne le reprend plus. */
 const _themeCouleur = () => {
-  const t = String(reglages.get('themeCouleur') || 'defaut');
-  return THEMES_CONNUS.indexOf(t) >= 0 ? t : 'defaut';
+  try {
+    if (!reglages.get('carboneAdopte')) {
+      const t0 = reglages.get('themeCouleur');
+      if (!t0 || t0 === 'defaut') reglages.set('themeCouleur', 'carbone');
+      reglages.set('carboneAdopte', true);
+    }
+  } catch {}
+  const t = String(reglages.get('themeCouleur') || 'carbone');
+  return THEMES_CONNUS.indexOf(t) >= 0 ? t : 'carbone';
 };
 const jsTheme = () => {
   const jour = !_modele.sombre;

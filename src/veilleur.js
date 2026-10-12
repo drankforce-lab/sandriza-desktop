@@ -841,7 +841,12 @@ function majTray() {
     }
   } catch {}
   try {
-    tray.setToolTip(TV('Veilleur SANDRIZA — ') + ligneEtat()
+    /* ⚠ PLUS SIMPLE (2026-10-12, sa demande, capture à l'appui) : « SANDRIZA », et c'est tout quand la
+       veille écoute normalement. L'infobulle ne dit quelque chose de plus que s'il y a quelque chose à
+       savoir : en pause, une panne, ou des notifications non vues. Le détail reste dans le menu. */
+    const etat = ligneEtat();
+    const normal = etat === TV('À l’écoute des commandes et des retours');
+    tray.setToolTip('SANDRIZA' + (normal ? '' : ' — ' + etat)
       + ((Number(e.nonVus) || 0) > 0
           ? (' · ' + TV('{0} non vue(s)').split('{0}').join(Number(e.nonVus) || 0)) : ''));
   } catch {}

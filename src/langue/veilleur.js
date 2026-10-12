@@ -38,7 +38,6 @@ module.exports = {
   /* ── La ligne d'état, en haut du menu ──────────────────────────────────── */
   'En pause': 'Paused',
   'À l’écoute des commandes et des retours': 'Listening for orders and returns',
-  'Veilleur SANDRIZA — ': 'SANDRIZA watcher — ',
 
   /* ── DEPUIS QUAND ÇA NE MARCHE PAS (#100, 2026-09-14) ───────────────────
      ⚠ DES PHRASES ENTIÈRES, avec le nombre en `{0}`. Traduire « depuis »,
