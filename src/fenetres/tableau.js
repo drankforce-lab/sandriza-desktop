@@ -69,6 +69,7 @@ button.mini{padding:.12rem .45rem;font-size:.74rem}
 .direct{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:700;color:var(--tx-ok);
   background:rgba(34,197,94,.12);padding:.16rem .6rem;border-radius:99px;white-space:nowrap}
 .direct i{width:7px;height:7px;border-radius:99px;background:currentColor;animation:tb-pouls 1.8s ease-out infinite}
+html.jour .direct{color:#22663a}
 @keyframes tb-pouls{0%{box-shadow:0 0 0 0 rgba(34,197,94,.55)}100%{box-shadow:0 0 0 8px rgba(34,197,94,0)}}
 .periode{display:inline-flex;gap:3px;padding:3px;border-radius:9px;background:var(--v04);border:1px solid var(--v10)}
 .periode button{border:0;background:transparent;border-radius:6px;padding:.18rem .65rem;font-size:.76rem;font-weight:600;color:var(--tx2)}
@@ -99,13 +100,13 @@ button.mini{padding:.12rem .45rem;font-size:.74rem}
 .etape{position:relative;text-align:center;padding:.45rem .3rem .55rem;border-radius:10px;border:1px solid var(--v07);
   background:var(--v03);cursor:pointer;transition:border-color .2s}
 .etape:hover{border-color:#c9a97e}
-.etape .n{font-size:1.75rem;font-weight:300;line-height:1.1;color:var(--c);font-variant-numeric:tabular-nums}
+.etape .n{font-size:1.75rem;font-weight:300;line-height:1.1;color:inherit;font-variant-numeric:tabular-nums}
 .etape .lib{font-size:.66rem;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
-.etape::after{content:"";position:absolute;left:26%;right:26%;bottom:0;height:3px;border-radius:3px 3px 0 0;background:var(--c);opacity:.8}
+.etape::after{content:"";position:absolute;left:26%;right:26%;bottom:0;height:3px;border-radius:3px 3px 0 0;background:currentColor;opacity:.8}
 .parcours{margin-top:.55rem;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.7rem;align-items:center;font-size:.73rem;color:var(--tx2)}
 .parcours b{color:var(--tx)}
 .p-barre{display:flex;gap:3px;height:9px;border-radius:5px;overflow:hidden;background:var(--v05)}
-.p-barre i{background:var(--c);transition:flex .6s ease}
+.p-barre i{transition:flex .6s ease}
 .inv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.45rem}
 .inv>div{background:var(--v03);border:1px solid var(--v07);border-radius:10px;padding:.4rem .6rem;cursor:pointer}
 .inv .k{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
@@ -180,9 +181,9 @@ button.eclair:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(1)}
 .canal .nm{display:flex;justify-content:space-between;font-size:.76rem;margin-bottom:.16rem}
 .canal .nm b{font-variant-numeric:tabular-nums}
 .pile{display:flex;height:8px;border-radius:5px;overflow:hidden;background:var(--v05);gap:2px}
-.pile i{background:var(--c)}
+
 .cles{display:flex;flex-wrap:wrap;gap:.2rem .65rem;font-size:.62rem;color:var(--tx2);margin-top:.15rem}
-.cles span::before{content:"";display:inline-block;width:7px;height:7px;border-radius:2px;background:var(--c);margin-right:.28rem}
+.cles i{display:inline-block;width:7px;height:7px;border-radius:2px;margin-right:.28rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .pied:has(.msg:empty){padding:0;border-top:0}
@@ -355,14 +356,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var h = barre() + tauxAvis() + '<div class="grille">';
 
     // ── rangée 1 ──
-    var etape = function(n, lib, c){ return '<div class="etape" data-ouvre="orders" style="--c:' + c + '" title="${T("Ouvrir les commandes")}"><div class="n">' + (n || 0) + '</div><div class="lib">' + lib + '</div></div>'; };
+    var etape = function(n, lib, c){ return '<div class="etape" data-ouvre="orders" style="color:' + c + '" title="${T("Ouvrir les commandes")}"><div class="n">' + (n || 0) + '</div><div class="lib">' + lib + '</div></div>'; };
     h += '<section class="carte c8 r1a"><h2>${T("Activité des commandes")}<span class="aside">${T("ce qui attend un geste")}</span></h2>'
       + '<div class="flux">' + etape(e.confirmer, '${T("À confirmer")}', 'var(--tx-bleu)') + etape(e.preparer, '${T("À préparer")}', 'var(--tx-att)')
       + etape(e.expedier, '${T("À expédier")}', 'var(--tx-or)') + etape(e.livraison, '${T("En livraison")}', 'var(--tx-ok)') + '</div>'
       + '<div class="parcours"><span>${T("Parcours du jour")} · <b>' + (pc.total || 0) + '</b></span><div class="p-barre" title="'
       + esc('${T("Reçues")} ' + (pc.recues || 0) + ' · ${T("En préparation")} ' + (pc.preparation || 0) + ' · ${T("Parties")} ' + (pc.parties || 0)) + '">'
-      + (pc.recues ? '<i style="--c:var(--tx-bleu);flex:' + pc.recues + '"></i>' : '') + (pc.preparation ? '<i style="--c:var(--tx-att);flex:' + pc.preparation + '"></i>' : '')
-      + (pc.parties ? '<i style="--c:var(--tx-ok);flex:' + pc.parties + '"></i>' : '') + '</div>'
+      + (pc.recues ? '<i style="background:var(--tx-bleu);flex:' + pc.recues + '"></i>' : '') + (pc.preparation ? '<i style="background:var(--tx-att);flex:' + pc.preparation + '"></i>' : '')
+      + (pc.parties ? '<i style="background:var(--tx-ok);flex:' + pc.parties + '"></i>' : '') + '</div>'
       + '<span>' + (V.delaiMoyenH != null ? '${T("Délai moyen avant envoi")} <b>' + delai(V.delaiMoyenH) + '</b>' : '${T("Aucun envoi ces 30 derniers jours")}') + '</span></div></section>';
     h += '<section class="carte c4 r1b"><h2>${T("Inventaire")}</h2><div class="inv">'
       + '<div data-ouvre="inventory"><div class="k">${T("En main")}</div><div class="v">' + (iv.enMain || 0) + '</div></div>'
@@ -424,8 +425,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '<section class="carte c4"><h2>${T("Par canal")}<span class="aside">${T("ce mois-ci")}</span></h2>'
       + (cx.length ? '<div class="canaux">' + cx.map(function(c){
           return '<div class="canal"><div class="nm"><span>' + esc(NOMS[c.cle] || c.nom) + '</span><b>' + c.total + '</b></div><div class="pile">'
-            + COUL.map(function(s){ var v = (c.statuts || {})[s[0]] || 0; return v ? '<i style="--c:' + s[1] + ';flex:' + v + '" title="' + esc(s[2] + ' : ' + v) + '"></i>' : ''; }).join('') + '</div></div>';
-        }).join('') + '</div><div class="cles">' + COUL.map(function(s){ return '<span style="--c:' + s[1] + '">' + s[2] + '</span>'; }).join('') + '</div>'
+            + COUL.map(function(s){ var v = (c.statuts || {})[s[0]] || 0; return v ? '<i style="background:' + s[1] + ';flex:' + v + '" title="' + esc(s[2] + ' : ' + v) + '"></i>' : ''; }).join('') + '</div></div>';
+        }).join('') + '</div><div class="cles">' + COUL.map(function(s){ return '<span><i style="background:' + s[1] + '"></i>' + s[2] + '</span>'; }).join('') + '</div>'
         : '<div class="vide">${T("Aucune commande ce mois-ci.")}</div>') + '</section>';
 
     h += '</div>';
