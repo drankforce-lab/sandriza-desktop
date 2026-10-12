@@ -970,8 +970,13 @@ function szPagesAjuster(c){
   // Le pied vient de prendre sa place : si le conteneur a retreci, on remesure une fois.
   if (c.clientHeight + 1 < hAvant && !c.__szPgRe) { c.__szPgRe = true; try { szPagesAjuster(c); } finally { c.__szPgRe = false; } }
 }
+/* Les listes pleine hauteur du socle (CSS_HAUTEUR) sont mises en pages SANS marque : elles
+   defilaient dans une vingtaine de fenetres. On leur donne une cle d office. */
+var _SZ_PG_AUTO = '.carte.plein>.liste,.corps.plein>.liste';
 function szPagesTout(){
   _szPg.file = false;
+  var au = document.querySelectorAll(_SZ_PG_AUTO);
+  for (var j = 0; j < au.length; j++) if (!au[j].hasAttribute('data-pages')) au[j].setAttribute('data-pages', 'auto' + j);
   var cs = document.querySelectorAll('[data-pages]');
   for (var i = 0; i < cs.length; i++) szPagesAjuster(cs[i]);
 }
@@ -3378,10 +3383,10 @@ const CSS_HAUTEUR = `
    tout (retours, ramassages). La zone defilante peut donc etre fille de la
    carte OU du corps — n en couvrir qu une laisserait la moitie des ecrans sans
    correction, et le defaut ne se verrait qu ecran par ecran. */
-.carte.plein>.liste,.corps.plein>.liste{flex:1 1 auto;min-height:0;overflow-y:auto}
-.carte.plein>.liste::-webkit-scrollbar,.corps.plein>.liste::-webkit-scrollbar{width:8px}
-.carte.plein>.liste::-webkit-scrollbar-thumb,
-.corps.plein>.liste::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* ➡ 2026-10-12 : CES LISTES NE DEFILENT PLUS — elles sont mises en PAGES par JS_PAGES (sa regle :
+   << aucun scroll bar dans l application >>). Meme selecteur des deux cotes : voir _SZ_PG_AUTO. */
+.carte.plein>.liste,.corps.plein>.liste{flex:1 1 auto;min-height:0;overflow:hidden}
+.carte.plein>.sz-pages,.corps.plein>.sz-pages{flex:0 0 auto}
 /* Une liste de lignes riches garde son espacement entre les lignes. */
 .corps.plein>.liste{display:flex;flex-direction:column;gap:.55rem}
 /* La pagination reste COLLEE au bas de la carte, jamais emportee par le
