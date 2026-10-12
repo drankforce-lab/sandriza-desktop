@@ -100,7 +100,7 @@ button.arme{border-color:#fbbf24;background:rgba(251,191,36,.16);color:#fde68a}
 .tuile .val.bon{color:var(--tx-ok)}.tuile .val.neutre{color:var(--tx2)}
 .tuile .val.att{color:var(--tx-att)}.tuile .val.mal{color:var(--tx-err)}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
-  padding:.6rem .75rem}
+  padding:.95rem 1.1rem}
 .carte + .carte{margin-top:.5rem}
 .chaine .entete{display:flex;align-items:flex-start;gap:.6rem;flex-wrap:wrap}
 .chaine .entete h3{margin:0;font:700 .9rem/1.3 Georgia,serif}

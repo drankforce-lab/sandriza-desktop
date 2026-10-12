@@ -80,7 +80,7 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 button .n{display:inline-block;margin-left:.3rem;font-size:.66rem;font-weight:700;
   background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
-  padding:.6rem .75rem}
+  padding:.95rem 1.1rem}
 .carte h2{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;
   letter-spacing:.07em;color:var(--tx2);font-weight:700;
   /* ⚠ FLEX, sinon le compteur de droite se colle au titre : on lisait

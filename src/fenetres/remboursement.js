@@ -44,7 +44,7 @@ body{background:var(--f-page);color:var(--tx);
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
-  padding:.6rem .75rem;flex:0 0 auto}
+  padding:.95rem 1.1rem;flex:0 0 auto}
 .carte h2{margin:0 0 .45rem;font-size:.71rem;text-transform:uppercase;
   letter-spacing:.09em;color:var(--tx2);font-weight:700}
 .carte h2 .note{font-weight:400;text-transform:none;letter-spacing:0;color:var(--tx3)}

@@ -68,7 +68,7 @@ button.actif{border-color:#c9a97e;background:rgba(201,169,126,.14)}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bc95}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
-  padding:.6rem .75rem}
+  padding:.95rem .8rem}
 .carte h2{margin:0 0 .5rem;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;
   color:var(--tx2);font-weight:700;display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap}
 .carte h2 .n{font-weight:400;text-transform:none;letter-spacing:0;font-size:.72rem;color:var(--tx3)}

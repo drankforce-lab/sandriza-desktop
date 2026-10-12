@@ -107,7 +107,7 @@ html.jour button.aconf{color:#7f1d1d}
 
 /* ── Tableaux serres (un registre est un document, pas une liste de cartes) ── */
 .corps table{border-collapse:collapse;border-spacing:0}
-.corps tbody td{padding:.24rem .35rem;border:0;border-top:1px solid var(--v055);border-radius:0;background:transparent}
+.corps tbody td{padding:.42rem .5rem;border:0;border-top:1px solid var(--v055);border-radius:0;background:transparent}
 .corps tbody tr:hover>td{background:var(--v03);border-color:var(--v055)}
 .corps thead th{padding:.22rem .35rem;background:transparent}
 table{width:100%;border-collapse:collapse;font-size:.79rem}
@@ -115,7 +115,7 @@ thead th{text-align:left;padding:.22rem .35rem;font-size:.64rem;text-transform:u
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 thead th.n,tbody td.n{text-align:right;font-family:ui-monospace,Consolas,monospace;white-space:nowrap}
 .bilan td.n small{white-space:normal}
-tbody td{padding:.24rem .35rem;border-top:1px solid var(--v055);vertical-align:middle}
+tbody td{padding:.42rem .5rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody tr.ligne{cursor:default}
 tbody tr.ligne.mod{cursor:pointer}
 .corps tbody tr.sel>td{background:rgba(201,169,126,.10)}

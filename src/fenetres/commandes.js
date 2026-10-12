@@ -56,7 +56,7 @@ body{background:var(--f-page);color:var(--tx);
   display:flex;flex-direction:column;gap:.55rem}
 
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
-  padding:.6rem .75rem;flex:0 0 auto}
+  padding:.95rem 1.1rem;flex:0 0 auto}
 .carte.plein{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
 
 input,select{font:inherit;color:var(--tx);background:var(--f-0f1826);

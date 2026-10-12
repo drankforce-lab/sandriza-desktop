@@ -86,7 +86,7 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 @media (max-width:920px){.deux{flex-direction:column}
   .deux .principal,.deux .cote{flex:1 1 0;width:100%}}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
-  padding:.6rem .75rem}
+  padding:.95rem 1.1rem}
 .carte h2{margin:0 0 .45rem;font-size:.71rem;text-transform:uppercase;
   letter-spacing:.09em;color:var(--tx2);font-weight:700;display:flex;align-items:center;gap:.5rem}
 table{width:100%;border-collapse:collapse;font-size:.84rem}

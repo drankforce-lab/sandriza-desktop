@@ -52,7 +52,7 @@ button.mini{padding:.12rem .45rem;font-size:.74rem;-webkit-user-select:none;user
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 button.danger:hover:not(:disabled){background:rgba(239,68,68,.12)}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
-  padding:.6rem .75rem}
+  padding:.95rem 1.1rem}
 table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;padding:.24rem .4rem;font-size:.68rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
