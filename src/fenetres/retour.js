@@ -48,7 +48,7 @@ body{background:var(--f-page);color:var(--tx);
   border:1px solid var(--v20);margin-left:.6rem}
 
 .pas{flex:0 0 auto;display:flex;gap:.35rem;padding:.45rem 1.1rem;
-  border-bottom:1px solid var(--v07);background:#111a28}
+  border-bottom:1px solid var(--v07);background:var(--f-pill)}
 .pas button{font:inherit;font-size:.76rem;padding:.24rem .6rem;border-radius:7px;
   border:1px solid transparent;background:transparent;color:var(--tx2);cursor:pointer}
 .pas button.on{background:rgba(var(--or-rgb),.16);border-color:rgba(var(--or-rgb),.45);color:var(--tx-creme)}

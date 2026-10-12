@@ -19,6 +19,7 @@
  */
 
 module.exports = {
+  'Sous le seuil': 'Below threshold',
   'Affichage de la liste': 'List view',
   'Affichage détaillé': 'Detailed view',
   'Détaillé': 'Detailed',

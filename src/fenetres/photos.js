@@ -336,7 +336,7 @@ tr:hover .act .ic{opacity:1}
   border:1px solid rgba(var(--or-rgb),.35);color:var(--tx-e8dcc4);border-radius:999px;cursor:pointer}
 .sugg button:hover{background:rgba(var(--or-rgb),.24)}
 .asst .pi{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;
-  padding:.6rem .9rem;border-top:1px solid var(--v08);background:#0f1725}
+  padding:.6rem .9rem;border-top:1px solid var(--v08);background:var(--f-champ)}
 /* Le panneau de l'assistant est une surface, pas un accent. */
 html.jour .asst .pi{background:#faf8f3}
 .asst .pi .dr{margin-left:auto;display:flex;gap:.5rem}

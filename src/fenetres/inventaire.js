@@ -336,6 +336,12 @@ html.jour .gp .cat.tc{color:color-mix(in srgb,var(--cc,#6d7f96) 55%,black);
 .gp .stk{display:flex;align-items:center;gap:.7rem;white-space:nowrap}
 .gp .stk .n{font-size:1.3rem;font-weight:800;line-height:1}
 .gp .stk .n.zero{color:var(--tx-err)}
+/* Les onglets Reapprovisionnement, Endommages et Ventes a rabais portent la meme grille (2026-10-12). */
+.gp td.fl{width:1.5rem;text-align:right;color:var(--tx3);font-size:1.1rem}
+.gp tbody tr[data-ligne]:hover td.fl{color:var(--or)}
+.gp .qn{font-size:1.05rem;font-weight:800}
+.gp tbody tr.total td{background:transparent;border-color:transparent;font-weight:700;padding-top:.5rem}
+.gp tbody tr[data-fac]{cursor:pointer}
 .gp .stk .u{font-size:.78rem;color:var(--tx2);margin-left:.2rem}
 .gp .pill{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:600;
   padding:.22rem .65rem}
@@ -388,10 +394,12 @@ html.jour .gp .cat.tc{color:color-mix(in srgb,var(--cc,#6d7f96) 55%,black);
 .vue-bascule button.on{background:var(--or)!important;color:#1a1208}
 /* LA BARRE SUR DEUX RANGEES (2026-10-12) : les filtres en haut ; dessous, les gestes a droite
    (bascule d affichage, ajouter un produit). Une seule rangee ecrasait la recherche. */
-.tb2{flex-wrap:wrap!important;row-gap:.65rem!important}
-.tb2>.rch{flex:1 1 14rem;min-width:11rem}
-.tb2>.droite{flex:1 1 100%!important;display:flex;align-items:center;justify-content:flex-end;gap:.5rem;margin-left:0;
-  padding-top:.65rem;border-top:1px solid var(--v07)}
+/* ➡ DE RETOUR SUR UNE SEULE LIGNE (2026-10-12, sa demande : « adapte les deux lignes de boutons en une seule »).
+   La recherche cede la place en premier ; sous 1240 px (fenetre detachee) la barre repasse sur deux lignes. */
+.tb2{flex-wrap:nowrap!important}
+.tb2>.rch{flex:1 1 11rem;min-width:8rem}
+.tb2>.droite{flex:0 0 auto!important;display:flex;align-items:center;gap:.4rem;margin-left:auto}
+@media (max-width:1240px){.tb2{flex-wrap:wrap!important;row-gap:.5rem!important}}
 /* Les boutons de la barre des produits : meme hauteur que la recherche, libelle net. */
 .tb2 .droite>button{height:2.4rem;padding:0 .95rem;border-radius:10px;font-weight:600;font-size:.82rem}
 /* La barre d outils de l onglet : champs plus hauts, pastilles d etat.
@@ -647,7 +655,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
         : '${T("✓ Aucune variante à réapprovisionner — toutes sont au-dessus de leur seuil.")}')
         + '</div>';
     } else {
-      h += '<div class="lignes" data-pages="inventaire-' + (enRecherche ? 'recherche' : 'reappro') + '">';
+      if (enRecherche) h += '<div class="lignes" data-pages="inventaire-recherche">';
       if (enRecherche) {
         lignes.forEach(function(a){
           h += '<div class="lg" data-pid="' + esc(a.id) + '">'
@@ -662,18 +670,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
       } else {
         // ⚠ MEME TRI QUE L ECRAN DU SITE (il vient deja trie du pont) : ce qui est
         // a zero d abord, puis le plus proche de la rupture EN PROPORTION.
+        /* AU LOOK DE LA GRILLE PRODUITS (2026-10-12, sa demande) : la photo dans le rond, le nom et sa
+           ligne secondaire, la variante, la quantite en grand contre son seuil, une pastille. */
+        h += '<div class="grille gp' + (COMPACT ? ' compacte' : '') + '" data-pages="inventaire-reappro"><table><thead><tr>'
+          + '<th>${T("Produit")}</th><th>${T("Variante")}</th><th>${T("Inventaire")}</th><th></th></tr></thead><tbody>';
         lignes.forEach(function(r){
-          h += '<div class="lg" data-pid="' + esc(r.produitId) + '">'
-            + '<span class="principal"><strong>' + esc(r.nom) + '</strong>'
-            /* ⚠ LE LIBELLE S AFFICHE, LA DONNEE RESTE — voir la fiche de
-               src/langue/couleurs.js. Le repli sur la donnee couvre une couleur
-               ajoutee a la main, qui n a pas de traduction et n en aura pas. */
-            + ' <span class="det">' + esc(r.taille) + ' / ' + esc(r.couleurLibelle || r.couleur) + '</span>'
-            + (r.sku ? ' <span class="code">' + esc(r.sku) + '</span>' : '')
-            + '</span>'
-            + '<span class="fin"><span class="q ' + (r.rupture ? 'rup' : 'bas') + '">' + r.qte
-            + '</span> / seuil ' + r.seuil + '</span></div>';
+          var ini = String(r.categorieNom || r.nom || '?').charAt(0).toUpperCase();
+          h += '<tr data-ligne="' + esc(r.produitId) + '" data-pid="' + esc(r.produitId) + '" title="${T("Ouvrir la fiche d’inventaire")}">'
+            + '<td><div class="prod">' + szVignette(r.image, ini, r.couleurCat, r.categorieNom)
+            +   '<div style="min-width:0"><div class="l1"><span class="nom">' + esc(r.nom) + '</span></div>'
+            +   '<div class="l2">' + (r.sku ? '<span class="code">' + esc(r.sku) + '</span>' : '<span class="rien">${T("sans SKU")}</span>')
+            +     (r.categorieNom ? '<span>·</span><span>' + esc(r.categorieNom) + '</span>' : '') + '</div></div></div></td>'
+            /* ⚠ LE LIBELLE S AFFICHE, LA DONNEE RESTE — voir la fiche de src/langue/couleurs.js. */
+            + '<td><div class="vars"><b>' + esc(r.taille) + '</b> · ' + esc(r.couleurLibelle || r.couleur) + '</div></td>'
+            + '<td><div class="stk"><span><span class="n' + (r.qte === 0 ? ' zero' : '') + '">' + r.qte + '</span>'
+            +   '<span class="u">/ ${T("seuil")} ' + r.seuil + '</span></span>'
+            +   (r.rupture || r.qte === 0 ? '<span class="pill rup">${T("Rupture")}</span>' : '<span class="pill bas">${T("Sous le seuil")}</span>') + '</div></td>'
+            + '<td class="fl" aria-hidden="true">›</td></tr>';
         });
+        h += '</tbody></table>';
       }
       h += '</div>';
     }
@@ -914,7 +929,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     corps.onclick = function(ev){
       var t = ev.target;
       if (!t || !t.closest) return;
-      var l = t.closest('.lg');
+      var l = t.closest('[data-pid]');
       if (l) ouvrirProduit(l.getAttribute('data-pid'));
     };
   }
@@ -1488,26 +1503,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
       /* En PAGES mesurees, plus de glissiere (2026-10-12). Le total passe en DERNIERE ligne du
          tbody : un tfoot sous des lignes paginees serait pousse hors du cadre. La barre
          d outils le redit en tout temps. */
-      h += '<div class="grille" data-pages="inventaire-endommages"><table><thead><tr>'
-        + '<th>${T("Date")}</th><th>${T("Commande")}</th><th>${T("Article")}</th><th class="c">${T("Qté")}</th>'
+      /* AU LOOK DE LA GRILLE PRODUITS (2026-10-12, sa demande). En PAGES mesurees ; le total reste en
+         DERNIERE ligne du tbody (un tfoot sous des lignes paginees serait pousse hors du cadre). */
+      h += '<div class="grille gp' + (COMPACT ? ' compacte' : '') + '" data-pages="inventaire-endommages"><table><thead><tr>'
+        + '<th>${T("Article")}</th><th class="c">${T("Qté")}</th>'
         + '<th style="text-align:right">${T("Prix")}</th><th style="text-align:right">${T("Valeur")}</th><th>${T("Raison")}</th>'
         + '</tr></thead><tbody>';
       d.lignes.forEach(function(l){
+        var ini = String(l.categorieNom || l.nom || '?').charAt(0).toUpperCase();
         h += '<tr>'
-          + '<td>' + new Date(l.date).toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'short', year: 'numeric' }) + '</td>'
-          + '<td><span class="code">' + esc(l.commande) + '</span></td>'
-          + '<td>' + esc(l.nom) + '</td>'
-          + '<td class="c">' + l.qte + '</td>'
-          + '<td style="text-align:right">' + szArgent(l.prix) + '</td>'
-          + '<td style="text-align:right;font-weight:600">' + szArgent(l.qte * l.prix) + '</td>'
-          + '<td>' + esc(l.raison) + '</td></tr>';
+          + '<td><div class="prod">' + szVignette(l.image, ini, l.couleurCat, l.categorieNom)
+          +   '<div style="min-width:0"><div class="l1"><span class="nom">' + esc(l.nom) + '</span></div>'
+          +   '<div class="l2"><span class="code">' + esc(l.commande) + '</span><span>·</span><span>'
+          +     new Date(l.date).toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'short', year: 'numeric' }) + '</span></div></div></div></td>'
+          + '<td class="c"><span class="qn">' + l.qte + '</span></td>'
+          + '<td style="text-align:right;white-space:nowrap">' + szArgent(l.prix) + '</td>'
+          + '<td style="text-align:right;white-space:nowrap"><b>' + szArgent(l.qte * l.prix) + '</b></td>'
+          + '<td>' + (l.raison ? '<span class="pill neutre">' + esc(l.raison) + '</span>' : '—') + '</td></tr>';
       });
-      h += '<tr style="font-weight:700">'
-        + '<td colspan="3" style="padding:.34rem .5rem;border-top:1px solid var(--v14)">${T("Total")}</td>'
-        + '<td class="c" style="border-top:1px solid var(--v14)">' + d.totalQte + '</td>'
-        + '<td style="border-top:1px solid var(--v14)"></td>'
-        + '<td style="text-align:right;border-top:1px solid var(--v14)">' + szArgent(d.totalValeur) + '</td>'
-        + '<td style="border-top:1px solid var(--v14)"></td></tr></tbody></table></div>';
+      h += '<tr class="total"><td>${T("Total")}</td><td class="c"><span class="qn">' + d.totalQte + '</span></td><td></td>'
+        + '<td style="text-align:right;white-space:nowrap"><b>' + szArgent(d.totalValeur) + '</b></td><td></td></tr></tbody></table></div>';
     }
     h += '</div>';
     corps.innerHTML = h;
@@ -1571,33 +1586,35 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
         : '${T("Aucun rabais accordé au comptoir")}' + (RAB_AN === 'all' ? '' : '${T(" pour ")}' + esc(String(RAB_AN))) + '.') + '</div>';
     } else {
       // En PAGES mesurees, total en derniere ligne du tbody (meme raison qu aux endommages, 2026-10-12).
-      h += '<div class="grille" data-pages="inventaire-rabais"><table><thead><tr>'
-        + '<th>${T("Date")}</th><th>${T("Facture")}</th><th>${T("Article")}</th><th class="c">${T("Qté")}</th>'
+      // AU LOOK DE LA GRILLE PRODUITS (2026-10-12, sa demande) ; total en derniere ligne du tbody.
+      h += '<div class="grille gp' + (COMPACT ? ' compacte' : '') + '" data-pages="inventaire-rabais"><table><thead><tr>'
+        + '<th>${T("Article")}</th><th>${T("Facture")}</th><th class="c">${T("Qté")}</th>'
         + '<th style="text-align:right">${T("Prix courant")}</th><th style="text-align:right">${T("Rabais")}</th>'
-        + '<th style="text-align:right">${T("Prix vendu")}</th><th>${T("Remarque")}</th><th>${T("Client")}</th>'
+        + '<th style="text-align:right">${T("Prix vendu")}</th><th>${T("Client")}</th>'
         + '</tr></thead><tbody>';
       d.lignes.forEach(function(l){
+        var ini = String(l.categorieNom || l.nom || '%').charAt(0).toUpperCase();
         var art = l.type === 'vente'
-          ? '<span class="rf-nom">${T("Toute la vente")}</span>'
-          : '<div class="rf-nom">' + esc(l.nom) + '</div><div class="rf-sous">'
-            + esc([l.taille, l.couleur].filter(Boolean).join(' / ') || '—')
-            + (l.sku ? ' · <span class="rf-code">' + esc(l.sku) + '</span>' : '') + '</div>';
+          ? '<div class="prod">' + szVignette('', '%', '', '') + '<div style="min-width:0"><div class="l1"><span class="nom">${T("Toute la vente")}</span></div>'
+            + '<div class="l2">' + (l.remarque ? esc(l.remarque) : '${T("rabais global")}') + '</div></div></div>'
+          : '<div class="prod">' + szVignette(l.image, ini, l.couleurCat, l.categorieNom)
+            + '<div style="min-width:0"><div class="l1"><span class="nom">' + esc(l.nom) + '</span></div>'
+            + '<div class="l2"><span>' + esc([l.taille, l.couleur].filter(Boolean).join(' / ') || '—') + '</span>'
+            + (l.sku ? '<span>·</span><span class="code">' + esc(l.sku) + '</span>' : '')
+            + (l.remarque ? '<span>·</span><span>' + esc(l.remarque) + '</span>' : '') + '</div></div></div>';
         var rab = (l.pct > 0 ? '−' + szNombre(l.pct, 2).replace(/[.,]00$/, '') + ' % · ' : '') + '−' + szArgent(l.rabais);
-        h += '<tr data-fac="' + esc(l.factureId || '') + '" title="${T("Ouvrir la facture")}" style="cursor:pointer">'
-          + '<td style="white-space:nowrap">' + new Date(l.date).toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'short', year: 'numeric' }) + '</td>'
-          + '<td><div class="code">' + esc(l.facture || '—') + '</div><div class="rf-sous">' + esc(l.commande || '') + '</div></td>'
+        h += '<tr data-ligne="' + esc(l.factureId || '') + '" data-fac="' + esc(l.factureId || '') + '" title="${T("Ouvrir la facture")}">'
           + '<td>' + art + '</td>'
-          + '<td class="c">' + l.qte + '</td>'
+          + '<td><div class="code">' + esc(l.facture || '—') + '</div><div class="l2">'
+          +   new Date(l.date).toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'short', year: 'numeric' }) + '</div></td>'
+          + '<td class="c"><span class="qn">' + l.qte + '</span></td>'
           + '<td style="text-align:right;white-space:nowrap">' + (l.type === 'vente' ? '—' : szArgent(l.prixOriginal)) + '</td>'
-          + '<td style="text-align:right;white-space:nowrap;font-weight:600">' + rab + '</td>'
-          + '<td style="text-align:right;white-space:nowrap">' + (l.type === 'vente' ? '—' : szArgent(l.prixVendu)) + '</td>'
-          + '<td>' + (l.remarque ? esc(l.remarque) : '<span class="rf-sous">—</span>') + '</td>'
-          + '<td>' + esc(l.client || '—') + (l.par ? '<div class="rf-sous">${T("par")} ' + esc(l.par) + '</div>' : '') + '</td></tr>';
+          + '<td style="text-align:right;white-space:nowrap"><span class="pill bas">' + rab + '</span></td>'
+          + '<td style="text-align:right;white-space:nowrap"><b>' + (l.type === 'vente' ? '—' : szArgent(l.prixVendu)) + '</b></td>'
+          + '<td>' + esc(l.client || '—') + (l.par ? '<div class="l2">${T("par")} ' + esc(l.par) + '</div>' : '') + '</td></tr>';
       });
-      h += '<tr style="font-weight:700">'
-        + '<td colspan="5" style="padding:.34rem .5rem;border-top:1px solid var(--v14)">${T("Total")}</td>'
-        + '<td style="text-align:right;white-space:nowrap;padding:.34rem 1.25rem .34rem .5rem;border-top:1px solid var(--v14)">−' + szArgent(d.totalRabais) + '</td>'
-        + '<td colspan="3" style="border-top:1px solid var(--v14)"></td></tr></tbody></table></div>';
+      h += '<tr class="total"><td colspan="4">${T("Total")}</td>'
+        + '<td style="text-align:right;white-space:nowrap"><b>−' + szArgent(d.totalRabais) + '</b></td><td colspan="2"></td></tr></tbody></table></div>';
     }
     h += '</div>';
     corps.innerHTML = h;

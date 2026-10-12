@@ -153,7 +153,7 @@ body{background:var(--f-page);color:var(--tx);
 
 /* Fil des etapes : cliquable, et il dit ce qui est FAIT — pas ce qui est passe. */
 .pas{flex:0 0 auto;display:flex;gap:.2rem;padding:.45rem 1.1rem;
-  border-bottom:1px solid var(--v08);background:#111a28;
+  border-bottom:1px solid var(--v08);background:var(--f-pill);
   overflow-x:auto;scrollbar-width:none}
 .pas::-webkit-scrollbar{display:none}
 .pas button{flex:0 0 auto;font:inherit;font-size:.76rem;padding:.24rem .58rem;
@@ -737,7 +737,7 @@ window.addEventListener('pagehide', function(){
 const CSS_LOTS = `
 .sz-lots{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;align-items:center;
   gap:.6rem;padding:.3rem .8rem;font-size:.76rem;color:var(--tx-creme);
-  background:linear-gradient(180deg,#1b2434,#141c29);
+  background:linear-gradient(180deg,var(--f-bande),var(--f-carte2));
   border-top:1px solid rgba(var(--or-rgb),.45);box-shadow:0 -4px 14px rgba(0,0,0,.35)}
 .sz-lots .nom{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:16rem}
 .sz-lots .jauge{flex:1 1 auto;min-width:4rem;height:.42rem;border-radius:99px;
@@ -2422,7 +2422,7 @@ html.jour select option,html.jour select optgroup{background:#ffffff;color:#1d24
 html.jour body{background:#f4f2ec;color:#1d2433}
 /* Le fil des etapes est un bandeau navy en nuit (#111a28) : en jour il doit
    suivre le bandeau de pied, sinon la fiche s'ouvre sur une barre sombre. */
-html.jour .pas{background:#efece4}
+html.jour .pas{background:var(--f-pill)}
 html.jour .tete{background:linear-gradient(180deg,#ffffff,#f4f2ec);border-bottom-color:rgba(15,23,42,.12)}
 html.jour .tete .sous{color:#414e66}
 html.jour .tuile .lbl{filter:grayscale(1)}
@@ -2666,6 +2666,21 @@ html[data-sz-theme="carbone"]{
   /* L'OR ÉCRIT EN DUR, CONVERTI (2026-10-12) : sous Carbone, l'accent des fenêtres devient le rouge. Texte foncé
      posé dessus : 5,3 de contraste ; ce rouge comme texte sur la carte sombre : 5,2. */
   --or:#f43f5e; --or-rgb:244,63,94; --or-clair:#fb7185; --tx-or:#fb7185;
+}
+/* LES FONDS DES FENETRES AUSSI (2026-10-12, sa capture : « plusieurs zones ou le theme carbone ne s applique
+   pas ») — la barre des etapes, le panneau de droite, le cadre photo, les champs, les en-tetes de tableaux.
+   Les jeux ne changeaient que les jetons --sz-* ; les fenetres peignent avec les --f-* (bleu nuit la nuit,
+   creme le jour). Sous Carbone : noir carbone la nuit, aluminium neutre le jour, gris sans bleu. */
+html[data-sz-theme="carbone"]:not(.jour){
+  --f-page:#0d0d10; --f-carte:#141417; --f-carte2:#121215; --f-pied:#0a0a0c; --f-champ:#0f0f12;
+  --f-pill:#18181c; --f-0f1826:#0f0f12; --f-0f172a:#0e0e11; --f-131c2b:#131316; --f-16202c:#16161a;
+  --f-bande:#18181c; --f-entete:#1d1d22;
+  --tx2:#a1a1aa; --tx3:#8e8e98; --tx-gris:#9a9aa4; --tx-bleute:#d4d4d8; --tx-gris2:#d4d4d8; --tx-94a3b8:#a1a1aa;
+}
+html.jour[data-sz-theme="carbone"]{
+  --f-page:#eceef1; --f-carte:#fbfbfc; --f-carte2:#f5f6f8; --f-pied:#e6e8ec; --f-champ:#ffffff;
+  --f-pill:#e9ebee; --f-0f1826:#ffffff; --f-0f172a:#ffffff; --f-131c2b:#f5f6f8; --f-16202c:#ffffff;
+  --f-bande:#e9ebee; --f-entete:#e3e5e9;
 }
 html[data-sz-theme="ocean"]{
   --sz-fond:#0a1620; --sz-fond2:#0f2030; --sz-pied:#081219;
@@ -4050,6 +4065,29 @@ html[data-sz-theme="carbone"] thead th:first-child{background-image:linear-gradi
 :where(html[data-sz-theme="carbone"] tbody tr:nth-child(even))>td{background-color:var(--v02)}
 :where(html.jour[data-sz-theme="carbone"] tbody tr:nth-child(even))>td{background-color:rgba(0,0,0,.022)}
 :where(html[data-sz-theme="carbone"] tbody tr:hover)>td:first-child{box-shadow:inset 3px 0 0 var(--sz-repere)}
+/* LE HALO DU THEME AU SURVOL, PAS SEULEMENT AU CLIC (2026-10-12, sa remarque : « plusieurs zones de choix ne
+   fonctionnent pas avec le survol, le halo rouge ne s applique que si on clique »). Les champs, les listes
+   deroulantes, les cases, les pastilles de choix et les boutons prennent au SURVOL le meme halo que le focus ;
+   le jour, l orange du theme remplace le dore ecrit en dur. Un etat CHOISI (.on, .actif, aria-pressed) garde
+   le sien. */
+html[data-sz-theme="carbone"] :is(.ch,.champ) :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),select,textarea):hover:not(:disabled),
+html[data-sz-theme="carbone"] :is(.ch,.champ) :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),select,textarea):focus{
+  border-color:rgba(var(--or-rgb),.75);box-shadow:0 0 0 3px rgba(var(--or-rgb),.16)}
+html[data-sz-theme="carbone"] :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),select,textarea):hover:not(:disabled):not(:focus){
+  border-color:rgba(var(--or-rgb),.6)!important;box-shadow:0 0 0 3px rgba(var(--or-rgb),.12)!important}
+html[data-sz-theme="carbone"] button:hover:not(:disabled):not(.on):not(.actif):not([aria-pressed="true"]):not(.prim):not(.paie){
+  border-color:rgba(var(--or-rgb),.6)!important;box-shadow:0 0 0 3px rgba(var(--or-rgb),.14)!important}
+html[data-sz-theme="carbone"] :is(input[type=checkbox],input[type=radio]){accent-color:var(--or)}
+html[data-sz-theme="carbone"] :is(input[type=checkbox],input[type=radio]):hover:not(:disabled){box-shadow:0 0 0 3px rgba(var(--or-rgb),.22);border-radius:4px}
+html[data-sz-theme="carbone"] :is(button,input,select,textarea){transition:border-color .2s ease,box-shadow .2s ease,background-color .2s ease}
+/* LES TABLEAUX EN CARBONE (2026-10-12, sa demande : « ameliore le look des tableaux en mode carbone »). L en-tete
+   n a plus de bande : un fin filet, le repere rouge sous la premiere colonne. Les lignes en cartes (grilles .gp)
+   prennent un leger relief ; au survol, un voile rouge qui s estompe et un filet a gauche. */
+html[data-sz-theme="carbone"] thead th{background-color:transparent;border-bottom:1px solid var(--v10)}
+html[data-sz-theme="carbone"] .gp tbody td{background:linear-gradient(180deg,var(--v045),var(--v02));border-color:var(--v07)}
+html[data-sz-theme="carbone"] .gp tbody tr[data-ligne]:hover td{background:rgba(var(--or-rgb),.08);border-color:rgba(var(--or-rgb),.38)}
+html[data-sz-theme="carbone"] .gp tbody tr[data-ligne]:hover td:first-child{box-shadow:inset 3px 0 0 var(--or)}
+html.jour[data-sz-theme="carbone"] .gp tbody td{background:linear-gradient(180deg,#ffffff,#f6f7f9)}
 `;
 
 module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_CARBONE,

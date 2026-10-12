@@ -126,6 +126,26 @@ button.mini.ligne-geste{height:2.4rem;padding:0 1rem;border-radius:10px;font-siz
 .tuile.cliq:hover{border-color:var(--or)}
 .tuile.cliq::after{content:"›";position:absolute;top:.55rem;right:.8rem;font-size:1.1rem;color:var(--tx3)}
 .liste{flex:1 1 auto;min-height:0;overflow-y:auto}
+/* LA BASCULE D AFFICHAGE (la meme que l Inventaire et Produits en vente), en icones : le libelle est dans
+   l infobulle et pour le lecteur d ecran. */
+.vue-bascule{display:inline-flex;align-items:stretch;gap:2px;padding:3px;border-radius:10px;
+  background:var(--v04);border:1px solid var(--v12);flex:0 0 auto}
+.vue-bascule button{display:inline-flex;align-items:center;height:2rem;padding:0 .6rem;
+  border:0!important;border-radius:7px;background:transparent!important;color:var(--tx2)}
+.vue-bascule button svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
+.vue-bascule button:hover:not(.on){color:var(--tx);background:var(--v06)!important}
+.vue-bascule button.on{background:var(--or)!important;color:#1a1208}
+/* L AFFICHAGE COMPACT : une ligne par commande — client, numero et date cote a cote, l avatar devient un point,
+   des pastilles plus petites. La pagination mesuree en tire plus de lignes. */
+.liste.compacte tbody td{padding-top:.2rem!important;padding-bottom:.2rem!important}
+.liste.compacte .rf-prod{gap:.55rem}
+.liste.compacte .rf-av{width:.55rem!important;height:.55rem!important;min-width:0!important;font-size:0!important;
+  border-radius:50%!important;background:var(--or)!important;opacity:.75}
+.liste.compacte .rf-prod>div{display:flex;align-items:baseline;gap:.7rem;min-width:0}
+.liste.compacte .rf-nom{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.liste.compacte .rf-sous{margin-top:0!important;white-space:nowrap}
+.liste.compacte .rf-pill{font-size:.6875rem;padding:.02rem .4rem}
+.liste.compacte .ligne-geste{min-height:0;height:1.75rem;padding:0 .55rem;font-size:.75rem}
 .liste::-webkit-scrollbar{width:8px}
 .liste::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
@@ -301,6 +321,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   // frappe, et lire les champs au moment de paginer ne rendrait que l affichage.
   // Auto par defaut : autant de lignes que la hauteur reelle, jamais de glissiere.
   var F = { q: '', statuts: [], annee: 'all', prioritaires: false, page: 0, parPage: 20, auto: true };
+  /* L AFFICHAGE COMPACT (2026-10-12, sa demande : « ajoute-moi aussi un mode compact dans les commandes »), le
+     meme que l Inventaire et Produits en vente : une ligne par commande, retenu sur le poste (sous garde). */
+  var COMPACT = false;
+  try { COMPACT = localStorage.getItem('sz-cmd-compact') === '1'; } catch (e) {}
   var enCours = false;
   var VUE = 'liste';        // 'liste' | 'detail'
   // Ouverte par << mode@identifiant >>, la fenetre EST un detail : pas de
@@ -506,7 +530,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
        bouton a qui ne peut pas restaurer l empecherait de CONSTATER qu une
        commande a ete supprimee — ce qui est precisement ce qu on veut pouvoir
        voir. La fenetre le dit alors en clair. */
-    h += '<span class="rf-droite">';
+    h += '<span class="rf-droite">'
+      + '<span class="vue-bascule" role="group" aria-label="${T("Affichage de la liste")}">'
+      +   '<button type="button" data-vue="detail" aria-label="${T("Affichage détaillé")}" aria-pressed="' + (!COMPACT) + '" class="' + (!COMPACT ? 'on' : '') + '" title="${T("Affichage détaillé")}">'
+      +     '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="2.5" width="12" height="4.5" rx="1.2"/><rect x="2" y="9" width="12" height="4.5" rx="1.2"/></svg></button>'
+      +   '<button type="button" data-vue="compact" aria-label="${T("Affichage compact : une ligne par commande, plus de commandes par page")}" aria-pressed="' + COMPACT + '" class="' + (COMPACT ? 'on' : '') + '" title="${T("Affichage compact : une ligne par commande, plus de commandes par page")}">'
+      +     '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3.5h12M2 6.5h12M2 9.5h12M2 12.5h12"/></svg></button>'
+      + '</span>';
     if (!expedition) {
       h += '<button class="rf-jet" id="c-corbeille" '
         + 'title="${T("Voir les commandes supprimées et les remettre en place")}">'
@@ -528,7 +558,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         ? '${T("Aucune commande ne correspond à ces filtres.")}'
         : (expedition ? '${T("Aucune commande expédiée.")}' : '${T("Aucune commande en cours.")}')) + '</div>';
     } else {
-      h += '<div class="liste"><table><thead><tr>'
+      h += '<div class="liste' + (COMPACT ? ' compacte' : '') + '"><table><thead><tr>'
         + '<th>${T("Client et commande")}</th>'
         + (expedition ? '<th>${T("Suivi")}</th>' : '<th class="c">${T("Articles")}</th>')
         + '<th class="d">${T("Total")}</th><th>${T("Statut")}</th><th class="c"></th>'
@@ -1225,6 +1255,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     corps.onclick = function(ev){
       var t = ev.target;
       if (!t || !t.closest) return;
+      var vb = t.closest('[data-vue]');
+      if (vb) {
+        var c = vb.getAttribute('data-vue') === 'compact';
+        if (c !== COMPACT) {
+          COMPACT = c;
+          try { localStorage.setItem('sz-cmd-compact', COMPACT ? '1' : '0'); } catch (e) {}
+          F.page = 0; dessiner(); charger();
+        }
+        return;
+      }
       var st = t.closest('[data-st]');
       if (st) {
         var cle = st.getAttribute('data-st');

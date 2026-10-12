@@ -101,9 +101,9 @@ code{font:.77rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 .tinp{width:100%;padding:.32rem .5rem;font-size:.84rem}
 .reco-sec{border:1px solid var(--v09);border-radius:11px;margin-bottom:.7rem;overflow:hidden}
 .reco-head{display:flex;align-items:center;gap:.5rem;padding:.5rem .7rem;cursor:pointer;background:var(--f-carte)}
-.reco-head:hover{background:#1b2739}
+.reco-head:hover{background:var(--f-bande)}
 /* Survol de l'en-tete de recommandation. */
-html.jour .reco-head:hover{background:#efece4}
+html.jour .reco-head:hover{background:var(--f-bande)}
 .reco-head .caret{color:var(--tx2)}
 .reco-head .titre{font-weight:700;font-size:.86rem;flex:1}
 .reco-head .outils{display:flex;gap:.3rem}

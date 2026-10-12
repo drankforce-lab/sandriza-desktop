@@ -107,11 +107,19 @@ tbody tr.coche td{background:rgba(var(--or-rgb),.1)}
 td.c,th.c{width:2rem;text-align:center}
 /* LA BARRE SUR DEUX RANGEES (2026-10-12) : les filtres en haut ; dessous, le compte a gauche et les
    gestes a droite (bascule d affichage, lot, marges, nouveau produit). Une seule rangee ecrasait la recherche. */
-.rf-tb{flex-wrap:wrap!important;row-gap:.65rem!important}
-.rf-tb>.rf-rch{flex:1 1 16rem;min-width:12rem}
-.rf-tb>.rf-droite{flex:1 1 100%;display:flex;align-items:center;gap:.5rem;margin-left:0;
-  padding-top:.65rem;border-top:1px solid var(--v07)}
-.rf-tb>.rf-droite>.dt{margin-right:auto}
+/* ➡ DE RETOUR SUR UNE SEULE LIGNE (2026-10-12, sa demande). La recherche cede la place en premier ; sous
+   1240 px (fenetre detachee) la barre repasse sur deux lignes. */
+.rf-tb{flex-wrap:nowrap!important}
+.rf-tb>.rf-rch{flex:1 1 11rem;min-width:8rem}
+.rf-tb>.rf-droite{flex:0 0 auto;display:flex;align-items:center;gap:.4rem;margin-left:auto}
+.rf-tb>.rf-droite>.dt{margin-right:.3rem;white-space:nowrap}
+/* Pour tenir sur une ligne : la bascule en icones seules (le libelle reste dans l infobulle et pour le
+   lecteur d ecran), et des menus deroulants un peu plus etroits. */
+.rf-droite .vue-bascule .tx{display:none}
+.rf-droite .vue-bascule button{padding:0 .6rem}
+.rf-tb select{max-width:9.5rem}
+@media (max-width:1500px){.rf-tb>.rf-droite>.dt{display:none}.rf-tb select{max-width:8.5rem}.rf-tb>.rf-rch{min-width:7rem}}
+@media (max-width:1240px){.rf-tb{flex-wrap:wrap!important;row-gap:.5rem!important}}
 /* Les boutons de la barre : meme hauteur que la recherche, libelle net. */
 .rf-droite>button{height:2.4rem;padding:0 .95rem;border-radius:10px;font-weight:600;font-size:.82rem}
 /* L AFFICHAGE COMPACT (2026-10-12, le meme que l Inventaire) : une ligne par produit, nom et categorie
@@ -362,10 +370,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '<span class="rf-droite"><span class="dt">' + (D.total || 0) + ' '
       + (D.total > 1 ? '${T("produits")}' : '${T("produit")}') + '</span>'
       + '<span class="vue-bascule" role="group" aria-label="${T("Affichage de la liste")}">'
-      +   '<button type="button" data-vue="detail" aria-pressed="' + (!COMPACT) + '" class="' + (!COMPACT ? 'on' : '') + '" title="${T("Affichage détaillé")}">'
-      +     '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="2.5" width="12" height="4.5" rx="1.2"/><rect x="2" y="9" width="12" height="4.5" rx="1.2"/></svg>${T("Détaillé")}</button>'
-      +   '<button type="button" data-vue="compact" aria-pressed="' + COMPACT + '" class="' + (COMPACT ? 'on' : '') + '" title="${T("Affichage compact : une ligne par produit, plus de produits par page")}">'
-      +     '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3.5h12M2 6.5h12M2 9.5h12M2 12.5h12"/></svg>${T("Compact")}</button>'
+      +   '<button type="button" data-vue="detail" aria-label="${T("Affichage détaillé")}" aria-pressed="' + (!COMPACT) + '" class="' + (!COMPACT ? 'on' : '') + '" title="${T("Affichage détaillé")}">'
+      +     '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="2.5" width="12" height="4.5" rx="1.2"/><rect x="2" y="9" width="12" height="4.5" rx="1.2"/></svg><span class="tx">${T("Détaillé")}</span></button>'
+      +   '<button type="button" data-vue="compact" aria-label="${T("Affichage compact : une ligne par produit, plus de produits par page")}" aria-pressed="' + COMPACT + '" class="' + (COMPACT ? 'on' : '') + '" title="${T("Affichage compact : une ligne par produit, plus de produits par page")}">'
+      +     '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3.5h12M2 6.5h12M2 9.5h12M2 12.5h12"/></svg><span class="tx">${T("Compact")}</span></button>'
       + '</span>'
       + (D.peutVenteFinale && !LOT ? '<button id="p-lot" title="${T("Appliquer ou retirer la vente finale sur plusieurs produits à la fois")}">${T("Vente finale en lot")}</button>' : '')
       + '<button id="p-marges" title="${T("Comparer les marges en tenant compte des coûts numériques (photos, IA, 3D)")}">${T("Vérifier mes marges")}</button>'
