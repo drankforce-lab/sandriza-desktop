@@ -145,6 +145,7 @@ button.eclair{display:inline-flex;align-items:center;justify-content:center;widt
   border-radius:9px;border:1px solid rgba(201,169,126,.6);background:rgba(201,169,126,.2);color:var(--tx-or);cursor:pointer}
 button.eclair svg{width:16px;height:16px;fill:currentColor}
 button.eclair:hover:not(:disabled){background:#c9a97e;color:#1a1208;border-color:#c9a97e}
+html.jour button.eclair{color:#6b5940}
 button.eclair:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(1)}
 /* Une ligne recente s ouvre au clic : la main le dit (le survol vient du socle). */
 tbody tr.ouvrable{cursor:pointer}
