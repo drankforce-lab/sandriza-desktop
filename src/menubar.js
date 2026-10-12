@@ -32,6 +32,8 @@ function pageDetachee(desc) {
   const menus = desc.menus || [];
   const css = desc.cssRail || '';
   const sombre = !!desc.sombre;
+  // Le jeu de couleurs du poste (Carbone…) : la feuille du site le lit sur data-sz-th (2026-10-12).
+  const th = String(desc.theme || 'carbone').replace(/[^a-z]/g, '');
 
   return `<!doctype html><html lang="${LANG()}"><head><meta charset="utf-8">
 <title>Menu — Administration Sandriza</title>
@@ -56,7 +58,7 @@ body{background:var(--sz-bg,#131b2a)}
   border-top:1px solid var(--sz-bord);margin-top:auto}
 ${css}
 </style></head><body>
-<div id="sz-menubar" class="${sombre ? 'sz-sombre' : ''}"></div>
+<div id="sz-menubar" class="${sombre ? 'sz-sombre' : ''}" data-sz-th="${th}"></div>
 <script>
 (function(){
   var D = ${JSON.stringify({ menus, version: desc.version || '' })};
@@ -76,7 +78,7 @@ ${css}
   }
 
   function panneau(items){
-    var pan=document.createElement('div'); pan.className='sz-panneau';
+    var pan=document.createElement('div'); pan.className='sz-panneau${sombre ? ' sz-sombre' : ''}'; pan.setAttribute('data-sz-th','${th}');
     items.forEach(function(it){
       if(it.sub){
         // Sous-groupe (Configuration > Apparence...) : on aplatit d'un cran,
@@ -148,6 +150,8 @@ function pagePanneau(desc) {
   const menus = desc.menus || [];
   const css = desc.cssRail || '';
   const sombre = !!desc.sombre;
+  // Le jeu de couleurs du poste (Carbone…) : la feuille du site le lit sur data-sz-th (2026-10-12).
+  const th = String(desc.theme || 'carbone').replace(/[^a-z]/g, '');
 
   /* ⚠ TOUS LES MENUS SONT CONSTRUITS D'AVANCE, UNE FOIS. La première version
      rechargeait la page a CHAQUE survol d'un bouton de la barre — c'était le
@@ -209,7 +213,7 @@ ${css}
 
   var rangee=document.createElement('div'); rangee.id='rangee';
   var sous=document.createElement('div'); sous.id='sous';
-  sous.className='sz-panneau${sombre ? ' sz-sombre' : ''}';
+  sous.className='sz-panneau${sombre ? ' sz-sombre' : ''}'; sous.setAttribute('data-sz-th','${th}');
 
   function mesurer(){
     // + les 7 px de marge transparente de chaque cote (l ombre y respire).
@@ -292,7 +296,7 @@ ${css}
   var panneaux = {};
   D.menus.forEach(function(m){
     var pan=document.createElement('div');
-    pan.className='sz-panneau${sombre ? ' sz-sombre' : ''}';
+    pan.className='sz-panneau${sombre ? ' sz-sombre' : ''}'; pan.setAttribute('data-sz-th','${th}');
     pan.style.display='none';
     if (m.entete) pan.appendChild(enteteCompte(m.entete));
     (m.items||[]).forEach(function(it){ pan.appendChild(entree(it, false)); });

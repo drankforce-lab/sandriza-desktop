@@ -6846,7 +6846,7 @@ ipcMain.on('menu:panneau', (e, label, x, y, ancrage) => {
        APRÈS avoir ouvert un menu. */
     panneauWin.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(pagePanneau({
       menus: _trItems(_menusLangue()),
-      cssRail: _modele.cssRail || '', sombre: !!_modele.sombre,
+      cssRail: _modele.cssRail || '', sombre: !!_modele.sombre, theme: _themeCouleur(),
     })));
   } else {
     montrer();
@@ -7417,7 +7417,7 @@ const majPalette = () => {
     menus: _trItems(_sansPseudo(_menusLangue())),
     version: app.getVersion(),
     taille: cfg.menuTaille,
-    sombre: !!_modele.sombre,
+    sombre: !!_modele.sombre, theme: _themeCouleur(),
     // ⚠ La feuille de style vient DU SITE, avec le modèle. La coquille n'en
     // tient plus de copie : celle qu'elle avait a dérivé (emojis absents,
     // espacements différents), et deux menus censés être le même ne se

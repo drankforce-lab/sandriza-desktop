@@ -131,7 +131,7 @@ html.jour .direct{color:#22663a}
 .fil{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:6px;overflow:hidden}
 .cmd{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.4rem .55rem;border-radius:10px;background:var(--v03);
   border:1px solid var(--v07);cursor:pointer}
-.cmd:hover{border-color:rgba(var(--or-rgb),.45)}
+.cmd:hover{border-color:rgba(var(--or-rgb),.45);background:linear-gradient(90deg,rgba(var(--or-rgb),.12),var(--v03) 65%)}
 .cmd.neuve{animation:tb-arrive .7s cubic-bezier(.2,.8,.2,1);border-color:rgba(34,197,94,.55)}
 @keyframes tb-arrive{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:none}}
 .cmd.prio{box-shadow:inset 3px 0 0 var(--tx-att)}
@@ -148,8 +148,9 @@ html.jour .direct{color:#22663a}
 .cmd .m{text-align:right;flex:0 0 auto}
 .cmd .m b{font-size:.84rem;font-variant-numeric:tabular-nums;white-space:nowrap}
 .cmd .m div{font-size:.66rem;color:var(--tx3);white-space:nowrap}
-/* Prioritaire : un seul signe, plus de pastille de texte (2026-10-12, sa demande : « ça prend beaucoup d espace »). */
-.prio-pill{flex:0 0 auto;font-size:.8rem;line-height:1}
+/* Prioritaire : un « ! » dans un cercle jaune (2026-10-12, sa demande) — dessine en CSS, pas un emoji : il garde sa couleur. */
+.prio-pill{flex:0 0 auto;display:inline-grid;place-items:center;width:1.05rem;height:1.05rem;border-radius:50%;
+  background:#fbbf24;color:#1a1208;font-size:.72rem;font-weight:900;line-height:1;box-shadow:0 0 0 2px rgba(251,191,36,.22)}
 .cadslot{display:inline}
 button.eclair{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:1.9rem;height:1.9rem;padding:0;
   border-radius:8px;border:1px solid rgba(var(--or-rgb),.6);background:rgba(var(--or-rgb),.2);color:var(--tx-or)}
@@ -183,10 +184,14 @@ html.jour .voile{background:rgba(20,24,30,.35)}
 /* Chaque ligne est un LIEN vers l endroit ou ces elements sont listes (2026-10-12, sa demande). */
 .details .r{display:flex;justify-content:space-between;align-items:center;gap:.4rem;padding:.24rem .3rem;margin:0 -.3rem;border-bottom:1px solid var(--v07);
   font-size:.82rem;cursor:pointer;border-radius:6px}
-.details .r:hover{background:var(--v05)}
-.details .r:hover span{text-decoration:underline;text-underline-offset:2px}
-.details .r b::after{content:"›";margin-left:.4rem;color:var(--tx3);font-weight:400}
-.inv>div:hover{border-color:var(--or)}
+.details .r b::after{content:"›";display:inline-block;margin-left:.4rem;color:var(--tx3);font-weight:400;transition:transform .25s ease,color .25s ease}
+/* LES SURVOLS DU THEME (2026-10-12, sa demande : « sans soulignement, plus stylés, avec fondu ») : un voile
+   dans l accent du jeu de couleurs qui s estompe vers la droite, un filet a gauche, la fleche qui glisse. */
+.details .r,.inv>div,.cmd{transition:background .28s ease,box-shadow .28s ease,border-color .28s ease}
+.details .r:hover{background:linear-gradient(90deg,rgba(var(--or-rgb),.18),rgba(var(--or-rgb),.03) 70%,transparent);
+  box-shadow:inset 3px 0 0 var(--or)}
+.details .r:hover b::after{transform:translateX(3px);color:var(--or)}
+.inv>div:hover{border-color:rgba(var(--or-rgb),.55);background:linear-gradient(160deg,rgba(var(--or-rgb),.14),rgba(var(--or-rgb),.02) 75%)}
 .details .r:last-child{border-bottom:0}
 .details .r b{font-variant-numeric:tabular-nums}
 .details .r.alerte,.details .r.alerte b{color:var(--tx-err)}
@@ -417,7 +422,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           var ton = { delivered: 'vert', shipped: 'bleu', confirmed: 'bleu', verification: 'bleu', pending: 'ambre', preparing: 'ambre', cancelled: 'rouge' }[c.statut] || '';
           return '<div class="cmd' + (c.prioritaire ? ' prio' : '') + (NEUVES[c.oid] ? ' neuve' : '') + '" data-ligne="' + esc(c.oid) + '" title="${T("Ouvrir la commande")}">'
             + '<div class="t"><b><span class="nm">' + esc(c.client || c.numero || '—') + '</span>'
-            + (c.prioritaire ? '<span class="prio-pill" role="img" title="${T("Prioritaire")} — ${T("Traitement prioritaire demandé par le client")}" aria-label="${T("Prioritaire")}"><span class="ic">❗</span></span>' : '')
+            + (c.prioritaire ? '<span class="prio-pill" role="img" title="${T("Prioritaire")} — ${T("Traitement prioritaire demandé par le client")}" aria-label="${T("Prioritaire")}">!</span>' : '')
             + '<span class="cadslot" data-cad="' + esc(c.oid) + '"></span></b>'
             + '<div class="a"><span class="rf-code">' + esc(c.numero) + '</span> <span class="rf-pill ' + ton + '">' + esc(szTd(c.statutLibelle || c.statut)) + '</span></div></div>'
             + '<div class="m"><b>' + fmt(c.total) + '</b><div>' + esc(ilYa(c.date)) + '</div></div>'
