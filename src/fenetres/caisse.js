@@ -71,9 +71,9 @@ body{background:var(--f-page);color:var(--tx);
 }
 
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:16px;
-  padding:.85rem 1rem;flex:0 0 auto;min-height:0}
-.carte.plein{flex:1 1 auto;display:flex;flex-direction:column;min-height:0;padding:.85rem 0 .4rem}
-.carte.plein > .entete{padding:0 1rem .55rem}
+  padding:.95rem 1.1rem;flex:0 0 auto;min-height:0}
+.carte.plein{flex:1 1 auto;display:flex;flex-direction:column;min-height:0;padding:.95rem 0 .45rem}
+.carte.plein > .entete{padding:0 1.1rem .6rem}
 .carte h2{margin:0 0 .55rem;font-size:.78rem;font-weight:700;color:var(--tx2);letter-spacing:.02em;
   display:flex;align-items:center;gap:.45rem}
 .carte h2 .lie{color:var(--tx-ok);font-size:.72rem;margin-left:auto}
@@ -160,7 +160,7 @@ input[type=checkbox]{width:auto;min-height:0}
 .rab-vente{display:grid;grid-template-columns:8.5rem 6.5rem minmax(0,1fr);gap:.5rem;align-items:end}
 
 /* Totaux : la ligne du total ne peut pas se confondre avec une taxe. */
-.tot .l{display:flex;justify-content:space-between;gap:1rem;padding:.08rem 0;font-size:.86rem}
+.tot .l{display:flex;justify-content:space-between;gap:1rem;padding:.16rem 0;font-size:.86rem}
 .tot .l > span:last-child{font-variant-numeric:tabular-nums}
 .tot .l.rab{color:var(--tx-or)}
 .tot .l.grand{margin-top:.35rem;padding-top:.4rem;border-top:1px solid var(--v12);font-size:1.22rem;font-weight:800}
@@ -337,6 +337,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   // ⚠ price reste le PRIX COURANT recu du site ; le pourcentage voyage a cote et
   // c est le site qui en tire le prix net (TOT.lignes).
   var LIGNES = [];
+  // La photo de chaque article, par produit : elle voyage A COTE des lignes (la vente ne la lit jamais).
+  var IMGS = {};
   var CLI = null;            // identifiant du compte lie, s il y en a un
   var TOT = null;            // dernier compte rendu de totaux, venu du SITE
   var TROUVES = [];          // fiches clientes trouvees, retenues entieres
@@ -480,8 +482,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var pct = parseFloat(String(l.rabaisPct || '').replace(',', '.')) || 0;
       var net = netDe(i);
       var h = '<div class="lg' + (EDIT === i ? ' ouverte' : '') + '">'
-        + '<div class="rf-prod"><span class="rf-av" aria-hidden="true">'
-        + esc(String(l.name || '?').trim().charAt(0).toUpperCase() || '?') + '</span><div style="min-width:0">'
+        + '<div class="rf-prod">' + szVignette(IMGS[l.productId], String(l.name || '?').trim(), '', l.name) + '<div style="min-width:0">'
         + '<div class="rf-nom">' + esc(l.name) + '</div>'
         + '<div class="rf-sous"><span>' + esc(det) + '</span>'
         + (l.sku ? '<span>·</span><span class="rf-code">' + esc(l.sku) + '</span>' : '')
@@ -544,6 +545,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // promotions en cours.
     appeler('caisse:article', [pid, taille, couleur]).then(function(r){
       if (!r.ok) { dire(expliquer(r.motif), 'err'); return; }
+      if (r.image) IMGS[r.ligne.productId] = r.image;
       LIGNES.push(r.ligne);
       apresAjout();
     });
