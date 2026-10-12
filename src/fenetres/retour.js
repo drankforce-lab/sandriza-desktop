@@ -214,6 +214,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     echange_indisponible:'${T("Échange impossible : l’article n’est plus disponible.")}',
     liberation_echouee: '${T("La taille réservée n’a pas pu être libérée — réessayez.")}',
     raison_requise:     '${T("Une raison est requise pour chaque article non remis en inventaire.")}',
+    plafond_depasse: '${T("Ce remboursement dépasserait ce qui a été payé (ou les frais retenus). Rien n’a été remboursé.")}',
+    commande_modifiee: '${T("La commande vient de recevoir un autre remboursement. Rouvrez-la pour voir le solde à jour ; rien n’a été remboursé.")}',
+    droit_insuffisant: '${T("Le serveur refuse : votre rôle ne permet pas ce geste.")}',
+    base_injoignable: '${T("La base de données ne répond pas. Rien n’a été remboursé — réessayez.")}',
+    commande_introuvable: '${T("Commande introuvable sur le serveur.")}',
+    square_indisponible: '${T("Aucun paiement Square lié à cette commande.")}',
     montant_invalide:   '${T("Montant du remboursement invalide.")}',
     etiquette_absente:  '${T("Aucune étiquette générée pour cette demande.")}',
     /* Les motifs du RECOURS (reprendre l’étiquette chez Postes Canada). Chacun

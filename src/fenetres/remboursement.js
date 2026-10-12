@@ -180,6 +180,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     bloque: '${T("Trop de tentatives. Réessayez dans quelques minutes.")}',
     nip_bloque: '${T("Trop de tentatives. Réessayez dans quelques minutes.")}',
     nip_indisponible: '${T("Le code n’a pas pu être vérifié : le serveur n’a pas répondu.")}',
+    plafond_depasse: '${T("Ce remboursement dépasserait ce qui a été payé (ou les frais retenus). Rien n’a été remboursé.")}',
+    commande_modifiee: '${T("La commande vient de recevoir un autre remboursement. Rouvrez-la pour voir le solde à jour ; rien n’a été remboursé.")}',
+    droit_insuffisant: '${T("Le serveur refuse : votre rôle ne permet pas ce geste.")}',
+    base_injoignable: '${T("La base de données ne répond pas. Rien n’a été remboursé — réessayez.")}',
+    commande_introuvable: '${T("Commande introuvable sur le serveur.")}',
     echec: '${T("L’opération a échoué.")}'
   };
   function expliquer(r){

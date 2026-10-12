@@ -26,6 +26,12 @@
  */
 
 module.exports = {
+  'Ce remboursement dépasserait ce qui a été payé (ou les frais retenus). Rien n’a été remboursé.': 'This refund would exceed what was paid (or the retained fees). Nothing was refunded.',
+  'La commande vient de recevoir un autre remboursement. Rouvrez-la pour voir le solde à jour ; rien n’a été remboursé.': 'The order just received another refund. Reopen it to see the current balance; nothing was refunded.',
+  'Le serveur refuse : votre rôle ne permet pas ce geste.': 'The server refused: your role does not allow this action.',
+  'La base de données ne répond pas. Rien n’a été remboursé — réessayez.': 'The database is not responding. Nothing was refunded — try again.',
+  'Commande introuvable sur le serveur.': 'Order not found on the server.',
+  'Aucun paiement Square lié à cette commande.': 'No Square payment linked to this order.',
   /* ⚠ L EXEMPLE du champ de recherche. Il ouvrait un attribut sur une ligne et
      le fermait deux lignes plus bas : aucun releve ne le voyait — voir
      tools/banc-attribut-coupe.js. */
