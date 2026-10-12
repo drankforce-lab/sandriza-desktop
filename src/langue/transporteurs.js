@@ -159,6 +159,7 @@ module.exports = {
   'FedEx': 'FedEx',
   'UPS': 'UPS',
   'Canpar': 'Canpar',
+  'Intelcom': 'Intelcom',
 
   /* ── REFONTE FINE (2026-09-26) : l etat des secrets en pastille ── */
   'Enregistré': 'Saved',

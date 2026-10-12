@@ -332,7 +332,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     sans_paiement: '${T("aucun paiement")}', paiement_inferieur: '${T("montant payé inférieur au total")}',
     sous_plancher: '${T("montant trop bas pour les articles commandés")}', paiement_deja_utilise: '${T("paiement déjà rattaché à une autre commande")}',
     paiement_introuvable: '${T("paiement introuvable chez Square")}', commande_vide: '${T("commande vide")}',
-    verification_impossible: '${T("vérification impossible pour le moment")}'
+    verification_impossible: '${T("vérification impossible pour le moment")}',
+    // Commandes liées à une intention (phase B, 2026-10-11) : le serveur relit le paiement au cent près.
+    intention_invalide: '${T("intention de paiement absente ou déjà utilisée")}', commande_modifiee: '${T("commande modifiée après le calcul du total")}',
+    square_injoignable: '${T("Square injoignable — vérification reportée")}', base_injoignable: '${T("base de données injoignable — vérification reportée")}',
+    paiement_statut: '${T("paiement non complété chez Square")}', paiement_montant: '${T("montant payé différent du total calculé")}',
+    paiement_devise: '${T("paiement dans une autre devise que le dollar canadien")}', paiement_rembourse: '${T("paiement déjà remboursé")}',
+    paiement_lieu: '${T("paiement fait à un autre point de vente Square")}', paiement_en_trop: '${T("paiement inscrit sur une commande sans montant à payer")}',
+    carte_cadeau: '${T("carte-cadeau introuvable")}', carte_cadeau_solde: '${T("solde de la carte-cadeau insuffisant")}',
+    carte_cadeau_ecart: '${T("carte-cadeau déjà débitée d’un autre montant")}', carte_cadeau_ecriture: '${T("débit de la carte-cadeau non enregistré")}',
+    credit: '${T("crédit demandé sans compte client")}', credit_solde: '${T("crédit du compte insuffisant")}',
+    credit_ecart: '${T("crédit déjà débité d’un autre montant")}', credit_ecriture: '${T("débit du crédit non enregistré")}',
+    points: '${T("points demandés sans compte client")}', points_solde: '${T("points du compte insuffisants")}',
+    points_ecart: '${T("points déjà débités d’un autre nombre")}', points_ecriture: '${T("débit des points non enregistré")}'
   };
   function pvHtml(c){
     var v = c.paiementVerifie;
@@ -342,7 +354,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var motif = v && v.motif ? (PV_MOTIFS[v.motif] || esc(v.motif)) : '${T("pas encore vérifié")}';
     // Un vrai paiement est inscrit sur une commande refusée : vérifier À QUI il appartient avant de rembourser.
     var rbm = c.remboursementAVerifier && c.remboursementAVerifier.montant != null ? ' ' + esc(szArgent(c.remboursementAVerifier.montant)) : '';
-    var rb = c.remboursementAVerifier ? ' · <strong>${T("paiement")}' + rbm + ' ${T("à vérifier avant tout remboursement")}</strong>' : '';
+    var rb = c.rembourseAuto ? ' · <strong>${T("paiement remboursé automatiquement")}</strong>' : c.remboursementAVerifier ?' · <strong>${T("paiement")}' + rbm + ' ${T("à vérifier avant tout remboursement")}</strong>' : '';
     var annulee = c.statut === 'cancelled';
     return '<div style="margin-top:.45rem;padding:.5rem .65rem;border-radius:8px;border:1px solid ' + (annulee ? 'var(--tx-err)' : 'var(--tx-att)') + ';color:' + (annulee ? 'var(--tx-err)' : 'var(--tx-att)') + ';font-size:.82rem">'
       + '<strong>' + (annulee ? '${T("Commande refusée : paiement non vérifié")}' : '${T("Paiement NON vérifié — ne pas expédier")}') + '</strong><br>' + motif + rb + '</div>';
