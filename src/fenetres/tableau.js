@@ -417,7 +417,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           var ton = { delivered: 'vert', shipped: 'bleu', confirmed: 'bleu', verification: 'bleu', pending: 'ambre', preparing: 'ambre', cancelled: 'rouge' }[c.statut] || '';
           return '<div class="cmd' + (c.prioritaire ? ' prio' : '') + (NEUVES[c.oid] ? ' neuve' : '') + '" data-ligne="' + esc(c.oid) + '" title="${T("Ouvrir la commande")}">'
             + '<div class="t"><b><span class="nm">' + esc(c.client || c.numero || '—') + '</span>'
-            + (c.prioritaire ? '<span class="prio-pill" role="img" title="${T("Prioritaire")} — ${T("Traitement prioritaire demandé par le client")}" aria-label="${T("Prioritaire")}">❗</span>' : '')
+            + (c.prioritaire ? '<span class="prio-pill ic" role="img" title="${T("Prioritaire")} — ${T("Traitement prioritaire demandé par le client")}" aria-label="${T("Prioritaire")}">❗</span>' : '')
             + '<span class="cadslot" data-cad="' + esc(c.oid) + '"></span></b>'
             + '<div class="a"><span class="rf-code">' + esc(c.numero) + '</span> <span class="rf-pill ' + ton + '">' + esc(szTd(c.statutLibelle || c.statut)) + '</span></div></div>'
             + '<div class="m"><b>' + fmt(c.total) + '</b><div>' + esc(ilYa(c.date)) + '</div></div>'
