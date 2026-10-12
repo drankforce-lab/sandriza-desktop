@@ -78,6 +78,8 @@ body{background:var(--f-page);color:var(--tx);
 .jeton b{color:var(--tx-ok)}
 .jeton.non b{color:var(--tx-jaune)}
 .tarifs{display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));gap:.6rem}
+/* Fenetre basse (detachee, 2026-10-12 : 14 px de trop). */
+@media (max-height:820px){.tarifs{gap:.4rem}.tarifs>*{padding-top:.4rem!important;padding-bottom:.4rem!important}.corps .aide,.corps .sous{margin-bottom:.15rem!important}}
 .tarif{background:var(--f-pill);border:1px solid var(--v07);border-radius:9px;padding:.55rem .7rem}
 .tarif .t{font-size:.76rem;font-weight:700}
 .tarif .r{font-size:.95rem;font-weight:700;color:var(--tx);margin:.1rem 0}

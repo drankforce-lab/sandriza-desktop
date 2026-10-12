@@ -46,14 +46,16 @@ body{background:var(--f-page);color:var(--tx);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
-.corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+.corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow:hidden;display:flex;flex-direction:column}
+/* 2026-10-12 : AUCUNE GLISSIERE. Les quatre angles sont fixes ; les MANNEQUINS (liste ouverte)
+   sont en PAGES mesurees (JS_PAGES du socle) : la grille prend la hauteur qui reste, par rangees. */
+.corps>*{flex:0 0 auto}
+.corps>.mqs{flex:1 1 0;min-height:0;align-content:start}
 .intro{max-width:52rem;color:var(--tx2);font-size:.8rem;line-height:1.55;margin:0 0 1rem}
 .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));gap:1rem}
 .slot{display:flex;flex-direction:column;gap:.35rem}
 .slot .lbl{font-size:.7rem;font-weight:700;color:var(--tx-bleute);text-transform:uppercase;letter-spacing:.05em;text-align:center}
-.cadre{aspect-ratio:3/4;max-height:max(10rem,calc(100vh - 31rem));border:1.5px dashed var(--v12);border-radius:9px;cursor:pointer;position:relative;
+.cadre{aspect-ratio:3/4;max-height:max(10rem,calc(100vh - 33.5rem));border:1.5px dashed var(--v12);border-radius:9px;cursor:pointer;position:relative;
   overflow:hidden;background:var(--f-champ);transition:border-color .15s;display:flex;align-items:center;justify-content:center}
 .cadre:hover{border-color:#c9a97e}
 .cadre.ro{cursor:default;opacity:.7}
@@ -116,7 +118,7 @@ function pageModeles() {
 
   <div class="sect"><h2>${T("Mannequins (habillage IA)")}</h2><span class="tr"></span></div>
   
-  <div class="mqs" id="mqs"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
+  <div class="mqs" id="mqs" data-pages="modeles-mannequins"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 </div>
 <input type="file" id="fichier" accept="image/*" style="display:none">
 <input type="file" id="fichier-mq" accept="image/*" style="display:none">
@@ -149,6 +151,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
+
+  /* ⚠ L ELEMENT AJOUTE DOIT SE VOIR : les mannequins sont en pages, et le socle
+     revient a la page 1 quand le nombre change. On pagine tout de suite, on repart
+     de la premiere page, puis on avance (borne) jusqu a ce qu il paraisse. */
+  function montrerNouveau(el){
+    if (!el || typeof szPagesAjuster !== 'function') return;
+    var c = el.closest('[data-pages]'); if (!c) return;
+    var it = el; while (it.parentNode && it.parentNode !== c && it.parentNode.tagName !== 'TBODY') it = it.parentNode;
+    try { szPagesAjuster(c); } catch (e) { return; }
+    if (it.style.display !== 'none') return;
+    var bouton = function(sens){
+      var p = c.nextElementSibling;
+      var b = (p && p.classList.contains('sz-pages')) ? p.querySelector('[data-szpg="' + sens + '"]') : null;
+      return (b && !b.disabled) ? b : null;
+    };
+    var b0;
+    for (var m = 0; m < 200 && (b0 = bouton('-1')); m++) b0.click();
+    for (var n = 0; n < 200 && it.style.display === 'none'; n++) {
+      var b1 = bouton('1');
+      if (!b1) break;
+      b1.click();
+    }
+  }
 
   var MOTIFS = {
     session:            '${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
@@ -326,7 +351,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       dire('${T("Téléversement…")}');
       appeler('config:mannequins:ajouter', [{ nom: nom, dataUrl: String(fr.result || '') }]).then(function(r){
         OCCUPE_MQ = false;
-        if (r && r.ok) { DM = r; ROM = !r.peutModifier; dessinerMq(); dire('${T("Mannequin ajouté.")}', 'bon'); }
+        if (r && r.ok) {
+          DM = r; ROM = !r.peutModifier; dessinerMq();
+          // Le mannequin neuf (juste avant la tuile d ajout) : sa page est ouverte.
+          var mqs = grilleMq.querySelectorAll('.mq'), dern = null;
+          for (var k = 0; k < mqs.length; k++) if (!mqs[k].querySelector('#mq-plus')) dern = mqs[k];
+          montrerNouveau(dern);
+          dire('${T("Mannequin ajouté.")}', 'bon');
+        }
         else dire(expliquer(r), 'err');
       });
     };

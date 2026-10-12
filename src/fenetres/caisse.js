@@ -112,7 +112,9 @@ input[type=checkbox]{width:auto;min-height:0}
 .res .vars button .q{color:var(--tx2)}
 
 /* ── LES ARTICLES : une ligne par article, le rabais visible sur la ligne. */
-.lignes{flex:1 1 auto;min-height:0;overflow-y:auto;padding:0 .5rem}
+/* Les articles de la vente en PAGES (2026-10-12, << aucun scroll bar >>) ; data-pages-fin : l article qu on
+   vient de scanner (ajoute en bas) est toujours a l ecran. */
+.lignes{flex:1 1 auto;min-height:0;overflow:hidden;padding:0 .5rem}
 .lg{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;align-items:center;gap:.8rem;
   padding:.6rem .5rem;border-top:1px solid var(--v06);border-radius:10px}
 .lg:first-child{border-top:0}
@@ -264,7 +266,7 @@ function pageCaisse(mode) {
     </div>
     <div class="carte plein">
       <div class="entete"><h2>${T("Articles")} <span class="compte num" id="nb-art"></span></h2></div>
-      <div class="lignes" id="lignes"></div>
+      <div class="lignes" id="lignes" data-pages="caisse-lignes" data-pages-fin></div>
     </div>
     <div class="carte tot" id="totaux"></div>
   </div>

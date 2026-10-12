@@ -143,7 +143,9 @@ body{background:var(--f-page);color:var(--tx);
    a chaque fois, une pastille allumee se reconnait. */
 /* L etat actif en OR, l accent unique (2026-10-04) — il etait bleu vif. */
 .btn.on{background:#c9a97e;border-color:#c9a97e;color:#17202c;font-weight:650}
-.insp .lst{flex:0 0 auto;max-height:26%;overflow-y:auto;border-bottom:1px solid var(--v08)}
+/* Les calques en PAGES (2026-10-12, << aucun scroll bar >>) : la boite garde son plafond de 26 %, ce qui
+   depasse passe en page suivante (data-pages, JS_PAGES du socle). */
+.insp .lst{flex:0 0 auto;max-height:26%;overflow:hidden;border-bottom:1px solid var(--v08)}
 .insp .prop{flex:1 1 auto;overflow-y:auto;padding:.7rem .8rem}
 /* ⚠ AUCUNE BARRE DE DEFILEMENT DANS UN MODULE (sa demande du 2026-09-26) : les
    reglages du modele depassaient de ~300 px dans une colonne de 340. Le plan a
@@ -152,6 +154,11 @@ body{background:var(--f-page);color:var(--tx);
 .insp{flex-basis:clamp(340px,40%,600px)}
 .insp .prop{columns:2 15rem;column-gap:1rem}
 .insp .prop>*{break-inside:avoid}
+/* Fenetre detachee (1080 px, 2026-10-12) : a 40 % l inspecteur n a plus la place de ses deux colonnes — le
+   texte filait en colonnes vers la droite (843 px hors cadre). Il prend plus de place sous 1240 px, et sa barre
+   d outils peut passer sur deux lignes plutot que sortir du cadre. */
+@media (max-width:1240px){.insp{flex-basis:clamp(340px,54%,620px)}.outils{flex-wrap:wrap!important}
+  .insp .prop.grillee{columns:auto;display:grid;grid-template-columns:1fr 1fr;gap:.55rem 1rem;align-content:start}}
 .el{display:flex;align-items:center;gap:.45rem;padding:.34rem .7rem;cursor:pointer;
   border-bottom:1px solid var(--v04);font-size:.79rem}
 .el:hover{background:var(--v04)}
@@ -284,7 +291,7 @@ function pagePromoEditeur(id) {
   <div class="insp">
     <div class="outils" id="outils"></div>
     <div class="aides" id="aides"></div>
-    <div class="lst" id="lst"></div>
+    <div class="lst" id="lst" data-pages="promo-calques"></div>
     <div class="prop" id="prop"></div>
   </div>
 </div>
@@ -327,6 +334,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var plan = document.getElementById('plan');
   var lst = document.getElementById('lst');
   var prop = document.getElementById('prop');
+  /* Sous 1240 px, les blocs de reglages passent d un mur en colonnes (qui filait vers la droite) a une grille
+     paginee par rangees (data-pages, JS_PAGES du socle) ; au-dessus, le mur tient. */
+  function regimeProp(){
+    if (!prop) return;
+    var etroit = window.innerWidth < 1240;
+    if (etroit && !prop.hasAttribute('data-pages')) { prop.classList.add('grillee'); prop.setAttribute('data-pages', 'promo-reglages'); }
+    else if (!etroit && prop.hasAttribute('data-pages')) {
+      prop.classList.remove('grillee'); prop.removeAttribute('data-pages');
+      for (var i = 0; i < prop.children.length; i++) prop.children[i].style.display = '';
+      var pq = prop.nextElementSibling; if (pq && pq.classList.contains('sz-pages')) pq.parentNode.removeChild(pq);
+    }
+  }
+  regimeProp();
+  window.addEventListener('resize', regimeProp);
   var outils = document.getElementById('outils');
   var aides = document.getElementById('aides');
   var bEnr = document.getElementById('b-enr');

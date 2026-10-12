@@ -52,9 +52,14 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .ong button.actif{background:var(--f-page);border-color:var(--v12);color:var(--tx);font-weight:600}
 .ro{flex:0 0 auto;margin:.55rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.45rem .7rem;font-size:.78rem}
-.corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+.corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow:hidden;display:flex;flex-direction:column}
+/* Aucune glissiere (2026-10-12) : le corps est une colonne bornee, la grille
+   prend la hauteur qui reste et la carte << Qui repond >> s etire jusqu en bas :
+   c est cette hauteur-la qui decide combien d agents tiennent par page
+   (data-pages, JS_PAGES du socle). */
+.corps>#corps{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+.corps>#corps>.grille{flex:1 1 0;min-height:0;grid-auto-rows:minmax(0,1fr)}
+.carte.qui{align-self:stretch;min-height:0}
 .quoi{font-size:.79rem;color:var(--tx2);line-height:1.6;margin:0 0 1rem}
 .quoi b{color:var(--tx)}
 .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(28rem,1fr));gap:.9rem;align-items:start}
@@ -220,7 +225,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        CARTE : ce sont les deux moities d une seule question — qui repond, et
        avec quel visage. Separees, la premiere laissait une carte presque vide
        a cote d une carte pleine, et rien ne disait qu elles s excluent. */
-    var hQui = '<div class="carte"><h2>${T("Qui répond")}</h2>'
+    var hQui = '<div class="carte qui sz-pagee"><h2>${T("Qui répond")}</h2>'
       + '<label class="champ"><span class="lbl">${T("Photo de l’agent fixe")}</span>'
       + '<span class="rang">'
       + (d.photoAgent
@@ -233,7 +238,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<input type="file" id="c-photo-f" accept="image/*" hidden>'
       + '<label class="champ" style="margin-bottom:.35rem"><span class="lbl">${T("Agents de la rotation")}</span></label>'
       + '<p class="quoi" style="margin:0 0 .6rem">${T("Chacun a son nom et sa photo. Décoché, un agent est sauté par la rotation sans être perdu.")}</p>'
-      + '<div id="c-agents"></div>'
+      + '<div id="c-agents" data-pages="chat-agents"></div>'
       + (RO ? '' : '<button class="b" type="button" id="c-agent-plus">${T("＋ Ajouter un agent")}</button>')
       + '<input type="file" id="c-agent-f" accept="image/*" hidden>'
       + '</div>';
@@ -292,6 +297,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     for (var m=0;m<s.length;m++) s[m].onclick = function(){ AGENTS.splice(+this.getAttribute('data-ag-suppr'),1); dessinerAgents(); dire('${T("Agent retiré — pensez à enregistrer.")}', 'att'); };
     var im = z.querySelectorAll('[data-ag-imp]');
     for (var q=0;q<im.length;q++) im[q].onclick = function(){ choisirPhoto(+this.getAttribute('data-ag-imp')); };
+  }
+
+  /* ⚠ L AGENT AJOUTE DOIT SE VOIR : le socle revient a la page 1 quand le
+     nombre change. On pagine tout de suite, puis on avance page par page
+     (borne) jusqu a ce qu il paraisse. */
+  function montrerNouveau(e){
+    if (!e || typeof szPagesAjuster !== 'function') return;
+    var c = e.closest('[data-pages]'); if (!c) return;
+    var it = e; while (it.parentNode && it.parentNode !== c && it.parentNode.tagName !== 'TBODY') it = it.parentNode;
+    try { szPagesAjuster(c); } catch (x) { return; }
+    for (var n = 0; n < 200 && it.style.display === 'none'; n++) {
+      var p = c.nextElementSibling;
+      var b = (p && p.classList.contains('sz-pages')) ? p.querySelector('[data-szpg="1"]') : null;
+      if (!b || b.disabled) break;
+      b.click();
+    }
   }
 
   /* ── PHOTOS ────────────────────────────────────────────────────────────────
@@ -425,7 +446,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var b = el('c-enr'); if (b) b.onclick = enregistrerWidget;
     var pl = el('c-agent-plus');
     if (pl) pl.onclick = function(){ AGENTS.push({ nom:'', photo:'', actif:true }); dessinerAgents();
-      var z = el('c-agents'), der = z && z.querySelector('.agent:last-child .nom'); if (der) der.focus(); };
+      var z = el('c-agents'), der = z && z.querySelector('.agent:last-child .nom'); if (der) { montrerNouveau(der); der.focus(); } };
     var imp = el('c-photo-imp'); if (imp) imp.onclick = function(){ choisirPhoto(-1); };
     var f1 = el('c-photo-f'); if (f1) f1.onchange = function(){ lirePhoto(this); };
     var f2 = el('c-agent-f'); if (f2) f2.onchange = function(){ lirePhoto(this); };

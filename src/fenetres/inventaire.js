@@ -109,7 +109,9 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
 .menu .liste input{width:auto}
 
 /* ── La grille des variantes ──────────────────────────────────────────────── */
-.grille{flex:1 1 auto;min-height:0;overflow-y:auto}
+/* 2026-10-12 : plus de glissiere — toutes les grilles sont en pages (data-pages, JS_PAGES du socle) ; la page
+   << Auto >> du serveur tient deja, et une taille fixe choisie (50, 100…) se repagine ici sans defiler. */
+.grille{flex:1 1 auto;min-height:0;overflow:hidden}
 .grille::-webkit-scrollbar{width:8px}
 .grille::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 table{width:100%;border-collapse:collapse;font-size:.86rem}
@@ -369,6 +371,8 @@ html.jour .gp .cat.tc{color:color-mix(in srgb,var(--cc,#6d7f96) 55%,black);
    la place en premier (flex 1 1, plancher 8rem) ; tout le reste garde sa taille
    naturelle et ne se coupe pas. Aucun element retire. */
 .tb2{gap:.4rem;margin-bottom:.2rem;flex-wrap:nowrap}
+/* Fenetre detachee (2026-10-12) : sous 1240 px la barre passe sur deux lignes plutot que sortir a droite. */
+@media (max-width:1240px){.tb2{flex-wrap:wrap;row-gap:.4rem}}
 .tb2 > *{flex:0 0 auto}
 .tb2 .rch{display:flex;align-items:center;gap:.5rem;flex:1 1 13rem;min-width:8rem;max-width:17rem;height:2.4rem;padding:0 .7rem;
   background:var(--f-0f1826);border:1px solid var(--v14);border-radius:10px;color:var(--tx2)}
@@ -693,7 +697,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     if (!lot.length) {
       h += '<div class="vide">${T("Aucune variante ne correspond aux filtres.")}</div>';
     } else {
-      h += '<div class="grille"><table><thead><tr>'
+      h += '<div class="grille" data-pages="inventaire-variantes"><table><thead><tr>'
         + '<th>${T("Variante")}</th><th>${T("Code")}</th><th class="c">${T("Qté")}</th>'
         + '<th class="c">${T("Seuil")}</th><th>${T("Emplacement")}</th><th class="c"></th>'
         + '</tr></thead><tbody>';
@@ -771,9 +775,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     var tr = g.querySelector('tbody tr');
     var hL = tr ? tr.offsetHeight : 0;
     if (!(hL > 0)) hL = 34;
+    /* 2026-10-12 : les lignes sont des cartes ESPACEES (border-spacing) — sans l ecart, Auto demandait une
+       ligne de trop et la derniere etait coupee (vu en fenetre detachee). Meme calcul que szAutoPagination. */
+    try { var tbE = g.querySelector('table'); var esp = tbE ? parseFloat(String(getComputedStyle(tbE).borderSpacing || '').split(' ')[1]) : 0; if (esp > 0) hL += esp; } catch (e) {}
     var dispo = g.clientHeight - ((th && th.offsetHeight) || 30);
     if (!(dispo > 0)) return; // le banc mesure NaN : on ne touche a rien
-    var n = Math.max(3, Math.floor(dispo / hL));
+    var n = Math.max(1, Math.floor(dispo / hL));
     /* ⚠⚠ UNE SEULE CORRECTION PAR DESSIN — SANS CE VERROU, LA FENÊTRE SE TUE.
        Le chemin est court et il boucle sur lui-même : dessiner() ->
        dessinerProduit() -> grilleAutoAjuste() -> dessiner(). Il ne s arrête que
@@ -1074,7 +1081,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     if (!d.lignes.length) {
       h += '<div class="vide">${T("Aucun produit trouvé.")}</div>';
     } else {
-      h += '<div class="grille gp"><table><thead><tr>'
+      h += '<div class="grille gp" data-pages="inventaire-produits"><table><thead><tr>'
         + (LOT ? '<th class="c" style="width:2rem"></th>' : '')
         + '<th>${T("Produit")}</th><th>${T("Variantes")}</th>'
         + '<th>${T("Inventaire")}</th><th style="text-align:right">${T("Actions")}</th>'
@@ -1714,7 +1721,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
       + (d.peutAjouter ? '<button class="mini" id="lx-ajouter"' + (LX_EDIT && LX_EDIT.id === '' ? ' disabled' : '')
         + '>${T("+ Ajouter un lieu")}</button>' : '')
       + '</h2>';
-    h += '<div class="grille"><table><thead><tr>'
+    h += '<div class="grille" data-pages="inventaire-lieux"><table><thead><tr>'
       + '<th>${T("Lieu")}</th><th colspan="2">${T("Adresse")}</th><th class="c">${T("Actions")}</th>'
       + '</tr></thead><tbody>';
     if (LX_EDIT && LX_EDIT.id === '') h += ligneLieuEdition(null);
@@ -1769,7 +1776,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
         .join(' ').toLowerCase().indexOf(q) >= 0;
     });
 
-    h += '<div class="grille"><table><thead><tr>'
+    h += '<div class="grille" data-pages="inventaire-casiers"><table><thead><tr>'
       + '<th>${T("Lieu")}</th><th>${T("Casier")}</th><th>${T("Section")}</th><th>${T("Référence")}</th>'
       + '<th class="c">${T("Variantes assignées")}</th><th class="c">${T("Actions")}</th>'
       + '</tr></thead><tbody>';

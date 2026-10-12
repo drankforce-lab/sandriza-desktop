@@ -508,4 +508,6 @@ module.exports = {
   'Panier abandonné — séquence en 3 temps': 'Abandoned cart — 3-step sequence',
   '1 h : rappel · 24 h : avis et rareté · 72 h : 10 % pendant 48 h': '1 h: reminder · 24 h: reviews and scarcity · 72 h: 10% for 48 h',
   'Séquence créée, en pause : relisez-la puis activez-la.': 'Sequence created, paused: review it then activate it.',
+  // 2026-10-12 : l apercu se pose par-dessus la colonne de droite, et se ferme par son bouton.
+  'Fermer l’aperçu': 'Close the preview',
 };

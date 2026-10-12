@@ -110,6 +110,9 @@ div.cmd > *{flex:0 0 auto}
    1400 px — la recherche descend jusqu a 3.5rem, et l ecart entre les pieces se resserre. */
 .cmd #p-q{flex:1 1 12rem;min-width:3.5rem;width:auto}
 div.cmd{gap:.35rem}
+/* Fenetre detachee (1080 px) : rien ne tient sur une ligne, meme la recherche au plus court — la barre passe
+   sur deux lignes plutot que sortir de 186 px a droite. Au-dessus de 1240 px, la ligne unique reste. */
+@media (max-width:1240px){div.cmd{flex-wrap:wrap;row-gap:.4rem}}
 .vues{display:inline-flex;gap:.25rem;margin-left:.2rem}
 .vues .vue{font:inherit;font-size:.78rem;height:2.1rem;padding:0 .7rem;border-radius:9px;
   border:1px solid var(--v10);background:var(--f-0f1826);color:var(--tx-gris2);cursor:pointer}

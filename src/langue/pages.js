@@ -289,4 +289,6 @@ module.exports = {
   "Onglet « Comment mesurer » (schémas)": "“How to measure” tab (diagrams)",
   "Calculateur « Trouvez votre taille »": "“Find your size” calculator",
   "Conversion US / EU…": "US / EU… conversion",
+  // 2026-10-12 : un guide a la fois ; la pastille d un guide sans nom porte son rang.
+  "Guide": "Chart",
 };

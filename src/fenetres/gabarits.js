@@ -35,11 +35,16 @@ body{background:var(--f-page);color:var(--tx);
 .tete .droite{margin-left:auto}
 .ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
-.corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+.corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow:hidden}
 /* ⚠ ANCRÉE = PLEINE PAGE : cartes en colonnes pour remplir la largeur. */
 .zone{columns:36rem;column-gap:1.1rem}
+/* Aucune glissiere (2026-10-12) : en LISTE, les deux cartes (gabarits,
+   attributions) sont cote a cote sur toute la hauteur qui reste, et chacune
+   pagine ses lignes (data-pages, JS_PAGES du socle). La grille l emporte sur la
+   colonne que le socle pose sur un #corps niche (specificite plus forte). */
+.corps>#corps.zone.lv{display:grid;columns:auto;gap:1.1rem;
+  grid-template-columns:repeat(auto-fit,minmax(min(30rem,100%),1fr));grid-auto-rows:minmax(0,1fr)}
+.corps>#corps.zone.lv>.carte{margin:0;min-height:0}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:1rem 1.1rem;
   margin:0 0 1.1rem;break-inside:avoid;-webkit-column-break-inside:avoid}
 .carte.edit{border-color:#c9a97e}
@@ -230,7 +235,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function listeHtml(){
     var g = (D && D.gabarits) || [];
-    var h = '<div class="carte"><div class="stitre"><span class="ic">🎨</span>${T(" Gabarits disponibles")}</div><div class="sdesc">${T("Le style (couleurs, sous-titre, bannière) partagé par les courriels.")}</div>';
+    // Les gabarits en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
+    var h = '<div class="carte sz-pagee"><div class="stitre"><span class="ic">🎨</span>${T(" Gabarits disponibles")}</div><div class="sdesc">${T("Le style (couleurs, sous-titre, bannière) partagé par les courriels.")}</div>'
+      + '<div data-pages="gabarits-liste">';
     for (var i = 0; i < g.length; i++) {
       var t = g[i];
       h += '<div class="ligne"><div class="nom">' + esc(t.name)
@@ -244,12 +251,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + ((!RO && t.supprimable) ? ('<button class="b dgr" type="button" data-del="' + esc(t.id) + '">' + (DELCONF === t.id ? '${T("Confirmer ?")}' : '<span class="ic">🗑</span>${T(" Supprimer")}') + '</button>') : '')
         + '</div></div>';
     }
-    h += '</div>';
+    h += '</div></div>';
     // Attributions
     var fns = (D && D.fonctions) || [];
     var opts = g.map(function(t){ return { id: t.id, name: t.name }; });
-    h += '<div class="carte"><div class="stitre"><span class="ic">📋</span>${T(" Attribution par module / fonction")}</div><div class="sdesc">${T("Choisissez quel gabarit s’applique à chaque type de courriel.")}</div>';
-    h += '<table class="tbl"><thead><tr><th>${T("Module")}</th><th>${T("Fonction")}</th><th>${T("Gabarit")}</th></tr></thead><tbody>';
+    h += '<div class="carte sz-pagee"><div class="stitre"><span class="ic">📋</span>${T(" Attribution par module / fonction")}</div><div class="sdesc">${T("Choisissez quel gabarit s’applique à chaque type de courriel.")}</div>';
+    h += '<div data-pages="gabarits-attributions"><table class="tbl"><thead><tr><th>${T("Module")}</th><th>${T("Fonction")}</th><th>${T("Gabarit")}</th></tr></thead><tbody>';
     for (var j = 0; j < fns.length; j++) {
       var f = fns[j], cur = (D.attributions && D.attributions[f.key]) || 'default';
       /* ⚠ Meme motif que la matrice des droits : le module et la fonction sont
@@ -262,7 +269,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       sel += '</select>';
       h += '<tr><td class="mod">' + esc(szTd(f.module)) + '</td><td>' + esc(szTd(f.label)) + '</td><td>' + sel + '</td></tr>';
     }
-    h += '</tbody></table>';
+    h += '</tbody></table></div>';
     if (!RO) h += '<div style="margin-top:.8rem"><button class="prim" id="g-assign-save"><span class="ic">💾</span>${T(" Enregistrer les attributions")}</button></div>';
     return h + '</div>';
   }
@@ -270,9 +277,36 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessiner(){
     var av = document.getElementById('ro'); if (av) av.hidden = !RO;
     bnouveau.style.display = (EDIT === null && !RO) ? 'inline-block' : 'none';
+    corps.className = 'zone' + (EDIT === null ? ' lv' : '');
     corps.innerHTML = (EDIT === null) ? listeHtml() : editeurHtml();
     brancher();
     if (EDIT !== null) { majApercu(); if (chk('g-gif')) rafraichirGif(); }
+    // De retour a la liste : le gabarit qu on vient d ecrire ou de copier reste sous les yeux.
+    else if (VOIR) { montrerNouveau(corps.querySelector('[data-edit="' + VOIR + '"]')); }
+    VOIR = '';
+  }
+
+  /* ⚠ LE GABARIT AJOUTE DOIT SE VOIR : le socle revient a la page 1 quand le
+     nombre change. On pagine tout de suite, puis on avance page par page
+     (borne) jusqu a ce qu il paraisse. */
+  var VOIR = '';
+  function montrerNouveau(el){
+    if (!el || typeof szPagesAjuster !== 'function') return;
+    var c = el.closest('[data-pages]'); if (!c) return;
+    var it = el; while (it.parentNode && it.parentNode !== c && it.parentNode.tagName !== 'TBODY') it = it.parentNode;
+    try { szPagesAjuster(c); } catch (e) { return; }
+    for (var n = 0; n < 200 && it.style.display === 'none'; n++) {
+      var p = c.nextElementSibling;
+      var b = (p && p.classList.contains('sz-pages')) ? p.querySelector('[data-szpg="1"]') : null;
+      if (!b || b.disabled) break;
+      b.click();
+    }
+  }
+  // L id du gabarit neuf : celui qui n existait pas avant l ecriture.
+  function idNeuf(avant){
+    var g = (D && D.gabarits) || [];
+    for (var i = g.length - 1; i >= 0; i--) if (avant.indexOf(g[i].id) < 0) return g[i].id;
+    return '';
   }
 
   function brancher(){
@@ -294,7 +328,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var gif = document.getElementById('g-gif'); if (gif) gif.onchange = function(){ var w = document.getElementById('g-gifwrap'); if (w) w.style.display = this.checked ? 'block' : 'none'; if (this.checked) rafraichirGif(); };
     var gr = document.getElementById('g-gifrefr'); if (gr) gr.onclick = rafraichirGif;
     var sv = document.getElementById('g-save'); if (sv) sv.onclick = enregistrer;
-    var cn = document.getElementById('g-cancel'); if (cn) cn.onclick = function(){ EDIT = null; dessiner(); dire(''); };
+    var cn = document.getElementById('g-cancel'); if (cn) cn.onclick = function(){ VOIR = EDIT || ''; EDIT = null; dessiner(); dire(''); };
   }
 
   function majApercu(){
@@ -331,9 +365,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (RO || OCCUPE) return;
     if (!val('g-name').trim()) { dire('${T("Le nom du gabarit est requis.")}', 'err'); return; }
     occuper(true); dire('${T("Enregistrement…")}');
+    var avant = ((D && D.gabarits) || []).map(function(x){ return x.id; });
     appeler('config:gabarits:ecrire', [saisieEditeur()]).then(function(r){
       occuper(false);
-      if (r && r.ok) { adopter(r); EDIT = null; dessiner(); dire('${T("Gabarit enregistré.")}', 'bon'); }
+      if (r && r.ok) { adopter(r); VOIR = EDIT || idNeuf(avant); EDIT = null; dessiner(); dire('${T("Gabarit enregistré.")}', 'bon'); }
       else dire(expliquer(r), 'err');
     });
   }

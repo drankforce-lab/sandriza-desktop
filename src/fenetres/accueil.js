@@ -33,9 +33,9 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .tete .droite{margin-left:auto;display:flex;gap:.4rem}
 .ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
-.corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+.corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow:hidden}
+/* Aucune glissiere (2026-10-12) : la liste des blocs se pagine dans la hauteur
+   qui reste (data-pages, JS_PAGES du socle). */
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:1rem 1.1rem;margin:0 0 1rem}
 .carte.edit{border-color:#c9a97e}
 .stitre{font-size:.9rem;font-weight:700;color:var(--tx-bleute);margin:0 0 .2rem}
@@ -90,6 +90,9 @@ button.prim:disabled{opacity:.5;cursor:default}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
 .diapos-choix{display:flex;gap:.35rem;flex-wrap:wrap;margin:0 0 .6rem}
+/* Les pastilles des diapos : UNE rangee, les autres en pages (2026-10-12) — sans
+   borne, chaque diapo ajoutee repoussait le formulaire sous le pied. */
+.diapos-choix[data-pages]{max-height:2.2rem;align-content:flex-start}
 .diapos-choix button{font:inherit;font-size:.78rem;font-weight:600;padding:.32rem .75rem;border-radius:99px;
   border:1px solid var(--v12);background:var(--v05);color:var(--tx2);cursor:pointer}
 .diapos-choix button.on{background:#c9a97e;border-color:#c9a97e;color:#17202c}
@@ -188,8 +191,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   // ── LISTE DES BLOCS ───────────────────────────────────────────────────────
   function listeHtml(){
-    var h = '<div class="carte"><div class="stitre">${T("Ordre et visibilité")}</div>'
+    var h = '<div class="carte sz-pagee"><div class="stitre">${T("Ordre et visibilité")}</div>'
       + '<div class="sdesc">${T("↑ ↓ pour réorganiser · l’œil masque un bloc sans le supprimer · le crayon modifie le contenu.")}</div>';
+    // Les blocs en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
+    h += '<div data-pages="accueil-blocs">';
     BLOCS.forEach(function(b, i){
       h += '<div class="bloc' + (b.visible ? '' : ' off') + '">'
         + '<span class="em" aria-hidden="true">' + (ICOB[b.id] || ICOB._) + '</span>'
@@ -202,7 +207,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           + '<button class="b" type="button" data-down="' + esc(b.id) + '"' + (i===BLOCS.length-1?' disabled':'') + '>↓</button>')
         + '</div></div>';
     });
-    return h + '</div>';
+    return h + '</div></div>';
   }
 
   // ── ÉDITEUR ─────────────────────────────────────────────────────────────────
@@ -250,7 +255,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (!SLIDES.length) return '<div class="vide">${T("Aucune diapo.")}</div>';
     if (SEL >= SLIDES.length) SEL = SLIDES.length - 1;
     if (SEL < 0) SEL = 0;
-    var chips = '<div class="diapos-choix">' + SLIDES.map(function(d, i){
+    var chips = '<div class="diapos-choix" data-pages="accueil-diapos">' + SLIDES.map(function(d, i){
       return '<button type="button" data-sch="' + i + '" class="' + (i === SEL ? 'on' : '') + '">${T("Diapo ")}' + (i + 1)
         + (d.title ? ' · ' + esc(String(d.title).slice(0, 22)) : '') + '</button>'; }).join('') + '</div>';
     return chips + diapoHtml(SLIDES[SEL], SEL);
@@ -286,6 +291,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     breinit.hidden = RO || EDIT !== null;
     corps.innerHTML = (EDIT === null) ? listeHtml() : editeurHtml();
     brancher();
+    // Le bloc qu on vient de deplacer reste sous les yeux, meme s il change de page.
+    if (EDIT === null && VOIR) { montrerNouveau(corps.querySelector('[data-ed="' + VOIR + '"]')); }
+    VOIR = null;
+    if (EDIT === 'hero') montrerNouveau(corps.querySelector('.diapos-choix .on'));
+  }
+
+  /* ⚠ L ELEMENT AJOUTE (OU DEPLACE) DOIT SE VOIR : le socle revient a la page 1
+     quand le nombre change, et un deplacement peut l envoyer sur la page
+     voisine. On pagine tout de suite, puis on avance page par page (borne)
+     jusqu a ce qu il paraisse. */
+  var VOIR = null;
+  function montrerNouveau(el){
+    if (!el || typeof szPagesAjuster !== 'function') return;
+    var c = el.closest('[data-pages]'); if (!c) return;
+    var it = el; while (it.parentNode && it.parentNode !== c && it.parentNode.tagName !== 'TBODY') it = it.parentNode;
+    try { szPagesAjuster(c); } catch (e) { return; }
+    for (var n = 0; n < 200 && it.style.display === 'none'; n++) {
+      var p = c.nextElementSibling;
+      var b = (p && p.classList.contains('sz-pages')) ? p.querySelector('[data-szpg="1"]') : null;
+      if (!b || b.disabled) break;
+      b.click();
+    }
   }
 
   function brancher(){
@@ -315,7 +342,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function deplacer(id, dir){
     var i = BLOCS.findIndex(function(x){ return x.id===id; }); var ni=i+dir;
     if (i<0 || ni<0 || ni>=BLOCS.length) return;
-    var tmp=BLOCS[i]; BLOCS[i]=BLOCS[ni]; BLOCS[ni]=tmp;
+    var tmp=BLOCS[i]; BLOCS[i]=BLOCS[ni]; BLOCS[ni]=tmp; VOIR = id;
     BLOCS.forEach(function(b,k){ b.order = k; });   // renumérote l'ordre
     ecrire();
   }
@@ -348,6 +375,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var el = document.getElementById('a-slides'); if (el) el.innerHTML = slidesListHtml();
     var cn = document.getElementById('a-scount'); if (cn) cn.textContent = '(' + SLIDES.length + ')';
     brancher();
+    // La pastille choisie (neuve, deplacee ou voisine d une supprimee) reste visible.
+    montrerNouveau(corps.querySelector('.diapos-choix .on'));
   }
   function ajouterDiapo(){ lireDiapos(); SEL = SLIDES.length; SLIDES.push({ id:'s'+SLIDES.length+'_'+SLIDES.length, image:'', gradient:gradVal(SLIDES.length % Math.max(1,GRADS.length)), overlay:0.15, eyebrow:'', title:SZ_DONNEES.diapoTitre, subtitle:'', cta1Text:SZ_DONNEES.diapoBouton, cta1Href:'#shop', cta2Text:'', cta2Href:'' }); rafraichirDiapos(); }
   function bougerDiapo(i, dir){ lireDiapos(); var ni=i+dir; if(ni<0||ni>=SLIDES.length)return; var t=SLIDES[i]; SLIDES[i]=SLIDES[ni]; SLIDES[ni]=t; SEL = ni; rafraichirDiapos(); }

@@ -40,10 +40,13 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* 2026-10-12 : AUCUNE GLISSIERE. Les regles, les liaisons, les statistiques, les articles du
+   generateur et ceux de la boite << Associer >> sont en PAGES mesurees (JS_PAGES du socle) :
+   la carte .sz-pagee prend la hauteur qui reste, son [data-pages] la remplit. */
+.corps>*{flex:0 0 auto}
+.corps>.sz-pagee{flex:1 1 0;min-height:7rem}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 /* ── La refonte de l Inventaire (2026-09-25) ── */
 .barreoutils .rf-jet{height:2.4rem;padding:0 .75rem;border-radius:10px;font-size:.8rem;background:var(--f-0f1826);
@@ -102,8 +105,12 @@ tbody tr:hover td{background:var(--v04)}
 .boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;
   max-width:36rem;width:100%;max-height:86vh;display:flex;flex-direction:column;padding:.9rem 1rem}
 .boite h3{margin:0 0 .6rem;font:700 .98rem/1.3 Georgia,serif}
-.choix{flex:1 1 auto;min-height:6rem;overflow:auto;border:1px solid var(--v10);
+.choix{flex:1 1 auto;min-height:6rem;overflow:hidden;border:1px solid var(--v10);
   border-radius:9px;padding:.4rem .5rem}
+/* La boite << Associer >> : la liste prend la hauteur qui reste, en pages. */
+.boite>*{flex:0 0 auto}
+.boite>.choix{flex:1 1 auto;min-height:6rem}
+.choix>*{flex-shrink:0}
 .choix label{display:flex;align-items:center;gap:.45rem;padding:.14rem 0;font-size:.83rem}
 .choix .sku{font-size:.74rem;color:var(--tx2);margin-left:auto;font-variant-numeric:tabular-nums}
 .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.8rem;flex-wrap:wrap}
@@ -183,6 +190,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var LIAISON = null;        // { id, nom, choisis:[] } en cours d'édition
   var REG_FORM = null;       // { mode:'creer' } | { mode:'editer', r } — formulaire de règle
   var QPROD = '';
+  /* ⚠ CE QUI VIENT D ETRE AJOUTE (OU DEPLACE) DOIT SE VOIR. Les listes sont en
+     pages, et le socle revient a la page 1 quand le nombre change : sans ce
+     renvoi, une regle creee atterrirait sur une page qu on ne regarde pas.
+     { id } | { nom } d une regle, ou { liaison } — lu une fois, au dessin suivant. */
+  var VOIR = null;
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -272,12 +284,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         if (!r || !r.ok) { if (btn) btn.disabled = false; dire('${T("Échec :")} ' + expliquer(r), 'err'); return; }
         /* ⚠ LE BROUILLON MEURT ICI, et seulement ici : le garder ferait
            concurrence a la fiche enregistree sans qu on sache laquelle fait foi. */
-        szBrouillonJeter(); REG_FORM = null; charger(); dire('${T("Règle «")} ' + (r.nom || '') + ' ${T("» créée.")}', 'bon');
+        szBrouillonJeter(); REG_FORM = null; VOIR = { nom: r.nom || payload.name }; charger(); dire('${T("Règle «")} ' + (r.nom || '') + ' ${T("» créée.")}', 'bon');
       });
     } else {
-      appeler('reco:editer', [REG_FORM.r.id, payload]).then(function(r){
+      var REG_ID = REG_FORM.r.id;   // le formulaire est ferme a la reponse : on garde l id
+      appeler('reco:editer', [REG_ID, payload]).then(function(r){
         if (!r || !r.ok) { if (btn) btn.disabled = false; dire('${T("Échec :")} ' + expliquer(r), 'err'); return; }
-        szBrouillonJeter(); REG_FORM = null; charger(); dire('${T("Règle mise à jour.")}', 'bon');
+        szBrouillonJeter(); REG_FORM = null; VOIR = { id: REG_ID }; charger(); dire('${T("Règle mise à jour.")}', 'bon');
       });
     }
   }
@@ -285,7 +298,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function vueRegles(){
     var h = '';
     if (REG_FORM) h += formulaireRegle();
-    h += '<div class="carte"><h2>${T("Ordre d’affichage")}</h2>'
+    // Les regles en PAGES mesurees : la carte prend la hauteur qui reste (JS_PAGES du socle).
+    h += '<div class="carte sz-pagee"><h2>${T("Ordre d’affichage")}</h2>'
       + '<div class="dt" style="margin-bottom:.45rem">${T("Une règle plus haute passe avant :")} '
       + '${T("c’est elle que le client voit en premier sur une fiche.")}</div>'
       + (D.peutModifier && !REG_FORM
@@ -295,7 +309,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       h += '<div class="vide">${T("Aucune règle pour l’instant")}'
         + (D.peutModifier ? ' ${T("— utilisez « + Nouvelle règle » ci-dessus pour en créer une.")}' : '.') + '</div>';
     } else {
-      h += '<table><thead><tr><th></th><th>${T("Règle")}</th><th>${T("Affichée sur")}</th>'
+      h += '<div data-pages="reco-regles"><table><thead><tr><th></th><th>${T("Règle")}</th><th>${T("Affichée sur")}</th>'
         + '<th class="num">Max</th><th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
         + D.regles.map(function(r, i){
             var gestes = '';
@@ -322,7 +336,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
               + (r.active ? '${T("Active")}' : '${T("Inactive")}') + '</span></td>'
               + (D.peutModifier ? '<td class="fin">' + gestes + '</td>' : '') + '</tr>';
           }).join('')
-        + '</tbody></table>';
+        + '</tbody></table></div>';
     }
     h += '</div>';
 
@@ -354,13 +368,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           ? '<button class="mini danger" id="rc-vider">'
             + (ARME === '__liaisons' ? '${T("Confirmer ?")}' : '${T("Tout effacer")}') + '</button>' : '')
       + '<span>' + ls.length + '${T(" produit")}' + (ls.length > 1 ? '${T("s liés")}' : '${T(" lié")}') + '</span></div></div>';
-    h += '<div class="carte">';
+    // Les liaisons en PAGES mesurees : une liaison = un element de page.
+    h += '<div class="carte sz-pagee">';
     if (!ls.length) {
       h += '<div class="vide">${T("Aucune liaison manuelle.")}'
         + '<div style="margin-top:.35rem">${T("Les recommandations automatiques s’appliquent seules.")}</div></div>';
     } else {
-      h += ls.map(function(l){
-        return '<div style="border-top:1px solid var(--v055);padding:.4rem 0">'
+      h += '<div data-pages="reco-liaisons">' + ls.map(function(l){
+        return '<div data-liaison="' + esc(l.id) + '" style="border-top:1px solid var(--v055);padding:.4rem 0">'
           + '<div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">'
           + '<strong>' + esc(l.nom) + '</strong>'
           + '<span class="dt">' + l.lies.length + ' '
@@ -370,7 +385,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
               : '') + '</div>'
           + '<div class="dt" style="margin-top:.15rem">'
           + l.lies.map(function(x){ return esc(x.nom); }).join(' · ') + '</div></div>';
-      }).join('');
+      }).join('') + '</div>';
     }
     h += '</div>';
     return h;
@@ -380,11 +395,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (!STATS) return '<div class="vide charge">${T("Chargement des statistiques…")}</div>';
     var max = 0;
     (STATS.regles || []).forEach(function(r){ if (r.couverture > max) max = r.couverture; });
-    var h = '<div class="carte"><h2>${T("Couverture des règles")}</h2>';
+    // Les deux tableaux en PAGES mesurees : chacun prend la moitie de la hauteur qui reste.
+    var h = '<div class="carte sz-pagee"><h2>${T("Couverture des règles")}</h2>';
     if (!(STATS.regles || []).length) {
       h += '<div class="vide">${T("Aucune règle.")}</div>';
     } else {
-      h += '<table><thead><tr><th>${T("Règle")}</th><th>${T("État")}</th><th class="num">${T("Articles couverts")}</th>'
+      h += '<div data-pages="reco-stats-regles"><table><thead><tr><th>${T("Règle")}</th><th>${T("État")}</th><th class="num">${T("Articles couverts")}</th>'
         + '<th style="width:40%"></th></tr></thead><tbody>'
         + STATS.regles.map(function(r){
             var pc = max ? Math.round(r.couverture / max * 100) : 0;
@@ -394,20 +410,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
               + '<td class="num">' + r.couverture + '</td>'
               + '<td><div class="jauge"><i style="width:' + pc + '%"></i></div></td></tr>';
           }).join('')
-        + '</tbody></table>';
+        + '</tbody></table></div>';
     }
     h += '</div>';
 
-    h += '<div class="carte"><h2>${T("Articles les plus demandés")}</h2>';
+    h += '<div class="carte sz-pagee"><h2>${T("Articles les plus demandés")}</h2>';
     if (!(STATS.populaires || []).length) {
       h += '<div class="vide">${T("Pas encore assez de commandes pour en tirer un classement.")}</div>';
     } else {
-      h += '<table><thead><tr><th></th><th>${T("Article")}</th><th class="num">${T("Score")}</th></tr></thead><tbody>'
+      h += '<div data-pages="reco-stats-populaires"><table><thead><tr><th></th><th>${T("Article")}</th><th class="num">${T("Score")}</th></tr></thead><tbody>'
         + STATS.populaires.map(function(p, i){
             return '<tr><td class="rang">' + (i + 1) + '</td><td>' + esc(p.nom) + '</td>'
               + '<td class="num">' + p.score + '</td></tr>';
           }).join('')
-        + '</tbody></table>';
+        + '</tbody></table></div>';
     }
     h += '</div>';
     return h;
@@ -433,7 +449,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           + tout.map(function(p){ return '<option value="' + esc(p.id) + '">' + esc(p.nom) + '</option>'; }).join('')
           + '</select></div>')
       + '<input aria-label="${T("Chercher un nom ou un SKU")}" type="search" id="rc-qprod" placeholder="${T("Chercher un nom ou un SKU…")}" value="' + esc(QPROD) + '" style="margin-bottom:.4rem">'
-      + '<div class="choix" id="rc-choix">'
+      // Les articles en PAGES mesurees (la boite ne defile plus) ; cocher ne redessine rien.
+      + '<div class="choix" id="rc-choix" data-pages="reco-choix">'
       + (vus.length ? vus.map(function(p){
           return '<label><input type="checkbox" class="rc-p" value="' + esc(p.id) + '"'
             + (L.choisis.indexOf(p.id) >= 0 ? ' checked' : '') + '> ' + esc(p.nom)
@@ -468,6 +485,42 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (LIAISON) h += boiteLiaison();
     corps.innerHTML = h;
     brancher();
+    if (VOIR) { var v = VOIR; VOIR = null; montrerNouveau(trouverVoir(v)); }
+  }
+
+  // La ligne a montrer : par l id (geste de la ligne), par le nom (regle neuve), ou la liaison.
+  function trouverVoir(v){
+    if (v.liaison) return corps.querySelector('[data-liaison="' + String(v.liaison).replace(/"/g, '') + '"]');
+    var rangs = corps.querySelectorAll('[data-pages="reco-regles"] tbody tr'), trouve = null;
+    for (var i = 0; i < rangs.length; i++) {
+      var tr = rangs[i];
+      if (v.id && tr.querySelector('[data-editer="' + String(v.id).replace(/"/g, '') + '"]')) return tr;
+      var n = tr.querySelector('.rf-nom');
+      if (v.nom && n && n.firstChild && String(n.firstChild.textContent).trim() === String(v.nom).trim()) trouve = tr;
+    }
+    return trouve;
+  }
+
+  /* L element neuf : on pagine tout de suite, on repart de la premiere page, puis on
+     avance (borne) jusqu a ce qu il paraisse. */
+  function montrerNouveau(el){
+    if (!el || typeof szPagesAjuster !== 'function') return;
+    var c = el.closest('[data-pages]'); if (!c) return;
+    var it = el; while (it.parentNode && it.parentNode !== c && it.parentNode.tagName !== 'TBODY') it = it.parentNode;
+    try { szPagesAjuster(c); } catch (e) { return; }
+    if (it.style.display !== 'none') return;
+    var bouton = function(sens){
+      var p = c.nextElementSibling;
+      var b = (p && p.classList.contains('sz-pages')) ? p.querySelector('[data-szpg="' + sens + '"]') : null;
+      return (b && !b.disabled) ? b : null;
+    };
+    var b0;
+    for (var m = 0; m < 200 && (b0 = bouton('-1')); m++) b0.click();
+    for (var n = 0; n < 200 && it.style.display === 'none'; n++) {
+      var b1 = bouton('1');
+      if (!b1) break;
+      b1.click();
+    }
   }
 
   function brancher(){
@@ -514,10 +567,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (be) be.onclick = function(){
       if (!LIAISON || !LIAISON.id) { dire('${T("Choisissez d’abord le produit source.")}', 'err'); return; }
       be.disabled = true;
+      var idLie = LIAISON.id;
       appeler('reco:liaisons', [LIAISON.id, LIAISON.choisis]).then(function(r){
         be.disabled = false;
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
         LIAISON = null;
+        VOIR = { liaison: idLie };
         dire(r.nb ? ('« ' + r.nom + ' » : ' + r.nb + '${T(" article")}' + (r.nb > 1 ? '${T("s liés.")}' : '${T(" lié.")}'))
                   : ('${T("Liaisons de «")} ' + r.nom + ' ${T("» retirées.")}'), 'bon');
         charger();
@@ -605,6 +660,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         .then(function(r){
           if (!r.ok) { b.disabled = false; dire(expliquer(r), 'err'); return; }
           dire('${T("Ordre modifié — «")} ' + (r.nom || '') + ' ${T("» a changé de place.")}', 'bon');
+          VOIR = { id: b.getAttribute(bm ? 'data-monter' : 'data-descendre') };   // elle peut changer de page
           charger();
         });
       return;
@@ -649,6 +705,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       appeler('reco:restaurer', [br.getAttribute('data-restaurer')]).then(function(r){
         if (!r.ok) { br.disabled = false; dire(expliquer(r), 'err'); return; }
         dire('« ' + (r.nom || '') + ' ${T("» remise en service.")}', 'bon');
+        VOIR = { nom: r.nom || '' };
         charger();
       });
       return;
@@ -703,7 +760,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         + '${T("Sans style, tous les articles actifs sont proposés.")}</div>';
     h += '</div>';
 
-    h += '<div class="carte"><h2>${T("2 · Articles")}<span class="n">' + LOOK.length + ' '
+    // Les articles en PAGES mesurees : la carte prend la hauteur qui reste.
+    h += '<div class="carte sz-pagee"><h2>${T("2 · Articles")}<span class="n">' + LOOK.length + ' '
       + (LOOK.length > 1 ? '${T("retenus")}' : '${T("retenu")}') + '</span></h2>'
       + '<div class="styles" style="margin-bottom:.45rem">'
       + '<button class="sty' + (CATF === 'all' ? ' actif' : '') + '" data-catf="all">${T("Toutes")}</button>'
@@ -715,7 +773,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (!liste.length) {
       h += '<div class="vide">${T("Aucun article actif dans cette catégorie.")}</div>';
     } else {
-      h += '<div class="choix" style="max-height:22rem">' + liste.map(function(p){
+      h += '<div class="choix" data-pages="reco-look-' + esc(CATF) + '">' + liste.map(function(p){
         return '<label><input type="checkbox" data-look="' + esc(p.id) + '"'
           + (LOOK.indexOf(p.id) >= 0 ? ' checked' : '') + (AGEN.peutEcrire ? '' : ' disabled') + '> '
           + esc(p.nom) + '<span class="sku">' + esc(p.categorieLibelle) + ' · '
@@ -772,6 +830,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       /* On revient aux REGLES : la suggestion vient d y naitre, et c est la
          qu on verifie qu elle est bien en place. */
       ONGLET = 'regles';
+      VOIR = { nom: r.nom || '' };   // la suggestion neuve, sur sa page
       charger();
       dire('« ' + r.nom + ' ${T("» publiée —")} ' + r.pieces + ' ${T("pièces, visible sur")} ' + r.ou + '.', 'bon');
     });

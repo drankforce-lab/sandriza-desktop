@@ -154,6 +154,8 @@ tbody tr.ligne.mod{cursor:pointer}
 
 /* ── Formulaires ─────────────────────────────────────────────────────────── */
 .form2{display:grid;grid-template-columns:1fr 1fr;gap:.42rem .65rem}
+/* Fenetre basse (detachee, 2026-10-12 : le formulaire depassait de 21 px) : champs et ecarts resserres. */
+@media (max-height:820px){.form2{gap:.3rem .65rem}.form2 input,.form2 select{padding-top:.28rem!important;padding-bottom:.28rem!important;min-height:0!important}}
 .champ{display:flex;flex-direction:column;gap:.16rem;min-width:0}
 .champ label{font-size:.71rem;color:var(--tx2)}
 .champ input,.champ select,.champ textarea{width:100%;min-width:0}

@@ -66,9 +66,20 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .onglets button{font:inherit;font-size:.82rem;white-space:nowrap;background:none;border:none;
   color:var(--tx2);padding:.5rem .85rem;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
 .onglets button.on{color:var(--tx-or);border-bottom-color:#c9a97e;font-weight:700}
-.corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+.corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow:hidden}
+/* 2026-10-12 : AUCUNE GLISSIERE. La liste des pages, les questions de la FAQ, les lignes d un
+   guide des tailles, les liens << En vedette >> et la boite de reception sont en PAGES mesurees
+   (JS_PAGES du socle) : la carte .sz-pagee prend la hauteur qui reste dans #corps (regle :has du
+   socle), son [data-pages] la remplit. */
+#corps>.carte{margin:0}
+#corps>.sz-pagee>*{flex:0 0 auto}
+#corps>.sz-pagee>[data-pages]{flex:1 1 0;min-height:0}
+/* Le guide des tailles : les deux cartes de reglages cote a cote, puis UN guide a la fois. */
+.tz-haut{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem}
+.tz-haut>.carte{margin:0}
+.tz-choix{display:flex;gap:.35rem;flex-wrap:wrap;align-items:center}
+.tz-choix button.on{background:rgba(201,169,126,.16);border-color:rgba(201,169,126,.45);color:var(--tx-e6cfa8);font-weight:700}
+.corps>#corps>.tz-choix[data-pages]{flex:0 0 auto;max-height:5.2rem}
 .carte{background:var(--v03);border:1px solid var(--v08);border-radius:12px;padding:1.1rem 1.2rem;margin:0 0 1.1rem}
 .carte h3{margin:0 0 .2rem;font:700 1rem/1.2 ${T("Georgia")},serif}
 .entete{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
@@ -122,6 +133,10 @@ table.tb.lp code{font-family:ui-monospace,monospace;font-size:.72rem;color:var(-
 .sur .tt{display:flex;justify-content:space-between;align-items:center;padding:.9rem 1.1rem;border-bottom:1px solid var(--v08)}
 .sur .tt h3{margin:0;font:700 1rem/1.2 ${T("Georgia")},serif}
 .sur .liste{padding:1rem 1.1rem;overflow-y:auto}
+/* La boite de reception : ses messages en PAGES mesurees, jamais de glissiere. */
+.sur #ib-liste{overflow:hidden;display:flex;flex-direction:column;min-height:0}
+#ib-liste>*{flex:0 0 auto}
+#ib-liste>[data-pages]{flex:1 1 auto;min-height:0}
 .mailmsg{border:1px solid var(--v10);border-radius:10px;padding:.7rem .8rem;margin:0 0 .6rem;background:var(--v02)}
 .mailmsg .hh{display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;margin-bottom:.35rem}
 .mailmsg a{color:var(--tx-or);text-decoration:none}
@@ -273,6 +288,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var GUIDES = null;       // copie de travail des tableaux de tailles
   var DELP = '';           // id de page personnalisée en attente de confirmation
   var VIDECONF = false;    // vider la boîte de réception, 2e clic
+  var GSEL = 0;            // le guide des tailles montre (un a la fois, ses lignes en pages)
+  var VOIRSLUG = '';       // la page perso a montrer dans la liste apres enregistrement
   /* ⚠ POL SURVIT AU CHANGEMENT D ONGLET, contrairement à FAQ et GUIDES.
      Un texte de politique se rédige en plusieurs minutes ; le remettre à zéro en
      passant voir la liste des pages effacerait un travail long sans rien dire.
@@ -323,6 +340,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function dire(t, cl){ szDire(t, cl); }
   function val(id){ var e=document.getElementById(id); return e?String(e.value||'').trim():''; }
 
+  /* ⚠ L ELEMENT AJOUTE (OU DEPLACE) DOIT SE VOIR : les listes sont en pages, et le
+     socle revient a la page 1 quand le nombre change. On pagine tout de suite, on
+     repart de la premiere page, puis on avance (borne) jusqu a ce qu il paraisse. */
+  function montrerNouveau(el){
+    if (!el || typeof szPagesAjuster !== 'function') return;
+    var c = el.closest('[data-pages]'); if (!c) return;
+    var it = el; while (it.parentNode && it.parentNode !== c && it.parentNode.tagName !== 'TBODY') it = it.parentNode;
+    try { szPagesAjuster(c); } catch (e) { return; }
+    if (it.style.display !== 'none') return;
+    var bouton = function(sens){
+      var p = c.nextElementSibling;
+      var b = (p && p.classList.contains('sz-pages')) ? p.querySelector('[data-szpg="' + sens + '"]') : null;
+      return (b && !b.disabled) ? b : null;
+    };
+    var b0;
+    for (var m = 0; m < 200 && (b0 = bouton('-1')); m++) b0.click();
+    for (var n = 0; n < 200 && it.style.display === 'none'; n++) {
+      var b1 = bouton('1');
+      if (!b1) break;
+      b1.click();
+    }
+  }
+
   var MOTIFS = {
     session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
     droit:'${T("Votre rôle ne donne pas accès aux pages du site.")}',
@@ -363,8 +403,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     ];
     var cp=D.customPages||[];
     var boutonNouv = (D.peutAjouter && !RO) ? '<button class="prim" id="cp-nouvelle">${T("＋ Nouvelle page")}</button>' : '';
-    var h='<div class="carte"><div class="entete"><h3>${T("Toutes les pages")} <span style="font-size:.8rem;font-weight:400;color:var(--tx2)">'+(builtins.length+cp.length)+' '+szPl(builtins.length+cp.length, '${T("page")}', '${T("pages")}')+'</span></h3>'+boutonNouv+'</div>';
-    h+='<table class="tb lp"><thead><tr><th style="text-align:left">${T("Page")}</th><th>${T("Type")}</th><th>${T("Pied de page")}</th><th></th></tr></thead><tbody>';
+    // La liste en PAGES mesurees : la carte prend la hauteur qui reste.
+    var h='<div class="carte sz-pagee"><div class="entete"><h3>${T("Toutes les pages")} <span style="font-size:.8rem;font-weight:400;color:var(--tx2)">'+(builtins.length+cp.length)+' '+szPl(builtins.length+cp.length, '${T("page")}', '${T("pages")}')+'</span></h3>'+boutonNouv+'</div>';
+    h+='<div data-pages="pages-liste"><table class="tb lp"><thead><tr><th style="text-align:left">${T("Page")}</th><th>${T("Type")}</th><th>${T("Pied de page")}</th><th></th></tr></thead><tbody>';
     for (var i=0;i<builtins.length;i++){ var b=builtins[i];
       var coche = f[b.k]!==false;
       h+='<tr><td style="text-align:left"><div class="rf-nom">'+esc(b.nom)+'</div><div class="rf-sous"><code>'+esc(b.route)+'</code></div></td>'
@@ -382,10 +423,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         +'<td style="text-align:right;white-space:nowrap"><button class="b" data-cedit="'+esc(p.id)+'">${T("Modifier")}</button>'
         +(D.peutSupprimer && !p.protege ? ' <button class="b dgr" data-cdel="'+esc(p.id)+'">'+(DELP===p.id?'${T("✓ Confirmer")}':'${T("Supprimer")}')+'</button>' : '')+'</td></tr>';
     }
-    h+='</tbody></table></div>';
-    h+='';
+    h+='</tbody></table></div></div>';
     corps.innerHTML=h;
     brancherListe();
+    // La page neuve (ou modifiee) : sa page de la liste est ouverte, retrouvee par son adresse.
+    if (VOIRSLUG){ var vs=VOIRSLUG; VOIRSLUG=''; var cs=corps.querySelectorAll('[data-pages="pages-liste"] tbody code');
+      for (var k=0;k<cs.length;k++) if (cs[k].textContent==='#page/'+vs){ montrerNouveau(cs[k]); break; } }
   }
   function pilEtat(pub){ return pub ? '<span class="rf-pill vert">${T("Publiée")}</span>' : '<span class="rf-pill ambre">${T("Brouillon")}</span>'; }
   function brancherListe(){
@@ -561,13 +604,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
            reecrirait par-dessus celui qu on vient de jeter. */
         szBrouillonJeter();
         fermerEditeurPage();
+        VOIRSLUG=slug;
         if (ONGLET==='list') vueListe();
         dire((nouv?'${T("Page créée.")}':'${T("Page modifiée.")}')+(publie?'':' ${T("(brouillon)")}'), 'bon');
       } else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
 
   // ── FAQ ──────────────────────────────────────────────────────────
-  function vueFaq(){
+  function vueFaq(voir, focus){
     if (!FAQ){ var s=D.faq||{}; FAQ={ title:s.title||SZ_DONNEES.faqTitre, subtitle:s.subtitle||'', items:(s.items||[]).map(function(it){ return {id:it.id,q:it.q||'',a:it.a||''}; }) }; }
     /* ⚠ L EN-TETE DE LA CARTE NOMME L ECRAN, comme « Page Contact » a cote ; il
        ne repete plus le titre PAR DEFAUT de la page, qui est une donnee. Les
@@ -577,8 +621,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       +champ('faq-title','${T("Titre de la page")}',FAQ.title)
       +champ('faq-sub','${T("Sous-titre")}',FAQ.subtitle)
       +'</div></div>';
-    h+='<div class="carte"><div class="entete"><h3>${T("Questions & réponses")} <span style="font-size:.8rem;font-weight:400;color:var(--tx2)">'+FAQ.items.length+' '+szPl(FAQ.items.length, '${T("entrée")}', '${T("entrées")}')+'</span></h3>'+(RO?'':'<button class="b" id="faq-add">${T("＋ Ajouter")}</button>')+'</div><div id="faq-liste">';
+    // Les questions en PAGES mesurees : une paire question/reponse = un element de page.
+    h+='<div class="carte sz-pagee"><div class="entete"><h3>${T("Questions & réponses")} <span style="font-size:.8rem;font-weight:400;color:var(--tx2)">'+FAQ.items.length+' '+szPl(FAQ.items.length, '${T("entrée")}', '${T("entrées")}')+'</span></h3>'+(RO?'':'<button class="b" id="faq-add">${T("＋ Ajouter")}</button>')+'</div>';
     if (!FAQ.items.length) h+='<div class="vide">${T("Aucune question.")}</div>';
+    h+='<div id="faq-liste" data-pages="pages-faq">';
     for (var i=0;i<FAQ.items.length;i++){ var it=FAQ.items[i];
       h+='<div class="qa">'
         +'<label class="champ"><span class="lbl">${T("Question")}</span><input aria-label="${T("Question")}" class="t" data-fq="'+i+'" value="'+esc(it.q)+'"'+(RO?' disabled':'')+'></label>'
@@ -592,15 +638,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     h+='</div></div>';
     corps.innerHTML=h;
     lierEnr('faqEnr', enregistrerFaq);
-    var a=document.getElementById('faq-add'); if (a) a.onclick=function(){ syncFaq(); FAQ.items.push({id:null,q:'',a:''}); vueFaq(); };
+    var a=document.getElementById('faq-add'); if (a) a.onclick=function(){ syncFaq(); FAQ.items.push({id:null,q:'',a:''}); vueFaq(FAQ.items.length-1, true); };
     lierFaqLignes();
+    // La question ajoutee (ou deplacee) : sa page est ouverte ; une neuve recoit le curseur.
+    if (typeof voir==='number'){ var qas=corps.querySelectorAll('#faq-liste .qa'); var q=qas[Math.min(voir, qas.length-1)];
+      if (q){ montrerNouveau(q); if (focus){ var fq=q.querySelector('[data-fq]'); if (fq) fq.focus({ preventScroll: true }); } } }
   }
   function lierFaqLignes(){
     var qs=corps.querySelectorAll('[data-fq]'); for (var i=0;i<qs.length;i++) qs[i].oninput=function(){ FAQ.items[+this.getAttribute('data-fq')].q=this.value; };
     var as=corps.querySelectorAll('[data-fa]'); for (var j=0;j<as.length;j++) as[j].oninput=function(){ FAQ.items[+this.getAttribute('data-fa')].a=this.value; };
-    var up=corps.querySelectorAll('[data-fup]'); for (var u=0;u<up.length;u++) up[u].onclick=function(){ syncFaq(); var k=+this.getAttribute('data-fup'); var t=FAQ.items[k-1]; FAQ.items[k-1]=FAQ.items[k]; FAQ.items[k]=t; vueFaq(); };
-    var dn=corps.querySelectorAll('[data-fdn]'); for (var d=0;d<dn.length;d++) dn[d].onclick=function(){ syncFaq(); var k=+this.getAttribute('data-fdn'); var t=FAQ.items[k+1]; FAQ.items[k+1]=FAQ.items[k]; FAQ.items[k]=t; vueFaq(); };
-    var rm=corps.querySelectorAll('[data-frm]'); for (var r=0;r<rm.length;r++) rm[r].onclick=function(){ syncFaq(); FAQ.items.splice(+this.getAttribute('data-frm'),1); vueFaq(); };
+    var up=corps.querySelectorAll('[data-fup]'); for (var u=0;u<up.length;u++) up[u].onclick=function(){ syncFaq(); var k=+this.getAttribute('data-fup'); var t=FAQ.items[k-1]; FAQ.items[k-1]=FAQ.items[k]; FAQ.items[k]=t; vueFaq(k-1); };
+    var dn=corps.querySelectorAll('[data-fdn]'); for (var d=0;d<dn.length;d++) dn[d].onclick=function(){ syncFaq(); var k=+this.getAttribute('data-fdn'); var t=FAQ.items[k+1]; FAQ.items[k+1]=FAQ.items[k]; FAQ.items[k]=t; vueFaq(k+1); };
+    var rm=corps.querySelectorAll('[data-frm]'); for (var r=0;r<rm.length;r++) rm[r].onclick=function(){ syncFaq(); var k=+this.getAttribute('data-frm'); FAQ.items.splice(k,1); vueFaq(k); };
   }
   function syncFaq(){ FAQ.title=val('faq-title'); FAQ.subtitle=val('faq-sub');
     var qs=corps.querySelectorAll('[data-fq]'); for (var i=0;i<qs.length;i++) FAQ.items[+qs[i].getAttribute('data-fq')].q=qs[i].value;
@@ -656,6 +705,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (r.etat==='reseau') tete+='<div class="note" style="margin-bottom:.7rem"><span class="ic">⚠</span> ${T("Relecture depuis le nuage impossible (réseau) — rien n’est perdu. Rouvrez pour réessayer.")}</div>';
     var corpsl='';
     if (!m.length) corpsl='<div class="vide">${T("Aucun message reçu.")}</div>';
+    // Les messages en PAGES mesurees (la boite ne defile plus) : un message = un element de page.
+    else corpsl='<div data-pages="pages-boite">';
     for (var i=m.length-1;i>=0;i--){ var s=m[i];
       var dt=''; try{ dt=new Date(s.createdAt).toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'short', year: 'numeric' }); }catch(e){}
       corpsl+='<div class="mailmsg"><div class="hh"><div><b>'+esc(s.name)+'</b> <a href="mailto:'+esc(s.email)+'">'+esc(s.email)+'</a></div>'
@@ -664,6 +715,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         +'<div style="font-size:.85rem;font-weight:600;margin-bottom:.2rem">'+esc(s.subject)+'</div>'
         +'<div style="font-size:.84rem;color:var(--tx-c0cad8);line-height:1.5">'+esc(s.message)+'</div></div>';
     }
+    if (m.length) corpsl+='</div>';
     l.innerHTML=tete+corpsl;
     var vd=document.getElementById('ib-vider'); if (vd) vd.onclick=function(){ if (VIDECONF){ viderBoite(); } else { VIDECONF=true; peindreBoite(r); } };
     var dels=l.querySelectorAll('[data-mdel]'); for (var d=0;d<dels.length;d++) dels[d].onclick=function(){ supprimerMsg(this.getAttribute('data-mdel')); };
@@ -1080,10 +1132,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
 
   // ── GUIDE DES TAILLES ────────────────────────────────────────────
-  function vueTailles(){
+  /* ⚠ AUCUNE GLISSIERE (2026-10-12) : les deux cartes de reglages cote a cote, puis
+     UN guide a la fois (une pastille par guide, en pages) dont les LIGNES sont en
+     pages. << voir >> : le rang de la ligne a montrer (ajoutee, ou celle qui prend la
+     place de la retiree). */
+  function vueTailles(voir){
     if (!GUIDES){ GUIDES=(D.sizeGuides||[]).map(function(g){ return { id:g.id, name:g.name||'', nameEN:g.nameEN||'', conversion:g.conversion!==false, headers:(g.headers||[]).slice(), rows:(g.rows||[]).map(function(r){ return r.slice(); }) }; }); }
     var sp=D.sizesPage||{};
-    var h='<div class="carte"><div class="entete"><h3>${T("Guide des tailles")}</h3>'+boutonEnr('tzEnr')+'</div>'
+    var h='<div class="tz-haut"><div class="carte"><div class="entete"><h3>${T("Guide des tailles")}</h3>'
+      +'<div style="display:flex;gap:.4rem;align-items:center">'+(RO?'':'<button class="b" id="tz-addguide">${T("＋ Ajouter un guide")}</button>')+boutonEnr('tzEnr')+'</div></div>'
       +'<div class="grille2">'+champ('tz-title','${T("Titre de la page")}',sp.title||'')+champ('tz-sub','${T("Sous-titre")}',sp.subtitle||'')+'</div>'
       +'<label class="champ" style="margin:0"><span class="lbl">${T("Texte d’introduction")}</span><textarea class="t" id="tz-intro" rows="2"'+(RO?' disabled':'')+'>'+esc(sp.intro||'')+'</textarea></label>'
       +'</div>';
@@ -1100,16 +1157,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       +'<label class="champ" style="margin:0;min-width:180px"><span class="lbl">${T("Unité par défaut")}</span><select class="t" id="tz-unite"'+(RO?' disabled':'')+'><option value="cm"'+(sp.uniteDefaut!=='po'?' selected':'')+'>cm</option><option value="po"'+(sp.uniteDefaut==='po'?' selected':'')+'>${T("pouces")}</option></select></label>'
       +'<label style="display:inline-flex;align-items:center;gap:.4rem;cursor:pointer"><input type="checkbox" id="tz-comment"'+(sp.commentMesurer!==false?' checked':'')+(RO?' disabled':'')+'> ${T("Onglet « Comment mesurer » (schémas)")}</label>'
       +'<label style="display:inline-flex;align-items:center;gap:.4rem;cursor:pointer"><input type="checkbox" id="tz-calc"'+(sp.calculateur!==false?' checked':'')+(RO?' disabled':'')+'> ${T("Calculateur « Trouvez votre taille »")}</label>'
-      +'</div></div>';
-    h+='<div id="tz-guides">';
-    if (!GUIDES.length) h+='<div class="vide">${T("Aucun guide.")}</div>';
+      +'</div></div></div>';
+    if (!GUIDES.length) h+='<div class="carte"><div class="vide">${T("Aucun guide.")}</div></div>';
+    if (GSEL>=GUIDES.length) GSEL=GUIDES.length-1;
+    if (GSEL<0) GSEL=0;
+    // Une pastille par guide (en pages, deux rangees au plus) : on en modifie un a la fois.
+    if (GUIDES.length) h+='<div class="tz-choix" data-pages="pages-tailles-guides">'+GUIDES.map(function(x,i){
+      return '<button class="b'+(i===GSEL?' on':'')+'" data-gsel="'+i+'">'+esc(x.name||('${T("Guide")} '+(i+1)))+'</button>'; }).join('')+'</div>';
     for (var gi=0; gi<GUIDES.length; gi++){ var g=GUIDES[gi];
-      h+='<div class="carte"><div class="entete" style="margin-bottom:.7rem"><div style="display:flex;gap:.4rem;flex:1;flex-wrap:wrap">'
+      if (gi!==GSEL) continue;
+      h+='<div class="carte sz-pagee"><div class="entete" style="margin-bottom:.7rem"><div style="display:flex;gap:.4rem;flex:1;flex-wrap:wrap">'
         +'<input aria-label="Nom du guide" class="t" data-gname="'+gi+'" value="'+esc(g.name)+'" placeholder="Nom du guide" style="max-width:280px;font-weight:600"'+(RO?' disabled':'')+'>'
         +'<input aria-label="Nom (EN)" class="t" data-gnameen="'+gi+'" value="'+esc(g.nameEN)+'" placeholder="Nom (EN)" style="max-width:240px"'+(RO?' disabled':'')+'>'
         +'<label style="display:inline-flex;align-items:center;gap:.35rem;font-size:.82rem;cursor:pointer"><input type="checkbox" data-gconv="'+gi+'"'+(g.conversion!==false?' checked':'')+(RO?' disabled':'')+'> ${T("Conversion US / EU…")}</label></div>'
         +(RO?'':'<div style="display:flex;gap:.3rem"><button class="b" data-grow="'+gi+'">${T("＋ Ligne")}</button><button class="b dgr" data-gdel="'+gi+'">${T("Supprimer")}</button></div>')+'</div>';
-      h+='<div style="overflow-x:auto"><table class="tb"><thead><tr>';
+      // Les lignes du guide en PAGES mesurees ; l en-tete reste en place.
+      h+='<div data-pages="pages-tailles-lignes-'+gi+'"><table class="tb"><thead><tr>';
       /* ⚠ UN TABLEAU DE SAISIE : chaque cellule est un champ, et rien ne les
          nomme puisque les EN-TETES SONT EUX AUSSI des champs. Le nom se compose
          donc de la position — c est le seul repere qui existe ici. */
@@ -1121,23 +1184,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       }
       h+='</tbody></table></div></div>';
     }
-    h+='</div>';
-    if (!RO) h+='<button class="b" id="tz-addguide">${T("＋ Ajouter un guide")}</button>';
     corps.innerHTML=h;
     lierEnr('tzEnr', enregistrerTailles);
     lierTailles();
+    // Le guide choisi reste en vue parmi les pastilles ; la ligne ajoutee aussi.
+    montrerNouveau(corps.querySelector('.tz-choix .on'));
+    if (typeof voir==='number'){ var trs=corps.querySelectorAll('[data-pages^="pages-tailles-lignes-"] tbody tr'); montrerNouveau(trs[Math.min(voir, trs.length-1)]); }
   }
   function lierTailles(){
     var q=function(sel,fn){ var e=corps.querySelectorAll(sel); for (var i=0;i<e.length;i++) fn(e[i]); };
-    q('[data-gname]', function(e){ e.oninput=function(){ GUIDES[+this.getAttribute('data-gname')].name=this.value; }; });
+    q('[data-gname]', function(e){ e.oninput=function(){ var gi=+this.getAttribute('data-gname'); GUIDES[gi].name=this.value;
+      // La pastille suit le nom tape, sans redessin (le curseur reste ou il est).
+      var pa=corps.querySelector('[data-gsel="'+gi+'"]'); if (pa) pa.textContent=this.value||('${T("Guide")} '+(gi+1)); }; });
+    q('[data-gsel]', function(e){ e.onclick=function(){ syncTailles(); GSEL=+this.getAttribute('data-gsel'); vueTailles(); }; });
     q('[data-gnameen]', function(e){ e.oninput=function(){ GUIDES[+this.getAttribute('data-gnameen')].nameEN=this.value; }; });
     q('[data-gconv]', function(e){ e.onchange=function(){ GUIDES[+this.getAttribute('data-gconv')].conversion=this.checked; }; });
     q('[data-gh]', function(e){ e.oninput=function(){ var p=this.getAttribute('data-gh').split('-'); GUIDES[+p[0]].headers[+p[1]]=this.value; }; });
     q('[data-gc]', function(e){ e.oninput=function(){ var p=this.getAttribute('data-gc').split('-'); GUIDES[+p[0]].rows[+p[1]][+p[2]]=this.value; }; });
-    q('[data-grow]', function(e){ e.onclick=function(){ syncTailles(); var gi=+this.getAttribute('data-grow'); var n=GUIDES[gi].headers.length; var row=[]; for (var i=0;i<n;i++) row.push(''); GUIDES[gi].rows.push(row); vueTailles(); }; });
-    q('[data-grrm]', function(e){ e.onclick=function(){ syncTailles(); var p=this.getAttribute('data-grrm').split('-'); GUIDES[+p[0]].rows.splice(+p[1],1); vueTailles(); }; });
-    q('[data-gdel]', function(e){ e.onclick=function(){ syncTailles(); GUIDES.splice(+this.getAttribute('data-gdel'),1); vueTailles(); }; });
-    var ag=document.getElementById('tz-addguide'); if (ag) ag.onclick=function(){ syncTailles(); GUIDES.push({ id:null, name:SZ_DONNEES.guideNom, nameEN:'', headers:[SZ_DONNEES.guideEntete1,SZ_DONNEES.guideEntete2,SZ_DONNEES.guideEntete3], rows:[['','','']] }); vueTailles(); };
+    q('[data-grow]', function(e){ e.onclick=function(){ syncTailles(); var gi=+this.getAttribute('data-grow'); var n=GUIDES[gi].headers.length; var row=[]; for (var i=0;i<n;i++) row.push(''); GUIDES[gi].rows.push(row); vueTailles(GUIDES[gi].rows.length-1); }; });
+    q('[data-grrm]', function(e){ e.onclick=function(){ syncTailles(); var p=this.getAttribute('data-grrm').split('-'); GUIDES[+p[0]].rows.splice(+p[1],1); vueTailles(+p[1]); }; });
+    q('[data-gdel]', function(e){ e.onclick=function(){ syncTailles(); var k=+this.getAttribute('data-gdel'); GUIDES.splice(k,1); if (GSEL>=k && GSEL>0) GSEL--; vueTailles(); }; });
+    var ag=document.getElementById('tz-addguide'); if (ag) ag.onclick=function(){ syncTailles(); GUIDES.push({ id:null, name:SZ_DONNEES.guideNom, nameEN:'', headers:[SZ_DONNEES.guideEntete1,SZ_DONNEES.guideEntete2,SZ_DONNEES.guideEntete3], rows:[['','','']] }); GSEL=GUIDES.length-1; vueTailles(); };
   }
   function syncTailles(){
     var q=function(sel,fn){ var e=corps.querySelectorAll(sel); for (var i=0;i<e.length;i++) fn(e[i]); };
@@ -1163,12 +1230,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   // ── EN VEDETTE ───────────────────────────────────────────────────
   function vueVedette(){
     var items=D.vedette||[];
-    var h='<div class="carte"><h3>${T("Menu Vêtements — En vedette")}</h3>'
+    // Les liens en PAGES mesurees : la carte prend la hauteur qui reste.
+    var h='<div class="carte sz-pagee"><h3>${T("Menu Vêtements — En vedette")}</h3>'
       +'<div class="note" style="margin:.6rem 0 1rem">${T("Les 4 sections du méga-menu « Vêtements » sont fixes. Vous pouvez ajouter ou retirer des liens dans la section « En vedette ».")}</div>';
     if (!RO) h+='<div class="grille2" style="align-items:end;gap:.6rem"><label class="champ" style="margin:0"><span class="lbl">${T("Libellé")}</span><input class="t" id="ved-label" placeholder="${T("ex. Meilleures ventes")}"></label>'
       +'<div style="display:flex;gap:.5rem;align-items:end"><label class="champ" style="margin:0;flex:1"><span class="lbl">${T("Lien")}</span><input class="t" id="ved-href" placeholder="${T("ex. #shop?cat=robes")}"></label><button class="prim" id="ved-add">${T("Ajouter")}</button></div></div>';
-    h+='<div id="ved-liste" style="margin-top:1rem">';
-    if (!items.length) h+='<div class="vide">${T("Aucun lien — la section sera vide dans le menu.")}</div>';
+    if (!items.length) h+='<div class="vide" style="margin-top:1rem">${T("Aucun lien — la section sera vide dans le menu.")}</div>';
+    h+='<div id="ved-liste" data-pages="pages-vedette" style="margin-top:1rem">';
     for (var i=0;i<items.length;i++){ var it=items[i];
       h+='<div class="lien"><div class="g"><strong>'+esc(it.label)+'</strong><div><code>'+esc(it.href)+'</code></div></div>'
         +(RO?'':'<button class="b dgr" data-vrm="'+i+'">${T("Retirer")}</button>')+'</div>';
@@ -1182,7 +1250,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (!label||!href){ dire('${T("Libellé et lien requis.")}', 'err'); return; }
     OCCUPE=true; dire('${T("Ajout…")}');
     appeler('pages:vedette:ajouter',[{label:label,href:href}]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ D.vedette=r.vedette||[]; vueVedette(); dire('${T("Lien ajouté.")}', 'bon'); } else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
+      if (r&&r.ok){ D.vedette=r.vedette||[]; vueVedette();
+        // Le lien neuf, au bout de la liste : sa page est ouverte.
+        var ls=corps.querySelectorAll('#ved-liste .lien'); if (ls.length) montrerNouveau(ls[ls.length-1]);
+        dire('${T("Lien ajouté.")}', 'bon'); } else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
   function retirerVedette(i){ if (RO||OCCUPE) return; OCCUPE=true; dire('${T("Retrait…")}');
     appeler('pages:vedette:retirer',[i]).then(function(r){ OCCUPE=false;

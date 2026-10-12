@@ -435,9 +435,9 @@ function rapport(lignes, nbFenetres, rates, lotsMorts) {
     return;
   }
   /* 🔴 SA REGLE (2026-10-12) : << aucun scroll bar dans l application >>. A la taille principale et avec les
-     jeux ordinaires, une SEULE zone qui defile fait echouer le banc. (--gros et --detache la nomment sans
-     echouer : les jeux gonfles touchent aussi des ensembles fixes, et le detache garde une dette.) */
-  if (!GROS && !DETACHE && zn.length) { console.log('\n>>> ' + zn.length + ' fenetre(s) avec une zone qui DEFILE — paginer (data-pages), jamais de glissiere'); process.exitCode = 1; }
+     jeux ordinaires, une SEULE zone qui defile fait echouer le banc — en fenetre detachee aussi (1080 x 780,
+     depuis le 2026-10-12). --gros la nomme sans echouer : les jeux gonfles touchent aussi des ensembles fixes. */
+  if (!GROS && zn.length) { console.log('\n>>> ' + zn.length + ' fenetre(s) avec une zone qui DEFILE — paginer (data-pages), jamais de glissiere'); process.exitCode = 1; }
   if (nouvelles.length || lotsMorts) { console.log('\n>>> ' + nouvelles.length + ' debordement(s) nouveau(x) ou aggrave(s)'); process.exitCode = 1; }
   else console.log('\n>>> aucun debordement nouveau');
 }

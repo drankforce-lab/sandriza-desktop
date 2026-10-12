@@ -179,6 +179,8 @@ jobs:
       # chaque travail : rouge ici = pas de publication.
       - name: Aucune glissiere — 108 fenetres mesurees au rendu (1400 x 833)
         run: node tools/banc-debordement.js
+      - name: Aucune glissiere — fenetre detachee (1080 x 780)
+        run: node tools/banc-debordement.js --detache
 
   windows:
     needs: menage

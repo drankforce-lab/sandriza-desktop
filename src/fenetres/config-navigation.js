@@ -40,9 +40,11 @@ body{background:var(--f-page);color:var(--tx);
 .barre{flex:0 0 auto;display:flex;align-items:center;gap:.5rem;justify-content:flex-end;
   padding:.6rem 1.05rem .2rem}
 .barre .aide{margin-right:auto;font-size:.76rem;color:var(--tx3);max-width:44rem}
-.corps{flex:1 1 auto;min-height:0;padding:.5rem 1.05rem .9rem;overflow-y:auto}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+.corps{flex:1 1 auto;min-height:0;padding:.5rem 1.05rem .9rem;overflow:hidden;
+  display:flex;flex-direction:column}
+/* Aucune glissiere (2026-10-12) : les elements du menu se paginent dans la
+   hauteur qui reste (data-pages, JS_PAGES du socle). Un element et son
+   sous-menu forment UNE entree : ils ne se separent jamais d une page a l autre. */
 .item{border:1px solid var(--v08);border-radius:11px;margin-bottom:.55rem;
   background:var(--f-carte);overflow:hidden}
 .item .lg{display:flex;align-items:center;gap:.6rem;padding:.6rem .8rem}
@@ -151,6 +153,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var SUPPR = null;      // id de l'element arme pour suppression
   var RESET = false;     // reinitialisation armee
   var FOCUS_ID = null;   // element a focaliser apres redraw (nouvel ajout)
+  var VOIR = null;       // element a garder visible apres redraw (deplace, sous-menu)
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -193,7 +196,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var l = items();
     if (!l.length) { corps.innerHTML = '<div class="vide">${T("Aucun élément de menu.")}</div>'; return; }
     var dis = RO ? ' disabled' : '';
-    var h = [];
+    var h = ['<div class="sz-pagee"><div data-pages="nav-elements">'];
     for (var i=0;i<l.length;i++) {
       var it = l[i];
       var masque = (it.visible === false);
@@ -236,11 +239,31 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       }
       h.push('</div>');
     }
+    h.push('</div></div>');
     corps.innerHTML = h.join('');
     if (FOCUS_ID) {
       var fe = corps.querySelector('input.lab[data-id="' + FOCUS_ID + '"]');
-      FOCUS_ID = null;
-      if (fe) { try { fe.focus(); fe.select(); } catch (e) {} }
+      FOCUS_ID = null; VOIR = null;
+      if (fe) { montrerNouveau(fe); try { fe.focus(); fe.select(); } catch (e) {} }
+    }
+    // L element touche (deplace, sous-menu ouvert ou ajoute) reste sous les yeux.
+    if (VOIR) { montrerNouveau(corps.querySelector('button[data-act="form"][data-id="' + VOIR + '"]')); VOIR = null; }
+  }
+
+  /* ⚠ L ELEMENT AJOUTE (OU DEPLACE) DOIT SE VOIR : le socle revient a la page 1
+     quand le nombre change, et un deplacement ou un sous-menu qui grandit peut
+     l envoyer sur la page voisine. On pagine tout de suite, puis on avance page
+     par page (borne) jusqu a ce qu il paraisse. */
+  function montrerNouveau(el){
+    if (!el || typeof szPagesAjuster !== 'function') return;
+    var c = el.closest('[data-pages]'); if (!c) return;
+    var it = el; while (it.parentNode && it.parentNode !== c && it.parentNode.tagName !== 'TBODY') it = it.parentNode;
+    try { szPagesAjuster(c); } catch (e) { return; }
+    for (var n = 0; n < 200 && it.style.display === 'none'; n++) {
+      var p = c.nextElementSibling;
+      var b = (p && p.classList.contains('sz-pages')) ? p.querySelector('[data-szpg="1"]') : null;
+      if (!b || b.disabled) break;
+      b.click();
     }
   }
 
@@ -326,6 +349,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var id = b.getAttribute('data-id');
     var prevSuppr = SUPPR; SUPPR = null;
     var it = trouver(id);
+    VOIR = id;
     if (act === 'up' || act === 'down') {
       var l = items(); var idx = -1; for (var k=0;k<l.length;k++){ if (l[k].id===id){ idx=k; break; } }
       if (idx < 0) return;

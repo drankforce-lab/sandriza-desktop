@@ -925,7 +925,9 @@ function szPagesAjuster(c){
   var st = _szPg.pages[cle] || (_szPg.pages[cle] = { page: 0, n: -1 });
   var els = _szPgElements(c);
   var pied = _szPgPied(c);
-  if (els.length !== st.n) { st.page = 0; st.n = els.length; }
+  /* data-pages-fin : une liste qui s ALLONGE montre sa DERNIERE page (la caisse : l article qu on vient de
+     scanner doit se voir). Sinon un changement de compte ramene a la page 1. */
+  if (els.length !== st.n) { st.page = (c.hasAttribute('data-pages-fin') && els.length > st.n && st.n >= 0) ? 1e6 : 0; st.n = els.length; }
   for (var i = 0; i < els.length; i++) els[i].style.display = '';
   if (!els.length) { pied.innerHTML = ''; pied.style.display = 'none'; return; }
   pied.style.display = '';
@@ -3912,6 +3914,23 @@ body{line-height:1.55}
    et son conteneur [data-pages] la remplit : c est cette hauteur-la qui decide du nombre de lignes. */
 .sz-pagee{flex:1 1 0;min-height:7rem;display:flex;flex-direction:column}
 .sz-pagee>[data-pages]{flex:1 1 auto;min-height:0}
+/* LA FENETRE DETACHEE (1080 x 780, 2026-10-12) : rien ne sort a droite non plus. Sous 1240 px, la barre
+   d outils peut passer sur deux lignes et les boutons d une ligne de tableau se rangent les uns sous les
+   autres — plutot que pousser le tableau hors du cadre. Les pages se remesurent d elles-memes. */
+/* Fenetre BASSE (detachee : 780 px) : on resserre l air avant de couper quoi que ce soit — marges du corps,
+   ecarts entre cartes, rembourrage des cartes et des tuiles. */
+@media (max-height:820px){
+  .corps{padding-top:.6rem!important;padding-bottom:.6rem!important;row-gap:.55rem!important}
+  .carte{padding-top:.65rem!important;padding-bottom:.65rem!important}
+  .tuile{padding-top:.55rem!important;padding-bottom:.55rem!important}
+  .tuiles{gap:.5rem!important}
+}
+@media (max-width:1240px){
+  .rf-tb{flex-wrap:wrap;row-gap:.4rem}
+  .rf-rch{min-width:7rem}
+  td.fin{white-space:normal!important}
+  td.fin>button,td.fin>.mini{margin:.1rem 0}
+}
 /* Onze fenetres dessinent dans un <div id="corps"> NICHE dans .corps : sans cette regle, la carte
    paginee n y est pas bornee (elle prenait 8600 px, et la liste croyait que tout tenait). On ne touche
    qu aux corps qui portent une carte paginee. */

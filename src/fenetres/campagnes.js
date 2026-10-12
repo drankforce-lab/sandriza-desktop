@@ -47,12 +47,35 @@ body{background:var(--f-page);color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
 /* 2026-10-12 : les LISTES (campagnes, chaines, segments) sont en PAGES mesurees (JS_PAGES du
-   socle), jamais de glissiere. ⚠ LE FORMULAIRE garde son defilement pour l instant : il porte
-   l editeur par blocs et les etapes d une chaine, qui grandissent, et le couper rendrait les
-   derniers champs injoignables. A reprendre a part. */
-.corps.formulaire{overflow-y:auto}
-.corps.formulaire::-webkit-scrollbar{width:8px}
-.corps.formulaire::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+   socle), jamais de glissiere. LE FORMULAIRE AUSSI (meme jour) : la carte prend toute la hauteur
+   du corps, en deux colonnes (les reglages a gauche, ce qui grandit a droite), et ce qui grandit
+   — les blocs du courriel, les pastilles des etapes, les criteres d un segment — est en pages.
+   Chaque bloc, chaque etape, chaque critere est UN element de page. */
+.corps.formulaire>.carte.form{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.carte.form>*{flex:0 0 auto}
+.carte.form>[data-pages]{flex:1 1 0;min-height:0}
+.fcols{flex:1 1 0!important;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);
+  grid-template-rows:minmax(0,1fr);gap:.9rem}
+.fcol{min-height:0;display:flex;flex-direction:column;overflow:hidden;position:relative}
+.fcol>*{flex:0 0 auto}
+.fcol>.champ.corpsm{flex:1 1 0;min-height:0;display:flex;flex-direction:column;margin-bottom:0}
+.corpsm>*{flex:0 0 auto}
+.corpsm>#f-blocs{flex:1 1 0;min-height:0;display:flex;flex-direction:column}
+.corpsm>#f-html{flex:1 1 0;min-height:6rem}
+#f-blocs>*{flex:0 0 auto}
+#f-blocs>[data-pages]{flex:1 1 0;min-height:0}
+.fcol>#f-etapes{flex:1 1 0;min-height:0;display:flex;flex-direction:column}
+#f-etapes>*{flex:0 0 auto}
+/* Les pastilles des etapes : deux rangees au plus, le reste en pages. */
+.etapes-choix[data-pages]{max-height:4.6rem}
+#f-etapes>.sz-pages{margin:-.3rem 0 .5rem}
+/* Dans une colonne, deux champs cote a cote ne debordent jamais (un long segment ne pousse rien). */
+.fcol .rang{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+/* L apercu se pose PAR-DESSUS la colonne de droite (il ne pousse plus rien hors de vue). */
+.fcol>.apercu{position:absolute;inset:0;z-index:5;margin:0;display:flex;flex-direction:column}
+.fcol>.apercu .chrome{display:flex;align-items:center;gap:.5rem}
+.fcol>.apercu .chrome button{margin-left:auto}
+.fcol>.apercu iframe{flex:1 1 auto;height:auto;min-height:0}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
@@ -354,6 +377,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     if (!BLOCS.length) {
       return pal + '<div class="bvide">${T("Aucun bloc. Ajoutez-en un ci-dessus, ou chargez un modèle.")}</div>';
     }
+    // Les blocs en PAGES mesurees (JS_PAGES du socle) : un bloc = un element de page.
     var cartes = BLOCS.map(function(b, i){
       var t = typeDe(b.type);
       var champs = (BCHAMPS[b.type] || []).map(function(c){
@@ -369,16 +393,43 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
         + (champs ? '<div class="bg">' + champs + '</div>' : '')
         + '</div>';
     }).join('');
-    return pal + cartes;
+    return pal + '<div data-pages="campagnes-blocs">' + cartes + '</div>';
   }
 
   // Ne repeint QUE la zone des blocs : un redessin du formulaire perdrait le
   // sujet, le segment et le SMS deja saisis.
-  function majBlocs(){
+  // << voir >> : le rang du bloc a montrer (ajoute, deplace) — sa page est ouverte.
+  function majBlocs(voir){
     var z = document.getElementById('f-blocs');
     if (!z) return;
     z.innerHTML = blocsHtml();
     brancherBlocs();
+    if (typeof voir === 'number') montrerNouveau(z.querySelectorAll('.bloc')[Math.min(voir, BLOCS.length - 1)]);
+  }
+
+  /* ⚠ L ELEMENT AJOUTE (OU DEPLACE) DOIT SE VOIR : le socle revient a la page 1
+     quand le nombre change, et un deplacement peut l envoyer sur la page
+     voisine. On pagine tout de suite, puis on avance page par page (borne)
+     jusqu a ce qu il paraisse. */
+  function montrerNouveau(el){
+    if (!el || typeof szPagesAjuster !== 'function') return;
+    var c = el.closest('[data-pages]'); if (!c) return;
+    var it = el; while (it.parentNode && it.parentNode !== c && it.parentNode.tagName !== 'TBODY') it = it.parentNode;
+    try { szPagesAjuster(c); } catch (e) { return; }
+    if (it.style.display !== 'none') return;
+    // Un deplacement vers le haut peut le mettre sur une page PRECEDENTE : on repart de la premiere.
+    var bouton = function(sens){
+      var p = c.nextElementSibling;
+      var b = (p && p.classList.contains('sz-pages')) ? p.querySelector('[data-szpg="' + sens + '"]') : null;
+      return (b && !b.disabled) ? b : null;
+    };
+    var b0;
+    for (var m = 0; m < 200 && (b0 = bouton('-1')); m++) b0.click();
+    for (var n = 0; n < 200 && it.style.display === 'none'; n++) {
+      var b1 = bouton('1');
+      if (!b1) break;
+      b1.click();
+    }
   }
 
   /* ══ L ECRITURE PUBLICITAIRE IA (#115, 2026-09-14) ═════════════════════════
@@ -497,11 +548,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       IAOCC = false;
       if (!r || !r.ok) { majIa(); dire(iaExpliquer(r), 'err'); return; }
       if (r.budget) { IAETAT = IAETAT || {}; IAETAT.budget = r.budget; IAETAT.clePosee = true; }
+      var prem = suite ? BLOCS.length : 0;   // le premier bloc redige : sa page est ouverte
       BLOCS = suite ? BLOCS.concat(r.blocs) : r.blocs.slice();
       /* ⚠ LE MODE VISUEL EST RETABLI : les blocs venus d ici ne se voient pas en
          mode HTML, et l on croirait que rien n est arrive. */
       if (BMODE !== 'visuel') { BMODE = 'visuel'; dessiner(); }
-      else { majIa(); majBlocs(); }
+      else { majIa(); majBlocs(prem); }
       // Le sujet n est pose que s il est VIDE : il a pu etre ecrit a la main, et
       // l IA n a pas a l ecraser.
       var su = document.getElementById('f-suj');
@@ -559,11 +611,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       el.onclick = function(){
         var t = typeDe(el.getAttribute('data-bajout'));
         BLOCS.push(JSON.parse(JSON.stringify(t.defaut || { type: t.cle })));
-        majBlocs();
+        majBlocs(BLOCS.length - 1);   // la page du bloc neuf
       };
     });
     z.querySelectorAll('[data-bsupp]').forEach(function(el){
-      el.onclick = function(){ BLOCS.splice(Number(el.getAttribute('data-bsupp')), 1); majBlocs(); };
+      // On reste ou l on etait : le bloc qui prend la place du retire reste en vue.
+      el.onclick = function(){ var k = Number(el.getAttribute('data-bsupp')); BLOCS.splice(k, 1); majBlocs(k); };
     });
     var bouger = function(att, pas){
       z.querySelectorAll('[' + att + ']').forEach(function(el){
@@ -571,7 +624,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
           var i = Number(el.getAttribute(att)), j = i + pas;
           if (j < 0 || j >= BLOCS.length) return;
           var t = BLOCS[i]; BLOCS[i] = BLOCS[j]; BLOCS[j] = t;
-          majBlocs();
+          majBlocs(j);
         };
       });
     };
@@ -691,12 +744,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
 
   function vueFormCampagne(){
     var f = FORM, d = f.d, c = d.campagne || {};
+    /* ⚠ DEUX COLONNES, ET AUCUNE GLISSIERE (2026-10-12) : a gauche les reglages
+       (nom, sujet, segment, canal, SMS) et l ecriture IA ; a droite le corps du
+       courriel, dont les blocs sont en pages. L apercu se pose par-dessus la
+       colonne de droite au lieu de pousser le formulaire vers le bas. */
     var h = '<div class="carte form">'
       + '<h3 style="margin:0 0 .6rem;font:700 .92rem/1.3 system-ui,sans-serif">'
       + (f.id ? '${T("Modifier la campagne")}' : '${T("Nouvelle campagne")}') + '</h3>'
+      + '<div class="fcols"><div class="fcol">'
       + '<div class="rang">'
       + '<div class="champ"><span class="lbl">${T("Nom interne")}</span>'
       + '<input id="f-nom" aria-label="${T("Nom interne")}" value="' + esc(c.nom || '') + '" placeholder="${T("Infolettre de septembre")}"></div>'
+      + '<div class="champ"><span class="lbl">${T("Sujet du courriel")}</span>'
+      + '<input id="f-suj" aria-label="${T("Sujet du courriel")}" value="' + esc(c.sujet || '') + '" placeholder="${T("Nos nouveautés sont arrivées !")}"></div>'
+      + '</div>'
+      + '<div class="rang">'
       // ⚠ CHAQUE SEGMENT MONTRE SA PORTEE : on choisit en voyant combien de
       // personnes il atteint MAINTENANT, pas en devinant. Un segment a 0 se
       // remarque avant l envoi, pas apres.
@@ -709,25 +771,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
           return '<option value="' + esc(s.cle) + '"' + ((c.segment || 'all') === s.cle ? ' selected' : '')
             + '>' + esc(s.nom) + ' (' + (s.compte || 0) + ')' + '</option>';
         }).join('') + '</select>'
-      + '<span class="aide" id="f-seg-quoi"></span></div></div>'
-      + '<div class="champ"><span class="lbl">${T("Sujet du courriel")}</span>'
-      + '<input id="f-suj" aria-label="${T("Sujet du courriel")}" value="' + esc(c.sujet || '') + '" placeholder="${T("Nos nouveautés sont arrivées !")}"></div>'
-      + '<div class="rang">'
+      + '<span class="aide" id="f-seg-quoi"></span></div>'
       + '<div class="champ"><span class="lbl">${T("Canal d’envoi")}</span><select id="f-canal" aria-label="${T("Canal d’envoi")}">'
       + (d.canaux || []).map(function(x){
           return '<option value="' + esc(x.cle) + '"' + ((c.canal || 'email') === x.cle ? ' selected' : '')
-            + '>' + esc(x.nom) + '</option>'; }).join('') + '</select></div>'
-      + '<div class="champ"><span class="lbl">${T("Destinataires SMS")}</span>'
-      + '<div class="aide" style="padding-top:.35rem">' + (d.smsDestinataires || 0)
+            + '>' + esc(x.nom) + '</option>'; }).join('') + '</select></div></div>'
+      // Les destinataires SMS vivent dans le bloc SMS : ils ne comptent que si le canal en envoie.
+      + '<div class="champ" id="f-sms-bloc"><span class="lbl">${T("Message texte (SMS)")}</span>'
+      + '<div class="aide"><strong>${T("Destinataires SMS")}</strong> · ' + (d.smsDestinataires || 0)
       + ' ' + szPl(d.smsDestinataires || 0, '${T("client ayant consenti, avec un téléphone.")}', '${T("clients ayant consenti, avec un téléphone.")}')
       + (d.smsPret ? '' : '<br><span style="color:var(--tx-err)"><span class="ic">⚠</span> ${T("Téléphonie non configurée : l’envoi SMS échouera.")}</span>')
-      + '</div></div></div>'
-      + '<div class="champ" id="f-sms-bloc"><span class="lbl">${T("Message texte (SMS)")}</span>'
+      + '</div>'
       + '<textarea id="f-sms" aria-label="${T("Message texte (SMS)")}" class="sms" maxlength="480" placeholder="${T("SANDRIZA : nos nouveautés sont arrivées !")}">'
       + esc(c.sms || '') + '</textarea>'
       + '<div class="aide"><span id="f-sms-n">0</span>/480 · Variable : <code>{{firstName}}</code>. '
       + '${T("Twilio gère STOP et AIDE automatiquement.")}</div></div>'
-      + '<div class="champ"><span class="lbl">${T("Corps du courriel")}</span>'
+      /* L ecriture IA, sous les reglages : ce qu elle produit tombe dans les blocs, a droite. */
+      + '<div class="iabloc" id="f-ia">' + iaPanneauHtml() + '</div>'
+      + '</div><div class="fcol">'
+      + '<div class="champ corpsm"><span class="lbl">${T("Corps du courriel")}</span>'
       + '<div class="duo" style="margin-bottom:.3rem">' + choixModeles('f-tpl', d.modeles)
       + '<button class="mini" id="f-charger">${T("Charger")}</button>'
       + '<button class="mini" id="f-apercu">${T("Aperçu")}</button></div>'
@@ -735,7 +797,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
          seul moyen de coller un gabarit venu d ailleurs, et de relire ce qui
          part vraiment. Basculer vers HTML CONVERTIT les blocs ; revenir au
          visuel remet le HTML dans un bloc << HTML libre >>, sans rien perdre. */
-      + '<div class="iabloc" id="f-ia">' + iaPanneauHtml() + '</div>'
       + '<div class="bqbar">'
       + '<button class="mini' + (BMODE === 'visuel' ? ' on' : '') + '" id="f-m-vis">${T("Visuel")}</button>'
       + '<button class="mini' + (BMODE === 'html' ? ' on' : '') + '" id="f-m-htm">HTML</button>'
@@ -745,9 +806,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       + '<textarea id="f-html" spellcheck="false"'
       + (BMODE === 'visuel' ? ' style="display:none"' : '') + '>' + esc(c.html || '') + '</textarea>'
       + ligneVars(VARS_CAMP) + '</div>'
-      + '<div class="apercu" id="f-apercu-bloc" style="display:none">'
-      + '<div class="chrome"><span class="ic">✉</span> ${T("Aperçu — marie@example.com")}</div>'
-      + '<iframe id="f-frame" sandbox=""></iframe></div>'
+      + apercuBloc()
+      + '</div></div>'
       + '<div class="fin3"><span class="gauche aide">${T("Enregistrée en <strong>brouillon</strong> : ")}'
       + '${T("rien ne part tant que vous n’appuyez pas sur « Envoyer ».")}</span>'
       + '<button id="f-annuler">${T("Annuler")}</button>'
@@ -760,6 +820,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     var h = '<div class="carte form">'
       + '<h3 style="margin:0 0 .6rem;font:700 .92rem/1.3 system-ui,sans-serif">'
       + (f.id ? '${T("Modifier la chaîne")}' : '${T("Nouvelle chaîne")}') + '</h3>'
+      // Deux colonnes (2026-10-12) : la chaine a gauche, ses etapes a droite.
+      + '<div class="fcols"><div class="fcol">'
       + '<div class="rang">'
       + '<div class="champ"><span class="lbl">${T("Nom")}</span>'
       + '<input id="f-nom" aria-label="${T("Nom de la chaîne")}" value="' + esc(ch.nom || '') + '" placeholder="${T("Bienvenue en trois temps")}"></div>'
@@ -775,18 +837,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       + '<option value="active"' + (ch.statut !== 'paused' ? ' selected' : '') + '>${T("Active")}</option>'
       + '<option value="paused"' + (ch.statut === 'paused' ? ' selected' : '') + '>${T("Suspendue")}</option>'
       + '</select></div></div>'
-      + '<div class="barreoutils" style="margin:.5rem 0 .4rem">'
+      + ligneVars(VARS_CHAINE, '${T("Les variables de panier ne se remplissent que dans une chaîne")} '
+          + '${T("dont le déclencheur est <strong>Panier abandonné</strong>. Ailleurs, elles ressortent vides.")}')
+      + '</div><div class="fcol">'
+      + '<div class="barreoutils" style="margin:0 0 .4rem">'
       + '<strong style="font-size:.8rem">${T("Étapes")}</strong>'
       + '<button class="mini" id="f-etape-plus">${T("+ Ajouter une étape")}</button></div>'
       + '<div id="f-etapes">' + vueEtapes() + '</div>'
-      + ligneVars(VARS_CHAINE, '${T("Les variables de panier ne se remplissent que dans une chaîne")} '
-          + '${T("dont le déclencheur est <strong>Panier abandonné</strong>. Ailleurs, elles ressortent vides.")}')
-      + '<div class="apercu" id="f-apercu-bloc" style="display:none">'
-      + '<div class="chrome"><span class="ic">✉</span> ${T("Aperçu — marie@example.com")}</div>'
-      + '<iframe id="f-frame" sandbox=""></iframe></div>'
+      + apercuBloc()
+      + '</div></div>'
       + '<div class="fin3"><button id="f-annuler">${T("Annuler")}</button>'
       + '<button class="prim" id="f-ok">${T("Enregistrer")}</button></div></div>';
     return h;
+  }
+
+  /* L apercu du courriel, pose par-dessus la colonne de droite : il se ferme par son
+     bouton, et le formulaire n a jamais a defiler pour le montrer. */
+  function apercuBloc(){
+    return '<div class="apercu" id="f-apercu-bloc" style="display:none">'
+      + '<div class="chrome"><span class="ic">✉</span> ${T("Aperçu — marie@example.com")}'
+      + '<button type="button" class="mini" id="f-apercu-x">${T("Fermer l’aperçu")}</button></div>'
+      + '<iframe id="f-frame" sandbox=""></iframe></div>';
   }
 
   function vueEtapes(){
@@ -800,7 +871,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
        de pastilles choisit celle qu on edite ; les autres restent dans ETAPES. */
     if (ESEL >= et.length) ESEL = et.length - 1;
     if (ESEL < 0) ESEL = 0;
-    var chips = '<div class="etapes-choix">' + et.map(function(s, i){
+    // Les pastilles en PAGES mesurees (deux rangees au plus) : la selectionnee reste en vue.
+    var chips = '<div class="etapes-choix" data-pages="campagnes-etapes">' + et.map(function(s, i){
       return '<button type="button" data-etsel="' + i + '" class="' + (i === ESEL ? 'on' : '') + '">${T("Étape")} ' + (i + 1)
         + (s.sujet ? ' · ' + esc(String(s.sujet).slice(0, 22)) : '') + '</button>'; }).join('') + '</div>';
     return chips + et.map(function(s, i){
@@ -853,8 +925,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
 
   function redessinerEtapes(){
     releverEtapes();
+    poserEtapes();
+  }
+
+  /* Repeint les etapes PUIS ouvre la page de la pastille choisie : une etape
+     ajoutee (le nombre change, le socle revient en page 1) ou deplacee reste en vue. */
+  function poserEtapes(){
     var z = document.getElementById('f-etapes');
-    if (z) z.innerHTML = vueEtapes();
+    if (!z) return;
+    z.innerHTML = vueEtapes();
+    montrerNouveau(z.querySelector('.etapes-choix .on'));
   }
 
   /* Le catalogue des blocs, demande UNE fois. ⚠ S il n arrive pas, la palette
@@ -1001,7 +1081,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       // il ne doit ni executer de script ni atteindre cette fenetre.
       cadre.setAttribute('srcdoc', r.html);
       dire('');
-      cadre.scrollIntoView({ block: 'nearest' });
+      // Plus de scrollIntoView : l apercu est pose par-dessus la colonne, il est deja en vue
+      // (et faire defiler un corps sans glissiere le laisserait decale).
     });
   }
 
@@ -1078,7 +1159,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
         // Premier critere par defaut : le plus parlant et le plus courant.
         var d0 = (FORM.d.champs || [])[0] || { cle: 'totalDepense', ops: [{ cle: 'gte' }] };
         CRITERES.push({ champ: d0.cle, op: (d0.ops[0] || {}).cle, valeur: '' });
-        redessinerCriteres();
+        redessinerCriteres(CRITERES.length - 1);
       };
       var bc = document.getElementById('f-compter');
       if (bc) bc.onclick = compterPortee;
@@ -1188,8 +1269,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       releverEtapes();
       ETAPES.push({ sujet: '', html: '', jours: ETAPES.length === 0 ? 0 : 3, heures: 0 });
       ESEL = ETAPES.length - 1;
-      var z = document.getElementById('f-etapes');
-      if (z) z.innerHTML = vueEtapes();
+      poserEtapes();
     };
   }
 
@@ -1261,7 +1341,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       + '<strong style="font-size:.8rem">${T("Critères")}</strong>'
       + '<span class="dt">${T("toutes ces conditions doivent être remplies")}</span>'
       + '<button class="mini" id="f-crit-plus">${T("+ Ajouter un critère")}</button></div>'
-      + '<div id="f-criteres">' + vueCriteres() + '</div>'
+      // Les criteres en PAGES mesurees : un critere = un element de page.
+      + '<div id="f-criteres" data-pages="campagnes-criteres">' + vueCriteres() + '</div>'
       + '<div class="portee" id="f-portee">${T("Portée : ")}<strong id="f-portee-n">—</strong> '
       + 'sur ' + (d.abonnesActifs || 0) + ' ${T("abonnées actives")} '
       + '<button class="mini" id="f-compter">${T("Compter")}</button></div>'
@@ -1336,9 +1417,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     });
   }
 
-  function redessinerCriteres(){
+  // << voir >> : le rang du critere a montrer (ajoute, ou celui qui prend la place du retire).
+  function redessinerCriteres(voir){
     var z = document.getElementById('f-criteres');
     if (z) z.innerHTML = vueCriteres();
+    if (z && typeof voir === 'number') montrerNouveau(z.querySelectorAll('.critere')[Math.min(voir, (CRITERES || []).length - 1)]);
     var p = document.getElementById('f-portee-n');
     if (p) p.textContent = '—';   // la portee affichee ne vaut plus rien
   }
@@ -1563,6 +1646,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       corps.innerHTML = (FORM.type === 'chaine') ? vueFormChaine()
         : (FORM.type === 'segment') ? vueFormSegment() : vueFormCampagne();
       brancherForm();
+      // La page de l etape choisie (les pages survivent au redessin, la selection aussi).
+      if (FORM.type === 'chaine') montrerNouveau(corps.querySelector('.etapes-choix .on'));
       return;
     }
     // La mention suit l ONGLET affiche : dire << consultation seulement >> en
@@ -1653,16 +1738,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       var cs = t.closest('[data-critsup]');
       if (cs) {
         releverCriteres();
-        CRITERES.splice(parseInt(cs.getAttribute('data-critsup'), 10), 1);
-        redessinerCriteres();
+        var kc = parseInt(cs.getAttribute('data-critsup'), 10);
+        CRITERES.splice(kc, 1);
+        redessinerCriteres(kc);
         return;
       }
       var esl = t.closest('[data-etsel]');
       if (esl) {
         releverEtapes();
         ESEL = parseInt(esl.getAttribute('data-etsel'), 10) || 0;
-        var zs = document.getElementById('f-etapes');
-        if (zs) zs.innerHTML = vueEtapes();
+        poserEtapes();
         return;
       }
       var sup = t.closest('[data-etsup]');
@@ -1670,8 +1755,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
         releverEtapes();
         ETAPES.splice(parseInt(sup.getAttribute('data-etsup'), 10), 1);
         ESEL = Math.max(0, ESEL - 1);
-        var z1 = document.getElementById('f-etapes');
-        if (z1) z1.innerHTML = vueEtapes();
+        poserEtapes();
         return;
       }
       var mnt = t.closest('[data-mont]');
@@ -1682,8 +1766,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
         var j0 = mnt ? i0 - 1 : i0 + 1;
         var tmp = ETAPES[i0]; ETAPES[i0] = ETAPES[j0]; ETAPES[j0] = tmp;
         ESEL = j0;
-        var z2 = document.getElementById('f-etapes');
-        if (z2) z2.innerHTML = vueEtapes();
+        poserEtapes();
         return;
       }
       var etc = t.closest('[data-etcharger]');
@@ -1699,6 +1782,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
           if (s2 && !s2.value.trim()) s2.value = r.sujet;
           dire('${T("Modèle «")} ' + esc(r.nom) + ' ${T("» chargé dans l’étape")} ' + (parseInt(ic, 10) + 1) + '.', 'bon');
         });
+        return;
+      }
+      if (t.closest('#f-apercu-x')) {
+        var ab = document.getElementById('f-apercu-bloc');
+        if (ab) ab.style.display = 'none';
         return;
       }
       var eta = t.closest('[data-etapercu]');
@@ -1876,7 +1964,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     var def = champDef(c.champ);
     c.op = (def && def.ops[0]) ? def.ops[0].cle : 'eq';
     c.valeur = '';
-    redessinerCriteres();
+    redessinerCriteres(parseInt(i, 10));
   });
 
   function charger(){

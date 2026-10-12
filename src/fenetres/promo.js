@@ -164,6 +164,8 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
    sa hauteur a pleine largeur et poussait la planche et ses boutons hors de la
    fenetre (+528 px a la sonde, des que son image temoin a eu une vraie taille). */
 .colapercu .gapercu img{max-height:19rem;width:auto;max-width:100%;object-fit:contain}
+/* Fenetre basse (detachee, 2026-10-12 : 46 px de trop) : l apercu cede la place, le formulaire reste entier. */
+@media (max-height:820px){.colapercu .gapercu img{max-height:13rem}.colapercu .gapercu{min-height:6rem}.rang{padding-top:.12rem!important;padding-bottom:.12rem!important}.champ{margin-bottom:.4rem!important}.champ input,.champ select{padding-top:.3rem!important;padding-bottom:.3rem!important}}
 .gapercu{background:#f2f2f2;border-radius:10px;min-height:9rem;display:flex;
   align-items:center;justify-content:center;padding:.5rem;overflow:hidden}
 /* ⚠ << 100% >> ET NON PLUS 16rem. Agrandir le cadre en laissant le plafond a

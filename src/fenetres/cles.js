@@ -40,10 +40,14 @@ body{background:var(--f-page);color:var(--tx);
 .ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;
   padding:.5rem .7rem;font-size:.78rem}
-.corps{flex:1 1 auto;min-height:0;padding:.7rem 1.05rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.7rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:1rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* ➡ FENETRE ETROITE (2026-10-12, << aucun scroll bar >>) : a 1080 px le mur de cartes depassait de 174 px.
+   Sous 1240 px, la rangee devient une GRILLE paginee par rangees (data-pages pose par regimeCles) ; au-dessus,
+   le mur reste, il tient. */
+.rangee.grillee{display:grid;grid-template-columns:repeat(auto-fill,minmax(19.5rem,1fr));gap:.65rem .8rem;
+  align-items:start;columns:auto;flex:1 1 auto;min-height:0}
+.rangee.grillee > *{margin:0;display:flex}
 /* ⚠ LES CARTES D UNE MEME RANGEE SE TERMINENT A LA MEME HAUTEUR (2026-08-10) :
    pas d align-items:start, sinon la rangee finit en escalier. */
 /* Colonnes automatiques d au moins 19,5 rem : quatre a 1400 px au lieu de deux —
@@ -262,6 +266,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<button data-retirer="' + k + '"' + (RO ? ' disabled' : '') + '>${T("Retirer")}</button>';
   }
 
+  /* Mur ou grille paginee selon la largeur (voir .rangee.grillee). En repassant au mur, on rend visibles les
+     cartes masquees par les pages et on retire le pied. */
+  function regimeCles(){
+    var r = corps.querySelector('.rangee');
+    if (!r) return;
+    var etroit = window.innerWidth < 1240;
+    if (etroit && !r.hasAttribute('data-pages')) { r.classList.add('grillee'); r.setAttribute('data-pages', 'cles'); }
+    else if (!etroit && r.hasAttribute('data-pages')) {
+      r.classList.remove('grillee'); r.removeAttribute('data-pages');
+      for (var i = 0; i < r.children.length; i++) r.children[i].style.display = '';
+      var p = r.nextElementSibling; if (p && p.classList.contains('sz-pages')) p.parentNode.removeChild(p);
+    }
+  }
+  window.addEventListener('resize', regimeCles);
+
   function dessiner(){
     var av = document.getElementById('ro');
     if (av) av.hidden = !RO;
@@ -277,6 +296,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
     h.push('</div>');
     corps.innerHTML = h.join('');
+    regimeCles();
     brancher();
     bsave.disabled = RO || OCCUPE;
   }
