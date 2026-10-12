@@ -28,9 +28,13 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
   border-bottom:1px solid var(--v08);background:linear-gradient(180deg,#131c2b,#0e1522)}
 .ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
-.corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+.corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow:hidden}
+/* DEUX COLONNES SOUS L ETAT (2026-10-12, sa regle : << aucun scroll bar >>) : empilees, les protections,
+   l explication et la Liste VIP depassaient de 137 px a 1400 x 833. A gauche ce qui se lit, a droite ce
+   qui se regle. */
+.deux-col{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:1.1rem;align-items:start}
+.deux-col>.vip{margin:0}
+.deux-col .prot{margin-bottom:.9rem}
 .etat{border-radius:12px;padding:1.25rem 1.4rem;margin:0 0 1.2rem;border:2px solid}
 .etat .lg{font-size:1.05rem;font-weight:700;margin:0 0 .2rem}
 .etat .ds{font-size:.82rem;color:var(--tx2)}
@@ -154,7 +158,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (RO ? '' : '<button class="bsc" id="b-bascule" style="background:' + btnCoul + '">' + esc(btnTxt) + '</button>')
       + '</div>' + src + '</div>';
 
-    h += '<div class="h4">${T("Mesures de protection")}</div><div class="prot">'
+    h += '<div class="deux-col"><div class="gauche"><div class="h4">${T("Mesures de protection")}</div><div class="prot">'
       + protLigne('robots.txt', '${T("servi par Cloudflare, pas par ce site : ce bouton ne le change pas")}')
       + protLigne('${T("X-Robots-Tag HTTP")}', enLigne ? '${T("en-tête retiré")}' : '${T("noindex, nofollow sur toutes les pages")}')
       + protLigne('${T("Meta robots HTML")}', enLigne ? '${T("balise retirée")}' : '${T("noindex dans chaque page")}')
@@ -167,9 +171,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '${T("<code>meta robots</code> — effet immédiat, sans redéploiement. <b>Mais l’état durable, c’est la variable ")}'
       + '${T("Render <code>ELG_LAUNCHED</code></b> : chaque déploiement reconstruit le serveur et repose le drapeau selon ")}'
       + '${T("elle. Pour lancer <b>pour de bon</b> : <code>ELG_LAUNCHED=1</code> dans Render. Sans elle, le défaut est ")}'
-      + '${T("« pré-lancement ».")}</div>';
+      + '${T("« pré-lancement ».")}</div></div>';
 
-    h += '<div class="vip" id="vip-zone"></div>';
+    h += '<div class="vip" id="vip-zone"></div></div>';
     relever();
     corps.innerHTML = h;
     var b = document.getElementById('b-bascule');

@@ -934,7 +934,10 @@ function szPagesAjuster(c){
   var bas = rc.top + c.clientHeight - (parseFloat(getComputedStyle(c).paddingBottom) || 0);
   var r0 = els[0].getBoundingClientRect();
   var dispo = bas - r0.top;
-  if (!(c.clientHeight > 0) || !(dispo > 0)) { pied.innerHTML = ''; pied.style.display = 'none'; return; }
+  if (!(c.clientHeight > 0)) { pied.innerHTML = ''; pied.style.display = 'none'; return; }
+  // Le conteneur a une hauteur mais le premier element n y entre pas (ce qui est au-dessus a tout pris) :
+  // une ligne par page plutot que tout montrer — montrer tout, c est deborder.
+  if (!(dispo > 0)) dispo = 1;
   // Les lignes visuelles (meme haut, a 2 px pres).
   var lignes = [], derTop = null;
   for (var j = 0; j < els.length; j++) {

@@ -41,10 +41,9 @@ body{background:var(--f-page);color:var(--tx);
 .ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;
   padding:.5rem .7rem;font-size:.78rem}
-.corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:1rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+.corps>*{flex:0 0 auto}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.8rem 1.1rem;min-width:0}
 .carte h2{margin:0 0 .2rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
@@ -272,10 +271,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var e = (D && D.echeances) || [];
     if (!e.length) return '';
     var passees = e.filter(function(x){ return x.expire; }).length;
-    var l = e.map(function(x){
+    /* Un AVIS, pas une liste (2026-10-12, << aucun scroll bar >>) : les quatre premieres echeances, puis
+       le compte du reste — chaque pays garde son etat dans le tableau, pagine, juste dessous. */
+    var l = e.slice(0, 4).map(function(x){
       return '<li>' + esc(x.nom) + ' — ' + esc(FLUX_NOMS[x.flux] || x.flux)
         + ' — ' + esc(szJour(x.valideJusqu)) + (x.expire ? ' ${T("(échue)")}' : '') + '</li>';
-    }).join('');
+    }).join('') + (e.length > 4 ? '<li>' + '${T("et {0} autres")}'.replace('{0}', e.length - 4) + '</li>' : '');
     return '<div class="avis ' + (passees ? 'dur' : '') + '">'
       + (passees ? '${T("Des adhésions sont ÉCHUES. Une adhésion expirée vaut une adhésion absente : le pays se referme.")}'
                  : '${T("Des adhésions arrivent à échéance dans les quatre prochains mois.")}')
@@ -299,11 +300,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + esc('${T("Ouvrir le dossier de ")}' + l.nom) + '">'
         + ((l.cc === OUVERT) ? '${T("Fermer")}' : '${T("Ouvrir")}') + '</button></td></tr>';
     }).join('');
-    return '<div class="carte"><div class="tete"><h2>${T("Les 27 États membres")}</h2>'
+    // Les pays en PAGES mesurees (2026-10-12, sa regle : << aucun scroll bar >>) : la carte prend la place qui reste.
+    return '<div class="carte sz-pagee"><div class="tete"><h2>${T("Les 27 États membres")}</h2>'
       + '<p class="sous">${T("Un pays fermé disparaît du choix à la caisse et la commande y est refusée.")}</p></div>'
-      + '<table><thead><tr><th>${T("Pays")}</th><th>${T("État")}</th>'
+      + '<div data-pages="pays"><table><thead><tr><th>${T("Pays")}</th><th>${T("État")}</th>'
       + '<th>${T("Bloquants")}</th><th>${T("À confirmer")}</th><th>${T("Mandats")}</th>'
-      + '<th class="dr">${T("Dossier")}</th></tr></thead><tbody>' + lignes + '</tbody></table>'
+      + '<th class="dr">${T("Dossier")}</th></tr></thead><tbody>' + lignes + '</tbody></table></div>'
       /* Le pied ferme le tableau et porte l export (2026-09-24). ⚠ IL VA DANS
          LA CARTE DU TABLEAU, pas au bas du corps : cet ecran empile quatre
          cartes (echeances, identite, tableau, dossier), et un pied pose tout

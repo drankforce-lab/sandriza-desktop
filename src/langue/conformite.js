@@ -182,4 +182,6 @@ module.exports = {
   'Commandes de 150 € d’articles et moins : la TVA du pays est ajoutée au total. Au-delà, la commande part en DAP par Postes Canada et le client paie à l’arrivée. Sans numéro IOSS, rien ne s’applique.':
     'Orders of €150 of items or less: the country’s VAT is added to the total. Above that, the order ships DAP by Canada Post and the customer pays on arrival. Without an IOSS number, nothing applies.',
   'Taux de change : 1 $ CA = … €': 'Exchange rate: CA$1 = … €',
+  /* ── L avis des echeances borne (2026-10-12) */
+  "et {0} autres": "and {0} more",
 };
