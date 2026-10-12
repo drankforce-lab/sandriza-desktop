@@ -4617,10 +4617,13 @@ const THEMES_CONNUS = ['carbone', 'defaut', 'ocean', 'violet', 'ardoise', 'graph
    possible par le menu, et la coquille ne le reprend plus. */
 const _themeCouleur = () => {
   try {
-    if (!reglages.get('carboneAdopte')) {
-      const t0 = reglages.get('themeCouleur');
-      if (!t0 || t0 === 'defaut') reglages.set('themeCouleur', 'carbone');
+    /* ⚠ 2ᵉ ADOPTION (2026-10-12) : la 1ʳᵉ gardait un jeu choisi exprès — son poste, resté sur Ardoise, n a
+       jamais vu Carbone (« je ne vois le nouveau thème nulle part »). Sa demande était « partout » : CHAQUE
+       poste passe à Carbone UNE fois, quel que soit son jeu d avant ; le menu permet ensuite d en changer. */
+    if (!reglages.get('carboneImpose')) {
+      reglages.set('themeCouleur', 'carbone');
       reglages.set('carboneAdopte', true);
+      reglages.set('carboneImpose', true);
     }
   } catch {}
   const t = String(reglages.get('themeCouleur') || 'carbone');
