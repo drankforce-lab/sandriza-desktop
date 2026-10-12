@@ -276,8 +276,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
       : '<span class="rf-pill">${T("jusqu’à épuisement")}</span>';
     var cc = /^#[0-9a-f]{3,8}$/i.test(l.couleur || '') ? l.couleur : '';
     return '<tr>'
-      + '<td><div class="rf-prod"><span class="rf-av' + (cc ? ' tc" style="--cc:' + cc : '') + '" title="' + esc(szTd(l.categorie || ''))
-      +   '" aria-hidden="true">' + esc(String(szTd(l.categorie) || l.nom || '?').charAt(0).toUpperCase()) + '</span>'
+      + '<td><div class="rf-prod">' + szVignette(l.image, szTd(l.categorie) || l.nom, cc, szTd(l.categorie || ''))
       +   '<div style="min-width:0"><div class="rf-nom">' + esc(l.nom) + '</div>'
       +   '<div class="rf-sous">' + (l.sku ? '<span class="rf-code">' + esc(l.sku) + '</span><span>·</span>' : '')
       +   '<span>' + esc(szTd(l.categorie)) + '</span></div></div></div></td>'

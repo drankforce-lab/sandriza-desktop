@@ -142,11 +142,10 @@ tbody tr.prio td:first-child{box-shadow:inset 3px 0 0 var(--tx-att)}
    direct (sondage des verrous, 3 s) ; il est RELU au clic avant d ouvrir quoi que ce soit. */
 td.geste{width:2.6rem;text-align:right}
 button.eclair{display:inline-flex;align-items:center;justify-content:center;width:2.1rem;height:2.1rem;padding:0;
-  border-radius:9px;border:1px solid rgba(201,169,126,.6);background:rgba(201,169,126,.2);color:#e2c49a;cursor:pointer}
+  border-radius:9px;border:1px solid rgba(201,169,126,.6);background:rgba(201,169,126,.2);color:var(--tx-or);cursor:pointer}
 button.eclair svg{width:16px;height:16px;fill:currentColor}
 button.eclair:hover:not(:disabled){background:#c9a97e;color:#1a1208;border-color:#c9a97e}
 button.eclair:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(1)}
-html.jour button.eclair{color:#7a5a2c;border-color:rgba(122,90,44,.4);background:rgba(201,169,126,.16)}
 /* Une ligne recente s ouvre au clic : la main le dit (le survol vient du socle). */
 tbody tr.ouvrable{cursor:pointer}
 /* Le cadenas : la pastille du socle (CSS_REFONTE), plus de regle locale. */

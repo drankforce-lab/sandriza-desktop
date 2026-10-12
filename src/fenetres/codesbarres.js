@@ -319,8 +319,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('codesbarres')}
                 + (r.stock > 0 ? ' <button class="mini" data-toutstock="' + esc(r.id) + '" title="${T("Ajouter toutes les variantes en stock (quantité = stock)")}">${T("+ Stock")}</button>' : '')
               : '<span class="dt">${T("SKU requis")}</span>';
             return '<tr>'
-              + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">'
-              + esc(String(szTd(r.categorie) || r.nom || '?').charAt(0).toUpperCase()) + '</span>'
+              + '<td><div class="rf-prod">' + szVignette(r.image, szTd(r.categorie) || r.nom, r.couleurCat, szTd(r.categorie || ''))
               + '<div style="min-width:0"><div class="rf-nom">' + esc(r.nom) + '</div>'
               + '<div class="rf-sous">' + (r.sku ? '<span class="rf-code">' + esc(r.sku) + '</span>' : '<span>${T("sans SKU")}</span>')
               + (r.categorie ? '<span>·</span><span>' + esc(szTd(r.categorie)) + '</span>' : '') + '</div></div></div></td>'

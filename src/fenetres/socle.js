@@ -1835,6 +1835,21 @@ function szNombre(n, dec){
    en francais 0 et 1 sont au singulier (« 0 produit », « 1 produit »), en
    anglais seul 1 l est (« 0 products »). Remplace les « produit(s) » : une
    fenetre qui sait compter n a pas a laisser le lecteur accorder. */
+/* LA VIGNETTE D UN PRODUIT DANS UNE LISTE (2026-10-12, sa demande : << la photo de mon article dans le
+   petit rond >>, et en compact << simplement un point >>). La photo est posee PAR-DESSUS l initiale : si
+   elle ne se charge pas, elle s efface et l initiale reste. En compact (.compacte), le rond devient un
+   point a la couleur de la categorie (CSS_REFONTE). Seule une adresse https passe. */
+function szVignette(url, ini, cc, titre){
+  var e = function(x){ return String(x == null ? '' : x).replace(/[&<>"]/g, function(c){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); };
+  var coul = /^#[0-9a-f]{3,8}$/i.test(cc || '') ? cc : '';
+  var ok = /^https:[/][/]/i.test(String(url || ''));
+  return '<span class="rf-av sz-vig' + (coul ? ' tc' : '') + (ok ? ' a-photo' : '') + '"'
+    + (coul ? ' style="--cc:' + coul + '"' : '') + ' title="' + e(titre) + '" aria-hidden="true">'
+    + (ok ? '<img src="' + e(url) + '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"'
+      + ' data-c="a-photo" onerror="this.parentNode.classList.remove(this.dataset.c);this.remove()">' : '')
+    + '<b>' + e(String(ini || '?').charAt(0).toUpperCase()) + '</b></span>';
+}
 function szPl(n, sing, plur){
   var v = Math.abs(Number(n) || 0);
   var en = ${LANGUE.langueCourante() === 'en' ? 'true' : 'false'};
@@ -3637,6 +3652,15 @@ input,select,textarea{border-radius:9px}
 .rf-prod{display:flex;align-items:center;gap:.75rem;min-width:0}
 .rf-av{width:2.4rem;height:2.4rem;flex:0 0 auto;border-radius:99px;display:flex;align-items:center;
   justify-content:center;font-weight:800;font-size:.86rem;background:var(--v06);border:1px solid var(--v08);color:var(--tx-gris2)}
+.sz-vig{position:relative;overflow:hidden}
+.sz-vig>b{font-weight:800}
+.sz-vig>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#fff;border-radius:inherit}
+.sz-vig.a-photo{border-color:var(--v12);background:#fff}
+/* EN COMPACT : un point a la couleur de la categorie, cerne d un halo de la meme teinte — sobre, lisible. */
+.compacte .sz-vig{width:.62rem!important;height:.62rem!important;min-width:0!important;border:0!important;padding:0!important;
+  border-radius:99px!important;background:var(--cc,#8a94a6)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--cc,#8a94a6) 22%,transparent);
+  margin:0 .25rem 0 .2rem;align-self:center}
+.compacte .sz-vig>img,.compacte .sz-vig>b{display:none}
 .rf-nom{font-size:.93rem;font-weight:700;color:var(--tx)}
 .rf-sous{display:flex;align-items:center;gap:.4rem;font-size:.74rem;color:var(--tx2);margin-top:.12rem;flex-wrap:wrap}
 .rf-code{font-family:ui-monospace,monospace;font-size:.72rem;color:var(--tx2)}

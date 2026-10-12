@@ -117,7 +117,6 @@ td.c,th.c{width:2rem;text-align:center}
 /* L AFFICHAGE COMPACT (2026-10-12, le meme que l Inventaire) : une ligne par produit, nom et categorie
    cote a cote, pastille plus petite. La pagination mesuree en tire plus de lignes. */
 .liste.compacte tbody td{padding-top:.2rem!important;padding-bottom:.2rem!important}
-.liste.compacte .rf-av{width:1.6rem!important;height:1.6rem!important;font-size:.75rem!important;border-radius:7px!important}
 .liste.compacte .rf-prod>div{display:flex;align-items:baseline;gap:.7rem;min-width:0}
 .liste.compacte .rf-nom{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .liste.compacte .rf-sous{margin-top:0!important;white-space:nowrap}
@@ -408,8 +407,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
               + ' title="' + (LOT ? '${T("Cliquer pour sélectionner")}' : '${T("Ouvrir la fiche")}') + '">'
               + (LOT ? '<td class="c"><input type="checkbox" data-coche="' + esc(r.id) + '" aria-label="' + esc('${T("Sélectionner")} ' + r.nom) + '"'
                   + (COCHES[r.id] ? ' checked' : '') + '></td>' : '')
-              + '<td><div class="rf-prod"><span class="rf-av' + (cc ? ' tc" style="--cc:' + cc : '') + '" title="'
-              + esc(szTd(r.categorie || '')) + '" aria-hidden="true">' + esc(ini) + '</span>'
+              + '<td><div class="rf-prod">' + szVignette(r.image, ini, cc, szTd(r.categorie || ''))
               + '<div style="min-width:0"><div class="rf-nom">' + esc(r.nom) + szVerrouCase('products', r.id) + badges + '</div>'
               + '<div class="rf-sous"><span>' + esc(szTd(r.categorie || '—')) + '</span>'
               + (r.tag ? '<span>·</span><span>' + esc(r.tag) + '</span>' : '') + '</div></div></div></td>'

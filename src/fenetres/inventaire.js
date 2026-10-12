@@ -1134,8 +1134,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
         }
         var initiale = String(l.categorieNom || l.categorie || '?').charAt(0).toUpperCase();
         h += '<tr data-ligne="' + esc(l.id) + '" title="${T("Cliquer pour modifier la fiche produit")}">'
-          + '<td><div class="prod"><span class="cat' + (/^#[0-9a-f]{3,8}$/i.test(l.couleurCat || '') ? ' tc" style="--cc:' + l.couleurCat : '')
-          +   '" title="' + esc(l.categorieNom) + '">' + esc(initiale) + '</span>'
+          + '<td><div class="prod">' + szVignette(l.image, initiale, l.couleurCat, l.categorieNom)
           +   '<div style="min-width:0"><div class="l1"><span class="nom">' + esc(l.nom) + '</span>'
           +     (l.enVente ? '<span class="badge vente">${T("En vente")}</span>' : '')
           +     (l.venteFinale ? '<span class="badge finale">${T("Vente finale")}</span>' : '') + '</div>'
