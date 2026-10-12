@@ -79,6 +79,8 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .tz-haut>.carte{margin:0}
 .tz-choix{display:flex;gap:.35rem;flex-wrap:wrap;align-items:center}
 .tz-choix button.on{background:rgba(201,169,126,.16);border-color:rgba(201,169,126,.45);color:var(--tx-e6cfa8);font-weight:700}
+/* Mode jour : le brun du jour (#756a56) faisait 4,28 sur ce fond dore — un cran plus sombre, meme teinte. */
+html.jour .tz-choix button.on{color:#5f5442}
 .corps>#corps>.tz-choix[data-pages]{flex:0 0 auto;max-height:5.2rem}
 .carte{background:var(--v03);border:1px solid var(--v08);border-radius:12px;padding:1.1rem 1.2rem;margin:0 0 1.1rem}
 .carte h3{margin:0 0 .2rem;font:700 1rem/1.2 ${T("Georgia")},serif}
