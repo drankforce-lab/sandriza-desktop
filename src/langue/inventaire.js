@@ -19,6 +19,9 @@
  */
 
 module.exports = {
+  'Ouvrir la fiche d’inventaire': 'Open the inventory sheet',
+  'seuil': 'threshold',
+  'rabais global': 'whole-sale discount',
   'Sous le seuil': 'Below threshold',
   'Affichage de la liste': 'List view',
   'Affichage détaillé': 'Detailed view',
