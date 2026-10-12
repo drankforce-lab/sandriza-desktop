@@ -87,6 +87,14 @@ function mesurer(racine, contexte) {
     var zn = ze.tagName.toLowerCase() + (ze.id ? '#' + ze.id : '') + (ze.classList && ze.classList.length ? '.' + ze.classList[0] : '');
     zones.push(zn + (dv ? ' V+' + (ze.scrollHeight - ze.clientHeight) : '') + (dh ? ' H+' + (ze.scrollWidth - ze.clientWidth) : ''));
   }
+  // Les listes en pages (JS_PAGES) : elements visibles / total, et le pied — preuve que la page n est pas COUPEE.
+  var pgs = racine.querySelectorAll('[data-pages]');
+  for (var q = 0; q < pgs.length; q++) {
+    var pc = pgs[q], tbq = pc.querySelector('tbody'), srcq = tbq || pc, tot = 0, vis = 0;
+    for (var w = 0; w < srcq.children.length; w++) { var ew = srcq.children[w]; if (ew.classList && ew.classList.contains('sz-pages')) continue; tot++; if (ew.style.display !== 'none') vis++; }
+    var pq = pc.nextElementSibling, ptxt = pq && pq.classList && pq.classList.contains('sz-pages') ? (pq.textContent || '').replace(/\s+/g, ' ').trim() : '';
+    dit('PAG|' + contexte + '|' + pc.getAttribute('data-pages') + '|' + vis + '/' + tot + '|' + ptxt.replace(/\|/g, ' '));
+  }
   dit('ZON|' + contexte + '|' + zones.length + '|' + zones.slice(0, 6).join(' ; ').replace(/\|/g, ' '));
   dit('DEB|' + contexte + '|' + vw + 'x' + vh + '|' + pageH + '|' + pageW + '|' + n + '|' + defilants + '|' + vus + '|' + hors.join(' ; '));
 }

@@ -867,6 +867,136 @@ function szAutoPagination(selecteur, surChangement){
 }
 `;
 
+/* ══ LES PAGES SANS GLISSIERE, POUR TOUTE LISTE QUI GRANDIT (2026-10-12) ═════
+   Sa regle : << aucun scroll bar dans l application >>, puis << il faut que les
+   ajouts de donnees soient tous sous controle de pagination, pour ne pas creer
+   des deformations ou des barres de defilement >>. L audit au rendu
+   (banc-debordement --gros) : 69 fenetres defilaient a 120 elements.
+
+   Le mecanisme est POSE UNE FOIS ICI et chaque fenetre n a qu a MARQUER sa liste :
+     <div class="liste" data-pages="abonnes"> ... </div>
+   Le conteneur marque doit avoir une hauteur BORNEE (enfant flex avec
+   min-height:0) : c est sa hauteur reelle qui decide combien d elements tiennent.
+   Les elements sont les lignes du premier <tbody> s il y a un tableau, sinon les
+   enfants directs. On les regroupe par LIGNE VISUELLE (meme haut) : une grille de
+   cartes se pagine par rangees, une table par lignes, une pile de blocs par blocs
+   — hauteurs variables comprises (decoupage glouton, mesure, jamais devine).
+   Ce qui depasse est masque (display:none) et un pied << ‹ › 1–25 sur 120 · page
+   1 / 5 >> est pose juste APRES le conteneur. Tout se refait seul : a chaque
+   redessin (MutationObserver) et a chaque redimensionnement.
+   La page courante survit aux redessins (par cle), et revient a 1 quand le
+   nombre d elements change (recherche, filtre).
+   ⚠ MESURE ABSURDE (hauteur nulle : rien n est dispose, ou un onglet cache) :
+   on ne masque rien. */
+const JS_PAGES = () => `
+var _szPg = { pages: {}, obs: null, file: false };
+function _szPgElements(c){
+  var tb = c.querySelector('tbody');
+  var src = tb || c;
+  var out = [];
+  for (var i = 0; i < src.children.length; i++) {
+    var e = src.children[i];
+    if (e.classList && e.classList.contains('sz-pages')) continue;
+    if (e.tagName === 'TEMPLATE' || e.tagName === 'SCRIPT' || e.tagName === 'STYLE') continue;
+    out.push(e);
+  }
+  return out;
+}
+function _szPgPied(c){
+  var cle = c.getAttribute('data-pages') || '';
+  var p = c.nextElementSibling;
+  if (p && p.classList && p.classList.contains('sz-pages') && p.getAttribute('data-pour') === cle) return p;
+  p = document.createElement('div');
+  p.className = 'sz-pages';
+  p.setAttribute('data-pour', cle);
+  c.parentNode.insertBefore(p, c.nextSibling);
+  p.addEventListener('click', function(ev){
+    var b = ev.target.closest('[data-szpg]'); if (!b || b.disabled) return;
+    var st = _szPg.pages[cle] || (_szPg.pages[cle] = { page: 0, n: -1 });
+    st.page = Math.max(0, st.page + parseInt(b.getAttribute('data-szpg'), 10));
+    var prec = p.previousElementSibling;
+    if (prec && prec.getAttribute('data-pages') === cle) szPagesAjuster(prec);
+  });
+  return p;
+}
+function szPagesAjuster(c){
+  if (!c || !c.isConnected || !c.parentNode) return;
+  var cle = c.getAttribute('data-pages') || '';
+  var st = _szPg.pages[cle] || (_szPg.pages[cle] = { page: 0, n: -1 });
+  var els = _szPgElements(c);
+  var pied = _szPgPied(c);
+  if (els.length !== st.n) { st.page = 0; st.n = els.length; }
+  for (var i = 0; i < els.length; i++) els[i].style.display = '';
+  if (!els.length) { pied.innerHTML = ''; pied.style.display = 'none'; return; }
+  pied.style.display = '';
+  // Hauteur offerte : du haut du premier element au bas visible du conteneur.
+  var rc = c.getBoundingClientRect();
+  var bas = rc.top + c.clientHeight - (parseFloat(getComputedStyle(c).paddingBottom) || 0);
+  var r0 = els[0].getBoundingClientRect();
+  var dispo = bas - r0.top;
+  if (!(c.clientHeight > 0) || !(dispo > 0)) { pied.innerHTML = ''; pied.style.display = 'none'; return; }
+  // Les lignes visuelles (meme haut, a 2 px pres).
+  var lignes = [], derTop = null;
+  for (var j = 0; j < els.length; j++) {
+    var r = els[j].getBoundingClientRect();
+    if (!(r.height > 0)) continue;
+    if (derTop === null || Math.abs(r.top - derTop) > 2) { lignes.push({ top: r.top, bas: r.bottom, el: [els[j]] }); derTop = r.top; }
+    else { var L = lignes[lignes.length - 1]; L.el.push(els[j]); if (r.bottom > L.bas) L.bas = r.bottom; }
+  }
+  if (!lignes.length) { pied.innerHTML = ''; pied.style.display = 'none'; return; }
+  // Decoupage glouton : une page prend des lignes tant que leur bas tient dans la hauteur offerte.
+  var pages = [], deb = 0;
+  while (deb < lignes.length) {
+    var org = lignes[deb].top, fin = deb;
+    while (fin + 1 < lignes.length && lignes[fin + 1].bas - org <= dispo + 1) fin++;
+    pages.push([deb, fin]);
+    deb = fin + 1;
+  }
+  if (st.page >= pages.length) st.page = pages.length - 1;
+  var pg = pages[st.page];
+  for (var k = 0; k < lignes.length; k++) {
+    if (k >= pg[0] && k <= pg[1]) continue;
+    for (var m = 0; m < lignes[k].el.length; m++) lignes[k].el[m].style.display = 'none';
+  }
+  if (pages.length < 2) { pied.innerHTML = ''; pied.style.display = 'none'; return; }
+  var premier = 0;
+  for (var a = 0; a < pg[0]; a++) premier += lignes[a].el.length;
+  var dernier = premier;
+  for (var b2 = pg[0]; b2 <= pg[1]; b2++) dernier += lignes[b2].el.length;
+  var hAvant = c.clientHeight;
+  pied.innerHTML = '<button type="button" class="pgf" data-szpg="-1" title="${T("Page précédente")}" aria-label="${T("Page précédente")}"' + (st.page === 0 ? ' disabled' : '') + '>‹</button>'
+    + '<button type="button" class="pgf" data-szpg="1" title="${T("Page suivante")}" aria-label="${T("Page suivante")}"' + (st.page >= pages.length - 1 ? ' disabled' : '') + '>›</button>'
+    + '<span class="pos">' + (premier + 1) + '–' + dernier + ' ${T("sur")} ' + els.length + '  ·  ${T("page")} ' + (st.page + 1) + ' / ' + pages.length + '</span>';
+  // Le pied vient de prendre sa place : si le conteneur a retreci, on remesure une fois.
+  if (c.clientHeight + 1 < hAvant && !c.__szPgRe) { c.__szPgRe = true; try { szPagesAjuster(c); } finally { c.__szPgRe = false; } }
+}
+function szPagesTout(){
+  _szPg.file = false;
+  var cs = document.querySelectorAll('[data-pages]');
+  for (var i = 0; i < cs.length; i++) szPagesAjuster(cs[i]);
+}
+function _szPgPlus(){
+  if (_szPg.file) return; _szPg.file = true;
+  (window.requestAnimationFrame || setTimeout)(szPagesTout);
+}
+(function(){
+  if (typeof document === 'undefined' || !window.MutationObserver || window.__szPages) return; window.__szPages = true;
+  function demarrer(){
+    _szPg.obs = new MutationObserver(function(ms){
+      for (var i = 0; i < ms.length; i++) {
+        var t = ms[i].target;
+        if (t && t.closest && t.closest('.sz-pages')) continue;
+        _szPgPlus(); return;
+      }
+    });
+    _szPg.obs.observe(document.body, { childList: true, subtree: true });
+    window.addEventListener('resize', _szPgPlus);
+    _szPgPlus();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', demarrer); else demarrer();
+})();
+`;
+
 /* ⚠ LES ICONES TRACEES. Voir la regle de `.ico` dans CSS_JOUR : un trace, une
    seule couleur, aucun fond. Le dessin est celui de la table `IC` d admin.js,
    pour qu un ecran se reconnaisse du site a la fenetre.
@@ -1735,7 +1865,7 @@ function szInter(id, titre, aide, on, attrs){
 /* La traduction pendant la frappe (2026-10-07) : aucune chaine visible, donc pas une fabrique. */
 const JS_JUMEAUX = "/* == CHAMP FRANCAIS -> CHAMP ANGLAIS, PENDANT LA FRAPPE (2026-10-07) ==========\n   Sa demande : << on tape en francais et ca traduit en anglais >>, partout ou un\n   couple FR / (anglais) existe. Pose UNE fois, ici, pour toutes les fenetres :\n   un ecouteur delegue sur document survit aux redessins (paliers, menus IVR).\n   Le jumeau anglais se trouve :\n     A. par l identifiant : x -> x-en (ou x-fr -> x-en), x -> xEN / xEn / xen ;\n     B. par un attribut data- dans la meme ligne : v -> vEN / vEn, vFr -> vEn,\n        ou l attribut N -> Nen de meme valeur (guides de tailles) ;\n     C. ou par data-jumeau-fr=\"<id du champ francais>\" pose sur le champ anglais.\n   On ne remplit QUE si le champ anglais est vide ou porte encore la derniere\n   traduction automatique ; des qu on y tape soi-meme, il n est plus touche.\n   Le champ rempli recoit un evenement input : le brouillon et l etat << modifie >>\n   le voient. La traduction passe par le pont (langue:traduire) ; un echec ne\n   recopie JAMAIS le francais. */\n(function(){\n  if (typeof window === 'undefined' || typeof document === 'undefined' || !document.addEventListener || window.__szJumeaux) return; window.__szJumeaux = true;\n  function _jmEstTexte(e){\n    return !!(e && !e.disabled && !e.readOnly && (e.tagName === 'TEXTAREA'\n      || (e.tagName === 'INPUT' && /^(text|search|)$/i.test(e.type || ''))));\n  }\n  function _jmEstAnglais(e){\n    if (e.hasAttribute && e.hasAttribute('data-jumeau-fr')) return true;\n    if (/(-en|EN|En)$/.test(e.id || '') || /^(.+)(en)$/.test(e.id || '') && document.getElementById((e.id || '').slice(0, -2))) return true;\n    for (var i = 0; i < e.attributes.length; i++) {\n      var a = e.attributes[i];\n      if (a.name.indexOf('data-') === 0 && (/(EN|En)$/.test(a.value) || /en$/.test(a.name))) return true;\n    }\n    return false;\n  }\n  function _jmParId(id){ return id ? document.getElementById(id) : null; }\n  function _jmJumeau(fr){\n    var id = fr.id || '', c;\n    if (id) {\n      var base = id.replace(/-fr$/, '');\n      c = _jmParId(base + '-en') || _jmParId(id + 'EN') || _jmParId(id + 'En') || _jmParId(id + 'en');\n      if (c && c !== fr) return c;\n      c = document.querySelector('[data-jumeau-fr=\"' + id + '\"]');\n      if (c) return c;\n    }\n    var cands = [];\n    for (var i = 0; i < fr.attributes.length; i++) {\n      var a = fr.attributes[i];\n      if (a.name.indexOf('data-') !== 0 || !a.value || a.name === 'data-jumeau-fr') continue;\n      var v = a.value.replace(/\"/g, '');\n      cands.push('[' + a.name + '=\"' + v + 'EN\"]', '[' + a.name + '=\"' + v + 'En\"]',\n        '[' + a.name + 'en=\"' + v + '\"]');\n      if (/Fr$/.test(v)) cands.push('[' + a.name + '=\"' + v.slice(0, -2) + 'En\"]');\n    }\n    if (!cands.length) return null;\n    var sel = cands.join(','), p = fr.parentElement, n = 0;\n    while (p && n < 6) { c = p.querySelector(sel); if (c && c !== fr) return c; p = p.parentElement; n++; }\n    return null;\n  }\n  var MIN = new WeakMap(), JET = new WeakMap();\n  document.addEventListener('input', function(ev){\n    var e = ev.target;\n    if (!_jmEstTexte(e)) return;\n    if (_jmEstAnglais(e)) {\n      if (ev.isTrusted && e.value !== (e.getAttribute('data-sz-auto') || '')) e.setAttribute('data-sz-manuel', '1');\n      return;\n    }\n    var en = _jmJumeau(e);\n    if (!_jmEstTexte(en) || en.getAttribute('data-sz-manuel') === '1') return;\n    var auto = en.getAttribute('data-sz-auto') || '';\n    if (en.value && en.value !== auto) return;\n    clearTimeout(MIN.get(e));\n    var src = e.value;\n    if (!src.trim()) {\n      if (en.value && en.value === auto) { en.value = ''; en.setAttribute('data-sz-auto', ''); en.dispatchEvent(new Event('input', { bubbles: true })); }\n      return;\n    }\n    MIN.set(e, setTimeout(function(){\n      if (!window.szPont || !window.szPont.appeler) return;\n      var n = (JET.get(e) || 0) + 1; JET.set(e, n);\n      Promise.resolve(window.szPont.appeler('langue:traduire', src)).then(function(r){\n        if (JET.get(e) !== n || !r || !r.ok || !r.texte) return;\n        if (en.getAttribute('data-sz-manuel') === '1') return;\n        var a2 = en.getAttribute('data-sz-auto') || '';\n        if (en.value && en.value !== a2) return;\n        en.value = r.texte; en.setAttribute('data-sz-auto', r.texte);\n        en.dispatchEvent(new Event('input', { bubbles: true }));\n      }, function(){});\n    }, 700));\n  }, true);\n})();\n";
 const JS_DIRE = () => JS_DIRE_BASE() + JS_PLEIN() + JS_PLEIN_AUTO() + JS_FENPLEIN()
-  + JS_VERROUS() + JS_LOTS() + JS_AUTOPAGE() + JS_COMPTE() + JS_MESURES()
+  + JS_VERROUS() + JS_LOTS() + JS_AUTOPAGE() + JS_PAGES() + JS_COMPTE() + JS_MESURES()
   + JS_DATES() + JS_FINITIONS() + JS_JUMEAUX;
 
 const JS_SOCLE = () => `
@@ -3760,6 +3890,17 @@ html.jour .pf-fiche .etat.on{color:#1f6b3d}
      répartis sur deux colonnes sans logique. */
 const CSS_AIR = `
 body{line-height:1.55}
+/* Les pages sans glissiere (JS_PAGES) : le conteneur marque ne defile JAMAIS, et son pied
+   reprend l allure du pied .pagi. */
+[data-pages]{overflow:hidden!important}
+.sz-pages{flex:0 0 auto;display:flex;align-items:center;gap:.5rem;padding-top:.45rem;
+  margin-top:.35rem;border-top:1px solid var(--v08);font-size:.78rem;color:var(--tx2)}
+.sz-pages button.pgf{min-width:2rem;padding:.15rem .5rem;font-size:1rem;line-height:1.1}
+.sz-pages .pos{margin-left:auto}
+/* La carte qui porte une liste paginee prend la place qui reste dans un corps en colonne (jamais plus),
+   et son conteneur [data-pages] la remplit : c est cette hauteur-la qui decide du nombre de lignes. */
+.sz-pagee{flex:1 1 0;min-height:7rem;display:flex;flex-direction:column}
+.sz-pagee>[data-pages]{flex:1 1 auto;min-height:0}
 .ch label,label.champ .lbl{font-size:.8rem}
 .aide,.ch .aide{font-size:.78rem;line-height:1.5}
 .pill,.rf-pill{font-size:.75rem}

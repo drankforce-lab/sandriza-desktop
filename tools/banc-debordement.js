@@ -412,6 +412,13 @@ function rapport(lignes, nbFenetres, rates, lotsMorts) {
   console.log('   ' + mes.length + ' fenetre(s) mesuree(s) sur ' + nbFenetres + (rates ? ' — ' + rates + ' fabrique(s) en echec' : '')
     + ' ; ' + fautes.length + ' deborde(nt), dont ' + nouvelles.length + ' nouveau(x) ou aggrave(s).');
   if (gueries.length) console.log('   ✓ revenues dans le cadre (a retirer de la dette) : ' + gueries.join(', '));
+  const pags = lignes.filter((l) => l.startsWith('PAG|') && !/^PAG\|_temoin/.test(l));
+  if (pags.length) {
+    console.log('');
+    console.log('   LISTES EN PAGES (visibles / total — pied) :');
+    const vus = new Set();
+    for (const l of pags) { const p = l.split('|'); const k = String(p[1]).split('@')[0] + ' ' + p[2]; if (vus.has(k)) continue; vus.add(k); console.log('   ' + k.padEnd(34) + ' ' + String(p[3]).padStart(9) + '   ' + p.slice(4).join('|')); }
+  }
   const zn = Object.keys(zones).sort((a, b) => zones[b].n - zones[a].n);
   console.log('');
   console.log('   ZONES QUI DEFILENT (glissiere visible — sa regle : pagination, jamais de barre) : ' + zn.length + ' fenetre(s)');

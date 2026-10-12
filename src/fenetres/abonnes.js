@@ -37,10 +37,8 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
@@ -236,11 +234,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('abonnes')}
             + '<button class="prim" id="ab-nouveau" style="height:2.4rem;padding:0 .9rem">${T("+ Ajouter")}</button>' : '')
       + '</span></div></div>';
 
-    h += '<div class="carte">';
+    // La liste en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
+    h += '<div class="carte sz-pagee">';
     if (!rows.length) {
       h += '<div class="vide">' + (Q || FILTRE !== 'all' ? '${T("Rien ne correspond.")}' : '${T("Aucun abonné.")}') + '</div>';
     } else {
-      h += '<table><thead><tr><th>${T("Abonné")}</th>'
+      h += '<div data-pages="abonnes"><table><thead><tr><th>${T("Abonné")}</th>'
         + '<th>${T("Inscription")}</th><th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
         + rows.map(function(a){
             var gestes = '';
@@ -261,7 +260,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('abonnes')}
               + (!a.actif && a.retireLe ? '<div class="dt">${T("le ")}' + esc(szJour(a.retireLe)) + '</div>' : '') + '</td>'
               + (D.peutModifier ? '<td class="fin">' + gestes + '</td>' : '') + '</tr>';
           }).join('')
-        + '</tbody></table>';
+        + '</tbody></table></div>';
     }
     h += '</div>';
 
