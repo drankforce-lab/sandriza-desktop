@@ -981,7 +981,7 @@ function _szPgPlus(){
 }
 (function(){
   if (typeof document === 'undefined' || !window.MutationObserver || window.__szPages) return; window.__szPages = true;
-  function demarrer(){
+  function _szPgDemarrer(){
     _szPg.obs = new MutationObserver(function(ms){
       for (var i = 0; i < ms.length; i++) {
         var t = ms[i].target;
@@ -993,7 +993,7 @@ function _szPgPlus(){
     window.addEventListener('resize', _szPgPlus);
     _szPgPlus();
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', demarrer); else demarrer();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _szPgDemarrer); else _szPgDemarrer();
 })();
 `;
 
