@@ -106,7 +106,10 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
    C est la recherche qui cede la place : elle retrecit, les boutons non. */
 div.cmd{flex-wrap:nowrap}
 div.cmd > *{flex:0 0 auto}
-.cmd #p-q{flex:1 1 12rem;min-width:7rem;width:auto}
+/* 2026-10-12 : sous Linux (polices plus larges, travail << contrastes >>), la barre depassait de 57 px a
+   1400 px — la recherche descend jusqu a 3.5rem, et l ecart entre les pieces se resserre. */
+.cmd #p-q{flex:1 1 12rem;min-width:3.5rem;width:auto}
+div.cmd{gap:.35rem}
 .vues{display:inline-flex;gap:.25rem;margin-left:.2rem}
 .vues .vue{font:inherit;font-size:.78rem;height:2.1rem;padding:0 .7rem;border-radius:9px;
   border:1px solid var(--v10);background:var(--f-0f1826);color:var(--tx-gris2);cursor:pointer}
