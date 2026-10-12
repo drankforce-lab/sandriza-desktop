@@ -83,6 +83,14 @@ module.exports = {
 
   /* ── L IDENTITE EUROPEENNE ──────────────────────────────────────────────── */
   'Identité européenne': 'European identity',
+  'à renseigner': 'to fill in',
+  'Personne responsable': 'Responsible person',
+  'IOSS': 'IOSS',
+  'TVA perçue à la caisse': 'VAT collected at checkout',
+  'oui': 'yes',
+  'non': 'no',
+  'Voir l’identité': 'View identity',
+  'Modifier l’identité': 'Edit identity',
   'Ces deux blocs valent pour les 27 États membres : sans eux, aucun pays de l’Union ne s’ouvre.':
     'These two blocks apply to all 27 member states: without them, no country of the Union opens.',
   'Personne responsable dans l’Union — nom': 'Responsible person in the Union — name',

@@ -97,10 +97,9 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .vign .att{font-size:.6rem;color:var(--tx-att);text-align:center;line-height:1.1}
 /* ── Les trois modes et la zone qui remplit la hauteur (2026-09-26) ── */
 .carte.pz{flex:1 1 auto;min-height:14rem;display:flex;flex-direction:column}
-/* En Auto la page est taillee pour tenir : rien ne defile. En taille fixe,
-   la zone DEFILE — sinon une page de 500 serait coupee sans recours. */
-.carte.pz .zone{flex:1 1 auto;min-height:0;overflow:auto}
-.carte.pz .zone.auto{overflow:hidden}
+/* La page est taillee pour tenir : rien ne defile (2026-10-12 : les tailles fixes
+   24 a 500, qui faisaient defiler la zone, sont retirees — la page se MESURE). */
+.carte.pz .zone{flex:1 1 auto;min-height:0;overflow:hidden}
 /* ⚠ UNE SEULE LIGNE (la regle de la refonte) : avec les trois modes, la barre
    passait a la ligne en anglais — « Lots » et « Tout vider » tombaient dessous.
    C est la recherche qui cede la place : elle retrecit, les boutons non. */
@@ -473,22 +472,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
        ils passent par les memes attributs data-*.
      • AUTO : la taille de page est CALCULEE pour remplir la hauteur visible —
        lignes, ou colonnes x rangees de vignettes — puis redemandee au site.
-       Recalculee au redimensionnement. Le choix d un nombre fixe reste offert.
+       Recalculee au redimensionnement. ⚠ Plus de nombre fixe (2026-10-12) :
+       24 a 500 par page faisaient defiler la zone. Aucune glissiere.
      ⚠ Retenus sur le POSTE (localStorage, sous garde) : c est l ecran qui
        decide, et l ecran du comptoir n est pas celui du bureau. */
   var VUE = 'liste', AUTO = true;
   try {
     var _vu = localStorage.getItem('sz-photos-vue');
     if (_vu === 'liste' || _vu === 'compacte' || _vu === 'vignettes') VUE = _vu;
-    if (localStorage.getItem('sz-photos-auto') === '0') AUTO = false;
-    var _tl = parseInt(localStorage.getItem('sz-photos-taille'), 10);
-    if (!AUTO && _tl > 0) TAILLE = _tl;
   } catch (e) {}
   function retenir(){
     try {
       localStorage.setItem('sz-photos-vue', VUE);
-      localStorage.setItem('sz-photos-auto', AUTO ? '1' : '0');
-      localStorage.setItem('sz-photos-taille', String(TAILLE));
     } catch (e) {}
   }
   /* Combien d elements tiennent dans la zone, sans defiler. Rien n est fait
@@ -686,15 +681,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '<select id="p-tri" aria-label="${T("Nombre de photos par page")}">'
       + opt('recent', '${T("Plus récentes")}') + opt('code', '${T("Par code")}') + opt('name', '${T("Par nom")}')
       + opt('linked', '${T("Liées d’abord")}') + opt('size', '${T("Plus lourdes")}')
-      + '</select>'
-      /* ⚠ JUSQU A 500 PAR PAGE. Le plafond de 24 obligeait a paginer pour cocher
-         un lot de deux cents, et un choix qui se perd entre deux pages n en est
-         pas un. */
-      + '<select id="p-taille" title="${T("Photos par page")}">'
-      + '<option value="auto"' + (AUTO ? ' selected' : '') + ' title="${T("Autant de photos que l’écran en montre, sans défiler")}">${T("Auto")}</option>'
-      + [24, 50, 100, 200, 500].map(function(n){
-          return '<option value="' + n + '"' + (!AUTO && TAILLE === n ? ' selected' : '') + '>' + n + '${T(" / page")}</option>';
-        }).join('')
       + '</select>'
       + '<span class="vues" role="group" aria-label="${T("Mode d’affichage")}">'
       + [['vignettes', '${T("Vignettes")}'], ['compacte', '${T("Liste compacte")}'], ['liste', '${T("Liste")}']].map(function(v){
@@ -2774,11 +2760,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       });
     };
 
-    var tl = document.getElementById('p-taille');
-    if (tl) tl.onchange = function(){
-      if (tl.value === 'auto') { AUTO = true; retenir(); mesurerAuto(); return; }
-      AUTO = false; TAILLE = parseInt(tl.value, 10) || 24; PAGE = 0; retenir(); charger();
-    };
     document.querySelectorAll('[data-vue]').forEach(function(b){
       b.onclick = function(){
         VUE = b.getAttribute('data-vue'); retenir(); dessiner();

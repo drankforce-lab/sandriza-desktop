@@ -82,6 +82,9 @@ input[type=text],input[type=date]{font:inherit;color:var(--tx);background:var(--
 input:focus{outline:none;border-color:#c9a97e}
 input:disabled{opacity:.55}
 label.ch{display:block;font-size:.72rem;color:var(--tx2);margin:0 0 .18rem}
+.ident{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem 1.6rem;font-size:.84rem}
+.ident b{color:var(--tx2);font-weight:600;margin-right:.3rem}
+.ident .pt{margin-left:auto}
 .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:.7rem}
 /* ── Le dossier d un pays, en boite (2026-10-04) ── */
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;align-items:center;
@@ -173,7 +176,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
   var rev = document.getElementById('rev');
   var bsave = document.getElementById('b-save');
-  var D = null, RO = false, OCCUPE = false, OUVERT = ${paysDepart};
+  var D = null, RO = false, OCCUPE = false, OUVERT = ${paysDepart}, IDENT = false;
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -244,11 +247,31 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '" aria-label="' + esc(lbl) + '"' + (RO ? ' disabled' : '') + '></div>';
   }
 
+  /* ⚠ L IDENTITE EST UN RESUME SUR UNE LIGNE, LE FORMULAIRE EST DANS UNE BOITE (2026-10-12).
+     Ses huit champs prenaient la moitie de la fenetre : il ne restait la place que pour un ou
+     deux pays par page dans le tableau. On la saisit une fois, on la lit souvent. */
   function htmlIdentite(){
     var r = D.registre || {};
     var ru = r.responsableUE || {}, io = r.ioss || {};
+    var manque = '<span class="t-bloque">${T("à renseigner")}</span>';
     return '<div class="carte"><div class="tete"><h2>${T("Identité européenne")}</h2>'
       + '<p class="sous">${T("Ces deux blocs valent pour les 27 États membres : sans eux, aucun pays de l’Union ne s’ouvre.")}</p></div>'
+      + '<div class="ident">'
+      + '<span><b>${T("Personne responsable")}</b> ' + (ru.nom ? esc(ru.nom) : manque) + '</span>'
+      + '<span><b>${T("IOSS")}</b> ' + (io.numero ? esc(io.numero) : manque) + '</span>'
+      + '<span><b>${T("TVA perçue à la caisse")}</b> ' + (io.actif ? '${T("oui")}' : '${T("non")}') + '</span>'
+      + '<button class="pt" id="b-ident">' + (RO ? '${T("Voir l’identité")}' : '${T("Modifier l’identité")}') + '</button>'
+      + '</div></div>';
+  }
+
+  function htmlBoiteIdentite(){
+    if (!IDENT) return '';
+    var r = D.registre || {};
+    var ru = r.responsableUE || {}, io = r.ioss || {};
+    return '<div class="voile" id="id-voile"><div class="boite" style="max-width:52rem" role="dialog" aria-modal="true" aria-label="${T("Identité européenne")}">'
+      + '<div class="bt-tete"><h3>${T("Identité européenne")}</h3>'
+      + '<span class="bt-sous">${T("Ces deux blocs valent pour les 27 États membres : sans eux, aucun pays de l’Union ne s’ouvre.")}</span></div>'
+      + '<div class="bt-corps" style="display:block">'
       + '<div class="grille">'
       + champ('r-nom', '${T("Personne responsable dans l’Union — nom")}', ru.nom)
       + champ('r-adr', '${T("Personne responsable — adresse complète")}', ru.adresse)
@@ -264,6 +287,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<label class="ch" style="display:flex;gap:.5rem;align-items:flex-start"><input type="checkbox" id="i-actif"' + (io.actif ? ' checked' : '') + (RO ? ' disabled' : '') + '>'
       + '<span><b>${T("Percevoir la TVA de l’Union à la caisse (IOSS)")}</b><br><span class="sous">${T("Commandes de 150 € d’articles et moins : la TVA du pays est ajoutée au total. Au-delà, la commande part en DAP par Postes Canada et le client paie à l’arrivée. Sans numéro IOSS, rien ne s’applique.")}</span></span></label>'
       + '<div class="ch"><label for="i-taux">${T("Taux de change : 1 $ CA = … €")}</label><input id="i-taux" type="number" min="0.1" max="2" step="0.001" value="' + esc(io.tauxEUR != null ? io.tauxEUR : 0.66) + '"' + (RO ? ' disabled' : '') + '></div>'
+      + '</div></div>'
+      + '<div class="pied-boite"><button class="pt" id="id-fermer">${T("Fermer")}</button>'
+      + '<button class="prim" id="id-enr"' + (RO ? ' disabled' : '') + '>${T("Enregistrer le registre")}</button></div>'
       + '</div></div>';
   }
 
@@ -413,7 +439,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     bsave.disabled = RO || OCCUPE;
     rev.textContent = D.intlLivraison ? '${T("Livraison internationale : active")}'
                                       : '${T("Livraison internationale : éteinte")}';
-    corps.innerHTML = htmlEcheances() + htmlIdentite() + htmlTableau() + htmlDossier();
+    corps.innerHTML = htmlEcheances() + htmlIdentite() + htmlTableau() + htmlDossier() + htmlBoiteIdentite();
     brancher();
   }
 
@@ -466,7 +492,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var bf = document.getElementById('cf-fermer'); if (bf) bf.onclick = fermerDossier;
     var be = document.getElementById('cf-enr'); if (be) be.onclick = function(){ lireIdentite(); bsave.click(); };
     var vo = document.getElementById('cf-voile');
-    if (!window.__cfEchap) { window.__cfEchap = 1; document.addEventListener('keydown', function(ev){ if (ev.key === 'Escape' && OUVERT) { lireIdentite(); OUVERT = ''; dessiner(); } }); }
+    if (!window.__cfEchap) { window.__cfEchap = 1; document.addEventListener('keydown', function(ev){ if (ev.key === 'Escape' && (OUVERT || IDENT)) { lireIdentite(); OUVERT = ''; IDENT = false; dessiner(); } }); }
+    var bi = document.getElementById('b-ident');
+    if (bi) bi.onclick = function(){ lireIdentite(); IDENT = true; dessiner(); var c = document.getElementById('r-nom'); if (c) c.focus(); };
+    var fermerIdent = function(){ lireIdentite(); IDENT = false; dessiner(); };
+    var bif = document.getElementById('id-fermer'); if (bif) bif.onclick = fermerIdent;
+    var bie = document.getElementById('id-enr'); if (bie) bie.onclick = function(){ lireIdentite(); IDENT = false; bsave.click(); };
     var bm = document.getElementById('b-mandat');
     if (bm) bm.addEventListener('click', function(){
       if (RO) return;
