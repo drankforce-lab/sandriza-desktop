@@ -372,6 +372,14 @@ const _veilleAttacher = () => {
          montre RIEN de l'entreprise hors session (sa demande du 2026-09-09).
          Même drapeau que celui qui décide si le X quitte : une seule source. */
       connecte: _sessionOuverte,
+      /* Les annonces détaillées d'une commande neuve (2026-10-12) : le détail vient du site, par la
+         même porte que les fenêtres ; un clic sur l'annonce montre l'administration et ouvre la
+         commande. Hors session, le veilleur ne les appelle pas. */
+      annonces: (n) => executerOpSite('veilleur:annonces', [n], null),
+      ouvrirCommande: (oid) => {
+        montrerAdministration();
+        if (oid) executerOpSite('commandes:ouvrirDetail', [String(oid)], null).catch(() => {});
+      },
     });
   } catch (e) { trayVeille = null; }
   return trayVeille;
@@ -2938,6 +2946,8 @@ const OPS_PONT = new Set([
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
   'tableau:lire', 'tableau:tuiles', 'tableau:ouvrir', 'tableau:verrous',
+  // Le détail des commandes neuves, pour les annonces du veilleur (2026-10-12).
+  'veilleur:annonces',
   // Derniere sauvegarde : lue A PART, car elle seule passe par le reseau (#25).
   'tableau:sauvegarde',
   // Variantes par couleur : teinte au CANEVAS par le site (une image, une
@@ -4297,6 +4307,12 @@ ipcMain.handle('dock:ouvrir', async (e, cle, etat) => {
     const view = new WebContentsView({ webPreferences: {
       preload: path.join(__dirname, 'pont-preload.js'), minimumFontSize: 11,
       contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: true,
+      /* ⚠ LE TABLEAU DE BORD RESTE EN DIRECT DERRIÈRE LES AUTRES MODULES (2026-10-12, sa demande :
+         « il doit rester dynamique même quand on change de module »). Une vue ancrée qu'on quitte
+         est seulement CACHÉE, et Chromium y freine les minuteries — jusqu'à une par minute après
+         quelques minutes. Pour lui seul, pas de frein : il se relit toutes les 12 s. Les autres
+         vues gardent le comportement par défaut (rien à y faire tourner en arrière-plan). */
+      backgroundThrottling: c !== 'tableau',
     } });
     a = { view, fenetre: null };
     ancrees.set(c, a);

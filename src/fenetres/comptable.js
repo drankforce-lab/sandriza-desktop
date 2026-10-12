@@ -126,7 +126,7 @@ function pageComptable(ouverture) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptable')}${JS_BROUILLON()}
   var corps = document.getElementById('corps');
   var sous  = document.getElementById('sous');
   var DEPART = ${dep};

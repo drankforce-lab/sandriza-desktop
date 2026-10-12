@@ -1,26 +1,35 @@
 'use strict';
 
 /*
- * FENÊTRE « TABLEAU DE BORD » — NATIVE
+ * FENÊTRE « TABLEAU DE BORD » — NATIVE, EN DIRECT
  * =============================================================================
- * Le premier écran de la journée, en fenêtre de consultation : les tuiles
- * chiffrées (masquables par personne, comme l'écran du site), l'avis de taux
- * de change s'il y a lieu, et les commandes et factures récentes — AUTANT QUE
- * LA FENÊTRE EN TIENT, dans une zone qui défile (sa décision du 2026-09-24, qui
- * remplace « les 10 dernières » du 2026-08-08 : une carte étirée que dix lignes
- * ne remplissent pas reste une carte à moitié vide). La suite vit dans « Tout
- * voir », qui ouvre la fenêtre native dans son état retenu.
- * AUCUNE écriture ici, sauf le réglage des tuiles (préférence par personne,
- * tableau:tuiles).
+ * Refaite le 2026-10-12 d'après sa démo approuvée (« 100 % dynamique », sur le
+ * modèle d'un tableau de bord d'inventaire) : trois rangées qui TIENNENT dans la
+ * fenêtre, sans aucune barre de défilement (sa règle du même jour) :
+ *   1. l'activité des commandes (à confirmer, à préparer, à expédier, en
+ *      livraison) avec le parcours du jour, et l'inventaire ;
+ *   2. la courbe des arrivées (aujourd'hui contre hier, ou la semaine / le mois
+ *      contre la période d'avant) et le fil « En direct » des dernières commandes ;
+ *   3. les produits (jauge des variantes en stock), les meilleures ventes avec
+ *      leurs photos, et les commandes par canal.
  *
- * ⚠ LE CALCUL VIT DANS LE SITE (Admin._tableauDonnees, sans DOM) : l'écran du
- * site et cette fenêtre consomment le MÊME cœur — dupliquer les sommes ici,
- * c'était garantir deux tableaux qui ne s'accordent plus au premier
- * ajustement (la leçon des collections, le jour même).
+ * ⚠⚠ PLUS DE TUILES (sa décision du même jour : « il n'y a plus lieu de garder
+ * aucune tuile de ce genre »). Ce qui attend un geste devient une PUCE « à faire »
+ * dans la barre, et seulement quand ce n'est pas zéro ; ce qui est à zéro se
+ * range dans la pastille « N à zéro » (un clic les montre).
  *
- * ⚠ CLIQUER UNE TUILE OUVRE LA CIBLE (tableau:ouvrir) : la fenêtre native
- * quand elle existe (Commandes, Inventaire), l'écran de la fenêtre principale
- * sinon. C'est un clic explicite de l'usager — pas une navigation volée.
+ * ⚠⚠ IL SE RELIT TOUT SEUL (toutes les 12 s), même quand on travaille dans un
+ * autre module — mais il N'ENVOIE AUCUNE NOTIFICATION : les annonces sont le
+ * métier du veilleur (sa demande). Une commande neuve se signale ici en glissant
+ * dans le fil, rien de plus.
+ *
+ * ⚠ LE CALCUL VIT DANS LE SITE (Admin._tableauVivant, sans DOM) : cette fenêtre
+ * ne fait que dessiner. Dupliquer les sommes ici, c'était garantir deux chiffres
+ * qui ne s'accordent plus au premier ajustement.
+ *
+ * ⚠ GARDÉS : le Mode exclusif (super-administrateur), la dernière sauvegarde
+ * (lue à part, réseau), l'avis de taux de change, les cadenas en direct et
+ * l'éclair « Lancer la préparation » (verrou relu au clic).
  *
  * ⚠ AUCUN CARACTÈRE ` (accent grave) dans la portion de script, COMMENTAIRES
  * COMPRIS : le script vit dans un littéral de gabarit.
@@ -43,146 +52,144 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
-  display:flex;flex-direction:column;gap:.7rem}
-.barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
-.barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
-  font-size:.78rem;color:var(--tx2)}
+.corps{flex:1 1 auto;min-height:0;padding:.75rem 1rem;overflow:hidden;
+  display:flex;flex-direction:column;gap:.65rem}
+.corps>*{flex:0 0 auto}
 select,button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem;cursor:pointer}
 select:focus,button:focus{outline:none;border-color:#c9a97e}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
-button.mini{padding:.12rem .42rem;font-size:.74rem}
-.avis{font-size:.78rem;line-height:1.45;border-radius:9px;padding:.45rem .7rem;
+button.mini{padding:.12rem .45rem;font-size:.74rem}
+.avis{font-size:.78rem;line-height:1.45;border-radius:9px;padding:.4rem .7rem;
   background:rgba(245,158,11,.11);border:1px solid rgba(245,158,11,.42);color:var(--tx-or2)}
-/* ── Les tuiles ── */
-.tuiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:.55rem}
-.tuile{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
-  padding:.6rem .8rem;min-width:0;cursor:pointer;user-select:none;
-  transition:border-color .13s}
-.tuile:hover{border-color:#c9a97e}
-.tuile .lbl{font-size:.6875rem;text-transform:uppercase;letter-spacing:.07em;color:var(--tx2);
-  filter:grayscale(1) brightness(1.45);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* Le chiffre dans la police de l ecran, en gras (refonte du 2026-09-25). */
-.tuile .val{font-weight:800;font-size:1.6rem;line-height:1.15}
-.tuile .val.att{color:var(--tx-att)}.tuile .val.err{color:var(--tx-err)}
-.tuile .sub{font-size:.7rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tuile .sub.att{color:var(--tx-att)}
-/* ── LA BANDE « À FAIRE MAINTENANT » ──────────────────────────────────────
-   ⚠ ELLE N'APPARAÎT QUE S'IL Y A QUELQUE CHOSE À FAIRE. Une bande permanente
-   qui annonce « rien à faire » finit par ne plus être lue — et le jour où elle
-   dit quelque chose, elle ne se distingue plus du décor. Rien à faire = pas de
-   bande, et l'écran commence directement par les chiffres. */
-.afaire{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;
-  background:rgba(201,169,126,.09);border:1px solid rgba(201,169,126,.32);
-  border-radius:11px;padding:.5rem .7rem}
-.afaire .titre{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;
-  color:var(--tx-or);font-weight:700;margin-right:.2rem}
-.afaire button{font-size:.79rem;padding:.22rem .6rem;border-radius:99px;
-  background:var(--v06);border:1px solid var(--v14)}
-.afaire button:hover{background:var(--v12)}
-.afaire button b{font-weight:800}
-/* Le separateur : discret, non italique malgre le <i>, et il porte l espace de
-   part et d autre — sans quoi le nombre reste colle au texte. */
-.afaire button i{font-style:normal;opacity:.45;margin:0 .38rem}
-.afaire button.urgent{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
-html.jour .afaire{background:rgba(180,140,80,.12);border-color:rgba(150,110,50,.35)}
-html.jour .afaire .titre{color:#6f5330}
-.panneau{background:var(--f-carte);border:1px solid var(--v09);border-radius:11px;
-  padding:.6rem .8rem;display:flex;gap:1rem;flex-wrap:wrap;font-size:.82rem}
-.panneau label{display:flex;align-items:center;gap:.4rem;cursor:pointer}
-.panneau input{width:auto}
-/* ── Les deux cartes récentes ── */
-/* ⚠⚠ LES DEUX TABLES DESCENDENT JUSQU EN BAS (2026-09-24, sa capture).
-   Mesure a SA taille de fenetre (1960 x 1190, pas les 1100 x 760 du banc — a
-   1100 le contenu DEBORDE, le defaut n existe pas la) : les cartes finissaient
-   a y=687 et le corps a y=1173. **486 px de vide.**
-   ⚠ << align-items:start >> RETIRE : c est lui qui laissait chaque carte a sa
-   hauteur naturelle. La grille les etire maintenant toutes les deux.
-   ⚠ << flex:1 0 auto >> ET PAS << 1 1 auto >> : elle GRANDIT dans la place libre, mais
-   ne RETRECIT jamais. Sur une fenetre courte (1100 x 760, ou le contenu
-   deborde deja), elle garde sa hauteur naturelle et le corps defile — pas d
-   overflow:hidden, donc rien ne peut etre coupe en silence.
-   ⚠ ET LA CARTE DEVIENT UNE COLONNE dont la LISTE defile : sans ca, une carte
-   plus haute serait une carte plus VIDE — le piege de #151, ou agrandir le
-   cadre sans que rien ne l occupe donne pire que le vide qu on corrigeait. */
-/* ⚠⚠ ET PLUS AUCUNE GLISSIERE (2026-10-12, sa regle : << aucun scroll bar dans l application >>,
-   << les ajouts de donnees sous controle de pagination >>). Sa capture : six commandes de test, et la
-   page entiere defilait sous la barre d etat. Le corps ne defile plus ; les deux cartes prennent la
-   place qui reste (1 1 0, jamais plus), et chaque liste montre AUTANT DE LIGNES QUE LA HAUTEUR
-   MESUREE en permet, le reste en pages (fleches dans l en-tete de la carte). Remplace la decision
-   du 2026-09-24 (<< tout afficher dans une zone qui defile >>). */
-.deux{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;flex:1 1 0;min-height:9rem}
-.deux>.carte{display:flex;flex-direction:column;min-height:0;overflow:hidden}
-.deux>.carte>.liste{flex:1 1 auto;min-height:0;overflow:hidden}
-.carte h2 .pg{display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;letter-spacing:0;
-  text-transform:none;font-weight:600;color:var(--tx2)}
-.carte h2 .pg button{padding:.05rem .45rem;font-size:.8rem;line-height:1.2}
-@media (max-width:900px){.deux{grid-template-columns:1fr}}
-.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
-  padding:.6rem .75rem}
-.carte h2{margin:0 0 .45rem;font-size:.71rem;text-transform:uppercase;
-  letter-spacing:.09em;color:var(--tx2);font-weight:700;display:flex;align-items:center;gap:.5rem}
-.carte h2 .tout{margin-left:auto}
-table{width:100%;border-collapse:collapse;font-size:.84rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
-tbody td{padding:.3rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
-tbody .num{font-weight:700}
-tbody .dt{font-size:.72rem;color:var(--tx2)}
+
+/* ── LA BARRE : période, en direct, puces à faire, pastille des zéros ── */
+.barre{display:flex;align-items:center;gap:.45rem .6rem;flex-wrap:wrap}
+.direct{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:700;color:var(--tx-ok);
+  background:rgba(34,197,94,.12);padding:.16rem .6rem;border-radius:99px;white-space:nowrap}
+.direct i{width:7px;height:7px;border-radius:99px;background:currentColor;animation:tb-pouls 1.8s ease-out infinite}
+@keyframes tb-pouls{0%{box-shadow:0 0 0 0 rgba(34,197,94,.55)}100%{box-shadow:0 0 0 8px rgba(34,197,94,0)}}
+.periode{display:inline-flex;gap:3px;padding:3px;border-radius:9px;background:var(--v04);border:1px solid var(--v10)}
+.periode button{border:0;background:transparent;border-radius:6px;padding:.18rem .65rem;font-size:.76rem;font-weight:600;color:var(--tx2)}
+.periode button.on{background:#c9a97e;color:#1a1208}
+.faire{display:inline-flex;align-items:center;gap:.3rem;font-size:.76rem;padding:.18rem .6rem;border-radius:99px;
+  background:var(--v06);border:1px solid var(--v14);white-space:nowrap}
+.faire b{font-weight:800}
+.faire.urgent{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
+.zeros{position:relative}
+.zero-puce{font-size:.72rem;color:var(--tx3);background:transparent;border:1px dashed var(--v16);border-radius:99px;padding:.16rem .6rem}
+.zero-pop{position:absolute;top:130%;left:0;z-index:20;min-width:15rem;background:var(--f-carte);border:1px solid var(--v12);
+  border-radius:10px;padding:.5rem .7rem;box-shadow:0 12px 28px rgba(0,0,0,.35);font-size:.78rem;color:var(--tx2)}
+.zero-pop div{display:flex;justify-content:space-between;gap:1rem;padding:.16rem 0}
+.barre .droite{margin-left:auto;display:flex;align-items:center;gap:.5rem;font-size:.76rem;color:var(--tx2);white-space:nowrap}
+
+/* ── LA GRILLE : trois rangées, celle du milieu prend ce qui reste ── */
+.grille{flex:1 1 auto;min-height:0;display:grid;gap:.65rem;grid-template-columns:repeat(12,minmax(0,1fr));
+  grid-template-rows:auto minmax(0,1fr) auto}
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:12px;padding:.65rem .85rem;min-width:0;min-height:0;overflow:hidden}
+.carte h2{margin:0 0 .5rem;font-size:.68rem;text-transform:uppercase;letter-spacing:.09em;color:var(--tx2);font-weight:700;
+  display:flex;align-items:center;gap:.5rem}
+.carte h2 .aside{margin-left:auto;text-transform:none;letter-spacing:0;font-weight:500;color:var(--tx3);font-size:.72rem}
+.c8{grid-column:span 8}.c4{grid-column:span 4}.c3{grid-column:span 3}.c5{grid-column:span 5}
+@media (max-width:1240px){.r1a,.r2a{grid-column:span 7}.r1b,.r2b{grid-column:span 5}}
+
+/* rangée 1 : l activité et l inventaire */
+.flux{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.5rem}
+.etape{position:relative;text-align:center;padding:.45rem .3rem .55rem;border-radius:10px;border:1px solid var(--v07);
+  background:var(--v03);cursor:pointer;transition:border-color .2s}
+.etape:hover{border-color:#c9a97e}
+.etape .n{font-size:1.75rem;font-weight:300;line-height:1.1;color:var(--c);font-variant-numeric:tabular-nums}
+.etape .lib{font-size:.66rem;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.etape::after{content:"";position:absolute;left:26%;right:26%;bottom:0;height:3px;border-radius:3px 3px 0 0;background:var(--c);opacity:.8}
+.parcours{margin-top:.55rem;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.7rem;align-items:center;font-size:.73rem;color:var(--tx2)}
+.parcours b{color:var(--tx)}
+.p-barre{display:flex;gap:3px;height:9px;border-radius:5px;overflow:hidden;background:var(--v05)}
+.p-barre i{background:var(--c);transition:flex .6s ease}
+.inv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.45rem}
+.inv>div{background:var(--v03);border:1px solid var(--v07);border-radius:10px;padding:.4rem .6rem;cursor:pointer}
+.inv .k{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
+.inv .v{font-size:1.3rem;font-weight:300;font-variant-numeric:tabular-nums;white-space:nowrap}
+.inv .v.err{color:var(--tx-err)}.inv .v.att{color:var(--tx-att)}
+.valeur{display:flex;justify-content:space-between;align-items:baseline;margin-top:.5rem;font-size:.74rem;color:var(--tx2)}
+.valeur b{font-size:.98rem;color:var(--tx);font-variant-numeric:tabular-nums}
+
+/* rangée 2 : la courbe et le fil */
+.courbe{display:flex;flex-direction:column}
+.kpis{display:flex;gap:1.5rem;margin-bottom:.1rem}
+.kpi .k{font-size:.62rem;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.07em}
+.kpi .v{font-size:1.2rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.2}
+.kpi .d{font-size:.68rem;font-weight:700;color:var(--tx3)}
+.kpi .d.haut{color:var(--tx-ok)}.kpi .d.bas{color:var(--tx-err)}
+.zone{flex:1 1 auto;min-height:0;position:relative}
+.zone svg{position:absolute;inset:0;width:100%;height:100%}
+.legende{display:flex;gap:1rem;font-size:.68rem;color:var(--tx2)}
+.legende span::before{content:"";display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:.35rem;vertical-align:middle;background:var(--tx-or)}
+.legende span.avant::before{background:repeating-linear-gradient(90deg,var(--tx3) 0 4px,transparent 4px 7px)}
+.direct-carte{display:flex;flex-direction:column}
+.fil{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:6px;overflow:hidden}
+.cmd{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.4rem .55rem;border-radius:10px;background:var(--v03);
+  border:1px solid var(--v07);cursor:pointer}
+.cmd:hover{border-color:rgba(201,169,126,.45)}
+.cmd.neuve{animation:tb-arrive .7s cubic-bezier(.2,.8,.2,1);border-color:rgba(34,197,94,.55)}
+@keyframes tb-arrive{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:none}}
+.cmd.prio{box-shadow:inset 3px 0 0 var(--tx-att)}
+.cmd.cache{display:none}
+.ph{width:32px;height:40px;border-radius:7px;flex:0 0 auto;overflow:hidden;background:#fff;display:grid;place-items:center;
+  font-size:.7rem;font-weight:800;color:#5a6574;border:1px solid var(--v08)}
+.ph img{width:100%;height:100%;object-fit:cover}
+.cmd .t{min-width:0;flex:1 1 auto}
+.cmd .t b{display:flex;align-items:center;gap:.3rem;font-size:.83rem;white-space:nowrap;overflow:hidden}
+.cmd .t b span.nm{overflow:hidden;text-overflow:ellipsis}
+.cmd .t .a{font-size:.7rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmd .m{text-align:right;flex:0 0 auto}
+.cmd .m b{font-size:.84rem;font-variant-numeric:tabular-nums}
+.cmd .m div{font-size:.66rem;color:var(--tx3);white-space:nowrap}
+.prio-pill{font-size:.6rem;font-weight:800;color:var(--tx-att);background:rgba(245,158,11,.15);padding:.02rem .36rem;border-radius:99px}
 .cadslot{display:inline}
-/* LA COMMANDE PRIORITAIRE (2026-10-12, sa demande) : pastille ambre a cote du nom, et un filet ambre
-   au bord de la ligne — se voit d un coup d oeil dans une liste. */
-tbody tr.prio td:first-child{box-shadow:inset 3px 0 0 var(--tx-att)}
-.prio-pill{display:inline-flex;align-items:center;margin-left:.5rem;padding:.05rem .5rem;border-radius:99px;
-  font-size:.6875rem;font-weight:700;letter-spacing:.02em;background:rgba(245,158,11,.16);color:var(--tx-att);vertical-align:middle}
-/* L ECLAIR : lancer la preparation depuis le tableau de bord. Le verrou d un collegue l eteint en
-   direct (sondage des verrous, 3 s) ; il est RELU au clic avant d ouvrir quoi que ce soit. */
-td.geste{width:2.6rem;text-align:right}
-button.eclair{display:inline-flex;align-items:center;justify-content:center;width:2.1rem;height:2.1rem;padding:0;
-  border-radius:9px;border:1px solid rgba(201,169,126,.6);background:rgba(201,169,126,.2);color:var(--tx-or);cursor:pointer}
-button.eclair svg{width:16px;height:16px;fill:currentColor}
+button.eclair{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:1.9rem;height:1.9rem;padding:0;
+  border-radius:8px;border:1px solid rgba(201,169,126,.6);background:rgba(201,169,126,.2);color:var(--tx-or)}
+button.eclair svg{width:15px;height:15px;fill:currentColor}
 button.eclair:hover:not(:disabled){background:#c9a97e;color:#1a1208;border-color:#c9a97e}
 html.jour button.eclair{color:#6b5940}
 button.eclair:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(1)}
-/* Une ligne recente s ouvre au clic : la main le dit (le survol vient du socle). */
-tbody tr.ouvrable{cursor:pointer}
-/* Le cadenas : la pastille du socle (CSS_REFONTE), plus de regle locale. */
-.pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
-.pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
-.pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
-.pill.err{background:rgba(239,68,68,.16);color:var(--tx-err)}
-.pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
-.pagi{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;
-  padding-top:.4rem;font-size:.74rem;color:var(--tx2)}
-.vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
+.fil-pied{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;font-size:.7rem;color:var(--tx3);
+  padding-top:.4rem;margin-top:.4rem;border-top:1px solid var(--v07)}
+.vide{padding:1rem .6rem;text-align:center;color:var(--tx2);font-size:.82rem}
+
+/* rangée 3 : produits, meilleures ventes, canaux */
+.details{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:.5rem;align-items:center}
+.details .r{display:flex;justify-content:space-between;padding:.24rem 0;border-bottom:1px solid var(--v07);font-size:.82rem}
+.details .r:last-child{border-bottom:0}
+.details .r b{font-variant-numeric:tabular-nums}
+.details .r.alerte,.details .r.alerte b{color:var(--tx-err)}
+.jauge{text-align:center}
+.jauge svg{width:110px;height:66px;display:block;margin:0 auto}
+.jauge .lib{font-size:.64rem;color:var(--tx2)}
+.top{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.45rem}
+.top .p{text-align:center;padding:.35rem .3rem .4rem;border-radius:10px;background:var(--v03);border:1px solid var(--v07);position:relative;min-width:0}
+.top .rang{position:absolute;top:5px;left:5px;width:18px;height:18px;border-radius:99px;display:grid;place-items:center;
+  font-size:.62rem;font-weight:800;background:#c9a97e;color:#1a1208}
+.top .im{height:64px;display:grid;place-items:center;margin-bottom:.15rem}
+.top .im img{max-height:64px;max-width:100%;object-fit:contain;border-radius:5px;background:#fff}
+.top .im span{width:46px;height:46px;border-radius:99px;display:grid;place-items:center;background:var(--v06);color:var(--tx2);font-weight:800}
+.top .nom{font-size:.7rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top .q{font-size:1rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.2}
+.top .q small{font-size:.64rem;color:var(--tx2);font-weight:500}
+.canaux{display:grid;gap:.45rem}
+.canal .nm{display:flex;justify-content:space-between;font-size:.76rem;margin-bottom:.16rem}
+.canal .nm b{font-variant-numeric:tabular-nums}
+.pile{display:flex;height:8px;border-radius:5px;overflow:hidden;background:var(--v05);gap:2px}
+.pile i{background:var(--c)}
+.cles{display:flex;flex-wrap:wrap;gap:.2rem .65rem;font-size:.62rem;color:var(--tx2);margin-top:.15rem}
+.cles span::before{content:"";display:inline-block;width:7px;height:7px;border-radius:2px;background:var(--c);margin-right:.28rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
-/* ⚠⚠ LE PIED VIDE NE PREND PLUS DE PLACE (2026-09-24, sa deuxieme capture).
-   Une fois les cartes descendues jusqu en bas, il restait 30 px entre elles et
-   la barre d etat de l application : 13 px de rembourrage du corps (normal,
-   symetrique du haut) et **17 px de BARRE DE MESSAGES VIDE**. Sur son ecran a
-   125 %, ca fait la bande qu il a photographiee — et elle se voit d autant plus
-   que les cartes arrivent dessus. Deux barres empilees, dont une vide.
-   ⚠ << :has(.msg:empty) >> ET PAS UNE CLASSE POSEE PAR szDire : szDire n est appele
-   QUE quand un message change, donc au chargement la classe ne serait jamais
-   posee et la bande resterait. Le CSS, lui, suit l etat reel a tout instant.
-   ⚠⚠ ET CETTE REGLE RESTE DANS CE FICHIER, PAS AU SOCLE. Verifie avant
-   d ecrire : << analytics >> et << messagerie >> mettent de VRAIS BOUTONS dans leur
-   pied (Enregistrer, la duree de conservation). Une regle au socle les ferait
-   disparaitre des que le message est vide. Ici le pied ne contient que le
-   message — c est ce qui rend la regle sure, et c est pour ca qu elle est
-   locale.
-   ➡ 2026-09-25 : la regle GENERALE est au socle (CSS_JOUR), et elle regarde
-   tout le pied, pas seulement le message. Celle-ci reste, redondante et sans
-   danger. */
 .pied:has(.msg:empty){padding:0;border-top:0}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}.cmd.neuve{animation-duration:.01s}}
 `;
 
 /** Page complète de la fenêtre native « Tableau de bord ». */
@@ -191,7 +198,7 @@ function pageTableau() {
 <title>${T("Tableau de bord — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.tableau}</span><h1>${T("Tableau de bord")}</h1>
-  <span class="sous" id="sous"></span></div>
+  <span class="sous" id="sous"></span><span id="tb-mx-slot"></span></div>
 <div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
@@ -199,43 +206,28 @@ function pageTableau() {
   'use strict';
   var P = window.szPont;
 ${JS_ACTIVITE()}${JS_DIRE()}
-  var msg = document.getElementById('msg');
   var corps = document.getElementById('corps');
 
-  var D = null;            // les donnees du site (tableau:lire)
-  var ANNEE = 'all';
-  var PANNEAU = false;     // le panneau << Tuiles >> est ouvert
-  var PP = { orders: 0, billing: 0 }, PG = { orders: 0, billing: 0 };   // recentes : lignes par page (mesurees), page courante
-  /* Le mode usage exclusif. « MX » reste nul tant que le serveur n a pas repondu,
-     et il refuse (superadmin_required) a qui n a pas le droit : le bouton ne
-     parait donc QUE pour un super-administrateur, sans que cette page ait a
-     connaitre le role. Sa regle du 2026-09-09 : masquer, pas griser. */
+  var D = null;              // les donnees du site (tableau:lire)
+  var PERIODE = 'jour';      // jour | 7j | mois — la courbe et ses chiffres
+  var ZEROS = false;         // la pastille des zeros est ouverte
+  var VUS = null;            // les commandes deja montrees dans le fil (pour signaler les neuves)
+  var NEUVES = {};
+  /* Le mode usage exclusif : « MX » reste nul tant que le serveur n a pas repondu, et il refuse
+     (superadmin_required) a qui n a pas le droit — le bouton ne parait donc QUE pour un
+     super-administrateur. Sa regle du 2026-09-09 : masquer, pas griser. */
   var MX = null;
-  /* L etat de la tuile << Derniere sauvegarde >> (#25). null = pas encore lue.
-     ⚠ ELLE SE LIT A PART, APRES le premier dessin : c est le seul indicateur du
-     tableau de bord qui passe par le RESEAU (backup.php interroge R2). La mettre
-     dans tableau:lire ferait attendre tout l ecran d ouverture de session pour
-     une ligne d information. */
+  /* La derniere sauvegarde : lue A PART, apres le premier dessin — c est le seul chiffre qui passe
+     par le RESEAU (backup.php interroge R2). Fraicheur de quinze secondes. */
   var SAUV = null, SAUV_QUAND = 0, SAUV_EN_COURS = false;
-  var VERROUS = {};           // #38 : { <idCommande>: { par, mine } } — sonde toutes les ~3 s
-  var VERROU_TIMER = null;
+  var VERROUS = {};          // #38 : { <idCommande>: { par, mine } } — sonde toutes les ~3 s
+  var VERROU_TIMER = null, VIF_TIMER = null;
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  /* Le bandeau de message : une seule regle, dans le socle (szDire) —
-     tout verdict s efface seul apres cinq secondes, sauf ce qui se termine
-     par des points de suspension, qui annonce un travail en cours. */
   function dire(t, cl){ szDire(t, cl); }
-  function fmt(n){
-    /* ⚠ LE REPLI COLLAIT << $ >> APRES LE NOMBRE, donc du francais sur une page
-       anglaise le jour ou Intl refuse. szArgent (socle) place le symbole du bon
-       cote dans les deux voies — une seule recette, un seul endroit. */
-    return szArgent(n);
-  }
-  function fmtDate(d){
-    try { return new Date(d).toLocaleDateString('${LIEU()}', { year: 'numeric', month: 'short', day: 'numeric' }); }
-    catch (e) { return String(d || ''); }
-  }
+  function fmt(n){ return szArgent(n); }
+  function pl(n, un, plus){ return n + ' ' + szPl(n, un, plus); }
 
   var MOTIFS = {
     session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
@@ -262,509 +254,301 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     corps.innerHTML = '<div class="vide"><strong>' + esc(titre)
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div>';
   }
-
-  /* Les tuiles. Les sept premieres sont celles de l ecran du site, dans le meme
-     ordre. Les suivantes sont propres au natif (#25) : elles disent ce qu il
-     RESTE A FAIRE, la ou les premieres disent des totaux.
-     ⚠ Chacune reste masquable par personne (panneau << Tuiles >>), et une tuile
-     inconnue de la preference est AFFICHEE par defaut — sans quoi personne ne
-     verrait jamais une tuile ajoutee apres coup. */
-  var TUILES = [
-    ['a_traiter', '${T("Commandes à traiter")}'],
-    ['products', '${T("Produits actifs")}'],
-    ['orders', 'Commandes'],
-    ['customers', '${T("Clients actifs")}'],
-    ['revenue', '${T("Revenus (payés)")}'],
-    ['messagerie', 'Messagerie'],
-    ['clavardage', '${T("Clavardage")}'],
-    ['returns_new', '${T("Nouveaux retours")}'],
-    ['returns_expiring', '${T("Retours qui expirent")}'],
-    ['en_livraison', '${T("En livraison")}'],
-    ['ruptures', '${T("Ruptures de stock")}'],
-    ['avis', '${T("Avis à modérer")}'],
-    ['factures_retard', '${T("Factures en retard")}'],
-    ['incidents', '${T("Incidents ouverts")}'],
-    ['sauvegarde', '${T("Dernière sauvegarde")}']
-  ];
-
-  function tuile(cle, lbl, valeur, ton, sousTitre, sousTon){
-    return '<div class="tuile" data-tuile="' + cle + '">'
-      + '<div class="lbl" title="' + esc(lbl) + '">' + esc(lbl) + '</div>'
-      + '<div class="val' + (ton ? ' ' + ton : '') + '">' + valeur + '</div>'
-      + '<div class="sub' + (sousTon ? ' ' + sousTon : '') + '">' + sousTitre + '</div></div>';
-  }
-
-  /* ⚠ UNE TUILE QU ON N A PAS LE DROIT DE VOIR NE S OFFRE MEME PAS AU REGLAGE.
-     Laisser << Derniere sauvegarde >> dans le panneau des tuiles a qui n a pas
-     la permission « backups », c est lui apprendre par la bande qu il existe des
-     sauvegardes et quand elles datent. Le pont refuse deja l operation ; ici on
-     retire aussi la case. */
-  function offerte(x){
-    if (x[0] !== 'sauvegarde') return true;
-    return !(SAUV && SAUV.interdite);
-  }
-
-  /* La tuile << Derniere sauvegarde >>. Ecrite a part parce qu elle a QUATRE
-     etats, et qu un empilement de ternaires y aurait tot ou tard affiche
-     << null j >> : pas encore lue, jamais faite, illisible, ou datee.
-     ⚠ LES SEUILS SONT DELIBERES : au-dela de 7 jours on avertit, au-dela de 30
-     on alarme, et << jamais >> alarme tout de suite. Une base non sauvegardee
-     ne doit pas se lire comme une ligne d information parmi d autres. */
-  function tuileSauvegarde(){
-    if (SAUV === null) {
-      return tuile('sauvegarde', '${T("Dernière sauvegarde")}', '…', '', '${T("lecture en cours…")}', '');
-    }
-    if (SAUV.erreur) {
-      return tuile('sauvegarde', '${T("Dernière sauvegarde")}', '—', '', esc(SAUV.erreur), 'att');
-    }
-    if (SAUV.aucune) {
-      return tuile('sauvegarde', '${T("Dernière sauvegarde")}', '${T("jamais")}', 'err',
-        '${T("la base n’est pas protégée")}', 'att');
-    }
-    var j = SAUV.jours;
-    // « jours » en toutes lettres (sa demande) : un « j » collé au chiffre se
-    // lit mal dans une grande valeur, et rien n oblige a abreger ici.
-    /* ⚠⚠ CES QUATRE-LA ETAIENT DES LITTERAUX NUS — sa capture du 2026-09-13 :
-       << 4 jours >> sous un en-tete LAST BACKUP. Le releve du residuel ne les a
-       pas vus : ce sont des fragments COURTS et EN MINUSCULES, la forme meme
-       que ses heuristiques ecartent pour ne pas confondre du texte avec un
-       identifiant de code. Et << jamais >> etait la valeur d une tuile.
-       ⚠ LES DEUX ALTERNATIVES EN ENTIER : en anglais le pluriel ne se fabrique
-       pas toujours en ajoutant une lettre, et un << s >> colle a part ne passe
-       par aucun dictionnaire. */
-    var val = (j === 0) ? '${T("aujourd’hui")}'
-      : (j === 1 ? '${T("hier")}'
-        : '${T("{0} jours")}'.split('{0}').join(j));
-    var ton = (j > 30) ? 'err' : (j > 7 ? 'att' : '');
-    /* La date et la taille BRUTES quand le site les envoie : mises en forme ici,
-       dans la langue du poste (le texte « 13 août 2026 · 17,4 Mo » du site
-       restait en francais dans l interface anglaise). Repli : le texte du site. */
-    var sous = esc(SAUV.createdAt ? szQuand(SAUV.createdAt) : SAUV.quand)
-      + ((typeof SAUV.octets === 'number') ? ' · ' + esc(szOctets(SAUV.octets)) : (SAUV.taille ? ' · ' + esc(SAUV.taille) : ''));
-    return tuile('sauvegarde', '${T("Dernière sauvegarde")}', val, ton, sous, (j > 7 ? 'att' : ''));
-  }
-
-  /* ══ LA PASTILLE A POINT, AUX COULEURS DE LA FENETRE COMMANDES (2026-09-25) ═
-     Une couleur = un sens, et le MEME sens d un ecran a l autre : une commande
-     << Expediee >> etait verte ici et bleue dans Commandes. Vert ce qui est
-     regle (livree, payee), bleu ce qui avance (confirmee, verification,
-     expediee), ambre ce qui attend un geste (en attente, en preparation,
-     impayee), rouge l annule et l en retard. */
-  function pilule(statut, libelle){
-    var ton = { paid: 'vert', demo: 'vert', delivered: 'vert',
-      shipped: 'bleu', confirmed: 'bleu', verification: 'bleu',
-      pending: 'ambre', unpaid: 'ambre', preparing: 'ambre',
-      overdue: 'rouge', cancelled: 'rouge' }[statut] || '';
-    return '<span class="rf-pill ' + ton + '">' + esc(libelle || statut) + '</span>';
-  }
   function initiales(nom){
     var m = String(nom || '').trim().split(' ').filter(Boolean);
-    if (!m.length || m[0] === '—') return '?';
+    if (!m.length) return '?';
     return ((m[0][0] || '') + (m.length > 1 ? (m[m.length - 1][0] || '') : '')).toUpperCase();
   }
+  function ilYa(d){
+    var s = Math.max(0, (Date.now() - new Date(d).getTime()) / 1000);
+    if (!(s >= 0) || !isFinite(s)) return '';
+    if (s < 60) return '${T("à l’instant")}';
+    if (s < 3600) return '${T("il y a {0} min")}'.split('{0}').join(Math.floor(s / 60));
+    if (s < 86400) return '${T("il y a {0} h")}'.split('{0}').join(Math.floor(s / 3600));
+    return szJour(d);
+  }
+  function image(url, alt){
+    return /^https:[/][/]/i.test(String(url || ''))
+      ? '<img src="' + esc(url) + '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" data-i="' + esc(initiales(alt)) + '" onerror="this.parentNode.textContent=this.dataset.i">'
+      : '<span>' + esc(initiales(alt)) + '</span>';
+  }
 
-  function tableRecent(titre, cibleTout, lignes){
-    /* ⚠⚠ LE PLAFOND DE DIX EST LEVE (2026-09-24), ET C EST UNE DECISION QUI EN
-       REMPLACE UNE AUTRE. Ce commentaire disait << les 10 dernieres, d un bloc
-       (demande du 2026-08-08) >>. Sa capture du 2026-09-24 montre 486 px de vide
-       sous ces tables, et sa consigne est << autant de lignes que ca rentre >> :
-       les deux ne tiennent pas ensemble — une carte etiree que dix lignes ne
-       remplissent pas reste une carte a moitie vide, on aurait deplace le vide
-       au lieu de le supprimer.
-       ➡ On affiche donc TOUT ce que le site envoie (25 depuis ce jour), dans une
-       zone qui DEFILE : la carte se remplit jusqu en bas, et ce qui depasse se
-       fait defiler au lieu d etre coupe. << Tout voir >> garde son role pour la
-       suite. ⚠ L ancienne decision n est pas oubliee, elle est REMPLACEE, et par
-       lui. */
-    /* ➡ 2026-10-12 : LA ZONE QUI DEFILE EST REMPLACEE PAR DES PAGES (voir le CSS de .deux).
-       PP[cible] = lignes tenables, mesurees apres le dessin (ajusterPages) ; 0 = pas encore mesure,
-       on dessine tout une fois (rien ne defile : la liste coupe) pour pouvoir mesurer. */
-    var pp = PP[cibleTout] || 0;
-    var nbP = pp ? Math.max(1, Math.ceil(lignes.length / pp)) : 1;
-    if ((PG[cibleTout] || 0) >= nbP) PG[cibleTout] = nbP - 1;
-    var pg = PG[cibleTout] || 0;
-    var vue = pp ? lignes.slice(pg * pp, pg * pp + pp) : lignes;
-    var facture = cibleTout === 'billing';
-    var nav = nbP > 1 ? '<span class="pg"><button class="mini" data-pgr="' + cibleTout + ':-1" title="${T("Page précédente")}" aria-label="${T("Page précédente")}"' + (pg === 0 ? ' disabled' : '') + '>‹</button>'
-      + (pg + 1) + ' / ' + nbP
-      + '<button class="mini" data-pgr="' + cibleTout + ':1" title="${T("Page suivante")}" aria-label="${T("Page suivante")}"' + (pg >= nbP - 1 ? ' disabled' : '') + '>›</button></span>' : '';
-    var h = '<div class="carte" data-carte="' + cibleTout + '"><h2>' + esc(titre)
-      + '<span class="tout" style="display:inline-flex;gap:.5rem;align-items:center">' + nav
-      + '<button class="mini" data-ouvre="' + cibleTout + '">${T("Tout voir →")}</button></span></h2>';
-    if (!vue.length) {
-      h += '<div class="vide">${T("Aucune entrée.")}</div>';
-    } else {
-      /* L ECLAIR n existe que pour les COMMANDES, et seulement si le role peut preparer. */
-      var geste = !facture && D && D.peutPreparer;
-      h += '<div class="liste"><table><thead><tr><th>${T("Client et commande")}</th><th>${T("Total")}</th><th>${T("Statut")}</th>'
-        + (geste ? '<th class="geste"></th>' : '') + '</tr></thead><tbody>'
-        + vue.map(function(r){
-            // ⚠ CADENAS DYNAMIQUE (#38) : la case data-cad est remplie/videe par
-            // le sondage des verrous, SANS redessiner le tableau. Une commande ET
-            // une facture pointent vers le meme ID de commande (r.oid).
-            /* La ligne riche de l Inventaire : initiales du client, nom en gras,
-               numero et date dessous ; le total en gras. Le cadenas garde sa case. */
-            /* ⚠ LA LIGNE OUVRE SON DETAIL (sa demande du 2026-09-29 : << lon clic
-               sur les commande ou les facture ici on rentre dans les detail >>).
-               Commande : sa fenetre de detail (commandes:ouvrirDetail) ; facture :
-               sa fenetre a elle (factures:ouvrir) — les memes portes que les
-               listes natives, rien de refait ici. Sans ID, la ligne reste inerte
-               plutot que d ouvrir une fenetre vide. */
-            var cibleL = facture ? (r.fid || '') : (r.oid || '');
-            var prio = !facture && r.prioritaire;
-            var classes = (cibleL ? 'ouvrable' : '') + (prio ? (cibleL ? ' ' : '') + 'prio' : '');
-            /* Une commande deja partie, livree, annulee ou remboursee n a plus rien a preparer. */
-            var preparable = geste && r.oid && ['shipped', 'delivered', 'cancelled', 'refunded', 'returned'].indexOf(r.statut) < 0;
-            return '<tr' + (classes ? ' class="' + classes + '"' : '') + (cibleL ? ' data-ligne="' + (facture ? 'f' : 'c') + ':' + esc(cibleL) + '"'
-                + ' title="' + (facture ? '${T("Ouvrir la facture")}' : '${T("Ouvrir la commande")}') + '"' : '')
-              + '><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(r.client)) + '</span>'
-              + '<div style="min-width:0"><div class="rf-nom">' + esc(r.client || '—')
-              + (prio ? '<span class="prio-pill" title="${T("Traitement prioritaire demandé par le client")}">${T("Prioritaire")}</span>' : '')
-              + '<span class="cadslot" data-cad="' + esc(r.oid || '') + '"></span></div>'
-              + '<div class="rf-sous"><span class="rf-code">' + esc(r.numero) + '</span><span>·</span>'
-              + '<span>' + esc(fmtDate(r.date)) + '</span></div></div></div></td>'
-              + '<td><span class="rf-mont">' + esc(fmt(r.total)) + '</span></td>'
-              + '<td>' + pilule(r.statut, szTd(r.statutLibelle)) + '</td>'
-              + (geste ? '<td class="geste">' + (preparable
-                  ? '<button type="button" class="eclair" data-prep="' + esc(r.oid) + '" data-eclair="' + esc(r.oid) + '"'
-                    + ' title="${T("Lancer la préparation")}" aria-label="' + esc('${T("Lancer la préparation de")} ' + r.numero) + '">'
-                    + '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9.2 1 3 9.1h4.1L6.6 15 13 6.6H8.8z"/></svg></button>'
-                  : '') + '</td>' : '')
-              + '</tr>';
-          }).join('')
-        + '</tbody></table></div>';
+  /* ══ LES PUCES « A FAIRE » ET LA PASTILLE DES ZEROS ═══════════════════════
+     Ce qui attend un geste et n est pas a zero devient une puce ; le reste est range dans la
+     pastille. Les ruptures n en sont pas : elles se commandent, elles ne se « traitent » pas en un
+     clic (elles sont dans la carte Inventaire). */
+  function files(){
+    var t = D.tuiles || {}, f = D.aFaire || {};
+    var l = [
+      ['support-mgmt', t.messagerie, '${T("message sans réponse")}', '${T("messages sans réponse")}', false, '${T("Messagerie")}'],
+      ['chat', t.clavardage, '${T("conversation en attente de réponse")}', '${T("conversations en attente de réponse")}', false, '${T("Clavardage")}'],
+      ['returns-pending', t.retoursNouveaux, '${T("retour à traiter")}', '${T("retours à traiter")}', false, '${T("Retours à traiter")}'],
+      ['returns-expiring', t.retoursExpirent, '${T("retour sur le point d’expirer")}', '${T("retours sur le point d’expirer")}', true, '${T("Retours qui expirent")}'],
+      ['reviews', f.avis, '${T("avis à modérer")}', '${T("avis à modérer")}', false, '${T("Avis à modérer")}'],
+      ['billing', f.facturesRetard, '${T("facture en retard")}', '${T("factures en retard")}', true, '${T("Factures en retard")}'],
+      ['security-incidents', f.incidentsCai, '${T("avis à la CAI à transmettre")}', '${T("avis à la CAI à transmettre")}', true, '${T("Avis à la CAI")}']
+    ];
+    return l.map(function(x){ return { cible: x[0], n: x[1] || 0, un: x[2], plus: x[3], urgent: x[4], nom: x[5] }; });
+  }
+  /* La sauvegarde : une puce SEULEMENT si elle est vieille (plus de 7 jours) ou absente — une base
+     non protegee ne doit pas se lire comme une ligne d information parmi d autres. */
+  function sauvegardeTexte(){
+    if (!SAUV || SAUV.interdite) return null;
+    if (SAUV.erreur) return { urgent: false, texte: '${T("Dernière sauvegarde : illisible")}' };
+    if (SAUV.aucune) return { urgent: true, texte: '${T("Aucune sauvegarde : la base n’est pas protégée")}' };
+    var j = SAUV.jours;
+    var quand = (j === 0) ? '${T("aujourd’hui")}' : (j === 1 ? '${T("hier")}' : '${T("il y a {0} jours")}'.split('{0}').join(j));
+    return { urgent: j > 7, texte: '${T("Dernière sauvegarde :")} ' + quand };
+  }
+
+  function barre(){
+    var fs = files(), actifs = fs.filter(function(x){ return x.n > 0; }), zeros = fs.filter(function(x){ return !(x.n > 0); });
+    var sv = sauvegardeTexte();
+    var h = '<div class="barre"><span class="direct" title="${T("Les chiffres se mettent à jour d’eux-mêmes")}"><i></i>${T("En direct")}</span>'
+      + '<span class="periode" role="group" aria-label="${T("Période")}">'
+      + [['jour', '${T("Aujourd’hui")}'], ['7j', '${T("7 jours")}'], ['mois', '${T("Ce mois")}']].map(function(p){
+          return '<button type="button" data-periode="' + p[0] + '" class="' + (PERIODE === p[0] ? 'on' : '') + '" aria-pressed="' + (PERIODE === p[0]) + '">' + p[1] + '</button>';
+        }).join('') + '</span>'
+      + actifs.map(function(x){
+          return '<button type="button" class="faire' + (x.urgent ? ' urgent' : '') + '" data-ouvre="' + x.cible + '"><b>' + x.n + '</b>' + esc(x.n > 1 ? x.plus : x.un) + '</button>';
+        }).join('')
+      + (sv && sv.urgent ? '<button type="button" class="faire urgent" data-ouvre="sauvegarde">' + esc(sv.texte) + '</button>' : '');
+    var nz = zeros.length + (sv && !sv.urgent ? 1 : 0);
+    if (nz) {
+      h += '<span class="zeros"><button type="button" class="zero-puce" id="tb-zeros" aria-expanded="' + ZEROS + '">'
+        + '${T("{0} à zéro")}'.split('{0}').join(nz) + '</button>'
+        + (ZEROS ? '<span class="zero-pop">' + zeros.map(function(x){ return '<div><span>' + esc(x.nom) + '</span><b>0</b></div>'; }).join('')
+            + (sv && !sv.urgent ? '<div><span>' + esc(sv.texte) + '</span></div>' : '') + '</span>' : '')
+        + '</span>';
     }
-    return h + '</div>';
+    h += '</div>';
+    // Le Mode exclusif vit dans l en-tete, a cote de la date : la barre garde sa ligne pour les puces.
+    var slot = document.getElementById('tb-mx-slot');
+    if (slot) slot.innerHTML = (MX && MX.ok) ? '<button class="mini" id="tb-mx" title="${T("Empecher toute autre connexion pendant une maintenance")}">'
+      + (MX.actif ? '\u{1F512} ${T("Mode exclusif : ACTIF")}' : '\u{1F512} ${T("Mode exclusif")}…') + '</button>' : '';
+    return h;
   }
 
-  /* ══ MODE USAGE EXCLUSIF ══════════════════════════════════════════════════
-     Sa demande du 2026-09-09 : << une option usage exclusif dans l application
-     que je peux activer dans un mode de maintenance si je veux m assurer que
-     personne ne se connecte pendant cette periode >>, puis, une heure apres la
-     premiere livraison : << mets le bouton mode exclusif dans le tableau de bord
-     plutot et non dans personnel connecte >>.
-     ⚠⚠ ET CE DEPLACEMENT CORRIGE UN DEFAUT, pas seulement un rangement. Dans
-     << Personnel connecte >>, la liste se rafraichit toutes les 4 secondes et
-     redessine le corps entier : le selecteur de date natif que le systeme venait
-     d ouvrir disparaissait avec, une ou deux secondes apres le clic — impossible
-     de choisir quoi que ce soit. Ici, « dessiner() » n est appele que sur un GESTE,
-     et le seul sondage de cette fenetre (les verrous, 3 s) ne touche que les
-     cadenas. Le probleme n a donc plus lieu d etre, au lieu d etre contourne. */
-  /* ══ MODE USAGE EXCLUSIF — LE BOUTON, ET RIEN QUE LE BOUTON ══════════════
-     Sa demande du 2026-09-09 : << si je clique sur mode exclusif, une autre
-     fenetre native s ouvre en detache et me propose les options >>.
-     ⚠⚠ ET CE N EST PAS QU UNE PREFERENCE DE PLACEMENT. Le formulaire a d abord
-     vecu dans << Personnel connecte >>, qui se redessine toutes les 4 secondes :
-     le selecteur de date natif se refermait une seconde apres le clic. Puis ici,
-     en panneau deplie — mieux, mais un formulaire dans un ecran qui porte aussi
-     douze tuiles et un sondage de verrous reste un formulaire de passage. Une
-     fenetre a lui, qui ne se rafraichit sur rien, est le seul montage ou le
-     selecteur tient.
-     ⚠ LE BOUTON NE PARAIT QUE SI LE SERVEUR A DIT OUI. « maintenance:etat » refuse
-     (superadmin_required) a qui n a pas le droit : le masquage se fait donc sur
-     la reponse, pas sur une idee que cette fenetre se ferait du role. Sa regle du
-     meme jour : masquer, pas griser. */
-  function mxLire(){
-    appeler('maintenance:etat',[]).then(function(r){
-      var avant = MX && MX.ok ? (MX.actif ? 2 : 1) : 0;
-      MX = r || { ok: false };
-      var apres = MX && MX.ok ? (MX.actif ? 2 : 1) : 0;
-      /* ⚠ ON NE REDESSINE QUE SI LE BOUTON CHANGE. Le tableau de bord est le
-         premier ecran de la session : un redessin gratuit y coute plus cher
-         qu ailleurs, et il n y a rien d autre a mettre a jour ici. */
-      if (avant !== apres) dessiner();
-    });
+  function tauxAvis(){
+    if (!D.taux) return '';
+    return '<div class="avis"><span class="ic">💱</span> ' + (D.taux.genre === 'secours'
+      ? '<strong>${T("Taux de change indisponible.")}</strong> ${T("Les prix affichés en USD utilisent un taux ")}'
+        + '${T("de secours (1 USD =")} ' + szNombre(D.taux.rate, 4) + ' ${T("CAD), donc approximatif.")} '
+        + '${T("Les commandes, elles, sont toujours facturées en dollars canadiens.")}'
+      : '<strong>${T("Taux de change vieux de")} ' + D.taux.ageHeures + ' h</strong> ${T("(relevé du ")}'
+        + esc(szQuand(D.taux.quand) || '') + ', 1 USD = ' + szNombre(D.taux.rate, 4) + ' CAD). '
+        + '${T("Les prix en USD peuvent s’écarter du marché.")}') + '</div>';
   }
 
-  /* Appelee par la fenetre du mode exclusif quand elle vient de poser ou de
-     lever : le libelle du bouton doit suivre sans attendre une reouverture. */
-  window.szMaintenanceChangee = function(){ mxLire(); };
+  function ecart(v){
+    if (v == null) return '<div class="d">&nbsp;</div>';
+    var c = v > 0 ? 'haut' : (v < 0 ? 'bas' : '');
+    return '<div class="d ' + c + '">' + (v > 0 ? '+' : '') + v + ' % ${T("vs période d’avant")}</div>';
+  }
 
+  /* ══ LE DESSIN ═════════════════════════════════════════════════════════ */
   function dessiner(){
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
-    var cfg = D.cfgTuiles || {};
-    var t = D.tuiles;
-    var f = D.aFaire || {};
-    var h = '';
+    var V = D.vivant;
+    if (!V) { vide('${T("Tableau de bord indisponible")}', '${T("Le site n’a pas encore cette version du tableau de bord.")}'); return; }
+    var e = V.etapes || {}, pc = V.parcours || {}, iv = V.inventaire || {}, pr = V.produits || {}, k = V.kpi || {};
+    var h = barre() + tauxAvis() + '<div class="grille">';
 
-    h += '<div class="barreoutils">'
-      + '<select id="tb-annee"><option value="all"' + (ANNEE === 'all' ? ' selected' : '') + '>${T("Tout cumulé")}</option>'
-      + (D.annees || []).map(function(a){
-          return '<option value="' + a + '"' + (String(ANNEE) === String(a) ? ' selected' : '') + '>' + a + '</option>'; }).join('')
-      + '</select>'
-      + '<button class="mini" id="tb-tuiles" title="${T("Afficher ou masquer des tuiles")}">${T("⚙ Tuiles")}</button>'
-      + ((MX && MX.ok)
-          ? '<button class="mini' + (MX.actif ? ' att' : '') + '" id="tb-mx" '
-            + 'title="${T("Empecher toute autre connexion pendant une maintenance")}">'
-            + (MX.actif ? '\u{1F512} ${T("Mode exclusif : ACTIF")}' : '\u{1F512} ${T("Mode exclusif")}\u2026')
-            + '</button>'
-          : '')
-      + '<span class="droite">' + esc(new Date().toLocaleDateString('${LIEU()}',
-          { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })) + '</span>'
-      + '</div>';
+    // ── rangée 1 ──
+    var etape = function(n, lib, c){ return '<div class="etape" data-ouvre="orders" style="--c:' + c + '" title="${T("Ouvrir les commandes")}"><div class="n">' + (n || 0) + '</div><div class="lib">' + lib + '</div></div>'; };
+    h += '<section class="carte c8 r1a"><h2>${T("Activité des commandes")}<span class="aside">${T("ce qui attend un geste")}</span></h2>'
+      + '<div class="flux">' + etape(e.confirmer, '${T("À confirmer")}', 'var(--tx-bleu)') + etape(e.preparer, '${T("À préparer")}', 'var(--tx-att)')
+      + etape(e.expedier, '${T("À expédier")}', 'var(--tx-or)') + etape(e.livraison, '${T("En livraison")}', 'var(--tx-ok)') + '</div>'
+      + '<div class="parcours"><span>${T("Parcours du jour")} · <b>' + (pc.total || 0) + '</b></span><div class="p-barre" title="'
+      + esc('${T("Reçues")} ' + (pc.recues || 0) + ' · ${T("En préparation")} ' + (pc.preparation || 0) + ' · ${T("Parties")} ' + (pc.parties || 0)) + '">'
+      + (pc.recues ? '<i style="--c:var(--tx-bleu);flex:' + pc.recues + '"></i>' : '') + (pc.preparation ? '<i style="--c:var(--tx-att);flex:' + pc.preparation + '"></i>' : '')
+      + (pc.parties ? '<i style="--c:var(--tx-ok);flex:' + pc.parties + '"></i>' : '') + '</div>'
+      + '<span>' + (V.delaiMoyenH != null ? '${T("Délai moyen avant envoi")} <b>' + delai(V.delaiMoyenH) + '</b>' : '${T("Aucun envoi ces 30 derniers jours")}') + '</span></div></section>';
+    h += '<section class="carte c4 r1b"><h2>${T("Inventaire")}</h2><div class="inv">'
+      + '<div data-ouvre="inventory"><div class="k">${T("En main")}</div><div class="v">' + (iv.enMain || 0) + '</div></div>'
+      + '<div data-ouvre="inventory"><div class="k">${T("À commander")}</div><div class="v' + (iv.aCommander ? ' att' : '') + '">' + (iv.aCommander || 0) + '</div></div>'
+      + '<div data-ouvre="inventory"><div class="k">${T("En rupture")}</div><div class="v' + (iv.ruptures ? ' err' : '') + '">' + (iv.ruptures || 0) + '</div></div></div>'
+      + '<div class="valeur"><span>${T("Valeur du stock (au coût)")}' + (iv.sansCout ? ' · ' + pl(iv.sansCout, '${T("produit sans coût")}', '${T("produits sans coût")}') : '') + '</span><b>' + fmt(iv.valeur || 0) + '</b></div></section>';
 
-    // L avis de taux de change — seulement s il y a un probleme, comme le site.
-    if (D.taux) {
-      h += '<div class="avis"><span class="ic">💱</span> ' + (D.taux.genre === 'secours'
-        ? '<strong>${T("Taux de change indisponible.")}</strong> ${T("Les prix affichés en USD utilisent un taux ")}'
-          + '${T("de secours (1 USD =")} ' + szNombre(D.taux.rate, 4) + ' ${T("CAD), donc approximatif.")} '
-          + '${T("Les commandes, elles, sont toujours facturées en dollars canadiens.")}'
-        : '<strong>${T("Taux de change vieux de")} ' + D.taux.ageHeures + ' h</strong> ${T("(relevé du ")}'
-          + esc(szQuand(D.taux.quand) || '') + ', 1 USD = ' + szNombre(D.taux.rate, 4) + ' CAD). '
-          + '${T("Les prix en USD peuvent s’écarter du marché.")}') + '</div>';
-    }
+    // ── rangée 2 ──
+    h += '<section class="carte c8 r2a courbe"><h2>${T("Arrivée des commandes")}<span class="aside">'
+      + (PERIODE === 'jour' ? '${T("par heure, aujourd’hui contre hier")}' : (PERIODE === '7j' ? '${T("par jour, 7 derniers jours contre les 7 d’avant")}' : '${T("par jour, ce mois contre le mois dernier")}'))
+      + '</span></h2><div class="kpis">'
+      + '<div class="kpi"><div class="k">${T("Commandes")}</div><div class="v">' + (k.commandes || 0) + '</div>' + ecart(k.ecartCommandes) + '</div>'
+      + '<div class="kpi"><div class="k">${T("Ventes")}</div><div class="v">' + fmt(k.ventes || 0) + '</div>' + ecart(k.ecartVentes) + '</div>'
+      + '<div class="kpi"><div class="k">${T("Panier moyen")}</div><div class="v">' + fmt(k.panier || 0) + '</div>' + ecart(k.ecartPanier) + '</div></div>'
+      + '<div class="zone" id="zone"><svg id="graphe" role="img" aria-label="${T("Commandes par période")}"></svg></div>'
+      + '<div class="legende"><span>' + (PERIODE === 'jour' ? '${T("Aujourd’hui")}' : '${T("Cette période")}') + '</span><span class="avant">'
+      + (PERIODE === 'jour' ? '${T("Hier")}' : '${T("Période d’avant")}') + '</span></div></section>';
+    var fil = V.fil || [];
+    var geste = !!D.peutPreparer;
+    h += '<section class="carte c4 r2b direct-carte"><h2>${T("En direct")}<span class="aside">${T("dernières commandes")}</span></h2><div class="fil" id="fil">'
+      + (fil.length ? fil.map(function(c){
+          var preparable = geste && c.oid && !c.comptoir && ['shipped', 'delivered', 'cancelled', 'refunded', 'returned'].indexOf(c.statut) < 0;
+          var a = c.article || {};
+          return '<div class="cmd' + (c.prioritaire ? ' prio' : '') + (NEUVES[c.oid] ? ' neuve' : '') + '" data-ligne="' + esc(c.oid) + '" title="${T("Ouvrir la commande")}">'
+            + '<span class="ph">' + image(a.image, a.nom) + '</span>'
+            + '<div class="t"><b><span class="nm">' + esc(c.client || c.numero || '—') + '</span>'
+            + (c.prioritaire ? '<span class="prio-pill" title="${T("Traitement prioritaire demandé par le client")}">${T("Prioritaire")}</span>' : '')
+            + '<span class="cadslot" data-cad="' + esc(c.oid) + '"></span></b>'
+            + '<div class="a">' + (a.nom ? (a.qte || 1) + ' × ' + esc(a.nom) : esc(c.numero)) + (c.autres ? ' ' + '${T("+ {0} autres")}'.split('{0}').join(c.autres) : '') + '</div></div>'
+            + '<div class="m"><b>' + fmt(c.total) + '</b><div>' + esc(ilYa(c.date)) + '</div></div>'
+            + (preparable ? '<button type="button" class="eclair" data-prep="' + esc(c.oid) + '" data-eclair="' + esc(c.oid) + '" title="${T("Lancer la préparation")}" aria-label="'
+                + esc('${T("Lancer la préparation de")} ' + c.numero) + '"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9.2 1 3 9.1h4.1L6.6 15 13 6.6H8.8z"/></svg></button>' : '')
+            + '</div>';
+        }).join('') : '<div class="vide">${T("Aucune commande pour l’instant.")}</div>')
+      + '</div><div class="fil-pied"><span id="fil-compte"></span><button class="mini" data-ouvre="orders">${T("Tout voir →")}</button></div></section>';
 
-    /* ── LA BANDE << A FAIRE MAINTENANT >> (#25) ────────────────────────
-       Le tableau de bord disait des TOTAUX ; il ne disait pas ce qui attend.
-       Cette bande reunit les files qui se VIDENT en travaillant — pas les
-       etats. Les ruptures de stock en sont donc absentes : elles ne se
-       traitent pas en un clic, elles se commandent, et elles tiendraient la
-       bande allumee en permanence. Meme raisonnement que la pastille de la
-       barre des taches, qui exclut le stock pour la meme raison. */
-    var files = [
-      ['orders', f.aTraiter, '${T("commande à traiter")}', '${T("commandes à traiter")}', false],
-      ['support-mgmt', t.messagerie, '${T("message sans réponse")}', '${T("messages sans réponse")}', false],
-      ['chat', t.clavardage, '${T("conversation en attente de réponse")}', '${T("conversations en attente de réponse")}', false],
-      ['returns-pending', t.retoursNouveaux, '${T("retour à traiter")}', '${T("retours à traiter")}', false],
-      ['returns-expiring', t.retoursExpirent, '${T("retour sur le point d’expirer")}', '${T("retours sur le point d’expirer")}', true],
-      ['reviews', f.avis, '${T("avis à modérer")}', '${T("avis à modérer")}', false],
-      ['billing', f.facturesRetard, '${T("facture en retard")}', '${T("factures en retard")}', true],
-      ['security-incidents', f.incidentsCai, '${T("avis à la CAI à transmettre")}', '${T("avis à la CAI à transmettre")}', true]
-    ].filter(function(x){ return (x[1] || 0) > 0; });
-    if (files.length) {
-      h += '<div class="afaire"><span class="titre">${T("À faire maintenant")}</span>'
-        + files.map(function(x){
-            return '<button data-ouvre="' + x[0] + '"' + (x[4] ? ' class="urgent"' : '') + '>'
-              // Point median entre le nombre et le libelle : c est le separateur
-              // du projet (<< Payer avec Afterpay · 45 $ >>). Colle, << 1commande a
-              // traiter >> se lisait comme un seul mot.
-              + '<b>' + x[1] + '</b><i aria-hidden="true">·</i>' + esc(x[1] > 1 ? x[3] : x[2]) + '</button>';
-          }).join('')
-        + '</div>';
-    }
+    // ── rangée 3 ──
+    var pct = pr.variantes ? Math.round(pr.enStock / pr.variantes * 100) : 0;
+    h += '<section class="carte c3"><h2>${T("Produits")}</h2><div class="details"><div>'
+      + '<div class="r' + (pr.aCommander ? ' alerte' : '') + '"><span>${T("À commander")}</span><b>' + (pr.aCommander || 0) + '</b></div>'
+      + '<div class="r"><span>${T("En vente")}</span><b>' + (pr.enVente || 0) + '</b></div>'
+      + '<div class="r"><span>${T("Variantes")}</span><b>' + (pr.variantes || 0) + '</b></div>'
+      + '<div class="r' + (pr.ruptures ? ' alerte' : '') + '"><span>${T("En rupture")}</span><b>' + (pr.ruptures || 0) + '</b></div></div>'
+      + '<div class="jauge"><svg viewBox="0 0 160 96" aria-hidden="true">'
+      + '<path d="M14 86 A66 66 0 0 1 146 86" fill="none" stroke="var(--v10)" stroke-width="16" stroke-linecap="round"/>'
+      + '<path d="M14 86 A66 66 0 0 1 146 86" fill="none" stroke="var(--tx-ok)" stroke-width="16" stroke-linecap="round" pathLength="100" stroke-dasharray="' + pct + ' 100"/>'
+      + '<text x="80" y="80" text-anchor="middle" font-size="26" font-weight="700" fill="var(--tx)">' + pct + ' %</text></svg>'
+      + '<div class="lib">${T("variantes en stock")}</div></div></div></section>';
+    var top = V.top || [];
+    h += '<section class="carte c5"><h2>${T("Meilleures ventes")}<span class="aside">${T("ce mois-ci")}</span></h2>'
+      + (top.length ? '<div class="top">' + top.map(function(x, i){
+          return '<div class="p"><span class="rang">' + (i + 1) + '</span><div class="im">' + image(x.image, x.nom) + '</div>'
+            + '<div class="nom" title="' + esc(x.nom) + '">' + esc(x.nom) + '</div><div class="q">' + x.qte + ' <small>' + szPl(x.qte, '${T("vendu")}', '${T("vendus")}') + '</small></div></div>';
+        }).join('') + '</div>' : '<div class="vide">${T("Aucune vente ce mois-ci.")}</div>') + '</section>';
+    var COUL = [['pending', 'var(--tx-att)', '${T("En attente")}'], ['confirmed', 'var(--tx-bleu)', '${T("Confirmées")}'],
+      ['preparing', 'var(--tx-or)', '${T("Préparation")}'], ['shipped', 'var(--tx-gris2)', '${T("Expédiées")}'], ['delivered', 'var(--tx-ok)', '${T("Livrées")}']];
+    var NOMS = { enligne: '${T("Boutique en ligne")}', comptoir: '${T("Vente au comptoir")}', telephone: '${T("Téléphone")}' };
+    var cx = V.canaux || [];
+    h += '<section class="carte c4"><h2>${T("Par canal")}<span class="aside">${T("ce mois-ci")}</span></h2>'
+      + (cx.length ? '<div class="canaux">' + cx.map(function(c){
+          return '<div class="canal"><div class="nm"><span>' + esc(NOMS[c.cle] || c.nom) + '</span><b>' + c.total + '</b></div><div class="pile">'
+            + COUL.map(function(s){ var v = (c.statuts || {})[s[0]] || 0; return v ? '<i style="--c:' + s[1] + ';flex:' + v + '" title="' + esc(s[2] + ' : ' + v) + '"></i>' : ''; }).join('') + '</div></div>';
+        }).join('') + '</div><div class="cles">' + COUL.map(function(s){ return '<span style="--c:' + s[1] + '">' + s[2] + '</span>'; }).join('') + '</div>'
+        : '<div class="vide">${T("Aucune commande ce mois-ci.")}</div>') + '</section>';
 
-    if (PANNEAU) {
-      h += '<div class="panneau">'
-        + TUILES.filter(offerte).map(function(x){
-            return '<label><input type="checkbox" data-cfg="' + x[0] + '"'
-              + (cfg[x[0]] !== false ? ' checked' : '') + '> ' + esc(x[1]) + '</label>';
-          }).join('')
-        + '</div>';
-    }
-
-    // Le meme contenu de tuiles que l ecran du site, valeur par valeur.
-    var an = (ANNEE === 'all') ? '' : ' ' + ANNEE;
-    var contenu = {
-      /* ⚠⚠ SA CAPTURE DU 2026-09-13 MONTRAIT << 11 variantes to restock >> — une
-         phrase a MOITIE traduite. La cause : le singulier/pluriel etait COLLE
-         (le mot, puis un << s >> ajoute a part), donc seul le dernier morceau
-         passait par le dictionnaire. On ecrit desormais les DEUX alternatives EN
-         ENTIER, comme la doctrine le demande depuis le debut : en anglais le
-         pluriel ne se fabrique pas toujours en ajoutant une lettre.
-         ⚠ ET AUCUN ACCENT GRAVE ICI, commentaires compris : ce texte vit dans un
-         litteral de gabarit, il se refermerait. Je viens de le repayer. */
-      products: tuile('products', '${T("Produits actifs")}', t.produits.actifs, '',
-        t.produits.produitsBas
-          ? t.produits.variantesReappro + (t.produits.variantesReappro > 1
-              ? ' ${T("variantes à réapprovisionner")}' : ' ${T("variante à réapprovisionner")}')
-          : '${T("aucun réapprovisionnement")}',
-        t.produits.produitsBas ? 'att' : ''),
-      orders: tuile('orders', '${T("Commandes")}' + an, t.commandes.total, '',
-        t.commandes.enAttente + ' ${T("en attente")}', t.commandes.enAttente > 0 ? 'att' : ''),
-      customers: tuile('customers', '${T("Clients actifs")}', t.clients.actifs, '',
-        t.clients.inactifs > 0 ? '${T("Comptes inactifs :")} ' + t.clients.inactifs : '&nbsp;', ''),
-      revenue: tuile('revenue', '${T("Revenus (net)")}' + an, esc(fmt(t.revenus.net)), '',
-        t.revenus.factures + ' ${T("factures encaissées")}'
-          + (t.revenus.rembourse > 0 ? ' · −' + esc(fmt(t.revenus.rembourse)) + ' ${T("remboursés")}' : ''), ''),
-      messagerie: tuile('messagerie', '${T("Messagerie")}', t.messagerie, t.messagerie > 0 ? 'att' : '',
-        t.messagerie > 0
-          ? (t.messagerie > 1 ? '${T("nouveaux messages en attente")}' : '${T("nouveau message en attente")}')
-          : '${T("aucun message en attente")}', ''),
-      clavardage: tuile('clavardage', '${T("Clavardage")}', t.clavardage || 0, (t.clavardage || 0) > 0 ? 'att' : '',
-        (t.clavardage || 0) > 0
-          ? ((t.clavardage > 1) ? '${T("conversations attendent votre réponse")}' : '${T("conversation attend votre réponse")}')
-          : '${T("aucune conversation en attente")}', ''),
-      returns_new: tuile('returns_new', '${T("Nouveaux retours")}', t.retoursNouveaux,
-        t.retoursNouveaux > 0 ? 'att' : '',
-        t.retoursNouveaux > 0
-          ? (t.retoursNouveaux > 1 ? '${T("demandes à traiter")}' : '${T("demande à traiter")}')
-          : '${T("aucune demande en attente")}', ''),
-      returns_expiring: tuile('returns_expiring', '${T("Retours qui expirent")}', t.retoursExpirent,
-        t.retoursExpirent > 0 ? 'err' : '',
-        t.retoursExpirent > 0 ? '${T("colis pas encore reçu")}' : '${T("aucun retour à risque")}', ''),
-      // ── Ce qu il reste a faire (#25) ──────────────────────────────
-      /* ⚠ PAS DE SOUS-TITRE ICI (retire a sa demande, 2026-08-14). Il enumerait
-         les trois statuts comptes — un texte trop long pour la tuile, qui
-         sortait tronque (<< confirmees, en preparation ou en ver... >>) et
-         n apprenait rien de plus que le chiffre. Une ligne coupee au milieu
-         d un mot coute plus d attention qu elle n en rend. */
-      a_traiter: tuile('a_traiter', '${T("Commandes à traiter")}', f.aTraiter,
-        f.aTraiter > 0 ? 'att' : '', '&nbsp;', ''),
-      en_livraison: tuile('en_livraison', '${T("En livraison")}', f.enLivraison, '',
-        f.enLivraison > 0 ? '${T("colis partis, pas encore livrés")}' : '${T("aucun colis en route")}', ''),
-      // ⚠ SANS SOUS-TITRE, comme << Commandes a traiter >> (retire a sa demande,
-      // 2026-08-14). Le chiffre et le titre suffisent ; la ligne du dessous
-      // n ajoutait qu un commentaire, coupe des que la tuile retrecit.
-      ruptures: tuile('ruptures', '${T("Ruptures de stock")}', f.ruptures,
-        f.ruptures > 0 ? 'err' : '', '&nbsp;', ''),
-      avis: tuile('avis', '${T("Avis à modérer")}', f.avis, f.avis > 0 ? 'att' : '',
-        f.avis > 0 ? '${T("en attente d’approbation")}' : '${T("aucun avis en attente")}', ''),
-      factures_retard: tuile('factures_retard', '${T("Factures en retard")}', f.facturesRetard,
-        f.facturesRetard > 0 ? 'err' : '',
-        f.facturesRetard > 0 ? esc(fmt(f.facturesRetardMontant)) + ' ${T("impayés")}' : '${T("aucune échéance dépassée")}',
-        f.facturesRetard > 0 ? 'att' : ''),
-      incidents: tuile('incidents', '${T("Incidents ouverts")}', f.incidentsOuverts,
-        f.incidentsOuverts > 0 ? 'att' : '',
-        f.incidentsCai > 0
-          ? f.incidentsCai + ' ${T("avis à la CAI à transmettre")}'
-          : (f.incidentsOuverts > 0 ? '${T("dossiers non clôturés")}' : '${T("registre Loi 25 à jour")}'),
-        f.incidentsCai > 0 ? 'att' : ''),
-      // ⚠ Elle arrive APRES le premier dessin (reseau) : d ici la, elle dit
-      // qu elle cherche, plutot que d afficher un zero qui serait un mensonge.
-      sauvegarde: tuileSauvegarde()
-    };
-    /* ⚠ PAS DE « Masquer les totaux » ICI (retiré à sa demande le 2026-09-26 :
-       « c'est pas nécessaire »). Les tuiles SONT le tableau de bord, et le
-       panneau « Tuiles » (cfg ci-dessous) choisit déjà lesquelles s'affichent.
-       ⚠ Un poste qui les avait repliées les retrouve : sans bouton, un repli
-       retenu serait devenu définitif. Dérogation écrite dans
-       banc-tuiles-masquables. */
-    h += ('<div class="tuiles">'
-      + TUILES.filter(offerte).filter(function(x){ return cfg[x[0]] !== false; })
-          .map(function(x){ return contenu[x[0]]; }).join('')
-      + '</div>');
-
-    h += '<div class="deux">'
-      + tableRecent('${T("Commandes récentes")}', 'orders', D.recentesCommandes || [])
-      + tableRecent('${T("Factures récentes")}', 'billing', D.recentesFactures || [])
-      + '</div>';
-
+    h += '</div>';
     corps.innerHTML = h;
-    appliquerVerrous();   // #38 : poser les cadenas connus sur le tableau frais
-    ajusterPages();
+    graphe();
+    ajusterFil();
+    appliquerVerrous();
+  }
+  function delai(hh){
+    var h = Math.floor(hh), m = Math.round((hh - h) * 60);
+    return h >= 48 ? '${T("{0} jours")}'.split('{0}').join(Math.round(hh / 24)) : (h + ' h' + (m ? ' ' + (m < 10 ? '0' : '') + m : ''));
   }
 
-  /* Combien de lignes tiennent dans chaque carte recente — MESURE, jamais devine (meme principe que
-     szAutoPagination). Redessine seulement si un compte change : pas de boucle. Mesure absurde (au
-     banc, rien n est dispose) : on ne touche a rien. */
-  function ajusterPages(){
-    var change = false;
-    Array.prototype.forEach.call(corps.querySelectorAll('.deux>.carte'), function(carte){
-      var k = carte.getAttribute('data-carte'), c = carte.querySelector('.liste');
-      if (!c || !(k in PP)) return;
-      var th = c.querySelector('thead'), tr = c.querySelector('tbody tr');
-      var hL = tr ? tr.offsetHeight : 0;
-      try { var tb = c.querySelector('table'); var esp = tb ? parseFloat(String(getComputedStyle(tb).borderSpacing || '').split(' ')[1]) : 0; if (esp > 0) hL += esp; } catch (e) {}
-      var dispo = c.clientHeight - ((th && th.offsetHeight) || 0);
-      if (!(hL > 0) || !(dispo > 0)) return;
-      var n = Math.max(1, Math.floor(dispo / hL));
-      if (n !== PP[k]) { PP[k] = n; change = true; }
-    });
-    /* ⚠ UNE SEULE CORRECTION PAR DESSIN (meme verrou qu Inventaire, grilleAutoAjuste) : la mesure peut
-       osciller entre deux valeurs, et dessiner -> ajusterPages -> dessiner tournait alors sans fin, de facon
-       synchrone — la fenetre ne se dessinait plus (vu au banc, fenetre detachee, police large). */
-    if (change && !_tbAjust) { _tbAjust = true; try { dessiner(); } finally { _tbAjust = false; } }
+  /* La courbe, dessinee a la taille REELLE de sa zone (elle remplit la carte, jamais plus). */
+  function graphe(){
+    var z = document.getElementById('zone'), svg = document.getElementById('graphe');
+    if (!z || !svg || !D || !D.vivant) return;
+    var w = z.clientWidth, h = z.clientHeight;
+    if (!(w > 40 && h > 40)) return;
+    var C = D.vivant.courbe || {}, A = C.actuel || [], B = C.precedent || [], E = C.etiquettes || [], n = A.length;
+    if (!n) { svg.innerHTML = ''; return; }
+    svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+    var g0 = 26, d0 = w - 10, haut = 18, bas = h - 18;
+    var max = Math.max(4, Math.max.apply(null, A.concat(B)) + 1);
+    var pas = Math.max(1, Math.ceil(max / 4));
+    var X = function(i){ return n > 1 ? g0 + i * ((d0 - g0) / (n - 1)) : (g0 + d0) / 2; };
+    var Y = function(v){ return bas - (v / max) * (bas - haut); };
+    var lisse = function(v, jusqu){
+      var d = 'M' + X(0) + ' ' + Y(v[0] || 0);
+      for (var i = 1; i <= jusqu; i++) { var cx = (X(i - 1) + X(i)) / 2; d += ' C' + cx + ' ' + Y(v[i - 1] || 0) + ' ' + cx + ' ' + Y(v[i] || 0) + ' ' + X(i) + ' ' + Y(v[i] || 0); }
+      return d;
+    };
+    var s = '';
+    for (var y = 0; y <= max; y += pas) s += '<line x1="' + g0 + '" x2="' + d0 + '" y1="' + Y(y) + '" y2="' + Y(y) + '" stroke="var(--v07)"/>'
+      + '<text x="' + (g0 - 7) + '" y="' + (Y(y) + 3) + '" font-size="10" fill="var(--tx3)" text-anchor="end">' + y + '</text>';
+    var tous = C.mode === 'heure' ? 3 : Math.max(1, Math.ceil(n / 10));
+    for (var i = 0; i < n; i += tous) s += '<text x="' + X(i) + '" y="' + (h - 4) + '" font-size="10" fill="var(--tx3)" text-anchor="middle">' + E[i] + (C.mode === 'heure' ? ' h' : '') + '</text>';
+    s += '<defs><linearGradient id="tb-aire" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--tx-or)" stop-opacity=".35"/><stop offset="1" stop-color="var(--tx-or)" stop-opacity="0"/></linearGradient></defs>';
+    s += '<path d="' + lisse(B, n - 1) + '" fill="none" stroke="var(--tx3)" stroke-width="1.5" stroke-dasharray="4 4" opacity=".7"/>';
+    var c = Math.min(n - 1, Math.max(0, C.courant || 0)), a = lisse(A, c), xd = X(c), yd = Y(A[c] || 0);
+    s += '<path d="' + a + ' L' + xd + ' ' + bas + ' L' + X(0) + ' ' + bas + ' Z" fill="url(#tb-aire)"/>';
+    s += '<path d="' + a + '" fill="none" stroke="var(--tx-or)" stroke-width="2.5" stroke-linecap="round"/>';
+    s += '<circle cx="' + xd + '" cy="' + yd + '" r="10" fill="var(--tx-or)" opacity=".18"><animate attributeName="r" values="5;12;5" dur="1.8s" repeatCount="indefinite"/></circle>';
+    s += '<circle cx="' + xd + '" cy="' + yd + '" r="4.2" fill="var(--tx-or)" stroke="var(--f-carte)" stroke-width="2"/>';
+    s += '<text x="' + Math.min(d0 - 20, Math.max(g0 + 20, xd)) + '" y="' + Math.max(12, yd - 12) + '" font-size="11" font-weight="700" fill="var(--tx)" text-anchor="middle">' + (A[c] || 0) + '</text>';
+    svg.innerHTML = s;
   }
-  var _tbAjust = false;
+
+  /* Le fil : AUTANT DE COMMANDES QUE LA CARTE EN MONTRE, jamais de defilement (sa regle). */
+  function ajusterFil(){
+    var f = document.getElementById('fil'); if (!f) return;
+    var els = f.querySelectorAll('.cmd'), vus = 0;
+    Array.prototype.forEach.call(els, function(e){ e.classList.remove('cache'); });
+    var bas = f.getBoundingClientRect().bottom + 0.5;
+    Array.prototype.forEach.call(els, function(e){ if (e.getBoundingClientRect().bottom > bas) e.classList.add('cache'); else vus++; });
+    var cpt = document.getElementById('fil-compte');
+    var k = (D && D.vivant && D.vivant.parcours) ? (D.vivant.parcours.total || 0) : 0;
+    if (cpt) cpt.textContent = els.length ? (vus + ' ' + '${T("sur {0} aujourd’hui")}'.split('{0}').join(k)) : '';
+  }
   var _tbRedim = null;
-  window.addEventListener('resize', function(){
-    clearTimeout(_tbRedim);
-    _tbRedim = setTimeout(function(){ PP = { orders: 0, billing: 0 }; dessiner(); }, 180);
-  });
+  window.addEventListener('resize', function(){ clearTimeout(_tbRedim); _tbRedim = setTimeout(function(){ graphe(); ajusterFil(); }, 120); });
 
-  // Ecouteur delegue : tout est redessine, rien ne se perd.
+  /* ══ LES GESTES ══════════════════════════════════════════════════════════ */
   corps.onclick = function(ev){
     var t = ev.target;
     if (!t || !t.closest) return;
-    var pr = t.closest('[data-pgr]');
-    if (pr) { if (pr.disabled) return; var v0 = pr.getAttribute('data-pgr').split(':'); PG[v0[0]] = (PG[v0[0]] || 0) + parseInt(v0[1], 10); dessiner(); return; }
-    var ou = t.closest('[data-ouvre]');
-    if (ou) { ouvrir(ou.getAttribute('data-ouvre')); return; }
+    var pe = t.closest('[data-periode]');
+    if (pe) { PERIODE = pe.getAttribute('data-periode'); charger(); return; }
+    if (t.closest('#tb-zeros')) { ZEROS = !ZEROS; dessiner(); return; }
     var ec = t.closest('button[data-prep]');
     if (ec) { if (!ec.disabled) lancerPreparation(ec.getAttribute('data-prep'), ec); return; }
-    var li = t.closest('tr[data-ligne]');
-    if (li) {
-      var v = li.getAttribute('data-ligne'), id = v.slice(2);
-      appeler(v.charAt(0) === 'f' ? 'factures:ouvrir' : 'commandes:ouvrirDetail', [id]).then(function(r){
-        if (!r || !r.ok) dire(expliquer(r), 'err');
-        else dire('');
-      });
-      return;
-    }
-    if (t.closest('#tb-tuiles')) { PANNEAU = !PANNEAU; dessiner(); return; }
-    /* ⚠ CES QUATRE-LA NE REDESSINENT PAS AVANT D AVOIR LU LES CHAMPS. Un
-       redessin efface la saisie et referme le selecteur de date : c est
-       exactement le defaut qu on vient de corriger en changeant d ecran, et il
-       reviendrait ici au premier raccourci. */
-    if (t.closest('#tb-mx')) {
-      appeler('maintenance:ouvrir',[]).then(function(r){
-        if (!r || !r.ok) dire(expliquer(r), 'err');
-      });
-      return;
-    }
-    var tu = t.closest('[data-tuile]');
-    if (tu) {
-      var cibles = { products: 'products', orders: 'orders', customers: 'customers',
-        revenue: 'billing', messagerie: 'support-mgmt', clavardage: 'chat',
-        returns_new: 'returns-pending', returns_expiring: 'returns-expiring',
-        a_traiter: 'orders', en_livraison: 'orders', ruptures: 'inventory',
-        avis: 'reviews', factures_retard: 'billing',
-        incidents: 'security-incidents', sauvegarde: 'sauvegarde' };
-      ouvrir(cibles[tu.getAttribute('data-tuile')] || '');
-    }
-  };
-  corps.onchange = function(ev){
-    var t = ev.target;
-    if (!t) return;
-    if (t.id === 'tb-annee') { ANNEE = t.value; charger(); return; }
-    var k = t.getAttribute && t.getAttribute('data-cfg');
-    if (k) {
-      var cfg = (D && D.cfgTuiles) || {};
-      cfg[k] = t.checked;
-      D.cfgTuiles = cfg;
-      dessiner();
-      // La preference suit la personne (profil Turso), comme l ecran du site.
-      appeler('tableau:tuiles', [cfg]).then(function(r){
-        if (!r || !r.ok) dire(expliquer(r), 'err');
+    var ou = t.closest('[data-ouvre]');
+    if (ou) { ouvrir(ou.getAttribute('data-ouvre')); return; }
+    var li = t.closest('[data-ligne]');
+    if (li && li.getAttribute('data-ligne')) {
+      appeler('commandes:ouvrirDetail', [li.getAttribute('data-ligne')]).then(function(r){
+        if (!r || !r.ok) dire(expliquer(r), 'err'); else dire('');
       });
     }
   };
+  var slotMx = document.getElementById('tb-mx-slot');
+  if (slotMx) slotMx.onclick = function(ev){
+    if (ev.target && ev.target.closest && ev.target.closest('#tb-mx'))
+      appeler('maintenance:ouvrir', []).then(function(r){ if (!r || !r.ok) dire(expliquer(r), 'err'); });
+  };
+  document.addEventListener('click', function(ev){
+    if (ZEROS && ev.target && ev.target.closest && !ev.target.closest('.zeros')) { ZEROS = false; dessiner(); }
+  });
 
   function ouvrir(cible){
     if (!cible) return;
     appeler('tableau:ouvrir', [cible]).then(function(r){
-      if (!r || !r.ok) dire(expliquer(r), 'err');
-      else dire('');
+      if (!r || !r.ok) dire(expliquer(r), 'err'); else dire('');
     });
   }
 
-  /* ⚠ RENVOIE SA PROMESSE (2026-09-26) : la coquille l attend avant de montrer
-     la vue (dock:ouvrir). Sans elle, la vue paraissait avec son contenu d avant
-     — « l administration n est pas encore chargée », peint au prechauffage —
-     puis les chiffres arrivaient 150 ms plus tard, sous les yeux. */
+  /* ══ LE CHARGEMENT, ET LE DIRECT ═════════════════════════════════════════
+     ⚠ RENVOIE SA PROMESSE : la coquille l attend avant de montrer la vue (dock:ouvrir).
+     ⚠ LES COMMANDES NEUVES glissent dans le fil (une fois) — aucune notification ici. */
+  var CHARGE_EN_COURS = false;
   function charger(){
-    return appeler('tableau:lire', [ANNEE]).then(function(r){
-      if (!r || !r.ok) { vide('${T("Tableau de bord indisponible")}', expliquer(r)); return; }
+    if (CHARGE_EN_COURS) return Promise.resolve();
+    CHARGE_EN_COURS = true;
+    return appeler('tableau:lire', ['all', PERIODE]).then(function(r){
+      CHARGE_EN_COURS = false;
+      if (!r || !r.ok) { if (!D) vide('${T("Tableau de bord indisponible")}', expliquer(r)); return; }
+      var fil = (r.vivant && r.vivant.fil) || [];
+      NEUVES = {};
+      if (VUS) fil.forEach(function(c){ if (c.oid && !VUS[c.oid]) NEUVES[c.oid] = true; });
+      VUS = {}; fil.forEach(function(c){ if (c.oid) VUS[c.oid] = true; });
       D = r;
-      dire('');
       dessiner();
       chargerSauvegarde();
     });
   }
+  /* Il se relit seul toutes les 12 s, meme derriere un autre module (sa demande) — sauf pendant que
+     la pastille des zeros est ouverte (on ne redessine pas sous les doigts). */
+  function demarrerDirect(){
+    if (VIF_TIMER) return;
+    VIF_TIMER = setInterval(function(){ if (!ZEROS) charger(); }, 12000);
+  }
 
-  /* ⚠ SON ECHEC NE DOIT RIEN CASSER. Le reste du tableau de bord est deja
-     dessine et ne depend pas d elle : un droit manquant ou un R2 injoignable
-     remplit la tuile d une explication, il ne vide pas l ecran. Un refus de
-     DROIT retire la tuile — annoncer l etat des sauvegardes a qui n y a pas
-     acces n est pas une information, c est une fuite. */
   function chargerSauvegarde(forcer){
-    /* ⚠ ELLE SE RELIT. Le premier jet ne lisait qu UNE SEULE FOIS (garde
-       << SAUV !== null >>) : apres avoir cree une sauvegarde, la tuile
-       continuait d annoncer << 16 jours >> et aucun rafraichissement n y
-       changeait rien (signale le 2026-08-14). Le garde servait a ne pas
-       rappeler le reseau a chaque redessin — c est maintenant une FRAICHEUR
-       de quinze secondes qui s en charge, et un retour dans la fenetre force
-       la relecture. Un indicateur qui ne bouge jamais ne rassure pas : il ment. */
     if (SAUV_EN_COURS) return;
     if (!forcer && SAUV !== null && (Date.now() - SAUV_QUAND) < 15000) return;
     SAUV_EN_COURS = true;
@@ -772,30 +556,33 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       SAUV_EN_COURS = false; SAUV_QUAND = Date.now();
       if (r && r.ok) SAUV = r;
       else if (r && r.motif === 'droit') SAUV = { interdite: true };
-      else SAUV = { aucune: false, jours: null, quand: '', taille: '', erreur: expliquer(r) };
+      else SAUV = { erreur: expliquer(r) };
       if (D) dessiner();
     });
   }
 
-  /* ══ CADENAS DYNAMIQUE (#38) ══════════════════════════════════════════════
-     Sondage leger des verrous 'orders' toutes les ~3 s : on pose/retire les
-     cadenas SANS redessiner le tableau (pas de clignotement ni de perte de
-     focus). Une commande ET sa facture pointent le meme ID de commande. */
+  function mxLire(){
+    appeler('maintenance:etat', []).then(function(r){
+      var avant = MX && MX.ok ? (MX.actif ? 2 : 1) : 0;
+      MX = r || { ok: false };
+      var apres = MX && MX.ok ? (MX.actif ? 2 : 1) : 0;
+      if (avant !== apres) dessiner();
+    });
+  }
+  window.szMaintenanceChangee = function(){ mxLire(); };
+
+  /* ══ CADENAS ET ECLAIR EN DIRECT (#38) ════════════════════════════════════
+     Sondage leger des verrous toutes les ~3 s : on pose/retire les cadenas et on eteint l eclair
+     d une commande qu un COLLEGUE tient, SANS redessiner. */
   function cadInner(oid){
     if (!oid || !VERROUS[oid]) return '';
     var v = VERROUS[oid];
-    var t = v.mine ? '${T("Vous tenez cette fiche en modification")}'
-      : ('${T("En traitement par")} ' + (v.par || '${T("un collegue")}'));
+    var t = v.mine ? '${T("Vous tenez cette fiche en modification")}' : ('${T("En traitement par")} ' + (v.par || '${T("un collegue")}'));
     return '<span class="cad' + (v.mine ? ' mine' : '') + '" title="' + esc(t) + '"><span class="ic">🔒</span></span>';
   }
   function appliquerVerrous(){
     var slots = document.querySelectorAll('.cadslot');
-    for (var i = 0; i < slots.length; i++){
-      slots[i].innerHTML = cadInner(slots[i].getAttribute('data-cad'));
-    }
-    /* L ECLAIR S ETEINT quand un COLLEGUE tient la commande — le meme verrou que la fenetre
-       Commandes (<< En traitement par >>). Sa propre preparation ouverte ne l eteint pas : un clic
-       la ramene simplement au premier plan. */
+    for (var i = 0; i < slots.length; i++) slots[i].innerHTML = cadInner(slots[i].getAttribute('data-cad'));
     var ecs = document.querySelectorAll('button[data-eclair]');
     for (var j = 0; j < ecs.length; j++){
       var v = VERROUS[ecs[j].getAttribute('data-eclair')];
@@ -804,8 +591,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       ecs[j].title = pris ? ('${T("En traitement par")} ' + (v.par || '${T("un collegue")}')) : '${T("Lancer la préparation")}';
     }
   }
-  /* ⚠ LE VERROU EST RELU AU CLIC : le sondage a jusqu a trois secondes de retard, et un collegue
-     peut avoir pris la commande entre-temps. On ne lance rien tant que la lecture n a pas repondu. */
+  /* ⚠ LE VERROU EST RELU AU CLIC : le sondage a jusqu a trois secondes de retard. */
   function lancerPreparation(oid, bouton){
     if (bouton) bouton.disabled = true;
     appeler('tableau:verrous', []).then(function(r){
@@ -834,51 +620,39 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     chargerVerrous();
     VERROU_TIMER = setInterval(chargerVerrous, 3000);
   }
-  window.addEventListener('pagehide', function(){ if (VERROU_TIMER) { clearInterval(VERROU_TIMER); VERROU_TIMER = null; } });
+  window.addEventListener('pagehide', function(){
+    if (VERROU_TIMER) { clearInterval(VERROU_TIMER); VERROU_TIMER = null; }
+    if (VIF_TIMER) { clearInterval(VIF_TIMER); VIF_TIMER = null; }
+  });
 
-  /* ⚠ ACTUALISATION POUSSEE PAR LA COQUILLE : une vente, un produit modifie ou
-     un remboursement fait relire les chiffres sans geste — mais jamais pendant
-     que le panneau des tuiles est ouvert (on redessinerait sous les doigts). */
-  window.szActualiser = function(){
-    if (PANNEAU) return;
-    charger();
-  };
-  // Ramenee au premier plan par le menu : les chiffres se relisent.
+  /* ⚠ ACTUALISATION POUSSEE PAR LA COQUILLE : une vente, un produit modifie ou un remboursement fait
+     relire les chiffres sans attendre le prochain battement. */
+  window.szActualiser = function(){ if (!ZEROS) charger(); };
   window.szRevenir = function(){
     SAUV_QUAND = 0;
     var p = charger();
-    /* ⚠ ET ON RELIT L ETAT DU MODE : quelqu un a pu le poser ou le lever depuis
-       l autre fenetre pendant que celle-ci etait derriere. */
     mxLire();
-    return p;   // la coquille attend les chiffres avant de montrer la vue
+    return p;
   };
-
-  /* ── MODE ANCRE ── La coquille appelle szModeAncre(true) quand cette page
-     vit DANS la fenetre principale : on offre alors << Detacher >>, qui
-     emporte la vue — et tout son etat — dans une vraie fenetre. */
-  /* \u26a0 LE TABLEAU DE BORD NE SE DETACHE PAS (demande du 2026-08-09) : c est
-     l ecran d ouverture de session — detache, la fenetre principale n aurait
-     qu un fond vide. Pas de bouton ; la coquille refuse aussi (dock:detacher,
-     NON_DETACHABLES), pour que la regle tienne meme sans ce dessin. */
+  /* ⚠ LE TABLEAU DE BORD NE SE DETACHE PAS (demande du 2026-08-09) : c est l ecran d ouverture de
+     session. Pas de bouton ; la coquille refuse aussi (dock:detacher, NON_DETACHABLES). */
   window.szModeAncre = function(){
     var b = document.getElementById('sz-detacher');
     if (b) b.remove();
   };
-
-
   document.addEventListener('keydown', function(ev){
     if (ev.key !== 'Escape') return;
+    if (ZEROS) { ZEROS = false; dessiner(); return; }
     ev.preventDefault();
     P.fermer();
   });
 
+  // La date vit dans l en-tete : la barre garde sa ligne pour les puces.
   var sous = document.getElementById('sous');
-  if (sous) sous.textContent = '';
-  window.szPret = charger();   // attendu par dock:ouvrir pour une vue neuve
-  demarrerVerrous();   // #38 : cadenas en direct sur les commandes/factures verrouillees
-  /* ⚠ APRES « charger() » , ET SANS L ATTENDRE : le tableau de bord ne doit pas
-     retarder son affichage pour savoir s il faut dessiner un bouton. Le bouton
-     paraitra au retour de cette reponse, ou jamais si le droit manque. */
+  if (sous) sous.textContent = new Date().toLocaleDateString('${LIEU()}', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  window.szPret = charger();
+  demarrerVerrous();
+  demarrerDirect();
   mxLire();
 })();
 </script>

@@ -27,6 +27,14 @@
  */
 
 module.exports = {
+  /* ── Les annonces détaillées (2026-10-12) ── */
+  'Commande prioritaire': 'Priority order',
+  'Nouvelle commande': 'New order',
+  '+ {0} autres': '+ {0} more',
+  'à l’instant': 'just now',
+  'Fermer': 'Close',
+  '+ {0} autres nouvelles commandes': '+ {0} more new orders',
+  'Ouvrez l’administration pour les voir.': 'Open the administration to see them.',
   /* ── La ligne d'état, en haut du menu ──────────────────────────────────── */
   'En pause': 'Paused',
   'À l’écoute des commandes et des retours': 'Listening for orders and returns',

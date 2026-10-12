@@ -531,6 +531,38 @@ function battre() {
   ecrireEtat({ pid: process.pid, vu: new Date().toISOString() });
 }
 
+/* L'ANNONCE DÉTAILLÉE D'UNE OU PLUSIEURS COMMANDES NEUVES. Rend true si elle a été montrée ;
+   false = le tour garde l'avis Windows (pas de session, site muet, rien de lisible).
+   ⚠ Le son et l'historique de l'icône restent les mêmes que pour l'avis Windows. */
+async function annoncerCommandes(n) {
+  if (!_annoncesHote || !(_connecteHote && _connecteHote())) return false;
+  let r = null;
+  try { r = await _annoncesHote(Math.min(Math.max(1, n), 5)); } catch { return false; }
+  const l = (r && r.ok && Array.isArray(r.commandes)) ? r.commandes.slice(0, n) : [];
+  if (!l.length) return false;
+  const annonce = require('./annonce');
+  const fr = require('./langue').langueCourante() !== 'en';
+  const argent = (v) => { try { return new Intl.NumberFormat(fr ? 'fr-CA' : 'en-CA', { style: 'currency', currency: 'CAD' }).format(Number(v) || 0); } catch { return String(v); } };
+  const ini = (s) => String(s || '').trim().split(/\s+/).filter(Boolean).slice(0, 2).map((m) => m[0]).join('').toUpperCase() || '?';
+  jouer('commande');
+  _noter(pluriel(n, TV('nouvelle commande'), TV('nouvelles commandes')), 'commande');
+  // Les plus anciennes d'abord : la plus récente arrive en dernier, donc en bas de la pile.
+  l.slice(0, 3).reverse().forEach((c) => {
+    const a = c.article || {};
+    annonce.montrer({
+      titre: (c.prioritaire ? '⚡ ' + TV('Commande prioritaire') : TV('Nouvelle commande')) + ' · ' + argent(c.total),
+      ligne: [c.client || c.numero || '', a.nom ? (a.qte || 1) + ' × ' + a.nom + (c.autres ? ' ' + TV('+ {0} autres').split('{0}').join(c.autres) : '') : ''].filter(Boolean).join(' · '),
+      pied: 'SANDRIZA · ' + (c.numero || '') + ' · ' + TV('à l’instant'),
+      image: a.image || '', initiales: ini(a.nom || c.client), prioritaire: !!c.prioritaire, fermer: TV('Fermer'),
+    }, () => { try { if (_ouvrirCommandeHote) _ouvrirCommandeHote(c.oid); else if (_ouvrirHote) _ouvrirHote(); } catch {} });
+  });
+  if (l.length > 3 || n > 3) {
+    annonce.montrer({ titre: TV('+ {0} autres nouvelles commandes').split('{0}').join(n - 3), ligne: TV('Ouvrez l’administration pour les voir.'),
+      pied: 'SANDRIZA', initiales: '+', fermer: TV('Fermer') }, () => { try { if (_ouvrirHote) _ouvrirHote(); } catch {} });
+  }
+  return true;
+}
+
 async function unTour() {
   battre();
   if (!lireEtat().actif) return;
@@ -563,7 +595,10 @@ async function unTour() {
   // l'erreur ne se voit pas.
   for (const a of aAnnoncer(d)) {
     if (a.type === 'commande') {
-      toast(pluriel(a.n, TV('nouvelle commande'), TV('nouvelles commandes')),
+      // L'annonce détaillée d'abord (quelqu'un est connecté) ; sinon l'avis Windows, sans donnée de cliente. La veille, elle, tourne toujours.
+      let montree = false;
+      try { montree = await annoncerCommandes(a.n); } catch { montree = false; }
+      if (!montree) toast(pluriel(a.n, TV('nouvelle commande'), TV('nouvelles commandes')),
         TV('Ouvrez l’administration pour la traiter.'), 'commande');
     } else if (a.type === 'clavardage') {
       toast(pluriel(a.n, TV('conversation attend votre réponse'), TV('conversations attendent votre réponse')),
@@ -974,6 +1009,12 @@ let _estSuperHote = null;
    dès la première connexion. Sert à ne rien montrer de l'entreprise hors
    session — voir `_sousMenuNotifs`. */
 let _connecteHote = null;
+/* ══ LES ANNONCES DÉTAILLÉES (2026-10-12, sa demande : « le style d'annonce, via mon veilleur ») ══
+   Deux fonctions de l'hôte : lire le détail des N dernières commandes (op du site
+   `veilleur:annonces`, SEULEMENT en session) et ouvrir une commande. Absentes ou en
+   échec : l'avis Windows d'avant, qui ne porte aucune donnée de cliente. */
+let _annoncesHote = null;
+let _ouvrirCommandeHote = null;
 
 /* Reprise de l'état laissé par l'ancien processus séparé. On ne l'écrase pas
    s'il existe déjà à la nouvelle place : une reprise ne doit jamais défaire un
@@ -996,6 +1037,8 @@ function attacher(hote) {
   _presenceHote = (hote && hote.presence) || null;
   _estSuperHote = (hote && hote.estSuper) || null;
   _connecteHote = (hote && hote.connecte) || null;
+  _annoncesHote = (hote && hote.annonces) || null;
+  _ouvrirCommandeHote = (hote && hote.ouvrirCommande) || null;
 
   _reprendreEtatSepare();
   etat = null;   // force la relecture depuis la nouvelle place

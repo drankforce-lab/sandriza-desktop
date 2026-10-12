@@ -861,6 +861,26 @@ const JEU = {
           annees: [2026, 2025],
           cfgTuiles: { revenue: false },
           peutPreparer: true,
+          // Le tableau de bord en direct (2026-10-12) : la forme réelle de Admin._tableauVivant.
+          vivant: {
+            periode: 'jour', etapes: { confirmer: 4, preparer: 7, expedier: 3, livraison: 5 },
+            parcours: { recues: 9, preparation: 4, parties: 6, total: 19 }, delaiMoyenH: 3.7,
+            courbe: { mode: 'heure', etiquettes: Array.from({ length: 24 }, (_, i) => i),
+              actuel: [0,0,0,0,0,0,1,1,2,3,4,3,5,3,1,0,0,0,0,0,0,0,0,0], precedent: [0,0,0,0,0,0,0,1,1,2,3,2,3,2,2,1,1,2,1,1,0,0,0,0], courant: 14 },
+            kpi: { commandes: 23, ventes: 2846.4, panier: 123.76, ecartCommandes: 28, ecartVentes: 19, ecartPanier: -3 },
+            fil: [
+              { oid: 'o251', numero: 'SZ-100251', date: '2026-10-12T14:20:00Z', client: 'Josée Lafleur', total: 302.96, statut: 'pending', statutLibelle: 'En attente', prioritaire: true, comptoir: false, article: { nom: 'Robe ZENXAS', qte: 1, image: 'https://exemple.invalid/zenxas.webp' }, autres: 2 },
+              { oid: 'o249', numero: 'SZ-100249', date: '2026-10-12T13:50:00Z', client: 'Marc Dubé', total: 89.95, statut: 'confirmed', statutLibelle: 'Confirmée', prioritaire: false, comptoir: false, article: { nom: 'Pantalon Yaolin', qte: 1, image: '' }, autres: 0 },
+              { oid: 'o242', numero: 'SZ-100242', date: '2026-10-12T11:00:00Z', client: 'Anne Roy', total: 145.0, statut: 'shipped', statutLibelle: 'En livraison', prioritaire: false, comptoir: false, article: { nom: 'Chemise Walla', qte: 2, image: '' }, autres: 0 },
+              { oid: 'o238', numero: 'SZ-100238', date: '2026-10-11T16:00:00Z', client: 'Luc Simard', total: 45.0, statut: 'delivered', statutLibelle: 'Livrée', prioritaire: false, comptoir: true, article: { nom: 'T-shirt Franklin', qte: 1, image: '' }, autres: 0 },
+              { oid: 'o236', numero: 'SZ-100236', date: '2026-10-11T10:00:00Z', client: 'Émilie Gagnon', total: 80.0, statut: 'delivered', statutLibelle: 'Livrée', prioritaire: false, comptoir: false, article: { nom: 'gilet bleu', qte: 1, image: '' }, autres: 0 }
+            ],
+            top: [ { id: 'p1', nom: 'T-shirt Franklin', qte: 19, image: '' }, { id: 'p2', nom: 'Robe ZENXAS', qte: 14, image: '' }, { id: 'p3', nom: 'Pantalon Yaolin', qte: 9, image: '' } ],
+            canaux: [ { cle: 'enligne', nom: 'Boutique en ligne', statuts: { pending: 4, confirmed: 18, preparing: 7, shipped: 31, delivered: 112 }, total: 172 },
+                      { cle: 'comptoir', nom: 'Vente au comptoir', statuts: { pending: 0, confirmed: 0, preparing: 0, shipped: 0, delivered: 46 }, total: 46 } ],
+            inventaire: { enMain: 138, aCommander: 11, ruptures: 1, valeur: 9845, sansCout: 1 },
+            produits: { enVente: 5, variantes: 18, enStock: 15, ruptures: 1, aCommander: 11 },
+          },
           tuiles: {
             produits: { actifs: 42, variantesReappro: 12, produitsBas: 4 },
             commandes: { total: 128, enAttente: 3 },

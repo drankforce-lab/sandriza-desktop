@@ -3166,8 +3166,17 @@ const _tuilesOff = (cle) => {
   } catch (e) { return false; }
 };
 
+/* ══ PLUS DE BANDEAUX DE TUILES DANS LES MODULES (2026-10-12, sa décision) ══════════════════════
+   Ses mots : « comme le nouveau tableau de bord est maintenant dynamique, il n'y a plus lieu de garder
+   aucune tuile de ce genre partout sur l'administration ». La pièce commune rend donc un bandeau VIDE —
+   un seul geste pour les quelque cinquante fenêtres qui l'appellent, et la place revient aux listes.
+   ⚠ SAUF LES RAPPORTS : là, les chiffres ne doublent pas le tableau de bord, ils SONT l'écran
+   (Statistiques, Publicité, Comptabilité, Comptable, Impôt, Livre, Banque, Coûts IA). Ils gardent leur
+   bandeau, toujours masquable. */
+const TUILES_DE_RAPPORT = new Set(['statistiques', 'publicite', 'comptabilite', 'comptable', 'impot', 'livre', 'banque', 'fal']);
 const JS_TUILES = (cle) => `
 var _SZBD_CLE = ${JSON.stringify(String(cle || ''))};
+var _SZBD_RETIRE = ${TUILES_DE_RAPPORT.has(String(cle || '')) ? 'false' : 'true'};
 var _SZBD_OFF = ${_tuilesOff(cle) ? 'true' : 'false'};
 var _SZBD_MASQ = ${JSON.stringify(T('Masquer les totaux'))};
 var _SZBD_AFF = ${JSON.stringify(T('Afficher les totaux'))};
@@ -3189,6 +3198,7 @@ function _szbdAttrs(b){
 
 /* Enveloppe un bandeau de tuiles. Rend TOUJOURS le bouton. */
 function szTuiles(html){
+  if (_SZBD_RETIRE) return '';
   szTuilesEcouter();
   var t = _SZBD_OFF ? _SZBD_AFF : _SZBD_MASQ;
   return '<div class="szbd' + (_SZBD_OFF ? ' szplie' : '') + '">'
