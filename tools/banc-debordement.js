@@ -378,6 +378,14 @@ function rapport(lignes, nbFenetres, rates, lotsMorts) {
     const nom = String(p[1]).split('@')[0];
     mes.push({ nom, pageH: +p[3], pageW: +p[4], hors: +p[5], defilants: +p[6], vus: +p[7], detail: p.slice(8).join('|') });
   }
+  // Les zones qui defilent, fenetre par fenetre (une fenetre peut avoir plusieurs contextes : on garde le pire).
+  const zones = {};
+  for (const l of lignes) {
+    if (!l.startsWith('ZON|')) continue;
+    const p = l.split('|'); const nom = String(p[1]).split('@')[0]; const n = +p[2] || 0;
+    if (nom === '_temoin' || !n) continue;
+    if (!zones[nom] || n > zones[nom].n) zones[nom] = { n, detail: p.slice(3).join('|') };
+  }
   console.log('');
   if (!mes.length) { console.log('✗ AUCUNE MESURE — le banc n a rien vu. Ne pas lire ce silence comme un bon resultat.'); process.exit(1); }
   const fautif = (m) => m.hors > 0 || m.pageH > 2 || m.pageW > 2;
@@ -404,6 +412,10 @@ function rapport(lignes, nbFenetres, rates, lotsMorts) {
   console.log('   ' + mes.length + ' fenetre(s) mesuree(s) sur ' + nbFenetres + (rates ? ' — ' + rates + ' fabrique(s) en echec' : '')
     + ' ; ' + fautes.length + ' deborde(nt), dont ' + nouvelles.length + ' nouveau(x) ou aggrave(s).');
   if (gueries.length) console.log('   ✓ revenues dans le cadre (a retirer de la dette) : ' + gueries.join(', '));
+  const zn = Object.keys(zones).sort((a, b) => zones[b].n - zones[a].n);
+  console.log('');
+  console.log('   ZONES QUI DEFILENT (glissiere visible — sa regle : pagination, jamais de barre) : ' + zn.length + ' fenetre(s)');
+  for (const n of zn) console.log('   ' + n.padEnd(21) + ' ' + String(zones[n].n).padStart(3) + '   ' + zones[n].detail.slice(0, 150));
   if (lotsMorts) console.log('⚠ ' + lotsMorts + ' lot(s) muet(s) : leurs fenetres manquent a la mesure.');
   if (ECRIRE_DETTE) {
     let tout = {};

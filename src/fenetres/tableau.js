@@ -43,10 +43,8 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
@@ -110,11 +108,18 @@ html.jour .afaire .titre{color:#6f5330}
    ⚠ ET LA CARTE DEVIENT UNE COLONNE dont la LISTE defile : sans ca, une carte
    plus haute serait une carte plus VIDE — le piege de #151, ou agrandir le
    cadre sans que rien ne l occupe donne pire que le vide qu on corrigeait. */
-.deux{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;flex:1 0 auto}
-.deux>.carte{display:flex;flex-direction:column;min-height:0}
-.deux>.carte>.liste{flex:1 1 auto;min-height:0;overflow-y:auto}
-.deux>.carte>.liste::-webkit-scrollbar{width:8px}
-.deux>.carte>.liste::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* ⚠⚠ ET PLUS AUCUNE GLISSIERE (2026-10-12, sa regle : << aucun scroll bar dans l application >>,
+   << les ajouts de donnees sous controle de pagination >>). Sa capture : six commandes de test, et la
+   page entiere defilait sous la barre d etat. Le corps ne defile plus ; les deux cartes prennent la
+   place qui reste (1 1 0, jamais plus), et chaque liste montre AUTANT DE LIGNES QUE LA HAUTEUR
+   MESUREE en permet, le reste en pages (fleches dans l en-tete de la carte). Remplace la decision
+   du 2026-09-24 (<< tout afficher dans une zone qui defile >>). */
+.deux{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;flex:1 1 0;min-height:9rem}
+.deux>.carte{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.deux>.carte>.liste{flex:1 1 auto;min-height:0;overflow:hidden}
+.carte h2 .pg{display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;letter-spacing:0;
+  text-transform:none;font-weight:600;color:var(--tx2)}
+.carte h2 .pg button{padding:.05rem .45rem;font-size:.8rem;line-height:1.2}
 @media (max-width:900px){.deux{grid-template-columns:1fr}}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
@@ -186,6 +191,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var D = null;            // les donnees du site (tableau:lire)
   var ANNEE = 'all';
   var PANNEAU = false;     // le panneau << Tuiles >> est ouvert
+  var PP = { orders: 0, billing: 0 }, PG = { orders: 0, billing: 0 };   // recentes : lignes par page (mesurees), page courante
   /* Le mode usage exclusif. « MX » reste nul tant que le serveur n a pas repondu,
      et il refuse (superadmin_required) a qui n a pas le droit : le bouton ne
      parait donc QUE pour un super-administrateur, sans que cette page ait a
@@ -356,10 +362,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        fait defiler au lieu d etre coupe. << Tout voir >> garde son role pour la
        suite. ⚠ L ancienne decision n est pas oubliee, elle est REMPLACEE, et par
        lui. */
-    var vue = lignes;
+    /* ➡ 2026-10-12 : LA ZONE QUI DEFILE EST REMPLACEE PAR DES PAGES (voir le CSS de .deux).
+       PP[cible] = lignes tenables, mesurees apres le dessin (ajusterPages) ; 0 = pas encore mesure,
+       on dessine tout une fois (rien ne defile : la liste coupe) pour pouvoir mesurer. */
+    var pp = PP[cibleTout] || 0;
+    var nbP = pp ? Math.max(1, Math.ceil(lignes.length / pp)) : 1;
+    if ((PG[cibleTout] || 0) >= nbP) PG[cibleTout] = nbP - 1;
+    var pg = PG[cibleTout] || 0;
+    var vue = pp ? lignes.slice(pg * pp, pg * pp + pp) : lignes;
     var facture = cibleTout === 'billing';
-    var h = '<div class="carte"><h2>' + esc(titre)
-      + '<button class="mini tout" data-ouvre="' + cibleTout + '">${T("Tout voir →")}</button></h2>';
+    var nav = nbP > 1 ? '<span class="pg"><button class="mini" data-pgr="' + cibleTout + ':-1" title="${T("Page précédente")}" aria-label="${T("Page précédente")}"' + (pg === 0 ? ' disabled' : '') + '>‹</button>'
+      + (pg + 1) + ' / ' + nbP
+      + '<button class="mini" data-pgr="' + cibleTout + ':1" title="${T("Page suivante")}" aria-label="${T("Page suivante")}"' + (pg >= nbP - 1 ? ' disabled' : '') + '>›</button></span>' : '';
+    var h = '<div class="carte" data-carte="' + cibleTout + '"><h2>' + esc(titre)
+      + '<span class="tout" style="display:inline-flex;gap:.5rem;align-items:center">' + nav
+      + '<button class="mini" data-ouvre="' + cibleTout + '">${T("Tout voir →")}</button></span></h2>';
     if (!vue.length) {
       h += '<div class="vide">${T("Aucune entrée.")}</div>';
     } else {
@@ -596,12 +613,39 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     corps.innerHTML = h;
     appliquerVerrous();   // #38 : poser les cadenas connus sur le tableau frais
+    ajusterPages();
   }
+
+  /* Combien de lignes tiennent dans chaque carte recente — MESURE, jamais devine (meme principe que
+     szAutoPagination). Redessine seulement si un compte change : pas de boucle. Mesure absurde (au
+     banc, rien n est dispose) : on ne touche a rien. */
+  function ajusterPages(){
+    var change = false;
+    Array.prototype.forEach.call(corps.querySelectorAll('.deux>.carte'), function(carte){
+      var k = carte.getAttribute('data-carte'), c = carte.querySelector('.liste');
+      if (!c || !(k in PP)) return;
+      var th = c.querySelector('thead'), tr = c.querySelector('tbody tr');
+      var hL = tr ? tr.offsetHeight : 0;
+      try { var tb = c.querySelector('table'); var esp = tb ? parseFloat(String(getComputedStyle(tb).borderSpacing || '').split(' ')[1]) : 0; if (esp > 0) hL += esp; } catch (e) {}
+      var dispo = c.clientHeight - ((th && th.offsetHeight) || 0);
+      if (!(hL > 0) || !(dispo > 0)) return;
+      var n = Math.max(1, Math.floor(dispo / hL));
+      if (n !== PP[k]) { PP[k] = n; change = true; }
+    });
+    if (change) dessiner();
+  }
+  var _tbRedim = null;
+  window.addEventListener('resize', function(){
+    clearTimeout(_tbRedim);
+    _tbRedim = setTimeout(function(){ PP = { orders: 0, billing: 0 }; dessiner(); }, 180);
+  });
 
   // Ecouteur delegue : tout est redessine, rien ne se perd.
   corps.onclick = function(ev){
     var t = ev.target;
     if (!t || !t.closest) return;
+    var pr = t.closest('[data-pgr]');
+    if (pr) { if (pr.disabled) return; var v0 = pr.getAttribute('data-pgr').split(':'); PG[v0[0]] = (PG[v0[0]] || 0) + parseInt(v0[1], 10); dessiner(); return; }
     var ou = t.closest('[data-ouvre]');
     if (ou) { ouvrir(ou.getAttribute('data-ouvre')); return; }
     var li = t.closest('tr[data-ligne]');

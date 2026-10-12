@@ -72,5 +72,21 @@ function mesurer(racine, contexte) {
     if (hors.length < 4) hors.push(_nomCourt(el) + ' bas=' + Math.round(r.bottom) + ' droite=' + Math.round(r.right));
   }
   comptes.vus = vus;
+  /* ── LES ZONES QUI DEFILENT (2026-10-12, sa regle : << aucun scroll bar dans l application >>,
+     << les ajouts de donnees sous controle de pagination >>). Un controle dans une liste qui defile
+     est atteignable — mais la glissiere elle-meme est le defaut qu il refuse. On les NOMME toutes :
+     overflow auto/scroll ET contenu reellement plus grand que la boite, en hauteur ou en largeur. */
+  var zones = [], toutes = racine.querySelectorAll('*');
+  for (var z = 0; z < toutes.length; z++) {
+    var ze = toutes[z], zc = getComputedStyle(ze);
+    var dv = /(auto|scroll)/.test(zc.overflowY) && ze.scrollHeight > ze.clientHeight + 2;
+    var dh = /(auto|scroll)/.test(zc.overflowX) && ze.scrollWidth > ze.clientWidth + 2;
+    if (!dv && !dh) continue;
+    if (!_visible(ze)) continue;
+    if (ze.tagName === 'TEXTAREA') continue;   // une zone de saisie longue defile par nature
+    var zn = ze.tagName.toLowerCase() + (ze.id ? '#' + ze.id : '') + (ze.classList && ze.classList.length ? '.' + ze.classList[0] : '');
+    zones.push(zn + (dv ? ' V+' + (ze.scrollHeight - ze.clientHeight) : '') + (dh ? ' H+' + (ze.scrollWidth - ze.clientWidth) : ''));
+  }
+  dit('ZON|' + contexte + '|' + zones.length + '|' + zones.slice(0, 6).join(' ; ').replace(/\|/g, ' '));
   dit('DEB|' + contexte + '|' + vw + 'x' + vh + '|' + pageH + '|' + pageW + '|' + n + '|' + defilants + '|' + vus + '|' + hors.join(' ; '));
 }
