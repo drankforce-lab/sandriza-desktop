@@ -3900,7 +3900,10 @@ const CSS_AIR = `
 body{line-height:1.55}
 /* Les pages sans glissiere (JS_PAGES) : le conteneur marque ne defile JAMAIS, et son pied
    reprend l allure du pied .pagi. */
-[data-pages]{overflow:hidden!important}
+[data-pages]{overflow:hidden!important;grid-auto-rows:max-content}
+/* Un element pagine garde SA hauteur : s il pouvait retrecir (enfant flex, rangee de grille a carte
+   overflow:hidden), tout << tiendrait >> en s ecrasant — vu le 2026-10-12, 120 logos aplatis a 26 px. */
+[data-pages]>*{flex-shrink:0}
 .sz-pages{flex:0 0 auto;display:flex;align-items:center;gap:.5rem;padding-top:.45rem;
   margin-top:.35rem;border-top:1px solid var(--v08);font-size:.78rem;color:var(--tx2)}
 .sz-pages button.pgf{min-width:2rem;padding:.15rem .5rem;font-size:1rem;line-height:1.1}
@@ -3909,6 +3912,13 @@ body{line-height:1.55}
    et son conteneur [data-pages] la remplit : c est cette hauteur-la qui decide du nombre de lignes. */
 .sz-pagee{flex:1 1 0;min-height:7rem;display:flex;flex-direction:column}
 .sz-pagee>[data-pages]{flex:1 1 auto;min-height:0}
+/* Onze fenetres dessinent dans un <div id="corps"> NICHE dans .corps : sans cette regle, la carte
+   paginee n y est pas bornee (elle prenait 8600 px, et la liste croyait que tout tenait). On ne touche
+   qu aux corps qui portent une carte paginee. */
+.corps:has(>#corps>.sz-pagee),.corps:has(>#corps>[data-pages]){display:flex;flex-direction:column}
+.corps>#corps:has(>.sz-pagee),.corps>#corps:has(>[data-pages]){flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:.7rem}
+.corps>#corps:has(>.sz-pagee)>*,.corps>#corps:has(>[data-pages])>*{flex:0 0 auto}
+.corps>#corps>.sz-pagee,.corps>#corps>[data-pages]{flex:1 1 0;min-height:0}
 .ch label,label.champ .lbl{font-size:.8rem}
 .aide,.ch .aide{font-size:.78rem;line-height:1.5}
 .pill,.rf-pill{font-size:.75rem}

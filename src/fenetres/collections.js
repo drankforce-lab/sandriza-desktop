@@ -32,10 +32,9 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
+/* Aucune glissiere (2026-10-12) : la liste se pagine (data-pages, JS_PAGES du socle). */
+.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 /* ── La refonte de l Inventaire (2026-09-25) ── */
 .tuiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem;flex:0 0 auto}
@@ -174,12 +173,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         /* ⚠ PLEINE HAUTEUR (2026-09-19) : la carte prend tout l espace restant et
        c est la LISTE qui defile. Sans ca, une liste courte s arrete a sa
        derniere ligne et laisse des centaines de pixels morts sous elle. */
-    h += '<div class="carte plein">';
+    // La liste en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
+    h += '<div class="carte plein sz-pagee">';
     if (!rows.length) {
       h += '<div class="vide">' + (toutes.length ? '${T("Aucune collection ne correspond.")}'
         : '${T("Pas de collection en ce moment.")}') + '</div>';
     } else {
-      h += '<div class="liste"><table><thead><tr><th>${T("Collection")}</th><th>${T("Saison")}</th>'
+      h += '<div class="liste" data-pages="collections"><table><thead><tr><th>${T("Collection")}</th><th>${T("Saison")}</th>'
         + '<th style="text-align:center">${T("Articles")}</th><th>${T("Statut")}</th></tr></thead><tbody>'
         + rows.map(function(r){
             return '<tr data-id="' + esc(r.id) + '" title="${T("Ouvrir la collection")}">'

@@ -81,10 +81,10 @@ tbody tr:hover td{background:var(--v03)}
 .section{padding:.15rem 0 .8rem;margin-bottom:.8rem;border-bottom:1px solid var(--v06)}
 .section:last-of-type{border-bottom:0;margin-bottom:.2rem}
 .section h4{margin:0 0 .45rem;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--tx2)}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
+/* Aucune glissiere (2026-10-12) : le corps ne defile plus ; chaque liste (une par onglet)
+   va en PAGES mesurees dans sa carte sz-pagee (JS_PAGES du socle). */
+.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barre{display:flex;gap:.45rem;align-items:center;flex-wrap:wrap}
 button{font:inherit;color:var(--tx);background:var(--v05);cursor:pointer;
   border:1px solid var(--v16);border-radius:8px;padding:.28rem .55rem}
@@ -225,14 +225,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   /* ── LES COMPTES VERROUILLÉS ─────────────────────────────────────────── */
   function zoneVerrous(){
     var v = ETAT.verrous || [];
-    var h = '<div class="carte" id="z-verrous"><h3>${T("Comptes verrouillés (")}' + v.length + ')</h3>';
+    var h = '<div class="carte sz-pagee" id="z-verrous"><h3>${T("Comptes verrouillés (")}' + v.length + ')</h3>';
     if (!v.length) return h + '<div class="vide">${T("Aucun compte verrouillé.")}</div></div>';
     /* Tous d un coup : l issue normale après le bouton panique (le même
        geste armé en deux clics, la clé « * » est comprise par le serveur). */
     if (v.length > 1) h += '<div class="barre" style="margin:0 0 .5rem"><button class="mini dgr" data-dev="*">'
       + (CONF === '*' ? '${T("✓ Confirmer — tout rouvrir")}' : '<span class="ic" aria-hidden="true">🔓</span>${T(" Tout déverrouiller (")}' + v.length + ')')
       + '</button></div>';
-    h += '<table><thead><tr><th>${T("Compte")}</th><th>${T("Depuis")}</th><th>${T("Motif")}</th><th></th></tr></thead><tbody>';
+    h += '<div data-pages="gardien-verrous"><table><thead><tr><th>${T("Compte")}</th><th>${T("Depuis")}</th><th>${T("Motif")}</th><th></th></tr></thead><tbody>';
     for (var i = 0; i < v.length; i++) {
       var l = v[i];
       h += '<tr><td>' + qui(l) + '</td>'
@@ -245,17 +245,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
               + (CONF === String(l.user_id) ? '${T("✓ Confirmer")}' : '<span class="ic" aria-hidden="true">🔓</span>${T(" Déverrouiller")}')
               + '</button>') + '</td></tr>';
     }
-    return h + '</tbody></table>'
+    return h + '</tbody></table></div>'
       + '<div class="sub" style="margin-top:.45rem">${T("Déverrouiller rouvre la connexion de ce compte et remet son compteur à zéro. Vérifiez d’abord, dans l’onglet Activité, que les gestes étaient bien les siens.")}</div></div>';
   }
 
   /* ── LES DERNIERS ÉVÉNEMENTS ─────────────────────────────────────────── */
   function zoneEvenements(){
     var e = ETAT.evenements || [];
-    var h = '<div class="carte"><h3>${T("Derniers gestes comptés (")}' + e.length + ')</h3>'
+    var h = '<div class="carte sz-pagee"><h3>${T("Derniers gestes comptés (")}' + e.length + ')</h3>'
       + '<div class="intro">${T("Les 50 plus récents. Les lectures complètes n’y figurent pas : trop nombreuses, elles noieraient le reste.")}</div>';
     if (!e.length) return h + '<div class="vide">${T("Aucun geste compté.")}</div></div>';
-    h += '<table><thead><tr><th>${T("Quand")}</th><th>${T("Compte")}</th><th>${T("Catégorie")}</th><th>${T("Nombre")}</th><th>${T("Détail")}</th><th>${T("Adresse IP")}</th></tr></thead><tbody>';
+    h += '<div data-pages="gardien-activite"><table><thead><tr><th>${T("Quand")}</th><th>${T("Compte")}</th><th>${T("Catégorie")}</th><th>${T("Nombre")}</th><th>${T("Détail")}</th><th>${T("Adresse IP")}</th></tr></thead><tbody>';
     for (var i = 0; i < e.length; i++) {
       var l = e[i];
       h += '<tr><td style="white-space:nowrap">' + esc(fdate(l.ts)) + '</td>'
@@ -265,7 +265,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + '<td class="sub">' + esc(String(l.detail || '').slice(0, 160)) + '</td>'
         + '<td class="mono">' + esc(l.ip || '') + '</td></tr>';
     }
-    return h + '</tbody></table></div>';
+    return h + '</tbody></table></div></div>';
   }
 
   /* ── LE JOURNAL INVIOLABLE (palier 3) ─────────────────────────────────
@@ -279,13 +279,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   function zoneJournal(){
     var j = ETAT.journal || [];
     var touches = j.filter(function(l){ return l.src === 'reecrit' || l.src === 'retrait' || l.src === 'bloc'; }).length;
-    var h = '<div class="carte"><h3>${T("Journal inviolable (")}' + j.length + ')</h3>'
+    var h = '<div class="carte sz-pagee"><h3>${T("Journal inviolable (")}' + j.length + ')</h3>'
       + '<div class="intro">${T("Les 100 dernières entrées. Écrit par le serveur seul : aucune session, même super-administrateur, ne peut le modifier ni le vider. Une entrée du journal d’accès réécrite ou retirée y laisse une trace.")}</div>';
     if (touches) h += '<div class="note" style="margin:0 0 .5rem;color:var(--tx-att)">' + touches
       + (touches > 1 ? '${T(" modifications du journal d’accès dans ces entrées — vérifiez qui les a faites.")}'
                      : '${T(" modification du journal d’accès dans ces entrées — vérifiez qui l’a faite.")}') + '</div>';
     if (!j.length) return h + '<div class="vide">${T("Aucune entrée pour l’instant.")}</div></div>';
-    h += '<table><thead><tr><th>${T("Quand")}</th><th>${T("Compte")}</th><th>${T("Action")}</th><th>${T("Origine")}</th><th>${T("Adresse IP")}</th></tr></thead><tbody>';
+    h += '<div data-pages="gardien-journal"><table><thead><tr><th>${T("Quand")}</th><th>${T("Compte")}</th><th>${T("Action")}</th><th>${T("Origine")}</th><th>${T("Adresse IP")}</th></tr></thead><tbody>';
     for (var i = 0; i < j.length; i++) {
       var l = j[i];
       var vif = l.src === 'reecrit' || l.src === 'retrait' || l.src === 'bloc';
@@ -296,7 +296,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + '<td style="white-space:nowrap' + (vif ? ';color:var(--tx-att);font-weight:700' : '') + '">' + (vif ? '<span class="ic" aria-hidden="true">⚠</span> ' : '') + esc(SOURCES[l.src] || l.src || '') + '</td>'
         + '<td class="mono">' + esc(l.ip || '') + '</td></tr>';
     }
-    return h + '</tbody></table></div>';
+    return h + '</tbody></table></div></div>';
   }
 
   /* ── LA CORBEILLE DU SERVEUR (palier 3) ───────────────────────────────
@@ -316,11 +316,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   }
   function zoneCorbeille(){
     var c = ETAT.corbeille || [];
-    var h = '<div class="carte"><h3>${T("Corbeille du serveur (")}' + c.length + ')</h3>'
+    var h = '<div class="carte sz-pagee"><h3>${T("Corbeille du serveur (")}' + c.length + ')</h3>'
       + '<div class="intro">${T("Ce qui a été supprimé dort ici pendant ")}' + esc(ETAT.corbeilleJours || 30)
       + '${T(" jours avant d’être effacé pour de bon. Restaurer remet la fiche telle qu’elle était au moment de la suppression, ou le fichier à son adresse d’origine.")}</div>';
     if (!c.length) return h + '<div class="vide">${T("La corbeille est vide.")}</div></div>';
-    h += '<table><thead><tr><th>${T("Supprimé le")}</th><th>${T("Quoi")}</th><th>${T("Par")}</th><th></th></tr></thead><tbody>';
+    h += '<div data-pages="gardien-corbeille"><table><thead><tr><th>${T("Supprimé le")}</th><th>${T("Quoi")}</th><th>${T("Par")}</th><th></th></tr></thead><tbody>';
     for (var i = 0; i < c.length; i++) {
       var l = c[i], cle = 'r' + l.id;
       h += '<tr><td style="white-space:nowrap">' + esc(fdate(l.quand)) + '</td>'
@@ -330,7 +330,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + '<td style="text-align:right"><button class="mini" data-rest="' + esc(l.id) + '">'
         + (CONF === cle ? '${T("✓ Confirmer")}' : '<span class="ic" aria-hidden="true">↩</span>${T(" Restaurer")}') + '</button></td></tr>';
     }
-    return h + '</tbody></table></div>';
+    return h + '</tbody></table></div></div>';
   }
 
   /* ── LE BOUTON PANIQUE (palier 3) ──────────────────────────────────────

@@ -36,10 +36,8 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
 input[type=search],button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem}
@@ -196,7 +194,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       /* ⚠ PLEINE HAUTEUR (2026-09-19) : cet ecran n a PAS de carte, ses lignes
          sont riches. La zone defilante est donc fille du CORPS, pas d une
          carte — le socle couvre les deux formes. */
-      h += '<div class="liste">' + rows.map(function(r){
+      // 2026-10-12 : plus de defilement, la liste est en PAGES mesurees (JS_PAGES du socle).
+      h += '<div class="liste" data-pages="retours">' + rows.map(function(r){
         var badges = '<span class="rf-pill ' + (TONS[r.statut] || '') + '">' + esc(szTd(r.statutLibelle)) + '</span>';
         if (r.expireAuto) badges += ' <span class="rf-pill rouge">${T("Expirée automatiquement")}</span>';
         if (r.expireBientot) badges += ' <span class="rf-pill rouge">${T("Expire le ")}' + esc(szQuand(r.expireLe)) + '</span>';

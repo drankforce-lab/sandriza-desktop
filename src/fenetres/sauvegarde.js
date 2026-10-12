@@ -46,9 +46,11 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
   border-bottom:1px solid var(--v08);background:linear-gradient(180deg,#131c2b,#0e1522)}
 .ro{flex:0 0 auto;margin:.55rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.45rem .7rem;font-size:.78rem}
-.corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* Aucune glissiere (2026-10-12) : le corps est une colonne bornee et le registre
+   des sauvegardes se pagine dans la hauteur qui reste (data-pages, JS_PAGES du socle). */
+.corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow:hidden;
+  display:flex;flex-direction:column}
+.corps>.sz-pagee{margin-bottom:0}
 .carte{background:var(--v03);border:1px solid var(--v08);border-radius:12px;padding:1.1rem 1.2rem;margin:0 0 1.1rem}
 .entete{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
 .quoi{font-size:.79rem;color:var(--tx2);line-height:1.6;margin:0;max-width:62rem}
@@ -254,7 +256,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('sauvegarde')}
       corps.innerHTML = h; lier(); return;
     }
 
-    h += '<div class="carte" style="overflow-x:auto"><table class="tb"><thead><tr>'
+    // Le registre en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
+    h += '<div class="carte sz-pagee"><div data-pages="sauvegarde"><table class="tb"><thead><tr>'
       + '<th>${T("Date")}</th><th>${T("Contenu")}</th><th>${T("Application")}</th><th style="text-align:center">${T("Objets R2")}</th><th>${T("Taille")}</th><th>${T("Note")}</th><th></th>'
       + '</tr></thead><tbody>';
     for (var i=0;i<l.length;i++){ var b=l[i];
@@ -324,7 +327,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('sauvegarde')}
         + (D.peutEcrire ? '<button class="b dgr" data-del="'+esc(b.encKey)+'" data-id="'+esc(b.id)+'" title="${T("Supprimer définitivement cette sauvegarde")}"><span class="ic">🗑</span> ${T("Supprimer")}</button>' : '')
         + '</td></tr>';
     }
-    h += '</tbody></table></div>';
+    h += '</tbody></table></div></div>';
     corps.innerHTML = h;
     lier();
   }

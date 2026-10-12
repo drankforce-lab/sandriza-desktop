@@ -47,10 +47,10 @@ body{background:var(--f-page);color:var(--tx);
 .onglets button{background:none;border:0;border-bottom:2px solid transparent;color:var(--tx2);
   font:600 .82rem/1 system-ui;padding:.45rem .7rem;cursor:pointer;border-radius:0}
 .onglets button.on{color:var(--tx);border-bottom-color:#c9a97e}
-.corps{flex:1 1 auto;min-height:0;padding:.85rem 1.05rem;overflow-y:auto;
+/* Aucune glissiere (2026-10-12) : chaque liste se pagine dans la hauteur qui
+   reste (data-pages, JS_PAGES du socle). */
+.corps{flex:1 1 auto;min-height:0;padding:.85rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.75rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.8rem .9rem}
 .carte h2{margin:0 0 .55rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
@@ -92,7 +92,8 @@ tbody tr:hover td{background:var(--v03)}
 .neuf input{background:var(--f-pied);font-family:ui-monospace,Consolas,monospace;font-size:.78rem}
 .neuf .gros{font-family:ui-monospace,Consolas,monospace;font-size:1.15rem;letter-spacing:.12em;
   color:var(--tx-or2);font-weight:700}
-.choix{display:flex;flex-wrap:wrap;gap:.35rem .9rem;margin:.2rem 0 0}
+/* Les destinataires du carnet : une boite bornee, paginee par rangees (2026-10-12). */
+.choix{display:flex;flex-wrap:wrap;gap:.35rem .9rem;margin:.2rem 0 0;max-height:5.6rem}
 .choix label{display:flex;align-items:center;gap:.35rem;color:var(--tx);font-size:.78rem;margin:.1rem 0}
 .choix input{width:auto;margin:0}
 .aide{font-size:.71rem;color:var(--tx2);margin:.3rem 0 0}
@@ -215,11 +216,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     if (ETAT.neuf) h.push(carteNeuf());
     if (ETAT.formulaire) h.push(formulaire());
 
-    h.push('<div class="carte"><h2>${T("Liens de l’exercice en cours")}</h2>');
+    // La liste en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
+    h.push('<div class="carte sz-pagee"><h2>${T("Liens de l’exercice en cours")}</h2>');
     if (!ETAT.partages.length) {
       h.push('<div class="vide">${T("Aucun exercice n’a encore été partagé.")}</div>');
     } else {
-      h.push('<table><thead><tr><th>${T("Exercice")}</th>'
+      h.push('<div data-pages="comptable-partages"><table><thead><tr><th>${T("Exercice")}</th>'
         + '<th>${T("Créé")}</th><th>${T("Échéance")}</th><th>${T("État")}</th><th></th></tr></thead><tbody>');
       ETAT.partages.forEach(function(p){
         var etat = p.expire ? 'expire' : 'actif';
@@ -235,7 +237,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
             + (ARME_REV === p.token ? '${T("Confirmer ?")}' : '${T("Révoquer")}') + '</button>'
           + '</td></tr>');
       });
-      h.push('</tbody></table>');
+      h.push('</tbody></table></div>');
     }
     h.push('</div>');
 
@@ -280,7 +282,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
       return '<option value="' + y + '"' + (y === ETAT.annee ? ' selected' : '') + '>' + y + '</option>';
     }).join('');
     var carnet = ETAT.contacts.length
-      ? '<div class="choix">' + ETAT.contacts.map(function(c){
+      ? '<div class="choix" data-pages="comptable-destinataires">' + ETAT.contacts.map(function(c){
           return '<label><input type="checkbox" class="rcpt" value="' + esc(c.email) + '">'
             + esc(c.name || c.email) + (c.firm ? ' <span class="dt">(' + esc(c.firm) + ')</span>' : '') + '</label>';
         }).join('') + '</div>'
@@ -397,11 +399,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
 
     if (ETAT.contactForm) h.push(contactForm());
 
-    h.push('<div class="carte"><h2>${T("Carnet")}</h2>');
+    // Le carnet en PAGES mesurees, jamais de glissiere (2026-10-12).
+    h.push('<div class="carte sz-pagee"><h2>${T("Carnet")}</h2>');
     if (!ETAT.contacts.length) {
       h.push('<div class="vide">${T("Le carnet est vide.")}</div>');
     } else {
-      h.push('<table><thead><tr><th>${T("Nom")}</th><th>${T("Cabinet")}</th><th>${T("Courriel")}</th>'
+      h.push('<div data-pages="comptable-carnet"><table><thead><tr><th>${T("Nom")}</th><th>${T("Cabinet")}</th><th>${T("Courriel")}</th>'
         + '<th>${T("Téléphone")}</th><th>${T("Note")}</th><th></th></tr></thead><tbody>');
       ETAT.contacts.forEach(function(c){
         h.push('<tr>'
@@ -416,7 +419,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
             + (ARME_CT === c.email ? '${T("Confirmer ?")}' : '${T("Retirer")}') + '</button>'
           + '</td></tr>');
       });
-      h.push('</tbody></table>');
+      h.push('</tbody></table></div>');
     }
     h.push('</div>');
 

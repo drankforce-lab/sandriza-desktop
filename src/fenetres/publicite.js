@@ -42,9 +42,12 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
   padding:.38rem .6rem;font-weight:600;font-size:.82rem;border-radius:6px 6px 0 0}
 .onglets button:hover{background:var(--v05);color:var(--tx)}
 .onglets button.actif{color:var(--tx-creme);border-bottom-color:#c9a97e}
-.corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;display:flex;flex-direction:column;gap:.85rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+.corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow:hidden;display:flex;flex-direction:column;gap:.85rem}
+/* 2026-10-12 : aucune glissiere (sa regle). Chaque tableau qui grandit est en PAGES mesurees
+   (JS_PAGES du socle) dans une carte .sz-pagee qui prend la hauteur qui reste. Pour l onglet
+   Social, la grille a deux colonnes est bornee (.borne) : la carte de gauche prend la hauteur
+   de la rangee. */
+.deuxb.borne{flex:1 1 0;min-height:7rem;align-items:stretch;grid-template-rows:minmax(0,1fr)}
 input,button,select,textarea{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.36rem .5rem}
 textarea{resize:vertical;min-height:60px;width:100%}
@@ -261,7 +264,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
       +   '<div class="carte"><h2>${T("Revenu mensuel — 6 mois")}<span class="legend"><span><i style="background:#c9a97e"></i>${T("Total")}</span><span><i style="background:rgba(201,169,126,.42)"></i>${T("Promo")}</span></span></h2><div class="graph">' + graph + '</div></div>'
       +   '<div class="carte"><h2><span><span class="ic">🏆</span> ${T("Top 5 produits")}</span></h2>' + tops + '</div>'
       + '</div>'
-      + '<div class="carte"><h2>${T("Commandes récentes")}</h2><table><thead><tr><th>${T("Commande")}</th><th>${T("Client")}</th><th>${T("Date")}</th><th>${T("Promo")}</th><th class="num">${T("Total")}</th><th>${T("Statut")}</th></tr></thead><tbody>' + recent + '</tbody></table></div>';
+      + '<div class="carte sz-pagee"><h2>${T("Commandes récentes")}</h2><div data-pages="publicite-recentes"><table><thead><tr><th>${T("Commande")}</th><th>${T("Client")}</th><th>${T("Date")}</th><th>${T("Promo")}</th><th class="num">${T("Total")}</th><th>${T("Statut")}</th></tr></thead><tbody>' + recent + '</tbody></table></div></div>';
   }
 
   /* ══ SEGMENTS ══════════════════════════════════════════════════════════════ */
@@ -280,11 +283,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
     }).join('') : '<tr><td colspan="7" class="vide">${T("Aucun client dans ce segment.")}</td></tr>';
     var reste = (D.filteredTotal > 50) ? '<tr><td colspan="7" class="vide">+' + (D.filteredTotal - 50) + ' ${T("autres — exportez en CSV pour la liste complète")}</td></tr>' : '';
     return '<div class="segc">' + cards + '</div>'
-      + '<div class="carte"><h2>' + esc(titre) + ' — ' + nb2(D.filteredTotal, '${T("client")}', '${T("clients")}') + '<span style="display:flex;gap:.5rem">'
+      + '<div class="carte sz-pagee"><h2>' + esc(titre) + ' — ' + nb2(D.filteredTotal, '${T("client")}', '${T("clients")}') + '<span style="display:flex;gap:.5rem">'
       +   '<button class="ghost mini" data-act="export">${T("⬇ Exporter CSV")}</button>'
       +   (D.avecCourriel > 0 && PEUT.edit ? '<button class="prim mini" data-act="cibler"><span class="ic">📢</span> ${T("Cibler ce segment")}</button>' : '')
       + '</span></h2>'
-      + '<table><thead><tr><th>${T("Client")}</th><th>${T("Courriel")}</th><th>${T("Segment")}</th><th class="ctr">${T("Cmd")}</th><th class="num">${T("Dépense")}</th><th>${T("Dernière cmd")}</th><th class="ctr">${T("Promo")}</th></tr></thead><tbody>' + rows + reste + '</tbody></table></div>';
+      + '<div data-pages="publicite-segments"><table><thead><tr><th>${T("Client")}</th><th>${T("Courriel")}</th><th>${T("Segment")}</th><th class="ctr">${T("Cmd")}</th><th class="num">${T("Dépense")}</th><th>${T("Dernière cmd")}</th><th class="ctr">${T("Promo")}</th></tr></thead><tbody>' + rows + reste + '</tbody></table></div></div>';
   }
 
   /* ══ PROMOTIONS ════════════════════════════════════════════════════════════ */
@@ -306,7 +309,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
       + '<div class="tuile"><div class="k"><span class="ic">💰</span> ${T("Revenu (promo)")}</div><div class="v">' + argentK(t.totalPromoRev) + '</div></div>'
       + '<div class="tuile"><div class="k"><span class="ic">🎁</span> ${T("Économies accordées")}</div><div class="v">' + argentK(t.totalSavings) + '</div></div>'
       + '</div>')
-      + '<div class="carte"><h2>${T("Toutes les offres")} &amp; ${T("coupons")}</h2><table><thead><tr><th>${T("Nom")}</th><th>${T("Type")}</th><th>${T("Rabais")}</th><th>${T("Portée")}</th><th class="ctr">${T("Cmd")}</th><th class="num">${T("Revenu")}</th><th class="num">${T("Économies")}</th><th>${T("Statut")}</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+      + '<div class="carte sz-pagee"><h2>${T("Toutes les offres")} &amp; ${T("coupons")}</h2><div data-pages="publicite-promos"><table><thead><tr><th>${T("Nom")}</th><th>${T("Type")}</th><th>${T("Rabais")}</th><th>${T("Portée")}</th><th class="ctr">${T("Cmd")}</th><th class="num">${T("Revenu")}</th><th class="num">${T("Économies")}</th><th>${T("Statut")}</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
   }
 
   /* ══ ATTRIBUTION SOCIALE + UTM ═════════════════════════════════════════════ */
@@ -326,10 +329,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
     }).join('') : '<div style="color:var(--tx2);font-size:.82rem">${T("Continuez à accumuler des données pour obtenir des recommandations.")}</div>';
     var src = ['facebook','instagram','pinterest','tiktok','email'].map(function(s){ return '<option value="' + s + '"' + (UTM.source === s ? ' selected' : '') + '>' + s.charAt(0).toUpperCase() + s.slice(1) + '</option>'; }).join('');
     var dst = [['#shop','${T("Boutique")}'],['#shop?cat=robes','${T("Robes")}'],['#shop?cat=hauts','${T("Hauts")}'],['#shop?cat=accessoires','${T("Accessoires")}'],['#giftcard','${T("Cartes-cadeaux")}']].map(function(d){ return '<option value="' + d[0] + '"' + (UTM.dest === d[0] ? ' selected' : '') + '>' + d[1] + '</option>'; }).join('');
-    return '<div class="deuxb">'
-      + '<div class="carte"><h2>${T("Publications sociales")} &amp; ${T("impact ventes")}</h2>'
+    return '<div class="deuxb borne">'
+      + '<div class="carte sz-pagee"><h2>${T("Publications sociales")} &amp; ${T("impact ventes")}</h2>'
       +   '<div style="font-size:.72rem;color:var(--tx2);margin:-.3rem 0 .4rem">${T("Commandes passées dans les 48 h suivant chaque publication")}</div>'
-      +   '<table><thead><tr><th>${T("Date")}</th><th>${T("Réseaux")}</th><th>${T("Contenu")}</th><th class="ctr">${T("Cmd 48h")}</th><th class="num">${T("Revenu 48h")}</th></tr></thead><tbody>' + posts + '</tbody></table></div>'
+      +   '<div data-pages="publicite-social"><table><thead><tr><th>${T("Date")}</th><th>${T("Réseaux")}</th><th>${T("Contenu")}</th><th class="ctr">${T("Cmd 48h")}</th><th class="num">${T("Revenu 48h")}</th></tr></thead><tbody>' + posts + '</tbody></table></div></div>'
       + '<div style="display:flex;flex-direction:column;gap:.85rem">'
       +   '<div class="carte"><h2><span><span class="ic">🔗</span> ${T("Liens UTM trackés")}</span></h2>'
       +     '<div class="champ"><label for="utm-source">${T("Source")}</label><select id="utm-source" data-utm="source">' + src + '</select></div>'
@@ -354,7 +357,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
     return '<div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap">'
       + '<div style="font-size:.82rem;color:var(--tx2)">${T("Créez des campagnes ciblées combinant publication sociale et infolettre selon les segments.")}</div>'
       + (PEUT.edit ? '<button class="prim" data-act="newcamp">${T("+ Nouvelle campagne")}</button>' : '') + '</div>'
-      + '<div class="carte"><table><thead><tr><th>${T("Nom")}</th><th>${T("Segment")}</th><th>${T("Audience")}</th><th>${T("Canaux")}</th><th>${T("Date")}</th><th>${T("Statut")}</th><th class="num">${T("Actions")}</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+      + '<div class="carte sz-pagee"><div data-pages="publicite-campagnes"><table><thead><tr><th>${T("Nom")}</th><th>${T("Segment")}</th><th>${T("Audience")}</th><th>${T("Canaux")}</th><th>${T("Date")}</th><th>${T("Statut")}</th><th class="num">${T("Actions")}</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
   }
   function vueForm(){
     var segs = [['all','${T("Tous les clients")}'],['nouveau','${T("Nouveaux (1 cmd)")}'],['regulier','${T("Réguliers (2-4 cmd)")}'],['vip','${T("VIP (5+ cmd ou 500 $+)")}'],['inactif','${T("Inactifs (90j+)")}'],['promo','${T("Acheteurs promo")}']]
@@ -397,10 +400,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
     if (D.indisponible) return '<div class="vide">${T("Module chat non chargé.")}</div>';
     if (!D.rated) return '<div class="carte"><div class="vide"><div style="font-size:2rem"><span class="ic">💬</span></div>${T("Aucune évaluation chat pour le moment.")}<br><span style="font-size:.8rem">${T("Les données apparaissent après que des clients aient noté leur conversation.")}</span></div></div>';
     var bar = function(v, tot, col){ var pct = tot ? Math.round(v / tot * 100) : 0; return '<div class="satbar"><div class="track"><div style="width:' + pct + '%;background:' + col + '"></div></div><span style="font-size:.78rem;color:var(--tx2);width:66px;text-align:right">' + v + ' (' + pct + '%)</span></div>'; };
-    var comments = D.comments.length ? '<div class="carte"><h2>${T("Commentaires récents")}</h2>' + D.comments.map(function(c){
+    var comments = D.comments.length ? '<div class="carte sz-pagee"><h2>${T("Commentaires récents")}</h2><div data-pages="publicite-commentaires">' + D.comments.map(function(c){
       return '<div style="display:flex;gap:.7rem;padding:.4rem 0;border-bottom:1px solid var(--v055)"><span style="font-size:1.1rem">' + (c.score ? '<span class="ic">👍</span>' : '<span class="ic">👎</span>') + '</span>'
         + '<div style="flex:1;min-width:0"><div style="font-size:.83rem">"' + esc(c.comment) + '"</div><div style="font-size:.7rem;color:var(--tx2);margin-top:.1rem">' + esc(c.name) + ' · ' + esc(szQuand(c.date)) + '</div></div></div>';
-    }).join('') + '</div>' : '';
+    }).join('') + '</div></div>' : '';
     return szTuiles('<div class="tuiles">'
       + '<div class="tuile" style="text-align:center"><div class="v" style="color:' + (D.rate >= 70 ? 'var(--tx-ok)' : 'var(--tx-err)') + ';font-size:2rem">' + szNombre(D.rate, 1) + ' %</div><div class="z">${T("Taux de satisfaction")}</div></div>'
       + '<div class="carte" style="grid-column:span 2"><h2>${T("Répartition des évaluations")}</h2>'

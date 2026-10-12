@@ -2549,7 +2549,7 @@ const JEU = {
       { nom: 'SMS (serveur)', id: 'sms', reponses: { identite: IDENTITE, 'journal:donnees': donnees,
         'journal:sms': { ok: true, sms: [ { id: 's1', from: '+14185550142', to: '+14185550000', body: 'Bonjour, ma commande ?', direction: 'inbound', date: '2026-08-13T12:00:00Z', read: false } ] } } },
       // Appels Twilio (2026-10-03) : un appel répondu et renvoyé, un manqué, un émis.
-      { nom: 'appels (serveur)', id: 'appels', exige: ['12 appels', 'renvoyé à', '1 / 2'], reponses: { identite: IDENTITE, 'journal:donnees': donnees,
+      { nom: 'appels (serveur)', id: 'appels', exige: ['12 appels', 'renvoyé à'], reponses: { identite: IDENTITE, 'journal:donnees': donnees,
         'journal:appels': { ok: true, jours: 90, tronque: false, appels: [
           { sid: 'CA1', from: '+14185550142', to: '+14185550000', direction: 'inbound', status: 'completed', startTime: 'Fri, 03 Oct 2026 14:12:00 +0000', duration: 187, price: 0.0255, priceUnit: 'USD', renvoyeA: '+14185559999' },
           { sid: 'CA2', from: '+15145550111', to: '+14185550000', direction: 'inbound', status: 'no-answer', startTime: 'Thu, 02 Oct 2026 19:40:00 +0000', duration: 0, price: null, priceUnit: 'USD' },

@@ -36,10 +36,13 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* << Aucun scroll bar dans l application >> (2026-10-12) : le corps ne defile
+   plus ; la carte de la liste prend la hauteur qui reste et c est la hauteur
+   reelle de la liste qui decide du nombre de lignes demandees au site. */
+.corps.plein .carte.plein{flex:1 1 0;min-height:0}
+.corps.plein .carte.plein>.liste{flex:1 1 auto;min-height:0;overflow:hidden}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;font-size:.78rem;color:var(--tx2)}
 input[type=search],button{font:inherit;color:var(--tx);background:var(--v05);
@@ -121,7 +124,7 @@ function pageRemboursements(onglet) {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.refunds}</span><h1>${T("Remboursements et crédits")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
+<div class="corps plein" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -134,6 +137,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('remboursements')}
   var ONGLET = '${depart}';
   var Q = '';
   var PAGE = 0;
+  /* La taille de page est MESUREE (szAutoPagination, apres chaque dessin) :
+     25 n est que le repli tant que la liste n a pas encore ete disposee. */
+  var TAILLE = 25;
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -208,14 +214,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('remboursements')}
       + ((t.nbActifs || 0) > 1 ? '${T(" actifs")}' : '${T(" actif")}') + '</div></div>'
       + '</div>');
 
-    h += '<div class="carte">';
+    h += '<div class="carte plein">';
     var rows = D.lignes || [];
     if (!rows.length) {
       h += '<div class="vide">' + (ONGLET === 'credits'
         ? '${T("Aucun crédit boutique.")}' : '${T("Aucun remboursement.")}') + '</div>';
     } else {
-      h += (ONGLET === 'credits' ? tableCredits(rows) : tableRemb(rows));
-      if ((D.pages || 1) > 1) {
+      h += '<div class="liste">' + (ONGLET === 'credits' ? tableCredits(rows) : tableRemb(rows)) + '</div>';
+      /* ⚠ Le pied de pages est TOUJOURS pose, meme sur une seule page : s il
+         apparaissait apres la mesure, il mangerait la hauteur deja comptee. */
+      if (rows.length) {
         h += '<div class="pagi">'
           + '<button class="mini" id="r-prec"' + (D.page <= 0 ? ' disabled' : '') + '>◀</button>'
           + '<span>${T("Page ")}' + (D.page + 1) + ' / ' + D.pages + '</span>'
@@ -230,6 +238,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('remboursements')}
     corps.innerHTML = h;
     szVerrousPeindre();   // reposer les cadenas connus sur la liste fraiche
     brancher();
+    // La mesure : combien de lignes tiennent VRAIMENT dans la liste bornee.
+    szAutoPagination('.liste', function(n){ if (n === TAILLE) return; TAILLE = n; PAGE = 0; charger(); });
   }
 
   function typePastille(t){
@@ -290,10 +300,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('remboursements')}
             /* ⚠ LE DETAIL DES UTILISATIONS EST VISIBLE, pas cache derriere un
                depliant : c est la seule piece qui explique pourquoi un solde a
                baisse, et c est exactement la question qu on se pose. */
+            /* ⚠ UNE SEULE LIGNE D UTILISATION (2026-10-12) : la liste est paginee
+               a la mesure d une ligne, et une ligne qui s allonge de trois
+               utilisations ferait deborder la page. La premiere reste visible,
+               les autres sont comptees (<< +2 >>) et toutes se lisent au survol. */
             + (c.usages && c.usages.length
-                ? '<div class="usages">' + c.usages.map(function(u){
-                    return '<span>' + esc(u.date) + ' · ' + esc(u.commande)
-                      + ' <b>−' + esc(u.montant) + '</b></span>'; }).join('') + '</div>'
+                ? '<div class="usages" title="' + esc(c.usages.map(function(u){
+                    return u.date + ' · ' + u.commande + ' −' + u.montant; }).join(' | ')) + '">'
+                  + '<span>' + esc(c.usages[0].date) + ' · ' + esc(c.usages[0].commande)
+                  + ' <b>−' + esc(c.usages[0].montant) + '</b>'
+                  + (c.usages.length > 1 ? ' +' + (c.usages.length - 1) : '') + '</span></div>'
                 : '') + '</td>'
             + '<td class="arg"><span class="rf-mont">' + esc(c.solde) + '</span></td>'
             + '<td><span class="rf-pill ' + st[0] + '">' + st[1] + '</span></td></tr>';
@@ -334,7 +350,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('remboursements')}
   function charger(garderSaisie){
     if (enCours) { RELANCE = true; return; }
     enCours = true;
-    appeler('remboursements:liste', [{ onglet: ONGLET, q: Q, page: PAGE, taille: 25 }]).then(function(r){
+    appeler('remboursements:liste', [{ onglet: ONGLET, q: Q, page: PAGE, taille: TAILLE }]).then(function(r){
       enCours = false;
       if (RELANCE) { RELANCE = false; charger(garderSaisie); return; }
       if (!r || !r.ok) { vide('${T("Remboursements indisponibles")}', expliquer(r)); return; }

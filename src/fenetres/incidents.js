@@ -40,9 +40,11 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
   border-bottom:1px solid var(--v08);background:linear-gradient(180deg,#131c2b,#0e1522)}
 .ro{flex:0 0 auto;margin:.55rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.45rem .7rem;font-size:.78rem}
-.corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* Aucune glissiere (2026-10-12) : le corps est une colonne bornee et le registre
+   se pagine dans la hauteur qui reste (data-pages, JS_PAGES du socle). */
+.corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow:hidden;
+  display:flex;flex-direction:column}
+.corps>.sz-pagee{margin-bottom:0}
 .carte{background:var(--v03);border:1px solid var(--v08);border-radius:12px;padding:1.1rem 1.2rem;margin:0 0 1.1rem}
 .entete{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
 .loi{font-size:.79rem;color:var(--tx2);line-height:1.6;margin:0;max-width:62rem}
@@ -260,7 +262,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
     }
 
     var nc = 7 + (D.peutModifier||D.peutSupprimer ? 1 : 0);
-    h += '<div class="carte" style="overflow-x:auto"><table><thead><tr>'
+    // Le registre en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
+    h += '<div class="carte sz-pagee"><div data-pages="incidents"><table><thead><tr>'
       + '<th>${T("Incident")}</th><th>${T("Prise de connaissance")}</th><th style="text-align:center">${T("Personnes")}</th>'
       + '<th>${T("Risque")}</th><th>${T("Avis CAI")}</th><th>${T("État")}</th>'
       + ((D.peutModifier||D.peutSupprimer) ? '<th></th>' : '')
@@ -283,7 +286,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
         + '<td>'+pilEtat(r.status)+'</td>'
         + acts + '</tr>';
     }
-    h += '</tbody></table></div>';
+    h += '</tbody></table></div></div>';
     corps.innerHTML = h;
     lier();
     if (!lg.length) return;

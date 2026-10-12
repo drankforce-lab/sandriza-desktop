@@ -46,15 +46,13 @@ body{background:var(--f-page);color:var(--tx);
    (vu au rendu le 2026-08-10, deux fois : le bandeau de lecture seule, puis la
    liste des icones). Le corps est donc une COLONNE, et seules les cartes qui
    doivent se partager une ligne vivent dans une << rangee >>. */
-.corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:1rem}
 /* ⚠ LES CARTES D UNE MEME RANGEE SE TERMINENT A LA MEME HAUTEUR (2026-08-10,
    capture a l appui). Avec << align-items:start >>, chacune prenait sa hauteur
    naturelle et la rangee finissait en escalier. On laisse donc l etirement par
    defaut, et les contenus restent en haut de leur carte. */
 .rangee{display:grid;grid-template-columns:repeat(auto-fit,minmax(28rem,1fr));gap:1rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:1rem 1.1rem;margin:0;min-width:0}
 .carte h2{margin:0 0 .2rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
@@ -84,8 +82,9 @@ body{background:var(--f-page);color:var(--tx);
    ⚠ La leçon : un fond qui ne suit pas le thème ne peut pas porter un texte qui
    le suit. Les deux vont ensemble, ou aucun des deux. */
 .vig .rien{font-size:.72rem;color:#576678;text-align:center;line-height:1.35}
-/* La liste des icones. */
-.grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));gap:.7rem}
+/* La liste des icones, en PAGES mesurees par rangee (JS_PAGES du socle, 2026-10-12) :
+   jamais de glissiere. align-content:start, sinon les rangees s etirent pour remplir la hauteur. */
+.grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));gap:.7rem;align-content:start}
 .ico{display:grid;grid-template-columns:3.4rem 1fr;gap:.7rem;align-items:center;min-width:0;
   border:1px solid var(--v07);border-radius:10px;padding:.6rem .7rem;background:var(--f-pill)}
 .ico .im{width:3.4rem;height:3.4rem;border-radius:8px;background:#f5f2ec;display:flex;
@@ -258,11 +257,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h.push('</div>');
 
     // ── La liste ───────────────────────────────────────────────────────────
-    h.push('<div class="carte"><h2>${T("Les icônes du site")}</h2>');
+    h.push('<div class="carte sz-pagee"><h2>${T("Les icônes du site")}</h2>');
     if (!liste.length) {
       h.push('<div class="vide">${T("Aucune icône pour l’instant.")}</div>');
     } else {
-      h.push('<div class="grille">');
+      h.push('<div class="grille" data-pages="icones">');
       liste.forEach(function(ic){
         h.push('<div class="ico"><div class="im">'
           + (ic.url ? '<img src="' + esc(ic.url) + '" alt="">' : '<span class="sansimg" title="${T("Aucune image : l’icône ne s’affichera pas")}">'+'${ICO.image}'+'</span>') + '</div><div style="min-width:0">'

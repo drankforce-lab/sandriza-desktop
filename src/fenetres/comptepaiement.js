@@ -44,10 +44,13 @@ body{background:var(--f-page);color:var(--tx);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete select{font:inherit;font-size:.8rem;color:var(--tx);background:var(--f-champ);
   border:1px solid var(--v12);border-radius:7px;padding:.18rem .4rem;margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:1rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* Aucune glissiere (2026-10-12) : mouvements et mois en PAGES mesurees (JS_PAGES du socle).
+   A l impression du releve, TOUTES les lignes reviennent et le pied de pages s efface. */
+@media print{body,.corps,.corps [data-pages]{overflow:visible!important;height:auto!important}
+  .corps .sz-pagee{flex:0 0 auto!important}
+  .corps [data-pages] tbody>tr{display:table-row!important}.sz-pages{display:none!important}}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:1rem 1.1rem;min-width:0}
 .carte h2{margin:0 0 .2rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
@@ -235,11 +238,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptepaiement')}
         + '<td class="dr ' + signe + '">' + esc((m.effet >= 0 ? '+' : '') + arg(m.effet)) + '</td>'
         + '<td class="dr sol">' + esc(arg(m.solde)) + '</td></tr>';
     }).join('');
-    return '<div class="carte"><h2>${T("Mouvements")}</h2>'
+    // La liste en PAGES mesurees, jamais de glissiere (2026-10-12).
+    return '<div class="carte sz-pagee"><h2>${T("Mouvements")}</h2>'
       + '<p class="sous">${T("Du plus ancien au plus récent. Une vente donne deux lignes : le brut entre, les frais sortent.")}</p>'
-      + '<table><thead><tr><th>${T("Date")}</th><th>${T("Nature")}</th><th>${T("Référence")}</th>'
+      + '<div data-pages="comptepaiement-mouvements"><table><thead><tr><th>${T("Date")}</th><th>${T("Nature")}</th><th>${T("Référence")}</th>'
       + '<th>${T("Détail")}</th><th class="dr">${T("Effet")}</th><th class="dr">${T("Solde")}</th>'
-      + '</tr></thead><tbody>' + lignes + '</tbody></table></div>';
+      + '</tr></thead><tbody>' + lignes + '</tbody></table></div></div>';
   }
 
   function htmlMois(){
@@ -253,11 +257,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptepaiement')}
         + '<td class="dr">' + esc(arg(x.depots)) + '</td>'
         + '<td class="dr sol">' + esc((x.net >= 0 ? '+' : '') + arg(x.net)) + '</td></tr>';
     }).join('');
-    return '<div class="carte"><h2>${T("Par mois")}</h2>'
-      + '<table><thead><tr><th>${T("Mois")}</th><th class="dr">${T("Ventes")}</th>'
+    // Douze lignes au plus, mais en PAGES aussi : la carte partage la hauteur avec les mouvements.
+    return '<div class="carte sz-pagee"><h2>${T("Par mois")}</h2>'
+      + '<div data-pages="comptepaiement-mois"><table><thead><tr><th>${T("Mois")}</th><th class="dr">${T("Ventes")}</th>'
       + '<th class="dr">${T("Frais")}</th><th class="dr">${T("Remboursements")}</th>'
       + '<th class="dr">${T("Dépôts")}</th><th class="dr">${T("Variation")}</th>'
-      + '</tr></thead><tbody>' + lignes + '</tbody></table></div>';
+      + '</tr></thead><tbody>' + lignes + '</tbody></table></div></div>';
   }
 
   function majAnnees(){

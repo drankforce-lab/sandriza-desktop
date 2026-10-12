@@ -38,10 +38,10 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
+/* Aucune glissiere (2026-10-12) : la liste se pagine (data-pages, JS_PAGES du socle).
+   L archive dessous reste entiere : le coeur la plafonne a 30 mots. */
+.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
@@ -194,12 +194,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('recherches')}
       + '</span></div></div>';
     var max = rows.reduce(function(m, x){ return Math.max(m, Number(x.fois) || 0); }, 0) || 1;
 
-    h += '<div class="carte"><h2>${T("Ce qu’on a cherché sans trouver")}</h2>';
+    // La liste en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
+    h += '<div class="carte sz-pagee"><h2>${T("Ce qu’on a cherché sans trouver")}</h2>';
     if (!rows.length) {
       h += '<div class="vide">' + (Q ? '${T("Rien ne correspond.")}'
         : '${T("Aucune recherche infructueuse dans les 30 derniers jours.")}') + '</div>';
     } else {
-      h += '<table><thead><tr><th>${T("Recherche")}</th><th class="num">${T("Fois")}</th>'
+      h += '<div data-pages="recherches"><table><thead><tr><th>${T("Recherche")}</th><th class="num">${T("Fois")}</th>'
         + '<th>${T("Dernière")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
         + rows.map(function(x){
             return '<tr><td><div class="rf-nom">' + esc(x.q) + '</div>'
@@ -211,7 +212,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('recherches')}
                     + '" title="${T("Traitée — retirer de la liste")}">&#10005;</button></td>'
                   : '') + '</tr>';
           }).join('')
-        + '</tbody></table>';
+        + '</tbody></table></div>';
     }
     h += '</div>';
 

@@ -41,10 +41,14 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* << Aucun scroll bar dans l application >> (2026-10-12) : ni le corps ni la
+   liste ne defilent. La carte de la liste prend la hauteur qui reste, et c est
+   la hauteur reelle de la liste qui decide du nombre de lignes demandees au
+   site (szAutoPagination) — depenses ET fournisseurs. */
+.corps.plein .carte.plein{flex:1 1 0;min-height:0}
+.corps.plein .carte.plein>.liste{flex:1 1 auto;min-height:0;overflow:hidden}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 /* ── La refonte de l Inventaire (2026-09-25) ── */
 .barreoutils .rf-jet{height:2.4rem;padding:0 .75rem;border-radius:10px;font-size:.8rem;background:var(--f-0f1826);
@@ -231,6 +235,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
     return szArgent(n);   /* voir szArgent (socle) : le repli aussi place le symbole */
   }
   var PAGE = 0;
+  /* Les tailles de page sont MESUREES (mesurerListe, apres chaque dessin) :
+     25 et 30 ne sont que les replis tant que la liste n a pas ete disposee. */
+  var TAILLE = 25, ANN_TAILLE = 30;
   var DETAIL = null;         // la depense ouverte (depenses:lire)
   var FORM = null;           // { id, date, categorie, paiement, description, fournisseur, montant, tps, tvq, recu }
   var SUPPR_ARME = false;
@@ -348,11 +355,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
       + '<button class="rf-jet' + (VUE === 'annuaire' ? ' on' : '') + '" data-vue="annuaire">${T("Fournisseurs")}</button>'
       + '</div>';
 
-    /* ⚠ L ANNUAIRE REPREND LE DEFILEMENT NORMAL : c est une grille de cartes
-       sans conteneur defilant, et << corps plein >> (overflow:hidden) la
-       couperait en silence. Meme contrepartie que le repertoire de
-       fournisseurs — la pleine hauteur est un choix par VUE. */
-    if (VUE === 'annuaire') { corps.className = 'corps'; h += vueAnnuaire(); corps.innerHTML = h; brancherAnnuaire(); return; }
+    /* L annuaire est lui aussi en << corps plein >> depuis le 2026-10-12 : sa
+       table vit dans une liste bornee et se pagine a la mesure, comme les
+       depenses — il defilait avant, et la regle est << aucune glissiere >>. */
+    if (VUE === 'annuaire') { corps.className = 'corps plein'; h += vueAnnuaire(); corps.innerHTML = h; brancherAnnuaire(); mesurerListe(); return; }
 
     h += '<div class="barreoutils">'
       + '<select id="d-annee" aria-label="${T("Filtrer par année")}">' + (D.annees || []).map(function(a){
@@ -431,7 +437,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
               + '</tr>';
           }).join('')
         + '</tbody></table></div>';
-      if ((D.pages || 1) > 1) {
+      /* ⚠ Le pied de pages est TOUJOURS pose, meme sur une seule page : s il
+         apparaissait apres la mesure, il mangerait la hauteur deja comptee. */
+      if (rows.length) {
         h += '<div class="pagi">'
           + '<button class="mini" id="d-prec"' + (D.page <= 0 ? ' disabled' : '') + '>◀</button>'
           + '<span>Page ' + (D.page + 1) + ' / ' + D.pages + '</span>'
@@ -452,6 +460,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
     corps.className = 'corps plein';
     corps.innerHTML = h;
     brancher();
+    mesurerListe();
+  }
+
+  /* La mesure : combien de lignes tiennent VRAIMENT dans la liste bornee de la
+     vue affichee. Un seul rappel pour les deux vues (le socle n en retient
+     qu un pour le redimensionnement) : il lit la VUE au moment ou il sonne. */
+  function mesurerListe(){
+    szAutoPagination('.liste', function(n){
+      if (VUE === 'annuaire') {
+        if (!ANN || n === ANN_TAILLE) return;
+        ANN_TAILLE = n; ANN_PAGE = 0; chargerAnnuaire();
+      } else {
+        if (n === TAILLE) return;
+        TAILLE = n; PAGE = 0; charger();
+      }
+    });
   }
 
   /* ══ L ANNUAIRE DES FOURNISSEURS ══════════════════════════════════════════
@@ -511,12 +535,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
         + '<button class="prim" id="a-ok">${T("✓ Enregistrer")}</button></div></div>';
     }
 
-    h += '<div class="carte">';
+    h += '<div class="carte plein">';
     var rows = ANN.lignes || [];
     if (!rows.length) {
       h += '<div class="vide">${T("Aucun fournisseur ne correspond.")}</div>';
     } else {
-      h += '<table><thead><tr><th>${T("Fournisseur")}</th><th>${T("Catégorie")}</th>'
+      h += '<div class="liste"><table><thead><tr><th>${T("Fournisseur")}</th><th>${T("Catégorie")}</th>'
         + '<th>${T("Origine")}</th><th style="text-align:right">${T("Actions")}</th></tr></thead><tbody>'
         + rows.map(function(r){
             return '<tr data-ann="' + esc(r.id) + '">'
@@ -539,8 +563,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
                           + (ANN_RETIRE === r.id ? '${T("Confirmer ?")}' : '✕') + '</button>'))
               + '</td></tr>';
           }).join('')
-        + '</tbody></table>';
-      if ((ANN.pages || 1) > 1) {
+        + '</tbody></table></div>';
+      // Pied de pages toujours pose (meme raison que la liste des depenses).
+      if (rows.length) {
         h += '<div class="pagi">'
           + '<button class="mini" id="a-prec"' + (ANN.page <= 0 ? ' disabled' : '') + '>◀</button>'
           + '<span>Page ' + (ANN.page + 1) + ' / ' + ANN.pages + '</span>'
@@ -1252,6 +1277,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
       var v = vv.getAttribute('data-vue');
       if (v === VUE) return;
       VUE = v; ANN_FORM = null; ANN_RETIRE = '';
+      /* ⚠ Les deux vues partagent la mesure du socle, qui ne rappelle que si le
+         compte CHANGE : une liste de l autre vue qui tiendrait le meme nombre de
+         lignes laisserait celle-ci a son repli. On oublie donc la derniere
+         mesure en changeant de vue. */
+      if (typeof _szAutoDernier !== 'undefined') _szAutoDernier = 0;
       dessiner();
       if (v === 'annuaire') { chargerAnnuaire(); prendreVerrou(); }
       else rendreVerrou();
@@ -1340,7 +1370,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
 
   /* ── CHARGEMENT ────────────────────────────────────────────────────────── */
   function chargerAnnuaire(garderSaisie){
-    return appeler('depenses:annuaire', [{ q: ANN_Q, page: ANN_PAGE, taille: 30 }]).then(function(r){
+    return appeler('depenses:annuaire', [{ q: ANN_Q, page: ANN_PAGE, taille: ANN_TAILLE }]).then(function(r){
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       ANN = r;
       if (garderSaisie) {
@@ -1382,7 +1412,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
     if (enCours) { RELANCE = true; return Promise.resolve(); }
     enCours = true;
     return appeler('depenses:donnees', [{ annee: ANNEE, mois: MOIS, categorie: CAT,
-      page: PAGE, taille: 25 }]).then(function(r){
+      page: PAGE, taille: TAILLE }]).then(function(r){
       enCours = false;
       if (RELANCE) { RELANCE = false; return charger(); }
       if (!r || !r.ok) { vide('${T("Dépenses indisponibles")}', expliquer(r)); return; }

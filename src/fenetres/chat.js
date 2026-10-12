@@ -45,10 +45,10 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* La file et les commentaires en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12). */
+.pile{display:flex;flex-direction:column;gap:.7rem}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
@@ -243,7 +243,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
       h += '<div class="vide">' + (Q || FILTRE ? '${T("Rien ne correspond.")}' : '${T("Aucune conversation à traiter.")}') + '</div>';
       return h;
     }
-    h += rows.map(function(c){
+    // La file en PAGES mesurees (JS_PAGES du socle) : elle prend la hauteur qui reste.
+    h += '<div class="sz-pagee"><div class="pile" data-pages="chat-file">' + rows.map(function(c){
       return '<div class="ligne" data-id="' + esc(c.id) + '" title="${T("Ouvrir la conversation")}">'
         + '<span class="rf-av" aria-hidden="true">' + esc(initiales(c.nom)) + '</span><div class="gauche">'
         + '<div class="haut"><span class="rf-nom">' + esc(c.nom) + '</span>'
@@ -255,7 +256,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
         + '<div class="rf-sous"><span>' + esc(c.courriel || '—') + '</span>'
         + (c.telephone ? '<span>·</span><span>' + esc(c.telephone) + '</span>' : '') + '</div>'
         + '</div></div>';
-    }).join('');
+    }).join('') + '</div></div>';
     /* Le pied ferme la file et porte l export (2026-09-24).
        ⚠ LE COMPTE EST DEJA EN HAUT, dans la barre d outils, et le repeter ici
        est VOULU : celui du haut est la reponse du filtre (il change quand on
@@ -338,12 +339,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
       + '<div class="sub">' + (s.rate == null ? '${T("aucune évaluation")}' : '${T("des évaluations")}') + '</div></div>'
       + '</div>');
 
-    h += '<div class="carte"><h2>${T("Commentaires laissés")}</h2>';
+    // Les commentaires en PAGES mesurees (JS_PAGES du socle) : la carte prend la hauteur qui reste.
+    h += '<div class="carte sz-pagee"><h2>${T("Commentaires laissés")}</h2>';
     var cs = s.comments || [];
     if (!cs.length) {
       h += '<div class="vide">${T("Aucun commentaire pour l’instant.")}</div>';
     } else {
-      h += cs.map(function(c){
+      h += '<div data-pages="chat-commentaires">' + cs.map(function(c){
         return '<div style="padding:.35rem 0;border-top:1px solid var(--v055)">'
           + '<span class="rf-pill ' + (c.score === true ? 'vert' : 'rouge') + '">'
           /* ⚠ << satisfait >> et << insatisfait >> etaient ecrits en dur. */
@@ -351,7 +353,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
           + '<strong>' + esc(c.name || '${T("Visiteur")}') + '</strong>'
           + '<div style="font-size:.86rem;white-space:pre-wrap;overflow-wrap:anywhere">'
           + esc(c.comment || '') + '</div></div>';
-      }).join('');
+      }).join('') + '</div>';
       /* ⚠ LE PIED FERME LES COMMENTAIRES, PAS LES TUILES. Les tuiles du haut
          sont des TOTAUX deja calcules (evaluees, satisfaites, taux) : elles
          n ont rien a exporter que le tableur ne saurait refaire a partir des

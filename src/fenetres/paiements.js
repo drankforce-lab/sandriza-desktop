@@ -38,10 +38,9 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
+/* Aucune glissiere (2026-10-12) : le corps ne defile plus, les listes vont en PAGES mesurees (JS_PAGES du socle). */
+.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
@@ -215,11 +214,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('paiements')}
         + '</div>');
     }
 
-    h += '<div class="carte"><h2>${T("Transactions — ")}' + D.annee + '</h2>';
+    // Transactions et remboursements en PAGES mesurees, chaque carte prend sa part de hauteur (2026-10-12).
+    h += '<div class="carte sz-pagee"><h2>${T("Transactions — ")}' + D.annee + '</h2>';
     if (!D.paiements.length) {
       h += '<div class="vide">${T("Aucune transaction pour ")}' + D.annee + '.</div>';
     } else {
-      h += '<table><thead><tr><th>${T("Date")}</th><th>${T("Réf. Square")}</th><th>${T("Mode de paiement")}</th>'
+      h += '<div data-pages="paiements-transactions"><table><thead><tr><th>${T("Date")}</th><th>${T("Réf. Square")}</th><th>${T("Mode de paiement")}</th>'
         + '<th class="num">${T("Brut")}</th><th class="num">${T("Frais")}</th><th class="num">${T("Net reçu")}</th></tr></thead><tbody>'
         + D.paiements.map(function(p){
             return '<tr><td style="white-space:nowrap">' + esc(p.date) + '</td>'
@@ -237,14 +237,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('paiements')}
            lignes n ont pas - 238,06 $ sous 149,49 + 87,47. Le recupere est dit
            dans la tuile << Frais Square >>. */
         + '<td class="num bon">' + fmt(Math.round((t.brut - t.frais) * 100) / 100) + '</td></tr>'
-        + '</tbody></table>';
+        + '</tbody></table></div>';
     }
     h += '</div>';
 
     if (D.remboursements.length) {
-      h += '<div class="carte"><h2>${T("Remboursements — ")}' + D.annee
+      h += '<div class="carte sz-pagee"><h2>${T("Remboursements — ")}' + D.annee
         + ' <span class="pill neutre">' + D.remboursements.length + '</span></h2>'
-        + '<table><thead><tr><th>${T("Date")}</th><th>${T("Réf.")}</th><th>${T("Paiement d’origine")}</th><th>${T("Motif")}</th>'
+        + '<div data-pages="paiements-remboursements"><table><thead><tr><th>${T("Date")}</th><th>${T("Réf.")}</th><th>${T("Paiement d’origine")}</th><th>${T("Motif")}</th>'
         + '<th class="num">${T("Montant")}</th></tr></thead><tbody>'
         + D.remboursements.map(function(r){
             return '<tr><td style="white-space:nowrap">' + esc(r.date) + '</td>'
@@ -256,7 +256,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('paiements')}
           }).join('')
         + '<tr class="tot"><td colspan="4">${T("Total des remboursements")}</td>'
         + '<td class="num err">−' + fmt(t.rembourse) + '</td></tr>'
-        + '</tbody></table></div>';
+        + '</tbody></table></div></div>';
     }
     return h;
   }

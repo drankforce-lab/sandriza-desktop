@@ -40,10 +40,9 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
+/* Aucune glissiere (2026-10-12) : la liste se pagine (data-pages, JS_PAGES du socle). */
+.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 /* Les tuiles de tete et la jauge d utilisation (refonte du 2026-09-25), aux
    mesures de l Inventaire. */
 .tuiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem;flex:0 0 auto;margin-bottom:.6rem}
@@ -314,11 +313,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
     /* ⚠ PLEINE HAUTEUR (2026-09-19) : la carte prend tout le reste, la liste
        defile. Le voile du formulaire est en position:fixed — il flotte
        au-dessus et n est donc pas coupe par overflow:hidden. */
-    h += '<div class="carte plein">';
+    // La liste en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
+    h += '<div class="carte plein sz-pagee">';
     if (!rows.length) {
       h += '<div class="vide">' + (Q || ETAT ? '${T("Rien ne correspond.")}' : '${T("Aucun coupon. Créez le premier.")}') + '</div>';
     } else {
-      h += '<div class="liste"><table><thead><tr><th>${T("Coupon")}</th><th>${T("Réduction")}</th>'
+      h += '<div class="liste" data-pages="coupons"><table><thead><tr><th>${T("Coupon")}</th><th>${T("Réduction")}</th>'
         + '<th class="num">${T("Minimum")}</th><th>${T("Cumul soldes")}</th><th class="num">${T("Utilisations")}</th>'
         + '<th>${T("Période")}</th><th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
         + rows.map(function(c){

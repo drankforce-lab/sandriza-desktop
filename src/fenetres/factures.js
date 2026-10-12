@@ -4,7 +4,7 @@
  * FENÊTRE « FACTURES » — NATIVE
  * =============================================================================
  * La LISTE des factures, en fenêtre de consultation : recherche, filtre par
- * statut, pagination locale. Cliquer une ligne ouvre la facture dans SA
+ * statut, pages mesurees (JS_PAGES). Cliquer une ligne ouvre la facture dans SA
  * fenêtre native (une par facture, celle qui existe déjà — factures:ouvrir).
  * Depuis 1.61.0, c'est l'écran FACTURATION AU COMPLET : les six tuiles,
  * encaisser/annuler un paiement (factures:payer), supprimer (confirmée en
@@ -40,10 +40,9 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
+/* Aucune glissiere (2026-10-12) : le corps ne defile plus, la liste va en PAGES mesurees (JS_PAGES du socle). */
+.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
@@ -88,8 +87,6 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
 .pill.err{background:rgba(239,68,68,.16);color:var(--tx-err)}
 .pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
-.pagi{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;
-  padding-top:.4rem;font-size:.74rem;color:var(--tx2)}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
@@ -119,8 +116,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
   var LIGNES = null;       // toutes les lignes (factures:liste), filtrees ici
   var Q = '';              // texte de recherche
   var STATUT = '';         // '' = tous
-  var PAGE = 0;
-  var PAR_PAGE = 25;
+  /* Plus de pages fixes de 25 (2026-10-12) : toutes les lignes sont ecrites, le socle
+     les met en pages a la hauteur reelle de la fenetre (data-pages="factures"). */
   var TUILES = null;                     // absentes sur un vieux site
   var PEUT_ENC = false, PEUT_SUP = false;
   var CLIENTS = [];                      // pour l'etat de compte
@@ -196,10 +193,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
   function dessiner(){
     if (!LIGNES) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var rows = filtrees();
-    var pages = Math.max(1, Math.ceil(rows.length / PAR_PAGE));
-    var p = Math.min(Math.max(0, PAGE), pages - 1);
-    PAGE = p;
-    var vue = rows.slice(p * PAR_PAGE, p * PAR_PAGE + PAR_PAGE);
+    var vue = rows;
 
     var h = '';
     if (TUILES) {
@@ -240,12 +234,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
       + (rows.length > 1 ? '${T("factures")}' : '${T("facture")}') + '</span></span>'
       + '</div></div>';
 
-    h += '<div class="carte">';
+    h += '<div class="carte sz-pagee">';
     if (!vue.length) {
       h += '<div class="vide">${T("Aucune facture ne correspond.")}</div>';
     } else {
       var avecGestes = PEUT_ENC || PEUT_SUP;
-      h += '<table><thead><tr><th>${T("Client et facture")}</th>'
+      h += '<div data-pages="factures"><table><thead><tr><th>${T("Client et facture")}</th>'
         + '<th>${T("Échéance")}</th><th style="text-align:right">${T("Total")}</th><th>${T("Statut")}</th>' + (avecGestes ? '<th></th>' : '') + '</tr></thead><tbody>'
         + vue.map(function(r){
             var gestes = '';
@@ -270,14 +264,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
               + '<td>' + pilule(r.statut, szTd(r.statutLibelle)) + '</td>'
               + (avecGestes ? '<td class="fin">' + gestes + '</td>' : '') + '</tr>';
           }).join('')
-        + '</tbody></table>';
-      if (pages > 1) {
-        h += '<div class="pagi">'
-          + '<button class="mini" id="f-prec"' + (p <= 0 ? ' disabled' : '') + '>◀</button>'
-          + '<span>${T("Page ")}' + (p + 1) + ' / ' + pages + '</span>'
-          + '<button class="mini" id="f-suiv"' + (p >= pages - 1 ? ' disabled' : '') + '>▶</button>'
-          + '</div>';
-      }
+        + '</tbody></table></div>';
     }
     h += '</div>';
 
@@ -316,14 +303,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
 
     var q = document.getElementById('f-q');
     if (q) {
-      q.oninput = function(){ Q = q.value; PAGE = 0; redessinerSansPerdreLaSaisie(); };
+      q.oninput = function(){ Q = q.value; redessinerSansPerdreLaSaisie(); };
     }
     var s = document.getElementById('f-statut');
-    if (s) s.onchange = function(){ STATUT = s.value; PAGE = 0; dessiner(); };
-    var bp = document.getElementById('f-prec');
-    if (bp) bp.onclick = function(){ PAGE = Math.max(0, PAGE - 1); dessiner(); };
-    var bs = document.getElementById('f-suiv');
-    if (bs) bs.onclick = function(){ PAGE = PAGE + 1; dessiner(); };
+    if (s) s.onchange = function(){ STATUT = s.value; dessiner(); };
   }
 
   /* ⚠ NE JAMAIS REDESSINER LE CHAMP SOUS LES DOIGTS : a chaque frappe on ne
@@ -345,7 +328,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
     var t = ev.target;
     if (!t || !t.closest) return;
     var fst = t.closest('[data-fst]');
-    if (fst) { STATUT = fst.getAttribute('data-fst') || ''; PAGE = 0; dessiner(); return; }
+    if (fst) { STATUT = fst.getAttribute('data-fst') || ''; dessiner(); return; }
     var bpay = t.closest('[data-payer]');
     if (bpay) {
       SUPPR_ARME = '';

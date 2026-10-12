@@ -33,10 +33,10 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.55rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* Les notes en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12). */
+.pile{display:flex;flex-direction:column;gap:.55rem}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem;cursor:pointer}
@@ -165,7 +165,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         ? '${T('Rien aux archives pour l’instant : les versions au-delà des {0} dernières viendront ici.')}'.split('{0}').join(n)
         : '${T('Aucune note.')}') + '</div>';
     } else {
-      h += liste.map(function(e){
+      // Les notes en PAGES mesurees (JS_PAGES du socle) : la pile prend la hauteur qui reste.
+      h += '<div class="sz-pagee"><div class="pile" data-pages="notes-' + ONGLET + '">' + liste.map(function(e){
         var ouverte = !!DEPLIE[e.v];
         var ici = (D.installee && e.v === D.installee)
           ? ' <span class="rf-pill vert">${T('installée ici')}</span>' : '';
@@ -193,7 +194,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + '<span class="titre">' + esc(e.t || '') + '</span>'
           + '<span class="droite">' + esc(szJour(e.d) || '') + ' ' + (ouverte ? '▾' : '▸') + '</span></div>'
           + det + '</div>';
-      }).join('');
+      }).join('') + '</div></div>';
     }
     corps.innerHTML = h;
   }

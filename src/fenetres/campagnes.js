@@ -44,10 +44,15 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* 2026-10-12 : les LISTES (campagnes, chaines, segments) sont en PAGES mesurees (JS_PAGES du
+   socle), jamais de glissiere. ⚠ LE FORMULAIRE garde son defilement pour l instant : il porte
+   l editeur par blocs et les etapes d une chaine, qui grandissent, et le couper rendrait les
+   derniers champs injoignables. A reprendre a part. */
+.corps.formulaire{overflow-y:auto}
+.corps.formulaire::-webkit-scrollbar{width:8px}
+.corps.formulaire::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
@@ -1221,7 +1226,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       return h + renvoi();
     }
 
-    h += '<div class="carte"><table><thead><tr><th>${T("Segment")}</th>'
+    // Les segments en PAGES mesurees (JS_PAGES du socle) : la carte prend la hauteur qui reste.
+    h += '<div class="carte sz-pagee"><div data-pages="campagnes-segments"><table><thead><tr><th>${T("Segment")}</th>'
       + '<th class="num">${T("Portée")}</th><th class="num">${T("Utilisé par")}</th>'
       + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
       + D.segments.map(function(s){
@@ -1240,7 +1246,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
             + '<td class="num dt">' + (s.utilisePar ? pluriel(s.utilisePar, '${T("campagne")}', '${T("campagnes")}') : '—') + '</td>'
             + (D.peutModifier ? '<td class="fin">' + gestes + '</td>' : '') + '</tr>';
         }).join('')
-      + '</tbody></table></div>';
+      + '</tbody></table></div></div>';
     return h + renvoi();
   }
 
@@ -1421,12 +1427,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       + (D.peutModifier ? '<button class="prim" id="cp-nouvelle" style="height:2.4rem;padding:0 .9rem">${T("+ Nouvelle campagne")}</button>' : '')
       + '</span></div></div>';
 
-    h += '<div class="carte">';
+    // Les campagnes en PAGES mesurees (JS_PAGES du socle) : la carte prend la hauteur qui reste.
+    h += '<div class="carte sz-pagee">';
     if (!rows.length) {
       h += '<div class="vide">' + (q ? '${T("Rien ne correspond.")}'
         : '${T("Aucune campagne pour l’instant. Cliquez « + Nouvelle campagne ».")}') + '</div>';
     } else {
-      h += '<table><thead><tr><th>${T("Campagne")}</th><th>${T("Envoyé à")}</th><th>${T("Canal")}</th>'
+      h += '<div data-pages="campagnes"><table><thead><tr><th>${T("Campagne")}</th><th>${T("Envoyé à")}</th><th>${T("Canal")}</th>'
         + '<th class="num">${T("Destinataires")}</th><th>${T("État")}</th><th class="num">${T("Partis / échecs")}</th>'
         + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
         + rows.map(function(c){
@@ -1460,7 +1467,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
               + (c.echecs ? ' / <span style="color:var(--tx-err)">' + c.echecs + '</span>' : '') + '</td>'
               + (D.peutModifier ? '<td class="fin">' + gestes + '</td>' : '') + '</tr>';
           }).join('')
-        + '</tbody></table>';
+        + '</tbody></table></div>';
     }
     h += '</div>' + renvoi();
     return h;
@@ -1509,7 +1516,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       h += '<div class="carte"><div class="vide">${T("Aucune chaîne pour l’instant.")} '
         + '${T("Cliquez « + Nouvelle chaîne ».")}</div></div>';
     } else {
-      h += (D.chaines || []).map(function(ch){
+      // Les chaines en PAGES mesurees (JS_PAGES du socle) : une carte par chaine, la pile prend la hauteur qui reste.
+      h += '<div class="sz-pagee"><div data-pages="campagnes-chaines">' + (D.chaines || []).map(function(ch){
         var gestes = '';
         if (D.peutModifier) {
           gestes += '<button class="mini geste" data-chmodif="' + esc(ch.id) + '">${T("Modifier")}</button>';
@@ -1538,7 +1546,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
                 }).join('') + '</div>'
               : '<div class="dt">${T("Aucune étape : cette chaîne n’enverra rien.")}</div>')
           + '</div>';
-      }).join('');
+      }).join('') + '</div></div>';
     }
 
     h += renvoi();
@@ -1551,6 +1559,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     // Redessiner la liste sous un formulaire ferait perdre la saisie en cours.
     if (FORM) {
       if (sous) sous.textContent = '';
+      corps.classList.add('formulaire');
       corps.innerHTML = (FORM.type === 'chaine') ? vueFormChaine()
         : (FORM.type === 'segment') ? vueFormSegment() : vueFormCampagne();
       brancherForm();
@@ -1560,6 +1569,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     // regardant les segments parce que les campagnes le sont serait faux.
     var vu = (ONGLET === 'chaines') ? DH : (ONGLET === 'segments') ? DS : DC;
     if (sous) sous.textContent = (vu && !vu.peutModifier) ? 'consultation seulement' : '';
+    corps.classList.remove('formulaire');
     corps.innerHTML = onglets() + (ONGLET === 'chaines' ? vueChaines()
       : ONGLET === 'segments' ? vueSegments() : vueCampagnes());
     brancher();

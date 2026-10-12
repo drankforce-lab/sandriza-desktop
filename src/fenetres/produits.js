@@ -35,10 +35,13 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* << Aucun scroll bar dans l application >> (2026-10-12) : la liste ne defile
+   plus, elle est BORNEE (carte pleine, liste flex) et sa hauteur reelle decide
+   du nombre de lignes demandees au site (szAutoPagination). */
+.corps.plein .carte.plein{flex:1 1 0;min-height:0}
+.corps.plein .carte.plein>.liste{flex:1 1 auto;min-height:0;overflow:hidden}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
@@ -102,7 +105,12 @@ html.jour .rf-av.tc{color:color-mix(in srgb,var(--cc,#6d7f96) 55%,black);
   background:var(--f-carte);border:1px solid var(--v10);border-radius:12px;padding:1rem 1.1rem}
 .voile h3{margin:0;font-size:1.02rem}
 .mg-res{font-size:.8rem;color:var(--tx2);line-height:1.5}
-.mg-tab{overflow:auto;min-height:0;flex:1 1 auto;border:1px solid var(--v08);border-radius:9px}
+/* ⚠ LE TABLEAU DES MARGES EST EN PAGES (data-pages, 2026-10-12), plus jamais
+   defilant : la boite est plafonnee (92vh) et le tableau prend ce qui reste ;
+   la mesure reaffiche toutes les lignes avant de compter, donc la boite qui
+   retrecit apres coup ne fausse pas la mesure suivante. Les cases cochees des
+   autres pages restent dans la page : << Appliquer a la selection >> les voit. */
+.mg-tab{overflow:hidden;min-height:0;flex:1 1 auto;border:1px solid var(--v08);border-radius:9px}
 .mg-tab table thead th{position:sticky;top:0;background:var(--f-carte);z-index:1}
 .mg-tab tbody tr{cursor:default}
 .mg-tab td.r,.mg-tab th.r{text-align:right;white-space:nowrap}
@@ -137,6 +145,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   var STOCK = '';          // '', low, ok
   var TRI = 'recent';      // recent | cart
   var PAGE = 0;
+  /* La taille de page est MESUREE (szAutoPagination, apres chaque dessin) :
+     25 n est que le repli tant que la liste n a pas encore ete disposee. */
   var TAILLE = 25;
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
@@ -158,7 +168,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     v.className = 'voile';
     v.innerHTML = '<div class="boite" role="dialog" aria-modal="true" aria-label="${T("Vérifier mes marges")}">'
       + '<h3>${T("Vérifier mes marges")}</h3><div class="mg-res" id="mg-res">${T("Analyse en cours…")}</div>'
-      + '<div class="mg-tab" id="mg-tab"></div>'
+      + '<div class="mg-tab" id="mg-tab" data-pages="marges"></div>'
       + '<div class="mg-pied"><button id="mg-tout">${T("Cocher les propositions")}</button><button id="mg-rien">${T("Tout décocher")}</button>'
       + '<span class="droite"><button id="mg-fermer">${T("Fermer")}</button><button class="prim" id="mg-appliquer" disabled>${T("Appliquer à la sélection")}</button></span></div></div>';
     document.body.appendChild(v);
@@ -350,7 +360,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
               + '</tr>';
           }).join('')
         + '</tbody></table></div>';
-      if ((D.pages || 1) > 1) {
+      /* ⚠ Le pied de pages est TOUJOURS pose, meme sur une seule page : s il
+         apparaissait apres la mesure, il mangerait la hauteur deja comptee. */
+      if (rows.length) {
         h += '<div class="pagi">'
           + '<button class="mini" id="p-prec"' + (D.page <= 0 ? ' disabled' : '') + '>◀</button>'
           + '<span>Page ' + (D.page + 1) + ' / ' + D.pages + '</span>'
@@ -371,6 +383,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     }
     corps.innerHTML = h;
     szVerrousPeindre();   // reposer les cadenas connus sur le tableau frais
+    // La mesure : combien de lignes tiennent VRAIMENT dans la liste bornee.
+    szAutoPagination('.liste', function(n){ if (n === TAILLE) return; TAILLE = n; PAGE = 0; charger(); });
 
     /* ⚠⚠ LE PRIX ET LE SOLDE SONT DEUX COLONNES, pas une chaine barree. A
        l ecran le solde se lit d un coup d oeil par-dessus le prix barre ; dans

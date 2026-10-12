@@ -36,10 +36,9 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
+/* Aucune glissiere (2026-10-12) : le corps ne defile plus, la liste va en PAGES mesurees (JS_PAGES du socle). */
+.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 /* ── La refonte de l Inventaire (2026-09-25) ── */
 .tuiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.6rem;flex:0 0 auto}
@@ -80,8 +79,6 @@ tbody .fin{white-space:nowrap;text-align:right}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
 .pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
-.pagi{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;
-  padding-top:.4rem;font-size:.74rem;color:var(--tx2)}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
@@ -111,8 +108,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   var D = null;            // les quatre piles (archives:liste)
   var ONGLET = 'commandes';
   var Q = '';
-  var PAGE = 0;
-  var PAR_PAGE = 25;
+  /* Plus de pages fixes de 25 (2026-10-12) : toutes les lignes de l onglet sont ecrites,
+     le socle les met en pages a la hauteur reelle (data-pages="archives-<onglet>"). */
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -245,17 +242,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   function dessiner(){
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var rows = filtrees();
-    var pages = Math.max(1, Math.ceil(rows.length / PAR_PAGE));
-    var p = Math.min(Math.max(0, PAGE), pages - 1);
-    PAGE = p;
-    var vue = rows.slice(p * PAR_PAGE, p * PAR_PAGE + PAR_PAGE);
+    var vue = rows;
 
     /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE AUX ARCHIVES (2026-09-25) ══════
        Les quatre listes arrivent ENTIERES : quatre tuiles les comptent et
        ouvrent chacune la sienne (elles portent data-onglet, le meme crochet
        que les anciens boutons). Barre a loupe sur une ligne ; lignes riches aux
-       initiales du client. Crochets gardes : data-onglet, #a-q, #a-prec,
-       #a-suiv, data-voir, data-rembourser, data-reactiver. */
+       initiales du client. Crochets gardes : data-onglet, #a-q,
+       data-voir, data-rembourser, data-reactiver. */
     var SOUS = { commandes: '${T("livrées depuis 45 jours")}', retours: '${T("demandes closes")}',
       factures: '${T("gardées 6 ans")}', remboursements: '${T("avec leur commande")}' };
     var h = szTuiles('<div class="tuiles">' + ONGLETS.map(function(g){
@@ -276,32 +270,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '${T("Pour rembourser une commande archivée, « Rembourser » la réactive pour un nouveau délai de 45 jours et l’ouvre dans sa fenêtre.")}'
       + '</div></div>';
 
-    h += '<div class="carte">';
+    h += '<div class="carte sz-pagee">';
     if (!vue.length) {
       h += '<div class="vide">' + (Q ? '${T("Rien ne correspond à la recherche.")}' : VIDES[ONGLET]) + '</div>';
     } else {
       var dessine = ONGLET === 'commandes' ? ligneCommande
         : ONGLET === 'retours' ? ligneRetour
         : ONGLET === 'factures' ? ligneFacture : ligneRemboursement;
-      h += '<table><thead><tr>' + TETES[ONGLET] + '</tr></thead><tbody>'
-        + vue.map(dessine).join('') + '</tbody></table>';
-      if (pages > 1) {
-        h += '<div class="pagi">'
-          + '<button class="mini" id="a-prec"' + (p <= 0 ? ' disabled' : '') + '>&#9664;</button>'
-          + '<span>Page ' + (p + 1) + ' / ' + pages + '</span>'
-          + '<button class="mini" id="a-suiv"' + (p >= pages - 1 ? ' disabled' : '') + '>&#9654;</button>'
-          + '</div>';
-      }
+      h += '<div data-pages="archives-' + ONGLET + '"><table><thead><tr>' + TETES[ONGLET] + '</tr></thead><tbody>'
+        + vue.map(dessine).join('') + '</tbody></table></div>';
     }
     h += '</div>';
     corps.innerHTML = h;
 
     var q = document.getElementById('a-q');
-    if (q) q.oninput = function(){ Q = q.value; PAGE = 0; redessinerSansPerdreLaSaisie(); };
-    var bp = document.getElementById('a-prec');
-    if (bp) bp.onclick = function(){ PAGE = Math.max(0, PAGE - 1); dessiner(); };
-    var bs = document.getElementById('a-suiv');
-    if (bs) bs.onclick = function(){ PAGE = PAGE + 1; dessiner(); };
+    if (q) q.oninput = function(){ Q = q.value; redessinerSansPerdreLaSaisie(); };
   }
 
   /* ⚠ NE JAMAIS REDESSINER LE CHAMP SOUS LES DOIGTS : le curseur et la
@@ -322,7 +305,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var t = ev.target;
     if (!t || !t.closest) return;
     var og = t.closest('[data-onglet]');
-    if (og) { ONGLET = og.getAttribute('data-onglet'); PAGE = 0; Q = ''; dessiner(); return; }
+    if (og) { ONGLET = og.getAttribute('data-onglet'); Q = ''; dessiner(); return; }
     var bv = t.closest('[data-voir]');
     if (bv) {
       dire('${T("Ouverture…")}');

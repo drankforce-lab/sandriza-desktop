@@ -34,10 +34,8 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 /* ── La refonte de l Inventaire (2026-09-25) ── */
 .tuiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem;flex:0 0 auto;margin-bottom:.6rem}
@@ -211,7 +209,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       /* ⚠ PLEINE HAUTEUR (2026-09-19) : lignes riches, pas de carte — la zone
          defilante est fille du CORPS. La boite de planification est un voile
          en position:fixed, elle flotte et n est donc pas coupee. */
-      h += '<div class="liste">' + rows.map(function(r){
+      // 2026-10-12 : plus de defilement, la liste est en PAGES mesurees (JS_PAGES du socle).
+      h += '<div class="liste" data-pages="ramassages">' + rows.map(function(r){
         var etat = r.annule ? '<span class="rf-pill rouge">${T("Annulé")}</span>' : '<span class="rf-pill vert">${T("Planifié")}</span>';
         return '<div class="ligne' + (r.annule ? ' annule' : '') + '">'
           + '<div class="haut">'
@@ -317,8 +316,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '</tbody><tfoot><tr><td>TOTAL</td><td style="text-align:center">' + RAP.total + '</td>'
       + '<td style="text-align:right">' + esc(fmt(RAP.totalFrais)) + '</td><td></td></tr></tfoot></table></div>';
 
-    h += '<div class="carte"><h2>${T("Les 60 dernières expéditions")}</h2>'
-      + '<table><thead><tr><th>${T("Commande")}</th><th>${T("Date")}</th><th>${T("Transporteur")}</th>'
+    // Les expeditions en PAGES mesurees (JS_PAGES du socle) : la carte prend la hauteur qui reste.
+    h += '<div class="carte plein sz-pagee"><h2>${T("Les 60 dernières expéditions")}</h2>'
+      + '<div data-pages="ramassages-expeditions"><table><thead><tr><th>${T("Commande")}</th><th>${T("Date")}</th><th>${T("Transporteur")}</th>'
       + '<th>${T("Suivi")}</th><th style="text-align:right">${T("Frais")}</th><th>${T("Statut")}</th></tr></thead><tbody>'
       + (RAP.expeditions || []).map(function(o){
           return '<tr><td><span class="num">' + esc(o.numero) + '</span></td>'
@@ -329,7 +329,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
             + '<td>' + (o.livree ? '<span class="rf-pill vert">${T("Livrée")}</span>' : '<span class="rf-pill bleu">${T("Expédiée")}</span>')
             + (o.ramasse ? ' <span class="rf-pill vert">${T("ramassé")}</span>' : '') + '</td></tr>';
         }).join('')
-      + '</tbody></table></div>';
+      + '</tbody></table></div></div>';
     corps.innerHTML = h;
   }
 

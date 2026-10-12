@@ -53,10 +53,11 @@ body{background:var(--f-page);color:var(--tx);
 .onglets button.actif{color:var(--tx-creme);border-bottom-color:#c9a97e}
 .onglets .pastille{display:inline-block;min-width:1.15rem;padding:0 .3rem;margin-left:.35rem;
   border-radius:99px;background:#c9a97e;color:#1a1207;font-size:.68rem;font-weight:800;text-align:center}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* 2026-10-12 : aucune glissiere (sa regle). Les transferts en transit, l historique et les
+   variantes a envoyer sont en PAGES mesurees (JS_PAGES du socle). */
+.pile{display:flex;flex-direction:column;gap:.7rem}
 input,button,select{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.32rem .55rem}
 input[type=search]{min-width:220px}
@@ -310,7 +311,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     return '<div class="avis jaune">${T("Les unités en transit sont <strong>retirées du stock vendable</strong> : ")}'
       + '${T("l’article s’affiche épuisé sur la boutique le temps du trajet, et les clients inscrits à l’alerte ")}'
       + '${T("« de retour en stock » sont prévenus à la réception.")}</div>'
-      + l.map(carteTransit).join('');
+      + '<div class="sz-pagee"><div class="pile" data-pages="transferts-transit">' + l.map(carteTransit).join('') + '</div></div>';
   }
 
   function carteTransit(t){
@@ -367,7 +368,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
        juste apres le trajet, et les trois CHIFFRES sont cote a cote a la fin.
        Parti / recu / ecart se lisent ENSEMBLE ou ne se lisent pas — separes par
        un motif et un etat, l oeil doit sauter par-dessus pour comparer. */
-    return '<div class="carte"><table><thead><tr>'
+    return '<div class="carte sz-pagee"><div data-pages="transferts-histo"><table><thead><tr>'
       + '<th class="art">${T("Article")}</th><th>${T("Trajet")}</th><th>${T("État")}</th>'
       + '<th class="num">${T("Parti")}</th><th class="num">${T("Reçu")}</th><th class="num">${T("Écart")}</th>'
       + '<th>${T("Motif")}</th><th>${T("Le")}</th>'
@@ -388,7 +389,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
             +   (t.recuPar ? '<br><span class="qui">' + esc(t.recuPar) + '</span>' : '') + '</td>'
             + '</tr>';
         }).join('')
-      + '</tbody></table>'
+      + '</tbody></table></div>'
       /* Le pied ferme l historique et porte l export (2026-09-24). ⚠ ICI ET
          NULLE PART AILLEURS dans cet ecran : << En transit >> est une vue de
          TRAVAIL (on y recoit, on y annule) et << Nouveau transfert >> un
@@ -467,7 +468,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '<div class="dt" style="margin-top:.4rem">${T("Le transfert emporte <strong>toute</strong> la quantité de la variante.")}</div></div>';
     if (!CAND) return haut + '<div class="vide">${T("Lancez une recherche pour voir ce qui peut partir.")}</div>';
     if (!CAND.length) return haut + '<div class="vide">${T("Aucune variante avec du stock <em>et</em> un emplacement connu.")}</div>';
-    return haut + '<div class="carte"><table><thead><tr>'
+    return haut + '<div class="carte sz-pagee"><div data-pages="transferts-candidats"><table><thead><tr>'
       + '<th>${T("Article")}</th><th class="num">${T("Qté")}</th><th>${T("Depuis")}</th><th>${T("Vers")}</th><th></th>'
       + '</tr></thead><tbody>'
       + CAND.map(function(c){
@@ -491,7 +492,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
             + '<td class="num"><button class="prim mini" data-part="' + esc(id) + '"' + (BUSY ? ' disabled' : '') + '>${T("Envoyer")}</button></td>'
             + '</tr>';
         }).join('')
-      + '</tbody></table></div>';
+      + '</tbody></table></div></div>';
   }
 
   /* ══ GESTES ══════════════════════════════════════════════════════════════ */

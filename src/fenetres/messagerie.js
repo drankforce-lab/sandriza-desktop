@@ -36,10 +36,10 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* La pile des demandes en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12). */
+.pile{display:flex;flex-direction:column;gap:.7rem}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 /* ── La refonte de l Inventaire (2026-09-25) ── */
 .tuiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem;flex:0 0 auto}
@@ -239,7 +239,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + (ONGLET !== 'all' ? '${T("Aucune demande dans cette catégorie.")}' : '${T("Aucune demande.")}')
         + '</div>';
     } else {
-      h += rows.map(function(r){
+      // Les demandes en PAGES mesurees (JS_PAGES du socle) : la pile prend la hauteur qui reste.
+      h += '<div class="sz-pagee"><div class="pile" data-pages="messagerie">' + rows.map(function(r){
         return '<div class="ligne" data-id="' + esc(r.id) + '" title="${T("Ouvrir la demande")}">'
           + '<span class="rf-av" aria-hidden="true">' + esc(initiales(r.client)) + '</span>'
           + '<div class="gauche">'
@@ -250,7 +251,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
           + (r.courriel ? '<span>·</span><span>' + esc(r.courriel) + '</span>' : '')
           + '<span>·</span><span>${T("Raison : ")}' + esc(r.raison || '–') + '</span></div>'
           + '</div></div>';
-      }).join('');
+      }).join('') + '</div></div>';
       /* Le pied ferme la liste et porte l export (2026-09-24). ⚠ Le compte se
          dit dans le VOCABULAIRE DE LA PILE : une demande repondue n est pas
          une demande en attente, et << 12 demandes >> sous l onglet Archive

@@ -31,13 +31,16 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .tete .droite{margin-left:auto}
 .ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
-.corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
-/* ⚠ ANCRÉE = PLEINE PAGE : pas de cap de largeur ; la grille des logos remplit. */
-.zone{width:100%}
+.corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow:hidden;display:flex;flex-direction:column}
+/* ⚠ ANCRÉE = PLEINE PAGE : pas de cap de largeur ; la grille des logos remplit.
+   2026-10-12 : la grille est en PAGES mesurees par rangee (JS_PAGES du socle), jamais de
+   glissiere ; la zone prend la hauteur qui reste et la grille la remplit. align-content:start,
+   sinon les rangees s etirent pour remplir la hauteur. */
+.zone{width:100%;flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+.zone>*{flex:0 0 auto}
 .barre{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin:0 0 1rem}
-.grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(11rem,1fr));gap:.9rem}
+.grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(11rem,1fr));gap:.9rem;align-content:start}
+.zone>.grille{flex:1 1 auto;min-height:0}
 .lcard{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;overflow:hidden;display:flex;flex-direction:column}
 /* ⚠ UN DAMIER GRIS MOYEN-CLAIR, plus le damier sombre (2026-10-01) : un logo
    FONCE (le bleu marine de la marque) y etait presque invisible. Gris moyen et
@@ -188,7 +191,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var h = '<div class="barre">'
       + (RO ? '' : '<label class="prim upl"><span class="ic">⭱</span>${T(" Téléverser une image")}<input type="file" accept="image/*" id="upl-input" style="display:none"></label>')
       + '<span style="font-size:.78rem;color:var(--tx2)">${T("Les dimensions vous seront présentées avant l’envoi. Stockage Cloudflare R2, réutilisable partout.")}</span></div>';
-    h += logos.length ? ('<div class="grille">' + logos.map(carteHtml).join('') + '</div>')
+    h += logos.length ? ('<div class="grille" data-pages="logotheque">' + logos.map(carteHtml).join('') + '</div>')
       : '<div class="vide">${T("Aucune image dans la logothèque.")}' + (RO ? '' : '${T(" Téléversez-en une ci-dessus.")}') + '</div>';
     return h;
   }

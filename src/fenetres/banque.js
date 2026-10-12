@@ -53,10 +53,10 @@ body{background:var(--f-page);color:var(--tx);
 .onglets button{background:none;border:0;border-bottom:2px solid transparent;color:var(--tx2);
   font:600 .82rem/1 system-ui;padding:.45rem .7rem;cursor:pointer;border-radius:0}
 .onglets button.on{color:var(--tx);border-bottom-color:#c9a97e}
-.corps{flex:1 1 auto;min-height:0;padding:.85rem 1.05rem;overflow-y:auto;
+/* Aucune glissiere (2026-10-12) : chaque liste se pagine dans la hauteur qui
+   reste (data-pages, JS_PAGES du socle). */
+.corps{flex:1 1 auto;min-height:0;padding:.85rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.75rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.8rem .9rem}
 .carte h2{margin:0 0 .55rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
@@ -76,6 +76,9 @@ button.mini{font-size:.72rem;padding:.16rem .45rem}
 button.dgr{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
 .duo{display:flex;gap:.65rem;flex-wrap:wrap}
 .duo>div{flex:1 1 9rem;min-width:0}
+/* L appariement : deux colonnes bornees cote a cote, chacune paginee (2026-10-12). */
+.duo.app{flex:1 1 0;min-height:7rem;flex-wrap:nowrap;align-items:stretch}
+.duo.app>div{display:flex;flex-direction:column;min-height:0}
 .barreoutils{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 /* ── La refonte de l Inventaire (2026-09-25) ── */
 .tuiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.6rem;flex:0 0 auto;margin-bottom:.7rem}
@@ -367,11 +370,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
       + (D.peutEcrire ? '<button class="prim" id="b-nouveau">${T("+ Nouvelle conciliation")}</button>' : '')
       + '</span></div>');
 
-    h.push('<div class="carte"><h2>${T("Conciliations")} ' + ANNEE + '</h2>');
+    // La liste en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
+    h.push('<div class="carte sz-pagee"><h2>${T("Conciliations")} ' + ANNEE + '</h2>');
     if (!(D.liste || []).length) {
       h.push('<div class="vide">${T("Aucune conciliation pour cette année.")}</div>');
     } else {
-      h.push('<table><thead><tr><th>${T("Nom")}</th><th class="num">${T("Relevé")}</th>'
+      h.push('<div data-pages="banque"><table><thead><tr><th>${T("Nom")}</th><th class="num">${T("Relevé")}</th>'
         + '<th class="num">${T("Dépôts")}</th><th class="num">${T("Écart")}</th><th>${T("État")}</th><th></th></tr></thead><tbody>');
       D.liste.forEach(function(r){
         var s = r.resume || {};
@@ -391,7 +395,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
                 : '')
           + '</td></tr>');
       });
-      h.push('</tbody></table>');
+      h.push('</tbody></table></div>');
       /* Le pied ferme la liste de l annee et porte l export (2026-09-24). */
       h.push(szPied(
         (D.liste.length > 1 ? (D.liste.length + ' ${T("conciliations")}')
@@ -456,14 +460,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
   function vueReleve(){
     var r = D.rec;
     var h = [enteteDetail()];
-    h.push('<div class="carte"><div class="barreoutils"><h2 style="margin:0">${T("Lignes du relevé")}</h2>'
+    // Les lignes en PAGES mesurees, jamais de glissiere (2026-10-12).
+    h.push('<div class="carte sz-pagee"><div class="barreoutils"><h2 style="margin:0">${T("Lignes du relevé")}</h2>'
       + (D.verrouille || !D.peutEcrire ? '' : '<span class="droite"><button class="prim" id="e-ajouter">${T("+ Ligne")}</button></span>')
       + '</div>');
     if (EDIT_E !== null) h.push(formEntree());
     if (!r.bankEntries.length) {
       h.push('<div class="vide">${T("Aucune ligne. Saisissez le relevé, ou collez-le ligne par ligne.")}</div>');
     } else {
-      h.push('<table><thead><tr><th>${T("Date")}</th><th>${T("Description")}</th><th>${T("Type")}</th>'
+      h.push('<div data-pages="banque-releve"><table><thead><tr><th>${T("Date")}</th><th>${T("Description")}</th><th>${T("Type")}</th>'
         + '<th class="num">${T("Montant")}</th><th>${T("État")}</th><th></th></tr></thead><tbody>');
       r.bankEntries.forEach(function(e){
         h.push('<tr><td class="dt">' + esc(szQuand(e.date) || '—') + '</td>'
@@ -479,7 +484,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
                   + (ARME === e.id ? '${T("Confirmer ?")}' : '${T("Retirer")}') + '</button>')
           + '</td></tr>');
       });
-      h.push('</tbody></table>');
+      h.push('</tbody></table></div>');
       /* ⚠ COMPTE SEUL, SANS BOUTON : le detail porte deja son bouton << CSV >>
          dans l en-tete, et szPied rend le compte sans gestes quand on ne lui en
          donne pas — il est ecrit pour ce cas. Poser un second bouton ici
@@ -517,7 +522,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
   function vueDepots(){
     var r = D.rec, sq = D.square || {};
     var h = [enteteDetail()];
-    h.push('<div class="carte"><div class="barreoutils"><h2 style="margin:0">${T("Dépôts Square et sorties")}</h2>'
+    // Les lignes en PAGES mesurees, jamais de glissiere (2026-10-12).
+    h.push('<div class="carte sz-pagee"><div class="barreoutils"><h2 style="margin:0">${T("Dépôts Square et sorties")}</h2>'
       + (D.verrouille || !D.peutEcrire ? '' : '<span class="droite">'
           + '<button id="v-square">${T("Importer Square")}</button>'
           + '<button id="v-depenses">${T("Importer les dépenses")}</button>'
@@ -530,7 +536,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     if (!r.squarePayouts.length) {
       h.push('<div class="vide">${T("Aucun dépôt ni sortie.")}</div>');
     } else {
-      h.push('<table><thead><tr><th>${T("Arrivée")}</th><th>${T("Description")}</th><th>${T("Période")}</th>'
+      h.push('<div data-pages="banque-depots"><table><thead><tr><th>${T("Arrivée")}</th><th>${T("Description")}</th><th>${T("Période")}</th>'
         + '<th class="num">${T("Montant")}</th><th>${T("État")}</th><th></th></tr></thead><tbody>');
       r.squarePayouts.forEach(function(p){
         h.push('<tr><td class="dt">' + esc(szQuand(p.arrivalDate) || '—') + '</td>'
@@ -547,7 +553,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
                   + (ARME === p.id ? '${T("Confirmer ?")}' : '${T("Retirer")}') + '</button>')
           + '</td></tr>');
       });
-      h.push('</tbody></table>');
+      h.push('</tbody></table></div>');
       /* ⚠ Compte seul ici aussi : le bouton << CSV >> de l en-tete sort DEJA
          les depots, dans le meme fichier que les lignes du releve. */
       h.push(szPied(r.squarePayouts.length > 1 ? (r.squarePayouts.length + ' ${T("lignes")}')
@@ -589,9 +595,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     var paires  = r.bankEntries.filter(function(e){ return e.status === 'matched'; });
     var h = [enteteDetail()];
 
-    h.push('<div class="duo" style="align-items:flex-start">');
-    h.push('<div style="flex:1 1 20rem"><div class="carte"><h2>${T("Relevé — non appariés (")}' + seulesB.length + ')</h2>');
+    /* Trois listes qui grandissent : les deux colonnes de << seules >> et les
+       appariements. Chacune dans une carte bornee, paginee (2026-10-12). */
+    h.push('<div class="duo app">');
+    h.push('<div style="flex:1 1 20rem"><div class="carte sz-pagee"><h2>${T("Relevé — non appariés (")}' + seulesB.length + ')</h2>');
     if (!seulesB.length) h.push('<div class="vide">${T("Toutes les lignes du relevé sont appariées ✓")}</div>');
+    else h.push('<div data-pages="banque-seules-releve">');
     seulesB.forEach(function(e){
       h.push('<div class="seule"><div class="d"><div>' + esc(e.description || '—') + '</div>'
         + '<div class="dt">' + esc(szQuand(e.date) || '—') + ' · ' + esc(e.type || '—') + '</div></div>'
@@ -605,20 +614,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
                 }).join('') + '</select>')
         + '</div>');
     });
+    if (seulesB.length) h.push('</div>');
     h.push('</div></div>');
 
-    h.push('<div style="flex:1 1 20rem"><div class="carte"><h2>${T("Dépôts et sorties — non appariés (")}' + seulesV.length + ')</h2>');
+    h.push('<div style="flex:1 1 20rem"><div class="carte sz-pagee"><h2>${T("Dépôts et sorties — non appariés (")}' + seulesV.length + ')</h2>');
     if (!seulesV.length) h.push('<div class="vide">${T("Tout est apparié ✓")}</div>');
+    else h.push('<div data-pages="banque-seules-depots">');
     seulesV.forEach(function(p){
       h.push('<div class="seule"><div class="d"><div>' + esc(p.description || '—') + '</div>'
         + '<div class="dt">' + esc(szQuand(p.arrivalDate) || '—') + '</div></div>'
         + '<div style="font-variant-numeric:tabular-nums;font-weight:700">' + sou(p.amount) + '</div></div>');
     });
+    if (seulesV.length) h.push('</div>');
     h.push('</div></div>');
     h.push('</div>');
 
     if (paires.length) {
-      h.push('<div class="carte"><h2>${T("Appariements confirmés (")}' + paires.length + ')</h2>');
+      h.push('<div class="carte sz-pagee"><h2>${T("Appariements confirmés (")}' + paires.length + ')</h2><div data-pages="banque-paires">');
       paires.forEach(function(e){
         var p = null;
         for (var i = 0; i < r.squarePayouts.length; i++) {
@@ -637,7 +649,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
               : '<button class="mini" data-desapp="' + esc(e.id) + '">${T("Défaire")}</button>')
           + '</div>');
       });
-      h.push('</div>');
+      h.push('</div></div>');
     }
     return h.join('');
   }

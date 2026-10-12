@@ -48,10 +48,8 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 /* ── La refonte de l Inventaire (2026-09-25) ── */
 .rf-tb select{height:2.4rem;border-radius:10px;background:var(--f-0f1826);border-color:var(--v10);max-width:13rem}
@@ -71,10 +69,22 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.prim{background:#c9a97e;border-color:#c9a97e;color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:#d8bc95}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
-.deux{display:flex;gap:.7rem;align-items:flex-start}
-.deux .principal{flex:1 1 auto;min-width:0}
-.deux .cote{flex:0 0 320px}
-@media (max-width:920px){.deux{flex-direction:column}.deux .cote{flex:1 1 auto;width:100%}}
+/* << Aucun scroll bar dans l application >> (2026-10-12) : le corps ne defile
+   plus. Les deux colonnes prennent la hauteur qui reste ; a gauche, la liste
+   des produits est BORNEE et sa hauteur reelle decide du nombre de lignes
+   demandees au site (szAutoPagination) ; a droite, la FILE se lit par pages
+   (data-pages) au lieu de s allonger sans fin. */
+.corps.plein>.deux{flex:1 1 0;min-height:0}
+.deux{display:flex;gap:.7rem;align-items:stretch}
+.deux .principal{flex:1 1 auto;min-width:0;min-height:0;display:flex;flex-direction:column}
+.deux .cote{flex:0 0 320px;min-height:0;display:flex;flex-direction:column}
+.deux .principal>.carte.plein{flex:1 1 0;min-height:0;display:flex;flex-direction:column}
+.deux .principal>.carte.plein>.liste{flex:1 1 auto;min-height:0;overflow:hidden}
+.deux .principal>.carte.plein>.pagi{flex:0 0 auto}
+.cb-fcarte>*{flex:0 0 auto}
+.cb-fcarte>.cb-flist{flex:1 1 auto;min-height:0}
+@media (max-width:920px){.deux{flex-direction:column}
+  .deux .principal,.deux .cote{flex:1 1 0;width:100%}}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
 .carte h2{margin:0 0 .45rem;font-size:.71rem;text-transform:uppercase;
@@ -110,7 +120,12 @@ html.jour .carte .stats .s .n{color:#1d2433}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
   align-items:center;justify-content:center;z-index:50;padding:1rem}
 .boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;
-  max-width:34rem;width:100%;max-height:82vh;overflow:auto;padding:.9rem 1rem}
+  max-width:34rem;width:100%;max-height:82vh;overflow:hidden;padding:.9rem 1rem;
+  display:flex;flex-direction:column}
+/* La boite ne defile plus (2026-10-12) : les variantes et les codes illisibles
+   se lisent par pages (data-pages) ; le reste garde sa taille. */
+.boite>*{flex:0 0 auto}
+.boite>.rangs,.boite>ul{flex:0 1 auto;min-height:3rem}
 .boite h3{margin:0 0 .6rem;font:700 .95rem/1.3 Georgia,serif}
 .boite .rangs{display:flex;flex-direction:column}
 .boite .rang{display:flex;align-items:center;gap:.55rem;padding:.3rem 0;
@@ -141,7 +156,7 @@ function pageCodesbarres(mode) {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.barcode}</span><h1>${T("Impression de codes-barres")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
+<div class="corps plein" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -155,6 +170,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('codesbarres')}
   var Q = '';
   var CAT = '';
   var PAGE = 0;
+  /* La taille de page est MESUREE (szAutoPagination, apres chaque dessin) :
+     20 n est que le repli tant que la liste n a pas encore ete disposee. */
   var TAILLE = 20;
   /* ⚠ LA FILE : une liste en memoire — { pid, sku, name, size, color, qty }.
      Jamais relue du tableau affiche. */
@@ -219,7 +236,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('codesbarres')}
     /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
        quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
        ce poste. Voir JS_TUILES dans socle.js. */
-    var h = '<div class="carte"><h2>${T("File d’impression")}</h2>'
+    var h = '<div class="carte sz-pagee cb-fcarte"><h2>${T("File d’impression")}</h2>'
       + szTuiles('<div class="stats">'
       /* ⚠ Le singulier et le pluriel, chacun entier : coupes en morceaux, ils ne
          laissaient au poseur que des bouts de mots. */
@@ -233,7 +250,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('codesbarres')}
     if (!FILE.length) {
       h += '<div class="vide">${T("Rien à imprimer. Choisissez des variantes à gauche.")}</div>';
     } else {
-      h += FILE.map(function(it, i){
+      /* La file en PAGES (data-pages) : cent lignes ne poussent plus les
+         boutons Imprimer et Vider sous le bas de la fenetre. */
+      h += '<div class="cb-flist" data-pages="cb-file">' + FILE.map(function(it, i){
         return '<div class="fileligne">'
           + '<div class="finfo"><div class="dt"><strong>' + esc(it.name) + '</strong></div>'
           + '<div class="dt">' + esc(it.size) + ' / ' + esc(it.color)
@@ -243,7 +262,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('codesbarres')}
           + '<button class="mini" data-fplus="' + i + '" title="${T("Plus")}">+</button>'
           + '<button class="mini" data-fret="' + i + '" title="${T("Retirer")}">✕</button>'
           + '</div>';
-      }).join('');
+      }).join('') + '</div>';
     }
     h += '<div style="display:flex;gap:.5rem;margin-top:.6rem">'
       + '<button class="danger" id="cb-vider"' + (FILE.length ? '' : ' disabled') + '>'
@@ -287,12 +306,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('codesbarres')}
       + '<span class="rf-droite"><span class="dt">' + (D.total || 0) + (D.total > 1 ? '${T(" produits")}' : '${T(" produit")}') + '</span></span>'
       + '</div></div>';
 
-    h += '<div class="deux"><div class="principal"><div class="carte">';
+    h += '<div class="deux"><div class="principal"><div class="carte plein">';
     var rows = D.lignes || [];
     if (!rows.length) {
       h += '<div class="vide">${T("Aucun produit trouvé.")}</div>';
     } else {
-      h += '<table><thead><tr><th>${T("Produit")}</th>'
+      h += '<div class="liste"><table><thead><tr><th>${T("Produit")}</th>'
         + '<th>${T("Stock")}</th><th style="text-align:right">${T("Ajouter")}</th></tr></thead><tbody>'
         + rows.map(function(r){
             var actions = r.sku
@@ -310,8 +329,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('codesbarres')}
               + '<td style="text-align:right;white-space:nowrap">' + actions + '</td>'
               + '</tr>';
           }).join('')
-        + '</tbody></table>';
-      if ((D.pages || 1) > 1) {
+        + '</tbody></table></div>';
+      /* ⚠ Le pied de pages est TOUJOURS pose, meme sur une seule page : s il
+         apparaissait apres la mesure, il mangerait la hauteur deja comptee. */
+      if (rows.length) {
         h += '<div class="pagi">'
           + '<button class="mini" id="cb-prec"' + (D.page <= 0 ? ' disabled' : '') + '>◀</button>'
           + '<span>${T("Page ")}' + (D.page + 1) + ' / ' + D.pages + '</span>'
@@ -324,7 +345,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('codesbarres')}
     if (PICKER) {
       h += '<div class="voile" id="cb-voile"><div class="boite">'
         + '<h3><span class="ic">🏷️</span> ' + esc(PICKER.nom) + '${T(" — choisir les variantes")}</h3>'
-        + '<div class="rangs">'
+        + '<div class="rangs" data-pages="cb-variantes">'
         + PICKER.variantes.map(function(v, i){
             var deja = null;
             FILE.forEach(function(it){ if (it.sku === v.sku) deja = it; });
@@ -346,6 +367,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('codesbarres')}
     }
     corps.innerHTML = h;
     brancher();
+    // La mesure : combien de lignes tiennent VRAIMENT dans la liste bornee.
+    szAutoPagination('.liste', function(n){ if (n === TAILLE) return; TAILLE = n; PAGE = 0; charger(); });
   }
 
   function redessinerFile(){
@@ -541,7 +564,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('codesbarres')}
       + '${T(" : la barre la plus fine tomberait à ")}'
       + '${T("<strong>1 point</strong>, sous le seuil de lecture des lecteurs. ")}'
       + '${T("L’étiquette s’imprimera correctement — mais elle ne se lira pas.")}</p>'
-      + '<ul style="padding-left:0">' + p.map(function(x){
+      + '<ul style="padding-left:0" data-pages="cb-illisibles">' + p.map(function(x){
           return '<li class="item"><strong>' + esc(x.sku) + '</strong>'
             + (x.nom ? ' — ' + esc(x.nom) : '')
             + '<br><span style="color:var(--tx2)">' + x.modules + '${T(" modules · il faudrait une ")}'

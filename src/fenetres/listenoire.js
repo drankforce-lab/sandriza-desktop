@@ -32,9 +32,10 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
   border-bottom:1px solid var(--v08);background:linear-gradient(180deg,#131c2b,#0e1522)}
 .ro{flex:0 0 auto;margin:.55rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.45rem .7rem;font-size:.78rem}
-.corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* Aucune glissiere (2026-10-12) : le corps est une colonne bornee et la liste
+   se pagine dans la hauteur qui reste (data-pages, JS_PAGES du socle). */
+.corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow:hidden;
+  display:flex;flex-direction:column}
 .entete{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
 .quoi{font-size:.79rem;color:var(--tx2);line-height:1.6;margin:0;max-width:60rem}
 .quoi b{color:var(--tx)}
@@ -208,7 +209,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     } else if (!l.length) {
       h += '<div class="carte"><div class="vide">${T("Aucune entrée.<br>C’est la bonne nouvelle — la liste ne sert qu’à écarter ce qui pose problème.")}</div></div>';
     } else {
-      h += '<div class="carte plein"><div class="liste" style="overflow-x:auto"><table><thead><tr>'
+      // La liste en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
+      h += '<div class="carte plein sz-pagee"><div class="liste" data-pages="listenoire"><table><thead><tr>'
         + '<th>${T("Entrée")}</th><th>${T("Ajouté le")}</th>'
         + (D.peutRetirer ? '<th></th>' : '') + '</tr></thead><tbody>';
       for (var i=0;i<l.length;i++){ var e=l[i];
@@ -237,8 +239,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
        couperait sans barre de defilement et sans rien dire. Le corps reprend
        donc son defilement normal tant que le formulaire est ouvert — et aussi
        sur la liste vide, ou il n y a rien a etirer. Meme regle que le
-       repertoire de fournisseurs : l adoption est un choix par VUE. */
-    corps.className = (l.length && !(AJOUT && D.peutAjouter)) ? 'corps plein' : 'corps';
+       repertoire de fournisseurs : l adoption est un choix par VUE.
+       ⚠ DEPUIS LE 2026-10-12 (<< aucun scroll bar >>) le corps ne defile plus
+       jamais : la liste se pagine, et c est elle qui cede la hauteur prise par
+       le formulaire d ajout (quelques champs, hauteur fixe). */
+    corps.className = 'corps plein';
     corps.innerHTML = h;
     lier();
 

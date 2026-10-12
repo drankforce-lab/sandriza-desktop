@@ -34,10 +34,13 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* << Aucun scroll bar dans l application >> (2026-10-12) : la liste ne defile
+   plus, elle est BORNEE (carte pleine, liste flex) et sa hauteur reelle decide
+   du nombre de lignes demandees au site (szAutoPagination). */
+.corps.plein .carte.plein{flex:1 1 0;min-height:0}
+.corps.plein .carte.plein>.liste{flex:1 1 auto;min-height:0;overflow:hidden}
 /* Les tuiles de tete (refonte du 2026-09-25), aux mesures de l Inventaire.
    La tuile de la liste affichee porte le cadre or. */
 .tuiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem;flex:0 0 auto;margin-bottom:.6rem}
@@ -105,6 +108,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   var ONGLET = 'active';
   var Q = '';
   var PAGE = 0;
+  /* La taille de page est MESUREE (szAutoPagination, apres chaque dessin) :
+     25 n est que le repli tant que la liste n a pas encore ete disposee. */
   var TAILLE = 25;
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
@@ -256,7 +261,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
               + '<td>' + st + '</td></tr>';
           }).join('')
         + '</tbody></table></div>';
-      if ((D.pages || 1) > 1) {
+      /* ⚠ Le pied de pages est TOUJOURS pose, meme sur une seule page : s il
+         apparaissait apres la mesure, il mangerait la hauteur deja comptee et
+         la derniere ligne passerait sous le bas du cadre. */
+      if (rows.length) {
         h += '<div class="pagi">'
           + '<button class="mini" id="c-prec"' + (D.page <= 0 ? ' disabled' : '') + '>◀</button>'
           + '<span>Page ' + (D.page + 1) + ' / ' + D.pages + '</span>'
@@ -283,6 +291,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     // disparaitraient a chaque redessin et ne reviendraient qu au sondage
     // suivant — un clignotement toutes les trois secondes.
     szVerrousPeindre();
+    // La mesure : combien de lignes tiennent VRAIMENT dans la liste bornee.
+    szAutoPagination('.liste', function(n){ if (n === TAILLE) return; TAILLE = n; PAGE = 0; charger(); });
 
     var q = document.getElementById('c-q');
     if (q) {

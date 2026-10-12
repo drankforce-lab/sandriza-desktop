@@ -56,10 +56,10 @@ body{background:var(--f-page);color:var(--tx);
 .onglets button{background:none;border:0;border-bottom:2px solid transparent;color:var(--tx2);
   font:600 .82rem/1 system-ui;padding:.45rem .7rem;cursor:pointer;border-radius:0}
 .onglets button.on{color:var(--tx);border-bottom-color:#c9a97e}
-.corps{flex:1 1 auto;min-height:0;padding:.85rem 1.05rem;overflow-y:auto;
+/* Aucune glissiere (2026-10-12) : le corps ne defile plus ; la liste des liens va en PAGES
+   mesurees (JS_PAGES du socle), le journal garde sa pagination auto dans une carte bornee. */
+.corps{flex:1 1 auto;min-height:0;padding:.85rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.75rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.8rem .9rem}
 .carte h2{margin:0 0 .55rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
@@ -85,8 +85,9 @@ button.dgr{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
 .tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center}
 table{width:100%;border-collapse:collapse;font-size:.79rem}
-/* La zone mesurable de la pagination auto : une hauteur REELLE a diviser. */
-.liste{max-height:52vh;overflow-y:auto}
+/* La zone mesurable de la pagination auto : une hauteur REELLE a diviser. Elle ne vient plus
+   d un max-height a glissiere (2026-10-12) : la carte sz-pagee la borne, rien ne defile. */
+.liste{flex:1 1 auto;min-height:0;overflow:hidden}
 .pagi{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;
   padding-top:.45rem;font-size:.75rem;color:var(--tx2)}
 thead th{text-align:left;padding:.22rem .35rem;font-size:.65rem;text-transform:uppercase;
@@ -274,11 +275,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     if (ETAT.neuf) h.push(carteNeuf());
     if (ETAT.formulaire) h.push(formulaire());
 
-    h.push('<div class="carte"><h2>${T("Liens émis")}</h2>');
+    // La liste en PAGES mesurees, jamais de glissiere (2026-10-12).
+    h.push('<div class="carte sz-pagee"><h2>${T("Liens émis")}</h2>');
     if (!ETAT.liens.length) {
       h.push('<div class="vide">${T("Aucun lien n’a encore été émis.")}</div>');
     } else {
-      h.push('<table><thead><tr><th>${T("Pour")}</th><th>${T("Compte")}</th>'
+      h.push('<div data-pages="liens"><table><thead><tr><th>${T("Pour")}</th><th>${T("Compte")}</th>'
         + '<th>${T("Usages")}</th><th>${T("Échéance")}</th><th>${T("Créé")}</th><th>${T("État")}</th><th></th></tr></thead><tbody>');
       ETAT.liens.forEach(function(l){
         var u = (l.maxUsages > 0) ? (l.usages + ' / ' + l.maxUsages) : (l.usages + ' / ∞');
@@ -314,7 +316,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
             + (l.motif ? ' — ' + esc(l.motif) : '') + '</td></tr>');
         }
       });
-      h.push('</tbody></table>');
+      h.push('</tbody></table></div>');
     }
     h.push('</div>');
 
@@ -677,7 +679,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
       + '<span class="droite"><button id="j-vers-journaux" title="${T("Voir ce journal dans le module Journaux")}"><span class="ic">🔎</span> ${T("Dans Journaux")}</button>'
       + '<button id="j-recharger">${T("Recharger")}</button></span></div>');
 
-    h.push('<div class="carte"><h2>${T("Accès aux liens")}</h2>');
+    h.push('<div class="carte sz-pagee"><h2>${T("Accès aux liens")}</h2>');
     if (!ETAT.journal.length) {
       h.push('<div class="vide">${T("Aucun événement pour ce filtre.")}</div>');
     } else {

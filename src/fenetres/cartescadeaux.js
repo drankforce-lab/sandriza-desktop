@@ -44,10 +44,9 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
+/* Aucune glissiere (2026-10-12) : la liste se pagine (data-pages, JS_PAGES du socle). */
+.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
@@ -104,6 +103,11 @@ tbody td{padding:.32rem .4rem;border-top:1px solid var(--v055);vertical-align:mi
   align-items:center;justify-content:center;z-index:50;padding:1rem}
 .boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;
   max-width:38rem;width:100%;max-height:86vh;overflow:auto;padding:.9rem 1rem}
+/* La fiche d une carte : son historique grandit a chaque achat. La boite devient
+   une colonne bornee (86vh) et l historique s y pagine au lieu de defiler (2026-10-12). */
+.boite.fiche-cc{display:flex;flex-direction:column;overflow:hidden}
+.boite.fiche-cc>*{flex:0 0 auto}
+.boite.fiche-cc>[data-pages]{flex:0 1 auto;min-height:4.5rem}
 .boite h3{margin:0 0 .6rem;font:700 .98rem/1.3 Georgia,serif;display:flex;
   align-items:center;gap:.5rem;flex-wrap:wrap}
 .boite .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.85rem;flex-wrap:wrap}
@@ -298,7 +302,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
   function boiteDetail(){
     var g = DETAIL;
     if (!g) return '';
-    var h = '<div class="voile" id="cc-voile"><div class="boite">'
+    var h = '<div class="voile" id="cc-voile"><div class="boite fiche-cc">'
       + '<h3><span class="code">' + esc(g.code) + '</span>'
       + '<span class="pill ' + (TONS[g.statut] || 'neutre') + '">'
       + esc({ active: '${T("Active")}', used: '${T("Utilisée")}', expired: '${T("Expirée")}', pending: '${T("Activation requise")}' }[g.statut] || g.statut)
@@ -329,14 +333,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
     if (!g.transactions.length) {
       h += '<div class="vide" style="padding:.7rem">${T("Carte jamais utilisée.")}</div>';
     } else {
-      h += '<table><thead><tr><th>${T("Date")}</th><th>${T("Commande")}</th>'
+      h += '<div data-pages="cartescadeaux-historique"><table><thead><tr><th>${T("Date")}</th><th>${T("Commande")}</th>'
         + '<th class="num">${T("Montant")}</th><th class="num">${T("Solde après")}</th></tr></thead><tbody>'
         + g.transactions.map(function(x){
             return '<tr><td>' + esc(szQuand(x.date)) + '</td><td>' + esc(x.commande || '—') + '</td>'
               + '<td class="num" style="color:var(--tx-err)">−' + fmt(x.montant) + '</td>'
               + '<td class="num">' + fmt(x.soldeApres) + '</td></tr>';
           }).join('')
-        + '</tbody></table>';
+        + '</tbody></table></div>';
     }
     h += '<div class="pied-boite">'
       + (g.statut === 'pending' && D.peutModifier
@@ -380,11 +384,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
       + (D.peutModifier ? '<button class="prim" id="cc-nouvelle" style="height:2.4rem;padding:0 .9rem">${T("+ Créer une carte")}</button>' : '')
       + '</span></div></div>';
 
-    h += '<div class="carte">';
+    // La liste en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
+    h += '<div class="carte sz-pagee">';
     if (!rows.length) {
       h += '<div class="vide">' + (Q || STATUT ? '${T("Rien ne correspond.")}' : '${T("Aucune carte-cadeau.")}') + '</div>';
     } else {
-      h += '<table><thead><tr><th>${T("Destinataire")}</th><th class="num">${T("Valeur")}</th>'
+      h += '<div data-pages="cartescadeaux"><table><thead><tr><th>${T("Destinataire")}</th><th class="num">${T("Valeur")}</th>'
         + '<th class="num">${T("Solde")}</th><th>${T("Acheteur")}</th><th>${T("Date")}</th><th>${T("Statut")}</th></tr></thead><tbody>'
         + rows.map(function(g){
             return '<tr data-id="' + esc(g.id) + '" title="${T("Voir le détail")}">'
@@ -402,7 +407,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
               + '<td><span class="rf-pill ' + (TONS[g.statut] || '') + '">' + esc(szTd(g.statutLibelle)) + '</span>'
               + (g.courrielEnvoye ? ' <span class="rf-pill bleu">${T("courriel ✓")}</span>' : '') + '</td></tr>';
           }).join('')
-        + '</tbody></table>';
+        + '</tbody></table></div>';
     }
     h += '</div>';
 

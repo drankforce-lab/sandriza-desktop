@@ -55,10 +55,9 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
+/* Aucune glissiere (2026-10-12) : les listes se paginent (data-pages, JS_PAGES du socle). */
+.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
@@ -245,12 +244,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('corbeille')}
       + '<span class="rf-droite"><span class="dt">' + rows.length
       + (rows.length > 1 ? '${T(" dossiers")}' : '${T(" dossier")}') + '</span></span></div></div>';
 
-    h += '<div class="carte"><h2>${T("Commandes supprimées")}</h2>';
+    // La liste en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
+    h += '<div class="carte sz-pagee"><h2>${T("Commandes supprimées")}</h2>';
     if (!rows.length) {
       h += '<div class="vide">' + (Q ? '${T("Rien ne correspond.")}'
         : '${T("Aucune commande supprimée. C’est la bonne nouvelle — la corbeille existe pour le jour où ça arrive.")}') + '</div>';
     } else {
-      h += '<table><thead><tr><th>${T("Client et commande")}</th>'
+      h += '<div data-pages="corbeille"><table><thead><tr><th>${T("Client et commande")}</th>'
         + '<th class="num">${T("Total")}</th><th>${T("Supprimée")}</th>'
         + '<th>${T("Ce qui est gardé")}</th><th></th></tr></thead><tbody>'
         + rows.map(function(d){
@@ -273,7 +273,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('corbeille')}
                     + (ARME === d.id ? '${T("Confirmer ?")}' : '${T("Purger")}') + '</button>' : '')
               + '</td></tr>';
           }).join('')
-        + '</tbody></table>';
+        + '</tbody></table></div>';
     }
     h += '</div>';
 
@@ -332,14 +332,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('corbeille')}
       + lgnPiece('${T("Variantes dont le stock a été rendu")}', (d.stock || []).length)
       + '</div></div></div>';
 
+    // Le stock rendu prend le reste de la hauteur et se pagine (2026-10-12).
     if ((d.stock || []).length) {
-      h += '<div class="carte"><h2>${T("Stock rendu à la suppression")}</h2>'
+      h += '<div class="carte sz-pagee"><h2>${T("Stock rendu à la suppression")}</h2>'
         + '<div class="dt" style="margin-bottom:.4rem">${T("Remettre la commande en place retirera de nouveau ces unités, à partir du stock d’aujourd’hui — une réception faite entre-temps est conservée.")}</div>'
-        + '<table><thead><tr><th>${T("Variante")}</th><th class="num">${T("Unités")}</th></tr></thead><tbody>'
+        + '<div data-pages="corbeille-stock"><table><thead><tr><th>${T("Variante")}</th><th class="num">${T("Unités")}</th></tr></thead><tbody>'
         + d.stock.map(function(m){
             return '<tr><td>' + esc(m.cle) + ' <span class="dt">' + esc(m.productId) + '</span></td>'
               + '<td class="num">' + (m.quantite || 0) + '</td></tr>'; }).join('')
-        + '</tbody></table></div>';
+        + '</tbody></table></div></div>';
     }
     corps.innerHTML = h;
     lierFiche();

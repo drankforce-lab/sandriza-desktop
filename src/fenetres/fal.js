@@ -46,10 +46,9 @@ body{background:var(--f-page);color:var(--tx);
 .onglets button{background:none;border:0;border-bottom:2px solid transparent;color:var(--tx2);
   font:600 .82rem/1 system-ui;padding:.45rem .7rem;cursor:pointer;border-radius:0}
 .onglets button.on{color:var(--tx);border-bottom-color:#c9a97e}
-.corps{flex:1 1 auto;min-height:0;padding:.85rem 1.05rem;overflow-y:auto;
+/* Aucune glissiere (2026-10-12) : le corps ne defile plus, les listes vont en PAGES mesurees (JS_PAGES du socle). */
+.corps{flex:1 1 auto;min-height:0;padding:.85rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.75rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.8rem .9rem}
 .carte h2{margin:0 0 .55rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
@@ -353,11 +352,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
     }
     h.push('<div class="rang2"><div>' + cartePlafond() + '</div><div>' + joursH + '</div></div>');
 
-    h.push('<div class="carte"><h2>${T("Par traitement")}</h2>');
+    // Le detail par traitement en PAGES mesurees : il prend la hauteur qui reste (2026-10-12).
+    h.push('<div class="carte sz-pagee"><h2>${T("Par traitement")}</h2>');
     if (!(D.parModele || []).length) {
       h.push('<div class="vide">${T("Aucun traitement n’a encore été lancé.")}</div>');
     } else {
-      h.push('<table><thead><tr><th>${T("Traitement")}</th><th>${T("Modèle")}</th><th class="num">${T("Appels")}</th>'
+      h.push('<div data-pages="fal-traitements"><table><thead><tr><th>${T("Traitement")}</th><th>${T("Modèle")}</th><th class="num">${T("Appels")}</th>'
         + '<th class="num">${T("Réussis")}</th><th class="num">${T("Coût")}</th><th class="num">${T("Unitaire")}</th>'
         + '<th>${T("Prix")}</th></tr></thead><tbody>');
       D.parModele.forEach(function(m){
@@ -373,7 +373,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
           + (mesure ? '${T("mesuré")}' : (m.coutsReels ? '${T("partiel")}' : '${T("estimé")}')) + '</span></td>'
           + '</tr>');
       });
-      h.push('</tbody></table>');
+      h.push('</tbody></table></div>');
     }
     h.push('</div>');
     return h.join('');
@@ -434,10 +434,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
       + 'border:1px solid var(--v16);border-radius:8px;padding:.32rem .55rem;font:inherit">'
       + '<span class="droite" style="font-size:.74rem;color:var(--tx2)"><span id="maj">'
       + (MAJ ? '${T("Dernière actualisation le ")}' + esc(MAJ) : '${T("Actualisation…")}') + '</span></span></div>');
-    h.push('<div class="carte"><h2>${T("Cinq cents derniers appels")}</h2>');
-    h.push('<table><thead><tr><th>${T("Quand")}</th><th>${T("Opération")}</th><th>${T("Traitement")}</th>'
+    // Les cinq cents appels en PAGES mesurees, plus de glissiere (2026-10-12).
+    h.push('<div class="carte sz-pagee"><h2>${T("Cinq cents derniers appels")}</h2>');
+    h.push('<div data-pages="fal-historique"><table><thead><tr><th>${T("Quand")}</th><th>${T("Opération")}</th><th>${T("Traitement")}</th>'
       + '<th>${T("Photo")}</th><th>${T("Par")}</th><th class="num">${T("Durée")}</th><th class="num">${T("Coût")}</th>'
-      + '<th>${T("État")}</th></tr></thead><tbody id="h-body">' + lignesHist() + '</tbody></table>');
+      + '<th>${T("État")}</th></tr></thead><tbody id="h-body">' + lignesHist() + '</tbody></table></div>');
     h.push('</div>');
     return h.join('');
   }

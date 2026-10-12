@@ -138,9 +138,8 @@ td.e select{min-width:8rem}
 .pagi select{width:auto;padding:.16rem .35rem;font-size:.76rem}
 
 /* ── Liste de reachat et resultats de recherche ───────────────────────────── */
-.lignes{flex:1 1 auto;min-height:0;overflow-y:auto}
-.lignes::-webkit-scrollbar{width:8px}
-.lignes::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* Aucune glissiere (2026-10-12) : la liste va en PAGES mesurees (data-pages, JS_PAGES du socle). */
+.lignes{flex:1 1 auto;min-height:0;overflow:hidden}
 .lg{display:flex;align-items:center;gap:.6rem;padding:.3rem .45rem;border-radius:7px;
   cursor:pointer;font-size:.85rem;border-top:1px solid var(--v05)}
 .lg:first-child{border-top:0}
@@ -616,7 +615,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
         : '${T("✓ Aucune variante à réapprovisionner — toutes sont au-dessus de leur seuil.")}')
         + '</div>';
     } else {
-      h += '<div class="lignes">';
+      h += '<div class="lignes" data-pages="inventaire-' + (enRecherche ? 'recherche' : 'reappro') + '">';
       if (enRecherche) {
         lignes.forEach(function(a){
           h += '<div class="lg" data-pid="' + esc(a.id) + '">'
@@ -1501,7 +1500,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
       h += '<div class="vide">${T("Aucun article endommagé")}'
         + (DMG_AN === 'all' ? '' : '${T(" pour ")}' + esc(String(DMG_AN))) + '.</div>';
     } else {
-      h += '<div class="grille"><table><thead><tr>'
+      /* En PAGES mesurees, plus de glissiere (2026-10-12). Le total passe en DERNIERE ligne du
+         tbody : un tfoot sous des lignes paginees serait pousse hors du cadre. La barre
+         d outils le redit en tout temps. */
+      h += '<div class="grille" data-pages="inventaire-endommages"><table><thead><tr>'
         + '<th>${T("Date")}</th><th>${T("Commande")}</th><th>${T("Article")}</th><th class="c">${T("Qté")}</th>'
         + '<th style="text-align:right">${T("Prix")}</th><th style="text-align:right">${T("Valeur")}</th><th>${T("Raison")}</th>'
         + '</tr></thead><tbody>';
@@ -1515,12 +1517,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
           + '<td style="text-align:right;font-weight:600">' + szArgent(l.qte * l.prix) + '</td>'
           + '<td>' + esc(l.raison) + '</td></tr>';
       });
-      h += '</tbody><tfoot><tr style="font-weight:700">'
+      h += '<tr style="font-weight:700">'
         + '<td colspan="3" style="padding:.34rem .5rem;border-top:1px solid var(--v14)">${T("Total")}</td>'
         + '<td class="c" style="border-top:1px solid var(--v14)">' + d.totalQte + '</td>'
         + '<td style="border-top:1px solid var(--v14)"></td>'
         + '<td style="text-align:right;border-top:1px solid var(--v14)">' + szArgent(d.totalValeur) + '</td>'
-        + '<td style="border-top:1px solid var(--v14)"></td></tr></tfoot></table></div>';
+        + '<td style="border-top:1px solid var(--v14)"></td></tr></tbody></table></div>';
     }
     h += '</div>';
     corps.innerHTML = h;
@@ -1583,7 +1585,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
       h += '<div class="vide">' + (RAB_Q ? '${T("Aucune ligne ne correspond au filtre.")}'
         : '${T("Aucun rabais accordé au comptoir")}' + (RAB_AN === 'all' ? '' : '${T(" pour ")}' + esc(String(RAB_AN))) + '.') + '</div>';
     } else {
-      h += '<div class="grille"><table><thead><tr>'
+      // En PAGES mesurees, total en derniere ligne du tbody (meme raison qu aux endommages, 2026-10-12).
+      h += '<div class="grille" data-pages="inventaire-rabais"><table><thead><tr>'
         + '<th>${T("Date")}</th><th>${T("Facture")}</th><th>${T("Article")}</th><th class="c">${T("Qté")}</th>'
         + '<th style="text-align:right">${T("Prix courant")}</th><th style="text-align:right">${T("Rabais")}</th>'
         + '<th style="text-align:right">${T("Prix vendu")}</th><th>${T("Remarque")}</th><th>${T("Client")}</th>'
@@ -1606,10 +1609,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
           + '<td>' + (l.remarque ? esc(l.remarque) : '<span class="rf-sous">—</span>') + '</td>'
           + '<td>' + esc(l.client || '—') + (l.par ? '<div class="rf-sous">${T("par")} ' + esc(l.par) + '</div>' : '') + '</td></tr>';
       });
-      h += '</tbody><tfoot><tr style="font-weight:700">'
+      h += '<tr style="font-weight:700">'
         + '<td colspan="5" style="padding:.34rem .5rem;border-top:1px solid var(--v14)">${T("Total")}</td>'
         + '<td style="text-align:right;white-space:nowrap;padding:.34rem 1.25rem .34rem .5rem;border-top:1px solid var(--v14)">−' + szArgent(d.totalRabais) + '</td>'
-        + '<td colspan="3" style="border-top:1px solid var(--v14)"></td></tr></tfoot></table></div>';
+        + '<td colspan="3" style="border-top:1px solid var(--v14)"></td></tr></tbody></table></div>';
     }
     h += '</div>';
     corps.innerHTML = h;

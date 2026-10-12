@@ -43,10 +43,8 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 /* Refonte fine (2026-09-26) : la barre d onglets de toutes les fenetres — et
    non quatre petits boutons. L actif prend l or du socle (.onglets .actif). */
 .onglets{display:flex;gap:.25rem;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--v08);padding:0 0 .5rem}
@@ -85,7 +83,9 @@ button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
 .entree .haut{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
 .entree .droite{margin-left:auto;display:flex;gap:.35rem;align-items:center}
 .entree .texte{font-size:.84rem;white-space:pre-wrap;overflow-wrap:anywhere;
-  margin-top:.25rem;color:var(--tx-bleute);max-height:5.5rem;overflow:auto}
+  margin-top:.25rem;color:var(--tx-bleute);max-height:5.5rem;overflow:hidden}
+/* 2026-10-12 : aucune glissiere (sa regle) — le texte d une entree est COUPE a 5.5rem au lieu
+   de defiler, et les listes (file, journal, patrons) sont en PAGES mesurees (JS_PAGES du socle). */
 .res{display:inline-flex;gap:.3rem;align-items:center}
 .res span{font-size:1rem}
 .dt{font-size:.72rem;color:var(--tx2)}
@@ -869,13 +869,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     if (!PAT) return '<div class="carte"><div class="vide charge">${T("Lecture des patrons…")}</div></div>';
     if (EDIT) return vuePatronEditeur();
     var l = PAT.patrons || [];
-    var h = '<div class="carte">';
+    // Les patrons en PAGES mesurees (JS_PAGES du socle) : la carte prend la hauteur qui reste.
+    var h = '<div class="carte sz-pagee">';
     if (PAT.peutEcrire) {
       h += '<div style="text-align:right;margin-bottom:.4rem">'
         + '<button class="mini prim" id="pa-nouveau">${T("+ Nouveau patron")}</button></div>';
     }
     if (!l.length) { h += '<div class="vide">${T("Aucun patron.")}</div></div>'; return h; }
-    h += l.map(function(p){
+    h += '<div data-pages="sociaux-patrons">' + l.map(function(p){
       return '<div class="entree">'
         + '<div class="haut"><strong>' + esc(p.nom) + '</strong>'
         + '<span class="pill ' + (p.actif ? 'bon' : 'neutre') + '">' + (p.actif ? '${T("actif")}' : '${T("inactif")}') + '</span>'
@@ -903,7 +904,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
                     + (PAT_ARME === p.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>')
             : '')
         + '</div></div>';
-    }).join('');
+    }).join('') + '</div>';
     h += '</div>';
     return h;
   }
@@ -1082,12 +1083,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       h += vueEpingle();
     } else {
       var pile = ONGLET === 'file' ? (D.file || []) : (D.historique || []);
-      h += '<div class="carte">';
+      // La file et le journal en PAGES mesurees (JS_PAGES du socle) : la carte prend la hauteur qui reste.
+      h += '<div class="carte sz-pagee">';
       if (!pile.length) {
         h += '<div class="vide">' + (ONGLET === 'file'
           ? '${T("Aucune publication en attente.")}' : '${T("Rien au journal pour l’instant.")}') + '</div>';
       } else {
-        h += pile.map(function(e){ return entree(e, ONGLET === 'file'); }).join('');
+        h += '<div data-pages="sociaux-' + ONGLET + '">' + pile.map(function(e){ return entree(e, ONGLET === 'file'); }).join('') + '</div>';
       }
       h += '</div>';
     }
@@ -1197,8 +1199,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
           + '<div class="dt" style="margin-top:.3rem">' + (r.reseaux.length
               ? r.reseaux.map(function(x){ return '<span class="pill neutre">' + esc(x) + '</span>'; }).join('')
               : '<span class="pill att">${T("aucun réseau — ce patron ne publiera nulle part")}</span>') + '</div>';
+        /* 2026-10-12 : l apercu se pose DANS l entree, plus a cote : la liste est en pages
+           (data-pages), et un element de plus remettrait la page a 1. */
         var anc = pa.closest('.entree');
-        if (anc && anc.parentNode) anc.parentNode.insertBefore(z, anc.nextSibling);
+        if (anc) anc.appendChild(z);
         dire('');
       });
       return;

@@ -42,10 +42,13 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* << Aucun scroll bar dans l application >> (2026-10-12) : la liste ne defile
+   plus, elle est BORNEE (carte pleine, liste flex) et sa hauteur reelle decide
+   du nombre de lignes demandees au site (szAutoPagination). */
+.corps.plein .carte.plein{flex:1 1 0;min-height:0}
+.corps.plein .carte.plein>.liste{flex:1 1 auto;min-height:0;overflow:hidden}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
@@ -103,16 +106,26 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
   align-items:center;justify-content:center;z-index:50;padding:1rem}
 .boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;
-  max-width:40rem;width:100%;max-height:84vh;overflow:auto;padding:.9rem 1rem}
+  max-width:40rem;width:100%;max-height:84vh;overflow:hidden;padding:.9rem 1rem;
+  display:flex;flex-direction:column}
+/* ⚠ LA BOITE NE DEFILE PLUS (2026-10-12) : un avis gonfle (douze photos, un
+   texte de trois pages) la faisait defiler de 1500 px. Tout y garde sa taille,
+   sauf le TEXTE, qui prend ce qui reste et se lit par pages (data-pages, par
+   morceaux de paragraphe) ; les photos tiennent sur UNE rangee, en pages
+   elles aussi. */
+.boite>*{flex:0 0 auto}
+.boite>.texte{flex:0 1 auto;min-height:4.8em}
+.boite .texte p{margin:0 0 .45em;white-space:pre-wrap;overflow-wrap:anywhere}
+.boite .texte p:last-child{margin-bottom:0}
 .boite h3{margin:0 0 .5rem;font:700 .98rem/1.3 Georgia,serif;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
 .boite .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.5rem;
   padding:.55rem 0;border-top:1px solid var(--v08);border-bottom:1px solid var(--v08);
   margin-bottom:.6rem}
 .boite .grille .l{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .boite .grille .v{font-size:.84rem;font-weight:600}
-.boite .texte{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.88rem;line-height:1.55;
+.boite .texte{overflow-wrap:anywhere;font-size:.88rem;line-height:1.55;
   background:var(--v03);border:1px solid var(--v07);border-radius:9px;padding:.6rem .7rem}
-.boite .photos{display:flex;flex-wrap:wrap;gap:.5rem;margin:0 0 .6rem}
+.boite .photos{display:flex;flex-wrap:wrap;gap:.5rem;margin:0 0 .6rem;height:86px}
 .boite .ph{position:relative;width:86px;height:86px;border-radius:9px;overflow:hidden;
   border:1px solid var(--v14);background:var(--v05)}
 .boite .ph img{width:100%;height:100%;object-fit:cover;display:block}
@@ -126,6 +139,9 @@ html.jour .boite .phx{background:rgba(255,255,255,.94)}
   color:var(--tx3);font-size:1.5rem}
 .boite .reponse{margin-top:.6rem;border-left:3px solid #c9a97e;padding:.4rem .7rem;
   background:rgba(201,169,126,.07);border-radius:0 9px 9px 0;font-size:.85rem}
+/* La reponse publiee se lit sur quatre lignes au plus ; le texte entier est
+   dans la bulle, et le bouton Repondre le rouvre en entier dans le champ. */
+.boite .reponse .rtx{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden}
 .boite .pied-boite{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem;justify-content:flex-end}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
@@ -166,6 +182,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   var NOTE = '';
   var PER = '';
   var PAGE = 0;
+  /* La taille de page est MESUREE (szAutoPagination, apres chaque dessin) :
+     20 n est que le repli tant que la liste n a pas encore ete disposee. */
   var TAILLE = 20;
   var DETAIL = null;         // l avis ouvert (avis:lire)
   var OUVERTURE = ${JSON.stringify(ouv)};
@@ -304,7 +322,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
               + '<td>' + pastille(r.statut) + '</td></tr>';
           }).join('')
         + '</tbody></table></div>';
-      if ((D.pages || 1) > 1) {
+      /* ⚠ Le pied de pages est TOUJOURS pose, meme sur une seule page : s il
+         apparaissait apres la mesure, il mangerait la hauteur deja comptee. */
+      if (rows.length) {
         h += '<div class="pagi">'
           + '<button class="mini" id="a-prec"' + (D.page <= 0 ? ' disabled' : '') + '>◀</button>'
           + '<span>Page ' + (D.page + 1) + ' / ' + D.pages + '</span>'
@@ -344,6 +364,33 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         (D.pages || 1) > 1 ? '${T("La page affichée")}' : '${T("Les avis affichés")}');
     };
     brancher();
+    // La mesure : combien de lignes tiennent VRAIMENT dans la liste bornee.
+    szAutoPagination('.liste', function(n){ if (n === TAILLE) return; TAILLE = n; PAGE = 0; charger(); });
+  }
+
+  /* Le texte de l avis en MORCEAUX (2026-10-12), pour qu il se lise par pages
+     dans la boite plutot que de la faire defiler : un morceau par ligne du
+     texte, et une longue ligne coupee entre deux phrases (puis entre deux mots
+     si une seule phrase est demesuree). ⚠ Aucune barre oblique inverse ici :
+     le gabarit l avalerait — le saut de ligne s ecrit par son code. */
+  function morceaux(t){
+    var out = [], MAX = 420;
+    String(t || '').split(String.fromCharCode(10)).forEach(function(par){
+      if (!par.trim()) return;
+      var ph = par.split('. '), cur = '';
+      for (var i = 0; i < ph.length; i++) {
+        var x = ph[i] + (i < ph.length - 1 ? '. ' : '');
+        if (cur && (cur + x).length > MAX) { out.push(cur); cur = ''; }
+        cur += x;
+        while (cur.length > MAX * 1.5) {
+          var cp = cur.lastIndexOf(' ', MAX);
+          if (cp < MAX / 2) cp = MAX;
+          out.push(cur.slice(0, cp)); cur = cur.slice(cp).replace(/^ +/, '');
+        }
+      }
+      if (cur) out.push(cur);
+    });
+    return out;
   }
 
   function boiteDetail(){
@@ -366,7 +413,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
          [[reference_r2_never_fetch_from_page]]). L adresse morte retombe sur un
          cadre gris plutot que sur l icone d image brisee du navigateur. */
       + ((r.photosUrl && r.photosUrl.length)
-          ? '<div class="photos">' + r.photosUrl.map(function(u, i){
+          ? '<div class="photos" data-pages="avis-photos">' + r.photosUrl.map(function(u, i){
               return '<div class="ph">'
                 /* ⚠ alt VIDE : une adresse morte affichait le texte de
                    remplacement en travers de la vignette, ce qui ressemble a un
@@ -382,11 +429,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
             }).join('') + '</div>'
           : '')
       + (r.titre ? '<div style="font-weight:700;margin-bottom:.35rem">' + esc(r.titre) + '</div>' : '')
-      + '<div class="texte">' + esc(r.texte || '${T("(aucun texte)")}') + '</div>'
+      + '<div class="texte" data-pages="avis-texte">' + (morceaux(r.texte).map(function(m){
+          return '<p>' + esc(m) + '</p>'; }).join('') || '<p>' + esc('${T("(aucun texte)")}') + '</p>') + '</div>'
       + (r.reponse
           ? '<div class="reponse"><div class="dt" style="font-size:.68rem;color:var(--tx2);text-transform:uppercase;'
             + 'letter-spacing:.05em">${T("Votre réponse")}' + (r.reponduLe ? ' · ' + esc(szQuand(r.reponduLe)) : '') + '</div>'
-            + esc(r.reponse) + '</div>'
+            + '<div class="rtx" title="' + esc(r.reponse) + '">' + esc(r.reponse) + '</div></div>'
           : '');
     if (REPONDRE) {
       /* ⚠ LA PHRASE ENTIERE, PAS LA CLE COURTE DEDANS. Avec la seule cle

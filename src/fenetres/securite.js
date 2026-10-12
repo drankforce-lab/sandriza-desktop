@@ -65,9 +65,14 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
   border-bottom:1px solid var(--v08);background:linear-gradient(180deg,#131c2b,#0e1522)}
 .ro{flex:0 0 auto;margin:.55rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.45rem .7rem;font-size:.78rem}
-.corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* Aucune glissiere (2026-10-12) : le corps est une colonne bornee ; les comptes
+   (liste OU fiches) se paginent dans la hauteur qui reste (data-pages, JS_PAGES
+   du socle). Les fiches se paginent par RANGEES de la grille. */
+.corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow:hidden;
+  display:flex;flex-direction:column}
+.corps>*{flex:0 0 auto}
+.corps>[data-pages]{flex:1 1 0;min-height:7rem}
+.corps>.fiches[data-pages]{align-content:start}
 .prim{font:inherit;font-size:.84rem;font-weight:700;border:0;border-radius:8px;padding:.5rem 1rem;background:#c9a97e;color:#1a1408;cursor:pointer}
 .prim:disabled{opacity:.5;cursor:default}
 .b{font:inherit;font-size:.8rem;border:1px solid var(--v16);border-radius:8px;padding:.42rem .8rem;background:var(--v05);color:var(--tx);cursor:pointer}
@@ -567,7 +572,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     } else if (!vus.length) {
       h += '<div class="vide">${T("Aucun compte ne correspond à ces filtres.")}</div>';
     } else if (VUE === 'table') {
-      h += '<table class="tbl"><thead><tr>'
+      // La liste en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
+      h += '<div data-pages="securite-comptes"><table class="tbl"><thead><tr>'
         + '<th>${T("Personne")}</th><th>${T("Rôle")}</th><th>${T("État")}</th>'
         + '<th>${T("Dernière connexion")}</th><th></th></tr></thead><tbody>';
       for (var t=0;t<vus.length;t++){ var u=vus[t];
@@ -582,9 +588,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + '<td class="dt">'+esc(fmtTs(u.derniereConnexion))+'</td>'
           + '<td class="act">'+(D.peutModifier ? gestesDe(u, superActifs) : '')+'</td></tr>';
       }
-      h += '</tbody></table>';
+      h += '</tbody></table></div>';
     } else {
-      h += '<div class="fiches">';
+      h += '<div class="fiches" data-pages="securite-fiches">';
       for (var i=0;i<vus.length;i++){ var s=vus[i];
         h += '<div class="fiche'+(s.active?'':' inactif')+'" data-ligne="'+esc(s.id)+'">'
           + '<div class="haut"><div class="init">'+esc(initiales(s))+'</div>'

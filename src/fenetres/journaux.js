@@ -40,8 +40,10 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .onglets{flex:0 0 auto;display:flex;gap:.1rem;flex-wrap:wrap;padding:.35rem 1rem 0;border-bottom:1px solid var(--v08)}
 .onglets button{font:inherit;font-size:.82rem;white-space:nowrap;background:none;border:none;color:var(--tx2);padding:.5rem .85rem;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
 .onglets button.on{color:var(--tx-or);border-bottom-color:#c9a97e;font-weight:700}
-.corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
-.corps::-webkit-scrollbar{width:8px}.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* Aucune glissiere (2026-10-12) : le corps ne defile plus, il se dispose en colonne et la
+   carte de chaque onglet (sz-pagee) prend la hauteur qui reste ; sa liste va en PAGES
+   mesurees (JS_PAGES du socle). */
+.corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow:hidden;display:flex;flex-direction:column}
 .carte{background:var(--v03);border:1px solid var(--v08);border-radius:12px;padding:1rem 1.1rem;margin:0 0 1.1rem}
 .barre{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin:0 0 .9rem}
 .barre .pousse{flex:1}
@@ -79,8 +81,12 @@ table.tb td{font-size:.82rem;vertical-align:top}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 .vide{padding:1.5rem;text-align:center;color:var(--tx2);font-size:.82rem}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer}
-/* La zone mesurable de la pagination auto (#31) : une hauteur REELLE. */
-.liste{max-height:calc(100vh - 17rem);overflow-y:auto}
+/* La zone mesurable de la pagination auto (#31) : une hauteur REELLE. Elle ne vient plus
+   d un max-height a glissiere (2026-10-12) : la carte sz-pagee la borne, rien ne defile. */
+.liste{flex:1 1 auto;min-height:0;overflow:hidden}
+/* La recherche inter-journaux : un seul tableau, chaque journal ouvre par sa ligne de titre. */
+tr.r-grp td{background:none!important;border:0!important;padding:.9rem 0 .3rem!important}
+tr.r-grp .barre{margin:0}
 .pagi{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;
   padding-top:.45rem;font-size:.75rem;color:var(--tx2)}
 .barre select{font:inherit;font-size:.76rem;color:var(--tx);background:var(--v05);
@@ -220,11 +226,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
 
   // ── Recherche inter-journaux ─────────────────────────────────────
   function vueRecherche(){
-    var h = '<div class="carte"><div class="barre">'
+    var h = '<div class="carte sz-pagee"><div class="barre">'
       + '<input aria-label="${T("Rechercher dans TOUS les journaux (IP, nom, courriel, no de commande, imprimante…)")}" class="t" id="r-q" placeholder="${T("Rechercher dans TOUS les journaux (IP, nom, courriel, no de commande, imprimante…)")}" value="'+esc(RQ)+'" style="flex:1;min-width:220px">'
       + '<button class="b" id="r-go"><span class="ic">🔎</span> ${T("Rechercher")}</button></div>'
       + '<div class="sub">${T("Le terme est cherché dans tous les champs de chaque journal (accès, automatisations, impressions). Minimum 2 caractères.")}</div>'
-      + '<div id="r-res">'+(RRES ? resultatsHtml() : '<div class="vide">${T("Tapez un terme puis « Rechercher ».")}</div>')+'</div></div>';
+      + '<div id="r-res" data-pages="journaux-recherche">'+(RRES ? resultatsHtml() : '<div class="vide">${T("Tapez un terme puis « Rechercher ».")}</div>')+'</div></div>';
     corps.innerHTML = h;
     var q=document.getElementById('r-q');
     var go=document.getElementById('r-go');
@@ -266,11 +272,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
     if (RRES && RRES.tropCourt) return '<div class="vide">${T("Entrez au moins 2 caractères.")}</div>';
     var groupes = (RRES&&RRES.groupes)||[];
     if (!groupes.length) return '<div class="vide">${T("Aucun résultat pour «")} '+esc(RRES?RRES.q:'')+' ».</div>';
-    var h='';
+    /* UN SEUL tableau pour tous les journaux (2026-10-12) : le socle pagine les lignes du
+       premier tbody ; chaque journal y ouvre par une ligne de titre (tr.r-grp). */
+    var h='<table class="tb"><tbody>';
     for (var g=0;g<groupes.length;g++){ var grp=groupes[g], e=grp.entrees||[];
-      h += '<div class="barre" style="margin:.9rem 0 .3rem"><strong>'+esc(szTd(grp.label))+' <span class="mut">('+(grp.total||e.length)+')</span></strong>'
-        + '<span class="pousse"></span><button class="b" data-goto="'+esc(grp.onglet)+'">${T("Ouvrir cet onglet")}</button></div>';
-      h += '<table class="tb"><tbody>';
+      h += '<tr class="r-grp"><td colspan="6"><div class="barre"><strong>'+esc(szTd(grp.label))+' <span class="mut">('+(grp.total||e.length)+')</span></strong>'
+        + '<span class="pousse"></span><button class="b" data-goto="'+esc(grp.onglet)+'">${T("Ouvrir cet onglet")}</button></div></td></tr>';
       for (var i=0;i<e.length;i++){ var x=e[i];
         if (grp.cle==='acces'){
           var t=TYPE[x.type]||{bg:'var(--v06)',c:'var(--tx2)',l:x.type};
@@ -291,9 +298,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
           h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(x.at))+'</td><td><span class="pill" style="background:var(--v06);color:var(--tx-c3cede)">'+esc(szTd(x.kindLabel||x.kind))+'</span></td><td>'+esc(x.label||'—')+'</td><td>'+esc(x.printer||'')+'</td><td class="sub">'+esc(x.who||'')+'</td><td>'+(x.ok===false?'<span class="pill err">${T("Échec")}</span>':'<span class="pill bon">${T("Imprimé")}</span>')+'</td></tr>';
         }
       }
-      h += '</tbody></table>';
     }
-    return h;
+    return h + '</tbody></table>';
   }
   function brancherResultats(){
     var gs=corps.querySelectorAll('[data-goto]');
@@ -341,7 +347,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
       + '<div class="stat"><div class="l">${T("Bloqués géo")}</div><div class="v"'+((st.geoBlocked||0)>0?' style="color:var(--tx-fda4af)"':'')+'>'+(st.geoBlocked||0)+'</div></div>'
       + '<div class="stat"><div class="l">${T("IPs uniques")}</div><div class="v">'+(st.ips||0)+'</div></div>'
       + '</div>');
-    h += '<div class="carte"><div class="barre"><span class="sub">'+szCompte(rows.length, D.accesTotal, '${T("entrée")}', '${T("entrées")}')+'${T(" · conservation 30 jours")}</span><span class="pousse"></span>'
+    h += '<div class="carte sz-pagee"><div class="barre"><span class="sub">'+szCompte(rows.length, D.accesTotal, '${T("entrée")}', '${T("entrées")}')+'${T(" · conservation 30 jours")}</span><span class="pousse"></span>'
       /* ⚠ LE BOUTON << Masquer les stats >> EST PARTI D ICI : la pièce commune
          dessine le sien, sur le bandeau lui-même, comme dans les vingt-sept
          autres fenêtres. En garder un second aurait fait DEUX boutons pour un
@@ -389,17 +395,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
     'returns-mgmt':'${T("↩ Retours")}', sociaux:'${T("Réseaux sociaux")}', newsletter:'Infolettre', systeme:'${T("Entretien")}', app:'${T("Application")}' };
   function vueAuto(){
     var rows = D.automations||[];
-    var h = '<div class="carte"><div class="barre"><span class="sub">'+szCompte(rows.length, D.autoTotal, '${T("entrée")}', '${T("entrées")}')+'${T(" · conservation 30 jours")}</span><span class="pousse"></span>'
+    var h = '<div class="carte sz-pagee"><div class="barre"><span class="sub">'+szCompte(rows.length, D.autoTotal, '${T("entrée")}', '${T("entrées")}')+'${T(" · conservation 30 jours")}</span><span class="pousse"></span>'
       + (D.peutModifier?'<button class="b" id="au-purge">${T("Purger anciens")}</button>':'')
       + '<button class="b" id="au-csv">${T("Exporter CSV")}</button></div>'
-      + '<table class="tb"><thead><tr><th>${T("Date")}</th><th>${T("Automatisation")}</th><th>${T("Action / Détail")}</th></tr></thead><tbody>';
+      + '<div data-pages="journaux-automatisations"><table class="tb"><thead><tr><th>${T("Date")}</th><th>${T("Automatisation")}</th><th>${T("Action / Détail")}</th></tr></thead><tbody>';
     if (!rows.length) h += '<tr><td colspan="3" class="vide">${T("Aucune action automatisée.")}</td></tr>';
     for (var i=0;i<rows.length;i++){ var l=rows[i];
       h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(l.ts))+'</td>'
         + '<td><span class="pill" style="background:var(--v06);color:var(--tx-c3cede)">'+esc(SECT[l.section]||l.section||'—')+'</span></td>'
         + '<td>'+esc(l.action||'—')+'</td></tr>';
     }
-    h += '</tbody></table></div>';
+    h += '</tbody></table></div></div>';
     corps.innerHTML = h;
     /* ⚠⚠ CES DEUX BOUTONS APPELAIENT LES OPS << ACCES >>, ET RIEN NE LE DISAIT.
        << Exporter CSV >> rendait exportLogsCSV : TOUT le journal, colonnes
@@ -437,13 +443,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
     var viaKeys = ['all','agent','navigateur','bluetooth'];
     var viaOpts = ''; for (var v=0;v<viaKeys.length;v++) viaOpts += '<option value="'+viaKeys[v]+'"'+(PF_VIA===viaKeys[v]?' selected':'')+'>'+(viaKeys[v]==='all'?'${T("Toutes les voies")}':VIA[viaKeys[v]])+'</option>';
 
-    var h = kpis + '<div class="carte"><div class="barre">'
+    var h = kpis + '<div class="carte sz-pagee"><div class="barre">'
       + '<select class="t" id="p-type" aria-label="${T("Filtrer par type de document")}">'+typeOpts+'</select>'
       + '<select class="t" id="p-via" aria-label="${T("Filtrer par voie d’impression")}">'+viaOpts+'</select><span class="pousse"></span>'
       + '<span class="sub">${T("Rétention 30 jours")}</span>'
       + (D.peutModifier?'<button class="b" id="p-purge">${T("Appliquer la purge")}</button>':'')
       + '<button class="b" id="p-csv">${T("Exporter CSV")}</button></div>'
-      + '<table class="tb"><thead><tr><th>${T("Date")}</th><th>${T("Type")}</th><th>${T("Document")}</th><th>${T("Qté")}</th><th>${T("Imprimante")}</th><th>${T("Par")}</th><th>${T("État")}</th></tr></thead><tbody>';
+      + '<div data-pages="journaux-impressions"><table class="tb"><thead><tr><th>${T("Date")}</th><th>${T("Type")}</th><th>${T("Document")}</th><th>${T("Qté")}</th><th>${T("Imprimante")}</th><th>${T("Par")}</th><th>${T("État")}</th></tr></thead><tbody>';
     if (!rows.length) h += '<tr><td colspan="7" class="vide">'+(all.length?'${T("Aucune impression ne correspond à ces filtres.")}':'${T("Aucune impression depuis 30 jours.")}')+'</td></tr>';
     for (var i=0;i<rows.length;i++){ var r=rows[i];
       h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(r.at))+'</td>'
@@ -454,7 +460,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
         + '<td class="sub">'+esc(r.who||'—')+(r.poste?'<div class="sub">poste '+esc(r.poste)+'</div>':'')+'</td>'
         + '<td>'+(r.ok===false?'<span class="pill err" title="'+esc(r.note||'')+'">${T("Échec")}</span>':'<span class="pill bon">${T("Imprimé")}</span>')+'</td></tr>';
     }
-    h += '</tbody></table></div>';
+    h += '</tbody></table></div></div>';
     corps.innerHTML = h;
     var pt=document.getElementById('p-type'); if (pt) pt.onchange=function(){ PF_TYPE=this.value; vuePrints(); };
     var pv=document.getElementById('p-via'); if (pv) pv.onchange=function(){ PF_VIA=this.value; vuePrints(); };
@@ -473,8 +479,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
     }
     var rows = SMS_D;
     var h = '<div class="note">ℹ ${T("Les SMS reçus et envoyés (Twilio). Leur gestion complète (répondre, marquer lu, supprimer) reste dans ")}<b>${T("Communications → Téléphonie")}</b>.</div>'
-      + '<div class="carte"><div class="barre"><span class="sub">'+rows.length+' '+szPl(rows.length,'${T("message")}','${T("messages")}')+'</span><span class="pousse"></span><button class="b" id="sms-reload"><span class="ic">🔄</span> ${T("Actualiser")}</button></div>'
-      + '<table class="tb"><thead><tr><th>${T("Date")}</th><th>${T("Sens")}</th><th>${T("De")}</th><th>${T("À")}</th><th>${T("Message")}</th></tr></thead><tbody>';
+      + '<div class="carte sz-pagee"><div class="barre"><span class="sub">'+rows.length+' '+szPl(rows.length,'${T("message")}','${T("messages")}')+'</span><span class="pousse"></span><button class="b" id="sms-reload"><span class="ic">🔄</span> ${T("Actualiser")}</button></div>'
+      + '<div data-pages="journaux-sms"><table class="tb"><thead><tr><th>${T("Date")}</th><th>${T("Sens")}</th><th>${T("De")}</th><th>${T("À")}</th><th>${T("Message")}</th></tr></thead><tbody>';
     if (!rows.length) h += '<tr><td colspan="5" class="vide">${T("Aucun SMS.")}</td></tr>';
     for (var i=0;i<rows.length;i++){ var s=rows[i]; var ent=(s.direction==='inbound');
       h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(s.date))+'</td>'
@@ -482,7 +488,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
         + '<td class="mono">'+esc(s.from||'—')+'</td><td class="mono">'+esc(s.to||'—')+'</td>'
         + '<td>'+esc(s.body||'')+'</td></tr>';
     }
-    h += '</tbody></table></div>';
+    h += '</tbody></table></div></div>';
     corps.innerHTML = h;
     var rl=document.getElementById('sms-reload'); if (rl) rl.onclick=function(){ SMS_D=null; vueSms(); };
   }
@@ -495,14 +501,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
      messagerie vocale — reste dans Communications → Téléphonie. */
   var APP_ISSUE = { 'completed':'${T("Répondu")}', 'no-answer':'${T("Sans réponse")}', 'busy':'${T("Occupé")}',
     'failed':'${T("Échoué")}', 'canceled':'${T("Annulé")}', 'in-progress':'${T("En cours")}', 'ringing':'${T("Sonne")}', 'queued':'${T("En attente")}' };
-  /* Par pages de 8 : sa règle, aucune barre de défilement dans les modules. */
-  var APP_PAGE = 0, APP_PAR = 8;
+  /* Plus de pages fixes de 8 (2026-10-12) : tous les appels sont ecrits, le socle les met en
+     pages a la hauteur reelle de la fenetre (data-pages="journaux-appels"). */
   function appDuree(s){ s = parseInt(s, 10) || 0; var m = Math.floor(s / 60), r = s % 60; return m + ':' + (r < 10 ? '0' : '') + r; }
   function vueAppels(){
     if (APP_D===null){
       corps.innerHTML='<div class="vide charge">${T("Lecture des appels…")}</div>'; OCCUPE=true;
       appeler('journal:appels',[90]).then(function(r){ OCCUPE=false;
-        if (r&&r.ok){ APP_D=r; APP_PAGE=0; if (ONGLET==='appels') vueAppels(); }
+        if (r&&r.ok){ APP_D=r; if (ONGLET==='appels') vueAppels(); }
         else { APP_D={ appels: [] }; if (ONGLET==='appels') corps.innerHTML='<div class="carte"><div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div></div>'; dire('${T("Échec : ")}'+expliquer(r), 'err'); } });
       return;
     }
@@ -513,17 +519,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
       if (a.status==='no-answer'||a.status==='busy'||a.status==='failed'||a.status==='canceled') manques++;
       if (a.price!=null){ cout += +a.price; if (!unite) unite = a.priceUnit||''; } }
     var h = '<div class="note">ℹ ${T("Les appels reçus et émis (Twilio) des 90 derniers jours. Rappeler ou écouter la messagerie se fait dans ")}<b>${T("Communications → Téléphonie")}</b>.</div>'
-      + '<div class="carte"><div class="barre"><span class="sub">'+rows.length+' '+szPl(rows.length,'${T("appel")}','${T("appels")}')
+      + '<div class="carte sz-pagee"><div class="barre"><span class="sub">'+rows.length+' '+szPl(rows.length,'${T("appel")}','${T("appels")}')
       + ' · '+manques+' '+szPl(manques,'${T("manqué")}','${T("manqués")}')+' · '+Math.round(sec/60)+' min'
       + (cout ? ' · '+cout.toFixed(2)+' '+esc(unite) : '')
       + (APP_D.tronque ? ' · <b>${T("liste coupée à 5 000 appels")}</b>' : '')
       + '</span><span class="pousse"></span>'
-      + (rows.length > APP_PAR ? '<button class="b" id="app-prec" aria-label="${T("Page précédente")}"'+(APP_PAGE<=0?' disabled':'')+'>‹</button><span class="sub" style="margin:0 .4rem">'+(APP_PAGE+1)+' / '+Math.ceil(rows.length/APP_PAR)+'</span><button class="b" id="app-suiv" aria-label="${T("Page suivante")}"'+((APP_PAGE+1)*APP_PAR>=rows.length?' disabled':'')+'>›</button> ' : '')
       + '<button class="b" id="app-reload"><span class="ic">🔄</span> ${T("Actualiser")}</button></div>'
-      + '<table class="tb"><thead><tr><th>${T("Date")}</th><th>${T("Sens")}</th><th>${T("De")}</th><th>${T("À")}</th><th>${T("Issue")}</th><th>${T("Durée")}</th><th>${T("Coût")}</th></tr></thead><tbody>';
+      + '<div data-pages="journaux-appels"><table class="tb"><thead><tr><th>${T("Date")}</th><th>${T("Sens")}</th><th>${T("De")}</th><th>${T("À")}</th><th>${T("Issue")}</th><th>${T("Durée")}</th><th>${T("Coût")}</th></tr></thead><tbody>';
     if (!rows.length) h += '<tr><td colspan="7" class="vide">${T("Aucun appel.")}</td></tr>';
-    var _d0 = APP_PAGE*APP_PAR, _d1 = Math.min(rows.length, _d0+APP_PAR);
-    for (var i=_d0;i<_d1;i++){ var c=rows[i]; var ent=String(c.direction||'').indexOf('inbound')===0;
+    for (var i=0;i<rows.length;i++){ var c=rows[i]; var ent=String(c.direction||'').indexOf('inbound')===0;
       var issue = APP_ISSUE[c.status] || esc(c.status||'—');
       var rate = (c.status==='no-answer'||c.status==='busy'||c.status==='failed'||c.status==='canceled');
       h += '<tr><td class="mut" style="white-space:nowrap">'+esc(fdate(c.startTime))+'</td>'
@@ -533,11 +537,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
         + '<td class="mono">'+appDuree(c.duration)+'</td>'
         + '<td class="mono mut">'+(c.price!=null ? (+c.price).toFixed(4)+' '+esc(c.priceUnit||'') : '—')+'</td></tr>';
     }
-    h += '</tbody></table></div>';
+    h += '</tbody></table></div></div>';
     corps.innerHTML = h;
     var rl=document.getElementById('app-reload'); if (rl) rl.onclick=function(){ APP_D=null; vueAppels(); };
-    var pp=document.getElementById('app-prec'); if (pp) pp.onclick=function(){ if (APP_PAGE>0){ APP_PAGE--; vueAppels(); } };
-    var ps=document.getElementById('app-suiv'); if (ps) ps.onclick=function(){ if ((APP_PAGE+1)*APP_PAR<rows.length){ APP_PAGE++; vueAppels(); } };
   }
 
   /* ══ JOURNAL D'ENVOI (venu de sa fenêtre propre, 2026-09-13) ═══════════════
@@ -574,7 +576,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
       + '<div class="kpi"><div class="l">${T("Partis")}</div><div class="v" style="color:var(--tx-ok2)">'+(ENV_D.envoyes||0)+'</div></div>'
       + '<div class="kpi"><div class="l">${T("Échecs")}</div><div class="v" style="color:var(--tx-err2)">'+(ENV_D.echecs||0)+'</div></div>'
       + '</div>'
-      + '<div class="carte"><div class="barre">'
+      + '<div class="carte sz-pagee"><div class="barre">'
       + '<input aria-label="${T("Adresse ou campagne")}" class="t" type="search" id="env-q" placeholder="${T("Adresse ou campagne…")}" value="'+esc(ENV_Q)+'" style="flex:1;min-width:200px">'
       + '<button class="mini'+(ENV_ECHECS?' actif':'')+'" id="env-echecs">${T("Échecs seulement")}</button>'
       + '<span class="pousse"></span>'
@@ -586,7 +588,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
     if (!rows.length) {
       h += '<div class="vide">'+((ENV_Q||ENV_ECHECS)?'${T("Rien ne correspond.")}':'${T("Aucun envoi enregistré.")}')+'</div>';
     } else {
-      h += '<table class="tb"><thead><tr><th>${T("Date")}</th><th>${T("Genre")}</th><th>${T("Référence")}</th>'
+      h += '<div data-pages="journaux-envois"><table class="tb"><thead><tr><th>${T("Date")}</th><th>${T("Genre")}</th><th>${T("Référence")}</th>'
         + '<th>${T("Destinataire")}</th><th>${T("Résultat")}</th><th>${T("Détail")}</th></tr></thead><tbody>';
       for (var i=0;i<rows.length;i++){ var l=rows[i];
         h += '<tr><td class="mut" style="white-space:nowrap">'+esc(szQuand(l.date, true))+'</td>'
@@ -601,7 +603,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
              d erreur : c est ce qui permet de repondre a << je n ai rien recu >>. */
           + '<td class="sub" title="'+esc(l.detail || '')+'">'+esc(l.detail || '—')+'</td></tr>';
       }
-      h += '</tbody></table>';
+      h += '</tbody></table></div>';
     }
     h += '</div>';
     corps.innerHTML = h;
@@ -664,7 +666,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
     if (CP_PAGE < 0) CP_PAGE = 0;
     var vue = rows.slice(CP_PAGE * CP_PARPAGE, CP_PAGE * CP_PARPAGE + CP_PARPAGE);
     var h = ''
-      + '<div class="carte"><div class="barre">'
+      + '<div class="carte sz-pagee"><div class="barre">'
       + '<select id="cp-canal"><option value="">${T("Tous les canaux")}</option>'
       + '<option value="installation"' + (CP_CANAL==='installation'?' selected':'') + '>${T("Installation")}</option>'
       + '<option value="comptable"' + (CP_CANAL==='comptable'?' selected':'') + '>${T("Comptable")}</option>'
@@ -704,13 +706,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
   function vueRecherchesRatees(){
     var rows = D.recherches||[];
     var h = ''
-      + '<div class="carte"><div class="barre"><span class="sub">'+szCompte(rows.length, D.recherchesTotal, '${T("terme distinct")}', '${T("termes distincts")}')+'</span></div>'
-      + '<table class="tb"><thead><tr><th>${T("Terme cherché")}</th><th style="text-align:center">${T("Fois")}</th><th>${T("Dernière fois")}</th></tr></thead><tbody>';
+      + '<div class="carte sz-pagee"><div class="barre"><span class="sub">'+szCompte(rows.length, D.recherchesTotal, '${T("terme distinct")}', '${T("termes distincts")}')+'</span></div>'
+      + '<div data-pages="journaux-recherches"><table class="tb"><thead><tr><th>${T("Terme cherché")}</th><th style="text-align:center">${T("Fois")}</th><th>${T("Dernière fois")}</th></tr></thead><tbody>';
     if (!rows.length) h += '<tr><td colspan="3" class="vide">${T("Aucune recherche sans résultat.")}</td></tr>';
     for (var i=0;i<rows.length;i++){ var x=rows[i];
       h += '<tr><td><strong>'+esc(x.q)+'</strong></td><td style="text-align:center">'+esc(x.fois||0)+'</td><td class="mut">'+esc(szJour(x.derniere)||'—')+'</td></tr>';
     }
-    h += '</tbody></table></div>';
+    h += '</tbody></table></div></div>';
     corps.innerHTML = h;
   }
 
@@ -730,7 +732,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
     var rows = D.jsErreurs || [];
     var neuves = D.jsErreursNeuves || 0;
     var h = ''
-      + '<div class="carte"><div class="barre">'
+      + '<div class="carte sz-pagee"><div class="barre">'
       /* ⚠ jsErreursTotal N'ÉTAIT AFFICHÉ NULLE PART, et la liste est coupée à
          300 : on lisait « 300 défauts distincts » sur un site qui en avait mille.
          La pastille des non vus, elle, se compte désormais sur TOUT — sinon elle
@@ -743,7 +745,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
               + (JS_ARME ? '${T("Confirmer — vider définitivement")}' : '${T("Vider")}') + '</button>'
             : '')
       + '</div>'
-      + '<table class="tb"><thead><tr>'
+      + '<div data-pages="journaux-jserreurs"><table class="tb"><thead><tr>'
       +   '<th>${T("Erreur")}</th><th>${T("Fichier")}</th><th style="text-align:center">${T("Fois")}</th>'
       +   '<th>${T("Où")}</th><th>${T("Dernière fois")}</th>'
       + '</tr></thead><tbody>';
@@ -772,7 +774,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
         +   (x.agent ? '<br><span style="font-size:.7rem" title="' + esc(x.agent) + '">navigateur</span>' : '') + '</td>'
         + '</tr>';
     }
-    h += '</tbody></table></div>';
+    h += '</tbody></table></div></div>';
     corps.innerHTML = h;
     var bv = document.getElementById('js-vues');
     if (bv) bv.onclick = function(){ jsVues(); };

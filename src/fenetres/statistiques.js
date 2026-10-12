@@ -42,10 +42,10 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* Aucune glissiere (2026-10-12) : le corps ne defile plus ; le journal des appels va en
+   PAGES mesurees (JS_PAGES du socle). */
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
@@ -385,9 +385,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('statistiques')}
             + '<td class="dt">' + esc(szQuand(c.date)) + '</td></tr>';
         }).join('')
       : '<tr><td colspan="6" class="dt" style="text-align:center">${T("Aucun appel.")}</td></tr>';
-    h += '<div class="carte"><h3><span class="ic">📋</span>${T(" Appels récents")}</h3><table><thead><tr><th>${T("Appelant")}</th>'
+    // Les appels en PAGES mesurees : la carte prend la hauteur qui reste (2026-10-12).
+    h += '<div class="carte sz-pagee"><h3><span class="ic">📋</span>${T(" Appels récents")}</h3><div data-pages="statistiques-appels"><table><thead><tr><th>${T("Appelant")}</th>'
       + '<th>${T("Sens")}</th><th>${T("Statut")}</th><th class="num">${T("Durée")}</th><th class="num">${T("Coût")}</th>'
-      + '<th>${T("Date")}</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+      + '<th>${T("Date")}</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
     return h;
   }
 

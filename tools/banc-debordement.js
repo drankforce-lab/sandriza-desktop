@@ -434,6 +434,10 @@ function rapport(lignes, nbFenetres, rates, lotsMorts) {
     console.log('   dette reecrite : ' + fautes.length + ' fenetre(s) (' + cle + ').');
     return;
   }
+  /* 🔴 SA REGLE (2026-10-12) : << aucun scroll bar dans l application >>. A la taille principale et avec les
+     jeux ordinaires, une SEULE zone qui defile fait echouer le banc. (--gros et --detache la nomment sans
+     echouer : les jeux gonfles touchent aussi des ensembles fixes, et le detache garde une dette.) */
+  if (!GROS && !DETACHE && zn.length) { console.log('\n>>> ' + zn.length + ' fenetre(s) avec une zone qui DEFILE — paginer (data-pages), jamais de glissiere'); process.exitCode = 1; }
   if (nouvelles.length || lotsMorts) { console.log('\n>>> ' + nouvelles.length + ' debordement(s) nouveau(x) ou aggrave(s)'); process.exitCode = 1; }
   else console.log('\n>>> aucun debordement nouveau');
 }

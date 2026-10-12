@@ -172,6 +172,13 @@ jobs:
         # ⚠ UNE SEULE LIGNE, voir juste au-dessus : `tools/bancs.js` lit la liste
         # des bancs dans ce fichier avec le motif `^\s*node tools/`.
         run: node tools/banc-contraste-rendu.js ${{ inputs.avec_themes && '--themes' || '' }} ${{ inputs.regenerer_reste && '--reste' || '' }}
+      # 🔴 SA REGLE DU 2026-10-12 : << aucun scroll bar dans l'application >>, et << les ajouts de donnees
+      # sous controle de pagination >>. Le banc rend les 108 fenetres a 1400 x 833 et ECHOUE sur une seule
+      # zone qui defile (ou un controle hors d'atteinte). Ici, sur Linux, et PAS dans la rafale locale :
+      # UNE SEULE LIGNE `run:` (voir plus haut, `tools/bancs.js` lit `^\s*node tools/`). livrer.ps1 lit
+      # chaque travail : rouge ici = pas de publication.
+      - name: Aucune glissiere — 108 fenetres mesurees au rendu (1400 x 833)
+        run: node tools/banc-debordement.js
 
   windows:
     needs: menage

@@ -69,10 +69,11 @@ body{background:var(--f-page);color:var(--tx);
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;
   padding:.55rem 1.05rem .1rem}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center}
-.corps{flex:1 1 auto;min-height:0;padding:.7rem 1.05rem .45rem;overflow-y:auto;
+/* Aucune glissiere (2026-10-12) : le corps ne defile plus. Le journal garde son budget
+   mesure (scrollHeight se lit aussi sous overflow:hidden) ; les ecritures manuelles vont en
+   PAGES mesurees (JS_PAGES du socle). */
+.corps{flex:1 1 auto;min-height:0;padding:.7rem 1.05rem .45rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.8rem .9rem}
 .carte h2{margin:0 0 .55rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
@@ -792,7 +793,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
         + '${T("C’est ici que vivent les apports, les retraits, les prêts, l’amortissement et les ajustements de votre comptable — tout ce que la boutique ne peut pas savoir.")}</div>';
       return h;
     }
-    h += '<div class="carte"><h2>${T("Écritures manuelles")}</h2><table>'
+    // La liste en PAGES mesurees, jamais de glissiere (2026-10-12).
+    h += '<div class="carte sz-pagee"><h2>${T("Écritures manuelles")}</h2><div data-pages="livre-ecritures"><table>'
       + '<thead><tr><th>${T("Date")}</th><th>${T("Libellé / compte")}</th>'
       + '<th class="n">${T("Débit")}</th><th class="n">${T("Crédit")}</th><th></th></tr></thead><tbody>';
     man.forEach(function(e){
@@ -808,7 +810,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
              + '</td><td class="n">' + (l.credit ? argent(l.credit) : '') + '</td><td></td></tr>';
       }).join('');
     });
-    h += '</tbody></table></div>';
+    h += '</tbody></table></div></div>';
     return h;
   }
 
