@@ -4075,7 +4075,7 @@ html[data-sz-theme="carbone"] :is(.ch,.champ) :is(input:not([type=checkbox]):not
   border-color:rgba(var(--or-rgb),.75);box-shadow:0 0 0 3px rgba(var(--or-rgb),.16)}
 html[data-sz-theme="carbone"] :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),select,textarea):hover:not(:disabled):not(:focus){
   border-color:rgba(var(--or-rgb),.6)!important;box-shadow:0 0 0 3px rgba(var(--or-rgb),.12)!important}
-html[data-sz-theme="carbone"] button:hover:not(:disabled):not(.on):not(.actif):not([aria-pressed="true"]):not(.prim):not(.paie){
+html[data-sz-theme="carbone"] button:hover:not(:disabled):not(.on):not(.actif):not([aria-pressed="true"]):not(.prim):not(.paie):not(.onglets button){
   border-color:rgba(var(--or-rgb),.6)!important;box-shadow:0 0 0 3px rgba(var(--or-rgb),.14)!important}
 html[data-sz-theme="carbone"] :is(input[type=checkbox],input[type=radio]){accent-color:var(--or)}
 html[data-sz-theme="carbone"] :is(input[type=checkbox],input[type=radio]):hover:not(:disabled){box-shadow:0 0 0 3px rgba(var(--or-rgb),.22);border-radius:4px}
@@ -4088,6 +4088,23 @@ html[data-sz-theme="carbone"] .gp tbody td{background:linear-gradient(180deg,var
 html[data-sz-theme="carbone"] .gp tbody tr[data-ligne]:hover td{background:rgba(var(--or-rgb),.08);border-color:rgba(var(--or-rgb),.38)}
 html[data-sz-theme="carbone"] .gp tbody tr[data-ligne]:hover td:first-child{box-shadow:inset 3px 0 0 var(--or)}
 html.jour[data-sz-theme="carbone"] .gp tbody td{background:linear-gradient(180deg,#ffffff,#f6f7f9)}
+/* LES ONGLETS EN CARBONE (2026-10-12, sa remarque : « je n aime pas le jeu de couleurs des onglets ») : plus
+   d aplat rouge a texte sombre. L onglet ouvert est un verre teinte de rouge, texte clair, un trait rouge
+   dessous ; les autres en gris neutre ; le survol, un voile et le trait qui monte en fondu. */
+html[data-sz-theme="carbone"] .onglets button{color:var(--tx2);background:transparent;border-color:transparent;
+  box-shadow:inset 0 -2px 0 transparent;transition:background-color .22s ease,box-shadow .22s ease,color .22s ease,border-color .22s ease}
+html[data-sz-theme="carbone"] .onglets button:hover:not(.on):not(.actif){color:var(--tx);background:var(--v05);
+  box-shadow:inset 0 -2px 0 rgba(var(--or-rgb),.5)}
+html[data-sz-theme="carbone"] .onglets button.on,html[data-sz-theme="carbone"] .onglets button.actif{
+  background:linear-gradient(180deg,rgba(var(--or-rgb),.22),rgba(var(--or-rgb),.08))!important;
+  border-color:rgba(var(--or-rgb),.5)!important;color:var(--tx)!important;font-weight:700;
+  box-shadow:inset 0 -2px 0 var(--or),0 0 0 3px rgba(var(--or-rgb),.08)}
+html[data-sz-theme="carbone"] .onglets button.on .pill,html[data-sz-theme="carbone"] .onglets button.actif .pill{
+  background:rgba(var(--or-rgb),.22);border-color:transparent}
+html.jour[data-sz-theme="carbone"] .onglets button{color:#4b4f58}
+html.jour[data-sz-theme="carbone"] .onglets button.on,html.jour[data-sz-theme="carbone"] .onglets button.actif{
+  background:linear-gradient(180deg,rgba(194,65,12,.13),rgba(194,65,12,.05))!important;border-color:rgba(194,65,12,.45)!important;
+  color:#1d2433!important;box-shadow:inset 0 -2px 0 #c2410c}
 `;
 
 module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_CARBONE,
