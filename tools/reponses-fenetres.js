@@ -885,7 +885,11 @@ const JEU = {
               { id: 'ret_2', commande: 'SZ-100219', client: 'Nadia Bouchard', statut: 'received', statutLibelle: 'Reçu', motif: 'Couleur différente de la photo', date: '2026-10-10T09:00:00Z', maj: '2026-10-12T10:40:00Z', articles: 2, valeur: 214.9, expireBientot: false },
               { id: 'ret_3', commande: 'SZ-100207', client: 'Marie Tremblay', statut: 'approved', statutLibelle: 'Approuvée', motif: 'Ne me va pas', date: '2026-10-05T15:00:00Z', maj: '2026-10-09T11:00:00Z', articles: 1, valeur: 125, expireBientot: true, expireLe: '2026-10-14' },
               { id: 'ret_4', commande: 'SZ-100198', client: 'Annie Lavoie', statut: 'in_transit', statutLibelle: 'En transit', motif: 'Défaut de couture', date: '2026-10-03T12:00:00Z', maj: '2026-10-08T08:00:00Z', articles: 1, valeur: 196, expireBientot: false },
-            ] },
+            ],
+            // L'arrivée des retours (2026-10-13) : même forme que `courbe`, et ses chiffres.
+            courbe: { mode: 'heure', etiquettes: Array.from({ length: 24 }, (_, i) => i),
+              actuel: [0,0,0,0,0,0,0,0,1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0], precedent: [0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,1,0,0,0,0,0,0,0,0], courant: 14 },
+            kpi: { retours: 3, valeur: 429.85, taux: 13, ecartRetours: 0, ecartValeur: 22, ecartTaux: -1.3 } },
           },
           tuiles: {
             produits: { actifs: 42, variantesReappro: 12, produitsBas: 4 },

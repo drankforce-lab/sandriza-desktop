@@ -137,13 +137,22 @@ html.jour .direct{color:#22663a}
 .dir-ong button[aria-selected="true"]{background:rgba(var(--or-rgb),.18)!important;color:var(--tx);box-shadow:inset 0 -2px 0 var(--or)}
 .dir-ong button b{font-size:.66rem;padding:0 .38rem;border-radius:99px;background:var(--tx-att);color:#1a1208}
 html.jour .dir-ong button b{color:var(--tx-sur-accent)}
-.r-parcours{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-bottom:6px}
-.r-et{display:flex;flex-direction:column;align-items:center;gap:1px;padding:.32rem .2rem;border-radius:9px;background:var(--v03);border:1px solid var(--v07);cursor:pointer;
-  transition:border-color .2s,background .2s}
-.r-et:hover{border-color:rgba(var(--or-rgb),.5);background:rgba(var(--or-rgb),.06)}
-.r-et b{font-size:1.05rem;font-variant-numeric:tabular-nums}
-.r-et span{font-size:.66rem;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
-.r-et.chaud b{color:var(--tx-att)}
+.courbe h2 .dir-ong{margin-left:.7rem}
+.r-parcours{display:flex;align-items:flex-start;margin:4px 0 10px}
+/* LES ÉTAPES D UN RETOUR EN LIGNE, PAS EN TUILES (2026-10-13, sa demande : « je n aime pas les tuiles ») : des
+   pastilles reliées par un trait, comme le suivi d un colis. Le trait se colore jusqu aux étapes occupées. */
+.r-et{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;position:relative}
+.r-et::before{content:"";position:absolute;top:13px;right:50%;width:100%;height:2px;background:var(--v10)}
+.r-et:first-child::before{display:none}
+.r-et.plein::before{background:linear-gradient(90deg,var(--v10),rgba(var(--or-rgb),.55))}
+.r-et b{position:relative;display:grid;place-items:center;min-width:28px;height:28px;padding:0 7px;border-radius:99px;box-sizing:border-box;
+  background:var(--f-carte);border:2px solid var(--v10);font-size:.8rem;font-weight:800;color:var(--tx3);font-variant-numeric:tabular-nums;
+  transition:box-shadow .2s,border-color .2s}
+.r-et.plein b{border-color:var(--tx-or);color:var(--tx)}
+.r-et.chaud b{background:var(--tx-att);border-color:var(--tx-att);color:#1a1208}
+.r-et span{font-size:.64rem;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.r-et:hover b{box-shadow:0 0 0 4px rgba(var(--or-rgb),.18);border-color:var(--tx-or)}
+.r-et:hover span{color:var(--tx)}
 .r-alerte{font-size:.72rem;color:var(--tx-att);margin:-2px 0 6px;cursor:pointer}
 .r-alerte:hover{text-decoration:underline}
 .cmd.ret .a .motif{color:var(--tx3);overflow:hidden;text-overflow:ellipsis}
@@ -390,10 +399,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '${T("Les prix en USD peuvent s’écarter du marché.")}') + '</div>';
   }
 
-  function ecart(v){
+  /* inverse : une hausse est une MAUVAISE nouvelle (les retours) ; points : l écart est en points de pourcentage. */
+  function ecart(v, inverse, points){
     if (v == null) return '<div class="d">&nbsp;</div>';
-    var c = v > 0 ? 'haut' : (v < 0 ? 'bas' : '');
-    return '<div class="d ' + c + '">' + (v > 0 ? '+' : '') + v + ' % ${T("vs période d’avant")}</div>';
+    var c = v > 0 ? (inverse ? 'bas' : 'haut') : (v < 0 ? (inverse ? 'haut' : 'bas') : '');
+    return '<div class="d ' + c + '">' + (v > 0 ? '+' : '') + String(v).replace('.', ',') + (points ? ' ${T("pts")}' : ' %') + ' ${T("vs période d’avant")}</div>';
   }
 
   /* ══ LE DESSIN ═════════════════════════════════════════════════════════ */
@@ -421,13 +431,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="valeur"><span>${T("Valeur du stock (au coût)")}' + (iv.sansCout ? ' · ' + pl(iv.sansCout, '${T("produit sans coût")}', '${T("produits sans coût")}') : '') + '</span><b>' + fmt(iv.valeur || 0) + '</b></div></section>';
 
     // ── rangée 2 ──
-    h += '<section class="carte c8 r2a courbe"><h2>${T("Arrivée des commandes")}<span class="aside">'
+    /* L ARRIVEE DES RETOURS (2026-10-13, sa demande : « un suivi pour les retours au même principe ») : la même
+       carte, un onglet Commandes | Retours, retenu sur le poste. Les écarts des retours sont INVERSÉS : plus de
+       retours, c est rouge. */
+    var RK = (V.retours && V.retours.kpi) || null;
+    var avecCourbeR = !!D.peutRetours && !!(V.retours && V.retours.courbe);
+    if (!avecCourbeR) COURBE = 'cmd';
+    var cR = COURBE === 'ret';
+    h += '<section class="carte c8 r2a courbe"><h2>' + (cR ? '${T("Arrivée des retours")}' : '${T("Arrivée des commandes")}') + '<span class="aside">'
       + (PERIODE === 'jour' ? '${T("par heure, aujourd’hui contre hier")}' : (PERIODE === '7j' ? '${T("par jour, 7 derniers jours contre les 7 d’avant")}' : '${T("par jour, ce mois contre le mois dernier")}'))
-      + '</span></h2><div class="kpis">'
-      + '<div class="kpi"><div class="k">${T("Commandes")}</div><div class="v">' + (k.commandes || 0) + '</div>' + ecart(k.ecartCommandes) + '</div>'
-      + '<div class="kpi"><div class="k">${T("Ventes")}</div><div class="v">' + fmt(k.ventes || 0) + '</div>' + ecart(k.ecartVentes) + '</div>'
-      + '<div class="kpi"><div class="k">${T("Panier moyen")}</div><div class="v">' + fmt(k.panier || 0) + '</div>' + ecart(k.ecartPanier) + '</div></div>'
-      + '<div class="zone" id="zone"><svg id="graphe" role="img" aria-label="${T("Commandes par période")}"></svg></div>'
+      + '</span>'
+      + (avecCourbeR ? '<span class="dir-ong" role="tablist"><button type="button" role="tab" data-courbe="cmd" aria-selected="' + !cR + '">${T("Commandes")}</button>'
+          + '<button type="button" role="tab" data-courbe="ret" aria-selected="' + cR + '">${T("Retours")}</button></span>' : '')
+      + '</h2><div class="kpis">'
+      + (cR
+          ? '<div class="kpi"><div class="k">${T("Retours")}</div><div class="v">' + (RK.retours || 0) + '</div>' + ecart(RK.ecartRetours, true) + '</div>'
+            + '<div class="kpi"><div class="k">${T("Valeur retournée")}</div><div class="v">' + fmt(RK.valeur || 0) + '</div>' + ecart(RK.ecartValeur, true) + '</div>'
+            + '<div class="kpi"><div class="k">${T("Taux de retour")}</div><div class="v">' + (RK.taux == null ? '—' : String(RK.taux).replace('.', ',') + ' %') + '</div>' + ecart(RK.ecartTaux, true, true) + '</div>'
+          : '<div class="kpi"><div class="k">${T("Commandes")}</div><div class="v">' + (k.commandes || 0) + '</div>' + ecart(k.ecartCommandes) + '</div>'
+            + '<div class="kpi"><div class="k">${T("Ventes")}</div><div class="v">' + fmt(k.ventes || 0) + '</div>' + ecart(k.ecartVentes) + '</div>'
+            + '<div class="kpi"><div class="k">${T("Panier moyen")}</div><div class="v">' + fmt(k.panier || 0) + '</div>' + ecart(k.ecartPanier) + '</div>')
+      + '</div>'
+      + '<div class="zone" id="zone"><svg id="graphe" role="img" aria-label="' + (cR ? '${T("Retours par période")}' : '${T("Commandes par période")}') + '"></svg></div>'
       + '<div class="legende"><span>' + (PERIODE === 'jour' ? '${T("Aujourd’hui")}' : '${T("Cette période")}') + '</span><span class="avant">'
       + (PERIODE === 'jour' ? '${T("Hier")}' : '${T("Période d’avant")}') + '</span></div></section>';
     var fil = V.fil || [];
@@ -445,7 +470,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '</h2>';
     if (DIRECT === 'ret') {
       /* LE PARCOURS D UN RETOUR, d un coup d oeil : chaque etape est un lien vers la liste des retours. */
-      var etapeR = function(n, lib, cls, cible){ return '<div class="r-et' + (n ? ' ' + cls : '') + '" data-ouvre="' + (cible || 'returns') + '"><b>' + (n || 0) + '</b><span>' + lib + '</span></div>'; };
+      var etapeR = function(n, lib, cls, cible){ return '<div class="r-et' + (n ? ' plein ' + cls : '') + '" data-ouvre="' + (cible || 'returns') + '"><b>' + (n || 0) + '</b><span>' + lib + '</span></div>'; };
       h += '<div class="r-parcours">' + etapeR(rc.nouveaux, '${T("Nouveaux")}', 'chaud', 'returns-pending') + etapeR(rc.approuves, '${T("Approuvés")}', '')
         + etapeR(rc.transit, '${T("En transit")}', '') + etapeR(rc.recus, '${T("Reçus")}', 'chaud') + '</div>'
         + (rc.expirent ? '<div class="r-alerte" data-ouvre="returns-expiring">' + pl(rc.expirent, '${T("retour arrive à échéance")}', '${T("retours arrivent à échéance")}') + '</div>' : '')
@@ -530,7 +555,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!z || !svg || !D || !D.vivant) return;
     var w = z.clientWidth, h = z.clientHeight;
     if (!(w > 40 && h > 40)) return;
-    var C = D.vivant.courbe || {}, A = C.actuel || [], B = C.precedent || [], E = C.etiquettes || [], n = A.length;
+    var C = (COURBE === 'ret' && D.vivant.retours && D.vivant.retours.courbe) || D.vivant.courbe || {}, A = C.actuel || [], B = C.precedent || [], E = C.etiquettes || [], n = A.length;
     if (!n) { svg.innerHTML = ''; return; }
     svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
     var g0 = 26, d0 = w - 10, haut = 18, bas = h - 18;
@@ -563,6 +588,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      en direct aussi ») : Commandes ou Retours, retenu sur le poste. */
   var DIRECT = 'cmd';
   try { if (localStorage.getItem('sz-tb-direct') === 'ret') DIRECT = 'ret'; } catch (e) {}
+  /* L onglet de la courbe : Commandes ou Retours (2026-10-13), retenu sur le poste. */
+  var COURBE = 'cmd';
+  try { if (localStorage.getItem('sz-tb-courbe') === 'ret') COURBE = 'ret'; } catch (e) {}
 
   /* Le fil : AUTANT DE COMMANDES QUE LA CARTE EN MONTRE, jamais de defilement (sa regle). */
   function ajusterFil(){
@@ -583,6 +611,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var t = ev.target;
     if (!t || !t.closest) return;
     if (t.closest('#tb-top100')) { top100(); return; }
+    var dc = t.closest('[data-courbe]');
+    if (dc) { COURBE = dc.getAttribute('data-courbe'); try { localStorage.setItem('sz-tb-courbe', COURBE); } catch (e) {} dessiner(); return; }
     var dj = t.closest('[data-direct]');
     if (dj) { DIRECT = dj.getAttribute('data-direct'); try { localStorage.setItem('sz-tb-direct', DIRECT); } catch (e) {} dessiner(); return; }
     var rt = t.closest('[data-retour]');
