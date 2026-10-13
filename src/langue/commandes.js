@@ -354,6 +354,8 @@ module.exports = {
   "paiement inscrit sur une commande sans montant à payer": "payment recorded on an order with nothing to pay",
   "carte-cadeau introuvable": "gift card not found",
   "solde de la carte-cadeau insuffisant": "insufficient gift card balance",
+  "code promo déjà utilisé (usage unique épuisé)": "promo code already used (single use exhausted)",
+  "usage du code promo non enregistré": "promo code use not recorded",
   "carte-cadeau déjà débitée d’un autre montant": "gift card already charged a different amount",
   "débit de la carte-cadeau non enregistré": "gift card charge not recorded",
   "crédit demandé sans compte client": "credit requested without a customer account",

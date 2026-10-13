@@ -368,7 +368,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     credit: '${T("crédit demandé sans compte client")}', credit_solde: '${T("crédit du compte insuffisant")}',
     credit_ecart: '${T("crédit déjà débité d’un autre montant")}', credit_ecriture: '${T("débit du crédit non enregistré")}',
     points: '${T("points demandés sans compte client")}', points_solde: '${T("points du compte insuffisants")}',
-    points_ecart: '${T("points déjà débités d’un autre nombre")}', points_ecriture: '${T("débit des points non enregistré")}'
+    points_ecart: '${T("points déjà débités d’un autre nombre")}', points_ecriture: '${T("débit des points non enregistré")}',
+    // Le code promo compté par le serveur (2026-10-13) : un code à usage unique ne sert qu une fois.
+    coupon_epuise: '${T("code promo déjà utilisé (usage unique épuisé)")}', coupon_ecriture: '${T("usage du code promo non enregistré")}'
   };
   function pvHtml(c){
     var v = c.paiementVerifie;
