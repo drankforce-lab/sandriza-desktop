@@ -136,7 +136,7 @@ html.jour .direct{color:#22663a}
 .dir-ong button:hover{color:var(--tx)}
 .dir-ong button[aria-selected="true"]{background:rgba(var(--or-rgb),.18)!important;color:var(--tx);box-shadow:inset 0 -2px 0 var(--or)}
 .dir-ong button b{font-size:.66rem;padding:0 .38rem;border-radius:99px;background:var(--tx-att);color:#1a1208}
-html.jour .dir-ong button b{color:#ffffff}
+html.jour .dir-ong button b{color:var(--tx-sur-accent)}
 .r-parcours{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-bottom:6px}
 .r-et{display:flex;flex-direction:column;align-items:center;gap:1px;padding:.32rem .2rem;border-radius:9px;background:var(--v03);border:1px solid var(--v07);cursor:pointer;
   transition:border-color .2s,background .2s}
