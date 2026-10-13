@@ -4102,6 +4102,11 @@ html[data-sz-theme="carbone"] .onglets button.on,html[data-sz-theme="carbone"] .
 html[data-sz-theme="carbone"] .onglets button.on .pill,html[data-sz-theme="carbone"] .onglets button.actif .pill{
   background:rgba(var(--or-rgb),.22);border-color:transparent}
 html.jour[data-sz-theme="carbone"] .onglets button{color:#4b4f58}
+/* LES DERNIERS RESTES BLEUTES (balayage des 108 fenetres sous Carbone, 2026-10-12) : les voiles des boites,
+   le damier de transparence des vignettes photo, le bouton d enregistrement de l acces anticipe. */
+html[data-sz-theme="carbone"]:not(.jour) :is(.voile,#bc-voile){background-color:rgba(4,4,6,.76)!important}
+html[data-sz-theme="carbone"]:not(.jour) .vign{background:conic-gradient(#3a3a40 25%,#2a2a2f 0 50%,#3a3a40 0 75%,#2a2a2f 0) 0 0/12px 12px}
+html[data-sz-theme="carbone"] button#v-ecrire.bsc:not(:disabled){background:var(--sz-btn-prim)!important}
 html.jour[data-sz-theme="carbone"] .onglets button.on,html.jour[data-sz-theme="carbone"] .onglets button.actif{
   background:linear-gradient(180deg,rgba(194,65,12,.13),rgba(194,65,12,.05))!important;border-color:rgba(194,65,12,.45)!important;
   color:#1d2433!important;box-shadow:inset 0 -2px 0 #c2410c}
