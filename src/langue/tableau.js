@@ -19,6 +19,20 @@
  */
 
 module.exports = {
+  'Retours': 'Returns',
+  'Nouveaux': 'New',
+  'Approuvés': 'Approved',
+  'En transit': 'In transit',
+  'Reçus': 'Received',
+  'retour arrive à échéance': 'return reaching its deadline',
+  'retours arrivent à échéance': 'returns reaching their deadline',
+  'Ouvrir le retour': 'Open the return',
+  'Arrive à échéance le': 'Deadline on',
+  'Arrive à échéance': 'Reaching its deadline',
+  'Aucun retour en cours.': 'No returns in progress.',
+  '{0} sur {1} retours': '{0} of {1} returns',
+  'article': 'item',
+  'articles': 'items',
   'Top 100': 'Top 100',
   'Top 100 des meilleures ventes': 'Top 100 best sellers',
   'Produit': 'Product',

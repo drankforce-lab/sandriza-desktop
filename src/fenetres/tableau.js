@@ -129,6 +129,23 @@ html.jour .direct{color:#22663a}
 .legende span.avant::before{background:repeating-linear-gradient(90deg,var(--tx3) 0 4px,transparent 4px 7px)}
 .direct-carte{display:flex;flex-direction:column}
 .fil{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:6px;overflow:hidden}
+/* Les onglets Commandes | Retours de la carte En direct, et le parcours des retours (2026-10-12). */
+.dir-ong{margin-left:auto;display:inline-flex;gap:2px;padding:2px;border-radius:9px;background:var(--v04);border:1px solid var(--v10)}
+.dir-ong button{border:0!important;background:transparent!important;color:var(--tx2);font-size:.72rem;font-weight:600;padding:.22rem .6rem;border-radius:7px;min-height:0;
+  display:inline-flex;align-items:center;gap:.35rem;transition:background .2s,color .2s}
+.dir-ong button:hover{color:var(--tx)}
+.dir-ong button[aria-selected="true"]{background:rgba(var(--or-rgb),.18)!important;color:var(--tx);box-shadow:inset 0 -2px 0 var(--or)}
+.dir-ong button b{font-size:.66rem;padding:0 .38rem;border-radius:99px;background:var(--tx-att);color:#1a1208}
+.r-parcours{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-bottom:6px}
+.r-et{display:flex;flex-direction:column;align-items:center;gap:1px;padding:.32rem .2rem;border-radius:9px;background:var(--v03);border:1px solid var(--v07);cursor:pointer;
+  transition:border-color .2s,background .2s}
+.r-et:hover{border-color:rgba(var(--or-rgb),.5);background:rgba(var(--or-rgb),.06)}
+.r-et b{font-size:1.05rem;font-variant-numeric:tabular-nums}
+.r-et span{font-size:.66rem;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.r-et.chaud b{color:var(--tx-att)}
+.r-alerte{font-size:.72rem;color:var(--tx-att);margin:-2px 0 6px;cursor:pointer}
+.r-alerte:hover{text-decoration:underline}
+.cmd.ret .a .motif{color:var(--tx3);overflow:hidden;text-overflow:ellipsis}
 .cmd{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.4rem .55rem;border-radius:10px;background:var(--v03);
   border:1px solid var(--v07);cursor:pointer}
 .cmd:hover{border-color:rgba(var(--or-rgb),.45);background:linear-gradient(90deg,rgba(var(--or-rgb),.12),var(--v03) 65%)}
@@ -414,7 +431,38 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (PERIODE === 'jour' ? '${T("Hier")}' : '${T("Période d’avant")}') + '</span></div></section>';
     var fil = V.fil || [];
     var geste = !!D.peutPreparer;
-    h += '<section class="carte c4 r2b direct-carte"><h2>${T("En direct")}<span class="aside">${T("dernières commandes")}</span></h2><div class="fil" id="fil">'
+    var RET = V.retours || { comptes: {}, liste: [] };
+    var rc = RET.comptes || {};
+    var aTraiterR = (rc.nouveaux || 0) + (rc.recus || 0) + (rc.analyse || 0);
+    var avecRet = !!D.peutRetours;
+    if (!avecRet) DIRECT = 'cmd';
+    h += '<section class="carte c4 r2b direct-carte"><h2>${T("En direct")}'
+      + (avecRet
+          ? '<span class="dir-ong" role="tablist"><button type="button" role="tab" data-direct="cmd" aria-selected="' + (DIRECT === 'cmd') + '">${T("Commandes")}</button>'
+            + '<button type="button" role="tab" data-direct="ret" aria-selected="' + (DIRECT === 'ret') + '">${T("Retours")}' + (aTraiterR ? '<b>' + aTraiterR + '</b>' : '') + '</button></span>'
+          : '<span class="aside">${T("dernières commandes")}</span>')
+      + '</h2>';
+    if (DIRECT === 'ret') {
+      /* LE PARCOURS D UN RETOUR, d un coup d oeil : chaque etape est un lien vers la liste des retours. */
+      var etapeR = function(n, lib, cls, cible){ return '<div class="r-et' + (n ? ' ' + cls : '') + '" data-ouvre="' + (cible || 'returns') + '"><b>' + (n || 0) + '</b><span>' + lib + '</span></div>'; };
+      h += '<div class="r-parcours">' + etapeR(rc.nouveaux, '${T("Nouveaux")}', 'chaud', 'returns-pending') + etapeR(rc.approuves, '${T("Approuvés")}', '')
+        + etapeR(rc.transit, '${T("En transit")}', '') + etapeR(rc.recus, '${T("Reçus")}', 'chaud') + '</div>'
+        + (rc.expirent ? '<div class="r-alerte" data-ouvre="returns-expiring">' + pl(rc.expirent, '${T("retour arrive à échéance")}', '${T("retours arrivent à échéance")}') + '</div>' : '')
+        + '<div class="fil" id="fil">'
+        + ((RET.liste || []).length ? RET.liste.map(function(r){
+            var tonR = { pending: 'ambre', awaiting_photo: 'ambre', approved: 'bleu', in_transit: 'bleu', received: 'ambre', disputed: 'rouge',
+              refunded: 'vert', completed: 'vert', rejected: 'rouge' }[r.statut] || '';
+            return '<div class="cmd ret' + (r.expireBientot ? ' prio' : '') + '" data-retour="' + esc(r.id) + '" title="${T("Ouvrir le retour")}">'
+              + '<div class="t"><b><span class="nm">' + esc(r.client || '—') + '</span>'
+              + (r.expireBientot ? '<span class="prio-pill" role="img" title="${T("Arrive à échéance le")} ' + esc(r.expireLe) + '" aria-label="${T("Arrive à échéance")}">!</span>' : '') + '</b>'
+              + '<div class="a"><span class="rf-code">' + esc(r.commande) + '</span> <span class="rf-pill ' + tonR + '">' + esc(szTd(r.statutLibelle || r.statut)) + '</span>'
+              + (r.motif ? ' <span class="motif">' + esc(r.motif) + '</span>' : '') + '</div></div>'
+              + '<div class="m"><b>' + (r.valeur ? fmt(r.valeur) : pl(r.articles || 0, '${T("article")}', '${T("articles")}')) + '</b><div>' + esc(ilYa(r.maj || r.date)) + '</div></div>'
+              + '</div>';
+          }).join('') : '<div class="vide">${T("Aucun retour en cours.")}</div>')
+        + '</div><div class="fil-pied"><span id="fil-compte"></span><button class="mini" data-ouvre="returns">${T("Tout voir →")}</button></div></section>';
+    } else {
+      h += '<div class="fil" id="fil">'
       + (fil.length ? fil.map(function(c){
           var preparable = geste && c.oid && !c.comptoir && ['shipped', 'delivered', 'cancelled', 'refunded', 'returned'].indexOf(c.statut) < 0;
           /* PAS DE PHOTO ICI (2026-10-12, sa demande) : le CLIENT, le MONTANT et la priorite d abord ; dessous,
@@ -431,6 +479,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + '</div>';
         }).join('') : '<div class="vide">${T("Aucune commande pour l’instant.")}</div>')
       + '</div><div class="fil-pied"><span id="fil-compte"></span><button class="mini" data-ouvre="orders">${T("Tout voir →")}</button></div></section>';
+    }
 
     // ── rangée 3 ──
     var pct = pr.variantes ? Math.round(pr.enStock / pr.variantes * 100) : 0;
@@ -509,6 +558,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     svg.innerHTML = s;
   }
 
+  /* L ONGLET DE LA CARTE EN DIRECT (2026-10-12, sa demande : « un onglet pour suivre les retours, super important,
+     en direct aussi ») : Commandes ou Retours, retenu sur le poste. */
+  var DIRECT = 'cmd';
+  try { if (localStorage.getItem('sz-tb-direct') === 'ret') DIRECT = 'ret'; } catch (e) {}
+
   /* Le fil : AUTANT DE COMMANDES QUE LA CARTE EN MONTRE, jamais de defilement (sa regle). */
   function ajusterFil(){
     var f = document.getElementById('fil'); if (!f) return;
@@ -518,7 +572,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     Array.prototype.forEach.call(els, function(e){ if (e.getBoundingClientRect().bottom > bas) e.classList.add('cache'); else vus++; });
     var cpt = document.getElementById('fil-compte');
     // Le fil montre les DERNIERES commandes (aujourd hui ou avant) : le compte dit combien sont a l ecran.
-    if (cpt) cpt.textContent = els.length ? '${T("{0} sur {1} dernières")}'.split('{0}').join(vus).split('{1}').join(els.length) : '';
+    if (cpt) cpt.textContent = els.length ? (DIRECT === 'ret' ? '${T("{0} sur {1} retours")}' : '${T("{0} sur {1} dernières")}').split('{0}').join(vus).split('{1}').join(els.length) : '';
   }
   var _tbRedim = null;
   window.addEventListener('resize', function(){ clearTimeout(_tbRedim); _tbRedim = setTimeout(function(){ graphe(); ajusterFil(); }, 120); });
@@ -528,6 +582,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var t = ev.target;
     if (!t || !t.closest) return;
     if (t.closest('#tb-top100')) { top100(); return; }
+    var dj = t.closest('[data-direct]');
+    if (dj) { DIRECT = dj.getAttribute('data-direct'); try { localStorage.setItem('sz-tb-direct', DIRECT); } catch (e) {} dessiner(); return; }
+    var rt = t.closest('[data-retour]');
+    if (rt) { appeler('retours:ouvrir', [rt.getAttribute('data-retour')]).then(function(r){ if (!r || !r.ok) dire(expliquer(r), 'err'); else dire(''); }); return; }
     var pe = t.closest('[data-periode]');
     if (pe) { PERIODE = pe.getAttribute('data-periode'); charger(); return; }
     if (t.closest('#tb-zeros')) { ZEROS = !ZEROS; dessiner(); return; }

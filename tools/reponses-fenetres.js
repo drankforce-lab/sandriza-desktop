@@ -860,7 +860,7 @@ const JEU = {
           annee: 'all',
           annees: [2026, 2025],
           cfgTuiles: { revenue: false },
-          peutPreparer: true,
+          peutPreparer: true, peutRetours: true,
           // Le tableau de bord en direct (2026-10-12) : la forme réelle de Admin._tableauVivant.
           vivant: {
             periode: 'jour', etapes: { confirmer: 4, preparer: 7, expedier: 3, livraison: 5 },
@@ -880,6 +880,12 @@ const JEU = {
                       { cle: 'comptoir', nom: 'Vente au comptoir', statuts: { pending: 0, confirmed: 0, preparing: 0, shipped: 0, delivered: 46 }, total: 46 } ],
             inventaire: { enMain: 138, aCommander: 11, ruptures: 1, valeur: 9845, sansCout: 1 },
             produits: { enVente: 5, variantes: 18, enStock: 15, ruptures: 1, aCommander: 11 },
+            retours: { comptes: { nouveaux: 2, approuves: 1, transit: 1, recus: 1, analyse: 0, expirent: 1 }, liste: [
+              { id: 'ret_1', commande: 'SZ-100231', client: 'Julie Côté', statut: 'pending', statutLibelle: 'En attente', motif: 'Taille trop petite', date: '2026-10-12T13:10:00Z', maj: '2026-10-12T13:10:00Z', articles: 1, valeur: 89.95, expireBientot: false },
+              { id: 'ret_2', commande: 'SZ-100219', client: 'Nadia Bouchard', statut: 'received', statutLibelle: 'Reçu', motif: 'Couleur différente de la photo', date: '2026-10-10T09:00:00Z', maj: '2026-10-12T10:40:00Z', articles: 2, valeur: 214.9, expireBientot: false },
+              { id: 'ret_3', commande: 'SZ-100207', client: 'Marie Tremblay', statut: 'approved', statutLibelle: 'Approuvée', motif: 'Ne me va pas', date: '2026-10-05T15:00:00Z', maj: '2026-10-09T11:00:00Z', articles: 1, valeur: 125, expireBientot: true, expireLe: '2026-10-14' },
+              { id: 'ret_4', commande: 'SZ-100198', client: 'Annie Lavoie', statut: 'in_transit', statutLibelle: 'En transit', motif: 'Défaut de couture', date: '2026-10-03T12:00:00Z', maj: '2026-10-08T08:00:00Z', articles: 1, valeur: 196, expireBientot: false },
+            ] },
           },
           tuiles: {
             produits: { actifs: 42, variantesReappro: 12, produitsBas: 4 },
