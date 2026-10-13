@@ -232,6 +232,7 @@ const MENU_APP_EN = {
      (`THEMES_COULEUR`) et non d'un `label:` écrit à la main — c'est pour ça que
      le banc les relève séparément. Sans ça ils seraient restés français dans un
      sous-menu anglais, invisibles à tout relevé qui ne lirait que `label:`. */
+  'Lin': 'Linen',
   'Carbone': 'Carbon',
   'Doré (ancien défaut)': 'Gold (former default)',
   'Océan': 'Ocean',

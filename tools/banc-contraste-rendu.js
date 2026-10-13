@@ -107,7 +107,7 @@ const TOUS_THEMES = OPT('--themes');
    chaque fenêtre, pour un passage rapide. Les THÈMES, eux, ne croisent que le
    premier cas — voir la note dans `fenetres()`. */
 const TOUS_LES_CAS = !OPT('--un-seul-cas');
-const THEMES = TOUS_THEMES ? ['', 'carbone', 'ocean', 'violet', 'ardoise', 'graphite', 'emeraude'] : [''];
+const THEMES = TOUS_THEMES ? ['', 'lin', 'carbone', 'ocean', 'violet', 'ardoise', 'graphite', 'emeraude'] : [''];
 
 /* ══ 0. LE BANC RANGE DERRIÈRE LUI — LA LEÇON DU 2026-09-05 ═════════════════
    ⚠⚠⚠ CE BANC A MIS LE POSTE À GENOUX. Il lançait un Chrome par lot et n'en

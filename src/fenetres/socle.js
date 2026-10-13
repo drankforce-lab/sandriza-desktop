@@ -2682,6 +2682,37 @@ html.jour[data-sz-theme="carbone"]{
   --f-pill:#e9ebee; --f-0f1826:#ffffff; --f-0f172a:#ffffff; --f-131c2b:#f5f6f8; --f-16202c:#ffffff;
   --f-bande:#e9ebee; --f-entete:#e3e5e9;
 }
+/* ══ LIN (2026-10-12, sa decision : « j'aime le theme Lin, applique-le partout, meme le tableau de bord et le
+   menu ») — demo approuvee : https://claude.ai/artifact/JgQjiqV4qr3EzoJuQrchev. Le JOUR : une toile de lin lavee,
+   greige, texte taupe, accent sauge. La NUIT : un brun-taupe chaud tres sombre (jamais un noir pur), texte ecru,
+   sauge eclaircie. Pas de texture : la retenue est le parti pris. */
+html[data-sz-theme="lin"]{
+  --sz-fond:#1d1b18; --sz-fond2:#22201c; --sz-pied:#191714;
+  --sz-surface:#22201c; --sz-surface2:#26231f;
+  --sz-bord:var(--v08); --sz-bord-fort:var(--v14);
+  --sz-accent:#a9bb97; --sz-accent-fort:#93a77f; --sz-accent-txt:#1b2014;
+  --sz-accent-doux:rgba(169,187,151,.16);
+  --sz-btn-prim:#a9bb97; --sz-btn-prim-fort:#bccbab; --sz-btn-prim-txt:#1b2014; --sz-repere:#a9bb97;
+  --or:#a9bb97; --or-rgb:169,187,151; --or-clair:#bccbab; --tx-or:#b9c9a7;
+}
+html[data-sz-theme="lin"]:not(.jour){
+  --f-page:#1d1b18; --f-carte:#22201c; --f-carte2:#201e1a; --f-pied:#191714; --f-champ:#1a1815;
+  --f-pill:#2a2723; --f-0f1826:#1a1815; --f-0f172a:#1a1815; --f-131c2b:#22201c; --f-16202c:#24221e;
+  --f-bande:#26231f; --f-entete:#2a2723;
+  --tx:#ece6dc; --tx2:#a9a194; --tx3:#988f82; --tx-gris:#a39b8f; --tx-bleute:#ddd6ca; --tx-gris2:#ddd6ca; --tx-94a3b8:#a9a194;
+}
+html.jour[data-sz-theme="lin"]{
+  --sz-fond:#efece6; --sz-fond2:#f5f3ef; --sz-pied:#ebe7df;
+  --sz-surface:#fbfaf7; --sz-surface2:#f7f5f0;
+  --sz-texte:#2e2b27; --sz-attenue:#6f695f;
+  --sz-accent:#5f7150; --sz-accent-fort:#4e5e41; --sz-accent-txt:#ffffff;
+  --sz-accent-doux:rgba(124,141,108,.16);
+  --sz-btn-prim:#5f7150; --sz-btn-prim-fort:#4e5e41; --sz-btn-prim-txt:#ffffff; --sz-repere:#7c8d6c;
+  --or:#9fb08d; --or-rgb:159,176,141; --or-clair:#b4c3a3; --tx-or:#55663f; --or-jour:#55663f; --or-jour-rgb:85,102,63;
+  --f-page:#f5f3ef; --f-carte:#fbfaf7; --f-carte2:#f7f5f0; --f-pied:#ebe7df; --f-champ:#ffffff;
+  --f-pill:#ebe7df; --f-0f1826:#ffffff; --f-0f172a:#ffffff; --f-131c2b:#f7f5f0; --f-16202c:#ffffff;
+  --f-bande:#ece8e0; --f-entete:#e6e1d8;
+}
 html[data-sz-theme="ocean"]{
   --sz-fond:#0a1620; --sz-fond2:#0f2030; --sz-pied:#081219;
   --sz-surface:#122536; --sz-surface2:#102232;
@@ -4048,68 +4079,73 @@ html.jour[data-sz-theme="carbone"] body{background:
   radial-gradient(55% 40% at 88% 0%,rgba(194,65,12,.08),transparent 70%),
   repeating-linear-gradient(90deg,rgba(255,255,255,.55) 0 1px,rgba(0,0,0,.025) 1px 2px,transparent 2px 3px),
   linear-gradient(180deg,#eceef1,#dcdee3)}
+html[data-sz-theme="lin"] body{background:var(--sz-fond)}
+html[data-sz-theme="lin"] .tete{background:var(--sz-fond2)}
+html[data-sz-theme="lin"] .carte,html[data-sz-theme="lin"] .tuile,html[data-sz-theme="lin"] .szr-sec{box-shadow:0 1px 0 var(--v04),0 10px 24px rgba(0,0,0,.28)}
+html.jour[data-sz-theme="lin"] .carte,html.jour[data-sz-theme="lin"] .tuile,html.jour[data-sz-theme="lin"] .szr-sec{box-shadow:0 1px 2px rgba(60,50,35,.06),0 8px 22px rgba(60,50,35,.06)}
+html.jour[data-sz-theme="lin"] .gp tbody td{background:linear-gradient(180deg,#ffffff,#f9f8f4)}
 html[data-sz-theme="carbone"] .tete{background:linear-gradient(180deg,rgba(20,20,24,.94),rgba(13,13,16,.94))}
 html.jour[data-sz-theme="carbone"] .tete{background:linear-gradient(180deg,rgba(236,238,241,.94),rgba(226,228,232,.94))}
-html[data-sz-theme="carbone"] .tete h1::before{content:"";display:inline-block;width:4px;height:1em;margin-right:.5rem;
+html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) .tete h1::before{content:"";display:inline-block;width:4px;height:1em;margin-right:.5rem;
   border-radius:2px;background:var(--sz-repere);vertical-align:-.12em}
 html[data-sz-theme="carbone"] .carte,html[data-sz-theme="carbone"] .tuile,html[data-sz-theme="carbone"] .szr-sec{
   box-shadow:inset 0 1px 0 var(--v05),0 12px 28px rgba(0,0,0,.45)}
 html.jour[data-sz-theme="carbone"] .carte,html.jour[data-sz-theme="carbone"] .tuile,html.jour[data-sz-theme="carbone"] .szr-sec{
   box-shadow:inset 0 1px 0 #fff,0 8px 20px rgba(0,0,0,.08)}
-html[data-sz-theme="carbone"] button.prim,html[data-sz-theme="carbone"] .jeton.prim,html[data-sz-theme="carbone"] button.paie{
+html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) button.prim,html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) .jeton.prim,html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) button.paie{
   background:var(--sz-btn-prim);border-color:var(--sz-btn-prim);color:var(--sz-btn-prim-txt)}
-html[data-sz-theme="carbone"] button.prim:hover:not(:disabled),html[data-sz-theme="carbone"] .jeton.prim:hover:not(:disabled){
+html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) button.prim:hover:not(:disabled),html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) .jeton.prim:hover:not(:disabled){
   background:var(--sz-btn-prim-fort);border-color:var(--sz-btn-prim-fort)}
-html[data-sz-theme="carbone"] thead th:first-child{background-image:linear-gradient(var(--sz-repere),var(--sz-repere));
+html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) thead th:first-child{background-image:linear-gradient(var(--sz-repere),var(--sz-repere));
   background-repeat:no-repeat;background-size:24px 2px;background-position:0 100%}
-:where(html[data-sz-theme="carbone"] tbody tr:nth-child(even))>td{background-color:var(--v02)}
+:where(html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) tbody tr:nth-child(even))>td{background-color:var(--v02)}
 :where(html.jour[data-sz-theme="carbone"] tbody tr:nth-child(even))>td{background-color:rgba(0,0,0,.022)}
-:where(html[data-sz-theme="carbone"] tbody tr:hover)>td:first-child{box-shadow:inset 3px 0 0 var(--sz-repere)}
+:where(html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) tbody tr:hover)>td:first-child{box-shadow:inset 3px 0 0 var(--sz-repere)}
 /* LE HALO DU THEME AU SURVOL, PAS SEULEMENT AU CLIC (2026-10-12, sa remarque : « plusieurs zones de choix ne
    fonctionnent pas avec le survol, le halo rouge ne s applique que si on clique »). Les champs, les listes
    deroulantes, les cases, les pastilles de choix et les boutons prennent au SURVOL le meme halo que le focus ;
    le jour, l orange du theme remplace le dore ecrit en dur. Un etat CHOISI (.on, .actif, aria-pressed) garde
    le sien. */
-html[data-sz-theme="carbone"] :is(.ch,.champ) :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),select,textarea):hover:not(:disabled),
-html[data-sz-theme="carbone"] :is(.ch,.champ) :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),select,textarea):focus{
+html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) :is(.ch,.champ) :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),select,textarea):hover:not(:disabled),
+html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) :is(.ch,.champ) :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),select,textarea):focus{
   border-color:rgba(var(--or-rgb),.75);box-shadow:0 0 0 3px rgba(var(--or-rgb),.16)}
-html[data-sz-theme="carbone"] :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),select,textarea):hover:not(:disabled):not(:focus){
+html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),select,textarea):hover:not(:disabled):not(:focus){
   border-color:rgba(var(--or-rgb),.6)!important;box-shadow:0 0 0 3px rgba(var(--or-rgb),.12)!important}
-html[data-sz-theme="carbone"] button:hover:not(:disabled):not(.on):not(.actif):not([aria-pressed="true"]):not(.prim):not(.paie):not(.onglets button){
+html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) button:hover:not(:disabled):not(.on):not(.actif):not([aria-pressed="true"]):not(.prim):not(.paie):not(.onglets button){
   border-color:rgba(var(--or-rgb),.6)!important;box-shadow:0 0 0 3px rgba(var(--or-rgb),.14)!important}
-html[data-sz-theme="carbone"] :is(input[type=checkbox],input[type=radio]){accent-color:var(--or)}
-html[data-sz-theme="carbone"] :is(input[type=checkbox],input[type=radio]):hover:not(:disabled){box-shadow:0 0 0 3px rgba(var(--or-rgb),.22);border-radius:4px}
-html[data-sz-theme="carbone"] :is(button,input,select,textarea){transition:border-color .2s ease,box-shadow .2s ease,background-color .2s ease}
+html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) :is(input[type=checkbox],input[type=radio]){accent-color:var(--or)}
+html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) :is(input[type=checkbox],input[type=radio]):hover:not(:disabled){box-shadow:0 0 0 3px rgba(var(--or-rgb),.22);border-radius:4px}
+html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) :is(button,input,select,textarea){transition:border-color .2s ease,box-shadow .2s ease,background-color .2s ease}
 /* LES TABLEAUX EN CARBONE (2026-10-12, sa demande : « ameliore le look des tableaux en mode carbone »). L en-tete
    n a plus de bande : un fin filet, le repere rouge sous la premiere colonne. Les lignes en cartes (grilles .gp)
    prennent un leger relief ; au survol, un voile rouge qui s estompe et un filet a gauche. */
-html[data-sz-theme="carbone"] thead th{background-color:transparent;border-bottom:1px solid var(--v10)}
-html[data-sz-theme="carbone"] .gp tbody td{background:linear-gradient(180deg,var(--v045),var(--v02));border-color:var(--v07)}
-html[data-sz-theme="carbone"] .gp tbody tr[data-ligne]:hover td{background:rgba(var(--or-rgb),.08);border-color:rgba(var(--or-rgb),.38)}
-html[data-sz-theme="carbone"] .gp tbody tr[data-ligne]:hover td:first-child{box-shadow:inset 3px 0 0 var(--or)}
-html.jour[data-sz-theme="carbone"] .gp tbody td{background:linear-gradient(180deg,#ffffff,#f6f7f9)}
+html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) thead th{background-color:transparent;border-bottom:1px solid var(--v10)}
+html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) .gp tbody td{background:linear-gradient(180deg,var(--v045),var(--v02));border-color:var(--v07)}
+html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) .gp tbody tr[data-ligne]:hover td{background:rgba(var(--or-rgb),.08);border-color:rgba(var(--or-rgb),.38)}
+html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) .gp tbody tr[data-ligne]:hover td:first-child{box-shadow:inset 3px 0 0 var(--or)}
+html.jour:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) .gp tbody td{background:linear-gradient(180deg,#ffffff,#f6f7f9)}
 /* LES ONGLETS EN CARBONE (2026-10-12, sa remarque : « je n aime pas le jeu de couleurs des onglets ») : plus
    d aplat rouge a texte sombre. L onglet ouvert est un verre teinte de rouge, texte clair, un trait rouge
    dessous ; les autres en gris neutre ; le survol, un voile et le trait qui monte en fondu. */
-html[data-sz-theme="carbone"] .onglets button{color:var(--tx2);background:transparent;border-color:transparent;
+html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) .onglets button{color:var(--tx2);background:transparent;border-color:transparent;
   box-shadow:inset 0 -2px 0 transparent;transition:background-color .22s ease,box-shadow .22s ease,color .22s ease,border-color .22s ease}
-html[data-sz-theme="carbone"] .onglets button:hover:not(.on):not(.actif){color:var(--tx);background:var(--v05);
+html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) .onglets button:hover:not(.on):not(.actif){color:var(--tx);background:var(--v05);
   box-shadow:inset 0 -2px 0 rgba(var(--or-rgb),.5)}
-html[data-sz-theme="carbone"] .onglets button.on,html[data-sz-theme="carbone"] .onglets button.actif{
+html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) .onglets button.on,html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) .onglets button.actif{
   background:linear-gradient(180deg,rgba(var(--or-rgb),.22),rgba(var(--or-rgb),.08))!important;
   border-color:rgba(var(--or-rgb),.5)!important;color:var(--tx)!important;font-weight:700;
   box-shadow:inset 0 -2px 0 var(--or),0 0 0 3px rgba(var(--or-rgb),.08)}
-html[data-sz-theme="carbone"] .onglets button.on .pill,html[data-sz-theme="carbone"] .onglets button.actif .pill{
+html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) .onglets button.on .pill,html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) .onglets button.actif .pill{
   background:rgba(var(--or-rgb),.22);border-color:transparent}
-html.jour[data-sz-theme="carbone"] .onglets button{color:#4b4f58}
+html.jour:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) .onglets button{color:#4b4f58}
 /* LES DERNIERS RESTES BLEUTES (balayage des 108 fenetres sous Carbone, 2026-10-12) : les voiles des boites,
    le damier de transparence des vignettes photo, le bouton d enregistrement de l acces anticipe. */
-html[data-sz-theme="carbone"]:not(.jour) :is(.voile,#bc-voile){background-color:rgba(4,4,6,.76)!important}
-html[data-sz-theme="carbone"]:not(.jour) .vign{background:conic-gradient(#3a3a40 25%,#2a2a2f 0 50%,#3a3a40 0 75%,#2a2a2f 0) 0 0/12px 12px}
-html[data-sz-theme="carbone"] button#v-ecrire.bsc:not(:disabled){background:var(--sz-btn-prim)!important}
-html.jour[data-sz-theme="carbone"] .onglets button.on,html.jour[data-sz-theme="carbone"] .onglets button.actif{
-  background:linear-gradient(180deg,rgba(194,65,12,.13),rgba(194,65,12,.05))!important;border-color:rgba(194,65,12,.45)!important;
-  color:#1d2433!important;box-shadow:inset 0 -2px 0 #c2410c}
+html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]):not(.jour) :is(.voile,#bc-voile){background-color:rgba(4,4,6,.76)!important}
+html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]):not(.jour) .vign{background:conic-gradient(#3a3a40 25%,#2a2a2f 0 50%,#3a3a40 0 75%,#2a2a2f 0) 0 0/12px 12px}
+html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) button#v-ecrire.bsc:not(:disabled){background:var(--sz-btn-prim)!important}
+html.jour:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) .onglets button.on,html.jour:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) .onglets button.actif{
+  background:linear-gradient(180deg,rgba(var(--or-rgb),.16),rgba(var(--or-rgb),.05))!important;border-color:rgba(var(--or-rgb),.55)!important;
+  color:#1d2433!important;box-shadow:inset 0 -2px 0 var(--sz-repere)}
 `;
 
 module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_CARBONE,

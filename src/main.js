@@ -4610,7 +4610,7 @@ const brancherOutils = (win) => {
    personnes sur deux postes n ont aucune raison de se l imposer l une a
    l autre. D ou reglages.json et non Turso.
    La feuille CSS_THEMES du socle fait le reste : on ne pose qu un attribut. */
-const THEMES_CONNUS = ['carbone', 'defaut', 'ocean', 'violet', 'ardoise', 'graphite', 'emeraude'];
+const THEMES_CONNUS = ['lin', 'carbone', 'defaut', 'ocean', 'violet', 'ardoise', 'graphite', 'emeraude'];
 /* ⚠ CARBONE DEVIENT LE THÈME DE TOUT LE MONDE (2026-10-12, sa décision : « applique carbone partout »).
    ADOPTÉ UNE SEULE FOIS par poste : un poste resté sur l'ancien défaut (doré) passe à Carbone ; celui
    qui avait CHOISI un autre jeu (océan, violet…) le garde. Après l'adoption, revenir au doré reste
@@ -4625,9 +4625,16 @@ const _themeCouleur = () => {
       reglages.set('carboneAdopte', true);
       reglages.set('carboneImpose', true);
     }
+    /* LIN REMPLACE CARBONE (2026-10-12, sa decision : « applique ce theme partout, meme le tableau de bord et le
+       menu »). Pose UNE fois sur chaque poste, quel que soit le jeu d avant (regle « partout = partout ») ; le
+       menu Affichage › Jeu de couleurs permet ensuite d en changer. */
+    if (!reglages.get('linImpose')) {
+      reglages.set('themeCouleur', 'lin');
+      reglages.set('linImpose', true);
+    }
   } catch {}
-  const t = String(reglages.get('themeCouleur') || 'carbone');
-  return THEMES_CONNUS.indexOf(t) >= 0 ? t : 'carbone';
+  const t = String(reglages.get('themeCouleur') || 'lin');
+  return THEMES_CONNUS.indexOf(t) >= 0 ? t : 'lin';
 };
 const jsTheme = () => {
   const jour = !_modele.sombre;

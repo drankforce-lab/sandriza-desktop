@@ -33,7 +33,7 @@ function pageDetachee(desc) {
   const css = desc.cssRail || '';
   const sombre = !!desc.sombre;
   // Le jeu de couleurs du poste (Carbone…) : la feuille du site le lit sur data-sz-th (2026-10-12).
-  const th = String(desc.theme || 'carbone').replace(/[^a-z]/g, '');
+  const th = String(desc.theme || 'lin').replace(/[^a-z]/g, '');
 
   return `<!doctype html><html lang="${LANG()}"><head><meta charset="utf-8">
 <title>Menu — Administration Sandriza</title>
@@ -151,7 +151,7 @@ function pagePanneau(desc) {
   const css = desc.cssRail || '';
   const sombre = !!desc.sombre;
   // Le jeu de couleurs du poste (Carbone…) : la feuille du site le lit sur data-sz-th (2026-10-12).
-  const th = String(desc.theme || 'carbone').replace(/[^a-z]/g, '');
+  const th = String(desc.theme || 'lin').replace(/[^a-z]/g, '');
 
   /* ⚠ TOUS LES MENUS SONT CONSTRUITS D'AVANCE, UNE FOIS. La première version
      rechargeait la page a CHAQUE survol d'un bouton de la barre — c'était le
