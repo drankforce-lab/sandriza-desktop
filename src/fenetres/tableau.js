@@ -35,7 +35,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU, SEP_DEC } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -403,7 +403,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function ecart(v, inverse, points){
     if (v == null) return '<div class="d">&nbsp;</div>';
     var c = v > 0 ? (inverse ? 'bas' : 'haut') : (v < 0 ? (inverse ? 'haut' : 'bas') : '');
-    return '<div class="d ' + c + '">' + (v > 0 ? '+' : '') + String(v).replace('.', ',') + (points ? ' ${T("pts")}' : ' %') + ' ${T("vs période d’avant")}</div>';
+    return '<div class="d ' + c + '">' + (v > 0 ? '+' : '') + String(v).replace('.', '${SEP_DEC()}') + (points ? ' ${T("pts")}' : ' %') + ' ${T("vs période d’avant")}</div>';
   }
 
   /* ══ LE DESSIN ═════════════════════════════════════════════════════════ */
@@ -447,7 +447,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (cR
           ? '<div class="kpi"><div class="k">${T("Retours")}</div><div class="v">' + (RK.retours || 0) + '</div>' + ecart(RK.ecartRetours, true) + '</div>'
             + '<div class="kpi"><div class="k">${T("Valeur retournée")}</div><div class="v">' + fmt(RK.valeur || 0) + '</div>' + ecart(RK.ecartValeur, true) + '</div>'
-            + '<div class="kpi"><div class="k">${T("Taux de retour")}</div><div class="v">' + (RK.taux == null ? '—' : String(RK.taux).replace('.', ',') + ' %') + '</div>' + ecart(RK.ecartTaux, true, true) + '</div>'
+            + '<div class="kpi"><div class="k">${T("Taux de retour")}</div><div class="v">' + (RK.taux == null ? '—' : String(RK.taux).replace('.', '${SEP_DEC()}') + ' %') + '</div>' + ecart(RK.ecartTaux, true, true) + '</div>'
           : '<div class="kpi"><div class="k">${T("Commandes")}</div><div class="v">' + (k.commandes || 0) + '</div>' + ecart(k.ecartCommandes) + '</div>'
             + '<div class="kpi"><div class="k">${T("Ventes")}</div><div class="v">' + fmt(k.ventes || 0) + '</div>' + ecart(k.ecartVentes) + '</div>'
             + '<div class="kpi"><div class="k">${T("Panier moyen")}</div><div class="v">' + fmt(k.panier || 0) + '</div>' + ecart(k.ecartPanier) + '</div>')
