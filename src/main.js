@@ -2380,6 +2380,10 @@ const OPS_PONT = new Set([
   // `pos:diffuser` n accepte qu elle. Sans cela, une fenetre quelconque pourrait
   // afficher n importe quel montant devant le client au moment de payer.
   'caisse:diffuser', 'caisse:affichage',
+  // Le PRIX MODIFIE a la caisse et son NIP (2026-10-14) : verifier rend un jeton a usage
+  // unique ; lire / ecrire / retirer sont refuses par le SERVEUR a tout autre role que
+  // super-administrateur.
+  'caisse:nipVerifier', 'caisse:nipLire', 'caisse:nipEcrire', 'caisse:nipRetirer',
   // Ajustement de stock. ⚠ `stock:enregistrer` écrit un INVENTAIRE : toute la
   // règle reste dans le site (`Admin._stockEcrire`, sans le moindre DOM), le pont
   // ne porte que des valeurs. La version qui lisait le formulaire aurait enregistré
@@ -3248,13 +3252,21 @@ ipcMain.handle('fenetre:visionneuse', (e, id, liste) => {
 });
 
 ipcMain.handle('fenetre:client', (e, id) => {
-  const cle = 'client-' + String(id || '').replace(/[^\w-]/g, '');
+  // « id@modifier|supprimer|purger » (clic droit de la liste Clients, 2026-10-14) : la MEME fenetre que l id
+  // seul — la cle ignore le suffixe ; une fiche deja ouverte recoit l intention (szIntention), qui la relit.
+  const brut = String(id || '');
+  const m = /^(.*)@(modifier|supprimer|purger)$/.exec(brut);
+  const base = m ? m[1] : brut;
+  const intention = m ? m[2] : '';
+  const cle = 'client-' + base.replace(/[^\w-]/g, '');
   const _avant = fenetresNatives.get(cle);
   const _reutilisee = !!(_avant && !_avant.isDestroyed());
-  const win = ouvrirNative(cle, TF('Fiche client'), () => pageClient(String(id || '')),
+  const win = ouvrirNative(cle, TF('Fiche client'), () => pageClient(base, intention),
     { width: 720, height: 720, minWidth: 600, minHeight: 500 });
   if (_reutilisee && win && !win.isDestroyed()) {
-    win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
+    win.webContents.executeJavaScript(intention
+      ? 'window.szIntention && window.szIntention(' + JSON.stringify(intention) + ')'
+      : 'window.szRevenir && window.szRevenir()', true).catch(() => {});
   }
   return true;
 });

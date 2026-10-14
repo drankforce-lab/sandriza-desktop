@@ -178,5 +178,9 @@ module.exports = {
   'Vérification': 'Verification',
   'En livraison': 'Out for delivery',
   'Livrée': 'Delivered',
-  'Annulée': 'Cancelled'
+  'Annulée': 'Cancelled',
+
+  /* L intention venue du clic droit de la liste Clients (2026-10-14) : le bouton
+     demande n existe pas sur cette fiche (droit, cadenas, dossier non purgeable). */
+  'Ce geste n’est pas offert sur cette fiche.': 'This action is not available on this record.',
 };

@@ -443,7 +443,15 @@ function _szPoserBouton(v){
   btn.textContent = '${T("⛶ Plein écran")}';
   btn.title = '${T("Occuper toute la fenêtre")}';
   var tt = b.querySelector('.tt');
-  if (tt) {
+  /* UNE RANGÉE DÉSIGNÉE (2026-10-14, sa capture : « le plein écran arrive par-dessus » la croix de l inspecteur
+     des photos). Une boîte qui a sa propre rangée de titre sans être une « .tt » la marque « sz-plein-ici » : le
+     bouton s y range AVANT son premier bouton (la croix reste au bord), au lieu de flotter au coin par-dessus. */
+  var ici = b.querySelector('.sz-plein-ici');
+  if (ici) {
+    var premier = ici.querySelector('button');
+    if (premier) ici.insertBefore(btn, premier); else ici.appendChild(btn);
+  }
+  else if (tt) {
     /* ⚠ AVANT LES BOUTONS DEJA LA, ET TOUS A DROITE (2026-10-04). Pose en
        dernier dans une barre en << space-between >>, il repoussait le << Fermer >>
        de la fenetre AU MILIEU de l en-tete (Pages, sa planche). Il se range

@@ -171,7 +171,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + (l.rabaisPct > 0 && l.prixOriginal > (l.price || 0)
             ? '<span class="rb">−' + Math.round(l.rabaisPct) + ' %</span>'
               + '<s>' + fmt(l.prixOriginal * (l.quantity || 1)) + '</s>'
-            : '')
+            /* Le PRIX MODIFIE a la caisse (2026-10-14) : le prix d origine barre, sans pastille — ni le
+               motif ni qui l a autorise ne viennent jusqu ici (la caisse ne les envoie pas). */
+            : (l.prixModifie && l.prixOriginal > (l.price || 0)
+              ? '<s>' + fmt(l.prixOriginal * (l.quantity || 1)) + '</s>' : ''))
         + fmt((l.price || 0) * (l.quantity || 1)) + '</div></div>');
     });
     h.push('</div><div class="bas">');

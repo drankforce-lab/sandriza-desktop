@@ -85,7 +85,6 @@ input,select{font:inherit;color:var(--tx);background:var(--f-champ);
   border:1px solid var(--v12);border-radius:10px;padding:.45rem .65rem;
   width:100%;min-width:0;min-height:38px}
 input:focus,select:focus{outline:none;border-color:var(--or);box-shadow:0 0 0 3px rgba(var(--or-rgb),.18)}
-input.manque{border-color:#f87171}
 input[type=checkbox]{width:auto;min-height:0}
 .ch{display:flex;flex-direction:column;gap:.25rem;min-width:0}
 .ch > span{font-size:.74rem;color:var(--tx2);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -143,7 +142,17 @@ input[type=checkbox]{width:auto;min-height:0}
 .puces{display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.55rem}
 .puces button{border-radius:99px;padding:.22rem .7rem;font-size:.8rem}
 .puces button.on{background:var(--or);border-color:var(--or);color:#17202c;font-weight:700}
-.edit .g-ed{display:grid;grid-template-columns:7rem minmax(0,1fr);gap:.5rem;align-items:end}
+.edit .g-ed{display:grid;grid-template-columns:7rem 8.5rem minmax(0,1fr);gap:.5rem;align-items:end}
+/* Le NOUVEAU PRIX (2026-10-14) : il exige le NIP, et la regle de non-cumul est ecrite sous les champs. */
+.edit .regle{font-size:.73rem;color:var(--tx2);margin-top:.45rem;line-height:1.4}
+.boite.nip{max-width:26rem}
+.boite.nip .resume{font-size:.84rem;color:var(--tx2);margin:0 0 .7rem;line-height:1.45}
+#nip-saisie,.nip-champ{font-size:1.2rem;letter-spacing:.35em;text-align:center;font-variant-numeric:tabular-nums}
+.nip-msg{min-height:1.3em;font-size:.8rem;margin-top:.45rem;color:var(--tx2)}
+.nip-msg.err{color:var(--tx-err)}.nip-msg.bon{color:var(--tx-ok)}
+.nip-actuel{display:flex;align-items:center;gap:.6rem;padding:.5rem .7rem;border:1px solid var(--v10);border-radius:10px;margin-bottom:.5rem}
+.nip-actuel strong{font-size:1.15rem;letter-spacing:.3em;font-variant-numeric:tabular-nums}
+.nip-actuel button{margin-left:auto}
 .edit .fin{display:flex;justify-content:flex-end;gap:.4rem;margin-top:.6rem;align-items:center}
 .edit .apercu{margin-right:auto;font-size:.8rem;color:var(--tx2)}
 .pct-champ{position:relative}
@@ -257,7 +266,11 @@ function pageCaisse(mode) {
 <div class="tete"><span class="ico">${ICO.payments}</span><h1>${T("Vente au comptoir")}</h1>
   <span class="pastille-par" id="sous"></span>
   <button id="btn-afficheur" class="mini" style="margin-left:auto"
-    title="${T("Ouvrir l’écran tourné vers le client, à poser sur un second moniteur")}">${T("Affichage client")}</button></div>
+    title="${T("Ouvrir l’écran tourné vers le client, à poser sur un second moniteur")}">${T("Affichage client")}</button>
+  <!-- Le NIP des prix modifies (2026-10-14) : montre au super-administrateur seulement ; le serveur
+       refuse de toute facon tout autre role. -->
+  <button id="btn-nip" class="mini" style="display:none"
+    title="${T("Voir ou changer le NIP exigé pour modifier un prix à la caisse")}">${T("NIP des prix")}</button></div>
 <div class="corps" id="corps">
   <div class="col">
     <div class="carte">
@@ -367,6 +380,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     client_requis:      '${T("Le nom du client est obligatoire — aucune vente anonyme.")}',
     courriel_invalide:  '${T("Un courriel valide est requis pour ouvrir un compte.")}',
     taxes_indisponibles:'${T("Moteur de taxes indisponible — n’encaissez pas.")}',
+    // Le prix modifie et son NIP (2026-10-14).
+    aucun_nip:          '${T("Aucun NIP défini — un super administrateur doit en créer un.")}',
+    nip_faux:           '${T("NIP incorrect.")}',
+    bloque:             '${T("Trop d’essais : la modification de prix est bloquée pour quelques minutes.")}',
+    prix_invalide:      '${T("Le nouveau prix doit être un montant supérieur à zéro.")}',
+    prix_nip_echu:      '${T("L’autorisation d’un prix modifié n’est plus valable (30 minutes, une seule vente) — rouvrez l’article (bouton %) et retapez le NIP.")}',
+    nip_invalide:       '${T("Le NIP compte de 4 à 8 chiffres.")}',
+    superadmin_requis:  '${T("Réservé aux super administrateurs.")}',
+    role_perime:        '${T("Votre rôle a changé depuis la connexion — reconnectez-vous.")}',
+    reseau:             '${T("Le serveur n’a pas répondu — rien n’a été modifié.")}',
     echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(m){ return MOTIFS[m] || '${T("Erreur inattendue (")}' + esc(m || '?') + ').'; }
@@ -425,6 +448,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var brut = (TOT.sousTotalBrut != null) ? TOT.sousTotalBrut : TOT.sousTotal;
     var h = '<div class="l"><span>${T("Sous-total")}</span><span>' + argent(brut) + '</span></div>';
     if (TOT.rabaisArticles > 0) h += '<div class="l rab"><span>${T("Rabais sur les articles")}</span><span>−' + argent(TOT.rabaisArticles) + '</span></div>';
+    // Un prix modifie A LA HAUSSE rend l ecart negatif : on l ecrit comme un ajout, jamais « −−x ».
+    if (TOT.rabaisArticles < 0) h += '<div class="l"><span>${T("Prix modifiés à la hausse")}</span><span>+' + argent(-TOT.rabaisArticles) + '</span></div>';
     if (TOT.rabais > 0) h += '<div class="l rab"><span>${T("Rabais sur la vente")}'
       + (TOT.rabaisType === 'pct' ? ' (' + pctTxt(TOT.rabaisValeur) + ')' : '') + '</span><span>−' + argent(TOT.rabais) + '</span></div>';
     (TOT.taxes || []).forEach(function(x){
@@ -441,8 +466,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // ⚠ LE NOM DU CLIENT FAIT PARTIE DES CONDITIONS : le site refuse une vente
     // anonyme, autant le dire avant d avoir tout saisi.
     var nomOk = !!val('c-nom').trim();
-    var champ = document.getElementById('c-nom');
-    if (champ) champ.className = (!nomOk && LIGNES.length) ? 'manque' : '';
+    /* ⚠ PLUS DE CADRE ROUGE SUR « NOM » (2026-10-14, sa demande : « pas besoin de me mettre le champ en rouge
+       dès que l on a entré un produit »). Le bouton dit déjà « Nom du client requis » : le rouge, posé au premier
+       article, accusait d une faute qu on n avait pas encore eu le temps de ne pas commettre. */
     var pret = !!(TOT && TOT.total > 0 && LIGNES.length && nomOk && CTX && CTX.peutVendre && !enVente);
     b.disabled = !pret;
     /* Pendant l enregistrement : bouton FERME et un cercle qui tourne — un second
@@ -479,7 +505,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var garder = document.activeElement && document.activeElement.id;
     z.innerHTML = LIGNES.map(function(l, i){
       var det = [l.size, l.color].filter(Boolean).join(' / ') || '—';
-      var pct = parseFloat(String(l.rabaisPct || '').replace(',', '.')) || 0;
+      // Prix modifie (2026-10-14) : il REMPLACE le pourcentage, les deux ne se cumulent jamais.
+      var force = !!l.prixForce;
+      var pct = force ? 0 : (parseFloat(String(l.rabaisPct || '').replace(',', '.')) || 0);
       var net = netDe(i);
       var h = '<div class="lg' + (EDIT === i ? ' ouverte' : '') + '">'
         + '<div class="rf-prod">' + szVignette(IMGS[l.productId], String(l.name || '?').trim(), '', l.name) + '<div style="min-width:0">'
@@ -487,15 +515,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<div class="rf-sous"><span>' + esc(det) + '</span>'
         + (l.sku ? '<span>·</span><span class="rf-code">' + esc(l.sku) + '</span>' : '')
         + (pct > 0 ? '<span class="rab-pill">−' + esc(pctTxt(pct)) + '</span>' : '')
-        + (pct > 0 && l.rabaisNote ? '<span class="rab-note">' + esc(l.rabaisNote) + '</span>' : '')
+        + (force ? '<span class="rab-pill" title="${T("Prix modifié — NIP vérifié par le serveur")}">${T("Prix modifié")}</span>' : '')
+        + ((pct > 0 || force) && l.rabaisNote ? '<span class="rab-note">' + esc(l.rabaisNote) + '</span>' : '')
         + '</div></div></div>'
         + '<span class="qte"><button data-q="' + i + '" data-d="-1" aria-label="${T("Retirer un")}">−</button>'
         + '<strong class="num">' + l.quantity + '</strong>'
         + '<button data-q="' + i + '" data-d="1" aria-label="${T("Ajouter un")}">+</button></span>'
         + '<span class="px num"><span class="net">' + argent(net) + '</span>'
-        + (pct > 0 ? '<span class="barre">' + argent(l.price) + '</span>' : '') + '</span>'
+        + ((pct > 0 || (force && net !== l.price)) ? '<span class="barre">' + argent(l.price) + '</span>' : '') + '</span>'
         + '<span class="act"><span class="tot num">' + argent(net * l.quantity) + '</span>'
-        + '<button class="ico-btn' + (pct > 0 ? ' on' : '') + '" data-rab="' + i + '" title="${T("Rabais sur cet article")}" aria-label="${T("Rabais sur cet article")}">${SVG_PCT}</button>'
+        + '<button class="ico-btn' + (pct > 0 || force ? ' on' : '') + '" data-rab="' + i + '" title="${T("Rabais sur cet article")}" aria-label="${T("Rabais sur cet article")}">${SVG_PCT}</button>'
         + '<button class="ico-btn" data-retirer="' + i + '" title="${T("Retirer")}" aria-label="${T("Retirer")}">${SVG_X}</button></span>';
       if (EDIT === i) h += editeur(l, i, pct);
       return h + '</div>';
@@ -506,32 +535,210 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   /* L editeur de rabais d un article : pourcentage (puces ou saisie libre) et
      REMARQUE. ⚠ Il ne calcule rien : l apercu du prix vient du site au prochain
      aller-retour, apres << Appliquer >>. */
+  /* LE NOUVEAU PRIX (2026-10-14, sa demande : « changer le prix au besoin ; par contre si on le fait on
+     doit devoir entrer un NIP de securite »). Il est saisi ici, mais il n est ACCEPTE qu apres le NIP :
+     le serveur rend un jeton a usage unique (ce produit, ce prix), et c est lui que la vente presente.
+     ⚠ REGLE DE NON-CUMUL, la plus simple et ecrite a l ecran : un nouveau prix REMPLACE le pourcentage.
+     La remarque sert de motif dans les deux cas. */
   function editeur(l, i, pct){
+    var force = !!l.prixForce;
+    var prixVal = force ? l.prixForce.prix : (l.prixVoulu || null);
     return '<div class="edit">'
       + '<div class="titre">${T("Rabais sur cet article, pour cette vente seulement")}</div>'
       + '<div class="puces">' + PUCES.map(function(p){
           return '<button type="button" data-puce="' + p + '"' + (pct === p ? ' class="on"' : '') + '>' + p + ' %</button>'; }).join('') + '</div>'
       + '<div class="g-ed">'
       + '<label class="ch"><span>${T("Pourcentage")}</span><span class="pct-champ"><input id="ed-pct" class="num" inputmode="decimal" value="' + (pct > 0 ? esc(String(l.rabaisPct)) : '') + '" placeholder="0"><i>%</i></span></label>'
+      + '<label class="ch"><span>${T("Nouveau prix")}</span><input id="ed-prix" class="num" inputmode="decimal" autocomplete="off" value="' + (prixVal != null ? esc(szNombre(prixVal, 2)) : '') + '" placeholder="' + esc(szArgentChamp(0)) + '" title="${T("Nouveau prix unitaire — exige le NIP de sécurité")}"></label>'
       + '<label class="ch"><span>${T("Remarque")}</span><input id="ed-note" list="sugg-rab" maxlength="200" autocomplete="off" value="' + esc(l.rabaisNote || '') + '" placeholder="${T("ex. : petit défaut à la manche")}"></label>'
       + '</div>'
-      + '<div class="fin"><span class="apercu">' + (pct > 0 ? '${T("Prix courant")} ' + argent(l.price) + ' → ' + argent(netDe(i)) : '${T("Prix courant")} ' + argent(l.price)) + '</span>'
-      + (pct > 0 ? '<button type="button" class="mini" data-rab-retirer="' + i + '">${T("Retirer le rabais")}</button>' : '')
+      + '<div class="regle">${T("Un nouveau prix remplace le pourcentage (ils ne se cumulent pas) et exige le NIP de sécurité. La remarque en est le motif.")}</div>'
+      + '<div class="fin"><span class="apercu">' + ((pct > 0 || force) ? '${T("Prix courant")} ' + argent(l.price) + ' → ' + argent(netDe(i)) : '${T("Prix courant")} ' + argent(l.price)) + '</span>'
+      + ((pct > 0 || force) ? '<button type="button" class="mini" data-rab-retirer="' + i + '">${T("Retirer le rabais")}</button>' : '')
       + '<button type="button" class="mini" data-rab-fermer="1">${T("Fermer")}</button>'
       + '<button type="button" class="mini prim" data-rab-appliquer="' + i + '">${T("Appliquer")}</button></div>'
       + '</div>';
   }
 
+  // « 12,50 », « 12.50 $ », « 1 234,5 » : un montant saisi a la quebecoise, ou NaN.
+  function lirePrix(s){
+    var t = String(s == null ? '' : s).replace(/[\s  $]/g, '').replace(',', '.');
+    if (!/^[0-9]+(\.[0-9]{0,2})?$/.test(t)) return NaN;
+    return Math.round(parseFloat(t) * 100) / 100;
+  }
+
   function appliquerRabais(i){
     var l = LIGNES[i]; if (!l) return;
+    var note = String(val('ed-note') || '').trim();
+    /* LE NOUVEAU PRIX D ABORD : s il est saisi, il gagne, et le pourcentage est ignore (non-cumul). */
+    var prixBrut = String(val('ed-prix') || '').trim();
+    if (prixBrut) {
+      var p = lirePrix(prixBrut);
+      if (!(p > 0)) { dire(expliquer('prix_invalide'), 'err'); return; }
+      // Meme prix, deja autorise : seule la remarque change, aucun NIP a retaper.
+      if (l.prixForce && Math.round(l.prixForce.prix * 100) === Math.round(p * 100)) {
+        l.rabaisNote = note; delete l.rabaisPct;
+        EDIT = -1; dessinerLignes(); majTotaux();
+        var s0 = document.getElementById('scan'); if (s0) s0.focus();
+        return;
+      }
+      demanderNip(i, p, note);
+      return;
+    }
+    delete l.prixForce; delete l.prixVoulu;
     var brut = String(val('ed-pct') || '').trim();
     var n = parseFloat(brut.replace(',', '.'));
     if (brut && !(n >= 0 && n <= 100)) { dire('${T("Le pourcentage doit être entre 0 et 100.")}', 'err'); return; }
     if (!(n > 0)) { delete l.rabaisPct; delete l.rabaisNote; }
-    else { l.rabaisPct = brut; l.rabaisNote = String(val('ed-note') || '').trim(); }
+    else { l.rabaisPct = brut; l.rabaisNote = note; }
     EDIT = -1;
     dessinerLignes(); majTotaux();
     var s = document.getElementById('scan'); if (s) s.focus();
+  }
+
+  /* ══ LE NIP DE SECURITE (2026-10-14) ═════════════════════════════════════════
+     ⚠ LA FENETRE NE CONNAIT PAS LE NIP ET NE LE COMPARE PAS : la saisie part au serveur
+     (caisse:nipVerifier), qui ne rend qu un JETON a usage unique pour CE produit a CE prix.
+     Cinq essais faux bloquent la modification de prix quinze minutes — compte EN BASE, pour
+     toute la boutique ; recharger la fenetre n y change rien. */
+  function fermerVoileNip(){ var v = document.getElementById('voile-nip'); if (v) v.remove(); }
+  function demanderNip(i, prix, note){
+    var l = LIGNES[i]; if (!l) return;
+    fermerVoileNip();
+    var v = document.createElement('div');
+    v.className = 'voile'; v.id = 'voile-nip';
+    v.innerHTML = '<div class="boite nip" role="dialog" aria-modal="true" aria-labelledby="nip-titre">'
+      + '<h3 id="nip-titre">${T("NIP de sécurité")}</h3>'
+      + '<p class="resume">' + esc(l.name) + ' : ' + argent(l.price) + ' → <strong>' + argent(prix) + '</strong><br>'
+      + '${T("Modifier un prix exige le NIP de la boutique.")}</p>'
+      + '<input id="nip-saisie" type="password" inputmode="numeric" autocomplete="off" maxlength="8" aria-label="${T("NIP de sécurité")}" placeholder="••••">'
+      + '<div class="nip-msg" id="nip-msg" role="status" aria-live="polite"></div>'
+      + '<div class="fin"><button type="button" id="nip-annuler">${T("Annuler")}</button>'
+      + '<button type="button" class="prim" id="nip-valider">${T("Valider le prix")}</button></div></div>';
+    document.body.appendChild(v);
+    var champ = document.getElementById('nip-saisie'), msg = document.getElementById('nip-msg'), bv = document.getElementById('nip-valider');
+    function nipMsg(t, cl){ msg.textContent = t || ''; msg.className = 'nip-msg' + (cl ? ' ' + cl : ''); }
+    function fermer(){ fermerVoileNip(); var e = document.getElementById('ed-prix') || document.getElementById('scan'); if (e) e.focus(); }
+    champ.oninput = function(){ var d = this.value.replace(/[^0-9]/g, '').slice(0, 8); if (d !== this.value) this.value = d; };
+    function valider(){
+      var nip = champ.value;
+      if (!/^[0-9]{4,8}$/.test(nip)) { nipMsg(expliquer('nip_invalide'), 'err'); champ.focus(); return; }
+      bv.disabled = true; nipMsg('${T("Vérification…")}');
+      appeler('caisse:nipVerifier', [nip, l.productId, prix]).then(function(r){
+        bv.disabled = false;
+        if (r.ok && r.jeton) {
+          // La ligne a pu etre retiree pendant l aller-retour : on ne pose jamais un prix sur une autre.
+          if (LIGNES[i] !== l) { fermerVoileNip(); dire('${T("La vente a changé pendant la vérification — refaites la modification.")}', 'err'); return; }
+          l.prixForce = { jeton: r.jeton, prix: prix, par: r.par || '' };
+          delete l.rabaisPct; delete l.prixVoulu;
+          l.rabaisNote = note;
+          fermerVoileNip(); EDIT = -1; dessinerLignes(); majTotaux();
+          dire('${T("Prix modifié — NIP vérifié.")}', 'bon');
+          var s = document.getElementById('scan'); if (s) s.focus();
+          return;
+        }
+        champ.value = '';
+        if (r.motif === 'nip_faux') {
+          nipMsg(r.restant > 0 ? '${T("NIP incorrect — essais restants :")} ' + r.restant
+            : '${T("NIP incorrect — la modification de prix est bloquée 15 minutes.")}', 'err');
+        } else if (r.motif === 'bloque') {
+          nipMsg('${T("Trop d’essais — modification de prix bloquée. Minutes restantes :")} ' + (r.minutes || 1), 'err');
+        } else nipMsg(expliquer(r.motif), 'err');
+        champ.focus();
+      });
+    }
+    bv.onclick = valider;
+    document.getElementById('nip-annuler').onclick = fermer;
+    v.addEventListener('keydown', function(ev){
+      if (ev.key === 'Enter') { ev.preventDefault(); valider(); }
+      else if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); fermer(); }
+    });
+    champ.focus();
+  }
+
+  /* ══ LE NIP VU ET CHANGE PAR LE SUPER-ADMINISTRATEUR (2026-10-14) ═══════════════
+     « enregistre et visible que pour les super administrateurs ». Le bouton n est montre qu a ce role
+     (CTX.superadmin, simple affichage) ; c est le SERVEUR qui refuse tout autre role, rôle relu a
+     chaque appel. Le NIP n est lu qu a l ouverture de ce volet, et masque tant qu on ne demande pas
+     a le voir. Un champ laisse vide ne retire RIEN : retirer est un geste nomme, en deux clics. */
+  function panneauNip(){
+    fermerVoileNip();
+    var v = document.createElement('div');
+    v.className = 'voile'; v.id = 'voile-nip';
+    v.innerHTML = '<div class="boite nip" role="dialog" aria-modal="true" aria-labelledby="nip-titre">'
+      + '<h3 id="nip-titre">${T("NIP des prix modifiés")}</h3>'
+      + '<p class="resume">${T("Exigé à la caisse pour modifier le prix d’un article. Visible et modifiable par les super administrateurs seulement.")}</p>'
+      + '<div id="nip-etat"><div class="nip-msg">${T("Lecture…")}</div></div>'
+      + '<div class="g2" style="margin-top:.4rem">'
+      + '<label class="ch"><span>${T("Nouveau NIP")}</span><input id="nip-neuf" class="nip-champ" type="password" inputmode="numeric" autocomplete="off" maxlength="8"></label>'
+      + '<label class="ch"><span>${T("Confirmer")}</span><input id="nip-conf" class="nip-champ" type="password" inputmode="numeric" autocomplete="off" maxlength="8"></label></div>'
+      + '<div class="nip-msg" id="nip-msg" role="status" aria-live="polite"></div>'
+      + '<div class="fin"><button type="button" id="nip-retirer" style="margin-right:auto" disabled>${T("Retirer le NIP")}</button>'
+      + '<button type="button" id="nip-fermer">${T("Fermer")}</button>'
+      + '<button type="button" class="prim" id="nip-enreg">${T("Enregistrer")}</button></div></div>';
+    document.body.appendChild(v);
+    var msg = document.getElementById('nip-msg'), actuel = null, retArme = null;
+    function nipMsg(t, cl){ msg.textContent = t || ''; msg.className = 'nip-msg' + (cl ? ' ' + cl : ''); }
+    function fermer(){ fermerVoileNip(); var s = document.getElementById('scan'); if (s) s.focus(); }
+    ['nip-neuf', 'nip-conf'].forEach(function(id){
+      document.getElementById(id).oninput = function(){ var d = this.value.replace(/[^0-9]/g, '').slice(0, 8); if (d !== this.value) this.value = d; };
+    });
+    function etat(r){
+      var z = document.getElementById('nip-etat');
+      if (!z) return;
+      if (!r.ok) { z.innerHTML = '<div class="nip-msg err">' + esc(expliquer(r.motif)) + '</div>'; document.getElementById('nip-enreg').disabled = true; return; }
+      actuel = r.nip;
+      var h;
+      if (!r.defini) h = '<div class="nip-msg err">${T("Aucun NIP défini — la modification de prix est refusée à la caisse.")}</div>';
+      else if (r.nip == null) h = '<div class="nip-msg err">${T("Un NIP est enregistré, mais il ne se relit plus sur ce serveur — enregistrez-en un nouveau.")}</div>';
+      else h = '<div class="nip-actuel"><span>${T("NIP actuel")}</span><strong id="nip-vu" class="num">' + '••••••••'.slice(0, String(r.nip).length) + '</strong>'
+        + '<button type="button" class="mini" id="nip-voir" aria-pressed="false">${T("Afficher")}</button></div>';
+      if (r.defini && (r.par || r.pose)) h += '<div class="aide">${T("Défini")}' + (r.pose ? ' ' + esc(typeof szQuand === 'function' ? szQuand(r.pose) : r.pose) : '')
+        + (r.par ? ' — ' + esc(r.par) : '') + '</div>';
+      if (r.bloqueMinutes > 0) h += '<div class="aide" style="color:var(--tx-att)">${T("Trop d’essais faux à la caisse — prix modifiés bloqués. Minutes restantes :")} ' + r.bloqueMinutes + '</div>';
+      z.innerHTML = h;
+      document.getElementById('nip-retirer').disabled = !r.defini;
+      var bvoir = document.getElementById('nip-voir');
+      if (bvoir) bvoir.onclick = function(){
+        var vu = document.getElementById('nip-vu'), on = this.getAttribute('aria-pressed') !== 'true';
+        vu.textContent = on ? String(actuel) : '••••••••'.slice(0, String(actuel).length);
+        this.setAttribute('aria-pressed', String(on));
+        this.textContent = on ? '${T("Masquer")}' : '${T("Afficher")}';
+      };
+    }
+    appeler('caisse:nipLire').then(etat);
+    document.getElementById('nip-enreg').onclick = function(){
+      var a = val('nip-neuf'), b = val('nip-conf'), btn = this;
+      if (!/^[0-9]{4,8}$/.test(a)) { nipMsg(expliquer('nip_invalide'), 'err'); return; }
+      if (a !== b) { nipMsg('${T("Les deux NIP ne concordent pas.")}', 'err'); return; }
+      btn.disabled = true; nipMsg('${T("Enregistrement…")}');
+      appeler('caisse:nipEcrire', [a]).then(function(r){
+        btn.disabled = false;
+        if (!r.ok) { nipMsg(expliquer(r.motif), 'err'); return; }
+        document.getElementById('nip-neuf').value = ''; document.getElementById('nip-conf').value = '';
+        etat(r); nipMsg('${T("NIP enregistré.")}', 'bon');
+      });
+    };
+    document.getElementById('nip-retirer').onclick = function(){
+      var btn = this;
+      if (!retArme) {
+        btn.textContent = '${T("Confirmer le retrait ?")}';
+        retArme = setTimeout(function(){ retArme = null; btn.textContent = '${T("Retirer le NIP")}'; }, 4000);
+        return;
+      }
+      clearTimeout(retArme); retArme = null; btn.textContent = '${T("Retirer le NIP")}';
+      btn.disabled = true;
+      appeler('caisse:nipRetirer').then(function(r){
+        if (!r.ok) { btn.disabled = false; nipMsg(expliquer(r.motif), 'err'); return; }
+        etat({ ok: true, defini: false, nip: null }); nipMsg('${T("NIP retiré — plus aucun prix ne peut être modifié à la caisse.")}', 'bon');
+      });
+    };
+    document.getElementById('nip-fermer').onclick = fermer;
+    v.addEventListener('keydown', function(ev){
+      if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); fermer(); }
+      else if (ev.key === 'Enter' && ev.target && /^nip-(neuf|conf)$/.test(ev.target.id)) { ev.preventDefault(); document.getElementById('nip-enreg').click(); }
+    });
+    document.getElementById('nip-neuf').focus();
   }
 
   function ajouter(pid, taille, couleur){
@@ -759,6 +966,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       imprimeParAppelant: true
     }]).then(function(r){
       enVente = false;
+      /* Une autorisation de prix echue : le jeton est jete, le prix VOULU reste propose dans l editeur —
+         il ne manque que le NIP a retaper. */
+      if (!r.ok && r.motif === 'prix_nip_echu') {
+        LIGNES.forEach(function(l){ if (l.prixForce) { l.prixVoulu = l.prixForce.prix; delete l.prixForce; } });
+        dessinerLignes(); majTotaux();
+      }
       if (!r.ok) { majBouton(); dire(expliquer(r.motif), 'err'); return; }
       // Lu AVANT la remise a zero, qui ramene la liste a son choix par defaut.
       var remise = val('v-remise');
@@ -918,6 +1131,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       document.getElementById('sous').textContent = r.par
         ? (r.par + (r.peutVendre ? '' : ' ${T("· lecture seule")}')) : '';
       if (!r.peutVendre) dire('${T("Votre rôle ne permet pas d’enregistrer une vente.")}', 'att');
+      // Le NIP des prix : le bouton n apparait qu au super-administrateur (le serveur tranche).
+      document.getElementById('btn-nip').style.display = r.superadmin ? '' : 'none';
       if (${rabaisTemoin ? 'true' : 'false'}) {
         /* Une vente TEMOIN, inerte : deux articles, le premier rabaisse de 25 %
            avec sa remarque, et son editeur ouvert. Rien n est enregistre. */
@@ -989,6 +1204,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     reinitialiser();
     var s = document.getElementById('scan'); if (s) s.focus();
   };
+  document.getElementById('btn-nip').onclick = panneauNip;
   document.getElementById('btn-afficheur').onclick = function(){
     var b = this;
     b.disabled = true;
@@ -1027,6 +1243,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (pu) {
       var champ = document.getElementById('ed-pct');
       if (champ) champ.value = pu.getAttribute('data-puce');
+      // Choisir un pourcentage vide le nouveau prix : les deux ne se cumulent pas, et le prix gagnerait.
+      var cp2 = document.getElementById('ed-prix'); if (cp2) cp2.value = '';
       var tous = document.querySelectorAll('[data-puce]');
       for (var m = 0; m < tous.length; m++) tous[m].className = (tous[m] === pu) ? 'on' : '';
       var en = document.getElementById('ed-note'); if (en) en.focus();
@@ -1037,7 +1255,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var rr2 = t.closest('[data-rab-retirer]');
     if (rr2) {
       var j = parseInt(rr2.getAttribute('data-rab-retirer'), 10);
-      if (LIGNES[j]) { delete LIGNES[j].rabaisPct; delete LIGNES[j].rabaisNote; }
+      if (LIGNES[j]) { delete LIGNES[j].rabaisPct; delete LIGNES[j].rabaisNote; delete LIGNES[j].prixForce; delete LIGNES[j].prixVoulu; }
       EDIT = -1; dessinerLignes(); majTotaux();
       return;
     }
@@ -1063,7 +1281,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   document.getElementById('corps').addEventListener('keydown', function(ev){
     if (ev.key !== 'Enter' || EDIT < 0) return;
     var id = ev.target && ev.target.id;
-    if (id === 'ed-pct' || id === 'ed-note') { ev.preventDefault(); appliquerRabais(EDIT); }
+    if (id === 'ed-pct' || id === 'ed-prix' || id === 'ed-note') { ev.preventDefault(); appliquerRabais(EDIT); }
   });
 
   // Echap ferme d abord l editeur de rabais, puis la fenetre — jamais un voile ouvert.

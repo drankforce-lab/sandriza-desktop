@@ -80,6 +80,7 @@ module.exports = {
   'À commander': 'To reorder',
   'En rupture': 'Out of stock',
   'Valeur du stock (au coût)': 'Stock value (at cost)',
+  'Valeur du stock (au prix de vente)': 'Stock value (at selling price)',
   'produit sans coût': 'product without cost',
   'produits sans coût': 'products without cost',
   'Arrivée des commandes': 'Incoming orders',

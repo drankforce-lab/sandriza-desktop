@@ -114,6 +114,7 @@ html.jour .direct{color:#22663a}
 .inv .v.err{color:var(--tx-err)}.inv .v.att{color:var(--tx-att)}
 .valeur{display:flex;justify-content:space-between;align-items:baseline;margin-top:.5rem;font-size:.74rem;color:var(--tx2)}
 .valeur b{font-size:.98rem;color:var(--tx);font-variant-numeric:tabular-nums}
+.valeur.v2{margin-top:.2rem}
 
 /* rangée 2 : la courbe et le fil */
 .courbe{display:flex;flex-direction:column}
@@ -428,7 +429,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div data-ouvre="inventory" title="${T("Ouvrir l’inventaire")}"><div class="k">${T("En main")}</div><div class="v">' + (iv.enMain || 0) + '</div></div>'
       + '<div data-ouvre="inventory-reappro" title="${T("Voir le réapprovisionnement")}"><div class="k">${T("À commander")}</div><div class="v' + (iv.aCommander ? ' att' : '') + '">' + (iv.aCommander || 0) + '</div></div>'
       + '<div data-ouvre="inventory-rupture" title="${T("Voir les produits en rupture")}"><div class="k">${T("En rupture")}</div><div class="v' + (iv.ruptures ? ' err' : '') + '">' + (iv.ruptures || 0) + '</div></div></div>'
-      + '<div class="valeur"><span>${T("Valeur du stock (au coût)")}' + (iv.sansCout ? ' · ' + pl(iv.sansCout, '${T("produit sans coût")}', '${T("produits sans coût")}') : '') + '</span><b>' + fmt(iv.valeur || 0) + '</b></div></section>';
+      + '<div class="valeur"><span>${T("Valeur du stock (au coût)")}' + (iv.sansCout ? ' · ' + pl(iv.sansCout, '${T("produit sans coût")}', '${T("produits sans coût")}') : '') + '</span><b>' + fmt(iv.valeur || 0) + '</b></div>'
+      /* Et au prix de vente (2026-10-14, sa demande). Absente d'un site qui ne la calcule pas encore : rien plutôt qu'un 0. */
+      + (iv.valeurVente != null ? '<div class="valeur v2"><span>${T("Valeur du stock (au prix de vente)")}</span><b>' + fmt(iv.valeurVente) + '</b></div>' : '')
+      + '</section>';
 
     // ── rangée 2 ──
     /* L ARRIVEE DES RETOURS (2026-10-13, sa demande : « un suivi pour les retours au même principe ») : la même

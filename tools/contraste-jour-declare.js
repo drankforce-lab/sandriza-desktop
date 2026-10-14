@@ -48,6 +48,10 @@ module.exports = {
      touchent jamais (contraste reel sur le degrade : > 9). */
   "#f7efe2": 1,           // 1.02  1 fenetre : cartescadeaux.js (.gc-carte)
   "#f0d6a0": 1,           // 1.26  1 fenetre : cartescadeaux.js (.gc-marque)
+  /* ⚠ LA VISIONNEUSE DE LA PHOTOTHEQUE (2026-10-14, sa demande) : une table lumineuse
+     TOUJOURS SOMBRE (rgba(8,9,12,.97)), jour comme nuit — la photo seule. Le banc mesure
+     son encre contre le fond de jour, qu elle ne touche jamais (contraste reel : > 14). */
+  "#e2e8f0": 5,           // 1.10  1 fenetre : photos.js (.visio)
   "#86efac": 4,           // 1.25  5 fenetre(s) : catalogio.js, newsletter.js, produit.js…
   "#bcd2f0": 6,           // 1.38  6 fenetre(s) : analytics.js, images.js, paiements-config.js…
   "#dcc39b": 5,           // 1.52  4 fenetre(s) : campagnes.js, studio.js, telephonie.js…

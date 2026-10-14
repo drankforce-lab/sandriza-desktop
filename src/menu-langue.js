@@ -153,7 +153,6 @@ const MENU_APP_EN = {
   'Compte de paiement': 'Payment account',
   'Heures d’ouverture': 'Opening hours',
   'Icônes personnalisées': 'Custom icons',
-  'Images des produits': 'Product images',
   'Import / Export du catalogue': 'Catalogue import / export',
   'Impression codes-barres': 'Barcode printing',
   'Imprimantes': 'Printers',

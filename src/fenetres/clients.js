@@ -49,6 +49,26 @@ body{background:var(--f-page);color:var(--tx);
 .tuile.cliq{cursor:pointer;user-select:none}
 .tuile.cliq:hover{border-color:rgba(var(--or-rgb),.6)}
 .tuile.on{border-color:var(--or)}
+/* LA BASCULE D AFFICHAGE (2026-10-14, sa demande : « met un mode compact ici ») — la MEME que Commandes,
+   l Inventaire et Produits en vente, en icones : le libelle est dans l infobulle et pour le lecteur d ecran. */
+.vue-bascule{display:inline-flex;align-items:stretch;gap:2px;padding:3px;border-radius:10px;
+  background:var(--v04);border:1px solid var(--v12);flex:0 0 auto}
+.vue-bascule button{display:inline-flex;align-items:center;height:2rem;padding:0 .6rem;
+  border:0!important;border-radius:7px;background:transparent!important;color:var(--tx2)}
+.vue-bascule button svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
+.vue-bascule button:hover:not(.on){color:var(--tx);background:var(--v06)!important}
+.vue-bascule button.on{background:var(--or)!important;color:#1a1208}
+/* L AFFICHAGE COMPACT : une ligne par client — nom et courriel cote a cote, l avatar devient un point, des
+   pastilles plus petites. La pagination mesuree (szAutoPagination) en tire plus de lignes : elle mesure la
+   PREMIERE ligne dessinee, donc la hauteur compacte. Aucune glissiere : la liste reste bornee. */
+.liste.compacte tbody td{padding-top:.2rem!important;padding-bottom:.2rem!important}
+.liste.compacte .rf-prod{gap:.55rem}
+.liste.compacte .rf-av{width:.55rem!important;height:.55rem!important;min-width:0!important;font-size:0!important;
+  border-radius:50%!important;background:var(--or)!important;opacity:.75}
+.liste.compacte .rf-prod>div{display:flex;align-items:baseline;gap:.7rem;min-width:0}
+.liste.compacte .rf-nom{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.liste.compacte .rf-sous{margin-top:0!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-wrap:nowrap}
+.liste.compacte .rf-pill{font-size:.6875rem;padding:.02rem .4rem}
 .barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
   font-size:.78rem;color:var(--tx2)}
@@ -111,6 +131,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   /* La taille de page est MESUREE (szAutoPagination, apres chaque dessin) :
      25 n est que le repli tant que la liste n a pas encore ete disposee. */
   var TAILLE = 25;
+  /* L AFFICHAGE COMPACT (2026-10-14, sa demande : « met un mode compact ici »), le meme que Commandes,
+     l Inventaire et Produits en vente : une ligne par client, retenu sur le poste (sous garde). */
+  var COMPACT = false;
+  try { COMPACT = localStorage.getItem('sz-cli-compact') === '1'; } catch (e) {}
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -230,7 +254,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
           return '<button class="rf-jet' + (ONGLET === o[0] ? ' on' : '') + '" data-onglet="' + o[0] + '">'
             + o[1] + ' (' + o[2] + ')</button>';
         }).join('')
-      + '<span class="rf-droite"><span class="dt">' + (D.total || 0) + ' '
+      + '<span class="rf-droite">'
+      + '<span class="vue-bascule" role="group" aria-label="${T("Affichage de la liste")}">'
+      +   '<button type="button" data-vue="detail" aria-label="${T("Affichage détaillé")}" aria-pressed="' + (!COMPACT) + '" class="' + (!COMPACT ? 'on' : '') + '" title="${T("Affichage détaillé")}">'
+      +     '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="2.5" width="12" height="4.5" rx="1.2"/><rect x="2" y="9" width="12" height="4.5" rx="1.2"/></svg></button>'
+      +   '<button type="button" data-vue="compact" aria-label="${T("Affichage compact : une ligne par client, plus de clients par page")}" aria-pressed="' + COMPACT + '" class="' + (COMPACT ? 'on' : '') + '" title="${T("Affichage compact : une ligne par client, plus de clients par page")}">'
+      +     '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3.5h12M2 6.5h12M2 9.5h12M2 12.5h12"/></svg></button>'
+      + '</span>'
+      + '<span class="dt">' + (D.total || 0) + ' '
       + (D.total > 1 ? '${T("clients")}' : '${T("client")}') + '</span></span>'
       + '</div></div>';
 
@@ -242,13 +273,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (!rows.length) {
       h += '<div class="vide">${T("Aucun client ne correspond.")}</div>';
     } else {
-      h += '<div class="liste"><table><thead><tr><th>${T("Client")}</th>'
+      h += '<div class="liste' + (COMPACT ? ' compacte' : '') + '"><table><thead><tr><th>${T("Client")}</th>'
         + '<th style="text-align:center">${T("Commandes")}</th><th style="text-align:right">${T("Achat total")}</th>'
         + '<th>${T("Segment")}</th><th>${T("Statut")}</th></tr></thead><tbody>'
         + rows.map(function(r){
             var st = r.supprime ? '<span class="rf-pill rouge">${T("Supprimé")}</span>'
               : (r.actif ? '<span class="rf-pill vert">${T("Actif")}</span>' : '<span class="rf-pill">${T("Inactif")}</span>');
-            return '<tr data-id="' + esc(r.id) + '" title="${T("Ouvrir la fiche client")}">'
+            return '<tr data-id="' + esc(r.id) + '" data-ctx-titre="' + esc(r.nom || r.courriel || '') + '" title="${T("Ouvrir la fiche client")}">'
               // ⚠ LE CADENAS EST SUR LA LIGNE, pas seulement dans la fiche ouverte.
         // Sans lui, un collegue devait CLIQUER pour decouvrir que la fiche
         // etait prise — l information existait, mais pas la ou l on regarde.
@@ -339,13 +370,94 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (!t || !t.closest) return;
     var og = t.closest('[data-onglet]');
     if (og) { ONGLET = og.getAttribute('data-onglet'); PAGE = 0; Q = ''; charger(); return; }
+    var vb = t.closest('[data-vue]');
+    if (vb) {
+      var c = vb.getAttribute('data-vue') === 'compact';
+      if (c !== COMPACT) {
+        COMPACT = c;
+        try { localStorage.setItem('sz-cli-compact', COMPACT ? '1' : '0'); } catch (e) {}
+        /* Le dessin D ABORD (la mesure lit la hauteur de la nouvelle ligne), puis la page 1 : la taille
+           mesuree change, l ancien numero de page ne designe plus les memes clients. */
+        PAGE = 0; dessiner();
+      }
+      return;
+    }
     if (t.closest('button') || t.closest('input')) return;
     var tr = t.closest('tr[data-id]');
     if (!tr) return;
+    ouvrirFiche(tr.getAttribute('data-id'), '');
+  };
+
+  /* Ouvrir la fiche, avec une INTENTION au besoin (« modifier », « supprimer », « purger ») : la fiche
+     s ouvre et lance elle-meme son geste — meme bouton, memes droits, meme confirmation en deux temps. Le
+     modele de Commandes (« id@supprimer ») : la confirmation montre le nom, le courriel et ce qui est
+     conserve avant le second clic, ce qu un menu ne peut pas dire. */
+  function ouvrirFiche(id, intention){
     dire('${T("Ouverture…")}');
-    appeler('clients:ouvrir', [tr.getAttribute('data-id')]).then(function(r){
+    appeler('clients:ouvrir', [id + (intention ? '@' + intention : '')]).then(function(r){
       dire(r.ok ? '${T("Fiche client ouverte dans sa fenêtre.")}' : expliquer(r), r.ok ? 'bon' : 'err');
     });
+  }
+
+  /* ══ LE CLIC DROIT SUR UN CLIENT (2026-10-14) ═════════════════════════════════════════════════════════
+     Sa demande : « le menu contextuel dans les clients tu ne me donnes que le choix Ouvrir, tu dois me donner
+     les autres options aussi ». La ligne n a aucun bouton : le menu automatique du socle n y trouvait que
+     << Ouvrir >>. Les gestes sont ceux de la FICHE (client.js), rien de plus — memes operations du pont
+     (client:etat, client:restaurer, client:etatCompte), memes droits (peutEcrire = customers:edit,
+     peutSupprimer = customers:delete, poses par clients:liste) :
+     · les gestes reversibles d un clic (activer, desactiver, restaurer, etat de compte) partent d ici ;
+     · << Modifier >> et les deux suppressions OUVRENT LA FICHE, confirmation armee — la mise a la corbeille dit
+       ce qui est conserve, la purge dit qu elle est IRREVERSIBLE ; un menu ne le dirait pas.
+     ⚠ LA PURGE n est offerte que sur un dossier PURGEABLE (supprime ET zero commande, la meme regle que la
+       fiche : 6 ans de conservation fiscale). Un geste qui refuse toujours fait chercher la panne ailleurs.
+     ⚠ FICHE TENUE PAR UN COLLEGUE (cadenas 'users') : la fiche se mettrait en lecture seule ; le menu fait
+       pareil — il le dit, et n offre plus les gestes d ecriture.
+     ⚠ UN SITE ANTERIEUR n envoie ni peutEcrire ni peutSupprimer : les gestes d ecriture n y paraissent pas,
+       la fiche reste la porte. */
+  window.szCtxEntrees = function(ligne){
+    if (!ligne.matches || !ligne.matches('tr[data-id]') || !D) return null;
+    var id = ligne.getAttribute('data-id');
+    var r = (D.lignes || []).filter(function(x){ return String(x.id) === id; })[0];
+    if (!r) return null;
+    var v = (typeof _szVerrous !== 'undefined' && _szVerrous) ? _szVerrous['users|' + id] : null;
+    var pris = !!(v && !v.mine);
+    var ecrire = !!D.peutEcrire && !pris;
+    var l = [{ lib: '${T("Ouvrir la fiche")}', fn: function(){ ouvrirFiche(id, ''); } }];
+    if (ecrire && !r.supprime) l.push({ lib: '${T("Modifier la fiche…")}', fn: function(){ ouvrirFiche(id, 'modifier'); } });
+    l.push({ lib: '${T("État de compte")}', fn: function(){
+      dire('${T("Impression de l’état de compte…")}');
+      appeler('client:etatCompte', [id]).then(function(x){
+        dire(x.ok ? '${T("État de compte envoyé à l’impression.")}' : expliquer(x), x.ok ? 'bon' : 'err');
+      }); } });
+    if (r.courriel) l.push({ lib: '${T("Copier le courriel")}', fn: function(){
+      try { navigator.clipboard.writeText(r.courriel); dire('${T("Courriel copié : ")}' + r.courriel, 'bon'); } catch (e) {} } });
+    if (pris) {
+      l.push({ trait: true });
+      l.push({ lib: '${T("En traitement par")} ' + (v.par || '${T("un collègue")}'), off: true });
+    } else if (ecrire) {
+      l.push({ trait: true });
+      if (r.supprime) l.push({ lib: '${T("Restaurer le client")}', fn: function(){
+        appeler('client:restaurer', [id]).then(function(x){
+          if (!x.ok) { dire(expliquer(x), 'err'); return; }
+          dire('${T("Client restauré.")}', 'bon'); charger();
+        }); } });
+      else l.push({ lib: r.actif ? '${T("Désactiver le compte")}' : '${T("Activer le compte")}', fn: function(){
+        var versActif = !r.actif;
+        appeler('client:etat', [id, versActif]).then(function(x){
+          if (!x.ok) { dire(expliquer(x), 'err'); return; }
+          dire(versActif ? '${T("Compte activé.")}' : '${T("Compte désactivé.")}', 'bon'); charger();
+        }); } });
+    }
+    if (D.peutSupprimer) {
+      if (!r.supprime) {
+        l.push({ trait: true });
+        l.push({ lib: '${T("Supprimer le client…")}', dgr: true, fn: function(){ ouvrirFiche(id, 'supprimer'); } });
+      } else if (!r.commandes) {
+        l.push({ trait: true });
+        l.push({ lib: '${T("Supprimer définitivement…")}', dgr: true, fn: function(){ ouvrirFiche(id, 'purger'); } });
+      }
+    }
+    return l;
   };
 
   var enCours = false, RELANCE = false;

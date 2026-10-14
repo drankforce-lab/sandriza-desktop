@@ -307,6 +307,32 @@ tr:hover .act .ic{opacity:1}
    carre gris fonce (vu le 2026-09-26). Ses glyphes sont du texte, pas des
    emojis : aucun filtre. */
 .act .ic,html.jour .act .ic{filter:none}
+/* ── LA VISIONNEUSE (2026-10-14, sa demande : « un double-clic devrait m ouvrir
+   la photo en resolution plus grande, sans les options ») ─────────────────
+   Toujours sombre, jour comme nuit : c est une table lumineuse, la photo seule.
+   ⚠ AUCUNE BARRE DE DEFILEMENT : la photo se CONTIENT dans le cadre (contain),
+   elle ne deborde jamais. */
+.visio:focus{outline:none}
+.visio{position:fixed;inset:0;z-index:140;background:rgba(8,9,12,.97);overflow:hidden;
+  display:flex;align-items:center;justify-content:center;user-select:none}
+.visio .vcadre{position:absolute;inset:3.2rem 4.6rem;display:flex;align-items:center;justify-content:center}
+.visio .vcadre img{max-width:100%;max-height:100%;object-fit:contain;display:block;
+  box-shadow:0 10px 40px rgba(0,0,0,.6)}
+.visio .vcadre .vrien{color:#e2e8f0;font-size:.9rem;text-align:center;line-height:1.5}
+.visio .vbandeau{position:absolute;left:0;right:0;top:0;height:3.2rem;display:flex;align-items:center;
+  gap:.8rem;padding:0 1rem;color:#e2e8f0;font-size:.82rem}
+.visio .vbandeau .vnom2{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#e2e8f0}
+.visio .vbandeau .vnom2 b{color:#e2e8f0;font-weight:600;margin-right:.5rem}
+.visio .vbandeau .vcompte{flex:0 0 auto;color:#e2e8f0;font-variant-numeric:tabular-nums}
+html .visio button,html.jour .visio button{font:inherit;background:rgba(255,255,255,.08);color:#e2e8f0;
+  border:1px solid rgba(255,255,255,.18);border-radius:999px;cursor:pointer;filter:none}
+html .visio button:hover,html.jour .visio button:hover{background:rgba(255,255,255,.18)}
+html .visio button:disabled,html.jour .visio button:disabled{opacity:.25;cursor:default}
+.visio .vferme{flex:0 0 auto;width:2.2rem;height:2.2rem;padding:0;font-size:1rem;line-height:1}
+.visio .vfl{position:absolute;top:50%;transform:translateY(-50%);width:3.2rem;height:3.2rem;padding:0;
+  font-size:1.6rem;line-height:1}
+.visio .vfl.g{left:.8rem}
+.visio .vfl.d{right:.8rem}
 /* ── L ASSISTANT ───────────────────────────────────────────────────────── */
 .asst{position:fixed;inset:0;background:rgba(6,10,18,.78);z-index:70;display:flex;
   align-items:center;justify-content:center;padding:1rem}
@@ -669,13 +695,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + (ro ? '' : '<button id="p-assistant"'
           + ' title="${T("Choisir une source, sélectionner les photos, puis les traiter")}">'
           + '${T("⚙ Traitement en lot")}</button>')
-      // Studio virtuel : mise en scène guidée (Photoroom). On y choisit une photo
-      // de la photothèque directement, d'où l'entrée ici.
-      /* Retirer le fond uni des photos des FICHES (2026-10-06) : le meme geste que
-         Photos > Retirer le fond uni du catalogue de l ecran web, memes coeurs. */
-      + (ro ? '' : '<button id="p-fondcat" title="${T("Détourer les photos des fiches produits (fond gris ou blanc uni) — avant / après à vérifier")}">'
-          + '${T("Fond uni du catalogue")}</button>')
-      + '<button id="p-studio" title="${T("Mise en scène guidée : mannequin virtuel, fantôme habillé, produit à plat")}"><span class="ic">🎨</span> ${T("Studio virtuel")}</button>'
+      /* « Fond uni du catalogue » (2026-10-06) RETIRÉ de la barre le 2026-10-14, sa demande (« retire ça, je ne
+         sais pas ce que c est ») — il échouait de surcroît sur une fiche dont additionalImages n est pas une
+         liste. Le gestionnaire plus bas reste inerte : il ne trouve plus le bouton (garde « if (fcat) »). */
+      /* « Studio virtuel » (mise en scène Photoroom) RETIRÉ de la barre le 2026-10-14, sa demande. Le gestionnaire
+         plus bas ne trouve plus le bouton (garde « if (stud) »). */
       + '<span class="sep"></span>'
       + '<input aria-label="${T("Code")}, nom, article" type="search" id="p-q" placeholder="${T("Code")}, nom, article…" value="' + esc(Q) + '">'
       + '<select id="p-tri" aria-label="${T("Nombre de photos par page")}">'
@@ -2120,7 +2144,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
        sur une fiche produit, dans un journal et sur une etiquette imprimee : le
        laisser bouger casserait la seule chose qui relie tout cela. */
     var h = '<div class="voile" id="p-voile"><div class="boite">'
-      + '<div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.4rem">'
+      + '<div class="sz-plein-ici" style="display:flex;align-items:center;gap:.4rem;margin-bottom:.4rem">'
       + '<span class="dt" style="flex:1 1 auto">${T("Inspecteur")}</span>'
       + '<button class="mini" id="p-fermer-insp" title="${T("Fermer le panneau")}">✕</button></div>'
       + '<h3><span class="num">' + esc(r.code) + '</span> '
@@ -3003,7 +3027,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + '<button data-g="piv">${T("Pivoter d’un quart de tour")}</button>'
         + '<div class="trait"></div>';
     }
-    h += '<button data-g="ouvre">${T("Ouvrir la fiche (fond, article, export)")}</button>';
+    h += '<button data-g="ouvre">${T("Voir l’aperçu")}</button>';
     if (!ro) h += '<div class="trait"></div><button class="dgr" data-g="sup">'
       + (arme ? '${T("Confirmer la suppression")}' : '${T("Supprimer…")}') + '</button>';
     var m = document.createElement('div');
@@ -3044,6 +3068,132 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     menuPhoto(ev, tr.getAttribute('data-id'));
   };
 
+  /* ══ LA VISIONNEUSE (2026-10-14, sa demande) ══════════════════════════════
+     « un double-clic devrait m ouvrir la photo en resolution plus grande, sans
+     les options, et je devrais aussi avoir la possibilite, avec le clavier ou
+     la souris, de defiler les photos dans ce mode ».
+     • LA PHOTO PLEINE TAILLE : « apercu » EST deja l image rangee entiere (une
+       seule image par photo depuis photos:ranger) — la grille la reduit, ici on
+       la montre au plus grand que le cadre permet.
+     • L ORDRE EST CELUI DE LA LISTE FILTREE ET TRIEE, TOUTES PAGES CONFONDUES :
+       on part de la page visible (tout de suite), puis on relit le filtre entier
+       par paquets de 500 (le plafond de photos:donnees). Si la relecture echoue,
+       on reste sur la page visible.
+     • Fleches gauche/droite, haut/bas, Page prec./suiv., molette, fleches a
+       l ecran ; Debut/Fin ; Echap ou la croix ferment.
+     • Elle vit HORS de « corps » : un redessin de la grille ne la detruit pas. */
+  var VISIO = null;   // { liste, i, el, molette, jeton }
+  function visioOuvrir(id){
+    if (!D) return;
+    fermerMenuPhoto();
+    var page = (D.lignes || []).slice();
+    var i = 0;
+    page.forEach(function(x, k){ if (x.id === id) i = k; });
+    if (!page.length) return;
+    visioFermer();
+    var el = document.createElement('div');
+    el.className = 'visio'; el.id = 'p-visio';
+    el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true');
+    el.setAttribute('aria-label', '${T("Aperçu")}');
+    el.innerHTML = '<div class="vbandeau"><span class="vnom2" id="pv-nom"></span>'
+      + '<span class="vcompte" id="pv-compte"></span>'
+      + '<button type="button" class="vferme" id="pv-x" title="${T("Fermer")}" aria-label="${T("Fermer")}">✕</button></div>'
+      + '<div class="vcadre" id="pv-cadre"></div>'
+      + '<button type="button" class="vfl g" id="pv-prec" title="${T("Photo précédente")}" aria-label="${T("Photo précédente")}">‹</button>'
+      + '<button type="button" class="vfl d" id="pv-suiv" title="${T("Photo suivante")}" aria-label="${T("Photo suivante")}">›</button>';
+    document.body.appendChild(el);
+    var jeton = {};
+    VISIO = { liste: page, i: i, el: el, molette: 0, jeton: jeton,
+              decalage: (D.page || 0) * (D.taille || TAILLE), total: D.trouvees || page.length };
+    document.getElementById('pv-x').onclick = visioFermer;
+    document.getElementById('pv-prec').onclick = function(){ visioAller(VISIO.i - 1); };
+    document.getElementById('pv-suiv').onclick = function(){ visioAller(VISIO.i + 1); };
+    el.addEventListener('wheel', function(ev){
+      ev.preventDefault();
+      if (!VISIO) return;
+      // Un cran de molette = une photo ; le pave tactile, plus bavard, est freine.
+      var mnt = Date.now();
+      if (mnt - VISIO.molette < 160) return;
+      var d = Math.abs(ev.deltaY) >= Math.abs(ev.deltaX) ? ev.deltaY : ev.deltaX;
+      if (!d) return;
+      VISIO.molette = mnt;
+      visioAller(VISIO.i + (d > 0 ? 1 : -1));
+    }, { passive: false });
+    visioDessiner();
+    el.tabIndex = -1; el.focus();
+    visioToutLire(jeton);
+  }
+  /* Relit le filtre entier (meme recherche, meme tri), page apres page de 500. */
+  function visioToutLire(jeton){
+    if ((D.pages || 1) <= 1) return;
+    var q = Q, tri = TRI, tout = [], p = 0;
+    var suite = function(){
+      appeler('photos:donnees', [{ q: q, tri: tri, taille: 500, page: p }]).then(function(r){
+        if (!VISIO || VISIO.jeton !== jeton) return;
+        if (!r || !r.ok) return;   // on garde la page visible
+        tout = tout.concat(r.lignes || []);
+        p += 1;
+        if (p < (r.pages || 1) && p < 40) { suite(); return; }
+        var cour = VISIO.liste[VISIO.i];
+        var j = -1;
+        tout.forEach(function(x, k){ if (cour && x.id === cour.id) j = k; });
+        if (j < 0) return;
+        VISIO.liste = tout; VISIO.i = j; VISIO.decalage = 0; VISIO.total = tout.length;
+        visioDessiner();
+      }).catch(function(){});
+    };
+    suite();
+  }
+  function visioAller(i){
+    if (!VISIO) return;
+    i = Math.max(0, Math.min(VISIO.liste.length - 1, i));
+    if (i === VISIO.i) return;
+    VISIO.i = i;
+    visioDessiner();
+  }
+  function visioDessiner(){
+    if (!VISIO) return;
+    var l = VISIO.liste, i = VISIO.i, r = l[i];
+    if (!r) return;
+    var cadre = document.getElementById('pv-cadre');
+    if (cadre) cadre.innerHTML = r.apercu
+      ? '<img src="' + esc(r.apercu) + '" alt="' + esc(r.nom || r.code) + '" draggable="false">'
+      : '<div class="vrien">${T("Cette photo n’a pas atteint le stockage.")}</div>';
+    var n = document.getElementById('pv-nom');
+    if (n) n.innerHTML = '<b>' + esc(r.code) + '</b>' + esc(r.nom && r.nom !== r.code ? r.nom : '');
+    var c = document.getElementById('pv-compte');
+    // Tant que la page visible seule est connue, le rang se compte dans le filtre entier.
+    if (c) c.textContent = (VISIO.decalage + i + 1) + ' / ' + Math.max(VISIO.total, l.length);
+    var bp = document.getElementById('pv-prec'), bs = document.getElementById('pv-suiv');
+    if (bp) bp.disabled = (i <= 0);
+    if (bs) bs.disabled = (i >= l.length - 1);
+    // Le prechargement : les voisines sont deja en memoire quand on y passe.
+    [i + 1, i - 1, i + 2].forEach(function(k){
+      var v = l[k];
+      if (v && v.apercu) { var im = new Image(); im.src = v.apercu; }
+    });
+  }
+  function visioFermer(){
+    if (!VISIO) return;
+    if (VISIO.el && VISIO.el.parentNode) VISIO.el.parentNode.removeChild(VISIO.el);
+    VISIO = null;
+  }
+  /* ⚠ A LA CAPTURE, SUR WINDOW : c est le premier a entendre la touche. Il la
+     MARQUE (preventDefault) sans l arreter — le veilleur d activite du socle
+     doit encore l entendre. Le gestionnaire d Echap du bas lit la marque : sans
+     elle, Echap fermerait aussi l inspecteur — ou la FENETRE entiere. */
+  window.addEventListener('keydown', function(ev){
+    if (!VISIO) return;
+    var k = ev.key, pris = true;
+    if (k === 'Escape') visioFermer();
+    else if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown') visioAller(VISIO.i + 1);
+    else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') visioAller(VISIO.i - 1);
+    else if (k === 'Home') visioAller(0);
+    else if (k === 'End') visioAller(VISIO.liste.length - 1);
+    else pris = false;
+    if (pris) ev.preventDefault();
+  }, true);
+
   /* ⚠ UN CLIC SUR UNE COMMANDE EST TRAITE PAR SA COMMANDE, jamais par ce
      gestionnaire general : sans cette garde, le clic qui vient d ARMER un bouton
      remonte jusqu ici et le desarme dans la meme foulee (le piege de 1.72.0). */
@@ -3054,7 +3204,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (jf) { fond(jf.getAttribute('data-fond'), ''); return; }
     var pp = t.closest('[data-pid]');
     if (pp) { attacher(pp.getAttribute('data-pid')); return; }
-    if (t.closest('.boite')) return;
+    if (t.closest('.boite')) {
+      // Le double-clic sur l apercu de l inspecteur ouvre aussi la visionneuse.
+      if (ev.detail >= 2 && DETAIL && t.closest('.apercu')) visioOuvrir(DETAIL.id);
+      return;
+    }
     /* ⚠ ON NE FERME PLUS EN CLIQUANT A COTE. Le panneau ne recouvre plus rien :
        cliquer ailleurs, c est vouloir travailler ailleurs — souvent sur une
        AUTRE photo, qui prend simplement la place dans l inspecteur. Fermer se
@@ -3063,6 +3217,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var tr = t.closest('tr[data-id]') || t.closest('.vcarte[data-id]');
     if (tr) {
       var id = tr.getAttribute('data-id');
+      /* ⚠ LE DOUBLE-CLIC SE LIT SUR LE SECOND CLIC (ev.detail === 2), PAS PAR
+         « dblclick » : le premier clic redessine la grille (l inspecteur
+         s ouvre), et l element qui recevrait « dblclick » n existe plus. Le
+         second clic, lui, ne refait PAS le simple clic : il n y a donc qu un
+         seul dessin, et la visionneuse s ouvre par-dessus. */
+      if (ev.detail >= 2) { visioOuvrir(id); return; }
       var r = (D.lignes || []).filter(function(x){ return x.id === id; })[0];
       if (r) { DETAIL = r; SUPPR_ARME = ''; SUPPR_ARME_INSP = false; ATTACHE = false; dessiner(); }
     }
@@ -3193,6 +3353,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 
   document.addEventListener('keydown', function(ev){
     if (ev.key === 'Escape') {
+      if (ev.defaultPrevented) return;   // deja pris (la visionneuse s est fermee)
       ev.preventDefault();
       if (DETAIL) { fermerDetail(); return; }
       P.fermer();

@@ -116,9 +116,12 @@ button.mini{padding:.14rem .5rem;font-size:.75rem}
 .coord .ligne .k{font-size:.7rem}
 `;
 
-/** Page complète de la fenêtre native « Fiche client ». `id` = client. */
-function pageClient(id) {
+/** Page complète de la fenêtre native « Fiche client ». `id` = client ;
+ *  `intention` (2026-10-14, le clic droit de la liste) = « modifier »,
+ *  « supprimer » ou « purger » : la fiche lance elle-même ce geste. */
+function pageClient(id, intention) {
   const depart = JSON.stringify(String(id || ''));
+  const intDepart = JSON.stringify(/^(modifier|supprimer|purger)$/.test(String(intention || '')) ? String(intention) : '');
   return `${TETE()}
 <title>${T("Fiche client — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -149,6 +152,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
   var sous = document.getElementById('sous');
 
   var ID = ${depart};
+  /* L INTENTION venue du clic droit de la liste Clients (2026-10-14) : la fiche CLIQUE son propre bouton
+     une fois chargee ET son verrou connu — un bouton absent (droit, cadenas d un collegue, dossier non
+     purgeable) n est pas clique, et la fiche le dit. Memes droits, meme confirmation en deux temps. */
+  var INTENTION = ${intDepart};
   var R = null;
   var EDITION = false;
   var enCours = false;
@@ -511,7 +518,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
 
   var VERROU_PRIS = false;
   function prendreVerrou(){
-    appeler('verrou:prendre', ['users', ID]).then(function(v){
+    return appeler('verrou:prendre', ['users', ID]).then(function(v){
       if (!v || !v.ok) return;
       VERROU_PRIS = !!v.obtenu;
       if (v.obtenu) { sous.textContent = v.horsLigne ? '${T("hors ligne")}' : '${T("Section verrouillée en modification par :")} ' + (v.par || '${T("vous")}'); return; }
@@ -528,6 +535,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
   }
   window.addEventListener('beforeunload', function(){ rendreVerrou(); });
   window.szRevenir = function(){ EDITION = false; recharger(); };
+  function appliquerIntention(){
+    var q = INTENTION; INTENTION = '';
+    if (!q || !R || document.querySelector('.voile')) return;
+    var b = document.getElementById(q === 'modifier' ? 'btn-modifier' : (q === 'purger' ? 'btn-purger' : 'btn-corbeille'));
+    if (b && !b.disabled) { b.click(); return; }
+    dire('${T("Ce geste n’est pas offert sur cette fiche.")}', 'att');
+  }
+  /* Une fiche DEJA OUVERTE recoit l intention ici (main.js, fenetre:client) au lieu d en ouvrir une 2e. */
+  window.szIntention = function(q){
+    if (!/^(modifier|supprimer|purger)$/.test(String(q || '')) || EDITION) return;
+    INTENTION = String(q);
+    recharger().then(appliquerIntention);
+  };
 
   function voile(html, apres){
     var v = document.createElement('div');
@@ -543,7 +563,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
     if (ev.key === 'Escape' && !document.querySelector('.voile')) { ev.preventDefault(); rendreVerrou(); P.fermer(); }
   });
 
-  recharger().then(function(){ if (R) prendreVerrou(); });
+  recharger().then(function(){ if (R) return prendreVerrou(); }).then(appliquerIntention);
 })();
 </script>
 </body></html>`;

@@ -63,6 +63,12 @@ button.actif{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
 button.ic{width:28px;height:28px;padding:0;display:inline-flex;align-items:center;justify-content:center;font-size:1rem;line-height:1}
 button.ic.plus{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent)}
+/* LE « + » DES TABLEAUX, CENTRÉ (2026-10-14, sa demande : « corrige l alignement du + dans le tableau dans tous
+   les onglets »). C était le caractère pleine chasse « ＋ » : sa boîte de glyphe n est pas centrée sur la ligne,
+   il tombait sous le milieu du bouton et à gauche. Un trait SVG est centré par construction ; l en-tête qui le
+   porte se cale au milieu de la rangée et colle au bord droit, au-dessus des boutons des lignes. */
+button.ic.plus svg{width:14px;height:14px;display:block}
+th:last-child:has(> button.ic.plus){vertical-align:middle;padding-top:.2rem;padding-bottom:.2rem}
 /* ⚠ UN BOUTON QUI PORTE LA CLASSE .ic HERITE DU FILTRE DES ICONES du socle
    (gris + assombri en jour) — sur TOUT le bouton, fond compris : il sortait en
    carre gris fonce (vu le 2026-09-26). Ses glyphes sont du texte, pas des
@@ -162,6 +168,8 @@ function pageInvMeta(ouverture) {
 (function(){
   'use strict';
   var P = window.szPont;
+  // Le « + » des en-têtes de tableau : un trait centré par construction (voir button.ic.plus svg).
+  var PLUS_SVG = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>';
 ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
   var sous = document.getElementById('sous');
@@ -268,7 +276,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<td style="text-align:right">' + rm + '</td></tr>';
     }).join('');
     var empty = (!items.length && ADDING !== type) ? '<tr><td colspan="4" class="vide">${T("Aucun élément — cliquez sur + pour en ajouter.")}</td></tr>' : '';
-    var plus = (D.peut.edit && ADDING !== type) ? '<button class="ic plus" data-attradd="' + type + '" title="${T("Ajouter")}">＋</button>' : '';
+    var plus = (D.peut.edit && ADDING !== type) ? '<button class="ic plus" data-attradd="' + type + '" title="${T("Ajouter")}">' + PLUS_SVG + '</button>' : '';
     return '<p class="aide">${T("Utilisés comme filtres dans la boutique et dans le formulaire produit.")}</p>'
       + '<div class="carte"><table><thead><tr><th>${T("Clé interne")}</th><th>${T("Étiquette FR")}</th><th>${T("Étiquette EN")}</th>'
       + '<th style="width:90px;text-align:right">' + plus + '</th></tr></thead>'
@@ -294,7 +302,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<td style="text-align:right">' + rm + '</td></tr>';
     }).join('');
     var empty = (!items.length && ADDING !== 'labels') ? '<tr><td colspan="5" class="vide">${T("Aucune étiquette — cliquez sur + pour en ajouter.")}</td></tr>' : '';
-    var plus = (D.peut.edit && ADDING !== 'labels') ? '<button class="ic plus" data-attradd="labels" title="${T("Ajouter")}">＋</button>' : '';
+    var plus = (D.peut.edit && ADDING !== 'labels') ? '<button class="ic plus" data-attradd="labels" title="${T("Ajouter")}">' + PLUS_SVG + '</button>' : '';
     return ''
       + '<div class="carte"><table><thead><tr><th>${T("Aperçu")}</th><th>${T("Nom FR")}</th><th>${T("Nom EN")}</th><th>${T("Couleur")}</th>'
       + '<th style="width:90px;text-align:right">' + plus + '</th></tr></thead>'
@@ -417,7 +425,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<td style="text-align:right">' + edit + del + '</td></tr>';
     }).join('');
     var empty = (!cats.length && CATEDIT !== '__new__') ? '<tr><td colspan="9" class="vide">${T("Aucune catégorie — cliquez sur + pour en créer une.")}</td></tr>' : '';
-    var plus = (D.peut.ajout && CATEDIT !== '__new__') ? '<button class="ic plus" data-catadd="1" title="${T("Ajouter")}">＋</button>' : '';
+    var plus = (D.peut.ajout && CATEDIT !== '__new__') ? '<button class="ic plus" data-catadd="1" title="${T("Ajouter")}">' + PLUS_SVG + '</button>' : '';
     return ''
       + '<div class="carte" style="overflow-x:auto"><table><thead><tr>'
       + '<th>${T("Couleur")}</th><th>${T("Nom affiché")}</th><th>${T("Nom EN")}</th><th>${T("Slug")}</th><th>${T("Code SKU")}</th>'

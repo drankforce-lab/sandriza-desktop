@@ -90,4 +90,29 @@ module.exports = {
   'comptes en service': 'accounts in use',
   'sans activité récente': 'no recent activity',
   'dans la corbeille': 'in the recycle bin',
+
+  /* ══ L AFFICHAGE COMPACT (2026-10-14, sa demande : « met un mode compact ici ») ══
+     Les memes mots que Commandes et Produits en vente : une bascule, deux icones. */
+  'Affichage de la liste': 'List display',
+  'Affichage détaillé': 'Detailed view',
+  'Affichage compact : une ligne par client, plus de clients par page': 'Compact view: one line per customer, more customers per page',
+  /* ══ LE CLIC DROIT SUR UN CLIENT (2026-10-14) ══
+     Les gestes de la FICHE, rien de plus ; « Modifier » et les deux suppressions
+     ouvrent la fiche, confirmation armee. « Ouverture… », « En traitement par »
+     et « un collègue » viennent du socle. */
+  'Ouvrir la fiche': 'Open the record',
+  'Modifier la fiche…': 'Edit the record…',
+  'État de compte': 'Account statement',
+  'Impression de l’état de compte…': 'Printing the account statement…',
+  'État de compte envoyé à l’impression.': 'Account statement sent to the printer.',
+  'Copier le courriel': 'Copy the email',
+  'Courriel copié : ': 'Email copied: ',
+  'Restaurer le client': 'Restore the customer',
+  'Client restauré.': 'Customer restored.',
+  'Désactiver le compte': 'Deactivate the account',
+  'Activer le compte': 'Activate the account',
+  'Compte activé.': 'Account activated.',
+  'Compte désactivé.': 'Account deactivated.',
+  'Supprimer le client…': 'Delete the customer…',
+  'Supprimer définitivement…': 'Delete permanently…',
 };
