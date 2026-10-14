@@ -211,10 +211,17 @@ module.exports = {
   'NIP des prix': 'Price PIN',
   'Aucun NIP défini — un super administrateur doit en créer un.': 'No PIN set — a super administrator must create one.',
   'NIP incorrect.': 'Incorrect PIN.',
-  'Trop d’essais : la modification de prix est bloquée pour quelques minutes.': 'Too many attempts: price changes are locked for a few minutes.',
+  'Trop d’essais : les prix modifiés et les rabais sont bloqués pour quelques minutes.': 'Too many attempts: price changes and discounts are locked for a few minutes.',
   'Le nouveau prix doit être un montant supérieur à zéro.': 'The new price must be an amount above zero.',
-  'L’autorisation d’un prix modifié n’est plus valable (30 minutes, une seule vente) — rouvrez l’article (bouton %) et retapez le NIP.':
-    'A price change authorization is no longer valid (30 minutes, one sale) — reopen the item (% button) and enter the PIN again.',
+  'Une autorisation par NIP n’est plus valable (30 minutes, une seule vente) — retapez le NIP.':
+    'A PIN authorization is no longer valid (30 minutes, one sale) — enter the PIN again.',
+  'Un rabais exige le NIP de la boutique.': 'A discount requires the store PIN.',
+  'Le rabais doit être supérieur à zéro.': 'The discount must be above zero.',
+  'Accorder un rabais exige le NIP de la boutique.': 'Granting a discount requires the store PIN.',
+  'Valider le rabais': 'Confirm discount',
+  'Rabais accordé — NIP vérifié.': 'Discount granted — PIN checked.',
+  'Prix modifié — super administrateur, sans NIP.': 'Price changed — super administrator, no PIN.',
+  'Prix modifié — super administrateur': 'Price changed — super administrator',
   'Le NIP compte de 4 à 8 chiffres.': 'The PIN has 4 to 8 digits.',
   'Réservé aux super administrateurs.': 'Reserved for super administrators.',
   'Votre rôle a changé depuis la connexion — reconnectez-vous.': 'Your role has changed since you signed in — sign in again.',
@@ -224,8 +231,8 @@ module.exports = {
   'Prix modifié': 'Price changed',
   'Nouveau prix': 'New price',
   'Nouveau prix unitaire — exige le NIP de sécurité': 'New unit price — requires the security PIN',
-  'Un nouveau prix remplace le pourcentage (ils ne se cumulent pas) et exige le NIP de sécurité. La remarque en est le motif.':
-    'A new price replaces the percentage (they do not add up) and requires the security PIN. The remark is its reason.',
+  'Un nouveau prix remplace le pourcentage (ils ne se cumulent pas). Prix et rabais exigent le NIP de sécurité, sauf pour un super administrateur. La remarque en est le motif.':
+    'A new price replaces the percentage (they do not add up). Prices and discounts require the security PIN, except for a super administrator. The remark is its reason.',
   'NIP de sécurité': 'Security PIN',
   'Modifier un prix exige le NIP de la boutique.': 'Changing a price requires the store PIN.',
   'Valider le prix': 'Confirm price',
@@ -233,15 +240,15 @@ module.exports = {
   'La vente a changé pendant la vérification — refaites la modification.': 'The sale changed during the check — make the change again.',
   'Prix modifié — NIP vérifié.': 'Price changed — PIN checked.',
   'NIP incorrect — essais restants :': 'Incorrect PIN — attempts left:',
-  'NIP incorrect — la modification de prix est bloquée 15 minutes.': 'Incorrect PIN — price changes are locked for 15 minutes.',
-  'Trop d’essais — modification de prix bloquée. Minutes restantes :': 'Too many attempts — price changes locked. Minutes left:',
+  'NIP incorrect — prix modifiés et rabais bloqués 15 minutes.': 'Incorrect PIN — price changes and discounts locked for 15 minutes.',
+  'Trop d’essais — prix modifiés et rabais bloqués. Minutes restantes :': 'Too many attempts — price changes and discounts locked. Minutes left:',
   'NIP des prix modifiés': 'Price change PIN',
-  'Exigé à la caisse pour modifier le prix d’un article. Visible et modifiable par les super administrateurs seulement.':
-    'Required at the till to change an item price. Visible and editable by super administrators only.',
+  'Exigé à la caisse pour modifier un prix ou accorder un rabais — les super administrateurs en sont dispensés. Visible et modifiable par eux seulement.':
+    'Required at the till to change a price or grant a discount — super administrators are exempt. Visible and editable by them only.',
   'Lecture…': 'Loading…',
   'Nouveau NIP': 'New PIN',
   'Retirer le NIP': 'Remove PIN',
-  'Aucun NIP défini — la modification de prix est refusée à la caisse.': 'No PIN set — price changes are refused at the till.',
+  'Aucun NIP défini — prix modifiés et rabais sont refusés à la caisse (sauf aux super administrateurs).': 'No PIN set — price changes and discounts are refused at the till (except for super administrators).',
   'Un NIP est enregistré, mais il ne se relit plus sur ce serveur — enregistrez-en un nouveau.':
     'A PIN is saved, but it can no longer be read on this server — save a new one.',
   'NIP actuel': 'Current PIN',
