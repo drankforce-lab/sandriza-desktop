@@ -45,6 +45,10 @@ module.exports = {
     'newsletter.js': { '.pop .cta': '#8f6f42' },
     'produit.js': { '.vue .x:hover,.vign .x:hover': '#e04141' },
     'studio.js': { '.jeton.prim': '#8f6f42' },
+    /* La VISIONNEUSE des photos (2026-10-14) : un plein cadre NOIR dans les deux modes, comme toute visionneuse -
+       une photo se juge sur fond sombre. Ses boutons y flottent : ils restent sombres avec elle (texte #e2e8f0,
+       declare au contraste de jour). Ce n'est pas une surface de la fenetre : la fenetre, elle, passe en clair. */
+    'photos.js': { 'html .visio button,html.jour .visio button': '#2b2b2b', 'html .visio button:hover,html.jour .visio button:hover': '#3a3a3a' },
   },
 
   /* Bordures dont la couleur porte un sens : le rouge encadre ce qui est
