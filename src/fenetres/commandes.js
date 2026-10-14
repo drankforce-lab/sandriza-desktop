@@ -311,10 +311,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   // Le banc ne CLIQUE pas — sans identifiant d ouverture, un ecran qui ECRIT
   // reste invisible au controle. C est l angle mort de #32, pas une commodite.
   var LIER_DEPART = false;
+  /* « id@supprimer » (2026-10-13) : le clic droit du tableau de bord ouvre le detail et LANCE la suppression —
+     son aperçu (tout ce qui part) puis sa confirmation, exactement comme le bouton Supprimer du detail. */
+  var SUPPR_DEPART = false;
+  if (DET_DEPART.indexOf('@supprimer') > 0) {
+    SUPPR_DEPART = true;
+    DET_DEPART = DET_DEPART.slice(0, DET_DEPART.indexOf('@supprimer'));
+  }
   if (DET_DEPART.indexOf('@lier') > 0) {
     LIER_DEPART = true;
     DET_DEPART = DET_DEPART.slice(0, DET_DEPART.indexOf('@lier'));
   }
+  window.szIntention = function(q){
+    if (q === 'supprimer' && DET && DET.droits && DET.droits.supprimer && VUE === 'detail') flowSupprimer();
+  };
   var CTX = null;
   var DONNEES = null;                       // derniere page recue
   // ⚠ L ETAT DU FILTRE VIT ICI, HORS DE LA LISTE : elle est redessinee a chaque
@@ -860,6 +870,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       dessiner();
       prendreVerrou(id);
       if (LIER_DEPART) { LIER_DEPART = false; flowLier(); }
+      if (SUPPR_DEPART) { SUPPR_DEPART = false; if (DET && DET.droits && DET.droits.supprimer) flowSupprimer(); else dire('${T("Votre rôle ne donne pas accès à cette opération.")}', 'err'); }
     });
   }
 
@@ -1164,6 +1175,33 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     });
   }
 
+  // ══ LE MENU COMPLET D UNE LIGNE (2026-10-13) — le menu du socle (szCtxMenu), les gestes de la ligne ══
+  function menuLigne(ev, o, tr){
+    var l = [{ lib: '${T("Ouvrir le détail")}', fn: function(){
+      ouvrir('commandes:ouvrirDetail', o.id, '${T("Détail")}'); setTimeout(function(){ charger(); }, 1200); } }];
+    var pr = tr.querySelector('[data-prep]');
+    if (pr && !pr.disabled) l.push({ lib: '${T("Traiter — lancer la préparation")}', fn: function(){
+      ouvrir('commandes:preparer', o.id, '${T("Préparation")}'); setTimeout(function(){ charger(); }, 1200); } });
+    if (CTX && CTX.peutEditer) {
+      if (o.enTraitement) {
+        l.push({ trait: true });
+        l.push({ lib: '${T("En traitement par")} ' + (o.par || '${T("quelqu’un d’autre")}'), off: true });
+      } else {
+        var cibles = ((CTX && CTX.statuts) || []).filter(function(x){
+          return ['pending', 'cancelled'].indexOf(x.cle) < 0 && x.cle !== o.statut;
+        });
+        if (cibles.length) l.push({ trait: true });
+        cibles.forEach(function(x){ l.push({ lib: '${T("Passer à : ")}' + x.libelle, fn: function(){ flowStatut(o.id, o.statut, x.cle, null); } }); });
+      }
+    }
+    if (CTX && CTX.peutSupprimer && !o.enTraitement) {
+      l.push({ trait: true });
+      l.push({ lib: '${T("Supprimer la commande…")}', dgr: true, fn: function(){
+        ouvrir('commandes:ouvrirDetail', o.id + '@supprimer', '${T("Détail")}'); } });
+    }
+    szCtxMenu(ev.clientX, ev.clientY, o.numero || '', l);
+  }
+
   // ══ MENU CONTEXTUEL (clic droit sur une ligne) ════════════════════
   // ⚠ AUCUNE option quand la commande est en traitement — juste la raison,
   // comme le menu du site (la neutralisation d une fiche ne l atteignait pas).
@@ -1302,7 +1340,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         setTimeout(function(){ charger(); }, 1200);
       }
     };
-    // Clic droit sur une ligne : changer le statut (jamais quand elle est tenue).
+    /* Clic droit sur une ligne (2026-10-13, ELARGI — sa demande : « supprimer une commande ou encore la
+       traiter ») : ouvrir, traiter, puis les statuts (jamais quand la commande est tenue), puis supprimer.
+       Memes droits que les boutons : CTX.peutEditer (orders:edit), CTX.peutSupprimer (orders:delete). */
     corps.oncontextmenu = function(ev){
       var t = ev.target;
       var tr = t && t.closest ? t.closest('tr[data-id]') : null;
@@ -1310,7 +1350,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       ev.preventDefault();
       var id = tr.getAttribute('data-id');
       var o = ((DONNEES && DONNEES.lignes) || []).filter(function(x){ return x.id === id; })[0];
-      if (o) menuStatut(ev, o);
+      if (o) menuLigne(ev, o, tr);
     };
   }
 

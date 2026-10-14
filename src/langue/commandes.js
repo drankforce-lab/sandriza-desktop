@@ -367,4 +367,9 @@ module.exports = {
   "points déjà débités d’un autre nombre": "points already charged a different number",
   "débit des points non enregistré": "points charge not recorded",
   "paiement remboursé automatiquement": "payment refunded automatically",
+  /* Le clic droit de la liste (2026-10-13). */
+  "Ouvrir le détail": "Open details",
+  "Traiter — lancer la préparation": "Process — start picking",
+  "Passer à : ": "Change to: ",
+  "Supprimer la commande…": "Delete order…",
 };

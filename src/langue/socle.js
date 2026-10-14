@@ -295,4 +295,6 @@ module.exports = {
   "Page suivante": "Next page",
   "sur": "of",
   "page": "page",
+  /* Le clic droit du socle (2026-10-13). */
+  'Ouvrir': 'Open',
 };

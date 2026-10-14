@@ -270,4 +270,10 @@ module.exports = {
   'conversations attendent votre réponse': 'conversations await your reply',
   'conversation attend votre réponse': 'conversation awaits your reply',
   'aucune conversation en attente': 'no conversation waiting',
+  /* Suppression d une carte et clic droit (2026-10-13). */
+  'Ouvrir le retour': 'Open return',
+  'Ouvrir la commande': 'Open order',
+  'Traiter — lancer la préparation': 'Process — start picking',
+  'Changer le statut…': 'Change status…',
+  'Supprimer la commande…': 'Delete order…',
 };

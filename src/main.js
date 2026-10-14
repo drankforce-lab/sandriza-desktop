@@ -2494,7 +2494,7 @@ const OPS_PONT = new Set([
   // Cartes-cadeaux (fenetre Cartes-cadeaux, 1.63.0). La LISTE attend la
   // resynchronisation : ce sont des soldes d argent.
   'cartescadeaux:liste', 'cartescadeaux:lire', 'cartescadeaux:creer',
-  'cartescadeaux:activer', 'cartescadeaux:recompense',
+  'cartescadeaux:activer', 'cartescadeaux:supprimer', 'cartescadeaux:recompense',
   // Coupons (fenetre Coupons, 1.64.0) : ils touchent la CAISSE.
   'coupons:liste', 'coupons:enregistrer', 'coupons:basculer', 'coupons:supprimer',
   // Offres et annonces (fenetre Promotions, 1.68.0). Offres, annonces et
@@ -3150,9 +3150,13 @@ ipcMain.handle('fenetre:factures', () => {
 ipcMain.handle('fenetre:commandeDetail', (e, id) => {
   const brut = String(id || '');
   if (!brut) return false;
+  // « id@supprimer » (clic droit du tableau de bord, 2026-10-13) : la MEME fenetre que l id seul — la cle
+  // ignore le suffixe ; une fenetre deja ouverte recoit l intention (szIntention) au lieu d en ouvrir une 2e.
+  const intention = brut.indexOf('@supprimer') > 0 ? 'supprimer' : '';
+  const base = intention ? brut.slice(0, brut.indexOf('@supprimer')) : brut;
   // Une fenetre PAR commande : on compare deux details cote a cote, et rouvrir
   // la meme ramene celle qui existe (szRevenir la fait relire).
-  const cle = 'cmd-detail-' + brut.replace(/[^\w-]/g, '');
+  const cle = 'cmd-detail-' + base.replace(/[^\w-]/g, '');
   const _avant = fenetresNatives.get(cle);
   const _reutilisee = !!(_avant && !_avant.isDestroyed());
   const win = ouvrirNative(cle, TF('Détail de commande'), () => pageCommandes('commandes@' + brut),
@@ -3171,6 +3175,7 @@ ipcMain.handle('fenetre:commandeDetail', (e, id) => {
     { width: 1000, height: 840, minWidth: 720, minHeight: 560 });
   if (_reutilisee && win && !win.isDestroyed()) {
     win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
+    if (intention) win.webContents.executeJavaScript('window.szIntention && window.szIntention(' + JSON.stringify(intention) + ')', true).catch(() => {});
   }
   return true;
 });

@@ -342,7 +342,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
           }).join('')
         + '</tbody></table></div>';
     }
+    /* SUPPRIMER (2026-10-13, sa demande) : droit DEDIE (D.peutSupprimer = giftcards:delete), confirmation
+       en deux temps qui DIT le solde perdu. Le serveur la garde 30 jours en corbeille. */
     h += '<div class="pied-boite">'
+      + (D.peutSupprimer
+          ? '<button class="mini danger" id="cc-suppr" style="margin-right:auto">'
+            + (SUPPR_ARME ? (g.solde > 0 ? '${T("Confirmer : supprimer (solde perdu : ")}' + fmt(g.solde) + ')' : '${T("Confirmer la suppression")}')
+                          : '${T("Supprimer la carte")}') + '</button>' : '')
       + (g.statut === 'pending' && D.peutModifier
           ? '<button class="mini prim" id="cc-activer">${T("Activer à la main")}</button>' : '')
       + '<button class="mini" id="cc-annuler">${T("Fermer")}</button></div>'
@@ -474,6 +480,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
       });
     };
 
+    var bsu = document.getElementById('cc-suppr');
+    if (bsu) bsu.onclick = function(){
+      if (!SUPPR_ARME) {
+        SUPPR_ARME = true; dessiner();
+        dire('${T("Cliquez encore pour supprimer définitivement cette carte.")}', 'att');
+        return;
+      }
+      bsu.disabled = true;
+      appeler('cartescadeaux:supprimer', [DETAIL && DETAIL.id]).then(function(r){
+        SUPPR_ARME = false;
+        if (!r || !r.ok) { bsu.disabled = false; dire(expliquer(r), 'err'); dessiner(); return; }
+        BOITE = null; DETAIL = null;
+        dire('${T("Carte ")}' + (r.code || '') + '${T(" supprimée.")}', 'bon');
+        charger();
+      });
+    };
     var bac = document.getElementById('cc-activer');
     if (bac) bac.onclick = function(){
       bac.disabled = true;
@@ -519,7 +541,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
      l ecriture est IMMEDIATE, avec les valeurs prises AVANT que la boite ne
      disparaisse. C est le defaut n°1 des Depenses, qui ne gardait que la
      categorie parce que l ecriture etait differee de trois secondes. */
-  function fermerBoite(){ szFermerBoite(function(){ BOITE = null; DETAIL = null; dessiner(); }); }
+  function fermerBoite(){ szFermerBoite(function(){ BOITE = null; DETAIL = null; SUPPR_ARME = false; dessiner(); }); }
 
   /* ⚠ NE JAMAIS REDESSINER LE CHAMP SOUS LES DOIGTS. */
   function redessinerSansPerdreLaSaisie(){
@@ -534,17 +556,41 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
     }
   }
 
+  var SUPPR_ARME = false;
+  function ouvrirCarte(id, armer){
+    appeler('cartescadeaux:lire', [id]).then(function(r){
+      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      DETAIL = r.carte; BOITE = 'detail'; SUPPR_ARME = !!armer; dessiner();
+      if (armer) dire('${T("Vérifiez la carte, puis confirmez la suppression.")}', 'att');
+    });
+  }
   corps.addEventListener('click', function(ev){
     var t = ev.target;
     if (!t || !t.closest) return;
     if (t.closest('.boite')) return;
     var tr = t.closest('tr[data-id]');
     if (!tr) return;
-    appeler('cartescadeaux:lire', [tr.getAttribute('data-id')]).then(function(r){
-      if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      DETAIL = r.carte; BOITE = 'detail'; dessiner();
-    });
+    ouvrirCarte(tr.getAttribute('data-id'), false);
   });
+
+  /* LE CLIC DROIT SUR UNE CARTE (2026-10-13) — memes gestes que la fiche, memes droits. « Supprimer… » ouvre
+     la fiche, confirmation ARMEE : on voit le solde perdu avant le second clic. */
+  window.szCtxEntrees = function(ligne){
+    if (!ligne.matches || !ligne.matches('tr[data-id]') || !D) return null;
+    var id = ligne.getAttribute('data-id');
+    var c = (D.cartes || []).filter(function(x){ return x.id === id; })[0];
+    if (!c) return null;
+    var l = [{ lib: '${T("Ouvrir la carte")}', fn: function(){ ouvrirCarte(id, false); } },
+      { lib: '${T("Copier le code")}', fn: function(){
+          try { navigator.clipboard.writeText(c.code); dire('${T("Code copié : ")}' + c.code, 'bon'); } catch (e) {} } }];
+    if (c.statut === 'pending' && D.peutModifier) l.push({ lib: '${T("Activer à la main")}', fn: function(){
+      appeler('cartescadeaux:activer', [id]).then(function(r){
+        if (!r.ok) { dire(expliquer(r), 'err'); return; }
+        dire('${T("Carte ")}' + (r.code || '') + '${T(" activée.")}', 'bon'); charger();
+      }); } });
+    if (D.peutSupprimer) { l.push({ trait: true }); l.push({ lib: '${T("Supprimer la carte…")}', dgr: true, fn: function(){ ouvrirCarte(id, true); } }); }
+    return l;
+  };
 
   function charger(){
     appeler('cartescadeaux:liste', []).then(function(r){

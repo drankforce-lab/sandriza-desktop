@@ -181,6 +181,10 @@ jobs:
         run: node tools/banc-debordement.js
       - name: Aucune glissiere — fenetre detachee (1080 x 780)
         run: node tools/banc-debordement.js --detache
+      # Le clic droit (2026-10-13) : chaque fenetre rendue, trois lignes essayees, aucune exception, aucune
+      # entree sans libelle, et un TEMOIN qui doit ouvrir son menu. Meme montage (lots sequentiels, un Chrome).
+      - name: Clic droit — 108 fenetres essayees au rendu
+        run: node tools/banc-clic-droit.js
 
   windows:
     needs: menage

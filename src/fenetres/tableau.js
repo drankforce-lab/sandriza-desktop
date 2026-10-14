@@ -631,6 +631,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       });
     }
   };
+  /* ══ LE CLIC DROIT SUR UNE COMMANDE DU FIL (2026-10-13, sa demande : « dans le tableau de bord, par
+     exemple supprimer une commande ou encore la traiter ») ══════════════════════════════════════════
+     Memes gestes que la fenetre Commandes, memes droits (D.peutPreparer = orders:edit, D.peutSupprimer =
+     orders:delete). « Supprimer… » ouvre le DETAIL de la commande avec la suppression lancee : on y voit
+     tout ce qui part (articles, paiement, remboursement Square) avant de confirmer — jamais d un clic.
+     Un retour du fil : l ouvrir. */
+  window.szCtxEntrees = function(ligne){
+    var rt = ligne.getAttribute && ligne.getAttribute('data-retour');
+    if (rt) return [{ lib: '${T("Ouvrir le retour")}', fn: function(){ ligne.click(); } }];
+    var oid = ligne.getAttribute && ligne.classList && ligne.classList.contains('cmd') ? ligne.getAttribute('data-ligne') : '';
+    if (!oid) return null;
+    var ouvrirAvec = function(suffixe){
+      appeler('commandes:ouvrirDetail', [oid + (suffixe || '')]).then(function(r){ if (!r || !r.ok) dire(expliquer(r), 'err'); else dire(''); });
+    };
+    var l = [{ lib: '${T("Ouvrir la commande")}', fn: function(){ ouvrirAvec(''); } }];
+    var ec = ligne.querySelector('button[data-prep]');
+    if (ec && !ec.disabled) l.push({ lib: '${T("Traiter — lancer la préparation")}', fn: function(){ lancerPreparation(oid, ec); } });
+    l.push({ lib: '${T("Changer le statut…")}', fn: function(){ ouvrirAvec(''); } });
+    if (D && D.peutSupprimer) { l.push({ trait: true }); l.push({ lib: '${T("Supprimer la commande…")}', dgr: true, fn: function(){ ouvrirAvec('@supprimer'); } }); }
+    return l;
+  };
   var slotMx = document.getElementById('tb-mx-slot');
   if (slotMx) slotMx.onclick = function(ev){
     if (ev.target && ev.target.closest && ev.target.closest('#tb-mx'))

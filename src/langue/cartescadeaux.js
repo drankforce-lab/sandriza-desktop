@@ -153,4 +153,15 @@ module.exports = {
   'Chaque achat de carte-cadeau en boutique reçoit un code de réduction.': 'Every gift card bought in the store earns a discount code.',
   'Le code remis': 'The code given',
   'Enregistrer': 'Save',
+  /* Suppression d une carte et clic droit (2026-10-13). */
+  'Confirmer : supprimer (solde perdu : ': 'Confirm: delete (balance lost: ',
+  'Confirmer la suppression': 'Confirm deletion',
+  'Supprimer la carte': 'Delete card',
+  'Cliquez encore pour supprimer définitivement cette carte.': 'Click again to permanently delete this card.',
+  ' supprimée.': ' deleted.',
+  'Vérifiez la carte, puis confirmez la suppression.': 'Check the card, then confirm the deletion.',
+  'Ouvrir la carte': 'Open card',
+  'Copier le code': 'Copy code',
+  'Code copié : ': 'Code copied: ',
+  'Supprimer la carte…': 'Delete card…',
 };

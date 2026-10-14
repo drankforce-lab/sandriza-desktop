@@ -1889,9 +1889,125 @@ function szInter(id, titre, aide, on, attrs){
 
 /* La traduction pendant la frappe (2026-10-07) : aucune chaine visible, donc pas une fabrique. */
 const JS_JUMEAUX = "/* == CHAMP FRANCAIS -> CHAMP ANGLAIS, PENDANT LA FRAPPE (2026-10-07) ==========\n   Sa demande : << on tape en francais et ca traduit en anglais >>, partout ou un\n   couple FR / (anglais) existe. Pose UNE fois, ici, pour toutes les fenetres :\n   un ecouteur delegue sur document survit aux redessins (paliers, menus IVR).\n   Le jumeau anglais se trouve :\n     A. par l identifiant : x -> x-en (ou x-fr -> x-en), x -> xEN / xEn / xen ;\n     B. par un attribut data- dans la meme ligne : v -> vEN / vEn, vFr -> vEn,\n        ou l attribut N -> Nen de meme valeur (guides de tailles) ;\n     C. ou par data-jumeau-fr=\"<id du champ francais>\" pose sur le champ anglais.\n   On ne remplit QUE si le champ anglais est vide ou porte encore la derniere\n   traduction automatique ; des qu on y tape soi-meme, il n est plus touche.\n   Le champ rempli recoit un evenement input : le brouillon et l etat << modifie >>\n   le voient. La traduction passe par le pont (langue:traduire) ; un echec ne\n   recopie JAMAIS le francais. */\n(function(){\n  if (typeof window === 'undefined' || typeof document === 'undefined' || !document.addEventListener || window.__szJumeaux) return; window.__szJumeaux = true;\n  function _jmEstTexte(e){\n    return !!(e && !e.disabled && !e.readOnly && (e.tagName === 'TEXTAREA'\n      || (e.tagName === 'INPUT' && /^(text|search|)$/i.test(e.type || ''))));\n  }\n  function _jmEstAnglais(e){\n    if (e.hasAttribute && e.hasAttribute('data-jumeau-fr')) return true;\n    if (/(-en|EN|En)$/.test(e.id || '') || /^(.+)(en)$/.test(e.id || '') && document.getElementById((e.id || '').slice(0, -2))) return true;\n    for (var i = 0; i < e.attributes.length; i++) {\n      var a = e.attributes[i];\n      if (a.name.indexOf('data-') === 0 && (/(EN|En)$/.test(a.value) || /en$/.test(a.name))) return true;\n    }\n    return false;\n  }\n  function _jmParId(id){ return id ? document.getElementById(id) : null; }\n  function _jmJumeau(fr){\n    var id = fr.id || '', c;\n    if (id) {\n      var base = id.replace(/-fr$/, '');\n      c = _jmParId(base + '-en') || _jmParId(id + 'EN') || _jmParId(id + 'En') || _jmParId(id + 'en');\n      if (c && c !== fr) return c;\n      c = document.querySelector('[data-jumeau-fr=\"' + id + '\"]');\n      if (c) return c;\n    }\n    var cands = [];\n    for (var i = 0; i < fr.attributes.length; i++) {\n      var a = fr.attributes[i];\n      if (a.name.indexOf('data-') !== 0 || !a.value || a.name === 'data-jumeau-fr') continue;\n      var v = a.value.replace(/\"/g, '');\n      cands.push('[' + a.name + '=\"' + v + 'EN\"]', '[' + a.name + '=\"' + v + 'En\"]',\n        '[' + a.name + 'en=\"' + v + '\"]');\n      if (/Fr$/.test(v)) cands.push('[' + a.name + '=\"' + v.slice(0, -2) + 'En\"]');\n    }\n    if (!cands.length) return null;\n    var sel = cands.join(','), p = fr.parentElement, n = 0;\n    while (p && n < 6) { c = p.querySelector(sel); if (c && c !== fr) return c; p = p.parentElement; n++; }\n    return null;\n  }\n  var MIN = new WeakMap(), JET = new WeakMap();\n  document.addEventListener('input', function(ev){\n    var e = ev.target;\n    if (!_jmEstTexte(e)) return;\n    if (_jmEstAnglais(e)) {\n      if (ev.isTrusted && e.value !== (e.getAttribute('data-sz-auto') || '')) e.setAttribute('data-sz-manuel', '1');\n      return;\n    }\n    var en = _jmJumeau(e);\n    if (!_jmEstTexte(en) || en.getAttribute('data-sz-manuel') === '1') return;\n    var auto = en.getAttribute('data-sz-auto') || '';\n    if (en.value && en.value !== auto) return;\n    clearTimeout(MIN.get(e));\n    var src = e.value;\n    if (!src.trim()) {\n      if (en.value && en.value === auto) { en.value = ''; en.setAttribute('data-sz-auto', ''); en.dispatchEvent(new Event('input', { bubbles: true })); }\n      return;\n    }\n    MIN.set(e, setTimeout(function(){\n      if (!window.szPont || !window.szPont.appeler) return;\n      var n = (JET.get(e) || 0) + 1; JET.set(e, n);\n      Promise.resolve(window.szPont.appeler('langue:traduire', src)).then(function(r){\n        if (JET.get(e) !== n || !r || !r.ok || !r.texte) return;\n        if (en.getAttribute('data-sz-manuel') === '1') return;\n        var a2 = en.getAttribute('data-sz-auto') || '';\n        if (en.value && en.value !== a2) return;\n        en.value = r.texte; en.setAttribute('data-sz-auto', r.texte);\n        en.dispatchEvent(new Event('input', { bubbles: true }));\n      }, function(){});\n    }, 700));\n  }, true);\n})();\n";
+const JS_CTX = () => `
+/* ══ LE CLIC DROIT, DANS TOUTES LES FENETRES (2026-10-13) ═════════════════════
+   Sa demande : << passe l ensemble des fonctions de l administration, et la ou tu
+   vois un gain, ajoute le menu contextuel >>. Trois fenetres avaient le leur
+   (securite, commandes, photos) ; les autres, rien. Plutot que cent menus ecrits
+   a la main — qui deriveraient chacun de leurs boutons —, le socle en pose UN,
+   partout :
+   · un clic droit sur une LIGNE de liste (tr, li, [data-ligne], [data-id]...)
+     propose les BOUTONS DE CETTE LIGNE, avec leur libelle, dans leur ordre ;
+     les gestes destructeurs a part, en rouge, apres un trait ;
+   · si la ligne s ouvre au clic (curseur main), << Ouvrir >> vient en tete.
+   ⚠ LE MENU N OFFRE QUE CE QUE LA LIGNE OFFRE DEJA (regle #110, securite.js) :
+     chaque entree CLIQUE le vrai bouton. Memes droits, memes gardes, meme
+     confirmation en deux temps — un bouton absent ou desactive n y parait pas.
+   ⚠ UNE FENETRE PEUT DIRE MIEUX : window.szCtxEntrees(ligne, ev) rend une liste
+     [{ lib, fn, dgr, off, trait }] (ou null pour le menu automatique). Les trois
+     menus existants appellent preventDefault : celui-ci se tait alors.
+   ⚠ LES CHAMPS DE SAISIE gardent leur comportement (copier / coller), et
+     data-ctx="non" sur un conteneur l eteint. */
+var _szCtxEl = null;
+function szCtxFermer(){ if (_szCtxEl && _szCtxEl.parentNode) _szCtxEl.parentNode.removeChild(_szCtxEl); _szCtxEl = null; }
+function _szCtxEsc(v){ return String(v == null ? '' : v).replace(/[&<>"]/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]; }); }
+function szCtxMenu(x, y, titre, entrees){
+  szCtxFermer();
+  var l = (entrees || []).filter(function(e){ return e && (e.trait || e.lib); });
+  while (l.length && l[0].trait) l.shift();
+  while (l.length && l[l.length - 1].trait) l.pop();
+  if (!l.length) return false;
+  var m = document.createElement('div');
+  m.className = 'ctx sz-ctxg'; m.setAttribute('role', 'menu');
+  var h = titre ? '<div class="tt">' + _szCtxEsc(titre) + '</div>' : '';
+  l.forEach(function(e, i){
+    if (e.trait) { h += '<div class="trait"></div>'; return; }
+    h += '<button type="button" role="menuitem" data-i="' + i + '"' + (e.dgr ? ' class="dgr"' : '') + (e.off ? ' disabled' : '') + '>' + _szCtxEsc(e.lib) + '</button>';
+  });
+  m.innerHTML = h;
+  document.body.appendChild(m);
+  _szCtxEl = m;
+  /* Replie dans la fenetre APRES l avoir pose : sa hauteur depend de ses entrees. */
+  var r = m.getBoundingClientRect();
+  m.style.left = Math.max(6, Math.min(x, window.innerWidth - r.width - 8)) + 'px';
+  m.style.top = Math.max(6, Math.min(y, window.innerHeight - r.height - 8)) + 'px';
+  m.onclick = function(ev){
+    var b = ev.target && ev.target.closest ? ev.target.closest('button[data-i]') : null;
+    if (!b || b.disabled) return;
+    var e = l[+b.getAttribute('data-i')];
+    szCtxFermer();
+    try { if (e && e.fn) e.fn(); } catch (x) {}
+  };
+  return true;
+}
+function _szCtxLib(b){
+  var t = String(b.textContent || '').replace(/\\s+/g, ' ').trim();
+  if (!/[A-Za-z\\u00C0-\u017F]/.test(t)) t = b.getAttribute('title') || b.getAttribute('aria-label') || '';
+  /* Le pictogramme de tete (🗑, ✎, 📋, ✓…) reste sur le bouton ; dans un menu de mots, il se lit comme du bruit. */
+  try { t = String(t).replace(/^[\\p{Extended_Pictographic}\\u2190-\\u21FF\\u2700-\\u27BF\\uFE0F\\s]+/u, ''); } catch (x) {}
+  return String(t).replace(/\\s+/g, ' ').trim();
+}
+var _SZ_DANGER = /supprim|effac|retir|purg|d\\u00e9trui|delete|remove|erase/i;
+function _szCtxAuto(ligne){
+  var out = [], vus = {}, dangers = [];
+  var styl = window.getComputedStyle ? getComputedStyle(ligne) : null;
+  if (styl && styl.cursor === 'pointer') out.push({ lib: '${T("Ouvrir")}', fn: function(){ ligne.click(); } });
+  var bs = ligne.querySelectorAll('button, a.btn, [role=button]');
+  for (var i = 0; i < bs.length; i++) {
+    var b = bs[i];
+    if (b.disabled || b.offsetParent === null || b.closest('.ctx')) continue;
+    var lib = _szCtxLib(b);
+    if (!lib || vus[lib]) continue;
+    vus[lib] = 1;
+    var dgr = _SZ_DANGER.test(lib) || /(^|\\s)(danger|dgr|suppr)(\\s|$)/.test(String(b.className || ''));
+    (dgr ? dangers : out).push({ lib: lib, dgr: dgr, fn: (function(x){ return function(){ x.click(); }; })(b) });
+  }
+  if (dangers.length) { if (out.length) out.push({ trait: true }); out = out.concat(dangers); }
+  return out;
+}
+if (typeof document !== 'undefined' && typeof window !== 'undefined') {
+document.addEventListener('contextmenu', function(ev){
+  if (ev.defaultPrevented) return;
+  var t = ev.target;
+  if (!t || !t.closest) return;
+  if (t.closest('input, textarea, select, [contenteditable=true], .ctx, [data-ctx=non]')) return;
+  var ligne = t.closest('[data-ctx-ligne], [data-ligne], [data-id], tr, li, .ligne');
+  if (!ligne || ligne.closest('thead')) return;
+  var l = null;
+  if (typeof window.szCtxEntrees === 'function') { try { l = window.szCtxEntrees(ligne, ev); } catch (x) { l = null; } }
+  if (!l) l = _szCtxAuto(ligne);
+  if (!l || !l.length) return;
+  ev.preventDefault();
+  var x = ev.clientX, y = ev.clientY;
+  if (!x && !y) { var rr = ligne.getBoundingClientRect(); x = rr.left + 24; y = rr.bottom - 4; }
+  szCtxMenu(x, y, ligne.getAttribute('data-ctx-titre') || '', l);
+});
+document.addEventListener('mousedown', function(ev){ if (_szCtxEl && !_szCtxEl.contains(ev.target)) szCtxFermer(); }, true);
+document.addEventListener('keydown', function(ev){ if (ev.key === 'Escape' && _szCtxEl) { szCtxFermer(); ev.stopPropagation(); } }, true);
+window.addEventListener('blur', szCtxFermer);
+window.addEventListener('resize', szCtxFermer);
+document.addEventListener('wheel', szCtxFermer, { passive: true });
+}
+`;
+/* Le menu du clic droit du socle (JS_CTX, 2026-10-13). Memes regles que les menus
+   de securite.js / commandes.js : entree destructrice en rouge, trait avant elle. */
+const CSS_CTX = `
+.sz-ctxg{position:fixed;z-index:9000;min-width:13rem;max-width:22rem;background:var(--sz-surface,var(--f-carte));
+  border:1px solid var(--sz-bord,var(--v16));border-radius:10px;padding:.3rem;box-shadow:0 10px 28px rgba(0,0,0,.45)}
+.sz-ctxg .tt{font-size:.7rem;color:var(--tx2);padding:.3rem .55rem .35rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sz-ctxg button{display:block;width:100%;text-align:left;font:inherit;font-size:.82rem;border:0;border-radius:7px;
+  padding:.42rem .6rem;background:none;color:var(--sz-texte,var(--tx));cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sz-ctxg button:hover:not(:disabled),.sz-ctxg button:focus-visible{background:var(--sz-survol,var(--v09));outline:none}
+.sz-ctxg button:disabled{opacity:.45;cursor:default}
+.sz-ctxg button.dgr{color:var(--tx-f6a6a6)}
+.sz-ctxg button.dgr:hover{background:rgba(248,113,113,.16)}
+html.jour .sz-ctxg button.dgr{color:#b91c1c}
+.sz-ctxg .trait{height:1px;background:var(--sz-bord,var(--v08));margin:.25rem .3rem}
+`;
+
 const JS_DIRE = () => JS_DIRE_BASE() + JS_PLEIN() + JS_PLEIN_AUTO() + JS_FENPLEIN()
   + JS_VERROUS() + JS_LOTS() + JS_AUTOPAGE() + JS_PAGES() + JS_COMPTE() + JS_MESURES()
-  + JS_DATES() + JS_FINITIONS() + JS_JUMEAUX;
+  + JS_DATES() + JS_FINITIONS() + JS_JUMEAUX + JS_CTX();
 
 const JS_SOCLE = () => `
 var P = window.szPont;
@@ -4148,8 +4264,8 @@ html.jour:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) .onglets button.on
   color:#1d2433!important;box-shadow:inset 0 -2px 0 var(--sz-repere)}
 `;
 
-module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_CARBONE,
-  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_CARBONE,
+module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_CARBONE + CSS_CTX,
+  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_CARBONE + CSS_CTX,
   JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_THEMES, CSS_FICHE, ICO,
   /* La page, pas son texte : voir l en-tete de ce fichier. */
   TETE, LIEU, SEP_DEC };
