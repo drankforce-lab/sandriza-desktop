@@ -562,7 +562,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   // « 12,50 », « 12.50 $ », « 1 234,5 » : un montant saisi a la quebecoise, ou NaN.
   function lirePrix(s){
-    var t = String(s == null ? '' : s).replace(/[\s  $]/g, '').replace(',', '.');
+    var t = String(s == null ? '' : s).replace(/[\\s  $]/g, '').replace(',', '.');
     if (!/^[0-9]+(\.[0-9]{0,2})?$/.test(t)) return NaN;
     return Math.round(parseFloat(t) * 100) / 100;
   }

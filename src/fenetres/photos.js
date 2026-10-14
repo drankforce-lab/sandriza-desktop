@@ -324,9 +324,9 @@ tr:hover .act .ic{opacity:1}
 .visio .vbandeau .vnom2{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#e2e8f0}
 .visio .vbandeau .vnom2 b{color:#e2e8f0;font-weight:600;margin-right:.5rem}
 .visio .vbandeau .vcompte{flex:0 0 auto;color:#e2e8f0;font-variant-numeric:tabular-nums}
-html .visio button,html.jour .visio button{font:inherit;background:rgba(255,255,255,.08);color:#e2e8f0;
+html .visio button,html.jour .visio button{font:inherit;background:#2b2b2b;color:#e2e8f0;
   border:1px solid rgba(255,255,255,.18);border-radius:999px;cursor:pointer;filter:none}
-html .visio button:hover,html.jour .visio button:hover{background:rgba(255,255,255,.18)}
+html .visio button:hover,html.jour .visio button:hover{background:#3a3a3a}
 html .visio button:disabled,html.jour .visio button:disabled{opacity:.25;cursor:default}
 .visio .vferme{flex:0 0 auto;width:2.2rem;height:2.2rem;padding:0;font-size:1rem;line-height:1}
 .visio .vfl{position:absolute;top:50%;transform:translateY(-50%);width:3.2rem;height:3.2rem;padding:0;
