@@ -470,10 +470,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // ⚠ LE NOM DU CLIENT FAIT PARTIE DES CONDITIONS : le site refuse une vente
     // anonyme, autant le dire avant d avoir tout saisi.
     var nomOk = !!val('c-nom').trim();
+    // « Courriel seulement » sans adresse valide : la cliente repartirait sans aucune facture.
+    var mailOk = val('v-remise') !== 'courriel' || /^[^s@]+@[^s@]+.[^s@]+$/.test(val('c-mail').trim());
     /* ⚠ PLUS DE CADRE ROUGE SUR « NOM » (2026-10-14, sa demande : « pas besoin de me mettre le champ en rouge
        dès que l on a entré un produit »). Le bouton dit déjà « Nom du client requis » : le rouge, posé au premier
        article, accusait d une faute qu on n avait pas encore eu le temps de ne pas commettre. */
-    var pret = !!(TOT && TOT.total > 0 && LIGNES.length && nomOk && CTX && CTX.peutVendre && !enVente);
+    var pret = !!(TOT && TOT.total > 0 && LIGNES.length && nomOk && mailOk && CTX && CTX.peutVendre && !enVente);
     b.disabled = !pret;
     /* Pendant l enregistrement : bouton FERME et un cercle qui tourne — un second
        clic ne doit pas pouvoir creer une seconde vente. */
@@ -481,7 +483,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       b.innerHTML = '<span class="tourne" aria-hidden="true"></span>${T("Commande en traitement…")}';
     } else {
       b.textContent = pret ? '${T("Effectuer la vente")} (' + argent(TOT.total) + ')'
-        : (LIGNES.length && !nomOk ? '${T("Nom du client requis")}' : '${T("Effectuer la vente")}');
+        : (LIGNES.length && !nomOk ? '${T("Nom du client requis")}'
+          : (LIGNES.length && !mailOk ? '${T("Courriel du client requis")}' : '${T("Effectuer la vente")}'));
     }
     // Actif des que QUOI QUE CE SOIT est saisi, pas seulement des articles : un
     // client ou un rabais laisse d une vente abandonnee se reinitialise aussi.
@@ -1051,6 +1054,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         RABNIP = null;
         dessinerLignes(); majTotaux();
       }
+      /* ⚠ UN DÉLAI N EST PAS UN REFUS : la vente a pu être enregistrée pendant qu on attendait. Recommencer
+         sans regarder créerait une SECONDE vente. */
+      if (!r.ok && r.motif === 'delai') { majBouton(); dire('${T("La réponse tarde : la vente a peut-être été enregistrée. Vérifiez dans Commandes avant de recommencer.")}', 'err'); return; }
       if (!r.ok) { majBouton(); dire(expliquer(r.motif), 'err'); return; }
       // Lu AVANT la remise a zero, qui ramene la liste a son choix par defaut.
       var remise = val('v-remise');
@@ -1205,7 +1211,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          adresse valide). */
       remplirListe('v-remise', [
         { cle: 'deux', libelle: '${T("Imprimer + courriel")}' },
-        { cle: 'impression', libelle: '${T("Imprimer seulement")}' }
+        { cle: 'impression', libelle: '${T("Imprimer seulement")}' },
+        // Courriel SEULEMENT (2026-10-14, sa demande) : rien ne sort de l imprimante ; le courriel est alors exigé.
+        { cle: 'courriel', libelle: '${T("Courriel seulement")}' }
       ], 'deux');
       document.getElementById('sous').textContent = r.par
         ? (r.par + (r.peutVendre ? '' : ' ${T("· lecture seule")}')) : '';
@@ -1253,6 +1261,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     masquerTel(this);
     chercherClient(this.value);
   };
+  document.getElementById('v-remise').onchange = majBouton;
   ['v-rab'].forEach(function(id){
     document.getElementById(id).onchange = function(){ majTotaux(); };
   });

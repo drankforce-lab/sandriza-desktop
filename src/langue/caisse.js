@@ -79,6 +79,10 @@ module.exports = {
   'Commande en traitement…': 'Processing the order…',
   'Imprimer + courriel': 'Print + email',
   'Imprimer seulement': 'Print only',
+  'Courriel seulement': 'Email only',
+  'Courriel du client requis': 'Customer email required',
+  'La réponse tarde : la vente a peut-être été enregistrée. Vérifiez dans Commandes avant de recommencer.':
+    'The answer is slow: the sale may have been recorded. Check Orders before trying again.',
   'Réinitialiser la vente': 'Reset the sale',
   'Imprimer la facture': 'Print the invoice',
   'Impression': 'Printing',

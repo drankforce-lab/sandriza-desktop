@@ -3324,6 +3324,10 @@ const LIMITES_PONT = {
      ses retours — c'est la même cascade, dans l'autre sens. */
   'commandes:corbeille:restaurer': 45000,
   'commandes:fraisEcrire': 45000, 'retour:finaliser': 45000,
+  /* ⚠ LA VENTE AU COMPTOIR N AVAIT PAS DE PLAFOND PROPRE (2026-10-14) : 8 s pour écrire la commande, la
+     facture, le stock, les points, vérifier les autorisations et envoyer le courriel. Elle annonçait
+     « délai » pendant qu elle s enregistrait — même défaut que le remboursement, même plafond. */
+  'caisse:vendre': 45000, 'caisse:verifierPaiement': 45000, 'caisse:nipVerifier': 20000,
   /* ⚠⚠ LES TRAITEMENTS D IMAGE PAR MODELE, ET C EST LA CAUSE DE << modele
      delai >> (signale le 2026-08-09 sur un retrait de mannequin). Ces
      operations n etaient PAS dans cette table : elles heritaient du plafond
