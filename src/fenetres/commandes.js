@@ -330,7 +330,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   // ⚠ L ETAT DU FILTRE VIT ICI, HORS DE LA LISTE : elle est redessinee a chaque
   // frappe, et lire les champs au moment de paginer ne rendrait que l affichage.
   // Auto par defaut : autant de lignes que la hauteur reelle, jamais de glissiere.
-  var F = { q: '', statuts: [], annee: 'all', prioritaires: false, page: 0, parPage: 20, auto: true };
+  var F = { q: '', statuts: [], annee: 'all', prioritaires: false, manuelles: false, page: 0, parPage: 20, auto: true };
   /* L AFFICHAGE COMPACT (2026-10-12, sa demande : « ajoute-moi aussi un mode compact dans les commandes »), le
      meme que l Inventaire et Produits en vente : une ligne par commande, retenu sur le poste (sous garde). */
   var COMPACT = false;
@@ -525,7 +525,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '${T("Prioritaires")}' + (d && d.prioritairesNonTraitees
           ? ' · ' + d.prioritairesNonTraitees + ' '
             + (d.prioritairesNonTraitees > 1 ? '${T("non traitées")}' : '${T("non traitée")}')
-          : '') + '</button>';
+          : '') + '</button>'
+      /* LES VENTES MANUELLES (2026-10-15, sa demande) : saisies a la caisse, elles sont livrees d office et
+         n apparaissaient donc jamais dans Commandes. Le filtre les montre TOUTES, quel que soit l onglet. */
+      + '<button class="rf-jet' + (F.manuelles ? ' on' : '') + '" data-manu="1" '
+      + 'title="${T("N’afficher que les ventes saisies à la caisse, quel que soit leur statut")}">'
+      + '${T("Ventes manuelles")}' + (d && d.manuellesTotal ? ' · ' + d.manuellesTotal : '') + '</button>';
     /* ⚠⚠ LA CORBEILLE S OUVRE D ICI, ET DE NULLE PART AILLEURS (#113, sa demande
        du 2026-09-14 : << met pas un lien dans les menu pour la corbeille, juste
        mettre un petit bouton dans la page des commande directement >>).
@@ -566,7 +571,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 
     h += '<div class="carte plein">';
     if (!d || !d.lignes.length) {
-      h += '<div class="vide">' + (F.q || F.statuts.length || F.annee !== 'all' || F.prioritaires
+      h += '<div class="vide">' + (F.q || F.statuts.length || F.annee !== 'all' || F.prioritaires || F.manuelles
         ? '${T("Aucune commande ne correspond à ces filtres.")}'
         : (expedition ? '${T("Aucune commande expédiée.")}' : '${T("Aucune commande en cours.")}')) + '</div>';
     } else {
@@ -1327,6 +1332,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         return;
       }
       if (t.closest('[data-prio]')) { F.prioritaires = !F.prioritaires; F.page = 0; dessiner(); charger(); return; }
+      if (t.closest('[data-manu]')) { F.manuelles = !F.manuelles; F.page = 0; dessiner(); charger(); return; }
       var pr = t.closest('[data-prep]');
       if (pr) {
         ouvrir('commandes:preparer', pr.getAttribute('data-prep'), '${T("Préparation")}');

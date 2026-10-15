@@ -257,6 +257,8 @@ module.exports = {
   'Traitement prioritaire': 'Priority handling',
   'Manuelle': 'Manual',
   'Vente saisie à la caisse': 'Sale entered at the register',
+  'Ventes manuelles': 'Manual sales',
+  'N’afficher que les ventes saisies à la caisse, quel que soit leur statut': 'Show only sales entered at the register, whatever their status',
   'Bon de commande': 'Picking slip',
   'Facture': 'Invoice',
   'Frais retenus (': 'Fees kept (',
