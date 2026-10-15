@@ -132,6 +132,18 @@ tbody td{padding:.32rem .4rem;border-top:1px solid var(--v055);vertical-align:mi
 .gc-montant{font-size:2rem;font-weight:800;margin-top:auto;font-variant-numeric:tabular-nums}
 .gc-pour{font-size:.84rem}
 .gc-de{font-size:.74rem;color:rgba(247,239,226,.75)}
+/* La liste refaite (2026-10-15, lot B) : un rang par carte, qui commence par la carte elle-meme en petit. */
+.cc-rang{grid-template-columns:minmax(0,1.9fr) 10rem minmax(0,1fr) minmax(0,1fr) 1.2rem;cursor:pointer}
+.gc-mini{flex:0 0 auto;width:6.6rem;height:4.1rem;border-radius:9px;padding:.45rem .6rem;display:flex;flex-direction:column;justify-content:space-between;
+  color:#f7efe2;background:linear-gradient(135deg,#1c2541 0%,#2a3358 55%,#8f6f42 140%);box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.gc-mini b{font:700 .5rem/1 Georgia,serif;letter-spacing:.24em;color:#f0d6a0}
+.gc-mini strong{font-size:.9rem;font-weight:800;font-variant-numeric:tabular-nums}
+.cc-rang.eteinte .gc-mini{filter:grayscale(.85)}
+.cc-rang .bilan small{font-size:.76rem;font-weight:500;color:var(--tx2)}
+.cc-rang .jaugec{margin-top:.3rem;width:100%}
+.cc-rang .etat{flex-direction:row;flex-wrap:wrap;gap:.35rem}
+.cc-ouvrir{font-size:1.3rem;color:var(--tx2);text-align:center}
+.cc-rang:hover .cc-ouvrir{color:var(--tx)}
 `;
 
 /** Page complète de la fenêtre native « Cartes-cadeaux ». */
@@ -373,54 +385,50 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
       + t.utilisees + '</div></div>'
       + '</div>');
 
-    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE AUX CARTES-CADEAUX (2026-09-25) ═
-       Barre sur une ligne : loupe, statuts en PASTILLES (plus une liste
-       deroulante). Ligne riche aux initiales, solde en gras avec sa jauge.
-       Crochets gardes : #cc-q, #cc-recompense, #cc-nouvelle, tr[data-id]. */
+    /* ══ LA LISTE REFAITE (2026-10-15, lot B de la refonte du marketing) ═════
+       Meme langage que Campagnes : une TETE (les statuts en boutons a choix —
+       le mot seul, jamais de compte —, recherche, recompense et creation a
+       droite), puis un RANG aere par carte, qui commence par la carte ELLE-MEME
+       en petit (son solde). Un clic ouvre la fiche, comme avant. Crochets
+       gardes : #cc-q, data-ccst, #cc-recompense, #cc-nouvelle, [data-id]. */
     var jet = function(v, lib){
-      return '<button class="rf-jet' + (STATUT === v ? ' on' : '') + '" data-ccst="' + v + '">' + lib + '</button>';
+      return '<button type="button" class="' + (STATUT === v ? 'on' : '') + '" data-ccst="' + v + '">' + lib + '</button>';
     };
-    h += '<div class="carte"><div class="rf-tb">'
-      + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Code, destinataire, courriel")}" type="search" id="cc-q" placeholder="${T("Code, destinataire, courriel…")}" value="' + esc(Q) + '"></label>'
+    h = '<div class="ls">' + '<div class="ls-tete"><div class="ed-seg ls-onglets">'
       + jet('', '${T("Tous les statuts")}') + jet('active', '${T("Actives")}') + jet('pending', '${T("Activation requise")}')
       + jet('used', '${T("Utilisées")}') + jet('expired', '${T("Expirées")}')
-      + '<span class="rf-droite">'
-      + '<button class="rf-jet" id="cc-recompense">${T("Récompense à l’achat")}</button>'
-      + '<span class="dt">' + rows.length + (rows.length > 1 ? '${T(" cartes")}' : '${T(" carte")}') + '</span>'
-      + (D.peutModifier ? '<button class="prim" id="cc-nouvelle" style="height:2.4rem;padding:0 .9rem">${T("+ Créer une carte")}</button>' : '')
-      + '</span></div></div>';
+      + '</div><div class="droite">'
+      + '<label class="ls-rch">${ICO.loupe}<input aria-label="${T("Code, destinataire, courriel")}" type="search" id="cc-q" placeholder="${T("Code, destinataire, courriel…")}" value="' + esc(Q) + '"></label>'
+      + '<button class="ed-bt" id="cc-recompense">${T("Récompense à l’achat")}</button>'
+      + (D.peutModifier ? '<button class="ed-bt fort" id="cc-nouvelle">${T("+ Créer une carte")}</button>' : '')
+      + '</div></div>' + h;
 
     // La liste en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
-    h += '<div class="carte sz-pagee">';
+    h += '<div class="ls-liste sz-pagee">';
     if (!rows.length) {
-      h += '<div class="vide">' + (Q || STATUT ? '${T("Rien ne correspond.")}' : '${T("Aucune carte-cadeau.")}') + '</div>';
+      h += '<div class="ls-vide">' + (Q || STATUT ? '${T("Rien ne correspond.")}' : '${T("Aucune carte-cadeau.")}') + '</div>';
     } else {
-      h += '<div data-pages="cartescadeaux"><table><thead><tr><th>${T("Destinataire")}</th><th class="num">${T("Valeur")}</th>'
-        + '<th class="num">${T("Solde")}</th><th>${T("Acheteur")}</th><th>${T("Date")}</th><th>${T("Statut")}</th></tr></thead><tbody>'
-        + rows.map(function(g){
-            return '<tr data-id="' + esc(g.id) + '" title="${T("Voir le détail")}">'
-              + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(g.destinataire)) + '</span>'
-              + '<div style="min-width:0"><div class="rf-nom">' + esc(g.destinataire || '—') + '</div>'
-              + '<div class="rf-sous"><span class="rf-code">' + esc(g.code) + '</span>'
-              + (g.courriel ? '<span>·</span><span>' + esc(g.courriel) + '</span>' : '') + '</div></div></div></td>'
-              + '<td class="num">' + fmt(g.initial) + '</td>'
-              + '<td class="num"><span class="rf-mont">' + fmt(g.solde) + '</span>'
-              + (g.initial > 0 ? '<div class="jaugec" title="' + Math.round(100 * g.solde / g.initial) + ' %"><i style="width:'
-                  + Math.max(0, Math.min(100, Math.round(100 * g.solde / g.initial))) + '%"></i></div>' : '')
-              + '</td>'
-              + '<td>' + esc(g.expediteur || '—') + '</td>'
-              + '<td class="dt">' + esc(szQuand(g.date)) + '</td>'
-              + '<td><span class="rf-pill ' + (TONS[g.statut] || '') + '">' + esc(szTd(g.statutLibelle)) + '</span>'
-              + (g.courrielEnvoye ? ' <span class="rf-pill bleu">${T("courriel ✓")}</span>' : '') + '</td></tr>';
-          }).join('')
-        + '</tbody></table></div>';
+      h += '<div data-pages="cartescadeaux">' + rows.map(function(g){
+        var pc = g.initial > 0 ? Math.max(0, Math.min(100, Math.round(100 * g.solde / g.initial))) : 0;
+        return '<div class="ls-rang cc-rang' + (g.statut === 'active' || g.statut === 'pending' ? '' : ' eteinte') + '" data-id="' + esc(g.id) + '" title="${T("Voir le détail")}">'
+          + '<div class="qui"><span class="gc-mini" aria-hidden="true"><b>SANDRIZA</b><strong>' + fmt(g.solde) + '</strong></span>'
+          + '<div class="tx"><b>' + esc(g.destinataire || '—') + '</b><span><span class="rf-code">' + esc(g.code) + '</span>'
+          + (g.courriel ? ' · ' + esc(g.courriel) : '') + '</span></div></div>'
+          + '<div class="bilan"><b>' + fmt(g.solde) + '<small> / ' + fmt(g.initial) + '</small></b>'
+          + (g.initial > 0 ? '<div class="jaugec" title="' + pc + ' %"><i style="width:' + pc + '%"></i></div>' : '') + '</div>'
+          + '<div class="ou"><b>' + esc(g.expediteur || '—') + '</b><span>' + esc(szQuand(g.date)) + '</span></div>'
+          + '<div class="etat"><span class="rf-pill ' + (TONS[g.statut] || '') + '">' + esc(szTd(g.statutLibelle)) + '</span>'
+          + (g.courrielEnvoye ? '<span class="rf-pill bleu">${T("courriel ✓")}</span>' : '') + '</div>'
+          + '<span class="cc-ouvrir" aria-hidden="true">›</span></div>';
+      }).join('') + '</div>';
     }
-    h += '</div>';
+    h += '</div></div>';
 
     if (BOITE === 'creer') h += boiteCreer();
     else if (BOITE === 'recompense') h += boiteRecompense();
     else if (BOITE === 'detail') h += boiteDetail();
 
+    corps.classList.add('ls-corps');
     corps.innerHTML = h;
     brancher();
   }
@@ -568,7 +576,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
     var t = ev.target;
     if (!t || !t.closest) return;
     if (t.closest('.boite')) return;
-    var tr = t.closest('tr[data-id]');
+    var tr = t.closest('.cc-rang[data-id]');
     if (!tr) return;
     ouvrirCarte(tr.getAttribute('data-id'), false);
   });
@@ -576,7 +584,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
   /* LE CLIC DROIT SUR UNE CARTE (2026-10-13) — memes gestes que la fiche, memes droits. « Supprimer… » ouvre
      la fiche, confirmation ARMEE : on voit le solde perdu avant le second clic. */
   window.szCtxEntrees = function(ligne){
-    if (!ligne.matches || !ligne.matches('tr[data-id]') || !D) return null;
+    if (!ligne.matches || !ligne.matches('.cc-rang[data-id]') || !D) return null;
     var id = ligne.getAttribute('data-id');
     var c = (D.cartes || []).filter(function(x){ return x.id === id; })[0];
     if (!c) return null;

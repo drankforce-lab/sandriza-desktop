@@ -184,6 +184,21 @@ input[type=checkbox]{accent-color:var(--or)}
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* La liste refaite (2026-10-15, lot B) : un rang par offre ; une annonce montre son bandeau ou son badge en petit. */
+.pr-rang{grid-template-columns:minmax(0,1.8fr) minmax(0,1fr) minmax(0,1.1fr) 17rem}
+.pr-rang-an{grid-template-columns:minmax(0,1.1fr) minmax(0,1.6fr) minmax(0,1fr) 17rem}
+.pr-rang .ou b.pr-red{font-size:1.05rem;font-weight:700}
+.pr-vu{min-width:0;display:flex}
+.pr-mini{flex:1 1 auto;min-width:0;display:flex;align-items:center;justify-content:center;gap:.6rem;height:2.3rem;padding:0 .9rem;
+  border-radius:9px;font-size:.78rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pr-mini i{font-style:normal;font-size:.68rem;padding:.1rem .55rem;border:1px solid currentColor;border-radius:99px}
+.pr-badge{display:inline-flex;align-items:center;height:1.7rem;padding:0 .75rem;border-radius:7px;background:var(--sz-btn-prim);
+  color:var(--sz-btn-prim-txt);font-size:.74rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.eteint .pr-mini,.eteint .pr-badge{filter:grayscale(.7)}
+.pr-defil{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.6rem 1rem;border-radius:12px;background:var(--f-carte);
+  border:1px solid var(--sz-bord);font-size:.8rem;color:var(--tx2)}
+.pr-defil b{color:var(--tx);font-weight:650;margin-right:.4rem}
+.pr-defil input{width:4.5rem;height:2rem}
 `;
 
 /** Page complète de la fenêtre native « Offres et annonces ». */
@@ -580,7 +595,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
       return '<div class="tuile cliq' + (ETAT === f ? ' on' : '') + '" data-prt="' + f + '" title="${T("Cliquer pour filtrer")}">'
         + '<div class="lbl">' + lib + '</div><div class="val">' + val + '</div><div class="sub">' + sous + '</div></div>';
     };
-    var h = szTuiles('<div class="tuiles">'
+    /* ══ LA LISTE REFAITE (2026-10-15, lot B de la refonte du marketing) ═════
+       Meme langage que Campagnes : une TETE (les deux onglets en boutons a
+       choix, recherche et creation a droite), puis un RANG aere par offre ou
+       annonce. Une annonce se montre telle que la boutique la peindra : son
+       BANDEAU en petit (ses couleurs) ou son BADGE. Crochets gardes :
+       data-onglet, data-prt, #pr-q, #pr-nouveau, #pr-interv, #pr-interv-enr,
+       data-modifier, data-basculer, data-suppr, #pr-exporter. */
+    var h = '<div class="ls">';
+    h += '<div class="ls-tete"><div class="ed-seg ls-onglets">'
+      + '<button type="button" class="' + (ONGLET === 'offres' ? 'on' : '') + '" data-onglet="offres">${T("Offres et rabais")}</button>'
+      + '<button type="button" class="' + (ONGLET === 'annonces' ? 'on' : '') + '" data-onglet="annonces">${T("Annonces et badges")}</button>'
+      + '</div><div class="droite">'
+      + '<label class="ls-rch">${ICO.loupe}<input aria-label="${T("Rechercher")}" type="search" id="pr-q" placeholder="${T("Rechercher…")}" value="' + esc(Q) + '"></label>'
+      + (D.peutModifier ? '<button class="ed-bt fort" id="pr-nouveau">+ '
+          + (ONGLET === 'offres' ? '${T("Nouvelle offre")}' : '${T("Nouvelle annonce")}') + '</button>' : '')
+      + '</div></div>';
+    h += szTuiles('<div class="tuiles">'
       + (ONGLET === 'offres'
           ? tu('', '${T("Offres")}', pile.length, '${T("au total")}')
             + tu('encours', '${T("En cours")}', nEn, '${T("appliquées en boutique")}')
@@ -590,71 +621,55 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
             + tu('announcement', '${T("Bandeaux")}', pile.filter(function(x){ return x.genre === 'announcement'; }).length, '${T("en haut de la boutique")}')
             + tu('badge', '${T("Badges")}', pile.filter(function(x){ return x.genre === 'badge'; }).length, '${T("sur les fiches produit")}'))
       + '</div>');
-    h += '<div class="carte"><div class="rf-tb">'
-      + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Rechercher")}" type="search" id="pr-q" placeholder="${T("Rechercher…")}" value="' + esc(Q) + '"></label>'
-      + '<button class="rf-jet' + (ONGLET === 'offres' ? ' on' : '') + '" data-onglet="offres">${T("Offres et rabais")}</button>'
-      + '<button class="rf-jet' + (ONGLET === 'annonces' ? ' on' : '') + '" data-onglet="annonces">${T("Annonces et badges")}</button>'
-      + '<span class="rf-droite"><span class="dt">' + rows.length + ' '
-      + (ONGLET === 'offres' ? (rows.length > 1 ? '${T("offres")}' : '${T("offre")}')
-                             : (rows.length > 1 ? '${T("annonces")}' : '${T("annonce")}')) + '</span>'
-      + (D.peutModifier ? '<button class="prim" id="pr-nouveau" style="height:2.4rem;padding:0 .9rem">+ '
-          + (ONGLET === 'offres' ? '${T("Nouvelle offre")}' : '${T("Nouvelle annonce")}') + '</button>' : '')
-      + '</span></div></div>';
 
     if (ONGLET === 'annonces' && D.peutModifier) {
-      h += '<div class="carte"><h2>${T("Défilement du bandeau")}</h2>'
-        + '<div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">'
-        + '<span class="dt">${T("Quand plusieurs bandeaux sont actifs, ils se succèdent toutes les")}</span>'
-        + '<input type="number" id="pr-interv" aria-label="${T("Intervalle en secondes")}" min="2" max="60" style="width:5rem" value="' + esc(D.intervalle || 6) + '">'
-        + '<span class="dt">${T("secondes.")}</span>'
-        + '<button class="mini" id="pr-interv-enr">${T("Enregistrer")}</button></div></div>';
+      h += '<div class="pr-defil"><b>${T("Défilement du bandeau")}</b>'
+        + '<span>${T("Quand plusieurs bandeaux sont actifs, ils se succèdent toutes les")}</span>'
+        + '<input type="number" id="pr-interv" aria-label="${T("Intervalle en secondes")}" min="2" max="60" value="' + esc(D.intervalle || 6) + '">'
+        + '<span>${T("secondes.")}</span>'
+        + '<button class="mini" id="pr-interv-enr">${T("Enregistrer")}</button></div>';
     }
 
-    /* ⚠ PLEINE HAUTEUR (2026-09-19) : la carte prend le reste du corps, et c est
-       la LISTE qui defile. La carte << Defilement du bandeau >>, au-dessus,
-       garde sa hauteur naturelle — elle est fille directe du corps. */
-    h += '<div class="carte plein">';
+    var periode = function(x){
+      return (x.debut ? esc(jour(x.debut)) : '—') + (x.fin ? ' → ' + esc(jour(x.fin)) : '');
+    };
+    var etat = function(x){
+      return '<div class="etat"><span class="rf-pill ' + (x.enCours ? 'vert' : '') + '">'
+        + (x.enCours ? '${T("En cours")}' : '${T("Hors service")}') + '</span><span>' + periode(x) + '</span></div>';
+    };
+    // La liste en PAGES mesurees, jamais de glissiere (JS_PAGES du socle).
+    h += '<div class="ls-liste sz-pagee">';
     if (!rows.length) {
-      h += '<div class="vide">' + (Q ? '${T("Rien ne correspond.")}'
+      h += '<div class="ls-vide">' + (Q ? '${T("Rien ne correspond.")}'
         : ONGLET === 'offres' ? '${T("Aucune offre. Créez la première.")}' : '${T("Aucune annonce. Créez la première.")}') + '</div>';
     } else if (ONGLET === 'offres') {
-      h += '<div class="liste"><table><thead><tr><th>${T("Nom")}</th><th>${T("Rabais")}</th><th>${T("Période")}</th>'
-        + '<th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
-        + rows.map(function(o){
-            return '<tr><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(o.nom)) + '</span>'
-              + '<div style="min-width:0"><div class="rf-nom">' + esc(o.nom) + '</div>'
-              + '<div class="rf-sous"><span>' + esc(o.portee) + '</span>'
-              + (o.bandeauAffiche === false ? '<span>${T("sans bandeau")}</span>' : '<span>${T("avec bandeau")}</span>')
-              + '</div></div></div></td>'
-              + '<td><span class="rf-mont">' + esc(o.rabais) + '</span></td>'
-              + '<td class="dt">' + (o.debut ? esc(jour(o.debut)) : '—')
-              + (o.fin ? ' → ' + esc(jour(o.fin)) : '') + '</td>'
-              + '<td><span class="rf-pill ' + (o.enCours ? 'vert' : '') + '">'
-              + (o.enCours ? '${T("En cours")}' : '${T("Hors service")}') + '</span></td>'
-              + (D.peutModifier ? '<td class="fin">' + gestes(o) + '</td>' : '') + '</tr>';
-          }).join('')
-        + '</tbody></table></div>';
+      h += '<div data-pages="promotions-offres">' + rows.map(function(o){
+        return '<div data-ctx-ligne class="ls-rang pr-rang' + (o.enCours ? '' : ' eteint') + '">'
+          + '<div class="qui"><span class="bico" aria-hidden="true">' + esc(initiales(o.nom)) + '</span>'
+          + '<div class="tx"><b>' + esc(o.nom) + '</b><span>' + esc(o.portee) + ' · '
+          + (o.bandeauAffiche === false ? '${T("sans bandeau")}' : '${T("avec bandeau")}') + '</span></div></div>'
+          + '<div class="ou"><b class="pr-red">' + esc(o.rabais) + '</b></div>'
+          + etat(o)
+          + '<div class="gestes">' + (D.peutModifier ? gestes(o) : '') + '</div></div>';
+      }).join('') + '</div>';
     } else {
-      h += '<div class="liste"><table><thead><tr><th>${T("Nom")}</th><th>${T("Genre")}</th><th>${T("Contenu")}</th><th>${T("Priorité")}</th>'
-        + '<th>${T("Période")}</th><th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
-        + rows.map(function(a){
-            return '<tr><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(a.nom)) + '</span>'
-              + '<div style="min-width:0"><div class="rf-nom">' + esc(a.nom) + '</div>'
-              + (a.expireAuto ? '<div class="rf-sous"><span>${T("expire après")} ' + a.expireJours + ' ${T("j par produit")}</span></div>' : '')
-              + '</div></div></td>'
-              + '<td><span class="rf-pill bleu">' + (a.genre === 'announcement' ? '${T("Bandeau")}' : '${T("Badge")}') + '</span></td>'
-              + '<td class="dt contenu">'
-              + esc(a.genre === 'announcement' ? a.message : a.badge) + '</td>'
-              + '<td>' + a.priorite + '</td>'
-              + '<td class="dt">' + (a.debut ? esc(jour(a.debut)) : '—')
-              + (a.fin ? ' → ' + esc(jour(a.fin)) : '') + '</td>'
-              + '<td><span class="rf-pill ' + (a.enCours ? 'vert' : '') + '">'
-              + (a.enCours ? '${T("En cours")}' : '${T("Hors service")}') + '</span></td>'
-              + (D.peutModifier ? '<td class="fin">' + gestes(a) + '</td>' : '') + '</tr>';
-          }).join('')
-        + '</tbody></table></div>';
+      h += '<div data-pages="promotions-annonces">' + rows.map(function(a){
+        var bandeau = a.genre === 'announcement';
+        // Ce que la cliente verra : le bandeau a ses couleurs, ou le badge.
+        var vu = bandeau
+          ? '<span class="pr-mini" style="background:' + esc(a.fond || '#1a1a2e') + ';color:' + esc(a.texte || '#ffffff') + '">'
+            + esc(a.message || '—') + (a.cta ? '<i>' + esc(a.cta) + '</i>' : '') + '</span>'
+          : '<span class="pr-badge">' + esc(a.badge || '—') + '</span>';
+        return '<div data-ctx-ligne class="ls-rang pr-rang-an' + (a.enCours ? '' : ' eteint') + '">'
+          + '<div class="qui"><div class="tx"><b>' + esc(a.nom) + '</b><span>'
+          + (bandeau ? '${T("Bandeau")}' : '${T("Badge")}') + ' · ${T("Priorité")} ' + a.priorite
+          + (a.expireAuto ? ' · ${T("expire après")} ' + a.expireJours + ' ${T("j par produit")}' : '') + '</span></div></div>'
+          + '<div class="pr-vu">' + vu + '</div>'
+          + etat(a)
+          + '<div class="gestes">' + (D.peutModifier ? gestes(a) : '') + '</div></div>';
+      }).join('') + '</div>';
     }
-    h += '</div>';
+    h += '</div></div>';
 
     /* ⚠⚠ DEUX ONGLETS DE FORMES DIFFERENTES, DONC DEUX FICHIERS. Une offre et
        une annonce n ont ni les memes colonnes ni le meme sens ; les mettre dans
@@ -671,6 +686,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     }
 
     if (FORM) h += (ONGLET === 'offres' ? boiteOffre() : boiteAnnonce());
+    corps.classList.add('ls-corps');
     corps.innerHTML = h;
     brancher();
 

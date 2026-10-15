@@ -249,12 +249,6 @@ tbody tr:hover td{background:var(--v04)}
 .ed-tete .nom input{flex:1 1 auto;min-width:8rem;max-width:34rem;background:transparent;border:1px solid transparent;
   font-size:1.3rem;font-weight:650;padding:.2rem .4rem;border-radius:9px}
 .ed-tete .nom input:hover,.ed-tete .nom input:focus{border-color:var(--sz-bord-fort);background:var(--f-champ)}
-.ed-pill{font-size:.74rem;padding:.2rem .65rem;border-radius:999px;background:var(--f-pill);color:var(--tx2);
-  border:1px solid var(--sz-bord-fort);white-space:nowrap}
-.ed-bt{height:2.4rem;padding:0 1rem;border-radius:10px;font-weight:600;display:inline-flex;align-items:center;gap:.45rem;white-space:nowrap}
-.ed-bt.ia{border-color:rgba(var(--or-rgb),.45);background:var(--sz-accent-doux);color:var(--tx)}
-.ed-bt.fort{background:var(--sz-btn-prim);border-color:var(--sz-btn-prim);color:var(--sz-btn-prim-txt);font-weight:700}
-.ed-bt.fort:hover:not(:disabled){background:var(--sz-btn-prim-fort)}
 .ed-bande{flex:0 0 auto;margin:0 1.6rem;padding:.75rem 1.1rem;border-radius:14px;background:var(--f-carte);
   border:1px solid var(--sz-bord);display:grid;grid-template-columns:minmax(0,1fr) minmax(12rem,17rem) minmax(9rem,12rem);
   gap:1.4rem;align-items:center}
@@ -292,10 +286,6 @@ tbody tr:hover td{background:var(--v04)}
 .ed-modele span{font-size:.74rem;color:var(--tx2)}
 .ed-modele .duo{display:flex;gap:.4rem}
 .ed-modele select{flex:1 1 auto;min-width:0;height:2.2rem;border-radius:9px;background:var(--f-carte)}
-.ed-seg{display:inline-flex;padding:3px;border-radius:10px;background:var(--f-carte);border:1px solid var(--sz-bord)}
-.ed-seg button{height:1.9rem;padding:0 .85rem;border:none;border-radius:8px;background:transparent;color:var(--tx2);font-size:.8rem}
-.ed-seg button.on{background:var(--f-pill);color:var(--tx);font-weight:600}
-.ed-seg.plein{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);width:100%}
 .ed-scene{flex:1 1 0;min-height:0;border-radius:16px;background:var(--f-champ);border:1px solid var(--sz-bord);
   display:flex;justify-content:center;padding:1.2rem 1rem 0;overflow:hidden}
 .ed-scene iframe{width:100%;max-width:40rem;height:100%;border:none;border-radius:10px 10px 0 0;background:#fff;
@@ -389,70 +379,6 @@ tbody tr:hover td{background:var(--v04)}
 .etapes-choix button{font:inherit;font-size:.78rem;font-weight:600;padding:.32rem .75rem;border-radius:99px;
   border:1px solid var(--v12);background:var(--v05);color:var(--tx2);cursor:pointer}
 .etapes-choix button.on{background:var(--or);border-color:var(--or);color:#17202c}
-/* ══ LES LISTES, REFAITES (2026-10-15, lot A) — meme langage que les editeurs : une tete (onglets a choix,
-   geste principal a droite), les chiffres dans UNE bande, des rangs aeres. Tout en variables du socle. */
-.corps.ls-corps{padding:0;gap:0}
-.ls{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:.9rem;padding:1rem 1.6rem .9rem}
-.ls>*{flex:0 0 auto}
-.ls-tete{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
-.ls-onglets button{height:2.25rem;padding:0 1.1rem;font-size:.86rem}
-.ls-tete .droite{margin-left:auto;display:flex;gap:.6rem;align-items:center}
-.ls-rch{display:flex;align-items:center;gap:.5rem;height:2.4rem;width:20rem;padding:0 .8rem;border-radius:10px;
-  background:var(--f-champ);border:1px solid var(--sz-bord-fort);color:var(--tx2)}
-.ls-rch svg{width:1rem;height:1rem;flex:0 0 auto}
-.ls-rch input{flex:1 1 auto;min-width:0;border:none;background:transparent;padding:0;height:100%}
-.ls .tuiles{display:flex;flex-wrap:wrap;gap:.6rem 2.6rem;padding:.85rem 1.3rem;border-radius:14px;background:var(--f-carte);
-  border:1px solid var(--sz-bord)}
-.ls .tuile{background:none;border:none;padding:0;min-width:0}
-.ls .tuile .val{font-size:1.45rem;font-weight:750;line-height:1.2;margin-top:.15rem}
-.ls .avis{border-radius:12px;padding:.65rem 1rem;font-size:.8rem}
-.ls-note{font-size:.78rem;line-height:1.55;color:var(--tx2);padding:0 .2rem}
-.ls-note strong{color:var(--tx)}
-.ls-action{display:flex;align-items:center;gap:1rem;padding:.7rem .8rem .7rem 1.2rem;border-radius:14px;
-  background:var(--sz-accent-doux);border:1px solid var(--sz-bord-fort)}
-.ls-action span{flex:1 1 auto;font-size:.88rem;font-weight:600}
-.ls-liste{flex:1 1 0;min-height:7rem}
-.ls-vide{flex:1 1 auto;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--tx2);
-  font-size:.88rem;line-height:1.6;padding:2rem;border-radius:16px;border:1px dashed var(--sz-bord-fort)}
-.ls-pied{font-size:.74rem;color:var(--tx2);padding:0 .2rem}
-.ls-rang{display:grid;align-items:center;gap:1.4rem;min-height:4.6rem;padding:.75rem 1rem .75rem .9rem;margin-bottom:.55rem;
-  border-radius:14px;background:var(--f-carte);border:1px solid var(--sz-bord)}
-.ls-rang:hover{border-color:var(--sz-bord-fort)}
-.ls-camp{grid-template-columns:minmax(0,1.7fr) minmax(0,1.15fr) 8.5rem 9.5rem 17rem}
-.ls-ch{grid-template-columns:minmax(0,1.25fr) minmax(0,1.6fr) 10.5rem 9rem 17rem}
-.ls-seg{grid-template-columns:minmax(0,1.8fr) minmax(10rem,1fr) 10rem 12rem}
-.ls-rang .qui{display:flex;align-items:center;gap:.85rem;min-width:0}
-.ls-rang .bico{width:2.5rem;height:2.5rem;border-radius:11px;background:var(--f-pill);color:var(--tx-or);display:flex;
-  align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex:0 0 auto}
-.ls-rang .tx,.ls-rang .ou,.ls-rang .etat,.ls-rang .bilan{display:flex;flex-direction:column;gap:.2rem;min-width:0}
-.ls-rang .tx b{font-size:.95rem;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ls-rang .ou b{font-size:.84rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ls-rang .tx span,.ls-rang .ou span,.ls-rang .etat>span:not(.rf-pill),.ls-rang .bilan span{font-size:.76rem;color:var(--tx2);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ls-rang .etat{align-items:flex-start}
-.ls-rang .bilan b{font-size:1.15rem;font-weight:700;line-height:1.15}
-.ls-rang .bilan em{font-style:normal;color:var(--tx-err)}
-.ls-rang .gestes{display:flex;gap:.4rem;justify-content:flex-end;flex-wrap:wrap}
-.ls-rang .gestes button{height:2.1rem;padding:0 .8rem;border-radius:9px}
-.ls-ch.eteinte .bico{color:var(--tx2)}
-/* La ligne du temps d une chaine : un point par etape, relies d un trait. */
-.ls-temps{display:flex;align-items:flex-start;min-width:0}
-.ls-temps.rien{font-size:.78rem;color:var(--tx2)}
-.ls-temps .pt{flex:1 1 0;min-width:0;position:relative;padding:1.05rem .7rem 0 0;display:flex;flex-direction:column;gap:.1rem}
-.ls-temps .pt i{position:absolute;top:.15rem;left:0;width:.62rem;height:.62rem;border-radius:50%;background:var(--sz-accent)}
-.ls-temps .pt::before{content:"";position:absolute;top:.45rem;left:.8rem;right:.25rem;height:1px;background:var(--sz-bord-fort)}
-.ls-temps .pt:last-of-type::before{display:none}
-.ls-temps .pt b{font-size:.78rem;font-weight:650}
-.ls-temps .pt small{font-size:.72rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ls-temps .plus{flex:0 0 auto;align-self:center;font-size:.76rem;color:var(--tx2)}
-.ls-ch.eteinte .ls-temps .pt i{background:var(--sz-bord-fort)}
-/* La portee d un segment : le nombre, puis la part des abonnees actives. */
-.ls-seg .prt{display:flex;flex-direction:column;gap:.4rem;min-width:0}
-.ls-seg .prt .ligne{display:flex;align-items:baseline;gap:.55rem;min-width:0}
-.ls-seg .prt b{font-size:1.25rem;font-weight:700}
-.ls-seg .prt span{font-size:.74rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ls-seg .barre{height:.4rem;border-radius:99px;background:var(--f-champ);overflow:hidden}
-.ls-seg .barre i{display:block;height:100%;border-radius:99px;background:var(--sz-accent)}
 `;
 
 /** Page complète de la fenêtre native « Campagnes et chaînes ». */
@@ -1877,7 +1803,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
               + esc(s.id) + '">' + (armeS ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
           }
           var pc = Math.min(100, Math.round(100 * (s.compte || 0) / tous));
-          return '<div class="ls-rang ls-seg">'
+          return '<div data-ctx-ligne class="ls-rang ls-seg">'
             + '<div class="qui"><span class="bico" aria-hidden="true">' + esc(initiales(s.nom)) + '</span>'
             + '<div class="tx"><b>' + esc(s.nom) + '</b><span>' + esc(s.phrase || '—') + '</span></div></div>'
             + '<div class="prt"><div class="ligne"><b>' + (s.compte || 0) + '</b><span>' + pc + ' ${T("% des abonnés actifs")}</span></div>'
@@ -2099,7 +2025,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
         }
         var nb = (c.canal === 'sms' ? (D.smsDestinataires || 0) : c.destinataires);
         var parti = (c.etat === 'sent' || c.envoyes);
-        return '<div class="ls-rang ls-camp">'
+        return '<div data-ctx-ligne class="ls-rang ls-camp">'
           + '<div class="qui"><span class="bico" aria-hidden="true">' + esc(initiales(c.nom)) + '</span>'
           + '<div class="tx"><b>' + esc(c.nom) + '</b><span>' + esc(c.sujet) + '</span></div></div>'
           + '<div class="ou"><b>' + esc(c.segmentLibelle) + '</b><span>' + esc(c.canalLibelle) + ' · '
@@ -2184,7 +2110,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
               return '<span class="pt"><i></i><b>' + esc(e.delai) + '</b><small>' + esc(e.sujet) + '</small></span>';
             }).join('') + (et.length > 4 ? '<span class="plus">+' + (et.length - 4) + '</span>' : '') + '</div>'
           : '<div class="ls-temps rien">${T("Aucune étape : cette chaîne n’enverra rien.")}</div>';
-        return '<div class="ls-rang ls-ch' + (ch.active ? '' : ' eteinte') + '">'
+        return '<div data-ctx-ligne class="ls-rang ls-ch' + (ch.active ? '' : ' eteinte') + '">'
           + '<div class="qui"><span class="bico" aria-hidden="true">' + esc(initiales(ch.nom)) + '</span>'
           + '<div class="tx"><b>' + esc(ch.nom) + '</b><span>' + esc(ch.description || ch.declencheurLibelle) + '</span></div></div>'
           + temps

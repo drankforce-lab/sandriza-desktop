@@ -46,8 +46,8 @@ module.exports = {
      degrade marine fixe, comme la carte que le client recoit — il ne change pas
      avec le mode. Le banc mesure ces encres contre le fond de jour, qu elles ne
      touchent jamais (contraste reel sur le degrade : > 9). */
-  "#f7efe2": 1,           // 1.02  1 fenetre : cartescadeaux.js (.gc-carte)
-  "#f0d6a0": 1,           // 1.26  1 fenetre : cartescadeaux.js (.gc-marque)
+  "#f7efe2": 2,           // 1.02  cartescadeaux.js (.gc-carte, .gc-mini — la carte en petit dans la liste, 2026-10-15) : texte SUR le degrade sombre de la carte, pas sur le fond de jour
+  "#f0d6a0": 2,           // 1.26  cartescadeaux.js (.gc-marque, .gc-mini b) : idem, sur le degrade de la carte
   /* ⚠ LA VISIONNEUSE DE LA PHOTOTHEQUE (2026-10-14, sa demande) : une table lumineuse
      TOUJOURS SOMBRE (rgba(8,9,12,.97)), jour comme nuit — la photo seule. Le banc mesure
      son encre contre le fond de jour, qu elle ne touche jamais (contraste reel : > 14). */

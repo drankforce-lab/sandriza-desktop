@@ -119,6 +119,15 @@ tbody tr:hover td{background:var(--v04)}
 .cp-apercu .cp-code{font-family:'Courier New',monospace;font-weight:700;letter-spacing:1px;color:var(--tx);
   padding:.15rem .55rem;border-radius:6px;background:var(--v06)}
 .cp-apercu .cp-fl{color:var(--tx3)}
+/* La liste refaite (2026-10-15, lot B) : un rang par coupon, qui commence par le coupon lui-meme (son code sur un ticket). */
+.cp-rang{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) 8rem minmax(0,1.1fr) 17rem}
+.cp-ticket{flex:0 0 auto;width:9.5rem;height:2.6rem;padding:0 .8rem;display:flex;align-items:center;justify-content:center;
+  border:1.5px dashed var(--sz-accent);border-radius:9px;background:var(--sz-accent-doux);color:var(--tx);
+  font:700 .8rem/1 ui-monospace,"Courier New",monospace;letter-spacing:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cp-rang.eteint .cp-ticket{border-color:var(--sz-bord-fort);background:transparent;color:var(--tx2)}
+.cp-rang .ou b.cp-red{font-size:1.05rem;font-weight:700}
+.cp-rang .bilan small{font-size:.76rem;font-weight:500;color:var(--tx2)}
+.cp-rang .jaugeu{margin-top:.25rem;width:100%}
 `;
 
 /** Page complète de la fenêtre native « Coupons ». */
@@ -293,65 +302,60 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
         + ' title="${T("Cliquer pour afficher")}' : '') + '"><div class="lbl">' + lib + '</div><div class="val">' + val + '</div>'
         + '<div class="sub">' + sous + '</div></div>';
     };
-    var h = szTuiles('<div class="tuiles">'
+    /* ══ LA LISTE REFAITE (2026-10-15, lot B de la refonte du marketing) ═════
+       Meme langage que Campagnes : une TETE (filtres en boutons a choix — le
+       mot seul, jamais de compte —, recherche et creation a droite), puis un
+       RANG aere par coupon, qui commence par le coupon LUI-MEME (son code sur
+       un ticket). Crochets gardes : #cp-q, data-etat, #cp-nouveau,
+       data-modifier / data-basculer / data-suppr, #cp-exporter. */
+    var h = '<div class="ls">';
+    h += '<div class="ls-tete"><div class="ed-seg ls-onglets">'
+      + '<button type="button" class="' + (ETAT === '' ? 'on' : '') + '" data-etat="">${T("Tous")}</button>'
+      + '<button type="button" class="' + (ETAT === 'actifs' ? 'on' : '') + '" data-etat="actifs">${T("En cours")}</button>'
+      + '<button type="button" class="' + (ETAT === 'inactifs' ? 'on' : '') + '" data-etat="inactifs">${T("Hors service")}</button>'
+      + '</div><div class="droite">'
+      + '<label class="ls-rch">${ICO.loupe}<input aria-label="${T("Code ou nom")}" type="search" id="cp-q" placeholder="${T("Code ou nom…")}" value="' + esc(Q) + '"></label>'
+      + (D.peutModifier ? '<button class="ed-bt fort" id="cp-nouveau">${T("+ Nouveau coupon")}</button>' : '')
+      + '</div></div>';
+    h += szTuiles('<div class="tuiles">'
       + tu('actifs', '${T("En cours")}', nEnCours, '${T("utilisables en boutique")}')
       + tu('inactifs', '${T("Hors service")}', tous.length - nEnCours, '${T("désactivés ou hors période")}')
       + tu(null, '${T("Utilisations")}', nUtil, '${T("tous coupons confondus")}')
       + '</div>');
-    h += '<div class="carte"><div class="rf-tb">'
-      + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Code ou nom")}" type="search" id="cp-q" placeholder="${T("Code ou nom…")}" value="' + esc(Q) + '"></label>'
-      + '<button class="rf-jet' + (ETAT === '' ? ' on' : '') + '" data-etat="">${T("Tous")}</button>'
-      + '<button class="rf-jet' + (ETAT === 'actifs' ? ' on' : '') + '" data-etat="actifs">${T("En cours")}</button>'
-      + '<button class="rf-jet' + (ETAT === 'inactifs' ? ' on' : '') + '" data-etat="inactifs">${T("Hors service")}</button>'
-      + '<span class="rf-droite">'
-      /* ⚠ Le singulier et le pluriel, chacun entier. Le compte AVANT le bouton,
-         comme dans toutes les autres listes (2026-10-01). */
-      + '<span class="dt">' + rows.length + (rows.length > 1 ? '${T(" coupons")}' : '${T(" coupon")}') + '</span>'
-      + (D.peutModifier ? '<button class="prim" id="cp-nouveau" style="height:2.4rem;padding:0 .9rem">${T("+ Nouveau coupon")}</button>' : '')
-      + '</span></div></div>';
 
-    /* ⚠ PLEINE HAUTEUR (2026-09-19) : la carte prend tout le reste, la liste
-       defile. Le voile du formulaire est en position:fixed — il flotte
-       au-dessus et n est donc pas coupe par overflow:hidden. */
     // La liste en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
-    h += '<div class="carte plein sz-pagee">';
+    h += '<div class="ls-liste sz-pagee">';
     if (!rows.length) {
-      h += '<div class="vide">' + (Q || ETAT ? '${T("Rien ne correspond.")}' : '${T("Aucun coupon. Créez le premier.")}') + '</div>';
+      h += '<div class="ls-vide">' + (Q || ETAT ? '${T("Rien ne correspond.")}' : '${T("Aucun coupon. Créez le premier.")}') + '</div>';
     } else {
-      h += '<div class="liste" data-pages="coupons"><table><thead><tr><th>${T("Coupon")}</th><th>${T("Réduction")}</th>'
-        + '<th class="num">${T("Minimum")}</th><th>${T("Cumul soldes")}</th><th class="num">${T("Utilisations")}</th>'
-        + '<th>${T("Période")}</th><th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
-        + rows.map(function(c){
-            var gestes = '';
-            if (D.peutModifier) {
-              gestes = '<button class="mini geste" data-modifier="' + esc(c.id) + '">${T("Modifier")}</button> '
-                + '<button class="mini geste" data-basculer="' + esc(c.id) + '">'
-                + (c.actif ? '${T("Désactiver")}' : '${T("Activer")}') + '</button> '
-                + '<button class="mini geste danger" data-suppr="' + esc(c.id) + '">'
-                + (SUPPR_ARME === c.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
-            }
-            return '<tr><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">%</span>'
-              + '<div style="min-width:0"><div class="rf-nom">' + esc(c.nom || c.code) + '</div>'
-              + '<div class="rf-sous"><span class="rf-code">' + esc(c.code) + '</span></div></div></div></td>'
-              + '<td><span class="rf-mont">' + esc(c.reduction) + '</span></td>'
-              + '<td class="num">' + (c.minimum ? fmt(c.minimum) : '—') + '</td>'
-              + '<td>' + (c.cumulSolde ? '<span class="rf-pill vert">${T("autorisé")}</span>'
-                                       : '<span class="rf-pill">${T("refusé")}</span>') + '</td>'
-              + '<td class="num">' + c.utilise + (c.maximum ? ' / ' + c.maximum : ' / ∞')
-              /* La jauge d utilisation, quand il y a un plafond : ambre des qu il
-                 est atteint (le coupon ne passera plus). */
-              + (c.maximum ? '<div class="jaugeu" title="' + c.utilise + ' / ' + c.maximum + '"><i'
-                  + (c.utilise >= c.maximum ? ' class="plein"' : '') + ' style="width:'
-                  + Math.min(100, Math.round(100 * c.utilise / c.maximum)) + '%"></i></div>' : '')
-              + '</td>'
-              + '<td class="dt">' + (c.debut ? esc(jour(c.debut)) : '—')
-              + (c.fin ? ' → ' + esc(jour(c.fin)) : '') + '</td>'
-              + '<td><span class="rf-pill ' + (c.enCours ? 'vert' : '') + '">'
-              + (c.enCours ? '${T("En cours")}' : '${T("Hors service")}') + '</span></td>'
-              + (D.peutModifier ? '<td class="fin">' + gestes + '</td>' : '') + '</tr>';
-          }).join('')
-        + '</tbody></table></div>';
+      h += '<div data-pages="coupons">' + rows.map(function(c){
+        var gestes = '';
+        if (D.peutModifier) {
+          gestes = '<button class="mini geste" data-modifier="' + esc(c.id) + '">${T("Modifier")}</button>'
+            + '<button class="mini geste" data-basculer="' + esc(c.id) + '">'
+            + (c.actif ? '${T("Désactiver")}' : '${T("Activer")}') + '</button>'
+            + '<button class="mini geste danger' + (SUPPR_ARME === c.id ? ' arme' : '') + '" data-suppr="' + esc(c.id) + '">'
+            + (SUPPR_ARME === c.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
+        }
+        return '<div data-ctx-ligne class="ls-rang cp-rang' + (c.enCours ? '' : ' eteint') + '">'
+          + '<div class="qui"><span class="cp-ticket">' + esc(c.code) + '</span>'
+          + '<div class="tx"><b>' + esc(c.nom || c.code) + '</b><span>'
+          + (c.cumulSolde ? '${T("Cumulable avec les soldes et promotions")}' : '${T("Cumul soldes")} : ${T("refusé")}') + '</span></div></div>'
+          + '<div class="ou"><b class="cp-red">' + esc(c.reduction) + '</b><span>'
+          + (c.minimum ? '${T("Minimum")} ' + fmt(c.minimum) : '—') + '</span></div>'
+          + '<div class="bilan"><b>' + c.utilise + '<small> / ' + (c.maximum ? c.maximum : '∞') + '</small></b>'
+          /* La jauge d utilisation, quand il y a un plafond : ambre des qu il est atteint (le coupon ne passera plus). */
+          + (c.maximum ? '<div class="jaugeu" title="' + c.utilise + ' / ' + c.maximum + '"><i'
+              + (c.utilise >= c.maximum ? ' class="plein"' : '') + ' style="width:'
+              + Math.min(100, Math.round(100 * c.utilise / c.maximum)) + '%"></i></div>' : '<span>${T("Utilisations")}</span>')
+          + '</div>'
+          + '<div class="etat"><span class="rf-pill ' + (c.enCours ? 'vert' : '') + '">'
+          + (c.enCours ? '${T("En cours")}' : '${T("Hors service")}') + '</span>'
+          + '<span>' + (c.debut ? esc(jour(c.debut)) : '—') + (c.fin ? ' → ' + esc(jour(c.fin)) : '') + '</span></div>'
+          + '<div class="gestes">' + gestes + '</div></div>';
+      }).join('') + '</div>';
     }
+    h += '</div>';
     h += '</div>';
 
     /* ⚠ LE PIED SE POSE AVANT LE VOILE DU FORMULAIRE, jamais apres : il
@@ -364,6 +368,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
     }
 
     if (FORM) h += boiteForm();
+    corps.classList.add('ls-corps');
     corps.innerHTML = h;
     brancher();
 
