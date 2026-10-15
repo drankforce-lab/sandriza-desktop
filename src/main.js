@@ -1586,6 +1586,7 @@ const createWindow = () => {
      relevait comme le defaut A5. */
   // La bande des boutons suit la porte dès le démarrage (2026-10-15) — sinon elle garde la couleur nuit
   // de création de la fenêtre au-dessus d'un panneau clair.
+  _porteSansTheme = false;
   _bandePorte(true);
   mainWindow.loadURL(portePage(TP('Démarrage'), TP('Préparation de l’application…'), 8)).catch(() => {});
 
@@ -1926,7 +1927,7 @@ const refuserFermeture = () => {
   const t = Date.now();
   if (t - _avisMajLe < 2500) return;
   _avisMajLe = t;
-  if (_porteActive) { montrerPorte(MSG_MAJ_T(), MSG_MAJ_D().replace(/\n\n/g, '<br><br>')); return; }
+  if (_porteActive) { montrerPorte(MSG_MAJ_T(), MSG_MAJ_D().replace(/\n\n/g, '<br><br>'), undefined, true); return; }
   try {
     dialog.showMessageBox(mainWindow && !mainWindow.isDestroyed() ? mainWindow : null, {
       type: 'warning', title: MSG_MAJ_T(), message: MSG_MAJ_T(), detail: MSG_MAJ_D(), buttons: [TP('Compris')],
@@ -2049,9 +2050,15 @@ const _portePalette = () => {
   return P[t] || null;     // null = Dore : l ecran d origine, inchange
 };
 
+/* ⚠ (2026-10-15, sa capture : « ici retire le thème durant les update, c'est trop sombre ») Les écrans
+   d'une VRAIE mise à jour (nouvelle version, téléchargement, installation, refus de fermer) reprennent
+   l'écran d'origine. Le démarrage, l'ouverture et la simple vérification GARDENT le jeu de couleurs —
+   c'était sa demande du matin (« le thème de la page de chargement n'est pas appliqué »), et une
+   vérification sans mise à jour passerait sinon d'une palette à l'autre à chaque lancement. */
+let _porteSansTheme = false;
 const portePage = (titre, message, progression) => {
   const b = porteMarque();
-  const p = _portePalette();
+  const p = _porteSansTheme ? null : _portePalette();
   const bg = 'linear-gradient(135deg,' + b.bgFrom + ' 0%,' + b.bgMid + ' 50%,' + b.bgFrom + ' 100%)';
 
   const barre = (progression === undefined) ? '' :
@@ -5127,7 +5134,7 @@ const PORTE_BANDE = { color: '#faf8f5', symbolColor: '#1d2433' };
    courante et la couleur de son titre ; Doré (palette null) garde la bande d'origine. */
 const _bandePortePalette = () => {
   let p = null;
-  try { p = _portePalette(); } catch (_) { p = null; }
+  try { p = _porteSansTheme ? null : _portePalette(); } catch (_) { p = null; }
   return p ? { color: p.panel, symbolColor: p.h1 } : PORTE_BANDE;
 };
 const _bandePorte = (dessus) => {
@@ -5404,8 +5411,9 @@ const connexionRetirer = () => {
   try { v.webContents.close(); } catch (e) {}
   return true;
 };
-const montrerPorte = (titre, message, progression) => {
+const montrerPorte = (titre, message, progression, sansTheme) => {
   if (!mainWindow || mainWindow.isDestroyed()) return;
+  _porteSansTheme = !!sansTheme;
   _bandePorte(true);
   mainWindow.loadURL(portePage(titre, message, progression)).catch(() => {});
 };
@@ -5838,7 +5846,7 @@ const getUpdater = () => {
         });
       } catch {}
       if (!_porteActive) return;
-      montrerPorte(TP('Téléchargement en cours'), texteProgression(p), Math.round(p && p.percent ? p.percent : 0));
+      montrerPorte(TP('Téléchargement en cours'), texteProgression(p), Math.round(p && p.percent ? p.percent : 0), true);
     });
 
     // ⚠ L'EN-TÊTE D'APPLICATION EST INDISPENSABLE ICI.
@@ -5879,7 +5887,7 @@ const getUpdater = () => {
         montrerPorte(TP('Installation'),
           TP('La version {0} est prête.', version) + '<br>'
           + '<span style="opacity:.7">' + TP('L’application redémarre, puis reprend où vous en étiez.') + '</span>',
-          100);
+          100, true);
         _porteActive = false;
         // On reste en zone critique : le redémarrage part dans 1,6 s et il ne doit
         // pas être devancé par un Alt+F4 pendant qu'on lit le message.
@@ -6081,7 +6089,7 @@ const verifierAuLancement = async () => {
 
     if (process.platform === 'darwin') {
       montrerPorte(TP('Nouvelle version disponible'),
-        TP('Une version plus récente existe. Sur macOS, la mise à jour se fait à la main tant que l’application n’est pas signée.'));
+        TP('Une version plus récente existe. Sur macOS, la mise à jour se fait à la main tant que l’application n’est pas signée.'), undefined, true);
       await dialog.showMessageBox(mainWindow, {
         type: 'info',
         buttons: [TP('Continuer')],
@@ -6097,7 +6105,7 @@ const verifierAuLancement = async () => {
     // Windows : l'écran reste, le téléchargement est déjà parti (autoDownload).
     // `update-downloaded` prendra le relais et redémarrera l'application.
     montrerPorte(TP('Nouvelle version disponible'),
-      '<span style="opacity:.7;white-space:nowrap">' + TP('L’application redémarrera dès qu’elle sera prête.') + '</span>');
+      '<span style="opacity:.7;white-space:nowrap">' + TP('L’application redémarrera dès qu’elle sera prête.') + '</span>', undefined, true);
   } catch (err) {
     if (tranche) return;
     tranche = true;
