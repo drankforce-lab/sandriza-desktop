@@ -380,7 +380,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (fl.length) {
       h += '<span class="fm"><button class="jeton' + (FILTRES.length ? ' on' : '') + '" id="flt" aria-haspopup="true"'
         + ' aria-expanded="' + (MENU_F ? 'true' : 'false') + '">${T("Filtres")}'
-        + (FILTRES.length ? ' · ' + FILTRES.length : '') + ' ▾</button>'
+        + ' ▾</button>'   // le mot seul (sa règle du 2026-10-15) : « on » dit qu'un filtre est actif
         + '<div class="menu" id="flt-menu"' + (MENU_F ? '' : ' hidden') + '>'
         + fl.map(function(f){
             return '<label><input type="checkbox" data-filtre="' + esc(f.cle) + '"'

@@ -2670,8 +2670,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     } else {
       h += '<button class="jeton' + (enImg ? ' on' : '') + '" id="cmp-off">${T("Résultat")}</button>';
     }
-    h += '<button class="jeton' + (enImg ? '' : ' on') + '" id="vue-fmt">${T("Enregistrer et formats")}'
-      + (FORMATS.length ? ' · ' + FORMATS.length : '') + '</button></div>';
+    h += '<button class="jeton' + (enImg ? '' : ' on') + '" id="vue-fmt">${T("Enregistrer et formats")}</button></div>';
     h += '<div class="resg"><div class="rimg' + (enImg ? '' : ' fmtv') + '" id="rimg">'
       + (enImg ? ((av && CMP) ? comparateurHtml(av) : ('<img src="' + RESULT.image + '" alt="${T("résultat")}">'))
                : formatsHtml())
