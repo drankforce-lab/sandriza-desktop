@@ -232,6 +232,128 @@ tbody tr:hover td{background:var(--v04)}
 .onglets > button:hover{background:var(--v05);color:var(--tx)}
 .onglets .droite{margin-left:auto}
 
+/* ══ L EDITEUR DE CAMPAGNE, REFAIT (2026-10-15, sa demande : « plus clair et plus beau, il nous faut
+   quelque chose qui respire ») — maquette approuvee « oui c est parfait ». Trois colonnes : les BLOCS
+   a gauche (une ligne chacun), l APERCU REEL au centre (on clique un bloc pour le choisir), les
+   REGLAGES du bloc a droite. Une bande pour l objet, les destinataires et le canal ; l IA dans un
+   panneau qu on ouvre. Tout en variables du socle : chaque jeu de couleurs, jour comme nuit. */
+.corps.formulaire.ed-corps{padding:0;gap:0}
+.ed{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;position:relative}
+.ed-tete{flex:0 0 auto;display:flex;align-items:center;gap:.9rem;padding:1rem 1.6rem .8rem}
+.ed-tete .retour{background:none;border:none;color:var(--tx2);font-size:.84rem;padding:.2rem 0}
+.ed-tete .retour:hover:not(:disabled){background:none;color:var(--tx)}
+.ed-tete .sep{color:var(--tx2);opacity:.5}
+.ed-tete .nom{flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:.7rem}
+.ed-tete .nom input{flex:1 1 auto;min-width:8rem;max-width:34rem;background:transparent;border:1px solid transparent;
+  font-size:1.3rem;font-weight:650;padding:.2rem .4rem;border-radius:9px}
+.ed-tete .nom input:hover,.ed-tete .nom input:focus{border-color:var(--sz-bord-fort);background:var(--f-champ)}
+.ed-pill{font-size:.74rem;padding:.2rem .65rem;border-radius:999px;background:var(--f-pill);color:var(--tx2);
+  border:1px solid var(--sz-bord-fort);white-space:nowrap}
+.ed-bt{height:2.4rem;padding:0 1rem;border-radius:10px;font-weight:600;display:inline-flex;align-items:center;gap:.45rem;white-space:nowrap}
+.ed-bt.ia{border-color:rgba(var(--or-rgb),.45);background:var(--sz-accent-doux);color:var(--tx)}
+.ed-bt.fort{background:var(--sz-btn-prim);border-color:var(--sz-btn-prim);color:var(--sz-btn-prim-txt);font-weight:700}
+.ed-bt.fort:hover:not(:disabled){background:var(--sz-btn-prim-fort)}
+.ed-bande{flex:0 0 auto;margin:0 1.6rem;padding:.75rem 1.1rem;border-radius:14px;background:var(--f-carte);
+  border:1px solid var(--sz-bord);display:grid;grid-template-columns:minmax(0,1fr) minmax(12rem,17rem) minmax(9rem,12rem);
+  gap:1.4rem;align-items:center}
+.ed-bande label{display:flex;align-items:center;gap:.8rem;min-width:0;font-size:.76rem;color:var(--tx2)}
+.ed-bande label>span{flex:0 0 auto}
+.ed-bande input{flex:1 1 auto;min-width:0;border:none;border-bottom:1px solid var(--sz-bord-fort);border-radius:0;
+  background:transparent;font-size:.95rem;padding:.35rem .1rem}
+.ed-bande select{flex:1 1 auto;min-width:0;height:2.2rem;border-radius:9px;background:var(--f-champ)}
+.ed-sous{flex:0 0 auto;margin:.35rem 1.6rem 0;font-size:.74rem;color:var(--tx2);min-height:1em}
+.ed-sms{flex:0 0 auto;margin:.5rem 1.6rem 0;padding:.6rem 1.1rem;border-radius:12px;background:var(--f-carte);
+  border:1px solid var(--sz-bord);display:flex;gap:1rem;align-items:flex-start}
+.ed-sms textarea{flex:1 1 auto;min-height:3.2rem;resize:none;font-family:inherit;font-size:.86rem}
+.ed-sms .aide{flex:0 0 15rem;font-size:.72rem;color:var(--tx2);line-height:1.55}
+.ed-cols{flex:1 1 0;min-height:0;display:grid;grid-template-columns:16rem minmax(0,1fr) 20rem;gap:1.2rem;
+  padding:1rem 1.6rem 0}
+.ed-col{min-height:0;display:flex;flex-direction:column;gap:.6rem;overflow:hidden;position:relative}
+.ed-col>*{flex:0 0 auto}
+.ed-titre{display:flex;align-items:baseline;justify-content:space-between;font-size:.72rem;font-weight:650;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--tx2)}
+#f-blocs{flex:1 1 0;min-height:0;display:flex;flex-direction:column;gap:.45rem;position:relative}
+#f-blocs>*{flex:0 0 auto}
+#f-blocs>[data-pages]{flex:1 1 0;min-height:0}
+.brang{width:100%;height:3.35rem;display:flex;align-items:center;gap:.7rem;padding:0 .7rem;border-radius:12px;
+  background:transparent;border:1px solid transparent;text-align:left;margin-bottom:.3rem}
+.brang:hover:not(:disabled){background:var(--f-carte)}
+.brang.on{background:var(--f-carte);border-color:rgba(var(--or-rgb),.6)}
+.brang .bico{width:1.8rem;height:1.8rem;border-radius:8px;background:var(--f-pill);color:var(--tx-or);display:flex;
+  align-items:center;justify-content:center;font-size:.78rem;font-weight:700;flex:0 0 auto}
+.brang .btx{display:flex;flex-direction:column;min-width:0}
+.brang .btx b{font-size:.84rem;font-weight:600}
+.brang .btx span{font-size:.76rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ed-ajout{height:2.75rem;border-radius:12px;border:1px dashed var(--sz-bord-fort);background:transparent;
+  color:var(--tx-or);font-weight:600}
+.ed-modele{margin-top:auto;padding-top:.7rem;border-top:1px solid var(--sz-bord);display:flex;flex-direction:column;gap:.4rem}
+.ed-modele span{font-size:.74rem;color:var(--tx2)}
+.ed-modele .duo{display:flex;gap:.4rem}
+.ed-modele select{flex:1 1 auto;min-width:0;height:2.2rem;border-radius:9px;background:var(--f-carte)}
+.ed-seg{display:inline-flex;padding:3px;border-radius:10px;background:var(--f-carte);border:1px solid var(--sz-bord)}
+.ed-seg button{height:1.9rem;padding:0 .85rem;border:none;border-radius:8px;background:transparent;color:var(--tx2);font-size:.8rem}
+.ed-seg button.on{background:var(--f-pill);color:var(--tx);font-weight:600}
+.ed-seg.plein{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);width:100%}
+.ed-scene{flex:1 1 0;min-height:0;border-radius:16px;background:var(--f-champ);border:1px solid var(--sz-bord);
+  display:flex;justify-content:center;padding:1.2rem 1rem 0;overflow:hidden}
+.ed-scene iframe{width:100%;max-width:40rem;height:100%;border:none;border-radius:10px 10px 0 0;background:#fff;
+  box-shadow:0 18px 44px rgba(0,0,0,.35)}
+.ed-scene textarea{width:100%;height:100%;resize:none;font-family:Consolas,"Courier New",monospace;font-size:.8rem;line-height:1.55}
+.ed-note{font-size:.74rem;color:var(--tx2);padding:.5rem 0 .7rem}
+.ed-insp{flex:1 1 0;min-height:0;padding:1.1rem;border-radius:16px;background:var(--f-carte);border:1px solid var(--sz-bord);
+  display:flex;flex-direction:column;gap:1rem;overflow:hidden}
+.ed-insp>*{flex:0 0 auto}
+.ed-insp .it{display:flex;align-items:center;gap:.6rem}
+.ed-insp .it .bico{width:1.9rem;height:1.9rem;border-radius:9px;background:var(--sz-accent-doux);color:var(--tx-or);
+  display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700}
+.ed-insp .it b{font-size:1rem;font-weight:650}
+.ed-insp .it .gestes{margin-left:auto;display:flex;gap:.35rem}
+.ed-insp .it .gestes button{width:2rem;height:2rem;padding:0;border-radius:8px;background:transparent}
+.ed-insp .champs{flex:1 1 0;min-height:0}
+.ed-insp .ch{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.85rem}
+.ed-insp .ch>label,.ed-insp .ch>.lbl{font-size:.74rem;color:var(--tx2)}
+.ed-insp input,.ed-insp select,.ed-insp textarea{width:100%;background:var(--f-champ);border-radius:10px;padding:.45rem .65rem}
+.ed-insp textarea{min-height:6rem;resize:none;font-family:inherit;line-height:1.55}
+.ed-insp .pastilles{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.ed-insp .pastilles button{width:1.8rem;height:1.8rem;padding:0;border-radius:50%;border:2px solid var(--sz-bord-fort)}
+.ed-insp .pastilles button.on{border-color:var(--tx)}
+.ed-insp .pastilles input[type=color]{width:2.4rem;height:1.8rem;padding:.1rem;border-radius:8px}
+.ed-infos{display:flex;flex-wrap:wrap;gap:.35rem}
+.ed-infos button{height:1.75rem;padding:0 .65rem;border-radius:999px;background:var(--f-champ);font-size:.76rem;color:var(--tx-gris2)}
+.ed-retirer{margin-top:auto;height:2.4rem;border-radius:10px;border-color:rgba(239,68,68,.45);background:transparent;
+  color:var(--tx-err);font-weight:600}
+.ed-vide{flex:1 1 auto;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--tx2);
+  font-size:.84rem;line-height:1.6;padding:1rem}
+/* Le menu « Ajouter un bloc » : trois familles, chaque type dit a quoi il sert. */
+.ed-menu{position:absolute;left:0;bottom:3.3rem;z-index:8;padding:.95rem;border-radius:16px;
+  background:var(--f-carte2);border:1px solid var(--sz-bord-fort);box-shadow:0 22px 56px rgba(0,0,0,.5);
+  display:flex;flex-direction:column;gap:.55rem;width:30rem}
+.ed-menu .ed-titre{margin-top:.15rem}
+.ed-menu .grille{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.4rem}
+.ed-menu .grille button{display:flex;align-items:center;gap:.6rem;padding:.5rem .6rem;border-radius:11px;
+  background:var(--f-champ);text-align:left}
+.ed-menu .grille .bico{width:1.8rem;height:1.8rem;border-radius:8px;background:var(--sz-accent-doux);color:var(--tx-or);
+  display:flex;align-items:center;justify-content:center;font-size:.76rem;font-weight:700;flex:0 0 auto}
+.ed-menu .grille b{display:block;font-size:.82rem;font-weight:600}
+.ed-menu .grille small{display:block;font-size:.72rem;color:var(--tx2)}
+/* Le panneau de l IA : par-dessus la colonne des reglages, seulement quand on l ouvre. */
+.ed-ia{position:absolute;top:0;right:0;bottom:0;width:24rem;z-index:9;background:var(--f-carte);
+  border-left:1px solid var(--sz-bord-fort);box-shadow:-20px 0 50px rgba(0,0,0,.4);padding:1.3rem;
+  display:none;flex-direction:column;gap:.9rem}
+.ed.ia-ouverte .ed-ia{display:flex}
+.ed-ia .iabloc{border:none;background:transparent;padding:0;margin:0;display:flex;flex-direction:column;gap:.7rem}
+.ed-ia .iatt b{font-size:1.02rem}
+.ed-ia input,.ed-ia select,.ed-ia textarea{background:var(--f-champ);border-radius:10px;padding:.45rem .65rem;font-size:.86rem}
+.ed-ia .iapied{flex-direction:column;align-items:stretch}
+.ed-ia .iapied select{width:100%}
+.ed-ia .iapied .aide{margin-left:0}
+.ed-ia #f-ia-go{height:2.6rem;font-size:.92rem}
+.ed-ia label{font-size:.8rem;color:var(--tx2);margin-bottom:.3rem}
+.ed-ia #f-ia-but{min-height:6.5rem;resize:none;line-height:1.55}
+.ed-ia .iaavis{font-size:.84rem;line-height:1.6}
+.ed-ia .ed-ia-x{position:absolute;top:.9rem;right:.9rem;width:2rem;height:2rem;padding:0;border-radius:8px;background:transparent}
+.ed-ia .iatt{padding-right:2.6rem}
+.ed-col.gauche{overflow:visible}
 .etapes-choix{display:flex;gap:.35rem;flex-wrap:wrap;margin:0 0 .6rem}
 .etapes-choix button{font:inherit;font-size:.78rem;font-weight:600;padding:.32rem .75rem;border-radius:99px;
   border:1px solid var(--v12);background:var(--v05);color:var(--tx2);cursor:pointer}
@@ -369,31 +491,127 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       + '<input id="' + id + '" data-bi="' + i + '" data-bc="' + cle + '" value="' + esc(v) + '"></div>';
   }
 
-  function blocsHtml(){
-    var pal = '<div class="bqbar">' + BTYPES.map(function(t){
-      return '<button class="mini" data-bajout="' + esc(t.cle) + '" title="${T("Ajouter : ")}'
-        + esc(szTd(t.label)) + '"><span class="ic">' + esc(t.icone) + '</span> ' + esc(szTd(t.label)) + '</button>';
-    }).join('') + '</div>';
-    if (!BLOCS.length) {
-      return pal + '<div class="bvide">${T("Aucun bloc. Ajoutez-en un ci-dessus, ou chargez un modèle.")}</div>';
+  /* ══ L EDITEUR REFAIT (2026-10-15) — LA LISTE, LE MENU, LES REGLAGES ════════════════════════════
+     A gauche une LIGNE par bloc (son nom et un extrait de ce qu il dit) ; un seul bouton « + Ajouter
+     un bloc » ouvre un menu en trois familles ; a droite les reglages du SEUL bloc choisi. Avant, onze
+     boutons en vrac et un bloc par page : on ne voyait jamais le courriel en entier. */
+  var BSEL = -1;        // le bloc choisi : ses reglages a droite, son cadre dans l apercu
+  var MENU = false;     // le menu « Ajouter un bloc » est ouvert
+  var DERNIER = null;   // le dernier champ de texte touche : « Inserer une information » y ecrit
+  var IAOUVERTE = false;
+  var BGROUPES = [
+    ['${T("Contenu")}', ['heading', 'text', 'button', 'image']],
+    ['${T("Ventes")}', ['produits', 'discountHero', 'codeBox']],
+    ['${T("Mise en page")}', ['divider', 'spacer', 'highlightBox', 'rawHtml']]
+  ];
+  var BDESC = { heading: '${T("Une grande phrase d’accroche")}', text: '${T("Un paragraphe")}',
+    button: '${T("Un lien vers la boutique")}', image: '${T("Une photo pleine largeur")}',
+    produits: '${T("Photos, noms et prix du catalogue")}', discountHero: '${T("Le rabais, en gros")}',
+    codeBox: '${T("Un code promo à copier")}', divider: '${T("Une ligne de séparation")}',
+    spacer: '${T("De l’air entre deux blocs")}', highlightBox: '${T("Un encadré qui attire l’œil")}',
+    rawHtml: '${T("Votre propre HTML")}' };
+  // Les couleurs proposees d un clic ; « Autre » garde le choix libre.
+  var PALETTE = ['#111111', '#2a2622', '#5f7150', '#9a6b4f', '#7a2e3a', '#c49a6c', '#ffffff'];
+  // Les variables, par leur NOM lisible : ce qui part dans le courriel reste la variable.
+  var VAR_NOMS = [['{{firstName}}', '${T("Prénom")}'], ['{{promoCode}}', '${T("Code promo")}'],
+    ['{{discountPercent}}', '${T("Rabais %")}'], ['{{expiryDate}}', '${T("Date de fin")}'],
+    ['{{shopUrl}}', '${T("Lien boutique")}'], ['{{collectionName}}', '${T("Collection")}']];
+
+  function extraitBloc(b){
+    if (b.type === 'produits') {
+      var n = String(b.refs || '').split(/[,;\\s]+/).filter(Boolean).length;
+      return n + ' ' + szPl(n, '${T("pièce")}', '${T("pièces")}');
     }
-    // Les blocs en PAGES mesurees (JS_PAGES du socle) : un bloc = un element de page.
-    var cartes = BLOCS.map(function(b, i){
-      var t = typeDe(b.type);
-      var champs = (BCHAMPS[b.type] || []).map(function(c){
-        return champBloc(i, c[0], c[1], c[2], b[c[0]]);
-      }).join('');
-      return '<div class="bloc">'
-        + '<div class="bt"><span class="bi ic">' + esc(t.icone) + '</span><b>' + esc(t.label) + '</b>'
-        + '<button class="mini" data-bhaut="' + i + '"' + (i === 0 ? ' disabled' : '')
-        + ' title="${T("Monter")}">\u2191</button>'
-        + '<button class="mini" data-bbas="' + i + '"' + (i === BLOCS.length - 1 ? ' disabled' : '')
-        + ' title="${T("Descendre")}">\u2193</button>'
-        + '<button class="mini" data-bsupp="' + i + '" title="${T("Retirer ce bloc")}">\u2715</button></div>'
-        + (champs ? '<div class="bg">' + champs + '</div>' : '')
-        + '</div>';
-    }).join('');
-    return pal + '<div data-pages="campagnes-blocs">' + cartes + '</div>';
+    if (b.type === 'spacer') return (b.height || 24) + ' px';
+    if (b.type === 'divider') return '—';
+    var v = b.text || b.content || b.title || b.code || b.label || b.percent || b.titre || b.url || '';
+    v = String(v).replace(/<[^>]*>/g, ' ').replace(/\\s+/g, ' ').trim();
+    // Les variables se lisent par leur nom (« Prénom »), comme dans les reglages.
+    VAR_NOMS.forEach(function(x){ v = v.split(x[0]).join(x[1]); });
+    return v || '—';
+  }
+
+  function blocsHtml(){
+    var h = '<div class="ed-titre"><span>${T("Blocs du courriel")}</span><span>' + BLOCS.length + '</span></div>';
+    if (!BLOCS.length) {
+      h += '<div class="bvide">${T("Aucun bloc pour l’instant. Ajoutez-en un, partez d’un modèle ou demandez à l’IA.")}</div>';
+    } else {
+      // En PAGES mesurees (JS_PAGES du socle) : une ligne = un element de page, jamais de glissiere.
+      h += '<div data-pages="campagnes-blocs">' + BLOCS.map(function(b, i){
+        var t = typeDe(b.type);
+        return '<button type="button" class="brang' + (i === BSEL ? ' on' : '') + '" data-bchoix="' + i + '">'
+          + '<span class="bico ic">' + esc(t.icone) + '</span>'
+          + '<span class="btx"><b>' + esc(szTd(t.label)) + '</b><span>' + esc(extraitBloc(b)) + '</span></span></button>';
+      }).join('') + '</div>';
+    }
+    h += '<button type="button" class="ed-ajout" id="f-ajout" aria-expanded="' + (MENU ? 'true' : 'false') + '">${T("+ Ajouter un bloc")}</button>';
+    if (MENU) h += menuHtml();
+    return h;
+  }
+
+  function menuHtml(){
+    var vus = {};
+    var famille = function(nom, cles){
+      var types = cles.filter(function(k){ vus[k] = true; return BTYPES.some(function(t){ return t.cle === k; }); });
+      if (!types.length) return '';
+      return '<div class="ed-titre">' + nom + '</div><div class="grille">' + types.map(function(k){
+        var t = typeDe(k);
+        return '<button type="button" data-bajout="' + esc(k) + '"><span class="bico ic">' + esc(t.icone) + '</span>'
+          + '<span><b>' + esc(szTd(t.label)) + '</b><small>' + esc(BDESC[k] || '') + '</small></span></button>';
+      }).join('') + '</div>';
+    };
+    var h = BGROUPES.map(function(g){ return famille(g[0], g[1]); }).join('');
+    // Un type ajoute plus tard au catalogue du site parait ici sans attendre qu on le classe.
+    var autres = BTYPES.filter(function(t){ return !vus[t.cle]; }).map(function(t){ return t.cle; });
+    if (autres.length) h += famille('${T("Autres")}', autres);
+    return '<div class="ed-menu" role="menu">' + h + '</div>';
+  }
+
+  function champInsp(i, cle, lib, genre, val){
+    var v = (val === undefined || val === null) ? '' : String(val);
+    if (genre.indexOf('choix:') === 0) {
+      return '<div class="ch"><span class="lbl">' + esc(lib) + '</span><div class="ed-seg plein">'
+        + genre.slice(6).split(',').map(function(o){
+            var q = o.split('=');
+            return '<button type="button" class="' + (v === q[0] ? 'on' : '') + '" data-bseg="' + i + '" data-bc="' + cle
+              + '" data-bv="' + esc(q[0]) + '">' + esc(q[1]) + '</button>';
+          }).join('') + '</div></div>';
+    }
+    if (genre === 'couleur') {
+      var cour = /^#[0-9a-f]{6}$/i.test(v) ? v.toLowerCase() : '#111111';
+      return '<div class="ch"><span class="lbl">' + esc(lib) + '</span><div class="pastilles">'
+        + PALETTE.map(function(p){
+            return '<button type="button" class="' + (cour === p ? 'on' : '') + '" data-bcoul="' + i + '" data-bc="' + cle
+              + '" data-bv="' + p + '" style="background:' + p + '" aria-label="' + p + '" title="' + p + '"></button>';
+          }).join('')
+        + '<input type="color" data-bi="' + i + '" data-bc="' + cle + '" value="' + esc(cour)
+        + '" aria-label="${T("Autre couleur")}" title="${T("Autre couleur")}"></div></div>';
+    }
+    return champBloc(i, cle, lib, genre, val).replace(/^<div>/, '<div class="ch">');
+  }
+
+  function inspHtml(){
+    if (BMODE !== 'visuel') return '<div class="ed-vide">${T("Mode HTML : le corps se modifie directement au centre.")}</div>';
+    var b = BLOCS[BSEL];
+    if (!b) {
+      return '<div class="ed-vide">' + (BLOCS.length
+        ? '${T("Choisissez un bloc à gauche, ou cliquez-le dans l’aperçu, pour le modifier.")}'
+        : '${T("Le courriel est vide. Ajoutez un bloc, partez d’un modèle ou demandez à l’IA de le rédiger.")}') + '</div>';
+    }
+    var t = typeDe(b.type), i = BSEL;
+    var defs = BCHAMPS[b.type] || [];
+    var champs = defs.map(function(c){ return champInsp(i, c[0], c[1], c[2], b[c[0]]); }).join('');
+    var texte = defs.some(function(c){ return c[2] === 'texte' || c[2] === 'long'; });
+    return '<div class="it"><span class="bico ic">' + esc(t.icone) + '</span><b>' + esc(szTd(t.label)) + '</b><span class="gestes">'
+      + '<button type="button" data-bhaut="' + i + '"' + (i === 0 ? ' disabled' : '') + ' aria-label="${T("Monter")}" title="${T("Monter")}">↑</button>'
+      + '<button type="button" data-bbas="' + i + '"' + (i === BLOCS.length - 1 ? ' disabled' : '') + ' aria-label="${T("Descendre")}" title="${T("Descendre")}">↓</button>'
+      + '<button type="button" data-bdup="' + i + '" aria-label="${T("Dupliquer")}" title="${T("Dupliquer")}"><span class="ic">⧉</span></button></span></div>'
+      + '<div class="champs" data-pages="campagnes-reglages">'
+      + (champs || '<div class="ed-vide">${T("Ce bloc n’a rien à régler.")}</div>') + '</div>'
+      + (texte ? '<div class="ch"><span class="lbl">${T("Insérer une information")}</span><div class="ed-infos">'
+          + VAR_NOMS.map(function(x){ return '<button type="button" data-bvar="' + esc(x[0]) + '" title="' + esc(x[0]) + '">' + esc(x[1]) + '</button>'; }).join('')
+          + '</div></div>' : '')
+      + '<button type="button" class="ed-retirer" data-bsupp="' + i + '">${T("Retirer ce bloc")}</button>';
   }
 
   // Ne repeint QUE la zone des blocs : un redessin du formulaire perdrait le
@@ -404,7 +622,85 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     if (!z) return;
     z.innerHTML = blocsHtml();
     brancherBlocs();
-    if (typeof voir === 'number') montrerNouveau(z.querySelectorAll('.bloc')[Math.min(voir, BLOCS.length - 1)]);
+    if (typeof voir === 'number') montrerNouveau(z.querySelectorAll('.brang')[Math.min(voir, BLOCS.length - 1)]);
+  }
+  function majInsp(){
+    var z = document.getElementById('f-insp');
+    if (!z) return;
+    z.innerHTML = inspHtml();
+    brancherInsp();
+  }
+  function choisir(i, depuisApercu){
+    BSEL = i; MENU = false;
+    majBlocs(i); majInsp(); marquerApercu(!depuisApercu);
+  }
+  function apresChangement(voir){
+    majBlocs(typeof voir === 'number' ? voir : BSEL);
+    majInsp();
+    apercuPlusTard();
+  }
+
+  /* ══ L APERCU VIVANT (2026-10-15) ═══════════════════════════════════════════════════════════════
+     Le courriel tel qu il partira, au centre, mis a jour pendant qu on ecrit. On demande au site ses
+     blocs EN HTML (nl:blocsHtml, la seule mise en page) puis son enveloppe (nl:apercu) — rien n est
+     recopie ici. Pour savoir quel bloc on clique dans l apercu, un REPERE (commentaire HTML) precede
+     chaque bloc : il n existe QUE dans l apercu, jamais dans ce qui s enregistre.
+     ⚠ Bac a sable SANS script (allow-same-origin seulement) : le courriel ne peut rien executer ; on
+     lit ses noeuds de l exterieur pour les cadrer, et un clic n ouvre jamais un lien. */
+  var APTIMER = null, APVERSION = 0, APGROUPES = [];
+  function apercuPlusTard(){ clearTimeout(APTIMER); APTIMER = setTimeout(apercuVivant, 450); }
+  function apercuVivant(){
+    var fr = document.getElementById('f-vivant');
+    if (!fr || BMODE !== 'visuel') return;
+    var v = ++APVERSION;
+    var marques = [];
+    BLOCS.forEach(function(b, i){ marques.push({ type: 'rawHtml', content: '<!--szb:' + i + '-->' }); marques.push(b); });
+    appeler('nl:blocsHtml', [marques]).then(function(r){
+      if (v !== APVERSION) return null;
+      return appeler('nl:apercu', [(r && r.ok) ? (r.html || '') : '']);
+    }).then(function(r2){
+      if (v !== APVERSION || !r2 || !r2.ok) return;
+      var y = 0;
+      try { y = fr.contentWindow ? (fr.contentWindow.scrollY || 0) : 0; } catch (e) {}
+      fr.onload = function(){ instrumenter(fr, y); };
+      fr.setAttribute('srcdoc', r2.html);
+    });
+  }
+  function instrumenter(fr, y){
+    var doc = null;
+    try { doc = fr.contentDocument; } catch (e) { doc = null; }
+    APGROUPES = [];
+    if (!doc || !doc.body) return;
+    try { fr.contentWindow.scrollTo(0, y || 0); } catch (e) {}
+    var w = doc.createTreeWalker(doc.body, 128), n, reps = [];
+    while ((n = w.nextNode())) {
+      var m = /^szb:(\\d+)$/.exec(n.nodeValue || '');
+      if (m) reps.push({ i: Number(m[1]), n: n });
+    }
+    reps.forEach(function(rp){
+      var els = [], s = rp.n.nextSibling;
+      while (s && !(s.nodeType === 8 && /^szb:/.test(s.nodeValue || ''))) { if (s.nodeType === 1) els.push(s); s = s.nextSibling; }
+      APGROUPES[rp.i] = els;
+      els.forEach(function(el){ el.style.cursor = 'pointer'; });
+    });
+    doc.addEventListener('click', function(e){
+      e.preventDefault();
+      for (var i = 0; i < APGROUPES.length; i++) {
+        var g = APGROUPES[i] || [];
+        for (var k = 0; k < g.length; k++) { if (g[k] === e.target || g[k].contains(e.target)) { choisir(i, true); return; } }
+      }
+    }, true);
+    marquerApercu(false);
+  }
+  function marquerApercu(defiler){
+    APGROUPES.forEach(function(g, i){
+      (g || []).forEach(function(el){
+        el.style.outline = (i === BSEL) ? '2px solid #5f7150' : '';
+        el.style.outlineOffset = (i === BSEL) ? '6px' : '';
+      });
+    });
+    var cible = APGROUPES[BSEL] && APGROUPES[BSEL][0];
+    if (defiler && cible) { try { cible.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (e) {} }
   }
 
   /* ⚠ L ELEMENT AJOUTE (OU DEPLACE) DOIT SE VOIR : le socle revient a la page 1
@@ -488,7 +784,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       return h + '<div class="iaavis">${T("Aucune clé d’écriture IA n’est enregistrée. Elle se pose dans Configuration ▸ Clés API.")}</div>';
     }
     h += '<div class="iag"><div class="iaplein"><label for="f-ia-but">${T("Que faut-il annoncer ?")}</label>'
-      + '<input id="f-ia-but" placeholder="${T("ex. l’arrivée de la collection d’automne, avec 15 % sur les manteaux")}"></div></div>';
+      + '<textarea id="f-ia-but" rows="4" placeholder="${T("ex. l’arrivée de la collection d’automne, avec 15 % sur les manteaux")}"></textarea></div></div>';
     if (IAMODE === 'avance') {
       h += '<div class="iag">'
         + iaChoix('f-ia-ton', '${T("Ton")}', [['chaleureux', '${T("Chaleureux")}'], ['elegant', '${T("Élégant")}'],
@@ -550,10 +846,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       if (r.budget) { IAETAT = IAETAT || {}; IAETAT.budget = r.budget; IAETAT.clePosee = true; }
       var prem = suite ? BLOCS.length : 0;   // le premier bloc redige : sa page est ouverte
       BLOCS = suite ? BLOCS.concat(r.blocs) : r.blocs.slice();
+      BSEL = BLOCS.length ? prem : -1;
+      /* Le panneau se referme : ce qu on veut voir maintenant, c est le courriel redige. */
+      IAOUVERTE = false;
+      var edx = document.getElementById('f-ed');
+      if (edx) edx.classList.remove('ia-ouverte');
       /* ⚠ LE MODE VISUEL EST RETABLI : les blocs venus d ici ne se voient pas en
          mode HTML, et l on croirait que rien n est arrive. */
       if (BMODE !== 'visuel') { BMODE = 'visuel'; dessiner(); }
-      else { majIa(); majBlocs(prem); }
+      else { majIa(); apresChangement(prem); }
       // Le sujet n est pose que s il est VIDE : il a pu etre ecrit a la main, et
       // l IA n a pas a l ecraser.
       var su = document.getElementById('f-suj');
@@ -604,34 +905,77 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     });
   }
 
+  // La liste de gauche : choisir un bloc, ouvrir le menu, ajouter un bloc depuis le menu.
   function brancherBlocs(){
     var z = document.getElementById('f-blocs');
     if (!z) return;
+    z.querySelectorAll('[data-bchoix]').forEach(function(el){
+      el.onclick = function(){ choisir(Number(el.getAttribute('data-bchoix')), false); };
+    });
+    var aj = document.getElementById('f-ajout');
+    if (aj) aj.onclick = function(e){ e.stopPropagation(); MENU = !MENU; majBlocs(); };
     z.querySelectorAll('[data-bajout]').forEach(function(el){
-      el.onclick = function(){
+      el.onclick = function(e){
+        e.stopPropagation();
         var t = typeDe(el.getAttribute('data-bajout'));
-        BLOCS.push(JSON.parse(JSON.stringify(t.defaut || { type: t.cle })));
-        majBlocs(BLOCS.length - 1);   // la page du bloc neuf
+        // Le bloc neuf se pose SOUS le bloc choisi (a la fin si aucun) et devient le bloc choisi.
+        var ou = (BSEL >= 0 && BSEL < BLOCS.length) ? BSEL + 1 : BLOCS.length;
+        BLOCS.splice(ou, 0, JSON.parse(JSON.stringify(t.defaut || { type: t.cle })));
+        BSEL = ou; MENU = false;
+        apresChangement(ou);
       };
     });
-    z.querySelectorAll('[data-bsupp]').forEach(function(el){
-      // On reste ou l on etait : le bloc qui prend la place du retire reste en vue.
-      el.onclick = function(){ var k = Number(el.getAttribute('data-bsupp')); BLOCS.splice(k, 1); majBlocs(k); };
-    });
+  }
+
+  /* Les reglages de droite. ⚠ UNE SAISIE NE REDESSINE JAMAIS LE CHAMP : le curseur repartirait au
+     debut a chaque lettre. On note la valeur dans le bloc, on rafraichit l extrait de la ligne de
+     gauche et, un instant plus tard, l apercu. */
+  function brancherInsp(){
+    var z = document.getElementById('f-insp');
+    if (!z) return;
     var bouger = function(att, pas){
       z.querySelectorAll('[' + att + ']').forEach(function(el){
         el.onclick = function(){
           var i = Number(el.getAttribute(att)), j = i + pas;
           if (j < 0 || j >= BLOCS.length) return;
           var t = BLOCS[i]; BLOCS[i] = BLOCS[j]; BLOCS[j] = t;
-          majBlocs(j);
+          BSEL = j;
+          apresChangement(j);
         };
       });
     };
     bouger('data-bhaut', -1);
     bouger('data-bbas', 1);
-    /* ⚠ UNE SAISIE NE REDESSINE JAMAIS : le curseur repartirait au debut a
-       chaque lettre. On note la valeur dans le bloc, et c est tout. */
+    z.querySelectorAll('[data-bdup]').forEach(function(el){
+      el.onclick = function(){
+        var i = Number(el.getAttribute('data-bdup'));
+        BLOCS.splice(i + 1, 0, JSON.parse(JSON.stringify(BLOCS[i])));
+        BSEL = i + 1;
+        apresChangement(i + 1);
+      };
+    });
+    z.querySelectorAll('[data-bsupp]').forEach(function(el){
+      // Le bloc qui prend la place du retire devient le bloc choisi : on reste ou l on etait.
+      el.onclick = function(){
+        var k = Number(el.getAttribute('data-bsupp'));
+        BLOCS.splice(k, 1);
+        BSEL = Math.min(k, BLOCS.length - 1);
+        apresChangement(BSEL);
+      };
+    });
+    var poserValeur = function(i, c, val){
+      if (!BLOCS[i]) return;
+      BLOCS[i][c] = val;
+      majInsp();
+      majBlocs(i);
+      apercuPlusTard();
+    };
+    z.querySelectorAll('[data-bseg]').forEach(function(el){
+      el.onclick = function(){ poserValeur(Number(el.getAttribute('data-bseg')), el.getAttribute('data-bc'), el.getAttribute('data-bv')); };
+    });
+    z.querySelectorAll('[data-bcoul]').forEach(function(el){
+      el.onclick = function(){ poserValeur(Number(el.getAttribute('data-bcoul')), el.getAttribute('data-bc'), el.getAttribute('data-bv')); };
+    });
     z.querySelectorAll('[data-bi]').forEach(function(el){
       var i = Number(el.getAttribute('data-bi')), c = el.getAttribute('data-bc');
       var poser = function(){
@@ -639,9 +983,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
         BLOCS[i][c] = (el.type === 'number') ? (Number(el.value) || 24)
           : el.multiple ? Array.prototype.filter.call(el.options, function(o){ return o.selected; }).map(function(o){ return o.value; }).join(',')
           : el.value;
+        var ligne = document.querySelector('[data-bchoix="' + i + '"] .btx span');
+        if (ligne) ligne.textContent = extraitBloc(BLOCS[i]);
+        apercuPlusTard();
       };
       el.oninput = poser;
       el.onchange = poser;
+      if (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && el.type !== 'color' && el.type !== 'number')) {
+        el.addEventListener('focus', function(){ DERNIER = el; });
+      }
+    });
+    // « Inserer une information » : la variable entre la ou se trouve le curseur du dernier champ touche.
+    z.querySelectorAll('[data-bvar]').forEach(function(el){
+      el.onmousedown = function(e){ e.preventDefault(); };   // le champ garde son curseur
+      el.onclick = function(){
+        var cible = (DERNIER && document.body.contains(DERNIER)) ? DERNIER : z.querySelector('input[data-bi]:not([type=color]), textarea[data-bi]');
+        if (!cible) return;
+        var x = el.getAttribute('data-bvar');
+        var d0 = (typeof cible.selectionStart === 'number') ? cible.selectionStart : cible.value.length;
+        var d1 = (typeof cible.selectionEnd === 'number') ? cible.selectionEnd : d0;
+        cible.value = cible.value.slice(0, d0) + x + cible.value.slice(d1);
+        cible.focus();
+        try { cible.setSelectionRange(d0 + x.length, d0 + x.length); } catch (e) {}
+        cible.dispatchEvent(new Event('input'));
+      };
     });
   }
 
@@ -744,74 +1109,68 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
 
   function vueFormCampagne(){
     var f = FORM, d = f.d, c = d.campagne || {};
-    /* ⚠ DEUX COLONNES, ET AUCUNE GLISSIERE (2026-10-12) : a gauche les reglages
-       (nom, sujet, segment, canal, SMS) et l ecriture IA ; a droite le corps du
-       courriel, dont les blocs sont en pages. L apercu se pose par-dessus la
-       colonne de droite au lieu de pousser le formulaire vers le bas. */
-    var h = '<div class="carte form">'
-      + '<h3 style="margin:0 0 .6rem;font:700 .92rem/1.3 system-ui,sans-serif">'
-      + (f.id ? '${T("Modifier la campagne")}' : '${T("Nouvelle campagne")}') + '</h3>'
-      + '<div class="fcols"><div class="fcol">'
-      + '<div class="rang">'
-      + '<div class="champ"><span class="lbl">${T("Nom interne")}</span>'
-      + '<input id="f-nom" aria-label="${T("Nom interne")}" value="' + esc(c.nom || '') + '" placeholder="${T("Infolettre de septembre")}"></div>'
-      + '<div class="champ"><span class="lbl">${T("Sujet du courriel")}</span>'
-      + '<input id="f-suj" aria-label="${T("Sujet du courriel")}" value="' + esc(c.sujet || '') + '" placeholder="${T("Nos nouveautés sont arrivées !")}"></div>'
+    /* ⚠ LA REFONTE DU 2026-10-15 (maquette approuvee). En haut, le nom et l etat ; une BANDE pour
+       l objet, les destinataires et le canal ; puis trois colonnes : les blocs, l APERCU REEL, les
+       reglages du bloc choisi. L IA s ouvre dans un panneau. Aucune glissiere : la liste et les
+       reglages sont en pages mesurees, l apercu defile dans son propre cadre. Les identifiants des
+       champs (f-nom, f-suj, f-seg, f-canal, f-sms, f-html) sont CEUX D AVANT : le brouillon, la
+       soumission et la bascule Visuel / HTML les lisent tels quels. */
+    var h = '<div class="ed' + (IAOUVERTE ? ' ia-ouverte' : '') + '" id="f-ed">'
+      + '<div class="ed-tete">'
+      + '<button type="button" class="retour" id="f-annuler">${T("← Campagnes")}</button><span class="sep">/</span>'
+      + '<div class="nom"><input id="f-nom" aria-label="${T("Nom interne")}" value="' + esc(c.nom || '')
+      + '" placeholder="${T("Nom de la campagne")}">'
+      + '<span class="ed-pill" title="${T("Rien ne part tant que vous n’appuyez pas sur « Envoyer ».")}">${T("Brouillon")}</span></div>'
+      + '<button type="button" class="ed-bt ia" id="f-ia-ouvrir"><span class="ic">✶</span> ${T("Rédiger avec l’IA")}</button>'
+      + '<button type="button" class="ed-bt fort" id="f-ok">${T("Enregistrer")}</button>'
       + '</div>'
-      + '<div class="rang">'
-      // ⚠ CHAQUE SEGMENT MONTRE SA PORTEE : on choisit en voyant combien de
-      // personnes il atteint MAINTENANT, pas en devinant. Un segment a 0 se
-      // remarque avant l envoi, pas apres.
-      /* ⚠ L ETIQUETTE EST UN <span>, PAS UN <label> : elle ne peut donc rien
-         relier. On pose un NOM sur le champ plutot que de convertir le span —
-         le rendu de ces fenetres ne peut pas etre verifie sur son poste
-         (aucun banc qui ouvre un navigateur), et un nom ne deplace rien. */
-      + '<div class="champ"><span class="lbl">${T("Segment")}</span><select id="f-seg" aria-label="${T("Segment")}">'
+      // ⚠ CHAQUE SEGMENT MONTRE SA PORTEE : on choisit en voyant combien de personnes il atteint MAINTENANT.
+      + '<div class="ed-bande">'
+      + '<label for="f-suj"><span>${T("Objet")}</span><input id="f-suj" value="' + esc(c.sujet || '')
+      + '" placeholder="${T("Nos nouveautés sont arrivées !")}"></label>'
+      + '<label for="f-seg"><span>${T("À")}</span><select id="f-seg">'
       + (d.segments || []).map(function(s){
           return '<option value="' + esc(s.cle) + '"' + ((c.segment || 'all') === s.cle ? ' selected' : '')
-            + '>' + esc(s.nom) + ' (' + (s.compte || 0) + ')' + '</option>';
-        }).join('') + '</select>'
-      + '<span class="aide" id="f-seg-quoi"></span></div>'
-      + '<div class="champ"><span class="lbl">${T("Canal d’envoi")}</span><select id="f-canal" aria-label="${T("Canal d’envoi")}">'
+            + '>' + esc(s.nom) + ' · ' + (s.compte || 0) + '</option>';
+        }).join('') + '</select></label>'
+      + '<label for="f-canal"><span>${T("Canal")}</span><select id="f-canal">'
       + (d.canaux || []).map(function(x){
           return '<option value="' + esc(x.cle) + '"' + ((c.canal || 'email') === x.cle ? ' selected' : '')
-            + '>' + esc(x.nom) + '</option>'; }).join('') + '</select></div></div>'
-      // Les destinataires SMS vivent dans le bloc SMS : ils ne comptent que si le canal en envoie.
-      + '<div class="champ" id="f-sms-bloc"><span class="lbl">${T("Message texte (SMS)")}</span>'
-      + '<div class="aide"><strong>${T("Destinataires SMS")}</strong> · ' + (d.smsDestinataires || 0)
-      + ' ' + szPl(d.smsDestinataires || 0, '${T("client ayant consenti, avec un téléphone.")}', '${T("clients ayant consenti, avec un téléphone.")}')
-      + (d.smsPret ? '' : '<br><span style="color:var(--tx-err)"><span class="ic">⚠</span> ${T("Téléphonie non configurée : l’envoi SMS échouera.")}</span>')
+            + '>' + esc(x.nom) + '</option>'; }).join('') + '</select></label>'
       + '</div>'
-      + '<textarea id="f-sms" aria-label="${T("Message texte (SMS)")}" class="sms" maxlength="480" placeholder="${T("SANDRIZA : nos nouveautés sont arrivées !")}">'
+      + '<div class="ed-sous" id="f-seg-quoi"></div>'
+      // Le message texte ne parait que si le canal envoie des SMS (majSms, plus bas).
+      + '<div class="ed-sms" id="f-sms-bloc">'
+      + '<textarea id="f-sms" aria-label="${T("Message texte (SMS)")}" maxlength="480" placeholder="${T("SANDRIZA : nos nouveautés sont arrivées !")}">'
       + esc(c.sms || '') + '</textarea>'
-      + '<div class="aide"><span id="f-sms-n">0</span>/480 · Variable : <code>{{firstName}}</code>. '
-      + '${T("Twilio gère STOP et AIDE automatiquement.")}</div></div>'
-      /* L ecriture IA, sous les reglages : ce qu elle produit tombe dans les blocs, a droite. */
-      + '<div class="iabloc" id="f-ia">' + iaPanneauHtml() + '</div>'
-      + '</div><div class="fcol">'
-      + '<div class="champ corpsm"><span class="lbl">${T("Corps du courriel")}</span>'
-      + '<div class="duo" style="margin-bottom:.3rem">' + choixModeles('f-tpl', d.modeles)
-      + '<button class="mini" id="f-charger">${T("Charger")}</button>'
-      + '<button class="mini" id="f-apercu">${T("Aperçu")}</button></div>'
-      /* ⚠ DEUX MODES, ET LE VISUEL EST LE DEFAUT. Le mode HTML reste : c est le
-         seul moyen de coller un gabarit venu d ailleurs, et de relire ce qui
-         part vraiment. Basculer vers HTML CONVERTIT les blocs ; revenir au
-         visuel remet le HTML dans un bloc << HTML libre >>, sans rien perdre. */
-      + '<div class="bqbar">'
-      + '<button class="mini' + (BMODE === 'visuel' ? ' on' : '') + '" id="f-m-vis">${T("Visuel")}</button>'
-      + '<button class="mini' + (BMODE === 'html' ? ' on' : '') + '" id="f-m-htm">HTML</button>'
+      + '<div class="aide"><strong>${T("Message texte (SMS)")}</strong> · <span id="f-sms-n">0</span>/480<br>'
+      + (d.smsDestinataires || 0) + ' '
+      + szPl(d.smsDestinataires || 0, '${T("client ayant consenti, avec un téléphone.")}', '${T("clients ayant consenti, avec un téléphone.")}')
+      + (d.smsPret ? '' : '<br><span style="color:var(--tx-err)"><span class="ic">⚠</span> ${T("Téléphonie non configurée : l’envoi SMS échouera.")}</span>')
+      + '<br>${T("Twilio gère STOP et AIDE automatiquement.")}</div></div>'
+      + '<div class="ed-cols">'
+      + '<div class="ed-col gauche"><div id="f-blocs"' + (BMODE === 'visuel' ? '' : ' style="display:none"') + '>' + blocsHtml() + '</div>'
+      + '<div class="ed-modele"><span>${T("Partir d’un modèle")}</span><div class="duo">' + choixModeles('f-tpl', d.modeles)
+      + '<button type="button" id="f-charger">${T("Charger")}</button></div></div></div>'
+      /* ⚠ DEUX MODES, ET LE VISUEL EST LE DEFAUT. Le mode HTML reste : c est le seul moyen de coller un
+         gabarit venu d ailleurs, et de relire ce qui part vraiment. Basculer vers HTML CONVERTIT les
+         blocs ; revenir au visuel remet le HTML dans un bloc « HTML libre », sans rien perdre. */
+      + '<div class="ed-col">'
+      + '<div style="display:flex;align-items:center;gap:.7rem">'
+      + '<div class="ed-seg"><button type="button" id="f-m-vis" class="' + (BMODE === 'visuel' ? 'on' : '') + '">${T("Visuel")}</button>'
+      + '<button type="button" id="f-m-htm" class="' + (BMODE === 'html' ? 'on' : '') + '">HTML</button></div>'
+      + '<span class="ed-note" style="margin-left:auto;padding:0">${T("Cliquez un bloc dans l’aperçu pour le modifier.")}</span></div>'
+      + '<div class="ed-scene"><iframe id="f-vivant" sandbox="allow-same-origin" title="${T("Aperçu du courriel")}"'
+      + (BMODE === 'visuel' ? '' : ' style="display:none"') + '></iframe>'
+      + '<textarea id="f-html" spellcheck="false" aria-label="HTML"' + (BMODE === 'visuel' ? ' style="display:none"' : '') + '>'
+      + esc(c.html || '') + '</textarea></div>'
+      + '<div class="ed-note">${T("Enregistrée en brouillon : rien ne part tant que vous n’appuyez pas sur « Envoyer ».")}</div>'
       + '</div>'
-      + '<div id="f-blocs"' + (BMODE === 'visuel' ? '' : ' style="display:none"') + '>'
-      + blocsHtml() + '</div>'
-      + '<textarea id="f-html" spellcheck="false"'
-      + (BMODE === 'visuel' ? ' style="display:none"' : '') + '>' + esc(c.html || '') + '</textarea>'
-      + ligneVars(VARS_CAMP) + '</div>'
-      + apercuBloc()
-      + '</div></div>'
-      + '<div class="fin3"><span class="gauche aide">${T("Enregistrée en <strong>brouillon</strong> : ")}'
-      + '${T("rien ne part tant que vous n’appuyez pas sur « Envoyer ».")}</span>'
-      + '<button id="f-annuler">${T("Annuler")}</button>'
-      + '<button class="prim" id="f-ok">${T("Enregistrer")}</button></div></div>';
+      + '<div class="ed-col"><div class="ed-insp" id="f-insp">' + inspHtml() + '</div></div>'
+      + '</div>'
+      + '<div class="ed-ia"><button type="button" class="ed-ia-x" id="f-ia-x" aria-label="${T("Fermer")}" title="${T("Fermer")}"><span class="ic">✕</span></button>'
+      + '<div class="iabloc" id="f-ia">' + iaPanneauHtml() + '</div></div>'
+      + '</div>';
     return h;
   }
 
@@ -975,6 +1334,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
         var htm0 = String((r.campagne && r.campagne.html) || '');
         BLOCS = htm0 ? [{ type: 'rawHtml', content: htm0 }] : [];
         BMODE = htm0 ? 'html' : 'visuel';
+        BSEL = BLOCS.length ? 0 : -1; MENU = false; IAOUVERTE = false; DERNIER = null;
       }
       ESEL = 0;
       ETAPES = (type === 'chaine')
@@ -1200,18 +1560,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       var zb = document.getElementById('f-blocs');
       var bv = document.getElementById('f-m-vis');
       var bh = document.getElementById('f-m-htm');
+      var fv = document.getElementById('f-vivant');
       var majMode = function(){
         if (zb) zb.style.display = (BMODE === 'visuel') ? '' : 'none';
         if (ta) ta.style.display = (BMODE === 'visuel') ? 'none' : '';
-        if (bv) bv.className = 'mini' + (BMODE === 'visuel' ? ' on' : '');
-        if (bh) bh.className = 'mini' + (BMODE === 'html' ? ' on' : '');
+        if (fv) fv.style.display = (BMODE === 'visuel') ? '' : 'none';
+        if (bv) bv.className = (BMODE === 'visuel' ? 'on' : '');
+        if (bh) bh.className = (BMODE === 'html' ? 'on' : '');
+        majInsp();
       };
       if (bv) bv.onclick = function(){
         if (BMODE === 'visuel') return;
         var htm = ta ? ta.value : '';
         BLOCS = htm.trim() ? [{ type: 'rawHtml', content: htm }] : [];
         BMODE = 'visuel';
-        majMode(); majBlocs();
+        BSEL = BLOCS.length ? 0 : -1;
+        majMode(); majBlocs(); apercuPlusTard();
         dire('${T("Mode visuel. Le HTML est rangé dans un bloc « HTML libre ».")}', 'att');
       };
       if (bh) bh.onclick = function(){
@@ -1225,7 +1589,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       };
       majMode();
       brancherBlocs();
+      brancherInsp();
       brancherIa();
+      /* Le panneau de l IA s ouvre et se ferme ; il ne repeint rien d autre (la saisie reste). */
+      var ed = document.getElementById('f-ed');
+      var iaBasculer = function(oui){
+        IAOUVERTE = oui;
+        if (ed) ed.classList.toggle('ia-ouverte', oui);
+        if (oui) { var but = document.getElementById('f-ia-but'); if (but) but.focus(); }
+      };
+      var io = document.getElementById('f-ia-ouvrir');
+      if (io) io.onclick = function(){ iaBasculer(!IAOUVERTE); };
+      var ix = document.getElementById('f-ia-x');
+      if (ix) ix.onclick = function(){ iaBasculer(false); };
+      // Le menu « Ajouter un bloc » se referme d un clic ailleurs (une seule ecoute, posee une fois).
+      if (!document.__szMenuFerme) {
+        document.__szMenuFerme = true;
+        document.addEventListener('click', function(e){
+          if (!MENU) return;
+          if (e.target.closest && (e.target.closest('.ed-menu') || e.target.closest('#f-ajout'))) return;
+          MENU = false; majBlocs();
+        });
+      }
+      // Le courriel s affiche des l ouverture.
+      apercuPlusTard();
       /* ⚠ L ETAT DE L IA N EST DEMANDE QU UNE FOIS PAR OUVERTURE. Le redemander
          a chaque redessin du panneau ferait un appel reseau par clic sur
          << Avancé >>, pour une reponse qui ne change pas. */
@@ -1241,7 +1628,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
            l inverse de ce que l editeur sert a faire. */
         if (BMODE === 'visuel' && BMODELES[cle]) {
           BLOCS = JSON.parse(JSON.stringify(BMODELES[cle]));
-          majBlocs();
+          BSEL = BLOCS.length ? 0 : -1;
+          apresChangement(0);
           dire('${T("Modèle chargé en blocs — ajustez-les à votre guise.")}', 'bon');
           return;
         }
@@ -1643,6 +2031,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     if (FORM) {
       if (sous) sous.textContent = '';
       corps.classList.add('formulaire');
+      // L editeur de campagne refait (2026-10-15) occupe tout le corps, sans la marge des listes.
+      corps.classList.toggle('ed-corps', FORM.type === 'campagne');
       corps.innerHTML = (FORM.type === 'chaine') ? vueFormChaine()
         : (FORM.type === 'segment') ? vueFormSegment() : vueFormCampagne();
       brancherForm();
@@ -1655,6 +2045,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     var vu = (ONGLET === 'chaines') ? DH : (ONGLET === 'segments') ? DS : DC;
     if (sous) sous.textContent = (vu && !vu.peutModifier) ? 'consultation seulement' : '';
     corps.classList.remove('formulaire');
+    corps.classList.remove('ed-corps');
     corps.innerHTML = onglets() + (ONGLET === 'chaines' ? vueChaines()
       : ONGLET === 'segments' ? vueSegments() : vueCampagnes());
     brancher();
