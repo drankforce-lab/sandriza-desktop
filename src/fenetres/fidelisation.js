@@ -219,6 +219,12 @@ label.case input{width:15px;height:15px;accent-color:var(--or);margin:0}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
 .pagi{display:flex;align-items:center;justify-content:center;gap:.6rem;padding:.45rem 0 0;font-size:.78rem;color:var(--tx2)}
+/* La tete et la liste des sondages refaites (2026-10-15, lot D). */
+.fi-tete{margin-bottom:.2rem}
+.fi-rang{grid-template-columns:minmax(0,1.9fr) 9rem minmax(0,1fr) 7rem 15rem;cursor:pointer}
+.fi-rang .bilan b{font-size:1.1rem}
+.fi-rang .ou{align-items:flex-start}
+.fi-rang .jauger{margin:.15rem 0 .1rem;max-width:none;width:100%}
 `;
 
 /**
@@ -340,48 +346,34 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     /* ⚠ LA DERNIERE CARTE PREND LA HAUTEUR QUI RESTE (#151, 2026-09-24). Les
        tuiles et la carte de notification gardent leur taille naturelle ; c est
        la LISTE qui s etire, comme sur clients et produits. */
-    h += '<div class="carte plein"><h2>${T("Sondages")}</h2>';
+    /* ══ LA LISTE REFAITE (2026-10-15, lot D) : un rang aere par sondage — le TAUX de reponse en
+       grand avec sa jauge. En pages mesurees par le socle (data-pages) : l ancienne pagination a la
+       main (fi-prec / fi-suiv) n a plus rien a paginer. Crochets gardes : [data-sondage] (ouvre le
+       depouillement), data-modifier-sondage, data-suppr-sondage, #fi-premier. */
+    h += '<div class="ls-liste sz-pagee">';
     if (!(D.sondages || []).length) {
-      h += '<div class="vide">${T("Aucun sondage configuré.")}'
-        + (D.peutModifier
-            ? '<div style="margin-top:.45rem"><button class="mini prim" id="fi-premier">${T("Créer le premier")}</button></div>'
-            : '') + '</div>';
+      h += '<div class="ls-vide">${T("Aucun sondage configuré.")}'
+        + (D.peutModifier ? ' <button class="ed-bt fort" id="fi-premier">${T("Créer le premier")}</button>' : '') + '</div>';
     } else {
-      h += '<div class="liste"><table><thead><tr><th>${T("Sondage")}</th>'
-        + '<th class="num">${T("Invitations")}</th><th class="num">${T("Réponses")}</th><th class="num">${T("Taux")}</th>'
-        + '<th>${T("Récompense")}</th><th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
-        + pageSondages().map(function(s){
-            return '<tr data-sondage="' + esc(s.id) + '" title="${T("Voir le dépouillement")}">'
-              /* ══ LA REFONTE DE L INVENTAIRE (2026-09-25) : la ligne riche (initiales,
-                 nom, declencheur et nombre de questions dessous) et la jauge du taux
-                 de reponse. Crochets gardes : tr[data-sondage], data-modifier-sondage,
-                 data-suppr-sondage. */
-              + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(s.nom)) + '</span>'
-              + '<div style="min-width:0"><div class="rf-nom">' + esc(s.nom) + '</div>'
-              + '<div class="rf-sous"><span>' + esc(s.declencheur) + '</span><span>·</span><span>' + s.nbQuestions
-              + (s.nbQuestions > 1 ? '${T(" questions")}' : '${T(" question")}') + '</span></div></div></div></td>'
-              + '<td class="num">' + s.invitations + '</td>'
-              + '<td class="num">' + s.reponses + '</td>'
-              + '<td class="num"><span class="rf-mont">' + szNombre(s.taux, 1) + ' %</span>'
-              + '<div class="jauger"><i style="width:' + Math.max(0, Math.min(100, Number(s.taux) || 0)) + '%"></i></div></td>'
-              + '<td>' + (s.recompense ? '<span class="rf-pill bleu">' + esc(s.recompense) + '</span>'
-                                       : '<span class="dt">${T("aucune")}</span>') + '</td>'
-              + '<td><span class="rf-pill ' + (s.actif ? 'vert' : '') + '">'
-              + (s.actif ? '${T("Actif")}' : '${T("Inactif")}') + '</span></td>'
-              + (D.peutModifier
-                  ? '<td class="fin"><button class="mini geste" data-modifier-sondage="' + esc(s.id) + '">${T("Modifier")}</button> '
-                    + '<button class="mini geste danger" data-suppr-sondage="' + esc(s.id) + '">'
-                    + (ARME === s.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button></td>'
-                  : '')
-              + '</tr>';
-          }).join('')
-        + '</tbody></table></div>';
-      /* ⚠ PAGINEE, JAMAIS DE GLISSIERE (sa demande du 2026-09-26) : autant de
-         lignes que la hauteur MESUREE en permet (szAutoPagination, socle). */
-      var pages = Math.max(1, Math.ceil(D.sondages.length / SPARPAGE));
-      if (pages > 1) h += '<div class="pagi"><button class="mini" id="fi-prec"' + (SPAGE <= 0 ? ' disabled' : '') + '>${T("‹ Précédent")}</button>'
-        + '<span>${T("Page")} ' + (SPAGE + 1) + ' / ' + pages + '</span>'
-        + '<button class="mini" id="fi-suiv"' + (SPAGE >= pages - 1 ? ' disabled' : '') + '>${T("Suivant ›")}</button></div>';
+      h += '<div data-pages="fidelisation-sondages">' + D.sondages.map(function(s){
+        var taux = Math.max(0, Math.min(100, Number(s.taux) || 0));
+        return '<div data-ctx-ligne class="ls-rang fi-rang' + (s.actif ? '' : ' eteint') + '" data-sondage="' + esc(s.id) + '" title="${T("Voir le dépouillement")}">'
+          + '<div class="qui"><span class="bico" aria-hidden="true">' + esc(initiales(s.nom)) + '</span>'
+          + '<div class="tx"><b>' + esc(s.nom) + '</b><span>' + esc(s.declencheur) + ' · ' + s.nbQuestions
+          + (s.nbQuestions > 1 ? '${T(" questions")}' : '${T(" question")}') + '</span></div></div>'
+          + '<div class="bilan"><b>' + szNombre(s.taux, 1) + ' %</b>'
+          + '<div class="jauger"><i style="width:' + taux + '%"></i></div>'
+          + '<span>' + s.reponses + ' / ' + s.invitations + '</span></div>'
+          + '<div class="ou">' + (s.recompense ? '<span class="rf-pill bleu">' + esc(s.recompense) + '</span>'
+                                               : '<span>${T("aucune")}</span>') + '</div>'
+          + '<div class="etat"><span class="rf-pill ' + (s.actif ? 'vert' : '') + '">'
+          + (s.actif ? '${T("Actif")}' : '${T("Inactif")}') + '</span></div>'
+          + '<div class="gestes">' + (D.peutModifier
+              ? '<button class="mini geste" data-modifier-sondage="' + esc(s.id) + '">${T("Modifier")}</button>'
+                + '<button class="mini geste danger' + (ARME === s.id ? ' arme' : '') + '" data-suppr-sondage="' + esc(s.id) + '">'
+                + (ARME === s.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>'
+              : '') + '</div></div>';
+      }).join('') + '</div>';
     }
     h += '</div>';
     return h;
@@ -1615,22 +1607,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     if (sous) sous.textContent = D.peutModifier ? '' : 'consultation seulement';
 
-    var h = '<div class="onglets">'
-      + '<button type="button" class="' + (ONGLET === 'sondages' ? 'actif' : '') + '" data-onglet="sondages">${T("Sondages")}'
-      + ((D.sondages || []).length ? '<span class="n">' + D.sondages.length + '</span>' : '') + '</button>'
-      + '<button type="button" class="' + (ONGLET === 'recompenses' ? 'actif' : '') + '" data-onglet="recompenses">${T("Récompenses")}'
-      + ((D.recompenses || []).length ? '<span class="n">' + (D.recompensesTotal || D.recompenses.length) + '</span>' : '') + '</button>'
-      + '<button type="button" class="' + (ONGLET === 'invitations' ? 'actif' : '') + '" data-onglet="invitations">${T("Invitations")}'
-      + ((D.invitations || []).length ? '<span class="n">' + (D.invitationsTotal || D.invitations.length) + '</span>' : '') + '</button>'
-      + '<button type="button" class="' + (ONGLET === 'points' ? 'actif' : '') + '" data-onglet="points">${T("Points")}</button>'
-      + '<button type="button" class="' + (ONGLET === 'ambassadrices' ? 'actif' : '') + '" data-onglet="ambassadrices">${T("Ambassadrices")}</button>'
-      + '<button type="button" class="' + (ONGLET === 'parrainage' ? 'actif' : '') + '" data-onglet="parrainage">${T("Parrainage")}</button>'
-      + '<button type="button" class="' + (ONGLET === 'paliers' ? 'actif' : '') + '" data-onglet="paliers">${T("Paliers")}</button>'
-      + '<button type="button" class="' + (ONGLET === 'anticipe' ? 'actif' : '') + '" data-onglet="anticipe">${T("Accès anticipé")}</button>'
-      + '<div class="droite">'
-      + (D.peutModifier ? '<button class="mini prim" id="fi-nouveau">${T("+ Nouveau sondage")}</button>' : '')
-      + '</div>'
-      + '</div>';
+    /* ══ LA TETE REFAITE (2026-10-15, lot D de la refonte du marketing) : les onglets en boutons a
+       choix — le mot seul, jamais de compte (les comptes vivent dans les tuiles) — et le geste
+       principal a droite. HORS de .onglets : le socle y peint l onglet courant en pastille doree. */
+    var og = function(v, lib){
+      return '<button type="button" class="' + (ONGLET === v ? 'on' : '') + '" data-onglet="' + v + '">' + lib + '</button>';
+    };
+    var h = '<div class="ls-tete fi-tete"><div class="ed-seg ls-onglets">'
+      + og('sondages', '${T("Sondages")}') + og('recompenses', '${T("Récompenses")}') + og('invitations', '${T("Invitations")}')
+      + og('points', '${T("Points")}') + og('ambassadrices', '${T("Ambassadrices")}') + og('parrainage', '${T("Parrainage")}')
+      + og('paliers', '${T("Paliers")}') + og('anticipe', '${T("Accès anticipé")}')
+      + '</div><div class="droite">'
+      + (D.peutModifier ? '<button class="ed-bt fort" id="fi-nouveau">${T("+ Nouveau sondage")}</button>' : '')
+      + '</div></div>';
 
     /* 🔴 IL Y AVAIT ICI << ONGLET === '${'$'}{T("invitations")}' >> — une VALEUR
        INTERNE comparee a sa TRADUCTION. Le bouton pose data-onglet="invitations"
@@ -1787,7 +1776,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       }
     }
 
-    var tr = t.closest('tr[data-sondage]');
+    var tr = t.closest('[data-sondage]');
     if (tr) {
       appeler('fidelisation:sondage', [tr.getAttribute('data-sondage')]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }

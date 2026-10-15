@@ -4266,6 +4266,7 @@ const CSS_RESPIRE = `
 .ls-seg .barre i{display:block;height:100%;border-radius:99px;background:var(--sz-accent)}
 /* Dans un corps « plein » (le socle y fige chaque enfant), la liste prend ce qui reste ; le pied garde les marges des rangs. */
 .corps.plein>.ls{flex:1 1 auto}
+.corps.plein>.ls-liste{flex:1 1 0;min-height:0}
 .corps.ls-corps>.sz-pied{margin:0 1.6rem .8rem}
 `;
 
