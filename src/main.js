@@ -805,7 +805,7 @@ const ouvrirDecompte = (secondes) => {
     ...(Number.isFinite(x) && Number.isFinite(y) ? { x, y } : {}),
     resizable: false, minimizable: false, maximizable: false, fullscreenable: false,
     alwaysOnTop: true, skipTaskbar: false, show: false,
-    title: 'Déconnexion imminente', autoHideMenuBar: true, backgroundColor: '#0e1522',
+    title: 'Déconnexion imminente', autoHideMenuBar: true, backgroundColor: _fondTheme(),
     webPreferences: {
       preload: path.join(__dirname, 'pont-preload.js'), minimumFontSize: 11,
       contextIsolation: true, nodeIntegration: false, sandbox: true,
@@ -899,7 +899,7 @@ ipcMain.handle('deconnexion:demander', (_e, nom, role) => new Promise((resolve) 
     parent: mainWindow, modal: true,
     resizable: false, minimizable: false, maximizable: false, fullscreenable: false,
     skipTaskbar: true, show: false, autoHideMenuBar: true,
-    title: 'Déconnexion', backgroundColor: '#0e1522',
+    title: 'Déconnexion', backgroundColor: _fondTheme(),
     webPreferences: {
       preload: path.join(__dirname, 'pont-preload.js'), minimumFontSize: 11,
       contextIsolation: true, nodeIntegration: false, sandbox: true,
@@ -1181,7 +1181,7 @@ const exigerCodeExport = (quoi, parent) => {
     codeExportWin = new BrowserWindow({
       width: L, height: H, ...(Number.isFinite(x) && Number.isFinite(y) ? { x, y } : {}),
       parent: par, modal: true, resizable: false, minimizable: false, maximizable: false, fullscreenable: false,
-      skipTaskbar: true, show: false, autoHideMenuBar: true, backgroundColor: '#0e1522',
+      skipTaskbar: true, show: false, autoHideMenuBar: true, backgroundColor: _fondTheme(),
       webPreferences: { preload: path.join(__dirname, 'pont-preload.js'), minimumFontSize: 11, contextIsolation: true, nodeIntegration: false, sandbox: true },
     });
     // La fermeture (croix, parent fermé, plantage) vaut « non » : rien n'est écrit.
@@ -1518,7 +1518,7 @@ const createWindow = () => {
     height: 900,
     minWidth: 1024,
     minHeight: 700,
-    backgroundColor: '#111827',
+    backgroundColor: _fondTheme(),
     title: 'Administration Sandriza',
     // ⚠ BARRE DE TITRE PERSONNALISÉE (2026-08-12) : cadre gris de Windows retiré,
     // barre foncée assortie au thème ; les boutons OS (réduire/agrandir/fermer)
@@ -1528,7 +1528,7 @@ const createWindow = () => {
     // on laisse la hauteur naturelle des boutons de légende. Réversible : retirer
     // ces deux clés pour revenir au cadre natif.
     titleBarStyle: 'hidden',
-    titleBarOverlay: { color: '#0e1522', symbolColor: '#e8edf5' },
+    titleBarOverlay: _bandeTheme(),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,   // durcissement : la page n'a jamais accès direct à Node
@@ -4261,7 +4261,7 @@ const poserEnFenetre = (c, a) => {
   } catch {}
   const win = new BaseWindow({
     width: tl.l, height: tl.h, useContentSize: true, minWidth: 760, minHeight: 520,
-    title: (defs[c] || [''])[0], autoHideMenuBar: true, backgroundColor: '#0e1522',
+    title: (defs[c] || [''])[0], autoHideMenuBar: true, backgroundColor: _fondTheme(),
   });
   win.contentView.addChildView(a.view);
   const poser = () => {
@@ -4387,7 +4387,7 @@ ipcMain.handle('dock:ouvrir', async (e, cle, etat) => {
        peinture - un rectangle blanc sur un panneau bleu nuit. On lui donne tout
        de suite le fond du theme courant : meme si elle parait un instant vide,
        elle parait de la bonne couleur. */
-    try { view.setBackgroundColor((_modele && _modele.sombre) ? '#0e1522' : '#f4f2ec'); } catch {}
+    try { view.setBackgroundColor(_fondTheme()); } catch {}
     /* ⚠⚠ LA RECETTE, RETENUE (2026-09-13). Sa demande : « si on change de langue
        via ce menu là, les pages ouvertes doivent se recharger dans la bonne
        langue ». Une page `data:` déjà assemblée ne se retraduit pas — il faut
@@ -4701,6 +4701,33 @@ const _themeCouleur = () => {
   const t = String(reglages.get('themeCouleur') || 'lin');
   return THEMES_CONNUS.indexOf(t) >= 0 ? t : 'lin';
 };
+/* ── LE FOND DES FENETRES ET DES VUES AVANT LEUR PREMIERE PEINTURE (2026-10-15) ──
+   Sa remarque, deux fois : « la page de chargement n a toujours pas le theme, c est encore bleu ».
+   Une douzaine d endroits peignaient en dur le bleu nuit de l ancien defaut (#0e1522) : fond des
+   vues ancrees et du cadre pendant qu elles chargent, fenetres natives, bande de titre, fenetre
+   principale (#111827). C est ce qu on voit pendant chaque chargement. Recopie de --f-page
+   (CSS_THEMES, socle.js) ; les jeux sans version jour gardent le creme du jour par defaut. */
+const _FONDS = {
+  lin:      ['#1d1b18', '#f5f3ef'], carbone: ['#0d0d10', '#eceef1'], defaut: ['#0e1522', '#f4f2ec'],
+  ocean:    ['#0a1620', '#f4f2ec'], violet:  ['#140f22', '#f4f2ec'], ardoise: ['#0f172a', '#f4f2ec'],
+  graphite: ['#121212', '#f4f2ec'], emeraude: ['#08170f', '#f4f2ec'],
+};
+const _sombreCourant = () => {
+  // `_modele` est un `let` déclaré plus bas : le lire avant sa ligne lève une erreur, d où le repli.
+  try { if (_modele && typeof _modele.sombre === 'boolean') return _modele.sombre; } catch {}
+  try { const v = reglages.get('sombre'); if (typeof v === 'boolean') return v; } catch {}
+  return true;
+};
+const _fondTheme = (sombre) => {
+  const s = (typeof sombre === 'boolean') ? sombre : _sombreCourant();
+  let t = 'lin';
+  try { t = _themeCouleur(); } catch {}
+  return (_FONDS[t] || _FONDS.lin)[s ? 0 : 1];
+};
+const _bandeTheme = () => {
+  const s = _sombreCourant();
+  return { color: _fondTheme(s), symbolColor: s ? '#e8edf5' : '#2e2b27' };
+};
 const jsTheme = () => {
   const jour = !_modele.sombre;
   return 'document.documentElement.classList.toggle("jour",' + jour + ');'
@@ -4980,7 +5007,7 @@ const ouvrirNative = (cle, titre, page, opts = {}) => {
     height: _borne(b.height || opts.height, 640, _wa.h),
     ...(Number.isFinite(b.x) && Number.isFinite(b.y) ? { x: b.x, y: b.y } : {}),
     minWidth: opts.minWidth || 520, minHeight: opts.minHeight || 420, show: false,
-    title: titre, autoHideMenuBar: true, backgroundColor: _modele.sombre ? '#0e1522' : '#f4f2ec',
+    title: titre, autoHideMenuBar: true, backgroundColor: _fondTheme(),
     webPreferences: {
       preload: path.join(__dirname, 'pont-preload.js'), minimumFontSize: 11,
       contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: true,
@@ -5035,7 +5062,7 @@ const ouvrirImprimantes = () => {
     width: b.width || 720, height: b.height || 600,
     ...(Number.isFinite(b.x) && Number.isFinite(b.y) ? { x: b.x, y: b.y } : {}),
     minWidth: 520, minHeight: 420, show: false,
-    title: 'Imprimantes', autoHideMenuBar: true, backgroundColor: '#0e1522',
+    title: 'Imprimantes', autoHideMenuBar: true, backgroundColor: _fondTheme(),
     webPreferences: {
       preload: path.join(__dirname, 'pont-preload.js'), minimumFontSize: 11,
       contextIsolation: true, nodeIntegration: false, sandbox: true,
@@ -5099,7 +5126,7 @@ const _bandePorte = (dessus) => {
       // ⚠ On REMET le défaut sombre en quittant la porte : le site reprendra la
       // main dès son premier rendu (chrome:titlebar), mais entre les deux il ne
       // faut pas laisser une bande claire sur l'écran de connexion.
-      : { color: '#0e1522', symbolColor: '#e8edf5' });
+      : _bandeTheme());
   } catch (_) {}
 };
 
@@ -5447,7 +5474,7 @@ const poserCadreNatif = () => {
       preload: path.join(__dirname, 'pont-preload.js'), minimumFontSize: 11,
       contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: true,
     } });
-    try { vueCadre.setBackgroundColor('#0e1522'); } catch (e) {}
+    try { vueCadre.setBackgroundColor(_fondTheme()); } catch (e) {}
     mainWindow.contentView.addChildView(vueCadre);
 
     _ajusterVuesCadre();
@@ -6996,7 +7023,7 @@ ipcMain.on('chrome:titlebar', (e, color, symbol) => {
     if (!_deLaPrincipale(e)) return;
     if (typeof mainWindow.setTitleBarOverlay !== 'function') return;
     mainWindow.setTitleBarOverlay({
-      color: _hexOuRien(color) || '#0e1522',
+      color: _hexOuRien(color) || _fondTheme(),
       symbolColor: _hexOuRien(symbol) || '#e8edf5',
     });
   } catch (_) {}
@@ -7507,7 +7534,7 @@ const majPalette = () => {
       title: 'Menu — Administration Sandriza',
       alwaysOnTop: !!cfg.menuToujoursDevant,
       minWidth: 200, minHeight: 260, autoHideMenuBar: true,
-      backgroundColor: desc.sombre ? '#0e1522' : '#f6f7f9',
+      backgroundColor: _fondTheme(!!desc.sombre),
       webPreferences: {
         preload: path.join(__dirname, 'palette-preload.js'),
         contextIsolation: true, nodeIntegration: false, sandbox: true,
