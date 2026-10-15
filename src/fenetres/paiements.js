@@ -7,10 +7,11 @@
  * l'année, avec les quatre tuiles) et RÉCONCILIATION (la comparaison entre le
  * système et Square, avec le verdict d'équilibre). Le choix de l'année vit ici.
  *
- * ⚠ LIRE ET CHARGER SONT DEUX GESTES. `paiements:lire` sert ce qui est en cache
- * — instantané, jamais de réseau. `paiements:charger` va chez Square : ça prend
- * du temps et ça peut échouer, donc c'est DEMANDÉ, et le bouton dit ce qu'il
- * fait (« Charger » quand rien n'est en cache, « Actualiser » ensuite).
+ * ⚠ LIRE ET CHARGER SONT DEUX OPÉRATIONS. `paiements:lire` sert ce qui est en
+ * cache — instantané, jamais de réseau. `paiements:charger` va chez Square : ça
+ * prend du temps et ça peut échouer. Depuis le 2026-10-15 (sa demande), la
+ * lecture chez Square part D'ELLE-MÊME à l'ouverture et à la première visite de
+ * chaque année ; le bouton reste pour actualiser (« Charger » / « Actualiser »).
  *
  * ⚠ MASQUER DES TRANSACTIONS EST RÉSERVÉ AU BAC À SABLE. Masquer un
  * encaissement réel fausserait le revenu, donc la conciliation, donc les
@@ -381,11 +382,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('paiements')}
     });
   }
 
+  /* (2026-10-15, sa demande : « le chargement des données doit se faire automatiquement au lancement
+     du module ») A l ouverture, et a la premiere visite de chaque annee, on va chez Square SANS attendre
+     le clic : le cache s affiche aussitot (s il existe), puis la lecture fraiche le remplace. Une seule
+     fois par annee et par ouverture — le bouton reste pour actualiser a la main. */
+  var LU_AUTO = {};
   function charger(){
     appeler('paiements:lire', [ANNEE || undefined]).then(function(r){
       if (!r || !r.ok) { vide('${T("Paiements indisponibles")}', expliquer(r)); return; }
       D = r;
       ANNEE = r.annee;
+      // chercherChezSquare dessine lui-meme l etat « Lecture chez Square… » : pas d eclair de « Cliquez… » avant.
+      if (!OCCUPE && !LU_AUTO[D.annee]) { LU_AUTO[D.annee] = true; chercherChezSquare(); return; }
       dessiner();
     });
   }
