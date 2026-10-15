@@ -110,6 +110,11 @@ button.prio{border-color:rgba(245,158,11,.4);color:var(--tx-bleute);border-radiu
 button.prio.on{background:rgba(245,158,11,.24);border-color:#f59e0b;color:#fde68a;
   font-weight:700;box-shadow:0 0 0 1px rgba(245,158,11,.35) inset}
 button.prio.on:hover{background:rgba(245,158,11,.34);border-color:#fbbf24}
+/* Le « ! » dans un cercle jaune, le MEME que le fil du tableau de bord (2026-10-15, sa demande : « Prioritaires
+   seulement, rien d autre dans le bouton, mais le ! dans un cercle a cote pour rester fidele »). */
+button.prio{display:inline-flex;align-items:center;gap:.4rem}
+.prio-pill{flex:0 0 auto;display:inline-grid;place-items:center;width:1.05rem;height:1.05rem;border-radius:50%;
+  background:#fbbf24;color:#1a1208;font-size:.72rem;font-weight:900;line-height:1;box-shadow:0 0 0 2px rgba(251,191,36,.22)}
 .eclair{color:var(--tx-att);margin-right:.2rem}
 
 /* La liste : la seule zone qui defile. */
@@ -521,11 +526,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + (F.statuts.length ? '<button class="rf-jet" data-vider="1">${T("Tout afficher")}</button>' : '')
       + '</span>'
       + '<button class="rf-jet prio' + (F.prioritaires ? ' on' : '') + '" data-prio="1" '
-      + 'title="${T("N’afficher que les commandes prioritaires — le compte est celui des prioritaires pas encore expédiées")}">'
-      + '${T("Prioritaires")}' + (d && d.prioritairesNonTraitees
-          ? ' · ' + d.prioritairesNonTraitees + ' '
-            + (d.prioritairesNonTraitees > 1 ? '${T("non traitées")}' : '${T("non traitée")}')
-          : '') + '</button>'
+      + 'title="${T("N’afficher que les commandes prioritaires")}">'
+      + '${T("Prioritaires")}<span class="prio-pill" aria-hidden="true">!</span></button>'
       /* LES VENTES MANUELLES (2026-10-15, sa demande) : saisies a la caisse, elles sont livrees d office et
          n apparaissaient donc jamais dans Commandes. Le filtre les montre TOUTES, quel que soit l onglet. */
       + '<button class="rf-jet' + (F.manuelles ? ' on' : '') + '" data-manu="1" '

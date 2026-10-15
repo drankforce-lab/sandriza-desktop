@@ -241,8 +241,7 @@ module.exports = {
      ⚠ « Clic : détails · clic droit : changer le statut » est le SEUL endroit
      ou le clic droit est enseigne. Sans lui, la moitie de l ecran est cachee. */
   'Rechercher une commande': 'Search an order',
-  'N’afficher que les commandes prioritaires — le compte est celui des prioritaires pas encore expédiées':
-    'Show only priority orders — the count is of priority orders not yet shipped',
+  'N’afficher que les commandes prioritaires': 'Show only priority orders',
   'Clic : détails · clic droit : changer le statut':
     'Click: details · right-click: change the status',
   'Rattacher cette commande à un compte client': 'Link this order to a customer account',
