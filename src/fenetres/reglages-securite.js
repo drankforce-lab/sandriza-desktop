@@ -190,9 +190,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="grpH" style="margin-top:1rem">${T("Verrouillage de session à l’écran")}</div>'
       + ''
       + '<div class="cols3">'
-      + champNum('idle-warn', '${T("Avertir après (minutes)")}', c.idleWarnMin||15, '${T("Défaut : 15.")}')
+      + champNum('idle-warn', '${T("Avertir après (minutes)")}', c.idleWarnMin||120, '${T("Défaut : 120 (2 heures).")}')
       + champNum('idle-out', '${T("Décompte avant fermeture (secondes)")}', c.idleLogoutSec||60, '${T("Défaut : 60.")}')
-      + champNum('idle-max', '${T("Plafond absolu (minutes)")}', c.idleMaxMin||60, '${T("Même si un éditeur est ouvert. Défaut : 60.")}')
+      + champNum('idle-max', '${T("Plafond absolu (minutes)")}', c.idleMaxMin||120, '${T("Même si un éditeur est ouvert. Défaut : 120.")}')
       + '</div></div>';
 
     var exempts = '';
@@ -264,7 +264,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var d = {
       staffEnabled: chkv('in-staff-on'), staffDays: numv('in-staff-d',180),
       custEnabled: chkv('in-cust-on'), custDays: numv('in-cust-d',730),
-      idleWarnMin: numv('idle-warn',15), idleLogoutSec: numv('idle-out',60), idleMaxMin: numv('idle-max',60)
+      idleWarnMin: numv('idle-warn',120), idleLogoutSec: numv('idle-out',60), idleMaxMin: numv('idle-max',120)
     };
     appeler('securite:inactivite:ecrire',[d]).then(function(r){ OCCUPE=false;
       if (r&&r.ok){ if (r.inactivity) D.inactivity=r.inactivity; dire('${T("Paramètres enregistrés.")}', 'bon'); }

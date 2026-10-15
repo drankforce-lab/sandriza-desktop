@@ -85,12 +85,12 @@ module.exports = {
   'Avertissement 30 jours avant.': 'Warning 30 days before.',
   'Verrouillage de session à l’écran': 'On-screen session lock',
   'Avertir après (minutes)': 'Warn after (minutes)',
-  'Défaut : 15.': 'Default: 15.',
+  'Défaut : 120 (2 heures).': 'Default: 120 (2 hours).',
   'Décompte avant fermeture (secondes)': 'Countdown before closing (seconds)',
   'Défaut : 60.': 'Default: 60.',
   'Plafond absolu (minutes)': 'Absolute cap (minutes)',
-  'Même si un éditeur est ouvert. Défaut : 60.':
-    'Even if an editor is open. Default: 60.',
+  'Même si un éditeur est ouvert. Défaut : 120.':
+    'Even if an editor is open. Default: 120.',
 
   /* ══ LA RESTRICTION GEOGRAPHIQUE ═══════════════════════════════════════════ */
   'Restriction géographique — administration': 'Geographic restriction — administration',
