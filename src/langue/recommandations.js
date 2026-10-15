@@ -210,4 +210,6 @@ module.exports = {
   'Inactive': 'Inactive',
   'consultation seulement': 'view only',
   'Règle Affichée sur': 'Rule Shown on',
+  // 2026-10-15 : la liste des regles refaite (lot E).
+  'articles au plus': 'items at most',
 };

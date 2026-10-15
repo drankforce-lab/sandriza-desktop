@@ -145,6 +145,11 @@ label.case input{width:15px;height:15px;accent-color:var(--or)}
 .reg-grille{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.45rem .9rem;align-items:end}
 .reg-grille .champ{margin:0}
 .reg-grille .champ select,.reg-grille .champ input{width:100%;min-height:2.2rem}
+/* Refaite (2026-10-15, lot E) : un rang par regle, son numero d ordre en tete. */
+.reco-rang{grid-template-columns:minmax(0,1.5fr) minmax(0,1.2fr) 7rem 6.5rem 27rem}
+.reco-no{font-size:.95rem!important;color:var(--tx)!important}
+.reco-ou{flex-direction:row!important;flex-wrap:wrap;gap:.3rem!important;align-items:center}
+.reco-rang .gestes button[data-monter],.reco-rang .gestes button[data-descendre]{width:2.1rem;padding:0}
 `;
 
 /**
@@ -298,45 +303,42 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function vueRegles(){
     var h = '';
     if (REG_FORM) h += formulaireRegle();
-    // Les regles en PAGES mesurees : la carte prend la hauteur qui reste (JS_PAGES du socle).
-    h += '<div class="carte sz-pagee"><h2>${T("Ordre d’affichage")}</h2>'
-      + '<div class="dt" style="margin-bottom:.45rem">${T("Une règle plus haute passe avant :")} '
-      + '${T("c’est elle que le client voit en premier sur une fiche.")}</div>'
-      + (D.peutModifier && !REG_FORM
-          ? '<div style="margin:0 0 .7rem"><button class="mini prim" id="reg-nouvelle">${T("+ Nouvelle règle")}</button></div>'
-          : '');
+    /* ══ REFAITE (2026-10-15, lot E de la refonte du marketing) : la note d ordre en une ligne, puis un
+       RANG aere par regle — son numero d ordre en tete (c est lui qui decide ce que le client voit en
+       premier). « + Nouvelle regle » est monte dans la tete. Crochets gardes : data-monter,
+       data-descendre, data-basculer, data-editer, data-suppr, data-defaut, data-restaurer. */
+    h += '<div class="ls-note">${T("Une règle plus haute passe avant :")} '
+      + '${T("c’est elle que le client voit en premier sur une fiche.")}</div>';
+    h += '<div class="ls-liste sz-pagee">';
     if (!(D.regles || []).length) {
-      h += '<div class="vide">${T("Aucune règle pour l’instant")}'
+      h += '<div class="ls-vide">${T("Aucune règle pour l’instant")}'
         + (D.peutModifier ? ' ${T("— utilisez « + Nouvelle règle » ci-dessus pour en créer une.")}' : '.') + '</div>';
     } else {
-      h += '<div data-pages="reco-regles"><table><thead><tr><th></th><th>${T("Règle")}</th><th>${T("Affichée sur")}</th>'
-        + '<th class="num">Max</th><th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
-        + D.regles.map(function(r, i){
-            var gestes = '';
-            if (D.peutModifier) {
-              gestes = '<button class="mini geste" data-monter="' + esc(r.id) + '"'
-                + (r.premiere ? ' disabled' : '') + ' title="${T("Monter")}">&#9650;</button> '
-                + '<button class="mini geste" data-descendre="' + esc(r.id) + '"'
-                + (r.derniere ? ' disabled' : '') + ' title="${T("Descendre")}">&#9660;</button> '
-                + '<button class="mini geste" data-basculer="' + esc(r.id) + '" data-actif="'
-                + (r.active ? '0' : '1') + '">' + (r.active ? '${T("Désactiver")}' : '${T("Activer")}') + '</button> '
-                + '<button class="mini geste" data-editer="' + esc(r.id) + '">${T("Modifier")}</button> '
-                + '<button class="mini geste danger" data-suppr="' + esc(r.id) + '" data-defaut="'
-                + (r.pardefaut ? '1' : '0') + '">' + (ARME === r.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
-            }
-            return '<tr><td class="rang">' + (i + 1) + '</td>'
-              + '<td><div class="rf-nom">' + esc(r.nom)
-              + (r.pardefaut ? ' <span class="rf-pill">${T("par défaut")}</span>' : '') + '</div>'
-              + '<div class="rf-sous">' + esc(r.typeLibelle) + '</div></td>'
-              + '<td>' + (r.ou.length
-                  ? r.ou.map(function(x){ return '<span class="rf-pill bleu">' + esc(x) + '</span>'; }).join(' ')
-                  : '<span class="dt">—</span>') + '</td>'
-              + '<td class="num">' + (r.max || '—') + '</td>'
-              + '<td><span class="rf-pill ' + (r.active ? 'vert' : '') + '">'
-              + (r.active ? '${T("Active")}' : '${T("Inactive")}') + '</span></td>'
-              + (D.peutModifier ? '<td class="fin">' + gestes + '</td>' : '') + '</tr>';
-          }).join('')
-        + '</tbody></table></div>';
+      h += '<div data-pages="reco-regles">' + D.regles.map(function(r, i){
+        var gestes = '';
+        if (D.peutModifier) {
+          gestes = '<button class="mini geste" data-monter="' + esc(r.id) + '"'
+            + (r.premiere ? ' disabled' : '') + ' title="${T("Monter")}">&#9650;</button>'
+            + '<button class="mini geste" data-descendre="' + esc(r.id) + '"'
+            + (r.derniere ? ' disabled' : '') + ' title="${T("Descendre")}">&#9660;</button>'
+            + '<button class="mini geste" data-basculer="' + esc(r.id) + '" data-actif="'
+            + (r.active ? '0' : '1') + '">' + (r.active ? '${T("Désactiver")}' : '${T("Activer")}') + '</button>'
+            + '<button class="mini geste" data-editer="' + esc(r.id) + '">${T("Modifier")}</button>'
+            + '<button class="mini geste danger' + (ARME === r.id ? ' arme' : '') + '" data-suppr="' + esc(r.id) + '" data-defaut="'
+            + (r.pardefaut ? '1' : '0') + '">' + (ARME === r.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
+        }
+        return '<div data-ctx-ligne class="ls-rang reco-rang' + (r.active ? '' : ' eteint') + '">'
+          + '<div class="qui"><span class="bico reco-no" aria-hidden="true">' + (i + 1) + '</span>'
+          + '<div class="tx"><b class="reco-nom">' + esc(r.nom) + '</b><span>' + esc(r.typeLibelle)
+          + (r.pardefaut ? ' · ${T("par défaut")}' : '') + '</span></div></div>'
+          + '<div class="ou reco-ou">' + (r.ou.length
+              ? r.ou.map(function(x){ return '<span class="rf-pill bleu">' + esc(x) + '</span>'; }).join('')
+              : '<span>—</span>') + '</div>'
+          + '<div class="bilan"><b>' + (r.max || '—') + '</b><span>${T("articles au plus")}</span></div>'
+          + '<div class="etat"><span class="rf-pill ' + (r.active ? 'vert' : '') + '">'
+          + (r.active ? '${T("Active")}' : '${T("Inactive")}') + '</span></div>'
+          + '<div class="gestes">' + gestes + '</div></div>';
+      }).join('') + '</div>';
     }
     h += '</div>';
 
@@ -468,15 +470,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     if (sous) sous.textContent = D.peutModifier ? '' : '${T("consultation seulement")}';
 
-    var h = '<div class="onglets">'
-      + '<button type="button" class="' + (ONGLET === 'regles' ? 'actif' : '') + '" data-onglet="regles">${T("Règles")}'
-      + ((D.regles || []).length ? '<span class="n">' + D.regles.length + '</span>' : '') + '</button>'
-      + '<button type="button" class="' + (ONGLET === 'liaisons' ? 'actif' : '') + '" data-onglet="liaisons">${T("Liaisons manuelles")}'
-      + ((D.liaisons || []).length ? '<span class="n">' + D.liaisons.length + '</span>' : '') + '</button>'
-      + '<button type="button" class="' + (ONGLET === 'stats' ? 'actif' : '') + '" data-onglet="stats">${T("Statistiques")}</button>'
-      + '<button type="button" class="' + (ONGLET === 'agencement' ? 'actif' : '') + '" data-onglet="agencement">${T("Générateur d’agencement")}'
-      + (LOOK.length ? '<span class="n hi">' + LOOK.length + '</span>' : '') + '</button>'
-      + '</div>';
+    /* ══ LA TETE REFAITE (2026-10-15, lot E) : les onglets en boutons a choix — le mot seul, sans compte
+       (le generateur garde le sien : c est la selection en cours, pas un compte de liste). HORS de
+       .onglets : le socle y peint l onglet courant en pastille doree. */
+    var og = function(v, lib){
+      return '<button type="button" class="' + (ONGLET === v ? 'on' : '') + '" data-onglet="' + v + '">' + lib + '</button>';
+    };
+    var h = '<div class="ls-tete"><div class="ed-seg ls-onglets">'
+      + og('regles', '${T("Règles")}') + og('liaisons', '${T("Liaisons manuelles")}') + og('stats', '${T("Statistiques")}')
+      + og('agencement', '${T("Générateur d’agencement")}' + (LOOK.length ? ' <span class="n hi">' + LOOK.length + '</span>' : ''))
+      + '</div><div class="droite">'
+      + (ONGLET === 'regles' && D.peutModifier && !REG_FORM ? '<button class="ed-bt fort" id="reg-nouvelle">${T("+ Nouvelle règle")}</button>' : '')
+      + '</div></div>';
 
     h += ONGLET === 'liaisons' ? vueLiaisons()
        : ONGLET === 'stats' ? vueStats()
@@ -491,11 +496,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   // La ligne a montrer : par l id (geste de la ligne), par le nom (regle neuve), ou la liaison.
   function trouverVoir(v){
     if (v.liaison) return corps.querySelector('[data-liaison="' + String(v.liaison).replace(/"/g, '') + '"]');
-    var rangs = corps.querySelectorAll('[data-pages="reco-regles"] tbody tr'), trouve = null;
+    var rangs = corps.querySelectorAll('[data-pages="reco-regles"] > .ls-rang'), trouve = null;
     for (var i = 0; i < rangs.length; i++) {
       var tr = rangs[i];
       if (v.id && tr.querySelector('[data-editer="' + String(v.id).replace(/"/g, '') + '"]')) return tr;
-      var n = tr.querySelector('.rf-nom');
+      var n = tr.querySelector('.reco-nom');
       if (v.nom && n && n.firstChild && String(n.firstChild.textContent).trim() === String(v.nom).trim()) trouve = tr;
     }
     return trouve;

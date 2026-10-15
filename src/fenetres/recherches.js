@@ -87,6 +87,12 @@ tbody tr:hover td{background:var(--v04)}
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* Refaite (2026-10-15, lot E) : un rang par requete, le nombre de fois en grand. */
+.rs-rang{grid-template-columns:minmax(0,1fr) 10rem 3.5rem;min-height:3.9rem}
+.rs-fois{flex:0 0 auto;min-width:2.6rem;height:2.6rem;padding:0 .5rem;border-radius:11px;background:var(--f-pill);color:var(--tx);
+  display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:750;font-variant-numeric:tabular-nums}
+.rs-rang .qui .tx{flex:1 1 auto}
+.rs-rang .jaugef{width:100%;max-width:18rem;margin-top:.3rem}
 `;
 
 /** Page complète de la fenêtre native « Recherches sans résultat ». */
@@ -166,7 +172,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('recherches')}
   function dessiner(){
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var rows = filtrees();
-    if (sous) sous.textContent = '${T("30 derniers jours")}';
+    // La periode se lit dans la tete de la liste (2026-10-15) : plus dans la barre de titre.
+    if (sous) sous.textContent = '';
 
     /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
        quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
@@ -181,38 +188,36 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('recherches')}
       + (D.etendue ? esc(etendueLisible(D.etendue)) : '${T("aucun mois archivé")}') + '</div></div>'
       + '</div>');
 
-    /* ══ LA REFONTE DE L INVENTAIRE (2026-09-25) : barre a loupe sur une ligne,
-       chaque requete avec sa jauge de frequence. Crochets gardes : #rs-q,
-       #rs-vers-journaux, #rs-vider, data-retirer. */
-    h += '<div class="carte"><div class="rf-tb">'
-      + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Chercher dans la liste")}" type="search" id="rs-q" placeholder="${T("Chercher dans la liste…")}" value="' + esc(Q) + '"></label>'
-      + '<span class="rf-droite"><span class="dt">' + rows.length + (rows.length > 1 ? '${T(" requêtes")}' : '${T(" requête")}') + '</span>'
-      + '<button class="rf-jet" id="rs-vers-journaux" title="${T("Voir ce journal dans le module Journaux")}">${T("Dans Journaux")}</button>'
+    /* ══ REFAITE (2026-10-15, lot E de la refonte du marketing) : une TETE (ce qu on regarde a gauche,
+       recherche et gestes a droite), puis un RANG aere par requete — le nombre de fois en grand, sa
+       jauge de frequence dessous. Crochets gardes : #rs-q, #rs-vers-journaux, #rs-vider, data-retirer. */
+    h = '<div class="ls-tete"><div class="ls-titre"><b>${T("Ce qu’on a cherché sans trouver")}</b>'
+      + '<span>${T("30 derniers jours")}</span></div><div class="droite">'
+      + '<label class="ls-rch">${ICO.loupe}<input aria-label="${T("Chercher dans la liste")}" type="search" id="rs-q" placeholder="${T("Chercher dans la liste…")}" value="' + esc(Q) + '"></label>'
+      + '<button class="ed-bt" id="rs-vers-journaux" title="${T("Voir ce journal dans le module Journaux")}">${T("Dans Journaux")}</button>'
       + (D.peutModifier && (D.recentes || []).length
-          ? '<button class="rf-jet danger" id="rs-vider">'
+          ? '<button class="ed-bt danger' + (ARME ? ' arme' : '') + '" id="rs-vider">'
             + (ARME ? '${T("Confirmer ?")}' : '${T("Vider le détail")}') + '</button>' : '')
-      + '</span></div></div>';
+      + '</div></div>' + h;
     var max = rows.reduce(function(m, x){ return Math.max(m, Number(x.fois) || 0); }, 0) || 1;
 
     // La liste en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
-    h += '<div class="carte sz-pagee"><h2>${T("Ce qu’on a cherché sans trouver")}</h2>';
+    h += '<div class="ls-liste sz-pagee">';
     if (!rows.length) {
-      h += '<div class="vide">' + (Q ? '${T("Rien ne correspond.")}'
+      h += '<div class="ls-vide">' + (Q ? '${T("Rien ne correspond.")}'
         : '${T("Aucune recherche infructueuse dans les 30 derniers jours.")}') + '</div>';
     } else {
-      h += '<div data-pages="recherches"><table><thead><tr><th>${T("Recherche")}</th><th class="num">${T("Fois")}</th>'
-        + '<th>${T("Dernière")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
-        + rows.map(function(x){
-            return '<tr><td><div class="rf-nom">' + esc(x.q) + '</div>'
-              + '<div class="jaugef"><i style="width:' + Math.max(4, Math.round(100 * (Number(x.fois) || 0) / max)) + '%"></i></div></td>'
-              + '<td class="num"><span class="rf-mont">' + x.fois + '</span></td>'
-              + '<td class="dt">' + esc(szQuand(x.derniere) || '—') + '</td>'
-              + (D.peutModifier
-                  ? '<td class="fin"><button class="mini danger" data-retirer="' + esc(x.q)
-                    + '" title="${T("Traitée — retirer de la liste")}">&#10005;</button></td>'
-                  : '') + '</tr>';
-          }).join('')
-        + '</tbody></table></div>';
+      h += '<div data-pages="recherches">' + rows.map(function(x){
+        return '<div data-ctx-ligne class="ls-rang rs-rang">'
+          + '<div class="qui"><span class="rs-fois" aria-hidden="true">' + x.fois + '</span>'
+          + '<div class="tx"><b>' + esc(x.q) + '</b>'
+          + '<div class="jaugef"><i style="width:' + Math.max(4, Math.round(100 * (Number(x.fois) || 0) / max)) + '%"></i></div></div></div>'
+          + '<div class="ou"><span>' + esc(szQuand(x.derniere) || '—') + '</span></div>'
+          + '<div class="gestes">' + (D.peutModifier
+              ? '<button class="mini geste danger" data-retirer="' + esc(x.q)
+                + '" title="${T("Traitée — retirer de la liste")}">&#10005;</button>'
+              : '') + '</div></div>';
+      }).join('') + '</div>';
     }
     h += '</div>';
 

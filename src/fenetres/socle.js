@@ -4208,6 +4208,9 @@ const CSS_RESPIRE = `
 .ls-tete{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
 .ls-onglets button{height:2.25rem;padding:0 1.1rem;font-size:.86rem}
 .ls-tete .droite{margin-left:auto;display:flex;gap:.6rem;align-items:center}
+.ls-titre{display:flex;flex-direction:column;gap:.15rem;min-width:0}
+.ls-titre b{font-size:1.05rem;font-weight:650}
+.ls-titre span{font-size:.76rem;color:var(--tx2)}
 .ls-rch{display:flex;align-items:center;gap:.5rem;height:2.4rem;width:20rem;padding:0 .8rem;border-radius:10px;
   background:var(--f-champ);border:1px solid var(--sz-bord-fort);color:var(--tx2)}
 .ls-rch svg{width:1rem;height:1rem;flex:0 0 auto}

@@ -159,6 +159,8 @@ label.case input{width:15px;height:15px;accent-color:var(--or)}
 .epenv input{width:100%;font-size:.8rem;padding:.26rem .4rem}
 .epenv .epinfo{grid-column:1/-1;text-align:left}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* La tete refaite (2026-10-15, lot E). */
+.so-tete .so-renvoi{font-size:.74rem;color:var(--tx2);max-width:22rem;text-align:right}
 `;
 
 /**
@@ -1050,29 +1052,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       + '<div class="tuile"><div class="lbl">${T("Ignorées")}</div><div class="val">' + (t.ignorees || 0) + '</div></div>'
       + '</div>');
 
-    h += '<div class="onglets">'
-      + '<button type="button" class="' + (ONGLET === 'file' ? 'actif' : '') + '" data-onglet="file">${T("File d’attente")}'
-      + ((D.file || []).length ? '<span class="n hi">' + D.file.length + '</span>' : '') + '</button>'
-      + '<button type="button" class="' + (ONGLET === 'historique' ? 'actif' : '') + '" data-onglet="historique">${T("Historique")}'
-      + ((D.historique || []).length ? '<span class="n">' + D.historique.length + '</span>' : '') + '</button>'
-      + '<button type="button" class="' + (ONGLET === 'patrons' ? 'actif' : '') + '" data-onglet="patrons">${T("Patrons")}'
-      + (PAT && (PAT.patrons || []).length
-          ? '<span class="n">' + PAT.patrons.filter(function(p){ return p.actif; }).length + '</span>' : '')
-      + '</button>'
-      /* ⚠ L EPINGLE EST UN ONGLET, PAS UNE FENETRE A PART. Elle vit ou vivent
-         deja les publications : on compose, on regarde la file juste a cote.
-         Une fenetre separee aurait demande son entree de menu, son droit et son
-         lexique — pour le meme sujet, a un clic d ici. */
-      + '<button type="button" class="' + (ONGLET === 'epingle' ? 'actif' : '') + '" data-onglet="epingle">'
-      + '${T("Publication IA")}</button>'
-      + '<div class="droite"><span class="dt">${T("Comptes et jetons des réseaux : ")}'
+    /* ══ LA TETE REFAITE (2026-10-15, lot E de la refonte du marketing) : les onglets en boutons a
+       choix — le mot seul ; seule la FILE garde son compte, parce qu il dit ce qui ATTEND d etre
+       publie (les autres comptes vivent dans les tuiles). HORS de .onglets : le socle y peint
+       l onglet courant en pastille doree. Crochets gardes : data-onglet, #so-tout, #so-vider.
+       ⚠ L EPINGLE EST UN ONGLET, PAS UNE FENETRE A PART. Elle vit ou vivent deja les publications :
+       on compose, on regarde la file juste a cote. */
+    var og = function(v, lib){
+      return '<button type="button" class="' + (ONGLET === v ? 'on' : '') + '" data-onglet="' + v + '">' + lib + '</button>';
+    };
+    h += '<div class="ls-tete so-tete"><div class="ed-seg ls-onglets">'
+      + og('file', '${T("File d’attente")}' + ((D.file || []).length ? ' <span class="n hi">' + D.file.length + '</span>' : ''))
+      + og('historique', '${T("Historique")}') + og('patrons', '${T("Patrons")}') + og('epingle', '${T("Publication IA")}')
+      + '</div><div class="droite"><span class="so-renvoi">${T("Comptes et jetons des réseaux : ")}'
       + '${T("Configuration → Communications → Réseaux sociaux")}</span>';
     if (ONGLET === 'file' && D.peutModifier && (D.file || []).length) {
-      h += '<button class="mini prim" id="so-tout"' + (OCCUPE ? ' disabled' : '') + '>'
+      h += '<button class="ed-bt' + (ARME === '__tout' ? ' arme' : ' fort') + '" id="so-tout"' + (OCCUPE ? ' disabled' : '') + '>'
         + (OCCUPE ? '${T("Publication…")}' : (ARME === '__tout' ? '${T("Confirmer — tout publier ?")}' : '${T("Tout publier")}')) + '</button>';
     }
     if (ONGLET === 'historique' && D.peutModifier && (D.historique || []).length) {
-      h += '<button class="mini danger" id="so-vider">'
+      h += '<button class="ed-bt danger' + (ARME === '__vider' ? ' arme' : '') + '" id="so-vider">'
         + (ARME === '__vider' ? '${T("Confirmer ?")}' : '${T("Vider le journal")}') + '</button>';
     }
     h += '</div></div>';
