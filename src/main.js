@@ -2003,8 +2003,52 @@ const porteMarque = () => {
    ceux qu on lit justement parce qu on ne peut rien faire d autre. */
 const TP = require('./langue').tr('porte');
 
+/* ── L ECRAN D ATTENTE SUIT LE JEU DE COULEURS DU POSTE (2026-10-15) ─────────
+   Sa remarque : « le theme de la page de chargement n est pas applique ». Le
+   panneau de droite etait CREME et DORE en dur, et les halos du cote marque
+   VIOLETS — l ancien defaut, alors que Lin est impose partout depuis le
+   2026-10-12. Le jeu (`themeCouleur`) et le mode (`sombre`) vivent dans
+   reglages.json : ils sont donc connus AVANT que le site n existe, ce qui est
+   exactement le moment ou cet ecran s affiche.
+   ⚠ Couleurs LITTERALES, recopiees de CSS_THEMES (socle.js) : la page est en
+   data:, sans la feuille du socle. Contrastes mesures (texte / panneau) :
+     lin nuit   #ece6dc 13.1 · #a9a194 6.4 · sauge #a9bb97 7.9
+     lin jour   #2e2b27 12.7 · #6f695f 4.9 · sauge #55663f 5.6
+     carbone n. #f4f4f5 16.7 · #a1a1aa 7.2 · #fb7185 6.8
+     carbone j. #18181b 17.1 · #52525b 7.5 · #be123c 6.1
+   ⚠ `defaut` (Dore) garde EXACTEMENT l ancien ecran ; Ocean, Violet, Ardoise,
+   Graphite et Emeraude n ont pas de version jour dans le socle : on garde
+   leur nuit dans les deux modes plutot que d inventer une teinte. */
+const _portePalette = () => {
+  let t = 'lin';
+  try { t = _themeCouleur(); } catch {}
+  let sombre = true;
+  try { const v = reglages.get('sombre'); if (typeof v === 'boolean') sombre = v; } catch {}
+  const nuit = (fond, h1, sub, acc, accTxt, rgb, orbe) => ({ scheme: 'dark', panel: fond, h1, sub, kicker: accTxt,
+    acc, acc2: accTxt, accTxt, rgb, mo: sub, mute: sub, orbe });
+  const P = {
+    lin:      sombre
+      ? { scheme: 'dark', panel: '#22201c', h1: '#ece6dc', sub: '#a9a194', kicker: '#a9bb97', acc: '#a9bb97',
+          acc2: '#bccbab', accTxt: '#a9bb97', rgb: '169,187,151', mo: '#ddd6ca', mute: '#a9a194', orbe: ['#7c8d6c', '#5f7150'] }
+      : { scheme: 'light', panel: '#f5f3ef', h1: '#2e2b27', sub: '#6f695f', kicker: '#55663f', acc: '#5f7150',
+          acc2: '#9fb08d', accTxt: '#55663f', rgb: '95,113,80', mo: '#4f4a43', mute: '#6f695f', orbe: ['#9fb08d', '#7c8d6c'] },
+    carbone:  sombre
+      ? { scheme: 'dark', panel: '#141417', h1: '#f4f4f5', sub: '#a1a1aa', kicker: '#fb7185', acc: '#f43f5e',
+          acc2: '#fb7185', accTxt: '#fb7185', rgb: '244,63,94', mo: '#d4d4d8', mute: '#a1a1aa', orbe: ['#f43f5e', '#3f3f46'] }
+      : { scheme: 'light', panel: '#fbfbfc', h1: '#18181b', sub: '#52525b', kicker: '#be123c', acc: '#d6193f',
+          acc2: '#f43f5e', accTxt: '#be123c', rgb: '214,25,63', mo: '#3f3f46', mute: '#52525b', orbe: ['#f43f5e', '#71717a'] },
+    ocean:    nuit('#122536', '#e8edf5', '#8fa1b8', '#38bdf8', '#38bdf8', '56,189,248', ['#0ea5e9', '#0369a1']),
+    violet:   nuit('#1f1838', '#e8edf5', '#a59cc0', '#a78bfa', '#a78bfa', '167,139,250', ['#8b5cf6', '#4338ca']),
+    ardoise:  nuit('#1b263f', '#e8edf5', '#94a3b8', '#7dd3fc', '#7dd3fc', '125,211,252', ['#38bdf8', '#334155']),
+    graphite: nuit('#1e1e1e', '#ececec', '#a3a3a3', '#fbbf24', '#fbbf24', '251,191,36', ['#f59e0b', '#404040']),
+    emeraude: nuit('#102a1c', '#e8f5ee', '#8fb8a3', '#34d399', '#34d399', '52,211,153', ['#10b981', '#065f46']),
+  };
+  return P[t] || null;     // null = Dore : l ecran d origine, inchange
+};
+
 const portePage = (titre, message, progression) => {
   const b = porteMarque();
+  const p = _portePalette();
   const bg = 'linear-gradient(135deg,' + b.bgFrom + ' 0%,' + b.bgMid + ' 50%,' + b.bgFrom + ' 100%)';
 
   const barre = (progression === undefined) ? '' :
@@ -2016,7 +2060,7 @@ const portePage = (titre, message, progression) => {
   const nom = b.logo ? '' : '<h1 class="bname">' + b.nom + '</h1>';
 
   const css = ''
-    + ':root{color-scheme:dark}'
+    + ':root{color-scheme:' + (p ? p.scheme : 'dark') + '}'
     + '*{box-sizing:border-box}'
     + 'body{margin:0;min-height:100vh;background:' + bg + ';-webkit-font-smoothing:antialiased;'
     +   'font:15px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}'
@@ -2024,9 +2068,9 @@ const portePage = (titre, message, progression) => {
     + '.brand{position:relative;flex:1 1 46%;display:flex;flex-direction:column;justify-content:center;'
     +   'padding:3.5rem 3.2rem;overflow:hidden;color:' + b.titre + '}'
     + '.orb{position:absolute;border-radius:50%;filter:blur(60px);opacity:.5;z-index:0;pointer-events:none;will-change:transform}'
-    + '.o1{width:360px;height:360px;background:' + b.logoG + ';top:-80px;left:-60px;animation:f1 17s ease-in-out infinite}'
-    + '.o2{width:300px;height:300px;opacity:.42;background:linear-gradient(135deg,#7c5cff,#4338ca);bottom:-70px;right:6%;animation:f2 21s ease-in-out infinite}'
-    + '.o3{width:220px;height:220px;opacity:.4;background:linear-gradient(135deg,#a855f7,#6d28d9);top:40%;right:-50px;animation:f3 25s ease-in-out infinite}'
+    + '.o1{width:360px;height:360px;background:' + (p ? 'linear-gradient(135deg,' + p.acc + ',' + p.orbe[1] + ')' : b.logoG) + ';top:-80px;left:-60px;animation:f1 17s ease-in-out infinite}'
+    + '.o2{width:300px;height:300px;opacity:.42;background:' + (p ? 'linear-gradient(135deg,' + p.orbe[0] + ',' + p.orbe[1] + ')' : 'linear-gradient(135deg,#7c5cff,#4338ca)') + ';bottom:-70px;right:6%;animation:f2 21s ease-in-out infinite}'
+    + '.o3{width:220px;height:220px;opacity:.4;background:' + (p ? 'linear-gradient(135deg,' + p.orbe[1] + ',' + p.orbe[0] + ')' : 'linear-gradient(135deg,#a855f7,#6d28d9)') + ';top:40%;right:-50px;animation:f3 25s ease-in-out infinite}'
     + '.brand::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(115deg,rgba(6,4,16,.55) 0%,rgba(6,4,16,.34) 46%,rgba(6,4,16,.14) 100%)}'
     + '.brand::after{content:"";position:absolute;inset:0;z-index:1;background:radial-gradient(85% 62% at 16% 12%,rgba(255,255,255,.10),transparent 55%)}'
     + '.binner{position:relative;z-index:2;max-width:460px}'
@@ -2039,7 +2083,7 @@ const portePage = (titre, message, progression) => {
     + '.bname{font-family:Georgia,serif;font-size:2.15rem;font-weight:800;margin:0 0 .9rem;line-height:1.12}'
     + '.eyebrow{display:flex;align-items:center;gap:.9rem;margin:0 0 2.4rem;text-transform:uppercase;'
     +   'letter-spacing:.26em;font-size:.8rem;font-weight:600;color:' + b.sous + '}'
-    + '.eyebrow .line{flex:0 0 auto;height:2px;width:42px;border-radius:2px;background:linear-gradient(90deg,#C49A6C,rgba(196,154,108,.08))}'
+    + '.eyebrow .line{flex:0 0 auto;height:2px;width:42px;border-radius:2px;background:linear-gradient(90deg,' + (p ? p.acc + ',rgba(' + p.rgb + ',.08)' : '#C49A6C,rgba(196,154,108,.08)') + ')}'
     + '.feats{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:1.05rem}'
     + '.feat{display:flex;align-items:center;gap:.9rem;font-size:.9rem;line-height:1.4;font-weight:500;color:rgba(243,237,227,.95)}'
     + '.feat .ic{flex:0 0 auto;width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;'
@@ -2050,19 +2094,19 @@ const portePage = (titre, message, progression) => {
     // RETIRÉ à la demande de l'utilisateur : à côté du panneau de marque, qui est
     // déjà riche, la moindre texture ici devient du bruit. Ne pas y revenir.
     + '.panel{flex:1 1 54%;display:flex;flex-direction:column;justify-content:center;align-items:center;'
-    +   'background:#faf8f5;padding:2.75rem 2rem;overflow-y:auto}'
+    +   'background:' + (p ? p.panel : '#faf8f5') + ';padding:2.75rem 2rem;overflow-y:auto}'
     + '.wrap{width:100%;max-width:520px;animation:rise .6s cubic-bezier(.16,.84,.44,1) both}'
-    + '.kicker{display:block;font-size:.69rem;font-weight:600;color:#9a7d62;margin-bottom:.7rem;'
+    + '.kicker{display:block;font-size:.69rem;font-weight:600;color:' + (p ? p.kicker : '#9a7d62') + ';margin-bottom:.7rem;'
     +   'text-transform:uppercase;letter-spacing:.08em}'
-    + '.h1{font-size:1.55rem;font-weight:800;color:#1a1207;font-family:Georgia,serif;letter-spacing:.01em;line-height:1.25;margin:0}'
-    + '.sub{font-size:.84rem;color:#7a6652;line-height:1.75;margin-top:.85rem}'
-    + '.pg{width:100%;height:7px;border-radius:99px;background:rgba(196,154,108,.16);overflow:hidden;margin-top:2.1rem}'
-    + '.pg-in{height:100%;background:linear-gradient(90deg,#C49A6C,#e0bd93);border-radius:99px;transition:width .25s ease}'
-    + '.pulse{margin-top:2.1rem;height:7px;border-radius:99px;background:rgba(196,154,108,.16);overflow:hidden;position:relative}'
+    + '.h1{font-size:1.55rem;font-weight:800;color:' + (p ? p.h1 : '#1a1207') + ';font-family:Georgia,serif;letter-spacing:.01em;line-height:1.25;margin:0}'
+    + '.sub{font-size:.84rem;color:' + (p ? p.sub : '#7a6652') + ';line-height:1.75;margin-top:.85rem}'
+    + '.pg{width:100%;height:7px;border-radius:99px;background:rgba(' + (p ? p.rgb : '196,154,108') + ',.16);overflow:hidden;margin-top:2.1rem}'
+    + '.pg-in{height:100%;background:linear-gradient(90deg,' + (p ? p.acc + ',' + p.acc2 : '#C49A6C,#e0bd93') + ');border-radius:99px;transition:width .25s ease}'
+    + '.pulse{margin-top:2.1rem;height:7px;border-radius:99px;background:rgba(' + (p ? p.rgb : '196,154,108') + ',.16);overflow:hidden;position:relative}'
     + '.pulse::after{content:"";position:absolute;top:0;bottom:0;width:38%;border-radius:99px;'
-    +   'background:linear-gradient(90deg,transparent,#C49A6C,transparent);animation:slide 1.5s ease-in-out infinite}'
-    + '.ver{margin-top:2.2rem;padding-top:1.2rem;border-top:1px solid rgba(196,154,108,.22);'
-    +   'font-size:.72rem;color:#9a7d62;letter-spacing:.02em}'
+    +   'background:linear-gradient(90deg,transparent,' + (p ? p.acc : '#C49A6C') + ',transparent);animation:slide 1.5s ease-in-out infinite}'
+    + '.ver{margin-top:2.2rem;padding-top:1.2rem;border-top:1px solid rgba(' + (p ? p.rgb : '196,154,108') + ',.22);'
+    +   'font-size:.72rem;color:' + (p ? p.mute : '#9a7d62') + ';letter-spacing:.02em}'
     /* ── LE TÉLÉCHARGEMENT : LE POURCENTAGE EN GROS ─────────────────────────
        Sa demande du 2026-09-06 : « des pourcentages en plus des Mo restants ».
        Le pourcentage EXISTAIT, noyé dans la phrase « Nouvelle version : 47 % » —
@@ -2079,11 +2123,11 @@ const portePage = (titre, message, progression) => {
        ⚠ `tabular-nums` : sans lui, les chiffres n'ont pas la même largeur et le
        nombre TREMBLE à chaque rafraîchissement — sur un compteur qui change
        plusieurs fois par seconde, ça donne l'impression d'un écran instable. */
-    + '.dl-pct{font:700 1.5rem/1.15 Georgia,serif;color:#C49A6C;margin:.15rem 0 .45rem;'
+    + '.dl-pct{font:700 1.5rem/1.15 Georgia,serif;color:' + (p ? p.accTxt : '#C49A6C') + ';margin:.15rem 0 .45rem;'
     +   'font-variant-numeric:tabular-nums;letter-spacing:-.02em}'
-    + '.dl-mo{font-size:.95rem;color:#6b5340;font-variant-numeric:tabular-nums}'
-    + '.dl-vit{font-size:.78rem;color:#9a7d62;margin-top:.25rem;font-variant-numeric:tabular-nums}'
-    + '.dl-fin{font-size:.78rem;color:#9a7d62;margin-top:.9rem}'
+    + '.dl-mo{font-size:.95rem;color:' + (p ? p.mo : '#6b5340') + ';font-variant-numeric:tabular-nums}'
+    + '.dl-vit{font-size:.78rem;color:' + (p ? p.mute : '#9a7d62') + ';margin-top:.25rem;font-variant-numeric:tabular-nums}'
+    + '.dl-fin{font-size:.78rem;color:' + (p ? p.mute : '#9a7d62') + ';margin-top:.9rem}'
     + '@keyframes f1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(36px,46px) scale(1.08)}}'
     + '@keyframes f2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-30px,-34px) scale(1.06)}}'
     + '@keyframes f3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(28px,-30px) scale(1.1)}}'
