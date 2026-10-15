@@ -1584,6 +1584,9 @@ const createWindow = () => {
      une animation qui pretend un avancement qu on ignore.
      << Un instant... >> ne disait rien et n avait pas de barre : la charte le
      relevait comme le defaut A5. */
+  // La bande des boutons suit la porte dès le démarrage (2026-10-15) — sinon elle garde la couleur nuit
+  // de création de la fenêtre au-dessus d'un panneau clair.
+  _bandePorte(true);
   mainWindow.loadURL(portePage(TP('Démarrage'), TP('Préparation de l’application…'), 8)).catch(() => {});
 
   // Réapplique la préférence de masquage de la barre latérale à chaque chargement,
@@ -5117,12 +5120,22 @@ const ouvrirImprimantes = () => {
    pleine largeur en haut au lieu de faire monter son panneau creme jusqu a
    y = 0. C est ce qui a ete propose, et refuse. */
 const PORTE_BANDE = { color: '#faf8f5', symbolColor: '#1d2433' };
+/* ⚠ (2026-10-15, sa capture : « pendant l'update les boutons restent blancs et n'ont pas le thème »)
+   La porte suit le JEU DE COULEURS depuis la 7.29.x (_portePalette : son panneau de droite prend `panel`),
+   mais la bande des boutons restait figée — crème ici, ou la couleur NUIT de création de la fenêtre à la
+   porte du démarrage, qui ne passait pas par _bandePorte. Elle prend désormais le panneau de la palette
+   courante et la couleur de son titre ; Doré (palette null) garde la bande d'origine. */
+const _bandePortePalette = () => {
+  let p = null;
+  try { p = _portePalette(); } catch (_) { p = null; }
+  return p ? { color: p.panel, symbolColor: p.h1 } : PORTE_BANDE;
+};
 const _bandePorte = (dessus) => {
   if (!mainWindow || mainWindow.isDestroyed()) return;
   if (typeof mainWindow.setTitleBarOverlay !== 'function') return;
   try {
     mainWindow.setTitleBarOverlay(dessus
-      ? PORTE_BANDE
+      ? _bandePortePalette()
       // ⚠ On REMET le défaut sombre en quittant la porte : le site reprendra la
       // main dès son premier rendu (chrome:titlebar), mais entre les deux il ne
       // faut pas laisser une bande claire sur l'écran de connexion.
