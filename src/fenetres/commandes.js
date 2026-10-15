@@ -530,7 +530,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
          n apparaissaient donc jamais dans Commandes. Le filtre les montre TOUTES, quel que soit l onglet. */
       + '<button class="rf-jet' + (F.manuelles ? ' on' : '') + '" data-manu="1" '
       + 'title="${T("N’afficher que les ventes saisies à la caisse, quel que soit leur statut")}">'
-      + '${T("Ventes manuelles")}' + (d && d.manuellesTotal ? ' · ' + d.manuellesTotal : '') + '</button>';
+      + '${T("Ventes manuelles")}</button>';
     /* ⚠⚠ LA CORBEILLE S OUVRE D ICI, ET DE NULLE PART AILLEURS (#113, sa demande
        du 2026-09-14 : << met pas un lien dans les menu pour la corbeille, juste
        mettre un petit bouton dans la page des commande directement >>).
