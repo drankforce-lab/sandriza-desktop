@@ -138,6 +138,9 @@ html.jour .graph .b2{background:rgba(168,128,78,.38)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+/* La tête refaite (2026-10-15, lot F) : les onglets en boutons à choix, le corps aux marges des éditeurs. */
+.pub-onglets{flex:0 0 auto;padding:1rem 1.6rem 0}
+.corps{padding:1rem 1.6rem .9rem}
 `;
 
 /**
@@ -222,7 +225,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
 
   function dessinerOnglets(){
     ongletsEl.innerHTML = ['overview','segments','promos','social','campaigns','satisfaction']
-      .map(function(id){ return '<button data-tab="' + id + '" class="' + (TAB === id ? 'actif' : '') + '">' + LBL[id] + '</button>'; }).join('');
+      .map(function(id){ return '<button type="button" data-tab="' + id + '" class="' + (TAB === id ? 'on' : '') + '">' + LBL[id] + '</button>'; }).join('');
+    // La tête refaite (2026-10-15, lot F) : boutons à choix, HORS de .onglets.
+    ongletsEl.innerHTML = '<div class="ed-seg ls-onglets">' + ongletsEl.innerHTML + '</div>';
+    ongletsEl.className = 'pub-onglets';
   }
 
   /* ══ VUE D ENSEMBLE ════════════════════════════════════════════════════════ */

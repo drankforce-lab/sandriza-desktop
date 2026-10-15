@@ -121,6 +121,9 @@ html.jour .col{background:rgba(168,128,78,.55)}html.jour .col:hover{background:r
 .rang2{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:.7rem;align-items:start}
 .rang2 > .carte{margin:0}
 @media (max-width:1000px){.rang2{grid-template-columns:1fr}}
+/* La tête refaite (2026-10-15, lot F). */
+.st-tete .st-lu{font-size:.76rem;color:var(--tx2)}
+.corps{padding:1rem 1.6rem .9rem}
 `;
 
 /** Page complète de la fenêtre native « Statistiques ». */
@@ -208,25 +211,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('statistiques')}
   }
 
   function onglets(){
-    var h = '<div class="barreoutils">'
-      + '<button class="rf-jet' + (ONGLET === 'ga' ? ' on' : '') + '" data-onglet="ga">${T("Google Analytics")}</button>'
-      + '<button class="rf-jet' + (ONGLET === 'tel' ? ' on' : '') + '" data-onglet="tel">${T("Téléphonie")}</button>'
-      + '<span class="sep" aria-hidden="true"></span>';
+    /* ══ LA TÊTE REFAITE (2026-10-15, lot F) : la SOURCE puis la PÉRIODE, chacune en boutons à
+       choix ; « lu à » et « Relire » à droite. Crochets gardés : data-onglet, data-plage, data-jours,
+       #st-relire. */
+    var jet = function(attr, v, on, lib){
+      return '<button type="button" class="' + (on ? 'on' : '') + '" ' + attr + '="' + v + '">' + lib + '</button>';
+    };
+    var h = '<div class="ls-tete st-tete"><div class="ed-seg ls-onglets">'
+      + jet('data-onglet', 'ga', ONGLET === 'ga', '${T("Google Analytics")}')
+      + jet('data-onglet', 'tel', ONGLET === 'tel', '${T("Téléphonie")}')
+      + '</div><div class="ed-seg ls-onglets">';
     if (ONGLET === 'ga') {
       h += [['7d', '${T("7 jours")}'], ['30d', '${T("30 jours")}'], ['90d', '${T("90 jours")}']].map(function(p){
-        return '<button class="rf-jet' + (PLAGE === p[0] ? ' on' : '') + '" data-plage="' + p[0] + '">'
-          + p[1] + '</button>';
+        return jet('data-plage', p[0], PLAGE === p[0], p[1]);
       }).join('');
     } else {
       h += [[7, '${T("7 jours")}'], [30, '${T("30 jours")}'], [90, '${T("90 jours")}']].map(function(p){
-        return '<button class="rf-jet' + (JOURS === p[0] ? ' on' : '') + '" data-jours="' + p[0] + '">'
-          + p[1] + '</button>';
+        return jet('data-jours', p[0], JOURS === p[0], p[1]);
       }).join('');
     }
+    h += '</div>';
     var lu = (ONGLET === 'ga') ? LUGA : LUTEL;
     h += '<div class="droite">'
-      + (lu ? '<span>${T("lu à ")}' + esc(lu) + '</span>' : '')
-      + '<button class="mini" id="st-relire"' + (CHARGE ? ' disabled' : '') + '>'
+      + (lu ? '<span class="st-lu">${T("lu à ")}' + esc(lu) + '</span>' : '')
+      + '<button class="ed-bt" id="st-relire"' + (CHARGE ? ' disabled' : '') + '>'
       + (CHARGE ? '${T("Lecture…")}' : '${T("↻ Relire")}') + '</button>'
       + '</div></div>';
     return h;

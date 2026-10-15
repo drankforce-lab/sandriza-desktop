@@ -129,6 +129,8 @@ button .n.hi{background:rgba(239,68,68,.28);color:var(--tx-err2)}
   font:inherit;font-weight:600;font-size:.82rem;cursor:pointer}
 .onglets > button:hover{background:var(--v05);color:var(--tx)}
 .onglets .droite{margin-left:auto}
+/* La tête refaite (2026-10-15, lot F). */
+.ch-renvoi{font-size:.74rem;color:var(--tx2);text-align:right}
 `;
 
 /** Page complète de la fenêtre native « Chat en ligne ». */
@@ -422,10 +424,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
         ? '<span class="pill att">' + D.enAttente + '${T(" en attente")}</span>'
         : '<span class="pill bon">${T("rien en attente")}</span>';
     }
-    var h = '<div class="onglets">'
-      + '<button type="button" class="' + (ONGLET === 'file' ? 'actif' : '') + '" data-onglet="file">${T("Conversations")}</button>'
-      + '<button type="button" class="' + (ONGLET === 'satisfaction' ? 'actif' : '') + '" data-onglet="satisfaction">${T("Satisfaction")}</button>'
-      + '<div class="droite"><span class="dt">${T("Réglages du chat et de l’assistant : ")}'
+    /* La tête refaite (2026-10-15, lot F) : boutons à choix, HORS de .onglets (le socle y peint une
+       pastille dorée). Crochet gardé : data-onglet. */
+    var og = function(v, lib){
+      return '<button type="button" class="' + (ONGLET === v ? 'on' : '') + '" data-onglet="' + v + '">' + lib + '</button>';
+    };
+    var h = '<div class="ls-tete"><div class="ed-seg ls-onglets">'
+      + og('file', '${T("Conversations")}') + og('satisfaction', '${T("Satisfaction")}')
+      + '</div><div class="droite"><span class="ch-renvoi">${T("Réglages du chat et de l’assistant : ")}'
       + '${T("Configuration → Communications → Chat en ligne")}</span></div></div>';
     h += ONGLET === 'satisfaction' ? vueSatisfaction() : vueFile();
     if (DETAIL) h += boiteDetail();
