@@ -36,8 +36,11 @@ const CSS = `
 #pal-zone td input[type="checkbox"]{width:1.2rem;height:1.2rem;cursor:pointer}
 #pal-zone td input[data-pal-k="nom"],#pal-zone td input[data-pal-k="nomEN"]{width:100%;max-width:16rem}
 .amb-sous{display:flex;gap:.3rem;align-items:center;flex-wrap:wrap}
-.amb-sous button{padding:.26rem .8rem;border-radius:99px;font-size:.8rem;font-weight:600;color:var(--tx2);background:transparent}
-.amb-sous button.actif{color:var(--tx)}
+/* 2026-10-15 (2e passe du lot D) : les sous-onglets dans un groupe .ed-seg du socle ; le compte qui reste dit
+   une chose A TRAITER (candidatures nouvelles, recompenses dues). */
+.amb-sous{margin-bottom:.2rem}
+.amb-sous .ls-onglets button{height:2rem;padding:0 .95rem;font-size:.8rem}
+.amb-sous .ls-onglets .n{margin-left:.4rem}
 .amb-sous .droite{margin-left:auto}
 .amb-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.7rem 1rem}
 .amb-deux{display:grid;grid-template-columns:1fr 1fr;gap:.7rem 1rem;margin-top:.7rem}
@@ -446,9 +449,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     /* DEUX SOUS-ONGLETS (2026-10-07, sa capture : la liste des soldes débordait sous les réglages) :
        « Soldes des clients » (le geste de tous les jours, ouvert par défaut) et « Réglages ». */
     var actifPts = !!cf.actif;
-    var sous = function(v, lib){ return '<button type="button" class="' + (PTSV === v ? 'actif' : '') + '" data-pt-vue="' + v + '">' + lib + '</button>'; };
+    var sous = function(v, lib){ return '<button type="button" class="' + (PTSV === v ? 'on' : '') + '" data-pt-vue="' + v + '">' + lib + '</button>'; };
     var barre = '<div class="amb-sous" id="pt-sous" style="margin-bottom:.7rem">'
-      + sous('soldes', '${T("Soldes des clients")}') + sous('reglages', '${T("Réglages")}')
+      + '<span class="ed-seg ls-onglets">' + sous('soldes', '${T("Soldes des clients")}') + sous('reglages', '${T("Réglages")}') + '</span>'
       + '<span class="droite"><span class="rf-pill ' + (actifPts ? 'vert' : '') + '">' + (actifPts ? '${T("Programme actif")}' : '${T("Programme inactif")}') + '</span></span></div>';
     if (PTSV === 'reglages') return barre + h;
     h = '';
@@ -901,11 +904,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     if (AMB.erreur) return '<div class="carte plein"><div class="vide">' + esc(AMB.erreur) + '</div></div>';
     var nouv = (AMB.demandes || []).filter(function(d){ return d.statut === 'nouvelle'; }).length;
     var actif = !!(AMB.cfg && AMB.cfg.actif);
-    var sous = function(v, lib, n){ return '<button type="button" class="' + (AMBV === v ? 'actif' : '') + '" data-amb-vue="' + v + '">' + lib + (n ? '<span class="n">' + n + '</span>' : '') + '</button>'; };
+    var sous = function(v, lib, n){ return '<button type="button" class="' + (AMBV === v ? 'on' : '') + '" data-amb-vue="' + v + '">' + lib + (n ? '<span class="n">' + n + '</span>' : '') + '</button>'; };
     return '<div class="amb-zone" id="amb-zone"><div class="amb-sous">'
-      + sous('liste', '${T("Ambassadrices et bilan")}', (AMB.ambassadrices || []).length)
+      + '<span class="ed-seg ls-onglets">' + sous('liste', '${T("Ambassadrices et bilan")}', 0)
       + sous('programme', '${T("Programme")}', 0)
-      + sous('demandes', '${T("Candidatures")}', nouv)
+      + sous('demandes', '${T("Candidatures")}', nouv) + '</span>'
       + '<span class="droite"><span class="rf-pill ' + (actif ? 'vert' : '') + '">' + (actif ? '${T("Programme actif")}' : '${T("Programme inactif")}') + '</span></span></div>'
       + (AMBV === 'programme' ? ambVueProgramme() : AMBV === 'demandes' ? ambVueDemandes() : ambVueListe())
       + '</div>';
@@ -1138,10 +1141,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     }
     if (PAR.erreur) return '<div class="carte plein"><div class="vide">' + esc(PAR.erreur) + '</div></div>';
     var actif = !!(PAR.cfg && PAR.cfg.actif);
-    var sous = function(v, lib, n){ return '<button type="button" class="' + (PARV === v ? 'actif' : '') + '" data-par-vue="' + v + '">' + lib + (n ? '<span class="n">' + n + '</span>' : '') + '</button>'; };
+    var sous = function(v, lib, n){ return '<button type="button" class="' + (PARV === v ? 'on' : '') + '" data-par-vue="' + v + '">' + lib + (n ? '<span class="n">' + n + '</span>' : '') + '</button>'; };
     return '<div class="amb-zone" id="par-zone"><div class="amb-sous">'
-      + sous('liste', '${T("Amies invitées et bilan")}', (PAR.totaux || {}).nbDues || 0)
-      + sous('programme', '${T("Programme")}', 0)
+      + '<span class="ed-seg ls-onglets">' + sous('liste', '${T("Amies invitées et bilan")}', (PAR.totaux || {}).nbDues || 0)
+      + sous('programme', '${T("Programme")}', 0) + '</span>'
       + '<span class="droite"><span class="rf-pill ' + (actif ? 'vert' : '') + '">' + (actif ? '${T("Programme actif")}' : '${T("Programme inactif")}') + '</span></span></div>'
       + (PARV === 'programme' ? parVueProgramme() : parVueListe())
       + '</div>';
