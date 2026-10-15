@@ -98,7 +98,7 @@ html.jour .bascule .piste{background:#cfcabd}
 .pop .titre{font:800 1.5rem/1.15 Georgia,serif;white-space:pre-line;color:#3a2f22}
 .pop .st{font-size:.9rem;color:#6b5b45;line-height:1.5}
 .pop .cta{background:#8f6f42;color:var(--tx-sur-accent);border:none;border-radius:8px;padding:.6rem;font-weight:700;margin-top:.4rem}
-.pop .lg{font-size:.6875rem;color:#9a8f7d}
+.pop .lg{font-size:.6875rem;color:#686868}
 .pop .x{position:absolute;top:.5rem;right:.7rem;background:rgba(0,0,0,.15);color:var(--tx-blanc);border:none;border-radius:50%;width:26px;height:26px}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

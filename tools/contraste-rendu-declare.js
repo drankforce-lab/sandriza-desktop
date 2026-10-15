@@ -98,8 +98,6 @@ module.exports = {
     '#576678 sur #0F172A @4.5': 1,
     // 3.14 · span > strong « ↩ Moyen de paiement original » · remboursement_c1/jour
     '#8E9299 sur #FFFFFF @4.5': 1,
-    // 3.18 · div.d > div.lg « En vous inscrivant, vous acceptez de rec » · newsletter_c5/jour newsletter_c5/nuit
-    '#9A8F7D sur #FFFFFF @4.5': 1,
     // 3.19 · h2 > span.cpt « 2 » · liquidation/jour liquidation/jour/ardoise liquidation/jour/emeraude liquidation/jour/graphite liquidation/jour/ocean liquidation/jour/violet liquidation_c2/jour liquidation_c3/jour
     '#D97706 sur #FFFFFF @4.5': 3,
     // 3.24 · td > div.mut « ⏳ promesse » · journaux_c11/nuit journaux_c4/nuit
