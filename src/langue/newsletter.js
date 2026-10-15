@@ -195,4 +195,6 @@ module.exports = {
   'échoué': 'failed',
   'étapes en attente': 'steps pending',
   'étape en attente': 'step pending',
+  // 2026-10-15 : l offre de bienvenue refaite (lot C), avec son apercu vivant.
+  'Aperçu en direct — ce que la visiteuse verra': 'Live preview — what the visitor will see',
 };

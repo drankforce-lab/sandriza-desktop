@@ -134,4 +134,6 @@ module.exports = {
   'toutes les inscriptions': 'all sign-ups',
   'Tous': 'All',
   'Actifs': 'Active',
+  // 2026-10-15 : la liste refaite (lot C).
+  'sans prénom': 'no first name',
 };

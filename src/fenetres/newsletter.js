@@ -108,6 +108,33 @@ html.jour .bascule .piste{background:#cfcabd}
 
 .grc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 .75rem;align-items:start}
 .grc .ctrl{align-self:center}
+/* ══ REFONTE « QUI RESPIRE » (2026-10-15, lot C) : les onglets en boutons a choix, le corps aux marges des
+   editeurs, et l offre de bienvenue en deux colonnes — les reglages, puis l apercu VIVANT du popup. */
+.nl-onglets{flex:0 0 auto;padding:1rem 1.6rem 0}
+.corps{padding:1rem 1.6rem .9rem}
+.nl-ed{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:minmax(24rem,32rem) minmax(0,1fr);gap:1.4rem}
+.nl-reg{min-height:0;padding:1.2rem 1.3rem;border-radius:16px;background:var(--f-carte);border:1px solid var(--sz-bord);
+  display:flex;flex-direction:column;gap:.15rem;overflow:hidden}
+.nl-reg-t{display:flex;align-items:flex-start;gap:1rem;margin-bottom:.8rem}
+.nl-reg-t>div{flex:1 1 auto;display:flex;flex-direction:column;gap:.25rem}
+.nl-reg-t b{font-size:1.05rem;font-weight:650}
+.nl-reg-t>div>span{font-size:.76rem;color:var(--tx2)}
+.nl-actif{display:flex;align-items:center;gap:.5rem;font-size:.78rem;color:var(--tx2)}
+.nl-fait{font-size:.78rem;color:var(--tx-ok);margin:0 0 .6rem}
+.nl-reg .deux{gap:.8rem}
+.nl-reg .nl-code{margin:-.35rem 0 .6rem}
+.nl-img{display:flex;gap:.5rem;align-items:center}
+.nl-img input{flex:1 1 auto;min-width:0}
+.nl-fic{flex:0 0 auto;cursor:pointer}
+.nl-gestes{margin-top:auto;padding-top:.8rem;display:flex;gap:.5rem;flex-wrap:wrap}
+.nl-reset{color:var(--tx-or)}
+.nl-scene{min-height:0;padding:1rem 1.2rem;border-radius:16px;background:var(--f-champ);border:1px solid var(--sz-bord);
+  display:flex;flex-direction:column;gap:.8rem;overflow:hidden}
+.nl-pop-zone{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center}
+.nl-pop-zone .pop{box-shadow:0 18px 44px rgba(0,0,0,.35)}
+.nl-scene .ed-titre{font-size:.72rem;font-weight:650;letter-spacing:.08em;text-transform:uppercase;color:var(--tx2)}
+.nl-img .nl-fic{display:inline-flex;align-items:center;gap:.4rem;height:2.4rem;padding:0 .9rem;border-radius:10px;
+  border:1px solid var(--sz-bord-fort);background:var(--f-champ);color:var(--tx);font-size:.82rem;font-weight:600;margin:0}
 `;
 
 /**
@@ -179,7 +206,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('newsletter')}
 
   function dessinerOnglets(){
     ongletsEl.innerHTML = [['dashboard','${T("Tableau de bord")}'],['config','${T("⚙ Configuration")}'],['offer','${T("Offre bienvenue")}']]
-      .map(function(t){ return '<button data-tab="' + t[0] + '" class="' + (TAB === t[0] ? 'actif' : '') + '">' + t[1] + '</button>'; }).join('');
+      .map(function(t){ return '<button type="button" data-tab="' + t[0] + '" class="' + (TAB === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('');
+    ongletsEl.innerHTML = '<div class="ed-seg ls-onglets">' + ongletsEl.innerHTML + '</div>';
+    // Hors de .onglets : le socle y peint l onglet courant en pastille doree, a l oppose des boutons a choix.
+    ongletsEl.className = 'nl-onglets';
   }
 
   /* « 10 août 2026 » : le site envoie AAAA-MM-JJ (jour LOCAL, pas minuit UTC). */
@@ -278,54 +308,80 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('newsletter')}
       + '</div>';
   }
 
-  /* ══ OFFRE DE BIENVENUE ════════════════════════════════════════════════════ */
+  /* ══ OFFRE DE BIENVENUE ════════════════════════════════════════════════════
+     REFAITE (2026-10-15, lot C de la refonte du marketing) au langage des
+     editeurs : les REGLAGES a gauche, l APERCU VIVANT a droite — le popup tel
+     que la visiteuse le verra, redessine a chaque frappe. Memes identifiants
+     (offer-enabled, offer-title, offer-img, offer-file, offer-sub, offer-cta,
+     offer-discount, offer-legal) : l enregistrement les lit tels quels. */
+  function popHtml(c, vivant){
+    var bg = c.imageUrl ? 'background-image:url(' + esc(c.imageUrl) + ')' : '';
+    return '<div class="pop"' + (vivant ? ' id="nl-pop"' : '') + '>'
+      + (vivant ? '' : '<button class="x" data-act="apclose">×</button>')
+      + '<div class="g" data-ap="img" style="' + bg + '"></div>'
+      + '<div class="d"><div class="titre" data-ap="titre">' + esc(c.title || '') + '</div>'
+      +   '<div class="st" data-ap="st">' + esc(c.subtitle || '') + '</div>'
+      +   '<button class="cta" type="button" tabindex="-1" data-ap="cta">' + esc(c.cta || SZ_DONNEES.offreBoutonDefaut) + '</button>'
+      +   '<div class="lg" data-ap="lg">' + esc(c.legal || '') + '</div></div>'
+      + '</div>';
+  }
   function vueOffer(){
     var c = D.cfg;
-    var stats = D.stats ? szTuiles('<div class="tuiles" style="margin-bottom:.8rem">'
+    var stats = D.stats ? szTuiles('<div class="tuiles">'
       + '<div class="tuile"><div class="k">${T("Codes générés")}</div><div class="v">' + D.stats.total + '</div></div>'
       + '<div class="tuile"><div class="k">${T("Codes utilisés")}</div><div class="v">' + D.stats.used + '</div></div>'
       + '<div class="tuile"><div class="k">${T("En attente")}</div><div class="v' + (D.stats.active ? '" style="color:var(--tx-att)' : '') + '">' + D.stats.active + '</div></div>'
       + '</div>') : '';
-    var img = c.imageUrl ? '<img class="apercu-img" src="' + esc(c.imageUrl) + '" alt="${T("Aperçu")}">' : '';
     var ro = PEUT.edit ? '' : ' readonly';
-    return '<div class="carte">'
-      + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;margin-bottom:1rem">'
-      +   '<div><h2 style="margin:0 0 .2rem">${T("Widget Offre de bienvenue")}</h2><div class="hint" style="margin:0">${T("Bouton ")}<span class="ic">🎁</span>${T(" flottant + popup — suit le visiteur sur tout le site.")}</div></div>'
-      +   '<div style="display:flex;align-items:center;gap:.5rem"><span class="hint" style="margin:0">${T("Actif")}</span>' + bascule('offer-enabled', c.enabled) + '</div>'
-      + '</div>'
-      + (D.done ? '<div class="hint" style="color:#86efac;margin:0 0 .8rem">${T("✓ Un visiteur a déjà soumis ce widget. Utilisez « Réinitialiser » pour re-tester.")}</div>' : '')
-      + stats
-      + '<div class="deux">'
+    return stats
+      + '<div class="nl-ed">'
+      + '<div class="nl-reg">'
+      +   '<div class="nl-reg-t"><div><b>${T("Widget Offre de bienvenue")}</b><span>${T("Bouton ")}<span class="ic">🎁</span>${T(" flottant + popup — suit le visiteur sur tout le site.")}</span></div>'
+      +   '<label class="nl-actif"><span>${T("Actif")}</span>' + bascule('offer-enabled', c.enabled) + '</label></div>'
+      +   (D.done ? '<div class="nl-fait">${T("✓ Un visiteur a déjà soumis ce widget. Utilisez « Réinitialiser » pour re-tester.")}</div>' : '')
       +   '<div class="champ"><label for="offer-title">${T("Titre (saut de ligne = ↵)")}</label><textarea id="offer-title" rows="2"' + ro + '>' + esc(c.title) + '</textarea></div>'
-      +   '<div class="champ"><label>${T("Image côté gauche")}</label>' + img
-      +     (PEUT.edit ? '<label style="display:inline-block;margin-bottom:.4rem"><span class="ghost mini" style="display:inline-block;padding:.16rem .5rem;border:1px solid var(--v16);border-radius:8px"><span class="ic">📁</span> ${T("Choisir une photo")}</span><input type="file" accept="image/*" id="offer-file" style="display:none"></label>' : '')
-      +     '<input id="offer-img" value="' + esc(c.imageUrl) + '" placeholder="${T("https://… ou coller une URL")}"' + ro + '>'
+      +   '<div class="champ"><label for="offer-sub">${T("Sous-titre")}</label><input id="offer-sub" value="' + esc(c.subtitle) + '"' + ro + '></div>'
+      +   '<div class="deux">'
+      +     '<div class="champ"><label for="offer-cta">${T("Texte du bouton")}</label><input id="offer-cta" value="' + esc(c.cta) + '"' + ro + '></div>'
+      +     '<div class="champ"><label for="offer-discount">${T("Valeur de réduction (%)")}</label><input id="offer-discount" type="number" min="1" max="100" value="' + (c.discountValue || 10) + '"' + ro + '></div>'
+      +   '</div>'
+      +   '<div class="hint nl-code">${T("Un code unique WB-XXXXXX par client, valide 1 commande, expire 30 j.")}</div>'
+      +   '<div class="champ"><label for="offer-legal">${T("Mention légale")}</label><input id="offer-legal" value="' + esc(c.legal) + '"' + ro + '></div>'
+      +   '<div class="champ"><label for="offer-img">${T("Image côté gauche")}</label>'
+      +     '<div class="nl-img">' + (PEUT.edit ? '<label class="ed-bt nl-fic"><span class="ic">📁</span> ${T("Choisir une photo")}<input type="file" accept="image/*" id="offer-file" style="display:none"></label>' : '')
+      +     '<input id="offer-img" value="' + esc(c.imageUrl) + '" placeholder="${T("https://… ou coller une URL")}"' + ro + '></div>'
       +     '<div class="hint">${T("700 × 900 px recommandé (portrait). Max 600 Ko.")}</div></div>'
+      +   '<div class="nl-gestes">'
+      +     (PEUT.edit ? '<button class="ed-bt fort" data-act="offersave">${T("Enregistrer")}</button>' : '')
+      +     '<button class="ed-bt" data-act="apercu">${T("Aperçu du popup")}</button>'
+      +     (PEUT.edit ? '<button class="ed-bt nl-reset" data-act="offerreset">${T("↺ Réinitialiser pour re-tester")}</button>' : '')
+      +   '</div>'
       + '</div>'
-      + '<div class="champ"><label for="offer-sub">${T("Sous-titre")}</label><input id="offer-sub" value="' + esc(c.subtitle) + '"' + ro + '></div>'
-      + '<div class="deux">'
-      +   '<div class="champ"><label for="offer-cta">${T("Texte du bouton")}</label><input id="offer-cta" value="' + esc(c.cta) + '"' + ro + '></div>'
-      +   '<div class="champ"><label for="offer-discount">${T("Valeur de réduction (%)")}</label><input id="offer-discount" type="number" min="1" max="100" value="' + (c.discountValue || 10) + '"' + ro + '><div class="hint">${T("Un code unique WB-XXXXXX par client, valide 1 commande, expire 30 j.")}</div></div>'
-      + '</div>'
-      + '<div class="champ"><label for="offer-legal">${T("Mention légale")}</label><input id="offer-legal" value="' + esc(c.legal) + '"' + ro + '></div>'
-      + '<div style="display:flex;gap:.6rem;flex-wrap:wrap">'
-      +   (PEUT.edit ? '<button class="prim" data-act="offersave">${T("Enregistrer")}</button>' : '')
-      +   '<button class="ghost" data-act="apercu">${T("Aperçu du popup")}</button>'
-      +   (PEUT.edit ? '<button class="ghost mini" data-act="offerreset" style="color:var(--tx-or)">${T("↺ Réinitialiser pour re-tester")}</button>' : '')
-      + '</div>'
+      + '<div class="nl-scene"><div class="ed-titre">${T("Aperçu en direct — ce que la visiteuse verra")}</div>'
+      +   '<div class="nl-pop-zone">' + popHtml(c, true) + '</div></div>'
       + '</div>';
   }
+  /* L apercu suit la saisie sans redessiner (on perdrait le curseur). */
+  function brancherApercuOffre(){
+    var pop = document.getElementById('nl-pop'); if (!pop) return;
+    var cle = function(k){ return pop.querySelector('[data-ap="' + k + '"]'); };
+    var lie = function(id, k, fn){
+      var e = document.getElementById(id); if (!e) return;
+      e.addEventListener('input', function(){ fn(cle(k), e.value); });
+    };
+    var texte = function(el, v){ if (el) el.textContent = v; };
+    lie('offer-title', 'titre', texte);
+    lie('offer-sub', 'st', texte);
+    lie('offer-legal', 'lg', texte);
+    lie('offer-cta', 'cta', function(el, v){ texte(el, v || SZ_DONNEES.offreBoutonDefaut); });
+    lie('offer-img', 'img', function(el, v){
+      if (!el) return;
+      var u = String(v || '').trim();
+      el.style.backgroundImage = /^(https?:|data:image)/.test(u) ? 'url("' + u.replace(/"/g, '%22') + '")' : '';
+    });
+  }
   function vueApercu(){
-    var c = D.cfg;
-    var bg = c.imageUrl ? 'background-image:url(' + esc(c.imageUrl) + ')' : '';
-    return '<div class="voile" id="ap-voile"><div class="pop">'
-      + '<button class="x" data-act="apclose">×</button>'
-      + '<div class="g" style="' + bg + '"></div>'
-      + '<div class="d"><div class="titre">' + esc(c.title || '') + '</div>'
-      +   '<div class="st">' + esc(c.subtitle || '') + '</div>'
-      +   '<button class="cta">' + esc(c.cta || SZ_DONNEES.offreBoutonDefaut) + '</button>'
-      +   '<div class="lg">' + esc(c.legal || '') + '</div></div>'
-      + '</div></div>';
+    return '<div class="voile" id="ap-voile">' + popHtml(D.cfg, false) + '</div>';
   }
 
   /* ══ DESSIN ════════════════════════════════════════════════════════════════ */
@@ -338,6 +394,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('newsletter')}
     corps.innerHTML = h;
     var f = document.getElementById('offer-file');
     if (f) f.onchange = function(){ if (f.files && f.files[0]) televerserImage(f.files[0]); };
+    brancherApercuOffre();
   }
 
   /* ══ GESTES ════════════════════════════════════════════════════════════════ */

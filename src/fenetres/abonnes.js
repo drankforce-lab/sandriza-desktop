@@ -95,6 +95,9 @@ tbody tr:hover td{background:var(--v04)}
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* La liste refaite (2026-10-15, lot C) : un rang par abonne. */
+.ab-rang{grid-template-columns:minmax(0,1.8fr) minmax(0,1.1fr) minmax(0,1fr) 15rem}
+.ab-rang.eteint .bico{color:var(--tx2)}
 `;
 
 /** Page complète de la fenêtre native « Abonnés de l'infolettre ». */
@@ -217,56 +220,54 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('abonnes')}
       + tu('all', '${T("Au total")}', (D.abonnes || []).length, '${T("toutes les inscriptions")}')
       + '</div>');
 
-    h += '<div class="carte"><div class="rf-tb">'
+    /* ══ LA LISTE REFAITE (2026-10-15, lot C de la refonte du marketing) ═════
+       Meme langage que Campagnes : une TETE (filtres en boutons a choix — le
+       mot seul, jamais de compte —, recherche, import et ajout a droite), puis
+       un RANG aere par abonne. Crochets gardes : #ab-q, data-filtre, #ab-import,
+       #ab-nouveau, data-basculer, data-suppr. */
+    h = '<div class="ls"><div class="ls-tete"><div class="ed-seg ls-onglets">'
+      + [['all', '${T("Tous")}'], ['actifs', '${T("Actifs")}'], ['retires', '${T("Désabonnés")}']].map(function(f){
+          return '<button type="button" class="' + (FILTRE === f[0] ? 'on' : '') + '" data-filtre="' + f[0] + '">' + f[1] + '</button>';
+        }).join('')
+      + '</div><div class="droite">'
       /* ⚠ L etiquette ENTIERE, pas << Courriel >> + un reste : une cle courte
          posee dans une phrase plus longue laisse l autre moitie en francais. */
-      + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Courriel ou prénom")}" type="search" id="ab-q" placeholder="${T("Courriel ou prénom…")}" value="' + esc(Q) + '"></label>'
-      /* ⚠ << Tous >> et << Actifs >> etaient ecrits en dur : jamais traduits. */
-      + [['all', '${T("Tous")}'], ['actifs', '${T("Actifs")}'], ['retires', '${T("Désabonnés")}']].map(function(f){
-          return '<button class="rf-jet' + (FILTRE === f[0] ? ' on' : '') + '" data-filtre="' + f[0] + '">'
-            + f[1] + '</button>';
-        }).join('')
-      + '<span class="rf-droite">'
-      // Le compte AVANT les boutons, comme dans toutes les autres listes (2026-10-01).
-      + '<span class="dt">' + rows.length + (rows.length > 1 ? '${T(" abonnés")}' : '${T(" abonné")}') + '</span>'
+      + '<label class="ls-rch">${ICO.loupe}<input aria-label="${T("Courriel ou prénom")}" type="search" id="ab-q" placeholder="${T("Courriel ou prénom…")}" value="' + esc(Q) + '"></label>'
       + (D.peutModifier
-          ? '<button class="rf-jet" id="ab-import">${T("Importer")}</button>'
-            + '<button class="prim" id="ab-nouveau" style="height:2.4rem;padding:0 .9rem">${T("+ Ajouter")}</button>' : '')
-      + '</span></div></div>';
+          ? '<button class="ed-bt" id="ab-import">${T("Importer")}</button>'
+            + '<button class="ed-bt fort" id="ab-nouveau">${T("+ Ajouter")}</button>' : '')
+      + '</div></div>' + h;
 
     // La liste en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
-    h += '<div class="carte sz-pagee">';
+    h += '<div class="ls-liste sz-pagee">';
     if (!rows.length) {
-      h += '<div class="vide">' + (Q || FILTRE !== 'all' ? '${T("Rien ne correspond.")}' : '${T("Aucun abonné.")}') + '</div>';
+      h += '<div class="ls-vide">' + (Q || FILTRE !== 'all' ? '${T("Rien ne correspond.")}' : '${T("Aucun abonné.")}') + '</div>';
     } else {
-      h += '<div data-pages="abonnes"><table><thead><tr><th>${T("Abonné")}</th>'
-        + '<th>${T("Inscription")}</th><th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
-        + rows.map(function(a){
-            var gestes = '';
-            if (D.peutModifier) {
-              gestes = '<button class="mini geste" data-basculer="' + esc(a.id) + '" data-actif="'
-                + (a.actif ? '0' : '1') + '">' + (a.actif ? '${T("Désabonner")}' : '${T("Réactiver")}') + '</button> '
-                + '<button class="mini geste danger" data-suppr="' + esc(a.id) + '">'
-                + (SUPPR_ARME === a.id ? '${T("Confirmer ?")}' : '${T("Retirer")}') + '</button>';
-            }
-            var ini = String(a.prenom || a.courriel || '?').trim().charAt(0).toUpperCase();
-            return '<tr><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(ini) + '</span>'
-              + '<div style="min-width:0"><div class="rf-nom">' + esc(a.prenom || a.courriel) + '</div>'
-              + '<div class="rf-sous">' + (a.prenom ? '<span>' + esc(a.courriel) + '</span><span>·</span>' : '')
-              + '<span>' + esc(a.sourceLibelle) + '</span></div></div></div></td>'
-              + '<td class="dt">' + esc(szQuand(a.date)) + '</td>'
-              + '<td><span class="rf-pill ' + (a.actif ? 'vert' : '') + '">'
-              + (a.actif ? '${T("Abonné")}' : '${T("Désabonné")}') + '</span>'
-              + (!a.actif && a.retireLe ? '<div class="dt">${T("le ")}' + esc(szJour(a.retireLe)) + '</div>' : '') + '</td>'
-              + (D.peutModifier ? '<td class="fin">' + gestes + '</td>' : '') + '</tr>';
-          }).join('')
-        + '</tbody></table></div>';
+      h += '<div data-pages="abonnes">' + rows.map(function(a){
+        var gestes = '';
+        if (D.peutModifier) {
+          gestes = '<button class="mini geste" data-basculer="' + esc(a.id) + '" data-actif="'
+            + (a.actif ? '0' : '1') + '">' + (a.actif ? '${T("Désabonner")}' : '${T("Réactiver")}') + '</button>'
+            + '<button class="mini geste danger' + (SUPPR_ARME === a.id ? ' arme' : '') + '" data-suppr="' + esc(a.id) + '">'
+            + (SUPPR_ARME === a.id ? '${T("Confirmer ?")}' : '${T("Retirer")}') + '</button>';
+        }
+        var ini = String(a.prenom || a.courriel || '?').trim().charAt(0).toUpperCase();
+        return '<div data-ctx-ligne class="ls-rang ab-rang' + (a.actif ? '' : ' eteint') + '">'
+          + '<div class="qui"><span class="bico" aria-hidden="true">' + esc(ini) + '</span>'
+          + '<div class="tx"><b>' + esc(a.prenom || a.courriel) + '</b><span>' + (a.prenom ? esc(a.courriel) : '${T("sans prénom")}') + '</span></div></div>'
+          + '<div class="ou"><b>' + esc(a.sourceLibelle) + '</b><span>' + esc(szQuand(a.date)) + '</span></div>'
+          + '<div class="etat"><span class="rf-pill ' + (a.actif ? 'vert' : '') + '">'
+          + (a.actif ? '${T("Abonné")}' : '${T("Désabonné")}') + '</span>'
+          + (!a.actif && a.retireLe ? '<span>${T("le ")}' + esc(szJour(a.retireLe)) + '</span>' : '') + '</div>'
+          + '<div class="gestes">' + gestes + '</div></div>';
+      }).join('') + '</div>';
     }
-    h += '</div>';
+    h += '</div></div>';
 
     if (BOITE === 'ajout') h += boiteAjout();
     else if (BOITE === 'import') h += boiteImport();
 
+    corps.classList.add('ls-corps');
     corps.innerHTML = h;
     brancher();
   }
