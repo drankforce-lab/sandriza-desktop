@@ -556,4 +556,18 @@ module.exports = {
   'pièces': 'pieces',
   'À': 'To',
   '← Campagnes': '← Campaigns',
+  // 2026-10-15 : l editeur de chaine refait (ligne du temps | apercu | reglages de l etape).
+  '(sans sujet)': '(no subject)',
+  'Articles du panier': 'Cart items',
+  'Immédiatement': 'Immediately',
+  'Les étapes partent d’elles-mêmes selon leur délai — rien ne part à l’enregistrement.': 'Steps go out on their own after their delay — nothing is sent when you save.',
+  'Lien du panier': 'Cart link',
+  'Nombre d’articles': 'Number of items',
+  'Premier produit': 'First product',
+  'Retirer cette étape': 'Remove this step',
+  'Total du panier': 'Cart total',
+  'Trois courriels après l’inscription': 'Three emails after sign-up',
+  'h': 'h',
+  'j': 'd',
+  '← Chaînes': '← Sequences',
 };

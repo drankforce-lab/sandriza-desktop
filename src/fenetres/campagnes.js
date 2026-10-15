@@ -238,11 +238,13 @@ tbody tr:hover td{background:var(--v04)}
    REGLAGES du bloc a droite. Une bande pour l objet, les destinataires et le canal ; l IA dans un
    panneau qu on ouvre. Tout en variables du socle : chaque jeu de couleurs, jour comme nuit. */
 .corps.formulaire.ed-corps{padding:0;gap:0}
-.ed{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;position:relative}
+.ed{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;position:relative;padding-bottom:.9rem}
 .ed-tete{flex:0 0 auto;display:flex;align-items:center;gap:.9rem;padding:1rem 1.6rem .8rem}
 .ed-tete .retour{background:none;border:none;color:var(--tx2);font-size:.84rem;padding:.2rem 0}
 .ed-tete .retour:hover:not(:disabled){background:none;color:var(--tx)}
-.ed-tete .sep{color:var(--tx2);opacity:.5}
+/* ⚠ Pas d opacite sur un texte (meme un « / ») : le juge des contrastes la mesure composee, et l a
+   refusee a 2.65 (2026-10-15). --tx2 tel quel est mesure. */
+.ed-tete .sep{color:var(--tx2)}
 .ed-tete .nom{flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:.7rem}
 .ed-tete .nom input{flex:1 1 auto;min-width:8rem;max-width:34rem;background:transparent;border:1px solid transparent;
   font-size:1.3rem;font-weight:650;padding:.2rem .4rem;border-radius:9px}
@@ -354,6 +356,19 @@ tbody tr:hover td{background:var(--v04)}
 .ed-ia .ed-ia-x{position:absolute;top:.9rem;right:.9rem;width:2rem;height:2rem;padding:0;border-radius:8px;background:transparent}
 .ed-ia .iatt{padding-right:2.6rem}
 .ed-col.gauche{overflow:visible}
+/* L editeur de chaine (meme langage) : la bande a trois champs, la ligne du temps, les reglages de l etape. */
+.ed-bande-ch{grid-template-columns:minmax(12rem,17rem) minmax(0,1fr) minmax(9rem,12rem)}
+.ed-liste{flex:1 1 0;min-height:0;display:flex;flex-direction:column;gap:.45rem}
+.ed-liste>*{flex:0 0 auto}
+.ed-liste>[data-pages]{flex:1 1 0;min-height:0}
+.ed-insp .duo{display:flex;gap:.5rem;align-items:center}
+.ed-insp .duo input[type=number]{width:5rem;flex:0 0 auto}
+.ed-insp .duo select{flex:1 1 auto;min-width:0}
+.ed-insp .duo span{font-size:.8rem;color:var(--tx2)}
+.ed-insp>.ch{margin-bottom:0}
+.ed-insp .ed-infos button{height:1.6rem;padding:0 .55rem;font-size:.74rem}
+.ed-insp .corps-et{flex:1 1 0;min-height:0;display:flex;flex-direction:column}
+.ed-insp .corps-et textarea{flex:1 1 auto;min-height:7rem;font-family:Consolas,"Courier New",monospace;font-size:.8rem}
 .etapes-choix{display:flex;gap:.35rem;flex-wrap:wrap;margin:0 0 .6rem}
 .etapes-choix button{font:inherit;font-size:.78rem;font-weight:600;padding:.32rem .75rem;border-radius:99px;
   border:1px solid var(--v12);background:var(--v05);color:var(--tx2);cursor:pointer}
@@ -1093,6 +1108,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     '{{discountPercent}}', '{{expiryDate}}', '{{collectionName}}'];
   var VARS_CHAINE = ['{{firstName}}', '{{panier}}', '{{panierTotal}}', '{{panierNb}}',
     '{{premierProduit}}', '{{lienPanier}}', '{{lienBoutique}}'];
+  // (2026-10-15) Les memes, par leur nom lisible — celles du panier ne valent qu en « Panier abandonne ».
+  var VAR_NOMS_CH = [['{{firstName}}', '${T("Prénom")}'], ['{{lienBoutique}}', '${T("Lien boutique")}'],
+    ['{{panier}}', '${T("Articles du panier")}'], ['{{panierTotal}}', '${T("Total du panier")}'],
+    ['{{panierNb}}', '${T("Nombre d’articles")}'], ['{{premierProduit}}', '${T("Premier produit")}'],
+    ['{{lienPanier}}', '${T("Lien du panier")}']];
 
   function ligneVars(liste, note){
     return '<div class="vars">${T("Variables :")} '
@@ -1174,40 +1194,86 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     return h;
   }
 
+  /* ⚠ L EDITEUR DE CHAINE, REFAIT COMME CELUI DES CAMPAGNES (2026-10-15, « le meme genre de refonte
+     a chacun des modules ») : le nom en tete, une bande declencheur / description / statut, puis la LIGNE
+     DU TEMPS des etapes a gauche (chacune dit QUAND elle part), l APERCU du courriel de l etape choisie
+     au centre, et ses reglages a droite. Memes identifiants qu avant (f-nom, f-decl, f-desc, f-statut,
+     e-j-i, e-h-i, e-s-i, e-t-i, e-b-i) : brouillon, releve et enregistrement inchanges. */
   function vueFormChaine(){
     var f = FORM, d = f.d, ch = d.chaine || {};
-    var h = '<div class="carte form">'
-      + '<h3 style="margin:0 0 .6rem;font:700 .92rem/1.3 system-ui,sans-serif">'
-      + (f.id ? '${T("Modifier la chaîne")}' : '${T("Nouvelle chaîne")}') + '</h3>'
-      // Deux colonnes (2026-10-12) : la chaine a gauche, ses etapes a droite.
-      + '<div class="fcols"><div class="fcol">'
-      + '<div class="rang">'
-      + '<div class="champ"><span class="lbl">${T("Nom")}</span>'
-      + '<input id="f-nom" aria-label="${T("Nom de la chaîne")}" value="' + esc(ch.nom || '') + '" placeholder="${T("Bienvenue en trois temps")}"></div>'
-      + '<div class="champ"><span class="lbl">${T("Déclencheur")}</span><select id="f-decl" aria-label="${T("Déclencheur")}">'
+    var h = '<div class="ed" id="f-ed">'
+      + '<div class="ed-tete">'
+      + '<button type="button" class="retour" id="f-annuler">${T("← Chaînes")}</button><span class="sep">/</span>'
+      + '<div class="nom"><input id="f-nom" aria-label="${T("Nom de la chaîne")}" value="' + esc(ch.nom || '')
+      + '" placeholder="${T("Bienvenue en trois temps")}"></div>'
+      + '<button type="button" class="ed-bt fort" id="f-ok">${T("Enregistrer")}</button>'
+      + '</div>'
+      + '<div class="ed-bande ed-bande-ch">'
+      + '<label for="f-decl"><span>${T("Déclencheur")}</span><select id="f-decl">'
       + (d.declencheurs || []).map(function(x){
           return '<option value="' + esc(x.cle) + '"'
             + ((ch.declencheur || 'subscribe') === x.cle ? ' selected' : '') + '>'
-            + esc(x.nom) + '</option>'; }).join('') + '</select></div></div>'
-      + '<div class="rang">'
-      + '<div class="champ"><span class="lbl">${T("Description")}</span>'
-      + '<input id="f-desc" aria-label="${T("Description")}" value="' + esc(ch.description || '') + '"></div>'
-      + '<div class="champ"><span class="lbl">${T("Statut")}</span><select id="f-statut" aria-label="${T("Statut")}">'
+            + esc(x.nom) + '</option>'; }).join('') + '</select></label>'
+      + '<label for="f-desc"><span>${T("Description")}</span><input id="f-desc" value="' + esc(ch.description || '')
+      + '" placeholder="${T("Trois courriels après l’inscription")}"></label>'
+      + '<label for="f-statut"><span>${T("Statut")}</span><select id="f-statut">'
       + '<option value="active"' + (ch.statut !== 'paused' ? ' selected' : '') + '>${T("Active")}</option>'
       + '<option value="paused"' + (ch.statut === 'paused' ? ' selected' : '') + '>${T("Suspendue")}</option>'
-      + '</select></div></div>'
-      + ligneVars(VARS_CHAINE, '${T("Les variables de panier ne se remplissent que dans une chaîne")} '
-          + '${T("dont le déclencheur est <strong>Panier abandonné</strong>. Ailleurs, elles ressortent vides.")}')
-      + '</div><div class="fcol">'
-      + '<div class="barreoutils" style="margin:0 0 .4rem">'
-      + '<strong style="font-size:.8rem">${T("Étapes")}</strong>'
-      + '<button class="mini" id="f-etape-plus">${T("+ Ajouter une étape")}</button></div>'
-      + '<div id="f-etapes">' + vueEtapes() + '</div>'
-      + apercuBloc()
-      + '</div></div>'
-      + '<div class="fin3"><button id="f-annuler">${T("Annuler")}</button>'
-      + '<button class="prim" id="f-ok">${T("Enregistrer")}</button></div></div>';
+      + '</select></label>'
+      + '</div>'
+      + '<div class="ed-cols">'
+      + '<div class="ed-col"><div id="f-etapes-liste" class="ed-liste">' + vueEtapesListe() + '</div></div>'
+      + '<div class="ed-col">'
+      + '<div class="ed-titre"><span id="f-et-titre">' + esc(titreEtape()) + '</span></div>'
+      + '<div class="ed-scene"><iframe id="f-et-vivant" sandbox="" title="${T("Aperçu du courriel")}"></iframe></div>'
+      + '<div class="ed-note">${T("Les étapes partent d’elles-mêmes selon leur délai — rien ne part à l’enregistrement.")}</div>'
+      + '</div>'
+      + '<div class="ed-col"><div class="ed-insp" id="f-etapes">' + vueEtapes() + '</div></div>'
+      + '</div>'
+      + '</div>';
     return h;
+  }
+
+  /* LA LIGNE DU TEMPS : chaque etape dit QUAND elle part, en mots (« Immediatement », « 3 j apres »). */
+  function delaiEtape(s){
+    var j = parseInt(s.jours, 10) || 0, hh = parseInt(s.heures, 10) || 0;
+    if (!j && !hh) return '${T("Immédiatement")}';
+    return '+ ' + (j ? j + ' ${T("j")}' : '') + (j && hh ? ' ' : '') + (hh ? hh + ' ${T("h")}' : '');
+  }
+  function titreEtape(){
+    var et = ETAPES || [];
+    if (!et.length) return '${T("Aperçu")}';
+    var i = Math.min(Math.max(ESEL, 0), et.length - 1);
+    return '${T("Étape")} ' + (i + 1) + ' · ' + delaiEtape(et[i]);
+  }
+  function vueEtapesListe(){
+    var et = ETAPES || [];
+    var h = '<div class="ed-titre"><span>${T("Étapes")}</span><span>' + et.length + '</span></div>';
+    if (!et.length) h += '<div class="bvide">${T("Aucune étape : cette chaîne n’enverrait rien.")}</div>';
+    else h += '<div data-pages="campagnes-etapes">' + et.map(function(s, i){
+      return '<button type="button" class="brang' + (i === ESEL ? ' on' : '') + '" data-etsel="' + i + '">'
+        + '<span class="bico">' + (i + 1) + '</span>'
+        + '<span class="btx"><b>' + esc(s.sujet || '${T("(sans sujet)")}') + '</b><span>' + esc(delaiEtape(s)) + '</span></span></button>';
+    }).join('') + '</div>';
+    return h + '<button type="button" class="ed-ajout" id="f-etape-plus">${T("+ Ajouter une étape")}</button>';
+  }
+
+  /* L apercu de l etape choisie : son HTML dans l enveloppe du courriel (nl:apercu), rafraichi pendant
+     qu on l ecrit. Bac a sable vide : rien ne s y execute. */
+  var ETTIMER = null, ETVER = 0;
+  function etApercuPlusTard(){ clearTimeout(ETTIMER); ETTIMER = setTimeout(etApercu, 450); }
+  function etApercu(){
+    var fr = document.getElementById('f-et-vivant');
+    if (!fr) return;
+    var b = document.getElementById('e-b-' + ESEL);
+    var htm = b ? b.value : (((ETAPES || [])[ESEL] || {}).html || '');
+    var v = ++ETVER;
+    appeler('nl:apercu', [htm]).then(function(r){
+      if (v !== ETVER || !r || !r.ok) return;
+      fr.setAttribute('srcdoc', r.html);
+    });
+    var t = document.getElementById('f-et-titre');
+    if (t) t.textContent = titreEtape();
   }
 
   /* L apercu du courriel, pose par-dessus la colonne de droite : il se ferme par son
@@ -1226,22 +1292,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
         + '${T("Cliquez « + Ajouter une étape ».")}</div>';
     }
     var mods = (FORM && FORM.d && FORM.d.modeles) || [];
-    /* ⚠ UNE ETAPE A LA FOIS (sa demande : aucune barre de defilement) — une rangee
-       de pastilles choisit celle qu on edite ; les autres restent dans ETAPES. */
+    /* ⚠ UNE ETAPE A LA FOIS (sa demande : aucune barre de defilement) — la ligne du temps a gauche
+       choisit celle qu on edite ; les autres restent dans ETAPES. */
     if (ESEL >= et.length) ESEL = et.length - 1;
     if (ESEL < 0) ESEL = 0;
-    // Les pastilles en PAGES mesurees (deux rangees au plus) : la selectionnee reste en vue.
-    var chips = '<div class="etapes-choix" data-pages="campagnes-etapes">' + et.map(function(s, i){
-      return '<button type="button" data-etsel="' + i + '" class="' + (i === ESEL ? 'on' : '') + '">${T("Étape")} ' + (i + 1)
-        + (s.sujet ? ' · ' + esc(String(s.sujet).slice(0, 22)) : '') + '</button>'; }).join('') + '</div>';
-    return chips + et.map(function(s, i){
+    return et.map(function(s, i){
       if (i !== ESEL) return '';
-      return '<div class="etapef"><div class="tete2"><strong>${T("Étape")} ' + (i + 1) + '</strong>'
-        + '<div class="gestes">'
-        + (i > 0 ? '<button class="mini" data-mont="' + i + '" title="${T("Monter")}">↑</button>' : '')
-        + (i < et.length - 1 ? '<button class="mini" data-desc="' + i + '" title="${T("Descendre")}">↓</button>' : '')
-        + '<button class="mini danger" data-etsup="' + i + '">${T("Retirer")}</button></div></div>'
-        + '<div class="rang"><div class="champ"><span class="lbl">${T("Délai depuis le déclenchement")}</span>'
+      return '<div class="it"><span class="bico">' + (i + 1) + '</span><b>${T("Étape")} ' + (i + 1) + '</b><span class="gestes">'
+        + '<button type="button" data-mont="' + i + '"' + (i > 0 ? '' : ' disabled') + ' aria-label="${T("Monter")}" title="${T("Monter")}">↑</button>'
+        + '<button type="button" data-desc="' + i + '"' + (i < et.length - 1 ? '' : ' disabled') + ' aria-label="${T("Descendre")}" title="${T("Descendre")}">↓</button>'
+        + '</span></div>'
+        + '<div class="ch"><span class="lbl">${T("Délai depuis le déclenchement")}</span>'
         /* ⚠ DEUX CHAMPS POUR UN SEUL LIBELLE (<< Delai depuis le declenchement >>)
          et les mots << jours >> / << heures >> ne sont que du texte entre eux :
          en tabulant, le lecteur d ecran annoncait deux fois << nombre >>. */
@@ -1254,14 +1315,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
         + ' aria-label="${T("Délai — heures")}"'
         + ' value="'
         + (s.heures || 0) + '"><span>${T("heures")}</span></div></div>'
-        + '<div class="champ"><span class="lbl">${T("Sujet")}</span>'
-        + '<input aria-label="${T("Sujet")}" id="e-s-' + i + '" value="' + esc(s.sujet || '') + '"></div></div>'
-        + '<div class="champ"><span class="lbl">${T("Corps du courriel (HTML)")}</span>'
-        + '<div class="duo" style="margin-bottom:.3rem">' + choixModeles('e-t-' + i, mods)
-        + '<button class="mini" data-etcharger="' + i + '">${T("Charger")}</button>'
-        + '<button class="mini" data-etapercu="' + i + '">${T("Aperçu")}</button></div>'
+        + '<div class="ch"><span class="lbl">${T("Sujet")}</span>'
+        + '<input aria-label="${T("Sujet")}" id="e-s-' + i + '" value="' + esc(s.sujet || '') + '"></div>'
+        + '<div class="ch"><span class="lbl">${T("Partir d’un modèle")}</span>'
+        + '<div class="duo">' + choixModeles('e-t-' + i, mods)
+        + '<button type="button" data-etcharger="' + i + '">${T("Charger")}</button></div></div>'
+        + '<div class="ch corps-et"><span class="lbl">${T("Corps du courriel (HTML)")}</span>'
         + '<textarea id="e-b-' + i + '" aria-label="${T("Corps du courriel de l’étape ")}' + (i + 1) + '" spellcheck="false">' + esc(s.html || '') + '</textarea></div>'
-        + '</div>';
+        // Les variables par leur NOM ; celles du panier ne valent que pour « Panier abandonne ».
+        + '<div class="ch"><span class="lbl">${T("Insérer une information")}</span><div class="ed-infos">'
+        + VAR_NOMS_CH.map(function(x){ return '<button type="button" data-etvar="' + esc(x[0]) + '" title="' + esc(x[0]) + '">' + esc(x[1]) + '</button>'; }).join('')
+        + '</div></div>'
+        + '<button type="button" class="ed-retirer" data-etsup="' + i + '">${T("Retirer cette étape")}</button>';
     }).join('');
   }
 
@@ -1293,7 +1358,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     var z = document.getElementById('f-etapes');
     if (!z) return;
     z.innerHTML = vueEtapes();
-    montrerNouveau(z.querySelector('.etapes-choix .on'));
+    // (2026-10-15) La ligne du temps a gauche et l apercu au centre suivent.
+    var l = document.getElementById('f-etapes-liste');
+    if (l) l.innerHTML = vueEtapesListe();
+    montrerNouveau(document.querySelector('#f-etapes-liste .brang.on'));
+    etApercuPlusTard();
   }
 
   /* Le catalogue des blocs, demande UNE fois. ⚠ S il n arrive pas, la palette
@@ -1652,13 +1721,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       return;
     }
 
-    var plus = document.getElementById('f-etape-plus');
-    if (plus) plus.onclick = function(){
-      releverEtapes();
-      ETAPES.push({ sujet: '', html: '', jours: ETAPES.length === 0 ? 0 : 3, heures: 0 });
-      ESEL = ETAPES.length - 1;
-      poserEtapes();
-    };
+    /* (2026-10-15) « + Ajouter une etape » vit dans la ligne du temps, redessinee a chaque geste : son clic
+       passe par la delegation commune (plus bas). Ici, la saisie : la ligne du temps et l apercu suivent. */
+    if (!document.__szEtapesSaisie) {
+      document.__szEtapesSaisie = true;
+      document.addEventListener('input', function(e){
+        if (!FORM || FORM.type !== 'chaine' || !e.target || !e.target.id) return;
+        if (!/^e-[sjhb]-\\d+$/.test(e.target.id)) return;
+        releverEtapes();
+        var l = document.getElementById('f-etapes-liste');
+        if (l && !/^e-b-/.test(e.target.id)) { l.innerHTML = vueEtapesListe(); montrerNouveau(document.querySelector('#f-etapes-liste .brang.on')); }
+        if (/^e-b-/.test(e.target.id) || /^e-[jh]-/.test(e.target.id)) etApercuPlusTard();
+      });
+      document.addEventListener('focusin', function(e){
+        if (e.target && /^e-[sb]-\\d+$/.test(e.target.id || '')) DERNIER = e.target;
+      });
+    }
   }
 
   /* ══ ONGLET SEGMENTS ══════════════════════════════════════════════════════
@@ -2032,12 +2110,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       if (sous) sous.textContent = '';
       corps.classList.add('formulaire');
       // L editeur de campagne refait (2026-10-15) occupe tout le corps, sans la marge des listes.
-      corps.classList.toggle('ed-corps', FORM.type === 'campagne');
+      corps.classList.toggle('ed-corps', FORM.type === 'campagne' || FORM.type === 'chaine');
       corps.innerHTML = (FORM.type === 'chaine') ? vueFormChaine()
         : (FORM.type === 'segment') ? vueFormSegment() : vueFormCampagne();
       brancherForm();
       // La page de l etape choisie (les pages survivent au redessin, la selection aussi).
-      if (FORM.type === 'chaine') montrerNouveau(corps.querySelector('.etapes-choix .on'));
+      if (FORM.type === 'chaine') { montrerNouveau(corps.querySelector('#f-etapes-liste .brang.on')); etApercuPlusTard(); }
       return;
     }
     // La mention suit l ONGLET affiche : dire << consultation seulement >> en
@@ -2134,6 +2212,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
         redessinerCriteres(kc);
         return;
       }
+      if (t.closest('#f-etape-plus')) {
+        releverEtapes();
+        ETAPES.push({ sujet: '', html: '', jours: ETAPES.length === 0 ? 0 : 3, heures: 0 });
+        ESEL = ETAPES.length - 1;
+        poserEtapes();
+        return;
+      }
+      // « Inserer une information » dans une etape : au curseur du dernier champ touche (corps par defaut).
+      var etv = t.closest('[data-etvar]');
+      if (etv) {
+        var cib = (DERNIER && document.body.contains(DERNIER) && /^e-[sb]-/.test(DERNIER.id)) ? DERNIER : document.getElementById('e-b-' + ESEL);
+        if (cib) {
+          var xv = etv.getAttribute('data-etvar');
+          var p0 = (typeof cib.selectionStart === 'number') ? cib.selectionStart : cib.value.length;
+          var p1 = (typeof cib.selectionEnd === 'number') ? cib.selectionEnd : p0;
+          cib.value = cib.value.slice(0, p0) + xv + cib.value.slice(p1);
+          cib.focus();
+          try { cib.setSelectionRange(p0 + xv.length, p0 + xv.length); } catch (e2) {}
+          cib.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        return;
+      }
       var esl = t.closest('[data-etsel]');
       if (esl) {
         releverEtapes();
@@ -2171,6 +2271,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
           if (b2) b2.value = r.html;
           var s2 = document.getElementById('e-s-' + ic);
           if (s2 && !s2.value.trim()) s2.value = r.sujet;
+          // La ligne du temps (sujet) et l apercu suivent le modele charge.
+          if (s2) s2.dispatchEvent(new Event('input', { bubbles: true }));
+          etApercuPlusTard();
           dire('${T("Modèle «")} ' + esc(r.nom) + ' ${T("» chargé dans l’étape")} ' + (parseInt(ic, 10) + 1) + '.', 'bon');
         });
         return;
