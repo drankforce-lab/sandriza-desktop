@@ -368,6 +368,22 @@ tbody tr:hover td{background:var(--v04)}
 .ed-insp>.ch{margin-bottom:0}
 .ed-insp .ed-infos button{height:1.6rem;padding:0 .55rem;font-size:.74rem}
 .ed-insp .corps-et{flex:1 1 0;min-height:0;display:flex;flex-direction:column}
+/* Le constructeur de segment : les criteres (phrases) a gauche, la portee en grand a droite. */
+.seg-cols{grid-template-columns:minmax(0,1fr) 22rem}
+.seg-crit{flex:1 1 0;min-height:0}
+.seg-crit .critere{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;padding:.75rem .9rem;margin-bottom:.55rem;
+  border-radius:12px;background:var(--f-carte);border:1px solid var(--sz-bord)}
+.seg-crit .critere .lien{flex:0 0 2.2rem;font-size:.8rem;font-weight:700;color:var(--tx-or)}
+.seg-crit .critere select,.seg-crit .critere input{height:2.3rem;border-radius:9px;background:var(--f-champ)}
+.seg-crit .critere button{margin-left:auto;width:2rem;height:2rem;padding:0;border-radius:8px}
+.seg-portee .lbl{font-size:.78rem;color:var(--tx2)}
+.seg-portee .gros{display:flex;flex-direction:column;gap:.2rem}
+.seg-portee .gros strong{font-size:3rem;line-height:1;font-weight:750;color:var(--tx)}
+.seg-portee .gros span{font-size:.84rem;color:var(--tx2)}
+.seg-portee .barre{height:.55rem;border-radius:99px;background:var(--f-champ);overflow:hidden}
+.seg-portee .barre i{display:block;height:100%;border-radius:99px;background:var(--sz-accent);transition:width .3s}
+.seg-portee .aide{font-size:.8rem;line-height:1.55;color:var(--tx2);margin:0}
+.seg-portee #f-compter{margin-top:auto;height:2.4rem;border-radius:10px}
 .ed-insp .corps-et textarea{flex:1 1 auto;min-height:7rem;font-family:Consolas,"Courier New",monospace;font-size:.8rem}
 .etapes-choix{display:flex;gap:.35rem;flex-wrap:wrap;margin:0 0 .6rem}
 .etapes-choix button{font:inherit;font-size:.78rem;font-weight:600;padding:.32rem .75rem;border-radius:99px;
@@ -1592,6 +1608,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       };
       var bc = document.getElementById('f-compter');
       if (bc) bc.onclick = compterPortee;
+      // (2026-10-15) Un operateur ou une valeur qui change : la portee se recompte d elle-meme.
+      var zc = document.getElementById('f-criteres');
+      if (zc) { zc.oninput = function(){ releverCriteres(); porteePlusTard(); }; zc.onchange = zc.oninput; }
+      porteePlusTard();
       return;
     }
 
@@ -1796,24 +1816,34 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     return h + renvoi();
   }
 
+  /* ⚠ LE CONSTRUCTEUR DE SEGMENT, REFAIT (2026-10-15, meme langage que les editeurs) : les CRITERES a
+     gauche, chacun lu comme une phrase (« Si… », « et… ») ; a droite la PORTEE en grand, recomptee
+     d elle-meme a chaque changement (avant : un bouton « Compter » au bas d une page vide). Memes
+     identifiants (f-nom, c-c-i, c-o-i, c-v-i, f-crit-plus, f-compter, f-portee-n). */
   function vueFormSegment(){
     var f = FORM, d = f.d;
-    return '<div class="carte form">'
-      + '<h3 style="margin:0 0 .6rem;font:700 .92rem/1.3 system-ui,sans-serif">'
-      + (f.id ? '${T("Modifier le segment")}' : '${T("Nouveau segment")}') + '</h3>'
-      + '<div class="champ"><span class="lbl">${T("Nom du segment")}</span>'
-      + '<input id="f-nom" aria-label="${T("Nom du segment")}" value="' + esc(f.nom || '') + '" placeholder="${T("Clients robes, 300 $ et plus")}"></div>'
-      + '<div class="barreoutils" style="margin:.5rem 0 .4rem">'
-      + '<strong style="font-size:.8rem">${T("Critères")}</strong>'
-      + '<span class="dt">${T("toutes ces conditions doivent être remplies")}</span>'
-      + '<button class="mini" id="f-crit-plus">${T("+ Ajouter un critère")}</button></div>'
+    return '<div class="ed" id="f-ed">'
+      + '<div class="ed-tete">'
+      + '<button type="button" class="retour" id="f-annuler">${T("← Segments")}</button><span class="sep">/</span>'
+      + '<div class="nom"><input id="f-nom" aria-label="${T("Nom du segment")}" value="' + esc(f.nom || '')
+      + '" placeholder="${T("Clients robes, 300 $ et plus")}"></div>'
+      + '<button type="button" class="ed-bt fort" id="f-ok">${T("Enregistrer")}</button>'
+      + '</div>'
+      + '<div class="ed-cols seg-cols">'
+      + '<div class="ed-col">'
+      + '<div class="ed-titre"><span>${T("Critères")}</span><span>${T("toutes ces conditions doivent être remplies")}</span></div>'
       // Les criteres en PAGES mesurees : un critere = un element de page.
-      + '<div id="f-criteres" data-pages="campagnes-criteres">' + vueCriteres() + '</div>'
-      + '<div class="portee" id="f-portee">${T("Portée : ")}<strong id="f-portee-n">—</strong> '
-      + 'sur ' + (d.abonnesActifs || 0) + ' ${T("abonnées actives")} '
-      + '<button class="mini" id="f-compter">${T("Compter")}</button></div>'
-      + '<div class="fin3"><button id="f-annuler">${T("Annuler")}</button>'
-      + '<button class="prim" id="f-ok">${T("Enregistrer")}</button></div></div>';
+      + '<div id="f-criteres" class="seg-crit" data-pages="campagnes-criteres">' + vueCriteres() + '</div>'
+      + '<button type="button" class="ed-ajout" id="f-crit-plus">${T("+ Ajouter un critère")}</button>'
+      + '</div>'
+      + '<div class="ed-col"><div class="ed-insp seg-portee" id="f-portee">'
+      + '<span class="lbl">${T("Portée de ce segment")}</span>'
+      + '<div class="gros"><strong id="f-portee-n">—</strong><span>${T("sur")} ' + (d.abonnesActifs || 0) + ' ${T("abonnées actives")}</span></div>'
+      + '<div class="barre"><i id="f-portee-barre" style="width:0%"></i></div>'
+      + '<p class="aide">${T("Un segment ne fait que restreindre la liste des abonnées actives : il n’ajoute jamais personne.")}</p>'
+      + '<button type="button" id="f-compter">${T("Recompter")}</button>'
+      + '</div></div>'
+      + '</div></div>';
   }
 
   function champDef(cle){
@@ -1856,7 +1886,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     var champs = (FORM.d && FORM.d.champs) || [];
     return cr.map(function(c, i){
       var def = champDef(c.champ) || { ops: [] };
-      return '<div class="critere">'
+      return '<div class="critere"><span class="lien">' + (i === 0 ? '${T("Si")}' : '${T("et")}') + '</span>'
         + '<select id="c-c-' + i + '" data-critchamp="' + i + '"'
           + ' aria-label="${T("Critère")} ' + (i + 1) + ' — champ">'
         + champs.map(function(x){
@@ -1890,7 +1920,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     if (z && typeof voir === 'number') montrerNouveau(z.querySelectorAll('.critere')[Math.min(voir, (CRITERES || []).length - 1)]);
     var p = document.getElementById('f-portee-n');
     if (p) p.textContent = '—';   // la portee affichee ne vaut plus rien
+    porteePlusTard();
   }
+  // La portee se recompte d elle-meme, un instant apres le dernier changement (2026-10-15).
+  var PTIMER = null;
+  function porteePlusTard(){ clearTimeout(PTIMER); PTIMER = setTimeout(function(){ if (FORM && FORM.type === 'segment' && (CRITERES || []).length) compterPortee(); }, 600); }
 
   function compterPortee(){
     releverCriteres();
@@ -1899,6 +1933,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     appeler('segments:apercu', [CRITERES || []]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); if (p) p.textContent = '—'; return; }
       if (p) p.textContent = String(r.compte);
+      // La barre de proportion (2026-10-15) : la part des abonnees actives que le segment atteint.
+      var br = document.getElementById('f-portee-barre');
+      if (br) br.style.width = (r.total ? Math.round(100 * r.compte / r.total) : 0) + '%';
       dire(r.compte === 0
         ? '${T("Aucune abonnée ne correspond : ce segment n’enverrait rien.")}'
         : pluriel(r.compte, '${T("abonnée")}', '${T("abonnées")}') + ' sur ' + r.total + '.', r.compte === 0 ? 'att' : 'bon');
@@ -2110,7 +2147,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       if (sous) sous.textContent = '';
       corps.classList.add('formulaire');
       // L editeur de campagne refait (2026-10-15) occupe tout le corps, sans la marge des listes.
-      corps.classList.toggle('ed-corps', FORM.type === 'campagne' || FORM.type === 'chaine');
+      corps.classList.toggle('ed-corps', FORM.type === 'campagne' || FORM.type === 'chaine' || FORM.type === 'segment');
       corps.innerHTML = (FORM.type === 'chaine') ? vueFormChaine()
         : (FORM.type === 'segment') ? vueFormSegment() : vueFormCampagne();
       brancherForm();

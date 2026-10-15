@@ -570,4 +570,11 @@ module.exports = {
   'h': 'h',
   'j': 'd',
   '← Chaînes': '← Sequences',
+  // 2026-10-15 : le constructeur de segment refait (criteres en phrases, portee en grand).
+  'Portée de ce segment': 'Reach of this segment',
+  'Recompter': 'Recount',
+  'Si': 'If',
+  'Un segment ne fait que restreindre la liste des abonnées actives : il n’ajoute jamais personne.': 'A segment only narrows the list of active subscribers: it never adds anyone.',
+  'et': 'and',
+  '← Segments': '← Segments',
 };
