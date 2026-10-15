@@ -297,4 +297,7 @@ module.exports = {
   "page": "page",
   /* Le clic droit du socle (2026-10-13). */
   'Ouvrir': 'Open',
+  // 2026-10-15 : la boite de confirmation commune (szConfirmer).
+  'Confirmer l’action': 'Confirm the action',
+  'Continuer': 'Continue',
 };

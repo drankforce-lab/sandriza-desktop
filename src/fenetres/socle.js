@@ -2013,9 +2013,65 @@ html.jour .sz-ctxg button.dgr{color:#b91c1c}
 .sz-ctxg .trait{height:1px;background:var(--sz-bord,var(--v08));margin:.25rem .3rem}
 `;
 
+const JS_CONFIRMER = () => `
+/* ══ JS_CONFIRMER — TOUTE CONFIRMATION EST UNE BOITE A PART (2026-10-15) ══════════
+   Sa regle, capture a l appui (« Envoyer » qui devenait « Confirmer l envoi ? ») :
+   « les confirmations devraient toujours etre une fenetre a part et ce pour toute
+   l administration et non un bouton qui change », puis « les messages de
+   confirmation doivent etre faits de maniere professionnelle ».
+   ⚠ DESSINEE PAR LA PAGE, PAS PAR WINDOWS : dialog.showMessageBox a ete refuse en
+   aout (fond clair, accent bleu au milieu d une application sombre). Meme lecon que
+   la question de fermeture (szBrouillonDemander).
+   szConfirmer({ titre, texte, details: [..], oui, non, danger }) -> Promise<boolean>.
+     · titre  : nomme l action (« Envoyer la campagne »)
+     · texte  : ce qui va se passer, a qui, et si c est irreversible
+     · details: quelques lignes « cle : valeur » facultatives (destinataires, montant…)
+     · oui    : le VERBE de l action (« Envoyer à 412 abonnés »), jamais « OK »
+     · danger : bouton rouge, focus sur Annuler
+     · prudent: focus sur Annuler et Entree inactive, SANS rouge (un envoi massif n est pas une destruction)
+   Echap et le voile annulent ; Entree ne valide QUE si l action n est pas dangereuse. */
+var _szConfOuverte = false;
+function szConfirmer(o){
+  o = o || {};
+  if (_szConfOuverte) return Promise.resolve(false);
+  _szConfOuverte = true;
+  var esc = function(x){ return String(x == null ? '' : x).replace(/[&<>"]/g, function(c){
+    return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); };
+  return new Promise(function(resoudre){
+    var v = document.createElement('div');
+    v.className = 'szc-voile';
+    v.innerHTML = '<div class="szc-boite' + (o.danger ? ' danger' : '') + '" role="alertdialog" aria-modal="true" aria-labelledby="szc-t" aria-describedby="szc-x">'
+      + '<h3 id="szc-t">' + esc(o.titre || '${T("Confirmer l’action")}') + '</h3>'
+      + (o.texte ? '<p id="szc-x">' + esc(o.texte) + '</p>' : '<p id="szc-x"></p>')
+      + ((o.details && o.details.length) ? '<dl class="szc-details">' + o.details.map(function(d){
+          return '<dt>' + esc(d[0]) + '</dt><dd>' + esc(d[1]) + '</dd>'; }).join('') + '</dl>' : '')
+      + '<div class="szc-pied">'
+      + '<button type="button" class="szc-non">' + esc(o.non || '${T("Annuler")}') + '</button>'
+      + '<button type="button" class="szc-oui">' + esc(o.oui || '${T("Continuer")}') + '</button>'
+      + '</div></div>';
+    document.body.appendChild(v);
+    var fini = function(ok){
+      if (v.parentNode) v.parentNode.removeChild(v);
+      document.removeEventListener('keydown', clavier, true);
+      _szConfOuverte = false;
+      resoudre(!!ok);
+    };
+    var clavier = function(ev){
+      if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); fini(false); }
+      else if (ev.key === 'Enter' && !o.danger && !o.prudent && document.activeElement === v.querySelector('.szc-oui')) { ev.preventDefault(); fini(true); }
+    };
+    document.addEventListener('keydown', clavier, true);
+    v.addEventListener('mousedown', function(ev){ if (ev.target === v) fini(false); });
+    v.querySelector('.szc-non').onclick = function(){ fini(false); };
+    v.querySelector('.szc-oui').onclick = function(){ fini(true); };
+    try { ((o.danger || o.prudent) ? v.querySelector('.szc-non') : v.querySelector('.szc-oui')).focus(); } catch (e) {}
+  });
+}
+`;
+
 const JS_DIRE = () => JS_DIRE_BASE() + JS_PLEIN() + JS_PLEIN_AUTO() + JS_FENPLEIN()
   + JS_VERROUS() + JS_LOTS() + JS_AUTOPAGE() + JS_PAGES() + JS_COMPTE() + JS_MESURES()
-  + JS_DATES() + JS_FINITIONS() + JS_JUMEAUX + JS_CTX();
+  + JS_DATES() + JS_FINITIONS() + JS_JUMEAUX + JS_CTX() + JS_CONFIRMER();
 
 const JS_SOCLE = () => `
 var P = window.szPont;
@@ -4268,6 +4324,28 @@ const CSS_RESPIRE = `
 .ls-seg .barre{height:.4rem;border-radius:99px;background:var(--f-champ);overflow:hidden}
 .ls-seg .barre i{display:block;height:100%;border-radius:99px;background:var(--sz-accent)}
 /* Dans un corps « plein » (le socle y fige chaque enfant), la liste prend ce qui reste ; le pied garde les marges des rangs. */
+/* La boite de confirmation (szConfirmer, 2026-10-15) : a part, au theme, professionnelle. */
+.szc-voile{position:fixed;inset:0;z-index:9500;display:flex;align-items:center;justify-content:center;padding:1.5rem;
+  background:rgba(4,8,14,.62)}
+.szc-boite{width:100%;max-width:30rem;padding:1.5rem 1.6rem 1.25rem;border-radius:16px;background:var(--f-carte2);color:var(--tx);
+  border:1px solid var(--sz-bord-fort);box-shadow:0 28px 70px rgba(0,0,0,.5)}
+.szc-boite h3{margin:0 0 .6rem;font-size:1.08rem;font-weight:700;line-height:1.35}
+.szc-boite p{margin:0;font-size:.88rem;line-height:1.6;color:var(--tx2)}
+.szc-details{display:grid;grid-template-columns:auto 1fr;gap:.35rem 1rem;margin:1rem 0 0;padding:.8rem 1rem;border-radius:10px;
+  background:var(--f-champ);border:1px solid var(--sz-bord);font-size:.84rem}
+.szc-details dt{color:var(--tx2)}
+.szc-details dd{margin:0;color:var(--tx);font-weight:600;min-width:0;overflow-wrap:anywhere}
+.szc-pied{display:flex;gap:.6rem;justify-content:flex-end;margin-top:1.4rem}
+.szc-pied button{height:2.4rem;padding:0 1.1rem;border-radius:10px;font-weight:600;font-size:.86rem}
+.szc-oui{background:var(--sz-btn-prim);border-color:var(--sz-btn-prim);color:var(--sz-btn-prim-txt);font-weight:700}
+.szc-oui:hover:not(:disabled){background:var(--sz-btn-prim-fort)}
+/* Le rouge de l action DANGEREUSE garde son sens jour comme nuit : la reprise generique du mode jour
+   (html.jour button) le repeindrait en blanc. Texte : #fff sur #b42318 = 6,5:1. */
+.szc-boite.danger .szc-oui{background:#b42318;border-color:#b42318;color:var(--tx-sur-accent)}
+.szc-boite.danger .szc-oui:hover:not(:disabled){background:#912018;border-color:#912018}
+html.jour .szc-boite.danger .szc-oui{background:#b42318;border-color:#b42318;color:var(--tx-sur-accent)}
+html.jour .szc-boite.danger .szc-oui:hover:not(:disabled){background:#912018;border-color:#912018}
+html.jour .szc-voile{background:rgba(29,36,51,.38)}
 .corps.plein>.ls{flex:1 1 auto}
 .corps.plein>.ls-liste{flex:1 1 0;min-height:0}
 .corps.ls-corps>.sz-pied{margin:0 1.6rem .8rem}

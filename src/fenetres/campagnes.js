@@ -1826,7 +1826,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
             gestes += '<button class="mini geste" data-segmodif="' + esc(s.id) + '">${T("Modifier")}</button>';
             var armeS = (ARME === 'segsup:' + s.id);
             gestes += '<button class="mini geste danger' + (armeS ? ' arme' : '') + '" data-segsup="'
-              + esc(s.id) + '">' + (armeS ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
+              + esc(s.id) + '">' + '${T("Supprimer")}' + '</button>';
           }
           var pc = Math.min(100, Math.round(100 * (s.compte || 0) / tous));
           return '<div data-ctx-ligne class="ls-rang ls-seg">'
@@ -2043,11 +2043,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
             var armeE = (ARME === 'env:' + c.id);
             gestes += '<button class="mini geste' + (armeE ? ' arme' : ' prim') + '" data-envoyer="'
               + esc(c.id) + '"' + (D.resendPret || c.canal === 'sms' ? '' : ' disabled')
-              + '>' + (armeE ? '${T("Confirmer l’envoi ?")}' : '${T("Envoyer")}') + '</button>';
+              + '>' + '${T("Envoyer")}' + '</button>';
           }
           var armeS = (ARME === 'sup:' + c.id);
           gestes += '<button class="mini geste danger' + (armeS ? ' arme' : '') + '" data-suppr="'
-            + esc(c.id) + '">' + (armeS ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
+            + esc(c.id) + '">' + '${T("Supprimer")}' + '</button>';
         }
         var nb = (c.canal === 'sms' ? (D.smsDestinataires || 0) : c.destinataires);
         var parti = (c.etat === 'sent' || c.envoyes);
@@ -2107,7 +2107,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
         + ', ${T("prêtes à partir")}</span>'
         + '<button class="ed-bt' + (armeT ? ' arme' : ' fort') + '" id="cp-traiter"'
         + (!D.envoisPermis ? ' disabled' : '') + '>'
-        + (armeT ? '${T("Confirmer — envoyer")} ' + pluriel(D.dues || 0, '${T("étape")}', '${T("étapes")}') + ' ?' : '${T("Traiter les étapes échues")}')
+        + '${T("Traiter les étapes échues")}'
         + '</button></div>';
     }
 
@@ -2124,10 +2124,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
           var armeB = (ARME === 'bas:' + ch.id);
           gestes += '<button class="mini geste' + (armeB ? ' arme' : '') + '" data-basculer="' + esc(ch.id)
             + '" data-active="' + (ch.active ? '0' : '1') + '">'
-            + (armeB ? '${T("Confirmer ?")}' : (ch.active ? '${T("Suspendre")}' : '${T("Activer")}')) + '</button>';
+            + (ch.active ? '${T("Suspendre")}' : '${T("Activer")}') + '</button>';
           var armeS = (ARME === 'chsup:' + ch.id);
           gestes += '<button class="mini geste danger' + (armeS ? ' arme' : '') + '" data-chsuppr="'
-            + esc(ch.id) + '">' + (armeS ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
+            + esc(ch.id) + '">' + '${T("Supprimer")}' + '</button>';
         }
         // La ligne du temps : quatre etapes au plus, le reste en « +n ».
         var et = ch.etapes || [];
@@ -2215,9 +2215,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     var bt = document.getElementById('cp-traiter');
     if (bt) bt.onclick = function(){
       if (ARME !== 'traiter') {
-        ARME = 'traiter';
-        dessiner();
-        dire('${T("Ces étapes partiront pour de bon, par courriel. Cliquez pour confirmer.")}', 'att');
+        var nD = (DH && DH.dues) || 0;
+        szConfirmer({ prudent: true, titre: '${T("Envoyer les étapes échues")}',
+          texte: pluriel(nD, '${T("étape échue")}', '${T("étapes échues")}') + ' ' + '${T("va partir par courriel immédiatement. Un envoi ne peut pas être annulé.")}',
+          oui: '${T("Envoyer")}' + ' (' + pluriel(nD, '${T("étape")}', '${T("étapes")}') + ')' })
+          .then(function(ok){ if (ok) { ARME = 'traiter'; bt.onclick(); } });
         return;
       }
       ARME = '';
@@ -2355,10 +2357,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     if (bss) {
       var idSg = bss.getAttribute('data-segsup');
       if (ARME !== 'segsup:' + idSg) {
-        ARME = 'segsup:' + idSg;
-        dessiner();
-        dire('${T("Cliquez « Confirmer ? » — le segment disparaît. Les campagnes qui")} '
-          + '${T("s’en servent doivent d’abord en choisir un autre.")}', 'att');
+        /* ⚠ (2026-10-15, sa règle) Toute confirmation est une BOÎTE À PART (szConfirmer, socle) :
+           confirmé, on arme puis on rejoue le clic — la suite ne change pas. */
+        var sgN = ((DS && DS.segments) || []).filter(function(x){ return x.id === idSg; })[0];
+        szConfirmer({ danger: true, titre: '${T("Supprimer le segment")}',
+          texte: '${T("Le segment")}' + ' « ' + (sgN ? sgN.nom : '') + ' » ' + '${T("sera supprimé définitivement. Les campagnes qui l’utilisent devront d’abord en choisir un autre.")}',
+          oui: '${T("Supprimer le segment")}' }).then(function(ok){ if (ok) { ARME = 'segsup:' + idSg; bss.click(); } });
         return;
       }
       ARME = '';
@@ -2389,18 +2393,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       var idE = be.getAttribute('data-envoyer');
       var camp = (DC && DC.campagnes || []).filter(function(c){ return c.id === idE; })[0];
       if (ARME !== 'env:' + idE) {
-        ARME = 'env:' + idE;
-        dessiner();
         /* ⚠ On annonce le nombre et le canal AVANT : c est la derniere
            occasion de se raviser, et rien ne se rattrape apres. */
         var combien = camp
           ? (camp.canal === 'sms' ? ((DC.smsDestinataires || 0) + ' SMS')
              : (pluriel(camp.destinataires, '${T("courriel")}', '${T("courriels")}')
-                + (camp.canal === 'both' ? ' et ' + (DC.smsDestinataires || 0) + ' SMS' : '')))
+                + (camp.canal === 'both' ? ' + ' + (DC.smsDestinataires || 0) + ' SMS' : '')))
           : '${T("les destinataires")}';
-        dire((DC && DC.modeTest)
-          ? ('${T("Mode test : un seul courriel partira, à")} ' + (DC.courrielTest || '${T("l’adresse de test")}') + '.')
-          : ('${T("Cliquez pour confirmer :")} ' + combien + ' ${T("vont partir, sans retour possible.")}'), 'att');
+        var test = !!(DC && DC.modeTest);
+        szConfirmer({ prudent: true, titre: test ? '${T("Envoyer le courriel de test")}' : '${T("Envoyer la campagne")}',
+          texte: test
+            ? ('${T("Le mode test est activé : un seul courriel sera envoyé, à")}' + ' ' + (DC.courrielTest || '${T("l’adresse de test")}') + '. ' + '${T("La campagne restera en brouillon.")}')
+            : ('${T("La campagne sera envoyée immédiatement. Un envoi ne peut pas être annulé.")}'),
+          details: camp ? [['${T("Campagne")}', camp.nom], ['${T("Objet")}', camp.sujet || '—'],
+            ['${T("Destinataires")}', camp.segmentLibelle], ['${T("Canal")}', camp.canalLibelle], ['${T("Envois")}', test ? '1' : combien]] : [],
+          oui: test ? '${T("Envoyer le test")}' : ('${T("Envoyer")}' + ' (' + combien + ')') })
+          .then(function(ok){ if (ok) { ARME = 'env:' + idE; be.click(); } });
         return;
       }
       ARME = '';
@@ -2424,9 +2432,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     if (bs) {
       var idS = bs.getAttribute('data-suppr');
       if (ARME !== 'sup:' + idS) {
-        ARME = 'sup:' + idS;
-        dessiner();
-        dire('${T("Cliquez « Confirmer ? » — la campagne et ses images sont supprimées pour de bon.")}', 'att');
+        var cS = ((DC && DC.campagnes) || []).filter(function(c){ return c.id === idS; })[0];
+        szConfirmer({ danger: true, titre: '${T("Supprimer la campagne")}',
+          texte: '${T("La campagne")}' + ' « ' + (cS ? cS.nom : '') + ' » ' + '${T("et ses images seront supprimées définitivement. Cette action est irréversible.")}',
+          oui: '${T("Supprimer la campagne")}' }).then(function(ok){ if (ok) { ARME = 'sup:' + idS; bs.click(); } });
         return;
       }
       ARME = '';
@@ -2448,11 +2457,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
          inscriptions en cours sont marquees faites et ne repartiront jamais.
          On ne l arme que s il y a vraiment quelque chose a perdre. */
       if (!versActive && enCours && ARME !== 'bas:' + idB) {
-        ARME = 'bas:' + idB;
-        dessiner();
-        dire('${T("Suspendre abandonnera")} ' + pluriel(enCours, '${T("inscription")}', '${T("inscriptions")}') + ' ${T("en cours :")} '
-          + (enCours > 1 ? '${T("ces personnes ne recevront jamais")}' : '${T("cette personne ne recevra jamais")}')
-          + ' ${T("la suite de la séquence. Cliquez pour confirmer.")}', 'att');
+        szConfirmer({ danger: true, titre: '${T("Suspendre la chaîne")}',
+          texte: '${T("La chaîne")}' + ' « ' + (ch ? ch.nom : '') + ' » ' + '${T("compte")}' + ' ' + pluriel(enCours, '${T("inscription en cours")}', '${T("inscriptions en cours")}') + '. '
+            + '${T("Une fois la chaîne suspendue, ces inscriptions seront abandonnées au prochain traitement : la suite de la séquence ne leur sera jamais envoyée.")}',
+          oui: '${T("Suspendre la chaîne")}' }).then(function(ok){ if (ok) { ARME = 'bas:' + idB; bb.click(); } });
         return;
       }
       ARME = '';
@@ -2472,10 +2480,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       var idC = bcs.getAttribute('data-chsuppr');
       var chS = (DH && DH.chaines || []).filter(function(c){ return c.id === idC; })[0];
       if (ARME !== 'chsup:' + idC) {
-        ARME = 'chsup:' + idC;
-        dessiner();
-        dire('${T("Cliquez « Confirmer ? » — la chaîne, ses étapes et")} '
-          + pluriel(chS ? chS.inscriptionsActives : 0, '${T("inscription")}', '${T("inscriptions")}') + ' ${T("en cours disparaissent.")}', 'att');
+        szConfirmer({ danger: true, titre: '${T("Supprimer la chaîne")}',
+          texte: '${T("La chaîne")}' + ' « ' + (chS ? chS.nom : '') + ' », ' + '${T("ses étapes et")}' + ' '
+            + pluriel(chS ? chS.inscriptionsActives : 0, '${T("inscription en cours")}', '${T("inscriptions en cours")}') + ' '
+            + '${T("seront supprimées définitivement. Cette action est irréversible.")}',
+          oui: '${T("Supprimer la chaîne")}' }).then(function(ok){ if (ok) { ARME = 'chsup:' + idC; bcs.click(); } });
         return;
       }
       ARME = '';
