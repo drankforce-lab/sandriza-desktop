@@ -582,4 +582,6 @@ module.exports = {
   'Inutilisé': 'Unused',
   'destinataire': 'recipient',
   'destinataires': 'recipients',
+  // 2026-10-15 : le panneau des reglages s elargit.
+  'Élargir les réglages': 'Widen the settings',
 };

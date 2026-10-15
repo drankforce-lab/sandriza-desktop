@@ -306,6 +306,13 @@ tbody tr:hover td{background:var(--v04)}
 .ed-insp .ch>label,.ed-insp .ch>.lbl{font-size:.74rem;color:var(--tx2)}
 .ed-insp input,.ed-insp select,.ed-insp textarea{width:100%;background:var(--f-champ);border-radius:10px;padding:.45rem .65rem}
 .ed-insp textarea{min-height:6rem;resize:none;font-family:inherit;line-height:1.55}
+/* (2026-10-15, sa capture : une zone de 3 lignes a glissiere au-dessus d un grand vide) Le champ qui porte une
+   zone de texte PREND LA HAUTEUR LIBRE des reglages ; la zone s etire encore a la main (resize). */
+.ed-insp .champs{display:flex;flex-direction:column}
+.ed-insp .champs>.ch:has(textarea){flex:1 1 auto;display:flex;flex-direction:column;min-height:9rem}
+.ed-insp .champs>.ch:has(textarea) textarea{flex:1 1 auto;min-height:8rem;resize:vertical}
+body.insp-large .ed-cols{grid-template-columns:16rem minmax(0,1fr) 32rem}
+body.insp-large .ed-insp .it .gestes button[data-binsplarge]{border-color:rgba(var(--or-rgb),.6);color:var(--tx-or)}
 .ed-insp .pastilles{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .ed-insp .pastilles button{width:1.8rem;height:1.8rem;padding:0;border-radius:50%;border:2px solid var(--sz-bord-fort)}
 .ed-insp .pastilles button.on{border-color:var(--tx)}
@@ -333,6 +340,11 @@ tbody tr:hover td{background:var(--v04)}
   border-left:1px solid var(--sz-bord-fort);box-shadow:-20px 0 50px rgba(0,0,0,.4);padding:1.3rem;
   display:none;flex-direction:column;gap:.9rem}
 .ed.ia-ouverte .ed-ia{display:flex}
+/* (2026-10-15, sa capture : le « × » et les champs du panneau rognés au bord droit, non reproduit ici a
+   1000 x 570 ni 1440 x 900) Garde : le panneau ne depasse jamais l editeur, ni ses champs le panneau. */
+.ed-ia{max-width:100%}
+.ed-ia>*{max-width:100%;min-width:0}
+.ed-ia input,.ed-ia select,.ed-ia textarea,.ed-ia button{max-width:100%}
 .ed-ia .iabloc{border:none;background:transparent;padding:0;margin:0;display:flex;flex-direction:column;gap:.7rem}
 .ed-ia .iatt b{font-size:1.02rem}
 .ed-ia input,.ed-ia select,.ed-ia textarea{background:var(--f-champ);border-radius:10px;padding:.45rem .65rem;font-size:.86rem}
@@ -611,6 +623,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     return champBloc(i, cle, lib, genre, val).replace(/^<div>/, '<div class="ch">');
   }
 
+  // Le panneau des reglages elargi (2026-10-15) : retenu sur le poste, applique avant le premier dessin.
+  try { if (localStorage.getItem('sz_camp_insp_large')) document.body.classList.add('insp-large'); } catch (e) {}
+
   function inspHtml(){
     if (BMODE !== 'visuel') return '<div class="ed-vide">${T("Mode HTML : le corps se modifie directement au centre.")}</div>';
     var b = BLOCS[BSEL];
@@ -626,7 +641,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     return '<div class="it"><span class="bico ic">' + esc(t.icone) + '</span><b>' + esc(szTd(t.label)) + '</b><span class="gestes">'
       + '<button type="button" data-bhaut="' + i + '"' + (i === 0 ? ' disabled' : '') + ' aria-label="${T("Monter")}" title="${T("Monter")}">↑</button>'
       + '<button type="button" data-bbas="' + i + '"' + (i === BLOCS.length - 1 ? ' disabled' : '') + ' aria-label="${T("Descendre")}" title="${T("Descendre")}">↓</button>'
-      + '<button type="button" data-bdup="' + i + '" aria-label="${T("Dupliquer")}" title="${T("Dupliquer")}"><span class="ic">⧉</span></button></span></div>'
+      + '<button type="button" data-bdup="' + i + '" aria-label="${T("Dupliquer")}" title="${T("Dupliquer")}"><span class="ic">⧉</span></button>'
+      // (2026-10-15, sa demande : « cette section devrait pouvoir s agrandir ») Le panneau s elargit, et le poste s en souvient.
+      + '<button type="button" data-binsplarge aria-pressed="' + (document.body.classList.contains('insp-large') ? 'true' : 'false') + '"'
+      + ' aria-label="${T("Élargir les réglages")}" title="${T("Élargir les réglages")}"><span class="ic">⤢</span></button></span></div>'
       + '<div class="champs" data-pages="campagnes-reglages">'
       + (champs || '<div class="ed-vide">${T("Ce bloc n’a rien à régler.")}</div>') + '</div>'
       + (texte ? '<div class="ch"><span class="lbl">${T("Insérer une information")}</span><div class="ed-infos">'
@@ -967,6 +985,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     };
     bouger('data-bhaut', -1);
     bouger('data-bbas', 1);
+    z.querySelectorAll('[data-binsplarge]').forEach(function(el){
+      el.onclick = function(){
+        var on = !document.body.classList.contains('insp-large');
+        document.body.classList.toggle('insp-large', on);
+        el.setAttribute('aria-pressed', on ? 'true' : 'false');
+        try { localStorage.setItem('sz_camp_insp_large', on ? '1' : ''); } catch (e) {}
+      };
+    });
     z.querySelectorAll('[data-bdup]').forEach(function(el){
       el.onclick = function(){
         var i = Number(el.getAttribute('data-bdup'));
