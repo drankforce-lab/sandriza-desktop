@@ -389,6 +389,70 @@ tbody tr:hover td{background:var(--v04)}
 .etapes-choix button{font:inherit;font-size:.78rem;font-weight:600;padding:.32rem .75rem;border-radius:99px;
   border:1px solid var(--v12);background:var(--v05);color:var(--tx2);cursor:pointer}
 .etapes-choix button.on{background:var(--or);border-color:var(--or);color:#17202c}
+/* ══ LES LISTES, REFAITES (2026-10-15, lot A) — meme langage que les editeurs : une tete (onglets a choix,
+   geste principal a droite), les chiffres dans UNE bande, des rangs aeres. Tout en variables du socle. */
+.corps.ls-corps{padding:0;gap:0}
+.ls{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:.9rem;padding:1rem 1.6rem .9rem}
+.ls>*{flex:0 0 auto}
+.ls-tete{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.ls-onglets button{height:2.25rem;padding:0 1.1rem;font-size:.86rem}
+.ls-tete .droite{margin-left:auto;display:flex;gap:.6rem;align-items:center}
+.ls-rch{display:flex;align-items:center;gap:.5rem;height:2.4rem;width:20rem;padding:0 .8rem;border-radius:10px;
+  background:var(--f-champ);border:1px solid var(--sz-bord-fort);color:var(--tx2)}
+.ls-rch svg{width:1rem;height:1rem;flex:0 0 auto}
+.ls-rch input{flex:1 1 auto;min-width:0;border:none;background:transparent;padding:0;height:100%}
+.ls .tuiles{display:flex;flex-wrap:wrap;gap:.6rem 2.6rem;padding:.85rem 1.3rem;border-radius:14px;background:var(--f-carte);
+  border:1px solid var(--sz-bord)}
+.ls .tuile{background:none;border:none;padding:0;min-width:0}
+.ls .tuile .val{font-size:1.45rem;font-weight:750;line-height:1.2;margin-top:.15rem}
+.ls .avis{border-radius:12px;padding:.65rem 1rem;font-size:.8rem}
+.ls-note{font-size:.78rem;line-height:1.55;color:var(--tx2);padding:0 .2rem}
+.ls-note strong{color:var(--tx)}
+.ls-action{display:flex;align-items:center;gap:1rem;padding:.7rem .8rem .7rem 1.2rem;border-radius:14px;
+  background:var(--sz-accent-doux);border:1px solid var(--sz-bord-fort)}
+.ls-action span{flex:1 1 auto;font-size:.88rem;font-weight:600}
+.ls-liste{flex:1 1 0;min-height:7rem}
+.ls-vide{flex:1 1 auto;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--tx2);
+  font-size:.88rem;line-height:1.6;padding:2rem;border-radius:16px;border:1px dashed var(--sz-bord-fort)}
+.ls-pied{font-size:.74rem;color:var(--tx2);padding:0 .2rem}
+.ls-rang{display:grid;align-items:center;gap:1.4rem;min-height:4.6rem;padding:.75rem 1rem .75rem .9rem;margin-bottom:.55rem;
+  border-radius:14px;background:var(--f-carte);border:1px solid var(--sz-bord)}
+.ls-rang:hover{border-color:var(--sz-bord-fort)}
+.ls-camp{grid-template-columns:minmax(0,1.7fr) minmax(0,1.15fr) 8.5rem 9.5rem 17rem}
+.ls-ch{grid-template-columns:minmax(0,1.25fr) minmax(0,1.6fr) 10.5rem 9rem 17rem}
+.ls-seg{grid-template-columns:minmax(0,1.8fr) minmax(10rem,1fr) 10rem 12rem}
+.ls-rang .qui{display:flex;align-items:center;gap:.85rem;min-width:0}
+.ls-rang .bico{width:2.5rem;height:2.5rem;border-radius:11px;background:var(--f-pill);color:var(--tx-or);display:flex;
+  align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex:0 0 auto}
+.ls-rang .tx,.ls-rang .ou,.ls-rang .etat,.ls-rang .bilan{display:flex;flex-direction:column;gap:.2rem;min-width:0}
+.ls-rang .tx b{font-size:.95rem;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ls-rang .ou b{font-size:.84rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ls-rang .tx span,.ls-rang .ou span,.ls-rang .etat>span:not(.rf-pill),.ls-rang .bilan span{font-size:.76rem;color:var(--tx2);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ls-rang .etat{align-items:flex-start}
+.ls-rang .bilan b{font-size:1.15rem;font-weight:700;line-height:1.15}
+.ls-rang .bilan em{font-style:normal;color:var(--tx-err)}
+.ls-rang .gestes{display:flex;gap:.4rem;justify-content:flex-end;flex-wrap:wrap}
+.ls-rang .gestes button{height:2.1rem;padding:0 .8rem;border-radius:9px}
+.ls-ch.eteinte .bico{color:var(--tx2)}
+/* La ligne du temps d une chaine : un point par etape, relies d un trait. */
+.ls-temps{display:flex;align-items:flex-start;min-width:0}
+.ls-temps.rien{font-size:.78rem;color:var(--tx2)}
+.ls-temps .pt{flex:1 1 0;min-width:0;position:relative;padding:1.05rem .7rem 0 0;display:flex;flex-direction:column;gap:.1rem}
+.ls-temps .pt i{position:absolute;top:.15rem;left:0;width:.62rem;height:.62rem;border-radius:50%;background:var(--sz-accent)}
+.ls-temps .pt::before{content:"";position:absolute;top:.45rem;left:.8rem;right:.25rem;height:1px;background:var(--sz-bord-fort)}
+.ls-temps .pt:last-of-type::before{display:none}
+.ls-temps .pt b{font-size:.78rem;font-weight:650}
+.ls-temps .pt small{font-size:.72rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ls-temps .plus{flex:0 0 auto;align-self:center;font-size:.76rem;color:var(--tx2)}
+.ls-ch.eteinte .ls-temps .pt i{background:var(--sz-bord-fort)}
+/* La portee d un segment : le nombre, puis la part des abonnees actives. */
+.ls-seg .prt{display:flex;flex-direction:column;gap:.4rem;min-width:0}
+.ls-seg .prt .ligne{display:flex;align-items:baseline;gap:.55rem;min-width:0}
+.ls-seg .prt b{font-size:1.25rem;font-weight:700}
+.ls-seg .prt span{font-size:.74rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ls-seg .barre{height:.4rem;border-radius:99px;background:var(--f-champ);overflow:hidden}
+.ls-seg .barre i{display:block;height:100%;border-radius:99px;background:var(--sz-accent)}
 `;
 
 /** Page complète de la fenêtre native « Campagnes et chaînes ». */
@@ -1093,15 +1157,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div>';
   }
 
-  function onglets(){
-    return '<div class="onglets">'
-      + '<button type="button" class="' + (ONGLET === 'campagnes' ? 'actif' : '') + '" data-onglet="campagnes">${T("Campagnes")}</button>'
-      + '<button type="button" class="' + (ONGLET === 'chaines' ? 'actif' : '') + '" data-onglet="chaines">${T("Chaînes automatisées")}</button>'
-      + '<button type="button" class="' + (ONGLET === 'segments' ? 'actif' : '') + '" data-onglet="segments">Segments</button>'
-      // ⚠ LA RECHERCHE N EST PLUS ICI (demande du 2026-08-14 : << pas beau a
-      // cote des onglets >>). Elle vit desormais dans la barre qui surplombe
-      // la liste, la ou porte son effet.
-      + '</div>';
+  /* ══ LES LISTES, REFAITES (2026-10-15, lot A de la refonte du marketing) ═══
+     Meme langage que les editeurs : une TETE (les trois onglets en boutons a
+     choix, le geste principal a droite), les chiffres dans UNE bande qui se
+     replie (szTuiles), puis des RANGS aeres — une ligne par campagne, chaine ou
+     segment, ce qui compte lisible d un coup d oeil. Crochets gardes :
+     data-onglet, #cp-q, #cp-nouvelle, #cp-nouvchaine, #cp-seqpanier,
+     #cp-nouvseg, #cp-traiter, data-modif, data-envoyer, data-suppr,
+     data-chmodif, data-basculer, data-chsuppr, data-segmodif, data-segsup. */
+  function teteListe(droite){
+    var o = [['campagnes', '${T("Campagnes")}'], ['chaines', '${T("Chaînes automatisées")}'], ['segments', 'Segments']];
+    return '<div class="ls-tete"><div class="ed-seg ls-onglets">'
+      + o.map(function(x){
+          return '<button type="button" class="' + (ONGLET === x[0] ? 'on' : '') + '" data-onglet="' + x[0] + '">' + x[1] + '</button>';
+        }).join('')
+      + '</div><div class="droite">' + (droite || '') + '</div></div>';
+  }
+  function squelListe(){
+    return '<div class="ls">' + teteListe('')
+      + '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>';
   }
 
   /* ── LE RENVOI VERS LE RESTE DE L ECRAN ───────────────────────────────────
@@ -1766,54 +1840,53 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
      actives — il n ajoute jamais personne (consentement, LCAP / Loi 25). */
   function vueSegments(){
     var D = DS;
-    if (!D) return '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>';
+    if (!D) return squelListe();
+    var h = '<div class="ls">' + teteListe(D.peutModifier
+      ? '<button class="ed-bt fort" id="cp-nouvseg">${T("+ Nouveau segment")}</button>' : '');
     /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
        quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
        ce poste. Les TROIS bandeaux de cette fenetre partagent la meme cle et se
        replient ensemble. Voir JS_TUILES dans socle.js. */
-    var h = szTuiles('<div class="tuiles">'
+    h += szTuiles('<div class="tuiles">'
       + '<div class="tuile"><div class="lbl">${T("Abonnés actifs")}</div><div class="val bon">'
       + (D.abonnesActifs || 0) + '</div><div class="dt">${T("le point de départ")}</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Segments composés")}</div><div class="val">'
       + (D.segments || []).length + '</div></div></div>');
 
-    h += '<div class="avis att">${T("Un segment ne fait que <strong>restreindre</strong> la liste ")}'
+    // ⚠ La phrase du consentement ne se resume pas (voir src/langue/campagnes.js) : elle reste entiere.
+    h += '<div class="ls-note">${T("Un segment ne fait que <strong>restreindre</strong> la liste ")}'
       + '${T("des abonnées actives : il ne peut jamais joindre quelqu’un qui n’a pas consenti")} '
       + '${T("à recevoir l’infolettre.")}</div>';
 
-    if (D.peutModifier) {
-      h += '<div class="barreoutils"><button class="mini prim" id="cp-nouvseg">'
-        + '${T("+ Nouveau segment")}</button></div>';
-    }
-
+    h += '<div class="ls-liste sz-pagee">';
     if (!(D.segments || []).length) {
-      h += '<div class="carte"><div class="vide">${T("Aucun segment composé. Les campagnes")} '
-        + '${T("disposent tout de même de « Tous les abonnés » et « Clients avec commandes ».")}</div></div>';
-      return h + renvoi();
+      h += '<div class="ls-vide">${T("Aucun segment composé. Les campagnes")} '
+        + '${T("disposent tout de même de « Tous les abonnés » et « Clients avec commandes ».")}</div>';
+      return h + '</div>' + renvoi() + '</div>';
     }
 
-    // Les segments en PAGES mesurees (JS_PAGES du socle) : la carte prend la hauteur qui reste.
-    h += '<div class="carte sz-pagee"><div data-pages="campagnes-segments"><table><thead><tr><th>${T("Segment")}</th>'
-      + '<th class="num">${T("Portée")}</th><th class="num">${T("Utilisé par")}</th>'
-      + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
+    // Les segments en PAGES mesurees (JS_PAGES du socle) : un rang par segment.
+    var tous = Math.max(1, D.abonnesActifs || 0);
+    h += '<div data-pages="campagnes-segments">'
       + D.segments.map(function(s){
           var gestes = '';
           if (D.peutModifier) {
-            gestes += '<button class="mini geste" data-segmodif="' + esc(s.id) + '">${T("Modifier")}</button> ';
+            gestes += '<button class="mini geste" data-segmodif="' + esc(s.id) + '">${T("Modifier")}</button>';
             var armeS = (ARME === 'segsup:' + s.id);
             gestes += '<button class="mini geste danger' + (armeS ? ' arme' : '') + '" data-segsup="'
               + esc(s.id) + '">' + (armeS ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
           }
-          return '<tr><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(s.nom)) + '</span>'
-            + '<div style="min-width:0"><div class="rf-nom">' + esc(s.nom) + '</div>'
-            + '<div class="rf-sous">' + esc(s.phrase || '—') + '</div></div></div></td>'
-            + '<td class="num"><span class="rf-pill ' + (s.compte ? 'vert' : '') + '">'
-            + s.compte + '</span></td>'
-            + '<td class="num dt">' + (s.utilisePar ? pluriel(s.utilisePar, '${T("campagne")}', '${T("campagnes")}') : '—') + '</td>'
-            + (D.peutModifier ? '<td class="fin">' + gestes + '</td>' : '') + '</tr>';
+          var pc = Math.min(100, Math.round(100 * (s.compte || 0) / tous));
+          return '<div class="ls-rang ls-seg">'
+            + '<div class="qui"><span class="bico" aria-hidden="true">' + esc(initiales(s.nom)) + '</span>'
+            + '<div class="tx"><b>' + esc(s.nom) + '</b><span>' + esc(s.phrase || '—') + '</span></div></div>'
+            + '<div class="prt"><div class="ligne"><b>' + (s.compte || 0) + '</b><span>' + pc + ' ${T("% des abonnés actifs")}</span></div>'
+            + '<div class="barre"><i style="width:' + pc + '%"></i></div></div>'
+            + '<div class="bilan"><span>' + (s.utilisePar ? '${T("Utilisé par")} ' + pluriel(s.utilisePar, '${T("campagne")}', '${T("campagnes")}') : '${T("Inutilisé")}') + '</span></div>'
+            + '<div class="gestes">' + gestes + '</div></div>';
         }).join('')
-      + '</tbody></table></div></div>';
-    return h + renvoi();
+      + '</div></div>';
+    return h + renvoi() + '</div>';
   }
 
   /* ⚠ LE CONSTRUCTEUR DE SEGMENT, REFAIT (2026-10-15, meme langage que les editeurs) : les CRITERES a
@@ -1969,14 +2042,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
   }
   function vueCampagnes(){
     var D = DC;
-    if (!D) return '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>';
+    if (!D) return squelListe();
     var q = Q.trim().toLowerCase();
     var rows = (D.campagnes || []).filter(function(c){
       if (!q) return true;
       return (String(c.nom) + ' ' + String(c.sujet)).toLowerCase().indexOf(q) !== -1;
     });
 
-    var h = szTuiles('<div class="tuiles">'
+    // La recherche et la creation, dans la tete, juste au-dessus de ce sur quoi elles agissent.
+    var h = '<div class="ls">' + teteListe(
+        '<label class="ls-rch">${ICO.loupe}<input type="search" id="cp-q" aria-label="${T("Nom ou sujet")}" placeholder="${T("Nom ou sujet…")}" value="'
+        + esc(Q) + '"></label>'
+        + (D.peutModifier ? '<button class="ed-bt fort" id="cp-nouvelle">${T("+ Nouvelle campagne")}</button>' : ''));
+
+    h += szTuiles('<div class="tuiles">'
       + '<div class="tuile"><div class="lbl">${T("Abonnés actifs")}</div><div class="val bon">'
       + (D.abonnesActifs || 0) + '</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Brouillons")}</div><div class="val neutre">'
@@ -1996,75 +2075,64 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       h += '<div class="avis att">${T("Mode test allumé : les courriels partiront <strong>uniquement</strong> à ")}'
         + esc(D.courrielTest) + '${T(", et la campagne restera en brouillon. Les SMS, eux, ne partent pas du tout.")}</div>';
     }
-    if (D.resendPret && D.expediteur) {
-      h += '<div class="dt">${T("Expéditeur :")} ' + esc(D.expediteur) + '</div>';
-    }
 
-    // La barre qui surplombe la LISTE : creation a gauche, recherche a droite,
-    // juste au-dessus de ce sur quoi elles agissent.
-    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE AUX CAMPAGNES (2026-09-25) ═════
-       Barre a loupe sur une ligne, le geste de creation a droite ; lignes
-       riches aux initiales ; etats en pastilles a point. Crochets gardes :
-       #cp-q, #cp-nouvelle, data-modif, data-envoyer, data-suppr. */
-    h += '<div class="carte"><div class="rf-tb">'
-      + '<label class="rf-rch" style="max-width:none">${ICO.loupe}<input type="search" id="cp-q" aria-label="${T("Nom ou sujet")}" placeholder="${T("Nom ou sujet…")}" value="'
-      + esc(Q) + '"></label>'
-      + '<span class="rf-droite"><span class="dt">' + pluriel(rows.length, '${T("campagne")}', '${T("campagnes")}') + '</span>'
-      + (D.peutModifier ? '<button class="prim" id="cp-nouvelle" style="height:2.4rem;padding:0 .9rem">${T("+ Nouvelle campagne")}</button>' : '')
-      + '</span></div></div>';
-
-    // Les campagnes en PAGES mesurees (JS_PAGES du socle) : la carte prend la hauteur qui reste.
-    h += '<div class="carte sz-pagee">';
+    // Les campagnes en PAGES mesurees (JS_PAGES du socle) : la liste prend la hauteur qui reste.
+    h += '<div class="ls-liste sz-pagee">';
     if (!rows.length) {
-      h += '<div class="vide">' + (q ? '${T("Rien ne correspond.")}'
+      h += '<div class="ls-vide">' + (q ? '${T("Rien ne correspond.")}'
         : '${T("Aucune campagne pour l’instant. Cliquez « + Nouvelle campagne ».")}') + '</div>';
     } else {
-      h += '<div data-pages="campagnes"><table><thead><tr><th>${T("Campagne")}</th><th>${T("Envoyé à")}</th><th>${T("Canal")}</th>'
-        + '<th class="num">${T("Destinataires")}</th><th>${T("État")}</th><th class="num">${T("Partis / échecs")}</th>'
-        + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
-        + rows.map(function(c){
-            var gestes = '';
-            if (D.peutModifier) {
-              // ⚠ MEME REGLE QUE LE WEB : une campagne PARTIE ne se modifie plus.
-              if (c.etat !== 'sent') {
-                gestes += '<button class="mini geste" data-modif="' + esc(c.id) + '">${T("Modifier")}</button> ';
-              }
-              if (c.etat !== 'sent') {
-                var armeE = (ARME === 'env:' + c.id);
-                gestes += '<button class="mini geste' + (armeE ? ' arme' : ' prim') + '" data-envoyer="'
-                  + esc(c.id) + '"' + (D.resendPret || c.canal === 'sms' ? '' : ' disabled')
-                  + '>' + (armeE ? '${T("Confirmer l’envoi ?")}' : '${T("Envoyer")}') + '</button> ';
-              }
-              var armeS = (ARME === 'sup:' + c.id);
-              gestes += '<button class="mini geste danger' + (armeS ? ' arme' : '') + '" data-suppr="'
-                + esc(c.id) + '">' + (armeS ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
-            }
-            return '<tr><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(c.nom)) + '</span>'
-              + '<div style="min-width:0"><div class="rf-nom">' + esc(c.nom) + '</div>'
-              + '<div class="rf-sous">' + esc(c.sujet) + '</div></div></div></td>'
-              + '<td class="dt">' + esc(c.segmentLibelle) + '</td>'
-              + '<td class="dt">' + esc(c.canalLibelle) + '</td>'
-              + '<td class="num">' + (c.canal === 'sms' ? (D.smsDestinataires || 0) : c.destinataires)
-              + (c.canal === 'both' ? ' + ' + (D.smsDestinataires || 0) + ' SMS' : '') + '</td>'
-              + '<td><span class="rf-pill ' + (c.etat === 'sent' ? 'vert' : (c.etat === 'sending' ? 'ambre' : ''))
-              + '">' + esc(c.etatLibelle) + '</span>'
-              + (c.date ? '<div class="dt">' + esc(szQuand(c.date)) + '</div>' : '') + '</td>'
-              + '<td class="num">' + c.envoyes
-              + (c.echecs ? ' / <span style="color:var(--tx-err)">' + c.echecs + '</span>' : '') + '</td>'
-              + (D.peutModifier ? '<td class="fin">' + gestes + '</td>' : '') + '</tr>';
-          }).join('')
-        + '</tbody></table></div>';
+      h += '<div data-pages="campagnes">' + rows.map(function(c){
+        var gestes = '';
+        if (D.peutModifier) {
+          // ⚠ MEME REGLE QUE LE WEB : une campagne PARTIE ne se modifie plus.
+          if (c.etat !== 'sent') {
+            gestes += '<button class="mini geste" data-modif="' + esc(c.id) + '">${T("Modifier")}</button>';
+            var armeE = (ARME === 'env:' + c.id);
+            gestes += '<button class="mini geste' + (armeE ? ' arme' : ' prim') + '" data-envoyer="'
+              + esc(c.id) + '"' + (D.resendPret || c.canal === 'sms' ? '' : ' disabled')
+              + '>' + (armeE ? '${T("Confirmer l’envoi ?")}' : '${T("Envoyer")}') + '</button>';
+          }
+          var armeS = (ARME === 'sup:' + c.id);
+          gestes += '<button class="mini geste danger' + (armeS ? ' arme' : '') + '" data-suppr="'
+            + esc(c.id) + '">' + (armeS ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
+        }
+        var nb = (c.canal === 'sms' ? (D.smsDestinataires || 0) : c.destinataires);
+        var parti = (c.etat === 'sent' || c.envoyes);
+        return '<div class="ls-rang ls-camp">'
+          + '<div class="qui"><span class="bico" aria-hidden="true">' + esc(initiales(c.nom)) + '</span>'
+          + '<div class="tx"><b>' + esc(c.nom) + '</b><span>' + esc(c.sujet) + '</span></div></div>'
+          + '<div class="ou"><b>' + esc(c.segmentLibelle) + '</b><span>' + esc(c.canalLibelle) + ' · '
+          + pluriel(nb, '${T("destinataire")}', '${T("destinataires")}') + (c.canal === 'both' ? ' + ' + (D.smsDestinataires || 0) + ' SMS' : '') + '</span></div>'
+          + '<div class="etat"><span class="rf-pill ' + (c.etat === 'sent' ? 'vert' : (c.etat === 'sending' ? 'ambre' : ''))
+          + '">' + esc(c.etatLibelle) + '</span>'
+          + (c.date ? '<span>' + esc(szQuand(c.date)) + '</span>' : '') + '</div>'
+          + '<div class="bilan">' + (parti
+              ? '<b>' + c.envoyes + '</b><span>' + pluriel(c.envoyes, '${T("courriel parti")}', '${T("courriels partis")}').replace(/^[0-9]+ /, '')
+                + (c.echecs ? ' · <em>' + pluriel(c.echecs, '${T("échec")}', '${T("échecs")}') + '</em>' : '') + '</span>'
+              : '<span>—</span>') + '</div>'
+          + '<div class="gestes">' + gestes + '</div></div>';
+      }).join('') + '</div>';
     }
-    h += '</div>' + renvoi();
-    return h;
+    h += '</div>';
+    if (D.resendPret && D.expediteur) {
+      h += '<div class="ls-pied">${T("Expéditeur :")} ' + esc(D.expediteur) + '</div>';
+    }
+    return h + renvoi() + '</div>';
   }
 
   /* ══ ONGLET CHAINES ═════════════════════════════════════════════════════ */
   function vueChaines(){
     var D = DH;
-    if (!D) return '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>';
+    if (!D) return squelListe();
 
-    var h = szTuiles('<div class="tuiles">'
+    var h = '<div class="ls">' + teteListe(D.peutModifier
+      ? '<button class="ed-bt" id="cp-seqpanier" title="${T("Panier abandonné : 1 h, 24 h, 72 h (avec 10 %) — créée en pause, à relire")}">'
+        + '${T("Créer la séquence panier en 3 temps")}</button>'
+        + '<button class="ed-bt fort" id="cp-nouvchaine">${T("+ Nouvelle chaîne")}</button>'
+      : '');
+
+    h += szTuiles('<div class="tuiles">'
       + '<div class="tuile"><div class="lbl">${T("Chaînes actives")}</div><div class="val bon">'
       + (D.actives || 0) + '</div></div>'
       + '<div class="tuile"><div class="lbl">${T("Inscriptions en cours")}</div><div class="val">'
@@ -2080,30 +2148,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
         + '${T("dans cet état abandonnerait les inscriptions sans rien envoyer.")}</div>';
     }
 
-    if (D.peutModifier) {
+    // Le geste qui ENVOIE n apparait que s il y a quelque chose a envoyer — arme en deux clics.
+    if (D.peutModifier && D.dues) {
       var armeT = (ARME === 'traiter');
-      h += '<div class="barreoutils"><button class="mini' + (armeT ? ' arme' : ' prim') + '" id="cp-traiter"'
-        + ((!D.dues || !D.envoisPermis) ? ' disabled' : '') + '>'
+      h += '<div class="ls-action"><span>' + pluriel(D.dues, '${T("étape échue")}', '${T("étapes échues")}')
+        + ', ${T("prêtes à partir")}</span>'
+        + '<button class="ed-bt' + (armeT ? ' arme' : ' fort') + '" id="cp-traiter"'
+        + (!D.envoisPermis ? ' disabled' : '') + '>'
         + (armeT ? '${T("Confirmer — envoyer")} ' + pluriel(D.dues || 0, '${T("étape")}', '${T("étapes")}') + ' ?' : '${T("Traiter les étapes échues")}')
-        + '</button>'
-        + '<div class="droite">' + (D.dues
-            ? pluriel(D.dues, '${T("étape échue")}', '${T("étapes échues")}')
-            : '${T("Rien d’échu pour l’instant")}') + '</div></div>';
+        + '</button></div>';
     }
 
-    if (D.peutModifier) {
-      h += '<div class="barreoutils"><button class="mini prim" id="cp-nouvchaine">'
-        + '${T("+ Nouvelle chaîne")}</button>'
-        + '<button class="mini" id="cp-seqpanier" title="${T("Panier abandonné : 1 h, 24 h, 72 h (avec 10 %) — créée en pause, à relire")}">'
-        + '${T("Créer la séquence panier en 3 temps")}</button></div>';
-    }
-
+    h += '<div class="ls-liste sz-pagee">';
     if (!(D.chaines || []).length) {
-      h += '<div class="carte"><div class="vide">${T("Aucune chaîne pour l’instant.")} '
-        + '${T("Cliquez « + Nouvelle chaîne ».")}</div></div>';
+      h += '<div class="ls-vide">${T("Aucune chaîne pour l’instant.")} '
+        + '${T("Cliquez « + Nouvelle chaîne ».")}</div>';
     } else {
-      // Les chaines en PAGES mesurees (JS_PAGES du socle) : une carte par chaine, la pile prend la hauteur qui reste.
-      h += '<div class="sz-pagee"><div data-pages="campagnes-chaines">' + (D.chaines || []).map(function(ch){
+      // Les chaines en PAGES mesurees (JS_PAGES du socle) : un rang par chaine.
+      h += '<div data-pages="campagnes-chaines">' + (D.chaines || []).map(function(ch){
         var gestes = '';
         if (D.peutModifier) {
           gestes += '<button class="mini geste" data-chmodif="' + esc(ch.id) + '">${T("Modifier")}</button>';
@@ -2115,28 +2177,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
           gestes += '<button class="mini geste danger' + (armeS ? ' arme' : '') + '" data-chsuppr="'
             + esc(ch.id) + '">' + (armeS ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
         }
-        return '<div class="carte chaine">'
-          + '<div class="entete"><div><h3>' + esc(ch.nom) + '</h3>'
-          + (ch.description ? '<div class="desc">' + esc(ch.description) + '</div>' : '') + '</div>'
-          + '<span class="rf-pill ' + (ch.active ? 'vert' : '') + '">'
+        // La ligne du temps : quatre etapes au plus, le reste en « +n ».
+        var et = ch.etapes || [];
+        var temps = et.length
+          ? '<div class="ls-temps">' + et.slice(0, 4).map(function(e){
+              return '<span class="pt"><i></i><b>' + esc(e.delai) + '</b><small>' + esc(e.sujet) + '</small></span>';
+            }).join('') + (et.length > 4 ? '<span class="plus">+' + (et.length - 4) + '</span>' : '') + '</div>'
+          : '<div class="ls-temps rien">${T("Aucune étape : cette chaîne n’enverra rien.")}</div>';
+        return '<div class="ls-rang ls-ch' + (ch.active ? '' : ' eteinte') + '">'
+          + '<div class="qui"><span class="bico" aria-hidden="true">' + esc(initiales(ch.nom)) + '</span>'
+          + '<div class="tx"><b>' + esc(ch.nom) + '</b><span>' + esc(ch.description || ch.declencheurLibelle) + '</span></div></div>'
+          + temps
+          + '<div class="etat"><span class="rf-pill ' + (ch.active ? 'vert' : '') + '">'
           + (ch.active ? '${T("Active")}' : '${T("Suspendue")}') + '</span>'
-          + '<span class="rf-pill bleu">' + esc(ch.declencheurLibelle) + '</span>'
-          + '<div class="gestes">' + gestes + '</div></div>'
-          + '<div class="compte">' + pluriel((ch.etapes || []).length, '${T("étape")}', '${T("étapes")}') + ' · '
-          + ch.inscriptionsActives + ' ${T("en cours ·")} '
-          + pluriel(ch.inscriptionsFinies, '${T("terminée")}', '${T("terminées")}') + '</div>'
-          + ((ch.etapes || []).length
-              ? '<div class="etapes">' + ch.etapes.map(function(e){
-                  return '<div class="etape"><span class="no">' + e.no + '.</span> '
-                    + esc(e.delai) + '<div class="suj">' + esc(e.sujet) + '</div></div>';
-                }).join('') + '</div>'
-              : '<div class="dt">${T("Aucune étape : cette chaîne n’enverra rien.")}</div>')
-          + '</div>';
-      }).join('') + '</div></div>';
+          + '<span class="rf-pill bleu">' + esc(ch.declencheurLibelle) + '</span></div>'
+          + '<div class="bilan"><b>' + (ch.inscriptionsActives || 0) + '</b><span>${T("en cours ·")} '
+          + pluriel(ch.inscriptionsFinies || 0, '${T("terminée")}', '${T("terminées")}') + '</span></div>'
+          + '<div class="gestes">' + gestes + '</div></div>';
+      }).join('') + '</div>';
     }
-
-    h += renvoi();
-    return h;
+    h += '</div>';
+    return h + renvoi() + '</div>';
   }
 
   function dessiner(){
@@ -2146,6 +2207,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     if (FORM) {
       if (sous) sous.textContent = '';
       corps.classList.add('formulaire');
+      corps.classList.remove('ls-corps');
       // L editeur de campagne refait (2026-10-15) occupe tout le corps, sans la marge des listes.
       corps.classList.toggle('ed-corps', FORM.type === 'campagne' || FORM.type === 'chaine' || FORM.type === 'segment');
       corps.innerHTML = (FORM.type === 'chaine') ? vueFormChaine()
@@ -2161,7 +2223,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     if (sous) sous.textContent = (vu && !vu.peutModifier) ? 'consultation seulement' : '';
     corps.classList.remove('formulaire');
     corps.classList.remove('ed-corps');
-    corps.innerHTML = onglets() + (ONGLET === 'chaines' ? vueChaines()
+    corps.classList.add('ls-corps');
+    corps.innerHTML = (ONGLET === 'chaines' ? vueChaines()
       : ONGLET === 'segments' ? vueSegments() : vueCampagnes());
     brancher();
   }

@@ -577,4 +577,9 @@ module.exports = {
   'Un segment ne fait que restreindre la liste des abonnées actives : il n’ajoute jamais personne.': 'A segment only narrows the list of active subscribers: it never adds anyone.',
   'et': 'and',
   '← Segments': '← Segments',
+  // 2026-10-15 : les listes refaites (lot A).
+  '% des abonnés actifs': '% of active subscribers',
+  'Inutilisé': 'Unused',
+  'destinataire': 'recipient',
+  'destinataires': 'recipients',
 };
