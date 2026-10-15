@@ -584,6 +584,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
           + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(o.client)) + '</span>'
           +   '<div style="min-width:0"><div class="rf-nom">' + esc(o.client)
           +     (o.prioritaire ? ' <span class="rf-pill ambre" title="${T("Traitement prioritaire")}">${T("Prioritaire")}</span>' : '')
+          // Vente saisie a la caisse (2026-10-15, sa demande) : rien a preparer, on la reconnait d un coup d oeil.
+          +     (o.manuelle ? ' <span class="rf-pill bleu" title="${T("Vente saisie à la caisse")}">${T("Manuelle")}</span>' : '')
           +     (attente ? ' <span class="rf-pill bleu">${T("étiquette prête")}</span>' : '') + '</div>'
           +   '<div class="rf-sous"><span class="rf-code">' + esc(o.numero) + '</span><span>·</span><span>'
           +     esc(dateCourte(o.date)) + '</span>' + (o.ville ? '<span>·</span><span>' + esc(o.ville) + '</span>' : '')
@@ -700,6 +702,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       h += '<span class="et ' + couleurStatut(c.statut) + '">' + esc(libelleStatut(c.statut)) + '</span>';
     }
     h += (c.prioritaire ? '<span class="badge2 or"><span class="ic" aria-hidden="true">⚡</span> ${T("Prioritaire")}</span>' : '')
+      + (c.manuelle ? '<span class="badge2" title="${T("Vente saisie à la caisse")}">${T("Manuelle")}</span>' : '')
       + (d.remboursements.complet ? '<span class="badge2 vertf"><span class="ic">✅</span> ${T("Remboursée")}</span>'
           : (d.remboursements.lignes.length
               ? '<span class="badge2 or">↩ ' + d.remboursements.lignes.length + ' ' + szPl(d.remboursements.lignes.length, '${T("remboursement")}', '${T("remboursements")}') + '</span>' : ''))

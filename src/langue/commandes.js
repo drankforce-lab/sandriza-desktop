@@ -255,6 +255,8 @@ module.exports = {
   'En traitement': 'Being handled',
   'Prioritaire': 'Priority',
   'Traitement prioritaire': 'Priority handling',
+  'Manuelle': 'Manual',
+  'Vente saisie à la caisse': 'Sale entered at the register',
   'Bon de commande': 'Picking slip',
   'Facture': 'Invoice',
   'Frais retenus (': 'Fees kept (',
