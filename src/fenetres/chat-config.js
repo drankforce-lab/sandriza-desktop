@@ -30,7 +30,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, JS_BORNER } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -142,7 +142,7 @@ function pageChatConfig(onglet) {
     if (actif) { b.textContent='${T("⧉ Détacher")}'; b.title='${T("Ouvrir cet écran dans sa propre fenêtre")}'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
     else { b.textContent='${T("⚓ Ancrer")}'; b.title='${T("Ramener cet écran dans la fenêtre principale")}'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'c-nom':40,'c-photo':500,'c-courriel':120,'c-accueil':300,'c-accueil-en':300,'c-horsligne':600,'c-horsligne-en':600,'input[data-ag-nom]':40,'input[data-ag-photo]':500,'i-transfert':300,'i-regles':4000})}
   var corps = document.getElementById('corps');
   var D = null, RO = true, OCCUPE = false;
   var ONGLET = ${JSON.stringify(ONG0)};

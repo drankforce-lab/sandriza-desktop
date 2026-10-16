@@ -20,7 +20,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, JS_BORNER } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -179,7 +179,7 @@ function pageMarque(onglet) {
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'m-name':40,'m-slogan':80,'m-slogan-en':80,'m-sub':120,'m-letter':2})}
   var corps = document.getElementById('corps');
   var ongl = document.getElementById('onglets');
   var bsave = document.getElementById('b-save');

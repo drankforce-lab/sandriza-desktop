@@ -707,6 +707,8 @@ function rapportChamps(res, pages, rates, lotsMorts, duree, nomsFen) {
     W.champs = Math.max(W.champs, s.champs || 0); W.remplis = Math.max(W.remplis, s.remplis || 0);
     W.sansBorne = Math.max(W.sansBorne, s.sansBorne || 0); W.nombresSansBorne = Math.max(W.nombresSansBorne, s.nombresSansBorne || 0);
     for (const e of (s.exSansBorne || [])) if (W.exSansBorne.length < 4 && !W.exSansBorne.includes(e)) W.exSansBorne.push(e);
+    W.sansBorneListe = W.sansBorneListe || [];
+    for (const e of (s.liste || [])) if (!W.sansBorneListe.includes(e)) W.sansBorneListe.push(e);
     for (const e of (x.errCharge || [])) W.errCharge.push(p.scen + ' : ' + e);
     for (const t of (x.trouve || [])) {
       const cle = p.nom + '|' + t.type + '|' + t.sig;

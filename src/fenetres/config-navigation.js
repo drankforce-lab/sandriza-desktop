@@ -17,7 +17,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, JS_BORNER } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠⚠ On ne traduit QUE ce qui se lit ICI — jamais l etiquette ni le
@@ -135,7 +135,7 @@ function pageConfigNavigation() {
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'input[data-field=label]':30,'input[data-field=href]':300})}
   /* ⚠⚠⚠ L ETIQUETTE ET LE LIEN D UN NOUVEL ELEMENT SONT ECRITS DANS LE MENU DU
      SITE : c est la CLIENTE qui les lit, pas l administration. Les traduire ici
      poserait un mot anglais dans une boutique francaise, et personne ne saurait

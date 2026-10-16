@@ -17,7 +17,7 @@
  * compris : tout ce script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU, JS_BORNER } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
    poste. ⚠⚠ Le contenu de l'offre de bienvenue (titre, sous-titre, bouton,
    mention légale) est TAPÉ ici et LU PAR LA VISITEUSE : c'est de la donnée, pas
@@ -157,7 +157,7 @@ function pageNewsletter(ouverture) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('newsletter')}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'nl-from-n':60,'nl-trans-from-n':60,'nl-co-name':80,'nl-co-addr':200,'nl-website-url':300,'nl-from-e':120,'nl-reply':120,'nl-trans-from-e':120,'nl-test-e':120,'offer-img':500})}${JS_TUILES('newsletter')}
   var corps = document.getElementById('corps');
   var sous = document.getElementById('sous');
   var ongletsEl = document.getElementById('onglets');

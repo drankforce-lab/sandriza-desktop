@@ -16,7 +16,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, JS_BORNER } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠ On ne traduit QUE ce qui se lit — jamais l adresse de renvoi, qui
@@ -112,7 +112,7 @@ function pageConfigRetours() {
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'f-name':80,'f-street':120,'f-city':60,'f-province':40,'f-postal':12,'f-country':40})}
   var corps = document.getElementById('corps');
   var bsave = document.getElementById('b-save');
   var D = null, RO = false, OCCUPE = false;

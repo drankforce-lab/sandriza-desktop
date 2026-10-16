@@ -2069,6 +2069,29 @@ function szConfirmer(o){
 }
 `;
 
+/* ══ LES BORNES DE SAISIE (2026-10-16, sa demande : « borne les champs affichés sur la boutique ») ══
+   Un texte saisi ici s affiche chez la cliente (boutique, courriel, clavardage) :
+   sans limite, un slogan de 3 000 caracteres deforme la page publique. Chaque
+   fenetre declare SA table — { id ou selecteur : longueur } — et cette piece pose
+   le maxlength, puis le REPOSE a chaque redessin (la plupart des fenetres
+   reconstruisent leur formulaire par innerHTML, et un maxlength pose une fois
+   disparaitrait au premier redessin).
+   ⚠ LES MEMES CHIFFRES SONT DANS LE COEUR DU SITE (troncature a l ecriture) :
+   le maxlength n arrete que la frappe, le coeur ne s y fie pas. A changer DES
+   DEUX COTES. banc-champs.js les remplit a leur maximum. */
+const JS_BORNER = (table) => `
+  (function(){
+    var B = ${JSON.stringify(table || {})};
+    function poser(){
+      for (var k in B) {
+        var l = /^[a-z][\\w-]*$/i.test(k) ? [document.getElementById(k)] : document.querySelectorAll(k);
+        for (var i = 0; i < l.length; i++) { var e = l[i]; if (e && e.maxLength !== B[k]) e.maxLength = B[k]; }
+      }
+    }
+    poser();
+    try { new MutationObserver(poser).observe(document.body, { childList: true, subtree: true }); } catch (e) {}
+  })();
+`;
 const JS_DIRE = () => JS_DIRE_BASE() + JS_PLEIN() + JS_PLEIN_AUTO() + JS_FENPLEIN()
   + JS_VERROUS() + JS_LOTS() + JS_AUTOPAGE() + JS_PAGES() + JS_COMPTE() + JS_MESURES()
   + JS_DATES() + JS_FINITIONS() + JS_JUMEAUX + JS_CTX() + JS_CONFIRMER();
@@ -4452,6 +4475,6 @@ html.jour:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) .onglets button.on
 
 module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_CARBONE + CSS_CTX,
   CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_CARBONE + CSS_CTX,
-  JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_THEMES, CSS_FICHE, ICO,
+  JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, JS_BORNER, CSS_THEMES, CSS_FICHE, ICO,
   /* La page, pas son texte : voir l en-tete de ce fichier. */
   TETE, LIEU, SEP_DEC };

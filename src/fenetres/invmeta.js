@@ -22,7 +22,7 @@
  * COMPRIS : tout ce script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, JS_BORNER } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -170,7 +170,7 @@ function pageInvMeta(ouverture) {
   var P = window.szPont;
   // Le « + » des en-têtes de tableau : un trait centré par construction (voir button.ic.plus svg).
   var PLUS_SVG = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>';
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'inv-color-name':30,'inv-color-hex':7,'ec-name':30,'ec-hex':7,'sz-input':120,'at-key':40,'at-fr':40,'at-en':40,'ic-name':40,'ic-nameen':40,'ic-key':40})}
   var corps = document.getElementById('corps');
   var sous = document.getElementById('sous');
   var ongletsEl = document.getElementById('onglets');

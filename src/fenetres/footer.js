@@ -14,7 +14,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, JS_BORNER } = require('./socle.js');
 
 /* La langue du poste, resolue A LA GENERATION : la page naît dans la bonne
    langue. ⚠⚠⚠ On ne traduit QUE ce qui se lit ICI — jamais l adresse, le
@@ -118,7 +118,7 @@ function pageFooter() {
       b.onclick = function(){ if (P && P.ancrer) P.ancrer(); };
     }
   };
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'fc-tagline':120,'fc-address':200,'fc-address-en':200,'fc-email':120,'fc-phone':30,'fc-tps':20,'fc-tvq':20})}
   var corps = document.getElementById('corps');
   var bsave = document.getElementById('b-save');
   var D = null, RO = false, MARQUE = 'SANDRIZA', ANNEE = 2026;

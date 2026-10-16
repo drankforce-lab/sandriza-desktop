@@ -43,7 +43,7 @@
  * ⚠ ANCRÉE = PLEINE PAGE. ⚠ Aucun caractère accent-grave dans la portion script.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, CSS_JOUR, ICO, TETE, LIEU, JS_BORNER } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
    poste. ⚠⚠⚠ CET ÉCRAN ÉDITE CE QUE LA CLIENTE LIT : la frontière entre
    l'interface et la donnée y passe au milieu de la même phrase. Ce qui est une
@@ -279,7 +279,7 @@ function pagePages(onglet) {
     if (actif) { b.textContent='${T("⧉ Détacher")}'; b.title='${T("Ouvrir cet écran dans sa propre fenêtre")}'; b.onclick=function(){ if(P&&P.detacher)P.detacher(); }; }
     else { b.textContent='${T("⚓ Ancrer")}'; b.title='${T("Ramener cet écran dans la fenêtre principale")}'; b.onclick=function(){ if(P&&P.ancrer)P.ancrer(); }; }
   };
-${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'pol-t':120,'pol-s':200})}${JS_BROUILLON()}
   var corps = document.getElementById('corps');
   var ongletsEl = document.getElementById('onglets');
   var D = null, RO = false, OCCUPE = false;

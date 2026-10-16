@@ -31,7 +31,7 @@
  * ⚠ LE COIN DROIT DE L'EN-TÊTE EST RÉSERVÉ AU VERROU, et à rien d'autre.
  */
 
-const { CSS_SOCLE, CSS_JOUR, CSS_FICHE, JS_SOCLE, ICO, TETE, LIEU } = require('./socle');
+const { CSS_SOCLE, CSS_JOUR, CSS_FICHE, JS_SOCLE, ICO, TETE, LIEU, JS_BORNER } = require('./socle');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -357,7 +357,7 @@ function pageProduit(id) {
 <script>
 (function(){
   'use strict';
-  ${JS_SOCLE()}
+  ${JS_SOCLE()}${JS_BORNER({'p-marque':60,'p-desc':4000,'p-prix':12,'p-solde':12,'p-cout':12})}
   MOTIFS.prix_invalide  = '${T("Le prix doit être supérieur à zéro.")}';
   MOTIFS.cout_requis    = '${T("Le coût d’acquisition est obligatoire.")}';
   MOTIFS.poids_requis   = '${T("Le poids unitaire est obligatoire.")}';

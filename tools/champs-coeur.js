@@ -183,7 +183,7 @@
   function auRepos() {
     var cs = controles();
     var champs = cs.filter(estChamp);
-    var stat = { champs: champs.length, controles: cs.length, sansBorne: 0, nombresSansBorne: 0, exSansBorne: [] };
+    var stat = { champs: champs.length, controles: cs.length, sansBorne: 0, nombresSansBorne: 0, exSansBorne: [], liste: [] };
     champs.forEach(function (el) {
       var r = el.getBoundingClientRect(), I = interieur(el), t = el.type;
       // ECRASE
@@ -216,7 +216,7 @@
       // pour information
       if (estSaisie(el) && !el.readOnly && !el.disabled) {
         if (t === 'number') { if (el.min === '' || el.max === '') stat.nombresSansBorne++; }
-        else if (el.maxLength < 0 && !/^(date|time|datetime-local|month|week)$/.test(t)) { stat.sansBorne++; if (stat.exSansBorne.length < 4) stat.exSansBorne.push(nomDe(el) || signature(el)); }
+        else if (el.maxLength < 0 && !/^(date|time|datetime-local|month|week)$/.test(t)) { stat.sansBorne++; if (stat.exSansBorne.length < 4) stat.exSansBorne.push(nomDe(el) || signature(el)); stat.liste.push(signature(el) + ' | ' + (t || el.tagName.toLowerCase()) + ' | ' + nomDe(el)); }
       }
     });
     // Les paires : CHEVAUCHE, COLLE, HAUTEURS

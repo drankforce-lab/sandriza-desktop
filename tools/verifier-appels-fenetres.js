@@ -80,7 +80,9 @@ const litSocle = () => {
 /* ⚠ `JS_TUILES` (2026-09-14) est le cinquième, et il prend un ARGUMENT — la clé
    de la fenêtre : `${JS_TUILES('remboursements')}`. Même chose que les quatre
    autres : Node le résout avant que le script existe. */
-const BLOCS_SOCLE = ['JS_SOCLE', 'JS_ACTIVITE', 'JS_DIRE', 'JS_BROUILLON', 'JS_TUILES', 'T'];
+/* JS_BORNER (2026-10-16) : le sixieme, avec un argument lui aussi — la table des bornes de
+   saisie de la fenetre : `${JS_BORNER({'m-name':40})}`. */
+const BLOCS_SOCLE = ['JS_SOCLE', 'JS_ACTIVITE', 'JS_DIRE', 'JS_BROUILLON', 'JS_TUILES', 'JS_BORNER', 'T'];
 
 const GLOBALES = new Set([
   ...BLOCS_SOCLE,  'setTimeout', 'clearTimeout', 'setInterval', 'clearInterval',
