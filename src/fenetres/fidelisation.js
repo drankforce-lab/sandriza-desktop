@@ -1161,7 +1161,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     if (PARARME !== 'verser') {
       var tP = PAR.totaux || {};
       szConfirmer({ prudent: true, titre: '${T("Verser les récompenses de parrainage")}',
-        texte: '${T("Les récompenses dues seront versées en crédit boutique aux clientes concernées. Un versement effectué ne peut pas être annulé.")}',
+        texte: '${T("Les récompenses dues seront versées en crédit boutique aux clients concernés. Un versement effectué ne peut pas être annulé.")}',
         details: [['${T("Montant dû")}', szArgent(tP.du || 0)]],
         oui: '${T("Verser les récompenses")}' }).then(function(ok){ if (ok) { PARARME = 'verser'; parVerser(b); } });
       return;

@@ -516,7 +516,7 @@ module.exports = {
   'La candidature de': 'The application from',
   'sera supprimée définitivement. Cette action est irréversible.': 'will be permanently deleted. This action cannot be undone.',
   'Verser les récompenses de parrainage': 'Pay referral rewards',
-  'Les récompenses dues seront versées en crédit boutique aux clientes concernées. Un versement effectué ne peut pas être annulé.': 'The rewards due will be paid as store credit to the customers concerned. A completed payout cannot be reversed.',
+  'Les récompenses dues seront versées en crédit boutique aux clients concernés. Un versement effectué ne peut pas être annulé.': 'The rewards due will be paid as store credit to the customers concerned. A completed payout cannot be reversed.',
   'Supprimer toutes les invitations': 'Delete all invitations',
   'Toutes les invitations aux sondages seront supprimées définitivement. Les réponses déjà reçues sont conservées. Cette action est irréversible.': 'All survey invitations will be permanently deleted. Responses already received are kept. This action cannot be undone.',
   'Supprimer les invitations': 'Delete invitations',
