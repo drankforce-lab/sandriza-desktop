@@ -63,7 +63,7 @@ input:focus,select:focus,button:focus{outline:none;border-color:var(--or)}
 .jeton{font-size:.73rem;padding:.14rem .5rem;border-radius:99px}
 .jeton.on{background:rgba(var(--or-rgb),.2);border-color:var(--or);color:var(--tx-creme);font-weight:600}
 .prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
-.vues{display:flex;gap:.15rem;margin-left:auto}
+.vues{display:flex;gap:.35rem;margin-left:auto}
 .vues button.on{border-color:var(--or);background:rgba(var(--or-rgb),.16)}
 /* Le corps : la liste a gauche, l apercu a droite — comme un explorateur. */
 .corps{flex:1 1 auto;min-height:0;display:flex}

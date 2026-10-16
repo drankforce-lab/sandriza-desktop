@@ -97,7 +97,7 @@ module.exports = {
   /* ── CE QUE LE BANC RESIDUEL A TROUVE ──────────────────────────────────── */
   'Aucune unité en stock': 'No unit in stock',
   'Rechercher un produit': 'Search for a product',
-  'Rechercher un produit…': 'Search for a product…',
+  'Rechercher…': 'Search…',
   'Mettre en premier les produits présents dans des paniers actifs': 'Put the products sitting in active baskets first',
   'Ouvrir la fiche': 'Open the record',
   '🟡 Liquidation': '🟡 Clearance',

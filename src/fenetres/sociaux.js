@@ -126,6 +126,9 @@ label.case input{width:15px;height:15px;accent-color:var(--or)}
    cheveu sur la proportion ferait valider un cadrage qui sera rogne. Le 2:3
    ci-dessous n est que le defaut, celui de Pinterest.
    ⚠ AUCUNE OPACITE SUR UN TEXTE (lecon du 2026-09-14) : --tx2 est mesure. */
+/* La barre des reseaux (Pinterest, Instagram…) : sa regle vivait dans campagnes.js seulement,
+   et ici les quatre boutons se touchaient (2026-10-16, banc-champs). */
+.bqbar{display:flex;gap:.3rem;flex-wrap:wrap}
 .epg{display:grid;grid-template-columns:minmax(0,1fr) 20rem;gap:.9rem;align-items:start}
 @media (max-width:52rem){.epg{grid-template-columns:minmax(0,1fr)}}
 .epg .cg,.epg .cd{display:flex;flex-direction:column;gap:.5rem;min-width:0}
@@ -441,9 +444,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
   function epChamp(cle, lib, max, longue){
     var id = 'ep-' + cle, v = epLire(cle);
     var n = v.length, trop = (max && n > max);
+    /* ⚠ LA LIMITE ANNONCEE EST TENUE (2026-10-16, banc-champs) : le compteur disait
+       « 300 / 100 » et le champ l acceptait — le reseau l aurait refusee a l envoi.
+       maxlength n arrete que la FRAPPE : un texte plus long venu de l IA reste
+       affiche, et le compteur rouge le signale. */
+    var lim = max ? ' maxlength="' + max + '"' : '';
     var corps2 = longue
-      ? '<textarea id="' + id + '" data-epc="' + cle + '">' + esc(v) + '</textarea>'
-      : '<input id="' + id + '" data-epc="' + cle + '" value="' + esc(v) + '">';
+      ? '<textarea id="' + id + '" data-epc="' + cle + '"' + lim + '>' + esc(v) + '</textarea>'
+      : '<input id="' + id + '" data-epc="' + cle + '" value="' + esc(v) + '"' + lim + '>';
     /* Deux par deux (sa demande : aucune barre de defilement) — plus de "plein". */
     return '<div><label for="' + id + '">' + esc(lib) + '</label>' + corps2
       + (max ? '<div class="cnt' + (trop ? ' trop' : '') + '" id="' + id + '-n">'

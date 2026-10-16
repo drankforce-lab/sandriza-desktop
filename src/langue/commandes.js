@@ -82,7 +82,7 @@ module.exports = {
   'Date': 'Date',
   'Total': 'Total',
   'Statut': 'Status',
-  ', numéro de suivi': ', tracking number',
+  ', suivi': ', tracking',
   'étiquette prête': 'label ready',
   'sans numéro': 'no number',
   '← Préc.': '← Prev.',

@@ -131,5 +131,6 @@ module.exports = {
   /* ── LES ONGLETS (2026-09-26) ── */
   'Mots de passe': 'Passwords',
   'Inactivité et session': 'Inactivity and session',
-  'Restriction géographique': 'Geographic restriction'
+  'Restriction géographique': 'Geographic restriction',
+  'Valeur ramenée dans sa plage :': 'Value brought back within its range:'
 };

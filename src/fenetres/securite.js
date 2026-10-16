@@ -96,6 +96,8 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .recherche:focus{outline:none;border-color:var(--or)}
 .filtres select{font:inherit;font-size:.79rem;background:var(--f-champ);border:1px solid var(--v12);
   border-radius:8px;color:var(--tx);padding:.4rem .55rem;max-width:14rem}
+/* Une seule hauteur pour la rangee des filtres (2026-10-16, banc-champs : 37 px a cote de 34). */
+.filtres .recherche,.filtres select{height:2.15rem;box-sizing:border-box}
 .filtres select:focus{outline:none;border-color:var(--or)}
 .fgr{display:flex;gap:.25rem;align-items:center}
 .fgr .lbl{font-size:.72rem;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;margin-right:.15rem}

@@ -101,7 +101,7 @@ tbody td{padding:.3rem .4rem;border-top:1px solid var(--v055);vertical-align:mid
 .onglets > button{background:transparent;border:1px solid transparent;color:var(--tx2);padding:.38rem .7rem;
   font:inherit;font-weight:600;font-size:.82rem;cursor:pointer}
 .onglets > button:hover{background:var(--v05);color:var(--tx)}
-.onglets .droite{margin-left:auto}
+.onglets .droite{margin-left:auto;display:flex;gap:.4rem;align-items:center}
 `;
 
 /** Page complète de la fenêtre native « Paiements Square ». */

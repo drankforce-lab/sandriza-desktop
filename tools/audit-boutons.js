@@ -83,6 +83,12 @@ const LOT = (() => { const v = VAL('lot', ''); const m = /^(\d+)\/(\d+)$/.exec(v
 const LARGEUR = 1400, HAUT = 833;
 const FILTRE = !!(CHOISIES.length || LOT || JEU_N !== null);
 const M_OPT = OPT('--options');
+/* --champs (2026-10-16) : le banc des CHAMPS ET DES ESPACEMENTS (banc-champs.js).
+   Même montage, un autre épilogue (champs-coeur.js), un relevé par scénario. */
+const M_CHAMPS = OPT('--champs');
+const ECRIRE_DETTE_CH = OPT('--dette');
+const DETTE_CH = path.join(__dirname, 'champs-dette.json');
+const RAPPORT_CH = path.join(__dirname, 'champs-rapport.json');
 const RAPPORT_OPT = path.join(__dirname, 'audit-options-rapport.json');
 
 /* Les appels qui partent SANS geste de l'usager (minuteries du socle) : ils ne
@@ -97,7 +103,13 @@ const _morceau = (marque) => {
   return parts[1].split('/* ==== ')[0].trim();
 };
 const PROLOGUE_BRUT = _morceau('PROLOGUE');
-const EPILOGUE_BRUT = _morceau('EPILOGUE');
+const EPILOGUE_BRUT = (() => {
+  if (!OPT('--champs')) return _morceau('EPILOGUE');
+  const src = fs.readFileSync(path.join(__dirname, 'champs-coeur.js'), 'utf8');
+  const p = src.split('/* ==== EPILOGUE ==== */');
+  if (p.length < 2) throw new Error('champs-coeur.js sans EPILOGUE');
+  return p[1].trim();
+})();
 /* ⚠ REMPLACEMENT PAR FONCTION : dans une chaîne de remplacement, « $& » est un motif. */
 const prologue = (jeu) => '<script>\n' + PROLOGUE_BRUT.replace('__REPONSES__',
   () => JSON.stringify(Object.assign({}, OPS_SOCLE, jeu.reponses || {}, { __emprunts: jeu.emprunts || {} })).replace(/<\/script/gi, '<\\/script')) + '\n</script>';
@@ -223,7 +235,7 @@ function fenetres() {
      ne valent rien — et c'est surtout le MUET qui compte : un écouteur global
      du socle qui toucherait au DOM à chaque clic ferait passer tous les muets
      pour vivants. */
-  if (!M_OPT) {
+  if (!M_OPT && !M_CHAMPS) {
     const SOCLE = require(path.join(DOS_FEN, 'socle.js'));
     out.push({ nom: '_temoin', cas: [{ i: 0, nom: 'témoin', jeu: { id: '', reponses: {} } }], fabrique: () =>
       '<!doctype html><html><head><meta charset="utf-8"><style>' + SOCLE.CSS_SOCLE + '</style></head><body>'
@@ -234,6 +246,28 @@ function fenetres() {
       + 'document.getElementById("t-appel").onclick=function(){szConfirmer({titre:"Témoin",oui:"Oui"}).then(function(ok){if(ok)P.appeler("temoin:op",1);});};'
       + 'document.getElementById("t-err").onclick=function(){null.x();};'
       + '<\/script></body></html>' });
+  }
+  if (M_CHAMPS) {
+    /* ⚠ LE TÉMOIN DES CHAMPS : un défaut de CHAQUE sorte, posé exprès, et une
+       rangée PROPRE. Un banc qui ne voit pas les premiers ne garde rien ; un banc
+       qui accuse la seconde crie au loup et finit débranché. */
+    const SOCLE = require(path.join(DOS_FEN, 'socle.js'));
+    out.push({ nom: '_temoinChamps', cas: [{ i: 0, nom: 'témoin', jeu: { id: '', reponses: {} } }], fabrique: () =>
+      '<!doctype html><html><head><meta charset="utf-8"><style>' + SOCLE.CSS_SOCLE
+      + 'body{padding:20px}.r{display:flex;gap:12px;margin:0 0 24px;align-items:flex-start}'
+      + '.r input,.r select,.r button{border-radius:6px}</style></head><body>'
+      + '<div class="r"><input id="t-ecrase" aria-label="Ecrase" style="width:20px"></div>'
+      + '<div class="r"><input id="t-coupe" aria-label="Coupe" style="height:12px;font-size:16px;padding:0;box-sizing:content-box"></div>'
+      + '<div class="r"><select id="t-tronque" aria-label="Tronque" style="width:70px"><option>Une option beaucoup trop longue pour sa boite</option></select></div>'
+      + '<div class="r" style="position:relative;height:40px"><button id="t-dessous" style="position:absolute;left:0;top:0;width:120px">Dessous</button>'
+      + '<button id="t-dessus" style="position:absolute;left:60px;top:0;width:120px">Dessus</button></div>'
+      + '<div class="r" style="gap:0"><button id="t-colle1">Colle 1</button><button id="t-colle2">Colle 2</button></div>'
+      + '<div class="r"><input id="t-etire" aria-label="Etire" style="width:80px" oninput="this.style.width=(this.value.length+2)+\'ch\'"></div>'
+      + '<div class="r"><div><input id="t-limite" aria-label="Limite" style="width:200px" oninput="document.getElementById(\'t-cpt\').textContent=this.value.length+\' / 20\'"><span id="t-cpt">0 / 20</span></div></div>'
+      + '<div class="r"><input id="t-haut" aria-label="Haut" style="height:40px;width:120px"><input id="t-bas" aria-label="Bas" style="height:24px;width:120px"></div>'
+      + '<div class="r" id="t-propre"><input aria-label="Propre A" maxlength="40" style="width:200px;height:32px"><input aria-label="Propre B" maxlength="40" style="width:200px;height:32px">'
+      + '<button style="height:32px">Propre</button></div>'
+      + '</body></html>' });
   }
   if (M_OPT) {
     const SOCLE = require(path.join(DOS_FEN, 'socle.js'));
@@ -341,7 +375,7 @@ function main() {
     }
   }
   const nbLots = Math.ceil(pages.length / PAR_LOT);
-  console.log((M_OPT ? '== AUDIT DES OPTIONS — ' : '== AUDIT DES BOUTONS — ') + liste.length + ' fenêtre(s), ' + pages.length + ' scénario(s), '
+  console.log((M_CHAMPS ? '== BANC DES CHAMPS ET DES ESPACEMENTS — ' : M_OPT ? '== AUDIT DES OPTIONS — ' : '== AUDIT DES BOUTONS — ') + liste.length + ' fenêtre(s), ' + pages.length + ' scénario(s), '
     + nbLots + ' lot(s) de ' + PAR_LOT + ', ' + PARALLELES + ' iframe(s) en vol, observation ' + OBS + ' ms ==');
 
   const res = [];
@@ -388,10 +422,10 @@ function main() {
       + Math.round((Date.now() - tl) / 1000) + ' s  [' + noms.slice(0, 90) + ']');
   }
   const duree = Math.round((Date.now() - t0) / 1000);
-  (M_OPT ? rapportOptions : rapport)(res, pages, rates, lotsMorts, duree, liste.map((f) => f.nom));
+  const code = (M_CHAMPS ? rapportChamps : M_OPT ? rapportOptions : rapport)(res, pages, rates, lotsMorts, duree, liste.map((f) => f.nom));
   if (!GARDER) { try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (e) {} }
   else console.log('   (dossier gardé : ' + tmp + ')');
-  process.exit(0);
+  process.exit(M_CHAMPS ? (code || 0) : 0);
 }
 
 /* ── LE CLASSEMENT ────────────────────────────────────────────────────────── */
@@ -648,6 +682,99 @@ function rapportOptions(res, pages, rates, lotsMorts, duree, nomsFen) {
       PERDU: 'aucune réaction ET enregistrement identique au témoin : SUSPECT', MUET: 'rien, et aucun Enregistrer', 'NON JUGÉ': 'voir « pourquoi »', ERREUR: 'exception' } }, doc);
   fs.writeFileSync(RAPPORT_OPT, JSON.stringify(doc, null, 1), 'utf8');
   L('   rapport : ' + path.relative(RACINE, RAPPORT_OPT) + (FILTRE ? ' (fusionné : ' + T2.fenetres + ' fenêtre(s) au total)' : ''));
+}
+
+/* ── LE BANC DES CHAMPS (--champs) ──────────────────────────────────────────
+   Un relevé par scénario ; un défaut se reconnaît d'un passage à l'autre par
+   « fenêtre | sorte | signature » (pas par le scénario : le même champ revient
+   dans dix scénarios). La DETTE (champs-dette.json) liste ceux qu'on a vus et
+   JUGÉS acceptables, chacun avec sa raison ; le banc échoue sur tout autre. */
+const SORTES_CH = ['ERREUR_SAISIE', 'DEPASSE_LIMITE', 'CHEVAUCHE', 'DEBORDE', 'TEXTE_COUPE', 'ECRASE', 'S_ETIRE', 'POUSSE_HORS', 'PAGE_ELARGIE',
+  'PAGE_ALLONGEE', 'CHOIX_TRONQUE', 'INDICATION_TRONQUEE', 'HAUTEURS', 'COLLE'];
+function rapportChamps(res, pages, rates, lotsMorts, duree, nomsFen) {
+  const parFic = {};
+  for (const p of pages) parFic[p.fic] = p;
+  const F = {};
+  const vus = new Set();
+  for (const x of res) {
+    const p = parFic[x.u] || { nom: x.nom || '?', scen: x.scen || '?' };
+    const W = F[p.nom] || (F[p.nom] = { scenarios: 0, defauts: {}, pannes: [], delais: [], errCharge: [], champs: 0, remplis: 0, sansBorne: 0, nombresSansBorne: 0, exSansBorne: [] });
+    if (x.mode === 'delai') { W.delais.push(p.scen); continue; }
+    if (x.mode !== 'champs') continue;
+    W.scenarios++;
+    if (x.panne) { W.pannes.push(p.scen + ' : ' + x.panne); continue; }
+    const s = x.stat || {};
+    W.champs = Math.max(W.champs, s.champs || 0); W.remplis = Math.max(W.remplis, s.remplis || 0);
+    W.sansBorne = Math.max(W.sansBorne, s.sansBorne || 0); W.nombresSansBorne = Math.max(W.nombresSansBorne, s.nombresSansBorne || 0);
+    for (const e of (s.exSansBorne || [])) if (W.exSansBorne.length < 4 && !W.exSansBorne.includes(e)) W.exSansBorne.push(e);
+    for (const e of (x.errCharge || [])) W.errCharge.push(p.scen + ' : ' + e);
+    for (const t of (x.trouve || [])) {
+      const cle = p.nom + '|' + t.type + '|' + t.sig;
+      vus.add(cle);
+      const d = W.defauts[cle] || (W.defauts[cle] = { type: t.type, sig: t.sig, nom: t.nom, detail: t.detail, scenarios: [] });
+      if (d.scenarios.length < 6) d.scenarios.push(p.scen);
+    }
+  }
+
+  /* Le témoin. */
+  let temoinOk = true;
+  const T = F._temoinChamps;
+  if (T) {
+    const d = Object.values(T.defauts);
+    const att = [['ECRASE', 't-ecrase'], ['TEXTE_COUPE', 't-coupe'], ['CHOIX_TRONQUE', 't-tronque'], ['CHEVAUCHE', 't-dessous'],
+      ['COLLE', 't-colle1'], ['S_ETIRE', 't-etire'], ['HAUTEURS', 't-haut'], ['DEPASSE_LIMITE', 't-limite']];
+    const rates2 = att.filter(([k, id]) => !d.some((x) => x.type === k && x.sig.includes('#' + id)));
+    const fauxPos = d.filter((x) => x.sig.includes('#t-propre') || /Propre/.test(x.nom));
+    temoinOk = !rates2.length && !fauxPos.length;
+    if (!temoinOk) console.log('✗ LE TÉMOIN DES CHAMPS N’EST PAS LU COMME ATTENDU — manqués : ' + rates2.map((r) => r[0]).join(', ')
+      + (fauxPos.length ? ' ; accusés à tort : ' + fauxPos.map((x) => x.type + ' ' + x.nom).join(', ') : '') + ' — les relevés ci-dessous ne prouvent rien.');
+    delete F._temoinChamps;
+    for (const c of Array.from(vus)) if (c.startsWith('_temoinChamps|')) vus.delete(c);
+  }
+
+  let dette = { cles: {} };
+  try { dette = JSON.parse(fs.readFileSync(DETTE_CH, 'utf8')); } catch (e) {}
+  const nouveaux = [], dus = [];
+  for (const n of Object.keys(F).sort()) for (const [cle, d] of Object.entries(F[n].defauts)) (dette.cles[cle] ? dus : nouveaux).push(Object.assign({ fen: n, cle }, d));
+  const rang = (d) => SORTES_CH.indexOf(d.type);
+  nouveaux.sort((a, b) => rang(a) - rang(b) || a.fen.localeCompare(b.fen));
+  const revenus = FILTRE ? [] : Object.keys(dette.cles).filter((c) => !vus.has(c));
+
+  const L = console.log;
+  L('');
+  const parSorte = {};
+  for (const d of nouveaux) parSorte[d.type] = (parSorte[d.type] || 0) + 1;
+  L('== DÉFAUTS NOUVEAUX (' + nouveaux.length + ') ==  ' + SORTES_CH.filter((k) => parSorte[k]).map((k) => k + ' ' + parSorte[k]).join(' · '));
+  for (const d of nouveaux.slice(0, 400)) L('  ✗ ' + d.type.padEnd(19) + d.fen.padEnd(18) + d.sig + (d.nom ? '  « ' + d.nom + ' »' : '') + ' — ' + d.detail + '  [' + d.scenarios[0] + (d.scenarios.length > 1 ? ' +' + (d.scenarios.length - 1) : '') + ']');
+  if (dus.length) L('   (' + dus.length + ' défaut(s) de la dette, jugés acceptables — voir champs-dette.json)');
+  if (revenus.length) { L(''); L('== DE LA DETTE, PLUS VUS (à retirer) =='); revenus.forEach((c) => L('  ✓ ' + c)); }
+  const pannes = Object.entries(F).filter(([, W]) => W.pannes.length || W.delais.length);
+  if (pannes.length) { L(''); L('== PANNES / DÉLAIS =='); pannes.forEach(([n, W]) => L('  ! ' + n + ' : ' + W.pannes.concat(W.delais.map((d) => 'délai ' + d)).slice(0, 3).join(' ; '))); }
+  if (rates.length) { L(''); L('== FABRIQUES EN ÉCHEC =='); rates.forEach((r) => L('  ✗ ' + r)); }
+  const sb = Object.entries(F).filter(([, W]) => W.sansBorne || W.nombresSansBorne).sort((a, b) => (b[1].sansBorne + b[1].nombresSansBorne) - (a[1].sansBorne + a[1].nombresSansBorne));
+  L('');
+  L('== POUR INFORMATION : SAISIES SANS BORNE (n’échoue pas) ==  ' + sb.reduce((s, [, W]) => s + W.sansBorne, 0) + ' texte(s) sans maxlength · '
+    + sb.reduce((s, [, W]) => s + W.nombresSansBorne, 0) + ' nombre(s) sans min/max, dans ' + sb.length + ' fenêtre(s)');
+  for (const [n, W] of sb.slice(0, 12)) L('  · ' + n.padEnd(20) + W.sansBorne + ' texte · ' + W.nombresSansBorne + ' nombre  (' + W.exSansBorne.join(', ') + ')');
+  const nbSc = Object.values(F).reduce((s, W) => s + W.scenarios, 0);
+  L('');
+  L('== RÉSUMÉ ==  ' + Object.keys(F).length + ' fenêtres · ' + nbSc + ' scénarios · ' + Object.values(F).reduce((s, W) => s + W.remplis, 0) + ' champs remplis sous charge · '
+    + nouveaux.length + ' défaut(s) nouveau(x) · ' + dus.length + ' en dette · ' + Math.floor(duree / 60) + ' min ' + (duree % 60) + ' s'
+    + (lotsMorts ? ' · ⚠ ' + lotsMorts + ' lot(s) muet(s)' : '') + (temoinOk ? ' · témoin vu' : ' · ✗ TÉMOIN RATÉ'));
+
+  fs.writeFileSync(RAPPORT_CH, JSON.stringify({ date: new Date().toISOString(), filtre: FILTRE ? ARGS.join(' ') : '', temoin: temoinOk, nouveaux, dette: dus, revenus, fenetres: F }, null, 1), 'utf8');
+  if (ECRIRE_DETTE_CH) {
+    /* ⚠ LA DETTE S'ÉCRIT À LA MAIN, SCIEMMENT : chaque entrée garde sa raison si
+       elle en avait une ; une entrée neuve reçoit « à juger » — à remplacer par
+       la vraie raison, sans quoi la dette n'est qu'un tapis sous lequel on balaie. */
+    const neuve = { note: dette.note || 'Défauts de champs vus et JUGÉS acceptables. Chaque entrée : sa raison. Réécrite par « node tools/banc-champs.js --dette ».', cles: {} };
+    for (const d of nouveaux.concat(dus)) neuve.cles[d.cle] = (dette.cles[d.cle]) || ('à juger — ' + d.detail);
+    fs.writeFileSync(DETTE_CH, JSON.stringify(neuve, null, 1) + '\n', 'utf8');
+    L('   dette réécrite : ' + Object.keys(neuve.cles).length + ' entrée(s)');
+  }
+  L('   rapport : ' + path.relative(RACINE, RAPPORT_CH));
+  if (!temoinOk || lotsMorts || rates.length) return 1;
+  return (nouveaux.length && !ECRIRE_DETTE_CH) ? 1 : 0;
 }
 
 main();

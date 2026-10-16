@@ -181,6 +181,12 @@ jobs:
         run: node tools/banc-debordement.js
       - name: Aucune glissiere — fenetre detachee (1080 x 780)
         run: node tools/banc-debordement.js --detache
+      # Les CHAMPS et les ESPACEMENTS (2026-10-16, sa demande) : chaque fenetre au repos (champ ecrase,
+      # texte coupe, choix tronque, chevauchement, controles colles, hauteurs) puis SOUS CHARGE (chaque
+      # saisie remplie a sa longueur maximale : rien ne s etire, ne deborde, ni ne depasse la limite que
+      # son compteur annonce). Un temoin pose un defaut de chaque sorte. Dette : tools/champs-dette.json.
+      - name: Champs et espacements — 108 fenetres, au repos et sous charge
+        run: node tools/banc-champs.js
       # Le clic droit (2026-10-13) : chaque fenetre rendue, trois lignes essayees, aucune exception, aucune
       # entree sans libelle, et un TEMOIN qui doit ouvrir son menu. Meme montage (lots sequentiels, un Chrome).
       - name: Clic droit — 108 fenetres essayees au rendu

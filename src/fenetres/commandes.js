@@ -513,7 +513,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     h += '<div class="carte">'
       + '<div class="rf-tb">'
       + '<label class="rf-rch">${ICO.loupe}<input id="rech" aria-label="${T("Rechercher une commande")}" autocomplete="off" placeholder="${T("Numéro de commande, nom, courriel")}'
-      + (expedition ? '${T(", numéro de suivi")}' : '') + '…" value="' + esc(F.q) + '"></label>'
+      + (expedition ? '${T(", suivi")}' : '') + '…" value="' + esc(F.q) + '"></label>'
       + '<span class="jetons">'
       + ((CTX && CTX.statuts) || []).filter(function(s){
           // Chaque liste ne propose que SES statuts : offrir << Livrée >> dans

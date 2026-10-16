@@ -509,7 +509,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
       + '</div>');
 
     h += '<div class="barreoutils">'
-      + '<input aria-label="${T("Domaine, nom ou catégorie")}" type="search" id="a-q" placeholder="${T("Domaine, nom ou catégorie…")}" value="' + esc(ANN_Q) + '">'
+      + '<input aria-label="${T("Domaine, nom ou catégorie")}" type="search" id="a-q" placeholder="${T("Nom ou domaine…")}" value="' + esc(ANN_Q) + '">'
       + ((ro || (VERROU && !VERROU.obtenu)) ? ''
           : '<button class="prim" id="a-nouveau">${T("＋ Ajouter un fournisseur")}</button>')
       + '<span class="droite">' + ANN.trouves + ' '

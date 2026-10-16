@@ -124,11 +124,31 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return p.then(function(r){ return r||{ok:false,motif:'echec'}; }).catch(function(e){ return {ok:false,motif:'echec',detail:(e&&e.message)||e}; });
   }
 
+  /* ⚠ LES BORNES DU SERVEUR, AFFICHEES (2026-10-16, banc-champs). Le cœur du site
+     (staff.js, _secBorne) ramenait deja chaque valeur dans sa plage, mais EN SILENCE :
+     on tapait 2 caracteres minimum, il en enregistrait 6, et la fenetre ne le disait
+     pas. Memes chiffres qu'au serveur — a changer DES DEUX COTES. */
+  var BORNES = {
+    'pw-exp-days': [7, 365], 'pw-min': [6, 32], 'pw-hist': [0, 24], 'pw-rate-n': [1, 20],
+    'pw-rate-h': [1, 168], 'pw-lock-h': [1, 168], 'in-staff-d': [30, 730], 'in-cust-d': [30, 1460],
+    'idle-warn': [1, 240], 'idle-out': [10, 600], 'idle-max': [5, 480]
+  };
   function champNum(id, lbl, val, sub){
+    var b = BORNES[id];
     return '<label class="champ"><span class="lbl">'+esc(lbl)+'</span>'
-      + '<input class="t n" type="number" id="'+id+'" value="'+esc(val)+'"'+(RO?' disabled':'')+'>'
+      + '<input class="t n" type="number" step="1" id="'+id+'" value="'+esc(val)+'"'
+      + (b ? ' min="'+b[0]+'" max="'+b[1]+'"' : '')+(RO?' disabled':'')+'>'
       + (sub?'<span class="sub">'+esc(sub)+'</span>':'')+'</label>';
   }
+  // Hors plage : la valeur est RAMENEE sous les yeux, au moment ou l on quitte le champ.
+  document.addEventListener('change', function(ev){
+    var el = ev.target;
+    if (!el || el.tagName !== 'INPUT' || el.type !== 'number' || !BORNES[el.id]) return;
+    var b = BORNES[el.id], v = parseInt(el.value, 10);
+    if (isNaN(v)) return;
+    var w = Math.min(b[1], Math.max(b[0], v));
+    if (w !== v) { el.value = String(w); szDire('${T("Valeur ramenée dans sa plage :")} ' + b[0] + ' – ' + b[1] + '.', 'att'); }
+  });
   function caseAC(id, lbl, coche){
     // Un reglage oui/non : la classe bascule le fait passer en interrupteur (socle, 2026-10-04).
     return '<label class="case bascule"><input type="checkbox" id="'+id+'" '+(coche?'checked':'')+(RO?' disabled':'')+'> <span>'+esc(lbl)+'</span></label>';

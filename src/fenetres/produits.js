@@ -117,8 +117,14 @@ td.c,th.c{width:2rem;text-align:center}
    lecteur d ecran), et des menus deroulants un peu plus etroits. */
 .rf-droite .vue-bascule .tx{display:none}
 .rf-droite .vue-bascule button{padding:0 .6rem}
-.rf-tb select{max-width:9.5rem}
-@media (max-width:1500px){.rf-tb>.rf-droite>.dt{display:none}.rf-tb select{max-width:8.5rem}.rf-tb>.rf-rch{min-width:7rem}}
+/* ⚠ LES MENUS NE SE COMPRIMENT PAS (2026-10-16, banc-champs) : en 1400 px, la barre
+   les ecrasait a 100 px — « Toutes les catég », « Toutes les étiqu » — et la croix de
+   la recherche mordait sur le premier. Ils gardent leur largeur ; c est la recherche
+   qui cede, jusqu a 7rem, puis la barre passe sur deux lignes (1240 px). */
+.rf-tb select{flex:0 0 auto;max-width:11rem}
+.rf-tb>.rf-rch{min-width:0}
+.rf-tb>.rf-rch input{min-width:0}
+@media (max-width:1500px){.rf-tb>.rf-droite>.dt{display:none}.rf-tb>.rf-rch{min-width:7rem}}
 @media (max-width:1240px){.rf-tb{flex-wrap:wrap!important;row-gap:.5rem!important}}
 /* Les boutons de la barre : meme hauteur que la recherche, libelle net. */
 .rf-droite>button{height:2.4rem;padding:0 .95rem;border-radius:10px;font-weight:600;font-size:.82rem}
@@ -345,7 +351,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + tu('${T("Catégories")}', ST.categories || 0, '${T("représentées")}', '', null)
       + '</div>');
     h += '<div class="carte"><div class="rf-tb">'
-      + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Rechercher un produit")}" type="search" id="p-q" placeholder="${T("Rechercher un produit…")}" value="' + esc(Q) + '"></label>'
+      + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Rechercher un produit")}" type="search" id="p-q" placeholder="${T("Rechercher…")}" value="' + esc(Q) + '"></label>'
       + '<select id="p-cat"><option value="">${T("Toutes les catégories")}</option>'
       + (D.cats || []).map(function(c){
           return '<option value="' + esc(c.cle) + '"' + (CAT === c.cle ? ' selected' : '') + '>' + esc(c.nom) + '</option>';

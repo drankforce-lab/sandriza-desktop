@@ -18,3 +18,4 @@ certs/*.key
 paquets/
 tools/audit-boutons-rapport.json
 tools/audit-options-rapport.json
+tools/champs-rapport.json

@@ -94,7 +94,7 @@ html.jour .bascule .piste{background:#cfcabd}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.78);display:flex;align-items:center;justify-content:center;z-index:50;padding:1rem}
 .pop{background:#fff;color:#222;border-radius:14px;max-width:40rem;width:100%;display:flex;overflow:hidden;min-height:16rem;position:relative}
 .pop .g{flex:1 1 45%;background:#e8dcc6 center/cover no-repeat;min-height:16rem}
-.pop .d{flex:1 1 55%;padding:1.4rem 1.5rem;display:flex;flex-direction:column;justify-content:center;gap:.6rem}
+.pop .d{flex:1 1 55%;min-width:0;overflow-wrap:anywhere;padding:1.4rem 1.5rem;display:flex;flex-direction:column;justify-content:center;gap:.6rem}
 .pop .titre{font:800 1.5rem/1.15 Georgia,serif;white-space:pre-line;color:#3a2f22}
 .pop .st{font-size:.9rem;color:#6b5b45;line-height:1.5}
 .pop .cta{background:#8f6f42;color:var(--tx-sur-accent);border:none;border-radius:8px;padding:.6rem;font-weight:700;margin-top:.4rem}
@@ -339,14 +339,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('newsletter')}
       +   '<div class="nl-reg-t"><div><b>${T("Widget Offre de bienvenue")}</b><span>${T("Bouton ")}<span class="ic">🎁</span>${T(" flottant + popup — suit le visiteur sur tout le site.")}</span></div>'
       +   '<label class="nl-actif"><span>${T("Actif")}</span>' + bascule('offer-enabled', c.enabled) + '</label></div>'
       +   (D.done ? '<div class="nl-fait">${T("✓ Un visiteur a déjà soumis ce widget. Utilisez « Réinitialiser » pour re-tester.")}</div>' : '')
-      +   '<div class="champ"><label for="offer-title">${T("Titre (saut de ligne = ↵)")}</label><textarea id="offer-title" rows="2"' + ro + '>' + esc(c.title) + '</textarea></div>'
-      +   '<div class="champ"><label for="offer-sub">${T("Sous-titre")}</label><input id="offer-sub" value="' + esc(c.subtitle) + '"' + ro + '></div>'
+      +   '<div class="champ"><label for="offer-title">${T("Titre (saut de ligne = ↵)")}</label><textarea id="offer-title" rows="2" maxlength="120"' + ro + '>' + esc(c.title) + '</textarea></div>'
+      +   '<div class="champ"><label for="offer-sub">${T("Sous-titre")}</label><input id="offer-sub" maxlength="160" value="' + esc(c.subtitle) + '"' + ro + '></div>'
       +   '<div class="deux">'
-      +     '<div class="champ"><label for="offer-cta">${T("Texte du bouton")}</label><input id="offer-cta" value="' + esc(c.cta) + '"' + ro + '></div>'
+      +     '<div class="champ"><label for="offer-cta">${T("Texte du bouton")}</label><input id="offer-cta" maxlength="40" value="' + esc(c.cta) + '"' + ro + '></div>'
       +     '<div class="champ"><label for="offer-discount">${T("Valeur de réduction (%)")}</label><input id="offer-discount" type="number" min="1" max="100" value="' + (c.discountValue || 10) + '"' + ro + '></div>'
       +   '</div>'
       +   '<div class="hint nl-code">${T("Un code unique WB-XXXXXX par client, valide 1 commande, expire 30 j.")}</div>'
-      +   '<div class="champ"><label for="offer-legal">${T("Mention légale")}</label><input id="offer-legal" value="' + esc(c.legal) + '"' + ro + '></div>'
+      +   '<div class="champ"><label for="offer-legal">${T("Mention légale")}</label><input id="offer-legal" maxlength="240" value="' + esc(c.legal) + '"' + ro + '></div>'
       +   '<div class="champ"><label for="offer-img">${T("Image côté gauche")}</label>'
       +     '<div class="nl-img">' + (PEUT.edit ? '<label class="ed-bt nl-fic"><span class="ic">📁</span> ${T("Choisir une photo")}<input type="file" accept="image/*" id="offer-file" style="display:none"></label>' : '')
       +     '<input id="offer-img" value="' + esc(c.imageUrl) + '" placeholder="${T("https://… ou coller une URL")}"' + ro + '></div>'
