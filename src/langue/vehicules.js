@@ -154,7 +154,7 @@ module.exports = {
   'Raison d’affaires': 'Business purpose',
   'Précision (obligatoire)': 'Details (required)',
   'Précision (facultative)': 'Details (optional)',
-  'Fournisseur visité, client, objet…': 'Supplier visited, client, subject…',
+  'Fournisseur, client, objet…': 'Supplier visited, client, subject…',
   'Kilomètres parcourus': 'Kilometres driven',
   'Aller-retour (× 2)': 'Round trip (× 2)',
   'N° de commande (facultatif)': 'Order no. (optional)',

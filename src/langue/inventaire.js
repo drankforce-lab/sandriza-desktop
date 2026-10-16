@@ -172,7 +172,7 @@ module.exports = {
   // Les en-tetes de la refonte du 2026-09-25 (lus d un bloc, comme ceux du dessus).
   'Produit Variantes': 'Product Variants',
   'SKU ou nom du produit': 'SKU or product name',
-  'SKU ou nom du produit…': 'SKU or product name…',
+  'SKU ou nom…': 'SKU or name…',
   // Le bouton d assignation : le sigle ne se traduit pas, mais il doit etre DECLARE.
   'SKU': 'SKU',
   'Inventaire Actions': 'Inventory Actions',

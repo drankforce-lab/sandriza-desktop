@@ -115,7 +115,8 @@ const prologue = (jeu) => '<script>\n' + PROLOGUE_BRUT.replace('__REPONSES__',
   () => JSON.stringify(Object.assign({}, OPS_SOCLE, jeu.reponses || {}, { __emprunts: jeu.emprunts || {} })).replace(/<\/script/gi, '<\\/script')) + '\n</script>';
 const epilogue = (nom, scen) => '<script>\n' + EPILOGUE_BRUT
   .split('__NOM__').join(JSON.stringify(nom))
-  .split('__SCEN__').join(JSON.stringify(scen)) + '\n</script>';
+  .split('__SCEN__').join(JSON.stringify(scen))
+  .split('__LINUX__').join(process.platform === 'linux' ? '1' : '0') + '\n</script>';
 
 /* ── LES DEUX LISTES D'OPÉRATIONS ────────────────────────────────────────── */
 function opsDuSite() {

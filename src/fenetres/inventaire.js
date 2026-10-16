@@ -1081,7 +1081,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
        geste est le meme qu avant (FP.etat, page 0, rechargement) — voir
        data-etat dans brancherProduits. */
     h += '<div class="toolbar tb2">'
-      + '<label class="rch">${ICO.loupe}<input aria-label="${T("SKU ou nom du produit")}" type="text" id="fp-q" autocomplete="off" placeholder="${T("SKU ou nom du produit…")}" value="' + esc(FP.q) + '"></label>'
+      + '<label class="rch">${ICO.loupe}<input aria-label="${T("SKU ou nom du produit")}" type="text" id="fp-q" autocomplete="off" placeholder="${T("SKU ou nom…")}" value="' + esc(FP.q) + '"></label>'
       + '<div class="etats" role="group" aria-label="${T("Filtrer par état du stock")}">'
       +   [['', '${T("Tout l’inventaire")}'], ['rupture', '${T("En rupture")}'],
            ['low', '${T("À commander")}'], ['ok', '${T("Seuil non atteint")}']].map(function(e){

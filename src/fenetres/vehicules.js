@@ -778,7 +778,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
       + (D.raisons || []).map(function(r){ return '<option value="' + esc(r.cle) + '"' + (s.raison === r.cle ? ' selected' : '') + '>' + esc(szTd(r.nom)) + '</option>'; }).join('')
       + '</select></div>'
       + '<div class="champ"><label for="d-detail" id="d-detail-l">' + (autre ? '${T("Précision (obligatoire)")}' : '${T("Précision (facultative)")}') + '</label>'
-      + '<input type="text" id="d-detail" maxlength="200" value="' + esc(s.detail) + '" placeholder="${T("Fournisseur visité, client, objet…")}"></div>'
+      + '<input type="text" id="d-detail" maxlength="200" value="' + esc(s.detail) + '" placeholder="${T("Fournisseur, client, objet…")}"></div>'
       + '<div class="champ"><label for="d-km">${T("Kilomètres parcourus")}</label><input type="text" inputmode="decimal" class="n" id="d-km" value="' + esc(s.km) + '" placeholder="0${SEP_DEC()}0">'
       + '<label class="ar" for="d-ar"><input type="checkbox" id="d-ar"' + (s.allerRetour ? ' checked' : '') + '> ${T("Aller-retour (× 2)")}</label></div>'
       + '<div class="champ"><label for="d-cmd">${T("N° de commande (facultatif)")}</label><input type="text" id="d-cmd" maxlength="40" value="' + esc(s.commande) + '" placeholder="${T("pour une livraison")}"></div>'

@@ -354,7 +354,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
 
   function vueModeles(ro){
     var h = '<div class="barreoutils" style="margin-top:.1rem">'
-      + '<input aria-label="${T("Nom")} ou format (3 car. min.)" type="search" id="p-q" placeholder="${T("Nom")} ou format (3 car. min.)" value="' + esc(Q) + '">'
+      + '<input aria-label="${T("Nom ou format (3 caractères au moins)")}" type="search" id="p-q" placeholder="${T("Nom ou format…")}" value="' + esc(Q) + '">'
       + '<select id="p-tri" aria-label="${T("Ordre de tri")}">'
       + '<option value="updated"' + (TRI === 'updated' ? ' selected' : '') + '>${T("Modifié récemment")}</option>'
       + '<option value="name"' + (TRI === 'name' ? ' selected' : '') + '>${T("Nom")}</option>'

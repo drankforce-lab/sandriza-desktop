@@ -44,6 +44,13 @@
 (function () {
   var A = window.__ab;
   var NOM = __NOM__, SCEN = __SCEN__;
+  /* ⚠ LA TOLERANCE DE POLICE (2026-10-16). L application n est construite QUE pour Windows ; le travail
+     « contrastes » de la construction tourne sous LINUX, dont les polices sont plus larges : 12 ecarts de
+     quelques pixels (texte 5 a 8 % plus large que sa boite, menus 3-4 px moins hauts que les champs) qui
+     n existent pas sous Windows. Sous Linux seulement : 10 % sur la largeur d un texte, 5 px sur les
+     hauteurs. Sous Windows, le banc reste au pixel. */
+  var LINUX = __LINUX__ === 1;
+  var TOL_TXT = LINUX ? 1.10 : 1, TOL_H = LINUX ? 5 : 3;
   var envoye = false;
   function rendre(x) {
     if (envoye) return; envoye = true;
@@ -196,12 +203,12 @@
       if (el.tagName === 'SELECT' && el.selectedIndex >= 0 && el.options[el.selectedIndex]) {
         var txt = el.options[el.selectedIndex].text;
         var w = largeurTexte(txt, el), dispo = I.l - (I.cs.appearance === 'none' ? 0 : 16);
-        if (txt && w > dispo + 2) noter('CHOIX_TRONQUE', el, '« ' + txt.slice(0, 40) + ' » : ' + Math.round(w) + ' px pour ' + Math.round(dispo) + ' px');
+        if (txt && w > dispo * TOL_TXT + 2) noter('CHOIX_TRONQUE', el, '« ' + txt.slice(0, 40) + ' » : ' + Math.round(w) + ' px pour ' + Math.round(dispo) + ' px');
       }
       // INDICATION_TRONQUEE
       if (estSaisie(el) && el.tagName !== 'TEXTAREA' && !el.value && el.placeholder) {
         var wp = largeurTexte(el.placeholder, el);
-        if (wp > I.l + 2) noter('INDICATION_TRONQUEE', el, '« ' + el.placeholder.slice(0, 40) + ' » : ' + Math.round(wp) + ' px pour ' + Math.round(I.l) + ' px');
+        if (wp > I.l * TOL_TXT + 2) noter('INDICATION_TRONQUEE', el, '« ' + el.placeholder.slice(0, 40) + ' » : ' + Math.round(wp) + ' px pour ' + Math.round(I.l) + ' px');
       }
       // DEBORDE
       if (r.right > innerWidth + 1 || r.left < -1) noter('DEBORDE', el, 'hors de la fenetre (' + Math.round(r.left) + ' → ' + Math.round(r.right) + ', fenetre ' + innerWidth + ')');
@@ -237,7 +244,7 @@
         var g = ra.left < rb.left ? rb.left - ra.right : ra.left - rb.right;
         var g1 = ra.left < rb.left ? a : b, g2 = ra.left < rb.left ? b : a;
         if (g >= -2 && g < 3 && !soudes(g1, g2, 'h') && aBoite(g1) && aBoite(g2) && !enGroupe(g1, g2)) noter('COLLE', g1, 'ecart de ' + Math.round(g) + ' px dans la rangee', g2);
-        if (estChamp(a) && estChamp(b) && g >= -2 && g < 24 && Math.abs(ra.height - rb.height) > 3)
+        if (estChamp(a) && estChamp(b) && g >= -2 && g < 24 && Math.abs(ra.height - rb.height) > TOL_H)
           noter('HAUTEURS', g1, Math.round(ra.left < rb.left ? ra.height : rb.height) + ' px a cote de ' + Math.round(ra.left < rb.left ? rb.height : ra.height) + ' px', g2);
       } else if (ix > mw * 0.5) {
         var gv = ra.top < rb.top ? rb.top - ra.bottom : ra.top - rb.bottom;

@@ -260,4 +260,7 @@ module.exports = {
   'sera supprimé définitivement. Les impressions déjà faites ne sont pas touchées. Cette action est irréversible.': 'will be permanently deleted. Prints already made are not affected. This action cannot be undone.',
   'Le format personnalisé': 'The custom format',
   'sera supprimé définitivement. Les modèles déjà créés dans ce format ne sont pas modifiés. Cette action est irréversible.': 'will be permanently deleted. Templates already created in this format are not changed. This action cannot be undone.',
+  // L indication de la recherche (2026-10-16) : elle etait a moitie non traduite.
+  'Nom ou format…': 'Name or format…',
+  'Nom ou format (3 caractères au moins)': 'Name or format (at least 3 characters)',
 };
