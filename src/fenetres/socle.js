@@ -3557,10 +3557,15 @@ tbody tr:hover>td{background:var(--v05)}
 
 /* ── 5. LE BOUTON S ENFONCE ────────────────────────────────────────────────
    Un bouton qui ne bouge pas sous le doigt laisse douter que le clic a pris —
-   et l on clique deux fois. Sur un bouton qui facture un appel, c est cher. */
+   et l on clique deux fois. Sur un bouton qui facture un appel, c est cher.
+   ⚠ PAR LA PROPRIETE translate, JAMAIS PAR transform (2026-10-16). Un bouton
+   centre par transform:translateY(-50%) (les fleches de la visionneuse des
+   photos) PERDAIT son centrage sous le doigt : transform remplace transform,
+   la fleche tombait de la moitie de sa hauteur puis remontait en glissant.
+   translate se compose avec transform : il ne remplace rien. */
 button{transition:background var(--sz-vite) linear,
-  border-color var(--sz-vite) linear,transform var(--sz-vite) var(--sz-courbe)}
-button:active:not(:disabled){transform:translateY(1px)}
+  border-color var(--sz-vite) linear,translate var(--sz-vite) var(--sz-courbe)}
+button:active:not(:disabled){translate:0 1px}
 
 /* ── 6. LE DEFILEMENT DOUX ─────────────────────────────────────────────────
    Un saut d ancre instantane fait perdre le fil : on ne sait pas si la page a
@@ -3575,7 +3580,7 @@ html{scroll-behavior:smooth}
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   .carte,button,tbody tr{transition:none!important}
-  button:active:not(:disabled){transform:none}
+  button:active:not(:disabled){translate:none}
 }
 `;
 

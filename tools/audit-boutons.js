@@ -32,9 +32,25 @@
      node tools/audit-boutons.js coupons caisse      # quelques fenêtres
      node tools/audit-boutons.js --lot=1/4           # le premier quart des fenêtres
      node tools/audit-boutons.js --jeu=0             # le premier scénario seulement
+     node tools/audit-boutons.js --options           # les OPTIONS (sélecteurs, cases, radios) — voir plus bas
    Options : --paralleles=N (iframes en vol, 4) · --max=N (boutons par rendu, 40)
              --obs=MS (observation après le clic, 700) · --par-lot=N (scénarios
              par Chrome, 12) · --garder (garde le dossier temporaire)
+   ── --options (2026-10-16) ─────────────────────────────────────────────────
+   Le clic ne juge pas une case : la cocher change TOUJOURS son état, elle
+   passe donc pour VISIBLE même si rien ne la lit. En mode --options, chaque
+   sélecteur / case / radio est CHANGÉ, puis l'« Enregistrer » le plus proche est
+   cliqué, et l'empreinte COMPLÈTE des arguments envoyés au pont est comparée à
+   un enregistrement témoin fait sans rien changer :
+     TRANSMIS (les arguments diffèrent) · APPEL (op dès le changement) ·
+     RÉAGIT (la page change, l'enregistrement non : filtre, affichage…) ·
+     PERDU (aucune réaction ET enregistrement identique : SUSPECT) ·
+     NON JUGÉ (pas d'Enregistrer, ou l'enregistrement témoin n'appelle rien) ·
+     ERREUR (exception).
+   ⚠ Un TRANSMIS prouve que la valeur PART, pas que le serveur la garde (faux pont).
+   ⚠ Un champ horodaté dans l'enregistrement le fait passer pour TRANSMIS à tort :
+     le mode peut rater un PERDU, il n'en invente pas.
+   Rapport : tools/audit-options-rapport.json.
    Rapport : console + tools/audit-boutons-rapport.json. Un passage FILTRÉ (noms,
    --lot, --jeu) FUSIONNE ses fenêtres dans le rapport existant ; un passage
    complet le réécrit.
@@ -66,6 +82,8 @@ const PAR_LOT = Number(VAL('par-lot', 12)) || 12;
 const LOT = (() => { const v = VAL('lot', ''); const m = /^(\d+)\/(\d+)$/.exec(v); return m ? { k: +m[1], n: +m[2] } : null; })();
 const LARGEUR = 1400, HAUT = 833;
 const FILTRE = !!(CHOISIES.length || LOT || JEU_N !== null);
+const M_OPT = OPT('--options');
+const RAPPORT_OPT = path.join(__dirname, 'audit-options-rapport.json');
 
 /* Les appels qui partent SANS geste de l'usager (minuteries du socle) : ils ne
    font pas d'un bouton un bouton « qui appelle ». */
@@ -205,7 +223,7 @@ function fenetres() {
      ne valent rien — et c'est surtout le MUET qui compte : un écouteur global
      du socle qui toucherait au DOM à chaque clic ferait passer tous les muets
      pour vivants. */
-  {
+  if (!M_OPT) {
     const SOCLE = require(path.join(DOS_FEN, 'socle.js'));
     out.push({ nom: '_temoin', cas: [{ i: 0, nom: 'témoin', jeu: { id: '', reponses: {} } }], fabrique: () =>
       '<!doctype html><html><head><meta charset="utf-8"><style>' + SOCLE.CSS_SOCLE + '</style></head><body>'
@@ -217,6 +235,20 @@ function fenetres() {
       + 'document.getElementById("t-err").onclick=function(){null.x();};'
       + '<\/script></body></html>' });
   }
+  if (M_OPT) {
+    const SOCLE = require(path.join(DOS_FEN, 'socle.js'));
+    out.push({ nom: '_temoinOpt', cas: [{ i: 0, nom: 'témoin', jeu: { id: '', reponses: {} } }], fabrique: () =>
+      '<!doctype html><html><head><meta charset="utf-8"><style>' + SOCLE.CSS_SOCLE + '</style></head><body>'
+      + '<label><input type="checkbox" id="o-lue"> Lue</label> <label><input type="checkbox" id="o-perdue"> Perdue</label> '
+      + '<label>Filtre <select id="o-filtre"><option>a</option><option>b</option></select></label> '
+      + '<label><input type="checkbox" id="o-err"> Erreur</label> <div id="o-liste">a</div>'
+      + '<button id="o-save">Enregistrer</button>'
+      + '<script>var P=window.szPont;'
+      + 'document.getElementById("o-filtre").onchange=function(){document.getElementById("o-liste").textContent=this.value;};'
+      + 'document.getElementById("o-err").onchange=function(){null.x();};'
+      + 'document.getElementById("o-save").onclick=function(){P.appeler("temoin:ecrire",{lue:document.getElementById("o-lue").checked});};'
+      + '<\/script></body></html>' });
+  }
   return out;
 }
 
@@ -224,7 +256,7 @@ function pagePilote(pages) {
   return '<!doctype html><meta charset="utf-8"><title>audit-boutons</title>\n'
     + '<style>html,body{margin:0}iframe{position:absolute;left:0;top:0;border:0;width:' + LARGEUR + 'px;height:' + HAUT + 'px;background:#fff}</style>\n'
     + '<script>\n'
-    + 'var PAGES = ' + JSON.stringify(pages) + ', N = ' + PARALLELES + ', MAX = ' + MAXB + ', OBS = ' + OBS + ';\n'
+    + 'var PAGES = ' + JSON.stringify(pages) + ', N = ' + PARALLELES + ', MAX = ' + MAXB + ', OBS = ' + OBS + ', M_OPT = ' + (M_OPT ? 'true' : 'false') + ';\n'
     + 'var file = PAGES.map(function (u) { return { u: u, b: -1 }; });\n'
     + 'var cases = [], finDite = false;\n'
     + 'function dire(x) { console.log("ELG-AB|" + encodeURIComponent(JSON.stringify(x))); }\n'
@@ -234,7 +266,7 @@ function pagePilote(pages) {
     + '  if (!file.length) { c.t = null; finir(); return; }\n'
     + '  var t = file.shift(); c.t = t;\n'
     + '  var f = document.createElement("iframe"); c.f = f;\n'
-    + '  f.src = t.u + "?b=" + t.b + "&max=" + MAX + "&obs=" + OBS;\n'
+    + '  f.src = t.u + "?b=" + t.b + "&max=" + MAX + "&obs=" + OBS + (M_OPT ? "&m=opt&s=" + (t.s === undefined ? -1 : t.s) : "");\n'
     + '  document.body.appendChild(f);\n'
     + '  c.timer = setTimeout(function () { dire({ mode: "delai", u: t.u, b: t.b }); lancer(c); }, 12000 + OBS);\n'
     + '}\n'
@@ -250,7 +282,13 @@ function pagePilote(pages) {
     + '  for (var i = 0; i < cases.length; i++) if (cases[i].f && cases[i].f.contentWindow === e.source) c = cases[i];\n'
     + '  if (!c || !c.t) return;\n'
     + '  var x = e.data.x; x.u = c.t.u; dire(x);\n'
-    + '  if (x.mode === "inv" && !x.panne) { var n = Math.min(x.total || 0, MAX); for (var k = 0; k < n; k++) file.push({ u: c.t.u, b: k }); }\n'
+    + '  if (x.mode === "inv" && !x.panne) { var n = Math.min(x.total || 0, MAX);\n'
+    + '    if (!M_OPT) { for (var k = 0; k < n; k++) file.push({ u: c.t.u, b: k }); }\n'
+    + '    else if (n) { var tem = {};\n'
+    + '      for (var k2 = 0; k2 < n; k2++) { var cs = (x.boutons[k2] && x.boutons[k2].cands) || [];\n'
+    + '        if (!cs.length) file.push({ u: c.t.u, b: k2, s: -1 });\n'
+    + '        cs.forEach(function (j2) { file.push({ u: c.t.u, b: k2, s: j2 }); tem[j2] = 1; }); }\n'
+    + '      Object.keys(tem).forEach(function (j) { file.unshift({ u: c.t.u, b: -100 - Number(j) }); }); } }\n'
     + '  var cc = c; setTimeout(function () { lancer(cc); }, 0);\n'
     + '});\n'
     + 'window.addEventListener("load", function () { for (var i = 0; i < N; i++) { var c = {}; cases.push(c); lancer(c); } });\n'
@@ -303,7 +341,7 @@ function main() {
     }
   }
   const nbLots = Math.ceil(pages.length / PAR_LOT);
-  console.log('== AUDIT DES BOUTONS — ' + liste.length + ' fenêtre(s), ' + pages.length + ' scénario(s), '
+  console.log((M_OPT ? '== AUDIT DES OPTIONS — ' : '== AUDIT DES BOUTONS — ') + liste.length + ' fenêtre(s), ' + pages.length + ' scénario(s), '
     + nbLots + ' lot(s) de ' + PAR_LOT + ', ' + PARALLELES + ' iframe(s) en vol, observation ' + OBS + ' ms ==');
 
   const res = [];
@@ -350,7 +388,7 @@ function main() {
       + Math.round((Date.now() - tl) / 1000) + ' s  [' + noms.slice(0, 90) + ']');
   }
   const duree = Math.round((Date.now() - t0) / 1000);
-  rapport(res, pages, rates, lotsMorts, duree, liste.map((f) => f.nom));
+  (M_OPT ? rapportOptions : rapport)(res, pages, rates, lotsMorts, duree, liste.map((f) => f.nom));
   if (!GARDER) { try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (e) {} }
   else console.log('   (dossier gardé : ' + tmp + ')');
   process.exit(0);
@@ -508,6 +546,108 @@ function rapport(res, pages, rates, lotsMorts, duree, nomsFen) {
     tilde: 'op~ = réponse empruntée à un scénario voisin de la même fenêtre' };
   fs.writeFileSync(RAPPORT_F, JSON.stringify(doc, null, 1), 'utf8');
   L('   rapport : ' + path.relative(RACINE, RAPPORT_F) + (FILTRE ? ' (fusionné : ' + T2.fenetres + ' fenêtre(s) au total)' : ''));
+}
+
+/* ── LE CLASSEMENT DES OPTIONS (--options) ─────────────────────────────────── */
+const CLASSES_OPT = ['ERREUR', 'APPEL', 'TRANSMIS', 'RÉAGIT', 'PERDU', 'MUET', 'NON JUGÉ'];
+const _empreintes = (s) => (s && s.ops ? s.ops.filter((o) => !OPS_FOND.has(o.op)).map((o) => o.op + '#' + o.sig).join(' ') : '');
+const reaction0 = (x) => !!((x.muts && x.muts.n) || x.valeur || (x.natifs && x.natifs.length) || (x.hors && x.hors.length));
+/* Un relevé par couple (option, Enregistrer) : l'option est TRANSMISE si UN
+   SEUL des Enregistrer envoie autre chose, PERDUE seulement si TOUS ceux qu'on a
+   pu juger envoient la même chose. */
+const RANG_OPT = { ERREUR: 0, APPEL: 1, TRANSMIS: 2, 'RÉAGIT': 3, 'NON JUGÉ': 4, PERDU: 5, MUET: 6 };
+function classerOpt(x, temoin) {
+  if (x.panne || (x.err && x.err.length)) return { k: 'ERREUR' };
+  if (!x.pris && !x.change) return { k: 'NON JUGÉ', pourquoi: 'la valeur n’a pas changé (étiquette qui ne relaie pas le clic ?)' };
+  if ((x.ops || []).filter((o) => !OPS_FOND.has(o.op)).length) return { k: 'APPEL' };
+  if (!x.change) return reaction0(x) ? { k: 'RÉAGIT', pourquoi: 'valeur remise après usage (liste d’outil)' } : { k: 'MUET', pourquoi: 'valeur remise sans rien faire' };
+  const reaction = !!((x.muts && x.muts.n) || x.valeur || (x.natifs && x.natifs.length) || (x.hors && x.hors.length));
+  if (x.sauveDisparu) return { k: reaction0(x) ? 'RÉAGIT' : 'NON JUGÉ', pourquoi: '« ' + x.sauveL + ' » a disparu après le changement' };
+  if (!x.sauve) return reaction ? { k: 'RÉAGIT', pourquoi: 'aucun Enregistrer à portée' } : { k: 'MUET' };
+  if (!temoin || temoin.absent || !temoin.sauve) return { k: reaction ? 'RÉAGIT' : 'NON JUGÉ', pourquoi: 'pas d’enregistrement témoin pour « ' + (x.sauveL || '?') + ' »' };
+  if (temoin.err && temoin.err.length) return { k: 'NON JUGÉ', pourquoi: 'l’enregistrement témoin lève : ' + temoin.err[0] };
+  const a = _empreintes(x.sauve), b = _empreintes(temoin.sauve);
+  if (a !== b) return { k: 'TRANSMIS' };
+  if (!b) return { k: reaction ? 'RÉAGIT' : 'NON JUGÉ', pourquoi: '« ' + (x.sauveL || '?') + ' » n’appelle rien, même sans changement (validation ?)' };
+  return reaction ? { k: 'RÉAGIT', pourquoi: 'enregistrement identique' } : { k: 'PERDU' };
+}
+
+function rapportOptions(res, pages, rates, lotsMorts, duree, nomsFen) {
+  const parFic = {};
+  for (const p of pages) parFic[p.fic] = p;
+  const temoins = {};   // fic -> [sauveTemoin]
+  for (const x of res) if (x.mode === 'sauveTemoin') (temoins[x.u] = temoins[x.u] || []).push(x);
+  const F = {};
+  const fen = (n) => F[n] || (F[n] = { essayes: 0, classes: Object.fromEntries(CLASSES_OPT.map((k) => [k, 0])), lignes: [],
+    inventaire: {}, delais: [], errCharge: [], instables: [] });
+  for (const x of res) {
+    const p = parFic[x.u] || { nom: x.nom || '?', scen: x.scen || '?' };
+    const W = fen(p.nom);
+    if (x.mode === 'delai') { W.delais.push(p.scen + (x.b >= 0 ? ' / option ' + x.b : x.b === -1 ? ' / inventaire' : ' / enregistrement témoin')); continue; }
+    if (x.mode === 'inv') {
+      W.inventaire[p.scen] = x.total;
+      for (const e of (x.errCharge || [])) W.errCharge.push(p.scen + ' : ' + e);
+      if (x.panne) W.lignes.push({ scen: p.scen, option: '(inventaire)', k: 'ERREUR', pourquoi: x.panne });
+      continue;
+    }
+    if (x.mode !== 'opt') continue;
+    if (x.absent) { W.instables.push(p.scen + ' / option ' + x.b + ' absente au rechargement'); continue; }
+    const t = (temoins[x.u] || []).find((y) => y.i === x.si && y.s === x.sauveS && y.l === x.sauveL);
+    const c = classerOpt(x, t);
+    const cle = x.u + '|' + x.b;
+    const lg = { scen: p.scen, option: (x.l || '(sans libellé)') + '  {' + x.s + '}', k: c.k, pourquoi: c.pourquoi || '',
+      err: x.err || [], ops: (x.ops || []).map((o) => o.op), essais: [] };
+    const deja = (W._par = W._par || {})[cle];
+    const L0 = deja || lg;
+    if (!deja) { W._par[cle] = lg; W.lignes.push(lg); }
+    else if (RANG_OPT[c.k] < RANG_OPT[deja.k] || (c.k === 'NON JUGÉ' && deja.k === 'PERDU')) { deja.k = c.k; deja.pourquoi = c.pourquoi || ''; deja.err = x.err || []; }
+    L0.essais.push({ sauve: x.sauveL || '', k: c.k, envoye: x.sauve ? x.sauve.ops.map((o) => o.op + ' ' + o.args) : [] });
+  }
+  for (const n of Object.keys(F)) { const W = F[n]; delete W._par; for (const m of W.lignes) if (m.option !== '(inventaire)') { W.essayes++; W.classes[m.k]++; } }
+
+  /* Le témoin d'abord. */
+  let temoinOk = true;
+  const T = F._temoinOpt;
+  if (T) {
+    const att = [['[checkbox] Lue', 'TRANSMIS'], ['[checkbox] Perdue', 'PERDU'], ['[select] Filtre', 'RÉAGIT'], ['[checkbox] Erreur', 'ERREUR']];
+    const rates2 = att.filter(([l, k]) => !T.lignes.some((m) => m.option.startsWith(l) && m.k === k));
+    temoinOk = !rates2.length;
+    if (!temoinOk) console.log('✗ LE TÉMOIN DES OPTIONS N’EST PAS CLASSÉ COMME ATTENDU (' + rates2.map((r) => r[0] + ' → ' + r[1]).join(', ') + ') — '
+      + JSON.stringify(T.lignes.map((m) => m.option.slice(0, 20) + '=' + m.k)) + ' — les relevés ci-dessous ne prouvent rien.');
+    delete F._temoinOpt;
+  }
+
+  const L = console.log;
+  const tot = Object.fromEntries([['fenetres', 0], ['options', 0]].concat(CLASSES_OPT.map((k) => [k, 0])));
+  for (const n of Object.keys(F)) { tot.fenetres++; tot.options += F[n].essayes; for (const k of CLASSES_OPT) tot[k] += F[n].classes[k]; }
+  L('');
+  L('== PAR FENÊTRE ==');
+  for (const n of Object.keys(F).sort()) {
+    const W = F[n];
+    if (!W.essayes && !W.lignes.length && !W.delais.length) continue;
+    L('  ' + n.padEnd(20) + String(W.essayes).padStart(4) + ' option(s)  ' + CLASSES_OPT.filter((k) => W.classes[k]).map((k) => k + ' ' + W.classes[k]).join(' · '));
+    for (const m of W.lignes.filter((m) => /^(ERREUR|PERDU|MUET)$/.test(m.k)))
+      L('      ' + (m.k === 'PERDU' ? '✗ PERDU ' : m.k === 'ERREUR' ? '✗ ERREUR' : '· MUET  ') + ' [' + m.scen + '] ' + m.option
+        + (m.k === 'PERDU' ? '  — ' + m.essais.map((e) => '« ' + e.sauve + ' »').join(', ') + ' envoie(nt) la même chose' : '') + (m.err.length ? ' — ' + m.err.join(' / ') : '') + (m.pourquoi ? ' — ' + m.pourquoi : ''));
+    for (const d of W.delais.slice(0, 3)) L('      ⌛ délai : ' + d);
+    for (const d of W.errCharge.slice(0, 2)) L('      ! au chargement : ' + d);
+  }
+  L('');
+  L('== RÉSUMÉ DES OPTIONS ==  ' + tot.fenetres + ' fenêtres · ' + tot.options + ' options en ' + Math.floor(duree / 60) + ' min ' + (duree % 60) + ' s');
+  L('   ' + CLASSES_OPT.map((k) => k + ' ' + tot[k]).join(' · ') + (lotsMorts ? ' · ⚠ ' + lotsMorts + ' lot(s) muet(s)' : '') + (temoinOk ? ' · témoin vu' : ' · ✗ TÉMOIN RATÉ'));
+  if (rates.length) { L(''); L('== FABRIQUES EN ÉCHEC =='); rates.forEach((r) => L('  ✗ ' + r)); }
+
+  let doc = { fenetres: {} };
+  if (FILTRE) { try { const ancien = JSON.parse(fs.readFileSync(RAPPORT_OPT, 'utf8')); if (ancien && ancien.fenetres) doc.fenetres = ancien.fenetres; } catch (e) {} }
+  const date = new Date().toISOString();
+  for (const n of Object.keys(F)) doc.fenetres[n] = Object.assign({ date }, F[n]);
+  const T2 = Object.fromEntries([['fenetres', 0], ['options', 0]].concat(CLASSES_OPT.map((k) => [k, 0])));
+  for (const n of Object.keys(doc.fenetres)) { const W = doc.fenetres[n]; T2.fenetres++; T2.options += W.essayes; for (const k of CLASSES_OPT) T2[k] += (W.classes[k] || 0); }
+  doc = Object.assign({ date, dernierPassage: { duree_s: duree, fenetres: nomsFen.length, filtre: FILTRE ? ARGS.join(' ') : '', temoin: temoinOk, lotsMuets: lotsMorts, fabriquesEnEchec: rates },
+    totaux: T2, legende: { TRANSMIS: 'les arguments de l’Enregistrer diffèrent de ceux du témoin', APPEL: 'op dès le changement', RÉAGIT: 'la page change, l’enregistrement non (filtre, affichage) ou rien à enregistrer',
+      PERDU: 'aucune réaction ET enregistrement identique au témoin : SUSPECT', MUET: 'rien, et aucun Enregistrer', 'NON JUGÉ': 'voir « pourquoi »', ERREUR: 'exception' } }, doc);
+  fs.writeFileSync(RAPPORT_OPT, JSON.stringify(doc, null, 1), 'utf8');
+  L('   rapport : ' + path.relative(RACINE, RAPPORT_OPT) + (FILTRE ? ' (fusionné : ' + T2.fenetres + ' fenêtre(s) au total)' : ''));
 }
 
 main();

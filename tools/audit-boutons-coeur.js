@@ -30,6 +30,14 @@
     s = String(s === undefined ? '' : s);
     return s.length > 140 ? s.slice(0, 140) + '...' : s;
   }
+  /* L'empreinte COMPLETE des arguments : court() les tronque, et deux
+     enregistrements qui ne different qu'en fin d'objet passeraient pour egaux. */
+  function empreinte(v) {
+    var s; try { s = JSON.stringify(v); } catch (e) { s = '?'; }
+    s = String(s === undefined ? '' : s);
+    var h = 5381; for (var i = 0; i < s.length; i++) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0;
+    return h.toString(36) + '.' + s.length;
+  }
   function copie(v) { try { return JSON.parse(JSON.stringify(v)); } catch (e) { return v; } }
   function erreur(m) { (A.phase === 'charge' ? A.errCharge : A.err).push(String(m).slice(0, 300)); }
   window.__abErreur = erreur;
@@ -55,7 +63,7 @@
       var args = Array.prototype.slice.call(arguments, 1);
       var duJeu = Object.prototype.hasOwnProperty.call(REP, nom);
       var emprunt = !duJeu && Object.prototype.hasOwnProperty.call(EMP, nom);
-      A.appels.push({ op: nom, jeu: duJeu ? true : (emprunt ? 'emprunt' : false), phase: A.phase, args: court(args) });
+      A.appels.push({ op: nom, jeu: duJeu ? true : (emprunt ? 'emprunt' : false), phase: A.phase, args: court(args), sig: empreinte(args) });
       return Promise.resolve(duJeu ? copie(REP[nom]) : (emprunt ? copie(EMP[nom]) : { ok: true }));
     },
     menuLabels: function () { return Promise.resolve(REP['__menuLabels'] || ['Fichier', 'Affichage', 'Aide']); },
@@ -131,12 +139,14 @@
 (function () {
   var A = window.__ab;
   var NOM = __NOM__, SCEN = __SCEN__;
-  var B = -1, MAXB = 40, OBS = 700;
+  var B = -1, MAXB = 40, OBS = 700, MODE = '', S = -1;
   try {
     var q = new URLSearchParams(location.search);
     B = Number(q.get('b')); if (isNaN(B)) B = -1;
     MAXB = Number(q.get('max')) || 40;
     OBS = Number(q.get('obs')) || 700;
+    MODE = q.get('m') || '';
+    S = q.has('s') ? Number(q.get('s')) : -1; if (isNaN(S)) S = -1;
   } catch (e) {}
   var envoye = false;
   function rendre(x) {
@@ -305,6 +315,50 @@
     var deja = /(^|\s)(on|actif|active|sel|selected|courant|choisi)(\s|$)/.test(String(el.className || ''))
       || el.getAttribute('aria-pressed') === 'true' || el.getAttribute('aria-selected') === 'true' || !!el.getAttribute('aria-current')
       || ((el.type === 'radio') && el.checked);
+    poserGardes(function () { fin(); });
+    /* L'ÉTALONNAGE : un clic À VIDE sur le fond de la page d'abord. Ce qu'il
+       change (un menu qui se referme, une liste de suggestions qui se cache…)
+       arrive à TOUT clic : on l'ignore ensuite, sinon un écouteur global ferait
+       passer chaque bouton muet pour vivant (vu sur la caisse : #c-res). */
+    var cal = observer();
+    try { cliquer(document.body, 1, 1); } catch (e) {}
+    setTimeout(function () {
+      cal.fin();
+      etat0 = (el.type === 'checkbox' || el.type === 'radio') ? el.checked : null;
+      nOps = A.appels.length; nNat = A.natifs.length; nHors = A.hors.length;
+      o = observer(cal.sigs);
+      vals0 = valeurs();
+      A.phase = 'clic';
+      try {
+        var r = el.getBoundingClientRect();
+        cliquer(el, Math.round(r.left + r.width / 2), Math.round(r.top + r.height / 2));
+      } catch (e) { window.__abErreur('dispatch : ' + (e && e.message)); }
+      setTimeout(fin, OBS);
+    }, 120);
+    var o = null, nOps = 0, nNat = 0, nHors = 0, etat0 = null, vals0 = null;
+    var fait = false;
+    function fin() {
+      if (fait || !o) return; fait = true;
+      o.fin();
+      rendre({
+        mode: 'clic', l: lib, s: sig, instable: instable, total: bs.length,
+        err: A.err.slice(0, 4),
+        ops: A.appels.slice(nOps).map(function (a) { return { op: a.op, jeu: a.jeu, args: a.args }; }).slice(0, 12),
+        natifs: A.natifs.slice(nNat).map(function (n) { return n.m; }).slice(0, 8),
+        hors: A.hors.slice(nHors).map(function (h) { return h.q; }).slice(0, 6),
+        conf: A.conf.slice(0, 3),
+        deja: deja ? 1 : 0,
+        valeur: (function () { var v = valeurs(); if (!vals0 || v.length !== vals0.length) return 0; for (var i = 0; i < v.length; i++) if (v[i] !== vals0[i]) return 1; return 0; })(),
+        focus: document.activeElement && document.activeElement !== document.body && document.activeElement !== el ? signature(document.activeElement) : '',
+        coche: (etat0 !== null && el.checked !== etat0) ? 1 : 0,
+        muts: o.muts,
+      });
+    }
+  }
+
+
+  /* ── LES GARDES COMMUNES AU CLIC ET AUX OPTIONS ── */
+  function poserGardes(surDepart) {
     // Les boîtes de confirmation du socle : ACCEPTÉES, et notées, pour suivre l'action jusqu'à son appel.
     window.szConfirmer = function (o) {
       o = o || {};
@@ -327,56 +381,201 @@
       window.__abHors('soumission de formulaire NON retenue par la fenêtre (rechargerait la page)');
     });
     window.addEventListener('pagehide', function () {
-      A.hors.push({ q: 'la page s’en va (navigation)', phase: 'clic' });
-      fin();
+      A.hors.push({ q: 'la page s’en va (navigation)', phase: A.phase });
+      surDepart();
     });
-    /* L'ÉTALONNAGE : un clic À VIDE sur le fond de la page d'abord. Ce qu'il
-       change (un menu qui se referme, une liste de suggestions qui se cache…)
-       arrive à TOUT clic : on l'ignore ensuite, sinon un écouteur global ferait
-       passer chaque bouton muet pour vivant (vu sur la caisse : #c-res). */
+  }
+
+  /* La VALEUR des champs : poser « 50 » dans une quantité ne touche pas au DOM
+     (c'est une propriété), et le bouton passerait pour MUET. « sauf » : le champ
+     qu'on vient soi-même de changer, dont la valeur a forcément bougé. */
+  function valeurs(sauf) {
+    var out = [];
+    Array.prototype.forEach.call(document.querySelectorAll('input, select, textarea'), function (c) {
+      if (c === sauf) { out.push('='); return; }
+      // Le radio choisi decoche forcement son voisin de groupe : ce n'est pas une reaction.
+      if (sauf && sauf.type === 'radio' && c.type === 'radio' && c.name && c.name === sauf.name) { out.push('='); return; }
+      out.push((c.type === 'checkbox' || c.type === 'radio') ? String(c.checked) : String(c.value));
+    });
+    return out;
+  }
+  function differe(a, b) { if (!a || !b || a.length !== b.length) return 0; for (var i = 0; i < a.length; i++) if (a[i] !== b[i]) return 1; return 0; }
+
+  /* ==================================================================
+     LES OPTIONS (m=opt, 2026-10-16) — UNE OPTION SERT-ELLE A QUELQUE CHOSE ?
+     Cocher une case change TOUJOURS son etat : le « case cochee » du clic ne
+     prouve donc rien. Ici, pour chaque selecteur, case ou radio :
+       1. on change sa valeur (vrais evenements input + change) et on regarde
+          la reaction immediate (op, DOM, autre champ) ;
+       2. on clique UN des Enregistrer de la page (s = son rang ; le pilote les
+          essaie TOUS, quatre au plus), et on prend l'empreinte complete des
+          arguments envoyes au pont. Pas le plus proche dans l'arbre : sur les
+          paiements, celui des identifiants est dans le pied de page, plus loin
+          du choix de mode que celui des modes de paiement — la proximite
+          designait le mauvais, et l'option passait pour perdue ;
+       3. le pilote compare a un ENREGISTREMENT TEMOIN fait sans rien changer
+          (b = -100 - i, i = rang de ce bouton). Memes arguments et aucune
+          reaction : l'option est PERDUE — l'usager la regle, rien ne la lit.
+     b = -1 : inventaire des options ; b = k : option k.
+     ================================================================== */
+  var SEL_OPT = 'select, input[type=checkbox], input[type=radio], [role=switch]';
+  /* Le verbe qui ENVOIE : « Enregistrer » ne suffit pas — un formulaire de lien
+     se termine par « + Creer le lien », celui d'un vehicule par « + Inscrire le
+     vehicule », la connexion par « Se connecter ». Avec le seul « Enregistrer »,
+     la premiere passe a declare PERDUES les options du vehicule (le bouton
+     essaye etait « Mettre a jour la liste ») et muettes celles de dix formulaires. */
+  var RE_SAUVE = /^[^A-Za-z\u00C0-\u00FF]*(enregistrer|sauvegarder|appliquer|mettre \u00E0 jour|valider|cr\u00E9er|fabriquer|publier|ajouter|inscrire|g\u00E9n\u00E9rer|envoyer|confirmer|se connecter|connexion|encaisser|programmer|planifier|activer|terminer|acheter|commander|imprimer|exporter|t\u00E9l\u00E9charger|continuer|suivant)/i;
+  function profondeur(n) { var d = 0; while (n) { d++; n = n.parentElement; } return d; }
+  function commun(a, b) { while (a && !a.contains(b)) a = a.parentElement; return a; }
+  /* Les trois Enregistrer les plus PROCHES (ancetre commun le plus profond), par rang
+     dans sauveurs() : on les essaie tous les trois, la proximite seule s'est trompee. */
+  function candidats(el, ss) {
+    return ss.map(function (b, i) { return { i: i, d: profondeur(commun(b, el)) }; })
+      .sort(function (a, b) { return b.d - a.d || a.i - b.i; }).slice(0, 3).map(function (x) { return x.i; });
+  }
+  function porteur(el) {
+    // Une bascule stylee cache souvent la vraie case : c'est son etiquette qu'on voit et qu'on clique.
+    if (visible(el)) return el;
+    var l = (el.labels && el.labels[0]) || el.closest('label');
+    return (l && visible(l)) ? l : null;
+  }
+  function autreChoix(s) {
+    var n = s.options.length;
+    for (var k = 1; k < n; k++) { var j = (s.selectedIndex + k) % n; if (!s.options[j].disabled) return j; }
+    return -1;
+  }
+  function options() {
+    var tous = Array.prototype.slice.call(document.querySelectorAll(SEL_OPT));
+    var out = [];
+    for (var i = 0; i < tous.length; i++) {
+      var el = tous[i];
+      if (!actif(el)) continue;
+      if (el.type === 'radio' && el.checked) continue;          // deja choisi : le reprendre ne change rien
+      if (el.tagName === 'SELECT' && autreChoix(el) < 0) continue;
+      var p = porteur(el);
+      if (!p || couvert(p)) continue;
+      out.push(el);
+    }
+    return out;
+  }
+  function libOpt(el) {
+    if (el.tagName !== 'SELECT') return libelle(el);
+    var lab = (el.labels && el.labels[0]) || el.closest('label');
+    var t = lab ? String(lab.innerText || lab.textContent || '') : (el.getAttribute('aria-label') || el.title || el.name || el.id || '');
+    t = '[select] ' + String(t).replace(/\s+/g, ' ').trim();
+    return t.length > 70 ? t.slice(0, 70) + '…' : t;
+  }
+  function sauveurs() { return boutons().filter(function (b) { return RE_SAUVE.test(libelle(b)); }); }
+  function changer(el) {
+    if (el.tagName === 'SELECT') {
+      el.selectedIndex = autreChoix(el);
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+      return;
+    }
+    // Une etiquette relaie le clic a sa case ; un role=switch nu recoit le clic direct.
+    var p = porteur(el) || el, r = p.getBoundingClientRect();
+    cliquer(p, Math.round(r.left + Math.min(r.width / 2, 12)), Math.round(r.top + r.height / 2));
+  }
+  /* LE PRE-REMPLISSAGE : un formulaire aux champs obligatoires vides refuse
+     d'envoyer, et un enregistrement qui n'envoie rien ne se compare a rien (la
+     premiere passe en a laisse 35 « non juges »). Les champs VIDES recoivent une
+     valeur plausible, LA MEME dans le passage temoin et dans celui de l'option ;
+     l'option, elle, est changee APRES. */
+  function preremplir() {
+    var n = 0;
+    Array.prototype.forEach.call(document.querySelectorAll('input, select, textarea'), function (c) {
+      if (c.disabled || c.readOnly || !visible(porteur(c) || c)) return;
+      var t = String(c.type || '').toLowerCase();
+      if (/^(checkbox|radio|file|hidden|button|submit|reset|image|range|color)$/.test(t)) return;
+      if (c.tagName === 'SELECT') {
+        if (c.value !== '') return;
+        for (var k = 0; k < c.options.length; k++) if (c.options[k].value !== '' && !c.options[k].disabled) { c.selectedIndex = k; break; }
+      } else {
+        if (c.value !== '') return;
+        c.value = t === 'email' ? 'essai@exemple.com' : t === 'tel' ? '5145550123' : t === 'url' ? 'https://exemple.com'
+          : t === 'number' ? String(c.min !== '' ? c.min : 1) : t === 'date' ? '2026-10-16' : t === 'time' ? '10:00'
+          : t === 'month' ? '2026-10' : t === 'datetime-local' ? '2026-10-16T10:00' : t === 'password' ? 'Essai-12345!' : 'Essai';
+      }
+      try { c.dispatchEvent(new Event('input', { bubbles: true })); c.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) {}
+      n++;
+    });
+    return n;
+  }
+  function opsDepuis(n) {
+    return A.appels.slice(n).filter(function (a) { return !/^(session:activite|lots:etat|verrous:liste|brouillon:ecrire)$/.test(a.op); });
+  }
+  function inventaireOpt(instable) {
+    var os = options(), ss = sauveurs();
+    rendre({
+      mode: 'inv', m: 'opt', instable: instable, total: os.length,
+      boutons: os.slice(0, MAXB).map(function (el) { return { l: libOpt(el), s: signature(el), cands: candidats(el, ss) }; }),
+      sauveurs: ss.map(function (b) { return { l: libelle(b), s: signature(b) }; }),
+      errCharge: A.errCharge.slice(0, 5),
+    });
+  }
+  function enregistrer(btn, apres) {
+    var n = A.appels.length, nc = A.conf.length;
+    A.phase = 'sauve';
+    try { var r = btn.getBoundingClientRect(); cliquer(btn, Math.round(r.left + r.width / 2), Math.round(r.top + r.height / 2)); }
+    catch (e) { window.__abErreur('dispatch : ' + (e && e.message)); }
+    setTimeout(function () {
+      apres({ ops: opsDepuis(n).map(function (a) { return { op: a.op, sig: a.sig, args: a.args, jeu: a.jeu }; }).slice(0, 12),
+        conf: A.conf.slice(nc).map(function (c) { return c.titre + ' → ' + c.oui; }) });
+    }, Math.round(OBS * 1.5));
+  }
+  function temoinSauve(instable) {
+    var i = -100 - B, ss = sauveurs(), btn = ss[i];
+    if (!btn) { rendre({ mode: 'sauveTemoin', i: i, absent: 1 }); return; }
+    poserGardes(function () {});
+    var lib = libelle(btn), sig = signature(btn);
+    var nPre = preremplir();
+    setTimeout(function () {
+    btn = sauveurs().filter(function (b) { return libelle(b) === lib && signature(b) === sig; })[0] || btn;
+    enregistrer(btn, function (s) { s.pre = nPre; rendre({ mode: 'sauveTemoin', i: i, l: lib, s: sig, sauve: s, err: A.err.slice(0, 4), instable: instable }); });
+    }, 200);
+  }
+  function optionner(instable) {
+    var os = options(), el = os[B];
+    if (!el) { rendre({ mode: 'opt', absent: 1, total: os.length }); return; }
+    var lib = libOpt(el), sig = signature(el);
+    var ss0 = sauveurs(), cible = (S >= 0 && ss0[S]) ? { l: libelle(ss0[S]), s: signature(ss0[S]) } : null;
+    var rendu = false;
+    function dire(x) { if (rendu) return; rendu = true; rendre(x); }
+    poserGardes(function () { dire({ mode: 'opt', l: lib, s: sig, hors: ['la page s’en va (navigation)'], err: A.err.slice(0, 4) }); });
+    preremplir();
     var cal = observer();
     try { cliquer(document.body, 1, 1); } catch (e) {}
     setTimeout(function () {
       cal.fin();
-      etat0 = (el.type === 'checkbox' || el.type === 'radio') ? el.checked : null;
-      nOps = A.appels.length; nNat = A.natifs.length; nHors = A.hors.length;
-      o = observer(cal.sigs);
-      vals0 = valeurs();
+      if (!document.contains(el)) { el = options().filter(function (o) { return signature(o) === sig && libOpt(o) === lib; })[0] || el; }
+      var avant = el.tagName === 'SELECT' ? el.value : el.checked;
+      var n0 = A.appels.length, nN = A.natifs.length, nH = A.hors.length;
+      var o = observer(cal.sigs), v0 = valeurs(el);
       A.phase = 'clic';
-      try {
-        var r = el.getBoundingClientRect();
-        cliquer(el, Math.round(r.left + r.width / 2), Math.round(r.top + r.height / 2));
-      } catch (e) { window.__abErreur('dispatch : ' + (e && e.message)); }
-      setTimeout(fin, OBS);
+      try { changer(el); } catch (e) { window.__abErreur('changement : ' + (e && e.message)); }
+      // Pris tout de suite ? Une liste d'outil (police, format) se remet a sa valeur apres usage : ce n'est pas un refus.
+      var pris = (el.tagName === 'SELECT' ? el.value : el.checked) !== avant;
+      setTimeout(function () {
+        o.fin();
+        var apres = el.tagName === 'SELECT' ? el.value : el.checked;
+        var x = { mode: 'opt', l: lib, s: sig, instable: instable,
+          change: avant !== apres ? 1 : 0, pris: pris ? 1 : 0,
+          ops: opsDepuis(n0).map(function (a) { return { op: a.op, args: a.args, jeu: a.jeu }; }).slice(0, 12),
+          natifs: A.natifs.slice(nN).map(function (q) { return q.m; }).slice(0, 8),
+          hors: A.hors.slice(nH).map(function (h) { return h.q; }).slice(0, 6),
+          muts: o.muts, valeur: differe(valeurs(el), v0) };
+        x.si = S;
+        if (!cible) { x.err = A.err.slice(0, 4); dire(x); return; }
+        // L'Enregistrer est cherche APRES le changement, par son libelle et sa signature :
+        // une fenetre qui REDESSINE au changement a remplace tous ses noeuds.
+        var apresS = sauveurs(), btn = null;
+        for (var q = 0; q < apresS.length && !btn; q++) if (libelle(apresS[q]) === cible.l && signature(apresS[q]) === cible.s) btn = apresS[q];
+        x.sauveL = cible.l; x.sauveS = cible.s;
+        if (!btn) { x.err = A.err.slice(0, 4); x.sauveDisparu = 1; dire(x); return; }
+        enregistrer(btn, function (r) { x.sauve = r; x.err = A.err.slice(0, 4); dire(x); });
+      }, OBS);
     }, 120);
-    var o = null, nOps = 0, nNat = 0, nHors = 0, etat0 = null, vals0 = null;
-    /* La VALEUR des champs : poser « 50 » dans une quantité ne touche pas au DOM
-       (c'est une propriété), et le bouton passerait pour MUET. */
-    function valeurs() {
-      var out = [];
-      Array.prototype.forEach.call(document.querySelectorAll('input, select, textarea'), function (c) {
-        out.push((c.type === 'checkbox' || c.type === 'radio') ? String(c.checked) : String(c.value));
-      });
-      return out;
-    }
-    var fait = false;
-    function fin() {
-      if (fait || !o) return; fait = true;
-      o.fin();
-      rendre({
-        mode: 'clic', l: lib, s: sig, instable: instable, total: bs.length,
-        err: A.err.slice(0, 4),
-        ops: A.appels.slice(nOps).map(function (a) { return { op: a.op, jeu: a.jeu, args: a.args }; }).slice(0, 12),
-        natifs: A.natifs.slice(nNat).map(function (n) { return n.m; }).slice(0, 8),
-        hors: A.hors.slice(nHors).map(function (h) { return h.q; }).slice(0, 6),
-        conf: A.conf.slice(0, 3),
-        deja: deja ? 1 : 0,
-        valeur: (function () { var v = valeurs(); if (!vals0 || v.length !== vals0.length) return 0; for (var i = 0; i < v.length; i++) if (v[i] !== vals0[i]) return 1; return 0; })(),
-        focus: document.activeElement && document.activeElement !== document.body && document.activeElement !== el ? signature(document.activeElement) : '',
-        coche: (etat0 !== null && el.checked !== etat0) ? 1 : 0,
-        muts: o.muts,
-      });
-    }
   }
 
   var tours = 0;
@@ -385,7 +584,10 @@
     if (tours < 6) { setTimeout(tour, 40); return; }
     couperAnimations();
     stable(function (instable) {
-      try { if (B < 0) inventaire(instable); else clic(instable); }
+      try {
+        if (MODE === 'opt') { if (B === -1) inventaireOpt(instable); else if (B <= -100) temoinSauve(instable); else optionner(instable); }
+        else if (B < 0) inventaire(instable); else clic(instable);
+      }
       catch (e) { rendre({ mode: B < 0 ? 'inv' : 'clic', panne: String(e && e.message) }); }
     });
   }

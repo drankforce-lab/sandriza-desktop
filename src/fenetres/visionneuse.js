@@ -96,6 +96,10 @@ function pageVisionneuse(id, liste) {
     var im = img();
     if (im) im.style.transform = 'translate(' + X + 'px,' + Y + 'px) scale(' + Z + ')';
     document.getElementById('pct').textContent = im ? Math.round(Z * 100) + ' %' : '—';
+    /* Sans image LISIBLE, le zoom n a rien a faire : grise, il le dit lui-meme
+       (cliquables, ils ne repondaient rien, et le message est deja dans le cadre). */
+    var lue = !!(im && im.naturalWidth);
+    ['b-moins', 'b-plus', 'b-ajuster', 'b-reel'].forEach(function(b){ document.getElementById(b).disabled = !lue; });
   }
   /* Ajuster = la photo ENTIERE dans le cadre, sans jamais l agrandir au-dela
      de sa taille reelle (une petite image grossie ne montre que du flou). */
@@ -132,6 +136,8 @@ function pageVisionneuse(id, liste) {
       cadre.innerHTML = '<img id="v-img" alt="">';
       var im = img();
       im.onload = ajuster;
+      // Reçue mais pas decodable (fichier abime, format inconnu) : sans ceci, un cadre vide et muet.
+      im.onerror = function(){ if (LISTE[I].id === id) { cadre.innerHTML = '<div class="attente">${T("Cette photo n’a pas pu être lue.")}</div>'; appliquer(); } };
       im.src = src;
     };
     if (PLEIN[id] !== undefined) { poser(PLEIN[id]); return; }
