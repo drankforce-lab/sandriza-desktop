@@ -43,31 +43,34 @@ body{background:var(--f-page);color:var(--tx);
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete select{font:inherit;font-size:.8rem;color:var(--tx);background:var(--f-champ);
-  border:1px solid var(--v12);border-radius:7px;padding:.18rem .4rem;margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow:hidden;
-  display:flex;flex-direction:column;gap:1rem}
-/* Aucune glissiere (2026-10-12) : mouvements et mois en PAGES mesurees (JS_PAGES du socle).
+  border:1px solid var(--v12);border-radius:7px;padding:.18rem .4rem}
+/* LA REFONTE DE LA COMPTABILITE (2026-10-16) : la grammaire .cx du socle (CSS_COMPTA). La tete porte le
+   resume, l annee et l impression ; le corps : les avis en pastilles, quatre chiffres, puis le fil et les mois
+   cote a cote. Aucune glissiere (2026-10-12) : mouvements et mois en PAGES mesurees (JS_PAGES du socle).
    A l impression du releve, TOUTES les lignes reviennent et le pied de pages s efface. */
-@media print{body,.corps,.corps [data-pages]{overflow:visible!important;height:auto!important}
-  .corps .sz-pagee{flex:0 0 auto!important}
-  .corps [data-pages] tbody>tr{display:table-row!important}.sz-pages{display:none!important}}
-.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
-  padding:1rem 1.1rem;min-width:0}
-.carte h2{margin:0 0 .2rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2)}
-.carte .sous{margin:0 0 .9rem;font-size:.78rem;color:var(--tx3)}
-.avis{border-radius:9px;padding:.55rem .75rem;font-size:.79rem;margin:0 0 .9rem;
-  border:1px solid rgba(240,180,80,.3);background:rgba(200,140,40,.09);color:var(--tx-or2)}
-.avis.dur{border-color:rgba(248,113,113,.35);background:rgba(190,60,60,.12);color:var(--tx-err)}
+@media print{body,.cx,.cx [data-pages],.cx-carte,.cx-deux{overflow:visible!important;height:auto!important}
+  .cx>.cx-deux{display:block!important}.cx [data-pages]{flex:0 0 auto!important}
+  .cx [data-pages] tbody>tr{display:table-row!important}.cx [data-pages]>.cp-mois{display:block!important}
+  .sz-pages,.szbd-b{display:none!important}}
+/* Les avis : une PASTILLE courte ; le texte complet s ouvre dessous, rien n est efface. */
+.cp-avis{display:flex;flex-wrap:wrap;align-items:flex-start;gap:.5rem}
+/* Le detail flotte SOUS la pastille, par-dessus la page : l ouvrir ne pousse rien (les pages mesurees tiennent).
+   A l impression, il reprend sa place dans le flux, ouvert. */
+.cp-avis details{position:relative;min-width:0;max-width:100%}
+.cp-avis summary{list-style:none;cursor:pointer}
+.cp-avis summary::-webkit-details-marker{display:none}
+.cp-avis details>p{position:absolute;z-index:20;top:calc(100% + .35rem);left:0;width:min(40rem,80vw);margin:0;
+  padding:.6rem .8rem;border-radius:12px;background:var(--f-carte2);border:1px solid var(--sz-bord,var(--v14));
+  box-shadow:0 12px 28px rgba(0,0,0,.35);font-size:.78rem;line-height:1.45;color:var(--tx)}
+@media print{.cp-avis details>p{position:static;box-shadow:none;width:auto}}
+.cx-averti.dur{border-color:color-mix(in srgb,var(--tx-err) 40%,transparent);
+  background:color-mix(in srgb,var(--tx-err) 9%,transparent);color:var(--tx-err)}
 /* ⚠ REPRISE DU MODE JOUR — la meme que dans conformite.js, et le chiffre
    vient de la meme mesure : sur #eedcd7, var(--tx-err) rend #ab4e4e (4.03,
    sous le seuil) ; assombri du MINIMUM necessaire, 92 % de la teinte, 4.59. */
-html.jour .avis.dur{color:#9d4848}
-.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr));gap:.7rem}
-.tuile{background:var(--v03);border:1px solid var(--v07);border-radius:10px;padding:.65rem .8rem}
-.tuile .t{font-size:.72rem;color:var(--tx2)}
-.tuile .v{font-size:1.15rem;font-weight:700;margin-top:.15rem;white-space:nowrap}
-.tuile.fort .v{font-size:1.4rem}
+html.jour .cx-averti.dur{color:#9d4848}
+.cp-mois{padding-bottom:.35rem}
+.cp-mois .cx-etat:last-child{border-bottom:0}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
 th{text-align:left;padding:.35rem .5rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);border-bottom:1px solid var(--v12);
@@ -75,14 +78,7 @@ th{text-align:left;padding:.35rem .5rem;font-size:.6875rem;text-transform:upperc
 td{padding:.35rem .5rem;border-bottom:1px solid var(--v05);vertical-align:middle}
 /* (Plus de « tr:last-child td{border-bottom:none} » : chaque ligne est une carte, la derniere garde son bord — 2026-09-26.) */
 td.dr,th.dr{text-align:right;white-space:nowrap}
-td.ref{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.78rem;color:var(--tx3)}
 td.sol{font-weight:700;white-space:nowrap}
-.plus{color:var(--tx-ok)}.moins{color:var(--tx-err)}
-.nat{display:inline-flex;align-items:center;gap:.35rem;white-space:nowrap}
-.pt{width:.5rem;height:.5rem;border-radius:50%;flex:0 0 auto}
-.n-vente{background:#4ade80}.n-frais{background:#fbbf24}
-.n-remboursement{background:#f87171}.n-frais_retenus{background:#7dd3fc}
-.n-depot{background:#a78bfa}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.82rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
@@ -104,10 +100,11 @@ function pageComptePaiement(annee) {
 <title>${T("Compte de paiement — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.payments}</span><h1>${T("Compte de paiement")}</h1>
-  <select id="an" aria-label="${T("Année du compte")}"></select></div>
-<div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
-<div class="pied"><span class="msg" id="msg"></span>
-  <button id="b-imprimer">${T("Imprimer le relevé")}</button></div>
+  <span class="cx-resume">${T("Le compte Square, comme un relevé bancaire")}</span>
+  <div class="cx-actions"><select id="an" aria-label="${T("Année du compte")}"></select>
+  <button id="b-imprimer" class="prim">${T("Imprimer le relevé")}</button></div></div>
+<div class="cx" id="corps"><div class="cx-carte"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
+<div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
   'use strict';
@@ -184,99 +181,116 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptepaiement')}
     depot:         '${T("Dépôt à la banque")}'
   };
 
+  /* LES AVIS EN PASTILLES (refonte 2026-10-16) : un mot court, et le texte
+     complet s ouvre dessous au clic — on n efface aucune information. */
+  function avis(cl, court, long){
+    return '<details><summary class="cx-averti' + (cl ? ' ' + cl : '') + '"><span>' + court + '</span></summary>'
+      + '<p>' + long + '</p></details>';
+  }
   function htmlAvis(){
     var h = '';
     if (D.resume && D.resume.soldeIncomplet) {
       /* ⚠ ON DIT LE POURQUOI ET LE QUOI FAIRE. << Solde incomplet >> tout seul
          ferait deviner ; ici on nomme la cause (aucun depot saisi) et le geste
          (les saisir a la conciliation bancaire). */
-      h += '<div class="avis">${T("Aucun dépôt n’est enregistré pour cette année. Les dépôts se saisissent à la Conciliation bancaire — tant qu’ils manquent, le solde ci-dessous compte comme détenu par le processeur de l’argent qui est peut-être déjà à la banque.")}</div>';
+      h += avis('', '${T("Solde incomplet — aucun dépôt saisi")}',
+        '${T("Aucun dépôt n’est enregistré pour cette année. Les dépôts se saisissent à la Conciliation bancaire — tant qu’ils manquent, le solde ci-dessous compte comme détenu par le processeur de l’argent qui est peut-être déjà à la banque.")}');
     }
     if (D.controle && !D.controle.equilibre) {
-      h += '<div class="avis dur">${T("Le solde du fil et le total par nature ne concordent pas — écart de ")}'
-        + esc(arg(D.controle.ecart)) + '${T(". Un mouvement manque, ou un signe est faux.")}</div>';
+      h += avis('dur', '${T("Écart dans le solde :")} ' + esc(arg(D.controle.ecart)),
+        '${T("Le solde du fil et le total par nature ne concordent pas — écart de ")}'
+        + esc(arg(D.controle.ecart)) + '${T(". Un mouvement manque, ou un signe est faux.")}');
     }
     if (D.bacASable) {
-      h += '<div class="avis">${T("Bac à sable : ces chiffres ne sont pas ceux de la production.")}</div>';
+      h += avis('', '${T("Bac à sable")}', '${T("Bac à sable : ces chiffres ne sont pas ceux de la production.")}');
     }
     if (!D.charge) {
-      h += '<div class="avis">${T("Aucune transaction en cache pour cette année. Ouvrez « Paiements Square » et chargez-les — cet écran ne va pas chercher les données lui-même.")}</div>';
+      h += avis('', '${T("Aucune transaction en cache")}',
+        '${T("Aucune transaction en cache pour cette année. Ouvrez « Paiements Square » et chargez-les — cet écran ne va pas chercher les données lui-même.")}');
     }
-    return h;
+    return h ? '<div class="cp-avis">' + h + '</div>' : '';
   }
 
-  /* Tuiles SANS vert ni rouge (2026-09-29) : six couleurs en bandeau faisaient
-     un arc-en-ciel, et un depot a la banque en rouge se lisait comme une perte.
-     Le signe dit le sens ; la colonne Effet du tableau garde ses couleurs. */
+  /* LES QUATRE CHIFFRES (refonte 2026-10-16). Ils s ADDITIONNENT : ventes,
+     moins frais et remboursements (les frais retenus rendus deduits), moins les
+     depots, donne le solde. Tout vient de D.resume — aucune arithmetique neuve
+     hors de cette somme d affichage. Le bandeau reste MASQUABLE (szTuiles). */
   function htmlTuiles(){
     var r = D.resume || {};
-    var t = function(cl, lbl, val, sup){
-      return '<div class="tuile' + (cl ? ' ' + cl : '') + '"><div class="t">' + esc(lbl)
-        + '</div><div class="v' + (sup || '') + '">' + esc(arg(val)) + '</div></div>';
+    var kpi = function(cl, lbl, val, sous, titre){
+      return '<div class="cx-kpi' + (cl ? ' ' + cl : '') + '"' + (titre ? ' title="' + esc(titre) + '"' : '') + '><span>' + esc(lbl)
+        + '</span><b>' + esc(val) + '</b><small>' + esc(sous) + '</small></div>';
     };
-    return szTuiles('<div class="stat-grid">'
-      + t('fort', '${T("Solde chez le processeur")}', r.solde)
-      + t('', '${T("Ventes")}', r.ventes)
-      + t('', '${T("Frais de traitement")}', -r.frais)
-      + t('', '${T("Remboursements")}', -r.remboursements)
-      + t('', '${T("Frais retenus")}', r.fraisRetenus)
-      + t('', '${T("Déposé à la banque")}', -r.depots)
+    var sortis = -(Number(r.frais) || 0) - (Number(r.remboursements) || 0) + (Number(r.fraisRetenus) || 0);
+    var detSortis = '${T("frais")} ' + arg(r.frais) + ' · ${T("remboursements")} ' + arg(r.remboursements)
+      + ((Number(r.fraisRetenus) || 0) ? ' · ${T("frais retenus")} +' + arg(r.fraisRetenus) : '');
+    return szTuiles('<div class="cx-kpis">'
+      + kpi('ok', '${T("Ventes entrées")}', '+' + arg(r.ventes), '${T("brut des paiements")}')
+      + kpi('err', '${T("Frais et remboursements")}', arg(sortis), detSortis, detSortis)
+      + kpi('', '${T("Dépôts vers la banque")}', arg(r.depots), '${T("virés au compte d’entreprise")}')
+      + kpi(r.soldeIncomplet ? 'att' : 'or', '${T("Solde chez le processeur")}',
+          ((Number(r.solde) || 0) >= 0 ? '+' : '') + arg(r.solde),
+          '${T("variation de l’exercice")} ' + (D.annee || ''))
       + '</div>');
   }
 
+  var PILLS = { vente: 'vert', frais: 'ambre', remboursement: 'rouge', frais_retenus: 'bleu', depot: '' };
   function htmlFil(){
     var l = (D && D.mouvements) || [];
-    if (!l.length) return '<div class="carte"><h2>${T("Mouvements")}</h2>'
+    if (!l.length) return '<div class="cx-carte"><h2>${T("Mouvements")}</h2>'
       + '<div class="vide">${T("Aucun mouvement pour cette année.")}</div></div>';
     var lignes = l.map(function(m){
-      var signe = (m.effet >= 0) ? 'plus' : 'moins';
+      var signe = (m.effet >= 0) ? 'cx-pos' : 'cx-neg';
       return '<tr><td>' + esc(szQuand(m.date) || '${T("(date illisible)")}') + '</td>'
-        + '<td><span class="nat"><span class="pt n-' + esc(m.nature) + '" aria-hidden="true"></span>'
+        + '<td><span class="rf-pill ' + (PILLS[m.nature] || '') + '">'
         + esc(NATURES[m.nature] || m.nature) + '</span></td>'
-        + '<td class="ref">' + esc(m.ref) + '</td>'
+        + '<td><span class="cx-code">' + esc(m.ref) + '</span></td>'
         + '<td>' + esc(m.libelle) + '</td>'
         + '<td class="dr ' + signe + '">' + esc((m.effet >= 0 ? '+' : '') + arg(m.effet)) + '</td>'
         + '<td class="dr sol">' + esc(arg(m.solde)) + '</td></tr>';
     }).join('');
     // La liste en PAGES mesurees, jamais de glissiere (2026-10-12).
-    return '<div class="carte sz-pagee"><h2>${T("Mouvements")}</h2>'
-      + '<p class="sous">${T("Du plus ancien au plus récent. Une vente donne deux lignes : le brut entre, les frais sortent.")}</p>'
-      + '<div data-pages="comptepaiement-mouvements"><table><thead><tr><th>${T("Date")}</th><th>${T("Nature")}</th><th>${T("Référence")}</th>'
+    return '<div class="cx-carte"><h2>${T("Mouvements")} <span class="cx-sub">${T("Du plus ancien au plus récent. Une vente donne deux lignes : le brut entre, les frais sortent.")}</span></h2>'
+      + '<div class="cx-pages" data-pages="comptepaiement-mouvements"><table><thead><tr><th>${T("Date")}</th><th>${T("Nature")}</th><th>${T("Référence")}</th>'
       + '<th>${T("Détail")}</th><th class="dr">${T("Effet")}</th><th class="dr">${T("Solde")}</th>'
       + '</tr></thead><tbody>' + lignes + '</tbody></table></div></div>';
   }
 
+  /* PAR MOIS, en releve (refonte 2026-10-16) : le mois et sa variation, puis ses
+     quatre postes en retrait. Un bloc par mois : la page ne coupe jamais un mois. */
   function htmlMois(){
     var m = (D && D.mois) || [];
-    if (!m.length) return '';
-    var lignes = m.map(function(x){
-      return '<tr><td>' + esc(x.mois) + '</td>'
-        + '<td class="dr">' + esc(arg(x.ventes)) + '</td>'
-        + '<td class="dr">' + esc(arg(x.frais)) + '</td>'
-        + '<td class="dr">' + esc(arg(x.remboursements)) + '</td>'
-        + '<td class="dr">' + esc(arg(x.depots)) + '</td>'
-        + '<td class="dr sol">' + esc((x.net >= 0 ? '+' : '') + arg(x.net)) + '</td></tr>';
+    if (!m.length) return '<div class="cx-carte"><h2>${T("Par mois")}</h2>'
+      + '<div class="vide">${T("Aucun mouvement pour cette année.")}</div></div>';
+    var etat = function(lbl, v){
+      return '<div class="cx-etat ret"><span>' + esc(lbl) + '</span><span>' + esc(arg(v)) + '</span></div>';
+    };
+    var blocs = m.map(function(x){
+      return '<div class="cp-mois"><div class="cx-etat"><span><b>' + esc(x.mois) + '</b></span>'
+        + '<span class="' + (x.net >= 0 ? 'cx-pos' : 'cx-neg') + '" title="${T("Variation")}"><b>'
+        + esc((x.net >= 0 ? '+' : '') + arg(x.net)) + '</b></span></div>'
+        + etat('${T("Ventes")}', x.ventes) + etat('${T("Frais")}', x.frais)
+        + etat('${T("Remboursements")}', x.remboursements) + etat('${T("Dépôts")}', x.depots) + '</div>';
     }).join('');
-    // Douze lignes au plus, mais en PAGES aussi : la carte partage la hauteur avec les mouvements.
-    return '<div class="carte sz-pagee"><h2>${T("Par mois")}</h2>'
-      + '<div data-pages="comptepaiement-mois"><table><thead><tr><th>${T("Mois")}</th><th class="dr">${T("Ventes")}</th>'
-      + '<th class="dr">${T("Frais")}</th><th class="dr">${T("Remboursements")}</th>'
-      + '<th class="dr">${T("Dépôts")}</th><th class="dr">${T("Variation")}</th>'
-      + '</tr></thead><tbody>' + lignes + '</tbody></table></div></div>';
+    // En PAGES aussi : douze mois ne tiennent pas dans la colonne.
+    return '<div class="cx-carte"><h2>${T("Par mois")}</h2>'
+      + '<div class="cx-pages" data-pages="comptepaiement-mois">' + blocs + '</div>'
+      + (m.length < 12 ? '<div class="cx-sub">${T("Les autres mois de l’exercice n’ont aucun mouvement.")}</div>' : '')
+      + '</div>';
   }
 
   function majAnnees(){
     var an = (D && D.annees) || [];
     selAn.innerHTML = an.map(function(y){
       return '<option value="' + esc(y) + '"' + (String(y) === String(D.annee) ? ' selected' : '') + '>'
-        + esc(y) + '</option>'; }).join('');
+        + '${T("Exercice")} ' + esc(y) + '</option>'; }).join('');
   }
 
   function dessiner(){
     if (!D) return;
     majAnnees();
-    corps.innerHTML = '<div class="carte">' + htmlAvis() + htmlTuiles() + '</div>'
-      + htmlFil() + htmlMois();
+    corps.innerHTML = htmlAvis() + htmlTuiles()
+      + '<div class="cx-deux">' + htmlFil() + htmlMois() + '</div>';
   }
 
   function charger(an){
@@ -284,7 +298,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptepaiement')}
     OCCUPE = true; dire('${T("Chargement…")}', 'att');
     return appeler('paiements:compte', [an || AN || '']).then(function(r){
       OCCUPE = false;
-      if (!r.ok) { corps.innerHTML = '<div class="carte"><div class="vide">' + esc(expliquer(r)) + '</div></div>';
+      if (!r.ok) { corps.innerHTML = '<div class="cx-carte"><div class="vide">' + esc(expliquer(r)) + '</div></div>';
                    dire(expliquer(r), 'err'); return; }
       D = r; AN = String(r.annee); dessiner(); dire('');
     });

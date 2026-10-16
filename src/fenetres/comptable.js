@@ -41,20 +41,31 @@ body{background:var(--f-page);color:var(--tx);
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.onglets{flex:0 0 auto;display:flex;gap:.3rem;padding:.5rem 1.05rem 0;
-  border-bottom:1px solid var(--v08)}
-.onglets button{background:none;border:0;border-bottom:2px solid transparent;color:var(--tx2);
-  font:600 .82rem/1 system-ui;padding:.45rem .7rem;cursor:pointer;border-radius:0}
-.onglets button.on{color:var(--tx);border-bottom-color:var(--or)}
 /* Aucune glissiere (2026-10-12) : chaque liste se pagine dans la hauteur qui
    reste (data-pages, JS_PAGES du socle). */
-.corps{flex:1 1 auto;min-height:0;padding:.85rem 1.05rem;overflow:hidden;
-  display:flex;flex-direction:column;gap:.75rem}
-.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
-  padding:.8rem .9rem}
-.carte h2{margin:0 0 .55rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2)}
+.corps{flex:1 1 auto;min-height:0;overflow:hidden}
+/* ── LA GRAMMAIRE DE LA COMPTABILITE (2026-10-16, esquisse Comptable.dc) ──
+   Tete : titre, onglets segmentes, resume, gestes (#actions, rempli par la vue).
+   Corps (.cx) : quatre chiffres, puis deux moities — les liens (ou le carnet) a
+   gauche, le formulaire ouvert ou les exercices a droite. */
+.cx>.sz-pagee,.cx-deux>.sz-pagee{flex:1 1 0;min-height:0}
+.cx-deux{grid-template-rows:minmax(0,1fr)}
+.cx-col{display:flex;flex-direction:column;gap:.9rem;min-height:0;min-width:0;overflow:hidden}
+.cx-col>.cx-carte{flex:0 1 auto}
+.cx-liste{display:flex;flex-direction:column;gap:.6rem}
+.cx-tuile .t1{display:flex;align-items:center;gap:.6rem;min-width:0}
+.cx-tuile .t1 b{font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cx-tuile .t1 .cx-sub{margin-left:auto;white-space:nowrap}
+.cx-val{display:block;margin-top:.2rem;padding:.38rem .6rem;border-radius:8px;background:var(--f-champ);
+  border:1px solid var(--sz-bord);font-family:ui-monospace,Consolas,monospace;font-size:.76rem;color:var(--tx);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cx-gestes{display:flex;align-items:center;gap:.5rem}
+.cx-gestes .droite{margin-left:auto;display:flex;gap:.5rem}
+.cx-annees{display:flex;gap:.5rem;flex-wrap:wrap}
+details.cx-det>summary{list-style:none;cursor:pointer;display:inline-flex}
+details.cx-det>summary::-webkit-details-marker{display:none}
+details.cx-det>.cx-sub{margin:.4rem 0 0 .2rem}
+td.r{text-align:right;white-space:nowrap}
 label{display:block;font-size:.73rem;color:var(--tx2);margin:.5rem 0 .18rem}
 input,select,textarea{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.34rem .5rem;width:100%}
@@ -71,10 +82,6 @@ button.dgr{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
 .duo{display:flex;gap:.65rem;flex-wrap:wrap}
 .duo>div{flex:1 1 10rem;min-width:0}
 .barreoutils{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
-/* ── La refonte de l Inventaire (2026-09-25) ── */
-.tuiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem;flex:0 0 auto;margin-bottom:.7rem}
-.tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
-.tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center}
 table{width:100%;border-collapse:collapse;font-size:.79rem}
 thead th{text-align:left;padding:.22rem .35rem;font-size:.6875rem;text-transform:uppercase;
@@ -115,12 +122,13 @@ function pageComptable(ouverture) {
 <title>${T("Liens comptables — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.acctlink}</span><h1>${T("Liens comptables")}</h1>
-  <span class="sous" id="sous"></span></div>
-<div class="onglets">
-  <button id="o-partages" class="on">${T("Exercices partagés")}</button>
-  <button id="o-carnet">${T("Carnet des comptables")}</button>
-</div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
+  <div class="ed-seg" role="tablist">
+    <button id="o-partages" class="on">${T("Exercices partagés")}</button>
+    <button id="o-carnet">${T("Carnet des comptables")}</button>
+  </div>
+  <span class="cx-resume" id="sous"></span>
+  <div class="cx-actions" id="actions"></div></div>
+<div class="corps cx" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -129,6 +137,7 @@ function pageComptable(ouverture) {
 ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptable')}${JS_BROUILLON()}
   var corps = document.getElementById('corps');
   var sous  = document.getElementById('sous');
+  var actions = document.getElementById('actions');
   var DEPART = ${dep};
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
@@ -177,6 +186,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptable')}${JS_BROUILLON()}
     if (isNaN(d.getTime())) return esc(iso);
     return d.toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'short', year: 'numeric' });
   }
+  // Les initiales de l avatar du carnet (Julie Bergeron -> JB).
+  function initiales(nom){
+    var m = String(nom || '').split('@')[0].split(' ').filter(function(x){ return x; });
+    return ((m[0] || '?').charAt(0) + (m.length > 1 ? m[m.length - 1].charAt(0) : '')).toUpperCase();
+  }
   function copierChamp(champ, bouton){
     champ.select();
     // execCommand ET NON navigator.clipboard : la fenetre est chargee en data:,
@@ -190,56 +204,87 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptable')}${JS_BROUILLON()}
   // ════════════════════════════════════════════════════════════════════════
   // VUE « EXERCICES PARTAGÉS »
   // ════════════════════════════════════════════════════════════════════════
+  /* ══ LA GRAMMAIRE DE LA COMPTABILITE (2026-10-16, esquisse Comptable.dc) ══
+     Quatre chiffres tires de comptable:donnees (rien d autre), les liens en
+     CARTES (.cx-tuile) au lieu d un tableau, le formulaire ouvert dans la moitie
+     droite. Crochets gardes : #b-nouveau, #b-recharger (montes dans la tete),
+     data-copier, data-revoquer, data-pages="comptable-partages". */
+  function kpi(lib, val, sous, ton){
+    return '<div class="cx-kpi' + (ton ? ' ' + ton : '') + '"><span>' + lib + '</span><b>' + val
+      + '</b><small>' + sous + '</small></div>';
+  }
+  function bandeau(){
+    var nExp = ETAT.partages.filter(function(p){ return p.expire; }).length;
+    var nAct = ETAT.partages.length - nExp;
+    var an = ETAT.annees || [];
+    return szTuiles('<div class="cx-kpis">'
+      + kpi('${T("Liens actifs")}', nAct, '${T("le comptable peut ouvrir l’exercice")}', nAct ? 'ok' : '')
+      + kpi('${T("Expirés")}', nExp, '${T("n’ouvrent plus rien")}', '')
+      + kpi('${T("Comptables au carnet")}', ETAT.contacts.length, '${T("destinataires possibles d’un lien")}', '')
+      + kpi('${T("Exercices disponibles")}', an.length,
+          an.length ? (esc(an[an.length - 1]) + ' – ' + esc(an[0])) : '—', '')
+      + '</div>');
+  }
+  /* Le registre distant muet : une PASTILLE, le detail au clic (rien n est efface). */
+  function avertissement(){
+    if (!ETAT.avert) return '';
+    return '<div class="cx-barre"><details class="cx-det"><summary class="cx-averti"><span><b>${T("Registre des liens injoignable")}</b>'
+      + ' ${T("· détail")}</span></summary>'
+      + '<div class="cx-sub">${T("Le carnet est affiché, mais le registre des liens distants n’a pas répondu : ")}'
+      + esc(ETAT.avert) + '</div></details></div>';
+  }
+  function carteExercices(){
+    var an = ETAT.annees || [];
+    return '<div class="cx-carte"><h2>${T("Exercices disponibles")}</h2>'
+      + (an.length
+          ? '<div class="cx-annees">' + an.map(function(y){
+              return '<span class="rf-pill' + (y === ETAT.annee ? ' bleu' : '') + '">' + esc(y) + '</span>';
+            }).join('') + '</div>'
+          : '<div class="vide">—</div>')
+      + '<div class="cx-sub">${T("Un seul lien pour tout l’exercice : le révoquer le coupe pour tous ses destinataires.")}</div>'
+      + '<div class="cx-sub">${T("Réservé au super-administrateur.")}</div>'
+      + '</div>';
+  }
+  function tuilePartage(p){
+    return '<div class="cx-tuile' + (p.expire ? '' : ' ok') + '">'
+      + '<div class="t1"><b>' + esc(p.label || p.periode || '—') + '</b>'
+      + '<span class="rf-pill ' + (p.expire ? '' : 'vert') + '">' + (p.expire ? '${T("Expiré")}' : '${T("Actif")}') + '</span>'
+      + '<span class="cx-sub">${T("Créé")} ' + jour(p.creeLe) + ' · ${T("Échéance")} ' + jour(p.expireLe) + '</span></div>'
+      + (p.url ? '<div><span class="cx-sub">${T("Adresse à transmettre")}</span><span class="cx-val">' + esc(p.url) + '</span></div>' : '')
+      + '<div class="cx-sub">' + (p.destinataire ? ('${T("Envoyé à")} ' + esc(p.destinataire)) : '${T("Aucun destinataire enregistré")}') + '</div>'
+      + '<div class="cx-gestes">'
+        + '<button class="mini" data-copier="' + esc(p.url) + '" title="${T("Copier le lien pour le comptable")}">${T("Copier le lien")}</button>'
+        + '<span class="droite"><button class="mini dgr" data-revoquer="' + esc(p.token) + '">${T("Révoquer")}</button></span>'
+      + '</div></div>';
+  }
+
   function dessinerPartages(){
     var h = [];
-    /* ══ LA REFONTE DE L INVENTAIRE (2026-09-25) : deux tuiles sur la liste
-       ENTIERE, lignes riches, etat en pastille a point. Crochets gardes :
-       #b-nouveau, #b-recharger, data-copier, data-revoquer. */
-    if (ETAT.partages.length) {
-      var nExp = ETAT.partages.filter(function(p){ return p.expire; }).length;
-      h.push(szTuiles('<div class="tuiles">'
-        + '<div class="tuile"><div class="lbl">${T("Liens actifs")}</div><div class="val">' + (ETAT.partages.length - nExp)
-        + '</div><div class="sub">${T("le comptable peut ouvrir l’exercice")}</div></div>'
-        + '<div class="tuile"><div class="lbl">${T("Expirés")}</div><div class="val">' + nExp
-        + '</div><div class="sub">${T("n’ouvrent plus rien")}</div></div>'
-        + '</div>'));
-    }
-    // Le bouton de creation a DROITE, comme dans toutes les autres listes (2026-10-02).
-    h.push('<div class="barreoutils"><span class="droite"><button id="b-recharger">${T("Recharger")}</button>'
-      + '<button class="prim" id="b-nouveau">${T("+ Nouveau lien de l’exercice")}</button></span></div>');
+    // Le geste principal dans la tete, a DROITE, comme dans toute la comptabilite.
+    actions.innerHTML = '<button id="b-recharger">${T("Recharger")}</button>'
+      + '<button class="prim" id="b-nouveau">${T("+ Nouveau lien de l’exercice")}</button>';
 
-    if (ETAT.avert) {
-      h.push('<div class="carte" style="border-color:rgba(234,179,8,.4)"><div class="dt">'
-        + '${T("Le carnet est affiché, mais le registre des liens distants n’a pas répondu : ")}'
-        + esc(ETAT.avert) + '</div></div>');
-    }
-    if (ETAT.neuf) h.push(carteNeuf());
-    if (ETAT.formulaire) h.push(formulaire());
+    h.push(bandeau());
+    h.push(avertissement());
 
+    h.push('<div class="cx-deux moitie">');
     // La liste en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
-    h.push('<div class="carte sz-pagee"><h2>${T("Liens de l’exercice en cours")}</h2>');
+    h.push('<div class="cx-carte sz-pagee"><h2>${T("Liens de l’exercice en cours")}'
+      + ' <span class="cx-sub">${T("un lien par exercice, à durée limitée")}</span></h2>');
     if (!ETAT.partages.length) {
       h.push('<div class="vide">${T("Aucun exercice n’a encore été partagé.")}</div>');
     } else {
-      h.push('<div data-pages="comptable-partages"><table><thead><tr><th>${T("Exercice")}</th>'
-        + '<th>${T("Créé")}</th><th>${T("Échéance")}</th><th>${T("État")}</th><th></th></tr></thead><tbody>');
-      ETAT.partages.forEach(function(p){
-        var etat = p.expire ? 'expire' : 'actif';
-        h.push('<tr>'
-          + '<td><div class="rf-nom">' + esc(p.label || p.periode || '—') + '</div>'
-          + '<div class="rf-sous">' + esc(p.destinataire || '—') + '</div></td>'
-          + '<td>' + jour(p.creeLe) + '</td>'
-          + '<td>' + jour(p.expireLe) + '</td>'
-          + '<td><span class="rf-pill ' + (p.expire ? '' : 'vert') + '">' + (p.expire ? '${T("Expiré")}' : '${T("Actif")}') + '</span></td>'
-          + '<td style="white-space:nowrap">'
-            + '<button class="mini" data-copier="' + esc(p.url) + '" title="${T("Copier le lien pour le comptable")}">${T("Copier")}</button> '
-            + '<button class="mini dgr" data-revoquer="' + esc(p.token) + '">'
-            + '${T("Révoquer")}' + '</button>'
-          + '</td></tr>');
-      });
-      h.push('</tbody></table></div>');
+      h.push('<div class="cx-pages cx-liste" data-pages="comptable-partages">');
+      ETAT.partages.forEach(function(p){ h.push(tuilePartage(p)); });
+      h.push('</div>');
     }
     h.push('</div>');
+
+    h.push('<div class="cx-col">');
+    if (ETAT.neuf) h.push(carteNeuf());
+    if (ETAT.formulaire) h.push(formulaire());
+    if (!ETAT.neuf && !ETAT.formulaire) h.push(carteExercices());
+    h.push('</div></div>');
 
     corps.innerHTML = h.join('');
     brancherPartages();
@@ -249,7 +294,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptable')}${JS_BROUILLON()}
     var n = ETAT.neuf;
     var envoyes = (n.envoyes || []);
     var rates = (n.rates || []);
-    return '<div class="carte neuf"><h2>${T("Lien de l’exercice ")}' + esc(String(n.annee || '')) + '</h2>'
+    return '<div class="cx-carte neuf"><h2>${T("Lien de l’exercice ")}' + esc(String(n.annee || '')) + '</h2>'
       + '<label for="n-url">${T("Adresse à remettre au comptable")}</label>'
       + '<input id="n-url" type="text" readonly value="' + esc(n.url) + '">'
       + '<div class="barreoutils" style="margin-top:.4rem"><button id="n-copier"><span class="ic">📋</span> ${T("Copier")}</button>'
@@ -288,7 +333,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptable')}${JS_BROUILLON()}
         }).join('') + '</div>'
       : '<p class="aide">${T("Le carnet est vide — ajoutez un comptable dans l’onglet Carnet, ou saisissez ")}'
         + '${T("une adresse ci-dessous.")}</p>';
-    return '<div class="carte"><h2>${T("Nouveau lien de l’exercice")}</h2>'
+    return '<div class="cx-carte"><h2>${T("Nouveau lien de l’exercice")}</h2>'
       + '<div class="duo">'
       + '<div><label for="f-annee">${T("Exercice")}</label><select id="f-annee">' + opAns + '</select></div>'
       + '<div><label for="f-duree">${T("Validité")}</label><select id="f-duree">'
@@ -397,26 +442,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptable')}${JS_BROUILLON()}
   // ════════════════════════════════════════════════════════════════════════
   function dessinerCarnet(){
     var h = [];
-    h.push('<div class="barreoutils"><span class="droite"><button id="c-recharger">${T("Recharger")}</button>'
-      + '<button class="prim" id="c-ajouter">${T("+ Ajouter un comptable")}</button></span></div>');
+    // Les gestes dans la tete, le principal a DROITE (grammaire du 2026-10-16).
+    actions.innerHTML = '<button id="c-recharger">${T("Recharger")}</button>'
+      + '<button class="prim" id="c-ajouter">${T("+ Ajouter un comptable")}</button>';
 
-    if (ETAT.contactForm) h.push(contactForm());
+    h.push(bandeau());
+    h.push(avertissement());
 
+    h.push('<div class="cx-deux moitie">');
     // Le carnet en PAGES mesurees, jamais de glissiere (2026-10-12).
-    h.push('<div class="carte sz-pagee"><h2>${T("Carnet")}</h2>');
+    h.push('<div class="cx-carte sz-pagee"><h2>${T("Carnet")}</h2>');
     if (!ETAT.contacts.length) {
       h.push('<div class="vide">${T("Le carnet est vide.")}</div>');
     } else {
-      h.push('<div data-pages="comptable-carnet"><table><thead><tr><th>${T("Nom")}</th><th>${T("Cabinet")}</th><th>${T("Courriel")}</th>'
-        + '<th>${T("Téléphone")}</th><th>${T("Note")}</th><th></th></tr></thead><tbody>');
+      h.push('<div class="cx-pages" data-pages="comptable-carnet"><table><thead><tr><th>${T("Nom")}</th><th>${T("Courriel")}</th>'
+        + '<th></th></tr></thead><tbody>');
       ETAT.contacts.forEach(function(c){
+        var l2 = [c.firm, c.note].filter(function(x){ return x; }).map(esc).join(' · ');
         h.push('<tr>'
-          + '<td>' + esc(c.name || '—') + '</td>'
-          + '<td>' + esc(c.firm || '') + '</td>'
-          + '<td class="mono">' + esc(c.email) + '</td>'
-          + '<td>' + esc(c.phone || '') + '</td>'
-          + '<td class="dt">' + esc(c.note || '') + '</td>'
-          + '<td style="white-space:nowrap">'
+          + '<td><div class="cx-qui"><span class="cx-av">' + esc(initiales(c.name || c.email)) + '</span>'
+            + '<div><b>' + esc(c.name || '—') + '</b>' + (l2 ? '<span class="cx-l2">' + l2 + '</span>' : '') + '</div></div></td>'
+          + '<td><span class="mono">' + esc(c.email) + '</span>'
+            + (c.phone ? '<span class="cx-l2">' + esc(c.phone) + '</span>' : '') + '</td>'
+          + '<td class="r">'
             + '<button class="mini" data-modifier="' + esc(c.email) + '">${T("Modifier")}</button> '
             + '<button class="mini dgr" data-retirer="' + esc(c.email) + '">'
             + '${T("Retirer")}' + '</button>'
@@ -425,6 +473,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptable')}${JS_BROUILLON()}
       h.push('</tbody></table></div>');
     }
     h.push('</div>');
+
+    h.push('<div class="cx-col">');
+    h.push(ETAT.contactForm ? contactForm() : carteExercices());
+    h.push('</div></div>');
 
     corps.innerHTML = h.join('');
     brancherCarnet();
@@ -439,7 +491,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptable')}${JS_BROUILLON()}
     }
     c = c || { name: '', firm: '', email: '', phone: '', note: '' };
     var fige = ETAT.edition ? ' readonly' : '';
-    return '<div class="carte"><h2>' + (ETAT.edition ? '${T("Modifier le comptable")}' : '${T("Nouveau comptable")}') + '</h2>'
+    return '<div class="cx-carte"><h2>' + (ETAT.edition ? '${T("Modifier le comptable")}' : '${T("Nouveau comptable")}') + '</h2>'
       + '<div class="duo">'
       + '<div><label for="ct-name">${T("Nom")}</label><input id="ct-name" type="text" value="' + esc(c.name) + '"></div>'
       + '<div><label for="ct-firm">${T("Cabinet")}</label><input id="ct-firm" type="text" value="' + esc(c.firm) + '"></div>'
@@ -590,7 +642,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptable')}${JS_BROUILLON()}
     if (dire_le) dire('${T("Lecture…")}');
     appeler('comptable:donnees').then(function(r){
       if (!r.ok) {
-        corps.innerHTML = '<div class="carte"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div></div>';
+        corps.innerHTML = '<div class="cx-carte"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div></div>';
         dire(expliquer(r), 'err');
         return;
       }

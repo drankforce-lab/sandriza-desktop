@@ -166,5 +166,15 @@ module.exports = {
 
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
   'Total': 'Total',
-  'Système': 'System'
+  'Système': 'System',
+  // 2026-10-16 : la grammaire de la Comptabilité (gestes dans la tête, quatre chiffres, panneau d'appui).
+  '{0} transactions complétées': '{0} completed transactions',
+  '{0} transaction complétée': '{0} completed transaction',
+  'Remboursé': 'Refunded',
+  'Transactions d’essai : masquables en bac à sable seulement.': 'Test transactions: can be hidden in the sandbox only.',
+  'Où va chaque dollar': 'Where each dollar goes',
+  '{0} %': '{0}%',
+  'Du brut au net': 'From gross to net',
+  'Frais nets': 'Net fees',
+  'Net Square': 'Square net',
 };

@@ -40,22 +40,28 @@ body{background:var(--f-page);color:var(--tx);
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
-  display:flex;flex-direction:column;gap:.7rem}
-/* << Aucun scroll bar dans l application >> (2026-10-12) : ni le corps ni la
-   liste ne defilent. La carte de la liste prend la hauteur qui reste, et c est
-   la hauteur reelle de la liste qui decide du nombre de lignes demandees au
-   site (szAutoPagination) — depenses ET fournisseurs. */
-.corps.plein .carte.plein{flex:1 1 0;min-height:0}
-.corps.plein .carte.plein>.liste{flex:1 1 auto;min-height:0;overflow:hidden}
-.barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
-/* ── La refonte de l Inventaire (2026-09-25) ── */
-.barreoutils .rf-jet{height:2.4rem;padding:0 .75rem;border-radius:10px;font-size:.8rem;background:var(--f-0f1826);
-  border:1px solid var(--v10);color:var(--tx-gris2)}
-.barreoutils .rf-jet.on{background:rgba(var(--or-rgb),.14);border-color:rgba(var(--or-rgb),.55);color:var(--tx-or2);font-weight:700}
-.barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
-  font-size:.78rem;color:var(--tx2)}
+/* LA REFONTE DE LA COMPTABILITE (2026-10-16) : la grammaire .cx du socle (CSS_COMPTA). La tete porte le
+   resume, l annee, la zone de depot et le geste principal (#d-actions, redessine avec la vue) ; le corps :
+   les pastilles, quatre chiffres, la barre (onglets segmentes et filtres), puis la liste et son panneau.
+   << Aucun scroll bar dans l application >> (2026-10-12) : ni le corps ni la liste ne defilent. La carte de
+   la liste prend la hauteur qui reste, et c est la hauteur reelle de la liste qui decide du nombre de lignes
+   demandees au site (szAutoPagination) — depenses ET fournisseurs. */
+.cx-carte>.liste{flex:1 1 0;min-height:0;overflow:hidden}
+.cx-barre .droite{font-size:.78rem;color:var(--tx2)}
+.cx-barre input[type=search]{min-width:16rem}
+.ed-seg button .n{display:inline-block;margin-left:.4rem;padding:0 .4rem;border-radius:99px;background:var(--v08);
+  font-size:.7rem;font-weight:600;color:var(--tx)}
+.cx-kpis.trois-k{grid-template-columns:repeat(3,minmax(0,1fr))}
+/* Les avis : une PASTILLE courte ; le texte complet s ouvre dessous, rien n est efface. */
+.dp-avis{display:flex;flex-wrap:wrap;align-items:flex-start;gap:.5rem}
+/* Le detail flotte SOUS la pastille, par-dessus la page : l ouvrir ne pousse rien (la mesure de la liste tient). */
+.dp-avis details{position:relative;min-width:0;max-width:100%}
+.dp-avis summary{list-style:none;cursor:pointer}
+.dp-avis summary::-webkit-details-marker{display:none}
+.dp-avis details>p{position:absolute;z-index:20;top:calc(100% + .35rem);left:0;width:min(40rem,80vw);margin:0;
+  padding:.6rem .8rem;border-radius:12px;background:var(--f-carte2);border:1px solid var(--sz-bord,var(--v14));
+  box-shadow:0 12px 28px rgba(0,0,0,.35);font-size:.78rem;line-height:1.45;color:var(--tx)}
+.cx-carte .aide strong{color:var(--tx)}
 input,select,button,textarea{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem}
 select,button{cursor:pointer}
@@ -71,34 +77,19 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
   padding:.95rem 1.1rem}
 .carte h2{margin:0 0 .5rem;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;
   color:var(--tx2);font-weight:700}
-/* Les compteurs aux mesures des tuiles de l Inventaire (refonte du 2026-09-25),
-   comme Remboursements : meme balisage, le libelle passe AU-DESSUS du chiffre. */
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:.6rem}
-.stats .s{display:flex;flex-direction:column;background:var(--f-carte);border:1px solid var(--v07);
-  border-radius:13px;padding:.75rem .95rem;min-width:0}
-.stats .s .l{order:0;font-size:.76rem;font-weight:600;color:var(--tx2)}
-.stats .s .n{order:1;font-size:1.6rem;font-weight:800;line-height:1.15;margin:.2rem 0 .1rem;color:var(--tx)}
-.stats .s .sub{order:2;font-size:.72rem;color:var(--tx3)}
-div.stats .s .n{color:var(--tx)}
-html.jour div.stats .s{background:var(--f-carte)}
-html.jour div.stats .s .n{color:var(--tx)}
 
 /* La zone de depot : c est la porte la plus rapide vers une depense saisie.
    ⚠⚠ ELLE PRENAIT TOUTE LA LARGEUR ET DEUX LIGNES DE HAUT, entre les tuiles et
    le tableau — sa remarque : << ses trop gros >>. Une zone de depot n est pas le
-   sujet de l ecran, c est un raccourci : elle tient maintenant sur UNE ligne,
-   dans la barre d outils, a DROITE du bouton << Nouvelle depense >> (sa place
-   demandee). Le pointille reste, parce que c est lui qui dit qu on peut lacher
-   un fichier la ; le reste a maigri.
-   ⚠ Sa deuxieme ligne d explication est partie AVEC la hauteur : elle disait ce
-   que le survol et le resultat disent deja. Ce qu il faut garder, c est la
-   distinction lecture automatique / simple piece jointe — elle passe en
-   attribut title, donc au survol ET au lecteur d ecran. */
-.depot{flex:0 0 auto;display:inline-flex;align-items:center;gap:.35rem;
-  border:1px dashed var(--v20);border-radius:9px;padding:.26rem .6rem;
-  font-size:.78rem;color:var(--tx2);white-space:nowrap;
-  cursor:pointer;transition:border-color .13s,background .13s}
+   sujet de l ecran, c est un raccourci. Refonte du 2026-10-16 : elle loge dans
+   le PANNEAU d appui, a droite de la liste (.cx-depot du socle), sous son titre ;
+   elle ne prend plus de place a la liste.
+   ⚠ La distinction lecture automatique / simple piece jointe reste en attribut
+   title, donc au survol ET au lecteur d ecran, et en clair dans la zone. */
+.depot{cursor:pointer;transition:border-color .13s,background .13s}
 .depot:hover,.depot.survol{border-color:var(--or);background:rgba(var(--or-rgb),.08);color:var(--tx)}
+#d-depot{min-height:7.5rem}
+#d-depot svg{width:1.4rem;height:1.4rem;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 /* Au survol d un fichier, elle doit se voir sans changer de taille : la bordure
    s epaissit vers l INTERIEUR (ombre portee interne), jamais en border-width
    qui pousserait les voisins de la barre. */
@@ -110,8 +101,8 @@ html.jour div.stats .s .n{color:var(--tx)}
    volet. La retrecir aussi aurait applique a un endroit une remarque faite sur
    un autre. */
 #d-depot-form{display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:.25rem;border-width:2px;border-radius:12px;
-  padding:.85rem 1rem;text-align:center;font-size:inherit;white-space:normal}
+  justify-content:center;gap:.25rem;border:2px dashed rgba(var(--or-rgb),.5);border-radius:12px;
+  padding:.85rem 1rem;text-align:center;font-size:inherit;white-space:normal;color:var(--tx2)}
 #d-depot-form .gros{font-size:.9rem;font-weight:600;color:var(--tx)}
 #d-depot-form .pt{font-size:.74rem}
 
@@ -128,16 +119,18 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
 .pill.info{background:rgba(59,130,246,.18);color:var(--tx-bleu)}
 .pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
-.pagi{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;
-  padding-top:.4rem;font-size:.74rem;color:var(--tx2)}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .aide{font-size:.75rem;color:var(--tx2);line-height:1.45}
-.avis{background:rgba(180,120,10,.1);border:1px solid rgba(180,120,10,.4);color:var(--tx-att);
-  border-radius:9px;padding:.45rem .65rem;font-size:.79rem;line-height:1.5}
+/* Dans les boites (fiche, formulaire), un avis reste un PARAGRAPHE : c est un texte a lire en entier
+   (lecture de facture, question de fermeture). Il prend les couleurs de la pastille .cx-averti. */
+.avis{background:color-mix(in srgb,var(--tx-att) 9%,transparent);border:1px solid color-mix(in srgb,var(--tx-att) 40%,transparent);
+  color:var(--tx-att);border-radius:12px;padding:.5rem .75rem;font-size:.79rem;line-height:1.5}
+.boite .cx-tuile{padding:.6rem .8rem;gap:.35rem;font-size:.79rem;line-height:1.5}
+td .rf-pill.usd{margin-left:.35rem}
 
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
   align-items:center;justify-content:center;z-index:50;padding:1rem}
-.boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;
+.boite{background:var(--f-carte2);border:1px solid var(--sz-bord,var(--v14));border-radius:16px;
   max-width:44rem;width:100%;max-height:96vh;overflow:auto;padding:.9rem 1rem}
 .boite h3{margin:0 0 .5rem;font:700 .98rem/1.3 Georgia,serif;display:flex;
   align-items:center;gap:.5rem;flex-wrap:wrap}
@@ -151,10 +144,8 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
   padding:.5rem .7rem}
 .boite .pied-boite{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem;justify-content:flex-end}
 .gros-montant{font-weight:800;font-size:1.7rem;line-height:1;text-align:center;padding:.3rem 0 .1rem}
-.rang{display:flex;justify-content:space-between;gap:1rem;padding:.28rem 0;
-  border-bottom:1px solid var(--v06);font-size:.86rem}
-.rang.total{border-bottom:none;border-top:2px solid var(--v18);
-  margin-top:.2rem;font-weight:700}
+/* Les rangs de montants de la fiche : .cx-etat du socle (refonte 2026-10-16). */
+.boite .cx-etat:last-child{border-bottom:0}
 .recu{background:#f2f2f2;border-radius:10px;margin-top:.6rem;padding:.4rem;
   display:flex;align-items:center;justify-content:center;max-height:22rem;overflow:hidden}
 .recu img{max-width:100%;max-height:21rem;object-fit:contain}
@@ -170,8 +161,8 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .champ{display:flex;flex-direction:column;gap:.2rem}
 .champ label{font-size:.7rem;color:var(--tx2)}
 .champ input,.champ select{width:100%}
-.bloc-montants{grid-column:1/-1;background:var(--v04);
-  border:1px solid var(--v09);border-radius:10px;padding:.55rem .7rem}
+.bloc-montants{grid-column:1/-1;background:var(--f-carte);
+  border:1px solid var(--sz-bord,var(--v09));border-radius:14px;padding:.55rem .7rem}
 .trois{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:.5rem;align-items:end}
 /* La part d affaires (usage mixte, 2026-10-02) entre dans le MEME rang que les
    montants : une colonne etroite, pas une ligne de plus (aucune barre de
@@ -219,8 +210,9 @@ function pageDepenses(ouverture) {
 <title>${T("Dépenses d’entreprise — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.depenses}</span><h1>${T("Dépenses d’entreprise")}</h1>
-  <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
+  <span class="cx-resume" id="sous"></span>
+  <div class="cx-actions" id="d-actions"></div></div>
+<div class="cx" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -345,25 +337,43 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
   function dessiner(){
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var h = '';
+    var act = document.getElementById('d-actions');
 
     if (!D.peutModifier && !D.peutAjouter) {
-      h += '<div class="avis"><span class="ic">👁</span> ${T("Lecture seule — votre rôle permet de consulter les dépenses, pas de les saisir.")}</div>';
+      h += '<div class="dp-avis">' + avis('<span class="ic">👁</span> ${T("Lecture seule")}',
+        '${T("Lecture seule — votre rôle permet de consulter les dépenses, pas de les saisir.")}') + '</div>';
     }
-
-    h += '<div class="barreoutils">'
-      + '<button class="rf-jet' + (VUE === 'depenses' ? ' on' : '') + '" data-vue="depenses">${T("Dépenses")}</button>'
-      + '<button class="rf-jet' + (VUE === 'annuaire' ? ' on' : '') + '" data-vue="annuaire">${T("Fournisseurs")}</button>'
-      + '</div>';
 
     /* L annuaire est lui aussi en << corps plein >> depuis le 2026-10-12 : sa
        table vit dans une liste bornee et se pagine a la mesure, comme les
        depenses — il defilait avant, et la regle est << aucune glissiere >>. */
-    if (VUE === 'annuaire') { corps.className = 'corps plein'; h += vueAnnuaire(); corps.innerHTML = h; brancherAnnuaire(); mesurerListe(); return; }
+    if (VUE === 'annuaire') {
+      if (act) act.innerHTML = actionsAnnuaire();
+      corps.className = 'cx'; h += vueAnnuaire(); corps.innerHTML = h; brancherAnnuaire(); mesurerListe(); return;
+    }
 
-    h += '<div class="barreoutils">'
-      + '<select id="d-annee" aria-label="${T("Filtrer par année")}">' + (D.annees || []).map(function(a){
-          return '<option value="' + a + '"' + (String(a) === String(D.annee) ? ' selected' : '') + '>' + a + '</option>';
+    /* LA TETE : l annee (le filtre qui dit l exercice), puis le geste principal, toujours a droite.
+       Mois et categorie restent dans la barre, sous les chiffres : ils filtrent la liste. */
+    if (act) act.innerHTML = '<select id="d-annee" aria-label="${T("Filtrer par année")}">' + (D.annees || []).map(function(a){
+          return '<option value="' + a + '"' + (String(a) === String(D.annee) ? ' selected' : '') + '>${T("Exercice")} ' + a + '</option>';
         }).join('') + '</select>'
+      + (D.peutAjouter ? '<button class="prim" id="d-nouvelle">${T("＋ Nouvelle dépense")}</button>' : '');
+
+    /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
+       quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
+       ce poste. Les DEUX bandeaux de cette fenetre partagent la meme cle et se
+       replient ensemble. Voir JS_TUILES dans socle.js.
+       ⚠ Les chiffres de l esquisse « recus manquants » et « plus grosse categorie »
+       ne sont PAS poses : la reponse ne porte que la PAGE affichee, et un compte
+       tire d une page mentirait sur la periode. */
+    h += szTuiles('<div class="cx-kpis">'
+      + kpi('', '${T("Total —")} ' + D.periode, D.total, '${T("hors taxes, déductible")}')
+      + kpi('ok', '${T("TPS payée")}', D.totalTps, '${T("crédit sur intrants")}')
+      + kpi('ok', '${T("TVQ payée")}', D.totalTvq, '${T("remboursement sur intrants")}')
+      + kpi('', '${T("Dépenses")}', D.nombre, D.periode)
+      + '</div>');
+
+    h += '<div class="cx-barre">' + ongletsVue()
       + '<select id="d-mois"><option value="0"' + (!D.mois ? ' selected' : '') + '>${T("Tous les mois")}</option>'
       + (D.moisNoms || []).map(function(m, i){
           return '<option value="' + (i + 1) + '"' + (D.mois === i + 1 ? ' selected' : '') + '>' + esc(m) + '</option>';
@@ -373,94 +383,108 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
           return '<option value="' + esc(c.cle) + '"' + (D.categorie === c.cle ? ' selected' : '') + '>'
             + esc(nomCat(c)) + '</option>';
         }).join('') + '</select>'
-      + (D.peutAjouter ? '<button class="prim" id="d-nouvelle">${T("＋ Nouvelle dépense")}</button>' : '')
-      + (D.peutAjouter ? '<div class="depot" id="d-depot" title="'
-          + esc(D.lectureAuto
-              ? '${T("Déposez une facture : elle est lue automatiquement, et vous vérifiez les champs avant d’enregistrer.")}'
-              : '${T("Déposez une facture : elle sera jointe comme reçu. La lecture automatique demande une clé (Configuration → Clés API).")}')
-          + '">${T("Glissez une facture ici")}</div>' : '')
-      + '<span class="droite">' + D.nombre + ' '
-      + (D.nombre > 1 ? '${T("dépenses")}' : '${T("dépense")}') + '</span>'
       + '</div>';
 
-    /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
-       quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
-       ce poste. Les DEUX bandeaux de cette fenetre partagent la meme cle et se
-       replient ensemble. Voir JS_TUILES dans socle.js. */
-    h += szTuiles('<div class="stats">'
-      + '<div class="s"><div class="n">' + esc(D.total) + '</div><div class="l">${T("Total —")} ' + esc(D.periode) + '</div>'
-      + '<div class="sub">${T("hors taxes, déductible")}</div></div>'
-      + '<div class="s"><div class="n">' + esc(D.totalTps) + '</div><div class="l">${T("TPS payée")}</div>'
-      + '<div class="sub">${T("crédit sur intrants")}</div></div>'
-      + '<div class="s"><div class="n">' + esc(D.totalTvq) + '</div><div class="l">${T("TVQ payée")}</div>'
-      + '<div class="sub">${T("remboursement sur intrants")}</div></div>'
-      + '<div class="s"><div class="n">' + D.nombre + '</div><div class="l">${T("Dépenses")}</div>'
-      + '<div class="sub">' + esc(D.periode) + '</div></div>'
-      + '</div>');
-
-    /* ⚠ La zone de depot vivait ICI, pleine largeur. Elle est remontee dans la
-       barre d outils, a droite de << Nouvelle depense >>. Ne pas la remettre : sa
-       taille etait le probleme, pas sa presence. */
-
-    /* ⚠ PLEINE HAUTEUR (2026-09-19) : la carte prend le reste du corps et c est
-       la LISTE qui defile ; la pagination et le rappel sur les frais Square
-       restent colles au bas, toujours visibles. Les deux boites (formulaire,
-       detail) sont des voiles en position:fixed — elles flottent au-dessus et
-       ne sont donc pas coupees par le corps. */
-    h += '<div class="carte plein">';
+    /* ⚠ PLEINE HAUTEUR (2026-09-19) : la carte prend le reste du corps, la liste
+       ne defile pas ; la pagination et le rappel sur les frais Square restent
+       colles au bas, toujours visibles. Les deux boites (formulaire, detail)
+       sont des voiles en position:fixed — elles flottent au-dessus et ne sont
+       donc pas coupees par le corps. */
+    h += '<div class="cx-deux"><div class="cx-carte">';
     var rows = D.lignes || [];
     if (!rows.length) {
       h += '<div class="vide">${T("Aucune dépense pour")} ' + esc(D.periode) + '.</div>';
     } else {
-      /* ══ LA REFONTE DE L INVENTAIRE (2026-09-25) : ligne riche (initiale de la
-         categorie, description en gras, categorie, ligne et fournisseur
-         dessous), montant en gras. Crochets gardes : tr[data-id]. */
-      h += '<div class="liste"><table><thead><tr><th>${T("Dépense")}</th><th>${T("Date")}</th>'
-        + '<th>${T("Paiement")}</th><th style="text-align:right">${T("Montant")}</th>'
-        + '<th style="text-align:right">${T("Taxes")}</th><th style="text-align:center">${T("Reçu")}</th></tr></thead><tbody>'
+      /* LA LIGNE (refonte 2026-10-16) : description en gras, fournisseur et mode de
+         paiement dessous ; la categorie et sa ligne fiscale ; le montant en gras ;
+         les taxes sur deux lignes ; le recu en pastille. Crochets gardes : tr[data-id]. */
+      h += '<div class="liste" data-pages="depenses-liste"><table><thead><tr><th>${T("Dépense")}</th><th>${T("Catégorie (ligne fiscale)")}</th>'
+        + '<th>${T("Date")}</th><th style="text-align:right">${T("Montant")}</th>'
+        + '<th style="text-align:right">${T("Taxes")}</th><th>${T("Reçu")}</th></tr></thead><tbody>'
         + rows.map(function(r){
+            var sous = [];
+            if (r.fournisseur && r.description) sous.push(esc(r.fournisseur));
+            if (r.paiement) sous.push(esc(szTd(r.paiement)));
             return '<tr data-id="' + esc(r.id) + '" title="${T("Voir le détail")}">'
-              + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">'
-              + esc(String(catLbl(r.categorie, r.categorieLbl) || '?').charAt(0).toUpperCase()) + '</span>'
-              + '<div style="min-width:0"><div class="rf-nom">' + esc(r.description || r.fournisseur || '—')
-              + (r.usd ? ' <span class="rf-pill bleu">USD</span>' : '') + '</div>'
-              + '<div class="rf-sous"><span>' + esc(catLbl(r.categorie, r.categorieLbl)) + '</span>'
-              + (r.ligne ? '<span>·</span><span class="rf-code">L.' + esc(r.ligne) + '</span>' : '')
-              + (r.fournisseur && r.description ? '<span>·</span><span>' + esc(r.fournisseur) + '</span>' : '')
-              + '</div></div></div></td>'
+              + '<td><b>' + esc(r.description || r.fournisseur || '—') + '</b>'
+              + (r.usd ? '<span class="rf-pill bleu usd">USD</span>' : '')
+              + (sous.length ? '<span class="cx-l2">' + sous.join(' · ') + '</span>' : '') + '</td>'
+              + '<td>' + esc(catLbl(r.categorie, r.categorieLbl))
+              + (r.ligne ? ' <span class="cx-code">' + esc(r.ligne) + '</span>' : '') + '</td>'
               + '<td class="dt" style="white-space:nowrap">' + esc(szJour(r.date) || r.dateFr) + '</td>'
-              + '<td class="dt">' + esc(szTd(r.paiement)) + '</td>'
-              + '<td class="num"><span class="rf-mont">' + esc(r.montant) + '</span></td>'
-              + '<td class="dt" style="text-align:right;white-space:nowrap">'
-              + (r.aTaxes ? esc(r.tps) + ' · ' + esc(r.tvq) : '—') + '</td>'
-              + '<td style="text-align:center">' + (r.recu ? '<span class="ic">📎</span>' : '<span class="dt">—</span>') + '</td>'
+              + '<td class="num"><b>' + esc(r.montant) + '</b></td>'
+              + '<td class="num" style="font-weight:400">'
+              + (r.aTaxes ? '${T("TPS")} ' + esc(r.tps) + '<span class="cx-l2">${T("TVQ")} ' + esc(r.tvq) + '</span>'
+                  : '<span class="cx-gris">—</span>') + '</td>'
+              + '<td>' + (r.recu ? '<span class="rf-pill vert">${T("Joint")}</span>'
+                  : '<span class="rf-pill ambre">${T("Manquant")}</span>') + '</td>'
               + '</tr>';
           }).join('')
         + '</tbody></table></div>';
-      /* ⚠ Le pied de pages est TOUJOURS pose, meme sur une seule page : s il
-         apparaissait apres la mesure, il mangerait la hauteur deja comptee. */
-      if (rows.length) {
-        h += '<div class="pagi">'
+    }
+    /* ⚠ Le pied de pages est TOUJOURS pose, meme sur une seule page : s il
+       apparaissait apres la mesure, il mangerait la hauteur deja comptee. Il
+       porte aussi le rappel sur les frais Square. */
+    h += '<div class="cx-pied"><span class="aide">${T("Les <strong>frais de traitement Square</strong> ")}'
+      + '${T("sont déjà comptés dans l’Impôt (ligne 8710) — ne les ressaisissez pas ici.")}</span>'
+      + (rows.length ? '<div class="droite">'
           + '<button class="mini" id="d-prec"' + (D.page <= 0 ? ' disabled' : '') + '>◀</button>'
           + '<span>Page ' + (D.page + 1) + ' / ' + D.pages + '</span>'
           + '<button class="mini" id="d-suiv"' + (D.page >= D.pages - 1 ? ' disabled' : '') + '>▶</button>'
-          + '</div>';
-      }
-    }
-    h += '</div>';
+          + '</div>' : '')
+      + '</div></div>';
 
-    h += '<div class="aide" style="padding:.1rem">${T("Les <strong>frais de traitement Square</strong> ")}'
-      + '${T("sont déjà comptés dans l’Impôt (ligne 8710) — ne les ressaisissez pas ici.")} '
-      + '${T("La ")}<strong>${T("fiscalité")}</strong>${T(" et la ")}<strong>${T("conciliation bancaire")}</strong>${T(" restent à ")}'
-      + '${T("l’écran Comptabilité de la fenêtre principale.")}</div>';
+    /* LE PANNEAU D APPUI : la zone de depot (sa place depuis la refonte) et ce qui
+       reste a l ecran Comptabilite. */
+    h += '<div class="cx-carte">';
+    if (D.peutAjouter) {
+      h += '<h2>${T("Lire une facture")}</h2>'
+        + '<div class="depot cx-depot" id="d-depot" title="'
+        + esc(D.lectureAuto
+            ? '${T("Déposez une facture : elle est lue automatiquement, et vous vérifiez les champs avant d’enregistrer.")}'
+            : '${T("Déposez une facture : elle sera jointe comme reçu. La lecture automatique demande une clé (Configuration → Clés API).")}')
+        + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3h16v-3"/></svg>'
+        + '<b>${T("Glissez une facture ici")}</b><span>' + (D.lectureAuto
+            ? '${T("Photo, image ou PDF — les champs sont pré-remplis, vous vérifiez avant d’enregistrer.")}'
+            : '${T("Elle sera jointe comme reçu (lecture automatique indisponible sans clé).")}') + '</span></div>'
+        + '<div class="cx-sep"></div>';
+    }
+    h += '<div class="aide">${T("La ")}<strong>${T("fiscalité")}</strong>${T(" et la ")}<strong>${T("conciliation bancaire")}</strong>${T(" restent à ")}'
+      + '${T("l’écran Comptabilité de la fenêtre principale.")}</div>'
+      + '</div></div>';
 
     if (FORM) h += boiteForm();
     else if (DETAIL) h += boiteDetail();
 
-    corps.className = 'corps plein';
+    corps.className = 'cx';
     corps.innerHTML = h;
     brancher();
     mesurerListe();
+  }
+
+  /* ── LES PIECES DE LA GRAMMAIRE (refonte 2026-10-16) ── */
+  function kpi(cl, lbl, val, sous){
+    return '<div class="cx-kpi' + (cl ? ' ' + cl : '') + '"><span>' + esc(lbl) + '</span><b>' + esc(val)
+      + '</b><small>' + esc(sous == null ? '' : sous) + '</small></div>';
+  }
+  /* Un avis : une PASTILLE courte, et le texte complet s ouvre dessous au clic. */
+  function avis(court, long, cl){
+    return '<details><summary class="cx-averti' + (cl ? ' ' + cl : '') + '"><span>' + court + '</span></summary>'
+      + '<p>' + long + '</p></details>';
+  }
+  /* Les deux vues en onglets segmentes. ⚠ data-vue est lu par le gestionnaire general. */
+  function ongletsVue(){
+    return '<div class="ed-seg">'
+      + '<button class="' + (VUE === 'depenses' ? 'on' : '') + '" data-vue="depenses">${T("Dépenses")}'
+      + (D && D.nombre != null ? '<span class="n">' + esc(D.nombre) + '</span>' : '') + '</button>'
+      + '<button class="' + (VUE === 'annuaire' ? 'on' : '') + '" data-vue="annuaire">${T("Fournisseurs")}</button>'
+      + '</div>';
+  }
+  function actionsAnnuaire(){
+    if (!ANN) return '';
+    var ro = !ANN.peutModifier;
+    return (ro || (VERROU && !VERROU.obtenu)) ? ''
+      : '<button class="prim" id="a-nouveau">${T("＋ Ajouter un fournisseur")}</button>';
   }
 
   /* La mesure : combien de lignes tiennent VRAIMENT dans la liste bornee de la
@@ -488,36 +512,35 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
      ferait croire qu on a detruit un fournisseur alors qu on l a seulement
      ramene a son reglage d usine. */
   function vueAnnuaire(){
-    if (!ANN) return '<div class="carte"><div class="vide charge">${T("Lecture de l’annuaire…")}</div></div>';
+    if (!ANN) return '<div class="cx-barre">' + ongletsVue() + '</div>'
+      + '<div class="cx-carte"><div class="vide charge">${T("Lecture de l’annuaire…")}</div></div>';
     var ro = !ANN.peutModifier;
     var h = '';
 
     if (VERROU && !VERROU.obtenu) {
-      h += '<div class="avis"><span class="ic">🔒</span> ${T("Annuaire ouvert en modification par")} <strong>'
+      h += '<div class="dp-avis">' + avis('<span class="ic">🔒</span> ${T("Annuaire ouvert en modification par")} <b>'
+          + esc(VERROU.parQui || '${T("un collègue")}') + '</b>',
+        '${T("Annuaire ouvert en modification par")} <strong>'
         + esc(VERROU.parQui || '${T("un collègue")}') + '</strong> ${T("— vous pouvez le consulter,")} '
         + '${T("pas le corriger. Deux corrections en même temps, c’est la dernière qui gagne")} '
-        + '${T("sans que la première le sache.")}</div>';
+        + '${T("sans que la première le sache.")}') + '</div>';
     }
 
-    h += szTuiles('<div class="stats">'
-      + '<div class="s"><div class="n">' + ANN.total + '</div><div class="l">fournisseurs</div>'
-      + '<div class="sub">${T("reconnus d’emblée")}</div></div>'
-      + '<div class="s"><div class="n">' + ANN.integres + '</div><div class="l">${T("livrés")}</div>'
-      + '<div class="sub">${T("avec l’application")}</div></div>'
-      + '<div class="s"><div class="n">' + ANN.appris + '</div><div class="l">vos corrections</div>'
-      + '<div class="sub">elles priment</div></div>'
+    /* Trois chiffres : l annuaire n en a pas un quatrieme a dire. */
+    h += szTuiles('<div class="cx-kpis trois-k">'
+      + kpi('', '${T("fournisseurs")}', ANN.total, '${T("reconnus d’emblée")}')
+      + kpi('', '${T("livrés")}', ANN.integres, '${T("avec l’application")}')
+      + kpi('or', '${T("vos corrections")}', ANN.appris, '${T("elles priment")}')
       + '</div>');
 
-    h += '<div class="barreoutils">'
+    h += '<div class="cx-barre">' + ongletsVue()
       + '<input aria-label="${T("Domaine, nom ou catégorie")}" type="search" id="a-q" placeholder="${T("Nom ou domaine…")}" value="' + esc(ANN_Q) + '">'
-      + ((ro || (VERROU && !VERROU.obtenu)) ? ''
-          : '<button class="prim" id="a-nouveau">${T("＋ Ajouter un fournisseur")}</button>')
       + '<span class="droite">' + ANN.trouves + ' '
       + (ANN.trouves > 1 ? '${T("affichés")}' : '${T("affiché")}') + '</span>'
       + '</div>';
 
     if (ANN_FORM) {
-      h += '<div class="carte"><h2>' + (ANN_FORM.neuf ? '${T("Ajouter un fournisseur")}' : '${T("Corriger le classement")}') + '</h2>'
+      h += '<div class="cx-carte"><h2>' + (ANN_FORM.neuf ? '${T("Ajouter un fournisseur")}' : '${T("Corriger le classement")}') + '</h2>'
         + '<div class="form">'
         + '<div class="champ"><label>${T("Domaine ou nom")}</label>'
         + '<input type="text" id="a-id" aria-label="${T("Domaine ou nom")}" value="' + esc(ANN_FORM.id) + '"'
@@ -535,19 +558,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
         + '<button class="prim" id="a-ok">${T("✓ Enregistrer")}</button></div></div>';
     }
 
-    h += '<div class="carte plein">';
+    h += '<div class="cx-carte cx-plein">';
     var rows = ANN.lignes || [];
     if (!rows.length) {
       h += '<div class="vide">${T("Aucun fournisseur ne correspond.")}</div>';
     } else {
-      h += '<div class="liste"><table><thead><tr><th>${T("Fournisseur")}</th><th>${T("Catégorie")}</th>'
+      h += '<div class="liste" data-pages="depenses-annuaire"><table><thead><tr><th>${T("Fournisseur")}</th><th>${T("Catégorie (ligne fiscale)")}</th>'
         + '<th>${T("Origine")}</th><th style="text-align:right">${T("Actions")}</th></tr></thead><tbody>'
         + rows.map(function(r){
             return '<tr data-ann="' + esc(r.id) + '">'
-              + '<td><span class="num">' + esc(r.id) + '</span>'
-              + (r.nom ? '<div class="dt">' + esc(r.nom) + '</div>' : '') + '</td>'
+              + '<td><b>' + esc(r.id) + '</b>'
+              + (r.nom ? '<span class="cx-l2">' + esc(r.nom) + '</span>' : '') + '</td>'
               + '<td>' + esc(catLbl(r.categorie, r.categorieLbl))
-              + (r.ligne ? ' <span class="dt">· L.' + esc(r.ligne) + '</span>' : '')
+              + (r.ligne ? ' <span class="cx-code">' + esc(r.ligne) + '</span>' : '')
               + (r.flou ? ' <span class="rf-pill ambre">${T("polyvalent")}</span>' : '') + '</td>'
               + '<td>' + (r.origine === 'integre' ? '<span class="rf-pill">${T("livré")}</span>'
                   : (r.origine === 'corrige'
@@ -566,11 +589,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
         + '</tbody></table></div>';
       // Pied de pages toujours pose (meme raison que la liste des depenses).
       if (rows.length) {
-        h += '<div class="pagi">'
+        h += '<div class="cx-pied"><div class="droite">'
           + '<button class="mini" id="a-prec"' + (ANN.page <= 0 ? ' disabled' : '') + '>◀</button>'
           + '<span>Page ' + (ANN.page + 1) + ' / ' + ANN.pages + '</span>'
           + '<button class="mini" id="a-suiv"' + (ANN.page >= ANN.pages - 1 ? ' disabled' : '') + '>▶</button>'
-          + '</div>';
+          + '</div></div>';
       }
     }
     h += '</div>';
@@ -601,11 +624,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
       + '<div class="texte">' + esc(e.description || '${T("(aucune description)")}') + '</div>';
 
     if (e.aTaxes) {
-      h += '<div class="carte" style="margin-top:.6rem">'
-        + '<div class="rang"><span>${T("Montant (hors taxes)")}</span><strong>' + esc(e.montant) + '</strong></div>'
-        + '<div class="rang"><span>${T("TPS payée")}</span><strong>' + esc(e.tps) + '</strong></div>'
-        + '<div class="rang"><span>${T("TVQ payée")}</span><strong>' + esc(e.tvq) + '</strong></div>'
-        + '<div class="rang total"><span>${T("Total payé")}</span><strong>' + esc(e.totalTTC) + '</strong></div>'
+      h += '<div class="cx-tuile" style="margin-top:.6rem">'
+        + '<div class="cx-etat"><span>${T("Montant (hors taxes)")}</span><strong>' + esc(e.montant) + '</strong></div>'
+        + '<div class="cx-etat ret"><span>${T("TPS payée")}</span><strong>' + esc(e.tps) + '</strong></div>'
+        + '<div class="cx-etat ret"><span>${T("TVQ payée")}</span><strong>' + esc(e.tvq) + '</strong></div>'
+        + '<div class="cx-etat fort"><span>${T("Total payé")}</span><strong>' + esc(e.totalTTC) + '</strong></div>'
         + '</div>';
     }
     /* ⚠ LA PART DEDUCTIBLE SE DIT DES QU ELLE N EST PAS ENTIERE : repas a 50 %,
@@ -613,8 +636,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
        PAYE (la comptabilite le garde entier) ; la declaration n en reprend que
        la part — et la meme part s applique aux taxes recuperables. */
     if (typeof e.part === 'number' && e.part < 1) {
-      h += '<div class="carte" style="margin-top:.6rem">'
-        + '<div class="rang"><span>${T("Part déductible :")} ' + esc(pctPart(e.part)) + '</span><strong>→ ' + esc(e.deductible) + '</strong></div>'
+      h += '<div class="cx-tuile att" style="margin-top:.6rem">'
+        + '<div class="cx-etat fort"><span>${T("Part déductible :")} ' + esc(pctPart(e.part)) + '</span><strong>→ ' + esc(e.deductible) + '</strong></div>'
         + '<div class="aide" style="margin-top:.3rem">' + (e.categorie === CAT_VEHICULE
             ? '${T("La part d’affaires du véhicule (km d’affaires ÷ km totaux de l’année), établie par le registre « Véhicules et déplacements ». Elle s’applique aussi à la TPS et à la TVQ récupérables.")}'
             : ((e.partAffaires !== '' && e.partAffaires != null)
@@ -680,15 +703,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
         + '</div>';
     }
     if (BR_REPRIS && neuf) {
-      h += '<div class="carte" style="margin-bottom:.6rem;font-size:.79rem;line-height:1.5;'
-        + 'display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">'
+      h += '<div class="cx-tuile ok" style="margin-bottom:.6rem;'
+        + 'flex-direction:row;gap:.6rem;align-items:center;flex-wrap:wrap">'
         + '<span>${T("↩ Brouillon repris — saisie commencée il y a")} '
         + (BR_REPRIS < 60 ? (BR_REPRIS + ' min') : (Math.round(BR_REPRIS / 60) + ' h'))
         + (f.recu ? '${T(", reçu compris")}' : '') + '.</span>'
         + '<button class="mini" id="f-neuf">${T("Repartir à neuf")}</button></div>';
     }
     if (f.lecture) {
-      h += '<div class="' + (f.lectureErr ? 'avis' : 'carte') + '" style="margin-bottom:.6rem;font-size:.79rem;line-height:1.5">'
+      h += '<div class="' + (f.lectureErr ? 'avis' : 'cx-tuile ok') + '" style="margin-bottom:.6rem;font-size:.79rem;line-height:1.5">'
         + esc(f.lecture) + '</div>';
     }
 
@@ -1426,7 +1449,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
       D = r;
       ANNEE = D.annee; MOIS = D.mois; CAT = D.categorie;
       var s = document.getElementById('sous');
-      if (s) s.textContent = D.periode + ' · ' + D.total;
+      if (s) s.textContent = D.periode + ' · ' + D.nombre + ' '
+        + (D.nombre > 1 ? '${T("dépenses")}' : '${T("dépense")}') + ' · ' + D.total;
       /* ⚠ L OUVERTURE DIRECTE PASSE PAR LE MEME CHEMIN QUE LE BOUTON : elle relit
          donc le brouillon. Poser un formulaire vierge ici aurait ecrase en
          silence ce qui avait ete commence. */

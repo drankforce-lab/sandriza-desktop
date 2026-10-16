@@ -509,4 +509,14 @@ module.exports = {
   'Supprimer le véhicule': 'Delete the vehicle',
   'Le véhicule': 'The vehicle',
   'sera retiré définitivement du registre. Cette action est irréversible.': 'will be permanently removed from the register. This action cannot be undone.',
+
+  /* ── LA REFONTE DE LA COMPTABILITE (2026-10-16) ─────────────────────────
+     ⚠ « Exercice » = l annee comptable : « Fiscal year ». « point(s) à
+     compléter » suit « point » = « item » (plus haut). */
+  'Onglets du registre': 'Register tabs',
+  'Exercice': 'Fiscal year',
+  'à compléter': 'to complete',
+  'Complet': 'Complete',
+  'détail dans l’onglet Bilan fiscal': 'details in the Tax summary tab',
+  'sur': 'of',
 };

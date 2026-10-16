@@ -92,6 +92,26 @@ module.exports = {
   'Dépôts': 'Deposits',
   'Variation': 'Net change',
 
+  /* ── LA REFONTE DE LA COMPTABILITE (2026-10-16) ─────────────────────────
+     ⚠ « Exercice » = l annee comptable : « Fiscal year ». Les pastilles
+     d avis sont COURTES ; leur texte complet reste plus haut, inchange. */
+  'Le compte Square, comme un relevé bancaire': 'The Square account, read like a bank statement',
+  'Exercice': 'Fiscal year',
+  'Solde incomplet — aucun dépôt saisi': 'Incomplete balance — no deposit entered',
+  'Écart dans le solde :': 'Balance discrepancy:',
+  'Bac à sable': 'Sandbox',
+  'Aucune transaction en cache': 'No cached transactions',
+  'Ventes entrées': 'Sales in',
+  'brut des paiements': 'gross of payments',
+  'Frais et remboursements': 'Fees and refunds',
+  'frais': 'fees',
+  'remboursements': 'refunds',
+  'frais retenus': 'fees retained',
+  'Dépôts vers la banque': 'Deposits to bank',
+  'virés au compte d’entreprise': 'transferred to the business account',
+  'variation de l’exercice': 'net change for fiscal year',
+  'Les autres mois de l’exercice n’ont aucun mouvement.': 'The other months of the fiscal year have no movement.',
+
   /* ── LES EN-TETES GROUPES ET L AVERTISSEMENT D ECART (2026-09-18) ────────
      ⚠ Les en-tetes voyagent PAR LIGNE, comme la page les ecrit. Les couper en
      mots isoles ferait des entrees (<< Date >>, << Solde >>) que d autres

@@ -59,27 +59,40 @@ body{background:var(--f-page);color:var(--tx);
 .tete h1{margin:0;font:700 .95rem/1.2 system-ui}
 .tete .ico{display:inline-flex;width:19px;height:19px;color:var(--or,var(--or))}
 .tete .ico svg{width:100%;height:100%}
-.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.onglets{flex:0 0 auto;display:flex;gap:.3rem;padding:.5rem 1.05rem 0;
-  border-bottom:1px solid var(--v08)}
-.onglets button{background:none;border:0;border-bottom:2px solid transparent;color:var(--tx2);
-  font:600 .82rem/1 system-ui;padding:.45rem .7rem;cursor:pointer;border-radius:0}
-.onglets button.on{color:var(--tx);border-bottom-color:var(--or)}
-.onglets .nb{font-weight:400;color:var(--tx3);margin-left:.3rem}
-.onglets .pt{display:inline-block;width:.45rem;height:.45rem;border-radius:99px;
+/* LA REFONTE DE LA COMPTABILITE (2026-10-16) : la grammaire .cx du socle (CSS_COMPTA). La tete porte le
+   resume, l annee et le geste de l onglet (#outils, dans .cx-actions) ; les cinq onglets sont des onglets
+   segmentes (.ed-seg) dans une barre (#vh-barre) que le dessin pose DANS le corps, sous les chiffres.
+   ⚠ La barre est un NOEUD QUI SURVIT aux redessins (elOnglets y reste attache) : poserBarre() la remet
+   a sa place apres chaque corps.innerHTML. */
+#vh-barre{flex:0 0 auto}
+body>#vh-barre{padding:.8rem 1.3rem 0}
+#vh-barre .ed-seg button .nb{display:inline-block;margin-left:.4rem;padding:0 .4rem;border-radius:99px;background:var(--v08);
+  font-size:.7rem;font-weight:600;color:var(--tx)}
+#vh-barre .ed-seg button .pt{display:inline-block;width:.45rem;height:.45rem;border-radius:99px;
   background:var(--tx-att);margin-left:.35rem;vertical-align:middle}
-.barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;
-  padding:.55rem 1.05rem .1rem}
-.barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center}
-.corps{flex:1 1 auto;min-height:0;padding:.7rem 1.05rem .45rem;overflow-y:auto;
-  display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
-.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
-  padding:.75rem .85rem;min-width:0}
-.carte h2{margin:0 0 .5rem;font:700 .76rem/1.2 system-ui;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2);display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
-.carte h2 .gris{text-transform:none;letter-spacing:0;font-weight:400}
+#vh-barre select{font-size:.8rem}
+/* Le corps : la grammaire, un peu resserree — la mesure des listes (dessiner) compte chaque ligne. */
+#corps.cx{padding:.8rem 1.3rem .6rem;gap:.7rem;overflow-y:auto}
+#corps::-webkit-scrollbar{width:8px}
+#corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* Les cartes des cinq onglets prennent l allure de .cx-carte (meme rayon, meme bord, meme titre). */
+.carte{background:var(--f-carte);border:1px solid var(--sz-bord,var(--v07));border-radius:16px;
+  padding:.85rem 1.05rem;min-width:0}
+.carte h2{margin:0 0 .55rem;font-size:.88rem;font-weight:650;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;min-width:0}
+.carte h2 .gris{font-weight:400;font-size:.75rem}
+.vh-pied{display:flex;align-items:center;gap:.6rem;font-size:.75rem;color:var(--tx2);padding-top:.45rem}
+.vh-pied .droite{margin-left:auto;display:flex;align-items:center;gap:.5rem}
+.vh-pied .pages{margin-left:0}
+/* Les avis : une PASTILLE courte ; le texte complet s ouvre dessous, rien n est efface. */
+.vh-avis{display:flex;flex-wrap:wrap;align-items:flex-start;gap:.5rem}
+/* Le detail flotte SOUS la pastille, par-dessus la page : l ouvrir ne pousse rien (la mesure des listes tient). */
+.vh-avis details{position:relative;min-width:0;max-width:100%}
+.vh-avis>details.avis{border:0;background:none;padding:0;border-radius:0}
+.vh-avis summary{list-style:none;cursor:pointer}
+.vh-avis summary::-webkit-details-marker{display:none}
+.vh-avis details>p{position:absolute;z-index:20;top:calc(100% + .35rem);left:0;width:min(40rem,80vw);margin:0;
+  padding:.6rem .8rem;border-radius:12px;background:var(--f-carte2);border:1px solid var(--sz-bord,var(--v14));
+  box-shadow:0 12px 28px rgba(0,0,0,.35);font-size:.78rem;line-height:1.45;color:var(--tx)}
 select,input,button,textarea{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.28rem .5rem;cursor:pointer}
 input,textarea{cursor:text}
@@ -97,19 +110,13 @@ button.danger{border-color:rgba(248,113,113,.45);color:var(--tx-err2)}
 button.aconf{background:rgba(248,113,113,.16);color:var(--tx-err2)}
 html.jour button.aconf{color:#7f1d1d}
 
-/* ── Les grands chiffres ─────────────────────────────────────────────────── */
-.chiffres{display:grid;grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));gap:.6rem}
-.chiffre{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:.55rem .75rem}
-.chiffre .lbl{font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
-.chiffre .val{font:700 1.15rem/1.25 ui-monospace,Consolas,monospace;margin-top:.12rem}
-.chiffre .sous{font-size:.6875rem;color:var(--tx3);margin-top:.08rem}
-.chiffre.att .val{color:var(--tx-att)}
+/* ── Les grands chiffres : .cx-kpis du socle (refonte 2026-10-16) ─────────── */
 
 /* ── Tableaux serres (un registre est un document, pas une liste de cartes) ── */
-.corps table{border-collapse:collapse;border-spacing:0}
-.corps tbody td{padding:.42rem .5rem;border:0;border-top:1px solid var(--v055);border-radius:0;background:transparent}
-.corps tbody tr:hover>td{background:var(--v03);border-color:var(--v055)}
-.corps thead th{padding:.22rem .35rem;background:transparent}
+#corps table{border-collapse:collapse;border-spacing:0}
+#corps tbody td{padding:.42rem .5rem;border:0;border-top:1px solid var(--v055);border-radius:0;background:transparent}
+#corps tbody tr:hover>td{background:var(--v03);border-color:var(--v055)}
+#corps thead th{padding:.22rem .35rem;background:transparent}
 table{width:100%;border-collapse:collapse;font-size:.79rem}
 thead th{text-align:left;padding:.22rem .35rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
@@ -118,9 +125,9 @@ thead th.n,tbody td.n{text-align:right;font-family:ui-monospace,Consolas,monospa
 tbody td{padding:.42rem .5rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody tr.ligne{cursor:default}
 tbody tr.ligne.mod{cursor:pointer}
-.corps tbody tr.sel>td{background:rgba(var(--or-rgb),.10)}
-.corps tbody tr.tot>td{border-top:1px solid var(--v16);font-weight:700}
-.corps tbody tr.grp>td{padding-top:.5rem;font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;
+#corps tbody tr.sel>td{background:rgba(var(--or-rgb),.10)}
+#corps tbody tr.tot>td{border-top:1px solid var(--v16);font-weight:700}
+#corps tbody tr.grp>td{padding-top:.5rem;font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;
   color:var(--tx2);font-weight:700;border-top:0}
 .nowrap{white-space:nowrap}
 .sous2{font-size:.7rem;color:var(--tx2);margin-top:.05rem}
@@ -141,11 +148,13 @@ tbody tr.ligne.mod{cursor:pointer}
 .duo>div{display:flex;flex-direction:column;gap:.7rem;min-width:0}
 .aide{font-size:.76rem;color:var(--tx2);line-height:1.45}
 .aide strong{color:var(--tx)}
-.avis{border:1px solid rgba(234,179,8,.45);background:rgba(234,179,8,.09);
-  border-radius:10px;padding:.5rem .75rem;font-size:.78rem;line-height:1.45}
+/* Un avis qui EST le contenu (le bilan a completer, avec sa liste) reste un bloc : il prend l allure
+   d une tuile .cx-tuile.att du socle. Les simples bandeaux sont devenus des pastilles (.vh-avis). */
+.avis{border:1px solid color-mix(in srgb,var(--tx-att) 38%,transparent);background:var(--f-carte2);
+  border-radius:14px;padding:.6rem .85rem;font-size:.78rem;line-height:1.45}
 .avis strong{color:var(--tx-att)}
-.ok-box{border:1px solid rgba(74,222,128,.38);background:rgba(74,222,128,.08);
-  border-radius:10px;padding:.5rem .75rem;font-size:.8rem;line-height:1.45}
+.ok-box{border:1px solid color-mix(in srgb,var(--tx-ok) 34%,transparent);background:var(--f-carte2);
+  border-radius:14px;padding:.6rem .85rem;font-size:.8rem;line-height:1.45}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem;line-height:1.5}
 .vide strong{display:block;color:var(--tx);font-size:.92rem;margin-bottom:.3rem}
 .appel{display:flex;flex-direction:column;align-items:center;gap:.6rem;padding:1.6rem 1rem;text-align:center}
@@ -163,7 +172,7 @@ tbody tr.ligne.mod{cursor:pointer}
 .ar{display:flex;align-items:center;gap:.4rem;font-size:.76rem;color:var(--tx2);margin-top:.2rem;cursor:pointer}
 /* La case garde sa taille : la règle .champ input (largeur 100 %) l étirait sur toute la colonne. */
 .champ .ar input{width:auto;flex:0 0 auto;margin:0}
-.calc{font-size:.8rem;padding:.35rem .55rem;border-radius:8px;background:var(--v04);border:1px solid var(--v08)}
+.calc{font-size:.8rem;padding:.35rem .6rem;border-radius:10px;background:var(--f-carte2);border:1px solid var(--sz-bord,var(--v08))}
 .boutons{display:flex;gap:.5rem;justify-content:flex-end;align-items:center;margin-top:.55rem;flex-wrap:wrap}
 .boutons .gauche{margin-right:auto}
 
@@ -184,8 +193,8 @@ tbody tr.ligne.mod{cursor:pointer}
 
 /* ── Bilan ───────────────────────────────────────────────────────────────── */
 .bilan td:first-child{color:var(--tx2)}
-.corps .bilan tbody td{padding-top:.17rem;padding-bottom:.17rem}
-.corps .bilan tbody tr.grp>td{padding-top:.38rem}
+#corps .bilan tbody td{padding-top:.17rem;padding-bottom:.17rem}
+#corps .bilan tbody tr.grp>td{padding-top:.38rem}
 .bilan td.n small{display:block;font:400 .6875rem/1.2 system-ui;color:var(--tx3)}
 .bilan thead th.n{text-transform:none;letter-spacing:0;font-size:.72rem;color:var(--tx)}
 .bilan tr.cle>td{font-weight:700;color:var(--tx)}
@@ -196,7 +205,7 @@ tbody tr.ligne.mod{cursor:pointer}
 /* ── La boite du vehicule ───────────────────────────────────────────────── */
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;align-items:center;
   justify-content:center;z-index:50;padding:1rem}
-.boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;
+.boite{background:var(--f-carte2);border:1px solid var(--sz-bord,var(--v14));border-radius:16px;
   max-width:44rem;width:100%;max-height:92vh;overflow:hidden;padding:.9rem 1rem}
 .boite h3{margin:0 0 .6rem;font:700 .98rem/1.3 system-ui}
 .boite.large{max-width:66rem}
@@ -248,10 +257,10 @@ function pageVehicules(ouverture) {
 <title>${T("Véhicules et déplacements — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.vehicule}</span><h1>${T("Véhicules et déplacements")}</h1>
-  <span class="sous" id="sous"></span></div>
-<div class="onglets" id="onglets"></div>
-<div class="barreoutils" id="outils"></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
+  <span class="cx-resume" id="sous"></span>
+  <div class="cx-actions" id="outils"></div></div>
+<div class="cx-barre" id="vh-barre"><div class="ed-seg" id="onglets" role="group" aria-label="${T("Onglets du registre")}"></div><div class="droite" id="vh-droite"></div></div>
+<div class="cx" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -262,6 +271,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
   var elOnglets = document.getElementById('onglets');
   var elOutils = document.getElementById('outils');
   var elSous = document.getElementById('sous');
+  var elBarre = document.getElementById('vh-barre');
+  var elDroite = document.getElementById('vh-droite');
 
   var D = null;               /* le registre, tel que le site le rend */
   var ONGLET = '${depart}';
@@ -514,7 +525,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     };
     var incomplet = D && D.bilan && !D.bilan.complet;
     elOnglets.innerHTML = ONGLETS.map(function(o){
-      return '<button type="button" data-o="' + o[0] + '"' + (ONGLET === o[0] ? ' class="on"' : '') + '>'
+      return '<button type="button" data-o="' + o[0] + '"' + (ONGLET === o[0] ? ' class="on" aria-pressed="true"' : ' aria-pressed="false"') + '>'
         + esc(o[1])
         + (n[o[0]] != null ? '<span class="nb">' + n[o[0]] + '</span>' : '')
         + (o[0] === 'bilan' && incomplet ? '<span class="pt" title="${T("Des renseignements manquent")}"></span>' : '')
@@ -523,16 +534,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
   }
 
   function outils(){
-    if (!D) { elOutils.innerHTML = ''; return; }
-    var h = '<label for="an" class="gris" style="font-size:.76rem">${T("Année")}</label>'
-      + '<select id="an">'
+    if (!D) { elOutils.innerHTML = ''; elDroite.innerHTML = ''; return; }
+    /* LA TETE (refonte 2026-10-16) : l annee de l exercice, puis le geste de l onglet, toujours a droite. */
+    var h = '<select id="an" aria-label="${T("Année")}">'
       + (D.annees || []).map(function(a){
-          return '<option value="' + esc(a) + '"' + (Number(a) === ANNEE ? ' selected' : '') + '>' + esc(a) + '</option>';
-        }).join('') + '</select><span class="droite">';
+          return '<option value="' + esc(a) + '"' + (Number(a) === ANNEE ? ' selected' : '') + '>${T("Exercice")} ' + esc(a) + '</option>';
+        }).join('') + '</select>';
     if (ONGLET === 'vehicules' && PA) h += '<button type="button" class="prim" data-act="veh-nouveau">${T("+ Inscrire un véhicule")}</button>';
     if (ONGLET === 'depenses') h += '<button type="button" data-act="ouvrir-depenses">${T("Ouvrir les Dépenses")}</button>';
-    h += '</span>';
     elOutils.innerHTML = h;
+    /* La barre des onglets, a droite : le filtre du registre (il vivait dans le titre de la liste). */
+    elDroite.innerHTML = (ONGLET === 'registre') ? filtreVehicule() : '';
     var sel = document.getElementById('an');
     if (sel) sel.onchange = function(){
       if (formSale()) szDire('${T("La saisie en cours est gardée : elle reste dans le formulaire.")}', 'att');
@@ -546,7 +558,55 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
 
   function bandeauLecture(){
     if (PA || PM || PS) return '';
-    return '<div class="avis"><strong>${T("Lecture seule.")}</strong> ${T("Votre rôle permet de consulter le registre et le bilan, pas de les modifier.")}</div>';
+    return '<div class="vh-avis">' + avis('${T("Lecture seule.")}',
+      '${T("Votre rôle permet de consulter le registre et le bilan, pas de les modifier.")}') + '</div>';
+  }
+  /* LES PIECES DE LA GRAMMAIRE (refonte 2026-10-16). Un avis : une PASTILLE courte,
+     et le texte complet s ouvre dessous au clic — on n efface aucune information. */
+  function avis(court, long){
+    /* ⚠ class="avis" reste sur l element : les jeux d essai de la lecture seule
+       (tools/reponses-fenetres.js) le cherchent pour savoir que l avis est dessine. */
+    return '<details class="avis"><summary class="cx-averti"><span>' + court + '</span></summary><p>' + long + '</p></details>';
+  }
+  function kpi(cl, lbl, val, sous, mot){
+    return '<div class="cx-kpi' + (cl ? ' ' + cl : '') + '"><span>' + esc(lbl) + '</span><b' + (mot ? ' class="mot"' : '') + '>'
+      + esc(val) + '</b><small title="' + esc(sous) + '">' + esc(sous) + '</small></div>';
+  }
+  /* Les quatre chiffres du registre. Tout vient du bilan du site (D.bilan) : la
+     fenetre ne calcule aucune part. Les cinq anciens chiffres y sont tous :
+     km d affaires et deplacements, part et km totaux, deductible — et le bilan. */
+  function kpisRegistre(){
+    var B = (D.bilan && D.bilan.total) || {};
+    var nD = B.nDeplacements || 0;
+    var points = 0;
+    ((D.bilan && D.bilan.vehicules) || []).forEach(function(l){ points += (l.manque || []).length; });
+    return szTuiles('<div class="cx-kpis">'
+      + kpi('or', '${T("Km d’affaires")}', km(B.kmAffaires || 0),
+          nD + ' ' + szPl(nD, '${T("déplacement")}', '${T("déplacements")}') + ' ${T("inscrits en")} ' + ANNEE)
+      + kpi(B.part == null ? 'att' : '', '${T("Part d’affaires")}', B.part == null ? '${T("À établir")}' : pct(B.part),
+          B.kmTotal ? '${T("Km totaux")} ' + km(B.kmTotal) + ' · ${T("lus à l’odomètre")}' : '${T("odomètre à compléter")}',
+          B.part == null)
+      + kpi('', '${T("Déductible")}', argent(B.deductible || 0), '${T("dépenses de véhicule, part appliquée")}')
+      + kpi(points ? 'att' : 'ok', '${T("Bilan fiscal")}',
+          points ? points + ' ' + szPl(points, '${T("point")}', '${T("points")}') + ' ${T("à compléter")}' : '${T("Complet")}',
+          '${T("détail dans l’onglet Bilan fiscal")}', true)
+      + '</div>');
+  }
+  /* Le filtre du registre, dans la barre des onglets. ⚠ id f-veh : lu par l ecouteur change. */
+  function filtreVehicule(){
+    var tous = (D.deplacements || []);
+    var vehs = (D.vehicules || []).filter(function(v){
+      return v.enService || tous.some(function(d){ return d.vehiculeId === v.id; }); });
+    if (vehs.length <= 1) return '';
+    return '<select id="f-veh" aria-label="${T("Filtrer par véhicule")}">'
+      + '<option value="">${T("Tous les véhicules")}</option>'
+      + vehs.map(function(v){ return '<option value="' + esc(v.id) + '"' + (FVEH === v.id ? ' selected' : '') + '>' + esc(v.nom) + '</option>'; }).join('')
+      + '</select>';
+  }
+  /* La barre des onglets est un noeud qui survit : on la remet a sa place (#vh-place) apres chaque dessin. */
+  function poserBarre(){
+    var place = document.getElementById('vh-place');
+    if (place && place.parentNode) place.parentNode.replaceChild(elBarre, place);
   }
 
   /* La navigation d une liste paginee. Des fleches, le nom complet en titre. */
@@ -559,7 +619,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
   }
   function estimer(cle){
     var h = corps.clientHeight || 640;
-    if (cle === 'reg') return Math.max(4, Math.floor((h - 190) / 37));
+    if (cle === 'reg') return Math.max(4, Math.floor((h - 220) / 38));
     if (cle === 'dep') return Math.max(4, Math.floor((h - 210) / 31));
     if (cle === 'chg') return Math.max(4, Math.floor((h - 90) / 33));
     if (cle === 'veh') return 6;
@@ -679,22 +739,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     return '${T("Kilomètres retenus : —")}';
   }
   function vueRegistre(){
-    var B = (D.bilan && D.bilan.total) || {};
-    var h = szTuiles('<div class="chiffres">'
-      + '<div class="chiffre"><div class="lbl">${T("Km d’affaires")}</div><div class="val">' + km(B.kmAffaires || 0) + '</div>'
-      + '<div class="sous">${T("la somme du registre")}</div></div>'
-      + '<div class="chiffre' + (B.kmTotal ? '' : ' att') + '"><div class="lbl">${T("Km totaux")}</div><div class="val">' + (B.kmTotal ? km(B.kmTotal) : '—') + '</div>'
-      + '<div class="sous">' + (B.kmTotal ? '${T("lus à l’odomètre")}' : '${T("odomètre à compléter")}') + '</div></div>'
-      + '<div class="chiffre' + (B.part == null ? ' att' : '') + '"><div class="lbl">${T("Part d’affaires")}</div><div class="val">' + (B.part == null ? '${T("À établir")}' : pct(B.part)) + '</div>'
-      + '<div class="sous">${T("km d’affaires ÷ km totaux")}</div></div>'
-      + '<div class="chiffre"><div class="lbl">${T("Déplacements")}</div><div class="val">' + (B.nDeplacements || 0) + '</div>'
-      + '<div class="sous">${T("inscrits en")} ' + ANNEE + '</div></div>'
-      + '<div class="chiffre"><div class="lbl">${T("Déductible")}</div><div class="val">' + argent(B.deductible || 0) + '</div>'
-      + '<div class="sous">${T("dépenses de véhicule, part appliquée")}</div></div>'
-      + '</div>');
-    if (!(D.vehicules || []).length) return h + appelPremierVehicule();
-    h += '<div class="duo"><div>' + listeDeplacements() + '</div><div>' + formDeplacement() + '</div></div>';
-    return h;
+    /* Les chiffres sont poses par rendu() AVANT la barre des onglets (kpisRegistre). */
+    if (!(D.vehicules || []).length) return appelPremierVehicule();
+    return '<div class="duo"><div>' + listeDeplacements() + '</div><div>' + formDeplacement() + '</div></div>';
   }
   function appelPremierVehicule(){
     return '<div class="carte appel"><strong>${T("Aucun véhicule inscrit")}</strong>'
@@ -708,45 +755,42 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     var L = FVEH ? tous.filter(function(d){ return d.vehiculeId === FVEH; }) : tous;
     var total = L.reduce(function(s, d){ return s + (Number(d.km) || 0); }, 0);
     var t = tranche(L, 'reg');
-    var vehs = (D.vehicules || []).filter(function(v){
-      return v.enService || tous.some(function(d){ return d.vehiculeId === v.id; }); });
-    var h = '<div class="carte"><h2>${T("Déplacements")} ' + ANNEE
-      + (vehs.length > 1
-          ? ' <select id="f-veh" aria-label="${T("Filtrer par véhicule")}" style="text-transform:none;letter-spacing:0;font-weight:400;font-size:.74rem;padding:.1rem .35rem">'
-            + '<option value="">${T("Tous les véhicules")}</option>'
-            + vehs.map(function(v){ return '<option value="' + esc(v.id) + '"' + (FVEH === v.id ? ' selected' : '') + '>' + esc(v.nom) + '</option>'; }).join('')
-            + '</select>'
-          : '')
-      + nav('reg', t.nbp) + '</h2>';
+    /* LE REGISTRE (refonte 2026-10-16) : le trajet en gras et sa raison dessous,
+       puis le vehicule et les km ; le filtre est monte dans la barre des onglets,
+       la navigation descend au pied de la carte. */
+    var h = '<div class="carte">';
     if (!L.length) {
       return h + '<div class="vide"><strong>${T("Aucun déplacement inscrit")}</strong>'
         + (FVEH ? '${T("pour ce véhicule en")} ' : '${T("en")} ') + ANNEE + '.<br>'
         + (PA ? '${T("Chaque sortie pour affaires s’inscrit à droite : la date, la destination, la raison et les kilomètres.")}' : '')
         + '</div></div>';
     }
-    h += '<table><thead><tr><th>${T("Date")}</th><th>${T("Véhicule")}</th><th>${T("Trajet et raison")}</th>'
+    h += '<table><thead><tr><th>${T("Date")}</th><th>${T("Trajet et raison")}</th><th>${T("Véhicule")}</th>'
       + '<th class="n">${T("Km")}</th><th></th></tr></thead><tbody>';
     h += t.vue.map(function(d){
       var parOdo = d.odoDebut != null && d.odoFin != null;
       var sous = esc(nomRaison(d.raison)) + (d.detail ? ' — ' + esc(d.detail) : '')
-        + (d.commande ? ' · ${T("commande")} ' + esc(d.commande) : '');
+        + (d.commande ? ' · ${T("commande")} ' + esc(d.commande) : '')
+        + (d.allerRetour ? ' · ${T("aller-retour")}' : '')
+        + (parOdo ? ' · <span title="${T("Lus à l’odomètre")}">${T("odomètre")} ' + szNombre(d.odoDebut, 1) + ' → ' + szNombre(d.odoFin, 1) + '</span>' : '');
       return '<tr class="ligne' + (PM ? ' mod' : '') + (SAISIE && SAISIE.id === d.id ? ' sel' : '') + '" data-dep="' + esc(d.id) + '"'
         + (PM ? ' title="${T("Double-cliquez pour modifier")}"' : '') + '>'
         + '<td class="nowrap">' + esc(szJour(d.date)) + '</td>'
+        + '<td><b class="traj">' + (d.depart ? esc(d.depart) + ' → ' : '') + esc(d.destination) + '</b>'
+        + '<span class="cx-l2">' + sous + '</span></td>'
         + '<td>' + esc(nomVeh(d.vehiculeId)) + '</td>'
-        + '<td><div class="traj">' + (d.depart ? esc(d.depart) + ' → ' : '') + esc(d.destination) + '</div>'
-        + '<div class="sous2">' + sous + '</div></td>'
-        + '<td class="n">' + km(d.km)
-        + (d.allerRetour ? '<div class="sous2"><span class="pill g">${T("aller-retour")}</span></div>' : '')
-        + (parOdo ? '<div class="sous2" title="${T("Lus à l’odomètre")}">' + szNombre(d.odoDebut, 1) + ' → ' + szNombre(d.odoFin, 1) + '</div>' : '')
-        + '</td><td class="n">'
+        + '<td class="n"><b>' + km(d.km) + '</b></td><td class="n">'
         + (PS ? '<button type="button" class="mini danger" data-sup-dep="' + esc(d.id) + '" aria-label="${T("Supprimer ce déplacement")}" title="${T("Supprimer ce déplacement")}">${T("Supprimer")}</button>' : '')
         + '</td></tr>';
     }).join('');
     h += '<tr class="tot"><td colspan="3">${T("Total")} ' + (FVEH ? esc(nomVeh(FVEH)) + ' ' : '') + ANNEE + ' — '
       + L.length + ' ' + szPl(L.length, '${T("déplacement")}', '${T("déplacements")}') + '</td>'
       + '<td class="n">' + km(Math.round(total * 10) / 10) + '</td><td></td></tr>';
-    return h + '</tbody></table></div>';
+    var prem = PG.reg * (BU.reg || 1) + 1, dern = Math.min(L.length, prem - 1 + t.vue.length);
+    h += '</tbody></table>'
+      + '<div class="vh-pied"><span>' + prem + '–' + dern + ' ${T("sur")} ' + L.length + '</span>'
+      + '<div class="droite">' + nav('reg', t.nbp) + '</div></div>';
+    return h + '</div>';
   }
   function formDeplacement(){
     var s = SAISIE;
@@ -1250,14 +1294,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     }
     var nonEtablies = L.filter(function(e){ return !e.partEtablie; }).length;
     var nonRatt = L.filter(function(e){ return !e.vehiculeId; }).length;
+    /* Les deux avertissements : des PASTILLES, le texte complet s ouvre au clic (refonte 2026-10-16). */
+    var pas = '';
     if (nonEtablies) {
-      h += '<div class="avis"><strong>' + nonEtablies + ' ' + szPl(nonEtablies, '${T("dépense sans part établie")}', '${T("dépenses sans part établie")}') + '.</strong> '
-        + '${T("Faute d’odomètre complet pour l’année, elles se déclarent en entier. Complétez l’odomètre (onglet Véhicules) : la part s’appliquera d’elle-même.")}</div>';
+      pas += avis('<b>' + nonEtablies + '</b> ' + szPl(nonEtablies, '${T("dépense sans part établie")}', '${T("dépenses sans part établie")}'),
+        '${T("Faute d’odomètre complet pour l’année, elles se déclarent en entier. Complétez l’odomètre (onglet Véhicules) : la part s’appliquera d’elle-même.")}');
     }
     if (nonRatt) {
-      h += '<div class="avis"><strong>' + nonRatt + ' ' + szPl(nonRatt, '${T("dépense non rattachée")}', '${T("dépenses non rattachées")}') + '.</strong> '
-        + '${T("Sans véhicule, elles prennent la part globale de l’année. Rattachez-les dans les Dépenses (fiche, Modifier) pour une part exacte.")}</div>';
+      pas += avis('<b>' + nonRatt + '</b> ' + szPl(nonRatt, '${T("dépense non rattachée")}', '${T("dépenses non rattachées")}'),
+        '${T("Sans véhicule, elles prennent la part globale de l’année. Rattachez-les dans les Dépenses (fiche, Modifier) pour une part exacte.")}');
     }
+    if (pas) h += '<div class="vh-avis">' + pas + '</div>';
     var tot = { m: 0, d: 0, tps: 0, tvq: 0 };
     L.forEach(function(e){ tot.m += Number(e.montant) || 0; tot.d += Number(e.deductible) || 0; tot.tps += Number(e.tps) || 0; tot.tvq += Number(e.tvq) || 0; });
     var t = tranche(L, 'dep');
@@ -1475,7 +1522,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
 
   /* ── LE DESSIN ──────────────────────────────────────────────────────── */
   function rendu(){
+    /* L ordre de la grammaire : la pastille, les chiffres (registre), la barre des onglets, le travail. */
     var h = bandeauLecture();
+    if (ONGLET === 'registre') h += kpisRegistre();
+    h += '<div id="vh-place"></div>';
     if (ONGLET === 'vehicules') h += vueVehicules();
     else if (ONGLET === 'changements') h += vueChangements();
     else if (ONGLET === 'depenses') h += vueDepenses();
@@ -1495,13 +1545,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     var kmA = (D.bilan && D.bilan.total) ? D.bilan.total.kmAffaires : 0;
     elSous.textContent = ANNEE + ' · ' + deps.length + ' ' + szPl(deps.length, '${T("déplacement")}', '${T("déplacements")}')
       + ' · ' + km(kmA || 0) + ' ${T("d’affaires")}';
-    corps.innerHTML = rendu();
+    corps.innerHTML = rendu(); poserBarre();
     /* LE BUDGET SE MESURE : si la page deborde, une ligne de moins et on
        redessine (quelques tours au plus) ; jamais de glissiere. */
     var cle = cleListe(), tours = 0;
+    /* (2026-10-16, vu a la capture) L estimation ne faisait que DESCENDRE : 8 deplacements par page
+       et le bas de la fenetre vide. On remplit tant qu il reste une page suivante, puis on recule. */
+    while (cle && corps.querySelector('[data-pg="' + cle + '"]') && corps.scrollHeight <= corps.clientHeight + 1 && tours < 40) {
+      BU[cle]++; tours++;
+      corps.innerHTML = rendu(); poserBarre();
+    }
+    tours = 0;
     while (cle && corps.scrollHeight > corps.clientHeight + 1 && BU[cle] > 1 && tours < 60) {
       BU[cle]--; tours++;
-      corps.innerHTML = rendu();
+      corps.innerHTML = rendu(); poserBarre();
     }
     var b = document.getElementById('v-nom');
     if (b && VFORM && !VFORM._vu) { VFORM._vu = true; try { b.focus(); } catch (e) {} }

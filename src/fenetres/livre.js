@@ -60,28 +60,23 @@ body{background:var(--f-page);color:var(--tx);
 .tete h1{margin:0;font:700 .95rem/1.2 system-ui}
 .tete .ico{display:inline-flex;width:19px;height:19px;color:var(--or,var(--or))}
 .tete .ico svg{width:100%;height:100%}
-.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.onglets{flex:0 0 auto;display:flex;gap:.3rem;padding:.5rem 1.05rem 0;
-  border-bottom:1px solid var(--v08)}
-.onglets button{background:none;border:0;border-bottom:2px solid transparent;color:var(--tx2);
-  font:600 .82rem/1 system-ui;padding:.45rem .7rem;cursor:pointer;border-radius:0}
-.onglets button.on{color:var(--tx);border-bottom-color:var(--or)}
-.barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;
-  padding:.55rem 1.05rem .1rem}
-.barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center}
+/* 2026-10-16 : la grammaire de la Comptabilite (CSS_COMPTA du socle). La tete porte le resume (#sous),
+   l exercice et les gestes (#outils) ; dessous, une barre : les six onglets segmentes (#onglets) a
+   gauche, le controle des deux moteurs et les points a savoir (#lv-etat) a droite ; puis le travail. */
+.tete .cx-actions select{height:2.1rem}
+.tete .cx-actions .gris{font-size:.76rem}
+#lv-etat{flex-wrap:wrap;justify-content:flex-end;min-width:0}
+#lv-etat>.avert[open]{flex-basis:100%}
 /* Aucune glissiere (2026-10-12) : le corps ne defile plus. Le journal garde son budget
    mesure (scrollHeight se lit aussi sous overflow:hidden) ; les ecritures manuelles vont en
    PAGES mesurees (JS_PAGES du socle). */
-.corps{flex:1 1 auto;min-height:0;padding:.7rem 1.05rem .45rem;overflow:hidden;
-  display:flex;flex-direction:column;gap:.7rem}
-.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
-  padding:.8rem .9rem}
-.carte h2{margin:0 0 .55rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2)}
+.cx>#corps{flex:1 1 0;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:.9rem}
+#corps>*{flex:0 0 auto}
+#corps>.sz-pagee{flex:1 1 0}
 select,input,button,textarea{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem;cursor:pointer}
 input,textarea{cursor:text}
-input.n{text-align:right;font-family:ui-monospace,Consolas,monospace;font-size:.78rem}
+input.n{text-align:right;font-variant-numeric:tabular-nums;font-size:.78rem}
 select:focus,input:focus,button:focus,textarea:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.45;cursor:default}
@@ -91,25 +86,19 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.danger{border-color:rgba(248,113,113,.45);color:var(--tx-err2)}
 
 /* ── LE RAPPROCHEMENT — en haut, et il change de couleur ─────────────────── */
-.rappro{border-radius:11px;padding:.65rem .85rem;font-size:.82rem;line-height:1.45;
+/* ⚠ QUAND LES MOTEURS DIVERGENT, LE BLOC ROUGE RESTE UN BLOC : on ne range pas une alerte en pastille. */
+.rappro{border-radius:14px;padding:.65rem .85rem;font-size:.82rem;line-height:1.45;
   border:1px solid transparent;display:flex;gap:.8rem;align-items:center;flex-wrap:wrap}
 .rappro.ok{border-color:rgba(74,222,128,.38);background:rgba(74,222,128,.08)}
 .rappro.non{border-color:rgba(248,113,113,.5);background:rgba(248,113,113,.10)}
-.rappro b{font-family:ui-monospace,Consolas,monospace}
+.rappro b{font-variant-numeric:tabular-nums}
 .rappro .t{font-weight:700}
-.rappro-p{font-size:.76rem;border:1px solid rgba(74,222,128,.38);background:rgba(74,222,128,.08);
-  border-radius:99px;padding:.18rem .65rem;white-space:nowrap;cursor:help}
-.rappro-p b{font-family:ui-monospace,Consolas,monospace}
+.cx-bon.rappro-p{cursor:help}
+.cx-bon.rappro-p b{font-variant-numeric:tabular-nums}
 
-/* ── Les grands chiffres ─────────────────────────────────────────────────── */
-.chiffres{display:grid;grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr));gap:.6rem}
-.chiffre{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
-  padding:.6rem .75rem}
-.chiffre .lbl{font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
-.chiffre .val{font:700 1.18rem/1.25 ui-monospace,Consolas,monospace;margin-top:.15rem}
-.chiffre .sous{font-size:.6875rem;color:var(--tx3);margin-top:.1rem}
-.chiffre.pos .val{color:var(--tx-ok)}
-.chiffre.neg .val{color:var(--tx-err2)}
+/* ── Les grands chiffres : moins de quatre, la bande se partage en autant ── */
+.cx-kpis.k3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.cx-kpis.k2{grid-template-columns:repeat(2,minmax(0,1fr))}
 
 /* ── Tableaux ────────────────────────────────────────────────────────────── */
 /* ⚠⚠ UN LIVRE DE COMPTES EST UN DOCUMENT, PAS UNE LISTE (2026-09-29). La
@@ -119,40 +108,33 @@ button.danger{border-color:rgba(248,113,113,.45);color:var(--tx-err2)}
    cartes, et le journal d un exercice 34 000 px. Ces regles, plus precises
    (.corps ...), rendent au livre son tableau serre, comme les feuilles de
    document (.feuille, .papier) du socle. */
-.corps table{border-collapse:collapse;border-spacing:0}
-.corps tbody td{padding:.42rem .5rem;border:0;border-top:1px solid var(--v055);border-radius:0;background:transparent}
-.corps tbody tr:hover>td{background:var(--v03);border-color:var(--v055)}
-.corps thead th{padding:.22rem .35rem;background:transparent}
+#corps table{border-collapse:collapse;border-spacing:0}
+#corps tbody td{padding:.42rem .5rem;border:0;border-top:1px solid var(--v055);border-radius:0;background:transparent}
+#corps tbody tr:hover>td{background:var(--v03);border-color:var(--v055)}
+#corps thead th{padding:.22rem .35rem;background:transparent}
 table{width:100%;border-collapse:collapse;font-size:.79rem}
 thead th{text-align:left;padding:.22rem .35rem;font-size:.6875rem;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
-thead th.n,tbody td.n{text-align:right;font-family:ui-monospace,Consolas,monospace}
+  letter-spacing:.06em;color:var(--tx3);font-weight:650;border-bottom:1px solid var(--v10)}
+thead th.n,tbody td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 tbody td{padding:.42rem .5rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody tr:hover td{background:var(--v03)}
 tbody tr.tot td{border-top:1px solid var(--v16);font-weight:700}
-tbody tr.ecr td{border-top:1px solid var(--v16);font-weight:600}
+/* L en-tete d une ecriture se lit comme un sous-total : gras, sur un voile. */
+#corps tbody tr.ecr>td{border-top:1px solid var(--v16);font-weight:600;background:var(--v03)}
 tbody tr.ligne td{color:var(--tx2)}
 tbody tr.ligne td:first-child{padding-left:1.4rem}
 .bon{color:var(--tx-ok)}.mauvais{color:var(--tx-err2)}.gris{color:var(--tx2)}
-.pill{display:inline-block;font-size:.6875rem;padding:.05rem .45rem;border-radius:99px;
-  white-space:nowrap;font-weight:700}
-.pill.g{background:rgba(148,163,184,.14);color:var(--tx-94a3b8);font-weight:600}
-.pill.att{background:rgba(234,179,8,.16);color:var(--tx-att)}
-/* ⚠⚠ PAS var(--or) EN COULEUR DE TEXTE — << banc-contraste-jour >> a mordu ici, et il
-   avait raison : cet or donne 1,98 sur le fond du mode jour, c est-a-dire
-   illisible. C est EXACTEMENT la meme faute que la phase 1 a payee en bâtissant
-   la fenetre des rapports. L or reste au FOND (un fond n est pas juge au ratio,
-   et il tient dans les deux modes) ; le texte prend le jeton, qui a deja sa
-   valeur de jour et sa valeur de nuit. */
-.pill.man{background:rgba(var(--or-rgb),.18);color:var(--tx)}
+#corps td .rf-pill{margin-left:.4rem;vertical-align:baseline;padding:.05rem .55rem}
 
-/* ── L'avertissement : visible, pas décoratif ────────────────────────────── */
-.avert{border:1px solid rgba(234,179,8,.45);background:rgba(234,179,8,.09);
-  border-radius:10px;padding:.55rem .75rem;font-size:.78rem;line-height:1.45}
-.avert strong{color:var(--tx-att)}
-.avert ul{margin:.35rem 0 0;padding-left:1.1rem}
-.avert summary{cursor:pointer;list-style-position:inside}
-.avert:not([open]){padding:.4rem .75rem}
+/* ── L'avertissement : une PASTILLE, et son détail au clic ────────────────── */
+.avert{display:flex;flex-direction:column;align-items:flex-end;gap:.45rem}
+.avert>summary{cursor:pointer;list-style:none}
+.avert>summary::-webkit-details-marker{display:none}
+.avert>summary::after{content:"▾";margin-left:.2rem;font-size:.7rem}
+.avert[open]>summary::after{content:"▴"}
+.avert ul{align-self:stretch;margin:0;padding:.55rem .8rem .55rem 1.8rem;font-size:.78rem;line-height:1.45;color:var(--tx2);
+  border:1px solid var(--sz-bord);border-radius:12px;background:var(--f-carte)}
+.avert ul strong{color:var(--tx-att)}
 
 /* ── Le formulaire d'écriture ────────────────────────────────────────────── */
 /* Date et libelle sur UNE rangee (2026-10-04) : empiles, la saisie faisait
@@ -169,23 +151,19 @@ tbody tr.ligne td:first-child{padding-left:1.4rem}
    par ecriture entiere (jamais une ecriture coupee entre deux pages). */
 .duo{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;align-items:start}
 .trio{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7rem;align-items:start}
-.trio>div>.carte+.carte{margin-top:.7rem}
+.trio>div>.cx-carte+.cx-carte{margin-top:.9rem}
+.duo,.trio{gap:.9rem}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;align-items:center;justify-content:center;z-index:50;padding:1rem}
 .voile .boite{max-width:52rem;width:100%;max-height:88vh;overflow:hidden;margin:0}
-.duo>div{display:flex;flex-direction:column;gap:.7rem;min-width:0}
-.cols2{columns:2;column-gap:.7rem}
-.cols2>.carte{break-inside:avoid;margin-bottom:.7rem}
-.pages{display:flex;align-items:center;gap:.5rem;margin-left:auto;font:400 .74rem/1 system-ui;
-  text-transform:none;letter-spacing:0;color:var(--tx2)}
-.carte h2.aveclien{display:flex;align-items:center;gap:.6rem}
+.duo>div{display:flex;flex-direction:column;gap:.9rem;min-width:0}
+.pages{display:flex;align-items:center;gap:.5rem;margin-left:auto;font-size:.74rem;font-weight:400;color:var(--tx2)}
 /* Grand livre : la ligne garde la hauteur d une ligne de texte — le bouton
    Detail se fait discret et la pastille de ligne fiscale reste sur la ligne. */
-.corps button.mini[data-ouvre]{padding:0 .4rem;font-size:.7rem;line-height:1.45;min-height:0;height:auto}
-.corps td .pill{vertical-align:baseline}
+#corps button.mini[data-ouvre]{padding:0 .4rem;font-size:.7rem;line-height:1.45;min-height:0;height:auto}
 .gl td:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:0;width:44%}
 /* L en-tete Debit / Credit / Solde une fois par colonne : les cartes suivantes
    ont exactement les memes colonnes. */
-.gl>div>.carte~.carte thead{display:none}
+.gl>div>.cx-carte~.cx-carte thead{display:none}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
@@ -209,10 +187,11 @@ function pageLivre(onglet) {
 <title>${T("Livre de comptes — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.billing}</span><h1>${T("Livre de comptes")}</h1>
-  <span class="sous" id="sous"></span></div>
-<div class="onglets" id="onglets"></div>
-<div class="barreoutils" id="outils"></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
+  <span class="cx-resume" id="sous"></span><div class="cx-actions" id="outils"></div></div>
+<div class="cx">
+<div class="cx-barre"><div class="ed-seg" id="onglets"></div><div class="droite" id="lv-etat"></div></div>
+<div id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
+</div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -223,6 +202,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
   var elOnglets = document.getElementById('onglets');
   var elOutils = document.getElementById('outils');
   var elSous = document.getElementById('sous');
+  var elEtat = document.getElementById('lv-etat');
 
   var D = null;              /* le livre, tel que le site le rend */
   var ONGLET = '${depart}';
@@ -320,20 +300,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
   function outils(){
     if (!D) { elOutils.innerHTML = ''; return; }
     var dispo = D.anneesDisponibles || [];
-    var h = '<label for="an" class="gris" style="font-size:.76rem">${T("Exercice")}</label>'
+    var h = '<label for="an" class="gris">${T("Exercice")}</label>'
           + '<select id="an" aria-label="${T("Exercice financier à afficher")}">'
           + dispo.map(function(a){
               return '<option value="' + a + '"' + (a === ANNEE ? ' selected' : '') + '>'
                    + '${T("1er janv. au 31 déc.")} ' + a + '</option>';
             }).join('')
-          + '</select>' + rapproPastille() + '<span class="droite">';
+          + '</select>';
     /* ⚠⚠ ON IMPRIME L ONGLET QU ON REGARDE, PAS << le livre >>. Un seul bouton
        qui sortirait les quatre documents d un coup obligerait a jeter trois
        liasses pour en garder une — et un comptable ne demande pas << le livre >>,
        il demande LE GRAND LIVRE, ou LA BALANCE. Le bouton dit donc ce qu il va
        sortir : son intitule change avec l onglet. */
     if (IMPRIMABLE[ONGLET]) {
-      h += '<button class="mini" id="imprimer">${T("Imprimer")} ' + esc(IMPRIMABLE[ONGLET][1]) + '</button>';
+      h += '<button id="imprimer">${T("Imprimer")} ' + esc(IMPRIMABLE[ONGLET][1]) + '</button>';
     }
     if (ONGLET === 'ecritures' && !RO) {
       h += '<button class="prim" id="neuve">${T("Nouvelle écriture")}</button>';
@@ -342,10 +322,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
        igrfImport) : celui qui se LIT (Excel, avec les comptes d origine) et
        celui qui s IMPORTE tel quel dans le logiciel d impot du comptable. */
     if (ONGLET === 'igrf' && D.igrf) {
-      h += '<button class="mini" id="igrf-csv">${T("Exporter le tableau (.csv)")}</button>'
+      h += '<button id="igrf-csv">${T("Exporter le tableau (.csv)")}</button>'
          + '<button class="prim" id="igrf-imp">${T("Fichier d’import IGRF")}</button>';
     }
-    h += '</span>';
     elOutils.innerHTML = h;
     var sel = document.getElementById('an');
     if (sel) sel.onchange = function(){ ANNEE = parseInt(sel.value, 10); charger(); };
@@ -385,8 +364,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
     if (!r || !r.concorde || r.resultatDeCompta === null || r.resultatDeCompta === undefined) return '';
     var detail = '${T("Résultat du livre")} ' + argent(r.resultatDuLivre) + ' ${T("= résultat des rapports")} '
       + argent(r.resultatDeCompta) + (r.effetManuel ? ' ${T("+ écritures manuelles")} ' + argent(r.effetManuel) : '');
-    return '<span class="rappro-p" title="' + esc(detail) + '">✓ ${T("Les deux moteurs concordent")}'
-      + ' <span class="gris">· ${T("Résultat du livre")} <b>' + argent(r.resultatDuLivre) + '</b></span></span>';
+    return '<span class="cx-bon rappro-p" title="' + esc(detail) + '">✓ ${T("Les deux moteurs concordent")}'
+      + ' <span>· ${T("Résultat du livre")} <b>' + argent(r.resultatDuLivre) + '</b></span></span>';
   }
   function rapprochement(){
     if (!D || !D.rapprochement) return '';
@@ -456,8 +435,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
        ecriture refusee) GARDE LE BLOC OUVERT : on ne replie pas une alerte. */
     var nb = (items.match(/<li/g) || []).length;
     var grave = items.indexOf('class="mauvais"') >= 0;
-    return '<details class="avert"' + (grave || AVERT_OUVERT ? ' open' : '') + '><summary><strong>${T("Ce que ce livre ne dit pas tout seul")}</strong>'
-      + ' <span class="gris">— ' + nb + ' ' + szPl(nb, '${T("point")}', '${T("points")}') + '</span></summary><ul>' + items + '</ul></details>';
+    /* La PASTILLE (.cx-averti) est le resume ; le detail entier s ouvre dessous, au clic. */
+    return '<details class="avert"' + (grave || AVERT_OUVERT ? ' open' : '') + '><summary class="cx-averti"><b>' + nb + ' ' + szPl(nb, '${T("point")}', '${T("points")}') + '</b>'
+      + '<span>${T("Ce que ce livre ne dit pas tout seul")}</span></summary><ul>' + items + '</ul></details>';
   }
 
   /* ══ ONGLET JOURNAL ══════════════════════════════════════════════════════
@@ -473,6 +453,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
     frais:          '${T("Frais d’encaissement")}',
     manuelle:       '${T("Écriture manuelle")}'
   };
+  /* Le numero du compte en etiquette (.cx-code), son nom a cote. */
+  function codeNom(code, nom){
+    return '<span class="cx-code">' + esc(code) + '</span>' + esc(nom);
+  }
   function nomCompte(code){
     if (!D) return code;
     for (var i = 0; i < (D.comptes || []).length; i++) {
@@ -511,12 +495,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
          ⚠ Aucun banc ne pouvait l attraper : le texte etait juste, seule la
          COLONNE etait fausse. C est l image qui l a montre. */
       var h = '<tr class="ecr"><td style="white-space:nowrap">' + esc(szJour(e.date)) + '</td><td>' + esc(e.libelle)
-            + ' <span class="pill ' + (e.source === 'manuelle' ? 'man' : 'g') + '">'
+            + '<span class="rf-pill' + (e.source === 'manuelle' ? ' bleu' : '') + '">'
             + esc(SOURCES[e.source] || e.source || '') + '</span></td>'
             + '<td class="n">' + argent(e.total) + '</td>'
             + '<td class="n">' + argent(e.total) + '</td></tr>';
       h += (e.lignes || []).map(function(l){
-        return '<tr class="ligne"><td></td><td>' + esc(l.compte) + ' — ' + esc(nomCompte(l.compte))
+        return '<tr class="ligne"><td></td><td>' + codeNom(l.compte, nomCompte(l.compte))
              + '</td><td class="n">' + (l.debit ? argent(l.debit) : '')
              + '</td><td class="n">' + (l.credit ? argent(l.credit) : '') + '</td></tr>';
       }).join('');
@@ -527,8 +511,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
         + '<span>${T("Page")} ' + (JPAGE + 1) + ' / ' + pages.length + '</span>'
         + '<button class="mini" data-jp="1"' + (JPAGE >= pages.length - 1 ? ' disabled' : '') + '>${T("Suivant ›")}</button></span>'
       : '';
-    return '<div class="carte" id="journal"><h2 class="aveclien">${T("Journal de l’exercice")} — ' + D.nbDerivees
-         + ' ' + szPl(D.nbDerivees, '${T("dérivée")}', '${T("dérivées")}') + ' · ' + D.nbManuelles + ' ' + szPl(D.nbManuelles, '${T("manuelle")}', '${T("manuelles")}') + nav + '</h2>'
+    return '<div class="cx-carte" id="journal"><h2 class="aveclien">${T("Journal de l’exercice")} <span class="cx-sub">' + D.nbDerivees
+         + ' ' + szPl(D.nbDerivees, '${T("dérivée")}', '${T("dérivées")}') + ' · ' + D.nbManuelles + ' ' + szPl(D.nbManuelles, '${T("manuelle")}', '${T("manuelles")}') + '</span>' + nav + '</h2>'
          + '<table><thead><tr><th>${T("Date")}</th><th>${T("Libellé / compte")}</th>'
          + '<th class="n">${T("Débit")}</th><th class="n">${T("Crédit")}</th></tr></thead>'
          + '<tbody>' + lignes + '</tbody></table></div>';
@@ -551,12 +535,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
       if (t === '|') { h += '</div><div>'; return; }
       var g = c.filter(function(x){ return x.type === t; });
       if (!g.length) return;
-      h += '<div class="carte"><h2>' + esc(TYPES[t] || t) + '</h2><table>'
+      h += '<div class="cx-carte"><h2>' + esc(TYPES[t] || t) + '</h2><table>'
          + '<thead><tr><th>${T("Compte")}</th><th class="n">${T("Débit")}</th>'
          + '<th class="n">${T("Crédit")}</th><th class="n">${T("Solde")}</th><th></th></tr></thead><tbody>';
       g.forEach(function(x){
-        h += '<tr><td title="' + esc(x.code + ' — ' + x.nom) + '">' + esc(x.code) + ' — ' + esc(x.nom)
-           + (x.ligne ? ' <span class="pill g">${T("ligne")} ' + esc(x.ligne) + '</span>' : '')
+        h += '<tr><td title="' + esc(x.code + ' — ' + x.nom) + '">' + codeNom(x.code, x.nom)
+           + (x.ligne ? '<span class="rf-pill">${T("ligne")} ' + esc(x.ligne) + '</span>' : '')
            + '</td><td class="n">' + argent(x.debit) + '</td><td class="n">' + argent(x.credit)
            + '</td><td class="n">' + argent(x.solde) + '</td>'
            + '<td class="n"><button class="mini" data-ouvre="' + esc(x.code) + '">'
@@ -589,8 +573,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
         + '<span>${T("Page")} ' + (MPAGE + 1) + ' / ' + nbp + '</span>'
         + '<button class="mini" data-mp="1"' + (MPAGE >= nbp - 1 ? ' disabled' : '') + '>${T("Suivant ›")}</button></span>'
       : '';
-    return '<div class="voile" id="v-mv"><div class="boite carte" id="b-mv">'
-      + '<h2 class="aveclien">' + esc(x.code) + ' — ' + esc(x.nom) + ' <span class="gris" style="text-transform:none;letter-spacing:0;font-weight:400">· '
+    return '<div class="voile" id="v-mv"><div class="boite cx-carte" id="b-mv">'
+      + '<h2 class="aveclien">' + codeNom(x.code, x.nom) + ' <span class="cx-sub">· '
       + mv.length + ' ' + szPl(mv.length, '${T("mouvement")}', '${T("mouvements")}') + '</span>' + nav + '</h2>'
       + (mv.length
         ? '<table><thead><tr><th>${T("Date")}</th><th>${T("Libellé")}</th><th class="n">${T("Débit")}</th><th class="n">${T("Crédit")}</th></tr></thead><tbody>'
@@ -601,7 +585,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
             }).join('')
           + '<tr class="tot"><td></td><td>${T("Solde")}</td><td class="n" colspan="2">' + argent(x.solde) + '</td></tr></tbody></table>'
         : '<div class="vide">${T("Aucun mouvement.")}</div>')
-      + '<div style="display:flex;justify-content:flex-end;margin-top:.6rem"><button id="mv-fermer">${T("Fermer")}</button></div>'
+      + '<div style="display:flex;justify-content:flex-end"><button id="mv-fermer">${T("Fermer")}</button></div>'
       + '</div></div>';
   }
 
@@ -612,7 +596,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
   function vueBalance(){
     var b = D.balance || {};
     function lg(x){
-      return '<tr><td>' + esc(x.code) + ' — ' + esc(x.nom) + '</td>'
+      return '<tr><td>' + codeNom(x.code, x.nom) + '</td>'
            + '<td class="n">' + argent(x.debit) + '</td>'
            + '<td class="n">' + argent(x.credit) + '</td></tr>';
     }
@@ -628,16 +612,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
        ce poste (#114). Sans elle, ce bandeau-ci serait le seul des vingt-sept a
        ne pas se replier — et une exception qu on ne peut pas expliquer se lit
        comme un oubli. << banc-tuiles-masquables >> a d ailleurs mordu ici. */
-    return szTuiles('<div class="chiffres">'
-      + '<div class="chiffre ' + (b.equilibree ? 'pos' : 'neg') + '"><div class="lbl">${T("Verdict")}</div>'
-      + '<div class="val">' + (b.equilibree ? '${T("Équilibrée")}' : '${T("DÉSÉQUILIBRÉE")}') + '</div>'
-      + '<div class="sous">${T("écart")} ' + argent(b.ecart) + '</div></div>'
-      + '<div class="chiffre"><div class="lbl">${T("Total des débits")}</div><div class="val">'
-      + argent(b.totalDebit) + '</div></div>'
-      + '<div class="chiffre"><div class="lbl">${T("Total des crédits")}</div><div class="val">'
-      + argent(b.totalCredit) + '</div></div>'
+    return szTuiles('<div class="cx-kpis k3">'
+      + '<div class="cx-kpi ' + (b.equilibree ? 'ok' : 'err') + '"><span>${T("Verdict")}</span>'
+      + '<b class="mot">' + (b.equilibree ? '${T("Équilibrée")}' : '${T("DÉSÉQUILIBRÉE")}') + '</b>'
+      + '<small>${T("écart")} ' + argent(b.ecart) + '</small></div>'
+      + '<div class="cx-kpi"><span>${T("Total des débits")}</span><b>'
+      + argent(b.totalDebit) + '</b></div>'
+      + '<div class="cx-kpi"><span>${T("Total des crédits")}</span><b>'
+      + argent(b.totalCredit) + '</b></div>'
       + '</div>')
-      + '<div class="carte"><h2>${T("Balance de vérification")}</h2><div class="duo">'
+      + '<div class="cx-carte"><h2>${T("Balance de vérification")}</h2><div class="duo">'
       + '<div><table>' + tete + '<tbody>' + gauche.map(lg).join('') + '</tbody></table></div>'
       + '<div><table>' + tete + '<tbody>' + droite.map(lg).join('')
       + '<tr class="tot"><td>${T("Totaux")}</td><td class="n">' + argent(b.totalDebit)
@@ -653,24 +637,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
   function vueBilan(){
     var b = D.bilan || {};
     function bloc(titre, liste, total){
-      return '<div class="carte"><h2>' + esc(titre) + '</h2><table><tbody>'
+      return '<div class="cx-carte"><h2>' + esc(titre) + '</h2><table><tbody>'
         + (liste || []).map(function(x){
-            return '<tr><td>' + esc(x.code) + ' — ' + esc(x.nom) + '</td><td class="n">'
+            return '<tr><td>' + codeNom(x.code, x.nom) + '</td><td class="n">'
                  + argent(x.solde) + '</td></tr>'; }).join('')
         + '<tr class="tot"><td>${T("Total")}</td><td class="n">' + argent(total) + '</td></tr>'
         + '</tbody></table></div>';
     }
     var h = '<div class="duo"><div>' + bloc('${T("Actif")}', b.actif, b.totalActif) + '</div><div>';
     h += bloc('${T("Passif")}', b.passif, b.totalPassif);
-    h += '<div class="carte"><h2>${T("Capitaux propres")}</h2><table><tbody>'
+    h += '<div class="cx-carte"><h2>${T("Capitaux propres")}</h2><table><tbody>'
       + (b.capitaux || []).map(function(x){
-          return '<tr><td>' + esc(x.code) + ' — ' + esc(x.nom) + '</td><td class="n">'
+          return '<tr><td>' + codeNom(x.code, x.nom) + '</td><td class="n">'
                + argent(x.solde) + '</td></tr>'; }).join('')
       + '<tr><td>${T("Résultat de l’exercice")}</td><td class="n">' + argent(b.resultatExercice) + '</td></tr>'
       + '<tr class="tot"><td>${T("Total")}</td><td class="n">' + argent(b.totalCapitaux) + '</td></tr>'
       + '</tbody></table></div></div></div>';
-    h += '<div class="carte"><h2>${T("L’équation")}</h2>'
-      + '<div style="font-size:.82rem;line-height:1.6">${T("Actif")} <b>' + argent(b.totalActif)
+    h += '<div class="cx-carte"><h2>${T("L’équation")}</h2>'
+      + '<div style="font-size:.82rem;line-height:1.6;font-variant-numeric:tabular-nums">${T("Actif")} <b>' + argent(b.totalActif)
       /* ⚠ LES SIGNES SONT ECRITS EN ENTITES, ET CE N EST PAS DE LA COQUETTERIE.
          Ecrit << = ${'$'}{T("Passif")} >>, << banc-langue-sur-code >> refuse l enveloppe :
          il voit un signe egal juste devant et croit a une AFFECTATION. Il a
@@ -680,7 +664,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
       + '</b> &nbsp;=&nbsp; ${T("Passif")} <b>' + argent(b.totalPassif)
       + '</b> &nbsp;+&nbsp; ${T("Capitaux propres")} <b>'
       + argent(b.totalCapitaux) + '</b>'
-      + '<div class="gris" style="margin-top:.35rem">'
+      + '<div class="cx-sub" style="margin-top:.35rem">'
       + '${T("Elle est toujours vraie dès que chaque écriture s’équilibre : elle ne prouve donc pas que les chiffres sont justes, seulement que le journal est sain.")}'
       + '</div></div></div>';
     return h;
@@ -701,17 +685,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
     var okR = c.resultat && c.resultat.concorde, okB = c.bilan && c.bilan.concorde;
     function lg(l){
       return '<tr' + (l.total ? ' class="tot"' : '') + ' title="' + esc((EN ? l.nom : (l.nomEn || '')) + ((l.comptes || []).length ? ' · ' + l.comptes.join(' · ') : '')) + '">'
-        + '<td class="n" style="width:3.6rem;text-align:left">' + esc(l.code) + '</td>'
+        + '<td class="n" style="width:3.6rem;text-align:left"><span class="cx-code">' + esc(l.code) + '</span></td>'
         + '<td>' + esc(EN && l.nomEn ? l.nomEn : l.nom) + '</td><td class="n">' + argent(l.montant) + '</td></tr>';
     }
     var tete = '<thead><tr><th>${T("Code")}</th><th>${T("Poste")}</th><th class="n">${T("Montant")}</th></tr></thead>';
-    var h = szTuiles('<div class="chiffres">'
-      + '<div class="chiffre ' + (okR ? 'pos' : 'neg') + '"><div class="lbl">${T("9999 — bénéfice net")}</div>'
-      + '<div class="val">' + argent(c.resultat ? c.resultat.igrf : 0) + '</div>'
-      + '<div class="sous">' + (okR ? '${T("égale le résultat du livre")}' : '${T("DIFFÈRE du livre :")} ' + argent(c.resultat ? c.resultat.livre : 0)) + '</div></div>'
-      + '<div class="chiffre ' + (okB ? 'pos' : 'neg') + '"><div class="lbl">${T("2599 — total de l’actif")}</div>'
-      + '<div class="val">' + argent(c.bilan ? c.bilan.actif : 0) + '</div>'
-      + '<div class="sous">' + (okB ? '${T("égale 3585, passif et capital")}' : '${T("DIFFÈRE de 3585 :")} ' + argent(c.bilan ? c.bilan.passifEtCapital : 0)) + '</div></div>'
+    var h = szTuiles('<div class="cx-kpis k2">'
+      + '<div class="cx-kpi ' + (okR ? 'ok' : 'err') + '"><span>${T("9999 — bénéfice net")}</span>'
+      + '<b>' + argent(c.resultat ? c.resultat.igrf : 0) + '</b>'
+      + '<small>' + (okR ? '${T("égale le résultat du livre")}' : '${T("DIFFÈRE du livre :")} ' + argent(c.resultat ? c.resultat.livre : 0)) + '</small></div>'
+      + '<div class="cx-kpi ' + (okB ? 'ok' : 'err') + '"><span>${T("2599 — total de l’actif")}</span>'
+      + '<b>' + argent(c.bilan ? c.bilan.actif : 0) + '</b>'
+      + '<small>' + (okB ? '${T("égale 3585, passif et capital")}' : '${T("DIFFÈRE de 3585 :")} ' + argent(c.bilan ? c.bilan.passifEtCapital : 0)) + '</small></div>'
       + '</div>');
     var notes = [];
     (g.aReclasser || []).forEach(function(x){
@@ -729,14 +713,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
     var charges = res.filter(function(l){ var n = +l.code; return n >= 8520 && n <= 9366; });
     var sommaire = res.filter(function(l){ var n = +l.code; return !(n >= 8520 && n <= 9366); });
     h += '<div class="trio">'
-      + '<div class="carte"><h2>${T("Bilan")}</h2><table>' + tete + '<tbody>' + (g.bilan || []).map(lg).join('') + '</tbody></table></div>'
-      + '<div><div class="carte"><h2>${T("État des résultats")}</h2><table>' + tete + '<tbody>' + sommaire.map(lg).join('') + '</tbody></table></div>'
-      + '<div class="carte"><h2>${T("À savoir avant de l’envoyer")}</h2><ul class="gris" style="margin:.2rem 0 0;padding-left:1.1rem;font-size:.76rem;line-height:1.5">'
+      + '<div class="cx-carte"><h2>${T("Bilan")}</h2><table>' + tete + '<tbody>' + (g.bilan || []).map(lg).join('') + '</tbody></table></div>'
+      + '<div><div class="cx-carte"><h2>${T("État des résultats")}</h2><table>' + tete + '<tbody>' + sommaire.map(lg).join('') + '</tbody></table></div>'
+      + '<div class="cx-carte"><h2>${T("À savoir avant de l’envoyer")}</h2><ul class="gris" style="margin:.2rem 0 0;padding-left:1.1rem;font-size:.76rem;line-height:1.5">'
       + notes.join('')
       + '<li>${T("Montants comptables : repas à 100 %, véhicule au montant payé. Les 50 %, la part d’affaires et la DPA vont dans la déclaration.")}</li>'
       + '<li>${T("Entreprise individuelle : capital en 3551 à 3585 (série des associés), retraits négatifs en 3553.")}</li>'
       + '</ul></div></div>'
-      + '<div class="carte"><h2>${T("Charges d’exploitation")}</h2><table>' + tete + '<tbody>' + charges.map(lg).join('') + '</tbody></table></div>'
+      + '<div class="cx-carte"><h2>${T("Charges d’exploitation")}</h2><table>' + tete + '<tbody>' + charges.map(lg).join('') + '</tbody></table></div>'
       + '</div>';
     return h;
   }
@@ -761,7 +745,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
   function vueEcritures(){
     var h = '';
     if (SAISIE) {
-      h += '<div class="carte"><h2>${T("Nouvelle écriture")}</h2><div class="form">'
+      h += '<div class="cx-carte"><h2>${T("Nouvelle écriture")}</h2><div class="form">'
         + '<label for="ec-date">${T("Date")}</label><input type="date" id="ec-date" value="' + esc(SAISIE.date) + '">'
         + '<label for="ec-lib">${T("Libellé")}</label><input type="text" id="ec-lib" value="' + esc(SAISIE.libelle) + '" placeholder="${T("Apport du propriétaire, amortissement, retrait…")}">'
         + '</div><div class="lignes" id="ec-lignes">'
@@ -779,11 +763,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
                  + '<input class="n" data-l="' + i + '" data-k="credit" value="' + esc(l.credit) + '" placeholder="${T("Crédit")}"'
                  + ' aria-label="${T("Crédit")} — ${T("ligne")} ' + (i + 1) + '">'
                  + '<button class="mini" data-retire="' + i + '">✕</button></div>'; }).join('')
-        + '</div><div style="margin-top:.5rem;display:flex;gap:.5rem">'
+        + '</div><div style="display:flex;gap:.5rem">'
         + '<button class="mini" id="ec-plus">${T("Ajouter une ligne")}</button>'
         + '<button class="prim" id="ec-enr">${T("Enregistrer l’écriture")}</button>'
         + '<button class="mini" id="ec-annul">${T("Annuler")}</button></div>'
-        + '<div class="gris" style="margin-top:.5rem;font-size:.76rem">'
+        + '<div class="cx-sub">'
         + '${T("Débits et crédits doivent s’équilibrer au cent. Une même ligne ne porte jamais les deux.")}</div>'
         + '</div>';
     }
@@ -794,7 +778,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
       return h;
     }
     // La liste en PAGES mesurees, jamais de glissiere (2026-10-12).
-    h += '<div class="carte sz-pagee"><h2>${T("Écritures manuelles")}</h2><div data-pages="livre-ecritures"><table>'
+    h += '<div class="cx-carte sz-pagee"><h2>${T("Écritures manuelles")}</h2><div data-pages="livre-ecritures"><table>'
       + '<thead><tr><th>${T("Date")}</th><th>${T("Libellé / compte")}</th>'
       + '<th class="n">${T("Débit")}</th><th class="n">${T("Crédit")}</th><th></th></tr></thead><tbody>';
     man.forEach(function(e){
@@ -805,7 +789,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
          + (RO ? '' : '<button class="mini danger" data-sup="' + esc(e.ref) + '">${T("Supprimer")}</button>')
          + '</td></tr>';
       h += (e.lignes || []).map(function(l){
-        return '<tr class="ligne"><td></td><td>' + esc(l.compte) + ' — ' + esc(nomCompte(l.compte))
+        return '<tr class="ligne"><td></td><td>' + codeNom(l.compte, nomCompte(l.compte))
              + '</td><td class="n">' + (l.debit ? argent(l.debit) : '')
              + '</td><td class="n">' + (l.credit ? argent(l.credit) : '') + '</td><td></td></tr>';
       }).join('');
@@ -817,9 +801,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
   /* ── LE DESSIN ──────────────────────────────────────────────────────────── */
   function dessiner(){
     onglets(); outils();
-    if (!D) return;
+    if (!D) { elEtat.innerHTML = ''; return; }
     elSous.textContent = ANNEE + ' · ' + (D.journal || []).length + ' ' + szPl((D.journal || []).length, '${T("écriture")}', '${T("écritures")}');
-    var h = rapprochement() + avertissements();
+    /* Le controle des deux moteurs (quand ils concordent) et les points a savoir : en pastilles, a droite
+       des onglets. ⚠ Quand ils DIVERGENT, le bloc rouge reste en tete du travail (rapprochement()). */
+    elEtat.innerHTML = rapproPastille() + avertissements();
+    var h = rapprochement();
     if (ONGLET === 'grandlivre') h += vueGrandLivre();
     else if (ONGLET === 'balance') h += vueBalance();
     else if (ONGLET === 'bilan') h += vueBilan();
@@ -840,9 +827,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
     if (ONGLET !== 'grandlivre' && ONGLET !== 'balance' && ONGLET !== 'bilan' && ONGLET !== 'ecritures' && ONGLET !== 'igrf'
         && D.journal && D.journal.length) {
       var tours = 0;
+      /* (2026-10-16, vu a la capture) L estimation ne faisait que DESCENDRE : 3 ecritures par page,
+         51 pages, la moitie de la fenetre vide. On remplit d abord, puis on recule d un cran. */
+      var total = 0;
+      D.journal.forEach(function(e){ total += 1 + ((e.lignes || []).length); });
+      while (corps.scrollHeight <= corps.clientHeight + 1 && JBUDGET < total && tours < 80) {
+        JBUDGET++; tours++;
+        corps.innerHTML = rapprochement() + vueJournal();
+      }
+      tours = 0;
       while (corps.scrollHeight > corps.clientHeight + 1 && JBUDGET > 4 && tours < 60) {
         JBUDGET--; tours++;
-        corps.innerHTML = rapprochement() + avertissements() + vueJournal();
+        corps.innerHTML = rapprochement() + vueJournal();
       }
     }
     brancher();

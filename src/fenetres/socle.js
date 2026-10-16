@@ -3444,7 +3444,7 @@ const _tuilesOff = (cle) => {
    ⚠ SAUF LES RAPPORTS : là, les chiffres ne doublent pas le tableau de bord, ils SONT l'écran
    (Statistiques, Publicité, Comptabilité, Comptable, Impôt, Livre, Banque, Coûts IA). Ils gardent leur
    bandeau, toujours masquable. */
-const TUILES_DE_RAPPORT = new Set(['statistiques', 'publicite', 'comptabilite', 'comptable', 'impot', 'livre', 'banque', 'fal']);
+const TUILES_DE_RAPPORT = new Set(['statistiques', 'publicite', 'comptabilite', 'comptable', 'impot', 'livre', 'banque', 'fal', 'rappels']);
 const JS_TUILES = (cle) => `
 var _SZBD_CLE = ${JSON.stringify(String(cle || ''))};
 var _SZBD_RETIRE = ${TUILES_DE_RAPPORT.has(String(cle || '')) ? 'false' : 'true'};
@@ -4385,6 +4385,71 @@ html.jour .szc-voile{background:rgba(29,36,51,.38)}
 .corps.ls-corps>.sz-pied{margin:0 1.6rem .8rem}
 `;
 
+/* ══ LA GRAMMAIRE DE LA COMPTABILITÉ (2026-10-16, sa demande : « un nouveau look » pour les 12 modules ;
+   esquisses approuvées « un go pour toute cette refonte » — https://claude.ai/artifact/2CEGeees4GPBM7xDhH9bus)
+   Une seule anatomie : la TETE porte titre, résumé, période et geste principal (.cx-actions, toujours à droite) ;
+   puis une bande de 4 chiffres (.cx-kpis), des onglets segmentés (.ed-seg), et le travail : un tableau et un
+   panneau d appui (.cx-deux). Les avertissements sont une PASTILLE (.cx-averti), jamais un bandeau. Tout en
+   variables du socle : la nuit, le jour et les six thèmes suivent sans retouche.
+   ⚠ PAS D ACCENT GRAVE DANS CE BLOC : il vit dans un littéral de gabarit. */
+const CSS_COMPTA = `
+.tete .cx-resume{font-size:.8rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.tete .cx-actions{margin-left:auto;display:flex;align-items:center;gap:.55rem;flex:0 0 auto}
+.cx{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:.9rem;padding:1rem 1.6rem 1.1rem}
+.cx>*{flex:0 0 auto}
+.cx>.cx-deux,.cx>.cx-plein{flex:1 1 0;min-height:0}
+.cx-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.75rem}
+.cx-kpi{padding:.8rem 1rem;border-radius:14px;background:var(--f-carte);border:1px solid var(--sz-bord);min-width:0}
+.cx-kpi>span{display:block;font-size:.74rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cx-kpi>b{display:block;font-size:1.42rem;font-weight:700;margin:.18rem 0 .06rem;font-variant-numeric:tabular-nums;letter-spacing:-.01em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cx-kpi>small{display:block;font-size:.72rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cx-kpi.ok>b{color:var(--tx-ok)}.cx-kpi.err>b{color:var(--tx-err)}.cx-kpi.att>b{color:var(--tx-att)}.cx-kpi.or>b{color:var(--tx-or)}
+.cx-kpi>b.mot{font-size:1.1rem;margin:.42rem 0 .18rem}
+.cx-barre{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.cx-barre>.droite{margin-left:auto;display:flex;align-items:center;gap:.5rem}
+.cx-deux{display:grid;grid-template-columns:minmax(0,1fr) 22rem;gap:.9rem}
+.cx-deux.moitie{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.cx-carte{min-height:0;overflow:hidden;padding:.95rem 1.1rem;border-radius:16px;background:var(--f-carte);border:1px solid var(--sz-bord);
+  display:flex;flex-direction:column;gap:.62rem}
+.cx-carte>*{flex:0 0 auto}
+.cx-carte>.cx-pages{flex:1 1 0;min-height:0}
+.cx-carte h2{margin:0;font-size:.88rem;font-weight:650;display:flex;align-items:center;gap:.6rem;min-width:0}
+.cx-carte h2 .cx-sub{font-weight:400}
+.cx-carte h2 .droite{margin-left:auto;display:flex;align-items:center;gap:.5rem}
+.cx-sub{font-size:.75rem;color:var(--tx2)}
+.cx-pied{margin-top:auto;display:flex;align-items:center;gap:.6rem;font-size:.75rem;color:var(--tx2);padding-top:.2rem}
+.cx-pied .droite{margin-left:auto;display:flex;align-items:center;gap:.5rem}
+.cx-sep{height:1px;background:var(--v08);flex:0 0 auto}
+.cx-neg{color:var(--tx-err)}.cx-pos{color:var(--tx-ok)}.cx-gris{color:var(--tx3)}
+td .cx-l2,.cx-l2{display:block;font-size:.72rem;color:var(--tx3);margin-top:.12rem}
+.cx-averti,.cx-bon,.cx-info{display:inline-flex;align-items:center;gap:.5rem;min-height:1.9rem;padding:.2rem .8rem;border-radius:999px;font-size:.78rem;
+  max-width:100%;min-width:0}
+.cx-averti{border:1px solid color-mix(in srgb,var(--tx-att) 40%,transparent);background:color-mix(in srgb,var(--tx-att) 9%,transparent);color:var(--tx-att)}
+.cx-bon{border:1px solid color-mix(in srgb,var(--tx-ok) 36%,transparent);background:color-mix(in srgb,var(--tx-ok) 8%,transparent);color:var(--tx-ok)}
+.cx-info{border:1px solid color-mix(in srgb,var(--tx-bleu) 36%,transparent);background:color-mix(in srgb,var(--tx-bleu) 8%,transparent);color:var(--tx-bleu)}
+.cx-averti b,.cx-bon b,.cx-info b{font-weight:700}
+.cx-averti>span,.cx-bon>span,.cx-info>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cx-ligne{display:grid;grid-template-columns:7rem minmax(0,1fr) 6rem;gap:.6rem;align-items:center;font-size:.78rem}
+.cx-ligne>span:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.cx-piste{height:.5rem;border-radius:99px;background:var(--f-champ);overflow:hidden}
+.cx-piste>i{display:block;height:100%;border-radius:99px;background:var(--or)}
+.cx-piste>i.ok{background:var(--tx-ok)}.cx-piste>i.err{background:var(--tx-err)}.cx-piste>i.info{background:var(--tx-bleu)}
+.cx-etat{display:flex;justify-content:space-between;align-items:baseline;gap:.8rem;padding:.42rem .1rem;border-bottom:1px solid var(--v08);font-size:.82rem}
+.cx-etat>span:last-child{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.cx-etat.ret{padding-left:1rem;color:var(--tx2)}
+.cx-etat.fort{font-weight:700;border-bottom:0;padding-top:.55rem}
+.cx-code{display:inline-flex;align-items:center;height:1.25rem;padding:0 .42rem;border-radius:6px;background:var(--f-pill);color:var(--tx2);
+  font-size:.72rem;font-weight:600;font-variant-numeric:tabular-nums;margin-right:.5rem;white-space:nowrap}
+.cx-qui{display:flex;align-items:center;gap:.6rem;min-width:0}
+.cx-av{width:1.9rem;height:1.9rem;flex:0 0 auto;border-radius:50%;background:var(--f-pill);display:inline-flex;align-items:center;justify-content:center;
+  font-size:.7rem;font-weight:700;color:var(--tx2)}
+.cx-tuile{padding:.95rem 1.05rem;border-radius:14px;border:1px solid var(--sz-bord);background:var(--f-carte2);display:flex;flex-direction:column;gap:.6rem;min-width:0}
+.cx-tuile.att{border-color:color-mix(in srgb,var(--tx-att) 38%,transparent)}
+.cx-tuile.ok{border-color:color-mix(in srgb,var(--tx-ok) 34%,transparent)}
+.cx-depot{border:1.5px dashed rgba(var(--or-rgb),.5);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:.35rem;padding:.9rem 1rem;color:var(--tx-or);font-size:.78rem;text-align:center}
+`;
 const CSS_CARBONE = `
 /* ══ LE THÈME CARBONE (2026-10-12, sa décision : « applique carbone partout ») ══════════════════════════
    Démo approuvée : https://claude.ai/artifact/9h2zUz8KeHf1e1Ms3WKwVi — SANS le halo qui suivait la souris.
@@ -4473,8 +4538,8 @@ html.jour:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) .onglets button.on
   color:#1d2433!important;box-shadow:inset 0 -2px 0 var(--sz-repere)}
 `;
 
-module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_CARBONE + CSS_CTX,
-  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_CARBONE + CSS_CTX,
+module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX,
+  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX,
   JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, JS_BORNER, CSS_THEMES, CSS_FICHE, ICO,
   /* La page, pas son texte : voir l en-tete de ce fichier. */
   TETE, LIEU, SEP_DEC };

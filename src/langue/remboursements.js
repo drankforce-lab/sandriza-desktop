@@ -108,4 +108,12 @@ module.exports = {
   'Actif': 'Active',
   'Client et crédit': 'Customer and credit',
   'Client et crédit Émis le Expiration': 'Customer and credit Issued on Expiry',
+  // 2026-10-16 : la grammaire de la Comptabilité (quatre chiffres, onglets, panneau d'appui).
+  'Sur cette page.': 'On this page.',
+  'Crédits ouverts': 'Open credits',
+  'Aucun crédit ouvert.': 'No open credit.',
+  'Un crédit non dépensé est un passif : de l’argent qu’on doit encore.': 'An unspent credit is a liability: money we still owe.',
+  'Par mode': 'By method',
+  'Écran de consultation : on rembourse depuis la commande. Un clic sur une ligne l’ouvre.': 'Read-only screen: refunds are made from the order. Click a row to open it.',
+  'Expiration : {0}': 'Expiry: {0}',
 };

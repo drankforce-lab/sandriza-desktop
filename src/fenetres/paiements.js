@@ -38,13 +38,21 @@ body{background:var(--f-page);color:var(--tx);
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-/* Aucune glissiere (2026-10-12) : le corps ne defile plus, les listes vont en PAGES mesurees (JS_PAGES du socle). */
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
-  display:flex;flex-direction:column;gap:.7rem}
-.barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
-.barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
-  font-size:.78rem;color:var(--tx2)}
+/* LA GRAMMAIRE DE LA COMPTABILITE (2026-10-16) : la tete porte le mode (resume) et les gestes (annee,
+   reafficher, masquer, charger), puis quatre chiffres, les onglets segmentes, le travail et son panneau
+   d appui (CSS_COMPTA du socle). Aucune glissiere : les listes vont en PAGES mesurees (data-pages). */
+#corps{overflow:hidden}
+.cx-col{display:flex;flex-direction:column;gap:.9rem;min-height:0;min-width:0}
+.cx-col>.cx-carte{flex:1 1 0;min-height:7rem}
+.cx-col>.cx-carte.court{flex:0 1 auto}
+.ed-seg button{border:none}
+.ed-seg .n{margin-left:.4rem;font-size:.7rem;color:var(--tx3);font-variant-numeric:tabular-nums}
+.ed-seg button.on .n{color:var(--tx2)}
+details.cx-detail{min-width:0}
+details.cx-detail>summary{cursor:pointer;list-style:none}
+details.cx-detail>summary::-webkit-details-marker{display:none}
+details.cx-detail>.cx-sub{margin:.5rem .2rem 0;line-height:1.5}
+.cx-carte .vide{margin:auto 0}
 select,button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem;cursor:pointer}
 select:focus,button:focus{outline:none;border-color:var(--or)}
@@ -55,27 +63,11 @@ button.actif{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600}
 button.prim:hover:not(:disabled){background:#a3824f}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
-/* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE AUX PAIEMENTS (2026-09-25) ══════
-   Les quatre tuiles prennent les mesures communes (le montant en grand, plus
-   de libelle en capitales, plus de contour colore : seule la VALEUR porte sa
-   couleur, une couleur = un sens) ; les pastilles prennent le point de
-   rf-pill ; les montants quittent Courier pour la police de l ecran. */
-.tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.6rem}
-.tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
-.tuile .val{font-size:1.55rem;font-weight:800;line-height:1.15;white-space:nowrap}
-.tuile .val.bon{color:var(--tx-ok)}.tuile .val.att{color:var(--tx-att)}.tuile .val.err{color:var(--tx-err)}
-.tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
-  padding:.6rem .75rem}
-.carte h2{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;
-  letter-spacing:.07em;color:var(--tx2);font-weight:700}
-table{width:100%;border-collapse:collapse;font-size:.84rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
-tbody td{padding:.3rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
+table{width:100%;font-size:.84rem}
+thead th{text-align:left}
+tbody td{vertical-align:middle}
 .num{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
-.ref{font-family:'Courier New',monospace;font-size:.72rem;color:var(--tx2)}
-.tot{font-weight:800;border-top:2px solid var(--v16)!important;background:var(--v03)}
+.tot td{font-weight:800;background:var(--v03)}
 .err{color:var(--tx-err)}.bon{color:var(--tx-ok)}.att{color:var(--tx-att)}
 .pill{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:600;padding:.22rem .65rem;
   border-radius:99px;white-space:nowrap}
@@ -83,9 +75,6 @@ tbody td{padding:.3rem .4rem;border-top:1px solid var(--v055);vertical-align:mid
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
 .pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
-.avis{font-size:.78rem;line-height:1.5;border-radius:9px;padding:.55rem .7rem}
-.avis.bon{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.35)}
-.avis.att{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.4)}
 .vide{padding:1.4rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .vide .gros{font-size:1.4rem;margin-bottom:.4rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
@@ -94,14 +83,6 @@ tbody td{padding:.3rem .4rem;border-top:1px solid var(--v055);vertical-align:mid
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
-
-/* Refonte fine (2026-09-26) : la barre d onglets commune — l actif prend l or
-   du socle (.onglets .actif) ; ce qui suit les onglets reste a droite. */
-.onglets{display:flex;gap:.25rem;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--v08);padding:0 0 .5rem}
-.onglets > button{background:transparent;border:1px solid transparent;color:var(--tx2);padding:.38rem .7rem;
-  font:inherit;font-weight:600;font-size:.82rem;cursor:pointer}
-.onglets > button:hover{background:var(--v05);color:var(--tx)}
-.onglets .droite{margin-left:auto;display:flex;gap:.4rem;align-items:center}
 `;
 
 /** Page complète de la fenêtre native « Paiements Square ». */
@@ -110,8 +91,9 @@ function pagePaiements() {
 <title>${T("Paiements Square — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.payments}</span><h1>${T("Paiements Square")}</h1>
-  <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
+  <span class="cx-resume" id="sous"></span>
+  <div class="cx-actions" id="p-actions"></div></div>
+<div class="cx" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -170,65 +152,81 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('paiements')}
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div>';
   }
 
-  function tuile(lbl, val, ton, sub){
-    return '<div class="tuile"><div class="lbl">' + lbl + '</div>'
-      + '<div class="val' + (ton ? ' ' + ton : '') + '">' + val + '</div>'
-      + (sub ? '<div class="sub">' + sub + '</div>' : '') + '</div>';
+  function kpi(lbl, val, ton, sub){
+    return '<div class="cx-kpi' + (ton ? ' ' + ton : '') + '"><span>' + lbl + '</span><b>' + val + '</b>'
+      + '<small>' + (sub || '&nbsp;') + '</small></div>';
+  }
+  function pctTexte(v){
+    try { return v.toLocaleString('${LIEU()}', { maximumFractionDigits: 1 }); }
+    catch (e) { return String(Math.round(v)); }
   }
 
-  function barre(){
-    var h = '<div class="onglets">'
-      + '<button type="button" class="' + (ONGLET === 'transactions' ? 'actif' : '') + '" data-onglet="transactions">${T("Transactions")}</button>'
-      + '<button type="button" class="' + (ONGLET === 'reconciliation' ? 'actif' : '') + '" data-onglet="reconciliation">${T("Réconciliation")}</button>'
-      + '<select id="p-annee" title="${T("Année")}">'
+  /* LES GESTES DANS LA TETE (2026-10-16) : l annee (#p-annee), reafficher (#p-reafficher), masquer
+     (#p-masquer) et le geste principal (#p-charger) montent dans .cx-actions — memes ids, memes
+     conditions qu avant. Les onglets restent dans le corps (data-onglet). */
+  function gestes(){
+    var h = '<select id="p-annee" title="${T("Année")}" aria-label="${T("Année")}">'
       + (D.annees || []).map(function(a){
           return '<option value="' + a + '"' + (a === D.annee ? ' selected' : '') + '>' + a + '</option>';
         }).join('')
-      + '</select>'
-      + '<div class="droite">';
+      + '</select>';
     if (D.bacASable && D.masquees) {
-      h += '<button class="mini" id="p-reafficher" title="${T("Réafficher les transactions masquées (bac à sable seulement)")}">${T("↺ Réafficher (")}' + D.masquees + ')</button>';
+      h += '<button id="p-reafficher" title="${T("Réafficher les transactions masquées (bac à sable seulement)")}">${T("↺ Réafficher (")}' + D.masquees + ')</button>';
     }
     if (D.bacASable && D.charge && D.tuiles && D.tuiles.nb > 0) {
-      h += '<button class="mini" id="p-masquer" title="${T("Masquer ces transactions d’essai — bac à sable seulement")}">${T("Masquer tout")}</button>';
+      h += '<button id="p-masquer" title="${T("Masquer ces transactions d’essai — bac à sable seulement")}">${T("Masquer tout")}</button>';
     }
-    h += '<button class="mini prim" id="p-charger"' + (OCCUPE ? ' disabled' : '') + '>'
+    h += '<button class="prim" id="p-charger"' + (OCCUPE ? ' disabled' : '') + '>'
       + (OCCUPE ? '${T("Lecture chez Square…")}' : (D.charge ? '${T("↻ Actualiser")}' : '${T("⬇ Charger les transactions")}'))
       + '</button>';
-    h += '</div></div>';
     return h;
+  }
+
+  function barre(){
+    return '<div class="cx-barre"><div class="ed-seg">'
+      + '<button type="button" class="' + (ONGLET === 'transactions' ? 'on' : '') + '" data-onglet="transactions">${T("Transactions")}'
+      + (D.charge ? '<span class="n">' + (D.paiements || []).length + '</span>' : '') + '</button>'
+      + '<button type="button" class="' + (ONGLET === 'reconciliation' ? 'on' : '') + '" data-onglet="reconciliation">${T("Réconciliation")}</button>'
+      + '</div></div>';
   }
 
   function vueTransactions(){
     var h = '';
     var t = D.tuiles;
     if (t) {
-      /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit
-         tel quel, la piece commune y ajoute le bouton de repli et l etat retenu
-         pour ce poste. Voir JS_TUILES dans socle.js. */
-      h += szTuiles('<div class="tuiles">'
-        + tuile('${T("Transactions")}', String(t.nb), '', '${T("complétées · ")}' + D.annee)
-        + tuile('${T("Revenu brut")}', fmt(t.brut), '', '${T("avant frais")}')
-        + tuile('${T("Frais Square")}', fmt(t.frais), '',
+      /* Les quatre chiffres : le nombre de transactions passe sous le brut ; les frais, le net et
+         le rembourse gardent leur sous-ligne d avant. */
+      h += '<div class="cx-kpis">'
+        + kpi('${T("Revenu brut")}', fmt(t.brut), '',
+            (t.nb > 1 ? '${T("{0} transactions complétées")}'.split('{0}').join(t.nb) : '${T("{0} transaction complétée")}'.split('{0}').join(t.nb || 0))
+            + ' · ' + D.annee)
+        + kpi('${T("Frais Square")}', '−' + fmt(t.frais), 'err',
             t.fraisRecuperes > 0 ? ('${T("dont ")}' + fmt(t.fraisRecuperes) + '${T(" récupérés · nets ")}' + fmt(t.fraisNets)) : '${T("déductibles d’impôt")}')
-        + tuile('${T("Revenu net")}', fmt(t.net), 'bon', '${T("après remb. et frais nets")}')
-        + '</div>');
+        + kpi('${T("Revenu net")}', fmt(t.net), 'ok', '${T("après remb. et frais nets")}')
+        + kpi('${T("Remboursé")}', (t.rembourse > 0 ? '−' : '') + fmt(t.rembourse || 0), '',
+            (t.nbRemboursements || 0) + ((t.nbRemboursements || 0) > 1 ? '${T(" remboursements")}' : '${T(" remboursement")}'))
+        + '</div>';
     }
+    h += barre();
 
     // Transactions et remboursements en PAGES mesurees, chaque carte prend sa part de hauteur (2026-10-12).
-    h += '<div class="carte sz-pagee"><h2>${T("Transactions — ")}' + D.annee + '</h2>';
+    var g = '<div class="cx-col">';
+    /* (2026-10-16, vu a la capture) Moitie-moitie, la carte des transactions n en montrait qu UNE :
+       chaque carte prend une part de hauteur selon ses lignes (bornee de 1 a 3). */
+    var part = function(n){ return Math.min(3, Math.max(1, n + 1)); };
+    g += '<div class="cx-carte sz-pagee" style="flex-grow:' + part(D.paiements.length) + '"><h2>${T("Transactions — ")}' + D.annee + '</h2>';
     if (!D.paiements.length) {
-      h += '<div class="vide">${T("Aucune transaction pour ")}' + D.annee + '.</div>';
+      g += '<div class="vide">${T("Aucune transaction pour ")}' + D.annee + '.</div>';
     } else {
-      h += '<div data-pages="paiements-transactions"><table><thead><tr><th>${T("Date")}</th><th>${T("Réf. Square")}</th><th>${T("Mode de paiement")}</th>'
+      g += '<div class="cx-pages" data-pages="paiements-transactions"><table><thead><tr><th>${T("Date")}</th><th>${T("Réf. Square")}</th><th>${T("Mode de paiement")}</th>'
         + '<th class="num">${T("Brut")}</th><th class="num">${T("Frais")}</th><th class="num">${T("Net reçu")}</th></tr></thead><tbody>'
         + D.paiements.map(function(p){
             return '<tr><td style="white-space:nowrap">' + esc(p.date) + '</td>'
-              + '<td class="ref">' + esc(p.ref) + '</td>'
+              + '<td><span class="cx-code">' + esc(p.ref) + '</span></td>'
               + '<td>' + esc(p.moyen) + '</td>'
               + '<td class="num">' + fmt(p.brut) + '</td>'
               + '<td class="num err">' + (p.frais > 0 ? '−' + fmt(p.frais) : '—') + '</td>'
-              + '<td class="num bon">' + fmt(p.net) + '</td></tr>';
+              + '<td class="num bon"><b>' + fmt(p.net) + '</b></td></tr>';
           }).join('')
         + '<tr class="tot"><td colspan="3">${T("Total ")}' + D.annee + '</td>'
         + '<td class="num">' + fmt(t.brut) + '</td>'
@@ -240,40 +238,70 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('paiements')}
         + '<td class="num bon">' + fmt(Math.round((t.brut - t.frais) * 100) / 100) + '</td></tr>'
         + '</tbody></table></div>';
     }
-    h += '</div>';
+    if (D.bacASable) g += '<div class="cx-pied"><span>${T("Transactions d’essai : masquables en bac à sable seulement.")}</span></div>';
+    g += '</div>';
 
+    /* Les remboursements restent A LEUR PLACE : sous les transactions, dans la meme colonne. */
     if (D.remboursements.length) {
-      h += '<div class="carte sz-pagee"><h2>${T("Remboursements — ")}' + D.annee
-        + ' <span class="pill neutre">' + D.remboursements.length + '</span></h2>'
-        + '<div data-pages="paiements-remboursements"><table><thead><tr><th>${T("Date")}</th><th>${T("Réf.")}</th><th>${T("Paiement d’origine")}</th><th>${T("Motif")}</th>'
+      g += '<div class="cx-carte sz-pagee" style="flex-grow:' + part(D.remboursements.length) + '"><h2>${T("Remboursements — ")}' + D.annee
+        + ' <span class="rf-pill">' + D.remboursements.length + '</span></h2>'
+        + '<div class="cx-pages" data-pages="paiements-remboursements"><table><thead><tr><th>${T("Date")}</th><th>${T("Réf.")}</th><th>${T("Paiement d’origine")}</th><th>${T("Motif")}</th>'
         + '<th class="num">${T("Montant")}</th></tr></thead><tbody>'
         + D.remboursements.map(function(r){
             return '<tr><td style="white-space:nowrap">' + esc(r.date) + '</td>'
-              + '<td class="ref">' + esc(r.ref) + '</td>'
-              + '<td class="ref">' + esc(r.paiement) + '</td>'
+              + '<td><span class="cx-code">' + esc(r.ref) + '</span></td>'
+              + '<td><span class="cx-code">' + esc(r.paiement) + '</span></td>'
               + '<td>' + esc(r.motif || '—')
-              + (r.enAttente ? ' <span class="pill att">${T("en attente")}</span>' : '') + '</td>'
+              + (r.enAttente ? ' <span class="rf-pill ambre">${T("en attente")}</span>' : '') + '</td>'
               + '<td class="num err">−' + fmt(r.montant) + '</td></tr>';
           }).join('')
         + '<tr class="tot"><td colspan="4">${T("Total des remboursements")}</td>'
         + '<td class="num err">−' + fmt(t.rembourse) + '</td></tr>'
         + '</tbody></table></div></div>';
     }
+    g += '</div>';
+
+    /* ── LE PANNEAU D APPUI : ou va chaque dollar, et le chemin du brut au net — tout depuis les
+       tuiles deja recues. ── */
+    if (t) {
+      var brut = Number(t.brut) || 0, frais = Number(t.frais) || 0;
+      var pNet = brut > 0 ? Math.max(0, Math.min(100, (brut - frais) / brut * 100)) : 0;
+      var pFr = brut > 0 ? Math.max(0, Math.min(100, frais / brut * 100)) : 0;
+      var fraisN = (t.fraisNets != null) ? t.fraisNets : t.frais;
+      var p = '<div class="cx-carte">'
+        + '<h2>${T("Où va chaque dollar")}</h2>'
+        + '<div class="cx-ligne"><span>${T("Net reçu")}</span><div class="cx-piste"><i class="ok" style="width:' + Math.round(pNet) + '%"></i></div>'
+        + '<span>' + '${T("{0} %")}'.split('{0}').join(pctTexte(pNet)) + '</span></div>'
+        + '<div class="cx-ligne"><span>${T("Frais Square")}</span><div class="cx-piste"><i class="err" style="width:' + Math.round(pFr) + '%"></i></div>'
+        + '<span>' + '${T("{0} %")}'.split('{0}').join(pctTexte(pFr)) + '</span></div>'
+        + '<div class="cx-sep"></div>'
+        + '<h2>${T("Du brut au net")}</h2>'
+        + '<div class="cx-etat"><span>${T("Revenu brut")}</span><span>' + fmt(t.brut) + '</span></div>'
+        + '<div class="cx-etat ret"><span>${T("Remboursements")}</span><span class="cx-neg">' + (t.rembourse > 0 ? '−' + fmt(t.rembourse) : '—') + '</span></div>'
+        + '<div class="cx-etat ret"><span>${T("Frais nets")}</span><span class="cx-neg">' + (fraisN > 0 ? '−' + fmt(fraisN) : '—') + '</span></div>'
+        + '<div class="cx-etat fort"><span>${T("Revenu net")}</span><span class="cx-pos">' + fmt(t.net) + '</span></div>'
+        + '</div>';
+      h += '<div class="cx-deux">' + g + p + '</div>';
+    } else {
+      h += g.split('<div class="cx-col">').join('<div class="cx-col cx-plein">');
+    }
     return h;
   }
 
   function vueReconciliation(){
     var R = D.reconciliation;
-    if (!R) return '<div class="vide">${T("Chargez d’abord les transactions, dans l’onglet Transactions.")}</div>';
-    var ton = R.equilibre ? 'bon' : 'att';
-    var h = szTuiles('<div class="tuiles">'
-      + tuile('${T("Commandes ")}' + esc(R.marque), String(R.nbCommandes), '', '${T("non annulées · ")}' + D.annee)
-      + tuile('${T("Transactions Square")}', String(R.nbSquare)
+    if (!R) return barre() + '<div class="vide">${T("Chargez d’abord les transactions, dans l’onglet Transactions.")}</div>';
+    var ton = R.equilibre ? 'ok' : 'att';
+    var h = '<div class="cx-kpis">'
+      + kpi('${T("Commandes ")}' + esc(R.marque), String(R.nbCommandes), '', '${T("non annulées · ")}' + D.annee)
+      + kpi('${T("Transactions Square")}', String(R.nbSquare)
           + (R.nbRemboursementsSquare ? ' / ' + R.nbRemboursementsSquare + '${T(" remb.")}' : ''), '', '${T("complétées · ")}' + D.annee)
-      + tuile('${T("Écart")}', fmt(Math.abs(R.ecart)), ton, R.equilibre ? '${T("Équilibré")}' : '${T("Vérification requise")}')
-      + '</div>');
+      + kpi('${T("Écart")}', fmt(Math.abs(R.ecart)), ton, R.equilibre ? '${T("Équilibré")}' : '${T("Vérification requise")}')
+      + kpi('${T("Net Square")}', fmt(R.square.net), '', '${T("Square (données réelles)")}')
+      + '</div>';
+    h += barre();
 
-    h += '<div class="carte"><h2>${T("Comparaison système et Square — ")}' + D.annee + '</h2>'
+    h += '<div class="cx-carte"><h2>${T("Comparaison système et Square — ")}' + D.annee + '</h2>'
       + '<table><thead><tr><th>${T("Source")}</th><th class="num">${T("Brut")}</th><th class="num">${T("Remboursements")}</th>'
       + '<th class="num">${T("Frais Square")}</th><th class="num">${T("Net")}</th><th class="num">${T("Nb")}</th></tr></thead><tbody>'
       + '<tr><td style="font-weight:600">${T("Système ")}' + esc(R.marque) + '</td>'
@@ -292,41 +320,48 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('paiements')}
       + '<td class="num bon" style="font-weight:800">' + fmt(R.square.net) + '</td>'
       + '<td class="num">' + R.nbSquare + '</td></tr>'
       + '<tr class="tot"><td>${T("Écart")}</td>'
-      + '<td class="num ' + ton + '">' + signe(R.square.brut - R.site.brut) + '</td>'
+      + '<td class="num ' + (R.equilibre ? 'bon' : 'att') + '">' + signe(R.square.brut - R.site.brut) + '</td>'
       + '<td class="num">' + signe(R.square.rembourse - R.site.rembourse) + '</td>'
       + '<td class="num">' + signe(-R.square.frais + (R.site.fraisRetenus + R.site.fraisRembourses)) + '</td>'
-      + '<td class="num ' + ton + '">' + signe(R.ecart) + '</td>'
+      + '<td class="num ' + (R.equilibre ? 'bon' : 'att') + '">' + signe(R.ecart) + '</td>'
       + '<td class="num">' + (R.nbSquare >= R.nbCommandes ? '+' : '') + (R.nbSquare - R.nbCommandes) + '</td></tr>'
-      + '</tbody></table></div>';
+      + '</tbody></table>';
 
+    /* Le verdict : une PASTILLE courte (plus de bandeau) ; le detail entier se deplie dessous. */
     h += R.equilibre
-      ? '<div class="avis bon"><strong class="bon">${T("Réconciliation équilibrée")}</strong>${T(" — les montants de Square et ceux du système correspondent (écart de moins d’un dollar).")}</div>'
-      : '<div class="avis att"><strong class="att">${T("Écart de ")}' + fmt(Math.abs(R.ecart)) + '</strong>${T(" — causes possibles : ")}'
+      ? '<details class="cx-detail"><summary class="cx-bon"><b>${T("Réconciliation équilibrée")}</b></summary>'
+        + '<div class="cx-sub">${T("Réconciliation équilibrée")}${T(" — les montants de Square et ceux du système correspondent (écart de moins d’un dollar).")}</div></details>'
+      : '<details class="cx-detail"><summary class="cx-averti"><b>${T("Écart de ")}' + fmt(Math.abs(R.ecart)) + '</b><span>${T("Vérification requise")}</span></summary>'
+        + '<div class="cx-sub"><b>${T("Écart de ")}' + fmt(Math.abs(R.ecart)) + '</b>${T(" — causes possibles : ")}'
         + '${T("transactions faites hors du système, remboursements partiels, paiements par carte-cadeau, ")}'
-        + '${T("ou commandes réglées par un autre moyen.")}</div>';
+        + '${T("ou commandes réglées par un autre moyen.")}</div></details>';
+    h += '</div>';
     return h;
   }
 
   function dessiner(){
-    if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
+    var act = document.getElementById('p-actions');
+    if (!D) { if (act) act.innerHTML = ''; corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     if (sous) {
       sous.innerHTML = D.connecte
-        ? '<span class="pill bon">' + (D.mode === 'production' ? '${T("Production")}' : '${T("Bac à sable")}') + '</span>'
-        : '<span class="pill neutre">${T("non configuré")}</span>';
+        ? '<span class="rf-pill vert">' + (D.mode === 'production' ? '${T("Production")}' : '${T("Bac à sable")}') + '</span>'
+        : '<span class="rf-pill">${T("non configuré")}</span>';
     }
     if (!D.connecte) {
+      if (act) act.innerHTML = '';
       corps.innerHTML = '<div class="vide"><div class="gros"><span class="ic">🔑</span></div>'
         + '${T("Configurez d’abord la connexion Square dans <strong>Configuration → Paiement</strong>, ")}'
         + '${T("dans la fenêtre principale.")}</div>';
       return;
     }
 
-    var h = barre();
+    if (act) act.innerHTML = gestes();
+    var h = '';
     if (!D.charge && !OCCUPE) {
-      h += '<div class="vide">${T("Aucune donnée pour ")}' + D.annee + '.'
+      h += barre() + '<div class="vide">${T("Aucune donnée pour ")}' + D.annee + '.'
         + '<div style="margin-top:.4rem">${T("Cliquez « Charger les transactions » pour les lire chez Square.")}</div></div>';
     } else if (OCCUPE && !D.charge) {
-      h += '<div class="vide charge">${T("Lecture des paiements et des remboursements chez Square pour ")}' + D.annee + '…</div>';
+      h += barre() + '<div class="vide charge">${T("Lecture des paiements et des remboursements chez Square pour ")}' + D.annee + '…</div>';
     } else {
       h += ONGLET === 'reconciliation' ? vueReconciliation() : vueTransactions();
     }

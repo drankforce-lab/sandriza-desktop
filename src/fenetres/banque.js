@@ -47,20 +47,35 @@ body{background:var(--f-page);color:var(--tx);
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.onglets{flex:0 0 auto;display:flex;gap:.3rem;padding:.5rem 1.05rem 0;
-  border-bottom:1px solid var(--v08)}
-.onglets button{background:none;border:0;border-bottom:2px solid transparent;color:var(--tx2);
-  font:600 .82rem/1 system-ui;padding:.45rem .7rem;cursor:pointer;border-radius:0}
-.onglets button.on{color:var(--tx);border-bottom-color:var(--or)}
 /* Aucune glissiere (2026-10-12) : chaque liste se pagine dans la hauteur qui
    reste (data-pages, JS_PAGES du socle). */
-.corps{flex:1 1 auto;min-height:0;padding:.85rem 1.05rem;overflow:hidden;
-  display:flex;flex-direction:column;gap:.75rem}
-.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
-  padding:.8rem .9rem}
-.carte h2{margin:0 0 .55rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2)}
+.corps{flex:1 1 auto;min-height:0;overflow:hidden}
+/* ── LA GRAMMAIRE DE LA COMPTABILITE (2026-10-16, esquisse Conciliation.dc) ──
+   Tete : titre, onglets segmentes du rapprochement ouvert, resume, gestes
+   (#actions, rempli par la vue). Corps (.cx) : quatre chiffres, puis le travail.
+   La liste de l annee devient des CARTES (.cx-tuile), deux par rangee. */
+.ed-seg:empty{display:none}
+.tete .cx-actions select{width:auto}
+.tete .cx-actions label{margin:0}
+.cx>.sz-pagee,.cx-deux>.sz-pagee,.cx-col>.sz-pagee{flex:1 1 0;min-height:0}
+.cx-deux{grid-template-rows:minmax(0,1fr)}
+.cx-col{display:flex;flex-direction:column;gap:.9rem;min-height:0;min-width:0;overflow:hidden}
+.cx-col>.cx-carte{flex:0 1 auto}
+.cx-col>.cx-carte.sz-pagee{flex:1 1 0;min-height:0}
+.cx-grille{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem;align-content:start}
+.cx-tuile.lg:hover{border-color:rgba(var(--or-rgb),.55)}
+.cx-tuile .t1{display:flex;align-items:center;gap:.6rem;min-width:0}
+.cx-tuile .t1 b{font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cx-tuile .t1 .cx-sub{margin-left:auto;white-space:nowrap}
+.cx-champs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem}
+.cx-champs .cx-sub{display:block}
+.cx-champs b{font-size:.95rem;font-variant-numeric:tabular-nums}
+.cx-ecart{display:flex;align-items:baseline;gap:.6rem}
+.cx-ecart b{font-size:1.3rem;font-variant-numeric:tabular-nums}
+.cx-gestes{display:flex;align-items:center;gap:.5rem}
+.cx-gestes .droite{margin-left:auto;display:flex;gap:.5rem}
+.cx-tuile .cx-ligne{grid-template-columns:8rem minmax(0,1fr) 5rem}
+.cx-tuile.form{background:var(--f-carte);gap:.3rem}
 label{display:block;font-size:.73rem;color:var(--tx2);margin:.5rem 0 .18rem}
 input,select,textarea{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.34rem .5rem;width:100%}
@@ -76,15 +91,7 @@ button.mini{font-size:.72rem;padding:.16rem .45rem}
 button.dgr{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
 .duo{display:flex;gap:.65rem;flex-wrap:wrap}
 .duo>div{flex:1 1 9rem;min-width:0}
-/* L appariement : deux colonnes bornees cote a cote, chacune paginee (2026-10-12). */
-.duo.app{flex:1 1 0;min-height:7rem;flex-wrap:nowrap;align-items:stretch}
-.duo.app>div{display:flex;flex-direction:column;min-height:0}
 .barreoutils{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
-/* ── La refonte de l Inventaire (2026-09-25) ── */
-.tuiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.6rem;flex:0 0 auto;margin-bottom:.7rem}
-.tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0}
-.tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.val.att{color:var(--tx-att)}
 .barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center}
 table{width:100%;border-collapse:collapse;font-size:.79rem}
 thead th{text-align:left;padding:.22rem .35rem;font-size:.6875rem;text-transform:uppercase;
@@ -102,16 +109,6 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
 .pill.g{background:rgba(148,163,184,.14);color:var(--tx-94a3b8);font-weight:600}
 .lg{cursor:pointer}
 .vide{padding:1.1rem .6rem;text-align:center;color:var(--tx2);font-size:.82rem}
-/* L ecart : c est LA chose qu on vient regarder. Il se lit sans chercher. */
-.ecart{border-radius:11px;padding:.75rem .9rem;display:flex;align-items:center;
-  justify-content:space-between;gap:1rem;flex-wrap:wrap}
-.ecart.bon{border:2px solid rgba(16,185,129,.5);background:rgba(16,185,129,.08)}
-.ecart.mauvais{border:2px solid rgba(248,113,113,.5);background:rgba(248,113,113,.08)}
-.ecart .col{min-width:7rem}
-.ecart .k{font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700}
-.ecart .v{font:700 1.05rem/1.2 system-ui;font-variant-numeric:tabular-nums}
-.ecart .verdict{font:700 1rem/1.2 system-ui}
-.ecart.bon .verdict{color:var(--tx-ok2)}.ecart.mauvais .verdict{color:var(--tx-err2)}
 .paire{border:1px solid rgba(16,185,129,.35);background:rgba(16,185,129,.07);
   border-radius:8px;padding:.35rem .5rem;margin-bottom:.3rem;display:flex;
   align-items:center;gap:.5rem}
@@ -119,8 +116,6 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
 .seule{border:1px solid var(--v12);border-radius:8px;padding:.35rem .5rem;
   margin-bottom:.3rem;display:flex;align-items:center;gap:.5rem}
 .seule .d{flex:1 1 auto;min-width:0}
-.franc{border:1px solid rgba(240,180,80,.35);background:rgba(200,140,40,.1);
-  color:var(--tx-or2);border-radius:9px;padding:.45rem .65rem;font-size:.74rem}
 .aide{font-size:.71rem;color:var(--tx2);margin:.3rem 0 0}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
@@ -140,9 +135,10 @@ function pageBanque(ouverture) {
 <title>${T("Conciliation bancaire — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.bankrec}</span><h1>${T("Conciliation bancaire")}</h1>
-  <span class="sous" id="sous"></span></div>
-<div class="onglets" id="onglets"></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
+  <div class="ed-seg" id="onglets" role="tablist"></div>
+  <span class="cx-resume" id="sous"></span>
+  <div class="cx-actions" id="actions"></div></div>
+<div class="corps cx" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -152,6 +148,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
   var corps = document.getElementById('corps');
   var sous  = document.getElementById('sous');
   var barre = document.getElementById('onglets');
+  var actions = document.getElementById('actions');
   var DEPART = ${dep};
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
@@ -346,56 +343,64 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
        ligne riche (nom en gras, lignes et modification dessous) ; l ecart en
        gras dans sa couleur. Crochets gardes : tr[data-ouvrir], data-pdf,
        data-jeter, #b-nouveau, #b-zip, #b-recharger, #b-exporter. */
+    /* ══ LA GRAMMAIRE DE LA COMPTABILITE (2026-10-16, esquisse Conciliation.dc) ═
+       L annee, l archive, Recharger et le geste principal montent dans la tete
+       (memes id). Chaque conciliation devient une CARTE (.cx-tuile) : on clique
+       la carte pour l ouvrir, comme on cliquait la ligne. Crochets gardes :
+       [data-ouvrir], data-pdf, data-jeter, data-pages="banque", #b-exporter. */
     var L0 = D.liste || [];
+    // Le bouton de creation a DROITE, apres les autres, comme dans toutes les
+    // listes (2026-10-01) ; l annee reste devant, c est un filtre.
+    actions.innerHTML = barreAnnees()
+      + '<button id="b-zip">${T("Archive de l’année")}</button>'
+      + '<button id="b-recharger">${T("Recharger")}</button>'
+      + (D.peutEcrire ? '<button class="prim" id="b-nouveau">${T("+ Nouvelle conciliation")}</button>' : '');
     if (L0.length) {
       var nEq = L0.filter(function(r){ return (r.resume || {}).isBalanced; }).length;
       var nVer = L0.filter(function(r){ return r.status === 'locked'; }).length;
       var tu = function(lib, val, sous, ton){
-        return '<div class="tuile"><div class="lbl">' + lib + '</div><div class="val' + (val && ton ? ' ' + ton : '') + '">'
-          + val + '</div><div class="sub">' + sous + '</div></div>';
+        return '<div class="cx-kpi' + (val && ton ? ' ' + ton : '') + '"><span>' + lib + '</span><b>'
+          + val + '</b><small>' + sous + '</small></div>';
       };
-      h.push(szTuiles('<div class="tuiles">'
+      h.push(szTuiles('<div class="cx-kpis">'
         + tu('${T("Conciliations")}', L0.length, '${T("pour l’année")} ' + ANNEE, '')
-        + tu('${T("Équilibrées")}', nEq, '${T("écart nul")}', '')
+        + tu('${T("Équilibrées")}', nEq, '${T("écart nul")}', 'ok')
         + tu('${T("À équilibrer")}', L0.length - nEq, '${T("écart non résolu")}', 'att')
         + tu('${T("Verrouillées")}', nVer, '${T("closes, en lecture seule")}', '')
         + '</div>'));
     }
-    // Le bouton de creation a DROITE, apres les autres, comme dans toutes les
-    // listes (2026-10-01) ; l annee reste a gauche, c est un filtre.
-    h.push('<div class="barreoutils">' + barreAnnees()
-      + '<span class="droite">'
-      + '<button id="b-zip">${T("Archive de l’année")}</button>'
-      + '<button id="b-recharger">${T("Recharger")}</button>'
-      + (D.peutEcrire ? '<button class="prim" id="b-nouveau">${T("+ Nouvelle conciliation")}</button>' : '')
-      + '</span></div>');
 
     // La liste en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
-    h.push('<div class="carte sz-pagee"><h2>${T("Conciliations")} ' + ANNEE + '</h2>');
+    h.push('<div class="cx-carte sz-pagee"><h2>${T("Conciliations")} ' + ANNEE + '</h2>');
     if (!(D.liste || []).length) {
       h.push('<div class="vide">${T("Aucune conciliation pour cette année.")}</div>');
     } else {
-      h.push('<div data-pages="banque"><table><thead><tr><th>${T("Nom")}</th><th class="num">${T("Relevé")}</th>'
-        + '<th class="num">${T("Dépôts")}</th><th class="num">${T("Écart")}</th><th>${T("État")}</th><th></th></tr></thead><tbody>');
+      h.push('<div class="cx-pages cx-grille" data-pages="banque">');
       D.liste.forEach(function(r){
         var s = r.resume || {};
-        h.push('<tr class="lg" data-ouvrir="' + esc(r.id) + '">'
-          + '<td><div class="rf-nom">' + esc(r.label || '—') + '</div>'
-          + '<div class="rf-sous"><span>' + r.nbBanque + ' / ' + r.nbVersements + ' ${T("lignes")}</span><span>·</span>'
-          + '<span>' + jour(r.updatedAt) + '</span></div></td>'
-          + '<td class="num">' + sou(s.bankTotal) + '</td>'
-          + '<td class="num">' + sou(s.squareTotal) + '</td>'
-          + '<td class="num"><span class="rf-mont" style="color:' + (s.isBalanced ? 'var(--tx-ok2)' : 'var(--tx-err2)') + '">' + sou(s.difference) + '</span></td>'
-          + '<td>' + pilStatut(r.status) + '</td>'
-          + '<td style="white-space:nowrap">'
-            + '<button class="mini" data-pdf="' + esc(r.id) + '">${T("Rapport")}</button> '
+        var nb = parseInt(r.nbBanque, 10) || 0;
+        var app = parseInt(s.matchedBank, 10);
+        var pct = (nb && app >= 0) ? Math.round(app / nb * 100) : 0;
+        h.push('<div class="cx-tuile lg' + (s.isBalanced ? '' : ' att') + '" data-ouvrir="' + esc(r.id) + '">'
+          + '<div class="t1"><b>' + esc(r.label || '—') + '</b>' + pilStatut(r.status)
+          + '<span class="cx-sub">' + r.nbBanque + ' / ' + r.nbVersements + ' ${T("lignes")} · ' + jour(r.updatedAt) + '</span></div>'
+          + '<div class="cx-champs"><div><span class="cx-sub">${T("Relevé")}</span><b>' + sou(s.bankTotal) + '</b></div>'
+          + '<div><span class="cx-sub">${T("Dépôts")}</span><b>' + sou(s.squareTotal) + '</b></div></div>'
+          + ((nb && app >= 0)
+              ? '<div class="cx-ligne"><span>${T("Lignes du relevé appariées")}</span><div class="cx-piste"><i class="'
+                + (pct >= 100 ? 'ok' : '') + '" style="width:' + pct + '%"></i></div><span>' + app + ' / ' + nb + '</span></div>'
+              : '')
+          + '<div class="cx-ecart"><span class="cx-sub">${T("Écart")}</span><b class="' + (s.isBalanced ? 'cx-pos' : 'cx-neg') + '">'
+          + sou(s.difference) + '</b></div>'
+          + '<div class="cx-gestes">'
+            + '<button class="mini" data-pdf="' + esc(r.id) + '">${T("Rapport")}</button>'
             + (D.peutEcrire
-                ? '<button class="mini dgr" data-jeter="' + esc(r.id) + '">'
-                  + '${T("Supprimer")}' + '</button>'
+                ? '<span class="droite"><button class="mini dgr" data-jeter="' + esc(r.id) + '">'
+                  + '${T("Supprimer")}' + '</button></span>'
                 : '')
-          + '</td></tr>');
+          + '</div></div>');
       });
-      h.push('</tbody></table></div>');
+      h.push('</div>');
       /* Le pied ferme la liste de l annee et porte l export (2026-09-24). */
       h.push(szPied(
         (D.liste.length > 1 ? (D.liste.length + ' ${T("conciliations")}')
@@ -439,20 +444,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
   // ── ENTÊTE DU DÉTAIL ────────────────────────────────────────────────────
   function enteteDetail(){
     var r = D.rec, s = D.resume || {};
-    return '<div class="barreoutils">'
-      + '<button id="b-retour">${T("← Toutes les conciliations")}</button>'
+    /* Le retour, le CSV et le rapport montent dans la tete (memes id) ; l ecart
+       devient la bande des quatre chiffres. ⚠ PAS dans szTuiles : c est le
+       verdict de l ecran, il ne se masque pas (banc-tuiles-masquables). */
+    actions.innerHTML = '<button id="b-retour">${T("← Toutes les conciliations")}</button>'
+      + '<button id="b-csv">${T("CSV")}</button>'
+      + '<button id="b-pdf">${T("Rapport")}</button>';
+    return '<div class="cx-barre">'
       + pilStatut(r.status)
       + '<strong>' + esc(r.label || '') + '</strong>'
       + (D.verrouille ? '<span class="rf-pill">${T("verrouillée le")} ' + jour(r.lockedAt) + '</span>' : '')
-      + '<span class="droite">'
-      + '<button id="b-csv">${T("CSV")}</button>'
-      + '<button id="b-pdf">${T("Rapport")}</button>'
-      + '</span></div>'
-      + '<div class="ecart ' + (s.isBalanced ? 'bon' : 'mauvais') + '">'
-      + '<div class="col"><div class="k">${T("Relevé")}</div><div class="v">' + sou(s.bankTotal) + '</div></div>'
-      + '<div class="col"><div class="k">${T("Dépôts et sorties")}</div><div class="v">' + sou(s.squareTotal) + '</div></div>'
-      + '<div class="col"><div class="k">${T("Écart")}</div><div class="v">' + sou(s.difference) + '</div></div>'
-      + '<div class="verdict">' + (s.isBalanced ? '${T("✓ Équilibrée")}' : '${T("Écart non résolu")}') + '</div>'
+      + '</div>'
+      + '<div class="cx-kpis">'
+      + '<div class="cx-kpi"><span>${T("Relevé")}</span><b>' + sou(s.bankTotal) + '</b><small>' + r.bankEntries.length + ' ${T("lignes")}</small></div>'
+      + '<div class="cx-kpi"><span>${T("Dépôts et sorties")}</span><b>' + sou(s.squareTotal) + '</b><small>' + r.squarePayouts.length + ' ${T("lignes")}</small></div>'
+      + '<div class="cx-kpi ' + (s.isBalanced ? 'ok' : 'err') + '"><span>${T("Écart")}</span><b>' + sou(s.difference) + '</b><small>'
+      + (s.isBalanced ? '${T("écart nul")}' : '${T("écart non résolu")}') + '</small></div>'
+      + '<div class="cx-kpi ' + (s.isBalanced ? 'ok' : 'err') + '"><span>${T("État")}</span><b class="mot">'
+      + (s.isBalanced ? '${T("✓ Équilibrée")}' : '${T("Écart non résolu")}') + '</b><small>' + esc(STATUTS[r.status] || r.status || '') + '</small></div>'
       + '</div>';
   }
 
@@ -461,14 +470,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
     var r = D.rec;
     var h = [enteteDetail()];
     // Les lignes en PAGES mesurees, jamais de glissiere (2026-10-12).
-    h.push('<div class="carte sz-pagee"><div class="barreoutils"><h2 style="margin:0">${T("Lignes du relevé")}</h2>'
+    h.push('<div class="cx-carte sz-pagee"><h2>${T("Lignes du relevé")}'
       + (D.verrouille || !D.peutEcrire ? '' : '<span class="droite"><button class="prim" id="e-ajouter">${T("+ Ligne")}</button></span>')
-      + '</div>');
+      + '</h2>');
     if (EDIT_E !== null) h.push(formEntree());
     if (!r.bankEntries.length) {
       h.push('<div class="vide">${T("Aucune ligne. Saisissez le relevé, ou collez-le ligne par ligne.")}</div>');
     } else {
-      h.push('<div data-pages="banque-releve"><table><thead><tr><th>${T("Date")}</th><th>${T("Description")}</th><th>${T("Type")}</th>'
+      h.push('<div class="cx-pages" data-pages="banque-releve"><table><thead><tr><th>${T("Date")}</th><th>${T("Description")}</th><th>${T("Type")}</th>'
         + '<th class="num">${T("Montant")}</th><th>${T("État")}</th><th></th></tr></thead><tbody>');
       r.bankEntries.forEach(function(e){
         h.push('<tr><td class="dt">' + esc(szQuand(e.date) || '—') + '</td>'
@@ -504,7 +513,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
       }
     }
     e = e || {};
-    return '<div class="carte" style="margin:.4rem 0">'
+    return '<div class="cx-tuile form">'
       + '<h2>' + (EDIT_E ? '${T("Modifier la ligne")}' : '${T("Nouvelle ligne du relevé")}') + '</h2>'
       + '<div class="duo">'
       + '<div><label for="e-date">${T("Date")}</label><input id="e-date" type="date" value="' + esc(e.date || '') + '"></div>'
@@ -523,20 +532,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
     var r = D.rec, sq = D.square || {};
     var h = [enteteDetail()];
     // Les lignes en PAGES mesurees, jamais de glissiere (2026-10-12).
-    h.push('<div class="carte sz-pagee"><div class="barreoutils"><h2 style="margin:0">${T("Dépôts Square et sorties")}</h2>'
+    h.push('<div class="cx-carte sz-pagee"><h2>${T("Dépôts Square et sorties")}'
       + (D.verrouille || !D.peutEcrire ? '' : '<span class="droite">'
           + '<button id="v-square">${T("Importer Square")}</button>'
           + '<button id="v-depenses">${T("Importer les dépenses")}</button>'
           + '<button class="prim" id="v-ajouter">${T("+ Ligne")}</button></span>')
-      + '</div>');
-    h.push('<p class="aide">${T("Square en mémoire pour")} ' + ANNEE + '&nbsp;: ' + (sq.nbTx || 0)
+      + '</h2>');
+    h.push('<div class="cx-sub">${T("Square en mémoire pour")} ' + ANNEE + '&nbsp;: ' + (sq.nbTx || 0)
       + ' ' + ((sq.nbTx || 0) > 1 ? '${T("transactions")}' : '${T("transaction")}') + ' · brut ' + sou(sq.brut)
-      + ' · frais ' + sou(sq.frais) + ' · net ' + sou(sq.net) + '.</p>');
+      + ' · frais ' + sou(sq.frais) + ' · net ' + sou(sq.net) + '.</div>');
     if (EDIT_V !== null) h.push(formVersement());
     if (!r.squarePayouts.length) {
       h.push('<div class="vide">${T("Aucun dépôt ni sortie.")}</div>');
     } else {
-      h.push('<div data-pages="banque-depots"><table><thead><tr><th>${T("Arrivée")}</th><th>${T("Description")}</th><th>${T("Période")}</th>'
+      h.push('<div class="cx-pages" data-pages="banque-depots"><table><thead><tr><th>${T("Arrivée")}</th><th>${T("Description")}</th><th>${T("Période")}</th>'
         + '<th class="num">${T("Montant")}</th><th>${T("État")}</th><th></th></tr></thead><tbody>');
       r.squarePayouts.forEach(function(p){
         h.push('<tr><td class="dt">' + esc(szQuand(p.arrivalDate) || '—') + '</td>'
@@ -571,7 +580,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
       }
     }
     p = p || {};
-    return '<div class="carte" style="margin:.4rem 0">'
+    return '<div class="cx-tuile form">'
       + '<h2>' + (EDIT_V ? '${T("Modifier la ligne")}' : '${T("Nouveau dépôt ou sortie")}') + '</h2>'
       + '<div class="duo">'
       + '<div><label for="v-date">${T("Arrivée")}</label><input id="v-date" type="date" value="' + esc(p.arrivalDate || '') + '"></div>'
@@ -597,10 +606,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
 
     /* Trois listes qui grandissent : les deux colonnes de << seules >> et les
        appariements. Chacune dans une carte bornee, paginee (2026-10-12). */
-    h.push('<div class="duo app">');
-    h.push('<div style="flex:1 1 20rem"><div class="carte sz-pagee"><h2>${T("Relevé — non appariés (")}' + seulesB.length + ')</h2>');
+    h.push('<div class="cx-deux moitie">');
+    h.push('<div class="cx-col"><div class="cx-carte sz-pagee"><h2>${T("Relevé — non appariés (")}' + seulesB.length + ')</h2>');
     if (!seulesB.length) h.push('<div class="vide">${T("Toutes les lignes du relevé sont appariées ✓")}</div>');
-    else h.push('<div data-pages="banque-seules-releve">');
+    else h.push('<div class="cx-pages" data-pages="banque-seules-releve">');
     seulesB.forEach(function(e){
       h.push('<div class="seule"><div class="d"><div>' + esc(e.description || '—') + '</div>'
         + '<div class="dt">' + esc(szQuand(e.date) || '—') + ' · ' + esc(e.type || '—') + '</div></div>'
@@ -617,9 +626,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
     if (seulesB.length) h.push('</div>');
     h.push('</div></div>');
 
-    h.push('<div style="flex:1 1 20rem"><div class="carte sz-pagee"><h2>${T("Dépôts et sorties — non appariés (")}' + seulesV.length + ')</h2>');
+    h.push('<div class="cx-col"><div class="cx-carte sz-pagee"><h2>${T("Dépôts et sorties — non appariés (")}' + seulesV.length + ')</h2>');
     if (!seulesV.length) h.push('<div class="vide">${T("Tout est apparié ✓")}</div>');
-    else h.push('<div data-pages="banque-seules-depots">');
+    else h.push('<div class="cx-pages" data-pages="banque-seules-depots">');
     seulesV.forEach(function(p){
       h.push('<div class="seule"><div class="d"><div>' + esc(p.description || '—') + '</div>'
         + '<div class="dt">' + esc(szQuand(p.arrivalDate) || '—') + '</div></div>'
@@ -630,7 +639,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
     h.push('</div>');
 
     if (paires.length) {
-      h.push('<div class="carte sz-pagee"><h2>${T("Appariements confirmés (")}' + paires.length + ')</h2><div data-pages="banque-paires">');
+      h.push('<div class="cx-carte sz-pagee"><h2>${T("Appariements confirmés (")}' + paires.length + ')</h2><div class="cx-pages" data-pages="banque-paires">');
       paires.forEach(function(e){
         var p = null;
         for (var i = 0; i < r.squarePayouts.length; i++) {
@@ -658,34 +667,42 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
   function vueResume(){
     var r = D.rec, s = D.resume || {};
     var h = [enteteDetail()];
-    h.push('<div class="carte"><h2>${T("Compte des lignes")}</h2><table><tbody>'
-      + '<tr><td>${T("Lignes du relevé appariées")}</td><td class="num">' + s.matchedBank + '</td></tr>'
-      + '<tr><td>${T("Lignes du relevé seules")}</td><td class="num">' + s.unmatchedBank + '</td></tr>'
-      + '<tr><td>${T("Dépôts et sorties seuls")}</td><td class="num">' + s.unmatchedSquare + '</td></tr>'
-      + '<tr><td>${T("Ajustements")}</td><td class="num">' + sou(s.adjTotal) + '</td></tr>'
-      + '</tbody></table></div>');
+    /* Deux moities : le compte des lignes a gauche (etats .cx-etat), les notes et
+       la cloture a droite. */
+    h.push('<div class="cx-deux moitie"><div class="cx-col">');
+    h.push('<div class="cx-carte"><h2>${T("Compte des lignes")}</h2>'
+      + '<div class="cx-etat"><span>${T("Lignes du relevé appariées")}</span><span>' + s.matchedBank + '</span></div>'
+      + '<div class="cx-etat"><span>${T("Lignes du relevé seules")}</span><span>' + s.unmatchedBank + '</span></div>'
+      + '<div class="cx-etat"><span>${T("Dépôts et sorties seuls")}</span><span>' + s.unmatchedSquare + '</span></div>'
+      + '<div class="cx-etat fort"><span>${T("Ajustements")}</span><span>' + sou(s.adjTotal) + '</span></div>'
+      + '</div>');
+    h.push('</div><div class="cx-col">');
 
-    h.push('<div class="carte"><h2>${T("Notes de conciliation")}</h2>'
+    h.push('<div class="cx-carte"><h2>${T("Notes de conciliation")}</h2>'
       + '<textarea id="r-notes" aria-label="${T("Notes du rapprochement")}"' + (D.verrouille || !D.peutEcrire ? ' readonly' : '') + '>' + esc(r.notes || '') + '</textarea>'
       + (D.verrouille || !D.peutEcrire ? ''
-          : '<div class="barreoutils" style="margin-top:.4rem"><button id="r-notes-ok">${T("Enregistrer les notes")}</button></div>')
+          : '<div class="barreoutils"><button id="r-notes-ok">${T("Enregistrer les notes")}</button></div>')
       + '</div>');
 
     if (!D.verrouille && D.peutEcrire) {
-      h.push('<div class="carte"><h2>${T("Clore")}</h2>'
+      /* ⚠ L avertissement du verrou devient une PASTILLE, et sa phrase reste
+         ENTIERE juste dessous : elle ne s adoucit pas (src/langue/banque.js). */
+      h.push('<div class="cx-carte"><h2>${T("Clore")}</h2>'
         + '<div class="barreoutils">'
         + '<button id="r-completer">${T("Marquer complétée")}</button>'
         + '<button class="prim' + (s.isBalanced ? '' : ' ') + '" id="r-verrouiller">'
         + '${T("Verrouiller")}' + '</button>'
         + '</div>'
-        + '<p class="aide">« ${T("Complétée")} ${T("» n’est accordé que si l’écart est nul&nbsp;: sinon le statut ")}'
-        + '${T("reste « en cours ». Le bouton ne peut donc pas mentir.")}</p>'
-        + '<div class="franc" style="margin-top:.5rem"><b>${T("Le verrouillage est définitif.")}</b> '
+        + '<div class="cx-sub">« ${T("Complétée")} ${T("» n’est accordé que si l’écart est nul&nbsp;: sinon le statut ")}'
+        + '${T("reste « en cours ». Le bouton ne peut donc pas mentir.")}</div>'
+        + '<div><span class="cx-averti"><span><b>${T("Le verrouillage est définitif.")}</b></span></span></div>'
+        + '<div class="cx-sub">'
         + '${T("La conciliation ne pourra plus jamais être modifiée — c’est ce qui en fait une pièce")} '
         + '${T("comptable opposable. Elle restera consultable et imprimable.")}'
         + (s.isBalanced ? '' : ' <strong>${T("L’écart n’est pas nul&nbsp;;")}</strong>${T(" verrouiller le fige tel quel.")}')
         + '</div></div>');
     }
+    h.push('</div></div>');
     return h.join('');
   }
 
@@ -947,7 +964,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
   function charger(){
     appeler('banque:donnees', [{ annee: ANNEE || undefined, id: REC || undefined }]).then(function(r){
       if (!r.ok) {
-        corps.innerHTML = '<div class="carte"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div></div>';
+        corps.innerHTML = '<div class="cx-carte"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div></div>';
         dire(expliquer(r), 'err');
         return;
       }

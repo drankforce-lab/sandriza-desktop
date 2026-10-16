@@ -200,4 +200,6 @@ module.exports = {
   'Ce que ces chiffres ne disent pas': 'What these figures do not tell you',
   'Ces chiffres se calculent sur ce que la boutique enregistre : ventes, remboursements, dépenses, encaissements et stock. Un apport du propriétaire, un prêt, un amortissement, une paie hors dépenses ou un ajustement demandé par votre comptable n’y figurent pas — ce sera l’objet du livre de comptes complet.':
     'These figures are computed from what the shop records: sales, refunds, expenses, payments and inventory. An owner contribution, a loan, depreciation, payroll outside of expenses, or an adjustment requested by your accountant do not appear here — that will be the job of the full general ledger.',
+  // 2026-10-16 : la refonte de la Comptabilité.
+  'La barre : le revenu du mois.': 'The bar: the month’s revenue.',
 };

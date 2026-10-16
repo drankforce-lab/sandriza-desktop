@@ -47,19 +47,9 @@ body{background:var(--f-page);color:var(--tx);
 .tete h1{margin:0;font:700 .95rem/1.2 system-ui}
 .tete .ico{display:inline-flex;width:19px;height:19px;color:var(--or,var(--or))}
 .tete .ico svg{width:100%;height:100%}
-.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;
-  padding:.55rem 1.05rem .1rem}
-.barreoutils .droite{margin-left:auto;display:flex;gap:.6rem;align-items:center}
-.corps{flex:1 1 auto;min-height:0;padding:.7rem 1.05rem .45rem;overflow:hidden;
-  display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
-.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
-  padding:.75rem .85rem;min-width:0}
-.carte h2{margin:0 0 .5rem;font:700 .76rem/1.2 system-ui;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2);display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
-.carte h2 .gris{text-transform:none;letter-spacing:0;font-weight:400}
+/* 2026-10-16 : la grammaire de la Comptabilite (CSS_COMPTA du socle) — tete avec resume et geste
+   principal, bande de chiffres, deux colonnes de cartes. */
+#corps{overflow:hidden}
 select,input,button,textarea{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.28rem .5rem;cursor:pointer}
 input,textarea{cursor:text}
@@ -75,54 +65,42 @@ button.danger{border-color:rgba(248,113,113,.45);color:var(--tx-err2)}
 button.aconf{background:rgba(248,113,113,.16);color:var(--tx-err2)}
 html.jour button.aconf{color:#7f1d1d}
 button.fait{border-color:rgba(74,222,128,.45);color:var(--tx-ok)}
-.chiffres{display:grid;grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));gap:.6rem}
-.chiffre{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:.55rem .75rem}
-.chiffre .lbl{font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
-.chiffre .val{font:700 1.15rem/1.25 ui-monospace,Consolas,monospace;margin-top:.12rem}
-.chiffre .sous{font-size:.6875rem;color:var(--tx3);margin-top:.08rem}
-.chiffre.retard .val{color:var(--tx-err2)}
-.chiffre.auj .val{color:var(--tx-att)}
-.duo{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(21rem,1fr);gap:.7rem;align-items:start}
-.duo>div{display:flex;flex-direction:column;gap:.7rem;min-width:0}
+.duo{display:grid;grid-template-columns:minmax(0,1fr) 22rem;gap:.9rem}
+.duo>div{display:flex;flex-direction:column;gap:.9rem;min-width:0}
 /* 2026-10-12 (<< aucun scroll bar >>) : la colonne des rappels PROPOSES depassait en bas en fenetre basse — et
    comme la page de << Mes rappels >> se reduit tant que le corps deborde, elle tombait a UN rappel par page.
    La duo prend la hauteur qui reste, et les proposes se paginent dans leur carte. */
 .duo{flex:1 1 0;min-height:0;grid-template-rows:minmax(0,1fr);align-items:stretch}
+#corps>.duo{flex:1 1 0}
 .duo>div{min-height:0;max-height:100%}
 .duo>div>.sz-pagee{flex:1 1 0;min-height:0}
-.pages{display:flex;align-items:center;gap:.4rem;margin-left:auto;font:400 .74rem/1 system-ui;
-  text-transform:none;letter-spacing:0;color:var(--tx2)}
+/* ⚠ LA CARTE DE LA LISTE NE COUPE PAS : c est son debordement qui fait grandir corps.scrollHeight, et
+   dessiner() retire une ligne par page tant qu il deborde. Elle grandit jusqu en bas, sans retrecir. */
+.duo>div>.cx-carte.liste{flex:1 0 auto;overflow:visible}
+.pages{display:flex;align-items:center;gap:.4rem;margin-left:auto;font-size:.74rem;font-weight:400;color:var(--tx2)}
 .pages button.pgf{min-width:1.9rem;padding:.08rem .45rem;font-size:.95rem;line-height:1.1}
 .gris{color:var(--tx2)}.bon{color:var(--tx-ok)}.mauvais{color:var(--tx-err2)}.attn{color:var(--tx-att)}
-.sous2{font-size:.72rem;color:var(--tx2);margin-top:.05rem}
-.pill{display:inline-block;font-size:.6875rem;padding:.04rem .45rem;border-radius:99px;
-  white-space:nowrap;font-weight:700;vertical-align:baseline}
-.pill.g{background:rgba(148,163,184,.14);color:var(--tx-94a3b8);font-weight:600}
-.pill.mod{background:rgba(var(--or-rgb),.16);color:var(--tx);font-weight:600}
-.pill.ok{background:rgba(74,222,128,.14);color:var(--tx-ok)}
 .aide{font-size:.76rem;color:var(--tx2);line-height:1.45}
-.avis{border:1px solid rgba(234,179,8,.45);background:rgba(234,179,8,.09);
-  border-radius:10px;padding:.5rem .75rem;font-size:.78rem;line-height:1.45}
-.avis strong{color:var(--tx-att)}
+.avis{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
 .appel{display:flex;flex-direction:column;align-items:center;gap:.6rem;padding:1.6rem 1rem;text-align:center}
 .appel strong{font-size:.98rem}
 .appel .aide{max-width:34rem}
 .appel .boutons{justify-content:center}
 
 /* ── La liste ────────────────────────────────────────────────────────────── */
-.grp{display:flex;align-items:center;gap:.5rem;font:700 .6875rem/1.2 system-ui;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2);padding:.45rem .2rem .2rem;border-bottom:1px solid var(--v08)}
-.grp .nb{font-weight:400;color:var(--tx3)}
-.grp.retard{color:var(--tx-err2)}.grp.aujourdhui{color:var(--tx-att)}
-.grp button{margin-left:auto;text-transform:none;letter-spacing:0;font-weight:400}
-.rp{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.5rem;align-items:center;
-  padding:.36rem .3rem;border-bottom:1px solid var(--v055);border-left:3px solid transparent}
+.grp{display:flex;align-items:center;gap:.5rem;font-size:.88rem;font-weight:650;color:var(--tx);padding:.35rem .1rem .05rem}
+.grp .nb{font-weight:400;font-size:.75rem;color:var(--tx3);font-variant-numeric:tabular-nums}
+.grp.retard{color:var(--tx-err)}.grp.aujourdhui{color:var(--tx-att)}
+.grp button{margin-left:auto;font-weight:400}
+.rp{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:.4rem .7rem;align-items:center;
+  padding:.5rem .75rem;border:1px solid var(--sz-bord);border-radius:11px;border-left:3px solid var(--sz-bord)}
 .rp:hover{background:var(--v03)}
 .rp.sel{background:rgba(var(--or-rgb),.10)}
-.rp.retard{border-left-color:rgba(248,113,113,.6)}
-.rp.aujourdhui{border-left-color:rgba(234,179,8,.6)}
+.rp.retard{border-left-color:color-mix(in srgb,var(--tx-err) 70%,transparent)}
+.rp.aujourdhui{border-left-color:color-mix(in srgb,var(--tx-att) 70%,transparent)}
 .rp.termine{opacity:.72}
 .rp .t{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rp .cx-l2{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rp .act{display:flex;gap:.3rem;align-items:center}
 .rep{grid-column:1/-1;display:flex;gap:.35rem;align-items:center;flex-wrap:wrap;
   padding:.35rem .45rem;border-radius:8px;background:var(--v04);border:1px solid var(--v08)}
@@ -144,7 +122,8 @@ button.fait{border-color:rgba(74,222,128,.45);color:var(--tx-ok)}
 .case{display:flex;align-items:center;gap:.4rem;font-size:.78rem;cursor:pointer}
 .boutons{display:flex;gap:.5rem;justify-content:flex-end;align-items:center;margin-top:.55rem;flex-wrap:wrap}
 .boutons .gauche{margin-right:auto}
-.hist{margin:.3rem 0 0;padding-left:1rem;font-size:.72rem;color:var(--tx2)}
+.hist{margin-top:.5rem}
+.hist h2{margin-bottom:.15rem}
 .notif{display:flex;align-items:center;gap:.35rem;font-size:.76rem;color:var(--tx2);cursor:pointer}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
@@ -169,9 +148,8 @@ function pageRappels(ouverture) {
 <title>${T("Rappels — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.rappels}</span><h1>${T("Rappels")}</h1>
-  <span class="sous" id="sous"></span></div>
-<div class="barreoutils" id="outils"></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
+  <span class="cx-resume" id="sous"></span><div class="cx-actions" id="outils"></div></div>
+<div class="cx" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -263,7 +241,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('rappels')}
       OCCUPE = false;
       if (!r || !r.ok) {
         D = null; outils();
-        corps.innerHTML = '<div class="appel carte"><strong>${T("Rappels indisponibles")}</strong><div class="aide">' + esc(expliquer(r)) + '</div></div>';
+        corps.innerHTML = '<div class="appel cx-carte"><strong>${T("Rappels indisponibles")}</strong><div class="aide">' + esc(expliquer(r)) + '</div></div>';
         return;
       }
       D = r;
@@ -289,28 +267,33 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('rappels')}
   /* ── LA BARRE D OUTILS ──────────────────────────────────────────────────── */
   function outils(){
     if (!D) { elOutils.innerHTML = ''; return; }
-    var h = '<span class="gris" style="font-size:.76rem">${T("Aujourd’hui :")} ' + esc(szJour(D.aujourdhui)) + '</span><span class="droite">';
+    var h = '';
     if (NOTIF !== null) {
       h += '<label class="notif" for="r-notif" title="${T("Une notification de bureau par rappel dû, une fois par jour ; un clic ouvre le module du rappel.")}">'
         + '<input type="checkbox" id="r-notif"' + (NOTIF ? ' checked' : '') + '> ${T("Notifications de bureau")}</label>';
     }
     if (PA) h += '<button type="button" class="prim" data-act="nouveau">${T("+ Nouveau rappel")}</button>';
-    elOutils.innerHTML = h + '</span>';
+    elOutils.innerHTML = h;
   }
 
   /* ── LES TUILES ─────────────────────────────────────────────────────────── */
   function compte(e){ return ((D && D.rappels) || []).filter(function(r){ return r.etat === e; }).length; }
+  /* Sous chaque chiffre : les rappels qu il compte, par leur titre (sinon, ce que le chiffre veut dire). */
+  function nomsDe(e){
+    return ((D && D.rappels) || []).filter(function(r){ return r.etat === e; })
+      .map(function(r){ return szTd(r.titre); }).join(', ');
+  }
+  function kpi(ton, lbl, n, sous){
+    return '<div class="cx-kpi' + (ton ? ' ' + ton : '') + '"><span>' + lbl + '</span><b>' + n + '</b>'
+      + '<small title="' + esc(sous) + '">' + esc(sous) + '</small></div>';
+  }
   function tuiles(){
     var actifs = ((D && D.rappels) || []).filter(function(r){ return r.actif; }).length;
-    return szTuiles('<div class="chiffres">'
-      + '<div class="chiffre' + (compte('retard') ? ' retard' : '') + '"><div class="lbl">${T("En retard")}</div><div class="val">' + compte('retard') + '</div>'
-      + '<div class="sous">${T("échéance passée")}</div></div>'
-      + '<div class="chiffre' + (compte('aujourdhui') ? ' auj' : '') + '"><div class="lbl">${T("Aujourd’hui")}</div><div class="val">' + compte('aujourdhui') + '</div>'
-      + '<div class="sous">${T("à faire dans la journée")}</div></div>'
-      + '<div class="chiffre"><div class="lbl">${T("Cette semaine")}</div><div class="val">' + compte('bientot') + '</div>'
-      + '<div class="sous">${T("dans les 7 prochains jours")}</div></div>'
-      + '<div class="chiffre"><div class="lbl">${T("Actifs")}</div><div class="val">' + actifs + '</div>'
-      + '<div class="sous">${T("rappels en service")}</div></div>'
+    return szTuiles('<div class="cx-kpis">'
+      + kpi(compte('retard') ? 'err' : '', '${T("En retard")}', compte('retard'), nomsDe('retard') || '${T("échéance passée")}')
+      + kpi(compte('aujourdhui') ? 'att' : '', '${T("Aujourd’hui")}', compte('aujourdhui'), nomsDe('aujourdhui') || '${T("à faire dans la journée")}')
+      + kpi('', '${T("Cette semaine")}', compte('bientot'), nomsDe('bientot') || '${T("dans les 7 prochains jours")}')
+      + kpi('ok', '${T("Actifs")}', actifs, '${T("rappels en service")}')
       + '</div>');
   }
 
@@ -350,15 +333,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('rappels')}
     var actif = r.etat !== 'termine';
     var h = '<div class="rp ' + r.etat + (FORM && FORM.id === r.id ? ' sel' : '') + '" data-rap="' + esc(r.id) + '"'
       + (PM ? ' title="${T("Double-cliquez pour modifier")}"' : '') + '>'
-      + '<div style="min-width:0"><div class="t">' + esc(szTd(r.titre))
-      + (mod ? ' <span class="pill mod">' + esc(mod) + '</span>' : '') + '</div>'
-      + '<div class="sous2"><span class="' + (r.etat === 'retard' ? 'mauvais' : (r.etat === 'aujourdhui' ? 'attn' : '')) + '">' + esc(relatif(r)) + '</span>'
-      + (actif && r.prochaine ? ' · ' + esc(szJour(r.prochaine)) : '')
-      + ' · ' + esc(nomFreq(r.frequence))
-      + (r.courriel ? ' · ${T("courriel")}' : '') + '</div></div>'
+      + '<div style="min-width:0"><div class="t">' + esc(szTd(r.titre)) + '</div>'
+      + '<span class="cx-l2">'
+      + (actif && r.prochaine ? esc(szJour(r.prochaine)) + ' · ' : '')
+      + esc(nomFreq(r.frequence))
+      + (r.courriel ? ' · ${T("courriel")}' : '')
+      + (mod ? ' · ${T("ouvre")} ' + esc(mod) : '') + '</span></div>'
+      + '<span class="rf-pill' + ({ retard: ' rouge', aujourdhui: ' ambre', bientot: ' bleu', termine: ' vert' }[r.etat] || '') + '">' + esc(relatif(r)) + '</span>'
       + '<div class="act">'
-      + (actif && PM ? '<button type="button" class="mini fait" data-fait="' + esc(r.id) + '" title="${T("Fait : le rappel passe à sa prochaine échéance.")}">✓ ${T("Fait")}</button>'
-          + '<button type="button" class="mini" data-rep="' + esc(r.id) + '" aria-expanded="' + (REPORT === r.id ? 'true' : 'false') + '">${T("Reporter")} ▾</button>' : '')
+      + (actif && PM ? '<button type="button" class="mini" data-rep="' + esc(r.id) + '" aria-expanded="' + (REPORT === r.id ? 'true' : 'false') + '">${T("Reporter")} ▾</button>'
+          + '<button type="button" class="mini fait" data-fait="' + esc(r.id) + '" title="${T("Fait : le rappel passe à sa prochaine échéance.")}">✓ ${T("Fait")}</button>' : '')
       + (r.module ? '<button type="button" class="mini" data-ouvrir="' + esc(r.module) + '" title="${T("Ouvrir")} ' + esc(mod) + '">${T("Ouvrir")}</button>' : '')
       + (PM ? '<button type="button" class="mini" data-mod="' + esc(r.id) + '">${T("Modifier")}</button>' : '')
       + (PS ? '<button type="button" class="mini danger" data-sup="' + esc(r.id) + '" aria-label="${T("Supprimer ce rappel")}">✕</button>' : '')
@@ -378,7 +362,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('rappels')}
     var L = (D.rappels || []);
     if (!L.length) {
       var libres = (D.modeles || []).filter(function(m){ return !m.deja; }).length;
-      return '<div class="carte appel"><strong>${T("Aucun rappel pour l’instant")}</strong>'
+      return '<div class="cx-carte appel"><strong>${T("Aucun rappel pour l’instant")}</strong>'
         + '<div class="aide">${T("Un rappel revient à la date voulue, dit ce qu’il faut faire et ouvre le bon module : saisir les dépenses de la semaine, remettre la TPS/TVQ, payer un acompte… Commencez par les rappels proposés, ajustables ensuite.")}</div>'
         + '<div class="boutons">'
         + (PA && libres ? '<button type="button" class="prim" data-act="tout">${T("Ajouter les")} ' + libres + ' ${T("rappels proposés")}</button>' : '')
@@ -395,7 +379,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('rappels')}
        qui le redit en tete (voir plus bas). */
     var suite = flat[(PG + 1) * BU];
     if (vue.length > 1 && !vue[vue.length - 1].r && suite && suite.r) vue.pop();
-    var h = '<div class="carte"><h2>${T("Mes rappels")} <span class="gris">— ' + L.length + ' ' + szPl(L.length, '${T("rappel")}', '${T("rappels")}') + '</span>' + nav(nbp) + '</h2>';
+    var h = '<div class="cx-carte liste"><h2>${T("Mes rappels")} <span class="cx-sub">' + L.length + ' ' + szPl(L.length, '${T("rappel")}', '${T("rappels")}') + '</span>' + nav(nbp) + '</h2>';
     /* Une page qui commence au milieu d un groupe redit son en-tete. */
     if (vue.length && vue[0].r) {
       var g = null; flat.forEach(function(x){ if (!x.r && x.grp === vue[0].grp) g = x; });
@@ -409,12 +393,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('rappels')}
   function proposes(){
     var M = (D.modeles || []);
     if (!M.length) return '';
-    return '<div class="carte sz-pagee"><h2>${T("Rappels proposés")}</h2><div data-pages="rappels-proposes">'
+    return '<div class="cx-carte sz-pagee"><h2>${T("Rappels proposés")}</h2><div data-pages="rappels-proposes">'
       + M.map(function(m){
           var info = nomFreq(m.frequence) + (m.prochaine ? ' · ${T("prochaine :")} ' + szJour(m.prochaine) : '') + (m.module ? ' · ' + nomModule(m.module) : '');
           return '<div class="mdl"><div style="min-width:0"><div class="t">' + esc(szTd(m.titre)) + '</div>'
             + '<div class="n" title="' + esc(szTd(m.note)) + '">' + esc(info) + '</div></div>'
-            + (m.deja ? '<span class="pill ok">${T("déjà ajouté")}</span>'
+            + (m.deja ? '<span class="rf-pill vert">${T("déjà ajouté")}</span>'
                 : (PA ? '<button type="button" class="mini" data-modele="' + esc(m.cle) + '">${T("Ajouter")}</button>' : ''))
             + '</div>';
         }).join('') + '</div>'
@@ -434,7 +418,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('rappels')}
   function avecJour(f){ return f === 'mensuel' || f === 'trimestriel' || f === 'annuel'; }
   function formulaire(){
     var f = FORM, modif = !!f.id;
-    var h = '<div class="carte" id="f-rap"><h2>' + (modif ? '${T("Modifier le rappel")}' : '${T("Nouveau rappel")}') + '</h2><div class="form2">'
+    var h = '<div class="cx-carte" id="f-rap"><h2>' + (modif ? '${T("Modifier le rappel")}' : '${T("Nouveau rappel")}') + '</h2><div class="form2">'
       + '<div class="champ large"><label for="r-titre">${T("Titre (obligatoire)")}</label>'
       + '<input type="text" id="r-titre" maxlength="100" value="' + esc(f.titre) + '" placeholder="${T("Ex. : Saisir les reçus d’essence")}"></div>'
       + '<div class="champ large"><label for="r-note">${T("Note (facultative)")}</label>'
@@ -456,12 +440,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('rappels')}
       + '</div>';
     var hist = (f.historique || []).slice(0, 3);
     if (modif && hist.length) {
-      h += '<ul class="hist">' + hist.map(function(x){
-        return '<li>' + (x.geste === 'reporte'
+      h += '<div class="hist"><h2>${T("Historique")}</h2>' + hist.map(function(x){
+        return '<div class="cx-etat"><span>' + (x.geste === 'reporte'
           ? '${T("Reporté au")} ' + esc(szJour(x.vers))
           : '${T("Fait pour l’échéance du")} ' + esc(szJour(x.echeance)))
-          + ' — ' + esc(szQuand(x.le)) + (x.par ? ' · ' + esc(x.par) : '') + '</li>';
-      }).join('') + '</ul>';
+          + (x.par ? ' · ' + esc(x.par) : '') + '</span><span class="cx-sub">' + esc(szQuand(x.le)) + '</span></div>';
+      }).join('') + '</div>';
     }
     return h + '<div class="boutons"><button type="button" id="r-annuler">${T("Annuler")}</button>'
       + '<button type="button" class="prim" id="r-ok">' + (modif ? '${T("Enregistrer")}' : '${T("+ Créer le rappel")}') + '</button></div></div>';
@@ -470,7 +454,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('rappels')}
   /* ── LE DESSIN ──────────────────────────────────────────────────────────── */
   function lecture(){
     if (PA || PM || PS) return '';
-    return '<div class="avis"><strong>${T("Lecture seule.")}</strong> ${T("Votre rôle permet de consulter les rappels, pas de les modifier.")}</div>';
+    /* ⚠ L enveloppe garde class="avis" : le cas « lecture seule » de verifier-fenetres l exige. */
+    return '<div class="avis"><span class="cx-averti" title="${T("Votre rôle permet de consulter les rappels, pas de les modifier.")}"><b>${T("Lecture seule.")}</b>'
+      + '<span>${T("Votre rôle permet de consulter les rappels, pas de les modifier.")}</span></span></div>';
   }
   function rendu(){
     return lecture() + tuiles() + '<div class="duo"><div>' + liste() + '</div><div>'
@@ -480,7 +466,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('rappels')}
     outils();
     if (!D) return;
     var dus = compte('retard') + compte('aujourdhui');
-    elSous.textContent = dus ? dus + ' ' + szPl(dus, '${T("rappel à faire")}', '${T("rappels à faire")}') : '${T("Rien à faire aujourd’hui")}';
+    elSous.textContent = '${T("Aujourd’hui :")} ' + szJour(D.aujourdhui) + ' · ' + (dus ? dus + ' ' + szPl(dus, '${T("rappel à faire")}', '${T("rappels à faire")}') : '${T("Rien à faire aujourd’hui")}');
     corps.innerHTML = rendu();
     /* LE BUDGET SE MESURE : une ligne de moins tant que la page deborde. */
     var tours = 0;

@@ -39,17 +39,21 @@ body{background:var(--f-page);color:var(--tx);
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-/* Aucune glissiere (2026-10-12) : le corps ne defile plus, la liste va en PAGES mesurees (JS_PAGES du socle). */
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
-  display:flex;flex-direction:column;gap:.7rem}
-.barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
-.barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center;
-  font-size:.78rem;color:var(--tx2)}
+/* LA GRAMMAIRE DE LA COMPTABILITE (2026-10-16) : tete (resume, geste principal), bande de 4 chiffres,
+   onglets segmentes, puis le tableau et son panneau d appui (CSS_COMPTA du socle). Aucune glissiere :
+   la liste va en PAGES mesurees (data-pages). */
+#corps{overflow:hidden}
 input[type=search],select,button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem}
-input[type=search]{min-width:220px}
 select,button{cursor:pointer}
+.ed-seg button{border:none}
+.ed-seg .n{margin-left:.4rem;font-size:.7rem;color:var(--tx3);font-variant-numeric:tabular-nums}
+.ed-seg button.on .n{color:var(--tx2)}
+.cx-barre .rf-rch{width:18rem;flex:0 0 auto}
+th.r,td.r{text-align:right;font-variant-numeric:tabular-nums}
+td .cx-num{font-weight:700;white-space:nowrap}
+.cx-qui b{font-weight:650}
+.cx-etat>span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 input:focus,select:focus,button:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
@@ -57,12 +61,6 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.geste{padding:.14rem .5rem;font-size:.73rem;white-space:nowrap}
 button.bon{border-color:rgba(34,197,94,.5);color:var(--tx-ok)}
 button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
-.tuiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:.5rem}
-.tuile{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:.5rem .65rem}
-.tuile .lbl{font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
-.tuile .val{font-size:.95rem;font-weight:800;margin-top:.1rem}
-.tuile .val.bon{color:var(--tx-ok)}.tuile .val.att{color:var(--tx-att)}.tuile .val.err{color:var(--tx-err)}
-.tuile .sub{font-size:.6875rem;color:var(--tx2)}
 tbody .fin{white-space:nowrap;text-align:right}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;
   align-items:center;justify-content:center;z-index:50;padding:1rem}
@@ -72,21 +70,10 @@ tbody .fin{white-space:nowrap;text-align:right}
 .boite select{width:100%;font:inherit;color:var(--tx);background:var(--f-0f1826);
   border:1px solid var(--v14);border-radius:8px;padding:.38rem .55rem}
 .boite .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.8rem}
-.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
-  padding:.6rem .75rem}
-table{width:100%;border-collapse:collapse;font-size:.84rem}
-thead th{text-align:left;padding:.24rem .4rem;font-size:.6875rem;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
+table{width:100%;font-size:.84rem}
+thead th{text-align:left}
 tbody tr{cursor:pointer}
-tbody tr:hover td{background:var(--v04)}
-tbody td{padding:.34rem .4rem;border-top:1px solid var(--v055);vertical-align:middle}
-tbody .num{font-weight:700}
-tbody .dt{font-size:.72rem;color:var(--tx2)}
-.pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
-.pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
-.pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
-.pill.err{background:rgba(239,68,68,.16);color:var(--tx-err)}
-.pill.neutre{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
+tbody td{vertical-align:middle}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
@@ -102,8 +89,9 @@ function pageFactures() {
 <title>${T("Factures — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.billing}</span><h1>${T("Factures")}</h1>
-  <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
+  <span class="cx-resume" id="sous"></span>
+  <div class="cx-actions" id="f-actions"></div></div>
+<div class="cx" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -196,51 +184,75 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
     var vue = rows;
 
     var h = '';
+    var nbTout = (LIGNES || []).length;
+    var compte = { '': nbTout, paid: 0, unpaid: 0, overdue: 0, cancelled: 0 };
+    var aRec = [];                       // non payees et en retard, pour l echeance
+    (LIGNES || []).forEach(function(r){
+      if (compte[r.statut] != null) compte[r.statut]++;
+      if (r.statut === 'unpaid' || r.statut === 'overdue') aRec.push(r);
+    });
+    aRec.sort(function(a, b){ return String(a.echeance || '').localeCompare(String(b.echeance || '')); });
+    function nbFact(n){ return n + ' ' + (n > 1 ? '${T("factures")}' : '${T("facture")}'); }
+    function pct(part, tout){
+      var v = tout > 0 ? Math.max(0, Math.min(100, part / tout * 100)) : 0;
+      return v;
+    }
+    function pctTexte(v){
+      try { return v.toLocaleString('${LIEU()}', { maximumFractionDigits: 1 }); }
+      catch (e) { return String(Math.round(v)); }
+    }
+
+    /* ── LA TETE : le resume a gauche, le geste principal a droite (#f-etat, meme id qu avant). ── */
+    var sousT = document.getElementById('sous');
+    if (sousT) sousT.textContent = nbFact(nbTout)
+      + (TUILES ? ' · ' + '${T("{0} à recevoir")}'.split('{0}').join(fmt(TUILES.aRecevoir)) : '');
+    var act = document.getElementById('f-actions');
+    if (act) act.innerHTML = CLIENTS.length ? '<button class="prim" id="f-etat">${T("État de compte client")}</button>' : '';
+
+    /* ── LES QUATRE CHIFFRES (.cx-kpis) — les six tuiles d avant y sont toutes : le nombre de factures
+       sous « Facturé », les depenses dans le panneau d appui. Absents sur un vieux site. ── */
     if (TUILES) {
-      var tuile = function(lbl, val, ton, sub){
-        return '<div class="tuile"><div class="lbl">' + lbl + '</div>'
-          + '<div class="val' + (ton ? ' ' + ton : '') + '">' + val + '</div>'
-          + (sub ? '<div class="sub">' + sub + '</div>' : '') + '</div>';
+      var kpi = function(lbl, val, ton, sub){
+        return '<div class="cx-kpi' + (ton ? ' ' + ton : '') + '"><span>' + lbl + '</span><b>' + val + '</b>'
+          + '<small>' + (sub || '&nbsp;') + '</small></div>';
       };
       var nbR = TUILES.nbRemboursements || 0;
-      /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit
-         tel quel, la piece commune y ajoute le bouton de repli et l etat retenu
-         pour ce poste. Voir JS_TUILES dans socle.js. */
-      h += szTuiles('<div class="tuiles">'
-        + tuile('${T("Total facturé")}', fmt(TUILES.total), '')
-        + tuile('${T("Encaissé")}', fmt(TUILES.encaisse), 'bon')
-        + tuile('${T("À recevoir")}', fmt(TUILES.aRecevoir), 'att')
+      var tot = Number(TUILES.total) || 0;
+      var proch = aRec.length ? aRec[0] : null;
+      h += '<div class="cx-kpis">'
+        + kpi('${T("Total facturé")}', esc(fmt(TUILES.total)), '', esc(nbFact(TUILES.nb || 0)))
+        + kpi('${T("Encaissé")}', esc(fmt(TUILES.encaisse)), 'ok',
+            esc('${T("{0} % du facturé")}'.split('{0}').join(pctTexte(pct(Number(TUILES.encaisse) || 0, tot)))))
+        + kpi('${T("À recevoir")}', esc(fmt(TUILES.aRecevoir)), 'att',
+            esc(!aRec.length ? '${T("Aucune facture impayée")}'
+              : (aRec.length > 1 ? '${T("{0} factures impayées")}'.split('{0}').join(aRec.length) : '${T("1 facture impayée")}')
+                + (proch && proch.echeance ? ' · ' + '${T("échéance {0}")}'.split('{0}').join(fmtDate(proch.echeance)) : '')))
         /* Deux formes ENTIERES : un << s >> colle a part ne se traduit pas. */
-        + tuile('${T("Remboursé")}', fmt(TUILES.rembourse), '',
-            nbR + (nbR > 1 ? '${T(" remboursements")}' : '${T(" remboursement")}'))
-        + tuile('${T("Dépenses ")}' + (TUILES.annee || ''), fmt(TUILES.depenses), '')
-        + tuile('${T("Factures")}', String(TUILES.nb || 0), '')
-        + '</div>');
+        + kpi('${T("Remboursé")}', esc(fmt(TUILES.rembourse)), '',
+            esc(nbR + (nbR > 1 ? '${T(" remboursements")}' : '${T(" remboursement")}')))
+        + '</div>';
     }
-    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE A FACTURES (2026-09-25) ════════
-       Barre sur une ligne : recherche a loupe, statuts en PASTILLES (plus une
-       liste deroulante : les cinq choix se voient d un coup). Crochets gardes :
-       #f-q, #f-etat, data-payer / data-depayer / data-suppr, tr[data-id]. */
-    var jet = function(v, lib){
-      return '<button class="rf-jet' + (STATUT === v ? ' on' : '') + '" data-fst="' + v + '">' + lib + '</button>';
+
+    /* ── LA BARRE : les statuts en onglets segmentes (data-fst, comme avant), la recherche a droite (#f-q). ── */
+    var seg = function(v, lib){
+      return '<button type="button" class="' + (STATUT === v ? 'on' : '') + '" data-fst="' + v + '">' + lib
+        + '<span class="n">' + (compte[v] || 0) + '</span></button>';
     };
-    h += '<div class="carte"><div class="rf-tb">'
+    h += '<div class="cx-barre"><div class="ed-seg">'
+      + seg('', '${T("Toutes")}') + seg('unpaid', '${T("Non payées")}') + seg('overdue', '${T("En retard")}')
+      + seg('paid', '${T("Payées")}') + seg('cancelled', '${T("Annulées")}')
+      + '</div><div class="droite">'
       + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Numéro, commande ou client")}" type="search" id="f-q" placeholder="${T("Numéro, commande ou client…")}" value="' + esc(Q) + '"></label>'
-      + jet('', '${T("Tous les statuts")}') + jet('paid', '${T("Payée")}') + jet('unpaid', '${T("Non payée")}')
-      + jet('overdue', '${T("En retard")}') + jet('cancelled', '${T("Annulée")}')
-      + '<span class="rf-droite">'
-      + (CLIENTS.length ? '<button class="rf-jet" id="f-etat">${T("État de compte client")}</button>' : '')
-      + '<span class="dt">' + rows.length + ' '
-      + (rows.length > 1 ? '${T("factures")}' : '${T("facture")}') + '</span></span>'
       + '</div></div>';
 
-    h += '<div class="carte sz-pagee">';
+    /* ── LE TABLEAU (data-pages="factures") ── */
+    var t = '<div class="cx-carte sz-pagee' + (TUILES ? '' : ' cx-plein') + '">';
     if (!vue.length) {
-      h += '<div class="vide">${T("Aucune facture ne correspond.")}</div>';
+      t += '<div class="vide">${T("Aucune facture ne correspond.")}</div>';
     } else {
       var avecGestes = PEUT_ENC || PEUT_SUP;
-      h += '<div data-pages="factures"><table><thead><tr><th>${T("Client et facture")}</th>'
-        + '<th>${T("Échéance")}</th><th style="text-align:right">${T("Total")}</th><th>${T("Statut")}</th>' + (avecGestes ? '<th></th>' : '') + '</tr></thead><tbody>'
+      t += '<div class="cx-pages" data-pages="factures"><table><thead><tr><th>${T("Facture")}</th><th>${T("Client")}</th>'
+        + '<th>${T("Échéance")}</th><th class="r">${T("Total")}</th><th>${T("Statut")}</th>' + (avecGestes ? '<th></th>' : '') + '</tr></thead><tbody>'
         + vue.map(function(r){
             var gestes = '';
             if (PEUT_ENC) {
@@ -251,22 +263,54 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
             }
             if (PEUT_SUP) gestes += '<button class="mini geste danger" data-suppr="' + esc(r.id) + '">' + '${T("Supprimer")}' + '</button>';
             return '<tr data-id="' + esc(r.id) + '" title="${T("Ouvrir la facture")}">'
+              + '<td><span class="cx-num">' + esc(r.numero) + '</span>'
+              + '<span class="cx-l2">' + (r.commande ? esc(r.commande) + ' · ' : '') + esc(fmtDate(r.date)) + '</span></td>'
               // ⚠ Le cadenas d une facture est celui de SA COMMANDE : c est
               // elle qui se verrouille (detail, expedition, remboursement).
-              + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(r.client)) + '</span>'
-              + '<div style="min-width:0"><div class="rf-nom">' + esc(r.client || '—')
-              + szVerrouCase('orders', r.commandeId || '') + '</div>'
-              + '<div class="rf-sous"><span class="rf-code">' + esc(r.numero) + '</span>'
-              + (r.commande ? '<span>·</span><span>' + esc(r.commande) + '</span>' : '')
-              + '<span>·</span><span>' + esc(fmtDate(r.date)) + '</span></div></div></div></td>'
+              + '<td><div class="cx-qui"><span class="cx-av" aria-hidden="true">' + esc(initiales(r.client)) + '</span>'
+              + '<div style="min-width:0"><b>' + esc(r.client || '—') + '</b>'
+              + szVerrouCase('orders', r.commandeId || '')
+              + (r.courriel ? '<span class="cx-l2">' + esc(r.courriel) + '</span>' : '') + '</div></div></td>'
               + '<td>' + esc(fmtDate(r.echeance)) + '</td>'
-              + '<td style="text-align:right"><span class="rf-mont">' + esc(fmt(r.total)) + '</span></td>'
+              + '<td class="r"><b>' + esc(fmt(r.total)) + '</b></td>'
               + '<td>' + pilule(r.statut, szTd(r.statutLibelle)) + '</td>'
               + (avecGestes ? '<td class="fin">' + gestes + '</td>' : '') + '</tr>';
           }).join('')
         + '</tbody></table></div>';
     }
-    h += '</div>';
+    t += '<div class="cx-pied"><span>' + esc(nbFact(rows.length)) + '</span></div>';
+    t += '</div>';
+
+    /* ── LE PANNEAU D APPUI : encaissement, prochaines echeances, depenses — tout depuis la liste et
+       les tuiles deja recues ; aucune donnee de plus. Absent sur un vieux site. ── */
+    if (TUILES) {
+      var totP = Number(TUILES.total) || 0;
+      var p = '<div class="cx-carte">'
+        + '<h2>${T("Encaissement")}</h2>'
+        + '<div class="cx-ligne"><span>${T("Encaissé")}</span><div class="cx-piste"><i class="ok" style="width:'
+        + pct(Number(TUILES.encaisse) || 0, totP).toFixed(0) + '%"></i></div><span>' + esc(fmt(TUILES.encaisse)) + '</span></div>'
+        + '<div class="cx-ligne"><span>${T("À recevoir")}</span><div class="cx-piste"><i style="width:'
+        + pct(Number(TUILES.aRecevoir) || 0, totP).toFixed(0) + '%"></i></div><span>' + esc(fmt(TUILES.aRecevoir)) + '</span></div>'
+        + '<div class="cx-sep"></div>'
+        + '<h2>${T("Prochaines échéances")}</h2>';
+      if (!aRec.length) p += '<div class="cx-sub">${T("Aucune facture à recevoir.")}</div>';
+      else {
+        p += aRec.slice(0, 4).map(function(r){
+          return '<div class="cx-etat"><span>' + esc(r.client || '—') + ' · ' + esc(r.numero) + '</span>'
+            + '<span><span class="rf-pill ' + (r.statut === 'overdue' ? 'rouge' : 'ambre') + '">' + esc(fmtDate(r.echeance)) + '</span></span></div>';
+        }).join('');
+        p += '<div class="cx-sub">' + (compte.overdue
+          ? esc(compte.overdue > 1 ? '${T("{0} factures en retard.")}'.split('{0}').join(compte.overdue) : '${T("1 facture en retard.")}')
+          : '${T("Aucune facture en retard.")}') + '</div>';
+      }
+      p += '<div class="cx-sep"></div>'
+        + '<h2>' + esc('${T("Dépenses ")}' + (TUILES.annee || '')) + '</h2>'
+        + '<div class="cx-etat"><span>${T("Total saisi")}</span><span>' + esc(fmt(TUILES.depenses)) + '</span></div>'
+        + '</div>';
+      h += '<div class="cx-deux">' + t + p + '</div>';
+    } else {
+      h += t;
+    }
 
     if (ETAT_OUVERT) {
       h += '<div class="voile" id="f-voile"><div class="boite">'

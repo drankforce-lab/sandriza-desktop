@@ -122,4 +122,7 @@ module.exports = {
   'Supprimer le rappel': 'Delete the reminder',
   'Le rappel': 'The reminder',
   'sera supprimé définitivement de votre liste. Cette action est irréversible.': 'will be permanently removed from your list. This action cannot be undone.',
+  // 2026-10-16 : la refonte de la Comptabilité.
+  'ouvre': 'opens',
+  'Historique': 'History',
 };

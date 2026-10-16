@@ -55,26 +55,21 @@ body{background:var(--f-page);color:var(--tx);
 .tete h1{margin:0;font:700 .95rem/1.2 system-ui}
 .tete .ico{display:inline-flex;width:19px;height:19px;color:var(--or,var(--or))}
 .tete .ico svg{width:100%;height:100%}
-.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.onglets{flex:0 0 auto;display:flex;gap:.3rem;padding:.5rem 1.05rem 0;
-  border-bottom:1px solid var(--v08)}
-.onglets button{background:none;border:0;border-bottom:2px solid transparent;color:var(--tx2);
-  font:600 .82rem/1 system-ui;padding:.45rem .7rem;cursor:pointer;border-radius:0}
-.onglets button.on{color:var(--tx);border-bottom-color:var(--or)}
-.barreoutils{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;
-  padding:.55rem 1.05rem .1rem}
-.barreoutils .droite{margin-left:auto;display:flex;gap:.5rem;align-items:center}
-.corps{flex:1 1 auto;min-height:0;padding:.7rem 1.05rem .9rem;overflow-y:auto;
-  display:flex;flex-direction:column;gap:.7rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
-.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
-  padding:.8rem .9rem}
-.carte h2{margin:0 0 .55rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2)}
+/* 2026-10-16 : la grammaire de la Comptabilite (CSS_COMPTA du socle). La tete porte les onglets
+   segmentes (#onglets), le resume (#sous) et le choix de l exercice (#outils, a droite). */
+.tete>.ed-seg{margin-left:.4rem;flex:0 0 auto}
+.tete .cx-actions select{height:2.1rem}
+.tete .cx-actions .gris{font-size:.76rem}
+#corps{overflow-y:auto}
+#corps::-webkit-scrollbar{width:8px}
+#corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* Les deux cartes des resultats grandissent jusqu en bas, mais ne retrecissent pas sous leur contenu :
+   rien ne se coupe en silence. */
+#corps>.cx-deux.rap{flex:1 0 auto;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr)}
+#corps>.cx-deux.rap>.cx-carte{overflow:visible}
 select,input,button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem;cursor:pointer}
-input{cursor:text;text-align:right;font-family:ui-monospace,Consolas,monospace;font-size:.78rem}
+input{cursor:text;text-align:right;font-variant-numeric:tabular-nums;font-size:.78rem}
 select:focus,input:focus,button:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.45;cursor:default}
@@ -82,55 +77,57 @@ button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weigh
 button.prim:hover:not(:disabled){background:var(--or-clair)}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.actif{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
-/* ── Les grands chiffres du haut ─────────────────────────────────────────── */
-.chiffres{display:grid;grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr));gap:.6rem}
-.chiffre{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
-  padding:.6rem .75rem}
-.chiffre .lbl{font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
-.chiffre .val{font:700 1.18rem/1.25 ui-monospace,Consolas,monospace;margin-top:.15rem}
-.chiffre .sous{font-size:.6875rem;color:var(--tx3);margin-top:.1rem}
-.chiffre.pos .val{color:var(--tx-ok)}
-.chiffre.neg .val{color:var(--tx-err2)}
 /* ── Tableaux ────────────────────────────────────────────────────────────── */
 table{width:100%;border-collapse:collapse;font-size:.79rem}
 /* ⚠⚠ UN ETAT FINANCIER EST UN DOCUMENT, PAS UNE LISTE (2026-09-29) — la meme
    lecon que le Livre de comptes : la couche commune (CSS_REFONTE) faisait de
    chaque ligne une carte espacee, et l etat des resultats plus les douze mois
    debordaient de 880 px. Ces regles plus precises rendent le tableau serre. */
-.corps table{border-collapse:collapse;border-spacing:0}
-.corps tbody td{padding:.26rem .35rem;border:0;border-top:1px solid var(--v055);border-radius:0;background:transparent}
-.corps tbody tr:hover>td{background:var(--v03);border-color:var(--v055)}
-.corps thead th{padding:.22rem .35rem;background:transparent}
-.duo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:.7rem;align-items:start}
-.avert summary{cursor:pointer;list-style-position:inside}
+#corps table{border-collapse:collapse;border-spacing:0}
+#corps tbody td{padding:.26rem .35rem;border:0;border-top:1px solid var(--v055);border-radius:0;background:transparent}
+#corps tbody tr:hover>td{background:var(--v03);border-color:var(--v055)}
+#corps thead th{padding:.22rem .35rem;background:transparent}
 .info-bulle{cursor:help;color:var(--tx2);font-weight:400;text-transform:none;letter-spacing:0}
 thead th{text-align:left;padding:.22rem .35rem;font-size:.6875rem;text-transform:uppercase;
-  letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
-thead th.n,tbody td.n{text-align:right;font-family:ui-monospace,Consolas,monospace}
+  letter-spacing:.06em;color:var(--tx3);font-weight:650;border-bottom:1px solid var(--v10)}
+thead th.n,tbody td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 tbody td{padding:.26rem .35rem;border-top:1px solid var(--v055);vertical-align:middle}
+/* L etat des resultats en lignes (.cx-etat) : le dernier, le resultat net, en fort et en couleur. */
+.cx-etat.tot{font-weight:700}
+/* Onze lignes d etat : un peu plus serrees que la grammaire, sinon la vue Resultats depassait de 14 px
+   et faisait paraitre une glissiere (banc-debordement, 2026-10-16). */
+#corps .cx-etat{padding-top:.3rem;padding-bottom:.3rem}
+/* Les sous-totaux arrivent en capitales (« REVENU TOTAL ») : ils se lisent ici en casse de phrase,
+   comme l esquisse, sans toucher au libelle. */
+.cx-etat.tot>span:first-child,.cx-etat.fort>span:first-child{display:inline-block;text-transform:lowercase}
+.cx-etat.tot>span:first-child::first-letter,.cx-etat.fort>span:first-child::first-letter{text-transform:uppercase}
+/* Le graphique des douze mois, DANS le tableau : la barre dit le revenu du mois, sans retirer une colonne. */
+#corps td.barre{width:16%;min-width:4.5rem;padding-right:.6rem}
+#corps td.barre .cx-piste{height:.45rem}
 /* Fenetre basse (detachee, 2026-10-12 : 52 px de trop) : les douze mois et l etat des resultats se resserrent. */
-@media (max-height:820px){.corps tbody td,tbody td{padding-top:.06rem!important;padding-bottom:.06rem!important}}
+@media (max-height:820px){#corps tbody td,tbody td{padding-top:.06rem!important;padding-bottom:.06rem!important}
+  #corps .cx-etat{padding-top:.12rem;padding-bottom:.12rem}}
 tbody tr:hover td{background:var(--v03)}
 tbody tr.tot td{border-top:1px solid var(--v16);font-weight:700}
 tbody tr.sous td{color:var(--tx2)}
 .bon{color:var(--tx-ok)}.mauvais{color:var(--tx-err)}.gris{color:var(--tx2)}
-.pill{display:inline-block;font-size:.6875rem;padding:.05rem .45rem;border-radius:99px;
-  white-space:nowrap;font-weight:700}
-.pill.g{background:rgba(148,163,184,.14);color:var(--tx-94a3b8);font-weight:600}
-.pill.att{background:rgba(234,179,8,.16);color:var(--tx-att)}
-/* ── L'avertissement : visible, pas décoratif ────────────────────────────── */
-.avert{border:1px solid rgba(234,179,8,.45);background:rgba(234,179,8,.09);
-  border-radius:10px;padding:.55rem .75rem;font-size:.78rem;line-height:1.45}
-.avert strong{color:var(--tx-att)}
-.avert ul{margin:.35rem 0 0;padding-left:1.1rem}
+/* ── L'avertissement : une PASTILLE, et son détail au clic ────────────────── */
+.avert{display:flex;flex-direction:column;align-items:flex-start;gap:.45rem}
+.avert>summary{cursor:pointer;list-style:none}
+.avert>summary::-webkit-details-marker{display:none}
+.avert>summary::after{content:"▾";margin-left:.2rem;font-size:.7rem}
+.avert[open]>summary::after{content:"▴"}
+.avert ul{margin:0;padding:.55rem .8rem .55rem 1.8rem;font-size:.78rem;line-height:1.45;color:var(--tx2);
+  border:1px solid var(--sz-bord);border-radius:12px;background:var(--f-carte)}
+.avert ul strong{color:var(--tx-att)}
 .limite{font-size:.75rem;color:var(--tx2);line-height:1.5;
   border-left:2px solid var(--v16);padding-left:.6rem}
 /* ── Le budget ───────────────────────────────────────────────────────────── */
 .mois12{display:grid;grid-template-columns:repeat(12,1fr);gap:.25rem;margin-top:.3rem}
 .mois12 label{display:block;font-size:.6875rem;color:var(--tx3);text-align:center}
 .mois12 input{width:100%;padding:.18rem .2rem;font-size:.7rem}
-.corps td.n input{padding:.12rem .45rem;min-height:0;height:auto}
-.corps td button.mini{padding:0 .45rem;line-height:1.45;min-height:0;height:auto}
+#corps td.n input{padding:.12rem .45rem;min-height:0;height:auto}
+#corps td button.mini{padding:0 .45rem;line-height:1.45;min-height:0;height:auto}
 /* EN LECTURE SEULE, UN CHAMP DESACTIVE SE LIT COMME UNE VALEUR (2026-09-29) :
    les boutons d enregistrement disparaissent, mais un champ qui garde son cadre
    invite a taper — et rien ne se passe. Sans cadre ni fond, c est un chiffre. */
@@ -159,10 +156,9 @@ function pageComptabilite(onglet) {
 <title>${T("Rapports et budget — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.mktstats}</span><h1>${T("Rapports et budget")}</h1>
-  <span class="sous" id="sous"></span></div>
-<div class="onglets" id="onglets"></div>
-<div class="barreoutils" id="outils"></div>
-<div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
+  <div class="ed-seg" id="onglets"></div>
+  <span class="cx-resume" id="sous"></span><div class="cx-actions" id="outils"></div></div>
+<div class="cx" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -269,14 +265,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
     var dispo = D.anneesDisponibles || [];
     var h = '';
     if (ONGLET === 'comparer') {
-      h += '<span class="gris" style="font-size:.76rem">${T("Exercices comparés :")}</span>';
+      h += '<span class="gris">${T("Exercices comparés :")}</span>';
       h += dispo.map(function(a){
         var on = ANNEES.indexOf(a) >= 0;
         return '<button class="mini' + (on ? ' actif' : '') + '" data-an="' + a + '">' + a + '</button>';
       }).join('');
     } else {
       var an = ANNEES.length ? ANNEES[ANNEES.length - 1] : (dispo[0] || 0);
-      h += '<label for="an" class="gris" style="font-size:.76rem">${T("Exercice")}</label>'
+      h += '<label for="an" class="gris">${T("Exercice")}</label>'
          + '<select id="an" aria-label="${T("Exercice financier à afficher")}">'
          + dispo.map(function(a){
              return '<option value="' + a + '"' + (a === an ? ' selected' : '') + '>'
@@ -284,7 +280,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
            }).join('')
          + '</select>';
     }
-    h += '<span class="droite">';
     if (ONGLET === 'budget' && !RO) {
       h += '<button class="mini" id="egal">${T("Répartir également")}</button>'
          + '<button class="prim" id="enr">${T("Enregistrer le budget")}</button>';
@@ -292,9 +287,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
     /* En lecture seule, la raison se dit a la place des boutons absents — une
        pastille dans la barre plutot qu un bloc sous le tableau. */
     if (ONGLET === 'budget' && RO) {
-      h += '<span class="pill att" title="${T("Lecture seule — votre rôle ne permet pas de poser un budget.")}">${T("Lecture seule")}</span>';
+      h += '<span class="rf-pill ambre" title="${T("Lecture seule — votre rôle ne permet pas de poser un budget.")}">${T("Lecture seule")}</span>';
     }
-    h += '</span>';
     elOutils.innerHTML = h;
 
     var sel = document.getElementById('an');
@@ -342,12 +336,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
        ce poste (#114). Sans elle, ce bandeau-ci serait le seul des vingt-six a
        ne pas se replier — et une exception qu on ne peut pas expliquer se lit
        comme un oubli. */
-    h += szTuiles('<div class="chiffres">'
+    h += szTuiles('<div class="cx-kpis">'
       + tuile('${T("Revenu total")}', argent(r.revenuTotal), '${T("Ventes nettes + livraison, retours déduits")}')
       + tuile('${T("Marge brute")}', argent(r.margeBrute),
               r.margePct === null ? '${T("Aucune vente")}' : (pct(r.margePct) + ' ${T("du revenu")}'))
       + tuile('${T("Charges")}', argent(r.chargesTotal), '${T("Dépenses d’exploitation + frais d’encaissement")}')
-      + tuile('${T("Résultat net")}', argent(r.resultatNet), '${T("Avant impôt")}', r.resultatNet >= 0 ? 'pos' : 'neg')
+      + tuile('${T("Résultat net")}', argent(r.resultatNet), '${T("Avant impôt")}', r.resultatNet >= 0 ? 'ok' : 'err')
       + '</div>');
 
     h += avertissements(r);
@@ -355,35 +349,42 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
     /* ── L état des résultats, ligne par ligne ───────────────────────────── */
     /* L etat et les douze mois COTE A COTE : empiles, ils depassaient la
        fenetre (sa regle : aucune barre de defilement). */
-    h += '<div class="duo">';
+    h += '<div class="cx-deux rap">';
     /* La LIMITE du rapport (texte fixe) en bulle sur le titre : un paragraphe
        identique a chaque ouverture poussait les tableaux hors de la fenetre. */
     var lim = (D && D.limite) ? '${T("Ces chiffres se calculent sur ce que la boutique enregistre : ventes, remboursements, dépenses, encaissements et stock. Un apport du propriétaire, un prêt, un amortissement, une paie hors dépenses ou un ajustement demandé par votre comptable n’y figurent pas — ce sera l’objet du livre de comptes complet.")}' : '';
-    h += '<div class="carte"><h2>${T("État des résultats")} ' + r.annee
-      + (lim ? ' <span class="info-bulle" title="' + esc(lim) + '" aria-label="' + esc(lim) + '">ⓘ</span>' : '') + '</h2><table><tbody>'
-      + lig('${T("Ventes brutes de marchandise")}', r.ventesBrutes)
-      + lig('${T("Moins : rabais et coupons")}', -r.rabais, 'sous')
-      + lig('${T("Moins : retours de marchandise")}', -r.retoursMarchandise, 'sous')
-      + lig('${T("Ventes nettes")}', r.ventesNettes, 'tot')
-      + lig('${T("Livraison facturée")}', r.livraison)
-      + lig('${T("Moins : livraison remboursée")}', -r.retoursLivraison, 'sous')
-      + lig('${T("REVENU TOTAL")}', r.revenuTotal, 'tot')
-      + lig('${T("Coût des marchandises vendues")}', -r.coutMarchandises,
-            r.coutComplet ? '' : 'sous')
-      + lig('${T("MARGE BRUTE")}', r.margeBrute, 'tot')
-      + lig('${T("Frais d’encaissement")}', -r.fraisPaiement)
-      + lig('${T("Dépenses d’exploitation")}', -r.depensesExploitation)
-      + lig('${T("RÉSULTAT NET")}', r.resultatNet, 'tot')
-      + '</tbody></table>'
+    h += '<div class="cx-carte"><h2>${T("État des résultats")} ' + r.annee
+      + (lim ? ' <span class="info-bulle" title="' + esc(lim) + '" aria-label="' + esc(lim) + '">ⓘ</span>' : '') + '</h2><div>'
+      + etat('${T("Ventes brutes de marchandise")}', r.ventesBrutes)
+      + etat('${T("Moins : rabais et coupons")}', -r.rabais, 'ret')
+      + etat('${T("Moins : retours de marchandise")}', -r.retoursMarchandise, 'ret')
+      + etat('${T("Ventes nettes")}', r.ventesNettes, 'tot')
+      + etat('${T("Livraison facturée")}', r.livraison, 'ret')
+      + etat('${T("Moins : livraison remboursée")}', -r.retoursLivraison, 'ret')
+      + etat('${T("REVENU TOTAL")}', r.revenuTotal, 'tot')
+      + etat('${T("Coût des marchandises vendues")}', -r.coutMarchandises, 'ret')
+      + etat('${T("MARGE BRUTE")}', r.margeBrute, 'tot')
+      + etat('${T("Frais d’encaissement")}', -r.fraisPaiement, 'ret')
+      + etat('${T("Dépenses d’exploitation")}', -r.depensesExploitation, 'ret')
+      + etat('${T("RÉSULTAT NET")}', r.resultatNet, 'fort ' + (r.resultatNet >= 0 ? 'net-pos' : 'net-neg'))
+      + '</div>'
       + '</div>';
 
-    /* ── Les douze mois ──────────────────────────────────────────────────── */
-    h += '<div class="carte"><h2>${T("Mois par mois")}</h2><table>'
-      + '<thead><tr><th>${T("Mois")}</th><th class="n">${T("Cmd")}</th><th class="n">${T("Revenu")}</th>'
+    /* ── Les douze mois ──────────────────────────────────────────────────────
+       ⚠ LE GRAPHIQUE NE REMPLACE PAS LA TABLE (2026-10-16) : une barre ne dit que le revenu,
+       et la table porte six colonnes (commandes, revenu, cout, marge, depenses, resultat). La
+       barre du revenu prend donc une colonne DE la table : toutes les colonnes restent. */
+    var maxRev = 0;
+    r.mois.forEach(function(m){ if ((Number(m.revenu) || 0) > maxRev) maxRev = Number(m.revenu) || 0; });
+    h += '<div class="cx-carte"><h2>${T("Mois par mois")} <span class="cx-sub">${T("La barre : le revenu du mois.")}</span></h2><table>'
+      + '<thead><tr><th>${T("Mois")}</th><th aria-hidden="true"></th><th class="n">${T("Cmd")}</th><th class="n">${T("Revenu")}</th>'
       + '<th class="n">${T("Coût")}</th><th class="n">${T("Marge")}</th><th class="n">${T("Dépenses")}</th>'
       + '<th class="n">${T("Résultat")}</th></tr></thead><tbody>'
       + r.mois.map(function(m, i){
-          return '<tr><td>' + MOIS[i] + '</td><td class="n">' + (m.commandes || '—') + '</td>'
+          var w = maxRev > 0 ? Math.max(0, Math.round(((Number(m.revenu) || 0) / maxRev) * 100)) : 0;
+          return '<tr><td>' + MOIS[i] + '</td>'
+            + '<td class="barre" aria-hidden="true"><div class="cx-piste"><i style="width:' + w + '%"></i></div></td>'
+            + '<td class="n">' + (m.commandes || '—') + '</td>'
             + '<td class="n">' + argent(m.revenu) + '</td>'
             + '<td class="n">' + argent(m.coutMarchandises) + '</td>'
             + '<td class="n">' + argent(m.margeBrute) + '</td>'
@@ -396,9 +397,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
   }
 
   function tuile(lbl, val, sous, cl){
-    return '<div class="chiffre ' + (cl || '') + '"><div class="lbl">' + esc(lbl) + '</div>'
-      + '<div class="val">' + esc(val) + '</div>'
-      + (sous ? '<div class="sous">' + esc(sous) + '</div>' : '') + '</div>';
+    return '<div class="cx-kpi' + (cl ? ' ' + cl : '') + '"><span>' + esc(lbl) + '</span>'
+      + '<b>' + esc(val) + '</b>'
+      + (sous ? '<small title="' + esc(sous) + '">' + esc(sous) + '</small>' : '') + '</div>';
+  }
+  /* Une ligne de l etat des resultats : retrait (ret) pour ce qui s ajoute ou se retranche, gras (tot)
+     pour un sous-total, et le resultat net en fort, dans sa couleur. */
+  function etat(lbl, montant, cl){
+    var c = cl || '';
+    var coul = c.indexOf('net-neg') >= 0 ? ' class="cx-neg"' : (c.indexOf('net-pos') >= 0 ? ' class="cx-pos"' : '');
+    return '<div class="cx-etat ' + c + '"><span>' + esc(lbl) + '</span><span' + coul + '>' + argent(montant) + '</span></div>';
   }
   function lig(lbl, montant, cl){
     return '<tr class="' + (cl || '') + '"><td>' + esc(lbl) + '</td>'
@@ -421,9 +429,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
     ];
     var h = '';
     if (c.resultats.length === 1) {
-      h += '<div class="avert">${T("Un seul exercice est choisi : il n’y a rien à comparer. Cochez une autre année dans la barre du haut.")}</div>';
+      h += '<div class="cx-barre"><span class="cx-averti" title="${T("Un seul exercice est choisi : il n’y a rien à comparer. Cochez une autre année dans la barre du haut.")}">'
+        + '<span>${T("Un seul exercice est choisi : il n’y a rien à comparer. Cochez une autre année dans la barre du haut.")}</span></span></div>';
     }
-    h += '<div class="carte"><h2>${T("Exercices côte à côte")}</h2><table>'
+    h += '<div class="cx-carte"><h2>${T("Exercices côte à côte")}</h2><table>'
       + '<thead><tr><th>${T("Poste")}</th>'
       + c.resultats.map(function(r){ return '<th class="n">' + r.annee + '</th>'; }).join('')
       + (c.resultats.length > 1 ? '<th class="n">${T("Écart")}</th><th class="n">${T("Variation")}</th>' : '')
@@ -449,13 +458,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
         }).join('')
       + '</tbody></table>'
       + (c.resultats.length > 1
-          ? '<div class="gris" style="font-size:.73rem;margin-top:.5rem">'
+          ? '<div class="cx-sub">'
             + '${T("Écart et variation portent sur les deux derniers exercices affichés.")}</div>'
           : '')
       + '</div>';
 
     if (c.resultats.length > 1) {
-      h += '<div class="carte"><h2>${T("Cumul des")} ' + c.resultats.length + ' ${T("exercices")}</h2><table><tbody>'
+      h += '<div class="cx-carte"><h2>${T("Cumul des")} ' + c.resultats.length + ' ${T("exercices")}</h2><table><tbody>'
         + lig('${T("Revenu total")}', c.cumul.revenuTotal)
         + lig('${T("Marge brute")}', c.cumul.margeBrute)
         + lig('${T("Charges totales")}', c.cumul.chargesTotal)
@@ -493,8 +502,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
     var nbVides = postes.filter(function(p){ return posteVide(p, reelPar[p.cle]); }).length;
 
     var h = '';
-    h += '<div class="carte"><h2>${T("Budget")} ' + (D.budget ? D.budget.annee : '') + '</h2>'
-      + '<div class="gris" style="font-size:.75rem;margin-bottom:.5rem">'
+    h += '<div class="cx-carte"><h2>${T("Budget")} ' + (D.budget ? D.budget.annee : '') + '</h2>'
+      + '<div class="cx-sub">'
       + '${T("Le prévu est comparé au réel jusqu’à")} ' + new Date(2000, (e.jusquAuMois || 12) - 1, 1).toLocaleDateString('${LIEU()}', { month: 'long' })
       + ' ${T("inclusivement — comparer douze mois de budget à quelques mois de ventes annoncerait une catastrophe tous les printemps.")}'
       + '</div>'
@@ -504,7 +513,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
       + postes.filter(function(p){ return VOIR_VIDES || !posteVide(p, reelPar[p.cle]); })
           .map(function(p){ return ligneBudget(p, reelPar[p.cle]); }).join('')
       + '</tbody></table>'
-      + (nbVides ? '<div style="margin-top:.45rem"><button class="mini" id="voir-vides">'
+      + (nbVides ? '<div><button class="mini" id="voir-vides">'
           + (VOIR_VIDES ? '${T("Masquer les postes sans budget ni dépense")}'
                         : '${T("Afficher les")} ' + nbVides + ' ' + szPl(nbVides, '${T("poste sans budget ni dépense")}', '${T("postes sans budget ni dépense")}'))
           + '</button></div>' : '')
@@ -531,7 +540,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
     var annuel = douze.reduce(function(s, v){ return s + (parseFloat(v) || 0); }, 0);
     var ouvert = !!OUVERTS[p.cle];
     var h = '<tr><td>' + esc(nomPoste(p))
-      + (p.sens === 'revenu' ? ' <span class="pill g">${T("revenu")}</span>' : '')
+      + (p.sens === 'revenu' ? ' <span class="rf-pill bleu">${T("revenu")}</span>' : '')
       + '</td>'
       + '<td class="n"><input data-an="' + esc(p.cle) + '" value="' + (annuel ? szArgentNombre(annuel, 2) : '')
       + '" placeholder="0${SEP_DEC()}00" aria-label="' + esc(nomPoste(p)) + ' — ${T("budget annuel")}"'
@@ -540,7 +549,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
       + '<td class="n">' + (l ? argent(l.reel) : '—') + '</td>';
     if (l && l.budgete) {
       h += '<td class="n ' + (l.favorable ? 'bon' : 'mauvais') + '">' + argent(l.ecart)
-        + (l.partiel && p.sens === 'charge' ? ' <span class="pill att" title="${T("Le réel de ce poste est annuel ; le prévu est coupé au mois. L’écart est indicatif.")}">${T("partiel")}</span>' : '')
+        + (l.partiel && p.sens === 'charge' ? ' <span class="rf-pill ambre" title="${T("Le réel de ce poste est annuel ; le prévu est coupé au mois. L’écart est indicatif.")}">${T("partiel")}</span>' : '')
         + '</td>';
     } else {
       h += '<td class="n gris">${T("non budgété")}</td>';
@@ -647,8 +656,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
     /* Ouvert d office seulement sous l etat des RESULTATS (r fourni) : c est la
        que le chiffre surestime se lit. Sous le budget, replie. */
     var grave = !!r && A.some(function(a){ return a.code === 'cout-inconnu'; });
-    return '<details class="avert"' + (grave ? ' open' : '') + '><summary><strong>${T("Ce que ces chiffres ne disent pas")}</strong>'
-      + ' <span class="gris">— ' + nbPts + ' ' + szPl(nbPts, '${T("point")}', '${T("points")}') + '</span></summary><ul>' + items + '</ul></details>';
+    /* La PASTILLE (.cx-averti) est le resume ; le detail entier s ouvre dessous, au clic. */
+    return '<details class="avert"' + (grave ? ' open' : '') + '><summary class="cx-averti"><b>' + nbPts + ' ' + szPl(nbPts, '${T("point")}', '${T("points")}') + '</b>'
+      + '<span>${T("Ce que ces chiffres ne disent pas")}</span></summary><ul>' + items + '</ul></details>';
   }
 
   /* ⚠ LA LIMITE VIENT DU RAPPORT (champ << limite >>), PAS D UNE CHAINE ECRITE

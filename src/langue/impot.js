@@ -283,5 +283,15 @@ module.exports = {
   /* ── TPS / TVQ EN DEUX COLONNES (2026-09-26) ── */
   'Par période': 'By period',
   'Par trimestre': 'By quarter',
-  'Par mois': 'By month'
+  'Par mois': 'By month',
+
+  /* ── LA GRAMMAIRE DE LA COMPTABILITE (2026-10-16) ── */
+  '· détail': '· details',
+  'Documents de l’exercice': 'Fiscal year documents',
+  'À titre indicatif seulement.': 'For information only.',
+  'Sous le seuil de': 'Below the threshold of',
+  'Seuil de': 'Threshold of',
+  'dépassé': 'exceeded',
+  '· inscription obligatoire': '· registration required',
+  'PST / RST perçues hors Québec': 'PST / RST collected outside Quebec'
 };

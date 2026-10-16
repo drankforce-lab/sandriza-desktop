@@ -333,4 +333,19 @@ module.exports = {
   'sera retiré de l’annuaire. Les prochaines dépenses à son nom ne seront plus classées automatiquement. Les dépenses déjà saisies ne sont pas modifiées.': 'will be removed from the directory. Future expenses under this name will no longer be classified automatically. Expenses already entered are not changed.',
   'Rétablir le classement': 'Restore classification',
   'Retirer le fournisseur': 'Remove supplier',
+
+  /* ── LA REFONTE DE LA COMPTABILITE (2026-10-16) ─────────────────────────
+     ⚠ « Exercice » = l annee comptable : « Fiscal year ». « Joint » / « Manquant »
+     disent l etat du RECU d une ligne. Les trois chiffres de l annuaire etaient
+     ecrits en dur, sans traduction : ils passent ici. */
+  'Lecture seule': 'Read only',
+  'Exercice': 'Fiscal year',
+  'Lire une facture': 'Read an invoice',
+  'TPS': 'GST',
+  'TVQ': 'QST',
+  'Joint': 'Attached',
+  'Manquant': 'Missing',
+  'fournisseurs': 'suppliers',
+  'vos corrections': 'your corrections',
+  'elles priment': 'they take precedence',
 };

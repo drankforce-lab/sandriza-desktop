@@ -179,4 +179,18 @@ module.exports = {
   'Le comptable': 'Accountant',
   'sera retiré du carnet. Les liens de partage déjà envoyés restent actifs jusqu’à leur échéance ou leur révocation.': 'will be removed from the address book. Share links already sent remain active until they expire or are revoked.',
   'Retirer du carnet': 'Remove from address book',
+
+  /* ── LA GRAMMAIRE DE LA COMPTABILITE (2026-10-16) ── */
+  'Comptables au carnet': 'Accountants in address book',
+  'destinataires possibles d’un lien': 'possible recipients of a link',
+  'Exercices disponibles': 'Available fiscal years',
+  'Registre des liens injoignable': 'Link registry unreachable',
+  '· détail': '· details',
+  'Un seul lien pour tout l’exercice : le révoquer le coupe pour tous ses destinataires.': 'One link for the whole fiscal year: revoking it cuts it off for all its recipients.',
+  'Réservé au super-administrateur.': 'Super administrator only.',
+  'Adresse à transmettre': 'Address to send',
+  'Envoyé à': 'Sent to',
+  'Aucun destinataire enregistré': 'No recipient recorded',
+  'Copier le lien': 'Copy link',
+  'un lien par exercice, à durée limitée': 'one link per fiscal year, time-limited',
 };
