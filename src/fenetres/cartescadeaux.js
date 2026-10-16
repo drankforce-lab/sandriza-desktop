@@ -495,7 +495,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
         if (gS.destinataire) dS.push(['${T("Destinataire")}', gS.destinataire]);
         szConfirmer({ danger: true, titre: '${T("Supprimer la carte-cadeau")}',
           texte: '${T("La carte-cadeau")}' + ' « ' + (gS.code || '') + ' » ' + '${T("sera supprimée et ne pourra plus être utilisée en boutique.")}'
-            + (gS.solde > 0 ? ' ' + '${T("Son solde restant sera perdu.")}' : ''),
+            + (gS.solde > 0 ? ' ' + '${T("Son solde restant sera perdu.")}' : '')
+            // (2026-10-15, vérifié au serveur : turso-proxy recopie la carte dans corbeille_serveur, catégorie « finances ».)
+            + ' ' + '${T("Elle reste restaurable pendant 30 jours depuis Gardien → Corbeille.")}',
           details: dS,
           oui: '${T("Supprimer la carte")}' }).then(function(ok){ if (ok) { SUPPR_ARME = true; bsu.onclick(); } });
         return;

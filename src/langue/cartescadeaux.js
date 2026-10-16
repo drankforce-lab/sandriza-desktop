@@ -170,4 +170,5 @@ module.exports = {
   'La carte-cadeau': 'The gift card',
   'sera supprimée et ne pourra plus être utilisée en boutique.': 'will be deleted and can no longer be used in the store.',
   'Son solde restant sera perdu.': 'Its remaining balance will be lost.',
+  'Elle reste restaurable pendant 30 jours depuis Gardien → Corbeille.': 'It can be restored for 30 days from Guard → Recycle bin.',
 };
