@@ -4246,6 +4246,10 @@ thead th{font-size:.7rem}
    Ne dans l editeur de campagne (campagnes.js), mis en commun pour les autres fenetres : boutons a choix (.ed-seg),
    boutons d en-tete (.ed-bt), et les LISTES aerees (.ls, .ls-tete, .ls-rang). Tout en variables du socle. */
 const CSS_RESPIRE = `
+/* (2026-10-15, trouvé par l audit des boutons) L attribut hidden CACHE, toujours. Sans cette règle,
+   .mini{display:inline-flex} et ses voisines l emportaient : « Réinitialiser » de la Page d accueil restait
+   affiché — et cliquable — en lecture seule, alors que le code le cachait. */
+[hidden]{display:none!important}
 .ed-pill{font-size:.74rem;padding:.2rem .65rem;border-radius:999px;background:var(--f-pill);color:var(--tx2);
   border:1px solid var(--sz-bord-fort);white-space:nowrap}
 .ed-bt{height:2.4rem;padding:0 1rem;border-radius:10px;font-weight:600;display:inline-flex;align-items:center;gap:.45rem;white-space:nowrap}

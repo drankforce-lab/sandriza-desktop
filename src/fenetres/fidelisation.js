@@ -1726,7 +1726,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
 
   corps.addEventListener('click', function(ev){
     var t = ev.target;
-    if (!t || !t.closest || t.closest('.boite')) return;
+    /* ⚠ (2026-10-15, trouvé par l audit des boutons) Ce filtre ignorait TOUT clic fait dans une .boite —
+       or l editeur de sondage EST une .boite, et ses gestes (+ Ajouter une question, Creer / Enregistrer,
+       ✕, Annuler) sont traites PLUS BAS dans ce gestionnaire : ils ne faisaient rien. Editeur ouvert, le
+       clic passe. */
+    if (!t || !t.closest || (t.closest('.boite') && !EDIT)) return;
 
     var og = t.closest('[data-onglet]');
     if (og) { ONGLET = og.getAttribute('data-onglet'); ARME = ''; AMBARME = ''; PARARME = ''; dessiner(); if (ONGLET === 'points') chargerPoints(); return; }
