@@ -22,6 +22,7 @@
 /* ==== PROLOGUE ==== */
 (function () {
   var REP = __REPONSES__;
+  var EMP = REP.__emprunts || {}; delete REP.__emprunts;
   var A = window.__ab = { phase: 'charge', appels: [], natifs: [], hors: [], conf: [], err: [], errCharge: [] };
   function court(v) {
     var s;
@@ -53,8 +54,9 @@
       var nom = String(op || '');
       var args = Array.prototype.slice.call(arguments, 1);
       var duJeu = Object.prototype.hasOwnProperty.call(REP, nom);
-      A.appels.push({ op: nom, jeu: duJeu, phase: A.phase, args: court(args) });
-      return Promise.resolve(duJeu ? copie(REP[nom]) : { ok: true });
+      var emprunt = !duJeu && Object.prototype.hasOwnProperty.call(EMP, nom);
+      A.appels.push({ op: nom, jeu: duJeu ? true : (emprunt ? 'emprunt' : false), phase: A.phase, args: court(args) });
+      return Promise.resolve(duJeu ? copie(REP[nom]) : (emprunt ? copie(EMP[nom]) : { ok: true }));
     },
     menuLabels: function () { return Promise.resolve(REP['__menuLabels'] || ['Fichier', 'Affichage', 'Aide']); },
     langue: function () { return Promise.resolve(REP['__langue'] || 'fr'); },

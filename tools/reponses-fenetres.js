@@ -1877,6 +1877,8 @@ const JEU = {
         sandbox:    { appId: 'sq0idb-abc', locId: 'LSANDBOX1', jeton: { defini: true, fin: '9f2c' } },
         production: { appId: 'sq0idp-xyz', locId: 'LPROD1',    jeton: { defini: true, fin: 'a41d' } },
         hebergee: true, afterpay: false, applepay: true, express: false },
+      // forme de _sqTesterCoeur (payments.js) : { ok, emplacements: [{ id, nom }] }
+      'config:paiements:tester': { ok: true, emplacements: [{ id: 'LPROD1', nom: 'Boutique Sandriza' }] },
     } },
     { nom: 'bac à sable sans jeton, lecture seule', reponses: {
       identite: IDENTITE,
@@ -1884,6 +1886,7 @@ const JEU = {
         sandbox:    { appId: '', locId: '', jeton: { defini: false, fin: '' } },
         production: { appId: '', locId: '', jeton: { defini: false, fin: '' } },
         hebergee: false, afterpay: false, applepay: false, express: false },
+      'config:paiements:tester': { ok: false, motif: 'sans_jeton' },
     } },
   ],
 
@@ -5147,7 +5150,8 @@ const JEU = {
            surcouche cessait de s’ouvrir, le rendu resterait maigre — et VERT. C’est
            exactement « un écran non regardé qui se lit comme un écran propre ». */
         exige: ['Appliquer l’import'],
-        reponses: { identite: IDENTITE, 'catalogio:etat': etat({ imp: IMP }), 'catalogio:lignes': LIGNES } },
+        reponses: { identite: IDENTITE, 'catalogio:etat': etat({ imp: IMP }), 'catalogio:lignes': LIGNES,
+          'catalogio:appliquer': { ok: true, rapport: RAP } } }, // forme de _appliquerCoeur (catalogio.js)
       { nom: 'rapport d un import termine', id: 'rapport',
         reponses: { identite: IDENTITE, 'catalogio:etat': etat({ rapport: RAP }),
           'catalogio:avis': { ok: true, sent: 3, rapport: RAP } } },

@@ -82,7 +82,7 @@ const PROLOGUE_BRUT = _morceau('PROLOGUE');
 const EPILOGUE_BRUT = _morceau('EPILOGUE');
 /* ⚠ REMPLACEMENT PAR FONCTION : dans une chaîne de remplacement, « $& » est un motif. */
 const prologue = (jeu) => '<script>\n' + PROLOGUE_BRUT.replace('__REPONSES__',
-  () => JSON.stringify(Object.assign({}, OPS_SOCLE, jeu.reponses || {})).replace(/<\/script/gi, '<\\/script')) + '\n</script>';
+  () => JSON.stringify(Object.assign({}, OPS_SOCLE, jeu.reponses || {}, { __emprunts: jeu.emprunts || {} })).replace(/<\/script/gi, '<\\/script')) + '\n</script>';
 const epilogue = (nom, scen) => '<script>\n' + EPILOGUE_BRUT
   .split('__NOM__').join(JSON.stringify(nom))
   .split('__SCEN__').join(JSON.stringify(scen)) + '\n</script>';
@@ -178,7 +178,23 @@ function fenetres() {
     if (!fabrique) continue;
     const brut = REPONSES[nom + '.js'];
     let cas;
-    if (Array.isArray(brut) && brut.length) cas = brut.map((j, i) => ({ i, nom: j.nom || ('cas ' + i), jeu: j }));
+    if (Array.isArray(brut) && brut.length) {
+      /* ⚠ LES EMPRUNTS (2026-10-16). Chaque scénario ne simule que l'onglet qu'il
+         dessine ; un clic sur l'onglet VOISIN recevait {ok:true} vide et
+         l'audit criait à l'exception — les 85 « erreurs » de la 52ᵉ séance, toutes
+         de ce type. Une op absente d'un scénario reçoit donc la réponse d'un
+         scénario voisin de la MÊME fenêtre (de préférence une qui réussit),
+         marquée « ~ » dans le rapport. Rien n'est emprunté hors de la fenêtre, et
+         reponses-fenetres.js n'est pas modifié : les autres bancs ne voient rien. */
+      const voisines = {};
+      for (const j of brut) for (const [op, r] of Object.entries(j.reponses || {}))
+        if (!(op in voisines) || (voisines[op] && voisines[op].ok === false && !(r && r.ok === false))) voisines[op] = r;
+      cas = brut.map((j, i) => {
+        const emprunts = {};
+        for (const [op, r] of Object.entries(voisines)) if (!(op in (j.reponses || {}))) emprunts[op] = r;
+        return { i, nom: j.nom || ('cas ' + i), jeu: Object.assign({}, j, { emprunts }) };
+      });
+    }
     else if (brut && typeof brut === 'object') cas = [{ i: 0, nom: 'unique', jeu: { id: '', reponses: brut } }];
     else cas = [{ i: 0, nom: 'sans jeu', jeu: { id: '', reponses: {} } }];
     if (JEU_N !== null) cas = cas.filter((c) => c.i === Math.min(JEU_N, cas.length - 1));
@@ -387,11 +403,11 @@ function rapport(res, pages, rates, lotsMorts, duree, nomsFen) {
     if (k === 'ERREUR') {
       const defaut = (x.ops || []).some((o) => !o.jeu && !OPS_FOND.has(o.op));
       W.erreurs.push({ scen: p.scen, bouton, msg: (x.err || [x.panne]).join(' / '),
-        ops: (x.ops || []).map((o) => o.op + (o.jeu ? '' : '*')), reponseParDefaut: defaut, instable: !!x.instable });
+        ops: (x.ops || []).map((o) => o.op + (o.jeu === 'emprunt' ? '~' : o.jeu ? '' : '*')), reponseParDefaut: defaut, instable: !!x.instable });
     } else if (k === 'MUET') {
       W.muets.push({ scen: p.scen, bouton, dejaActif: !!x.deja, focus: x.focus || '', instable: !!x.instable });
     } else if (k === 'APPEL') {
-      W.appels.push({ scen: p.scen, bouton, ops: (x.ops || []).filter((o) => !OPS_FOND.has(o.op)).map((o) => o.op + (o.jeu ? '' : '*') + ' ' + o.args),
+      W.appels.push({ scen: p.scen, bouton, ops: (x.ops || []).filter((o) => !OPS_FOND.has(o.op)).map((o) => o.op + (o.jeu === 'emprunt' ? '~' : o.jeu ? '' : '*') + ' ' + o.args),
         conf: (x.conf || []).map((c) => c.titre + ' → ' + c.oui), hors: x.hors || [] });
     } else {
       W.visibles.push({ scen: p.scen, bouton, muts: x.muts ? x.muts.n : 0, ex: x.muts ? x.muts.ex : [], coche: !!x.coche, valeur: !!x.valeur,
@@ -488,7 +504,8 @@ function rapport(res, pages, rates, lotsMorts, duree, nomsFen) {
   doc.opsInconnues = inconnues2;
   doc.legende = { ERREUR: 'exception pendant ~' + OBS + ' ms après le clic', APPEL: 'au moins une op du pont (hors minuteries du socle)',
     VISIBLE: 'DOM changé, valeur de champ changée, case cochée, boîte, effet natif (szPont.*) ou hors page (presse-papier, fichier, lien…)', MUET: 'rien du tout : suspect',
-    etoile: 'op* = répondue par défaut {ok:true}, absente du jeu de réponses' };
+    etoile: 'op* = répondue par défaut {ok:true}, absente du jeu de réponses',
+    tilde: 'op~ = réponse empruntée à un scénario voisin de la même fenêtre' };
   fs.writeFileSync(RAPPORT_F, JSON.stringify(doc, null, 1), 'utf8');
   L('   rapport : ' + path.relative(RACINE, RAPPORT_F) + (FILTRE ? ' (fusionné : ' + T2.fenetres + ' fenêtre(s) au total)' : ''));
 }
