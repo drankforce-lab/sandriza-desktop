@@ -184,4 +184,9 @@ module.exports = {
   'modules · il faudrait une': 'modules · you would need a',
   // La refonte, comme l'Inventaire (2026-09-25).
   'Produit Stock Ajouter': 'Product Stock Add',
+  // 2026-10-15 : confirmations en boîte à part.
+  "Vider la file d’impression": "Clear the print queue",
+  "Toutes les lignes de la file d’impression seront retirées. Aucune étiquette ne sera imprimée et aucun stock n’est modifié.": "Every line in the print queue will be removed. No labels will be printed and no stock is changed.",
+  "Lignes": "Lines",
+  "Vider la file": "Clear the queue",
 };

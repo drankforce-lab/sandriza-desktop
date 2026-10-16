@@ -7,8 +7,8 @@
  * statut, pages mesurees (JS_PAGES). Cliquer une ligne ouvre la facture dans SA
  * fenêtre native (une par facture, celle qui existe déjà — factures:ouvrir).
  * Depuis 1.61.0, c'est l'écran FACTURATION AU COMPLET : les six tuiles,
- * encaisser/annuler un paiement (factures:payer), supprimer (confirmée en
- * deux clics, factures:supprimer) et l'état de compte client (factures:etat).
+ * encaisser/annuler un paiement (factures:payer), supprimer (confirmée dans
+ * une boîte à part, szConfirmer, factures:supprimer) et l'état de compte client (factures:etat).
  * Les règles vivent au site (Billing._facture*Coeur) — la fenêtre ne décide
  * de rien. Sur un VIEUX site, tuiles et gestes sont absents de la réponse :
  * la fenêtre les cache et reste la liste de consultation qu'elle était.
@@ -249,7 +249,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
                  plus longue laisse l autre moitie en francais. */
               else if (r.statut === 'paid') gestes += '<button class="mini geste" data-depayer="' + esc(r.id) + '" title="${T("Annuler le statut de paiement")}">${T("Annuler le paiement")}</button> ';
             }
-            if (PEUT_SUP) gestes += '<button class="mini geste danger" data-suppr="' + esc(r.id) + '">' + (SUPPR_ARME === r.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
+            if (PEUT_SUP) gestes += '<button class="mini geste danger" data-suppr="' + esc(r.id) + '">' + '${T("Supprimer")}' + '</button>';
             return '<tr data-id="' + esc(r.id) + '" title="${T("Ouvrir la facture")}">'
               // ⚠ Le cadenas d une facture est celui de SA COMMANDE : c est
               // elle qui se verrouille (detail, expedition, remboursement).
@@ -354,13 +354,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
     var bsup = t.closest('[data-suppr]');
     if (bsup) {
       var idS = bsup.getAttribute('data-suppr');
-      /* Suppression ARMEE en deux clics : pas de boite, mais jamais un seul
-         clic pour un geste irreversible (la facture est retiree de partout,
-         y compris du compte client et du nuage). */
+      /* Suppression CONFIRMEE dans une boite a part (szConfirmer, 2026-10-15) :
+         jamais un seul clic pour un geste irreversible (la facture est retiree
+         de partout, y compris du compte client et du nuage). */
       if (SUPPR_ARME !== idS) {
-        SUPPR_ARME = idS;
-        dessiner();
-        dire('${T("Cliquez « Confirmer ? » pour supprimer définitivement — la facture sera retirée de partout, y compris du compte client.")}', 'att');
+        var fS = (LIGNES || []).filter(function(x){ return x.id === idS; })[0] || {};
+        szConfirmer({ danger: true, titre: '${T("Supprimer la facture")}',
+          texte: '${T("La facture")}' + ' ' + (fS.numero || '') + ' ' + '${T("sera supprimée définitivement. Elle sera retirée de partout, y compris du compte client. Cette action est irréversible.")}',
+          details: [['${T("Client")}', fS.client || '—'], ['${T("Commande")}', fS.commande || '—'],
+            ['${T("Total")}', fmt(fS.total)], ['${T("Statut")}', szTd(fS.statutLibelle) || '—']],
+          oui: '${T("Supprimer la facture")}' }).then(function(ok){ if (ok) { SUPPR_ARME = idS; bsup.click(); } });
         return;
       }
       SUPPR_ARME = '';

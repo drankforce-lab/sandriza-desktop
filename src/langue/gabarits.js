@@ -122,4 +122,8 @@ module.exports = {
   'Attributions enregistrées.': 'Assignments saved.',
   "En-tête : couleur du sous-titre": "Header: subtitle colour",
   " Effet animé CSS (en-tête)": " Animated CSS effect (header)",
+  // 2026-10-15 : confirmations en boîte à part.
+  "Supprimer le gabarit": "Delete the template",
+  "Le gabarit": "The template",
+  "sera supprimé définitivement. Les courriels qui lui étaient attribués utiliseront le gabarit par défaut. Cette action est irréversible.": "will be permanently deleted. Emails assigned to it will use the default template. This action cannot be undone.",
 };

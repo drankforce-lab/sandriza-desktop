@@ -518,7 +518,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return '<button class="b" data-edit="'+esc(s.id)+'"><span class="ic">✎</span> ${T("Modifier")}</button>'
       + (s.active ? '<button class="b" data-mfa="'+esc(s.id)+'" title="${T("Gérer l’authentification à deux facteurs")}"><span class="ic">🔐</span> MFA</button>' : '')
       + (s.active && !s.estSuper ? '<button class="b" data-invite="'+esc(s.id)+'" title="${T("Renvoyer un mot de passe temporaire par courriel")}"><span class="ic">📧</span> ${T("Renvoyer")}</button>' : '')
-      + (peutSuppr ? '<button class="b dgr" data-del="'+esc(s.id)+'">'+(DELU===s.id?'${T("✓ Confirmer")}':'${T("Supprimer")}')+'</button>' : '');
+      + (peutSuppr ? '<button class="b dgr" data-del="'+esc(s.id)+'">'+'${T("Supprimer")}'+'</button>' : '');
   }
 
   // ── LA LISTE ─────────────────────────────────────────────────────
@@ -633,7 +633,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var mfas=corps.querySelectorAll('[data-mfa]'); for (var mm=0;mm<mfas.length;mm++) mfas[mm].onclick=function(){ ouvrirMfa(this.getAttribute('data-mfa')); };
     var invs=corps.querySelectorAll('[data-invite]'); for (var v=0;v<invs.length;v++) invs[v].onclick=function(){ inviterCompte(this.getAttribute('data-invite')); };
     var dels=corps.querySelectorAll('[data-del]'); for (var d=0;d<dels.length;d++) dels[d].onclick=function(){ var id=this.getAttribute('data-del');
-      if (DELU===id){ DELU=''; supprimerCompte(id); } else { DELU=id; vueUsers(); dire('${T("Cliquez encore pour supprimer ce compte.")}', 'att'); } };
+      if (DELU===id){ DELU=''; supprimerCompte(id); } else { var bDel=this; confirmerSuppression(id).then(function(ok){ if (ok) { DELU=id; bDel.onclick(); } }); } };
 
     /* ══ LE CLIC DROIT SUR UNE LIGNE (#110) ═══════════════════════════════════
        ⚠ IL N OFFRE QUE CE QUE LA LIGNE OFFRE DEJA, aux memes conditions : un
@@ -719,8 +719,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (quoi === 'off')    { basculerActif(id, false); return; }
       /* ⚠ LA SUPPRESSION GARDE SA CONFIRMATION EN DEUX TEMPS, celle du bouton :
          un menu contextuel rend le geste plus rapide, pas plus definitif. */
-      if (quoi === 'del')    { DELU = id; vueUsers(); dire('${T("Cliquez « Supprimer » encore une fois pour confirmer.")}', 'att'); }
+      if (quoi === 'del')    { confirmerSuppression(id).then(function(ok){ if (ok) { DELU=''; supprimerCompte(id); } }); }
     };
+  }
+
+  /* 2026-10-15 : la confirmation de suppression d un compte, en boite a part
+     (le bouton de la ligne et le clic droit passent par la meme). */
+  function confirmerSuppression(id){
+    var cS = ((D && D.comptes) || []).filter(function(x){ return x.id === id; })[0] || {};
+    return szConfirmer({ danger: true, titre: '${T("Supprimer le compte")}',
+      texte: '${T("Le compte")}' + ' « ' + (cS.nom || cS.email || id) + ' » ' + '${T("sera supprimé. Cette personne ne pourra plus se connecter à l’administration. Cette action est irréversible.")}',
+      details: [['${T("Courriel")}', String(cS.email || '—')], ['${T("Rôle")}', String(cS.roleLabel || cS.role || '—')]],
+      oui: '${T("Supprimer le compte")}' });
   }
 
   /* ⚠ TROIS FACONS DE LE REFERMER, et c est deliberé : un menu qui reste ouvert
@@ -1440,8 +1450,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var SESSU = '';
   function fermerSessions(id){
     if (OCCUPE) return;
-    if (SESSU !== id){ SESSU = id; dire('${T("Cliquez encore une fois pour fermer ses sessions — son travail non enregistré sera perdu.")}', 'att');
-      setTimeout(function(){ if (SESSU === id) SESSU = ''; }, 6000); return; }
+    if (SESSU !== id){
+      var cF = ((D && D.comptes) || []).filter(function(x){ return x.id === id; })[0] || {};
+      szConfirmer({ danger: true, titre: '${T("Fermer les sessions")}',
+        texte: '${T("Toutes les sessions ouvertes du compte")}' + ' « ' + (cF.nom || cF.email || id) + ' » ' + '${T("seront fermées et une reconnexion sera exigée. Son travail non enregistré sera perdu.")}',
+        oui: '${T("Fermer les sessions")}' }).then(function(ok){ if (ok) { SESSU = id; fermerSessions(id); } });
+      return; }
     SESSU = ''; OCCUPE=true; dire('${T("Fermeture des sessions…")}');
     appeler('securite:mfa:sessions',[id]).then(function(r){ OCCUPE=false;
       if (r&&r.ok){ fermerMfa(); recharger('${T("Sessions fermées — reconnexion exigée pour ")}'+(r.nom||'')+'.', 'bon'); }

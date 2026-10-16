@@ -318,4 +318,9 @@ module.exports = {
   // La refonte (2026-09-25).
   'Traitement': 'Processing',
   'Règlement': 'Settlement',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Marquer le colis comme reçu': 'Mark parcel as received',
+  'Le colis de retour de la commande': 'The return parcel for order',
+  'sera marqué comme reçu en entrepôt. Le client peut en être avisé par courriel.': 'will be marked as received at the warehouse. The customer may be notified by email.',
+  'Marquer comme reçu': 'Mark as received',
 };

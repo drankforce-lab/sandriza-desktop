@@ -328,4 +328,8 @@ module.exports = {
   'Numéro invalide.': 'Invalid number.',
   'Bloquer ce numéro': 'Block this number',
   'Confirmer le blocage ?': 'Confirm block?',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Bloquer le numéro': 'Block the number',
+  'Le numéro': 'The number',
+  'sera bloqué : ses appels et ses textos ne seront plus acceptés. Vous pourrez le débloquer en tout temps dans l’onglet « Numéros bloqués ».': 'will be blocked: its calls and text messages will no longer be accepted. You can unblock it at any time in the “Blocked numbers” tab.',
 };

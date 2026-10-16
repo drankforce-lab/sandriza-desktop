@@ -16,7 +16,7 @@
  * ⚠ CE QUE L'ON CHANGE ICI EST VU PAR LE CLIENT : la fiche produit de la
  * boutique annonce « Offre valide jusqu'au … » (période fixe) ou « Jusqu'à
  * épuisement de l'inventaire », et le régime interdit le retour. Ce n'est donc
- * pas un classement interne — d'où le retrait ARMÉ en deux clics, et le résumé
+ * pas un classement interne — d'où le retrait CONFIRMÉ dans une boîte à part, et le résumé
  * avant d'appliquer un lot.
  *
  * ⚠ AUCUNE IMAGE NE PASSE PAR LE PONT (voir _produitLigne) : une liste n'a pas
@@ -264,12 +264,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
 
   /* ══ L ECRAN ═══════════════════════════════════════════════════════════════ */
   function ligneProduit(l){
-    var arme = (ARME === l.id);
     var geste = '';
     if (D.peut.edition) {
-      geste = arme
-        ? '<button class="geste danger" data-confirmer="' + esc(l.id) + '">${T("✓ Confirmer le retrait")}</button>'
-        : '<button class="geste" data-retirer="' + esc(l.id) + '" title="${T("Ramener au régime normal")}">${T("✕ Retirer")}</button>';
+      geste = '<button class="geste" data-retirer="' + esc(l.id) + '" title="${T("Ramener au régime normal")}">${T("✕ Retirer")}</button>';
     }
     var quand = l.au
       ? '<span class="rf-pill bleu" title="${T("La boutique annonce cette date au client")}">${T("jusqu’au ")}' + esc(szQuand(l.au)) + '</span>'
@@ -417,7 +414,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
     };
   }
 
-  /* ══ RETIRER (arme en deux clics) ══════════════════════════════════════════ */
+  /* ══ RETIRER (confirme dans une boite a part, szConfirmer, 2026-10-15) ═════ */
+  function confirmerRetrait(id){
+    var lR = null, enLiq = false;
+    ((D && D.liq && D.liq.lignes) || []).forEach(function(x){ if (x.id === id) { lR = x; enLiq = true; } });
+    if (!lR) ((D && D.finale && D.finale.lignes) || []).forEach(function(x){ if (x.id === id) lR = x; });
+    lR = lR || {};
+    szConfirmer({ titre: enLiq ? '${T("Retirer de la liquidation")}' : '${T("Retirer de la vente finale")}',
+      texte: '${T("Le produit")}' + ' « ' + (lR.nom || id) + ' » '
+        + (enLiq ? '${T("sera retiré de la liquidation et reviendra au régime normal.")}' : '${T("sera retiré de la vente finale et reviendra au régime normal.")}')
+        + ' ' + '${T("La boutique cessera aussitôt d’annoncer l’offre, et le produit redeviendra admissible aux retours et aux échanges.")}',
+      details: [['${T("SKU")}', lR.sku || '—'], ['${T("Prix")}', argent(lR.prix)], ['${T("Stock")}', String(lR.stock == null ? '—' : lR.stock)]],
+      oui: '${T("Ramener au régime normal")}' }).then(function(ok){ if (ok) retirer(id); });
+  }
   function retirer(id){
     dire('${T("Retrait…")}');
     appeler('liquidation:retirer', id).then(function(r){
@@ -734,7 +743,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
       charger().then(function(ok){ if (ok) dessiner(); });
       return;
     }
-    if (b && b.hasAttribute('data-retirer')) { ARME = b.getAttribute('data-retirer'); dessiner(); return; }
+    if (b && b.hasAttribute('data-retirer')) { confirmerRetrait(b.getAttribute('data-retirer')); return; }
     if (b && b.hasAttribute('data-confirmer')) { retirer(b.getAttribute('data-confirmer')); return; }
     // Un clic ailleurs desarme : un bouton reste arme, on finit par cliquer dessus
     // en croyant faire autre chose.

@@ -94,4 +94,8 @@ module.exports = {
   'toutes occurrences': 'all occurrences',
   // La refonte, comme l'Inventaire (2026-09-25).
   'Dans Journaux': 'In Logs',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Vider le détail des recherches': 'Clear the search detail',
+  'Le détail des recherches des 30 derniers jours sera effacé définitivement. L’archive est conservée et les nouvelles recherches continueront d’être enregistrées. Cette action est irréversible.': 'The search detail for the last 30 days will be permanently deleted. The archive is kept and new searches will continue to be recorded. This action cannot be undone.',
+  'Requêtes': 'Queries',
 };

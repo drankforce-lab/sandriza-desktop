@@ -230,7 +230,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     /* Tous d un coup : l issue normale après le bouton panique (le même
        geste armé en deux clics, la clé « * » est comprise par le serveur). */
     if (v.length > 1) h += '<div class="barre" style="margin:0 0 .5rem"><button class="mini dgr" data-dev="*">'
-      + (CONF === '*' ? '${T("✓ Confirmer — tout rouvrir")}' : '<span class="ic" aria-hidden="true">🔓</span>${T(" Tout déverrouiller (")}' + v.length + ')')
+      + '<span class="ic" aria-hidden="true">🔓</span>${T(" Tout déverrouiller (")}' + v.length + ')'
       + '</button></div>';
     h += '<div data-pages="gardien-verrous"><table><thead><tr><th>${T("Compte")}</th><th>${T("Depuis")}</th><th>${T("Motif")}</th><th></th></tr></thead><tbody>';
     for (var i = 0; i < v.length; i++) {
@@ -242,7 +242,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + '<td style="text-align:right">' + (l.moi
             ? '<span class="sub">${T("par le lien de l’alerte")}</span>'
             : '<button class="mini dgr" data-dev="' + esc(l.user_id) + '">'
-              + (CONF === String(l.user_id) ? '${T("✓ Confirmer")}' : '<span class="ic" aria-hidden="true">🔓</span>${T(" Déverrouiller")}')
+              + '<span class="ic" aria-hidden="true">🔓</span>${T(" Déverrouiller")}'
               + '</button>') + '</td></tr>';
     }
     return h + '</tbody></table></div>'
@@ -328,7 +328,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + '<div class="sub">' + nomSource(l.source) + ' · <span class="mono">' + esc(l.rec_id || '') + '</span></div></td>'
         + '<td>' + (l.user_id ? qui(l) : '<span class="mut">—</span>') + '</td>'
         + '<td style="text-align:right"><button class="mini" data-rest="' + esc(l.id) + '">'
-        + (CONF === cle ? '${T("✓ Confirmer")}' : '<span class="ic" aria-hidden="true">↩</span>${T(" Restaurer")}') + '</button></td></tr>';
+        + '<span class="ic" aria-hidden="true">↩</span>${T(" Restaurer")}' + '</button></td></tr>';
     }
     return h + '</tbody></table></div></div>';
   }
@@ -369,7 +369,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '<textarea id="g-mel">' + esc((c.alerteCourriel || []).join('\\n')) + '</textarea></div></div>'
       + '<div class="sub" style="margin-top:.45rem">${T("Le courriel de l’entreprise reçoit aussi chaque alerte.")}</div></div>'
       + '<div class="barre" style="margin-top:.6rem"><button class="prim" id="g-save">'
-      + (CONF === 'regler' ? '${T("✓ Confirmer — une alerte partira")}' : '${T("Enregistrer les réglages")}') + '</button>'
+      + '${T("Enregistrer les réglages")}' + '</button>'
       + (SALE ? '<button id="g-annuler">${T("Annuler les modifications")}</button>' : '') + '</div>'
       + '<div class="note" style="margin-top:.6rem">${T("Chaque enregistrement envoie une alerte aux anciens ET aux nouveaux destinataires : personne ne peut changer les seuils ou les numéros en silence.")}</div>'
       + '</div>';
@@ -507,7 +507,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       rs[q].onclick = function(){
         var id = this.getAttribute('data-rest');
         if (CONF === 'r' + id) { CONF = ''; restaurer(id); }
-        else { CONF = 'r' + id; redessinerVivant(); dire('${T("Cliquez encore pour restaurer cette fiche.")}', 'att'); }
+        else {
+          var bR = this;
+          var eR = ((ETAT && ETAT.corbeille) || []).filter(function(x){ return String(x.id) === String(id); })[0] || {};
+          szConfirmer({ titre: '${T("Restaurer l’élément supprimé")}',
+            texte: '${T("L’élément")}' + ' « ' + (eR.libelle || eR.rec_id || id) + ' » ' + '${T("sera remis tel qu’il était au moment de sa suppression, ou le fichier à son adresse d’origine.")}',
+            details: [['${T("Source")}', String(SRC[eR.source] || eR.source || '')], ['${T("Supprimé le")}', eR.quand ? fdate(eR.quand) : '']],
+            oui: '${T("Restaurer l’élément")}' }).then(function(ok){ if (ok) { CONF = 'r' + id; bR.onclick(); } });
+        }
       };
     }
     var us = corps.querySelectorAll('[data-dev]');
@@ -515,7 +522,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       us[u].onclick = function(){
         var id = this.getAttribute('data-dev');
         if (CONF === id) { CONF = ''; deverrouiller(id); }
-        else { CONF = id; redessinerVivant(); dire(id === '*' ? '${T("Cliquez encore pour rouvrir tous les comptes.")}' : '${T("Cliquez encore pour rouvrir ce compte.")}', 'att'); }
+        else {
+          var bD = this;
+          var cfD;
+          if (id === '*') {
+            cfD = { danger: true, titre: '${T("Rouvrir tous les comptes")}',
+              texte: '${T("Tous les comptes verrouillés pourront de nouveau se connecter, et leurs compteurs seront remis à zéro. Assurez-vous d’abord que les mots de passe compromis ont été changés.")}',
+              details: [['${T("Comptes")}', String(((ETAT && ETAT.verrous) || []).length)]],
+              oui: '${T("Rouvrir tous les comptes")}' };
+          } else {
+            var vD = ((ETAT && ETAT.verrous) || []).filter(function(x){ return String(x.user_id) === String(id); })[0] || {};
+            cfD = { danger: true, titre: '${T("Rouvrir le compte")}',
+              texte: '${T("Le compte")}' + ' « ' + (vD.nom || vD.courriel || id) + ' » ' + '${T("pourra de nouveau se connecter, et son compteur sera remis à zéro. Vérifiez d’abord, dans l’onglet Activité, que les gestes étaient bien les siens.")}',
+              details: [['${T("Courriel")}', String(vD.courriel || '—')]],
+              oui: '${T("Rouvrir le compte")}' };
+          }
+          szConfirmer(cfD).then(function(ok){ if (ok) { CONF = id; bD.onclick(); } });
+        }
       };
     }
   }
@@ -540,9 +563,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       var f = lireForm();
       if (f.faute) { CONF = ''; this.textContent = '${T("Enregistrer les réglages")}'; dire(f.faute, 'err'); return; }
       if (CONF === 'regler') { CONF = ''; regler(f.cfg); return; }
-      CONF = 'regler';
-      this.textContent = '${T("✓ Confirmer — une alerte partira")}';
-      dire('${T("Cliquez encore : une alerte partira aux anciens et aux nouveaux destinataires.")}', 'att');
+      var bG = this;
+      szConfirmer({ prudent: true, titre: '${T("Enregistrer les réglages du gardien")}',
+        texte: '${T("Les nouveaux réglages seront appliqués immédiatement. Une alerte sera envoyée aux anciens et aux nouveaux destinataires afin qu’aucun changement ne passe inaperçu.")}',
+        oui: '${T("Enregistrer et alerter")}' }).then(function(ok){ if (ok) { CONF = 'regler'; bG.onclick(); } });
     };
   }
   function annuler(){ SALE = false; CONF = ''; dessiner(); dire(''); }

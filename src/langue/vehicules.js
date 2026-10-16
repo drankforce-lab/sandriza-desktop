@@ -501,4 +501,12 @@ module.exports = {
   'Location admissible (le moindre des trois)': 'Eligible lease costs (the least of the three)',
   'Plafonds B / C': 'Limits B / C',
   'Le calcul : vue « Plafonds B / C ».': 'The calculation: “Limits B / C” view.',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Supprimer le déplacement': 'Delete the trip',
+  'Le déplacement': 'The trip',
+  'du': 'on',
+  'sera retiré définitivement du registre, et ses kilomètres ne compteront plus dans le calcul de l’usage d’affaires. Cette action est irréversible.': 'will be permanently removed from the log, and its kilometres will no longer count toward business use. This action cannot be undone.',
+  'Supprimer le véhicule': 'Delete the vehicle',
+  'Le véhicule': 'The vehicle',
+  'sera retiré définitivement du registre. Cette action est irréversible.': 'will be permanently removed from the register. This action cannot be undone.',
 };

@@ -4288,8 +4288,8 @@ const CSS_RESPIRE = `
 .ls-rang{display:grid;align-items:center;gap:1.4rem;min-height:4.6rem;padding:.75rem 1rem .75rem .9rem;margin-bottom:.55rem;
   border-radius:14px;background:var(--f-carte);border:1px solid var(--sz-bord)}
 .ls-rang:hover{border-color:var(--sz-bord-fort)}
-.ls-camp{grid-template-columns:minmax(0,1.7fr) minmax(0,1.15fr) 8.5rem 9.5rem 17rem}
-.ls-ch{grid-template-columns:minmax(0,1.25fr) minmax(0,1.6fr) 10.5rem 9rem 17rem}
+.ls-camp{grid-template-columns:minmax(0,1.7fr) minmax(0,1.15fr) 8.5rem 9.5rem 23.5rem}
+.ls-ch{grid-template-columns:minmax(0,1.25fr) minmax(0,1.6fr) 10.5rem 9rem 20rem}
 .ls-seg{grid-template-columns:minmax(0,1.8fr) minmax(10rem,1fr) 10rem 12rem}
 .ls-rang .qui{display:flex;align-items:center;gap:.85rem;min-width:0}
 .ls-rang .bico{width:2.5rem;height:2.5rem;border-radius:11px;background:var(--f-pill);color:var(--tx-or);display:flex;
@@ -4302,7 +4302,9 @@ const CSS_RESPIRE = `
 .ls-rang .etat{align-items:flex-start}
 .ls-rang .bilan b{font-size:1.15rem;font-weight:700;line-height:1.15}
 .ls-rang .bilan em{font-style:normal;color:var(--tx-err)}
-.ls-rang .gestes{display:flex;gap:.4rem;justify-content:flex-end;flex-wrap:wrap}
+/* (2026-10-15, sa capture : « Supprimer » passait sous les autres) Les gestes d un rang restent sur UNE ligne. */
+.ls-rang .gestes{display:flex;gap:.4rem;justify-content:flex-end;flex-wrap:nowrap;white-space:nowrap}
+.ls-rang .bico svg{width:1.15rem;height:1.15rem}
 .ls-rang .gestes button{height:2.1rem;padding:0 .8rem;border-radius:9px}
 .ls-ch.eteinte .bico{color:var(--tx2)}
 /* La ligne du temps d une chaine : un point par etape, relies d un trait. */

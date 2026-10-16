@@ -724,7 +724,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
          dans la fenêtre Journaux unifiée (palier 5). L'écran reste accessible par
          le menu Configuration en attendant. */
       + (D.total && !ro
-          ? '<button class="mini danger" id="p-vider">' + (VIDER_ARME ? '${T("Confirmer — vider les")} ' + D.total + ' ?' : '${T("Tout vider")}') + '</button>'
+          ? '<button class="mini danger" id="p-vider">' + '${T("Tout vider")}' + '</button>'
           : '')
       + '</span></div>';
 
@@ -977,17 +977,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
           + '<button class="mini" data-lotsel="' + esc(l.id) + '">${T("Tout cocher")}</button> '
           + (D.peutModifier
               ? '<button class="mini dgr" data-lotdel="' + esc(l.id) + '">'
-                + (arme ? '${T("Confirmer ?")}' : '${T("Supprimer le lot")}') + '</button>'
+                + '${T("Supprimer le lot")}' + '</button>'
               : '')
-          + '</td></tr>'
-          + (arme
-              ? '<tr><td colspan="7" class="dt" style="color:var(--tx-jaune)">'
-                + szPl(nLibres, nLibres + ' ${T("photo non attachée sera retirée.")}', '${T("Les")} ' + nLibres + ' ${T("photos non attachées seront retirées.")}') + ' '
-                + (l.liees ? (szPl(l.liees, '${T("La photo attachée à un article est GARDÉE :")}', '${T("Les")} ' + l.liees + ' ${T("attachées à un article sont GARDÉES :")}') + ' '
-                              + '${T("retirer la photothèque ne doit jamais dépouiller une fiche produit.")}')
-                           : '')
-                + '</td></tr>'
-              : '');
+          + '</td></tr>';
       });
       h += '</tbody></table>';
     }
@@ -1025,7 +1017,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     Array.prototype.forEach.call(corps.querySelectorAll('[data-lotdel]'), function(b){
       b.onclick = function(){
         var id = b.getAttribute('data-lotdel');
-        if (LOT_ARME !== id) { LOT_ARME = id; dessiner(); return; }
+        if (LOT_ARME !== id) {
+          var lD = LOTS.filter(function(x){ return x.id === id; })[0] || {};
+          var nL = Math.max(0, (lD.nombre || 0) - (lD.liees || 0));
+          szConfirmer({ danger: true, titre: '${T("Supprimer le lot")}',
+            texte: '${T("Le lot")}' + ' « ' + (lD.nom || '${T("Sans nom")}') + ' » ' + '${T("sera supprimé et ses photos non attachées seront retirées de la photothèque. Les photos attachées à un article sont conservées, afin qu’aucune fiche produit ne perde son image. Cette action est irréversible.")}',
+            details: [['${T("Photos retirées")}', String(nL)], ['${T("Photos conservées (attachées)")}', String(lD.liees || 0)]],
+            oui: '${T("Supprimer le lot")}' }).then(function(ok){ if (ok) { LOT_ARME = id; b.click(); } });
+          return;
+        }
         LOT_ARME = '';
         dire('${T("Suppression du lot…")}');
         appeler('lot:jeter', [id]).then(function(r){
@@ -1755,7 +1755,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '<button class="mini" data-lot="pivot" title="${T("Pivoter d’un quart de tour vers la droite")}">${T("⟳ Pivoter")}</button>'
       + '<button class="mini" data-apercu="fantome" title="${T("Voir le retrait du mannequin, filigrané et gratuit, avant de payer")}"><span class="ic">👁</span> ${T("Aperçu du retrait")}</button>'
       + '<button class="mini dgr" id="p-lot-sup">'
-      + (SUP_LOT_ARME ? '${T("Confirmer — supprimer")} ' + n + ' ?' : '${T("Supprimer")}') + '</button>'
+      + '${T("Supprimer")}' + '</button>'
       + '<button class="mini" id="p-rien">${T("Tout décocher")}</button>'
       + '<span class="av">${T("Les deux derniers traitements <strong>engendrent</strong> une image&nbsp;: ")}'
       + '${T("l’original est conservé à côté.")}</span></div>';
@@ -2095,8 +2095,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
      trente. Les gestes courants sont donc SUR la ligne.
      ⚠ LE NOM SE MODIFIE SUR PLACE : un champ, entree pour valider, echap pour
      renoncer. Ouvrir une fenetre pour changer un mot est disproportionne.
-     ⚠ LA SUPPRESSION S ARME sur la ligne meme — le second clic est a l endroit
-     ou l on vient de cliquer, pas dans une boite qui parait ailleurs.
+     ⚠ LA SUPPRESSION SE CONFIRME DANS UNE BOITE A PART (2026-10-15) : sa regle,
+     « les confirmations devraient toujours etre une fenetre a part ».
      ══════════════════════════════════════════════════════════════════════════ */
   /* La carte du mode Vignettes : les MEMES attributs que la ligne (data-id,
      data-chx, data-ren2 et les boutons d action), donc les memes gestes. */
@@ -2188,7 +2188,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 
     h += '<div class="pied-boite">'
       + (ro ? '' : '<button class="danger" id="p-suppr">'
-          + (SUPPR_ARME_INSP ? '${T("Confirmer le retrait ?")}' : '${T("✕ Retirer de la médiathèque")}') + '</button>')
+          + '${T("✕ Retirer de la médiathèque")}' + '</button>')
       + (D.bureau ? '<button id="p-enreg">${T("⤓ Enregistrer le fichier")}</button>' : '')
       + (ro || r.isole ? '' : '<button class="prim" id="p-isoler"><span class="ic">✂</span> ${T("Isoler le vêtement")}</button>')
       + (ro ? '' : '<button class="' + (r.isole ? 'prim' : '') + '" id="p-attacher">'
@@ -2715,11 +2715,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       var ids = Object.keys(CHOIX);
       if (!ids.length) return;
       if (!SUP_LOT_ARME) {
-        SUP_LOT_ARME = true;
-        dessiner();
-        dire(szPl(ids.length, '${T("Cliquez encore pour supprimer la photo cochée.")}', '${T("Cliquez encore pour supprimer les")} ' + ids.length + ' ${T("photos cochées.")}') + ' '
-          + '${T("Les articles liés gardent leur image.")}', 'att');
-        setTimeout(function(){ if (SUP_LOT_ARME) { SUP_LOT_ARME = false; dessiner(); } }, 6000);
+        var tSup = szPl(ids.length, '${T("Supprimer la photo")}', '${T("Supprimer les photos")}');
+        szConfirmer({ danger: true, titre: tSup,
+          texte: szPl(ids.length, '${T("La photo cochée sera retirée de la photothèque.")}', '${T("Les photos cochées seront retirées de la photothèque.")}') + ' '
+            + '${T("Les articles liés conservent leur image. Cette action est irréversible.")}',
+          details: [['${T("Photos")}', String(ids.length)]],
+          oui: tSup }).then(function(ok){ if (ok) { SUP_LOT_ARME = true; supLot.click(); } });
         return;
       }
       SUP_LOT_ARME = false;
@@ -2830,10 +2831,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 
     var vd = document.getElementById('p-vider');
     if (vd) vd.onclick = function(){
-      /* ⚠ ARME EN DEUX CLICS, et le second dit COMBIEN disparaissent. */
+      /* ⚠ LA CONFIRMATION EST UNE BOITE A PART (2026-10-15), et elle dit COMBIEN disparaissent. */
       if (!VIDER_ARME) {
-        VIDER_ARME = true; dessiner();
-        setTimeout(function(){ if (VIDER_ARME) { VIDER_ARME = false; dessiner(); } }, 5000);
+        szConfirmer({ danger: true, titre: '${T("Vider la photothèque")}',
+          texte: '${T("Toutes les photos de la photothèque seront retirées, ainsi que leurs images dans le stockage. Les articles auxquels une photo est attachée conservent leur image. Cette action est irréversible.")}',
+          details: [['${T("Photos")}', String(D.total || 0)]],
+          oui: '${T("Vider la photothèque")}' }).then(function(ok){ if (ok) { VIDER_ARME = true; vd.click(); } });
         return;
       }
       VIDER_ARME = false;
@@ -2956,8 +2959,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var su = document.getElementById('p-suppr');
     if (su) su.onclick = function(){
       if (!SUPPR_ARME_INSP) {
-        SUPPR_ARME_INSP = true; dessiner();
-        setTimeout(function(){ if (SUPPR_ARME_INSP) { SUPPR_ARME_INSP = false; if (DETAIL) dessiner(); } }, 5000);
+        szConfirmer({ danger: true, titre: '${T("Retirer de la médiathèque")}',
+          texte: '${T("La photo")}' + ' « ' + ((DETAIL.code ? DETAIL.code + ' · ' : '') + (DETAIL.nom || '')) + ' » ' + '${T("sera retirée de la médiathèque. Si elle est attachée à un article, la fiche conserve son image. Cette action est irréversible.")}',
+          oui: '${T("Retirer la photo")}' }).then(function(ok){ if (ok) { SUPPR_ARME_INSP = true; su.click(); } });
         return;
       }
       SUPPR_ARME_INSP = false;
@@ -2990,15 +2994,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   function gesteTraiter(id, quoi){ choisirSeule(id); lancerLot(quoi); }
   function gestePivoter(id){ choisirSeule(id); lancerPivot([id]); }
   function gesteOuvrir(id){ var t = lignePar(id); if (t) { DETAIL = t; dessiner(); } }
-  /* ⚠ LA SUPPRESSION GARDE SES DEUX TEMPS : le premier choix l'ARME (la ligne se
-     teinte, et l'entrée du menu devient « Confirmer la suppression »), le second
-     la fait. Elle se désarme seule au bout de cinq secondes. */
+  /* ⚠ LA SUPPRESSION DEMANDE DANS UNE BOITE A PART (2026-10-15) : szConfirmer ;
+     confirmee, on arme puis on rappelle le geste, qui agit comme avant. */
   function gesteSupprimer(id){
     if (SUPPR_ARME !== id) {
-      SUPPR_ARME = id;
-      dessiner();
-      dire('${T("Clic droit → « Confirmer la suppression » pour la retirer — l’article lié, lui, garde son image.")}', 'att');
-      setTimeout(function(){ if (SUPPR_ARME === id) { SUPPR_ARME = ''; dessiner(); } }, 5000);
+      var lS = lignePar(id);
+      szConfirmer({ danger: true, titre: '${T("Supprimer la photo")}',
+        texte: '${T("La photo")}' + ' « ' + (lS ? ((lS.code ? lS.code + ' · ' : '') + (lS.nom || '')) : id) + ' » ' + '${T("sera retirée de la photothèque. Si elle est attachée à un article, la fiche conserve son image. Cette action est irréversible.")}',
+        oui: '${T("Supprimer la photo")}' }).then(function(ok){ if (ok) { SUPPR_ARME = id; gesteSupprimer(id); } });
       return;
     }
     SUPPR_ARME = '';
@@ -3029,7 +3032,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     }
     h += '<button data-g="ouvre">${T("Voir l’aperçu")}</button>';
     if (!ro) h += '<div class="trait"></div><button class="dgr" data-g="sup">'
-      + (arme ? '${T("Confirmer la suppression")}' : '${T("Supprimer…")}') + '</button>';
+      + '${T("Supprimer…")}' + '</button>';
     var m = document.createElement('div');
     m.className = 'ctx'; m.id = 'p-ctx'; m.setAttribute('role', 'menu'); m.innerHTML = h;
     document.body.appendChild(m);

@@ -221,4 +221,12 @@ module.exports = {
   'Cliquer pour afficher': 'Click to show',
   'Nom, SKU ou catégorie — les deux régimes…': 'Name, SKU or category — both regimes…',
   'Rupture': 'Out of stock',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Retirer de la liquidation': 'Remove from clearance',
+  'Retirer de la vente finale': 'Remove from final sale',
+  'Le produit': 'The product',
+  'sera retiré de la liquidation et reviendra au régime normal.': 'will be removed from clearance and return to regular status.',
+  'sera retiré de la vente finale et reviendra au régime normal.': 'will be removed from final sale and return to regular status.',
+  'La boutique cessera aussitôt d’annoncer l’offre, et le produit redeviendra admissible aux retours et aux échanges.': 'The store will stop advertising the offer immediately, and the product will again be eligible for returns and exchanges.',
+  'SKU': 'SKU',
 };

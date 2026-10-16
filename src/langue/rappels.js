@@ -118,4 +118,8 @@ module.exports = {
   'Rappel ajouté à votre liste.': 'Reminder added to your list.',
   'Notifications de rappels activées.': 'Reminder notifications turned on.',
   'Notifications de rappels coupées.': 'Reminder notifications turned off.',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Supprimer le rappel': 'Delete the reminder',
+  'Le rappel': 'The reminder',
+  'sera supprimé définitivement de votre liste. Cette action est irréversible.': 'will be permanently removed from your list. This action cannot be undone.',
 };

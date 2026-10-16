@@ -169,4 +169,14 @@ module.exports = {
   'n’ouvrent plus rien': 'no longer open anything',
   'Créé Échéance État': 'Created Deadline Status',
   "Copier le lien pour le comptable": "Copy the link for the accountant",
+  // 2026-10-15 : confirmations en boîte à part.
+  'Révoquer le lien de partage': 'Revoke share link',
+  'Le lien de partage': 'The share link',
+  'cessera immédiatement de fonctionner pour tous ses destinataires. Les documents comptables ne seront plus accessibles par ce lien. Cette action est irréversible.': 'will stop working immediately for all its recipients. The accounting documents will no longer be accessible through this link. This action cannot be undone.',
+  'Destinataire': 'Recipient',
+  'Révoquer le lien': 'Revoke link',
+  'Retirer le comptable du carnet': 'Remove accountant from address book',
+  'Le comptable': 'Accountant',
+  'sera retiré du carnet. Les liens de partage déjà envoyés restent actifs jusqu’à leur échéance ou leur révocation.': 'will be removed from the address book. Share links already sent remain active until they expire or are revoked.',
+  'Retirer du carnet': 'Remove from address book',
 };

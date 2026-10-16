@@ -248,7 +248,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<div style="display:flex;gap:.35rem">'
         + '<button class="b" type="button" data-edit="' + esc(t.id) + '"><span class="ic">✎</span>${T(" Modifier")}</button>'
         + (RO ? '' : '<button class="b" type="button" data-copy="' + esc(t.id) + '"><span class="ic">📋</span>${T(" Copier")}</button>')
-        + ((!RO && t.supprimable) ? ('<button class="b dgr" type="button" data-del="' + esc(t.id) + '">' + (DELCONF === t.id ? '${T("Confirmer ?")}' : '<span class="ic">🗑</span>${T(" Supprimer")}') + '</button>') : '')
+        + ((!RO && t.supprimable) ? ('<button class="b dgr" type="button" data-del="' + esc(t.id) + '">' + '<span class="ic">🗑</span>${T(" Supprimer")}' + '</button>') : '')
         + '</div></div>';
     }
     h += '</div></div>';
@@ -313,7 +313,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (EDIT === null) {
       var eds = corps.querySelectorAll('[data-edit]'); for (var i = 0; i < eds.length; i++) eds[i].onclick = function(){ DELCONF = ''; EDIT = this.getAttribute('data-edit'); dessiner(); };
       var cps = corps.querySelectorAll('[data-copy]'); for (var c = 0; c < cps.length; c++) cps[c].onclick = function(){ copier(this.getAttribute('data-copy')); };
-      var dls = corps.querySelectorAll('[data-del]'); for (var d = 0; d < dls.length; d++) dls[d].onclick = function(){ var id = this.getAttribute('data-del'); if (DELCONF === id) { DELCONF = ''; supprimer(id); } else { DELCONF = id; dessiner(); } };
+      var dls = corps.querySelectorAll('[data-del]'); for (var d = 0; d < dls.length; d++) dls[d].onclick = function(){ var id = this.getAttribute('data-del'); if (DELCONF === id) { DELCONF = ''; supprimer(id); } else { var bD = this, gD = gabParId(id);
+        szConfirmer({ danger: true, titre: '${T("Supprimer le gabarit")}',
+          texte: '${T("Le gabarit")}' + ' « ' + (gD ? gD.name : id) + ' » ' + '${T("sera supprimé définitivement. Les courriels qui lui étaient attribués utiliseront le gabarit par défaut. Cette action est irréversible.")}',
+          oui: '${T("Supprimer le gabarit")}' }).then(function(ok){ if (ok) { DELCONF = id; bD.click(); } }); } };
       var asv = document.getElementById('g-assign-save'); if (asv) asv.onclick = enregistrerAttributions;
       return;
     }

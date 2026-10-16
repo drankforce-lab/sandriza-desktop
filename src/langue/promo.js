@@ -253,4 +253,11 @@ module.exports = {
   'étiquettes déjà envoyées.': 'labels already sent.',
   // Forme ronde d un modele, dans la liste (2026-09-29)
   ' · rond': ' · round',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Supprimer le modèle': 'Delete template',
+  'Supprimer le format': 'Delete format',
+  'Le modèle': 'The template',
+  'sera supprimé définitivement. Les impressions déjà faites ne sont pas touchées. Cette action est irréversible.': 'will be permanently deleted. Prints already made are not affected. This action cannot be undone.',
+  'Le format personnalisé': 'The custom format',
+  'sera supprimé définitivement. Les modèles déjà créés dans ce format ne sont pas modifiés. Cette action est irréversible.': 'will be permanently deleted. Templates already created in this format are not changed. This action cannot be undone.',
 };

@@ -506,4 +506,21 @@ module.exports = {
   'Date choisie': 'Chosen date',
   // Sous-onglet de Points (2026-10-07).
   'Réglages': 'Settings',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Verser les récompenses des ambassadrices': 'Pay ambassador rewards',
+  'Les récompenses dues seront versées aux ambassadrices concernées. Un versement effectué ne peut pas être annulé.': 'The rewards due will be paid to the ambassadors concerned. A completed payout cannot be reversed.',
+  'Montant dû': 'Amount due',
+  'Commandes concernées': 'Orders concerned',
+  'Verser les récompenses': 'Pay rewards',
+  'Supprimer la candidature': 'Delete application',
+  'La candidature de': 'The application from',
+  'sera supprimée définitivement. Cette action est irréversible.': 'will be permanently deleted. This action cannot be undone.',
+  'Verser les récompenses de parrainage': 'Pay referral rewards',
+  'Les récompenses dues seront versées en crédit boutique aux clientes concernées. Un versement effectué ne peut pas être annulé.': 'The rewards due will be paid as store credit to the customers concerned. A completed payout cannot be reversed.',
+  'Supprimer toutes les invitations': 'Delete all invitations',
+  'Toutes les invitations aux sondages seront supprimées définitivement. Les réponses déjà reçues sont conservées. Cette action est irréversible.': 'All survey invitations will be permanently deleted. Responses already received are kept. This action cannot be undone.',
+  'Supprimer les invitations': 'Delete invitations',
+  'Supprimer le sondage': 'Delete survey',
+  'et toutes ses réponses seront supprimés définitivement. Cette action est irréversible.': 'and all its responses will be permanently deleted. This action cannot be undone.',
+  'Réponses perdues': 'Responses lost',
 };

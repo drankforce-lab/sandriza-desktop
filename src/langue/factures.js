@@ -105,4 +105,8 @@ module.exports = {
   'Page': 'Page',
   // La refonte de la liste, comme l'Inventaire (2026-09-25).
   'Client et facture': 'Customer and invoice',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Supprimer la facture': 'Delete invoice',
+  'La facture': 'Invoice',
+  'sera supprimée définitivement. Elle sera retirée de partout, y compris du compte client. Cette action est irréversible.': 'will be permanently deleted. It will be removed everywhere, including from the customer account. This action cannot be undone.',
 };

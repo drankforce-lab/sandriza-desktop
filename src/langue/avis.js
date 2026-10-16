@@ -149,4 +149,12 @@ module.exports = {
   'Cliquer pour afficher': 'Click to show',
   'Client Note': 'Customer Rating',
   'Date État': 'Date Status',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Retirer la photo': 'Remove photo',
+  'La photo': 'Photo',
+  'sera retirée de l’avis et supprimée du stockage. Le texte de l’avis n’est pas modifié. Cette action est irréversible.': 'will be removed from the review and deleted from storage. The review text is not changed. This action cannot be undone.',
+  'Supprimer l’avis': 'Delete review',
+  'L’avis de': 'The review by',
+  'sur': 'on',
+  'sera supprimé définitivement, avec ses photos et sa réponse. Pour le retirer de la boutique sans le perdre, utilisez plutôt « Masquer ». Cette action est irréversible.': 'will be permanently deleted, along with its photos and reply. To remove it from the store without losing it, use “Hide” instead. This action cannot be undone.',
 };

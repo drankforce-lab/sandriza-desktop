@@ -256,11 +256,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     /* Refonte fine (2026-09-26) : l etat se DIT en pastille, la fin de la cle
        en code — la meme forme que Telephonie, Paiements et Transporteurs. */
     if (!e.defini) return '<span class="rf-pill ambre">${T("Aucune clé enregistrée")}</span>';
-    if (ARME[k]) {
-      return '<span class="txt">${T("Retirer la clé enregistrée ?")}</span>'
-        + '<button class="conf" data-conf="' + k + '"' + (RO ? ' disabled' : '') + '>${T("Confirmer le retrait")}</button>'
-        + '<button class="annu" data-annu="' + k + '">${T("Annuler")}</button>';
-    }
     return '<span class="rf-pill vert">${T("Clé enregistrée")}</span>'
       + '<span class="rf-code">…' + esc(e.fin) + '</span>'
       + '<button data-retirer="' + k + '"' + (RO ? ' disabled' : '') + '>${T("Retirer")}</button>';
@@ -303,8 +298,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function brancher(){
     corps.querySelectorAll('[data-retirer]').forEach(function(b){
+      /* 2026-10-15 : le retrait se confirme dans une boite a part (szConfirmer). */
       b.onclick = function(){ if (RO) return; var k = b.getAttribute('data-retirer');
-        ARME[k] = true; rafraichirEtat(k); };
+        var sv = null, ch = null;
+        SERVICES.forEach(function(s){ s.champs.forEach(function(c){ if (c.k === k) { sv = s; ch = c; } }); });
+        var e = (D && D[k]) || { fin: '' };
+        szConfirmer({ danger: true, titre: '${T("Retirer la clé")}',
+          texte: '${T("La clé enregistrée")}' + ' « ' + (ch ? ch.label : k) + ' »' + (sv ? ' ${T("du service")} ' + sv.titre : '')
+            + ' ${T("sera retirée. Les fonctions qui en dépendent cesseront de fonctionner jusqu’à ce qu’une nouvelle clé soit saisie.")}',
+          details: e.fin ? [['${T("Fin de la clé")}', '…' + e.fin]] : [],
+          oui: '${T("Retirer la clé")}' }).then(function(ok){ if (ok) retirer(k); });
+      };
     });
     corps.querySelectorAll('[data-annu]').forEach(function(b){
       b.onclick = function(){ var k = b.getAttribute('data-annu'); ARME[k] = false; rafraichirEtat(k); };

@@ -128,4 +128,10 @@ module.exports = {
   'Annulés': 'Cancelled',
   'gardés au registre': 'kept on record',
   ' colis': ' parcels',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Annuler le ramassage': 'Cancel the pickup',
+  'Le ramassage': 'The pickup',
+  'du': 'on',
+  'sera annulé auprès du transporteur. Pour le rétablir, il faudra en planifier un nouveau.': 'will be cancelled with the carrier. To restore it, a new pickup will have to be scheduled.',
+  'Conserver': 'Keep',
 };

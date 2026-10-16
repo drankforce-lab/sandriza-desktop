@@ -234,7 +234,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptable')}${JS_BROUILLON()}
           + '<td style="white-space:nowrap">'
             + '<button class="mini" data-copier="' + esc(p.url) + '" title="${T("Copier le lien pour le comptable")}">${T("Copier")}</button> '
             + '<button class="mini dgr" data-revoquer="' + esc(p.token) + '">'
-            + (ARME_REV === p.token ? '${T("Confirmer ?")}' : '${T("Révoquer")}') + '</button>'
+            + '${T("Révoquer")}' + '</button>'
           + '</td></tr>');
       });
       h.push('</tbody></table></div>');
@@ -370,14 +370,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptable')}${JS_BROUILLON()}
     });
   }
 
-  /* ⚠ LE BOUTON S ARME, IL NE DEMANDE PAS : confirm() bloque le processus, et
-     une fenetre chargee en data: n a pas de boite de dialogue du site. Premier
-     clic arme, second agit, le bandeau du bas dit ce qui va se passer. */
+  /* ⚠ PAS DE confirm() : il bloque le processus, et une fenetre chargee en
+     data: n a pas de boite de dialogue du site. La confirmation passe par la
+     boite a part du socle (szConfirmer, 2026-10-15) ; confirme, on arme et on
+     rejoue le geste. */
   function revoquer(token){
     if (ARME_REV !== token) {
-      ARME_REV = token;
-      dessinerPartages();
-      dire('${T("Cliquez « Confirmer ? » pour révoquer — le lien cessera aussitôt de fonctionner pour tous les destinataires.")}', 'att');
+      var pR = (ETAT.partages || []).filter(function(x){ return x.token === token; })[0] || {};
+      szConfirmer({ danger: true, titre: '${T("Révoquer le lien de partage")}',
+        texte: '${T("Le lien de partage")}' + ' « ' + (pR.label || pR.periode || '—') + ' » ' + '${T("cessera immédiatement de fonctionner pour tous ses destinataires. Les documents comptables ne seront plus accessibles par ce lien. Cette action est irréversible.")}',
+        details: [['${T("Destinataire")}', pR.destinataire || '—'], ['${T("Échéance")}', pR.expireLe ? jour(pR.expireLe) : '—']],
+        oui: '${T("Révoquer le lien")}' }).then(function(ok){ if (ok) { ARME_REV = token; revoquer(token); } });
       return;
     }
     ARME_REV = '';
@@ -416,7 +419,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptable')}${JS_BROUILLON()}
           + '<td style="white-space:nowrap">'
             + '<button class="mini" data-modifier="' + esc(c.email) + '">${T("Modifier")}</button> '
             + '<button class="mini dgr" data-retirer="' + esc(c.email) + '">'
-            + (ARME_CT === c.email ? '${T("Confirmer ?")}' : '${T("Retirer")}') + '</button>'
+            + '${T("Retirer")}' + '</button>'
           + '</td></tr>');
       });
       h.push('</tbody></table></div>');
@@ -540,9 +543,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptable')}${JS_BROUILLON()}
 
   function retirerContact(email){
     if (ARME_CT !== email) {
-      ARME_CT = email;
-      dessinerCarnet();
-      dire('${T("Cliquez « Confirmer ? » pour retirer ce comptable du carnet.")}', 'att');
+      var cR = (ETAT.contacts || []).filter(function(x){ return x.email === email; })[0] || {};
+      szConfirmer({ danger: true, titre: '${T("Retirer le comptable du carnet")}',
+        texte: '${T("Le comptable")}' + ' ' + (cR.name || email) + ' ' + '${T("sera retiré du carnet. Les liens de partage déjà envoyés restent actifs jusqu’à leur échéance ou leur révocation.")}',
+        details: [['${T("Courriel")}', email]].concat(cR.firm ? [['${T("Cabinet")}', cR.firm]] : []),
+        oui: '${T("Retirer du carnet")}' }).then(function(ok){ if (ok) { ARME_CT = email; retirerContact(email); } });
       return;
     }
     ARME_CT = '';

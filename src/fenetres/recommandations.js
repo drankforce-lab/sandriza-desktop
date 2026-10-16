@@ -324,8 +324,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
             + '<button class="mini geste" data-basculer="' + esc(r.id) + '" data-actif="'
             + (r.active ? '0' : '1') + '">' + (r.active ? '${T("Désactiver")}' : '${T("Activer")}') + '</button>'
             + '<button class="mini geste" data-editer="' + esc(r.id) + '">${T("Modifier")}</button>'
-            + '<button class="mini geste danger' + (ARME === r.id ? ' arme' : '') + '" data-suppr="' + esc(r.id) + '" data-defaut="'
-            + (r.pardefaut ? '1' : '0') + '">' + (ARME === r.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
+            + '<button class="mini geste danger" data-suppr="' + esc(r.id) + '" data-defaut="'
+            + (r.pardefaut ? '1' : '0') + '">' + '${T("Supprimer")}' + '</button>';
         }
         return '<div data-ctx-ligne class="ls-rang reco-rang' + (r.active ? '' : ' eteint') + '">'
           + '<div class="qui"><span class="bico reco-no" aria-hidden="true">' + (i + 1) + '</span>'
@@ -368,7 +368,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '<div class="droite">'
       + (D.peutModifier && ls.length
           ? '<button class="mini danger" id="rc-vider">'
-            + (ARME === '__liaisons' ? '${T("Confirmer ?")}' : '${T("Tout effacer")}') + '</button>' : '')
+            + '${T("Tout effacer")}' + '</button>' : '')
       + '<span>' + ls.length + '${T(" produit")}' + (ls.length > 1 ? '${T("s liés")}' : '${T(" lié")}') + '</span></div></div>';
     // Les liaisons en PAGES mesurees : une liaison = un element de page.
     h += '<div class="carte sz-pagee">';
@@ -587,9 +587,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var bv = document.getElementById('rc-vider');
     if (bv) bv.onclick = function(){
       if (ARME !== '__liaisons') {
-        ARME = '__liaisons'; dessiner();
-        dire('${T("Cliquez « Confirmer ? » — tous les rapprochements faits à la main seront perdus,")} '
-          + '${T("les recommandations automatiques reprennent seules.")}', 'att');
+        szConfirmer({ danger: true, titre: '${T("Effacer toutes les liaisons")}',
+          texte: '${T("Toutes les associations de produits faites manuellement seront supprimées définitivement. Les recommandations automatiques continueront de s’appliquer. Cette action est irréversible.")}',
+          details: [['${T("Produits liés")}', szNombre((D.liaisons || []).length, 0)]],
+          oui: '${T("Effacer les liaisons")}' }).then(function(ok){ if (ok) { ARME = '__liaisons'; bv.onclick(); } });
         return;
       }
       ARME = '';
@@ -688,10 +689,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       var idS = bs.getAttribute('data-suppr');
       var pard = bs.getAttribute('data-defaut') === '1';
       if (ARME !== idS) {
-        ARME = idS; dessiner();
-        dire(pard
-          ? '${T("Cliquez « Confirmer ? » — cette règle par défaut sera retirée, mais vous pourrez la restaurer.")}'
-          : '${T("Cliquez « Confirmer ? » pour supprimer cette règle.")}', 'att');
+        var rS = (D.regles || []).filter(function(x){ return x.id === idS; })[0];
+        var nomS = ' « ' + (rS ? rS.nom : '') + ' » ';
+        szConfirmer({ danger: !pard, titre: '${T("Supprimer la règle")}',
+          texte: pard
+            ? '${T("La règle par défaut")}' + nomS + '${T("sera retirée des recommandations. Vous pourrez la restaurer ultérieurement.")}'
+            : '${T("La règle")}' + nomS + '${T("sera supprimée définitivement. Cette action est irréversible.")}',
+          oui: '${T("Supprimer la règle")}' }).then(function(ok){ if (ok) { ARME = idS; bs.click(); } });
         return;
       }
       ARME = '';

@@ -212,4 +212,14 @@ module.exports = {
   'Règle Affichée sur': 'Rule Shown on',
   // 2026-10-15 : la liste des regles refaite (lot E).
   'articles au plus': 'items at most',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Effacer toutes les liaisons': 'Clear all links',
+  'Toutes les associations de produits faites manuellement seront supprimées définitivement. Les recommandations automatiques continueront de s’appliquer. Cette action est irréversible.': 'All manually created product associations will be permanently deleted. Automatic recommendations will continue to apply. This action cannot be undone.',
+  'Produits liés': 'Linked products',
+  'Effacer les liaisons': 'Clear links',
+  'Supprimer la règle': 'Delete rule',
+  'La règle par défaut': 'The default rule',
+  'sera retirée des recommandations. Vous pourrez la restaurer ultérieurement.': 'will be removed from recommendations. You can restore it later.',
+  'La règle': 'The rule',
+  'sera supprimée définitivement. Cette action est irréversible.': 'will be permanently deleted. This action cannot be undone.',
 };

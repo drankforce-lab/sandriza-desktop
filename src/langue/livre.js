@@ -276,4 +276,8 @@ module.exports = {
     'Accounting amounts: meals at 100%, vehicle at the amount paid. The 50% limit, business-use share and CCA go in the tax return.',
   'Entreprise individuelle : capital en 3551 à 3585 (série des associés), retraits négatifs en 3553.':
     'Sole proprietorship: capital in 3551 to 3585 (the partners’ series), drawings negative in 3553.',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Supprimer l’écriture': 'Delete entry',
+  'L’écriture manuelle': 'The manual entry',
+  'sera supprimée définitivement du livre de comptes. Les soldes et les états financiers de l’exercice seront recalculés sans elle. Cette action est irréversible.': 'will be permanently deleted from the ledger. The balances and financial statements for the fiscal year will be recalculated without it. This action cannot be undone.',
 };

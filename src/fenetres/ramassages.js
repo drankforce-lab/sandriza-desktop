@@ -220,7 +220,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
           + etat
           + (!r.annule
               ? '<button class="mini danger" style="margin-left:auto" data-annuler="' + esc(r.id) + '">'
-                + (ANNULER_ARME === r.id ? '${T("Confirmer l’annulation ?")}' : '${T("Annuler")}') + '</button>'
+                + '${T("Annuler")}</button>'
               : '')
           + '</div>'
           + '<div class="dt">${T("Confirmation :")} <span class="mono">' + esc(r.confirmation || '—') + '</span>'
@@ -382,12 +382,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var an = t.closest('[data-annuler]');
     if (an) {
       var id = an.getAttribute('data-annuler');
-      /* ⚠ L ANNULATION EST UN GESTE AUPRES DU TRANSPORTEUR : deux clics — le
-         premier arme le bouton, le second confirme (et jamais de boite native). */
+      /* ⚠ L ANNULATION EST UN GESTE AUPRES DU TRANSPORTEUR : elle se confirme dans
+         une boite a part (szConfirmer, 2026-10-15 ; jamais de boite native). */
       if (ANNULER_ARME !== id) {
-        ANNULER_ARME = id;
-        dessiner();
-        setTimeout(function(){ if (ANNULER_ARME === id) { ANNULER_ARME = ''; dessiner(); } }, 4000);
+        var rA = (RAM || []).filter(function(x){ return x.id === id; })[0];
+        szConfirmer({ danger: true, titre: '${T("Annuler le ramassage")}',
+          texte: '${T("Le ramassage")}' + (rA ? ' ' + rA.transporteur + ' ${T("du")} ' + szQuand(rA.date) : '')
+            + ' ${T("sera annulé auprès du transporteur. Pour le rétablir, il faudra en planifier un nouveau.")}',
+          details: rA ? [['${T("Colis")}', String(rA.colis)], ['${T("Confirmation")}', rA.confirmation || '—']] : [],
+          oui: '${T("Annuler le ramassage")}', non: '${T("Conserver")}' }).then(function(ok){ if (ok) { ANNULER_ARME = id; an.click(); } });
         return;
       }
       ANNULER_ARME = '';

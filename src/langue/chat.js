@@ -161,4 +161,8 @@ module.exports = {
   'attendent une réponse': 'awaiting a reply',
   'en cours': 'in progress',
   'terminées': 'finished',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Supprimer la conversation': 'Delete conversation',
+  'La conversation avec': 'The conversation with',
+  'sera supprimée définitivement, avec l’ensemble de ses messages. Cette action est irréversible.': 'will be permanently deleted, along with all of its messages. This action cannot be undone.',
 };

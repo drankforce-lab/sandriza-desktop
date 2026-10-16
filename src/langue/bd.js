@@ -120,5 +120,12 @@ module.exports = {
   'image déplacée': 'image moved',
   'images déplacées': 'images moved',
   'erreur.': 'error.',
-  'erreurs.': 'errors.'
+  'erreurs.': 'errors.',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Restaurer depuis Turso': 'Restore from Turso',
+  'La configuration enregistrée dans Turso remplacera la configuration locale, puis la fenêtre principale sera rechargée. Les réglages locaux qui n’ont pas été poussés vers Turso seront perdus.': 'The configuration stored in Turso will replace the local configuration, then the main window will reload. Local settings that have not been pushed to Turso will be lost.',
+  'Restaurer la configuration': 'Restore the configuration',
+  'Migrer les images vers R2': 'Migrate images to R2',
+  'Les images encore stockées en base64 dans la base de données seront déplacées vers Cloudflare R2. L’opération peut durer plusieurs minutes et n’est à lancer qu’une seule fois.': 'Images still stored as base64 in the database will be moved to Cloudflare R2. The operation may take several minutes and only needs to be run once.',
+  'Lancer la migration': 'Start the migration',
 };

@@ -102,4 +102,15 @@ module.exports = {
   'Éteints': 'Expired',
   'ne bloquent personne': 'block no one',
   'Enregistrement Détenu par': 'Record Held by',
+
+  // 2026-10-15 : confirmations en boîte à part.
+  'Libérer tous les verrous': 'Release all locks',
+  'Tous les verrous de fiches seront libérés de force. Les personnes qui modifient actuellement une fiche risquent de perdre leurs changements non enregistrés.':
+    'All record locks will be forcibly released. People currently editing a record may lose their unsaved changes.',
+  'Forcer le déverrouillage': 'Force unlock',
+  'Le verrou de la fiche': 'The lock on the record',
+  'sera libéré de force. Si la personne qui la tient la modifie encore, ses changements non enregistrés risquent d’être perdus.':
+    'will be forcibly released. If the person holding it is still editing it, their unsaved changes may be lost.',
+  'Tenu par': 'Held by',
+  'Libérer le verrou': 'Release lock',
 };

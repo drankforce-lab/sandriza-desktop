@@ -119,4 +119,11 @@ module.exports = {
   'Aucune entrée ne correspond.': 'No entry matches.',
   'Entrée': 'Entry',
   'Entrée Ajouté le': 'Entry Added on',
+
+  // 2026-10-15 : confirmations en boîte à part.
+  'Retirer de la liste noire': 'Remove from blocklist',
+  'L’entrée': 'The entry',
+  'sera retirée de la liste noire. Elle pourra de nouveau passer des commandes.':
+    'will be removed from the blocklist. It will be able to place orders again.',
+  'Retirer l’entrée': 'Remove entry',
 };

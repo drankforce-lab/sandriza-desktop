@@ -3677,16 +3677,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   // Pleine qualité : consomme des crédits → armement en deux temps.
   bFinal.onclick = function(){
     if (RO || OCCUPE) return;
+    /* ⚠ LA CONFIRMATION EST UNE BOITE A PART (2026-10-15) : plus de bouton qui
+       change ni d armement qui expire ; confirme, on arme puis on rejoue le geste. */
     if (!ARME) {
-      ARME = true; bFinal.className = 'prim conf'; bFinal.textContent = '${T("Confirmer (consomme des crédits)")}';
-      dire('${T("Un clic de plus lance un vrai rendu payant.")}', 'att');
-      /* ⚠ L ARMEMENT EXPIRE : reste arme, un clic distrait une heure plus tard
-         lancait un rendu payant. */
       clearTimeout(ARME_T);
-      ARME_T = setTimeout(function(){
-        if (!ARME) return;
-        ARME = false; bFinal.className = 'prim'; bFinal.textContent = '${T("Générer en pleine qualité")}';
-      }, 8000);
+      szConfirmer({ prudent: true, titre: '${T("Générer en pleine qualité")}',
+        texte: '${T("Le rendu en pleine qualité est un traitement payant : il consomme des crédits du service de génération d’images. Utilisez l’aperçu filigrané, gratuit, pour valider le résultat au préalable.")}',
+        oui: '${T("Lancer le rendu payant")}' }).then(function(ok){ if (ok) { ARME = true; bFinal.onclick(); } });
       return;
     }
     ARME = false; bFinal.className = 'prim'; bFinal.textContent = '${T("Générer en pleine qualité")}';

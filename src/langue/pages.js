@@ -291,4 +291,13 @@ module.exports = {
   "Conversion US / EU…": "US / EU… conversion",
   // 2026-10-12 : un guide a la fois ; la pastille d un guide sans nom porte son rang.
   "Guide": "Chart",
+  // 2026-10-15 : confirmations en boîte à part.
+  "Supprimer la page": "Delete the page",
+  "La page": "The page",
+  "sera supprimée définitivement du site, et son adresse cessera de fonctionner. Cette action est irréversible.": "will be permanently deleted from the site, and its address will stop working. This action cannot be undone.",
+  "Adresse": "Address",
+  "Supprimer tous les messages": "Delete all messages",
+  "Tous les messages reçus par le formulaire de contact seront supprimés définitivement. Cette action est irréversible.": "All messages received through the contact form will be permanently deleted. This action cannot be undone.",
+  "Messages": "Messages",
+  "Supprimer les messages": "Delete the messages",
 };

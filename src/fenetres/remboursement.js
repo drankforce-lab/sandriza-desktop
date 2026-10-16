@@ -468,19 +468,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var s = saisie();
     if (!String(s.motif || '').trim()) { dire(MOTIFS.motif_requis, 'err'); return; }
     var enCredit = s.methode !== 'original';
-    voile('<h3><span class="ic">💳</span> ${T("Confirmer le remboursement ?")}</h3>'
-      + '<p>' + TOT.nbArticles + ' '
-      + (TOT.nbArticles > 1 ? '${T("unités")}' : '${T("unité")}')
-      + (TOT.livraison > 0 ? '${T(" + livraison")}' : '') + '${T(" — total ")}<strong>' + argent(TOT.total) + '</strong>'
-      + (TOT.retenu ? '${T(", net au client ")}<strong>' + argent(TOT.net) + '</strong>${T(" (frais ")}' + argent(TOT.frais) + '${T(" retenus)")}' : '')
-      + '</p><p>${T("Méthode : ")}<strong>' + (enCredit ? '${T("crédit boutique (n’expire jamais)")}' : '${T("moyen de paiement original — Square")}') + '</strong></p>'
-      + '<p style="color:var(--tx-att)">${T("Un remboursement ne s’annule pas d’un clic.")}</p>'
-      + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
-      + '<button class="paie" id="v-oui">${T("Rembourser ")}' + argent(TOT.retenu ? TOT.net : TOT.total) + '</button></div>',
-      function(fermer){
-        document.getElementById('v-non').onclick = fermer;
-        document.getElementById('v-oui').onclick = function(){
-          fermer();
+    /* ⚠ UNE BOITE A PART (szConfirmer, 2026-10-15) : le montant, la commande et
+       la methode sont nommes avant que l argent parte. */
+    var aRendre = TOT.retenu ? TOT.net : TOT.total;
+    var dtR = [['${T("Commande")}', R.numero || '—'],
+      ['${T("Articles")}', TOT.nbArticles + ' ' + (TOT.nbArticles > 1 ? '${T("unités")}' : '${T("unité")}') + (TOT.livraison > 0 ? '${T(" + livraison")}' : '')],
+      ['${T("Total")}', argent(TOT.total)]];
+    if (TOT.retenu) dtR.push(['${T("Frais retenus")}', argent(TOT.frais)], ['${T("Net au client")}', argent(TOT.net)]);
+    dtR.push(['${T("Méthode")}', enCredit ? '${T("Crédit boutique (n’expire jamais)")}' : '${T("Moyen de paiement original (Square)")}']);
+    szConfirmer({ prudent: true, titre: '${T("Rembourser le client")}',
+      texte: '${T("Le client sera remboursé de")}' + ' ' + argent(aRendre) + ' '
+        + (enCredit ? '${T("en crédit boutique ; un courriel lui sera envoyé avec le numéro du crédit.")}' : '${T("sur son moyen de paiement original, par Square.")}')
+        + ' ' + '${T("Un remboursement émis ne peut pas être annulé.")}',
+      details: dtR,
+      oui: '${T("Rembourser ")}' + argent(aRendre) }).then(function(ok){
+        if (!ok) return;
           enCours = true; majBouton(); dire('${T("Remboursement en cours…")}', 'att');
           s.nipFrais = s.retenirFrais ? '' : NIP_SAISI;
           appeler('remboursement:ecrire', [ID, s]).then(function(r){
@@ -494,7 +496,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             QTE = {}; TOT = null;
             recharger();
           });
-        };
       });
   }
 

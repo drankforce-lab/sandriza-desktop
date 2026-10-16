@@ -270,4 +270,9 @@ module.exports = {
   'Premier numéro libre :': 'First free number:',
   'La priorité': 'Priority',
   'est déjà prise par': 'is already used by',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Supprimer l’offre': 'Delete offer',
+  'Supprimer l’annonce': 'Delete announcement',
+  'sera supprimée définitivement, et son bandeau sera retiré de la boutique. Cette action est irréversible.': 'will be permanently deleted, and its banner will be removed from the store. This action cannot be undone.',
+  'sera supprimée définitivement et retirée de la boutique. Cette action est irréversible.': 'will be permanently deleted and removed from the store. This action cannot be undone.',
 };

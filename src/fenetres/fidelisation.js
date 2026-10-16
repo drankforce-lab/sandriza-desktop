@@ -373,8 +373,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
           + (s.actif ? '${T("Actif")}' : '${T("Inactif")}') + '</span></div>'
           + '<div class="gestes">' + (D.peutModifier
               ? '<button class="mini geste" data-modifier-sondage="' + esc(s.id) + '">${T("Modifier")}</button>'
-                + '<button class="mini geste danger' + (ARME === s.id ? ' arme' : '') + '" data-suppr-sondage="' + esc(s.id) + '">'
-                + (ARME === s.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>'
+                + '<button class="mini geste danger" data-suppr-sondage="' + esc(s.id) + '">'
+                + '${T("Supprimer")}' + '</button>'
               : '') + '</div></div>';
       }).join('') + '</div>';
     }
@@ -786,9 +786,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       + (ro ? '' : '<button type="button" class="mini prim" data-amb="ajouter">${T("+ Ajouter une ambassadrice")}</button>')
       + '<div class="droite"><span>${T("En attente :")} <b>' + ambVal(t.att, t.attP) + '</b></span>'
       + '<span>${T("Dû :")} <b>' + ambVal(t.du, t.duP) + '</b></span>'
-      + (ro ? '' : '<button type="button" class="mini ' + (AMBARME === 'verser' ? 'danger' : 'prim') + '" data-amb="verser"'
+      + (ro ? '' : '<button type="button" class="mini prim" data-amb="verser"'
           + (raison ? ' disabled title="' + esc(raison) + '"' : '') + '>'
-          + (AMBARME === 'verser' ? '${T("Confirmer le versement ?")}' : '${T("Verser les récompenses dues")}') + '</button>')
+          + '${T("Verser les récompenses dues")}' + '</button>')
       + '</div></div>';
     if (raison && !ro) h += '<div class="dt amb-raison">' + esc(raison) + '</div>';
     if (AMBED) h += ambFormulaire();
@@ -891,7 +891,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
             + '<td><span class="rf-pill ' + (PILL[d.statut] || '') + '">' + (LIB[d.statut] || esc(d.statut)) + '</span></td>'
             + '<td class="fin">' + (ro ? '' : (d.statut !== 'acceptee' ? '<button type="button" class="mini geste" data-amb="creer-de" data-id="' + esc(d.id) + '">${T("Créer l’ambassadrice")}</button> ' : '')
               + (d.statut === 'nouvelle' ? '<button type="button" class="mini geste" data-amb="refuser" data-id="' + esc(d.id) + '">${T("Refuser")}</button> ' : '')
-              + '<button type="button" class="mini geste danger" data-amb="suppr-dem" data-id="' + esc(d.id) + '">' + (AMBARME === 'sup:' + d.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>') + '</td></tr>';
+              + '<button type="button" class="mini geste danger" data-amb="suppr-dem" data-id="' + esc(d.id) + '">' + '${T("Supprimer")}' + '</button>') + '</td></tr>';
         }).join('')
       + '</tbody></table></div>' + ambPages(l.length);
     return h + '</div>';
@@ -938,8 +938,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
   function ambVerser(b){
     var t = ambTotaux();
     if (AMBARME !== 'verser') {
-      AMBARME = 'verser'; dessiner();
-      dire('${T("Cliquez « Confirmer le versement ? » —")}' + ' ' + ambVal(t.du, t.duP) + ' ${T("pour")} ' + t.nb + ' ${T("commande(s). Ce geste ne se défait pas.")}', 'att');
+      szConfirmer({ prudent: true, titre: '${T("Verser les récompenses des ambassadrices")}',
+        texte: '${T("Les récompenses dues seront versées aux ambassadrices concernées. Un versement effectué ne peut pas être annulé.")}',
+        details: [['${T("Montant dû")}', ambVal(t.du, t.duP)], ['${T("Commandes concernées")}', szNombre(t.nb, 0)]],
+        oui: '${T("Verser les récompenses")}' }).then(function(ok){ if (ok) { AMBARME = 'verser'; ambVerser(b); } });
       return;
     }
     AMBARME = ''; if (b) b.disabled = true;
@@ -990,7 +992,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
         appeler('fidelisation:amb:demande', [id, 'refusee']).then(function(r){ b.disabled = false; ambApres(r, '${T("Candidature refusée.")}'); });
       }
       else if (g === 'suppr-dem') {
-        if (AMBARME !== 'sup:' + id) { AMBARME = 'sup:' + id; dessiner(); dire('${T("Cliquez « Confirmer ? » — la candidature sera effacée.")}', 'att'); return; }
+        if (AMBARME !== 'sup:' + id) {
+          var dS = parId(AMB.demandes);
+          szConfirmer({ danger: true, titre: '${T("Supprimer la candidature")}',
+            texte: '${T("La candidature de")}' + ' ' + (dS ? (dS.nom || dS.courriel || '') : '') + ' ' + '${T("sera supprimée définitivement. Cette action est irréversible.")}',
+            oui: '${T("Supprimer la candidature")}' }).then(function(ok){ if (ok) { AMBARME = 'sup:' + id; b.click(); } });
+          return;
+        }
         AMBARME = ''; b.disabled = true;
         appeler('fidelisation:amb:demande', [id, 'supprimer']).then(function(r){ ambApres(r, '${T("Candidature supprimée.")}'); });
       }
@@ -1084,9 +1092,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       + '<div class="droite"><span>${T("En attente :")} <b>' + szArgent(t.attente || 0) + '</b></span>'
       + '<span>${T("Dû :")} <b>' + szArgent(t.du || 0) + '</b></span>'
       + '<span>${T("Versé :")} <b>' + szArgent(t.verse || 0) + '</b></span>'
-      + (ro ? '' : '<button type="button" class="mini ' + (PARARME === 'verser' ? 'danger' : 'prim') + '" data-par="verser"'
+      + (ro ? '' : '<button type="button" class="mini prim" data-par="verser"'
           + (raison ? ' disabled title="' + esc(raison) + '"' : '') + '>'
-          + (PARARME === 'verser' ? '${T("Confirmer le versement ?")}' : '${T("Verser les récompenses dues")}') + '</button>')
+          + '${T("Verser les récompenses dues")}' + '</button>')
       + '</div></div>';
     if (raison && !ro) h += '<div class="dt amb-raison">' + esc(raison) + '</div>';
     h += '<div class="carte plein"><h2>${T("Amies invitées")}</h2>';
@@ -1151,8 +1159,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
   }
   function parVerser(b){
     if (PARARME !== 'verser') {
-      PARARME = 'verser'; dessiner();
-      dire('${T("Cliquez « Confirmer le versement ? » —")}' + ' ' + szArgent((PAR.totaux || {}).du || 0) + ' ${T("en crédit boutique. Ce geste ne se défait pas.")}', 'att');
+      var tP = PAR.totaux || {};
+      szConfirmer({ prudent: true, titre: '${T("Verser les récompenses de parrainage")}',
+        texte: '${T("Les récompenses dues seront versées en crédit boutique aux clientes concernées. Un versement effectué ne peut pas être annulé.")}',
+        details: [['${T("Montant dû")}', szArgent(tP.du || 0)]],
+        oui: '${T("Verser les récompenses")}' }).then(function(ok){ if (ok) { PARARME = 'verser'; parVerser(b); } });
       return;
     }
     PARARME = ''; if (b) b.disabled = true;
@@ -1358,7 +1369,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     var h = '<div class="barreoutils"><div class="droite">'
       + (D.peutModifier && iv.length
           ? '<button class="mini danger" id="fi-vider">'
-            + (ARME === '__invites' ? '${T("Confirmer ?")}' : '${T("Tout supprimer")}') + '</button>' : '')
+            + '${T("Tout supprimer")}' + '</button>' : '')
       + '<span>' + compte(iv.length, D.invitationsTotal, '${T("invitation")}', '${T("invitations")}') + '</span></div></div>';
     h += '<div class="carte plein">';
     if (!iv.length) {
@@ -1697,8 +1708,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     var bv = document.getElementById('fi-vider');
     if (bv) bv.onclick = function(){
       if (ARME !== '__invites') {
-        ARME = '__invites'; dessiner();
-        dire('${T("Cliquez « Confirmer ? » — les invitations partent, les réponses déjà reçues restent.")}', 'att');
+        var nI = (D.invitations || []).length;
+        szConfirmer({ danger: true, titre: '${T("Supprimer toutes les invitations")}',
+          texte: '${T("Toutes les invitations aux sondages seront supprimées définitivement. Les réponses déjà reçues sont conservées. Cette action est irréversible.")}',
+          details: [['${T("Invitations")}', szNombre(D.invitationsTotal != null ? D.invitationsTotal : nI, 0)]],
+          oui: '${T("Supprimer les invitations")}' }).then(function(ok){ if (ok) { ARME = '__invites'; bv.onclick(); } });
         return;
       }
       ARME = '';
@@ -1725,11 +1739,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       /* Deux clics, et l on DIT combien de reponses disparaissent : elles ne
          se reconstituent pas. */
       if (ARME !== idS) {
-        ARME = idS; dessiner();
-        dire('${T("Cliquez « Confirmer ? » — le sondage et ses ")}'
-          + ((s && s.reponses) || 0)
-          + (((s && s.reponses) || 0) > 1 ? '${T(" réponses seront détruits, sans retour possible.")}'
-                                          : '${T(" réponse seront détruits, sans retour possible.")}'), 'att');
+        var nR = (s && s.reponses) || 0;
+        szConfirmer({ danger: true, titre: '${T("Supprimer le sondage")}',
+          texte: '${T("Le sondage")}' + ' « ' + (s ? s.nom : '') + ' » ' + '${T("et toutes ses réponses seront supprimés définitivement. Cette action est irréversible.")}',
+          details: [['${T("Réponses perdues")}', szNombre(nR, 0)]],
+          oui: '${T("Supprimer le sondage")}' }).then(function(ok){ if (ok) { ARME = idS; bs.click(); } });
         return;
       }
       ARME = '';

@@ -266,4 +266,13 @@ module.exports = {
   'closes, en lecture seule': 'closed, read-only',
   'Nom Relevé': 'Name Statement',
   'Dépôts Écart État': 'Deposits Difference Status',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Verrouiller la conciliation': 'Lock reconciliation',
+  'sera close et passera en lecture seule. Ses lignes, ses dépôts et ses appariements ne pourront plus être modifiés. Cette action est irréversible.': 'will be closed and become read-only. Its lines, deposits and matches can no longer be changed. This action cannot be undone.',
+  'Attention : l’écart n’est pas nul.': 'Warning: the difference is not zero.',
+  'Retirer la ligne': 'Remove line',
+  'Vous allez retirer': 'You are about to remove',
+  'de la conciliation. Si la ligne est appariée, l’appariement sera défait. Cette action est irréversible.': 'from the reconciliation. If the line is matched, the match will be undone. This action cannot be undone.',
+  'Supprimer la conciliation': 'Delete reconciliation',
+  'sera supprimée définitivement, avec ses lignes et ses appariements. Les transactions bancaires et les dépenses ne sont pas touchées. Cette action est irréversible.': 'will be permanently deleted, along with its lines and matches. Bank transactions and expenses are not affected. This action cannot be undone.',
 };

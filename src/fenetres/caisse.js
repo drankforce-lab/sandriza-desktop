@@ -729,7 +729,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      « enregistre et visible que pour les super administrateurs ». Le bouton n est montre qu a ce role
      (CTX.superadmin, simple affichage) ; c est le SERVEUR qui refuse tout autre role, rôle relu a
      chaque appel. Le NIP n est lu qu a l ouverture de ce volet, et masque tant qu on ne demande pas
-     a le voir. Un champ laisse vide ne retire RIEN : retirer est un geste nomme, en deux clics. */
+     a le voir. Un champ laisse vide ne retire RIEN : retirer est un geste nomme, confirme dans une boite a part. */
   function panneauNip(){
     fermerVoileNip();
     var v = document.createElement('div');
@@ -791,11 +791,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     document.getElementById('nip-retirer').onclick = function(){
       var btn = this;
       if (!retArme) {
-        btn.textContent = '${T("Confirmer le retrait ?")}';
-        retArme = setTimeout(function(){ retArme = null; btn.textContent = '${T("Retirer le NIP")}'; }, 4000);
+        szConfirmer({ prudent: true, titre: '${T("Retirer le NIP de sécurité")}',
+          texte: '${T("Le NIP de sécurité de la caisse sera retiré. Plus aucun prix ne pourra être modifié à la caisse tant qu’un nouveau NIP n’aura pas été enregistré.")}',
+          oui: '${T("Retirer le NIP")}' }).then(function(ok){ if (ok) { retArme = true; btn.onclick(); } });
         return;
       }
-      clearTimeout(retArme); retArme = null; btn.textContent = '${T("Retirer le NIP")}';
+      retArme = null;
       btn.disabled = true;
       appeler('caisse:nipRetirer').then(function(r){
         if (!r.ok) { btn.disabled = false; nipMsg(expliquer(r.motif), 'err'); return; }
@@ -1273,24 +1274,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   document.getElementById('rt-montant').onclick = function(){ if (RABTYPE !== 'montant') { poserRabType('montant'); majTotaux(); } };
   document.getElementById('rt-pct').onclick = function(){ if (RABTYPE !== 'pct') { poserRabType('pct'); majTotaux(); } };
   document.getElementById('btn-vendre').onclick = vendre;
-  /* ⚠ DEUX CLICS, pas une boite de confirmation : le premier ARME le bouton
-     (« Confirmer ? ») pendant 4 s, le second efface. Un clic egare a cote de
+  /* ⚠ UNE BOITE A PART (szConfirmer, 2026-10-15) : un clic egare a cote de
      « Effectuer la vente » ne doit pas faire perdre une vente saisie. */
-  var viderArme = null;
-  function desarmerVider(){
-    var b = document.getElementById('btn-vider');
-    clearTimeout(viderArme); viderArme = null;
-    b.classList.remove('arme'); b.textContent = '${T("Réinitialiser la vente")}';
-  }
   document.getElementById('btn-vider').onclick = function(){
-    if (!viderArme) {
-      this.classList.add('arme'); this.textContent = '${T("Confirmer ?")}';
-      viderArme = setTimeout(desarmerVider, 4000);
-      return;
-    }
-    desarmerVider();
-    reinitialiser();
-    var s = document.getElementById('scan'); if (s) s.focus();
+    var nArt = 0;
+    LIGNES.forEach(function(l){ nArt += (parseInt(l.quantity, 10) || 0); });
+    var nomCli = val('c-nom');
+    szConfirmer({ danger: true, titre: '${T("Réinitialiser la vente")}',
+      texte: '${T("La vente en cours sera effacée : les articles, le client, la note et le rabais saisis seront perdus. Aucune vente n’a encore été enregistrée ni encaissée.")}',
+      details: [['${T("Articles")}', String(nArt)], ['${T("Total")}', argent(TOT ? TOT.total : 0)]]
+        .concat(nomCli ? [['${T("Client")}', nomCli]] : []),
+      oui: '${T("Réinitialiser la vente")}' }).then(function(ok){
+      if (!ok) return;
+      reinitialiser();
+      var s = document.getElementById('scan'); if (s) s.focus();
+    });
   };
   document.getElementById('btn-nip').onclick = panneauNip;
   document.getElementById('btn-afficheur').onclick = function(){

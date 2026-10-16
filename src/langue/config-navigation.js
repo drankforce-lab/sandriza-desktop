@@ -72,5 +72,14 @@ module.exports = {
   'Sous-menu': 'Submenu',
   'Type': 'Type',
   'Collection': 'Collection',
-  'Ajouter': 'Add'
+  'Ajouter': 'Add',
+
+  // 2026-10-15 : confirmations en boîte à part.
+  'Supprimer l’élément de menu': 'Delete menu item',
+  'L’élément de menu': 'The menu item',
+  'et ses sous-menus seront retirés de la navigation de la boutique.': 'and its submenus will be removed from the store navigation.',
+  'Supprimer l’élément': 'Delete item',
+  'Réinitialiser la navigation': 'Reset navigation',
+  'Le menu de la boutique reprendra sa composition d’origine. Les éléments et sous-menus que vous avez ajoutés seront perdus. Cette action est irréversible.':
+    'The store menu will return to its original layout. The items and submenus you added will be lost. This action cannot be undone.'
 };

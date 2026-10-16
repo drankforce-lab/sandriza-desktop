@@ -489,7 +489,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   breinit.onclick = function(){
     if (RO || OCCUPE) return;
-    if (!CONF_REINIT) { CONF_REINIT = true; breinit.textContent='${T("Confirmer ?")}'; setTimeout(function(){ CONF_REINIT=false; breinit.textContent='${T("Réinitialiser")}'; }, 5000); return; }
+    if (!CONF_REINIT) {
+      szConfirmer({ danger: true, titre: '${T("Réinitialiser la page d’accueil")}',
+        texte: '${T("Tous les blocs de la page d’accueil seront remplacés par la configuration par défaut. Les blocs et diapositives actuels seront perdus. Cette action est irréversible.")}',
+        oui: '${T("Réinitialiser les blocs")}' }).then(function(ok){ if (ok) { CONF_REINIT = true; breinit.onclick(); } });
+      return;
+    }
     CONF_REINIT = false; breinit.textContent='${T("Réinitialiser")}';
     occuper(true); dire('${T("Réinitialisation…")}');
     appeler('config:accueil:reinit').then(function(r){ occuper(false);

@@ -795,4 +795,7 @@ module.exports = {
   "cadrage du rendu": "as rendered",
   "Filigrane ignoré — lancez l’aperçu en bas de la fenêtre.": "Watermark skipped — start the preview at the bottom of the window.",
   "Filigrane ignoré.": "Watermark skipped.",
+  // 2026-10-15 : confirmations en boîte à part.
+  "Le rendu en pleine qualité est un traitement payant : il consomme des crédits du service de génération d’images. Utilisez l’aperçu filigrané, gratuit, pour valider le résultat au préalable.": "Full-quality rendering is a paid process: it uses credits from the image generation service. Use the free watermarked preview to check the result first.",
+  "Lancer le rendu payant": "Start the paid render",
 };

@@ -164,4 +164,10 @@ module.exports = {
   'Copier le code': 'Copy code',
   'Code copié : ': 'Code copied: ',
   'Supprimer la carte…': 'Delete card…',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Solde perdu': 'Balance lost',
+  'Supprimer la carte-cadeau': 'Delete gift card',
+  'La carte-cadeau': 'The gift card',
+  'sera supprimée et ne pourra plus être utilisée en boutique.': 'will be deleted and can no longer be used in the store.',
+  'Son solde restant sera perdu.': 'Its remaining balance will be lost.',
 };

@@ -126,4 +126,9 @@ module.exports = {
   'Archive': 'Archive',
   'depuis le début': 'since the start',
   '· Raison :': '· Reason:',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Supprimer la demande': 'Delete the request',
+  'La demande de': 'The request from',
+  'concernant la commande': 'regarding order',
+  'sera supprimée définitivement, avec son contenu. Cette action est irréversible.': 'will be permanently deleted, along with its content. This action cannot be undone.',
 };

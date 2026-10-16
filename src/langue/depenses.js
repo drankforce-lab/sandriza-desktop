@@ -320,4 +320,17 @@ module.exports = {
     'Mixed use (e.g. cell phone): only the business share is deductible, taxes included. Empty: 100%.',
   'Usage mixte (ex. cellulaire) : seule la part d’affaires se déduit, taxes comprises.':
     'Mixed use (e.g. cell phone): only the business share is deductible, taxes included.',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Supprimer la dépense': 'Delete expense',
+  'La dépense': 'The expense',
+  'sera supprimée définitivement. Elle disparaîtra de la comptabilité et des rapports d’impôt, et les taxes payées ne seront plus réclamées. Cette action est irréversible.': 'will be permanently deleted. It will disappear from the accounting and tax reports, and the taxes paid will no longer be claimed. This action cannot be undone.',
+  'Rétablir le classement d’origine': 'Restore original classification',
+  'Retirer le fournisseur de l’annuaire': 'Remove supplier from directory',
+  'La correction apportée au fournisseur': 'The correction made to supplier',
+  'sera retirée. Il retrouvera son classement livré :': 'will be removed. It will return to its built-in classification:',
+  'Les dépenses déjà saisies ne sont pas modifiées.': 'Expenses already entered are not changed.',
+  'Le fournisseur': 'Supplier',
+  'sera retiré de l’annuaire. Les prochaines dépenses à son nom ne seront plus classées automatiquement. Les dépenses déjà saisies ne sont pas modifiées.': 'will be removed from the directory. Future expenses under this name will no longer be classified automatically. Expenses already entered are not changed.',
+  'Rétablir le classement': 'Restore classification',
+  'Retirer le fournisseur': 'Remove supplier',
 };

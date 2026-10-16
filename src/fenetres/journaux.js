@@ -582,7 +582,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
       + '<span class="pousse"></span>'
       + '<span class="sub">'+rows.length+' '+(rows.length>1?'${T("lignes")}':'${T("ligne")}')+'</span>'
       + (ENV_D.peutModifier && (ENV_D.total||0)
-          ? '<button class="b dgr" id="env-vider">'+(ENV_ARME?'${T("Confirmer ?")}':'${T("Effacer le journal")}')+'</button>' : '')
+          ? '<button class="b dgr" id="env-vider">${T("Effacer le journal")}</button>' : '')
       + '<button class="b" id="env-reload"><span class="ic">🔄</span> ${T("Actualiser")}</button></div>';
 
     if (!rows.length) {
@@ -620,9 +620,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
     var bv=document.getElementById('env-vider');
     if (bv) bv.onclick=function(){
       if (!ENV_ARME){
-        ENV_ARME=true; vueEnvois();
         /* Une phrase ENTIERE dans un seul litteral. */
-        dire('${T("Cliquez « Confirmer ? » — le journal est effacé, et avec lui la preuve de ce qui est parti. Les envois eux-mêmes ne sont pas annulés.")}', 'att');
+        szConfirmer({ danger: true, titre: '${T("Effacer le journal des envois")}',
+          texte: '${T("Toutes les entrées du journal des envois seront effacées définitivement, et avec elles la preuve de ce qui a été expédié. Les courriels déjà envoyés ne sont pas annulés. Cette action est irréversible.")}',
+          details: [['${T("Entrées")}', String((ENV_D && ENV_D.total) || 0)]],
+          oui: '${T("Effacer le journal")}' }).then(function(ok){ if (ok) { ENV_ARME=true; bv.onclick(); } });
         return;
       }
       ENV_ARME=false;
@@ -741,8 +743,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
       +     (neuves ? ' · <b style="color:var(--tx-att)">' + neuves + ' ' + szPl(neuves, '${T("non vu")}', '${T("non vus")}') + '</b>' : '') + '</span>'
       +   (D.peutModifier && neuves ? '<button class="mini" id="js-vues">${T("Tout marquer comme vu")}</button>' : '')
       +   (D.peutModifier && rows.length
-            ? '<button class="mini" id="js-purge"' + (JS_ARME ? ' style="border-color:rgba(239,68,68,.6);color:var(--tx-err)"' : '') + '>'
-              + (JS_ARME ? '${T("Confirmer — vider définitivement")}' : '${T("Vider")}') + '</button>'
+            ? '<button class="mini" id="js-purge">${T("Vider")}</button>'
             : '')
       + '</div>'
       + '<div data-pages="journaux-jserreurs"><table class="tb"><thead><tr>'
@@ -804,9 +805,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
   function jsPurger(){
     if (OCCUPE) return;
     if (!JS_ARME) {
-      JS_ARME = true;
-      vueJsErreurs();
-      dire('${T("Cliquez de nouveau pour vider — les compteurs ne se reconstituent pas.")}', 'att');
+      szConfirmer({ danger: true, titre: '${T("Vider le journal des erreurs")}',
+        texte: '${T("Toutes les erreurs rapportées seront effacées pour l’ensemble des utilisateurs, ainsi que leurs compteurs, qui ne pourront pas être reconstitués. Cette action est irréversible.")}',
+        details: [['${T("Défauts distincts")}', String((D && (D.jsErreursTotal || (D.jsErreurs || []).length)) || 0)]],
+        oui: '${T("Vider le journal")}' }).then(function(ok){ if (ok) { JS_ARME = true; jsPurger(); } });
       return;
     }
     JS_ARME = false; OCCUPE = true; dire('${T("Vidage…")}');

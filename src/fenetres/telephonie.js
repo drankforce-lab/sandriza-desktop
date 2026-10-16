@@ -589,7 +589,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
   }
   function bloquer(num, note){ return bloquesAppel('config:telephonie:bloquer', [num, note || ''], '${T("Numéro bloqué.")}'); }
   function debloquer(num){ return bloquesAppel('config:telephonie:debloquer', [num], '${T("Numéro débloqué.")}'); }
-  // Un bouton « Bloquer » (textos, messages vocaux) : deux clics, le premier demande confirmation.
+  // Un bouton « Bloquer » (textos, messages vocaux) : il demande confirmation dans une boîte à part.
   function boutonBloquer(num){
     if (RO || !num) return '';
     if (estBloque(num)) return '<span class="rf-pill rouge">${T("Bloqué")}</span>';
@@ -598,13 +598,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
   function brancherBloquer(box){
     var bs = box.querySelectorAll('[data-bloquer]');
     for (var i = 0; i < bs.length; i++) bs[i].onclick = function(){
-      var el = this;
-      if (el.getAttribute('data-ok') !== '1') {
-        el.setAttribute('data-ok', '1'); el.textContent = '${T("Confirmer le blocage ?")}';
-        setTimeout(function(){ if (el.isConnected) { el.removeAttribute('data-ok'); el.innerHTML = '<span class="ic">⛔</span> ${T("Bloquer")}'; } }, 4000);
-        return;
-      }
-      bloquer(el.getAttribute('data-bloquer'), '').then(function(){ rendreVm(); rendreSms(); });
+      var el = this, nB = el.getAttribute('data-bloquer');
+      /* 2026-10-15 : le blocage se confirme dans une boite a part (szConfirmer). */
+      szConfirmer({ titre: '${T("Bloquer le numéro")}',
+        texte: '${T("Le numéro")}' + ' ' + nB + ' ' + '${T("sera bloqué : ses appels et ses textos ne seront plus acceptés. Vous pourrez le débloquer en tout temps dans l’onglet « Numéros bloqués ».")}',
+        oui: '${T("Bloquer le numéro")}' }).then(function(ok){
+        if (ok) bloquer(nB, '').then(function(){ rendreVm(); rendreSms(); });
+      });
     };
   }
 

@@ -682,18 +682,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
 
   function marquerRecu(){
-    voile('<h3><span class="ic">📬</span> ${T("Réception du colis")}</h3><p>${T("Confirmer la réception du colis de retour en entrepôt ?")}</p>'
-      + '<div class="fin2"><button id="v-non">${T("Annuler")}</button><button class="prim" id="v-oui">${T("Confirmer")}</button></div>',
-      function(fermer){
-        document.getElementById('v-non').onclick = fermer;
-        document.getElementById('v-oui').onclick = function(){
-          fermer(); dire('${T("Réception…")}', 'att');
-          appeler('retour:recu', [ID]).then(function(r){
-            if (!r.ok) { dire(expliquer(r), 'err'); return; }
-            dire('${T("Retour marqué reçu.")}' + (r.courriel && r.courriel.envoye ? ' ${T("Courriel envoyé.")}' : ''), 'bon');
-            recharger();
-          });
-        };
+    /* Une boite a part (szConfirmer, 2026-10-15), qui nomme la demande. */
+    var dR = (R && R.demande) || {};
+    szConfirmer({ titre: '${T("Marquer le colis comme reçu")}',
+      texte: '${T("Le colis de retour de la commande")}' + ' ' + (dR.commande || '—') + ' ' + '${T("sera marqué comme reçu en entrepôt. Le client peut en être avisé par courriel.")}',
+      details: [['${T("Client")}', dR.client || '—'], ['${T("Numéro de suivi")}', dR.suivi || '—']],
+      oui: '${T("Marquer comme reçu")}' }).then(function(ok){
+        if (!ok) return;
+        dire('${T("Réception…")}', 'att');
+        appeler('retour:recu', [ID]).then(function(r){
+          if (!r.ok) { dire(expliquer(r), 'err'); return; }
+          dire('${T("Retour marqué reçu.")}' + (r.courriel && r.courriel.envoye ? ' ${T("Courriel envoyé.")}' : ''), 'bon');
+          recharger();
+        });
       });
   }
 

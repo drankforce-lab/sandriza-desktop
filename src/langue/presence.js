@@ -154,4 +154,10 @@ module.exports = {
   'se sont manifestées à l’instant': 'seen just now',
   'En retrait': 'In the background',
   'connectées, fenêtre réduite': 'signed in, window minimized',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Déconnecter la personne': 'Sign the person out',
+  'Cette personne': 'This person',
+  'sera déconnectée immédiatement, sans être consultée. Son travail non enregistré sera perdu et ses fiches ouvertes seront libérées.': 'will be signed out immediately, without being asked. Any unsaved work will be lost and their open records will be released.',
+  'Courriel': 'Email',
+  'Une confirmation vous est demandée.': 'You will be asked to confirm.',
 };

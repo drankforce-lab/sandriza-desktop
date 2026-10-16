@@ -18,7 +18,8 @@
  * Les COMPTES et JETONS, eux, restent dans Configuration → Communications.
  *
  * ⚠ PUBLIER ENGAGE L'EXTÉRIEUR. Le message part chez Facebook, Instagram ou X
- * et ne se rattrape pas : le bouton s'arme en deux clics, et le verdict est
+ * et ne se rattrape pas : une boîte de confirmation à part (szConfirmer) le
+ * précède (2026-10-15 ; avant, le bouton s'armait en deux clics), et le verdict est
  * donné RÉSEAU PAR RÉSEAU. Annoncer « publié » sur un envoi partiel enverrait
  * chercher longtemps une publication qui n'est jamais partie.
  *
@@ -277,7 +278,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       + '<span class="droite">';
     if (avecGestes && D.peutModifier) {
       h += '<button class="mini geste prim" data-publier="' + esc(e.id) + '">'
-        + (ARME === e.id ? '${T("Confirmer l’envoi ?")}' : '${T("Publier")}') + '</button>'
+        + '${T("Publier")}' + '</button>'
         + '<button class="mini geste" data-ignorer="' + esc(e.id) + '">${T("Ignorer")}</button>';
     }
     h += '<span class="dt">' + esc(szQuand(e.partie || e.creee)) + '</span>'
@@ -903,7 +904,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
               + '<button class="mini" data-bascule="' + esc(p.id) + '">' + (p.actif ? '${T("Désactiver")}' : '${T("Activer")}') + '</button>'
               + (p.defaut ? ''
                   : '<button class="mini danger" data-patsuppr="' + esc(p.id) + '">'
-                    + (PAT_ARME === p.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>')
+                    + '${T("Supprimer")}' + '</button>')
             : '')
         + '</div></div>';
     }).join('') + '</div>';
@@ -1067,12 +1068,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       + '</div><div class="droite"><span class="so-renvoi">${T("Comptes et jetons des réseaux : ")}'
       + '${T("Configuration → Communications → Réseaux sociaux")}</span>';
     if (ONGLET === 'file' && D.peutModifier && (D.file || []).length) {
-      h += '<button class="ed-bt' + (ARME === '__tout' ? ' arme' : ' fort') + '" id="so-tout"' + (OCCUPE ? ' disabled' : '') + '>'
-        + (OCCUPE ? '${T("Publication…")}' : (ARME === '__tout' ? '${T("Confirmer — tout publier ?")}' : '${T("Tout publier")}')) + '</button>';
+      h += '<button class="ed-bt fort" id="so-tout"' + (OCCUPE ? ' disabled' : '') + '>'
+        + (OCCUPE ? '${T("Publication…")}' : '${T("Tout publier")}') + '</button>';
     }
     if (ONGLET === 'historique' && D.peutModifier && (D.historique || []).length) {
-      h += '<button class="ed-bt danger' + (ARME === '__vider' ? ' arme' : '') + '" id="so-vider">'
-        + (ARME === '__vider' ? '${T("Confirmer ?")}' : '${T("Vider le journal")}') + '</button>';
+      h += '<button class="ed-bt danger" id="so-vider">'
+        + '${T("Vider le journal")}' + '</button>';
     }
     h += '</div></div>';
 
@@ -1100,8 +1101,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     var bt = document.getElementById('so-tout');
     if (bt) bt.onclick = function(){
       if (ARME !== '__tout') {
-        ARME = '__tout'; dessiner();
-        dire('${T("Cliquez de nouveau pour publier toute la file — les messages partent chez les réseaux et ne se rattrapent pas.")}', 'att');
+        var nF = (D.file || []).length;
+        szConfirmer({ prudent: true, titre: '${T("Publier toute la file")}',
+          texte: '${T("Toutes les publications en attente seront envoyées aux réseaux sociaux configurés. Une publication envoyée ne peut pas être retirée depuis l’application.")}',
+          details: [['${T("Publications")}', szNombre(nF, 0)]],
+          oui: '${T("Tout publier")}' }).then(function(ok){ if (ok) { ARME = '__tout'; bt.onclick(); } });
         return;
       }
       ARME = ''; OCCUPE = true; dessiner();
@@ -1123,8 +1127,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     var bv = document.getElementById('so-vider');
     if (bv) bv.onclick = function(){
       if (ARME !== '__vider') {
-        ARME = '__vider'; dessiner();
-        dire('${T("Cliquez « Confirmer ? » — le journal est effacé, mais les publications restent en ligne sur les réseaux.")}', 'att');
+        szConfirmer({ danger: true, titre: '${T("Vider le journal des publications")}',
+          texte: '${T("Toutes les entrées du journal seront effacées définitivement. Les publications déjà parues restent en ligne sur les réseaux. Cette action est irréversible.")}',
+          details: [['${T("Entrées")}', szNombre((D.historique || []).length, 0)]],
+          oui: '${T("Vider le journal")}' }).then(function(ok){ if (ok) { ARME = '__vider'; bv.onclick(); } });
         return;
       }
       ARME = '';
@@ -1167,8 +1173,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     if (ps) {
       var idS = ps.getAttribute('data-patsuppr');
       if (PAT_ARME !== idS) {
-        PAT_ARME = idS; dessiner();
-        dire('${T("Recliquez pour confirmer — le gabarit disparaît. Les publications déjà faites ne bougent pas.")}', 'att');
+        var pS = ((PAT && PAT.patrons) || []).filter(function(x){ return x.id === idS; })[0];
+        szConfirmer({ danger: true, titre: '${T("Supprimer le patron")}',
+          texte: '${T("Le patron")}' + ' « ' + (pS ? pS.nom : '') + ' » ' + '${T("sera supprimé définitivement. Les publications déjà faites ne sont pas touchées. Cette action est irréversible.")}',
+          oui: '${T("Supprimer le patron")}' }).then(function(ok){ if (ok) { PAT_ARME = idS; ps.click(); } });
         return;
       }
       PAT_ARME = '';
@@ -1212,8 +1220,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       var idP = bp.getAttribute('data-publier');
       /* ARME EN DEUX CLICS : le message part a l exterieur et ne revient pas. */
       if (ARME !== idP) {
-        ARME = idP; dessiner();
-        dire('${T("Cliquez « Confirmer l’envoi ? » — la publication part chez les réseaux et ne se rattrape pas.")}', 'att');
+        var eP = (D.file || []).filter(function(x){ return x.id === idP; })[0];
+        var resP = ((eP && eP.reseaux) || []).map(function(x){ return x.nom; }).join(', ');
+        szConfirmer({ prudent: true, titre: '${T("Publier sur les réseaux sociaux")}',
+          texte: '${T("La publication")}' + ' « ' + ((eP && eP.patron) || '${T("Publication")}') + ' » ' + '${T("sera envoyée aux réseaux sociaux. Une publication envoyée ne peut pas être retirée depuis l’application.")}',
+          details: resP ? [['${T("Réseaux")}', resP]] : [],
+          oui: '${T("Publier")}' }).then(function(ok){ if (ok) { ARME = idP; bp.click(); } });
         return;
       }
       ARME = '';

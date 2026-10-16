@@ -282,7 +282,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       ? '<span class="sub mut">${T("vous")}</span>'
       : '<button class="mini" data-ecrire="' + esc(s.staffId) + '">${T("Message…")}</button>'
         + ' <button class="mini dgr" data-dec="' + esc(s.staffId) + '">'
-        + (CONF === s.staffId ? '${T("Confirmer la déconnexion")}' : '${T("Déconnecter")}') + '</button>';
+        + '${T("Déconnecter")}</button>';
     /* La cellule riche (refonte du 2026-09-25) : initiales, nom en gras,
        courriel dessous ; le role en pastille a point. */
     var h = '<tr><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(s.nom)) + '</span>'
@@ -343,7 +343,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     h += '<div class="note">'
       + '${T("<strong>Déconnecter quelqu’un coupe sa session sans lui demander</strong> : ")}'
       + '${T("son travail non enregistré est perdu, et ses fiches ouvertes se libèrent. ")}'
-      + '${T("Deux clics sont demandés.")}<br>'
+      + '${T("Une confirmation vous est demandée.")}<br>'
       + '${T("<strong>« À l’écran »</strong> veut dire que le poste s’est manifesté il y a ")}'
       + '${T("moins de ")}' + FRAIS + ' ${T("s. Une fenêtre réduite dans la zone de notification ")}'
       + '${T("se manifeste moins souvent : la personne reste connectée et joignable, ")}'
@@ -384,10 +384,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         var id = this.getAttribute('data-dec');
         if (CONF === id) { CONF = ''; deconnecter(id); }
         else {
-          CONF = id;
+          /* 2026-10-15 : la deconnexion se confirme dans une boite a part (szConfirmer). */
+          var bD = this;
+          var sD = (SESS || []).filter(function(x){ return x.staffId === id; })[0];
           retenirBrouillon();
-          dessiner();
-          dire('${T("Cliquez encore pour déconnecter cette personne.")}', 'att');
+          szConfirmer({ danger: true, titre: '${T("Déconnecter la personne")}',
+            texte: (sD && sD.nom ? sD.nom : '${T("Cette personne")}') + ' '
+              + '${T("sera déconnectée immédiatement, sans être consultée. Son travail non enregistré sera perdu et ses fiches ouvertes seront libérées.")}',
+            details: sD ? [['${T("Courriel")}', sD.courriel || '—'], ['${T("Rôle")}', szTd(sD.roleLabel || sD.role || '—')]] : [],
+            oui: '${T("Déconnecter")}' }).then(function(ok){ if (ok) { CONF = id; bD.onclick(); } });
         }
       };
     }

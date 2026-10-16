@@ -391,7 +391,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
             + '<button class="mini" data-pdf="' + esc(r.id) + '">${T("Rapport")}</button> '
             + (D.peutEcrire
                 ? '<button class="mini dgr" data-jeter="' + esc(r.id) + '">'
-                  + (ARME === r.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>'
+                  + '${T("Supprimer")}' + '</button>'
                 : '')
           + '</td></tr>');
       });
@@ -481,7 +481,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
             + (D.verrouille || !D.peutEcrire ? ''
                 : '<button class="mini" data-e-mod="' + esc(e.id) + '">${T("Modifier")}</button> '
                   + '<button class="mini dgr" data-e-jeter="' + esc(e.id) + '">'
-                  + (ARME === e.id ? '${T("Confirmer ?")}' : '${T("Retirer")}') + '</button>')
+                  + '${T("Retirer")}' + '</button>')
           + '</td></tr>');
       });
       h.push('</tbody></table></div>');
@@ -550,7 +550,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
             + (D.verrouille || !D.peutEcrire ? ''
                 : '<button class="mini" data-v-mod="' + esc(p.id) + '">${T("Modifier")}</button> '
                   + '<button class="mini dgr" data-v-jeter="' + esc(p.id) + '">'
-                  + (ARME === p.id ? '${T("Confirmer ?")}' : '${T("Retirer")}') + '</button>')
+                  + '${T("Retirer")}' + '</button>')
           + '</td></tr>');
       });
       h.push('</tbody></table></div>');
@@ -676,7 +676,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
         + '<div class="barreoutils">'
         + '<button id="r-completer">${T("Marquer complétée")}</button>'
         + '<button class="prim' + (s.isBalanced ? '' : ' ') + '" id="r-verrouiller">'
-        + (ARME === 'verrou' ? '${T("Confirmer le verrouillage ?")}' : '${T("Verrouiller")}') + '</button>'
+        + '${T("Verrouiller")}' + '</button>'
         + '</div>'
         + '<p class="aide">« ${T("Complétée")} ${T("» n’est accordé que si l’écart est nul&nbsp;: sinon le statut ")}'
         + '${T("reste « en cours ». Le bouton ne peut donc pas mentir.")}</p>'
@@ -828,8 +828,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
     var vr = document.getElementById('r-verrouiller');
     if (vr) vr.onclick = function(){
       if (ARME !== 'verrou') {
-        ARME = 'verrou'; dessiner();
-        dire('${T("Cliquez de nouveau pour verrouiller — la conciliation ne pourra plus jamais être modifiée.")}', 'att');
+        var rV = D.rec || {}, sV = D.resume || {};
+        szConfirmer({ prudent: true, titre: '${T("Verrouiller la conciliation")}',
+          texte: '${T("La conciliation")}' + ' « ' + (rV.label || '—') + ' » ' + '${T("sera close et passera en lecture seule. Ses lignes, ses dépôts et ses appariements ne pourront plus être modifiés. Cette action est irréversible.")}'
+            + (sV.isBalanced ? '' : ' ' + '${T("Attention : l’écart n’est pas nul.")}'),
+          details: [['${T("Relevé")}', sou(sV.bankTotal)], ['${T("Dépôts")}', sou(sV.squareTotal)], ['${T("Écart")}', sou(sV.difference)]],
+          oui: '${T("Verrouiller la conciliation")}' }).then(function(ok){ if (ok) { ARME = 'verrou'; vr.onclick(); } });
         return;
       }
       ARME = '';
@@ -854,8 +858,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
   }
   function jeter(op, id, quoi){
     if (ARME !== id) {
-      ARME = id; dessiner();
-      dire('${T("Cliquez « Confirmer ? » pour retirer")} ' + quoi + '${T(". Un appariement lié sera défait.")}', 'att');
+      var rJ = D.rec || {}, lJ = null;
+      ((rJ.bankEntries || []).concat(rJ.squarePayouts || [])).forEach(function(x){ if (x.id === id) lJ = x; });
+      szConfirmer({ danger: true, titre: '${T("Retirer la ligne")}',
+        texte: '${T("Vous allez retirer")}' + ' ' + quoi + ' ' + '${T("de la conciliation. Si la ligne est appariée, l’appariement sera défait. Cette action est irréversible.")}',
+        details: lJ ? [['${T("Date")}', szQuand(lJ.date || lJ.arrivalDate) || '—'], ['${T("Description")}', lJ.description || '—'], ['${T("Montant")}', sou(lJ.amount)]] : [],
+        oui: '${T("Retirer la ligne")}' }).then(function(ok){ if (ok) { ARME = id; jeter(op, id, quoi); } });
       return;
     }
     ARME = '';
@@ -863,8 +871,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
   }
   function supprimer(id){
     if (ARME !== id) {
-      ARME = id; dessinerListe();
-      dire('${T("Cliquez « Confirmer ? » pour supprimer cette conciliation. Les transactions bancaires, elles, restent intactes.")}', 'att');
+      var cS = ((D && D.liste) || []).filter(function(x){ return x.id === id; })[0], sS = (cS && cS.resume) || {};
+      szConfirmer({ danger: true, titre: '${T("Supprimer la conciliation")}',
+        texte: '${T("La conciliation")}' + ' « ' + ((cS && cS.label) || '—') + ' » ' + '${T("sera supprimée définitivement, avec ses lignes et ses appariements. Les transactions bancaires et les dépenses ne sont pas touchées. Cette action est irréversible.")}',
+        details: cS ? [['${T("Relevé")}', sou(sS.bankTotal)], ['${T("Dépôts")}', sou(sS.squareTotal)], ['${T("Écart")}', sou(sS.difference)]] : [],
+        oui: '${T("Supprimer la conciliation")}' }).then(function(ok){ if (ok) { ARME = id; supprimer(id); } });
       return;
     }
     ARME = '';

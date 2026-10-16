@@ -191,5 +191,26 @@ module.exports = {
   ' jours avant effacement': ' days before deletion',
   'Général': 'General',
   'Seuils': 'Thresholds',
-  'Destinataires des alertes': 'Alert recipients'
+  'Destinataires des alertes': 'Alert recipients',
+
+  // 2026-10-15 : confirmations en boîte à part.
+  'Restaurer l’élément supprimé': 'Restore deleted item',
+  'L’élément': 'The item',
+  'sera remis tel qu’il était au moment de sa suppression, ou le fichier à son adresse d’origine.':
+    'will be restored as it was when it was deleted, or the file to its original location.',
+  'Source': 'Source',
+  'Restaurer l’élément': 'Restore item',
+  'Rouvrir tous les comptes': 'Reopen all accounts',
+  'Tous les comptes verrouillés pourront de nouveau se connecter, et leurs compteurs seront remis à zéro. Assurez-vous d’abord que les mots de passe compromis ont été changés.':
+    'All locked accounts will be able to sign in again, and their counters will be reset. First make sure that any compromised passwords have been changed.',
+  'Comptes': 'Accounts',
+  'Rouvrir le compte': 'Reopen account',
+  'Le compte': 'The account',
+  'pourra de nouveau se connecter, et son compteur sera remis à zéro. Vérifiez d’abord, dans l’onglet Activité, que les gestes étaient bien les siens.':
+    'will be able to sign in again, and its counter will be reset. First check, in the Activity tab, that the actions were really its own.',
+  'Courriel': 'Email',
+  'Enregistrer les réglages du gardien': 'Save guardian settings',
+  'Les nouveaux réglages seront appliqués immédiatement. Une alerte sera envoyée aux anciens et aux nouveaux destinataires afin qu’aucun changement ne passe inaperçu.':
+    'The new settings will take effect immediately. An alert will be sent to both the previous and the new recipients so that no change goes unnoticed.',
+  'Enregistrer et alerter': 'Save and send alert'
 };

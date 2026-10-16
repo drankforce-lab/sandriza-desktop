@@ -248,8 +248,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('abonnes')}
         if (D.peutModifier) {
           gestes = '<button class="mini geste" data-basculer="' + esc(a.id) + '" data-actif="'
             + (a.actif ? '0' : '1') + '">' + (a.actif ? '${T("Désabonner")}' : '${T("Réactiver")}') + '</button>'
-            + '<button class="mini geste danger' + (SUPPR_ARME === a.id ? ' arme' : '') + '" data-suppr="' + esc(a.id) + '">'
-            + (SUPPR_ARME === a.id ? '${T("Confirmer ?")}' : '${T("Retirer")}') + '</button>';
+            + '<button class="mini geste danger" data-suppr="' + esc(a.id) + '">'
+            + '${T("Retirer")}' + '</button>';
         }
         var ini = String(a.prenom || a.courriel || '?').trim().charAt(0).toUpperCase();
         return '<div data-ctx-ligne class="ls-rang ab-rang' + (a.actif ? '' : ' eteint') + '">'
@@ -382,10 +382,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('abonnes')}
       /* ⚠ RETIRER efface AUSSI la trace du refus : sans elle, plus rien
          n empeche de reinscrire quelqu un qui s etait desabonne. */
       if (SUPPR_ARME !== idS) {
-        SUPPR_ARME = idS;
-        dessiner();
-        dire('${T("Cliquez « Confirmer ? » — le retrait efface aussi la trace du refus. ")}'
-          + '${T("Pour seulement arrêter les envois, utilisez « Désabonner ».")}', 'att');
+        var aS = (D.abonnes || []).filter(function(a){ return a.id === idS; })[0];
+        szConfirmer({ danger: true, titre: '${T("Retirer l’abonné de la liste")}',
+          texte: '${T("L’adresse")}' + ' « ' + (aS ? aS.courriel : '') + ' » ' + '${T("sera retirée définitivement de la liste, y compris la trace d’un éventuel désabonnement. Pour seulement cesser les envois, utilisez plutôt « Désabonner ». Cette action est irréversible.")}',
+          oui: '${T("Retirer de la liste")}' }).then(function(ok){ if (ok) { SUPPR_ARME = idS; bs.click(); } });
         return;
       }
       SUPPR_ARME = '';

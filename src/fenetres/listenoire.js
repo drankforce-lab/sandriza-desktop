@@ -220,7 +220,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
           + (e.note ? '<span>·</span><span>' + esc(e.note) + '</span>' : '') + '</div></div></div></td>'
           + '<td style="white-space:nowrap;color:var(--tx2)">'+esc(szQuand(e.quand))+'</td>'
           + (D.peutRetirer ? '<td class="acts"><button class="b dgr" data-del="'+esc(e.id)+'">'
-              +(DELID===e.id?'${T("✓ Confirmer")}':'${T("Retirer")}')+'</button></td>' : '')
+              +'${T("Retirer")}'+'</button></td>' : '')
           + '</tr>';
       }
       h += '</tbody></table></div></div>';
@@ -284,7 +284,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     for (var i=0;i<ds.length;i++) ds[i].onclick=function(){
       var id=this.getAttribute('data-del');
       if (DELID===id){ DELID=''; retirer(id); }
-      else { DELID=id; dessiner(); dire('${T("Cliquez encore pour retirer — cette adresse pourra de nouveau commander.")}', 'att'); }
+      else {
+        var bL=this;
+        var eL=((D && D.entrees) || []).filter(function(x){ return x.id === id; })[0] || {};
+        szConfirmer({ danger: true, titre: '${T("Retirer de la liste noire")}',
+          texte: '${T("L’entrée")}' + ' « ' + (eL.valeur || id) + ' » ' + '${T("sera retirée de la liste noire. Elle pourra de nouveau passer des commandes.")}',
+          details: [['${T("Type")}', String(eL.type ? libType(eL) : '—')]],
+          oui: '${T("Retirer l’entrée")}' }).then(function(ok){ if (ok) { DELID=id; bL.onclick(); } });
+      }
     };
     brancherSuggestions();
   }

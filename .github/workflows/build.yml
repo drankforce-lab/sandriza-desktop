@@ -468,6 +468,9 @@ jobs:
           node tools/banc-jetons.js
           node tools/banc-fonds-jour.js
           node tools/banc-texte-sur-fond.js
+          # ⚠ (2026-10-15, sa règle) Toute confirmation est une BOÎTE À PART (szConfirmer) — jamais un
+          # bouton qui se change en « Confirmer ? ». Le motif était recopié dans 50 fenêtres.
+          node tools/banc-confirmation-a-part.js
           # ⚠ `tools/bancs.js` (2026-09-08) lance TOUS ces bancs d'un coup, en
           # LISANT leur liste dans CE fichier — à faire avant chaque push. Il est
           # né d'un échec de construction sur `banc-pictogrammes.js` : le banc

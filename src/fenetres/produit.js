@@ -1995,7 +1995,6 @@ function pageProduit(id) {
     if (!b) return;
     b.disabled = G3D.enCours || !IMAGE;
     b.innerHTML = G3D.enCours ? '<span class="ic">⏳</span> ${T("Génération en cours…")}'
-      : G3D.conf ? '${T("✓ Confirmer — environ 0,68 $ US facturés par Fal.ai")}'
       : G3D.forcer ? '<span class="ic">⚠</span> ${T("Regénérer quand même (≈ 0,68 $ US)")}'
       : (MOD3D ? '<span class="ic">🧊</span> ${T("Regénérer l’aperçu 3D (≈ 0,68 $ US)")}' : '<span class="ic">🧊</span> ${T("Générer l’aperçu 3D (≈ 0,68 $ US)")}');
     if (vg) { vg.style.display = (MOD3D && G3D.vignette) ? '' : 'none'; if (G3D.vignette) vg.src = G3D.vignette; }
@@ -2009,8 +2008,13 @@ function pageProduit(id) {
   function lancer3d(){
     if (G3D.enCours || !IMAGE) return;
     if (!G3D.conf) {
-      G3D.conf = true; dessiner3d();
-      dire(G3D.forcer ? '${T("Cliquez encore : un aperçu de plus sera facturé (≈ 0,68 $ US).")}' : '${T("Cliquez encore pour confirmer : environ 0,68 $ US facturés par Fal.ai, 2 minutes environ.")}', 'att');
+      szConfirmer({ prudent: true,
+        titre: G3D.forcer ? '${T("Regénérer l’aperçu 3D")}' : '${T("Générer l’aperçu 3D")}',
+        texte: G3D.forcer
+          ? '${T("Cet article possède déjà un aperçu 3D. Un nouvel aperçu sera généré par Fal.ai à partir de la photo principale et facturé en supplément.")}'
+          : '${T("L’aperçu 3D sera généré par Fal.ai à partir de la photo principale. Ce traitement est facturé.")}',
+        details: [['${T("Coût estimé")}', '≈ 0,68 $ US'], ['${T("Durée")}', '${T("environ 2 minutes")}']],
+        oui: G3D.forcer ? '${T("Regénérer l’aperçu 3D")}' : '${T("Générer l’aperçu 3D")}' }).then(function(ok){ if (ok) { G3D.conf = true; lancer3d(); } });
       return;
     }
     G3D.conf = false; G3D.enCours = true; dessiner3d();

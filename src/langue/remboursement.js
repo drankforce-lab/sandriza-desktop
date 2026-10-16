@@ -203,4 +203,17 @@ module.exports = {
   "Pour rembourser": "To refund",
   "Prêt à rembourser": "Ready to refund",
   "Écrivez d’abord le motif du remboursement.": "Write the reason for the refund first.",
+  // 2026-10-15 : confirmations en boîte à part.
+  'Commande': 'Order',
+  'Articles': 'Items',
+  'Total': 'Total',
+  'Frais retenus': 'Fees withheld',
+  'Méthode': 'Method',
+  'Crédit boutique (n’expire jamais)': 'Store credit (never expires)',
+  'Moyen de paiement original (Square)': 'Original payment method (Square)',
+  'Rembourser le client': 'Refund customer',
+  'Le client sera remboursé de': 'The customer will be refunded',
+  'en crédit boutique ; un courriel lui sera envoyé avec le numéro du crédit.': 'in store credit; an email with the credit number will be sent to them.',
+  'sur son moyen de paiement original, par Square.': 'to their original payment method, through Square.',
+  'Un remboursement émis ne peut pas être annulé.': 'An issued refund cannot be cancelled.',
 };

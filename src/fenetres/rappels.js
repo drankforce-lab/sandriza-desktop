@@ -546,13 +546,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('rappels')}
       return x;
     });
   }
-  function armer(b, cle, faire){
-    if (ARME && ARME.cle === cle) { clearTimeout(ARME.t); ARME = null; faire(); return; }
+  /* 2026-10-15 : la confirmation se fait dans une boite a part (szConfirmer),
+     plus sur le bouton qui changeait de texte. */
+  function armer(b, cle, faire, o){
     if (ARME) desarmer();
-    b.setAttribute('data-texte', b.textContent);
-    b.textContent = '${T("Confirmer ?")}';
-    b.classList.add('aconf');
-    ARME = { cle: cle, b: b, t: setTimeout(desarmer, 5000) };
+    szConfirmer(o || {}).then(function(ok){ if (ok) faire(); });
   }
   function desarmer(){
     if (!ARME) return;
@@ -608,11 +606,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('rappels')}
     var sp = t.closest('[data-sup]');
     if (sp) {
       var ids = sp.getAttribute('data-sup');
+      var rS = rappel(ids);
       armer(sp, ids, function(){
         appeler('rappels:supprimer', [ids]).then(function(x){
           if (apres(x, 'supprimer', '${T("Rappel supprimé.")}') && FORM && FORM.id === ids) FORM = null;
         });
-      });
+      }, { danger: true, titre: '${T("Supprimer le rappel")}',
+        texte: '${T("Le rappel")}' + ' « ' + (rS ? szTd(rS.titre) : '') + ' » '
+          + '${T("sera supprimé définitivement de votre liste. Cette action est irréversible.")}',
+        oui: '${T("Supprimer le rappel")}' });
       return;
     }
     var md = t.closest('[data-modele]');

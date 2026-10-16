@@ -932,20 +932,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
 
   function brancherSup(){
     Array.prototype.forEach.call(corps.querySelectorAll('button[data-sup]'), function(b){
-      /* ⚠ ON ARME EN DEUX TEMPS, comme toute action qui detruit : un clic
-         distrait ne doit pas retirer une ecriture d un livre de comptes. */
-      var arme = false;
+      /* ⚠ ON CONFIRME DANS UNE BOITE A PART (szConfirmer, 2026-10-15), comme
+         toute action qui detruit : un clic distrait ne doit pas retirer une
+         ecriture d un livre de comptes. */
       b.onclick = function(){
-        if (!arme) {
-          arme = true;
-          b.textContent = '${T("Confirmer")}';
-          setTimeout(function(){ if (arme) { arme = false; b.textContent = '${T("Supprimer")}'; } }, 5000);
-          return;
-        }
-        appeler('compta:ecritureSupprimer', [b.getAttribute('data-sup')]).then(function(r){
-          if (!r || !r.ok) { szDire(expliquer(r), 'err'); return; }
-          szDire('${T("Écriture supprimée.")}', 'bon');
-          charger();
+        var refS = b.getAttribute('data-sup');
+        var eS = ((D && D.journal) || []).filter(function(x){ return x.ref === refS; })[0] || {};
+        szConfirmer({ danger: true, titre: '${T("Supprimer l’écriture")}',
+          texte: '${T("L’écriture manuelle")}' + ' « ' + (eS.libelle || refS) + ' » ' + '${T("sera supprimée définitivement du livre de comptes. Les soldes et les états financiers de l’exercice seront recalculés sans elle. Cette action est irréversible.")}',
+          details: [['${T("Date")}', szJour(eS.date) || eS.date || '—'], ['${T("Montant")}', argent(eS.total)]],
+          oui: '${T("Supprimer l’écriture")}' }).then(function(ok){
+          if (!ok) return;
+          appeler('compta:ecritureSupprimer', [refS]).then(function(r){
+            if (!r || !r.ok) { szDire(expliquer(r), 'err'); return; }
+            szDire('${T("Écriture supprimée.")}', 'bon');
+            charger();
+          });
         });
       };
     });

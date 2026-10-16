@@ -423,7 +423,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         +'<td style="text-align:center"><span class="rf-pill bleu">${T("Personnalisée")}</span></td>'
         +'<td style="text-align:center"><label class="chk"><input type="checkbox" data-cfoot="'+esc(p.id)+'" '+(p.footerVisible?'checked':'')+(RO?' disabled':'')+'></label></td>'
         +'<td style="text-align:right;white-space:nowrap"><button class="b" data-cedit="'+esc(p.id)+'">${T("Modifier")}</button>'
-        +(D.peutSupprimer && !p.protege ? ' <button class="b dgr" data-cdel="'+esc(p.id)+'">'+(DELP===p.id?'${T("✓ Confirmer")}':'${T("Supprimer")}')+'</button>' : '')+'</td></tr>';
+        +(D.peutSupprimer && !p.protege ? ' <button class="b dgr" data-cdel="'+esc(p.id)+'">${T("Supprimer")}</button>' : '')+'</td></tr>';
     }
     h+='</tbody></table></div></div>';
     corps.innerHTML=h;
@@ -445,7 +445,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     for (var e=0;e<eds.length;e++) eds[e].onclick=function(){ ouvrirEditeurPage(this.getAttribute('data-cedit')); };
     var dls=corps.querySelectorAll('[data-cdel]');
     for (var d=0;d<dls.length;d++) dls[d].onclick=function(){ var id=this.getAttribute('data-cdel');
-      if (DELP===id){ DELP=''; supprimerPage(id); } else { DELP=id; vueListe(); dire('${T("Cliquez encore pour supprimer cette page.")}', 'att'); } };
+      if (DELP===id){ DELP=''; supprimerPage(id); } else { var bP=this, pP=((D&&D.customPages)||[]).filter(function(x){ return x.id===id; })[0];
+        szConfirmer({ danger: true, titre: '${T("Supprimer la page")}',
+          texte: '${T("La page")}'+' « '+(pP?pP.title:'')+' » '+'${T("sera supprimée définitivement du site, et son adresse cessera de fonctionner. Cette action est irréversible.")}',
+          details: pP ? [['${T("Adresse")}', '#page/'+pP.slug]] : [],
+          oui: '${T("Supprimer la page")}' }).then(function(ok){ if (ok){ DELP=id; bP.click(); } }); } };
   }
   function supprimerPage(id){
     if (RO||OCCUPE) return; OCCUPE=true; dire('${T("Suppression…")}');
@@ -703,7 +707,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (!r||!r.ok){ l.innerHTML='<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>'; return; }
     var m=r.messages||[];
     var tete='<div class="entete" style="margin-bottom:.7rem"><span style="font-size:.82rem;color:var(--tx2)">'+m.length+' '+szPl(m.length, '${T("message")}', '${T("messages")}')+'</span>'
-      +(m.length&&!RO?'<button class="b dgr" id="ib-vider">'+(VIDECONF?'${T("✓ Confirmer")}':'${T("Tout supprimer")}')+'</button>':'')+'</div>';
+      +(m.length&&!RO?'<button class="b dgr" id="ib-vider">${T("Tout supprimer")}</button>':'')+'</div>';
     if (r.etat==='reseau') tete+='<div class="note" style="margin-bottom:.7rem"><span class="ic">⚠</span> ${T("Relecture depuis le nuage impossible (réseau) — rien n’est perdu. Rouvrez pour réessayer.")}</div>';
     var corpsl='';
     if (!m.length) corpsl='<div class="vide">${T("Aucun message reçu.")}</div>';
@@ -719,7 +723,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     }
     if (m.length) corpsl+='</div>';
     l.innerHTML=tete+corpsl;
-    var vd=document.getElementById('ib-vider'); if (vd) vd.onclick=function(){ if (VIDECONF){ viderBoite(); } else { VIDECONF=true; peindreBoite(r); } };
+    var vd=document.getElementById('ib-vider'); if (vd) vd.onclick=function(){ if (VIDECONF){ viderBoite(); } else {
+      szConfirmer({ danger: true, titre: '${T("Supprimer tous les messages")}',
+        texte: '${T("Tous les messages reçus par le formulaire de contact seront supprimés définitivement. Cette action est irréversible.")}',
+        details: [['${T("Messages")}', String(m.length)]],
+        oui: '${T("Supprimer les messages")}' }).then(function(ok){ if (ok){ VIDECONF=true; vd.click(); } }); } };
     var dels=l.querySelectorAll('[data-mdel]'); for (var d=0;d<dels.length;d++) dels[d].onclick=function(){ supprimerMsg(this.getAttribute('data-mdel')); };
   }
   function supprimerMsg(id){ appeler('pages:inbox:supprimer',[id]).then(function(r){ if (r&&r.ok){ appeler('pages:inbox',[]).then(peindreBoite); recharger('', ''); } else dire('${T("Échec : ")}'+expliquer(r), 'err'); }); }

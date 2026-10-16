@@ -729,7 +729,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
       + '<button class="mini geste" data-basculer="' + esc(x.id) + '">'
       + (x.actif ? '${T("Désactiver")}' : '${T("Activer")}') + '</button> '
       + '<button class="mini geste danger" data-suppr="' + esc(x.id) + '">'
-      + (SUPPR_ARME === x.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
+      + '${T("Supprimer")}' + '</button>';
   }
 
   /* Look complet : la portee est la liste de ses pieces — << Des produits
@@ -1059,9 +1059,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     if (bs) {
       var idS = bs.getAttribute('data-suppr');
       if (SUPPR_ARME !== idS) {
-        SUPPR_ARME = idS;
-        dessiner();
-        dire('${T("Cliquez « Confirmer ? » pour supprimer — la bannière de la boutique sera retirée avec.")}', 'att');
+        var offre = ONGLET === 'offres';
+        var xS = ((offre ? D.offres : D.annonces) || []).filter(function(x){ return x.id === idS; })[0];
+        var nomS = ' « ' + (xS ? xS.nom : '') + ' » ';
+        szConfirmer({ danger: true, titre: offre ? '${T("Supprimer l’offre")}' : '${T("Supprimer l’annonce")}',
+          texte: offre
+            ? '${T("L’offre")}' + nomS + '${T("sera supprimée définitivement, et son bandeau sera retiré de la boutique. Cette action est irréversible.")}'
+            : '${T("L’annonce")}' + nomS + '${T("sera supprimée définitivement et retirée de la boutique. Cette action est irréversible.")}',
+          oui: offre ? '${T("Supprimer l’offre")}' : '${T("Supprimer l’annonce")}' }).then(function(ok){ if (ok) { SUPPR_ARME = idS; bs.click(); } });
         return;
       }
       SUPPR_ARME = '';

@@ -266,7 +266,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('codesbarres')}
     }
     h += '<div style="display:flex;gap:.5rem;margin-top:.6rem">'
       + '<button class="danger" id="cb-vider"' + (FILE.length ? '' : ' disabled') + '>'
-      + (VIDER_ARME ? '${T("Confirmer ?")}' : '<span class="ic">🗑</span> ${T("Vider")}') + '</button>'
+      + '<span class="ic">🗑</span> ${T("Vider")}' + '</button>'
       + '<button class="prim" id="cb-imprimer" style="flex:1"' + (FILE.length ? '' : ' disabled') + '><span class="ic">🖨</span> ${T("Imprimer ")}'
       + (etiquettes ? etiquettes + (etiquettes > 1 ? '${T(" étiquettes")}' : '${T(" étiquette")}') : '') + '</button>'
       + '</div>'
@@ -381,8 +381,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('codesbarres')}
     if (v) v.onclick = function(){
       if (!FILE.length) return;
       if (!VIDER_ARME) {
-        VIDER_ARME = true; redessinerFile();
-        setTimeout(function(){ if (VIDER_ARME) { VIDER_ARME = false; redessinerFile(); } }, 3500);
+        var nEt = FILE.reduce(function(s, it){ return s + (Number(it.qty) || 0); }, 0);
+        szConfirmer({ danger: true, titre: '${T("Vider la file d’impression")}',
+          texte: '${T("Toutes les lignes de la file d’impression seront retirées. Aucune étiquette ne sera imprimée et aucun stock n’est modifié.")}',
+          details: [['${T("Lignes")}', String(FILE.length)], ['${T("Étiquettes")}', String(nEt)]],
+          oui: '${T("Vider la file")}' }).then(function(ok){ if (ok) { VIDER_ARME = true; v.click(); } });
         return;
       }
       VIDER_ARME = false; FILE = []; redessinerFile();

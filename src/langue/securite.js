@@ -389,4 +389,14 @@ module.exports = {
   'Retirer': 'Remove',
   'vue le ': 'last used ',
   ' contient un lien sécurisé vers ce mot de passe (chiffré, une seule lecture, 24 heures, après confirmation de son adresse). Il s’affiche aussi ici.': ' contains a secure link to this password (encrypted, one view, 24 hours, after confirming their address). It is also shown here.',
+
+  // 2026-10-15 : confirmations en boîte à part.
+  'Supprimer le compte': 'Delete account',
+  'Le compte': 'The account',
+  'sera supprimé. Cette personne ne pourra plus se connecter à l’administration. Cette action est irréversible.':
+    'will be deleted. This person will no longer be able to sign in to the administration. This action cannot be undone.',
+  'Fermer les sessions': 'Close sessions',
+  'Toutes les sessions ouvertes du compte': 'All open sessions of the account',
+  'seront fermées et une reconnexion sera exigée. Son travail non enregistré sera perdu.':
+    'will be closed and a new sign-in will be required. Any unsaved work will be lost.',
 };

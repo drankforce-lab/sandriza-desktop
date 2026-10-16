@@ -269,8 +269,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('corbeille')}
               + (D.peutRestaurer && !d.dejaPresente
                   ? '<button class="mini prim b" data-remettre="' + esc(d.id) + '">${T("Remettre")}</button>' : '')
               + (D.peutRestaurer
-                  ? '<button class="mini danger b" data-purger="' + esc(d.id) + '">'
-                    + (ARME === d.id ? '${T("Confirmer ?")}' : '${T("Purger")}') + '</button>' : '')
+                  ? '<button class="mini danger b" data-purger="' + esc(d.id) + '">${T("Purger")}</button>' : '')
               + '</td></tr>';
           }).join('')
         + '</tbody></table></div>';
@@ -440,8 +439,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('corbeille')}
     if (bp) {
       var id = bp.getAttribute('data-purger');
       if (ARME !== id) {
-        ARME = id; dessiner();
-        dire('${T("Cliquez « Confirmer ? » — le dossier et les photos des retours partent pour de bon, et cette commande ne pourra plus être remise en place.")}', 'att');
+        var dP = ((D && D.dossiers) || []).filter(function(d){ return d.id === id; })[0];
+        szConfirmer({ danger: true, titre: '${T("Purger le dossier")}',
+          texte: '${T("Le dossier de la commande")}' + ' « ' + (dP ? (dP.orderNumber || dP.orderId || '') : id) + ' » '
+            + '${T("et les photos des demandes de retour seront effacés définitivement. Cette commande ne pourra plus être remise en place. Cette action est irréversible.")}',
+          details: dP ? [['${T("Client")}', dP.client || '—'], ['${T("Montant")}', argent(dP.total)]] : [],
+          oui: '${T("Purger le dossier")}' }).then(function(ok){ if (ok) { ARME = id; bp.click(); } });
         return;
       }
       ARME = '';

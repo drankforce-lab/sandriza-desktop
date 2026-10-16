@@ -423,7 +423,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
                 + '<img src="' + esc(u) + '" alt="" title="Photo ' + (i + 1) + ' de l’avis">'
                 + (r.peutModifier
                     ? '<button class="phx" data-photo="' + i + '" title="${T("Retirer cette photo de l’avis et du stockage")}">'
-                      + (PHOTO_ARMEE === i ? '?' : '✕') + '</button>'
+                      + '✕' + '</button>'
                     : '')
                 + '</div>';
             }).join('') + '</div>'
@@ -447,7 +447,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + '<button class="prim" id="a-repenvoyer">${T("Enregistrer la réponse")}</button></div></div>';
     }
     h += '<div class="pied-boite">'
-      + '<button class="danger" id="a-supprimer">' + (SUPPR_ARME ? '${T("Confirmer la suppression ?")}' : '<span class="ic">🗑</span> ${T("Supprimer")}') + '</button>'
+      + '<button class="danger" id="a-supprimer">' + '<span class="ic">🗑</span> ${T("Supprimer")}' + '</button>'
       + (!REPONDRE ? '<button id="a-repondre"><span class="ic">💬</span>${T(" Répondre")}</button>' : '')
       + (r.statut !== 'pending'
           ? '<button id="a-masquer">' + (r.statut === 'hidden' ? '<span class="ic">👁</span>${T(" Republier")}' : '<span class="ic">🙈</span>${T(" Masquer")}') + '</button>'
@@ -459,7 +459,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   }
 
   /* ── RETIRER UNE PHOTO (#33) ───────────────────────────────────────────────
-     ⚠ ARMEE EN DEUX CLICS et l avis reste ouvert : on retire souvent DEUX
+     ⚠ CONFIRMEE DANS UNE BOITE A PART (szConfirmer, 2026-10-15) et l avis reste ouvert : on retire souvent DEUX
      photos d affilee, et refermer le panneau a chaque fois obligerait a
      rouvrir l avis entre chaque geste.
      ⚠ ON RELIT L AVIS APRES COUP plutot que de retirer la vignette a la main :
@@ -468,8 +468,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   function retirerPhoto(i){
     if (!DETAIL) return;
     if (PHOTO_ARMEE !== i) {
-      PHOTO_ARMEE = i; dessiner();
-      dire('${T("Recliquez pour confirmer — la photo quitte l’avis ET le stockage. Le texte reste intact.")}', 'att');
+      szConfirmer({ danger: true, titre: '${T("Retirer la photo")}',
+        texte: '${T("La photo")}' + ' ' + (i + 1) + ' ' + '${T("sera retirée de l’avis et supprimée du stockage. Le texte de l’avis n’est pas modifié. Cette action est irréversible.")}',
+        details: [['${T("Client")}', DETAIL.client || '—'], ['${T("Produit")}', DETAIL.produit || '—']],
+        oui: '${T("Retirer la photo")}' }).then(function(ok){ if (ok && DETAIL) { PHOTO_ARMEE = i; retirerPhoto(i); } });
       return;
     }
     PHOTO_ARMEE = -1;
@@ -530,11 +532,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     };
     var su = document.getElementById('a-supprimer');
     if (su) su.onclick = function(){
-      /* Suppression DEFINITIVE : armee en deux clics — masquer suffit
-         presque toujours, et c est dit dans la fenetre de detail du site. */
+      /* Suppression DEFINITIVE : confirmee dans une boite a part (szConfirmer,
+         2026-10-15) — masquer suffit presque toujours, et la boite le dit. */
       if (!SUPPR_ARME) {
-        SUPPR_ARME = true; dessiner();
-        setTimeout(function(){ if (SUPPR_ARME) { SUPPR_ARME = false; if (DETAIL) dessiner(); } }, 4000);
+        var aS = DETAIL || {};
+        szConfirmer({ danger: true, titre: '${T("Supprimer l’avis")}',
+          texte: '${T("L’avis de")}' + ' ' + (aS.client || '') + ' ' + '${T("sur")}' + ' « ' + (aS.produit || '') + ' » '
+            + '${T("sera supprimé définitivement, avec ses photos et sa réponse. Pour le retirer de la boutique sans le perdre, utilisez plutôt « Masquer ». Cette action est irréversible.")}',
+          details: [['${T("Note")}', (aS.note || 0) + '${T(" sur 5")}']],
+          oui: '${T("Supprimer l’avis")}' }).then(function(ok){ if (ok && DETAIL) { SUPPR_ARME = true; su.onclick(); } });
         return;
       }
       SUPPR_ARME = false;

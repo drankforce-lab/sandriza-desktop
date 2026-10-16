@@ -271,4 +271,11 @@ module.exports = {
   'Le courriel envoyé à ': 'The email sent to ',
   ' avec un lien sécurisé vers le nouveau mot de passe. L’ancien ne fonctionne plus.': ' with a secure link to the new password. The old one no longer works.',
   ' contient un lien sécurisé (une seule lecture, 24 heures) vers ce mot de passe.': ' contains a secure link (one view, 24 hours) to this password.',
+  // 2026-10-15 : confirmations en boîte à part.
+  "Révoquer le lien": "Revoke the link",
+  "Le lien": "The link",
+  "cessera immédiatement de fonctionner, y compris pour une personne qui l’a déjà ouvert. La révocation sera inscrite au journal. Cette action est irréversible.": "will stop working immediately, including for anyone who has already opened it. The revocation will be recorded in the log. This action cannot be undone.",
+  "Retirer le lien de la liste": "Remove the link from the list",
+  "sera retiré de la liste. Son journal d’accès est conservé et reste consultable.": "will be removed from the list. Its access log is kept and remains available.",
+  "Retirer le lien": "Remove the link",
 };

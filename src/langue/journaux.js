@@ -331,4 +331,12 @@ module.exports = {
   'renvoyé à': 'forwarded to',
   'Page précédente': 'Previous page',
   'Page suivante': 'Next page',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Effacer le journal des envois': 'Clear the sending log',
+  'Toutes les entrées du journal des envois seront effacées définitivement, et avec elles la preuve de ce qui a été expédié. Les courriels déjà envoyés ne sont pas annulés. Cette action est irréversible.': 'Every entry in the sending log will be permanently deleted, along with the record of what was sent. Emails already sent are not recalled. This action cannot be undone.',
+  'Entrées': 'Entries',
+  'Vider le journal des erreurs': 'Clear the error log',
+  'Toutes les erreurs rapportées seront effacées pour l’ensemble des utilisateurs, ainsi que leurs compteurs, qui ne pourront pas être reconstitués. Cette action est irréversible.': 'All reported errors will be deleted for every user, along with their counters, which cannot be rebuilt. This action cannot be undone.',
+  'Défauts distincts': 'Distinct faults',
+  'Vider le journal': 'Clear the log',
 };

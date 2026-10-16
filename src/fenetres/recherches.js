@@ -196,8 +196,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('recherches')}
       + '<label class="ls-rch">${ICO.loupe}<input aria-label="${T("Chercher dans la liste")}" type="search" id="rs-q" placeholder="${T("Chercher dans la liste…")}" value="' + esc(Q) + '"></label>'
       + '<button class="ed-bt" id="rs-vers-journaux" title="${T("Voir ce journal dans le module Journaux")}">${T("Dans Journaux")}</button>'
       + (D.peutModifier && (D.recentes || []).length
-          ? '<button class="ed-bt danger' + (ARME ? ' arme' : '') + '" id="rs-vider">'
-            + (ARME ? '${T("Confirmer ?")}' : '${T("Vider le détail")}') + '</button>' : '')
+          ? '<button class="ed-bt danger" id="rs-vider">'
+            + '${T("Vider le détail")}' + '</button>' : '')
       + '</div></div>' + h;
     var max = rows.reduce(function(m, x){ return Math.max(m, Number(x.fois) || 0); }, 0) || 1;
 
@@ -246,10 +246,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('recherches')}
     var bv = document.getElementById('rs-vider');
     if (bv) bv.onclick = function(){
       if (!ARME) {
-        ARME = true; dessiner();
         /* Une phrase ENTIERE dans un seul litteral : coupee en deux, elle se
            traduirait en deux morceaux qui ne se recollent pas. */
-        dire('${T("Cliquez « Confirmer ? » — seul le détail des 30 jours est effacé ; l’archive reste, et ce qui reviendra sera réenregistré.")}', 'att');
+        szConfirmer({ danger: true, titre: '${T("Vider le détail des recherches")}',
+          texte: '${T("Le détail des recherches des 30 derniers jours sera effacé définitivement. L’archive est conservée et les nouvelles recherches continueront d’être enregistrées. Cette action est irréversible.")}',
+          details: [['${T("Requêtes")}', szNombre((D.recentes || []).length, 0)]],
+          oui: '${T("Vider le détail")}' }).then(function(ok){ if (ok) { ARME = true; bv.onclick(); } });
         return;
       }
       ARME = false;

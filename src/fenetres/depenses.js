@@ -560,7 +560,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
                   : '<button class="mini" data-annmod="' + esc(r.id) + '">${T("Modifier")}</button>'
                     + (r.origine === 'integre' ? ''
                         : ' <button class="mini danger" data-annret="' + esc(r.id) + '">'
-                          + (ANN_RETIRE === r.id ? '${T("Confirmer ?")}' : '✕') + '</button>'))
+                          + '✕' + '</button>'))
               + '</td></tr>';
           }).join('')
         + '</tbody></table></div>';
@@ -651,15 +651,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
 
     h += '<div class="pied-boite">'
       + (D.peutSupprimer ? '<button class="danger" id="d-suppr">'
-          + (SUPPR_ARME ? '${T("Confirmer la suppression ?")}' : '<span class="ic">🗑</span> ${T("Supprimer")}') + '</button>' : '')
+          + '<span class="ic">🗑</span> ${T("Supprimer")}' + '</button>' : '')
       + (e.aRecu ? '<button id="d-recu"><span class="ic">📎</span> ${T("Ouvrir le reçu")}</button>' : '')
       + (D.peutModifier ? '<button class="prim" id="d-modifier"><span class="ic">✎</span> ${T("Modifier")}</button>' : '')
       + '<button id="d-fermer">${T("Fermer")}</button>'
       + '</div>';
-    if (SUPPR_ARME) {
-      h += '<div class="aide" style="margin-top:.5rem">${T("Elle disparaît de la comptabilité et des")} '
-        + '${T("rapports d’impôt. Irréversible.")}</div>';
-    }
     h += '</div></div>';
     return h;
   }
@@ -1131,8 +1127,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
     var su = document.getElementById('d-suppr');
     if (su) su.onclick = function(){
       if (!SUPPR_ARME) {
-        SUPPR_ARME = true; dessiner();
-        setTimeout(function(){ if (SUPPR_ARME) { SUPPR_ARME = false; if (DETAIL) dessiner(); } }, 5000);
+        var eS = DETAIL || {};
+        szConfirmer({ danger: true, titre: '${T("Supprimer la dépense")}',
+          texte: '${T("La dépense")}' + ' « ' + (eS.fournisseur || eS.description || '—') + ' » '
+            + '${T("sera supprimée définitivement. Elle disparaîtra de la comptabilité et des rapports d’impôt, et les taxes payées ne seront plus réclamées. Cette action est irréversible.")}',
+          details: [['${T("Date")}', szJour(eS.date) || eS.dateFr || '—'], ['${T("Catégorie")}', catLbl(eS.categorie, eS.categorieLbl) || '—'],
+            ['${T("Montant (hors taxes)")}', eS.montant || '—']].concat(eS.aTaxes ? [['${T("Total payé")}', eS.totalTTC]] : []),
+          oui: '${T("Supprimer la dépense")}' }).then(function(ok){ if (ok) { SUPPR_ARME = true; su.onclick(); } });
         return;
       }
       SUPPR_ARME = false;
@@ -1297,13 +1298,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
     var ar = t.closest('[data-annret]');
     if (ar) {
       var idr = ar.getAttribute('data-annret');
-      /* ⚠ ARME EN DEUX CLICS, et le second dit ce qui se passe VRAIMENT : sur un
+      /* ⚠ CONFIRME DANS UNE BOITE A PART (2026-10-15), qui dit ce qui se passe VRAIMENT : sur un
          fournisseur LIVRE, retirer la correction ne le supprime pas — il retrouve
          son classement d origine. Confondre les deux ferait croire qu on a
          detruit un fournisseur alors qu on l a ramene a son reglage d usine. */
       if (ANN_RETIRE !== idr) {
-        ANN_RETIRE = idr; dessiner();
-        setTimeout(function(){ if (ANN_RETIRE === idr) { ANN_RETIRE = ''; dessiner(); } }, 5000);
+        var lR = ((ANN && ANN.lignes) || []).filter(function(x){ return x.id === idr; })[0] || {};
+        var corrige = (lR.origine === 'corrige');
+        szConfirmer({ danger: !corrige, titre: corrige ? '${T("Rétablir le classement d’origine")}' : '${T("Retirer le fournisseur de l’annuaire")}',
+          texte: corrige
+            ? '${T("La correction apportée au fournisseur")}' + ' « ' + idr + ' » ' + '${T("sera retirée. Il retrouvera son classement livré :")}' + ' ' + lR.categorieBaseLbl + '. ' + '${T("Les dépenses déjà saisies ne sont pas modifiées.")}'
+            : '${T("Le fournisseur")}' + ' « ' + idr + ' » ' + '${T("sera retiré de l’annuaire. Les prochaines dépenses à son nom ne seront plus classées automatiquement. Les dépenses déjà saisies ne sont pas modifiées.")}',
+          details: [['${T("Catégorie")}', catLbl(lR.categorie, lR.categorieLbl) || '—']],
+          oui: corrige ? '${T("Rétablir le classement")}' : '${T("Retirer le fournisseur")}' }).then(function(ok){ if (ok) { ANN_RETIRE = idr; ar.click(); } });
         return;
       }
       ANN_RETIRE = '';

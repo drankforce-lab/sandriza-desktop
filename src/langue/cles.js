@@ -139,5 +139,11 @@ module.exports = {
 
   /* ── REFONTE FINE (2026-09-26) : l etat des secrets en pastille ── */
   'Aucune clé enregistrée': 'No key saved',
-  'Clé enregistrée': 'Key saved'
+  'Clé enregistrée': 'Key saved',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Retirer la clé': 'Remove the key',
+  'La clé enregistrée': 'The saved key',
+  'du service': 'for the service',
+  'sera retirée. Les fonctions qui en dépendent cesseront de fonctionner jusqu’à ce qu’une nouvelle clé soit saisie.': 'will be removed. Features that depend on it will stop working until a new key is entered.',
+  'Fin de la clé': 'Key ending',
 };

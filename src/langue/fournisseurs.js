@@ -109,4 +109,8 @@ module.exports = {
   'au total': 'in total',
   // L'en-tête de la liste refaite, lu d'un bloc (2026-09-25).
   'Fournisseur Contact': 'Supplier Contact',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Supprimer le fournisseur': 'Delete supplier',
+  'La fiche du fournisseur': 'The supplier record',
+  'sera supprimée définitivement. Les produits qui lui sont rattachés restent en place, mais sans fournisseur. Cette action est irréversible.': 'will be permanently deleted. Products linked to it remain in place, but without a supplier. This action cannot be undone.',
 };

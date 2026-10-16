@@ -8,7 +8,7 @@
  * panneau : le message du client, le contexte (commande, courriel), votre
  * réponse — qui est ENVOYÉE PAR COURRIEL au client à l'envoi. Le verdict
  * distingue « réponse envoyée » de « enregistrée mais courriel NON parti »
- * (repli Newsletter). Supprimer s'arme en deux clics.
+ * (repli Newsletter). Supprimer se confirme dans une boîte à part.
  *
  * ⚠ messagerie:liste ATTEND LA RESYNCHRONISATION des billets (le site relit
  * le nuage, comme les retours) : le premier chargement peut prendre quelques
@@ -289,7 +289,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + (r.statut === 'answered' ? '${T("Modifier la réponse (renvoyée par courriel)")}' : '${T("Votre réponse (envoyée par courriel au client)")}') + '</div>'
       + '<textarea aria-label="${T("Rédigez votre réponse")}" id="m-reptxt" placeholder="${T("Rédigez votre réponse…")}">' + esc(r.reponse || '') + '</textarea></div>'
       + '<div class="pied-boite">'
-      + '<button class="danger" id="m-supprimer">' + (SUPPR_ARME ? '${T("Confirmer la suppression ?")}' : '<span class="ic">🗑</span> ${T("Supprimer")}') + '</button>'
+      + '<button class="danger" id="m-supprimer"><span class="ic">🗑</span> ${T("Supprimer")}</button>'
       + '<button id="m-fermer">${T("Fermer")}</button>'
       + '<button class="prim" id="m-envoyer"><span class="ic">📨</span>${T(" Envoyer la réponse")}</button>'
       + '</div></div></div>';
@@ -323,8 +323,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var su = document.getElementById('m-supprimer');
     if (su) su.onclick = function(){
       if (!SUPPR_ARME) {
-        SUPPR_ARME = true; dessiner();
-        setTimeout(function(){ if (SUPPR_ARME) { SUPPR_ARME = false; if (DETAIL) dessiner(); } }, 4000);
+        var dS = DETAIL;
+        szConfirmer({ danger: true, titre: '${T("Supprimer la demande")}',
+          texte: '${T("La demande de")}' + ' ' + (dS ? (dS.client || '') : '') + ' ${T("concernant la commande")} « ' + (dS ? (dS.commande || '') : '') + ' » '
+            + '${T("sera supprimée définitivement, avec son contenu. Cette action est irréversible.")}',
+          details: dS ? [['${T("Courriel")}', dS.courriel || '–'], ['${T("Raison")}', dS.raison || '–']] : [],
+          oui: '${T("Supprimer la demande")}' }).then(function(ok){ if (ok && DETAIL === dS) { SUPPR_ARME = true; su.onclick(); } });
         return;
       }
       SUPPR_ARME = false;

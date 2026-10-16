@@ -291,15 +291,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var CLASSIQUE_ARME = false;
   document.getElementById('b-classique').addEventListener('click', function(){
     if (!CLASSIQUE_ARME) {
-      CLASSIQUE_ARME = true;
-      this.textContent = '${T("Confirmer — l’application redémarre")}';
-      szDire('${T("Cliquez de nouveau pour revenir au mode classique.")}', 'att');
-      setTimeout(function(){
-        var b = document.getElementById('b-classique');
-        if (b && CLASSIQUE_ARME) { CLASSIQUE_ARME = false; b.textContent = '${T("← Revenir au mode classique")}'; }
-      }, 6000);
+      var bC = this;
+      szConfirmer({ prudent: true, titre: '${T("Revenir au mode classique")}',
+        texte: '${T("L’application va redémarrer en mode classique. Enregistrez au préalable toute saisie en cours.")}',
+        oui: '${T("Redémarrer en mode classique")}' }).then(function(ok){ if (ok) { CLASSIQUE_ARME = true; bC.click(); } });
       return;
     }
+    CLASSIQUE_ARME = false;
     szDire('${T("Retour au mode classique…")}', '');
     if (P && P.cadreEteindre) P.cadreEteindre();
   });

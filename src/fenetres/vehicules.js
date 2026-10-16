@@ -1720,21 +1720,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
       charger();
     });
   }
-  /* ⚠ ON ARME EN DEUX TEMPS, comme toute action qui detruit, et SANS
-     REDESSINER : seul le texte du bouton change. Un redessin entre les deux
-     clics remplacerait le bouton, et le second clic tomberait dans le vide. */
-  function armer(b, cle, faire){
-    if (ARME && ARME.cle === cle) {
-      clearTimeout(ARME.t); ARME = null;
-      b.classList.remove('aconf');
-      faire();
-      return;
-    }
+  /* ⚠ TOUTE ACTION QUI DETRUIT SE CONFIRME, et depuis le 2026-10-15 dans une
+     boite a part (szConfirmer) : plus de bouton qui change de texte. */
+  function armer(b, cle, faire, o){
     if (ARME) desarmer();
-    b.setAttribute('data-texte', b.textContent);
-    b.textContent = '${T("Confirmer ?")}';
-    b.classList.add('aconf');
-    ARME = { cle: cle, b: b, t: setTimeout(desarmer, 5000) };
+    szConfirmer(o || {}).then(function(ok){ if (ok) faire(); });
   }
   function desarmer(){
     if (!ARME) return;
@@ -1787,9 +1777,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
       desarmer(); dessiner(); return;
     }
     var sd = t.closest('[data-sup-dep]');
-    if (sd) { var idd = sd.getAttribute('data-sup-dep'); armer(sd, 'dep:' + idd, function(){ supprimerDeplacement(idd); }); return; }
+    if (sd) {
+      var idd = sd.getAttribute('data-sup-dep');
+      var dD = ((D && D.deplacements) || []).filter(function(x){ return x.id === idd; })[0];
+      armer(sd, 'dep:' + idd, function(){ supprimerDeplacement(idd); }, { danger: true,
+        titre: '${T("Supprimer le déplacement")}',
+        texte: '${T("Le déplacement")}' + (dD ? ' « ' + (dD.depart ? dD.depart + ' → ' : '') + (dD.destination || '') + ' » ${T("du")} ' + szJour(dD.date) : '')
+          + ' ${T("sera retiré définitivement du registre, et ses kilomètres ne compteront plus dans le calcul de l’usage d’affaires. Cette action est irréversible.")}',
+        details: dD ? [['${T("Véhicule")}', nomVeh(dD.vehiculeId) || '—'], ['${T("Km")}', km(dD.km)]] : [],
+        oui: '${T("Supprimer le déplacement")}' });
+      return;
+    }
     var sv = t.closest('[data-sup-veh]');
-    if (sv) { var idv = sv.getAttribute('data-sup-veh'); armer(sv, 'veh:' + idv, function(){ supprimerVehicule(idv); }); return; }
+    if (sv) {
+      var idv = sv.getAttribute('data-sup-veh');
+      var vV = vehicule(idv);
+      armer(sv, 'veh:' + idv, function(){ supprimerVehicule(idv); }, { danger: true,
+        titre: '${T("Supprimer le véhicule")}',
+        texte: '${T("Le véhicule")}' + ' « ' + (vV ? libVeh(vV) : '') + ' » '
+          + '${T("sera retiré définitivement du registre. Cette action est irréversible.")}',
+        oui: '${T("Supprimer le véhicule")}' });
+      return;
+    }
     var mv = t.closest('[data-veh-mod]');
     if (mv) { ouvrirVehicule(mv.getAttribute('data-veh-mod')); return; }
     var dt = t.closest('[data-dpa-tab]');

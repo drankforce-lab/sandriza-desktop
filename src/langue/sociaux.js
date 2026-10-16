@@ -357,4 +357,17 @@ module.exports = {
   'images': 'images',
   'non rendue': 'not rendered',
   'non rendues': 'not rendered',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Publier toute la file': 'Post the entire queue',
+  'Toutes les publications en attente seront envoyées aux réseaux sociaux configurés. Une publication envoyée ne peut pas être retirée depuis l’application.': 'All pending posts will be sent to the configured social networks. A post that has been sent cannot be withdrawn from the application.',
+  'Publications': 'Posts',
+  'Vider le journal des publications': 'Clear the posting log',
+  'Toutes les entrées du journal seront effacées définitivement. Les publications déjà parues restent en ligne sur les réseaux. Cette action est irréversible.': 'All log entries will be permanently deleted. Posts already published remain online on the networks. This action cannot be undone.',
+  'Entrées': 'Entries',
+  'Supprimer le patron': 'Delete template',
+  'Le patron': 'The template',
+  'sera supprimé définitivement. Les publications déjà faites ne sont pas touchées. Cette action est irréversible.': 'will be permanently deleted. Posts already published are not affected. This action cannot be undone.',
+  'Publier sur les réseaux sociaux': 'Post to social networks',
+  'La publication': 'The post',
+  'sera envoyée aux réseaux sociaux. Une publication envoyée ne peut pas être retirée depuis l’application.': 'will be sent to the social networks. A post that has been sent cannot be withdrawn from the application.',
 };

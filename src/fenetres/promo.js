@@ -403,8 +403,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
               + '<button class="mini" data-imprimer="' + esc(r.id) + '">${T("Imprimer")}</button> '
               + '<button class="mini" data-editeur="' + esc(r.id) + '">${T("Éditeur")}</button>'
               + (ro ? '' : ' <button class="mini" data-dup="' + esc(r.id) + '">${T("Dupliquer")}</button>'
-                  + ' <button class="mini danger" data-suppr="' + esc(r.id) + '">'
-                  + (SUPPR_ARME === r.id ? '${T("Confirmer ?")}' : '✕') + '</button>')
+                  + ' <button class="mini danger" data-suppr="' + esc(r.id) + '" title="${T("Supprimer le modèle")}" aria-label="${T("Supprimer le modèle")}">'
+                  + '✕' + '</button>')
               + '</td></tr>';
           }).join('')
         + '</tbody></table></div>';
@@ -459,8 +459,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
                 : '${T("impression directe")}') + '</td>'
             + '<td style="text-align:right;white-space:nowrap">'
             + (ro ? '' : '<button class="mini" data-creer="' + esc(x.cle) + '">${T("Créer un modèle")}</button>'
-                + (x.perso ? ' <button class="mini danger" data-fmtsuppr="' + esc(x.id) + '">'
-                    + (FMT_ARME === x.id ? '${T("Confirmer ?")}' : '✕') + '</button>' : ''))
+                + (x.perso ? ' <button class="mini danger" data-fmtsuppr="' + esc(x.id) + '" title="${T("Supprimer le format")}" aria-label="${T("Supprimer le format")}">'
+                    + '✕' + '</button>' : ''))
             + '</td></tr>';
         }).join('')
       + '</tbody></table></div>';
@@ -841,10 +841,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
     var su = t.closest('[data-suppr]');
     if (su) {
       var idS = su.getAttribute('data-suppr');
-      /* ⚠ ARME EN DEUX CLICS : un modele supprime ne se reconstitue pas. */
+      /* ⚠ CONFIRME DANS UNE BOITE A PART (szConfirmer, 2026-10-15) : un modele
+         supprime ne se reconstitue pas. */
       if (SUPPR_ARME !== idS) {
-        SUPPR_ARME = idS; dessiner();
-        setTimeout(function(){ if (SUPPR_ARME === idS) { SUPPR_ARME = ''; dessiner(); } }, 5000);
+        var mS = (D.lignes || []).filter(function(x){ return x.id === idS; })[0];
+        szConfirmer({ danger: true, titre: '${T("Supprimer le modèle")}',
+          texte: '${T("Le modèle")}' + ' « ' + (mS ? mS.nom : '') + ' » ' + '${T("sera supprimé définitivement. Les impressions déjà faites ne sont pas touchées. Cette action est irréversible.")}',
+          details: mS && mS.dim ? [['${T("Format")}', mS.dim]] : [],
+          oui: '${T("Supprimer le modèle")}' }).then(function(ok){ if (ok) { SUPPR_ARME = idS; su.click(); } });
         return;
       }
       SUPPR_ARME = '';
@@ -886,8 +890,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
     if (fs) {
       var idF = fs.getAttribute('data-fmtsuppr');
       if (FMT_ARME !== idF) {
-        FMT_ARME = idF; dessiner();
-        setTimeout(function(){ if (FMT_ARME === idF) { FMT_ARME = ''; dessiner(); } }, 5000);
+        var fS = (D.formats || []).filter(function(x){ return x.id === idF; })[0];
+        szConfirmer({ danger: true, titre: '${T("Supprimer le format")}',
+          texte: '${T("Le format personnalisé")}' + ' « ' + (fS ? fS.nom : '') + ' » ' + '${T("sera supprimé définitivement. Les modèles déjà créés dans ce format ne sont pas modifiés. Cette action est irréversible.")}',
+          details: fS && fS.dim ? [['${T("Dimensions")}', fS.dim]] : [],
+          oui: '${T("Supprimer le format")}' }).then(function(ok){ if (ok) { FMT_ARME = idF; fs.click(); } });
         return;
       }
       FMT_ARME = '';

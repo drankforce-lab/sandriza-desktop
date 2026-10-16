@@ -136,4 +136,9 @@ module.exports = {
   'Actifs': 'Active',
   // 2026-10-15 : la liste refaite (lot C).
   'sans prénom': 'no first name',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Retirer l’abonné de la liste': 'Remove subscriber from the list',
+  'L’adresse': 'The address',
+  'sera retirée définitivement de la liste, y compris la trace d’un éventuel désabonnement. Pour seulement cesser les envois, utilisez plutôt « Désabonner ». Cette action est irréversible.': 'will be permanently removed from the list, including any record of an unsubscribe. To simply stop sending, use “Unsubscribe” instead. This action cannot be undone.',
+  'Retirer de la liste': 'Remove from the list',
 };

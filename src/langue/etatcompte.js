@@ -62,5 +62,11 @@ module.exports = {
     'Click again to send the account statement to',
   'Envoi du courriel…': 'Sending the email…',
   'État de compte envoyé à ': 'Account statement sent to ',
-  'État de compte envoyé à': 'Account statement sent to'
+  'État de compte envoyé à': 'Account statement sent to',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Envoyer l’état de compte': 'Send account statement',
+  'L’état de compte de': 'The account statement for',
+  'sera envoyé par courriel au client. Un courriel envoyé ne peut pas être rappelé.': 'will be emailed to the customer. A sent email cannot be recalled.',
+  'Destinataire': 'Recipient',
+  'Solde dû': 'Balance due',
 };

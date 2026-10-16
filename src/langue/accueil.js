@@ -104,4 +104,8 @@ module.exports = {
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
   'Diapo': 'Slide',
   "Supprimer": "Delete",
+  // 2026-10-15 : confirmations en boîte à part.
+  "Réinitialiser la page d’accueil": "Reset the home page",
+  "Tous les blocs de la page d’accueil seront remplacés par la configuration par défaut. Les blocs et diapositives actuels seront perdus. Cette action est irréversible.": "All home page blocks will be replaced with the default configuration. The current blocks and slides will be lost. This action cannot be undone.",
+  "Réinitialiser les blocs": "Reset the blocks",
 };

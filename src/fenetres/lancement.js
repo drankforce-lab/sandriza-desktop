@@ -145,8 +145,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var lbl = enLigne ? '${T("En ligne")}' : '${T("Pré-lancement")}';
     var ds = enLigne ? '${T("Le site est visible par les moteurs de recherche et les visiteurs.")}'
                      : '${T("Le site est protégé contre l’indexation. Seules les personnes ayant le lien direct peuvent le visiter.")}';
-    var btnTxt = enLigne ? '${T("Repasser en pré-lancement")}' : (CONF ? '${T("Confirmer le lancement PUBLIC ?")}' : '${T("Lancer le site au public")}');
-    var btnCoul = enLigne ? '#dc2626' : (CONF ? '#b91c1c' : '#15803d');
+    var btnTxt = enLigne ? '${T("Repasser en pré-lancement")}' : '${T("Lancer le site au public")}';
+    var btnCoul = enLigne ? '#dc2626' : '#15803d';
 
     var src;
     if (!D.coherent && D.envPresente) src = '<div class="src err">${T("✗ Incohérence : la variable Render <code>ELG_LAUNCHED=")}' + esc(D.envValeur) + '${T("</code> dit le contraire de l’état actuel. Le prochain déploiement suivra la variable.")}</div>';
@@ -227,8 +227,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       : '';
     if (!ro) {
       h += '<div class="actions"><button class="bsc" id="v-ecrire" style="background:#1C2541"' + (VOCC ? ' disabled' : '') + '>${T("Enregistrer")}</button>'
-        + '<button class="bsc" id="v-envoyer" style="background:' + (VCONF ? '#b91c1c' : '#9B2335') + '"' + (peutEnvoyer ? '' : ' disabled') + '>'
-        + (VCONF ? '${T("Confirmer l’envoi des codes ?")}' : '${T("Envoyer les codes VIP")}') + '</button></div>';
+        + '<button class="bsc" id="v-envoyer" style="background:#9B2335"' + (peutEnvoyer ? '' : ' disabled') + '>'
+        + '${T("Envoyer les codes VIP")}</button></div>';
     }
     if (pourquoi) h += '<div class="pourquoi">' + pourquoi + '</div>';
     if (VRES) h += '<div class="resultat">' + VRES + '</div>';
@@ -252,9 +252,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function envoyerVip(){
     if (!V || !V.peutModifier || VOCC) return;
     if (!VCONF) {
-      relever(); VCONF = true; dessinerVip();
-      dire('${T("Cliquez encore pour envoyer un courriel à chaque inscrite VIP.")}', 'att');
-      setTimeout(function(){ if (VCONF) { relever(); VCONF = false; dessinerVip(); } }, 6000);
+      /* 2026-10-15 : l envoi se confirme dans une boite a part (szConfirmer). */
+      relever();
+      var kV = V.compte || {}, nV = kV.aEnvoyer || 0;
+      szConfirmer({ prudent: true, titre: '${T("Envoyer les codes VIP")}',
+        texte: '${T("Un courriel contenant un code de rabais unique sera envoyé à chaque inscrite VIP qui ne l’a pas encore reçu. Un courriel envoyé ne peut pas être rappelé.")}',
+        details: [['${T("Destinataires")}', String(nV)]]
+          .concat(V.cfg && V.cfg.rabaisPct ? [['${T("Rabais")}', V.cfg.rabaisPct + ' %']] : [])
+          .concat(V.cfg && V.cfg.validiteJours ? [['${T("Validité du code")}', V.cfg.validiteJours + ' ' + szPl(Number(V.cfg.validiteJours) || 0, '${T("jour")}', '${T("jours")}')]] : []),
+        oui: '${T("Envoyer à")} ' + nV + ' ' + szPl(nV, '${T("inscrite")}', '${T("inscrites")}') }).then(function(ok){ if (ok) { VCONF = true; envoyerVip(); } });
       return;
     }
     relever(); VCONF = false; VOCC = true; VRES = ''; dessinerVip();
@@ -283,9 +289,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (enLigne) { basculer('prelaunch'); return; }   // revenir en protégé : sûr, immédiat
     // PASSER EN LIGNE : garde absolue → confirmation en deux temps.
     if (!CONF) {
-      CONF = true; dessiner();
-      dire('${T("Cliquez encore pour rendre le site PUBLIC et indexable.")}', 'att');
-      setTimeout(function(){ if (CONF) { CONF = false; dessiner(); } }, 6000);
+      /* 2026-10-15 : le lancement se confirme dans une boite a part (szConfirmer). */
+      szConfirmer({ prudent: true, titre: '${T("Lancer le site au public")}',
+        texte: '${T("Le site deviendra public : les protections contre l’indexation seront retirées et les moteurs de recherche pourront le répertorier. Une page déjà indexée ne se retire pas aussitôt, même si vous revenez ensuite en pré-lancement.")}',
+        oui: '${T("Lancer le site")}' }).then(function(ok){ if (ok) { CONF = true; cliquer(); } });
       return;
     }
     CONF = false;

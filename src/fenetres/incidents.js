@@ -273,7 +273,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
       if (D.peutModifier||D.peutSupprimer){
         acts = '<td class="acts"><button class="b" data-vue="'+esc(r.id)+'" title="${T("Voir le détail")}"><span class="ic">👁</span>${T(" Détail")}</button>'
           + (D.peutModifier ? '<button class="b" data-edit="'+esc(r.id)+'"><span class="ic">✎</span>${T(" Modifier")}</button>' : '')
-          + (D.peutSupprimer ? '<button class="b dgr" data-del="'+esc(r.id)+'">'+(DELID===r.id?'${T("✓ Confirmer")}':'${T("Retirer")}')+'</button>' : '')
+          + (D.peutSupprimer ? '<button class="b dgr" data-del="'+esc(r.id)+'">'+'${T("Retirer")}'+'</button>' : '')
           + '</td>';
       }
       h += '<tr><td><div class="rf-nom">'+esc(szTd(r.type)||'—')+'</div>'
@@ -299,7 +299,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
     var ds=corps.querySelectorAll('[data-del]'); for (var c=0;c<ds.length;c++) ds[c].onclick=function(){
       var id=this.getAttribute('data-del');
       if (DELID===id){ DELID=''; supprimer(id); }
-      else { DELID=id; vueRegistre(); dire('${T("Le registre se conserve CINQ ANS. Ne retirez qu’une saisie erronée, jamais un incident réel — cliquez encore pour confirmer.")}', 'att'); }
+      else {
+        var bI=this;
+        var rI=((D && D.lignes) || []).filter(function(x){ return x.id === id; })[0] || {};
+        szConfirmer({ danger: true, titre: '${T("Retirer l’entrée du registre")}',
+          texte: '${T("L’entrée")}' + ' « ' + (szTd(rI.type) || rI.ref || id) + ' » ' + '${T("sera retirée du registre des incidents. Le registre doit être conservé cinq ans : ne retirez qu’une saisie erronée, jamais un incident réel.")}',
+          details: [['${T("Référence")}', String(rI.ref || '—')], ['${T("Survenu le")}', String(szQuand(rI.occurredAt) || '—')]],
+          oui: '${T("Retirer l’entrée")}' }).then(function(ok){ if (ok) { DELID=id; bI.onclick(); } });
+      }
     };
   }
 

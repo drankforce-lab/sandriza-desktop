@@ -179,4 +179,9 @@ module.exports = {
   'par ': 'by ',
   'Client et commande Total Supprimée': 'Customer and order Total Deleted',
   'Total Supprimée': 'Total Deleted',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Purger le dossier': 'Purge the record',
+  'Le dossier de la commande': 'The record for order',
+  'et les photos des demandes de retour seront effacés définitivement. Cette commande ne pourra plus être remise en place. Cette action est irréversible.': 'and the return request photos will be permanently deleted. This order can no longer be restored. This action cannot be undone.',
+  'Montant': 'Amount',
 };

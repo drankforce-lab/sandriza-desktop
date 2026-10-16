@@ -191,7 +191,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var av = document.getElementById('ro'); if (av) av.hidden = !RO;
     bAdd.disabled = RO || OCCUPE;
     bReset.disabled = RO || OCCUPE;
-    bReset.textContent = RESET ? '${T("Confirmer ?")}' : '${T("Réinitialiser")}';
+    bReset.textContent = '${T("Réinitialiser")}';
     bReset.classList.toggle('arme', !!RESET);
     var l = items();
     if (!l.length) { corps.innerHTML = '<div class="vide">${T("Aucun élément de menu.")}</div>'; return; }
@@ -218,7 +218,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       h.push('<button class="mini" data-act="form" data-id="' + esc(it.id) + '"' + dis + '>${T("+ Sous-menu")}</button>');
       if (!it.fixed) {
         var arme = (SUPPR === it.id);
-        h.push('<button class="mini danger' + (arme?' arme':'') + '" data-act="del" data-id="' + esc(it.id) + '"' + dis + '>' + (arme?'${T("Confirmer ?")}':'<span class="ic">🗑</span>') + '</button>');
+        h.push('<button class="mini danger' + (arme?' arme':'') + '" data-act="del" data-id="' + esc(it.id) + '"' + dis + '>' + '<span class="ic">🗑</span>' + '</button>');
       }
       h.push('</div></div>');
       // sous-menu existant
@@ -367,7 +367,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (prevSuppr === id) {
         D.items = items().filter(function(x){ return x.id !== id; });
         ecrire(true);
-      } else { SUPPR = id; dessiner(); dire('${T("Cliquez « Confirmer ? » pour supprimer cet élément.")}', 'att'); }
+      } else {
+        szConfirmer({ danger: true, titre: '${T("Supprimer l’élément de menu")}',
+          texte: '${T("L’élément de menu")}' + ' « ' + (it.label || it.id) + ' » ' + '${T("et ses sous-menus seront retirés de la navigation de la boutique.")}',
+          oui: '${T("Supprimer l’élément")}' }).then(function(ok){ if (ok) { SUPPR = id; b.click(); } });
+      }
     } else if (act === 'delchild') {
       var cid = b.getAttribute('data-cid');
       if (it) { it.children = (it.children || []).filter(function(c){ return c.id !== cid; }); ecrire(true); }
@@ -422,7 +426,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   bReset.onclick = function(){
     if (RO || OCCUPE) return;
     if (RESET) { reinit(); }
-    else { RESET = true; dessiner(); dire('${T("Cliquez « Confirmer ? » : le menu reprend sa composition d’origine, vos ajouts sont perdus.")}', 'att'); }
+    else {
+      szConfirmer({ danger: true, titre: '${T("Réinitialiser la navigation")}',
+        texte: '${T("Le menu de la boutique reprendra sa composition d’origine. Les éléments et sous-menus que vous avez ajoutés seront perdus. Cette action est irréversible.")}',
+        oui: '${T("Réinitialiser la navigation")}' }).then(function(ok){ if (ok) { RESET = true; bReset.onclick(); } });
+    }
   };
 
   function charger(){

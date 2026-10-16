@@ -299,14 +299,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
             + (l.etat === 'actif'
                 ? '<button class="mini" data-renvoyer="' + esc(l.id) + '"><span class="ic">✉</span> ${T("Renvoyer")}</button> '
                   + '<button class="mini dgr" data-revoquer="' + esc(l.id) + '">'
-                  + (ARME === l.id ? '${T("Confirmer ?")}' : '${T("Révoquer")}') + '</button> '
+                  + '${T("Révoquer")}' + '</button> '
                 /* ⚠ SUPPRIMER N EST OFFERT QUE SUR UN LIEN PERIME (#30). Sur un
                    lien ACTIF, le retirer le rendrait invisible ici tout en le
                    laissant fonctionner pour qui a l adresse : une porte ouverte
                    qu on ne voit plus. Il faut le revoquer d abord. */
                 : '<button class="mini dgr" data-supprimer="' + esc(l.id) + '" '
                   + 'title="${T("Retirer de la liste — le journal de ses accès est conservé")}">'
-                  + (ARME === 'sup:' + l.id ? '${T("Confirmer ?")}' : '<span class="ic">🗑</span> ${T("Supprimer")}') + '</button> ')
+                  + '<span class="ic">🗑</span> ${T("Supprimer")}' + '</button> ')
             + '<button class="mini" data-journal="' + esc(l.id) + '">${T("Journal")}</button>'
           + '</td></tr>');
         if (RENVOI && RENVOI.id === l.id) h.push(ligneRenvoi(l));
@@ -617,17 +617,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     });
   }
 
-  /* ⚠ LE BOUTON S ARME, IL NE DEMANDE PAS. C est la convention de ce projet
-     (Promotions, Coupons) et surtout la seule qui tienne ici : confirm() bloque
-     le processus, et une fenetre native chargee en data: n a pas de boite de
-     dialogue du site a sa disposition. Le premier clic arme, le second agit,
-     et le bandeau du bas dit ce qui va se passer. */
+  /* ⚠ TOUTE CONFIRMATION EST UNE BOITE A PART (2026-10-15) : szConfirmer du socle,
+     dessinee par la page (pas confirm(), qui bloque le processus). Confirme, on
+     arme PUIS on rappelle le geste : le second passage agit comme avant. */
   var ARME = '';
+  function nomLien(id){
+    var l = (ETAT.liens || []).filter(function(x){ return x.id === id; })[0];
+    return l ? (l.etiquette || l.destinataire || '') : '';
+  }
   function revoquer(id){
     if (ARME !== id) {
-      ARME = id;
-      dessinerLiens();
-      dire('${T("Cliquez « Confirmer ? » pour révoquer — le lien cessera aussitôt de fonctionner, même pour quelqu’un qui l’a déjà ouvert.")}', 'att');
+      szConfirmer({ danger: true, titre: '${T("Révoquer le lien")}',
+        texte: '${T("Le lien")}' + ' « ' + nomLien(id) + ' » ' + '${T("cessera immédiatement de fonctionner, y compris pour une personne qui l’a déjà ouvert. La révocation sera inscrite au journal. Cette action est irréversible.")}',
+        oui: '${T("Révoquer le lien")}' }).then(function(ok){ if (ok) { ARME = id; revoquer(id); } });
       return;
     }
     ARME = '';
@@ -646,10 +648,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
      l historique la ou quelqu un voudrait regarder apres coup. */
   function supprimer(id){
     if (ARME !== 'sup:' + id) {
-      ARME = 'sup:' + id;
-      dessinerLiens();
-      dire('${T("Cliquez « Confirmer ? » pour retirer ce lien de la liste.")} '
-        + '${T("Son journal d’accès est conservé.")}', 'att');
+      szConfirmer({ danger: true, titre: '${T("Retirer le lien de la liste")}',
+        texte: '${T("Le lien")}' + ' « ' + nomLien(id) + ' » ' + '${T("sera retiré de la liste. Son journal d’accès est conservé et reste consultable.")}',
+        oui: '${T("Retirer le lien")}' }).then(function(ok){ if (ok) { ARME = 'sup:' + id; supprimer(id); } });
       return;
     }
     ARME = '';

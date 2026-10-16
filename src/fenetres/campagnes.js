@@ -266,6 +266,29 @@ tbody tr:hover td{background:var(--v04)}
 .ed-offre select{height:2rem;border-radius:8px;background:var(--f-champ)}
 .ed-offre input[type=number]{width:4.6rem;height:2rem;border-radius:8px;background:var(--f-champ)}
 .ed-offre #f-offre-coupon{min-width:18rem}
+/* Les statistiques d une campagne (2026-10-15). */
+.st-tete{padding:0 0 .2rem}
+.st-tuiles{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:.7rem}
+.st-t{display:flex;flex-direction:column;gap:.15rem;padding:.8rem 1rem;border-radius:14px;background:var(--f-carte);border:1px solid var(--sz-bord)}
+.st-t span{font-size:.74rem;color:var(--tx2)}
+.st-t b{font-size:1.5rem;font-weight:750;line-height:1.2}
+.st-t small{font-size:.74rem;color:var(--tx2)}
+.st-t.bon b{color:var(--tx-ok)}.st-t.att b{color:var(--tx-att)}.st-t.mal b{color:var(--tx-err)}
+.st-cols{flex:1 1 0;min-height:0;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:1rem}
+.st-carte{min-height:0;overflow:hidden;padding:1rem 1.1rem;border-radius:16px;background:var(--f-carte);border:1px solid var(--sz-bord);display:flex;flex-direction:column;gap:.7rem}
+.st-lien{display:flex;flex-direction:column;gap:.25rem}
+.st-lien-t{display:flex;align-items:baseline;gap:.8rem;font-size:.82rem}
+.st-lien-t span{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st-lien small{font-size:.72rem;color:var(--tx2)}
+.st-barre{height:.4rem;border-radius:99px;background:var(--f-champ);overflow:hidden}
+.st-barre i{display:block;height:100%;border-radius:99px;background:var(--sz-accent)}
+.st-jours{flex:0 0 9rem;display:flex;align-items:flex-end;gap:.3rem}
+.st-j{flex:1 1 0;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:.2rem}
+.st-j i{display:block;width:100%;max-width:1.6rem;border-radius:5px 5px 0 0;background:var(--sz-accent)}
+.st-j small{font-size:.66rem;color:var(--tx2)}
+.st-aud{margin-top:.4rem}
+.st-audience{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem}
+.st-audience .st-t b{font-size:1.2rem}
 .ed-sous{flex:0 0 auto;margin:.35rem 1.6rem 0;font-size:.74rem;color:var(--tx2);min-height:1em}
 .ed-sms{flex:0 0 auto;margin:.5rem 1.6rem 0;padding:.6rem 1.1rem;border-radius:12px;background:var(--f-carte);
   border:1px solid var(--sz-bord);display:flex;gap:1rem;align-items:flex-start}
@@ -2071,7 +2094,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
 
   /* ══ ONGLET CAMPAGNES ═══════════════════════════════════════════════════ */
   function initiales(nom){
-    var m = String(nom || '').trim().split(' ').filter(Boolean);
+    // Seuls les mots qui commencent par une lettre ou un chiffre comptent (« (copie) » ne donne plus « ( »).
+    var m = String(nom || '').replace(/[^0-9A-Za-zÀ-ÿ ]+/g, ' ').trim().split(' ').filter(Boolean);
     if (!m.length) return '?';
     return ((m[0][0] || '') + (m.length > 1 ? (m[m.length - 1][0] || '') : '')).toUpperCase();
   }
@@ -2129,6 +2153,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
               + '>' + '${T("Envoyer")}' + '</button>';
           }
           // (2026-10-15, sa demande) Une campagne, même ENVOYÉE, se duplique en brouillon.
+          // (2026-10-15, sa demande) Les statistiques d une campagne partie : ouvertures, clics, liens, audience.
+          if (c.etat === 'sent') gestes += '<button class="mini geste" data-stats="' + esc(c.id) + '">${T("Statistiques")}</button>';
           gestes += '<button class="mini geste" data-dupliquer="' + esc(c.id) + '">${T("Dupliquer")}</button>';
           var armeS = (ARME === 'sup:' + c.id);
           gestes += '<button class="mini geste danger' + (armeS ? ' arme' : '') + '" data-suppr="'
@@ -2137,7 +2163,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
         var nb = (c.canal === 'sms' ? (D.smsDestinataires || 0) : c.destinataires);
         var parti = (c.etat === 'sent' || c.envoyes);
         return '<div data-ctx-ligne class="ls-rang ls-camp">'
-          + '<div class="qui"><span class="bico" aria-hidden="true">' + esc(initiales(c.nom)) + '</span>'
+          /* (2026-10-15, sa capture : « C( » pour « Campagne Automne 2026 (copie) », lu comme un identifiant)
+             La pastille dit le CANAL — une enveloppe, un téléphone —, pas des lettres tirées du nom. */
+          + '<div class="qui"><span class="bico" aria-hidden="true">' + (c.canal === 'sms' ? '${ICO.telephone}' : '${ICO.newsletter}') + '</span>'
           + '<div class="tx"><b>' + esc(c.nom) + '</b><span>' + esc(c.sujet) + '</span></div></div>'
           + '<div class="ou"><b>' + esc(c.segmentLibelle) + '</b><span>' + esc(c.canalLibelle) + ' · '
           + pluriel(nb, '${T("destinataire")}', '${T("destinataires")}') + (c.canal === 'both' ? ' + ' + (D.smsDestinataires || 0) + ' SMS' : '') + '</span></div>'
@@ -2237,8 +2265,73 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     return h + renvoi() + '</div>';
   }
 
+  /* ══ LES STATISTIQUES D UNE CAMPAGNE (2026-10-15) ══════════════════════════════════
+     Sa demande : « un bouton pour les statistiques des ouvertures, par clic et lien des differentes
+     campagnes, et le suivi de l audience aussi — le tout par campagne ». Les chiffres viennent du
+     site (campagnes:stats) : le journal d envoi, les evenements de Resend (resend-webhook.php) et la
+     liste des abonnes. ⚠ suivi=false : AUCUN evenement n est jamais arrive — le suivi n est pas branche
+     chez Resend ; la vue le dit et dit quoi activer, au lieu d afficher des zeros trompeurs. */
+  var STATS = null;
+  function pct(n, d){ return d ? Math.round(1000 * n / d) / 10 : 0; }
+  function vueStats(){
+    var S = STATS, E = S.engagement, A = S.audience || {};
+    var base = (E && E.livres) || S.partis || 0;
+    var tuile = function(lib, val, sous, cl){
+      return '<div class="st-t' + (cl ? ' ' + cl : '') + '"><span>' + lib + '</span><b>' + val + '</b>' + (sous ? '<small>' + sous + '</small>' : '') + '</div>';
+    };
+    var h = '<div class="ls st"><div class="ed-tete st-tete">'
+      + '<button type="button" class="retour" id="st-retour">${T("← Campagnes")}</button><span class="sep">/</span>'
+      + '<div class="ls-titre"><b>' + esc(S.nom) + '</b><span>' + esc(S.sujet) + (S.envoyeeLe ? ' · ${T("envoyée le")} ' + esc(szQuand(S.envoyeeLe)) : '')
+      + (S.segment ? ' · ' + esc(S.segment) : '') + (S.code ? ' · ${T("code")} ' + esc(S.code) : '') + '</span></div></div>';
+    h += '<div class="st-tuiles">'
+      + tuile('${T("Partis")}', S.partis, S.echecs ? pluriel(S.echecs, '${T("échec")}', '${T("échecs")}') : '')
+      + tuile('${T("Livrés")}', E ? E.livres : '—', E && S.partis ? pct(E.livres, S.partis) + ' %' : '')
+      + tuile('${T("Ouverts")}', E ? E.ouverts : '—', E && base ? pct(E.ouverts, base) + ' ${T("% d’ouverture")}' : '', 'bon')
+      + tuile('${T("Cliqués")}', E ? E.cliques : '—', E && base ? pct(E.cliques, base) + ' ${T("% de clic")}' : '', 'bon')
+      + tuile('${T("Rebonds")}', E ? E.rebonds : '—', '', E && E.rebonds ? 'att' : '')
+      + tuile('${T("Plaintes")}', E ? E.plaintes : '—', '', E && E.plaintes ? 'mal' : '')
+      + '</div>';
+    if (!E || !E.suivi) {
+      h += '<div class="avis att">' + (S.engagementErreur && S.engagementErreur !== 'echec'
+          ? '${T("Les événements de suivi n’ont pas pu être lus")} (' + esc(S.engagementErreur) + '). '
+          : '') + '${T("Le suivi des ouvertures et des clics n’est pas encore branché. Chez Resend : 1) Domaines → votre domaine → activez « Open tracking » et « Click tracking » ; 2) Webhooks → ajoutez l’adresse https://www.sandriza.com/resend-webhook.php avec les événements email.* ; 3) copiez son « Signing secret » dans la variable RESEND_WEBHOOK_SECRET du serveur. Les campagnes envoyées ensuite seront suivies.")}</div>';
+    }
+    var liens = (E && E.liens) || [];
+    var maxL = liens.reduce(function(m, l){ return Math.max(m, l.clics); }, 0) || 1;
+    var jours = (E && E.jours) || [];
+    var maxJ = jours.reduce(function(m, j){ return Math.max(m, j.ouvertures); }, 0) || 1;
+    h += '<div class="st-cols">'
+      + '<div class="st-carte"><div class="ed-titre"><span>${T("Liens cliqués")}</span><span>' + liens.length + '</span></div>'
+      + (liens.length ? liens.map(function(l){
+          return '<div class="st-lien"><div class="st-lien-t"><span title="' + esc(l.lien) + '">' + esc(String(l.lien).replace('https://', '').replace('http://', '')) + '</span>'
+            + '<b>' + l.clics + '</b></div><div class="st-barre"><i style="width:' + Math.max(3, Math.round(100 * l.clics / maxL)) + '%"></i></div>'
+            + '<small>' + pluriel(l.personnes, '${T("personne")}', '${T("personnes")}') + '</small></div>';
+        }).join('') : '<div class="ls-note">${T("Aucun clic enregistré pour cette campagne.")}</div>')
+      + '</div>'
+      + '<div class="st-carte"><div class="ed-titre"><span>${T("Ouvertures par jour")}</span></div>'
+      + (jours.length ? '<div class="st-jours">' + jours.map(function(j){
+          return '<div class="st-j" title="' + esc(j.jour) + ' · ' + j.ouvertures + '"><i style="height:' + Math.max(4, Math.round(100 * j.ouvertures / maxJ)) + '%"></i><small>' + esc(j.jour.slice(5)) + '</small></div>';
+        }).join('') + '</div>' : '<div class="ls-note">${T("Aucune ouverture enregistrée pour cette campagne.")}</div>')
+      + '<div class="ed-titre st-aud"><span>${T("Audience")}</span></div>'
+      + '<div class="st-audience">'
+      + tuile('${T("Abonnés actifs aujourd’hui")}', A.actifsAujourdhui || 0, '')
+      + tuile('${T("Nouveaux dans les 7 jours")}', '+' + (A.gagnes7j || 0), '', 'bon')
+      + tuile('${T("Désabonnés dans les 7 jours")}', '−' + (A.perdus7j || 0), '', A.perdus7j ? 'att' : '')
+      + '</div></div>'
+      + '</div></div>';
+    return h;
+  }
+
   function dessiner(){
     if (OCCUPE) return;
+    // Les statistiques d une campagne prennent tout le corps, comme un editeur.
+    if (STATS && !FORM) {
+      if (sous) sous.textContent = '';
+      corps.classList.remove('formulaire'); corps.classList.remove('ed-corps');
+      corps.classList.add('ls-corps');
+      corps.innerHTML = vueStats();
+      return;
+    }
     // ⚠ UN FORMULAIRE OUVERT PREND TOUTE LA VUE : pas d onglets, pas de liste.
     // Redessiner la liste sous un formulaire ferait perdre la saisie en cours.
     if (FORM) {
@@ -2472,7 +2565,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     }
 
     var og = t.closest('[data-onglet]');
-    if (og) { ONGLET = og.getAttribute('data-onglet'); ARME = ''; charger(); return; }
+    if (og) { ONGLET = og.getAttribute('data-onglet'); ARME = ''; STATS = null; charger(); return; }
 
     var be = t.closest('[data-envoyer]');
     if (be && !be.disabled) {
@@ -2513,6 +2606,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       });
       return;
     }
+
+    var bst = t.closest('[data-stats]');
+    if (bst) {
+      bst.disabled = true;
+      dire('${T("Lecture des statistiques…")}');
+      appeler('campagnes:stats', [bst.getAttribute('data-stats')]).then(function(r){
+        bst.disabled = false;
+        if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+        dire(''); STATS = r; dessiner();
+      });
+      return;
+    }
+    if (t.closest('#st-retour')) { STATS = null; dessiner(); return; }
 
     var bdu = t.closest('[data-dupliquer]');
     if (bdu) {

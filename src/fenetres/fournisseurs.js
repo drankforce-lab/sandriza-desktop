@@ -239,13 +239,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
               + '<td>' + ((r.categories || []).map(function(c){
                   return '<span class="rf-pill">' + esc(c) + '</span>'; }).join(' ') || '—') + '</td>'
               + '<td>' + (r.actif ? '<span class="rf-pill vert">${T("Actif")}</span>' : '<span class="rf-pill">${T("Inactif")}</span>') + '</td>'
-              /* ⚠ ARME EN DEUX CLICS, comme partout ailleurs : une fiche
+              /* ⚠ CONFIRME DANS UNE BOITE A PART (szConfirmer, 2026-10-15) : une fiche
                  supprimee ne se reconstitue pas, et la ligne entiere est deja
                  cliquable pour OUVRIR — un bouton a un seul clic juste a cote
                  serait un piege. */
               + (D.peutSupprimer
                   ? '<td style="text-align:right"><button class="mini danger" data-suppr="' + esc(r.id) + '">'
-                    + (SUPPR_ARME === r.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button></td>'
+                    + '${T("Supprimer")}' + '</button></td>'
                   : '')
               + '</tr>';
           }).join('')
@@ -384,8 +384,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var SUPPR_ARME = null;
   function supprimer(id){
     if (SUPPR_ARME !== id) {
-      SUPPR_ARME = id; dessiner();
-      dire('${T("Recliquez pour confirmer — la fiche disparaît, les produits rattachés restent sans fournisseur.")}', 'att');
+      var fS = ((D && D.lignes) || []).filter(function(x){ return x.id === id; })[0] || {};
+      szConfirmer({ danger: true, titre: '${T("Supprimer le fournisseur")}',
+        texte: '${T("La fiche du fournisseur")}' + ' « ' + (fS.nom || '—') + ' » ' + '${T("sera supprimée définitivement. Les produits qui lui sont rattachés restent en place, mais sans fournisseur. Cette action est irréversible.")}',
+        details: [['${T("Contact")}', fS.contact || '—'], ['${T("Courriel")}', fS.courriel || '—']],
+        oui: '${T("Supprimer le fournisseur")}' }).then(function(ok){ if (ok) { SUPPR_ARME = id; supprimer(id); } });
       return;
     }
     SUPPR_ARME = null;

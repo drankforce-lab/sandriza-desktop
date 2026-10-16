@@ -128,4 +128,13 @@ module.exports = {
   'Incident Prise de connaissance': 'Incident Discovered on',
   'Incident Prise de connaissance Personnes': 'Incident Discovered on People',
   'survenu le': 'occurred on',
+
+  // 2026-10-15 : confirmations en boîte à part.
+  'Retirer l’entrée du registre': 'Remove register entry',
+  'L’entrée': 'The entry',
+  'sera retirée du registre des incidents. Le registre doit être conservé cinq ans : ne retirez qu’une saisie erronée, jamais un incident réel.':
+    'will be removed from the incident register. The register must be kept for five years: only remove an entry made in error, never a real incident.',
+  'Référence': 'Reference',
+  'Survenu le': 'Occurred on',
+  'Retirer l’entrée': 'Remove entry',
 };

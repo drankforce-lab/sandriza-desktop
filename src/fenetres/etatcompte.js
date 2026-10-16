@@ -181,15 +181,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
   };
 
-  /* ENVOI ARME EN DEUX CLICS : un courriel part chez le client et ne se
-     rattrape pas. Le premier clic demande confirmation, le second envoie. */
+  /* ENVOI CONFIRME DANS UNE BOITE A PART (szConfirmer, 2026-10-15) : un
+     courriel part chez le client et ne se rattrape pas. */
   var ARME = false;
   bCourriel.onclick = function(){
     if (!D || !D.courriel) return;
     if (!ARME) {
-      ARME = true;
-      bCourriel.textContent = '${T("Confirmer l’envoi ?")}';
-      dire('${T("Cliquez de nouveau pour envoyer l’état de compte à ")}' + D.courriel + '.', 'att');
+      szConfirmer({ prudent: true, titre: '${T("Envoyer l’état de compte")}',
+        texte: '${T("L’état de compte de")}' + ' ' + (D.nom || '—') + ' ' + '${T("sera envoyé par courriel au client. Un courriel envoyé ne peut pas être rappelé.")}',
+        details: [['${T("Destinataire")}', D.courriel], ['${T("Solde dû")}', fmt(D.solde || 0)]],
+        oui: '${T("Envoyer l’état de compte")}' }).then(function(ok){ if (ok) { ARME = true; bCourriel.onclick(); } });
       return;
     }
     ARME = false;
@@ -202,16 +203,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       dire(r.ok ? '${T("État de compte envoyé à ")}' + r.adresse + '.' : expliquer(r), r.ok ? 'bon' : 'err');
     });
   };
-
-
-  // Un clic ailleurs desarme l envoi : on ne laisse pas un bouton arme trainer.
-  document.addEventListener('click', function(ev){
-    if (ARME && ev.target !== bCourriel) {
-      ARME = false;
-      if (D && D.courriel) bCourriel.textContent = '${T("Envoyer à ")}' + D.courriel;
-      dire('');
-    }
-  }, true);
 
   window.szActualiser = function(){ charger(); };
   window.szRevenir = function(){ charger(); };

@@ -334,8 +334,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
           gestes = '<button class="mini geste" data-modifier="' + esc(c.id) + '">${T("Modifier")}</button>'
             + '<button class="mini geste" data-basculer="' + esc(c.id) + '">'
             + (c.actif ? '${T("Désactiver")}' : '${T("Activer")}') + '</button>'
-            + '<button class="mini geste danger' + (SUPPR_ARME === c.id ? ' arme' : '') + '" data-suppr="' + esc(c.id) + '">'
-            + (SUPPR_ARME === c.id ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>';
+            + '<button class="mini geste danger" data-suppr="' + esc(c.id) + '">'
+            + '${T("Supprimer")}' + '</button>';
         }
         return '<div data-ctx-ligne class="ls-rang cp-rang' + (c.enCours ? '' : ' eteint') + '">'
           + '<div class="qui"><span class="cp-ticket">' + esc(c.code) + '</span>'
@@ -507,13 +507,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
     var bs = t.closest('[data-suppr]');
     if (bs) {
       var idS = bs.getAttribute('data-suppr');
-      /* Suppression ARMEE en deux clics. Elle ne touche pas aux commandes deja
-         reglees : le coupon disparait pour l avenir, les reductions passees
-         restent — c est ce que dit le message. */
+      /* Suppression CONFIRMEE dans une boite a part (szConfirmer, 2026-10-15).
+         Elle ne touche pas aux commandes deja reglees : le coupon disparait pour
+         l avenir, les reductions passees restent — c est ce que dit le message. */
       if (SUPPR_ARME !== idS) {
-        SUPPR_ARME = idS;
-        dessiner();
-        dire('${T("Cliquez « Confirmer ? » pour supprimer — les commandes déjà réglées gardent leur réduction.")}', 'att');
+        var cS = (D.coupons || []).filter(function(c){ return c.id === idS; })[0];
+        szConfirmer({ danger: true, titre: '${T("Supprimer le coupon")}',
+          texte: '${T("Le coupon")}' + ' « ' + (cS ? cS.code : '') + ' » ' + '${T("sera supprimé définitivement et ne pourra plus être utilisé. Les commandes déjà réglées conservent leur réduction. Cette action est irréversible.")}',
+          details: cS ? [['${T("Réduction")}', String(cS.reduction || '')], ['${T("Utilisations")}', String(cS.utilise || 0)]] : [],
+          oui: '${T("Supprimer le coupon")}' }).then(function(ok){ if (ok) { SUPPR_ARME = idS; bs.click(); } });
         return;
       }
       SUPPR_ARME = '';

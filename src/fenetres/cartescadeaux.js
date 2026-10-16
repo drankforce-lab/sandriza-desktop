@@ -355,12 +355,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
         + '</tbody></table></div>';
     }
     /* SUPPRIMER (2026-10-13, sa demande) : droit DEDIE (D.peutSupprimer = giftcards:delete), confirmation
-       en deux temps qui DIT le solde perdu. Le serveur la garde 30 jours en corbeille. */
+       dans une boite a part (szConfirmer, 2026-10-15) qui DIT le solde perdu. Le serveur la garde 30 jours en corbeille. */
     h += '<div class="pied-boite">'
       + (D.peutSupprimer
           ? '<button class="mini danger" id="cc-suppr" style="margin-right:auto">'
-            + (SUPPR_ARME ? (g.solde > 0 ? '${T("Confirmer : supprimer (solde perdu : ")}' + fmt(g.solde) + ')' : '${T("Confirmer la suppression")}')
-                          : '${T("Supprimer la carte")}') + '</button>' : '')
+            + '${T("Supprimer la carte")}' + '</button>' : '')
       + (g.statut === 'pending' && D.peutModifier
           ? '<button class="mini prim" id="cc-activer">${T("Activer à la main")}</button>' : '')
       + '<button class="mini" id="cc-annuler">${T("Fermer")}</button></div>'
@@ -491,8 +490,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
     var bsu = document.getElementById('cc-suppr');
     if (bsu) bsu.onclick = function(){
       if (!SUPPR_ARME) {
-        SUPPR_ARME = true; dessiner();
-        dire('${T("Cliquez encore pour supprimer définitivement cette carte.")}', 'att');
+        var gS = DETAIL || {};
+        var dS = [['${T("Solde perdu")}', fmt(gS.solde || 0)]];
+        if (gS.destinataire) dS.push(['${T("Destinataire")}', gS.destinataire]);
+        szConfirmer({ danger: true, titre: '${T("Supprimer la carte-cadeau")}',
+          texte: '${T("La carte-cadeau")}' + ' « ' + (gS.code || '') + ' » ' + '${T("sera supprimée et ne pourra plus être utilisée en boutique.")}'
+            + (gS.solde > 0 ? ' ' + '${T("Son solde restant sera perdu.")}' : ''),
+          details: dS,
+          oui: '${T("Supprimer la carte")}' }).then(function(ok){ if (ok) { SUPPR_ARME = true; bsu.onclick(); } });
         return;
       }
       bsu.disabled = true;
@@ -568,8 +573,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
   function ouvrirCarte(id, armer){
     appeler('cartescadeaux:lire', [id]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      DETAIL = r.carte; BOITE = 'detail'; SUPPR_ARME = !!armer; dessiner();
-      if (armer) dire('${T("Vérifiez la carte, puis confirmez la suppression.")}', 'att');
+      DETAIL = r.carte; BOITE = 'detail'; SUPPR_ARME = false; dessiner();
+      /* « Supprimer la carte… » du clic droit : la fiche s ouvre derriere, et la
+         boite de confirmation (szConfirmer) se pose dessus avec le solde perdu. */
+      if (armer) { var bsA = document.getElementById('cc-suppr'); if (bsA && bsA.onclick) bsA.onclick(); }
     });
   }
   corps.addEventListener('click', function(ev){
@@ -582,7 +589,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
   });
 
   /* LE CLIC DROIT SUR UNE CARTE (2026-10-13) — memes gestes que la fiche, memes droits. « Supprimer… » ouvre
-     la fiche, confirmation ARMEE : on voit le solde perdu avant le second clic. */
+     la fiche et pose dessus la boite de confirmation, qui dit le solde perdu. */
   window.szCtxEntrees = function(ligne){
     if (!ligne.matches || !ligne.matches('.cc-rang[data-id]') || !D) return null;
     var id = ligne.getAttribute('data-id');

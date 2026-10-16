@@ -167,7 +167,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
             ? '<span class="rf-pill">' + esc(motif) + '</span>'
             : '<span class="rf-pill ambre">${T("Actif · ")}' + Math.max(0, l.expiresIn) + ' s</span>') + '</td>'
         + (PEUT ? '<td style="text-align:right"><button class="mini dgr" data-unl="' + esc(cle) + '">'
-            + (CONF === cle ? '${T("✓ Confirmer")}' : '<span class="ic" aria-hidden="true">🔓</span>${T(" Déverrouiller")}') + '</button></td>' : '')
+            + '<span class="ic" aria-hidden="true">🔓</span>${T(" Déverrouiller")}' + '</button></td>' : '')
         + '</tr>';
     }
     return h + '</tbody></table>';
@@ -206,8 +206,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     h += '<div class="barre"><button class="mini" id="v-reload"><span class="ic">🔄</span>${T(" Actualiser")}</button>'
       + (VERR.length && PEUT
           ? '<button class="mini dgr" id="v-all">'
-            + (CONF === 'tout' ? '${T("✓ Confirmer — tout déverrouiller")}'
-                               : '<span class="ic" aria-hidden="true">🔓</span>${T(" Tout déverrouiller (")}' + VERR.length + ')') + '</button>'
+            + '<span class="ic" aria-hidden="true">🔓</span>${T(" Tout déverrouiller (")}' + VERR.length + ')' + '</button>'
           : '') + '</div>';
 
     h += '<div class="carte"><h3>${T("Verrous actifs (")}' + actifs.length + ')</h3>'
@@ -222,14 +221,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var va = document.getElementById('v-all');
     if (va) va.onclick = function(){
       if (CONF === 'tout') { CONF = ''; deverrouillerTout(); }
-      else { CONF = 'tout'; dessiner(); dire('${T("Cliquez encore pour tout déverrouiller.")}', 'att'); }
+      else {
+        var nT = (VERR || []).length;
+        szConfirmer({ danger: true, titre: '${T("Libérer tous les verrous")}',
+          texte: '${T("Tous les verrous de fiches seront libérés de force. Les personnes qui modifient actuellement une fiche risquent de perdre leurs changements non enregistrés.")}',
+          details: [['${T("Verrous")}', String(nT)]],
+          oui: '${T("Libérer tous les verrous")}' }).then(function(ok){ if (ok) { CONF = 'tout'; va.onclick(); } });
+      }
     };
     var us = corps.querySelectorAll('[data-unl]');
     for (var u = 0; u < us.length; u++) {
       us[u].onclick = function(){
         var cle = this.getAttribute('data-unl');
         if (CONF === cle) { CONF = ''; var p = cle.split(SEP); deverrouiller(p[0], p[1]); }
-        else { CONF = cle; dessiner(); dire('${T("Cliquez encore pour forcer ce déverrouillage.")}', 'att'); }
+        else {
+          var bU = this;
+          var lU = (VERR || []).filter(function(x){ return (x.scope + SEP + x.id) === cle; })[0] || {};
+          szConfirmer({ danger: true, titre: '${T("Forcer le déverrouillage")}',
+            texte: '${T("Le verrou de la fiche")}' + ' « ' + (lU.label || lU.id || '') + ' » ' + '${T("sera libéré de force. Si la personne qui la tient la modifie encore, ses changements non enregistrés risquent d’être perdus.")}',
+            details: [['${T("Section")}', String(lU.scopeLabel || lU.scope || '')], ['${T("Tenu par")}', String(lU.who || '—')]],
+            oui: '${T("Libérer le verrou")}' }).then(function(ok){ if (ok) { CONF = cle; bU.onclick(); } });
+        }
       };
     }
   }

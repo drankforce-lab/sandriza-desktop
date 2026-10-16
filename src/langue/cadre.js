@@ -85,5 +85,9 @@ module.exports = {
   'cette fenêtre n’a pas encore remplacé la fenêtre principale, et l’interrupteur garde sa position « éteint ». Il ne se retirera qu’une fois ce cadre éprouvé sur un vrai poste.':
     'this window has not yet replaced the main window, and the switch stays in its “off” position. It will only be removed once this frame has been proven on a real workstation.',
   'menu': 'menu',
-  'menus': 'menus'
+  'menus': 'menus',
+  // 2026-10-15 : confirmations en boîte à part.
+  "Revenir au mode classique": "Return to classic mode",
+  "L’application va redémarrer en mode classique. Enregistrez au préalable toute saisie en cours.": "The application will restart in classic mode. Save any work in progress first.",
+  "Redémarrer en mode classique": "Restart in classic mode",
 };

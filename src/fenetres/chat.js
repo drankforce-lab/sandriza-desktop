@@ -401,7 +401,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
     if (D.peutModifier) {
       h += '<div style="margin-top:.6rem"><textarea aria-label="${T("Votre réponse")}" id="ch-reponse" placeholder="${T("Votre réponse…")}"></textarea></div>'
         + '<div class="pied-boite">'
-        + '<button class="mini danger" id="ch-suppr">' + (SUPPR_ARME ? '${T("Confirmer ?")}' : '${T("Supprimer")}') + '</button>'
+        + '<button class="mini danger" id="ch-suppr">' + '${T("Supprimer")}' + '</button>'
         + '<select id="ch-statut" aria-label="${T("Changer l’état de la conversation")}" style="max-width:11rem">'
         + '<option value="">${T("Changer l’état…")}</option>'
         + '<option value="pending">${T("En attente")}</option>'
@@ -477,12 +477,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
 
     var bs = document.getElementById('ch-suppr');
     if (bs) bs.onclick = function(){
-      /* Deux clics : une conversation supprimee emporte tout l echange, et
-         c est parfois la seule trace de ce qu on a promis a quelqu un. */
+      /* Confirmee dans une boite a part (szConfirmer, 2026-10-15) : une
+         conversation supprimee emporte tout l echange, et c est parfois la
+         seule trace de ce qu on a promis a quelqu un. */
       if (!SUPPR_ARME) {
-        SUPPR_ARME = true;
-        dessiner();
-        dire('${T("Cliquez « Confirmer ? » pour supprimer — tout l’échange sera perdu.")}', 'att');
+        var cS = DETAIL || {};
+        szConfirmer({ danger: true, titre: '${T("Supprimer la conversation")}',
+          texte: '${T("La conversation avec")}' + ' ' + (cS.nom || cS.courriel || '') + ' ' + '${T("sera supprimée définitivement, avec l’ensemble de ses messages. Cette action est irréversible.")}',
+          details: [['${T("Messages")}', szNombre((cS.messages || []).length, 0)]],
+          oui: '${T("Supprimer la conversation")}' }).then(function(ok){ if (ok) { SUPPR_ARME = true; bs.onclick(); } });
         return;
       }
       SUPPR_ARME = false;

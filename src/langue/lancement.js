@@ -174,5 +174,17 @@ module.exports = {
   'Aucune clé Resend configurée (Infolettre) : aucun courriel ne peut partir.':
     'No Resend key configured (Newsletter): no email can be sent.',
   'Déploiement d’essai : aucun courriel ne part d’ici.':
-    'Test deployment: no email is sent from here.'
+    'Test deployment: no email is sent from here.',
+  // 2026-10-15 : confirmations en boîte à part.
+  'Un courriel contenant un code de rabais unique sera envoyé à chaque inscrite VIP qui ne l’a pas encore reçu. Un courriel envoyé ne peut pas être rappelé.': 'An email containing a unique discount code will be sent to every VIP subscriber who has not yet received one. A sent email cannot be recalled.',
+  'Destinataires': 'Recipients',
+  'Rabais': 'Discount',
+  'Validité du code': 'Code validity',
+  'jour': 'day',
+  'jours': 'days',
+  'Envoyer à': 'Send to',
+  'inscrite': 'subscriber',
+  'inscrites': 'subscribers',
+  'Le site deviendra public : les protections contre l’indexation seront retirées et les moteurs de recherche pourront le répertorier. Une page déjà indexée ne se retire pas aussitôt, même si vous revenez ensuite en pré-lancement.': 'The site will become public: the indexing protections will be removed and search engines will be able to list it. A page that has been indexed is not removed right away, even if you return to pre-launch afterwards.',
+  'Lancer le site': 'Launch the site',
 };

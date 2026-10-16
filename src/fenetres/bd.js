@@ -156,9 +156,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '${T("par exemple après avoir vidé le cache du navigateur.")}</div>'
       + '<div class="gestes">'
       + '<button class="prim" type="button" data-act="pousser"' + dis + '>${T("↑ Pousser tout vers Turso")}</button>'
-      + '<button class="b" type="button" data-act="restaurer"' + dis + '>' + (CONF === 'restaurer' ? '${T("Confirmer la restauration ?")}' : '${T("↓ Restaurer depuis Turso")}') + '</button>'
+      + '<button class="b" type="button" data-act="restaurer"' + dis + '>${T("↓ Restaurer depuis Turso")}</button>'
       + '<button class="b" type="button" data-act="tester">${T("Tester la connexion")}</button>'
-      + '<button class="b" type="button" data-act="migrer"' + dis + '>' + (CONF === 'migrer' ? '${T("Confirmer la migration ?")}' : '${T("↦ Migrer les images vers R2")}') + '</button>'
+      + '<button class="b" type="button" data-act="migrer"' + dis + '>${T("↦ Migrer les images vers R2")}</button>'
       + '</div>'
       + '<div class="expl" style="margin:0">${T("<b>Pousser</b> : envoie toutes les configs locales vers Turso. ")}'
       + '${T("<b>Restaurer</b> : recharge depuis Turso puis recharge la fenêtre principale (utile après un vidage de cache). ")}'
@@ -179,9 +179,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (OCCUPE) return;
     if (act === 'tester') return tester();
     if (act === 'pousser') return pousser();
-    // Restaurer et migrer : confirmation en deux temps (gestes lourds).
+    // Restaurer et migrer : gestes lourds, confirmes dans une boite a part (szConfirmer, 2026-10-15).
     if (act === 'restaurer' || act === 'migrer') {
-      if (CONF !== act) { CONF = act; dessiner(); setTimeout(function(){ if (CONF === act) { CONF=''; dessiner(); } }, 5000); return; }
+      if (CONF !== act) {
+        var oC = (act === 'restaurer')
+          ? { danger: true, titre: '${T("Restaurer depuis Turso")}',
+              texte: '${T("La configuration enregistrée dans Turso remplacera la configuration locale, puis la fenêtre principale sera rechargée. Les réglages locaux qui n’ont pas été poussés vers Turso seront perdus.")}',
+              oui: '${T("Restaurer la configuration")}' }
+          : { prudent: true, titre: '${T("Migrer les images vers R2")}',
+              texte: '${T("Les images encore stockées en base64 dans la base de données seront déplacées vers Cloudflare R2. L’opération peut durer plusieurs minutes et n’est à lancer qu’une seule fois.")}',
+              oui: '${T("Lancer la migration")}' };
+        szConfirmer(oC).then(function(ok){ if (ok) { CONF = act; agir(act); } });
+        return;
+      }
       CONF = '';
       return (act === 'restaurer') ? restaurer() : migrer();
     }
