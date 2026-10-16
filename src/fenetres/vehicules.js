@@ -1258,7 +1258,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     return '<div class="carte" id="f-chg"><h2>${T("Enregistrer un changement")}</h2><div class="form2">'
       + '<div class="champ large"><label for="c-date">${T("Date du changement")}</label><input type="date" id="c-date" value="' + esc(c.date) + '"></div>'
       + '<div class="champ"><label for="c-anc">${T("Véhicule sortant")}</label><select id="c-anc">'
-      + '<option value="">${T("— aucun (premier véhicule) —")}</option>'
+      + '<option value="">${T("Aucun (premier véhicule)")}</option>'
       + sortants.map(function(v){ return '<option value="' + esc(v.id) + '"' + (c.ancienId === v.id ? ' selected' : '') + '>' + esc(libVeh(v)) + '</option>'; }).join('')
       + '</select></div>'
       + '<div class="champ"><label for="c-oanc">${T("Son odomètre ce jour-là")}</label><input type="text" inputmode="decimal" class="n" id="c-oanc" value="' + esc(c.odoAncien) + '"></div>'

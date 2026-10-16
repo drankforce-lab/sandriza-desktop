@@ -218,7 +218,7 @@ module.exports = {
   'Votre rôle permet de consulter l’historique, pas d’y inscrire un changement.':
     'Your role lets you view the history, not record a change.',
   'Date du changement': 'Date of the change',
-  '— aucun (premier véhicule) —': '— none (first vehicle) —',
+  'Aucun (premier véhicule)': 'None (first vehicle)',
   'Son odomètre ce jour-là': 'Its odometer that day',
   '— aucun (non remplacé) —': '— none (not replaced) —',
   'Motif (facultatif)': 'Reason (optional)',
