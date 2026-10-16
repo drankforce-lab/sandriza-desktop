@@ -27,7 +27,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, CSS_JOUR, ICO, TETE, SEP_DEC } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -266,29 +266,54 @@ tbody tr:hover td{background:var(--v04)}
 .ed-offre select{height:2rem;border-radius:8px;background:var(--f-champ)}
 .ed-offre input[type=number]{width:4.6rem;height:2rem;border-radius:8px;background:var(--f-champ)}
 .ed-offre #f-offre-coupon{min-width:18rem}
-/* Les statistiques d une campagne (2026-10-15). */
-.st-tete{padding:0 0 .2rem}
-.st-tuiles{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:.7rem}
-.st-t{display:flex;flex-direction:column;gap:.15rem;padding:.8rem 1rem;border-radius:14px;background:var(--f-carte);border:1px solid var(--sz-bord)}
-.st-t span{font-size:.74rem;color:var(--tx2)}
-.st-t b{font-size:1.5rem;font-weight:750;line-height:1.2}
-.st-t small{font-size:.74rem;color:var(--tx2)}
+/* Les statistiques d une campagne (2026-10-15, refaites le 2026-10-16 : onglets et vrais tableaux). */
+.ls.st{gap:.8rem}
+.st-tete{flex:0 0 auto;display:flex;align-items:center;gap:1rem;padding:0 0 .1rem}
+.st-tete .ls-titre{flex:1 1 auto;min-width:0}
+/* LE RETOUR, UNE VRAIE PASTILLE (sa demande : « le bouton retour n est pas super beau ») : un chevron
+   dessine (pas une fleche de texte), un contour, l accent au survol. */
+.st-retour{flex:0 0 auto;display:inline-flex;align-items:center;gap:.4rem;height:2.1rem;padding:0 .9rem 0 .6rem;
+  border-radius:999px;border:1px solid var(--sz-bord-fort);background:var(--f-carte);color:var(--tx);font-size:.82rem;font-weight:600}
+.st-retour svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.st-retour:hover:not(:disabled){border-color:var(--or);color:var(--or)}
+.st-ong{flex:0 0 auto}
+.st-note{flex:0 0 auto;font-size:.8rem;color:var(--tx2);padding:.55rem .9rem;border-radius:11px;border:1px dashed var(--sz-bord-fort)}
+/* ⚠ .ls.st>.st-pan, pas .st-pan : la regle du socle .ls>*{flex:0 0 auto} vient APRES ce style et le
+   figeait a sa taille de contenu — la grille du bas tombait a 30 px. */
+.ls.st>.st-pan{flex:1 1 0;min-height:0;display:flex;flex-direction:column;gap:.8rem}
+.st-tuiles{flex:0 0 auto;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:.6rem}
+.st-t{display:flex;flex-direction:column;gap:.1rem;padding:.7rem .85rem;border-radius:14px;background:var(--f-carte);border:1px solid var(--sz-bord);min-width:0}
+.st-t span{font-size:.72rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st-t b{font-size:1.35rem;font-weight:750;line-height:1.2;font-variant-numeric:tabular-nums}
+.st-t small{font-size:.7rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .st-t.bon b{color:var(--tx-ok)}.st-t.att b{color:var(--tx-att)}.st-t.mal b{color:var(--tx-err)}
-.st-cols{flex:1 1 0;min-height:0;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:1rem}
-.st-carte{min-height:0;overflow:hidden;padding:1rem 1.1rem;border-radius:16px;background:var(--f-carte);border:1px solid var(--sz-bord);display:flex;flex-direction:column;gap:.7rem}
-.st-lien{display:flex;flex-direction:column;gap:.25rem}
-.st-lien-t{display:flex;align-items:baseline;gap:.8rem;font-size:.82rem}
-.st-lien-t span{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.st-lien small{font-size:.72rem;color:var(--tx2)}
-.st-barre{height:.4rem;border-radius:99px;background:var(--f-champ);overflow:hidden}
+.st-grille{flex:1 1 0;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.9rem}
+.st-carte{min-height:0;overflow:hidden;padding:.9rem 1.05rem;border-radius:16px;background:var(--f-carte);border:1px solid var(--sz-bord);display:flex;flex-direction:column;gap:.45rem}
+.st-plein{flex:1 1 0}
+.st-pages{flex:1 1 0;min-height:0}
+.st-tab{width:100%;font-size:.8rem;border-spacing:0 4px}
+.st-tab tbody td{padding:.34rem .7rem}
+.st-tab thead th{padding-top:.1rem}
+.st-tab td.dr,.st-tab th.dr{text-align:right;font-variant-numeric:tabular-nums}
+.st-tab .st-url{max-width:24rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st-bcell{width:28%}
+.st-bl{display:flex;align-items:center;gap:.55rem}
+.st-bl .st-barre{flex:1 1 auto}
+.st-bl small{flex:0 0 3.4rem;text-align:right;font-size:.72rem;color:var(--tx2);font-variant-numeric:tabular-nums}
+.st-barre{height:.45rem;border-radius:99px;background:var(--f-champ);overflow:hidden}
 .st-barre i{display:block;height:100%;border-radius:99px;background:var(--sz-accent)}
-.st-jours{flex:0 0 9rem;display:flex;align-items:flex-end;gap:.3rem}
-.st-j{flex:1 1 0;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:.2rem}
-.st-j i{display:block;width:100%;max-width:1.6rem;border-radius:5px 5px 0 0;background:var(--sz-accent)}
-.st-j small{font-size:.66rem;color:var(--tx2)}
-.st-aud{margin-top:.4rem}
-.st-audience{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem}
-.st-audience .st-t b{font-size:1.2rem}
+.st-gris{color:var(--tx2)}.st-ok{color:var(--tx-ok)}.st-att{color:var(--tx-att)}
+.st-filtres{flex:0 0 auto;display:flex;align-items:center;gap:.35rem;flex-wrap:wrap}
+.st-filtres .st-gris{margin-left:auto;font-size:.78rem}
+.st-leg{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--tx2);text-transform:none;letter-spacing:0}
+.st-leg i{display:inline-block;width:.6rem;height:.6rem;border-radius:3px;margin-left:.3rem}
+.st-leg i.o,.st-h i.o{background:var(--sz-accent)}
+.st-leg i.c,.st-h i.c{background:var(--tx-ok)}
+.st-graphe{flex:0 0 auto}
+.st-heures{flex:0 0 9.5rem;display:flex;align-items:flex-end;gap:2px;padding-bottom:1.1rem;position:relative}
+.st-h{flex:1 1 0;min-width:0;height:100%;display:flex;align-items:flex-end;justify-content:center;gap:1px;position:relative}
+.st-h i{display:block;width:45%;border-radius:3px 3px 0 0;min-height:0}
+.st-h small{position:absolute;bottom:-1.1rem;left:0;font-size:.62rem;color:var(--tx2);white-space:nowrap}
 .ed-sous{flex:0 0 auto;margin:.35rem 1.6rem 0;font-size:.74rem;color:var(--tx2);min-height:1em}
 .ed-sms{flex:0 0 auto;margin:.5rem 1.6rem 0;padding:.6rem 1.1rem;border-radius:12px;background:var(--f-carte);
   border:1px solid var(--sz-bord);display:flex;gap:1rem;align-items:flex-start}
@@ -432,6 +457,9 @@ function pageCampagnes(ongletDepart) {
      ajouts de ce lot — seraient invisibles au controle. Angle mort de #32. */
   const brut = String(ongletDepart || '');
   const neuf = brut.indexOf(':neuve') > 0;
+  /* « campagnes:stats:<id> » ouvre directement les statistiques d une campagne (2026-10-16) :
+     sans cet etat d ouverture, aucun banc de rendu ne dessinerait la vue. */
+  const statsDepart = brut.indexOf('campagnes:stats:') === 0 ? brut.slice('campagnes:stats:'.length) : '';
   const base = neuf ? brut.slice(0, brut.indexOf(':neuve')) : brut;
   const dep = (base === 'chaines') ? 'chaines'
             : (base === 'segments') ? 'segments' : 'campagnes';
@@ -453,6 +481,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
 
   var ONGLET = ${JSON.stringify(dep)};   // campagnes | chaines
   var FORM_DEPART = ${neuf ? 'true' : 'false'};
+  var STATS_DEPART = ${JSON.stringify(statsDepart)};
   var DC = null;             // donnees des campagnes
   var DH = null;             // donnees des chaines
   var DS = null;             // donnees des segments
@@ -2265,60 +2294,213 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     return h + renvoi() + '</div>';
   }
 
-  /* ══ LES STATISTIQUES D UNE CAMPAGNE (2026-10-15) ══════════════════════════════════
-     Sa demande : « un bouton pour les statistiques des ouvertures, par clic et lien des differentes
-     campagnes, et le suivi de l audience aussi — le tout par campagne ». Les chiffres viennent du
-     site (campagnes:stats) : le journal d envoi, les evenements de Resend (resend-webhook.php) et la
-     liste des abonnes. ⚠ suivi=false : AUCUN evenement n est jamais arrive — le suivi n est pas branche
-     chez Resend ; la vue le dit et dit quoi activer, au lieu d afficher des zeros trompeurs. */
-  var STATS = null;
+  /* ══ LES STATISTIQUES D UNE CAMPAGNE (2026-10-15, refaites le 2026-10-16) ═══════════════════════
+     Sa demande du 15 : « un bouton pour les statistiques des ouvertures, par clic et lien des
+     differentes campagnes, et le suivi de l audience aussi — le tout par campagne ». Celle du 16 :
+     « de vrais tableaux avec le plus de statistiques possible », et un plus beau bouton de retour.
+     Quatre onglets, chacun tient dans la fenetre (aucune glissiere : les tableaux sont en pages) :
+       Apercu        tuiles, entonnoir, indicateurs, resultats (code et commandes), audience ;
+       Liens         chaque lien : clics, cliqueurs, part des clics, part des ouvreurs ;
+       Destinataires chaque courriel : envoi, livraison, ouvertures, clics, etat — filtrable ;
+       Chronologie   par jour (et cumul), puis heure par heure sur les 48 premieres heures.
+     Les chiffres viennent du site (campagnes:stats) : journal d envoi, evenements de Resend
+     (resend-webhook.php, lus par nl-stats.php), abonnes et commandes.
+     ⚠ LE BANDEAU « suivi pas branche » ne parait que si le serveur dit que le SECRET du webhook
+     manque (branche=false). Une campagne partie AVANT le premier evenement recu n a pas pu etre
+     suivie : une note discrete le dit, au lieu de zeros qu on lirait comme un echec. */
+  var STATS = null, ST_ONG = 'apercu', ST_FILTRE = 'tous';
   function pct(n, d){ return d ? Math.round(1000 * n / d) / 10 : 0; }
+  // ⚠ Les separateurs viennent du socle : la virgule en francais, le point en anglais (banc-langue-page).
+  function dec(x){ return String(x).replace('.', '${SEP_DEC()}'); }
+  function pctTx(n, d){ return d ? dec(pct(n, d)) + ' %' : '—'; }
+  function argent(n){ return szArgent(Number(n) || 0); }
+  function delai(min){
+    if (min == null || !isFinite(min)) return '—';
+    if (min < 1) return '${T("moins d’une minute")}';
+    if (min < 60) return Math.round(min) + ' min';
+    if (min < 1440) { var h = Math.floor(min / 60), m = Math.round(min % 60); return h + ' h' + (m ? ' ' + (m < 10 ? '0' : '') + m : ''); }
+    var j = Math.round(10 * min / 1440) / 10; return dec(j) + ' ${T("j")}';
+  }
+  function mediane(l){ if (!l.length) return null; var s = l.slice().sort(function(a, b){ return a - b; }); var k = Math.floor(s.length / 2); return s.length % 2 ? s[k] : (s[k - 1] + s[k]) / 2; }
+  function minutesDepuis(iso, t0){ var t = iso ? new Date(iso).getTime() : 0; return (t && t0 && t >= t0) ? (t - t0) / 60000 : null; }
+  /* La cle d heure du serveur est UTC (« 2026-10-16T13 ») : on la lit comme telle, on l affiche a l heure locale. */
+  function heureLocale(cle){ var d = new Date(String(cle) + ':00:00Z'); return isNaN(d.getTime()) ? null : d; }
+  function jourLocal(d){ var m = d.getMonth() + 1, j = d.getDate(); return d.getFullYear() + '-' + (m < 10 ? '0' : '') + m + '-' + (j < 10 ? '0' : '') + j; }
+
+  function statsCalcul(){
+    var S = STATS, E = S.engagement || null, dest = S.destinataires || [];
+    var t0 = S.envoyeeLe ? new Date(S.envoyeeLe).getTime() : 0;
+    var c = { partis: S.partis || 0, echecs: S.echecs || 0, livres: E ? E.livres : 0, ouvreurs: E ? E.ouverts : 0,
+      cliqueurs: E ? E.cliques : 0, rebonds: E ? E.rebonds : 0, plaintes: E ? E.plaintes : 0, retardes: E ? (E.retardes || 0) : 0,
+      ouvTot: E ? (E.ouverturesTotal || 0) : 0, clicTot: E ? (E.clicsTotal || 0) : 0,
+      desabo: (S.resultats && S.resultats.desabonnes) || 0 };
+    c.base = c.livres || c.partis;
+    var dO = [], dC = [];
+    dest.forEach(function(d){ var a = minutesDepuis(d.ouvertLe, t0), b = minutesDepuis(d.cliqueLe, t0); if (a != null) dO.push(a); if (b != null) dC.push(b); });
+    c.delaiOuv = mediane(dO); c.delaiClic = mediane(dC);
+    // Les heures (UTC) ramenees a l heure locale, puis regroupees par jour local.
+    var parJour = {}, h48 = [];
+    (E && E.heures || []).forEach(function(h){
+      var d = heureLocale(h.heure); if (!d) return;
+      var k = jourLocal(d), x = parJour[k] || (parJour[k] = { jour: k, ouvreurs: 0, cliqueurs: 0 });
+      x.ouvreurs += h.ouvreurs; x.cliqueurs += h.cliqueurs;
+      if (t0) { var rang = Math.floor((d.getTime() - t0) / 3600000); if (rang >= 0 && rang < 48) h48.push({ rang: rang, d: d, ouvreurs: h.ouvreurs, cliqueurs: h.cliqueurs }); }
+    });
+    // ⚠ Repli : un serveur plus ancien ne rend que les jours (UTC) — on les prend tels quels.
+    if (!Object.keys(parJour).length) (E && E.jours || []).forEach(function(j){ parJour[j.jour] = { jour: j.jour, ouvreurs: j.ouvertures, cliqueurs: 0 }; });
+    c.jours = Object.keys(parJour).sort().map(function(k){ return parJour[k]; });
+    c.h48 = h48;
+    c.suiviAvant = !!(E && E.branche && E.premierEvenement && t0 && t0 < new Date(E.premierEvenement).getTime() && !c.livres && !c.ouvreurs);
+    return c;
+  }
+
   function vueStats(){
-    var S = STATS, E = S.engagement, A = S.audience || {};
-    var base = (E && E.livres) || S.partis || 0;
+    var S = STATS, E = S.engagement, A = S.audience || {}, R = S.resultats || {}, c = statsCalcul();
+    var dest = S.destinataires || [], liens = (E && E.liens) || [];
     var tuile = function(lib, val, sous, cl){
       return '<div class="st-t' + (cl ? ' ' + cl : '') + '"><span>' + lib + '</span><b>' + val + '</b>' + (sous ? '<small>' + sous + '</small>' : '') + '</div>';
     };
-    var h = '<div class="ls st"><div class="ed-tete st-tete">'
-      + '<button type="button" class="retour" id="st-retour">${T("← Campagnes")}</button><span class="sep">/</span>'
+    var h = '<div class="ls st"><div class="st-tete">'
+      + '<button type="button" class="st-retour" id="st-retour" title="${T("Revenir à la liste des campagnes")}">'
+      + '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg><span>${T("Campagnes")}</span></button>'
       + '<div class="ls-titre"><b>' + esc(S.nom) + '</b><span>' + esc(S.sujet) + (S.envoyeeLe ? ' · ${T("envoyée le")} ' + esc(szQuand(S.envoyeeLe)) : '')
-      + (S.segment ? ' · ' + esc(S.segment) : '') + (S.code ? ' · ${T("code")} ' + esc(S.code) : '') + '</span></div></div>';
-    h += '<div class="st-tuiles">'
-      + tuile('${T("Partis")}', S.partis, S.echecs ? pluriel(S.echecs, '${T("échec")}', '${T("échecs")}') : '')
-      + tuile('${T("Livrés")}', E ? E.livres : '—', E && S.partis ? pct(E.livres, S.partis) + ' %' : '')
-      + tuile('${T("Ouverts")}', E ? E.ouverts : '—', E && base ? pct(E.ouverts, base) + ' ${T("% d’ouverture")}' : '', 'bon')
-      + tuile('${T("Cliqués")}', E ? E.cliques : '—', E && base ? pct(E.cliques, base) + ' ${T("% de clic")}' : '', 'bon')
-      + tuile('${T("Rebonds")}', E ? E.rebonds : '—', '', E && E.rebonds ? 'att' : '')
-      + tuile('${T("Plaintes")}', E ? E.plaintes : '—', '', E && E.plaintes ? 'mal' : '')
-      + '</div>';
-    if (!E || !E.suivi) {
-      h += '<div class="avis att">' + (S.engagementErreur && S.engagementErreur !== 'echec'
-          ? '${T("Les événements de suivi n’ont pas pu être lus")} (' + esc(S.engagementErreur) + '). '
-          : '') + '${T("Le suivi des ouvertures et des clics n’est pas encore branché. Chez Resend : 1) Domaines → votre domaine → activez « Open tracking » et « Click tracking » ; 2) Webhooks → ajoutez l’adresse https://www.sandriza.com/resend-webhook.php avec les événements email.* ; 3) copiez son « Signing secret » dans la variable RESEND_WEBHOOK_SECRET du serveur. Les campagnes envoyées ensuite seront suivies.")}</div>';
+      + (S.segment ? ' · ' + esc(S.segment) : '') + (S.code ? ' · ${T("code")} ' + esc(S.code) : '') + '</span></div>'
+      + '<div class="ed-seg st-ong">'
+      + [['apercu', '${T("Aperçu")}'], ['liens', '${T("Liens")}' + (liens.length ? ' · ' + liens.length : '')],
+         ['dest', '${T("Destinataires")}' + (dest.length ? ' · ' + dest.length : '')], ['temps', '${T("Chronologie")}']].map(function(o){
+          return '<button type="button" class="' + (ST_ONG === o[0] ? 'on' : '') + '" data-sto="' + o[0] + '">' + o[1] + '</button>';
+        }).join('') + '</div></div>';
+    if (E && E.branche === false) {
+      h += '<div class="avis att">${T("Le suivi des ouvertures et des clics n’est pas branché sur le serveur : la variable RESEND_WEBHOOK_SECRET est absente.")}</div>';
+    } else if (!E && S.engagementErreur) {
+      h += '<div class="avis att">${T("Les événements de suivi n’ont pas pu être lus")} (' + esc(S.engagementErreur) + ').</div>';
+    } else if (c.suiviAvant) {
+      h += '<div class="st-note">${T("Cette campagne est partie avant le branchement du suivi (premier événement reçu le")} '
+        + esc(szQuand(E.premierEvenement)) + '${T(") : ses livraisons, ouvertures et clics n’ont pas été enregistrés. Les campagnes suivantes le seront.")}</div>';
     }
-    var liens = (E && E.liens) || [];
-    var maxL = liens.reduce(function(m, l){ return Math.max(m, l.clics); }, 0) || 1;
-    var jours = (E && E.jours) || [];
-    var maxJ = jours.reduce(function(m, j){ return Math.max(m, j.ouvertures); }, 0) || 1;
-    h += '<div class="st-cols">'
-      + '<div class="st-carte"><div class="ed-titre"><span>${T("Liens cliqués")}</span><span>' + liens.length + '</span></div>'
-      + (liens.length ? liens.map(function(l){
-          return '<div class="st-lien"><div class="st-lien-t"><span title="' + esc(l.lien) + '">' + esc(String(l.lien).replace('https://', '').replace('http://', '')) + '</span>'
-            + '<b>' + l.clics + '</b></div><div class="st-barre"><i style="width:' + Math.max(3, Math.round(100 * l.clics / maxL)) + '%"></i></div>'
-            + '<small>' + pluriel(l.personnes, '${T("personne")}', '${T("personnes")}') + '</small></div>';
-        }).join('') : '<div class="ls-note">${T("Aucun clic enregistré pour cette campagne.")}</div>')
-      + '</div>'
-      + '<div class="st-carte"><div class="ed-titre"><span>${T("Ouvertures par jour")}</span></div>'
-      + (jours.length ? '<div class="st-jours">' + jours.map(function(j){
-          return '<div class="st-j" title="' + esc(j.jour) + ' · ' + j.ouvertures + '"><i style="height:' + Math.max(4, Math.round(100 * j.ouvertures / maxJ)) + '%"></i><small>' + esc(j.jour.slice(5)) + '</small></div>';
-        }).join('') + '</div>' : '<div class="ls-note">${T("Aucune ouverture enregistrée pour cette campagne.")}</div>')
-      + '<div class="ed-titre st-aud"><span>${T("Audience")}</span></div>'
-      + '<div class="st-audience">'
-      + tuile('${T("Abonnés actifs aujourd’hui")}', A.actifsAujourdhui || 0, '')
-      + tuile('${T("Nouveaux dans les 7 jours")}', '+' + (A.gagnes7j || 0), '', 'bon')
-      + tuile('${T("Désabonnés dans les 7 jours")}', '−' + (A.perdus7j || 0), '', A.perdus7j ? 'att' : '')
-      + '</div></div>'
-      + '</div></div>';
+    h += '<div class="st-pan">';
+    if (ST_ONG === 'liens') h += vueStLiens(liens, c);
+    else if (ST_ONG === 'dest') h += vueStDest(dest);
+    else if (ST_ONG === 'temps') h += vueStTemps(c);
+    else {
+      h += '<div class="st-tuiles">'
+        + tuile('${T("Partis")}', c.partis, c.echecs ? pluriel(c.echecs, '${T("échec")}', '${T("échecs")}') : '${T("aucun échec")}')
+        + tuile('${T("Livrés")}', c.livres, pctTx(c.livres, c.partis) + ' ${T("des partis")}')
+        + tuile('${T("Ouvreurs")}', c.ouvreurs, pctTx(c.ouvreurs, c.base) + ' ${T("d’ouverture")}', 'bon')
+        + tuile('${T("Cliqueurs")}', c.cliqueurs, pctTx(c.cliqueurs, c.base) + ' ${T("de clic")}', 'bon')
+        + tuile('${T("Clic / ouverture")}', pctTx(c.cliqueurs, c.ouvreurs), '${T("des ouvreurs ont cliqué")}')
+        + tuile('${T("Rebonds")}', c.rebonds, pctTx(c.rebonds, c.partis), c.rebonds ? 'att' : '')
+        + tuile('${T("Plaintes")}', c.plaintes, pctTx(c.plaintes, c.livres || c.partis), c.plaintes ? 'mal' : '')
+        + tuile('${T("Désabonnés")}', c.desabo, '${T("dans les 7 jours")}', c.desabo ? 'att' : '')
+        + '</div>';
+      var etapes = [['${T("Partis")}', c.partis], ['${T("Livrés")}', c.livres], ['${T("Ouverts")}', c.ouvreurs], ['${T("Cliqués")}', c.cliqueurs]];
+      var ligne = function(l, v){ return '<tr><td>' + l + '</td><td class="dr">' + v + '</td></tr>'; };
+      h += '<div class="st-grille">'
+        + '<div class="st-carte"><div class="ed-titre"><span>${T("Entonnoir")}</span></div>'
+        + '<table class="st-tab"><thead><tr><th>${T("Étape")}</th><th class="dr">${T("Personnes")}</th><th class="dr">${T("% des partis")}</th><th class="dr">${T("% de l’étape précédente")}</th><th>${T("Proportion")}</th></tr></thead><tbody>'
+        + etapes.map(function(e, i){
+            var prec = i ? etapes[i - 1][1] : e[1];
+            return '<tr><td>' + e[0] + '</td><td class="dr">' + e[1] + '</td><td class="dr">' + pctTx(e[1], c.partis) + '</td><td class="dr">' + (i ? pctTx(e[1], prec) : '—')
+              + '</td><td class="st-bcell"><div class="st-barre"><i style="width:' + Math.max(c.partis ? 2 : 0, Math.round(100 * e[1] / (c.partis || 1))) + '%"></i></div></td></tr>';
+          }).join('')
+        + '</tbody></table>'
+        + '<div class="ed-titre"><span>${T("Indicateurs")}</span></div>'
+        + '<table class="st-tab"><tbody>'
+        + ligne('${T("Ouvertures au total")}', c.ouvTot)
+        + ligne('${T("Ouvertures par ouvreur")}', c.ouvreurs ? dec(Math.round(10 * c.ouvTot / c.ouvreurs) / 10) : '—')
+        + ligne('${T("Clics au total")}', c.clicTot)
+        + ligne('${T("Clics par cliqueur")}', c.cliqueurs ? dec(Math.round(10 * c.clicTot / c.cliqueurs) / 10) : '—')
+        + ligne('${T("Délai médian avant la première ouverture")}', delai(c.delaiOuv))
+        + ligne('${T("Délai médian avant le premier clic")}', delai(c.delaiClic))
+        + ligne('${T("Livraisons retardées")}', c.retardes)
+        + '</tbody></table></div>'
+        + '<div class="st-carte"><div class="ed-titre"><span>${T("Résultats")}</span></div>'
+        + '<table class="st-tab"><tbody>'
+        + (S.code ? ligne('${T("Commandes avec le code")} <b>' + esc(S.code) + '</b>', R.codeCommandes || 0)
+            + ligne('${T("Revenu avec le code")}', argent(R.codeRevenu))
+            + ligne('${T("Rabais accordé par le code")}', argent(R.codeRabais))
+            + ligne('${T("Panier moyen avec le code")}', R.codeCommandes ? argent(R.codeRevenu / R.codeCommandes) : '—')
+          : ligne('${T("Code promo")}', '<span class="st-gris">${T("aucun rattaché")}</span>'))
+        + ligne('${T("Commandes des destinataires (7 jours)")}', R.destCommandes || 0)
+        + ligne('${T("Revenu des destinataires (7 jours)")}', argent(R.destRevenu))
+        + ligne('${T("Revenu par courriel livré")}', c.base ? argent((R.destRevenu || 0) / c.base) : '—')
+        + '</tbody></table>'
+        + '<div class="ed-titre"><span>${T("Audience")}</span></div>'
+        + '<table class="st-tab"><tbody>'
+        + ligne('${T("Abonnés actifs aujourd’hui")}', A.actifsAujourdhui || 0)
+        + ligne('${T("Nouveaux abonnés dans les 7 jours")}', '<span class="st-ok">+' + (A.gagnes7j || 0) + '</span>')
+        + ligne('${T("Désabonnés dans les 7 jours")}', '<span class="' + (A.perdus7j ? 'st-att' : '') + '">−' + (A.perdus7j || 0) + '</span>')
+        + ligne('${T("… dont destinataires de cette campagne")}', c.desabo)
+        + '</tbody></table></div>'
+        + '</div>';
+    }
+    return h + '</div></div>';
+  }
+
+  function vueStLiens(liens, c){
+    if (!liens.length) return '<div class="st-carte st-plein"><div class="ls-note">${T("Aucun clic enregistré pour cette campagne.")}</div></div>';
+    var tot = liens.reduce(function(s, l){ return s + l.clics; }, 0) || 1;
+    return '<div class="st-carte st-plein"><div class="st-pages" data-pages="campagnes-st-liens"><table class="st-tab"><thead><tr>'
+      + '<th class="dr">#</th><th>${T("Lien")}</th><th class="dr">${T("Clics")}</th><th class="dr">${T("Cliqueurs")}</th><th>${T("Part des clics")}</th><th class="dr">${T("% des ouvreurs")}</th></tr></thead><tbody>'
+      + liens.map(function(l, i){
+          var court = String(l.lien).replace('https://', '').replace('http://', '');
+          return '<tr><td class="dr st-gris">' + (i + 1) + '</td><td class="st-url" title="' + esc(l.lien) + '">' + esc(court) + '</td><td class="dr"><b>' + l.clics + '</b></td><td class="dr">' + l.personnes
+            + '</td><td class="st-bcell"><div class="st-bl"><div class="st-barre"><i style="width:' + Math.max(3, Math.round(100 * l.clics / tot)) + '%"></i></div><small>' + pctTx(l.clics, tot) + '</small></div></td>'
+            + '<td class="dr">' + pctTx(l.personnes, c.ouvreurs) + '</td></tr>';
+        }).join('') + '</tbody></table></div></div>';
+  }
+
+  function etatDest(d){
+    if (d.envoi === 'echec') return '<span class="rf-pill rouge" title="' + esc(d.erreur || '') + '">${T("Échec d’envoi")}</span>';
+    if (d.plainte) return '<span class="rf-pill rouge">${T("Plainte")}</span>';
+    if (d.rebond) return '<span class="rf-pill rouge">${T("Rebond")}</span>';
+    var p = '';
+    if (d.clics) p = '<span class="rf-pill vert">${T("A cliqué")}</span>';
+    else if (d.ouvertures) p = '<span class="rf-pill bleu">${T("A ouvert")}</span>';
+    else if (d.livre) p = '<span class="rf-pill">${T("Livré")}</span>';
+    else p = '<span class="rf-pill">${T("Parti")}</span>';
+    if (d.desabonneLe) p += ' <span class="rf-pill ambre">${T("Désabonné")}</span>';
+    return p;
+  }
+  function vueStDest(dest){
+    var F = { tous: function(){ return true; }, ouvert: function(d){ return d.ouvertures > 0; }, clic: function(d){ return d.clics > 0; },
+      sans: function(d){ return d.envoi !== 'echec' && !d.rebond && !d.ouvertures; },
+      pb: function(d){ return d.envoi === 'echec' || d.rebond || d.plainte || !!d.desabonneLe; } };
+    var l = dest.filter(F[ST_FILTRE] || F.tous);
+    var fil = [['tous', '${T("Tous")}'], ['ouvert', '${T("Ont ouvert")}'], ['clic', '${T("Ont cliqué")}'], ['sans', '${T("Sans ouverture")}'], ['pb', '${T("Problèmes")}']];
+    var h = '<div class="st-carte st-plein"><div class="st-filtres">' + fil.map(function(f){
+        return '<button type="button" class="mini' + (ST_FILTRE === f[0] ? ' actif' : '') + '" data-stf="' + f[0] + '">' + f[1] + '</button>';
+      }).join('') + '<span class="st-gris">' + pluriel(l.length, '${T("destinataire")}', '${T("destinataires")}') + '</span></div>';
+    if (!l.length) return h + '<div class="ls-note">' + (dest.length ? '${T("Personne dans ce filtre.")}' : '${T("Aucun destinataire enregistré pour cette campagne.")}') + '</div></div>';
+    var q = function(iso){ return iso ? esc(szQuand(iso)) : '<span class="st-gris">—</span>'; };
+    return h + '<div class="st-pages" data-pages="campagnes-st-dest"><table class="st-tab"><thead><tr>'
+      + '<th>${T("Courriel")}</th><th>${T("Livré")}</th><th>${T("Première ouverture")}</th><th class="dr">${T("Ouvertures")}</th><th>${T("Premier clic")}</th><th class="dr">${T("Clics")}</th><th>${T("État")}</th></tr></thead><tbody>'
+      + l.map(function(d){
+          return '<tr><td class="st-url" title="' + esc(d.courriel) + '">' + esc(d.courriel) + '</td><td>' + (d.livre ? '✓' : '<span class="st-gris">—</span>') + '</td><td>' + q(d.ouvertLe)
+            + '</td><td class="dr">' + (d.ouvertures || 0) + '</td><td>' + q(d.cliqueLe) + '</td><td class="dr">' + (d.clics || 0) + '</td><td>' + etatDest(d) + '</td></tr>';
+        }).join('') + '</tbody></table></div></div>';
+  }
+
+  function vueStTemps(c){
+    if (!c.jours.length) return '<div class="st-carte st-plein"><div class="ls-note">${T("Aucune ouverture enregistrée pour cette campagne.")}</div></div>';
+    var cumul = 0, base = c.base || 1;
+    var tab = '<div class="st-carte st-plein"><div class="ed-titre"><span>${T("Par jour")}</span></div>'
+      + '<div class="st-pages" data-pages="campagnes-st-jours"><table class="st-tab"><thead><tr><th>${T("Jour")}</th><th class="dr">${T("Ouvreurs")}</th><th class="dr">${T("Cliqueurs")}</th><th class="dr">${T("Ouvreurs cumulés")}</th><th class="dr">${T("% cumulé")}</th></tr></thead><tbody>'
+      + c.jours.map(function(j){
+          cumul += j.ouvreurs;
+          return '<tr><td>' + esc(szJour(j.jour)) + '</td><td class="dr">' + j.ouvreurs + '</td><td class="dr">' + j.cliqueurs + '</td><td class="dr">' + cumul + '</td><td class="dr">' + pctTx(cumul, base) + '</td></tr>';
+        }).join('') + '</tbody></table></div></div>';
+    var max = c.h48.reduce(function(m, x){ return Math.max(m, x.ouvreurs, x.cliqueurs); }, 0) || 1;
+    var cases = [];
+    for (var r = 0; r < 48; r++) cases.push({ ouvreurs: 0, cliqueurs: 0, rang: r });
+    c.h48.forEach(function(x){ cases[x.rang].ouvreurs += x.ouvreurs; cases[x.rang].cliqueurs += x.cliqueurs; });
+    var h = '<div class="st-carte st-graphe"><div class="ed-titre"><span>${T("Les 48 premières heures")}</span><span class="st-leg"><i class="o"></i>${T("ouvreurs")} <i class="c"></i>${T("cliqueurs")}</span></div>'
+      + '<div class="st-heures">' + cases.map(function(x){
+          return '<div class="st-h" title="+' + x.rang + ' h · ' + x.ouvreurs + ' / ' + x.cliqueurs + '"><i class="o" style="height:' + Math.round(100 * x.ouvreurs / max) + '%"></i><i class="c" style="height:' + Math.round(100 * x.cliqueurs / max) + '%"></i>'
+            + (x.rang % 6 === 0 ? '<small>+' + x.rang + ' h</small>' : '') + '</div>';
+        }).join('') + '</div>'
+      + '<div class="ls-note">${T("Heures comptées depuis l’envoi. Délai médian avant la première ouverture :")} ' + delai(c.delaiOuv) + '.</div></div>';
+    h += tab;
     return h;
   }
 
@@ -2614,11 +2796,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       appeler('campagnes:stats', [bst.getAttribute('data-stats')]).then(function(r){
         bst.disabled = false;
         if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
-        dire(''); STATS = r; dessiner();
+        dire(''); STATS = r; ST_ONG = 'apercu'; ST_FILTRE = 'tous'; dessiner();
       });
       return;
     }
-    if (t.closest('#st-retour')) { STATS = null; dessiner(); return; }
+    if (t.closest('#st-retour')) { STATS = null; ST_ONG = 'apercu'; ST_FILTRE = 'tous'; dessiner(); return; }
+    var bso = t.closest('[data-sto]');
+    if (bso && STATS) { ST_ONG = bso.getAttribute('data-sto'); dessiner(); return; }
+    var bsf = t.closest('[data-stf]');
+    if (bsf && STATS) { ST_FILTRE = bsf.getAttribute('data-stf'); dessiner(); return; }
 
     var bdu = t.closest('[data-dupliquer]');
     if (bdu) {
@@ -2802,7 +2988,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
   if (FORM_DEPART) {
     ouvrirForm(ONGLET === 'chaines' ? 'chaine'
              : ONGLET === 'segments' ? 'segment' : 'campagne', '');
-  } else charger();
+  } else {
+    charger();
+    if (STATS_DEPART) appeler('campagnes:stats', [STATS_DEPART]).then(function(r){
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+      STATS = r; dessiner();
+    });
+  }
 })();
 </script>
 </body></html>`;

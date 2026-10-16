@@ -71,6 +71,47 @@
  */
 
 // ── PIÈCES COMMUNES ─────────────────────────────────────────────────────────
+// Les statistiques d'une campagne (2026-10-16), dans la forme de _campagneStatsCoeur + nl-stats.php.
+// Huit destinataires : ouvert + cliqué, ouvert seul, livré sans ouverture, rebond, plainte,
+// échec d'envoi, désabonné — tous les états que le tableau sait dire.
+function STATS_CAMP(o) {
+  o = o || {};
+  const dest = [
+    { courriel: 'marie@example.com', envoi: 'parti', erreur: '', livre: true, ouvertLe: '2026-10-15T23:58:10Z', ouvertures: 3, cliqueLe: '2026-10-16T00:02:41Z', clics: 2, rebond: false, plainte: false, retarde: false, desabonneLe: '' },
+    { courriel: 'julie.tremblay@exemple.ca', envoi: 'parti', erreur: '', livre: true, ouvertLe: '2026-10-16T12:20:00Z', ouvertures: 1, cliqueLe: '', clics: 0, rebond: false, plainte: false, retarde: false, desabonneLe: '' },
+    { courriel: 'sophie.gagnon@exemple.ca', envoi: 'parti', erreur: '', livre: true, ouvertLe: '2026-10-16T14:05:00Z', ouvertures: 2, cliqueLe: '2026-10-16T14:06:30Z', clics: 1, rebond: false, plainte: false, retarde: false, desabonneLe: '' },
+    { courriel: 'nathalie.roy@exemple.ca', envoi: 'parti', erreur: '', livre: true, ouvertLe: '', ouvertures: 0, cliqueLe: '', clics: 0, rebond: false, plainte: false, retarde: true, desabonneLe: '' },
+    { courriel: 'adresse.inconnue@exemple.ca', envoi: 'parti', erreur: '', livre: false, ouvertLe: '', ouvertures: 0, cliqueLe: '', clics: 0, rebond: true, plainte: false, retarde: false, desabonneLe: '' },
+    { courriel: 'pas.interessee@exemple.ca', envoi: 'parti', erreur: '', livre: true, ouvertLe: '2026-10-16T01:10:00Z', ouvertures: 1, cliqueLe: '', clics: 0, rebond: false, plainte: true, retarde: false, desabonneLe: '2026-10-16T01:11:00Z' },
+    { courriel: 'catherine.cote@exemple.ca', envoi: 'echec', erreur: 'Resend : 422 adresse invalide', livre: false, ouvertLe: '', ouvertures: 0, cliqueLe: '', clics: 0, rebond: false, plainte: false, retarde: false, desabonneLe: '' },
+    { courriel: 'valerie.morin@exemple.ca', envoi: 'parti', erreur: '', livre: true, ouvertLe: '2026-10-17T15:40:00Z', ouvertures: 1, cliqueLe: '', clics: 0, rebond: false, plainte: false, retarde: false, desabonneLe: '2026-10-17T15:42:00Z' },
+  ];
+  const vide = !!o.vide;
+  const engagement = {
+    ok: true, campagne: 'camp_0006', suivi: true, branche: !o.sansSecret,
+    premierEvenement: vide ? '2026-10-16T18:00:00Z' : '2026-10-15T23:50:00Z',
+    livres: vide ? 0 : 6, ouverts: vide ? 0 : 5, cliques: vide ? 0 : 2, rebonds: vide ? 0 : 1, plaintes: vide ? 0 : 1, retardes: vide ? 0 : 1,
+    clicsTotal: vide ? 0 : 3, ouverturesTotal: vide ? 0 : 8,
+    liens: vide ? [] : [
+      { lien: 'https://www.sandriza.com/#shop/robes?utm_source=infolettre&utm_campaign=automne-2026', clics: 2, personnes: 2 },
+      { lien: 'https://www.sandriza.com/#product/robe-elegance-mi-longue', clics: 1, personnes: 1 },
+    ],
+    jours: vide ? [] : [{ jour: '2026-10-15', ouvertures: 1 }, { jour: '2026-10-16', ouvertures: 3 }, { jour: '2026-10-17', ouvertures: 1 }],
+    heures: vide ? [] : [
+      { heure: '2026-10-15T23', ouvreurs: 1, cliqueurs: 0 }, { heure: '2026-10-16T00', ouvreurs: 0, cliqueurs: 1 },
+      { heure: '2026-10-16T01', ouvreurs: 1, cliqueurs: 0 }, { heure: '2026-10-16T12', ouvreurs: 1, cliqueurs: 0 },
+      { heure: '2026-10-16T14', ouvreurs: 1, cliqueurs: 1 }, { heure: '2026-10-17T15', ouvreurs: 1, cliqueurs: 0 },
+    ],
+    destinataires: vide ? [] : dest,
+  };
+  return { ok: true, id: 'camp_0006', nom: 'Campagne Automne 2026', sujet: 'Les nouveautés d’automne sont arrivées',
+    envoyeeLe: '2026-10-15T23:47:00Z', segment: 'Tous les abonnés', canal: 'email', partis: 8, echecs: 1, code: vide ? '' : 'AUTOMNE15',
+    destinataires: vide ? dest.map((d) => Object.assign({}, d, { livre: false, ouvertLe: '', ouvertures: 0, cliqueLe: '', clics: 0, rebond: false, plainte: false, retarde: false, desabonneLe: '' })) : dest,
+    resultats: vide ? { codeCommandes: 0, codeRevenu: 0, codeRabais: 0, destCommandes: 0, destRevenu: 0, desabonnes: 0 }
+      : { codeCommandes: 2, codeRevenu: 214.85, codeRabais: 37.92, destCommandes: 3, destRevenu: 304.84, desabonnes: 2 },
+    engagement, engagementErreur: '',
+    audience: { actifsAujourdhui: 412, gagnes7j: 9, perdus7j: 2 } };
+}
 // Les frais de véhicule des Dépenses (2026-10-02) : les véhicules inscrits au
 // registre et les types de frais, dans la forme de `_depensesDonnees`
 // (expenses.js) — `{ id, nom, retire }` et `{ cle, nom }`, noms recopiés de
@@ -1306,6 +1347,35 @@ const JEU = {
           modeTest: false, courrielTest: '' },
         'campagnes:supprimer': { ok: true, nom: 'Rentrée — nouveautés', etaitEnvoyee: false },
         identite: IDENTITE,
+      },
+    },
+    /* ⚠ LES STATISTIQUES D UNE CAMPAGNE (2026-10-16) — ouvertes par « campagnes:stats:<id> ».
+       FORME REELLE : Newsletter._campagneStatsCoeur (newsletter.js) + nl-stats.php pour
+       engagement (heures en UTC, « 2026-10-15T23 »). Trois etats : garnie, partie AVANT le
+       branchement du suivi (premierEvenement apres l envoi), et serveur sans secret. */
+    {
+      nom: 'statistiques — campagne garnie',
+      id: 'campagnes:stats:camp_0006',
+      exige: ['data-sto="dest"', 'st-retour'],
+      reponses: {
+        identite: IDENTITE,
+        'campagnes:stats': STATS_CAMP({}),
+      },
+    },
+    {
+      nom: 'statistiques — partie avant le branchement du suivi',
+      id: 'campagnes:stats:camp_0005',
+      reponses: {
+        identite: IDENTITE,
+        'campagnes:stats': STATS_CAMP({ vide: true }),
+      },
+    },
+    {
+      nom: 'statistiques — secret du webhook absent',
+      id: 'campagnes:stats:camp_0006',
+      reponses: {
+        identite: IDENTITE,
+        'campagnes:stats': STATS_CAMP({ sansSecret: true }),
       },
     },
     {
