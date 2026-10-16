@@ -344,9 +344,9 @@ function pageMaintenance() {
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       dire('${T("Mode activé. Personne d’autre ne peut se connecter.")}', 'bon');
       /* ⚠ LE TABLEAU DE BORD DOIT LE SAVOIR TOUT DE SUITE : c est lui qui porte
-         le bouton, et son libelle change avec l etat. Sans cet avis, il
-         annoncerait << inactif >> jusqu a sa prochaine ouverture. */
-      try { P.appeler('tableau:rafraichirMaintenance'); } catch (e) {}
+         le bouton, et son libelle change avec l etat. C est la COQUILLE qui le
+         previent apres un maintenance:ecrire reussi (main.js, executerOpSite) ;
+         l ancien appel tableau:rafraichirMaintenance n existait nulle part. */
       charger();
     });
   }
@@ -372,7 +372,6 @@ function pageMaintenance() {
       if (b2) b2.disabled = false;
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       dire('${T("Maintenance prolongée. Le NIP n’a pas changé.")}', 'bon');
-      try { P.appeler('tableau:rafraichirMaintenance'); } catch (e) {}
       charger();
     });
   }
@@ -386,7 +385,6 @@ function pageMaintenance() {
       if (l2) l2.disabled = false;
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       dire('${T("Mode levé. Les connexions sont de nouveau possibles.")}', 'bon');
-      try { P.appeler('tableau:rafraichirMaintenance'); } catch (e) {}
       charger();
     });
   }

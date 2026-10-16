@@ -4022,6 +4022,17 @@ async function executerOpSite(nom, args, emetteur) {
       if (nom === 'collection:enregistrer') fenetres.push('collections');
       if (nom === 'fournisseur:enregistrer') fenetres.push('fournisseurs');
       if (fenetres.length) actualiserFenetres(fenetres, emetteur);
+      /* (2026-10-15, trouvé par l'audit des opérations) La fenêtre Maintenance appelait
+         « tableau:rafraichirMaintenance », qui n'existait NULLE PART : refusé en silence, et le bouton
+         Maintenance du tableau de bord gardait l'ancien état jusqu'à sa réouverture. Le relais est ICI :
+         une écriture de maintenance réussie fait relire son état au tableau (fenêtre ou vue ancrée). */
+      if (nom === 'maintenance:ecrire') {
+        const js = 'window.szMaintenanceChangee && window.szMaintenanceChangee()';
+        const w = fenetresNatives.get('tableau');
+        if (w && !w.isDestroyed()) w.webContents.executeJavaScript(js, true).catch(() => {});
+        const an = ancrees.get('tableau');
+        if (an && an.view && !an.view.webContents.isDestroyed()) an.view.webContents.executeJavaScript(js, true).catch(() => {});
+      }
     }
     /* ⚠⚠ LA DERNIÈRE CHOSE AVANT QUE LA RÉPONSE N'ENTRE DANS LA FENÊTRE : les
        libellés composés par le site passent en anglais ici, et NULLE PART

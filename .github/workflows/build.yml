@@ -471,6 +471,9 @@ jobs:
           # ⚠ (2026-10-15, sa règle) Toute confirmation est une BOÎTE À PART (szConfirmer) — jamais un
           # bouton qui se change en « Confirmer ? ». Le motif était recopié dans 50 fenêtres.
           node tools/banc-confirmation-a-part.js
+          # ⚠ (2026-10-15, audit des fonctions) Une opération appelée par une fenêtre et inconnue de la
+          # coquille est refusée EN SILENCE (tableau:rafraichirMaintenance, trouvé ainsi).
+          node tools/banc-ops-appelees.js
           # ⚠ `tools/bancs.js` (2026-09-08) lance TOUS ces bancs d'un coup, en
           # LISANT leur liste dans CE fichier — à faire avant chaque push. Il est
           # né d'un échec de construction sur `banc-pictogrammes.js` : le banc
