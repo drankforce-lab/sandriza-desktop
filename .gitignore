@@ -16,3 +16,4 @@ certs/*.key
 # Paquets construits localement - JAMAIS dans le depot : un installateur
 # contient la cle du verrou, et ce depot est PUBLIC.
 paquets/
+tools/audit-boutons-rapport.json
