@@ -109,7 +109,10 @@ td.c,th.c{width:2rem;text-align:center}
    gestes a droite (bascule d affichage, lot, marges, nouveau produit). Une seule rangee ecrasait la recherche. */
 /* ➡ DE RETOUR SUR UNE SEULE LIGNE (2026-10-12, sa demande). La recherche cede la place en premier ; sous
    1240 px (fenetre detachee) la barre repasse sur deux lignes. */
-.rf-tb{flex-wrap:nowrap!important}
+/* ⚠ A LA LIGNE SEULEMENT S IL LE FAUT (2026-10-16) : les menus ne se compriment plus (voir plus bas) ;
+   sous Linux, polices plus larges, la barre forcee sur une ligne poussait « + Nouveau produit » 58 px
+   hors de la fenetre (banc-debordement, travail contrastes). Ici, elle tient sur une ligne. */
+.rf-tb{flex-wrap:wrap!important;row-gap:.5rem!important}
 .rf-tb>.rf-rch{flex:1 1 11rem;min-width:8rem}
 .rf-tb>.rf-droite{flex:0 0 auto;display:flex;align-items:center;gap:.4rem;margin-left:auto}
 .rf-tb>.rf-droite>.dt{margin-right:.3rem;white-space:nowrap}
