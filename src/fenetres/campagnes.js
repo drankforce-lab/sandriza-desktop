@@ -257,6 +257,15 @@ tbody tr:hover td{background:var(--v04)}
 .ed-bande input{flex:1 1 auto;min-width:0;border:none;border-bottom:1px solid var(--sz-bord-fort);border-radius:0;
   background:transparent;font-size:.95rem;padding:.35rem .1rem}
 .ed-bande select{flex:1 1 auto;min-width:0;height:2.2rem;border-radius:9px;background:var(--f-champ)}
+/* La bande du code promo (2026-10-15). */
+.ed-offre{flex:0 0 auto;margin:.6rem 1.6rem 0;padding:.55rem 1.1rem;border-radius:12px;background:var(--f-carte);
+  border:1px solid var(--sz-bord);display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;font-size:.8rem}
+.ed-offre .lbl{font-size:.76rem;color:var(--tx2)}
+.ed-offre>span:not(.lbl){display:inline-flex;align-items:center;gap:.5rem}
+.ed-offre [hidden]{display:none!important}
+.ed-offre select{height:2rem;border-radius:8px;background:var(--f-champ)}
+.ed-offre input[type=number]{width:4.6rem;height:2rem;border-radius:8px;background:var(--f-champ)}
+.ed-offre #f-offre-coupon{min-width:18rem}
 .ed-sous{flex:0 0 auto;margin:.35rem 1.6rem 0;font-size:.74rem;color:var(--tx2);min-height:1em}
 .ed-sms{flex:0 0 auto;margin:.5rem 1.6rem 0;padding:.6rem 1.1rem;border-radius:12px;background:var(--f-carte);
   border:1px solid var(--sz-bord);display:flex;gap:1rem;align-items:flex-start}
@@ -1169,6 +1178,73 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       + '</select>';
   }
 
+  /* ══ LE CODE PROMO DE LA CAMPAGNE (2026-10-15) ══════════════════════════════════
+     Sa capture : un courriel parti avec « {{promoCode}} » en clair, puis « la section campagne
+     doit être plus automatisée au niveau de la création des codes ». Trois choix :
+       · Aucun ;
+       · Créer automatiquement — le site crée le coupon À L ENVOI (code tiré du nom, une
+         utilisation par client, valide N jours) et remplit {{promoCode}}, {{discountPercent}},
+         {{expiryDate}} ;
+       · Coupon existant — un coupon actif de la fenêtre Coupons.
+     ⚠ Le site REFUSE d envoyer un courriel qui emploie {{promoCode}} sans code rattaché. */
+  function offreHtml(d, c){
+    var o = c.offre || { mode: 'aucun', type: 'percent', valeur: 15, jours: 14 };
+    var m = o.mode || 'aucun';
+    var choix = [['aucun', '${T("Aucun")}'], ['auto', '${T("Créer automatiquement")}'], ['coupon', '${T("Coupon existant")}']];
+    return '<div class="ed-offre" id="f-offre">'
+      + '<span class="lbl">${T("Code promo")}</span>'
+      + '<div class="ed-seg" id="f-offre-seg">' + choix.map(function(x){
+          return '<button type="button" data-offre-mode="' + x[0] + '" class="' + (m === x[0] ? 'on' : '') + '">' + x[1] + '</button>';
+        }).join('') + '</div>'
+      + '<input type="hidden" id="f-offre-mode" value="' + esc(m) + '">'
+      + '<span class="of-auto"' + (m === 'auto' ? '' : ' hidden') + '>'
+      +   '<select id="f-offre-type" aria-label="${T("Type de rabais")}">'
+      +     '<option value="percent"' + (o.type === 'percent' || !o.type ? ' selected' : '') + '>${T("Pourcentage")}</option>'
+      +     '<option value="fixed"' + (o.type === 'fixed' ? ' selected' : '') + '>${T("Montant fixe")}</option>'
+      +     '<option value="freeshipping"' + (o.type === 'freeshipping' ? ' selected' : '') + '>${T("Livraison gratuite")}</option></select>'
+      +   '<input type="number" id="f-offre-val" min="0" step="1" aria-label="${T("Valeur du rabais")}" value="' + esc(o.valeur != null ? o.valeur : 15) + '"'
+      +   (o.type === 'freeshipping' ? ' hidden' : '') + '>'
+      +   '<span class="dt of-unite">' + (o.type === 'fixed' ? '$' : '%') + '</span>'
+      +   '<span class="dt">${T("valide")}</span><input type="number" id="f-offre-jours" min="1" max="365" step="1" aria-label="${T("Jours de validité")}" value="' + esc(o.jours || 14) + '">'
+      +   '<span class="dt">${T("jours · une utilisation par client")}</span>'
+      +   (o.code ? '<span class="ed-pill" title="${T("Créé au premier envoi ; réutilisé tant que le réglage ne change pas.")}">' + esc(o.code) + '</span>' : '')
+      + '</span>'
+      + '<span class="of-coupon"' + (m === 'coupon' ? '' : ' hidden') + '>'
+      +   '<select id="f-offre-coupon" aria-label="${T("Coupon")}"><option value="">${T("Choisir un coupon…")}</option>'
+      +   (d.coupons || []).map(function(x){
+            return '<option value="' + esc(x.id) + '"' + (o.couponId === x.id ? ' selected' : '') + '>' + esc(x.libelle) + '</option>';
+          }).join('') + '</select>'
+      + '</span>'
+      + '</div>';
+  }
+  function brancherOffre(){
+    var z = document.getElementById('f-offre'); if (!z) return;
+    var majVue = function(){
+      var m = document.getElementById('f-offre-mode').value;
+      z.querySelector('.of-auto').hidden = (m !== 'auto');
+      z.querySelector('.of-coupon').hidden = (m !== 'coupon');
+      var ty = document.getElementById('f-offre-type');
+      var gratuit = ty && ty.value === 'freeshipping';
+      var v = document.getElementById('f-offre-val'); if (v) v.hidden = gratuit;
+      var u = z.querySelector('.of-unite'); if (u) { u.hidden = gratuit; u.textContent = (ty && ty.value === 'fixed') ? '$' : '%'; }
+    };
+    z.querySelectorAll('[data-offre-mode]').forEach(function(b){
+      b.onclick = function(){
+        document.getElementById('f-offre-mode').value = b.getAttribute('data-offre-mode');
+        z.querySelectorAll('[data-offre-mode]').forEach(function(x){ x.classList.toggle('on', x === b); });
+        majVue();
+      };
+    });
+    var ty = document.getElementById('f-offre-type'); if (ty) ty.onchange = majVue;
+    majVue();
+  }
+  function offreReleve(){
+    var g = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
+    return { mode: g('f-offre-mode') || 'aucun', type: g('f-offre-type') || 'percent',
+      valeur: parseFloat(g('f-offre-val')) || 0, jours: parseInt(g('f-offre-jours'), 10) || 14,
+      couponId: g('f-offre-coupon') };
+  }
+
   function vueFormCampagne(){
     var f = FORM, d = f.d, c = d.campagne || {};
     /* ⚠ LA REFONTE DU 2026-10-15 (maquette approuvee). En haut, le nom et l etat ; une BANDE pour
@@ -1200,6 +1276,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
           return '<option value="' + esc(x.cle) + '"' + ((c.canal || 'email') === x.cle ? ' selected' : '')
             + '>' + esc(x.nom) + '</option>'; }).join('') + '</select></label>'
       + '</div>'
+      + offreHtml(d, c)
       + '<div class="ed-sous" id="f-seg-quoi"></div>'
       // Le message texte ne parait que si le canal envoie des SMS (majSms, plus bas).
       + '<div class="ed-sms" id="f-sms-bloc">'
@@ -1578,7 +1655,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
         return;
       }
       var data = { nom: g('f-nom').trim(), sujet: g('f-suj').trim(), segment: g('f-seg'),
-        canal: g('f-canal'), sms: g('f-sms').trim(), html: g('f-html') };
+        canal: g('f-canal'), sms: g('f-sms').trim(), html: g('f-html'), offre: offreReleve() };
+      if (data.offre.mode === 'coupon' && !data.offre.couponId) { dire('${T("Choisissez le coupon de la campagne, ou un autre réglage de code promo.")}', 'err'); return; }
+      if (data.offre.mode === 'auto' && data.offre.type !== 'freeshipping' && !(data.offre.valeur > 0)) { dire('${T("Indiquez la valeur du rabais du code automatique.")}', 'err'); return; }
+      // ⚠ Le courriel emploie {{promoCode}} sans code : on le dit à l'enregistrement, pas au moment d'envoyer.
+      if (data.offre.mode === 'aucun' && /\{\{\s*(promoCode|discountPercent|expiryDate)\s*\}\}/.test(data.sujet + data.html + data.sms)) {
+        dire('${T("Ce courriel contient un code promo : choisissez « Créer automatiquement » ou un coupon existant, sinon l’envoi sera refusé.")}', 'err'); return;
+      }
       if (!data.nom) { dire('${T("Le nom interne est requis.")}', 'err'); return; }
       if (!data.sujet) { dire('${T("Le sujet est requis.")}', 'err'); return; }
       if ((data.canal === 'sms' || data.canal === 'both') && !data.sms) {
@@ -2045,6 +2128,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
               + esc(c.id) + '"' + (D.resendPret || c.canal === 'sms' ? '' : ' disabled')
               + '>' + '${T("Envoyer")}' + '</button>';
           }
+          // (2026-10-15, sa demande) Une campagne, même ENVOYÉE, se duplique en brouillon.
+          gestes += '<button class="mini geste" data-dupliquer="' + esc(c.id) + '">${T("Dupliquer")}</button>';
           var armeS = (ARME === 'sup:' + c.id);
           gestes += '<button class="mini geste danger' + (armeS ? ' arme' : '') + '" data-suppr="'
             + esc(c.id) + '">' + '${T("Supprimer")}' + '</button>';
@@ -2165,6 +2250,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       corps.innerHTML = (FORM.type === 'chaine') ? vueFormChaine()
         : (FORM.type === 'segment') ? vueFormSegment() : vueFormCampagne();
       brancherForm();
+      if (FORM.type === 'campagne') brancherOffre();
       // La page de l etape choisie (les pages survivent au redessin, la selection aussi).
       if (FORM.type === 'chaine') { montrerNouveau(corps.querySelector('#f-etapes-liste .brang.on')); etApercuPlusTard(); }
       return;
@@ -2424,6 +2510,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
           + (r.modeTest ? ' ${T("(mode test : la campagne reste en brouillon).")}' : '.'),
           r.echecs ? 'att' : 'bon');
         charger();
+      });
+      return;
+    }
+
+    var bdu = t.closest('[data-dupliquer]');
+    if (bdu) {
+      bdu.disabled = true;
+      appeler('campagnes:dupliquer', [bdu.getAttribute('data-dupliquer')]).then(function(r){
+        bdu.disabled = false;
+        if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+        dire(esc(r.nom) + ' ${T("créée en brouillon.")}', 'bon');
+        // La copie s'ouvre tout de suite : on la duplique pour la retoucher.
+        if (r.id) ouvrirForm('campagne', r.id); else charger();
       });
       return;
     }

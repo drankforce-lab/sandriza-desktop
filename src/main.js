@@ -2746,7 +2746,7 @@ const OPS_PONT = new Set([
   // Campagnes et chaines (fenetre Campagnes, 2.1.0). ⚠ DE VRAIS COURRIELS :
   // << envoyer >> part vers toute la liste, << traiter >> envoie les etapes
   // echues de toutes les chaines. Les deux sont armes en deux clics.
-  'campagnes:liste', 'campagnes:envoyer', 'campagnes:supprimer',
+  'campagnes:liste', 'campagnes:envoyer', 'campagnes:supprimer', 'campagnes:dupliquer',
   'chaines:liste', 'chaines:basculer', 'chaines:supprimer', 'chaines:traiter',
   // Statistiques distantes (fenetre Statistiques, 2.2.0). ⚠ Elles ne lisent PAS
   // la base : la fenetre principale interroge Google et Twilio par le reseau.
