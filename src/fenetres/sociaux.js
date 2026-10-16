@@ -129,38 +129,58 @@ label.case input{width:15px;height:15px;accent-color:var(--or)}
 /* La barre des reseaux (Pinterest, Instagram…) : sa regle vivait dans campagnes.js seulement,
    et ici les quatre boutons se touchaient (2026-10-16, banc-champs). */
 .bqbar{display:flex;gap:.3rem;flex-wrap:wrap}
-.epg{display:grid;grid-template-columns:minmax(0,1fr) 20rem;gap:.9rem;align-items:start}
+/* LA PUBLICATION IA EN TROIS ETAPES (2026-10-16, maquette A approuvee). */
+.epg{display:grid;grid-template-columns:minmax(0,1fr) 21rem;gap:1.1rem;align-items:start}
 @media (max-width:52rem){.epg{grid-template-columns:minmax(0,1fr)}}
-.epg .cg,.epg .cd{display:flex;flex-direction:column;gap:.5rem;min-width:0}
-.epia{border:1px solid var(--v16);border-radius:9px;background:var(--v05);padding:.55rem .65rem}
-.epia .tt{display:flex;align-items:center;gap:.4rem;margin-bottom:.45rem}
-.epia .tt .ic{font-size:.85rem}
-.epia .tt b{font:700 .8rem/1.2 system-ui;flex:1 1 auto;min-width:0}
-.epia .tt button{font-size:.72rem;padding:.2rem .5rem;border-radius:7px}
-.epg .g{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.45rem .6rem;margin-bottom:.35rem}
-.epg .plein{grid-column:1/-1}
-.epg label{font-size:.7rem;color:var(--tx2);display:block;margin-bottom:.1rem}
-.epg input,.epg select,.epg textarea{width:100%;font-size:.8rem;padding:.26rem .4rem}
-.epg textarea{font-family:inherit;min-height:3.2rem}
-.epg .pied{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
-.epg .pied .aide{color:var(--tx2);font-size:.72rem;margin-left:auto}
-.epg .cnt{font-size:.6875rem;color:var(--tx2);text-align:right}
+.epg .cg,.epg .cd{display:flex;flex-direction:column;gap:.7rem;min-width:0}
+.ep-etapes{padding:1.15rem 1.4rem;border-radius:18px;background:var(--f-carte);border:1px solid var(--sz-bord);gap:.85rem!important}
+.ep-et{display:flex;flex-direction:column;gap:.55rem;min-width:0}
+.ep-et-ligne{flex-direction:row;align-items:center;gap:1rem;flex-wrap:wrap}
+.ep-et-t{display:flex;align-items:center;gap:.65rem;min-width:0}
+.ep-et-ligne .ep-et-t{width:14rem}
+.ep-n{flex:0 0 auto;width:1.5rem;height:1.5rem;border-radius:50%;background:var(--or);color:#1a1208;font-size:.75rem;font-weight:800;
+  display:inline-flex;align-items:center;justify-content:center}
+.ep-et-t b{font-size:.9rem;font-weight:650}
+.ep-et .aide{font-size:.76rem;color:var(--tx2)}
+.ep-res button{height:2rem;padding:0 1rem}
+.ep-res button.on{background:var(--or);color:#1a1208;font-weight:700}
+.ep-sep{height:1px;background:var(--v08)}
+.ep-corps{padding-left:2.15rem;display:flex;flex-direction:column;gap:.5rem;min-width:0}
+.ep-ligne{display:grid;grid-template-columns:15.5rem minmax(0,1fr) auto;gap:.65rem;align-items:end}
+.ep-go{height:2.5rem;padding:0 1.15rem;display:inline-flex;align-items:center;gap:.5rem;border-radius:10px;font-weight:700}
+.ep-go svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.ep-sous{display:flex;align-items:center;gap:1rem;font-size:.76rem;color:var(--tx2)}
+.ep-lien{background:none!important;border:0!important;padding:0;height:auto;color:var(--or);font-size:.76rem}
+.ep-lien:hover:not(:disabled){text-decoration:underline}
+.ep-grp{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--tx2);font-weight:700;margin-top:.15rem}
+.ep-g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem}
+.ep-g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem}
+.epg label{font-size:.72rem;color:var(--tx2);display:block;margin-bottom:.22rem}
+.epg label.epc{display:flex;justify-content:space-between;gap:.6rem}
+.epg input,.epg select,.epg textarea{width:100%;box-sizing:border-box;font-size:.82rem;padding:.45rem .7rem;border-radius:9px}
+.epg input,.epg select{height:2.3rem}
+.ep-ligne input,.ep-ligne select{height:2.5rem}
+.epg textarea{font-family:inherit;min-height:4.6rem;resize:none}
+.epg .cnt{font-size:.6875rem;color:var(--tx2)}
 .epg .cnt.trop{color:var(--tx-err)}
-.epvue{border:1px solid var(--v16);border-radius:9px;overflow:hidden;background:#F8F6F3;
+.ep-note{font-size:.76rem;color:var(--tx2)}
+.ep-apercu{padding:.9rem;border-radius:18px;background:var(--f-carte);border:1px solid var(--sz-bord);display:flex;flex-direction:column;align-items:center;gap:.55rem}
+.epvue{border:1px solid var(--v16);border-radius:12px;overflow:hidden;background:#F8F6F3;
   aspect-ratio:2/3;display:flex;align-items:center;justify-content:center}
 .epvue img{display:block;width:100%;height:100%;object-fit:contain}
-/* ⚠ LA HAUTEUR SUIT LA FENETRE, LA LARGEUR SUIT LE FORMAT (2026-09-26, sa demande :
-   aucune barre de defilement). Un 2:3 de 20 rem de large faisait 30 rem de haut
-   et poussait les boutons hors de l ecran. On fixe la HAUTEUR a ce qui reste, et
-   aspect-ratio en deduit la largeur : la proportion — ce que l apercu doit dire
-   juste — ne bouge pas d un cheveu. */
-.epvue{height:max(12rem, min(calc(100vh - 33rem), 30rem));width:auto;max-width:100%;align-self:center}
+/* ⚠ LA HAUTEUR SUIT LA FENETRE, LA LARGEUR SUIT LE FORMAT (2026-09-26, sa demande : aucune barre de
+   defilement) : on fixe la HAUTEUR a ce qui reste, aspect-ratio en deduit la largeur. */
+.epvue{height:max(12rem, min(calc(100vh - 31rem), 24rem));width:auto;max-width:100%;align-self:center}
 .epvue .rien{font-size:.76rem;color:#4A4A4A;padding:1rem;text-align:center}
-.epinfo{font-size:.7rem;color:var(--tx2);text-align:center}
-.epenv{border-top:1px solid var(--v12);padding-top:.5rem;margin-top:.2rem;
-  display:grid;grid-template-columns:1fr auto;gap:.35rem;align-items:end}
-.epenv label{grid-column:1/-1;font-size:.7rem;color:var(--tx2);display:block;margin-bottom:.1rem}
-.epenv input{width:100%;font-size:.8rem;padding:.26rem .4rem}
+.epinfo{font-size:.72rem;color:var(--tx2);text-align:center}
+.ep-enr{height:2.75rem;border-radius:12px;font-size:.88rem;font-weight:700}
+.ep-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem}
+.ep-2 button{height:2.35rem;border-radius:10px}
+.epenv{padding:.75rem .9rem;border-radius:14px;background:var(--f-carte);border:1px solid var(--sz-bord);
+  display:grid;grid-template-columns:1fr auto;gap:.45rem;align-items:end}
+.epenv label{grid-column:1/-1;font-size:.8rem;font-weight:650;color:var(--tx);display:block;margin-bottom:0}
+.epenv input{width:100%;font-size:.82rem;padding:.45rem .7rem;height:2.3rem;border-radius:9px}
+.epenv button{height:2.3rem;border-radius:9px}
 .epenv .epinfo{grid-column:1/-1;text-align:left}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 /* La tete refaite (2026-10-15, lot E). */
@@ -453,131 +473,126 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       ? '<textarea id="' + id + '" data-epc="' + cle + '"' + lim + '>' + esc(v) + '</textarea>'
       : '<input id="' + id + '" data-epc="' + cle + '" value="' + esc(v) + '"' + lim + '>';
     /* Deux par deux (sa demande : aucune barre de defilement) — plus de "plein". */
-    return '<div><label for="' + id + '">' + esc(lib) + '</label>' + corps2
-      + (max ? '<div class="cnt' + (trop ? ' trop' : '') + '" id="' + id + '-n">'
-               + n + ' / ' + max + '</div>' : '')
+    return '<div><label class="epc" for="' + id + '"><span>' + esc(lib) + '</span>'
+      + (max ? '<span class="cnt' + (trop ? ' trop' : '') + '" id="' + id + '-n">' + n + ' / ' + max + '</span>' : '')
+      + '</label>' + corps2
       + '</div>';
   }
 
+  /* ══ LA PUBLICATION IA, EN TROIS ETAPES (2026-10-16, maquette A approuvee : « A est parfait ») ══
+     Sa demande : « redonne un nouveau look, c est trop complexe ». Une seule page lue de haut en bas —
+     ① le reseau, ② l idee et « Rediger » sur UNE ligne, ③ le texte range en deux groupes (sur l image /
+     la publication) — et, a droite, l apercu avec UN geste principal. Les options avancees se deplient.
+     Maquette : https://claude.ai/artifact/RRcFuXtyj25GN41tAa92y9
+     ⚠ LES IDENTIFIANTS N ONT PAS CHANGE (ep-prod, ep-but, ep-go, ep-simple/ep-avance, ep-sur… ep-lien,
+     ep-enr, ep-copier, ep-dossier, ep-a, ep-envoi, ep-presse, data-epres, data-epdia) : les gestes
+     branches plus bas les retrouvent tels quels.
+     ⚠ L IDEE ET LES OPTIONS SURVIVENT AU REDESSIN (EPSAISIE) : deplier les options, ou changer de
+     reseau, redessine la page — l idee tapee disparaissait. */
+  var EPSAISIE = { but: '', ton: 'elegant', langue: 'fr', plus: '' };
   function vueEpingle(){
     if (!EPD) return '<div class="carte"><div class="vide charge">${T("Lecture du catalogue…")}</div></div>';
     if (!EP) EP = epVide();
     var pret = !!(EPETAT && EPETAT.clePosee);
-    var h = '<div class="epg"><div class="cg">';
+    var F = epFiche();
+    var multi = (F.diapos && F.diapos[1] > 1);
+    var num = function(n, titre, aide){
+      return '<div class="ep-et-t"><span class="ep-n" aria-hidden="true">' + n + '</span><b>' + titre + '</b>'
+        + (aide ? '<span class="aide">' + aide + '</span>' : '') + '</div>';
+    };
+    var h = '<div class="epg"><div class="cg ep-etapes">';
 
-    // ── Le choix du reseau : la MEME demande, une sortie differente ────────
-    h += '<div class="bqbar" style="margin-bottom:.5rem">'
-      + (EPD.reseaux || []).map(function(r){
-          return '<button class="mini' + (r.cle === EPRES ? ' actif' : '') + '" data-epres="'
-            + esc(r.cle) + '">' + esc(r.nom) + '</button>';
-        }).join('')
-      + '</div>';
+    // ── ① Le reseau : la MEME demande, une sortie differente ─────────────
+    var champsDuReseau = (F.titre ? '${T("titre, ")}' : '') + '${T("description")}' + (F.lienCliquable ? '${T(" et lien")}' : '');
+    h += '<div class="ep-et ep-et-ligne">' + num(1, '${T("Pour quel réseau ?")}', '')
+      + '<div class="ed-seg ep-res">' + (EPD.reseaux || []).map(function(r){
+          return '<button type="button" class="' + (r.cle === EPRES ? 'on' : '') + '" data-epres="' + esc(r.cle) + '">' + esc(r.nom) + '</button>';
+        }).join('') + '</div>'
+      + '<span class="aide">' + F.largeur + ' &times; ' + F.hauteur + ' · ' + champsDuReseau
+      + (multi ? ' · ' + F.diapos[0] + '${T(" à ")}' + F.diapos[1] + ' ${T("diapos")}' : '') + '</span></div>';
+    h += '<div class="ep-sep"></div>';
 
-    // ── Le panneau d ecriture IA ──────────────────────────────────────────
-    h += '<div class="epia" id="ep-ia"><div class="tt"><span class="ic">✶</span>'
-      + '<b>${T("Écrire avec l’IA pour ")}' + esc(epFiche().nom) + '</b>'
-      + '<button class="mini' + (EPMODE === 'simple' ? ' actif' : '') + '" id="ep-simple">${T("Simple")}</button>'
-      + '<button class="mini' + (EPMODE === 'avance' ? ' actif' : '') + '" id="ep-avance">${T("Avancé")}</button>'
-      + '</div>';
+    // ── ② L idee ─────────────────────────────────────────────────────────
+    h += '<div class="ep-et" id="ep-ia">' + num(2, '${T("Que voulez-vous annoncer ?")}', '');
     if (EPETAT && !pret) {
-      h += '<div class="vide">${T("Aucune clé d’écriture IA n’est enregistrée. Elle se pose dans Configuration ▸ Clés API.")}</div>';
+      h += '<div class="ep-corps"><div class="vide">${T("Aucune clé d’écriture IA n’est enregistrée. Elle se pose dans Configuration ▸ Clés API.")}</div></div>';
     } else {
       var opts = [['', '${T("— aucun produit —")}']].concat((EPD.produits || []).map(function(p){
         return [p.id, p.nom + (p.categorie ? ' · ' + p.categorie : '')];
       }));
-      h += '<div class="g">' + epChoix('ep-prod', '${T("Produit mis en avant")}', opts, EP.produitId) + '</div>'
-        + '<div class="g"><div class="plein"><label for="ep-but">${T("Que faut-il annoncer ?")}</label>'
-        + '<input id="ep-but" placeholder="${T("ex. la coupe et la matière de ce manteau, pour l’automne")}"></div></div>';
+      h += '<div class="ep-corps"><div class="ep-ligne">' + epChoix('ep-prod', '${T("Produit")}', opts, EP.produitId)
+        + '<div><label for="ep-but">${T("L’idée, en une phrase")}</label>'
+        + '<input id="ep-but" value="' + esc(EPSAISIE.but) + '" placeholder="${T("ex. la coupe et la matière de ce manteau, pour l’automne")}"></div>'
+        + '<button type="button" class="prim ep-go" id="ep-go"' + (EPOCC ? ' disabled' : '') + '>'
+        + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6"/></svg>'
+        + (EPOCC ? '${T("Rédaction…")}' : '${T("Rédiger")}') + '</button></div>'
+        + '<div class="ep-sous"><span>' + esc(epSousBudget()) + '</span>'
+        + (EPMODE === 'avance'
+            ? '<button type="button" class="ep-lien" id="ep-simple">${T("Masquer les options ▴")}</button>'
+            : '<button type="button" class="ep-lien" id="ep-avance">${T("Ton, langue et consignes ▾")}</button>')
+        + '</div>';
       if (EPMODE === 'avance') {
-        h += '<div class="g">'
+        h += '<div class="ep-g3">'
           + epChoix('ep-ton', '${T("Ton")}', [['chaleureux', '${T("Chaleureux")}'], ['elegant', '${T("Élégant")}'],
-              ['enjoue', '${T("Enjoué")}'], ['urgent', '${T("Pressant")}']], 'elegant')
-          + epChoix('ep-langue', '${T("Langue")}', [['fr', '${T("Français")}'], ['en', '${T("Anglais")}']], 'fr')
-          + '</div><div class="g"><div class="plein">'
-          + '<label for="ep-plus">${T("Consignes supplémentaires")}</label>'
-          + '<textarea id="ep-plus" rows="2" placeholder="${T("ex. viser la recherche « manteau de laine Québec »")}"></textarea>'
-          + '</div></div>';
+              ['enjoue', '${T("Enjoué")}'], ['urgent', '${T("Pressant")}']], EPSAISIE.ton)
+          + epChoix('ep-langue', '${T("Langue")}', [['fr', '${T("Français")}'], ['en', '${T("Anglais")}']], EPSAISIE.langue)
+          + '<div><label for="ep-plus">${T("Consignes supplémentaires")}</label>'
+          + '<input id="ep-plus" value="' + esc(EPSAISIE.plus) + '" placeholder="${T("ex. viser la recherche « manteau de laine Québec »")}"></div>'
+          + '</div>';
       }
-      h += '<div class="pied"><button class="mini prim" id="ep-go"' + (EPOCC ? ' disabled' : '') + '>'
-        + (EPOCC ? '${T("Rédaction…")}' : '${T("Rédiger")}') + '</button>'
-        + '<span class="aide">' + esc(epSousBudget()) + '</span></div>';
+      h += '</div>';
     }
-    h += '</div>';
+    h += '</div><div class="ep-sep"></div>';
 
-    // ── Le modele, entierement modifiable ─────────────────────────────────
-    var F = epFiche();
-    var multi = (F.diapos && F.diapos[1] > 1);
-    h += '<div class="carte">';
+    // ── ③ Le texte, entierement modifiable ────────────────────────────────
+    h += '<div class="ep-et ep-texte">' + num(3, '${T("Le texte")}', '${T("tout se corrige à la main")}') + '<div class="ep-corps">';
     /* ⚠ LA BANDE DES DIAPOS N APPARAIT QUE LA OU IL Y EN A PLUSIEURS. Sur
        Pinterest, un bandeau << Diapo 1 sur 1 >> avec un bouton << ajouter >>
        ferait croire qu on peut publier une suite la ou le reseau n en veut pas. */
     if (multi) {
       h += '<div class="bqbar">'
         + (EP.diapos || []).map(function(d, i){
-            return '<button class="mini' + (i === EP.iDia ? ' actif' : '') + '" data-epdia="' + i + '">'
-              + (i + 1) + '</button>';
+            return '<button class="mini' + (i === EP.iDia ? ' actif' : '') + '" data-epdia="' + i + '">' + (i + 1) + '</button>';
           }).join('')
-        + ((EP.diapos || []).length < F.diapos[1]
-            ? '<button class="mini" id="ep-dia-plus" title="${T("Ajouter une diapo")}">+</button>' : '')
-        + ((EP.diapos || []).length > 1
-            ? '<button class="mini" id="ep-dia-moins" title="${T("Retirer cette diapo")}">✕</button>' : '')
-        + '<span class="aide" style="margin-left:auto">${T("Diapo ")}' + (EP.iDia + 1)
-        + '${T(" sur ")}' + (EP.diapos || []).length + '</span>'
-        + '</div>';
+        + ((EP.diapos || []).length < F.diapos[1] ? '<button class="mini" id="ep-dia-plus" title="${T("Ajouter une diapo")}">+</button>' : '')
+        + ((EP.diapos || []).length > 1 ? '<button class="mini" id="ep-dia-moins" title="${T("Retirer cette diapo")}">✕</button>' : '')
+        + '<span class="aide" style="margin-left:auto">${T("Diapo ")}' + (EP.iDia + 1) + '${T(" sur ")}' + (EP.diapos || []).length + '</span></div>';
     }
-    h += '<div class="g">'
-      + epChamp('sur', '${T("Sur-titre (dans l’image)")}', 0, false)
-      + epChamp('gros', '${T("Accroche (dans l’image)")}', 0, false)
-      + epChamp('sous', '${T("Précision (dans l’image)")}', 0, false)
-      /* ⚠ LE TITRE N EXISTE QUE CHEZ PINTEREST. Facebook et Instagram n en ont
-         pas : dessiner un champ vide qui ne part nulle part ferait ecrire un
-         titre que personne ne verra jamais. La fiche du reseau le dit (0). */
-      + (F.titre ? epChamp('titre', '${T("Titre de l’épingle")}', F.titre, false) : '')
-      + epChamp('description', F.cle === 'pinterest'
-          ? '${T("Description (elle sert à être trouvée)")}'
-          : '${T("Texte de la publication")}', F.description, true)
-      + epChamp('alt', '${T("Texte de remplacement de l’image")}', 0, true)
-      /* ⚠⚠ ET LE LIEN DISPARAIT LA OU IL NE CLIQUE PAS. Instagram ne rend
-         AUCUNE adresse cliquable dans une legende : laisser le champ inviterait
-         a coller une adresse que personne ne peut suivre — on renvoie vers le
-         lien de la bio, et on le DIT. */
-      + (F.lienCliquable ? epChamp('lien', '${T("Lien de destination")}', 0, false) : '')
+    h += '<span class="ep-grp">${T("Sur l’image")}</span><div class="ep-g3">'
+      + epChamp('sur', '${T("Sur-titre")}', 0, false)
+      + epChamp('gros', '${T("Accroche")}', 0, false)
+      + epChamp('sous', '${T("Précision")}', 0, false)
       + '</div>';
-    if (!F.lienCliquable) {
-      h += '<div class="epinfo">${T("Ce réseau ne rend pas les liens cliquables : mettez l’adresse dans la bio du compte.")}</div>';
-    }
+    /* ⚠ LE TITRE N EXISTE QUE CHEZ PINTEREST, ET LE LIEN DISPARAIT LA OU IL NE CLIQUE PAS
+       (Instagram ne rend aucune adresse cliquable dans une legende). La fiche du reseau le dit. */
+    h += '<span class="ep-grp">${T("La publication")}</span><div class="ep-g2">'
+      + (F.titre ? epChamp('titre', '${T("Titre de l’épingle")}', F.titre, false) : '')
+      + (F.lienCliquable ? epChamp('lien', '${T("Lien de destination")}', 0, false) : '')
+      + epChamp('description', F.cle === 'pinterest' ? '${T("Description (elle sert à être trouvée)")}' : '${T("Texte de la publication")}', F.description, true)
+      + epChamp('alt', '${T("Texte de remplacement de l’image")}', 0, true)
+      + '</div>';
+    if (!F.lienCliquable) h += '<div class="ep-note">${T("Ce réseau ne rend pas les liens cliquables : mettez l’adresse dans la bio du compte.")}</div>';
     if ((EP.motsCles || []).length) {
-      h += '<div class="epinfo">' + (F.cle === 'pinterest'
-            ? '${T("Mots de recherche : ")}' : '${T("Mots-clics : ")}')
-        + esc(EP.motsCles.map(function(m){ return F.cle === 'pinterest' ? m : ('#' + m); }).join(' ')) + '</div>';
+      h += '<div class="ep-note">' + (F.cle === 'pinterest' ? '${T("Mots de recherche : ")}' : '${T("Mots-clics : ")}')
+        + esc(EP.motsCles.map(function(m){ return F.cle === 'pinterest' ? m : ('#' + m); }).join(' · ')) + '</div>';
     }
-    h += '</div></div>';
+    h += '</div></div></div>';
 
-    // ── L apercu, au format que CE reseau-la montre ───────────────────────
-    h += '<div class="cd"><div class="epvue" id="ep-vue" style="aspect-ratio:'
-      + F.largeur + '/' + F.hauteur + '"></div>'
-      + '<div class="epinfo">' + F.largeur + ' &times; ' + F.hauteur + ' ${T("px · le format que ")}'
-      + esc(F.nom) + '${T(" montre en entier")}</div>'
-      + '<div class="pied"><button class="mini prim" id="ep-enr"' + (EPIMG ? '' : ' disabled') + '>'
-      + '${T("Enregistrer la publication")}</button>'
-      + '<button class="mini" id="ep-copier">${T("Copier le texte")}</button></div>'
-      + '<div class="pied"><button class="mini" id="ep-dossier">${T("Ouvrir le dossier des exports")}</button></div>'
-      /* ⚠⚠ L ENVOI PAR COURRIEL N EST PAS UN CONFORT, C EST LE SEUL PONT VERS LE
-         TELEPHONE. Instagram et TikTok ne se publient pas depuis un navigateur
-         de bureau : il faut que l image ARRIVE sur l appareil. On compose ici,
-         on s envoie le tout, on ouvre le message sur le telephone, on enregistre
-         les images et l on colle le texte. Sans ce bouton, deux des quatre
-         reseaux s arretaient dans un dossier que le telephone ne voit pas. */
-      + '<div class="epenv"><label for="ep-a">${T("Envoyer par courriel")}</label>'
-      + '<input id="ep-a" type="email" value="' + esc((EPD && EPD.courrielDefaut) || '')
-      + '" placeholder="${T("votre@courriel.com")}"'
+    // ── L apercu, au format que CE reseau-la montre, et UN geste principal ──
+    h += '<div class="cd"><div class="ep-apercu"><div class="epvue" id="ep-vue" style="aspect-ratio:' + F.largeur + '/' + F.hauteur + '"></div>'
+      + '<div class="epinfo">' + F.largeur + ' &times; ' + F.hauteur + ' ${T("px · le format que ")}' + esc(F.nom) + '${T(" montre en entier")}</div></div>'
+      + '<button type="button" class="prim ep-enr" id="ep-enr"' + (EPIMG ? '' : ' disabled') + '>${T("Enregistrer la publication")}</button>'
+      + '<div class="ep-2"><button type="button" id="ep-copier">${T("Copier le texte")}</button>'
+      + '<button type="button" id="ep-dossier">${T("Dossier des exports")}</button></div>'
+      /* ⚠⚠ L ENVOI PAR COURRIEL N EST PAS UN CONFORT, C EST LE SEUL PONT VERS LE TELEPHONE :
+         Instagram et TikTok ne se publient pas depuis un bureau. */
+      + '<div class="epenv"><label for="ep-a">${T("Vers le téléphone")}</label>'
+      + '<input id="ep-a" type="email" value="' + esc((EPD && EPD.courrielDefaut) || '') + '" placeholder="${T("votre@courriel.com")}"'
       + ((EPD && EPD.resendPret === false) ? ' disabled' : '') + '>'
-      + '<button class="mini" id="ep-envoi"'
-      + ((EPIMG && !(EPD && EPD.resendPret === false)) ? '' : ' disabled')
-      + '>${T("Envoyer")}</button>'
+      + '<button type="button" id="ep-envoi"' + ((EPIMG && !(EPD && EPD.resendPret === false)) ? '' : ' disabled') + '>${T("Envoyer")}</button>'
       + ((EPD && EPD.resendPret === false)
           ? '<div class="epinfo">${T("Aucune clé Resend : l’envoi de courriel n’est pas configuré.")}</div>'
-          : '<div class="epinfo">${T("Les images partent en pièces jointes, à enregistrer sur le téléphone.")}</div>')
+          : '<div class="epinfo">${T("Images en pièces jointes, texte prêt à coller.")}</div>')
       + '</div>'
       + '<textarea id="ep-presse" aria-hidden="true" tabindex="-1" style="position:absolute;left:-9999px;top:0;width:1px;height:1px"></textarea>'
       + '</div></div>';
@@ -820,6 +835,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     if (b) b.onclick = function(){ EPMODE = 'avance'; dessiner(); };
     b = document.getElementById('ep-go');
     if (b) b.onclick = epRediger;
+    [['ep-but', 'but'], ['ep-ton', 'ton'], ['ep-langue', 'langue'], ['ep-plus', 'plus']].forEach(function(x){
+      var e = document.getElementById(x[0]);
+      if (e) e.addEventListener(e.tagName === 'SELECT' ? 'change' : 'input', function(){ EPSAISIE[x[1]] = e.value; });
+    });
     b = document.getElementById('ep-enr');
     if (b) b.onclick = epEnregistrer;
     b = document.getElementById('ep-copier');
