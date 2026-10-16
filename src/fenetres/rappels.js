@@ -96,6 +96,8 @@ button.fait{border-color:rgba(74,222,128,.45);color:var(--tx-ok)}
   padding:.5rem .75rem;border:1px solid var(--sz-bord);border-radius:11px;border-left:3px solid var(--sz-bord)}
 .rp:hover{background:var(--v03)}
 .rp.sel{background:rgba(var(--or-rgb),.10)}
+/* Sur la ligne choisie (fond or), la pastille rouge tombait a 4.27 la nuit (contrastes Linux, 7.37.0). */
+.rp.sel .rf-pill.rouge{color:color-mix(in srgb,var(--tx-err) 72%,var(--tx))}
 .rp.retard{border-left-color:color-mix(in srgb,var(--tx-err) 70%,transparent)}
 .rp.aujourdhui{border-left-color:color-mix(in srgb,var(--tx-att) 70%,transparent)}
 .rp.termine{opacity:.72}

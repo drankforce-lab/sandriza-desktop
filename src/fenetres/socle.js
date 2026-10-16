@@ -4425,9 +4425,11 @@ const CSS_COMPTA = `
 td .cx-l2,.cx-l2{display:block;font-size:.72rem;color:var(--tx3);margin-top:.12rem}
 .cx-averti,.cx-bon,.cx-info{display:inline-flex;align-items:center;gap:.5rem;min-height:1.9rem;padding:.2rem .8rem;border-radius:999px;font-size:.78rem;
   max-width:100%;min-width:0}
-.cx-averti{border:1px solid color-mix(in srgb,var(--tx-att) 40%,transparent);background:color-mix(in srgb,var(--tx-att) 9%,transparent);color:var(--tx-att)}
-.cx-bon{border:1px solid color-mix(in srgb,var(--tx-ok) 36%,transparent);background:color-mix(in srgb,var(--tx-ok) 8%,transparent);color:var(--tx-ok)}
-.cx-info{border:1px solid color-mix(in srgb,var(--tx-bleu) 36%,transparent);background:color-mix(in srgb,var(--tx-bleu) 8%,transparent);color:var(--tx-bleu)}
+.cx-averti{border:1px solid color-mix(in srgb,var(--tx-att) 40%,transparent);background:color-mix(in srgb,var(--tx-att) 9%,transparent);color:color-mix(in srgb,var(--tx-att) 78%,var(--tx))}
+.cx-bon{border:1px solid color-mix(in srgb,var(--tx-ok) 36%,transparent);background:color-mix(in srgb,var(--tx-ok) 8%,transparent);color:color-mix(in srgb,var(--tx-ok) 78%,var(--tx))}
+.cx-info{border:1px solid color-mix(in srgb,var(--tx-bleu) 36%,transparent);background:color-mix(in srgb,var(--tx-bleu) 8%,transparent);color:color-mix(in srgb,var(--tx-bleu) 78%,var(--tx))}
+/* (7.37.0, contrastes Linux : 4.29 et 4.38 au jour) Le texte d une pastille tire vers --tx : plus fonce le jour,
+   plus clair la nuit — le contraste monte dans les deux modes. */
 .cx-averti b,.cx-bon b,.cx-info b{font-weight:700}
 .cx-averti>span,.cx-bon>span,.cx-info>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cx-ligne{display:grid;grid-template-columns:7rem minmax(0,1fr) 6rem;gap:.6rem;align-items:center;font-size:.78rem}

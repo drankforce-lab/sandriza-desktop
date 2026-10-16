@@ -47,7 +47,8 @@ body{background:var(--f-page);color:var(--tx);
 .cx-col>.cx-carte.court{flex:0 1 auto}
 .ed-seg button{border:none}
 .ed-seg .n{margin-left:.4rem;font-size:.7rem;color:var(--tx3);font-variant-numeric:tabular-nums}
-.ed-seg button.on .n{color:var(--tx2)}
+/* Contrastes Linux 7.37.0 : --tx2 sur le segment actif du jour tombait a 4.24. */
+.ed-seg button.on .n{color:var(--tx)}
 details.cx-detail{min-width:0}
 details.cx-detail>summary{cursor:pointer;list-style:none}
 details.cx-detail>summary::-webkit-details-marker{display:none}
