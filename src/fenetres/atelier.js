@@ -81,13 +81,16 @@ button.mini{padding:.12rem .5rem;font-size:.76rem}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 
 /* ── La bibliothèque ── */
-.at-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(13rem,1fr));grid-auto-rows:19rem;gap:1rem;align-content:start}
-.at-carte{position:relative;display:flex;flex-direction:column;border:1px solid var(--sz-bord);border-radius:16px;background:var(--f-carte2);overflow:hidden;
+.at-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(12.5rem,1fr));grid-auto-rows:16.5rem;gap:.9rem;align-content:start}
+/* ⚠ la HAUTEUR est celle de la carte, pas de la rangée : le socle impose grid-auto-rows:max-content à tout conteneur paginé */
+.at-carte{position:relative;display:flex;flex-direction:column;height:16.5rem;border:1px solid var(--sz-bord);border-radius:16px;background:var(--f-carte2);overflow:hidden;
   cursor:pointer;text-align:left;padding:0;min-width:0;transition:transform .14s ease,box-shadow .14s ease,border-color .14s ease}
 .at-carte:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,0,0,.28);border-color:rgba(var(--or-rgb),.55)}
 .at-carte.on{border:2px solid var(--or);box-shadow:0 0 0 3px rgba(var(--or-rgb),.18)}
-.at-carte .vig{flex:1 1 auto;min-height:0;width:100%;background:linear-gradient(180deg,#F6F1E8,#ECE4D6);color:#1C1B18;display:flex;align-items:center;justify-content:center;padding:1rem .9rem .7rem}
-.at-carte .vig svg{display:block;width:100%;height:100%}
+.at-carte .vig{position:relative;flex:1 1 0;min-height:0;width:100%;background:linear-gradient(180deg,#F6F1E8,#ECE4D6);color:#1C1B18;display:block}
+/* ⚠ le croquis en POSITION ABSOLUE : à 100 % d une hauteur « auto », un SVG prend la sienne (celle de ses
+   proportions) et étirait la carte au-delà de sa rangée — le texte passait sous le bord (fenêtre détachée) */
+.at-carte .vig svg{position:absolute;left:.9rem;right:.9rem;top:.9rem;bottom:.6rem;width:calc(100% - 1.8rem);height:calc(100% - 1.5rem);display:block}
 .at-carte .tx{display:block;padding:.65rem .85rem .75rem;border-top:1px solid var(--sz-bord)}
 .at-carte .tx .l1{display:flex;align-items:center;gap:.45rem;min-width:0}
 .at-carte .tx .l1 b{flex:1 1 auto;min-width:0;font-size:.9rem;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
