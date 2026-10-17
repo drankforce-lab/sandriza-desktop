@@ -179,6 +179,12 @@ table.at-tab{width:100%;border-collapse:collapse;font-size:.8rem;font-variant-nu
 .v3-scene{position:relative;border-radius:12px;overflow:hidden;min-height:0;cursor:grab;user-select:none}
 .v3-scene.glisse{cursor:grabbing}
 .v3-scene.vise{cursor:crosshair}
+.ph-trois .ed-seg{display:flex;flex-wrap:wrap}
+.ph-vign{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.35rem;margin-bottom:.5rem}
+.ph-vign button{position:relative;aspect-ratio:3/4;padding:0;border-radius:8px;overflow:hidden;border:2px solid var(--v16);background:var(--f-carte);color:var(--tx)}
+.ph-vign button img{width:100%;height:100%;object-fit:cover;display:block}
+.ph-vign button.face{border-color:var(--or)}.ph-vign button.dos{border-color:var(--tx2)}
+.ph-vign button b{position:absolute;left:0;right:0;bottom:0;font-size:.68rem;font-weight:600;background:var(--f-carte);color:var(--tx);padding:.05rem 0}
 .v3-trois .ed-seg{display:flex;flex-wrap:wrap}
 .v3-scene canvas{display:block;position:absolute;left:0;top:0;width:100%;height:100%}
 .v3-scene.beige{background:#EFE8DD}.v3-scene.blanc{background:#FFFFFF}
@@ -416,7 +422,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     document.getElementById('titre').textContent = '${T("Atelier de création")}';
     document.getElementById('sous').textContent = (tous.length > 1 ? '${T("{0} modèles")}'.split('{0}').join(tous.length) : '${T("{0} modèle")}'.split('{0}').join(tous.length))
       + (nbBr ? ' · ' + (nbBr > 1 ? '${T("{0} brouillons")}'.split('{0}').join(nbBr) : '${T("1 brouillon")}') : '');
-    document.getElementById('actions').innerHTML = D.peutAjouter ? '<button type="button" class="prim" id="a-nouveau">${T("Nouveau modèle")}</button>' : '';
+    document.getElementById('actions').innerHTML = D.peutAjouter ? '<button type="button" id="a-photo">${T("Depuis une photo")}</button><button type="button" class="prim" id="a-nouveau">${T("Nouveau modèle")}</button>' : '';
 
     var seg = function(attr, v, lib, actif){
       return '<button type="button" class="' + (actif ? 'on' : '') + '" ' + attr + '="' + v + '">' + lib + '</button>';
@@ -1763,14 +1769,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var LETAT3 = { trop: '${T("trop serré")}', serre: '${T("serré")}', ajuste: '${T("ajusté")}', aise: '${T("aisé")}' };
   // ⚠ « Taille » seul veut dire la TAILLE du vêtement (Size) dans cette fenêtre : les zones prennent les « Tour de… » (Waist).
   var LZONE3 = { Poitrine: '${T("Tour de poitrine")}', Taille: '${T("Tour de taille")}', Hanches: '${T("Tour de hanches")}', Bras: '${T("Tour de bras")}' };
-  var VUES3 = [['face', '${T("Face")}', 0], ['tq', '${T("3/4")}', 0.7, '${T("Trois-quarts")}'], ['profil', '${T("Profil")}', 1.5708], ['dos', '${T("Dos")}', 3.1416]];
+  var VUES3 = [['fantome', '${T("Fantôme")}', 0, '${T("Comme un mannequin fantôme : de face, un peu d en haut, l intérieur visible par l encolure")}', 0.42], ['face', '${T("Face")}', 0], ['tq', '${T("3/4")}', 0.7, '${T("Trois-quarts")}'], ['profil', '${T("Profil")}', 1.5708], ['dos', '${T("Dos")}', 3.1416]];
 
   function ouvrir3d(id, retour){
     var m = (D.modeles || []).filter(function(x){ return x.id === id; })[0];
     if (!m) { dire(MOTIFS.introuvable, 'err'); return; }
     SEL = id;
     V3 = { id: id, m: m, retour: retour || 'biblio', taille: m.tailleBase || 'M', stature: 165, r: null, mesh: null,
-      yaw: 0.45, pitch: 0.12, zoom: 1, px: 0, py: 0, carte: false, fil: false, auto: false, couleur: COUL3[0][0], fond: 'beige', sale: true,
+      yaw: 0, pitch: 0.42, zoom: 1, px: 0, py: 0, carte: false, fil: false, auto: false, couleur: m.photo3d ? m.photo3d.couleur : COUL3[0][0], fond: 'beige', sale: true, photo: !!m.photo3d,
       outil: 'tourner', dec: { forme: 'rond', l: 3, h: 3 }, el: { type: 'perle', matiere: 'or', taille: 0.8 }, pile: [], dsale: false,
       design: { decoupes: ((m.design3d && m.design3d.decoupes) || []).slice(), elements: ((m.design3d && m.design3d.elements) || []).slice() } };
     VUE = '3d'; dessiner(); charger3d();
@@ -1834,6 +1840,195 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function hex(c){ return [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)]; }
 
+
+
+  /* ══ LE PATRON DEPUIS UNE PHOTO (lot 7, 2026-10-17) ═══════════════════════
+     Sa demande : « regénérer un patron à partir d une photo de vêtement sous mannequin fantôme,
+     et ensuite utiliser le moteur 3D ». Le SITE lit la photo (silhouette, IA de vision) et propose
+     une base, des options, des aisances ; la fenêtre MONTRE le patron proposé PAR-DESSUS la photo
+     pour qu on l ajuste à l œil — c est un patron de même allure, pas le patron du fournisseur.
+     « Créer le modèle » l enregistre avec la photo détourée, que l aperçu 3D plaque sur le devant. */
+  var PH = null, PHIMG = {};
+  var LTYPE7 = { '': '${T("Auto (IA)")}', robe: '${T("Robe")}', chemisier: '${T("Haut")}', jupe: '${T("Jupe")}', pantalon: '${T("Pantalon")}' };
+  var LNOTE7 = { echelle_poitrine: '${T("L’échelle est prise à la poitrine, en supposant son aisance habituelle : si le tracé déborde ou flotte partout, corrigez l’échelle.")}',
+    echelle_taille: '${T("L’échelle est prise à la taille, en supposant son aisance habituelle : si le tracé déborde ou flotte partout, corrigez l’échelle.")}',
+    taille_supposee: '${T("La taille ne se voit pas sur la photo (vêtement droit) : sa hauteur est supposée.")}',
+    hanches_non_vues: '${T("Le vêtement s’arrête avant les hanches : leur aisance reste standard.")}',
+    fourche_non_vue: '${T("La fourche ne se voit pas : la longueur de jambe reste celle du tableau.")}',
+    dos_illisible: '${T("La photo de dos n’a pas pu être détourée : seul le devant sera plaqué.")}',
+    dos_non_televerse: '${T("La photo de dos n’a pas pu être enregistrée : seul le devant sera plaqué.")}' };
+  function ouvrirPhoto(){
+    if (!D || !D.peutAjouter) return;
+    PH = { produit: '', face: '', dos: '', choix: 'face', taille: 'M', type: '', r: null, ap: null, nom: '', occupe: false };
+    VUE = 'photo'; dessiner();
+  }
+  function produitsAvecPhoto(){ return (D.produits || []).filter(function(p){ return (p.photos || []).length; }); }
+  // une image https → un Image décodé (pour le canevas), mise en cache ; le rappel redessine
+  function imagePH(url, rappel){
+    if (!url) return null;
+    var e = PHIMG[url];
+    if (e && e.im) return e.im;
+    if (e) return null;
+    PHIMG[url] = { im: null };
+    var poser = function(src){ if (!src) return; var im = new Image(); im.onload = function(){ PHIMG[url].im = im; if (rappel) rappel(); }; im.src = src; };
+    if (/^data:/.test(url)) poser(url);
+    else if (P && P.imageLocale) Promise.resolve(P.imageLocale(url)).then(poser);
+    return null;
+  }
+  function dessinerPhoto(){
+    document.getElementById('titre').textContent = '${T("Patron depuis une photo")}';
+    document.getElementById('sous').textContent = '${T("Une photo sur mannequin fantôme, fond uni : le patron de même allure, puis le vêtement en 3D")}';
+    document.getElementById('actions').innerHTML = '<button type="button" id="ph-retour">${T("← Bibliothèque")}</button>'
+      + (PH.r ? '<button type="button" class="prim" id="ph-creer">${T("Créer le modèle")}</button>' : '');
+    var seg = function(attr, k, lib, on){ return '<button type="button" class="' + (on ? 'on' : '') + '" ' + attr + '="' + k + '">' + lib + '</button>'; };
+    var prods = produitsAvecPhoto(), pr = prods.filter(function(p){ return p.id === PH.produit; })[0];
+    var g = '<div class="cx-carte"><h2>${T("Photo")}</h2><div class="at-champs"><label class="large">${T("Produit de la boutique")}<select id="ph-produit"><option value="">${T("— Choisir un produit —")}</option>'
+      + prods.map(function(p){ return '<option value="' + esc(p.id) + '"' + (PH.produit === p.id ? ' selected' : '') + '>' + esc(p.nom) + '</option>'; }).join('') + '</select></label></div>';
+    if (pr) g += '<div class="ed-seg" role="group" aria-label="${T("Photo choisie")}" style="margin:.5rem 0">' + seg('data-phchoix', 'face', '${T("Face")}', PH.choix === 'face') + seg('data-phchoix', 'dos', '${T("Dos (facultatif)")}', PH.choix === 'dos') + '</div>'
+      + '<div class="ph-vign">' + pr.photos.map(function(u){ var im = PHIMG[u] && PHIMG[u].im;
+          return '<button type="button" data-phphoto="' + esc(u) + '" class="' + (PH.face === u ? 'face' : PH.dos === u ? 'dos' : '') + '" aria-label="${T("Choisir cette photo")}">'
+            + (im ? '<img src="' + esc(im.src) + '" alt="">' : '<span class="ic">🖼</span>') + (PH.face === u ? '<b>${T("Face")}</b>' : PH.dos === u ? '<b>${T("Dos")}</b>' : '') + '</button>'; }).join('') + '</div>';
+    g += '<div class="ed-gestes"><button type="button" class="mini" id="ph-deposer">${T("Déposer une photo…")}</button></div>'
+      + '<input type="file" id="ph-fichier" accept=".png,.jpg,.jpeg,.webp" aria-label="${T("Choisir une photo")}" style="display:none">'
+      + '<div class="cx-sep"></div><h2>${T("Taille photographiée")}</h2><div class="ed-seg" role="group" aria-label="${T("Taille photographiée")}">'
+      + (D.tailles || []).map(function(t){ return seg('data-phtaille', t, esc(t), PH.taille === t); }).join('') + '</div>'
+      + '<div class="cx-sep"></div><h2>${T("Type de vêtement")}</h2><div class="ed-seg" role="group" aria-label="${T("Type de vêtement")}">'
+      + Object.keys(LTYPE7).map(function(k){ return seg('data-phtype', k, LTYPE7[k], PH.type === k); }).join('') + '</div>'
+      + '<div class="ed-gestes" style="margin-top:.7rem"><button type="button" class="prim" id="ph-analyser"' + (PH.face && !PH.occupe ? '' : ' disabled') + '>${T("Analyser la photo")}</button></div>'
+      + '<div class="ed-note">${T("Le fond doit être uni (blanc ou gris) : il est retiré pour lire la silhouette. L’IA de vision reconnaît le type, l’encolure et les manches ; les mesures viennent de la silhouette, à l’échelle de la taille photographiée.")}</div></div>';
+    var c = '<div class="mo-toile" id="ph-toile"><svg id="ph-svg" role="img" aria-label="${T("La photo et le patron proposé")}"></svg></div>';
+    var d = '<div class="cx-carte" id="ph-pan"></div>';
+    corps.innerHTML = '<div class="mo-trois ph-trois">' + g + c + d + '</div>';
+    peindrePH(); panneauPH();
+    var tz = document.getElementById('ph-toile');
+    if (window.ResizeObserver && tz) { if (window._phRO) window._phRO.disconnect(); window._phRO = new ResizeObserver(function(){ peindrePH(); }); window._phRO.observe(tz); }
+  }
+  function panneauPH(){
+    var z = document.getElementById('ph-pan'); if (!z || !PH) return;
+    var r = PH.r;
+    if (PH.occupe) { z.innerHTML = '<h2>${T("Patron proposé")}</h2><div class="sz-squel" role="status" aria-label="${T("Analyse en cours")}"><i></i><i></i><i></i></div><div class="ed-note">${T("Lecture de la silhouette et de l’IA de vision…")}</div>'; return; }
+    if (!r) { z.innerHTML = '<h2>${T("Patron proposé")}</h2><div class="cx-sub">${T("Choisissez une photo de face, puis « Analyser la photo ».")}</div>'; return; }
+    var seg = function(attr, k, lib, on){ return '<button type="button" class="' + (on ? 'on' : '') + '" ' + attr + '="' + k + '">' + lib + '</button>'; };
+    var nb = function(v){ return esc(String(v).replace('.', '${SEP_DEC()}')); };
+    var o = r.options || {}, a = r.aisances || {}, opt = D.options || {};
+    var h = '<h2>${T("Patron proposé")}</h2><div class="ed-seg" role="group" aria-label="${T("Base")}">'
+      + ['robe', 'chemisier', 'jupe', 'pantalon'].map(function(k){ return seg('data-phbase', k, LTYPE7[k], r.base === k); }).join('') + '</div>'
+      + '<div class="at-champs" style="margin-top:.5rem"><label class="large">${T("Nom")}<input type="text" id="ph-nom" maxlength="80" value="' + esc(PH.nom) + '"></label>';
+    var choix = function(id, liste, val){ return '<select id="' + id + '">' + (liste || []).map(function(x){ return '<option value="' + esc(x.cle) + '"' + (val === x.cle ? ' selected' : '') + '>' + esc(szTd(x.nom)) + '</option>'; }).join('') + '</select>'; };
+    if (r.base === 'robe' || r.base === 'chemisier') h += '<label>${T("Encolure")}' + choix('ph-encolure', opt.encolure, o.encolure) + '</label><label>${T("Manches")}' + choix('ph-manche', opt.manche, o.manche) + '</label>';
+    if (r.base === 'jupe') h += '<label class="large">${T("Forme")}' + choix('ph-forme', opt.formeJupe, o.forme) + '</label>';
+    if (r.base === 'pantalon') h += '<label class="large">${T("Forme")}' + choix('ph-forme', opt.formePantalon, o.forme) + '</label>';
+    h += '<label>' + (r.base === 'pantalon' ? '${T("Entrejambe (cm)")}' : r.base === 'jupe' ? '${T("Longueur (cm)")}' : '${T("Sous la taille (cm)")}') + '<input type="text" id="ph-longueur" inputmode="decimal" maxlength="5" value="' + nb(o.longueur || 0) + '"></label>'
+      + '<label>${T("Échelle (px/cm)")}<input type="text" id="ph-k" inputmode="decimal" maxlength="6" value="' + nb(r.face.k) + '"></label>'
+      + '<label>${T("Aisance poitrine")}<input type="text" id="ph-ap" inputmode="decimal" maxlength="4" value="' + nb(a.poitrine) + '"></label>'
+      + '<label>${T("Aisance taille")}<input type="text" id="ph-at" inputmode="decimal" maxlength="4" value="' + nb(a.taille) + '"></label>'
+      + '<label>${T("Aisance hanches")}<input type="text" id="ph-ah" inputmode="decimal" maxlength="4" value="' + nb(a.hanches) + '"></label></div>'
+      + '<div class="cx-sub" style="margin-top:.4rem">' + (r.ia && r.ia.type ? '${T("IA de vision : {0}.")}'.split('{0}').join(esc(LTYPE7[{ haut: 'chemisier' }[r.ia.type] || r.ia.type] || szTd(r.ia.type))) : '${T("IA de vision indisponible : le type vient de votre choix.")}') + '</div>';
+    (r.notes || []).forEach(function(n){ if (LNOTE7[n]) h += '<div class="ed-note">' + LNOTE7[n] + '</div>'; });
+    h += '<div class="ed-note">${T("Le tracé bleu est le devant proposé, à l’échelle de la photo. Corrigez les aisances, la longueur ou l’échelle jusqu’à ce qu’il épouse la silhouette.")}</div>';
+    z.innerHTML = h;
+  }
+  /* La toile : la photo (détourée après analyse), et le devant proposé par-dessus — déplié au pli. */
+  function peindrePH(){
+    var z = document.getElementById('ph-toile'), svg = document.getElementById('ph-svg'); if (!z || !svg || !PH) return;
+    var W = z.clientWidth || 800, H = z.clientHeight || 600, r = PH.r, s = '';
+    var url = r ? r.face.url : PH.face, im = imagePH(url, function(){ if (VUE === 'photo') { peindrePH(); if (!r) dessinerPhoto(); } });
+    var l = r ? r.face.l : (im ? im.naturalWidth : 0), h = r ? r.face.h : (im ? im.naturalHeight : 0);
+    if (!url) s = '<text x="' + W / 2 + '" y="' + H / 2 + '" text-anchor="middle" font-size="14" fill="#3F3A32" font-family="Segoe UI, sans-serif">${T("Choisissez la photo de face du vêtement.")}</text>';
+    else if (!im || !l) s = '<text x="' + W / 2 + '" y="' + H / 2 + '" text-anchor="middle" font-size="14" fill="#3F3A32" font-family="Segoe UI, sans-serif">${T("Chargement de la photo…")}</text>';
+    else {
+      var f = Math.min((W - 40) / l, (H - 40) / h), ox = (W - l * f) / 2, oy = (H - h * f) / 2;
+      s += '<image href="' + im.src + '" x="' + ox + '" y="' + oy + '" width="' + l * f + '" height="' + h * f + '"/>';
+      var dv = PH.ap && (PH.ap.pieces || []).filter(function(p){ return p.id === 'devant'; })[0];
+      if (r && dv) {
+        var k = r.face.k, X = function(v){ return Math.round((ox + (r.face.cx + v * k) * f) * 10) / 10; }, Y = function(v){ return Math.round((oy + (r.face.haut + v * k) * f) * 10) / 10; };
+        var axe = dv.pli || { a: { x: 0, y: 0 }, b: { x: 0, y: 1 } };
+        var mir = dv.contour.map(function(q){ var m = reflet(q, axe); if (q.c1 && q.c2) { m.c1 = reflet(q.c1, axe); m.c2 = reflet(q.c2, axe); } return m; });
+        s += '<path d="' + cheminPiece(dv.contour, X, Y) + ' ' + cheminPiece(mir, X, Y) + '" fill="rgba(37,99,235,.10)" stroke="#1D4ED8" stroke-width="2" stroke-linejoin="round"/>';
+      }
+    }
+    svg.setAttribute('width', W); svg.setAttribute('height', H); svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    svg.innerHTML = s;
+  }
+  // le devant proposé, retracé par le site à chaque réglage (atelier:apercu ne crée rien)
+  var phN = 0;
+  function retracerPH(){
+    if (!PH || !PH.r) return;
+    var n = ++phN, r = PH.r;
+    appeler('atelier:apercu', [{ base: r.base, options: r.options, aisances: r.aisances, taille: r.taille, tableau: D.standard }]).then(function(a){
+      if (n !== phN || !PH || VUE !== 'photo') return;
+      if (a && a.ok) { PH.ap = a; peindrePH(); } else dire(expliquer(a), 'err');
+    });
+  }
+  function analyserPH(){
+    if (!PH || !PH.face || PH.occupe) return;
+    PH.occupe = true; PH.r = null; PH.ap = null; dessinerPhoto(); dire('${T("Analyse de la photo…")}');
+    appeler('atelier:depuisPhoto', [{ face: PH.face, dos: PH.dos || '', taille: PH.taille, base: PH.type || '', tableau: D.standard }]).then(function(r){
+      if (!PH) return;
+      PH.occupe = false;
+      if (!r || !r.ok) { dessinerPhoto(); dire(r && r.motif === 'type_inconnu' ? '${T("L’IA n’a pas reconnu le type : choisissez-le, puis analysez de nouveau.")}' : r && r.motif === 'fond_non_uni' ? '${T("Le fond de la photo n’est pas uni : le vêtement ne se détache pas.")}' : expliquer(r), 'err'); return; }
+      PH.r = r; if (!PH.nom) { var pr = (D.produits || []).filter(function(p){ return p.id === PH.produit; })[0]; PH.nom = r.nom || (pr ? pr.nom : '') || LTYPE7[r.base]; }
+      dessinerPhoto(); retracerPH(); dire('${T("Patron proposé : ajustez-le sur la photo, puis « Créer le modèle ».")}', 'bon');
+    });
+  }
+  function creerPH(){
+    if (!PH || !PH.r || OCCUPE) return;
+    var r = PH.r, nom = String(PH.nom || '').trim();
+    if (!nom) { dire('${T("Donnez un nom au modèle.")}', 'err'); return; }
+    OCCUPE = true; dire('${T("Enregistrement…")}');
+    appeler('atelier:ecrire', [{ nom: nom, base: r.base, categorie: r.categorie, options: r.options, aisances: r.aisances, tailleBase: r.taille,
+      produitId: PH.produit || '', photo3d: { face: r.face, dos: r.dos, couleur: r.couleur }, notes: '${T("Tiré d’une photo (lot 7).")}' }]).then(function(w){
+      OCCUPE = false;
+      if (!w || !w.ok) { dire(expliquer(w), 'err'); return; }
+      var id = w.id || (w.entree && w.entree.id);
+      appeler('atelier:donnees', []).then(function(d){
+        if (d && d.ok) D = d;
+        PH = null; if (window._phRO) { window._phRO.disconnect(); window._phRO = null; }
+        if (id) ouvrir3d(id, 'biblio'); else { VUE = 'biblio'; dessiner(); }
+        dire('${T("Modèle créé depuis la photo.")}', 'bon');
+      });
+    });
+  }
+  function quitterPH(){ PH = null; if (window._phRO) { window._phRO.disconnect(); window._phRO = null; } VUE = 'biblio'; dessiner(); dire(''); }
+  function clicPH(ev){
+    var t = ev.target, b;
+    if ((b = t.closest('[data-phchoix]'))) { PH.choix = b.getAttribute('data-phchoix'); dessinerPhoto(); return; }
+    if ((b = t.closest('[data-phphoto]'))) {
+      var u = b.getAttribute('data-phphoto');
+      if (PH.choix === 'dos') PH.dos = PH.dos === u ? '' : u; else { PH.face = u; if (PH.dos === u) PH.dos = ''; }
+      PH.r = null; PH.ap = null; dessinerPhoto(); return;
+    }
+    if ((b = t.closest('[data-phtaille]'))) { PH.taille = b.getAttribute('data-phtaille'); PH.r = null; dessinerPhoto(); return; }
+    if ((b = t.closest('[data-phtype]'))) { PH.type = b.getAttribute('data-phtype'); PH.r = null; dessinerPhoto(); return; }
+    if ((b = t.closest('[data-phbase]'))) { PH.type = b.getAttribute('data-phbase'); analyserPH(); return; }
+    if (t.closest('#ph-deposer')) { var f = document.getElementById('ph-fichier'); if (f) { f.value = ''; f.click(); } return; }
+    if (t.closest('#ph-analyser')) { analyserPH(); return; }
+  }
+  function changePH(t){
+    var r = PH.r, v = parseFloat(String(t.value).replace(',', '.'));
+    if (t.id === 'ph-produit') { PH.produit = t.value; var pr = (D.produits || []).filter(function(p){ return p.id === t.value; })[0];
+      PH.face = pr && pr.photos[0] || ''; PH.dos = ''; PH.choix = 'face'; PH.r = null; PH.ap = null; PH.nom = pr ? pr.nom : ''; dessinerPhoto(); return; }
+    if (t.id === 'ph-fichier') {
+      var fi = t.files && t.files[0]; if (!fi) return;
+      if (fi.size > 20 * 1024 * 1024) { dire('${T("Une photo de 20 Mo au plus.")}', 'err'); return; }
+      var lect = new FileReader();
+      lect.onload = function(){ var d = String(lect.result || ''); if (PH.choix === 'dos') PH.dos = d; else PH.face = d; PH.r = null; PH.ap = null; dessinerPhoto(); };
+      lect.readAsDataURL(fi); return;
+    }
+    if (t.id === 'ph-nom') { PH.nom = t.value; return; }
+    if (!r) return;
+    var borne = function(x, a, b){ return Math.max(a, Math.min(b, Math.round(x * 100) / 100)); };
+    if (t.id === 'ph-encolure') r.options.encolure = t.value;
+    else if (t.id === 'ph-manche') r.options.manche = t.value;
+    else if (t.id === 'ph-forme') r.options.forme = t.value;
+    else if (!isFinite(v)) { panneauPH(); return; }
+    else if (t.id === 'ph-longueur') r.options.longueur = borne(v, 0, 160);
+    else if (t.id === 'ph-k') { var k0 = r.face.k; r.face.k = borne(v, 0.05, 500); if (r.dos) r.dos.k = Math.round(r.dos.k * r.face.k / k0 * 1000) / 1000; }
+    else if (t.id === 'ph-ap') r.aisances.poitrine = borne(v, 0, 40);
+    else if (t.id === 'ph-at') r.aisances.taille = borne(v, 0, 40);
+    else if (t.id === 'ph-ah') r.aisances.hanches = borne(v, 0, 40);
+    panneauPH(); retracerPH(); peindrePH();
+  }
 
   /* ══ LE MOTEUR WebGL (lot 6, 2026-10-17 — sa décision : « moteur 3D au poste ») ══════════════
      Sa demande : « la même qualité que ce que fal.ai génère, avec plus de détail, surtout une
@@ -1975,6 +2170,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var enCm = function(){ g.setTransform(sx, 0, 0, sy, -bb.x0 * sx, -bb.y0 * sy); };
     g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-over'; g.clearRect(0, 0, cw, ch);
     enCm(); g.fillStyle = V3.couleur; g.beginPath(); tracerC(g, pc.p.contour); if (pc.mir) tracerC(g, pc.mir); g.fill();
+    var ph = V3.photo && V3.m.photo3d ? (pid === 'devant' ? V3.m.photo3d.face : pid === 'dos' ? V3.m.photo3d.dos : null) : null;
+    var phi = ph && imagePH(ph.url, function(){ if (GLV) { GLV.cle = ''; demander3d(); } });
+    if (phi) { enCm(); g.globalCompositeOperation = 'source-atop'; g.drawImage(phi, -ph.cx / ph.k, -ph.haut / ph.k, ph.l / ph.k, ph.h / ph.k); }
     g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-atop';
     g.fillStyle = g.createPattern(grain(), 'repeat'); g.fillRect(0, 0, cw, ch);
     if (motifImg) g.drawImage(motifImg, 0, 0, cw, ch);
@@ -2116,13 +2314,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   /* ── Les programmes ── */
   var VS_TISSU = 'attribute vec3 aP; attribute vec3 aN; attribute vec2 aT; attribute vec4 aK; uniform mat4 uM; uniform mat4 uV; uniform mat3 uR; varying vec3 vN; varying vec2 vT; varying vec3 vE; varying vec4 vK;'
     + ' void main(){ vec4 p = uV * vec4(aP, 1.0); vE = -p.xyz; vN = uR * aN; vT = aT; vK = aK; gl_Position = uM * vec4(aP, 1.0); }';
-  var FS_TISSU = 'precision mediump float; uniform sampler2D uS; uniform vec3 uL; uniform float uC; varying vec3 vN; varying vec2 vT; varying vec3 vE; varying vec4 vK;'
+  var FS_TISSU = 'precision mediump float; uniform sampler2D uS; uniform vec3 uL; uniform float uC; uniform vec3 uF; varying vec3 vN; varying vec2 vT; varying vec3 vE; varying vec4 vK;'
     + ' void main(){ vec4 t = texture2D(uS, vT); if (t.a < 0.5) discard; vec3 n = normalize(vN); vec3 e = normalize(vE); float de = 0.0;'
     + ' if (dot(n, e) < 0.0) { n = -n; de = 1.0; }'
     + ' float d = max(0.0, (dot(n, uL) + 0.35) / 1.35); float r = pow(1.0 - max(0.0, dot(n, e)), 2.5);'
     + ' vec3 h = normalize(uL + e); float sp = pow(max(0.0, dot(n, h)), 24.0) * 0.05;'
     + ' vec3 b = mix(t.rgb, vK.rgb, vK.a * uC); vec3 c = b * (0.34 + 0.72 * d) + vec3(r * 0.09 + sp);'
-    + ' if (de > 0.5) c = c * 0.55; gl_FragColor = vec4(c, 1.0); }';
+    + ' if (de > 0.5) { float o = 0.62 + 0.38 * clamp(1.0 - abs(dot(n, e)), 0.0, 1.0); c = uF * (0.50 + 0.30 * d) * o; } gl_FragColor = vec4(c, 1.0); }';
   var VS_OBJ = 'attribute vec3 aP; attribute vec3 aN; uniform mat4 uM; uniform mat4 uV; uniform mat3 uR; varying vec3 vN; varying vec3 vE;'
     + ' void main(){ vec4 p = uV * vec4(aP, 1.0); vE = -p.xyz; vN = uR * aN; gl_Position = uM * vec4(aP, 1.0); }';
   var FS_OBJ = 'precision mediump float; uniform vec3 uL; uniform vec3 uB; uniform float uMet; uniform float uBr; varying vec3 vN; varying vec3 vE;'
@@ -2159,6 +2357,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     GLV.solB = tampon(gl, new Float32Array([-1, -1, 1, -1, 1, 1, -1, -1, 1, 1, -1, 1]));
     var ob = objets3d(); GLV.objets = {};
     Object.keys(ob).forEach(function(k){ GLV.objets[k] = { pos: tampon(gl, ob[k].pos), nor: tampon(gl, ob[k].nor), n: ob[k].n }; });
+    // ⚠ les petits textes et les images fines du motif demandent de la définition : 32 px/cm, borné par la carte
+    GLV.maxTex = Math.max(1024, Math.min(4096, gl.getParameter(gl.MAX_TEXTURE_SIZE) || 2048));
     GLV.aniso = gl.getExtension('EXT_texture_filter_anisotropic') || gl.getExtension('WEBKIT_EXT_texture_filter_anisotropic');
     cv.addEventListener('webglcontextlost', function(ev){ ev.preventDefault(); GLV = null; });
     return true;
@@ -2171,8 +2371,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     Object.keys(GLV.toiles).forEach(function(k){ if (GLV.toiles[k].tex) gl.deleteTexture(GLV.toiles[k].tex); });
     GLV.mailles = []; GLV.toiles = {};
     (r.pieces || []).forEach(function(p){
-      var pc = depliee(p), bb = pc.bb, pp = function(v){ var n = 256; while (n < v && n < 2048) n *= 2; return n; };
-      pc.toile = document.createElement('canvas'); pc.toile.width = pp((bb.x1 - bb.x0) * 16); pc.toile.height = pp((bb.y1 - bb.y0) * 16);
+      var pc = depliee(p), bb = pc.bb, pp = function(v){ var n = 256; while (n < v && n < GLV.maxTex) n *= 2; return n; };
+      pc.toile = document.createElement('canvas'); pc.toile.width = pp((bb.x1 - bb.x0) * 32); pc.toile.height = pp((bb.y1 - bb.y0) * 32);
       pieces[p.id] = pc; GLV.toiles[p.id] = pc;
     });
     (r.vetement || []).forEach(function(tb){
@@ -2252,7 +2452,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!GLV || GLV.cv !== cv) { if (!initGL(cv)) return false; }
     var gl = GLV.gl;
     if (GLV.r !== V3.r) construireGL(V3.r);
-    var cle = V3.id + '|' + V3.couleur + '|' + JSON.stringify(V3.design || {}) + '|' + (V3.m.version || 0);
+    var cle = V3.id + '|' + V3.couleur + '|' + (V3.photo ? 1 : 0) + '|' + JSON.stringify(V3.design || {}) + '|' + (V3.m.version || 0);
     if (GLV.cle !== cle) { GLV.cle = cle; toilesGL(); }
     var W = cv.clientWidth, H = cv.clientHeight, dpr = window.devicePixelRatio || 1;
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
@@ -2268,7 +2468,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // le tissu
     var pt = GLV.tissu; gl.useProgram(pt.p); delier(gl);
     gl.uniformMatrix4fv(pt.u.uM, false, col4(cam.M)); gl.uniformMatrix4fv(pt.u.uV, false, col4(cam.V)); gl.uniformMatrix3fv(pt.u.uR, false, col3(cam.R));
-    gl.uniform3f(pt.u.uL, L[0], L[1], L[2]); gl.uniform1f(pt.u.uC, V3.carte ? 0.6 : 0); gl.uniform1i(pt.u.uS, 0); gl.activeTexture(gl.TEXTURE0);
+    gl.uniform3f(pt.u.uL, L[0], L[1], L[2]); gl.uniform1f(pt.u.uC, V3.carte ? 0.6 : 0); var fo = hex(V3.couleur); gl.uniform3f(pt.u.uF, fo[0] / 255 * 0.92, fo[1] / 255 * 0.92, fo[2] / 255 * 0.92); gl.uniform1i(pt.u.uS, 0); gl.activeTexture(gl.TEXTURE0);
     GLV.mailles.forEach(function(ma){
       if (!ma.pc.tex) return;
       gl.bindTexture(gl.TEXTURE_2D, ma.pc.tex);
@@ -2357,7 +2557,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if ((D3.elements || []).length >= 300) { dire('${T("300 éléments au plus.")}', 'err'); return true; }
       memo3d(); D3.elements.push({ piece: v.piece, type: V3.el.type, matiere: V3.el.matiere, x: v.x, y: v.y, taille: V3.el.taille });
     } else return false;
-    V3.dsale = true; V3.quitterOk = false; dire(''); peindreDesign3d(); entete3d(); demander3d();
+    V3.dsale = true; dire(''); peindreDesign3d(); entete3d(); demander3d();
     return true;
   }
   function annuler3d(){ if (!V3 || !V3.pile.length) return; V3.design = V3.pile.pop(); V3.dsale = true; peindreDesign3d(); entete3d(); demander3d(); }
@@ -2494,7 +2694,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (m.tailles || []).map(function(t){ return seg('data-v3t', t, esc(t), V3.taille === t); }).join('') + '</div>'
       + '<div class="cx-sep"></div><h2>${T("Vue")}</h2><div class="ed-seg" role="group" aria-label="${T("Vue")}">'
       + VUES3.map(function(v){ return seg('data-v3v', v[0], v[1], false).replace('<button ', '<button title="' + (v[3] || v[1]) + '" '); }).join('') + '</div>'
-      + '<div class="im-cases" style="margin-top:.6rem">' + chip('carte', '${T("Carte d’ajustement")}', V3.carte) + chip('fil', '${T("Fil de fer")}', V3.fil) + chip('auto', '${T("Rotation automatique")}', V3.auto) + '</div>'
+      + '<div class="im-cases" style="margin-top:.6rem">' + chip('carte', '${T("Carte d’ajustement")}', V3.carte) + chip('fil', '${T("Fil de fer")}', V3.fil) + chip('auto', '${T("Rotation automatique")}', V3.auto) + (m.photo3d ? chip('photo', '${T("Photo plaquée")}', V3.photo) : '') + '</div>'
       + '<div class="cx-sep"></div><h2>${T("Couleur du tissu")}</h2><div class="v3-couleurs">'
       + COUL3.map(function(c){ return '<button type="button" class="' + (V3.couleur === c[0] ? 'on' : '') + '" data-v3c="' + c[0] + '" title="' + c[1] + '" aria-label="' + c[1] + '" style="background:' + c[0] + '"></button>'; }).join('') + '</div>'
       + '<div class="cx-sep"></div><h2>${T("Fond")}</h2><div class="ed-seg" role="group" aria-label="${T("Fond")}">' + seg('data-v3f', 'beige', '${T("Beige")}', V3.fond === 'beige') + seg('data-v3f', 'blanc', '${T("Blanc")}', V3.fond === 'blanc') + '</div>'
@@ -2535,7 +2735,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function clic3d(ev){
     var t = ev.target, b;
     if ((b = t.closest('[data-v3t]'))) { V3.taille = b.getAttribute('data-v3t'); dessiner(); V3.r = null; peindrePanneau3d(); charger3d(); return; }
-    if ((b = t.closest('[data-v3v]'))) { var v = VUES3.filter(function(x){ return x[0] === b.getAttribute('data-v3v'); })[0]; V3.yaw = v[2]; V3.pitch = 0.05; demander3d(); return; }
+    if ((b = t.closest('[data-v3v]'))) { var v = VUES3.filter(function(x){ return x[0] === b.getAttribute('data-v3v'); })[0]; V3.yaw = v[2]; V3.pitch = v[4] != null ? v[4] : 0.05; demander3d(); return; }
     if ((b = t.closest('[data-v3c]'))) { V3.couleur = b.getAttribute('data-v3c'); dessiner(); return; }
     if ((b = t.closest('[data-v3f]'))) { V3.fond = b.getAttribute('data-v3f'); dessiner(); return; }
     if ((b = t.closest('[data-v3out]'))) { V3.outil = b.getAttribute('data-v3out'); var sc = document.getElementById('v3-scene'); if (sc) sc.classList.toggle('vise', V3.outil !== 'tourner'); peindreDesign3d(); return; }
@@ -2544,7 +2744,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if ((b = t.closest('[data-v3em]'))) { V3.el.matiere = b.getAttribute('data-v3em'); peindreDesign3d(); return; }
   }
   function change3d(t){
-    if (t.hasAttribute('data-v3o')) { V3[t.getAttribute('data-v3o')] = !!t.checked; demander3d(); return; }
+    if (t.hasAttribute('data-v3o')) { V3[t.getAttribute('data-v3o')] = !!t.checked; if (t.getAttribute('data-v3o') === 'photo' && GLV) GLV.cle = ''; demander3d(); return; }
     if (changeDesign3d(t)) return;
 
   }
@@ -2562,7 +2762,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
   }
   function quitter3d(){
-    if (V3 && V3.dsale && !V3.quitterOk) { V3.quitterOk = true; dire('${T("Le design 3D n’est pas enregistré : cliquez encore pour quitter sans enregistrer.")}', 'att'); return; }
+    if (V3 && V3.dsale && !V3.quitterOk) { szConfirmer({ titre: '${T("Quitter sans enregistrer ?")}', texte: '${T("Le design 3D (découpes, bijoux) sera perdu.")}', oui: '${T("Quitter")}', danger: true }).then(function(ok){ if (ok && V3) { V3.quitterOk = true; quitter3d(); } }); return; }
     var r = V3 ? V3.retour : 'biblio', id = V3 ? V3.id : '';
     V3 = null; if (window._v3RO) { window._v3RO.disconnect(); window._v3RO = null; }
     if (r === 'editeur' && id) { VUE = 'biblio'; ouvrirEditeur(id); return; }
@@ -3310,6 +3510,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (VUE === 'impression') { if (IMP) clicImpression(ev); return; }
     if (VUE === '3d') { if (V3) clic3d(ev); return; }
     if (VUE === 'motif') { if (MO) clicMo(ev); return; }
+    if (VUE === 'photo') { if (PH) clicPH(ev); return; }
     var b;
     if ((b = t.closest('[data-motif]'))) { ouvrirMotif(b.getAttribute('data-motif'), 'biblio'); return; }
     if ((b = t.closest('[data-v3]'))) { ouvrir3d(b.getAttribute('data-v3'), 'biblio'); return; }
@@ -3332,12 +3533,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if ((b = t.closest('#m-standard'))) { M.tableau = copie(D.standard); TRACE = true; dessinerModele(); dire('${T("Tableau standard remis.")}', 'bon'); return; }
   });
   corps.addEventListener('dblclick', function(ev){
-    if (VUE === 'editeur' || VUE === 'impression' || VUE === '3d' || VUE === 'motif') return;
+    if (VUE === 'editeur' || VUE === 'impression' || VUE === '3d' || VUE === 'motif' || VUE === 'photo') return;
     var b = ev.target && ev.target.closest ? ev.target.closest('[data-sel]') : null;
     if (b) ouvrirModele(b.getAttribute('data-sel'));
   });
   corps.addEventListener('input', function(ev){
-    if (VUE === 'editeur' || VUE === 'impression' || VUE === '3d' || VUE === 'motif') return;
+    if (VUE === 'editeur' || VUE === 'impression' || VUE === '3d' || VUE === 'motif' || VUE === 'photo') return;
     var t = ev.target;
     if (t && t.id === 'a-q') { Q = t.value; clearTimeout(window._atQ); window._atQ = setTimeout(redessinerSansPerdreLaSaisie, 200); return; }
     ramasser(t);
@@ -3348,6 +3549,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (VUE === 'impression') { if (IMP) changeImpression(t); return; }
     if (VUE === '3d') { if (V3) change3d(t); return; }
     if (VUE === 'motif') { if (MO) changeMo(t); return; }
+    if (VUE === 'photo') { if (PH) changePH(t); return; }
     if (t.hasAttribute && t.hasAttribute('data-taille')) {
       var tl = t.getAttribute('data-taille');
       var ls = (M.tailles || []).filter(function(x){ return x !== tl; });
@@ -3389,6 +3591,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (t.closest('#e-enreg')) { enregistrerEditeur(t.closest('#e-enreg')); return; }
     if (t.closest('#m-editer')) { if (M && M.id && !TRACE) { var mid = M.id; M = null; ouvrirEditeur(mid); } return; }
     if (t.closest('#a-nouveau')) { ouvrirNeuf(); return; }
+    if (t.closest('#a-photo')) { ouvrirPhoto(); return; }
+    if (t.closest('#ph-retour')) { quitterPH(); return; }
+    if (t.closest('#ph-creer')) { creerPH(); return; }
     if (t.closest('#m-retour')) { revenir(); return; }
     if (t.closest('#m-enreg')) { enregistrer(t.closest('#m-enreg')); return; }
   });
@@ -3461,7 +3666,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function dessiner(){
     if (!D) return;
-    if (VUE === 'motif' && MO) dessinerMo(); else if (VUE === '3d' && V3) dessiner3d(); else if (VUE === 'impression' && IMP) dessinerImpression(); else if (VUE === 'editeur' && E) dessinerEditeur(); else if (VUE === 'modele' && M) dessinerModele(); else dessinerBiblio();
+    if (VUE === 'photo' && PH) dessinerPhoto(); else if (VUE === 'motif' && MO) dessinerMo(); else if (VUE === '3d' && V3) dessiner3d(); else if (VUE === 'impression' && IMP) dessinerImpression(); else if (VUE === 'editeur' && E) dessinerEditeur(); else if (VUE === 'modele' && M) dessinerModele(); else dessinerBiblio();
   }
   /* ⚠ NE JAMAIS REDESSINER LE CHAMP SOUS LES DOIGTS. */
   function redessinerSansPerdreLaSaisie(){
@@ -3483,6 +3688,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       else if (DEPART.indexOf('editeur:') === 0) { var de = DEPART.slice(8); DEPART = ''; ouvrirEditeur(de); }
       else if (DEPART.indexOf('impression:') === 0) { var di = DEPART.slice(11); DEPART = ''; ouvrirImpression(di, 'biblio'); }
       else if (DEPART.indexOf('3d:') === 0) { var d3 = DEPART.slice(3); DEPART = ''; ouvrir3d(d3, 'biblio'); }
+      else if (DEPART === 'photo' && D.peutAjouter) { DEPART = ''; ouvrirPhoto(); }
       else if (DEPART.indexOf('motif:') === 0) { var dm = DEPART.slice(6); DEPART = ''; ouvrirMotif(dm, 'biblio'); }
       else dessiner();
       if (apres) apres(); else dire('');

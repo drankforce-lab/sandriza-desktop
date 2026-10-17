@@ -3707,6 +3707,11 @@ const JEU = {
       { nom: 'nouveau modèle (moteur)', id: 'nouveau', reponses: avec({ 'atelier:donnees': D, 'atelier:apercu': AP }) },
       { nom: 'motif et impression textile', id: 'motif:atl_essai1', reponses: avec({ 'atelier:donnees': DMO, 'atelier:apercu': AP, 'atelier:motifControler': MOC, 'atelier:motifExporter': { ok: false, motif: 'motif_vide' }, 'atelier:motifImage': { ok: false, motif: 'televersement' } }) },
       { nom: 'aperçu 3D', id: '3d:atl_essai1', reponses: avec({ 'atelier:donnees': D, 'atelier:apercu': AP }) },
+      // lot 7 : le patron depuis une photo — la vue de départ (produits avec photos ; l analyse demande une vraie photo)
+      { nom: 'patron depuis une photo', id: 'photo', reponses: avec({ 'atelier:donnees': (function(){ var d = JSON.parse(JSON.stringify(D));
+        d.produits = [{ id: 'prod_0011', nom: 'Robe ZENXAS', categorie: 'robes', photos: ['https://essai.sandriza/robe-face.jpg', 'https://essai.sandriza/robe-dos.jpg'] },
+          { id: 'prod_0012', nom: 'Pantalon Yaolin', categorie: 'pantalons', photos: ['https://essai.sandriza/pantalon.jpg'] }]; return d; })(), 'atelier:apercu': AP,
+        'atelier:depuisPhoto': { ok: false, motif: 'fond_non_uni' } }) },
       { nom: 'imprimer et exporter', id: 'impression:atl_essai1', reponses: avec({ 'atelier:donnees': D, 'atelier:apercu': AP }) },
       { nom: 'éditeur de patron', id: 'editeur:atl_essai1', reponses: avec({ 'atelier:donnees': D, 'atelier:apercu': AP }) },
       { nom: 'rôle sans droit', id: '', reponses: { 'atelier:donnees': { ok: false, motif: 'droit' }, identite: IDENTITE } },
