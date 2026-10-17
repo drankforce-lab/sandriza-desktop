@@ -435,4 +435,7 @@ module.exports = {
   'généré (chemisier)': 'generated (blouse)',
   'généré (jupe)': 'generated (skirt)',
   'généré (pantalon)': 'generated (trousers)',
+  'Lettre': 'Letter',
+  'Légal': 'Legal',
+  'Tabloïd': 'Tabloid',
 };

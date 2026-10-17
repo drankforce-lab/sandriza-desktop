@@ -297,6 +297,12 @@ contextBridge.exposeInMainWorld('szPont', {
     .invoke('export:save', String(nom || ''), String(contenu == null ? '' : contenu))
     .catch((e) => ({ ok: false, error: String((e && e.message) || e) })),
   ouvrirDossierExports: () => ipcRenderer.invoke('export:openFolder').catch(() => false),
+  /* Un document HTML changé en PDF par le principal (Atelier, 2026-10-17) :
+     `{ pageCss: true }` garde la taille de page que le document déclare, sans
+     marge. Le PDF revient en base64 et part ensuite par enregistrerExport —
+     aucun chemin n'entre depuis la fenêtre. */
+  documentPdf: (html, opts) => ipcRenderer.invoke('doc:pdf', String(html || ''), { pageCss: !!(opts && opts.pageCss) })
+    .catch((e) => ({ ok: false, error: String((e && e.message) || e) })),
 
   /* ══ OU LES EXPORTS ATTERRISSENT — LE LIRE ET LE CHANGER ═══════════════════
      ⚠ La fenetre ne choisit toujours PAS le chemin elle-meme : elle demande

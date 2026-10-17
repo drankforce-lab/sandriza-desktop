@@ -21,7 +21,11 @@
  * onglet Gradation, calque « Toutes les tailles »), les NOMS de bords, les
  * ASSEMBLAGES (écart, Égaliser) et la restauration des VERSIONS. Les pièces
  * passent par atelier:preparer à l'ouverture.
- * Les lots suivants : l'impression et l'export, l'aperçu 3D, l'éditeur de motif.
+ * LOT 3 (7.43.0) : IMPRIMER ET EXPORTER — la fenêtre choisit la destination et
+ * les réglages, montre l'aperçu que le site dessine (atelier:exporter, apercu),
+ * fait changer le HTML en PDF par la coquille (P.documentPdf, taille de page
+ * exacte) et enregistre dans le dossier des exports (P.enregistrerExport).
+ * Les lots suivants : l'aperçu 3D, l'éditeur de motif.
  *
  * ⚠ LA FENÊTRE NE TRACE RIEN (sauf le geste de l'éditeur : un point suit la
  * souris ; la ligne de coupe, les longueurs et le tissu reviennent du site par
@@ -143,6 +147,22 @@ table.at-tab{width:100%;border-collapse:collapse;font-size:.8rem;font-variant-nu
 .ed-gestes{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.5rem}
 .ed-note{font-size:.76rem;color:var(--tx2);margin:.35rem 0 .1rem}
 .ed-bords{font-variant-numeric:tabular-nums}
+
+/* ── Imprimer et exporter (lot 3) ── */
+.im-trois{display:grid;grid-template-columns:19rem minmax(0,1fr) 21rem;gap:.9rem;min-height:0}
+.cx>.im-trois{flex:1 1 0}
+.im-trois>.cx-carte{min-height:0;overflow:auto}
+.im-dest{display:flex;flex-direction:column;gap:.15rem;width:100%;text-align:left;padding:.5rem .65rem;border-radius:10px;background:transparent;border:1px solid transparent;margin-bottom:.3rem}
+.im-dest b{font-size:.84rem;font-weight:650}
+.im-dest span{font-size:.74rem;color:var(--tx2)}
+.im-dest.on{border-color:var(--or);background:rgba(var(--or-rgb),.12)}
+.im-groupe{font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;color:var(--tx2);margin:.6rem 0 .3rem}
+.cx-carte>.im-apercu{flex:1 1 0;min-height:0}
+.im-apercu{border-radius:12px;background:#FFFFFF;color:#1C1B18;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:.6rem}
+.im-apercu svg{display:block;max-width:100%;max-height:100%}
+.im-cases{display:flex;flex-direction:column;gap:.3rem;font-size:.82rem}
+.im-cases label{display:flex;align-items:center;gap:.45rem;cursor:pointer}
+.im-resume{font-size:.8rem;color:var(--tx2);margin-top:.5rem;font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -222,6 +242,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     assemblage: '${T("Un des deux bords de cet assemblage n’existe plus.")}',
     retouche_et_retrace: '${T("Impossible d’enregistrer une retouche et de retracer en même temps.")}',
     pieces: '${T("Le patron n’a plus de pièce valable.")}',
+    aucune_piece: '${T("Aucune des pièces choisies n’existe dans ce modèle.")}',
     echec: '${T("L’opération a échoué.")}'
   };
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
@@ -389,6 +410,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + (D.peutSupprimer ? '<button type="button" class="danger" data-suppr="' + esc(m.id) + '">${T("Supprimer")}</button>' : '')
         + (D.peutAjouter ? '<button type="button" data-dupl="' + esc(m.id) + '">${T("Dupliquer")}</button>' : '')
         + '<button type="button" data-editer="' + esc(m.id) + '">${T("Éditer le patron")}</button>'
+        + '<button type="button" data-imprimer="' + esc(m.id) + '">${T("Imprimer / exporter")}</button>'
         + '<button type="button" class="prim" data-ouvrir="' + esc(m.id) + '">${T("Ouvrir le modèle")}</button></div>'
         + (m.edite ? '<div class="ed-note">${T("Patron retouché dans l’éditeur : « retracer » depuis le modèle effacerait ces retouches.")}</div>' : '');
     }
@@ -1057,6 +1079,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (SALE ? ' · ${T("modifications non enregistrées")}' : '');
     var a = document.getElementById('actions');
     a.innerHTML = '<button type="button" id="e-retour">${T("← Bibliothèque")}</button>'
+      + '<button type="button" id="e-imprimer">${T("Imprimer / exporter")}</button>'
       + '<button type="button" id="e-annuler" title="${T("Annuler (Ctrl+Z)")}" aria-label="${T("Annuler")}"' + (PILE.length ? '' : ' disabled') + '>↶</button>'
       + '<button type="button" id="e-refaire" title="${T("Refaire (Ctrl+Y)")}" aria-label="${T("Refaire")}"' + (REFAIRE.length ? '' : ' disabled') + '>↷</button>'
       + (D.peutModifier ? '<button type="button" class="prim" id="e-enreg"' + (SALE ? '' : ' disabled') + '>${T("Enregistrer la version")}</button>' : '');
@@ -1131,7 +1154,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     szConfirmer({ titre: '${T("Quitter sans enregistrer ?")}', texte: '${T("Les retouches du patron depuis le dernier enregistrement seront perdues.")}', oui: '${T("Quitter")}', danger: true })
       .then(function(ok){ if (ok) sortir(); });
   }
-  function enregistrerEditeur(btn){
+  /* L export part de la version ENREGISTRÉE : des retouches en cours s enregistrent d abord. */
+  function imprimerDepuisEditeur(){
+    if (!E) return;
+    var id = E.m.id;
+    if (!SALE) { E = null; ouvrirImpression(id, 'editeur'); return; }
+    szConfirmer({ titre: '${T("Enregistrer avant d’exporter ?")}', texte: '${T("L’export part de la version enregistrée. Vos retouches en cours seront enregistrées comme une nouvelle version.")}',
+      oui: '${T("Enregistrer et exporter")}' }).then(function(ok){
+      if (ok) enregistrerEditeur(document.getElementById('e-enreg'), function(){ E = null; ouvrirImpression(id, 'editeur'); });
+    });
+  }
+  function enregistrerEditeur(btn, apres){
     if (OCCUPE || !E || !SALE) return;
     OCCUPE = true; if (btn) btn.disabled = true;
     dire('${T("Enregistrement…")}');
@@ -1142,6 +1175,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       appeler('atelier:donnees', []).then(function(d){
         if (d && d.ok) { D = d; var m = (D.modeles || []).filter(function(x){ return x.id === E.m.id; })[0]; if (m && E) E.m = copie(m); }
         if (VUE === 'editeur' && E) { teteEditeur(); dire('${T("Version enregistrée.")}', 'bon'); }
+        if (apres) apres();
       });
     });
   }
@@ -1496,11 +1530,163 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return false;
   }
 
+  /* ══ IMPRIMER ET EXPORTER (lot 3) ═══════════════════════════════════════
+     Tout le contenu des fichiers se FABRIQUE dans le site (atelier:exporter,
+     depuis la version ENREGISTRÉE du modèle) ; la fenêtre choisit, montre
+     l aperçu que le site dessine, fait changer le HTML en PDF par la coquille
+     (P.documentPdf, taille de page exacte) et l enregistre dans le dossier des
+     exports (P.enregistrerExport). */
+  var IMP = null;
+  var DESTS = [
+    { cle: 'tuiles', grp: 'patron', lib: '${T("Imprimante de bureau")}', sous: '${T("PDF en tuiles · Lettre, Légal, A4, A3 · à assembler")}' },
+    { cle: 'grand', grp: 'patron', lib: '${T("Traceur grand format")}', sous: '${T("PDF A0 ou rouleau 36 po / 60 po")}' },
+    { cle: 'plt', grp: 'patron', lib: '${T("Traceur (PLT / HPGL)")}', sous: '${T("Fichier de traçage · imprimante « PBX » : modèle à préciser")}' },
+    { cle: 'dxf', grp: 'patron', lib: '${T("Table de coupe")}', sous: '${T("DXF-AAMA · un bloc par pièce et par taille")}' },
+    { cle: 'svg', grp: 'fichiers', lib: '${T("Fichier ouvert (SVG)")}', sous: '${T("Vectoriel, à l’échelle 1, en millimètres")}' },
+    { cle: 'fiche', grp: 'documents', lib: '${T("Fiche technique")}', sous: '${T("PDF Lettre : croquis, mesures, pièces, tissu")}' }
+  ];
+  var LGRP = { patron: '${T("Patron")}', fichiers: '${T("Fichiers ouverts")}', documents: '${T("Documents")}' };
+  var LPAPIER = { lettre: '${T("Lettre (8,5 × 11 po)")}', legal: '${T("Légal (8,5 × 14 po)")}', a4: 'A4', a3: 'A3', tabloid: '${T("Tabloïd (11 × 17 po)")}' };
+  var LTRACEUR = { a0: '${T("A0 (841 × 1189 mm)")}', r36: '${T("Rouleau 36 po (914 mm)")}', r60: '${T("Rouleau 60 po (1524 mm)")}' };
+
+  function ouvrirImpression(id, retour){
+    var m = (D.modeles || []).filter(function(x){ return x.id === id; })[0];
+    if (!m) { dire(MOTIFS.introuvable, 'err'); return; }
+    SEL = id;
+    IMP = { id: id, m: m, retour: retour || 'biblio', format: (IMP && IMP.format) || 'tuiles', papier: (IMP && IMP.papier) || 'lettre',
+      chev: (IMP && IMP.chev != null) ? IMP.chev : 10, traceur: 'a0', tailles: 'base', pieces: (m.pieces || []).map(function(p){ return p.id; }),
+      calques: { couture: true, crans: true, constr: true, noms: true }, encre: false, ap: null };
+    VUE = 'impression'; dessiner(); apercuImpression();
+  }
+  function optsImpression(apercu){
+    var t = IMP.format === 'plt' && IMP.traceur === 'a0' ? 'r36' : IMP.traceur;
+    return { id: IMP.id, format: IMP.format, papier: IMP.papier, chevauchement: IMP.chev, traceur: t, tailles: IMP.tailles,
+      pieces: IMP.pieces, calques: IMP.calques, encre: IMP.encre, apercu: !!apercu };
+  }
+  var imN = 0;
+  function apercuImpression(){
+    var n = ++imN, z = document.getElementById('i-apercu');
+    if (z) z.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i></div>';
+    appeler('atelier:exporter', [optsImpression(true)]).then(function(r){
+      if (n !== imN || VUE !== 'impression' || !IMP) return;
+      IMP.ap = r && r.ok ? r : null;
+      var zz = document.getElementById('i-apercu'), rs = document.getElementById('i-resume');
+      if (!r || !r.ok) { if (zz) zz.innerHTML = '<div class="vide">' + esc(expliquer(r)) + '</div>'; if (rs) rs.textContent = ''; return; }
+      if (zz) zz.innerHTML = r.apercu || '';
+      if (rs) rs.textContent = resumeImpression(r);
+    });
+  }
+  function resumeImpression(r){
+    var q = r.resume || {}, cm2 = function(v){ return String(Math.round((v || 0) * 10) / 10).replace('.', '${SEP_DEC()}'); };
+    if (r.format === 'tuiles') return '${T("{0} pages {1} ({2} × {3}) + 1 page de plan · nom du fichier : {4}")}'.split('{0}').join(q.cols * q.rangs).split('{1}').join(szTd(q.papier || '')).split('{2}').join(q.cols).split('{3}').join(q.rangs).split('{4}').join(r.nom);
+    if (r.format === 'grand') return '${T("{0} feuille(s) · plan de {1} × {2} cm · {3}")}'.split('{0}').join(r.pages).split('{1}').join(cm2(q.largeur)).split('{2}').join(cm2(q.hauteur)).split('{3}').join(r.nom);
+    if (r.format === 'fiche') return '${T("1 page Lettre · {0}")}'.split('{0}').join(r.nom);
+    return '${T("Plan de {0} × {1} cm · {2}")}'.split('{0}').join(cm2(q.largeur)).split('{1}').join(cm2(q.hauteur)).split('{2}').join(r.nom);
+  }
+  function dessinerImpression(){
+    var m = IMP.m;
+    document.getElementById('titre').textContent = '${T("Imprimer et exporter")}';
+    document.getElementById('sous').textContent = m.nom + (m.ref ? ' · ' + m.ref : '') + ' · v' + (m.version || 1) + ' · '
+      + '${T("{0} pièces")}'.split('{0}').join((m.pieces || []).length);
+    document.getElementById('actions').innerHTML = '<button type="button" id="i-retour">' + (IMP.retour === 'editeur' ? '${T("← Éditeur")}' : '${T("← Bibliothèque")}') + '</button>'
+      + '<button type="button" id="i-dossier">${T("Ouvrir le dossier des exports")}</button>'
+      + '<button type="button" class="prim" id="i-exporter">${T("Exporter le fichier")}</button>';
+    var g = '<div class="cx-carte"><h2>${T("Destination")}</h2>', grp = '';
+    DESTS.forEach(function(d){
+      if (d.grp !== grp) { grp = d.grp; g += '<div class="im-groupe">' + LGRP[grp] + '</div>'; }
+      g += '<button type="button" class="im-dest' + (IMP.format === d.cle ? ' on' : '') + '" data-idest="' + d.cle + '" aria-pressed="' + (IMP.format === d.cle) + '"><b>' + d.lib + '</b><span>' + d.sous + '</span></button>';
+    });
+    g += '</div>';
+    var a = '<div class="cx-carte"><h2>${T("Aperçu")}</h2><div class="im-apercu" id="i-apercu"></div><div class="im-resume" id="i-resume"></div></div>';
+    var sel = function(id, lib, liste, val){
+      return '<label class="large">' + lib + '<select id="' + id + '">' + Object.keys(liste).map(function(k){
+        return '<option value="' + k + '"' + (String(val) === k ? ' selected' : '') + '>' + liste[k] + '</option>'; }).join('') + '</select></label>';
+    };
+    var f = IMP.format, r = '<div class="cx-carte"><h2>${T("Réglages")}</h2><div class="at-champs">';
+    if (f === 'tuiles') r += sel('i-papier', '${T("Papier")}', LPAPIER, IMP.papier) + sel('i-chev', '${T("Chevauchement")}', { '0': '${T("Aucun")}', '10': '1 cm', '20': '2 cm' }, IMP.chev);
+    if (f === 'grand') r += sel('i-traceur', '${T("Format")}', LTRACEUR, IMP.traceur);
+    if (f === 'plt') r += sel('i-traceur', '${T("Largeur du rouleau")}', { r36: LTRACEUR.r36, r60: LTRACEUR.r60 }, IMP.traceur === 'a0' ? 'r36' : IMP.traceur);
+    r += '</div>';
+    if (f !== 'fiche') {
+      var tb = esc(m.tailleBase || 'M');
+      r += '<div class="cx-sep"></div><h2>${T("Tailles")}</h2><div class="ed-seg" role="group" aria-label="${T("Tailles")}">'
+        + [['base', '${T("Taille {0}")}'.split('{0}').join(tb), '${T("Taille {0} seulement")}'.split('{0}').join(tb)], ['toutes', '${T("Emboîtées")}', '${T("Toutes, emboîtées")}'], ['separees', '${T("Par taille")}', '${T("Une série par taille")}']].map(function(o){
+            return '<button type="button" class="' + (IMP.tailles === o[0] ? 'on' : '') + '" data-itailles="' + o[0] + '" title="' + o[2] + '">' + o[1] + '</button>'; }).join('') + '</div>'
+        + '<div class="cx-sep"></div><h2>${T("Pièces")}</h2><div class="im-cases">'
+        + (m.pieces || []).map(function(p){
+            return '<label><input type="checkbox" data-ipiece="' + esc(p.id) + '"' + (IMP.pieces.indexOf(p.id) >= 0 ? ' checked' : '') + '>' + esc(nomPiece(p)) + '</label>'; }).join('')
+        + '</div><div class="cx-sep"></div><h2>${T("Sur le patron")}</h2><div class="im-cases">'
+        + [['couture', '${T("Ligne de couture (pointillé)")}'], ['crans', '${T("Crans")}'], ['constr', '${T("Pinces")}'], ['noms', '${T("Droit-fil, pli, nom et taille des pièces")}']].map(function(o){
+            return '<label><input type="checkbox" data-icalque="' + o[0] + '"' + (IMP.calques[o[0]] ? ' checked' : '') + '>' + o[1] + '</label>'; }).join('')
+        + '<label><input type="checkbox" id="i-encre"' + (IMP.encre ? ' checked' : '') + '>${T("Économie d’encre (traits fins)")}</label></div>';
+    }
+    r += '<div class="cx-sep"></div><div class="ed-note">' + (f === 'tuiles' || f === 'grand'
+      ? '${T("Imprimez à 100 % (taille réelle), jamais « ajuster à la page ». Après l’impression, mesurez le carré de contrôle : s’il ne fait pas 10 cm, l’imprimante a mis la page à l’échelle.")}'
+      : f === 'plt' ? '${T("Le fichier PLT (HPGL, 40 unités par mm) convient à la plupart des traceurs. Pour l’imprimante « PBX », donnez-nous son modèle exact : son format propre pourra s’ajouter.")}'
+      : f === 'dxf' ? '${T("DXF-AAMA en millimètres : contour sur le calque 1, couture 14, crans 4, droit-fil 7, pli 6, pinces 8.")}'
+      : f === 'svg' ? '${T("Le SVG s’ouvre dans Illustrator, Inkscape ou un navigateur ; ses dimensions sont en millimètres réels.")}'
+      : '${T("La fiche reprend la version enregistrée du modèle : croquis, tableau de tailles, aisances, pièces et tissu estimé.")}') + '</div>'
+      + '<div class="ed-note">${T("L’export part de la version ENREGISTRÉE du modèle.")}</div></div>';
+    corps.innerHTML = '<div class="im-trois">' + g + a + r + '</div>';
+  }
+  function clicImpression(ev){
+    var t = ev.target, b;
+    if ((b = t.closest('[data-idest]'))) { IMP.format = b.getAttribute('data-idest'); if (IMP.format === 'plt' && IMP.traceur === 'a0') IMP.traceur = 'r36'; dessiner(); apercuImpression(); return; }
+    if ((b = t.closest('[data-itailles]'))) { IMP.tailles = b.getAttribute('data-itailles'); dessiner(); apercuImpression(); return; }
+  }
+  function changeImpression(t){
+    var id = t.id;
+    if (id === 'i-papier') IMP.papier = t.value;
+    else if (id === 'i-chev') IMP.chev = parseInt(t.value, 10) || 0;
+    else if (id === 'i-traceur') IMP.traceur = t.value;
+    else if (id === 'i-encre') IMP.encre = !!t.checked;
+    else if (t.hasAttribute('data-icalque')) IMP.calques[t.getAttribute('data-icalque')] = !!t.checked;
+    else if (t.hasAttribute('data-ipiece')) {
+      var pid = t.getAttribute('data-ipiece');
+      IMP.pieces = IMP.pieces.filter(function(x){ return x !== pid; });
+      if (t.checked) IMP.pieces.push(pid);
+      if (!IMP.pieces.length) { t.checked = true; IMP.pieces.push(pid); dire('${T("Gardez au moins une pièce.")}', 'att'); return; }
+    } else return;
+    apercuImpression();
+  }
+  function exporterFichier(btn){
+    if (OCCUPE || !IMP) return;
+    if (!P || typeof P.enregistrerExport !== 'function') { dire('${T("Cette version de l’application ne sait pas enregistrer un export.")}', 'err'); return; }
+    OCCUPE = true; if (btn) btn.disabled = true;
+    var fin = function(msg, cl){ OCCUPE = false; if (btn) btn.disabled = false; dire(msg, cl); };
+    dire('${T("Préparation du fichier…")}');
+    appeler('atelier:exporter', [optsImpression(false)]).then(function(r){
+      if (!r || !r.ok || !r.contenu) { fin(expliquer(r), 'err'); return; }
+      var ecrire = function(contenu){
+        Promise.resolve(P.enregistrerExport(r.nom, contenu)).then(function(w){
+          if (w && w.ok) fin('${T("Enregistré : {0}")}'.split('{0}').join(w.path || r.nom), 'bon');
+          else if (w && w.annule) fin('${T("Export annulé : le code d’export n’a pas été donné.")}', 'att');
+          else fin('${T("L’enregistrement a échoué : {0}")}'.split('{0}').join((w && w.error) || '?'), 'err');
+        });
+      };
+      if (r.type !== 'pdf') { ecrire(r.contenu); return; }
+      if (typeof P.documentPdf !== 'function') { fin('${T("Cette version de l’application ne sait pas fabriquer de PDF.")}', 'err'); return; }
+      dire('${T("Fabrication du PDF ({0} pages)…")}'.split('{0}').join(r.pages));
+      Promise.resolve(P.documentPdf(r.contenu, { pageCss: true })).then(function(pdf){
+        if (!pdf || !pdf.ok || !pdf.base64) { fin('${T("Le PDF n’a pas pu être fabriqué : {0}")}'.split('{0}').join((pdf && pdf.error) || '?'), 'err'); return; }
+        ecrire('data:application/pdf;base64,' + pdf.base64);
+      });
+    });
+  }
+  function quitterImpression(){
+    var r = IMP ? IMP.retour : 'biblio', id = IMP ? IMP.id : '';
+    IMP = null;
+    if (r === 'editeur' && id) { VUE = 'biblio'; ouvrirEditeur(id); return; }
+    VUE = 'biblio'; dessiner(); dire('');
+  }
+
   /* ══ LES GESTES ═══════════════════════════════════════════════════════ */
   corps.addEventListener('click', function(ev){
     var t = ev.target; if (!t || !t.closest) return;
     if (VUE === 'editeur') { if (E) clicEditeur(ev); return; }
+    if (VUE === 'impression') { if (IMP) clicImpression(ev); return; }
     var b;
+    if ((b = t.closest('[data-imprimer]'))) { ouvrirImpression(b.getAttribute('data-imprimer'), 'biblio'); return; }
     if ((b = t.closest('[data-editer]'))) { ouvrirEditeur(b.getAttribute('data-editer')); return; }
     if ((b = t.closest('[data-cat]'))) { CAT = b.getAttribute('data-cat'); dessiner(); return; }
     if ((b = t.closest('[data-etat]'))) { var e = b.getAttribute('data-etat'); ETAT = ETAT === e ? '' : e; dessiner(); return; }
@@ -1520,12 +1706,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if ((b = t.closest('#m-standard'))) { M.tableau = copie(D.standard); TRACE = true; dessinerModele(); dire('${T("Tableau standard remis.")}', 'bon'); return; }
   });
   corps.addEventListener('dblclick', function(ev){
-    if (VUE === 'editeur') return;
+    if (VUE === 'editeur' || VUE === 'impression') return;
     var b = ev.target && ev.target.closest ? ev.target.closest('[data-sel]') : null;
     if (b) ouvrirModele(b.getAttribute('data-sel'));
   });
   corps.addEventListener('input', function(ev){
-    if (VUE === 'editeur') return;
+    if (VUE === 'editeur' || VUE === 'impression') return;
     var t = ev.target;
     if (t && t.id === 'a-q') { Q = t.value; clearTimeout(window._atQ); window._atQ = setTimeout(redessinerSansPerdreLaSaisie, 200); return; }
     ramasser(t);
@@ -1533,6 +1719,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   corps.addEventListener('change', function(ev){
     var t = ev.target; if (!t) return;
     if (VUE === 'editeur') { if (E) changeEditeur(t); return; }
+    if (VUE === 'impression') { if (IMP) changeImpression(t); return; }
     if (t.hasAttribute && t.hasAttribute('data-taille')) {
       var tl = t.getAttribute('data-taille');
       var ls = (M.tailles || []).filter(function(x){ return x !== tl; });
@@ -1557,6 +1744,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   document.addEventListener('click', function(ev){
     var t = ev.target; if (!t || !t.closest) return;
     if (t.closest('#e-retour')) { quitterEditeur(); return; }
+    if (t.closest('#e-imprimer')) { imprimerDepuisEditeur(); return; }
+    if (t.closest('#i-retour')) { quitterImpression(); return; }
+    if (t.closest('#i-exporter')) { exporterFichier(t.closest('#i-exporter')); return; }
+    if (t.closest('#i-dossier')) { if (P && P.ouvrirDossierExports) P.ouvrirDossierExports(); return; }
     if (t.closest('#e-annuler')) { annuler(); return; }
     if (t.closest('#e-refaire')) { refaire(); return; }
     if (t.closest('#e-enreg')) { enregistrerEditeur(t.closest('#e-enreg')); return; }
@@ -1615,7 +1806,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         { trait: true }, { lib: '${T("Supprimer la pièce")}', dgr: true, fn: function(){ supprimerPiece(pi); } }];
     }
     var out = [{ lib: '${T("Ouvrir le modèle")}', fn: function(){ ouvrirModele(id); } },
-      { lib: '${T("Éditer le patron")}', fn: function(){ ouvrirEditeur(id); } }];
+      { lib: '${T("Éditer le patron")}', fn: function(){ ouvrirEditeur(id); } },
+      { lib: '${T("Imprimer / exporter")}', fn: function(){ ouvrirImpression(id, 'biblio'); } }];
     if (D.peutAjouter) out.push({ lib: '${T("Dupliquer")}', fn: function(){ dupliquer(id); } });
     if (D.peutSupprimer) { out.push({ trait: true }); out.push({ lib: '${T("Supprimer")}', dgr: true, fn: function(){ supprimer(id); } }); }
     return out;
@@ -1623,7 +1815,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function dessiner(){
     if (!D) return;
-    if (VUE === 'editeur' && E) dessinerEditeur(); else if (VUE === 'modele' && M) dessinerModele(); else dessinerBiblio();
+    if (VUE === 'impression' && IMP) dessinerImpression(); else if (VUE === 'editeur' && E) dessinerEditeur(); else if (VUE === 'modele' && M) dessinerModele(); else dessinerBiblio();
   }
   /* ⚠ NE JAMAIS REDESSINER LE CHAMP SOUS LES DOIGTS. */
   function redessinerSansPerdreLaSaisie(){
@@ -1643,6 +1835,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (SEL && !(D.modeles || []).some(function(m){ return m.id === SEL; })) SEL = '';
       if (DEPART === 'nouveau' && D.peutAjouter) { DEPART = ''; ouvrirNeuf(); }
       else if (DEPART.indexOf('editeur:') === 0) { var de = DEPART.slice(8); DEPART = ''; ouvrirEditeur(de); }
+      else if (DEPART.indexOf('impression:') === 0) { var di = DEPART.slice(11); DEPART = ''; ouvrirImpression(di, 'biblio'); }
       else dessiner();
       if (apres) apres(); else dire('');
     });
@@ -1659,6 +1852,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (VUE === 'editeur' && E && ev.key !== 'Escape' && toucheEditeur(ev)) return;
     if (ev.key !== 'Escape') return;
     ev.preventDefault();
+    if (VUE === 'impression') { quitterImpression(); return; }
     if (VUE === 'editeur' && E) {
       if (GLISSE) return;
       if (MES) { MES = null; peindre(); peindrePanneau(true); return; }
