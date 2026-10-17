@@ -135,9 +135,6 @@ button.mini.ligne-geste{height:2.4rem;padding:0 1rem;border-radius:10px;font-siz
 .cx{overflow:hidden}
 .cx-carte>.liste{flex:1 1 0;min-height:0}
 .cx>.cx-carte.seule{flex:1 1 0;min-height:0}
-.cx-kpi[data-tuile]{cursor:pointer;user-select:none}
-.cx-kpi[data-tuile]:hover{border-color:rgba(var(--or-rgb),.6)}
-.cx-kpi.on{border-color:var(--or)}
 [data-tuile].cx-averti{cursor:pointer}
 .ed-seg button{border:none}
 /* 23rem : « Numéro de commande, nom, courriel, suivi… » (Expéditions) tient, polices Linux comprises. */
@@ -502,10 +499,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var expedition = MODE === 'expeditions';
 
     /* ══ LA GRAMMAIRE DES FACTURES, APPLIQUEE A LA LISTE (2026-10-16, sa demande : « le meme look ») ═════
-       Tete (resume, Corbeille a droite), quatre chiffres CLIQUABLES (data-tuile, comme les tuiles d avant),
-       les statuts en boutons a choix (le mot seul), puis le tableau et son panneau d appui (CSS_COMPTA).
-       ⚠ Les chiffres viennent du PONT (tuiles.compteStatuts...), comptes sur la liste ENTIERE, avant
-       recherche : ils disent l etat du magasin, pas de l ecran. ⚠ La PAGE SEULE voyage : la pagination
+       Tete (resume, Corbeille a droite), les statuts en boutons a choix (le mot seul), puis le tableau et son
+       panneau d appui (CSS_COMPTA). ⚠ AUCUNE BANDE DE CHIFFRES (sa regle, redite le 2026-10-16 : « retirer ces
+       cellules partout, sauf dans le tableau de bord »). Les comptes du PONT (tuiles.compteStatuts...) ne
+       servent plus qu au resume et au panneau. ⚠ La PAGE SEULE voyage : la pagination
        reste celle du site (.liste mesuree par listeAutoAjuste), pas data-pages.
        Crochets gardes : data-st, data-vider, data-tuile, data-prio, data-manu, data-prep, data-vue,
        tr[data-id], #rech, #f-annee, #c-corbeille, #pg-*. Le detail n est PAS touche (corps.corps). */
@@ -524,28 +521,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var actT = document.getElementById('c-actions');
     if (actT) actT.innerHTML = expedition ? '' : '<button class="mini" id="c-corbeille" '
       + 'title="${T("Voir les commandes supprimées et les remettre en place")}">${T("Corbeille")}</button>';
-
-    /* ── LES QUATRE CHIFFRES ── */
-    if (TU) {
-      var kpi = function(lib, val, sub, ton, geste, on){
-        return '<div class="cx-kpi' + (ton ? ' ' + ton : '') + (on ? ' on' : '') + '"'
-          + (geste ? ' data-tuile="' + geste + '" title="${T("Cliquer pour filtrer")}"' : '') + '>'
-          + '<span>' + lib + '</span><b>' + val + '</b><small>' + (sub || '&nbsp;') + '</small></div>';
-      };
-      var seul = function(cle){ return F.statuts.length === 1 && F.statuts[0] === cle; };
-      h += '<div class="cx-kpis">'
-        + (expedition
-          ? kpi('${T("Expédiées")}', cs.shipped || 0, '${T("en route")}', '', 'shipped', seul('shipped'))
-            + kpi('${T("Livrées")}', cs.delivered || 0, '${T("reçues par le client")}', 'ok', 'delivered', seul('delivered'))
-            + kpi('${T("Commandes")}', TU.nombre || 0, '${T("au total")}', '', '', false)
-            + kpi('${T("Valeur")}', esc(argent(TU.valeurTotale || 0)), '${T("expédiée")}', '', '', false)
-          : kpi('${T("En attente")}', cs.pending || 0, '${T("à confirmer")}', (cs.pending ? 'att' : ''), 'pending', seul('pending'))
-            + kpi('${T("En préparation")}', cs.preparing || 0, '${T("à emballer")}', '', 'preparing', seul('preparing'))
-            + kpi('${T("Prioritaires")}', (d.prioritairesNonTraitees || 0), '${T("non traitées")}',
-                (d.prioritairesNonTraitees ? 'att' : ''), 'prio', F.prioritaires)
-            + kpi('${T("Valeur")}', esc(argent(TU.valeurTotale || 0)), esc(nbEnCours(TU.nombre || 0)), '', '', false))
-        + '</div>';
-    }
 
     /* ── LA BARRE : les statuts en boutons a choix (plusieurs a la fois, comme avant) — « Toutes » defait
        le filtre —, Prioritaires (son « ! ») et Ventes manuelles a cote ; a droite, la recherche, la

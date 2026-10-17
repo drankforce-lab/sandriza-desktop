@@ -3444,7 +3444,10 @@ const _tuilesOff = (cle) => {
    ⚠ SAUF LES RAPPORTS : là, les chiffres ne doublent pas le tableau de bord, ils SONT l'écran
    (Statistiques, Publicité, Comptabilité, Comptable, Impôt, Livre, Banque, Coûts IA). Ils gardent leur
    bandeau, toujours masquable. */
-const TUILES_DE_RAPPORT = new Set(['statistiques', 'publicite', 'comptabilite', 'comptable', 'impot', 'livre', 'banque', 'fal', 'rappels']);
+/* ⚠⚠ PLUS D EXCEPTION (2026-10-16, ses mots, capture des Commandes a l appui : « j avais demande de retirer ces
+   cellules partout », puis « sauf dans le tableau de bord »). Les rapports aussi perdent leur bandeau ; le
+   tableau de bord n appelle pas cette piece et garde ses chiffres. */
+const TUILES_DE_RAPPORT = new Set([]);
 const JS_TUILES = (cle) => `
 var _SZBD_CLE = ${JSON.stringify(String(cle || ''))};
 var _SZBD_RETIRE = ${TUILES_DE_RAPPORT.has(String(cle || '')) ? 'false' : 'true'};
@@ -4398,7 +4401,13 @@ const CSS_COMPTA = `
 .cx{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:.9rem;padding:1rem 1.6rem 1.1rem}
 .cx>*{flex:0 0 auto}
 .cx>.cx-deux,.cx>.cx-plein{flex:1 1 0;min-height:0}
-.cx-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.75rem}
+/* ⚠⚠ LA BANDE DE CHIFFRES EST ETEINTE (2026-10-16, sa regle du 2026-10-12 redite : aucune tuile hors du tableau de
+   bord). La refonte de la comptabilite l avait posee en ecrivant .cx-kpis A LA MAIN, hors de szTuiles — la garde ne
+   la voyait pas. L eteindre ICI couvre les quatorze fenetres d un coup, et celles qui la recopieront. */
+.cx-kpis{display:none!important}
+/* Un bouton de filtre porte son libelle SEUL (sa regle du 2026-10-15) : les comptes poses dans les onglets
+   segmentes de la comptabilite (.ed-seg .n) sont eteints ici, pour toutes les fenetres. */
+.ed-seg .n{display:none!important}
 .cx-kpi{padding:.8rem 1rem;border-radius:14px;background:var(--f-carte);border:1px solid var(--sz-bord);min-width:0}
 .cx-kpi>span{display:block;font-size:.74rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cx-kpi>b{display:block;font-size:1.42rem;font-weight:700;margin:.18rem 0 .06rem;font-variant-numeric:tabular-nums;letter-spacing:-.01em;

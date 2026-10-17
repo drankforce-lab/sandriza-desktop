@@ -48,10 +48,6 @@ button:hover:not(:disabled){background:var(--v10)}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
 .ed-seg button{border:none}
 .cx-barre .rf-rch{width:18rem;flex:0 0 auto}
-.cx-kpis.cinq{grid-template-columns:repeat(5,minmax(0,1fr))}
-.cx-kpi[data-onglet]{cursor:pointer;user-select:none}
-.cx-kpi[data-onglet]:hover{border-color:rgba(var(--or-rgb),.6)}
-.cx-kpi.on{border-color:var(--or)}
 [data-onglet].cx-averti,[data-onglet].cx-bon{cursor:pointer}
 table{width:100%;font-size:.84rem}
 thead th{text-align:left}
@@ -175,24 +171,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var act = document.getElementById('r-actions');
     if (act) act.innerHTML = '<button class="mini" id="r-exporter"><span class="ic">⬇</span>${T(" Exporter")}</button>';
 
-    /* ── LES CHIFFRES : les cinq etats qui DEMANDENT UN GESTE (les tuiles d avant), toujours
-       cliquables. Ambre des qu il y en a ; rouge pour ce qui expire et ce qui est conteste. ── */
-    var h = '<div class="cx-kpis cinq">' + ONGLETS.filter(function(o){ return EN_TUILE[o[0]]; }).map(function(o){
-        var n = c[o[0]] || 0;
-        var ton = !n ? '' : ((o[0] === 'disputed' || o[0] === 'expiring_soon') ? 'err' : 'att');
-        return '<div class="cx-kpi' + (ton ? ' ' + ton : '') + (ONGLET === o[0] ? ' on' : '') + '" data-onglet="' + o[0] + '"'
-          + ' title="${T("Cliquer pour afficher")}"><span>' + o[1] + '</span><b>' + n + '</b>'
-          + '<small>' + EN_TUILE[o[0]] + '</small></div>';
-      }).join('') + '</div>';
-
-    /* ── LA BARRE : les quatre autres listes en boutons a choix — le mot seul (sa regle du
-       2026-10-15 : les comptes vivent dans les chiffres) —, la recherche a droite. ── */
+    /* ── LA BARRE : les NEUF listes en boutons a choix — le mot seul (sa regle du 2026-10-15) —, la recherche a
+       droite. ⚠ AUCUNE BANDE DE CHIFFRES (2026-10-16, « retirer ces cellules partout, sauf dans le tableau de
+       bord ») : les cinq etats qui en dependaient sont revenus ici ; les comptes vivent dans le panneau. ── */
+    var h = '';
     var seg = function(v, lib){
       return '<button type="button" class="' + (ONGLET === v ? 'on' : '') + '" data-onglet="' + v + '">' + lib + '</button>';
     };
     h += '<div class="cx-barre"><div class="ed-seg">'
-      + seg('all', '${T("Toutes")}') + seg('approved', '${T("Approuvées")}')
-      + seg('rejected', '${T("Rejetées")}') + seg('completed', '${T("Complétées")}')
+      + ONGLETS.map(function(o){ return seg(o[0], o[1]); }).join('')
       + '</div><div class="droite">'
       + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Nom, courriel, n° commande")}" type="search" id="r-q" placeholder="${T("Nom, courriel, n° commande…")}" value="' + esc(Q) + '"></label>'
       + '</div></div>';
@@ -241,6 +228,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '<h2>${T("Parcours des retours")}</h2>'
       + piste('pending', '${T("En attente")}', '') + piste('approved', '${T("Approuvées")}', 'info')
       + piste('in_transit', '${T("En transit")}', 'info') + piste('received', '${T("Reçues")}', '')
+      + piste('disputed', '${T("À analyser")}', 'err')
       + piste('completed', '${T("Complétées")}', 'ok') + piste('rejected', '${T("Rejetées")}', 'err')
       + '<div class="cx-sep"></div>'
       + '<h2>${T("À surveiller")}</h2>';
