@@ -17,8 +17,11 @@
  * ajouter un point, rendre un bord droit ou courbe, poser un cran ou une pince,
  * mesurer ; aimantation ; couture par bord ; pièces ajoutées, dupliquées,
  * supprimées ; historique (Ctrl+Z / Ctrl+Y) ; enregistrer une version.
- * Les lots suivants : la gradation des retouches, l'impression et l'export,
- * l'aperçu 3D, l'éditeur de motif.
+ * LOT 2b (7.42.0) : la GRADATION des retouches (règle par point et par taille,
+ * onglet Gradation, calque « Toutes les tailles »), les NOMS de bords, les
+ * ASSEMBLAGES (écart, Égaliser) et la restauration des VERSIONS. Les pièces
+ * passent par atelier:preparer à l'ouverture.
+ * Les lots suivants : l'impression et l'export, l'aperçu 3D, l'éditeur de motif.
  *
  * ⚠ LA FENÊTRE NE TRACE RIEN (sauf le geste de l'éditeur : un point suit la
  * souris ; la ligne de coupe, les longueurs et le tissu reviennent du site par
@@ -129,7 +132,8 @@ table.at-tab{width:100%;border-collapse:collapse;font-size:.8rem;font-variant-nu
 .ed-toile.glisse{cursor:grabbing}
 .ed-coin{position:absolute;right:.6rem;bottom:.5rem;font-size:.76rem;color:#3F3A32;background:rgba(243,238,229,.92);padding:.1rem .45rem;border-radius:6px;font-variant-numeric:tabular-nums;pointer-events:none}
 .ed-panneau{min-height:0;overflow:auto}
-.ed-panneau .ed-seg{margin-bottom:.6rem}
+.ed-panneau .ed-seg{margin-bottom:.6rem;display:flex;flex-wrap:wrap}
+.ed-panneau .ed-seg button{padding:.3rem .55rem;font-size:.8rem}
 .ed-bas{display:flex;flex-wrap:wrap;align-items:center;gap:.45rem 1.1rem;font-size:.78rem;color:var(--tx2);padding-top:.55rem}
 .ed-bas .grp{display:inline-flex;align-items:center;gap:.3rem}
 .ed-bas button.mini.on{border-color:var(--or);background:rgba(var(--or-rgb),.14);color:var(--tx)}
@@ -214,6 +218,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     tailles: '${T("Gardez au moins une taille, dont la taille de base.")}',
     introuvable: '${T("Ce modèle n’existe plus.")}',
     nuage: '${T("Enregistré sur ce poste seulement : le serveur n’a pas confirmé. Réessayez.")}',
+    version: '${T("Cette version ne se restaure plus (seules les 5 dernières qui ont changé les pièces le peuvent).")}',
+    assemblage: '${T("Un des deux bords de cet assemblage n’existe plus.")}',
+    retouche_et_retrace: '${T("Impossible d’enregistrer une retouche et de retracer en même temps.")}',
+    pieces: '${T("Le patron n’a plus de pièce valable.")}',
     echec: '${T("L’opération a échoué.")}'
   };
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
@@ -565,12 +573,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var PILE = [], REFAIRE = [];
   var AN = null;           // dernière analyse du site
   var AIM = { points: true, grille: false, a45: true };
-  var CALQ = { couture: true, crans: true, constr: true };
+  var CALQ = { couture: true, crans: true, constr: true, tailles: false };
   var UNITE = 'cm';
   var SALE = false;
   var MES = null;          // la mesure en cours : { a, b } en cm de toile
   var GLISSE = null;       // le geste de souris en cours
   var ONGLET = 'prop';
+  var GR = null;           // les tailles graduées (atelier:graduer), pour le calque « Tailles »
+  var PRESSE = null;       // une règle de gradation copiée
+  var ASSDE = null;        // « Assembler avec… » : le bord de départ { p, k }
   var LTISSU = { principal: '${T("Principal")}', doublure: '${T("Doublure")}', entoilage: '${T("Entoilage")}', contraste: '${T("Contraste")}' };
   var OUTILS = [
     { cle: 'sel', lib: '${T("Sélection")}', touche: 'V', ico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 3l14 8-6 1.5L10 19z"/></svg>' },
@@ -684,12 +695,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   /* ── L historique ── */
-  function etat(){ return JSON.stringify({ p: E.pieces, pos: POS }); }
+  function etat(){ return JSON.stringify({ p: E.pieces, pos: POS, a: E.ass }); }
   function memo(lib){
     PILE.push({ lib: lib, e: etat() }); if (PILE.length > 100) PILE.shift();
     REFAIRE = []; SALE = true;
   }
-  function remettre(s){ var o = JSON.parse(s); E.pieces = o.p; POS = o.pos; if (E.sel >= E.pieces.length) E.sel = E.pieces.length ? 0 : -1; deselectionner(true); }
+  function remettre(s){ var o = JSON.parse(s); E.pieces = o.p; POS = o.pos; E.ass = o.a || []; if (E.sel >= E.pieces.length) E.sel = E.pieces.length ? 0 : -1; deselectionner(true); }
   function annuler(){
     if (!PILE.length) return;
     var d = PILE.pop(); REFAIRE.push({ lib: d.lib, e: etat() }); remettre(d.e); SALE = true;
@@ -736,6 +747,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       nv = { x: r2(s.x), y: r2(s.y), c1: { x: r2(q0.x), y: r2(q0.y) }, c2: { x: r2(r0.x), y: r2(r0.y) } };
       z.c1 = { x: r2(r1.x), y: r2(r1.y) }; z.c2 = { x: r2(q2.x), y: r2(q2.y) };
     } else { var m = lerp(a, z, t); nv = { x: r2(m.x), y: r2(m.y) }; }
+    /* Lot 2b : le nouveau point reçoit une identité et une règle de gradation
+       interpolée entre ses deux voisins ; les poignées du bord coupé reprennent
+       la règle par défaut (2 nombres). */
+    var nk = 1; while (p.contour.some(function(q){ return q.k === 'n' + nk; })) nk++;
+    nv.k = 'n' + nk;
+    if (a.g || z.g) {
+      nv.g = {};
+      Object.keys(Object.assign({}, a.g || {}, z.g || {})).forEach(function(tl){
+        var ga = (a.g && a.g[tl]) || [0, 0], gz = (z.g && z.g[tl]) || [0, 0];
+        nv.g[tl] = [r2(ga[0] + (gz[0] - ga[0]) * t), r2(ga[1] + (gz[1] - ga[1]) * t)];
+      });
+      if (z.g) Object.keys(z.g).forEach(function(tl){ z.g[tl] = z.g[tl].slice(0, 2); });
+    }
+    if (z.nom) nv.nom = z.nom;
     var at = bord === 0 ? p.contour.length : bord;
     p.contour.splice(at, 0, nv);
     decalerCoutures(p, bord, true);
@@ -748,6 +773,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function retirerPoint(i, n){
     var p = E.pieces[i];
     if (p.contour.length <= 3) { dire('${T("Une pièce garde au moins trois points.")}', 'att'); return false; }
+    var kk = p.contour[n].k;
+    E.ass = (E.ass || []).filter(function(x){ return !((x.a.p === p.id && x.a.k === kk) || (x.b.p === p.id && x.b.k === kk)); });
     p.contour.splice(n, 1);
     decalerCoutures(p, n, false);
     return true;
@@ -788,8 +815,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
     return '<path d="M' + x1 + ' ' + y1 + ' L' + x2 + ' ' + y2 + s + '" stroke="#1C1B18" stroke-width="1.1" fill="none"/>';
   }
+  function dessinTailles(p, i){
+    if (!CALQ.tailles || !GR || !GR.tailles || (GLISSE && GLISSE.bouge)) return '';
+    var s = '';
+    Object.keys(GR.tailles).forEach(function(tl){
+      if (tl === GR.tailleBase) return;
+      var q = (GR.tailles[tl] || []).filter(function(x){ return x.id === p.id; })[0];
+      if (!q || q.contour.length !== p.contour.length) return;
+      s += '<path d="' + cheminP(i, q) + '" fill="none" stroke="#7A7366" stroke-width="0.9" stroke-dasharray="4 3"/>';
+      if (i === E.sel && E.noeud >= 0 && q.contour[E.noeud]) s += '<circle cx="' + sx(i, q.contour[E.noeud].x) + '" cy="' + sy(i, q.contour[E.noeud].y) + '" r="3" fill="#2563EB"/>';
+    });
+    return s;
+  }
   function dessinPiece(p, i){
-    var sel = i === E.sel, s = '', an = analyseDe(i);
+    var sel = i === E.sel, s = dessinTailles(p, i), an = analyseDe(i);
     if (CALQ.couture && an && an.coupe && an.coupe.length && !(GLISSE && GLISSE.piece === i && GLISSE.bouge)) {
       s += '<path d="M' + an.coupe.map(function(q){ return sx(i, q.x) + ' ' + sy(i, q.y); }).join(' L') + ' Z" stroke="#6E675B" stroke-width="1" fill="none"/>';
     }
@@ -859,6 +898,58 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return a && p && a.id === p.id && a.bords && a.bords.length === p.contour.length ? a : null;
   }
 
+  /* ── Lot 2b : noms des bords, assemblages ── */
+  function nomBord(p, b){
+    var z = p.contour[b];
+    return '${T("Bord {0}")}'.split('{0}').join(b + 1) + (z && z.nom ? ' · ' + szTd(z.nom) : '');
+  }
+  function assDe(p, z){
+    return (E.ass || []).filter(function(x){ return (x.a.p === p.id && x.a.k === z.k) || (x.b.p === p.id && x.b.k === z.k); })[0] || null;
+  }
+  function libRef(r){
+    var q = E.pieces.filter(function(x){ return x.id === r.p; })[0]; if (!q) return '?';
+    var b = q.contour.findIndex(function(n){ return n.k === r.k; });
+    return nomPiece(q) + ' · ' + (b >= 0 ? nomBord(q, b) : '?');
+  }
+  function infoAss(x){
+    var a = AN && AN.assemblages ? AN.assemblages.filter(function(y){ return y.a.p === x.a.p && y.a.k === x.a.k && y.b.p === x.b.p && y.b.k === x.b.k; })[0] : null;
+    return a;
+  }
+  function blocAssemblage(p, z){
+    var x = assDe(p, z);
+    if (!x) return '<div class="ed-gestes"><button type="button" class="mini" id="e-ass-de">${T("Assembler avec un autre bord…")}</button></div><div class="cx-sep"></div>';
+    var autre = x.a.p === p.id && x.a.k === z.k ? x.b : x.a, inf = infoAss(x);
+    return '<div class="cx-etat"><span>${T("Cousu avec")}</span><span>' + esc(libRef(autre)) + '</span></div>'
+      + (inf ? '<div class="cx-etat"><span>${T("Écart de longueur")}</span><span>' + (inf.ecart > 0 ? '+' : '') + esc(lUnite(inf.ecart)) + '</span></div>' : '')
+      + '<div class="ed-gestes"><button type="button" class="mini" id="e-ass-egal">${T("Égaliser")}</button><button type="button" class="mini" id="e-ass-defaire">${T("Défaire l’assemblage")}</button></div><div class="cx-sep"></div>';
+  }
+
+  /* ── Lot 2b : la gradation d un point ── */
+  function panneauGrad(){
+    var p = E.pieces[E.sel];
+    if (!p) return '<h2>${T("Gradation")}</h2><div class="cx-sub">${T("Cliquez une pièce, puis un de ses points.")}</div>';
+    var avecRegle = p.contour.filter(function(n){ return n.g && Object.keys(n.g).length; }).length;
+    var h = '<h2>${T("Gradation")} <span class="cx-sub">' + '${T("{0} points sur {1} ont une règle")}'.split('{0}').join(avecRegle).split('{1}').join(p.contour.length) + '</span></h2>';
+    if (!CALQ.tailles) h += '<div class="ed-gestes"><button type="button" class="mini" data-ecalq="tailles">${T("Voir toutes les tailles sur la toile")}</button></div>';
+    if (E.noeud < 0 || !p.contour[E.noeud]) return h + '<div class="ed-note">${T("Cliquez un point de la pièce : sa règle de gradation (déplacement par taille) s’affiche ici.")}</div>';
+    var n = p.contour[E.noeud], tb = E.m.tailleBase || 'M';
+    h += '<div class="cx-sub">' + esc(nomBord(p, E.noeud)) + '</div>'
+      + '<table class="at-tab"><thead><tr><th>${T("Taille")}</th><th>Δx (' + UNITE + ')</th><th>Δy (' + UNITE + ')</th></tr></thead><tbody>'
+      + (E.m.tailles || []).map(function(tl){
+          if (tl === tb) return '<tr><td>' + esc(tl) + ' · ${T("base")}</td><td>0</td><td>0</td></tr>';
+          var g = (n.g && n.g[tl]) || [0, 0];
+          return '<tr><td>' + esc(tl) + '</td>' + [0, 1].map(function(c){
+            return '<td><input type="text" inputmode="decimal" maxlength="7" data-gt="' + esc(tl) + '" data-gc="' + c + '" aria-label="' + esc((c ? 'Δy ' : 'Δx ') + tl) + '" value="' + esc(enUnite(g[c] || 0)) + '"></td>';
+          }).join('') + '</tr>';
+        }).join('') + '</tbody></table>'
+      + '<div class="ed-gestes"><button type="button" class="mini" id="e-g-copier">${T("Copier la règle")}</button>'
+      + '<button type="button" class="mini" id="e-g-coller"' + (PRESSE ? '' : ' disabled') + '>${T("Coller")}</button>'
+      + '<button type="button" class="mini" id="e-g-prop">${T("Proportionnel")}</button>'
+      + '<button type="button" class="mini" id="e-g-zero">${T("Remettre à zéro")}</button></div>'
+      + '<div class="ed-note">${T("« Proportionnel » reprend l’écart de la taille juste au-dessus de la base et le répète d’une taille à l’autre.")}</div>';
+    return h;
+  }
+
   /* ── Le panneau de droite ── */
   function champ(id, lib, val, attrs){ return '<label>' + lib + '<input type="text" id="' + id + '" value="' + esc(val) + '" ' + (attrs || '') + '></label>'; }
   function panneauProp(){
@@ -889,8 +980,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     if (E.bord >= 0 && p.contour[E.bord]) {
       var z = p.contour[E.bord], cv = (p.coutures || {})[E.bord];
-      h += '<h2>' + '${T("Bord {0}")}'.split('{0}').join(E.bord + 1) + ' <span class="cx-sub">' + (z.c1 && z.c2 ? '${T("courbe")}' : '${T("droite")}') + '</span></h2>'
+      h += '<h2>' + esc(nomBord(p, E.bord)) + ' <span class="cx-sub">' + (z.c1 && z.c2 ? '${T("courbe")}' : '${T("droite")}') + '</span></h2>'
         + '<div class="cx-etat"><span>${T("Longueur")}</span><span>' + (an ? esc(lUnite(an.bords[E.bord])) : '…') + '</span></div>'
+        + '<div class="at-champs"><label class="large">${T("Nom du bord")}<input type="text" id="e-bnom" maxlength="30" value="' + esc(z.nom || '') + '" placeholder="${T("Épaule, côté, ourlet…")}"></label></div>'
+        + blocAssemblage(p, z)
         + '<div class="at-champs">' + champ('e-bc', '${T("Couture de ce bord")} (' + UNITE + ')', cv != null ? enUnite(cv) : '', 'inputmode="decimal" maxlength="6" placeholder="' + esc(enUnite(p.couture)) + '"') + '</div>'
         + '<div class="ed-gestes"><button type="button" class="mini" id="e-b-ourlet">${T("Mettre l’ourlet")}</button>'
         + '<button type="button" class="mini" id="e-b-piece">${T("Valeur de la pièce")}</button>'
@@ -912,7 +1005,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<div class="cx-etat"><span>${T("Bords à couture propre")}</span><span>' + surcharges + '</span></div>'
         + '<div class="cx-etat"><span>${T("Tissu estimé, tout le patron (laize 140 cm)")}</span><span>' + String(AN.tissu ? AN.tissu.metres : 0).replace('.', '${SEP_DEC()}') + ' m</span></div>'
         + '<div class="ed-bords">' + an.bords.map(function(L, b){
-            return '<button type="button" class="ed-ligne' + (E.bord === b ? ' on' : '') + '" data-ebord="' + b + '"><span>' + '${T("Bord {0}")}'.split('{0}').join(b + 1)
+            return '<button type="button" class="ed-ligne' + (E.bord === b ? ' on' : '') + '" data-ebord="' + b + '"><span>' + esc(nomBord(p, b))
               + ((p.coutures || {})[b] != null ? ' · ' + esc(lUnite(p.coutures[b])) : '') + '</span><span>' + esc(lUnite(L)) + '</span></button>';
           }).join('') + '</div>';
     }
@@ -924,21 +1017,39 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       }).join('')
       + '<div class="ed-gestes"><button type="button" class="mini" id="e-p-rect">${T("+ Pièce rectangulaire")}</button>'
       + (E.sel >= 0 ? '<button type="button" class="mini" id="e-p-dupl">${T("Dupliquer la pièce")}</button><button type="button" class="mini danger" id="e-p-suppr">${T("Supprimer la pièce")}</button>' : '')
-      + '</div><div class="ed-note">${T("Une pièce rectangulaire se pose à 20 × 30 cm : parementure, poche, ceinture… à reformer ensuite.")}</div>';
+      + '</div><div class="ed-note">${T("Une pièce rectangulaire se pose à 20 × 30 cm : parementure, poche, ceinture… à reformer ensuite.")}</div>'
+      + '<div class="cx-sep"></div><h2>${T("Coutures assemblées")}</h2>'
+      + ((E.ass || []).length ? (E.ass || []).map(function(x, j){
+          var inf = infoAss(x), e = inf ? inf.ecart : null, bon = e != null && Math.abs(e) < 0.15;
+          return '<button type="button" class="ed-ligne" data-eass="' + j + '"><span>' + esc(libRef(x.a)) + ' ↔ ' + esc(libRef(x.b)) + '</span><span>'
+            + (e == null ? '…' : (bon ? '${T("égales")}' : (e > 0 ? '+' : '') + esc(lUnite(e)))) + '</span></button>';
+        }).join('') : '<div class="cx-sub">${T("Aucune. Choisissez un bord, puis « Assembler avec un autre bord… ».")}</div>')
+      + '<div class="ed-note">${T("L’écart est la longueur du second bord moins celle du premier ; « Égaliser » allonge ou raccourcit le second.")}</div>';
   }
   function panneauHist(){
-    if (!PILE.length) return '<h2>${T("Historique")}</h2><div class="cx-sub">${T("Aucune modification depuis l’ouverture.")}</div>';
-    return '<h2>${T("Historique")}</h2><div class="ed-note">${T("Cliquez une étape pour revenir juste avant elle.")}</div>'
+    var h = !PILE.length ? '<h2>${T("Historique")}</h2><div class="cx-sub">${T("Aucune modification depuis l’ouverture.")}</div>'
+      : '<h2>${T("Historique")}</h2><div class="ed-note">${T("Cliquez une étape pour revenir juste avant elle.")}</div>'
       + PILE.map(function(d, n){ return { d: d, n: n }; }).reverse().map(function(o){
           return '<button type="button" class="ed-ligne" data-ehist="' + o.n + '"><span>' + esc(o.d.lib) + '</span><span>' + (o.n + 1) + '</span></button>';
         }).join('');
+    var vs = (E.m.versions || []).slice().reverse();
+    h += '<div class="cx-sep"></div><h2>${T("Versions enregistrées")}</h2>'
+      + vs.map(function(v){
+          var actuelle = v.n === E.m.version;
+          // une version restaurée porte « restaure » (son numéro d origine) : la note se dit alors dans la langue de la fenêtre
+          return '<div class="cx-etat"><span>v' + v.n + ' — ' + esc(v.restaure ? '${T("retour à la version {0}")}'.split('{0}').join(v.restaure) : szTd(String(v.note || ''))) + '<span class="cx-gris"> · ' + esc(jour(v.date)) + '</span></span><span>'
+            + (actuelle ? '<span class="cx-gris">${T("actuelle")}</span>' : (v.restaurable && D.peutModifier ? '<button type="button" class="mini" data-erest="' + v.n + '">${T("Restaurer")}</button>' : ''))
+            + '</span></div>';
+        }).join('')
+      + '<div class="ed-note">${T("Restaurer crée une nouvelle version avec les pièces d’alors : rien n’est effacé. Les 5 dernières versions qui ont changé les pièces se restaurent.")}</div>';
+    return h;
   }
   function peindrePanneau(force){
     var z = document.getElementById('e-pan'); if (!z || !E) return;
     if (!force && document.activeElement && z.contains(document.activeElement) && /^(INPUT|SELECT)$/.test(document.activeElement.tagName)) return;
     var seg = function(k, lib){ return '<button type="button" class="' + (ONGLET === k ? 'on' : '') + '" data-eonglet="' + k + '">' + lib + '</button>'; };
-    z.innerHTML = '<div class="ed-seg" role="group" aria-label="${T("Panneau")}">' + seg('prop', '${T("Propriétés")}') + seg('pieces', '${T("Pièces")}') + seg('hist', '${T("Historique")}') + '</div>'
-      + (ONGLET === 'pieces' ? panneauPieces() : ONGLET === 'hist' ? panneauHist() : panneauProp());
+    z.innerHTML = '<div class="ed-seg" role="group" aria-label="${T("Panneau")}">' + seg('prop', '${T("Propriétés")}') + seg('grad', '${T("Gradation")}') + seg('pieces', '${T("Pièces")}') + seg('hist', '${T("Historique")}') + '</div>'
+      + (ONGLET === 'pieces' ? panneauPieces() : ONGLET === 'hist' ? panneauHist() : ONGLET === 'grad' ? panneauGrad() : panneauProp());
   }
   function teteEditeur(){
     document.getElementById('titre').textContent = E.m.nom || '${T("Modèle")}';
@@ -959,14 +1070,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var chip = function(attr, k, lib, on){ return '<button type="button" class="mini' + (on ? ' on' : '') + '" ' + attr + '="' + k + '" aria-pressed="' + !!on + '">' + lib + '</button>'; };
     var bas = '<div class="ed-bas">'
       + '<span class="grp">${T("Aimanter :")}' + chip('data-eaim', 'points', '${T("Points")}', AIM.points) + chip('data-eaim', 'grille', '${T("Grille 5 mm")}', AIM.grille) + chip('data-eaim', 'a45', '45°', AIM.a45) + '</span>'
-      + '<span class="grp">${T("Calques :")}' + chip('data-ecalq', 'couture', '${T("Ligne de coupe")}', CALQ.couture) + chip('data-ecalq', 'crans', '${T("Crans")}', CALQ.crans) + chip('data-ecalq', 'constr', '${T("Construction")}', CALQ.constr) + '</span>'
+      + '<span class="grp">${T("Calques :")}' + chip('data-ecalq', 'couture', '${T("Ligne de coupe")}', CALQ.couture) + chip('data-ecalq', 'crans', '${T("Crans")}', CALQ.crans) + chip('data-ecalq', 'constr', '${T("Construction")}', CALQ.constr) + chip('data-ecalq', 'tailles', '${T("Toutes les tailles")}', CALQ.tailles) + '</span>'
       + '<span class="grp">${T("Zoom :")} <b id="e-zoom"></b>' + chip('data-ezoom', '25', '25 %', false) + chip('data-ezoom', '50', '50 %', false) + chip('data-ezoom', '100', '${T("100 % (taille réelle)")}', false) + chip('data-ezoom', 'ajuster', '${T("Tout voir")}', false) + '</span>'
       + '<span class="grp">${T("Unité :")}' + chip('data-eunite', 'cm', 'cm', UNITE === 'cm') + chip('data-eunite', 'mm', 'mm', UNITE === 'mm') + chip('data-eunite', 'po', '${T("po")}', UNITE === 'po') + '</span>'
       + '</div>';
     corps.innerHTML = '<div class="ed-cadre">' + o
       + '<div class="ed-toile o-' + OUTIL + '" id="e-toile"><svg id="e-svg" role="img" aria-label="${T("Toile de l’éditeur de patron")}"></svg><span class="ed-coin" id="e-coin"></span></div>'
       + '<div class="cx-carte ed-panneau" id="e-pan"></div></div>' + bas
-      + '<div class="ed-note">' + '${T("Retouches sur la taille de base ({0}). Les autres tailles restent tracées depuis le tableau de tailles : la gradation des retouches vient au prochain lot.")}'.split('{0}').join(esc(E.m.tailleBase || 'M')) + '</div>';
+      + '<div class="ed-note">' + '${T("Retouches sur la taille de base ({0}) ; les autres tailles suivent la règle de gradation de chaque point (onglet Gradation, calque « Toutes les tailles »).")}'.split('{0}').join(esc(E.m.tailleBase || 'M')) + '</div>';
     peindre(); peindrePanneau(true);
     /* La toile change de taille APRÈS le premier dessin (le panneau se remplit, la fenêtre se règle) :
        on redessine à chaque changement de sa taille, sinon la grille s arrête au milieu. */
@@ -984,10 +1095,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     clearTimeout(anT);
     anT = setTimeout(function(){
       var n = ++anN;
-      appeler('atelier:analyser', [{ pieces: E.pieces, laize: 140 }]).then(function(r){
+      appeler('atelier:analyser', [{ pieces: E.pieces, assemblages: E.ass, laize: 140 }]).then(function(r){
         if (n !== anN || VUE !== 'editeur' || !E) return;
         if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
         AN = r; peindre(); peindrePanneau();
+      });
+      if (CALQ.tailles) appeler('atelier:graduer', [{ pieces: E.pieces, tailleBase: E.m.tailleBase, tailles: E.m.tailles }]).then(function(r){
+        if (n !== anN || VUE !== 'editeur' || !E) return;
+        GR = r && r.ok ? r : null; peindre();
       });
     }, 180);
   }
@@ -997,12 +1112,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!m) { dire(MOTIFS.introuvable, 'err'); return; }
     if (!(m.pieces || []).length) { dire('${T("Ce modèle n’a pas encore de pièces : enregistrez-le d’abord.")}', 'att'); return; }
     SEL = id;
-    E = { m: copie(m), pieces: copie(m.pieces), sel: 0, noeud: -1, poignee: '', bord: -1, cran: -1, pince: -1 };
-    E.pieces.forEach(function(p){ if (!p.coutures) p.coutures = {}; });
-    PILE = []; REFAIRE = []; SALE = false; AN = null; MES = null; OUTIL = 'sel'; ONGLET = 'prop';
-    VUE = 'editeur';
-    ranger(); dessinerEditeur(); ajuster(); peindre(); analyser();
-    dire(AIDE_OUTIL.sel);
+    dire('${T("Préparation du patron…")}');
+    /* Le site complète les pièces : identités des points, noms des bords, règles de gradation, assemblages. */
+    appeler('atelier:preparer', [{ base: m.base, tableau: m.tableau, options: m.options, aisances: m.aisances, tailleBase: m.tailleBase,
+      pieces: m.pieces, assemblages: m.assemblages, sansAuto: !!m.edite }]).then(function(r){
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+      E = { m: copie(m), pieces: r.pieces, ass: r.assemblages || [], sel: 0, noeud: -1, poignee: '', bord: -1, cran: -1, pince: -1 };
+      E.pieces.forEach(function(p){ if (!p.coutures) p.coutures = {}; });
+      PILE = []; REFAIRE = []; SALE = false; AN = null; GR = null; MES = null; ASSDE = null; OUTIL = 'sel'; ONGLET = 'prop';
+      VUE = 'editeur';
+      ranger(); dessinerEditeur(); ajuster(); peindre(); analyser();
+      dire(AIDE_OUTIL.sel);
+    });
   }
   function quitterEditeur(){
     var sortir = function(){ E = null; SALE = false; PILE = []; REFAIRE = []; VUE = 'biblio'; dessiner(); dire(''); };
@@ -1014,7 +1135,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (OCCUPE || !E || !SALE) return;
     OCCUPE = true; if (btn) btn.disabled = true;
     dire('${T("Enregistrement…")}');
-    appeler('atelier:ecrire', [{ id: E.m.id, nom: E.m.nom, pieces: E.pieces, piecesEditees: true }]).then(function(r){
+    appeler('atelier:ecrire', [{ id: E.m.id, nom: E.m.nom, pieces: E.pieces, assemblages: E.ass, piecesEditees: true }]).then(function(r){
       OCCUPE = false;
       if (!r.ok) { if (btn) btn.disabled = false; dire(expliquer(r), 'err'); return; }
       SALE = false;
@@ -1139,6 +1260,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       }
       return;
     }
+    if (cb && ASSDE) {                          // « Assembler avec… » : le second bord
+      var pb = E.pieces[cb.piece], kb = pb.contour[cb.bord].k, de = ASSDE; ASSDE = null;
+      if (de.p === pb.id && de.k === kb) { dire('${T("Choisissez un AUTRE bord.")}', 'att'); return; }
+      memo('${T("Bords assemblés")}');
+      E.ass = (E.ass || []).filter(function(x){ return !((x.a.p === de.p && x.a.k === de.k) || (x.b.p === de.p && x.b.k === de.k) || (x.a.p === pb.id && x.a.k === kb) || (x.b.p === pb.id && x.b.k === kb)); });
+      E.ass.push({ a: de, b: { p: pb.id, k: kb } });
+      choisir(cb.piece); E.bord = cb.bord; ONGLET = 'prop'; apresChangement(); peindrePanneau(true);
+      dire('${T("Bords assemblés : l’écart s’affiche dans les propriétés.")}', 'bon'); return;
+    }
     if (cb) { choisir(cb.piece); E.bord = cb.bord; E.noeud = -1; E.cran = -1; E.pince = -1; ONGLET = 'prop'; peindre(); peindrePanneau(true); return; }
     var sous = pieceSous(m);
     if (sous >= 0) { choisir(sous); peindre(); peindrePanneau(true); GLISSE = { type: 'piece', piece: sous, m0: m, avant: etat(), px: POS[sous].x, py: POS[sous].y }; return; }
@@ -1200,7 +1330,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if ((b = t.closest('[data-eoutil]'))) { OUTIL = b.getAttribute('data-eoutil'); MES = null; dessinerEditeur(); dire(AIDE_OUTIL[OUTIL]); return; }
     if ((b = t.closest('[data-eonglet]'))) { ONGLET = b.getAttribute('data-eonglet'); peindrePanneau(true); return; }
     if ((b = t.closest('[data-eaim]'))) { var a = b.getAttribute('data-eaim'); AIM[a] = !AIM[a]; dessinerEditeur(); return; }
-    if ((b = t.closest('[data-ecalq]'))) { var c = b.getAttribute('data-ecalq'); CALQ[c] = !CALQ[c]; dessinerEditeur(); return; }
+    if ((b = t.closest('[data-ecalq]'))) { var c = b.getAttribute('data-ecalq'); CALQ[c] = !CALQ[c]; dessinerEditeur(); if (c === 'tailles' && CALQ.tailles) analyser(); return; }
     if ((b = t.closest('[data-eunite]'))) { UNITE = b.getAttribute('data-eunite'); dessinerEditeur(); return; }
     if ((b = t.closest('[data-ezoom]'))) {
       var zv = b.getAttribute('data-ezoom'), tz = document.getElementById('e-toile');
@@ -1209,6 +1339,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     if ((b = t.closest('[data-epiece]'))) { choisir(parseInt(b.getAttribute('data-epiece'), 10)); peindre(); peindrePanneau(true); return; }
     if ((b = t.closest('[data-ebord]'))) { E.bord = parseInt(b.getAttribute('data-ebord'), 10); E.noeud = -1; E.cran = -1; E.pince = -1; peindre(); peindrePanneau(true); return; }
+    if ((b = t.closest('[data-eass]'))) {
+      var xa = (E.ass || [])[parseInt(b.getAttribute('data-eass'), 10)]; if (!xa) return;
+      var ip = E.pieces.findIndex(function(q){ return q.id === xa.b.p; });
+      if (ip >= 0) { choisir(ip); E.bord = E.pieces[ip].contour.findIndex(function(n){ return n.k === xa.b.k; }); ONGLET = 'prop'; peindre(); peindrePanneau(true); }
+      return;
+    }
+    if ((b = t.closest('[data-erest]'))) { restaurerVersion(parseInt(b.getAttribute('data-erest'), 10)); return; }
     if ((b = t.closest('[data-ehist]'))) { revenirA(parseInt(b.getAttribute('data-ehist'), 10)); dire('${T("Patron remis à cette étape.")}'); return; }
     var p = E.pieces[E.sel];
     if (t.closest('#e-retirer-point') && p) { memo('${T("Point retiré")}'); if (retirerPoint(E.sel, E.noeud)) { E.noeud = -1; apresChangement(); } else PILE.pop(); return; }
@@ -1222,9 +1359,60 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       else { memo('${T("Bord rendu courbe")}'); z.c1 = { x: r2(a0.x + (z.x - a0.x) / 3), y: r2(a0.y + (z.y - a0.y) / 3) }; z.c2 = { x: r2(a0.x + 2 * (z.x - a0.x) / 3), y: r2(a0.y + 2 * (z.y - a0.y) / 3) }; E.noeud = E.bord; }
       apresChangement(); return;
     }
+    if (t.closest('#e-ass-de') && p) { ASSDE = { p: p.id, k: p.contour[E.bord].k }; OUTIL = 'sel'; dire('${T("Cliquez maintenant le bord qui se coud avec celui-ci.")}', 'att'); return; }
+    if (t.closest('#e-ass-defaire') && p) {
+      var zd = p.contour[E.bord]; memo('${T("Assemblage défait")}');
+      E.ass = (E.ass || []).filter(function(x){ return !((x.a.p === p.id && x.a.k === zd.k) || (x.b.p === p.id && x.b.k === zd.k)); });
+      apresChangement(); peindrePanneau(true); return;
+    }
+    if (t.closest('#e-ass-egal') && p) { egaliser(p, p.contour[E.bord]); return; }
+    var ng = p && E.noeud >= 0 ? p.contour[E.noeud] : null;
+    if (t.closest('#e-g-copier') && ng) { PRESSE = copie(ng.g || {}); dire('${T("Règle copiée.")}', 'bon'); peindrePanneau(true); return; }
+    if (t.closest('#e-g-coller') && ng && PRESSE) { memo('${T("Règle collée")}'); ng.g = copie(PRESSE); apresChangement(); peindrePanneau(true); return; }
+    if (t.closest('#e-g-zero') && ng) { memo('${T("Règle remise à zéro")}'); delete ng.g; apresChangement(); peindrePanneau(true); return; }
+    if (t.closest('#e-g-prop') && ng) { proportionnel(ng); return; }
     if (t.closest('#e-p-rect')) { nouvellePiece(); return; }
     if (t.closest('#e-p-dupl') && p) { dupliquerPiece(E.sel); return; }
     if (t.closest('#e-p-suppr') && p) { supprimerPiece(E.sel); return; }
+  }
+  function egaliser(p, z){
+    var x = assDe(p, z); if (!x) return;
+    dire('${T("Égalisation…")}');
+    appeler('atelier:egaliser', [{ pieces: E.pieces, a: x.a, b: x.b }]).then(function(r){
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+      memo('${T("Assemblage égalisé")}');
+      var garde = {}; E.pieces.forEach(function(q){ garde[q.id] = q.coutures || {}; });
+      E.pieces = r.pieces; E.pieces.forEach(function(q){ q.coutures = q.coutures || garde[q.id] || {}; });
+      apresChangement(); peindrePanneau(true);
+      dire('${T("Égalisé : le second bord a bougé de {0}.")}'.split('{0}').join(lUnite(Math.abs(r.deplacement))), 'bon');
+    });
+  }
+  function proportionnel(n){
+    var ts = E.m.tailles || [], tb = E.m.tailleBase || 'M', ib = ts.indexOf(tb);
+    var ref = ts[ib + 1] || ts[ib - 1]; if (!ref) { dire('${T("Il faut au moins deux tailles.")}', 'att'); return; }
+    var g = (n.g && n.g[ref]) || [0, 0], sens = ts.indexOf(ref) > ib ? 1 : -1;
+    if (!g[0] && !g[1]) { dire('${T("Donnez d’abord l’écart de la taille {0}.")}'.split('{0}').join(ref), 'att'); return; }
+    memo('${T("Règle proportionnelle")}');
+    n.g = n.g || {};
+    ts.forEach(function(tl, i){ if (tl === tb) return; var k = (i - ib) * sens; n.g[tl] = [r2(g[0] * k), r2(g[1] * k)]; });
+    apresChangement(); peindrePanneau(true);
+  }
+  function restaurerVersion(nv){
+    if (SALE) { dire('${T("Enregistrez ou annulez vos retouches avant de restaurer une version.")}', 'att'); return; }
+    szConfirmer({ titre: '${T("Restaurer cette version ?")}', texte: '${T("Les pièces de la version {0} deviennent une nouvelle version. La version actuelle reste dans l’historique.")}'.split('{0}').join(nv),
+      oui: '${T("Restaurer la version")}' }).then(function(ok){
+      if (!ok) return;
+      dire('${T("Restauration…")}');
+      appeler('atelier:restaurer', [E.m.id, nv]).then(function(r){
+        if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+        var mid = E.m.id;
+        appeler('atelier:donnees', []).then(function(d){
+          if (d && d.ok) D = d;
+          E = null; ouvrirEditeur(mid);
+          setTimeout(function(){ dire('${T("Version restaurée.")}', 'bon'); }, 400);
+        });
+      });
+    });
   }
   function nouvellePiece(){
     memo('${T("Pièce ajoutée")}');
@@ -1268,6 +1456,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     } else if (id === 'e-bc') {
       if (!String(t.value).trim()) { memo('${T("Couture du bord remise à celle de la pièce")}'); delete p.coutures[E.bord]; }
       else { v = depuisUnite(t.value); if (!isFinite(v) || v < 0 || v > 10) { dire('${T("Une couture va de 0 à 10 cm.")}', 'err'); return; } memo('${T("Couture d’un bord")}'); p.coutures[E.bord] = r2(v); }
+    } else if (id === 'e-bnom') { memo('${T("Bord renommé")}'); var zb = p.contour[E.bord]; var nb = String(t.value).trim().slice(0, 30); if (nb) zb.nom = nb; else delete zb.nom;
+    } else if (t.hasAttribute('data-gt')) {
+      v = depuisUnite(t.value); if (!isFinite(v) || Math.abs(v) > 50) { dire('${T("Un déplacement va de −50 à 50 cm.")}', 'err'); return; }
+      var ngr = p.contour[E.noeud]; if (!ngr) return;
+      memo('${T("Règle de gradation")}');
+      var tl = t.getAttribute('data-gt'), c = parseInt(t.getAttribute('data-gc'), 10);
+      ngr.g = ngr.g || {}; ngr.g[tl] = (ngr.g[tl] || [0, 0]).slice(0, 2); ngr.g[tl][c] = r2(v);
     } else if (id === 'e-pnom') { memo('${T("Pièce renommée")}'); p.nom = String(t.value).slice(0, 40); }
     else if (id === 'e-pqte') { v = parseInt(t.value, 10); if (!(v >= 1 && v <= 20)) { dire('${T("Une quantité va de 1 à 20.")}', 'err'); return; } memo('${T("Quantité")}'); p.qte = v; }
     else if (id === 'e-ptissu') { memo('${T("Tissu de la pièce")}'); p.tissu = t.value; }
