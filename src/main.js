@@ -5879,7 +5879,9 @@ const getUpdater = () => {
          passer au pourcentage du téléchargement (qui partait aussitôt et cachait la nouvelle) ; le veilleur
          l'écrit dans son journal et le notifie, une fois par version. */
       _majDetecteeA = Date.now();
-      majEtat({ etape: 'detectee', version: _majVersionVue });
+      // ⚠ la VEILLE ne fait qu ANNONCER (sa consigne : « juste un avis, pas qu elle s installe toute seule ») :
+      // la barre garde l avis tant qu on n a pas choisi d installer (Aide › Vérifier les mises à jour)
+      majEtat({ etape: _veilleEnCours ? 'disponible' : 'detectee', version: _majVersionVue });
       try { require('./veilleur').annoncerMaj(_majVersionVue); } catch {}
     });
     // Rien à télécharger : aucune raison de retenir quoi que ce soit.
@@ -6050,11 +6052,11 @@ const getUpdater = () => {
    verification silencieuse : si une version est la, `update-available` fait le reste (barre, veilleur,
    telechargement). Rien si une mise a jour est deja vue ou en cours. */
 const VEILLE_MAJ_MS = 15 * 60 * 1000;
-let _veilleMaj = null;
+let _veilleMaj = null, _veilleEnCours = false;
 const demarrerVeilleMaj = () => {
   if (_veilleMaj || !app.isPackaged) return;
   _veilleMaj = setInterval(() => {
-    if (_majDispo || _updBusy) return;
+    if (_majDispo || _updBusy) return;   // une version deja annoncee n est pas re-annoncee
     checkForUpdates(false).catch(() => {});
   }, VEILLE_MAJ_MS);
 };
@@ -6077,6 +6079,11 @@ const checkForUpdates = async (manual) => {
   try { updater = getUpdater(); }
   catch { _updBusy = false; return; } // electron-updater absent : sans effet
   getUpdater._manual = !!manual;
+  /* La VEILLE (manual = false) ANNONCE SEULEMENT : sans téléchargement, donc rien à installer à la
+     fermeture. Le téléchargement et l installation restent un CHOIX : « Vérifier les mises à jour »
+     (manual = true) ou le prochain démarrage. */
+  _veilleEnCours = !manual;
+  try { updater.autoDownload = !!manual; } catch {}
   // La barre d etat le dit des le clic : << Recherche d une mise a jour >>.
   // (une verification de VEILLE, toutes les 15 min, ne l affiche pas : la barre clignoterait pour rien)
   if (manual) majEtat({ etape: 'verif', percent: 0 });
@@ -6085,7 +6092,8 @@ const checkForUpdates = async (manual) => {
     const remote = res && res.updateInfo && res.updateInfo.version;
     const isNew = remote && remote !== app.getVersion();
     if (!isNew) {
-      _updBusy = false;
+      _updBusy = false; _veilleEnCours = false;
+      try { updater.autoDownload = true; } catch {}
       if (manual || _majEtape === 'verif') majEtat(null);
       if (manual) {
         dialog.showMessageBox(mainWindow, {
@@ -6095,6 +6103,12 @@ const checkForUpdates = async (manual) => {
           detail: 'Version installée : ' + app.getVersion() + '.',
         });
       }
+      return;
+    }
+    if (!manual) {
+      // la veille s arrete a l avis : la barre (« disponible ») et le veilleur ont parle
+      _updBusy = false; _veilleEnCours = false;
+      try { updater.autoDownload = true; } catch {}
       return;
     }
     if (manual) {
@@ -6110,9 +6124,10 @@ const checkForUpdates = async (manual) => {
        de progression : en differentiel, il n arrive parfois qu a la fin. */
     /* ⚠ Seulement si rien n a encore parle : un telechargement differentiel peut
        etre DEJA fini, et l on repasserait alors de << prete >> a << 0 % >>. */
-    if (_majEtape === 'verif' || (!manual && !_majEtape)) majEtat({ etape: 'telechargement', version: String(remote), percent: 0 });
+    if (_majEtape === 'verif' || _majEtape === 'disponible') majEtat({ etape: 'telechargement', version: String(remote), percent: 0 });
   } catch (err) {
-    _updBusy = false;
+    _updBusy = false; _veilleEnCours = false;
+    try { updater.autoDownload = true; } catch {}
     if (manual || _majEtape === 'verif') majEtat(null);   // une veille en echec ne touche pas la barre
     if (manual) {
       dialog.showMessageBox(mainWindow, {

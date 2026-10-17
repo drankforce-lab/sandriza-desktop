@@ -1131,7 +1131,7 @@ function annoncerMaj(version) {
     if (!Notification.isSupported()) return;
     const n = new Notification({
       title: titre,
-      body: TV('Elle se télécharge en arrière-plan ; l’installation vous sera proposée quand elle sera prête.'),
+      body: TV('Rien ne s’installe tout seul : pour l’installer, Aide › Vérifier les mises à jour, ou redémarrez l’application.'),
       icon: fs.existsSync(ICON_PATH) ? ICON_PATH : undefined,
       silent: true, timeoutType: 'default', urgency: 'normal',
     });
