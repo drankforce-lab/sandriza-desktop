@@ -70,11 +70,12 @@ module.exports = {
           + 'ce `title` soit traduit. Le dire vaut mieux que le laisser croire.',
     },
     'src/veilleur.js|new Notification': {
-      n: 1,
+      n: 2,
       banc: 'tools/banc-langue-processus-principal.js',
       quoi: 'Les deux toasts de la veille — nouvelle commande, nouvelle demande de '
           + 'retour. Ce sont eux qui portent toute la fonction : s ils sortent en '
-          + 'francais sur une session anglaise, personne ne le voit passer.',
+          + 'francais sur une session anglaise, personne ne le voit passer. '
+          + 'Et (2026-10-17) l annonce d une MISE À JOUR détectée : titre et corps passent par TV().',
     },
     'src/veilleur.js|Menu.buildFromTemplate': {
       n: 1,

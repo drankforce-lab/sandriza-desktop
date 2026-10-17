@@ -27,6 +27,10 @@
  */
 
 module.exports = {
+  /* ── La mise à jour détectée (2026-10-17) ── */
+  'Nouvelle version {0} disponible': 'New version {0} available',
+  'Elle se télécharge en arrière-plan ; l’installation vous sera proposée quand elle sera prête.': 'It is downloading in the background; you will be offered to install it when it is ready.',
+  'Connectez-vous pour voir la mise à jour.': 'Sign in to see the update.',
   /* ── Les annonces détaillées (2026-10-12) ── */
   'Commande prioritaire': 'Priority order',
   'Nouvelle commande': 'New order',

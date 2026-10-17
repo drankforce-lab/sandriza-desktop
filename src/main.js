@@ -5676,6 +5676,7 @@ let _majMinuterie = null;
 let _majVersionPrete = '';
 // La version annoncee par update-available, pour la barre d etat (majEtat).
 let _majVersionVue = '';
+let _majDetecteeA = 0;
 
 /* ⚠⚠ `_majPage` EST PARTI LE 2026-09-10, AVEC LE TOAST QU IL SERVAIT. Il
    injectait `Admin._majPrete(...)` dans la fenêtre principale et attendait sa
@@ -5871,7 +5872,16 @@ const getUpdater = () => {
        ce qui empêche ce réglage de devenir dangereux. */
     autoUpdater.allowDowngrade = true;
 
-    autoUpdater.on('update-available', (info) => { _majDispo = true; _majVersionVue = (info && info.version) ? String(info.version) : ''; });
+    autoUpdater.on('update-available', (info) => {
+      _majDispo = true; _majVersionVue = (info && info.version) ? String(info.version) : '';
+      /* ⚠ SA DEMANDE DU 2026-10-17 : « dans la zone d'état, une notification quand une nouvelle mise à
+         jour est détectée, et un message via le veilleur ». La barre d'état le dit cinq secondes avant de
+         passer au pourcentage du téléchargement (qui partait aussitôt et cachait la nouvelle) ; le veilleur
+         l'écrit dans son journal et le notifie, une fois par version. */
+      _majDetecteeA = Date.now();
+      majEtat({ etape: 'detectee', version: _majVersionVue });
+      try { require('./veilleur').annoncerMaj(_majVersionVue); } catch {}
+    });
     // Rien à télécharger : aucune raison de retenir quoi que ce soit.
     autoUpdater.on('update-not-available', () => { _majDispo = false; _majCritique = false; majBoutonsFermeture(); majEtat(null); });
 
@@ -5886,6 +5896,7 @@ const getUpdater = () => {
       _majCritique = true;
       majBoutonsFermeture();
       _majDernierOctet = Date.now();
+      const _tenir = Date.now() - _majDetecteeA < 5000;           // la nouvelle reste lisible 5 s
       /* ⚠⚠ SA DEMANDE DU 2026-09-24 : << quand le telechargement se fait en
          background tu pourrais afficher la progression dans la barre d etat >>.
          Il avait raison, et le defaut etait juste en dessous : la ligne
@@ -5897,7 +5908,7 @@ const getUpdater = () => {
          d attente le site n est pas encore la, l envoi ne coute rien ; apres,
          c est la seule facon de le dire.
          ⚠ DES NOMBRES, PAS UNE PHRASE — le panneau connait sa langue, pas nous. */
-      try {
+      if (!_tenir) try {
         majEtat({
           etape: 'telechargement',
           version: _majVersionVue || '',

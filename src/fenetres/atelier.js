@@ -81,16 +81,18 @@ button.mini{padding:.12rem .5rem;font-size:.76rem}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 
 /* ── La bibliothèque ── */
-.at-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(11.5rem,1fr));grid-auto-rows:15.5rem;gap:.8rem;align-content:start}
-.at-carte{display:flex;flex-direction:column;border:1px solid var(--sz-bord);border-radius:14px;background:var(--f-carte2);overflow:hidden;
-  cursor:pointer;text-align:left;padding:0;min-width:0}
-.at-carte:hover{border-color:rgba(var(--or-rgb),.6)}
-.at-carte.on{border:2px solid var(--or)}
-.at-carte .vig{flex:1 1 auto;min-height:0;background:#EFE8DD;color:#1C1B18;display:flex;align-items:center;justify-content:center}
-.at-carte .vig svg{display:block}
-.at-carte .tx{padding:.5rem .7rem}
-.at-carte .tx b{display:block;font-size:.86rem;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.at-carte .tx span{display:block;font-size:.74rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.at-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(13rem,1fr));grid-auto-rows:19rem;gap:1rem;align-content:start}
+.at-carte{position:relative;display:flex;flex-direction:column;border:1px solid var(--sz-bord);border-radius:16px;background:var(--f-carte2);overflow:hidden;
+  cursor:pointer;text-align:left;padding:0;min-width:0;transition:transform .14s ease,box-shadow .14s ease,border-color .14s ease}
+.at-carte:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,0,0,.28);border-color:rgba(var(--or-rgb),.55)}
+.at-carte.on{border:2px solid var(--or);box-shadow:0 0 0 3px rgba(var(--or-rgb),.18)}
+.at-carte .vig{flex:1 1 auto;min-height:0;width:100%;background:linear-gradient(180deg,#F6F1E8,#ECE4D6);color:#1C1B18;display:flex;align-items:center;justify-content:center;padding:1rem .9rem .7rem}
+.at-carte .vig svg{display:block;width:100%;height:100%}
+.at-carte .tx{display:block;padding:.65rem .85rem .75rem;border-top:1px solid var(--sz-bord)}
+.at-carte .tx .l1{display:flex;align-items:center;gap:.45rem;min-width:0}
+.at-carte .tx .l1 b{flex:1 1 auto;min-width:0;font-size:.9rem;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.at-carte .tx .l2,.at-carte .tx .l3{display:block;font-size:.74rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:.2rem}
+.at-carte .tx .l3{font-size:.7rem}
 .at-carte.nouveau{border-style:dashed;background:transparent;align-items:center;justify-content:center;gap:.4rem;padding:1rem;text-align:center;color:var(--tx2)}
 .at-carte.nouveau b{color:var(--tx);font-size:.9rem}
 .at-puce{display:inline-flex;align-items:center;font-size:.72rem;padding:.1rem .6rem;border-radius:999px;border:1px solid var(--v16);white-space:nowrap}
@@ -109,12 +111,20 @@ button.mini{padding:.12rem .5rem;font-size:.76rem}
 .at-base.on{border:2px solid var(--or)}
 .at-base svg{width:1.6rem;height:2rem;flex:0 0 auto}
 .at-base b{display:block;font-size:.82rem}
-.at-liste{width:100%;border-collapse:collapse;font-size:.84rem}
-.at-liste th{text-align:left;font-weight:600;color:var(--tx2);font-size:.74rem;padding:.3rem .5rem;border-bottom:1px solid var(--sz-bord);white-space:nowrap}
-.at-liste td{padding:.42rem .5rem;border-bottom:1px solid var(--v055);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:16rem}
+.at-liste{width:100%;border-collapse:separate;border-spacing:0 .35rem;font-size:.84rem}
+.at-liste th{text-align:left;font-weight:600;color:var(--tx2);font-size:.72rem;letter-spacing:.03em;padding:.2rem .7rem;white-space:nowrap}
+.at-liste td{padding:.45rem .7rem;background:var(--f-carte2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:16rem;vertical-align:middle}
+.at-liste td:first-child{border-radius:12px 0 0 12px}
+.at-liste td:last-child{border-radius:0 12px 12px 0}
+.at-liste td.mini,.at-liste th.mini{width:3.4rem;padding-right:0}
+.at-liste .vigm{display:block;width:2.6rem;height:3.2rem;border-radius:8px;background:linear-gradient(180deg,#F6F1E8,#ECE4D6);color:#1C1B18;padding:.2rem}
+.at-liste .vigm svg{display:block;width:100%;height:100%}
+.at-liste td.nom b{display:block;font-weight:650}
+.at-liste td.nom span{display:block;font-size:.72rem;margin-top:.1rem}
 .at-liste tbody tr{cursor:pointer}
-.at-liste tbody tr:hover{background:var(--v055)}
-.at-liste tbody tr.on{outline:2px solid var(--or);outline-offset:-2px}
+.at-liste tbody tr:hover td{background:color-mix(in srgb,var(--f-carte2) 80%,var(--or) 8%)}
+.at-liste tbody tr.on td{background:color-mix(in srgb,var(--f-carte2) 82%,var(--or) 14%)}
+.at-liste tbody tr.on td:first-child{box-shadow:inset 3px 0 0 var(--or)}
 .at-tri{background:none;border:none;padding:0;color:inherit;font:inherit;cursor:pointer}
 .at-tri.on{color:var(--tx)}
 .nip-champ{display:flex;flex-direction:column;gap:.25rem;margin:.5rem 0;font-size:.8rem}
@@ -581,12 +591,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function listeCompacte(liste){
     var th = function(cle, lib){ return '<th><button type="button" class="at-tri' + (TRI.cle === cle ? ' on' : '') + '" data-tri="' + cle + '">' + lib + (TRI.cle === cle ? (TRI.sens > 0 ? ' ▲' : ' ▼') : '') + '</button></th>'; };
-    return '<div class="cx-pages" data-pages="atelier"><table class="at-liste"><thead><tr>' + th('nom', '${T("Nom")}') + th('ref', '${T("Réf.")}') + th('type', '${T("Type")}')
+    return '<div class="cx-pages" data-pages="atelier"><table class="at-liste"><thead><tr><th class="mini"></th>' + th('nom', '${T("Nom")}') + th('type', '${T("Type")}')
       + '<th>${T("État")}</th>' + th('version', '${T("Version")}') + th('cree', '${T("Créé le")}') + th('maj', '${T("Modifié le")}') + '</tr></thead><tbody>'
       + trierModeles(liste).map(function(m){
           return '<tr class="' + (SEL === m.id ? 'on' : '') + '" data-sel="' + esc(m.id) + '" data-ctx-ligne="' + esc(m.id) + '" tabindex="0">'
-            + '<td><b>' + esc(m.nom) + '</b>' + (m.verrouille ? ' <span class="ic" title="${T("Protégé par NIP")}" aria-label="${T("Protégé par NIP")}">🔒</span>' : '') + '</td>'
-            + '<td>' + esc(m.ref || '—') + '</td><td>' + esc(LBASE[m.base] || szTd(m.base || '')) + '</td>'
+            + '<td class="mini"><span class="vigm">' + (m.vignette || '') + '</span></td>'
+            + '<td class="nom"><b>' + esc(m.nom) + (m.verrouille ? ' <span class="ic" title="${T("Protégé par NIP")}" aria-label="${T("Protégé par NIP")}">🔒</span>' : '') + '</b><span class="cx-gris">' + esc(m.ref || '${T("sans référence")}') + '</span></td>'
+            + '<td>' + esc(LBASE[m.base] || szTd(m.base || '')) + '</td>'
             + '<td><span class="at-puce ' + esc(m.etat) + '">' + esc(LETAT[m.etat] || m.etat) + '</span></td><td>v' + (m.version || 1) + '</td>'
             + '<td class="cx-gris">' + esc(jour(m.createdAt)) + '</td><td class="cx-gris">' + esc(jour(m.updatedAt)) + '</td></tr>';
         }).join('') + '</tbody></table></div>';
@@ -630,8 +641,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (VUEB === 'liste') t += listeCompacte(liste);
     else t += '<div class="at-grille" data-pages="atelier">' + liste.map(function(m){
       return '<button type="button" class="at-carte' + (SEL === m.id ? ' on' : '') + '" data-sel="' + esc(m.id) + '" data-ctx-ligne="' + esc(m.id) + '" title="${T("Clic : détails · double-clic : ouvrir")}">'
-        + '<span class="vig">' + svgPieces([{ pieces: m.pieces || [] }], 176, 150, { mini: true, titre: m.nom }) + '</span>'
-        + '<span class="tx"><b>' + (m.verrouille ? '<span class="ic" aria-label="${T("Protégé par NIP")}">🔒</span> ' : '') + esc(m.nom) + '</b><span>' + esc((m.ref ? m.ref + ' · ' : '') + 'v' + (m.version || 1) + ' · ' + (m.tailles || []).join(' ')) + '</span></span></button>';
+        // le croquis de face (le vêtement qu on reconnaît) ; à défaut, les pièces à plat
+        + '<span class="vig">' + (m.vignette || svgPieces([{ pieces: m.pieces || [] }], 176, 150, { mini: true, titre: m.nom })) + '</span>'
+        + '<span class="tx"><span class="l1"><b>' + esc(m.nom) + '</b>' + (m.verrouille ? '<span class="ic" title="${T("Protégé par NIP")}" aria-label="${T("Protégé par NIP")}">🔒</span>' : '')
+        + '<span class="at-puce ' + esc(m.etat) + '">' + esc(LETAT[m.etat] || m.etat) + '</span></span>'
+        + '<span class="l2">' + esc([LBASE[m.base] || '', m.ref, 'v' + (m.version || 1), (m.tailles || []).join(' ')].filter(Boolean).join(' · ')) + '</span>'
+        + '<span class="l3">' + esc('${T("modifié le {0}")}'.split('{0}').join(jour(m.updatedAt))) + '</span></span></button>';
     }).join('') + '</div>';
     // (2026-10-17, sa demande « retire ça » : la carte « Partir d un patron de base » doublait le bouton « Nouveau modèle » de la tête.)
     if (tous.length && !liste.length) t += '<div class="vide">${T("Aucun modèle ne correspond.")}</div>';

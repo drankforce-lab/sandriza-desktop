@@ -730,7 +730,7 @@ function ligneEtat() {
    d'image en ligne. Le caractère est donc la seule façon de distinguer une
    commande d'un retour d'un coup d'œil dans la liste, et `banc-pictogrammes.js`
    ne lit d'ailleurs que `src/fenetres/`, jamais ce fichier. */
-const _NOTIF_ICO = { commande: '🛍', retour: '↩' };
+const _NOTIF_ICO = { commande: '🛍', retour: '↩', maj: '⬇' };
 
 function _quandCourt(iso) {
   const d = new Date(iso);
@@ -1115,4 +1115,29 @@ function rafraichir() {
   try { majTray(); } catch { /* icône absente : rien à reconstruire */ }
 }
 
-module.exports = { attacher, rafraichir };
+/* ══ LA MISE À JOUR DÉTECTÉE (2026-10-17, sa demande : « fais-moi un message via le veilleur si tu
+   détectes une nouvelle mise à jour disponible ») ══ Un message dans le journal du veilleur (la pastille
+   de l'icône le compte) et une notification du système, UNE fois par version : la recherche repasse
+   toutes les quelques heures, et la même version ne se rannonce pas. Sans son : ce n'est pas une
+   commande. Un clic ouvre l'administration. */
+let _majAnnoncee = '';
+function annoncerMaj(version) {
+  const v = String(version || '').trim();
+  if (!v || v === _majAnnoncee) return;
+  _majAnnoncee = v;
+  const titre = TV('Nouvelle version {0} disponible').split('{0}').join(v);
+  _noter(titre, 'maj');
+  try {
+    if (!Notification.isSupported()) return;
+    const n = new Notification({
+      title: titre,
+      body: TV('Elle se télécharge en arrière-plan ; l’installation vous sera proposée quand elle sera prête.'),
+      icon: fs.existsSync(ICON_PATH) ? ICON_PATH : undefined,
+      silent: true, timeoutType: 'default', urgency: 'normal',
+    });
+    n.on('click', () => ouvrirAdministration(TV('Connectez-vous pour voir la mise à jour.')));
+    n.show();
+  } catch { /* le message reste dans le journal */ }
+}
+
+module.exports = { attacher, rafraichir, annoncerMaj };
