@@ -136,6 +136,8 @@ html.jour .pf-med-l video{background:#1d2433}
 .gp-res img{display:block;width:100%;height:100%;object-fit:cover}
 .gp-lgd{font-size:.74rem;color:var(--tx2);margin-top:.25rem}
 .gp-ia{display:flex;align-items:center;gap:.45rem;font-size:.82rem;margin:.2rem 0 .4rem}
+.gp-modes{display:flex;flex-direction:column;gap:.15rem;margin:.3rem 0 .4rem}
+.gp-modes .gp-ia{margin:0}
 .fonds{display:flex;gap:.4rem;flex-wrap:wrap;margin:.5rem 0}
 .fonds button{display:inline-flex;align-items:center;gap:.35rem;font-size:.76rem;
   padding:.2rem .5rem;border-radius:99px;border:1px solid var(--v18);
@@ -2637,7 +2639,12 @@ function pageProduit(id) {
       + '<div class="gp-deux"><div><div class="gp-photo" id="gp-photo"><img id="gp-img" src="' + esc(IMAGE) + '" alt=""><div class="gp-cadre" id="gp-cadre" style="display:none"></div></div>'
       + '<div class="gp-lgd">${T("Photo principale")}</div></div>'
       + '<div><div class="gp-res" id="gp-res">${T("Recherche de la zone de tissu…")}</div><div class="gp-lgd" id="gp-lgd">${T("Aperçu du recadrage")}</div></div></div>'
-      + '<label class="gp-ia"><input type="checkbox" id="gp-ia" checked> ${T("Agrandir avec l’IA (Real-ESRGAN : fidèle à la matière, n’invente pas de tissage) · environ 0,01 $ US")}</label>'
+      // (2026-10-17, sa remarque : « l agrandissement n est pas de haute qualité… que l on voie les mailles ») : le rendu PRO
+      // refait une macro du même tissu ; l agrandissement fidèle et le simple recadrage restent au choix
+      + '<div class="gp-modes" role="radiogroup" aria-label="${T("Qualité du gros plan")}">'
+      + '<label class="gp-ia"><input type="radio" name="gp-mode" value="pro" checked> ${T("Rendu professionnel par l’IA : une macro du même tissu, mailles et fibres visibles (reconstituée par FLUX) · environ 0,04 $ US")}</label>'
+      + '<label class="gp-ia"><input type="radio" name="gp-mode" value="fidele"> ${T("Agrandir avec l’IA (Real-ESRGAN : fidèle à la matière, n’invente pas de tissage) · environ 0,01 $ US")}</label>'
+      + '<label class="gp-ia"><input type="radio" name="gp-mode" value="non"> ${T("Recadrer seulement, sans IA")}</label></div>'
       + '<div class="pied2"><button type="button" id="gp-non">${T("Annuler")}</button>'
       + '<button type="button" id="gp-lancer" disabled>${T("Fabriquer le gros plan")}</button>'
       + '<button type="button" class="prim" id="gp-oui" disabled>${T("✓ Ajouter aux photos")}</button></div></div>';
@@ -2678,14 +2685,14 @@ function pageProduit(id) {
     el('gp-lancer').onclick = function(){
       if (OCC || !ZONE) return;
       OCC = true; el('gp-lancer').disabled = true;
-      var ia = !!el('gp-ia').checked;
-      el('gp-res').innerHTML = ia ? '${T("Agrandissement par l’IA…")}' : '${T("Recadrage…")}';
+      var mc = v.querySelector('input[name="gp-mode"]:checked'), mode = mc ? mc.value : 'pro', ia = mode === 'pro' ? 'pro' : mode === 'fidele';
+      el('gp-res').innerHTML = mode === 'pro' ? '${T("Rendu professionnel par l’IA… (environ 20 s)")}' : ia ? '${T("Agrandissement par l’IA…")}' : '${T("Recadrage…")}';
       P.appeler('produit:grosPlan', IMAGE, ZONE, ia, cleCouts()).then(function(r){
         OCC = false; el('gp-lancer').disabled = false;
         if (!r || !r.ok) { el('gp-res').innerHTML = '<div style="padding:1rem;color:var(--tx-err)">' + esc((r && r.detail) || expliquer(r)) + '</div>'; return; }
         RESULTAT = r.image || '';
         el('gp-res').innerHTML = '<img src="' + esc(RESULTAT) + '" alt="">';
-        el('gp-lgd').textContent = r.agrandi ? '${T("Gros plan agrandi ×4 par l’IA (1200 × 1200 px)")}' : '${T("Gros plan recadré, sans IA (1200 × 1200 px)")}';
+        el('gp-lgd').textContent = r.pro ? '${T("Macro professionnelle reconstituée par l’IA (1200 × 1200 px)")}' : r.agrandi ? '${T("Gros plan agrandi ×4 par l’IA (1200 × 1200 px)")}' : '${T("Gros plan recadré, sans IA (1200 × 1200 px)")}';
         el('gp-oui').disabled = !RESULTAT;
         if (r.agrandi) chargerCouts();
       });

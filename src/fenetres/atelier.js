@@ -119,11 +119,13 @@ button.mini{padding:.12rem .5rem;font-size:.76rem}
 .at-liste td{padding:.45rem .7rem;background:var(--f-carte2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:16rem;vertical-align:middle}
 .at-liste td:first-child{border-radius:12px 0 0 12px}
 .at-liste td:last-child{border-radius:0 12px 12px 0}
-.at-liste td.mini,.at-liste th.mini{width:3.4rem;padding-right:0}
-.at-liste .vigm{display:block;width:2.6rem;height:3.2rem;border-radius:8px;background:linear-gradient(180deg,#F6F1E8,#ECE4D6);color:#1C1B18;padding:.2rem}
-.at-liste .vigm svg{display:block;width:100%;height:100%}
-.at-liste td.nom b{display:block;font-weight:650}
-.at-liste td.nom span{display:block;font-size:.72rem;margin-top:.1rem}
+.at-liste .nomv{display:flex;align-items:center;gap:.8rem;min-width:0}
+.at-liste .vigm{flex:0 0 auto;display:block;position:relative;width:2.8rem;height:3.4rem;border-radius:9px;overflow:hidden;background:linear-gradient(180deg,#F6F1E8,#ECE4D6);color:#1C1B18}
+.at-liste .vigm svg{position:absolute;left:.2rem;top:.2rem;width:calc(100% - .4rem);height:calc(100% - .4rem);display:block}
+.at-liste .vigm img.vigp,.at-carte .vig img.vigp{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;object-position:50% 40%;display:block}
+.at-liste .nomt{display:block;min-width:0}
+.at-liste td.nom b{display:block;font-weight:650;overflow:hidden;text-overflow:ellipsis}
+.at-liste .nomt>span{display:block;font-size:.72rem;margin-top:.1rem}
 .at-liste tbody tr{cursor:pointer}
 .at-liste tbody tr:hover td{background:color-mix(in srgb,var(--f-carte2) 80%,var(--or) 8%)}
 .at-liste tbody tr.on td{background:color-mix(in srgb,var(--f-carte2) 82%,var(--or) 14%)}
@@ -210,6 +212,10 @@ table.at-tab{width:100%;border-collapse:collapse;font-size:.8rem;font-variant-nu
 .v3-scene.glisse{cursor:grabbing}
 .v3-scene.vise{cursor:crosshair}
 .szc-boite.v3-fiche{max-width:46rem;width:calc(100vw - 4rem)}
+.v3r-duo{display:flex;gap:.8rem;justify-content:center}
+.v3r-duo figure{margin:0;flex:1 1 0;max-width:20rem;text-align:center}
+.v3f-vign.v3r-duo img{width:100%;height:auto;max-width:none;max-height:22rem;object-fit:contain;border-radius:10px;background:#FFFFFF;display:block}
+.v3r-duo figcaption{font-size:.74rem;color:var(--tx2);margin-top:.3rem}
 .v3f-vign{display:flex;gap:.6rem;margin:.7rem 0;min-height:9rem;align-items:center}
 .v3f-vign img{width:6.75rem;height:9rem;object-fit:contain;border-radius:8px;border:1px solid var(--sz-bord);background:#FFFFFF}
 .ph-trois .ed-seg{display:flex;flex-wrap:wrap}
@@ -594,12 +600,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function listeCompacte(liste){
     var th = function(cle, lib){ return '<th><button type="button" class="at-tri' + (TRI.cle === cle ? ' on' : '') + '" data-tri="' + cle + '">' + lib + (TRI.cle === cle ? (TRI.sens > 0 ? ' ▲' : ' ▼') : '') + '</button></th>'; };
-    return '<div class="cx-pages" data-pages="atelier"><table class="at-liste"><thead><tr><th class="mini"></th>' + th('nom', '${T("Nom")}') + th('type', '${T("Type")}')
+    return '<div class="cx-pages" data-pages="atelier"><table class="at-liste"><thead><tr>' + th('nom', '${T("Nom")}') + th('type', '${T("Type")}')
       + '<th>${T("État")}</th>' + th('version', '${T("Version")}') + th('cree', '${T("Créé le")}') + th('maj', '${T("Modifié le")}') + '</tr></thead><tbody>'
       + trierModeles(liste).map(function(m){
           return '<tr class="' + (SEL === m.id ? 'on' : '') + '" data-sel="' + esc(m.id) + '" data-ctx-ligne="' + esc(m.id) + '" tabindex="0">'
-            + '<td class="mini"><span class="vigm">' + (m.vignette || '') + '</span></td>'
-            + '<td class="nom"><b>' + esc(m.nom) + (m.verrouille ? ' <span class="ic" title="${T("Protégé par NIP")}" aria-label="${T("Protégé par NIP")}">🔒</span>' : '') + '</b><span class="cx-gris">' + esc(m.ref || '${T("sans référence")}') + '</span></td>'
+            // ⚠ la vignette DANS la cellule du nom : seule dans sa colonne, le socle lui dessinait sa propre carte et la rangée paraissait coupée en deux
+            + '<td class="nom"><span class="nomv"><span class="vigm">' + (m.vignette || '') + '</span><span class="nomt"><b>' + esc(m.nom) + (m.verrouille ? ' <span class="ic" title="${T("Protégé par NIP")}" aria-label="${T("Protégé par NIP")}">🔒</span>' : '') + '</b><span class="cx-gris">' + esc(m.ref || '${T("sans référence")}') + '</span></span></span></td>'
             + '<td>' + esc(LBASE[m.base] || szTd(m.base || '')) + '</td>'
             + '<td><span class="at-puce ' + esc(m.etat) + '">' + esc(LETAT[m.etat] || m.etat) + '</span></td><td>v' + (m.version || 1) + '</td>'
             + '<td class="cx-gris">' + esc(jour(m.createdAt)) + '</td><td class="cx-gris">' + esc(jour(m.updatedAt)) + '</td></tr>';
@@ -1999,6 +2005,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (n !== v3N || VUE !== '3d' || !V3) return;
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       V3.r = r; V3.mesh = maillage(r); V3.sale = true; peindrePanneau3d(); peindreDesign3d(); entete3d(); imagesMotif3d(); demander3d();
+      programmerVignette();
     });
   }
   var v3N = 0;
@@ -2370,22 +2377,132 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      la boutique), sur fond blanc ; le SITE les range parmi les photos du produit, sans jamais
      écraser une photo de la personne (les rendus envoyés avant sont remplacés). */
   var VUES_FICHE = [['face', '${T("Face")}', 0, 0.06], ['tq', '${T("3/4")}', 0.6, 0.1], ['dos', '${T("Dos")}', Math.PI, 0.06]];
-  function rendreVues3d(cles, fantome){
+  function rendreVues3d(cles, fantome, taille, fond){
     var cv = GLV && GLV.cv; if (!cv || !plaque3d() || !GLV.h) return [];
     var sauve = { yaw: V3.yaw, pitch: V3.pitch, zoom: V3.zoom, px: V3.px, py: V3.py, carte: V3.carte, fil: V3.fil };
-    var W = 1200, H = 1600, out = [];
+    var W = taille ? taille[0] : 1200, H = taille ? taille[1] : 1600, out = [];
     V3.carte = false; V3.fil = false; V3.px = 0; V3.py = 0;
     V3.zoom = H * 0.8 * Math.max(GLV.minH || 120, GLV.h) / (GLV.h * W * 0.85);
     VUES_FICHE.filter(function(v){ return cles.indexOf(v[0]) >= 0; }).forEach(function(v){
       V3.yaw = v[2]; V3.pitch = v[3] + (fantome ? 0.22 : 0);
       peindreGL(cv, { W: W, H: H });
       var c2 = document.createElement('canvas'); c2.width = W; c2.height = H;
-      var g = c2.getContext('2d'); g.fillStyle = '#FFFFFF'; g.fillRect(0, 0, W, H); g.drawImage(cv, 0, 0, W, H);
-      out.push(c2.toDataURL('image/jpeg', 0.92));
+      var g = c2.getContext('2d'); g.fillStyle = fond || '#FFFFFF'; g.fillRect(0, 0, W, H); g.drawImage(cv, 0, 0, W, H);
+      out.push(c2.toDataURL('image/jpeg', W < 600 ? 0.82 : 0.92));
     });
     Object.keys(sauve).forEach(function(k){ V3[k] = sauve[k]; });
     peindreGL(cv);
     return out;
+  }
+  /* LA VIGNETTE DU VÊTEMENT (2026-10-17, sa remarque : « tu n as pas mis la vraie vignette du vêtement avec le
+     logo ») : à l ouverture de la 3D (motif chargé) et après chaque enregistrement, un petit rendu de face part au
+     site — la bibliothèque montre alors le vêtement tel qu il est. Un rendu réaliste choisi n est pas écrasé. */
+  var VIGT = null;
+  function programmerVignette(){
+    if (VIGT) clearTimeout(VIGT);
+    VIGT = setTimeout(function(){
+      VIGT = null;
+      if (!V3 || VUE !== '3d' || !D.peutModifier || !plaque3d() || V3.m.vignetteSource === 'ia') return;
+      if (Object.keys(MOIMG).some(function(k){ return MOIMG[k] === 'chargement'; })) { programmerVignette(); return; }
+      var img = rendreVues3d(['face'], false, [300, 400], '#F3EEE5')[0], id = V3.id; if (!img) return;
+      appeler('atelier:vignette', [{ id: id, image: img, source: 'moteur' }]).then(function(r){
+        if (r && r.ok && !r.garde) (D.modeles || []).forEach(function(x){ if (x.id === id) x.vignette = '<img class="vigp" src="' + img + '" alt="">'; });
+      });
+    }, 1800);
+  }
+
+  /* ══ LE RENDU RÉALISTE (2026-10-17, sa demande : « je veux la même précision que FAL.AI ») ══════════
+     Le moteur du poste donne la FORME exacte (le patron, le motif, le logo à sa place) ; Fal.ai (FLUX
+     Kontext) en fait une photo de studio : la matière, les coutures, les plis. Payant (~0,04 $ le rendu) :
+     rien ne part sans un clic qui en dit le prix. Le résultat s enregistre, devient la vignette, ou va
+     vers la fiche produit. */
+  function ouvrirRenduIa(){
+    if (!V3 || !plaque3d() || OCCUPE) return;
+    var st = { vue: 'face', fantome: true, source: '', image: '' };
+    var v = document.createElement('div'); v.className = 'szc-voile';
+    document.body.appendChild(v);
+    var fermer = function(){ if (v.parentNode) v.parentNode.removeChild(v); };
+    var peindre = function(){
+      if (!st.image) st.source = rendreVues3d([st.vue], st.fantome, [900, 1200])[0] || '';
+      var prods = D.produits || [];
+      v.innerHTML = '<div class="szc-boite v3-fiche" role="dialog" aria-modal="true" aria-labelledby="v3r-t"><h3 id="v3r-t">${T("Rendu réaliste (Fal.ai)")}</h3>'
+        + '<p>${T("Le moteur 3D donne la forme exacte du vêtement, son motif et son logo ; Fal.ai en fait une photo de studio (matière, coutures, plis). Environ 0,04 $ par rendu, compté dans le plafond Fal.ai.")}</p>'
+        + (st.image ? '' : '<div class="im-cases">' + VUES_FICHE.map(function(x){ return '<label><input type="radio" name="v3r-vue" data-v3rv="' + x[0] + '"' + (st.vue === x[0] ? ' checked' : '') + '>' + x[1] + '</label>'; }).join('')
+          + '<label><input type="checkbox" id="v3r-fantome"' + (st.fantome ? ' checked' : '') + '>${T("Style mannequin fantôme")}</label></div>')
+        + '<div class="v3f-vign v3r-duo">' + (st.source ? '<figure><img src="' + st.source + '" alt=""><figcaption>${T("Moteur 3D")}</figcaption></figure>' : '')
+        + (st.image ? '<figure><img src="' + st.image + '" alt=""><figcaption>${T("Rendu réaliste")}</figcaption></figure>' : '') + '</div>'
+        + '<div class="szc-pied"><button type="button" class="szc-non">' + (st.image ? '${T("Fermer")}' : '${T("Annuler")}') + '</button>'
+        + (st.image ? '<button type="button" id="v3r-fichier">${T("Enregistrer le fichier")}</button>'
+            + (D.peutModifier ? '<button type="button" id="v3r-vign">${T("Utiliser comme vignette")}</button>' : '')
+            + (D.peutModifier && prods.length ? '<button type="button" class="szc-oui" id="v3r-fiche">${T("Vers la fiche produit")}</button>' : '')
+          : '<button type="button" class="szc-oui" id="v3r-go"' + (st.source ? '' : ' disabled') + '>${T("Générer (≈ 0,04 $)")}</button>')
+        + '</div></div>';
+      v.querySelector('.szc-non').onclick = fermer;
+      Array.prototype.forEach.call(v.querySelectorAll('[data-v3rv]'), function(c){ c.onchange = function(){ st.vue = c.getAttribute('data-v3rv'); peindre(); }; });
+      var cf = v.querySelector('#v3r-fantome'); if (cf) cf.onchange = function(ev){ st.fantome = ev.target.checked; peindre(); };
+      var go = v.querySelector('#v3r-go'); if (go) go.onclick = generer;
+      var bf = v.querySelector('#v3r-fichier'); if (bf) bf.onclick = function(){
+        if (!P || typeof P.enregistrerExport !== 'function') { dire('${T("Cette version de l’application ne sait pas enregistrer un export.")}', 'err'); return; }
+        var nom = String((V3.m.ref || V3.m.nom) + '-v' + (V3.m.version || 1) + '-rendu-' + st.vue).replace(/[^A-Za-z0-9._-]+/g, '-') + '.jpg';
+        Promise.resolve(P.enregistrerExport(nom, st.image)).then(function(w){
+          if (w && w.ok) dire('${T("Enregistré : {0}")}'.split('{0}').join(w.path || nom), 'bon');
+          else if (w && w.annule) dire('${T("Export annulé : le code d’export n’a pas été donné.")}', 'att');
+          else dire('${T("L’enregistrement a échoué : {0}")}'.split('{0}').join((w && w.error) || '?'), 'err');
+        });
+      };
+      var bv = v.querySelector('#v3r-vign'); if (bv) bv.onclick = function(){ vignetteDepuis(st.image); };
+      var bp = v.querySelector('#v3r-fiche'); if (bp) bp.onclick = function(){ versFiche(st.image); };
+    };
+    var generer = function(){
+      if (OCCUPE || !st.source) return;
+      OCCUPE = true; var b = v.querySelector('#v3r-go'); if (b) { b.disabled = true; b.textContent = '${T("Génération… (environ 20 s)")}'; }
+      dire('${T("Rendu réaliste en cours…")}');
+      appeler('atelier:rendrePhoto', [{ id: V3.id, image: st.source, vue: st.vue }]).then(function(r){
+        OCCUPE = false;
+        if (!r || !r.ok || !r.image) { if (b) { b.disabled = false; b.textContent = '${T("Générer (≈ 0,04 $)")}'; } dire(r && r.detail ? '${T("Fal.ai : {0}")}'.split('{0}').join(r.detail) : expliquer(r), 'err'); return; }
+        st.image = r.image; peindre(); dire('${T("Rendu réaliste prêt.")}', 'bon');
+      });
+    };
+    // une image (adresse ou data:) : petite vignette 300 × 400, recadrée au centre
+    var vignetteDepuis = function(src){
+      var im = new Image(); im.crossOrigin = 'anonymous';
+      im.onload = function(){
+        var c = document.createElement('canvas'); c.width = 300; c.height = 400;
+        var k = Math.max(300 / im.width, 400 / im.height), w = im.width * k, h = im.height * k;
+        c.getContext('2d').drawImage(im, (300 - w) / 2, (400 - h) / 2, w, h);
+        var d; try { d = c.toDataURL('image/jpeg', 0.82); } catch (e) { dire('${T("Cette image ne peut pas devenir une vignette.")}', 'err'); return; }
+        var id = V3.id;
+        appeler('atelier:vignette', [{ id: id, image: d, source: 'ia' }]).then(function(r){
+          if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+          if (V3) V3.m.vignetteSource = 'ia';
+          (D.modeles || []).forEach(function(x){ if (x.id === id) { x.vignette = '<img class="vigp" src="' + d + '" alt="">'; x.vignetteSource = 'ia'; } });
+          dire('${T("Vignette du modèle mise à jour.")}', 'bon');
+        });
+      };
+      im.onerror = function(){ dire('${T("Cette image ne peut pas devenir une vignette.")}', 'err'); };
+      im.src = src;
+    };
+    var versFiche = function(src){
+      var prods = D.produits || [], pid = V3.m.produitId && prods.some(function(p){ return p.id === V3.m.produitId; }) ? V3.m.produitId : (prods[0] && prods[0].id);
+      if (!pid || OCCUPE) return;
+      var envoi = function(d){
+        OCCUPE = true; dire('${T("Envoi des rendus…")}');
+        appeler('atelier:envoyerFiche', [{ id: V3.id, produitId: pid, images: [d], principale: false }]).then(function(r){
+          OCCUPE = false;
+          if (!r || !r.ok) { dire(r && r.motif === 'trop_de_photos' ? '${T("La fiche n’a plus de place pour une photo.")}' : expliquer(r), 'err'); return; }
+          var pr = prods.filter(function(p){ return p.id === r.produitId; })[0];
+          dire('${T("{0} rendu(s) ajouté(s) à la fiche « {1} ».")}'.split('{0}').join(r.envoyees).split('{1}').join(pr ? pr.nom : r.produitId), 'bon');
+        });
+      };
+      if (src.indexOf('data:image/jpeg') === 0 || src.indexOf('data:image/png') === 0) { envoi(src); return; }
+      var im = new Image(); im.crossOrigin = 'anonymous';
+      im.onload = function(){ var c = document.createElement('canvas'); c.width = im.width; c.height = im.height; c.getContext('2d').drawImage(im, 0, 0); try { envoi(c.toDataURL('image/jpeg', 0.92)); } catch (e) { dire('${T("Cette image ne peut pas être envoyée.")}', 'err'); } };
+      im.onerror = function(){ dire('${T("Cette image ne peut pas être envoyée.")}', 'err'); };
+      im.src = src;
+    };
+    v.addEventListener('keydown', function(ev){ if (ev.key === 'Escape' && !OCCUPE) fermer(); });
+    v.addEventListener('mousedown', function(ev){ if (ev.target === v && !OCCUPE) fermer(); });
+    peindre();
   }
   function ouvrirEnvoiFiche(){
     if (!V3 || !plaque3d() || OCCUPE) return;
@@ -2758,8 +2875,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var bords = an.map(function(a, i){ var w = pid === 'devant' ? a.wf : a.wb; return w && w.x1 > w.x0 ? w : null; });
     for (var i = 0; i < bords.length; i++) if (!bords[i]) bords[i] = bords[i - 1] || bords.filter(Boolean)[0] || { x0: 0, x1: 1 };
     var arc = function(i, x){
-      var a = an[i], L = tabs[i], C = L[L.length - 1], w = bords[i], f = (x - w.x0) / (w.x1 - w.x0), s2;
-      if (mode === 'haut') s2 = pid === 'devant' ? (1 - f) * C / 4 : C / 2 - (1 - f) * C / 4;
+      var a = an[i], L = tabs[i], C = L[L.length - 1], w = bords[i], f = (x - w.x0) / (w.x1 - w.x0), s2, md = a.mode || mode;
+      if (md === 'haut') s2 = pid === 'devant' ? (1 - f) * C / 4 : C / 2 - (1 - f) * C / 4;
       else s2 = pid === 'devant' ? C / 4 - f * C / 2 : C / 4 + f * C / 2;
       return { f: f, phi: angleArc(L, sg * s2) };
     };
@@ -2767,7 +2884,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       anneau: function(i){ var a = an[i]; return { c: [a.c.x, a.c.y, a.c.z || 0], etat: a.etat }; },
       pli: vie.a > 0 ? function(i, j){
         var a = an[i], x = bb.x0 + (bb.x1 - bb.x0) * j / J, f = arc(i, x).f, cou = Math.max(0, Math.min(1, f / 0.12, (1 - f) / 0.12));
-        var g = mode === 'haut' ? 0.15 : 0.25 + 0.75 * Math.min(1, i / Math.max(1, R0 - 1));
+        var g = (an[i].mode || mode) === 'haut' ? 0.15 : 0.25 + 0.75 * Math.min(1, i / Math.max(1, R0 - 1));
         return vie.a * 0.6 * g * cou * onde(x + (pid === 'dos' ? 137 : 0) + sg * 50, a.yp, vie.l * 0.8, pid === 'dos' ? 2.2 : 0.9);
       } : null,
       point: function(i, j){
@@ -3044,7 +3161,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     PX[k * 3] = x; PX[k * 3 + 1] = y; PX[k * 3 + 2] = z;
   }
   /* epingle(ma, i, j) : vrai = tenu (ne bouge pas). Renvoie le nombre de soudures posées (pour le banc d essai). */
-  function draper(mailles, tubesCorps, epingle, pas){
+  function draper(mailles, tubesCorps, epingle, pas, longueursPatron){
     var N = 0;
     mailles.forEach(function(ma){
       var R = ma.R, J = ma.J, bb = ma.pc.bb, n = R * (J + 1), polys = [contourPts(ma.pc.p.contour)].concat(ma.pc.mir ? [contourPts(ma.pc.mir)] : []);
@@ -3082,7 +3199,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        longue que l emmanchure, c est l embu — débordait au-dessus de l épaule en épaulette carrée. Les mailles
        gardent donc leur longueur de départ ; seules les COUTURES (longueur 0) se ferment, et le maillage se
        déforme en douceur autour d elles. Les plis viennent de la « vie du tissu ». */
-    for (var cz = 0; cz < nC; cz++) if (L[cz] > 0) { var za = A[cz] * 3, zb = B[cz] * 3; L[cz] = Math.hypot(PX[zb] - PX[za], PX[zb + 1] - PX[za + 1], PX[zb + 2] - PX[za + 2]); }
+    if (!longueursPatron) for (var cz = 0; cz < nC; cz++) if (L[cz] > 0) { var za = A[cz] * 3, zb = B[cz] * 3; L[cz] = Math.hypot(PX[zb] - PX[za], PX[zb + 1] - PX[za + 1], PX[zb + 2] - PX[za + 2]); }
     /* ⚠ UN RELÂCHEMENT ANCRÉ, PAS UNE CHUTE LIBRE (vu à l essai) : tenu au seul cou, le vêtement glissait et se
        tordait d un côté. Chaque particule est rappelée DOUCEMENT vers sa pose de départ (qui est bonne) : le drapé
        coud les bords, rend au tissu ses longueurs et le laisse tomber un peu — il ne le promène pas. */
@@ -3186,6 +3303,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!dv || !ds) return paires;
     var cf = dv.pc.p.contour, cb = ds.pc.p.contour, fam = fam3d(), nf = cf.length, nb = cb.length;
     var manches = mailles.filter(function(m){ return m.pid === 'manche'; });
+    if (fam === 'bas') {
+      var cote = function(pid, S){ return mailles.filter(function(m){ if (m.pid !== pid) return false; var sx = 0, n = 0; for (var k = 0; k < m.pos.length; k += 30) { sx += m.pos[k]; n++; } return (sx / Math.max(1, n)) * S > 0; })[0]; };
+      [1, -1].forEach(function(S){
+        var a = cote('devant', S), b = cote('dos', S); if (!a || !b || nf < 9 || nb < 9) return;
+        coudre(paires, a, bordPts(cf, 6, 8, 1), 1, b, bordPts(cb, 6, 8, 1), 1);                        // côté
+        coudre(paires, a, bordPts(cf, 3, 5, 1), 1, b, bordPts(cb, 3, 5, 1), 1);                        // entrejambe
+      });
+      coudre(paires, cote('devant', 1), bordPts(cf, 1, 3, 1), 1, cote('devant', -1), bordPts(cf, 1, 3, 1), 1);   // milieu devant
+      coudre(paires, cote('dos', 1), bordPts(cb, 1, 3, 1), 1, cote('dos', -1), bordPts(cb, 1, 3, 1), 1);         // milieu dos
+      return paires;
+    }
     [1, -1].forEach(function(S){
       // le devant côté S est son x de signe S ; le dos côté S, son x de signe −S (le dos est tourné)
       if (fam === 'jupe') { coudre(paires, dv, bordPts(cf, 1, 3, 1), S, ds, bordPts(cb, 1, 3, 1), -S); return; }
@@ -3215,13 +3343,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       pieces[p.id] = pc; GLV.toiles[p.id] = pc;
     });
     if (r.motif3d === 'tete') GLV.mailles = maillesTete(r, pieces);
+    /* LE PANTALON : chaque pièce de chaque jambe est UN maillage, de la ceinture à l ourlet — au-dessus de la
+       fourche sur l anneau des hanches, au-dessous sur celui de la jambe (le haut et les jambes se chevauchaient : une
+       marche se voyait). Le drapé coud ensuite le côté, l entrejambe et les milieux. */
+    if (fam3d() === 'bas' && r.fourche != null) {
+      var tH = (r.vetement || []).filter(function(t){ return /haut/.test(t.nom || ''); })[0];
+      [[1, /gauche/], [-1, /droite/]].forEach(function(x){
+        var tj = (r.vetement || []).filter(function(t){ return x[1].test(t.nom || ''); })[0]; if (!tH || !tj) return;
+        var rangs = tH.anneaux.filter(function(a){ return a.yp != null && a.yp < r.fourche; }).map(function(a){ return Object.assign({}, a, { mode: 'haut' }); })
+          .concat(tj.anneaux.filter(function(a){ return a.yp != null && a.yp >= r.fourche; }).map(function(a){ return Object.assign({}, a, { mode: 'jambe' }); }));
+        if (rangs.length > 2) ['devant', 'dos'].forEach(function(pid){ if (pieces[pid]) GLV.mailles.push(mailleBas(rangs, pieces[pid], pid, x[0], 'jambe')); });
+      });
+    }
     (r.vetement || []).forEach(function(tb){
       var an = (tb.anneaux || []).filter(function(a){ return a.yp != null; }); if (an.length < 2) return;
       // ⚠ avec le DRAPÉ, le haut garde la forme du CORPS (des épaules qui tombent) : élargi jusqu au cou, il faisait
       // des épaules carrées, et la tête de manche s accrochait au coin en épaulette. Sans drapé, l élargissement reste.
       if (an[0].sf != null) { var drapeOn = ['haut', 'jupe'].indexOf(fam3d()) >= 0 && (r.corps || []).length; an = lisser(drapeOn ? adoucir(an) : epaules(adoucir(an), pieces.devant && pieces.devant.p.contour[2] ? pieces.devant.p.contour[2].y : 0)); }
       if (an[0].sf != null) ['devant', 'dos'].forEach(function(pid){ if (pieces[pid]) GLV.mailles.push(mailleCorps(an, pieces[pid], pid)); });
-      else if (an[0].wf !== undefined) {
+      else if (an[0].wf !== undefined && r.fourche == null) {
         var mode = /haut/.test(tb.nom || '') ? 'haut' : 'jambe', cotes = mode === 'haut' ? [1, -1] : [/gauche/.test(tb.nom || '') ? 1 : -1];
         cotes.forEach(function(sgb){ ['devant', 'dos'].forEach(function(pid){ if (pieces[pid]) GLV.mailles.push(mailleBas(an, pieces[pid], pid, sgb, mode)); }); });
       }
@@ -3229,13 +3369,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
     // LE DRAPÉ : les vêtements portés sur le corps (pas les chapeaux)
     var famD = fam3d();
-    if (['haut', 'jupe'].indexOf(famD) >= 0 && (r.corps || []).length) {               // (les pantalons : leurs coutures restent à déclarer)
+    if (['haut', 'jupe', 'bas'].indexOf(famD) >= 0 && (r.corps || []).length) {
       var epY = pieces.devant && pieces.devant.p.contour[2] ? pieces.devant.p.contour[2].y : 0;
       try {
         GLV.soudures = draper(GLV.mailles, r.corps, function(ma, i){
           if (ma.pid !== 'devant' && ma.pid !== 'dos') return false;
           return famD === 'haut' ? ma.yp[i] <= 1.2 : i <= 2;                   // tenu à l encolure (les épaules se posent sur le corps), ou à la ceinture
-        }, 60);
+        }, 60, famD === 'bas');                                            // un pantalon reprend ses longueurs du patron (la hanche rejoint la jambe)
       } catch (e) { GLV.soudures = -1; }
     }
     var y0 = 1e9, y1 = -1e9;
@@ -3428,7 +3568,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       V3.dsale = false; V3.pile = [];
       appeler('atelier:donnees', []).then(function(d){
         if (d && d.ok) { D = d; var m = (D.modeles || []).filter(function(x){ return x.id === V3.id; })[0]; if (m && V3) { V3.m = m; V3.design = copie(m.design3d || V3.design); } }
-        if (VUE === '3d' && V3) { entete3d(); peindreDesign3d(); dire('${T("Design 3D enregistré.")}', 'bon'); }
+        if (VUE === '3d' && V3) { entete3d(); peindreDesign3d(); dire('${T("Design 3D enregistré.")}', 'bon'); programmerVignette(); }
       });
     });
   }
@@ -3441,7 +3581,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (plaque3d() ? '<button type="button" id="v3-annuler" aria-label="${T("Annuler")}" title="${T("Annuler")}"' + (V3.pile.length ? '' : ' disabled') + '>↶</button>'
         + (D.peutModifier ? '<button type="button" class="prim" id="v3-enreg"' + (V3.dsale ? '' : ' disabled') + '>${T("Enregistrer")}</button>' : '') : '')
       + (plaque3d() && D.peutModifier && (D.produits || []).length ? '<button type="button" id="v3-fiche">${T("Vers la fiche produit")}</button>' : '')
-      + '<button type="button" id="v3-photo">${T("Photo du rendu")}</button>';
+      + '<button type="button" id="v3-photo">${T("Photo du rendu")}</button>'
+      + (plaque3d() ? '<button type="button" id="v3-ia">${T("Rendu réaliste (Fal.ai)")}</button>' : '');
   }
   var LDEC3 = { rond: '${T("Rond")}', ovale: '${T("Ovale")}', goutte: '${T("Goutte")}', rect: '${T("Rectangle")}' };
   var LEL3 = { perle: '${T("Perle")}', bouton: '${T("Bouton")}', strass: '${T("Strass")}', anneau: '${T("Anneau")}', oeillet: '${T("Œillet")}', clou: '${T("Clou")}' };
@@ -4483,6 +4624,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (t.closest('#v3-photo')) { photo3d(); return; }
     if (t.closest('#v3-enreg')) { enregistrer3d(); return; }
     if (t.closest('#v3-fiche')) { ouvrirEnvoiFiche(); return; }
+    if (t.closest('#v3-ia')) { ouvrirRenduIa(); return; }
     if (t.closest('#v3-annuler')) { annuler3d(); return; }
     if (t.closest('#e-3d')) { troisDDepuisEditeur(); return; }
     if (t.closest('#i-exporter')) { exporterFichier(t.closest('#i-exporter')); return; }

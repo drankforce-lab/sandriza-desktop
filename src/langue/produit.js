@@ -682,4 +682,9 @@ module.exports = {
   'Gros plan recadré, sans IA (1200 × 1200 px)': 'Close-up cropped, without AI (1200 × 1200 px)',
   'Les photos supplémentaires sont toutes prises : retirez-en une, puis recommencez.': 'All additional photo slots are taken: remove one, then try again.',
   'Gros plan ajouté aux photos du produit. Il sera enregistré avec la fiche.': 'Close-up added to the product photos. It will be saved with the product.',
+  'Qualité du gros plan': 'Close-up quality',
+  'Rendu professionnel par l’IA : une macro du même tissu, mailles et fibres visibles (reconstituée par FLUX) · environ 0,04 $ US': 'Professional AI render: a macro of the same fabric, stitches and fibres visible (reconstructed by FLUX) · about US$0.04',
+  'Recadrer seulement, sans IA': 'Crop only, no AI',
+  'Rendu professionnel par l’IA… (environ 20 s)': 'Professional AI render… (about 20 s)',
+  'Macro professionnelle reconstituée par l’IA (1200 × 1200 px)': 'Professional macro reconstructed by AI (1200 × 1200 px)',
 };
