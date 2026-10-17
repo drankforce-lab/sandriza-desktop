@@ -197,7 +197,14 @@ table.at-tab{width:100%;border-collapse:collapse;font-size:.8rem;font-variant-nu
 .mo-trois>.cx-carte{min-height:0;overflow:auto}
 .mo-toile{position:relative;border-radius:12px;background:#EFE8DD;color:#1C1B18;overflow:hidden;min-height:0;user-select:none}
 .mo-toile svg{display:block;position:absolute;left:0;top:0}
-.mo-calque{display:flex;align-items:center;gap:.45rem;width:100%;padding:.35rem .5rem;border-radius:8px;text-align:left;font-size:.82rem;background:transparent;border:1px solid transparent}
+.mo-calque{display:flex;align-items:center;gap:.45rem;width:100%;padding:.3rem .4rem;border-radius:8px;text-align:left;font-size:.82rem;background:transparent;border:1px solid transparent;cursor:pointer}
+.mo-calque:hover{background:var(--v05)}
+.mo-oeil{flex:0 0 auto;width:1.6rem;height:1.6rem;padding:0;border-radius:6px;font-size:.78rem;line-height:1;background:transparent;border:1px solid var(--v16)}
+.mo-oeil.off{color:var(--tx2)}
+.mo-vue{position:absolute;right:.6rem;top:.5rem;display:flex;align-items:center;gap:.3rem;background:rgba(243,238,229,.94);color:#1C1B18;border-radius:8px;padding:.2rem .35rem;font-size:.76rem}
+.mo-vue button.mini{color:#1C1B18;background:#FFFFFF;border-color:#C9BFAE}
+.mo-aide{position:absolute;left:.6rem;bottom:.45rem;right:.6rem;font-size:.72rem;color:#3F3A32;background:rgba(243,238,229,.92);padding:.12rem .45rem;border-radius:6px;pointer-events:none}
+.mo-grille{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.35rem}
 .mo-calque.on{border-color:var(--or)}
 .mo-calque .t{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mo-calque .k{font-size:.7rem;color:var(--tx2)}
@@ -1761,7 +1768,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!m) { dire(MOTIFS.introuvable, 'err'); return; }
     SEL = id;
     V3 = { id: id, m: m, retour: retour || 'biblio', taille: m.tailleBase || 'M', stature: 165, r: null, mesh: null,
-      yaw: 0.55, pitch: 0.08, zoom: 1, px: 0, py: 0, carte: true, fil: false, auto: false, couleur: COUL3[0][0], fond: 'beige', sale: true };
+      yaw: 0.45, pitch: 0.12, zoom: 1, px: 0, py: 0, carte: false, fil: false, auto: false, couleur: COUL3[0][0], fond: 'beige', sale: true };
     VUE = '3d'; dessiner(); charger3d();
   }
   function charger3d(){
@@ -1774,9 +1781,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   var v3N = 0;
 
-  /* ── Des anneaux aux triangles ── */
+  /* ── Des anneaux aux triangles ──
+     ⚠ LE VÊTEMENT SEUL (2026-10-17, sa demande : « l aperçu 3D n est pas beau, je veux uniquement voir
+     le vêtement »). Le corps sert encore, INVISIBLE, à donner sa forme au vêtement (le site le calcule) ;
+     on n en peint plus rien. Chaque point porte sa NORMALE (celle de l ellipse) : l ombrage se fait par
+     point et non plus par facette — c est ce qui efface l effet « carrelé ». */
   function maillage(r){
-    var N = 22, tri = [];
+    var N = 48, tri = [];
     var ajouter = function(tubes, vet){
       (tubes || []).forEach(function(tb){
         var an = tb.anneaux || [], pts = [];
@@ -1789,7 +1800,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           var c = an[i].c, anneau = [];
           for (var k = 0; k < N; k++) {
             var t = 2 * Math.PI * k / N, co = Math.cos(t) * an[i].rx, si = Math.sin(t) * an[i].rz;
-            anneau.push({ x: c.x + ux * co + vx * si, y: c.y + uy * co + vy * si, z: (c.z || 0) + uz * co + vz * si });
+            // la normale d une ellipse : (cos / rx, sin / rz), portée par u et v
+            var ncu = Math.cos(t) / Math.max(0.1, an[i].rx), ncv = Math.sin(t) / Math.max(0.1, an[i].rz);
+            var nx = ux * ncu + vx * ncv, ny = uy * ncu + vy * ncv, nz = uz * ncu + vz * ncv, nn = Math.hypot(nx, ny, nz) || 1;
+            anneau.push({ x: c.x + ux * co + vx * si, y: c.y + uy * co + vy * si, z: (c.z || 0) + uz * co + vz * si, n: { x: nx / nn, y: ny / nn, z: nz / nn } });
           }
           pts.push({ p: anneau, etat: an[i].etat || '' });
         }
@@ -1809,7 +1823,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         });
       });
     };
-    ajouter(r.corps, false); ajouter(r.vetement, true);
+    ajouter(r.vetement, true);
     var y0 = 1e9, y1 = -1e9;
     tri.forEach(function(t){ t.v.forEach(function(v){ if (v.y < y0) y0 = v.y; if (v.y > y1) y1 = v.y; }); });
     return { tri: tri, cy: (y0 + y1) / 2, h: y1 - y0 };
@@ -1833,27 +1847,38 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     };
     var L = [0.35, 0.55, 0.76], ll = Math.hypot(L[0], L[1], L[2]); L = [L[0] / ll, L[1] / ll, L[2] / ll];
     var cVet = hex(V3.couleur), cCorps = [205, 198, 186];
+    // la normale d un point, tournée comme la vue, éclairée (lumière douce, un peu d ambiance)
+    var eclaire = function(n){
+      var x = n.x * cyw + n.z * syw, z = -n.x * syw + n.z * cyw;
+      var y2 = n.y * cp - z * sp, z2 = n.y * sp + z * cp;
+      return { l: x * L[0] + y2 * L[1] + z2 * L[2], vers: z2 };    // vers > 0 : la face regarde l oeil
+    };
+    // l ombre portée au sol, sous l ourlet
+    var ybas = 1e9; V3.mesh.tri.forEach(function(t){ t.v.forEach(function(v){ if (v.y < ybas) ybas = v.y; }); });
+    var sol = proj({ x: 0, y: ybas - 3, z: 0 }), rs = f * 26;
+    var grad = g.createRadialGradient(sol.x, sol.y, 0, sol.x, sol.y, rs);
+    grad.addColorStop(0, 'rgba(40,32,22,0.28)'); grad.addColorStop(1, 'rgba(40,32,22,0)');
+    g.save(); g.translate(sol.x, sol.y); g.scale(1, 0.16); g.translate(-sol.x, -sol.y);
+    g.fillStyle = grad; g.beginPath(); g.arc(sol.x, sol.y, rs, 0, 2 * Math.PI); g.fill(); g.restore();
     var liste = [];
     V3.mesh.tri.forEach(function(t){
       var a = proj(t.v[0]), b = proj(t.v[1]), c = proj(t.v[2]);
-      var cross = (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
-      var dos = cross > 0;
-      if (dos && !t.vet && !V3.fil) return;                       // l intérieur du corps ne se voit jamais
-      // normale dans l espace de la vue (pour l ombrage)
-      var ux = b.x - a.x, uy = -(b.y - a.y), uz = b.z - a.z, vx = c.x - a.x, vy = -(c.y - a.y), vz = c.z - a.z;
-      var nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx, nl = Math.hypot(nx, ny, nz) || 1;
-      var lum = Math.abs((nx * L[0] + ny * L[1] + nz * L[2]) / nl);
+      // ⚠ L AVANT ET L ENVERS SE JUGENT À LA NORMALE (tournée vers l oeil ou non), pas à l ordre des sommets
+      var e0 = eclaire(t.v[0].n), e1 = eclaire(t.v[1].n), e2 = eclaire(t.v[2].n);
+      var e = (e0.l + e1.l + e2.l) / 3, dos = (e0.vers + e1.vers + e2.vers) < 0;
+      // vu de dedans (encolure, emmanchures, ourlet), c est l envers du tissu qui reçoit la lumière
+      var lum = Math.max(0, dos ? -e : e);
       liste.push({ a: a, b: b, c: c, z: (a.z + b.z + c.z) / 3, lum: lum, t: t, dos: dos });
     });
     liste.sort(function(p, q){ return p.z - q.z; });
     g.lineJoin = 'round';
     liste.forEach(function(o){
       var base = o.t.vet ? (V3.carte && o.t.etat && ETAT3[o.t.etat] ? hex(ETAT3[o.t.etat]) : cVet) : cCorps;
-      var k = 0.42 + 0.58 * o.lum; if (o.dos) k *= 0.62;
+      var k = 0.36 + 0.64 * Math.pow(o.lum, 0.85); if (o.dos) k *= 0.55;
       var col = 'rgb(' + Math.round(base[0] * k) + ',' + Math.round(base[1] * k) + ',' + Math.round(base[2] * k) + ')';
       g.beginPath(); g.moveTo(o.a.x, o.a.y); g.lineTo(o.b.x, o.b.y); g.lineTo(o.c.x, o.c.y); g.closePath();
       if (V3.fil) { g.strokeStyle = col; g.lineWidth = 0.6; g.stroke(); }
-      else { g.fillStyle = col; g.fill(); g.strokeStyle = col; g.lineWidth = 0.5; g.stroke(); }
+      else { g.fillStyle = col; g.fill(); g.strokeStyle = col; g.lineWidth = 0.6; g.stroke(); }
     });
   }
   var v3Raf = 0;
@@ -1877,16 +1902,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<button type="button" id="v3-photo">${T("Photo du rendu")}</button>';
     var seg = function(attr, k, lib, on){ return '<button type="button" class="' + (on ? 'on' : '') + '" ' + attr + '="' + k + '">' + lib + '</button>'; };
     var chip = function(k, lib, on){ return '<label><input type="checkbox" data-v3o="' + k + '"' + (on ? ' checked' : '') + '>' + lib + '</label>'; };
-    var g = '<div class="cx-carte"><h2>${T("Mannequin")}</h2><div class="ed-seg" role="group" aria-label="${T("Taille du mannequin")}">'
+    var g = '<div class="cx-carte"><h2>${T("Taille")}</h2><div class="ed-seg" role="group" aria-label="${T("Taille affichée")}">'
       + (m.tailles || []).map(function(t){ return seg('data-v3t', t, esc(t), V3.taille === t); }).join('') + '</div>'
-      + '<div class="at-champs" style="margin-top:.6rem"><label>${T("Stature (cm)")}<input type="text" id="v3-stature" inputmode="numeric" maxlength="3" value="' + V3.stature + '"></label></div>'
       + '<div class="cx-sep"></div><h2>${T("Vue")}</h2><div class="ed-seg" role="group" aria-label="${T("Vue")}">'
       + VUES3.map(function(v){ return seg('data-v3v', v[0], v[1], false).replace('<button ', '<button title="' + (v[3] || v[1]) + '" '); }).join('') + '</div>'
       + '<div class="im-cases" style="margin-top:.6rem">' + chip('carte', '${T("Carte d’ajustement")}', V3.carte) + chip('fil', '${T("Fil de fer")}', V3.fil) + chip('auto', '${T("Rotation automatique")}', V3.auto) + '</div>'
       + '<div class="cx-sep"></div><h2>${T("Couleur du tissu")}</h2><div class="v3-couleurs">'
       + COUL3.map(function(c){ return '<button type="button" class="' + (V3.couleur === c[0] ? 'on' : '') + '" data-v3c="' + c[0] + '" title="' + c[1] + '" aria-label="' + c[1] + '" style="background:' + c[0] + '"></button>'; }).join('') + '</div>'
       + '<div class="cx-sep"></div><h2>${T("Fond")}</h2><div class="ed-seg" role="group" aria-label="${T("Fond")}">' + seg('data-v3f', 'beige', '${T("Beige")}', V3.fond === 'beige') + seg('data-v3f', 'blanc', '${T("Blanc")}', V3.fond === 'blanc') + '</div></div>';
-    var sc = '<div class="v3-scene ' + V3.fond + '" id="v3-scene"><canvas id="v3-canevas" role="img" aria-label="${T("Le vêtement sur le mannequin, en 3D")}"></canvas>'
+    var sc = '<div class="v3-scene ' + V3.fond + '" id="v3-scene"><canvas id="v3-canevas" role="img" aria-label="${T("Le vêtement en 3D")}"></canvas>'
       + '<span class="v3-aide">${T("Glisser pour tourner · molette pour zoomer · Maj + glisser pour déplacer · double-clic pour recentrer")}</span></div>';
     var d = '<div class="cx-carte" id="v3-pan"></div>';
     corps.innerHTML = '<div class="v3-trois">' + g + sc + d + '</div>';
@@ -1912,7 +1936,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       : '${T("Le point le plus serré garde {0} d’aisance, à {1} cm du sol.")}').split('{0}').join(cm1(Math.abs(r.pire.ecart)).replace('+', '')).split('{1}').join(Math.round(r.pire.hauteur)) + '</div>';
     if ((r.nonPosees || []).length) h += '<div class="ed-note">' + '${T("Pièces non posées sur le mannequin : {0}.")}'.split('{0}').join(esc(r.nonPosees.join(', '))) + '</div>';
     if (r.motif3d === 'pieces_inconnues') h += '<div class="ed-note">${T("Ce patron n’a pas de devant et de dos reconnaissables : seul le mannequin est montré.")}</div>';
-    h += '<div class="cx-sep"></div><div class="ed-note">${T("Aperçu géométrique : le vêtement est posé autour du mannequin à sa largeur réelle, mesurée sur les pièces niveau par niveau (pinces déduites). Le tombé du tissu — plis, poids, glissement — n’est pas simulé.")}</div>'
+    h += '<div class="cx-sep"></div><div class="ed-note">${T("Aperçu géométrique : le vêtement est montré seul, porté sur un corps invisible aux mesures du tableau ; sa largeur est mesurée sur les pièces, niveau par niveau (pinces déduites). Le tombé du tissu — plis, poids, glissement — n’est pas simulé.")}</div>'
       + '<div class="ed-note">${T("Les écarts se lisent de 0 à 2 cm serré, de 2 à 8 cm ajusté, au-delà aisé ; sous 0, le vêtement est plus petit que le corps.")}</div>';
     z.innerHTML = h;
   }
@@ -1925,11 +1949,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function change3d(t){
     if (t.hasAttribute('data-v3o')) { V3[t.getAttribute('data-v3o')] = !!t.checked; demander3d(); return; }
-    if (t.id === 'v3-stature') {
-      var v = parseInt(t.value, 10);
-      if (!(v >= 140 && v <= 200)) { dire('${T("Une stature va de 140 à 200 cm.")}', 'err'); t.value = V3.stature; return; }
-      V3.stature = v; charger3d();
-    }
+
   }
   function photo3d(){
     var cv = document.getElementById('v3-canevas'); if (!cv || !V3) return;
@@ -2033,28 +2053,54 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       d += z.c1 && z.c2 ? ' C' + X(z.c1.x) + ' ' + Y(z.c1.y) + ' ' + X(z.c2.x) + ' ' + Y(z.c2.y) + ' ' + X(z.x) + ' ' + Y(z.y) : ' L' + X(z.x) + ' ' + Y(z.y); }
     return d + ' Z';
   }
+  /* ⚠ LE MÊME DESSIN QUE LE FICHIER (svgMotif, site) : fusion, réglages d image, retournements,
+     formes, contour et ajustement du texte. Un écart ici serait un motif qui ne s imprime pas
+     comme on l a vu — le banc ⑪ du site vérifie que le fichier porte chacune de ces fonctions. */
+  function styleCalqueF(c){
+    var f = c.filtres, st = [];
+    if (f) st.push('filter:brightness(' + f.lum / 100 + ') contrast(' + f.con / 100 + ') saturate(' + f.sat / 100 + ')' + (f.teinte ? ' hue-rotate(' + f.teinte + 'deg)' : '') + (f.gris ? ' grayscale(1)' : ''));
+    if (c.fusion && c.fusion !== 'normal') st.push('mix-blend-mode:' + c.fusion);
+    return st.join(';');
+  }
+  function etoileF(n, l, h){
+    var pts = [];
+    for (var i = 0; i < n * 2; i++) { var a = -Math.PI / 2 + i * Math.PI / n, r = i % 2 ? 0.45 : 1; pts.push((Math.cos(a) * l / 2 * r) + ',' + (Math.sin(a) * h / 2 * r)); }
+    return pts.join(' ');
+  }
   function calqueSvg(c, X, Y){
-    var x = X(c.x), y = Y(c.y), l = c.l * MK, h = c.h * MK, cx = x + l / 2, cy = y + h / 2;
-    var s = '<g transform="translate(' + cx + ' ' + cy + ') rotate(' + (c.rot || 0) + ')' + (c.miroir ? ' scale(-1 1)' : '') + '" opacity="' + (c.opacite == null ? 1 : c.opacite) + '">';
+    var x = X(c.x), y = Y(c.y), l = c.l * MK, h = c.h * MK, cx = x + l / 2, cy = y + h / 2, st = styleCalqueF(c);
+    var s = '<g transform="translate(' + cx + ' ' + cy + ') rotate(' + (c.rot || 0) + ')' + (c.miroir || c.retourneV ? ' scale(' + (c.miroir ? -1 : 1) + ' ' + (c.retourneV ? -1 : 1) + ')' : '')
+      + '" opacity="' + (c.opacite == null ? 1 : c.opacite) + '"' + (st ? ' style="' + st + '"' : '') + '>';
     if (c.type === 'image') {
       var d = MOIMG[c.url];
       s += d && d !== 'chargement' ? '<image href="' + d + '" x="' + (-l / 2) + '" y="' + (-h / 2) + '" width="' + l + '" height="' + h + '" preserveAspectRatio="none"/>'
         : '<rect x="' + (-l / 2) + '" y="' + (-h / 2) + '" width="' + l + '" height="' + h + '" fill="#D8D0C3"/><text x="0" y="4" text-anchor="middle" font-size="12" fill="#3F3A32" font-family="Segoe UI, sans-serif">' + esc(c.nom || LTYPE.image) + '</text>';
     }
     if (c.type === 'forme') {
-      var st = c.plein !== false ? 'fill="' + c.couleur + '"' : 'fill="none" stroke="' + c.couleur + '" stroke-width="' + Math.max(1, (c.contour || 0.1) * MK) + '"';
-      s += c.forme === 'ellipse' ? '<ellipse cx="0" cy="0" rx="' + (l / 2) + '" ry="' + (h / 2) + '" ' + st + '/>' : '<rect x="' + (-l / 2) + '" y="' + (-h / 2) + '" width="' + l + '" height="' + h + '" ' + st + '/>';
+      var tr = 'stroke="' + c.couleur + '" stroke-width="' + Math.max(1, (c.contour || 0.1) * MK) + '"';
+      var pl = c.plein !== false && c.forme !== 'ligne' ? 'fill="' + c.couleur + '"' : 'fill="none" ' + tr;
+      s += c.forme === 'ellipse' ? '<ellipse cx="0" cy="0" rx="' + (l / 2) + '" ry="' + (h / 2) + '" ' + pl + '/>'
+        : c.forme === 'ligne' ? '<line x1="' + (-l / 2) + '" y1="0" x2="' + (l / 2) + '" y2="0" ' + tr + ' stroke-linecap="round"/>'
+        : c.forme === 'etoile' ? '<polygon points="' + etoileF(c.branches || 5, l, h) + '" ' + pl + '/>'
+        : '<rect x="' + (-l / 2) + '" y="' + (-h / 2) + '" width="' + l + '" height="' + h + '"' + (c.forme === 'arrondi' ? ' rx="' + Math.min(Math.min(l, h) / 2, (c.rayon || 0) * MK) + '"' : '') + ' ' + pl + '/>';
     }
-    if (c.type === 'texte') s += '<text x="0" y="' + (h * 0.36) + '" font-family="' + esc(c.police || 'Arial') + '" font-size="' + h + '" font-weight="' + (c.gras ? 700 : 400) + '" fill="' + c.couleur + '" text-anchor="middle" textLength="' + l + '" lengthAdjust="spacingAndGlyphs">' + esc(c.texte || '') + '</text>';
+    if (c.type === 'texte') s += '<text x="0" y="' + (h * 0.36) + '" font-family="' + esc(c.police || 'Arial') + '" font-size="' + h + '" font-weight="' + (c.gras ? 700 : 400) + '" fill="' + c.couleur + '"'
+      + (c.contourEp ? ' stroke="' + (c.contourCouleur || '#FFFFFF') + '" stroke-width="' + c.contourEp * MK + '" paint-order="stroke" stroke-linejoin="round"' : '')
+      + ' text-anchor="middle" textLength="' + l + '" lengthAdjust="' + (c.ajustement === 'espacer' ? 'spacing' : 'spacingAndGlyphs') + '">' + esc(c.texte || '') + '</text>';
     return s + '</g>';
   }
+  var POIGNEES = [['nw', -1, -1], ['n', 0, -1], ['ne', 1, -1], ['e', 1, 0], ['se', 1, 1], ['s', 0, 1], ['sw', -1, 1], ['w', -1, 0]];
+  function vueMo(){ if (!MO.vue) MO.vue = { z: 1, px: 0, py: 0 }; return MO.vue; }
   function peindreMo(){
     var z = document.getElementById('mo-toile'), svg = document.getElementById('mo-svg'); if (!z || !svg || !MO) return;
-    var W = z.clientWidth || 800, H = z.clientHeight || 600, mo = MO.motif, zo = mo.zone, s = '';
+    var W = z.clientWidth || 800, H = z.clientHeight || 600, mo = MO.motif, zo = mo.zone, s = '', V = vueMo();
     var p = (MO.m.pieces || []).filter(function(x){ return x.id === mo.piece; })[0];
+    // la vue : l ajustement à la toile, puis le zoom et le déplacement de la personne
+    var cadre = function(mk0, bx0, by0){ MK = mk0 * V.z; return { bx: W / 2 + (bx0 - W / 2) * V.z + V.px, by: H / 2 + (by0 - H / 2) * V.z + V.py }; };
     if (mo.mode === 'raccord') {
       // trois modules sur trois, décalés selon le raccord : on voit le tissu au mètre
-      MK = Math.min((W - 60) / (zo.l * 3), (H - 60) / (zo.h * 3)); MX = (W - zo.l * 3 * MK) / 2; MY = (H - zo.h * 3 * MK) / 2;
+      var mk0 = Math.min((W - 60) / (zo.l * 3), (H - 60) / (zo.h * 3)), o = cadre(mk0, (W - zo.l * 3 * mk0) / 2, (H - zo.h * 3 * mk0) / 2);
+      MX = o.bx; MY = o.by;
       var X0 = function(v){ return v * MK; }, Y0 = function(v){ return v * MK; };
       s += '<defs><clipPath id="mo-cl"><rect x="0" y="0" width="' + zo.l * MK + '" height="' + zo.h * MK + '"/></clipPath><g id="mo-mod" clip-path="url(#mo-cl)"><rect width="' + zo.l * MK + '" height="' + zo.h * MK + '" fill="' + (mo.fond === 'blanc' ? '#FFFFFF' : '#F6F1E9') + '"/>'
         + (mo.calques || []).filter(function(c){ return c.visible !== false; }).map(function(c){ return calqueSvg(c, X0, Y0); }).join('') + '</g></defs>';
@@ -2062,16 +2108,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         var ox = j * zo.l + (mo.raccord === 'demibrique' && i % 2 ? zo.l / 2 : 0), oy = i * zo.h + (mo.raccord === 'demigoutte' && j % 2 ? zo.h / 2 : 0);
         s += '<use href="#mo-mod" x="' + (MX + ox * MK) + '" y="' + (MY + oy * MK) + '"/>';
       }
-      s += '<rect x="' + (MX + zo.l * MK) + '" y="' + (MY + zo.h * MK) + '" width="' + zo.l * MK + '" height="' + zo.h * MK + '" fill="none" stroke="#2563EB" stroke-width="1.5" stroke-dasharray="6 4"/>';
       MX += zo.l * MK; MY += zo.h * MK;     // le module édité : celui du centre
     } else {
       var pts = p ? p.contour.slice() : [];
       var tous = pts.concat(p && p.aupli && p.pli ? pts.map(function(q){ return reflet(q, p.pli); }) : []).concat([{ x: zo.x, y: zo.y }, { x: zo.x + zo.l, y: zo.y + zo.h }]);
       var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
       tous.forEach(function(q){ x0 = Math.min(x0, q.x); y0 = Math.min(y0, q.y); x1 = Math.max(x1, q.x); y1 = Math.max(y1, q.y); });
-      MK = Math.min((W - 60) / Math.max(1, x1 - x0), (H - 60) / Math.max(1, y1 - y0));
-      var bx = (W - (x1 - x0) * MK) / 2 - x0 * MK, by = (H - (y1 - y0) * MK) / 2 - y0 * MK;
-      var PX = function(v){ return Math.round((bx + v * MK) * 10) / 10; }, PY = function(v){ return Math.round((by + v * MK) * 10) / 10; };
+      var mkp = Math.min((W - 60) / Math.max(1, x1 - x0), (H - 60) / Math.max(1, y1 - y0));
+      var op = cadre(mkp, (W - (x1 - x0) * mkp) / 2 - x0 * mkp, (H - (y1 - y0) * mkp) / 2 - y0 * mkp);
+      var PX = function(v){ return Math.round((op.bx + v * MK) * 10) / 10; }, PY = function(v){ return Math.round((op.by + v * MK) * 10) / 10; };
+      MO.piecePx = { bx: op.bx, by: op.by };
       if (p) {
         s += '<path d="' + cheminPiece(p.contour, PX, PY) + '" fill="#F8F4EC" stroke="#1C1B18" stroke-width="1.4"/>';
         if (p.aupli && p.pli) {
@@ -2082,18 +2128,33 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       }
       MX = PX(zo.x); MY = PY(zo.y);
       var Xz = function(v){ return MX + v * MK; }, Yz = function(v){ return MY + v * MK; };
-      s += '<rect x="' + MX + '" y="' + MY + '" width="' + zo.l * MK + '" height="' + zo.h * MK + '" fill="none" stroke="#2563EB" stroke-width="1.5" stroke-dasharray="6 4"/>'
+      s += '<rect x="' + MX + '" y="' + MY + '" width="' + zo.l * MK + '" height="' + zo.h * MK + '" fill="' + (MO.zoneSel ? 'rgba(37,99,235,.05)' : 'none') + '" stroke="#2563EB" stroke-width="' + (MO.zoneSel ? 2 : 1.5) + '" stroke-dasharray="6 4"/>'
         + '<text x="' + MX + '" y="' + (MY - 6) + '" font-size="12" fill="#1E40AF" font-family="Segoe UI, sans-serif">' + esc('${T("Zone d’impression · {0} × {1} cm")}'.split('{0}').join(String(zo.l).replace('.', '${SEP_DEC()}')).split('{1}').join(String(zo.h).replace('.', '${SEP_DEC()}'))) + '</text>';
       s += (mo.calques || []).filter(function(c){ return c.visible !== false; }).map(function(c){ return calqueSvg(c, function(v){ return Xz(v); }, function(v){ return Yz(v); }); }).join('');
+      if (MO.zoneSel) POIGNEES.forEach(function(h){
+        var hx = MX + (h[1] + 1) / 2 * zo.l * MK, hy = MY + (h[2] + 1) / 2 * zo.h * MK;
+        s += '<rect x="' + (hx - 5) + '" y="' + (hy - 5) + '" width="10" height="10" fill="#FFFFFF" stroke="#2563EB" stroke-width="1.5"/>';
+      });
     }
+    // la boîte de transformation du calque choisi : tournée avec lui, 8 poignées, et la rotation
     var c = moCalque();
-    if (c) {
-      var sx0 = MX + c.x * MK, sy0 = MY + c.y * MK, sl = c.l * MK, sh = c.h * MK;
-      s += '<rect x="' + sx0 + '" y="' + sy0 + '" width="' + sl + '" height="' + sh + '" fill="none" stroke="#C2410C" stroke-width="1.2" stroke-dasharray="4 3"/>'
-        + '<rect x="' + (sx0 + sl - 5) + '" y="' + (sy0 + sh - 5) + '" width="10" height="10" fill="#FFFFFF" stroke="#C2410C" stroke-width="1.5"/>';
+    if (c && c.visible !== false) {
+      var cx = MX + (c.x + c.l / 2) * MK, cy = MY + (c.y + c.h / 2) * MK, l = c.l * MK, h = c.h * MK;
+      s += '<g transform="translate(' + cx + ' ' + cy + ') rotate(' + (c.rot || 0) + ')">'
+        + '<rect x="' + (-l / 2) + '" y="' + (-h / 2) + '" width="' + l + '" height="' + h + '" fill="none" stroke="' + (c.verrou ? '#8F897D' : '#C2410C') + '" stroke-width="1.2" stroke-dasharray="4 3"/>';
+      if (!c.verrou) {
+        s += '<path d="M0 ' + (-h / 2) + ' L0 ' + (-h / 2 - 22) + '" stroke="#C2410C" stroke-width="1.2"/><circle cx="0" cy="' + (-h / 2 - 22) + '" r="5.5" fill="#FFFFFF" stroke="#C2410C" stroke-width="1.5"/>';
+        POIGNEES.forEach(function(p2){ s += '<rect x="' + (p2[1] * l / 2 - 4.5) + '" y="' + (p2[2] * h / 2 - 4.5) + '" width="9" height="9" fill="#FFFFFF" stroke="#C2410C" stroke-width="1.5"/>'; });
+      }
+      s += '</g>';
     }
+    // les repères commentés (magenta, comme Photoshop) pendant un déplacement aimanté
+    (MO.guides || []).forEach(function(g){
+      s += g.x != null ? '<path d="M' + (MX + g.x * MK) + ' 0 V' + H + '" stroke="#EC4899" stroke-width="1"/>' : '<path d="M0 ' + (MY + g.y * MK) + ' H' + W + '" stroke="#EC4899" stroke-width="1"/>';
+    });
     svg.setAttribute('width', W); svg.setAttribute('height', H); svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
     svg.innerHTML = s;
+    var zz = document.getElementById('mo-zoom'); if (zz) zz.textContent = Math.round(V.z * 100) + ' %';
   }
 
   /* ── Les panneaux ── */
@@ -2112,16 +2173,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (mo.mode === 'place') g += '<label class="large">${T("Pièce")}<select id="mo-piece">' + (m.pieces || []).map(function(p){ return '<option value="' + esc(p.id) + '"' + (mo.piece === p.id ? ' selected' : '') + '>' + esc(nomPiece(p)) + '</option>'; }).join('') + '</select></label>';
     g += '<label>' + (mo.mode === 'raccord' ? '${T("Module · L (cm)")}' : '${T("Zone · L (cm)")}') + '<input type="text" id="mo-zl" inputmode="decimal" maxlength="5" value="' + esc(String(mo.zone.l).replace('.', '${SEP_DEC()}')) + '"></label>'
       + '<label>' + (mo.mode === 'raccord' ? '${T("Module · H (cm)")}' : '${T("Zone · H (cm)")}') + '<input type="text" id="mo-zh" inputmode="decimal" maxlength="5" value="' + esc(String(mo.zone.h).replace('.', '${SEP_DEC()}')) + '"></label></div>';
-    if (mo.mode === 'place') g += '<div class="ed-gestes"><button type="button" class="mini" id="mo-centrer">${T("Centrer la zone sur la pièce")}</button></div>';
+    if (mo.mode === 'place') g += '<div class="at-champs"><label>${T("Zone · X (cm)")}<input type="text" id="mo-zx" inputmode="decimal" maxlength="6" value="' + esc(String(mo.zone.x).replace('.', '${SEP_DEC()}')) + '"></label>'
+      + '<label>${T("Zone · Y (cm)")}<input type="text" id="mo-zy" inputmode="decimal" maxlength="6" value="' + esc(String(mo.zone.y).replace('.', '${SEP_DEC()}')) + '"></label></div>'
+      + '<div class="ed-gestes"><button type="button" class="mini" id="mo-centrer">${T("Centrer la zone sur la pièce")}</button></div>'
+      + '<div class="ed-note">${T("Cliquez dans la zone pour la saisir : glissez-la, tirez ses poignées.")}</div>';
     g += '<div class="cx-sep"></div><h2>${T("Calques")}</h2>'
       + (mo.calques || []).slice().reverse().map(function(c){
-          return '<button type="button" class="mo-calque' + (MO.sel === c.id ? ' on' : '') + '" data-mocal="' + esc(c.id) + '"><span class="t">' + esc(c.type === 'texte' ? (c.texte || '') : (c.nom || LTYPE[c.type])) + '</span><span class="k">' + LTYPE[c.type] + (c.visible === false ? ' · ${T("masqué")}' : '') + '</span></button>';
+          return '<div class="mo-calque' + (MO.sel === c.id ? ' on' : '') + '" data-mocal="' + esc(c.id) + '" data-ctx-ligne="mo:' + esc(c.id) + '" role="button" tabindex="0">'
+            + '<button type="button" class="mo-oeil' + (c.visible === false ? ' off' : '') + '" data-moeil="' + esc(c.id) + '" aria-label="${T("Afficher ou masquer")}" title="${T("Afficher ou masquer")}">' + (c.visible === false ? '◌' : '●') + '</button>'
+            + '<span class="t">' + esc(c.type === 'texte' ? (c.texte || '') : (c.nom || LTYPE[c.type])) + '</span><span class="k">' + LTYPE[c.type] + '</span>'
+            + '<button type="button" class="mo-oeil' + (c.verrou ? '' : ' off') + '" data-moverrou="' + esc(c.id) + '" aria-label="${T("Verrouiller ou déverrouiller")}" title="${T("Verrouiller ou déverrouiller")}"><span class="ic">' + (c.verrou ? '🔒' : '🔓') + '</span></button></div>';
         }).join('')
       + (!(mo.calques || []).length ? '<div class="cx-sub">${T("Aucun calque : ajoutez une image, un texte ou une forme.")}</div>' : '')
       + '<div class="ed-gestes"><button type="button" class="mini" id="mo-add-image">${T("+ Image")}</button><button type="button" class="mini" id="mo-add-texte">${T("+ Texte")}</button><button type="button" class="mini" id="mo-add-forme">${T("+ Forme")}</button></div>'
       + '<input type="file" id="mo-fichier" accept=".png,.jpg,.jpeg" aria-label="${T("Choisir une image")}" style="display:none">'
       + '<div class="ed-note">${T("Une image se dépose à pleine résolution (PNG ou JPEG, 20 Mo au plus). Pour le DTF, un PNG au fond transparent.")}</div></div>';
-    var t = '<div class="mo-toile" id="mo-toile"><svg id="mo-svg" role="img" aria-label="${T("Le motif sur la pièce")}"></svg></div>';
+    var t = '<div class="mo-toile" id="mo-toile"><svg id="mo-svg" role="img" aria-label="${T("Le motif sur la pièce")}"></svg>'
+      + '<div class="mo-vue"><button type="button" class="mini" data-mozoom="-" aria-label="${T("Zoom arrière")}">−</button><b id="mo-zoom">100 %</b><button type="button" class="mini" data-mozoom="+" aria-label="${T("Zoom avant")}">+</button><button type="button" class="mini" data-mozoom="0">${T("Tout voir")}</button></div>'
+      + '<div class="mo-aide">${T("Molette : zoom · Espace + glisser : se déplacer · Maj : proportions libres, rotation par 15° · Alt : sans aimant · flèches : 1 mm (Maj : 1 cm)")}</div></div>';
     var d = '<div class="cx-carte" id="mo-pan"></div>';
     corps.innerHTML = '<div class="mo-trois">' + g + t + d + '</div>';
     peindreMo(); peindrePanMo();
@@ -2140,22 +2209,47 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         h += '<h2>' + esc(c.type === 'texte' ? c.texte : (c.nom || LTYPE[c.type])) + ' <span class="cx-sub">' + LTYPE[c.type] + '</span></h2><div class="at-champs">';
         if (c.type === 'texte') h += '<label class="large">${T("Texte")}<input type="text" id="mo-c-texte" maxlength="200" value="' + esc(c.texte) + '"></label>'
           + '<label>${T("Police")}<select id="mo-c-police">' + ['Arial', 'Georgia', 'Courier New', 'Trebuchet MS', 'Impact'].map(function(f){ return '<option' + (c.police === f ? ' selected' : '') + '>' + f + '</option>'; }).join('') + '</select></label>'
-          + '<label style="flex-direction:row;align-items:center;gap:.4rem;margin-top:1.1rem"><input type="checkbox" id="mo-c-gras"' + (c.gras ? ' checked' : '') + '>${T("Gras")}</label>';
+          + '<label>${T("Ajustement")}<select id="mo-c-ajust"><option value="etirer"' + (c.ajustement !== 'espacer' ? ' selected' : '') + '>${T("Étirer les lettres")}</option><option value="espacer"' + (c.ajustement === 'espacer' ? ' selected' : '') + '>${T("Espacer les lettres")}</option></select></label>'
+          + '<label style="flex-direction:row;align-items:center;gap:.4rem;margin-top:1.1rem"><input type="checkbox" id="mo-c-gras"' + (c.gras ? ' checked' : '') + '>${T("Gras")}</label>'
+          + '<label>${T("Contour · couleur")}<input type="color" id="mo-c-ccoul" value="' + esc(c.contourCouleur || '#FFFFFF') + '"></label>'
+          + '<label>${T("Contour (mm)")}<input type="text" id="mo-c-cep" inputmode="decimal" maxlength="4" value="' + cm((c.contourEp || 0) * 10) + '"></label>';
         else h += '<label class="large">${T("Nom")}<input type="text" id="mo-c-nom" maxlength="40" value="' + esc(c.nom || '') + '"></label>';
         if (c.type !== 'image') h += '<label>${T("Couleur")}<input type="color" id="mo-c-couleur" value="' + esc(c.couleur || '#1C1B18') + '"></label>';
-        if (c.type === 'forme') h += '<label>${T("Forme")}<select id="mo-c-forme"><option value="rect"' + (c.forme !== 'ellipse' ? ' selected' : '') + '>${T("Rectangle")}</option><option value="ellipse"' + (c.forme === 'ellipse' ? ' selected' : '') + '>${T("Ellipse")}</option></select></label>'
-          + '<label style="flex-direction:row;align-items:center;gap:.4rem"><input type="checkbox" id="mo-c-plein"' + (c.plein !== false ? ' checked' : '') + '>${T("Plein")}</label>'
-          + '<label>${T("Trait (mm)")}<input type="text" id="mo-c-contour" inputmode="decimal" maxlength="4" value="' + cm((c.contour || 0) * 10) + '"></label>';
+        if (c.type === 'forme') {
+          var FO = { rect: '${T("Rectangle")}', arrondi: '${T("Rectangle arrondi")}', ellipse: '${T("Ellipse")}', etoile: '${T("Étoile")}', ligne: '${T("Ligne")}' };
+          h += '<label>${T("Forme")}<select id="mo-c-forme">' + Object.keys(FO).map(function(k){ return '<option value="' + k + '"' + ((c.forme || 'rect') === k ? ' selected' : '') + '>' + FO[k] + '</option>'; }).join('') + '</select></label>'
+            + (c.forme !== 'ligne' ? '<label style="flex-direction:row;align-items:center;gap:.4rem"><input type="checkbox" id="mo-c-plein"' + (c.plein !== false ? ' checked' : '') + '>${T("Plein")}</label>' : '')
+            + '<label>${T("Trait (mm)")}<input type="text" id="mo-c-contour" inputmode="decimal" maxlength="4" value="' + cm((c.contour || 0) * 10) + '"></label>'
+            + (c.forme === 'arrondi' ? '<label>${T("Rayon (cm)")}<input type="text" id="mo-c-rayon" inputmode="decimal" maxlength="5" value="' + cm(c.rayon || 1) + '"></label>' : '')
+            + (c.forme === 'etoile' ? '<label>${T("Branches")}<input type="text" id="mo-c-branches" inputmode="numeric" maxlength="2" value="' + (c.branches || 5) + '"></label>' : '');
+        }
+        var FU = { normal: '${T("Normal")}', multiply: '${T("Produit")}', overlay: '${T("Superposition")}', screen: '${T("Écran")}', darken: '${T("Obscurcir")}', lighten: '${T("Éclaircir")}' };
         h += '<label>X (cm)<input type="text" id="mo-c-x" inputmode="decimal" maxlength="6" value="' + cm(c.x) + '"></label><label>Y (cm)<input type="text" id="mo-c-y" inputmode="decimal" maxlength="6" value="' + cm(c.y) + '"></label>'
           + '<label>${T("Largeur (cm)")}<input type="text" id="mo-c-l" inputmode="decimal" maxlength="6" value="' + cm(c.l) + '"></label><label>${T("Hauteur (cm)")}<input type="text" id="mo-c-h" inputmode="decimal" maxlength="6" value="' + cm(c.h) + '"></label>'
           + '<label>${T("Rotation (°)")}<input type="text" id="mo-c-rot" inputmode="decimal" maxlength="5" value="' + cm(c.rot) + '"></label><label>${T("Opacité (%)")}<input type="text" id="mo-c-op" inputmode="numeric" maxlength="3" value="' + Math.round((c.opacite == null ? 1 : c.opacite) * 100) + '"></label>'
-          + '<label style="flex-direction:row;align-items:center;gap:.4rem"><input type="checkbox" id="mo-c-miroir"' + (c.miroir ? ' checked' : '') + '>${T("Miroir")}</label>'
-          + '<label style="flex-direction:row;align-items:center;gap:.4rem"><input type="checkbox" id="mo-c-visible"' + (c.visible !== false ? ' checked' : '') + '>${T("Visible")}</label></div>';
+          + '<label class="large">${T("Mode de fusion")}<select id="mo-c-fusion">' + Object.keys(FU).map(function(k){ return '<option value="' + k + '"' + ((c.fusion || 'normal') === k ? ' selected' : '') + '>' + FU[k] + '</option>'; }).join('') + '</select></label>'
+          + '<label style="flex-direction:row;align-items:center;gap:.4rem"><input type="checkbox" id="mo-c-visible"' + (c.visible !== false ? ' checked' : '') + '>${T("Visible")}</label>'
+          + '<label style="flex-direction:row;align-items:center;gap:.4rem"><input type="checkbox" id="mo-c-verrou"' + (c.verrou ? ' checked' : '') + '>${T("Verrouillé")}</label></div>';
+        h += '<div class="cx-sep"></div><h2>${T("Disposer")}</h2><div class="mo-grille">'
+          + [['g', '${T("⇤ Gauche")}'], ['ch', '${T("↔ Centre")}'], ['d', '${T("Droite ⇥")}'], ['h', '${T("⤒ Haut")}'], ['cv', '${T("↕ Milieu")}'], ['b', '${T("⤓ Bas")}']].map(function(a){ return '<button type="button" class="mini" data-moali="' + a[0] + '">' + a[1] + '</button>'; }).join('')
+          + '</div><div class="ed-gestes"><button type="button" class="mini" data-moali="ajuster">${T("Ajuster à la zone")}</button><button type="button" class="mini" data-moali="remplir">${T("Remplir la zone")}</button>'
+          + '<button type="button" class="mini" data-moali="flipH">${T("Retourner ↔")}</button><button type="button" class="mini" data-moali="flipV">${T("Retourner ↕")}</button></div>';
         if (c.type === 'image') {
-          var ppp = Math.min(c.px.l / (c.l / 2.54), c.px.h / (c.h / 2.54));
-          h += '<div class="cx-etat"><span>${T("Fichier")}</span><span>' + c.px.l + ' × ' + c.px.h + ' px</span></div><div class="cx-etat"><span>${T("Résolution à cette taille")}</span><span>' + Math.round(ppp) + ' ${T("ppp")}</span></div>';
+          var ppp = Math.min(c.px.l / (c.l / 2.54), c.px.h / (c.h / 2.54)), f = c.filtres || {};
+          h += '<div class="cx-etat"><span>${T("Fichier")}</span><span>' + c.px.l + ' × ' + c.px.h + ' px</span></div><div class="cx-etat"><span>${T("Résolution à cette taille")}</span><span>' + Math.round(ppp) + ' ${T("ppp")}</span></div>'
+            + '<div class="cx-sep"></div><h2>${T("Réglages de l’image")}</h2><div class="at-champs">'
+            + '<label>${T("Luminosité (%)")}<input type="text" id="mo-f-lum" inputmode="numeric" maxlength="3" value="' + (f.lum == null ? 100 : f.lum) + '"></label>'
+            + '<label>${T("Contraste (%)")}<input type="text" id="mo-f-con" inputmode="numeric" maxlength="3" value="' + (f.con == null ? 100 : f.con) + '"></label>'
+            + '<label>${T("Saturation (%)")}<input type="text" id="mo-f-sat" inputmode="numeric" maxlength="3" value="' + (f.sat == null ? 100 : f.sat) + '"></label>'
+            + '<label>${T("Teinte (°)")}<input type="text" id="mo-f-teinte" inputmode="numeric" maxlength="4" value="' + (f.teinte || 0) + '"></label>'
+            + '<label style="flex-direction:row;align-items:center;gap:.4rem"><input type="checkbox" id="mo-f-gris"' + (f.gris ? ' checked' : '') + '>${T("Noir et blanc")}</label></div>'
+            + '<div class="ed-gestes"><button type="button" class="mini" id="mo-f-zero">${T("Réinitialiser les réglages")}</button></div>'
+            + '<div class="cx-sep"></div><h2>${T("Retirer le fond")}</h2><div class="at-champs"><label>${T("Tolérance")}<select id="mo-dt-tol"><option value="20">${T("Faible")}</option><option value="36" selected>${T("Moyenne")}</option><option value="60">${T("Forte")}</option></select></label></div>'
+            + '<div class="ed-gestes"><button type="button" class="mini" id="mo-dt">${T("Retirer le fond uni")}</button></div>'
+            + '<div class="ed-note">${T("À pleine résolution, pour un fond UNI : le fond devient transparent, l’image détourée remplace celle du calque.")}</div>';
         }
-        h += '<div class="ed-gestes"><button type="button" class="mini" id="mo-c-centrer">${T("Centrer dans la zone")}</button><button type="button" class="mini" id="mo-c-monter">${T("Monter")}</button><button type="button" class="mini" id="mo-c-descendre">${T("Descendre")}</button><button type="button" class="mini" id="mo-c-dupl">${T("Dupliquer")}</button><button type="button" class="mini danger" id="mo-c-suppr">${T("Supprimer")}</button></div>';
+        h += '<div class="cx-sep"></div><div class="ed-gestes"><button type="button" class="mini" id="mo-c-premier">${T("Premier plan")}</button><button type="button" class="mini" id="mo-c-monter">${T("Monter")}</button><button type="button" class="mini" id="mo-c-descendre">${T("Descendre")}</button><button type="button" class="mini" id="mo-c-arriere">${T("Arrière-plan")}</button>'
+          + '<button type="button" class="mini" id="mo-c-dupl">${T("Dupliquer")}</button><button type="button" class="mini danger" id="mo-c-suppr">${T("Supprimer")}</button></div>';
       }
     } else {
       h += '<h2>${T("Procédé d’impression")}</h2>' + Object.keys(LPROC).map(function(k){ return '<button type="button" class="im-dest' + (mo.procede === k ? ' on' : '') + '" data-moproc="' + k + '"><b>' + LPROC[k] + '</b></button>'; }).join('');
@@ -2255,50 +2349,201 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     lect.readAsDataURL(f);
   }
 
-  /* ── La souris : déplacer, redimensionner ── */
-  function sourisMo(ev){ var r = document.getElementById('mo-svg').getBoundingClientRect(); return { x: (ev.clientX - r.left - MX) / MK, y: (ev.clientY - r.top - MY) / MK }; }
-  function dansCalque(c, q){
+  /* ── La souris (lot 5b) : la ZONE se saisit et se redimensionne ; un calque se déplace, se
+     transforme par ses 8 poignées (Maj : proportions libres), tourne par sa poignée (Maj : 15°),
+     s aimante aux bords et au centre de la zone et des autres calques (Alt : sans aimant) ; la
+     molette zoome, Espace + glisser (ou le bouton du milieu) déplace la vue. Tout geste qui bouge
+     quelque chose prend une étape d historique (Ctrl+Z). */
+  function ecranMo(ev){ var r = document.getElementById('mo-svg').getBoundingClientRect(); return { sx: ev.clientX - r.left, sy: ev.clientY - r.top }; }
+  function sourisMo(ev){ var e = ecranMo(ev); return { x: (e.sx - MX) / MK, y: (e.sy - MY) / MK }; }
+  function localCalque(c, q){
     var a = -(c.rot || 0) * Math.PI / 180, cx = c.x + c.l / 2, cy = c.y + c.h / 2, dx = q.x - cx, dy = q.y - cy;
-    var x = dx * Math.cos(a) - dy * Math.sin(a), y = dx * Math.sin(a) + dy * Math.cos(a);
-    if (!(Math.abs(x) <= c.l / 2 && Math.abs(y) <= c.h / 2)) return false;
+    return { x: dx * Math.cos(a) - dy * Math.sin(a), y: dx * Math.sin(a) + dy * Math.cos(a) };
+  }
+  function dansCalque(c, q){
+    var L = localCalque(c, q);
+    if (!(Math.abs(L.x) <= c.l / 2 && Math.abs(L.y) <= Math.max(c.h, 6 / MK) / 2)) return false;
     // une forme NON PLEINE ne se saisit que près de son trait : son intérieur laisse passer le clic
-    if (c.type === 'forme' && c.plein === false) { var m = 8 / MK; return Math.abs(x) >= c.l / 2 - m || Math.abs(y) >= c.h / 2 - m; }
+    if (c.type === 'forme' && (c.plein === false || c.forme === 'ligne') && c.forme !== 'ligne') { var m = 8 / MK; return Math.abs(L.x) >= c.l / 2 - m || Math.abs(L.y) >= c.h / 2 - m; }
     return true;
   }
+  function boiteRot(c){
+    var a = (c.rot || 0) * Math.PI / 180, cx = c.x + c.l / 2, cy = c.y + c.h / 2, ex = Math.abs(Math.cos(a)) * c.l / 2 + Math.abs(Math.sin(a)) * c.h / 2, ey = Math.abs(Math.sin(a)) * c.l / 2 + Math.abs(Math.cos(a)) * c.h / 2;
+    return { x0: cx - ex, x1: cx + ex, y0: cy - ey, y1: cy + ey, cx: cx, cy: cy };
+  }
+  /* L aimant : les bords et le centre de la boîte qui bouge vers ceux de la zone et des autres calques. */
+  function aimanterMo(c, ev){
+    MO.guides = [];
+    if (ev.altKey) return;
+    var b = boiteRot(c), zo = MO.motif.zone, seuil = 6 / MK, cibX = [0, zo.l / 2, zo.l], cibY = [0, zo.h / 2, zo.h];
+    (MO.motif.calques || []).forEach(function(o){ if (o === c || o.visible === false) return; var bo = boiteRot(o); cibX.push(bo.x0, bo.cx, bo.x1); cibY.push(bo.y0, bo.cy, bo.y1); });
+    var meilleur = function(bords, cibles){ var best = null; bords.forEach(function(e){ cibles.forEach(function(t){ var d = t - e; if (Math.abs(d) < seuil && (!best || Math.abs(d) < Math.abs(best.d))) best = { d: d, t: t }; }); }); return best; };
+    var sx = meilleur([b.x0, b.cx, b.x1], cibX), sy = meilleur([b.y0, b.cy, b.y1], cibY);
+    if (sx) { c.x += sx.d; MO.guides.push({ x: sx.t }); }
+    if (sy) { c.y += sy.d; MO.guides.push({ y: sy.t }); }
+  }
+  var r1 = function(v){ return Math.round(v * 100) / 100; };
   corps.addEventListener('mousedown', function(ev){
     if (VUE !== 'motif' || !MO || !(ev.target && ev.target.closest && ev.target.closest('#mo-svg'))) return;
-    var q = sourisMo(ev), c = moCalque();
-    if (c && Math.abs(q.x - (c.x + c.l)) * MK < 9 && Math.abs(q.y - (c.y + c.h)) * MK < 9) { MO.glisse = { type: 'taille', q0: q, l: c.l, h: c.h, avant: JSON.stringify(MO.motif) }; return; }
-    // le calque déjà choisi passe d abord : on le reprend même s il est sous un autre
-    var cs = (MO.motif.calques || []).slice().reverse().filter(function(x){ return x.visible !== false; });
-    if (c && c.visible !== false) cs = [c].concat(cs.filter(function(x){ return x !== c; }));
+    ev.preventDefault();
+    var e = ecranMo(ev), q = sourisMo(ev), c = moCalque(), V = vueMo(), avant = JSON.stringify(MO.motif);
+    if (ev.button === 1 || MO.espace) { MO.glisse = { type: 'vue', e0: e, px: V.px, py: V.py }; return; }
+    if (c && !c.verrou && c.visible !== false) {
+      var L = localCalque(c, q), t = 7 / MK;
+      if (Math.hypot(L.x, L.y + c.h / 2 + 22 / MK) < 8 / MK) {
+        var ccx = c.x + c.l / 2, ccy = c.y + c.h / 2;
+        MO.glisse = { type: 'rot', cx: ccx, cy: ccy, rot0: c.rot || 0, a0: Math.atan2(q.y - ccy, q.x - ccx), avant: avant }; return;
+      }
+      for (var k = 0; k < POIGNEES.length; k++) { var pg = POIGNEES[k];
+        if (Math.abs(L.x - pg[1] * c.l / 2) < t && Math.abs(L.y - pg[2] * c.h / 2) < t) {
+          MO.glisse = { type: 'taille', sx: pg[1], sy: pg[2], e0: e, l0: c.l, h0: c.h, cx0: c.x + c.l / 2, cy0: c.y + c.h / 2, avant: avant }; return;
+        }
+      }
+    }
+    var zo = MO.motif.zone, place = MO.motif.mode === 'place';
+    if (place && MO.zoneSel) for (var z2 = 0; z2 < POIGNEES.length; z2++) { var pz = POIGNEES[z2];
+      if (Math.abs(q.x - (pz[1] + 1) / 2 * zo.l) * MK < 8 && Math.abs(q.y - (pz[2] + 1) / 2 * zo.h) * MK < 8) {
+        MO.glisse = { type: 'zoneTaille', sx: pz[1], sy: pz[2], e0: e, z0: { x: zo.x, y: zo.y, l: zo.l, h: zo.h }, avant: avant }; return;
+      }
+    }
+    // le calque déjà choisi passe d abord ; un calque verrouillé ou masqué ne se saisit pas sur la toile
+    var cs = (MO.motif.calques || []).slice().reverse().filter(function(x){ return x.visible !== false && !x.verrou; });
+    if (c && c.visible !== false && !c.verrou) cs = [c].concat(cs.filter(function(x){ return x !== c; }));
     for (var i = 0; i < cs.length; i++) if (dansCalque(cs[i], q)) {
-      MO.sel = cs[i].id; MO.onglet = 'calque';
-      MO.glisse = { type: 'deplacer', q0: q, x: cs[i].x, y: cs[i].y, avant: JSON.stringify(MO.motif) };
+      var neuf = MO.sel !== cs[i].id; MO.sel = cs[i].id; MO.zoneSel = false; MO.onglet = 'calque';
+      MO.glisse = { type: 'deplacer', e0: e, x: cs[i].x, y: cs[i].y, avant: avant };
+      if (neuf) dessinerMo(); else peindreMo();
+      return;
+    }
+    if (place && q.x >= 0 && q.y >= 0 && q.x <= zo.l && q.y <= zo.h) {
+      MO.sel = ''; MO.zoneSel = true;
+      MO.glisse = { type: 'zone', e0: e, x: zo.x, y: zo.y, avant: avant };
       dessinerMo(); return;
     }
-    MO.sel = ''; peindreMo(); peindrePanMo();
+    MO.sel = ''; MO.zoneSel = false; dessinerMo();
+    MO.glisse = { type: 'vue', e0: e, px: V.px, py: V.py };
   });
   window.addEventListener('mousemove', function(ev){
     if (VUE !== 'motif' || !MO || !MO.glisse) return;
-    var g = MO.glisse, c = moCalque(); if (!c) return;
-    var q = sourisMo(ev), r1 = function(v){ return Math.round(v * 10) / 10; };
+    var g = MO.glisse, e = ecranMo(ev), dx = (e.sx - (g.e0 ? g.e0.sx : 0)) / MK, dy = (e.sy - (g.e0 ? g.e0.sy : 0)) / MK, c = moCalque(), zo = MO.motif.zone;
+    if (g.e0 && !g.bouge && Math.hypot(e.sx - g.e0.sx, e.sy - g.e0.sy) < 2) return;
     g.bouge = true;
-    if (g.type === 'deplacer') { c.x = r1(g.x + q.x - g.q0.x); c.y = r1(g.y + q.y - g.q0.y); }
-    else { var k = Math.max(0.05, (g.l + q.x - g.q0.x) / g.l); c.l = r1(Math.max(0.2, g.l * k)); c.h = ev.shiftKey ? r1(Math.max(0.2, g.h + q.y - g.q0.y)) : r1(Math.max(0.2, g.h * k)); }
+    if (g.type === 'vue') { var V = vueMo(); V.px = g.px + e.sx - g.e0.sx; V.py = g.py + e.sy - g.e0.sy; peindreMo(); return; }
+    if (g.type === 'zone') { zo.x = r1(g.x + dx); zo.y = r1(g.y + dy); MO.guides = []; peindreMo(); return; }
+    if (g.type === 'zoneTaille') {
+      var z0 = g.z0;
+      if (g.sx) { var nl = Math.max(2, z0.l + g.sx * dx); zo.l = r1(nl); zo.x = r1(g.sx < 0 ? z0.x + z0.l - nl : z0.x); }
+      if (g.sy) { var nh = Math.max(2, z0.h + g.sy * dy); zo.h = r1(nh); zo.y = r1(g.sy < 0 ? z0.y + z0.h - nh : z0.y); }
+      peindreMo(); return;
+    }
+    if (!c) return;
+    if (g.type === 'deplacer') { c.x = r1(g.x + dx); c.y = r1(g.y + dy); aimanterMo(c, ev); c.x = r1(c.x); c.y = r1(c.y); }
+    else if (g.type === 'rot') {
+      var q = sourisMo(ev), a = g.rot0 + (Math.atan2(q.y - g.cy, q.x - g.cx) - g.a0) * 180 / Math.PI;
+      if (ev.shiftKey) a = Math.round(a / 15) * 15;
+      c.rot = Math.round(((a % 360 + 540) % 360 - 180) * 10) / 10;
+    } else if (g.type === 'taille') {
+      var ra = (c.rot || 0) * Math.PI / 180, lx = dx * Math.cos(-ra) - dy * Math.sin(-ra), ly = dx * Math.sin(-ra) + dy * Math.cos(-ra);
+      var nlc = g.sx ? Math.max(0.2, g.l0 + g.sx * lx) : g.l0, nhc = g.sy ? Math.max(0.2, g.h0 + g.sy * ly) : g.h0;
+      // un coin garde les proportions (Maj : libres), un côté étire un seul sens
+      if (g.sx && g.sy && !ev.shiftKey) { var kk = Math.max(nlc / g.l0, nhc / g.h0); nlc = Math.max(0.2, g.l0 * kk); nhc = Math.max(0.2, g.h0 * kk); }
+      var ox = g.sx * (nlc - g.l0) / 2, oy = g.sy * (nhc - g.h0) / 2;
+      var ncx = g.cx0 + ox * Math.cos(ra) - oy * Math.sin(ra), ncy = g.cy0 + ox * Math.sin(ra) + oy * Math.cos(ra);
+      c.l = r1(nlc); c.h = r1(nhc); c.x = r1(ncx - nlc / 2); c.y = r1(ncy - nhc / 2);
+    }
     peindreMo();
   });
   window.addEventListener('mouseup', function(){
     if (!MO || !MO.glisse) return;
-    var g = MO.glisse; MO.glisse = null;
-    if (g.bouge) { MOPILE.push(g.avant); MOREF = []; MO.sale = true; apresMo(false); }
+    var g = MO.glisse; MO.glisse = null; MO.guides = [];
+    if (g.bouge && g.type !== 'vue') { MOPILE.push(g.avant); if (MOPILE.length > 80) MOPILE.shift(); MOREF = []; MO.sale = true; apresMo(g.type === 'zone' || g.type === 'zoneTaille'); }
+    else peindreMo();
   });
+  corps.addEventListener('wheel', function(ev){
+    if (VUE !== 'motif' || !MO || !(ev.target && ev.target.closest && ev.target.closest('#mo-toile'))) return;
+    ev.preventDefault();
+    zoomerMo(ev.deltaY < 0 ? 1.15 : 1 / 1.15, ecranMo(ev));
+  }, { passive: false });
+  function zoomerMo(f, e){
+    var V = vueMo(), z = document.getElementById('mo-toile'), W = z ? z.clientWidth : 800, H = z ? z.clientHeight : 600;
+    var p = e || { sx: W / 2, sy: H / 2 }, z2 = Math.max(0.25, Math.min(12, V.z * f));
+    // le point sous la souris reste sous la souris
+    var ux = (p.sx - W / 2 - V.px) / V.z, uy = (p.sy - H / 2 - V.py) / V.z;
+    V.px = p.sx - W / 2 - ux * z2; V.py = p.sy - H / 2 - uy * z2; V.z = z2;
+    peindreMo();
+  }
+  /* Les raccourcis (lot 5b), hors d un champ de saisie. */
+  function toucheMo(ev){
+    var tag = (ev.target && ev.target.tagName) || '';
+    if (/^(INPUT|SELECT|TEXTAREA)$/.test(tag)) return false;
+    var c = moCalque(), k = String(ev.key), ctrl = ev.ctrlKey || ev.metaKey, cs = MO.motif.calques || [];
+    if (k === ' ') { MO.espace = true; ev.preventDefault(); return true; }
+    if (ctrl && k.toLowerCase() === 'z') { ev.preventDefault(); if (ev.shiftKey) refaireMo(); else annulerMo(); return true; }
+    if (ctrl && k.toLowerCase() === 'y') { ev.preventDefault(); refaireMo(); return true; }
+    if (ctrl && (k === '0')) { ev.preventDefault(); var V = vueMo(); V.z = 1; V.px = 0; V.py = 0; peindreMo(); return true; }
+    if (ctrl && (k === '+' || k === '=')) { ev.preventDefault(); zoomerMo(1.25); return true; }
+    if (ctrl && k === '-') { ev.preventDefault(); zoomerMo(1 / 1.25); return true; }
+    if (/^Arrow/.test(k) && (c || MO.zoneSel)) {
+      ev.preventDefault();
+      var pas = ev.shiftKey ? 1 : 0.1, cible = c && !c.verrou ? c : (MO.zoneSel ? MO.motif.zone : null); if (!cible) return true;
+      moMemo();
+      if (k === 'ArrowLeft') cible.x = r1(cible.x - pas); if (k === 'ArrowRight') cible.x = r1(cible.x + pas);
+      if (k === 'ArrowUp') cible.y = r1(cible.y - pas); if (k === 'ArrowDown') cible.y = r1(cible.y + pas);
+      apresMo(false); return true;
+    }
+    if (!c) return false;
+    var i = cs.indexOf(c);
+    if ((k === 'Delete' || k === 'Backspace') && !c.verrou) { ev.preventDefault(); moMemo(); cs.splice(i, 1); MO.sel = ''; apresMo(true); return true; }
+    if (ctrl && (k.toLowerCase() === 'j' || k.toLowerCase() === 'd')) { ev.preventDefault(); dupliquerCalque(c); return true; }
+    if (ctrl && (k === ']' || k === '}')) { ev.preventDefault(); ordreCalque(c, ev.shiftKey ? 'premier' : 'monter'); return true; }
+    if (ctrl && (k === '[' || k === '{')) { ev.preventDefault(); ordreCalque(c, ev.shiftKey ? 'arriere' : 'descendre'); return true; }
+    return false;
+  }
+  document.addEventListener('keyup', function(ev){ if (MO && String(ev.key) === ' ') MO.espace = false; });
+  function dupliquerCalque(c){
+    var cs = MO.motif.calques, d = copie(c), n = 1; while (cs.some(function(x){ return x.id === 'c' + n; })) n++;
+    moMemo(); d.id = 'c' + n; d.x = r1(d.x + 1); d.y = r1(d.y + 1); d.verrou = false; cs.splice(cs.indexOf(c) + 1, 0, d); MO.sel = d.id; apresMo(true);
+  }
+  function ordreCalque(c, o){
+    var cs = MO.motif.calques, i = cs.indexOf(c), j = o === 'monter' ? i + 1 : o === 'descendre' ? i - 1 : o === 'premier' ? cs.length - 1 : 0;
+    if (j < 0 || j >= cs.length || j === i) return;
+    moMemo(); cs.splice(i, 1); cs.splice(j, 0, c); apresMo(true);
+  }
+  function refaireMo(){ if (!MOREF.length) return; MOPILE.push(JSON.stringify(MO.motif)); MO.motif = JSON.parse(MOREF.pop()); MO.sale = true; if (!moCalque()) MO.sel = ''; apresMo(true); }
+  /* Disposer dans la zone : aligner (sur la boîte tournée), ajuster, remplir, retourner. */
+  function disposerMo(c, a){
+    var zo = MO.motif.zone, b = boiteRot(c);
+    moMemo();
+    if (a === 'g') c.x = r1(c.x - b.x0); if (a === 'd') c.x = r1(c.x + zo.l - b.x1); if (a === 'ch') c.x = r1(c.x + zo.l / 2 - b.cx);
+    if (a === 'h') c.y = r1(c.y - b.y0); if (a === 'b') c.y = r1(c.y + zo.h - b.y1); if (a === 'cv') c.y = r1(c.y + zo.h / 2 - b.cy);
+    if (a === 'ajuster' || a === 'remplir') {
+      var k = a === 'ajuster' ? Math.min(zo.l / c.l, zo.h / c.h) : Math.max(zo.l / c.l, zo.h / c.h);
+      c.rot = 0; c.l = r1(c.l * k); c.h = r1(c.h * k); c.x = r1((zo.l - c.l) / 2); c.y = r1((zo.h - c.h) / 2);
+    }
+    if (a === 'flipH') c.miroir = !c.miroir;
+    if (a === 'flipV') c.retourneV = !c.retourneV;
+    apresMo(false);
+  }
+  function detourerMo(c){
+    var sel = document.getElementById('mo-dt-tol'), tol = sel ? parseInt(sel.value, 10) : 36, b = document.getElementById('mo-dt');
+    if (b) b.disabled = true;
+    dire('${T("Retrait du fond à pleine résolution…")}');
+    appeler('atelier:motifDetourer', [c.url, tol]).then(function(r){
+      if (b) b.disabled = false;
+      if (!r || !r.ok) { dire(r && r.motif === 'fond_non_uni' ? '${T("Le fond n’est pas uni : presque rien n’a été retiré. Essayez une tolérance plus forte, ou une image au fond uni.")}' : expliquer(r), 'err'); return; }
+      moMemo(); c.url = r.url; c.px = r.px; MOIMG[r.url] = ''; chargerImagesMo(); apresMo(false);
+      dire('${T("Fond retiré ({0} % de l’image).")}'.split('{0}').join(Math.round(r.part * 100)), 'bon');
+    });
+  }
 
   function clicMo(ev){
     var t = ev.target, b, c = moCalque();
     if ((b = t.closest('[data-momode]'))) { moMemo(); MO.motif.mode = b.getAttribute('data-momode'); apresMo(true); return; }
     if ((b = t.closest('[data-moracc]'))) { moMemo(); MO.motif.raccord = b.getAttribute('data-moracc'); apresMo(true); return; }
-    if ((b = t.closest('[data-mocal]'))) { MO.sel = b.getAttribute('data-mocal'); MO.onglet = 'calque'; dessinerMo(); return; }
+    if ((b = t.closest('[data-moeil]'))) { var ce = (MO.motif.calques || []).filter(function(x){ return x.id === b.getAttribute('data-moeil'); })[0]; if (ce) { moMemo(); ce.visible = ce.visible === false; apresMo(true); } return; }
+    if ((b = t.closest('[data-moverrou]'))) { var cv = (MO.motif.calques || []).filter(function(x){ return x.id === b.getAttribute('data-moverrou'); })[0]; if (cv) { moMemo(); cv.verrou = !cv.verrou; apresMo(true); } return; }
+    if ((b = t.closest('[data-mozoom]'))) { var zv = b.getAttribute('data-mozoom'); if (zv === '0') { var V = vueMo(); V.z = 1; V.px = 0; V.py = 0; peindreMo(); } else zoomerMo(zv === '+' ? 1.25 : 1 / 1.25); return; }
+    if ((b = t.closest('[data-mocal]'))) { MO.sel = b.getAttribute('data-mocal'); MO.zoneSel = false; MO.onglet = 'calque'; dessinerMo(); return; }
     if ((b = t.closest('[data-moong]'))) { MO.onglet = b.getAttribute('data-moong'); peindrePanMo(); return; }
     if ((b = t.closest('[data-moproc]'))) { moMemo(); MO.motif.procede = b.getAttribute('data-moproc'); apresMo(false); return; }
     if ((b = t.closest('[data-mosortie]'))) { sortieMo(b.getAttribute('data-mosortie'), b); return; }
@@ -2313,18 +2558,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       apresMo(false); return;
     }
     if (!c) return;
-    if (t.closest('#mo-c-centrer')) { moMemo(); c.x = Math.round((MO.motif.zone.l - c.l) / 2 * 10) / 10; c.y = Math.round((MO.motif.zone.h - c.h) / 2 * 10) / 10; apresMo(false); return; }
+    if ((b = t.closest('[data-moali]'))) { disposerMo(c, b.getAttribute('data-moali')); return; }
     var cs = MO.motif.calques, i = cs.indexOf(c);
-    if (t.closest('#mo-c-monter') && i < cs.length - 1) { moMemo(); cs.splice(i, 1); cs.splice(i + 1, 0, c); apresMo(true); return; }
-    if (t.closest('#mo-c-descendre') && i > 0) { moMemo(); cs.splice(i, 1); cs.splice(i - 1, 0, c); apresMo(true); return; }
-    if (t.closest('#mo-c-dupl')) { var d = copie(c), n = 1; while (cs.some(function(x){ return x.id === 'c' + n; })) n++; moMemo(); d.id = 'c' + n; d.x += 1; d.y += 1; cs.push(d); MO.sel = d.id; apresMo(true); return; }
+    if (t.closest('#mo-c-premier')) { ordreCalque(c, 'premier'); return; }
+    if (t.closest('#mo-c-monter')) { ordreCalque(c, 'monter'); return; }
+    if (t.closest('#mo-c-descendre')) { ordreCalque(c, 'descendre'); return; }
+    if (t.closest('#mo-c-arriere')) { ordreCalque(c, 'arriere'); return; }
+    if (t.closest('#mo-c-dupl')) { dupliquerCalque(c); return; }
     if (t.closest('#mo-c-suppr')) { moMemo(); cs.splice(i, 1); MO.sel = ''; apresMo(true); return; }
+    if (t.closest('#mo-f-zero')) { moMemo(); delete c.filtres; apresMo(false); return; }
+    if (t.closest('#mo-dt')) { detourerMo(c); return; }
   }
   function changeMo(t){
     var id = t.id, mo = MO.motif, c = moCalque();
     var num = function(v){ return nombre(v, NaN); };
     if (id === 'mo-fichier') { importerImage(t.files && t.files[0]); return; }
     if (id === 'mo-piece') { moMemo(); mo.piece = t.value; apresMo(false); return; }
+    if (id === 'mo-zx' || id === 'mo-zy') { var vz = num(t.value); if (!isFinite(vz) || Math.abs(vz) > 300) { dire('${T("Nombre illisible.")}', 'err'); return; } moMemo(); mo.zone[id === 'mo-zx' ? 'x' : 'y'] = r1(vz); apresMo(false); return; }
     if (id === 'mo-zl' || id === 'mo-zh') { var v = num(t.value); if (!(v >= 2 && v <= 300)) { dire('${T("Une zone va de 2 à 300 cm.")}', 'err'); return; } moMemo(); mo.zone[id === 'mo-zl' ? 'l' : 'h'] = Math.round(v * 10) / 10; apresMo(false); return; }
     if (id === 'mo-ppp') { moMemo(); mo.ppp = parseInt(t.value, 10) === 600 ? 600 : 300; apresMo(false); return; }
     if (id === 'mo-sous') { moMemo(); mo.souscouche = t.value; apresMo(false); return; }
@@ -2344,8 +2594,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     else if (id === 'mo-c-contour') c.contour = Math.max(0, Math.min(50, num(t.value) || 0)) / 10;
     else if (id === 'mo-c-miroir') c.miroir = !!t.checked;
     else if (id === 'mo-c-visible') c.visible = !!t.checked;
+    else if (id === 'mo-c-verrou') c.verrou = !!t.checked;
+    else if (id === 'mo-c-fusion') c.fusion = t.value;
+    else if (id === 'mo-c-ajust') c.ajustement = t.value;
+    else if (id === 'mo-c-ccoul') c.contourCouleur = String(t.value).toUpperCase();
+    else if (id === 'mo-c-cep') c.contourEp = Math.max(0, Math.min(20, num(t.value) || 0)) / 10;
+    else if (id === 'mo-c-rayon') c.rayon = Math.max(0, Math.min(100, num(t.value) || 0));
+    else if (id === 'mo-c-branches') c.branches = Math.max(3, Math.min(12, parseInt(t.value, 10) || 5));
+    else if (/^mo-f-/.test(id)) {
+      var f = c.filtres || { lum: 100, con: 100, sat: 100, teinte: 0, gris: false }, cle = id.slice(5), bornes = { lum: [0, 200], con: [0, 200], sat: [0, 300], teinte: [-180, 180] };
+      if (cle === 'gris') f.gris = !!t.checked; else { var vf = num(t.value); if (!isFinite(vf)) { MOPILE.pop(); dire('${T("Nombre illisible.")}', 'err'); return; } f[cle] = Math.max(bornes[cle][0], Math.min(bornes[cle][1], Math.round(vf))); }
+      c.filtres = f;
+    }
     else { MOPILE.pop(); return; }
-    apresMo(id === 'mo-c-texte' || id === 'mo-c-nom' || id === 'mo-c-visible');
+    apresMo(id === 'mo-c-texte' || id === 'mo-c-nom' || id === 'mo-c-visible' || id === 'mo-c-verrou' || id === 'mo-c-forme');
   }
   function enregistrerMo(apres){
     if (OCCUPE || !MO) return;
@@ -2572,6 +2834,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   window.szCtxEntrees = function(el){
     var id = el && el.getAttribute ? el.getAttribute('data-ctx-ligne') : '';
     if (!id || !D) return null;
+    if (id.indexOf('mo:') === 0) {                // un calque du motif
+      var mc = MO ? (MO.motif.calques || []).filter(function(x){ return x.id === id.slice(3); })[0] : null; if (!mc) return null;
+      return [{ lib: '${T("Dupliquer")}', fn: function(){ dupliquerCalque(mc); } },
+        { lib: '${T("Premier plan")}', fn: function(){ ordreCalque(mc, 'premier'); } }, { lib: '${T("Arrière-plan")}', fn: function(){ ordreCalque(mc, 'arriere'); } },
+        { lib: mc.visible === false ? '${T("Afficher")}' : '${T("Masquer")}', fn: function(){ moMemo(); mc.visible = mc.visible === false; apresMo(true); } },
+        { lib: mc.verrou ? '${T("Déverrouiller")}' : '${T("Verrouiller")}', fn: function(){ moMemo(); mc.verrou = !mc.verrou; apresMo(true); } },
+        { trait: true }, { lib: '${T("Supprimer")}', dgr: true, fn: function(){ var cs = MO.motif.calques; moMemo(); cs.splice(cs.indexOf(mc), 1); MO.sel = ''; apresMo(true); } }];
+    }
     if (id.indexOf('p:') === 0) {                 // une pièce, dans le panneau de l éditeur
       var pi = parseInt(id.slice(2), 10); if (!E || !E.pieces[pi]) return null;
       return [{ lib: '${T("Choisir la pièce")}', fn: function(){ choisir(pi); peindre(); ONGLET = 'prop'; peindrePanneau(true); } },
@@ -2627,7 +2897,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   window.szRevenir = window.szActualiser;
   document.addEventListener('keydown', function(ev){
     if (VUE === 'editeur' && E && ev.key !== 'Escape' && toucheEditeur(ev)) return;
-    if (VUE === 'motif' && MO && (ev.ctrlKey || ev.metaKey) && String(ev.key).toLowerCase() === 'z' && !/^(INPUT|SELECT|TEXTAREA)$/.test((ev.target && ev.target.tagName) || '')) { ev.preventDefault(); annulerMo(); return; }
+    if (VUE === 'motif' && MO && ev.key !== 'Escape' && toucheMo(ev)) return;
+    if (VUE === 'motif' && MO && ev.key === 'Escape' && (MO.sel || MO.zoneSel)) { ev.preventDefault(); MO.sel = ''; MO.zoneSel = false; dessinerMo(); return; }
     if (ev.key !== 'Escape') return;
     ev.preventDefault();
     if (VUE === 'impression') { quitterImpression(); return; }
