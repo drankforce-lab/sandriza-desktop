@@ -109,6 +109,12 @@ button.mini{padding:.12rem .5rem;font-size:.76rem}
 .at-base.on{border:2px solid var(--or)}
 .at-base svg{width:1.6rem;height:2rem;flex:0 0 auto}
 .at-base b{display:block;font-size:.82rem}
+.at-fam{grid-column:1/-1;font-size:.72rem;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em;margin-top:.35rem}
+.pl-deux{display:grid;grid-template-columns:18rem minmax(0,1fr);gap:.9rem;min-height:0}
+.cx>.pl-deux{flex:1 1 0}
+.pl-deux>.cx-carte{min-height:0;overflow:auto;scrollbar-gutter:stable}
+.pl-toile{cursor:crosshair}
+.pl-toile svg{display:block;width:100%;height:100%}
 .at-champs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.45rem .6rem}
 .at-champs label{display:flex;flex-direction:column;gap:.2rem;font-size:.74rem;color:var(--tx2);min-width:0}
 .at-champs label.large{grid-column:1/-1}
@@ -255,24 +261,44 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var OCCUPE = false;
 
   /* Les mots de la fenêtre, par CLÉ (voir l en-tête). */
-  var LBASE = { robe: '${T("Robe droite")}', chemisier: '${T("Chemisier")}', jupe: '${T("Jupe")}', pantalon: '${T("Pantalon")}' };
+  var LBASE = { robe: '${T("Robe")}', chemisier: '${T("Chemisier")}', jupe: '${T("Jupe")}', pantalon: '${T("Pantalon")}',
+    tshirt: '${T("T-shirt")}', chemise: '${T("Chemise")}', debardeur: '${T("Débardeur")}', sweat: '${T("Sweat")}', jean: '${T("Jean")}', short: '${T("Short")}',
+    legging: '${T("Legging")}', culotte: '${T("Culotte")}', brassiere: '${T("Brassière")}', casquette: '${T("Casquette")}', bob: '${T("Bob")}', tuque: '${T("Tuque")}' };
   var LBASED = { robe: '${T("devant, dos, pinces de taille")}', chemisier: '${T("devant, dos, manche")}',
-    jupe: '${T("devant, dos, pinces")}', pantalon: '${T("devant, dos")}' };
+    jupe: '${T("devant, dos, pinces")}', pantalon: '${T("devant, dos")}',
+    tshirt: '${T("devant, dos, manche, bande")}', chemise: '${T("patte, empiècement, col, poignets")}', debardeur: '${T("devant, dos, biais")}',
+    sweat: '${T("bord-côte, poignets, capuche")}', jean: '${T("empiècement, poches, ceinture")}', short: '${T("devant, dos, ceinture")}',
+    legging: '${T("jersey, ceinture élastique")}', culotte: '${T("devant, dos, fond")}', brassiere: '${T("bonnets, bande, bretelles")}',
+    casquette: '${T("6 panneaux, visière")}', bob: '${T("calotte, côtés, bord")}', tuque: '${T("4 fuseaux, revers")}' };
+  var LFAM = { haut: '${T("Hauts et robes")}', jupe: '${T("Jupes")}', bas: '${T("Pantalons")}', lingerie: '${T("Lingerie")}', tete: '${T("Chapeaux")}' };
+  var LCH = { encolure: '${T("Encolure")}', manche: '${T("Manche")}', forme: '${T("Forme")}', col: '${T("Col")}', capuche: '${T("Capuche")}', revers: '${T("Revers")}' };
+  var LLONG = { robe: '${T("Longueur sous la taille")}', chemisier: '${T("Longueur sous la taille")}', tshirt: '${T("Longueur sous la taille")}', chemise: '${T("Longueur sous la taille")}',
+    debardeur: '${T("Longueur sous la taille")}', sweat: '${T("Longueur sous la taille")}', jupe: '${T("Longueur")}', pantalon: '${T("Longueur de jambe (0 = entrejambe)")}',
+    jean: '${T("Longueur de jambe (0 = entrejambe)")}', legging: '${T("Longueur de jambe (0 = entrejambe)")}', short: '${T("Longueur de jambe")}', bob: '${T("Largeur du bord")}', tuque: '${T("Hauteur")}' };
   var LCAT = { robes: '${T("Robes")}', hauts: '${T("Hauts")}', pantalons: '${T("Pantalons")}', jupes: '${T("Jupes")}',
-    manteaux: '${T("Manteaux")}', motifs: '${T("Motifs")}' };
+    manteaux: '${T("Manteaux")}', lingerie: '${T("Lingerie")}', accessoires: '${T("Accessoires")}', motifs: '${T("Motifs")}' };
   var LETAT = { brouillon: '${T("Brouillon")}', pret: '${T("Prêt à couper")}', archive: '${T("Archivé")}' };
   var LETATS = { brouillon: '${T("Brouillons")}', pret: '${T("Prêts à couper")}', archive: '${T("Archivés")}' };
   var LMES = { poitrine: '${T("Tour de poitrine")}', taille: '${T("Tour de taille")}', hanches: '${T("Tour de hanches")}',
     longDos: '${T("Longueur taille-dos")}', carrure: '${T("Carrure dos")}', hautPoitrine: '${T("Hauteur de poitrine")}',
     cou: '${T("Tour de cou")}', tourBras: '${T("Tour de bras")}', longBras: '${T("Longueur de bras")}',
-    montant: '${T("Hauteur de montant")}', entrejambe: '${T("Longueur d’entrejambe")}' };
+    montant: '${T("Hauteur de montant")}', entrejambe: '${T("Longueur d’entrejambe")}',
+    sousPoitrine: '${T("Tour de dessous de poitrine")}', tete: '${T("Tour de tête")}' };
   var LOPT = {
     encolure: { ronde: '${T("Ronde")}', v: '${T("En V")}', bateau: '${T("Bateau")}' },
     manche: { sans: '${T("Sans manche")}', courte: '${T("Courte")}', longue: '${T("Longue")}' },
     formeJupe: { droite: '${T("Droite")}', crayon: '${T("Crayon")}', evasee: '${T("Évasée")}' },
-    formePantalon: { droit: '${T("Droit")}', large: '${T("Large")}', fusele: '${T("Fuselé")}' }
+    formePantalon: { droit: '${T("Droit")}', large: '${T("Large")}', fusele: '${T("Fuselé")}' },
+    formeRobe: { droite: '${T("Droite")}', trapeze: '${T("Trapèze")}' },
+    col: { classique: '${T("Classique")}', mao: '${T("Mao")}' },
+    ouiNon: { non: '${T("Non")}', oui: '${T("Oui")}' },
+    formeCulotte: { classique: '${T("Classique")}', haute: '${T("Taille haute")}', hipster: '${T("Hipster")}' }
   };
-  var LPIECE = { devant: '${T("Devant")}', dos: '${T("Dos")}', manche: '${T("Manche")}' };
+  var LPIECE = { devant: '${T("Devant")}', dos: '${T("Dos")}', manche: '${T("Manche")}', empiecement: '${T("Empiècement")}', col: '${T("Col")}',
+    piedcol: '${T("Pied de col")}', poignet: '${T("Poignet")}', bande: '${T("Bande")}', biais: '${T("Biais")}', bordcote: '${T("Bord-côte")}', capuche: '${T("Capuche")}',
+    ceinture: '${T("Ceinture")}', pochear: '${T("Poche arrière")}', garde: '${T("Garde-poche")}', patte: '${T("Patte de braguette")}',
+    bonnet: '${T("Bonnet")}', bretelle: '${T("Bretelle")}', panneau: '${T("Panneau")}', visiere: '${T("Visière")}', renfort: '${T("Renfort de visière")}',
+    calotte: '${T("Calotte")}', cote: '${T("Côté")}', bord: '${T("Bord")}', fuseau: '${T("Fuseau")}', revers: '${T("Revers")}' };
   var LCTRL = { emmanchure: '${T("Emmanchure")}', cote: '${T("Couture de côté")}', tete: '${T("Tête de manche")}',
     embu: '${T("Embu de la manche")}', fourche: '${T("Fourche")}', entrejambe: '${T("Entrejambe")}' };
   /* Les pictogrammes des bases : un croquis à plat, trait seul. */
@@ -280,7 +306,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     robe: '<svg viewBox="0 0 120 160" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" aria-hidden="true"><path d="M44 10l-22 14 6 30 10-4-4 100h52l-4-100 10 4 6-30-22-14c-2 8-9 12-16 12s-14-4-16-12z"/></svg>',
     chemisier: '<svg viewBox="0 0 130 120" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" aria-hidden="true"><path d="M48 8L14 22l-8 44 16 4 6-26v68h74V44l6 26 16-4-8-44L82 8c-3 8-10 12-17 12S51 16 48 8z"/></svg>',
     jupe: '<svg viewBox="0 0 120 130" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" aria-hidden="true"><path d="M30 8h60l22 112H8z"/></svg>',
-    pantalon: '<svg viewBox="0 0 100 170" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" aria-hidden="true"><path d="M18 6h64l8 156H58L50 50l-8 112H10z"/></svg>'
+    pantalon: '<svg viewBox="0 0 100 170" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" aria-hidden="true"><path d="M18 6h64l8 156H58L50 50l-8 112H10z"/></svg>',
+    tshirt: '<svg viewBox="0 0 120 140" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" aria-hidden="true"><path d="M40 10L10 26l10 22 12-6v88h56V42l12 6 10-22-30-16c-3 8-10 12-20 12s-17-4-20-12z"/></svg>',
+    chemise: '<svg viewBox="0 0 120 140" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" aria-hidden="true"><path d="M40 10L10 26l4 92 14-2 4-74v88h56V42l4 74 14 2 4-92-30-16-20 18zM60 28v100"/></svg>',
+    debardeur: '<svg viewBox="0 0 120 140" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" aria-hidden="true"><path d="M38 8c2 14 10 20 22 20s20-6 22-20l10 4c-6 18-4 30 8 40v80H20V52c12-10 14-22 8-40z"/></svg>',
+    sweat: '<svg viewBox="0 0 120 140" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" aria-hidden="true"><path d="M42 20c0-12 8-16 18-16s18 4 18 16l30 16 6 86h-16l-10-70v80H30V52l-10 70H4l6-86z"/></svg>',
+    jean: '<svg viewBox="0 0 120 140" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" aria-hidden="true"><path d="M18 6h64l8 128H58L50 50l-8 84H10zM18 20h64"/></svg>',
+    short: '<svg viewBox="0 0 120 140" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" aria-hidden="true"><path d="M18 20h84l12 70H70l-10-30-10 30H6z"/></svg>',
+    legging: '<svg viewBox="0 0 120 140" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" aria-hidden="true"><path d="M30 6h60l-2 128H66L60 50l-6 84H32z"/></svg>',
+    culotte: '<svg viewBox="0 0 120 140" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" aria-hidden="true"><path d="M10 30h100c-10 40-36 50-42 70H52C46 80 20 70 10 30z"/></svg>',
+    brassiere: '<svg viewBox="0 0 120 140" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" aria-hidden="true"><path d="M10 80c8-30 20-44 28-60h4c8 20 16 32 18 44 2-12 10-24 18-44h4c8 16 20 30 28 60zM10 80h100v16H10z"/></svg>',
+    casquette: '<svg viewBox="0 0 120 140" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" aria-hidden="true"><path d="M14 90c0-40 22-64 46-64s46 24 46 64zM14 90c20 12 60 14 92 4"/></svg>',
+    bob: '<svg viewBox="0 0 120 140" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" aria-hidden="true"><path d="M30 80l8-44h44l8 44M6 100c20-14 40-22 54-22s34 8 54 22c-30 10-78 10-108 0z"/></svg>',
+    tuque: '<svg viewBox="0 0 120 140" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" aria-hidden="true"><path d="M18 100c0-50 18-80 42-80s42 30 42 80zM14 100h92v26H14z"/></svg>'
   };
 
   var MOTIFS = {
@@ -474,6 +512,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + (D.peutAjouter ? '<button type="button" data-dupl="' + esc(m.id) + '">${T("Dupliquer")}</button>' : '')
         + '<button type="button" data-editer="' + esc(m.id) + '">${T("Éditer le patron")}</button>'
         + '<button type="button" data-imprimer="' + esc(m.id) + '">${T("Imprimer / exporter")}</button>'
+        + '<button type="button" data-planche="' + esc(m.id) + '">${T("Planche de dessin")}</button>'
         + '<button type="button" data-v3="' + esc(m.id) + '">${T("Aperçu 3D")}</button>'
         + '<button type="button" data-motif="' + esc(m.id) + '">${T("Motif et impression textile")}</button>'
         + '<button type="button" class="prim" data-ouvrir="' + esc(m.id) + '">${T("Ouvrir le modèle")}</button></div>'
@@ -497,15 +536,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return '<label>' + lib + '<select id="' + id + '">' + Object.keys(liste).map(function(k){
         return '<option value="' + k + '"' + (val === k ? ' selected' : '') + '>' + liste[k] + '</option>'; }).join('') + '</select></label>';
     };
-    var h = '';
-    if (M.base === 'robe' || M.base === 'chemisier') {
-      h += sel('o-encolure', '${T("Encolure")}', LOPT.encolure, 'encolure', o.encolure || 'ronde');
-      h += sel('o-manche', '${T("Manche")}', LOPT.manche, 'manche', o.manche || (M.base === 'robe' ? 'sans' : 'longue'));
-    }
-    if (M.base === 'jupe') h += sel('o-forme', '${T("Forme")}', LOPT.formeJupe, 'forme', o.forme || 'droite');
-    if (M.base === 'pantalon') h += sel('o-forme', '${T("Forme")}', LOPT.formePantalon, 'forme', o.forme || 'droit');
-    var libL = M.base === 'pantalon' ? '${T("Longueur de jambe (0 = entrejambe)")}' : (M.base === 'chemisier' ? '${T("Longueur sous la taille")}' : '${T("Longueur sous la taille")}');
-    h += '<label>' + libL + '<input type="text" id="o-longueur" maxlength="5" inputmode="decimal" value="' + esc(o.longueur != null ? String(o.longueur).replace('.', '${SEP_DEC()}') : '') + '"></label>';
+    var h = '', b = (D.bases || []).filter(function(x){ return x.cle === M.base; })[0] || {}, ch = b.choix || {};
+    Object.keys(ch).forEach(function(k){ if (LOPT[ch[k]]) h += sel('o-' + k, LCH[k] || k, LOPT[ch[k]], k, o[k] || (b.options || {})[k]); });
+    if (b.options && b.options.longueur != null) h += '<label>' + (LLONG[M.base] || '${T("Longueur")}') + '<input type="text" id="o-longueur" maxlength="5" inputmode="decimal" value="' + esc(o.longueur != null ? String(o.longueur).replace('.', '${SEP_DEC()}') : '') + '"></label>';
     return h;
   }
   function dessinerModele(){
@@ -517,9 +550,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (!neuf ? '<button type="button" id="m-editer"' + (TRACE ? ' disabled title="${T("Enregistrez d’abord les changements du modèle.")}"' : '') + '>${T("Éditer le patron")}</button>' : '')
       + ((neuf ? D.peutAjouter : D.peutModifier) ? '<button type="button" class="prim" id="m-enreg">' + (neuf ? '${T("Créer le modèle")}' : '${T("Enregistrer la version")}') + '</button>' : '');
 
+    var famPrec = '';
     var g = '<div class="cx-carte"><h2>${T("Patron de base")}</h2><div class="at-bases">'
       + (D.bases || []).map(function(b){
-          return '<button type="button" class="at-base' + (M.base === b.cle ? ' on' : '') + '" data-base="' + b.cle + '">' + (PICTO[b.cle] || '')
+          var tete = b.famille && b.famille !== famPrec ? '<div class="at-fam">' + (LFAM[b.famille] || '') + '</div>' : ''; famPrec = b.famille || famPrec;
+          return tete + '<button type="button" class="at-base' + (M.base === b.cle ? ' on' : '') + '" data-base="' + b.cle + '">' + (PICTO[b.cle] || '')
             + '<span><b>' + esc(LBASE[b.cle] || szTd(b.nom)) + '</b><span class="cx-sub">' + esc(LBASED[b.cle] || '') + '</span></span></button>';
         }).join('') + '</div>'
       + '<div class="at-champs">' + optionsBase() + '</div>'
@@ -618,7 +653,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     else if (id === 'm-prod') M.produitId = cible.value;
     else if (id === 'm-notes') M.notes = cible.value;
     else if (id === 'm-tbase') { M.tailleBase = cible.value; if ((M.tailles || []).indexOf(cible.value) < 0) M.tailles.push(cible.value); TRACE = true; dessinerModele(); return; }
-    else if (id === 'o-encolure' || id === 'o-manche' || id === 'o-forme') { M.options = M.options || {}; M.options[id.slice(2)] = cible.value; TRACE = true; demanderApercu(); }
+    else if (/^o-/.test(id) && id !== 'o-longueur') { M.options = M.options || {}; M.options[id.slice(2)] = cible.value; TRACE = true; demanderApercu(); }
     else if (id === 'o-longueur') { M.options = M.options || {}; var L = nombre(cible.value, NaN); if (isFinite(L)) { M.options.longueur = L; TRACE = true; demanderApercu(); } }
     else if (id.indexOf('a-') === 0 && id !== 'a-q') { var v = nombre(cible.value, NaN); if (isFinite(v)) { M.aisances[id.slice(2)] = v; TRACE = true; demanderApercu(); } }
     else if (cible.hasAttribute('data-t')) {
@@ -1842,6 +1877,129 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
 
 
+
+  /* ══ LA PLANCHE DE DESSIN (lot 8, 2026-10-17) ═══════════════════════════════
+     Sa demande : « les planches de dessin et modèles pour la plupart des types de vêtements ».
+     Le SITE dessine le croquis technique (devant, dos) depuis les pièces du modèle ; on dessine
+     PAR-DESSUS au crayon, dans le même repère (le cm du croquis) — le dessin est enregistré avec
+     le modèle et sort tel quel dans la planche PDF et la fiche technique. */
+  var PL = null;
+  var COUL_PL = ['#1C1B18', '#B4583C', '#1E3A5F', '#8FA58A', '#C9A9A6', '#F2C14E', '#7C3AED', '#2563EB'];
+  var EP_PL = [['fin', '${T("Fin")}', 0.12], ['moyen', '${T("Moyen")}', 0.25], ['epais', '${T("Épais")}', 0.5]];
+  function ouvrirPlanche(id, retour){
+    var m = (D.modeles || []).filter(function(x){ return x.id === id; })[0];
+    if (!m) { dire(MOTIFS.introuvable, 'err'); return; }
+    SEL = id;
+    PL = { id: id, m: m, retour: retour || 'biblio', cq: null, traits: copie((m.planche && m.planche.traits) || []), note: (m.planche && m.planche.note) || '',
+      outil: 'crayon', couleur: COUL_PL[0], ep: 'moyen', pile: [], sale: false, trait: null };
+    VUE = 'planche'; dessiner();
+    appeler('atelier:croquis', [{ id: id }]).then(function(r){
+      if (!PL || PL.id !== id) return;
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+      PL.cq = r; peindrePL();
+    });
+  }
+  function dessinerPlanche(){
+    var m = PL.m;
+    document.getElementById('titre').textContent = '${T("Planche de dessin")}';
+    document.getElementById('sous').textContent = m.nom + (m.ref ? ' · ' + m.ref : '') + ' · v' + (m.version || 1) + (PL.sale ? ' · ${T("modifications non enregistrées")}' : '');
+    document.getElementById('actions').innerHTML = '<button type="button" id="pl-retour">${T("← Bibliothèque")}</button>'
+      + '<button type="button" id="pl-annuler" aria-label="${T("Annuler")}" title="${T("Annuler")}"' + (PL.pile.length ? '' : ' disabled') + '>↶</button>'
+      + '<button type="button" id="pl-pdf">${T("Planche PDF")}</button>'
+      + (D.peutModifier ? '<button type="button" class="prim" id="pl-enreg"' + (PL.sale ? '' : ' disabled') + '>${T("Enregistrer")}</button>' : '');
+    var seg = function(attr, k, lib, on){ return '<button type="button" class="' + (on ? 'on' : '') + '" ' + attr + '="' + k + '">' + lib + '</button>'; };
+    var g = '<div class="cx-carte"><h2>${T("Outil")}</h2><div class="ed-seg" role="group" aria-label="${T("Outil")}">'
+      + seg('data-plout', 'crayon', '${T("Crayon")}', PL.outil === 'crayon') + seg('data-plout', 'gomme', '${T("Gomme")}', PL.outil === 'gomme') + '</div>'
+      + '<div class="cx-sep"></div><h2>${T("Épaisseur")}</h2><div class="ed-seg" role="group" aria-label="${T("Épaisseur")}">'
+      + EP_PL.map(function(e){ return seg('data-plep', e[0], e[1], PL.ep === e[0]); }).join('') + '</div>'
+      + '<div class="cx-sep"></div><h2>${T("Couleur")}</h2><div class="v3-couleurs">'
+      + COUL_PL.map(function(c){ return '<button type="button" class="' + (PL.couleur === c ? 'on' : '') + '" data-plc="' + c + '" aria-label="' + c + '" title="' + c + '" style="background:' + c + '"></button>'; }).join('') + '</div>'
+      + '<div class="cx-sep"></div><div class="at-champs"><label class="large">${T("Notes de la planche")}<textarea id="pl-note" maxlength="2000">' + esc(PL.note) + '</textarea></label></div>'
+      + '<div class="ed-gestes"><button type="button" class="mini danger" id="pl-effacer"' + (PL.traits.length ? '' : ' disabled') + '>${T("Effacer le dessin")}</button></div>'
+      + '<div class="ed-note">${T("Le croquis vient du patron (taille de base) : retouchez le patron, le croquis suit. Le dessin se garde avec le modèle et sort dans la planche PDF et la fiche technique.")}</div></div>';
+    var c = '<div class="mo-toile pl-toile" id="pl-toile"><svg id="pl-svg" role="img" aria-label="${T("Le croquis technique et le dessin")}"></svg></div>';
+    corps.innerHTML = '<div class="pl-deux">' + g + c + '</div>';
+    peindrePL();
+    var tz = document.getElementById('pl-toile');
+    if (window.ResizeObserver && tz) { if (window._plRO) window._plRO.disconnect(); window._plRO = new ResizeObserver(function(){ peindrePL(); }); window._plRO.observe(tz); }
+  }
+  function cheminTrait(t){ var d = ''; for (var i = 0; i + 1 < t.pts.length; i += 2) d += (i ? ' L' : 'M') + t.pts[i] + ' ' + t.pts[i + 1]; return d; }
+  function svgTrait(t){ return '<path d="' + cheminTrait(t) + '" fill="none" stroke="' + t.c + '" stroke-width="' + t.e + '" stroke-opacity="' + (t.o == null ? 1 : t.o) + '" stroke-linecap="round" stroke-linejoin="round"/>'; }
+  function peindrePL(){
+    var svg = document.getElementById('pl-svg'), z = document.getElementById('pl-toile'); if (!svg || !z || !PL) return;
+    var W = z.clientWidth || 800, H = z.clientHeight || 600;
+    svg.setAttribute('width', W); svg.setAttribute('height', H);
+    if (!PL.cq) { svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); svg.innerHTML = '<text x="' + W / 2 + '" y="' + H / 2 + '" text-anchor="middle" font-size="14" fill="#3F3A32" font-family="Segoe UI, sans-serif">${T("Croquis en préparation…")}</text>'; return; }
+    var cq = PL.cq;
+    svg.setAttribute('viewBox', '0 0 ' + cq.l + ' ' + cq.h); svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    svg.innerHTML = '<rect x="0" y="0" width="' + cq.l + '" height="' + cq.h + '" fill="#FFFFFF"/>' + cq.corps + PL.traits.map(svgTrait).join('') + (PL.trait ? svgTrait(PL.trait) : '');
+  }
+  // l écran → le repère du croquis (cm)
+  function pointPL(ev){
+    var svg = document.getElementById('pl-svg'); if (!svg || !svg.getScreenCTM) return null;
+    var m = svg.getScreenCTM(); if (!m) return null;
+    var p = svg.createSVGPoint(); p.x = ev.clientX; p.y = ev.clientY;
+    var q = p.matrixTransform(m.inverse());
+    return { x: Math.round(q.x * 10) / 10, y: Math.round(q.y * 10) / 10 };
+  }
+  function memoPL(){ PL.pile.push(JSON.stringify(PL.traits)); if (PL.pile.length > 60) PL.pile.shift(); PL.sale = true; }
+  function apresPL(){ dessinerPlanche(); }
+  function gommerPL(q){
+    var meilleur = -1, dm = 1e9;
+    PL.traits.forEach(function(t, i){ for (var k = 0; k + 1 < t.pts.length; k += 2) { var d = Math.hypot(t.pts[k] - q.x, t.pts[k + 1] - q.y); if (d < dm) { dm = d; meilleur = i; } } });
+    if (meilleur < 0 || dm > 1.2) return;
+    memoPL(); PL.traits.splice(meilleur, 1); apresPL();
+  }
+  function enregistrerPL(){
+    if (OCCUPE || !PL || !PL.sale) return;
+    OCCUPE = true; dire('${T("Enregistrement…")}');
+    appeler('atelier:ecrire', [{ id: PL.id, nom: PL.m.nom, planche: { traits: PL.traits, note: PL.note } }]).then(function(r){
+      OCCUPE = false;
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+      PL.sale = false; PL.pile = [];
+      appeler('atelier:donnees', []).then(function(d){
+        if (d && d.ok) { D = d; var m = (D.modeles || []).filter(function(x){ return x.id === PL.id; })[0]; if (m && PL) PL.m = m; }
+        if (VUE === 'planche' && PL) { dessinerPlanche(); dire('${T("Planche enregistrée.")}', 'bon'); }
+      });
+    });
+  }
+  function pdfPL(btn){
+    if (OCCUPE || !PL) return;
+    if (PL.sale) { dire('${T("Enregistrez d’abord la planche : le PDF reprend la version enregistrée.")}', 'att'); return; }
+    if (!P || typeof P.enregistrerExport !== 'function' || typeof P.documentPdf !== 'function') { dire('${T("Cette version de l’application ne sait pas fabriquer de PDF.")}', 'err'); return; }
+    OCCUPE = true; if (btn) btn.disabled = true;
+    var fin = function(msg, cl){ OCCUPE = false; if (btn) btn.disabled = false; dire(msg, cl); };
+    dire('${T("Préparation du fichier…")}');
+    appeler('atelier:exporter', [{ id: PL.id, format: 'planche' }]).then(function(r){
+      if (!r || !r.ok || !r.contenu) { fin(expliquer(r), 'err'); return; }
+      Promise.resolve(P.documentPdf(r.contenu, { pageCss: true })).then(function(pdf){
+        if (!pdf || !pdf.ok || !pdf.base64) { fin('${T("Le PDF n’a pas pu être fabriqué : {0}")}'.split('{0}').join((pdf && pdf.error) || '?'), 'err'); return; }
+        Promise.resolve(P.enregistrerExport(r.nom, 'data:application/pdf;base64,' + pdf.base64)).then(function(w){
+          if (w && w.ok) fin('${T("Enregistré : {0}")}'.split('{0}').join(w.path || r.nom), 'bon');
+          else if (w && w.annule) fin('${T("Export annulé : le code d’export n’a pas été donné.")}', 'att');
+          else fin('${T("L’enregistrement a échoué : {0}")}'.split('{0}').join((w && w.error) || '?'), 'err');
+        });
+      });
+    });
+  }
+  function quitterPL(){
+    var sortir = function(){ PL = null; if (window._plRO) { window._plRO.disconnect(); window._plRO = null; } VUE = 'biblio'; dessiner(); dire(''); };
+    if (!PL || !PL.sale) { sortir(); return; }
+    szConfirmer({ titre: '${T("Quitter sans enregistrer ?")}', texte: '${T("Le dessin de la planche sera perdu.")}', oui: '${T("Quitter")}', danger: true }).then(function(ok){ if (ok) sortir(); });
+  }
+  function clicPL(ev){
+    var t = ev.target, b;
+    if ((b = t.closest('[data-plout]'))) { PL.outil = b.getAttribute('data-plout'); dessinerPlanche(); return; }
+    if ((b = t.closest('[data-plep]'))) { PL.ep = b.getAttribute('data-plep'); dessinerPlanche(); return; }
+    if ((b = t.closest('[data-plc]'))) { PL.couleur = b.getAttribute('data-plc'); PL.outil = 'crayon'; dessinerPlanche(); return; }
+    if (t.closest('#pl-effacer')) {
+      szConfirmer({ titre: '${T("Effacer tout le dessin ?")}', texte: '${T("Le croquis reste ; seuls vos traits sont effacés (Annuler les rend).")}', oui: '${T("Effacer")}', danger: true }).then(function(ok){
+        if (ok && PL) { memoPL(); PL.traits = []; apresPL(); } });
+    }
+  }
+  function changePL(t){ if (t.id === 'pl-note') { if (t.value !== PL.note) { PL.note = t.value; PL.sale = true; dessinerPlanche(); } } }
+  function annulerPL(){ if (!PL || !PL.pile.length) return; PL.traits = JSON.parse(PL.pile.pop()); PL.sale = true; apresPL(); }
+
   /* ══ LE PATRON DEPUIS UNE PHOTO (lot 7, 2026-10-17) ═══════════════════════
      Sa demande : « regénérer un patron à partir d une photo de vêtement sous mannequin fantôme,
      et ensuite utiliser le moteur 3D ». Le SITE lit la photo (silhouette, IA de vision) et propose
@@ -1849,7 +2007,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      pour qu on l ajuste à l œil — c est un patron de même allure, pas le patron du fournisseur.
      « Créer le modèle » l enregistre avec la photo détourée, que l aperçu 3D plaque sur le devant. */
   var PH = null, PHIMG = {};
-  var LTYPE7 = { '': '${T("Auto (IA)")}', robe: '${T("Robe")}', chemisier: '${T("Haut")}', jupe: '${T("Jupe")}', pantalon: '${T("Pantalon")}' };
+  var LTYPE7 = { '': '${T("Auto (IA)")}', robe: '${T("Robe")}', chemisier: '${T("Haut")}', tshirt: '${T("T-shirt")}', chemise: '${T("Chemise")}', jupe: '${T("Jupe")}', pantalon: '${T("Pantalon")}', jean: '${T("Jean")}' };
   var LNOTE7 = { echelle_poitrine: '${T("L’échelle est prise à la poitrine, en supposant son aisance habituelle : si le tracé déborde ou flotte partout, corrigez l’échelle.")}',
     echelle_taille: '${T("L’échelle est prise à la taille, en supposant son aisance habituelle : si le tracé déborde ou flotte partout, corrigez l’échelle.")}',
     taille_supposee: '${T("La taille ne se voit pas sur la photo (vêtement droit) : sa hauteur est supposée.")}',
@@ -1912,13 +2070,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var nb = function(v){ return esc(String(v).replace('.', '${SEP_DEC()}')); };
     var o = r.options || {}, a = r.aisances || {}, opt = D.options || {};
     var h = '<h2>${T("Patron proposé")}</h2><div class="ed-seg" role="group" aria-label="${T("Base")}">'
-      + ['robe', 'chemisier', 'jupe', 'pantalon'].map(function(k){ return seg('data-phbase', k, LTYPE7[k], r.base === k); }).join('') + '</div>'
+      + (D.bases || []).filter(function(b){ return ['haut', 'jupe', 'bas'].indexOf(b.famille) >= 0; }).map(function(b){ return seg('data-phbase', b.cle, LBASE[b.cle] || szTd(b.nom), r.base === b.cle); }).join('') + '</div>'
       + '<div class="at-champs" style="margin-top:.5rem"><label class="large">${T("Nom")}<input type="text" id="ph-nom" maxlength="80" value="' + esc(PH.nom) + '"></label>';
     var choix = function(id, liste, val){ return '<select id="' + id + '">' + (liste || []).map(function(x){ return '<option value="' + esc(x.cle) + '"' + (val === x.cle ? ' selected' : '') + '>' + esc(szTd(x.nom)) + '</option>'; }).join('') + '</select>'; };
-    if (r.base === 'robe' || r.base === 'chemisier') h += '<label>${T("Encolure")}' + choix('ph-encolure', opt.encolure, o.encolure) + '</label><label>${T("Manches")}' + choix('ph-manche', opt.manche, o.manche) + '</label>';
-    if (r.base === 'jupe') h += '<label class="large">${T("Forme")}' + choix('ph-forme', opt.formeJupe, o.forme) + '</label>';
-    if (r.base === 'pantalon') h += '<label class="large">${T("Forme")}' + choix('ph-forme', opt.formePantalon, o.forme) + '</label>';
-    h += '<label>' + (r.base === 'pantalon' ? '${T("Entrejambe (cm)")}' : r.base === 'jupe' ? '${T("Longueur (cm)")}' : '${T("Sous la taille (cm)")}') + '<input type="text" id="ph-longueur" inputmode="decimal" maxlength="5" value="' + nb(o.longueur || 0) + '"></label>'
+    var bph = (D.bases || []).filter(function(x){ return x.cle === r.base; })[0] || {}, chph = bph.choix || {};
+    Object.keys(chph).forEach(function(k){ var l = LOPT[chph[k]]; if (l) h += '<label>' + (LCH[k] || k) + '<select id="ph-opt-' + k + '">' + Object.keys(l).map(function(c){ return '<option value="' + c + '"' + (o[k] === c ? ' selected' : '') + '>' + l[c] + '</option>'; }).join('') + '</select></label>'; });
+    h += '<label>' + (bph.famille === 'bas' ? '${T("Entrejambe (cm)")}' : bph.famille === 'jupe' ? '${T("Longueur (cm)")}' : '${T("Sous la taille (cm)")}') + '<input type="text" id="ph-longueur" inputmode="decimal" maxlength="5" value="' + nb(o.longueur || 0) + '"></label>'
       + '<label>${T("Échelle (px/cm)")}<input type="text" id="ph-k" inputmode="decimal" maxlength="6" value="' + nb(r.face.k) + '"></label>'
       + '<label>${T("Aisance poitrine")}<input type="text" id="ph-ap" inputmode="decimal" maxlength="4" value="' + nb(a.poitrine) + '"></label>'
       + '<label>${T("Aisance taille")}<input type="text" id="ph-at" inputmode="decimal" maxlength="4" value="' + nb(a.taille) + '"></label>'
@@ -2018,9 +2175,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (t.id === 'ph-nom') { PH.nom = t.value; return; }
     if (!r) return;
     var borne = function(x, a, b){ return Math.max(a, Math.min(b, Math.round(x * 100) / 100)); };
-    if (t.id === 'ph-encolure') r.options.encolure = t.value;
-    else if (t.id === 'ph-manche') r.options.manche = t.value;
-    else if (t.id === 'ph-forme') r.options.forme = t.value;
+    if (t.id.indexOf('ph-opt-') === 0) r.options[t.id.slice(7)] = t.value;
     else if (!isFinite(v)) { panneauPH(); return; }
     else if (t.id === 'ph-longueur') r.options.longueur = borne(v, 0, 160);
     else if (t.id === 'ph-k') { var k0 = r.face.k; r.face.k = borne(v, 0.05, 500); if (r.dos) r.dos.k = Math.round(r.dos.k * r.face.k / k0 * 1000) / 1000; }
@@ -2727,6 +2882,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       ? '${T("Le point le plus serré manque de {0} au corps, à {1} cm du sol : le vêtement ne fermera pas à cet endroit.")}'
       : '${T("Le point le plus serré garde {0} d’aisance, à {1} cm du sol.")}').split('{0}').join(cm1(Math.abs(r.pire.ecart)).replace('+', '')).split('{1}').join(Math.round(r.pire.hauteur)) + '</div>';
     if ((r.nonPosees || []).length) h += '<div class="ed-note">' + '${T("Pièces non posées sur le mannequin : {0}.")}'.split('{0}').join(esc(r.nonPosees.join(', '))) + '</div>';
+    if (r.motif3d === 'type_sans_3d') h += '<div class="ed-note">${T("L’aperçu 3D n’est pas encore offert pour ce type (lingerie, chapeaux) : sa planche de dessin et son patron le sont.")}</div>';
     if (r.motif3d === 'pieces_inconnues') h += '<div class="ed-note">${T("Ce patron n’a pas de devant et de dos reconnaissables : seul le mannequin est montré.")}</div>';
     h += '<div class="cx-sep"></div><div class="ed-note">${T("Aperçu géométrique : le vêtement est montré seul, porté sur un corps invisible aux mesures du tableau ; sa largeur est mesurée sur les pièces, niveau par niveau (pinces déduites). Le tombé du tissu — plis, poids, glissement — n’est pas simulé.")}</div>'
       + '<div class="ed-note">${T("Les écarts se lisent de 0 à 2 cm serré, de 2 à 8 cm ajusté, au-delà aisé ; sous 0, le vêtement est plus petit que le corps.")}</div>';
@@ -2768,6 +2924,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (r === 'editeur' && id) { VUE = 'biblio'; ouvrirEditeur(id); return; }
     VUE = 'biblio'; dessiner(); dire('');
   }
+
+  /* ── La planche : le crayon suit la souris ; la gomme ôte le trait le plus proche ── */
+  corps.addEventListener('mousedown', function(ev){
+    if (VUE !== 'planche' || !PL || !PL.cq || ev.button !== 0 || !(ev.target && ev.target.closest && ev.target.closest('#pl-svg'))) return;
+    var q = pointPL(ev); if (!q) return;
+    ev.preventDefault();
+    if (PL.outil === 'gomme') { gommerPL(q); return; }
+    var ep = EP_PL.filter(function(e){ return e[0] === PL.ep; })[0] || EP_PL[1];
+    PL.trait = { c: PL.couleur, e: ep[2], o: 1, pts: [q.x, q.y] };
+  });
+  window.addEventListener('mousemove', function(ev){
+    if (VUE !== 'planche' || !PL || !PL.trait) return;
+    var q = pointPL(ev); if (!q) return;
+    var n = PL.trait.pts.length;
+    if (Math.hypot(q.x - PL.trait.pts[n - 2], q.y - PL.trait.pts[n - 1]) < 0.15 || n >= 4000) return;
+    PL.trait.pts.push(q.x, q.y); peindrePL();
+  });
+  window.addEventListener('mouseup', function(){
+    if (VUE !== 'planche' || !PL || !PL.trait) return;
+    var t = PL.trait; PL.trait = null;
+    if (t.pts.length < 4) t.pts.push(t.pts[0] + 0.05, t.pts[1]);       // un point : un petit trait, pour qu il se voie
+    if (PL.traits.length >= 600) { dire('${T("600 traits au plus sur une planche.")}', 'err'); peindrePL(); return; }
+    memoPL(); PL.traits.push(t); apresPL();
+  });
 
   /* ── La souris : tourner, zoomer, déplacer ── */
   corps.addEventListener('mousedown', function(ev){
@@ -3511,7 +3691,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (VUE === '3d') { if (V3) clic3d(ev); return; }
     if (VUE === 'motif') { if (MO) clicMo(ev); return; }
     if (VUE === 'photo') { if (PH) clicPH(ev); return; }
+    if (VUE === 'planche') { if (PL) clicPL(ev); return; }
     var b;
+    if ((b = t.closest('[data-planche]'))) { ouvrirPlanche(b.getAttribute('data-planche'), 'biblio'); return; }
     if ((b = t.closest('[data-motif]'))) { ouvrirMotif(b.getAttribute('data-motif'), 'biblio'); return; }
     if ((b = t.closest('[data-v3]'))) { ouvrir3d(b.getAttribute('data-v3'), 'biblio'); return; }
     if ((b = t.closest('[data-imprimer]'))) { ouvrirImpression(b.getAttribute('data-imprimer'), 'biblio'); return; }
@@ -3533,12 +3715,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if ((b = t.closest('#m-standard'))) { M.tableau = copie(D.standard); TRACE = true; dessinerModele(); dire('${T("Tableau standard remis.")}', 'bon'); return; }
   });
   corps.addEventListener('dblclick', function(ev){
-    if (VUE === 'editeur' || VUE === 'impression' || VUE === '3d' || VUE === 'motif' || VUE === 'photo') return;
+    if (VUE === 'editeur' || VUE === 'impression' || VUE === '3d' || VUE === 'motif' || VUE === 'photo' || VUE === 'planche') return;
     var b = ev.target && ev.target.closest ? ev.target.closest('[data-sel]') : null;
     if (b) ouvrirModele(b.getAttribute('data-sel'));
   });
   corps.addEventListener('input', function(ev){
-    if (VUE === 'editeur' || VUE === 'impression' || VUE === '3d' || VUE === 'motif' || VUE === 'photo') return;
+    if (VUE === 'editeur' || VUE === 'impression' || VUE === '3d' || VUE === 'motif' || VUE === 'photo' || VUE === 'planche') return;
     var t = ev.target;
     if (t && t.id === 'a-q') { Q = t.value; clearTimeout(window._atQ); window._atQ = setTimeout(redessinerSansPerdreLaSaisie, 200); return; }
     ramasser(t);
@@ -3550,6 +3732,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (VUE === '3d') { if (V3) change3d(t); return; }
     if (VUE === 'motif') { if (MO) changeMo(t); return; }
     if (VUE === 'photo') { if (PH) changePH(t); return; }
+    if (VUE === 'planche') { if (PL) changePL(t); return; }
     if (t.hasAttribute && t.hasAttribute('data-taille')) {
       var tl = t.getAttribute('data-taille');
       var ls = (M.tailles || []).filter(function(x){ return x !== tl; });
@@ -3594,6 +3777,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (t.closest('#a-photo')) { ouvrirPhoto(); return; }
     if (t.closest('#ph-retour')) { quitterPH(); return; }
     if (t.closest('#ph-creer')) { creerPH(); return; }
+    if (t.closest('#pl-retour')) { quitterPL(); return; }
+    if (t.closest('#pl-annuler')) { annulerPL(); return; }
+    if (t.closest('#pl-enreg')) { enregistrerPL(); return; }
+    if (t.closest('#pl-pdf')) { pdfPL(t.closest('#pl-pdf')); return; }
     if (t.closest('#m-retour')) { revenir(); return; }
     if (t.closest('#m-enreg')) { enregistrer(t.closest('#m-enreg')); return; }
   });
@@ -3666,7 +3853,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function dessiner(){
     if (!D) return;
-    if (VUE === 'photo' && PH) dessinerPhoto(); else if (VUE === 'motif' && MO) dessinerMo(); else if (VUE === '3d' && V3) dessiner3d(); else if (VUE === 'impression' && IMP) dessinerImpression(); else if (VUE === 'editeur' && E) dessinerEditeur(); else if (VUE === 'modele' && M) dessinerModele(); else dessinerBiblio();
+    if (VUE === 'planche' && PL) dessinerPlanche(); else if (VUE === 'photo' && PH) dessinerPhoto(); else if (VUE === 'motif' && MO) dessinerMo(); else if (VUE === '3d' && V3) dessiner3d(); else if (VUE === 'impression' && IMP) dessinerImpression(); else if (VUE === 'editeur' && E) dessinerEditeur(); else if (VUE === 'modele' && M) dessinerModele(); else dessinerBiblio();
   }
   /* ⚠ NE JAMAIS REDESSINER LE CHAMP SOUS LES DOIGTS. */
   function redessinerSansPerdreLaSaisie(){
@@ -3689,6 +3876,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       else if (DEPART.indexOf('impression:') === 0) { var di = DEPART.slice(11); DEPART = ''; ouvrirImpression(di, 'biblio'); }
       else if (DEPART.indexOf('3d:') === 0) { var d3 = DEPART.slice(3); DEPART = ''; ouvrir3d(d3, 'biblio'); }
       else if (DEPART === 'photo' && D.peutAjouter) { DEPART = ''; ouvrirPhoto(); }
+      else if (DEPART.indexOf('planche:') === 0) { var dp = DEPART.slice(8); DEPART = ''; ouvrirPlanche(dp, 'biblio'); }
       else if (DEPART.indexOf('motif:') === 0) { var dm = DEPART.slice(6); DEPART = ''; ouvrirMotif(dm, 'biblio'); }
       else dessiner();
       if (apres) apres(); else dire('');

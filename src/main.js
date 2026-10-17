@@ -3008,7 +3008,7 @@ const OPS_PONT = new Set([
   'vehicules:catalogue',
   // Atelier de creation (2026-10-16) : les modeles de vetements. ⚠ `atelier:donnees` est l op de
   // LECTURE (nom repere par l etape 2 du verificateur du site) ; `atelier:apercu` trace sans ecrire.
-  'atelier:donnees', 'atelier:apercu', 'atelier:analyser', 'atelier:preparer', 'atelier:graduer', 'atelier:egaliser', 'atelier:restaurer', 'atelier:exporter', 'atelier:apercu3d', 'atelier:motifControler', 'atelier:motifExporter', 'atelier:motifImage', 'atelier:motifDetourer', 'atelier:depuisPhoto', 'atelier:ecrire', 'atelier:dupliquer', 'atelier:supprimer',
+  'atelier:donnees', 'atelier:apercu', 'atelier:analyser', 'atelier:preparer', 'atelier:graduer', 'atelier:egaliser', 'atelier:restaurer', 'atelier:exporter', 'atelier:apercu3d', 'atelier:motifControler', 'atelier:motifExporter', 'atelier:motifImage', 'atelier:motifDetourer', 'atelier:depuisPhoto', 'atelier:croquis', 'atelier:ecrire', 'atelier:dupliquer', 'atelier:supprimer',
   // Rappels (fenetre Rappels, 2026-10-02). ⚠ `rappels:etat` sert AUSSI au
   // processus principal : c est lui que src/rappels-notif.js interroge pour
   // les notifications de bureau, par la meme porte (executerOpSite).
