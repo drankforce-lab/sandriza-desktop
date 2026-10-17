@@ -863,4 +863,5 @@ module.exports = {
   'Vignette du modèle mise à jour.': 'Model thumbnail updated.',
   'La fiche n’a plus de place pour une photo.': 'The product page has no room left for a photo.',
   'Cette image ne peut pas être envoyée.': 'This image cannot be sent.',
+  'Mannequin': 'Dress form',
 };
