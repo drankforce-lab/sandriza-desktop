@@ -2357,7 +2357,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var sauve = { yaw: V3.yaw, pitch: V3.pitch, zoom: V3.zoom, px: V3.px, py: V3.py, carte: V3.carte, fil: V3.fil };
     var W = 1200, H = 1600, out = [];
     V3.carte = false; V3.fil = false; V3.px = 0; V3.py = 0;
-    V3.zoom = H * 0.8 * Math.max(120, GLV.h) / (GLV.h * W * 0.85);
+    V3.zoom = H * 0.8 * Math.max(GLV.minH || 120, GLV.h) / (GLV.h * W * 0.85);
     VUES_FICHE.filter(function(v){ return cles.indexOf(v[0]) >= 0; }).forEach(function(v){
       V3.yaw = v[2]; V3.pitch = v[3] + (fantome ? 0.22 : 0);
       peindreGL(cv, { W: W, H: H });
@@ -2577,11 +2577,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   /* ── Les maillages : le devant et le dos sur les anneaux du corps, la pièce de manche sur chaque manche ── */
   function grille3d(R, J, fab){
-    var n = R * (J + 1), pos = new Float32Array(n * 3), uv = new Float32Array(n * 2), tint = new Float32Array(n * 4), cen = [];
+    var n = R * (J + 1), pos = new Float32Array(n * 3), uv = new Float32Array(n * 2), tint = new Float32Array(n * 4), cen = [], ao = new Float32Array(n).fill(1);
     for (var i = 0; i < R; i++) {
       var ri = fab.anneau(i); cen.push(ri.c);
       for (var j = 0; j <= J; j++) {
         var q = fab.point(i, j, ri), k = i * (J + 1) + j;
+        if (fab.pli) {
+          // LE PLI : un déplacement perpendiculaire à l axe de l anneau (vers le dehors ou le dedans)
+          var dpl = fab.pli(i, j), rx0 = q.p[0] - ri.c[0], ry0 = fab.axe ? 0 : q.p[1] - ri.c[1], rz0 = q.p[2] - ri.c[2], rl = Math.hypot(rx0, ry0, rz0) || 1;
+          if (fab.axe) { var ax = fab.axe(i), pr = rx0 * ax[0] + (q.p[1] - ri.c[1]) * ax[1] + rz0 * ax[2]; rx0 -= ax[0] * pr; ry0 = (q.p[1] - ri.c[1]) - ax[1] * pr; rz0 -= ax[2] * pr; rl = Math.hypot(rx0, ry0, rz0) || 1; }
+          q.p = [q.p[0] + rx0 / rl * dpl, q.p[1] + ry0 / rl * dpl, q.p[2] + rz0 / rl * dpl];
+          ao[k] = Math.max(0.7, Math.min(1.06, 1 + dpl * 0.16));
+        }
         pos[k * 3] = q.p[0]; pos[k * 3 + 1] = q.p[1]; pos[k * 3 + 2] = q.p[2];
         uv[k * 2] = q.u; uv[k * 2 + 1] = q.v;
         var e = ETAT3[ri.etat]; if (e) { var h = hex(e); tint[k * 4] = h[0] / 255; tint[k * 4 + 1] = h[1] / 255; tint[k * 4 + 2] = h[2] / 255; tint[k * 4 + 3] = 1; }
@@ -2599,8 +2606,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var v0 = a * (J + 1) + b, v1 = v0 + 1, w0 = v0 + J + 1, w1 = w0 + 1;
       idx.push(v0, w0, w1, v0, w1, v1); lig.push(v0, v1, v0, w0);
     }
-    return { pos: pos, nor: nor, uv: uv, tint: tint, idx: new Uint16Array(idx), lig: new Uint16Array(lig), R: R, J: J };
+    return { pos: pos, nor: nor, uv: uv, tint: tint, ao: ao, idx: new Uint16Array(idx), lig: new Uint16Array(lig), R: R, J: J };
   }
+  /* ══ LA VIE DU TISSU (2026-10-17, sa demande : « une fonction pour donner vie au vêtement, ajouter des
+     plis naturels ») ══ Les plis se calculent, ils ne se simulent pas : ils suivent trois règles de vêtement —
+     la PESANTEUR (ils se creusent vers le bas : la jupe d une robe, le bas d un haut), l AISANCE (un vêtement
+     ajusté reste presque lisse, un vêtement ample ondule) et le BRAS (une manche longue tasse un peu vers le
+     poignet). Le TISSU règle leur largeur et leur profondeur : fluide = plis fins et nombreux, rigide = rares
+     et larges. Ils suivent la pièce (x, y du patron) : le motif, les bijoux et les rendus les suivent. */
+  var PLIS = [['aucun', '${T("Aucun")}', 0], ['legers', '${T("Légers")}', 0.5], ['naturels', '${T("Naturels")}', 1], ['marques', '${T("Marqués")}', 1.7]];
+  var TISSUS3 = [['fluide', '${T("Fluide")}', 1.15, 6.5], ['moyen', '${T("Moyen")}', 1, 9.5], ['rigide', '${T("Rigide")}', 0.8, 14]];
+  var VIE = (function(){ try { var v = JSON.parse(localStorage.getItem('sz-atelier-vie') || '{}'); return { plis: v.plis || 'naturels', tissu: v.tissu || 'moyen' }; } catch (e) { return { plis: 'naturels', tissu: 'moyen' }; } })();
+  function reglageVie(){
+    var p = PLIS.filter(function(x){ return x[0] === VIE.plis; })[0] || PLIS[2], t = TISSUS3.filter(function(x){ return x[0] === VIE.tissu; })[0] || TISSUS3[1];
+    return { a: p[2] * t[2] * 0.85, l: t[3] };
+  }
+  // une onde qui « erre » doucement en descendant : deux harmoniques, des phases qui varient avec la hauteur
+  function onde(x, y, l, graine){
+    var f1 = 1.3 * Math.sin(y / 23 + graine) + 0.45 * Math.sin(y / 7.3 + graine * 2.1), f2 = 2.1 * Math.cos(y / 17 + graine * 0.7);
+    return 0.66 * Math.sin(2 * Math.PI * x / l + f1) + 0.34 * Math.sin(2 * Math.PI * x / (l * 0.53) + f2);
+  }
+
   /* Au-dessus de l emmanchure, les anneaux du site serrent le corps (les pièces n y font plus un tour) :
      on y passe EN DOUCEUR depuis le dernier anneau jugé, sur 12 cm — une marche se voyait à la poitrine. */
   function adoucir(an){
@@ -2621,8 +2647,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        la pièce a retrouvé la forme du corps. */
     var cc = pc.p.contour, nk = cc[1] || { x: 0, y: 0 }, ep = cc[2] || nk, haut = fam3d() === 'haut' && cc.length > 3;
     var ligne = function(ax){ return ax <= nk.x ? nk.y : ax >= ep.x ? ep.y : nk.y + (ep.y - nk.y) * (ax - nk.x) / Math.max(0.1, ep.x - nk.x); };
+    var vie = reglageVie(), R0 = an.length;
+    // la force des plis, rang par rang, LISSÉE sur ±4 cm (un saut d aisance aux hanches faisait une ride)
+    var brut = an.map(function(a, i){ var yr = i / Math.max(1, R0 - 1), g = Math.min(1, Math.max(0, (yr - 0.25) / 0.75));
+      return (a.e == null ? 0.7 : Math.max(0.15, Math.min(1.25, a.e / 6))) * (0.12 + 0.88 * g * g * (3 - 2 * g)); });
+    var force = brut.map(function(_, i){ var n = 0, s2 = 0; for (var k = Math.max(0, i - 4); k <= Math.min(R0 - 1, i + 4); k++) { n++; s2 += brut[k]; } return s2 / n; });
     var m = grille3d(an.length, J, {
       anneau: function(i){ var a = an[i]; return { c: [a.c.x, a.c.y, a.c.z || 0], etat: a.etat }; },
+      pli: vie.a > 0 ? function(i, j){
+        var a = an[i], x = bb.x0 + (bb.x1 - bb.x0) * j / J;
+        // à la couture de côté, le pli s efface : le devant et le dos se rejoignent sans fente
+        var bord = (pid === 'devant' ? a.sf : a.sb) || 0, cou = bord > 0 ? Math.max(0, Math.min(1, (bord - Math.abs(x)) / 4)) : 1;
+        return vie.a * force[i] * cou * onde(x + (pid === 'dos' ? 211 : 0), a.yp, vie.l, pid === 'dos' ? 3.1 : 0.4);
+      } : null,
       point: function(i, j){
         var a = an[i], L = tabs[i], C = L[L.length - 1], k = Math.min(1, C / Math.max(1, 2 * ((a.sf || 0) + (a.sb || 0))));
         var x = bb.x0 + (bb.x1 - bb.x0) * j / J;
@@ -2669,8 +2706,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var proche = an.reduce(function(m, a){ return !m || Math.abs(a.yp - y) < Math.abs(m.yp - y) ? a : m; }, null);
       rangs.push({ yp: y, r: r, c: ctr, f: cadre(t), etat: proche && Math.abs(proche.yp - y) < 1.5 ? proche.etat : '' });
     }
+    var vie = reglageVie(), Lm = rangs.length ? rangs[rangs.length - 1].yp : 1;
     var m = grille3d(rangs.length, J, {
       anneau: function(i){ return { c: rangs[i].c, etat: rangs[i].etat }; },
+      axe: function(i){ return unit3(croix3(rangs[i].f.u, rangs[i].f.v)); },
+      pli: vie.a > 0 ? function(i, j){
+        var a = rangs[i]; if (a.yp < ch + 2) return 0;
+        var x = bb.x0 + (bb.x1 - bb.x0) * j / J, t = Math.min(1, (a.yp - ch) / Math.max(1, Lm - ch));
+        return vie.a * 0.32 * (0.35 + 0.65 * t) * Math.sin(2 * Math.PI * a.yp / (vie.l * 0.55) + 0.9 * Math.sin(x / 3.5 + a.yp / 9) + sg);
+      } : null,
       point: function(i, j){
         var a = rangs[i], x = bb.x0 + (bb.x1 - bb.x0) * j / J, f = x / a.r, co = Math.cos(f) * a.r, si = Math.sin(f) * a.r;
         return { p: [a.c[0] + a.f.u[0] * co + a.f.v[0] * si, a.c[1] + a.f.u[1] * co + a.f.v[1] * si, a.c[2] + a.f.u[2] * co + a.f.v[2] * si], u: (x - bb.x0) / (bb.x1 - bb.x0), v: (a.yp - bb.y0) / (bb.y1 - bb.y0) };
@@ -2763,15 +2807,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   /* ── Les programmes ── */
-  var VS_TISSU = 'attribute vec3 aP; attribute vec3 aN; attribute vec2 aT; attribute vec4 aK; uniform mat4 uM; uniform mat4 uV; uniform mat3 uR; varying vec3 vN; varying vec2 vT; varying vec3 vE; varying vec4 vK;'
-    + ' void main(){ vec4 p = uV * vec4(aP, 1.0); vE = -p.xyz; vN = uR * aN; vT = aT; vK = aK; gl_Position = uM * vec4(aP, 1.0); }';
-  var FS_TISSU = 'precision mediump float; uniform sampler2D uS; uniform vec3 uL; uniform float uC; uniform vec3 uF; varying vec3 vN; varying vec2 vT; varying vec3 vE; varying vec4 vK;'
+  var VS_TISSU = 'attribute vec3 aP; attribute vec3 aN; attribute vec2 aT; attribute vec4 aK; attribute float aO; uniform mat4 uM; uniform mat4 uV; uniform mat3 uR; varying vec3 vN; varying vec2 vT; varying vec3 vE; varying vec4 vK; varying float vO;'
+    + ' void main(){ vec4 p = uV * vec4(aP, 1.0); vE = -p.xyz; vN = uR * aN; vT = aT; vK = aK; vO = aO; gl_Position = uM * vec4(aP, 1.0); }';
+  var FS_TISSU = 'precision mediump float; uniform sampler2D uS; uniform vec3 uL; uniform float uC; uniform vec3 uF; varying vec3 vN; varying vec2 vT; varying vec3 vE; varying vec4 vK; varying float vO;'
     + ' void main(){ vec4 t = texture2D(uS, vT); if (t.a < 0.5) discard; vec3 n = normalize(vN); vec3 e = normalize(vE); float de = 0.0;'
     + ' if (dot(n, e) < 0.0) { n = -n; de = 1.0; }'
     + ' float d = max(0.0, (dot(n, uL) + 0.35) / 1.35); float r = pow(1.0 - max(0.0, dot(n, e)), 2.5);'
     + ' vec3 h = normalize(uL + e); float sp = pow(max(0.0, dot(n, h)), 24.0) * 0.05;'
     + ' vec3 b = mix(t.rgb, vK.rgb, vK.a * uC); vec3 c = b * (0.34 + 0.72 * d) + vec3(r * 0.09 + sp);'
-    + ' if (de > 0.5) { float o = 0.62 + 0.38 * clamp(1.0 - abs(dot(n, e)), 0.0, 1.0); c = uF * (0.66 + 0.30 * d) * o; } gl_FragColor = vec4(c, 1.0); }';
+    + ' if (de > 0.5) { float o = 0.62 + 0.38 * clamp(1.0 - abs(dot(n, e)), 0.0, 1.0); c = uF * (0.66 + 0.30 * d) * o; } gl_FragColor = vec4(c * vO, 1.0); }';
   var VS_OBJ = 'attribute vec3 aP; attribute vec3 aN; uniform mat4 uM; uniform mat4 uV; uniform mat3 uR; varying vec3 vN; varying vec3 vE;'
     + ' void main(){ vec4 p = uV * vec4(aP, 1.0); vE = -p.xyz; vN = uR * aN; gl_Position = uM * vec4(aP, 1.0); }';
   var FS_OBJ = 'precision mediump float; uniform vec3 uL; uniform vec3 uB; uniform float uMet; uniform float uBr; varying vec3 vN; varying vec3 vE;'
@@ -2815,10 +2859,92 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return true;
   }
 
+
+  /* ══ LES CHAPEAUX EN 3D (2026-10-17) ═══════════════════════════════════════
+     Montés depuis leurs PIÈCES, autour d une tête au tour du tableau (le site l envoie) :
+       · tuque, casquette : n fuseaux (4, 6) forment une coupole — à chaque rang, le tour est n fois la
+         largeur du fuseau ; la hauteur se déduit de la longueur du fuseau (le méridien) ;
+       · la visière sort à l avant, légèrement baissée ; le revers fait une bande au bas de la tuque ;
+       · le bob : la calotte en haut, les deux côtés en tronc de cône, le bord qui retombe.
+     Toutes les pièces gardent leur toile : motif, découpes et bijoux s y posent comme ailleurs. */
+  function coupole(pc, n, rang0, hauteurBase){
+    var c = pc.p.contour, bb = pc.bb, yMax = bb.y1 - 1, J = 24, rangs = [], dy = 0.5;
+    for (var y = Math.max(0.05, bb.y0 + 1); y <= yMax + 0.001; y += dy) { var b = bornesXF(c, y); rangs.push({ y: y, r: b ? n * (b.x1 - b.x0) / (2 * Math.PI) : 0.05 }); }
+    // la hauteur : le long du méridien, de haut en bas (dh = racine(dy² − dr²)), puis posée sur la base
+    var h = 0; rangs[0].h = 0;
+    for (var i = 1; i < rangs.length; i++) { var dr = rangs[i].r - rangs[i - 1].r; h -= Math.sqrt(Math.max(0.0001, dy * dy - dr * dr)); rangs[i].h = h; }
+    var dec = hauteurBase - rangs[rangs.length - 1].h;
+    var mailles = [];
+    for (var g = 0; g < n; g++) {
+      var th0 = rang0 + 2 * Math.PI * g / n;
+      var m = grille3d(rangs.length, J, {
+        anneau: function(i){ return { c: [0, rangs[i].h + dec, 0], etat: '' }; },
+        point: function(i, j){
+          var a = rangs[i], x = bb.x0 + (bb.x1 - bb.x0) * j / J, th = th0 + x / Math.max(0.05, a.r);
+          return { p: [Math.sin(th) * a.r * 0.96, a.h + dec, Math.cos(th) * a.r * 1.06], u: (x - bb.x0) / (bb.x1 - bb.x0), v: (a.y - bb.y0) / (bb.y1 - bb.y0) };
+        }
+      });
+      m.pid = pc.p.id; m.pc = pc; m.yp = rangs.map(function(a){ return a.y; }); mailles.push(m);
+    }
+    return { mailles: mailles, rBase: rangs[rangs.length - 1].r };
+  }
+  // une bande (revers, côté de bob) : x le long du tour, y vers le bas ; rH en haut, rB en bas
+  // ⚠ la HAUTEUR de la pièce (sans la marge de 1 cm de sa toile) va de hHaut à hBas ; « tour » = les cm qui font un tour complet
+  function bande(pc, th0, rH, rB, hHaut, hBas, sens, tour){
+    var bb = pc.bb, J = 48, R = 14, ya = bb.y0 + 1, yb = bb.y1 - 1;
+    var hy = function(y){ return hHaut + (hBas - hHaut) * (y - ya) / Math.max(0.1, yb - ya); }, ry = function(y){ return rH + (rB - rH) * (y - ya) / Math.max(0.1, yb - ya); };
+    var mm = grille3d(R, J, {
+      anneau: function(i){ var y = bb.y0 + (bb.y1 - bb.y0) * i / (R - 1); return { c: [0, hy(y), 0], etat: '' }; },
+      point: function(i, j){
+        var y = bb.y0 + (bb.y1 - bb.y0) * i / (R - 1), x = bb.x0 + (bb.x1 - bb.x0) * j / J, r = ry(y), th = th0 + sens * 2 * Math.PI * x / tour;
+        return { p: [Math.sin(th) * r * 0.96, hy(y), Math.cos(th) * r * 1.06], u: (x - bb.x0) / (bb.x1 - bb.x0), v: (y - bb.y0) / (bb.y1 - bb.y0) };
+      }
+    });
+    mm.pid = pc.p.id; mm.pc = pc; mm.yp = []; for (var i = 0; i < R; i++) mm.yp.push(bb.y0 + (bb.y1 - bb.y0) * i / (R - 1));
+    return mm;
+  }
+  // une pièce posée À PLAT (calotte, visière, bord) : f(x, y) → point 3D ; centre pour orienter la normale
+  function aPlat(pc, f, centre){
+    var bb = pc.bb, J = 40, R = 30, mm = grille3d(R, J, {
+      anneau: function(){ return { c: centre, etat: '' }; },
+      point: function(i, j){ var x = bb.x0 + (bb.x1 - bb.x0) * j / J, y = bb.y0 + (bb.y1 - bb.y0) * i / (R - 1); return { p: f(x, y), u: (x - bb.x0) / (bb.x1 - bb.x0), v: (y - bb.y0) / (bb.y1 - bb.y0) }; }
+    });
+    mm.pid = pc.p.id; mm.pc = pc; mm.yp = []; for (var i = 0; i < R; i++) mm.yp.push(bb.y0 + (bb.y1 - bb.y0) * i / (R - 1));
+    return mm;
+  }
+  function maillesTete(r, pieces){
+    var out = [], base = V3.m.base, T = (r.tete || 56) + 1;
+    if (base === 'tuque' && pieces.fuseau) {
+      var cp = coupole(pieces.fuseau, 4, Math.PI / 4, 0); out = out.concat(cp.mailles);
+      if (pieces.revers) { var wr = pieces.revers.bb.x1 - pieces.revers.bb.x0 - 2; out.push(bande(pieces.revers, 0, cp.rBase + 0.4, cp.rBase + 0.4, 7, -1, 1, wr)); }
+    }
+    if (base === 'casquette' && pieces.panneau) {
+      var cq = coupole(pieces.panneau, 6, 0, 0); out = out.concat(cq.mailles);
+      if (pieces.visiere) {
+        var v = pieces.visiere, r0 = cq.rBase;
+        // l arc intérieur se colle au bas de la calotte, à l avant ; la visière sort en s inclinant de 12°
+        // la visière s incurve : ses côtés descendent (comme une visière cintrée), sa pointe avance un peu baissée
+        var av = (boiteC(v.p.contour).rx) || 10;
+        out.push(aPlat(v, function(x, y){ var phi = x / r0, d = Math.max(0, y + 3), rr = r0 - 0.4 + d * 0.98, cb = (x / av) * (x / av); return [Math.sin(phi) * rr * 0.96, 0.4 - d * 0.16 - cb * (1.2 + d * 0.25), Math.cos(phi) * rr * 1.06]; }, [0, -30, 0]));
+      }
+    }
+    if (base === 'bob' && pieces.cote) {
+      var rB = T / (2 * Math.PI), hC = 8, rT = rB * 0.95;
+      out.push(bande(pieces.cote, -Math.PI / 2, rT, rB, hC, 0, 1, T));
+      out.push(bande(pieces.cote, Math.PI / 2, rT, rB, hC, 0, 1, T));
+      if (pieces.calotte) { var bc = boiteC(pieces.calotte.p.contour); out.push(aPlat(pieces.calotte, function(x, y){ return [x * rT * 0.96 / bc.rx, hC + 0.6 - (x * x / (bc.rx * bc.rx) + y * y / (bc.rz * bc.rz)) * 0.6, y * rT * 1.06 / bc.rz]; }, [0, -30, 0])); }
+      if (pieces.bord) [0, Math.PI].forEach(function(o){
+        out.push(aPlat(pieces.bord, function(x, y){ var rho = Math.hypot(x, y), al = Math.atan2(y, x) + o + Math.PI / 2, d = Math.max(0, rho - rB); return [Math.sin(al) * rho * 0.96, -d * 0.42, Math.cos(al) * rho * 1.06]; }, [0, -30, 0]));
+      });
+    }
+    return out;
+  }
+  function boiteC(c){ var x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; c.forEach(function(q){ x0 = Math.min(x0, q.x); x1 = Math.max(x1, q.x); y0 = Math.min(y0, q.y); y1 = Math.max(y1, q.y); }); return { rx: Math.max(1, (x1 - x0) / 2), rz: Math.max(1, (y1 - y0) / 2) }; }
+
   /* Les maillages d une taille (à chaque nouvel aperçu du site). */
   function construireGL(r){
     var gl = GLV.gl, pieces = {};
-    GLV.mailles.forEach(function(ma){ [ma.bP, ma.bN, ma.bT, ma.bK, ma.bI, ma.bL].forEach(function(b){ if (b) gl.deleteBuffer(b); }); });
+    GLV.mailles.forEach(function(ma){ [ma.bP, ma.bN, ma.bT, ma.bK, ma.bO, ma.bI, ma.bL].forEach(function(b){ if (b) gl.deleteBuffer(b); }); });
     Object.keys(GLV.toiles).forEach(function(k){ if (GLV.toiles[k].tex) gl.deleteTexture(GLV.toiles[k].tex); });
     GLV.mailles = []; GLV.toiles = {};
     (r.pieces || []).forEach(function(p){
@@ -2826,6 +2952,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       pc.toile = document.createElement('canvas'); pc.toile.width = pp((bb.x1 - bb.x0) * 32); pc.toile.height = pp((bb.y1 - bb.y0) * 32);
       pieces[p.id] = pc; GLV.toiles[p.id] = pc;
     });
+    if (r.motif3d === 'tete') GLV.mailles = maillesTete(r, pieces);
     (r.vetement || []).forEach(function(tb){
       var an = (tb.anneaux || []).filter(function(a){ return a.yp != null; }); if (an.length < 2) return;
       if (an[0].sf != null) { an = lisser(epaules(adoucir(an), pieces.devant && pieces.devant.p.contour[2] ? pieces.devant.p.contour[2].y : 0)); }
@@ -2835,10 +2962,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var y0 = 1e9, y1 = -1e9;
     GLV.mailles.forEach(function(ma){
       for (var k = 1; k < ma.pos.length; k += 3) { if (ma.pos[k] < y0) y0 = ma.pos[k]; if (ma.pos[k] > y1) y1 = ma.pos[k]; }
-      ma.bP = tampon(gl, ma.pos); ma.bN = tampon(gl, ma.nor); ma.bT = tampon(gl, ma.uv); ma.bK = tampon(gl, ma.tint);
+      ma.bP = tampon(gl, ma.pos); ma.bN = tampon(gl, ma.nor); ma.bT = tampon(gl, ma.uv); ma.bK = tampon(gl, ma.tint); ma.bO = tampon(gl, ma.ao);
       ma.bI = tampon(gl, ma.idx, gl.ELEMENT_ARRAY_BUFFER); ma.bL = tampon(gl, ma.lig, gl.ELEMENT_ARRAY_BUFFER);
     });
     GLV.cy = (y0 + y1) / 2; GLV.h = Math.max(1, y1 - y0); GLV.ybas = y0; GLV.r = r; GLV.cle = '';
+    GLV.minH = r.motif3d === 'tete' ? 34 : 120;                    // un chapeau se cadre sur sa hauteur, un vêtement sur 120 cm au moins
   }
 
   /* Les toiles (tissu + motif + découpes) et les objets posés. Le motif arrive en second : il se charge. */
@@ -2892,7 +3020,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var cyw = Math.cos(V3.yaw), syw = Math.sin(V3.yaw), cp = Math.cos(V3.pitch), sp = Math.sin(V3.pitch), dist = 300, cy = GLV.cy;
     var R = [[cyw, 0, syw], [sp * syw, cp, -sp * cyw], [-cp * syw, sp, cp * cyw]];
     var V = [R[0][0], R[0][1], R[0][2], R[0][1] * -cy, R[1][0], R[1][1], R[1][2], R[1][1] * -cy, R[2][0], R[2][1], R[2][2], R[2][1] * -cy - dist, 0, 0, 0, 1];
-    var F = Math.min(W, H) * 0.85 * V3.zoom / Math.max(120, GLV.h) * dist, nr = 20, fr = 2000;
+    var F = Math.min(W, H) * 0.85 * V3.zoom / Math.max(GLV.minH || 120, GLV.h) * dist, nr = 20, fr = 2000;
     var Pm = [2 * F / W, 0, 0, 0, 0, 2 * F / H, 0, 0, 0, 0, -(fr + nr) / (fr - nr), -2 * fr * nr / (fr - nr), 0, 0, -1, 0];
     var M = mul4(Pm, V), tx = 2 * V3.px / W, ty = -2 * V3.py / H;
     for (var c = 0; c < 4; c++) { M[c] += tx * M[12 + c]; M[4 + c] += ty * M[12 + c]; }
@@ -2902,7 +3030,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function peindreGL(cv, dims){
     if (!GLV || GLV.cv !== cv) { if (!initGL(cv)) return false; }
     var gl = GLV.gl;
-    if (GLV.r !== V3.r) construireGL(V3.r);
+    if (GLV.r !== V3.r || GLV.vie !== VIE.plis + '|' + VIE.tissu) { construireGL(V3.r); GLV.vie = VIE.plis + '|' + VIE.tissu; }
     var cle = V3.id + '|' + V3.couleur + '|' + (V3.photo ? 1 : 0) + '|' + JSON.stringify(V3.design || {}) + '|' + (V3.m.version || 0);
     if (GLV.cle !== cle) { GLV.cle = cle; toilesGL(); }
     var W = dims ? dims.W : cv.clientWidth, H = dims ? dims.H : cv.clientHeight, dpr = dims ? 1 : (window.devicePixelRatio || 1);
@@ -2923,7 +3051,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     GLV.mailles.forEach(function(ma){
       if (!ma.pc.tex) return;
       gl.bindTexture(gl.TEXTURE_2D, ma.pc.tex);
-      lier(gl, pt, 'aP', ma.bP, 3); lier(gl, pt, 'aN', ma.bN, 3); lier(gl, pt, 'aT', ma.bT, 2); lier(gl, pt, 'aK', ma.bK, 4);
+      lier(gl, pt, 'aP', ma.bP, 3); lier(gl, pt, 'aN', ma.bN, 3); lier(gl, pt, 'aT', ma.bT, 2); lier(gl, pt, 'aK', ma.bK, 4); lier(gl, pt, 'aO', ma.bO, 1);
       if (V3.fil) { gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ma.bL); gl.drawElements(gl.LINES, ma.lig.length, gl.UNSIGNED_SHORT, 0); }
       else { gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ma.bI); gl.drawElements(gl.TRIANGLES, ma.idx.length, gl.UNSIGNED_SHORT, 0); }
     });
@@ -3147,6 +3275,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="cx-sep"></div><h2>${T("Vue")}</h2><div class="ed-seg" role="group" aria-label="${T("Vue")}">'
       + VUES3.map(function(v){ return seg('data-v3v', v[0], v[1], false).replace('<button ', '<button title="' + (v[3] || v[1]) + '" '); }).join('') + '</div>'
       + '<div class="im-cases" style="margin-top:.6rem">' + chip('carte', '${T("Carte d’ajustement")}', V3.carte) + chip('fil', '${T("Fil de fer")}', V3.fil) + chip('auto', '${T("Rotation automatique")}', V3.auto) + (m.photo3d ? chip('photo', '${T("Photo plaquée")}', V3.photo) : '') + '</div>'
+      + '<div class="cx-sep"></div><h2>${T("Vie du tissu")}</h2><div class="ed-seg" role="group" aria-label="${T("Plis")}">'
+      + PLIS.map(function(x){ return seg('data-v3plis', x[0], x[1], VIE.plis === x[0]); }).join('') + '</div>'
+      + '<div class="ed-seg" role="group" aria-label="${T("Tissu")}" style="margin-top:.45rem">' + TISSUS3.map(function(x){ return seg('data-v3tissu', x[0], x[1], VIE.tissu === x[0]); }).join('') + '</div>'
       + '<div class="cx-sep"></div><h2>${T("Couleur du tissu")}</h2><div class="v3-couleurs">'
       + COUL3.map(function(c){ return '<button type="button" class="' + (V3.couleur === c[0] ? 'on' : '') + '" data-v3c="' + c[0] + '" title="' + c[1] + '" aria-label="' + c[1] + '" style="background:' + c[0] + '"></button>'; }).join('') + '</div>'
       + '<div class="cx-sep"></div><h2>${T("Fond")}</h2><div class="ed-seg" role="group" aria-label="${T("Fond")}">' + seg('data-v3f', 'beige', '${T("Beige")}', V3.fond === 'beige') + seg('data-v3f', 'blanc', '${T("Blanc")}', V3.fond === 'blanc') + '</div>'
@@ -3179,6 +3310,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       ? '${T("Le point le plus serré manque de {0} au corps, à {1} cm du sol : le vêtement ne fermera pas à cet endroit.")}'
       : '${T("Le point le plus serré garde {0} d’aisance, à {1} cm du sol.")}').split('{0}').join(cm1(Math.abs(r.pire.ecart)).replace('+', '')).split('{1}').join(Math.round(r.pire.hauteur)) + '</div>';
     if ((r.nonPosees || []).length) h += '<div class="ed-note">' + '${T("Pièces non posées sur le mannequin : {0}.")}'.split('{0}').join(esc(r.nonPosees.join(', '))) + '</div>';
+    if (r.motif3d === 'tete') h += '<div class="ed-note">' + '${T("Monté sur une tête de {0} cm de tour (le tableau de tailles) : la coupole vient de la largeur des pièces, rang par rang.")}'.split('{0}').join(String(r.tete).replace('.', '${SEP_DEC()}')) + '</div>';
     if (r.motif3d === 'type_sans_3d') h += '<div class="ed-note">${T("L’aperçu 3D n’est pas encore offert pour ce type (lingerie, chapeaux) : sa planche de dessin et son patron le sont.")}</div>';
     if (r.motif3d === 'pieces_inconnues') h += '<div class="ed-note">${T("Ce patron n’a pas de devant et de dos reconnaissables : seul le mannequin est montré.")}</div>';
     h += '<div class="cx-sep"></div><div class="ed-note">${T("Aperçu géométrique : le vêtement est montré seul, porté sur un corps invisible aux mesures du tableau ; sa largeur est mesurée sur les pièces, niveau par niveau (pinces déduites). Le tombé du tissu — plis, poids, glissement — n’est pas simulé.")}</div>'
@@ -3191,6 +3323,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if ((b = t.closest('[data-v3v]'))) { var v = VUES3.filter(function(x){ return x[0] === b.getAttribute('data-v3v'); })[0]; V3.yaw = v[2]; V3.pitch = v[4] != null ? v[4] : 0.05; demander3d(); return; }
     if ((b = t.closest('[data-v3c]'))) { V3.couleur = b.getAttribute('data-v3c'); dessiner(); return; }
     if ((b = t.closest('[data-v3f]'))) { V3.fond = b.getAttribute('data-v3f'); dessiner(); return; }
+    if ((b = t.closest('[data-v3plis]')) || (b = t.closest('[data-v3tissu]'))) {
+      if (b.hasAttribute('data-v3plis')) VIE.plis = b.getAttribute('data-v3plis'); else VIE.tissu = b.getAttribute('data-v3tissu');
+      try { localStorage.setItem('sz-atelier-vie', JSON.stringify(VIE)); } catch (e) {}
+      dessiner(); demander3d(); return;
+    }
     if ((b = t.closest('[data-v3out]'))) { V3.outil = b.getAttribute('data-v3out'); var sc = document.getElementById('v3-scene'); if (sc) sc.classList.toggle('vise', V3.outil !== 'tourner'); peindreDesign3d(); return; }
     if ((b = t.closest('[data-v3df]'))) { V3.dec.forme = b.getAttribute('data-v3df'); peindreDesign3d(); return; }
     if ((b = t.closest('[data-v3et]'))) { V3.el.type = b.getAttribute('data-v3et'); peindreDesign3d(); return; }

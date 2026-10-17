@@ -517,6 +517,9 @@ module.exports = {
   'Aperçu géométrique : le vêtement est montré seul, porté sur un corps invisible aux mesures du tableau ; sa largeur est mesurée sur les pièces, niveau par niveau (pinces déduites). Le tombé du tissu — plis, poids, glissement — n’est pas simulé.':
     'Geometric preview: the garment is shown alone, worn on an invisible body with the size chart measurements; its width is measured on the pieces, level by level (darts deducted). The fabric drape — folds, weight, slipping — is not simulated.',
   'Taille affichée': 'Size shown',
+  'Monté sur une tête de {0} cm de tour (le tableau de tailles) : la coupole vient de la largeur des pièces, rang par rang.': 'Fitted on a {0} cm head (the size chart): the crown comes from the width of the pieces, row by row.',
+  'Vie du tissu': 'Fabric life', 'Plis': 'Folds', 'Légers': 'Light', 'Naturels': 'Natural', 'Marqués': 'Pronounced',
+  'Fluide': 'Fluid', 'Rigide': 'Stiff',
   'Retirer le NIP (super-administrateur)': 'Remove the PIN (super administrator)', 'NIP retiré par {0} le {1}.': 'PIN removed by {0} on {1}.',
   'Retirer le NIP sans le connaître ?': 'Remove the PIN without knowing it?',
   'Réservé au super-administrateur, pour un NIP oublié. Le modèle redevient modifiable par toute personne autorisée ; votre nom et la date sont gardés avec le modèle.':
