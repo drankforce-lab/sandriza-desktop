@@ -6043,6 +6043,22 @@ const getUpdater = () => {
   return autoUpdater;
 };
 
+/* ══ LA VEILLE DES MISES A JOUR (2026-10-17) ══ sa capture : « ou est la notification » — la 7.56.0
+   etait publiee, la 7.55.0 tournait, et rien ne l avait vu. L application ne cherchait qu AU DEMARRAGE
+   (la porte) ou sur « Verifier les mises a jour » : l avis « nouvelle version detectee » (barre d etat
+   + veilleur) ne pouvait donc JAMAIS paraitre pendant le travail. Toutes les 15 minutes, une
+   verification silencieuse : si une version est la, `update-available` fait le reste (barre, veilleur,
+   telechargement). Rien si une mise a jour est deja vue ou en cours. */
+const VEILLE_MAJ_MS = 15 * 60 * 1000;
+let _veilleMaj = null;
+const demarrerVeilleMaj = () => {
+  if (_veilleMaj || !app.isPackaged) return;
+  _veilleMaj = setInterval(() => {
+    if (_majDispo || _updBusy) return;
+    checkForUpdates(false).catch(() => {});
+  }, VEILLE_MAJ_MS);
+};
+
 const checkForUpdates = async (manual) => {
   if (!app.isPackaged) {
     if (manual) {
@@ -6062,14 +6078,15 @@ const checkForUpdates = async (manual) => {
   catch { _updBusy = false; return; } // electron-updater absent : sans effet
   getUpdater._manual = !!manual;
   // La barre d etat le dit des le clic : << Recherche d une mise a jour >>.
-  majEtat({ etape: 'verif', percent: 0 });
+  // (une verification de VEILLE, toutes les 15 min, ne l affiche pas : la barre clignoterait pour rien)
+  if (manual) majEtat({ etape: 'verif', percent: 0 });
   try {
     const res = await updater.checkForUpdates();
     const remote = res && res.updateInfo && res.updateInfo.version;
     const isNew = remote && remote !== app.getVersion();
     if (!isNew) {
       _updBusy = false;
-      majEtat(null);
+      if (manual || _majEtape === 'verif') majEtat(null);
       if (manual) {
         dialog.showMessageBox(mainWindow, {
           type: 'info',
@@ -6093,10 +6110,10 @@ const checkForUpdates = async (manual) => {
        de progression : en differentiel, il n arrive parfois qu a la fin. */
     /* ⚠ Seulement si rien n a encore parle : un telechargement differentiel peut
        etre DEJA fini, et l on repasserait alors de << prete >> a << 0 % >>. */
-    if (_majEtape === 'verif') majEtat({ etape: 'telechargement', version: String(remote), percent: 0 });
+    if (_majEtape === 'verif' || (!manual && !_majEtape)) majEtat({ etape: 'telechargement', version: String(remote), percent: 0 });
   } catch (err) {
     _updBusy = false;
-    majEtat(null);
+    if (manual || _majEtape === 'verif') majEtat(null);   // une veille en echec ne touche pas la barre
     if (manual) {
       dialog.showMessageBox(mainWindow, {
         type: 'error',
@@ -7750,6 +7767,7 @@ if (!app.requestSingleInstanceLock()) {
     buildMenu();       // repli minimal ; le vrai menu arrive du site
     createWindow();
     startUsbWatch();
+    demarrerVeilleMaj();
 
     /* PRECHAUFFAGE DU TABLEAU DE BORD (1.58.3) : la vue ancree n etait creee
        qu apres le chargement complet du site — on voyait le menu, puis
