@@ -2478,7 +2478,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   /* ── La pièce dépliée : son contour (et son miroir si elle est coupée au pli), son cadre ── */
   // ⚠ le devant et le dos sont des DEMI-pièces : au pli, ou coupées deux fois (milieu dos cousu) — on les déplie toujours
   function depliee(p){
-    var axe = p.aupli && p.pli ? p.pli : (p.id === 'devant' || p.id === 'dos') ? (p.pli || { a: { x: 0, y: 0 }, b: { x: 0, y: 1 } }) : null;
+    // ⚠ un pantalon n est PAS fait de demi-pièces : chaque jambe est une pièce entière — on ne la déplie pas
+    var axe = p.aupli && p.pli ? p.pli : ((p.id === 'devant' || p.id === 'dos') && fam3d() !== 'bas') ? (p.pli || { a: { x: 0, y: 0 }, b: { x: 0, y: 1 } }) : null;
     var mir = axe ? p.contour.map(function(q){ var r = reflet(q, axe); if (q.c1 && q.c2) { r.c1 = reflet(q.c1, axe); r.c2 = reflet(q.c2, axe); } return r; }) : null;
     var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
     p.contour.concat(mir || []).forEach(function(q){ [q, q.c1, q.c2].forEach(function(z){ if (!z) return; x0 = Math.min(x0, z.x); y0 = Math.min(y0, z.y); x1 = Math.max(x1, z.x); y1 = Math.max(y1, z.y); }); });
@@ -2491,11 +2492,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   // les bords, SAUF celui du pli (le tissu y continue)
   function tracerBords(g, c, pli){
+    // la PATTE de boutonnage (bord vertical près du milieu) n a pas de trait : il faisait une bande sombre au milieu
+    var patte = function(a, z){ return Math.abs(a.x - z.x) < 0.01 && Math.abs(a.x) > 0.5 && Math.abs(a.x) < 3.5; };
     var surPli = function(q){ if (!pli) return false; var dx = pli.b.x - pli.a.x, dy = pli.b.y - pli.a.y, l = Math.hypot(dx, dy) || 1; return Math.abs((q.x - pli.a.x) * dy - (q.y - pli.a.y) * dx) / l < 0.05; };
     g.moveTo(c[0].x, c[0].y);
     for (var n = 1; n <= c.length; n++) {
       var a = c[n - 1], z = c[n % c.length];
-      if (surPli(a) && surPli(z)) { g.moveTo(z.x, z.y); continue; }
+      if ((surPli(a) && surPli(z)) || patte(a, z)) { g.moveTo(z.x, z.y); continue; }
       if (z.c1 && z.c2) g.bezierCurveTo(z.c1.x, z.c1.y, z.c2.x, z.c2.y, z.x, z.y); else g.lineTo(z.x, z.y);
     }
   }
@@ -2569,7 +2572,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var sx = cw / (bb.x1 - bb.x0), sy = ch / (bb.y1 - bb.y0);
     var enCm = function(){ g.setTransform(sx, 0, 0, sy, -bb.x0 * sx, -bb.y0 * sy); };
     g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-over'; g.clearRect(0, 0, cw, ch);
-    enCm(); g.fillStyle = V3.couleur; g.beginPath(); tracerC(g, pc.p.contour); if (pc.mir) tracerC(g, pc.mir); g.fill();
+    // ⚠ deux remplissages : une seule forme (pièce + miroir, tracés en sens contraires) s ANNULAIT là où ils se
+    // recouvrent — la patte de boutonnage de la chemise restait vide, la chemise paraissait ouverte
+    enCm(); g.fillStyle = V3.couleur; g.beginPath(); tracerC(g, pc.p.contour); g.fill(); if (pc.mir) { g.beginPath(); tracerC(g, pc.mir); g.fill(); }
     var ph = V3.photo && V3.m.photo3d ? (pid === 'devant' ? V3.m.photo3d.face : pid === 'dos' ? V3.m.photo3d.dos : null) : null;
     var phi = ph && imagePH(ph.url, function(){ if (GLV) { GLV.cle = ''; demander3d(); } });
     if (phi) { enCm(); g.globalCompositeOperation = 'source-atop'; g.drawImage(phi, -ph.cx / ph.k, -ph.haut / ph.k, ph.l / ph.k, ph.h / ph.k); }
@@ -2680,7 +2685,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         var x = bb.x0 + (bb.x1 - bb.x0) * j / J;
         // le devant part du milieu devant vers +x ; le dos, du milieu dos (C / 2) — les côtés se rejoignent
         var f = angleArc(L, pid === 'devant' ? x * k : C / 2 + x * k);
-        var d = haut ? a.yp - ligne(Math.abs(x)) : 99, t = Math.max(0, Math.min(1, d / 7)), kz = 0.18 + 0.82 * t * t * (3 - 2 * t);
+        var d = haut ? a.yp - ligne(Math.abs(x)) : 99, t = Math.max(0, Math.min(1, d / 7)), kz = 0.03 + 0.97 * t * t * (3 - 2 * t);
         return { p: [a.c.x + Math.sin(f) * a.rx, a.c.y, (a.c.z || 0) + Math.cos(f) * a.rz * kz], u: (x - bb.x0) / (bb.x1 - bb.x0), v: (a.yp - bb.y0) / (bb.y1 - bb.y0) };
       }
     });
@@ -2715,9 +2720,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var rangs = [];
     for (var y = 0.3; y <= yEnd + 0.01; y += 1) {
       var b = bornesXF(c, y), w = b ? b.x1 - b.x0 : 0, cap = y < ch;
-      var r = cap ? ru : Math.max(1, w / (2 * Math.PI)), t, ctr;
-      if (cap) { t = tc; ctr = [P0[0] + tc[0] * lc * y / ch, P0[1] + tc[1] * lc * y / ch, P0[2] + tc[2] * lc * y / ch]; }
-      else { var g = Math.min(1, (y - ch) / 4); t = unit3([tc[0] * (1 - g) + t0[0] * g, tc[1] * (1 - g) + t0[1] * g, tc[2] * (1 - g) + t0[2] * g]); ctr = [Pch[0] + t0[0] * (y - ch), Pch[1] + t0[1] * (y - ch), Pch[2] + t0[2] * (y - ch)]; }
+      // la tête de manche s ARRONDIT vers le haut (un cylindre faisait un coin carré au-dessus de l épaule)
+      var r = cap ? ru * (0.62 + 0.38 * Math.pow(Math.max(0, y) / ch, 0.6)) : Math.max(1, w / (2 * Math.PI)), t, ctr;
+      // la tête suit l AXE DU BRAS (le haut d un fourreau) ; la couture la ramène sur l emmanchure — suivre la pente
+      // épaule → aisselle, très inclinée, la poussait vers le dehors en épaulette
+      if (cap) { t = t0; var lc0 = Math.max(2, pt3(sub3(Pch, P0), t0)); ctr = [P0[0] + t0[0] * lc0 * y / ch, P0[1] + t0[1] * lc0 * y / ch, P0[2] + t0[2] * lc0 * y / ch]; }
+      else { t = t0; var lc1 = Math.max(2, pt3(sub3(Pch, P0), t0)); ctr = [P0[0] + t0[0] * (lc1 + y - ch), P0[1] + t0[1] * (lc1 + y - ch), P0[2] + t0[2] * (lc1 + y - ch)]; }
       var proche = an.reduce(function(m, a){ return !m || Math.abs(a.yp - y) < Math.abs(m.yp - y) ? a : m; }, null);
       rangs.push({ yp: y, r: r, c: ctr, f: cadre(t), etat: proche && Math.abs(proche.yp - y) < 1.5 ? proche.etat : '' });
     }
@@ -2728,7 +2736,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       pli: vie.a > 0 ? function(i, j){
         var a = rangs[i]; if (a.yp < ch + 2) return 0;
         var x = bb.x0 + (bb.x1 - bb.x0) * j / J, t = Math.min(1, (a.yp - ch) / Math.max(1, Lm - ch));
-        return vie.a * 0.32 * (0.35 + 0.65 * t) * Math.sin(2 * Math.PI * a.yp / (vie.l * 0.55) + 0.9 * Math.sin(x / 3.5 + a.yp / 9) + sg);
+        // ⚠ pas une sinusoïde le long du bras : elle faisait des côtes en accordéon (sa capture du 2026-10-17)
+        return vie.a * 0.14 * (0.3 + 0.7 * t) * onde(a.yp * 1.3 + x * 0.6, x * 0.5 + a.yp * 0.2, vie.l * 0.9, 1.7 + sg);
       } : null,
       point: function(i, j){
         var a = rangs[i], x = bb.x0 + (bb.x1 - bb.x0) * j / J, f = x / a.r, co = Math.cos(f) * a.r, si = Math.sin(f) * a.r;
@@ -2736,6 +2745,34 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       }
     });
     m.pid = 'manche'; m.pc = pc; m.yp = rangs.map(function(a){ return a.yp; }); return m;
+  }
+  /* LE PANTALON EN 3D (2026-10-17) : chaque pièce est plaquée d une couture à l autre. Au-dessus de la fourche
+     (« haut »), le devant va de la couture de côté (f = 0) au milieu devant (f = 1), le dos du côté au milieu
+     dos ; sous la fourche (« jambe »), le devant fait la moitié avant de la jambe, de la couture de côté à
+     l entrejambe, et le dos la moitié arrière. Le côté gauche (sg = +1) est le miroir du droit. */
+  function mailleBas(an, pc, pid, sg, mode){
+    var bb = pc.bb, J = 56, tabs = an.map(function(a){ return tableArc(a.rz, a.rx); }), vie = reglageVie(), R0 = an.length;
+    var bords = an.map(function(a, i){ var w = pid === 'devant' ? a.wf : a.wb; return w && w.x1 > w.x0 ? w : null; });
+    for (var i = 0; i < bords.length; i++) if (!bords[i]) bords[i] = bords[i - 1] || bords.filter(Boolean)[0] || { x0: 0, x1: 1 };
+    var arc = function(i, x){
+      var a = an[i], L = tabs[i], C = L[L.length - 1], w = bords[i], f = (x - w.x0) / (w.x1 - w.x0), s2;
+      if (mode === 'haut') s2 = pid === 'devant' ? (1 - f) * C / 4 : C / 2 - (1 - f) * C / 4;
+      else s2 = pid === 'devant' ? C / 4 - f * C / 2 : C / 4 + f * C / 2;
+      return { f: f, phi: angleArc(L, sg * s2) };
+    };
+    var m = grille3d(R0, J, {
+      anneau: function(i){ var a = an[i]; return { c: [a.c.x, a.c.y, a.c.z || 0], etat: a.etat }; },
+      pli: vie.a > 0 ? function(i, j){
+        var a = an[i], x = bb.x0 + (bb.x1 - bb.x0) * j / J, f = arc(i, x).f, cou = Math.max(0, Math.min(1, f / 0.12, (1 - f) / 0.12));
+        var g = mode === 'haut' ? 0.15 : 0.25 + 0.75 * Math.min(1, i / Math.max(1, R0 - 1));
+        return vie.a * 0.6 * g * cou * onde(x + (pid === 'dos' ? 137 : 0) + sg * 50, a.yp, vie.l * 0.8, pid === 'dos' ? 2.2 : 0.9);
+      } : null,
+      point: function(i, j){
+        var a = an[i], x = bb.x0 + (bb.x1 - bb.x0) * j / J, ph = arc(i, x).phi;
+        return { p: [a.c.x + Math.sin(ph) * a.rx, a.c.y, (a.c.z || 0) + Math.cos(ph) * a.rz], u: (x - bb.x0) / (bb.x1 - bb.x0), v: (a.yp - bb.y0) / (bb.y1 - bb.y0) };
+      }
+    });
+    m.pid = pid; m.pc = pc; m.yp = an.map(function(a){ return a.yp; }); return m;
   }
   /* L attache d une manche, côté sg : le point d épaule et le bas d emmanchure du corsage, en 3D
      (la moyenne du devant et du dos — le dos est tourné : son x positif part vers −x). */
@@ -2956,6 +2993,213 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function boiteC(c){ var x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; c.forEach(function(q){ x0 = Math.min(x0, q.x); x1 = Math.max(x1, q.x); y0 = Math.min(y0, q.y); y1 = Math.max(y1, q.y); }); return { rx: Math.max(1, (x1 - x0) / 2), rz: Math.max(1, (y1 - y0) / 2) }; }
 
+
+  /* ══ LE DRAPÉ (2026-10-17, sa demande : « ce n est pas beau, il faut que tu améliores le rendu vraiment
+     mieux que ça ») ═══════════════════════════════════════════════════════════════════════════════
+     Le plaquage sur des anneaux ne COUD rien : l épaule restait ouverte, la tête de manche flottait, les
+     plis étaient dessinés. Ici le vêtement est DRAPÉ, comme dans les logiciels de mode (en version légère) :
+       · chaque sommet d une pièce devient une particule ; ses mailles gardent leur LONGUEUR DU PATRON
+         (la vraie, en cm) ;
+       · les bords qui se touchent au départ (côtés, épaules, tête de manche) sont SOUDÉS ;
+       · un CORPS invisible aux mesures du tableau repousse le tissu ;
+       · la PESANTEUR tire ; le vêtement est TENU au cou et aux épaules (un haut) ou à la ceinture (un bas).
+     Méthode : dynamique par positions (PBD), quelques dizaines de pas — une à deux secondes. */
+  function contourPts(c){
+    var pts = []; for (var i = 0; i < c.length; i++) { var a = c[i === 0 ? c.length - 1 : i - 1], b = c[i];
+      for (var k = 1; k <= 8; k++) { var t = k / 8; if (b.c1 && b.c2) { var u = 1 - t; pts.push([u * u * u * a.x + 3 * u * u * t * b.c1.x + 3 * u * t * t * b.c2.x + t * t * t * b.x, u * u * u * a.y + 3 * u * u * t * b.c1.y + 3 * u * t * t * b.c2.y + t * t * t * b.y]); } else pts.push([a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t]); } }
+    return pts;
+  }
+  function dansPoly(pts, x, y){
+    var d = false; for (var i = 0, j = pts.length - 1; i < pts.length; j = i++) { var a = pts[i], b = pts[j]; if ((a[1] > y) !== (b[1] > y) && x < (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]) + a[0]) d = !d; }
+    return d;
+  }
+  /* Le corps : chaque tube est une suite d anneaux le long de son axe (du premier au dernier centre). */
+  function corpsDrape(tubes){
+    return (tubes || []).filter(function(t){ return (t.anneaux || []).length > 1; }).map(function(t){
+      var an = t.anneaux, c0 = an[0].c, c1 = an[an.length - 1].c, ax = unit3([c1.x - c0.x, c1.y - c0.y, (c1.z || 0) - (c0.z || 0)]);
+      var proj = an.map(function(a){ return (a.c.x - c0.x) * ax[0] + (a.c.y - c0.y) * ax[1] + ((a.c.z || 0) - (c0.z || 0)) * ax[2]; });
+      var vertical = Math.abs(ax[1]) > 0.9, rmax = 0; an.forEach(function(a){ rmax = Math.max(rmax, a.rx, a.rz); });
+      return { an: an, c0: c0, ax: ax, proj: proj, vertical: vertical, rmax: rmax, pmin: Math.min(proj[0], proj[proj.length - 1]), pmax: Math.max(proj[0], proj[proj.length - 1]) };
+    });
+  }
+  function repousser(PX, k, tubes, marge){
+    var x = PX[k * 3], y = PX[k * 3 + 1], z = PX[k * 3 + 2];
+    for (var t = 0; t < tubes.length; t++) {
+      var T = tubes[t], q = (x - T.c0.x) * T.ax[0] + (y - T.c0.y) * T.ax[1] + (z - (T.c0.z || 0)) * T.ax[2];
+      if (q < T.pmin - 1 || q > T.pmax + 1) continue;
+      // l anneau à cette hauteur de l axe (interpolé)
+      var an = T.an, pr = T.proj, i = 0; var mont = pr[pr.length - 1] > pr[0];
+      while (i + 1 < pr.length - 1 && (mont ? pr[i + 1] < q : pr[i + 1] > q)) i++;
+      var u = Math.max(0, Math.min(1, (q - pr[i]) / ((pr[i + 1] - pr[i]) || 1))), a = an[i], b = an[i + 1];
+      var cx = a.c.x + (b.c.x - a.c.x) * u, cy = a.c.y + (b.c.y - a.c.y) * u, cz = (a.c.z || 0) + ((b.c.z || 0) - (a.c.z || 0)) * u;
+      var rx = a.rx + (b.rx - a.rx) * u + marge, rz = a.rz + (b.rz - a.rz) * u + marge;
+      var dx = x - cx, dy = y - cy, dz = z - cz, pa = dx * T.ax[0] + dy * T.ax[1] + dz * T.ax[2];
+      dx -= T.ax[0] * pa; dy -= T.ax[1] * pa; dz -= T.ax[2] * pa;
+      var e = T.vertical ? Math.sqrt((dx / rx) * (dx / rx) + (dz / rz) * (dz / rz)) : Math.sqrt(dx * dx + dy * dy + dz * dz) / ((rx + rz) / 2);
+      if (e < 1 && e > 1e-4) { var f = 1 / e; x = cx + T.ax[0] * pa + dx * f; y = cy + T.ax[1] * pa + dy * f; z = cz + T.ax[2] * pa + dz * f; }
+    }
+    PX[k * 3] = x; PX[k * 3 + 1] = y; PX[k * 3 + 2] = z;
+  }
+  /* epingle(ma, i, j) : vrai = tenu (ne bouge pas). Renvoie le nombre de soudures posées (pour le banc d essai). */
+  function draper(mailles, tubesCorps, epingle, pas){
+    var N = 0;
+    mailles.forEach(function(ma){
+      var R = ma.R, J = ma.J, bb = ma.pc.bb, n = R * (J + 1), polys = [contourPts(ma.pc.p.contour)].concat(ma.pc.mir ? [contourPts(ma.pc.mir)] : []);
+      var dedans = new Uint8Array(n), act = new Uint8Array(n);
+      for (var i = 0; i < R; i++) for (var j = 0; j <= J; j++) { var x = bb.x0 + (bb.x1 - bb.x0) * j / J; if (polys.some(function(pp){ return dansPoly(pp, x, ma.yp[i]); })) dedans[i * (J + 1) + j] = 1; }
+      for (var i2 = 0; i2 < R; i2++) for (var j2 = 0; j2 <= J; j2++) if (dedans[i2 * (J + 1) + j2]) for (var di = -1; di <= 1; di++) for (var dj = -1; dj <= 1; dj++) { var a = i2 + di, b = j2 + dj; if (a >= 0 && a < R && b >= 0 && b <= J) act[a * (J + 1) + b] = 1; }
+      ma.act = act; ma.dedans = dedans; ma.gid = new Int32Array(n).fill(-1);
+      for (var k = 0; k < n; k++) if (act[k]) ma.gid[k] = N++;
+    });
+    if (!N) return 0;
+    var PX = new Float32Array(N * 3), V = new Float32Array(N * 3), W = new Float32Array(N).fill(1);
+    var CA = [], CB = [], CL = [], CK = [];
+    var lien = function(a, b, L, k){ if (a < 0 || b < 0) return; CA.push(a); CB.push(b); CL.push(L); CK.push(k); };
+    var bords = [];
+    mailles.forEach(function(ma, mi){
+      var R = ma.R, J = ma.J, bb = ma.pc.bb, dx = (bb.x1 - bb.x0) / J, g = ma.gid;
+      for (var i = 0; i < R; i++) for (var j = 0; j <= J; j++) {
+        var k = i * (J + 1) + j, id = g[k]; if (id < 0) continue;
+        PX[id * 3] = ma.pos[k * 3]; PX[id * 3 + 1] = ma.pos[k * 3 + 1]; PX[id * 3 + 2] = ma.pos[k * 3 + 2];
+        if (epingle(ma, i, j)) W[id] = 0;
+        var dy = i + 1 < R ? Math.abs(ma.yp[i + 1] - ma.yp[i]) : 1;
+        if (j < J) lien(id, g[k + 1], dx, 1);
+        if (i + 1 < R) { lien(id, g[k + J + 1], dy, 1); if (j < J) lien(id, g[k + J + 2], Math.hypot(dx, dy), 0.6); if (j > 0) lien(id, g[k + J], Math.hypot(dx, dy), 0.6); }
+        if (j + 2 <= J) lien(id, g[k + 2], 2 * dx, 0.12);
+        if (i + 2 < R) lien(id, g[k + 2 * (J + 1)], dy + (i + 2 < R ? Math.abs(ma.yp[i + 2] - ma.yp[i + 1]) : dy), 0.12);
+        // un BORD : un sommet de la pièce qui touche le vide (ou le bout de la grille)
+        if (ma.dedans[k] && (j === 0 || j === J || i === 0 || i === R - 1 || !ma.dedans[k - 1] || !ma.dedans[k + 1] || !ma.dedans[k - J - 1] || !ma.dedans[k + J + 1])) bords.push({ id: id, m: mi, i: i, j: j });
+      }
+    });
+    // LES COUTURES : celles du patron (couturesPatron), point pour point
+    var soudes = 0;
+    (couturesPatron(mailles) || []).forEach(function(pr){ lien(pr[0], pr[1], 0, 1); soudes++; });
+    var nC = CA.length, A = Int32Array.from(CA), B = Int32Array.from(CB), L = Float32Array.from(CL), K = Float32Array.from(CK);
+    /* ⚠ LA FORME DE DÉPART EST GARDÉE (vu à l essai) : avec les longueurs du PATRON, la tête de manche — plus
+       longue que l emmanchure, c est l embu — débordait au-dessus de l épaule en épaulette carrée. Les mailles
+       gardent donc leur longueur de départ ; seules les COUTURES (longueur 0) se ferment, et le maillage se
+       déforme en douceur autour d elles. Les plis viennent de la « vie du tissu ». */
+    for (var cz = 0; cz < nC; cz++) if (L[cz] > 0) { var za = A[cz] * 3, zb = B[cz] * 3; L[cz] = Math.hypot(PX[zb] - PX[za], PX[zb + 1] - PX[za + 1], PX[zb + 2] - PX[za + 2]); }
+    /* ⚠ UN RELÂCHEMENT ANCRÉ, PAS UNE CHUTE LIBRE (vu à l essai) : tenu au seul cou, le vêtement glissait et se
+       tordait d un côté. Chaque particule est rappelée DOUCEMENT vers sa pose de départ (qui est bonne) : le drapé
+       coud les bords, rend au tissu ses longueurs et le laisse tomber un peu — il ne le promène pas. */
+    var P0 = PX.slice(), ancre = 0.012;
+    var tubes = corpsDrape(tubesCorps), G = -0.01, iters = 8, n3 = N * 3;
+    for (var s = 0; s < (pas || 60); s++) {
+      for (var p = 0; p < N; p++) { if (!W[p]) continue; var o3 = p * 3; V[o3 + 1] += G; PX[o3] += V[o3] * 0.9; PX[o3 + 1] += V[o3 + 1] * 0.9; PX[o3 + 2] += V[o3 + 2] * 0.9; }
+      var avant = PX.slice();
+      for (var it = 0; it < iters; it++) {
+        for (var c3 = 0; c3 < nC; c3++) {
+          var a3 = A[c3] * 3, b3 = B[c3] * 3, wa = W[A[c3]], wb = W[B[c3]], ws = wa + wb; if (!ws) continue;
+          var ex = PX[b3] - PX[a3], ey = PX[b3 + 1] - PX[a3 + 1], ez = PX[b3 + 2] - PX[a3 + 2], d = Math.sqrt(ex * ex + ey * ey + ez * ez) || 1e-6;
+          var f = (d - L[c3]) / d * K[c3] / ws;
+          PX[a3] += ex * f * wa; PX[a3 + 1] += ey * f * wa; PX[a3 + 2] += ez * f * wa;
+          PX[b3] -= ex * f * wb; PX[b3 + 1] -= ey * f * wb; PX[b3 + 2] -= ez * f * wb;
+        }
+        for (var qa = 0; qa < N; qa++) if (W[qa]) { var oa = qa * 3; PX[oa] += (P0[oa] - PX[oa]) * ancre; PX[oa + 1] += (P0[oa + 1] - PX[oa + 1]) * ancre * 0.5; PX[oa + 2] += (P0[oa + 2] - PX[oa + 2]) * ancre; }
+        if (it === iters - 1 || it % 3 === 0) for (var q = 0; q < N; q++) if (W[q]) repousser(PX, q, tubes, 0.35);
+      }
+      // la vitesse : ce que le pas a VRAIMENT fait (amorti), pas ce qu on avait prévu
+      for (var v = 0; v < n3; v++) V[v] = (PX[v] - avant[v]) * 0.6 + V[v] * 0.25;
+    }
+    mailles.forEach(function(ma){ var g = ma.gid; for (var k = 0; k < g.length; k++) if (g[k] >= 0) { ma.pos[k * 3] = PX[g[k] * 3]; ma.pos[k * 3 + 1] = PX[g[k] * 3 + 1]; ma.pos[k * 3 + 2] = PX[g[k] * 3 + 2]; } });
+    /* UN LISSAGE LÉGER après le drapé : l embu de la tête de manche se tassait en petits froissés. Les sommets
+       cousus et tenus ne bougent pas ; les manches se lissent davantage que le corps. */
+    var cousu = new Uint8Array(N); for (var cc = 0; cc < nC; cc++) if (L[cc] === 0) { cousu[A[cc]] = 1; cousu[B[cc]] = 1; }
+    mailles.forEach(function(ma){
+      var R = ma.R, J = ma.J, g = ma.gid, passes = ma.pid === 'manche' ? 4 : 2, pos = ma.pos;
+      for (var ps = 0; ps < passes; ps++) {
+        var nv = pos.slice();
+        for (var i = 1; i < R - 1; i++) for (var j = 1; j < J; j++) {
+          var k = i * (J + 1) + j; if (g[k] < 0 || !W[g[k]] || cousu[g[k]]) continue;
+          var vs = [k - 1, k + 1, k - J - 1, k + J + 1]; if (vs.some(function(q){ return g[q] < 0; })) continue;
+          for (var c4 = 0; c4 < 3; c4++) { var m4 = (pos[vs[0] * 3 + c4] + pos[vs[1] * 3 + c4] + pos[vs[2] * 3 + c4] + pos[vs[3] * 3 + c4]) / 4; nv[k * 3 + c4] = pos[k * 3 + c4] * 0.55 + m4 * 0.45; }
+        }
+        pos.set(nv);
+      }
+      normalesGrille(ma);
+    });
+    return soudes;
+  }
+  // les normales recalculées après le drapé (différences finies, orientées vers le dehors)
+  function normalesGrille(ma){
+    var R = ma.R, J = ma.J, pos = ma.pos, nor = ma.nor, at = function(i, j){ var k = (i * (J + 1) + j) * 3; return [pos[k], pos[k + 1], pos[k + 2]]; };
+    for (var i = 0; i < R; i++) for (var j = 0; j <= J; j++) {
+      var nn = unit3(croix3(sub3(at(i, Math.min(J, j + 1)), at(i, Math.max(0, j - 1))), sub3(at(Math.min(R - 1, i + 1), j), at(Math.max(0, i - 1), j)))), k = (i * (J + 1) + j) * 3;
+      var ref = [nor[k], nor[k + 1], nor[k + 2]]; if (pt3(nn, ref) < 0) nn = [-nn[0], -nn[1], -nn[2]];
+      nor[k] = nn[0]; nor[k + 1] = nn[1]; nor[k + 2] = nn[2];
+    }
+  }
+
+
+  /* LES COUTURES DU PATRON : les bords cousus ensemble, tirés des NŒUDS des pièces (comme l atelier les nomme) —
+     et non « au plus proche », qui soudait n importe quoi (dents de scie aux côtés, épaulettes aux manches).
+     Chaque bord est échantillonné par longueur ; le k-ième point de l un se coud au k-ième de l autre. */
+  function cubSeg(a, b, t){
+    if (b.c1 && b.c2) { var u = 1 - t; return [u * u * u * a.x + 3 * u * u * t * b.c1.x + 3 * u * t * t * b.c2.x + t * t * t * b.x, u * u * u * a.y + 3 * u * u * t * b.c1.y + 3 * u * t * t * b.c2.y + t * t * t * b.y]; }
+    return [a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t];
+  }
+  function bordPts(c, k0, k1, sens){
+    // le chemin de nœud en nœud, de k0 à k1 (sens +1 : nœuds croissants ; −1 : décroissants) — une courbe va de
+    // son nœud d avant au nœud qui porte ses poignées ; à l envers, on la parcourt de t = 1 à t = 0
+    var n = c.length, pts = [[c[k0].x, c[k0].y]], k = k0, garde = 0;
+    while (k !== k1 && garde++ < n + 2) {
+      var kn = (k + sens + n) % n, a = sens > 0 ? c[k] : c[kn], b = sens > 0 ? c[kn] : c[k];
+      for (var s = 1; s <= 12; s++) pts.push(cubSeg(a, b, sens > 0 ? s / 12 : 1 - s / 12));
+      k = kn;
+    }
+    // ré-échantillonné tous les 0,8 cm
+    var Ls = [0]; for (var i = 1; i < pts.length; i++) Ls.push(Ls[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+    return { pts: pts, L: Ls, tot: Ls[Ls.length - 1] };
+  }
+  function auT(b, t){
+    var d = t * b.tot, i = 1; while (i < b.L.length - 1 && b.L[i] < d) i++;
+    var u = (d - b.L[i - 1]) / ((b.L[i] - b.L[i - 1]) || 1), p = b.pts[i - 1], q = b.pts[i];
+    return [p[0] + (q[0] - p[0]) * u, p[1] + (q[1] - p[1]) * u];
+  }
+  // la particule d une maille la plus proche d un point (x, y) du patron
+  function gidPres(ma, x, y){
+    var R = ma.R, J = ma.J, bb = ma.pc.bb, i = 0, dm = 1e9;
+    for (var r = 0; r < R; r++) { var d = Math.abs(ma.yp[r] - y); if (d < dm) { dm = d; i = r; } }
+    var j = Math.round((x - bb.x0) / (bb.x1 - bb.x0) * J);
+    for (var rr = 0; rr <= 2; rr++) for (var di = -rr; di <= rr; di++) for (var dj = -rr; dj <= rr; dj++) {
+      var a = i + di, b2 = j + dj; if (a < 0 || a >= R || b2 < 0 || b2 > J) continue;
+      var g = ma.gid[a * (J + 1) + b2]; if (g >= 0) return g;
+    }
+    return -1;
+  }
+  function coudre(paires, maA, bA, sxA, maB, bB, sxB){
+    if (!maA || !maB) return;
+    var n = Math.max(6, Math.round(Math.max(bA.tot, bB.tot) / 0.4));
+    for (var k = 0; k <= n; k++) {
+      var t = k / n, pa = auT(bA, t), pb = auT(bB, t);
+      var ga = gidPres(maA, pa[0] * sxA, pa[1]), gb = gidPres(maB, pb[0] * sxB, pb[1]);
+      if (ga >= 0 && gb >= 0 && ga !== gb) paires.push([ga, gb]);
+    }
+  }
+  /* Les coutures d un HAUT (et d une jupe) : épaules, côtés, têtes et dessous de manche, des deux côtés. */
+  function couturesPatron(mailles){
+    var paires = [], dv = mailles.filter(function(m){ return m.pid === 'devant'; })[0], ds = mailles.filter(function(m){ return m.pid === 'dos'; })[0];
+    if (!dv || !ds) return paires;
+    var cf = dv.pc.p.contour, cb = ds.pc.p.contour, fam = fam3d(), nf = cf.length, nb = cb.length;
+    var manches = mailles.filter(function(m){ return m.pid === 'manche'; });
+    [1, -1].forEach(function(S){
+      // le devant côté S est son x de signe S ; le dos côté S, son x de signe −S (le dos est tourné)
+      if (fam === 'jupe') { coudre(paires, dv, bordPts(cf, 1, 3, 1), S, ds, bordPts(cb, 1, 3, 1), -S); return; }
+      if (nf < 6 || nb < 6) return;
+      coudre(paires, dv, bordPts(cf, 1, 2, 1), S, ds, bordPts(cb, 1, 2, 1), -S);                       // épaule
+      coudre(paires, dv, bordPts(cf, 3, nf - 2, 1), S, ds, bordPts(cb, 3, nb - 2, 1), -S);             // côté
+      var mc = manches.filter(function(m){ var sx = 0, n = 0; for (var k = 0; k < m.pos.length; k += 30) { sx += m.pos[k]; n++; } return (sx / Math.max(1, n)) * S > 0; })[0];
+      if (mc && mc.pc.p.contour.length >= 5) {
+        var cm = mc.pc.p.contour;
+        coudre(paires, mc, bordPts(cm, 1, 2, 1), 1, dv, bordPts(cf, 2, 3, 1), S);                      // tête avant → emmanchure du devant
+        coudre(paires, mc, bordPts(cm, 1, 0, -1), 1, ds, bordPts(cb, 2, 3, 1), -S);                    // tête arrière → emmanchure du dos
+        coudre(paires, mc, bordPts(cm, 2, 3, 1), 1, mc, bordPts(cm, 0, 4, -1), 1);                     // dessous de manche
+      }
+    });
+    return paires;
+  }
+
   /* Les maillages d une taille (à chaque nouvel aperçu du site). */
   function construireGL(r){
     var gl = GLV.gl, pieces = {};
@@ -2970,10 +3214,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (r.motif3d === 'tete') GLV.mailles = maillesTete(r, pieces);
     (r.vetement || []).forEach(function(tb){
       var an = (tb.anneaux || []).filter(function(a){ return a.yp != null; }); if (an.length < 2) return;
-      if (an[0].sf != null) { an = lisser(epaules(adoucir(an), pieces.devant && pieces.devant.p.contour[2] ? pieces.devant.p.contour[2].y : 0)); }
+      // ⚠ avec le DRAPÉ, le haut garde la forme du CORPS (des épaules qui tombent) : élargi jusqu au cou, il faisait
+      // des épaules carrées, et la tête de manche s accrochait au coin en épaulette. Sans drapé, l élargissement reste.
+      if (an[0].sf != null) { var drapeOn = ['haut', 'jupe'].indexOf(fam3d()) >= 0 && (r.corps || []).length; an = lisser(drapeOn ? adoucir(an) : epaules(adoucir(an), pieces.devant && pieces.devant.p.contour[2] ? pieces.devant.p.contour[2].y : 0)); }
       if (an[0].sf != null) ['devant', 'dos'].forEach(function(pid){ if (pieces[pid]) GLV.mailles.push(mailleCorps(an, pieces[pid], pid)); });
+      else if (an[0].wf !== undefined) {
+        var mode = /haut/.test(tb.nom || '') ? 'haut' : 'jambe', cotes = mode === 'haut' ? [1, -1] : [/gauche/.test(tb.nom || '') ? 1 : -1];
+        cotes.forEach(function(sgb){ ['devant', 'dos'].forEach(function(pid){ if (pieces[pid]) GLV.mailles.push(mailleBas(an, pieces[pid], pid, sgb, mode)); }); });
+      }
       else if (an[0].s0 != null && pieces.manche) { var sxm = 0; an.forEach(function(a){ sxm += a.c.x; }); GLV.mailles.push(mailleManche(an, pieces.manche, attacheManche(sxm >= 0 ? 1 : -1))); }
     });
+    // LE DRAPÉ : les vêtements portés sur le corps (pas les chapeaux)
+    var famD = fam3d();
+    if (['haut', 'jupe'].indexOf(famD) >= 0 && (r.corps || []).length) {               // (les pantalons : leurs coutures restent à déclarer)
+      var epY = pieces.devant && pieces.devant.p.contour[2] ? pieces.devant.p.contour[2].y : 0;
+      try {
+        GLV.soudures = draper(GLV.mailles, r.corps, function(ma, i){
+          if (ma.pid !== 'devant' && ma.pid !== 'dos') return false;
+          return famD === 'haut' ? ma.yp[i] <= 1.2 : i <= 2;                   // tenu à l encolure (les épaules se posent sur le corps), ou à la ceinture
+        }, 60);
+      } catch (e) { GLV.soudures = -1; }
+    }
     var y0 = 1e9, y1 = -1e9;
     GLV.mailles.forEach(function(ma){
       for (var k = 1; k < ma.pos.length; k += 3) { if (ma.pos[k] < y0) y0 = ma.pos[k]; if (ma.pos[k] > y1) y1 = ma.pos[k]; }
