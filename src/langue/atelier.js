@@ -517,6 +517,24 @@ module.exports = {
   'Aperçu géométrique : le vêtement est montré seul, porté sur un corps invisible aux mesures du tableau ; sa largeur est mesurée sur les pièces, niveau par niveau (pinces déduites). Le tombé du tissu — plis, poids, glissement — n’est pas simulé.':
     'Geometric preview: the garment is shown alone, worn on an invisible body with the size chart measurements; its width is measured on the pieces, level by level (darts deducted). The fabric drape — folds, weight, slipping — is not simulated.',
   'Taille affichée': 'Size shown',
+  /* ── LA PROTECTION ET LA LISTE (lot 9) ── */
+  'NIP': 'PIN', 'Un NIP de 4 à 8 chiffres.': 'A PIN of 4 to 8 digits.', 'Valider': 'Confirm', 'Modèle protégé': 'Protected model',
+  '« {0} » est protégé par un NIP. Entrez-le pour enregistrer ce changement.': '“{0}” is protected by a PIN. Enter it to save this change.',
+  'Les deux NIP diffèrent.': 'The two PINs differ.', 'Nouveau NIP': 'New PIN', 'Confirmer le NIP': 'Confirm the PIN', 'NIP actuel': 'Current PIN',
+  'Protéger « {0} » par un NIP': 'Protect “{0}” with a PIN', 'Changer le NIP': 'Change the PIN', 'Retirer la protection': 'Remove the protection',
+  'Le modèle redeviendra modifiable sans NIP.': 'The model will be editable again without a PIN.',
+  'Le NIP (4 à 8 chiffres) sera demandé pour modifier, copier ou supprimer ce modèle. Il n’est pas gardé en clair : notez-le, un NIP oublié ne se retrouve pas.':
+    'The PIN (4 to 8 digits) will be asked to edit, copy or delete this model. It is not stored in clear: write it down, a forgotten PIN cannot be recovered.',
+  'Retirer': 'Remove', 'Protéger': 'Protect', 'Entrez le NIP actuel.': 'Enter the current PIN.', 'Protection retirée.': 'Protection removed.', 'Modèle protégé par NIP.': 'Model protected by PIN.',
+  'NIP incorrect.': 'Incorrect PIN.', 'Ce modèle est protégé : son NIP est demandé.': 'This model is protected: its PIN is required.',
+  'Trop d’essais : réessayez dans 5 minutes.': 'Too many attempts: try again in 5 minutes.', 'Ce modèle n’est pas protégé.': 'This model is not protected.',
+  'Changement non enregistré : le NIP n’a pas été donné.': 'Change not saved: the PIN was not given.',
+  'Affichage': 'Display', 'Cartes': 'Cards', 'Liste': 'List', 'Réf.': 'Ref.', 'Type': 'Type', 'Créé le': 'Created', 'Modifié le': 'Modified', 'Version': 'Version',
+  'Protégé par NIP': 'Protected by PIN', 'Protection': 'Protection', 'créé le {0}': 'created {0}',
+  'Non protégé : toute personne autorisée peut le modifier.': 'Not protected: anyone authorized can edit it.', 'Protéger par NIP': 'Protect with a PIN',
+  'Dossier de protection (PDF)': 'Protection file (PDF)',
+  'Le dossier prépare l’enregistrement d’un dessin industriel (l’apparence d’un vêtement ne se brevète pas) : vues, description, historique daté, empreinte numérique et questions pour votre juriste. Ce n’est pas un avis juridique.':
+    'The file prepares an industrial design registration (a garment’s appearance cannot be patented): views, description, dated history, digital fingerprint and questions for your lawyer. It is not legal advice.',
   /* ── LES TYPES ET LA PLANCHE (lot 8) ── */
   'T-shirt': 'T-shirt', 'Chemise': 'Shirt', 'Débardeur': 'Tank top', 'Sweat': 'Sweatshirt', 'Jean': 'Jeans', 'Short': 'Shorts', 'Legging': 'Leggings',
   'Culotte': 'Panties', 'Brassière': 'Bralette', 'Casquette': 'Cap', 'Bob': 'Bucket hat', 'Tuque': 'Beanie',

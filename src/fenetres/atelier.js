@@ -109,6 +109,17 @@ button.mini{padding:.12rem .5rem;font-size:.76rem}
 .at-base.on{border:2px solid var(--or)}
 .at-base svg{width:1.6rem;height:2rem;flex:0 0 auto}
 .at-base b{display:block;font-size:.82rem}
+.at-liste{width:100%;border-collapse:collapse;font-size:.84rem}
+.at-liste th{text-align:left;font-weight:600;color:var(--tx2);font-size:.74rem;padding:.3rem .5rem;border-bottom:1px solid var(--sz-bord);white-space:nowrap}
+.at-liste td{padding:.42rem .5rem;border-bottom:1px solid var(--v055);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:16rem}
+.at-liste tbody tr{cursor:pointer}
+.at-liste tbody tr:hover{background:var(--v055)}
+.at-liste tbody tr.on{outline:2px solid var(--or);outline-offset:-2px}
+.at-tri{background:none;border:none;padding:0;color:inherit;font:inherit;cursor:pointer}
+.at-tri.on{color:var(--tx)}
+.nip-champ{display:flex;flex-direction:column;gap:.25rem;margin:.5rem 0;font-size:.8rem}
+.nip-champ input{font-size:1.1rem;letter-spacing:.3em;padding:.35rem .5rem}
+.nip-err{min-height:1.1rem;font-size:.8rem;color:var(--rouge,#DC2626)}
 .at-fam{grid-column:1/-1;font-size:.72rem;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em;margin-top:.35rem}
 .pl-deux{display:grid;grid-template-columns:18rem minmax(0,1fr);gap:.9rem;min-height:0}
 .cx>.pl-deux{flex:1 1 0}
@@ -338,6 +349,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     assemblage: '${T("Un des deux bords de cet assemblage n’existe plus.")}',
     retouche_et_retrace: '${T("Impossible d’enregistrer une retouche et de retracer en même temps.")}',
     pieces: '${T("Le patron n’a plus de pièce valable.")}',
+    nip: '${T("NIP incorrect.")}',
+    nip_requis: '${T("Ce modèle est protégé : son NIP est demandé.")}',
+    nip_bloque: '${T("Trop d’essais : réessayez dans 5 minutes.")}',
+    nip_format: '${T("Un NIP de 4 à 8 chiffres.")}',
+    pas_de_nip: '${T("Ce modèle n’est pas protégé.")}',
+    nip_annule: '${T("Changement non enregistré : le NIP n’a pas été donné.")}',
     aucune_piece: '${T("Aucune des pièces choisies n’existe dans ce modèle.")}',
     motif_vide: '${T("Le motif est vide : ajoutez un calque, puis enregistrez.")}',
     aucune_encre: '${T("Aucune encre à séparer : les images ne se séparent pas en aplats.")}',
@@ -351,6 +368,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
   function expliquer(r){ var m = r && r.motif; return MOTIFS[m] || ((r && r.detail) ? String(r.detail) : ('${T("Erreur inattendue (")}' + esc(m || '?') + ').')); }
   function appeler(op, args){
+    var id = op === 'atelier:ecrire' ? (args && args[0] && args[0].id) : (op === 'atelier:supprimer' || op === 'atelier:dupliquer' || op === 'atelier:restaurer') ? (args && args[0]) : '';
+    var m = id && D ? (D.modeles || []).filter(function(x){ return x.id === id; })[0] : null;
+    if (!m || !m.verrouille) return appelerBrut(op, args);
+    return obtenirNip(m).then(function(nip){
+      if (!nip) return { ok: false, motif: 'nip_annule' };
+      var a = args.slice();
+      if (op === 'atelier:ecrire') { a[0] = {}; Object.keys(args[0]).forEach(function(k){ a[0][k] = args[0][k]; }); a[0].nip = nip; }
+      else if (op === 'atelier:restaurer') a[2] = nip; else a[1] = nip;
+      return appelerBrut(op, a).then(function(r){ if (r && (r.motif === 'nip' || r.motif === 'nip_requis' || r.motif === 'nip_bloque')) delete NIPS[id]; return r; });
+    });
+  }
+  function appelerBrut(op, args){
     var p;
     try { p = P.appeler.apply(P, [op].concat(args || [])); }
     catch (e) { return Promise.resolve({ ok: false, motif: 'pont_indisponible' }); }
@@ -443,6 +472,105 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return s + '</svg>';
   }
 
+
+  /* ══ LA PROTECTION D UN MODÈLE (lot 9, 2026-10-17) ═══════════════════════════
+     Sa demande : « une protection par NIP si nécessaire pour la modification du modèle, sur
+     demande ». Le NIP se demande UNE fois par séance et par modèle, au premier geste qui écrit
+     (enregistrer, retoucher, motif, design 3D, planche, restaurer, copier, supprimer) ; il vit en
+     mémoire seulement, et s oublie s il est refusé. Le site n en garde que l empreinte. */
+  var NIPS = {};
+  function demanderNip(o){
+    return new Promise(function(fin){
+      var v = document.createElement('div'); v.className = 'szc-voile';
+      var champs = o.champs || [{ id: 'nip', lib: '${T("NIP")}' }];
+      v.innerHTML = '<div class="szc-boite" role="dialog" aria-modal="true" aria-labelledby="nip-t"><h3 id="nip-t">' + esc(o.titre) + '</h3>'
+        + (o.texte ? '<p>' + esc(o.texte) + '</p>' : '')
+        + champs.map(function(c){ return '<label class="nip-champ">' + c.lib + '<input type="password" inputmode="numeric" autocomplete="off" maxlength="8" data-nipc="' + c.id + '"></label>'; }).join('')
+        + '<div class="nip-err" role="alert"></div><div class="szc-pied"><button type="button" class="szc-non">${T("Annuler")}</button><button type="button" class="szc-oui">' + esc(o.oui || '${T("Valider")}') + '</button></div></div>';
+      document.body.appendChild(v);
+      var fermer = function(r){ if (v.parentNode) v.parentNode.removeChild(v); fin(r); };
+      var valider = function(){
+        var r = {}; Array.prototype.forEach.call(v.querySelectorAll('[data-nipc]'), function(i){ r[i.getAttribute('data-nipc')] = i.value.trim(); });
+        var err = o.verifier ? o.verifier(r) : (/^[0-9]{4,8}$/.test(r[champs[0].id]) ? '' : '${T("Un NIP de 4 à 8 chiffres.")}');
+        if (err) { v.querySelector('.nip-err').textContent = err; return; }
+        fermer(champs.length === 1 ? r[champs[0].id] : r);
+      };
+      v.querySelector('.szc-non').onclick = function(){ fermer(null); };
+      v.querySelector('.szc-oui').onclick = valider;
+      v.addEventListener('keydown', function(ev){ if (ev.key === 'Escape') { ev.preventDefault(); fermer(null); } else if (ev.key === 'Enter') { ev.preventDefault(); valider(); } });
+      v.addEventListener('mousedown', function(ev){ if (ev.target === v) fermer(null); });
+      try { v.querySelector('input').focus(); } catch (e) {}
+    });
+  }
+  function obtenirNip(m){
+    if (NIPS[m.id]) return Promise.resolve(NIPS[m.id]);
+    return demanderNip({ titre: '${T("Modèle protégé")}', texte: '${T("« {0} » est protégé par un NIP. Entrez-le pour enregistrer ce changement.")}'.split('{0}').join(m.nom), oui: '${T("Déverrouiller")}' })
+      .then(function(n){ if (n) NIPS[m.id] = n; return n; });
+  }
+  function nipValide(r){ return /^[0-9]{4,8}$/.test(r.n1 || '') ? (r.n1 !== r.n2 ? '${T("Les deux NIP diffèrent.")}' : '') : '${T("Un NIP de 4 à 8 chiffres.")}'; }
+  function protegerModele(id, geste){
+    var m = (D.modeles || []).filter(function(x){ return x.id === id; })[0]; if (!m || OCCUPE) return;
+    var champs = geste === 'poser' ? [{ id: 'n1', lib: '${T("Nouveau NIP")}' }, { id: 'n2', lib: '${T("Confirmer le NIP")}' }]
+      : geste === 'changer' ? [{ id: 'actuel', lib: '${T("NIP actuel")}' }, { id: 'n1', lib: '${T("Nouveau NIP")}' }, { id: 'n2', lib: '${T("Confirmer le NIP")}' }]
+      : [{ id: 'actuel', lib: '${T("NIP actuel")}' }];
+    demanderNip({ champs: champs,
+      titre: geste === 'poser' ? '${T("Protéger « {0} » par un NIP")}'.split('{0}').join(m.nom) : geste === 'changer' ? '${T("Changer le NIP")}' : '${T("Retirer la protection")}',
+      texte: geste === 'retirer' ? '${T("Le modèle redeviendra modifiable sans NIP.")}' : '${T("Le NIP (4 à 8 chiffres) sera demandé pour modifier, copier ou supprimer ce modèle. Il n’est pas gardé en clair : notez-le, un NIP oublié ne se retrouve pas.")}',
+      oui: geste === 'retirer' ? '${T("Retirer")}' : '${T("Protéger")}',
+      verifier: function(r){ if (geste !== 'poser' && !/^[0-9]{4,8}$/.test(r.actuel || '')) return '${T("Entrez le NIP actuel.")}'; return geste === 'retirer' ? '' : nipValide(r); }
+    }).then(function(r){
+      if (!r) return;
+      OCCUPE = true; dire('${T("Enregistrement…")}');
+      appelerBrut('atelier:verrou', [{ id: id, nip: r.actuel || '', nouveau: r.n1 || '', retirer: geste === 'retirer' }]).then(function(w){
+        OCCUPE = false;
+        if (!w || !w.ok) { dire(expliquer(w), 'err'); return; }
+        if (geste === 'retirer') delete NIPS[id]; else NIPS[id] = r.n1;
+        charger(function(){ dire(geste === 'retirer' ? '${T("Protection retirée.")}' : '${T("Modèle protégé par NIP.")}', 'bon'); });
+      });
+    });
+  }
+  /* Un PDF du modèle (la planche, le dossier de protection) : le site le compose, la coquille l imprime. */
+  function exporterPdfModele(id, format, btn){
+    if (OCCUPE) return;
+    if (!P || typeof P.enregistrerExport !== 'function' || typeof P.documentPdf !== 'function') { dire('${T("Cette version de l’application ne sait pas fabriquer de PDF.")}', 'err'); return; }
+    OCCUPE = true; if (btn) btn.disabled = true;
+    var fin = function(msg, cl){ OCCUPE = false; if (btn) btn.disabled = false; dire(msg, cl); };
+    dire('${T("Préparation du fichier…")}');
+    appeler('atelier:exporter', [{ id: id, format: format }]).then(function(r){
+      if (!r || !r.ok || !r.contenu) { fin(expliquer(r), 'err'); return; }
+      Promise.resolve(P.documentPdf(r.contenu, { pageCss: true })).then(function(pdf){
+        if (!pdf || !pdf.ok || !pdf.base64) { fin('${T("Le PDF n’a pas pu être fabriqué : {0}")}'.split('{0}').join((pdf && pdf.error) || '?'), 'err'); return; }
+        Promise.resolve(P.enregistrerExport(r.nom, 'data:application/pdf;base64,' + pdf.base64)).then(function(w){
+          if (w && w.ok) fin('${T("Enregistré : {0}")}'.split('{0}').join(w.path || r.nom), 'bon');
+          else if (w && w.annule) fin('${T("Export annulé : le code d’export n’a pas été donné.")}', 'att');
+          else fin('${T("L’enregistrement a échoué : {0}")}'.split('{0}').join((w && w.error) || '?'), 'err');
+        });
+      });
+    });
+  }
+
+  /* ══ LA LISTE COMPACTE (lot 9) ══ sa demande : « un mode d affichage par liste compacte, avec les
+     dates de création et de modification ». Le choix cartes / liste reste sur ce poste. */
+  var VUEB = (function(){ try { return localStorage.getItem('sz-atelier-vue') === 'liste' ? 'liste' : 'cartes'; } catch (e) { return 'cartes'; } })();
+  var TRI = { cle: 'maj', sens: -1 };
+  function trierModeles(l){
+    var v = function(m){ return TRI.cle === 'nom' ? String(m.nom || '').toLowerCase() : TRI.cle === 'ref' ? String(m.ref || '').toLowerCase() : TRI.cle === 'type' ? String(LBASE[m.base] || m.base || '')
+      : TRI.cle === 'cree' ? String(m.createdAt || '') : TRI.cle === 'version' ? (m.version || 1) : String(m.updatedAt || ''); };
+    return l.slice().sort(function(a, b){ var x = v(a), y = v(b); return (x < y ? -1 : x > y ? 1 : 0) * TRI.sens; });
+  }
+  function listeCompacte(liste){
+    var th = function(cle, lib){ return '<th><button type="button" class="at-tri' + (TRI.cle === cle ? ' on' : '') + '" data-tri="' + cle + '">' + lib + (TRI.cle === cle ? (TRI.sens > 0 ? ' ▲' : ' ▼') : '') + '</button></th>'; };
+    return '<div class="cx-pages" data-pages="atelier"><table class="at-liste"><thead><tr>' + th('nom', '${T("Nom")}') + th('ref', '${T("Réf.")}') + th('type', '${T("Type")}')
+      + '<th>${T("État")}</th>' + th('version', '${T("Version")}') + th('cree', '${T("Créé le")}') + th('maj', '${T("Modifié le")}') + '</tr></thead><tbody>'
+      + trierModeles(liste).map(function(m){
+          return '<tr class="' + (SEL === m.id ? 'on' : '') + '" data-sel="' + esc(m.id) + '" data-ctx-ligne="' + esc(m.id) + '" tabindex="0">'
+            + '<td><b>' + esc(m.nom) + '</b>' + (m.verrouille ? ' <span class="ic" title="${T("Protégé par NIP")}" aria-label="${T("Protégé par NIP")}">🔒</span>' : '') + '</td>'
+            + '<td>' + esc(m.ref || '—') + '</td><td>' + esc(LBASE[m.base] || szTd(m.base || '')) + '</td>'
+            + '<td><span class="at-puce ' + esc(m.etat) + '">' + esc(LETAT[m.etat] || m.etat) + '</span></td><td>v' + (m.version || 1) + '</td>'
+            + '<td class="cx-gris">' + esc(jour(m.createdAt)) + '</td><td class="cx-gris">' + esc(jour(m.updatedAt)) + '</td></tr>';
+        }).join('') + '</tbody></table></div>';
+  }
+
   /* ══ LA BIBLIOTHÈQUE ═══════════════════════════════════════════════════ */
   function filtres(){
     var q = Q.trim().toLowerCase();
@@ -470,6 +598,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (D.categories || []).map(function(c){ return seg('data-cat', c.cle, LCAT[c.cle] || szTd(c.nom), CAT === c.cle); }).join('')
       + '</div><div class="ed-seg" role="group" aria-label="${T("État")}">'
       + (D.etats || []).map(function(e){ return seg('data-etat', e.cle, LETATS[e.cle] || szTd(e.nom), ETAT === e.cle); }).join('')
+      + '</div><div class="ed-seg" role="group" aria-label="${T("Affichage")}">' + seg('data-vueb', 'cartes', '${T("Cartes")}', VUEB === 'cartes') + seg('data-vueb', 'liste', '${T("Liste")}', VUEB === 'liste')
       + '</div><div class="droite"><label class="rf-rch">${ICO.loupe}<input type="search" id="a-q" maxlength="60" aria-label="${T("Rechercher un modèle")}" placeholder="${T("Nom, référence, base…")}" value="' + esc(Q) + '"></label></div></div>';
 
     var liste = filtres();
@@ -477,14 +606,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!tous.length) {
       t += '<div class="vide">${T("Aucun modèle pour l’instant. Partez d’un patron de base : il se trace à vos mesures.")}</div>';
     }
-    t += '<div class="at-grille" data-pages="atelier">';
-    t += liste.map(function(m){
+    if (VUEB === 'liste') t += listeCompacte(liste);
+    else t += '<div class="at-grille" data-pages="atelier">' + liste.map(function(m){
       return '<button type="button" class="at-carte' + (SEL === m.id ? ' on' : '') + '" data-sel="' + esc(m.id) + '" data-ctx-ligne="' + esc(m.id) + '" title="${T("Clic : détails · double-clic : ouvrir")}">'
         + '<span class="vig">' + svgPieces([{ pieces: m.pieces || [] }], 176, 150, { mini: true, titre: m.nom }) + '</span>'
-        + '<span class="tx"><b>' + esc(m.nom) + '</b><span>' + esc((m.ref ? m.ref + ' · ' : '') + 'v' + (m.version || 1) + ' · ' + (m.tailles || []).join(' ')) + '</span></span></button>';
-    }).join('');
+        + '<span class="tx"><b>' + (m.verrouille ? '<span class="ic" aria-label="${T("Protégé par NIP")}">🔒</span> ' : '') + esc(m.nom) + '</b><span>' + esc((m.ref ? m.ref + ' · ' : '') + 'v' + (m.version || 1) + ' · ' + (m.tailles || []).join(' ')) + '</span></span></button>';
+    }).join('') + '</div>';
     // (2026-10-17, sa demande « retire ça » : la carte « Partir d un patron de base » doublait le bouton « Nouveau modèle » de la tête.)
-    t += '</div>';
     if (tous.length && !liste.length) t += '<div class="vide">${T("Aucun modèle ne correspond.")}</div>';
     t += '<div class="cx-pied"><span>' + liste.length + ' ' + (liste.length > 1 ? '${T("modèles")}' : '${T("modèle")}') + '</span></div></div>';
 
@@ -494,7 +622,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       p += '<h2>${T("Modèle choisi")}</h2><div class="cx-sub">${T("Cliquez une carte pour voir ses pièces, ses tailles et ses versions.")}</div>';
     } else {
       p += '<h2>' + esc(m.nom) + ' <span class="at-puce ' + esc(m.etat) + '">' + esc(LETAT[m.etat] || m.etat) + '</span></h2>'
-        + '<div class="cx-sub">' + esc((m.ref ? m.ref + ' · ' : '') + (LBASE[m.base] || '') + ' · ' + '${T("modifié le {0}")}'.split('{0}').join(jour(m.updatedAt))) + '</div>'
+        + '<div class="cx-sub">' + esc((m.ref ? m.ref + ' · ' : '') + (LBASE[m.base] || '') + ' · ' + '${T("créé le {0}")}'.split('{0}').join(jour(m.createdAt)) + ' · ' + '${T("modifié le {0}")}'.split('{0}').join(jour(m.updatedAt))) + '</div>'
         + '<div class="cx-sep"></div><h2>${T("Pièces du patron")}</h2>'
         + (m.pieces || []).map(function(pc){
             return '<div class="cx-etat"><span>' + esc(nomPiece(pc)) + ' · ×' + (pc.qte || 1) + (pc.aupli ? ' ${T("au pli")}' : '') + '</span><span class="cx-gris">' + (pc.pinces && pc.pinces.length ? '${T("pince")}' : '') + '</span></div>';
@@ -507,6 +635,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + (m.versions || []).slice(-4).reverse().map(function(v){
             return '<div class="cx-etat"><span>v' + v.n + ' — ' + esc(v.note || '') + '</span><span class="cx-gris">' + esc(jour(v.date)) + '</span></div>';
           }).join('')
+        + '<div class="cx-sep"></div><h2>${T("Protection")}</h2>'
+        + (m.verrouille ? '<div class="cx-etat"><span><span class="ic">🔒</span> ${T("Protégé par NIP")}</span><span class="cx-gris">' + esc(jour(m.verrouDepuis)) + '</span></div>'
+          : '<div class="cx-sub">${T("Non protégé : toute personne autorisée peut le modifier.")}</div>')
+        + '<div class="at-gestes">' + (D.peutModifier ? (m.verrouille ? '<button type="button" data-nip="changer:' + esc(m.id) + '">${T("Changer le NIP")}</button><button type="button" data-nip="retirer:' + esc(m.id) + '">${T("Retirer la protection")}</button>'
+          : '<button type="button" data-nip="poser:' + esc(m.id) + '">${T("Protéger par NIP")}</button>') : '')
+        + '<button type="button" data-protection="' + esc(m.id) + '">${T("Dossier de protection (PDF)")}</button></div>'
+        + '<div class="ed-note">${T("Le dossier prépare l’enregistrement d’un dessin industriel (l’apparence d’un vêtement ne se brevète pas) : vues, description, historique daté, empreinte numérique et questions pour votre juriste. Ce n’est pas un avis juridique.")}</div>'
         + '<div class="at-gestes">'
         + (D.peutSupprimer ? '<button type="button" class="danger" data-suppr="' + esc(m.id) + '">${T("Supprimer")}</button>' : '')
         + (D.peutAjouter ? '<button type="button" data-dupl="' + esc(m.id) + '">${T("Dupliquer")}</button>' : '')
@@ -3694,6 +3829,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (VUE === 'planche') { if (PL) clicPL(ev); return; }
     var b;
     if ((b = t.closest('[data-planche]'))) { ouvrirPlanche(b.getAttribute('data-planche'), 'biblio'); return; }
+    if ((b = t.closest('[data-vueb]'))) { VUEB = b.getAttribute('data-vueb'); try { localStorage.setItem('sz-atelier-vue', VUEB); } catch (e) {} dessiner(); return; }
+    if ((b = t.closest('[data-tri]'))) { var tk = b.getAttribute('data-tri'); TRI = { cle: tk, sens: TRI.cle === tk ? -TRI.sens : (tk === 'nom' || tk === 'ref' || tk === 'type' ? 1 : -1) }; dessiner(); return; }
+    if ((b = t.closest('[data-nip]'))) { var gn = b.getAttribute('data-nip').split(':'); protegerModele(gn.slice(1).join(':'), gn[0]); return; }
+    if ((b = t.closest('[data-protection]'))) { exporterPdfModele(b.getAttribute('data-protection'), 'protection', b); return; }
     if ((b = t.closest('[data-motif]'))) { ouvrirMotif(b.getAttribute('data-motif'), 'biblio'); return; }
     if ((b = t.closest('[data-v3]'))) { ouvrir3d(b.getAttribute('data-v3'), 'biblio'); return; }
     if ((b = t.closest('[data-imprimer]'))) { ouvrirImpression(b.getAttribute('data-imprimer'), 'biblio'); return; }
@@ -3876,6 +4015,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       else if (DEPART.indexOf('impression:') === 0) { var di = DEPART.slice(11); DEPART = ''; ouvrirImpression(di, 'biblio'); }
       else if (DEPART.indexOf('3d:') === 0) { var d3 = DEPART.slice(3); DEPART = ''; ouvrir3d(d3, 'biblio'); }
       else if (DEPART === 'photo' && D.peutAjouter) { DEPART = ''; ouvrirPhoto(); }
+      else if (DEPART === 'liste') { DEPART = ''; VUEB = 'liste'; SEL = ((D.modeles || [])[0] || {}).id || ''; dessiner(); }
       else if (DEPART.indexOf('planche:') === 0) { var dp = DEPART.slice(8); DEPART = ''; ouvrirPlanche(dp, 'biblio'); }
       else if (DEPART.indexOf('motif:') === 0) { var dm = DEPART.slice(6); DEPART = ''; ouvrirMotif(dm, 'biblio'); }
       else dessiner();
