@@ -101,7 +101,7 @@ const GLOBALES = new Set([
   /* ⚠ AJOUTÉES PARCE QUE L OUTIL LES A RÉCLAMÉES, pas par anticipation. Une
      liste devinée est soit trop courte (des faux), soit trop longue (elle
      couvre des noms qui n existent pas et laisse passer de vraies fautes). */
-  'Uint8Array', 'Uint8ClampedArray', 'Int8Array', 'Float32Array', 'Float64Array',
+  'Uint8Array', 'Uint8ClampedArray', 'Int8Array', 'Uint16Array', 'Int16Array', 'Uint32Array', 'Int32Array', 'Float32Array', 'Float64Array',
   'ArrayBuffer', 'DataView', 'BigInt', 'Proxy', 'crypto', 'performance',
   // Mots-clés et formes qui ressemblent à un appel dans une lecture naïve.
   'if', 'for', 'while', 'switch', 'catch', 'function', 'return', 'typeof',

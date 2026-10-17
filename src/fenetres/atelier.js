@@ -178,6 +178,8 @@ table.at-tab{width:100%;border-collapse:collapse;font-size:.8rem;font-variant-nu
 .v3-trois>.cx-carte{min-height:0;overflow:auto;scrollbar-gutter:stable}
 .v3-scene{position:relative;border-radius:12px;overflow:hidden;min-height:0;cursor:grab;user-select:none}
 .v3-scene.glisse{cursor:grabbing}
+.v3-scene.vise{cursor:crosshair}
+.v3-trois .ed-seg{display:flex;flex-wrap:wrap}
 .v3-scene canvas{display:block;position:absolute;left:0;top:0;width:100%;height:100%}
 .v3-scene.beige{background:#EFE8DD}.v3-scene.blanc{background:#FFFFFF}
 .v3-aide{position:absolute;left:.7rem;bottom:.55rem;font-size:.76rem;color:#3F3A32;background:rgba(243,238,229,.92);padding:.12rem .5rem;border-radius:6px;pointer-events:none}
@@ -1768,7 +1770,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!m) { dire(MOTIFS.introuvable, 'err'); return; }
     SEL = id;
     V3 = { id: id, m: m, retour: retour || 'biblio', taille: m.tailleBase || 'M', stature: 165, r: null, mesh: null,
-      yaw: 0.45, pitch: 0.12, zoom: 1, px: 0, py: 0, carte: false, fil: false, auto: false, couleur: COUL3[0][0], fond: 'beige', sale: true };
+      yaw: 0.45, pitch: 0.12, zoom: 1, px: 0, py: 0, carte: false, fil: false, auto: false, couleur: COUL3[0][0], fond: 'beige', sale: true,
+      outil: 'tourner', dec: { forme: 'rond', l: 3, h: 3 }, el: { type: 'perle', matiere: 'or', taille: 0.8 }, pile: [], dsale: false,
+      design: { decoupes: ((m.design3d && m.design3d.decoupes) || []).slice(), elements: ((m.design3d && m.design3d.elements) || []).slice() } };
     VUE = '3d'; dessiner(); charger3d();
   }
   function charger3d(){
@@ -1776,7 +1780,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('atelier:apercu3d', [{ id: V3.id, taille: V3.taille, stature: V3.stature }]).then(function(r){
       if (n !== v3N || VUE !== '3d' || !V3) return;
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
-      V3.r = r; V3.mesh = maillage(r); V3.sale = true; peindrePanneau3d(); demander3d();
+      V3.r = r; V3.mesh = maillage(r); V3.sale = true; peindrePanneau3d(); peindreDesign3d(); entete3d(); imagesMotif3d(); demander3d();
     });
   }
   var v3N = 0;
@@ -1830,12 +1834,598 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function hex(c){ return [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)]; }
 
-  /* ── La peinture : rotation, perspective, ombrage, tri des faces ── */
-  function peindre3d(){
-    var cv = document.getElementById('v3-canevas'); if (!cv || !V3 || !V3.mesh) return;
+
+  /* ══ LE MOTEUR WebGL (lot 6, 2026-10-17 — sa décision : « moteur 3D au poste ») ══════════════
+     Sa demande : « la même qualité que ce que fal.ai génère, avec plus de détail, surtout une
+     reproduction FIDÈLE de l image que nous allons créer sur le vêtement, et la possibilité de
+     designer le vêtement : faire des trous, insérer des éléments comme des bijoux ».
+     ⚠ LES PIÈCES SONT PLAQUÉES SUR LA FORME : chaque point de la surface EST un point (x, y) du
+     patron (le site donne, anneau par anneau, sa hauteur dans le patron et les bords du devant et du
+     dos). Le tissu, le motif posé et les découpes sont PEINTS dans une texture par pièce, au même
+     dessin que le fichier d impression (calqueSvg) : ce qui est hors de la pièce — encolure,
+     emmanchures, trous — n est pas dessiné. Les éléments (perles, strass…) sont de petits objets
+     posés sur la surface, tournés selon sa normale.
+     ⚠ Sans WebGL, ou pour un pantalon (les jambes ne se plaquent pas encore), la peinture 2D d avant
+     reprend la main — rien ne disparaît. */
+  var GLV = null, GL_DISPO = null;
+  var MAT3 = { or: [0.83, 0.66, 0.26, 1, 60], argent: [0.80, 0.81, 0.84, 1, 80], nacre: [0.94, 0.91, 0.86, 0.25, 40], noir: [0.07, 0.07, 0.08, 0, 90], cristal: [0.86, 0.93, 1.0, 0.7, 140] };
+  function webglDispo(){
+    if (GL_DISPO !== null) return GL_DISPO;
+    try { var c = document.createElement('canvas'), g = c.getContext('webgl'); GL_DISPO = !!g; var x = g && g.getExtension('WEBGL_lose_context'); if (x) x.loseContext(); }
+    catch (e) { GL_DISPO = false; }
+    return GL_DISPO;
+  }
+  function plaque3d(){ return !!(V3 && V3.r && V3.r.plaquage === 'oui' && (V3.r.pieces || []).length && !V3.glNon && webglDispo()); }
+
+  /* ── Petits calculs ── */
+  function sub3(a, b){ return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]; }
+  function croix3(a, b){ return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]; }
+  function pt3(a, b){ return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
+  function unit3(a){ var l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; }
+  function mul4(a, b){ var o = []; for (var r = 0; r < 4; r++) for (var c = 0; c < 4; c++) { var s = 0; for (var k = 0; k < 4; k++) s += a[r * 4 + k] * b[k * 4 + c]; o.push(s); } return o; }
+  function col4(a){ var o = new Float32Array(16); for (var r = 0; r < 4; r++) for (var c = 0; c < 4; c++) o[c * 4 + r] = a[r * 4 + c]; return o; }
+  function col3(R){ var o = new Float32Array(9); for (var r = 0; r < 3; r++) for (var c = 0; c < 3; c++) o[c * 3 + r] = R[r][c]; return o; }
+  function mul3(A, B){ var o = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]; for (var r = 0; r < 3; r++) for (var c = 0; c < 3; c++) o[r][c] = A[r][0] * B[0][c] + A[r][1] * B[1][c] + A[r][2] * B[2][c]; return o; }
+  function sombre(hx, k){ var c = hex(hx); return 'rgb(' + Math.round(c[0] * k) + ',' + Math.round(c[1] * k) + ',' + Math.round(c[2] * k) + ')'; }
+
+  /* La longueur d arc d une ellipse (ra sur l axe de départ, rb sur l autre) : 128 pas. */
+  function tableArc(ra, rb){
+    var n = 128, L = [0], px = ra, pz = 0;
+    for (var i = 1; i <= n; i++) { var t = 2 * Math.PI * i / n, x = ra * Math.cos(t), z = rb * Math.sin(t); L.push(L[i - 1] + Math.hypot(x - px, z - pz)); px = x; pz = z; }
+    return L;
+  }
+  function angleArc(L, s){
+    var n = L.length - 1, C = L[n]; s = ((s % C) + C) % C;
+    var lo = 0, hi = n; while (hi - lo > 1) { var mi = (lo + hi) >> 1; if (L[mi] <= s) lo = mi; else hi = mi; }
+    return 2 * Math.PI * (lo + (s - L[lo]) / Math.max(1e-6, L[hi] - L[lo])) / n;
+  }
+
+  /* ── La pièce dépliée : son contour (et son miroir si elle est coupée au pli), son cadre ── */
+  // ⚠ le devant et le dos sont des DEMI-pièces : au pli, ou coupées deux fois (milieu dos cousu) — on les déplie toujours
+  function depliee(p){
+    var axe = p.aupli && p.pli ? p.pli : (p.id === 'devant' || p.id === 'dos') ? (p.pli || { a: { x: 0, y: 0 }, b: { x: 0, y: 1 } }) : null;
+    var mir = axe ? p.contour.map(function(q){ var r = reflet(q, axe); if (q.c1 && q.c2) { r.c1 = reflet(q.c1, axe); r.c2 = reflet(q.c2, axe); } return r; }) : null;
+    var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    p.contour.concat(mir || []).forEach(function(q){ [q, q.c1, q.c2].forEach(function(z){ if (!z) return; x0 = Math.min(x0, z.x); y0 = Math.min(y0, z.y); x1 = Math.max(x1, z.x); y1 = Math.max(y1, z.y); }); });
+    return { p: p, mir: mir, axe: axe, bb: { x0: x0 - 1, y0: y0 - 1, x1: x1 + 1, y1: y1 + 1 } };
+  }
+  function tracerC(g, c){
+    g.moveTo(c[0].x, c[0].y);
+    for (var n = 1; n <= c.length; n++) { var z = c[n % c.length]; if (z.c1 && z.c2) g.bezierCurveTo(z.c1.x, z.c1.y, z.c2.x, z.c2.y, z.x, z.y); else g.lineTo(z.x, z.y); }
+    g.closePath();
+  }
+  // les bords, SAUF celui du pli (le tissu y continue)
+  function tracerBords(g, c, pli){
+    var surPli = function(q){ if (!pli) return false; var dx = pli.b.x - pli.a.x, dy = pli.b.y - pli.a.y, l = Math.hypot(dx, dy) || 1; return Math.abs((q.x - pli.a.x) * dy - (q.y - pli.a.y) * dx) / l < 0.05; };
+    g.moveTo(c[0].x, c[0].y);
+    for (var n = 1; n <= c.length; n++) {
+      var a = c[n - 1], z = c[n % c.length];
+      if (surPli(a) && surPli(z)) { g.moveTo(z.x, z.y); continue; }
+      if (z.c1 && z.c2) g.bezierCurveTo(z.c1.x, z.c1.y, z.c2.x, z.c2.y, z.x, z.y); else g.lineTo(z.x, z.y);
+    }
+  }
+  /* Le contour d une découpe — LE MÊME que contourDecoupe du site (qui le trace dans le patron). */
+  function contourDecoupeF(d){
+    var pts = [], n = 32, K = [[-1, -1], [1, -1], [1, 1], [-1, 1]];
+    for (var i = 0; i < n; i++) {
+      var t = 2 * Math.PI * i / n;
+      if (d.forme === 'rect') { var k = K[Math.floor(i / 8)], k2 = K[(Math.floor(i / 8) + 1) % 4], f = (i % 8) / 8; pts.push({ x: d.x + (k[0] + (k2[0] - k[0]) * f) * d.l / 2, y: d.y + (k[1] + (k2[1] - k[1]) * f) * d.h / 2 }); continue; }
+      var r = d.forme === 'goutte' ? 1 - 0.55 * Math.pow(Math.max(0, -Math.sin(t)), 3) : 1;
+      pts.push({ x: d.x + Math.cos(t) * d.l / 2 * r, y: d.y + Math.sin(t) * d.h / 2 * (d.forme === 'goutte' && Math.sin(t) < 0 ? 1.25 : 1) });
+    }
+    return pts;
+  }
+  // une découpe dans une demi-pièce se coupe DES DEUX CÔTÉS (le patron la trace en |x|)
+  function decoupesDe(pid, pc){
+    var out = [];
+    ((V3.design && V3.design.decoupes) || []).forEach(function(d){
+      if (d.piece !== pid) return;
+      var c = contourDecoupeF(d); out.push(c);
+      if (pc.axe) out.push(c.map(function(q){ return reflet(q, pc.axe); }));
+    });
+    return out;
+  }
+
+  /* Le grain du tissu : un bruit fin, discret (il donne la matière sans faire de moiré). */
+  var GRAIN = null;
+  function grain(){
+    if (GRAIN) return GRAIN;
+    var c = document.createElement('canvas'); c.width = c.height = 96;
+    var g = c.getContext('2d'), im = g.createImageData(96, 96), s = 7;
+    for (var i = 0; i < 96 * 96; i++) {
+      s = (s * 16807) % 2147483647; var v = (s % 1000) / 1000, x = i % 96, y = Math.floor(i / 96);
+      var trame = ((x + y) % 4 < 2) ? 1 : 0;              // un sergé très léger
+      im.data[i * 4] = im.data[i * 4 + 1] = im.data[i * 4 + 2] = v > 0.5 ? 255 : 0;
+      im.data[i * 4 + 3] = Math.round(8 + 10 * Math.abs(v - 0.5) + trame * 6);
+    }
+    g.putImageData(im, 0, 0); GRAIN = c; return c;
+  }
+
+  /* LE MOTIF, au dessin du fichier : un SVG en millimètres sur le cadre de la pièce. */
+  function svgMotifPiece(pc, pid, cw, ch){
+    var mo = V3.m.motif; if (!mo || !(mo.calques || []).length) return '';
+    if (mo.mode !== 'raccord' && mo.piece !== pid) return '';
+    var bb = pc.bb, Wm = (bb.x1 - bb.x0) * 10, Hm = (bb.y1 - bb.y0) * 10, zo = mo.zone, s = '', mk = MK;
+    var vis = mo.calques.filter(function(c){ return c.visible !== false && (c.type !== 'image' || (MOIMG[c.url] && MOIMG[c.url] !== 'chargement')); });
+    MK = 10;
+    try {
+      if (mo.mode === 'raccord') {
+        var X0 = function(v){ return v * 10; };
+        s += '<defs><clipPath id="m3c"><rect x="0" y="0" width="' + zo.l * 10 + '" height="' + zo.h * 10 + '"/></clipPath><g id="m3m" clip-path="url(#m3c)">'
+          + (mo.fond === 'blanc' ? '<rect width="' + zo.l * 10 + '" height="' + zo.h * 10 + '" fill="#FFFFFF"/>' : '')
+          + vis.map(function(c){ return calqueSvg(c, X0, X0); }).join('') + '</g></defs>';
+        var i0 = Math.floor(bb.y0 / zo.h) - 1, i1 = Math.ceil(bb.y1 / zo.h) + 1, j0 = Math.floor(bb.x0 / zo.l) - 1, j1 = Math.ceil(bb.x1 / zo.l) + 1;
+        for (var i = i0; i <= i1; i++) for (var j = j0; j <= j1; j++) {
+          var ox = j * zo.l + (mo.raccord === 'demibrique' && i % 2 ? zo.l / 2 : 0), oy = i * zo.h + (mo.raccord === 'demigoutte' && j % 2 ? zo.h / 2 : 0);
+          s += '<use href="#m3m" x="' + ((ox - bb.x0) * 10) + '" y="' + ((oy - bb.y0) * 10) + '"/>';
+        }
+      } else {
+        var Xz = function(v){ return (zo.x + v - bb.x0) * 10; }, Yz = function(v){ return (zo.y + v - bb.y0) * 10; };
+        if (mo.fond === 'blanc') s += '<rect x="' + Xz(0) + '" y="' + Yz(0) + '" width="' + zo.l * 10 + '" height="' + zo.h * 10 + '" fill="#FFFFFF"/>';
+        s += vis.map(function(c){ return calqueSvg(c, Xz, Yz); }).join('');
+      }
+    } finally { MK = mk; }
+    return '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="' + cw + '" height="' + ch + '" viewBox="0 0 ' + Wm + ' ' + Hm + '" preserveAspectRatio="none">' + s + '</svg>';
+  }
+
+  /* La toile d une pièce : le tissu, le grain, le motif, les bords, les découpes. */
+  function peindreToile(pc, pid, motifImg){
+    var bb = pc.bb, cv = pc.toile, cw = cv.width, ch = cv.height, g = cv.getContext('2d');
+    var sx = cw / (bb.x1 - bb.x0), sy = ch / (bb.y1 - bb.y0);
+    var enCm = function(){ g.setTransform(sx, 0, 0, sy, -bb.x0 * sx, -bb.y0 * sy); };
+    g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-over'; g.clearRect(0, 0, cw, ch);
+    enCm(); g.fillStyle = V3.couleur; g.beginPath(); tracerC(g, pc.p.contour); if (pc.mir) tracerC(g, pc.mir); g.fill();
+    g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-atop';
+    g.fillStyle = g.createPattern(grain(), 'repeat'); g.fillRect(0, 0, cw, ch);
+    if (motifImg) g.drawImage(motifImg, 0, 0, cw, ch);
+    // les bords : une ombre de couture, d un ton plus sombre que le tissu
+    enCm(); g.strokeStyle = sombre(V3.couleur, 0.72); g.lineWidth = 0.45; g.lineJoin = 'round';
+    g.beginPath(); tracerBords(g, pc.p.contour, pc.axe); if (pc.mir) tracerBords(g, pc.mir, pc.axe); g.stroke();
+    // les découpes : le trou, puis son bord (le tissu tranché)
+    var trous = decoupesDe(pid, pc);
+    if (trous.length) {
+      g.globalCompositeOperation = 'destination-out'; g.fillStyle = '#000000';
+      trous.forEach(function(c){ g.beginPath(); tracerC(g, c); g.fill(); });
+      g.globalCompositeOperation = 'source-atop'; g.strokeStyle = sombre(V3.couleur, 0.6); g.lineWidth = 0.35;
+      trous.forEach(function(c){ g.beginPath(); tracerC(g, c); g.stroke(); });
+    }
+    g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-over';
+  }
+
+  /* ── Les maillages : le devant et le dos sur les anneaux du corps, la pièce de manche sur chaque manche ── */
+  function grille3d(R, J, fab){
+    var n = R * (J + 1), pos = new Float32Array(n * 3), uv = new Float32Array(n * 2), tint = new Float32Array(n * 4), cen = [];
+    for (var i = 0; i < R; i++) {
+      var ri = fab.anneau(i); cen.push(ri.c);
+      for (var j = 0; j <= J; j++) {
+        var q = fab.point(i, j, ri), k = i * (J + 1) + j;
+        pos[k * 3] = q.p[0]; pos[k * 3 + 1] = q.p[1]; pos[k * 3 + 2] = q.p[2];
+        uv[k * 2] = q.u; uv[k * 2 + 1] = q.v;
+        var e = ETAT3[ri.etat]; if (e) { var h = hex(e); tint[k * 4] = h[0] / 255; tint[k * 4 + 1] = h[1] / 255; tint[k * 4 + 2] = h[2] / 255; tint[k * 4 + 3] = 1; }
+      }
+    }
+    var nor = new Float32Array(n * 3), at = function(i, j){ var k = (i * (J + 1) + j) * 3; return [pos[k], pos[k + 1], pos[k + 2]]; };
+    for (var i2 = 0; i2 < R; i2++) for (var j2 = 0; j2 <= J; j2++) {
+      var du = sub3(at(i2, Math.min(J, j2 + 1)), at(i2, Math.max(0, j2 - 1))), dv = sub3(at(Math.min(R - 1, i2 + 1), j2), at(Math.max(0, i2 - 1), j2));
+      var nn = unit3(croix3(du, dv)), pp = at(i2, j2);
+      if (pt3(nn, sub3(pp, cen[i2])) < 0) nn = [-nn[0], -nn[1], -nn[2]];       // vers le dehors
+      var k2 = (i2 * (J + 1) + j2) * 3; nor[k2] = nn[0]; nor[k2 + 1] = nn[1]; nor[k2 + 2] = nn[2];
+    }
+    var idx = [], lig = [];
+    for (var a = 0; a + 1 < R; a++) for (var b = 0; b < J; b++) {
+      var v0 = a * (J + 1) + b, v1 = v0 + 1, w0 = v0 + J + 1, w1 = w0 + 1;
+      idx.push(v0, w0, w1, v0, w1, v1); lig.push(v0, v1, v0, w0);
+    }
+    return { pos: pos, nor: nor, uv: uv, tint: tint, idx: new Uint16Array(idx), lig: new Uint16Array(lig), R: R, J: J };
+  }
+  /* Au-dessus de l emmanchure, les anneaux du site serrent le corps (les pièces n y font plus un tour) :
+     on y passe EN DOUCEUR depuis le dernier anneau jugé, sur 12 cm — une marche se voyait à la poitrine. */
+  function adoucir(an){
+    var k = -1; for (var i = 0; i < an.length; i++) if (an[i].e != null) { k = i; break; }
+    if (k <= 0) return an;
+    var top = an[k];
+    return an.map(function(a, i){
+      if (i >= k) return a;
+      var t = Math.min(1, Math.max(0, (top.yp - a.yp) / 12)), w = 1 - t * t * (3 - 2 * t);
+      return Object.assign({}, a, { rx: Math.max(a.rx, a.rx + (top.rx - a.rx) * w), rz: Math.max(a.rz, a.rz + (top.rz - a.rz) * w) });
+    });
+  }
+  function mailleCorps(an, pc, pid){
+    var bb = pc.bb, J = 72, tabs = an.map(function(a){ return tableArc(a.rz, a.rx); });
+    var m = grille3d(an.length, J, {
+      anneau: function(i){ var a = an[i]; return { c: [a.c.x, a.c.y, a.c.z || 0], etat: a.etat }; },
+      point: function(i, j){
+        var a = an[i], L = tabs[i], C = L[L.length - 1], k = Math.min(1, C / Math.max(1, 2 * ((a.sf || 0) + (a.sb || 0))));
+        var x = bb.x0 + (bb.x1 - bb.x0) * j / J;
+        // le devant part du milieu devant vers +x ; le dos, du milieu dos (C / 2) — les côtés se rejoignent
+        var f = angleArc(L, pid === 'devant' ? x * k : C / 2 + x * k);
+        return { p: [a.c.x + Math.sin(f) * a.rx, a.c.y, (a.c.z || 0) + Math.cos(f) * a.rz], u: (x - bb.x0) / (bb.x1 - bb.x0), v: (a.yp - bb.y0) / (bb.y1 - bb.y0) };
+      }
+    });
+    m.pid = pid; m.pc = pc; m.yp = an.map(function(a){ return a.yp; }); return m;
+  }
+  function mailleManche(an, pc){
+    var bb = pc.bb, J = 48, sx = 0; an.forEach(function(a){ sx += a.c.x; }); var sg = sx >= 0 ? 1 : -1;
+    var cadres = an.map(function(a, i){
+      var p = an[Math.max(0, i - 1)].c, q = an[Math.min(an.length - 1, i + 1)].c;
+      var t = unit3([q.x - p.x, q.y - p.y, (q.z || 0) - (p.z || 0)]), u = unit3([-t[1], t[0], 0]);
+      if (u[0] * sg < 0) u = [-u[0], -u[1], -u[2]];                     // vers le DEHORS du bras
+      var v = unit3(croix3(t, u)); if (v[2] < 0) v = [-v[0], -v[1], -v[2]];   // vers l AVANT
+      return { o: u, v: v, L: tableArc(a.rx, a.rz) };
+    });
+    var m = grille3d(an.length, J, {
+      anneau: function(i){ var a = an[i]; return { c: [a.c.x, a.c.y, a.c.z || 0], etat: a.etat }; },
+      point: function(i, j){
+        var a = an[i], F = cadres[i], C = F.L[F.L.length - 1], k = Math.min(1, C / Math.max(1, (a.s1 || 0) - (a.s0 || 0)));
+        var x = bb.x0 + (bb.x1 - bb.x0) * j / J, xm = ((a.s0 || 0) + (a.s1 || 0)) / 2;
+        var f = angleArc(F.L, (x - xm) * k), co = Math.cos(f) * a.rx, si = Math.sin(f) * a.rz;
+        return { p: [a.c.x + F.o[0] * co + F.v[0] * si, a.c.y + F.o[1] * co + F.v[1] * si, (a.c.z || 0) + F.o[2] * co + F.v[2] * si], u: (x - bb.x0) / (bb.x1 - bb.x0), v: (a.yp - bb.y0) / (bb.y1 - bb.y0) };
+      }
+    });
+    m.pid = 'manche'; m.pc = pc; m.yp = an.map(function(a){ return a.yp; }); return m;
+  }
+
+  /* Un point du patron (pièce, x, y) → un point de la surface, sa normale, et le « haut » de la pièce. */
+  function surface3d(ma, x, y){
+    var R = ma.R, J = ma.J, yp = ma.yp, i0 = -1, bb = ma.pc.bb;
+    for (var i = 0; i + 1 < R; i++) if ((yp[i] - y) * (yp[i + 1] - y) <= 0 && yp[i] !== yp[i + 1]) { i0 = i; break; }
+    if (i0 < 0) return null;
+    var fi = (y - yp[i0]) / (yp[i0 + 1] - yp[i0]), fj = (x - bb.x0) / (bb.x1 - bb.x0) * J;
+    if (fj < 0 || fj > J) return null;
+    var j0 = Math.min(J - 1, Math.floor(fj)), gj = fj - j0;
+    var mel = function(arr){ var o = []; for (var c = 0; c < 3; c++) { var at = function(i, j){ return arr[(i * (J + 1) + j) * 3 + c]; };
+      o.push((at(i0, j0) * (1 - gj) + at(i0, j0 + 1) * gj) * (1 - fi) + (at(i0 + 1, j0) * (1 - gj) + at(i0 + 1, j0 + 1) * gj) * fi); } return o; };
+    var p = mel(ma.pos), n = unit3(mel(ma.nor));
+    var k0 = (i0 * (J + 1) + j0) * 3, k1 = ((i0 + 1) * (J + 1) + j0) * 3;
+    var t = [ma.pos[k0] - ma.pos[k1], ma.pos[k0 + 1] - ma.pos[k1 + 1], ma.pos[k0 + 2] - ma.pos[k1 + 2]];
+    if (yp[i0] > yp[i0 + 1]) t = [-t[0], -t[1], -t[2]];
+    return { p: p, n: n, t: t };
+  }
+
+  /* ── Les objets : chacun est un tour (un profil qu on fait tourner autour de sa normale) ── */
+  function tour3(profil, seg, plat, zc){
+    var PO = [], NO = [], pt = function(q, a){ return [q[0] * Math.cos(a), q[0] * Math.sin(a), q[1]]; };
+    var nm = function(q, a){ return [q[2] * Math.cos(a), q[2] * Math.sin(a), q[3]]; };
+    for (var i = 0; i + 1 < profil.length; i++) for (var s = 0; s < seg; s++) {
+      var a0 = 2 * Math.PI * s / seg, a1 = 2 * Math.PI * (s + 1) / seg, A = profil[i], B = profil[i + 1];
+      var tri = [[[A, a0], [B, a0], [B, a1]], [[A, a0], [B, a1], [A, a1]]];
+      tri.forEach(function(T){
+        var v = T.map(function(x){ return pt(x[0], x[1]); });
+        if (plat) {
+          var f = croix3(sub3(v[1], v[0]), sub3(v[2], v[0])); if (Math.hypot(f[0], f[1], f[2]) < 1e-9) return;
+          f = unit3(f); var c = [(v[0][0] + v[1][0] + v[2][0]) / 3, (v[0][1] + v[1][1] + v[2][1]) / 3, (v[0][2] + v[1][2] + v[2][2]) / 3 - zc];
+          if (pt3(f, c) < 0) f = [-f[0], -f[1], -f[2]];
+          v.forEach(function(q){ PO.push(q[0], q[1], q[2]); NO.push(f[0], f[1], f[2]); });
+        } else T.forEach(function(x, k){ var q = v[k], n = nm(x[0], x[1]); PO.push(q[0], q[1], q[2]); NO.push(n[0], n[1], n[2]); });
+      });
+    }
+    return { pos: new Float32Array(PO), nor: new Float32Array(NO), n: PO.length / 3 };
+  }
+  function objets3d(){
+    var arc = function(n, f){ var o = []; for (var k = 0; k <= n; k++) o.push(f(k / n)); return o; };
+    return {
+      perle: tour3(arc(14, function(t){ var a = -Math.PI / 2 + Math.PI * t; return [Math.cos(a), 0.8 + Math.sin(a), Math.cos(a), Math.sin(a)]; }), 24, false),
+      anneau: tour3(arc(20, function(t){ var a = 2 * Math.PI * t; return [0.72 + 0.28 * Math.cos(a), 0.28 + 0.28 * Math.sin(a), Math.cos(a), Math.sin(a)]; }), 32, false),
+      oeillet: tour3(arc(20, function(t){ var a = 2 * Math.PI * t; return [0.66 + 0.34 * Math.cos(a), 0.16 + 0.16 * Math.sin(a), Math.cos(a) * 0.5, Math.sin(a)]; }), 32, false),
+      bouton: tour3([[0, 0.4, 0, 1], [0.78, 0.4, 0, 1], [0.78, 0.4, 0.6, 0.8], [1, 0.26, 1, 0.2], [1, 0.05, 1, 0], [1, 0.05, 0, -1], [0, 0.05, 0, -1]], 32, false),
+      strass: tour3([[0, 0], [1, 0.32], [0.58, 0.7], [0, 0.7]], 10, true, 0.35),
+      clou: tour3([[0, 0], [1, 0], [0, 1.1]], 4, true, 0.35)
+    };
+  }
+
+  /* ── Les programmes ── */
+  var VS_TISSU = 'attribute vec3 aP; attribute vec3 aN; attribute vec2 aT; attribute vec4 aK; uniform mat4 uM; uniform mat4 uV; uniform mat3 uR; varying vec3 vN; varying vec2 vT; varying vec3 vE; varying vec4 vK;'
+    + ' void main(){ vec4 p = uV * vec4(aP, 1.0); vE = -p.xyz; vN = uR * aN; vT = aT; vK = aK; gl_Position = uM * vec4(aP, 1.0); }';
+  var FS_TISSU = 'precision mediump float; uniform sampler2D uS; uniform vec3 uL; uniform float uC; varying vec3 vN; varying vec2 vT; varying vec3 vE; varying vec4 vK;'
+    + ' void main(){ vec4 t = texture2D(uS, vT); if (t.a < 0.5) discard; vec3 n = normalize(vN); vec3 e = normalize(vE); float de = 0.0;'
+    + ' if (dot(n, e) < 0.0) { n = -n; de = 1.0; }'
+    + ' float d = max(0.0, (dot(n, uL) + 0.35) / 1.35); float r = pow(1.0 - max(0.0, dot(n, e)), 2.5);'
+    + ' vec3 h = normalize(uL + e); float sp = pow(max(0.0, dot(n, h)), 24.0) * 0.05;'
+    + ' vec3 b = mix(t.rgb, vK.rgb, vK.a * uC); vec3 c = b * (0.34 + 0.72 * d) + vec3(r * 0.09 + sp);'
+    + ' if (de > 0.5) c = c * 0.55; gl_FragColor = vec4(c, 1.0); }';
+  var VS_OBJ = 'attribute vec3 aP; attribute vec3 aN; uniform mat4 uM; uniform mat4 uV; uniform mat3 uR; varying vec3 vN; varying vec3 vE;'
+    + ' void main(){ vec4 p = uV * vec4(aP, 1.0); vE = -p.xyz; vN = uR * aN; gl_Position = uM * vec4(aP, 1.0); }';
+  var FS_OBJ = 'precision mediump float; uniform vec3 uL; uniform vec3 uB; uniform float uMet; uniform float uBr; varying vec3 vN; varying vec3 vE;'
+    + ' void main(){ vec3 n = normalize(vN); vec3 e = normalize(vE); if (dot(n, e) < 0.0) n = -n; float d = max(0.0, dot(n, uL)); vec3 h = normalize(uL + e);'
+    + ' float sp = pow(max(0.0, dot(n, h)), uBr); vec3 env = mix(vec3(0.30, 0.28, 0.26), vec3(1.0, 0.98, 0.95), 0.5 + 0.5 * n.y);'
+    + ' vec3 dif = uB * (0.30 + 0.75 * d); vec3 met = uB * env * (0.45 + 0.6 * d); vec3 c = mix(dif, met, uMet) + vec3(sp) * mix(0.5, 1.2, uMet);'
+    + ' gl_FragColor = vec4(c, 1.0); }';
+  var VS_SOL = 'attribute vec2 aQ; uniform mat4 uM; uniform vec3 uO; uniform float uRay; varying vec2 vQ;'
+    + ' void main(){ vQ = aQ; gl_Position = uM * vec4(uO.x + aQ.x * uRay, uO.y, uO.z + aQ.y * uRay * 0.7, 1.0); }';
+  var FS_SOL = 'precision mediump float; varying vec2 vQ; void main(){ float a = 0.30 * (1.0 - smoothstep(0.0, 1.0, length(vQ))); gl_FragColor = vec4(0.16 * a, 0.12 * a, 0.09 * a, a); }';
+  function progGL(gl, vs, fs){
+    var mk = function(t, src){ var s = gl.createShader(t); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
+    var p = gl.createProgram(); gl.attachShader(p, mk(gl.VERTEX_SHADER, vs)); gl.attachShader(p, mk(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+    var o = { p: p, a: {}, u: {} }, na = gl.getProgramParameter(p, gl.ACTIVE_ATTRIBUTES), nu = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
+    for (var i = 0; i < na; i++) { var x = gl.getActiveAttrib(p, i); o.a[x.name] = gl.getAttribLocation(p, x.name); }
+    for (var k = 0; k < nu; k++) { var y = gl.getActiveUniform(p, k); o.u[y.name] = gl.getUniformLocation(p, y.name); }
+    return o;
+  }
+  function tampon(gl, data, cible){ var b = gl.createBuffer(); gl.bindBuffer(cible || gl.ARRAY_BUFFER, b); gl.bufferData(cible || gl.ARRAY_BUFFER, data, gl.STATIC_DRAW); return b; }
+  function lier(gl, pr, nom, buf, n){
+    var l = pr.a[nom]; if (l == null || l < 0) return;
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.enableVertexAttribArray(l); gl.vertexAttribPointer(l, n, gl.FLOAT, false, 0, 0);
+  }
+  function delier(gl){ for (var i = 0; i < 8; i++) gl.disableVertexAttribArray(i); }
+
+  function initGL(cv){
+    var gl = null;
+    try { gl = cv.getContext('webgl', { antialias: true, preserveDrawingBuffer: true, alpha: true, premultipliedAlpha: true }); } catch (e) { gl = null; }
+    if (!gl) { V3.glNon = true; return false; }
+    try {
+      GLV = { cv: cv, gl: gl, tissu: progGL(gl, VS_TISSU, FS_TISSU), obj: progGL(gl, VS_OBJ, FS_OBJ), sol: progGL(gl, VS_SOL, FS_SOL), r: null, cle: '', mailles: [], toiles: {}, inst: [], n: 0 };
+    } catch (e) { GLV = null; V3.glNon = true; return false; }
+    GLV.solB = tampon(gl, new Float32Array([-1, -1, 1, -1, 1, 1, -1, -1, 1, 1, -1, 1]));
+    var ob = objets3d(); GLV.objets = {};
+    Object.keys(ob).forEach(function(k){ GLV.objets[k] = { pos: tampon(gl, ob[k].pos), nor: tampon(gl, ob[k].nor), n: ob[k].n }; });
+    GLV.aniso = gl.getExtension('EXT_texture_filter_anisotropic') || gl.getExtension('WEBKIT_EXT_texture_filter_anisotropic');
+    cv.addEventListener('webglcontextlost', function(ev){ ev.preventDefault(); GLV = null; });
+    return true;
+  }
+
+  /* Les maillages d une taille (à chaque nouvel aperçu du site). */
+  function construireGL(r){
+    var gl = GLV.gl, pieces = {};
+    GLV.mailles.forEach(function(ma){ [ma.bP, ma.bN, ma.bT, ma.bK, ma.bI, ma.bL].forEach(function(b){ if (b) gl.deleteBuffer(b); }); });
+    Object.keys(GLV.toiles).forEach(function(k){ if (GLV.toiles[k].tex) gl.deleteTexture(GLV.toiles[k].tex); });
+    GLV.mailles = []; GLV.toiles = {};
+    (r.pieces || []).forEach(function(p){
+      var pc = depliee(p), bb = pc.bb, pp = function(v){ var n = 256; while (n < v && n < 2048) n *= 2; return n; };
+      pc.toile = document.createElement('canvas'); pc.toile.width = pp((bb.x1 - bb.x0) * 16); pc.toile.height = pp((bb.y1 - bb.y0) * 16);
+      pieces[p.id] = pc; GLV.toiles[p.id] = pc;
+    });
+    (r.vetement || []).forEach(function(tb){
+      var an = (tb.anneaux || []).filter(function(a){ return a.yp != null; }); if (an.length < 2) return;
+      if (an[0].sf != null) { an = adoucir(an); }
+      if (an[0].sf != null) ['devant', 'dos'].forEach(function(pid){ if (pieces[pid]) GLV.mailles.push(mailleCorps(an, pieces[pid], pid)); });
+      else if (an[0].s0 != null && pieces.manche) GLV.mailles.push(mailleManche(an, pieces.manche));
+    });
+    var y0 = 1e9, y1 = -1e9;
+    GLV.mailles.forEach(function(ma){
+      for (var k = 1; k < ma.pos.length; k += 3) { if (ma.pos[k] < y0) y0 = ma.pos[k]; if (ma.pos[k] > y1) y1 = ma.pos[k]; }
+      ma.bP = tampon(gl, ma.pos); ma.bN = tampon(gl, ma.nor); ma.bT = tampon(gl, ma.uv); ma.bK = tampon(gl, ma.tint);
+      ma.bI = tampon(gl, ma.idx, gl.ELEMENT_ARRAY_BUFFER); ma.bL = tampon(gl, ma.lig, gl.ELEMENT_ARRAY_BUFFER);
+    });
+    GLV.cy = (y0 + y1) / 2; GLV.h = Math.max(1, y1 - y0); GLV.ybas = y0; GLV.r = r; GLV.cle = '';
+  }
+
+  /* Les toiles (tissu + motif + découpes) et les objets posés. Le motif arrive en second : il se charge. */
+  var glToileN = 0;
+  function toilesGL(){
+    var n = ++glToileN, gl = GLV.gl;
+    var envoyer = function(pc){
+      if (!GLV) return;
+      if (!pc.tex) pc.tex = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, pc.tex);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, pc.toile);
+      gl.generateMipmap(gl.TEXTURE_2D);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      if (GLV.aniso) gl.texParameterf(gl.TEXTURE_2D, GLV.aniso.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(8, gl.getParameter(GLV.aniso.MAX_TEXTURE_MAX_ANISOTROPY_EXT)));
+    };
+    Object.keys(GLV.toiles).forEach(function(pid){
+      var pc = GLV.toiles[pid]; peindreToile(pc, pid, null); envoyer(pc);
+      var svg = svgMotifPiece(pc, pid, pc.toile.width, pc.toile.height); if (!svg) return;
+      var im = new Image();
+      im.onload = function(){ if (n !== glToileN || !GLV || GLV.toiles[pid] !== pc) return; try { peindreToile(pc, pid, im); envoyer(pc); } catch (e) { peindreToile(pc, pid, null); envoyer(pc); } demander3d(); };
+      im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    });
+    instancesGL();
+  }
+  // les images du motif : chargées une fois (P.imageLocale), puis les toiles se repeignent
+  function imagesMotif3d(){
+    var mo = V3 && V3.m && V3.m.motif; if (!mo || !P || !P.imageLocale) return;
+    (mo.calques || []).forEach(function(c){
+      if (c.type !== 'image' || !c.url || MOIMG[c.url]) return;
+      MOIMG[c.url] = 'chargement';
+      Promise.resolve(P.imageLocale(c.url)).then(function(d){ MOIMG[c.url] = d || ''; if (GLV && VUE === '3d') { GLV.cle = ''; demander3d(); } });
+    });
+  }
+  function instancesGL(){
+    GLV.inst = [];
+    ((V3.design && V3.design.elements) || []).forEach(function(el){
+      GLV.mailles.forEach(function(ma){
+        if (ma.pid !== el.piece) return;
+        var s = surface3d(ma, el.x, el.y); if (!s) return;
+        var n = s.n, t = unit3(sub3(s.t, [n[0] * pt3(n, s.t), n[1] * pt3(n, s.t), n[2] * pt3(n, s.t)])), b = croix3(t, n), k = el.taille / 2, e = 0.06;
+        GLV.inst.push({ type: el.type, matiere: el.matiere,
+          M: [b[0] * k, t[0] * k, n[0] * k, s.p[0] + n[0] * e, b[1] * k, t[1] * k, n[1] * k, s.p[1] + n[1] * e, b[2] * k, t[2] * k, n[2] * k, s.p[2] + n[2] * e, 0, 0, 0, 1],
+          B: [[b[0], t[0], n[0]], [b[1], t[1], n[1]], [b[2], t[2], n[2]]] });
+      });
+    });
+  }
+
+  /* La caméra : la même que la peinture 2D (glisser, molette, Maj + glisser), en perspective. */
+  function cameraGL(W, H){
+    var cyw = Math.cos(V3.yaw), syw = Math.sin(V3.yaw), cp = Math.cos(V3.pitch), sp = Math.sin(V3.pitch), dist = 300, cy = GLV.cy;
+    var R = [[cyw, 0, syw], [sp * syw, cp, -sp * cyw], [-cp * syw, sp, cp * cyw]];
+    var V = [R[0][0], R[0][1], R[0][2], R[0][1] * -cy, R[1][0], R[1][1], R[1][2], R[1][1] * -cy, R[2][0], R[2][1], R[2][2], R[2][1] * -cy - dist, 0, 0, 0, 1];
+    var F = Math.min(W, H) * 0.85 * V3.zoom / Math.max(120, GLV.h) * dist, nr = 20, fr = 2000;
+    var Pm = [2 * F / W, 0, 0, 0, 0, 2 * F / H, 0, 0, 0, 0, -(fr + nr) / (fr - nr), -2 * fr * nr / (fr - nr), 0, 0, -1, 0];
+    var M = mul4(Pm, V), tx = 2 * V3.px / W, ty = -2 * V3.py / H;
+    for (var c = 0; c < 4; c++) { M[c] += tx * M[12 + c]; M[4 + c] += ty * M[12 + c]; }
+    return { M: M, V: V, R: R, W: W, H: H };
+  }
+
+  function peindreGL(cv){
+    if (!GLV || GLV.cv !== cv) { if (!initGL(cv)) return false; }
+    var gl = GLV.gl;
+    if (GLV.r !== V3.r) construireGL(V3.r);
+    var cle = V3.id + '|' + V3.couleur + '|' + JSON.stringify(V3.design || {}) + '|' + (V3.m.version || 0);
+    if (GLV.cle !== cle) { GLV.cle = cle; toilesGL(); }
     var W = cv.clientWidth, H = cv.clientHeight, dpr = window.devicePixelRatio || 1;
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
-    var g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
+    gl.viewport(0, 0, cv.width, cv.height);
+    gl.clearColor(0, 0, 0, 0); gl.clearDepth(1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    var cam = GLV.cam = cameraGL(W, H), L = unit3([0.35, 0.55, 0.76]);
+    // l ombre au sol, d abord, sans écrire la profondeur
+    gl.disable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    gl.useProgram(GLV.sol.p); delier(gl); lier(gl, GLV.sol, 'aQ', GLV.solB, 2);
+    gl.uniformMatrix4fv(GLV.sol.u.uM, false, col4(cam.M)); gl.uniform3f(GLV.sol.u.uO, 0, GLV.ybas - 1.5, 0); gl.uniform1f(GLV.sol.u.uRay, 30);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    gl.disable(gl.BLEND); gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL);
+    // le tissu
+    var pt = GLV.tissu; gl.useProgram(pt.p); delier(gl);
+    gl.uniformMatrix4fv(pt.u.uM, false, col4(cam.M)); gl.uniformMatrix4fv(pt.u.uV, false, col4(cam.V)); gl.uniformMatrix3fv(pt.u.uR, false, col3(cam.R));
+    gl.uniform3f(pt.u.uL, L[0], L[1], L[2]); gl.uniform1f(pt.u.uC, V3.carte ? 0.6 : 0); gl.uniform1i(pt.u.uS, 0); gl.activeTexture(gl.TEXTURE0);
+    GLV.mailles.forEach(function(ma){
+      if (!ma.pc.tex) return;
+      gl.bindTexture(gl.TEXTURE_2D, ma.pc.tex);
+      lier(gl, pt, 'aP', ma.bP, 3); lier(gl, pt, 'aN', ma.bN, 3); lier(gl, pt, 'aT', ma.bT, 2); lier(gl, pt, 'aK', ma.bK, 4);
+      if (V3.fil) { gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ma.bL); gl.drawElements(gl.LINES, ma.lig.length, gl.UNSIGNED_SHORT, 0); }
+      else { gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ma.bI); gl.drawElements(gl.TRIANGLES, ma.idx.length, gl.UNSIGNED_SHORT, 0); }
+    });
+    // les éléments posés
+    var po = GLV.obj; gl.useProgram(po.p); delier(gl); gl.uniform3f(po.u.uL, L[0], L[1], L[2]);
+    GLV.inst.forEach(function(it){
+      var ob = GLV.objets[it.type] || GLV.objets.perle, mt = MAT3[it.matiere] || MAT3.or;
+      lier(gl, po, 'aP', ob.pos, 3); lier(gl, po, 'aN', ob.nor, 3);
+      gl.uniformMatrix4fv(po.u.uM, false, col4(mul4(cam.M, it.M))); gl.uniformMatrix4fv(po.u.uV, false, col4(mul4(cam.V, it.M)));
+      gl.uniformMatrix3fv(po.u.uR, false, col3(mul3(cam.R, it.B)));
+      gl.uniform3f(po.u.uB, mt[0], mt[1], mt[2]); gl.uniform1f(po.u.uMet, mt[3]); gl.uniform1f(po.u.uBr, mt[4]);
+      gl.drawArrays(gl.TRIANGLES, 0, ob.n);
+    });
+    return true;
+  }
+
+  /* ── VISER : quel point du patron est sous la souris ? ──
+     Les sommets tournés vers l oeil, à moins de 16 px, le plus proche de l oeil l emporte ; puis on
+     retrouve le point exact dans les triangles voisins (coordonnées barycentriques à l écran). */
+  function viser3d(ev){
+    if (!GLV || !GLV.cam) return null;
+    var rc = GLV.cv.getBoundingClientRect(), mx = ev.clientX - rc.left, my = ev.clientY - rc.top, cam = GLV.cam, M = cam.M, V = cam.V;
+    var ecran = function(ma, k){ var x = ma.pos[k * 3], y = ma.pos[k * 3 + 1], z = ma.pos[k * 3 + 2];
+      var w = M[12] * x + M[13] * y + M[14] * z + M[15]; if (w <= 0) return null;
+      return { x: ((M[0] * x + M[1] * y + M[2] * z + M[3]) / w * 0.5 + 0.5) * cam.W, y: (0.5 - (M[4] * x + M[5] * y + M[6] * z + M[7]) / w * 0.5) * cam.H }; };
+    var mieux = null;
+    GLV.mailles.forEach(function(ma){
+      var n = ma.R * (ma.J + 1);
+      for (var k = 0; k < n; k++) {
+        var s = ecran(ma, k); if (!s) continue;
+        var d = Math.hypot(s.x - mx, s.y - my); if (d > 16) continue;
+        var x = ma.pos[k * 3], y = ma.pos[k * 3 + 1], z = ma.pos[k * 3 + 2];
+        var pv = [V[0] * x + V[1] * y + V[2] * z + V[3], V[4] * x + V[5] * y + V[6] * z + V[7], V[8] * x + V[9] * y + V[10] * z + V[11]];
+        var nv = [pt3(cam.R[0], [ma.nor[k * 3], ma.nor[k * 3 + 1], ma.nor[k * 3 + 2]]), pt3(cam.R[1], [ma.nor[k * 3], ma.nor[k * 3 + 1], ma.nor[k * 3 + 2]]), pt3(cam.R[2], [ma.nor[k * 3], ma.nor[k * 3 + 1], ma.nor[k * 3 + 2]])];
+        if (pt3(nv, pv) >= 0) continue;                           // le dos de la surface
+        var sc = -pv[2] + d * 0.3;
+        if (!mieux || sc < mieux.sc) mieux = { sc: sc, ma: ma, k: k };
+      }
+    });
+    if (!mieux) return null;
+    var ma = mieux.ma, J = ma.J, i0 = Math.floor(mieux.k / (J + 1)), j0 = mieux.k % (J + 1), bb = ma.pc.bb;
+    var px = function(j){ return bb.x0 + (bb.x1 - bb.x0) * j / J; }, res = { piece: ma.pid, x: px(j0), y: ma.yp[i0] };
+    for (var a = Math.max(0, i0 - 1); a <= Math.min(ma.R - 2, i0); a++) for (var b = Math.max(0, j0 - 1); b <= Math.min(J - 1, j0); b++) {
+      var q = [[a, b], [a + 1, b], [a + 1, b + 1], [a, b + 1]];
+      [[0, 1, 2], [0, 2, 3]].forEach(function(T){
+        var Q3 = T.map(function(t){ return { s: ecran(ma, q[t][0] * (J + 1) + q[t][1]), x: px(q[t][1]), y: ma.yp[q[t][0]] }; });
+        if (!Q3[0].s || !Q3[1].s || !Q3[2].s) return;
+        var A = Q3[0].s, B = Q3[1].s, C = Q3[2].s, de = (B.y - C.y) * (A.x - C.x) + (C.x - B.x) * (A.y - C.y); if (Math.abs(de) < 1e-6) return;
+        var l1 = ((B.y - C.y) * (mx - C.x) + (C.x - B.x) * (my - C.y)) / de, l2 = ((C.y - A.y) * (mx - C.x) + (A.x - C.x) * (my - C.y)) / de, l3 = 1 - l1 - l2;
+        if (l1 < -0.01 || l2 < -0.01 || l3 < -0.01) return;
+        res.x = l1 * Q3[0].x + l2 * Q3[1].x + l3 * Q3[2].x; res.y = l1 * Q3[0].y + l2 * Q3[1].y + l3 * Q3[2].y;
+      });
+    }
+    // y a-t-il du tissu à cet endroit ? (la toile le dit)
+    var pc = ma.pc, tx = Math.floor((res.x - bb.x0) / (bb.x1 - bb.x0) * pc.toile.width), ty = Math.floor((res.y - bb.y0) / (bb.y1 - bb.y0) * pc.toile.height);
+    try { res.tissu = pc.toile.getContext('2d').getImageData(Math.max(0, Math.min(pc.toile.width - 1, tx)), Math.max(0, Math.min(pc.toile.height - 1, ty)), 1, 1).data[3] > 127; } catch (e) { res.tissu = true; }
+    res.x = Math.round(res.x * 10) / 10; res.y = Math.round(res.y * 10) / 10;
+    return res;
+  }
+
+  /* ── LE DESIGN : trouer, poser un bijou, effacer ── */
+  function memo3d(){ V3.pile.push(copie(V3.design)); if (V3.pile.length > 50) V3.pile.shift(); }
+  function poser3d(ev){
+    var v = viser3d(ev);
+    if (!v) { dire('${T("Cliquez sur le vêtement.")}', 'att'); return true; }
+    var D3 = V3.design;
+    if (V3.outil === 'gomme') {
+      var pc = GLV.toiles[v.piece], meilleur = null;
+      var dist = function(o){ var d = Math.hypot(o.x - v.x, o.y - v.y); if (pc && pc.axe && o.l) { var r = reflet({ x: o.x, y: o.y }, pc.axe); d = Math.min(d, Math.hypot(r.x - v.x, r.y - v.y)); } return d; };
+      ['elements', 'decoupes'].forEach(function(gr){ (D3[gr] || []).forEach(function(o, i){
+        if (o.piece !== v.piece) return; var d = dist(o), lim = Math.max(1.5, (o.taille || Math.max(o.l || 0, o.h || 0)) * 0.75);
+        if (d <= lim && (!meilleur || d < meilleur.d)) meilleur = { d: d, gr: gr, i: i };
+      }); });
+      if (!meilleur) { dire('${T("Rien à effacer ici.")}', 'att'); return true; }
+      memo3d(); D3[meilleur.gr].splice(meilleur.i, 1);
+    } else if (V3.outil === 'decoupe') {
+      if (!v.tissu) { dire('${T("Pas de tissu à cet endroit.")}', 'att'); return true; }
+      if ((D3.decoupes || []).length >= 60) { dire('${T("60 découpes au plus.")}', 'err'); return true; }
+      memo3d(); D3.decoupes.push({ piece: v.piece, forme: V3.dec.forme, x: v.x, y: v.y, l: V3.dec.l, h: V3.dec.forme === 'rond' ? V3.dec.l : V3.dec.h });
+    } else if (V3.outil === 'element') {
+      if (!v.tissu) { dire('${T("Pas de tissu à cet endroit.")}', 'att'); return true; }
+      if ((D3.elements || []).length >= 300) { dire('${T("300 éléments au plus.")}', 'err'); return true; }
+      memo3d(); D3.elements.push({ piece: v.piece, type: V3.el.type, matiere: V3.el.matiere, x: v.x, y: v.y, taille: V3.el.taille });
+    } else return false;
+    V3.dsale = true; V3.quitterOk = false; dire(''); peindreDesign3d(); entete3d(); demander3d();
+    return true;
+  }
+  function annuler3d(){ if (!V3 || !V3.pile.length) return; V3.design = V3.pile.pop(); V3.dsale = true; peindreDesign3d(); entete3d(); demander3d(); }
+  function enregistrer3d(){
+    if (OCCUPE || !V3 || !V3.dsale) return;
+    OCCUPE = true; dire('${T("Enregistrement…")}');
+    appeler('atelier:ecrire', [{ id: V3.id, nom: V3.m.nom, design3d: V3.design }]).then(function(r){
+      OCCUPE = false;
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+      V3.dsale = false; V3.pile = [];
+      appeler('atelier:donnees', []).then(function(d){
+        if (d && d.ok) { D = d; var m = (D.modeles || []).filter(function(x){ return x.id === V3.id; })[0]; if (m && V3) { V3.m = m; V3.design = copie(m.design3d || V3.design); } }
+        if (VUE === '3d' && V3) { entete3d(); peindreDesign3d(); dire('${T("Design 3D enregistré.")}', 'bon'); }
+      });
+    });
+  }
+  // la barre du haut : retour, annuler, enregistrer, photo
+  function entete3d(){
+    var a = document.getElementById('actions'); if (!a || !V3) return;
+    var m = V3.m;
+    document.getElementById('sous').textContent = m.nom + (m.ref ? ' · ' + m.ref : '') + ' · v' + (m.version || 1) + ' · ' + '${T("taille {0}")}'.split('{0}').join(V3.taille) + (V3.dsale ? ' · ${T("modifications non enregistrées")}' : '');
+    a.innerHTML = '<button type="button" id="v3-retour">' + (V3.retour === 'editeur' ? '${T("← Éditeur")}' : '${T("← Bibliothèque")}') + '</button>'
+      + (plaque3d() ? '<button type="button" id="v3-annuler" aria-label="${T("Annuler")}" title="${T("Annuler")}"' + (V3.pile.length ? '' : ' disabled') + '>↶</button>'
+        + (D.peutModifier ? '<button type="button" class="prim" id="v3-enreg"' + (V3.dsale ? '' : ' disabled') + '>${T("Enregistrer")}</button>' : '') : '')
+      + '<button type="button" id="v3-photo">${T("Photo du rendu")}</button>';
+  }
+  var LDEC3 = { rond: '${T("Rond")}', ovale: '${T("Ovale")}', goutte: '${T("Goutte")}', rect: '${T("Rectangle")}' };
+  var LEL3 = { perle: '${T("Perle")}', bouton: '${T("Bouton")}', strass: '${T("Strass")}', anneau: '${T("Anneau")}', oeillet: '${T("Œillet")}', clou: '${T("Clou")}' };
+  var LMAT3 = { or: '${T("Or")}', argent: '${T("Argent")}', nacre: '${T("Nacre")}', noir: '${T("Noir")}', cristal: '${T("Cristal")}' };
+  function peindreDesign3d(){
+    var z = document.getElementById('v3-design'); if (!z || !V3) return;
+    if (!V3.r) { z.innerHTML = ''; return; }
+    if (!plaque3d()) { z.innerHTML = '<div class="cx-sep"></div><div class="ed-note">${T("Le design en 3D (découpes, bijoux) demande l’aperçu plaqué : il n’est pas encore offert pour un pantalon, ni sans accélération graphique.")}</div>'; return; }
+    var seg = function(attr, k, lib, on){ return '<button type="button" class="' + (on ? 'on' : '') + '" ' + attr + '="' + k + '">' + lib + '</button>'; };
+    var nb = function(v){ return esc(String(v).replace('.', '${SEP_DEC()}')); };
+    var h = '<div class="cx-sep"></div><h2>${T("Design")}</h2><div class="ed-seg" role="group" aria-label="${T("Outil")}">'
+      + seg('data-v3out', 'tourner', '${T("Tourner")}', V3.outil === 'tourner') + seg('data-v3out', 'decoupe', '${T("Trouer")}', V3.outil === 'decoupe')
+      + seg('data-v3out', 'element', '${T("Bijou")}', V3.outil === 'element') + seg('data-v3out', 'gomme', '${T("Gomme")}', V3.outil === 'gomme') + '</div>';
+    if (V3.outil === 'decoupe') h += '<div class="ed-seg" role="group" aria-label="${T("Forme")}" style="margin-top:.5rem">' + Object.keys(LDEC3).map(function(k){ return seg('data-v3df', k, LDEC3[k], V3.dec.forme === k); }).join('') + '</div>'
+      + '<div class="at-champs" style="margin-top:.5rem"><label>${T("Largeur (cm)")}<input type="text" id="v3-dl" inputmode="decimal" maxlength="4" value="' + nb(V3.dec.l) + '"></label>'
+      + (V3.dec.forme === 'rond' ? '' : '<label>${T("Hauteur (cm)")}<input type="text" id="v3-dh" inputmode="decimal" maxlength="4" value="' + nb(V3.dec.h) + '"></label>') + '</div>'
+      + '<div class="ed-note">${T("Cliquez sur le vêtement pour le trouer. La découpe est tracée dans le patron imprimé ; sur le devant et le dos (des demi-pièces), elle se répète en miroir.")}</div>';
+    if (V3.outil === 'element') h += '<div class="ed-seg" role="group" aria-label="${T("Élément")}" style="margin-top:.5rem">' + Object.keys(LEL3).map(function(k){ return seg('data-v3et', k, LEL3[k], V3.el.type === k); }).join('') + '</div>'
+      + '<div class="ed-seg" role="group" aria-label="${T("Matière")}" style="margin-top:.5rem">' + Object.keys(LMAT3).map(function(k){ return seg('data-v3em', k, LMAT3[k], V3.el.matiere === k); }).join('') + '</div>'
+      + '<div class="at-champs" style="margin-top:.5rem"><label>${T("Diamètre (cm)")}<input type="text" id="v3-et" inputmode="decimal" maxlength="4" value="' + nb(V3.el.taille) + '"></label></div>'
+      + '<div class="ed-note">${T("Cliquez sur le vêtement pour poser l’élément. Une manche reçoit l’élément sur les deux manches : elles sont coupées dans la même pièce.")}</div>';
+    if (V3.outil === 'gomme') h += '<div class="ed-note">${T("Cliquez sur une découpe ou un élément pour l’effacer.")}</div>';
+    var D3 = V3.design || {};
+    h += '<div class="cx-sub" style="margin-top:.5rem">' + '${T("{0} découpe(s) · {1} élément(s)")}'.split('{0}').join((D3.decoupes || []).length).split('{1}').join((D3.elements || []).length) + '</div>';
+    z.innerHTML = h;
+  }
+  function changeDesign3d(t){
+    var v = parseFloat(String(t.value).replace(',', '.'));
+    var borne = function(x, a, b, d){ return isFinite(x) ? Math.max(a, Math.min(b, Math.round(x * 10) / 10)) : d; };
+    if (t.id === 'v3-dl') { V3.dec.l = borne(v, 0.3, 60, V3.dec.l); t.value = String(V3.dec.l).replace('.', '${SEP_DEC()}'); return true; }
+    if (t.id === 'v3-dh') { V3.dec.h = borne(v, 0.3, 60, V3.dec.h); t.value = String(V3.dec.h).replace('.', '${SEP_DEC()}'); return true; }
+    if (t.id === 'v3-et') { V3.el.taille = borne(v, 0.2, 5, V3.el.taille); t.value = String(V3.el.taille).replace('.', '${SEP_DEC()}'); return true; }
+    return false;
+  }
+
+  /* ── La peinture 2D (sans WebGL, ou pour un pantalon) : rotation, perspective, ombrage, tri des faces ── */
+  function peindre3d(){
+    var cv = document.getElementById('v3-canevas'); if (!cv || !V3 || !V3.mesh) return;
+    if (plaque3d() && peindreGL(cv)) return;
+    var W = cv.clientWidth, H = cv.clientHeight, dpr = window.devicePixelRatio || 1;
+    if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+    var g = cv.getContext('2d'); if (!g) return;
+    g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
     var cyw = Math.cos(V3.yaw), syw = Math.sin(V3.yaw), cp = Math.cos(V3.pitch), sp = Math.sin(V3.pitch);
     var Dst = 520, f = Math.min(W, H) * 2.9 * V3.zoom * (Dst - 60) / Math.max(120, V3.mesh.h) / Dst * 0.33;
     var cx = W / 2 + V3.px, cy = H / 2 + V3.py, cyM = V3.mesh.cy;
@@ -1897,9 +2487,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessiner3d(){
     var m = V3.m;
     document.getElementById('titre').textContent = '${T("Aperçu 3D")}';
-    document.getElementById('sous').textContent = m.nom + (m.ref ? ' · ' + m.ref : '') + ' · v' + (m.version || 1) + ' · ' + '${T("taille {0}")}'.split('{0}').join(V3.taille);
-    document.getElementById('actions').innerHTML = '<button type="button" id="v3-retour">' + (V3.retour === 'editeur' ? '${T("← Éditeur")}' : '${T("← Bibliothèque")}') + '</button>'
-      + '<button type="button" id="v3-photo">${T("Photo du rendu")}</button>';
+    entete3d();
     var seg = function(attr, k, lib, on){ return '<button type="button" class="' + (on ? 'on' : '') + '" ' + attr + '="' + k + '">' + lib + '</button>'; };
     var chip = function(k, lib, on){ return '<label><input type="checkbox" data-v3o="' + k + '"' + (on ? ' checked' : '') + '>' + lib + '</label>'; };
     var g = '<div class="cx-carte"><h2>${T("Taille")}</h2><div class="ed-seg" role="group" aria-label="${T("Taille affichée")}">'
@@ -1909,12 +2497,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="im-cases" style="margin-top:.6rem">' + chip('carte', '${T("Carte d’ajustement")}', V3.carte) + chip('fil', '${T("Fil de fer")}', V3.fil) + chip('auto', '${T("Rotation automatique")}', V3.auto) + '</div>'
       + '<div class="cx-sep"></div><h2>${T("Couleur du tissu")}</h2><div class="v3-couleurs">'
       + COUL3.map(function(c){ return '<button type="button" class="' + (V3.couleur === c[0] ? 'on' : '') + '" data-v3c="' + c[0] + '" title="' + c[1] + '" aria-label="' + c[1] + '" style="background:' + c[0] + '"></button>'; }).join('') + '</div>'
-      + '<div class="cx-sep"></div><h2>${T("Fond")}</h2><div class="ed-seg" role="group" aria-label="${T("Fond")}">' + seg('data-v3f', 'beige', '${T("Beige")}', V3.fond === 'beige') + seg('data-v3f', 'blanc', '${T("Blanc")}', V3.fond === 'blanc') + '</div></div>';
-    var sc = '<div class="v3-scene ' + V3.fond + '" id="v3-scene"><canvas id="v3-canevas" role="img" aria-label="${T("Le vêtement en 3D")}"></canvas>'
+      + '<div class="cx-sep"></div><h2>${T("Fond")}</h2><div class="ed-seg" role="group" aria-label="${T("Fond")}">' + seg('data-v3f', 'beige', '${T("Beige")}', V3.fond === 'beige') + seg('data-v3f', 'blanc', '${T("Blanc")}', V3.fond === 'blanc') + '</div>'
+      + '<div id="v3-design"></div></div>';
+    var sc = '<div class="v3-scene ' + V3.fond + (V3.outil !== 'tourner' ? ' vise' : '') + '" id="v3-scene"><canvas id="v3-canevas" role="img" aria-label="${T("Le vêtement en 3D")}"></canvas>'
       + '<span class="v3-aide">${T("Glisser pour tourner · molette pour zoomer · Maj + glisser pour déplacer · double-clic pour recentrer")}</span></div>';
     var d = '<div class="cx-carte" id="v3-pan"></div>';
     corps.innerHTML = '<div class="v3-trois">' + g + sc + d + '</div>';
-    peindrePanneau3d();
+    // le canevas WebGL est GARDÉ d une vue à l autre : son contexte et ses toiles restent
+    var nv = document.getElementById('v3-canevas');
+    if (GLV && GLV.cv && nv && GLV.cv !== nv && V3.m.base !== 'pantalon') nv.parentNode.replaceChild(GLV.cv, nv);
+    peindrePanneau3d(); peindreDesign3d();
     var z = document.getElementById('v3-scene');
     if (window.ResizeObserver && z) { if (window._v3RO) window._v3RO.disconnect(); window._v3RO = new ResizeObserver(function(){ demander3d(); }); window._v3RO.observe(z); }
     demander3d();
@@ -1946,9 +2538,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if ((b = t.closest('[data-v3v]'))) { var v = VUES3.filter(function(x){ return x[0] === b.getAttribute('data-v3v'); })[0]; V3.yaw = v[2]; V3.pitch = 0.05; demander3d(); return; }
     if ((b = t.closest('[data-v3c]'))) { V3.couleur = b.getAttribute('data-v3c'); dessiner(); return; }
     if ((b = t.closest('[data-v3f]'))) { V3.fond = b.getAttribute('data-v3f'); dessiner(); return; }
+    if ((b = t.closest('[data-v3out]'))) { V3.outil = b.getAttribute('data-v3out'); var sc = document.getElementById('v3-scene'); if (sc) sc.classList.toggle('vise', V3.outil !== 'tourner'); peindreDesign3d(); return; }
+    if ((b = t.closest('[data-v3df]'))) { V3.dec.forme = b.getAttribute('data-v3df'); peindreDesign3d(); return; }
+    if ((b = t.closest('[data-v3et]'))) { V3.el.type = b.getAttribute('data-v3et'); peindreDesign3d(); return; }
+    if ((b = t.closest('[data-v3em]'))) { V3.el.matiere = b.getAttribute('data-v3em'); peindreDesign3d(); return; }
   }
   function change3d(t){
     if (t.hasAttribute('data-v3o')) { V3[t.getAttribute('data-v3o')] = !!t.checked; demander3d(); return; }
+    if (changeDesign3d(t)) return;
 
   }
   function photo3d(){
@@ -1965,6 +2562,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
   }
   function quitter3d(){
+    if (V3 && V3.dsale && !V3.quitterOk) { V3.quitterOk = true; dire('${T("Le design 3D n’est pas enregistré : cliquez encore pour quitter sans enregistrer.")}', 'att'); return; }
     var r = V3 ? V3.retour : 'biblio', id = V3 ? V3.id : '';
     V3 = null; if (window._v3RO) { window._v3RO.disconnect(); window._v3RO = null; }
     if (r === 'editeur' && id) { VUE = 'biblio'; ouvrirEditeur(id); return; }
@@ -1975,6 +2573,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   corps.addEventListener('mousedown', function(ev){
     if (VUE !== '3d' || !V3 || !(ev.target && ev.target.closest && ev.target.closest('#v3-scene'))) return;
     ev.preventDefault();
+    if (V3.outil !== 'tourner' && ev.button === 0 && !ev.shiftKey && plaque3d() && GLV && poser3d(ev)) return;
     V3.glisse = { x: ev.clientX, y: ev.clientY, yaw: V3.yaw, pitch: V3.pitch, px: V3.px, py: V3.py, dep: ev.shiftKey || ev.button === 1 };
     var z = document.getElementById('v3-scene'); if (z) z.classList.add('glisse');
   });
@@ -2780,6 +3379,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (t.closest('#mo-enreg')) { enregistrerMo(); return; }
     if (t.closest('#mo-annuler')) { annulerMo(); return; }
     if (t.closest('#v3-photo')) { photo3d(); return; }
+    if (t.closest('#v3-enreg')) { enregistrer3d(); return; }
+    if (t.closest('#v3-annuler')) { annuler3d(); return; }
     if (t.closest('#e-3d')) { troisDDepuisEditeur(); return; }
     if (t.closest('#i-exporter')) { exporterFichier(t.closest('#i-exporter')); return; }
     if (t.closest('#i-dossier')) { if (P && P.ouvrirDossierExports) P.ouvrirDossierExports(); return; }

@@ -430,7 +430,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
       if (NOUVEAU) {
         h += '<div class="carte" style="margin-bottom:.6rem">'
           + '<div class="deux">'
-          + '<div class="champ"><label for="f-nom">${T("Nom")}</label><input type="text" id="f-nom" placeholder="ex. ${T("Étiquette")} bijou"></div>'
+          + '<div class="champ"><label for="f-nom">${T("Nom")}</label><input type="text" id="f-nom" placeholder="${T("ex. Étiquette bijou")}"></div>'
           + '<div class="champ"><label for="f-type">Type</label><select id="f-type">'
           + '<option value="label">${T("Étiquette")}</option><option value="stick">${T("Autocollant")}</option>'
           + '<option value="card">${T("Carte d’affaires")}</option></select></div>'

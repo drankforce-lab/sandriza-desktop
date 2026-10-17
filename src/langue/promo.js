@@ -102,6 +102,7 @@ module.exports = {
   '＋ Ajouter un format': '＋ Add a format',
   'Étiquette Autocollant': 'Label Sticker',
   'Étiquette': 'Label',
+  'ex. Étiquette bijou': 'e.g. Jewelry label',
   'Autocollant': 'Sticker',
   'Carte d’affaires': 'Business card',
   'Rectangle Carré': 'Rectangle Square',
