@@ -126,6 +126,16 @@ html.jour .pf-med-l video{background:#1d2433}
   background:var(--v05);color:var(--tx);cursor:pointer}
 .mini-decor:hover:not(:disabled){border-color:var(--or)}
 .mini-decor:disabled{opacity:.35;cursor:default}
+/* Le gros plan sur la fibre (2026-10-17) */
+.gp-deux{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin:.6rem 0}
+.gp-photo{position:relative;border-radius:10px;overflow:hidden;background:var(--f-0f1826);cursor:crosshair;align-self:start}
+.gp-photo img{display:block;width:100%;height:auto}
+.gp-cadre{position:absolute;border:2px solid #F59E0B;box-shadow:0 0 0 9999px rgba(0,0,0,.35);pointer-events:none}
+.gp-res{border-radius:10px;overflow:hidden;background:var(--f-0f1826);aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;color:var(--tx2);font-size:.8rem;text-align:center}
+.gp-res .vu{width:100%;height:100%;background-repeat:no-repeat}
+.gp-res img{display:block;width:100%;height:100%;object-fit:cover}
+.gp-lgd{font-size:.74rem;color:var(--tx2);margin-top:.25rem}
+.gp-ia{display:flex;align-items:center;gap:.45rem;font-size:.82rem;margin:.2rem 0 .4rem}
 .fonds{display:flex;gap:.4rem;flex-wrap:wrap;margin:.5rem 0}
 .fonds button{display:inline-flex;align-items:center;gap:.35rem;font-size:.76rem;
   padding:.2rem .5rem;border-radius:99px;border:1px solid var(--v18);
@@ -587,7 +597,9 @@ function pageProduit(id) {
       + '<div class="vign" id="p-vign" title="${T("Photo principale — cliquer pour choisir, ou déposer une secondaire ici")}">${T("choisir une photo")}</div>'
       + '<div class="lgd-principale">${T("Photo principale")}</div>'
       + '<button type="button" id="p-detourer" class="mini-decor" disabled '
-      + 'title="${T("Détourer la photo et poser un décor (studio, jardin, Paris…)")}"><span class="ic">✂</span> ${T("Décor")}</button></div>'
+      + 'title="${T("Détourer la photo et poser un décor (studio, jardin, Paris…)")}"><span class="ic">✂</span> ${T("Décor")}</button>'
+      + '<button type="button" id="p-fibre" class="mini-decor" disabled '
+      + 'title="${T("Un gros plan sur la matière, tiré de la photo principale, ajouté aux photos")}"><span class="ic">🔍</span> ${T("Gros plan fibre")}</button></div>'
       + '<div class="vues" id="p-vues"></div>'
       + '</div></div>'
       /* ⚠ LES MÉDIAS (2026-10-07, sa demande : « Sophie mesure 1,68 m et porte
@@ -951,6 +963,7 @@ function pageProduit(id) {
         return;
       }
       if (ev.target.closest('#p-detourer')) { ouvrirDetourage(); return; }
+      if (ev.target.closest('#p-fibre')) { ouvrirGrosPlan(); return; }
       if (ev.target.closest('#p-cv-gen')) { genererVariantes(); return; }
       if (ev.target.closest('#p-vign')) {
         choisirPhoto(function(ds){ IMAGE = ds[0]; montrerImage(IMAGE); majIa(); });
@@ -1845,6 +1858,8 @@ function pageProduit(id) {
     v.setAttribute('draggable', src ? 'true' : 'false');
     var bd = document.getElementById('p-detourer');
     if (bd) bd.disabled = !src;
+    var bf = document.getElementById('p-fibre');
+    if (bf) bf.disabled = !src;
     v.innerHTML = src
       ? '<img src="' + esc(src) + '" alt="">'
         + '<button type="button" class="x" id="p-vider" title="${T("Retirer la photo")}">×</button>'
@@ -2602,6 +2617,88 @@ function pageProduit(id) {
       montrerImage(IMAGE); majIa();
       v.remove();
       dire('${T("Photo principale remplacée par la version détourée.")}', 'bon');
+    };
+  }
+
+  /* ── LE GROS PLAN SUR LA FIBRE (2026-10-17) ── Sa demande : « à partir de la photo
+     principale, une photo en GROS PLAN sur la FIBRE, ajoutée aux photos du produit ».
+     Le SITE trouve la zone de tissu (produit:grosPlanZone : dans le vêtement, loin des
+     coutures, boutons, imprimés — gratuit), puis fabrique le gros plan (produit:grosPlan :
+     recadré, agrandi ×4 par Real-ESRGAN chez fal.ai, FIDÈLE à la matière ; ou recadré
+     seulement, sans IA). Un clic sur la photo déplace la zone. Rien ne s ajoute aux photos
+     sans « Ajouter aux photos », et rien ne s enregistre avant la fiche. */
+  function ouvrirGrosPlan(){
+    if (!IMAGE) return;
+    var v = document.createElement('div');
+    v.className = 'voile';
+    v.innerHTML = '<div class="boite" style="max-width:46rem">'
+      + '<h3><span class="ic">🔍</span> ${T("Gros plan sur la fibre")}</h3>'
+      + '<div class="aide">${T("La zone de tissu est choisie automatiquement : dans le vêtement, loin des coutures, des boutons et des imprimés. Cliquez la photo pour la déplacer.")}</div>'
+      + '<div class="gp-deux"><div><div class="gp-photo" id="gp-photo"><img id="gp-img" src="' + esc(IMAGE) + '" alt=""><div class="gp-cadre" id="gp-cadre" style="display:none"></div></div>'
+      + '<div class="gp-lgd">${T("Photo principale")}</div></div>'
+      + '<div><div class="gp-res" id="gp-res">${T("Recherche de la zone de tissu…")}</div><div class="gp-lgd" id="gp-lgd">${T("Aperçu du recadrage")}</div></div></div>'
+      + '<label class="gp-ia"><input type="checkbox" id="gp-ia" checked> ${T("Agrandir avec l’IA (Real-ESRGAN : fidèle à la matière, n’invente pas de tissage) · environ 0,01 $ US")}</label>'
+      + '<div class="pied2"><button type="button" id="gp-non">${T("Annuler")}</button>'
+      + '<button type="button" id="gp-lancer" disabled>${T("Fabriquer le gros plan")}</button>'
+      + '<button type="button" class="prim" id="gp-oui" disabled>${T("✓ Ajouter aux photos")}</button></div></div>';
+    document.body.appendChild(v);
+    var ZONE = null, SRC = null, RESULTAT = '', OCC = false;
+    function el(id){ return document.getElementById(id); }
+    function peindreZone(){
+      var c = el('gp-cadre'), r = el('gp-res'); if (!c || !ZONE || !SRC) return;
+      c.style.display = 'block';
+      c.style.left = (ZONE.x / SRC.l * 100) + '%'; c.style.top = (ZONE.y / SRC.h * 100) + '%';
+      c.style.width = (ZONE.c / SRC.l * 100) + '%'; c.style.height = (ZONE.c / SRC.h * 100) + '%';
+      // l aperçu du recadrage : la photo en fond, agrandie et décalée (pas de canevas : une photo R2 le « teinterait »)
+      if (!RESULTAT && r) r.innerHTML = '<div class="vu" style="background-image:url(&quot;' + esc(IMAGE) + '&quot;);background-size:' + (SRC.l / ZONE.c * 100) + '% ' + (SRC.h / ZONE.c * 100) + '%;background-position:'
+        + (SRC.l === ZONE.c ? 0 : ZONE.x / (SRC.l - ZONE.c) * 100) + '% ' + (SRC.h === ZONE.c ? 0 : ZONE.y / (SRC.h - ZONE.c) * 100) + '%"></div>';
+    }
+    P.appeler('produit:grosPlanZone', IMAGE).then(function(r){
+      if (!r || !r.ok) {
+        el('gp-res').innerHTML = '<div style="padding:1rem;color:var(--tx-err)">' + esc(r && r.motif === 'zone_introuvable'
+          ? '${T("Aucune zone de tissu assez grande et unie dans cette photo. Cliquez la photo pour choisir la zone vous-même.")}' : expliquer(r)) + '</div>';
+        var im = el('gp-img');
+        SRC = { l: (im && im.naturalWidth) || 1000, h: (im && im.naturalHeight) || 1000 };
+        el('gp-lancer').disabled = true;
+        return;
+      }
+      ZONE = r.zone; SRC = r.source; peindreZone(); el('gp-lancer').disabled = false;
+    });
+    el('gp-photo').onclick = function(ev){
+      if (OCC) return;
+      var im = el('gp-img'); if (!im) return;
+      if (!SRC) SRC = { l: im.naturalWidth || 1000, h: im.naturalHeight || 1000 };
+      var b = im.getBoundingClientRect(), fx = (ev.clientX - b.left) / b.width, fy = (ev.clientY - b.top) / b.height;
+      var c = ZONE ? ZONE.c : Math.round(Math.min(SRC.l, SRC.h) * 0.2);
+      ZONE = { c: c, x: Math.round(Math.max(0, Math.min(SRC.l - c, fx * SRC.l - c / 2))), y: Math.round(Math.max(0, Math.min(SRC.h - c, fy * SRC.h - c / 2))) };
+      RESULTAT = ''; el('gp-oui').disabled = true; el('gp-lancer').disabled = false;
+      el('gp-lgd').textContent = '${T("Aperçu du recadrage")}';
+      peindreZone();
+    };
+    el('gp-lancer').onclick = function(){
+      if (OCC || !ZONE) return;
+      OCC = true; el('gp-lancer').disabled = true;
+      var ia = !!el('gp-ia').checked;
+      el('gp-res').innerHTML = ia ? '${T("Agrandissement par l’IA…")}' : '${T("Recadrage…")}';
+      P.appeler('produit:grosPlan', IMAGE, ZONE, ia, cleCouts()).then(function(r){
+        OCC = false; el('gp-lancer').disabled = false;
+        if (!r || !r.ok) { el('gp-res').innerHTML = '<div style="padding:1rem;color:var(--tx-err)">' + esc((r && r.detail) || expliquer(r)) + '</div>'; return; }
+        RESULTAT = r.image || '';
+        el('gp-res').innerHTML = '<img src="' + esc(RESULTAT) + '" alt="">';
+        el('gp-lgd').textContent = r.agrandi ? '${T("Gros plan agrandi ×4 par l’IA (1200 × 1200 px)")}' : '${T("Gros plan recadré, sans IA (1200 × 1200 px)")}';
+        el('gp-oui').disabled = !RESULTAT;
+        if (r.agrandi) chargerCouts();
+      });
+    };
+    el('gp-non').onclick = function(){ v.remove(); };
+    el('gp-oui').onclick = function(){
+      if (!RESULTAT) return;
+      var n = Object.keys(VUES).filter(function(k){ return k.indexOf('libre') === 0 && VUES[k]; }).length;
+      if (n >= MAX_PHOTOS) { dire('${T("Les photos supplémentaires sont toutes prises : retirez-en une, puis recommencez.")}', 'att'); return; }
+      var k = 1; while (VUES['libre' + k]) k++;
+      VUES['libre' + k] = RESULTAT; dessinerVues();
+      v.remove();
+      dire('${T("Gros plan ajouté aux photos du produit. Il sera enregistré avec la fiche.")}', 'bon');
     };
   }
 

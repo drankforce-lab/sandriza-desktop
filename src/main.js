@@ -3024,7 +3024,7 @@ const OPS_PONT = new Set([
   // couleur par appel — la fenetre boucle), aucun service externe.
   'produit:teinter',
   // L'aperçu 3D (Hunyuan3D par Fal.ai), les coûts par article et le contrôle des marges (7.16.0).
-  'produit:apercu3dLancer', 'produit:apercu3dSuivre', 'produit:couts', 'marges:analyser', 'marges:appliquer',
+  'produit:apercu3dLancer', 'produit:apercu3dSuivre', 'produit:couts', 'produit:grosPlanZone', 'produit:grosPlan', 'marges:analyser', 'marges:appliquer',
   'commandes:preparer', 'commandes:expedier',
   // Retours. ⚠ retour:finaliser peut REMBOURSER (Square ou credit boutique) et
   // retour:enregistrer peut generer une etiquette FACTUREE : toute la regle vit
@@ -3559,6 +3559,8 @@ const LIMITES_PONT = {
   'produit:photoIa': 120000,
   'produit:detourer': 30000, 'produit:teinter': 30000, 'stock:etiquettes': 30000,
   'produit:apercu3dLancer': 90000, 'produit:apercu3dSuivre': 60000, 'produit:couts': 30000,
+  /* le gros plan sur la fibre : la zone se trouve au poste (court) ; l agrandissement passe par fal.ai */
+  'produit:grosPlanZone': 30000, 'produit:grosPlan': 120000,
   'marges:analyser': 60000, 'marges:appliquer': 90000,
   'stock:endommagesRapport': 30000, 'stock:rabaisComptoirRapport': 30000, 'facture:imprimer': 30000, 'expedition:comparer': 30000, 'commande:bon': 30000,
   // La liste des retours RESYNCHRONISE les demandes avant de repondre (la
