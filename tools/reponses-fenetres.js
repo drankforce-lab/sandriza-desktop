@@ -5816,7 +5816,7 @@ const JEU = {
         'chat:lire': {
           ok: true,
           conversation: { id: 's1', nom: 'Marie Tremblay', courriel: 'marie@example.com',
-            telephone: '', contactVoulu: 'email', statut: 'pending', horsLigne: false,
+            telephone: '', contactVoulu: 'email', statut: 'pending', statutLibelle: 'En attente', horsLigne: false,
             ouverte: '2026-08-07 14:22',
             messages: [
               { texte: 'Bonjour, avez-vous la robe en taille M ?', qui: 'visitor', heure: '14:22' },
