@@ -430,7 +430,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<span class="vig">' + svgPieces([{ pieces: m.pieces || [] }], 176, 150, { mini: true, titre: m.nom }) + '</span>'
         + '<span class="tx"><b>' + esc(m.nom) + '</b><span>' + esc((m.ref ? m.ref + ' · ' : '') + 'v' + (m.version || 1) + ' · ' + (m.tailles || []).join(' ')) + '</span></span></button>';
     }).join('');
-    if (D.peutAjouter) t += '<button type="button" class="at-carte nouveau" id="a-nouveau2"><b>${T("Partir d’un patron de base")}</b><span>${T("Robe, chemisier, jupe, pantalon — tracé à vos mesures")}</span></button>';
+    // (2026-10-17, sa demande « retire ça » : la carte « Partir d un patron de base » doublait le bouton « Nouveau modèle » de la tête.)
     t += '</div>';
     if (tous.length && !liste.length) t += '<div class="vide">${T("Aucun modèle ne correspond.")}</div>';
     t += '<div class="cx-pied"><span>' + liste.length + ' ' + (liste.length > 1 ? '${T("modèles")}' : '${T("modèle")}') + '</span></div></div>';
@@ -2456,7 +2456,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if ((b = t.closest('[data-editer]'))) { ouvrirEditeur(b.getAttribute('data-editer')); return; }
     if ((b = t.closest('[data-cat]'))) { CAT = b.getAttribute('data-cat'); dessiner(); return; }
     if ((b = t.closest('[data-etat]'))) { var e = b.getAttribute('data-etat'); ETAT = ETAT === e ? '' : e; dessiner(); return; }
-    if ((b = t.closest('#a-nouveau2'))) { ouvrirNeuf(); return; }
     if ((b = t.closest('[data-ouvrir]'))) { ouvrirModele(b.getAttribute('data-ouvrir')); return; }
     if ((b = t.closest('[data-dupl]'))) { dupliquer(b.getAttribute('data-dupl')); return; }
     if ((b = t.closest('[data-suppr]'))) { supprimer(b.getAttribute('data-suppr')); return; }

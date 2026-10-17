@@ -1525,6 +1525,8 @@ const createWindow = () => {
     height: 900,
     minWidth: 1024,
     minHeight: 700,
+    // ⚠ CACHÉE JUSQU À LA DÉCISION DE LA VÉRIFICATION (2026-10-17) — voir _montrerDemarrage.
+    show: false,
     backgroundColor: _fondTheme(),
     title: 'Administration Sandriza',
     // ⚠ BARRE DE TITRE PERSONNALISÉE (2026-08-12) : cadre gris de Windows retiré,
@@ -1596,6 +1598,8 @@ const createWindow = () => {
   _porteSansTheme = false;
   _bandePorte(true);
   mainWindow.loadURL(portePage(TP('Démarrage'), TP('Préparation de l’application…'), 8)).catch(() => {});
+  // Le filet : si la vérification traîne, la fenêtre se montre quand même (jamais d écran absent).
+  setTimeout(() => _montrerDemarrage(), DEMARRAGE_ATTENTE_MS);
 
   // Réapplique la préférence de masquage de la barre latérale à chaque chargement,
   // et remet le menu en accord avec l'état de session de la page qui vient de
@@ -5441,11 +5445,39 @@ const connexionRetirer = () => {
   try { v.webContents.close(); } catch (e) {}
   return true;
 };
-const montrerPorte = (titre, message, progression, sansTheme) => {
+/* ══ LA FENÊTRE NE SE MONTRE QU UNE FOIS LA VÉRIFICATION TRANCHÉE (2026-10-17) ══
+   Ses mots : « quand on démarre l application et qu il y a une mise à jour, il y a
+   un moment où on voit encore le thème lin s appliquer, ensuite on le voit
+   disparaître ». Deux de ses décisions se croisaient là :
+     · le matin du 2026-10-15 : la page de chargement suit le jeu de couleurs ;
+     · le soir : « retire le thème durant les update, c est trop sombre ».
+   On ne SAIT qu il y a une mise à jour qu APRÈS la vérification ; l écran de
+   démarrage et celui de la vérification, au thème, passaient donc à l écran
+   d origine de la mise à jour — le flash.
+   ➡ La fenêtre naît CACHÉE et se montre sur le premier écran DÉCISIF : l ouverture
+   de l administration (au thème) s il n y a rien, l écran de la mise à jour (sans
+   thème) s il y en a une. Rien de ce qui précède ne se voit.
+   ⚠ LE FILET : au-delà de DEMARRAGE_ATTENTE_MS, elle se montre quand même — une
+   application qui ne paraît pas pendant vingt secondes de réseau lent semble
+   plantée, et c est pire qu un flash.
+   ⚠ LE DÉMARRAGE CACHÉ (--veilleur, icône présente) RESTE CACHÉ : c est voulu. */
+const DEMARRAGE_ATTENTE_MS = 4000;
+let _demarrageMontre = false;
+const _montrerDemarrage = () => {
+  if (_demarrageMontre) return;
+  _demarrageMontre = true;
+  if (DEMARRER_CACHE && trayVeille) return;
+  try { if (mainWindow && !mainWindow.isDestroyed() && !mainWindow.isVisible()) mainWindow.show(); } catch (_) {}
+};
+/* `attente` : un écran qui n est PAS décisif (la vérification en cours) — il se
+   peint sans montrer la fenêtre. Tout autre écran la montre, une fois PEINT. */
+const montrerPorte = (titre, message, progression, sansTheme, attente) => {
   if (!mainWindow || mainWindow.isDestroyed()) return;
   _porteSansTheme = !!sansTheme;
   _bandePorte(true);
-  mainWindow.loadURL(portePage(titre, message, progression)).catch(() => {});
+  mainWindow.loadURL(portePage(titre, message, progression))
+    .then(() => { if (!attente) _montrerDemarrage(); })
+    .catch(() => { if (!attente) _montrerDemarrage(); });
 };
 
 /* Les gardes qui appartiennent a la PAGE DU SITE, ou qu elle vive. */
@@ -5973,6 +6005,7 @@ const getUpdater = () => {
       // on laisse passer en le DISANT — c'est un échec de vérification, pas un
       // refus de mettre à jour.
       if (_porteActive) {
+        _montrerDemarrage();
         const { response } = await dialog.showMessageBox(mainWindow, {
           type: 'warning',
           buttons: ['Réessayer', 'Continuer sans vérifier'],
@@ -6084,7 +6117,7 @@ const PORTE_DELAI_MS = 20000; // au-delà, on considère la vérification imposs
 const verifierAuLancement = async () => {
   _porteActive = true;
   _majDispo = false;
-  montrerPorte(TP('Vérification des mises à jour'), TP('Quelques secondes, le temps d’interroger le serveur.'), 35);
+  montrerPorte(TP('Vérification des mises à jour'), TP('Quelques secondes, le temps d’interroger le serveur.'), 35, false, true);
 
   // En développement (npm start), il n'y a ni paquet ni flux : on ouvre.
   if (!app.isPackaged) { ouvrirAdmin(); return; }

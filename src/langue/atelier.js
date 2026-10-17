@@ -126,8 +126,6 @@ module.exports = {
   'Aucun modèle pour l’instant. Partez d’un patron de base : il se trace à vos mesures.':
     'No design yet. Start from a base block: it is drafted to your measurements.',
   'Clic : détails · double-clic : ouvrir': 'Click: details · double-click: open',
-  'Partir d’un patron de base': 'Start from a base block',
-  'Robe, chemisier, jupe, pantalon — tracé à vos mesures': 'Dress, blouse, skirt, trousers — drafted to your measurements',
   'Aucun modèle ne correspond.': 'No design matches.',
   'modèles': 'designs',
   'modèle': 'design',

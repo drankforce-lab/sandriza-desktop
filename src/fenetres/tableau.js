@@ -701,12 +701,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      ⚠ RENVOIE SA PROMESSE : la coquille l attend avant de montrer la vue (dock:ouvrir).
      ⚠ LES COMMANDES NEUVES glissent dans le fil (une fois) — aucune notification ici. */
   var CHARGE_EN_COURS = false;
+  /* ⚠ AU DÉMARRAGE, LE SITE N EST PAS ENCORE LÀ (2026-10-17, sa capture : « Tableau de bord
+     indisponible — la fenêtre principale n a pas répondu à temps », « ce n est pas normal de voir
+     cela après que l écran de chargement a été effectué »). Le tableau de bord demande ses chiffres
+     pendant que la fenêtre principale finit de charger l administration : la première réponse
+     arrive en retard, et il restait sur l échec — sa relecture de 12 s ne part qu après un succès.
+     ➡ Une panne PASSAGÈRE (délai, administration pas encore chargée, pont muet) garde le squelette
+     de chargement et RÉESSAIE seule ; l échec ne se dit qu après ~1 minute d essais. */
+  var ESSAIS = 0, PASSAGERES = { delai: 1, indisponible: 1, pont_indisponible: 1 };
   function charger(){
     if (CHARGE_EN_COURS) return Promise.resolve();
     CHARGE_EN_COURS = true;
     return appeler('tableau:lire', ['all', PERIODE]).then(function(r){
       CHARGE_EN_COURS = false;
-      if (!r || !r.ok) { if (!D) vide('${T("Tableau de bord indisponible")}', expliquer(r)); return; }
+      if (!r || !r.ok) {
+        if (!D && r && PASSAGERES[r.motif] && ESSAIS < 10) { ESSAIS++; setTimeout(charger, Math.min(8000, 1500 * ESSAIS)); return; }
+        if (!D) vide('${T("Tableau de bord indisponible")}', expliquer(r));
+        return;
+      }
+      ESSAIS = 0;
       var fil = (r.vivant && r.vivant.fil) || [];
       NEUVES = {};
       if (VUS) fil.forEach(function(c){ if (c.oid && !VUS[c.oid]) NEUVES[c.oid] = true; });
