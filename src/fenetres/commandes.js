@@ -131,6 +131,28 @@ button.mini.ligne-geste{height:2.4rem;padding:0 1rem;border-radius:10px;font-siz
 .tuile.cliq:hover{border-color:var(--or)}
 .tuile.cliq::after{content:"›";position:absolute;top:.55rem;right:.8rem;font-size:1.1rem;color:var(--tx3)}
 .liste{flex:1 1 auto;min-height:0;overflow-y:auto}
+/* LA GRAMMAIRE DES FACTURES (2026-10-16) : chiffres cliquables, barre segmentee, tableau + panneau d appui. */
+.cx{overflow:hidden}
+.cx-carte>.liste{flex:1 1 0;min-height:0}
+.cx>.cx-carte.seule{flex:1 1 0;min-height:0}
+.cx-kpi[data-tuile]{cursor:pointer;user-select:none}
+.cx-kpi[data-tuile]:hover{border-color:rgba(var(--or-rgb),.6)}
+.cx-kpi.on{border-color:var(--or)}
+[data-tuile].cx-averti{cursor:pointer}
+.ed-seg button{border:none}
+/* 23rem : « Numéro de commande, nom, courriel, suivi… » (Expéditions) tient, polices Linux comprises. */
+.cx-barre .rf-rch{width:23rem;flex:0 1 auto;min-width:12rem}
+#rech{max-width:none}
+.cx-barre select{width:auto}
+.tete .sous~.cx-actions{margin-left:0}
+/* Prioritaires et Ventes manuelles : la hauteur et le corps des boutons a choix voisins. */
+.cx-barre>button.rf-jet{align-self:stretch;display:inline-flex;align-items:center;gap:.4rem;margin-left:0;
+  padding:0 .85rem;border-radius:10px;font-size:.84rem}
+.cx table{font-size:.84rem}
+.cx thead th{text-align:left}
+.cx th.d,.cx td.d{text-align:right;white-space:nowrap}
+.cx th.c,.cx td.c{text-align:center;white-space:nowrap}
+.cx tbody td{vertical-align:middle}
 /* LA BASCULE D AFFICHAGE (la meme que l Inventaire et Produits en vente), en icones : le libelle est dans
    l infobulle et pour le lecteur d ecran. */
 .vue-bascule{display:inline-flex;align-items:stretch;gap:2px;padding:3px;border-radius:10px;
@@ -154,15 +176,15 @@ button.mini.ligne-geste{height:2.4rem;padding:0 1rem;border-radius:10px;font-siz
 .liste::-webkit-scrollbar{width:8px}
 .liste::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
-thead th{position:sticky;top:0;background:var(--f-bande);text-align:left;
+.corps thead th{position:sticky;top:0;background:var(--f-bande);text-align:left;
   padding:.34rem .5rem;font-size:.7rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700}
-thead th.d{text-align:right}
-thead th.c{text-align:center}
-tbody td{padding:.3rem .5rem;border-top:1px solid var(--v055);vertical-align:middle}
+.corps thead th.d{text-align:right}
+.corps thead th.c{text-align:center}
+.corps tbody td{padding:.3rem .5rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody td.d{text-align:right;white-space:nowrap}
 tbody td.c{text-align:center;white-space:nowrap}
-tbody tr:hover{background:var(--v04)}
+.corps tbody tr:hover{background:var(--v04)}
 tbody .num{font-family:ui-monospace,monospace;font-size:.78rem;color:var(--tx-or)}
 tbody .det{font-size:.75rem;color:var(--tx2)}
 /* Une commande ETIQUETEE mais pas encore expediee : c est exactement celle qu on
@@ -294,7 +316,9 @@ function pageCommandes(mode) {
 <title>${titre} ${T("— Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${icone}</span><h1 id="titre">${titre}</h1>
-  <span class="sous" id="sous"></span></div>
+  <span class="cx-resume" id="c-resume"></span>
+  <span class="sous" id="sous"></span>
+  <div class="cx-actions" id="c-actions"></div></div>
 <div class="corps" id="corps"></div>
 <div class="pied"><span class="msg" id="msg"></span>
   <span class="actions" id="actions"></span></div>
@@ -477,54 +501,67 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var d = DONNEES;
     var expedition = MODE === 'expeditions';
 
-    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE A COMMANDES (2026-09-25) ═══════
-       Sa capture, en 6.18 : << pourtant cet ecran est natif et rien n a
-       change >>. La couche commune avait mis la ligne en carte, rien de plus.
-       Ici, le CONTENU prend la forme de l Inventaire : tuiles en tete, une
-       barre sur une ligne (recherche a loupe, statuts en pastilles), la cellule
-       principale riche (initiale du client, nom, numero et date dessous), le
-       statut en pastille a point, le total en gras.
-       ⚠ Les tuiles viennent du PONT (tuiles.compteStatuts...), comptees sur la
-       liste ENTIERE, avant recherche : elles disent l etat du magasin, pas de
-       l ecran. Les crochets des gestes (data-st, data-prio, data-prep,
-       tr[data-id], #rech, #c-corbeille) sont tous gardes. */
+    /* ══ LA GRAMMAIRE DES FACTURES, APPLIQUEE A LA LISTE (2026-10-16, sa demande : « le meme look ») ═════
+       Tete (resume, Corbeille a droite), quatre chiffres CLIQUABLES (data-tuile, comme les tuiles d avant),
+       les statuts en boutons a choix (le mot seul), puis le tableau et son panneau d appui (CSS_COMPTA).
+       ⚠ Les chiffres viennent du PONT (tuiles.compteStatuts...), comptes sur la liste ENTIERE, avant
+       recherche : ils disent l etat du magasin, pas de l ecran. ⚠ La PAGE SEULE voyage : la pagination
+       reste celle du site (.liste mesuree par listeAutoAjuste), pas data-pages.
+       Crochets gardes : data-st, data-vider, data-tuile, data-prio, data-manu, data-prep, data-vue,
+       tr[data-id], #rech, #f-annee, #c-corbeille, #pg-*. Le detail n est PAS touche (corps.corps). */
+    corps.className = 'cx';
     var TU = (d && d.tuiles) || null;
+    var cs = (TU && TU.compteStatuts) || {};
     var h = '';
+    var nbEnCours = function(n){ return n > 1 ? '${T("{0} commandes en cours")}'.split('{0}').join(n) : (n + '${T(" commande en cours")}'); };
+    var nbExped = function(n){ return n > 1 ? '${T("{0} commandes expédiées")}'.split('{0}').join(n) : (n + '${T(" commande expédiée")}'); };
+
+    /* ── LA TETE : le resume a gauche ; la Corbeille a droite (#113 : « un petit bouton dans la page des
+       commandes » — seulement dans Commandes, jamais dans Expeditions). ── */
+    var resT = document.getElementById('c-resume');
+    if (resT) resT.textContent = TU ? ((expedition ? nbExped(TU.nombre || 0) : nbEnCours(TU.nombre || 0))
+      + ' · ' + argent(TU.valeurTotale || 0)) : '';
+    var actT = document.getElementById('c-actions');
+    if (actT) actT.innerHTML = expedition ? '' : '<button class="mini" id="c-corbeille" '
+      + 'title="${T("Voir les commandes supprimées et les remettre en place")}">${T("Corbeille")}</button>';
+
+    /* ── LES QUATRE CHIFFRES ── */
     if (TU) {
-      var cs = TU.compteStatuts || {};
-      var tu = function(lib, val, sous, ton, geste){
-        return '<div class="tuile' + (geste ? ' cliq" data-tuile="' + geste + '" title="${T("Cliquer pour filtrer")}' : '') + '">'
-          + '<div class="lbl">' + lib + '</div><div class="val' + (ton ? ' ' + ton : '') + '">' + val + '</div>'
-          + '<div class="sub">' + sous + '</div></div>';
+      var kpi = function(lib, val, sub, ton, geste, on){
+        return '<div class="cx-kpi' + (ton ? ' ' + ton : '') + (on ? ' on' : '') + '"'
+          + (geste ? ' data-tuile="' + geste + '" title="${T("Cliquer pour filtrer")}"' : '') + '>'
+          + '<span>' + lib + '</span><b>' + val + '</b><small>' + (sub || '&nbsp;') + '</small></div>';
       };
-      h += szTuiles('<div class="tuiles">'
+      var seul = function(cle){ return F.statuts.length === 1 && F.statuts[0] === cle; };
+      h += '<div class="cx-kpis">'
         + (expedition
-          ? tu('${T("Expédiées")}', cs.shipped || 0, '${T("en route")}', '', 'shipped')
-            + tu('${T("Livrées")}', cs.delivered || 0, '${T("reçues par le client")}', '', 'delivered')
-          : tu('${T("En attente")}', cs.pending || 0, '${T("à confirmer")}', (cs.pending ? 'att' : ''), 'pending')
-            + tu('${T("En préparation")}', cs.preparing || 0, '${T("à emballer")}', '', 'preparing')
-            + tu('${T("Prioritaires")}', (d.prioritairesNonTraitees || 0), '${T("non traitées")}',
-                (d.prioritairesNonTraitees ? 'att' : ''), 'prio')
-            + tu('${T("Étiquettes prêtes")}', TU.etiquettesPretes || 0, '${T("pas encore parties")}', '', ''))
-        + tu(expedition ? '${T("Commandes")}' : '${T("En cours")}', TU.nombre || 0, '${T("au total")}', '', '')
-        + tu('${T("Valeur")}', argent(TU.valeurTotale || 0), expedition ? '${T("expédiée")}' : '${T("en cours")}', '', '')
-        + '</div>');
+          ? kpi('${T("Expédiées")}', cs.shipped || 0, '${T("en route")}', '', 'shipped', seul('shipped'))
+            + kpi('${T("Livrées")}', cs.delivered || 0, '${T("reçues par le client")}', 'ok', 'delivered', seul('delivered'))
+            + kpi('${T("Commandes")}', TU.nombre || 0, '${T("au total")}', '', '', false)
+            + kpi('${T("Valeur")}', esc(argent(TU.valeurTotale || 0)), '${T("expédiée")}', '', '', false)
+          : kpi('${T("En attente")}', cs.pending || 0, '${T("à confirmer")}', (cs.pending ? 'att' : ''), 'pending', seul('pending'))
+            + kpi('${T("En préparation")}', cs.preparing || 0, '${T("à emballer")}', '', 'preparing', seul('preparing'))
+            + kpi('${T("Prioritaires")}', (d.prioritairesNonTraitees || 0), '${T("non traitées")}',
+                (d.prioritairesNonTraitees ? 'att' : ''), 'prio', F.prioritaires)
+            + kpi('${T("Valeur")}', esc(argent(TU.valeurTotale || 0)), esc(nbEnCours(TU.nombre || 0)), '', '', false))
+        + '</div>';
     }
-    h += '<div class="carte">'
-      + '<div class="rf-tb">'
-      + '<label class="rf-rch">${ICO.loupe}<input id="rech" aria-label="${T("Rechercher une commande")}" autocomplete="off" placeholder="${T("Numéro de commande, nom, courriel")}'
-      + (expedition ? '${T(", suivi")}' : '') + '…" value="' + esc(F.q) + '"></label>'
-      + '<span class="jetons">'
-      + ((CTX && CTX.statuts) || []).filter(function(s){
-          // Chaque liste ne propose que SES statuts : offrir << Livrée >> dans
-          // Commandes donnerait toujours zero resultat, et l on chercherait pourquoi.
-          return expedition ? (s.cle === 'shipped' || s.cle === 'delivered')
-                            : (s.cle !== 'shipped' && s.cle !== 'delivered');
-        }).map(function(s){
-          return '<button class="rf-jet' + (F.statuts.indexOf(s.cle) >= 0 ? ' on' : '')
+
+    /* ── LA BARRE : les statuts en boutons a choix (plusieurs a la fois, comme avant) — « Toutes » defait
+       le filtre —, Prioritaires (son « ! ») et Ventes manuelles a cote ; a droite, la recherche, la
+       bascule d affichage et l annee. ── */
+    var stats = ((CTX && CTX.statuts) || []).filter(function(s){
+      // Chaque liste ne propose que SES statuts : offrir << Livrée >> dans
+      // Commandes donnerait toujours zero resultat, et l on chercherait pourquoi.
+      return expedition ? (s.cle === 'shipped' || s.cle === 'delivered')
+                        : (s.cle !== 'shipped' && s.cle !== 'delivered');
+    });
+    h += '<div class="cx-barre"><div class="ed-seg">'
+      + '<button type="button" class="' + (F.statuts.length ? '' : 'on') + '" data-vider="1">${T("Toutes")}</button>'
+      + stats.map(function(s){
+          return '<button type="button" class="' + (F.statuts.indexOf(s.cle) >= 0 ? 'on' : '')
             + '" data-st="' + esc(s.cle) + '">' + esc(szTd(s.libelle)) + '</button>'; }).join('')
-      + (F.statuts.length ? '<button class="rf-jet" data-vider="1">${T("Tout afficher")}</button>' : '')
-      + '</span>'
+      + '</div>'
       + '<button class="rf-jet prio' + (F.prioritaires ? ' on' : '') + '" data-prio="1" '
       + 'title="${T("N’afficher que les commandes prioritaires")}">'
       + '${T("Prioritaires")}<span class="prio-pill" aria-hidden="true">!</span></button>'
@@ -532,52 +569,34 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
          n apparaissaient donc jamais dans Commandes. Le filtre les montre TOUTES, quel que soit l onglet. */
       + '<button class="rf-jet' + (F.manuelles ? ' on' : '') + '" data-manu="1" '
       + 'title="${T("N’afficher que les ventes saisies à la caisse, quel que soit leur statut")}">'
-      + '${T("Ventes manuelles")}</button>';
-    /* ⚠⚠ LA CORBEILLE S OUVRE D ICI, ET DE NULLE PART AILLEURS (#113, sa demande
-       du 2026-09-14 : << met pas un lien dans les menu pour la corbeille, juste
-       mettre un petit bouton dans la page des commande directement >>).
-       ⚠ C EST LA BONNE PLACE, et pas seulement parce qu il l a demandee : on ne
-       cherche pas une corbeille << quelque part >>, on la cherche A L INSTANT ou
-       l on vient de comprendre qu on a supprime la mauvaise ligne — donc sans
-       quitter des yeux la liste d ou l on vient.
-       ⚠ SEULEMENT DANS << Commandes >>, pas dans << Expeditions >> : cette
-       fenetre sert les deux listes, et on ne supprime pas une commande depuis
-       l ecran d expedition. Un bouton qui ne sert jamais la ou il est finit par
-       ne plus etre lu la ou il sert.
-       ⚠ IL PARAIT POUR QUICONQUE VOIT LES COMMANDES. Remettre en place et purger
-       exigent orders:delete, et ces gardes-la sont dans le pont ; masquer le
-       bouton a qui ne peut pas restaurer l empecherait de CONSTATER qu une
-       commande a ete supprimee — ce qui est precisement ce qu on veut pouvoir
-       voir. La fenetre le dit alors en clair. */
-    h += '<span class="rf-droite">'
+      + '${T("Ventes manuelles")}</button>'
+      + '<div class="droite">'
+      + '<label class="rf-rch">${ICO.loupe}<input id="rech" aria-label="${T("Rechercher une commande")}" autocomplete="off" placeholder="${T("Numéro de commande, nom, courriel")}'
+      + (expedition ? '${T(", suivi")}' : '') + '…" value="' + esc(F.q) + '"></label>'
       + '<span class="vue-bascule" role="group" aria-label="${T("Affichage de la liste")}">'
       +   '<button type="button" data-vue="detail" aria-label="${T("Affichage détaillé")}" aria-pressed="' + (!COMPACT) + '" class="' + (!COMPACT ? 'on' : '') + '" title="${T("Affichage détaillé")}">'
       +     '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="2.5" width="12" height="4.5" rx="1.2"/><rect x="2" y="9" width="12" height="4.5" rx="1.2"/></svg></button>'
       +   '<button type="button" data-vue="compact" aria-label="${T("Affichage compact : une ligne par commande, plus de commandes par page")}" aria-pressed="' + COMPACT + '" class="' + (COMPACT ? 'on' : '') + '" title="${T("Affichage compact : une ligne par commande, plus de commandes par page")}">'
       +     '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3.5h12M2 6.5h12M2 9.5h12M2 12.5h12"/></svg></button>'
       + '</span>';
-    if (!expedition) {
-      h += '<button class="rf-jet" id="c-corbeille" '
-        + 'title="${T("Voir les commandes supprimées et les remettre en place")}">'
-        + '${T("Corbeille")}</button>';
-    }
     if (expedition && CTX && (CTX.annees || []).length) {
-      h += '<span class="lbl" style="margin-left:.4rem">${T("Année :")}</span><select id="f-annee" aria-label="${T("Année")}">'
+      h += '<select id="f-annee" aria-label="${T("Année")}">'
         + '<option value="all"' + (F.annee === 'all' ? ' selected' : '') + '>${T("Toutes")}</option>'
         + CTX.annees.map(function(a){
             return '<option value="' + a + '"' + (String(F.annee) === String(a) ? ' selected' : '')
               + '>' + a + '</option>'; }).join('')
         + '</select>';
     }
-    h += '</span></div></div>';
+    h += '</div></div>';
 
-    h += '<div class="carte plein">';
+    /* ── LE TABLEAU ── */
+    var t = '<div class="cx-carte cx-liste">';
     if (!d || !d.lignes.length) {
-      h += '<div class="vide">' + (F.q || F.statuts.length || F.annee !== 'all' || F.prioritaires || F.manuelles
+      t += '<div class="vide">' + (F.q || F.statuts.length || F.annee !== 'all' || F.prioritaires || F.manuelles
         ? '${T("Aucune commande ne correspond à ces filtres.")}'
         : (expedition ? '${T("Aucune commande expédiée.")}' : '${T("Aucune commande en cours.")}')) + '</div>';
     } else {
-      h += '<div class="liste' + (COMPACT ? ' compacte' : '') + '"><table><thead><tr>'
+      t += '<div class="liste' + (COMPACT ? ' compacte' : '') + '"><table><thead><tr>'
         + '<th>${T("Client et commande")}</th>'
         + (expedition ? '<th>${T("Suivi")}</th>' : '<th class="c">${T("Articles")}</th>')
         + '<th class="d">${T("Total")}</th><th>${T("Statut")}</th><th class="c"></th>'
@@ -586,7 +605,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         // ⚠ Etiquetee mais pas partie : la ligne se teinte. C est l etat qui se
         // perd le plus facilement, entre l impression et le depot au comptoir.
         var attente = o.aUneEtiquette && o.statut !== 'shipped' && o.statut !== 'delivered';
-        h += '<tr class="' + (attente ? 'attente' : '') + '" data-id="' + esc(o.id)
+        t += '<tr class="' + (attente ? 'attente' : '') + '" data-id="' + esc(o.id)
           + '" style="cursor:pointer" title="${T("Clic : détails · clic droit : changer le statut")}">'
           + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(o.client)) + '</span>'
           +   '<div style="min-width:0"><div class="rf-nom">' + esc(o.client)
@@ -608,11 +627,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
              de boutons differents a ce niveau >>). Verrou tenu par QUICONQUE —
              soi compris, sa propre fenetre de preparation ouverte est un
              traitement en cours — la ligne dit 🔒 En traitement, et par qui.
-             Libre : 📦 Preparer la commande, qui ouvre l assistant (lequel se place tout
-             seul a la bonne etape depuis la 1.28.0, et fabrique l etiquette a
-             son etape 2 : plus besoin d un bouton Expedier separe ici).
-             Et AUCUN bouton sur une commande expediee ou livree — la vue
-             Expeditions n en porte donc pas. */
+             Libre : 📦 Preparer la commande, qui ouvre l assistant. Et AUCUN
+             bouton sur une commande expediee ou livree. */
           + '<td class="c">'
           + (expedition || o.statut === 'shipped' || o.statut === 'delivered' ? ''
              : (o.enTraitement
@@ -621,9 +637,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
                    ? '<button class="mini ligne-geste" data-prep="' + esc(o.id) + '"><span style="filter:grayscale(1)"><span class="ic">📦</span></span> ${T("Préparer la commande")}</button>' : '')))
           + '</td></tr>';
       });
-      h += '</tbody></table></div>';
+      t += '</tbody></table></div>';
 
-      h += '<div class="pagi"><span>${T("Afficher")}</span>'
+      t += '<div class="pagi"><span>${T("Afficher")}</span>'
         + '<select id="pg-taille" aria-label="${T("Nombre de commandes par page")}">'
         + '<option value="auto"' + (F.auto ? ' selected' : '') + '>Auto</option>'
         + [10, 20, 50, 100].map(function(n){
@@ -637,7 +653,37 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + '<button class="mini" id="pg-suiv"' + (d.page >= d.pages - 1 ? ' disabled' : '') + '>${T("Suiv. →")}</button>'
         + '</span></div>';
     }
-    h += '</div>';
+    t += '</div>';
+
+    /* ── LE PANNEAU D APPUI : ou en sont les commandes, et ce qui presse — tout depuis les chiffres deja
+       recus (tuiles du pont) ; aucune donnee de plus. Absent sur un vieux site. ── */
+    if (TU) {
+      var tot = TU.nombre || 0;
+      var piste = function(lib, n, ton){
+        var v = tot > 0 ? Math.max(0, Math.min(100, n / tot * 100)) : 0;
+        return '<div class="cx-ligne"><span>' + lib + '</span><div class="cx-piste"><i' + (ton ? ' class="' + ton + '"' : '')
+          + ' style="width:' + v.toFixed(0) + '%"></i></div><span>' + n + '</span></div>';
+      };
+      var p = '<div class="cx-carte">'
+        + '<h2>' + (expedition ? '${T("Où en sont les envois")}' : '${T("Où en sont les commandes")}') + '</h2>'
+        + stats.map(function(s){
+            var ton = s.cle === 'delivered' ? 'ok' : (s.cle === 'shipped' ? 'info' : (s.cle === 'cancelled' ? 'err' : ''));
+            return piste(esc(szTd(s.libelle)), cs[s.cle] || 0, ton);
+          }).join('');
+      if (!expedition) {
+        var nP = d.prioritairesNonTraitees || 0, nE = TU.etiquettesPretes || 0;
+        p += '<div class="cx-sep"></div><h2>${T("À faire")}</h2>';
+        if (nP) p += '<div class="cx-averti" data-tuile="prio" title="${T("Cliquer pour filtrer")}"><span>'
+          + esc(nP > 1 ? '${T("{0} commandes prioritaires non traitées.")}'.split('{0}').join(nP) : '${T("1 commande prioritaire non traitée.")}') + '</span></div>';
+        if (nE) p += '<div class="cx-info"><span>'
+          + esc(nE > 1 ? '${T("{0} étiquettes prêtes, pas encore parties.")}'.split('{0}').join(nE) : '${T("1 étiquette prête, pas encore partie.")}') + '</span></div>';
+        if (!nP && !nE) p += '<div class="cx-bon"><span>${T("Rien ne presse.")}</span></div>';
+      }
+      p += '</div>';
+      h += '<div class="cx-deux">' + t + p + '</div>';
+    } else {
+      h += t.replace('cx-carte cx-liste', 'cx-carte cx-liste seule');
+    }
     corps.innerHTML = h;
 
     actions.innerHTML = '';
@@ -677,6 +723,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 
   // ══ DETAIL D UNE COMMANDE ═══════════════════════════════════════
   function dessinerDetail(){
+    corps.className = 'corps';
+    var resD = document.getElementById('c-resume'); if (resD) resD.textContent = '';
+    var actD = document.getElementById('c-actions'); if (actD) actD.innerHTML = '';
     var d = DET;
     if (!d) {
       corps.innerHTML = '<div class="carte plein"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>';

@@ -35,36 +35,33 @@ body{background:var(--f-page);color:var(--tx);
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;
   padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
-.tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
-  display:flex;flex-direction:column;gap:.7rem}
-.barreoutils{flex:0 0 auto;display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
+/* LA GRAMMAIRE DES FACTURES (2026-10-16, sa demande : « le meme look ») : tete (resume, export a
+   droite), les cinq etats qui demandent un geste en chiffres CLIQUABLES, les autres en boutons a choix
+   (le mot seul : les comptes vivent dans les chiffres et le panneau), puis le tableau en pages et son
+   panneau d appui (CSS_COMPTA du socle). */
+#corps{overflow:hidden}
 input[type=search],button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem}
-input[type=search]{min-width:220px;margin-left:auto}
 button{cursor:pointer}
 input:focus,button:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button.mini{padding:.12rem .42rem;font-size:.74rem}
-button.actif{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
-button .n{display:inline-block;margin-left:.3rem;font-size:.6875rem;font-weight:700;
-  background:rgba(148,163,184,.18);border-radius:99px;padding:0 .4rem}
-button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
-/* Les tuiles de tete (refonte du 2026-09-25), aux mesures de l Inventaire. */
-.tuiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.6rem;flex:0 0 auto;margin-bottom:.6rem}
-.tuile{background:var(--f-carte);border:1px solid var(--v07);min-width:0;cursor:pointer;user-select:none}
-.tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tuile:hover{border-color:rgba(var(--or-rgb),.6)}
-.tuile.on{border-color:var(--or)}
-.val.att{color:var(--tx-att)}.val.err{color:var(--tx-err)}
-.ligne{display:flex;align-items:center;gap:.8rem;padding:.6rem .75rem;cursor:pointer;
-  background:var(--f-carte);border:1px solid var(--v07);border-radius:11px}
-.ligne:hover{border-color:var(--or)}
-.ligne .gauche{flex:1 1 auto;min-width:0}
-.ligne .haut{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}
-.ligne .num{font-weight:700}
-.ligne .dt{font-size:.72rem;color:var(--tx2)}
-.ligne .droite{flex:0 0 auto;text-align:right;font-size:.74rem;color:var(--tx2)}
+.ed-seg button{border:none}
+.cx-barre .rf-rch{width:18rem;flex:0 0 auto}
+.cx-kpis.cinq{grid-template-columns:repeat(5,minmax(0,1fr))}
+.cx-kpi[data-onglet]{cursor:pointer;user-select:none}
+.cx-kpi[data-onglet]:hover{border-color:rgba(var(--or-rgb),.6)}
+.cx-kpi.on{border-color:var(--or)}
+[data-onglet].cx-averti,[data-onglet].cx-bon{cursor:pointer}
+table{width:100%;font-size:.84rem}
+thead th{text-align:left}
+th.r,td.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tbody tr{cursor:pointer}
+tbody td{vertical-align:middle}
+td .cx-num{font-weight:700;white-space:nowrap}
+.cx-qui b{font-weight:650}
+td.motif{max-width:16rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pastilles{display:flex;flex-wrap:wrap;gap:.3rem;align-items:center}
 .pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.att{background:rgba(245,158,11,.16);color:var(--tx-att)}
@@ -86,8 +83,9 @@ function pageRetours() {
 <title>${T("Nos retours — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.returns}</span><h1>${T("Nos retours")}</h1>
-  <span class="sous" id="sous"></span></div>
-<div class="corps plein" id="corps"><div class="vide charge">${T("Chargement… (les demandes se resynchronisent)")}</div></div>
+  <span class="cx-resume" id="sous"></span>
+  <div class="cx-actions" id="r-actions"></div></div>
+<div class="cx" id="corps"><div class="vide charge">${T("Chargement… (les demandes se resynchronisent)")}</div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -163,65 +161,98 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   function dessiner(){
     if (!D) { corps.innerHTML = '<div class="vide charge">${T("Chargement… (les demandes se resynchronisent)")}</div>'; return; }
     var c = D.comptes || {};
-    /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE A RETOURS (2026-09-25) ═════════
-       Tuiles pour ce qui demande un geste (ambre, ou rouge pour ce qui expire
-       et ce qui est conteste, des qu il y en a), barre sur une ligne a loupe,
-       lignes riches aux initiales. Crochets gardes : data-onglet, #r-q,
-       .ligne[data-id], le verrou, #r-exporter. */
-    var h = szTuiles('<div class="tuiles">' + ONGLETS.filter(function(o){ return EN_TUILE[o[0]]; }).map(function(o){
+    var tout = c.all || 0;
+    function nbDem(n){ return n + ' ' + (n > 1 ? '${T("demandes")}' : '${T("demande")}'); }
+
+    /* ══ LA GRAMMAIRE DES FACTURES, APPLIQUEE AUX RETOURS (2026-10-16, sa demande) ═══════════
+       Crochets gardes : data-onglet (chiffres, boutons, pastilles du panneau), #r-q, le verrou,
+       #r-exporter (passe dans la tete), et la ligne — devenue tr[data-id]. */
+
+    /* ── LA TETE : le resume a gauche, l export a droite. ── */
+    var sousT = document.getElementById('sous');
+    if (sousT) sousT.textContent = nbDem(tout)
+      + (c.pending ? ' · ' + '${T("{0} en attente")}'.split('{0}').join(c.pending) : '');
+    var act = document.getElementById('r-actions');
+    if (act) act.innerHTML = '<button class="mini" id="r-exporter"><span class="ic">⬇</span>${T(" Exporter")}</button>';
+
+    /* ── LES CHIFFRES : les cinq etats qui DEMANDENT UN GESTE (les tuiles d avant), toujours
+       cliquables. Ambre des qu il y en a ; rouge pour ce qui expire et ce qui est conteste. ── */
+    var h = '<div class="cx-kpis cinq">' + ONGLETS.filter(function(o){ return EN_TUILE[o[0]]; }).map(function(o){
         var n = c[o[0]] || 0;
         var ton = !n ? '' : ((o[0] === 'disputed' || o[0] === 'expiring_soon') ? 'err' : 'att');
-        return '<div class="tuile' + (ONGLET === o[0] ? ' on' : '') + '" data-onglet="' + o[0] + '"'
-          + ' title="${T("Cliquer pour afficher")}"><div class="lbl">' + o[1] + '</div>'
-          + '<div class="val ' + ton + '">' + n + '</div><div class="sub">' + EN_TUILE[o[0]] + '</div></div>';
-      }).join('') + '</div>');
-    h += '<div class="carte"><div class="rf-tb">'
+        return '<div class="cx-kpi' + (ton ? ' ' + ton : '') + (ONGLET === o[0] ? ' on' : '') + '" data-onglet="' + o[0] + '"'
+          + ' title="${T("Cliquer pour afficher")}"><span>' + o[1] + '</span><b>' + n + '</b>'
+          + '<small>' + EN_TUILE[o[0]] + '</small></div>';
+      }).join('') + '</div>';
+
+    /* ── LA BARRE : les quatre autres listes en boutons a choix — le mot seul (sa regle du
+       2026-10-15 : les comptes vivent dans les chiffres) —, la recherche a droite. ── */
+    var seg = function(v, lib){
+      return '<button type="button" class="' + (ONGLET === v ? 'on' : '') + '" data-onglet="' + v + '">' + lib + '</button>';
+    };
+    h += '<div class="cx-barre"><div class="ed-seg">'
+      + seg('all', '${T("Toutes")}') + seg('approved', '${T("Approuvées")}')
+      + seg('rejected', '${T("Rejetées")}') + seg('completed', '${T("Complétées")}')
+      + '</div><div class="droite">'
       + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Nom, courriel, n° commande")}" type="search" id="r-q" placeholder="${T("Nom, courriel, n° commande…")}" value="' + esc(Q) + '"></label>'
-      + ONGLETS.filter(function(o){ return !EN_TUILE[o[0]]; }).map(function(o){
-          var n = c[o[0]] || 0;
-          return '<button class="rf-jet' + (ONGLET === o[0] ? ' on' : '') + '" data-onglet="' + o[0] + '">'
-            + o[1] + '<span class="n">' + n + '</span></button>';
-        }).join('')
       + '</div></div>';
 
+    /* ── LE TABLEAU (data-pages="retours") ── */
     var rows = D.lignes || [];
+    var t = '<div class="cx-carte sz-pagee">';
     if (!rows.length) {
       /* Deux phrases ENTIERES, pas un fragment recolle. */
-      h += '<div class="vide">'
+      t += '<div class="vide">'
         + (ONGLET !== 'all' ? '${T("Aucune demande dans cette catégorie.")}' : '${T("Aucune demande.")}')
         + '</div>';
     } else {
-      /* ⚠ PLEINE HAUTEUR (2026-09-19) : cet ecran n a PAS de carte, ses lignes
-         sont riches. La zone defilante est donc fille du CORPS, pas d une
-         carte — le socle couvre les deux formes. */
-      // 2026-10-12 : plus de defilement, la liste est en PAGES mesurees (JS_PAGES du socle).
-      h += '<div class="liste" data-pages="retours">' + rows.map(function(r){
-        var badges = '<span class="rf-pill ' + (TONS[r.statut] || '') + '">' + esc(szTd(r.statutLibelle)) + '</span>';
-        if (r.expireAuto) badges += ' <span class="rf-pill rouge">${T("Expirée automatiquement")}</span>';
-        if (r.expireBientot) badges += ' <span class="rf-pill rouge">${T("Expire le ")}' + esc(szQuand(r.expireLe)) + '</span>';
-        if (r.suivi) badges += ' <span class="rf-pill"><span class="rf-code">' + esc(r.suivi) + '</span></span>';
-        if (r.etiquette === 'reelle') badges += ' <span class="rf-pill bleu">${T("Étiquette réelle")}</span>';
-        else if (r.etiquette === 'generee') badges += ' <span class="rf-pill bleu">${T("Étiquette générée")}</span>';
-        if (r.fraisBoutique) badges += ' <span class="rf-pill bleu">${T("Frais pris en charge")}</span>';
-        return '<div class="ligne" data-id="' + esc(r.id) + '" title="${T("Ouvrir la demande de retour")}">'
-          + '<span class="rf-av" aria-hidden="true">' + esc(initiales(r.client)) + '</span>'
-          + '<div class="gauche">'
-          + '<div class="haut"><span class="rf-nom">' + esc(r.client || '—') + '</span>'
-          + szVerrouCase('return_reqs', r.id) + badges + '</div>'
-          + '<div class="rf-sous"><span class="rf-code">' + esc(r.commande) + '</span>'
-          + (r.courriel ? '<span>·</span><span>' + esc(r.courriel) + '</span>' : '') + '</div>'
-          + '<div class="dt">${T("Motif : ")}' + esc(r.motif || '–') + '</div>'
-          + '</div>'
-          + '<div class="droite">' + esc(fmtDate(r.date)) + '</div>'
-          + '</div>';
-      }).join('') + '</div>';
-      /* Le pied ferme la liste et porte l export (2026-09-19). ⚠ Cet ecran
-         n est PAS un tableau : ce sont des lignes riches. Le fichier, lui, est
-         tabulaire — et c est justement pour ca qu il sert a autre chose. */
-      h += szPied(
-        rows.length + ' ' + (rows.length > 1 ? '${T("demandes")}' : '${T("demande")}'),
-        '<button class="mini" id="r-exporter"><span class="ic">⬇</span>${T(" Exporter")}</button>');
+      t += '<div class="cx-pages" data-pages="retours"><table><thead><tr><th>${T("Client")}</th><th>${T("Commande")}</th>'
+        + '<th>${T("Motif")}</th><th>${T("Statut")}</th><th class="r">${T("Date")}</th></tr></thead><tbody>'
+        + rows.map(function(r){
+            var badges = '<span class="rf-pill ' + (TONS[r.statut] || '') + '">' + esc(szTd(r.statutLibelle)) + '</span>';
+            if (r.expireAuto) badges += '<span class="rf-pill rouge">${T("Expirée automatiquement")}</span>';
+            if (r.expireBientot) badges += '<span class="rf-pill rouge">${T("Expire le ")}' + esc(szQuand(r.expireLe)) + '</span>';
+            if (r.etiquette === 'reelle') badges += '<span class="rf-pill bleu">${T("Étiquette réelle")}</span>';
+            else if (r.etiquette === 'generee') badges += '<span class="rf-pill bleu">${T("Étiquette générée")}</span>';
+            if (r.fraisBoutique) badges += '<span class="rf-pill bleu">${T("Frais pris en charge")}</span>';
+            return '<tr data-id="' + esc(r.id) + '" title="${T("Ouvrir la demande de retour")}">'
+              + '<td><div class="cx-qui"><span class="cx-av" aria-hidden="true">' + esc(initiales(r.client)) + '</span>'
+              + '<div style="min-width:0"><b>' + esc(r.client || '—') + '</b>' + szVerrouCase('return_reqs', r.id)
+              + (r.courriel ? '<span class="cx-l2">' + esc(r.courriel) + '</span>' : '') + '</div></div></td>'
+              + '<td><span class="cx-num">' + esc(r.commande) + '</span>'
+              + (r.suivi ? '<span class="cx-l2">' + esc(r.suivi) + '</span>' : '') + '</td>'
+              + '<td class="motif" title="' + esc(r.motif || '') + '">' + esc(r.motif || '–') + '</td>'
+              + '<td><div class="pastilles">' + badges + '</div></td>'
+              + '<td class="r">' + esc(fmtDate(r.date)) + '</td></tr>';
+          }).join('')
+        + '</tbody></table></div>';
     }
+    t += '<div class="cx-pied"><span>' + esc(nbDem(rows.length)) + '</span></div></div>';
+
+    /* ── LE PANNEAU D APPUI : ou en sont les retours, et ce qui presse — tout depuis les comptes
+       deja recus (retours:liste) ; aucune donnee de plus. ── */
+    var piste = function(cle, lib, ton){
+      var n = c[cle] || 0;
+      var v = tout > 0 ? Math.max(0, Math.min(100, n / tout * 100)) : 0;
+      return '<div class="cx-ligne"><span>' + lib + '</span><div class="cx-piste"><i' + (ton ? ' class="' + ton + '"' : '')
+        + ' style="width:' + v.toFixed(0) + '%"></i></div><span>' + n + '</span></div>';
+    };
+    var p = '<div class="cx-carte">'
+      + '<h2>${T("Parcours des retours")}</h2>'
+      + piste('pending', '${T("En attente")}', '') + piste('approved', '${T("Approuvées")}', 'info')
+      + piste('in_transit', '${T("En transit")}', 'info') + piste('received', '${T("Reçues")}', '')
+      + piste('completed', '${T("Complétées")}', 'ok') + piste('rejected', '${T("Rejetées")}', 'err')
+      + '<div class="cx-sep"></div>'
+      + '<h2>${T("À surveiller")}</h2>';
+    var nExp = c.expiring_soon || 0, nDis = c.disputed || 0;
+    if (nExp) p += '<div class="cx-averti" data-onglet="expiring_soon" title="${T("Cliquer pour afficher")}"><span>'
+      + esc(nExp > 1 ? '${T("{0} demandes expirent bientôt.")}'.split('{0}').join(nExp) : '${T("1 demande expire bientôt.")}') + '</span></div>';
+    if (nDis) p += '<div class="cx-averti" data-onglet="disputed" title="${T("Cliquer pour afficher")}"><span>'
+      + esc(nDis > 1 ? '${T("{0} demandes à trancher.")}'.split('{0}').join(nDis) : '${T("1 demande à trancher.")}') + '</span></div>';
+    if (!nExp && !nDis) p += '<div class="cx-bon"><span>${T("Aucune demande à surveiller.")}</span></div>';
+    p += '</div>';
+    h += '<div class="cx-deux">' + t + p + '</div>';
+
     corps.innerHTML = h;
     szVerrousPeindre();   // reposer les cadenas connus sur la liste fraiche
 
@@ -264,7 +295,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var og = t.closest('[data-onglet]');
     if (og) { ONGLET = og.getAttribute('data-onglet'); charger(); return; }
     if (t.closest('button') || t.closest('input')) return;
-    var li = t.closest('.ligne[data-id]');
+    var li = t.closest('tr[data-id]');
     if (!li) return;
     dire('${T("Ouverture…")}');
     appeler('retours:ouvrir', [li.getAttribute('data-id')]).then(function(r){
@@ -338,8 +369,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (ev.key === 'Escape') { ev.preventDefault(); P.fermer(); }
   });
 
-  var sous = document.getElementById('sous');
-  if (sous) sous.textContent = '';
   charger();
   szVerrousSuivre(['return_reqs']);
 })();

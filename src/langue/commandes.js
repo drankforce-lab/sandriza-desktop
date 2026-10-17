@@ -65,6 +65,20 @@ module.exports = {
   'Suppression non confirmée par le serveur (': 'Deletion not confirmed by the server (',
   ') — réessayez.': ') — try again.',
 
+  /* ── LA GRAMMAIRE DES FACTURES (2026-10-16) : la tete, les chiffres, le panneau d appui.
+     Des phrases ENTIERES au pluriel ; au singulier, le chiffre est colle devant (« 1 commande en cours »). */
+  '{0} commandes en cours': '{0} orders in progress',
+  ' commande en cours': ' order in progress',
+  '{0} commandes expédiées': '{0} orders shipped',
+  ' commande expédiée': ' order shipped',
+  'Où en sont les commandes': 'Where orders stand',
+  'Où en sont les envois': 'Where shipments stand',
+  'À faire': 'To do',
+  '{0} commandes prioritaires non traitées.': '{0} priority orders not handled.',
+  '1 commande prioritaire non traitée.': '1 priority order not handled.',
+  '{0} étiquettes prêtes, pas encore parties.': '{0} labels ready, not shipped yet.',
+  '1 étiquette prête, pas encore partie.': '1 label ready, not shipped yet.',
+  'Rien ne presse.': 'Nothing urgent.',
   /* ── LES FILTRES ET LA LISTE ────────────────────────────────────────────── */
   /* ⚠ Les LIBELLES de statut viennent du serveur — voir la fiche en tete. */
   'Statut :': 'Status:',

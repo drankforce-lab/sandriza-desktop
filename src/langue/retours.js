@@ -42,6 +42,15 @@ module.exports = {
   'Suivi': 'Tracking',
   'Étiquette': 'Label',
   'La liste des retours': 'The return list',
+  /* ── LA GRAMMAIRE DES FACTURES (2026-10-16) : la tete, le panneau d appui ── */
+  '{0} en attente': '{0} pending',
+  'Parcours des retours': 'Where returns stand',
+  'À surveiller': 'To watch',
+  '1 demande expire bientôt.': '1 request expires soon.',
+  '{0} demandes expirent bientôt.': '{0} requests expire soon.',
+  '1 demande à trancher.': '1 request to decide.',
+  '{0} demandes à trancher.': '{0} requests to decide.',
+  'Aucune demande à surveiller.': 'No request to watch.',
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   'Nos retours — Administration Sandriza': 'Our returns — Sandriza Administration',
   'Nos retours': 'Our returns',
