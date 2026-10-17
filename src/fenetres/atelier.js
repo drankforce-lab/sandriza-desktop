@@ -226,7 +226,8 @@ table.at-tab{width:100%;border-collapse:collapse;font-size:.8rem;font-variant-nu
 .ph-vign button b{position:absolute;left:0;right:0;bottom:0;font-size:.68rem;font-weight:600;background:var(--f-carte);color:var(--tx);padding:.05rem 0}
 .v3-trois .ed-seg{display:flex;flex-wrap:wrap}
 .v3-scene canvas{display:block;position:absolute;left:0;top:0;width:100%;height:100%}
-.v3-scene.beige{background:#EFE8DD}.v3-scene.blanc{background:#FFFFFF}
+/* le fond de studio : un léger dégradé, plus clair derrière le vêtement (le cyclo d un photographe) */
+.v3-scene.beige{background:#EFE8DD;background:radial-gradient(ellipse 70% 60% at 50% 42%,#F7F3EC 0%,#EFE8DD 58%,#E3DACB 100%)}.v3-scene.blanc{background:#FFFFFF;background:radial-gradient(ellipse 70% 60% at 50% 42%,#FFFFFF 0%,#FAFAF8 60%,#EEEDEA 100%)}
 .v3-aide{position:absolute;left:.7rem;bottom:.55rem;font-size:.76rem;color:#3F3A32;background:rgba(243,238,229,.92);padding:.12rem .5rem;border-radius:6px;pointer-events:none}
 .v3-couleurs{display:flex;flex-wrap:wrap;gap:.4rem}
 .v3-couleurs button{width:1.9rem;height:1.9rem;border-radius:50%;padding:0;border:2px solid var(--v16)}
@@ -2766,7 +2767,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        emmanchures et aux côtés). L ourlet et l encolure restent coupés net. */
     var cous = bordsCousus(pc, pid);
     if (cous.length) { g.strokeStyle = V3.couleur; g.lineWidth = 2; g.lineJoin = 'round'; g.lineCap = 'round';
-      cous.forEach(function(ch2){ g.beginPath(); ch2.forEach(function(q, k){ if (k) g.lineTo(q[0], q[1]); else g.moveTo(q[0], q[1]); }); g.stroke(); }); }
+      // la manche : pas de marge au sommet de la tête (1,5 cm), où la manche n est encore qu un anneau ouvert — elle y
+      // dessinait de petites boucles au bout des épaules
+      g.save(); if (pid === 'manche') { g.beginPath(); g.rect(bb.x0 - 5, 1.5, bb.x1 - bb.x0 + 10, bb.y1 + 5); g.clip(); }
+      cous.forEach(function(ch2){ g.beginPath(); ch2.forEach(function(q, k){ if (k) g.lineTo(q[0], q[1]); else g.moveTo(q[0], q[1]); }); g.stroke(); });
+      g.restore(); }
     var ph = V3.photo && V3.m.photo3d ? (pid === 'devant' ? V3.m.photo3d.face : pid === 'dos' ? V3.m.photo3d.dos : null) : null;
     var phi = ph && imagePH(ph.url, function(){ if (GLV) { GLV.cle = ''; demander3d(); } });
     if (phi) { enCm(); g.globalCompositeOperation = 'source-atop'; g.drawImage(phi, -ph.cx / ph.k, -ph.haut / ph.k, ph.l / ph.k, ph.h / ph.k); }
@@ -3640,7 +3645,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (GLV.mq) { gl.deleteBuffer(GLV.mq.bP); gl.deleteBuffer(GLV.mq.bN); GLV.mq = null; }
     if (['haut', 'jupe', 'bas'].indexOf(famD) >= 0 && (r.corps || []).length) { var mq = mannequinGL(r); if (mq.n) GLV.mq = { bP: tampon(gl, mq.pos), bN: tampon(gl, mq.nor), n: mq.n }; }
     GLV.cy = (y0 + y1) / 2; GLV.h = Math.max(1, y1 - y0); GLV.ybas = y0; GLV.r = r; GLV.cle = '';
-    GLV.minH = r.motif3d === 'tete' ? 34 : 120;                    // un chapeau se cadre sur sa hauteur, un vêtement sur 120 cm au moins
+    // le cadrage : SERRÉ sur le vêtement, comme une photo de studio (sa référence Fal.ai) — un cadre de 120 cm au moins
+    // laissait un t-shirt de 65 cm perdu au milieu ; un chapeau garde 34 cm au moins
+    GLV.minH = r.motif3d === 'tete' ? 34 : 40;
   }
 
   /* ══ LE MANNEQUIN (2026-10-17, sa référence : le rendu Fal.ai, un t-shirt sur un mannequin blanc) ══
@@ -3649,7 +3656,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      donne au vêtement son échelle. Le cou s arrête net à 9 cm, comme un buste de couture. */
   function mannequinGL(r){
     var pos = [], nor = [], fam = fam3d(), S = 36;
-    var anneau = function(a, ax){
+    // ⚠ PEINT 5 mm PLUS MINCE que le corps du drapé : un mannequin a du jeu sous le vêtement — au ras du tissu, il
+    // affleurait par le moindre interstice (des taches grises le long de la crête d épaule)
+    var anneau = function(a0, ax){
+      var a = { c: a0.c, rx: Math.max(0.2, a0.rx - 0.5), rz: Math.max(0.2, a0.rz - 0.5) };
       var c = [a.c.x, a.c.y, a.c.z || 0], u, v;
       if (Math.abs(ax[1]) > 0.9) { u = [1, 0, 0]; v = [0, 0, 1]; } else { u = unit3(croix3(ax, [0, 0, 1])); v = [0, 0, 1]; }
       var pts = [], nrm = [];
@@ -3674,7 +3684,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (/tete/.test(nm)) bouchon(rings[rings.length - 1], 1);
       if (/bras/.test(nm) || /jambe/.test(nm) || /epaules/.test(nm) || /poitrine/.test(nm)) bouchon(rings[rings.length - 1], 1);
       if (/epaules/.test(nm) || /poitrine/.test(nm)) bouchon(rings[0], -1);
-      if (/tronc/.test(nm)) bouchon(rings[0], -1);
+      if (/tronc/.test(nm)) { bouchon(rings[0], -1); bouchon(rings[rings.length - 1], 1); }   // fermé en haut : l intérieur se voyait dans l encolure
     });
     return { pos: new Float32Array(pos), nor: new Float32Array(nor), n: pos.length / 3 };
   }
