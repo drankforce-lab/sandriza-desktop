@@ -175,7 +175,7 @@ table.at-tab{width:100%;border-collapse:collapse;font-size:.8rem;font-variant-nu
 /* ── Aperçu 3D (lot 4) ── */
 .v3-trois{display:grid;grid-template-columns:18rem minmax(0,1fr) 20rem;gap:.9rem;min-height:0}
 .cx>.v3-trois{flex:1 1 0}
-.v3-trois>.cx-carte{min-height:0;overflow:auto}
+.v3-trois>.cx-carte{min-height:0;overflow:auto;scrollbar-gutter:stable}
 .v3-scene{position:relative;border-radius:12px;overflow:hidden;min-height:0;cursor:grab;user-select:none}
 .v3-scene.glisse{cursor:grabbing}
 .v3-scene canvas{display:block;position:absolute;left:0;top:0;width:100%;height:100%}
@@ -194,7 +194,7 @@ table.at-tab{width:100%;border-collapse:collapse;font-size:.8rem;font-variant-nu
 /* ── Éditeur de motif (lot 5) ── */
 .mo-trois{display:grid;grid-template-columns:18rem minmax(0,1fr) 21rem;gap:.9rem;min-height:0}
 .cx>.mo-trois{flex:1 1 0}
-.mo-trois>.cx-carte{min-height:0;overflow:auto}
+.mo-trois>.cx-carte{min-height:0;overflow:auto;scrollbar-gutter:stable}
 .mo-toile{position:relative;border-radius:12px;background:#EFE8DD;color:#1C1B18;overflow:hidden;min-height:0;user-select:none}
 .mo-toile svg{display:block;position:absolute;left:0;top:0}
 .mo-calque{display:flex;align-items:center;gap:.45rem;width:100%;padding:.3rem .4rem;border-radius:8px;text-align:left;font-size:.82rem;background:transparent;border:1px solid transparent;cursor:pointer}
