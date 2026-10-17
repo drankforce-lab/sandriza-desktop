@@ -208,52 +208,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
     if (isNaN(d.getTime())) return esc(iso);
     return d.toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'short', year: 'numeric' });
   }
+  /* LE SOLDE DANS LE RÉSUMÉ (2026-10-16, sa demande : « oui mets le solde des crédits dans le résumé »). Les
+     bandeaux de chiffres sont partis de toute l administration ; le solde, lui, sert avant chaque traitement :
+     il revient en une ligne dans la tête — Photoroom (réel, lu en direct) et fal.ai (restant calculé). */
+  function resumeCredits(){
+    var morceaux = [];
+    if (PR && PR.compte && PR.compte.available != null) {
+      morceaux.push('${T("Photoroom : {0} crédits")}'.split('{0}').join(PR.compte.available
+        + (PR.compte.subscription != null ? ' / ' + PR.compte.subscription : '')));
+    } else {
+      morceaux.push('${T("Photoroom : solde non lu")}');
+    }
+    var solde = Number(D && D.soldeSaisi) || 0, conso = Number(D && D.consoDepuis) || 0;
+    morceaux.push(solde > 0 ? '${T("fal.ai : {0} restants")}'.split('{0}').join(sous_(Math.max(0, solde - conso)))
+      : '${T("fal.ai : solde à saisir en Configuration")}');
+    return morceaux.join(' · ');
+  }
   function duree(ms){
     var n = Number(ms) || 0;
     return n >= 1000 ? (Math.round(n / 100) / 10).toString().replace('.', '${SEP_DEC()}') + ' s' : n + ' ms';
   }
 
-  /* La carte des CRÉDITS PHOTOROOM — le fournisseur principal du retrait et de
-     l’ajout de mannequin. Le restant est RÉEL, lu de /v2/account ; le sandbox
-     est notre compte estimé (Photoroom ne l’expose pas). */
-  function carteCredits(){
-    // Photoroom : credits reels (lus par API) + apercus sandbox (comptes par nous).
-    var reel;
-    if (PR && PR.compte && PR.compte.available != null) {
-      var c = PR.compte;
-      reel = '<div class="t"><div class="l">${T("Crédits Photoroom (réels)")}</div><div class="n">'
-        + c.available + (c.subscription != null ? ' <span class="s">/ ' + c.subscription + '</span>' : '')
-        + '</div><div class="s">' + (c.plan ? '${T("offre ")}' + esc(c.plan) + ' · ' : '')
-        + '${T("lus en direct de Photoroom")}</div></div>';
-    } else {
-      reel = '<div class="t"><div class="l">${T("Crédits Photoroom (réels)")}</div><div class="n">—</div>'
-        + '<div class="s">' + (PR ? '${T("indisponible (clé de production requise)")}' : '${T("non lu")}') + '</div></div>';
-    }
-    var sb = (PR && PR.sandbox) ? PR.sandbox : { utilise: 0, quotaMois: 1000 };
-    var sand = '<div class="t"><div class="l">${T("Aperçus sandbox")}</div><div class="n">'
-      + (sb.utilise || 0) + ' <span class="s">/ ' + (sb.quotaMois || 1000) + '</span></div>'
-      + '<div class="s">${T("ce mois · estimé · filigrané")}</div></div>';
-    /* fal.ai : un SOLDE RESTANT, comme Photoroom, mais calculé — fal n'expose
-       aucun solde par API. Restant = montant saisi en Configuration MOINS la
-       consommation mesurée depuis la saisie ; il diminue donc à chaque traitement
-       fal. Un chiffre honnête et daté plutôt qu'un paragraphe. */
-    var solde = Number(D.soldeSaisi) || 0, conso = Number(D.consoDepuis) || 0;
-    var reste = solde - conso; if (reste < 0) { reste = 0; }
-    var fal;
-    if (solde > 0) {
-      fal = '<div class="t"><div class="l">${T("Solde fal.ai (restant)")}</div><div class="n">' + sous_(reste)
-        + '</div><div class="s">' + (D.soldeDate ? '${T("saisi le ")}' + esc(jourCourt(D.soldeDate)) + ' · ' : '')
-        + '${T("diminue à chaque traitement")}</div></div>';
-    } else {
-      fal = '<div class="t"><div class="l">${T("Solde fal.ai (restant)")}</div><div class="n">—</div>'
-        + '<div class="s">${T("à saisir en Configuration")}</div></div>';
-    }
-    /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
-       quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
-       ce poste. Voir JS_TUILES dans socle.js. */
-    return '<div class="carte"><h2>${T("Crédits &amp; solde")}</h2>'
-      + szTuiles('<div class="tuiles">' + reel + sand + fal + '</div>') + '</div>';
-  }
 
   /* ══ LE PLAFOND MENSUEL DE DÉPENSE (lot 2 du #29) ═════════════════════════
      ⚠⚠ UN SEUL PLAFOND POUR LES DEUX FOURNISSEURS, et c est ce qui le rend utile.
@@ -320,20 +295,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
     /* ⚠ EN RANGEES, PAS EN ETAGES (sa demande : aucune barre de defilement) :
        credits | consommation, puis plafond | trente jours, puis le detail. */
 
-    var reussis = 0;
-    (D.parModele || []).forEach(function(m){ reussis += m.reussis; });
-    var echecs = (D.appels || 0) - reussis;
 
-    var tuConso = szTuiles('<div class="tuiles">'
-      + '<div class="t"><div class="l">${T("Consommation totale")}</div><div class="n">' + sous_(D.total) + '</div>'
-      + '<div class="s">${T("depuis le début du suivi")}</div></div>'
-      + '<div class="t"><div class="l">${T("Appels")}</div><div class="n">' + (D.appels || 0) + '</div>'
-      + '<div class="s">' + reussis + '${T(" réussis · ")}' + echecs + '${T(" en échec")}</div></div>'
-      + '<div class="t"><div class="l">${T("Coût moyen")}</div><div class="n">'
-      + sous_((D.appels ? (D.total / D.appels) : 0)) + '</div>'
-      + '<div class="s">${T("par appel")}</div></div>'
-      + '</div>');
-    h.push('<div class="rang2"><div>' + carteCredits() + '</div><div>' + tuConso + '</div></div>');
+    /* (2026-10-16) Plus de rangée « Crédits & solde | Consommation » : ses bandeaux sont éteints (aucune tuile hors du
+       tableau de bord) ; le solde est dans la tête (resumeCredits). */
     var joursH = '';
 
     // Les trente derniers jours
@@ -517,7 +481,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
       D = r;
       MAJ = _horoNow();
       /* ⚠ Le singulier et le pluriel, chacun entier. */
-      sous.textContent = (D.appels || 0) + ((D.appels || 0) > 1 ? '${T(" appels")}' : '${T(" appel")}')
+      sous.textContent = resumeCredits() + ' · ' + (D.appels || 0) + ((D.appels || 0) > 1 ? '${T(" appels")}' : '${T(" appel")}')
         + ' · ' + sous_(D.total);
       dessiner();
       if (dit) dire('');

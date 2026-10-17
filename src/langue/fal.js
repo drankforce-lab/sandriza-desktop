@@ -27,6 +27,11 @@
  */
 
 module.exports = {
+  /* ── LE SOLDE DANS LE RESUME (2026-10-16) ── */
+  'Photoroom : {0} crédits': 'Photoroom: {0} credits',
+  'Photoroom : solde non lu': 'Photoroom: balance not read',
+  'fal.ai : {0} restants': 'fal.ai: {0} left',
+  'fal.ai : solde à saisir en Configuration': 'fal.ai: balance to enter in Settings',
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   'Traitements d’image — Administration Sandriza':
     'Image treatments — Sandriza Administration',
