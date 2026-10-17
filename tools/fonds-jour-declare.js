@@ -27,6 +27,8 @@ module.exports = {
      html.jour dans leur fenetre — sans quoi le bouton de paiement perdait sa
      couleur en plein jour. Trouve par ce banc meme, le 2026-09-04. */
   fonds: {
+    // Atelier (lot 5) : la pastille ROUGE d'un contrôle avant impression en erreur — le rouge EST le message.
+    'atelier.js': { '.mo-ctl.err i': '#DC2626' },
     'chat-config.js': { '.b.prim': '#8f6f42' },
     'commandes.js': { '.badge2.vertf': '#166534', '.banniere': '#7f1d1d', '.ctx .warn': '#7f1d1d' },
     'config-navigation.js': { 'button.danger.arme': '#7f1d1d' },

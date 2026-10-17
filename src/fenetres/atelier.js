@@ -30,7 +30,10 @@
  * en 3D logicielle sur un canevas 2D (projection, ombrage, tri des faces) ; la
  * souris fait tourner l'objet en direct (sa demande). Aperçu géométrique : le
  * tombé du tissu n'est pas simulé, et la fenêtre le dit.
- * Le lot suivant : l'éditeur de motif.
+ * LOT 5 (7.45.0) : le MOTIF ET L'IMPRESSION TEXTILE — placé sur une pièce
+ * (dépliée au pli) ou au mètre (raccords) ; calques image / texte / forme
+ * placés à la souris ; le site nettoie, contrôle et fabrique les sorties ;
+ * la fenêtre rastérise le PNG et y inscrit la résolution (bloc pHYs).
  *
  * ⚠ LA FENÊTRE NE TRACE RIEN (sauf le geste de l'éditeur : un point suit la
  * souris ; la ligne de coupe, les longueurs et le tissu reviennent du site par
@@ -187,6 +190,22 @@ table.at-tab{width:100%;border-collapse:collapse;font-size:.8rem;font-variant-nu
 .v3-pt{width:.8rem;height:.8rem;border-radius:50%;flex:0 0 auto;border:1px solid rgba(0,0,0,.25)}
 .v3-legende{display:flex;flex-wrap:wrap;gap:.35rem .9rem;font-size:.76rem;color:var(--tx2);margin:.4rem 0}
 .v3-legende span{display:inline-flex;align-items:center;gap:.3rem}
+
+/* ── Éditeur de motif (lot 5) ── */
+.mo-trois{display:grid;grid-template-columns:18rem minmax(0,1fr) 21rem;gap:.9rem;min-height:0}
+.cx>.mo-trois{flex:1 1 0}
+.mo-trois>.cx-carte{min-height:0;overflow:auto}
+.mo-toile{position:relative;border-radius:12px;background:#EFE8DD;color:#1C1B18;overflow:hidden;min-height:0;user-select:none}
+.mo-toile svg{display:block;position:absolute;left:0;top:0}
+.mo-calque{display:flex;align-items:center;gap:.45rem;width:100%;padding:.35rem .5rem;border-radius:8px;text-align:left;font-size:.82rem;background:transparent;border:1px solid transparent}
+.mo-calque.on{border-color:var(--or)}
+.mo-calque .t{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mo-calque .k{font-size:.7rem;color:var(--tx2)}
+.mo-ctl{display:flex;gap:.5rem;align-items:flex-start;font-size:.8rem;padding:.35rem 0;border-top:1px solid var(--v055)}
+.mo-ctl i{flex:0 0 auto;width:.7rem;height:.7rem;border-radius:50%;margin-top:.3rem}
+.mo-ctl.bon i{background:#16A34A}.mo-ctl.att i{background:#F59E0B}.mo-ctl.err i{background:#DC2626}
+.mo-sorties{display:flex;flex-direction:column;gap:.4rem;margin-top:.4rem}
+input[type=color]{width:100%;height:2rem;padding:.1rem;cursor:pointer}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -267,6 +286,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     retouche_et_retrace: '${T("Impossible d’enregistrer une retouche et de retracer en même temps.")}',
     pieces: '${T("Le patron n’a plus de pièce valable.")}',
     aucune_piece: '${T("Aucune des pièces choisies n’existe dans ce modèle.")}',
+    motif_vide: '${T("Le motif est vide : ajoutez un calque, puis enregistrez.")}',
+    aucune_encre: '${T("Aucune encre à séparer : les images ne se séparent pas en aplats.")}',
+    image_format: '${T("Choisissez une image PNG ou JPEG.")}',
+    image_lourde: '${T("Image trop lourde (20 Mo au plus).")}',
+    televersement: '${T("Le dépôt de l’image a échoué. Réessayez.")}',
     echec: '${T("L’opération a échoué.")}'
   };
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
@@ -436,6 +460,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<button type="button" data-editer="' + esc(m.id) + '">${T("Éditer le patron")}</button>'
         + '<button type="button" data-imprimer="' + esc(m.id) + '">${T("Imprimer / exporter")}</button>'
         + '<button type="button" data-v3="' + esc(m.id) + '">${T("Aperçu 3D")}</button>'
+        + '<button type="button" data-motif="' + esc(m.id) + '">${T("Motif et impression textile")}</button>'
         + '<button type="button" class="prim" data-ouvrir="' + esc(m.id) + '">${T("Ouvrir le modèle")}</button></div>'
         + (m.edite ? '<div class="ed-note">${T("Patron retouché dans l’éditeur : « retracer » depuis le modèle effacerait ces retouches.")}</div>' : '');
     }
@@ -1955,13 +1980,477 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     V3.zoom = 1; V3.px = 0; V3.py = 0; V3.pitch = 0.08; demander3d();
   });
 
+  /* ══ L ÉDITEUR DE MOTIF (lot 5) ═════════════════════════════════════════
+     Le motif vit dans le modèle (« motif »). La fenêtre place les calques à la
+     souris (le geste doit suivre) ; le SITE nettoie, contrôle (atelier:
+     motifControler) et fabrique les sorties (atelier:motifExporter) depuis le
+     motif ENREGISTRÉ. Les images partent dans R2 à pleine résolution
+     (atelier:motifImage) ; la fenêtre les affiche par P.imageLocale.
+     Le PNG reçoit la résolution DANS le fichier (bloc pHYs) : sans lui, le
+     logiciel d une imprimante DTF le lit à 72 ppp — quatre fois trop grand. */
+  var MO = null;
+  var MOIMG = {};             // url → donnée (data:) chargée par P.imageLocale
+  var MOPILE = [], MOREF = [];
+  var LPROC = { dtf: '${T("DTF (film transfert)")}', dtg: '${T("DTG (direct sur vêtement)")}', sublimation: '${T("Sublimation (polyester)")}',
+    serigraphie: '${T("Sérigraphie")}', vinyle: '${T("Vinyle / flex (découpe)")}', broderie: '${T("Broderie")}' };
+  var LRACC = { droit: '${T("Droit")}', demigoutte: '${T("Demi-goutte")}', demibrique: '${T("Demi-brique")}' };
+  var LTYPE = { image: '${T("image")}', texte: '${T("texte")}', forme: '${T("forme")}' };
+
+  function motifDefaut(m){
+    var dv = (m.pieces || []).filter(function(p){ return p.id === 'devant'; })[0] || (m.pieces || [])[0];
+    var pli = dv && dv.aupli;
+    return { mode: 'place', piece: dv ? dv.id : 'devant', zone: { x: pli ? -15 : 2, y: 12, l: 30, h: 35 }, raccord: 'droit',
+      procede: 'dtf', ppp: 300, souscouche: 'auto', fond: 'transparent', calques: [] };
+  }
+  function ouvrirMotif(id, retour){
+    var m = (D.modeles || []).filter(function(x){ return x.id === id; })[0];
+    if (!m) { dire(MOTIFS.introuvable, 'err'); return; }
+    SEL = id;
+    MO = { id: id, m: m, retour: retour || 'biblio', motif: copie(m.motif || motifDefaut(m)), sel: '', onglet: 'calque', ctl: null, sale: false, glisse: null };
+    MOPILE = []; MOREF = [];
+    VUE = 'motif'; dessiner(); controlerMo(); chargerImagesMo();
+  }
+  function moMemo(){ MOPILE.push(JSON.stringify(MO.motif)); if (MOPILE.length > 80) MOPILE.shift(); MOREF = []; MO.sale = true; }
+  function moCalque(){ return (MO.motif.calques || []).filter(function(c){ return c.id === MO.sel; })[0] || null; }
+  function chargerImagesMo(){
+    (MO.motif.calques || []).forEach(function(c){
+      if (c.type !== 'image' || !c.url || MOIMG[c.url] || !P || !P.imageLocale) return;
+      MOIMG[c.url] = 'chargement';
+      Promise.resolve(P.imageLocale(c.url)).then(function(d){ MOIMG[c.url] = d || ''; if (VUE === 'motif') peindreMo(); });
+    });
+  }
+
+  /* ── La toile : la pièce (dépliée si elle est coupée au pli), la zone, les calques ── */
+  var MK = 6, MX = 0, MY = 0;
+  function reflet(q, pli){
+    var dx = pli.b.x - pli.a.x, dy = pli.b.y - pli.a.y, l2 = dx * dx + dy * dy || 1;
+    var t = ((q.x - pli.a.x) * dx + (q.y - pli.a.y) * dy) / l2, px = pli.a.x + t * dx, py = pli.a.y + t * dy;
+    return { x: 2 * px - q.x, y: 2 * py - q.y };
+  }
+  function cheminPiece(c, X, Y){
+    var d = 'M' + X(c[0].x) + ' ' + Y(c[0].y);
+    for (var n = 1; n <= c.length; n++) { var z = c[n % c.length];
+      d += z.c1 && z.c2 ? ' C' + X(z.c1.x) + ' ' + Y(z.c1.y) + ' ' + X(z.c2.x) + ' ' + Y(z.c2.y) + ' ' + X(z.x) + ' ' + Y(z.y) : ' L' + X(z.x) + ' ' + Y(z.y); }
+    return d + ' Z';
+  }
+  function calqueSvg(c, X, Y){
+    var x = X(c.x), y = Y(c.y), l = c.l * MK, h = c.h * MK, cx = x + l / 2, cy = y + h / 2;
+    var s = '<g transform="translate(' + cx + ' ' + cy + ') rotate(' + (c.rot || 0) + ')' + (c.miroir ? ' scale(-1 1)' : '') + '" opacity="' + (c.opacite == null ? 1 : c.opacite) + '">';
+    if (c.type === 'image') {
+      var d = MOIMG[c.url];
+      s += d && d !== 'chargement' ? '<image href="' + d + '" x="' + (-l / 2) + '" y="' + (-h / 2) + '" width="' + l + '" height="' + h + '" preserveAspectRatio="none"/>'
+        : '<rect x="' + (-l / 2) + '" y="' + (-h / 2) + '" width="' + l + '" height="' + h + '" fill="#D8D0C3"/><text x="0" y="4" text-anchor="middle" font-size="12" fill="#3F3A32" font-family="Segoe UI, sans-serif">' + esc(c.nom || LTYPE.image) + '</text>';
+    }
+    if (c.type === 'forme') {
+      var st = c.plein !== false ? 'fill="' + c.couleur + '"' : 'fill="none" stroke="' + c.couleur + '" stroke-width="' + Math.max(1, (c.contour || 0.1) * MK) + '"';
+      s += c.forme === 'ellipse' ? '<ellipse cx="0" cy="0" rx="' + (l / 2) + '" ry="' + (h / 2) + '" ' + st + '/>' : '<rect x="' + (-l / 2) + '" y="' + (-h / 2) + '" width="' + l + '" height="' + h + '" ' + st + '/>';
+    }
+    if (c.type === 'texte') s += '<text x="0" y="' + (h * 0.36) + '" font-family="' + esc(c.police || 'Arial') + '" font-size="' + h + '" font-weight="' + (c.gras ? 700 : 400) + '" fill="' + c.couleur + '" text-anchor="middle" textLength="' + l + '" lengthAdjust="spacingAndGlyphs">' + esc(c.texte || '') + '</text>';
+    return s + '</g>';
+  }
+  function peindreMo(){
+    var z = document.getElementById('mo-toile'), svg = document.getElementById('mo-svg'); if (!z || !svg || !MO) return;
+    var W = z.clientWidth || 800, H = z.clientHeight || 600, mo = MO.motif, zo = mo.zone, s = '';
+    var p = (MO.m.pieces || []).filter(function(x){ return x.id === mo.piece; })[0];
+    if (mo.mode === 'raccord') {
+      // trois modules sur trois, décalés selon le raccord : on voit le tissu au mètre
+      MK = Math.min((W - 60) / (zo.l * 3), (H - 60) / (zo.h * 3)); MX = (W - zo.l * 3 * MK) / 2; MY = (H - zo.h * 3 * MK) / 2;
+      var X0 = function(v){ return v * MK; }, Y0 = function(v){ return v * MK; };
+      s += '<defs><clipPath id="mo-cl"><rect x="0" y="0" width="' + zo.l * MK + '" height="' + zo.h * MK + '"/></clipPath><g id="mo-mod" clip-path="url(#mo-cl)"><rect width="' + zo.l * MK + '" height="' + zo.h * MK + '" fill="' + (mo.fond === 'blanc' ? '#FFFFFF' : '#F6F1E9') + '"/>'
+        + (mo.calques || []).filter(function(c){ return c.visible !== false; }).map(function(c){ return calqueSvg(c, X0, Y0); }).join('') + '</g></defs>';
+      for (var i = -1; i <= 3; i++) for (var j = -1; j <= 3; j++) {
+        var ox = j * zo.l + (mo.raccord === 'demibrique' && i % 2 ? zo.l / 2 : 0), oy = i * zo.h + (mo.raccord === 'demigoutte' && j % 2 ? zo.h / 2 : 0);
+        s += '<use href="#mo-mod" x="' + (MX + ox * MK) + '" y="' + (MY + oy * MK) + '"/>';
+      }
+      s += '<rect x="' + (MX + zo.l * MK) + '" y="' + (MY + zo.h * MK) + '" width="' + zo.l * MK + '" height="' + zo.h * MK + '" fill="none" stroke="#2563EB" stroke-width="1.5" stroke-dasharray="6 4"/>';
+      MX += zo.l * MK; MY += zo.h * MK;     // le module édité : celui du centre
+    } else {
+      var pts = p ? p.contour.slice() : [];
+      var tous = pts.concat(p && p.aupli && p.pli ? pts.map(function(q){ return reflet(q, p.pli); }) : []).concat([{ x: zo.x, y: zo.y }, { x: zo.x + zo.l, y: zo.y + zo.h }]);
+      var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+      tous.forEach(function(q){ x0 = Math.min(x0, q.x); y0 = Math.min(y0, q.y); x1 = Math.max(x1, q.x); y1 = Math.max(y1, q.y); });
+      MK = Math.min((W - 60) / Math.max(1, x1 - x0), (H - 60) / Math.max(1, y1 - y0));
+      var bx = (W - (x1 - x0) * MK) / 2 - x0 * MK, by = (H - (y1 - y0) * MK) / 2 - y0 * MK;
+      var PX = function(v){ return Math.round((bx + v * MK) * 10) / 10; }, PY = function(v){ return Math.round((by + v * MK) * 10) / 10; };
+      if (p) {
+        s += '<path d="' + cheminPiece(p.contour, PX, PY) + '" fill="#F8F4EC" stroke="#1C1B18" stroke-width="1.4"/>';
+        if (p.aupli && p.pli) {
+          var mir = p.contour.map(function(q){ var r = reflet(q, p.pli); if (q.c1 && q.c2) { r.c1 = reflet(q.c1, p.pli); r.c2 = reflet(q.c2, p.pli); } return r; });
+          s += '<path d="' + cheminPiece(mir, PX, PY) + '" fill="#F8F4EC" stroke="#1C1B18" stroke-width="1.4"/>'
+            + '<path d="M' + PX(p.pli.a.x) + ' ' + PY(p.pli.a.y) + ' L' + PX(p.pli.b.x) + ' ' + PY(p.pli.b.y) + '" stroke="#8F897D" stroke-width="1" stroke-dasharray="8 4"/>';
+        }
+      }
+      MX = PX(zo.x); MY = PY(zo.y);
+      var Xz = function(v){ return MX + v * MK; }, Yz = function(v){ return MY + v * MK; };
+      s += '<rect x="' + MX + '" y="' + MY + '" width="' + zo.l * MK + '" height="' + zo.h * MK + '" fill="none" stroke="#2563EB" stroke-width="1.5" stroke-dasharray="6 4"/>'
+        + '<text x="' + MX + '" y="' + (MY - 6) + '" font-size="12" fill="#1E40AF" font-family="Segoe UI, sans-serif">' + esc('${T("Zone d’impression · {0} × {1} cm")}'.split('{0}').join(String(zo.l).replace('.', '${SEP_DEC()}')).split('{1}').join(String(zo.h).replace('.', '${SEP_DEC()}'))) + '</text>';
+      s += (mo.calques || []).filter(function(c){ return c.visible !== false; }).map(function(c){ return calqueSvg(c, function(v){ return Xz(v); }, function(v){ return Yz(v); }); }).join('');
+    }
+    var c = moCalque();
+    if (c) {
+      var sx0 = MX + c.x * MK, sy0 = MY + c.y * MK, sl = c.l * MK, sh = c.h * MK;
+      s += '<rect x="' + sx0 + '" y="' + sy0 + '" width="' + sl + '" height="' + sh + '" fill="none" stroke="#C2410C" stroke-width="1.2" stroke-dasharray="4 3"/>'
+        + '<rect x="' + (sx0 + sl - 5) + '" y="' + (sy0 + sh - 5) + '" width="10" height="10" fill="#FFFFFF" stroke="#C2410C" stroke-width="1.5"/>';
+    }
+    svg.setAttribute('width', W); svg.setAttribute('height', H); svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    svg.innerHTML = s;
+  }
+
+  /* ── Les panneaux ── */
+  function dessinerMo(){
+    var m = MO.m, mo = MO.motif;
+    document.getElementById('titre').textContent = '${T("Motif")}';
+    document.getElementById('sous').textContent = m.nom + (m.ref ? ' · ' + m.ref : '') + (MO.sale ? ' · ${T("modifications non enregistrées")}' : '');
+    document.getElementById('actions').innerHTML = '<button type="button" id="mo-retour">${T("← Bibliothèque")}</button>'
+      + '<button type="button" id="mo-annuler" aria-label="${T("Annuler")}" title="${T("Annuler (Ctrl+Z)")}"' + (MOPILE.length ? '' : ' disabled') + '>↶</button>'
+      + (D.peutModifier ? '<button type="button" class="prim" id="mo-enreg"' + (MO.sale ? '' : ' disabled') + '>${T("Enregistrer")}</button>' : '');
+    var seg = function(attr, k, lib, on){ return '<button type="button" class="' + (on ? 'on' : '') + '" ' + attr + '="' + k + '">' + lib + '</button>'; };
+    var g = '<div class="cx-carte"><h2>${T("Motif")}</h2><div class="ed-seg" role="group" aria-label="${T("Mode")}">'
+      + seg('data-momode', 'place', '${T("Placé")}', mo.mode === 'place') + seg('data-momode', 'raccord', '${T("Au mètre")}', mo.mode === 'raccord') + '</div>';
+    if (mo.mode === 'raccord') g += '<div class="ed-seg" role="group" aria-label="${T("Raccord")}" style="margin-top:.5rem">' + Object.keys(LRACC).map(function(k){ return seg('data-moracc', k, LRACC[k], mo.raccord === k); }).join('') + '</div>';
+    g += '<div class="at-champs" style="margin-top:.6rem">';
+    if (mo.mode === 'place') g += '<label class="large">${T("Pièce")}<select id="mo-piece">' + (m.pieces || []).map(function(p){ return '<option value="' + esc(p.id) + '"' + (mo.piece === p.id ? ' selected' : '') + '>' + esc(nomPiece(p)) + '</option>'; }).join('') + '</select></label>';
+    g += '<label>' + (mo.mode === 'raccord' ? '${T("Module · L (cm)")}' : '${T("Zone · L (cm)")}') + '<input type="text" id="mo-zl" inputmode="decimal" maxlength="5" value="' + esc(String(mo.zone.l).replace('.', '${SEP_DEC()}')) + '"></label>'
+      + '<label>' + (mo.mode === 'raccord' ? '${T("Module · H (cm)")}' : '${T("Zone · H (cm)")}') + '<input type="text" id="mo-zh" inputmode="decimal" maxlength="5" value="' + esc(String(mo.zone.h).replace('.', '${SEP_DEC()}')) + '"></label></div>';
+    if (mo.mode === 'place') g += '<div class="ed-gestes"><button type="button" class="mini" id="mo-centrer">${T("Centrer la zone sur la pièce")}</button></div>';
+    g += '<div class="cx-sep"></div><h2>${T("Calques")}</h2>'
+      + (mo.calques || []).slice().reverse().map(function(c){
+          return '<button type="button" class="mo-calque' + (MO.sel === c.id ? ' on' : '') + '" data-mocal="' + esc(c.id) + '"><span class="t">' + esc(c.type === 'texte' ? (c.texte || '') : (c.nom || LTYPE[c.type])) + '</span><span class="k">' + LTYPE[c.type] + (c.visible === false ? ' · ${T("masqué")}' : '') + '</span></button>';
+        }).join('')
+      + (!(mo.calques || []).length ? '<div class="cx-sub">${T("Aucun calque : ajoutez une image, un texte ou une forme.")}</div>' : '')
+      + '<div class="ed-gestes"><button type="button" class="mini" id="mo-add-image">${T("+ Image")}</button><button type="button" class="mini" id="mo-add-texte">${T("+ Texte")}</button><button type="button" class="mini" id="mo-add-forme">${T("+ Forme")}</button></div>'
+      + '<input type="file" id="mo-fichier" accept=".png,.jpg,.jpeg" aria-label="${T("Choisir une image")}" style="display:none">'
+      + '<div class="ed-note">${T("Une image se dépose à pleine résolution (PNG ou JPEG, 20 Mo au plus). Pour le DTF, un PNG au fond transparent.")}</div></div>';
+    var t = '<div class="mo-toile" id="mo-toile"><svg id="mo-svg" role="img" aria-label="${T("Le motif sur la pièce")}"></svg></div>';
+    var d = '<div class="cx-carte" id="mo-pan"></div>';
+    corps.innerHTML = '<div class="mo-trois">' + g + t + d + '</div>';
+    peindreMo(); peindrePanMo();
+    var tz = document.getElementById('mo-toile');
+    if (window.ResizeObserver && tz) { if (window._moRO) window._moRO.disconnect(); window._moRO = new ResizeObserver(function(){ peindreMo(); }); window._moRO.observe(tz); }
+  }
+  function peindrePanMo(){
+    var z = document.getElementById('mo-pan'); if (!z || !MO) return;
+    var mo = MO.motif, c = moCalque();
+    var seg = function(attr, k, lib, on){ return '<button type="button" class="' + (on ? 'on' : '') + '" ' + attr + '="' + k + '">' + lib + '</button>'; };
+    var cm = function(v){ return esc(String(Math.round((v || 0) * 10) / 10).replace('.', '${SEP_DEC()}')); };
+    var h = '<div class="ed-seg" role="group" aria-label="${T("Panneau")}">' + seg('data-moong', 'calque', '${T("Calque")}', MO.onglet === 'calque') + seg('data-moong', 'impression', '${T("Impression")}', MO.onglet === 'impression') + '</div>';
+    if (MO.onglet === 'calque') {
+      if (!c) h += '<h2>${T("Calque")}</h2><div class="cx-sub">${T("Cliquez un calque sur la toile ou dans la liste.")}</div>';
+      else {
+        h += '<h2>' + esc(c.type === 'texte' ? c.texte : (c.nom || LTYPE[c.type])) + ' <span class="cx-sub">' + LTYPE[c.type] + '</span></h2><div class="at-champs">';
+        if (c.type === 'texte') h += '<label class="large">${T("Texte")}<input type="text" id="mo-c-texte" maxlength="200" value="' + esc(c.texte) + '"></label>'
+          + '<label>${T("Police")}<select id="mo-c-police">' + ['Arial', 'Georgia', 'Courier New', 'Trebuchet MS', 'Impact'].map(function(f){ return '<option' + (c.police === f ? ' selected' : '') + '>' + f + '</option>'; }).join('') + '</select></label>'
+          + '<label style="flex-direction:row;align-items:center;gap:.4rem;margin-top:1.1rem"><input type="checkbox" id="mo-c-gras"' + (c.gras ? ' checked' : '') + '>${T("Gras")}</label>';
+        else h += '<label class="large">${T("Nom")}<input type="text" id="mo-c-nom" maxlength="40" value="' + esc(c.nom || '') + '"></label>';
+        if (c.type !== 'image') h += '<label>${T("Couleur")}<input type="color" id="mo-c-couleur" value="' + esc(c.couleur || '#1C1B18') + '"></label>';
+        if (c.type === 'forme') h += '<label>${T("Forme")}<select id="mo-c-forme"><option value="rect"' + (c.forme !== 'ellipse' ? ' selected' : '') + '>${T("Rectangle")}</option><option value="ellipse"' + (c.forme === 'ellipse' ? ' selected' : '') + '>${T("Ellipse")}</option></select></label>'
+          + '<label style="flex-direction:row;align-items:center;gap:.4rem"><input type="checkbox" id="mo-c-plein"' + (c.plein !== false ? ' checked' : '') + '>${T("Plein")}</label>'
+          + '<label>${T("Trait (mm)")}<input type="text" id="mo-c-contour" inputmode="decimal" maxlength="4" value="' + cm((c.contour || 0) * 10) + '"></label>';
+        h += '<label>X (cm)<input type="text" id="mo-c-x" inputmode="decimal" maxlength="6" value="' + cm(c.x) + '"></label><label>Y (cm)<input type="text" id="mo-c-y" inputmode="decimal" maxlength="6" value="' + cm(c.y) + '"></label>'
+          + '<label>${T("Largeur (cm)")}<input type="text" id="mo-c-l" inputmode="decimal" maxlength="6" value="' + cm(c.l) + '"></label><label>${T("Hauteur (cm)")}<input type="text" id="mo-c-h" inputmode="decimal" maxlength="6" value="' + cm(c.h) + '"></label>'
+          + '<label>${T("Rotation (°)")}<input type="text" id="mo-c-rot" inputmode="decimal" maxlength="5" value="' + cm(c.rot) + '"></label><label>${T("Opacité (%)")}<input type="text" id="mo-c-op" inputmode="numeric" maxlength="3" value="' + Math.round((c.opacite == null ? 1 : c.opacite) * 100) + '"></label>'
+          + '<label style="flex-direction:row;align-items:center;gap:.4rem"><input type="checkbox" id="mo-c-miroir"' + (c.miroir ? ' checked' : '') + '>${T("Miroir")}</label>'
+          + '<label style="flex-direction:row;align-items:center;gap:.4rem"><input type="checkbox" id="mo-c-visible"' + (c.visible !== false ? ' checked' : '') + '>${T("Visible")}</label></div>';
+        if (c.type === 'image') {
+          var ppp = Math.min(c.px.l / (c.l / 2.54), c.px.h / (c.h / 2.54));
+          h += '<div class="cx-etat"><span>${T("Fichier")}</span><span>' + c.px.l + ' × ' + c.px.h + ' px</span></div><div class="cx-etat"><span>${T("Résolution à cette taille")}</span><span>' + Math.round(ppp) + ' ${T("ppp")}</span></div>';
+        }
+        h += '<div class="ed-gestes"><button type="button" class="mini" id="mo-c-centrer">${T("Centrer dans la zone")}</button><button type="button" class="mini" id="mo-c-monter">${T("Monter")}</button><button type="button" class="mini" id="mo-c-descendre">${T("Descendre")}</button><button type="button" class="mini" id="mo-c-dupl">${T("Dupliquer")}</button><button type="button" class="mini danger" id="mo-c-suppr">${T("Supprimer")}</button></div>';
+      }
+    } else {
+      h += '<h2>${T("Procédé d’impression")}</h2>' + Object.keys(LPROC).map(function(k){ return '<button type="button" class="im-dest' + (mo.procede === k ? ' on' : '') + '" data-moproc="' + k + '"><b>' + LPROC[k] + '</b></button>'; }).join('');
+      h += '<div class="cx-sep"></div><h2>${T("Réglages")}</h2><div class="at-champs">';
+      if (mo.procede !== 'vinyle' && mo.procede !== 'broderie') h += '<label>${T("Résolution")}<select id="mo-ppp"><option value="300"' + (mo.ppp !== 600 ? ' selected' : '') + '>300 ${T("ppp")}</option><option value="600"' + (mo.ppp === 600 ? ' selected' : '') + '>600 ${T("ppp")}</option></select></label>';
+      if (mo.procede === 'dtf' || mo.procede === 'dtg') h += '<label>${T("Sous-couche blanche")}<select id="mo-sous"><option value="auto"' + (mo.souscouche === 'auto' ? ' selected' : '') + '>${T("Automatique")}</option><option value="pleine"' + (mo.souscouche === 'pleine' ? ' selected' : '') + '>${T("Pleine")}</option><option value="aucune"' + (mo.souscouche === 'aucune' ? ' selected' : '') + '>${T("Aucune")}</option></select></label>';
+      h += '<label>${T("Fond")}<select id="mo-fond"><option value="transparent"' + (mo.fond !== 'blanc' ? ' selected' : '') + '>${T("Transparent")}</option><option value="blanc"' + (mo.fond === 'blanc' ? ' selected' : '') + '>${T("Blanc")}</option></select></label></div>';
+      h += '<div class="cx-sep"></div><h2>${T("Contrôles avant impression")}</h2>' + (MO.ctl ? MO.ctl.map(function(x){ return '<div class="mo-ctl ' + x.niveau + '"><i></i><span>' + esc(phraseCtl(x)) + '</span></div>'; }).join('') : '<div class="cx-sub">…</div>');
+      var so = mo.procede === 'serigraphie' ? [['separations', '${T("Séparations, une par encre (PDF)")}']]
+        : mo.procede === 'vinyle' ? [['svg', '${T("Fichier de découpe (SVG)")}']]
+        : mo.procede === 'broderie' ? [['pdf', '${T("PDF à l’échelle pour le brodeur")}']]
+        : [['png', '${T("PNG à {0} ppp")}'.split('{0}').join(mo.ppp)], ['pdf', '${T("PDF à l’échelle")}']];
+      h += '<div class="cx-sep"></div><h2>${T("Sorties")}</h2><div class="mo-sorties">' + so.map(function(x, i){ return '<button type="button" class="' + (i ? '' : 'prim') + '" data-mosortie="' + x[0] + '">' + x[1] + '</button>'; }).join('') + '</div>'
+        + '<div class="ed-note">${T("Les sorties partent du motif ENREGISTRÉ ; des changements en cours s’enregistrent d’abord.")}</div>';
+    }
+    z.innerHTML = h;
+  }
+  /* Le site envoie une CLÉ et des VALEURS ; la phrase se compose ici, dans la langue de la fenêtre. */
+  var PHRASES = {
+    vide: '${T("Le motif est vide : ajoutez une image, un texte ou une forme.")}',
+    'resolution.err': '${T("« {nom} » : {ppp} ppp à cette taille — il en faut {cible} : l’impression sera floue. Réduisez-la ou fournissez un fichier plus grand.")}',
+    'resolution.att': '${T("« {nom} » : {ppp} ppp à cette taille ({cible} visés) — acceptable, un peu doux de près.")}',
+    'resolution.bon': '${T("Résolution suffisante partout (≥ {cible} ppp).")}',
+    'zone.err': '${T("{noms} sort de la zone d’impression : ce qui dépasse ne sera pas imprimé.")}',
+    'zone.att': '${T("{noms} dépasse le module : la partie qui déborde sera coupée au raccord.")}',
+    'zone.bon': '${T("Tout le design est dans la zone d’impression.")}',
+    trait: '${T("« {nom} » : trait de {mm} mm, trop fin pour ce procédé (min. {min} mm).")}',
+    texte: '${T("« {texte} » : lettres de {mm} mm, trop petites pour ce procédé (min. {min} mm).")}',
+    encres: '${T("Encres : {n} — un écran et une séparation par encre, avec repères de calage.")}',
+    image_serigraphie: '${T("Les images en couleurs continues ne se séparent pas en aplats : vectorisez-les, ou passez en DTF / DTG.")}',
+    image_vinyle: '${T("Le vinyle se DÉCOUPE : une image ne se découpe pas. Gardez des textes et des formes, ou passez en DTF.")}',
+    broderie: '${T("Fichier de broderie (DST, PES) non produit : la broderie demande un numérisage point par point, à faire chez le brodeur à partir du PDF.")}',
+    miroir: '${T("Sublimation : le fichier sort en MIROIR, pour un tissu clair à fort taux de polyester.")}',
+    'souscouche.pleine': '${T("Sous-couche blanche pleine — à régler dans le logiciel de l’imprimante.")}',
+    'souscouche.auto': '${T("Sous-couche blanche automatique, sous ce qui est imprimé — à régler dans le logiciel de l’imprimante.")}'
+  };
+  function phraseCtl(x){
+    var v = x.v || {}, k = x.cle;
+    var modele = PHRASES[k + '.' + x.niveau] || (k === 'souscouche' ? PHRASES[v.pleine ? 'souscouche.pleine' : 'souscouche.auto'] : PHRASES[k]);
+    if (!modele) return szTd(x.texte || '');
+    var nb = function(n){ return String(n).replace('.', '${SEP_DEC()}'); };
+    return modele.replace(/[{]([a-z]+)[}]/g, function(a, c){
+      var val = v[c];
+      if (c === 'noms') return (val || []).map(function(t){ return '« ' + t + ' »'; }).join(', ');
+      return val == null ? '' : (typeof val === 'number' ? nb(val) : String(val));
+    });
+  }
+  var moT = null;
+  function controlerMo(){
+    clearTimeout(moT);
+    moT = setTimeout(function(){
+      appeler('atelier:motifControler', [{ id: MO.id, motif: MO.motif }]).then(function(r){
+        if (VUE !== 'motif' || !MO) return;
+        MO.ctl = r && r.ok ? r.controles : [{ niveau: 'err', texte: expliquer(r) }];
+        if (MO.onglet === 'impression' && !(document.activeElement && document.getElementById('mo-pan') && document.getElementById('mo-pan').contains(document.activeElement) && /^(INPUT|SELECT)$/.test(document.activeElement.tagName))) peindrePanMo();
+      });
+    }, 250);
+  }
+  function apresMo(redessiner){ if (redessiner) dessinerMo(); else { peindreMo(); peindrePanMo(); var e = document.getElementById('mo-enreg'); if (e) e.disabled = !MO.sale; var a = document.getElementById('mo-annuler'); if (a) a.disabled = !MOPILE.length; document.getElementById('sous').textContent = MO.m.nom + (MO.m.ref ? ' · ' + MO.m.ref : '') + (MO.sale ? ' · ${T("modifications non enregistrées")}' : ''); } controlerMo(); }
+
+  function nouveauCalque(type, extra){
+    moMemo();
+    var n = 1; while ((MO.motif.calques || []).some(function(c){ return c.id === 'c' + n; })) n++;
+    var zo = MO.motif.zone, c = { id: 'c' + n, type: type, x: zo.l * 0.2, y: zo.h * 0.3, l: zo.l * 0.6, h: type === 'texte' ? Math.max(1, zo.h * 0.1) : zo.l * 0.6, rot: 0, opacite: 1, miroir: false, visible: true };
+    if (type === 'texte') { c.texte = 'SANDRIZA'; c.police = 'Arial'; c.couleur = '#1C1B18'; c.gras = true; }
+    if (type === 'forme') { c.forme = 'rect'; c.couleur = '#B4583C'; c.plein = true; c.contour = 0.1; c.l = zo.l * 0.3; c.h = zo.l * 0.3; c.nom = '${T("Forme")}'; }
+    if (extra) Object.keys(extra).forEach(function(k){ c[k] = extra[k]; });
+    MO.motif.calques = (MO.motif.calques || []).concat([c]); MO.sel = c.id; MO.onglet = 'calque';
+    apresMo(true);
+  }
+  /* Une image : lue, ramenée à 6000 px au plus de côté, déposée dans R2 à pleine résolution. */
+  function importerImage(f){
+    if (!f) return;
+    if (!/^image[/](png|jpeg)$/.test(f.type)) { dire('${T("Choisissez une image PNG ou JPEG.")}', 'err'); return; }
+    var lect = new FileReader();
+    lect.onload = function(){
+      var img = new Image();
+      img.onload = function(){
+        var w = img.naturalWidth, h = img.naturalHeight, d = String(lect.result || '');
+        if (Math.max(w, h) > 6000) {
+          var k = 6000 / Math.max(w, h), cv = document.createElement('canvas'); cv.width = Math.round(w * k); cv.height = Math.round(h * k);
+          cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height); d = cv.toDataURL(f.type); w = cv.width; h = cv.height;
+        }
+        dire('${T("Dépôt de l’image ({0} × {1} px)…")}'.split('{0}').join(w).split('{1}').join(h));
+        appeler('atelier:motifImage', [d]).then(function(r){
+          if (!r || !r.ok) { dire(r && r.motif === 'image_lourde' ? '${T("Image trop lourde (20 Mo au plus).")}' : expliquer(r), 'err'); return; }
+          MOIMG[r.url] = d;
+          var zo = MO.motif.zone, l = Math.min(zo.l * 0.8, w / 300 * 2.54), hh = l * h / w;
+          if (hh > zo.h * 0.8) { hh = zo.h * 0.8; l = hh * w / h; }
+          nouveauCalque('image', { url: r.url, px: { l: w, h: h }, nom: String(f.name || 'image').slice(0, 40), l: l, h: hh, x: (zo.l - l) / 2, y: (zo.h - hh) / 2 });
+          dire('${T("Image déposée.")}', 'bon');
+        });
+      };
+      img.onerror = function(){ dire('${T("Image illisible.")}', 'err'); };
+      img.src = String(lect.result || '');
+    };
+    lect.readAsDataURL(f);
+  }
+
+  /* ── La souris : déplacer, redimensionner ── */
+  function sourisMo(ev){ var r = document.getElementById('mo-svg').getBoundingClientRect(); return { x: (ev.clientX - r.left - MX) / MK, y: (ev.clientY - r.top - MY) / MK }; }
+  function dansCalque(c, q){
+    var a = -(c.rot || 0) * Math.PI / 180, cx = c.x + c.l / 2, cy = c.y + c.h / 2, dx = q.x - cx, dy = q.y - cy;
+    var x = dx * Math.cos(a) - dy * Math.sin(a), y = dx * Math.sin(a) + dy * Math.cos(a);
+    if (!(Math.abs(x) <= c.l / 2 && Math.abs(y) <= c.h / 2)) return false;
+    // une forme NON PLEINE ne se saisit que près de son trait : son intérieur laisse passer le clic
+    if (c.type === 'forme' && c.plein === false) { var m = 8 / MK; return Math.abs(x) >= c.l / 2 - m || Math.abs(y) >= c.h / 2 - m; }
+    return true;
+  }
+  corps.addEventListener('mousedown', function(ev){
+    if (VUE !== 'motif' || !MO || !(ev.target && ev.target.closest && ev.target.closest('#mo-svg'))) return;
+    var q = sourisMo(ev), c = moCalque();
+    if (c && Math.abs(q.x - (c.x + c.l)) * MK < 9 && Math.abs(q.y - (c.y + c.h)) * MK < 9) { MO.glisse = { type: 'taille', q0: q, l: c.l, h: c.h, avant: JSON.stringify(MO.motif) }; return; }
+    // le calque déjà choisi passe d abord : on le reprend même s il est sous un autre
+    var cs = (MO.motif.calques || []).slice().reverse().filter(function(x){ return x.visible !== false; });
+    if (c && c.visible !== false) cs = [c].concat(cs.filter(function(x){ return x !== c; }));
+    for (var i = 0; i < cs.length; i++) if (dansCalque(cs[i], q)) {
+      MO.sel = cs[i].id; MO.onglet = 'calque';
+      MO.glisse = { type: 'deplacer', q0: q, x: cs[i].x, y: cs[i].y, avant: JSON.stringify(MO.motif) };
+      dessinerMo(); return;
+    }
+    MO.sel = ''; peindreMo(); peindrePanMo();
+  });
+  window.addEventListener('mousemove', function(ev){
+    if (VUE !== 'motif' || !MO || !MO.glisse) return;
+    var g = MO.glisse, c = moCalque(); if (!c) return;
+    var q = sourisMo(ev), r1 = function(v){ return Math.round(v * 10) / 10; };
+    g.bouge = true;
+    if (g.type === 'deplacer') { c.x = r1(g.x + q.x - g.q0.x); c.y = r1(g.y + q.y - g.q0.y); }
+    else { var k = Math.max(0.05, (g.l + q.x - g.q0.x) / g.l); c.l = r1(Math.max(0.2, g.l * k)); c.h = ev.shiftKey ? r1(Math.max(0.2, g.h + q.y - g.q0.y)) : r1(Math.max(0.2, g.h * k)); }
+    peindreMo();
+  });
+  window.addEventListener('mouseup', function(){
+    if (!MO || !MO.glisse) return;
+    var g = MO.glisse; MO.glisse = null;
+    if (g.bouge) { MOPILE.push(g.avant); MOREF = []; MO.sale = true; apresMo(false); }
+  });
+
+  function clicMo(ev){
+    var t = ev.target, b, c = moCalque();
+    if ((b = t.closest('[data-momode]'))) { moMemo(); MO.motif.mode = b.getAttribute('data-momode'); apresMo(true); return; }
+    if ((b = t.closest('[data-moracc]'))) { moMemo(); MO.motif.raccord = b.getAttribute('data-moracc'); apresMo(true); return; }
+    if ((b = t.closest('[data-mocal]'))) { MO.sel = b.getAttribute('data-mocal'); MO.onglet = 'calque'; dessinerMo(); return; }
+    if ((b = t.closest('[data-moong]'))) { MO.onglet = b.getAttribute('data-moong'); peindrePanMo(); return; }
+    if ((b = t.closest('[data-moproc]'))) { moMemo(); MO.motif.procede = b.getAttribute('data-moproc'); apresMo(false); return; }
+    if ((b = t.closest('[data-mosortie]'))) { sortieMo(b.getAttribute('data-mosortie'), b); return; }
+    if (t.closest('#mo-add-image')) { var f = document.getElementById('mo-fichier'); if (f) { f.value = ''; f.click(); } return; }
+    if (t.closest('#mo-add-texte')) { nouveauCalque('texte'); return; }
+    if (t.closest('#mo-add-forme')) { nouveauCalque('forme'); return; }
+    if (t.closest('#mo-centrer')) {
+      var p = (MO.m.pieces || []).filter(function(x){ return x.id === MO.motif.piece; })[0]; if (!p) return;
+      moMemo();
+      var bb = boitePiece(p), zo = MO.motif.zone;
+      zo.x = p.aupli && p.pli ? Math.round(-zo.l / 2 * 10) / 10 : Math.round(((bb.x0 + bb.x1) / 2 - zo.l / 2) * 10) / 10;
+      apresMo(false); return;
+    }
+    if (!c) return;
+    if (t.closest('#mo-c-centrer')) { moMemo(); c.x = Math.round((MO.motif.zone.l - c.l) / 2 * 10) / 10; c.y = Math.round((MO.motif.zone.h - c.h) / 2 * 10) / 10; apresMo(false); return; }
+    var cs = MO.motif.calques, i = cs.indexOf(c);
+    if (t.closest('#mo-c-monter') && i < cs.length - 1) { moMemo(); cs.splice(i, 1); cs.splice(i + 1, 0, c); apresMo(true); return; }
+    if (t.closest('#mo-c-descendre') && i > 0) { moMemo(); cs.splice(i, 1); cs.splice(i - 1, 0, c); apresMo(true); return; }
+    if (t.closest('#mo-c-dupl')) { var d = copie(c), n = 1; while (cs.some(function(x){ return x.id === 'c' + n; })) n++; moMemo(); d.id = 'c' + n; d.x += 1; d.y += 1; cs.push(d); MO.sel = d.id; apresMo(true); return; }
+    if (t.closest('#mo-c-suppr')) { moMemo(); cs.splice(i, 1); MO.sel = ''; apresMo(true); return; }
+  }
+  function changeMo(t){
+    var id = t.id, mo = MO.motif, c = moCalque();
+    var num = function(v){ return nombre(v, NaN); };
+    if (id === 'mo-fichier') { importerImage(t.files && t.files[0]); return; }
+    if (id === 'mo-piece') { moMemo(); mo.piece = t.value; apresMo(false); return; }
+    if (id === 'mo-zl' || id === 'mo-zh') { var v = num(t.value); if (!(v >= 2 && v <= 300)) { dire('${T("Une zone va de 2 à 300 cm.")}', 'err'); return; } moMemo(); mo.zone[id === 'mo-zl' ? 'l' : 'h'] = Math.round(v * 10) / 10; apresMo(false); return; }
+    if (id === 'mo-ppp') { moMemo(); mo.ppp = parseInt(t.value, 10) === 600 ? 600 : 300; apresMo(false); return; }
+    if (id === 'mo-sous') { moMemo(); mo.souscouche = t.value; apresMo(false); return; }
+    if (id === 'mo-fond') { moMemo(); mo.fond = t.value; apresMo(false); return; }
+    if (!c) return;
+    var champs = { 'mo-c-x': 'x', 'mo-c-y': 'y', 'mo-c-l': 'l', 'mo-c-h': 'h', 'mo-c-rot': 'rot' };
+    if (champs[id]) { var w = num(t.value); if (!isFinite(w)) { dire('${T("Nombre illisible.")}', 'err'); return; } if ((id === 'mo-c-l' || id === 'mo-c-h') && w < 0.2) { dire('${T("Au moins 2 mm.")}', 'err'); return; } moMemo(); c[champs[id]] = Math.round(w * 10) / 10; apresMo(false); return; }
+    moMemo();
+    if (id === 'mo-c-op') c.opacite = Math.max(0, Math.min(100, parseInt(t.value, 10) || 0)) / 100;
+    else if (id === 'mo-c-texte') c.texte = String(t.value).slice(0, 200);
+    else if (id === 'mo-c-nom') c.nom = String(t.value).slice(0, 40);
+    else if (id === 'mo-c-police') c.police = t.value;
+    else if (id === 'mo-c-gras') c.gras = !!t.checked;
+    else if (id === 'mo-c-couleur') c.couleur = String(t.value).toUpperCase();
+    else if (id === 'mo-c-forme') c.forme = t.value;
+    else if (id === 'mo-c-plein') c.plein = !!t.checked;
+    else if (id === 'mo-c-contour') c.contour = Math.max(0, Math.min(50, num(t.value) || 0)) / 10;
+    else if (id === 'mo-c-miroir') c.miroir = !!t.checked;
+    else if (id === 'mo-c-visible') c.visible = !!t.checked;
+    else { MOPILE.pop(); return; }
+    apresMo(id === 'mo-c-texte' || id === 'mo-c-nom' || id === 'mo-c-visible');
+  }
+  function enregistrerMo(apres){
+    if (OCCUPE || !MO) return;
+    if (!MO.sale) { if (apres) apres(); return; }
+    OCCUPE = true; dire('${T("Enregistrement…")}');
+    appeler('atelier:ecrire', [{ id: MO.id, nom: MO.m.nom, motif: MO.motif }]).then(function(r){
+      OCCUPE = false;
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+      MO.sale = false;
+      appeler('atelier:donnees', []).then(function(d){
+        if (d && d.ok) { D = d; var m = (D.modeles || []).filter(function(x){ return x.id === MO.id; })[0]; if (m && MO) { MO.m = m; MO.motif = copie(m.motif || MO.motif); } }
+        if (VUE === 'motif' && MO) { apresMo(false); dire('${T("Motif enregistré.")}', 'bon'); }
+        if (apres) apres();
+      });
+    });
+  }
+  /* Remplacer les adresses des images par leur donnée : le PDF et le PNG doivent les contenir. */
+  function avecDonnees(txt){
+    var urls = {}; String(txt).replace(/href="(https:[^"]+)"/g, function(a, u){ urls[u] = 1; return a; });
+    return Promise.all(Object.keys(urls).map(function(u){
+      if (MOIMG[u] && MOIMG[u] !== 'chargement') return Promise.resolve();
+      return Promise.resolve(P && P.imageLocale ? P.imageLocale(u) : null).then(function(d){ MOIMG[u] = d || ''; });
+    })).then(function(){
+      return String(txt).replace(/href="(https:[^"]+)"/g, function(a, u){ return MOIMG[u] ? 'href="' + MOIMG[u] + '"' : a; });
+    });
+  }
+  /* Le bloc PNG « pHYs » : la résolution écrite dans le fichier. */
+  var CRC = null;
+  function crc32(oct){
+    if (!CRC) { CRC = []; for (var n = 0; n < 256; n++) { var c = n; for (var k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; CRC[n] = c >>> 0; } }
+    var x = 0xFFFFFFFF; for (var i = 0; i < oct.length; i++) x = CRC[(x ^ oct[i]) & 255] ^ (x >>> 8);
+    return (x ^ 0xFFFFFFFF) >>> 0;
+  }
+  function pngAvecPpp(dataUrl, ppp){
+    var b64 = dataUrl.slice(dataUrl.indexOf(',') + 1), bin = atob(b64), n = bin.length, o = new Uint8Array(n);
+    for (var i = 0; i < n; i++) o[i] = bin.charCodeAt(i);
+    var ppm = Math.round(ppp / 0.0254), u32 = function(v){ return [(v >>> 24) & 255, (v >>> 16) & 255, (v >>> 8) & 255, v & 255]; };
+    var corpsC = [112, 72, 89, 115].concat(u32(ppm), u32(ppm), [1]);
+    var bloc = u32(9).concat(corpsC, u32(crc32(corpsC)));
+    var sortie = new Uint8Array(n + bloc.length);
+    sortie.set(o.subarray(0, 33), 0); sortie.set(bloc, 33); sortie.set(o.subarray(33), 33 + bloc.length);   // juste après IHDR
+    var s = ''; for (var j = 0; j < sortie.length; j += 32768) s += String.fromCharCode.apply(null, sortie.subarray(j, j + 32768));
+    return 'data:image/png;base64,' + btoa(s);
+  }
+  function sortieMo(format, btn){
+    if (!P || typeof P.enregistrerExport !== 'function') { dire('${T("Cette version de l’application ne sait pas enregistrer un export.")}', 'err'); return; }
+    enregistrerMo(function(){
+      if (btn) btn.disabled = true;
+      var fin = function(msg, cl){ if (btn) btn.disabled = false; dire(msg, cl); };
+      dire('${T("Préparation du fichier…")}');
+      appeler('atelier:motifExporter', [{ id: MO.id, format: format }]).then(function(r){
+        if (!r || !r.ok) { fin(expliquer(r), 'err'); return; }
+        var ecrire = function(contenu){
+          Promise.resolve(P.enregistrerExport(r.nom, contenu)).then(function(w){
+            if (w && w.ok) fin('${T("Enregistré : {0}")}'.split('{0}').join(w.path || r.nom), 'bon');
+            else if (w && w.annule) fin('${T("Export annulé : le code d’export n’a pas été donné.")}', 'att');
+            else fin('${T("L’enregistrement a échoué : {0}")}'.split('{0}').join((w && w.error) || '?'), 'err');
+          });
+        };
+        if (r.type === 'texte') { avecDonnees(r.contenu).then(ecrire); return; }
+        if (r.type === 'pdf') {
+          if (typeof P.documentPdf !== 'function') { fin('${T("Cette version de l’application ne sait pas fabriquer de PDF.")}', 'err'); return; }
+          avecDonnees(r.contenu).then(function(html){
+            Promise.resolve(P.documentPdf(html, { pageCss: true })).then(function(pdf){
+              if (!pdf || !pdf.ok) { fin('${T("Le PDF n’a pas pu être fabriqué : {0}")}'.split('{0}').join((pdf && pdf.error) || '?'), 'err'); return; }
+              ecrire('data:application/pdf;base64,' + pdf.base64);
+            });
+          });
+          return;
+        }
+        // PNG : le SVG du site rastérisé à la résolution voulue, la résolution écrite dans le fichier
+        dire('${T("Rendu de l’image ({0} × {1} px)…")}'.split('{0}').join(r.pixels.l).split('{1}').join(r.pixels.h));
+        avecDonnees(r.svg).then(function(svg){
+          svg = svg.replace(/width="[^"]*mm" height="[^"]*mm"/, 'width="' + r.pixels.l + '" height="' + r.pixels.h + '"');
+          var img = new Image();
+          img.onload = function(){
+            var cv = document.createElement('canvas'); cv.width = r.pixels.l; cv.height = r.pixels.h;
+            var g = cv.getContext('2d'); if (r.fond === 'blanc') { g.fillStyle = '#FFFFFF'; g.fillRect(0, 0, cv.width, cv.height); }
+            g.drawImage(img, 0, 0, cv.width, cv.height);
+            try { ecrire(pngAvecPpp(cv.toDataURL('image/png'), r.ppp)); }
+            catch (e) { fin('${T("Le rendu a échoué : {0}")}'.split('{0}').join(String((e && e.message) || e)), 'err'); }
+          };
+          img.onerror = function(){ fin('${T("Le rendu a échoué : {0}")}'.split('{0}').join('svg'), 'err'); };
+          img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+        });
+      });
+    });
+  }
+  function quitterMo(){
+    var sortir = function(){ var r = MO ? MO.retour : 'biblio', id = MO ? MO.id : ''; MO = null; if (window._moRO) { window._moRO.disconnect(); window._moRO = null; }
+      if (r === 'editeur' && id) { VUE = 'biblio'; ouvrirEditeur(id); return; } VUE = 'biblio'; dessiner(); dire(''); };
+    if (!MO || !MO.sale) { sortir(); return; }
+    szConfirmer({ titre: '${T("Quitter sans enregistrer ?")}', texte: '${T("Les changements du motif seront perdus.")}', oui: '${T("Quitter")}', danger: true }).then(function(ok){ if (ok) sortir(); });
+  }
+  function annulerMo(){ if (!MOPILE.length) return; MOREF.push(JSON.stringify(MO.motif)); MO.motif = JSON.parse(MOPILE.pop()); MO.sale = true; if (!moCalque()) MO.sel = ''; apresMo(true); }
+
   /* ══ LES GESTES ═══════════════════════════════════════════════════════ */
   corps.addEventListener('click', function(ev){
     var t = ev.target; if (!t || !t.closest) return;
     if (VUE === 'editeur') { if (E) clicEditeur(ev); return; }
     if (VUE === 'impression') { if (IMP) clicImpression(ev); return; }
     if (VUE === '3d') { if (V3) clic3d(ev); return; }
+    if (VUE === 'motif') { if (MO) clicMo(ev); return; }
     var b;
+    if ((b = t.closest('[data-motif]'))) { ouvrirMotif(b.getAttribute('data-motif'), 'biblio'); return; }
     if ((b = t.closest('[data-v3]'))) { ouvrir3d(b.getAttribute('data-v3'), 'biblio'); return; }
     if ((b = t.closest('[data-imprimer]'))) { ouvrirImpression(b.getAttribute('data-imprimer'), 'biblio'); return; }
     if ((b = t.closest('[data-editer]'))) { ouvrirEditeur(b.getAttribute('data-editer')); return; }
@@ -1983,12 +2472,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if ((b = t.closest('#m-standard'))) { M.tableau = copie(D.standard); TRACE = true; dessinerModele(); dire('${T("Tableau standard remis.")}', 'bon'); return; }
   });
   corps.addEventListener('dblclick', function(ev){
-    if (VUE === 'editeur' || VUE === 'impression' || VUE === '3d') return;
+    if (VUE === 'editeur' || VUE === 'impression' || VUE === '3d' || VUE === 'motif') return;
     var b = ev.target && ev.target.closest ? ev.target.closest('[data-sel]') : null;
     if (b) ouvrirModele(b.getAttribute('data-sel'));
   });
   corps.addEventListener('input', function(ev){
-    if (VUE === 'editeur' || VUE === 'impression' || VUE === '3d') return;
+    if (VUE === 'editeur' || VUE === 'impression' || VUE === '3d' || VUE === 'motif') return;
     var t = ev.target;
     if (t && t.id === 'a-q') { Q = t.value; clearTimeout(window._atQ); window._atQ = setTimeout(redessinerSansPerdreLaSaisie, 200); return; }
     ramasser(t);
@@ -1998,6 +2487,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (VUE === 'editeur') { if (E) changeEditeur(t); return; }
     if (VUE === 'impression') { if (IMP) changeImpression(t); return; }
     if (VUE === '3d') { if (V3) change3d(t); return; }
+    if (VUE === 'motif') { if (MO) changeMo(t); return; }
     if (t.hasAttribute && t.hasAttribute('data-taille')) {
       var tl = t.getAttribute('data-taille');
       var ls = (M.tailles || []).filter(function(x){ return x !== tl; });
@@ -2025,6 +2515,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (t.closest('#e-imprimer')) { imprimerDepuisEditeur(); return; }
     if (t.closest('#i-retour')) { quitterImpression(); return; }
     if (t.closest('#v3-retour')) { quitter3d(); return; }
+    if (t.closest('#mo-retour')) { quitterMo(); return; }
+    if (t.closest('#mo-enreg')) { enregistrerMo(); return; }
+    if (t.closest('#mo-annuler')) { annulerMo(); return; }
     if (t.closest('#v3-photo')) { photo3d(); return; }
     if (t.closest('#e-3d')) { troisDDepuisEditeur(); return; }
     if (t.closest('#i-exporter')) { exporterFichier(t.closest('#i-exporter')); return; }
@@ -2089,7 +2582,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var out = [{ lib: '${T("Ouvrir le modèle")}', fn: function(){ ouvrirModele(id); } },
       { lib: '${T("Éditer le patron")}', fn: function(){ ouvrirEditeur(id); } },
       { lib: '${T("Imprimer / exporter")}', fn: function(){ ouvrirImpression(id, 'biblio'); } },
-      { lib: '${T("Aperçu 3D")}', fn: function(){ ouvrir3d(id, 'biblio'); } }];
+      { lib: '${T("Aperçu 3D")}', fn: function(){ ouvrir3d(id, 'biblio'); } },
+      { lib: '${T("Motif et impression textile")}', fn: function(){ ouvrirMotif(id, 'biblio'); } }];
     if (D.peutAjouter) out.push({ lib: '${T("Dupliquer")}', fn: function(){ dupliquer(id); } });
     if (D.peutSupprimer) { out.push({ trait: true }); out.push({ lib: '${T("Supprimer")}', dgr: true, fn: function(){ supprimer(id); } }); }
     return out;
@@ -2097,7 +2591,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function dessiner(){
     if (!D) return;
-    if (VUE === '3d' && V3) dessiner3d(); else if (VUE === 'impression' && IMP) dessinerImpression(); else if (VUE === 'editeur' && E) dessinerEditeur(); else if (VUE === 'modele' && M) dessinerModele(); else dessinerBiblio();
+    if (VUE === 'motif' && MO) dessinerMo(); else if (VUE === '3d' && V3) dessiner3d(); else if (VUE === 'impression' && IMP) dessinerImpression(); else if (VUE === 'editeur' && E) dessinerEditeur(); else if (VUE === 'modele' && M) dessinerModele(); else dessinerBiblio();
   }
   /* ⚠ NE JAMAIS REDESSINER LE CHAMP SOUS LES DOIGTS. */
   function redessinerSansPerdreLaSaisie(){
@@ -2119,6 +2613,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       else if (DEPART.indexOf('editeur:') === 0) { var de = DEPART.slice(8); DEPART = ''; ouvrirEditeur(de); }
       else if (DEPART.indexOf('impression:') === 0) { var di = DEPART.slice(11); DEPART = ''; ouvrirImpression(di, 'biblio'); }
       else if (DEPART.indexOf('3d:') === 0) { var d3 = DEPART.slice(3); DEPART = ''; ouvrir3d(d3, 'biblio'); }
+      else if (DEPART.indexOf('motif:') === 0) { var dm = DEPART.slice(6); DEPART = ''; ouvrirMotif(dm, 'biblio'); }
       else dessiner();
       if (apres) apres(); else dire('');
     });
@@ -2133,10 +2628,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   window.szRevenir = window.szActualiser;
   document.addEventListener('keydown', function(ev){
     if (VUE === 'editeur' && E && ev.key !== 'Escape' && toucheEditeur(ev)) return;
+    if (VUE === 'motif' && MO && (ev.ctrlKey || ev.metaKey) && String(ev.key).toLowerCase() === 'z' && !/^(INPUT|SELECT|TEXTAREA)$/.test((ev.target && ev.target.tagName) || '')) { ev.preventDefault(); annulerMo(); return; }
     if (ev.key !== 'Escape') return;
     ev.preventDefault();
     if (VUE === 'impression') { quitterImpression(); return; }
     if (VUE === '3d') { quitter3d(); return; }
+    if (VUE === 'motif') { quitterMo(); return; }
     if (VUE === 'editeur' && E) {
       if (GLISSE) return;
       if (MES) { MES = null; peindre(); peindrePanneau(true); return; }
