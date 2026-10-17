@@ -2995,6 +2995,9 @@ const OPS_PONT = new Set([
   'vehicules:dpa',
   // La liste des marques et modeles d une annee, demandee a la NHTSA (vPIC).
   'vehicules:catalogue',
+  // Atelier de creation (2026-10-16) : les modeles de vetements. ⚠ `atelier:donnees` est l op de
+  // LECTURE (nom repere par l etape 2 du verificateur du site) ; `atelier:apercu` trace sans ecrire.
+  'atelier:donnees', 'atelier:apercu', 'atelier:ecrire', 'atelier:dupliquer', 'atelier:supprimer',
   // Rappels (fenetre Rappels, 2026-10-02). ⚠ `rappels:etat` sert AUSSI au
   // processus principal : c est lui que src/rappels-notif.js interroge pour
   // les notifications de bureau, par la meme porte (executerOpSite).
@@ -3649,6 +3652,10 @@ const LIMITES_PONT = {
   /* 37 demandes paralleles a la NHTSA (une par marque), puis l ecriture de la
      configuration partagee : 10 a 30 s d habitude, davantage sur un reseau lent. */
   'vehicules:catalogue': 90000,
+  /* L atelier : la lecture est locale ; l apercu retrace toutes les tailles (calcul pur, rapide) ;
+     les ecritures passent par le nuage, un modele entier (ses pieces) a la fois. */
+  'atelier:donnees': 15000, 'atelier:apercu': 15000,
+  'atelier:ecrire': 30000, 'atelier:dupliquer': 30000, 'atelier:supprimer': 30000,
   /* Les rappels se lisent en local ; les ecritures passent par le nuage. */
   'rappels:donnees': 15000, 'rappels:etat': 15000,
   'rappels:ecrire': 30000, 'rappels:modele': 30000, 'rappels:fait': 30000,
@@ -4141,6 +4148,7 @@ const PAGES_ANCRABLES = () => ({
   livre: ['Livre de comptes', () => pageLivre()],
   vehicules: ['Véhicules et déplacements', () => pageVehicules()],
   rappels: ['Rappels', () => pageRappels()],
+  atelier: ['Atelier de création', () => pageAtelier('')],
   liens: ['Liens d’installation', () => pageLiens('')],
   comptable: ['Liens comptables', () => pageComptable('')],
   bankrec: ['Conciliation bancaire', () => pageBanque('')],
@@ -6196,6 +6204,7 @@ const { pageComptabilite } = require('./fenetres/comptabilite');
 const { pageLivre } = require('./fenetres/livre');
 const { pageVehicules } = require('./fenetres/vehicules');
 const { pageRappels } = require('./fenetres/rappels');
+const { pageAtelier } = require('./fenetres/atelier');
 const { pageLiens } = require('./fenetres/liens');
 const { pageComptable } = require('./fenetres/comptable');
 const { pageInactivite } = require('./fenetres/inactivite');
@@ -6432,6 +6441,8 @@ const actionApp = (nom, arg) => {
     case 'vehicules':
     // Rappels (2026-10-02) : meme cas, sa section hote cote site ne porte que la zone.
     case 'rappels':
+    // Atelier de creation (2026-10-16) : meme cas, nee native.
+    case 'atelier':
     case 'config-heures': case 'config-footer': case 'config-apparence':
     case 'config-marque': case 'config-icones': case 'config-taxes': case 'config-conformite':
     case 'compte-paiement':

@@ -226,6 +226,8 @@ const MENU_APP_EN = {
   // de l ARC en anglais (« mileage log »), plus juste que « trips » pour un ecran
   // qui sert d abord a etablir une part d utilisation.
   'Véhicules et déplacements': 'Vehicles and mileage',
+  // L atelier (2026-10-16) : « design studio » est le mot des logiciels de patronage en anglais.
+  'Atelier de création': 'Design studio',
   'Verrous (fiches en cours)': 'Locks (records in progress)',
   /* ⚠ LES SIX JEUX DE COULEURS viennent d'une TABLE d'`appbar.js`
      (`THEMES_COULEUR`) et non d'un `label:` écrit à la main — c'est pour ça que

@@ -1055,6 +1055,8 @@ const ICO = {
   customers: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>',
   /* Le registre des deplacements (2026-10-02) : une auto vue de cote, ses deux
      roues et une ligne de route — le kilometrage, pas la depense. */
+  /* L atelier (2026-10-16) : un buste de couturiere sur son pied — creer un vetement, pas le vendre. */
+  atelier: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8l1 4-1.5 3 1.5 4-2 3H9l-2-3 1.5-4L7 7z"/><path d="M12 17v4"/><path d="M9 21h6"/><path d="M9.5 7.5c1.5 1 3.5 1 5 0"/></svg>',
   vehicule: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15.5V12l2-4.5A2 2 0 016.8 6.3h8.6a2 2 0 011.6.8L20 11l1.2.6a1 1 0 01.8 1v2.9"/><path d="M3 15.5h2.2m4.6 0h4.4m4.6 0H22"/><line x1="5" y1="11" x2="20" y2="11"/><circle cx="7.5" cy="16" r="2.2"/><circle cx="16.5" cy="16" r="2.2"/></svg>',
   /* Les rappels (2026-10-02) : une cloche, et le petit arc de son tintement. */
   rappels: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0112 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 004 0"/><path d="M19.5 5.5a6 6 0 011.5 3"/></svg>',
