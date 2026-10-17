@@ -517,6 +517,22 @@ module.exports = {
   'Aperçu géométrique : le vêtement est montré seul, porté sur un corps invisible aux mesures du tableau ; sa largeur est mesurée sur les pièces, niveau par niveau (pinces déduites). Le tombé du tissu — plis, poids, glissement — n’est pas simulé.':
     'Geometric preview: the garment is shown alone, worn on an invisible body with the size chart measurements; its width is measured on the pieces, level by level (darts deducted). The fabric drape — folds, weight, slipping — is not simulated.',
   'Taille affichée': 'Size shown',
+  'Retirer le NIP (super-administrateur)': 'Remove the PIN (super administrator)', 'NIP retiré par {0} le {1}.': 'PIN removed by {0} on {1}.',
+  'Retirer le NIP sans le connaître ?': 'Remove the PIN without knowing it?',
+  'Réservé au super-administrateur, pour un NIP oublié. Le modèle redevient modifiable par toute personne autorisée ; votre nom et la date sont gardés avec le modèle.':
+    'For the super administrator, for a forgotten PIN. The model becomes editable again by anyone authorized; your name and the date are kept with the model.',
+  'Retirer le NIP': 'Remove the PIN', 'Réservé au super-administrateur.': 'Super administrator only.',
+  /* ── LES RENDUS VERS LA FICHE PRODUIT ── */
+  'Aucun produit dans la boutique : créez d’abord la fiche du vêtement.': 'No product in the shop: create the garment’s product page first.',
+  'Envoyer les rendus vers la fiche produit': 'Send the renders to the product page',
+  'Rendus du moteur 3D, à 1200 × 1600 sur fond blanc, sans frais. Les rendus envoyés avant à ce produit sont remplacés ; vos photos ne sont jamais écrasées.':
+    '3D engine renders, 1200 × 1600 on a white background, at no cost. Renders sent earlier to this product are replaced; your photos are never overwritten.',
+  'Style mannequin fantôme': 'Ghost mannequin style', 'Le premier rendu devient la photo principale': 'The first render becomes the main photo',
+  'Choisissez au moins une vue.': 'Choose at least one view.', 'Envoyer {0} rendu(s)': 'Send {0} render(s)', 'Envoi des rendus…': 'Sending the renders…',
+  'La fiche n’a de place que pour {0} rendu(s) : envoyez moins de vues, ou retirez des photos de la fiche.': 'The product page only has room for {0} render(s): send fewer views, or remove photos from the page.',
+  '{0} rendu(s) ajouté(s) à la fiche « {1} ».': '{0} render(s) added to the “{1}” product page.', 'Le premier est la photo principale.': 'The first one is the main photo.',
+  'Vers la fiche produit': 'To the product page', 'Ce produit n’existe plus dans la boutique.': 'This product no longer exists in the shop.',
+  'Aucun rendu à envoyer.': 'No render to send.', 'La fiche n’a plus de place pour ces rendus.': 'The product page has no room left for these renders.',
   /* ── LA PROTECTION ET LA LISTE (lot 9) ── */
   'NIP': 'PIN', 'Un NIP de 4 à 8 chiffres.': 'A PIN of 4 to 8 digits.', 'Valider': 'Confirm', 'Modèle protégé': 'Protected model',
   '« {0} » est protégé par un NIP. Entrez-le pour enregistrer ce changement.': '“{0}” is protected by a PIN. Enter it to save this change.',

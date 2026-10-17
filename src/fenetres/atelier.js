@@ -196,6 +196,9 @@ table.at-tab{width:100%;border-collapse:collapse;font-size:.8rem;font-variant-nu
 .v3-scene{position:relative;border-radius:12px;overflow:hidden;min-height:0;cursor:grab;user-select:none}
 .v3-scene.glisse{cursor:grabbing}
 .v3-scene.vise{cursor:crosshair}
+.szc-boite.v3-fiche{max-width:46rem;width:calc(100vw - 4rem)}
+.v3f-vign{display:flex;gap:.6rem;margin:.7rem 0;min-height:9rem;align-items:center}
+.v3f-vign img{width:6.75rem;height:9rem;object-fit:contain;border-radius:8px;border:1px solid var(--sz-bord);background:#FFFFFF}
 .ph-trois .ed-seg{display:flex;flex-wrap:wrap}
 .ph-vign{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.35rem;margin-bottom:.5rem}
 .ph-vign button{position:relative;aspect-ratio:3/4;padding:0;border-radius:8px;overflow:hidden;border:2px solid var(--v16);background:var(--f-carte);color:var(--tx)}
@@ -350,11 +353,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     retouche_et_retrace: '${T("Impossible d’enregistrer une retouche et de retracer en même temps.")}',
     pieces: '${T("Le patron n’a plus de pièce valable.")}',
     nip: '${T("NIP incorrect.")}',
+    produit_introuvable: '${T("Ce produit n’existe plus dans la boutique.")}',
+    aucune_image: '${T("Aucun rendu à envoyer.")}',
+    trop_de_photos: '${T("La fiche n’a plus de place pour ces rendus.")}',
     nip_requis: '${T("Ce modèle est protégé : son NIP est demandé.")}',
     nip_bloque: '${T("Trop d’essais : réessayez dans 5 minutes.")}',
     nip_format: '${T("Un NIP de 4 à 8 chiffres.")}',
     pas_de_nip: '${T("Ce modèle n’est pas protégé.")}',
     nip_annule: '${T("Changement non enregistré : le NIP n’a pas été donné.")}',
+    superadmin_requis: '${T("Réservé au super-administrateur.")}',
     aucune_piece: '${T("Aucune des pièces choisies n’existe dans ce modèle.")}',
     motif_vide: '${T("Le motif est vide : ajoutez un calque, puis enregistrez.")}',
     aucune_encre: '${T("Aucune encre à séparer : les images ne se séparent pas en aplats.")}',
@@ -510,6 +517,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function nipValide(r){ return /^[0-9]{4,8}$/.test(r.n1 || '') ? (r.n1 !== r.n2 ? '${T("Les deux NIP diffèrent.")}' : '') : '${T("Un NIP de 4 à 8 chiffres.")}'; }
   function protegerModele(id, geste){
     var m = (D.modeles || []).filter(function(x){ return x.id === id; })[0]; if (!m || OCCUPE) return;
+    if (geste === 'forcer') {
+      szConfirmer({ titre: '${T("Retirer le NIP sans le connaître ?")}', texte: '${T("Réservé au super-administrateur, pour un NIP oublié. Le modèle redevient modifiable par toute personne autorisée ; votre nom et la date sont gardés avec le modèle.")}',
+        details: [['${T("Modèle")}', m.nom]], oui: '${T("Retirer le NIP")}', danger: true }).then(function(ok){
+        if (!ok) return;
+        OCCUPE = true; dire('${T("Enregistrement…")}');
+        appelerBrut('atelier:verrou', [{ id: id, retirer: true, forcer: true }]).then(function(w){
+          OCCUPE = false;
+          if (!w || !w.ok) { dire(expliquer(w), 'err'); return; }
+          delete NIPS[id];
+          charger(function(){ dire('${T("Protection retirée.")}', 'bon'); });
+        });
+      });
+      return;
+    }
     var champs = geste === 'poser' ? [{ id: 'n1', lib: '${T("Nouveau NIP")}' }, { id: 'n2', lib: '${T("Confirmer le NIP")}' }]
       : geste === 'changer' ? [{ id: 'actuel', lib: '${T("NIP actuel")}' }, { id: 'n1', lib: '${T("Nouveau NIP")}' }, { id: 'n2', lib: '${T("Confirmer le NIP")}' }]
       : [{ id: 'actuel', lib: '${T("NIP actuel")}' }];
@@ -638,8 +659,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<div class="cx-sep"></div><h2>${T("Protection")}</h2>'
         + (m.verrouille ? '<div class="cx-etat"><span><span class="ic">🔒</span> ${T("Protégé par NIP")}</span><span class="cx-gris">' + esc(jour(m.verrouDepuis)) + '</span></div>'
           : '<div class="cx-sub">${T("Non protégé : toute personne autorisée peut le modifier.")}</div>')
+        + (m.verrouRetire && !m.verrouille ? '<div class="cx-sub">' + esc('${T("NIP retiré par {0} le {1}.")}'.split('{0}').join(m.verrouRetire.par || '?').split('{1}').join(jour(m.verrouRetire.le))) + '</div>' : '')
         + '<div class="at-gestes">' + (D.peutModifier ? (m.verrouille ? '<button type="button" data-nip="changer:' + esc(m.id) + '">${T("Changer le NIP")}</button><button type="button" data-nip="retirer:' + esc(m.id) + '">${T("Retirer la protection")}</button>'
           : '<button type="button" data-nip="poser:' + esc(m.id) + '">${T("Protéger par NIP")}</button>') : '')
+        // le retrait SANS le NIP (oublié) : visible du seul super-administrateur ; le site le revérifie
+        + (m.verrouille && D.superadmin ? '<button type="button" class="danger" data-nip="forcer:' + esc(m.id) + '">${T("Retirer le NIP (super-administrateur)")}</button>' : '')
         + '<button type="button" data-protection="' + esc(m.id) + '">${T("Dossier de protection (PDF)")}</button></div>'
         + '<div class="ed-note">${T("Le dossier prépare l’enregistrement d’un dessin industriel (l’apparence d’un vêtement ne se brevète pas) : vues, description, historique daté, empreinte numérique et questions pour votre juriste. Ce n’est pas un avis juridique.")}</div>'
         + '<div class="at-gestes">'
@@ -1939,14 +1963,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var LETAT3 = { trop: '${T("trop serré")}', serre: '${T("serré")}', ajuste: '${T("ajusté")}', aise: '${T("aisé")}' };
   // ⚠ « Taille » seul veut dire la TAILLE du vêtement (Size) dans cette fenêtre : les zones prennent les « Tour de… » (Waist).
   var LZONE3 = { Poitrine: '${T("Tour de poitrine")}', Taille: '${T("Tour de taille")}', Hanches: '${T("Tour de hanches")}', Bras: '${T("Tour de bras")}' };
-  var VUES3 = [['fantome', '${T("Fantôme")}', 0, '${T("Comme un mannequin fantôme : de face, un peu d en haut, l intérieur visible par l encolure")}', 0.42], ['face', '${T("Face")}', 0], ['tq', '${T("3/4")}', 0.7, '${T("Trois-quarts")}'], ['profil', '${T("Profil")}', 1.5708], ['dos', '${T("Dos")}', 3.1416]];
+  var VUES3 = [['fantome', '${T("Fantôme")}', 0, '${T("Comme un mannequin fantôme : de face, un peu d en haut, l intérieur visible par l encolure")}', 0.26], ['face', '${T("Face")}', 0], ['tq', '${T("3/4")}', 0.7, '${T("Trois-quarts")}'], ['profil', '${T("Profil")}', 1.5708], ['dos', '${T("Dos")}', 3.1416]];
 
   function ouvrir3d(id, retour){
     var m = (D.modeles || []).filter(function(x){ return x.id === id; })[0];
     if (!m) { dire(MOTIFS.introuvable, 'err'); return; }
     SEL = id;
     V3 = { id: id, m: m, retour: retour || 'biblio', taille: m.tailleBase || 'M', stature: 165, r: null, mesh: null,
-      yaw: 0, pitch: 0.42, zoom: 1, px: 0, py: 0, carte: false, fil: false, auto: false, couleur: m.photo3d ? m.photo3d.couleur : COUL3[0][0], fond: 'beige', sale: true, photo: !!m.photo3d,
+      yaw: 0, pitch: 0.26, zoom: 1, px: 0, py: 0, carte: false, fil: false, auto: false, couleur: m.photo3d ? m.photo3d.couleur : COUL3[0][0], fond: 'beige', sale: true, photo: !!m.photo3d,
       outil: 'tourner', dec: { forme: 'rond', l: 3, h: 3 }, el: { type: 'perle', matiere: 'or', taille: 0.8 }, pile: [], dsale: false,
       design: { decoupes: ((m.design3d && m.design3d.decoupes) || []).slice(), elements: ((m.design3d && m.design3d.elements) || []).slice() } };
     VUE = '3d'; dessiner(); charger3d();
@@ -2320,6 +2344,77 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     panneauPH(); retracerPH(); peindrePH();
   }
 
+
+  /* ══ LES RENDUS 3D VERS LA FICHE PRODUIT (2026-10-17) ═══════════════════════
+     Sa question : « va-t-on pouvoir utiliser notre moteur 3D pour générer les photos des
+     vêtements dans les fiches produit au lieu de payer fal.ai ? » — pour les vêtements de
+     l Atelier, oui, et sans frais. Le moteur rend chaque vue à 1200 × 1600 (le format 3:4 de
+     la boutique), sur fond blanc ; le SITE les range parmi les photos du produit, sans jamais
+     écraser une photo de la personne (les rendus envoyés avant sont remplacés). */
+  var VUES_FICHE = [['face', '${T("Face")}', 0, 0.06], ['tq', '${T("3/4")}', 0.6, 0.1], ['dos', '${T("Dos")}', Math.PI, 0.06]];
+  function rendreVues3d(cles, fantome){
+    var cv = GLV && GLV.cv; if (!cv || !plaque3d() || !GLV.h) return [];
+    var sauve = { yaw: V3.yaw, pitch: V3.pitch, zoom: V3.zoom, px: V3.px, py: V3.py, carte: V3.carte, fil: V3.fil };
+    var W = 1200, H = 1600, out = [];
+    V3.carte = false; V3.fil = false; V3.px = 0; V3.py = 0;
+    V3.zoom = H * 0.8 * Math.max(120, GLV.h) / (GLV.h * W * 0.85);
+    VUES_FICHE.filter(function(v){ return cles.indexOf(v[0]) >= 0; }).forEach(function(v){
+      V3.yaw = v[2]; V3.pitch = v[3] + (fantome ? 0.22 : 0);
+      peindreGL(cv, { W: W, H: H });
+      var c2 = document.createElement('canvas'); c2.width = W; c2.height = H;
+      var g = c2.getContext('2d'); g.fillStyle = '#FFFFFF'; g.fillRect(0, 0, W, H); g.drawImage(cv, 0, 0, W, H);
+      out.push(c2.toDataURL('image/jpeg', 0.92));
+    });
+    Object.keys(sauve).forEach(function(k){ V3[k] = sauve[k]; });
+    peindreGL(cv);
+    return out;
+  }
+  function ouvrirEnvoiFiche(){
+    if (!V3 || !plaque3d() || OCCUPE) return;
+    var prods = D.produits || [];
+    if (!prods.length) { dire('${T("Aucun produit dans la boutique : créez d’abord la fiche du vêtement.")}', 'att'); return; }
+    var st = { produit: V3.m.produitId && prods.some(function(p){ return p.id === V3.m.produitId; }) ? V3.m.produitId : prods[0].id, vues: ['face', 'tq', 'dos'], fantome: true, principale: false, images: [] };
+    var v = document.createElement('div'); v.className = 'szc-voile';
+    document.body.appendChild(v);
+    var fermer = function(){ if (v.parentNode) v.parentNode.removeChild(v); };
+    var peindre = function(){
+      st.images = rendreVues3d(st.vues, st.fantome);
+      v.innerHTML = '<div class="szc-boite v3-fiche" role="dialog" aria-modal="true" aria-labelledby="v3f-t"><h3 id="v3f-t">${T("Envoyer les rendus vers la fiche produit")}</h3>'
+        + '<p>${T("Rendus du moteur 3D, à 1200 × 1600 sur fond blanc, sans frais. Les rendus envoyés avant à ce produit sont remplacés ; vos photos ne sont jamais écrasées.")}</p>'
+        + '<div class="at-champs"><label class="large">${T("Produit de la boutique")}<select id="v3f-produit">' + prods.map(function(p){ return '<option value="' + esc(p.id) + '"' + (st.produit === p.id ? ' selected' : '') + '>' + esc(p.nom) + '</option>'; }).join('') + '</select></label></div>'
+        + '<div class="im-cases">' + VUES_FICHE.map(function(x){ return '<label><input type="checkbox" data-v3fv="' + x[0] + '"' + (st.vues.indexOf(x[0]) >= 0 ? ' checked' : '') + '>' + x[1] + '</label>'; }).join('')
+        + '<label><input type="checkbox" id="v3f-fantome"' + (st.fantome ? ' checked' : '') + '>${T("Style mannequin fantôme")}</label>'
+        + '<label><input type="checkbox" id="v3f-principale"' + (st.principale ? ' checked' : '') + '>${T("Le premier rendu devient la photo principale")}</label></div>'
+        + '<div class="v3f-vign">' + st.images.map(function(d){ return '<img src="' + d + '" alt="">'; }).join('') + (st.images.length ? '' : '<span class="cx-sub">${T("Choisissez au moins une vue.")}</span>') + '</div>'
+        + '<div class="szc-pied"><button type="button" class="szc-non">${T("Annuler")}</button><button type="button" class="szc-oui"' + (st.images.length ? '' : ' disabled') + '>' + '${T("Envoyer {0} rendu(s)")}'.split('{0}').join(st.images.length) + '</button></div></div>';
+      v.querySelector('.szc-non').onclick = fermer;
+      v.querySelector('.szc-oui').onclick = envoyer;
+      v.querySelector('#v3f-produit').onchange = function(ev){ st.produit = ev.target.value; };
+      Array.prototype.forEach.call(v.querySelectorAll('[data-v3fv]'), function(c){ c.onchange = function(){ var k = c.getAttribute('data-v3fv'); st.vues = c.checked ? st.vues.concat([k]) : st.vues.filter(function(x){ return x !== k; }); st.vues = VUES_FICHE.map(function(x){ return x[0]; }).filter(function(x){ return st.vues.indexOf(x) >= 0; }); peindre(); }; });
+      v.querySelector('#v3f-fantome').onchange = function(ev){ st.fantome = ev.target.checked; peindre(); };
+      v.querySelector('#v3f-principale').onchange = function(ev){ st.principale = ev.target.checked; };
+    };
+    var envoyer = function(){
+      if (!st.images.length || OCCUPE) return;
+      OCCUPE = true; var b = v.querySelector('.szc-oui'); if (b) b.disabled = true;
+      dire('${T("Envoi des rendus…")}');
+      appeler('atelier:envoyerFiche', [{ id: V3.id, produitId: st.produit, images: st.images, principale: st.principale }]).then(function(r){
+        OCCUPE = false;
+        if (!r || !r.ok) {
+          if (b) b.disabled = false;
+          dire(r && r.motif === 'trop_de_photos' ? '${T("La fiche n’a de place que pour {0} rendu(s) : envoyez moins de vues, ou retirez des photos de la fiche.")}'.split('{0}').join(r.places || 0) : expliquer(r), 'err');
+          return;
+        }
+        fermer();
+        var pr = prods.filter(function(p){ return p.id === r.produitId; })[0];
+        dire('${T("{0} rendu(s) ajouté(s) à la fiche « {1} ».")}'.split('{0}').join(r.envoyees).split('{1}').join(pr ? pr.nom : r.produitId) + (r.principale ? ' ${T("Le premier est la photo principale.")}' : ''), 'bon');
+      });
+    };
+    v.addEventListener('keydown', function(ev){ if (ev.key === 'Escape') fermer(); });
+    v.addEventListener('mousedown', function(ev){ if (ev.target === v) fermer(); });
+    peindre();
+  }
+
   /* ══ LE MOTEUR WebGL (lot 6, 2026-10-17 — sa décision : « moteur 3D au poste ») ══════════════
      Sa demande : « la même qualité que ce que fal.ai génère, avec plus de détail, surtout une
      reproduction FIDÈLE de l image que nous allons créer sur le vêtement, et la possibilité de
@@ -2520,6 +2615,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function mailleCorps(an, pc, pid){
     var bb = pc.bb, J = 72, tabs = an.map(function(a){ return tableArc(a.rz, a.rx); });
+    /* LA COUTURE D ÉPAULE : le devant et le dos s y REJOIGNENT (sa capture du 2026-10-17 : on voyait
+       l envers du dos entre les deux, et une pointe au cou). Près de la ligne d épaule de la pièce
+       (du cou au point d épaule), la profondeur se resserre vers le milieu ; à 7 cm sous la ligne,
+       la pièce a retrouvé la forme du corps. */
+    var cc = pc.p.contour, nk = cc[1] || { x: 0, y: 0 }, ep = cc[2] || nk, haut = fam3d() === 'haut' && cc.length > 3;
+    var ligne = function(ax){ return ax <= nk.x ? nk.y : ax >= ep.x ? ep.y : nk.y + (ep.y - nk.y) * (ax - nk.x) / Math.max(0.1, ep.x - nk.x); };
     var m = grille3d(an.length, J, {
       anneau: function(i){ var a = an[i]; return { c: [a.c.x, a.c.y, a.c.z || 0], etat: a.etat }; },
       point: function(i, j){
@@ -2527,30 +2628,90 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         var x = bb.x0 + (bb.x1 - bb.x0) * j / J;
         // le devant part du milieu devant vers +x ; le dos, du milieu dos (C / 2) — les côtés se rejoignent
         var f = angleArc(L, pid === 'devant' ? x * k : C / 2 + x * k);
-        return { p: [a.c.x + Math.sin(f) * a.rx, a.c.y, (a.c.z || 0) + Math.cos(f) * a.rz], u: (x - bb.x0) / (bb.x1 - bb.x0), v: (a.yp - bb.y0) / (bb.y1 - bb.y0) };
+        var d = haut ? a.yp - ligne(Math.abs(x)) : 99, t = Math.max(0, Math.min(1, d / 7)), kz = 0.18 + 0.82 * t * t * (3 - 2 * t);
+        return { p: [a.c.x + Math.sin(f) * a.rx, a.c.y, (a.c.z || 0) + Math.cos(f) * a.rz * kz], u: (x - bb.x0) / (bb.x1 - bb.x0), v: (a.yp - bb.y0) / (bb.y1 - bb.y0) };
       }
     });
     m.pid = pid; m.pc = pc; m.yp = an.map(function(a){ return a.yp; }); return m;
   }
-  function mailleManche(an, pc){
+  /* LA MANCHE MONTÉE (2026-10-17, sa capture : « le moteur 3D est affreux… que ce soit un vrai vêtement »).
+     ⚠ Le site ne donne la manche qu à partir du DESSOUS DE BRAS : la tête de manche manquait, les manches
+     flottaient comme deux tubes à côté du corps. On la reconstruit ici depuis la PIÈCE : chaque rang du
+     patron (yp) est un anneau dont le tour EST la largeur de la pièce à ce rang ; la tête (yp < hauteur de
+     tête) va du POINT D ÉPAULE du corsage au BAS D EMMANCHURE — la manche est cousue au corps — puis le bras
+     suit la direction donnée par le site. La tête se découpe toute seule : hors de la pièce, la toile est vide. */
+  function bornesXF(c, y){
+    var pts = []; for (var i = 0; i < c.length; i++) { var a = c[i === 0 ? c.length - 1 : i - 1], b = c[i];
+      for (var k = 1; k <= 12; k++) { var t = k / 12; if (b.c1 && b.c2) { var u = 1 - t; pts.push({ x: u * u * u * a.x + 3 * u * u * t * b.c1.x + 3 * u * t * t * b.c2.x + t * t * t * b.x, y: u * u * u * a.y + 3 * u * u * t * b.c1.y + 3 * u * t * t * b.c2.y + t * t * t * b.y }); } else pts.push({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t }); } }
+    var x0 = 1e9, x1 = -1e9;
+    for (var j = 0; j < pts.length; j++) { var p = pts[j], q = pts[(j + 1) % pts.length]; if ((p.y - y) * (q.y - y) <= 0 && p.y !== q.y) { var x = p.x + (q.x - p.x) * (y - p.y) / (q.y - p.y); x0 = Math.min(x0, x); x1 = Math.max(x1, x); } }
+    return x1 > x0 ? { x0: x0, x1: x1 } : null;
+  }
+  function mailleManche(an, pc, attache){
     var bb = pc.bb, J = 48, sx = 0; an.forEach(function(a){ sx += a.c.x; }); var sg = sx >= 0 ? 1 : -1;
-    var cadres = an.map(function(a, i){
-      var p = an[Math.max(0, i - 1)].c, q = an[Math.min(an.length - 1, i + 1)].c;
-      var t = unit3([q.x - p.x, q.y - p.y, (q.z || 0) - (p.z || 0)]), u = unit3([-t[1], t[0], 0]);
-      if (u[0] * sg < 0) u = [-u[0], -u[1], -u[2]];                     // vers le DEHORS du bras
-      var v = unit3(croix3(t, u)); if (v[2] < 0) v = [-v[0], -v[1], -v[2]];   // vers l AVANT
-      return { o: u, v: v, L: tableArc(a.rx, a.rz) };
-    });
-    var m = grille3d(an.length, J, {
-      anneau: function(i){ var a = an[i]; return { c: [a.c.x, a.c.y, a.c.z || 0], etat: a.etat }; },
+    var c = pc.p.contour, ch = Math.max(4, (c[0] && c[0].y) || 10), yEnd = an[an.length - 1].yp;
+    var bu = bornesXF(c, ch + 0.5), ru = bu ? (bu.x1 - bu.x0) / (2 * Math.PI) : 5;
+    // la direction du bras : celle des anneaux du site
+    var t0 = unit3([an[an.length - 1].c.x - an[0].c.x, an[an.length - 1].c.y - an[0].c.y, 0]);
+    var cadre = function(t){ var u = unit3([-t[1], t[0], 0]); if (u[0] * sg < 0) u = [-u[0], -u[1], -u[2]]; var v = unit3(croix3(t, u)); if (v[2] < 0) v = [-v[0], -v[1], -v[2]]; return { u: u, v: v }; };
+    // l attache : le haut de la tête sur le point d épaule, le dessous de bras sur le bas d emmanchure
+    var P0, Pch, tc = t0;
+    if (attache) {
+      for (var it = 0; it < 3; it++) { var f0 = cadre(tc); P0 = sub3(attache.S, [f0.u[0] * ru, f0.u[1] * ru, f0.u[2] * ru]); Pch = [attache.A[0] + f0.u[0] * ru, attache.A[1] + f0.u[1] * ru, attache.A[2] + f0.u[2] * ru]; tc = unit3(sub3(Pch, P0)); }
+    } else { var a0 = an[0].c; Pch = [a0.x, a0.y, a0.z || 0]; P0 = sub3(Pch, [t0[0] * ch, t0[1] * ch, 0]); tc = t0; }
+    var lc = Math.hypot(Pch[0] - P0[0], Pch[1] - P0[1], Pch[2] - P0[2]);
+    var rangs = [];
+    for (var y = 0.3; y <= yEnd + 0.01; y += 1) {
+      var b = bornesXF(c, y), w = b ? b.x1 - b.x0 : 0, cap = y < ch;
+      var r = cap ? ru : Math.max(1, w / (2 * Math.PI)), t, ctr;
+      if (cap) { t = tc; ctr = [P0[0] + tc[0] * lc * y / ch, P0[1] + tc[1] * lc * y / ch, P0[2] + tc[2] * lc * y / ch]; }
+      else { var g = Math.min(1, (y - ch) / 4); t = unit3([tc[0] * (1 - g) + t0[0] * g, tc[1] * (1 - g) + t0[1] * g, tc[2] * (1 - g) + t0[2] * g]); ctr = [Pch[0] + t0[0] * (y - ch), Pch[1] + t0[1] * (y - ch), Pch[2] + t0[2] * (y - ch)]; }
+      var proche = an.reduce(function(m, a){ return !m || Math.abs(a.yp - y) < Math.abs(m.yp - y) ? a : m; }, null);
+      rangs.push({ yp: y, r: r, c: ctr, f: cadre(t), etat: proche && Math.abs(proche.yp - y) < 1.5 ? proche.etat : '' });
+    }
+    var m = grille3d(rangs.length, J, {
+      anneau: function(i){ return { c: rangs[i].c, etat: rangs[i].etat }; },
       point: function(i, j){
-        var a = an[i], F = cadres[i], C = F.L[F.L.length - 1], k = Math.min(1, C / Math.max(1, (a.s1 || 0) - (a.s0 || 0)));
-        var x = bb.x0 + (bb.x1 - bb.x0) * j / J, xm = ((a.s0 || 0) + (a.s1 || 0)) / 2;
-        var f = angleArc(F.L, (x - xm) * k), co = Math.cos(f) * a.rx, si = Math.sin(f) * a.rz;
-        return { p: [a.c.x + F.o[0] * co + F.v[0] * si, a.c.y + F.o[1] * co + F.v[1] * si, (a.c.z || 0) + F.o[2] * co + F.v[2] * si], u: (x - bb.x0) / (bb.x1 - bb.x0), v: (a.yp - bb.y0) / (bb.y1 - bb.y0) };
+        var a = rangs[i], x = bb.x0 + (bb.x1 - bb.x0) * j / J, f = x / a.r, co = Math.cos(f) * a.r, si = Math.sin(f) * a.r;
+        return { p: [a.c[0] + a.f.u[0] * co + a.f.v[0] * si, a.c[1] + a.f.u[1] * co + a.f.v[1] * si, a.c[2] + a.f.u[2] * co + a.f.v[2] * si], u: (x - bb.x0) / (bb.x1 - bb.x0), v: (a.yp - bb.y0) / (bb.y1 - bb.y0) };
       }
     });
-    m.pid = 'manche'; m.pc = pc; m.yp = an.map(function(a){ return a.yp; }); return m;
+    m.pid = 'manche'; m.pc = pc; m.yp = rangs.map(function(a){ return a.yp; }); return m;
+  }
+  /* L attache d une manche, côté sg : le point d épaule et le bas d emmanchure du corsage, en 3D
+     (la moyenne du devant et du dos — le dos est tourné : son x positif part vers −x). */
+  function attacheManche(sg){
+    var dv = GLV.mailles.filter(function(m){ return m.pid === 'devant'; })[0], ds = GLV.mailles.filter(function(m){ return m.pid === 'dos'; })[0];
+    if (!dv || !ds) return null;
+    var cf = dv.pc.p.contour, cb = ds.pc.p.contour; if (cf.length < 4 || cb.length < 4) return null;
+    var Sf = surface3d(dv, sg * cf[2].x, cf[2].y), Sb = surface3d(ds, -sg * cb[2].x, cb[2].y);
+    var Af = surface3d(dv, sg * cf[3].x, cf[3].y - 0.5), Ab = surface3d(ds, -sg * cb[3].x, cb[3].y - 0.5);
+    if (!Sf || !Sb || !Af || !Ab) return null;
+    var moy = function(a, b){ return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2 + 0.6, (a[2] + b[2]) / 2]; };
+    return { S: moy(Sf.p, Sb.p), A: moy(Af.p, Ab.p) };
+  }
+  /* La silhouette LISSÉE en hauteur (une moyenne sur 5 rangs) : un pli horizontal se voyait à la taille. */
+  /* LE DESSUS DES ÉPAULES : au-dessus du point d épaule, les anneaux du corps se resserrent jusqu au cou
+     et les pièces s y tassaient en pointes. On y garde la LARGEUR des épaules et l on aplatit la
+     PROFONDEUR (le dessus d une épaule) ; l encolure, elle, reste découpée par la pièce. */
+  function fam3d(){ var b = (D.bases || []).filter(function(x){ return V3 && x.cle === V3.m.base; })[0]; return b ? b.famille : ''; }
+  function epaules(an, yS){
+    if (!(yS > 0)) return an;
+    var k = -1; for (var i = 0; i < an.length; i++) if (an[i].yp >= yS) { k = i; break; }
+    if (k <= 0) return an;
+    var ref = an[k];
+    return an.map(function(a, i){
+      if (i >= k) return a;
+      var f = Math.max(0, a.yp / yS);
+      return Object.assign({}, a, { rx: Math.max(a.rx, ref.rx * (0.9 + 0.1 * f)), rz: ref.rz });
+    });
+  }
+  function lisser(an){
+    return an.map(function(a, i){
+      var n = 0, rx = 0, rz = 0;
+      for (var k = Math.max(0, i - 2); k <= Math.min(an.length - 1, i + 2); k++) { n++; rx += an[k].rx; rz += an[k].rz; }
+      return Object.assign({}, a, { rx: rx / n, rz: rz / n });
+    });
   }
 
   /* Un point du patron (pièce, x, y) → un point de la surface, sa normale, et le « haut » de la pièce. */
@@ -2610,7 +2771,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     + ' float d = max(0.0, (dot(n, uL) + 0.35) / 1.35); float r = pow(1.0 - max(0.0, dot(n, e)), 2.5);'
     + ' vec3 h = normalize(uL + e); float sp = pow(max(0.0, dot(n, h)), 24.0) * 0.05;'
     + ' vec3 b = mix(t.rgb, vK.rgb, vK.a * uC); vec3 c = b * (0.34 + 0.72 * d) + vec3(r * 0.09 + sp);'
-    + ' if (de > 0.5) { float o = 0.62 + 0.38 * clamp(1.0 - abs(dot(n, e)), 0.0, 1.0); c = uF * (0.50 + 0.30 * d) * o; } gl_FragColor = vec4(c, 1.0); }';
+    + ' if (de > 0.5) { float o = 0.62 + 0.38 * clamp(1.0 - abs(dot(n, e)), 0.0, 1.0); c = uF * (0.66 + 0.30 * d) * o; } gl_FragColor = vec4(c, 1.0); }';
   var VS_OBJ = 'attribute vec3 aP; attribute vec3 aN; uniform mat4 uM; uniform mat4 uV; uniform mat3 uR; varying vec3 vN; varying vec3 vE;'
     + ' void main(){ vec4 p = uV * vec4(aP, 1.0); vE = -p.xyz; vN = uR * aN; gl_Position = uM * vec4(aP, 1.0); }';
   var FS_OBJ = 'precision mediump float; uniform vec3 uL; uniform vec3 uB; uniform float uMet; uniform float uBr; varying vec3 vN; varying vec3 vE;'
@@ -2667,9 +2828,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
     (r.vetement || []).forEach(function(tb){
       var an = (tb.anneaux || []).filter(function(a){ return a.yp != null; }); if (an.length < 2) return;
-      if (an[0].sf != null) { an = adoucir(an); }
+      if (an[0].sf != null) { an = lisser(epaules(adoucir(an), pieces.devant && pieces.devant.p.contour[2] ? pieces.devant.p.contour[2].y : 0)); }
       if (an[0].sf != null) ['devant', 'dos'].forEach(function(pid){ if (pieces[pid]) GLV.mailles.push(mailleCorps(an, pieces[pid], pid)); });
-      else if (an[0].s0 != null && pieces.manche) GLV.mailles.push(mailleManche(an, pieces.manche));
+      else if (an[0].s0 != null && pieces.manche) { var sxm = 0; an.forEach(function(a){ sxm += a.c.x; }); GLV.mailles.push(mailleManche(an, pieces.manche, attacheManche(sxm >= 0 ? 1 : -1))); }
     });
     var y0 = 1e9, y1 = -1e9;
     GLV.mailles.forEach(function(ma){
@@ -2738,13 +2899,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return { M: M, V: V, R: R, W: W, H: H };
   }
 
-  function peindreGL(cv){
+  function peindreGL(cv, dims){
     if (!GLV || GLV.cv !== cv) { if (!initGL(cv)) return false; }
     var gl = GLV.gl;
     if (GLV.r !== V3.r) construireGL(V3.r);
     var cle = V3.id + '|' + V3.couleur + '|' + (V3.photo ? 1 : 0) + '|' + JSON.stringify(V3.design || {}) + '|' + (V3.m.version || 0);
     if (GLV.cle !== cle) { GLV.cle = cle; toilesGL(); }
-    var W = cv.clientWidth, H = cv.clientHeight, dpr = window.devicePixelRatio || 1;
+    var W = dims ? dims.W : cv.clientWidth, H = dims ? dims.H : cv.clientHeight, dpr = dims ? 1 : (window.devicePixelRatio || 1);
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
     gl.viewport(0, 0, cv.width, cv.height);
     gl.clearColor(0, 0, 0, 0); gl.clearDepth(1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -2872,6 +3033,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     a.innerHTML = '<button type="button" id="v3-retour">' + (V3.retour === 'editeur' ? '${T("← Éditeur")}' : '${T("← Bibliothèque")}') + '</button>'
       + (plaque3d() ? '<button type="button" id="v3-annuler" aria-label="${T("Annuler")}" title="${T("Annuler")}"' + (V3.pile.length ? '' : ' disabled') + '>↶</button>'
         + (D.peutModifier ? '<button type="button" class="prim" id="v3-enreg"' + (V3.dsale ? '' : ' disabled') + '>${T("Enregistrer")}</button>' : '') : '')
+      + (plaque3d() && D.peutModifier && (D.produits || []).length ? '<button type="button" id="v3-fiche">${T("Vers la fiche produit")}</button>' : '')
       + '<button type="button" id="v3-photo">${T("Photo du rendu")}</button>';
   }
   var LDEC3 = { rond: '${T("Rond")}', ovale: '${T("Ovale")}', goutte: '${T("Goutte")}', rect: '${T("Rectangle")}' };
@@ -3904,6 +4066,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (t.closest('#mo-annuler')) { annulerMo(); return; }
     if (t.closest('#v3-photo')) { photo3d(); return; }
     if (t.closest('#v3-enreg')) { enregistrer3d(); return; }
+    if (t.closest('#v3-fiche')) { ouvrirEnvoiFiche(); return; }
     if (t.closest('#v3-annuler')) { annuler3d(); return; }
     if (t.closest('#e-3d')) { troisDDepuisEditeur(); return; }
     if (t.closest('#i-exporter')) { exporterFichier(t.closest('#i-exporter')); return; }
