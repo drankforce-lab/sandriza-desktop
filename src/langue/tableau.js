@@ -284,7 +284,7 @@ module.exports = {
   'Solde Fal.ai indisponible :': 'Fal.ai balance unavailable:',
   'Estimation : solde saisi le {0} ({1}) moins la consommation mesurée depuis ({2}).': 'Estimate: balance entered on {0} ({1}) minus the usage measured since ({2}).',
   'Solde du compte Fal.ai, lu chez Fal.ai': 'Fal.ai account balance, read from Fal.ai',
-  'Fal.ai demande une clé d’administration pour donner son solde. En attendant : ': 'Fal.ai requires an admin key to report its balance. Meanwhile: ',
+  'Pour le vrai solde : une clé de lecture du solde dans Configuration › Clés (Fal.ai). En attendant : ': 'For the real balance: a balance read key in Configuration › Keys (Fal.ai). Meanwhile: ',
   'Solde Photoroom indisponible :': 'Photoroom balance unavailable:',
   'Crédits restants du compte Photoroom': 'Remaining Photoroom account credits',
   'Soldes…': 'Balances…',

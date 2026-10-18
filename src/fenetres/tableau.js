@@ -371,11 +371,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      (jamais à chaque relecture de 12 s : ce sont des appels aux services). Une pastille BASSE passe en alerte.
      Fal.ai n a pas d API de solde : c est le solde saisi moins la consommation mesurée — « ≈ », et l info-bulle
      le dit. Un service muet garde sa pastille grise, sans éteindre les deux autres. */
-  var SOLDES = null, SOLDES_TIMER = null;
+  var SOLDES = null, SOLDES_TIMER = null, SOLDES_ESSAIS = 0;
   function chargerSoldes(){
     appeler('tableau:soldes', []).then(function(r){
       // ⚠ un échec SE VOIT (2026-10-17, sa capture : « où sont mes soldes ? » — un échec silencieux laissait la barre vide)
       SOLDES = (r && r.ok) ? r : { echec: expliquer(r) };
+      // un échec à l OUVERTURE (session ou site pas encore prêts) se réessaie vite : 20 s, six fois — pas 5 minutes
+      if (r && r.ok) SOLDES_ESSAIS = 0;
+      else if (SOLDES_ESSAIS < 6) { SOLDES_ESSAIS++; setTimeout(chargerSoldes, 20000); }
       var b = document.getElementById('tb-soldes'); if (b) b.outerHTML = soldesHtml();
     });
   }
@@ -392,7 +395,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + puce('Twilio', tw, !t.erreur && t.solde < 5, t.erreur ? '${T("Solde Twilio indisponible :")} ' + t.erreur : '${T("Solde du compte Twilio (appels et textos)")}')
       + puce('Fal.ai', fa, !f.erreur && f.restant < 3, f.erreur ? '${T("Solde Fal.ai indisponible :")} ' + f.erreur
           : !f.estime ? '${T("Solde du compte Fal.ai, lu chez Fal.ai")}'
-          : (f.motifReel === 'cle_admin_requise' ? '${T("Fal.ai demande une clé d’administration pour donner son solde. En attendant : ")}' : '')
+          : (f.motifReel === 'cle_admin_requise' ? '${T("Pour le vrai solde : une clé de lecture du solde dans Configuration › Clés (Fal.ai). En attendant : ")}' : '')
             + '${T("Estimation : solde saisi le {0} ({1}) moins la consommation mesurée depuis ({2}).")}'
               .split('{0}').join(String(f.date || '').slice(0, 10)).split('{1}').join(szArgentSymbole(szArgentNombre(f.saisi, 2))).split('{2}').join(szArgentSymbole(szArgentNombre(f.conso, 2))))
       + puce('Photoroom', ph, !p.erreur && p.disponibles != null && p.disponibles < 20, p.erreur ? '${T("Solde Photoroom indisponible :")} ' + p.erreur

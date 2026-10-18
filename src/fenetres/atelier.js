@@ -2919,12 +2919,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
            traversait). Elle PASSE PAR-DESSUS l épaule : depuis la couture (au sommet, z = 0), elle tourne sur un
            quart de cercle de rayon = la profondeur du corps à cet endroit, puis redescend — la longueur du patron
            est gardée. On rejoint ensuite, en douceur, la hauteur des anneaux du site. */
-        if (haut && d < 16) {
+        // ⚠ (2026-10-17) PAS de borne à 16 cm : là où le corps est profond, la transition n y était pas finie et la
+        // surface sautait — le « rectangle » en relief en haut de la poitrine. La transition s achève d elle-même (sb = 1).
+        if (haut && d < 60) {
           // au-dessus de la couture (d < 0 : la marge), la pièce CONTINUE sur la courbe de l épaule, de l autre côté de
           // la crête et un peu dessous : le devant et le dos se chevauchent comme une vraie couture, sans trou ni rabat
           var dz = Math.max(-2.5, d), rr = Math.max(0.6, Math.abs(zr)) * (d < 0 ? 0.96 : 1), th = Math.min(Math.PI / 2, dz / rr), ys = yDeYp(ligne(Math.abs(x)));
-          var yw = ys - rr * (1 - Math.cos(th)) - Math.max(0, dz - rr * Math.PI / 2), zw = (zr >= 0 ? 1 : -1) * rr * Math.sin(th);
-          var tb = Math.max(0, Math.min(1, (dz - rr * Math.PI / 2) / 8)), sb = tb * tb * (3 - 2 * tb);
+          /* ⚠ LA HAUTEUR suit un rayon UNIQUE par rang (la profondeur du corps au milieu, a.rz) : avec le rayon local, le
+             tissu remontait plus au milieu que sur les côtés, et un motif imprimé s arquait. La profondeur (z), elle,
+             garde le rayon local — c est elle qui fait l épaule. */
+          var Rg = Math.max(0.6, a.rz * (d < 0 ? 0.96 : 1)), thg = Math.min(Math.PI / 2, dz / Rg);
+          var yw = ys - Rg * (1 - Math.cos(thg)) - Math.max(0, dz - Rg * Math.PI / 2), zw = (zr >= 0 ? 1 : -1) * rr * Math.sin(th);
+          // le retour aux anneaux se cale sur le RANG (sous le point d épaule le plus bas), pas sur la ligne d épaule
+          // de chaque colonne — sinon il commençait plus tôt au cou qu aux épaules, et le motif s arquait
+          var dRang = a.yp - Math.max(nk.y, ep.y), tb = Math.max(0, Math.min(1, (dRang - Rg * Math.PI / 2 + 2) / 8)), sb = tb * tb * (3 - 2 * tb);
           py = yw + (a.c.y - yw) * sb; pz = zw + (zr - zw) * sb;
         }
         return { p: [px, py, (a.c.z || 0) + pz], u: (x - bb.x0) / (bb.x1 - bb.x0), v: (a.yp - bb.y0) / (bb.y1 - bb.y0) };
@@ -2980,7 +2988,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var r = cap ? Math.max((rBras + 0.6) * (0.82 + 0.18 * Math.sqrt(Math.max(0, y) / ch)), ru * (0.62 + 0.38 * Math.pow(Math.max(0, y) / ch, 0.6))) : Math.max(rBras + 0.4, w / (2 * Math.PI)), t, ctr;
       // la tête suit l AXE DU BRAS (le haut d un fourreau) ; la couture la ramène sur l emmanchure — suivre la pente
       // épaule → aisselle, très inclinée, la poussait vers le dehors en épaulette
-      if (cap) { t = t0; var lc0 = Math.max(2, pt3(sub3(Pch, P0), t0)); ctr = [P0[0] + t0[0] * lc0 * y / ch, P0[1] + t0[1] * lc0 * y / ch, P0[2] + t0[2] * lc0 * y / ch]; }
+      if (cap && bras) {
+        /* LA TÊTE EN DÔME (2026-10-17, le haut sans drapé : une tête en tube laissait l épaule du bras à nu). À chaque
+           rang, le tour EST la largeur de la pièce (étroite au sommet de la tête, pleine au dessous de bras) ; l anneau
+           recule le long du bras d autant que le dôme se referme — une demi-ellipse de la hauteur de la tête. La
+           collision pousse ensuite le dôme au-dessus de la tête du bras. */
+        var Rc = Math.max(rBras + 0.6, ru);
+        r = Math.max(0.5, Math.min(Rc, w / (2 * Math.PI)));
+        // la hauteur du dôme : celle du patron, mais assez pour COIFFER la tête du bras (son sommet est rBras au-dessus de l articulation)
+        var Hd = Math.max(ch, sA + rBras + 0.6), sY = sA - Hd * Math.sqrt(Math.max(0, 1 - (r / Rc) * (r / Rc)));
+        t = t0; ctr = [J0[0] + t0[0] * sY, J0[1] + t0[1] * sY, J0[2] + t0[2] * sY];
+      }
+      else if (cap) { t = t0; var lc0 = Math.max(2, pt3(sub3(Pch, P0), t0)); ctr = [P0[0] + t0[0] * lc0 * y / ch, P0[1] + t0[1] * lc0 * y / ch, P0[2] + t0[2] * lc0 * y / ch]; }
       else { t = t0; var lc1 = Math.max(2, pt3(sub3(Pch, P0), t0)); ctr = [P0[0] + t0[0] * (lc1 + y - ch), P0[1] + t0[1] * (lc1 + y - ch), P0[2] + t0[2] * (lc1 + y - ch)]; }
       var proche = an.reduce(function(m, a){ return !m || Math.abs(a.yp - y) < Math.abs(m.yp - y) ? a : m; }, null);
       rangs.push({ yp: y, r: r, c: ctr, f: cadre(t), etat: proche && Math.abs(proche.yp - y) < 1.5 ? proche.etat : '' });
@@ -3289,7 +3308,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       for (var k = 0; k < n; k++) {
         var u = -1 + 2 * k / (n - 1), x = u * xg, bout = Math.abs(u), pente = Math.min(1, Math.max(0, (bout * xg - 6) / Math.max(1, xg - 6)));
         var haut2 = yN - 0.5 - (yN - 0.5 - (yj + a0.rx * 0.75)) * Math.pow(pente, 0.8), rv = 2.6 + 1.2 * pente;
-        ep.push({ c: { x: x, y: haut2 - rv, z: 0 }, rx: rv, rz: Math.max(a0.rz * 0.95, rzT * (0.9 - 0.3 * pente)) });
+        // (2026-10-17) un peu MOINS profonde que le buste dessous : plus profonde, elle faisait une marche — un rectangle en
+        // relief sous le tissu, en haut de la poitrine
+        ep.push({ c: { x: x, y: haut2 - rv, z: 0 }, rx: rv, rz: Math.max(a0.rz * 0.95, rzT * (0.74 - 0.2 * pente)) });
       }
       tubes.push({ nom: 'epaules', anneaux: ep });
       /* LA POITRINE (2026-10-17, sa référence : sur le mannequin Fal.ai, le t-shirt a du VOLUME devant). Le tronc du site
@@ -3324,7 +3345,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var an = t.anneaux, c0 = an[0].c, c1 = an[an.length - 1].c, ax = unit3([c1.x - c0.x, c1.y - c0.y, (c1.z || 0) - (c0.z || 0)]);
       var proj = an.map(function(a){ return (a.c.x - c0.x) * ax[0] + (a.c.y - c0.y) * ax[1] + ((a.c.z || 0) - (c0.z || 0)) * ax[2]; });
       var vertical = Math.abs(ax[1]) > 0.9, rmax = 0; an.forEach(function(a){ rmax = Math.max(rmax, a.rx, a.rz); });
-      return { an: an, c0: c0, ax: ax, u: unit3(croix3(ax, [0, 0, 1])), proj: proj, vertical: vertical, rmax: rmax, pmin: Math.min(proj[0], proj[proj.length - 1]), pmax: Math.max(proj[0], proj[proj.length - 1]) };
+      return { nom: String(t.nom || ''), an: an, c0: c0, ax: ax, u: unit3(croix3(ax, [0, 0, 1])), proj: proj, vertical: vertical, rmax: rmax, pmin: Math.min(proj[0], proj[proj.length - 1]), pmax: Math.max(proj[0], proj[proj.length - 1]) };
     });
   }
   function repousser(PX, k, tubes, marge){
@@ -3644,7 +3665,37 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
     // LE DRAPÉ : les vêtements portés sur le corps (pas les chapeaux)
     var famD = fam3d();
-    if (['haut', 'jupe', 'bas'].indexOf(famD) >= 0 && (r.corps || []).length) {
+    if (famD === 'haut' && (r.corps || []).length) {
+      /* ⚠ LE HAUT N EST PLUS DRAPÉ (2026-10-17, ses captures en XS : « affreux », coutures d épaule et de côté déchirées).
+         Le drapé recousait des pièces construites séparément, au sommet de grille le plus proche : il les tirait de
+         travers, et c est ce qui froissait et déchirait. La forme CONSTRUITE est juste (l épaule enroulée sur le
+         mannequin, les côtés joints par construction, la manche en dôme sur l axe du bras) : elle reste telle quelle,
+         avec une passe de collision et un lissage là où le tissu a été poussé. Jupes et pantalons gardent le drapé. */
+      var tubesH = corpsDrape(r.corps);
+      GLV.mailles.forEach(function(ma){
+        var n = ma.R * (ma.J + 1), R = ma.R, J = ma.J, pos = ma.pos, avant = pos.slice();
+        for (var k = 0; k < n; k++) repousser(pos, k, tubesH, 0.45);
+        // le tissu ne MOULE pas le corps : là où la collision l a poussé, on le lisse (il jette un pont sur les creux) —
+        // sans cela, la bande de buste se voyait en rectangle sous le t-shirt
+        // seulement le BUSTE (devant, dos), sous l épaule : lissés, les bords de l épaule s écartaient de la manche
+        var cc5 = ma.pc.p.contour, yLis = cc5.length > 2 ? cc5[2].y + 4 : 0;
+        for (var ps = 0; ps < 8 && (ma.pid === 'devant' || ma.pid === 'dos'); ps++) {
+          var nv = pos.slice();
+          for (var i = 1; i < R - 1; i++) for (var j = 1; j < J; j++) {
+            if (ma.yp[i] < yLis) continue;
+            var q = i * (J + 1) + j, bouge = Math.abs(pos[q * 3] - avant[q * 3]) + Math.abs(pos[q * 3 + 1] - avant[q * 3 + 1]) + Math.abs(pos[q * 3 + 2] - avant[q * 3 + 2]);
+            var wv = Math.min(1, bouge / 0.6) * 0.5; if (wv <= 0) continue;
+            for (var c = 0; c < 3; c++) { var m = (pos[(q - 1) * 3 + c] + pos[(q + 1) * 3 + c] + pos[(q - J - 1) * 3 + c] + pos[(q + J + 1) * 3 + c]) / 4; nv[q * 3 + c] = pos[q * 3 + c] * (1 - wv) + m * wv; }
+          }
+          pos.set(nv);
+        }
+        for (var k2 = 0; k2 < n; k2++) repousser(pos, k2, tubesH, 0.3);
+        normalesGrille(ma);
+      });
+      // (seuls les BRAS font une ombre de contact — sous les manches, sur les flancs ; le cou, la ligne d épaules et la
+      // bande de buste, aux bouts plats, dessinaient un rectangle sombre en haut de la poitrine)
+      try { ombreContact(GLV.mailles, tubesH.filter(function(t){ return /bras/.test(t.nom); })); } catch (e) {}
+    } else if (['haut', 'jupe', 'bas'].indexOf(famD) >= 0 && (r.corps || []).length) {
       var epY = pieces.devant && pieces.devant.p.contour[2] ? pieces.devant.p.contour[2].y : 0;
       try {
         GLV.soudures = draper(GLV.mailles, r.corps, function(ma, i){

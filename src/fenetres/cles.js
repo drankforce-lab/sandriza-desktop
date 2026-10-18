@@ -185,7 +185,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       sous: '${T("Habillage mannequin virtuel (IDM-VTON) sur les vues produit.")}',
       lien: ['fal.ai', 'https://fal.ai'],
       champs: [{ k: 'fal', label: '${T("Clé API")}', place: 'xxxxxxxx:xxxx…',
-        aide: '${T("Gratuit à l’inscription — Dashboard puis API Keys sur fal.ai.")}' }],
+        aide: '${T("Gratuit à l’inscription — Dashboard puis API Keys sur fal.ai.")}' },
+        /* (2026-10-17, sa demande : « il devrait afficher 7,26 US ») la clé de génération n a pas le droit de lire le
+           solde ; une clé à la permission billing:usage:read le donne au tableau de bord. Au serveur seulement. */
+        { k: 'falLecture', label: '${T("Clé de lecture du solde")}', place: 'xxxxxxxx:xxxx…',
+          aide: '${T("Facultative. Une clé fal.ai avec la permission « billing:usage:read » (préréglage BILLING ou READONLY, dans API Keys) : le tableau de bord affiche alors le vrai solde. Elle reste au serveur.")}' }],
       solde: true },
     { titre: '${T("Photoroom — Retrait du mannequin")}',
       sous: '${T("Le « mannequin fantôme ». Sans clé, la photothèque se rabat sur un détourage par masque.")}',
@@ -238,8 +242,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return '<div class="ch"><label for="f-falSolde">${T("Solde du compte (saisi à la main)")}</label>'
       + '<input id="f-falSolde" class="solde" type="number" step="0.01" min="0" value="' + esc(sv) + '"'
       + ' placeholder="${T("ex. 25.00")}"' + (RO ? ' disabled' : '') + '>'
-      + '<div class="aide">${T("fal.ai n’expose aucun solde par API. La fenêtre Traitements d’image affiche ")}'
-      + '${T("ce montant et la consommation mesurée depuis")}' + maj + '${T(". À tenir à jour.")}</div></div>';
+      + '<div class="aide">${T("Sans clé de lecture du solde, le tableau de bord estime : ce montant moins la consommation mesurée depuis")}'
+      + maj + '${T(". À tenir à jour.")}</div></div>';
   }
   /* Le plafond mensuel de l ecriture IA. Ce n est pas un solde a tenir a jour
      comme celui de fal.ai : c est une BORNE, et la passerelle la lit AVANT

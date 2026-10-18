@@ -6198,6 +6198,19 @@ const fenetresNonEnregistrees = () => {
       const wc = require('electron').webContents.fromId(id);
       if (!wc || wc.isDestroyed()) { fenSale.delete(id); return; }
       const w = BrowserWindow.fromWebContents(wc) || null;
+      /* ⚠ SEULEMENT CE QUI EST À L ÉCRAN (2026-10-17, sa capture : « Studio virtuel » signalé alors qu aucune fenêtre
+         n était ouverte). Un module ANCRÉ reste chargé, caché, après qu on l a quitté — son brouillon est gardé sur le
+         poste, rien ne se perd. On ne compte donc que les fenêtres détachées visibles et le module AFFICHÉ. */
+      if (w && !w.isDestroyed() && !w.isVisible()) return;
+      if (!w || w === mainWindow) {
+        let visible = false;
+        ancrees.forEach((a, cle) => {
+          if (!a || !a.view || a.view.webContents !== wc) return;
+          if (a.fenetre) { try { visible = !a.fenetre.isDestroyed() && a.fenetre.isVisible(); } catch (e) {} }   // détachée
+          else visible = (cle === ancreeVisible);                                                                // ancrée et affichée
+        });
+        if (!visible && wc !== siteWC()) return;
+      }
       out.push({ wc, w, titre: String((w && !w.isDestroyed() && w !== mainWindow && w.getTitle()) || wc.getTitle() || 'Administration Sandriza') });
     } catch (e) {}
   });

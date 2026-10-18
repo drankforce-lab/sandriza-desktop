@@ -146,4 +146,7 @@ module.exports = {
   'du service': 'for the service',
   'sera retirée. Les fonctions qui en dépendent cesseront de fonctionner jusqu’à ce qu’une nouvelle clé soit saisie.': 'will be removed. Features that depend on it will stop working until a new key is entered.',
   'Fin de la clé': 'Key ending',
+  'Clé de lecture du solde': 'Balance read key',
+  'Facultative. Une clé fal.ai avec la permission « billing:usage:read » (préréglage BILLING ou READONLY, dans API Keys) : le tableau de bord affiche alors le vrai solde. Elle reste au serveur.': 'Optional. A fal.ai key with the « billing:usage:read » permission (BILLING or READONLY preset, under API Keys): the dashboard then shows the real balance. It stays on the server.',
+  'Sans clé de lecture du solde, le tableau de bord estime : ce montant moins la consommation mesurée depuis': 'Without a balance read key, the dashboard estimates: this amount minus the usage measured since',
 };
