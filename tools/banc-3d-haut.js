@@ -90,13 +90,15 @@ const SEUILS = { etires: 0, plis: 0, dedans: 0, fentes: 0, couture: 0.15, ballon
 /* LES PLAFONDS DE NON-RÉGRESSION (2026-10-18) : ce que le moteur ATTEINT aujourd hui, cas par cas. Sans option, le verdict (et le
    code de sortie) se juge sur eux — un banc de non-régression qu on peut lancer à chaque changement ; ce qui reste au-dessus de
    ZÉRO est toujours affiché (« reste »). --strict juge sur la cible, zéro. ⚠ Un plafond se BAISSE quand le moteur progresse,
-   il ne se monte jamais pour faire passer un changement. Le reste des seuils (dedans, couture, ballon, épaulette) vaut pour tous. */
+   il ne se monte jamais pour faire passer un changement. Le reste des seuils (dedans, couture, ballon, épaulette) vaut pour tous.
+   percees (2026-10-18, sa capture 72) : les points où le mannequin perce le tissu, toutes vues — avant le recouvrement des coutures
+   et le décalage de profondeur du mannequin : 543, 511, 621, 662, 512. Mannequin femme ; l homme (--homme) n a pas de plafond. */
 const PLAFONDS = {
-  'ts-xs': { etires: 80, plis: 41, fentes: 0 },
-  'ts-l': { etires: 231, plis: 106, fentes: 2 },
-  'sw-xs': { etires: 93, plis: 15, fentes: 0 },
-  'ch-m': { etires: 189, plis: 70, fentes: 2 },
-  'cs-xs': { etires: 100, plis: 25, fentes: 0 },
+  'ts-xs': { etires: 80, plis: 41, fentes: 0, percees: 128 },
+  'ts-l': { etires: 231, plis: 106, fentes: 2, percees: 123 },
+  'sw-xs': { etires: 93, plis: 15, fentes: 0, percees: 122 },
+  'ch-m': { etires: 189, plis: 70, fentes: 0, percees: 166 },
+  'cs-xs': { etires: 100, plis: 25, fentes: 0, percees: 93 },
 };
 const STRICT = ARGS.includes('--strict');
 // LES PLIS DE VIE (2026-10-18) : ils doivent EXISTER (réglage « Naturels ») et rester sobres — la plus grande levée du tissu sur le corps
@@ -113,6 +115,11 @@ const CAS = [
 ].filter((c) => !SEUL || c.id === SEUL);
 if (ARGS.includes('--brut')) CAS.forEach((c) => { c.brut = true; });
 if (ARGS.includes('--sansplis')) CAS.forEach((c) => { c.sansPlis = true; });
+// --motif : le motif placé (texte + logo) sur tous les cas — sa capture 73 est un t-shirt imprimé « SANDRIZA »
+if (ARGS.includes('--motif')) CAS.forEach((c) => { c.motif = true; });
+// --homme : le mannequin HOMME (l aperçu 3D le retient par modèle) — DIAGNOSTIC : les plafonds sont ceux du mannequin femme, le
+// verdict y est rouge (2026-10-18 : éclats ×2 à ×3,5, rang arqué de 1 à 1,2 cm — le corps homme n a pas encore été réglé)
+if (ARGS.includes('--homme')) CAS.forEach((c) => { c.homme = true; });
 // --plis legers|naturels|marques : un autre réglage de plis de vie (les plafonds, eux, valent pour le réglage par défaut, « Naturels »)
 if (arg('--plis')) CAS.forEach((c) => { c.plisVie = arg('--plis'); });
 
@@ -385,6 +392,35 @@ const SCRIPT_PAGE = function () {
     var pc = p95(couture), pt = p95(temoin);
     return { couture: Math.round(pc * 10) / 10, temoin: Math.round(pt * 10) / 10, exces: Math.round(Math.max(0, pc - pt) * 10) / 10, n: couture.length };
   }
+  /* LE MANNEQUIN QUI PERCE (2026-10-18, sa capture 72 : « les coutures d épaule et la couture dos en fines lignes blanches
+     pointillées ») : la même vue avec et sans mannequin ; là où le tissu se dessine dans les deux, il doit être IDENTIQUE. Un
+     point du tissu qui change quand le mannequin paraît est un point où le mannequin passe devant le tissu — à angle rasant, à
+     moins d un millimètre, sur une fraction du pixel — ou se voit par un jour de couture. Les grandes zones (l encolure, où le
+     mannequin se voit à bon droit) ne comptent pas : seuls les points isolés (îlots de 12 px au plus). */
+  function pixels(cv) { var c = document.createElement('canvas'); c.width = cv.width; c.height = cv.height; var gx = c.getContext('2d'); gx.drawImage(cv, 0, 0); return gx.getImageData(0, 0, c.width, c.height).data; }
+  function percees(avec, sans, W, H) {
+    var dif = new Uint8Array(W * H);
+    // (loin de tout bord du tissu : à 2 px d une silhouette, l anticrénelage mêle le tissu à ce qui est derrière — le fond ou le mannequin)
+    var plein = function (x, y) { for (var dy = -2; dy <= 2; dy++) for (var dx = -2; dx <= 2; dx++) { var xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= W || yy >= H || sans[(yy * W + xx) * 4 + 3] < 255) return false; } return true; };
+    for (var p = 0; p < W * H; p++) { var k = p * 4; if (sans[k + 3] < 255 || avec[k + 3] < 255 || !plein(p % W, (p - p % W) / W)) continue;
+      if (Math.abs(avec[k] - sans[k]) + Math.abs(avec[k + 1] - sans[k + 1]) + Math.abs(avec[k + 2] - sans[k + 2]) > 24) dif[p] = 1; }
+    var vu = new Uint8Array(W * H), n = 0, pile = [];
+    for (var s = 0; s < W * H; s++) { if (!dif[s] || vu[s]) continue; var aire = 0; pile.push(s); vu[s] = 1;
+      while (pile.length) { var q = pile.pop(), x = q % W; aire++; [q - 1, q + 1, q - W, q + W, q - W - 1, q - W + 1, q + W - 1, q + W + 1].forEach(function (z) { if (z >= 0 && z < W * H && !vu[z] && dif[z] && Math.abs((z % W) - x) <= 1) { vu[z] = 1; pile.push(z); } }); }
+      if (aire <= 12) n++; }
+    return n;
+  }
+  /* LE SCINTILLEMENT DE LA MAILLE (2026-10-18, sa capture 72 : « une tache de moiré de la maille sur le haut du dos ») : la même
+     vue, la caméra glissée d un tiers de pixel ; une maille bien filtrée bouge à peine, une maille trop fine pour l écran (moiré,
+     poussière de points) change d un pixel à l autre. Rend l écart de luminance moyen sur le tissu (loin des bords), × 100.
+     ⚠ Indicatif : le grain de la toile et les détails nets y comptent aussi — il a peu bougé (129 → 120 sur la vue du col)
+     alors que la poussière de points, à l œil, a disparu. Le juge reste la capture (vues « encolure » et « col »). */
+  function scintille(a, b, W, H) {
+    var s = 0, n = 0;
+    for (var y = 3; y < H - 3; y++) for (var x = 3; x < W - 3; x++) { var k = (y * W + x) * 4; if (a[k + 3] < 255 || b[k + 3] < 255 || a[k - 12 + 3] < 255 || a[k + 12 + 3] < 255 || a[k - W * 12 + 3] < 255 || a[k + W * 12 + 3] < 255) continue;
+      s += Math.abs(0.299 * (a[k] - b[k]) + 0.587 * (a[k + 1] - b[k + 1]) + 0.114 * (a[k + 2] - b[k + 2])); n++; }
+    return n ? Math.round(s / n * 100) : 0;
+  }
   // les îlots d envers ou de vide entourés de tissu, dans une image diagnostique
   function fentes(cv) {
     var W = cv.width, H = cv.height, c = document.createElement('canvas'); c.width = W; c.height = H;
@@ -410,6 +446,17 @@ const SCRIPT_PAGE = function () {
     var res = { cas: CAS.id, geo: geo(mo.tubes()), fentes: 0, vues: {} };
     res.ecarts = (g.ecarts || []).concat([g.ecartsAvantZip || {}]); 
     res.bosse = bosseTete(mo.tubes()); res.plisVie = g.plisVie || null;
+    // (diagnostic --aisselle) le haut de la couture de côté : le devant et le dos, sur leur GRILLE, du bas d emmanchure à 6 cm dessous
+    res.aisselle = (function () { var r = {}; ['devant', 'dos'].forEach(function (pid) { var ma = g.mailles.filter(function (m) { return m.pid === pid; })[0]; if (!ma) return;
+      var c = ma.pc.p.contour, bb = ma.pc.bb, J = ma.J, R = ma.R, yp = ma.yp, P = ma.pos;
+      var grille = function (x, y) { var i = 0; while (i + 2 < R && yp[i + 1] < y) i++; var fy = Math.max(0, Math.min(1, (y - yp[i]) / ((yp[i + 1] - yp[i]) || 1)));
+        var fj = Math.max(0, Math.min(J - 1e-6, (x - bb.x0) / (bb.x1 - bb.x0) * J)), j = Math.floor(fj), fx = fj - j, k = function (ii, jj) { var q = (ii * (J + 1) + jj) * 3; return [P[q], P[q + 1], P[q + 2]]; };
+        var a = k(i, j), b = k(i, j + 1), cc = k(i + 1, j), d = k(i + 1, j + 1);
+        return [0, 1, 2].map(function (t) { return Math.round(((a[t] * (1 - fx) + b[t] * fx) * (1 - fy) + (cc[t] * (1 - fx) + d[t] * fx) * fy) * 100) / 100; }); };
+      var x3 = Math.abs(c[3].x), y3 = c[3].y; r[pid] = [0, 1, 2, 4, 6].map(function (dy) { return [dy, grille(x3 * (pid === 'devant' ? 1 : -1), y3 + dy)]; }); r[pid + 'X'] = [x3, y3];
+      r[pid + 'Rang'] = [0, 1, 3].map(function (dy) { return [dy, [-3, -2, -1, -0.5, 0, 0.5, 1].map(function (dx) { var x = (x3 + dx) * (pid === 'devant' ? 1 : -1); return [Math.round(x * 10) / 10, grille(x, y3 + dy)[2]]; })]; }); });
+      r.tour = g.tourPatron ? [17, 18, 19, 19.2, 19.5, 20, 20.2, 21, 22.5].map(function (y) { return [y, Math.round(g.tourPatron(y) * 100) / 100]; }) : null;
+      return r; })();
     res.tubes = mo.tubes().map(function (T) { var a = T.an[0], b = T.an[T.an.length - 1]; return [T.nom, T.an.length, (T.nom === "tronc" ? T.an.slice(-12) : T.an.slice(0, 9)).map(function (q) { return [q.c.x, q.c.y, q.rx, q.rz].map(function (x) { return Math.round(x * 10) / 10; }); }), [a.c.x, a.c.y, a.c.z || 0, a.rx, a.rz].map(function (x) { return Math.round(x * 10) / 10; }), [b.c.x, b.c.y, b.c.z || 0, b.rx, b.rz].map(function (x) { return Math.round(x * 10) / 10; })]; }); res.erreurConf = g.erreurConf || ''; res.ecartsRendus = g.ecartsRendus || {}; res.loft = (g.loft || []).filter(function (l) { return l[3] > 0.3; }).slice(0, 30);
     // le profil rang par rang (devant, première manche) : étirement horizontal et vertical moyens, en ‰ de la longueur au patron
     res.profil = {};
@@ -445,7 +492,10 @@ const SCRIPT_PAGE = function () {
       // manche|devant, deux pièces qui ne sont pas cousues là — des silhouettes, pas des coutures)
       ['aisselle', 1.57, -0.5, 3, aisselle],
       // SES deux vues (2026-10-18) : de face un peu au-dessus, le haut du buste ; et d en dessous, en remontant la manche
-      ['sienne', 0, 0.18, 1.6, haut ? [haut[0], haut[1] - 12, haut[2]] : null], ['sienne-dessous', 1.57, -1.1, 1.8, aisselle]
+      ['sienne', 0, 0.18, 1.6, haut ? [haut[0], haut[1] - 12, haut[2]] : null], ['sienne-dessous', 1.57, -1.1, 1.8, aisselle],
+      // SA vue plongeante sur le col (2026-10-18, sa capture 72) : de face, presque d aplomb, l encolure et le haut du dos ; et de près
+      ['col', 0, 1.2, 1.9, haut ? [haut[0], haut[1] - 6, haut[2] - 3] : null],
+      ['col-dos', 0, 1.2, 3.2, haut ? [haut[0], haut[1], haut[2] - 7] : null]
     ];
     VUES.forEach(function (vv) {
       v.yaw = vv[1]; v.pitch = vv[2]; v.vueNom = '';
@@ -460,12 +510,19 @@ const SCRIPT_PAGE = function () {
         v.mannequin = m[1]; mo.diag(m[2]); v.carte = mode === 'x' || mode === 'p'; viser(v, vv[4], vv[3]);
         if (m[2] && vv[4] && vv[0] !== 'aisselle' && vv[0] !== 'sienne-dessous') { var f = fentes(cv); res.vues[vv[0]] = f;
           // (sa vue de face, venue après les plafonds, est comptée À PART : ses îlots aux bords du cadre sont l espace entre le bras et le buste)
-          if (vv[0] === 'sienne') res.fentesSienne = f.n; else res.fentes += f.n; }
+          // (les vues plongeantes sur le col, venues ensuite, aussi : vu d aplomb, le haut du dos est une silhouette rasante — un fil
+          // d un pixel de haut entre l épaule et le fond, pas une fente)
+          if (vv[0] === 'sienne') res.fentesSienne = f.n; else if (/^col/.test(vv[0])) res.fentesCol = (res.fentesCol || 0) + f.n; else res.fentes += f.n; }
         if (m[0] === 'n' && (vv[0] === 'face' || vv[0] === 'sienne')) {
           // le liseré se mesure MAILLE COUPÉE : le relief de la maille (fsTissu) élevait le témoin et masquait un vrai liseré. La taille
           // de pièce uTa est forcée à presque rien le temps de la mesure — le relief devient plat, rien d autre ne change
           window.__szSansMaille = true; mo.peindre(); var li = lisere(cv); window.__szSansMaille = false; mo.peindre();
           res.lisere = res.lisere || {}; res.lisere[vv[0]] = li; }
+        if (m[0] === 'n' && (vv[0] === 'col' || vv[0] === 'facedessus' || vv[0] === 'sienne')) { var s0 = pixels(cv); v.px += 0.33; v.py += 0.33; mo.peindre();
+          res.scintille = res.scintille || {}; res.scintille[vv[0]] = scintille(s0, pixels(cv), cv.width, cv.height); v.px -= 0.33; v.py -= 0.33; mo.peindre(); }
+        // (« m » vient juste avant « n » : la même vue, avec puis sans mannequin)
+        if (m[0] === 'm') window.__szAvec = pixels(cv);
+        if (m[0] === 'n' && window.__szAvec) { res.percees = res.percees || {}; res.percees[vv[0]] = percees(window.__szAvec, pixels(cv), cv.width, cv.height); window.__szAvec = null; }
         envoyer('img:' + vv[0] + '-' + m[0], cv.toDataURL('image/png'));
       });
     });
@@ -494,6 +551,7 @@ const SCRIPT_MODELES = function () {
   }
   localStorage.setItem('elg_atelier_modeles', JSON.stringify([m]));
   localStorage.setItem('sz-atelier-mannequin', '1');
+  var gen = {}; if (c.homme) gen[m.id] = 'homme'; localStorage.setItem('sz-atelier-genre', JSON.stringify(gen));
   if (c.sansPlis) localStorage.setItem('sz-atelier-vie', JSON.stringify({ plis: 'aucun', tissu: 'moyen' })); else if (c.plisVie) localStorage.setItem('sz-atelier-vie', JSON.stringify({ plis: c.plisVie, tissu: 'moyen' })); else localStorage.removeItem('sz-atelier-vie');
 };
 
@@ -509,7 +567,11 @@ function page(c) {
     + 'if(op==="atelier:donnees"){var d0=JSON.parse(JSON.stringify(window.__REP["atelier:donnees"]));d0.modeles=window.Atelier.getModeles().map(function(m){var x=JSON.parse(JSON.stringify(m));x.verrouille=false;x.vignette="";return x;});return Promise.resolve(d0);}'
     + 'var r=window.__REP[op];return Promise.resolve(r?JSON.parse(JSON.stringify(r)):{ok:false,motif:"operation_inconnue"});},fermer:function(){},detacher:function(){},ancrer:function(){},imageLocale:function(){return Promise.resolve(null);}};'
     + '</script><script src="file:///' + path.join(SITE, 'assets/js/atelier.js').replace(/\\/g, '/') + '"></script>'
-    + '<script>(' + SCRIPT_MODELES.toString() + ')();</script>';
+    + '<script>(' + SCRIPT_MODELES.toString() + ')();</script>'
+    /* (2026-10-18, l aperçu 3D refait dans le langage du studio) LA SCÈNE À TAILLE FIXE : les fentes se comptent en PIXELS —
+       une autre mise en page (995 × 602 au lieu de 786 × 746) changeait le compte sans que la géométrie bouge d un triangle.
+       Les plafonds ont été posés à 786 × 746 : la scène du banc garde cette taille, quelle que soit la fenêtre autour. */
+    + '<style>#v3-scene{flex:0 0 auto!important;width:786px!important;height:746px!important}</style>';
   const i = h.indexOf('<script');
   h = h.slice(0, i) + pont + h.slice(i);
   return h.replace('</body>', '<script>(' + SCRIPT_PAGE.toString() + ')();</script></body>');
@@ -557,6 +619,8 @@ for (const c of CAS) {
   if (g.plis > pl.plis) ko.push(g.plis + ' pli(s) cassé(s) (plafond ' + pl.plis + ')');
   if (g.dedans > SEUILS.dedans) ko.push(g.dedans + ' sommet(s) dans le corps');
   if (r.fentes > pl.fentes) ko.push(r.fentes + ' fente(s) (plafond ' + pl.fentes + ')');
+  const percTot = Object.values(r.percees || {}).reduce((x, y) => x + y, 0);
+  if (pl.percees != null && percTot > pl.percees) ko.push(percTot + ' point(s) où le mannequin perce le tissu (plafond ' + pl.percees + ')');
   const reste = [g.etires && g.etires + ' éclat(s)', g.plis && g.plis + ' pli(s)', r.fentes && r.fentes + ' fente(s)'].filter(Boolean);
   const ecMax = Math.max(0, ...Object.values(r.ecartsRendus || {}).map((e) => e[0]));
   if (ecMax > SEUILS.couture) ko.push('couture ouverte de ' + ecMax + ' cm');
@@ -570,11 +634,12 @@ for (const c of CAS) {
   if (r.erreurConf) ko.push('maillage conforme en erreur : ' + String(r.erreurConf).split(String.fromCharCode(10))[0]);
   if (ko.length) echec++;
   bilan.push(r);
-  console.log((ko.length ? '✗ ' : '✓ ') + c.id.padEnd(6) + ` triangles ${g.triVisibles}, éclats ${g.etires}, plis cassés ${g.plis}, dans le corps ${g.dedans}, fentes ${r.fentes}, couture la plus ouverte ${ecMax} cm, épaulette ${r.bosse ? r.bosse.monte : '?'} cm, bombé en excès ${r.bosse ? r.bosse.ballon : '?'} cm, arc des rangs ${r.bosse ? r.bosse.arc : '?'} cm, asymétrie ${r.bosse ? r.bosse.asym : '?'} cm, fentes (sa vue de face) ${r.fentesSienne || 0}, plis de vie ${r.plisVie ? (Math.round((r.plisVie.max || 0) * 100) / 100) + ' cm (moy. ' + (Math.round((r.plisVie.rms || 0) * 100) / 100) + ')' : '?'}, liseré ${r.lisere ? JSON.stringify(r.lisere) : '?'}`
+  console.log((ko.length ? '✗ ' : '✓ ') + c.id.padEnd(6) + ` triangles ${g.triVisibles}, éclats ${g.etires}, plis cassés ${g.plis}, dans le corps ${g.dedans}, fentes ${r.fentes}, couture la plus ouverte ${ecMax} cm, épaulette ${r.bosse ? r.bosse.monte : '?'} cm, bombé en excès ${r.bosse ? r.bosse.ballon : '?'} cm, arc des rangs ${r.bosse ? r.bosse.arc : '?'} cm, asymétrie ${r.bosse ? r.bosse.asym : '?'} cm, fentes (sa vue de face) ${r.fentesSienne || 0}, fentes (vues du col) ${r.fentesCol || 0}, plis de vie ${r.plisVie ? (Math.round((r.plisVie.max || 0) * 100) / 100) + ' cm (moy. ' + (Math.round((r.plisVie.rms || 0) * 100) / 100) + ')' : '?'}, liseré ${r.lisere ? JSON.stringify(r.lisere) : '?'}, scintillement ${JSON.stringify(r.scintille || {})}, mannequin perçant ${percTot} point(s) ${JSON.stringify(r.percees || {})}`
     + (ko.length ? '  ← ' + ko.join(', ') : '') + (!ko.length && reste.length ? '  (reste avant zéro : ' + reste.join(', ') + ')' : ''));
   if (ARGS.includes('--zip')) console.log('   écarts dessinés : ' + JSON.stringify(r.ecartsRendus));
   if (ARGS.includes('--piresm')) console.log('   pires manche (x, y, ×) : ' + JSON.stringify(g.piresManche) + ' | pire triangle : ' + JSON.stringify(g.pireTri));
   if (ARGS.includes('--tubes')) (r.tubes || []).forEach((t) => console.log('   tube ' + JSON.stringify(t)));
+  if (ARGS.includes('--aisselle') && r.aisselle) Object.keys(r.aisselle).forEach((k) => console.log('   aisselle ' + k + ' ' + JSON.stringify(r.aisselle[k])));
   if (ARGS.includes('--profil')) Object.keys(r.profil || {}).forEach((k) => { console.log('   profil ' + k + ' [rang, yp, horiz, vert, max]'); r.profil[k].forEach((l) => console.log('     ' + JSON.stringify(l))); });
   if (ARGS.includes('--detail')) Object.keys(g.parPiece).forEach((k) => console.log('      ' + k + ' : ' + JSON.stringify(g.parPiece[k])));
   if (ko.length) {

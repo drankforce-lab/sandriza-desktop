@@ -376,10 +376,39 @@ html.jour .st-onglets button.on{border-bottom-color:var(--or)}
 .im-cases label{display:flex;align-items:center;gap:.45rem;cursor:pointer}
 .im-resume{font-size:.8rem;color:var(--tx2);margin-top:.5rem;font-variant-numeric:tabular-nums}
 
-/* ── Aperçu 3D (lot 4) ── */
-.v3-trois{display:grid;grid-template-columns:18rem minmax(0,1fr) 20rem;gap:.9rem;min-height:0}
-.cx>.v3-trois{flex:1 1 0}
-.v3-trois>.cx-carte{min-height:0;overflow:auto;scrollbar-gutter:stable}
+/* ── Aperçu 3D (lot 4) ── LE MÊME LANGAGE QUE LE STUDIO (2026-10-18, sa demande : « les options disparaissent ou
+   ne sont pas visibles ») : menus, barre d options, palette d outils, la scène au centre, des panneaux à onglets qui
+   DÉFILENT chacun dans la colonne, la barre d état. Rien n est conditionné à un état passager (le mannequin chargé). */
+.v3 .st-corps{grid-template-columns:4.2rem minmax(0,1fr) 21rem}
+.v3-plan{position:relative;min-width:0;min-height:0;padding:.7rem;background:var(--f-page);display:flex}
+.v3-plan>.v3-scene{flex:1 1 auto;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.35),0 0 0 1px rgba(0,0,0,.12)}
+.v3 .st-panneaux{scrollbar-gutter:stable}
+.v3 .ed-seg{display:flex;flex-wrap:wrap}
+.v3 .st-outil:disabled{opacity:.4;cursor:default;background:none;border-color:transparent}
+.v3 .st-options .ecart{min-width:.5rem}
+.v3-gestes{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap}
+.v3-gestes button{padding:.28rem .7rem;font-size:.8rem}
+.v3-sec{font-size:.68rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2);margin:.25rem 0 -.15rem}
+.v3-sec:first-child{margin-top:0}
+.v3-cam{position:absolute;right:.6rem;top:.6rem;z-index:2;display:flex;align-items:center;gap:.15rem;padding:.2rem;border-radius:9px;background:rgba(243,238,229,.92);box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.v3-cam button{background:none;border:0;color:#3F3A32;min-width:1.85rem;height:1.85rem;padding:0 .45rem;border-radius:6px;font-size:.8rem;line-height:1;cursor:pointer}
+.v3-cam button:hover{background:rgba(63,58,50,.12)}
+.v3-cam button[aria-pressed="true"]{background:#DDD5C8;color:#3F3A32;font-weight:700}
+.v3-cam .val{min-width:3rem;text-align:center;font-size:.76rem;color:#3F3A32;font-variant-numeric:tabular-nums}
+html.jour .v3-cam button{background:none;border-color:transparent;box-shadow:none}
+html.jour .v3-cam button[aria-pressed="true"]{background:#DDD5C8}
+.v3-mes{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.15rem .8rem;font-size:.78rem}
+.v3-mes span{color:var(--tx2)}
+.v3-mes b{font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+.v3-apropos{font-size:.74rem;color:var(--tx2);border-top:1px solid var(--v08);padding-top:.45rem}
+.v3-apropos summary{cursor:pointer;color:var(--tx);font-weight:600}
+.v3-apropos p{margin:.4rem 0 0}
+@media (max-width:1180px){.v3 .st-corps{grid-template-columns:3.8rem minmax(0,1fr) 18.5rem}}
+@media (max-width:960px){.v3 .st-corps{grid-template-columns:3.4rem minmax(0,1fr) 16.5rem}.v3 .st-outil span{display:none}}
+@media (max-width:760px){.v3 .st-corps{grid-template-columns:3.2rem minmax(0,1fr);grid-template-rows:minmax(13rem,1fr) minmax(0,42%)}
+  .v3 .st-palette{grid-row:1}.v3 .st-panneaux{grid-column:1 / span 2;border-left:0;border-top:1px solid var(--sz-bord)}.v3-aide{display:none}}
+@media (max-height:760px){.v3-plan{padding:.45rem}.v3-aide{font-size:.7rem}}
+@media (max-height:560px){.v3-aide{display:none}.v3-cam{top:.35rem;right:.35rem}}
 .v3-scene{position:relative;border-radius:12px;overflow:hidden;min-height:0;cursor:grab;user-select:none}
 .v3-scene.glisse{cursor:grabbing}
 .v3-scene.vise{cursor:crosshair}
@@ -396,7 +425,6 @@ html.jour .st-onglets button.on{border-bottom-color:var(--or)}
 .ph-vign button img{width:100%;height:100%;object-fit:cover;display:block}
 .ph-vign button.face{border-color:var(--or)}.ph-vign button.dos{border-color:var(--tx2)}
 .ph-vign button b{position:absolute;left:0;right:0;bottom:0;font-size:.68rem;font-weight:600;background:var(--f-carte);color:var(--tx);padding:.05rem 0}
-.v3-trois .ed-seg{display:flex;flex-wrap:wrap}
 .v3-scene canvas{display:block;position:absolute;left:0;top:0;width:100%;height:100%}
 /* le fond de studio : un léger dégradé, plus clair derrière le vêtement (le cyclo d un photographe) */
 .v3-scene.beige{background:#EFE8DD;background:radial-gradient(ellipse 70% 60% at 50% 42%,#F7F3EC 0%,#EFE8DD 58%,#E3DACB 100%)}.v3-scene.blanc{background:#FFFFFF;background:radial-gradient(ellipse 70% 60% at 50% 42%,#FFFFFF 0%,#FAFAF8 60%,#EEEDEA 100%)}
@@ -949,12 +977,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       MINI.cv.addEventListener('dblclick', function(ev){ ev.stopPropagation(); if (MINI.id) ouvrir3d(MINI.id, 'biblio'); });
     }
     hote.appendChild(MINI.cv);
-    var cle = m.id + '|' + (m.version || 0) + '|' + (m.updatedAt || '');
+    var cle = m.id + '|' + (m.version || 0) + '|' + (m.updatedAt || '') + '|' + genre3d(m.id);
     if (MINI.cle === cle) { if (MINI.v3 && MINI.cadre) hote.classList.add('pret'); miniDemander(); return; }
     MINI.cle = cle; MINI.id = m.id; MINI.v3 = null; MINI.cadre = false;
     var n = ++MINI.n;
     if (!webglDispo()) return;
-    appeler('atelier:apercu3d', [{ id: m.id, taille: m.tailleBase || 'M', stature: 165 }]).then(function(r){
+    appeler('atelier:apercu3d', [{ id: m.id, taille: m.tailleBase || 'M', stature: STATURE3[genre3d(m.id)], genre: genre3d(m.id) }]).then(function(r){
       if (n !== MINI.n || !r || !r.ok) return;
       MINI.v3 = { id: m.id, m: m, r: r, taille: m.tailleBase || 'M', yaw: 0.45, pitch: 0.1, zoom: 1, px: 0, py: 0, carte: false, fil: false, mannequin: false, vueNom: '',
         couleur: m.photo3d ? m.photo3d.couleur : COUL3[0][0], photo: !!m.photo3d,
@@ -1253,9 +1281,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function stOuvrirMenu(k, focusPremier){
     stFermerMenu();
-    var btn = corps.querySelector('[data-st-menu="' + k + '"]'), st = corps.querySelector('.st'); if (!btn || !st || !M) return;
+    var btn = corps.querySelector('[data-st-menu="' + k + '"]'), st = corps.querySelector('.st'); if (!btn || !st || (VUE === '3d' ? !V3 : !M)) return;
     MENU = k; btn.setAttribute('aria-expanded', 'true');
-    var l = stEntrees(k), h = '';
+    var l = VUE === '3d' ? v3Entrees(k) : stEntrees(k), h = '';  // l aperçu 3D partage les menus du studio
     l.forEach(function(e, i){
       if (e.trait) { h += '<div class="trait" role="separator"></div>'; return; }
       if (e.sec) { h += '<div class="sec" role="presentation">' + esc(e.sec) + '</div>'; return; }
@@ -2626,13 +2654,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var LETAT3 = { trop: '${T("trop serré")}', serre: '${T("serré")}', ajuste: '${T("ajusté")}', aise: '${T("aisé")}' };
   // ⚠ « Taille » seul veut dire la TAILLE du vêtement (Size) dans cette fenêtre : les zones prennent les « Tour de… » (Waist).
   var LZONE3 = { Poitrine: '${T("Tour de poitrine")}', Taille: '${T("Tour de taille")}', Hanches: '${T("Tour de hanches")}', Bras: '${T("Tour de bras")}' };
+  /* LE MANNEQUIN FEMME / HOMME (2026-10-18) : retenu PAR MODÈLE, sur le poste ; le site bâtit le corps homme
+     depuis son tableau standard homme (le patron, lui, garde ses mesures). */
+  var STATURE3 = { femme: 165, homme: 178 };
+  function genre3d(id){ try { var g = JSON.parse(localStorage.getItem('sz-atelier-genre') || '{}'); return g && g[id] === 'homme' ? 'homme' : 'femme'; } catch (e) { return 'femme'; } }
+  function garderGenre3d(id, g){ try { var o = JSON.parse(localStorage.getItem('sz-atelier-genre') || '{}') || {}; if (g === 'homme') o[id] = g; else delete o[id]; localStorage.setItem('sz-atelier-genre', JSON.stringify(o)); } catch (e) {} }
   var VUES3 = [['fantome', '${T("Fantôme")}', 0, '${T("Comme un mannequin fantôme : de face, un peu d en haut, l intérieur visible par l encolure")}', 0.26], ['face', '${T("Face")}', 0], ['tq', '${T("3/4")}', 0.7, '${T("Trois-quarts")}'], ['profil', '${T("Profil")}', 1.5708], ['dos', '${T("Dos")}', 3.1416]];
 
   function ouvrir3d(id, retour){
     var m = (D.modeles || []).filter(function(x){ return x.id === id; })[0];
     if (!m) { dire(MOTIFS.introuvable, 'err'); return; }
     SEL = id;
-    V3 = { id: id, m: m, retour: retour || 'biblio', taille: m.tailleBase || 'M', stature: 165, r: null, mesh: null,
+    var gen = genre3d(id);
+    V3 = { id: id, m: m, retour: retour || 'biblio', taille: m.tailleBase || 'M', genre: gen, stature: STATURE3[gen], r: null, mesh: null,
       yaw: 0, pitch: 0.26, zoom: 1, px: 0, py: 0, carte: false, fil: false, auto: false, mannequin: (function(){ try { return localStorage.getItem('sz-atelier-mannequin') !== '0'; } catch (e) { return true; } })(), couleur: m.photo3d ? m.photo3d.couleur : COUL3[0][0], fond: 'beige', sale: true, photo: !!m.photo3d,
       outil: 'tourner', dec: { forme: 'rond', l: 3, h: 3 }, el: { type: 'perle', matiere: 'or', taille: 0.8 }, pile: [], dsale: false,
       design: { decoupes: ((m.design3d && m.design3d.decoupes) || []).slice(), elements: ((m.design3d && m.design3d.elements) || []).slice() } };
@@ -2640,7 +2674,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function charger3d(){
     var n = ++v3N;
-    appeler('atelier:apercu3d', [{ id: V3.id, taille: V3.taille, stature: V3.stature }]).then(function(r){
+    appeler('atelier:apercu3d', [{ id: V3.id, taille: V3.taille, stature: V3.stature, genre: V3.genre }]).then(function(r){
       if (n !== v3N || VUE !== '3d' || !V3) return;
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       V3.r = r; V3.mesh = maillage(r); V3.sale = true; peindrePanneau3d(); peindreDesign3d(); entete3d(); imagesMotif3d(); demander3d();
@@ -3933,8 +3967,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + ' vec2 p = vT * uTa; float per = uMat < 0.5 ? 0.16 : (uMat < 1.5 ? 0.32 : 0.11);'
       + (der ? ' vec2 dpx = dFdx(p); vec2 dpy = dFdy(p); float fw = max(length(dpx), length(dpy));'
              : ' float fw = length(vE) * 0.0016;')
-      // la maille ne se montre que lorsqu elle couvre assez de pixels pour se lire (≥ ~8 px) ; plus petite, elle s efface
-      + ' float vis = 1.0 - smoothstep(per * 0.07, per * 0.30, fw); float h = relief(p);'
+      // la maille ne se montre que lorsqu elle couvre assez de pixels pour se lire (≥ ~20 px) ; plus petite, elle s efface — et
+      // tout à fait sous ~7 px. ⚠ (2026-10-18, sa capture 72) effacée seulement sous ~3 px, elle tombait en poussière de points et
+      // en MOIRÉ sur le haut du dos et la poitrine vus de haut (le relief, plus fin que le pixel, échantillonné de travers)
+      + ' float vis = 1.0 - smoothstep(per * 0.05, per * 0.15, fw); float h = relief(p);'
       + (der ? ' if (vis > 0.01) { float ep = per * 0.07; float gx = (relief(p + vec2(ep, 0.0)) - h) / ep; float gy = (relief(p + vec2(0.0, ep)) - h) / ep;'
              + '   vec3 qx = dFdx(-vE); vec3 qy = dFdy(-vE); float det = dpx.x * dpy.y - dpx.y * dpy.x;'
              + '   if (abs(det) > 1e-12) { vec3 T = (qx * dpy.y - qy * dpx.y) / det; vec3 B = (qy * dpx.x - qx * dpy.x) / det;'
@@ -3963,13 +3999,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (/^(chemise|chemisier|robe)$/.test(b)) return 3;
     return 0;
   }
-  var VS_OBJ = 'attribute vec3 aP; attribute vec3 aN; uniform mat4 uM; uniform mat4 uV; uniform mat3 uR; varying vec3 vN; varying vec3 vE;'
-    + ' void main(){ vec4 p = uV * vec4(aP, 1.0); vE = -p.xyz; vN = uR * aN; gl_Position = uM * vec4(aP, 1.0); }';
-  var FS_OBJ = 'precision mediump float; uniform vec3 uL; uniform vec3 uB; uniform float uMet; uniform float uBr; varying vec3 vN; varying vec3 vE;'
+  // aA : l ombre du vêtement sur le mannequin (voir mannequinGL) ; les bijoux, sans tableau, la lisent à 1
+  var VS_OBJ = 'attribute vec3 aP; attribute vec3 aN; attribute float aA; uniform mat4 uM; uniform mat4 uV; uniform mat3 uR; varying vec3 vN; varying vec3 vE; varying float vA;'
+    + ' void main(){ vec4 p = uV * vec4(aP, 1.0); vE = -p.xyz; vN = uR * aN; vA = aA; gl_Position = uM * vec4(aP, 1.0); }';
+  var FS_OBJ = 'precision mediump float; uniform vec3 uL; uniform vec3 uB; uniform float uMet; uniform float uBr; varying vec3 vN; varying vec3 vE; varying float vA;'
     + ' void main(){ vec3 n = normalize(vN); vec3 e = normalize(vE); if (dot(n, e) < 0.0) n = -n; float d = max(0.0, dot(n, uL)); vec3 h = normalize(uL + e);'
     + ' float sp = pow(max(0.0, dot(n, h)), uBr); vec3 env = mix(vec3(0.30, 0.28, 0.26), vec3(1.0, 0.98, 0.95), 0.5 + 0.5 * n.y);'
     + ' vec3 dif = uB * (0.30 + 0.75 * d); vec3 met = uB * env * (0.45 + 0.6 * d); vec3 c = mix(dif, met, uMet) + vec3(sp) * mix(0.5, 1.2, uMet);'
-    + ' gl_FragColor = vec4(c, 1.0); }';
+    + ' gl_FragColor = vec4(c * vA, 1.0); }';
   var VS_SOL = 'attribute vec2 aQ; uniform mat4 uM; uniform vec3 uO; uniform float uRay; varying vec2 vQ;'
     + ' void main(){ vQ = aQ; gl_Position = uM * vec4(uO.x + aQ.x * uRay, uO.y, uO.z + aQ.y * uRay * 0.7, 1.0); }';
   var FS_SOL = 'precision mediump float; varying vec2 vQ; void main(){ float a = 0.30 * (1.0 - smoothstep(0.0, 1.0, length(vQ))); gl_FragColor = vec4(0.16 * a, 0.12 * a, 0.09 * a, a); }';
@@ -4798,6 +4835,37 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         if (autre) nouv.push([rd, v, unit3(n)]); } });
     nouv.forEach(function(e){ var rd = e[0], v = e[1]; rd.nor[v * 3] = e[2][0]; rd.nor[v * 3 + 1] = e[2][1]; rd.nor[v * 3 + 2] = e[2][2]; });
   }
+  /* LE RECOUVREMENT DES COUTURES (2026-10-18, sa capture 72 : « les coutures d épaule et la couture dos en fines lignes blanches
+     pointillées ») : deux pièces cousues se touchent bord à bord, mais leurs bords ne sont pas la même ligne entre deux sommets
+     (une corde de chaque côté) — sous le pixel, le rastériseur laissait passer le mannequin par points le long de la couture.
+     Ce qui se DESSINE de chaque bord cousu avance donc de 0,3 mm sous la pièce voisine, dans le plan du tissu (l application
+     du patron sur le triangle du bord ; la toile suit — elle porte sa marge peinte). Seul le dessin bouge : rd.pos (le drapé,
+     les mesures) reste tel quel. ⚠ Essayé plus (1 à 1,5 mm), et plié vers le corps : le prolongement sortait de la voisine sur
+     les coutures en arête (emmanchure) — un liseré clair et des fentes au banc (liseré de face 14,8 → 30 ; fentes 0 → 4 à 7). */
+  function recouvrement(ma){
+    var rd = ma.rendu; if (!rd || !rd.cousu) return null;
+    var I = rd.idx, n = rd.n, bb = ma.pc.bb, cnt = {}, tri = {}, D2 = new Float32Array(n * 2), D3 = new Float32Array(n * 3), nb = new Uint8Array(n), P = rd.pos;
+    for (var t = 0; t < I.length; t += 3) for (var e = 0; e < 3; e++) { var x = I[t + e], y = I[t + (e + 1) % 3], k = Math.min(x, y) + '_' + Math.max(x, y); cnt[k] = (cnt[k] || 0) + 1; tri[k] = I[t + (e + 2) % 3]; }
+    Object.keys(cnt).forEach(function(k){
+      if (cnt[k] !== 1) return; var ab = k.split('_'), a = +ab[0], b = +ab[1]; if (!rd.cousu[a] || !rd.cousu[b]) return;
+      var c = tri[k], ex = rd.vx[b] - rd.vx[a], ey = rd.vy[b] - rd.vy[a], le = Math.hypot(ex, ey); if (le < 1e-6) return;
+      var ox = ey / le, oy = -ex / le; if (ox * (rd.vx[c] - rd.vx[a]) + oy * (rd.vy[c] - rd.vy[a]) > 0) { ox = -ox; oy = -oy; }
+      // l image 3D de (ox, oy) par le triangle du bord : (ox, oy) = s (b - a) + u (c - a) au patron, le même mélange en 3D
+      var fx = rd.vx[c] - rd.vx[a], fy = rd.vy[c] - rd.vy[a], det = ex * fy - ey * fx; if (Math.abs(det) < 1e-9) return;
+      var s = (ox * fy - oy * fx) / det, u = (ex * oy - ey * ox) / det;
+      var d3 = [0, 1, 2].map(function(q){ return s * (P[b * 3 + q] - P[a * 3 + q]) + u * (P[c * 3 + q] - P[a * 3 + q]); }), l3 = Math.hypot(d3[0], d3[1], d3[2]);
+      if (!(l3 > 1e-6) || l3 > 4) return;
+      [a, b].forEach(function(v){ D2[v * 2] += ox; D2[v * 2 + 1] += oy; for (var q = 0; q < 3; q++) D3[v * 3 + q] += d3[q] / l3; nb[v]++; });
+    });
+    var pos = new Float32Array(P), uv = new Float32Array(rd.uv), AV = 0.03;
+    for (var v = 0; v < n; v++) {
+      if (!nb[v]) continue;
+      var l2 = Math.hypot(D2[v * 2], D2[v * 2 + 1]), l3 = Math.hypot(D3[v * 3], D3[v * 3 + 1], D3[v * 3 + 2]); if (l2 < 0.3 || l3 < 0.3) continue;     // un coin trop aigu : on ne pousse pas
+      for (var q = 0; q < 3; q++) pos[v * 3 + q] += D3[v * 3 + q] / l3 * AV;
+      uv[v * 2] += D2[v * 2] / l2 * AV / (bb.x1 - bb.x0); uv[v * 2 + 1] += D2[v * 2 + 1] / l2 * AV / (bb.y1 - bb.y0);
+    }
+    return { pos: pos, uv: uv };
+  }
   // les attributs du maillage conforme : normales (orientées comme la grille), ombre, teinte, traits
   function finirConforme(ma){
     var rd = ma.rendu, n = rd.n, PZ = rd.pos, I = rd.idx, nor = new Float32Array(n * 3), ao = new Float32Array(n), tint = new Float32Array(n * 4);
@@ -5402,12 +5470,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     GLV.mailles.forEach(function(ma){
       for (var k = 1; k < ma.pos.length; k += 3) { if (ma.pos[k] < y0) y0 = ma.pos[k]; if (ma.pos[k] > y1) y1 = ma.pos[k]; }
       // ce qui se DESSINE : le maillage conforme s il existe (les hauts), sinon la grille
-      var rd = ma.rendu || ma;
-      ma.bP = tampon(gl, rd.pos); ma.bN = tampon(gl, rd.nor); ma.bT = tampon(gl, rd.uv); ma.bK = tampon(gl, rd.tint); ma.bO = tampon(gl, rd.ao);
+      var rd = ma.rendu || ma, rc = ma.rendu ? recouvrement(ma) : null;
+      ma.bP = tampon(gl, rc ? rc.pos : rd.pos); ma.bN = tampon(gl, rd.nor); ma.bT = tampon(gl, rc ? rc.uv : rd.uv); ma.bK = tampon(gl, rd.tint); ma.bO = tampon(gl, rd.ao);
       ma.bI = tampon(gl, rd.idx, gl.ELEMENT_ARRAY_BUFFER); ma.bL = tampon(gl, rd.lig, gl.ELEMENT_ARRAY_BUFFER); ma.nIdx = rd.idx.length; ma.nLig = rd.lig.length;
     });
-    if (GLV.mq) { gl.deleteBuffer(GLV.mq.bP); gl.deleteBuffer(GLV.mq.bN); GLV.mq = null; }
-    if (['haut', 'jupe', 'bas'].indexOf(famD) >= 0 && (r.corps || []).length) { var mq = mannequinGL(r); if (mq.n) GLV.mq = { bP: tampon(gl, mq.pos), bN: tampon(gl, mq.nor), n: mq.n }; }
+    if (GLV.mq) { gl.deleteBuffer(GLV.mq.bP); gl.deleteBuffer(GLV.mq.bN); if (GLV.mq.bA) gl.deleteBuffer(GLV.mq.bA); GLV.mq = null; }
+    if (['haut', 'jupe', 'bas'].indexOf(famD) >= 0 && (r.corps || []).length) { var mq = mannequinGL(r); if (mq.n) GLV.mq = { bP: tampon(gl, mq.pos), bN: tampon(gl, mq.nor), bA: tampon(gl, mq.omb), n: mq.n }; }
     GLV.cy = (y0 + y1) / 2; GLV.h = Math.max(1, y1 - y0); GLV.ybas = y0; GLV.r = r; GLV.cle = '';
     // le cadrage : SERRÉ sur le vêtement, comme une photo de studio (sa référence Fal.ai) — un cadre de 120 cm au moins
     // laissait un t-shirt de 65 cm perdu au milieu ; un chapeau garde 34 cm au moins
@@ -5448,9 +5516,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (/tete/.test(nm)) bouchon(rings[rings.length - 1], 1);
       if (/bras/.test(nm) || /jambe/.test(nm) || /epaules/.test(nm) || /poitrine/.test(nm)) bouchon(rings[rings.length - 1], 1);
       if (/epaules/.test(nm) || /poitrine/.test(nm)) bouchon(rings[0], -1);
-      if (/tronc/.test(nm)) { bouchon(rings[0], -1); bouchon(rings[rings.length - 1], 1); }   // fermé en haut : l intérieur se voyait dans l encolure
+      // fermé en haut : l intérieur se voyait dans l encolure. ⚠ (2026-10-18) le couvercle est posé 1 cm SOUS le dernier anneau : à
+      // sa hauteur, son bord (en pleine lumière, tourné vers le haut) se confondait avec le pied du cou — une ellipse de points
+      // blancs, vue d en haut (il en reste quelques-uns, plus rares)
+      if (/tronc/.test(nm)) { bouchon(rings[0], -1); var hautT = rings[rings.length - 1], dC = function(q){ return [q[0] - hautT.ax[0], q[1] - hautT.ax[1], q[2] - hautT.ax[2]]; };
+        bouchon({ c: dC(hautT.c), p: hautT.p.map(dC), ax: hautT.ax }, 1); }
     });
-    return { pos: new Float32Array(pos), nor: new Float32Array(nor), n: pos.length / 3 };
+    /* L OMBRE DU VÊTEMENT SUR LE MANNEQUIN (2026-10-18, sa capture 72 : « le gris du cou passe par des triangles », des coins
+       blancs au dos du col ; et sur le mannequin homme, deux reflets blancs dans l encolure — la cassure de la capsule des
+       épaules) : vu d en haut, la pente des épaules du mannequin — en pleine lumière, à facettes — brillait entre le cou et le
+       bord-côte, comme des éclats. Sous un vêtement, le corps est dans l ombre du tissu : chaque point du mannequin s assombrit
+       à l approche du tissu (de moitié au contact, plus rien à 4 cm). Le cou, loin du col, reste clair. */
+    var omb = new Float32Array(pos.length / 3).fill(1), cases = {}, CS = 2;
+    (GLV && GLV.mailles || []).forEach(function(ma){ var P = (ma.rendu || ma).pos; for (var k = 0; k < P.length; k += 3) {
+      var cl = Math.floor(P[k] / CS) + '_' + Math.floor(P[k + 1] / CS) + '_' + Math.floor(P[k + 2] / CS); (cases[cl] = cases[cl] || []).push(P[k], P[k + 1], P[k + 2]); } });
+    for (var w = 0; w < omb.length; w++) {
+      var x = pos[w * 3], y = pos[w * 3 + 1], z = pos[w * 3 + 2], gx = Math.floor(x / CS), gy = Math.floor(y / CS), gz = Math.floor(z / CS), d2 = 16;
+      for (var ax2 = -2; ax2 <= 2; ax2++) for (var ay = -2; ay <= 2; ay++) for (var az = -2; az <= 2; az++) { var l = cases[(gx + ax2) + '_' + (gy + ay) + '_' + (gz + az)]; if (!l) continue;
+        for (var q = 0; q < l.length; q += 3) { var dd = (l[q] - x) * (l[q] - x) + (l[q + 1] - y) * (l[q + 1] - y) + (l[q + 2] - z) * (l[q + 2] - z); if (dd < d2) d2 = dd; } }
+      var t2 = Math.min(1, Math.sqrt(d2) / 4); omb[w] = 0.5 + 0.5 * t2 * t2 * (3 - 2 * t2);
+    }
+    return { pos: new Float32Array(pos), nor: new Float32Array(nor), omb: omb, n: pos.length / 3 };
   }
 
   /* Les toiles (tissu + motif + découpes) et les objets posés. Le motif arrive en second : il se charge. */
@@ -5554,11 +5640,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // le mannequin (même programme que les bijoux : un blanc satiné, sans métal)
     // la vue FANTÔME montre l intérieur du vêtement : le mannequin s efface tant qu elle est choisie
     if (GLV.mq && V3.mannequin !== false && V3.vueNom !== 'fantome' && !GLV.diag) {
-      lier(gl, po, 'aP', GLV.mq.bP, 3); lier(gl, po, 'aN', GLV.mq.bN, 3);
+      lier(gl, po, 'aP', GLV.mq.bP, 3); lier(gl, po, 'aN', GLV.mq.bN, 3); lier(gl, po, 'aA', GLV.mq.bA, 1);
       gl.uniformMatrix4fv(po.u.uM, false, col4(cam.M)); gl.uniformMatrix4fv(po.u.uV, false, col4(cam.V)); gl.uniformMatrix3fv(po.u.uR, false, col3(cam.R));
       gl.uniform3f(po.u.uB, 1.12, 1.11, 1.09); gl.uniform1f(po.u.uMet, 0); gl.uniform1f(po.u.uBr, 28);
+      /* ⚠ (2026-10-18, sa capture 72) le mannequin se dessine ~1 cm plus LOIN qu il n est (décalage de profondeur constant, le même
+         pour toutes ses faces — un décalage selon la pente reclassait ses propres faces : une ellipse blanche au pied du cou) : à
+         angle rasant, à moins d un millimètre sous le tissu, il le perçait en pointillés (des lignes le long des épaules, vu d en
+         haut). Le tissu, lui, ne bouge pas : décalé, son envers passait devant son endroit (des fentes au banc). */
+      gl.enable(gl.POLYGON_OFFSET_FILL); gl.polygonOffset(0, 4000);
       gl.drawArrays(gl.TRIANGLES, 0, GLV.mq.n);
+      gl.disable(gl.POLYGON_OFFSET_FILL); gl.polygonOffset(0, 0);
     }
+    // les bijoux : sans ombre (l attribut éteint vaut 1)
+    if (po.a.aA != null && po.a.aA >= 0) { gl.disableVertexAttribArray(po.a.aA); gl.vertexAttrib1f(po.a.aA, 1); }
     GLV.inst.forEach(function(it){
       var ob = GLV.objets[it.type] || GLV.objets.perle, mt = MAT3[it.matiere] || MAT3.or;
       lier(gl, po, 'aP', ob.pos, 3); lier(gl, po, 'aN', ob.nor, 3);
@@ -5655,36 +5749,78 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       });
     });
   }
-  // la barre du haut : retour, annuler, enregistrer, photo
+  /* L en-tête ne garde que le retour (comme le studio) ; les gestes du modèle sont au bout de la barre d options
+     (Annuler, Photo, Rendu réaliste, Enregistrer) et TOUS dans le menu Fichier — six boutons alignés en haut
+     se lisaient mal et changeaient de place selon l état. */
   function entete3d(){
     var a = document.getElementById('actions'); if (!a || !V3) return;
     var m = V3.m;
     document.getElementById('sous').textContent = m.nom + (m.ref ? ' · ' + m.ref : '') + ' · v' + (m.version || 1) + ' · ' + '${T("taille {0}")}'.split('{0}').join(V3.taille) + (V3.dsale ? ' · ${T("modifications non enregistrées")}' : '');
-    a.innerHTML = '<button type="button" id="v3-retour">' + (V3.retour === 'editeur' ? '${T("← Éditeur")}' : '${T("← Bibliothèque")}') + '</button>'
-      + (plaque3d() ? '<button type="button" id="v3-annuler" aria-label="${T("Annuler")}" title="${T("Annuler")}"' + (V3.pile.length ? '' : ' disabled') + '>↶</button>'
-        + (D.peutModifier ? '<button type="button" class="prim" id="v3-enreg"' + (V3.dsale ? '' : ' disabled') + '>${T("Enregistrer")}</button>' : '') : '')
-      + (plaque3d() && D.peutModifier && (D.produits || []).length ? '<button type="button" id="v3-fiche">${T("Vers la fiche produit")}</button>' : '')
-      + '<button type="button" id="v3-photo">${T("Photo du rendu")}</button>'
-      + (plaque3d() ? '<button type="button" id="v3-ia">${T("Rendu réaliste (Fal.ai)")}</button>' : '');
+    a.innerHTML = '<button type="button" id="v3-retour">' + (V3.retour === 'editeur' ? '${T("← Éditeur")}' : '${T("← Bibliothèque")}') + '</button>';
+    var g = document.getElementById('v3-gestes'), pq = plaque3d();
+    if (g) g.innerHTML = '<button type="button" id="v3-annuler" aria-label="${T("Annuler la modification")}" title="${T("Annuler la modification")} (Ctrl+Z)"' + (pq && V3.pile.length ? '' : ' disabled') + '>↶</button>'
+      + '<button type="button" id="v3-photo" title="${T("Enregistrer l’image de la scène")}">${T("Photo du rendu")}</button>'
+      + '<button type="button" id="v3-ia"' + (pq ? '' : ' disabled') + '>${T("Rendu réaliste (Fal.ai)")}</button>'
+      + (D.peutModifier ? '<button type="button" class="prim" id="v3-enreg" title="Ctrl+S"' + (pq && V3.dsale ? '' : ' disabled') + '>${T("Enregistrer")}</button>' : '');
+    // les outils de design s ouvrent quand l aperçu plaqué est prêt (il arrive après le premier dessin)
+    corps.querySelectorAll('.v3 [data-v3out]').forEach(function(b){ b.disabled = b.getAttribute('data-v3out') !== 'tourner' && !pq; });
+    majEtat3d();
+  }
+  function majEtat3d(){
+    var e = document.getElementById('v3-etat'); if (!e || !V3) return;
+    var D3 = V3.design || {}, v = VUES3.filter(function(x){ return x[0] === V3.vueNom; })[0];
+    e.innerHTML = '<span>${T("Taille")} <b>' + esc(V3.taille) + '</b></span>'
+      + '<span>${T("Mannequin")} <b>' + (V3.genre === 'homme' ? '${T("Homme")}' : '${T("Femme")}') + ' · ' + Math.round((V3.r && V3.r.stature) || V3.stature) + ' cm</b></span>'
+      + '<span>${T("Vue")} <b>' + (v ? v[1] : '${T("Libre")}') + '</b></span>'
+      + '<span>${T("Zoom")} <b>' + Math.round(V3.zoom * 100) + ' %</b></span>'
+      + '<span>' + '${T("{0} découpe(s) · {1} élément(s)")}'.split('{0}').join((D3.decoupes || []).length).split('{1}').join((D3.elements || []).length) + '</span>'
+      + '<span class="ecart"></span>' + (V3.dsale ? '<span class="att">${T("modifications non enregistrées")}</span>' : '<span class="ok">${T("Enregistré")}</span>');
+    var zv = document.getElementById('v3-zoomv'); if (zv) zv.textContent = Math.round(V3.zoom * 100) + ' %';
+  }
+  function zoom3d(z){ if (!V3) return; V3.zoom = Math.max(0.4, Math.min(5, z)); majEtat3d(); demander3d(); }
+  function recentrer3d(){ if (!V3) return; V3.zoom = 1; V3.px = 0; V3.py = 0; majEtat3d(); demander3d(); }
+  function vue3d(k){
+    var v = VUES3.filter(function(x){ return x[0] === k; })[0]; if (!v || !V3) return;
+    V3.yaw = v[2]; V3.pitch = v[4] != null ? v[4] : 0.05; V3.vueNom = v[0];
+    corps.querySelectorAll('[data-v3v]').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-v3v') === k); });
+    majEtat3d(); demander3d();
+  }
+  function genreChoisi3d(g){
+    if (!V3 || V3.genre === g) return;
+    V3.genre = g; V3.stature = STATURE3[g]; garderGenre3d(V3.id, g); MINI.cle = '';
+    V3.r = null; dessiner(); charger3d();
+  }
+  function outil3d(k){
+    if (!V3) return;
+    V3.outil = k;
+    if (k !== 'tourner') { V3P.pans.design = 1; V3P.ong.a = 'design'; V3P.repli.a = 0; garderEspace3d(); }
+    dessiner();
+  }
+  function bascule3d(k){
+    if (!V3) return;
+    V3[k] = k === 'mannequin' ? V3.mannequin === false : !V3[k];      // le mannequin est montré tant qu il n est pas « false »
+    if (k === 'mannequin') { try { localStorage.setItem('sz-atelier-mannequin', V3.mannequin ? '1' : '0'); } catch (e) {} }
+    if (k === 'photo' && GLV) GLV.cle = '';
+    dessiner();
   }
   var LDEC3 = { rond: '${T("Rond")}', ovale: '${T("Ovale")}', goutte: '${T("Goutte")}', rect: '${T("Rectangle")}' };
   var LEL3 = { perle: '${T("Perle")}', bouton: '${T("Bouton")}', strass: '${T("Strass")}', anneau: '${T("Anneau")}', oeillet: '${T("Œillet")}', clou: '${T("Clou")}' };
   var LMAT3 = { or: '${T("Or")}', argent: '${T("Argent")}', nacre: '${T("Nacre")}', noir: '${T("Noir")}', cristal: '${T("Cristal")}' };
   function peindreDesign3d(){
     var z = document.getElementById('v3-design'); if (!z || !V3) return;
-    if (!V3.r) { z.innerHTML = ''; return; }
-    if (!plaque3d()) { z.innerHTML = '<div class="cx-sep"></div><div class="ed-note">${T("Le design en 3D (découpes, bijoux) demande l’aperçu plaqué : il n’est pas encore offert pour un pantalon, ni sans accélération graphique.")}</div>'; return; }
+    if (!V3.r) { z.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i></div>'; return; }
+    if (!plaque3d()) { z.innerHTML = '<div class="ed-note">${T("Le design en 3D (découpes, bijoux) demande l’aperçu plaqué : il n’est pas encore offert pour un pantalon, ni sans accélération graphique.")}</div>'; return; }
     var seg = function(attr, k, lib, on){ return '<button type="button" class="' + (on ? 'on' : '') + '" ' + attr + '="' + k + '">' + lib + '</button>'; };
     var nb = function(v){ return esc(String(v).replace('.', '${SEP_DEC()}')); };
-    var h = '<div class="cx-sep"></div><h2>${T("Design")}</h2><div class="ed-seg" role="group" aria-label="${T("Outil")}">'
+    var h = '<div class="v3-sec">${T("Outil")}</div><div class="ed-seg" role="group" aria-label="${T("Outil")}">'
       + seg('data-v3out', 'tourner', '${T("Tourner")}', V3.outil === 'tourner') + seg('data-v3out', 'decoupe', '${T("Trouer")}', V3.outil === 'decoupe')
       + seg('data-v3out', 'element', '${T("Bijou")}', V3.outil === 'element') + seg('data-v3out', 'gomme', '${T("Gomme")}', V3.outil === 'gomme') + '</div>';
-    if (V3.outil === 'decoupe') h += '<div class="ed-seg" role="group" aria-label="${T("Forme")}" style="margin-top:.5rem">' + Object.keys(LDEC3).map(function(k){ return seg('data-v3df', k, LDEC3[k], V3.dec.forme === k); }).join('') + '</div>'
+    if (V3.outil === 'decoupe') h += '<div class="v3-sec">${T("Forme")}</div><div class="ed-seg" role="group" aria-label="${T("Forme")}">' + Object.keys(LDEC3).map(function(k){ return seg('data-v3df', k, LDEC3[k], V3.dec.forme === k); }).join('') + '</div>'
       + '<div class="at-champs" style="margin-top:.5rem"><label>${T("Largeur (cm)")}<input type="text" id="v3-dl" inputmode="decimal" maxlength="4" value="' + nb(V3.dec.l) + '"></label>'
       + (V3.dec.forme === 'rond' ? '' : '<label>${T("Hauteur (cm)")}<input type="text" id="v3-dh" inputmode="decimal" maxlength="4" value="' + nb(V3.dec.h) + '"></label>') + '</div>'
       + '<div class="ed-note">${T("Cliquez sur le vêtement pour le trouer. La découpe est tracée dans le patron imprimé ; sur le devant et le dos (des demi-pièces), elle se répète en miroir.")}</div>';
-    if (V3.outil === 'element') h += '<div class="ed-seg" role="group" aria-label="${T("Élément")}" style="margin-top:.5rem">' + Object.keys(LEL3).map(function(k){ return seg('data-v3et', k, LEL3[k], V3.el.type === k); }).join('') + '</div>'
-      + '<div class="ed-seg" role="group" aria-label="${T("Matière")}" style="margin-top:.5rem">' + Object.keys(LMAT3).map(function(k){ return seg('data-v3em', k, LMAT3[k], V3.el.matiere === k); }).join('') + '</div>'
+    if (V3.outil === 'element') h += '<div class="v3-sec">${T("Élément")}</div><div class="ed-seg" role="group" aria-label="${T("Élément")}">' + Object.keys(LEL3).map(function(k){ return seg('data-v3et', k, LEL3[k], V3.el.type === k); }).join('') + '</div>'
+      + '<div class="v3-sec">${T("Matière")}</div><div class="ed-seg" role="group" aria-label="${T("Matière")}">' + Object.keys(LMAT3).map(function(k){ return seg('data-v3em', k, LMAT3[k], V3.el.matiere === k); }).join('') + '</div>'
       + '<div class="at-champs" style="margin-top:.5rem"><label>${T("Diamètre (cm)")}<input type="text" id="v3-et" inputmode="decimal" maxlength="4" value="' + nb(V3.el.taille) + '"></label></div>'
       + '<div class="ed-note">${T("Cliquez sur le vêtement pour poser l’élément. Une manche reçoit l’élément sur les deux manches : elles sont coupées dans la même pièce.")}</div>';
     if (V3.outil === 'gomme') h += '<div class="ed-note">${T("Cliquez sur une découpe ou un élément pour l’effacer.")}</div>';
@@ -5766,29 +5902,149 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
   }
 
-  /* ── La vue et ses panneaux ── */
-  function dessiner3d(){
+  /* ── La vue et ses panneaux ──
+     REFONTE (2026-10-18, sa demande : « c est pas beau et les options disparaissent ou ne sont pas visibles ») : le
+     même langage que le studio de création — menus (Fichier, Édition, Affichage, Mannequin, Tissu, Fenêtre), barre
+     d options (taille, vue, mannequin ; les gestes au bout), palette d outils à gauche, la scène au centre avec ses
+     commandes de caméra, des panneaux à onglets repliables qui DÉFILENT, la barre d état. Toute option a sa place
+     fixe : rien ne dépend plus d un état passager (la case « Mannequin » n apparaissait qu une fois le corps chargé). */
+  var MENUS3 = [['fichier', '${T("Fichier")}'], ['edition', '${T("Édition")}'], ['affichage', '${T("Affichage")}'], ['mannequin', '${T("Mannequin")}'],
+    ['tissu', '${T("Tissu")}'], ['fenetre', '${T("Fenêtre")}']];
+  var STP3 = { tissu: '${T("Tissu")}', design: '${T("Design")}', ajust: '${T("Ajustement")}', mannequin: '${T("Mannequin")}' };
+  var STG3 = [['a', ['tissu', 'design']], ['b', ['ajust', 'mannequin']]];
+  var OUTILS3 = [['tourner', '${T("Tourner")}', '<path d="M20 12a8 8 0 1 1-2.3-5.7"/><polyline points="20 4 20 9 15 9"/>'],
+    ['decoupe', '${T("Trouer")}', '<circle cx="12" cy="12" r="7.5" stroke-dasharray="3 2.4"/><circle cx="12" cy="12" r="2.4"/>'],
+    ['element', '${T("Bijou")}', '<path d="M7 4h10l4 5-9 11L3 9z"/><path d="M3 9h18M10 4l2 16M14 4l-2 16"/>'],
+    ['gomme', '${T("Gomme")}', '<path d="M4 15.5l9.5-9.5 6.5 6.5-7.5 7.5H8z"/><path d="M9.5 10l6.5 6.5M12 20h8"/>']];
+  var V3P = (function(){
+    var d = { pans: { tissu: 1, design: 1, ajust: 1, mannequin: 1 }, ong: { a: 'tissu', b: 'ajust' }, repli: {} };
+    try { var o = JSON.parse(localStorage.getItem('sz-atelier-3d-espace') || 'null'); if (o && o.pans && o.ong) return { pans: o.pans, ong: o.ong, repli: o.repli || {} }; } catch (e) {}
+    return d;
+  })();
+  function garderEspace3d(){ try { localStorage.setItem('sz-atelier-3d-espace', JSON.stringify(V3P)); } catch (e) {} }
+  function seg3(attr, k, lib, on, off){ return '<button type="button" class="' + (on ? 'on' : '') + '" ' + attr + '="' + k + '" aria-pressed="' + !!on + '"' + (off ? ' disabled' : '') + '>' + lib + '</button>'; }
+  function case3(k, lib, on){ return '<label><input type="checkbox" data-v3o="' + k + '"' + (on ? ' checked' : '') + '>' + lib + '</label>'; }
+  function v3Panneau(k){
     var m = V3.m;
+    if (k === 'tissu') return '<div class="v3-sec">${T("Couleur du tissu")}</div><div class="v3-couleurs">'
+      + COUL3.map(function(c){ return '<button type="button" class="' + (V3.couleur === c[0] ? 'on' : '') + '" data-v3c="' + c[0] + '" title="' + c[1] + '" aria-label="' + c[1] + '" aria-pressed="' + (V3.couleur === c[0]) + '" style="background:' + c[0] + '"></button>'; }).join('') + '</div>'
+      + '<div class="v3-sec">${T("Vie du tissu")}</div><div class="ed-seg" role="group" aria-label="${T("Plis")}">' + PLIS.map(function(x){ return seg3('data-v3plis', x[0], x[1], VIE.plis === x[0]); }).join('') + '</div>'
+      + '<div class="v3-sec">${T("Tenue")}</div><div class="ed-seg" role="group" aria-label="${T("Tenue")}">' + TISSUS3.map(function(x){ return seg3('data-v3tissu', x[0], x[1], VIE.tissu === x[0]); }).join('') + '</div>'
+      + '<div class="v3-sec">${T("Fond")}</div><div class="ed-seg" role="group" aria-label="${T("Fond")}">' + seg3('data-v3f', 'beige', '${T("Beige")}', V3.fond === 'beige') + seg3('data-v3f', 'blanc', '${T("Blanc")}', V3.fond === 'blanc') + '</div>';
+    if (k === 'design') return '<div id="v3-design"></div>';
+    if (k === 'ajust') return '<div class="im-cases">' + case3('carte', '${T("Carte d’ajustement")}', V3.carte) + '</div><div id="v3-pan"></div>';
+    var mc = (V3.r && V3.r.mesuresCorps) || null, cm = function(v){ return String(Math.round(v * 10) / 10).replace('.', '${SEP_DEC()}') + ' cm'; };
+    return '<div class="v3-sec">${T("Corps")}</div><div class="ed-seg" role="group" aria-label="${T("Mannequin")}">' + seg3('data-v3g', 'femme', '${T("Femme")}', V3.genre !== 'homme') + seg3('data-v3g', 'homme', '${T("Homme")}', V3.genre === 'homme') + '</div>'
+      + '<div class="im-cases">' + case3('mannequin', '${T("Afficher le mannequin")}', V3.mannequin !== false) + '</div>'
+      + '<div class="v3-sec">${T("Mesures du corps")}</div>'
+      + (mc ? '<div class="v3-mes"><span>${T("Stature")}</span><b>' + cm((V3.r && V3.r.stature) || V3.stature) + '</b>'
+        + [['poitrine', '${T("Tour de poitrine")}'], ['taille', '${T("Tour de taille")}'], ['hanches', '${T("Tour de hanches")}'], ['carrure', '${T("Carrure dos")}'], ['cou', '${T("Tour de cou")}'], ['tourBras', '${T("Tour de bras")}']]
+          .map(function(x){ return mc[x[0]] != null ? '<span>' + x[1] + '</span><b>' + cm(mc[x[0]]) + '</b>' : ''; }).join('') + '</div>'
+        : '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i></div>')
+      + '<div class="ed-note">' + (V3.genre === 'homme' ? '${T("Mannequin homme : le corps suit le tableau standard homme (taille {0}) ; le vêtement garde son patron.")}' : '${T("Mannequin femme : le corps suit le tableau de mesures du modèle (taille {0}).")}').split('{0}').join(esc(V3.taille)) + '</div>'
+      + '<div class="v3-sec">${T("Affichage")}</div><div class="im-cases">' + case3('fil', '${T("Fil de fer")}', V3.fil) + case3('auto', '${T("Rotation automatique")}', V3.auto)
+      + (m.photo3d ? case3('photo', '${T("Photo plaquée")}', V3.photo) : '') + '</div>';
+  }
+  function v3Panneaux(){
+    var h = STG3.map(function(g){
+      var vis = g[1].filter(function(k){ return V3P.pans[k]; }); if (!vis.length) return '';
+      var act = vis.indexOf(V3P.ong[g[0]]) >= 0 ? V3P.ong[g[0]] : vis[0], rep = !!V3P.repli[g[0]];
+      var lr = rep ? '${T("Déplier le panneau")}' : '${T("Replier le panneau")}';
+      return '<section class="st-pan' + (rep ? ' replie' : '') + '" aria-label="' + esc(vis.map(function(k){ return STP3[k]; }).join(' · ')) + '">'
+        + '<div class="st-pan-tete"><div class="st-onglets" role="tablist">' + vis.map(function(k){
+            return '<button type="button" role="tab" aria-selected="' + (k === act) + '" class="' + (k === act ? 'on' : '') + '" data-st-onglet="' + g[0] + ':' + k + '">' + STP3[k] + '</button>';
+          }).join('')
+        + '</div><button type="button" class="st-repli" data-st-repli="' + g[0] + '" aria-expanded="' + (rep ? 'false' : 'true') + '" title="' + lr + '" aria-label="' + lr + '">' + CHEV + '</button></div>'
+        + (rep ? '' : '<div class="st-pan-corps" role="tabpanel">' + v3Panneau(act) + '</div>') + '</section>';
+    }).join('');
+    return h || '<p class="st-note" style="padding:1rem">${T("Tous les panneaux sont masqués : menu Fenêtre.")}</p>';
+  }
+  function v3Entrees(k){
+    var l = [], pq = plaque3d(), m = V3.m;
+    var sec = function(t){ l.push({ sec: t }); }, tr = function(){ l.push({ trait: true }); };
+    if (k === 'fichier') {
+      l.push({ lib: '${T("Enregistrer")}', rac: 'Ctrl+S', off: !D.peutModifier || !pq || !V3.dsale, fn: enregistrer3d });
+      tr();
+      l.push({ lib: '${T("Photo du rendu")}', fn: photo3d });
+      l.push({ lib: '${T("Rendu réaliste (Fal.ai)")}', off: !pq, fn: ouvrirRenduIa });
+      l.push({ lib: '${T("Vers la fiche produit")}', off: !(pq && D.peutModifier && (D.produits || []).length), fn: ouvrirEnvoiFiche });
+      tr();
+      l.push({ lib: V3.retour === 'editeur' ? '${T("Retour à l’éditeur")}' : '${T("Retour à la bibliothèque")}', rac: '${T("Échap")}', fn: quitter3d });
+    } else if (k === 'edition') {
+      l.push({ lib: '${T("Annuler la modification")}', rac: 'Ctrl+Z', off: !V3.pile.length, fn: annuler3d });
+      sec('${T("Outil")}');
+      OUTILS3.forEach(function(o){ l.push({ lib: o[1], coche: V3.outil === o[0], off: o[0] !== 'tourner' && !pq, fn: function(){ outil3d(o[0]); } }); });
+    } else if (k === 'affichage') {
+      sec('${T("Taille affichée")}');
+      (m.tailles || []).forEach(function(t){ l.push({ lib: t, coche: V3.taille === t, fn: function(){ taille3d(t); } }); });
+      sec('${T("Vue")}');
+      VUES3.forEach(function(v){ l.push({ lib: v[1], coche: V3.vueNom === v[0], fn: function(){ vue3d(v[0]); } }); });
+      tr();
+      l.push({ lib: '${T("Carte d’ajustement")}', coche: !!V3.carte, fn: function(){ bascule3d('carte'); } });
+      l.push({ lib: '${T("Fil de fer")}', coche: !!V3.fil, fn: function(){ bascule3d('fil'); } });
+      l.push({ lib: '${T("Rotation automatique")}', coche: !!V3.auto, fn: function(){ bascule3d('auto'); } });
+      if (m.photo3d) l.push({ lib: '${T("Photo plaquée")}', coche: !!V3.photo, fn: function(){ bascule3d('photo'); } });
+      tr();
+      l.push({ lib: '${T("Zoom avant")}', rac: 'Ctrl++', fn: function(){ zoom3d(V3.zoom * 1.2); } });
+      l.push({ lib: '${T("Zoom arrière")}', rac: 'Ctrl+-', fn: function(){ zoom3d(V3.zoom / 1.2); } });
+      l.push({ lib: '${T("Recentrer")}', rac: 'Ctrl+0', fn: recentrer3d });
+    } else if (k === 'mannequin') {
+      l.push({ lib: '${T("Femme")}', coche: V3.genre !== 'homme', fn: function(){ genreChoisi3d('femme'); } });
+      l.push({ lib: '${T("Homme")}', coche: V3.genre === 'homme', fn: function(){ genreChoisi3d('homme'); } });
+      tr();
+      l.push({ lib: '${T("Afficher le mannequin")}', coche: V3.mannequin !== false, fn: function(){ bascule3d('mannequin'); } });
+      l.push({ lib: '${T("Mesures du corps")}', fn: function(){ montrer3d('b', 'mannequin'); } });
+    } else if (k === 'tissu') {
+      sec('${T("Vie du tissu")}');
+      PLIS.forEach(function(x){ l.push({ lib: x[1], coche: VIE.plis === x[0], fn: function(){ vie3d('plis', x[0]); } }); });
+      sec('${T("Tenue")}');
+      TISSUS3.forEach(function(x){ l.push({ lib: x[1], coche: VIE.tissu === x[0], fn: function(){ vie3d('tissu', x[0]); } }); });
+      sec('${T("Couleur du tissu")}');
+      COUL3.forEach(function(c){ l.push({ lib: c[1], coche: V3.couleur === c[0], fn: function(){ V3.couleur = c[0]; dessiner(); } }); });
+      sec('${T("Fond")}');
+      [['beige', '${T("Beige")}'], ['blanc', '${T("Blanc")}']].forEach(function(f){ l.push({ lib: f[1], coche: V3.fond === f[0], fn: function(){ V3.fond = f[0]; dessiner(); } }); });
+    } else if (k === 'fenetre') {
+      ['tissu', 'design', 'ajust', 'mannequin'].forEach(function(p){
+        l.push({ lib: STP3[p], coche: !!V3P.pans[p], fn: function(){ V3P.pans[p] = V3P.pans[p] ? 0 : 1; garderEspace3d(); dessiner(); } });
+      });
+      tr();
+      l.push({ lib: '${T("Réinitialiser l’espace de travail")}', fn: function(){
+        V3P = { pans: { tissu: 1, design: 1, ajust: 1, mannequin: 1 }, ong: { a: 'tissu', b: 'ajust' }, repli: {} }; garderEspace3d(); recentrer3d(); dessiner(); } });
+    }
+    return l;
+  }
+  function montrer3d(g, k){ V3P.pans[k] = 1; V3P.ong[g] = k; V3P.repli[g] = 0; garderEspace3d(); dessiner(); }
+  function taille3d(t){ if (!V3 || V3.taille === t) return; V3.taille = t; V3.r = null; dessiner(); charger3d(); }
+  function vie3d(k, v){ VIE[k] = v; try { localStorage.setItem('sz-atelier-vie', JSON.stringify(VIE)); } catch (e) {} dessiner(); demander3d(); }
+  function dessiner3d(){
+    var m = V3.m, pq = plaque3d(), ico = function(p){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>'; };
     document.getElementById('titre').textContent = '${T("Aperçu 3D")}';
+    var menus = '<div class="st-menus" role="menubar" aria-label="${T("Menus de l’aperçu 3D")}">'
+      + MENUS3.map(function(x){ return '<button type="button" role="menuitem" aria-haspopup="menu" aria-expanded="false" data-st-menu="' + x[0] + '">' + x[1] + '</button>'; }).join('') + '</div>';
+    var opt = '<div class="st-options" role="toolbar" aria-label="${T("Options de l’aperçu 3D")}">'
+      + '<div class="grp"><span class="lib">${T("Taille")}</span><span class="ed-seg" role="group" aria-label="${T("Taille affichée")}">'
+      + (m.tailles || []).map(function(t){ return seg3('data-v3t', t, esc(t), V3.taille === t); }).join('') + '</span></div>'
+      + '<div class="grp"><span class="lib">${T("Vue")}</span><span class="ed-seg" role="group" aria-label="${T("Vue")}">'
+      + VUES3.map(function(v){ return seg3('data-v3v', v[0], v[1], V3.vueNom === v[0]).replace('<button ', '<button title="' + (v[3] || v[1]) + '" '); }).join('') + '</span></div>'
+      + '<div class="grp"><span class="lib">${T("Mannequin")}</span><span class="ed-seg" role="group" aria-label="${T("Mannequin")}">'
+      + seg3('data-v3g', 'femme', '${T("Femme")}', V3.genre !== 'homme') + seg3('data-v3g', 'homme', '${T("Homme")}', V3.genre === 'homme') + '</span></div>'
+      + '<span class="ecart"></span><span class="v3-gestes" id="v3-gestes"></span></div>';
+    var pal = '<nav class="st-palette" aria-label="${T("Outils de design")}">' + OUTILS3.map(function(o){
+        var off = o[0] !== 'tourner' && !pq;
+        return '<button type="button" class="st-outil' + (V3.outil === o[0] ? ' on' : '') + '" data-v3out="' + o[0] + '" aria-pressed="' + (V3.outil === o[0]) + '" title="' + o[1] + '"' + (off ? ' disabled' : '') + '>' + ico(o[2]) + '<span>' + o[1] + '</span></button>';
+      }).join('') + '</nav>';
+    var sc = '<div class="v3-plan"><div class="v3-scene ' + V3.fond + (V3.outil !== 'tourner' ? ' vise' : '') + '" id="v3-scene" role="region" aria-label="${T("Scène 3D")}"><canvas id="v3-canevas" role="img" aria-label="${T("Le vêtement en 3D")}"></canvas>'
+      + '<div class="v3-cam" role="group" aria-label="${T("Caméra")}">'
+      + '<button type="button" data-v3zoom="-" title="${T("Zoom arrière")} (Ctrl+-)" aria-label="${T("Zoom arrière")}">−</button><span class="val" id="v3-zoomv">' + Math.round(V3.zoom * 100) + ' %</span>'
+      + '<button type="button" data-v3zoom="+" title="${T("Zoom avant")} (Ctrl++)" aria-label="${T("Zoom avant")}">+</button>'
+      + '<button type="button" data-v3zoom="0" title="${T("Recentrer (Ctrl+0)")}">${T("Ajuster")}</button>'
+      + '<button type="button" data-v3cam="auto" aria-pressed="' + !!V3.auto + '" title="${T("Rotation automatique")}" aria-label="${T("Rotation automatique")}">⟳</button></div>'
+      + '<span class="v3-aide">${T("Glisser pour tourner · molette pour zoomer · Maj + glisser pour déplacer · double-clic pour recentrer")}</span></div></div>';
+    corps.innerHTML = '<div class="st v3">' + menus + opt
+      + '<div class="st-corps">' + pal + sc + '<aside class="st-panneaux" aria-label="${T("Panneaux")}">' + v3Panneaux() + '</aside></div>'
+      + '<div class="st-etat" id="v3-etat" role="status"></div></div>';
+    MENU = '';
     entete3d();
-    var seg = function(attr, k, lib, on){ return '<button type="button" class="' + (on ? 'on' : '') + '" ' + attr + '="' + k + '">' + lib + '</button>'; };
-    var chip = function(k, lib, on){ return '<label><input type="checkbox" data-v3o="' + k + '"' + (on ? ' checked' : '') + '>' + lib + '</label>'; };
-    var g = '<div class="cx-carte"><h2>${T("Taille")}</h2><div class="ed-seg" role="group" aria-label="${T("Taille affichée")}">'
-      + (m.tailles || []).map(function(t){ return seg('data-v3t', t, esc(t), V3.taille === t); }).join('') + '</div>'
-      + '<div class="cx-sep"></div><h2>${T("Vue")}</h2><div class="ed-seg" role="group" aria-label="${T("Vue")}">'
-      + VUES3.map(function(v){ return seg('data-v3v', v[0], v[1], false).replace('<button ', '<button title="' + (v[3] || v[1]) + '" '); }).join('') + '</div>'
-      + '<div class="im-cases" style="margin-top:.6rem">' + chip('carte', '${T("Carte d’ajustement")}', V3.carte) + chip('fil', '${T("Fil de fer")}', V3.fil) + chip('auto', '${T("Rotation automatique")}', V3.auto) + (GLV && GLV.mq ? chip('mannequin', '${T("Mannequin")}', V3.mannequin !== false) : '') + (m.photo3d ? chip('photo', '${T("Photo plaquée")}', V3.photo) : '') + '</div>'
-      + '<div class="cx-sep"></div><h2>${T("Vie du tissu")}</h2><div class="ed-seg" role="group" aria-label="${T("Plis")}">'
-      + PLIS.map(function(x){ return seg('data-v3plis', x[0], x[1], VIE.plis === x[0]); }).join('') + '</div>'
-      + '<div class="ed-seg" role="group" aria-label="${T("Tissu")}" style="margin-top:.45rem">' + TISSUS3.map(function(x){ return seg('data-v3tissu', x[0], x[1], VIE.tissu === x[0]); }).join('') + '</div>'
-      + '<div class="cx-sep"></div><h2>${T("Couleur du tissu")}</h2><div class="v3-couleurs">'
-      + COUL3.map(function(c){ return '<button type="button" class="' + (V3.couleur === c[0] ? 'on' : '') + '" data-v3c="' + c[0] + '" title="' + c[1] + '" aria-label="' + c[1] + '" style="background:' + c[0] + '"></button>'; }).join('') + '</div>'
-      + '<div class="cx-sep"></div><h2>${T("Fond")}</h2><div class="ed-seg" role="group" aria-label="${T("Fond")}">' + seg('data-v3f', 'beige', '${T("Beige")}', V3.fond === 'beige') + seg('data-v3f', 'blanc', '${T("Blanc")}', V3.fond === 'blanc') + '</div>'
-      + '<div id="v3-design"></div></div>';
-    var sc = '<div class="v3-scene ' + V3.fond + (V3.outil !== 'tourner' ? ' vise' : '') + '" id="v3-scene"><canvas id="v3-canevas" role="img" aria-label="${T("Le vêtement en 3D")}"></canvas>'
-      + '<span class="v3-aide">${T("Glisser pour tourner · molette pour zoomer · Maj + glisser pour déplacer · double-clic pour recentrer")}</span></div>';
-    var d = '<div class="cx-carte" id="v3-pan"></div>';
-    corps.innerHTML = '<div class="v3-trois">' + g + sc + d + '</div>';
     // le canevas WebGL est GARDÉ d une vue à l autre : son contexte et ses toiles restent
     var nv = document.getElementById('v3-canevas');
     if (GLV && GLV.cv && nv && GLV.cv !== nv && V3.m.base !== 'pantalon') nv.parentNode.replaceChild(GLV.cv, nv);
@@ -5798,11 +6054,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     demander3d();
   }
   function peindrePanneau3d(){
-    var z = document.getElementById('v3-pan'); if (!z || !V3) return;
-    var r = V3.r;
-    if (!r) { z.innerHTML = '<h2>${T("Ajustement")}</h2><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i></div>'; return; }
+    var z = document.getElementById('v3-pan'), r = V3 ? V3.r : null;
+    // les mesures du corps arrivent avec l aperçu : le panneau Mannequin, s il est ouvert, se redessine
+    var om = V3 ? corps.querySelector('.v3 [data-st-onglet="b:mannequin"].on') : null, pm = om && om.closest('.st-pan') ? om.closest('.st-pan').querySelector('.st-pan-corps') : null;
+    if (pm) pm.innerHTML = v3Panneau('mannequin');
+    if (!z || !V3) return;
+    if (!r) { z.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i></div>'; return; }
     var cm1 = function(v){ return (v > 0 ? '+' : '') + String(Math.round(v * 10) / 10).replace('.', '${SEP_DEC()}') + ' cm'; };
-    var h = '<h2>' + '${T("Ajustement · taille {0}")}'.split('{0}').join(esc(r.taille)) + '</h2>'
+    var h = '<div class="v3-sec">' + '${T("Ajustement · taille {0}")}'.split('{0}').join(esc(r.taille)) + '</div>'
       + '<div class="v3-legende">' + Object.keys(ETAT3).map(function(k){ return '<span><i class="v3-pt" style="background:' + ETAT3[k] + '"></i>' + LETAT3[k] + '</span>'; }).join('') + '</div>';
     if (!(r.zones || []).length) h += '<div class="cx-sub">${T("Aucune zone mesurable pour ce modèle.")}</div>';
     (r.zones || []).forEach(function(zn){
@@ -5816,31 +6075,86 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (r.motif3d === 'tete') h += '<div class="ed-note">' + '${T("Monté sur une tête de {0} cm de tour (le tableau de tailles) : la coupole vient de la largeur des pièces, rang par rang.")}'.split('{0}').join(String(r.tete).replace('.', '${SEP_DEC()}')) + '</div>';
     if (r.motif3d === 'type_sans_3d') h += '<div class="ed-note">${T("L’aperçu 3D n’est pas encore offert pour ce type (lingerie, chapeaux) : sa planche de dessin et son patron le sont.")}</div>';
     if (r.motif3d === 'pieces_inconnues') h += '<div class="ed-note">${T("Ce patron n’a pas de devant et de dos reconnaissables : seul le mannequin est montré.")}</div>';
-    h += '<div class="cx-sep"></div><div class="ed-note">${T("Aperçu géométrique : le vêtement est montré seul, porté sur un corps invisible aux mesures du tableau ; sa largeur est mesurée sur les pièces, niveau par niveau (pinces déduites). Le tombé du tissu — plis, poids, glissement — n’est pas simulé.")}</div>'
-      + '<div class="ed-note">${T("Les écarts se lisent de 0 à 2 cm serré, de 2 à 8 cm ajusté, au-delà aisé ; sous 0, le vêtement est plus petit que le corps.")}</div>';
+    // les explications de méthode, repliées : elles occupaient la moitié du panneau
+    h += '<details class="v3-apropos"><summary>${T("À propos de cet aperçu")}</summary>'
+      + '<p>${T("Aperçu géométrique : le vêtement est montré seul, porté sur un corps invisible aux mesures du tableau ; sa largeur est mesurée sur les pièces, niveau par niveau (pinces déduites). Le tombé du tissu — plis, poids, glissement — n’est pas simulé.")}</p>'
+      + '<p>${T("Les écarts se lisent de 0 à 2 cm serré, de 2 à 8 cm ajusté, au-delà aisé ; sous 0, le vêtement est plus petit que le corps.")}</p></details>';
     z.innerHTML = h;
   }
   function clic3d(ev){
     var t = ev.target, b;
-    if ((b = t.closest('[data-v3t]'))) { V3.taille = b.getAttribute('data-v3t'); dessiner(); V3.r = null; peindrePanneau3d(); charger3d(); return; }
-    if ((b = t.closest('[data-v3v]'))) { var v = VUES3.filter(function(x){ return x[0] === b.getAttribute('data-v3v'); })[0]; V3.yaw = v[2]; V3.pitch = v[4] != null ? v[4] : 0.05; V3.vueNom = v[0]; demander3d(); return; }
+    if ((b = t.closest('[data-st-menu]'))) { var k = b.getAttribute('data-st-menu'); if (MENU === k) stFermerMenu(); else stOuvrirMenu(k, false); return; }
+    if ((b = t.closest('[data-st-onglet]'))) { var p = b.getAttribute('data-st-onglet').split(':'); V3P.ong[p[0]] = p[1]; garderEspace3d(); dessiner(); return; }
+    if ((b = t.closest('[data-st-repli]'))) { var g = b.getAttribute('data-st-repli'); V3P.repli[g] = V3P.repli[g] ? 0 : 1; garderEspace3d(); dessiner(); return; }
+    if ((b = t.closest('[data-v3zoom]'))) { var zz = b.getAttribute('data-v3zoom'); if (zz === '0') recentrer3d(); else zoom3d(zz === '+' ? V3.zoom * 1.2 : V3.zoom / 1.2); return; }
+    if ((b = t.closest('[data-v3cam]'))) { bascule3d('auto'); return; }
+    if ((b = t.closest('[data-v3g]'))) { genreChoisi3d(b.getAttribute('data-v3g')); return; }
+    if ((b = t.closest('[data-v3t]'))) { taille3d(b.getAttribute('data-v3t')); return; }
+    if ((b = t.closest('[data-v3v]'))) { vue3d(b.getAttribute('data-v3v')); return; }
     if ((b = t.closest('[data-v3c]'))) { V3.couleur = b.getAttribute('data-v3c'); dessiner(); return; }
     if ((b = t.closest('[data-v3f]'))) { V3.fond = b.getAttribute('data-v3f'); dessiner(); return; }
     if ((b = t.closest('[data-v3plis]')) || (b = t.closest('[data-v3tissu]'))) {
-      if (b.hasAttribute('data-v3plis')) VIE.plis = b.getAttribute('data-v3plis'); else VIE.tissu = b.getAttribute('data-v3tissu');
-      try { localStorage.setItem('sz-atelier-vie', JSON.stringify(VIE)); } catch (e) {}
-      dessiner(); demander3d(); return;
+      if (b.hasAttribute('data-v3plis')) vie3d('plis', b.getAttribute('data-v3plis')); else vie3d('tissu', b.getAttribute('data-v3tissu'));
+      return;
     }
-    if ((b = t.closest('[data-v3out]'))) { V3.outil = b.getAttribute('data-v3out'); var sc = document.getElementById('v3-scene'); if (sc) sc.classList.toggle('vise', V3.outil !== 'tourner'); peindreDesign3d(); return; }
+    if ((b = t.closest('[data-v3out]'))) { if (!b.disabled) outil3d(b.getAttribute('data-v3out')); return; }
     if ((b = t.closest('[data-v3df]'))) { V3.dec.forme = b.getAttribute('data-v3df'); peindreDesign3d(); return; }
     if ((b = t.closest('[data-v3et]'))) { V3.el.type = b.getAttribute('data-v3et'); peindreDesign3d(); return; }
     if ((b = t.closest('[data-v3em]'))) { V3.el.matiere = b.getAttribute('data-v3em'); peindreDesign3d(); return; }
   }
   function change3d(t){
-    if (t.hasAttribute('data-v3o')) { V3[t.getAttribute('data-v3o')] = !!t.checked; if (t.getAttribute('data-v3o') === 'mannequin') { try { localStorage.setItem('sz-atelier-mannequin', t.checked ? '1' : '0'); } catch (e) {} } if (t.getAttribute('data-v3o') === 'photo' && GLV) GLV.cle = ''; demander3d(); return; }
+    if (t.hasAttribute('data-v3o')) {
+      var k = t.getAttribute('data-v3o'); V3[k] = !!t.checked;
+      if (k === 'mannequin') { try { localStorage.setItem('sz-atelier-mannequin', t.checked ? '1' : '0'); } catch (e) {} }
+      if (k === 'photo' && GLV) GLV.cle = '';
+      if (k === 'auto') { var ba = corps.querySelector('[data-v3cam="auto"]'); if (ba) ba.setAttribute('aria-pressed', String(!!t.checked)); }
+      demander3d(); return;
+    }
     if (changeDesign3d(t)) return;
-
   }
+  /* Les menus et le clavier de l aperçu (le studio a les siens, liés à son modèle) : survol d un menu à l autre,
+     clic hors du menu, F10, flèches, Échap (ferme d abord le menu, sinon quitte), Ctrl+S, Ctrl+Z, zoom. */
+  corps.addEventListener('mouseover', function(ev){
+    if (VUE !== '3d' || !MENU) return;
+    var b = ev.target && ev.target.closest ? ev.target.closest('[data-st-menu]') : null;
+    if (b && b.getAttribute('data-st-menu') !== MENU) stOuvrirMenu(b.getAttribute('data-st-menu'), false);
+  });
+  document.addEventListener('mousedown', function(ev){
+    if (VUE !== '3d' || !MENU) return;
+    var t = ev.target;
+    if (!(t && t.closest && t.closest('.st-menu-liste, [data-st-menu]'))) stFermerMenu();
+  }, true);
+  document.addEventListener('keydown', function(ev){
+    if (VUE !== '3d' || !V3 || document.querySelector('.szc-voile')) return;
+    var k = ev.key, ctrl = ev.ctrlKey || ev.metaKey, a = document.activeElement;
+    var barre = function(){ return Array.prototype.slice.call(corps.querySelectorAll('[data-st-menu]')); };
+    var stop = function(){ ev.preventDefault(); ev.stopImmediatePropagation(); };
+    var liste = corps.querySelector('.st-menu-liste');
+    if (liste && a && liste.contains(a)) {
+      var its = Array.prototype.slice.call(liste.querySelectorAll('button:not(:disabled)')), i = its.indexOf(a);
+      if (k === 'ArrowDown' || k === 'ArrowUp') { stop(); var n = its[(i + (k === 'ArrowDown' ? 1 : -1) + its.length) % its.length]; if (n) n.focus(); return; }
+      if (k === 'Home' || k === 'End') { stop(); var e2 = its[k === 'Home' ? 0 : its.length - 1]; if (e2) e2.focus(); return; }
+      if (k === 'ArrowRight' || k === 'ArrowLeft') {
+        stop(); var j = MENUS3.map(function(x){ return x[0]; }).indexOf(MENU);
+        stOuvrirMenu(MENUS3[(j + (k === 'ArrowRight' ? 1 : -1) + MENUS3.length) % MENUS3.length][0], true); return;
+      }
+      if (k === 'Tab') { stFermerMenu(); return; }
+    }
+    if (a && a.hasAttribute && a.hasAttribute('data-st-menu')) {
+      var bb = barre(), x = bb.indexOf(a);
+      if (k === 'ArrowRight' || k === 'ArrowLeft') { stop(); var nb = bb[(x + (k === 'ArrowRight' ? 1 : -1) + bb.length) % bb.length]; if (nb) { nb.focus(); if (MENU) stOuvrirMenu(nb.getAttribute('data-st-menu'), false); } return; }
+      if (k === 'ArrowDown' || k === 'Enter' || k === ' ') { stop(); stOuvrirMenu(a.getAttribute('data-st-menu'), true); return; }
+    }
+    if (k === 'F10') { stop(); var pb = barre()[0]; if (pb) pb.focus(); return; }
+    if (k === 'Escape' && MENU) { stop(); var mb = corps.querySelector('[data-st-menu="' + MENU + '"]'); stFermerMenu(); if (mb) mb.focus(); return; }
+    if (!ctrl) return;
+    var champ = a && /^(INPUT|TEXTAREA)$/.test(a.tagName), kl = String(k).toLowerCase();
+    if (kl === 's') { stop(); enregistrer3d(); return; }
+    if (kl === 'z' && !ev.shiftKey && !champ) { stop(); annuler3d(); return; }
+    if (k === '+' || k === '=') { stop(); zoom3d(V3.zoom * 1.2); return; }
+    if (k === '-') { stop(); zoom3d(V3.zoom / 1.2); return; }
+    if (k === '0') { stop(); recentrer3d(); return; }
+  }, true);
   function photo3d(){
     var cv = document.getElementById('v3-canevas'); if (!cv || !V3) return;
     if (!P || typeof P.enregistrerExport !== 'function') { dire('${T("Cette version de l’application ne sait pas enregistrer un export.")}', 'err'); return; }
@@ -5888,7 +6202,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   /* ── La souris : tourner, zoomer, déplacer ── */
   corps.addEventListener('mousedown', function(ev){
-    if (VUE !== '3d' || !V3 || !(ev.target && ev.target.closest && ev.target.closest('#v3-scene'))) return;
+    if (VUE !== '3d' || !V3 || !(ev.target && ev.target.closest && ev.target.closest('#v3-scene')) || ev.target.closest('.v3-cam')) return;   // les commandes de caméra sont DANS la scène : ni glisser ni poser
     ev.preventDefault();
     if (V3.outil !== 'tourner' && ev.button === 0 && !ev.shiftKey && plaque3d() && GLV && poser3d(ev)) return;
     V3.glisse = { x: ev.clientX, y: ev.clientY, yaw: V3.yaw, pitch: V3.pitch, px: V3.px, py: V3.py, dep: ev.shiftKey || ev.button === 1 };
@@ -5909,11 +6223,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   corps.addEventListener('wheel', function(ev){
     if (VUE !== '3d' || !V3 || !(ev.target && ev.target.closest && ev.target.closest('#v3-scene'))) return;
     ev.preventDefault();
-    V3.zoom = Math.max(0.4, Math.min(5, V3.zoom * (ev.deltaY < 0 ? 1.12 : 1 / 1.12))); demander3d();
+    zoom3d(V3.zoom * (ev.deltaY < 0 ? 1.12 : 1 / 1.12));
   }, { passive: false });
   corps.addEventListener('dblclick', function(ev){
-    if (VUE !== '3d' || !V3 || !(ev.target && ev.target.closest && ev.target.closest('#v3-scene'))) return;
-    V3.zoom = 1; V3.px = 0; V3.py = 0; V3.pitch = 0.08; demander3d();
+    if (VUE !== '3d' || !V3 || !(ev.target && ev.target.closest && ev.target.closest('#v3-scene')) || ev.target.closest('.v3-cam')) return;
+    V3.pitch = 0.08; recentrer3d();
   });
 
   /* ══ L ÉDITEUR DE MOTIF (lot 5) ═════════════════════════════════════════

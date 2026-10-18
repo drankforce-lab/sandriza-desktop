@@ -922,4 +922,19 @@ module.exports = {
   'Plan de travail': 'Workspace',
   'Panneaux': 'Panels',
   'Annuler la modification': 'Undo',
+
+  /* ── L APERÇU 3D REFAIT, MANNEQUIN FEMME / HOMME (2026-10-18) ───────────── */
+  'Enregistrer l’image de la scène': 'Save the scene image',
+  'Femme': 'Women', 'Homme': 'Men', 'Corps': 'Body', 'Libre': 'Free',
+  'Recentrer': 'Re-centre', 'Recentrer (Ctrl+0)': 'Re-centre (Ctrl+0)',
+  'Afficher le mannequin': 'Show the dress form',
+  'Stature': 'Height', 'Mesures du corps': 'Body measurements', 'Tenue': 'Drape',
+  'Retour à la bibliothèque': 'Back to the library', 'Retour à l’éditeur': 'Back to the editor',
+  'Menus de l’aperçu 3D': '3D preview menus', 'Options de l’aperçu 3D': '3D preview options',
+  'Outils de design': 'Design tools', 'Scène 3D': '3D scene', 'Caméra': 'Camera',
+  'À propos de cet aperçu': 'About this preview',
+  'Mannequin homme : le corps suit le tableau standard homme (taille {0}) ; le vêtement garde son patron.':
+    'Men’s dress form: the body follows the standard men’s size chart (size {0}); the garment keeps its pattern.',
+  'Mannequin femme : le corps suit le tableau de mesures du modèle (taille {0}).':
+    'Women’s dress form: the body follows the design’s size chart (size {0}).',
 };
