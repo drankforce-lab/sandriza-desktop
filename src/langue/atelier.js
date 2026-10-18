@@ -864,4 +864,6 @@ module.exports = {
   'La fiche n’a plus de place pour une photo.': 'The product page has no room left for a photo.',
   'Cette image ne peut pas être envoyée.': 'This image cannot be sent.',
   'Mannequin': 'Dress form',
+  'Générer (≈ {0})': 'Generate (≈ {0})',
+  'Le prix a changé : {0} au lieu de {1}. Rien n’a été lancé — cliquez de nouveau pour générer à ce prix.': 'The price changed: {0} instead of {1}. Nothing was started — click again to generate at this price.',
 };

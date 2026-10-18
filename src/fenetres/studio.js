@@ -741,6 +741,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var PRESET = '';       // cle d ambiance
   var PRESETS = [];      // [{cle,label,emoji,desc}]
   var RESULT = null;     // { image, essai, decorErreur, upNote, largeur, hauteur }
+  /* LE MONTANT AFFICHÉ avant le clic (2026-10-17, sa demande : « avant de lancer un appel, tu valides le prix et tu
+     regardes le prix que tu as affiché ; si ça diffère, tu dois nous aviser avec le vrai montant »). Il part avec la
+     demande ; le relais le compare au vrai prix AVANT tout appel et refuse s il diffère (motif prix_change). */
+  var PRIX_ANNONCE = null;
   /* ══ LE FILIGRANE (lot 3c) ════════════════════════════════════════════════
      ⚠⚠ LE COLLAGE N EST PAS FAIT ICI. La fenetre pourrait le faire dans son
      propre canevas, plus vite d un aller-retour — mais la geometrie serait alors
@@ -794,7 +798,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
      (_purgerPortraits dans pont.js). */
   var VOIES = [
     { cle: 'humain',  t: '${T("Mannequin virtuel")}', d: '${T("Porté par un modèle, décor intégré")}' },
-    { cle: 'fantome', t: '${T("Fantôme habillé")}',   d: '${T("Sans mannequin, décor pro ajouté")}' },
+    // (2026-10-17, sa demande : « renomme mannequin fantôme par vêtement sans mannequin, sinon ça porte à confusion »)
+    { cle: 'fantome', t: '${T("Vêtement sans mannequin")}', d: '${T("Mannequin retiré, vêtement fidèle sur fond uni")}' },
     { cle: 'plat',    t: '${T("Produit à plat")}',    d: '${T("Détourage + décor + ombre")}' }
   ];
   /* Les 16 modeles REELS de Photoroom (virtualModel.model.preset.name, verifies
@@ -1255,6 +1260,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       // nombre (voir PANIER_SIG).
       if (sig !== PANIER_SIG) {
         PANIER_SIG = sig;
+        /* (2026-10-17, sa demande) un ENVOI NEUF (de la photothèque ou de l explorateur) arrive à l ÉTAPE 2 : la photo
+           est chargée, il reste à choisir « Vêtement sans mannequin » ou « Mannequin virtuel » */
+        if (PANIER.length) VOIE_CHOISIE = false;
         if (PANIER.length) {
           // La photo ouverte reste ouverte si elle fait encore partie de l envoi.
           var k = -1;
@@ -3226,7 +3234,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
        panier venu de l explorateur) prenait donc DEJA ce repli : rien ne change
        pour lui, et plus personne ne lit une variable qui restait vide. */
     var opts = [
-      { cle: 'detourage', nom: '${T("Détourage")}' }, { cle: 'fantome', nom: '${T("Mannequin retiré")}' },
+      { cle: 'detourage', nom: '${T("Détourage")}' }, { cle: 'fantome', nom: '${T("Vêtement sans mannequin")}' },
       { cle: 'humain', nom: '${T("Porté par un mannequin")}' },
       /* ⚠ LE FILIGRANE MANQUAIT A LA LISTE (2026-09-25) : le site l accepte, et
          tout le code qui le traite plus bas (estimation gratuite, logo) etait
@@ -3480,6 +3488,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function saisie(apercu){
     var s = { geste: VOIE, preset: PRESET, apercu: apercu };
+    if (!apercu && PRIX_ANNONCE != null) s.prixAnnonce = PRIX_ANNONCE;
     if (PHOTO_ID) { s.photoId = PHOTO_ID; } else { s.image = PHOTO; }
     if (VOIE === 'humain') {
       var sel = document.getElementById('modele-sel');
@@ -3550,6 +3559,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         chargerCredits();
         // Le filigrane pose avant ce rendu se repose sur la nouvelle image.
         if (FIL_POSE && logoChoisi()) appliquerFiligrane();
+      } else if (r && r.motif === 'prix_change' && r.prixReel != null) {
+        // LE PRIX A CHANGÉ depuis l affichage : RIEN n est parti. On dit le vrai montant ; la personne décide.
+        var h = '<h3><span class="ic">⚠</span> ${T("Le prix a changé")}</h3>'
+          + '<p>${T("Affiché : {0} — prix réel : {1} ({2} appel(s)). Rien n’a été lancé ni facturé.")}'
+              .split('{0}').join(szArgentSymbole(argent(r.prixAnnonce)))
+              .split('{1}').join('<strong>' + szArgentSymbole(argent(r.prixReel)) + '</strong>')
+              .split('{2}').join(String(r.appels || 1)) + '</p>'
+          + '<div class="fin2"><button id="pc-non">${T("Annuler")}</button>'
+          + '<button class="conf" id="pc-oui">${T("Lancer —")} ' + szArgentSymbole(argent(r.prixReel)) + '</button></div>';
+        dire('${T("Le prix a changé : à confirmer.")}', 'att');
+        voile(h, function(fermer){
+          var non = document.getElementById('pc-non'), oui = document.getElementById('pc-oui');
+          if (non) non.onclick = function(){ fermer(); dire('${T("Annulé : rien n’a été facturé.")}', 'att'); };
+          if (oui) oui.onclick = function(){ fermer(); PRIX_ANNONCE = r.prixReel; lancer(false); };
+        });
       } else {
         dire(expliquer(r), 'err');
       }
@@ -3587,7 +3611,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function causesAppels(){
     var c = [];
     if (VOIE === 'fantome') {
-      c.push('${T("le <strong>fantôme habillé</strong> demande deux gestes : retirer le mannequin, puis poser le décor")}');
+      c.push('${T("le <strong>vêtement sans mannequin</strong> avec décor, ombre ou lumière IA demande deux gestes : retirer le mannequin, puis poser le décor")}');
     }
     if (AV.upActive) c.push('${T("l’<strong>agrandissement ×4</strong> est un appel de plus, après le traitement")}');
     return c;
@@ -3607,11 +3631,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       .then(function(r){
         boutonAttente(bC, '');
         occuper(false);
-        if (!r || !r.ok) { dire('${T("Coût non estimé — le rendu part quand même.")}', 'att'); suite(); return; }
+        if (!r || !r.ok) { PRIX_ANNONCE = null; dire('${T("Coût non estimé — le rendu part quand même.")}', 'att'); suite(); return; }
         var n = r.appelsMax || 1;
+        PRIX_ANNONCE = apercu ? null : r.coutMax;
         // Un seul appel par image : rien a confirmer, on ne met pas un voile
-        // entre lui et le bouton pour le cas ordinaire.
-        if (n <= 1) { dire(''); suite(); return; }
+        // entre lui et le bouton pour le cas ordinaire — mais le PRIX se dit (c est lui que le relais vérifie)
+        if (n <= 1) { dire(apercu ? '' : '${T("1 appel facturé ≈ {0} — vérifié avant l’envoi.")}'.split('{0}').join(szArgentSymbole(argent(r.coutMax)))); suite(); return; }
         var causes = causesAppels();
         var bu = r.budget || {};
         var h = '<h3>' + (apercu ? '<span class="ic">👁</span> ${T("Aperçu —")} ' : '')

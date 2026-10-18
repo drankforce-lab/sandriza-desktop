@@ -66,6 +66,11 @@ button.mini{padding:.12rem .45rem;font-size:.74rem}
 
 /* ── LA BARRE : période, en direct, puces à faire, pastille des zéros ── */
 .barre{display:flex;align-items:center;gap:.45rem .6rem;flex-wrap:wrap}
+.soldes{display:inline-flex;gap:.35rem;flex-wrap:wrap}
+.solde{display:inline-flex;align-items:center;gap:.3rem;font-size:.74rem;padding:.18rem .55rem;border-radius:99px;border:1px solid var(--v10);color:var(--tx2);white-space:nowrap}
+.solde b{color:var(--tx);font-weight:600}
+.solde.bas{border-color:var(--tx-err);color:var(--tx-err)}
+.solde.muet{opacity:.6}
 .direct{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:700;color:var(--tx-ok);
   background:rgba(34,197,94,.12);padding:.16rem .6rem;border-radius:99px;white-space:nowrap}
 .direct i{width:7px;height:7px;border-radius:99px;background:currentColor;animation:tb-pouls 1.8s ease-out infinite}
@@ -361,6 +366,38 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return { urgent: j > 7, texte: '${T("Dernière sauvegarde :")} ' + quand };
   }
 
+  /* ══ LES SOLDES DES SERVICES PAYANTS (2026-10-17, sa demande : « un suivi de nos soldes des différentes API :
+     Twilio, Fal.ai, Photoroom ») ══ Trois pastilles dans la barre, relues au démarrage puis toutes les 5 minutes
+     (jamais à chaque relecture de 12 s : ce sont des appels aux services). Une pastille BASSE passe en alerte.
+     Fal.ai n a pas d API de solde : c est le solde saisi moins la consommation mesurée — « ≈ », et l info-bulle
+     le dit. Un service muet garde sa pastille grise, sans éteindre les deux autres. */
+  var SOLDES = null, SOLDES_TIMER = null;
+  function chargerSoldes(){
+    appeler('tableau:soldes', []).then(function(r){
+      if (!r || !r.ok) return;
+      SOLDES = r;
+      var b = document.getElementById('tb-soldes'); if (b) b.outerHTML = soldesHtml();
+    });
+  }
+  function soldesHtml(){
+    if (!SOLDES) return '<span id="tb-soldes" class="soldes"></span>';
+    var puce = function(nom, txt, bas, titre){ return '<span class="solde' + (bas ? ' bas' : '') + (txt ? '' : ' muet') + '" title="' + esc(titre) + '"><b>' + nom + '</b> ' + esc(txt || '—') + '</span>'; };
+    var t = SOLDES.twilio || {}, f = SOLDES.fal || {}, p = SOLDES.photoroom || {};
+    var tw = t.erreur ? '' : szArgentSymbole(szArgentNombre(t.solde, 2)) + (t.devise && t.devise !== 'USD' ? ' ' + t.devise : ' US');
+    // le vrai solde (api.fal.ai) quand Fal.ai le donne ; sinon l estimation, précédée de « ≈ »
+    var fa = f.erreur ? '' : (f.estime ? '≈ ' : '') + szArgentSymbole(szArgentNombre(f.restant, 2)) + ' US';
+    var ph = p.erreur || p.disponibles == null ? '' : '${T("{0} crédits")}'.split('{0}').join(p.disponibles);
+    return '<span id="tb-soldes" class="soldes" aria-label="${T("Soldes des services")}">'
+      + puce('Twilio', tw, !t.erreur && t.solde < 5, t.erreur ? '${T("Solde Twilio indisponible :")} ' + t.erreur : '${T("Solde du compte Twilio (appels et textos)")}')
+      + puce('Fal.ai', fa, !f.erreur && f.restant < 3, f.erreur ? '${T("Solde Fal.ai indisponible :")} ' + f.erreur
+          : !f.estime ? '${T("Solde du compte Fal.ai, lu chez Fal.ai")}'
+          : (f.motifReel === 'cle_admin_requise' ? '${T("Fal.ai demande une clé d’administration pour donner son solde. En attendant : ")}' : '')
+            + '${T("Estimation : solde saisi le {0} ({1}) moins la consommation mesurée depuis ({2}).")}'
+              .split('{0}').join(String(f.date || '').slice(0, 10)).split('{1}').join(szArgentSymbole(szArgentNombre(f.saisi, 2))).split('{2}').join(szArgentSymbole(szArgentNombre(f.conso, 2))))
+      + puce('Photoroom', ph, !p.erreur && p.disponibles != null && p.disponibles < 20, p.erreur ? '${T("Solde Photoroom indisponible :")} ' + p.erreur
+          : '${T("Crédits restants du compte Photoroom")}' + (p.plan ? ' (' + p.plan + ')' : ''))
+      + '</span>';
+  }
   function barre(){
     var fs = files(), actifs = fs.filter(function(x){ return x.n > 0; }), zeros = fs.filter(function(x){ return !(x.n > 0); });
     var sv = sauvegardeTexte();
@@ -373,6 +410,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           return '<button type="button" class="faire' + (x.urgent ? ' urgent' : '') + '" data-ouvre="' + x.cible + '"><b>' + x.n + '</b>' + esc(x.n > 1 ? x.plus : x.un) + '</button>';
         }).join('')
       + (sv && sv.urgent ? '<button type="button" class="faire urgent" data-ouvre="sauvegarde">' + esc(sv.texte) + '</button>' : '');
+    h += soldesHtml();
     var nz = zeros.length + (sv && !sv.urgent ? 1 : 0);
     if (nz) {
       h += '<span class="zeros"><button type="button" class="zero-puce" id="tb-zeros" aria-expanded="' + ZEROS + '">'
@@ -384,8 +422,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '</div>';
     // Le Mode exclusif vit dans l en-tete, a cote de la date : la barre garde sa ligne pour les puces.
     var slot = document.getElementById('tb-mx-slot');
-    if (slot) slot.innerHTML = (MX && MX.ok) ? '<button class="mini" id="tb-mx" title="${T("Empecher toute autre connexion pendant une maintenance")}">'
+    var mxH = (MX && MX.ok) ? '<button class="mini" id="tb-mx" title="${T("Empecher toute autre connexion pendant une maintenance")}">'
       + (MX.actif ? '\u{1F512} ${T("Mode exclusif : ACTIF")}' : '\u{1F512} ${T("Mode exclusif")}…') + '</button>' : '';
+    if (slot && slot._src !== mxH) { slot.innerHTML = mxH; slot._src = mxH; }   // (même règle : rien ne se repeint sans changement)
     return h;
   }
 
@@ -543,10 +582,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         : '<div class="vide">${T("Aucune commande ce mois-ci.")}</div>') + '</section>';
 
     h += '</div>';
-    corps.innerHTML = h;
+    poser(corps, h);
     graphe();
     ajusterFil();
     appliquerVerrous();
+  }
+  /* ⚠ ON NE REMPLACE QUE CE QUI A CHANGÉ (2026-10-17, son signalement : « dans le tableau de bord il y a toujours
+     un flash comme un chargement ; on voit tous les rafraîchissements »). Toutes les 12 s, tout le contenu était
+     reconstruit — les vignettes des produits se rechargeaient, la courbe disparaissait le temps d être redessinée.
+     Chaque carte garde le HTML qui l a produite : identique, elle ne bouge pas ; différente, elle seule est remplacée.
+     La grille est comparée carte par carte. Les clics passent par corps.onclick (délégation) : rien à rebrancher. */
+  function poser(conteneur, html){
+    var t = document.createElement('div'); t.innerHTML = html;
+    var neufs = Array.prototype.slice.call(t.children), vieux = Array.prototype.slice.call(conteneur.children);
+    if (neufs.length !== vieux.length || vieux.some(function(v){ return v._src == null; })) {
+      conteneur.innerHTML = ''; neufs.forEach(function(n){ n._src = n.outerHTML; conteneur.appendChild(n); }); return;
+    }
+    neufs.forEach(function(n, i){
+      var src = n.outerHTML, v = vieux[i]; if (v._src === src) return;
+      if (n.className === v.className && (' ' + n.className + ' ').indexOf(' grille ') >= 0) { poser(v, n.innerHTML); v._src = src; return; }
+      n._src = src; conteneur.replaceChild(n, v);
+    });
   }
   function delai(hh){
     var h = Math.floor(hh), m = Math.round((hh - h) * 60);
@@ -842,6 +898,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   window.szPret = charger();
   demarrerVerrous();
   demarrerDirect();
+  chargerSoldes(); SOLDES_TIMER = setInterval(chargerSoldes, 5 * 60 * 1000);
   mxLire();
 })();
 </script>

@@ -27,6 +27,13 @@
  */
 
 const { app, BrowserWindow, BaseWindow, WebContentsView, ipcMain, shell, Menu, Notification, nativeImage, nativeTheme, powerSaveBlocker, session, dialog } = require('electron');
+/* ⚠ PAS DE DÉCOUVERTE SUR LE RÉSEAU LOCAL (2026-10-17, son signalement : au premier lancement sur un poste neuf,
+   Windows demandait l accès au réseau et son message bloquait la vérification de mise à jour). Ce n est pas
+   l application qui écoute — elle n ouvre aucun port — mais Chromium : la découverte d écrans Cast (Media Router)
+   et le répondeur mDNS de WebRTC ouvrent des ports UDP, et c est ce que le pare-feu signale. L application ne
+   diffuse vers aucun écran et ne fait pas d appel vidéo : on les coupe. (L installateur inscrit aussi l application
+   au pare-feu : voir build/installer.nsh.) */
+app.commandLine.appendSwitch('disable-features', 'MediaRouter,DialMediaRouteProvider,CastMediaRouteProvider,WebRtcHideLocalIpsWithMdns');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -3017,7 +3024,7 @@ const OPS_PONT = new Set([
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
-  'tableau:lire', 'tableau:tuiles', 'tableau:ouvrir', 'tableau:verrous',
+  'tableau:lire', 'tableau:soldes', 'tableau:tuiles', 'tableau:ouvrir', 'tableau:verrous',
   // Le détail des commandes neuves, pour les annonces du veilleur (2026-10-12).
   'veilleur:annonces',
   // Le vœu d'ouverture de l'Inventaire (onglet ou filtre), posé par un lien du tableau de bord.
@@ -4500,6 +4507,10 @@ ipcMain.handle('dock:ouvrir', async (e, cle, etat) => {
   const b = boundsAncrage();
   if (b) { try { a.view.setBounds(b); } catch {} }
   try { a.view.setVisible(true); } catch {}
+  /* ⚠ LE CLAVIER VA AU MODULE OUVERT (2026-10-17, son signalement : « dans la vente au comptoir, on doit toujours
+     cliquer dans la zone de recherche pour scanner »). La vue était montrée sans recevoir le clavier : le curseur
+     clignotait dans la zone de scan, mais les frappes du lecteur (un clavier) partaient dans la page du menu. */
+  try { a.view.webContents.focus(); } catch {}
   ancreeVisible = c; vueVoilee = null;
   /* ⚠ « VISIBLE » N'EST PAS « PEINTE » (2026-09-26, filmé chez lui) : après
      `setVisible`, une vue restée cachée met ~250 ms à peindre sa première
@@ -4545,6 +4556,7 @@ ipcMain.on('dock:voiler', (e, visible) => {
       try { a.view.setVisible(true); } catch {}
       const b = boundsAncrage();
       if (b) { try { a.view.setBounds(b); } catch {} }
+      try { a.view.webContents.focus(); } catch {}   // le menu refermé, le clavier revient au module
     }
     return;
   }
@@ -4602,6 +4614,7 @@ ipcMain.handle('dock:ancrer', (e) => {
     a.view.webContents.executeJavaScript('window.szModeAncre && window.szModeAncre(true);', true).catch(() => {});
     ancreeVisible = c; vueVoilee = null;
     mainWindow.show(); mainWindow.focus();
+    try { a.view.webContents.focus(); } catch {}
     try { cadreWC().send('dock:ancree', c); } catch {}
     return true;
   }
@@ -6017,6 +6030,16 @@ const getUpdater = () => {
       // travail sur TOUS les postes à la fois. On propose donc de réessayer, et
       // on laisse passer en le DISANT — c'est un échec de vérification, pas un
       // refus de mettre à jour.
+      /* ⚠ LE PREMIER LANCEMENT SUR UN POSTE NEUF (2026-10-17, son signalement : « à sa première ouverture, Windows
+         fait un message qui bloque la vérification de mise à jour, et au final ça fait une erreur — on doit fermer
+         et rouvrir »). Le réseau n est pas toujours prêt à la seconde où l application s ouvre (pare-feu, profil
+         Windows qui se termine) : UN échec à la porte se RÉESSAIE seul, 4 s plus tard, avant de déranger. */
+      if (_porteActive && !_porteReessaye) {
+        _porteReessaye = true;
+        montrerPorte(TP('Vérification des mises à jour'), TP('Quelques secondes, le temps d’interroger le serveur.'), 35, false, true);
+        setTimeout(() => { verifierAuLancement(); }, 4000);
+        return;
+      }
       if (_porteActive) {
         _montrerDemarrage();
         const { response } = await dialog.showMessageBox(mainWindow, {
@@ -6156,6 +6179,7 @@ const checkForUpdates = async (manual) => {
 // impasse : la version est périmée ET ne peut pas être remplacée. Sur Mac, on
 // avertit et on laisse passer, jusqu'à ce qu'il y ait un certificat Apple.
 const PORTE_DELAI_MS = 20000; // au-delà, on considère la vérification impossible
+let _porteReessaye = false;     // un échec à la porte se réessaie UNE fois, sans rien demander (voir `error`)
 
 const verifierAuLancement = async () => {
   _porteActive = true;

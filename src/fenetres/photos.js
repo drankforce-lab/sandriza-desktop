@@ -1127,7 +1127,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 
   function assistOuvrir(){
     ASSIST = { etape: 1, sources: null, lecteur: '', fichiers: [], choix: {},
-               tri: 'date', nom: '', but: 'detourage' };
+               tri: 'date', nom: '', but: 'aucun' };
     dessiner();
     dire('${T("Lecture des sources…")}');
     appeler('lot:sources', []).then(function(r){
@@ -1251,21 +1251,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + ' placeholder="${T("ex. Collection printemps")}">'
         + '<p class="aide">${T("Les photos importées seront nommées « Nom 01 », « Nom 02 »…")} '
         + '${T("Laissé vide, on garde le nom d’origine.")}</p>'
-        + '<label style="margin-top:.7rem">${T("Que faut-il en faire&nbsp;?")}</label><div class="but">';
-      BUTS.forEach(function(b){
-        h += '<label class="' + (A.but === b[0] ? 'on' : '') + '">'
-          + '<input type="radio" name="a-but" value="' + b[0] + '"' + (A.but === b[0] ? ' checked' : '') + '>'
-          + '<span><strong>' + b[1] + '</strong><span class="d">' + b[2] + '</span></span></label>';
-      });
-      h += '</div>'
-        + '<div class="franc" style="margin-top:.6rem"><b>${T("L’ordre est imposé, et c’est voulu.")}</b> '
-        + '${T("Demander un mannequin humain sur une photo brute donne un modèle qui porte le décor")} '
-        + '${T("autant que le vêtement. Le fond part d’abord, puis le mannequin, et seulement ensuite")} '
-        + '${T("la personne est engendrée.")}<br>'
-        + '${T("<b>Ce qui est déjà fait n’est pas refait</b> : une étape déjà présente est sautée, ")}'
-        + '${T("et la raison est inscrite au suivi et au journal.")}</div>'
+        // (2026-10-17) l import ne retouche plus : les photos sont rangées, les retouches se font dans le studio virtuel
+        + '<div class="franc" style="margin-top:.6rem">${T("Les photos sont importées telles quelles dans la photothèque. Pour retirer le fond ou le mannequin, ou mettre en scène, ouvrez le studio virtuel.")}</div>'
         + '<p class="aide"><b>' + m + '</b> ' + (m > 1 ? '${T("photos")}' : '${T("photo")}')
-        + ' ${T("à traiter.")}</p>';
+        + ' ${T("à importer.")}</p>';
     }
 
     h += '</div><div class="pi">'
@@ -1273,7 +1262,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '<span class="dr">'
       + (ASSIST.etape > 1 ? '<button id="a-prec">${T("← Retour")}</button>' : '')
       + '<button class="prim" id="a-suiv">'
-      + (ASSIST.etape === 3 ? '${T("Lancer le traitement")}' : '${T("Continuer →")}') + '</button>'
+      + (ASSIST.etape === 3 ? '${T("Importer")}' : '${T("Continuer →")}') + '</button>'
       + '</span></div></div></div>';
     return h;
   }
@@ -1390,8 +1379,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var fichiers = assistTriees().filter(function(f){ return A.choix[f.cle]; });
     var nomLot = A.nom.trim();
     var but = A.but;
-    var libelle = { detourage: '${T("Retrait du fond")}', fantome: '${T("Retrait du mannequin")}',
-                    humain: '${T("Mannequin humain")}' }[but] || 'Traitement';
+    var libelle = but === 'aucun' ? '${T("Import")}' : ({ detourage: '${T("Retrait du fond")}', fantome: '${T("Retrait du mannequin")}',
+                    humain: '${T("Mannequin humain")}' }[but] || 'Traitement');
     var titres = fichiers.map(function(f, i){
       return nomLot ? (nomLot + ' ' + (i + 1 < 10 ? '0' : '') + (i + 1)) : f.nom;
     });
@@ -1437,6 +1426,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       suiviLigne(k, 'cours', '${T("en cours")}');
 
       var apresImport = function(id){
+        // un import simple : rangée, rien d autre (les retouches se font dans le studio virtuel)
+        if (but === 'aucun') { faites++; suiviEtapes(k, [{ nom: 'import', ok: true }]); suiviLigne(k, 'faite', '${T("importée")}'); suite(k + 1); return; }
         suiviEtapes(k, [{ nom: 'import', ok: true },
                         { nom: libelle.toLowerCase(), etat: 'encours' }]);
         occuper(libelle + ' ' + (k + 1) + ' / ' + fichiers.length + '…');
@@ -1749,11 +1740,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (!n || !D.peutModifier) return '';
     return '<div class="lot"><span class="cnt">' + n + ' '
       + (n > 1 ? '${T("photos choisies")}' : '${T("photo choisie")}') + '</span>'
-      + TRAITEMENTS_LOT.map(function(l){
-          return '<button class="mini" data-lot="' + l[0] + '" title="' + esc(l[2]) + '">' + l[1] + '</button>';
-        }).join('')
-      + '<button class="mini" data-lot="pivot" title="${T("Pivoter d’un quart de tour vers la droite")}">${T("⟳ Pivoter")}</button>'
-      + '<button class="mini" data-apercu="fantome" title="${T("Voir le retrait du mannequin, filigrané et gratuit, avant de payer")}"><span class="ic">👁</span> ${T("Aperçu du retrait")}</button>'
+      // (2026-10-17) les traitements en lot sont passés au studio virtuel : il n en reste que le passage
+      + '<button class="mini" data-g-studio="1" title="${T("Les retouches (fond, mannequin, mise en scène) se font dans le studio virtuel")}">' + (n > 1 ? '${T("Envoyer ces photos au studio virtuel")}' : '${T("Envoyer au studio virtuel")}') + '</button>'
       + '<button class="mini dgr" id="p-lot-sup">'
       + '${T("Supprimer")}' + '</button>'
       + '<button class="mini" id="p-rien">${T("Tout décocher")}</button>'
@@ -2167,7 +2155,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
           + (r.lieSku ? ' · ' + esc(r.lieSku) : '') + '</div></div>' : '')
       + '</div>';
 
-    if (!ro && r.isole && (D.fonds || []).length) {
+    if (false && !ro && r.isole && (D.fonds || []).length) {   // (2026-10-17) le fond se choisit dans le studio virtuel
       h += '<div class="l" style="font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)">${T("Fond")}</div>'
         + '<div class="jetons">'
         + '<button data-fond="__transp" class="' + (!r.fond || r.fond === '__transp' ? 'on' : '') + '">Transparent</button>'
@@ -2190,7 +2178,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + (ro ? '' : '<button class="danger" id="p-suppr">'
           + '${T("✕ Retirer de la médiathèque")}' + '</button>')
       + (D.bureau ? '<button id="p-enreg">${T("⤓ Enregistrer le fichier")}</button>' : '')
-      + (ro || r.isole ? '' : '<button class="prim" id="p-isoler"><span class="ic">✂</span> ${T("Isoler le vêtement")}</button>')
+      + (ro ? '' : '<button id="p-vers-studio">${T("Envoyer au studio virtuel")}</button>')
       + (ro ? '' : '<button class="' + (r.isole ? 'prim' : '') + '" id="p-attacher">'
           + (ATTACHE ? '${T("Annuler l’attache")}' : '${T("Attacher à un article")}') + '</button>')
       + '<button id="p-fermer">${T("Fermer")}</button>'
@@ -2917,6 +2905,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (me) me.onclick = function(ev){ stop(ev); mesurerEspace(); };
     var iso = document.getElementById('p-isoler');
     if (iso) iso.onclick = isoler;
+    var vst = document.getElementById('p-vers-studio');
+    if (vst) vst.onclick = function(){ ouvrirStudio(DETAIL ? [DETAIL.id] : []); };
+    Array.prototype.forEach.call(corps.querySelectorAll('[data-g-studio]'), function(b){ b.onclick = function(){ ouvrirStudio(Object.keys(CHOIX)); }; });
 
     var at = document.getElementById('p-attacher');
     if (at) at.onclick = function(){
@@ -3014,6 +3005,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     });
   }
 
+  /* LES PHOTOS PARTENT AU STUDIO (2026-10-17, sa demande : « quand on choisit cette option avec une ou plusieurs
+     photos, elles doivent être automatiquement sélectionnées dans le studio virtuel, et nous amener à l étape 2 »).
+     Le même chemin que l explorateur : le PANIER (panier:poser), que le Studio relit tout seul ; puis on l ouvre. */
+  function ouvrirStudio(ids){
+    fermerMenuPhoto();
+    ids = (ids || []).filter(Boolean);
+    var ouvrir = function(){
+      appeler('studio:ouvrir', []).then(function(r){
+        if (!r || !r.ok) dire(r && r.motif === 'version_coquille' ? '${T("Cette version ne sait pas encore ouvrir le Studio.")}' : '${T("Ouverture du Studio impossible.")}', 'err');
+      });
+    };
+    if (!ids.length) { ouvrir(); return; }
+    appeler('panier:poser', [ids]).then(function(r){
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+      dire(ids.length + ' ' + (ids.length > 1 ? '${T("photos envoyées")}' : '${T("photo envoyée")}') + '${T(" au studio virtuel : choisissez « Vêtement sans mannequin » ou « Mannequin virtuel ».")}', 'bon');
+      ouvrir();
+    });
+  }
   function fermerMenuPhoto(){ var m = document.getElementById('p-ctx'); if (m && m.parentNode) m.parentNode.removeChild(m); }
   function menuPhoto(ev, id){
     fermerMenuPhoto();
@@ -3022,12 +3031,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var arme = (SUPPR_ARME === id);
     var h = '<div class="tt">' + esc(l.nom || l.code || '') + '</div>';
     if (!ro) {
+      /* ⚠ PLUS DE RETOUCHE ICI (2026-10-17, sa demande : « retire les options de modification dans Photo : les
+         opérations des photos doivent se faire uniquement dans le studio virtuel »). La photothèque range, nomme,
+         attache et supprime ; le Studio retouche. */
       h += '<button data-g="ren">${T("Renommer")}</button>'
         + '<div class="trait"></div>'
-        + '<button data-g="detourage">${T("Détourer le vêtement")}</button>'
-        + '<button data-g="fantome">${T("Retirer le mannequin")}</button>'
-        + '<button data-g="humain">${T("Mettre sur un mannequin")}</button>'
-        + '<button data-g="piv">${T("Pivoter d’un quart de tour")}</button>'
+        + '<button data-g="studio">${T("Envoyer au studio virtuel")}</button>'
         + '<div class="trait"></div>';
     }
     h += '<button data-g="ouvre">${T("Voir l’aperçu")}</button>';
@@ -3046,8 +3055,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         var g = b.getAttribute('data-g');
         fermerMenuPhoto();
         if (g === 'ren') gesteRenommer(id);
-        else if (g === 'detourage' || g === 'fantome' || g === 'humain') gesteTraiter(id, g);
-        else if (g === 'piv') gestePivoter(id);
+        else if (g === 'studio') ouvrirStudio([id]);
         else if (g === 'ouvre') gesteOuvrir(id);
         else if (g === 'sup') gesteSupprimer(id);
       };

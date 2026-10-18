@@ -2643,13 +2643,15 @@ function pageProduit(id) {
       // refait une macro du même tissu ; l agrandissement fidèle et le simple recadrage restent au choix
       + '<div class="gp-modes" role="radiogroup" aria-label="${T("Qualité du gros plan")}">'
       + '<label class="gp-ia"><input type="radio" name="gp-mode" value="pro" checked> ${T("Rendu professionnel par l’IA : une macro du même tissu, mailles et fibres visibles (reconstituée par FLUX) · environ 0,04 $ US")}</label>'
-      + '<label class="gp-ia"><input type="radio" name="gp-mode" value="fidele"> ${T("Agrandir avec l’IA (Real-ESRGAN : fidèle à la matière, n’invente pas de tissage) · environ 0,01 $ US")}</label>'
+      + '<label class="gp-ia"><input type="radio" name="gp-mode" value="fidele"> ${T("Agrandir avec l’IA (Real-ESRGAN : fidèle à la matière, n’invente pas de tissage) · environ 0,005 $ US")}</label>'
       + '<label class="gp-ia"><input type="radio" name="gp-mode" value="non"> ${T("Recadrer seulement, sans IA")}</label></div>'
       + '<div class="pied2"><button type="button" id="gp-non">${T("Annuler")}</button>'
       + '<button type="button" id="gp-lancer" disabled>${T("Fabriquer le gros plan")}</button>'
       + '<button type="button" class="prim" id="gp-oui" disabled>${T("✓ Ajouter aux photos")}</button></div></div>';
     document.body.appendChild(v);
     var ZONE = null, SRC = null, RESULTAT = '', OCC = false;
+    // les montants AFFICHÉS ci-dessus, envoyés avec la demande : le relais les vérifie avant tout appel (contrôle des coûts)
+    var PRIX_GP = { pro: 0.04, fidele: 0.005 };
     function el(id){ return document.getElementById(id); }
     function peindreZone(){
       var c = el('gp-cadre'), r = el('gp-res'); if (!c || !ZONE || !SRC) return;
@@ -2687,8 +2689,14 @@ function pageProduit(id) {
       OCC = true; el('gp-lancer').disabled = true;
       var mc = v.querySelector('input[name="gp-mode"]:checked'), mode = mc ? mc.value : 'pro', ia = mode === 'pro' ? 'pro' : mode === 'fidele';
       el('gp-res').innerHTML = mode === 'pro' ? '${T("Rendu professionnel par l’IA… (environ 20 s)")}' : ia ? '${T("Agrandissement par l’IA…")}' : '${T("Recadrage…")}';
-      P.appeler('produit:grosPlan', IMAGE, ZONE, ia, cleCouts()).then(function(r){
+      P.appeler('produit:grosPlan', IMAGE, ZONE, ia, cleCouts(), ia ? PRIX_GP[mode] : null).then(function(r){
         OCC = false; el('gp-lancer').disabled = false;
+        if (r && r.motif === 'prix_change' && r.prixReel != null) {
+          var avant = PRIX_GP[mode]; PRIX_GP[mode] = Number(r.prixReel);
+          var fmt = function(n){ return szArgentSymbole(szArgentNombre(Number(n), n < 0.01 ? 3 : 2)); };
+          el('gp-res').innerHTML = '<div style="padding:1rem;color:var(--tx-att)">' + esc('${T("Le prix a changé : {0} au lieu de {1}. Rien n’a été lancé — cliquez de nouveau sur « Fabriquer le gros plan » pour le lancer à ce prix.")}'.split('{0}').join(fmt(r.prixReel)).split('{1}').join(fmt(avant))) + '</div>';
+          return;
+        }
         if (!r || !r.ok) { el('gp-res').innerHTML = '<div style="padding:1rem;color:var(--tx-err)">' + esc((r && r.detail) || expliquer(r)) + '</div>'; return; }
         RESULTAT = r.image || '';
         el('gp-res').innerHTML = '<img src="' + esc(RESULTAT) + '" alt="">';

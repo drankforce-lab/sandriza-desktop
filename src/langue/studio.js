@@ -65,8 +65,8 @@ module.exports = {
      fiche en tete de ce fichier. */
   'Mannequin virtuel': 'Virtual model',
   'Porté par un modèle, décor intégré': 'Worn by a model, scene included',
-  'Fantôme habillé': 'Ghost mannequin',
-  'Sans mannequin, décor pro ajouté': 'No model, pro scene added',
+  'Vêtement sans mannequin': 'Garment without mannequin',
+  'Mannequin retiré, vêtement fidèle sur fond uni': 'Mannequin removed, true-to-life garment on a plain background',
   'Produit à plat': 'Flat lay',
   'Détourage + décor + ombre': 'Cut-out + scene + shadow',
 
@@ -454,7 +454,6 @@ module.exports = {
   'Appliquer la mise en scène de l’écran —': 'Apply the staging from the screen —',
   'Décochez pour un traitement brut,': 'Untick for a raw job,',
   'sans ambiance ni pose imposée.': 'with no preset or imposed pose.',
-  'Mannequin retiré': 'Model removed',
   'Porté par un mannequin': 'Worn by a model',
   'Traitement à appliquer': 'Job to apply',
   'Nom du lot (pour le retrouver dans le suivi)': 'Batch name (to find it again in the tracker)',
@@ -583,8 +582,8 @@ module.exports = {
     'Optional, and <strong>billed one more call</strong>.',
   /* ⚠⚠ CES DEUX-LA DISENT POURQUOI UN RENDU COUTE DEUX APPELS AU LIEU D UN.
      Les couper en morceaux ferait perdre la raison en gardant le chiffre. */
-  'le <strong>fantôme habillé</strong> demande deux gestes : retirer le mannequin, puis poser le décor':
-    'the <strong>ghost mannequin</strong> takes two steps: remove the model, then set the scene',
+  'le <strong>vêtement sans mannequin</strong> avec décor, ombre ou lumière IA demande deux gestes : retirer le mannequin, puis poser le décor':
+    'the <strong>garment without mannequin</strong> with an AI scene, shadow or light needs two steps: remove the mannequin, then add the scene',
   'l’<strong>agrandissement ×4</strong> est un appel de plus, après le traitement':
     'the <strong>×4 upscale</strong> is one more call, after the job',
   'Ce qu’il consomme, ce sont vos <strong>aperçus du mois</strong> — ':
@@ -798,4 +797,9 @@ module.exports = {
   // 2026-10-15 : confirmations en boîte à part.
   "Le rendu en pleine qualité est un traitement payant : il consomme des crédits du service de génération d’images. Utilisez l’aperçu filigrané, gratuit, pour valider le résultat au préalable.": "Full-quality rendering is a paid process: it uses credits from the image generation service. Use the free watermarked preview to check the result first.",
   "Lancer le rendu payant": "Start the paid render",
+  '1 appel facturé ≈ {0} — vérifié avant l’envoi.': '1 billed call ≈ {0} — checked before sending.',
+  'Le prix a changé': 'The price changed',
+  'Affiché : {0} — prix réel : {1} ({2} appel(s)). Rien n’a été lancé ni facturé.': 'Shown: {0} — actual price: {1} ({2} call(s)). Nothing was started or billed.',
+  'Le prix a changé : à confirmer.': 'The price changed: please confirm.',
+  'Annulé : rien n’a été facturé.': 'Cancelled: nothing was billed.',
 };

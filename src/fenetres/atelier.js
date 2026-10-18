@@ -104,6 +104,8 @@ button.mini{padding:.12rem .5rem;font-size:.76rem}
 .at-puce.base{border-color:var(--or);color:var(--tx)}
 .at-tailles{display:flex;flex-wrap:wrap;gap:.35rem}
 .at-gestes{margin-top:auto;display:flex;gap:.5rem;flex-wrap:wrap}
+.at-gestes.at-tete{margin-top:.65rem;gap:.35rem}
+.at-gestes.at-tete button{padding:.3rem .65rem;font-size:.8rem}
 .at-gestes button{flex:1 1 auto}
 
 /* ── Le modèle (moteur) ── */
@@ -669,6 +671,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     } else {
       p += '<h2>' + esc(m.nom) + ' <span class="at-puce ' + esc(m.etat) + '">' + esc(LETAT[m.etat] || m.etat) + '</span></h2>'
         + '<div class="cx-sub">' + esc((m.ref ? m.ref + ' · ' : '') + (LBASE[m.base] || '') + ' · ' + '${T("créé le {0}")}'.split('{0}').join(jour(m.createdAt)) + ' · ' + '${T("modifié le {0}")}'.split('{0}').join(jour(m.updatedAt))) + '</div>'
+        // ⚠ LES GESTES EN TÊTE (2026-10-17, son signalement : sur un petit écran, le volet était coupé avant ses
+        // boutons — « Dossier de protection » et tous les autres disparaissaient). Ce qu on fait d un modèle passe
+        // avant ce qu on en lit ; le dossier de protection rejoint les gestes.
+        + '<div class="at-gestes at-tete">'
+        + '<button type="button" class="prim" data-ouvrir="' + esc(m.id) + '">${T("Ouvrir le modèle")}</button>'
+        + '<button type="button" data-editer="' + esc(m.id) + '">${T("Éditer le patron")}</button>'
+        + '<button type="button" data-v3="' + esc(m.id) + '">${T("Aperçu 3D")}</button>'
+        + '<button type="button" data-planche="' + esc(m.id) + '">${T("Planche de dessin")}</button>'
+        + '<button type="button" data-motif="' + esc(m.id) + '">${T("Motif et impression textile")}</button>'
+        + '<button type="button" data-imprimer="' + esc(m.id) + '">${T("Imprimer / exporter")}</button>'
+        + '<button type="button" data-protection="' + esc(m.id) + '">${T("Dossier de protection (PDF)")}</button>'
+        + (D.peutAjouter ? '<button type="button" data-dupl="' + esc(m.id) + '">${T("Dupliquer")}</button>' : '')
+        + (D.peutSupprimer ? '<button type="button" class="danger" data-suppr="' + esc(m.id) + '">${T("Supprimer")}</button>' : '')
+        + '</div>'
+        + (m.edite ? '<div class="ed-note">${T("Patron retouché dans l’éditeur : « retracer » depuis le modèle effacerait ces retouches.")}</div>' : '')
         + '<div class="cx-sep"></div><h2>${T("Pièces du patron")}</h2>'
         + (m.pieces || []).map(function(pc){
             return '<div class="cx-etat"><span>' + esc(nomPiece(pc)) + ' · ×' + (pc.qte || 1) + (pc.aupli ? ' ${T("au pli")}' : '') + '</span><span class="cx-gris">' + (pc.pinces && pc.pinces.length ? '${T("pince")}' : '') + '</span></div>';
@@ -678,7 +695,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '</div>'
         + '<div class="cx-etat"><span>${T("Tissu estimé (laize 140 cm)")}</span><span>' + (m.tissu ? String(m.tissu.metres).replace('.', '${SEP_DEC()}') + ' m' : '—') + '</span></div>'
         + '<div class="cx-sep"></div><h2>${T("Versions")}</h2>'
-        + (m.versions || []).slice(-4).reverse().map(function(v){
+        + (m.versions || []).slice(-3).reverse().map(function(v){
             return '<div class="cx-etat"><span>v' + v.n + ' — ' + esc(v.note || '') + '</span><span class="cx-gris">' + esc(jour(v.date)) + '</span></div>';
           }).join('')
         + '<div class="cx-sep"></div><h2>${T("Protection")}</h2>'
@@ -689,18 +706,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           : '<button type="button" data-nip="poser:' + esc(m.id) + '">${T("Protéger par NIP")}</button>') : '')
         // le retrait SANS le NIP (oublié) : visible du seul super-administrateur ; le site le revérifie
         + (m.verrouille && D.superadmin ? '<button type="button" class="danger" data-nip="forcer:' + esc(m.id) + '">${T("Retirer le NIP (super-administrateur)")}</button>' : '')
-        + '<button type="button" data-protection="' + esc(m.id) + '">${T("Dossier de protection (PDF)")}</button></div>'
+        + '</div>'
         + '<div class="ed-note">${T("Le dossier prépare l’enregistrement d’un dessin industriel (l’apparence d’un vêtement ne se brevète pas) : vues, description, historique daté, empreinte numérique et questions pour votre juriste. Ce n’est pas un avis juridique.")}</div>'
-        + '<div class="at-gestes">'
-        + (D.peutSupprimer ? '<button type="button" class="danger" data-suppr="' + esc(m.id) + '">${T("Supprimer")}</button>' : '')
-        + (D.peutAjouter ? '<button type="button" data-dupl="' + esc(m.id) + '">${T("Dupliquer")}</button>' : '')
-        + '<button type="button" data-editer="' + esc(m.id) + '">${T("Éditer le patron")}</button>'
-        + '<button type="button" data-imprimer="' + esc(m.id) + '">${T("Imprimer / exporter")}</button>'
-        + '<button type="button" data-planche="' + esc(m.id) + '">${T("Planche de dessin")}</button>'
-        + '<button type="button" data-v3="' + esc(m.id) + '">${T("Aperçu 3D")}</button>'
-        + '<button type="button" data-motif="' + esc(m.id) + '">${T("Motif et impression textile")}</button>'
-        + '<button type="button" class="prim" data-ouvrir="' + esc(m.id) + '">${T("Ouvrir le modèle")}</button></div>'
-        + (m.edite ? '<div class="ed-note">${T("Patron retouché dans l’éditeur : « retracer » depuis le modèle effacerait ces retouches.")}</div>' : '');
+;
     }
     p += '</div>';
     corps.innerHTML = h + '<div class="cx-deux">' + t + p + '</div>';
@@ -2420,7 +2428,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      vers la fiche produit. */
   function ouvrirRenduIa(){
     if (!V3 || !plaque3d() || OCCUPE) return;
-    var st = { vue: 'face', fantome: true, source: '', image: '' };
+    // st.prix : le montant AFFICHÉ sur le bouton, envoyé avec la demande ; le relais le vérifie avant tout appel
+    var st = { vue: 'face', fantome: true, source: '', image: '', prix: 0.04 };
+    var prixTxt = function(){ return szArgentSymbole(szArgentNombre(st.prix, st.prix < 0.01 ? 3 : 2)); };
     var v = document.createElement('div'); v.className = 'szc-voile';
     document.body.appendChild(v);
     var fermer = function(){ if (v.parentNode) v.parentNode.removeChild(v); };
@@ -2437,7 +2447,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + (st.image ? '<button type="button" id="v3r-fichier">${T("Enregistrer le fichier")}</button>'
             + (D.peutModifier ? '<button type="button" id="v3r-vign">${T("Utiliser comme vignette")}</button>' : '')
             + (D.peutModifier && prods.length ? '<button type="button" class="szc-oui" id="v3r-fiche">${T("Vers la fiche produit")}</button>' : '')
-          : '<button type="button" class="szc-oui" id="v3r-go"' + (st.source ? '' : ' disabled') + '>${T("Générer (≈ 0,04 $)")}</button>')
+          : '<button type="button" class="szc-oui" id="v3r-go"' + (st.source ? '' : ' disabled') + '>' + '${T("Générer (≈ {0})")}'.split('{0}').join(prixTxt()) + '</button>')
         + '</div></div>';
       v.querySelector('.szc-non').onclick = fermer;
       Array.prototype.forEach.call(v.querySelectorAll('[data-v3rv]'), function(c){ c.onchange = function(){ st.vue = c.getAttribute('data-v3rv'); peindre(); }; });
@@ -2459,9 +2469,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (OCCUPE || !st.source) return;
       OCCUPE = true; var b = v.querySelector('#v3r-go'); if (b) { b.disabled = true; b.textContent = '${T("Génération… (environ 20 s)")}'; }
       dire('${T("Rendu réaliste en cours…")}');
-      appeler('atelier:rendrePhoto', [{ id: V3.id, image: st.source, vue: st.vue }]).then(function(r){
+      appeler('atelier:rendrePhoto', [{ id: V3.id, image: st.source, vue: st.vue, prixAnnonce: st.prix }]).then(function(r){
         OCCUPE = false;
-        if (!r || !r.ok || !r.image) { if (b) { b.disabled = false; b.textContent = '${T("Générer (≈ 0,04 $)")}'; } dire(r && r.detail ? '${T("Fal.ai : {0}")}'.split('{0}').join(r.detail) : expliquer(r), 'err'); return; }
+        // LE PRIX A CHANGÉ depuis l affichage : rien n est parti ; le bouton prend le vrai montant, la personne relance si elle veut
+        if (r && r.motif === 'prix_change' && r.prixReel != null) {
+          var avant = prixTxt(); st.prix = Number(r.prixReel);
+          if (b) { b.disabled = false; b.textContent = '${T("Générer (≈ {0})")}'.split('{0}').join(prixTxt()); }
+          dire('${T("Le prix a changé : {0} au lieu de {1}. Rien n’a été lancé — cliquez de nouveau pour générer à ce prix.")}'.split('{0}').join(prixTxt()).split('{1}').join(avant), 'att');
+          return;
+        }
+        if (!r || !r.ok || !r.image) { if (b) { b.disabled = false; b.textContent = '${T("Générer (≈ {0})")}'.split('{0}').join(prixTxt()); } dire(r && r.detail ? '${T("Fal.ai : {0}")}'.split('{0}').join(r.detail) : expliquer(r), 'err'); return; }
         st.image = r.image; peindre(); dire('${T("Rendu réaliste prêt.")}', 'bon');
       });
     };
@@ -3545,9 +3562,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     return -1;
   }
-  function coudre(paires, maA, bA, sxA, maB, bB, sxB){
+  function coudre(paires, maA, bA, sxA, maB, bB, sxB, pas){
     if (!maA || !maB) return;
-    var n = Math.max(6, Math.round(Math.max(bA.tot, bB.tot) / 0.4));
+    var n = Math.max(6, Math.round(Math.max(bA.tot, bB.tot) / (pas || 0.4)));
     for (var k = 0; k <= n; k++) {
       var t = k / n, pa = auT(bA, t), pb = auT(bB, t);
       var ga = gidPres(maA, pa[0] * sxA, pa[1]), gb = gidPres(maB, pb[0] * sxB, pb[1]);
@@ -3575,7 +3592,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       // le devant côté S est son x de signe S ; le dos côté S, son x de signe −S (le dos est tourné)
       if (fam === 'jupe') { coudre(paires, dv, bordPts(cf, 1, 3, 1), S, ds, bordPts(cb, 1, 3, 1), -S); return; }
       if (nf < 6 || nb < 6) return;
-      coudre(paires, dv, bordPts(cf, 1, 2, 1), S, ds, bordPts(cb, 1, 2, 1), -S);                       // épaule
+      // l épaule, cousue SERRÉ (un point tous les 1,5 mm) : le devant et le dos s écartaient entre deux points
+      coudre(paires, dv, bordPts(cf, 1, 2, 1), S, ds, bordPts(cb, 1, 2, 1), -S, 0.15);                 // épaule
       coudre(paires, dv, bordPts(cf, 3, nf - 2, 1), S, ds, bordPts(cb, 3, nb - 2, 1), -S);             // côté
       var mc = manches.filter(function(m){ var sx = 0, n = 0; for (var k = 0; k < m.pos.length; k += 30) { sx += m.pos[k]; n++; } return (sx / Math.max(1, n)) * S > 0; })[0];
       if (mc && mc.pc.p.contour.length >= 5) {
@@ -3632,6 +3650,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         GLV.soudures = draper(GLV.mailles, r.corps, function(ma, i){
           if (ma.pid !== 'devant' && ma.pid !== 'dos') return false;
           return famD === 'haut' ? ma.yp[i] <= 1.2 : i <= 2;                   // tenu à l encolure (les épaules se posent sur le corps), ou à la ceinture
+          // (⚠ tenir aussi la crête d épaule a été essayé le 2026-10-17 : le mannequin la traversait — voir coudre, pas serré)
         }, 60, famD === 'bas');                                            // un pantalon reprend ses longueurs du patron (la hanche rejoint la jambe)
       } catch (e) { GLV.soudures = -1; }
       try { ombreContact(GLV.mailles, corpsDrape(r.corps)); } catch (e) {}

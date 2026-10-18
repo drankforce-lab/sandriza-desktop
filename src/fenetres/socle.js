@@ -4240,6 +4240,14 @@ body{line-height:1.55}
   .tuile{padding-top:.55rem!important;padding-bottom:.55rem!important}
   .tuiles{gap:.5rem!important}
 }
+/* ⚠ LES PETITS ÉCRANS (2026-10-17, son signalement : « sur un plus petit écran, tu n en tiens pas compte : dans
+   l Atelier de création, on perd le bouton Dossier de protection ; l application doit se redimensionner »). Presque
+   toutes les mesures sont en rem : baisser la taille de BASE met toute l interface à l échelle, par paliers, selon
+   la place réelle — sans toucher aux coordonnées des dessins (une « zoom » CSS les aurait décalées). Le plein écran
+   choisi (sz-zoom) garde sa propre taille. */
+@media (max-height:760px), (max-width:1180px){ html:not(.sz-zoom):not(.sz-zoom-fen){font-size:92%} }
+@media (max-height:660px), (max-width:1020px){ html:not(.sz-zoom):not(.sz-zoom-fen){font-size:84%} }
+@media (max-height:560px){ html:not(.sz-zoom):not(.sz-zoom-fen){font-size:76%} }
 @media (max-width:1240px){
   .rf-tb{flex-wrap:wrap;row-gap:.4rem}
   .pas{flex-wrap:wrap;row-gap:.3rem;overflow-x:visible}

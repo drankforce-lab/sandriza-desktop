@@ -1240,6 +1240,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
   }
 
+  /* ⚠ TOUJOURS PRÊT À SCANNER (2026-10-17, sa demande : « par défaut être déjà prêt pour scanner des produits »).
+     Le lecteur de codes-barres EST un clavier : une frappe qui n arrive dans AUCUN champ (après un clic sur la
+     liste, un bouton, le fond) est renvoyée dans la zone de scan, et la fenêtre qui reprend le clavier y remet le
+     curseur. Un champ de saisie (client, prix, remise) garde ses frappes. */
+  function champActif(){ var a = document.activeElement; return !!(a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.tagName === 'SELECT' || a.isContentEditable)); }
+  function voileOuvert(){ return !!document.querySelector('.voile, .szc-voile, [role="dialog"]'); }
+  window.addEventListener('focus', function(){ if (!champActif() && !voileOuvert()) { var s = document.getElementById('scan'); if (s) s.focus(); } });
+  document.addEventListener('keydown', function(ev){
+    if (champActif() || voileOuvert() || ev.ctrlKey || ev.altKey || ev.metaKey) return;
+    if (ev.key && ev.key.length === 1) { var s = document.getElementById('scan'); if (s) { s.focus(); } }
+  }, true);
+
   // ── Ecouteurs ──────────────────────────────────────────────────────────────
   document.getElementById('scan').oninput = function(){ chercher(this.value, false); };
   document.getElementById('scan').onkeydown = function(ev){

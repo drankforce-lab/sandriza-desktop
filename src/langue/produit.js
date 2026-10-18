@@ -687,4 +687,6 @@ module.exports = {
   'Recadrer seulement, sans IA': 'Crop only, no AI',
   'Rendu professionnel par l’IA… (environ 20 s)': 'Professional AI render… (about 20 s)',
   'Macro professionnelle reconstituée par l’IA (1200 × 1200 px)': 'Professional macro reconstructed by AI (1200 × 1200 px)',
+  'Agrandir avec l’IA (Real-ESRGAN : fidèle à la matière, n’invente pas de tissage) · environ 0,005 $ US': 'Enlarge with AI (Real-ESRGAN: true to the fabric, does not invent a weave) · about US$0.005',
+  'Le prix a changé : {0} au lieu de {1}. Rien n’a été lancé — cliquez de nouveau sur « Fabriquer le gros plan » pour le lancer à ce prix.': 'The price changed: {0} instead of {1}. Nothing was started — click « Make the close-up » again to run it at this price.',
 };
