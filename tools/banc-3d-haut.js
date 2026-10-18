@@ -35,7 +35,7 @@
      node tools/banc-3d-haut.js --cas ts-xs     # un seul cas
      node tools/banc-3d-haut.js --sortie <dossier>   # garde les images (sinon : %TEMP%)
 
-   Chrome est lancé UNE fois par cas (4 lancements, séquentiels).
+   Chrome est lancé UNE fois par cas (5 lancements, séquentiels).
 
      ballon    le bombé de la tête de manche AU-DELÀ de celui du mannequin dessous ;
      épaulette la tête qui REMONTE au-dessus de la ligne d épaule prolongée (ses 3
@@ -44,12 +44,23 @@
    --tubes donne les anneaux du mannequin (bras, tronc, capsule des épaules) ; --detail
    donne aussi, par pièce, où sont les sommets dans le corps et contre quel tube.
 
-   ⚠ PAS DANS bancs.js (2026-10-18) : la liste de bancs.js est LUE dans build.yml, dont
-   les travaux de bancs tournent sur ubuntu-latest — ce banc-ci cherche chrome.exe et
-   nettoie ses processus par PowerShell (Windows seulement), et prend ~27 s pour les
-   4 cas. Et ses seuils sont À ZÉRO, c est la cible : il échoue tant qu il reste un
-   éclat — l y mettre ferait rougir chaque construction. À lancer à la main, sur le
-   poste, après tout changement du moteur 3D (src/fenetres/atelier.js).
+   asym      le devant gauche contre le droit (un sommet et son miroir), rangs 8 à 25 cm :
+             une torsion (seuil 0,5 cm ; les plis de vie, voulus asymétriques, font 0,3).
+   arc       l écart de hauteur d un rang du devant (12, 16, 20 cm) sur |x| <= 10 : un
+             motif imprimé ne doit pas s arquer (seuil 0,5 cm).
+   Cas cs-xs : SON modèle — un chemisier XS à motif imprimé (texte + logo), avec la vue
+   « facedessus » (au-dessus des épaules, l encolure visible) : ses deux captures.
+
+   VERDICT : sans option, sur les PLAFONDS de non-régression (ce que le moteur atteint,
+   cas par cas — voir PLAFONDS) ; --strict : sur la cible, zéro. Le reste avant zéro est
+   toujours affiché.
+
+   Linux : Chrome cherché aussi dans /usr/bin (google-chrome, chromium) ou SZ_CHROME ; le
+   site (son cœur 3D) dans ../Sandriza ou SZ_SITE.
+   ⚠ PAS ENCORE DANS bancs.js (2026-10-18) : sa liste est LUE dans build.yml, et la
+   construction n extrait que ce dépôt — il lui faudrait AUSSI le site (un second
+   checkout, SZ_SITE). Et ~50 s pour les 5 cas. À lancer à la main, sur le poste, après
+   tout changement du moteur 3D (src/fenetres/atelier.js).
    ============================================================================ */
 'use strict';
 const fs = require('fs');
@@ -58,7 +69,8 @@ const os = require('os');
 const { spawnSync } = require('child_process');
 
 const RACINE = path.resolve(__dirname, '..');
-const SITE = path.resolve(RACINE, '..', 'Sandriza');
+// le site (son cœur 3D, assets/js/atelier.js) : le dépôt voisin, ou SZ_SITE (une construction qui l extrait ailleurs)
+const SITE = path.resolve(process.env.SZ_SITE || path.join(RACINE, '..', 'Sandriza'));
 process.chdir(RACINE);
 const { pageAtelier } = require('../src/fenetres/atelier.js');
 const REP = require('./reponses-fenetres.js');
@@ -70,26 +82,45 @@ const SEUL = arg('--cas');
 
 // ⚠ des SEUILS À ZÉRO : un défaut qui se voit n a pas de quota. L embu d une tête de manche (tissu un peu tassé ou tendu, sans
 // cassure) n est pas un défaut : seuls l étirement au-delà de 2 fois et le tassement sous 0,4 fois — une écharde — comptent.
-const SEUILS = { etires: 0, plis: 0, dedans: 0, fentes: 0, couture: 0.15, ballon: 0.5, epaulette: 0.3 };
+const SEUILS = { etires: 0, plis: 0, dedans: 0, fentes: 0, couture: 0.15, ballon: 0.5, epaulette: 0.3, arc: 0.5, asym: 0.5 };
+/* LES PLAFONDS DE NON-RÉGRESSION (2026-10-18) : ce que le moteur ATTEINT aujourd hui, cas par cas. Sans option, le verdict (et le
+   code de sortie) se juge sur eux — un banc de non-régression qu on peut lancer à chaque changement ; ce qui reste au-dessus de
+   ZÉRO est toujours affiché (« reste »). --strict juge sur la cible, zéro. ⚠ Un plafond se BAISSE quand le moteur progresse,
+   il ne se monte jamais pour faire passer un changement. Le reste des seuils (dedans, couture, ballon, épaulette) vaut pour tous. */
+const PLAFONDS = {
+  'ts-xs': { etires: 113, plis: 58, fentes: 0 },
+  'ts-l': { etires: 256, plis: 106, fentes: 2 },
+  'sw-xs': { etires: 241, plis: 21, fentes: 1 },
+  'ch-m': { etires: 423, plis: 70, fentes: 3 },
+  'cs-xs': { etires: 121, plis: 31, fentes: 2 },
+};
+const STRICT = ARGS.includes('--strict');
 
 const CAS = [
   { id: 'ts-xs', base: 'tshirt', taille: 'XS', options: { encolure: 'ronde', manche: 'courte', longueur: 22 } },
   { id: 'ts-l', base: 'tshirt', taille: 'L', options: { encolure: 'ronde', manche: 'courte', longueur: 22 } },
   { id: 'sw-xs', base: 'sweat', taille: 'XS' },
   { id: 'ch-m', base: 'chemise', taille: 'M' },
+  // (2026-10-18) SON modèle « Test » : un CHEMISIER, base XS, avec un MOTIF imprimé (texte + logo) — vu de face-dessus et sans mannequin
+  { id: 'cs-xs', base: 'chemisier', taille: 'XS', options: { encolure: 'ronde', manche: 'courte', longueur: 20 }, motif: true },
 ].filter((c) => !SEUL || c.id === SEUL);
 if (ARGS.includes('--brut')) CAS.forEach((c) => { c.brut = true; });
 if (ARGS.includes('--sansplis')) CAS.forEach((c) => { c.sansPlis = true; });
 
 function chrome() {
-  const l = [path.join(process.env['ProgramFiles'] || '', 'Google/Chrome/Application/chrome.exe'),
+  const l = [process.env.SZ_CHROME || '',
+    path.join(process.env['ProgramFiles'] || '', 'Google/Chrome/Application/chrome.exe'),
     path.join(process.env['ProgramFiles(x86)'] || '', 'Google/Chrome/Application/chrome.exe'),
-    path.join(process.env['LOCALAPPDATA'] || '', 'Google/Chrome/Application/chrome.exe')];
-  return l.find((p) => fs.existsSync(p));
+    path.join(process.env['LOCALAPPDATA'] || '', 'Google/Chrome/Application/chrome.exe'),
+    // Linux (ubuntu-latest a google-chrome) et macOS
+    '/usr/bin/google-chrome', '/usr/bin/google-chrome-stable', '/usr/bin/chromium', '/usr/bin/chromium-browser',
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'];
+  return l.find((p) => p && fs.existsSync(p));
 }
 // on referme NOS Chrome (retrouvés par leur dossier temporaire) — voir banc-contraste-rendu.js du site
 function fermerNosChrome(motif) {
-  if (!motif || process.platform !== 'win32') return;
+  if (!motif) return;
+  if (process.platform !== 'win32') { try { spawnSync('pkill', ['-f', String(motif)], { stdio: 'ignore', timeout: 30000 }); } catch (e) {} return; }
   try {
     const r = spawnSync('powershell', ['-NoProfile', '-NonInteractive', '-Command',
       "@(Get-CimInstance Win32_Process -Filter \"Name='chrome.exe'\" | Where-Object { $_.CommandLine -like '*" + String(motif).replace(/'/g, "''") + "*' }) | ForEach-Object { $_.ProcessId }"],
@@ -157,7 +188,7 @@ const SCRIPT_PAGE = function () {
       Object.keys(aretes).forEach(function (k) {
         var l = aretes[k]; if (l.length !== 2 || vis[l[0]] !== 1 || vis[l[1]] !== 1) return;
         var d = nrm[l[0] * 3] * nrm[l[1] * 3] + nrm[l[0] * 3 + 1] * nrm[l[1] * 3 + 1] + nrm[l[0] * 3 + 2] * nrm[l[1] * 3 + 2];
-        if (d < Math.cos(75 * Math.PI / 180)) { res.plis++; cpt.plis++; [l[0], l[1]].forEach(function (tt) { fautif[I[tt * 3]] = fautif[I[tt * 3 + 1]] = fautif[I[tt * 3 + 2]] = 2; }); }
+        if (d < Math.cos(75 * Math.PI / 180)) { res.plis++; cpt.plis++; if (conf && (cpt.exPlis = cpt.exPlis || []).length < 30) { var va = I[l[0] * 3]; cpt.exPlis.push([Math.round(rd.vx[va] * 10) / 10, Math.round(rd.vy[va] * 10) / 10, Math.round(Math.acos(Math.max(-1, d)) * 180 / Math.PI)]); } [l[0], l[1]].forEach(function (tt) { fautif[I[tt * 3]] = fautif[I[tt * 3 + 1]] = fautif[I[tt * 3 + 2]] = 2; }); }
       });
       // collision : les sommets des triangles visibles, contre les tubes du corps
       var vu = new Uint8Array(P.length / 3);
@@ -268,7 +299,22 @@ const SCRIPT_PAGE = function () {
         }
       });
     }
-    return { cm: Math.round(pire * 100) / 100, ou: ou, sommet: Math.round(sommet * 100) / 100, sommetOu: souOu, ballon: Math.round(ballon * 100) / 100, monte: Math.round(monte * 100) / 100, monteOu: monteOu };
+    // L ARC DES RANGS (2026-10-18, son motif : le texte s arquait sur la poitrine) : un rang du patron devant doit rester à peu
+    // près à niveau ; l écart de hauteur 3D d un rang (12, 16, 20 cm sous la ligne), sur |x| <= 10
+    var arc = 0, arcOu = null;
+    if (dv) [12, 16, 20].forEach(function (yr) { var lo = 1e9, hi = -1e9, rdv2 = dv.rendu;
+      for (var v = 0; v < rdv2.n; v++) if (Math.abs(rdv2.vy[v] - yr) < 0.35 && Math.abs(rdv2.vx[v]) <= 10) { lo = Math.min(lo, rdv2.pos[v * 3 + 1]); hi = Math.max(hi, rdv2.pos[v * 3 + 1]); }
+      if (hi > lo && hi - lo > arc) { arc = hi - lo; arcOu = yr; } });
+    // LA SYMÉTRIE DU DEVANT (2026-10-18, son motif vu de dessus semblait penché) : un sommet (x, y) du patron et son miroir (-x, y)
+    // doivent être symétriques en 3D (x opposés, même hauteur, même profondeur) ; le plus grand écart, rangs 8 à 25 cm, |x| <= 12
+    var asym = 0, asymOu = null;
+    if (dv) { var rS = dv.rendu, cleS = {};
+      for (var v = 0; v < rS.n; v++) cleS[Math.round(rS.vx[v] * 100) + '_' + Math.round(rS.vy[v] * 100)] = v;
+      for (var v2 = 0; v2 < rS.n; v2++) { if (rS.vx[v2] <= 0.5 || rS.vx[v2] > 12 || rS.vy[v2] < 8 || rS.vy[v2] > 25) continue;
+        var w2 = cleS[Math.round(-rS.vx[v2] * 100) + '_' + Math.round(rS.vy[v2] * 100)]; if (w2 === undefined) continue;
+        var e2 = Math.max(Math.abs(rS.pos[v2 * 3] + rS.pos[w2 * 3]), Math.abs(rS.pos[v2 * 3 + 1] - rS.pos[w2 * 3 + 1]), Math.abs(rS.pos[v2 * 3 + 2] - rS.pos[w2 * 3 + 2]));
+        if (e2 > asym) { asym = e2; asymOu = [Math.round(rS.vx[v2] * 10) / 10, Math.round(rS.vy[v2] * 10) / 10, [0, 1, 2].map(function (c) { return Math.round((c ? rS.pos[v2 * 3 + c] - rS.pos[w2 * 3 + c] : rS.pos[v2 * 3] + rS.pos[w2 * 3]) * 100) / 100; })]; } } }
+    return { asym: Math.round(asym * 100) / 100, asymOu: asymOu, arc: Math.round(arc * 100) / 100, arcOu: arcOu, cm: Math.round(pire * 100) / 100, ou: ou, sommet: Math.round(sommet * 100) / 100, sommetOu: souOu, ballon: Math.round(ballon * 100) / 100, monte: Math.round(monte * 100) / 100, monteOu: monteOu };
   }
   // un point visé : le haut de la tête de manche (côté sg), en 3D
   function epaule(sg) {
@@ -338,7 +384,9 @@ const SCRIPT_PAGE = function () {
     var VUES = [
       ['face', 0, 0.05, 1, null], ['tq', 0.62, 0.12, 1, null], ['dos', Math.PI, 0.05, 1, null], ['profil', Math.PI / 2, 0.05, 1, null], ['dessus', 0, 0.95, 1, null],
       ['epaule-face', 0, 0.08, 4, gauche], ['epaule-face2', 0, 0.08, 4, droite], ['epaule-tq', 0.75, 0.15, 4, gauche], ['epaule-dos', Math.PI, 0.1, 4, droite],
-      ['epaule-dessus', 0.3, 0.8, 4, gauche], ['encolure', 0, 0.12, 3, haut]
+      ['epaule-dessus', 0.3, 0.8, 4, gauche], ['encolure', 0, 0.12, 3, haut],
+      // SA vue : de face, la caméra au-dessus des épaules (~30°), l encolure et les deux têtes de manche dans le cadre
+      ['facedessus', 0, 0.52, 1.7, haut]
     ];
     VUES.forEach(function (vv) {
       v.yaw = vv[1]; v.pitch = vv[2]; v.vueNom = '';
@@ -368,6 +416,15 @@ const SCRIPT_MODELES = function () {
   var m = { id: 'banc_' + c.id, createdAt: '2026-10-18T00:00:00Z', updatedAt: '2026-10-18T00:00:00Z', nom: 'Banc ' + c.id, ref: '', categorie: 'hauts', etat: 'brouillon',
     base: c.base, options: c.options || {}, aisances: {}, tailleBase: c.taille, tailles: T, pieces: pr.pieces, assemblages: pr.assemblages || [], edite: false,
     instantanes: [], motif: null, design3d: null, photo3d: null, planche: null, produitId: '', notes: '', version: 1, versions: [{ n: 1, date: '2026-10-18T00:00:00Z', note: 'banc' }] };
+  if (c.motif) {
+    // un motif PLACÉ sur le devant, comme le sien : un texte, un logo (une forme orange à sa place), un second texte
+    var dv = pr.pieces.filter(function (p) { return p.id === 'devant'; })[0], pli = dv && dv.aupli;
+    m.motif = { mode: 'place', piece: 'devant', zone: { x: pli ? -15 : 2, y: 12, l: 30, h: 35 }, raccord: 'droit', procede: 'dtf', ppp: 300, souscouche: 'auto', fond: 'transparent',
+      calques: [
+        { id: 'c1', type: 'texte', texte: 'SANDRIZA', police: 'Arial', couleur: '#111111', gras: true, ajustement: 'etirer', x: 4, y: 2, l: 22, h: 4, rot: 0, opacite: 1, visible: true },
+        { id: 'c2', type: 'forme', forme: 'rect', couleur: '#E8870E', plein: true, x: 12, y: 12, l: 6, h: 6, rot: 45, opacite: 1, visible: true },
+        { id: 'c3', type: 'texte', texte: 'Stein Monast', police: 'Arial', couleur: '#2A2D34', gras: true, ajustement: 'etirer', x: 6, y: 21, l: 18, h: 2.6, rot: 0, opacite: 1, visible: true }] };
+  }
   localStorage.setItem('elg_atelier_modeles', JSON.stringify([m]));
   localStorage.setItem('sz-atelier-mannequin', '1');
   if (c.sansPlis) localStorage.setItem('sz-atelier-vie', JSON.stringify({ plis: 'aucun', tissu: 'moyen' })); else localStorage.removeItem('sz-atelier-vie');
@@ -428,25 +485,28 @@ for (const c of CAS) {
     const d = lire(k); if (!d) return;
     fs.writeFileSync(path.join(SORTIE, c.id + '-' + k.slice(4) + '.png'), Buffer.from(d.replace(/^data:image\/png;base64,/, ''), 'base64'));
   });
-  const g = r.geo, ko = [];
-  if (g.etires > SEUILS.etires) ko.push(g.etires + ' étiré(s)');
-  if (g.plis > SEUILS.plis) ko.push(g.plis + ' pli(s) cassé(s)');
+  const g = r.geo, ko = [], pl = STRICT ? SEUILS : Object.assign({}, SEUILS, PLAFONDS[c.id] || {});
+  if (g.etires > pl.etires) ko.push(g.etires + ' étiré(s) (plafond ' + pl.etires + ')');
+  if (g.plis > pl.plis) ko.push(g.plis + ' pli(s) cassé(s) (plafond ' + pl.plis + ')');
   if (g.dedans > SEUILS.dedans) ko.push(g.dedans + ' sommet(s) dans le corps');
-  if (r.fentes > SEUILS.fentes) ko.push(r.fentes + ' fente(s)');
+  if (r.fentes > pl.fentes) ko.push(r.fentes + ' fente(s) (plafond ' + pl.fentes + ')');
+  const reste = [g.etires && g.etires + ' éclat(s)', g.plis && g.plis + ' pli(s)', r.fentes && r.fentes + ' fente(s)'].filter(Boolean);
   const ecMax = Math.max(0, ...Object.values(r.ecartsRendus || {}).map((e) => e[0]));
   if (ecMax > SEUILS.couture) ko.push('couture ouverte de ' + ecMax + ' cm');
   if (r.bosse && r.bosse.ballon > SEUILS.ballon) ko.push('tête de manche bombée (' + r.bosse.ballon + ' cm de plus que l épaule du mannequin)');
   if (r.bosse && r.bosse.monte > SEUILS.epaulette) ko.push('épaulette : la tête remonte de ' + r.bosse.monte + ' cm au-dessus de la ligne d épaule');
+  if (r.bosse && r.bosse.arc > SEUILS.arc) ko.push('rang arqué de ' + r.bosse.arc + ' cm (motif courbé, rang ' + r.bosse.arcOu + ')');
+  if (r.bosse && r.bosse.asym > SEUILS.asym) ko.push('devant asymétrique de ' + r.bosse.asym + ' cm ' + JSON.stringify(r.bosse.asymOu));
   if (r.erreurConf) ko.push('maillage conforme en erreur : ' + String(r.erreurConf).split(String.fromCharCode(10))[0]);
   if (ko.length) echec++;
   bilan.push(r);
-  console.log((ko.length ? '✗ ' : '✓ ') + c.id.padEnd(6) + ` triangles ${g.triVisibles}, éclats ${g.etires}, plis cassés ${g.plis}, dans le corps ${g.dedans}, fentes ${r.fentes}, couture la plus ouverte ${ecMax} cm, épaulette ${r.bosse ? r.bosse.monte : '?'} cm, bombé en excès ${r.bosse ? r.bosse.ballon : '?'} cm`
-    + (ko.length ? '  ← ' + ko.join(', ') : ''));
+  console.log((ko.length ? '✗ ' : '✓ ') + c.id.padEnd(6) + ` triangles ${g.triVisibles}, éclats ${g.etires}, plis cassés ${g.plis}, dans le corps ${g.dedans}, fentes ${r.fentes}, couture la plus ouverte ${ecMax} cm, épaulette ${r.bosse ? r.bosse.monte : '?'} cm, bombé en excès ${r.bosse ? r.bosse.ballon : '?'} cm, arc des rangs ${r.bosse ? r.bosse.arc : '?'} cm, asymétrie ${r.bosse ? r.bosse.asym : '?'} cm`
+    + (ko.length ? '  ← ' + ko.join(', ') : '') + (!ko.length && reste.length ? '  (reste avant zéro : ' + reste.join(', ') + ')' : ''));
   if (ARGS.includes('--zip')) console.log('   écarts dessinés : ' + JSON.stringify(r.ecartsRendus));
   if (ARGS.includes('--piresm')) console.log('   pires manche (x, y, ×) : ' + JSON.stringify(g.piresManche) + ' | pire triangle : ' + JSON.stringify(g.pireTri));
   if (ARGS.includes('--tubes')) (r.tubes || []).forEach((t) => console.log('   tube ' + JSON.stringify(t)));
   if (ARGS.includes('--profil')) Object.keys(r.profil || {}).forEach((k) => { console.log('   profil ' + k + ' [rang, yp, horiz, vert, max]'); r.profil[k].forEach((l) => console.log('     ' + JSON.stringify(l))); });
-  if (ko.length && ARGS.includes('--detail')) Object.keys(g.parPiece).forEach((k) => console.log('      ' + k + ' : ' + JSON.stringify(g.parPiece[k])));
+  if (ARGS.includes('--detail')) Object.keys(g.parPiece).forEach((k) => console.log('      ' + k + ' : ' + JSON.stringify(g.parPiece[k])));
   if (ko.length) {
     (g.pires || []).slice(0, 4).forEach((p) => console.log('      étiré ' + p.pid + ' ×' + p.s + ' en ' + p.p.join(', ')));
     Object.keys(r.vues).forEach((k) => { if (r.vues[k].n) console.log('      ' + k + ' : ' + r.vues[k].n + ' îlot(s) ' + JSON.stringify(r.vues[k].ilots.slice(0, 3))); });
@@ -455,5 +515,5 @@ for (const c of CAS) {
 }
 fs.writeFileSync(path.join(SORTIE, 'mesures.json'), JSON.stringify(bilan, null, 1));
 console.log('\nimages : ' + SORTIE);
-console.log(echec ? `>>> ${echec} cas en défaut` : '>>> les hauts en 3D sont propres');
+console.log(echec ? `>>> ${echec} cas en défaut` + (STRICT ? ' (cible zéro)' : ' (plafonds de non-régression)') : (STRICT ? '>>> les hauts en 3D sont propres' : '>>> aucun cas au-dessus de ses plafonds (--strict : la cible zéro)'));
 process.exit(echec ? 1 : 0);

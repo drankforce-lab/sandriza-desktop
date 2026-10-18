@@ -227,6 +227,113 @@ table.at-tab{width:100%;border-collapse:collapse;font-size:.8rem;font-variant-nu
 .at-ligne span:first-child{color:var(--tx2)}
 .at-ligne span:last-child{font-variant-numeric:tabular-nums;text-align:right}
 
+/* ── LE STUDIO DU MODÈLE (2026-10-18, sa demande : « tout est à refaire, pas assez professionnel, les options trop
+   tassées — un studio avec menus et options au même principe que Photoshop ») ──
+   menus · barre d options · palette des types | plan de travail | panneaux à onglets, repliables · barre d état */
+.cx>.st{flex:1 1 0;min-height:0}
+.st{position:relative;display:flex;flex-direction:column;min-height:0;border:1px solid var(--sz-bord);border-radius:12px;overflow:hidden;background:var(--f-carte)}
+.st-menus{display:flex;align-items:center;gap:.1rem;padding:.2rem .4rem;border-bottom:1px solid var(--sz-bord);background:var(--f-entete,var(--f-carte2))}
+.st-menus>button{background:none;border:0;color:var(--tx);font-size:.82rem;padding:.32rem .65rem;border-radius:6px;cursor:pointer}
+.st-menus>button:hover,.st-menus>button[aria-expanded="true"]{background:var(--v08)}
+.st-menus>button:focus-visible{outline:2px solid var(--or);outline-offset:-2px}
+.st-menu-liste{position:absolute;z-index:40;min-width:16rem;max-width:22rem;max-height:calc(100% - 3rem);overflow-y:auto;padding:.3rem;border-radius:10px;
+  background:var(--sz-surface,var(--f-carte));border:1px solid var(--sz-bord-fort,var(--v16));box-shadow:0 14px 34px rgba(0,0,0,.42)}
+.st-menu-liste button{display:grid;grid-template-columns:1.1rem minmax(0,1fr) auto;align-items:center;gap:.35rem;width:100%;text-align:left;background:none;border:0;
+  color:var(--tx);font-size:.82rem;padding:.4rem .55rem;border-radius:6px;cursor:pointer}
+.st-menu-liste button:hover:not(:disabled),.st-menu-liste button:focus-visible{background:var(--sz-survol,var(--v10));outline:none}
+.st-menu-liste button:disabled{opacity:.45;cursor:default}
+.st-menu-liste .ck{color:var(--tx-or);font-weight:700;text-align:center}
+.st-menu-liste .rac{color:var(--tx2);font-size:.74rem;font-variant-numeric:tabular-nums;padding-left:1.2rem}
+.st-menu-liste .sec{font-size:.68rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2);padding:.45rem .55rem .2rem 2rem}
+.st-menu-liste .trait{height:1px;background:var(--v08);margin:.3rem .4rem}
+.st-options{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;padding:.45rem .75rem;border-bottom:1px solid var(--sz-bord);background:var(--f-carte2)}
+.st-options .grp{display:flex;align-items:center;gap:.4rem;padding-right:.7rem;border-right:1px solid var(--v08)}
+.st-options .grp:last-of-type{border-right:0}
+.st-options .lib{font-size:.72rem;color:var(--tx2);white-space:nowrap}
+.st-options .ed-seg button{padding:.24rem .55rem;font-size:.78rem}
+.st-options .ecart{flex:1 1 auto}
+.st-type{display:inline-flex;align-items:center;gap:.45rem;padding:.25rem .6rem .25rem .4rem;font-size:.82rem;font-weight:600;border-radius:8px}
+.st-type svg{width:1.15rem;height:1.4rem;flex:0 0 auto}
+.st-type .fl{color:var(--tx2);font-weight:400;font-size:.7rem}
+.st-zoom{display:inline-flex;align-items:center;gap:.2rem}
+.st-zoom button{min-width:1.9rem;padding:.2rem .4rem;font-size:.85rem;line-height:1}
+.st-zoom .val{min-width:3.2rem;text-align:center;font-size:.78rem;font-variant-numeric:tabular-nums;color:var(--tx)}
+.st-options button.prim{font-weight:600}
+.st-corps{position:relative;flex:1 1 0;min-height:0;display:grid;grid-template-columns:4.6rem minmax(0,1fr) 27rem}
+.st-palette{display:flex;flex-direction:column;gap:.3rem;padding:.5rem .35rem;border-right:1px solid var(--sz-bord);background:var(--f-carte2);overflow-y:auto}
+.st-outil{display:flex;flex-direction:column;align-items:center;gap:.2rem;padding:.45rem .2rem;border-radius:9px;background:none;border:1px solid transparent;color:var(--tx2);font-size:.62rem;line-height:1.15;text-align:center;cursor:pointer}
+.st-outil svg{width:1.45rem;height:1.6rem}
+.st-outil:hover{background:var(--v06);color:var(--tx)}
+.st-outil.on{background:var(--v08);border-color:var(--or);color:var(--tx)}
+.st-outil[aria-expanded="true"]{background:var(--v10);color:var(--tx)}
+.st-fly{position:absolute;z-index:30;left:4.8rem;top:.5rem;max-height:calc(100% - 1rem);width:min(34rem,calc(100% - 6rem));display:flex;flex-direction:column;border-radius:12px;
+  background:var(--sz-surface,var(--f-carte));border:1px solid var(--sz-bord-fort,var(--v16));box-shadow:0 18px 44px rgba(0,0,0,.45)}
+.st-fly-tete{display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.65rem .9rem;border-bottom:1px solid var(--v08)}
+.st-fly-tete b{font-size:.9rem}
+.st-fly-tete button{background:none;border:0;color:var(--tx2);font-size:1.2rem;line-height:1;padding:.15rem .4rem;border-radius:6px;cursor:pointer}
+.st-fly-tete button:hover{background:var(--v08);color:var(--tx)}
+.st-fly-corps{flex:1 1 auto;min-height:0;overflow-y:auto;padding:.4rem .9rem .9rem}
+.st-fly-corps .at-bases{grid-template-columns:repeat(auto-fill,minmax(10.5rem,1fr));gap:.5rem}
+.st-fly-corps .at-base{padding:.55rem .6rem;border:1px solid var(--v08)}
+.st-fly-corps .at-base:hover{border-color:rgba(var(--or-rgb),.55)}
+.st-fly-corps .at-base.on{border:2px solid var(--or)}
+.st-plan{position:relative;min-width:0;min-height:0;overflow:auto;background:var(--f-page);display:flex}
+.st-plan.grille{background-image:linear-gradient(var(--v04) 1px,transparent 1px),linear-gradient(90deg,var(--v04) 1px,transparent 1px);background-size:24px 24px}
+.st-feuille{margin:auto;padding:1.4rem}
+.st-feuille>.at-apercu{border-radius:6px;box-shadow:0 10px 30px rgba(0,0,0,.35),0 0 0 1px rgba(0,0,0,.12)}
+.st-panneaux{display:flex;flex-direction:column;gap:0;min-height:0;min-width:0;overflow-y:auto;overflow-x:hidden;border-left:1px solid var(--sz-bord);background:var(--f-carte2)}
+/* ⚠ flex:0 0 auto — un panneau ne RÉTRÉCIT pas : c est la colonne qui défile (sinon ils se chevauchent) */
+.st-pan{flex:0 0 auto;border-bottom:1px solid var(--sz-bord);display:flex;flex-direction:column}
+.st-pan-tete{display:flex;align-items:center;gap:.2rem;padding:0 .3rem 0 .5rem;background:var(--f-entete,var(--f-carte));border-bottom:1px solid var(--v08)}
+.st-pan.replie .st-pan-tete{border-bottom:0}
+.st-onglets{display:flex;gap:.1rem;flex:1 1 auto;min-width:0}
+.st-onglets button{background:none;border:0;border-bottom:2px solid transparent;color:var(--tx2);font-size:.76rem;font-weight:600;letter-spacing:.02em;padding:.55rem .6rem .45rem;cursor:pointer;white-space:nowrap}
+.st-onglets button.on{color:var(--tx);border-bottom-color:var(--or)}
+.st-onglets button:hover{color:var(--tx)}
+.st-repli{background:none;border:0;color:var(--tx2);padding:.3rem .4rem;border-radius:6px;cursor:pointer;line-height:0}
+.st-repli:hover{background:var(--v08);color:var(--tx)}
+.st-repli svg{width:14px;height:14px;transition:transform .15s ease}
+.st-pan.replie .st-repli svg{transform:rotate(-90deg)}
+.st-pan-corps{padding:.8rem .9rem .9rem;display:flex;flex-direction:column;gap:.55rem}
+.st-form{display:flex;flex-direction:column;gap:.55rem}
+.st-form>label{display:grid;grid-template-columns:8.6rem minmax(0,1fr);align-items:center;gap:.6rem;font-size:.78rem;color:var(--tx2)}
+.st-form>label.haut{align-items:start}
+.st-form>label.haut>textarea{min-height:4.4em;resize:vertical}
+.st-form input,.st-form select,.st-form textarea{font-size:.82rem;width:100%;min-width:0}
+.st-type-ligne{display:grid;grid-template-columns:8.6rem minmax(0,1fr);align-items:center;gap:.6rem;font-size:.78rem;color:var(--tx2)}
+.st-type-ligne button{justify-self:start}
+/* ⚠ un champ de mesure fait au moins 48 px (banc-champs) : quand la colonne est étroite, le TABLEAU défile de côté,
+   la colonne des noms reste en place */
+.st-mes-zone{overflow-x:auto;margin:0 -.2rem;padding:0 .2rem}
+.st-mes{width:100%;border-collapse:separate;border-spacing:0;font-size:.78rem}
+.st-mes th{font-weight:600;color:var(--tx2);text-align:center;padding:.25rem .15rem .4rem;white-space:nowrap}
+.st-mes th:first-child,.st-mes td:first-child{text-align:left;padding-left:0;position:sticky;left:0;background:var(--f-carte2);z-index:1}
+.st-mes th.base{color:var(--tx-or)}
+.st-mes th label{display:inline-flex;align-items:center;gap:.2rem;cursor:pointer}
+.st-mes td{padding:.14rem .12rem;border-top:1px solid var(--v055)}
+.st-mes td:first-child{color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:8rem;min-width:6.5rem;padding-right:.4rem}
+.st-mes input[type=text]{width:3.1rem;min-width:3rem;text-align:right;padding:.16rem .3rem;font-size:.78rem;font-variant-numeric:tabular-nums}
+.st-pied-pan{display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding-top:.3rem;border-top:1px solid var(--v08)}
+.st-pied-pan label{display:flex;align-items:center;gap:.45rem;font-size:.76rem;color:var(--tx2)}
+.st-pied-pan select{width:auto}
+.st-note{font-size:.72rem;color:var(--tx2);margin:0}
+.st-etat{display:flex;align-items:center;gap:1.1rem;padding:.3rem .8rem;border-top:1px solid var(--sz-bord);background:var(--f-pied);font-size:.72rem;color:var(--tx2);white-space:nowrap;overflow:hidden}
+.st-etat b{color:var(--tx);font-weight:600;font-variant-numeric:tabular-nums}
+.st-etat .ecart{flex:1 1 auto}
+.st-etat .att{color:var(--tx-att)}
+.st-etat .ok{color:var(--tx-ok)}
+/* mode jour : le socle habille TOUT bouton en blanc encadré — les commandes « à plat » du studio (menus, onglets,
+   palette, repli, croix, entrées de menu) restent à plat */
+html.jour .st-menus>button,html.jour .st-onglets button,html.jour .st-outil,html.jour .st-repli,html.jour .st-fly-tete button,html.jour .st-menu-liste button{background:none;border-color:transparent;box-shadow:none}
+html.jour .st-menus>button:hover:not(:disabled),html.jour .st-menus>button[aria-expanded="true"],html.jour .st-outil:hover:not(:disabled),html.jour .st-repli:hover:not(:disabled),html.jour .st-menu-liste button:hover:not(:disabled){background:var(--v08)}
+html.jour .st-outil.on{background:var(--v08);border-color:var(--or)}
+html.jour .st-onglets button.on{border-bottom-color:var(--or)}
+@media (max-width:1180px){.st-corps{grid-template-columns:4.2rem minmax(0,1fr) 22rem}.st-form>label,.st-type-ligne{grid-template-columns:7rem minmax(0,1fr)}
+  .st-mes th{font-size:.7rem;padding-left:0;padding-right:0}.st-mes th label{gap:.1rem}}
+@media (max-width:960px){.st-corps{grid-template-columns:4rem minmax(0,1fr) 19rem}.st-options .lib{display:none}}
+@media (max-height:760px){.st-pan-corps{padding:.6rem .75rem .7rem;gap:.45rem}.st-form{gap:.42rem}.st-feuille{padding:.8rem}.st-options{padding:.32rem .6rem}}
+@media (max-height:620px){.st-etat{display:none}.st-outil span{display:none}}
+
 /* ── L éditeur de patron (lot 2) ── */
 .ed-cadre{display:grid;grid-template-columns:auto minmax(0,1fr) 21rem;gap:.7rem;min-height:0}
 .cx>.ed-cadre{flex:1 1 0}
@@ -903,68 +1010,407 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (b.options && b.options.longueur != null) h += '<label>' + (LLONG[M.base] || '${T("Longueur")}') + '<input type="text" id="o-longueur" maxlength="5" inputmode="decimal" value="' + esc(o.longueur != null ? String(o.longueur).replace('.', '${SEP_DEC()}') : '') + '"></label>';
     return h;
   }
+  /* ══ LE STUDIO DU MODÈLE (2026-10-18, sa demande, capture à l appui : « tout est à refaire, c est pas assez
+     professionnel et les options sont trop tassées — il faut un studio avec menus et options au même principe que
+     Photoshop ») ══════════════════════════════════════════════════════════════
+     · une BARRE DE MENUS (Fichier, Édition, Modèle, Tailles, Affichage, Fenêtre), au clavier (F10, flèches, Échap),
+       raccourcis affichés et actifs (Ctrl+S, Ctrl+Z / Ctrl+Y, Ctrl+N, Ctrl+P, Ctrl++ / Ctrl+- / Ctrl+0) ;
+     · une BARRE D OPTIONS (type, taille affichée, zoom, gestes principaux) ;
+     · à gauche une PALETTE étroite des familles de vêtements ; le choix du type s ouvre en volet (plus de colonne de
+       tuiles) ;
+     · au centre le PLAN DE TRAVAIL : le patron en grand, zoomable (Ctrl + molette), grille au choix ;
+     · à droite des PANNEAUX à onglets, repliables, qu on montre ou cache (menu Fenêtre) — l espace de travail est
+       gardé sur ce poste ;
+     · une BARRE D ÉTAT (taille de base, tailles, tissu, zoom, état d enregistrement).
+     Rien n a disparu : mêmes champs, mêmes identifiants, mêmes gestionnaires — seulement réorganisés. Annuler /
+     Rétablir est nouveau (instantanés du modèle, 60 au plus). */
+  var ST = (function(){
+    var d = { pans: { prop: 1, mod: 1, mes: 1, ais: 1, inf: 1 }, ong: { a: 'prop', b: 'mes' }, repli: {}, grille: 1 };
+    try {
+      var s = JSON.parse(localStorage.getItem('sz-atelier-studio') || 'null');
+      if (s && s.pans) { d.pans = Object.assign(d.pans, s.pans); d.ong = Object.assign(d.ong, s.ong || {}); d.repli = s.repli || {}; d.grille = s.grille === 0 ? 0 : 1; }
+    } catch (e) {}
+    return d;
+  })();
+  function stGarder(){ try { localStorage.setItem('sz-atelier-studio', JSON.stringify(ST)); } catch (e) {} }
+  var ZOOM = 1, FLY = '', MENU = '', PILEM = [], REFM = [];
+  var STP = { prop: '${T("Propriétés")}', mod: '${T("Modèle")}', mes: '${T("Mesures")}', ais: '${T("Aisances")}', inf: '${T("Infos")}' };
+  var STG = [['a', ['prop', 'mod']], ['b', ['mes', 'ais']], ['c', ['inf']]];
+  var LFAMC = { haut: '${T("Hauts")}', jupe: '${T("Jupes")}', bas: '${T("Bas")}', lingerie: '${T("Lingerie")}', tete: '${T("Chapeaux")}' };
+  var MENUS = [['fichier', '${T("Fichier")}'], ['edition', '${T("Édition")}'], ['modele', '${T("Modèle")}'], ['tailles', '${T("Tailles")}'],
+    ['affichage', '${T("Affichage")}'], ['fenetre', '${T("Fenêtre")}']];
+  var CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>';
+
+  /* Annuler / Rétablir : un instantané du modèle avant chaque changement (premier caractère d un champ, choix d une
+     liste, type, tailles, tableau standard). */
+  function memoM(){ if (!M) return; PILEM.push({ m: copie(M), t: TRACE }); if (PILEM.length > 60) PILEM.shift(); REFM = []; }
+  function annulerM(){
+    if (!PILEM.length) { dire('${T("Rien à annuler.")}', 'att'); return; }
+    REFM.push({ m: copie(M), t: TRACE }); var s = PILEM.pop(); M = s.m; TRACE = s.t; dessinerModele(); dire('${T("Annulé.")}');
+  }
+  function retablirM(){
+    if (!REFM.length) { dire('${T("Rien à rétablir.")}', 'att'); return; }
+    PILEM.push({ m: copie(M), t: TRACE }); var s = REFM.pop(); M = s.m; TRACE = s.t; dessinerModele(); dire('${T("Rétabli.")}');
+  }
+  function stFamilles(){ var f = []; (D.bases || []).forEach(function(b){ var k = b.famille || ''; if (f.indexOf(k) < 0) f.push(k); }); return f; }
+  function stZoom(z){
+    ZOOM = Math.max(0.5, Math.min(4, z));
+    var v = document.getElementById('st-zoomv'); if (v) v.textContent = Math.round(ZOOM * 100) + ' %';
+    if (AP) peindreApercu(AP); else majEtat();
+  }
+  function stNomType(){ var b = (D.bases || []).filter(function(x){ return x.cle === M.base; })[0] || {}; return LBASE[M.base] || szTd(b.nom || ''); }
+
+  /* ── les panneaux ── */
+  function stPanneau(k){
+    var tl = D.tailles || [];
+    if (k === 'prop') {
+      var o = optionsBase();
+      return '<div class="st-type-ligne"><span>${T("Type")}</span><button type="button" class="st-type" data-st-fly="tous" aria-haspopup="dialog">' + (PICTO[M.base] || '')
+        + '<span>' + esc(stNomType()) + '</span><span class="fl" aria-hidden="true">▾</span></button></div>'
+        + (o ? '<div class="st-form">' + o + '</div>' : '<p class="st-note">${T("Ce type n’a pas d’option.")}</p>')
+        + (LBASED[M.base] ? '<p class="st-note">${T("Pièces :")} ' + esc(LBASED[M.base]) + '</p>' : '');
+    }
+    if (k === 'mod') {
+      return '<div class="st-form">'
+        + '<label>${T("Nom")}<input type="text" id="m-nom" maxlength="80" value="' + esc(M.nom) + '"></label>'
+        + '<label>${T("Référence")}<input type="text" id="m-ref" maxlength="24" value="' + esc(M.ref) + '" placeholder="RB-014"></label>'
+        + '<label>${T("Catégorie")}<select id="m-cat">' + (D.categories || []).map(function(c){
+            return '<option value="' + c.cle + '"' + (M.categorie === c.cle ? ' selected' : '') + '>' + esc(LCAT[c.cle] || szTd(c.nom)) + '</option>'; }).join('') + '</select></label>'
+        + '<label>${T("État")}<select id="m-etat">' + (D.etats || []).map(function(e){
+            return '<option value="' + e.cle + '"' + (M.etat === e.cle ? ' selected' : '') + '>' + esc(LETAT[e.cle] || szTd(e.nom)) + '</option>'; }).join('') + '</select></label>'
+        + '<label>${T("Produit lié")}<select id="m-prod"><option value="">${T("— Aucun —")}</option>' + (D.produits || []).map(function(pr){
+            return '<option value="' + esc(pr.id) + '"' + (M.produitId === pr.id ? ' selected' : '') + '>' + esc(pr.nom) + '</option>'; }).join('') + '</select></label>'
+        + '<label class="haut">${T("Notes")}<textarea id="m-notes" maxlength="600">' + esc(M.notes) + '</textarea></label>'
+        + '</div>';
+    }
+    if (k === 'mes') {
+      return '<p class="st-note">${T("Mesures du corps, en cm. Décochez une taille pour ne pas la garder.")}</p>'
+        + '<div class="st-mes-zone"><table class="st-mes"><thead><tr><th>${T("Mesure")}</th>'
+        + tl.map(function(t){
+            var inclus = (M.tailles || []).indexOf(t) >= 0;
+            return '<th class="' + (M.tailleBase === t ? 'base' : '') + '"><label><input type="checkbox" data-taille="' + t + '"' + (inclus ? ' checked' : '') + ' aria-label="${T("Taille gardée :")} ' + t + '">' + t + '</label></th>';
+          }).join('') + '</tr></thead><tbody>'
+        + (D.mesures || []).map(function(m){
+            var nm = LMES[m.cle] || szTd(m.nom);
+            return '<tr><td title="' + esc(nm) + '">' + esc(nm) + '</td>' + tl.map(function(t){
+              var v = ((M.tableau || {})[t] || {})[m.cle];
+              return '<td><input type="text" inputmode="decimal" maxlength="5" data-t="' + t + '" data-m="' + m.cle + '" aria-label="' + esc(nm + ' ' + t) + '" value="' + esc(v != null ? String(v).replace('.', '${SEP_DEC()}') : '') + '"></td>';
+            }).join('') + '</tr>';
+          }).join('')
+        + '</tbody></table></div>'
+        + '<div class="st-pied-pan"><label>${T("Taille de base")}<select id="m-tbase" title="${T("Taille de base (tracé de référence)")}">' + tl.map(function(t){
+            return '<option value="' + t + '"' + (M.tailleBase === t ? ' selected' : '') + '>' + t + '</option>'; }).join('') + '</select></label>'
+        + '<button type="button" class="mini" id="m-standard">${T("Tableau standard")}</button></div>';
+    }
+    if (k === 'ais') {
+      return '<p class="st-note">${T("Ajoutées au tour du corps, en cm.")}</p><div class="st-form">'
+        + ['poitrine', 'taille', 'hanches'].map(function(q){
+            return '<label>' + esc(LMES[q]) + '<input type="text" inputmode="decimal" maxlength="4" id="a-' + q + '" value="' + esc(String((M.aisances || {})[q] != null ? M.aisances[q] : '').replace('.', '${SEP_DEC()}')) + '"></label>';
+          }).join('') + '</div>';
+    }
+    return '<div id="m-ctrl"><p class="st-note">${T("Calcul en cours…")}</p></div>';
+  }
+  function stPanneaux(){
+    var h = STG.map(function(g){
+      var vis = g[1].filter(function(k){ return ST.pans[k]; }); if (!vis.length) return '';
+      var act = vis.indexOf(ST.ong[g[0]]) >= 0 ? ST.ong[g[0]] : vis[0], rep = !!ST.repli[g[0]];
+      var lr = rep ? '${T("Déplier le panneau")}' : '${T("Replier le panneau")}';
+      return '<section class="st-pan' + (rep ? ' replie' : '') + '" aria-label="' + esc(vis.map(function(k){ return STP[k]; }).join(' · ')) + '">'
+        + '<div class="st-pan-tete"><div class="st-onglets" role="tablist">' + vis.map(function(k){
+            return '<button type="button" role="tab" aria-selected="' + (k === act) + '" class="' + (k === act ? 'on' : '') + '" data-st-onglet="' + g[0] + ':' + k + '">' + STP[k] + '</button>';
+          }).join('')
+        + '</div><button type="button" class="st-repli" data-st-repli="' + g[0] + '" aria-expanded="' + !rep + '" title="' + lr + '" aria-label="' + lr + '">' + CHEV + '</button></div>'
+        + (rep ? '' : '<div class="st-pan-corps" role="tabpanel">' + stPanneau(act) + '</div>') + '</section>';
+    }).join('');
+    return h || '<p class="st-note" style="padding:1rem">${T("Tous les panneaux sont masqués : menu Fenêtre.")}</p>';
+  }
+  function stPeindrePanneaux(){
+    var p = corps.querySelector('.st-panneaux'); if (!p) return;
+    p.innerHTML = stPanneaux();
+    if (AP) peindreApercu(AP);
+  }
+  /* montrer un panneau (et y poser le curseur) — depuis les menus */
+  function stMontrer(g, k, champ){
+    ST.pans[k] = 1; ST.ong[g] = k; ST.repli[g] = 0; stGarder(); stPeindrePanneaux();
+    var c = champ ? document.getElementById(champ) : corps.querySelector('.st-pan-corps input, .st-pan-corps select');
+    if (c) c.focus();
+  }
+
+  /* ── le volet « Type de vêtement » ── */
+  function stFly(){
+    if (!FLY) return '';
+    var fams = FLY === 'tous' ? stFamilles() : [FLY];
+    return '<div class="st-fly" role="dialog" aria-label="${T("Type de vêtement")}"><div class="st-fly-tete"><b>'
+      + (FLY === 'tous' ? '${T("Type de vêtement")}' : esc(LFAM[FLY] || FLY)) + '</b>'
+      + '<button type="button" data-st-fly-fermer="1" aria-label="${T("Fermer")}" title="${T("Fermer (Échap)")}">×</button></div>'
+      + '<div class="st-fly-corps"><div class="at-bases">'
+      + fams.map(function(f){
+          return (fams.length > 1 ? '<div class="at-fam">' + esc(LFAM[f] || f) + '</div>' : '')
+            + (D.bases || []).filter(function(b){ return (b.famille || '') === f; }).map(function(b){
+                return '<button type="button" class="at-base' + (M.base === b.cle ? ' on' : '') + '" data-base="' + b.cle + '" aria-pressed="' + (M.base === b.cle) + '">' + (PICTO[b.cle] || '')
+                  + '<span><b>' + esc(LBASE[b.cle] || szTd(b.nom)) + '</b><span class="cx-sub">' + esc(LBASED[b.cle] || '') + '</span></span></button>';
+              }).join('');
+        }).join('') + '</div></div></div>';
+  }
+  function stPeindreFly(){
+    var c = corps.querySelector('.st-corps'); if (!c) return;
+    var v = c.querySelector('.st-fly'); if (v) v.remove();
+    if (FLY) c.insertAdjacentHTML('beforeend', stFly());
+    corps.querySelectorAll('[data-st-fly]').forEach(function(b){ b.setAttribute('aria-expanded', String(FLY !== '' && b.getAttribute('data-st-fly') === FLY)); });
+    var p = FLY ? c.querySelector('.st-fly .at-base.on, .st-fly .at-base') : null; if (p) p.focus();
+  }
+
+  /* ── la barre d état ── */
+  function stEtatHtml(){
+    var etat = !M.id ? '<span class="att">${T("Nouveau modèle — pas encore enregistré")}</span>'
+      : TRACE ? '<span class="att">${T("Modifié — les pièces seront retracées à l’enregistrement")}</span>'
+      : '<span class="ok">${T("Enregistré")}</span> <span>· v' + (M.version || 1) + '</span>';
+    return '<span>${T("Taille de base")} <b>' + esc(M.tailleBase || '') + '</b></span>'
+      + '<span>${T("Tailles")} <b>' + esc((M.tailles || []).join(' ')) + '</b></span>'
+      + '<span>${T("Tissu estimé")} <b>' + (AP && AP.tissu ? String(AP.tissu.metres).replace('.', '${SEP_DEC()}') + ' m' : '—') + '</b></span>'
+      + '<span>${T("Zoom")} <b>' + Math.round(ZOOM * 100) + ' %</b></span><span class="ecart"></span>' + etat;
+  }
+  function majEtat(){ var e = document.getElementById('st-etat'); if (e) e.innerHTML = stEtatHtml(); }
+
+  /* ── les menus ── */
+  function stNouveau(){
+    if (!D.peutAjouter) return;
+    if ((M && M.id && TRACE) || (M && !M.id && String(M.nom || '').trim())) {
+      szConfirmer({ titre: '${T("Quitter sans enregistrer ?")}', texte: '${T("Les changements de base, d’options ou de mesures seront perdus.")}', oui: '${T("Nouveau modèle")}', danger: true })
+        .then(function(ok){ if (ok) ouvrirNeuf(); });
+      return;
+    }
+    ouvrirNeuf();
+  }
+  function stTableauStandard(){ memoM(); M.tableau = copie(D.standard); TRACE = true; dessinerModele(); dire('${T("Tableau standard remis.")}', 'bon'); }
+  function stEntrees(k){
+    var neuf = !M.id, peut = neuf ? D.peutAjouter : D.peutModifier, fige = neuf || TRACE, tl = D.tailles || [], l = [];
+    var sec = function(t){ l.push({ sec: t }); }, tr = function(){ l.push({ trait: true }); };
+    var quitterVers = function(fn){ return function(){ var mid = M.id; M = null; fn(mid); }; };
+    if (k === 'fichier') {
+      l.push({ lib: '${T("Nouveau modèle")}', rac: 'Ctrl+N', off: !D.peutAjouter, fn: stNouveau });
+      tr();
+      l.push({ lib: neuf ? '${T("Créer le modèle")}' : '${T("Enregistrer la version")}', rac: 'Ctrl+S', off: !peut, fn: function(){ enregistrer(document.getElementById('m-enreg')); } });
+      tr();
+      l.push({ lib: '${T("Éditer le patron")}', off: fige, fn: quitterVers(function(id){ ouvrirEditeur(id); }) });
+      l.push({ lib: '${T("Aperçu 3D")}', off: fige, fn: quitterVers(function(id){ ouvrir3d(id, 'biblio'); }) });
+      l.push({ lib: '${T("Imprimer / exporter…")}', rac: 'Ctrl+P', off: fige, fn: quitterVers(function(id){ ouvrirImpression(id, 'biblio'); }) });
+      tr();
+      l.push({ lib: '${T("Fermer")}', rac: '${T("Échap")}', fn: revenir });
+    } else if (k === 'edition') {
+      // « Annuler la modification » : « Annuler » seul est déjà traduit « Cancel » (bouton de boîte) — ici c est « Undo »
+      l.push({ lib: '${T("Annuler la modification")}', rac: 'Ctrl+Z', off: !PILEM.length, fn: annulerM });
+      l.push({ lib: '${T("Rétablir")}', rac: 'Ctrl+Y', off: !REFM.length, fn: retablirM });
+      tr();
+      l.push({ lib: '${T("Tableau standard")}', fn: stTableauStandard });
+    } else if (k === 'modele') {
+      l.push({ lib: '${T("Type de vêtement…")}', fn: function(){ FLY = 'tous'; stPeindreFly(); } });
+      l.push({ lib: '${T("Options du type")}', fn: function(){ stMontrer('a', 'prop'); } });
+      l.push({ lib: '${T("Informations du modèle")}', fn: function(){ stMontrer('a', 'mod', 'm-nom'); } });
+      tr();
+      l.push({ lib: '${T("Mesures")}', fn: function(){ stMontrer('b', 'mes'); } });
+      l.push({ lib: '${T("Aisances")}', fn: function(){ stMontrer('b', 'ais', 'a-poitrine'); } });
+    } else if (k === 'tailles') {
+      sec('${T("Tailles du modèle")}');
+      tl.forEach(function(t){
+        var inclus = (M.tailles || []).indexOf(t) >= 0;
+        l.push({ lib: t, coche: inclus, off: t === M.tailleBase, fn: function(){
+          memoM(); var ls = (M.tailles || []).filter(function(x){ return x !== t; }); if (!inclus) ls.push(t);
+          M.tailles = tl.filter(function(x){ return ls.indexOf(x) >= 0; }); dessinerModele(); } });
+      });
+      sec('${T("Taille de base")}');
+      tl.forEach(function(t){
+        l.push({ lib: t, coche: M.tailleBase === t, fn: function(){
+          if (M.tailleBase === t) return;
+          memoM(); M.tailleBase = t; if ((M.tailles || []).indexOf(t) < 0) M.tailles.push(t); TRACE = true; dessinerModele(); } });
+      });
+      tr();
+      l.push({ lib: '${T("Tableau standard")}', fn: stTableauStandard });
+    } else if (k === 'affichage') {
+      sec('${T("Taille affichée")}');
+      tl.forEach(function(t){ l.push({ lib: t, coche: !TOUTES && TAP === t, fn: function(){ TAP = t; TOUTES = false; dessinerModele(); } }); });
+      l.push({ lib: '${T("Toutes les tailles emboîtées")}', coche: TOUTES, fn: function(){ TOUTES = !TOUTES; dessinerModele(); } });
+      tr();
+      l.push({ lib: '${T("Zoom avant")}', rac: 'Ctrl++', fn: function(){ stZoom(ZOOM * 1.25); } });
+      l.push({ lib: '${T("Zoom arrière")}', rac: 'Ctrl+-', fn: function(){ stZoom(ZOOM / 1.25); } });
+      l.push({ lib: '${T("Ajuster à la fenêtre")}', rac: 'Ctrl+0', fn: function(){ stZoom(1); } });
+      tr();
+      l.push({ lib: '${T("Grille")}', coche: !!ST.grille, fn: function(){ ST.grille = ST.grille ? 0 : 1; stGarder(); var pl = document.getElementById('st-plan'); if (pl) pl.classList.toggle('grille', !!ST.grille); } });
+    } else if (k === 'fenetre') {
+      ['prop', 'mod', 'mes', 'ais', 'inf'].forEach(function(p){
+        l.push({ lib: STP[p], coche: !!ST.pans[p], fn: function(){ ST.pans[p] = ST.pans[p] ? 0 : 1; stGarder(); stPeindrePanneaux(); } });
+      });
+      tr();
+      l.push({ lib: '${T("Réinitialiser l’espace de travail")}', fn: function(){
+        ST.pans = { prop: 1, mod: 1, mes: 1, ais: 1, inf: 1 }; ST.ong = { a: 'prop', b: 'mes' }; ST.repli = {}; ST.grille = 1; stGarder(); ZOOM = 1; dessinerModele(); } });
+    }
+    return l;
+  }
+  function stFermerMenu(){
+    MENU = '';
+    var m = corps.querySelector('.st-menu-liste'); if (m) m.remove();
+    corps.querySelectorAll('[data-st-menu]').forEach(function(b){ b.setAttribute('aria-expanded', 'false'); });
+  }
+  function stOuvrirMenu(k, focusPremier){
+    stFermerMenu();
+    var btn = corps.querySelector('[data-st-menu="' + k + '"]'), st = corps.querySelector('.st'); if (!btn || !st || !M) return;
+    MENU = k; btn.setAttribute('aria-expanded', 'true');
+    var l = stEntrees(k), h = '';
+    l.forEach(function(e, i){
+      if (e.trait) { h += '<div class="trait" role="separator"></div>'; return; }
+      if (e.sec) { h += '<div class="sec" role="presentation">' + esc(e.sec) + '</div>'; return; }
+      h += '<button type="button" role="' + (e.coche != null ? 'menuitemcheckbox' : 'menuitem') + '"' + (e.coche != null ? ' aria-checked="' + !!e.coche + '"' : '')
+        + ' data-st-mi="' + i + '"' + (e.off ? ' disabled' : '') + '><span class="ck" aria-hidden="true">' + (e.coche ? '✓' : '') + '</span><span>' + esc(e.lib) + '</span><span class="rac">' + esc(e.rac || '') + '</span></button>';
+    });
+    var m = document.createElement('div'); m.className = 'st-menu-liste'; m.setAttribute('role', 'menu'); m.setAttribute('aria-label', btn.textContent);
+    m.innerHTML = h;
+    var rs = st.getBoundingClientRect(), rb = btn.getBoundingClientRect();
+    m.style.left = Math.max(4, rb.left - rs.left) + 'px'; m.style.top = (rb.bottom - rs.top + 2) + 'px';
+    st.appendChild(m);
+    m.onclick = function(ev){
+      var b = ev.target.closest('[data-st-mi]'); if (!b || b.disabled) return;
+      ev.stopPropagation();
+      var e = l[+b.getAttribute('data-st-mi')]; stFermerMenu(); btn.focus();
+      try { e.fn(); } catch (x) { dire(String((x && x.message) || x), 'err'); }
+    };
+    if (focusPremier) { var p = m.querySelector('button:not(:disabled)'); if (p) p.focus(); }
+  }
+
   function dessinerModele(){
-    var neuf = !M.id;
+    var neuf = !M.id, tl = D.tailles || [], peut = neuf ? D.peutAjouter : D.peutModifier;
+    var b0 = (D.bases || []).filter(function(x){ return x.cle === M.base; })[0] || {};
     document.getElementById('titre').textContent = neuf ? '${T("Nouveau modèle")}' : (M.nom || '${T("Modèle")}');
     document.getElementById('sous').textContent = neuf ? '${T("Tracé à partir d’un patron de base et de vos mesures")}'
       : ((M.ref ? M.ref + ' · ' : '') + 'v' + (M.version || 1));
-    document.getElementById('actions').innerHTML = '<button type="button" id="m-retour">${T("← Bibliothèque")}</button>'
-      + (!neuf ? '<button type="button" id="m-editer"' + (TRACE ? ' disabled title="${T("Enregistrez d’abord les changements du modèle.")}"' : '') + '>${T("Éditer le patron")}</button>' : '')
-      + ((neuf ? D.peutAjouter : D.peutModifier) ? '<button type="button" class="prim" id="m-enreg">' + (neuf ? '${T("Créer le modèle")}' : '${T("Enregistrer la version")}') + '</button>' : '');
+    document.getElementById('actions').innerHTML = '<button type="button" id="m-retour">${T("← Bibliothèque")}</button>';
 
-    var famPrec = '';
-    var g = '<div class="cx-carte"><h2>${T("Patron de base")}</h2><div class="at-bases">'
-      + (D.bases || []).map(function(b){
-          var tete = b.famille && b.famille !== famPrec ? '<div class="at-fam">' + (LFAM[b.famille] || '') + '</div>' : ''; famPrec = b.famille || famPrec;
-          return tete + '<button type="button" class="at-base' + (M.base === b.cle ? ' on' : '') + '" data-base="' + b.cle + '">' + (PICTO[b.cle] || '')
-            + '<span><b>' + esc(LBASE[b.cle] || szTd(b.nom)) + '</b><span class="cx-sub">' + esc(LBASED[b.cle] || '') + '</span></span></button>';
-        }).join('') + '</div>'
-      + '<div class="at-champs">' + optionsBase() + '</div>'
-      + '<div class="cx-sep"></div><h2>${T("Le modèle")}</h2><div class="at-champs">'
-      + '<label class="large">${T("Nom")}<input type="text" id="m-nom" maxlength="80" value="' + esc(M.nom) + '"></label>'
-      + '<label>${T("Référence")}<input type="text" id="m-ref" maxlength="24" value="' + esc(M.ref) + '" placeholder="RB-014"></label>'
-      + '<label>${T("Catégorie")}<select id="m-cat">' + (D.categories || []).map(function(c){
-          return '<option value="' + c.cle + '"' + (M.categorie === c.cle ? ' selected' : '') + '>' + esc(LCAT[c.cle] || szTd(c.nom)) + '</option>'; }).join('') + '</select></label>'
-      + '<label>${T("État")}<select id="m-etat">' + (D.etats || []).map(function(e){
-          return '<option value="' + e.cle + '"' + (M.etat === e.cle ? ' selected' : '') + '>' + esc(LETAT[e.cle] || szTd(e.nom)) + '</option>'; }).join('') + '</select></label>'
-      + '<label>${T("Produit lié")}<select id="m-prod"><option value="">${T("— Aucun —")}</option>' + (D.produits || []).map(function(pr){
-          return '<option value="' + esc(pr.id) + '"' + (M.produitId === pr.id ? ' selected' : '') + '>' + esc(pr.nom) + '</option>'; }).join('') + '</select></label>'
-      + '<label class="large">${T("Notes")}<textarea id="m-notes" maxlength="600">' + esc(M.notes) + '</textarea></label>'
-      + '</div></div>';
-
-    var tl = D.tailles || [];
-    var c = '<div class="cx-carte"><h2>${T("Tableau de tailles")} <span class="cx-sub">${T("mesures du corps, en cm")}</span>'
-      + '<span class="droite"><button type="button" class="mini" id="m-standard">${T("Tableau standard")}</button></span></h2>'
-      + '<table class="at-tab"><thead><tr><th>${T("Mesure")}</th>'
-      + tl.map(function(t){
-          var inclus = (M.tailles || []).indexOf(t) >= 0;
-          return '<th class="' + (M.tailleBase === t ? 'base' : '') + '"><label><input type="checkbox" data-taille="' + t + '"' + (inclus ? ' checked' : '') + ' aria-label="${T("Taille gardée :")} ' + t + '">' + t + '</label></th>';
-        }).join('') + '</tr></thead><tbody>'
-      + (D.mesures || []).map(function(m){
-          return '<tr><td>' + esc(LMES[m.cle] || szTd(m.nom)) + '</td>' + tl.map(function(t){
-            var v = ((M.tableau || {})[t] || {})[m.cle];
-            return '<td><input type="text" inputmode="decimal" maxlength="5" data-t="' + t + '" data-m="' + m.cle + '" aria-label="' + esc((LMES[m.cle] || m.nom) + ' ' + t) + '" value="' + esc(v != null ? String(v).replace('.', '${SEP_DEC()}') : '') + '"></td>';
-          }).join('') + '</tr>';
-        }).join('')
-      + '</tbody></table>'
-      + '<div class="at-champs"><label>${T("Taille de base (tracé de référence)")}<select id="m-tbase">' + tl.map(function(t){
-          return '<option value="' + t + '"' + (M.tailleBase === t ? ' selected' : '') + '>' + t + '</option>'; }).join('') + '</select></label></div>'
-      + '<div class="cx-sep"></div><h2>${T("Aisances")} <span class="cx-sub">${T("ajoutées au tour, en cm")}</span></h2><div class="at-ais">'
-      + ['poitrine', 'taille', 'hanches'].map(function(k){
-          return '<label>' + esc(LMES[k]) + '<input type="text" inputmode="decimal" maxlength="4" id="a-' + k + '" value="' + esc(String((M.aisances || {})[k] != null ? M.aisances[k] : '').replace('.', '${SEP_DEC()}')) + '"></label>';
-        }).join('') + '</div></div>';
-
-    var a = '<div class="cx-carte"><h2>${T("Aperçu")}<span class="droite"><span class="ed-seg" role="group" aria-label="${T("Taille de l’aperçu")}">'
+    var menus = '<div class="st-menus" role="menubar" aria-label="${T("Menus du studio")}">'
+      + MENUS.map(function(m){ return '<button type="button" role="menuitem" aria-haspopup="menu" aria-expanded="false" data-st-menu="' + m[0] + '">' + m[1] + '</button>'; }).join('')
+      + '</div>';
+    var opt = '<div class="st-options" role="toolbar" aria-label="${T("Options du studio")}">'
+      + '<div class="grp"><span class="lib">${T("Type")}</span><button type="button" class="st-type" data-st-fly="tous" aria-haspopup="dialog" aria-expanded="' + (FLY === 'tous') + '">'
+      + (PICTO[M.base] || '') + '<span>' + esc(stNomType()) + '</span><span class="fl" aria-hidden="true">▾</span></button></div>'
+      + '<div class="grp"><span class="lib">${T("Taille affichée")}</span><span class="ed-seg" role="group" aria-label="${T("Taille de l’aperçu")}">'
       + tl.map(function(t){ return '<button type="button" class="' + (!TOUTES && TAP === t ? 'on' : '') + '" data-tap="' + t + '">' + t + '</button>'; }).join('')
-      + '<button type="button" class="' + (TOUTES ? 'on' : '') + '" data-toutes="1">${T("Toutes")}</button></span></span></h2>'
-      + '<div class="at-apercu" id="m-apercu"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i></div></div>'
-      + '<div id="m-ctrl"></div></div>';
+      + '<button type="button" class="' + (TOUTES ? 'on' : '') + '" data-toutes="1">${T("Toutes")}</button></span></div>'
+      + '<div class="grp"><span class="lib">${T("Zoom")}</span><span class="st-zoom">'
+      + '<button type="button" data-st-zoom="-" title="${T("Zoom arrière (Ctrl+-)")}" aria-label="${T("Zoom arrière")}">−</button>'
+      + '<span class="val" id="st-zoomv">' + Math.round(ZOOM * 100) + ' %</span>'
+      + '<button type="button" data-st-zoom="+" title="${T("Zoom avant (Ctrl++)")}" aria-label="${T("Zoom avant")}">+</button>'
+      + '<button type="button" data-st-zoom="0" title="${T("Ajuster à la fenêtre (Ctrl+0)")}">${T("Ajuster")}</button></span></div>'
+      + '<span class="ecart"></span>'
+      + (!neuf ? '<button type="button" id="m-editer"' + (TRACE ? ' disabled title="${T("Enregistrez d’abord les changements du modèle.")}"' : '') + '>${T("Éditer le patron")}</button>' : '')
+      + (peut ? '<button type="button" class="prim" id="m-enreg" title="Ctrl+S">' + (neuf ? '${T("Créer le modèle")}' : '${T("Enregistrer la version")}') + '</button>' : '')
+      + '</div>';
+    var pal = '<nav class="st-palette" aria-label="${T("Types de vêtement")}">' + stFamilles().map(function(f){
+        var bf = (D.bases || []).filter(function(x){ return (x.famille || '') === f; });
+        var ic = bf.some(function(x){ return x.cle === M.base; }) ? M.base : (bf[0] || {}).cle;
+        return '<button type="button" class="st-outil' + (f === (b0.famille || '') ? ' on' : '') + '" data-st-fly="' + f + '" aria-haspopup="dialog" aria-expanded="' + (FLY === f) + '" title="' + esc(LFAM[f] || f) + '">'
+          + (PICTO[ic] || '') + '<span>' + esc(LFAMC[f] || LFAM[f] || f) + '</span></button>';
+      }).join('') + '</nav>';
+    var plan = '<div class="st-plan' + (ST.grille ? ' grille' : '') + '" id="st-plan" role="region" aria-label="${T("Plan de travail")}"><div class="st-feuille">'
+      + '<div class="at-apercu" id="m-apercu"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i></div></div></div></div>';
 
-    corps.innerHTML = '<div class="at-trois">' + g + c + a + '</div>';
+    corps.innerHTML = '<div class="st">' + menus + opt
+      + '<div class="st-corps">' + pal + plan + '<aside class="st-panneaux" aria-label="${T("Panneaux")}">' + stPanneaux() + '</aside>' + stFly() + '</div>'
+      + '<div class="st-etat" id="st-etat" role="status">' + stEtatHtml() + '</div></div>';
+    MENU = '';
+    // la feuille suit la TAILLE DU PLAN (panneaux repliés, fenêtre redimensionnée, mise en page pas encore faite au
+    // premier dessin) — l événement « resize » de la fenêtre ne voit pas tout cela
+    if (window.ResizeObserver) {
+      if (window._stRO) window._stRO.disconnect();
+      var pl = document.getElementById('st-plan'), dim = '';
+      window._stRO = new ResizeObserver(function(){
+        if (VUE !== 'modele' || !AP || !pl) return;
+        var d2 = pl.clientWidth + 'x' + pl.clientHeight; if (d2 === dim) return; dim = d2; peindreApercu(AP);
+      });
+      if (pl) window._stRO.observe(pl);
+    }
     if (!neuf && TRACE) dire(M.edite ? '${T("Attention : retracer effacera les retouches faites dans l’éditeur de patron.")}'
       : '${T("Base, options ou mesures changées : les pièces seront retracées à l’enregistrement.")}', 'att');
     demanderApercu();
   }
+
+  /* ── les gestes du studio (posés AVANT ceux de la bibliothèque, plus bas : les instantanés d annulation se
+     prennent avant que le gestionnaire commun ne change le modèle) ── */
+  corps.addEventListener('click', function(ev){
+    if (VUE !== 'modele' || !M) return;
+    var t = ev.target; if (!t || !t.closest) return;
+    var b;
+    if ((b = t.closest('[data-st-menu]'))) { var k = b.getAttribute('data-st-menu'); if (MENU === k) stFermerMenu(); else stOuvrirMenu(k, false); return; }
+    if ((b = t.closest('[data-st-fly-fermer]'))) { FLY = ''; stPeindreFly(); return; }
+    if ((b = t.closest('[data-st-fly]'))) { var f = b.getAttribute('data-st-fly'); FLY = FLY === f ? '' : f; stPeindreFly(); return; }
+    if ((b = t.closest('[data-st-onglet]'))) { var p = b.getAttribute('data-st-onglet').split(':'); ST.ong[p[0]] = p[1]; stGarder(); stPeindrePanneaux(); return; }
+    if ((b = t.closest('[data-st-repli]'))) { var g = b.getAttribute('data-st-repli'); ST.repli[g] = ST.repli[g] ? 0 : 1; stGarder(); stPeindrePanneaux(); return; }
+    if ((b = t.closest('[data-st-zoom]'))) { var z = b.getAttribute('data-st-zoom'); stZoom(z === '+' ? ZOOM * 1.25 : z === '-' ? ZOOM / 1.25 : 1); return; }
+    if ((b = t.closest('[data-base]')) && b.getAttribute('data-base') !== M.base) { memoM(); FLY = ''; return; }
+    if (t.closest('#m-standard')) { memoM(); return; }
+  });
+  corps.addEventListener('mouseover', function(ev){
+    if (VUE !== 'modele' || !MENU) return;
+    var b = ev.target && ev.target.closest ? ev.target.closest('[data-st-menu]') : null;
+    if (b && b.getAttribute('data-st-menu') !== MENU) stOuvrirMenu(b.getAttribute('data-st-menu'), false);
+  });
+  corps.addEventListener('input', function(ev){
+    if (VUE !== 'modele' || !M) return;
+    var t = ev.target; if (!t || !t.closest || !t.closest('.st') || t._szMemo) return;
+    memoM(); t._szMemo = true;
+  });
+  corps.addEventListener('change', function(ev){
+    if (VUE !== 'modele' || !M) return;
+    var t = ev.target; if (t && t.hasAttribute && t.hasAttribute('data-taille')) { memoM(); setTimeout(majEtat, 0); }
+  });
+  corps.addEventListener('wheel', function(ev){
+    if (VUE !== 'modele' || !ev.ctrlKey || !(ev.target && ev.target.closest && ev.target.closest('#st-plan'))) return;
+    ev.preventDefault(); stZoom(ev.deltaY < 0 ? ZOOM * 1.15 : ZOOM / 1.15);
+  }, { passive: false });
+  document.addEventListener('mousedown', function(ev){
+    if (VUE !== 'modele') return;
+    var t = ev.target;
+    if (MENU && !(t && t.closest && t.closest('.st-menu-liste, [data-st-menu]'))) stFermerMenu();
+    if (FLY && !(t && t.closest && t.closest('.st-fly, [data-st-fly]'))) { FLY = ''; stPeindreFly(); }
+  }, true);
+  /* Le clavier : F10 (menus), flèches dans les menus, Échap, et les raccourcis. En capture : Échap ferme d abord le
+     menu ou le volet ouvert, sans quitter le studio. */
+  document.addEventListener('keydown', function(ev){
+    if (VUE !== 'modele' || !M || document.querySelector('.szc-voile')) return;
+    var k = ev.key, ctrl = ev.ctrlKey || ev.metaKey, a = document.activeElement;
+    var barre = function(){ return Array.prototype.slice.call(corps.querySelectorAll('[data-st-menu]')); };
+    var stop = function(){ ev.preventDefault(); ev.stopImmediatePropagation(); };
+    var liste = corps.querySelector('.st-menu-liste');
+    if (liste && a && liste.contains(a)) {
+      var its = Array.prototype.slice.call(liste.querySelectorAll('button:not(:disabled)')), i = its.indexOf(a);
+      if (k === 'ArrowDown' || k === 'ArrowUp') { stop(); var n = its[(i + (k === 'ArrowDown' ? 1 : -1) + its.length) % its.length]; if (n) n.focus(); return; }
+      if (k === 'Home' || k === 'End') { stop(); var e2 = its[k === 'Home' ? 0 : its.length - 1]; if (e2) e2.focus(); return; }
+      if (k === 'ArrowRight' || k === 'ArrowLeft') {
+        stop(); var bs = barre(), j = MENUS.map(function(m){ return m[0]; }).indexOf(MENU);
+        var nk = MENUS[(j + (k === 'ArrowRight' ? 1 : -1) + MENUS.length) % MENUS.length][0]; stOuvrirMenu(nk, true); return;
+      }
+      if (k === 'Tab') { stFermerMenu(); return; }
+    }
+    if (a && a.hasAttribute && a.hasAttribute('data-st-menu')) {
+      var bb = barre(), x = bb.indexOf(a);
+      if (k === 'ArrowRight' || k === 'ArrowLeft') { stop(); var nb = bb[(x + (k === 'ArrowRight' ? 1 : -1) + bb.length) % bb.length]; if (nb) { nb.focus(); if (MENU) stOuvrirMenu(nb.getAttribute('data-st-menu'), false); } return; }
+      if (k === 'ArrowDown' || k === 'Enter' || k === ' ') { stop(); stOuvrirMenu(a.getAttribute('data-st-menu'), true); return; }
+    }
+    if (k === 'F10') { stop(); var pb = barre()[0]; if (pb) pb.focus(); return; }
+    if (k === 'Escape') {
+      if (MENU) { stop(); var mb = corps.querySelector('[data-st-menu="' + MENU + '"]'); stFermerMenu(); if (mb) mb.focus(); return; }
+      if (FLY) { stop(); FLY = ''; stPeindreFly(); return; }
+      return;
+    }
+    if (!ctrl) return;
+    var champ = a && /^(INPUT|TEXTAREA)$/.test(a.tagName);
+    var kl = String(k).toLowerCase();
+    if (kl === 's') { stop(); var be = document.getElementById('m-enreg'); if (be && !be.disabled) enregistrer(be); return; }
+    if (kl === 'n') { stop(); stNouveau(); return; }
+    if (kl === 'p') { stop(); if (M.id && !TRACE) { var mid = M.id; M = null; ouvrirImpression(mid, 'biblio'); } return; }
+    if (kl === 'z' && !ev.shiftKey && !champ) { stop(); annulerM(); return; }
+    if ((kl === 'y' || (kl === 'z' && ev.shiftKey)) && !champ) { stop(); retablirM(); return; }
+    if (k === '+' || k === '=') { stop(); stZoom(ZOOM * 1.25); return; }
+    if (k === '-') { stop(); stZoom(ZOOM / 1.25); return; }
+    if (k === '0') { stop(); stZoom(1); return; }
+  }, true);
 
   /* L aperçu : redemandé au site à chaque réglage (après une pause de frappe). */
   var apT = null, apN = 0;
@@ -983,8 +1429,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function peindreApercu(r){
     var z = document.getElementById('m-apercu'); if (!z) return;
     var ctrl = document.getElementById('m-ctrl');
-    if (!r || !r.ok) { z.innerHTML = '<div class="vide">' + esc(expliquer(r)) + '</div>'; if (ctrl) ctrl.innerHTML = ''; return; }
-    var W = Math.max(200, z.clientWidth || 340), H = Math.max(200, z.clientHeight || 420);
+    if (!r || !r.ok) { z.innerHTML = '<div class="vide">' + esc(expliquer(r)) + '</div>'; if (ctrl) ctrl.innerHTML = ''; majEtat(); return; }
+    var W, H, plan = document.getElementById('st-plan');
+    if (plan) {
+      // le plan de travail du studio : la feuille prend la place du plan (moins ses marges), multipliée par le zoom
+      var mg = parseFloat(getComputedStyle(plan.firstElementChild).paddingLeft) || 22;
+      // ⚠ à 100 %, le plan ne défile pas : un pixel de trop ferait naître une barre, qui rétrécirait le plan, etc.
+      plan.style.overflow = ZOOM > 1 ? 'auto' : 'hidden';
+      W = Math.floor(Math.max(260, plan.clientWidth - 2 * mg - 4) * ZOOM); H = Math.floor(Math.max(260, plan.clientHeight - 2 * mg - 4) * ZOOM);
+      z.style.width = W + 'px'; z.style.height = H + 'px';
+    } else { W = Math.max(200, z.clientWidth || 340); H = Math.max(200, z.clientHeight || 420); }
     var jeux;
     if (TOUTES && r.tailles) {
       jeux = [{ pieces: r.tailles[M.tailleBase] || r.pieces, trait: '#1C1B18', epais: 1.8 }];
@@ -994,6 +1448,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       });
     } else jeux = [{ pieces: r.pieces }];
     z.innerHTML = svgPieces(jeux, W, H, { titre: TOUTES ? '${T("Toutes les tailles emboîtées")}' : '${T("Pièces de la taille")} ' + TAP });
+    majEtat();
     if (!ctrl) return;
     var lignes = '<div class="at-ligne"><span>${T("Tissu estimé (laize 140 cm)")}</span><span>' + String(r.tissu ? r.tissu.metres : 0).replace('.', '${SEP_DEC()}') + ' m</span></div>';
     (r.pieces || []).forEach(function(p){
@@ -1026,7 +1481,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function enregistrer(btn){
     if (OCCUPE || !M) return;
-    if (!String(M.nom || '').trim()) { dire(MOTIFS.nom, 'err'); var n = document.getElementById('m-nom'); if (n) n.focus(); return; }
+    if (!String(M.nom || '').trim()) {
+      dire(MOTIFS.nom, 'err'); var n = document.getElementById('m-nom');
+      // le champ vit dans l onglet « Modèle » du studio : on l ouvre s il est caché
+      if (!n && VUE === 'modele') { stMontrer('a', 'mod', 'm-nom'); return; }
+      if (n) n.focus(); return;
+    }
     if (M.edite && TRACE && !enregistrer.confirme) {
       szConfirmer({ titre: '${T("Retracer le patron ?")}', texte: '${T("Les pièces seront retracées depuis la base : les retouches faites dans l’éditeur de patron seront perdues.")}',
         oui: '${T("Retracer et enregistrer")}', danger: true }).then(function(ok){ if (ok) { enregistrer.confirme = true; enregistrer(btn); enregistrer.confirme = false; } });
@@ -3145,7 +3605,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         var u0 = Math.abs(xc) / Math.max(0.1, nk.x), z0 = u0 < 1 ? Math.max(0, Math.min(bE - 0.8, 0.85 * nk.x * (1 - u0 * u0))) : 0;
         bE -= z0;
         tab = arcs(aa, bE);
-        chemins.push({ ys: pe0.ys, haut: pe0.haut, a: aa, b: bE, z0: z0, sg: pe0.sg, x0: Pst[0], zc: pe0.zc, SE: SEh, tab: tab, x: xc });
+        /* ⚠ (2026-10-18, son motif : « SANDRIZA » s arquait sur la poitrine) LE NIVEAU DES RANGS : sous l ellipse, un rang descend de
+           (longueur passée sur l épaule − hauteur perdue) = SE − a, plus grand là où le corps est profond — le milieu devant montait de
+           1 cm. Sous l ellipse, chaque colonne rejoint en 6 cm la valeur du POINT D ÉPAULE (celle des colonnes au-delà : la couture de
+           côté ne bouge pas) ; le rang redevient droit, l étirement vertical reste sous 20 %. */
+        var peR = parEllipse((xc >= 0 ? 1 : -1) * ep.x), dD = (arcs(peR.a, peR.bz)[32] - peR.a) - (SEh - aa);
+        chemins.push({ ys: pe0.ys, haut: pe0.haut, a: aa, b: bE, z0: z0, sg: pe0.sg, x0: Pst[0], zc: pe0.zc, SE: SEh, tab: tab, x: xc, dD: dD });
       }
     }
     var surChemin = function(ch, s, y){
@@ -3158,7 +3623,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         return [ch.x0, ch.haut - ch.a * (1 - Math.cos(th)), ch.zc + ch.sg * (ch.z0 + ch.b * Math.sin(th))];
       }
       // dessous : un centimètre de patron = un centimètre de hauteur, sur l anneau de cette hauteur (le même pour le devant et le dos)
-      return aHauteurC(ch.haut - ch.a - (s - ch.SE), ch.x, y);
+      var tR = Math.min(1, (s - ch.SE) / 4), wR = tR * tR * (3 - 2 * tR);
+      return aHauteurC(ch.haut - ch.a - (s - ch.SE) + (ch.dD || 0) * wR, ch.x, y);
     };
     var aHauteurC = chemins ? aHauteur : null;
     var m = grille3d(an.length, J, {
@@ -3569,6 +4035,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       // la PENTE d une épaule : du bas du cou (le haut du tronc) à l articulation du bras ; le dessus de la capsule
       // suit cette pente, son épaisseur (rx, verticale) est celle d une épaule, sa profondeur celle du tronc
       var yN = tr ? tr.anneaux[tr.anneaux.length - 1].c.y : yj + 6, ep = [], n = 15;
+      // l anneau du tronc à une hauteur (interpolé)
+      var anneauTronc = function(h){ if (!tr) return null; var A = tr.anneaux;
+        for (var q = 0; q + 1 < A.length; q++) if ((A[q].c.y - h) * (A[q + 1].c.y - h) <= 0) { var u = (h - A[q].c.y) / ((A[q + 1].c.y - A[q].c.y) || 1);
+          return { rx: A[q].rx + (A[q + 1].rx - A[q].rx) * u, rz: A[q].rz + (A[q + 1].rz - A[q].rz) * u }; }
+        return null; };
       for (var k = 0; k < n; k++) {
         var u = -1 + 2 * k / (n - 1), x = u * xg, bout = Math.abs(u), pente = Math.min(1, Math.max(0, (bout * xg - 6) / Math.max(1, xg - 6)));
         /* ⚠ (2026-10-18, sa remarque : « des manches ballon ») AU BOUT DE L ÉPAULE, la capsule REJOINT LE BRAS : même hauteur que le
@@ -3579,8 +4050,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         // relief sous le tissu, en haut de la poitrine
         /* ⚠ (2026-10-18, banc 3D) et au bout, la MÊME PROFONDEUR que le bras : le disque qui ferme la capsule était plus profond
            (5,2 cm contre 3,8) — il dépassait devant et derrière l articulation, et le corps du vêtement y faisait une corne. */
-        var rzC = Math.max(a0.rz, rzT * (0.74 - 0.2 * pente));
-        ep.push({ c: { x: x, y: haut2 - rv, z: 0 }, rx: rv, rz: a0.rz + (rzC - a0.rz) * (1 - pente * pente) });
+        var rzC = Math.max(a0.rz, rzT * (0.74 - 0.2 * pente)), rzE = a0.rz + (rzC - a0.rz) * (1 - pente * pente);
+        /* ⚠ (2026-10-18, son chemisier vu de face-dessus) DANS la largeur du tronc, la capsule ne dépasse pas son devant ni son dos :
+           elle sortait de 2 à 5 mm sur la poitrine — des taches blanches (sa surface regarde le haut, elle prend la lumière), un
+           croissant blanc dans l encolure, et une marche sous le tissu. Jamais plus mince que le bras. */
+        var at = anneauTronc(haut2 - rv);
+        if (at && Math.abs(x) < at.rx) rzE = Math.max(a0.rz, Math.min(rzE, at.rz * Math.sqrt(1 - (x / at.rx) * (x / at.rx)) - 0.3));
+        ep.push({ c: { x: x, y: haut2 - rv, z: 0 }, rx: rv, rz: rzE });
       }
       tubes.push({ nom: 'epaules', anneaux: ep });
       /* ⚠ (2026-10-18, banc 3D) LE HAUT DU TRONC SOUS LA LIGNE D ÉPAULES : le tronc du site est une boîte (16 cm de demi-largeur
@@ -3589,12 +4065,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          le dessus de la capsule passe à sa hauteur. */
       if (tr) {
         var dess = ep.filter(function(a){ return a.c.x >= 0; }).sort(function(a, b){ return a.c.x - b.c.x; }).map(function(a){ return [a.c.x, a.c.y + a.rx]; });
-        var xCap = function(h){ if (h <= dess[dess.length - 1][1] || h > dess[0][1]) return null;
+        // au-dessus du dessus de la capsule, c est le COU (la chemise M finissait le tronc en boîte de 8,9 cm à 1 cm sous le cou :
+        // son dessus plat se voyait, blanc, dans l encolure)
+        var tete = tubes.filter(function(t){ return /tete/.test(t.nom || '') && (t.anneaux || []).length; })[0], a0t = tete ? tete.anneaux[0] : null;
+        var xCap = function(h){ if (h > dess[0][1]) return a0t ? a0t.rx : null; if (h <= dess[dess.length - 1][1]) return null;
           for (var d = 0; d + 1 < dess.length; d++) if (dess[d + 1][1] <= h) { var p0 = dess[d], p1 = dess[d + 1]; return p0[0] + (p1[0] - p0[0]) * (p0[1] - h) / ((p0[1] - p1[1]) || 1); }
           return null; };
         var rCou = tr.anneaux[tr.anneaux.length - 1].rx;
         tubes = tubes.map(function(t){ if (t !== tr) return t;
-          return Object.assign({}, t, { anneaux: t.anneaux.map(function(a){ var xc = xCap(a.c.y); return xc != null && a.rx > xc ? Object.assign({}, a, { rx: Math.max(rCou, xc) }) : a; }) }); });
+          return Object.assign({}, t, { anneaux: t.anneaux.map(function(a){ var xc = xCap(a.c.y), cou = a0t && a.c.y > dess[0][1];
+            if (cou) return Object.assign({}, a, { rx: Math.min(a.rx, a0t.rx), rz: Math.min(a.rz, a0t.rz) });
+            return xc != null && a.rx > xc ? Object.assign({}, a, { rx: Math.max(rCou, xc) }) : a; }).concat(
+            // et le tronc va JUSQU AU cou : celui de la chemise M s arrêtait 1 cm dessous — une bande vide sous le cou
+            a0t && a0t.c.y > t.anneaux[t.anneaux.length - 1].c.y + 0.05 ? [Object.assign({}, a0t, { c: { x: a0t.c.x, y: a0t.c.y, z: a0t.c.z || 0 } })] : []) }); });
       }
       /* LA POITRINE (2026-10-17, sa référence : sur le mannequin Fal.ai, le t-shirt a du VOLUME devant). Le tronc du site
          est une ellipse lisse. ⚠ Deux sphères faisaient deux bosses où le tissu collait comme un film : un t-shirt JETTE
@@ -3802,6 +4285,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     var last = p[p.length - 1]; return ax <= Math.abs(p[0][0]) ? { y: p[0][1], f: 0 } : { y: last[1], f: 1 };
   }
+  /* L EMBU SOUTENU (2026-10-18, banc 3D) : la couture de tête est plus longue que l emmanchure (l embu). Posée par fraction de
+     longueur, la différence se répartissait partout — jusque sous le bras, où la tête n a pas la place de l absorber : ~25 replis
+     retournés par manche le long du bas d emmanchure. Comme une couturière qui « soutient » la tête, on ne met AUCUN embu sur le
+     bas (45 % inférieurs de chaque demi-tête : un centimètre de tête pour un centimètre d emmanchure), et tout le surplus sur le
+     haut, où la tête s arrondit. g(u) : la fraction d emmanchure où va la fraction u de tête (u = 0 au sommet, 1 sous le bras). */
+  function embu(Lc, Lb){
+    var r = Lb / Math.max(1e-6, Lc); if (!(r < 0.999)) return function(u){ return u; };
+    var a = 0.35, w = 0.2, H = 1 - a - w / 2, k0 = Math.max(0.5, (r - H) / (1 - H));
+    var Hc = function(u){ if (u <= a) return 0; if (u >= a + w) return w / 2 + (u - a - w); var t = (u - a) / w; return w * (t * t * t - t * t * t * t / 2); };
+    var tot = k0 + (1 - k0) * Hc(1);
+    return function(u){ u = Math.max(0, Math.min(1, u)); return (k0 * u + (1 - k0) * Hc(u)) / tot; };
+  }
   function teteSurEmmanchure(mailles){
     var dv = mailles.filter(function(m){ return m.pid === 'devant'; })[0], ds = mailles.filter(function(m){ return m.pid === 'dos'; })[0];
     if (!dv || !ds) return;
@@ -3812,6 +4307,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var c = ma.pc.p.contour; if (c.length < 5) return;
       var S = coteMaille(ma), J = ma.J, R = ma.R, bb = ma.pc.bb, yp = ma.yp, pos = ma.pos;
       var capAv = bordPts(c, 1, 2, 1), capAr = bordPts(c, 1, 0, -1), ch = Math.max(c[0].y, c[2].y);
+      var gAv = embu(capAv.tot, emF.tot), gAr = embu(capAr.tot, emB.tot);     // l embu soutenu (voir embu)
       // le rang où le bras reprend : un peu sous le bas de la tête
       var iT = 0; while (iT + 1 < R && yp[iT] < ch + 1.5) iT++;
       if (iT < 2 || iT + 2 >= R) return;
@@ -3837,19 +4333,42 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          prolongée le long de sa tangente. */
       var courbeTete = function(x, Q){
         var av = x >= 0, bt = bordTete(av ? capAv : capAr, x), em = av ? emF : emB, mc = av ? dv : ds, sx = av ? S : -S;
-        var pe = auT(em, Math.max(0, Math.min(1, bt.f))), A = posVirtuel(mc, pointVirtuel(mc, sx * pe[0], pe[1]));
+        var pe = auT(em, (av ? gAv : gAr)(Math.max(0, Math.min(1, bt.f)))), A = posVirtuel(mc, pointVirtuel(mc, sx * pe[0], pe[1]));
         var Pin = posVirtuel(mc, pointVirtuel(mc, sx * (pe[0] - 1), pe[1])), Tc = unit3(sub3(A, Pin));
         var Lq = Math.hypot(Q[0] - A[0], Q[1] - A[1], Q[2] - A[2]), corde = unit3(sub3(Q, A)), mixT = 0.35;
         var T0 = unit3([Tc[0] * mixT + corde[0] * (1 - mixT), Tc[1] * mixT + corde[1] * (1 - mixT), Tc[2] * mixT + corde[2] * (1 - mixT)]);
         var C1 = [A[0] + T0[0] * Lq / 3, A[1] + T0[1] * Lq / 3, A[2] + T0[2] * Lq / 3], C2 = [Q[0] - ax[0] * Lq / 3, Q[1] - ax[1] * Lq / 3, Q[2] - ax[2] * Lq / 3];
         var ev = function(t){ var u = 1 - t, a1 = u * u * u, a2 = 3 * u * u * t, a3 = 3 * u * t * t, a4 = t * t * t;
           return [a1 * A[0] + a2 * C1[0] + a3 * C2[0] + a4 * Q[0], a1 * A[1] + a2 * C1[1] + a3 * C2[1] + a4 * Q[1], a1 * A[2] + a2 * C1[2] + a3 * C2[2] + a4 * Q[2]]; };
-        var T = [0], prev = A; for (var e = 1; e <= 24; e++) { var pn = ev(e / 24); T.push(T[e - 1] + Math.hypot(pn[0] - prev[0], pn[1] - prev[1], pn[2] - prev[2])); prev = pn; }
-        return { bt: bt, A: A, point: function(tl){
+        var T, mesurer = function(){ T = [0]; var prev = A; for (var e = 1; e <= 24; e++) { var pn = ev(e / 24); T.push(T[e - 1] + Math.hypot(pn[0] - prev[0], pn[1] - prev[1], pn[2] - prev[2])); prev = pn; } };
+        mesurer();
+        /* ⚠ (2026-10-18, banc 3D) L AISANCE DU BAS DE TÊTE : sur les côtés bas de la tête, l anneau du bras passe tout près de
+           l emmanchure — 1 cm de courbe pour 5 cm de patron, le tissu tassé dix fois (des éclats sous le bras). Le tissu de trop
+           s écarte du bras : la courbe prend un ventre, vers le dehors de l axe du bras, jusqu à 80 % de la longueur du patron. */
+        var Lp = Math.max(0.5, yp[iT] - bt.y), ventre = 0;
+        var gonfler = function(hv){
+          var mil = [(A[0] + Q[0]) / 2 - C0[0], (A[1] + Q[1]) / 2 - C0[1], (A[2] + Q[2]) / 2 - C0[2]], pa3 = pt3(mil, ax);
+          var rd3 = [mil[0] - ax[0] * pa3, mil[1] - ax[1] * pa3, mil[2] - ax[2] * pa3], pc3 = pt3(rd3, corde);
+          rd3 = unit3([rd3[0] - corde[0] * pc3, rd3[1] - corde[1] * pc3, rd3[2] - corde[2] * pc3]);
+          // le ventre se prend côté bras (C2) seulement : déplacer C1 changeait l angle où la tête quitte la couture — un pli le long
+          // du bas d emmanchure
+          for (var cv = 0; cv < 3; cv++) C2[cv] += rd3[cv] * hv * 2;
+          ventre += hv; mesurer();
+        };
+        // le ventre LISSÉ d une colonne à l autre (ventreDe, posé plus bas) ; sans lui, on le calcule — linéaire dans le manque, pas
+        // en racine : une colonne bombée à côté d une colonne qui ne l était pas faisait un pli cassé
+        if (ventreDe) { var vd = ventreDe(x); if (vd > 0) gonfler(vd); }
+        else for (var iv = 0; iv < 3 && T[24] < 0.8 * Lp; iv++) gonfler(Math.min(2.5, 0.45 * (0.8 * Lp - T[24])) / 0.75);
+        return { bt: bt, A: A, ventre: ventre, point: function(tl){
           if (tl < 0) { var te = Math.max(-1, tl); return [A[0] + 3 * (C1[0] - A[0]) * te, A[1] + 3 * (C1[1] - A[1]) * te, A[2] + 3 * (C1[2] - A[2]) * te]; }
           var d = Math.min(1, tl) * T[24], k = 1; while (k < 24 && T[k] < d) k++;
           return ev((k - 1 + (d - T[k - 1]) / ((T[k] - T[k - 1]) || 1)) / 24); } };
       };
+      // le ventre de chaque colonne, puis LISSÉ sur ± 3 colonnes (trois passes) : la grille et le raccord lisent le même
+      var ventreDe = null, vbrut = [];
+      for (var jv = 0; jv <= J; jv++) { var kv = (iT * (J + 1) + jv) * 3; vbrut.push(courbeTete(bb.x0 + (bb.x1 - bb.x0) * jv / J, [pos[kv], pos[kv + 1], pos[kv + 2]]).ventre); }
+      for (var pv5 = 0; pv5 < 3; pv5++) vbrut = vbrut.map(function(v, jv){ var s5 = 0, n5 = 0; for (var d5 = -3; d5 <= 3; d5++) { var q5 = jv + d5; if (q5 >= 0 && q5 <= J) { s5 += vbrut[q5]; n5++; } } return s5 / n5; });
+      ventreDe = function(x){ var f = Math.max(0, Math.min(J, (x - bb.x0) / (bb.x1 - bb.x0) * J)), j0 = Math.min(J - 1, Math.floor(f)); return vbrut[j0] + (vbrut[j0 + 1] - vbrut[j0]) * (f - j0); };
       var neuf = new Float32Array(iT * (J + 1) * 3);
       for (var j = 0; j <= J; j++) {
         var x = bb.x0 + (bb.x1 - bb.x0) * j / J, kq = (iT * (J + 1) + j) * 3, ct = courbeTete(x, [pos[kq], pos[kq + 1], pos[kq + 2]]);
@@ -4107,11 +4626,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var courbe = function(t){ var m = milieu(t), f0 = lisse(1 - t * L / 2), f1 = lisse(1 - (1 - t) * L / 2);
         var c3 = new Float32Array([m[0] + (T0[0] - M0[0]) * f0 + (T1[0] - M1[0]) * f1, m[1] + (T0[1] - M0[1]) * f0 + (T1[1] - M1[1]) * f1, m[2] + (T0[2] - M0[2]) * f0 + (T1[2] - M1[2]) * f1]);
         if (tubes) repousser(c3, 0, tubes, 0.4); return [c3[0], c3[1], c3[2]]; };
+      // la courbe est paramétrée par l emmanchure (le maître) ; la tête de manche y va par l embu soutenu (voir embu)
+      var gD = D[8] === 'B' ? embu(D[1].tot, D[4].tot) : null;
       [[D[0], D[1], D[2]], [D[3], D[4], D[5]]].forEach(function(S){
         var M = S[0], b = S[1], s = S[2], rd = M.rendu, a = acc.get(M); if (!rd || !a) return;
         for (var v = 0; v < rd.n; v++) {
           var sb = surBord(b, s, rd.vx[v], rd.vy[v]); if (sb.d >= RF) continue;
-          var E = surGrille(M, b, s, sb.t), C = courbe(sb.t);
+          var E = surGrille(M, b, s, sb.t), C = courbe(gD && M === D[0] ? gD(sb.t) : sb.t);
           // SUR la couture : le sommet prend la position même de la courbe cousue (absolue — un déplacement relatif reportait
           // l écart entre le sommet et son point projeté, sensible là où la tête de manche est raide)
           if (sb.d < 0.02) { a.ex[v * 3] += C[0]; a.ex[v * 3 + 1] += C[1]; a.ex[v * 3 + 2] += C[2]; a.nx[v]++; continue; }
@@ -4131,6 +4652,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       for (var v = 0; v < n; v++) vois.push([]);
       for (var t = 0; t < I.length; t += 3) for (var e = 0; e < 3; e++) { var x = I[t + e], y = I[t + (e + 1) % 3]; if (vois[x].indexOf(y) < 0) vois[x].push(y); if (vois[y].indexOf(x) < 0) vois[y].push(x); }
       var bande = []; for (var v2 = 0; v2 < n; v2++) if (a.nx[v2] === 0 && a.w[v2] > 0) bande.push(v2);
+      rd.cousu = new Uint8Array(n); for (var v5 = 0; v5 < n; v5++) if (a.nx[v5] > 0) rd.cousu[v5] = 1;     // pour detordre
       // ⚠ le lissage ne garde que sa composante NORMALE à la surface : la moyenne des voisins, près des petits triangles du bord,
       // faisait GLISSER les sommets le long du tissu (jusqu à 1 cm au sommet de la tête de manche : des triangles étirés 20 fois)
       var nrm = function(v){ var pv = rd.poids[v], o = [0, 0, 0]; for (var q = 0; q < 3; q++) { var k = pv.k[q], w = pv.w[q]; o[0] += ma.nor[k * 3] * w; o[1] += ma.nor[k * 3 + 1] * w; o[2] += ma.nor[k * 3 + 2] * w; } return unit3(o); };
@@ -4222,11 +4744,75 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var e = Math.round(Math.hypot(A[0] - B[0], A[1] - B[1], A[2] - B[2]) * 100) / 100; if (!m[D[6]] || e > m[D[6]][0]) m[D[6]] = [e, t, [A[0] - B[0], A[1] - B[1], A[2] - B[2]].map(function(v){ return Math.round(v * 10) / 10; })]; } });
     return m;
   }
+  /* LES TRIANGLES RETOURNÉS (2026-10-18, banc 3D) : le long du bas d emmanchure (au creux de l aisselle, le bras et le tronc
+     repoussent la bande de couture dans deux sens) et au bord de l encolure du dos, des triangles se retournaient — pas du drapé,
+     un tissu replié sur lui-même (plis cassés à 170°). Une face est retournée quand sa normale s écarte de plus de ~80° de celle
+     de la grille dessous (qui dit où est le dehors) ; ses sommets — jamais ceux cousus sur une couture — reprennent la moyenne de
+     leurs voisins, puis sortent du corps. On recommence tant qu il en reste (12 fois au plus). */
+  function detordre(ma, tubes){
+    var rd = ma.rendu, PZ = rd.pos, I = rd.idx, n = rd.n, cousu = rd.cousu || new Uint8Array(n), vois = [];
+    for (var v = 0; v < n; v++) vois.push([]);
+    for (var t = 0; t < I.length; t += 3) for (var e = 0; e < 3; e++) { var x = I[t + e], y = I[t + (e + 1) % 3]; if (vois[x].indexOf(y) < 0) vois[x].push(y); if (vois[y].indexOf(x) < 0) vois[y].push(x); }
+    var refN = new Float32Array(n * 3);
+    for (var r = 0; r < n; r++) { var pv = rd.poids[r], o = [0, 0, 0]; for (var q = 0; q < 3; q++) { var k = pv.k[q], w = pv.w[q]; o[0] += ma.nor[k * 3] * w; o[1] += ma.nor[k * 3 + 1] * w; o[2] += ma.nor[k * 3 + 2] * w; }
+      o = unit3(o); refN[r * 3] = o[0]; refN[r * 3 + 1] = o[1]; refN[r * 3 + 2] = o[2]; }
+    var normale = function(t){ var a = I[t] * 3, b = I[t + 1] * 3, c = I[t + 2] * 3;
+      var ex = PZ[b] - PZ[a], ey = PZ[b + 1] - PZ[a + 1], ez = PZ[b + 2] - PZ[a + 2], fx = PZ[c] - PZ[a], fy = PZ[c + 1] - PZ[a + 1], fz = PZ[c + 2] - PZ[a + 2];
+      return [ey * fz - ez * fy, ez * fx - ex * fz, ex * fy - ey * fx]; };
+    // le sens des faces se décide une fois, à la majorité (comme finirConforme)
+    var vote = 0; for (var t0 = 0; t0 < I.length; t0 += 3) { var f0 = normale(t0); for (var s0 = 0; s0 < 3; s0++) vote += f0[0] * refN[I[t0 + s0] * 3] + f0[1] * refN[I[t0 + s0] * 3 + 1] + f0[2] * refN[I[t0 + s0] * 3 + 2]; }
+    var sg = vote < 0 ? -1 : 1;
+    // les triangles de chaque sommet, et combien seraient des éclats si le sommet était en (px, py, pz)
+    var triDe = []; for (var v6 = 0; v6 < n; v6++) triDe.push([]);
+    for (var t6 = 0; t6 < I.length; t6 += 3) for (var s6 = 0; s6 < 3; s6++) triDe[I[t6 + s6]].push(t6);
+    var eclats = function(v, px, py, pz){ var nb2 = 0;
+      triDe[v].forEach(function(t){
+        var a2 = Math.abs((rd.vx[I[t + 1]] - rd.vx[I[t]]) * (rd.vy[I[t + 2]] - rd.vy[I[t]]) - (rd.vy[I[t + 1]] - rd.vy[I[t]]) * (rd.vx[I[t + 2]] - rd.vx[I[t]])) / 2;
+        if (a2 < 0.02) return;
+        for (var e2 = 0; e2 < 3; e2++) { var a = I[t + e2], b = I[t + (e2 + 1) % 3];
+          var pa = a === v ? [px, py, pz] : [PZ[a * 3], PZ[a * 3 + 1], PZ[a * 3 + 2]], pb = b === v ? [px, py, pz] : [PZ[b * 3], PZ[b * 3 + 1], PZ[b * 3 + 2]];
+          var l2 = Math.hypot(rd.vx[a] - rd.vx[b], rd.vy[a] - rd.vy[b]); if (l2 < 1e-6) continue;
+          var r2 = Math.hypot(pa[0] - pb[0], pa[1] - pb[1], pa[2] - pb[2]) / l2; if (r2 > 2 || r2 < 0.4) { nb2++; return; } } });
+      return nb2; };
+    for (var tour = 0; tour < 12; tour++) {
+      var mauvais = new Uint8Array(n), nb = 0;
+      for (var t1 = 0; t1 < I.length; t1 += 3) {
+        var f1 = normale(t1), l1 = Math.hypot(f1[0], f1[1], f1[2]); if (l1 < 1e-9) continue;
+        var rm = [0, 0, 0]; for (var s1 = 0; s1 < 3; s1++) for (var c1 = 0; c1 < 3; c1++) rm[c1] += refN[I[t1 + s1] * 3 + c1];
+        rm = unit3(rm);
+        if (sg * (f1[0] * rm[0] + f1[1] * rm[1] + f1[2] * rm[2]) / l1 < -0.17) for (var s2 = 0; s2 < 3; s2++) { var vv = I[t1 + s2]; if (!cousu[vv] && !mauvais[vv]) { mauvais[vv] = 1; nb++; } }
+      }
+      if (!nb) break;
+      var nv = PZ.slice();
+      // ⚠ pas la simple moyenne des voisins : elle tassait les triangles (des éclats à la place des plis). Le sommet va là où le
+      // PATRON le place par rapport à ses voisins : l application patron → 3D, ajustée sur eux (moindres carrés), en son point
+      for (var v3 = 0; v3 < n; v3++) { if (!mauvais[v3] || vois[v3].length < 3) continue;
+        var L = vois[v3], nq = L.length, um = 0, wm = 0, m = [0, 0, 0];
+        L.forEach(function(qq){ um += rd.vx[qq]; wm += rd.vy[qq]; m[0] += PZ[qq * 3]; m[1] += PZ[qq * 3 + 1]; m[2] += PZ[qq * 3 + 2]; });
+        um /= nq; wm /= nq; m = [m[0] / nq, m[1] / nq, m[2] / nq];
+        var suu = 0, suw = 0, sww = 0, bu = [0, 0, 0], bw = [0, 0, 0];
+        L.forEach(function(qq){ var du = rd.vx[qq] - um, dw = rd.vy[qq] - wm; suu += du * du; suw += du * dw; sww += dw * dw;
+          for (var c2 = 0; c2 < 3; c2++) { var dp = PZ[qq * 3 + c2] - m[c2]; bu[c2] += du * dp; bw[c2] += dw * dp; } });
+        var det = suu * sww - suw * suw, du0 = rd.vx[v3] - um, dw0 = rd.vy[v3] - wm;
+        for (var c3 = 0; c3 < 3; c3++) {
+          var ju = det > 1e-9 ? (bu[c3] * sww - bw[c3] * suw) / det : 0, jw = det > 1e-9 ? (bw[c3] * suu - bu[c3] * suw) / det : 0;
+          nv[v3 * 3 + c3] = m[c3] + ju * du0 + jw * dw0; } }
+      // ⚠ un sommet ne bouge que si AUCUN de ses triangles ne devient un éclat (étiré au-delà de 2 fois, tassé sous 0,4 — le
+      // critère du banc) : au creux de l aisselle, le pli retourné absorbe du tissu de trop, et le déplier le tassait ailleurs
+      var un = new Float32Array(3), bouge = 0;
+      for (var v4 = 0; v4 < n; v4++) { if (!mauvais[v4]) continue;
+        un[0] = nv[v4 * 3]; un[1] = nv[v4 * 3 + 1]; un[2] = nv[v4 * 3 + 2]; if (tubes) repousser(un, 0, tubes, 0.4);
+        if (eclats(v4, PZ[v4 * 3], PZ[v4 * 3 + 1], PZ[v4 * 3 + 2]) < eclats(v4, un[0], un[1], un[2])) continue;
+        PZ[v4 * 3] = un[0]; PZ[v4 * 3 + 1] = un[1]; PZ[v4 * 3 + 2] = un[2]; bouge++; }
+      if (!bouge) break;
+    }
+  }
   function conformerHaut(mailles, tubes){
     var tops = mailles.filter(function(m){ return m.pid === 'devant' || m.pid === 'dos' || m.pid === 'manche'; });
     if (window.__szBanc3d) GLV.ecartsAvantZip = ecartsCoutures(mailles);
     tops.forEach(function(ma){ try { ma.rendu = maillageConforme(ma); } catch (e) { ma.rendu = null; GLV.erreurConf = String(e && e.stack || e); } });
     try { zipperCoutures(tops, descrCouturesHaut(mailles), tubes); } catch (e) { GLV.erreurConf = String(e && e.stack || e); }
+    tops.forEach(function(ma){ if (ma.rendu) detordre(ma, tubes); });
     if (window.__szBanc3d) try { GLV.ecartsRendus = ecartsRendus(descrCouturesHaut(mailles)); } catch (e) { GLV.erreurConf = String(e && e.stack || e); }
   }
   /* L OMBRE DE CONTACT (occlusion ambiante, 2026-10-17, sa référence Fal.ai : le tissu y a de la PROFONDEUR — plus
@@ -5845,11 +6431,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (t.closest('#m-enreg')) { enregistrer(t.closest('#m-enreg')); return; }
   });
 
-  function ouvrirNeuf(){ if (!D) return; M = modeleNeuf('robe'); TRACE = true; TAP = 'M'; TOUTES = false; VUE = 'modele'; dessiner(); var n = document.getElementById('m-nom'); if (n) n.focus(); }
+  function ouvrirNeuf(){ if (!D) return; M = modeleNeuf('robe'); TRACE = true; TAP = 'M'; TOUTES = false; PILEM = []; REFM = []; FLY = ''; VUE = 'modele'; dessiner(); var n = document.getElementById('m-nom'); if (n) n.focus(); }
   function ouvrirModele(id){
     var m = (D.modeles || []).filter(function(x){ return x.id === id; })[0];
     if (!m) { dire(MOTIFS.introuvable, 'err'); return; }
-    SEL = id; M = copie(m); TRACE = false; TAP = m.tailleBase || 'M'; TOUTES = false; VUE = 'modele'; dessiner();
+    SEL = id; M = copie(m); TRACE = false; TAP = m.tailleBase || 'M'; TOUTES = false; PILEM = []; REFM = []; FLY = ''; VUE = 'modele'; dessiner();
   }
   function revenir(){
     if (TRACE && M && M.id) {
