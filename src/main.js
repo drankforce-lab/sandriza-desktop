@@ -6224,9 +6224,32 @@ const fenetresNonEnregistrees = () => {
   });
   return out;
 };
+/* ⚠ LA VERSION SE REVÉRIFIE AU MOMENT D INSTALLER (2026-10-18, sa capture : « Cannot download … 404 ») : la barre
+   annonçait la version vue à la dernière veille ; une version plus récente publiée entre-temps remplace l ancienne
+   sur le serveur, et le téléchargement de celle qu on avait vue échouait en 404. On redemande donc au serveur la
+   DERNIÈRE version juste avant de proposer, et on l affiche. Rend la version, ou null (rien de plus récent / hors ligne). */
+const rafraichirVersionMaj = async (updater) => {
+  try {
+    const avant = updater.autoDownload; updater.autoDownload = false;
+    const r = await updater.checkForUpdates();
+    updater.autoDownload = avant;
+    const nv = r && r.updateInfo && r.updateInfo.version ? String(r.updateInfo.version) : '';
+    if (nv && nv !== app.getVersion()) {
+      // un ancien paquet déjà téléchargé ne s installe pas si une version plus récente existe
+      if (_majVersionPrete && _majVersionPrete !== nv) _majVersionPrete = '';
+      _majVersionVue = nv; _majDispo = true;
+      try { majEtat({ etape: 'disponible', version: nv }); } catch (e) {}
+      return nv;
+    }
+  } catch (e) { /* hors ligne : on garde ce qu on savait */ }
+  return null;
+};
+
 const proposerInstallation = async (version) => {
   const parent = (mainWindow && !mainWindow.isDestroyed()) ? mainWindow : undefined;
-  const v = String(version || _majVersionVue || '');
+  let updater0 = null; try { updater0 = getUpdater(); } catch (e) {}
+  const fraiche = updater0 && !_updBusy ? await rafraichirVersionMaj(updater0) : null;
+  const v = String(fraiche || _majVersionVue || version || '');
   const { response } = await dialog.showMessageBox(parent, {
     type: 'question', buttons: [TP('Installer maintenant'), TP('Plus tard')], defaultId: 0, cancelId: 1,
     title: TP('Mise à jour'), message: TP('Nouvelle version {0} disponible.', v),
@@ -6253,7 +6276,17 @@ const proposerInstallation = async (version) => {
   if (_majVersionPrete) { installerEtRelancer(updater); return true; }
   majEtat({ etape: 'telechargement', version: v, percent: 0 });
   try { _updBusy = true; updater.autoDownload = true; await updater.downloadUpdate(); }
-  catch (e) { _updBusy = false; _installDemandee = false; majEtat(null);
+  catch (e) {
+    // 404 : la version a été remplacée sur le serveur pendant qu on regardait — on revérifie et l on réessaie UNE fois
+    if (/404|not found/i.test(String((e && e.message) || e))) {
+      _updBusy = false;
+      const nv = await rafraichirVersionMaj(updater);
+      if (nv) {
+        try { majEtat({ etape: 'telechargement', version: nv, percent: 0 }); _updBusy = true; updater.autoDownload = true; await updater.downloadUpdate(); return true; }
+        catch (e2) { e = e2; }
+      }
+    }
+    _updBusy = false; _installDemandee = false; majEtat(null);
     dialog.showMessageBox(parent, { type: 'error', title: TP('Mise à jour'), message: TP('Le téléchargement de la mise à jour a échoué.'), detail: String((e && e.message) || e) }); }
   return true;
 };
