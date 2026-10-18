@@ -157,4 +157,8 @@ module.exports = {
   "Comparer les marges en tenant compte des coûts numériques (photos, IA, 3D)": "Compare margins including digital costs (photos, AI, 3D)",
   "Sélectionner": "Select",
   "Nouveau prix de": "New price for",
+  /* ── Les coûts par article, nommés (2026-10-18) ── */
+  "Vue 360°": "360° view",
+  "Aperçu 3D": "3D preview",
+  "Mannequin retiré": "Mannequin removed",
 };

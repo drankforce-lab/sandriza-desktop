@@ -66,6 +66,19 @@ const CSS_PROPRE = `
 .pf-med-l{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-top:.65rem}
 .pf-med-l video{height:96px;max-width:170px;border-radius:8px;background:#000}
 html.jour .pf-med-l video{background:#1d2433}
+/* ⚠ LA CARTE NE SE TASSE PAS (2026-10-18) : « plein » la laisse rétrécir dans l'étape, et 36 vues 360° plus la ligne
+   de génération débordaient de son cadre. Elle prend la hauteur de son contenu ; c'est l'étape qui défile. */
+#p-med-carte{flex:0 0 auto}
+/* LA BARRE D'ÉTAPES DE LA VUE 360° (2026-10-18, sa demande : « chaque étape cochée, l'étape en cours et sa durée »). */
+#p-360-etapes{list-style:none;margin:.55rem 0 0;padding:0;display:flex;flex-wrap:wrap;gap:.3rem .45rem}
+#p-360-etapes li{display:flex;align-items:center;gap:.35rem;font-size:.75rem;color:var(--tx2);
+  padding:.2rem .55rem;border-radius:99px;border:1px solid var(--v12);background:var(--v05)}
+#p-360-etapes li .m{font-weight:700;min-width:1em;text-align:center}
+#p-360-etapes li .d{color:var(--tx3);font-variant-numeric:tabular-nums}
+#p-360-etapes li.cours{border-color:var(--or);color:var(--tx)}
+#p-360-etapes li.fait{color:var(--tx)}
+#p-360-etapes li.fait .m{color:var(--tx-ok)}
+#p-360-etapes li.err{border-color:var(--tx-err);color:var(--tx-err)}
 #p-360-bande{display:flex;gap:4px;flex-wrap:wrap;margin-top:.4rem}
 #p-360-bande img{width:40px;height:52px;object-fit:cover;border-radius:5px;border:1px solid var(--v22)}
 .cote.pf-bas{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}
@@ -232,7 +245,7 @@ html.jour .mv-zone{background:#e9e6df}
   border-radius:50%;font-size:.78rem;line-height:1;font-weight:700;
   background:rgba(200,40,40,.94);border:1px solid var(--v28);color:var(--tx-blanc)}
 .vue .x:hover,.vign .x:hover{background:#e04141;border-color:var(--v50)}
-/* La pastille « Dos » (mode photos simples, 2026-10-18) : désigne la photo du dos de l’aperçu 3D. */
+/* La pastille « Dos » (mode photos simples, 2026-10-18) : désigne la photo du dos de la vue 360°. */
 .vue .dos{position:absolute;top:3px;left:3px;height:20px;padding:0 .5rem;border-radius:99px;
   font-size:.6875rem;font-weight:700;line-height:1;background:var(--f-carte);border:1px solid var(--v28);color:var(--tx2)}
 .vue .dos.on{background:var(--or);border-color:var(--or);color:#1a1208}
@@ -405,11 +418,18 @@ function pageProduit(id) {
   MOTIFS.stock_requis = '${T("Saisissez une quantité pour au moins une variante.")}';
   MOTIFS.couleur_non_mappee = '${T("Cette couleur n’a pas de teinte unie attribuée.")}';
   MOTIFS.fal = '${T("Fal.ai a refusé la demande.")}';
-  MOTIFS.limite3d = '${T("Trois aperçus 3D déjà générés pour cet article dans les dernières 24 heures : réessayez demain.")}';
+  MOTIFS.limite360 = '${T("Trois vues 360° déjà générées pour cet article dans les dernières 24 heures : réessayez demain.")}';
+  MOTIFS.video_illisible = '${T("La vidéo de The New Black n’a pas pu être lue.")}';
+  MOTIFS.cle_absente = '${T("Clé The New Black absente : posez-la dans Configuration › Sécurité.")}';
+  MOTIFS.credits_insuffisants = '${T("Crédits The New Black insuffisants.")}';
+  MOTIFS.tnb_echec = '${T("The New Black n’a pas pu générer la vue 360° (crédits remboursés).")}';
+  MOTIFS.tnb_erreur = '${T("The New Black a refusé la demande.")}';
+  MOTIFS.tnb_injoignable = '${T("The New Black est injoignable.")}';
+  MOTIFS.plafond = '${T("Plafond mensuel des traitements d’image atteint.")}';
   MOTIFS.photo_format = '${T("La photo principale n’est pas dans un format accepté.")}';
-  // L'aperçu 3D exige le devant ET le dos (2026-10-18) : refusé au pont et au relais, motifs nommés.
+  // La vue 360° exige le devant ET le dos (2026-10-18) : refusée au pont et au relais, motifs nommés.
   MOTIFS.photo_absente = '${T("Choisissez d’abord la photo principale.")}';
-  MOTIFS.photo_dos_absente = '${T("Ajoutez une photo du dos pour générer l’aperçu 3D.")}';
+  MOTIFS.photo_dos_absente = '${T("Ajoutez une photo du dos pour générer la vue 360°.")}';
   MOTIFS.photo_dos_format = '${T("La photo du dos n’est pas dans un format accepté.")}';
   MOTIFS.photo_dos_identique = '${T("La photo du dos est la même que celle du devant : choisissez une vraie photo du dos.")}';
   MOTIFS.modele3d_trop_lourd = '${T("L’aperçu 3D est trop lourd (plus de 5,5 Mo).")}';
@@ -432,7 +452,7 @@ function pageProduit(id) {
   // FAISAIT PERDRE ses photos par couleur. Un defaut qui ne se voit pas a
   // l enregistrement — il se decouvre plus tard, sur la boutique.
   var VUES = {};      // { 'vue-2': dataUrl | url, … }
-  // LA PHOTO DU DOS EN MODE PHOTOS SIMPLES (2026-10-18) : l'aperçu 3D exige un devant (la principale) ET un
+  // LA PHOTO DU DOS EN MODE PHOTOS SIMPLES (2026-10-18) : la vue 360° exige un devant (la principale) ET un
   // dos. En mode angles, le dos est la vue « Derrière » ; en mode simple, les photos n'ont pas de rôle — la
   // pastille « Dos » en marque une, retenue ICI par sa chaîne (elle survit au glisser-déposer). Enregistrée
   // dans la fiche sous photoDos (le pont ne la garde que si elle est une des photos supplémentaires).
@@ -647,7 +667,7 @@ function pageProduit(id) {
          boutique exactement comme avant. La taille portée se CHOISIT parmi les
          tailles offertes — tapée, elle finirait par annoncer une taille que la
          fiche ne vend pas. */
-      + '<div class="carte plein"><h2>${T("Médias")}</h2>'
+      + '<div class="carte plein" id="p-med-carte"><h2>${T("Médias")}</h2>'
       + '<div class="pf-med">'
       + ch('p-mq-prenom', '${T("Prénom du mannequin")}', { placeholder: '${T("Ex : Sophie")}' })
       + ch('p-mq-cm', '${T("Taille du mannequin (cm)")}', { type: 'number', min: 120, pas: '1', placeholder: '${T("Ex : 168")}' })
@@ -664,14 +684,20 @@ function pageProduit(id) {
       + '<span class="aide" id="p-360-etat"></span>'
       + '<button type="button" id="p-360-retirer" style="display:none">${T("Tout retirer")}</button></div>'
       + '<div id="p-360-bande"></div>'
-      /* L'APERÇU 3D (7.16.0) : Hunyuan3D par Fal.ai, confirmé en deux clics. Depuis le 2026-10-18 : le devant
-         (photo principale) ET le dos, sinon le bouton est désactivé — ≈ 0,83 $ US (0,825 $, FAL_PRIX). */
-      + '<div class="pf-med-l" id="p-3d-l">'
-      + '<button type="button" id="p-3d-gen"><span class="ic">🧊</span> ${T("Générer l’aperçu 3D")}</button>'
+      /* LA VUE 360° GÉNÉRÉE (2026-10-18, sa décision : « ne fais que Product 360 » de The New Black) : une vidéo de 5 s
+         construite à partir du DEVANT (photo principale) et du DOS — sinon le bouton est désactivé, avec la raison —,
+         dont le poste tire 36 images posées dans la vue 360° ci-dessus. ≈ 0,72 $ US (11 crédits, forfait Business).
+         L'aperçu 3D Hunyuan n'est plus proposé : un aperçu déjà posé reste sur la fiche (ligne « p-3d-l »). */
+      + '<div class="pf-med-l" id="p-360g-l">'
+      + '<button type="button" id="p-360-gen"><span class="ic">🔄</span> ${T("Générer la vue 360°")}</button>'
+      + '<label for="p-360-ref" class="aide">${T("Couleur de référence")}</label>'
+      + '<select id="p-360-ref" style="width:auto;flex:0 0 auto"><option value="devant">${T("Devant (photo principale)")}</option><option value="dos">${T("Dos")}</option><option value="aucune">${T("Aucune correction")}</option></select>'
       + '<span id="p-3d-vues"></span>'
-      + '<img id="p-3d-vign" alt="" style="display:none;width:52px;height:52px;object-fit:contain;border-radius:7px;background:var(--v05)">'
+      + '<span class="aide" id="p-360g-etat"></span></div>'
+      + '<ol id="p-360-etapes" style="display:none"></ol>'
+      + '<div class="pf-med-l" id="p-3d-l" style="display:none">'
       + '<span class="aide" id="p-3d-etat"></span>'
-      + '<button type="button" id="p-3d-retirer" style="display:none">${T("Retirer l’aperçu 3D")}</button></div>'
+      + '<button type="button" id="p-3d-retirer">${T("Retirer l’aperçu 3D")}</button></div>'
       + '</div></div>');
 
     /* 5 bis — PHOTOS PAR COULEUR, ÉTAPE À PART (2026-10-09, sa demande : « que les espaces pour
@@ -869,7 +895,8 @@ function pageProduit(id) {
        Photoroom, 3D), et la marge une fois ce coût réparti sur ses unités en stock. */
     var totU = 0; Object.keys(STOCK).forEach(function(k){ totU += (+STOCK[k] || 0); });
     if (COUTS && COUTS.total > 0) {
-      var det = (COUTS.detail || []).map(function(x){ return x.n + ' × ' + (x.geste || x.modele) + ' : ' + szArgent(x.cout); }).join(' · ');
+      var NOMS_GESTE = { vue360: '${T("Vue 360°")}', apercu3d: '${T("Aperçu 3D")}', fantome: '${T("Mannequin retiré")}' };
+      var det = (COUTS.detail || []).map(function(x){ return x.n + ' × ' + (NOMS_GESTE[x.geste] || x.geste || x.modele) + ' : ' + szArgent(x.cout); }).join(' · ');
       var parU = COUTS.total / Math.max(1, totU);
       h += '<div class="l" title="' + esc(det) + '"><span class="k">${T("Coûts numériques")}</span><span class="v">' + esc(szArgent(COUTS.total))
         + ' <span class="sous" style="font-size:.72rem;color:var(--tx3)">(' + COUTS.n + '${T(" appel(s)")})</span></span></div>';
@@ -1756,11 +1783,11 @@ function pageProduit(id) {
           + (src ? '<button type="button" class="x" data-vuex="' + esc(cle) + '" title="${T("Retirer")}">×</button>' : '')
           + depl
           + ((src && cle.indexOf('libre') === 0) ? '<button type="button" class="dos' + (src === DOS_SRC ? ' on' : '')
-            + '" data-vuedos="' + esc(cle) + '" title="${T("Photo du dos — sert à l’aperçu 3D")}">${T("Dos")}</button>' : '')
+            + '" data-vuedos="' + esc(cle) + '" title="${T("Photo du dos — sert à la vue 360°")}">${T("Dos")}</button>' : '')
           + '<div class="lgd">' + esc(nomVue(cle)) + '</div></div>';
       }).join('');
     }
-    dessiner3d();   // le bouton de l'aperçu 3D dépend de la photo du dos
+    dessiner3d();   // le bouton de la vue 360° dépend de la photo du dos
     var p = document.getElementById('p-parcoul');
     if (!p) return;
     // ⚠ ON MASQUE LA CARTE ENTIERE, on n y met pas un message d excuse. Une carte
@@ -1923,7 +1950,7 @@ function pageProduit(id) {
   }
 
   function montrerImage(src){
-    dessiner3d();   // le devant de l'aperçu 3D est la photo principale
+    dessiner3d();   // le devant de la vue 360° est la photo principale
     var v = document.getElementById('p-vign'); if (!v) return;
     v.classList.toggle('pleine', !!src);
     v.setAttribute('draggable', src ? 'true' : 'false');
@@ -2068,19 +2095,57 @@ function pageProduit(id) {
      le corps sans un mot — d où le refus AVANT la lecture du fichier. */
   var VIDEO = '', VIDEO_OCTETS = 0, VUE360 = [], MQ_TAILLE = '';
 
-  /* ══ L'APERÇU 3D ET LES COÛTS DE L'ARTICLE (7.16.0, 2026-10-09) ═════════════════════════════
-     MOD3D : le modèle (adresse déposée, ou donnée compressée au poste en attente de dépôt).
+  /* ══ LA VUE 360° GÉNÉRÉE ET LES COÛTS DE L'ARTICLE (2026-10-18 ; les coûts : 7.16.0) ═════════════════════════
+     MOD3D : un aperçu 3D DÉJÀ posé (Hunyuan, avant le 2026-10-18) — gardé tel quel, retirable, plus jamais généré.
      CLE_COUTS : la clé sous laquelle le journal des appels payants range ce qu'on dépense ICI —
      l'identifiant du produit, ou « brouillon:… » pendant une création (rattaché au vrai produit à
-     l'enregistrement). COUTS : ce que le journal dit avoir dépensé pour cet article. */
+     l'enregistrement). COUTS : ce que le journal dit avoir dépensé pour cet article.
+     G360 : la génération en cours (Product 360 de The New Black), de la confirmation aux 36 images. */
   var MOD3D = '', CLE_COUTS = '', COUTS = null;
-  var G3D = { conf: false, forcer: false, enCours: false, vignette: '', poids: 0, avert: null, debutCalcul: 0 };
-  /* LE PRIX ANNONCÉ (2026-10-18) : 55 unités Fal.ai à 0,015 $ = 0,825 $ US (45 pour le devant, 10 pour le dos —
-     « multi-view adds $0.15 »). Il part avec la demande (prixAnnonce) : si le relais a un autre prix, rien ne part
-     et la fenêtre affiche le vrai montant. */
-  var PRIX_3D = 0.825;
+  var G360 = { conf: false, forcer: false, enCours: false, debut: 0, etapes: null, minuterie: 0 };
+  /* LES SEPT ÉTAPES. Les cinq premières se font ici, l'une après l'autre ; le dépôt dans R2 et la pose sur la fiche
+     se font à l'enregistrement (c'est le site qui dépose, comme pour toutes les photos). La génération chez The New
+     Black dure ~2 min 15 s (essai du 2026-10-18 : 133 s) : la durée estimée est dite à côté du temps écoulé. */
+  var ETAPES_360 = ['${T("Envoi des photos")}', '${T("Génération chez The New Black")}', '${T("Téléchargement de la vidéo")}',
+    '${T("Découpage en 36 images")}', '${T("Correction de couleur")}', '${T("Dépôt dans R2")}', '${T("Posé sur la fiche")}'];
+  var DUREE_TNB_S = 135;
+  function etape360(i, etat){
+    if (!G360.etapes) return;
+    var e = G360.etapes[i]; if (!e) return;
+    if (etat === 'cours') e.t0 = Date.now();
+    if (etat === 'fait' || etat === 'err') e.t1 = Date.now();
+    e.etat = etat;
+    dessinerEtapes360();
+  }
+  function dessinerEtapes360(){
+    var z = document.getElementById('p-360-etapes'); if (!z) return;
+    if (!G360.etapes) { z.style.display = 'none'; z.innerHTML = ''; return; }
+    z.style.display = '';
+    z.innerHTML = G360.etapes.map(function(e, i){
+      var sec = e.t0 ? Math.round(((e.t1 || Date.now()) - e.t0) / 1000) : 0;
+      var duree = e.etat === 'cours' ? sec + ' s' + (i === 1 ? ' / ≈ ' + DUREE_TNB_S + ' s' : '')
+        : (e.etat === 'fait' ? sec + ' s' : (e.etat === 'apres' ? '${T("à l’enregistrement")}' : ''));
+      var marque = e.etat === 'fait' ? '✓' : (e.etat === 'cours' ? '…' : (e.etat === 'err' ? '✕' : String(i + 1)));
+      return '<li class="' + e.etat + '"><span class="m">' + marque + '</span>' + esc(e.lib)
+        + (duree ? ' <span class="d">' + esc(duree) + '</span>' : '') + '</li>';
+    }).join('');
+  }
+  function debutEtapes360(){
+    G360.etapes = ETAPES_360.map(function(l){ return { lib: l, etat: 'att', t0: 0, t1: 0 }; });
+    clearInterval(G360.minuterie);
+    G360.minuterie = setInterval(function(){ if (G360.enCours) dessinerEtapes360(); else clearInterval(G360.minuterie); }, 1000);
+    dessinerEtapes360();
+  }
+  function echecEtape360(){
+    if (!G360.etapes) return;
+    G360.etapes.forEach(function(e, i){ if (e.etat === 'cours') etape360(i, 'err'); });
+  }
+  /* LE PRIX ANNONCÉ : 2,2 crédits la seconde × 5 s = 11 crédits × 0,065 $ (forfait Business) = 0,715 $ US. Il part
+     avec la demande (prixAnnonce) : si le relais lit un autre barème chez The New Black, rien ne part et la fenêtre
+     affiche le vrai montant. */
+  var PRIX_360 = 0.715;
   function prixUS(x){ return '${T("≈ {n} $ US")}'.replace('{n}', szNombre(Math.round(x * 100) / 100, 2)); }
-  function prix3d(){ return prixUS(PRIX_3D); }
+  function prix360(){ return prixUS(PRIX_360); }
   // La photo du dos : la vue « Derrière » (mode angles) ou la photo marquée « Dos » (mode simple).
   function photoDos(){
     if (!modeStandard()) return VUES.derriere || '';
@@ -2092,13 +2157,18 @@ function pageProduit(id) {
     var k = Object.keys(VUES).filter(function(x){ return VUES[x] === DOS_SRC; })[0];
     return k || '';
   }
-  function raison3d(){
+  function raison360(){
     if (!IMAGE) return '${T("Choisissez d’abord la photo principale.")}';
     var d = photoDos();
-    if (!d) return '${T("Ajoutez une photo du dos pour générer l’aperçu 3D.")}' + ' '
+    if (!d) return '${T("Ajoutez une photo du dos pour générer la vue 360°.")}' + ' '
       + (modeStandard() ? '${T("Marquez-la « Dos » parmi les photos.")}' : '${T("Déposez-la dans la case « Derrière ».")}');
     if (d === IMAGE) return '${T("La photo du dos est la même que celle du devant : choisissez une vraie photo du dos.")}';
     return '';
+  }
+  // La photo dont la couleur fait foi pour les 36 vues : le devant par défaut (sa demande), le dos au choix.
+  function refCouleur(){
+    var c = val('p-360-ref') || 'devant';
+    return c === 'aucune' ? '' : (c === 'dos' ? (photoDos() || IMAGE) : IMAGE);
   }
   function cleCouts(){
     if (ID) return String(ID);
@@ -2112,94 +2182,109 @@ function pageProduit(id) {
     });
   }
   function dessiner3d(){
-    var b = document.getElementById('p-3d-gen'), e = document.getElementById('p-3d-etat');
-    var vg = document.getElementById('p-3d-vign'), rt = document.getElementById('p-3d-retirer');
-    if (!b || !G3D) return;
-    var raison = raison3d(), pv = document.getElementById('p-3d-vues');
-    b.disabled = G3D.enCours || !!raison;
+    var b = document.getElementById('p-360-gen'), e = document.getElementById('p-360g-etat');
+    if (!b || !G360) return;
+    var raison = raison360(), pv = document.getElementById('p-3d-vues');
+    b.disabled = G360.enCours || !!raison;
     b.title = raison;
-    b.innerHTML = G3D.enCours ? '<span class="ic">⏳</span> ${T("Génération en cours…")}'
-      : (G3D.forcer ? '<span class="ic">⚠</span> ${T("Regénérer quand même")}'
-        : (MOD3D ? '<span class="ic">🧊</span> ${T("Regénérer l’aperçu 3D")}' : '<span class="ic">🧊</span> ${T("Générer l’aperçu 3D")}'))
-        + ' (' + prix3d() + ')';
-    // Ce qui part chez Fal.ai, dit en clair : le devant et le dos, chacun avec sa case d'origine.
+    b.innerHTML = G360.enCours ? '<span class="ic">⏳</span> ${T("Génération en cours…")}'
+      : (G360.forcer ? '<span class="ic">⚠</span> ${T("Regénérer quand même")}'
+        : '<span class="ic">🔄</span> ' + (VUE360.length ? '${T("Regénérer la vue 360°")}' : '${T("Générer la vue 360°")}'))
+        + ' (${T("par The New Black")}, ' + prix360() + ')';
+    // Ce qui part chez The New Black, dit en clair : le devant et le dos, chacun avec sa case d'origine.
     if (pv) pv.textContent = '${T("Devant :")} ' + (IMAGE ? '✓ ${T("photo principale")}' : '—') + ' · ${T("Dos :")} '
       + (photoDos() ? '✓ ' + (modeStandard() ? '${T("photo marquée « Dos »")}' : '${T("vue « Derrière »")}') : '—');
-    if (vg) { vg.style.display = (MOD3D && G3D.vignette) ? '' : 'none'; if (G3D.vignette) vg.src = G3D.vignette; }
-    if (rt) rt.style.display = (MOD3D && !G3D.enCours) ? '' : 'none';
-    if (rt) rt.onclick = function(){ MOD3D = ''; G3D.vignette = ''; dessiner3d(); dire('${T("Aperçu 3D retiré — enregistrez pour l’enlever de la boutique.")}', 'att'); };
-    if (e && !G3D.enCours) e.textContent = MOD3D
-      ? (/^data:/.test(MOD3D) ? '${T("Aperçu prêt")} (' + Math.round(G3D.poids / 1024) + ' Ko) — ${T("déposé à l’enregistrement")}' : '${T("Aperçu 3D en ligne sur la fiche.")}')
-      : raison;
-    b.onclick = lancer3d;
+    if (e && !G360.enCours) e.textContent = raison;
+    b.onclick = lancer360;
+    // L'aperçu 3D d'avant : montré s'il existe, retirable, jamais regénéré.
+    var l3 = document.getElementById('p-3d-l'), e3 = document.getElementById('p-3d-etat'), rt = document.getElementById('p-3d-retirer');
+    if (l3) l3.style.display = MOD3D ? '' : 'none';
+    if (e3) e3.textContent = MOD3D ? '${T("Aperçu 3D (Hunyuan) déjà sur la fiche — il reste affiché en boutique.")}' : '';
+    if (rt) rt.onclick = function(){ MOD3D = ''; dessiner3d(); dire('${T("Aperçu 3D retiré — enregistrez pour l’enlever de la boutique.")}', 'att'); };
   }
-  function lancer3d(){
-    if (G3D.enCours) return;
-    var raison = raison3d();
+  function lancer360(){
+    if (G360.enCours) return;
+    var raison = raison360();
     if (raison) { dire(raison, 'att'); dessiner3d(); return; }
-    if (!G3D.conf) {
+    if (!G360.conf) {
       szConfirmer({ prudent: true,
-        titre: G3D.forcer ? '${T("Regénérer l’aperçu 3D")}' : '${T("Générer l’aperçu 3D")}',
-        texte: G3D.forcer
-          ? '${T("Cet article possède déjà un aperçu 3D. Un nouvel aperçu sera généré par Fal.ai à partir de la photo du devant et de la photo du dos, et facturé en supplément.")}'
-          : '${T("L’aperçu 3D sera généré par Fal.ai à partir de la photo du devant (principale) et de la photo du dos. Ce traitement est facturé.")}',
-        details: [['${T("Coût estimé")}', prix3d()], ['${T("Photos envoyées")}', '${T("devant + dos")}'], ['${T("Durée")}', '${T("environ 2 minutes, plus l’attente en file chez Fal.ai")}']],
-        oui: G3D.forcer ? '${T("Regénérer l’aperçu 3D")}' : '${T("Générer l’aperçu 3D")}' }).then(function(ok){ if (ok) { G3D.conf = true; lancer3d(); } });
+        titre: VUE360.length || G360.forcer ? '${T("Regénérer la vue 360°")}' : '${T("Générer la vue 360°")}',
+        texte: (VUE360.length || G360.forcer)
+          ? '${T("Cet article possède déjà une vue 360°. Une nouvelle sera générée par The New Black à partir de la photo du devant et de la photo du dos, et facturée en supplément ; elle remplacera les vues actuelles.")}'
+          : '${T("La vue 360° sera générée par The New Black à partir de la photo du devant (principale) et de la photo du dos : une vidéo de 5 secondes dont le poste tire 36 images, que le client tourne au doigt. Ce traitement est facturé.")}',
+        details: [['${T("Coût estimé")}', prix360()], ['${T("Photos envoyées")}', '${T("devant + dos")}'],
+          ['${T("Durée")}', '${T("environ 2 minutes, puis 30 secondes de préparation au poste")}'],
+          ['${T("Poids en boutique")}', '${T("environ 0,6 Mo, chargés seulement si le client ouvre la vue 360°")}']],
+        oui: (VUE360.length || G360.forcer) ? '${T("Regénérer la vue 360°")}' : '${T("Générer la vue 360°")}' }).then(function(ok){ if (ok) { G360.conf = true; lancer360(); } });
       return;
     }
-    G3D.conf = false; G3D.enCours = true; dessiner3d();
-    var e = document.getElementById('p-3d-etat'); if (e) e.textContent = '${T("Envoi des photos (devant et dos) à Fal.ai…")}';
-    P.appeler('produit:apercu3dLancer', IMAGE, cleCouts(), G3D.forcer, photoDos(), PRIX_3D).then(function(r){
+    G360.conf = false; G360.enCours = true; dessiner3d();
+    debutEtapes360(); etape360(0, 'cours');
+    var e = document.getElementById('p-360g-etat'); if (e) e.textContent = '${T("Envoi des photos (devant et dos) à The New Black…")}';
+    P.appeler('produit:vue360Lancer', IMAGE, cleCouts(), G360.forcer, photoDos(), PRIX_360).then(function(r){
       if (!r || !r.ok) {
-        G3D.enCours = false;
+        G360.enCours = false;
+        // rien n'est parti (prix, avertissement, refus) : la barre d'étapes s'efface, sauf sur une vraie erreur
+        if (r && (r.motif === 'prix_change' || r.motif === 'avertir')) { G360.etapes = null; dessinerEtapes360(); } else echecEtape360();
         if (r && r.motif === 'prix_change' && r.prixReel != null) {
           // ⚠ LE CONTRÔLE DES COÛTS : le relais a un autre prix que celui affiché — RIEN n'est parti.
-          var avant = PRIX_3D; PRIX_3D = Number(r.prixReel); dessiner3d();
-          dire('${T("Le prix a changé : ")}' + prix3d() + '${T(" au lieu de ")}' + prixUS(avant)
+          var avant = PRIX_360; PRIX_360 = Number(r.prixReel); dessiner3d();
+          dire('${T("Le prix a changé : ")}' + prix360() + '${T(" au lieu de ")}' + prixUS(avant)
             + '${T(". Rien n’a été lancé — cliquez de nouveau pour confirmer au nouveau prix.")}', 'att');
           return;
         }
         if (r && r.motif === 'avertir') {
-          // ⚠ LE GARDE-FOU ANTI-BOUCLE : le serveur a déjà des aperçus 3D pour cet article.
-          G3D.forcer = true; dessiner3d();
-          dire('${T("Cet article a déjà ")}' + r.deja + '${T(" aperçu(s) 3D (")}' + szArgent(r.dejaCout || 0) + '${T("). Un autre coûtera ")}' + prix3d()
+          // ⚠ LE GARDE-FOU ANTI-BOUCLE : le serveur a déjà des vues 360° générées pour cet article.
+          G360.forcer = true; dessiner3d();
+          dire('${T("Cet article a déjà ")}' + r.deja + '${T(" vue(s) 360° générée(s) (")}' + szArgent(r.dejaCout || 0) + '${T("). Une autre coûtera ")}' + prix360()
             + '${T(" : cliquez « Regénérer quand même » si c’est voulu.")}', 'att');
           return;
         }
         dessiner3d(); dire(expliquer(r), 'err'); return;
       }
-      G3D.forcer = false; G3D.debutCalcul = 0; chargerCouts();
-      suivre3d(r.etat_url, r.resultat_url, Date.now());
+      G360.forcer = false; chargerCouts();
+      etape360(0, 'fait'); etape360(1, 'cours');
+      suivre360(r.id, Date.now());
     });
   }
-  function suivre3d(eu, ru, t0){
-    var e = document.getElementById('p-3d-etat');
-    P.appeler('produit:apercu3dSuivre', eu, ru).then(function(r){
-      if (!r || !r.ok) { G3D.enCours = false; dessiner3d(); dire(expliquer(r), 'err'); return; }
+  function suivre360(id, t0){
+    var e = document.getElementById('p-360g-etat');
+    var rate = function(r, txt){ G360.enCours = false; echecEtape360(); dessiner3d(); dire((txt || '') + (txt ? ' ' : '') + expliquer(r), 'err'); };
+    P.appeler('produit:vue360Suivre', id).then(function(r){
+      if (!r || !r.ok) { rate(r); return; }
       if (!r.pret) {
         var sec = Math.round((Date.now() - t0) / 1000);
-        if (sec > 600) { G3D.enCours = false; dessiner3d(); dire('${T("Fal.ai n’a pas fini en 10 minutes. Le coût est engagé : réessayez plus tard, sans regénérer.")}', 'err'); return; }
-        /* (2026-10-18, sa question : « pourquoi c’est si long ? ») Deux attentes distinctes : la FILE chez
-           Fal.ai (IN_QUEUE — d'autres demandes passent avant, rien ne se calcule encore) et le CALCUL
-           (IN_PROGRESS). Le temps de chacune se compte à part. */
-        if (r.etat === 'IN_QUEUE') {
-          if (e) e.textContent = '${T("En file chez Fal.ai… ")}' + (r.position != null ? '${T("(position {n})")} '.replace('{n}', String(Number(r.position) + 1)) : '') + sec + ' s';
-        } else {
-          if (!G3D.debutCalcul) G3D.debutCalcul = Date.now();
-          var sc = Math.round((Date.now() - G3D.debutCalcul) / 1000);
-          if (e) e.textContent = '${T("Génération 3D en cours… ")}' + sc + ' s' + (sec - sc > 5 ? ' ' + '${T("(après {n} s en file)")}'.replace('{n}', String(sec - sc)) : '');
-        }
-        setTimeout(function(){ suivre3d(eu, ru, t0); }, 5000);
+        if (sec > 600) { G360.enCours = false; echecEtape360(); dessiner3d(); dire('${T("The New Black n’a pas fini en 10 minutes. Le coût est engagé : réessayez plus tard, sans regénérer.")}', 'err'); return; }
+        if (e) e.textContent = '${T("Génération de la vidéo chez The New Black… ")}' + sec + ' s';
+        setTimeout(function(){ suivre360(id, t0); }, 5000);
         return;
       }
-      if (e) e.textContent = '${T("Compression du modèle…")}';
-      var prep = (P && P.modele3dPreparer) ? P.modele3dPreparer(r.glb) : Promise.resolve(null);
-      prep.then(function(m){
-        G3D.enCours = false;
-        if (!m || !m.ok) { dessiner3d(); dire('${T("Le modèle 3D n’a pas pu être préparé.")}' + (m && m.detail ? ' (' + m.detail + ')' : ''), 'err'); return; }
-        MOD3D = m.dataUrl; G3D.vignette = r.vignette || ''; G3D.poids = m.apres || 0;
-        dessiner3d(); majFicheBientot();
-        dire('${T("Aperçu 3D prêt (")}' + Math.round((m.apres || 0) / 1024) + '${T(" Ko) — il sera déposé à l’enregistrement.")}', 'bon');
+      etape360(1, 'fait'); etape360(2, 'cours');
+      if (e) e.textContent = '${T("Vidéo prête — téléchargement…")}';
+      var video = r.video;
+      P.appeler('produit:vue360Telecharger', video).then(function(a){
+        if (!a || !a.ok) { rate(a, '${T("Les vues 360° n’ont pas pu être tirées de la vidéo.")}'); return; }
+        etape360(2, 'fait'); etape360(3, 'cours');
+        if (e) e.textContent = '${T("Découpage de la vidéo en 36 images…")}';
+        P.appeler('produit:vue360Decouper', video).then(function(b){
+          if (!b || !b.ok) { rate(b, '${T("Les vues 360° n’ont pas pu être tirées de la vidéo.")}'); return; }
+          etape360(3, 'fait'); etape360(4, 'cours');
+          if (e) e.textContent = '${T("Correction de couleur…")}';
+          P.appeler('produit:vue360Couleur', video, refCouleur()).then(function(x){
+            G360.enCours = false;
+            if (!x || !x.ok) { echecEtape360(); dessiner3d(); dire('${T("Les vues 360° n’ont pas pu être tirées de la vidéo.")}' + (x && x.detail ? ' (' + x.detail + ')' : ''), 'err'); return; }
+            etape360(4, 'fait');
+            if (G360.etapes) { G360.etapes[5].etat = 'apres'; G360.etapes[6].etat = 'apres'; dessinerEtapes360(); }
+            VUE360 = x.vues.slice();
+            dessinerMedias(); majFicheBientot();
+            var c = x.couleur || null;
+            var mot = (c && c.refuse === 'teinte')
+              ? ' ${T("Couleur NON harmonisée : la photo de référence ne semble pas être le même vêtement.")}'
+              : (c && c.apres ? ' ${T("Couleur harmonisée sur la photo de référence.")}' : '');
+            dire(VUE360.length + ' ${T("vues 360° prêtes")} (' + szOctets(x.poids || 0) + ') — ${T("déposées à l’enregistrement.")}' + mot,
+              (c && c.refuse) ? 'att' : 'bon');
+          });
+        });
       });
     });
   }
@@ -3535,7 +3620,7 @@ function pageProduit(id) {
       belowCost: !!SOUSCOUT,
       belowCostReason: SOUSCOUT ? SOUSCOUT.raison : '',
       additionalImages: VUES,
-      // La photo du dos en mode simple (l'aperçu 3D) ; en mode angles, c'est la vue « Derrière » — null.
+      // La photo du dos en mode simple (la vue 360°) ; en mode angles, c'est la vue « Derrière » — null.
       photoDos: (modeStandard() && photoDos()) ? photoDos() : null,
       // Les mesures du vêtement (7.13.0) : null = aucune. Le pont ne les écrit que si la clé est envoyée.
       mesuresVetement: mvPourEnvoi(),
@@ -3553,7 +3638,7 @@ function pageProduit(id) {
       mannequin: MQ || null,
       video: VIDEO || null,
       vue360: VUE360.length ? VUE360.slice() : null,
-      // L'aperçu 3D, et la clé des coûts engagés pendant la création (rattachés au produit).
+      // L'aperçu 3D d'avant (gardé, ou retiré), et la clé des coûts engagés pendant la création (rattachés au produit).
       modele3d: MOD3D || null,
       brouillonCouts: (!ID && CLE_COUTS) ? CLE_COUTS : ''
     }).then(function(r){

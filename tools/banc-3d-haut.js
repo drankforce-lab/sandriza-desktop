@@ -92,18 +92,33 @@ const SEUILS = { etires: 0, plis: 0, dedans: 0, fentes: 0, couture: 0.15, ballon
    ZÉRO est toujours affiché (« reste »). --strict juge sur la cible, zéro. ⚠ Un plafond se BAISSE quand le moteur progresse,
    il ne se monte jamais pour faire passer un changement. Le reste des seuils (dedans, couture, ballon, épaulette) vaut pour tous.
    percees (2026-10-18, sa capture 72) : les points où le mannequin perce le tissu, toutes vues — avant le recouvrement des coutures
-   et le décalage de profondeur du mannequin : 543, 511, 621, 662, 512. Mannequin femme ; l homme (--homme) n a pas de plafond. */
+   et le décalage de profondeur du mannequin : 543, 511, 621, 662, 512. Mannequin femme ; l homme (--homme) n a pas de plafond.
+   ⚠ (2026-10-18, second tour) la mesure ne compte plus la frange des grandes zones (voir percees), puis le mannequin recule de 2 cm :
+   95, 94, 100, 109, 77 → 66, 74, 66, 72, 57. Le défroissage : plis 41 → 39, 106 → 82, 15 → 14, 70 → 66, 25 → 24 ; éclats 231 → 227,
+   93 → 90, 100 → 98. ⚠ Les plafonds valent pour TOUS les réglages de plis : chacun est le plus haut du défaut et de « Aucun »
+   (--sansplis), jamais au-dessus de l ancien. « Aucun » reste au-dessus sur trois cas (2026-10-18) : t-shirt XS 2 fentes (un pli
+   retourné de la manche au coin d aisselle, un jour à l emmanchure dos), chemise M 1 fente, chemisier XS 103 éclats et 27 plis — sans
+   plis de vie, rien ne les recouvre. Les plis de traction ADOUCIS (sa décision) ne soulèvent plus le tissu du corps : les points de
+   perçage sont ceux du vêtement sans eux (67, 75, 66, 73, 59 — mesurés traction coupée).
+   traction : [crêtes, la plus franche en cm] de chaque côté, devant puis dos — des planchers (voir TRACTION plus bas). */
 const PLAFONDS = {
-  'ts-xs': { etires: 80, plis: 41, fentes: 0, percees: 128 },
-  'ts-l': { etires: 231, plis: 106, fentes: 2, percees: 123 },
-  'sw-xs': { etires: 93, plis: 15, fentes: 0, percees: 122 },
-  'ch-m': { etires: 189, plis: 70, fentes: 0, percees: 166 },
-  'cs-xs': { etires: 100, plis: 25, fentes: 0, percees: 93 },
+  'ts-xs': { etires: 80, plis: 41, fentes: 0, percees: 66, traction: { devant: [3, 0.15], dos: [2, 0.06] } },
+  'ts-l': { etires: 227, plis: 84, fentes: 2, percees: 75, traction: { devant: [0, 0], dos: [2, 0.18] } },
+  'sw-xs': { etires: 90, plis: 14, fentes: 0, percees: 82, traction: { devant: [2, 0.08], dos: [1, 0.12] } },
+  'ch-m': { etires: 189, plis: 66, fentes: 0, percees: 73, traction: { devant: [1, 0.04], dos: [0, 0] } },
+  'cs-xs': { etires: 100, plis: 25, fentes: 0, percees: 59, traction: { devant: [2, 0.1], dos: [2, 0.17] } },
 };
 const STRICT = ARGS.includes('--strict');
 // LES PLIS DE VIE (2026-10-18) : ils doivent EXISTER (réglage « Naturels ») et rester sobres — la plus grande levée du tissu sur le corps
 // (devant, dos), en cm. Avec --sansplis (réglage « Aucun »), aucune.
 const PLIS_VIE = { min: 0.15, max: 1.2 };
+/* (2026-10-18) LES PLIS DE TRACTION ET LE BORD-CÔTE ont des PLANCHERS : ce qui a été obtenu ne doit pas s effacer. Les plis de traction,
+   au réglage par défaut, par cas (« traction » dans PLAFONDS : [crêtes, la plus franche en cm] de chaque côté, devant puis dos) ; une
+   encolure en bord-côte (t-shirt, sweat) garde sa marche (≥ 0,09 cm) et son roulé (≥ 0,15). Mesurés le 2026-10-18 : marche 0,10 à
+   0,12, roulé 0,17 à 0,23. ⚠ (2026-10-18, sa décision) les plis de traction sont ADOUCIS : ~0,2 cm, effilés — des planchers bas, qui
+   gardent qu ils existent (t-shirt XS : 3 à 4 crêtes de 0,2 cm devant) ; sur le t-shirt L et la chemise M, devant, presque rien ne
+   dépasse 0,5 mm (plancher nul). */
+const BORD_COTE = { marche: 0.09, roule: 0.15 };
 
 const CAS = [
   { id: 'ts-xs', base: 'tshirt', taille: 'XS', options: { encolure: 'ronde', manche: 'courte', longueur: 22 } },
@@ -117,8 +132,9 @@ if (ARGS.includes('--brut')) CAS.forEach((c) => { c.brut = true; });
 if (ARGS.includes('--sansplis')) CAS.forEach((c) => { c.sansPlis = true; });
 // --motif : le motif placé (texte + logo) sur tous les cas — sa capture 73 est un t-shirt imprimé « SANDRIZA »
 if (ARGS.includes('--motif')) CAS.forEach((c) => { c.motif = true; });
-// --homme : le mannequin HOMME (l aperçu 3D le retient par modèle) — DIAGNOSTIC : les plafonds sont ceux du mannequin femme, le
-// verdict y est rouge (2026-10-18 : éclats ×2 à ×3,5, rang arqué de 1 à 1,2 cm — le corps homme n a pas encore été réglé)
+// --homme : le mannequin HOMME (l aperçu 3D le retient par modèle), et un vêtement tracé sur le tableau homme — DIAGNOSTIC : les
+// plafonds sont ceux du mannequin femme, le verdict y est rouge (2026-10-18 : déchirure à l emmanchure devant, tête de manche
+// froissée, jusqu à 437 éclats et 32 fentes ; rang arqué de 0,56 à 0,75 cm — le corps homme n a pas encore été réglé)
 if (ARGS.includes('--homme')) CAS.forEach((c) => { c.homme = true; });
 // --plis legers|naturels|marques : un autre réglage de plis de vie (les plafonds, eux, valent pour le réglage par défaut, « Naturels »)
 if (arg('--plis')) CAS.forEach((c) => { c.plisVie = arg('--plis'); });
@@ -404,10 +420,14 @@ const SCRIPT_PAGE = function () {
     var plein = function (x, y) { for (var dy = -2; dy <= 2; dy++) for (var dx = -2; dx <= 2; dx++) { var xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= W || yy >= H || sans[(yy * W + xx) * 4 + 3] < 255) return false; } return true; };
     for (var p = 0; p < W * H; p++) { var k = p * 4; if (sans[k + 3] < 255 || avec[k + 3] < 255 || !plein(p % W, (p - p % W) / W)) continue;
       if (Math.abs(avec[k] - sans[k]) + Math.abs(avec[k + 1] - sans[k + 1]) + Math.abs(avec[k + 2] - sans[k + 2]) > 24) dif[p] = 1; }
-    var vu = new Uint8Array(W * H), n = 0, pile = [];
-    for (var s = 0; s < W * H; s++) { if (!dif[s] || vu[s]) continue; var aire = 0; pile.push(s); vu[s] = 1;
-      while (pile.length) { var q = pile.pop(), x = q % W; aire++; [q - 1, q + 1, q - W, q + W, q - W - 1, q - W + 1, q + W - 1, q + W + 1].forEach(function (z) { if (z >= 0 && z < W * H && !vu[z] && dif[z] && Math.abs((z % W) - x) <= 1) { vu[z] = 1; pile.push(z); } }); }
-      if (aire <= 12) n++; }
+    // les îlots ; ⚠ (2026-10-18) un petit îlot à moins de 6 px d une GRANDE zone (le bord de l encolure, où le mannequin se voit à
+    // bon droit) n en est que la frange, déchiquetée par l anticrénelage — il ne compte pas (le moindre changement le faisait varier de ±3)
+    var vu = new Int32Array(W * H).fill(-1), n = 0, pile = [], ilots = [], grand = new Uint8Array(W * H);
+    for (var s = 0; s < W * H; s++) { if (!dif[s] || vu[s] >= 0) continue; var pts = []; pile.push(s); vu[s] = ilots.length;
+      while (pile.length) { var q = pile.pop(), x = q % W; pts.push(q); [q - 1, q + 1, q - W, q + W, q - W - 1, q - W + 1, q + W - 1, q + W + 1].forEach(function (z) { if (z >= 0 && z < W * H && vu[z] < 0 && dif[z] && Math.abs((z % W) - x) <= 1) { vu[z] = ilots.length; pile.push(z); } }); }
+      ilots.push(pts); if (pts.length > 12) pts.forEach(function (q) { grand[q] = 1; }); }
+    var pres = function (q) { var x = q % W, y = (q - x) / W; for (var dy = -6; dy <= 6; dy++) for (var dx = -6; dx <= 6; dx++) { var xx = x + dx, yy = y + dy; if (xx >= 0 && yy >= 0 && xx < W && yy < H && grand[yy * W + xx]) return true; } return false; };
+    ilots.forEach(function (pts) { if (pts.length <= 12 && !pts.some(pres)) n++; });
     return n;
   }
   /* LE SCINTILLEMENT DE LA MAILLE (2026-10-18, sa capture 72 : « une tache de moiré de la maille sur le haut du dos ») : la même
@@ -535,11 +555,14 @@ const SCRIPT_PAGE = function () {
 // fabriquer les modèles dans la page, avec le VRAI cœur du site (tracer, graduer)
 const SCRIPT_MODELES = function () {
   var c = window.__szBanc3d.cas, A = window.Atelier, T = ['XS', 'S', 'M', 'L', 'XL'];
-  var ap = A.apercuCoeur({ base: c.base, taille: c.taille, options: c.options });
-  var pr = A.preparerCoeur({ base: c.base, options: c.options, tailleBase: c.taille, pieces: ap.pieces });
+  // (--homme) un vêtement HOMME : tracé sur le tableau standard homme, comme le corps — un t-shirt de femme XS sur un homme XS est
+  // trop petit (et son étirement est vrai : 265 éclats, le dos d encolure tiré 3,5 fois)
+  var tab = null; if (c.homme && A.mesuresHomme) { tab = {}; T.forEach(function (t) { tab[t] = A.mesuresHomme(t); }); }
+  var ap = A.apercuCoeur({ base: c.base, taille: c.taille, options: c.options, tableau: tab || undefined });
+  var pr = A.preparerCoeur({ base: c.base, options: c.options, tailleBase: c.taille, pieces: ap.pieces, tableau: tab || undefined });
   var m = { id: 'banc_' + c.id, createdAt: '2026-10-18T00:00:00Z', updatedAt: '2026-10-18T00:00:00Z', nom: 'Banc ' + c.id, ref: '', categorie: 'hauts', etat: 'brouillon',
     base: c.base, options: c.options || {}, aisances: {}, tailleBase: c.taille, tailles: T, pieces: pr.pieces, assemblages: pr.assemblages || [], edite: false,
-    instantanes: [], motif: null, design3d: null, photo3d: null, planche: null, produitId: '', notes: '', version: 1, versions: [{ n: 1, date: '2026-10-18T00:00:00Z', note: 'banc' }] };
+    instantanes: [], motif: null, tableau: tab || undefined, design3d: null, photo3d: null, planche: null, produitId: '', notes: '', version: 1, versions: [{ n: 1, date: '2026-10-18T00:00:00Z', note: 'banc' }] };
   if (c.motif) {
     // un motif PLACÉ sur le devant, comme le sien : un texte, un logo (une forme orange à sa place), un second texte
     var dv = pr.pieces.filter(function (p) { return p.id === 'devant'; })[0], pli = dv && dv.aupli;
@@ -631,10 +654,14 @@ for (const c of CAS) {
   if (r.plisVie && r.plisVie.erreur) ko.push('plis de vie en erreur : ' + r.plisVie.erreur);
   else if (r.plisVie && !c.sansPlis && (r.plisVie.max < PLIS_VIE.min || r.plisVie.max > PLIS_VIE.max)) ko.push('plis de vie hors amplitude (' + Math.round(r.plisVie.max * 100) / 100 + ' cm, attendu ' + PLIS_VIE.min + ' à ' + PLIS_VIE.max + ')');
   else if (r.plisVie && c.sansPlis && r.plisVie.max > 0.001) ko.push('plis de vie présents avec « Aucun »');
+  const TR = (PLAFONDS[c.id] || {}).traction;
+  if (TR && !STRICT && r.plisVie && r.plisVie.traction && !c.sansPlis && !c.plisVie && !c.homme) Object.keys(TR).forEach((k) => (r.plisVie.traction[k] || []).forEach((t, i) => {
+    if (t[0] < TR[k][0] || t[1] < TR[k][1]) ko.push('plis de traction ' + k + (i ? ' droite' : ' gauche') + ' : ' + t[0] + ' crête(s), ' + t[1] + ' cm (plancher ' + TR[k].join(', ') + ')'); }));
+  if (r.plisVie && r.plisVie.bordCote && (r.plisVie.bordCote.marche < BORD_COTE.marche || r.plisVie.bordCote.roule < BORD_COTE.roule)) ko.push('bord-côte sans épaisseur ' + JSON.stringify(r.plisVie.bordCote));
   if (r.erreurConf) ko.push('maillage conforme en erreur : ' + String(r.erreurConf).split(String.fromCharCode(10))[0]);
   if (ko.length) echec++;
   bilan.push(r);
-  console.log((ko.length ? '✗ ' : '✓ ') + c.id.padEnd(6) + ` triangles ${g.triVisibles}, éclats ${g.etires}, plis cassés ${g.plis}, dans le corps ${g.dedans}, fentes ${r.fentes}, couture la plus ouverte ${ecMax} cm, épaulette ${r.bosse ? r.bosse.monte : '?'} cm, bombé en excès ${r.bosse ? r.bosse.ballon : '?'} cm, arc des rangs ${r.bosse ? r.bosse.arc : '?'} cm, asymétrie ${r.bosse ? r.bosse.asym : '?'} cm, fentes (sa vue de face) ${r.fentesSienne || 0}, fentes (vues du col) ${r.fentesCol || 0}, plis de vie ${r.plisVie ? (Math.round((r.plisVie.max || 0) * 100) / 100) + ' cm (moy. ' + (Math.round((r.plisVie.rms || 0) * 100) / 100) + ')' : '?'}, liseré ${r.lisere ? JSON.stringify(r.lisere) : '?'}, scintillement ${JSON.stringify(r.scintille || {})}, mannequin perçant ${percTot} point(s) ${JSON.stringify(r.percees || {})}`
+  console.log((ko.length ? '✗ ' : '✓ ') + c.id.padEnd(6) + ` triangles ${g.triVisibles}, éclats ${g.etires}, plis cassés ${g.plis}, dans le corps ${g.dedans}, fentes ${r.fentes}, couture la plus ouverte ${ecMax} cm, épaulette ${r.bosse ? r.bosse.monte : '?'} cm, bombé en excès ${r.bosse ? r.bosse.ballon : '?'} cm, arc des rangs ${r.bosse ? r.bosse.arc : '?'} cm, asymétrie ${r.bosse ? r.bosse.asym : '?'} cm, fentes (sa vue de face) ${r.fentesSienne || 0}, fentes (vues du col) ${r.fentesCol || 0}, plis de vie ${r.plisVie ? (Math.round((r.plisVie.max || 0) * 100) / 100) + ' cm (moy. ' + (Math.round((r.plisVie.rms || 0) * 100) / 100) + ')' : '?'}, traction ${r.plisVie && r.plisVie.traction ? JSON.stringify(r.plisVie.traction) : '?'}, bord-côte ${r.plisVie && r.plisVie.bordCote ? JSON.stringify(r.plisVie.bordCote) : '-'}, liseré ${r.lisere ? JSON.stringify(r.lisere) : '?'}, scintillement ${JSON.stringify(r.scintille || {})}, mannequin perçant ${percTot} point(s) ${JSON.stringify(r.percees || {})}`
     + (ko.length ? '  ← ' + ko.join(', ') : '') + (!ko.length && reste.length ? '  (reste avant zéro : ' + reste.join(', ') + ')' : ''));
   if (ARGS.includes('--zip')) console.log('   écarts dessinés : ' + JSON.stringify(r.ecartsRendus));
   if (ARGS.includes('--piresm')) console.log('   pires manche (x, y, ×) : ' + JSON.stringify(g.piresManche) + ' | pire triangle : ' + JSON.stringify(g.pireTri));

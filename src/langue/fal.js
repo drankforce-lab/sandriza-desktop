@@ -189,6 +189,7 @@ module.exports = {
   'Vues': 'Views',
   'Mise à plat': 'Flat lay',
   'Aperçu 3D': '3D preview',
+  'Vue 360° (The New Black)': '360° view (The New Black)',
   'Gros plan de la fibre': 'Fabric close-up',
   'Gros plan de la fibre (rendu IA)': 'Fabric close-up (AI render)',
   'Tous les fournisseurs': 'All providers',

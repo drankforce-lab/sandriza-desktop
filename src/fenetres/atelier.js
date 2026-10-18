@@ -3442,6 +3442,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           var nb = Math.round(lg / 0.22); g.strokeStyle = sombre(V3.couleur, 0.82); g.lineWidth = 0.06;
           for (var r2 = 0; r2 <= nb; r2++) { var t2 = r2 / Math.max(1, nb), ix = Math.min(bord.length - 1, Math.round(t2 * (bord.length - 1))); g.beginPath(); g.moveTo(bord[ix][0], bord[ix][1]); g.lineTo(int[ix][0], int[ix][1]); g.stroke(); }
           g.strokeStyle = fil; ligne(decaler(c, bord, 2.25), 0.07, [0.28, 0.14]);
+          // (2026-10-18) la bande est DOUBLE : vue de l intérieur de l encolure, c est encore la côte. La toile le dit au shader par
+          // son alpha — 0,88 : opaque, mais marqué
+          var op = g.globalCompositeOperation; g.globalCompositeOperation = 'destination-out'; g.fillStyle = 'rgba(0,0,0,0.12)'; g.beginPath();
+          bord.forEach(function(q, k){ if (k) g.lineTo(q[0], q[1]); else g.moveTo(q[0], q[1]); }); for (var k4 = int.length - 1; k4 >= 0; k4--) g.lineTo(int[k4][0], int[k4][1]);
+          g.closePath(); g.fill(); g.globalCompositeOperation = op;
         }
         var ourlet = bordPts(c, n - 2, n - 1, 1).pts; g.strokeStyle = fil;
         ligne(decaler(c, ourlet, 1.5), 0.07, [0.28, 0.14]); ligne(decaler(c, ourlet, 2.1), 0.07, [0.28, 0.14]);
@@ -3987,7 +3992,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + ' float ciel = 0.22 + 0.16 * (0.5 + 0.5 * n.y); float nv = max(0.0, dot(n, e));'
       + ' float sh = pow(1.0 - nv, 3.0) * (0.55 + 0.45 * d); vec3 hh = normalize(uL + e); float sp = pow(max(0.0, dot(n, hh)), 28.0) * 0.022;'
       + ' vec3 c = b * (ciel * 0.80 + 0.70 * d2 + 0.16 * df) + mix(b, vec3(1.0), 0.45) * sh * 0.24 + vec3(sp);'
-      + ' if (de > 0.5) { float o = 0.62 + 0.38 * clamp(1.0 - abs(dot(n, e)), 0.0, 1.0); c = uF * (0.78 + 0.24 * d) * o * (1.0 + (h - 0.62) * 0.08 * vis); }'
+      + ' if (de > 0.5) { float o = 0.62 + 0.38 * clamp(1.0 - abs(dot(n, e)), 0.0, 1.0); c = uF * (0.78 + 0.24 * d) * o * (1.0 + (h - 0.62) * 0.08 * vis);'
+      // la bande DOUBLE (alpha de la toile < 0,95, voir finitions) : vue de dedans, c est encore la côte, pas l envers du jersey
+      + ' if (t.a < 0.95) c = b * 0.92 * (0.78 + 0.24 * d) * o * (1.0 + (h - 0.62) * 0.08 * vis); }'
       + ' gl_FragColor = vec4(c * vO, 1.0); }';
   }
   // la MATIÈRE d une pièce : bord-côte pour les bandes et poignets ; sergé pour jean, pantalon, jupe, casquette ; toile
@@ -4947,6 +4954,61 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      un tissu replié sur lui-même (plis cassés à 170°). Une face est retournée quand sa normale s écarte de plus de ~100° de celle
      de la grille dessous (qui dit où est le dehors) ; ses sommets — jamais ceux cousus sur une couture — vont où le patron les
      place par rapport à leurs voisins, puis sortent du corps, si cela ne fait aucun éclat. On recommence (12 fois au plus). */
+  /* LE DÉFROISSAGE (2026-10-18, le coin d aisselle) : après detordre, il reste des PLIS CASSÉS — deux triangles voisins à plus de 75° —
+     surtout dans la bande cousue de la manche et au bas d emmanchure. Chaque sommet d un pli cassé essaie quelques places : vers la
+     moyenne de ses voisins (5 pas), sur le plan de ses voisins, ou retourné de l autre côté de ce plan (un sommet replié). Il prend
+     la meilleure si elle casse moins d arêtes autour de lui — ou autant, plus ouvertes — SANS faire d éclat (étiré > 2, tassé < 0,4),
+     sans retourner de face (contre la normale de la grille), et sans s approcher du corps à moins de 8 mm (ou de son écart d avant).
+     Les sommets cousus, ceux à moins de 1 cm d une couture (la voisine s y dessinait par un jour : le mannequin perçait) et ceux à
+     moins de 3 cm d un bord libre (la silhouette de l encolure et de l ourlet) ne bougent pas. ⚠ Essayé aussi (2026-10-18) : rendre
+     aux arêtes de la bande cousue leur longueur au patron (ressorts bornés à 0,45–1,9) — les éclats tombaient presque à zéro, mais
+     l excès de tissu se repliait en plis cassés (41 → 58) ; et une membrane harmonique au coin d aisselle — plus d éclats. */
+  function defroisser(ma, tubes){
+    var rd = ma.rendu, PZ = rd.pos, I = rd.idx, n = rd.n, triDe = [], vois = [], cnt = {}, ar = {};
+    for (var v = 0; v < n; v++) { triDe.push([]); vois.push([]); }
+    for (var t = 0; t < I.length; t += 3) for (var e = 0; e < 3; e++) { var a = I[t + e], b = I[t + (e + 1) % 3], k = Math.min(a, b) + '_' + Math.max(a, b);
+      triDe[a].push(t); if (vois[a].indexOf(b) < 0) vois[a].push(b); if (vois[b].indexOf(a) < 0) vois[b].push(a); cnt[k] = (cnt[k] || 0) + 1; (ar[k] = ar[k] || []).push(t); }
+    // qui peut bouger : loin des coutures (1 cm) et des bords libres (3 cm), au patron
+    var cx = [], cy = [], lx = [], ly = [];
+    for (var v1 = 0; v1 < n; v1++) if (rd.cousu && rd.cousu[v1]) { cx.push(rd.vx[v1]); cy.push(rd.vy[v1]); }
+    Object.keys(cnt).forEach(function(k){ if (cnt[k] !== 1) return; k.split('_').forEach(function(q){ q = +q; if (!rd.cousu || !rd.cousu[q]) { lx.push(rd.vx[q]); ly.push(rd.vy[q]); } }); });
+    var loin = function(v, X, Y, d){ for (var i = 0; i < X.length; i++) if (Math.abs(rd.vx[v] - X[i]) < d && Math.abs(rd.vy[v] - Y[i]) < d && Math.hypot(rd.vx[v] - X[i], rd.vy[v] - Y[i]) < d) return false; return true; };
+    var libre = []; for (var v2 = 0; v2 < n; v2++) if ((!rd.cousu || !rd.cousu[v2]) && loin(v2, cx, cy, 1) && loin(v2, lx, ly, 3)) libre.push(v2);
+    if (!libre.length) return;
+    var nrm = function(t){ var a = I[t] * 3, b = I[t + 1] * 3, c = I[t + 2] * 3; return unit3(croix3([PZ[b] - PZ[a], PZ[b + 1] - PZ[a + 1], PZ[b + 2] - PZ[a + 2]], [PZ[c] - PZ[a], PZ[c + 1] - PZ[a + 1], PZ[c + 2] - PZ[a + 2]])); };
+    var COS = Math.cos(75 * Math.PI / 180);
+    // la normale de référence (la grille dit où est le dehors) et le sens des faces, à la majorité (comme detordre)
+    var refN = []; for (var r = 0; r < n; r++) { var pv = rd.poids[r], o = [0, 0, 0]; for (var q = 0; q < 3; q++) { var kk = pv.k[q], ww = pv.w[q]; o[0] += ma.nor[kk * 3] * ww; o[1] += ma.nor[kk * 3 + 1] * ww; o[2] += ma.nor[kk * 3 + 2] * ww; } refN.push(unit3(o)); }
+    var vote = 0; for (var t0 = 0; t0 < I.length; t0 += 3) { var f0 = nrm(t0); vote += pt3(f0, refN[I[t0]]) + pt3(f0, refN[I[t0 + 1]]) + pt3(f0, refN[I[t0 + 2]]); }
+    var sg = vote < 0 ? -1 : 1;
+    var retourne = function(t){ var f = nrm(t), m = unit3([refN[I[t]][0] + refN[I[t + 1]][0] + refN[I[t + 2]][0], refN[I[t]][1] + refN[I[t + 1]][1] + refN[I[t + 2]][1], refN[I[t]][2] + refN[I[t + 1]][2] + refN[I[t + 2]][2]]); return sg * pt3(f, m) < -0.17; };
+    // autour de v : les arêtes cassées, l angle le plus fort (son cosinus), les éclats et les faces retournées de ses triangles
+    var etat = function(v){ var nc = 0, pire = 1, ecl = 0, rt = 0, vu = {};
+      triDe[v].forEach(function(t){ var nt = nrm(t); if (retourne(t)) rt++;
+        for (var e3 = 0; e3 < 3; e3++) { var a = I[t + e3], b = I[t + (e3 + 1) % 3], k = Math.min(a, b) + '_' + Math.max(a, b);
+          ar[k].forEach(function(u){ if (u === t || vu[k + '|' + Math.min(t, u)]) return; vu[k + '|' + Math.min(t, u)] = 1; var d = pt3(nt, nrm(u)); if (d < pire) pire = d; if (d < COS) nc++; });
+          var L0 = Math.hypot(rd.vx[a] - rd.vx[b], rd.vy[a] - rd.vy[b]); if (L0 > 1e-6) { var rr = Math.hypot(PZ[a * 3] - PZ[b * 3], PZ[a * 3 + 1] - PZ[b * 3 + 1], PZ[a * 3 + 2] - PZ[b * 3 + 2]) / L0; if (rr > 2 || rr < 0.4) ecl++; } } });
+      return { nc: nc, cos: pire, ecl: ecl, rt: rt }; };
+    var mieux = function(e1, e0){ return e1.ecl <= e0.ecl && e1.rt <= e0.rt && (e1.nc < e0.nc || (e1.nc === e0.nc && e1.cos > e0.cos + 1e-3)); };
+    var un = new Float32Array(3);
+    for (var tour = 0; tour < 40; tour++) {
+      var bouge = 0;
+      libre.forEach(function(v){
+        var e0 = etat(v); if (e0.cos > COS) return;
+        var l = vois[v], m = [0, 0, 0]; l.forEach(function(q){ m[0] += PZ[q * 3] / l.length; m[1] += PZ[q * 3 + 1] / l.length; m[2] += PZ[q * 3 + 2] / l.length; });
+        var old = [PZ[v * 3], PZ[v * 3 + 1], PZ[v * 3 + 2]], pn = [0, 0, 0];
+        for (var i = 0; i < l.length; i++) { var a = l[i], b = l[(i + 1) % l.length], c = croix3([PZ[a * 3] - m[0], PZ[a * 3 + 1] - m[1], PZ[a * 3 + 2] - m[2]], [PZ[b * 3] - m[0], PZ[b * 3 + 1] - m[1], PZ[b * 3 + 2] - m[2]]); pn[0] += c[0]; pn[1] += c[1]; pn[2] += c[2]; }
+        var cands = []; for (var f = 0.8; f >= 0.1; f /= 2) cands.push([old[0] + (m[0] - old[0]) * f, old[1] + (m[1] - old[1]) * f, old[2] + (m[2] - old[2]) * f]);
+        if (Math.hypot(pn[0], pn[1], pn[2]) > 1e-9) { pn = unit3(pn); var h = (old[0] - m[0]) * pn[0] + (old[1] - m[1]) * pn[1] + (old[2] - m[2]) * pn[2];
+          cands.push([old[0] - 2 * h * pn[0], old[1] - 2 * h * pn[1], old[2] - 2 * h * pn[2]]); cands.push([old[0] - h * pn[0], old[1] - h * pn[1], old[2] - h * pn[2]]); }
+        var best = null, be = e0, dmin = tubes ? Math.min(versCorps(tubes, old[0], old[1], old[2]).d, 0.8) : 0;
+        cands.forEach(function(c){ un[0] = c[0]; un[1] = c[1]; un[2] = c[2]; if (tubes) { repousser(un, 0, tubes, 0.4); if (versCorps(tubes, un[0], un[1], un[2]).d < dmin - 1e-3) return; }
+          PZ[v * 3] = un[0]; PZ[v * 3 + 1] = un[1]; PZ[v * 3 + 2] = un[2]; var e1 = etat(v); if (mieux(e1, be)) { be = e1; best = [un[0], un[1], un[2]]; } });
+        if (best) { PZ[v * 3] = best[0]; PZ[v * 3 + 1] = best[1]; PZ[v * 3 + 2] = best[2]; bouge++; } else { PZ[v * 3] = old[0]; PZ[v * 3 + 1] = old[1]; PZ[v * 3 + 2] = old[2]; }
+      });
+      if (!bouge) break;
+    }
+  }
   function detordre(ma, tubes){
     var rd = ma.rendu, PZ = rd.pos, I = rd.idx, n = rd.n, cousu = rd.cousu || new Uint8Array(n), vois = [];
     for (var v = 0; v < n; v++) vois.push([]);
@@ -5024,7 +5086,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      ou casserait un pli (plus de 75° entre deux triangles voisins) — là où le tissu n en était pas déjà là — est réduit, sommet
      par sommet, jusqu à ce qu il n y en ait plus. Mesuré par tools/banc-3d-haut.js (« plis de vie », plafonds). */
   function plisDeVie(mailles, tubes){
-    var vie = reglageVie(), A0 = vie.a, L = vie.l, stats = { max: 0, rms: 0, n: 0 };
+    var vie = reglageVie(), A0 = vie.a, L = vie.l, stats = { max: 0, rms: 0, n: 0 }, colBC = [];
+    var aBande3 = V3 && V3.m && ['tshirt', 'debardeur', 'sweat'].indexOf(V3.m.base) >= 0 && (V3.m.pieces || []).some(function(p){ return p.id === 'bande'; });
     mailles.forEach(function(ma){ if (ma.rendu) ma.rendu.creux = null; });
     var tronc = tubes ? tubes.filter(function(t){ return t.nom === 'tronc'; })[0] : null;
     if (!tronc) { GLV.plisVie = stats; return; }
@@ -5048,6 +5111,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var bustes = [1, -1].map(function(S){ var best = null;
       if (poi) poi.an.forEach(function(a){ if ((a.c.x >= 0 ? 1 : -1) !== S && Math.abs(a.c.x) > 0.5) return; var z = (a.c.z || 0) + a.rz; if (!best || z > best[2]) best = [a.c.x, a.c.y, z]; });
       return best || [S * 7, yB, anneau(yB).z + anneau(yB).r]; });
+    // l omoplate, de chaque côté : sur le dos, 4 cm au-dessus du bas d emmanchure, à ~43° du milieu dos (le but des plis de traction du dos)
+    var omoplates = [1, -1].map(function(S){ var a = anneau(yA + 4), th = S * (Math.PI - 0.75); return [a.x + Math.sin(th) * a.r, yA + 4, a.z + Math.cos(th) * a.r]; });
     // un NOMBRE ENTIER de plis autour du tronc (pris à la taille) : la phase fait le tour sans saut — l angle passe de +π à -π au milieu
     // dos, et une longueur d onde quelconque y cassait les plis en V
     var Nt = Math.max(3, Math.round(2 * Math.PI * anneau(yW).r / L));
@@ -5064,7 +5129,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       for (var dx = -2; dx <= 2; dx++) for (var dy = -2; dy <= 2; dy++) for (var dz = -2; dz <= 2; dz++) (grilleC[(x + dx) + '_' + (y + dy) + '_' + (z + dz)] || []).forEach(function(q){ b = Math.min(b, Math.hypot(q[0] - p[0], q[1] - p[1], q[2] - p[2])); });
       return b; };
     var champ = function(ma, p){
-      var amp = [], gs = [], a = anneau(p[1]), th = Math.atan2(p[0] - a.x, p[2] - a.z), corps = ma.pid !== 'manche';
+      var amp = [], gs = [], aw = [], a = anneau(p[1]), th = Math.atan2(p[0] - a.x, p[2] - a.z), corps = ma.pid !== 'manche';
       if (!(Amax > 0)) return { d: 0, a: 0 };
       var vc = versCorps(tubes, p[0], p[1], p[2]), e = Math.max(0, Math.min(1, (vc.d < 1e8 ? vc.d : 0) / 1.2)), dC = versCouture(p);
       if (corps) {
@@ -5083,11 +5148,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         // (la traction ne vaut que sur le DEVANT de la poitrine — sur le flanc, sous la manche, elle l écartait du corps)
         var tr = corps ? cb * cb * lisse((Math.cos(th) - 0.4) / 0.3) : 0, lg = 7 + 3 * tr; if (r > (corps ? 15 + 3 * tr : 12)) return;
         amp.push(lisse(dC / 1) * Amax * (0.5 + 0.2 * tr) * Math.exp(-r / lg) * lisse((r - 3) / 2)); gs.push(0.5 - 0.5 * Math.cos(8 * Math.atan2(-dy, Math.hypot(dx, dz)) + ph)); });
+      /* LES PLIS DE TRACTION (2026-10-18, sa demande : « des plis de traction francs du buste vers l aisselle, et du dos vers
+         l aisselle, lisibles à distance normale ») : des CRÊTES en rayons, du bas d emmanchure vers le sommet de la poitrine (trois,
+         devant) et vers l omoplate (deux, plus douces, dos). Larges de ~3 cm EN TRAVERS du rayon (le maillage fait 1 cm : une crête
+         plus fine ne se dessinait pas), espacées de 16°, elles naissent à 1 cm de l aisselle et s effilent jusqu à rien aux 85 % du
+         chemin. Leur ombre (aw, à moitié) borde la crête seulement : comptée sur tout l éventail, elle noircissait le buste en aplat.
+         ⚠ (2026-10-18, sa décision : « adoucis les plis de traction ») une première version, 3 fois plus haute (0,75 cm) et coupée
+         net avant la poitrine, se lisait comme des creux et des bosses — une bosse isolée au milieu du buste du t-shirt L. Ici ~0,2 cm. */
+      if (corps) PA.forEach(function(P, iS){
+        [[bustes[iS], 1, 3], [omoplates[iS], 0.7, 2]].forEach(function(cfg){ var B = cfg[0];
+          var dx = p[0] - P[0], dy = p[1] - P[1], dz = p[2] - P[2], r = Math.hypot(dx, dy, dz), u = [B[0] - P[0], B[1] - P[1], B[2] - P[2]], LB = Math.hypot(u[0], u[1], u[2]);
+          if (r < 0.5 || LB < 1 || r > LB * 0.85) return; u = [u[0] / LB, u[1] / LB, u[2] / LB];
+          var c = Math.max(-1, Math.min(1, (dx * u[0] + dy * u[1] + dz * u[2]) / r)); if (c < 0.6) return;
+          // de quel côté du rayon central : le signe de la composante perpendiculaire, vers le haut
+          var perp = [dx / r - u[0] * c, dy / r - u[1] * c, dz / r - u[2] * c], up = [-u[0] * u[1], 1 - u[1] * u[1], -u[2] * u[1]], phi = (pt3(perp, up) >= 0 ? 1 : -1) * Math.acos(c);
+          var sl = r * Math.sin(phi), nf = cfg[2], g = 0;
+          for (var k = 0; k < nf; k++) { var c0 = r * Math.sin(((k - (nf - 1) / 2) * 16 - 4) * Math.PI / 180), z = (sl - c0) / 1.7; g = Math.max(g, Math.exp(-z * z / 2) * (1 - 0.25 * Math.abs(k - (nf - 1) / 2))); }
+          // l amplitude décroît d un bout à l autre (forte à l aisselle, nulle avant la poitrine) : pas de bosse isolée au milieu du buste
+          var A = lisse(dC / 1) * Amax * 0.5 * cfg[1] * lisse((r - 1) / 3) * Math.pow(Math.max(0, 1 - r / (LB * 0.85)), 0.8) * lisse((c - 0.6) / 0.2);
+          amp.push(A); gs.push(g); aw[amp.length - 1] = A * Math.min(1, g * 1.4) * 0.5; }); });
       if (!corps) coude.forEach(function(C){ if ((p[0] >= 0 ? 1 : -1) !== C.S) return;
         var w = sub3(p, C.o), t = pt3(w, C.ax), rr = [w[0] - C.ax[0] * t, w[1] - C.ax[1] * t, w[2] - C.ax[2] * t], rl = Math.hypot(rr[0], rr[1], rr[2]) || 1;
         amp.push(Amax * 0.55 * Math.exp(-Math.pow((t - C.te) / 4, 2)) * (0.3 + 0.7 * Math.max(0, rr[2] / rl)));
         gs.push(0.5 - 0.5 * Math.cos(2 * Math.PI * t / 3.5 + 1.3 * Math.sin(2 * Math.atan2(rr[2], rr[0] * C.S) + ph))); });
-      var d = 0, al = 0; for (var i = 0; i < amp.length; i++) { d += amp[i] * gs[i]; al += amp[i]; }
+      var d = 0, al = 0; for (var i = 0; i < amp.length; i++) { d += amp[i] * gs[i]; al += aw[i] != null ? aw[i] : amp[i]; }
       return { d: Math.min(d, Amax * 1.2), a: Math.min(al, Amax * 1.2) };
     };
     // la normale de chaque sommet (orientée vers le dehors, à la majorité, comme finirConforme), et ses voisins
@@ -5115,6 +5199,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       // l OURLET : les bords libres du BAS de la pièce (ourlet du corps, bas de manche) — la distance au patron de chaque sommet
       var ymax = -1e9; for (var vy = 0; vy < n; vy++) ymax = Math.max(ymax, rd.vy[vy]);
       var bas = []; Object.keys(cnt).forEach(function(kk){ if (cnt[kk] !== 1) return; kk.split('_').forEach(function(q){ q = +q; if ((!rd.cousu || !rd.cousu[q]) && rd.vy[q] > ymax - 2.5 && bas.indexOf(q) < 0) bas.push(q); }); });
+      // l ENCOLURE en bord-côte (la bande des t-shirts, débardeurs, sweats) : les bords libres du HAUT du devant et du dos
+      var col = [];
+      if (aBande3 && (ma.pid === 'devant' || ma.pid === 'dos')) Object.keys(cnt).forEach(function(kk){ if (cnt[kk] !== 1) return; kk.split('_').forEach(function(q){ q = +q; if ((!rd.cousu || !rd.cousu[q]) && rd.vy[q] < ymax - 2.5 && col.indexOf(q) < 0) col.push(q); }); });
       var creux = new Float32Array(n), dep = new Float32Array(n * 3), pD = new Float32Array(n);
       for (var v = 0; v < n; v++) {
         var nn = [nor[v * 3], nor[v * 3 + 1], nor[v * 3 + 2]], ch = champ(ma, [PZ[v * 3], PZ[v * 3 + 1], PZ[v * 3 + 2]]);
@@ -5130,6 +5217,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         var db = 9; for (var ib = 0; ib < bas.length; ib++) { var qb = bas[ib]; db = Math.min(db, Math.hypot(rd.vx[qb] - rd.vx[v], rd.vy[qb] - rd.vy[v])); }
         var ro = db < 2 ? AROULE * Math.exp(-Math.pow((db - 0.4) / 0.32, 2)) : 0;
         if (db < 2) creux[v] = Math.max(creux[v], 0.5 * Math.exp(-Math.pow((db - 1.0) / 0.3, 2)));
+        /* L ÉPAISSEUR DU BORD-CÔTE (2026-10-18, sa demande) : la bande, double, se tient 1,3 mm plus haut que le jersey (une marche à la
+           couture, 2 cm du bord, et son ombre) ; son bord est un pli ROULÉ — il bombe à ~4 mm, puis le tissu tourne vers le dedans :
+           l épaisseur se lit de dessus. Effacé près de la couture d épaule : le devant et le dos s y levaient différemment (une
+           fente au point de cou). À tous les réglages, comme le roulé de l ourlet. */
+        if (col.length) { var dc = 9; for (var ic = 0; ic < col.length; ic++) { var qc = col[ic]; dc = Math.min(dc, Math.hypot(rd.vx[qc] - rd.vx[v], rd.vy[qc] - rd.vy[v])); }
+          if (dc < 3) { var fcs = lisse(versCouture([PZ[v * 3], PZ[v * 3 + 1], PZ[v * 3 + 2]]) / 1.5);
+            var bc = (0.13 * lisse((2.15 - dc) / 0.3) + 0.09 * Math.exp(-Math.pow((dc - 0.4) / 0.25, 2)) - 0.16 * lisse((0.3 - dc) / 0.3)) * fcs;
+            ro += bc; colBC.push([dc, bc]); creux[v] = Math.max(creux[v], 0.45 * Math.exp(-Math.pow((dc - 2.25) / 0.18, 2))); } }
         var dd = ch.d + ro; dep[v * 3] = nn[0] * dd; dep[v * 3 + 1] = nn[1] * dd; dep[v * 3 + 2] = nn[2] * dd;
       }
       rd.creux = creux; rd.nPli = null; rd.dep = dep; rd.pD = pD;
@@ -5172,8 +5267,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       for (var v3 = 0; v3 < rd.n; v3++) { var f = E.s[v3]; rd.pos[v3 * 3] += rd.dep[v3 * 3] * f; rd.pos[v3 * 3 + 1] += rd.dep[v3 * 3 + 1] * f; rd.pos[v3 * 3 + 2] += rd.dep[v3 * 3 + 2] * f; if (f < 1) rd.creux[v3] *= f;
         // (la mesure du banc : le pli vraiment posé, après le garde-fou — sans le roulé d ourlet, qui n est pas un pli)
         if (ma.pid !== 'manche') { var dq = rd.pD[v3] * f; stats.max = Math.max(stats.max, dq); stats.rms += dq * dq; stats.n++; } }
+      if (ma.pid !== 'manche') { rd.levee = new Float32Array(rd.n); for (var v4 = 0; v4 < rd.n; v4++) rd.levee[v4] = rd.pD[v4] * E.s[v4]; }
       rd.dep = null; rd.pD = null; });
-    stats.rms = stats.n ? Math.sqrt(stats.rms / stats.n) : 0; GLV.plisVie = stats;
+    stats.rms = stats.n ? Math.sqrt(stats.rms / stats.n) : 0;
+    /* (la mesure du banc) LES PLIS DE TRACTION : sur un arc entre 25 et 50 % du chemin du bas d emmanchure au sommet de la poitrine
+       (devant), à l omoplate (dos), à ±45° de cette direction, la plus forte levée posée par pas de 2° ; on compte les crêtes qui
+       dominent leurs creux d au moins 0,5 mm. Par côté : [crêtes, la plus franche (cm)]. Puis le bord-côte : sa marche (cm, la
+       bande contre le jersey dessous) et son roulé (la bosse du bord contre le bord lui-même). */
+    stats.traction = {}; [['devant', bustes], ['dos', omoplates]].forEach(function(cf){ var ma = mailles.filter(function(m){ return m.pid === cf[0] && m.rendu && m.rendu.levee; })[0]; if (!ma) return;
+      stats.traction[cf[0]] = PA.map(function(P, iS){ var B = cf[1][iS], u = sub3(B, P), LB = Math.hypot(u[0], u[1], u[2]), rd = ma.rendu, bins = []; u = [u[0] / LB, u[1] / LB, u[2] / LB];
+        for (var v = 0; v < rd.n; v++) { var d = [rd.pos[v * 3] - P[0], rd.pos[v * 3 + 1] - P[1], rd.pos[v * 3 + 2] - P[2]], r = Math.hypot(d[0], d[1], d[2]); if (r < 0.25 * LB || r > 0.5 * LB) continue;
+          var c = pt3(d, u) / r; if (c < 0.7) continue; var pp = [d[0] / r - u[0] * c, d[1] / r - u[1] * c, d[2] / r - u[2] * c], up = [-u[0] * u[1], 1 - u[1] * u[1], -u[2] * u[1]];
+          var k = Math.round((pt3(pp, up) >= 0 ? 1 : -1) * Math.acos(Math.min(1, c)) * 90 / Math.PI) + 23; bins[k] = Math.max(bins[k] || 0, rd.levee[v]); }
+        var l = []; for (var i = 0; i <= 46; i++) if (bins[i] != null) l.push(bins[i]);
+        var nC = 0, best = 0; for (var j = 1; j + 1 < l.length; j++) { if (!(l[j] >= l[j - 1] && l[j] >= l[j + 1])) continue;
+          var gm = l[j], dm = l[j]; for (var g2 = j - 1; g2 >= 0; g2--) { gm = Math.min(gm, l[g2]); if (l[g2] > l[j]) break; } for (var d2 = j + 1; d2 < l.length; d2++) { dm = Math.min(dm, l[d2]); if (l[d2] > l[j]) break; }
+          var pr = l[j] - Math.max(gm, dm); if (pr >= 0.05) { nC++; best = Math.max(best, pr); } }
+        return [nC, Math.round(best * 100) / 100]; }); });
+    if (colBC.length) { var mk = function(a, b){ var s0 = 0, n0 = 0; colBC.forEach(function(e){ if (e[0] >= a && e[0] < b) { s0 += e[1]; n0++; } }); return n0 ? s0 / n0 : 0; };
+      stats.bordCote = { marche: Math.round((mk(0.8, 1.6) - mk(2.6, 3)) * 1000) / 1000, roule: Math.round((mk(0.3, 0.5) - mk(0, 0.1)) * 1000) / 1000 }; }
+    GLV.plisVie = stats;
   }
   // l ombre des creux de plis (après finirConforme : elle multiplie l ombre de contact du sommet)
   function plisAO(mailles){ mailles.forEach(function(ma){ var rd = ma.rendu; if (!rd || !rd.creux || !rd.ao) return; for (var v = 0; v < rd.n; v++) rd.ao[v] *= 1 - 0.28 * rd.creux[v]; }); }
@@ -5183,6 +5296,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     tops.forEach(function(ma){ try { ma.rendu = maillageConforme(ma); } catch (e) { ma.rendu = null; GLV.erreurConf = String(e && e.stack || e); } });
     try { zipperCoutures(tops, descrCouturesHaut(mailles), tubes); } catch (e) { GLV.erreurConf = String(e && e.stack || e); }
     tops.forEach(function(ma){ if (ma.rendu) detordre(ma, tubes); });
+    tops.forEach(function(ma){ if (ma.rendu) defroisser(ma, tubes); });
     if (window.__szBanc3d) try { GLV.ecartsRendus = ecartsRendus(descrCouturesHaut(mailles)); } catch (e) { GLV.erreurConf = String(e && e.stack || e); }
   }
   /* L OMBRE DE CONTACT (occlusion ambiante, 2026-10-17, sa référence Fal.ai : le tissu y a de la PROFONDEUR — plus
@@ -5539,6 +5653,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return { pos: new Float32Array(pos), nor: new Float32Array(nor), omb: omb, n: pos.length / 3 };
   }
 
+  /* LE DÉBORD DES COULEURS (2026-10-18) : hors du contour, la toile est transparente — et NOIRE (rgb 0). Les mipmaps mêlaient ce noir
+     au bord de la pièce : vu de loin ou en biais, un bord libre prenait un liseré sombre (le bord-côte de l encolure, vu de dedans,
+     un trait noir). La couleur du bord est étendue de quelques pixels dans le vide — l alpha reste 0, rien n apparaît là. Sur une
+     ImageData : un canevas ne garde pas la couleur d un pixel transparent. */
+  function deborder(cv, passes){
+    var W = cv.width, H = cv.height, im = cv.getContext('2d').getImageData(0, 0, W, H), d = im.data, N = W * H, etat = new Uint8Array(N), neuf = new Uint8Array(N);
+    for (var p = 0; p < N; p++) if (d[p * 4 + 3] > 0) etat[p] = 1;
+    for (var ps = 0; ps < passes; ps++) {
+      var n0 = 0;
+      for (var y = 0; y < H; y++) for (var x = 0; x < W; x++) { var q = y * W + x; if (etat[q]) continue;
+        var r = 0, g = 0, b = 0, n = 0, z;
+        if (x > 0 && etat[z = q - 1]) { r += d[z * 4]; g += d[z * 4 + 1]; b += d[z * 4 + 2]; n++; }
+        if (x < W - 1 && etat[z = q + 1]) { r += d[z * 4]; g += d[z * 4 + 1]; b += d[z * 4 + 2]; n++; }
+        if (y > 0 && etat[z = q - W]) { r += d[z * 4]; g += d[z * 4 + 1]; b += d[z * 4 + 2]; n++; }
+        if (y < H - 1 && etat[z = q + W]) { r += d[z * 4]; g += d[z * 4 + 1]; b += d[z * 4 + 2]; n++; }
+        if (n) { d[q * 4] = r / n; d[q * 4 + 1] = g / n; d[q * 4 + 2] = b / n; neuf[q] = 1; n0++; } }
+      if (!n0) break;
+      for (var k = 0; k < N; k++) if (neuf[k]) { etat[k] = 1; neuf[k] = 0; }
+    }
+    return im;
+  }
   /* Les toiles (tissu + motif + découpes) et les objets posés. Le motif arrive en second : il se charge. */
   function toilesGL(){
     var n = GLV.toileN = (GLV.toileN || 0) + 1, gl = GLV.gl, ctxV3 = V3, ctxGLV = GLV;
@@ -5546,7 +5681,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (!GLV) return;
       if (!pc.tex) pc.tex = gl.createTexture();
       gl.bindTexture(gl.TEXTURE_2D, pc.tex);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, pc.toile);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, deborder(pc.toile, 6));
       gl.generateMipmap(gl.TEXTURE_2D);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
@@ -5643,11 +5778,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       lier(gl, po, 'aP', GLV.mq.bP, 3); lier(gl, po, 'aN', GLV.mq.bN, 3); lier(gl, po, 'aA', GLV.mq.bA, 1);
       gl.uniformMatrix4fv(po.u.uM, false, col4(cam.M)); gl.uniformMatrix4fv(po.u.uV, false, col4(cam.V)); gl.uniformMatrix3fv(po.u.uR, false, col3(cam.R));
       gl.uniform3f(po.u.uB, 1.12, 1.11, 1.09); gl.uniform1f(po.u.uMet, 0); gl.uniform1f(po.u.uBr, 28);
-      /* ⚠ (2026-10-18, sa capture 72) le mannequin se dessine ~1 cm plus LOIN qu il n est (décalage de profondeur constant, le même
+      /* ⚠ (2026-10-18, sa capture 72) le mannequin se dessine ~2 cm plus LOIN qu il n est (décalage de profondeur constant, le même
          pour toutes ses faces — un décalage selon la pente reclassait ses propres faces : une ellipse blanche au pied du cou) : à
          angle rasant, à moins d un millimètre sous le tissu, il le perçait en pointillés (des lignes le long des épaules, vu d en
          haut). Le tissu, lui, ne bouge pas : décalé, son envers passait devant son endroit (des fentes au banc). */
-      gl.enable(gl.POLYGON_OFFSET_FILL); gl.polygonOffset(0, 4000);
+      // (4000 au départ, ~1 cm ; 8000 le 2026-10-18 : sans plis de vie, le tissu colle davantage — points de perçage 124 → 82 sur le sweat)
+      gl.enable(gl.POLYGON_OFFSET_FILL); gl.polygonOffset(0, 8000);
       gl.drawArrays(gl.TRIANGLES, 0, GLV.mq.n);
       gl.disable(gl.POLYGON_OFFSET_FILL); gl.polygonOffset(0, 0);
     }

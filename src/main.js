@@ -3042,8 +3042,9 @@ const OPS_PONT = new Set([
   // Variantes par couleur : teinte au CANEVAS par le site (une image, une
   // couleur par appel — la fenetre boucle), aucun service externe.
   'produit:teinter',
-  // L'aperçu 3D (Hunyuan3D par Fal.ai), les coûts par article et le contrôle des marges (7.16.0).
-  'produit:apercu3dLancer', 'produit:apercu3dSuivre', 'produit:couts', 'produit:grosPlanZone', 'produit:grosPlan', 'marges:analyser', 'marges:appliquer',
+  // La vue 360° générée (Product 360 de The New Black, 2026-10-18 — remplace l'aperçu 3D Hunyuan), les coûts par
+  // article et le contrôle des marges (7.16.0).
+  'produit:vue360Lancer', 'produit:vue360Suivre', 'produit:vue360Telecharger', 'produit:vue360Decouper', 'produit:vue360Couleur', 'produit:couts', 'produit:grosPlanZone', 'produit:grosPlan', 'marges:analyser', 'marges:appliquer',
   'commandes:preparer', 'commandes:expedier',
   // Retours. ⚠ retour:finaliser peut REMBOURSER (Square ou credit boutique) et
   // retour:enregistrer peut generer une etiquette FACTUREE : toute la regle vit
@@ -3579,7 +3580,7 @@ const LIMITES_PONT = {
   // Detourage, impressions et rapports.
   'produit:photoIa': 120000,
   'produit:detourer': 30000, 'produit:teinter': 30000, 'stock:etiquettes': 30000,
-  'produit:apercu3dLancer': 90000, 'produit:apercu3dSuivre': 60000, 'produit:couts': 30000,
+  'produit:vue360Lancer': 90000, 'produit:vue360Suivre': 60000, 'produit:vue360Telecharger': 90000, 'produit:vue360Decouper': 120000, 'produit:vue360Couleur': 90000, 'produit:couts': 30000,
   /* le gros plan sur la fibre : la zone se trouve au poste (court) ; l agrandissement passe par fal.ai */
   'produit:grosPlanZone': 30000, 'produit:grosPlan': 120000,
   'marges:analyser': 60000, 'marges:appliquer': 90000,
