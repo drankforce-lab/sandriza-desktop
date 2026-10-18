@@ -804,4 +804,6 @@ module.exports = {
   'Annulé : rien n’a été facturé.': 'Cancelled: nothing was billed.',
   'Vêtement sans mannequin par Fal.ai ≈ {0} — vérifié avant l’envoi.': 'Garment without mannequin by Fal.ai ≈ {0} — checked before sending.',
   'Retrait du mannequin par Fal.ai…': 'Removing the mannequin with Fal.ai…',
+  'Fond transparent': 'Transparent background',
+  'Le vêtement seul, sans fond : un PNG transparent': 'The garment alone, no background: a transparent PNG',
 };

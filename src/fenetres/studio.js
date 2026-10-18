@@ -620,7 +620,9 @@ function pageStudio(mode) {
   const rcTemoin = String(mode || '') === 'recettes';
   return `${TETE()}
 <title>${T("Studio virtuel — Administration Sandriza")}</title>
-<style>${CSS}${CSS_JOUR}</style></head><body>
+<style>${CSS}${CSS_JOUR}.pied .transp{display:inline-flex;align-items:center;gap:.35rem;font-size:.82rem;color:var(--tx2);margin-right:.4rem;white-space:nowrap}
+.pied .transp[hidden]{display:none}
+</style></head><body>
 <div class="tete"><span class="ico">${ICO.studio}</span><h1>${T("Studio virtuel")}</h1>
   <span class="credits" id="credits"></span>
   <!-- ⚠ « Traitements » EST ICI DEPUIS LE 2026-09-09, sa demande : « une icône
@@ -638,6 +640,7 @@ function pageStudio(mode) {
 <div class="ro" id="ro" hidden>${T("Lecture seule : votre rôle ne permet pas de lancer de traitement.")}</div>
 <div class="corps plein" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
+  <label class="transp" id="l-transp" hidden title="${T("Le vêtement seul, sans fond : un PNG transparent")}"><input type="checkbox" id="c-transp"> ${T("Fond transparent")}</label>
   <button id="b-reset" title="${T("Tout effacer : photo, réglages et rendu")}">${T("↺ Recommencer")}</button>
   <button id="b-lot">${T("⚙ Traiter en lot…")}</button>
   <button class="gratuit" id="b-apercu" disabled>${T("Aperçu gratuit")}</button>
@@ -1000,7 +1003,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     return aUnePhoto() && !!PRESET && !RO && !LOTS_VUE;
   }
 
+  /* (2026-10-17, sa demande : « retire le fond ou donne une option ») la case « Fond transparent » — vêtement sans
+     mannequin seulement ; le choix reste sur ce poste */
+  (function(){ var c = document.getElementById('c-transp'); if (!c) return;
+    try { c.checked = localStorage.getItem('sz-studio-transp') === '1'; } catch (e) {}
+    c.onchange = function(){ try { localStorage.setItem('sz-studio-transp', c.checked ? '1' : '0'); } catch (e) {} }; })();
   function majBoutons(){
+    var lt = document.getElementById('l-transp'); if (lt) lt.hidden = VOIE !== 'fantome';
     var pret = pretALancer() && !OCCUPE;
     bApercu.disabled = !pret;
     bFinal.disabled = !pret;
@@ -3488,6 +3497,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function saisie(apercu){
     var s = { geste: VOIE, preset: PRESET, apercu: apercu };
+    var ct = document.getElementById('c-transp'); if (VOIE === 'fantome' && ct && ct.checked) s.fondTransparent = true;
     if ((!apercu || VOIE === 'fantome') && PRIX_ANNONCE != null) s.prixAnnonce = PRIX_ANNONCE;
     if (PHOTO_ID) { s.photoId = PHOTO_ID; } else { s.image = PHOTO; }
     if (VOIE === 'humain') {
