@@ -620,8 +620,7 @@ function pageStudio(mode) {
   const rcTemoin = String(mode || '') === 'recettes';
   return `${TETE()}
 <title>${T("Studio virtuel — Administration Sandriza")}</title>
-<style>${CSS}${CSS_JOUR}.pied .transp{display:inline-flex;align-items:center;gap:.35rem;font-size:.82rem;color:var(--tx2);margin-right:.4rem;white-space:nowrap}
-.pied .transp[hidden]{display:none}
+<style>${CSS}${CSS_JOUR}.pied .transp[hidden]{display:none}
 </style></head><body>
 <div class="tete"><span class="ico">${ICO.studio}</span><h1>${T("Studio virtuel")}</h1>
   <span class="credits" id="credits"></span>
@@ -640,7 +639,6 @@ function pageStudio(mode) {
 <div class="ro" id="ro" hidden>${T("Lecture seule : votre rôle ne permet pas de lancer de traitement.")}</div>
 <div class="corps plein" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
-  <label class="transp" id="l-transp" hidden title="${T("Le vêtement seul, sans fond : un PNG transparent")}"><input type="checkbox" id="c-transp"> ${T("Fond transparent")}</label>
   <button id="b-reset" title="${T("Tout effacer : photo, réglages et rendu")}">${T("↺ Recommencer")}</button>
   <button id="b-lot">${T("⚙ Traiter en lot…")}</button>
   <button class="gratuit" id="b-apercu" disabled>${T("Aperçu gratuit")}</button>
@@ -987,7 +985,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           var cw = Math.max(1, Math.round(w * ech)), chh = Math.max(1, Math.round(h * ech));
           var c = document.createElement('canvas'); c.width = cw; c.height = chh;
           c.getContext('2d').drawImage(im, 0, 0, cw, chh);
-          cb(c.toDataURL('image/jpeg', 0.92));
+          cb(c.toDataURL('image/jpeg', 0.96));
         } catch (e) { cb(dataUrl); }
       };
       im.onerror = function(){ cb(dataUrl); };
@@ -1003,13 +1001,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     return aUnePhoto() && !!PRESET && !RO && !LOTS_VUE;
   }
 
-  /* (2026-10-17, sa demande : « retire le fond ou donne une option ») la case « Fond transparent » — vêtement sans
-     mannequin seulement ; le choix reste sur ce poste */
-  (function(){ var c = document.getElementById('c-transp'); if (!c) return;
-    try { c.checked = localStorage.getItem('sz-studio-transp') === '1'; } catch (e) {}
-    c.onchange = function(){ try { localStorage.setItem('sz-studio-transp', c.checked ? '1' : '0'); } catch (e) {} }; })();
+  /* LE FOND TRANSPARENT EST UNE AMBIANCE (2026-10-18, sa demande : « ajoute un fond transparent aussi ici », sur la
+     liste des ambiances) — elle remplace la case du pied. Vêtement sans mannequin seulement : ailleurs, Photoroom
+     compose un décor. Au relais part l ambiance par défaut (le prix ne dépend pas du fond) et fondTransparent. */
+  var AMB_TRANSP = { cle: 'transparent', label: '${T("Fond transparent")}', desc: '${T("Le vêtement seul, sans fond : un PNG transparent.")}' };
+  function transparentChoisi(){ return VOIE === 'fantome' && PRESET === 'transparent'; }
+  function presetEnvoye(){ return PRESET === 'transparent' ? ((PRESETS[0] || {}).cle || '') : PRESET; }
   function majBoutons(){
-    var lt = document.getElementById('l-transp'); if (lt) lt.hidden = VOIE !== 'fantome';
+    if (PRESET === 'transparent' && VOIE !== 'fantome') PRESET = (PRESETS[0] || {}).cle || '';
     var pret = pretALancer() && !OCCUPE;
     bApercu.disabled = !pret;
     bFinal.disabled = !pret;
@@ -1441,6 +1440,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
      La teinte se déduit de la clé ; une ambiance inconnue garde une bande neutre. */
   function ambianceTeinte(cle){
     var c = String(cle || '');
+    if (c === 'transparent') return 'repeating-conic-gradient(#d6d2cb 0 25%,#f4f2ee 0 50%) 0 0/14px 14px';
     if (/epure|studio/.test(c)) return 'linear-gradient(90deg,#e9e6e1,#cfcac2)';
     if (/plage|sable|dore/.test(c)) return 'linear-gradient(90deg,#e8c48a,#9fc3cf)';
     if (/beton|urbain/.test(c)) return 'linear-gradient(90deg,#b8b4ad,#7d7a76)';
@@ -1450,7 +1450,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
   function ambiancesHtml(){
     if (!PRESETS.length) return '<div class="vide">${T("Aucune ambiance.")}</div>';
-    return '<div class="tuiles amb">' + PRESETS.map(function(p){
+    return '<div class="tuiles amb">' + (VOIE === 'fantome' ? [AMB_TRANSP] : []).concat(PRESETS).map(function(p){
       return '<div class="tuile' + (PRESET === p.cle ? ' on' : '') + '" data-preset="' + esc(p.cle) + '">'
         + '<span class="teinte" aria-hidden="true" style="background:' + ambianceTeinte(p.cle) + '"></span>'
         + '<span class="t">' + esc(szTd(p.label)) + '</span>'
@@ -2206,7 +2206,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (r.pose && POSES.filter(function(p){ return p.cle === r.pose; }).length) POSE_SEL = r.pose;
     if (r.formMode === 'recadrer' || r.formMode === 'marges') FORM_MODE = r.formMode;
     if (r.preset) {
-      if (PRESETS.filter(function(p){ return p.cle === r.preset; }).length) PRESET = r.preset;
+      if (r.preset === 'transparent' || PRESETS.filter(function(p){ return p.cle === r.preset; }).length) PRESET = r.preset;
       else perdus.push('l’ambiance');
     }
     AV = fusionner(AV_DEF, r.av);
@@ -2713,7 +2713,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     return x ? x.t : v;
   }
   function nomPreset(c){
-    var x = PRESETS.filter(function(o){ return o.cle === c; })[0];
+    var x = [AMB_TRANSP].concat(PRESETS).filter(function(o){ return o.cle === c; })[0];
     return szTd((x && x.label) || c);
   }
   /* ⚠ << etapeFaite >> et << enteteEtape >> ont ete RETIREES a la cloture du
@@ -3496,8 +3496,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
 
   function saisie(apercu){
-    var s = { geste: VOIE, preset: PRESET, apercu: apercu };
-    var ct = document.getElementById('c-transp'); if (VOIE === 'fantome' && ct && ct.checked) s.fondTransparent = true;
+    var s = { geste: VOIE, preset: presetEnvoye(), apercu: apercu };
+    if (transparentChoisi()) s.fondTransparent = true;
     if ((!apercu || VOIE === 'fantome') && PRIX_ANNONCE != null) s.prixAnnonce = PRIX_ANNONCE;
     if (PHOTO_ID) { s.photoId = PHOTO_ID; } else { s.image = PHOTO; }
     if (VOIE === 'humain') {
@@ -3637,7 +3637,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var bC = apercu ? bApercu : bFinal;
     occuper(true);
     boutonAttente(bC, '${T("Calcul du coût…")}');
-    appeler('studio:estimer', [{ geste: VOIE, preset: PRESET, nb: 1, finition: fin, options: opt }])
+    appeler('studio:estimer', [{ geste: VOIE, preset: presetEnvoye(), nb: 1, finition: fin, options: opt }])
       .then(function(r){
         boutonAttente(bC, '');
         occuper(false);
