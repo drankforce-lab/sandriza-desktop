@@ -1453,8 +1453,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         // (2026-10-18, sa demande : « lancer la génération directement, sans option, avec un seul bouton ») —
         // l ambiance choisie (ou la première), aucun réglage facultatif
         + (v.cle === 'fantome' ? '<div class="fmodes" role="group" aria-label="${T("Mode")}">'
-          + '<button type="button" data-fmode="exact" class="' + (FANT_MODE === 'exact' ? 'on' : '') + '" aria-pressed="' + (FANT_MODE === 'exact') + '" title="${T("Le vêtement de la photo, détouré au pixel près : rien n’est redessiné.")}">${T("Exact")}</button>'
-          + '<button type="button" data-fmode="3d" class="' + (FANT_MODE === '3d' ? 'on' : '') + '" aria-pressed="' + (FANT_MODE === '3d') + '" title="${T("Forme portée et intérieur du col reconstruits par l’IA (FLUX Kontext) : plus « studio », mais un petit détail peut changer.")}">${T("Fantôme 3D")}</button>'
+          + '<button type="button" data-fantmode="exact" class="' + (FANT_MODE === 'exact' ? 'on' : '') + '" aria-pressed="' + (FANT_MODE === 'exact') + '" title="${T("Le vêtement de la photo, détouré au pixel près : rien n’est redessiné.")}">${T("Exact")}</button>'
+          + '<button type="button" data-fantmode="3d" class="' + (FANT_MODE === '3d' ? 'on' : '') + '" aria-pressed="' + (FANT_MODE === '3d') + '" title="${T("Forme portée et intérieur du col reconstruits par l’IA (FLUX Kontext) : plus « studio », mais un petit détail peut changer.")}">${T("Fantôme 3D")}</button>'
           + '</div>' : '')
         + (v.cle === 'fantome' ? '<button type="button" class="prim direct" data-direct="fantome"' + (RO || !aUnePhoto() ? ' disabled' : '')
           + ' title="${T("Lance tout de suite, avec les réglages par défaut")}">${T("Générer maintenant")}<span data-prix-direct></span></button>' : '')
@@ -2920,9 +2920,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
        cherche un element absent n est pas une erreur, mais il fait croire que
        l ecran existe encore quelque part — c est la raison meme pour laquelle
        ph-ouvrir avait ete debranche le 2026-09-09. */
-    corps.querySelectorAll('[data-fmode]').forEach(function(el){
+    // ⚠ data-FANTMODE, pas data-fmode : ce nom-là appartient aux formats (Recadrer / Marges), branchés plus bas —
+    // leur branchement écrasait celui-ci et « Fantôme 3D » ne répondait plus (2026-10-18, sa capture)
+    corps.querySelectorAll('[data-fantmode]').forEach(function(el){
       el.onclick = function(ev){ ev.stopPropagation(); if (RO || OCCUPE) return;
-        FANT_MODE = el.getAttribute('data-fmode') === '3d' ? '3d' : 'exact';
+        FANT_MODE = el.getAttribute('data-fantmode') === '3d' ? '3d' : 'exact';
         try { localStorage.setItem('sz-studio-fantome-mode', FANT_MODE); } catch (e) {}
         VOIE = 'fantome'; VOIE_CHOISIE = true; dessiner(); };
     });
