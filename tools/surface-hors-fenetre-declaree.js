@@ -44,7 +44,9 @@ module.exports = {
        commentaire, et deux des appels du veilleur aussi. Un releve qui compte
        les citations accuse la documentation qui garde la regle. */
     'src/main.js|dialog.showMessageBox': {
-      n: 10,
+      // 12 (2026-10-17) : + la proposition d installation, l avertissement des fenetres non enregistrees,
+      // l echec du telechargement ; - la boite « version disponible » du menu (remplacee par la proposition)
+      n: 12,
       banc: 'tools/banc-langue-processus-principal.js',
       quoi: 'Les questions posees par le processus principal (quitter, restaurer, '
           + 'remplacer un fichier, confirmer une purge). Elles sortent AVANT toute '

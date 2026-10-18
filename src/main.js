@@ -5894,7 +5894,8 @@ const getUpdater = () => {
       _majDetecteeA = Date.now();
       // ⚠ la VEILLE ne fait qu ANNONCER (sa consigne : « juste un avis, pas qu elle s installe toute seule ») :
       // la barre garde l avis tant qu on n a pas choisi d installer (Aide › Vérifier les mises à jour)
-      majEtat({ etape: _veilleEnCours ? 'disponible' : 'detectee', version: _majVersionVue });
+      // rien ne se télécharge d office (sauf à la porte du démarrage) : la barre dit « disponible », cliquable
+      majEtat({ etape: _porteActive ? 'detectee' : 'disponible', version: _majVersionVue });
       try { require('./veilleur').annoncerMaj(_majVersionVue); } catch {}
     });
     // Rien à télécharger : aucune raison de retenir quoi que ce soit.
@@ -6003,6 +6004,7 @@ const getUpdater = () => {
          laisserait la mise à jour en suspens sans que personne le sache — et
          `_majProposer` rend faux aussi bien quand la fenêtre est absente que
          quand le site est plus ancien que la coquille. */
+      if (_installDemandee) { installerEtRelancer(autoUpdater); return; }   // la personne a déjà dit oui (proposerInstallation)
       if (!(await _majProposer(version))) {
         if (process.platform === 'darwin') return;   // rien à installer ici
         installerEtRelancer(autoUpdater);
@@ -6106,7 +6108,7 @@ const checkForUpdates = async (manual) => {
      fermeture. Le téléchargement et l installation restent un CHOIX : « Vérifier les mises à jour »
      (manual = true) ou le prochain démarrage. */
   _veilleEnCours = !manual;
-  try { updater.autoDownload = !!manual; } catch {}
+  try { updater.autoDownload = false; } catch {}   // ni la veille ni le menu ne téléchargent d office : on propose d abord
   // La barre d etat le dit des le clic : << Recherche d une mise a jour >>.
   // (une verification de VEILLE, toutes les 15 min, ne l affiche pas : la barre clignoterait pour rien)
   if (manual) majEtat({ etape: 'verif', percent: 0 });
@@ -6135,12 +6137,12 @@ const checkForUpdates = async (manual) => {
       return;
     }
     if (manual) {
-      dialog.showMessageBox(mainWindow, {
-        type: 'info',
-        title: 'Mise à jour',
-        message: 'Version ' + remote + ' disponible.',
-        detail: 'Le téléchargement se fait en arrière-plan ; vous serez averti quand elle sera prête.',
-      });
+      // (2026-10-17) on PROPOSE : la question, puis les fenêtres non enregistrées, puis le téléchargement et l installation
+      _updBusy = false; _veilleEnCours = false;
+      try { updater.autoDownload = true; } catch {}
+      if (_majEtape === 'verif') majEtat({ etape: 'disponible', version: String(remote) });
+      proposerInstallation(String(remote));
+      return;
     }
     // Le téléchargement part tout seul (autoDownload) ; `update-downloaded` prend le relais.
     /* ⚠ LA BARRE PASSE A << TELECHARGEMENT >> SANS ATTENDRE le premier evenement
@@ -6178,6 +6180,61 @@ const checkForUpdates = async (manual) => {
 // electron-builder.yml). Y bloquer l'entrée enfermerait le poste dans une
 // impasse : la version est périmée ET ne peut pas être remplacée. Sur Mac, on
 // avertit et on laisse passer, jusqu'à ce qu'il y ait un certificat Apple.
+/* ══ PROPOSER L'INSTALLATION (2026-10-17, sa demande : « l avis : seulement “Nouvelle version X disponible”, en gras ;
+   si on clique dessus, on demande : voulez-vous installer la mise à jour ? Si, au moment de la lancer, des fenêtres de
+   l application NON ENREGISTRÉES sont ouvertes, tu dois avertir et proposer de les fermer avant ; et ce processus doit
+   aussi passer par Aide › Vérifier les mises à jour ») ══
+   UNE fonction, deux portes (le clic sur l avis de la barre d état, et le menu Aide). Les fenêtres « sales » sont
+   celles qui l ont déclaré (fenSale : szPont.brouillonSale) ; les FERMER passe par leur garde de fermeture, qui demande
+   d enregistrer. Une fois la personne d accord, le téléchargement part et l installation suit SANS reposer la question
+   (_installDemandee) — sinon la bannière « prête » la reposerait. */
+let _installDemandee = false;
+const fenetresNonEnregistrees = () => {
+  const out = [];
+  Array.from(fenSale).forEach((id) => {
+    try {
+      const wc = require('electron').webContents.fromId(id);
+      if (!wc || wc.isDestroyed()) { fenSale.delete(id); return; }
+      const w = BrowserWindow.fromWebContents(wc) || null;
+      out.push({ wc, w, titre: String((w && !w.isDestroyed() && w !== mainWindow && w.getTitle()) || wc.getTitle() || 'Administration Sandriza') });
+    } catch (e) {}
+  });
+  return out;
+};
+const proposerInstallation = async (version) => {
+  const parent = (mainWindow && !mainWindow.isDestroyed()) ? mainWindow : undefined;
+  const v = String(version || _majVersionVue || '');
+  const { response } = await dialog.showMessageBox(parent, {
+    type: 'question', buttons: [TP('Installer maintenant'), TP('Plus tard')], defaultId: 0, cancelId: 1,
+    title: TP('Mise à jour'), message: TP('Nouvelle version {0} disponible.', v),
+    detail: TP('Voulez-vous installer la mise à jour ? L’application redémarrera.'),
+  });
+  if (response !== 0) return false;
+  let sales = fenetresNonEnregistrees();
+  while (sales.length) {
+    const r2 = await dialog.showMessageBox(parent, {
+      type: 'warning', buttons: [TP('Fermer ces fenêtres'), TP('Installer quand même'), TP('Annuler')], defaultId: 0, cancelId: 2,
+      title: TP('Mise à jour'), message: TP('Des fenêtres ont des modifications non enregistrées.'),
+      detail: sales.map((x) => '• ' + x.titre).join('\n') + '\n\n' + TP('Enregistrez-les ou fermez-les avant d’installer : sinon ce travail sera perdu.'),
+    });
+    if (r2.response === 2) return false;
+    if (r2.response === 1) break;
+    // « Fermer » : chaque fenêtre passe par SON garde (qui demande d enregistrer) ; une vue posée dans la principale
+    // ne se ferme pas — on la montre, pour qu on l enregistre
+    sales.forEach((x) => { try { if (x.w && !x.w.isDestroyed() && x.w !== mainWindow) x.w.close(); else { x.wc.focus(); } } catch (e) {} });
+    await new Promise((r) => setTimeout(r, 1500));
+    sales = fenetresNonEnregistrees();
+  }
+  _installDemandee = true;
+  let updater; try { updater = getUpdater(); } catch (e) { return false; }
+  if (_majVersionPrete) { installerEtRelancer(updater); return true; }
+  majEtat({ etape: 'telechargement', version: v, percent: 0 });
+  try { _updBusy = true; updater.autoDownload = true; await updater.downloadUpdate(); }
+  catch (e) { _updBusy = false; _installDemandee = false; majEtat(null);
+    dialog.showMessageBox(parent, { type: 'error', title: TP('Mise à jour'), message: TP('Le téléchargement de la mise à jour a échoué.'), detail: String((e && e.message) || e) }); }
+  return true;
+};
+
 const PORTE_DELAI_MS = 20000; // au-delà, on considère la vérification impossible
 let _porteReessaye = false;     // un échec à la porte se réessaie UNE fois, sans rien demander (voir `error`)
 
@@ -6192,6 +6249,7 @@ const verifierAuLancement = async () => {
   let updater;
   try { updater = getUpdater(); }
   catch { ouvrirAdmin(); return; }   // electron-updater absent : sans effet
+  try { updater.autoDownload = true; } catch {}   // à la PORTE, la mise à jour s installe d elle-même (personne ne travaille encore)
 
   getUpdater._manual = false;
   _updBusy = true;
@@ -6479,6 +6537,8 @@ const actionApp = (nom, arg) => {
       break;
     }
     case 'update-check': checkForUpdates(true); break;
+    // le clic sur « Nouvelle version X disponible » (barre d état) : la version est connue, on propose tout de suite
+    case 'update-install': if (_majVersionVue || _majVersionPrete) proposerInstallation(_majVersionPrete || _majVersionVue); else checkForUpdates(true); break;
     case 'about':       ouvrirApropos(); break;
     case 'imprimantes': ouvrirImprimantes(); break;
     /* Le CADRE natif : la barre laterale et la zone d ancrage, dessinees par la

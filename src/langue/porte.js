@@ -94,4 +94,14 @@ module.exports = {
      relecture. Un bouton reste le dernier mot qu on lit. */
   'Compris': 'Understood',
 
+  'Installer maintenant': 'Install now',
+  'Plus tard': 'Later',
+  'Nouvelle version {0} disponible.': 'New version {0} available.',
+  'Voulez-vous installer la mise à jour ? L’application redémarrera.': 'Do you want to install the update? The application will restart.',
+  'Fermer ces fenêtres': 'Close these windows',
+  'Installer quand même': 'Install anyway',
+  'Annuler': 'Cancel',
+  'Des fenêtres ont des modifications non enregistrées.': 'Some windows have unsaved changes.',
+  'Enregistrez-les ou fermez-les avant d’installer : sinon ce travail sera perdu.': 'Save or close them before installing: otherwise this work will be lost.',
+  'Le téléchargement de la mise à jour a échoué.': 'The update download failed.',
 };
