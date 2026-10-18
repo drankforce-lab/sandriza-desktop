@@ -289,4 +289,6 @@ module.exports = {
   'Crédits restants du compte Photoroom': 'Remaining Photoroom account credits',
   'Soldes…': 'Balances…',
   'Soldes indisponibles': 'Balances unavailable',
+  'Nouveau logo posé sur la boutique, les factures et les courriels.': 'New logo applied to the shop, invoices and emails.',
+  'lu à {0}': 'read at {0}',
 };

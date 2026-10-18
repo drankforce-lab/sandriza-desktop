@@ -1121,21 +1121,23 @@ function rafraichir() {
    toutes les quelques heures, et la même version ne se rannonce pas. Sans son : ce n'est pas une
    commande. Un clic ouvre l'administration. */
 let _majAnnoncee = '';
-function annoncerMaj(version) {
+function annoncerMaj(version, surClic) {
   const v = String(version || '').trim();
   if (!v || v === _majAnnoncee) return;
   _majAnnoncee = v;
-  const titre = TV('Nouvelle version {0} disponible').split('{0}').join(v);
+  // (2026-10-18, sa demande : dire qu une MISE À JOUR est disponible, avec son numéro, et que ses notes sont prêtes)
+  const titre = TV('Mise à jour {0} disponible').split('{0}').join(v);
   _noter(titre, 'maj');
   try {
     if (!Notification.isSupported()) return;
     const n = new Notification({
       title: titre,
-      body: TV('Rien ne s’installe tout seul : pour l’installer, Aide › Vérifier les mises à jour, ou redémarrez l’application.'),
+      body: TV('Les notes de mise à jour sont disponibles : cliquez pour voir les nouveautés. Elle s’installe quand vous le décidez.'),
       icon: fs.existsSync(ICON_PATH) ? ICON_PATH : undefined,
       silent: true, timeoutType: 'default', urgency: 'normal',
     });
-    n.on('click', () => ouvrirAdministration(TV('Connectez-vous pour voir la mise à jour.')));
+    // le clic ouvre les NOTES (la coquille les montre : surClic) ; à défaut, l administration
+    n.on('click', () => { if (typeof surClic === 'function') { try { surClic(); return; } catch { /* repli */ } } ouvrirAdministration(TV('Connectez-vous pour voir la mise à jour.')); });
     n.show();
   } catch { /* le message reste dans le journal */ }
 }

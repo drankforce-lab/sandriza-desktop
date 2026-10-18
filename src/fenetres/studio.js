@@ -621,6 +621,13 @@ function pageStudio(mode) {
   return `${TETE()}
 <title>${T("Studio virtuel — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}.pied .transp[hidden]{display:none}
+.tuile .direct{margin-top:.55rem;align-self:flex-start;padding:.35rem .8rem;font-size:.8rem;border-radius:8px}
+.pied .prix-est{font-size:.82rem;color:var(--tx2);margin-right:.6rem;white-space:nowrap}
+.pied .prix-est b{color:var(--tx);font-weight:650}
+.pied .prix-est[hidden]{display:none}
+.tuile .fmodes{display:inline-flex;margin-top:.55rem;padding:2px;border-radius:9px;border:1px solid var(--v12);background:var(--v04)}
+.tuile .fmodes button{border:0;background:none;color:var(--tx2);font:inherit;font-size:.78rem;padding:.28rem .7rem;border-radius:7px;cursor:pointer}
+.tuile .fmodes button.on{background:var(--f-carte);color:var(--tx);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.25)}
 </style></head><body>
 <div class="tete"><span class="ico">${ICO.studio}</span><h1>${T("Studio virtuel")}</h1>
   <span class="credits" id="credits"></span>
@@ -639,6 +646,7 @@ function pageStudio(mode) {
 <div class="ro" id="ro" hidden>${T("Lecture seule : votre rôle ne permet pas de lancer de traitement.")}</div>
 <div class="corps plein" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
+  <span class="prix-est" id="prix-est" hidden title="${T("Calculé au tarif réel des services, selon les options choisies")}"></span>
   <button id="b-reset" title="${T("Tout effacer : photo, réglages et rendu")}">${T("↺ Recommencer")}</button>
   <button id="b-lot">${T("⚙ Traiter en lot…")}</button>
   <button class="gratuit" id="b-apercu" disabled>${T("Aperçu gratuit")}</button>
@@ -1006,9 +1014,42 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
      compose un décor. Au relais part l ambiance par défaut (le prix ne dépend pas du fond) et fondTransparent. */
   var AMB_TRANSP = { cle: 'transparent', label: '${T("Fond transparent")}', desc: '${T("Le vêtement seul, sans fond : un PNG transparent.")}' };
   function transparentChoisi(){ return VOIE === 'fantome' && PRESET === 'transparent'; }
+  /* LE MODE DU VÊTEMENT SANS MANNEQUIN (2026-10-18) : « exact » (détourage, aucun pixel redessiné) ou « 3d » (FLUX
+     Kontext : forme portée et intérieur du col reconstruits — plus studio, mais génératif). Le choix reste sur ce poste. */
+  var FANT_MODE = (function(){ try { return localStorage.getItem('sz-studio-fantome-mode') === '3d' ? '3d' : 'exact'; } catch (e) { return 'exact'; } })();
   function presetEnvoye(){ return PRESET === 'transparent' ? ((PRESETS[0] || {}).cle || '') : PRESET; }
+  /* LE PRIX, AVANT DE LANCER (2026-10-18, sa demande : « un précalcul que l on peut voir, selon les options choisies,
+     basé sur la réalité ; on doit savoir combien ça va coûter avant de lancer, et la confirmation doit le rappeler »).
+     Le relais chiffre au tarif RÉEL (studio:estimer : barème Fal.ai pour le vêtement sans mannequin, nombre d appels
+     Photoroom selon l ambiance et les finitions) — sans appel payant. Recalculé quand un réglage change (attente de
+     0,35 s, et jamais deux fois la même demande) ; affiché au pied, sur le bouton direct et dans la confirmation. */
+  var PRIX_EST = null, PRIX_CLE = '', PRIX_T = null;
+  function prixTexte(r){
+    if (!r || !r.ok) return '';
+    var m = function(x){ return szArgentSymbole(szArgentNombre(x, x < 0.1 ? 3 : 2)) + ' US'; };
+    return (r.coutMin != null && r.coutMin !== r.coutMax ? m(r.coutMin) + ' – ' : '') + m(r.coutMax);
+  }
+  function majPrix(){
+    var el = document.getElementById('prix-est');
+    // dès qu une photo est là — sans ambiance choisie, celle que prendrait « Générer maintenant » (la première)
+    if (!aUnePhoto() || RO || LOTS_VUE) { if (el) el.hidden = true; PRIX_EST = null; PRIX_CLE = ''; peindrePrix(); return; }
+    var dem = { geste: VOIE, mode: VOIE === 'fantome' && FANT_MODE === '3d' ? '3d' : '', preset: presetEnvoye() || (PRESETS[0] || {}).cle || '', nb: 1, finition: finitionPour(VOIE) || {}, options: VOIE === 'humain' ? optionsPour('humain') : {} };
+    var cle = JSON.stringify(dem); if (cle === PRIX_CLE) { peindrePrix(); return; }   // redessiné : on repeint, sans redemander
+    PRIX_CLE = cle; clearTimeout(PRIX_T);
+    PRIX_T = setTimeout(function(){
+      appeler('studio:estimer', [dem]).then(function(r){ if (cle !== PRIX_CLE) return; PRIX_EST = (r && r.ok) ? r : null; peindrePrix(); });
+    }, 350);
+  }
+  function peindrePrix(){
+    var el = document.getElementById('prix-est'), t = prixTexte(PRIX_EST), n = (PRIX_EST && PRIX_EST.appelsMax) || 0;
+    if (el) { el.hidden = !t; el.innerHTML = t ? '${T("Coût estimé :")} <b>' + esc(t) + '</b>' + (n > 1 ? ' <span class="n">· ' + '${T("{0} appels")}'.split('{0}').join(n) + '</span>' : '') : ''; }
+    // sur le bouton, le MAXIMUM seul (la fourchette ne tient pas sur la tuile) : c est le montant vérifié à l envoi
+    var tm = PRIX_EST ? '≈ ' + szArgentSymbole(szArgentNombre(PRIX_EST.coutMax, PRIX_EST.coutMax < 0.1 ? 3 : 2)) + ' US' : '';
+    corps.querySelectorAll('[data-prix-direct]').forEach(function(s){ s.textContent = tm ? ' · ' + tm : ''; });
+  }
   function majBoutons(){
     if (PRESET === 'transparent' && VOIE !== 'fantome') PRESET = (PRESETS[0] || {}).cle || '';
+    setTimeout(majPrix, 0);
     var pret = pretALancer() && !OCCUPE;
     bApercu.disabled = !pret;
     bFinal.disabled = !pret;
@@ -1020,6 +1061,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     /* Le suivi des lots n'a rien à générer ni à recommencer : ses boutons de
        rendu restaient au pied, grisés, sans rapport avec l'écran. */
     bApercu.hidden = bFinal.hidden = !!LOTS_VUE;
+    /* (2026-10-18, sa demande : « retirer aperçu gratuit avec le vêtement sans mannequin, il consomme des crédits
+       Fal.ai de toute façon ») : un seul bouton, Générer. */
+    if (VOIE === 'fantome') bApercu.hidden = true;
     var br = document.getElementById('b-reset'); if (br) br.hidden = !!LOTS_VUE;
     if (!pret && ARME) { ARME = false; bFinal.className = 'prim'; bFinal.textContent = '${T("Générer en pleine qualité")}'; }
   }
@@ -1405,8 +1449,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     return VOIES.map(function(v){
       return '<div class="tuile' + (VOIE === v.cle ? ' on' : '') + '" data-voie="' + v.cle + '">'
         + '<span class="t">' + esc(v.t) + '</span>'
-        + '<span class="d">' + esc(v.d) + '</span></div>';
+        + '<span class="d">' + esc(v.d) + '</span>'
+        // (2026-10-18, sa demande : « lancer la génération directement, sans option, avec un seul bouton ») —
+        // l ambiance choisie (ou la première), aucun réglage facultatif
+        + (v.cle === 'fantome' ? '<div class="fmodes" role="group" aria-label="${T("Mode")}">'
+          + '<button type="button" data-fmode="exact" class="' + (FANT_MODE === 'exact' ? 'on' : '') + '" aria-pressed="' + (FANT_MODE === 'exact') + '" title="${T("Le vêtement de la photo, détouré au pixel près : rien n’est redessiné.")}">${T("Exact")}</button>'
+          + '<button type="button" data-fmode="3d" class="' + (FANT_MODE === '3d' ? 'on' : '') + '" aria-pressed="' + (FANT_MODE === '3d') + '" title="${T("Forme portée et intérieur du col reconstruits par l’IA (FLUX Kontext) : plus « studio », mais un petit détail peut changer.")}">${T("Fantôme 3D")}</button>'
+          + '</div>' : '')
+        + (v.cle === 'fantome' ? '<button type="button" class="prim direct" data-direct="fantome"' + (RO || !aUnePhoto() ? ' disabled' : '')
+          + ' title="${T("Lance tout de suite, avec les réglages par défaut")}">${T("Générer maintenant")}<span data-prix-direct></span></button>' : '')
+        + '</div>';
     }).join('');
+  }
+  function genererDirect(){
+    if (RO || OCCUPE) return;
+    if (!aUnePhoto()) { dire('${T("Importez d’abord une photo.")}', 'err'); return; }
+    VOIE = 'fantome'; VOIE_CHOISIE = true; RESULT = null; FORMATS = []; ENREG = false;
+    if (!PRESET) PRESET = (PRESETS[0] || {}).cle || '';
+    dessiner();
+    ARME = true; bFinal.onclick();
   }
 
   function nomModele(m){ return m.charAt(0).toUpperCase() + m.slice(1); }
@@ -2859,6 +2920,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
        cherche un element absent n est pas une erreur, mais il fait croire que
        l ecran existe encore quelque part — c est la raison meme pour laquelle
        ph-ouvrir avait ete debranche le 2026-09-09. */
+    corps.querySelectorAll('[data-fmode]').forEach(function(el){
+      el.onclick = function(ev){ ev.stopPropagation(); if (RO || OCCUPE) return;
+        FANT_MODE = el.getAttribute('data-fmode') === '3d' ? '3d' : 'exact';
+        try { localStorage.setItem('sz-studio-fantome-mode', FANT_MODE); } catch (e) {}
+        VOIE = 'fantome'; VOIE_CHOISIE = true; dessiner(); };
+    });
+    corps.querySelectorAll('[data-direct]').forEach(function(el){
+      el.onclick = function(ev){ ev.stopPropagation(); genererDirect(); };
+    });
     corps.querySelectorAll('[data-voie]').forEach(function(el){
       el.onclick = function(){ if (RO || OCCUPE) return; VOIE = el.getAttribute('data-voie'); VOIE_CHOISIE = true; RESULT = null; FORMATS = []; ENREG = false; dessiner();
         dire('${T("Voie :")} ' + VOIE + '.', 'att'); };
@@ -3498,6 +3568,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function saisie(apercu){
     var s = { geste: VOIE, preset: presetEnvoye(), apercu: apercu };
     if (transparentChoisi()) s.fondTransparent = true;
+    if (VOIE === 'fantome' && FANT_MODE === '3d') s.fantomeMode = '3d';
     if ((!apercu || VOIE === 'fantome') && PRIX_ANNONCE != null) s.prixAnnonce = PRIX_ANNONCE;
     if (PHOTO_ID) { s.photoId = PHOTO_ID; } else { s.image = PHOTO; }
     if (VOIE === 'humain') {
@@ -3637,7 +3708,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var bC = apercu ? bApercu : bFinal;
     occuper(true);
     boutonAttente(bC, '${T("Calcul du coût…")}');
-    appeler('studio:estimer', [{ geste: VOIE, preset: presetEnvoye(), nb: 1, finition: fin, options: opt }])
+    appeler('studio:estimer', [{ geste: VOIE, mode: VOIE === 'fantome' && FANT_MODE === '3d' ? '3d' : '', preset: presetEnvoye(), nb: 1, finition: fin, options: opt }])
       .then(function(r){
         boutonAttente(bC, '');
         occuper(false);
@@ -3721,8 +3792,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (!ARME) {
       clearTimeout(ARME_T);
       szConfirmer({ prudent: true, titre: '${T("Générer en pleine qualité")}',
-        texte: '${T("Le rendu en pleine qualité est un traitement payant : il consomme des crédits du service de génération d’images. Utilisez l’aperçu filigrané, gratuit, pour valider le résultat au préalable.")}',
-        oui: '${T("Lancer le rendu payant")}' }).then(function(ok){ if (ok) { ARME = true; bFinal.onclick(); } });
+        texte: (VOIE === 'fantome' ? '${T("Le vêtement sans mannequin est un traitement payant de Fal.ai. Son prix est vérifié avant l’envoi.")}'
+          : '${T("Le rendu en pleine qualité est un traitement payant : il consomme des crédits du service de génération d’images. Utilisez l’aperçu filigrané, gratuit, pour valider le résultat au préalable.")}')
+          + (prixTexte(PRIX_EST) ? ' ' + '${T("Coût estimé : {0}.")}'.split('{0}').join(prixTexte(PRIX_EST)) : ''),
+        details: PRIX_EST ? [['${T("Coût estimé")}', prixTexte(PRIX_EST)], ['${T("Appels facturés")}', String(PRIX_EST.appelsMax || 1)]] : null,
+        oui: prixTexte(PRIX_EST) ? '${T("Lancer — {0}")}'.split('{0}').join(prixTexte(PRIX_EST)) : '${T("Lancer le rendu payant")}' }).then(function(ok){ if (ok) { ARME = true; bFinal.onclick(); } });
       return;
     }
     ARME = false; bFinal.className = 'prim'; bFinal.textContent = '${T("Générer en pleine qualité")}';

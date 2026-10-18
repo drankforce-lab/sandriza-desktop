@@ -100,7 +100,8 @@ ${css}
   var marque=document.createElement('button'); marque.type='button'; marque.className='sz-marque';
   marque.title='Tableau de bord';
   marque.setAttribute('aria-label','Revenir au tableau de bord');
-  marque.innerHTML='<div class="sz-pastille">S</div><span class="sz-nom">Sandriza</span>';
+  // le MONOGRAMME du nouveau logo (2026-10-18), comme la barre ancrée (appbar.js)
+  marque.innerHTML='<div class="sz-pastille" aria-hidden="true"><span class="sz-s">S</span><span class="sz-z">z</span></div><span class="sz-nom">Sandriza</span>';
   marque.onclick=function(){ envoyer({section:'dashboard'}); };
   bar.appendChild(marque);
 

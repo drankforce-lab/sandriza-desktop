@@ -1032,12 +1032,17 @@ ipcMain.handle('notify', (e, opts = {}) => notifier(opts.title, opts.body, { sil
 // Pastille (overlay) sur l'icône de la barre des tâches. Windows n'a pas de
 // compteur natif → on affiche une IMAGE dessinée par la page (canvas → dataURL),
 // ou on efface si dataUrl vide. `desc` = texte lu par les lecteurs d'écran.
-ipcMain.handle('badge:set', (e, dataUrl, desc) => {
+ipcMain.handle('badge:set', (e, dataUrl, desc, echelle) => {
   const w = BrowserWindow.fromWebContents(e.sender) || mainWindow;
   if (!w) return false;
   try {
     if (!dataUrl) { w.setOverlayIcon(null, ''); return true; }
-    w.setOverlayIcon(nativeImage.createFromDataURL(dataUrl), desc || 'notifications');
+    // l'image arrive dessinée à 16 px × l'échelle de l'écran (preload.js) : on la déclare à cette échelle,
+    // sinon Windows la réduit une seconde fois
+    const k = Math.max(1, Math.min(3, Number(echelle) || 1));
+    const b64 = String(dataUrl).replace(/^data:image\/png;base64,/, '');
+    const img = nativeImage.createFromBuffer(Buffer.from(b64, 'base64'), { scaleFactor: k });
+    w.setOverlayIcon(img.isEmpty() ? nativeImage.createFromDataURL(dataUrl) : img, desc || 'notifications');
     return true;
   } catch { return false; }
 });
@@ -1528,6 +1533,9 @@ const createWindow = () => {
   // cote du theme des le demarrage (avant meme d en ouvrir une).
   _majThemeOS();
   mainWindow = new BrowserWindow({
+    // (2026-10-18, sa capture : la barre des tâches montrait encore l ancien « S ») l icône posée SUR la fenêtre —
+    // Windows prend sinon celle de son cache d icônes, qui survit aux mises à jour
+    icon: ICON_PATH || undefined,
     width: 1400,
     height: 900,
     minWidth: 1024,
@@ -5898,7 +5906,7 @@ const getUpdater = () => {
       // la barre garde l avis tant qu on n a pas choisi d installer (Aide › Vérifier les mises à jour)
       // rien ne se télécharge d office (sauf à la porte du démarrage) : la barre dit « disponible », cliquable
       majEtat({ etape: _porteActive ? 'detectee' : 'disponible', version: _majVersionVue });
-      try { require('./veilleur').annoncerMaj(_majVersionVue); } catch {}
+      try { require('./veilleur').annoncerMaj(_majVersionVue, () => { try { if (mainWindow && !mainWindow.isDestroyed()) { mainWindow.show(); mainWindow.focus(); } } catch {} actionApp('notes'); }); } catch {}
     });
     // Rien à télécharger : aucune raison de retenir quoi que ce soit.
     autoUpdater.on('update-not-available', () => { _majDispo = false; _majCritique = false; majBoutonsFermeture(); majEtat(null); });

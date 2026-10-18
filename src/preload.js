@@ -258,14 +258,20 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
     const n = parseInt(count, 10) || 0;
     if (n <= 0) return ipcRenderer.invoke('badge:set', null, '');
     try {
-      const s = 32, c = document.createElement('canvas'); c.width = s; c.height = s;
+      /* ⚠ DESSINÉE À SA VRAIE TAILLE (2026-10-18, sa capture : « le point rouge est déformé »). Windows affiche la
+         pastille en 16 px LOGIQUES : une image de 32 px réduite d'office brouillait le chiffre et rognait le rond.
+         On la dessine à 16 × l'échelle de l'écran et on dit cette échelle au processus principal. Couleurs du logo :
+         un rond caramel cerclé de noir (il se détache sur l'icône noire comme sur une barre claire), chiffre noir. */
+      const k = Math.max(1, Math.min(3, window.devicePixelRatio || 1)), s = Math.round(16 * k);
+      const c = document.createElement('canvas'); c.width = s; c.height = s;
       const x = c.getContext('2d');
-      x.fillStyle = '#c0392b'; x.beginPath(); x.arc(s / 2, s / 2, s / 2, 0, Math.PI * 2); x.fill();
-      x.fillStyle = '#fff'; x.textAlign = 'center'; x.textBaseline = 'middle';
-      const txt = n > 99 ? '99+' : String(n);
-      x.font = 'bold ' + (txt.length >= 3 ? 13 : 18) + 'px Segoe UI, sans-serif';
-      x.fillText(txt, s / 2, s / 2 + 1);
-      return ipcRenderer.invoke('badge:set', c.toDataURL('image/png'), n + ' à traiter');
+      x.fillStyle = '#111111'; x.beginPath(); x.arc(s / 2, s / 2, s / 2, 0, Math.PI * 2); x.fill();
+      x.fillStyle = '#C49A6C'; x.beginPath(); x.arc(s / 2, s / 2, s / 2 - Math.max(1, k), 0, Math.PI * 2); x.fill();
+      const txt = n > 9 ? '9+' : String(n);
+      x.fillStyle = '#111111'; x.textAlign = 'center'; x.textBaseline = 'middle';
+      x.font = '700 ' + Math.round((txt.length > 1 ? 8.5 : 11) * k) + 'px Segoe UI, Arial, sans-serif';
+      x.fillText(txt, s / 2, s / 2 + 0.5 * k);
+      return ipcRenderer.invoke('badge:set', c.toDataURL('image/png'), n + ' à traiter', k);
     } catch { return ipcRenderer.invoke('badge:set', null, ''); }
   },
 

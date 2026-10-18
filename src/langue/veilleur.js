@@ -28,8 +28,6 @@
 
 module.exports = {
   /* ── La mise à jour détectée (2026-10-17) ── */
-  'Nouvelle version {0} disponible': 'New version {0} available',
-  'Rien ne s’installe tout seul : pour l’installer, Aide › Vérifier les mises à jour, ou redémarrez l’application.': 'Nothing installs by itself: to install it, Help › Check for updates, or restart the application.',
   'Connectez-vous pour voir la mise à jour.': 'Sign in to see the update.',
   /* ── Les annonces détaillées (2026-10-12) ── */
   'Commande prioritaire': 'Priority order',
@@ -114,4 +112,6 @@ module.exports = {
   'conversation attend votre réponse': 'conversation awaits your reply',
   'conversations attendent votre réponse': 'conversations await your reply',
   'Ouvrez le clavardage pour répondre.': 'Open the chat to reply.',
+  'Mise à jour {0} disponible': 'Update {0} available',
+  'Les notes de mise à jour sont disponibles : cliquez pour voir les nouveautés. Elle s’installe quand vous le décidez.': 'The update notes are available: click to see what’s new. It installs when you decide.',
 };

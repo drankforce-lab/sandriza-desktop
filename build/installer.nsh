@@ -68,6 +68,11 @@
   Pop $0
   nsExec::Exec 'netsh advfirewall firewall add rule name="Administration Sandriza" dir=in action=allow program="$INSTDIR\${APP_EXECUTABLE_FILENAME}" enable=yes profile=any'
   Pop $0
+  ; (2026-10-18) l icone a change (nouveau logo) : Windows garde l ancienne dans son cache, raccourcis epingles compris.
+  ; On lui demande de rafraichir — sans fenetre (nsExec), sans effet si l outil manque.
+  nsExec::Exec '"$SYSDIR\ie4uinit.exe" -show'
+  Pop $0
+  System::Call 'shell32::SHChangeNotify(i 0x08000000, i 0, p 0, p 0)'
 !macroend
 !macro customUnInstall
   nsExec::Exec 'netsh advfirewall firewall delete rule name="Administration Sandriza"'

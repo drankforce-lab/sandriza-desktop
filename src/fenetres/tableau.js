@@ -371,27 +371,51 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      (jamais à chaque relecture de 12 s : ce sont des appels aux services). Une pastille BASSE passe en alerte.
      Fal.ai n a pas d API de solde : c est le solde saisi moins la consommation mesurée — « ≈ », et l info-bulle
      le dit. Un service muet garde sa pastille grise, sans éteindre les deux autres. */
-  var SOLDES = null, SOLDES_TIMER = null, SOLDES_ESSAIS = 0;
+  /* ⚠ DÈS L OUVERTURE (2026-10-18, sa capture : « Soldes indisponibles » au chargement — « j aimerais que les soldes
+     soient déjà disponibles »). Les derniers soldes lus sont GARDÉS sur ce poste et affichés tout de suite ; la relecture
+     se fait derrière et les remplace. Un échec n efface jamais des soldes déjà connus : il se réessaie (4 s, 10 s, puis
+     20 s) et l info-bulle dit l heure de la dernière lecture. */
+  var SOLDES = (function(){ try { var c = JSON.parse(localStorage.getItem('sz-tb-soldes') || 'null'); return c && c.ok ? c : null; } catch (e) { return null; } })();
+  var SOLDES_TIMER = null, SOLDES_ESSAIS = 0;
   function chargerSoldes(){
     appeler('tableau:soldes', []).then(function(r){
-      // ⚠ un échec SE VOIT (2026-10-17, sa capture : « où sont mes soldes ? » — un échec silencieux laissait la barre vide)
-      SOLDES = (r && r.ok) ? r : { echec: expliquer(r) };
-      // un échec à l OUVERTURE (session ou site pas encore prêts) se réessaie vite : 20 s, six fois — pas 5 minutes
-      if (r && r.ok) SOLDES_ESSAIS = 0;
-      else if (SOLDES_ESSAIS < 6) { SOLDES_ESSAIS++; setTimeout(chargerSoldes, 20000); }
+      if (r && r.ok) {
+        SOLDES = r; SOLDES.lu = Date.now(); SOLDES_ESSAIS = 0;
+        try { localStorage.setItem('sz-tb-soldes', JSON.stringify(SOLDES)); } catch (e) {}
+      } else {
+        // ⚠ un échec SE VOIT (2026-10-17) — mais seulement s il n y a rien de connu à montrer
+        if (!SOLDES || SOLDES.echec) SOLDES = { echec: expliquer(r) };
+        if (SOLDES_ESSAIS < 8) { setTimeout(chargerSoldes, [4000, 10000][SOLDES_ESSAIS] || 20000); SOLDES_ESSAIS++; }
+      }
       var b = document.getElementById('tb-soldes'); if (b) b.outerHTML = soldesHtml();
+    });
+  }
+  /* LE NOUVEAU LOGO, POSÉ D OFFICE (2026-10-18, sa demande : « je pensais que c était toi qui le faisais partout »).
+     Une seule fois : tant que personne n a choisi de jeu (config marque_jeu vide), la première ouverture par un compte
+     qui a le droit de modifier l apparence pose le nouveau jeu. Choisir ensuite « Ancien logo » dans Logos et marque
+     écrit le choix : il n est plus jamais touché d ici. */
+  function logoDOffice(){
+    appeler('config:marque:donnees', []).then(function(r){
+      if (!r || !r.ok || !r.peutModifier) return;
+      // ⚠ les premiers fichiers du nouveau logo (trop de marge) ont été remplacés sous d autres noms : un jeu déjà
+      // « nouveau » est reposé UNE fois pour que la base porte les nouvelles adresses (la boutique les lit déjà)
+      var reposer = r.jeuPose && r.jeu === 'nouveau' && (function(){ try { return localStorage.getItem('sz-logo-v2') !== '1'; } catch (e) { return false; } })();
+      if (r.jeuPose !== false && !reposer) return;
+      try { localStorage.setItem('sz-logo-v2', '1'); } catch (e) {}
+      appeler('config:marque:jeu', ['nouveau']).then(function(w){ if (w && w.ok) dire('${T("Nouveau logo posé sur la boutique, les factures et les courriels.")}', 'bon'); });
     });
   }
   function soldesHtml(){
     if (!SOLDES) return '<span id="tb-soldes" class="soldes"><span class="solde muet">${T("Soldes…")}</span></span>';
     if (SOLDES.echec) return '<span id="tb-soldes" class="soldes"><span class="solde muet" title="' + esc(SOLDES.echec) + '">${T("Soldes indisponibles")}</span></span>';
+    var vu = SOLDES.lu ? ' — ' + '${T("lu à {0}")}'.split('{0}').join(new Date(SOLDES.lu).toLocaleTimeString('${LIEU()}', { hour: '2-digit', minute: '2-digit' })) : '';
     var puce = function(nom, txt, bas, titre){ return '<span class="solde' + (bas ? ' bas' : '') + (txt ? '' : ' muet') + '" title="' + esc(titre) + '"><b>' + nom + '</b> ' + esc(txt || '—') + '</span>'; };
     var t = SOLDES.twilio || {}, f = SOLDES.fal || {}, p = SOLDES.photoroom || {};
     var tw = t.erreur ? '' : szArgentSymbole(szArgentNombre(t.solde, 2)) + (t.devise && t.devise !== 'USD' ? ' ' + t.devise : ' US');
     // le vrai solde (api.fal.ai) quand Fal.ai le donne ; sinon l estimation, précédée de « ≈ »
     var fa = f.erreur ? '' : (f.estime ? '≈ ' : '') + szArgentSymbole(szArgentNombre(f.restant, 2)) + ' US';
     var ph = p.erreur || p.disponibles == null ? '' : '${T("{0} crédits")}'.split('{0}').join(p.disponibles);
-    return '<span id="tb-soldes" class="soldes" aria-label="${T("Soldes des services")}">'
+    return '<span id="tb-soldes" class="soldes" aria-label="${T("Soldes des services")}" title="${T("Soldes des services")}' + esc(vu) + '">'
       + puce('Twilio', tw, !t.erreur && t.solde < 5, t.erreur ? '${T("Solde Twilio indisponible :")} ' + t.erreur : '${T("Solde du compte Twilio (appels et textos)")}')
       + puce('Fal.ai', fa, !f.erreur && f.restant < 3, f.erreur ? '${T("Solde Fal.ai indisponible :")} ' + f.erreur
           : !f.estime ? '${T("Solde du compte Fal.ai, lu chez Fal.ai")}'
@@ -903,6 +927,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   demarrerVerrous();
   demarrerDirect();
   chargerSoldes(); SOLDES_TIMER = setInterval(chargerSoldes, 5 * 60 * 1000);
+  setTimeout(logoDOffice, 3000);
   mxLire();
 })();
 </script>
