@@ -625,9 +625,10 @@ function pageStudio(mode) {
 .pied .prix-est{font-size:.82rem;color:var(--tx2);margin-right:.6rem;white-space:nowrap}
 .pied .prix-est b{color:var(--tx);font-weight:650}
 .pied .prix-est[hidden]{display:none}
-.tuile .fmodes{display:inline-flex;margin-top:.55rem;padding:2px;border-radius:9px;border:1px solid var(--v12);background:var(--v04)}
-.tuile .fmodes button{border:0;background:none;color:var(--tx2);font:inherit;font-size:.78rem;padding:.28rem .7rem;border-radius:7px;cursor:pointer}
-.tuile .fmodes button.on{background:var(--f-carte);color:var(--tx);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.tuile .paliers{display:flex;flex-direction:column;gap:.2rem;margin-top:.55rem;font-size:.78rem;color:var(--tx2)}
+.tuile .paliers label{display:inline-flex;align-items:center;gap:.4rem;cursor:pointer}
+.tuile .paliers label b{color:var(--tx);font-weight:600}
+.tuile .paliers .px{color:var(--tx2);font-variant-numeric:tabular-nums}
 </style></head><body>
 <div class="tete"><span class="ico">${ICO.studio}</span><h1>${T("Studio virtuel")}</h1>
   <span class="credits" id="credits"></span>
@@ -808,7 +809,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var VOIES = [
     { cle: 'humain',  t: '${T("Mannequin virtuel")}', d: '${T("Porté par un modèle, décor intégré")}' },
     // (2026-10-17, sa demande : « renomme mannequin fantôme par vêtement sans mannequin, sinon ça porte à confusion »)
-    { cle: 'fantome', t: '${T("Vêtement sans mannequin")}', d: '${T("Par Fal.ai : mannequin retiré, vêtement intact sur fond uni")}' },
+    { cle: 'fantome', t: '${T("Vêtement sans mannequin")}', d: '${T("Par The New Black : mannequin retiré, col et volume reconstruits, fond transparent ou uni")}' },
     { cle: 'plat',    t: '${T("Produit à plat")}',    d: '${T("Détourage + décor + ombre")}' }
   ];
   /* Les 16 modeles REELS de Photoroom (virtualModel.model.preset.name, verifies
@@ -964,6 +965,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
     module_photos:      '${T("La photothèque n’a pas pu être chargée. Rechargez (Ctrl+R) ; si cela revient, reconnectez-vous.")}',
     version_coquille:   '${T("Cette version de l’application ne sait pas encore ouvrir cet écran.")}',
+    /* (2026-10-18) LE VÊTEMENT SANS MANNEQUIN PAR THE NEW BLACK : chaque refus est NOMMÉ — aucune bascule silencieuse
+       sur un autre service. */
+    cle_absente:          '${T("Aucune clé The New Black configurée (Configuration ▸ Sécurité ▸ Clé et plafond de dépense IA). Rien n’a été lancé.")}',
+    cle_refusee:          '${T("The New Black refuse la clé configurée. Rien n’a été lancé.")}',
+    credits_insuffisants: '${T("Crédits The New Black insuffisants pour ce palier. Rien n’a été lancé.")}',
+    tnb_echec:            '${T("The New Black n’a pas pu générer l’image ; les crédits sont remboursés.")}',
+    tnb_delai:            '${T("The New Black n’a pas rendu l’image à temps. Elle restera visible dans votre compte The New Black.")}',
+    tnb_injoignable:      '${T("The New Black est injoignable. Rien n’a été lancé.")}',
+    tnb_erreur:           '${T("The New Black a refusé la demande.")}',
+    detourage:            '${T("Le détourage du vêtement généré a échoué.")}',
+    plafond:              '${T("Plafond mensuel de dépense atteint.")}',
     echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
@@ -1014,13 +1026,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
      compose un décor. Au relais part l ambiance par défaut (le prix ne dépend pas du fond) et fondTransparent. */
   var AMB_TRANSP = { cle: 'transparent', label: '${T("Fond transparent")}', desc: '${T("Le vêtement seul, sans fond : un PNG transparent.")}' };
   function transparentChoisi(){ return VOIE === 'fantome' && PRESET === 'transparent'; }
-  /* LE MODE DU VÊTEMENT SANS MANNEQUIN (2026-10-18) : « exact » (détourage, aucun pixel redessiné) ou « 3d » (FLUX
-     Kontext : forme portée et intérieur du col reconstruits — plus studio, mais génératif). Le choix reste sur ce poste. */
-  var FANT_MODE = (function(){ try { return localStorage.getItem('sz-studio-fantome-mode') === '3d' ? '3d' : 'exact'; } catch (e) { return 'exact'; } })();
+  /* LE PALIER THE NEW BLACK DU VÊTEMENT SANS MANNEQUIN (2026-10-18, sa demande : « gardons standard ») : Standard (1K,
+     1 crédit) est la base — rien à cocher ; deux cases, exclusives l une de l autre, montent à « 2K — Pro » ou à
+     « 4K — Ultra », leur prix à côté. Aucune cochée = Standard. Jamais retenu d une séance à l autre : un palier plus
+     cher se choisit à chaque fois, il ne se retrouve pas coché par mégarde. */
+  var FANT_PALIER = 'standard';
   function presetEnvoye(){ return PRESET === 'transparent' ? ((PRESETS[0] || {}).cle || '') : PRESET; }
   /* LE PRIX, AVANT DE LANCER (2026-10-18, sa demande : « un précalcul que l on peut voir, selon les options choisies,
      basé sur la réalité ; on doit savoir combien ça va coûter avant de lancer, et la confirmation doit le rappeler »).
-     Le relais chiffre au tarif RÉEL (studio:estimer : barème Fal.ai pour le vêtement sans mannequin, nombre d appels
+     Le relais chiffre au tarif RÉEL (studio:estimer : forfait The New Black pour le vêtement sans mannequin, nombre d appels
      Photoroom selon l ambiance et les finitions) — sans appel payant. Recalculé quand un réglage change (attente de
      0,35 s, et jamais deux fois la même demande) ; affiché au pied, sur le bouton direct et dans la confirmation. */
   var PRIX_EST = null, PRIX_CLE = '', PRIX_T = null;
@@ -1033,7 +1047,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var el = document.getElementById('prix-est');
     // dès qu une photo est là — sans ambiance choisie, celle que prendrait « Générer maintenant » (la première)
     if (!aUnePhoto() || RO || LOTS_VUE) { if (el) el.hidden = true; PRIX_EST = null; PRIX_CLE = ''; peindrePrix(); return; }
-    var dem = { geste: VOIE, mode: VOIE === 'fantome' && FANT_MODE === '3d' ? '3d' : '', preset: presetEnvoye() || (PRESETS[0] || {}).cle || '', nb: 1, finition: finitionPour(VOIE) || {}, options: VOIE === 'humain' ? optionsPour('humain') : {} };
+    var dem = { geste: VOIE, palier: VOIE === 'fantome' ? FANT_PALIER : '', preset: presetEnvoye() || (PRESETS[0] || {}).cle || '', nb: 1, finition: finitionPour(VOIE) || {}, options: VOIE === 'humain' ? optionsPour('humain') : {} };
     var cle = JSON.stringify(dem); if (cle === PRIX_CLE) { peindrePrix(); return; }   // redessiné : on repeint, sans redemander
     PRIX_CLE = cle; clearTimeout(PRIX_T);
     PRIX_T = setTimeout(function(){
@@ -1046,6 +1060,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     // sur le bouton, le MAXIMUM seul (la fourchette ne tient pas sur la tuile) : c est le montant vérifié à l envoi
     var tm = PRIX_EST ? '≈ ' + szArgentSymbole(szArgentNombre(PRIX_EST.coutMax, PRIX_EST.coutMax < 0.1 ? 3 : 2)) + ' US' : '';
     corps.querySelectorAll('[data-prix-direct]').forEach(function(s){ s.textContent = tm ? ' · ' + tm : ''; });
+    // le prix d UNE photo à chaque palier, à côté de sa case (le barème du relais, jamais recalculé ici)
+    var pp = (PRIX_EST && PRIX_EST.prixPaliers) || null;
+    corps.querySelectorAll('[data-prix-palier]').forEach(function(s){
+      var v = pp ? pp[s.getAttribute('data-prix-palier')] : null;
+      s.textContent = v != null ? '(' + szArgentSymbole(szArgentNombre(v, v < 0.1 ? 3 : 2)) + ' US)' : '';
+    });
   }
   function majBoutons(){
     if (PRESET === 'transparent' && VOIE !== 'fantome') PRESET = (PRESETS[0] || {}).cle || '';
@@ -1445,6 +1465,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '<div class="lots">' + lotsHtml() + '</div>';
   }
 
+  function caseP(cle, lib){
+    return '<label><input type="checkbox" data-fantpalier="' + cle + '"' + (FANT_PALIER === cle ? ' checked' : '')
+      + (RO ? ' disabled' : '') + '> <b>' + lib + '</b> <span class="px" data-prix-palier="' + cle + '"></span></label>';
+  }
   function voiesHtml(){
     return VOIES.map(function(v){
       return '<div class="tuile' + (VOIE === v.cle ? ' on' : '') + '" data-voie="' + v.cle + '">'
@@ -1452,10 +1476,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         + '<span class="d">' + esc(v.d) + '</span>'
         // (2026-10-18, sa demande : « lancer la génération directement, sans option, avec un seul bouton ») —
         // l ambiance choisie (ou la première), aucun réglage facultatif
-        + (v.cle === 'fantome' ? '<div class="fmodes" role="group" aria-label="${T("Mode")}">'
-          + '<button type="button" data-fantmode="exact" class="' + (FANT_MODE === 'exact' ? 'on' : '') + '" aria-pressed="' + (FANT_MODE === 'exact') + '" title="${T("Le vêtement de la photo, détouré au pixel près : rien n’est redessiné.")}">${T("Exact")}</button>'
-          + '<button type="button" data-fantmode="3d" class="' + (FANT_MODE === '3d' ? 'on' : '') + '" aria-pressed="' + (FANT_MODE === '3d') + '" title="${T("Le vêtement de la photo, au pixel près ; seul l’intérieur du col (là où était le cou du mannequin) est peint par l’IA, sans étiquette ni ajout.")}">${T("Fantôme 3D")}</button>'
-          + '</div>' : '')
+        + (v.cle === 'fantome' ? '<div class="paliers" role="group" aria-label="${T("Qualité The New Black")}" title="${T("Standard (1K) sans case cochée ; une case monte la résolution, et le prix.")}">'
+          + caseP('pro', '${T("2K — Pro")}') + caseP('ultra', '${T("4K — Ultra")}') + '</div>' : '')
         + (v.cle === 'fantome' ? '<button type="button" class="prim direct" data-direct="fantome"' + (RO || !aUnePhoto() ? ' disabled' : '')
           + ' title="${T("Lance tout de suite, avec les réglages par défaut")}">${T("Générer maintenant")}<span data-prix-direct></span></button>' : '')
         + '</div>';
@@ -1465,7 +1487,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (RO || OCCUPE) return;
     if (!aUnePhoto()) { dire('${T("Importez d’abord une photo.")}', 'err'); return; }
     VOIE = 'fantome'; VOIE_CHOISIE = true; RESULT = null; FORMATS = []; ENREG = false;
-    if (!PRESET) PRESET = FANT_MODE === '3d' ? 'transparent' : ((PRESETS[0] || {}).cle || '');
+    // (2026-10-18) le fond TRANSPARENT par défaut ; une ambiance choisie garde sa couleur unie
+    if (!PRESET) PRESET = 'transparent';
     dessiner();
     ARME = true; bFinal.onclick();
   }
@@ -2920,14 +2943,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
        cherche un element absent n est pas une erreur, mais il fait croire que
        l ecran existe encore quelque part — c est la raison meme pour laquelle
        ph-ouvrir avait ete debranche le 2026-09-09. */
-    // ⚠ data-FANTMODE, pas data-fmode : ce nom-là appartient aux formats (Recadrer / Marges), branchés plus bas —
-    // leur branchement écrasait celui-ci et « Fantôme 3D » ne répondait plus (2026-10-18, sa capture)
-    corps.querySelectorAll('[data-fantmode]').forEach(function(el){
-      el.onclick = function(ev){ ev.stopPropagation(); if (RO || OCCUPE) return;
-        FANT_MODE = el.getAttribute('data-fantmode') === '3d' ? '3d' : 'exact';
-        // (2026-10-18, sa demande) le fantôme 3D a un FOND TRANSPARENT par défaut — on peut ensuite choisir une ambiance
-        if (FANT_MODE === '3d') PRESET = 'transparent';
-        try { localStorage.setItem('sz-studio-fantome-mode', FANT_MODE); } catch (e) {}
+    // ⚠ data-FANTPALIER, pas data-fmode : ce nom-là appartient aux formats (Recadrer / Marges), branchés plus bas.
+    // Les deux cases s excluent : cocher l une décoche l autre ; décocher revient à Standard.
+    corps.querySelectorAll('[data-fantpalier]').forEach(function(el){
+      el.onclick = function(ev){ ev.stopPropagation(); };
+      el.onchange = function(){ if (RO || OCCUPE) { el.checked = FANT_PALIER === el.getAttribute('data-fantpalier'); return; }
+        FANT_PALIER = el.checked ? el.getAttribute('data-fantpalier') : 'standard';
+        if (!PRESET) PRESET = 'transparent';
         VOIE = 'fantome'; VOIE_CHOISIE = true; dessiner(); };
     });
     corps.querySelectorAll('[data-direct]').forEach(function(el){
@@ -3572,7 +3594,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function saisie(apercu){
     var s = { geste: VOIE, preset: presetEnvoye(), apercu: apercu };
     if (transparentChoisi()) s.fondTransparent = true;
-    if (VOIE === 'fantome' && FANT_MODE === '3d') s.fantomeMode = '3d';
+    if (VOIE === 'fantome') s.palier = FANT_PALIER;
     if ((!apercu || VOIE === 'fantome') && PRIX_ANNONCE != null) s.prixAnnonce = PRIX_ANNONCE;
     if (PHOTO_ID) { s.photoId = PHOTO_ID; } else { s.image = PHOTO; }
     if (VOIE === 'humain') {
@@ -3614,7 +3636,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     occuper(true);
     var bT = apercu ? bApercu : bFinal;
     boutonAttente(bT, apercu ? '${T("Aperçu en cours…")}' : '${T("Génération en cours…")}');
-    dire(VOIE === 'fantome' ? '${T("Retrait du mannequin par Fal.ai…")}' : apercu ? '${T("Aperçu gratuit en cours…")}' : '${T("Génération en pleine qualité…")}');
+    dire(VOIE === 'fantome' ? '${T("Retrait du mannequin par The New Black…")}' : apercu ? '${T("Aperçu gratuit en cours…")}' : '${T("Génération en pleine qualité…")}');
     appeler('studio:traiter', [saisie(apercu)]).then(function(r){
       boutonAttente(bT, '');
       occuper(false);
@@ -3712,17 +3734,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var bC = apercu ? bApercu : bFinal;
     occuper(true);
     boutonAttente(bC, '${T("Calcul du coût…")}');
-    appeler('studio:estimer', [{ geste: VOIE, mode: VOIE === 'fantome' && FANT_MODE === '3d' ? '3d' : '', preset: presetEnvoye(), nb: 1, finition: fin, options: opt }])
+    appeler('studio:estimer', [{ geste: VOIE, palier: VOIE === 'fantome' ? FANT_PALIER : '', preset: presetEnvoye(), nb: 1, finition: fin, options: opt }])
       .then(function(r){
         boutonAttente(bC, '');
         occuper(false);
         if (!r || !r.ok) { PRIX_ANNONCE = null; dire('${T("Coût non estimé — le rendu part quand même.")}', 'att'); suite(); return; }
         var n = r.appelsMax || 1;
-        // (2026-10-17) le vêtement sans mannequin passe par Fal.ai (voie « fal ») : l aperçu y est un VRAI traitement
-        // (sans filigrane, ~0,01 $) — son prix se dit et se vérifie comme le rendu final
-        var parFal = r.voie === 'fal';
-        PRIX_ANNONCE = (apercu && !parFal) ? null : r.coutMax;
-        if (parFal) { dire('${T("Vêtement sans mannequin par Fal.ai ≈ {0} — vérifié avant l’envoi.")}'.split('{0}').join(szArgentSymbole(szArgentNombre(r.coutMax, 3)))); suite(); return; }
+        // (2026-10-18) le vêtement sans mannequin passe par The New Black (voie « tnb ») : une génération au palier
+        // choisi + le détourage — son prix se dit (et ses crédits) et se vérifie avant l envoi
+        var parTnb = r.voie === 'tnb';
+        PRIX_ANNONCE = (apercu && !parTnb) ? null : r.coutMax;
+        if (parTnb) { dire('${T("Vêtement sans mannequin par The New Black ({1}, {2} crédit(s)) ≈ {0} — vérifié avant l’envoi.")}'
+          .split('{0}').join(szArgentSymbole(szArgentNombre(r.coutMax, 3))).split('{1}').join(String(r.resolution || '1K'))
+          .split('{2}').join(String(r.credits || 1))); suite(); return; }
         // Un seul appel par image : rien a confirmer, on ne met pas un voile
         // entre lui et le bouton pour le cas ordinaire — mais le PRIX se dit (c est lui que le relais vérifie)
         if (n <= 1) { dire(apercu ? '' : '${T("1 appel facturé ≈ {0} — vérifié avant l’envoi.")}'.split('{0}').join(szArgentSymbole(argent(r.coutMax)))); suite(); return; }
@@ -3796,7 +3820,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (!ARME) {
       clearTimeout(ARME_T);
       szConfirmer({ prudent: true, titre: '${T("Générer en pleine qualité")}',
-        texte: (VOIE === 'fantome' ? '${T("Le vêtement sans mannequin est un traitement payant de Fal.ai. Son prix est vérifié avant l’envoi.")}'
+        texte: (VOIE === 'fantome' ? '${T("Le vêtement sans mannequin est un traitement payant de The New Black (crédits du forfait). Son prix est vérifié avant l’envoi.")}'
           : '${T("Le rendu en pleine qualité est un traitement payant : il consomme des crédits du service de génération d’images. Utilisez l’aperçu filigrané, gratuit, pour valider le résultat au préalable.")}')
           + (prixTexte(PRIX_EST) ? ' ' + '${T("Coût estimé : {0}.")}'.split('{0}').join(prixTexte(PRIX_EST)) : ''),
         details: PRIX_EST ? [['${T("Coût estimé")}', prixTexte(PRIX_EST)], ['${T("Appels facturés")}', String(PRIX_EST.appelsMax || 1)]] : null,

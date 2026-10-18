@@ -112,7 +112,7 @@ html.jour .jours .b{background:rgba(168,128,78,.55)}html.jour .jours .b:hover{ba
 @media (max-width:1000px){.rang2{grid-template-columns:1fr}}
 `;
 
-/** @param {string} ouverture '' (consommation) ou 'historique' */
+/** @param {string} ouverture '' (consommation), 'historique' ou 'tnb' (The New Black) */
 function pageFal(ouverture) {
   const dep = JSON.stringify(String(ouverture || ''));
   return `${TETE()}
@@ -123,6 +123,7 @@ function pageFal(ouverture) {
 <div class="onglets">
   <button id="o-conso" class="on">${T("Consommation")}</button>
   <button id="o-hist">${T("Historique")}</button>
+  <button id="o-tnb">The New Black</button>
 </div>
 <div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
@@ -140,8 +141,9 @@ function pageFal(ouverture) {
 ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
   var corps = document.getElementById('corps');
   var sous  = document.getElementById('sous');
-  var VUE = ${dep} === 'historique' ? 'hist' : 'conso';
+  var VUE = ${dep} === 'historique' ? 'hist' : ${dep} === 'tnb' ? 'tnb' : 'conso';
   var D = null;
+  var TN = null;   // le détail The New Black (fal:suivi « tnb ») : solde, forfait, registre, nos générations
   var PR = null;
   // Filtres de l'historique + horodatage de la dernière lecture (l'écran se
   // rafraîchit seul, sans bouton).
@@ -346,7 +348,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
   // ── HISTORIQUE ──────────────────────────────────────────────────────────
   /* L'opération d'un appel se lit dans son modèle : Photoroom loggue toujours
      « photoroom/… », fal.ai loggue « fal-ai/… ». Un seul test suffit à ranger. */
-  function evtProv(e){ return (String(e.modele || '').indexOf('photoroom') === 0) ? 'photoroom' : 'fal'; }
+  function evtProv(e){ var m = String(e.modele || ''); return m.indexOf('photoroom') === 0 ? 'photoroom' : m.indexOf('tnb/') === 0 ? 'tnb' : 'fal'; }
   function evtsFiltres(){
     var q = (FILT_Q || '').trim().toLowerCase();
     return (D.evenements || []).filter(function(e){
@@ -370,7 +372,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
         : (e.photoNom ? '<span class="dt">' + esc(e.photoNom) + '</span>' : '—');
       out.push('<tr>'
         + '<td class="dt" style="white-space:nowrap">' + quand(e.au) + '</td>'
-        + '<td><span class="pill g">' + (prov === 'photoroom' ? 'Photoroom' : 'Fal.ai') + '</span></td>'
+        + '<td><span class="pill g">' + (prov === 'photoroom' ? 'Photoroom' : prov === 'tnb' ? 'The New Black' : 'Fal.ai') + '</span></td>'
         + '<td>' + esc(GESTES[e.geste] || e.geste || '—') + '</td>'
         + '<td>' + photo + '</td>'
         + '<td class="dt">' + esc(e.qui || '—') + '</td>'
@@ -392,7 +394,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
     var h = [];
     h.push('<div class="barreoutils">'
       + '<select id="h-prov" aria-label="${T("Filtrer par service")}">'
-      + opt('tous', '${T("Toutes les opérations")}') + opt('fal', 'Fal.ai') + opt('photoroom', 'Photoroom') + '</select>'
+      + opt('tous', '${T("Toutes les opérations")}') + opt('fal', 'Fal.ai') + opt('photoroom', 'Photoroom') + opt('tnb', 'The New Black') + '</select>'
       + '<input id="h-q" type="search" aria-label="${T("Filtrer par photo")}" placeholder="${T("Filtrer par photo (nom ou PH-000000)")}" value="' + esc(FILT_Q || '')
       + '" style="flex:1;min-width:13rem;background:var(--v05);color:var(--tx);'
       + 'border:1px solid var(--v16);border-radius:8px;padding:.32rem .55rem;font:inherit">'
@@ -407,11 +409,72 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
     return h.join('');
   }
 
+  /* ══ THE NEW BLACK (2026-10-18, sa demande : « notre coût et notre solde The New Black ») ══
+     Le solde est LU chez The New Black (crédits) ; son équivalent en dollars vient du FORFAIT (prix du mois ÷ crédits
+     du mois), une constante unique au serveur. La dépense du mois vient de NOTRE journal (chaque génération y passe,
+     avec sa photo et son palier) ; celle des trente jours, du registre de The New Black. L API ne donne pas la date
+     du prochain renouvellement : on montre le dernier versement du forfait, rien d inventé. */
+  var PALIERS_TNB = { standard: '${T("Standard (1K)")}', pro: '${T("Pro (2K)")}', ultra: '${T("Ultra (4K)")}' };
+  var TYPES_TNB = { plan: '${T("Forfait")}', grant: '${T("Offerts")}', hold: '${T("Retenue")}', settle: '${T("Règlement")}', refund: '${T("Remboursement")}', purchase: '${T("Achat")}' };
+  function vueTnb(){
+    var t = TN || {}, fo = t.forfait || {}, h = [];
+    h.push(ligneMaj());
+    var nbr = function(v){ return szArgentNombre(Number(v) || 0, 0); };
+    var solde = '<div class="carte"><h2>${T("Solde et forfait")}</h2>';
+    if (!t.clePosee) solde += '<p class="dt">${T("Aucune clé The New Black : Configuration › Sécurité › Clé et plafond de dépense IA.")}</p>';
+    else if (t.credits == null) solde += '<p class="dt" style="color:var(--tx-err)">${T("Solde non lu :")} ' + esc(t.error || t.motif || '?') + '</p>';
+    else solde += '<p style="font-size:1.5rem;margin:.2rem 0 .1rem"><strong>' + nbr(t.credits) + '</strong> ${T("crédits")}'
+      + ' <span class="dt">≈ ' + sous_(t.dollars) + '</span></p>';
+    var dernier = (t.registre || []).filter(function(x){ return x.type === 'plan'; })[0];
+    solde += '<p class="dt">' + '${T("Forfait {0} : {1} par mois, {2} crédits par mois, cumul de {3} crédits au plus — {4} le crédit.")}'
+        .split('{0}').join(esc(fo.nom || '')).split('{1}').join(sous_(fo.prixMois)).split('{2}').join(nbr(fo.creditsMois))
+        .split('{3}').join(nbr(fo.cumulMax)).split('{4}').join(sous_(t.prixCredit)) + '</p>';
+    solde += '<p class="dt">' + (dernier ? '${T("Dernier versement du forfait le {0} ; The New Black ne communique pas la date du prochain.")}'.split('{0}').join(jourCourt(dernier.au))
+      : '${T("The New Black ne communique pas la date du prochain renouvellement.")}') + '</p>';
+    var pal = t.paliers || {};
+    solde += '<p class="dt">' + Object.keys(pal).map(function(k){
+      return esc(PALIERS_TNB[k] || k) + ' : ' + pal[k].credits + ' ${T("cr.")} ≈ ' + sous_(pal[k].credits * (Number(t.prixCredit) || 0));
+    }).join(' · ') + '</p></div>';
+    var mo = t.mois || {}, d30 = t.depense30j || null;
+    var dep = '<div class="carte"><h2>${T("Dépenses")}</h2>'
+      + '<p>' + '${T("Ce mois-ci ({0}) : {1} génération(s), {2}.")}'.split('{0}').join(esc(mo.mois || ''))
+          .split('{1}').join(String(mo.generations || 0)).split('{2}').join('<strong>' + sous_(mo.dollars) + '</strong>') + '</p>'
+      + (d30 ? '<p class="dt">' + '${T("Trente derniers jours, selon The New Black : {0} crédit(s), {1}.")}'
+          .split('{0}').join(nbr(d30.credits)).split('{1}').join(sous_(d30.dollars)) + '</p>' : '')
+      + '<p class="dt">${T("Le détourage qui suit chaque génération (fal.ai) est compté à part, avec les autres traitements.")}</p>';
+    var reg = (t.registre || []).slice(0, 6);
+    if (reg.length) dep += '<table><thead><tr><th>${T("Quand")}</th><th>${T("Mouvement")}</th><th class="num">${T("Crédits")}</th></tr></thead><tbody>'
+      + reg.map(function(x){ return '<tr><td class="dt">' + quand(x.au) + '</td><td>' + esc(TYPES_TNB[x.type] || x.type) + (x.note ? ' <span class="dt">' + esc(x.note) + '</span>' : '')
+        + '</td><td class="num">' + (x.credits > 0 ? '+' : '') + nbr(x.credits) + '</td></tr>'; }).join('') + '</tbody></table>';
+    dep += '</div>';
+    h.push('<div class="rang2"><div>' + solde + '</div><div>' + dep + '</div></div>');
+    h.push('<div class="carte sz-pagee"><h2>${T("Générations récentes")}</h2>');
+    var g = t.generations || [];
+    if (!g.length) h.push('<div class="vide">${T("Aucune génération The New Black n’a encore été lancée.")}</div>');
+    else {
+      h.push('<div data-pages="tnb-generations"><table><thead><tr><th>${T("Quand")}</th><th>${T("Photo")}</th><th>${T("Palier")}</th>'
+        + '<th>${T("Par")}</th><th class="num">${T("Durée")}</th><th class="num">${T("Coût")}</th><th>${T("État")}</th></tr></thead><tbody>');
+      g.forEach(function(e){
+        var photo = e.photoCode ? '<span class="mono">' + esc(e.photoCode) + '</span>' + (e.photoNom ? ' <span class="dt">' + esc(e.photoNom) + '</span>' : '')
+          : (e.photoNom ? '<span class="dt">' + esc(e.photoNom) + '</span>' : '—');
+        h.push('<tr><td class="dt" style="white-space:nowrap">' + quand(e.au) + '</td><td>' + photo + '</td>'
+          + '<td>' + esc(PALIERS_TNB[e.palier] || e.palier) + '</td><td class="dt">' + esc(e.qui || '—') + '</td>'
+          + '<td class="num">' + duree(e.ms) + '</td><td class="num">' + sous_(e.cout) + '</td>'
+          + '<td>' + (e.ok ? '<span class="pill ok">${T("réussi")}</span>' : '<span class="pill non">${T("échec")}</span>') + '</td></tr>'
+          + (e.ok || !e.erreur ? '' : '<tr><td></td><td colspan="6" class="dt" style="color:var(--tx-err2)">' + esc(e.erreur) + '</td></tr>'));
+      });
+      h.push('</tbody></table></div>');
+    }
+    h.push('</div>');
+    return h.join('');
+  }
+
   function dessiner(){
     document.getElementById('o-conso').classList.toggle('on', VUE === 'conso');
     document.getElementById('o-hist').classList.toggle('on', VUE === 'hist');
-    corps.innerHTML = (VUE === 'hist') ? vueHist() : vueConso();
-    if (VUE === 'hist') { brancherHist(); } else { brancherPlafond(); }
+    document.getElementById('o-tnb').classList.toggle('on', VUE === 'tnb');
+    corps.innerHTML = (VUE === 'hist') ? vueHist() : (VUE === 'tnb') ? vueTnb() : vueConso();
+    if (VUE === 'hist') { brancherHist(); } else if (VUE === 'conso') { brancherPlafond(); }
   }
   function brancherPlafond(){
     var bt = document.getElementById('pl-poser');
@@ -463,14 +526,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
 
   document.getElementById('o-conso').onclick = function(){ VUE = 'conso'; charger(false); };
   document.getElementById('o-hist').onclick = function(){ VUE = 'hist'; charger(false); };
+  document.getElementById('o-tnb').onclick = function(){ VUE = 'tnb'; charger(false); };
 
   function charger(dit){
     if (dit) dire('${T("Lecture…")}');
     Promise.all([
       appeler('fal:suivi', [VUE === 'hist' ? 'journal' : 'resume']),
-      appeler('photoroom:compte')
+      appeler('photoroom:compte'),
+      VUE === 'tnb' ? appeler('fal:suivi', ['tnb']) : Promise.resolve(null)
     ]).then(function(rs){
       var r = rs[0];
+      // le VŒU de la pastille The New Black du tableau de bord : l écran s ouvre (ou se tourne) sur son onglet
+      if ((r && r.voeu === 'tnb') || (rs[2] && rs[2].voeu === 'tnb')) { if (VUE !== 'tnb') { VUE = 'tnb'; charger(false); return; } }
+      if (VUE === 'tnb') TN = (rs[2] && rs[2].ok) ? rs[2] : { clePosee: true, credits: null, error: expliquer(rs[2]) };
       // Le compteur Photoroom ne bloque pas l’écran : s’il échoue, la carte le dit.
       PR = (rs[1] && rs[1].ok) ? rs[1] : null;
       if (!r.ok) {
@@ -528,6 +596,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
       Promise.all([appeler('fal:suivi', ['resume']), appeler('photoroom:compte')]).then(function(rs){
         var r = rs[0];
         if (!r || !r.ok) return;   // une lecture ratée ne casse pas l'écran affiché
+        if (r.voeu === 'tnb' && VUE !== 'tnb') { VUE = 'tnb'; charger(false); return; }
         var prNew = (rs[1] && rs[1].ok) ? rs[1] : PR;
         var pa = (prNew && prNew.compte && prNew.compte.available != null) ? prNew.compte.available : '-';
         var apres = [r.appels, r.total, pa, r.soldeSaisi, r.consoDepuis, sigPlafond(r.budget)].join('|');

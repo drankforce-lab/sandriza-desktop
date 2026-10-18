@@ -418,11 +418,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var cl = 'solde' + (bas ? ' bas' : '') + (txt ? '' : ' muet');
       return ouvre ? '<button type="button" class="' + cl + ' lien" data-ouvre="' + ouvre + '" title="' + esc(titre + ' — ' + '${T("voir le détail")}') + '"><b>' + nom + '</b> ' + esc(txt || '—') + '</button>'
         : '<span class="' + cl + '" title="' + esc(titre) + '"><b>' + nom + '</b> ' + esc(txt || '—') + '</span>'; };
-    var t = SOLDES.twilio || {}, f = SOLDES.fal || {}, p = SOLDES.photoroom || {};
+    var t = SOLDES.twilio || {}, f = SOLDES.fal || {}, p = SOLDES.photoroom || {}, nb = SOLDES.tnb || {};
     var tw = t.erreur ? '' : szArgentSymbole(szArgentNombre(t.solde, 2)) + (t.devise && t.devise !== 'USD' ? ' ' + t.devise : ' US');
     // le vrai solde (api.fal.ai) quand Fal.ai le donne ; sinon l estimation, précédée de « ≈ »
     var fa = f.erreur ? '' : (f.estime ? '≈ ' : '') + szArgentSymbole(szArgentNombre(f.restant, 2)) + ' US';
     var ph = p.erreur || p.disponibles == null ? '' : '${T("{0} crédits")}'.split('{0}').join(p.disponibles);
+    /* (2026-10-18) THE NEW BLACK : le VRAI solde en crédits, et son équivalent en $ d après le forfait (prix du mois ÷
+       crédits du mois, lu au serveur) — le détail (forfait, cumul, dépenses par génération) s ouvre au clic. */
+    var fo = nb.forfait || {};
+    var tn = nb.erreur ? '' : '${T("{0} crédits")}'.split('{0}').join(szArgentNombre(nb.credits, 0)) + ' ≈ ' + szArgentSymbole(szArgentNombre(nb.dollars, 2)) + ' US';
     return '<span id="tb-soldes" class="soldes" aria-label="${T("Soldes des services")}" title="${T("Soldes des services")}' + esc(vu) + '">'
       + puce('Twilio', tw, !t.erreur && t.solde < 5, t.erreur ? '${T("Solde Twilio indisponible :")} ' + t.erreur : '${T("Solde du compte Twilio (appels et textos)")}')
       + puce('Fal.ai', fa, !f.erreur && f.restant < 3, f.erreur ? '${T("Solde Fal.ai indisponible :")} ' + f.erreur
@@ -432,6 +436,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
               .split('{0}').join(String(f.date || '').slice(0, 10)).split('{1}').join(szArgentSymbole(szArgentNombre(f.saisi, 2))).split('{2}').join(szArgentSymbole(szArgentNombre(f.conso, 2))), 'fal-suivi')
       + puce('Photoroom', ph, !p.erreur && p.disponibles != null && p.disponibles < 20, p.erreur ? '${T("Solde Photoroom indisponible :")} ' + p.erreur
           : '${T("Crédits restants du compte Photoroom")}' + (p.plan ? ' (' + p.plan + ')' : ''), 'fal-suivi')
+      + puce('The New Black', tn, !nb.erreur && nb.credits < 20, nb.erreur
+          ? (nb.motif === 'cle_absente' ? '${T("Aucune clé The New Black : Configuration › Sécurité › Clé et plafond de dépense IA.")}' : '${T("Solde The New Black indisponible :")} ' + nb.erreur)
+          : '${T("Crédits du compte The New Black, lus chez The New Black — forfait {0} : {1} crédits par mois, cumul de {2} au plus")}'
+              .split('{0}').join(String(fo.nom || '')).split('{1}').join(szArgentNombre(fo.creditsMois || 0, 0)).split('{2}').join(szArgentNombre(fo.cumulMax || 0, 0)), 'tnb-suivi')
       + '</span>';
   }
   function barre(){

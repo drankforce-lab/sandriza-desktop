@@ -191,6 +191,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         { k: 'falLecture', label: '${T("Clé de lecture du solde")}', place: 'xxxxxxxx:xxxx…',
           aide: '${T("Facultative. Une clé fal.ai avec la permission « billing:usage:read » (préréglage BILLING ou READONLY, dans API Keys) : le tableau de bord affiche alors le vrai solde. Elle reste au serveur.")}' }],
       solde: true },
+    /* (2026-10-18, sa décision) The New Black fait le vêtement sans mannequin du Studio. Sa clé dépense des crédits :
+       elle reste au serveur (tnb-proxy.php), l écran n en connaît que les quatre derniers caractères. */
+    { titre: '${T("The New Black — Vêtement sans mannequin")}',
+      sous: '${T("Le mannequin retiré, le col et le volume reconstruits (Studio virtuel). Facturé en crédits du forfait.")}',
+      lien: ['thenewblack.ai', 'https://thenewblack.ai'],
+      champs: [{ k: 'tnb', label: '${T("Clé API")}', place: 'tnb_live_…',
+        aide: '${T("Payant en crédits. La clé reste au serveur : elle n’est jamais recopiée dans l’application.")}' }] },
     { titre: '${T("Photoroom — Retrait du mannequin")}',
       sous: '${T("Le « mannequin fantôme ». Sans clé, la photothèque se rabat sur un détourage par masque.")}',
       lien: ['photoroom.com', 'https://www.photoroom.com/api'],

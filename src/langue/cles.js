@@ -149,4 +149,8 @@ module.exports = {
   'Clé de lecture du solde': 'Balance read key',
   'Facultative. Une clé fal.ai avec la permission « billing:usage:read » (préréglage BILLING ou READONLY, dans API Keys) : le tableau de bord affiche alors le vrai solde. Elle reste au serveur.': 'Optional. A fal.ai key with the « billing:usage:read » permission (BILLING or READONLY preset, under API Keys): the dashboard then shows the real balance. It stays on the server.',
   'Sans clé de lecture du solde, le tableau de bord estime : ce montant moins la consommation mesurée depuis': 'Without a balance read key, the dashboard estimates: this amount minus the usage measured since',
+  // (2026-10-18) The New Black
+  'The New Black — Vêtement sans mannequin': 'The New Black — Garment without mannequin',
+  'Le mannequin retiré, le col et le volume reconstruits (Studio virtuel). Facturé en crédits du forfait.': 'Mannequin removed, collar and volume rebuilt (Virtual studio). Billed in plan credits.',
+  'Payant en crédits. La clé reste au serveur : elle n’est jamais recopiée dans l’application.': 'Paid in credits. The key stays on the server: it is never copied into the application.',
 };
