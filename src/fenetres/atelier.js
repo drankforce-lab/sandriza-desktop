@@ -3266,14 +3266,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     g.closePath();
   }
   // les bords, SAUF celui du pli (le tissu y continue)
-  function tracerBords(g, c, pli){
+  /* Le segment k (de c[k] à c[k+1]) est-il COUSU ? Les mêmes bords que bordsCousus. */
+  function segCousu(pid, k, n){
+    var fam = fam3d();
+    if (fam === 'haut' && (pid === 'devant' || pid === 'dos') && n >= 6) return k >= 1 && k <= n - 3;
+    if (fam === 'haut' && pid === 'manche' && n >= 5) return k <= 2 || k >= 4;
+    if (fam === 'jupe' && (pid === 'devant' || pid === 'dos') && n >= 4) return k >= 1 && k <= 2;
+    return false;
+  }
+  function tracerBords(g, c, pli, pid){
     // la PATTE de boutonnage (bord vertical près du milieu) n a pas de trait : il faisait une bande sombre au milieu
     var patte = function(a, z){ return Math.abs(a.x - z.x) < 0.01 && Math.abs(a.x) > 0.5 && Math.abs(a.x) < 3.5; };
     var surPli = function(q){ if (!pli) return false; var dx = pli.b.x - pli.a.x, dy = pli.b.y - pli.a.y, l = Math.hypot(dx, dy) || 1; return Math.abs((q.x - pli.a.x) * dy - (q.y - pli.a.y) * dx) / l < 0.05; };
     g.moveTo(c[0].x, c[0].y);
     for (var n = 1; n <= c.length; n++) {
       var a = c[n - 1], z = c[n % c.length];
-      if ((surPli(a) && surPli(z)) || patte(a, z)) { g.moveTo(z.x, z.y); continue; }
+      /* ⚠ (2026-10-18, ses captures : « on voit encore les coutures ») PAS DE TRAIT SUR UN BORD COUSU : chaque pièce
+         traçait son ombre de bord, et deux traits côte à côte faisaient une ligne sombre le long de l emmanchure, de
+         l épaule et du côté. Le trait ne reste que sur les bords COUPÉS (ourlet, encolure, bas de manche). */
+      if ((surPli(a) && surPli(z)) || patte(a, z) || (pid && segCousu(pid, n - 1, c.length))) { g.moveTo(z.x, z.y); continue; }
       if (z.c1 && z.c2) g.bezierCurveTo(z.c1.x, z.c1.y, z.c2.x, z.c2.y, z.x, z.y); else g.lineTo(z.x, z.y);
     }
   }
@@ -3434,7 +3445,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     finitions(g, pc, pid, enCm);
     // les bords : une ombre de couture, d un ton plus sombre que le tissu
     enCm(); g.strokeStyle = sombre(V3.couleur, 0.9); g.lineWidth = 0.16; g.lineJoin = 'round';
-    g.beginPath(); tracerBords(g, pc.p.contour, pc.axe); if (pc.mir) tracerBords(g, pc.mir, pc.axe); g.stroke();
+    g.beginPath(); tracerBords(g, pc.p.contour, pc.axe, pid); if (pc.mir) tracerBords(g, pc.mir, pc.axe, pid); g.stroke();
     // les découpes : le trou, puis son bord (le tissu tranché)
     var trous = decoupesDe(pid, pc);
     if (trous.length) {
@@ -3728,7 +3739,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         t = t0; ctr = [J0[0] + t0[0] * sY, J0[1] + t0[1] * sY, J0[2] + t0[2] * sY];
       }
       else if (cap) { t = t0; var lc0 = Math.max(2, pt3(sub3(Pch, P0), t0)); ctr = [P0[0] + t0[0] * lc0 * y / ch, P0[1] + t0[1] * lc0 * y / ch, P0[2] + t0[2] * lc0 * y / ch]; }
-      else { t = t0; var lc1 = Math.max(2, pt3(sub3(Pch, P0), t0)); ctr = [P0[0] + t0[0] * (lc1 + y - ch), P0[1] + t0[1] * (lc1 + y - ch), P0[2] + t0[2] * (lc1 + y - ch)]; }
+      else { t = t0; var lc1 = Math.max(2, pt3(sub3(Pch, P0), t0)); ctr = [P0[0] + t0[0] * (lc1 + y - ch), P0[1] + t0[1] * (lc1 + y - ch), P0[2] + t0[2] * (lc1 + y - ch)];
+        /* ⚠ (2026-10-18, banc 3D) sous la tête, le tour ne descend pas sous le bras À CETTE HAUTEUR — pas sous le haut du bras : une
+           manche longue (poignet de 22 cm) gardait un anneau de 31 cm au poignet, et sa couture de dessous restait ouverte de 6 à
+           7 cm avant le zip (étirée en éclats en la refermant). */
+        if (bras) { var sB = pt3(sub3(ctr, J0), t0), rL = 0, bP = -1e9;
+          bras.forEach(function(a){ var sa = (a.c.x - J0[0]) * t0[0] + (a.c.y - J0[1]) * t0[1] + ((a.c.z || 0) - J0[2]) * t0[2]; if (sa <= sB && sa > bP) { bP = sa; rL = Math.max(a.rx, a.rz); } });
+          // (sur les 10 premiers cm sous la tête, le haut du bras comme avant — serrée là, la manche courte faisait un repli au bas
+          // d emmanchure ; puis, sur 8 cm, le bras à sa hauteur : l avant-bras des manches longues)
+          var tB = Math.max(0, Math.min(1, (y - ch - 14) / 8)), wB = tB * tB * (3 - 2 * tB);
+          if (bP > -1e9) r = Math.max(rBras + (rL - rBras) * wB + 0.4, w / (2 * Math.PI)); } }
       var proche = an.reduce(function(m, a){ return !m || Math.abs(a.yp - y) < Math.abs(m.yp - y) ? a : m; }, null);
       rangs.push({ yp: y, r: r, c: ctr, f: cadre(t), etat: proche && Math.abs(proche.yp - y) < 1.5 ? proche.etat : '' });
     }
@@ -3875,6 +3895,74 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     + ' vec3 h = normalize(uL + e); float sp = pow(max(0.0, dot(n, h)), 18.0) * 0.035; float ciel = 0.26 + 0.14 * (0.5 + 0.5 * n.y);'
     + ' vec3 b = mix(t.rgb, vK.rgb, vK.a * uC); float d2 = d * d * (3.0 - 2.0 * d); vec3 c = b * (ciel * 0.82 + 0.80 * d2) + b * r * 0.20 + vec3(sp);'
     + ' if (de > 0.5) { float o = 0.62 + 0.38 * clamp(1.0 - abs(dot(n, e)), 0.0, 1.0); c = uF * (0.78 + 0.24 * d) * o; } gl_FragColor = vec4(c * vO, 1.0); }';
+  /* ══ LA VRAIE FIBRE (2026-10-18, sa demande : « la vraie fibre comme sur un t-shirt, pas un polygone brut — comme une
+     photo réelle ») ══ Le tissu est calculé AU CM DU PATRON (uTa : la taille de la pièce, vT : sa position) :
+       · la MATIÈRE (uMat) : 0 jersey (mailles en V, colonnes verticales), 1 bord-côte, 2 sergé (diagonale), 3 toile ;
+         elle relève la NORMALE (relief de la maille, repère tangent tiré des dérivées d écran) et module à peine la teinte
+         (creux un peu plus sombres, léger chiné) — le motif imprimé garde sa netteté ;
+       · elle S EFFACE au loin (empreinte du pixel en cm comparée au pas de la maille) : pas de moiré ni de scintillement ;
+       · la LUMIÈRE DE STUDIO : une boîte à lumière enveloppante, une lumière d appoint de l autre côté, un ciel plus clair
+         en haut, et le SATINÉ du coton aux angles rasants ; la couleur choisie reste celle qu on voit de face.
+     Sans l extension des dérivées (rare), la maille ne module que la teinte, effacée par la distance. */
+  var NL3 = String.fromCharCode(10);
+  function fsTissu(der){
+    return (der ? '#extension GL_OES_standard_derivatives : enable' + NL3 : '')
+      + '#ifdef GL_FRAGMENT_PRECISION_HIGH' + NL3 + 'precision highp float;' + NL3 + '#else' + NL3 + 'precision mediump float;' + NL3 + '#endif' + NL3
+      + 'uniform sampler2D uS; uniform vec3 uL; uniform float uC; uniform vec3 uF; uniform float uDg; uniform vec2 uTa; uniform float uMat;'
+      + ' varying vec3 vN; varying vec2 vT; varying vec3 vE; varying vec4 vK; varying float vO;'
+      + ' float hs(vec2 q){ return fract(sin(dot(q, vec2(127.1, 311.7))) * 43758.5453); }'
+      + ' float vn(vec2 q){ vec2 i = floor(q); vec2 f = fract(q); f = f * f * (3.0 - 2.0 * f);'
+      + '   return mix(mix(hs(i), hs(i + vec2(1.0, 0.0)), f.x), mix(hs(i + vec2(0.0, 1.0)), hs(i + vec2(1.0, 1.0)), f.x), f.y); }'
+      // le relief de l armure au point p (cm), de 0 (creux) à 1 (sommet de la maille)
+      + ' float relief(vec2 p){'
+      // jersey : des COLONNES de mailles (le trait dominant d un t-shirt), chaque maille un peu différente de sa voisine
+      // (épaisseur du fil) — sans ce hasard, une grille de points trop régulière, qui ne ressemble à aucun tissu
+      // la maille du jersey : deux JAMBES inclinées qui forment un V (le point endroit d un t-shirt), creux entre les colonnes
+      + '   if (uMat < 0.5) { vec2 q = vec2(p.x / 0.16, p.y / 0.13); float a = abs(fract(q.x) - 0.5); float v = fract(q.y);'
+      + '     float rn = 0.82 + 0.36 * hs(floor(q)); float ac = 0.34 - 0.26 * v;'
+      + '     float dl = clamp(abs(a - ac) / 0.21, 0.0, 1.0); float leg = 1.0 - dl * dl; float creux = 1.0 - smoothstep(0.42, 0.5, a);'
+      + '     return (0.25 + 0.75 * leg) * creux * rn; }'
+      + '   if (uMat < 1.5) { float lr = fract(p.x / 0.32) - 0.5; return 1.0 - pow(abs(lr) * 2.0, 1.6); }'
+      + '   if (uMat < 2.5) { return 0.5 + 0.5 * cos(6.2832 * fract((p.x + p.y) / 0.13)); }'
+      + '   float a = 0.5 + 0.5 * cos(6.2832 * p.x / 0.09); float b = 0.5 + 0.5 * cos(6.2832 * p.y / 0.09);'
+      + '   return mix(a, b, step(0.5, fract((floor(p.x / 0.09) + floor(p.y / 0.09)) * 0.5))); }'
+      + ' void main(){ vec4 t = texture2D(uS, vT); if (t.a < 0.5) discard; vec3 n = normalize(vN); vec3 e = normalize(vE); float de = 0.0;'
+      + ' if (dot(n, e) < 0.0) { n = -n; de = 1.0; }'
+      // le mode DIAGNOSTIC du banc de rendu : l endroit en vert pur, l envers en rouge pur
+      + ' if (uDg > 0.5) { gl_FragColor = de > 0.5 ? vec4(1.0, 0.0, 0.0, 1.0) : vec4(0.0, 1.0, 0.0, 1.0); return; }'
+      + ' vec2 p = vT * uTa; float per = uMat < 0.5 ? 0.16 : (uMat < 1.5 ? 0.32 : 0.11);'
+      + (der ? ' vec2 dpx = dFdx(p); vec2 dpy = dFdy(p); float fw = max(length(dpx), length(dpy));'
+             : ' float fw = length(vE) * 0.0016;')
+      // la maille ne se montre que lorsqu elle couvre assez de pixels pour se lire (≥ ~8 px) ; plus petite, elle s efface
+      + ' float vis = 1.0 - smoothstep(per * 0.07, per * 0.30, fw); float h = relief(p);'
+      + (der ? ' if (vis > 0.01) { float ep = per * 0.07; float gx = (relief(p + vec2(ep, 0.0)) - h) / ep; float gy = (relief(p + vec2(0.0, ep)) - h) / ep;'
+             + '   vec3 qx = dFdx(-vE); vec3 qy = dFdy(-vE); float det = dpx.x * dpy.y - dpx.y * dpy.x;'
+             + '   if (abs(det) > 1e-12) { vec3 T = (qx * dpy.y - qy * dpx.y) / det; vec3 B = (qy * dpx.x - qx * dpy.x) / det;'
+             + '     T = T - n * dot(n, T); B = B - n * dot(n, B); float lt = length(T); float lb = length(B);'
+             + '     if (lt > 1e-6 && lb > 1e-6) { float amp = per * (uMat < 0.5 ? 0.20 : (uMat < 1.5 ? 0.38 : 0.10)) * vis;'
+             + '       n = normalize(n - amp * (T / lt * gx + B / lb * gy)); } } }'
+             : '')
+      // la teinte : la pièce (motif compris), puis les creux de la maille un peu plus sombres et un léger chiné
+      + ' vec3 b = mix(t.rgb, vK.rgb, vK.a * uC); float sl = vn(p * 2.2) * 0.6 + vn(p * 6.5) * 0.4;'
+      + ' b = b * (1.0 + (h - 0.62) * 0.05 * vis) * (0.982 + 0.036 * sl);'
+      // la lumière de studio : principale enveloppante, appoint opposé, ciel, satiné du coton, reflet à peine marqué
+      + ' float d = max(0.0, (dot(n, uL) + 0.5) / 1.5); float d2 = d * d * (3.0 - 2.0 * d);'
+      + ' vec3 lf = normalize(vec3(-0.75, 0.15, 0.62)); float df = max(0.0, (dot(n, lf) + 0.3) / 1.3);'
+      + ' float ciel = 0.22 + 0.16 * (0.5 + 0.5 * n.y); float nv = max(0.0, dot(n, e));'
+      + ' float sh = pow(1.0 - nv, 3.0) * (0.55 + 0.45 * d); vec3 hh = normalize(uL + e); float sp = pow(max(0.0, dot(n, hh)), 28.0) * 0.022;'
+      + ' vec3 c = b * (ciel * 0.80 + 0.70 * d2 + 0.16 * df) + mix(b, vec3(1.0), 0.45) * sh * 0.24 + vec3(sp);'
+      + ' if (de > 0.5) { float o = 0.62 + 0.38 * clamp(1.0 - abs(dot(n, e)), 0.0, 1.0); c = uF * (0.78 + 0.24 * d) * o * (1.0 + (h - 0.62) * 0.08 * vis); }'
+      + ' gl_FragColor = vec4(c * vO, 1.0); }';
+  }
+  // la MATIÈRE d une pièce : bord-côte pour les bandes et poignets ; sergé pour jean, pantalon, jupe, casquette ; toile
+  // pour chemise, chemisier, robe ; jersey pour le reste (t-shirt, sweat, débardeur, legging, culotte, brassière, tuque)
+  function matTissu3(pid){
+    var b = (V3 && V3.m && V3.m.base) || '', id = String(pid || '');
+    if (/bande|poignet|bord|revers|ceinture|col/.test(id) && b !== 'chemise') return 1;
+    if (/^(jean|pantalon|jupe|casquette|bob|short)$/.test(b)) return 2;
+    if (/^(chemise|chemisier|robe)$/.test(b)) return 3;
+    return 0;
+  }
   var VS_OBJ = 'attribute vec3 aP; attribute vec3 aN; uniform mat4 uM; uniform mat4 uV; uniform mat3 uR; varying vec3 vN; varying vec3 vE;'
     + ' void main(){ vec4 p = uV * vec4(aP, 1.0); vE = -p.xyz; vN = uR * aN; gl_Position = uM * vec4(aP, 1.0); }';
   var FS_OBJ = 'precision mediump float; uniform vec3 uL; uniform vec3 uB; uniform float uMet; uniform float uBr; varying vec3 vN; varying vec3 vE;'
@@ -3906,7 +3994,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     try { gl = cv.getContext('webgl', { antialias: true, preserveDrawingBuffer: true, alpha: true, premultipliedAlpha: true }); } catch (e) { gl = null; }
     if (!gl) { V3.glNon = true; return false; }
     try {
-      GLV = { cv: cv, gl: gl, tissu: progGL(gl, VS_TISSU, FS_TISSU), obj: progGL(gl, VS_OBJ, FS_OBJ), sol: progGL(gl, VS_SOL, FS_SOL), r: null, cle: '', mailles: [], toiles: {}, inst: [], n: 0 };
+      // la fibre (fsTissu) : avec les dérivées d écran si la carte les offre ; sinon (ou si elle refuse le programme) la
+      // version sans relief, puis l ancien tissu — jamais d écran vide
+      var der = !!gl.getExtension('OES_standard_derivatives'), progT = null;
+      try { progT = progGL(gl, VS_TISSU, fsTissu(der)); } catch (e1) { try { progT = progGL(gl, VS_TISSU, fsTissu(false)); } catch (e2) { progT = progGL(gl, VS_TISSU, FS_TISSU); } }
+      GLV = { cv: cv, gl: gl, tissu: progT, obj: progGL(gl, VS_OBJ, FS_OBJ), sol: progGL(gl, VS_SOL, FS_SOL), r: null, cle: '', mailles: [], toiles: {}, inst: [], n: 0 };
     } catch (e) { GLV = null; V3.glNon = true; return false; }
     GLV.solB = tampon(gl, new Float32Array([-1, -1, 1, -1, 1, 1, -1, -1, 1, 1, -1, 1]));
     var ob = objets3d(); GLV.objets = {};
@@ -4598,6 +4690,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // deux comptes : ce qui est SUR une couture (le sommet suit exactement sa ou ses coutures), et le fondu de l intérieur
     mailles.forEach(function(ma){ if (ma.rendu) acc.set(ma, { d: new Float32Array(ma.rendu.n * 3), w: new Float32Array(ma.rendu.n), ex: new Float32Array(ma.rendu.n * 3), nx: new Float32Array(ma.rendu.n) }); });
     var surGrille = function(M, b, s, t){ var p = auT(b, t); return posVirtuel(M, pointVirtuel(M, p[0] * s, p[1])); };
+    // ⚠ (2026-10-18, banc 3D) sur le bord de TÊTE, le maillage dessiné est posé par la FORMULE du raccord (voir maillageConforme) :
+    // le point de bord se lit au même endroit. Lu sur la grille (plus grossière, là où la tête tourne fort), il en différait — la
+    // correction de la couture dépassait, et le bas de tête faisait des dents retournées sous le bras.
+    var surTete = function(M, b, s, t){ var p = auT(b, t); return M.raccord ? M.raccord(p[0] * s, p[1]) : surGrille(M, b, s, t); };
     /* LES JONCTIONS : là où plusieurs coutures se rejoignent (le point d épaule, l aisselle — quatre pièces —, le sommet de
        tête), chaque couture visait SON milieu et le coin restait ouvert. Les bouts de couture qui se touchent forment un
        groupe ; le groupe vise UN point (la moyenne de ses pièces), et chaque couture y plie sa courbe sur ses 2 derniers cm. */
@@ -4623,16 +4719,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       // la courbe cousue : le milieu des deux pièces, pliée vers les jonctions près des bouts
       // (la courbe cousue est repoussée hors du corps : le point de jonction de l épaule, moyenne de trois pièces, y tombait — le
       // mannequin affleurait au sommet de la tête de manche. Les deux pièces lisent la MÊME courbe, déjà dehors.)
-      var courbe = function(t){ var m = milieu(t), f0 = lisse(1 - t * L / 2), f1 = lisse(1 - (1 - t) * L / 2);
+      var courbeBrute = function(t){ var m = milieu(t), f0 = lisse(1 - t * L / 2), f1 = lisse(1 - (1 - t) * L / 2);
         var c3 = new Float32Array([m[0] + (T0[0] - M0[0]) * f0 + (T1[0] - M1[0]) * f1, m[1] + (T0[1] - M0[1]) * f0 + (T1[1] - M1[1]) * f1, m[2] + (T0[2] - M0[2]) * f0 + (T1[2] - M1[2]) * f1]);
         if (tubes) repousser(c3, 0, tubes, 0.4); return [c3[0], c3[1], c3[2]]; };
+      /* ⚠ (2026-10-18, banc 3D) LA COURBE CALCULÉE UNE FOIS : repoussée hors du corps point par point, elle sortait un peu en dents au
+         creux de l aisselle ; le corps et la manche la lisaient à des endroits différents, leurs deux bords ne suivaient pas les mêmes
+         dents — un fil de jour au bas de l emmanchure. Elle est tabulée (200 points), lissée (bouts fixes), puis lue par interpolation :
+         les deux pièces sont sur la MÊME courbe. */
+      var NC = 200, tabC = []; for (var kc = 0; kc <= NC; kc++) tabC.push(courbeBrute(kc / NC));
+      for (var pc = 0; pc < 3; pc++) tabC = tabC.map(function(p, k){ if (k === 0 || k === NC) return p; var a = tabC[k - 1], b = tabC[k + 1];
+        return [(a[0] + 2 * p[0] + b[0]) / 4, (a[1] + 2 * p[1] + b[1]) / 4, (a[2] + 2 * p[2] + b[2]) / 4]; });
+      var courbe = function(t){ var f = Math.max(0, Math.min(1, t)) * NC, k = Math.min(NC - 1, Math.floor(f)), u = f - k, a = tabC[k], b = tabC[k + 1];
+        return [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; };
       // la courbe est paramétrée par l emmanchure (le maître) ; la tête de manche y va par l embu soutenu (voir embu)
       var gD = D[8] === 'B' ? embu(D[1].tot, D[4].tot) : null;
       [[D[0], D[1], D[2]], [D[3], D[4], D[5]]].forEach(function(S){
         var M = S[0], b = S[1], s = S[2], rd = M.rendu, a = acc.get(M); if (!rd || !a) return;
         for (var v = 0; v < rd.n; v++) {
           var sb = surBord(b, s, rd.vx[v], rd.vy[v]); if (sb.d >= RF) continue;
-          var E = surGrille(M, b, s, sb.t), C = courbe(gD && M === D[0] ? gD(sb.t) : sb.t);
+          // (la formule seulement sur le BAS de la tête, là où elle tourne fort — en haut la grille suffit, et le coin d aisselle suit
+          // la jonction des quatre pièces)
+          var tete = gD && M === D[0], E = tete && sb.t >= 0.5 && sb.t <= 0.9 ? surTete(M, b, s, sb.t) : surGrille(M, b, s, sb.t), C = courbe(tete ? gD(sb.t) : sb.t);
           // SUR la couture : le sommet prend la position même de la courbe cousue (absolue — un déplacement relatif reportait
           // l écart entre le sommet et son point projeté, sensible là où la tête de manche est raide)
           if (sb.d < 0.02) { a.ex[v * 3] += C[0]; a.ex[v * 3 + 1] += C[1]; a.ex[v * 3 + 2] += C[2]; a.nx[v]++; continue; }
@@ -4668,6 +4775,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       // posés sur la courbe cousue, déjà repoussée hors du corps (voir « courbe ») ; les repousser un à un rouvrait les coutures
       if (tubes) for (var v4 = 0; v4 < n; v4++) if (a.nx[v4] === 0) repousser(PZ, v4, tubes, 0.4);
     });
+  }
+  /* LA LUMIÈRE CONTINUE À TRAVERS LES COUTURES (2026-10-18, sa capture : « on voit encore les coutures ») : chaque pièce calculait
+     ses normales seule ; sur la couture, les deux bords n avaient pas la même — un saut de lumière (la manche plus claire que le
+     corps) dessinait la couture. Les sommets cousus de pièces DIFFÉRENTES au même endroit (à 1 mm) prennent la normale moyenne.
+     (L ombre de contact, elle, relève du rendu du tissu : pas touchée ici.) */
+  function soudeNormales(mailles){
+    var cle = function(x, y, z){ return Math.round(x * 10) + '_' + Math.round(y * 10) + '_' + Math.round(z * 10); }, cases = {};
+    mailles.forEach(function(ma, mi){ var rd = ma.rendu; if (!rd.cousu || !rd.nor) return;
+      for (var v = 0; v < rd.n; v++) { if (!rd.cousu[v]) continue; var k = cle(rd.pos[v * 3], rd.pos[v * 3 + 1], rd.pos[v * 3 + 2]); (cases[k] = cases[k] || []).push([mi, v]); } });
+    var voisins = function(rd, v){ var x = Math.round(rd.pos[v * 3] * 10), y = Math.round(rd.pos[v * 3 + 1] * 10), z = Math.round(rd.pos[v * 3 + 2] * 10), out = [];
+      for (var dx = -1; dx <= 1; dx++) for (var dy = -1; dy <= 1; dy++) for (var dz = -1; dz <= 1; dz++) { var l = cases[(x + dx) + '_' + (y + dy) + '_' + (z + dz)]; if (l) out = out.concat(l); }
+      return out; };
+    var nouv = [];
+    mailles.forEach(function(ma, mi){ var rd = ma.rendu; if (!rd.cousu || !rd.nor) return;
+      for (var v = 0; v < rd.n; v++) { if (!rd.cousu[v]) continue;
+        var n = [rd.nor[v * 3], rd.nor[v * 3 + 1], rd.nor[v * 3 + 2]], autre = false;
+        voisins(rd, v).forEach(function(e){ if (e[0] === mi) return; var r2 = mailles[e[0]].rendu, w = e[1];
+          if (Math.hypot(r2.pos[w * 3] - rd.pos[v * 3], r2.pos[w * 3 + 1] - rd.pos[v * 3 + 1], r2.pos[w * 3 + 2] - rd.pos[v * 3 + 2]) > 0.1) return;
+          if (r2.nor[w * 3] * n[0] + r2.nor[w * 3 + 1] * n[1] + r2.nor[w * 3 + 2] * n[2] < 0) return;      // pas à travers un pli
+          n[0] += r2.nor[w * 3]; n[1] += r2.nor[w * 3 + 1]; n[2] += r2.nor[w * 3 + 2]; autre = true; });
+        if (autre) nouv.push([rd, v, unit3(n)]); } });
+    nouv.forEach(function(e){ var rd = e[0], v = e[1]; rd.nor[v * 3] = e[2][0]; rd.nor[v * 3 + 1] = e[2][1]; rd.nor[v * 3 + 2] = e[2][2]; });
   }
   // les attributs du maillage conforme : normales (orientées comme la grille), ombre, teinte, traits
   function finirConforme(ma){
@@ -4739,16 +4868,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   // l écart (cm) de chaque couture, sur la grille — pour le banc de rendu
   function ecartsCoutures(mailles){
     var m = {};
-    descrCouturesHaut(mailles).forEach(function(D){ for (var k = 0; k <= 40; k++) { var t = k / 40, pa = auT(D[1], t), pb = auT(D[4], t);
+    descrCouturesHaut(mailles).forEach(function(D){ var gD = D[8] === 'B' ? embu(D[1].tot, D[4].tot) : function(u){ return u; };
+      for (var k = 0; k <= 40; k++) { var t = k / 40, pa = auT(D[1], t), pb = auT(D[4], gD(t));
       var A = posVirtuel(D[0], pointVirtuel(D[0], pa[0] * D[2], pa[1])), B = posVirtuel(D[3], pointVirtuel(D[3], pb[0] * D[5], pb[1]));
       var e = Math.round(Math.hypot(A[0] - B[0], A[1] - B[1], A[2] - B[2]) * 100) / 100; if (!m[D[6]] || e > m[D[6]][0]) m[D[6]] = [e, t, [A[0] - B[0], A[1] - B[1], A[2] - B[2]].map(function(v){ return Math.round(v * 10) / 10; })]; } });
     return m;
   }
   /* LES TRIANGLES RETOURNÉS (2026-10-18, banc 3D) : le long du bas d emmanchure (au creux de l aisselle, le bras et le tronc
      repoussent la bande de couture dans deux sens) et au bord de l encolure du dos, des triangles se retournaient — pas du drapé,
-     un tissu replié sur lui-même (plis cassés à 170°). Une face est retournée quand sa normale s écarte de plus de ~80° de celle
-     de la grille dessous (qui dit où est le dehors) ; ses sommets — jamais ceux cousus sur une couture — reprennent la moyenne de
-     leurs voisins, puis sortent du corps. On recommence tant qu il en reste (12 fois au plus). */
+     un tissu replié sur lui-même (plis cassés à 170°). Une face est retournée quand sa normale s écarte de plus de ~100° de celle
+     de la grille dessous (qui dit où est le dehors) ; ses sommets — jamais ceux cousus sur une couture — vont où le patron les
+     place par rapport à leurs voisins, puis sortent du corps, si cela ne fait aucun éclat. On recommence (12 fois au plus). */
   function detordre(ma, tubes){
     var rd = ma.rendu, PZ = rd.pos, I = rd.idx, n = rd.n, cousu = rd.cousu || new Uint8Array(n), vois = [];
     for (var v = 0; v < n; v++) vois.push([]);
@@ -5082,6 +5212,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       // la pièce DESSINÉE au contour exact, ses coutures zippées (voir maillageConforme)
       conformerHaut(GLV.mailles, tubesH);
       GLV.mailles.forEach(function(ma){ if (ma.rendu) finirConforme(ma); });
+      soudeNormales(GLV.mailles.filter(function(ma){ return ma.rendu; }));
     } else if (['haut', 'jupe', 'bas'].indexOf(famD) >= 0 && (r.corps || []).length) {
       var epY = pieces.devant && pieces.devant.p.contour[2] ? pieces.devant.p.contour[2].y : 0;
       try {
@@ -5237,6 +5368,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     GLV.mailles.forEach(function(ma){
       if (!ma.pc.tex) return;
       gl.bindTexture(gl.TEXTURE_2D, ma.pc.tex);
+      // la fibre se calcule au cm de la pièce : sa taille, et sa matière
+      if (pt.u.uTa) { var bbT = ma.pc.bb || { x0: 0, x1: 1, y0: 0, y1: 1 }; gl.uniform2f(pt.u.uTa, Math.max(0.1, bbT.x1 - bbT.x0), Math.max(0.1, bbT.y1 - bbT.y0)); }
+      if (pt.u.uMat) gl.uniform1f(pt.u.uMat, matTissu3(ma.pid));
       lier(gl, pt, 'aP', ma.bP, 3); lier(gl, pt, 'aN', ma.bN, 3); lier(gl, pt, 'aT', ma.bT, 2); lier(gl, pt, 'aK', ma.bK, 4); lier(gl, pt, 'aO', ma.bO, 1);
       if (V3.fil) { gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ma.bL); gl.drawElements(gl.LINES, ma.nLig, gl.UNSIGNED_SHORT, 0); }
       else { gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ma.bI); gl.drawElements(gl.TRIANGLES, ma.nIdx, gl.UNSIGNED_SHORT, 0); }

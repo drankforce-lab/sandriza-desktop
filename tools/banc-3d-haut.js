@@ -44,6 +44,8 @@
    --tubes donne les anneaux du mannequin (bras, tronc, capsule des épaules) ; --detail
    donne aussi, par pièce, où sont les sommets dans le corps et contre quel tube.
 
+   liseré    le contraste de luminance le long des coutures (vues « face » et « sienne », sans
+             mannequin, maille du tissu coupée) moins celui du tissu sans couture (témoin).
    asym      le devant gauche contre le droit (un sommet et son miroir), rangs 8 à 25 cm :
              une torsion (seuil 0,5 cm ; les plis de vie, voulus asymétriques, font 0,3).
    arc       l écart de hauteur d un rang du devant (12, 16, 20 cm) sur |x| <= 10 : un
@@ -88,11 +90,11 @@ const SEUILS = { etires: 0, plis: 0, dedans: 0, fentes: 0, couture: 0.15, ballon
    ZÉRO est toujours affiché (« reste »). --strict juge sur la cible, zéro. ⚠ Un plafond se BAISSE quand le moteur progresse,
    il ne se monte jamais pour faire passer un changement. Le reste des seuils (dedans, couture, ballon, épaulette) vaut pour tous. */
 const PLAFONDS = {
-  'ts-xs': { etires: 113, plis: 58, fentes: 0 },
-  'ts-l': { etires: 256, plis: 106, fentes: 2 },
-  'sw-xs': { etires: 241, plis: 21, fentes: 1 },
-  'ch-m': { etires: 423, plis: 70, fentes: 3 },
-  'cs-xs': { etires: 121, plis: 31, fentes: 2 },
+  'ts-xs': { etires: 80, plis: 41, fentes: 0 },
+  'ts-l': { etires: 231, plis: 106, fentes: 2 },
+  'sw-xs': { etires: 93, plis: 15, fentes: 0 },
+  'ch-m': { etires: 189, plis: 70, fentes: 2 },
+  'cs-xs': { etires: 100, plis: 25, fentes: 0 },
 };
 const STRICT = ARGS.includes('--strict');
 
@@ -188,7 +190,7 @@ const SCRIPT_PAGE = function () {
       Object.keys(aretes).forEach(function (k) {
         var l = aretes[k]; if (l.length !== 2 || vis[l[0]] !== 1 || vis[l[1]] !== 1) return;
         var d = nrm[l[0] * 3] * nrm[l[1] * 3] + nrm[l[0] * 3 + 1] * nrm[l[1] * 3 + 1] + nrm[l[0] * 3 + 2] * nrm[l[1] * 3 + 2];
-        if (d < Math.cos(75 * Math.PI / 180)) { res.plis++; cpt.plis++; if (conf && (cpt.exPlis = cpt.exPlis || []).length < 30) { var va = I[l[0] * 3]; cpt.exPlis.push([Math.round(rd.vx[va] * 10) / 10, Math.round(rd.vy[va] * 10) / 10, Math.round(Math.acos(Math.max(-1, d)) * 180 / Math.PI)]); } [l[0], l[1]].forEach(function (tt) { fautif[I[tt * 3]] = fautif[I[tt * 3 + 1]] = fautif[I[tt * 3 + 2]] = 2; }); }
+        if (d < Math.cos(75 * Math.PI / 180)) { res.plis++; cpt.plis++; if (conf && (cpt.exPlis = cpt.exPlis || []).length < 30) { var va = I[l[0] * 3]; cpt.exPlis.push([Math.round(rd.vx[va] * 10) / 10, Math.round(rd.vy[va] * 10) / 10, Math.round(Math.acos(Math.max(-1, d)) * 180 / Math.PI)].concat(ma.bordTeteY ? ['sous bord ' + Math.round((rd.vy[va] - ma.bordTeteY(rd.vx[va])) * 10) / 10] : [])); } [l[0], l[1]].forEach(function (tt) { fautif[I[tt * 3]] = fautif[I[tt * 3 + 1]] = fautif[I[tt * 3 + 2]] = 2; }); }
       });
       // collision : les sommets des triangles visibles, contre les tubes du corps
       var vu = new Uint8Array(P.length / 3);
@@ -340,6 +342,42 @@ const SCRIPT_PAGE = function () {
     var sy = (0.5 - (M[4] * cible[0] + M[5] * cible[1] + M[6] * cible[2] + M[7]) / w * 0.5) * g.cam.H;
     v.px = g.cam.W / 2 - sx; v.py = g.cam.H / 2 - sy; mo.peindre();
   }
+  /* LE LISERÉ DE COUTURE (2026-10-18, sa capture : « on voit encore les coutures ») : chaque sommet cousu est projeté à l écran ; on
+     compare la luminance de son pixel à la médiane d un anneau de 3 px autour. Une ligne le long de la couture (trait, fil de jour,
+     saut de lumière) ressort des deux côtés ; un dégradé d éclairage, non. Rend le 95e centile et le maximum (0 à 255). */
+  function lisere(cv) {
+    var g = B.moteur.glv(), W = cv.width, H = cv.height, c = document.createElement('canvas'); c.width = W; c.height = H;
+    var gx = c.getContext('2d'); gx.drawImage(cv, 0, 0); var d = gx.getImageData(0, 0, W, H).data, M = g.cam.M;
+    // (le fond — noir — n est pas du tissu : sur une silhouette, l anneau le mordait et la couture d épaule, vue de face, comptait le bord)
+    var Lum = function (x, y) { var k = (y * W + x) * 4; return d[k + 3] < 200 || d[k] + d[k + 1] + d[k + 2] < 20 ? -1 : 0.299 * d[k] + 0.587 * d[k + 1] + 0.114 * d[k + 2]; };
+    var mesure = function (X, Y, Z) { var w = M[12] * X + M[13] * Y + M[14] * Z + M[15]; if (!(w > 0)) return -1;
+      var sx = Math.round(((M[0] * X + M[1] * Y + M[2] * Z + M[3]) / w * 0.5 + 0.5) * W), sy = Math.round((0.5 - (M[4] * X + M[5] * Y + M[6] * Z + M[7]) / w * 0.5) * H);
+      if (sx < 4 || sy < 4 || sx >= W - 4 || sy >= H - 4) return -1;
+      var L0 = Lum(sx, sy); if (L0 < 0) return -1; var an = [];
+      for (var a = 0; a < 12; a++) { var l = Lum(Math.round(sx + 3 * Math.cos(a * Math.PI / 6)), Math.round(sy + 3 * Math.sin(a * Math.PI / 6))); if (l >= 0) an.push(l); }
+      if (an.length < 12) return -1; an.sort(function (p, q) { return p - q; }); return Math.abs(L0 - an[an.length >> 1]); };
+    // les sommets de COUTURE, trouvés par le banc lui-même (indépendant du moteur) : un sommet de bord du maillage dessiné qui a, à
+    // moins de 1,5 mm, un sommet de bord d une AUTRE pièce (ou de la même, loin au patron : le dessous de manche)
+    var bords = [], cases = {};
+    g.mailles.forEach(function (ma, mi) { var rd = ma.rendu; if (!rd) return; var I = rd.idx, cnt = {};
+      for (var t = 0; t < I.length; t += 3) for (var e = 0; e < 3; e++) { var x = I[t + e], y = I[t + (e + 1) % 3], k = Math.min(x, y) + '_' + Math.max(x, y); cnt[k] = (cnt[k] || 0) + 1; }
+      var sur = {}; Object.keys(cnt).forEach(function (k) { if (cnt[k] === 1) k.split('_').forEach(function (q) { sur[q] = 1; }); });
+      Object.keys(sur).forEach(function (q) { q = +q; var X = rd.pos[q * 3], Y = rd.pos[q * 3 + 1], Z = rd.pos[q * 3 + 2], cl = Math.round(X * 5) + '_' + Math.round(Y * 5) + '_' + Math.round(Z * 5);
+        bords.push([mi, q, X, Y, Z]); (cases[cl] = cases[cl] || []).push(bords.length - 1); }); });
+    var couture = [], temoin = [];
+    bords.forEach(function (b0) { var x = Math.round(b0[2] * 5), y = Math.round(b0[3] * 5), z = Math.round(b0[4] * 5), ok = false;
+      for (var dx = -1; dx <= 1 && !ok; dx++) for (var dy = -1; dy <= 1 && !ok; dy++) for (var dz = -1; dz <= 1 && !ok; dz++) (cases[(x + dx) + '_' + (y + dy) + '_' + (z + dz)] || []).forEach(function (j) {
+        var b1 = bords[j]; if (ok || (b1[0] === b0[0] && b1[1] === b0[1])) return;
+        if (Math.hypot(b1[2] - b0[2], b1[3] - b0[3], b1[4] - b0[4]) > 0.15) return;
+        if (b1[0] === b0[0]) { var rd = g.mailles[b0[0]].rendu; if (Math.hypot(rd.vx[b1[1]] - rd.vx[b0[1]], rd.vy[b1[1]] - rd.vy[b0[1]]) < 3) return; }
+        ok = true; });
+      if (ok) { var m0 = mesure(b0[2], b0[3], b0[4]); if (m0 >= 0) couture.push(m0); } });
+    // le TÉMOIN : des sommets du dedans (même grain, même lumière, pas de couture)
+    g.mailles.forEach(function (ma) { var rd = ma.rendu; if (!rd) return; for (var v = 0; v < rd.n; v += 7) { var m1 = mesure(rd.pos[v * 3], rd.pos[v * 3 + 1], rd.pos[v * 3 + 2]); if (m1 >= 0) temoin.push(m1); } });
+    var p95 = function (l) { if (!l.length) return 0; l.sort(function (p, q) { return p - q; }); return l[Math.floor(l.length * 0.95)]; };
+    var pc = p95(couture), pt = p95(temoin);
+    return { couture: Math.round(pc * 10) / 10, temoin: Math.round(pt * 10) / 10, exces: Math.round(Math.max(0, pc - pt) * 10) / 10, n: couture.length };
+  }
   // les îlots d envers ou de vide entourés de tissu, dans une image diagnostique
   function fentes(cv) {
     var W = cv.width, H = cv.height, c = document.createElement('canvas'); c.width = W; c.height = H;
@@ -360,6 +398,8 @@ const SCRIPT_PAGE = function () {
   }
   function mesurer() {
     var mo = B.moteur, v = mo.v3(), g = mo.glv(), cv = document.getElementById('v3-canevas');
+    (function () { var gl = g.gl, u = g.tissu && g.tissu.u && g.tissu.u.uTa, orig = gl.uniform2f; if (!u) return;
+      gl.uniform2f = function (loc, a, b) { return orig.call(gl, loc, window.__szSansMaille && loc === u ? 0.001 : a, window.__szSansMaille && loc === u ? 0.001 : b); }; })();
     var res = { cas: CAS.id, geo: geo(mo.tubes()), fentes: 0, vues: {} };
     res.ecarts = (g.ecarts || []).concat([g.ecartsAvantZip || {}]); 
     res.bosse = bosseTete(mo.tubes());
@@ -381,24 +421,44 @@ const SCRIPT_PAGE = function () {
       res.profil[ma.pid === 'devant' ? 'devant' : 'manche'] = lignes;
     });
     var gauche = epaule(1), droite = epaule(-1), haut = cou();
+    // le creux de l aisselle (côté +x) : le sommet du devant le plus proche du bas d emmanchure du patron
+    var aisselle = (function () { var dv3 = g.mailles.filter(function (m) { return m.pid === 'devant' && m.rendu; })[0]; if (!dv3) return null;
+      var c3 = dv3.pc.p.contour[3], rd3 = dv3.rendu, b3 = -1, bd3 = 1e9;
+      for (var v = 0; v < rd3.n; v++) { var d3 = Math.hypot(rd3.vx[v] - Math.abs(c3.x), rd3.vy[v] - c3.y); if (d3 < bd3 && rd3.pos[v * 3] > 0) { bd3 = d3; b3 = v; } }
+      return b3 < 0 ? null : [rd3.pos[b3 * 3], rd3.pos[b3 * 3 + 1], rd3.pos[b3 * 3 + 2]]; })();
     var VUES = [
       ['face', 0, 0.05, 1, null], ['tq', 0.62, 0.12, 1, null], ['dos', Math.PI, 0.05, 1, null], ['profil', Math.PI / 2, 0.05, 1, null], ['dessus', 0, 0.95, 1, null],
       ['epaule-face', 0, 0.08, 4, gauche], ['epaule-face2', 0, 0.08, 4, droite], ['epaule-tq', 0.75, 0.15, 4, gauche], ['epaule-dos', Math.PI, 0.1, 4, droite],
       ['epaule-dessus', 0.3, 0.8, 4, gauche], ['encolure', 0, 0.12, 3, haut],
       // SA vue : de face, la caméra au-dessus des épaules (~30°), l encolure et les deux têtes de manche dans le cadre
-      ['facedessus', 0, 0.52, 1.7, haut]
+      ['facedessus', 0, 0.52, 1.7, haut],
+      // le creux de l aisselle, de côté et d en dessous : là où la tête de manche rejoint le bas d emmanchure
+      // ⚠ ses fentes ne sont PAS comptées : vue d en dessous, le bord du corps passe devant la manche à angle rasant, et un tissu
+      // sans épaisseur y montre son envers sur moins d un pixel (vérifié : ces « îlots » sont à la frontière dos|manche et
+      // manche|devant, deux pièces qui ne sont pas cousues là — des silhouettes, pas des coutures)
+      ['aisselle', 1.57, -0.5, 3, aisselle],
+      // SES deux vues (2026-10-18) : de face un peu au-dessus, le haut du buste ; et d en dessous, en remontant la manche
+      ['sienne', 0, 0.18, 1.6, haut ? [haut[0], haut[1] - 12, haut[2]] : null], ['sienne-dessous', 1.57, -1.1, 1.8, aisselle]
     ];
     VUES.forEach(function (vv) {
       v.yaw = vv[1]; v.pitch = vv[2]; v.vueNom = '';
       // normale avec mannequin, normale SANS mannequin (sa capture : l intérieur de l encolure), diagnostique
-      [['m', true, false], ['n', false, false], ['d', false, true], ['x', false, false], ['p', false, false], ['q', false, false], ['c', true, false]].forEach(function (m) {
+      [['m', true, false], ['n', false, false], ['d', false, true], ['x', false, false], ['p', false, false], ['q', false, false], ['c', true, false], ['y', false, false]].forEach(function (m) {
         // « q » : la manche SEULE (le corps masqué), en couleurs de pièces ; « c » : le MANNEQUIN seul
-        g.mailles.forEach(function (ma) { if (ma.nIdx0 === undefined) ma.nIdx0 = ma.nIdx; ma.nIdx = (m[0] === 'q' && ma.pid !== 'manche') || m[0] === 'c' ? 0 : ma.nIdx0; });
+        g.mailles.forEach(function (ma) { if (ma.nIdx0 === undefined) ma.nIdx0 = ma.nIdx; ma.nIdx = ((m[0] === 'q' || m[0] === 'y') && ma.pid !== 'manche') || m[0] === 'c' ? 0 : ma.nIdx0; });
+        if (m[0] === 'y') m = ['y', false, false, 'x'];      // « y » : la manche SEULE, en teinte de défauts
         if (m[0] === 'q') m = ['q', false, false, 'p'];
         var mode = m[3] || m[0];
         if (mode === 'x' || mode === 'p') g.mailles.forEach(function (ma) { if (!ma[mode === 'x' ? 'kDefauts' : 'kPieces']) return; g.gl.bindBuffer(g.gl.ARRAY_BUFFER, ma.bK); g.gl.bufferData(g.gl.ARRAY_BUFFER, ma[mode === 'x' ? 'kDefauts' : 'kPieces'], g.gl.STATIC_DRAW); });
         v.mannequin = m[1]; mo.diag(m[2]); v.carte = mode === 'x' || mode === 'p'; viser(v, vv[4], vv[3]);
-        if (m[2] && vv[4]) { var f = fentes(cv); res.vues[vv[0]] = f; res.fentes += f.n; }
+        if (m[2] && vv[4] && vv[0] !== 'aisselle' && vv[0] !== 'sienne-dessous') { var f = fentes(cv); res.vues[vv[0]] = f;
+          // (sa vue de face, venue après les plafonds, est comptée À PART : ses îlots aux bords du cadre sont l espace entre le bras et le buste)
+          if (vv[0] === 'sienne') res.fentesSienne = f.n; else res.fentes += f.n; }
+        if (m[0] === 'n' && (vv[0] === 'face' || vv[0] === 'sienne')) {
+          // le liseré se mesure MAILLE COUPÉE : le relief de la maille (fsTissu) élevait le témoin et masquait un vrai liseré. La taille
+          // de pièce uTa est forcée à presque rien le temps de la mesure — le relief devient plat, rien d autre ne change
+          window.__szSansMaille = true; mo.peindre(); var li = lisere(cv); window.__szSansMaille = false; mo.peindre();
+          res.lisere = res.lisere || {}; res.lisere[vv[0]] = li; }
         envoyer('img:' + vv[0] + '-' + m[0], cv.toDataURL('image/png'));
       });
     });
@@ -500,7 +560,7 @@ for (const c of CAS) {
   if (r.erreurConf) ko.push('maillage conforme en erreur : ' + String(r.erreurConf).split(String.fromCharCode(10))[0]);
   if (ko.length) echec++;
   bilan.push(r);
-  console.log((ko.length ? '✗ ' : '✓ ') + c.id.padEnd(6) + ` triangles ${g.triVisibles}, éclats ${g.etires}, plis cassés ${g.plis}, dans le corps ${g.dedans}, fentes ${r.fentes}, couture la plus ouverte ${ecMax} cm, épaulette ${r.bosse ? r.bosse.monte : '?'} cm, bombé en excès ${r.bosse ? r.bosse.ballon : '?'} cm, arc des rangs ${r.bosse ? r.bosse.arc : '?'} cm, asymétrie ${r.bosse ? r.bosse.asym : '?'} cm`
+  console.log((ko.length ? '✗ ' : '✓ ') + c.id.padEnd(6) + ` triangles ${g.triVisibles}, éclats ${g.etires}, plis cassés ${g.plis}, dans le corps ${g.dedans}, fentes ${r.fentes}, couture la plus ouverte ${ecMax} cm, épaulette ${r.bosse ? r.bosse.monte : '?'} cm, bombé en excès ${r.bosse ? r.bosse.ballon : '?'} cm, arc des rangs ${r.bosse ? r.bosse.arc : '?'} cm, asymétrie ${r.bosse ? r.bosse.asym : '?'} cm, fentes (sa vue de face) ${r.fentesSienne || 0}, liseré ${r.lisere ? JSON.stringify(r.lisere) : '?'}`
     + (ko.length ? '  ← ' + ko.join(', ') : '') + (!ko.length && reste.length ? '  (reste avant zéro : ' + reste.join(', ') + ')' : ''));
   if (ARGS.includes('--zip')) console.log('   écarts dessinés : ' + JSON.stringify(r.ecartsRendus));
   if (ARGS.includes('--piresm')) console.log('   pires manche (x, y, ×) : ' + JSON.stringify(g.piresManche) + ' | pire triangle : ' + JSON.stringify(g.pireTri));
