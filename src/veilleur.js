@@ -295,24 +295,31 @@ function poserIconePastille() {
       w.webContents.executeJavaScript(
         '(() => { const i = document.getElementById("_ico");'
         + ' if (!i || !i.naturalWidth) return "";'
+        /* ⚠ (2026-10-18, sa capture : « le point rouge est déformé ») PEINTE À LA TAILLE DE LA ZONE : 32 px (16 px à
+           l'échelle 2), pas sur l'icône de 512 px que Windows réduisait ensuite — le point s'y écrasait en tache. */
         + ' const c = document.createElement("canvas");'
-        + ' c.width = i.naturalWidth; c.height = i.naturalHeight;'
-        + ' const x = c.getContext("2d"); x.drawImage(i, 0, 0);'
+        + ' c.width = 32; c.height = 32;'
+        + ' const x = c.getContext("2d"); x.imageSmoothingQuality = "high"; x.drawImage(i, 0, 0, 32, 32);'
         /* ⚠ LA PASTILLE EN BAS À DROITE, AVEC UN LISERÉ CLAIR. L'icône se pose
            sur une barre des tâches qui peut être sombre OU claire selon le
            thème du poste : un point rouge nu se perd sur un fond rouge sombre,
            et un liseré blanc le détache dans les deux cas. Le même raisonnement
            que le bandeau crème des publications — on ne maîtrise pas le fond. */
-        + ' const r = Math.max(3, Math.round(c.width * 0.22));'
-        + ' const cx = c.width - r - 1, cy = c.height - r - 1;'
-        + ' x.beginPath(); x.arc(cx, cy, r + Math.max(1, r * 0.28), 0, 6.2832);'
-        + ' x.fillStyle = "#FFFFFF"; x.fill();'
+        /* un rond CARAMEL (le z du logo) cerclé de crème : visible sur l'icône noire comme sur une barre claire */
+        + ' const r = 5.5, cx = 32 - r - 1.5, cy = 32 - r - 1.5;'
+        + ' x.beginPath(); x.arc(cx, cy, r + 1.5, 0, 6.2832);'
+        + ' x.fillStyle = "#F8F6F3"; x.fill();'
         + ' x.beginPath(); x.arc(cx, cy, r, 0, 6.2832);'
-        + ' x.fillStyle = "#D7263D"; x.fill();'
+        + ' x.fillStyle = "#C49A6C"; x.fill();'
         + ' try { return c.toDataURL("image/png"); } catch (e) { return ""; } })();', true
       ).then((url) => {
         if (!url) return resolve(null);
-        try { _iconePastille = nativeImage.createFromDataURL(url); } catch { _iconePastille = null; }
+        // déclarée à l'échelle 2 : Windows l'affiche en 16 px nets, sans la réduire une seconde fois
+        try {
+          const brut = Buffer.from(String(url).replace(/^data:image\/png;base64,/, ''), 'base64');
+          _iconePastille = nativeImage.createFromBuffer(brut, { scaleFactor: 2 });
+          if (_iconePastille.isEmpty()) _iconePastille = nativeImage.createFromDataURL(url);
+        } catch { _iconePastille = null; }
         resolve(_iconePastille);
       }).catch(() => resolve(null));
     };
