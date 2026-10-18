@@ -818,6 +818,139 @@ window.addEventListener('pagehide', function(){
 });
 `;
 
+/* ══ LE PANNEAU DES GÉNÉRATIONS (2026-10-18, sa demande : « un indicateur global où elle peut la minimiser, la
+   rouvrir ou l'INTERROMPRE ; plusieurs générations en même temps, chacune avec sa barre d'étapes ; le coût de
+   chacune ») ══
+   La file vit dans la page principale (generations:etat) ; ce panneau, posé ICI dans le socle comme le témoin des
+   lots, suit la personne dans TOUTES les fenêtres sans qu'aucune n'ait à y penser.
+   ⚠ IL NE PARAÎT QUE S'IL Y A UNE GÉNÉRATION (en cours, ou terminée depuis moins d'une heure). Une pastille en bas
+   à droite ; un clic ouvre le panneau, « Réduire » le referme — le choix est retenu sur ce poste.
+   ⚠ INTERROMPRE DIT CE QUI EST DÉJÀ FACTURÉ : la génération continue chez The New Black, le montant n'en revient pas.
+   ⚠ PAS DE BARRE DE DÉFILEMENT (la règle de la maison) : quatre générations au plus dans le panneau, et « + N
+   autres » pour le reste. */
+const CSS_GEN = `
+.sz-gen{position:fixed;right:.8rem;bottom:.3rem;z-index:61;display:flex;align-items:center;gap:.45rem;
+  padding:.38rem .8rem;border-radius:99px;font-size:.78rem;cursor:pointer;color:var(--tx);
+  background:var(--f-carte2);border:1px solid rgba(var(--or-rgb),.55);box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.sz-gen .roue{display:inline-block;animation:szGenTourne 1.6s linear infinite}
+.sz-gen.calme .roue{animation:none}
+@keyframes szGenTourne{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){.sz-gen .roue{animation:none}}
+html.sz-lots-on .sz-gen{bottom:2.2rem}
+/* ⚠ LA PASTILLE NE RECOUVRE RIEN (capture du 2026-10-18 : posée en bas à droite, elle masquait « Enregistrer »).
+   Une fenêtre qui a un PIED la reçoit DANS son pied, à gauche des boutons — à sa place, sans rien pousser ; les
+   autres l'ont en bas à droite. */
+.sz-gen.dans-pied{position:static;box-shadow:none;margin-left:auto;margin-right:.6rem;padding:.28rem .7rem}
+.sz-gen-pan{position:fixed;right:.8rem;bottom:2.6rem;z-index:62;width:min(27rem,calc(100vw - 1.6rem));
+  background:var(--f-carte);border:1px solid var(--v16);border-radius:12px;box-shadow:0 14px 34px rgba(0,0,0,.45);
+  padding:.7rem .8rem;font-size:.78rem;color:var(--tx)}
+html.sz-lots-on .sz-gen-pan{bottom:4.5rem}
+.sz-gen-pan h4{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
+.sz-gen-it{padding:.5rem 0;border-top:1px solid var(--v08)}
+.sz-gen-it:first-of-type{border-top:0}
+.sz-gen-it .l1{display:flex;align-items:center;gap:.45rem}
+.sz-gen-it .nom{font-weight:600;flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sz-gen-it .cout{font-variant-numeric:tabular-nums;color:var(--tx2);white-space:nowrap}
+.sz-gen-it .pas{display:flex;gap:3px;margin:.35rem 0 .2rem}
+.sz-gen-it .pas i{flex:1 1 0;height:.32rem;border-radius:99px;background:var(--v12)}
+.sz-gen-it .pas i.fait{background:var(--tx-ok)}
+.sz-gen-it .pas i.cours{background:var(--or)}
+.sz-gen-it .pas i.err{background:var(--tx-err)}
+.sz-gen-it .l2{color:var(--tx2)}
+.sz-gen-it .l2.err{color:var(--tx-err)}
+.sz-gen-it .l2.bon{color:var(--tx-ok)}
+.sz-gen-it button,.sz-gen-pied button{font-size:.72rem;padding:.18rem .55rem}
+.sz-gen-pied{display:flex;gap:.4rem;justify-content:flex-end;flex-wrap:wrap;margin-top:.55rem;padding-top:.5rem;border-top:1px solid var(--v08)}
+.sz-gen-pied .plus{margin-right:auto;color:var(--tx2);align-self:center}
+`;
+
+const JS_GEN = () => `
+var _szGenT = null, _szGenPill = null, _szGenPan = null, _szGenDer = null;
+function _szGenOuvert(){ try { return localStorage.getItem('sz_gen_ouvert') === '1'; } catch (e) { return false; } }
+function _szGenOuvrir(v){ try { localStorage.setItem('sz_gen_ouvert', v ? '1' : '0'); } catch (e) {} _szGenPeindre(_szGenDer); }
+function _szGenEsc(x){ return String(x == null ? '' : x).replace(/[&<>"]/g, function(c){ return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
+function _szGenArgent(n){ return (Math.round((Number(n) || 0) * 100) / 100).toFixed(2).replace('.', ',') + ' $ US'; }
+var _SZ_GEN_ETAPES = ['${T("Envoi des photos")}', '${T("Génération chez The New Black")}', '${T("Téléchargement de la vidéo")}',
+  '${T("Découpage en 36 images")}', '${T("Correction de couleur")}', '${T("Dépôt dans R2 et la photothèque")}', '${T("Posé sur la fiche")}'];
+function _szGenPeindre(r){
+  _szGenDer = r;
+  var l = (r && r.ok && r.liste) ? r.liste : [];
+  if (!l.length) {
+    if (_szGenPill && _szGenPill.parentNode) _szGenPill.parentNode.removeChild(_szGenPill);
+    if (_szGenPan && _szGenPan.parentNode) _szGenPan.parentNode.removeChild(_szGenPan);
+    _szGenPill = _szGenPan = null; return;
+  }
+  var cours = l.filter(function(g){ return g.etat === 'cours'; });
+  var cout = cours.reduce(function(s, g){ return s + (Number(g.cout) || 0); }, 0);
+  if (!_szGenPill) {
+    _szGenPill = document.createElement('button'); _szGenPill.type = 'button'; _szGenPill.className = 'sz-gen';
+    _szGenPill.addEventListener('click', function(){ _szGenOuvrir(!_szGenOuvert()); });
+    var act = document.querySelector('.pied .actions');
+    if (act && act.parentNode) { _szGenPill.classList.add('dans-pied'); act.parentNode.insertBefore(_szGenPill, act); }
+    else document.body.appendChild(_szGenPill);
+  }
+  _szGenPill.classList.toggle('calme', !cours.length);
+  _szGenPill.setAttribute('aria-expanded', _szGenOuvert() ? 'true' : 'false');
+  _szGenPill.innerHTML = cours.length
+    ? '<span class="roue" aria-hidden="true">⟳</span> ' + cours.length + ' ' + (cours.length > 1 ? '${T("générations en cours")}' : '${T("génération en cours")}') + ' · ' + _szGenArgent(cout)
+    : '<span aria-hidden="true">✓</span> ' + l.length + ' ' + (l.length > 1 ? '${T("générations terminées")}' : '${T("génération terminée")}');
+  if (!_szGenOuvert()) { if (_szGenPan && _szGenPan.parentNode) _szGenPan.parentNode.removeChild(_szGenPan); _szGenPan = null; return; }
+  if (!_szGenPan) {
+    _szGenPan = document.createElement('div'); _szGenPan.className = 'sz-gen-pan'; _szGenPan.setAttribute('role', 'region');
+    _szGenPan.setAttribute('aria-label', '${T("Générations")}');
+    _szGenPan.addEventListener('click', _szGenClic);
+    document.body.appendChild(_szGenPan);
+  }
+  var montre = l.slice(0, 4), reste = l.length - montre.length;
+  var maintenant = Date.now();
+  _szGenPan.innerHTML = '<h4>${T("Générations")}</h4>' + montre.map(function(g){
+    var e = g.etapes[g.etapeCourante] || {}, sec = e.t0 ? Math.round(((e.t1 || maintenant) - e.t0) / 1000) : 0;
+    var l2 = g.etat === 'cours'
+      ? '${T("Étape")} ' + (g.etapeCourante + 1) + '/7 · ' + _szGenEsc(_SZ_GEN_ETAPES[g.etapeCourante] || e.lib) + ' · ' + sec + ' s' + (g.etapeCourante === 1 ? ' / ≈ ' + (g.dureeEstimee || 135) + ' s' : '')
+      : (g.etat === 'fini' ? '✓ ${T("Terminée")}' : (g.etat === 'interrompu' ? '${T("Interrompue")}' : '✕ ${T("Échec")}')) + (g.message ? ' — ' + _szGenEsc(g.message) : '');
+    return '<div class="sz-gen-it" data-id="' + _szGenEsc(g.id) + '"><div class="l1"><span class="nom">' + _szGenEsc(g.produitNom) + ' · ${T("Vue 360°")}</span>'
+      + '<span class="cout">' + _szGenArgent(g.cout) + '</span>'
+      + (g.etat === 'cours' ? '<button type="button" data-g="interrompre">${T("Interrompre")}</button>' : '<button type="button" data-g="retirer">${T("Retirer")}</button>')
+      + '</div><div class="pas">' + g.etapes.map(function(x){ return '<i class="' + x.etat + '"></i>'; }).join('') + '</div>'
+      + '<div class="l2' + (g.etat === 'echec' ? ' err' : (g.etat === 'fini' ? ' bon' : '')) + '">' + l2 + '</div></div>';
+  }).join('')
+  + '<div class="sz-gen-pied">' + (reste > 0 ? '<span class="plus">+ ' + reste + ' ${T("autre(s)")}</span>' : '')
+  + (cours.length > 1 ? '<button type="button" data-g="interrompreTout">${T("Tout interrompre")}</button>' : '')
+  + (l.length > cours.length ? '<button type="button" data-g="retirerTout">${T("Retirer les terminées")}</button>' : '')
+  + '<button type="button" data-g="reduire">${T("Réduire")}</button></div>';
+}
+function _szGenClic(ev){
+  var b = ev.target.closest('button[data-g]'); if (!b) return;
+  var g = b.getAttribute('data-g'), it = b.closest('[data-id]'), id = it ? it.getAttribute('data-id') : '*';
+  if (g === 'reduire') { _szGenOuvrir(false); return; }
+  var agir = function(geste){ window.szPont.appeler('generations:agir', id, geste).then(function(){ _szGenLire(); }).catch(function(){}); };
+  if (g === 'retirer' || g === 'retirerTout') { agir('retirer'); return; }
+  var l = (_szGenDer && _szGenDer.liste) || [];
+  var cibles = l.filter(function(x){ return x.etat === 'cours' && (id === '*' || x.id === id); });
+  var engage = cibles.reduce(function(s, x){ return s + (Number(x.cout) || 0); }, 0);
+  var question = { danger: true, titre: cibles.length > 1 ? '${T("Interrompre toutes les générations")}' : '${T("Interrompre la génération")}',
+    texte: '${T("{n} $ US sont déjà engagés chez The New Black : ce montant ne sera pas remboursé. Les photos de la fiche seront déverrouillées et rien ne sera posé.")}'.replace('{n}', _szGenArgent(engage).replace(' $ US', '')),
+    oui: '${T("Interrompre")}' };
+  (typeof szConfirmer === 'function' ? szConfirmer(question) : Promise.resolve(true)).then(function(ok){ if (ok) agir('interrompre'); });
+}
+function _szGenLire(){
+  if (document.hidden) return;
+  if (!window.szPont || !window.szPont.appeler) return;
+  var p;
+  try { p = window.szPont.appeler('generations:etat'); } catch (e) { return; }
+  if (!p || typeof p.then !== 'function') return;
+  p.then(_szGenPeindre).catch(function(){});
+}
+function szGenSuivre(){
+  if (_szGenT) return;
+  _szGenLire();
+  _szGenT = setInterval(_szGenLire, 2000);
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', szGenSuivre); else szGenSuivre();
+document.addEventListener('visibilitychange', function(){ if (!document.hidden) _szGenLire(); });
+window.addEventListener('pagehide', function(){ if (_szGenT) { clearInterval(_szGenT); _szGenT = null; } });
+`;
+
 /* ══ PAGINATION AUTOMATIQUE (#30) ═══════════════════════════════════════════
    Sa demande : << tous les journaux devraient avoir de la pagination auto >>,
    et la meme chose dans les liens.
@@ -2095,7 +2228,7 @@ const JS_BORNER = (table) => `
   })();
 `;
 const JS_DIRE = () => JS_DIRE_BASE() + JS_PLEIN() + JS_PLEIN_AUTO() + JS_FENPLEIN()
-  + JS_VERROUS() + JS_LOTS() + JS_AUTOPAGE() + JS_PAGES() + JS_COMPTE() + JS_MESURES()
+  + JS_VERROUS() + JS_LOTS() + JS_GEN() + JS_AUTOPAGE() + JS_PAGES() + JS_COMPTE() + JS_MESURES()
   + JS_DATES() + JS_FINITIONS() + JS_JUMEAUX + JS_CTX() + JS_CONFIRMER();
 
 const JS_SOCLE = () => `
@@ -4559,8 +4692,8 @@ html.jour:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) .onglets button.on
   color:#1d2433!important;box-shadow:inset 0 -2px 0 var(--sz-repere)}
 `;
 
-module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX,
-  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX,
+module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_GEN + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX,
+  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_GEN + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX,
   JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, JS_BORNER, CSS_THEMES, CSS_FICHE, ICO,
   /* La page, pas son texte : voir l en-tete de ce fichier. */
   TETE, LIEU, SEP_DEC };

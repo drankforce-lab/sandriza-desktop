@@ -79,6 +79,14 @@ html.jour .pf-med-l video{background:#1d2433}
 #p-360-etapes li.fait{color:var(--tx)}
 #p-360-etapes li.fait .m{color:var(--tx-ok)}
 #p-360-etapes li.err{border-color:var(--tx-err);color:var(--tx-err)}
+/* LE VERROU DES PHOTOS PENDANT UNE GÉNÉRATION (2026-10-18) : ni ajout, ni retrait, ni déplacement de photo jusqu'à
+   la fin ; le reste de la fiche reste modifiable. Le serveur refuse de toute façon (gen_photos_garde) : l'écran le
+   montre AVANT, pour qu'on ne fasse pas un geste qui serait refusé à l'enregistrement. */
+.p-verrou-photos{display:none;margin:0 0 .6rem;padding:.45rem .7rem;border-radius:9px;font-size:.8rem;
+  border:1px solid rgba(var(--or-rgb),.55);background:rgba(var(--or-rgb),.10);color:var(--tx)}
+html.photos-verrou .p-verrou-photos{display:block}
+html.photos-verrou .ligne-photos,html.photos-verrou #p-parcoul,html.photos-verrou #p-cv-gen,
+html.photos-verrou #p-360-choisir,html.photos-verrou #p-360-retirer,html.photos-verrou #p-360-bande{pointer-events:none;opacity:.55}
 #p-360-bande{display:flex;gap:4px;flex-wrap:wrap;margin-top:.4rem}
 #p-360-bande img{width:40px;height:52px;object-fit:cover;border-radius:5px;border:1px solid var(--v22)}
 .cote.pf-bas{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}
@@ -426,6 +434,9 @@ function pageProduit(id) {
   MOTIFS.tnb_erreur = '${T("The New Black a refusé la demande.")}';
   MOTIFS.tnb_injoignable = '${T("The New Black est injoignable.")}';
   MOTIFS.plafond = '${T("Plafond mensuel des traitements d’image atteint.")}';
+  MOTIFS.produit_non_enregistre = '${T("Enregistrez d’abord la fiche : la vue 360° se pose directement sur elle, même si vous la fermez.")}';
+  MOTIFS.file_pleine = '${T("Quatre générations sont déjà en cours chez The New Black : attendez qu’une se termine.")}';
+  MOTIFS.photos_verrouillees = '${T("Une génération 360° est en cours : les photos de cette fiche sont verrouillées jusqu’à la fin.")}';
   MOTIFS.photo_format = '${T("La photo principale n’est pas dans un format accepté.")}';
   // La vue 360° exige le devant ET le dos (2026-10-18) : refusée au pont et au relais, motifs nommés.
   MOTIFS.photo_absente = '${T("Choisissez d’abord la photo principale.")}';
@@ -650,7 +661,7 @@ function pageProduit(id) {
          principale laissait toute sa moitie droite vide, et les deux phrases
          d explication n apprenaient rien apres la premiere utilisation. Le
          MAXIMUM, seul renseignement qui compte, vit dans le TITRE. */
-      + '<div class="carte"><h2 id="p-vues-titre">Photos</h2>'
+      + '<div class="carte"><div class="p-verrou-photos" role="status"></div><h2 id="p-vues-titre">Photos</h2>'
       + '<div class="ligne-photos">'
       + '<div class="vue-principale">'
       + '<div class="vign" id="p-vign" title="${T("Photo principale — cliquer pour choisir, ou déposer une secondaire ici")}">${T("choisir une photo")}</div>'
@@ -712,7 +723,7 @@ function pageProduit(id) {
          l’enregistrement ; MANUEL = on dépose une photo par couleur. La
          1ʳᵉ couleur n’a jamais de variante : ses photos SONT celles du
          produit (la boutique ne lit une variante que pour les autres). */
-      + '<div class="carte plein" id="p-parcoul-carte"><h2 id="p-parcoul-titre">${T("Photo par couleur")}</h2>'
+      + '<div class="carte plein" id="p-parcoul-carte"><div class="p-verrou-photos" role="status"></div><h2 id="p-parcoul-titre">${T("Photo par couleur")}</h2>'
       + '<div class="aide" id="p-parcoul-aide" style="margin-bottom:.5rem"></div>'
       + '<div class="vues" id="p-parcoul"></div>'
       + '<div style="margin-top:.5rem"><button type="button" id="p-cv-gen" style="display:none" '
@@ -2102,43 +2113,73 @@ function pageProduit(id) {
      l'enregistrement). COUTS : ce que le journal dit avoir dépensé pour cet article.
      G360 : la génération en cours (Product 360 de The New Black), de la confirmation aux 36 images. */
   var MOD3D = '', CLE_COUTS = '', COUTS = null;
-  var G360 = { conf: false, forcer: false, enCours: false, debut: 0, etapes: null, minuterie: 0 };
-  /* LES SEPT ÉTAPES. Les cinq premières se font ici, l'une après l'autre ; le dépôt dans R2 et la pose sur la fiche
-     se font à l'enregistrement (c'est le site qui dépose, comme pour toutes les photos). La génération chez The New
-     Black dure ~2 min 15 s (essai du 2026-10-18 : 133 s) : la durée estimée est dite à côté du temps écoulé. */
+  var G360 = { conf: false, forcer: false, enCours: false, genId: '', etapes: null, minuterie: 0, verrou: null, vu: '' };
+  /* LES SEPT ÉTAPES viennent de la FILE DES GÉNÉRATIONS (page principale, generations:etat) : la génération continue
+     si l'on enregistre, ferme ou change de module, et cette fenêtre — rouverte — la retrouve. Les libellés sont
+     traduits ICI, par rang. La génération chez The New Black dure ~2 min 15 s (essai du 2026-10-18 : 133 s). */
   var ETAPES_360 = ['${T("Envoi des photos")}', '${T("Génération chez The New Black")}', '${T("Téléchargement de la vidéo")}',
-    '${T("Découpage en 36 images")}', '${T("Correction de couleur")}', '${T("Dépôt dans R2")}', '${T("Posé sur la fiche")}'];
-  var DUREE_TNB_S = 135;
-  function etape360(i, etat){
-    if (!G360.etapes) return;
-    var e = G360.etapes[i]; if (!e) return;
-    if (etat === 'cours') e.t0 = Date.now();
-    if (etat === 'fait' || etat === 'err') e.t1 = Date.now();
-    e.etat = etat;
-    dessinerEtapes360();
-  }
+    '${T("Découpage en 36 images")}', '${T("Correction de couleur")}', '${T("Dépôt dans R2 et la photothèque")}', '${T("Posé sur la fiche")}'];
   function dessinerEtapes360(){
     var z = document.getElementById('p-360-etapes'); if (!z) return;
     if (!G360.etapes) { z.style.display = 'none'; z.innerHTML = ''; return; }
     z.style.display = '';
     z.innerHTML = G360.etapes.map(function(e, i){
       var sec = e.t0 ? Math.round(((e.t1 || Date.now()) - e.t0) / 1000) : 0;
-      var duree = e.etat === 'cours' ? sec + ' s' + (i === 1 ? ' / ≈ ' + DUREE_TNB_S + ' s' : '')
-        : (e.etat === 'fait' ? sec + ' s' : (e.etat === 'apres' ? '${T("à l’enregistrement")}' : ''));
+      var duree = e.etat === 'cours' ? sec + ' s' + (i === 1 ? ' / ≈ ' + (G360.duree || 135) + ' s' : '') : (e.etat === 'fait' ? sec + ' s' : '');
       var marque = e.etat === 'fait' ? '✓' : (e.etat === 'cours' ? '…' : (e.etat === 'err' ? '✕' : String(i + 1)));
-      return '<li class="' + e.etat + '"><span class="m">' + marque + '</span>' + esc(e.lib)
+      return '<li class="' + e.etat + '"><span class="m">' + marque + '</span>' + esc(ETAPES_360[i] || e.lib)
         + (duree ? ' <span class="d">' + esc(duree) + '</span>' : '') + '</li>';
     }).join('');
   }
-  function debutEtapes360(){
-    G360.etapes = ETAPES_360.map(function(l){ return { lib: l, etat: 'att', t0: 0, t1: 0 }; });
-    clearInterval(G360.minuterie);
-    G360.minuterie = setInterval(function(){ if (G360.enCours) dessinerEtapes360(); else clearInterval(G360.minuterie); }, 1000);
-    dessinerEtapes360();
+  // Le verrou des photos : posé par une génération de CE produit (ici ou sur un autre poste), levé à sa fin.
+  function verrouPhotos(v){
+    G360.verrou = v || null;
+    document.documentElement.classList.toggle('photos-verrou', !!v);
+    var txt = v ? ('${T("Génération 360° en cours par {p} — étape {e}. Les photos sont verrouillées jusqu’à la fin ; le reste de la fiche reste modifiable, et vous pouvez l’enregistrer ou la fermer.")}'
+      .replace('{p}', v.par || '—').replace('{e}', v.etape || '…')) : '';
+    Array.prototype.forEach.call(document.querySelectorAll('.p-verrou-photos'), function(b){ b.textContent = txt; });
   }
-  function echecEtape360(){
-    if (!G360.etapes) return;
-    G360.etapes.forEach(function(e, i){ if (e.etat === 'cours') etape360(i, 'err'); });
+  /* LE SUIVI : toutes les 2 s tant qu'une génération concerne cette fiche. ⚠ À la fin, les vues posées par la
+     génération REMPLACENT celles de la fenêtre : sans cela, enregistrer la fiche ensuite remettrait les anciennes. */
+  function suivre360(){
+    clearInterval(G360.minuterie);
+    var tour = function(){
+      if (!ID) return;
+      P.appeler('generations:etat').then(function(r){
+        var l = (r && r.ok && r.liste) ? r.liste.filter(function(x){ return x.produit === String(ID) && x.genre === 'vue360'; }) : [];
+        var g = l.filter(function(x){ return x.id === G360.genId; })[0] || l.filter(function(x){ return x.etat === 'cours'; })[0] || null;
+        if (!g) {
+          // rien ici : peut-être sur un autre poste (le serveur le sait)
+          P.appeler('produit:photosVerrou', ID).then(function(v){
+            verrouPhotos(v && v.ok ? v.verrou : null);
+            if (!(v && v.ok && v.verrou)) { G360.enCours = false; clearInterval(G360.minuterie); dessiner3d(); }
+          });
+          return;
+        }
+        G360.genId = g.id; G360.etapes = g.etapes; G360.duree = g.dureeEstimee;
+        dessinerEtapes360();
+        var e = document.getElementById('p-360g-etat');
+        if (g.etat === 'cours') {
+          G360.enCours = true;
+          verrouPhotos({ par: g.par, etape: (g.etapeCourante + 1) + '/7 · ' + (ETAPES_360[g.etapeCourante] || '') });
+          if (e) e.textContent = '${T("Suivie dans le panneau des générations : vous pouvez enregistrer, fermer ou changer de module.")}';
+        } else {
+          G360.enCours = false; clearInterval(G360.minuterie); verrouPhotos(null);
+          if (G360.vu !== g.id + g.etat) {
+            G360.vu = g.id + g.etat;
+            if (g.etat === 'fini' && g.vue360 && g.vue360.length) {
+              VUE360 = g.vue360.slice(); dessinerMedias();
+              dire(VUE360.length + ' ${T("vues 360° posées sur la fiche, et le rendu rangé dans la photothèque.")}', 'bon');
+            } else if (g.etat === 'echec') dire('${T("La vue 360° a échoué :")} ' + (g.message || ''), 'err');
+            else if (g.etat === 'interrompu') dire('${T("Vue 360° interrompue.")} ' + (g.message || ''), 'att');
+          }
+          if (e) e.textContent = '';
+        }
+        dessiner3d();
+      });
+    };
+    tour();
+    G360.minuterie = setInterval(tour, 2000);
   }
   /* LE PRIX ANNONCÉ : 2,2 crédits la seconde × 5 s = 11 crédits × 0,065 $ (forfait Business) = 0,715 $ US. Il part
      avec la demande (prixAnnonce) : si le relais lit un autre barème chez The New Black, rien ne part et la fenêtre
@@ -2158,6 +2199,8 @@ function pageProduit(id) {
     return k || '';
   }
   function raison360(){
+    if (!ID) return '${T("Enregistrez d’abord la fiche : la vue 360° se pose directement sur elle, même si vous la fermez.")}';
+    if (G360.verrou && !G360.enCours) return '${T("Une vue 360° est déjà en cours pour cet article.")}';
     if (!IMAGE) return '${T("Choisissez d’abord la photo principale.")}';
     var d = photoDos();
     if (!d) return '${T("Ajoutez une photo du dos pour générer la vue 360°.")}' + ' '
@@ -2206,6 +2249,9 @@ function pageProduit(id) {
     if (G360.enCours) return;
     var raison = raison360();
     if (raison) { dire(raison, 'att'); dessiner3d(); return; }
+    if (IMAGE.indexOf('data:') === 0 || String(photoDos()).indexOf('data:') === 0) {
+      dire('${T("Enregistrez d’abord la fiche : une photo neuve doit être déposée avant la génération.")}', 'att'); return;
+    }
     if (!G360.conf) {
       szConfirmer({ prudent: true,
         titre: VUE360.length || G360.forcer ? '${T("Regénérer la vue 360°")}' : '${T("Générer la vue 360°")}',
@@ -2219,13 +2265,13 @@ function pageProduit(id) {
       return;
     }
     G360.conf = false; G360.enCours = true; dessiner3d();
-    debutEtapes360(); etape360(0, 'cours');
     var e = document.getElementById('p-360g-etat'); if (e) e.textContent = '${T("Envoi des photos (devant et dos) à The New Black…")}';
-    P.appeler('produit:vue360Lancer', IMAGE, cleCouts(), G360.forcer, photoDos(), PRIX_360).then(function(r){
+    var ref = val('p-360-ref') || 'devant';
+    P.appeler('generations:lancer360', { produit: String(ID), image: IMAGE, dos: photoDos(), forcer: G360.forcer, prix: PRIX_360,
+      reference: ref === 'aucune' ? 'aucune' : (ref === 'dos' ? photoDos() : IMAGE) }).then(function(r){
       if (!r || !r.ok) {
         G360.enCours = false;
-        // rien n'est parti (prix, avertissement, refus) : la barre d'étapes s'efface, sauf sur une vraie erreur
-        if (r && (r.motif === 'prix_change' || r.motif === 'avertir')) { G360.etapes = null; dessinerEtapes360(); } else echecEtape360();
+        if (e) e.textContent = '';
         if (r && r.motif === 'prix_change' && r.prixReel != null) {
           // ⚠ LE CONTRÔLE DES COÛTS : le relais a un autre prix que celui affiché — RIEN n'est parti.
           var avant = PRIX_360; PRIX_360 = Number(r.prixReel); dessiner3d();
@@ -2240,52 +2286,15 @@ function pageProduit(id) {
             + '${T(" : cliquez « Regénérer quand même » si c’est voulu.")}', 'att');
           return;
         }
+        if (r && r.motif === 'deja_en_cours') {
+          dire('${T("Une vue 360° est déjà en cours pour cet article, par {p} (étape {e}).")}'.replace('{p}', r.par || '—').replace('{e}', String(r.etape || '…')), 'att');
+          suivre360(); return;
+        }
         dessiner3d(); dire(expliquer(r), 'err'); return;
       }
-      G360.forcer = false; chargerCouts();
-      etape360(0, 'fait'); etape360(1, 'cours');
-      suivre360(r.id, Date.now());
-    });
-  }
-  function suivre360(id, t0){
-    var e = document.getElementById('p-360g-etat');
-    var rate = function(r, txt){ G360.enCours = false; echecEtape360(); dessiner3d(); dire((txt || '') + (txt ? ' ' : '') + expliquer(r), 'err'); };
-    P.appeler('produit:vue360Suivre', id).then(function(r){
-      if (!r || !r.ok) { rate(r); return; }
-      if (!r.pret) {
-        var sec = Math.round((Date.now() - t0) / 1000);
-        if (sec > 600) { G360.enCours = false; echecEtape360(); dessiner3d(); dire('${T("The New Black n’a pas fini en 10 minutes. Le coût est engagé : réessayez plus tard, sans regénérer.")}', 'err'); return; }
-        if (e) e.textContent = '${T("Génération de la vidéo chez The New Black… ")}' + sec + ' s';
-        setTimeout(function(){ suivre360(id, t0); }, 5000);
-        return;
-      }
-      etape360(1, 'fait'); etape360(2, 'cours');
-      if (e) e.textContent = '${T("Vidéo prête — téléchargement…")}';
-      var video = r.video;
-      P.appeler('produit:vue360Telecharger', video).then(function(a){
-        if (!a || !a.ok) { rate(a, '${T("Les vues 360° n’ont pas pu être tirées de la vidéo.")}'); return; }
-        etape360(2, 'fait'); etape360(3, 'cours');
-        if (e) e.textContent = '${T("Découpage de la vidéo en 36 images…")}';
-        P.appeler('produit:vue360Decouper', video).then(function(b){
-          if (!b || !b.ok) { rate(b, '${T("Les vues 360° n’ont pas pu être tirées de la vidéo.")}'); return; }
-          etape360(3, 'fait'); etape360(4, 'cours');
-          if (e) e.textContent = '${T("Correction de couleur…")}';
-          P.appeler('produit:vue360Couleur', video, refCouleur()).then(function(x){
-            G360.enCours = false;
-            if (!x || !x.ok) { echecEtape360(); dessiner3d(); dire('${T("Les vues 360° n’ont pas pu être tirées de la vidéo.")}' + (x && x.detail ? ' (' + x.detail + ')' : ''), 'err'); return; }
-            etape360(4, 'fait');
-            if (G360.etapes) { G360.etapes[5].etat = 'apres'; G360.etapes[6].etat = 'apres'; dessinerEtapes360(); }
-            VUE360 = x.vues.slice();
-            dessinerMedias(); majFicheBientot();
-            var c = x.couleur || null;
-            var mot = (c && c.refuse === 'teinte')
-              ? ' ${T("Couleur NON harmonisée : la photo de référence ne semble pas être le même vêtement.")}'
-              : (c && c.apres ? ' ${T("Couleur harmonisée sur la photo de référence.")}' : '');
-            dire(VUE360.length + ' ${T("vues 360° prêtes")} (' + szOctets(x.poids || 0) + ') — ${T("déposées à l’enregistrement.")}' + mot,
-              (c && c.refuse) ? 'att' : 'bon');
-          });
-        });
-      });
+      G360.forcer = false; G360.genId = r.id; chargerCouts();
+      dire('${T("Vue 360° lancée — elle continue même si vous enregistrez, fermez la fiche ou changez de module.")}', 'bon');
+      suivre360();
     });
   }
   var MAX_VIDEO_MO = 5.5;
@@ -2619,6 +2628,8 @@ function pageProduit(id) {
     VIDEO_OCTETS = 0;
     VUE360 = Array.isArray(p.vue360) ? p.vue360.filter(Boolean).map(String) : [];
     dessinerMedias();
+    // Une génération en cours pour cette fiche (ici ou ailleurs) : ses étapes, et le verrou des photos.
+    if (ID) suivre360();
   }
 
   // ⚠ LA FICHE PEUT PORTER TROIS FORMES de photos supplémentaires : un TABLEAU
