@@ -107,6 +107,69 @@ button.mini{padding:.12rem .5rem;font-size:.76rem}
 .at-gestes.at-tete{margin-top:.65rem;gap:.35rem}
 .at-gestes.at-tete button{padding:.3rem .65rem;font-size:.8rem}
 .at-gestes button{flex:1 1 auto}
+/* ── La fiche du modèle choisi (2026-10-18, sa demande : « trop condensé ; des onglets à droite pour l historique ;
+   des boutons plus professionnels ; un petit aperçu 3D qui tourne ») ── */
+.cx-carte.at-fiche{display:flex;flex-direction:column;gap:.75rem;padding:0;overflow:hidden}
+.at-fiche-tete{padding:1rem 1.1rem 0}
+.at-fiche-titre{display:flex;align-items:center;gap:.55rem;min-width:0}
+.at-fiche-titre h2{margin:0;font-size:1.12rem;font-weight:650;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.at-fiche-tete .cx-sub{margin-top:.2rem}
+.at-scene{position:relative;margin:0 1.1rem;height:13.5rem;flex:0 0 auto;border-radius:14px;overflow:hidden;
+  background:radial-gradient(ellipse at 50% 38%,#FBF8F2 0%,#EFE7DA 70%,#E6DCCB 100%);color:#1C1B18;cursor:grab;user-select:none}
+.at-scene:active{cursor:grabbing}
+.at-scene .at-scene-vig{position:absolute;inset:0;display:block;transition:opacity .35s ease}
+.at-scene .at-scene-vig img.vigp{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:50% 50%}
+.at-scene .at-scene-vig svg{position:absolute;inset:.8rem;width:calc(100% - 1.6rem);height:calc(100% - 1.6rem)}
+.at-scene canvas.at-mini-cv{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;transition:opacity .35s ease}
+.at-scene.pret canvas.at-mini-cv{opacity:1}
+.at-scene.pret .at-scene-vig{opacity:0}
+.at-scene .at-scene-aide{position:absolute;left:.6rem;bottom:.5rem;font-size:.68rem;padding:.15rem .5rem;border-radius:999px;background:rgba(28,27,24,.86);color:#F6F1E8;opacity:0;transition:opacity .2s ease;pointer-events:none}
+.at-scene.pret:hover .at-scene-aide{opacity:1}
+.at-scene .at-scene-3d{position:absolute;right:.5rem;top:.5rem;font-size:.64rem;font-weight:700;letter-spacing:.08em;padding:.12rem .45rem;border-radius:6px;background:rgba(28,27,24,.86);color:#F6F1E8;opacity:0;transition:opacity .35s ease}
+.at-scene.pret .at-scene-3d{opacity:1}
+.at-actions{display:flex;gap:.45rem;padding:0 1.1rem}
+.at-actions button{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;padding:.5rem .8rem;font-size:.84rem;border-radius:10px;white-space:nowrap}
+.at-actions button{min-width:0;flex:1 1 0}
+.at-actions button.prim{font-weight:600}
+.at-actions button svg,.at-outil svg{width:1.05rem;height:1.05rem;flex:0 0 auto}
+.at-actions .at-plus{flex:0 0 auto;padding:.5rem .55rem}
+.at-outils{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.35rem;padding:0 1.1rem}
+.at-outil{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3rem;padding:.55rem .2rem .5rem;border-radius:10px;
+  background:var(--f-carte2);border:1px solid var(--sz-bord);color:var(--tx2);font-size:.7rem;line-height:1.1;text-align:center;min-width:0;cursor:pointer;
+  transition:background .14s ease,color .14s ease,border-color .14s ease}
+.at-outil svg{width:1.25rem;height:1.25rem}
+.at-outil span{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.at-outil:hover{color:var(--tx);border-color:rgba(var(--or-rgb),.55);background:color-mix(in srgb,var(--f-carte2) 86%,var(--or) 10%)}
+.at-outil:disabled{opacity:.5;cursor:default}
+.at-fiche>.ed-note{margin:0 1.1rem}
+.at-onglets{display:flex;gap:.2rem;padding:0 1.1rem;border-bottom:1px solid var(--sz-bord);margin-top:.15rem}
+.at-onglets button{background:none;border:0;border-radius:0;padding:.55rem .65rem .6rem;font-size:.82rem;color:var(--tx2);cursor:pointer;
+  border-bottom:2px solid transparent;margin-bottom:-1px;display:inline-flex;align-items:center;gap:.35rem}
+.at-onglets button:hover{color:var(--tx)}
+.at-onglets button.on{color:var(--tx);border-bottom-color:var(--or);font-weight:600}
+.at-onglets .n{font-size:.66rem;padding:0 .4rem;border-radius:999px;background:var(--v08);color:var(--tx);font-weight:600}
+.at-onglet-corps{flex:1 1 0;min-height:0;overflow:auto;padding:.3rem 1.1rem 1.1rem;display:flex;flex-direction:column;gap:.55rem}
+.at-onglet-corps h3{margin:.55rem 0 .1rem;font-size:.72rem;font-weight:650;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2)}
+.at-fiche-dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.35rem 1rem;margin:0;font-size:.82rem}
+.at-fiche-dl dt{color:var(--tx2)}
+.at-fiche-dl dd{margin:0;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.at-pieces{display:flex;flex-direction:column;border:1px solid var(--sz-bord);border-radius:10px;overflow:hidden}
+.at-pieces>div{display:flex;justify-content:space-between;gap:.6rem;padding:.42rem .7rem;font-size:.82rem}
+.at-pieces>div+div{border-top:1px solid var(--sz-bord)}
+.at-hist{list-style:none;margin:.3rem 0 0;padding:0 0 0 .2rem;position:relative}
+.at-hist li{position:relative;padding:0 0 .9rem 1.3rem}
+.at-hist li::before{content:"";position:absolute;left:.25rem;top:.35rem;width:.55rem;height:.55rem;border-radius:50%;background:var(--f-carte2);border:2px solid var(--v16)}
+.at-hist li::after{content:"";position:absolute;left:.5rem;top:1.05rem;bottom:0;width:1px;background:var(--sz-bord)}
+.at-hist li:last-child::after{display:none}
+.at-hist li.actuelle::before{border-color:var(--or);background:var(--or)}
+.at-hist .h1{display:flex;align-items:baseline;gap:.5rem;font-size:.84rem}
+.at-hist .h1 b{font-weight:650}
+.at-hist .h2{font-size:.74rem;color:var(--tx2);margin-top:.12rem}
+.at-hist .moi{font-size:.66rem;padding:.02rem .45rem;border-radius:999px;border:1px solid var(--or);color:var(--tx)}
+.at-prot{display:flex;align-items:center;gap:.6rem;padding:.65rem .75rem;border-radius:10px;border:1px solid var(--sz-bord);font-size:.84rem}
+.at-prot .ic{font-size:1rem}
+@media (max-height:760px){.at-scene{height:10rem}}
+@media (max-height:620px){.at-scene{height:7.5rem}}
 
 /* ── Le modèle (moteur) ── */
 .at-trois{display:grid;grid-template-columns:19rem minmax(0,1fr) 23rem;gap:.9rem}
@@ -289,6 +352,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var VUE = 'biblio';      // 'biblio' | 'modele'
   var CAT = '', ETAT = '', Q = '';
   var SEL = '';            // modèle choisi dans la bibliothèque
+  // l onglet de la fiche (Détails, Historique, Protection) : gardé sur ce poste
+  var ONGLETB = (function(){ try { var o = localStorage.getItem('sz-atelier-onglet'); return o === 'hist' || o === 'prot' ? o : 'details'; } catch (e) { return 'details'; } })();
   var M = null;            // le modèle en création ou en modification
   var TRACE = false;       // base, options, tableau ou aisances changés : retracer à l enregistrement
   var AP = null;           // dernier aperçu reçu
@@ -665,54 +730,159 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     t += '<div class="cx-pied"><span>' + liste.length + ' ' + (liste.length > 1 ? '${T("modèles")}' : '${T("modèle")}') + '</span></div></div>';
 
     var m = SEL ? (D.modeles || []).filter(function(x){ return x.id === SEL; })[0] : null;
-    var p = '<div class="cx-carte">';
+    var p = '<div class="cx-carte' + (m ? ' at-fiche' : '') + '">';
     if (!m) {
       p += '<h2>${T("Modèle choisi")}</h2><div class="cx-sub">${T("Cliquez une carte pour voir ses pièces, ses tailles et ses versions.")}</div>';
     } else {
-      p += '<h2>' + esc(m.nom) + ' <span class="at-puce ' + esc(m.etat) + '">' + esc(LETAT[m.etat] || m.etat) + '</span></h2>'
-        + '<div class="cx-sub">' + esc((m.ref ? m.ref + ' · ' : '') + (LBASE[m.base] || '') + ' · ' + '${T("créé le {0}")}'.split('{0}').join(jour(m.createdAt)) + ' · ' + '${T("modifié le {0}")}'.split('{0}').join(jour(m.updatedAt))) + '</div>'
-        // ⚠ LES GESTES EN TÊTE (2026-10-17, son signalement : sur un petit écran, le volet était coupé avant ses
-        // boutons — « Dossier de protection » et tous les autres disparaissaient). Ce qu on fait d un modèle passe
-        // avant ce qu on en lit ; le dossier de protection rejoint les gestes.
-        + '<div class="at-gestes at-tete">'
+      /* LA FICHE (2026-10-18, sa demande : « trop condensé ; des onglets à droite pour l historique ; des boutons plus
+         professionnels ; un petit aperçu 3D qui tourne quand on clique sur le modèle »). En tête : le vêtement qui tourne,
+         les deux gestes principaux, puis les outils en tuiles ; dessous, trois onglets — Détails, Historique, Protection. */
+      var outil = function(attr, ico, court, long){ return '<button type="button" class="at-outil" ' + attr + '="' + esc(m.id) + '" title="' + long + '" aria-label="' + long + '">' + ico + '<span>' + court + '</span></button>'; };
+      var ong = function(k, lib, n){ return '<button type="button" role="tab" aria-selected="' + (ONGLETB === k) + '" class="' + (ONGLETB === k ? 'on' : '') + '" data-bonglet="' + k + '">' + lib + (n ? '<span class="n">' + n + '</span>' : '') + '</button>'; };
+      var vs = (m.versions || []).slice().reverse();
+      p += '<div class="at-fiche-tete"><div class="at-fiche-titre"><h2>' + esc(m.nom) + '</h2>'
+        + (m.verrouille ? '<span class="ic" title="${T("Protégé par NIP")}" aria-label="${T("Protégé par NIP")}">🔒</span>' : '')
+        + '<span class="at-puce ' + esc(m.etat) + '">' + esc(LETAT[m.etat] || m.etat) + '</span></div>'
+        + '<div class="cx-sub">' + esc([LBASE[m.base] || '', m.ref, 'v' + (m.version || 1)].filter(Boolean).join(' · ')) + '</div></div>'
+        + '<div class="at-scene" id="at-mini" title="${T("Glisser pour tourner · double-clic : aperçu 3D")}">'
+        + '<span class="at-scene-vig">' + (m.vignette || svgPieces([{ pieces: m.pieces || [] }], 300, 220, { mini: true, titre: m.nom })) + '</span>'
+        + '<span class="at-scene-3d">3D</span><span class="at-scene-aide">${T("Glisser pour tourner")}</span></div>'
+        + '<div class="at-actions">'
         + '<button type="button" class="prim" data-ouvrir="' + esc(m.id) + '">${T("Ouvrir le modèle")}</button>'
-        + '<button type="button" data-editer="' + esc(m.id) + '">${T("Éditer le patron")}</button>'
-        + '<button type="button" data-v3="' + esc(m.id) + '">${T("Aperçu 3D")}</button>'
-        + '<button type="button" data-planche="' + esc(m.id) + '">${T("Planche de dessin")}</button>'
-        + '<button type="button" data-motif="' + esc(m.id) + '">${T("Motif et impression textile")}</button>'
-        + '<button type="button" data-imprimer="' + esc(m.id) + '">${T("Imprimer / exporter")}</button>'
-        + '<button type="button" data-protection="' + esc(m.id) + '">${T("Dossier de protection (PDF)")}</button>'
-        + (D.peutAjouter ? '<button type="button" data-dupl="' + esc(m.id) + '">${T("Dupliquer")}</button>' : '')
-        + (D.peutSupprimer ? '<button type="button" class="danger" data-suppr="' + esc(m.id) + '">${T("Supprimer")}</button>' : '')
+        + '<button type="button" data-editer="' + esc(m.id) + '">' + ICA.patron + '${T("Éditer le patron")}</button>'
+        + '<button type="button" class="at-plus" data-plus="' + esc(m.id) + '" data-ctx-ligne="' + esc(m.id) + '" title="${T("Plus d’actions")}" aria-label="${T("Plus d’actions")}" aria-haspopup="menu">' + ICA.plus + '</button>'
+        + '</div>'
+        + '<div class="at-outils">'
+        + outil('data-v3', ICA.cube, '${T("3D")}', '${T("Aperçu 3D")}')
+        + outil('data-planche', ICA.crayon, '${T("Planche")}', '${T("Planche de dessin")}')
+        + outil('data-motif', ICA.motif, '${T("Motif")}', '${T("Motif et impression textile")}')
+        + outil('data-imprimer', ICA.imprimer, '${T("Imprimer")}', '${T("Imprimer / exporter")}')
+        + outil('data-protection', ICA.dossier, '${T("Dossier")}', '${T("Dossier de protection (PDF)")}')
         + '</div>'
         + (m.edite ? '<div class="ed-note">${T("Patron retouché dans l’éditeur : « retracer » depuis le modèle effacerait ces retouches.")}</div>' : '')
-        + '<div class="cx-sep"></div><h2>${T("Pièces du patron")}</h2>'
-        + (m.pieces || []).map(function(pc){
-            return '<div class="cx-etat"><span>' + esc(nomPiece(pc)) + ' · ×' + (pc.qte || 1) + (pc.aupli ? ' ${T("au pli")}' : '') + '</span><span class="cx-gris">' + (pc.pinces && pc.pinces.length ? '${T("pince")}' : '') + '</span></div>';
+        + '<div class="at-onglets" role="tablist" aria-label="${T("Fiche du modèle")}">'
+        + ong('details', '${T("Détails")}') + ong('hist', '${T("Historique")}', vs.length) + ong('prot', '${T("Protection")}') + '</div>'
+        + '<div class="at-onglet-corps" role="tabpanel">';
+      if (ONGLETB === 'hist') {
+        p += '<ul class="at-hist">' + vs.map(function(v){
+            var actuelle = v.n === (m.version || 1);
+            return '<li class="' + (actuelle ? 'actuelle' : '') + '"><div class="h1"><b>v' + v.n + '</b><span>' + esc(v.restaure ? '${T("retour à la version {0}")}'.split('{0}').join(v.restaure) : szTd(String(v.note || ''))) + '</span>'
+              + (actuelle ? '<span class="moi">${T("actuelle")}</span>' : '') + '</div><div class="h2">' + esc(jour(v.date)) + '</div></li>';
           }).join('')
-        + '<div class="cx-sep"></div><h2>${T("Tailles gradées")}</h2><div class="at-tailles">'
-        + (m.tailles || []).map(function(tl){ return '<span class="at-puce' + (tl === m.tailleBase ? ' base' : '') + '">' + esc(tl) + (tl === m.tailleBase ? ' · ${T("base")}' : '') + '</span>'; }).join('')
-        + '</div>'
-        + '<div class="cx-etat"><span>${T("Tissu estimé (laize 140 cm)")}</span><span>' + (m.tissu ? String(m.tissu.metres).replace('.', '${SEP_DEC()}') + ' m' : '—') + '</span></div>'
-        + '<div class="cx-sep"></div><h2>${T("Versions")}</h2>'
-        + (m.versions || []).slice(-3).reverse().map(function(v){
-            return '<div class="cx-etat"><span>v' + v.n + ' — ' + esc(v.note || '') + '</span><span class="cx-gris">' + esc(jour(v.date)) + '</span></div>';
-          }).join('')
-        + '<div class="cx-sep"></div><h2>${T("Protection")}</h2>'
-        + (m.verrouille ? '<div class="cx-etat"><span><span class="ic">🔒</span> ${T("Protégé par NIP")}</span><span class="cx-gris">' + esc(jour(m.verrouDepuis)) + '</span></div>'
-          : '<div class="cx-sub">${T("Non protégé : toute personne autorisée peut le modifier.")}</div>')
-        + (m.verrouRetire && !m.verrouille ? '<div class="cx-sub">' + esc('${T("NIP retiré par {0} le {1}.")}'.split('{0}').join(m.verrouRetire.par || '?').split('{1}').join(jour(m.verrouRetire.le))) + '</div>' : '')
-        + '<div class="at-gestes">' + (D.peutModifier ? (m.verrouille ? '<button type="button" data-nip="changer:' + esc(m.id) + '">${T("Changer le NIP")}</button><button type="button" data-nip="retirer:' + esc(m.id) + '">${T("Retirer la protection")}</button>'
-          : '<button type="button" data-nip="poser:' + esc(m.id) + '">${T("Protéger par NIP")}</button>') : '')
-        // le retrait SANS le NIP (oublié) : visible du seul super-administrateur ; le site le revérifie
-        + (m.verrouille && D.superadmin ? '<button type="button" class="danger" data-nip="forcer:' + esc(m.id) + '">${T("Retirer le NIP (super-administrateur)")}</button>' : '')
-        + '</div>'
-        + '<div class="ed-note">${T("Le dossier prépare l’enregistrement d’un dessin industriel (l’apparence d’un vêtement ne se brevète pas) : vues, description, historique daté, empreinte numérique et questions pour votre juriste. Ce n’est pas un avis juridique.")}</div>'
-;
+          + '<li><div class="h1"><b>${T("Création")}</b></div><div class="h2">' + esc(jour(m.createdAt)) + '</div></li></ul>'
+          + (m.verrouRetire ? '<div class="cx-sub">' + esc('${T("NIP retiré par {0} le {1}.")}'.split('{0}').join(m.verrouRetire.par || '?').split('{1}').join(jour(m.verrouRetire.le))) + '</div>' : '')
+          + '<div class="ed-note">${T("Pour revenir à une version, ouvrez « Éditer le patron » : son onglet Historique la restaure sans rien effacer.")}</div>';
+      } else if (ONGLETB === 'prot') {
+        p += (m.verrouille ? '<div class="at-prot"><span class="ic">🔒</span><span>${T("Protégé par NIP")}<span class="cx-gris"> · ' + esc(jour(m.verrouDepuis)) + '</span></span></div>'
+            : '<div class="at-prot"><span class="ic">🔓</span><span>${T("Non protégé : toute personne autorisée peut le modifier.")}</span></div>')
+          + '<div class="at-gestes">' + (D.peutModifier ? (m.verrouille ? '<button type="button" data-nip="changer:' + esc(m.id) + '">${T("Changer le NIP")}</button><button type="button" data-nip="retirer:' + esc(m.id) + '">${T("Retirer la protection")}</button>'
+            : '<button type="button" data-nip="poser:' + esc(m.id) + '">${T("Protéger par NIP")}</button>') : '')
+          // le retrait SANS le NIP (oublié) : visible du seul super-administrateur ; le site le revérifie
+          + (m.verrouille && D.superadmin ? '<button type="button" class="danger" data-nip="forcer:' + esc(m.id) + '">${T("Retirer le NIP (super-administrateur)")}</button>' : '')
+          + '</div>'
+          + '<h3>${T("Dossier de protection")}</h3>'
+          + '<div class="ed-note">${T("Le dossier prépare l’enregistrement d’un dessin industriel (l’apparence d’un vêtement ne se brevète pas) : vues, description, historique daté, empreinte numérique et questions pour votre juriste. Ce n’est pas un avis juridique.")}</div>'
+          + '<div class="at-gestes"><button type="button" data-protection="' + esc(m.id) + '">' + ICA.dossier + ' ${T("Dossier de protection (PDF)")}</button></div>';
+      } else {
+        p += '<dl class="at-fiche-dl">'
+          + '<dt>${T("Type")}</dt><dd>' + esc(LBASE[m.base] || szTd(m.base || '')) + '</dd>'
+          + '<dt>${T("Référence")}</dt><dd>' + esc(m.ref || '—') + '</dd>'
+          + '<dt>${T("Version")}</dt><dd>v' + (m.version || 1) + '</dd>'
+          + '<dt>${T("Créé le")}</dt><dd>' + esc(jour(m.createdAt)) + '</dd>'
+          + '<dt>${T("Modifié le")}</dt><dd>' + esc(jour(m.updatedAt)) + '</dd>'
+          + '<dt>${T("Tissu estimé (laize 140 cm)")}</dt><dd>' + (m.tissu ? String(m.tissu.metres).replace('.', '${SEP_DEC()}') + ' m' : '—') + '</dd></dl>'
+          + '<h3>${T("Pièces du patron")}</h3><div class="at-pieces">'
+          + (m.pieces || []).map(function(pc){
+              return '<div><span>' + esc(nomPiece(pc)) + ' · ×' + (pc.qte || 1) + (pc.aupli ? ' ${T("au pli")}' : '') + '</span><span class="cx-gris">' + (pc.pinces && pc.pinces.length ? '${T("pince")}' : '') + '</span></div>';
+            }).join('') + '</div>'
+          + '<h3>${T("Tailles gradées")}</h3><div class="at-tailles">'
+          + (m.tailles || []).map(function(tl){ return '<span class="at-puce' + (tl === m.tailleBase ? ' base' : '') + '">' + esc(tl) + (tl === m.tailleBase ? ' · ${T("base")}' : '') + '</span>'; }).join('')
+          + '</div>';
+      }
+      p += '</div>';
     }
     p += '</div>';
     corps.innerHTML = h + '<div class="cx-deux">' + t + p + '</div>';
+    miniPoser(m);
   }
+
+  /* Les pictogrammes de la fiche : même trait que ceux du socle (24 px, 1,75). */
+  var SVGA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+  var ICA = {
+    cube: SVGA + '<path d="M12 2.8l8 4.5v9.4l-8 4.5-8-4.5V7.3z"/><path d="M4 7.3l8 4.5 8-4.5M12 11.8v9.4"/></svg>',
+    crayon: SVGA + '<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>',
+    motif: SVGA + '<rect x="3.5" y="3.5" width="17" height="17" rx="3"/><circle cx="8.5" cy="8.5" r="1.6"/><circle cx="15.5" cy="8.5" r="1.6"/><circle cx="8.5" cy="15.5" r="1.6"/><circle cx="15.5" cy="15.5" r="1.6"/></svg>',
+    imprimer: SVGA + '<path d="M7 9V3.5h10V9"/><rect x="3.5" y="9" width="17" height="8" rx="2"/><path d="M7 14h10v6.5H7z"/></svg>',
+    dossier: SVGA + '<path d="M12 3l7.5 3v5.5c0 4.4-3.1 8.1-7.5 9.5-4.4-1.4-7.5-5.1-7.5-9.5V6z"/><path d="M9 12l2 2 4-4"/></svg>',
+    patron: SVGA + '<circle cx="6" cy="6.5" r="2.5"/><circle cx="6" cy="17.5" r="2.5"/><path d="M8 8l12 9M8 16l12-9"/></svg>',
+    plus: SVGA + '<circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></svg>'
+  };
+
+  /* ══ L APERÇU QUI TOURNE (2026-10-18) ══════════════════════════════════════
+     Sa demande : « un petit aperçu 3D qui tourne quand on clique sur le modèle ». C est le moteur de la vue 3D,
+     dans son PROPRE contexte : V3 et GLV sont échangés le temps de chaque image, puis rendus — la vue 3D et ses
+     vignettes n en voient rien. Un seul canevas, déplacé d un dessin à l autre : un contexte WebGL par dessin
+     finirait par faire perdre les plus anciens (la vue 3D comprise). Sans WebGL, la vignette reste, immobile.
+     Glisser fait tourner à la main ; un double-clic ouvre la vraie vue 3D. */
+  var MINI = { cv: null, v3: null, glv: null, id: '', cle: '', n: 0, raf: 0, glisse: null, repos: 0, cadre: false };
+  var MINI_CALME = (function(){ try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } })();
+  function avecMini(fn){
+    var sv = V3, sg = GLV; V3 = MINI.v3; GLV = MINI.glv;
+    try { return fn(); } finally { MINI.glv = GLV; V3 = sv; GLV = sg; }
+  }
+  function miniPoser(m){
+    var hote = document.getElementById('at-mini');
+    if (!hote || !m) { MINI.n++; return; }
+    if (!MINI.cv) {
+      MINI.cv = document.createElement('canvas'); MINI.cv.className = 'at-mini-cv';
+      MINI.cv.addEventListener('pointerdown', function(ev){ if (!MINI.v3) return; MINI.glisse = { x: ev.clientX, yaw: MINI.v3.yaw }; try { MINI.cv.setPointerCapture(ev.pointerId); } catch (e) {} });
+      MINI.cv.addEventListener('pointermove', function(ev){ if (!MINI.glisse || !MINI.v3) return; MINI.v3.yaw = MINI.glisse.yaw + (ev.clientX - MINI.glisse.x) * 0.012; miniDemander(); });
+      var lacher = function(){ if (MINI.glisse) { MINI.glisse = null; MINI.repos = Date.now() + 1800; miniDemander(); } };
+      MINI.cv.addEventListener('pointerup', lacher); MINI.cv.addEventListener('pointercancel', lacher);
+      MINI.cv.addEventListener('dblclick', function(ev){ ev.stopPropagation(); if (MINI.id) ouvrir3d(MINI.id, 'biblio'); });
+    }
+    hote.appendChild(MINI.cv);
+    var cle = m.id + '|' + (m.version || 0) + '|' + (m.updatedAt || '');
+    if (MINI.cle === cle) { if (MINI.v3 && MINI.cadre) hote.classList.add('pret'); miniDemander(); return; }
+    MINI.cle = cle; MINI.id = m.id; MINI.v3 = null; MINI.cadre = false;
+    var n = ++MINI.n;
+    if (!webglDispo()) return;
+    appeler('atelier:apercu3d', [{ id: m.id, taille: m.tailleBase || 'M', stature: 165 }]).then(function(r){
+      if (n !== MINI.n || !r || !r.ok) return;
+      MINI.v3 = { id: m.id, m: m, r: r, taille: m.tailleBase || 'M', yaw: 0.45, pitch: 0.1, zoom: 1, px: 0, py: 0, carte: false, fil: false, mannequin: false, vueNom: '',
+        couleur: m.photo3d ? m.photo3d.couleur : COUL3[0][0], photo: !!m.photo3d,
+        design: { decoupes: ((m.design3d && m.design3d.decoupes) || []).slice(), elements: ((m.design3d && m.design3d.elements) || []).slice() } };
+      var ok = avecMini(function(){ if (!plaque3d()) return false; imagesMotif3d(); return true; });
+      if (!ok) { MINI.v3 = null; return; }
+      miniDemander();
+    });
+  }
+  function miniDemander(){
+    if (MINI.raf) return;
+    MINI.raf = requestAnimationFrame(function(){
+      MINI.raf = 0;
+      var cv = MINI.cv;
+      if (VUE !== 'biblio' || !MINI.v3 || !cv || !cv.isConnected || document.hidden) return;
+      if (MINI.glv && MINI.glv.gl && MINI.glv.gl.isContextLost()) MINI.glv = null;
+      if (!cv.clientWidth || !cv.clientHeight) return;
+      var tourne = !MINI_CALME && !MINI.glisse && Date.now() > MINI.repos;
+      if (tourne) MINI.v3.yaw += 0.014;
+      var peint = avecMini(function(){
+        if (!peindreGL(cv)) return false;
+        // le cadrage : le vêtement entier, à 80 % de la hauteur (comme les vignettes), une fois ses mesures connues
+        if (!MINI.cadre && GLV && GLV.h) {
+          var W = cv.clientWidth, H = cv.clientHeight;
+          V3.zoom = Math.min(H * 0.8 * Math.max(GLV.minH || 120, GLV.h) / (GLV.h * W * 0.85), 1.6);
+          MINI.cadre = true; peindreGL(cv);
+        }
+        return true;
+      });
+      if (!peint) { MINI.v3 = null; return; }
+      var hote = document.getElementById('at-mini'); if (hote && MINI.cadre) hote.classList.add('pret');
+      if (tourne || MINI.glisse || Date.now() <= MINI.repos) miniDemander();
+    });
+  }
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden) miniDemander(); });
 
   /* ══ LE MODÈLE (le moteur) ═════════════════════════════════════════════ */
   function copie(o){ return JSON.parse(JSON.stringify(o || {})); }
@@ -3760,9 +3930,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   /* Les toiles (tissu + motif + découpes) et les objets posés. Le motif arrive en second : il se charge. */
-  var glToileN = 0;
   function toilesGL(){
-    var n = ++glToileN, gl = GLV.gl;
+    var n = GLV.toileN = (GLV.toileN || 0) + 1, gl = GLV.gl, ctxV3 = V3, ctxGLV = GLV;
     var envoyer = function(pc){
       if (!GLV) return;
       if (!pc.tex) pc.tex = gl.createTexture();
@@ -3777,7 +3946,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var pc = GLV.toiles[pid]; peindreToile(pc, pid, null); envoyer(pc);
       var svg = svgMotifPiece(pc, pid, pc.toile.width, pc.toile.height); if (!svg) return;
       var im = new Image();
-      im.onload = function(){ if (n !== glToileN || !GLV || GLV.toiles[pid] !== pc) return; try { peindreToile(pc, pid, im); envoyer(pc); } catch (e) { peindreToile(pc, pid, null); envoyer(pc); } demander3d(); };
+      // ⚠ l image arrive plus tard : on repeint dans le contexte qui l a demandée (la vue 3D OU l aperçu de la fiche)
+      im.onload = function(){
+        var sv = V3, sg = GLV; V3 = ctxV3; GLV = ctxGLV;
+        try { if (n !== ctxGLV.toileN || ctxGLV.toiles[pid] !== pc) return; try { peindreToile(pc, pid, im); envoyer(pc); } catch (e) { peindreToile(pc, pid, null); envoyer(pc); } }
+        finally { V3 = sv; GLV = sg; }
+        if (ctxV3 && ctxV3 === MINI.v3) miniDemander(); else demander3d();
+      };
       im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
     });
     instancesGL();
@@ -3788,7 +3963,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     (mo.calques || []).forEach(function(c){
       if (c.type !== 'image' || !c.url || MOIMG[c.url]) return;
       MOIMG[c.url] = 'chargement';
-      Promise.resolve(P.imageLocale(c.url)).then(function(d){ MOIMG[c.url] = d || ''; if (GLV && VUE === '3d') { GLV.cle = ''; demander3d(); } });
+      Promise.resolve(P.imageLocale(c.url)).then(function(d){ MOIMG[c.url] = d || ''; if (GLV && VUE === '3d') { GLV.cle = ''; demander3d(); }
+        if (MINI.glv) { MINI.glv.cle = ''; miniDemander(); } });
     });
   }
   function instancesGL(){
@@ -4927,6 +5103,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (VUE === 'planche') { if (PL) clicPL(ev); return; }
     var b;
     if ((b = t.closest('[data-planche]'))) { ouvrirPlanche(b.getAttribute('data-planche'), 'biblio'); return; }
+    if ((b = t.closest('[data-bonglet]'))) { ONGLETB = b.getAttribute('data-bonglet'); try { localStorage.setItem('sz-atelier-onglet', ONGLETB); } catch (e) {} dessiner(); return; }
+    if ((b = t.closest('[data-plus]'))) {
+      var pid = b.getAttribute('data-plus'), rc = b.getBoundingClientRect(), pm = (D.modeles || []).filter(function(x){ return x.id === pid; })[0];
+      var l = window.szCtxEntrees(b) || [];
+      // le menu « … » : les gestes qui ne sont pas déjà affichés sur la fiche
+      l = l.filter(function(x){ return x.trait || x.dgr || x.lib === '${T("Dupliquer")}'; });
+      if (pm && D.peutModifier) l.unshift({ lib: pm.verrouille ? '${T("Changer le NIP")}' : '${T("Protéger par NIP")}', fn: function(){ protegerModele(pid, pm.verrouille ? 'changer' : 'poser'); } });
+      while (l.length && l[0].trait) l.shift();
+      if (l.length) szCtxMenu(rc.right - 210, rc.bottom + 4, pm ? pm.nom : '', l);
+      return;
+    }
     if ((b = t.closest('[data-vueb]'))) { VUEB = b.getAttribute('data-vueb'); try { localStorage.setItem('sz-atelier-vue', VUEB); } catch (e) {} dessiner(); return; }
     if ((b = t.closest('[data-tri]'))) { var tk = b.getAttribute('data-tri'); TRI = { cle: tk, sens: TRI.cle === tk ? -TRI.sens : (tk === 'nom' || tk === 'ref' || tk === 'type' ? 1 : -1) }; dessiner(); return; }
     if ((b = t.closest('[data-nip]'))) { var gn = b.getAttribute('data-nip').split(':'); protegerModele(gn.slice(1).join(':'), gn[0]); return; }

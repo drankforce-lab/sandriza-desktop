@@ -42,6 +42,10 @@ module.exports = {
      fonce sur presque noir, illisible (vu a la capture). Encre claire dans les deux
      modes, donc ecrite en dur. */
   "#f1ece4": 1,           // 1.05  1 fenetre : studio.js (.cmp .cet — sur pastille sombre)
+  /* ⚠ LES ETIQUETTES « 3D » ET « GLISSER POUR TOURNER » DE L APERCU DE LA FICHE (atelier.js, 2026-10-18) : posees
+     sur une PASTILLE SOMBRE fixe (rgba(28,27,24,.86)) par-dessus la scene creme du vetement, dans les deux modes.
+     Le banc les mesure contre le fond de jour, qu elles ne touchent jamais (contraste reel au rendu : > 4.5). */
+  "#f6f1e8": 2,           // 1.00  1 fenetre : atelier.js (.at-scene-3d, .at-scene-aide — sur pastille sombre)
   /* ⚠ LA CARTE-CADEAU EN APERCU (2026-10-04) : un OBJET dessine, sur son propre
      degrade marine fixe, comme la carte que le client recoit — il ne change pas
      avec le mode. Le banc mesure ces encres contre le fond de jour, qu elles ne
