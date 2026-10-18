@@ -799,7 +799,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var VOIES = [
     { cle: 'humain',  t: '${T("Mannequin virtuel")}', d: '${T("Porté par un modèle, décor intégré")}' },
     // (2026-10-17, sa demande : « renomme mannequin fantôme par vêtement sans mannequin, sinon ça porte à confusion »)
-    { cle: 'fantome', t: '${T("Vêtement sans mannequin")}', d: '${T("Mannequin retiré, vêtement fidèle sur fond uni")}' },
+    { cle: 'fantome', t: '${T("Vêtement sans mannequin")}', d: '${T("Par Fal.ai : mannequin retiré, vêtement intact sur fond uni")}' },
     { cle: 'plat',    t: '${T("Produit à plat")}',    d: '${T("Détourage + décor + ombre")}' }
   ];
   /* Les 16 modeles REELS de Photoroom (virtualModel.model.preset.name, verifies
@@ -3488,7 +3488,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function saisie(apercu){
     var s = { geste: VOIE, preset: PRESET, apercu: apercu };
-    if (!apercu && PRIX_ANNONCE != null) s.prixAnnonce = PRIX_ANNONCE;
+    if ((!apercu || VOIE === 'fantome') && PRIX_ANNONCE != null) s.prixAnnonce = PRIX_ANNONCE;
     if (PHOTO_ID) { s.photoId = PHOTO_ID; } else { s.image = PHOTO; }
     if (VOIE === 'humain') {
       var sel = document.getElementById('modele-sel');
@@ -3529,7 +3529,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     occuper(true);
     var bT = apercu ? bApercu : bFinal;
     boutonAttente(bT, apercu ? '${T("Aperçu en cours…")}' : '${T("Génération en cours…")}');
-    dire(apercu ? '${T("Aperçu gratuit en cours…")}' : '${T("Génération en pleine qualité…")}');
+    dire(VOIE === 'fantome' ? '${T("Retrait du mannequin par Fal.ai…")}' : apercu ? '${T("Aperçu gratuit en cours…")}' : '${T("Génération en pleine qualité…")}');
     appeler('studio:traiter', [saisie(apercu)]).then(function(r){
       boutonAttente(bT, '');
       occuper(false);
@@ -3633,7 +3633,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         occuper(false);
         if (!r || !r.ok) { PRIX_ANNONCE = null; dire('${T("Coût non estimé — le rendu part quand même.")}', 'att'); suite(); return; }
         var n = r.appelsMax || 1;
-        PRIX_ANNONCE = apercu ? null : r.coutMax;
+        // (2026-10-17) le vêtement sans mannequin passe par Fal.ai (voie « fal ») : l aperçu y est un VRAI traitement
+        // (sans filigrane, ~0,01 $) — son prix se dit et se vérifie comme le rendu final
+        var parFal = r.voie === 'fal';
+        PRIX_ANNONCE = (apercu && !parFal) ? null : r.coutMax;
+        if (parFal) { dire('${T("Vêtement sans mannequin par Fal.ai ≈ {0} — vérifié avant l’envoi.")}'.split('{0}').join(szArgentSymbole(szArgentNombre(r.coutMax, 3)))); suite(); return; }
         // Un seul appel par image : rien a confirmer, on ne met pas un voile
         // entre lui et le bouton pour le cas ordinaire — mais le PRIX se dit (c est lui que le relais vérifie)
         if (n <= 1) { dire(apercu ? '' : '${T("1 appel facturé ≈ {0} — vérifié avant l’envoi.")}'.split('{0}').join(szArgentSymbole(argent(r.coutMax)))); suite(); return; }

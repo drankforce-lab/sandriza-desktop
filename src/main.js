@@ -3560,6 +3560,8 @@ const LIMITES_PONT = {
      un par un. 'studio:filigraner' porte une photo de studio dans les deux sens —
      le même ordre de grandeur que l'enregistrement. */
   'studio:logos': 60000, 'studio:filigraner': 90000,
+  // les soldes : trois services externes interrogés (Twilio, Photoroom, Fal.ai) — 8 s ne suffisaient pas, la barre restait vide
+  'tableau:soldes': 40000,
   /* Les recettes ne portent que du texte et des nombres — aucune image. La
      lecture sort du cache local ; les deux ecritures attendent le verdict de la
      base avant de repondre, d ou un delai d ecriture de configuration ordinaire. */

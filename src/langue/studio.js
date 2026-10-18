@@ -66,7 +66,7 @@ module.exports = {
   'Mannequin virtuel': 'Virtual model',
   'Porté par un modèle, décor intégré': 'Worn by a model, scene included',
   'Vêtement sans mannequin': 'Garment without mannequin',
-  'Mannequin retiré, vêtement fidèle sur fond uni': 'Mannequin removed, true-to-life garment on a plain background',
+  'Par Fal.ai : mannequin retiré, vêtement intact sur fond uni': 'By Fal.ai: mannequin removed, garment untouched on a plain background',
   'Produit à plat': 'Flat lay',
   'Détourage + décor + ombre': 'Cut-out + scene + shadow',
 
@@ -802,4 +802,6 @@ module.exports = {
   'Affiché : {0} — prix réel : {1} ({2} appel(s)). Rien n’a été lancé ni facturé.': 'Shown: {0} — actual price: {1} ({2} call(s)). Nothing was started or billed.',
   'Le prix a changé : à confirmer.': 'The price changed: please confirm.',
   'Annulé : rien n’a été facturé.': 'Cancelled: nothing was billed.',
+  'Vêtement sans mannequin par Fal.ai ≈ {0} — vérifié avant l’envoi.': 'Garment without mannequin by Fal.ai ≈ {0} — checked before sending.',
+  'Retrait du mannequin par Fal.ai…': 'Removing the mannequin with Fal.ai…',
 };

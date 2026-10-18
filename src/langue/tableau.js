@@ -287,4 +287,6 @@ module.exports = {
   'Fal.ai demande une clé d’administration pour donner son solde. En attendant : ': 'Fal.ai requires an admin key to report its balance. Meanwhile: ',
   'Solde Photoroom indisponible :': 'Photoroom balance unavailable:',
   'Crédits restants du compte Photoroom': 'Remaining Photoroom account credits',
+  'Soldes…': 'Balances…',
+  'Soldes indisponibles': 'Balances unavailable',
 };

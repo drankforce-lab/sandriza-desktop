@@ -70,7 +70,7 @@ button.mini{padding:.12rem .45rem;font-size:.74rem}
 .solde{display:inline-flex;align-items:center;gap:.3rem;font-size:.74rem;padding:.18rem .55rem;border-radius:99px;border:1px solid var(--v10);color:var(--tx2);white-space:nowrap}
 .solde b{color:var(--tx);font-weight:600}
 .solde.bas{border-color:var(--tx-err);color:var(--tx-err)}
-.solde.muet{opacity:.6}
+.solde.muet{border-style:dashed}   /* (pas d opacité : le texte gris passait sous le seuil de contraste) */
 .direct{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:700;color:var(--tx-ok);
   background:rgba(34,197,94,.12);padding:.16rem .6rem;border-radius:99px;white-space:nowrap}
 .direct i{width:7px;height:7px;border-radius:99px;background:currentColor;animation:tb-pouls 1.8s ease-out infinite}
@@ -374,13 +374,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var SOLDES = null, SOLDES_TIMER = null;
   function chargerSoldes(){
     appeler('tableau:soldes', []).then(function(r){
-      if (!r || !r.ok) return;
-      SOLDES = r;
+      // ⚠ un échec SE VOIT (2026-10-17, sa capture : « où sont mes soldes ? » — un échec silencieux laissait la barre vide)
+      SOLDES = (r && r.ok) ? r : { echec: expliquer(r) };
       var b = document.getElementById('tb-soldes'); if (b) b.outerHTML = soldesHtml();
     });
   }
   function soldesHtml(){
-    if (!SOLDES) return '<span id="tb-soldes" class="soldes"></span>';
+    if (!SOLDES) return '<span id="tb-soldes" class="soldes"><span class="solde muet">${T("Soldes…")}</span></span>';
+    if (SOLDES.echec) return '<span id="tb-soldes" class="soldes"><span class="solde muet" title="' + esc(SOLDES.echec) + '">${T("Soldes indisponibles")}</span></span>';
     var puce = function(nom, txt, bas, titre){ return '<span class="solde' + (bas ? ' bas' : '') + (txt ? '' : ' muet') + '" title="' + esc(titre) + '"><b>' + nom + '</b> ' + esc(txt || '—') + '</span>'; };
     var t = SOLDES.twilio || {}, f = SOLDES.fal || {}, p = SOLDES.photoroom || {};
     var tw = t.erreur ? '' : szArgentSymbole(szArgentNombre(t.solde, 2)) + (t.devise && t.devise !== 'USD' ? ' ' + t.devise : ' US');
