@@ -128,7 +128,6 @@ const MENU_APP_EN = {
   'Facturation': 'Billing',
   'Conciliation bancaire': 'Bank reconciliation',
   'Liens d’installation': 'Install links',
-  'Traitements d’image (Fal.ai)': 'Image processing (Fal.ai)',
   'Fenêtre séparée (autre écran)': 'Separate window (other screen)',
   'Fidélisation': 'Loyalty',
 

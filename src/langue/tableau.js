@@ -291,4 +291,5 @@ module.exports = {
   'Soldes indisponibles': 'Balances unavailable',
   'Nouveau logo posé sur la boutique, les factures et les courriels.': 'New logo applied to the shop, invoices and emails.',
   'lu à {0}': 'read at {0}',
+  'voir le détail': 'see the details',
 };

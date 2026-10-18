@@ -69,6 +69,9 @@ button.mini{padding:.12rem .45rem;font-size:.74rem}
 .soldes{display:inline-flex;gap:.35rem;flex-wrap:wrap}
 .solde{display:inline-flex;align-items:center;gap:.3rem;font-size:.74rem;padding:.18rem .55rem;border-radius:99px;border:1px solid var(--v10);color:var(--tx2);white-space:nowrap}
 .solde b{color:var(--tx);font-weight:600}
+button.solde.lien{font:inherit;font-size:.74rem;background:none;cursor:pointer;transition:border-color .13s ease,background-color .13s ease}
+button.solde.lien:hover{border-color:var(--or);background:var(--v05)}
+button.solde.lien:focus-visible{outline:2px solid var(--or);outline-offset:2px}
 .solde.bas{border-color:var(--tx-err);color:var(--tx-err)}
 .solde.muet{border-style:dashed}   /* (pas d opacité : le texte gris passait sous le seuil de contraste) */
 .direct{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:700;color:var(--tx-ok);
@@ -409,7 +412,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!SOLDES) return '<span id="tb-soldes" class="soldes"><span class="solde muet">${T("Soldes…")}</span></span>';
     if (SOLDES.echec) return '<span id="tb-soldes" class="soldes"><span class="solde muet" title="' + esc(SOLDES.echec) + '">${T("Soldes indisponibles")}</span></span>';
     var vu = SOLDES.lu ? ' — ' + '${T("lu à {0}")}'.split('{0}').join(new Date(SOLDES.lu).toLocaleTimeString('${LIEU()}', { hour: '2-digit', minute: '2-digit' })) : '';
-    var puce = function(nom, txt, bas, titre){ return '<span class="solde' + (bas ? ' bas' : '') + (txt ? '' : ' muet') + '" title="' + esc(titre) + '"><b>' + nom + '</b> ' + esc(txt || '—') + '</span>'; };
+    /* (2026-10-18, sa demande) une pastille qui a un DÉTAIL est un bouton : Fal.ai et Photoroom ouvrent les traitements
+       d'image (l'entrée de menu « Traitements d'image (Fal.ai) » est retirée) */
+    var puce = function(nom, txt, bas, titre, ouvre){
+      var cl = 'solde' + (bas ? ' bas' : '') + (txt ? '' : ' muet');
+      return ouvre ? '<button type="button" class="' + cl + ' lien" data-ouvre="' + ouvre + '" title="' + esc(titre + ' — ' + '${T("voir le détail")}') + '"><b>' + nom + '</b> ' + esc(txt || '—') + '</button>'
+        : '<span class="' + cl + '" title="' + esc(titre) + '"><b>' + nom + '</b> ' + esc(txt || '—') + '</span>'; };
     var t = SOLDES.twilio || {}, f = SOLDES.fal || {}, p = SOLDES.photoroom || {};
     var tw = t.erreur ? '' : szArgentSymbole(szArgentNombre(t.solde, 2)) + (t.devise && t.devise !== 'USD' ? ' ' + t.devise : ' US');
     // le vrai solde (api.fal.ai) quand Fal.ai le donne ; sinon l estimation, précédée de « ≈ »
@@ -421,9 +429,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           : !f.estime ? '${T("Solde du compte Fal.ai, lu chez Fal.ai")}'
           : (f.motifReel === 'cle_admin_requise' ? '${T("Pour le vrai solde : une clé de lecture du solde dans Configuration › Clés (Fal.ai). En attendant : ")}' : '')
             + '${T("Estimation : solde saisi le {0} ({1}) moins la consommation mesurée depuis ({2}).")}'
-              .split('{0}').join(String(f.date || '').slice(0, 10)).split('{1}').join(szArgentSymbole(szArgentNombre(f.saisi, 2))).split('{2}').join(szArgentSymbole(szArgentNombre(f.conso, 2))))
+              .split('{0}').join(String(f.date || '').slice(0, 10)).split('{1}').join(szArgentSymbole(szArgentNombre(f.saisi, 2))).split('{2}').join(szArgentSymbole(szArgentNombre(f.conso, 2))), 'fal-suivi')
       + puce('Photoroom', ph, !p.erreur && p.disponibles != null && p.disponibles < 20, p.erreur ? '${T("Solde Photoroom indisponible :")} ' + p.erreur
-          : '${T("Crédits restants du compte Photoroom")}' + (p.plan ? ' (' + p.plan + ')' : ''))
+          : '${T("Crédits restants du compte Photoroom")}' + (p.plan ? ' (' + p.plan + ')' : ''), 'fal-suivi')
       + '</span>';
   }
   function barre(){
