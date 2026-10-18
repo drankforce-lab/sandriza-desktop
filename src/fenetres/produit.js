@@ -215,6 +215,11 @@ html.jour .mv-zone{background:#e9e6df}
   border-radius:50%;font-size:.78rem;line-height:1;font-weight:700;
   background:rgba(200,40,40,.94);border:1px solid var(--v28);color:var(--tx-blanc)}
 .vue .x:hover,.vign .x:hover{background:#e04141;border-color:var(--v50)}
+/* La pastille « Dos » (mode photos simples, 2026-10-18) : désigne la photo du dos de l’aperçu 3D. */
+.vue .dos{position:absolute;top:3px;left:3px;height:20px;padding:0 .5rem;border-radius:99px;
+  font-size:.6875rem;font-weight:700;line-height:1;background:var(--f-carte);border:1px solid var(--v28);color:var(--tx2)}
+.vue .dos.on{background:var(--or);border-color:var(--or);color:#1a1208}
+#p-3d-vues{font-size:.75rem;color:var(--tx2)}
 /* ⚠ CINQ CADRES, UNE SEULE LIGNE, A TOUTE LARGEUR DE FENETRE. Une largeur fixe
    ne peut pas tenir les deux promesses a la fois : assez grande sur une fenetre
    large, elle passe a deux lignes des qu on la reduit — or le nombre de photos
@@ -385,6 +390,11 @@ function pageProduit(id) {
   MOTIFS.fal = '${T("Fal.ai a refusé la demande.")}';
   MOTIFS.limite3d = '${T("Trois aperçus 3D déjà générés pour cet article dans les dernières 24 heures : réessayez demain.")}';
   MOTIFS.photo_format = '${T("La photo principale n’est pas dans un format accepté.")}';
+  // L'aperçu 3D exige le devant ET le dos (2026-10-18) : refusé au pont et au relais, motifs nommés.
+  MOTIFS.photo_absente = '${T("Choisissez d’abord la photo principale.")}';
+  MOTIFS.photo_dos_absente = '${T("Ajoutez une photo du dos pour générer l’aperçu 3D.")}';
+  MOTIFS.photo_dos_format = '${T("La photo du dos n’est pas dans un format accepté.")}';
+  MOTIFS.photo_dos_identique = '${T("La photo du dos est la même que celle du devant : choisissez une vraie photo du dos.")}';
   MOTIFS.modele3d_trop_lourd = '${T("L’aperçu 3D est trop lourd (plus de 5,5 Mo).")}';
   MOTIFS.modele3d_format = '${T("L’aperçu 3D n’est pas dans un format accepté.")}';
   MOTIFS.mannequin_incomplet = '${T("Mannequin : le prénom, la taille (120 à 220 cm) et la taille portée vont ensemble.")}';
@@ -405,6 +415,11 @@ function pageProduit(id) {
   // FAISAIT PERDRE ses photos par couleur. Un defaut qui ne se voit pas a
   // l enregistrement — il se decouvre plus tard, sur la boutique.
   var VUES = {};      // { 'vue-2': dataUrl | url, … }
+  // LA PHOTO DU DOS EN MODE PHOTOS SIMPLES (2026-10-18) : l'aperçu 3D exige un devant (la principale) ET un
+  // dos. En mode angles, le dos est la vue « Derrière » ; en mode simple, les photos n'ont pas de rôle — la
+  // pastille « Dos » en marque une, retenue ICI par sa chaîne (elle survit au glisser-déposer). Enregistrée
+  // dans la fiche sous photoDos (le pont ne la garde que si elle est une des photos supplémentaires).
+  var DOS_SRC = '';
   var PARCOUL = {};   // { 'Noir': { principale: dataUrl | url }, … }
   // ⚠ LES VUES SUIVENT LA CATEGORIE, comme dans l editeur du site. Une categorie
   // en mode « standard » demande une serie de vues sans couleur ; les autres
@@ -627,9 +642,11 @@ function pageProduit(id) {
       + '<span class="aide" id="p-360-etat"></span>'
       + '<button type="button" id="p-360-retirer" style="display:none">${T("Tout retirer")}</button></div>'
       + '<div id="p-360-bande"></div>'
-      /* L'APERÇU 3D (7.16.0) : Hunyuan3D par Fal.ai, ~0,68 $ US, ~2 minutes, confirmé en deux clics. */
+      /* L'APERÇU 3D (7.16.0) : Hunyuan3D par Fal.ai, confirmé en deux clics. Depuis le 2026-10-18 : le devant
+         (photo principale) ET le dos, sinon le bouton est désactivé — ≈ 0,83 $ US (0,825 $, FAL_PRIX). */
       + '<div class="pf-med-l" id="p-3d-l">'
-      + '<button type="button" id="p-3d-gen"><span class="ic">🧊</span> ${T("Générer l’aperçu 3D (≈ 0,68 $ US)")}</button>'
+      + '<button type="button" id="p-3d-gen"><span class="ic">🧊</span> ${T("Générer l’aperçu 3D")}</button>'
+      + '<span id="p-3d-vues"></span>'
       + '<img id="p-3d-vign" alt="" style="display:none;width:52px;height:52px;object-fit:contain;border-radius:7px;background:var(--v05)">'
       + '<span class="aide" id="p-3d-etat"></span>'
       + '<button type="button" id="p-3d-retirer" style="display:none">${T("Retirer l’aperçu 3D")}</button></div>'
@@ -992,6 +1009,13 @@ function pageProduit(id) {
       }
       var x = ev.target.closest('[data-vuex]');
       if (x) { delete VUES[x.getAttribute('data-vuex')]; dessinerVues(); return; }
+      var xd = ev.target.closest('[data-vuedos]');
+      if (xd) {
+        var sd = VUES[xd.getAttribute('data-vuedos')] || '';
+        DOS_SRC = (sd && sd !== DOS_SRC) ? sd : '';
+        dessinerVues();
+        return;
+      }
       var p = ev.target.closest('[data-coul]');
       if (p) {
         var n = p.getAttribute('data-coul');
@@ -1690,9 +1714,12 @@ function pageProduit(id) {
           + (src ? ' title="${T("Glisser pour réordonner, ou déposer sur la principale")}"' : '') + '>'
           + (src ? '<img src="' + esc(src) + '" alt="">' : 'ajouter') + '</div>'
           + (src ? '<button type="button" class="x" data-vuex="' + esc(cle) + '" title="${T("Retirer")}">×</button>' : '')
+          + ((src && cle.indexOf('libre') === 0) ? '<button type="button" class="dos' + (src === DOS_SRC ? ' on' : '')
+            + '" data-vuedos="' + esc(cle) + '" title="${T("Photo du dos — sert à l’aperçu 3D")}">${T("Dos")}</button>' : '')
           + '<div class="lgd">' + esc(nomVue(cle)) + '</div></div>';
       }).join('');
     }
+    dessiner3d();   // le bouton de l'aperçu 3D dépend de la photo du dos
     var p = document.getElementById('p-parcoul');
     if (!p) return;
     // ⚠ ON MASQUE LA CARTE ENTIERE, on n y met pas un message d excuse. Une carte
@@ -1855,6 +1882,7 @@ function pageProduit(id) {
   }
 
   function montrerImage(src){
+    dessiner3d();   // le devant de l'aperçu 3D est la photo principale
     var v = document.getElementById('p-vign'); if (!v) return;
     v.classList.toggle('pleine', !!src);
     v.setAttribute('draggable', src ? 'true' : 'false');
@@ -1994,7 +2022,32 @@ function pageProduit(id) {
      l'identifiant du produit, ou « brouillon:… » pendant une création (rattaché au vrai produit à
      l'enregistrement). COUTS : ce que le journal dit avoir dépensé pour cet article. */
   var MOD3D = '', CLE_COUTS = '', COUTS = null;
-  var G3D = { conf: false, forcer: false, enCours: false, vignette: '', poids: 0, avert: null };
+  var G3D = { conf: false, forcer: false, enCours: false, vignette: '', poids: 0, avert: null, debutCalcul: 0 };
+  /* LE PRIX ANNONCÉ (2026-10-18) : 55 unités Fal.ai à 0,015 $ = 0,825 $ US (45 pour le devant, 10 pour le dos —
+     « multi-view adds $0.15 »). Il part avec la demande (prixAnnonce) : si le relais a un autre prix, rien ne part
+     et la fenêtre affiche le vrai montant. */
+  var PRIX_3D = 0.825;
+  function prixUS(x){ return '${T("≈ {n} $ US")}'.replace('{n}', szNombre(Math.round(x * 100) / 100, 2)); }
+  function prix3d(){ return prixUS(PRIX_3D); }
+  // La photo du dos : la vue « Derrière » (mode angles) ou la photo marquée « Dos » (mode simple).
+  function photoDos(){
+    if (!modeStandard()) return VUES.derriere || '';
+    return (DOS_SRC && libresOrdonnees().indexOf(DOS_SRC) >= 0) ? DOS_SRC : '';
+  }
+  // Le brouillon retient la CASE de la photo du dos, pas l'image une seconde fois.
+  function cleDos(){
+    if (!DOS_SRC) return '';
+    var k = Object.keys(VUES).filter(function(x){ return VUES[x] === DOS_SRC; })[0];
+    return k || '';
+  }
+  function raison3d(){
+    if (!IMAGE) return '${T("Choisissez d’abord la photo principale.")}';
+    var d = photoDos();
+    if (!d) return '${T("Ajoutez une photo du dos pour générer l’aperçu 3D.")}' + ' '
+      + (modeStandard() ? '${T("Marquez-la « Dos » parmi les photos.")}' : '${T("Déposez-la dans la case « Derrière ».")}');
+    if (d === IMAGE) return '${T("La photo du dos est la même que celle du devant : choisissez une vraie photo du dos.")}';
+    return '';
+  }
   function cleCouts(){
     if (ID) return String(ID);
     if (!CLE_COUTS) CLE_COUTS = 'brouillon:' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -2009,45 +2062,61 @@ function pageProduit(id) {
   function dessiner3d(){
     var b = document.getElementById('p-3d-gen'), e = document.getElementById('p-3d-etat');
     var vg = document.getElementById('p-3d-vign'), rt = document.getElementById('p-3d-retirer');
-    if (!b) return;
-    b.disabled = G3D.enCours || !IMAGE;
+    if (!b || !G3D) return;
+    var raison = raison3d(), pv = document.getElementById('p-3d-vues');
+    b.disabled = G3D.enCours || !!raison;
+    b.title = raison;
     b.innerHTML = G3D.enCours ? '<span class="ic">⏳</span> ${T("Génération en cours…")}'
-      : G3D.forcer ? '<span class="ic">⚠</span> ${T("Regénérer quand même (≈ 0,68 $ US)")}'
-      : (MOD3D ? '<span class="ic">🧊</span> ${T("Regénérer l’aperçu 3D (≈ 0,68 $ US)")}' : '<span class="ic">🧊</span> ${T("Générer l’aperçu 3D (≈ 0,68 $ US)")}');
+      : (G3D.forcer ? '<span class="ic">⚠</span> ${T("Regénérer quand même")}'
+        : (MOD3D ? '<span class="ic">🧊</span> ${T("Regénérer l’aperçu 3D")}' : '<span class="ic">🧊</span> ${T("Générer l’aperçu 3D")}'))
+        + ' (' + prix3d() + ')';
+    // Ce qui part chez Fal.ai, dit en clair : le devant et le dos, chacun avec sa case d'origine.
+    if (pv) pv.textContent = '${T("Devant :")} ' + (IMAGE ? '✓ ${T("photo principale")}' : '—') + ' · ${T("Dos :")} '
+      + (photoDos() ? '✓ ' + (modeStandard() ? '${T("photo marquée « Dos »")}' : '${T("vue « Derrière »")}') : '—');
     if (vg) { vg.style.display = (MOD3D && G3D.vignette) ? '' : 'none'; if (G3D.vignette) vg.src = G3D.vignette; }
     if (rt) rt.style.display = (MOD3D && !G3D.enCours) ? '' : 'none';
     if (rt) rt.onclick = function(){ MOD3D = ''; G3D.vignette = ''; dessiner3d(); dire('${T("Aperçu 3D retiré — enregistrez pour l’enlever de la boutique.")}', 'att'); };
     if (e && !G3D.enCours) e.textContent = MOD3D
       ? (/^data:/.test(MOD3D) ? '${T("Aperçu prêt")} (' + Math.round(G3D.poids / 1024) + ' Ko) — ${T("déposé à l’enregistrement")}' : '${T("Aperçu 3D en ligne sur la fiche.")}')
-      : (IMAGE ? '' : '${T("Choisissez d’abord la photo principale.")}');
+      : raison;
     b.onclick = lancer3d;
   }
   function lancer3d(){
-    if (G3D.enCours || !IMAGE) return;
+    if (G3D.enCours) return;
+    var raison = raison3d();
+    if (raison) { dire(raison, 'att'); dessiner3d(); return; }
     if (!G3D.conf) {
       szConfirmer({ prudent: true,
         titre: G3D.forcer ? '${T("Regénérer l’aperçu 3D")}' : '${T("Générer l’aperçu 3D")}',
         texte: G3D.forcer
-          ? '${T("Cet article possède déjà un aperçu 3D. Un nouvel aperçu sera généré par Fal.ai à partir de la photo principale et facturé en supplément.")}'
-          : '${T("L’aperçu 3D sera généré par Fal.ai à partir de la photo principale. Ce traitement est facturé.")}',
-        details: [['${T("Coût estimé")}', '≈ 0,68 $ US'], ['${T("Durée")}', '${T("environ 2 minutes")}']],
+          ? '${T("Cet article possède déjà un aperçu 3D. Un nouvel aperçu sera généré par Fal.ai à partir de la photo du devant et de la photo du dos, et facturé en supplément.")}'
+          : '${T("L’aperçu 3D sera généré par Fal.ai à partir de la photo du devant (principale) et de la photo du dos. Ce traitement est facturé.")}',
+        details: [['${T("Coût estimé")}', prix3d()], ['${T("Photos envoyées")}', '${T("devant + dos")}'], ['${T("Durée")}', '${T("environ 2 minutes, plus l’attente en file chez Fal.ai")}']],
         oui: G3D.forcer ? '${T("Regénérer l’aperçu 3D")}' : '${T("Générer l’aperçu 3D")}' }).then(function(ok){ if (ok) { G3D.conf = true; lancer3d(); } });
       return;
     }
     G3D.conf = false; G3D.enCours = true; dessiner3d();
-    var e = document.getElementById('p-3d-etat'); if (e) e.textContent = '${T("Envoi de la photo à Fal.ai…")}';
-    P.appeler('produit:apercu3dLancer', IMAGE, cleCouts(), G3D.forcer).then(function(r){
+    var e = document.getElementById('p-3d-etat'); if (e) e.textContent = '${T("Envoi des photos (devant et dos) à Fal.ai…")}';
+    P.appeler('produit:apercu3dLancer', IMAGE, cleCouts(), G3D.forcer, photoDos(), PRIX_3D).then(function(r){
       if (!r || !r.ok) {
         G3D.enCours = false;
+        if (r && r.motif === 'prix_change' && r.prixReel != null) {
+          // ⚠ LE CONTRÔLE DES COÛTS : le relais a un autre prix que celui affiché — RIEN n'est parti.
+          var avant = PRIX_3D; PRIX_3D = Number(r.prixReel); dessiner3d();
+          dire('${T("Le prix a changé : ")}' + prix3d() + '${T(" au lieu de ")}' + prixUS(avant)
+            + '${T(". Rien n’a été lancé — cliquez de nouveau pour confirmer au nouveau prix.")}', 'att');
+          return;
+        }
         if (r && r.motif === 'avertir') {
           // ⚠ LE GARDE-FOU ANTI-BOUCLE : le serveur a déjà des aperçus 3D pour cet article.
           G3D.forcer = true; dessiner3d();
-          dire('${T("Cet article a déjà ")}' + r.deja + '${T(" aperçu(s) 3D (")}' + szArgent(r.dejaCout || 0) + '${T("). Un autre coûtera ≈ 0,68 $ US : cliquez « Regénérer quand même » si c’est voulu.")}', 'att');
+          dire('${T("Cet article a déjà ")}' + r.deja + '${T(" aperçu(s) 3D (")}' + szArgent(r.dejaCout || 0) + '${T("). Un autre coûtera ")}' + prix3d()
+            + '${T(" : cliquez « Regénérer quand même » si c’est voulu.")}', 'att');
           return;
         }
         dessiner3d(); dire(expliquer(r), 'err'); return;
       }
-      G3D.forcer = false; chargerCouts();
+      G3D.forcer = false; G3D.debutCalcul = 0; chargerCouts();
       suivre3d(r.etat_url, r.resultat_url, Date.now());
     });
   }
@@ -2058,8 +2127,17 @@ function pageProduit(id) {
       if (!r.pret) {
         var sec = Math.round((Date.now() - t0) / 1000);
         if (sec > 600) { G3D.enCours = false; dessiner3d(); dire('${T("Fal.ai n’a pas fini en 10 minutes. Le coût est engagé : réessayez plus tard, sans regénérer.")}', 'err'); return; }
-        if (e) e.textContent = '${T("Génération 3D en cours… ")}' + sec + ' s';
-        setTimeout(function(){ suivre3d(eu, ru, t0); }, 6000);
+        /* (2026-10-18, sa question : « pourquoi c’est si long ? ») Deux attentes distinctes : la FILE chez
+           Fal.ai (IN_QUEUE — d'autres demandes passent avant, rien ne se calcule encore) et le CALCUL
+           (IN_PROGRESS). Le temps de chacune se compte à part. */
+        if (r.etat === 'IN_QUEUE') {
+          if (e) e.textContent = '${T("En file chez Fal.ai… ")}' + (r.position != null ? '${T("(position {n})")} '.replace('{n}', String(Number(r.position) + 1)) : '') + sec + ' s';
+        } else {
+          if (!G3D.debutCalcul) G3D.debutCalcul = Date.now();
+          var sc = Math.round((Date.now() - G3D.debutCalcul) / 1000);
+          if (e) e.textContent = '${T("Génération 3D en cours… ")}' + sc + ' s' + (sec - sc > 5 ? ' ' + '${T("(après {n} s en file)")}'.replace('{n}', String(sec - sc)) : '');
+        }
+        setTimeout(function(){ suivre3d(eu, ru, t0); }, 5000);
         return;
       }
       if (e) e.textContent = '${T("Compression du modèle…")}';
@@ -2386,6 +2464,8 @@ function pageProduit(id) {
     LOCS = Object.assign({}, p.warehouseLocations || p.stockLoc || {});
     if (p.image) { IMAGE = p.image; montrerImage(IMAGE); }
     VUES = vuesDepuisFiche(p.additionalImages);
+    // La photo du dos (mode simple) : retenue telle quelle ; photoDos() vérifie qu'elle est encore une des photos.
+    DOS_SRC = (typeof p.photoDos === 'string' && p.photoDos) ? p.photoDos : '';
     // ⚠ COPIE PROFONDE : chaque couleur porte son propre objet. Une copie de
     // surface les partagerait avec la fiche d origine, et retirer une photo ici
     // la retirerait aussi de la reference qui sert a detecter les conflits.
@@ -3054,7 +3134,7 @@ function pageProduit(id) {
         regime: val('p-regime'), retours: val('p-retours'), actif: coché('p-actif')
       },
       tailles: tailles(), couleurs: couleurs(),
-      image: IMAGE || '', vues: VUES, parcoul: PARCOUL, stock: STOCK, locs: LOCS, mesv: MESV,
+      image: IMAGE || '', vues: VUES, dosCle: cleDos(), parcoul: PARCOUL, stock: STOCK, locs: LOCS, mesv: MESV,
       ent: Array.from(ENT)
     };
   }
@@ -3118,6 +3198,7 @@ function pageProduit(id) {
     CHOIX = (d.couleurs || []).map(String);
     IMAGE = d.image || '';
     VUES = Object.assign({}, d.vues || {});
+    DOS_SRC = (d.dosCle && VUES[d.dosCle]) ? VUES[d.dosCle] : '';
     // Un brouillon d’une version antérieure porte encore la clé « principale ».
     PARCOUL = parcoulDepuisFiche(d.parcoul);
     MESV = mvDepuisFiche(d.mesv);
@@ -3402,6 +3483,8 @@ function pageProduit(id) {
       belowCost: !!SOUSCOUT,
       belowCostReason: SOUSCOUT ? SOUSCOUT.raison : '',
       additionalImages: VUES,
+      // La photo du dos en mode simple (l'aperçu 3D) ; en mode angles, c'est la vue « Derrière » — null.
+      photoDos: (modeStandard() && photoDos()) ? photoDos() : null,
       // Les mesures du vêtement (7.13.0) : null = aucune. Le pont ne les écrit que si la clé est envoyée.
       mesuresVetement: mvPourEnvoi(),
       // Les photos des couleurs RETIREES ne partent pas : le site les
