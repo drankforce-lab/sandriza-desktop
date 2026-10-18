@@ -820,5 +820,5 @@ module.exports = {
   'Exact': 'Exact',
   'Fantôme 3D': '3D ghost',
   'Le vêtement de la photo, détouré au pixel près : rien n’est redessiné.': 'The garment from the photo, cut out to the pixel: nothing is redrawn.',
-  'Forme portée et intérieur du col reconstruits par l’IA (FLUX Kontext) : plus « studio », mais un petit détail peut changer.': 'Worn shape and inside of the collar rebuilt by AI (FLUX Kontext): more “studio”, but a small detail may change.',
+  'Le vêtement de la photo, au pixel près ; seul l’intérieur du col (là où était le cou du mannequin) est peint par l’IA, sans étiquette ni ajout.': 'The garment from the photo, to the pixel; only the inside of the collar (where the mannequin’s neck was) is painted by AI, with no label or addition.',
 };

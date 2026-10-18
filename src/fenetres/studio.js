@@ -1454,7 +1454,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         // l ambiance choisie (ou la première), aucun réglage facultatif
         + (v.cle === 'fantome' ? '<div class="fmodes" role="group" aria-label="${T("Mode")}">'
           + '<button type="button" data-fantmode="exact" class="' + (FANT_MODE === 'exact' ? 'on' : '') + '" aria-pressed="' + (FANT_MODE === 'exact') + '" title="${T("Le vêtement de la photo, détouré au pixel près : rien n’est redessiné.")}">${T("Exact")}</button>'
-          + '<button type="button" data-fantmode="3d" class="' + (FANT_MODE === '3d' ? 'on' : '') + '" aria-pressed="' + (FANT_MODE === '3d') + '" title="${T("Forme portée et intérieur du col reconstruits par l’IA (FLUX Kontext) : plus « studio », mais un petit détail peut changer.")}">${T("Fantôme 3D")}</button>'
+          + '<button type="button" data-fantmode="3d" class="' + (FANT_MODE === '3d' ? 'on' : '') + '" aria-pressed="' + (FANT_MODE === '3d') + '" title="${T("Le vêtement de la photo, au pixel près ; seul l’intérieur du col (là où était le cou du mannequin) est peint par l’IA, sans étiquette ni ajout.")}">${T("Fantôme 3D")}</button>'
           + '</div>' : '')
         + (v.cle === 'fantome' ? '<button type="button" class="prim direct" data-direct="fantome"' + (RO || !aUnePhoto() ? ' disabled' : '')
           + ' title="${T("Lance tout de suite, avec les réglages par défaut")}">${T("Générer maintenant")}<span data-prix-direct></span></button>' : '')
@@ -1465,7 +1465,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (RO || OCCUPE) return;
     if (!aUnePhoto()) { dire('${T("Importez d’abord une photo.")}', 'err'); return; }
     VOIE = 'fantome'; VOIE_CHOISIE = true; RESULT = null; FORMATS = []; ENREG = false;
-    if (!PRESET) PRESET = (PRESETS[0] || {}).cle || '';
+    if (!PRESET) PRESET = FANT_MODE === '3d' ? 'transparent' : ((PRESETS[0] || {}).cle || '');
     dessiner();
     ARME = true; bFinal.onclick();
   }
@@ -2925,6 +2925,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     corps.querySelectorAll('[data-fantmode]').forEach(function(el){
       el.onclick = function(ev){ ev.stopPropagation(); if (RO || OCCUPE) return;
         FANT_MODE = el.getAttribute('data-fantmode') === '3d' ? '3d' : 'exact';
+        // (2026-10-18, sa demande) le fantôme 3D a un FOND TRANSPARENT par défaut — on peut ensuite choisir une ambiance
+        if (FANT_MODE === '3d') PRESET = 'transparent';
         try { localStorage.setItem('sz-studio-fantome-mode', FANT_MODE); } catch (e) {}
         VOIE = 'fantome'; VOIE_CHOISIE = true; dessiner(); };
     });
