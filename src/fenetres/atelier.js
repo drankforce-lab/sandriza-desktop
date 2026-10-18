@@ -4937,6 +4937,178 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (!bouge) break;
     }
   }
+  /* ══ LES PLIS DE VIE (2026-10-18, sa demande : « continue le moteur 3D, ajoute les plis de vie » — que l aperçu ressemble à la
+     photo d un vrai vêtement porté) ══ Posés APRÈS la couture, sur le maillage dessiné, comme un champ de déplacement défini dans
+     l ESPACE (pas sur le patron) : continu d une pièce à l autre, il ne peut pas ouvrir une couture — les sommets cousus prennent
+     en plus le même déplacement que leur vis-à-vis. Le tissu ne se creuse jamais vers le corps : il se soulève, le long de sa
+     normale, de 0 à A.
+       · le TOMBÉ : sous la poitrine, des ondulations verticales qui s accentuent vers le bas et là où le tissu flotte ;
+       · la TAILLE : de douces ondulations horizontales, surtout sur les côtés, là où le haut ajusté se tasse ;
+       · l AISSELLE : des plis en éventail qui rayonnent du bas d emmanchure, sur le corps et sur la manche — plus longs et plus
+         marqués vers la poitrine (les plis de TRACTION du buste vers l aisselle) ;
+       · le COUDE (manches longues) : des fronces en travers, surtout au creux, côté intérieur ;
+       · l OURLET (bas du corps, bas de manche) : un léger ROULÉ juste au-dessus du bord — l épaisseur du tissu replié, à tous les
+         réglages (ce n est pas un pli).
+     L amplitude suit « Plis » (Aucun : rien ; Naturels : ~0,7 cm au plus ; Marqués : un peu plus, ses plis de grille faisant le
+     reste), la longueur d onde suit le tissu (fluide : plis fins et nombreux ; rigide : larges et rares). La phase vient du modèle
+     (même modèle, mêmes plis). Chaque sommet garde son « creux » : l ombre de contact l assombrit (plisAO).
+     ⚠ LE GARDE-FOU : un soulèvement qui étirerait un triangle au-delà de 1,95 fois sa longueur au patron, le tasserait sous 0,42
+     ou casserait un pli (plus de 75° entre deux triangles voisins) — là où le tissu n en était pas déjà là — est réduit, sommet
+     par sommet, jusqu à ce qu il n y en ait plus. Mesuré par tools/banc-3d-haut.js (« plis de vie », plafonds). */
+  function plisDeVie(mailles, tubes){
+    var vie = reglageVie(), A0 = vie.a, L = vie.l, stats = { max: 0, rms: 0, n: 0 };
+    mailles.forEach(function(ma){ if (ma.rendu) ma.rendu.creux = null; });
+    var tronc = tubes ? tubes.filter(function(t){ return t.nom === 'tronc'; })[0] : null;
+    if (!tronc) { GLV.plisVie = stats; return; }
+    // (« Marqués » ne la pousse pas plus loin que A0 = 1 : ses plis de grille, déjà 1,7 fois plus forts, font le reste)
+    var Amax = A0 > 0 ? Math.min(0.8, 0.09 * L) * Math.min(1, A0) : 0, AROULE = 0.14;
+    var sid = String((V3 && V3.m && V3.m.id) || ''), g0 = 7; for (var c0 = 0; c0 < sid.length; c0++) g0 = (g0 * 31 + sid.charCodeAt(c0)) % 9973;
+    var ph = g0 / 9973 * 2 * Math.PI, lisse = function(u){ u = Math.max(0, Math.min(1, u)); return u * u * (3 - 2 * u); };
+    var poi = tubes.filter(function(t){ return t.nom === 'poitrine'; })[0], brasT = tubes.filter(function(t){ return /bras/.test(t.nom); });
+    var anneau = function(h){ var A = tronc.an;
+      for (var q = 0; q + 1 < A.length; q++) if ((A[q].c.y - h) * (A[q + 1].c.y - h) <= 0) { var u = (h - A[q].c.y) / ((A[q + 1].c.y - A[q].c.y) || 1);
+        return { x: A[q].c.x + (A[q + 1].c.x - A[q].c.x) * u, z: (A[q].c.z || 0) + ((A[q + 1].c.z || 0) - (A[q].c.z || 0)) * u, r: (A[q].rx + A[q].rz + (A[q + 1].rx + A[q + 1].rz - A[q].rx - A[q].rz) * u) / 2 }; }
+      var a = A[h < A[0].c.y ? 0 : A.length - 1]; return { x: a.c.x, z: a.c.z || 0, r: (a.rx + a.rz) / 2 }; };
+    // les repères : le bas d emmanchure (de chaque côté), la poitrine (et son sommet de chaque côté), la taille
+    var dv = mailles.filter(function(m){ return m.pid === 'devant' && m.rendu; })[0]; if (!dv) { GLV.plisVie = stats; return; }
+    var cA = dv.pc.p.contour[3], PA = [1, -1].map(function(S){ var rd = dv.rendu, b = -1, bd = 1e9;
+      for (var v = 0; v < rd.n; v++) { var dd = Math.hypot(rd.vx[v] - S * Math.abs(cA.x), rd.vy[v] - cA.y); if (dd < bd) { bd = dd; b = v; } }
+      return [rd.pos[b * 3], rd.pos[b * 3 + 1], rd.pos[b * 3 + 2]]; });
+    var yA = (PA[0][1] + PA[1][1]) / 2, yB = poi ? poi.an[0].c.y : yA - 8, yW = yA - 15, rW = 1e9;
+    tronc.an.forEach(function(a){ if (a.c.y < yA - 6 && a.c.y > yA - 30 && a.rx < rW) { rW = a.rx; yW = a.c.y; } });
+    // le sommet de la poitrine, de chaque côté : l anneau de la bande de buste le plus en avant, à mi-chemin du milieu et du flanc
+    var bustes = [1, -1].map(function(S){ var best = null;
+      if (poi) poi.an.forEach(function(a){ if ((a.c.x >= 0 ? 1 : -1) !== S && Math.abs(a.c.x) > 0.5) return; var z = (a.c.z || 0) + a.rz; if (!best || z > best[2]) best = [a.c.x, a.c.y, z]; });
+      return best || [S * 7, yB, anneau(yB).z + anneau(yB).r]; });
+    // un NOMBRE ENTIER de plis autour du tronc (pris à la taille) : la phase fait le tour sans saut — l angle passe de +π à -π au milieu
+    // dos, et une longueur d onde quelconque y cassait les plis en V
+    var Nt = Math.max(3, Math.round(2 * Math.PI * anneau(yW).r / L));
+    var coude = brasT.map(function(T){ var a = T.an[0].c, b = T.an[T.an.length - 1].c, Lb = Math.hypot(b.x - a.x, b.y - a.y, (b.z || 0) - (a.z || 0));
+      return { o: [a.x, a.y, a.z || 0], ax: unit3([b.x - a.x, b.y - a.y, (b.z || 0) - (a.z || 0)]), te: Lb * 0.47, S: a.x >= 0 ? 1 : -1 }; });
+    // les sommets cousus et leurs vis-à-vis (avant de bouger quoi que ce soit)
+    var cases = {}, cle = function(x, y, z){ return Math.round(x * 20) + '_' + Math.round(y * 20) + '_' + Math.round(z * 20); };
+    mailles.forEach(function(ma, mi){ var rd = ma.rendu; if (!rd || !rd.cousu) return;
+      for (var v = 0; v < rd.n; v++) if (rd.cousu[v]) { var k = cle(rd.pos[v * 3], rd.pos[v * 3 + 1], rd.pos[v * 3 + 2]); (cases[k] = cases[k] || []).push([mi, v]); } });
+    // la distance (3D) au sommet cousu le plus proche, par une grille de 1 cm
+    var grilleC = {}; mailles.forEach(function(ma){ var rd = ma.rendu; if (!rd || !rd.cousu) return;
+      for (var v = 0; v < rd.n; v++) if (rd.cousu[v]) { var k = Math.floor(rd.pos[v * 3]) + '_' + Math.floor(rd.pos[v * 3 + 1]) + '_' + Math.floor(rd.pos[v * 3 + 2]); (grilleC[k] = grilleC[k] || []).push([rd.pos[v * 3], rd.pos[v * 3 + 1], rd.pos[v * 3 + 2]]); } });
+    var versCouture = function(p){ var x = Math.floor(p[0]), y = Math.floor(p[1]), z = Math.floor(p[2]), b = 9;
+      for (var dx = -2; dx <= 2; dx++) for (var dy = -2; dy <= 2; dy++) for (var dz = -2; dz <= 2; dz++) (grilleC[(x + dx) + '_' + (y + dy) + '_' + (z + dz)] || []).forEach(function(q){ b = Math.min(b, Math.hypot(q[0] - p[0], q[1] - p[1], q[2] - p[2])); });
+      return b; };
+    var champ = function(ma, p){
+      var amp = [], gs = [], a = anneau(p[1]), th = Math.atan2(p[0] - a.x, p[2] - a.z), corps = ma.pid !== 'manche';
+      if (!(Amax > 0)) return { d: 0, a: 0 };
+      var vc = versCorps(tubes, p[0], p[1], p[2]), e = Math.max(0, Math.min(1, (vc.d < 1e8 ? vc.d : 0) / 1.2)), dC = versCouture(p);
+      if (corps) {
+        // le tombé et la taille s effacent à l approche d une couture (1,5 cm) ; le garde-fou fait le reste
+        var fc = lisse(dC / 1.5);
+        amp.push(fc * Amax * (0.35 + 0.65 * e) * lisse((yB - 2 - p[1]) / 16)); gs.push(0.5 - 0.5 * Math.cos(Nt * th + 0.9 * Math.sin(p[1] / 11 + ph) + ph));
+        // (surtout sur les CÔTÉS — là où un haut se tasse sur la hanche ; tout autour, on aurait dit des anneaux)
+        var cote = Math.pow(Math.abs(Math.sin(th)), 1.5);
+        amp.push(fc * Amax * 0.3 * Math.exp(-Math.pow((p[1] - yW) / 5, 2)) * (1 - 0.6 * e) * (0.25 + 0.75 * cote)); gs.push(0.5 - 0.5 * Math.cos(2 * Math.PI * (p[1] - yW) / (0.75 * L) + 0.7 * Math.sin(2 * th + ph)));
+      }
+      // les éventails d aisselle, plus longs et plus forts du côté de la poitrine (la traction du buste vers l aisselle) ; ils
+      // meurent à 1 cm de la couture. (15 cm de rayon — jusqu à 18 vers la poitrine seulement, et 12 sur la manche : plus loin,
+      // l éventail atteignait le bas d une manche courte et le flanc dessous, et les écartait l un de l autre)
+      PA.forEach(function(P, iS){ var dx = p[0] - P[0], dy = p[1] - P[1], dz = p[2] - P[2], r = Math.hypot(dx, dy, dz); if (r > 18 || dy > 1.5) return;
+        var B = bustes[iS], vb = unit3([B[0] - P[0], B[1] - P[1], B[2] - P[2]]), cb = r > 0.01 ? Math.max(0, (dx * vb[0] + dy * vb[1] + dz * vb[2]) / r) : 0;
+        // (la traction ne vaut que sur le DEVANT de la poitrine — sur le flanc, sous la manche, elle l écartait du corps)
+        var tr = corps ? cb * cb * lisse((Math.cos(th) - 0.4) / 0.3) : 0, lg = 7 + 3 * tr; if (r > (corps ? 15 + 3 * tr : 12)) return;
+        amp.push(lisse(dC / 1) * Amax * (0.5 + 0.2 * tr) * Math.exp(-r / lg) * lisse((r - 3) / 2)); gs.push(0.5 - 0.5 * Math.cos(8 * Math.atan2(-dy, Math.hypot(dx, dz)) + ph)); });
+      if (!corps) coude.forEach(function(C){ if ((p[0] >= 0 ? 1 : -1) !== C.S) return;
+        var w = sub3(p, C.o), t = pt3(w, C.ax), rr = [w[0] - C.ax[0] * t, w[1] - C.ax[1] * t, w[2] - C.ax[2] * t], rl = Math.hypot(rr[0], rr[1], rr[2]) || 1;
+        amp.push(Amax * 0.55 * Math.exp(-Math.pow((t - C.te) / 4, 2)) * (0.3 + 0.7 * Math.max(0, rr[2] / rl)));
+        gs.push(0.5 - 0.5 * Math.cos(2 * Math.PI * t / 3.5 + 1.3 * Math.sin(2 * Math.atan2(rr[2], rr[0] * C.S) + ph))); });
+      var d = 0, al = 0; for (var i = 0; i < amp.length; i++) { d += amp[i] * gs[i]; al += amp[i]; }
+      return { d: Math.min(d, Amax * 1.2), a: Math.min(al, Amax * 1.2) };
+    };
+    // la normale de chaque sommet (orientée vers le dehors, à la majorité, comme finirConforme), et ses voisins
+    mailles.forEach(function(ma){
+      var rd = ma.rendu; if (!rd) return; var PZ = rd.pos, I = rd.idx, n = rd.n, nor = new Float32Array(n * 3), refN = new Float32Array(n * 3), vote = 0, fn = [];
+      for (var r0 = 0; r0 < n; r0++) { var pv = rd.poids[r0]; for (var q0 = 0; q0 < 3; q0++) { var k0 = pv.k[q0], w0 = pv.w[q0]; refN[r0 * 3] += ma.nor[k0 * 3] * w0; refN[r0 * 3 + 1] += ma.nor[k0 * 3 + 1] * w0; refN[r0 * 3 + 2] += ma.nor[k0 * 3 + 2] * w0; } }
+      for (var t = 0; t < I.length; t += 3) { var a = I[t] * 3, b = I[t + 1] * 3, c = I[t + 2] * 3;
+        var ex = PZ[b] - PZ[a], ey = PZ[b + 1] - PZ[a + 1], ez = PZ[b + 2] - PZ[a + 2], fx = PZ[c] - PZ[a], fy = PZ[c + 1] - PZ[a + 1], fz = PZ[c + 2] - PZ[a + 2];
+        var f = [ey * fz - ez * fy, ez * fx - ex * fz, ex * fy - ey * fx]; fn.push(f); vote += f[0] * refN[a] + f[1] * refN[a + 1] + f[2] * refN[a + 2]; }
+      var sg = vote < 0 ? -1 : 1;
+      for (var t2 = 0; t2 < I.length; t2 += 3) { var f2 = fn[t2 / 3]; for (var s2 = 0; s2 < 3; s2++) { var k2 = I[t2 + s2] * 3; nor[k2] += f2[0] * sg; nor[k2 + 1] += f2[1] * sg; nor[k2 + 2] += f2[2] * sg; } }
+      for (var v1 = 0; v1 < n; v1++) { var u1 = unit3([nor[v1 * 3], nor[v1 * 3 + 1], nor[v1 * 3 + 2]]); nor[v1 * 3] = u1[0]; nor[v1 * 3 + 1] = u1[1]; nor[v1 * 3 + 2] = u1[2]; }
+      rd.nPli = nor;
+    });
+    // ⚠ sur une couture, les deux bords se soulèvent selon la MÊME normale (la moyenne du groupe) : chacun selon la sienne, ils
+    // s écartaient
+    Object.keys(cases).forEach(function(k){ var l = cases[k]; if (l.length < 2) return; var m = [0, 0, 0];
+      l.forEach(function(e){ var N = mailles[e[0]].rendu.nPli; m[0] += N[e[1] * 3]; m[1] += N[e[1] * 3 + 1]; m[2] += N[e[1] * 3 + 2]; });
+      m = unit3(m); l.forEach(function(e){ var N = mailles[e[0]].rendu.nPli; N[e[1] * 3] = m[0]; N[e[1] * 3 + 1] = m[1]; N[e[1] * 3 + 2] = m[2]; }); });
+    mailles.forEach(function(ma){
+      var rd = ma.rendu; if (!rd || !rd.nPli) return; var PZ = rd.pos, n = rd.n, nor = rd.nPli, I = rd.idx, vois = [], cnt = {};
+      for (var v0 = 0; v0 < n; v0++) vois.push([]);
+      for (var t0 = 0; t0 < I.length; t0 += 3) for (var e0 = 0; e0 < 3; e0++) { var x0 = I[t0 + e0], y0 = I[t0 + (e0 + 1) % 3]; if (vois[x0].indexOf(y0) < 0) vois[x0].push(y0); if (vois[y0].indexOf(x0) < 0) vois[y0].push(x0);
+        var kk = Math.min(x0, y0) + '_' + Math.max(x0, y0); cnt[kk] = (cnt[kk] || 0) + 1; }
+      // l OURLET : les bords libres du BAS de la pièce (ourlet du corps, bas de manche) — la distance au patron de chaque sommet
+      var ymax = -1e9; for (var vy = 0; vy < n; vy++) ymax = Math.max(ymax, rd.vy[vy]);
+      var bas = []; Object.keys(cnt).forEach(function(kk){ if (cnt[kk] !== 1) return; kk.split('_').forEach(function(q){ q = +q; if ((!rd.cousu || !rd.cousu[q]) && rd.vy[q] > ymax - 2.5 && bas.indexOf(q) < 0) bas.push(q); }); });
+      var creux = new Float32Array(n), dep = new Float32Array(n * 3), pD = new Float32Array(n);
+      for (var v = 0; v < n; v++) {
+        var nn = [nor[v * 3], nor[v * 3 + 1], nor[v * 3 + 2]], ch = champ(ma, [PZ[v * 3], PZ[v * 3 + 1], PZ[v * 3 + 2]]);
+        /* ⚠ dans un CREUX du tissu (concave), soulever le long de la normale retourne les triangles dès que le soulèvement dépasse le
+           rayon du creux ; sur une CRÊTE vive (convexe), les normales voisines divergent et le soulèvement étire le tissu. Il est
+           borné à la moitié du rayon : R ≈ e² / 2|h|, h la hauteur du milieu des voisins au-dessus du plan tangent, e leur distance. */
+        var L0 = vois[v]; if (L0.length >= 3 && ch.d > 0) { var mx = 0, my = 0, mz = 0, el = 0;
+          L0.forEach(function(q){ mx += PZ[q * 3]; my += PZ[q * 3 + 1]; mz += PZ[q * 3 + 2]; el += Math.hypot(PZ[q * 3] - PZ[v * 3], PZ[q * 3 + 1] - PZ[v * 3 + 1], PZ[q * 3 + 2] - PZ[v * 3 + 2]); });
+          var hh = (mx / L0.length - PZ[v * 3]) * nn[0] + (my / L0.length - PZ[v * 3 + 1]) * nn[1] + (mz / L0.length - PZ[v * 3 + 2]) * nn[2]; el /= L0.length;
+          if (Math.abs(hh) > 1e-4) { var dR = Math.min(ch.d, 0.5 * el * el / (2 * Math.abs(hh))); ch.a *= dR / ch.d; ch.d = dR; } }
+        creux[v] = ch.a > 0.03 ? (ch.a - ch.d) / Math.max(ch.a, 0.3) * Math.min(1, ch.a / 0.4) : 0; pD[v] = ch.d;
+        // le roulé de l ourlet : une crête douce à ~4 mm du bord, et une ombre juste au-dessus
+        var db = 9; for (var ib = 0; ib < bas.length; ib++) { var qb = bas[ib]; db = Math.min(db, Math.hypot(rd.vx[qb] - rd.vx[v], rd.vy[qb] - rd.vy[v])); }
+        var ro = db < 2 ? AROULE * Math.exp(-Math.pow((db - 0.4) / 0.32, 2)) : 0;
+        if (db < 2) creux[v] = Math.max(creux[v], 0.5 * Math.exp(-Math.pow((db - 1.0) / 0.3, 2)));
+        var dd = ch.d + ro; dep[v * 3] = nn[0] * dd; dep[v * 3 + 1] = nn[1] * dd; dep[v * 3 + 2] = nn[2] * dd;
+      }
+      rd.creux = creux; rd.nPli = null; rd.dep = dep; rd.pD = pD;
+    });
+    /* les coutures tenues : les sommets cousus qui COÏNCIDAIENT (à 0,05 mm) prennent le même déplacement (la moyenne). ⚠ Pas la
+       position moyenne d une case : au point de cou, elle mêlait des sommets voisins mais distincts et retournait les petits
+       triangles du coin. */
+    var groupes = [];
+    Object.keys(cases).forEach(function(k){ var l = cases[k]; if (l.length < 2) return;
+      var P0 = mailles[l[0][0]].rendu.pos, i0 = l[0][1], grp = l.filter(function(e){ var P = mailles[e[0]].rendu.pos;
+        return Math.hypot(P[e[1] * 3] - P0[i0 * 3], P[e[1] * 3 + 1] - P0[i0 * 3 + 1], P[e[1] * 3 + 2] - P0[i0 * 3 + 2]) < 0.005; });
+      if (grp.length < 2) return; groupes.push(grp); var m = [0, 0, 0];
+      grp.forEach(function(e){ var d = mailles[e[0]].rendu.dep; m[0] += d[e[1] * 3]; m[1] += d[e[1] * 3 + 1]; m[2] += d[e[1] * 3 + 2]; });
+      grp.forEach(function(e){ var d = mailles[e[0]].rendu.dep; d[e[1] * 3] = m[0] / grp.length; d[e[1] * 3 + 1] = m[1] / grp.length; d[e[1] * 3 + 2] = m[2] / grp.length; }); });
+    /* LE GARDE-FOU (voir plus haut) : chaque pièce garde un facteur par sommet (1 au départ) ; on cherche les triangles que le
+       soulèvement étirerait au-delà de 1,95, tasserait sous 0,42, ou les paires qu il casserait (> 75°), là où ce n était pas déjà
+       le cas — leurs sommets sont réduits de 40 %, et l on recommence (8 fois au plus). Un groupe cousu prend le plus petit facteur
+       de ses membres : la couture reste fermée. */
+    var etat = mailles.map(function(ma){ var rd = ma.rendu; if (!rd || !rd.dep) return null; var I = rd.idx, ar = {};
+      for (var t = 0; t < I.length; t += 3) for (var e = 0; e < 3; e++) { var a = I[t + e], b = I[t + (e + 1) % 3], k = Math.min(a, b) + '_' + Math.max(a, b); (ar[k] = ar[k] || []).push(t); }
+      return { s: new Float32Array(rd.n).fill(1), ar: ar }; });
+    var posA = function(rd, s, v, apres){ var f = apres ? s[v] : 0; return [rd.pos[v * 3] + rd.dep[v * 3] * f, rd.pos[v * 3 + 1] + rd.dep[v * 3 + 1] * f, rd.pos[v * 3 + 2] + rd.dep[v * 3 + 2] * f]; };
+    var bilan = function(rd, s, t, apres){ var I = rd.idx, a = I[t], b = I[t + 1], c = I[t + 2], P = [posA(rd, s, a, apres), posA(rd, s, b, apres), posA(rd, s, c, apres)], mn = 9, mx = 0;
+      [[a, b, 0, 1], [b, c, 1, 2], [c, a, 2, 0]].forEach(function(e){ var l2 = Math.hypot(rd.vx[e[0]] - rd.vx[e[1]], rd.vy[e[0]] - rd.vy[e[1]]); if (l2 < 0.05) return;
+        var r = Math.hypot(P[e[2]][0] - P[e[3]][0], P[e[2]][1] - P[e[3]][1], P[e[2]][2] - P[e[3]][2]) / l2; mn = Math.min(mn, r); mx = Math.max(mx, r); });
+      return { mn: mn, mx: mx, n: unit3(croix3(sub3(P[1], P[0]), sub3(P[2], P[0]))) }; };
+    for (var tour = 0; tour < 8; tour++) {
+      var marque = 0;
+      mailles.forEach(function(ma, mi){ var E = etat[mi]; if (!E) return; var rd = ma.rendu, I = rd.idx, s = E.s, mauvais = new Uint8Array(rd.n), av = [], ap = [];
+        for (var t = 0; t < I.length; t += 3) { var b0 = bilan(rd, s, t, false), b1 = bilan(rd, s, t, true); av.push(b0); ap.push(b1);
+          if ((b1.mx > 1.95 && b1.mx > b0.mx + 0.005) || (b1.mn < 0.42 && b1.mn < b0.mn - 0.005)) { mauvais[I[t]] = mauvais[I[t + 1]] = mauvais[I[t + 2]] = 1; } }
+        Object.keys(E.ar).forEach(function(k){ var l = E.ar[k]; if (l.length !== 2) return; var x = av[l[0] / 3], y = av[l[1] / 3], x1 = ap[l[0] / 3], y1 = ap[l[1] / 3];
+          var c0 = x.n[0] * y.n[0] + x.n[1] * y.n[1] + x.n[2] * y.n[2], c1 = x1.n[0] * y1.n[0] + x1.n[1] * y1.n[1] + x1.n[2] * y1.n[2];
+          if (c1 < 0.26 && c1 < c0 - 0.005) [l[0], l[1]].forEach(function(t){ mauvais[I[t]] = mauvais[I[t + 1]] = mauvais[I[t + 2]] = 1; }); });
+        for (var v = 0; v < rd.n; v++) if (mauvais[v] && s[v] > 0.01) { s[v] *= 0.6; marque++; } });
+      groupes.forEach(function(grp){ var m = 1; grp.forEach(function(e){ var E = etat[e[0]]; if (E) m = Math.min(m, E.s[e[1]]); }); grp.forEach(function(e){ var E = etat[e[0]]; if (E) E.s[e[1]] = m; }); });
+      if (!marque) break;
+    }
+    mailles.forEach(function(ma, mi){ var rd = ma.rendu, E = etat[mi]; if (!rd || !rd.dep || !E) return;
+      for (var v3 = 0; v3 < rd.n; v3++) { var f = E.s[v3]; rd.pos[v3 * 3] += rd.dep[v3 * 3] * f; rd.pos[v3 * 3 + 1] += rd.dep[v3 * 3 + 1] * f; rd.pos[v3 * 3 + 2] += rd.dep[v3 * 3 + 2] * f; if (f < 1) rd.creux[v3] *= f;
+        // (la mesure du banc : le pli vraiment posé, après le garde-fou — sans le roulé d ourlet, qui n est pas un pli)
+        if (ma.pid !== 'manche') { var dq = rd.pD[v3] * f; stats.max = Math.max(stats.max, dq); stats.rms += dq * dq; stats.n++; } }
+      rd.dep = null; rd.pD = null; });
+    stats.rms = stats.n ? Math.sqrt(stats.rms / stats.n) : 0; GLV.plisVie = stats;
+  }
+  // l ombre des creux de plis (après finirConforme : elle multiplie l ombre de contact du sommet)
+  function plisAO(mailles){ mailles.forEach(function(ma){ var rd = ma.rendu; if (!rd || !rd.creux || !rd.ao) return; for (var v = 0; v < rd.n; v++) rd.ao[v] *= 1 - 0.28 * rd.creux[v]; }); }
   function conformerHaut(mailles, tubes){
     var tops = mailles.filter(function(m){ return m.pid === 'devant' || m.pid === 'dos' || m.pid === 'manche'; });
     if (window.__szBanc3d) GLV.ecartsAvantZip = ecartsCoutures(mailles);
@@ -5211,8 +5383,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       try { ombreContact(GLV.mailles, tubesH.filter(function(t){ return /bras/.test(t.nom); })); } catch (e) {}
       // la pièce DESSINÉE au contour exact, ses coutures zippées (voir maillageConforme)
       conformerHaut(GLV.mailles, tubesH);
+      try { plisDeVie(GLV.mailles.filter(function(ma){ return ma.rendu; }), tubesH); } catch (e) { GLV.plisVie = { erreur: String(e && e.message || e) }; }
       GLV.mailles.forEach(function(ma){ if (ma.rendu) finirConforme(ma); });
       soudeNormales(GLV.mailles.filter(function(ma){ return ma.rendu; }));
+      plisAO(GLV.mailles);
     } else if (['haut', 'jupe', 'bas'].indexOf(famD) >= 0 && (r.corps || []).length) {
       var epY = pieces.devant && pieces.devant.p.contour[2] ? pieces.devant.p.contour[2].y : 0;
       try {

@@ -44,6 +44,8 @@
    --tubes donne les anneaux du mannequin (bras, tronc, capsule des épaules) ; --detail
    donne aussi, par pièce, où sont les sommets dans le corps et contre quel tube.
 
+   plis de vie la plus grande levée du tissu sur le corps par les plis de vie (cm) : ils doivent
+             exister et rester sobres (0,15 à 1,2 cm au réglage par défaut) ; nuls avec --sansplis.
    liseré    le contraste de luminance le long des coutures (vues « face » et « sienne », sans
              mannequin, maille du tissu coupée) moins celui du tissu sans couture (témoin).
    asym      le devant gauche contre le droit (un sommet et son miroir), rangs 8 à 25 cm :
@@ -97,6 +99,9 @@ const PLAFONDS = {
   'cs-xs': { etires: 100, plis: 25, fentes: 0 },
 };
 const STRICT = ARGS.includes('--strict');
+// LES PLIS DE VIE (2026-10-18) : ils doivent EXISTER (réglage « Naturels ») et rester sobres — la plus grande levée du tissu sur le corps
+// (devant, dos), en cm. Avec --sansplis (réglage « Aucun »), aucune.
+const PLIS_VIE = { min: 0.15, max: 1.2 };
 
 const CAS = [
   { id: 'ts-xs', base: 'tshirt', taille: 'XS', options: { encolure: 'ronde', manche: 'courte', longueur: 22 } },
@@ -108,6 +113,8 @@ const CAS = [
 ].filter((c) => !SEUL || c.id === SEUL);
 if (ARGS.includes('--brut')) CAS.forEach((c) => { c.brut = true; });
 if (ARGS.includes('--sansplis')) CAS.forEach((c) => { c.sansPlis = true; });
+// --plis legers|naturels|marques : un autre réglage de plis de vie (les plafonds, eux, valent pour le réglage par défaut, « Naturels »)
+if (arg('--plis')) CAS.forEach((c) => { c.plisVie = arg('--plis'); });
 
 function chrome() {
   const l = [process.env.SZ_CHROME || '',
@@ -402,7 +409,7 @@ const SCRIPT_PAGE = function () {
       gl.uniform2f = function (loc, a, b) { return orig.call(gl, loc, window.__szSansMaille && loc === u ? 0.001 : a, window.__szSansMaille && loc === u ? 0.001 : b); }; })();
     var res = { cas: CAS.id, geo: geo(mo.tubes()), fentes: 0, vues: {} };
     res.ecarts = (g.ecarts || []).concat([g.ecartsAvantZip || {}]); 
-    res.bosse = bosseTete(mo.tubes());
+    res.bosse = bosseTete(mo.tubes()); res.plisVie = g.plisVie || null;
     res.tubes = mo.tubes().map(function (T) { var a = T.an[0], b = T.an[T.an.length - 1]; return [T.nom, T.an.length, (T.nom === "tronc" ? T.an.slice(-12) : T.an.slice(0, 9)).map(function (q) { return [q.c.x, q.c.y, q.rx, q.rz].map(function (x) { return Math.round(x * 10) / 10; }); }), [a.c.x, a.c.y, a.c.z || 0, a.rx, a.rz].map(function (x) { return Math.round(x * 10) / 10; }), [b.c.x, b.c.y, b.c.z || 0, b.rx, b.rz].map(function (x) { return Math.round(x * 10) / 10; })]; }); res.erreurConf = g.erreurConf || ''; res.ecartsRendus = g.ecartsRendus || {}; res.loft = (g.loft || []).filter(function (l) { return l[3] > 0.3; }).slice(0, 30);
     // le profil rang par rang (devant, première manche) : étirement horizontal et vertical moyens, en ‰ de la longueur au patron
     res.profil = {};
@@ -487,7 +494,7 @@ const SCRIPT_MODELES = function () {
   }
   localStorage.setItem('elg_atelier_modeles', JSON.stringify([m]));
   localStorage.setItem('sz-atelier-mannequin', '1');
-  if (c.sansPlis) localStorage.setItem('sz-atelier-vie', JSON.stringify({ plis: 'aucun', tissu: 'moyen' })); else localStorage.removeItem('sz-atelier-vie');
+  if (c.sansPlis) localStorage.setItem('sz-atelier-vie', JSON.stringify({ plis: 'aucun', tissu: 'moyen' })); else if (c.plisVie) localStorage.setItem('sz-atelier-vie', JSON.stringify({ plis: c.plisVie, tissu: 'moyen' })); else localStorage.removeItem('sz-atelier-vie');
 };
 
 function page(c) {
@@ -557,10 +564,13 @@ for (const c of CAS) {
   if (r.bosse && r.bosse.monte > SEUILS.epaulette) ko.push('épaulette : la tête remonte de ' + r.bosse.monte + ' cm au-dessus de la ligne d épaule');
   if (r.bosse && r.bosse.arc > SEUILS.arc) ko.push('rang arqué de ' + r.bosse.arc + ' cm (motif courbé, rang ' + r.bosse.arcOu + ')');
   if (r.bosse && r.bosse.asym > SEUILS.asym) ko.push('devant asymétrique de ' + r.bosse.asym + ' cm ' + JSON.stringify(r.bosse.asymOu));
+  if (r.plisVie && r.plisVie.erreur) ko.push('plis de vie en erreur : ' + r.plisVie.erreur);
+  else if (r.plisVie && !c.sansPlis && (r.plisVie.max < PLIS_VIE.min || r.plisVie.max > PLIS_VIE.max)) ko.push('plis de vie hors amplitude (' + Math.round(r.plisVie.max * 100) / 100 + ' cm, attendu ' + PLIS_VIE.min + ' à ' + PLIS_VIE.max + ')');
+  else if (r.plisVie && c.sansPlis && r.plisVie.max > 0.001) ko.push('plis de vie présents avec « Aucun »');
   if (r.erreurConf) ko.push('maillage conforme en erreur : ' + String(r.erreurConf).split(String.fromCharCode(10))[0]);
   if (ko.length) echec++;
   bilan.push(r);
-  console.log((ko.length ? '✗ ' : '✓ ') + c.id.padEnd(6) + ` triangles ${g.triVisibles}, éclats ${g.etires}, plis cassés ${g.plis}, dans le corps ${g.dedans}, fentes ${r.fentes}, couture la plus ouverte ${ecMax} cm, épaulette ${r.bosse ? r.bosse.monte : '?'} cm, bombé en excès ${r.bosse ? r.bosse.ballon : '?'} cm, arc des rangs ${r.bosse ? r.bosse.arc : '?'} cm, asymétrie ${r.bosse ? r.bosse.asym : '?'} cm, fentes (sa vue de face) ${r.fentesSienne || 0}, liseré ${r.lisere ? JSON.stringify(r.lisere) : '?'}`
+  console.log((ko.length ? '✗ ' : '✓ ') + c.id.padEnd(6) + ` triangles ${g.triVisibles}, éclats ${g.etires}, plis cassés ${g.plis}, dans le corps ${g.dedans}, fentes ${r.fentes}, couture la plus ouverte ${ecMax} cm, épaulette ${r.bosse ? r.bosse.monte : '?'} cm, bombé en excès ${r.bosse ? r.bosse.ballon : '?'} cm, arc des rangs ${r.bosse ? r.bosse.arc : '?'} cm, asymétrie ${r.bosse ? r.bosse.asym : '?'} cm, fentes (sa vue de face) ${r.fentesSienne || 0}, plis de vie ${r.plisVie ? (Math.round((r.plisVie.max || 0) * 100) / 100) + ' cm (moy. ' + (Math.round((r.plisVie.rms || 0) * 100) / 100) + ')' : '?'}, liseré ${r.lisere ? JSON.stringify(r.lisere) : '?'}`
     + (ko.length ? '  ← ' + ko.join(', ') : '') + (!ko.length && reste.length ? '  (reste avant zéro : ' + reste.join(', ') + ')' : ''));
   if (ARGS.includes('--zip')) console.log('   écarts dessinés : ' + JSON.stringify(r.ecartsRendus));
   if (ARGS.includes('--piresm')) console.log('   pires manche (x, y, ×) : ' + JSON.stringify(g.piresManche) + ' | pire triangle : ' + JSON.stringify(g.pireTri));
