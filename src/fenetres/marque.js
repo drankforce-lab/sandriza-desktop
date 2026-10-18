@@ -58,6 +58,15 @@ body{background:var(--f-page);color:var(--tx);
 .carte h2{margin:0 0 .2rem;font:700 .78rem/1.2 system-ui;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2)}
 .carte .sous{margin:0 0 .9rem;font-size:.78rem;color:var(--tx3)}
+.jeux{display:grid;grid-template-columns:repeat(auto-fill,minmax(15rem,1fr));gap:.8rem}
+.jeu{border:1px solid var(--v08);border-radius:10px;padding:.7rem;display:flex;flex-direction:column;gap:.35rem}
+.jeu.on{border:2px solid var(--or)}
+.jeu .vig{border-radius:8px;height:5.5rem;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.jeu .vig img{max-width:100%;max-height:100%;object-fit:contain}
+.jeu .nom{margin:0;font-weight:600;font-size:.85rem}
+.jeu .actuel{color:var(--tx-ok);font-weight:600}
+.jeu .aide{margin:0;font-size:.75rem;color:var(--tx3)}
+.jeu button{align-self:flex-start}
 .ch{margin:0 0 .8rem}
 .ch:last-child{margin-bottom:0}
 .ch label{display:block;margin-bottom:.25rem;font-size:.78rem;color:var(--tx2)}
@@ -199,6 +208,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'m-name':40,'m-slogan':80,'m-slogan-en'
     depot:              '${T("Le dépôt du logo dans le stockage a échoué. Rien n’a été modifié.")}',
     pas_une_image:      '${T("Ce fichier n’est pas une image.")}',
     logo_inconnu:       '${T("Ce type de logo n’existe pas dans cette version.")}',
+    jeu_inconnu:        '${T("Ce jeu de logos n’existe pas dans cette version.")}',
     quoi_inconnu:       '${T("Cette remise à zéro n’existe pas dans cette version.")}',
     rien_a_ecrire:      '${T("Aucun changement à enregistrer.")}',
     indisponible:       '${T("La configuration n’est pas prête dans la fenêtre principale.")}',
@@ -320,8 +330,40 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'m-name':40,'m-slogan':80,'m-slogan-en'
   }
 
   /* ── ONGLET 2 : les logos ────────────────────────────────────────────── */
+  /* LE JEU DE LOGOS (2026-10-18, sa demande : « applique le nouveau logo… mais fais-moi un retour en arrière
+     possible avec l'ancien »). Un geste pose les six emplacements ET l'en-tête des courriels ; rien n'est effacé,
+     l'autre jeu reste prêt. Les icônes et l'image de partage suivent avec tools/marque/logo.ps1 (site) et
+     tools/logo.ps1 (application). */
+  function carteJeu(){
+    var jeux = (D && D.jeux) || null; if (!jeux) return '';
+    var jeu = (D && D.jeu) || 'ancien';
+    var tuile = function(k, nom, aide){
+      var on = jeu === k;
+      return '<div class="jeu' + (on ? ' on' : '') + '"><div class="vig" style="background:#f5f2ec"><img src="' + esc(jeux[k].store) + '" alt=""></div>'
+        + '<p class="nom">' + nom + (on ? ' <span class="actuel">${T("· en ligne")}</span>' : '') + '</p><p class="aide">' + aide + '</p>'
+        + (on ? '' : '<button class="pt" data-jeu="' + k + '"' + (RO ? ' disabled' : '') + '>${T("Utiliser ce logo")}</button>') + '</div>';
+    };
+    return '<div class="carte pleine"><h2>${T("Jeu de logos")}</h2>'
+      + '<p class="sous">${T("Bascule d’un coup les six logos et l’en-tête des courriels. L’autre jeu reste prêt : on peut revenir à tout moment.")}</p>'
+      + '<div class="jeux">' + tuile('nouveau', '${T("Nouveau logo")}', '${T("Monogramme « Sz », noir et caramel.")}')
+      + tuile('ancien', '${T("Ancien logo")}', '${T("Monogramme « SS », marine et bordeaux.")}') + '</div></div>';
+  }
+  function basculerJeu(k){
+    if (RO) return;
+    szConfirmer({ titre: k === 'nouveau' ? '${T("Passer au nouveau logo ?")}' : '${T("Revenir à l’ancien logo ?")}',
+      texte: '${T("Les six logos (boutique, connexion, factures) et l’en-tête des courriels changent tout de suite. L’autre jeu reste disponible ici.")}',
+      oui: k === 'nouveau' ? '${T("Passer au nouveau logo")}' : '${T("Revenir à l’ancien logo")}' }).then(function(ok){
+      if (!ok) return;
+      occuper(true); dire('${T("Changement du logo…")}');
+      appeler('config:marque:jeu', [k]).then(function(r){
+        occuper(false);
+        if (r && r.ok) { ENATTENTE = {}; D = r; RO = !r.peutModifier; dessiner(); dire(k === 'nouveau' ? '${T("Nouveau logo en place.")}' : '${T("Ancien logo remis en place.")}', 'bon'); }
+        else dire(expliquer(r), 'err');
+      });
+    });
+  }
   function dessinerLogos(){
-    var h = ['<div class="carte pleine"><h2>${T("Les six logos")}</h2>'];
+    var h = [carteJeu(), '<div class="carte pleine"><h2>${T("Les six logos")}</h2>'];
     h.push('<p class="sous">${T("Un logo choisi n’est déposé qu’à l’enregistrement. PNG ou SVG, fond transparent recommandé.")}</p>');
     h.push('<div class="logos">');
     LOGOS.forEach(function(L){
@@ -343,6 +385,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'m-name':40,'m-slogan':80,'m-slogan-en'
     brancherLogos();
   }
   function brancherLogos(){
+    var js = corps.querySelectorAll('[data-jeu]');
+    for (var q = 0; q < js.length; q++) js[q].onclick = function(e){ basculerJeu(e.currentTarget.getAttribute('data-jeu')); };
     var bs = corps.querySelectorAll('[data-choisir]');
     for (var i = 0; i < bs.length; i++) bs[i].onclick = function(e){ choisirFichier(e.currentTarget.getAttribute('data-choisir')); };
     var an = corps.querySelectorAll('[data-annuler]');

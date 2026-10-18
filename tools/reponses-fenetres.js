@@ -1840,6 +1840,8 @@ const JEU = {
     { nom: 'marque onglet logos', id: 'logos', reponses: {
       identite: IDENTITE,
       'config:marque:donnees': { ok: true, peutModifier: true,
+        // le JEU de logos (2026-10-18) : la carte « Jeu de logos » se dessine (nouveau en ligne, ancien prêt)
+        jeu: 'nouveau', jeux: { nouveau: { store: LOGO_BANDEAU }, ancien: { store: LOGO_BANDEAU } },
         marque: { name: 'SANDRIZA', sub: '', slogan: '', sloganEN: '', letter: 'S',
           gradient: { enabled: false, from: '#ec4899', to: '#3b82f6', dir: '135deg' } },
         logos: { store: '', store_en: '', admin: '', login: '', transparent: '', transparent_en: '' },

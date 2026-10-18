@@ -2802,7 +2802,7 @@ const OPS_PONT = new Set([
   'config:heures:donnees', 'config:heures:ecrire',
   'config:footer:donnees', 'config:footer:ecrire',
   'config:apparence:donnees', 'config:apparence:ecrire',
-  'config:marque:donnees', 'config:marque:ecrire', 'config:marque:reinit',
+  'config:marque:donnees', 'config:marque:ecrire', 'config:marque:reinit', 'config:marque:jeu',
   'config:icones:donnees', 'config:icones:ajouter', 'config:icones:supprimer',
   'config:icones:ico', 'config:icones:convertir',
   'config:conformite:donnees', 'config:conformite:ecrire',
@@ -3456,7 +3456,7 @@ const LIMITES_PONT = {
   // ⚠ L ecriture de la marque porte des IMAGES : le depot dans R2 se fait au
   // coeur, six logos peuvent partir d un coup, et un plafond de 20 s ferait
   // passer un depot lent pour une panne.
-  'config:marque:donnees': 15000, 'config:marque:ecrire': 120000, 'config:marque:reinit': 30000,
+  'config:marque:donnees': 15000, 'config:marque:ecrire': 120000, 'config:marque:reinit': 30000, 'config:marque:jeu': 30000,
   // ⚠ L ajout d une icone depose dans R2 ; la conversion .ico redessine six
   // tailles depuis l original. Ni l une ni l autre n est instantanee.
   'config:icones:donnees': 15000, 'config:icones:ajouter': 90000,
