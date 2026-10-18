@@ -1652,8 +1652,48 @@ const JEU = {
             { au: '2026-08-09T14:58:40Z', modele: 'fal-ai/flux-pro/kontext', geste: 'humain',
               qui: 'bbrousseau', ms: 900, ok: false,
               erreur: 'Exhausted balance. Please top up your account.', cout: 0, coutReel: false },
+            // Un appel de chaque autre fournisseur : le journal complet les distingue par une pastille.
+            { au: '2026-08-09T14:50:00Z', modele: 'photoroom/v2/edit', geste: 'fantome', qui: 'bbrousseau', ms: 6100,
+              ok: true, erreur: '', cout: 0.1, coutReel: true, photoCode: 'PH-000042', photoNom: 'chemisier-soie.jpg', apercu: false },
+            { au: '2026-08-09T14:40:00Z', modele: 'tnb/image_to_ghost_mannequin-v1/standard', geste: 'fantome', qui: 'bbrousseau', ms: 2600,
+              ok: true, erreur: '', cout: 0.065, coutReel: true, photoCode: 'PH-000043', photoNom: 'veste-suede.jpg' },
           ] }),
           'photoroom:compte': PR_OK,
+          'photos:liste': { ok: true, photos: [] },
+          identite: IDENTITE,
+        },
+      },
+      // ⚠ L ONGLET THE NEW BLACK (2026-10-18) : le faux pont rend la même réponse quel que soit l argument de
+      // fal:suivi — elle porte donc À LA FOIS le résumé et le détail « tnb » (forme réelle de tnb-proxy.php,
+      // action suivi), registre aux mots bruts compris (« delivered », « image_to_ghost_mannequin »).
+      {
+        nom: 'the new black',
+        id: 'tnb',
+        reponses: {
+          'fal:suivi': Object.assign({}, BASE, {
+            forfait: { nom: 'Business', prixMois: 65, creditsMois: 1000, cumulMax: 4000 }, prixCredit: 0.065,
+            paliers: { standard: { credits: 1 }, pro: { credits: 3 }, ultra: { credits: 7 } },
+            clePosee: true, credits: 1191, dollars: 77.42,
+            registre: [
+              { au: '2026-10-18T20:33:10Z', type: 'settle', credits: 0, note: 'delivered' },
+              { au: '2026-10-18T20:33:01Z', type: 'hold', credits: -1, note: 'image_to_ghost_mannequin' },
+              { au: '2026-10-18T20:29:40Z', type: 'settle', credits: 0, note: 'delivered' },
+              { au: '2026-10-18T20:28:55Z', type: 'hold', credits: -1, note: 'image_to_ghost_mannequin-v1' },
+              { au: '2026-10-18T19:04:12Z', type: 'refund', credits: 7, note: 'failed' },
+              { au: '2026-10-18T19:03:30Z', type: 'hold', credits: -7, note: 'image_to_ghost_mannequin' },
+              { au: '2026-10-18T12:00:00Z', type: 'plan', credits: 1000, note: 'monthly' },
+            ],
+            depense30j: { credits: 12, dollars: 0.78 },
+            generations: [
+              { au: '2026-10-18T20:33:10Z', palier: 'standard', ok: true, erreur: '', cout: 0.065, photoCode: 'PH-000112', photoNom: 'veste-suede-devant.jpg', qui: 'staff_sa001', ms: 2600 },
+              { au: '2026-10-18T20:29:40Z', palier: 'pro', ok: true, erreur: '', cout: 0.195, photoCode: 'PH-000109', photoNom: 'robe-lin-noire.jpg', qui: 'staff_sa001', ms: 41200 },
+              { au: '2026-10-18T19:04:12Z', palier: 'ultra', ok: false, erreur: 'Generation failed: garment not detected', cout: 0, photoCode: 'PH-000101', photoNom: 'jupe-plissee.jpg', qui: 'bbrousseau', ms: 18800 },
+            ],
+            mois: { mois: '2026-10', generations: 3, dollars: 0.195 },
+            budget: { actif: true, mensuel: 50, depense: 3.1, restant: 46.9, mois: '2026-10' },
+          }),
+          'photoroom:compte': PR_OK,
+          'photos:liste': { ok: true, photos: [] },
           identite: IDENTITE,
         },
       },

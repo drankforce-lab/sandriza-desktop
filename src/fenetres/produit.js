@@ -121,6 +121,23 @@ html.jour .pf-med-l video{background:#1d2433}
 #p-vues .vue .cadre{width:100%;height:160px}
 #p-vues .cadre.pleine{border-style:dashed;border-color:var(--v40)}
 .cadre.survol,.vign.survol{outline:3px solid #4ade80;outline-offset:2px}
+/* Pendant le glisser (2026-10-18) : la case qu on tire s estompe, la case visee dit ce que le depot va faire. */
+#p-vues .cadre{position:relative}
+.cadre.tire,.vign.tire{opacity:.38}
+.cadre.survol[data-geste]::after,.vign.survol[data-geste]::after{content:attr(data-geste);position:absolute;left:50%;bottom:8px;
+  transform:translateX(-50%);padding:.22rem .6rem;border-radius:99px;background:#14532d;color:var(--tx-sur-accent);font-size:.72rem;
+  font-weight:700;white-space:nowrap;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+/* Les gestes au clavier : ‹ ⇤ › au pied de la case, visibles au survol et au foyer. */
+.vue .depl{position:absolute;left:0;right:0;bottom:calc(1.25rem + 8px);display:flex;justify-content:center;gap:4px;
+  opacity:0;transition:opacity .12s}
+.vue:hover .depl,.vue .depl:focus-within{opacity:1}
+.vue .depl button{width:26px;height:24px;padding:0;border-radius:7px;font-size:.85rem;line-height:1;font-weight:700;
+  background:rgba(12,18,28,.86);border:1px solid var(--v28);color:var(--tx-blanc)}
+.vue .depl button:hover:not(:disabled){background:var(--or);border-color:var(--or);color:#1a1208}
+.vue .depl button:focus-visible{outline:2px solid var(--or);outline-offset:1px}
+.vue .depl button:disabled{opacity:.35;cursor:default}
+html.jour .cadre.survol[data-geste]::after,html.jour .vign.survol[data-geste]::after{background:#166534;color:var(--tx-sur-accent)}
+html.jour .vue .depl button{background:rgba(255,255,255,.92);color:#1d2433;border-color:rgba(29,36,51,.25)}
 .mini-decor{display:block;width:100%;margin-top:.3rem;font-size:.72rem;
   padding:.14rem .3rem;border-radius:7px;border:1px solid var(--v16);
   background:var(--v05);color:var(--tx);cursor:pointer}
@@ -446,12 +463,17 @@ function pageProduit(id) {
   // faut, et l ordre est celui de l ajout.
   function clesVues(){
     if (modeStandard()) {
-      var n = Object.keys(VUES).filter(function(k){ return k.indexOf('libre') === 0; }).length;
+      /* ⚠ LES CASES PEUVENT AVOIR DES TROUS (2026-10-18, sa demande : glisser la photo 1 dans la case 2 vide
+         doit l y mettre). On montre donc jusqu a la PLUS HAUTE case occupée, plus une vide au bout. Le pont
+         remet les photos dans l ordre des cases à l enregistrement : un trou ne part jamais sur la boutique. */
+      var occ = Object.keys(VUES).filter(function(k){ return k.indexOf('libre') === 0 && VUES[k]; });
+      var hi = 0;
+      occ.forEach(function(k){ var x = parseInt(k.slice(5), 10) || 0; if (x > hi) hi = x; });
       var l = [];
       // Une case vide au bout TANT QU IL RESTE DE LA PLACE : en proposer une
       // sixieme laisserait croire qu on peut depasser, et le refus arriverait
       // apres avoir choisi le fichier.
-      var max = Math.min(n + 1, MAX_PHOTOS);
+      var max = Math.min(Math.max(hi, occ.length) + 1, MAX_PHOTOS);
       for (var i = 1; i <= max; i++) l.push('libre' + i);
       return l;
     }
@@ -996,19 +1018,25 @@ function pageProduit(id) {
         var libre = k.indexOf('libre') === 0;
         choisirPhoto(function(ds){
           if (!libre) { VUES[k] = ds[0]; dessinerVues(); return; }
-          var deja = Object.keys(VUES).filter(function(x){ return x.indexOf('libre') === 0; }).length;
-          var place = Math.max(0, MAX_PHOTOS - deja);
+          // Les cases VIDES reçoivent les photos — celle qu on a cliquée d abord, puis les autres dans l ordre
+          // (les cases peuvent avoir des trous depuis le glisser-déposer : compter les pleines écraserait).
+          var places = [];
+          if (!VUES[k]) places.push(k);
+          for (var ip = 1; ip <= MAX_PHOTOS; ip++) { if (!VUES['libre' + ip] && ('libre' + ip) !== k) places.push('libre' + ip); }
+          var place = places.length;
           if (ds.length > place) {
             dire('Maximum ' + MAX_PHOTOS + ' ${T("photos supplémentaires —")} '
               + (ds.length - place) + ' ' + szPl(ds.length - place, '${T("ignorée.")}', '${T("ignorées.")}'), 'att');
           }
-          ds.slice(0, place).forEach(function(d, i){ VUES['libre' + (deja + i + 1)] = d; });
+          ds.slice(0, place).forEach(function(d, i){ VUES[places[i]] = d; });
           dessinerVues();
         }, libre);
         return;
       }
       var x = ev.target.closest('[data-vuex]');
       if (x) { delete VUES[x.getAttribute('data-vuex')]; dessinerVues(); return; }
+      var dp = ev.target.closest('[data-depl]');
+      if (dp) { deplacerAuClavier(dp.getAttribute('data-cle'), dp.getAttribute('data-depl')); return; }
       var xd = ev.target.closest('[data-vuedos]');
       if (xd) {
         var sd = VUES[xd.getAttribute('data-vuedos')] || '';
@@ -1708,12 +1736,25 @@ function pageProduit(id) {
       : '${T("Photos — principale + vues")}';
     var z = document.getElementById('p-vues');
     if (z) {
-      z.innerHTML = clesVues().map(function(cle){
+      var cles = clesVues();
+      z.innerHTML = cles.map(function(cle, i){
         var src = VUES[cle] || '';
+        /* ⚠ LE CLAVIER AUSSI (2026-10-18) : ‹ et › échangent la photo avec la case voisine (ou l y déplacent si
+           elle est vide), ⇤ l échange avec la principale. Ils apparaissent au survol et au foyer. */
+        var nom = esc(nomVue(cle));
+        var depl = src ? '<div class="depl">'
+          + '<button type="button" data-depl="g" data-cle="' + esc(cle) + '"' + (i === 0 ? ' disabled' : '')
+          + ' title="${T("Déplacer vers la case précédente")}" aria-label="${T("Déplacer vers la case précédente")} — ' + nom + '">‹</button>'
+          + '<button type="button" data-depl="p" data-cle="' + esc(cle) + '"'
+          + ' title="${T("Échanger avec la photo principale")}" aria-label="${T("Échanger avec la photo principale")} — ' + nom + '">⇤</button>'
+          + '<button type="button" data-depl="d" data-cle="' + esc(cle) + '"' + (i === cles.length - 1 ? ' disabled' : '')
+          + ' title="${T("Déplacer vers la case suivante")}" aria-label="${T("Déplacer vers la case suivante")} — ' + nom + '">›</button>'
+          + '</div>' : '';
         return '<div class="vue"><div class="cadre' + (src ? ' pleine" draggable="true' : '') + '" data-vue="' + esc(cle) + '"'
-          + (src ? ' title="${T("Glisser pour réordonner, ou déposer sur la principale")}"' : '') + '>'
-          + (src ? '<img src="' + esc(src) + '" alt="">' : 'ajouter') + '</div>'
+          + (src ? ' title="${T("Glisser sur une autre case pour l’y déplacer ou l’échanger, ou sur la principale")}"' : '') + '>'
+          + (src ? '<img src="' + esc(src) + '" alt="" draggable="false">' : 'ajouter') + '</div>'
           + (src ? '<button type="button" class="x" data-vuex="' + esc(cle) + '" title="${T("Retirer")}">×</button>' : '')
+          + depl
           + ((src && cle.indexOf('libre') === 0) ? '<button type="button" class="dos' + (src === DOS_SRC ? ' on' : '')
             + '" data-vuedos="' + esc(cle) + '" title="${T("Photo du dos — sert à l’aperçu 3D")}">${T("Dos")}</button>' : '')
           + '<div class="lgd">' + esc(nomVue(cle)) + '</div></div>';
@@ -1891,116 +1932,127 @@ function pageProduit(id) {
     var bf = document.getElementById('p-fibre');
     if (bf) bf.disabled = !src;
     v.innerHTML = src
-      ? '<img src="' + esc(src) + '" alt="">'
+      ? '<img src="' + esc(src) + '" alt="" draggable="false">'
         + '<button type="button" class="x" id="p-vider" title="${T("Retirer la photo")}">×</button>'
       : '${T("choisir une photo")}';
   }
 
-  /* ── GLISSER-DEPOSER DES PHOTOS (demande le 2026-08-08) ──
-     Une secondaire deposee sur la principale PREND SA PLACE, et l ancienne
-     principale descend dans la ligne : rien ne se perd. Les cases libres se
-     reordonnent en glissant sur la ligne ; les vues NOMMEES (devant,
-     derriere...) gardent leur sens, elles ne font que s echanger. Tout vit
-     dans IMAGE et VUES, jamais dans l ecran : le redessin repart de l etat. */
+  /* ── GLISSER-DEPOSER DES PHOTOS (demande le 2026-08-08, refait le 2026-10-18) ──
+     ⚠ UNE SEULE REGLE, DANS LES DEUX MODES (photos simples et angles) : déposer une photo sur une case
+     PLEINE les ÉCHANGE ; sur une case VIDE, elle s y DÉPLACE. La principale suit la même règle : une
+     secondaire déposée sur elle prend sa place et l ancienne descend dans la case quittée — rien ne se perd.
+     Avant (2026-10-18, sa capture) : les cases libres se « réordonnaient » en se tassant, si bien que glisser
+     la photo 1 sur la case 2 vide la remettait… en 1 — rien ne bougeait, le geste semblait mort.
+     ⚠ LE RÔLE « DOS » SUIT LA PHOTO, pas la case : DOS_SRC retient son adresse. Il ne tombe que si la photo
+     devient la principale (le devant et le dos ne peuvent pas être la même photo). En mode angles, le dos
+     est la case « Derrière » : c est une place, et la photo qu on y dépose devient le dos.
+     Tout vit dans IMAGE et VUES, jamais dans l écran : le redessin repart de l état. */
   function libresOrdonnees(){
-    return Object.keys(VUES).filter(function(k){ return k.indexOf('libre') === 0; })
+    return Object.keys(VUES).filter(function(k){ return k.indexOf('libre') === 0 && VUES[k]; })
       .sort(function(a, b){ return parseInt(a.slice(5), 10) - parseInt(b.slice(5), 10); })
       .map(function(k){ return VUES[k]; });
   }
-  function poserLibres(arr){
-    Object.keys(VUES).forEach(function(k){ if (k.indexOf('libre') === 0) delete VUES[k]; });
-    arr.forEach(function(src, i){ VUES['libre' + (i + 1)] = src; });
+  function valeurCase(k){ return k === 'principale' ? IMAGE : (VUES[k] || ''); }
+  function poserCase(k, v){
+    if (k === 'principale') { IMAGE = v || ''; return; }
+    if (v) VUES[k] = v; else delete VUES[k];
+  }
+  function nomCase(k){ return k === 'principale' ? '${T("Photo principale")}' : nomVue(k); }
+  // Déplace (case vide) ou échange (case pleine). Rend true si quelque chose a bougé.
+  function deplacer(src, cible){
+    if (!src || !cible || src === cible) return false;
+    var a = valeurCase(src), b = valeurCase(cible);
+    if (!a) return false;
+    poserCase(cible, a);
+    poserCase(src, b);
+    var dosPerdu = false;
+    if (DOS_SRC && IMAGE && IMAGE === DOS_SRC) { DOS_SRC = ''; dosPerdu = true; }
+    montrerImage(IMAGE); dessinerVues(); majIa();
+    var m;
+    if (cible === 'principale' || src === 'principale') {
+      m = (cible === 'principale' && b) || (src === 'principale' && b)
+        ? '${T("Photo principale remplacée — l’ancienne a pris la case quittée.")}'
+        : '${T("Photo déplacée dans « {0} ».")}'.split('{0}').join(nomCase(cible));
+    } else {
+      m = b ? '${T("Photos échangées : « {0} » et « {1} ».")}'.split('{0}').join(nomCase(src)).split('{1}').join(nomCase(cible))
+        : '${T("Photo déplacée dans « {0} ».")}'.split('{0}').join(nomCase(cible));
+    }
+    if (dosPerdu) m += ' ${T("Elle ne peut plus servir de dos : la marque « Dos » est retirée.")}';
+    dire(m, dosPerdu ? 'att' : 'bon');
+    return true;
+  }
+  // Le clavier : ‹ › vers la case voisine, ⇤ avec la principale. Le foyer suit la photo dans sa nouvelle case.
+  function deplacerAuClavier(cle, sens){
+    var cles = clesVues();
+    var i = cles.indexOf(cle);
+    if (i < 0) return;
+    var cible = sens === 'p' ? 'principale' : cles[i + (sens === 'g' ? -1 : 1)];
+    if (!cible) return;
+    if (!deplacer(cle, cible)) return;
+    var vers = sens === 'p' ? cle : cible;   // après ⇤, la case garde le foyer (elle porte l ancienne principale)
+    var bt = document.querySelector('#p-vues [data-depl="' + sens + '"][data-cle="' + vers + '"]');
+    if (bt && !bt.disabled) bt.focus();
+    else { var autre = document.querySelector('#p-vues [data-cle="' + vers + '"]:not([disabled])'); if (autre) autre.focus(); }
   }
   var GLISSE = null; // 'principale' | cle de la vue tiree
   function nettoyerSurvol(){
     Array.prototype.forEach.call(document.querySelectorAll('.survol'), function(el){
-      el.classList.remove('survol');
+      el.classList.remove('survol'); el.removeAttribute('data-geste');
     });
   }
+  function finGlisser(){
+    GLISSE = null;
+    nettoyerSurvol();
+    Array.prototype.forEach.call(document.querySelectorAll('.tire'), function(el){ el.classList.remove('tire'); });
+  }
+  // La case visée : la principale, un cadre, ou n importe quoi DANS la case (pastille, boutons, légende).
+  function caseVisee(el){
+    if (!el || !el.closest) return null;
+    var v = el.closest('#p-vign'); if (v) return v;
+    var c = el.closest('#p-vues [data-vue]'); if (c) return c;
+    var w = el.closest('#p-vues .vue');
+    return w ? w.querySelector('[data-vue]') : null;
+  }
+  function cleDe(el){ return el.id === 'p-vign' ? 'principale' : el.getAttribute('data-vue'); }
   document.getElementById('corps').addEventListener('dragstart', function(ev){
     var t = ev.target;
     if (!t || !t.closest) return;
+    var el = null;
     if (t.closest('#p-vign')) {
       if (!IMAGE) return;
-      GLISSE = 'principale';
-      try { ev.dataTransfer.setData('text/plain', 'principale'); } catch (e) {}
-      return;
+      el = t.closest('#p-vign'); GLISSE = 'principale';
+    } else {
+      var c = t.closest('#p-vues [data-vue]');
+      if (!c || !c.classList.contains('pleine')) return;
+      el = c; GLISSE = c.getAttribute('data-vue');
     }
-    var c = t.closest('[data-vue]');
-    if (c && c.classList.contains('pleine')) {
-      GLISSE = c.getAttribute('data-vue');
-      try { ev.dataTransfer.setData('text/plain', GLISSE); } catch (e) {}
-    }
+    try { ev.dataTransfer.effectAllowed = 'move'; ev.dataTransfer.setData('text/plain', GLISSE); } catch (e) {}
+    // La case qu on tire s estompe : on voit d où part la photo pendant tout le geste.
+    setTimeout(function(){ if (GLISSE) el.classList.add('tire'); }, 0);
   });
   document.getElementById('corps').addEventListener('dragover', function(ev){
     if (!GLISSE) return;
-    var t = ev.target && ev.target.closest ? (ev.target.closest('#p-vign') || ev.target.closest('[data-vue]')) : null;
-    if (!t) return;
+    var t = caseVisee(ev.target);
+    if (!t) { nettoyerSurvol(); return; }
+    var k = cleDe(t);
+    if (k === GLISSE) { nettoyerSurvol(); return; }
     ev.preventDefault();
+    try { ev.dataTransfer.dropEffect = 'move'; } catch (e) {}
+    if (t.classList.contains('survol')) return;
     nettoyerSurvol();
     t.classList.add('survol');
+    // Ce que le dépôt va faire, écrit sur la case visée.
+    t.setAttribute('data-geste', valeurCase(k) ? '${T("⇄ Échanger")}' : '${T("Déposer ici")}');
   });
-  document.getElementById('corps').addEventListener('dragend', function(){
-    GLISSE = null;
-    nettoyerSurvol();
-  });
+  document.getElementById('corps').addEventListener('dragend', finGlisser);
   document.getElementById('corps').addEventListener('drop', function(ev){
     if (!GLISSE) return;
     var src = GLISSE;
-    GLISSE = null;
-    nettoyerSurvol();
-    var surVign = ev.target.closest ? ev.target.closest('#p-vign') : null;
-    var surVue = ev.target.closest ? ev.target.closest('[data-vue]') : null;
-    if (!surVign && !surVue) return;
+    var t = caseVisee(ev.target);
+    finGlisser();
+    if (!t) return;
     ev.preventDefault();
-    if (surVign) {
-      if (src === 'principale') return;
-      var neuve = VUES[src];
-      if (!neuve) return;
-      var ancienne = IMAGE;
-      IMAGE = neuve;
-      if (src.indexOf('libre') === 0) {
-        var arr = libresOrdonnees();
-        var i = arr.indexOf(neuve);
-        if (i >= 0) { if (ancienne) arr[i] = ancienne; else arr.splice(i, 1); }
-        poserLibres(arr);
-      } else {
-        if (ancienne) VUES[src] = ancienne; else delete VUES[src];
-      }
-      montrerImage(IMAGE); dessinerVues(); majIa();
-      dire('${T("Photo principale remplacée — l’ancienne est restée dans la ligne.")}', 'bon');
-      return;
-    }
-    var cible = surVue.getAttribute('data-vue');
-    if (src === 'principale') {
-      if (!IMAGE) return;
-      var valC = VUES[cible];
-      if (valC) { VUES[cible] = IMAGE; IMAGE = valC; }
-      else if (cible.indexOf('libre') === 0) {
-        var a0 = libresOrdonnees();
-        if (a0.length >= MAX_PHOTOS) { dire('Maximum ' + MAX_PHOTOS + ' ${T("photos supplémentaires.")}', 'att'); return; }
-        a0.push(IMAGE); poserLibres(a0); IMAGE = '';
-      } else { VUES[cible] = IMAGE; IMAGE = ''; }
-      montrerImage(IMAGE); dessinerVues(); majIa();
-      return;
-    }
-    if (src === cible) return;
-    if (src.indexOf('libre') === 0 && cible.indexOf('libre') === 0) {
-      var a = libresOrdonnees();
-      var de = a.indexOf(VUES[src]);
-      if (de < 0) return;
-      var val = a.splice(de, 1)[0];
-      var vers = VUES[cible] ? a.indexOf(VUES[cible]) : a.length;
-      if (vers < 0) vers = a.length;
-      a.splice(vers, 0, val);
-      poserLibres(a);
-      dessinerVues();
-      return;
-    }
-    var tmp = VUES[src];
-    if (VUES[cible]) { VUES[src] = VUES[cible]; } else { delete VUES[src]; }
-    VUES[cible] = tmp;
-    dessinerVues();
+    deplacer(src, cleDe(t));
   });
   var MAX_MO = 8;
 
