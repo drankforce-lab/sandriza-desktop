@@ -147,6 +147,7 @@ const MENU_APP_EN = {
   'Fournisseurs': 'Suppliers',
   'Gabarits courriel': 'Email templates',
   'Gardien': 'Guard',
+  'NIP': 'PINs',
   'Gestion des taxes': 'Tax management',
   'Conformité internationale': 'International compliance',
   'Compte de paiement': 'Payment account',

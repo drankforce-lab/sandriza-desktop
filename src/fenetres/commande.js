@@ -78,13 +78,17 @@ button.prim .kb{border-color:rgba(23,32,44,.35);color:#17202c}
 .reprise[hidden]{display:none}
 .reprise span{flex:1 1 auto;min-width:0}
 .scan-l{font-size:.8rem;color:var(--tx2)}
-.scan{display:flex;align-items:center;gap:.8rem;background:var(--f-champ);border:2px solid var(--or);border-radius:14px;
-  padding:0 1rem;height:72px;flex:0 0 auto}
+.scan{display:flex;align-items:center;gap:.8rem;background:var(--f-champ);border:2px solid var(--or);border-radius:12px;
+  padding:0 .9rem;height:50px;flex:0 0 auto;box-sizing:border-box}
+.scan:focus-within{box-shadow:0 0 0 3px rgba(var(--or-rgb),.22)}
 .scan.ok{border-color:var(--tx-ok)}
 .scan.err{border-color:var(--tx-err)}
 .scan svg{flex:0 0 auto;color:var(--or)}
 .scan input{flex:1 1 auto;min-width:0;background:transparent;border:0;outline:none;color:var(--tx);
-  font:600 1.35rem/1 ui-monospace,Consolas,monospace;letter-spacing:.02em;padding:0}
+  font:600 1.05rem/1 ui-monospace,Consolas,monospace;letter-spacing:.02em;padding:0;height:auto;
+  box-shadow:none!important;border:0!important;outline:none!important;border-radius:0}
+.scan input:focus,.scan input:focus-visible{box-shadow:none!important;border:0!important;outline:none!important}
+.scan svg{width:22px;height:22px}
 .scan input::placeholder{color:var(--tx3);font-weight:500}
 .retour{display:flex;align-items:center;gap:.6rem;border-radius:11px;padding:.55rem .8rem;font-size:.9rem;
   min-height:2.6rem;border:1px solid transparent}

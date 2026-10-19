@@ -396,12 +396,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function cartePcHtml(){
     var pc = (D.carriers || {})['postes-canada'] || {};
     if (aDeuxJeux(pc)) {
-      var h2 = teteHtml('${T("Postes Canada")}', 'cp-en', pc.enabled, 'postes-canada') + '<div class="szr-sections">';
+      var h2 = teteHtml('${T("Postes Canada")}', 'cp-en', pc.enabled, 'postes-canada')
+        + '<div class="info">${T("Portail développeur de Postes Canada › Identifiants : Credential for [Test] = bac à sable, [Production] = production. Copiez la « Clé d’API » et le « Code API secret » dans le bloc correspondant.")}</div>'
+        + '<div class="szr-sections">';
       JEUX.forEach(function(j){
         var e = pc.jeux[j.k] || {};
         var actif = (pc.mode || 'sandbox') === j.k;
         h2 += '<section class="szr-sec jeu' + (actif ? ' actif' : '') + '">' + jeuTeteHtml(j, pc)
-          + secretHtml('cp-cle-' + j.k, '${T("Clé API:Secret")}', e.cle, '${T("clé:secret")}')
+          + secretHtml('cp-cle-' + j.k, '${T("Clé d’API")}', e.cle, '${T("Clé d’API du portail")}')
+          + secretHtml('cp-sec-' + j.k, '${T("Code API secret")}', e.secret, '••••••••')
           + texteHtml('cp-cust-' + j.k, '${T("Numéro client")}', e.customerNumber, j.k === 'sandbox' ? '${T("Ex : 2004381")}' : '${T("Ex : 0001234567")}', false)
           + texteHtml('cp-contract-' + j.k, '${T("ID contrat")}', e.contractId, '${T("Vide sans entente commerciale")}', false)
           + (e.plateforme ? '<div class="aide">' + (e.plateforme === 'oauth' ? '${T("Nouvelle plateforme (OAuth) — un seul hôte : c’est la clé qui est de test ou de production.")}' : '${T("Ancienne passerelle (soa-gw) — hôte de test ct.soa-gw.canadapost.ca.")}') + '</div>' : '')
@@ -517,7 +520,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (document.getElementById('cp-cle-sandbox')) {
       s['postes-canada'].jeux = {};
       JEUX.forEach(function(j){
-        s['postes-canada'].jeux[j.k] = { cle: val('cp-cle-' + j.k), customerNumber: val('cp-cust-' + j.k), contractId: val('cp-contract-' + j.k) };
+        // La clé et le secret partent SÉPARÉMENT : un champ vide = inchangé au serveur.
+        s['postes-canada'].jeux[j.k] = { cle: val('cp-cle-' + j.k), secret: val('cp-sec-' + j.k), customerNumber: val('cp-cust-' + j.k), contractId: val('cp-contract-' + j.k) };
       });
     }
     SIMPLES.forEach(function(sp){

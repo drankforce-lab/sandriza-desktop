@@ -725,90 +725,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return !!(RABNIP && RABNIP.type === RABTYPE && RABNIP.valeur === brut);
   }
 
-  /* ══ LE NIP VU ET CHANGE PAR LE SUPER-ADMINISTRATEUR (2026-10-14) ═══════════════
-     « enregistre et visible que pour les super administrateurs ». Le bouton n est montre qu a ce role
-     (CTX.superadmin, simple affichage) ; c est le SERVEUR qui refuse tout autre role, rôle relu a
-     chaque appel. Le NIP n est lu qu a l ouverture de ce volet, et masque tant qu on ne demande pas
-     a le voir. Un champ laisse vide ne retire RIEN : retirer est un geste nomme, confirme dans une boite a part. */
+  /* (2026-10-19, sa demande) TOUS LES NIP SE REGLENT DANS Configuration > Securite > NIP, par le super-administrateur.
+     Ce volet posait et relisait le NIP de la caisse ici : deux endroits qui ecrivent la meme chose finissent par
+     se contredire. Le bouton (montre au super-administrateur seulement) ouvre maintenant la section NIP. */
   function panneauNip(){
-    fermerVoileNip();
-    var v = document.createElement('div');
-    v.className = 'voile'; v.id = 'voile-nip';
-    v.innerHTML = '<div class="boite nip" role="dialog" aria-modal="true" aria-labelledby="nip-titre">'
-      + '<h3 id="nip-titre">${T("NIP des prix modifiés")}</h3>'
-      + '<p class="resume">${T("Exigé à la caisse pour modifier un prix ou accorder un rabais — les super administrateurs en sont dispensés. Visible et modifiable par eux seulement.")}</p>'
-      + '<div id="nip-etat"><div class="nip-msg">${T("Lecture…")}</div></div>'
-      + '<div class="g2" style="margin-top:.4rem">'
-      + '<label class="ch"><span>${T("Nouveau NIP")}</span><input id="nip-neuf" class="nip-champ" type="password" inputmode="numeric" autocomplete="off" maxlength="8"></label>'
-      + '<label class="ch"><span>${T("Confirmer")}</span><input id="nip-conf" class="nip-champ" type="password" inputmode="numeric" autocomplete="off" maxlength="8"></label></div>'
-      + '<div class="nip-msg" id="nip-msg" role="status" aria-live="polite"></div>'
-      + '<div class="fin"><button type="button" id="nip-retirer" style="margin-right:auto" disabled>${T("Retirer le NIP")}</button>'
-      + '<button type="button" id="nip-fermer">${T("Fermer")}</button>'
-      + '<button type="button" class="prim" id="nip-enreg">${T("Enregistrer")}</button></div></div>';
-    document.body.appendChild(v);
-    var msg = document.getElementById('nip-msg'), actuel = null, retArme = null;
-    function nipMsg(t, cl){ msg.textContent = t || ''; msg.className = 'nip-msg' + (cl ? ' ' + cl : ''); }
-    function fermer(){ fermerVoileNip(); var s = document.getElementById('scan'); if (s) s.focus(); }
-    ['nip-neuf', 'nip-conf'].forEach(function(id){
-      document.getElementById(id).oninput = function(){ var d = this.value.replace(/[^0-9]/g, '').slice(0, 8); if (d !== this.value) this.value = d; };
-    });
-    function etat(r){
-      var z = document.getElementById('nip-etat');
-      if (!z) return;
-      if (!r.ok) { z.innerHTML = '<div class="nip-msg err">' + esc(expliquer(r.motif)) + '</div>'; document.getElementById('nip-enreg').disabled = true; return; }
-      actuel = r.nip;
-      var h;
-      if (!r.defini) h = '<div class="nip-msg err">${T("Aucun NIP défini — prix modifiés et rabais sont refusés à la caisse (sauf aux super administrateurs).")}</div>';
-      else if (r.nip == null) h = '<div class="nip-msg err">${T("Un NIP est enregistré, mais il ne se relit plus sur ce serveur — enregistrez-en un nouveau.")}</div>';
-      else h = '<div class="nip-actuel"><span>${T("NIP actuel")}</span><strong id="nip-vu" class="num">' + '••••••••'.slice(0, String(r.nip).length) + '</strong>'
-        + '<button type="button" class="mini" id="nip-voir" aria-pressed="false">${T("Afficher")}</button></div>';
-      if (r.defini && (r.par || r.pose)) h += '<div class="aide">${T("Défini")}' + (r.pose ? ' ' + esc(typeof szQuand === 'function' ? szQuand(r.pose) : r.pose) : '')
-        + (r.par ? ' — ' + esc(r.par) : '') + '</div>';
-      if (r.bloqueMinutes > 0) h += '<div class="aide" style="color:var(--tx-att)">${T("Trop d’essais faux à la caisse — prix modifiés bloqués. Minutes restantes :")} ' + r.bloqueMinutes + '</div>';
-      z.innerHTML = h;
-      document.getElementById('nip-retirer').disabled = !r.defini;
-      var bvoir = document.getElementById('nip-voir');
-      if (bvoir) bvoir.onclick = function(){
-        var vu = document.getElementById('nip-vu'), on = this.getAttribute('aria-pressed') !== 'true';
-        vu.textContent = on ? String(actuel) : '••••••••'.slice(0, String(actuel).length);
-        this.setAttribute('aria-pressed', String(on));
-        this.textContent = on ? '${T("Masquer")}' : '${T("Afficher")}';
-      };
-    }
-    appeler('caisse:nipLire').then(etat);
-    document.getElementById('nip-enreg').onclick = function(){
-      var a = val('nip-neuf'), b = val('nip-conf'), btn = this;
-      if (!/^[0-9]{4,8}$/.test(a)) { nipMsg(expliquer('nip_invalide'), 'err'); return; }
-      if (a !== b) { nipMsg('${T("Les deux NIP ne concordent pas.")}', 'err'); return; }
-      btn.disabled = true; nipMsg('${T("Enregistrement…")}');
-      appeler('caisse:nipEcrire', [a]).then(function(r){
-        btn.disabled = false;
-        if (!r.ok) { nipMsg(expliquer(r.motif), 'err'); return; }
-        document.getElementById('nip-neuf').value = ''; document.getElementById('nip-conf').value = '';
-        etat(r); nipMsg('${T("NIP enregistré.")}', 'bon');
-      });
-    };
-    document.getElementById('nip-retirer').onclick = function(){
-      var btn = this;
-      if (!retArme) {
-        szConfirmer({ prudent: true, titre: '${T("Retirer le NIP de sécurité")}',
-          texte: '${T("Le NIP de sécurité de la caisse sera retiré. Plus aucun prix ne pourra être modifié à la caisse tant qu’un nouveau NIP n’aura pas été enregistré.")}',
-          oui: '${T("Retirer le NIP")}' }).then(function(ok){ if (ok) { retArme = true; btn.onclick(); } });
-        return;
-      }
-      retArme = null;
-      btn.disabled = true;
-      appeler('caisse:nipRetirer').then(function(r){
-        if (!r.ok) { btn.disabled = false; nipMsg(expliquer(r.motif), 'err'); return; }
-        etat({ ok: true, defini: false, nip: null }); nipMsg('${T("NIP retiré — plus aucun prix ne peut être modifié à la caisse.")}', 'bon');
-      });
-    };
-    document.getElementById('nip-fermer').onclick = fermer;
-    v.addEventListener('keydown', function(ev){
-      if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); fermer(); }
-      else if (ev.key === 'Enter' && ev.target && /^nip-(neuf|conf)$/.test(ev.target.id)) { ev.preventDefault(); document.getElementById('nip-enreg').click(); }
-    });
-    document.getElementById('nip-neuf').focus();
+    var lien = function(ok){ if (!ok) dire('${T("Le NIP de la caisse se règle dans Configuration › Sécurité › NIP.")}', 'att'); };
+    if (P && P.ouvrirModule) Promise.resolve(P.ouvrirModule('nips')).then(lien, function(){ lien(false); });
+    else lien(false);
   }
 
   function ajouter(pid, taille, couleur){

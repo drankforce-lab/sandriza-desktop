@@ -389,4 +389,7 @@ module.exports = {
   "Traiter — lancer la préparation": "Process — start picking",
   "Passer à : ": "Change to: ",
   "Supprimer la commande…": "Delete order…",
+  /* (2026-10-19) Décisions pour banc-langue-fenetres : les fragments de code, sélecteurs, polices et noms
+     de services se rendent à l’identique ; les textes d’interface sont traduits. */
+  "cx-carte cx-liste seule": "cx-carte cx-liste seule",
 };

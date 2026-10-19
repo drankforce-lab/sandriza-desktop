@@ -62,5 +62,6 @@ module.exports = {
   'Verrous': 'Locks',
   'Mode usage exclusif': 'Exclusive use mode',
   'Personnel connecté': 'Staff signed in',
-  'Gardien': 'Guard'
+  'Gardien': 'Guard',
+  'NIP': 'PINs'
 };

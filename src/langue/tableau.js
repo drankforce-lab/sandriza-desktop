@@ -301,4 +301,7 @@ module.exports = {
   "Ouverture en cours…": "Opening…",
   "Une préparation est déjà en cours d’ouverture…": "A preparation is already opening…",
   "L’ouverture a échoué.": "Opening failed.",
+  /* (2026-10-19) Décisions pour banc-langue-fenetres : les fragments de code, sélecteurs, polices et noms
+     de services se rendent à l’identique ; les textes d’interface sont traduits. */
+  "The New Black": "The New Black",
 };

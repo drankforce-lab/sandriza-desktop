@@ -1040,4 +1040,19 @@ module.exports = {
   "Construction lancée — suivie dans la petite fenêtre de suivi.": "Build started — followed in the small progress window.",
   "Aperçu 3D construit.": "3D preview built.",
   "La construction n’a pas abouti.": "The build did not succeed.",
+  /* (2026-10-19) Décisions pour banc-langue-fenetres : les fragments de code, sélecteurs, polices et noms
+     de services se rendent à l’identique ; les textes d’interface sont traduits. */
+  "Version v": "Version v",
+  "Enregistré · v": "Saved · v",
+  "Taille Δx (": "Size Δx (",
+  "xMidYMid meet": "xMidYMid meet",
+  "if (dot(n, e)": "if (dot(n, e)",
+  "if (uMat": "if (uMat",
+  "if (t.a": "if (t.a",
+  "Courier New": "Courier New",
+  "Trebuchet MS": "Trebuchet MS",
+  "X (cm)": "X (cm)",
+  "Y (cm)": "Y (cm)",
+  "px Résolution à cette taille": "px Resolution at this size",
+  "+ MOIMG[u] +": "+ MOIMG[u] +",
 };

@@ -300,6 +300,13 @@ module.exports = {
   // 2026-10-15 : la boite de confirmation commune (szConfirmer).
   'Confirmer l’action': 'Confirm the action',
   'Continuer': 'Continue',
+  // 2026-10-19 : la saisie d'un NIP commune (szDemanderNip).
+  'NIP de sécurité': 'Security PIN',
+  'NIP': 'PIN',
+  'Valider': 'Confirm',
+  'Un NIP de': 'A PIN of',
+  'à': 'to',
+  'chiffres.': 'digits.',
   /* ── La file des générations (2026-10-18) ── */
   "Envoi des photos": "Sending the photos",
   "Générations": "Generations",

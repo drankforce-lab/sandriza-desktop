@@ -2125,6 +2125,59 @@ function szConfirmer(o){
     try { ((o.danger || o.prudent) ? v.querySelector('.szc-non') : v.querySelector('.szc-oui')).focus(); } catch (e) {}
   });
 }
+/* ══ szDemanderNip — LA SAISIE D UN NIP, MEME BOITE QUE LA CONFIRMATION (2026-10-19) ══════════
+   Reprend la boite de l Atelier (protection d un modele) : titre, texte, un champ masque a
+   chiffres, un message d erreur, Annuler / le verbe. La fenetre NE CONNAIT PAS le NIP et ne le
+   compare pas : la saisie part au serveur, qui seul la verifie (et compte les essais en base).
+   szDemanderNip({ titre, texte, oui, erreur, min, max }) -> Promise<string|null>
+     · erreur : le message a afficher d emblee (« NIP incorrect — essais restants : 3 »)
+     · min/max : la longueur permise (4 a 8 par defaut) — une saisie hors bornes ne part pas. */
+var _szNipOuverte = false;
+function szDemanderNip(o){
+  o = o || {};
+  if (_szNipOuverte) return Promise.resolve(null);
+  _szNipOuverte = true;
+  var min = o.min || 4, max = o.max || 8;
+  var esc = function(x){ return String(x == null ? '' : x).replace(/[&<>"]/g, function(c){
+    return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); };
+  return new Promise(function(resoudre){
+    var v = document.createElement('div');
+    v.className = 'szc-voile';
+    v.innerHTML = '<div class="szc-boite" role="dialog" aria-modal="true" aria-labelledby="szn-t">'
+      + '<h3 id="szn-t">' + esc(o.titre || '${T("NIP de sécurité")}') + '</h3>'
+      + (o.texte ? '<p>' + esc(o.texte) + '</p>' : '')
+      + '<label class="szc-nip"><span>${T("NIP")}</span><input type="password" inputmode="numeric" autocomplete="off" maxlength="' + max + '" aria-label="${T("NIP")}"></label>'
+      + '<div class="szc-nip-err" role="alert">' + esc(o.erreur || '') + '</div>'
+      + '<div class="szc-pied"><button type="button" class="szc-non">${T("Annuler")}</button>'
+      + '<button type="button" class="szc-oui">' + esc(o.oui || '${T("Valider")}') + '</button></div></div>';
+    document.body.appendChild(v);
+    var champ = v.querySelector('input');
+    champ.oninput = function(){ var d = this.value.replace(/[^0-9]/g, '').slice(0, max); if (d !== this.value) this.value = d; };
+    var fini = function(r){
+      if (v.parentNode) v.parentNode.removeChild(v);
+      document.removeEventListener('keydown', clavier, true);
+      _szNipOuverte = false;
+      resoudre(r);
+    };
+    var valider = function(){
+      var n = champ.value;
+      if (!/^[0-9]+$/.test(n) || n.length < min || n.length > max) {
+        v.querySelector('.szc-nip-err').textContent = '${T("Un NIP de")} ' + min + ' ${T("à")} ' + max + ' ${T("chiffres.")}';
+        champ.focus(); return;
+      }
+      fini(n);
+    };
+    var clavier = function(ev){
+      if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); fini(null); }
+      else if (ev.key === 'Enter') { ev.preventDefault(); ev.stopPropagation(); valider(); }
+    };
+    document.addEventListener('keydown', clavier, true);
+    v.addEventListener('mousedown', function(ev){ if (ev.target === v) fini(null); });
+    v.querySelector('.szc-non').onclick = function(){ fini(null); };
+    v.querySelector('.szc-oui').onclick = valider;
+    try { champ.focus(); } catch (e) {}
+  });
+}
 `;
 
 /* ══ LES BORNES DE SAISIE (2026-10-16, sa demande : « borne les champs affichés sur la boutique ») ══
@@ -4449,6 +4502,11 @@ const CSS_RESPIRE = `
 html.jour .szc-boite.danger .szc-oui{background:#b42318;border-color:#b42318;color:var(--tx-sur-accent)}
 html.jour .szc-boite.danger .szc-oui:hover:not(:disabled){background:#912018;border-color:#912018}
 html.jour .szc-voile{background:rgba(29,36,51,.38)}
+/* La saisie d un NIP (szDemanderNip, 2026-10-19) : la meme boite, un champ a chiffres masque. */
+.szc-nip{display:flex;flex-direction:column;gap:.3rem;margin:1rem 0 0;font-size:.8rem;color:var(--tx2)}
+.szc-nip input{font-size:1.15rem;letter-spacing:.3em;padding:.45rem .6rem;border-radius:10px;background:var(--f-champ);
+  border:1px solid var(--sz-bord-fort);color:var(--tx)}
+.szc-nip-err{min-height:1.2rem;margin-top:.45rem;font-size:.8rem;color:var(--rouge,#DC2626)}
 .corps.plein>.ls{flex:1 1 auto}
 .corps.plein>.ls-liste{flex:1 1 0;min-height:0}
 .corps.ls-corps>.sz-pied{margin:0 1.6rem .8rem}

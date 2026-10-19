@@ -696,4 +696,15 @@ module.exports = {
   "Dos": "Back",
   "Devant": "Front",
   "Autre": "Other",
+  // Le NIP des photos (2026-10-19).
+  "Aucun NIP des photos n’est défini : seul un super-administrateur peut retirer une photo d’un article. Il se définit dans Configuration › NIP.": "No photo PIN is set: only a super administrator can remove a photo from an item. Set it in Settings › PINs.",
+  "Trop d’essais faux — les retraits de photos sont bloqués 15 minutes.": "Too many wrong attempts — photo removals are blocked for 15 minutes.",
+  "Retirer une photo d’un article exige le NIP des photos.": "Removing a photo from an item requires the photo PIN.",
+  "NIP incorrect.": "Incorrect PIN.",
+  "Retirer une photo d’un article": "Remove a photo from an item",
+  "Cette photo est attachée à :": "This photo is attached to:",
+  "Entrez le NIP des photos pour la supprimer.": "Enter the photo PIN to delete it.",
+  "NIP incorrect — essais restants :": "Incorrect PIN — attempts left:",
+  "NIP incorrect — retraits de photos bloqués 15 minutes.": "Incorrect PIN — photo removals blocked for 15 minutes.",
+  "Suppression annulée — la photo est gardée.": "Deletion cancelled — the photo is kept.",
 };

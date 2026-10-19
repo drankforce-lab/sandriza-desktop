@@ -723,4 +723,7 @@ module.exports = {
   'ouvreurs': 'openers',
   'cliqueurs': 'clickers',
   'Heures comptées depuis l’envoi. Délai médian avant la première ouverture :': 'Hours counted from sending. Median time to first open:',
+  /* (2026-10-19) Décisions pour banc-langue-fenetres : les fragments de code, sélecteurs, polices et noms
+     de services se rendent à l’identique ; les textes d’interface sont traduits. */
+  "\"] .btx span": "\"] .btx span",
 };

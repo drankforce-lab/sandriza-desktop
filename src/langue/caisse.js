@@ -269,4 +269,5 @@ module.exports = {
   'Retirer le NIP de sécurité': 'Remove security PIN',
   'Le NIP de sécurité de la caisse sera retiré. Plus aucun prix ne pourra être modifié à la caisse tant qu’un nouveau NIP n’aura pas été enregistré.': 'The register’s security PIN will be removed. No price can be changed at the register until a new PIN has been saved.',
   'La vente en cours sera effacée : les articles, le client, la note et le rabais saisis seront perdus. Aucune vente n’a encore été enregistrée ni encaissée.': 'The current sale will be cleared: the items, customer, note and discount entered will be lost. No sale has been recorded or collected yet.',
+  'Le NIP de la caisse se règle dans Configuration › Sécurité › NIP.': 'The register PIN is set in Settings › Security › PINs.',
 };

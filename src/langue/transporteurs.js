@@ -230,4 +230,8 @@ module.exports = {
   "Numéros de suivi": "Tracking numbers",
   "Nouvelle plateforme (OAuth) — un seul hôte : c’est la clé qui est de test ou de production.": "New platform (OAuth) — a single host: the key itself is test or production.",
   "Ancienne passerelle (soa-gw) — hôte de test ct.soa-gw.canadapost.ca.": "Legacy gateway (soa-gw) — test host ct.soa-gw.canadapost.ca.",
+  "Clé d’API": "API key",
+  "Clé d’API du portail": "API key from the portal",
+  "Code API secret": "API secret",
+  "Portail développeur de Postes Canada › Identifiants : Credential for [Test] = bac à sable, [Production] = production. Copiez la « Clé d’API » et le « Code API secret » dans le bloc correspondant.": "Canada Post developer portal › Credentials: Credential for [Test] = sandbox, [Production] = production. Copy the « API key » and the « API secret » into the matching block.",
 };

@@ -342,4 +342,10 @@ module.exports = {
   "n’est plus activé.": "is no longer enabled.",
   "Aucun transporteur activé. Configuration → Transporteurs.": "No carrier enabled. Settings → Carriers.",
   "L’étiquette sera créée en PRODUCTION : elle sera facturée.": "The label will be created in PRODUCTION: it will be billed.",
+  /* (2026-10-19) Décisions pour banc-langue-fenetres : les fragments de code, sélecteurs, polices et noms
+     de services se rendent à l’identique ; les textes d’interface sont traduits. */
+  "🖨 Bon de commande Ctrl+B": "🖨 Purchase order Ctrl+B",
+  "Continuer → Étiquette F9": "Continue → Label F9",
+  "Créer l’étiquette F9": "Create the label F9",
+  "Marquer comme expédiée F9": "Mark as shipped F9",
 };

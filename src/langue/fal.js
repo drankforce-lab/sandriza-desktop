@@ -253,4 +253,10 @@ module.exports = {
   'Détail': 'Detail',
   /* ── L’aperçu 3D par The New Black (2026-10-18) ── */
   "Aperçu 3D (The New Black)": "3D preview (The New Black)",
+  /* (2026-10-19) Décisions pour banc-langue-fenetres : les fragments de code, sélecteurs, polices et noms
+     de services se rendent à l’identique ; les textes d’interface sont traduits. */
+  "Fal.ai": "Fal.ai",
+  "Photoroom": "Photoroom",
+  "The New Black": "The New Black",
+  "h2 .cpt": "h2 .cpt",
 };

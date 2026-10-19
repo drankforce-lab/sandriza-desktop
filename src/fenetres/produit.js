@@ -438,6 +438,9 @@ function pageProduit(id) {
   MOTIFS.produit_non_enregistre = '${T("Enregistrez d’abord la fiche : l’aperçu 3D se pose directement sur elle, même si vous la fermez.")}';
   MOTIFS.file_pleine = '${T("Quatre générations sont déjà en cours chez The New Black : attendez qu’une se termine.")}';
   MOTIFS.photos_verrouillees = '${T("Un aperçu 3D est en cours de génération : les photos de cette fiche sont verrouillées jusqu’à la fin.")}';
+  // Le NIP des photos (2026-10-19) : retirer une photo de l'article l'exige — le serveur le vérifie.
+  MOTIFS.photos_nip_absent = '${T("Aucun NIP des photos n’est défini : seul un super-administrateur peut retirer une photo d’un article. Il se définit dans Configuration › NIP.")}';
+  MOTIFS.photos_nip_bloque = '${T("Trop d’essais faux — les retraits de photos sont bloqués 15 minutes.")}';
   MOTIFS.photo_format = '${T("La photo principale n’est pas dans un format accepté.")}';
   // L'aperçu 3D exige le devant ET le dos (2026-10-18) : refusé au pont et au relais, motifs nommés.
   MOTIFS.photo_absente = '${T("Choisissez d’abord la photo principale.")}';
@@ -3762,7 +3765,11 @@ function pageProduit(id) {
     });
   }
 
-  function enregistrer(){
+  /* nipPhotos (2026-10-19) : le NIP des photos, quand le serveur le réclame parce que la fiche RETIRE une photo de
+     l'article. La fenêtre ne le compare pas ; il part avec l'envoi, et seulement pour cet envoi. */
+  var NIP_PHOTOS = '';
+  function enregistrer(nipPhotos){
+    NIP_PHOTOS = (typeof nipPhotos === 'string') ? nipPhotos : '';
     if (!Assist.toutValide()) return;
     if (!tailles().length || !couleurs().length) {
       Assist.aller(1);
@@ -3901,7 +3908,8 @@ function pageProduit(id) {
       vue360: VUE360.length ? VUE360.slice() : null,
       // L'aperçu 3D (gardé, ou retiré), et la clé des coûts engagés pendant la création (rattachés au produit).
       modele3d: MOD3D || null,
-      brouillonCouts: (!ID && CLE_COUTS) ? CLE_COUTS : ''
+      brouillonCouts: (!ID && CLE_COUTS) ? CLE_COUTS : '',
+      photosNip: NIP_PHOTOS
     }).then(function(r){
       // Le prochain envoi repart de zéro : les photos ont pu changer entre-temps.
       VAR_FAITES = false;
@@ -3922,6 +3930,17 @@ function pageProduit(id) {
         if (r && r.motif === 'photo_requise') Assist.aller(2);
         if (r && /^(mannequin_|video_|vue360_)/.test(String(r.motif || ''))) Assist.aller(2);
         if (r && r.motif === 'stock_requis') Assist.aller(6);
+        // LE NIP DES PHOTOS : demandé (et redemandé s'il est faux) ; annuler laisse la fiche telle qu'à l'écran.
+        if (r && (r.motif === 'photos_nip_requis' || r.motif === 'photos_nip_faux')) {
+          dire('');
+          szDemanderNip({ titre: '${T("Retirer une photo de l’article")}',
+            texte: '${T("Cet enregistrement retire une photo de la fiche. Entrez le NIP des photos pour l’enregistrer.")}',
+            oui: '${T("Enregistrer")}',
+            erreur: r.motif === 'photos_nip_faux' ? ((r.restant > 0) ? '${T("NIP incorrect — essais restants :")} ' + r.restant
+              : '${T("NIP incorrect — retraits de photos bloqués 15 minutes.")}') : '' })
+            .then(function(n){ if (n) enregistrer(n); else dire('${T("Non enregistré — la fiche est restée à l’écran.")}', 'att'); });
+          return;
+        }
         if (r && r.motif === 'emplacement_requis') {
           Assist.aller(6);
           dire('${T("Sélectionnez un emplacement d’entrepôt pour :")} '

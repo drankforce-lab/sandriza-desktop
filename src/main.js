@@ -2466,6 +2466,9 @@ const OPS_PONT = new Set([
   // unique ; lire / ecrire / retirer sont refuses par le SERVEUR a tout autre role que
   // super-administrateur.
   'caisse:nipVerifier', 'caisse:nipLire', 'caisse:nipEcrire', 'caisse:nipRetirer',
+  // Configuration > NIP (2026-10-19) : TOUS les NIP au meme endroit ; super-administrateur seul,
+  // verifie au coeur ET au serveur (nip_etat / nip_ecrire). Aucune valeur ne revient.
+  'nip:etat', 'nip:ecrire', 'nip:retirer',
   // Ajustement de stock. ⚠ `stock:enregistrer` écrit un INVENTAIRE : toute la
   // règle reste dans le site (`Admin._stockEcrire`, sans le moindre DOM), le pont
   // ne porte que des valeurs. La version qui lisait le formulaire aurait enregistré
@@ -4264,6 +4267,9 @@ const PAGES_ANCRABLES = () => ({
   'presence': ['Personnel connecté', () => pagePresence()],
   /* Le GARDIEN (7.5.0) : ne natif, sans jumeau web, comme << presence >>. */
   'gardien': ['Gardien', () => pageGardien()],
+  /* Configuration > NIP (2026-10-19, sa demande) : ANCRABLE, section hote << nips >> cote site (_DOCKABLES),
+     comme le Gardien. Super-administrateur seul : le coeur et le SERVEUR refusent tout autre role. */
+  'nips': ['NIP', () => pageNips()],
   'maintenance': ['Mode usage exclusif', () => pageMaintenance()],
   'connexion': ['Connexion', () => pageConnexion()],
   'maj': ['Mise à jour', (id) => pageMaj(id)],
@@ -6509,6 +6515,7 @@ const { pageVerrous } = require('./fenetres/verrous');
 const { pageGenerations } = require('./fenetres/generations');
 const { pagePresence } = require('./fenetres/presence');
 const { pageGardien } = require('./fenetres/gardien');
+const { pageNips } = require('./fenetres/nips');
 const { pageMaintenance } = require('./fenetres/maintenance');
 const { pageConnexion } = require('./fenetres/connexion');
 const { pageMaj } = require('./fenetres/maj');
@@ -6711,7 +6718,7 @@ const actionApp = (nom, arg) => {
     case 'config-marque': case 'config-icones': case 'config-taxes': case 'config-conformite':
     case 'compte-paiement':
     case 'config-paiements': case 'config-cles': case 'studio':
-    case 'config-livraison': case 'config-retours': case 'config-navigation': case 'config-carriers': case 'config-automations': case 'config-telephonie': case 'config-models': case 'config-gabarits': case 'config-logotheque': case 'config-analytics': case 'config-turso': case 'config-homepage': case 'config-launch': case 'pages': case 'securite': case 'reglages-securite': case 'sociaux-config': case 'chat-config': case 'listenoire': case 'profil': case 'journaux': case 'incidents': case 'sauvegarde': case 'gardien': {
+    case 'config-livraison': case 'config-retours': case 'config-navigation': case 'config-carriers': case 'config-automations': case 'config-telephonie': case 'config-models': case 'config-gabarits': case 'config-logotheque': case 'config-analytics': case 'config-turso': case 'config-homepage': case 'config-launch': case 'pages': case 'securite': case 'reglages-securite': case 'sociaux-config': case 'chat-config': case 'listenoire': case 'profil': case 'journaux': case 'incidents': case 'sauvegarde': case 'gardien': case 'nips': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);
@@ -7018,7 +7025,9 @@ ipcMain.handle('journaux:ouvrir', (e, onglet) => {
 /* ⚠ Les modules qu un RAPPEL peut ouvrir (bouton « Ouvrir » de la fenetre
    Rappels, 2026-10-02) : les cles de `Rappels.MODULES` du site. */
 const _MODULES_OUVRABLES = ['generations', 'verrous', 'journaux', 'securite', 'incidents', 'config-logotheque', 'corbeille', 'depenses', 'vehicules',
-  'rappels', 'impot', 'bankrec', 'livre', 'compta', 'factures', 'inventaire', 'commandes'];
+  'rappels', 'impot', 'bankrec', 'livre', 'compta', 'factures', 'inventaire', 'commandes',
+  // Configuration > NIP (2026-10-19) : ses liens (Atelier, mode usage exclusif) et le lien des anciens emplacements vers elle.
+  'nips', 'atelier', 'maintenance'];
 ipcMain.handle('module:ouvrir', (e, nom) => {
   const n = String(nom || '').toLowerCase();
   if (_MODULES_OUVRABLES.indexOf(n) < 0) return false;

@@ -624,6 +624,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     attache:            '${T("L’attache a échoué — rien n’a été écrit sur la fiche.")}',
     import:             '${T("L’import a échoué.")}',
     nuage:              '${T("Écriture dans le nuage refusée — rien n’a été retiré.")}',
+    /* Le NIP des photos (2026-10-19) : retirer une photo d un article l exige, le serveur le verifie. */
+    photos_nip_absent:  '${T("Aucun NIP des photos n’est défini : seul un super-administrateur peut retirer une photo d’un article. Il se définit dans Configuration › NIP.")}',
+    photos_nip_bloque:  '${T("Trop d’essais faux — les retraits de photos sont bloqués 15 minutes.")}',
+    photos_nip_requis:  '${T("Retirer une photo d’un article exige le NIP des photos.")}',
+    photos_nip_faux:    '${T("NIP incorrect.")}',
     usb_hors_app:       '${T("La détection de clé USB n’existe que dans l’application de bureau.")}',
     export_hors_app:    '${T("L’enregistrement de fichier n’existe que dans l’application de bureau.")}',
     echec:              '${T("L’opération a échoué.")}'
@@ -3015,8 +3020,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       texte: '${T("Cette photo est utilisée par :")} ' + (r.produits || []).join(', ') + '. ${T("La fiche garde sa propre copie de l’image, mais le lien vers la photothèque sera perdu.")}',
       oui: '${T("Supprimer quand même")}' }).then(function(ok){
         if (!ok) return;
-        appeler('photos:supprimer', [id, true]).then(function(r2){ if (!r2 || !r2.ok) { dire(expliquer(r2), 'err'); return; } fini(r2); });
+        supprimerAvecNip(id, '', fini);
       });
+  }
+  /* LE NIP DES PHOTOS (2026-10-19, sa demande) : une photo ATTACHEE ne se supprime qu avec le NIP des photos.
+     La fenetre ne le connait pas : le serveur le verifie (cinq essais, puis quinze minutes) ; le
+     super-administrateur en est dispense. On le demande quand le serveur le reclame, et on le redemande s il
+     est faux, en disant combien d essais il reste. */
+  function supprimerAvecNip(id, nip, fini){
+    appeler('photos:supprimer', [id, true, nip || '']).then(function(r2){
+      if (r2 && r2.ok) { fini(r2); return; }
+      var m = r2 && r2.motif;
+      if (m === 'photos_nip_requis' || m === 'photos_nip_faux') {
+        szDemanderNip({ titre: '${T("Retirer une photo d’un article")}',
+          texte: '${T("Cette photo est attachée à :")} ' + ((r2.produits || []).join(', ') || '—') + '. ${T("Entrez le NIP des photos pour la supprimer.")}',
+          oui: '${T("Supprimer la photo")}',
+          erreur: m === 'photos_nip_faux' ? ((r2.restant > 0) ? '${T("NIP incorrect — essais restants :")} ' + r2.restant
+            : '${T("NIP incorrect — retraits de photos bloqués 15 minutes.")}') : '' })
+          .then(function(n){ if (n) supprimerAvecNip(id, n, fini); else dire('${T("Suppression annulée — la photo est gardée.")}'); });
+        return;
+      }
+      dire(expliquer(r2), 'err');
+    });
   }
   function gesteSupprimer(id){
     if (SUPPR_ARME !== id) {

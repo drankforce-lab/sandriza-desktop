@@ -818,5 +818,13 @@ module.exports = {
   "Mo": "MB",
   "Rattacher": "Attach",
   "Rattachement de l’original…": "Attaching the original…",
-  "Original rattaché — « Refaire le rendu » est de nouveau disponible pendant 30 jours.": "Original attached — “Redo the rendering” is available again for 30 days.",
+  "Original rattaché — « Refaire le rendu » est de nouveau disponible pendant 30 jours.": "Original attached — “Redo the rendering” is available again for 30 days.",  // Le NIP des photos (2026-10-19).
+  "Aucun NIP des photos n’est défini : seul un super-administrateur peut retirer une photo d’un article. Il se définit dans Configuration › NIP.": "No photo PIN is set: only a super administrator can remove a photo from an item. Set it in Settings › PINs.",
+  "Trop d’essais faux — les retraits de photos sont bloqués 15 minutes.": "Too many wrong attempts — photo removals are blocked for 15 minutes.",
+  "Retirer une photo de l’article": "Remove a photo from the item",
+  "Cet enregistrement retire une photo de la fiche. Entrez le NIP des photos pour l’enregistrer.": "This save removes a photo from the item. Enter the photo PIN to save it.",
+  "NIP incorrect — essais restants :": "Incorrect PIN — attempts left:",
+  "NIP incorrect — retraits de photos bloqués 15 minutes.": "Incorrect PIN — photo removals blocked for 15 minutes.",
+  "Non enregistré — la fiche est restée à l’écran.": "Not saved — the item is still on screen.",
+  "Enregistrer": "Save",
 };
