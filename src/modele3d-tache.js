@@ -104,9 +104,21 @@ async function apercu(m){
   const nt = mat.getNormalTexture();
   if (nt && m.normaleImage) nt.setImage(new Uint8Array(m.normaleImage)).setMimeType('image/jpeg');
   matiereMate(doc, mat, ext);
-  const glb = await io.writeBinary(doc);
-  const f = etat.sens.devant;
-  return { glb: glb.buffer.slice(glb.byteOffset, glb.byteOffset + glb.byteLength), theta0: Math.atan2(f[0], f[2]) * 180 / Math.PI };
+  /* ⚠⚠ TOURNÉ COMME LE MODÈLE FINAL (2026-10-19, mesuré sur la Walla). La lumière de <model-viewer> est FIXE dans la
+     scène : un modèle dont le devant regarde +X n'est pas éclairé comme le même modèle tourné vers +Z. Mesuré non
+     tourné, l'aperçu disait « uniforme à ΔE 3,8 » et le modèle livré (tourné) sortait à ΔE 12 sur les flancs — les
+     corrections de lumière tombaient du mauvais côté. L'aperçu est donc tourné ICI comme `ecrire` le fera (devant vers
+     +Z), puis remis tel quel : la caméra part de 0°. */
+  const { prim } = S, f = etat.sens.devant, an = -Math.atan2(f[0], f[2]), ca = Math.cos(an), sa = Math.sin(an), garde = [];
+  for (const sem of ['POSITION', 'NORMAL']) {
+    const acc = prim.getAttribute(sem); if (!acc) continue;
+    const orig = acc.getArray(), arr = orig.slice();
+    for (let i = 0; i < arr.length; i += 3) { const x = arr[i], z = arr[i + 2]; arr[i] = x * ca + z * sa; arr[i + 2] = -x * sa + z * ca; }
+    acc.setArray(arr); garde.push([acc, orig]);
+  }
+  let glb;
+  try { glb = await io.writeBinary(doc); } finally { garde.forEach(([acc, orig]) => acc.setArray(orig)); }
+  return { glb: glb.buffer.slice(glb.byteOffset, glb.byteOffset + glb.byteLength), theta0: 0 };
 }
 
 function vignette(){

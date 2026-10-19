@@ -712,7 +712,7 @@ function pageProduit(id) {
       + '<button type="button" id="p-3d-rejeter">${T("Rejeter le modèle")}</button></div>'
       + '<div class="pf-med-l" id="p-3d-l" style="display:none">'
       + '<span class="aide" id="p-3d-etat"></span>'
-      + '<button type="button" id="p-3d-refaire" title="${T("Retraite l’aperçu posé au poste — sans nouvel appel payant")}">${T("Refaire la couleur")}</button>'
+      + '<button type="button" id="p-3d-refaire" title="${T("Retraite l’aperçu posé au poste — sans nouvel appel payant")}">${T("Refaire le rendu")}</button>'
       + '<button type="button" id="p-3d-retirer">${T("Retirer l’aperçu 3D")}</button></div>'
       + '</div></div>');
 
@@ -2265,7 +2265,8 @@ function pageProduit(id) {
     if (!c || c.devant == null) return '';
     return '${T("Conforme au devant : {d} % · au dos : {o} %")}'.replace('{d}', String(c.devant)).replace('{o}', String(c.dos))
       + (c.reliefEfface != null ? ' · ' + '${T("relief inventé effacé à {r} %")}'.replace('{r}', String(c.reliefEfface)) : '')
-      + (c.teinteUniformite != null ? ' · ' + '${T("teinte uniforme à ΔE {u} (face/photo ΔE {p})")}'.replace('{u}', String(c.teinteUniformite)).replace('{p}', String(c.teinteEcartPhoto)) : '');
+      + (c.teinteUniformite != null ? ' · ' + '${T("teinte uniforme à ΔE {u} (face/photo ΔE {p})")}'.replace('{u}', String(c.teinteUniformite)).replace('{p}', String(c.teinteEcartPhoto)) : '')
+      + (c.structureDos != null ? ' · ' + '${T("structure du dos {s}")}'.replace('{s}', szNombre(c.structureDos, 2)) : '');
   }
   /* LE SUIVI : toutes les 2 s tant qu'une génération concerne cette fiche. ⚠ À la fin, le modèle posé par la
      génération REMPLACE celui de la fenêtre : sans cela, enregistrer la fiche ensuite remettrait l'ancien. */
@@ -2386,15 +2387,15 @@ function pageProduit(id) {
      (lecture gratuite) ou, s'il a expiré, le modèle posé ; aucun nouvel appel payant. Suivi comme une génération. */
   function refaireCouleur3d(){
     if (!ID || G3D.enCours) return;
-    szConfirmer({ prudent: true, titre: '${T("Refaire la couleur de l’aperçu 3D")}',
-      texte: '${T("Le modèle actuel est retraité au poste : la teinte de toute la surface est ramenée sur celle de la photo principale, vérifiée au rendu de la boutique sous huit angles, puis l’aperçu est reposé sur la fiche. Aucun nouvel appel payant.")}',
+    szConfirmer({ prudent: true, titre: '${T("Refaire le rendu de l’aperçu 3D")}',
+      texte: '${T("Le modèle est retraité au poste, sans nouvel appel payant : matière mate, relief inventé effacé sous les photos, une seule teinte vérifiée au rendu de la boutique sous huit angles (devant et dos égaux), structure du dos comparée à la photo ; puis l’aperçu est reposé sur la fiche.")}',
       details: [['${T("Coût")}', '${T("0 $ — sans nouvel appel")}'], ['${T("Durée")}', '${T("environ 1 minute au poste")}']],
-      oui: '${T("Refaire la couleur")}' }).then(function(ok){
+      oui: '${T("Refaire le rendu")}' }).then(function(ok){
         if (!ok) return;
         P.appeler('generations:refaireCouleur', String(ID)).then(function(r){
           if (!r || !r.ok) { dire(r && r.motif === 'aucun_modele' ? '${T("Aucun aperçu 3D à retraiter pour cet article.")}' : expliquer(r), 'err'); return; }
           G3D.genId = r.id; G3D.enCours = true; dessiner3d();
-          dire('${T("Couleur en cours de retraitement — suivie dans la fenêtre Générations.")}', 'bon');
+          dire('${T("Rendu en cours de retraitement — suivi dans la fenêtre Générations.")}', 'bon');
           suivre3d();
         });
       });

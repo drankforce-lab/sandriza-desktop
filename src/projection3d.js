@@ -794,6 +794,21 @@ function aplanirRelief(etat, options){
     const n2 = unit([nor[v * 3] * (1 - w) + g[0] * w, nor[v * 3 + 1] * (1 - w) + g[1] * w, nor[v * 3 + 2] * (1 - w) + g[2] * w]);
     nor[v * 3] = n2[0]; nor[v * 3 + 1] = n2[1]; nor[v * 3 + 2] = n2[2];
   }
+  /* ⚠⚠ L'OMBRE EST DÉJÀ PEINTE (2026-10-19, sa plainte : « trop lumineux et réfléchissant sur le devant »). Sous une
+     photo, les plis portent DÉJÀ leur ombre — celle de la prise de vue. La lumière de la boutique en ajoutait une seconde
+     sur les mêmes plis (la géométrie de The New Black) : le contraste doublait, et le suède prenait l'air d'un satin.
+     Sous la photo, la normale est donc tournée vers l'appareil qui l'a prise, au prorata de la couverture et de
+     l'orientation (pleinement de face, rien sur les flancs) : la boutique éclaire alors cette zone presque à plat, et
+     ce qu'on voit est l'ombre VRAIE, celle de la photo. La silhouette ne bouge pas (seules les normales changent). */
+  for (let v = 0; v < nV; v++) {
+    const r0 = geo.rep[v], k = geo.cVue[0][r0] >= geo.cVue[1][r0] ? 0 : 1, cov = geo.cVue[k][r0];
+    const vers = [-d[k][0], -d[k][1], -d[k][2]];
+    const nv = scal([nor[v * 3], nor[v * 3 + 1], nor[v * 3 + 2]], vers);
+    const t = lisse((cov - 0.3) / 0.5) * lisse((nv - 0.2) / 0.4) * (o.ombrePeinte != null ? o.ombrePeinte : 0.75);
+    if (t <= 0.01) continue;
+    const n2 = unit([nor[v * 3] * (1 - t) + vers[0] * t, nor[v * 3 + 1] * (1 - t) + vers[1] * t, nor[v * 3 + 2] * (1 - t) + vers[2] * t]);
+    nor[v * 3] = n2[0]; nor[v * 3 + 1] = n2[1]; nor[v * 3 + 2] = n2[2];
+  }
   const apres = mesurerRelief(etat);
   etat.relief = { avant, apres, sommetsAplanis: bouges };
   return etat.relief;

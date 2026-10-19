@@ -352,7 +352,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!c || c.devant == null) return '';
     return '${T("Conforme au devant : {d} % · au dos : {o} %")}'.replace('{d}', String(c.devant)).replace('{o}', String(c.dos))
       + (c.reliefEfface != null ? ' · ' + '${T("relief inventé effacé à {r} %")}'.replace('{r}', String(c.reliefEfface)) : '')
-      + (c.teinteUniformite != null ? ' · ' + '${T("teinte uniforme à ΔE {u} (face/photo ΔE {p})")}'.replace('{u}', String(c.teinteUniformite)).replace('{p}', String(c.teinteEcartPhoto)) : '');
+      + (c.teinteUniformite != null ? ' · ' + '${T("teinte uniforme à ΔE {u} (face/photo ΔE {p})")}'.replace('{u}', String(c.teinteUniformite)).replace('{p}', String(c.teinteEcartPhoto)) : '')
+      + (c.structureDos != null ? ' · ' + '${T("structure du dos {s}")}'.replace('{s}', szNombre(c.structureDos, 2)) : '');
   }
   /* ⚠ ON NE RÉÉCRIT QUE CE QUI A CHANGÉ : la fenêtre se relit chaque seconde ; un bouton remplacé entre l appui
      et le relâchement perd son clic. Les gestes vivent dans leur propre zone, qui ne bouge que si les gestes
@@ -379,7 +380,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var h = '<div class="ent"><span class="vg"' + vignette(g) + '>' + (vignette(g) ? '' : (g.genre === 'fantome' ? '${T("Photo")}' : '3D')) + '</span>'
       + '<div class="tx"><h2>' + esc(g.produitNom || g.produit) + '</h2>'
       + '<div class="meta">' + (g.genre === 'fantome' ? '${T("Vêtement sans mannequin · The New Black")}' + (g.palier ? ' (' + esc(g.palier) + ')' : '')
-          : (g.refaite ? '${T("Couleur refaite · sans nouvel appel payant")}' : '${T("Aperçu 3D · The New Black, Image to 3D")}')) + (g.sku ? ' · ' + esc(g.sku) : '') + '</div>'
+          : (g.refaite ? '${T("Rendu refait · sans nouvel appel payant")}' : '${T("Aperçu 3D · The New Black, Image to 3D")}')) + (g.sku ? ' · ' + esc(g.sku) : '') + '</div>'
       + '<div class="meta">' + '${T("Lancée le {d} par {p}")}'.replace('{d}', fdate(g.debut)).replace('{p}', esc(g.par || '—'))
       + ' · ' + '${T("durée {t}")}'.replace('{t}', duree(total)) + ' · ' + '${T("coût {c}")}'.replace('{c}', argent(g.cout)) + '</div></div>'
       + '<div class="pct"><b>' + av.pct + ' %</b><span>' + sousTitre + '</span></div></div>'
@@ -414,7 +415,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (etat === 'cours') h += '<button type="button" class="dgr" data-g="interrompre">${T("Arrêter la génération")}</button>';
     if (etat === 'attente') h += '<button type="button" class="pri" data-g="confirmer">${T("Publier quand même")}</button><button type="button" class="dgr" data-g="rejeter">${T("Rejeter")}</button>';
     h += '<span class="esp"></span>';
-    if (g.peutRefaire) h += '<button type="button" data-g="refaire" title="${T("Retraite l’aperçu au poste — sans nouvel appel payant")}">${T("Refaire la couleur")}</button>';
+    if (g.peutRefaire) h += '<button type="button" data-g="refaire" title="${T("Retraite l’aperçu au poste — sans nouvel appel payant")}">${T("Refaire le rendu")}</button>';
     if (g.produit) h += '<button type="button" data-g="fiche">${T("Ouvrir la fiche")}</button>';
     if (etat !== 'cours' && etat !== 'attente') h += '<button type="button" data-g="retirer">${T("Retirer de la liste")}</button>';
     poser(z.gestes, h);
@@ -459,14 +460,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     if (geste === 'retirer') { agir(g, 'retirer'); return; }
     if (geste === 'refaire') {
-      szConfirmer({ prudent: true, titre: '${T("Refaire la couleur de l’aperçu 3D")}',
-        texte: '${T("Le modèle est retraité au poste : la teinte de toute la surface est ramenée sur celle de la photo principale, vérifiée au rendu de la boutique sous huit angles, puis l’aperçu est reposé sur la fiche. Aucun nouvel appel payant.")}',
+      szConfirmer({ prudent: true, titre: '${T("Refaire le rendu de l’aperçu 3D")}',
+        texte: '${T("Le modèle est retraité au poste, sans nouvel appel payant : matière mate, relief inventé effacé sous les photos, une seule teinte vérifiée au rendu de la boutique sous huit angles (devant et dos égaux), structure du dos comparée à la photo ; puis l’aperçu est reposé sur la fiche.")}',
         details: [['${T("Produit")}', String(g.produitNom || g.produit)], ['${T("Coût")}', '${T("0 $ — sans nouvel appel")}']],
-        oui: '${T("Refaire la couleur")}' }).then(function(ok){
+        oui: '${T("Refaire le rendu")}' }).then(function(ok){
           if (!ok) return;
           appeler('generations:refaireCouleur', [g.id]).then(function(r){
             if (!r.ok) { dire(r.motif === 'deja_en_cours' ? '${T("Une génération est déjà en cours pour cet article.")}' : expliquer(r), 'err'); return; }
-            SEL = r.id; dire('${T("Couleur en cours de retraitement.")}', 'bon'); charger();
+            SEL = r.id; dire('${T("Rendu en cours de retraitement.")}', 'bon'); charger();
           });
         });
       return;
