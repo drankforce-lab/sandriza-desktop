@@ -531,7 +531,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
   function rendreVerrou(){
     if (!VERROU_PRIS) return;
     VERROU_PRIS = false;
-    try { P.appeler('verrou:rendre'); } catch (e) {}
+    try { P.appeler('verrou:rendre', 'users', ID); } catch (e) {}   // (2026-10-19) [portée, id] : cette fiche-ci
   }
   window.addEventListener('beforeunload', function(){ rendreVerrou(); });
   window.szRevenir = function(){ EDITION = false; recharger(); };

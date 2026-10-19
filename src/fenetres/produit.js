@@ -461,7 +461,7 @@ function pageProduit(id) {
   var ID   = ${ident};
   var bEnr = document.getElementById('btn-enr');
   var sous = document.getElementById('sous');
-  var CTX = null, FICHE = null, IMAGE = '', STOCK = {}, LOCS = {}, PAGI = null;
+  var CTX = null, FICHE = null, IMAGE = '', STOCK = {}, STOCK0 = null, LOCS = {}, PAGI = null;
   // ⚠ CES DEUX-LA ETAIENT DEJA ENVOYES AU PONT MAIS JAMAIS REMPLIS : la fenetre
   // expediait deux objets vides, et modifier une fiche depuis l application lui
   // FAISAIT PERDRE ses photos par couleur. Un defaut qui ne se voit pas a
@@ -2852,6 +2852,7 @@ function pageProduit(id) {
     CHOIX = (p.colors || []).map(String);
     dessinerJetons();
     STOCK = Object.assign({}, p.stock || {});
+    STOCK0 = Object.assign({}, STOCK);   // (2026-10-19) ce que la fiche avait à l ouverture : on n envoie que ce qui a changé
     // ⚠ LE CHAMP DU PRODUIT EST warehouseLocations. Cette fenêtre lisait
     // « stockLoc », un nom qu'elle avait inventé : les emplacements existants
     // ne s'affichaient JAMAIS (tout restait à « Choisir l'emplacement »), et
@@ -3647,10 +3648,21 @@ function pageProduit(id) {
     });
   }
 
+  /* (2026-10-19, audit — lot S1) LE VERROU EST RENDU À LA FERMETURE. Il ne l'était jamais : la fiche restait
+     « ouverte par vous » chez les collègues tant que le site renouvelait — et, un poste tenant désormais un
+     verrou PAR fiche, il ne tombait plus en ouvrant la suivante. On rend CETTE fiche ([portée, id]). */
+  var VERROU_PRIS = '';
+  function rendreVerrou(){
+    if (!VERROU_PRIS) return;
+    var id = VERROU_PRIS; VERROU_PRIS = '';
+    try { P.appeler('verrou:rendre', 'products', id); } catch (e) {}
+  }
+  window.addEventListener('beforeunload', function(){ rendreVerrou(); });
   function verrou(){
     if (!ID) return Promise.resolve();
     return P.appeler('verrou:prendre', 'products', ID).then(function(v){
       if (!v || !v.ok) { sous.textContent = ''; return; }
+      if (v.obtenu) VERROU_PRIS = String(ID);
       if (v.obtenu) { sous.textContent = v.horsLigne ? '${T("hors ligne")}' : '${T("Section verrouillée en modification par :")} ' + (v.par || '${T("vous")}'); return; }
       sous.textContent = '${T("ouverte par ")}' + (v.parQui || '${T("quelqu’un d’autre")}');
       bEnr.disabled = true;
@@ -3860,7 +3872,12 @@ function pageProduit(id) {
     var valides = {};
     tailles().forEach(function(t){ couleurs().forEach(function(c){ valides[t + '-' + c] = true; }); });
     var stock = {}, locs = {};
-    Object.keys(STOCK).forEach(function(k){ if (valides[k] && STOCK[k] > 0) stock[k] = STOCK[k]; });
+    /* (2026-10-19, audit — lot S1) Une variante à 0 RESTE (0 est une quantité : la retirer effaçait la variante
+       de la fiche, et le site la croyait disparue). Seules les variantes qui n existent plus partent. */
+    Object.keys(STOCK).forEach(function(k){ if (valides[k]) stock[k] = Math.max(0, parseInt(STOCK[k], 10) || 0); });
+    /* Et le stock n est ENVOYÉ que s il a changé depuis l ouverture : le site en tire des DIFFÉRENCES par variante
+       (stock_ajuster), et une vente faite pendant la saisie reste comptée. Fiche neuve : toujours envoyé. */
+    var stockChange = !ID || !STOCK0 || Object.keys(stock).some(function(k){ return (parseInt(STOCK0[k], 10) || 0) !== stock[k]; });
     Object.keys(LOCS).forEach(function(k){ if (valides[k] && LOCS[k]) locs[k] = LOCS[k]; });
 
     bEnr.disabled = true;
@@ -3900,7 +3917,7 @@ function pageProduit(id) {
         cs.forEach(function(c){ if (PARCOUL[c]) g[c] = PARCOUL[c]; });
         return g;
       })(),
-      stock: stock, stockLoc: locs,
+      stock: stockChange ? stock : undefined, stockLoc: locs,
       // Les médias : null = aucun (ou retiré). Le pont ne les écrit que parce
       // que la clé est envoyée — une coquille plus ancienne ne les efface pas.
       mannequin: MQ || null,
@@ -3958,7 +3975,7 @@ function pageProduit(id) {
       // l article provisoire du Studio prend son vrai identifiant : ses photos étiquetées et sa boîte aux lettres suivent
       if (!ID && r.id) P.appeler('studio:lierProvisoire', PROV, String(r.id), val('p-nom').trim());
       dire('${T("Enregistré.")}', 'bon');
-      setTimeout(function(){ P.fermer(); }, 700);
+      setTimeout(function(){ rendreVerrou(); P.fermer(); }, 700);
     });
   }
 
@@ -3968,6 +3985,7 @@ function pageProduit(id) {
   // personne ne porte l'écriture.
   function fermerProprement(){
     brArreter();
+    rendreVerrou();
     if (ID || BR_FINI) { P.fermer(); return; }
     var d = brCapturer();
     if (!brUtile(d)) { P.fermer(); return; }

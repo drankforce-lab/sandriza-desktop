@@ -3042,7 +3042,7 @@ const OPS_PONT = new Set([
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
-  'tableau:lire', 'tableau:soldes', 'tableau:tuiles', 'tableau:ouvrir', 'tableau:verrous',
+  'tableau:lire', 'tableau:soldes', 'tableau:tuiles', 'tableau:ouvrir', 'tableau:verrous', 'tableau:etiquettesVu',
   // Le détail des commandes neuves, pour les annonces du veilleur (2026-10-12).
   'veilleur:annonces',
   // Le vœu d'ouverture de l'Inventaire (onglet ou filtre), posé par un lien du tableau de bord.

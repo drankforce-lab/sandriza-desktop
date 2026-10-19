@@ -270,6 +270,17 @@ function pageCommande(id) {
   MOTIFS.impression = '${T("L’impression a échoué.")}';
   MOTIFS.reseau = '${T("Le réseau a échoué — rien n’a été commandé.")}';
   MOTIFS.deja_expediee = '${T("Cette commande est déjà expédiée.")}';
+  // Les refus du SERVEUR à la création (2026-10-19) : le détail donne la raison exacte.
+  MOTIFS.prix_different = '${T("Création refusée : le prix a changé.")}';
+  MOTIFS.prix_facture_different = '${T("Prix facturé différent du prix affiché.")}';
+  MOTIFS.prix_absent = '${T("Création refusée : prix affiché absent.")}';
+  MOTIFS.options_non_cotees = '${T("Création refusée : option non cotée.")}';
+  MOTIFS.colis_invalide = '${T("Création refusée : colis ou adresse à corriger.")}';
+  MOTIFS.etiquette_existe = '${T("Une étiquette existe déjà pour cette commande.")}';
+  MOTIFS.etiquette_en_cours = '${T("Une étiquette est déjà en cours de création.")}';
+  MOTIFS.etiquette_bloquee = '${T("Étiquette BLOQUÉE.")}';
+  MOTIFS.pas_4x6 = '${T("Ce document n’est pas une étiquette 4 × 6.")}';
+  MOTIFS.commande_terminee = '${T("Cette commande est déjà terminée.")}';
   // Le DETAIL (motif du transporteur, de l imprimante) est rendu TEL QUEL : « L impression a
   // échoué. » seul ne disait pas quoi corriger (sa capture du 2026-10-19).
   function expliquerD(r){
@@ -860,16 +871,23 @@ function pageCommande(id) {
     });
     var av = document.getElementById('e-avis');
     var i = CHOIX ? infoT(CHOIX.t) : {};
+    if (CHOIX && i.mode !== 'production') coterJeuActif();
+    var pc = prixCreation();
+    var eSb = CHOIX ? PRIX_CREE[cleChoix(CHOIX)] : null;
     if (av) av.innerHTML = !CHOIX ? '${T("Choisissez un tarif.")}'
       : (i.mode === 'production'
         ? '<span class="prod">${T("L’étiquette sera créée en PRODUCTION : elle sera facturée.")}</span>'
-        : '${T("L’étiquette est créée dans le")} <b class="bac">${T("bac à sable")}</b>${T(" : rien n’est facturé pendant les essais.")}')
+        : '${T("L’étiquette est créée dans le")} <b class="bac">${T("bac à sable")}</b>${T(" : rien n’est facturé pendant les essais.")}'
+          + '<br>${T("En bac à sable, Postes Canada et FedEx facturent le tarif du COMPTE DE TEST :")} '
+          + (eSb && eSb.etat === 'ok' ? '<b>' + argent(eSb.reel) + '</b> ${T("(prix de test vérifié à la création ; prix contrat")} ' + argent(CHOIX.reel) + ').'
+             : (eSb && eSb.etat === 'non' ? '<b class="prod">${T("indisponible")}</b> (' + esc(eSb.motif || '') + ').' : '${T("cotation des clés de test…")}')))
         + (paye === 0 ? '<br>${T("Livraison offerte au client : l’étiquette est une dépense.")}' : '');
     var bc = document.getElementById('e-creer');
     if (bc) {
-      bc.disabled = LECTURE || !CTX.peutExpedier || !CHOIX;
+      // Pas de prix vérifiable = pas de création : le serveur refuserait de toute façon.
+      bc.disabled = LECTURE || !CTX.peutExpedier || !CHOIX || pc == null;
       var bct = document.getElementById('e-creer-t');
-      if (bct) bct.textContent = CHOIX ? '${T("Créer l’étiquette ·")} ' + argent(CHOIX.reel) : '${T("Créer l’étiquette")}';
+      if (bct) bct.textContent = CHOIX ? '${T("Créer l’étiquette ·")} ' + (pc != null ? argent(pc) : '…') : '${T("Créer l’étiquette")}';
     }
     var bm = document.getElementById('e-moins');
     if (bm) {
@@ -877,6 +895,33 @@ function pageCommande(id) {
       bm.disabled = LECTURE || !CTX.peutExpedier || !m || (CHOIX && m.t === CHOIX.t && m.service === CHOIX.service);
       bm.textContent = m ? '${T("Prendre le moins cher")} (' + argent(m.reel) + ')' : '${T("Prendre le moins cher")}';
     }
+  }
+  /* ══ LE PRIX AFFICHÉ = LE PRIX DU JEU QUI CRÉE (2026-10-19, sa décision) ══════════════════════════
+     Le relais refuse toute création dont le prix affiché diffère d un cent de sa re-cotation, faite avec
+     les clés qui créent. En BAC À SABLE, ce sont les clés de TEST : la ligne choisie est donc re-cotée
+     avec elles, et c est CE prix qui part comme « prix affiché » — l écran le dit. En production, prix
+     du contrat = prix affiché = prix créé. */
+  var PRIX_CREE = {};      // 't|service' -> { etat:'attente'|'ok'|'non', reel }
+  function cleChoix(c){ return c ? c.t + '|' + c.service : ''; }
+  function prixCreation(){
+    if (!CHOIX) return null;
+    var i = infoT(CHOIX.t);
+    if (i.mode === 'production') return CHOIX.reel;
+    var e = PRIX_CREE[cleChoix(CHOIX)];
+    return (e && e.etat === 'ok') ? e.reel : null;
+  }
+  function coterJeuActif(){
+    if (!CHOIX) return;
+    var i = infoT(CHOIX.t); if (i.mode === 'production') return;
+    var k = cleChoix(CHOIX); if (PRIX_CREE[k]) return;
+    PRIX_CREE[k] = { etat: 'attente' };
+    var pd = poidsDims(), c = CHOIX;
+    P.appeler('expedition:comparer', ID, pd.poids, { transporteurs: [c.t], dims: pd.dims, jeu: 'actif' }).then(function(r){
+      var x = r && r.ok && (r.resultats || []).find(function(y){ return y.transporteur === c.t && y.ok; });
+      var sv = x ? ((x.services && x.services.length ? x.services : [x]).find(function(z){ return z.service === c.service; })) : null;
+      PRIX_CREE[k] = sv ? { etat: 'ok', reel: Number(sv.reel) } : { etat: 'non', motif: (x ? '${T("service non offert avec les clés de test")}' : ((r && r.detail) || '${T("pas de réponse")}')) };
+      majArgent();
+    }).catch(function(){ PRIX_CREE[k] = { etat: 'non', motif: '${T("pas de réponse")}' }; majArgent(); });
   }
   function choisir(t, s){
     var o = options().find(function(x){ return x.t === t && x.service === s; });
@@ -921,18 +966,26 @@ function pageCommande(id) {
   function acheter(poids, forcer){
     var b = document.getElementById('e-creer');
     b.disabled = true; dire('${T("Demande au transporteur…")}', 'att');
-    P.appeler('expedition:etiquette', ID, CHOIX.t, CHOIX.service, poids, forcer).then(function(r){
+    var pc = prixCreation();
+    if (pc == null) { b.disabled = false; dire('${T("Prix de création non vérifié — rien n’a été envoyé.")}', 'err'); return; }
+    var pd = poidsDims();
+    P.appeler('expedition:etiquette', ID, CHOIX.t, CHOIX.service, poids, forcer,
+      { prixCents: Math.round(pc * 100), dims: pd.dims }).then(function(r){
       b.disabled = false;
       premierPlan();   // ⚠ la fenêtre passait derrière la fenêtre principale pendant la création
-      if (!r || !r.ok) { dire(expliquerD(r), 'err'); return; }
+      // Le refus du serveur porte sa raison EXACTE (prix affiché / re-coté, service, compte…).
+      if (!r || !r.ok) { dire((r && r.detail) ? String(r.detail) : expliquerD(r), 'err'); if (r && /prix/.test(r.motif || '')) { PRIX_CREE = {}; majArgent(); } return; }
       if (!r.suivi) { dire('${T("Aucun numéro reçu : l’étiquette n’a PAS été générée.")}', 'err'); return; }
       poser('c-suivi', r.suivi);
       PDF = r.pdf || null;
       CMD.aUneEtiquette = true; CMD.suivi = r.suivi; CMD.transporteur = CHOIX.t;
-      VIGN = null; chargerVignettes(true);   // la vignette de la NOUVELLE étiquette
-      CMD.etiquette = { t: CHOIX.t, nom: CHOIX.nom, reel: CHOIX.reel };
+      // Le prix RÉEL renvoyé par le transporteur sert au gain (sinon le prix affiché vérifié).
+      CMD.etiquette = { t: CHOIX.t, nom: CHOIX.nom, reel: (r.prixFacture != null ? Number(r.prixFacture) : pc) };
+      CMD.etiquetteBloquee = r.bloque || r.pdfRefus || '';
+      VIGN = null; if (!CMD.etiquetteBloquee) chargerVignettes(true); else VIGN = [];
       majExpedier();
       aller(2);
+      if (CMD.etiquetteBloquee) { dire(CMD.etiquetteBloquee, 'err'); return; }
       // On imprime TOUT DE SUITE l étiquette (et le bordereau qui la suit) : c est le geste suivant.
       imprimerEtiquette();
     }).catch(function(){ b.disabled = false; dire('${T("L’opération a échoué.")}', 'err'); });
@@ -1017,7 +1070,8 @@ function pageCommande(id) {
     dessinerVignettes();
     document.getElementById('x-etat').textContent = suivi ? '${T("Étiquette créée")}' : (coché('c-sans') ? '${T("Sans étiquette — remise en main propre")}' : '${T("Aucune étiquette")}');
     document.getElementById('x-quoi').textContent = (nomT(t) || '') + (e.nom ? ' · ' + e.nom : '') + (e.reel ? ' · ' + argent(e.reel) : '');
-    var bi = document.getElementById('c-etiq-imp'); if (bi) bi.disabled = !(CMD.aUneEtiquette || suivi);
+    var bi = document.getElementById('c-etiq-imp'); if (bi) bi.disabled = !(CMD.aUneEtiquette || suivi) || !!CMD.etiquetteBloquee;
+    if (CMD.etiquetteBloquee) document.getElementById('x-etat').textContent = '${T("Étiquette BLOQUÉE :")} ' + CMD.etiquetteBloquee;
     majArgent();
     majExpedier();
   }
@@ -1028,6 +1082,7 @@ function pageCommande(id) {
     else if (!CTX || !CTX.peutExpedier) pourquoi = '${T("Votre rôle ne permet pas d’expédier.")}';
     else if (!toutVerifie()) pourquoi = '${T("Vérifiez le colis d’abord —")} ' + comptes() + ' ${T("sur")} ' + attendus() + ' ' + szPl(attendus(), '${T("unité confirmée.")}', '${T("unités confirmées.")}');
     else if (!etiquetteFaite()) pourquoi = '${T("Créez l’étiquette (étape Étiquette), ou cochez « Expédier sans numéro de suivi ».")}';
+    else if (CMD && CMD.etiquetteBloquee) pourquoi = '${T("Étiquette BLOQUÉE :")} ' + CMD.etiquetteBloquee;
     else if (!coché('x-c1') || !coché('x-c2')) pourquoi = '${T("Cochez « Bordereau glissé » et « Étiquette collée » avant de fermer la boîte.")}';
     b.disabled = !!pourquoi;
     b.title = pourquoi || '${T("Marquer la commande expédiée et prévenir le client")}';
@@ -1219,7 +1274,7 @@ function pageCommande(id) {
   function rendreVerrou(){
     if (!VERROU_PRIS) return;
     VERROU_PRIS = false;
-    try { P.appeler('verrou:rendre'); } catch (e) {}
+    try { P.appeler('verrou:rendre', 'orders', ID); } catch (e) {}   // (2026-10-19) [portée, id] : un verrou PAR fiche
   }
   window.addEventListener('beforeunload', function(){ rendreVerrou(); });
 

@@ -262,6 +262,9 @@ function pageCollection(id) {
     l.readAsDataURL(f);
   }
 
+  /* (2026-10-19, audit — lot S1) le verrou se REND à la fermeture, [portée, id] : un poste tient un verrou PAR
+     fiche, il ne tombe plus en ouvrant la suivante. */
+  window.addEventListener('beforeunload', function(){ if (ID) { try { P.appeler('verrou:rendre', 'collections', ID); } catch (e) {} } });
   function verrou(){
     if (!ID) return Promise.resolve();
     return P.appeler('verrou:prendre', 'collections', ID).then(function(v){

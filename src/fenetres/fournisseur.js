@@ -190,6 +190,9 @@ function pageFournisseur(id) {
   // ⚠ LE VERROU EST PRIS A L OUVERTURE, pas seulement a l enregistrement.
   // Le decouvrir apres avoir tout saisi, c est perdre la saisie. On le demande
   // des l ouverture et on le DIT dans l en-tete.
+  /* (2026-10-19, audit — lot S1) le verrou se REND à la fermeture, [portée, id] : un poste tient un verrou PAR
+     fiche, il ne tombe plus en ouvrant la suivante. */
+  window.addEventListener('beforeunload', function(){ if (ID) { try { P.appeler('verrou:rendre', 'suppliers', ID); } catch (e) {} } });
   function verrou(){
     if (!ID) return Promise.resolve();
     return P.appeler('verrou:prendre', 'suppliers', ID).then(function(v){

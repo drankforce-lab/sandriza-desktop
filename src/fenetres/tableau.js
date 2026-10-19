@@ -63,6 +63,7 @@ button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .45rem;font-size:.74rem}
 .avis{font-size:.78rem;line-height:1.45;border-radius:9px;padding:.4rem .7rem;
   background:rgba(245,158,11,.11);border:1px solid rgba(245,158,11,.42);color:var(--tx-or2)}
+.avis.err{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
 
 /* ── LA BARRE : période, en direct, puces à faire, pastille des zéros ── */
 .barre{display:flex;align-items:center;gap:.45rem .6rem;flex-wrap:wrap}
@@ -472,6 +473,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return h;
   }
 
+  /* (2026-10-19) LE PRIX D UNE ÉTIQUETTE A CHANGÉ APRÈS COUP chez le transporteur (re-pesée, correction
+     d adresse…) : relevé par cron-surveiller-etiquettes.php, dit ici en rouge, jusqu à « Vu ». */
+  function alertesEtiquettes(){
+    var l = D && D.alertesEtiquettes;
+    if (!l || !l.length) return '';
+    var arg = function(c){ return szArgent((c || 0) / 100); };
+    return '<div class="avis err" role="alert"><span class="ic">⚠</span> <strong>' + l.length + ' '
+      + szPl(l.length, '${T("étiquette dont le prix a changé chez le transporteur")}', '${T("étiquettes dont le prix a changé chez le transporteur")}') + '</strong> — '
+      + l.slice(0, 3).map(function(a){ return esc(a.numero || a.commande) + ' : ' + arg(a.avant) + ' → ' + arg(a.apres) + ' (' + esc(a.raison || '') + ')'; }).join(' · ')
+      + (l.length > 3 ? ' · …' : '')
+      + ' <button type="button" class="mini" id="tb-etiq-vu" data-ids="' + esc(l.map(function(a){ return a.id; }).join(',')) + '">${T("Vu")}</button></div>';
+  }
+
   function tauxAvis(){
     if (!D.taux) return '';
     return '<div class="avis"><span class="ic">💱</span> ' + (D.taux.genre === 'secours'
@@ -496,7 +510,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var V = D.vivant;
     if (!V) { vide('${T("Tableau de bord indisponible")}', '${T("Le site n’a pas encore cette version du tableau de bord.")}'); return; }
     var e = V.etapes || {}, pc = V.parcours || {}, iv = V.inventaire || {}, pr = V.produits || {}, k = V.kpi || {};
-    var h = barre() + tauxAvis() + '<div class="grille">';
+    var h = barre() + tauxAvis() + alertesEtiquettes() + '<div class="grille">';
 
     // ── rangée 1 ──
     var etape = function(n, lib, c){ return '<div class="etape" data-ouvre="orders" style="color:' + c + '" title="${T("Ouvrir les commandes")}"><div class="n">' + (n || 0) + '</div><div class="lib">' + lib + '</div></div>'; };
@@ -714,6 +728,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   corps.onclick = function(ev){
     var t = ev.target;
     if (!t || !t.closest) return;
+    var ev2 = t.closest('#tb-etiq-vu');
+    if (ev2) { appeler('tableau:etiquettesVu', [String(ev2.getAttribute('data-ids') || '').split(',').map(Number).filter(Boolean)]).then(function(){ charger(); }); return; }
     if (t.closest('#tb-top100')) { top100(); return; }
     var dc = t.closest('[data-courbe]');
     if (dc) { COURBE = dc.getAttribute('data-courbe'); try { localStorage.setItem('sz-tb-courbe', COURBE); } catch (e) {} dessiner(); return; }

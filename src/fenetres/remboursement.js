@@ -527,7 +527,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function rendreVerrou(){
     if (!VERROU_PRIS) return;
     VERROU_PRIS = false;
-    try { P.appeler('verrou:rendre'); } catch (e) {}
+    try { P.appeler('verrou:rendre', 'orders', ID); } catch (e) {}   // (2026-10-19) [portée, id] : cette commande-ci
   }
   window.addEventListener('beforeunload', function(){ rendreVerrou(); });
   window.szRevenir = function(){ QTE = {}; TOT = null; NIP_OK = false; NIP_SAISI = ''; recharger(); };

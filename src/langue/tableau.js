@@ -304,4 +304,7 @@ module.exports = {
   /* (2026-10-19) Décisions pour banc-langue-fenetres : les fragments de code, sélecteurs, polices et noms
      de services se rendent à l’identique ; les textes d’interface sont traduits. */
   "The New Black": "The New Black",
+  "étiquette dont le prix a changé chez le transporteur": "label whose price changed at the carrier",
+  "étiquettes dont le prix a changé chez le transporteur": "labels whose price changed at the carrier",
+  "Vu": "Seen",
 };

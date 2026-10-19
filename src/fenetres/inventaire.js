@@ -2023,10 +2023,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     });
   }
 
-  var VERROU_PRIS = false;
+  var VERROU_PRIS = false, VERROU_ID = '';
   function prendreVerrou(pid){
     // ⚠ A L OUVERTURE, PAS A L ENREGISTREMENT : decouvrir le verrou apres avoir
     // saisi trente quantites, c est perdre la saisie.
+    VERROU_ID = String(pid || '');
     appeler('verrou:prendre', ['products', pid]).then(function(v){
       if (!v || !v.ok) { sous.textContent = ''; return; }
       VERROU_PRIS = !!v.obtenu;
@@ -2041,7 +2042,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     if (!VERROU_PRIS) return;
     VERROU_PRIS = false;
     sous.textContent = '';
-    appeler('verrou:rendre');
+    // (2026-10-19) [portée, id] : le poste tient un verrou PAR fiche — rendre ce produit-ci.
+    appeler('verrou:rendre', ['products', VERROU_ID]);
   }
 
   // Recharge les donnees de L ONGLET COURANT, et lui seul : la fenetre ne

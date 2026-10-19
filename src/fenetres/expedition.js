@@ -625,11 +625,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
   }
 
-  var VERROU_PRIS = false;
+  var VERROU_PRIS = false, VERROU_ID = '';
   function prendreVerrou(cid){
     appeler('verrou:prendre', ['orders', cid]).then(function(v){
       if (!v || !v.ok) { return; }
-      VERROU_PRIS = !!v.obtenu;
+      VERROU_PRIS = !!v.obtenu; VERROU_ID = cid;
       if (v.obtenu) { sous.textContent = v.horsLigne ? '${T("hors ligne")}' : '${T("Section verrouillée en modification par :")} ' + (v.par || '${T("vous")}'); return; }
       sous.textContent = '${T("ouverte par ")}' + (v.parQui || '${T("quelqu’un d’autre")}');
       ['btn-etiquette', 'btn-expedier'].forEach(function(k){
@@ -641,7 +641,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function rendreVerrou(){
     if (!VERROU_PRIS) return;
     VERROU_PRIS = false;
-    appeler('verrou:rendre');
+    // (2026-10-19) [portée, id] : le poste tient un verrou PAR fiche — rendre celle-ci, pas une autre.
+    appeler('verrou:rendre', ['orders', VERROU_ID]);
   }
 
   function voile(html, apres){

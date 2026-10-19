@@ -936,7 +936,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   function rendreVerrou(){
     if (!VERROU_PRIS) return;
     VERROU_PRIS = false;
-    appeler('verrou:rendre', DET_ID ? ['orders', DET_ID] : []);
+    if (DET_ID) appeler('verrou:rendre', ['orders', DET_ID]);   // (2026-10-19) jamais sans [portée, id]
   }
   function retourListe(){
     rendreVerrou();
