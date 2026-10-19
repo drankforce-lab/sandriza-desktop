@@ -51,7 +51,7 @@ html.jour .bas{background:#fff4d6;color:#7a4b00;border-color:rgba(122,75,0,.35)}
 .fil button .n{width:1.55rem;height:1.55rem;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
   font-weight:800;font-size:.74rem;border:1.5px solid var(--v22)}
 .fil button.fait .n{background:var(--tx-ok);border-color:var(--tx-ok);color:#0e1522}
-html.jour .fil button.fait .n{color:#ffffff}
+html.jour .fil button.fait .n{color:var(--tx-sur-accent)}
 .fil button.on{color:var(--tx);font-weight:700}
 .fil button.on .n{background:var(--or);border-color:var(--or);color:#17202c}
 .fil button:disabled{cursor:default;opacity:.55}
