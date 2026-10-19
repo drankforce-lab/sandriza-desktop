@@ -210,6 +210,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 120)) + ')';
     return t;
   }
+  function raisonRefaire(m){
+    return m === 'original_supprime' ? '${T("Original supprimé après 30 jours — générez un nouvel aperçu 3D pour pouvoir refaire le rendu.")}'
+      : '${T("L’original de The New Black n’a pas été conservé pour cet aperçu — générez un nouvel aperçu 3D pour pouvoir refaire le rendu.")}';
+  }
   function appeler(op, args){
     var p;
     try { p = P.appeler.apply(P, [op].concat(args || [])); }
@@ -250,10 +254,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   /* (2026-10-19) les rendus de l Atelier (photo, modèle 3D) : leurs étapes viennent de la file elle-même */
   function etapesDe(g){
     if (g && g.genre === 'fantome') return ETAPES_FANT;
-    if (g && (g.genre === 'atelier' || g.genre === 'atelier3d')) return (g.etapes || []).map(function(e){ return [esc(e.lib), '', /New Black/.test(e.lib) ? (Number(g.dureeEstimee) || 60) : 4]; });
+    if (g && (g.genre === 'atelier' || g.genre === 'atelier3d')) return (g.etapes || []).map(function(e){ return [esc(e.lib), '', e.d || (/New Black/.test(e.lib) ? (Number(g.dureeEstimee) || 60) : 4)]; });
     return ETAPES;
   }
-  function typeDe(g){ return g && g.genre === 'fantome' ? '${T("Sans mannequin")}' : (g && g.genre === 'atelier' ? '${T("Rendu photo")}' : (g && g.genre === 'atelier3d' ? '${T("Rendu 3D")}' : '${T("Aperçu 3D")}')); }
+  function typeDe(g){ return g && g.genre === 'fantome' ? '${T("Sans mannequin")}' : (g && g.genre === 'atelier' ? '${T("Rendu photo")}' : (g && g.genre === 'atelier3d' ? '${T("Aperçu 3D · Atelier")}' : '${T("Aperçu 3D")}')); }
   function poids(g, i){ var E = etapesDe(g); return i === 1 ? (Number(g.dureeEstimee) || E[1][2]) : E[i][2]; }
   /* Le POURCENTAGE et le TEMPS RESTANT : pondérés par la durée habituelle de chaque étape. L étape en cours compte
      au temps écoulé sur sa durée habituelle, plafonnée à 95 % — elle n est pas finie tant qu elle ne l a pas dit. */
@@ -385,7 +389,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var h = '<div class="ent"><span class="vg"' + vignette(g) + '>' + (vignette(g) ? '' : (g.genre === 'fantome' ? '${T("Photo")}' : '3D')) + '</span>'
       + '<div class="tx"><h2>' + esc(g.produitNom || g.produit) + '</h2>'
       + '<div class="meta">' + (g.genre === 'atelier' ? '${T("Atelier · rendu photo par The New Black")}' + (g.palier ? ' (' + esc(g.palier) + ')' : '')
-          : g.genre === 'atelier3d' ? '${T("Atelier · modèle 3D par The New Black (Image to 3D)")}'
+          : g.genre === 'atelier3d' ? '${T("Atelier · aperçu 3D construit par The New Black (sans mannequin, puis Image to 3D)")}'
           : g.genre === 'fantome' ? '${T("Vêtement sans mannequin · The New Black")}' + (g.palier ? ' (' + esc(g.palier) + ')' : '')
           : (g.refaite ? '${T("Rendu refait · sans nouvel appel payant")}' : '${T("Aperçu 3D · The New Black, Image to 3D")}')) + (g.sku ? ' · ' + esc(g.sku) : '') + '</div>'
       + '<div class="meta">' + '${T("Lancée le {d} par {p}")}'.replace('{d}', fdate(g.debut)).replace('{p}', esc(g.par || '—'))
@@ -422,7 +426,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (etat === 'cours') h += '<button type="button" class="dgr" data-g="interrompre">${T("Arrêter la génération")}</button>';
     if (etat === 'attente') h += '<button type="button" class="pri" data-g="confirmer">${T("Publier quand même")}</button><button type="button" class="dgr" data-g="rejeter">${T("Rejeter")}</button>';
     h += '<span class="esp"></span>';
-    if (g.peutRefaire) h += '<button type="button" data-g="refaire" title="${T("Retraite l’aperçu au poste — sans nouvel appel payant")}">${T("Refaire le rendu")}</button>';
+    /* ⚠ (2026-10-19, sa décision) : « Refaire » ne repart que de l'ORIGINAL de The New Black, gardé 30 jours ; supprimé
+       ou jamais conservé, le bouton reste visible mais GRISÉ, avec la raison — une nouvelle génération le réactive. */
+    if (g.peutRefaire) h += '<button type="button" data-g="refaire" title="${T("Retraite l’aperçu au poste depuis l’original de The New Black (conservé 30 jours) — sans nouvel appel payant")}">${T("Refaire le rendu")}</button>';
+    else if (g.refaireRaison) h += '<button type="button" disabled title="' + esc(raisonRefaire(g.refaireRaison)) + '">${T("Refaire le rendu")}</button>';
     if (g.produit) h += '<button type="button" data-g="fiche">${T("Ouvrir la fiche")}</button>';
     if (etat !== 'cours' && etat !== 'attente') h += '<button type="button" data-g="retirer">${T("Retirer de la liste")}</button>';
     poser(z.gestes, h);
@@ -469,11 +476,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (geste === 'refaire') {
       szConfirmer({ prudent: true, titre: '${T("Refaire le rendu de l’aperçu 3D")}',
         texte: '${T("Le modèle est retraité au poste, sans nouvel appel payant : matière mate, relief inventé effacé sous les photos, une seule teinte vérifiée au rendu de la boutique sous huit angles (devant et dos égaux), structure du dos comparée à la photo ; puis l’aperçu est reposé sur la fiche.")}',
-        details: [['${T("Produit")}', String(g.produitNom || g.produit)], ['${T("Coût")}', '${T("0 $ — sans nouvel appel")}']],
+        details: [['${T("Produit")}', String(g.produitNom || g.produit)], ['${T("Coût")}', '${T("0 $ — sans nouvel appel")}'],
+          ['${T("Source")}', '${T("l’original de The New Black, conservé 30 jours après la génération")}']],
         oui: '${T("Refaire le rendu")}' }).then(function(ok){
           if (!ok) return;
           appeler('generations:refaireCouleur', [g.id]).then(function(r){
-            if (!r.ok) { dire(r.motif === 'deja_en_cours' ? '${T("Une génération est déjà en cours pour cet article.")}' : expliquer(r), 'err'); return; }
+            if (!r.ok) { dire(r.motif === 'deja_en_cours' ? '${T("Une génération est déjà en cours pour cet article.")}'
+              : (r.motif === 'original_supprime' || r.motif === 'original_absent') ? raisonRefaire(r.motif) : expliquer(r), 'err'); charger(); return; }
             SEL = r.id; dire('${T("Rendu en cours de retraitement.")}', 'bon'); charger();
           });
         });

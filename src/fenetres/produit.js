@@ -2384,19 +2384,44 @@ function pageProduit(id) {
     if (e3) e3.textContent = MOD3D ? '${T("Aperçu 3D en ligne sur la fiche — le client le tourne de gauche à droite.")}' : '';
     if (rt) rt.onclick = function(){ MOD3D = ''; dessiner3d(); dire('${T("Aperçu 3D retiré — enregistrez pour l’enlever de la boutique.")}', 'att'); };
     var rf = document.getElementById('p-3d-refaire');
-    if (rf) { rf.disabled = G3D.enCours || !!G3D.attente || !ID; rf.onclick = refaireCouleur3d; }
+    if (rf) {
+      /* ⚠ L'ORIGINAL, GARDÉ 30 JOURS (2026-10-19, sa décision) : « Refaire le rendu » ne repart que de l'original de
+         The New Black. Supprimé (30 jours) ou jamais conservé : le bouton est GRISÉ, avec la raison, jusqu'à une
+         nouvelle génération. L'état se demande au pont (sans rien lancer) ; une génération en cours le fait redemander. */
+      if (G3D.enCours) BRUT3D = null;
+      if (!BRUT3D && ID && !G3D.enCours && !BRUT3D_DEMANDE) {
+        BRUT3D_DEMANDE = true;
+        P.appeler('generations:refaireCouleur', String(ID), { verifier: true }).then(function(r){
+          BRUT3D = r || { ok: false, motif: 'echec' }; BRUT3D_DEMANDE = false; dessiner3d();
+        }, function(){ BRUT3D = { ok: false, motif: 'echec' }; BRUT3D_DEMANDE = false; dessiner3d(); });
+      }
+      var rr = raisonRefaire3d();
+      rf.disabled = G3D.enCours || !!G3D.attente || !ID || !BRUT3D || !!rr;
+      rf.title = rr || (BRUT3D && BRUT3D.expireLe ? '${T("Retraite l’aperçu au poste depuis l’original de The New Black — sans nouvel appel payant. Original conservé jusqu’au")} ' + dateCourte3d(BRUT3D.expireLe) + '.' : '');
+      if (e3 && MOD3D && rr) e3.textContent = rr;
+      rf.onclick = refaireCouleur3d;
+    }
   }
-  /* « REFAIRE LA COULEUR » (2026-10-19) : l'aperçu posé est RETRAITÉ au poste — le modèle brut de The New Black
-     (lecture gratuite) ou, s'il a expiré, le modèle posé ; aucun nouvel appel payant. Suivi comme une génération. */
+  var BRUT3D = null, BRUT3D_DEMANDE = false;
+  function dateCourte3d(ms){ try { return new Date(ms).toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return ''; } }
+  function raisonRefaire3d(){
+    if (!BRUT3D || BRUT3D.ok) return '';
+    if (BRUT3D.motif === 'original_supprime') return '${T("Original supprimé après 30 jours — générez un nouvel aperçu 3D pour pouvoir refaire le rendu.")}';
+    if (BRUT3D.motif === 'original_absent') return '${T("L’original de The New Black n’a pas été conservé pour cet aperçu — générez un nouvel aperçu 3D pour pouvoir refaire le rendu.")}';
+    return expliquer(BRUT3D);
+  }
+  /* « REFAIRE LE RENDU » (2026-10-19) : l'aperçu est RETRAITÉ au poste depuis l'ORIGINAL de The New Black, conservé
+     30 jours — jamais depuis le modèle posé ; aucun nouvel appel payant. Suivi comme une génération. */
   function refaireCouleur3d(){
     if (!ID || G3D.enCours) return;
     szConfirmer({ prudent: true, titre: '${T("Refaire le rendu de l’aperçu 3D")}',
       texte: '${T("Le modèle est retraité au poste, sans nouvel appel payant : matière mate, relief inventé effacé sous les photos, une seule teinte vérifiée au rendu de la boutique sous huit angles (devant et dos égaux), structure du dos comparée à la photo ; puis l’aperçu est reposé sur la fiche.")}',
-      details: [['${T("Coût")}', '${T("0 $ — sans nouvel appel")}'], ['${T("Durée")}', '${T("environ 1 minute au poste")}']],
+      details: [['${T("Coût")}', '${T("0 $ — sans nouvel appel")}'], ['${T("Durée")}', '${T("environ 1 minute au poste")}'],
+        ['${T("Source")}', '${T("l’original de The New Black, conservé 30 jours après la génération")}' + (BRUT3D && BRUT3D.expireLe ? ' (${T("jusqu’au")} ' + dateCourte3d(BRUT3D.expireLe) + ')' : '')]],
       oui: '${T("Refaire le rendu")}' }).then(function(ok){
         if (!ok) return;
         P.appeler('generations:refaireCouleur', String(ID)).then(function(r){
-          if (!r || !r.ok) { dire(r && r.motif === 'aucun_modele' ? '${T("Aucun aperçu 3D à retraiter pour cet article.")}' : expliquer(r), 'err'); return; }
+          if (!r || !r.ok) { BRUT3D = r || null; dessiner3d(); dire(r && (r.motif === 'original_supprime' || r.motif === 'original_absent') ? raisonRefaire3d() : expliquer(r), 'err'); return; }
           G3D.genId = r.id; G3D.enCours = true; dessiner3d();
           dire('${T("Rendu en cours de retraitement — suivi dans la fenêtre Générations.")}', 'bon');
           suivre3d();

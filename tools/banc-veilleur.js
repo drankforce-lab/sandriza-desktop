@@ -534,4 +534,12 @@ cas('PANNE : une porte commune sans `show()` est REFUSÉE', () => {
   assert.ok(!/\.show\(\)/.test(c), 'le banc accepterait une porte qui ne montre rien');
 });
 
+/* (2026-10-19, sa demande) LA MISE À JOUR INSTALLÉE AU DÉMARRAGE NE S'ANNONCE PAS : à la porte, elle s'installe d'elle-même
+   et l'application redémarre sur elle — « Mise à jour X disponible » et ses notes annonceraient ce qu'on installe. */
+cas('la porte du démarrage n’annonce pas la mise à jour qu’elle installe (annoncerMaj gardé par !_porteActive)', () => {
+  const appels = _srcM.match(/[^\n]*annoncerMaj\([^\n]*/g) || [];
+  assert.ok(appels.length >= 1, 'aucun appel à annoncerMaj dans main.js');
+  appels.forEach((l) => assert.ok(/if \(!_porteActive\)/.test(l), 'appel non gardé : ' + l.trim().slice(0, 90)));
+});
+
 console.log('\n' + (process.exitCode ? '✗ DES CAS ONT ÉCHOUÉ' : '✓ ' + vert + ' cas verts') + '\n');

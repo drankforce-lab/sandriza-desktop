@@ -2670,7 +2670,7 @@ const JEU = {
       etapes: [{ lib: 'Contrôle du prix', etat: 'err', t0: T0 - 60000, t1: T0 - 59000 }, { lib: 'Retrait du mannequin chez The New Black', etat: 'att', t0: 0, t1: 0 }] };
     return [
       { nom: 'trois generations', reponses: { 'generations:etat': { ok: true, liste: [atl, fini, echec] }, 'generations:agir': { ok: true } },
-        exige: ['class="suivi', 'Étape 3/4', 'Annuler', 'Fermer', 'class="jauge"'] },
+        exige: ['class="suivi', 'Atelier · Robe portefeuille', '3/4 · ', 'Tout le détail', 'Annuler', 'Fermer', 'class="jauge"'] },
       { nom: 'une seule en cours', reponses: { 'generations:etat': { ok: true, liste: [atl] }, 'generations:agir': { ok: true } } },
       { nom: 'file vide', reponses: { 'generations:etat': { ok: true, liste: [] } } }
     ];
@@ -3825,6 +3825,7 @@ const JEU = {
       'atelier:supprimer': { ok: true, id: 'atl_essai3' }, 'atelier:analyser': AN, 'atelier:preparer': PR, 'atelier:graduer': GR,
       'atelier:egaliser': { ok: true, pieces: PR.pieces, deplacement: 0.3, ecart: 0 }, 'atelier:restaurer': { ok: true, id: 'atl_essai1' }, 'atelier:exporter': EXP, 'atelier:apercu3d': V3D, identite: IDENTITE,
       // (2026-10-19) le rendu photo de The New Black, vue principale de l aperçu : le barème lu avant toute génération
+      'atelier:modele3dPrix': { ok: true, prix: 0.715, credits: 11, fantome: { credits: 1, prix: 0.065 }, modele3d: { credits: 10, prix: 0.65 }, solde: 1136, soldeDollars: 73.84 },
       'atelier:renduPrix': { ok: true, prix: { porte: { standard: { credits: 1, prix: 0.065 }, pro: { credits: 3, prix: 0.195 }, ultra: { credits: 7, prix: 0.455 } }, fantome: { standard: { credits: 1, prix: 0.065 }, pro: { credits: 3, prix: 0.195 }, ultra: { credits: 7, prix: 0.455 } }, plat: { standard: { credits: 1, prix: 0.065 }, pro: { credits: 3, prix: 0.195 }, ultra: { credits: 7, prix: 0.455 } } }, solde: 1147, soldeDollars: 74.56 } };
     var avec = function(o){ var r = {}; Object.keys(gestes).forEach(function(k){ r[k] = gestes[k]; }); Object.keys(o).forEach(function(k){ r[k] = o[k]; }); return r; };
     var vide = JSON.parse(JSON.stringify(D)); vide.modeles = [];

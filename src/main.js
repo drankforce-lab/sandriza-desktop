@@ -3026,7 +3026,7 @@ const OPS_PONT = new Set([
   'vehicules:catalogue',
   // Atelier de creation (2026-10-16) : les modeles de vetements. ⚠ `atelier:donnees` est l op de
   // LECTURE (nom repere par l etape 2 du verificateur du site) ; `atelier:apercu` trace sans ecrire.
-  'atelier:donnees', 'atelier:apercu', 'atelier:analyser', 'atelier:preparer', 'atelier:graduer', 'atelier:egaliser', 'atelier:restaurer', 'atelier:exporter', 'atelier:apercu3d', 'atelier:motifControler', 'atelier:motifExporter', 'atelier:motifImage', 'atelier:motifDetourer', 'atelier:depuisPhoto', 'atelier:croquis', 'atelier:verrou', 'atelier:envoyerFiche', 'atelier:vignette', 'atelier:rendrePhoto', 'atelier:renduPrix', 'atelier:renduTnb', 'atelier:renduResultat', 'atelier:ecrire', 'atelier:dupliquer', 'atelier:supprimer',
+  'atelier:donnees', 'atelier:apercu', 'atelier:analyser', 'atelier:preparer', 'atelier:graduer', 'atelier:egaliser', 'atelier:restaurer', 'atelier:exporter', 'atelier:apercu3d', 'atelier:motifControler', 'atelier:motifExporter', 'atelier:motifImage', 'atelier:motifDetourer', 'atelier:depuisPhoto', 'atelier:croquis', 'atelier:verrou', 'atelier:envoyerFiche', 'atelier:vignette', 'atelier:rendrePhoto', 'atelier:renduPrix', 'atelier:renduTnb', 'atelier:renduResultat', 'atelier:modele3dPrix', 'atelier:modele3dLancer', 'atelier:ecrire', 'atelier:dupliquer', 'atelier:supprimer',
   // Rappels (fenetre Rappels, 2026-10-02). ⚠ `rappels:etat` sert AUSSI au
   // processus principal : c est lui que src/rappels-notif.js interroge pour
   // les notifications de bureau, par la meme porte (executerOpSite).
@@ -3693,7 +3693,7 @@ const LIMITES_PONT = {
      les ecritures passent par le nuage, un modele entier (ses pieces) a la fois. */
   'atelier:donnees': 15000, 'atelier:apercu': 15000, 'atelier:analyser': 15000, 'atelier:preparer': 15000, 'atelier:graduer': 15000, 'atelier:egaliser': 15000, 'atelier:exporter': 30000, 'atelier:apercu3d': 15000, 'atelier:motifControler': 15000, 'atelier:motifExporter': 30000,
   /* une image d'impression (jusqu'à 20 Mo) part vers R2 : sur une connexion lente, il faut du temps */
-  'atelier:motifImage': 180000, 'atelier:motifDetourer': 180000, 'atelier:depuisPhoto': 180000, 'atelier:envoyerFiche': 180000, 'atelier:rendrePhoto': 180000, 'atelier:renduPrix': 30000, 'atelier:renduTnb': 120000, 'atelier:renduResultat': 20000,
+  'atelier:motifImage': 180000, 'atelier:motifDetourer': 180000, 'atelier:depuisPhoto': 180000, 'atelier:envoyerFiche': 180000, 'atelier:rendrePhoto': 180000, 'atelier:renduPrix': 30000, 'atelier:renduTnb': 120000, 'atelier:renduResultat': 20000, 'atelier:modele3dPrix': 30000, 'atelier:modele3dLancer': 90000,
   'atelier:ecrire': 30000, 'atelier:dupliquer': 30000, 'atelier:supprimer': 30000, 'atelier:restaurer': 30000,
   /* Les rappels se lisent en local ; les ecritures passent par le nuage. */
   'rappels:donnees': 15000, 'rappels:etat': 15000,
@@ -5937,7 +5937,10 @@ const getUpdater = () => {
       // la barre garde l avis tant qu on n a pas choisi d installer (Aide › Vérifier les mises à jour)
       // rien ne se télécharge d office (sauf à la porte du démarrage) : la barre dit « disponible », cliquable
       majEtat({ etape: _porteActive ? 'detectee' : 'disponible', version: _majVersionVue });
-      try { require('./veilleur').annoncerMaj(_majVersionVue, () => { try { if (mainWindow && !mainWindow.isDestroyed()) { mainWindow.show(); mainWindow.focus(); } } catch {} actionApp('notes'); }); } catch {}
+      /* ⚠ PAS À LA PORTE DU DÉMARRAGE (2026-10-19, sa demande) : là, la mise à jour s'installe d'elle-même et
+         l'application redémarre sur cette version — « Mise à jour X disponible » et ses notes annonceraient une version
+         qu'on est en train d'installer. Le veilleur ne parle que d'une mise à jour détectée PENDANT l'utilisation. */
+      if (!_porteActive) try { require('./veilleur').annoncerMaj(_majVersionVue, () => { try { if (mainWindow && !mainWindow.isDestroyed()) { mainWindow.show(); mainWindow.focus(); } } catch {} actionApp('notes'); }); } catch {}
     });
     // Rien à télécharger : aucune raison de retenir quoi que ce soit.
     autoUpdater.on('update-not-available', () => { _majDispo = false; _majCritique = false; majBoutonsFermeture(); majEtat(null); });

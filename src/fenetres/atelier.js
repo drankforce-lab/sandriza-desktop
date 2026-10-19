@@ -451,6 +451,22 @@ html.jour .v3-cam button[aria-pressed="true"]{background:#DDD5C8}
 .v3-tnb .coin span{font-size:.72rem;color:#3d362f;background:#F7F4EF;border-radius:99px;padding:.15rem .55rem}
 .v3-tnb .coin button,.v3-tnb .perime button{font:inherit;font-size:.75rem;padding:.25rem .6rem;border-radius:8px;cursor:pointer;
   border:1px solid rgba(0,0,0,.25);background:#FBF9F6;color:#2b2621}
+/* L aperçu 3D construit (2026-10-19) : l afficheur de la boutique, et « Prêt à construire ? » */
+.v3-tnb .c3-mv{position:absolute;inset:0;width:100%;height:100%;--poster-color:transparent;background:transparent}
+.v3-tnb .c3-pan{display:flex;flex-direction:column;align-items:center;gap:.6rem;max-width:44rem}
+.v3-tnb .c3-grille{display:flex;gap:1rem;align-items:flex-start;text-align:left}
+.v3-tnb .c3-ctl{display:flex;flex-direction:column;gap:.35rem;min-width:20rem}
+.v3-tnb .c3-ctl .lib{font-weight:700;color:#4f463d;font-size:.82rem}
+.v3-tnb .c3-l{display:flex;gap:.5rem;align-items:flex-start;font-size:.8rem;color:#2b2621;background:#F7F4EF;border-radius:8px;padding:.35rem .5rem}
+.v3-tnb .c3-l .s{flex:0 0 1.1rem;font-weight:700}
+.v3-tnb .c3-l.ok .s{color:#1f6b3a}.v3-tnb .c3-l.non .s{color:#9b2c2c}
+.v3-tnb .c3-l small{display:block;color:#4f463d;font-size:.74rem}
+.v3-tnb .c3-l button{margin-left:auto;flex:0 0 auto;font:inherit;font-size:.74rem;padding:.2rem .55rem;border-radius:7px;cursor:pointer;border:1px solid rgba(0,0,0,.25);background:#FBF9F6;color:#2b2621}
+.v3-tnb .c3-src{margin:0;display:flex;flex-direction:column;align-items:center;gap:.2rem;font-size:.72rem;color:#4f463d}
+.v3-tnb .c3-src img{width:7.5rem;height:10rem;object-fit:contain;background:#fff;border:1px solid rgba(0,0,0,.15);border-radius:6px}
+.v3-tnb .c3-non{color:#9b2c2c;font-weight:600}
+.v3-tnb .gen:disabled{opacity:.45;cursor:default;filter:none}
+.v3-tnb .c3-info b{font-weight:600}
 .v3-tnb .perime{position:absolute;left:50%;transform:translateX(-50%);bottom:.8rem;z-index:4;font-size:.78rem;color:#5c3d0e;
   background:rgba(255,236,200,.95);border:1px solid rgba(160,110,30,.45);border-radius:9px;padding:.35rem .6rem;display:flex;gap:.5rem;align-items:center}
 /* le fond de studio : un léger dégradé, plus clair derrière le vêtement (le cyclo d un photographe) */
@@ -3098,13 +3114,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      la boutique), sur fond blanc ; le SITE les range parmi les photos du produit, sans jamais
      écraser une photo de la personne (les rendus envoyés avant sont remplacés). */
   var VUES_FICHE = [['face', '${T("Face")}', 0, 0.06], ['tq', '${T("3/4")}', 0.6, 0.1], ['dos', '${T("Dos")}', Math.PI, 0.06]];
-  function rendreVues3d(cles, fantome, taille, fond){
+  function rendreVues3d(cles, fantome, taille, fond, marge){
     var cv = GLV && GLV.cv; if (!cv || !plaque3d() || !GLV.h) return [];
     var sauve = { yaw: V3.yaw, pitch: V3.pitch, zoom: V3.zoom, px: V3.px, py: V3.py, carte: V3.carte, fil: V3.fil, mannequin: V3.mannequin };
     if (fantome) V3.mannequin = false;
     var W = taille ? taille[0] : 1200, H = taille ? taille[1] : 1600, out = [];
     V3.carte = false; V3.fil = false; V3.px = 0; V3.py = 0;
-    V3.zoom = H * 0.8 * Math.max(GLV.minH || 120, GLV.h) / (GLV.h * W * 0.85);
+    V3.zoom = H * 0.8 * Math.max(GLV.minH || 120, GLV.h) / (GLV.h * W * 0.85) * (marge || 1);
     VUES_FICHE.filter(function(v){ return cles.indexOf(v[0]) >= 0; }).forEach(function(v){
       V3.yaw = v[2]; V3.pitch = v[3] + (fantome ? 0.22 : 0);
       peindreGL(cv, { W: W, H: H });
@@ -3135,7 +3151,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   /* « Rendu photo (The New Black) », depuis le menu ou la barre : la VUE PRINCIPALE de l aperçu, panneau de génération
      ouvert (2026-10-19, sa décision — voir peindreTnb3d). */
-  function ouvrirRenduIa(){ if (!V3) return; V3.technique = false; RP.panneau = true; peindreTnb3d(); }
+  function ouvrirRenduIa(){ if (!V3) return; V3.technique = false; V3.vuePrinc = 'photo'; RP.panneau = true; peindreTnb3d(); }
   // une image (adresse ou data:) : petite vignette 300 × 400, recadrée au centre — et l envoi vers la fiche produit
   function vignetteDepuis(src){
       var im = new Image(); im.crossOrigin = 'anonymous';
@@ -6143,7 +6159,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       sec('${T("Tenue")}');
       TISSUS3.forEach(function(x){ l.push({ lib: x[1], coche: VIE.tissu === x[0], fn: function(){ vie3d('tissu', x[0]); } }); });
       sec('${T("Couleur du tissu")}');
-      COUL3.forEach(function(c){ l.push({ lib: c[1], coche: V3.couleur === c[0], fn: function(){ V3.couleur = c[0]; dessiner(); } }); });
+      COUL3.forEach(function(c){ l.push({ lib: c[1], coche: V3.couleur === c[0], fn: function(){ V3.couleur = c[0]; V3.couleurChoisie = true; C3.ctl = null; C3.verifPour = ''; dessiner(); } }); });
       sec('${T("Fond")}');
       [['beige', '${T("Beige")}'], ['blanc', '${T("Blanc")}']].forEach(function(f){ l.push({ lib: f[1], coche: V3.fond === f[0], fn: function(){ V3.fond = f[0]; dessiner(); } }); });
     } else if (k === 'fenetre') {
@@ -6214,19 +6230,245 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function rpChoisis(){ return RP_ANGLES.filter(function(a){ return RP.angles[a[0]]; }).map(function(a){ return a[0]; }); }
   function rpUsd(x){ return x == null ? '…' : '${T("{0} $ US")}'.split('{0}').join(szArgentNombre(x, 3)); }
   function rpEnCours(){ return Object.keys(RP.gens).length > 0; }
+  /* ══ L APERÇU 3D CONSTRUIT PAR THE NEW BLACK — LA VUE PRINCIPALE (2026-10-19, sa demande : « la vue 3D des plans de
+     l Atelier devra produire une demande chez The New Black pour CONSTRUIRE l aperçu 3D, et ensuite on travaille avec le
+     rendu généré ; pour la construction initiale, demande et confirmation ; et des VALIDATIONS côté Atelier avant de
+     générer — des barrières pour éviter des générations coûteuses à chaque fois ») ══
+     · le GLB construit (sans mannequin puis Image to 3D, traité au poste : non éclairé, orienté de face) s affiche dans
+       la scène, en rotation libre — le même afficheur que la boutique (model-viewer, exposition 1) ;
+     · « PRÊT À CONSTRUIRE ? » : cinq contrôles, chacun vert ou rouge avec sa raison et un lien pour le corriger ; le
+       bouton reste grisé tant qu un seul est rouge ;
+     · une construction est liée à la VERSION : déjà construite → seulement « Reconstruire… » (confirmation renforcée,
+       ce qu elle a déjà coûté) ; « Régénérer… » n est proposé que si le modèle a changé (les champs qui comptent) ;
+       au plus trois constructions par modèle en 24 heures ; le total déjà dépensé est toujours rappelé.
+     Le rendu photo (porté, sans mannequin, à plat) reste là, en action SECONDAIRE ; la vue du poste, en « Vue technique 3D ». */
+  var C3 = { prix: null, solde: null, chargement: false, ctl: null, verif: 0, source: '', panneau: false, gen: '', pct: 0, t: null };
+  var C3_CHAMPS = { base: '${T("la base")}', options: '${T("les options")}', pieces: '${T("le patron")}', motif: '${T("le motif")}', design3d: '${T("les découpes et éléments")}' };
+  function c3Usd(x){ return x == null ? '…' : '${T("{0} $ US")}'.split('{0}').join(szArgentNombre(x, 2)); }
+  function c3Construit(){ return V3 && V3.m.tnb3d && /^https:/.test(String(V3.m.tnb3d.url || '')) ? V3.m.tnb3d : null; }
+  function c3Etat(){ return (V3 && V3.m.construction3d) || { total: 0, constructions: 0, recentes: 0, plafond: 3, plafondAtteint: false, changements: null }; }
+  // ce qui a changé depuis la construction : la version, les champs qui comptent, la couleur choisie
+  function c3Changements(){
+    var t = c3Construit(); if (!t) return null;
+    var l = (c3Etat().changements || []).map(function(k){ return C3_CHAMPS[k] || k; });
+    if (Number(t.version) !== Number(V3.m.version || 1) && !l.length) l.push('${T("la version")}');
+    if (t.couleur && V3.couleur && t.couleur !== V3.couleur) l.push('${T("la couleur du tissu")}');
+    return l;
+  }
+  function chargerPrixC3(){
+    if (C3.chargement) return; C3.chargement = true;
+    appeler('atelier:modele3dPrix', []).then(function(r){
+      C3.chargement = false;
+      if (r && r.ok && r.prix != null) { C3.prix = r; C3.solde = r.solde; peindreTnb3d(); }
+      else dire(r && (r.detail || r.error) ? '${T("The New Black : {0}")}'.split('{0}').join(r.detail || r.error) : expliquer(r), 'err');
+    });
+  }
+  function c3ModelViewer(){
+    if (window.customElements && customElements.get('model-viewer')) return;
+    if (document.getElementById('c3-mv-js')) return;
+    var sc = document.createElement('script'); sc.type = 'module'; sc.id = 'c3-mv-js';
+    sc.src = 'https://unpkg.com/@google/model-viewer@3.5.0/dist/model-viewer.min.js';
+    document.head.appendChild(sc);
+  }
+  // la vue de face qui PART (fond blanc, sans le mannequin, le vêtement entier avec une marge) — et son contrôle
+  function c3Capturer(){
+    var img = rendreVues3d(['face'], true, [900, 1200], '#FFFFFF', 0.78)[0];
+    if (!img) return Promise.resolve({ ok: false, attente: true, raison: '${T("Le vêtement n’est pas encore calculé : attendez la fin du calcul de la vue.")}' });
+    return new Promise(function(ok){
+      var im = new Image();
+      im.onload = function(){
+        var W = 180, H = 240, c = document.createElement('canvas'); c.width = W; c.height = H;
+        var g = c.getContext('2d'); g.drawImage(im, 0, 0, W, H);
+        var d = g.getImageData(0, 0, W, H).data, bord = 0, plein = 0;
+        var fond = function(k){ return d[k] > 238 && d[k + 1] > 238 && d[k + 2] > 238; };
+        for (var x = 0; x < W; x++) { if (!fond(x * 4)) bord++; if (!fond(((H - 1) * W + x) * 4)) bord++; }
+        for (var y = 0; y < H; y++) { if (!fond((y * W) * 4)) bord++; if (!fond((y * W + W - 1) * 4)) bord++; }
+        for (var k = 0; k < W * H; k++) if (!fond(k * 4)) plein++;
+        if (plein < W * H * 0.08) ok({ ok: false, image: img, raison: '${T("La vue de face est presque vide : le vêtement n’apparaît pas.")}' });
+        else if (bord > 3) ok({ ok: false, image: img, raison: '${T("Quelque chose touche le bord de l’image (le vêtement coupé, ou le support du mannequin) : The New Black le reproduirait.")}' });
+        else ok({ ok: true, image: img });
+      };
+      im.onerror = function(){ ok({ ok: false, raison: '${T("La vue de face n’a pas pu être capturée.")}' }); };
+      im.src = img;
+    });
+  }
+  /* « PRÊT À CONSTRUIRE ? » — cinq contrôles ; chacun { ok, lib, raison, lien, geste }. */
+  function verifierC3(){
+    if (!V3) return;
+    var n = ++C3.verif, m = V3.m, ctl = [];
+    var fin = function(){ if (n !== C3.verif || !V3) return; C3.ctl = ctl; peindreTnb3d(); };
+    ctl.push(V3.dsale
+      ? { ok: false, lib: '${T("Modèle enregistré")}', raison: '${T("Des modifications ne sont pas enregistrées : l’aperçu représenterait une version qui n’existe pas.")}', lien: '${T("Enregistrer")}', geste: 'enreg' }
+      : { ok: true, lib: '${T("Modèle enregistré")}', raison: '${T("Version {0}")}'.split('{0}').join(String(m.version || 1)) });
+    var aMotif = !!(m.motif && (m.motif.calques || []).length);
+    var couleurOk = !!(V3.photo || V3.couleurChoisie);
+    ctl.push(couleurOk
+      ? { ok: true, lib: '${T("Couleur du tissu choisie")}', raison: V3.photo ? '${T("Celle de la photo du modèle")}' : '' }
+      : { ok: false, lib: '${T("Couleur du tissu choisie")}', raison: '${T("La couleur par défaut n’a pas été confirmée : choisissez la couleur du tissu dans le panneau Tissu.")}', lien: '${T("Choisir")}', geste: 'couleur' });
+    var pieces = m.pieces || [];
+    Promise.all([
+      pieces.length ? appeler('atelier:analyser', [{ pieces: pieces, assemblages: m.assemblages || [], laize: 140 }]) : Promise.resolve(null),
+      pieces.length ? appeler('atelier:graduer', [{ pieces: pieces, tailleBase: m.tailleBase || 'M', tailles: m.tailles || [] }]) : Promise.resolve(null),
+      aMotif ? appeler('atelier:motifControler', [{ id: m.id, motif: m.motif }]) : Promise.resolve(null),
+      c3Capturer()
+    ]).then(function(rs){
+      var an = rs[0], gr = rs[1], mo = rs[2], cap = rs[3];
+      var ecarts = an && an.ok ? (an.assemblages || []).filter(function(a){ return Math.abs(Number(a.ecart) || 0) > 0.5; }) : [];
+      if (!pieces.length) ctl.splice(1, 0, { ok: false, lib: '${T("Patron validé")}', raison: '${T("Le modèle n’a pas de pièces.")}', lien: '${T("Ouvrir le patron")}', geste: 'patron' });
+      else if (!an || !an.ok) ctl.splice(1, 0, { ok: false, lib: '${T("Patron validé")}', raison: expliquer(an), lien: '${T("Ouvrir le patron")}', geste: 'patron' });
+      else if (ecarts.length) ctl.splice(1, 0, { ok: false, lib: '${T("Patron validé")}', raison: '${T("{0} couture(s) assemblent des bords de longueurs différentes (plus de 0,5 cm).")}'.split('{0}').join(String(ecarts.length)), lien: '${T("Ouvrir le patron")}', geste: 'patron' });
+      else if (!gr || !gr.ok) ctl.splice(1, 0, { ok: false, lib: '${T("Patron validé")}', raison: '${T("La gradation des tailles n’a pas pu être calculée.")}', lien: '${T("Ouvrir le patron")}', geste: 'patron' });
+      else ctl.splice(1, 0, { ok: true, lib: '${T("Patron validé")}', raison: '${T("{0} pièce(s), coutures cohérentes, gradation calculée")}'.split('{0}').join(String(pieces.length)) });
+      if (!aMotif) ctl.splice(2, 0, { ok: true, lib: '${T("Motif / impression")}', raison: '${T("Aucun motif sur ce modèle")}' });
+      else {
+        var alertes = mo && mo.ok ? (mo.controles || []).filter(function(c){ return c.niveau && c.niveau !== 'ok' && c.niveau !== 'info'; }) : [{ texte: expliquer(mo) }];
+        ctl.splice(2, 0, alertes.length
+          ? { ok: false, lib: '${T("Motif / impression")}', raison: String(alertes[0].texte || '') + (alertes.length > 1 ? ' (+' + (alertes.length - 1) + ')' : ''), lien: '${T("Ouvrir le motif")}', geste: 'motif' }
+          : { ok: true, lib: '${T("Motif / impression")}', raison: '${T("Placé et validé")}' });
+      }
+      C3.source = cap && cap.image ? cap.image : '';
+      // le vêtement encore en calcul : on revérifie toute seule, sans clic (au plus une minute)
+      if (cap && cap.attente && (C3.essais = (C3.essais || 0) + 1) < 40) setTimeout(function(){ if (n === C3.verif && V3 && !C3.gen) verifierC3(); }, 1500);
+      else if (cap && !cap.attente) C3.essais = 0;
+      ctl.push(cap && cap.ok
+        ? { ok: true, lib: '${T("Vue de face sans défaut")}', raison: '${T("Le vêtement entier, sans mannequin, sur fond blanc")}' }
+        : { ok: false, lib: '${T("Vue de face sans défaut")}', raison: (cap && cap.raison) || '', lien: '${T("Vue technique 3D")}', geste: 'tech' });
+      fin();
+    });
+  }
+  function c3Pret(){ return !!(C3.ctl && C3.ctl.every(function(c){ return c.ok; })); }
+  function peindreC3(z){
+    c3ModelViewer();
+    var t = c3Construit(), et = c3Etat(), ch = c3Changements(), h = '';
+    var depense = '${T("Déjà dépensé pour ce modèle : {0} ({1} construction(s))")}'.split('{0}').join(c3Usd(et.total)).split('{1}').join(String(et.constructions));
+    if (C3.gen) {
+      h += '<div class="t1">${T("Construction de l’aperçu 3D…")}</div><div class="t2">${T("Sans mannequin, puis modèle 3D chez The New Black — environ 3 à 4 minutes. Suivie dans la petite fenêtre de suivi et la fenêtre Générations.")}</div>'
+        + '<div class="barre" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + C3.pct + '"><i style="width:' + C3.pct + '%"></i></div>'
+        + '<div class="coin"><button type="button" data-c3="photo">${T("Rendu photo…")}</button><button type="button" data-c3="tech">${T("Vue technique 3D")}</button></div>';
+    } else if (t && !C3.panneau) {
+      h += '<model-viewer class="c3-mv" src="' + esc(t.url) + '" camera-controls touch-action="pan-y" exposure="1" shadow-intensity="0.6" camera-orbit="0deg 80deg auto" interaction-prompt="none" alt="' + esc(V3.m.nom || '') + '"></model-viewer>'
+        + '<div class="coin">'
+        + (ch && ch.length ? '<button type="button" data-c3="panneau">${T("Régénérer…")}</button>' : (D.peutModifier ? '<button type="button" data-c3="panneau">${T("Reconstruire…")}</button>' : ''))
+        + '<button type="button" data-c3="photo">${T("Rendu photo…")}</button><button type="button" data-c3="tech">${T("Vue technique 3D")}</button></div>'
+        + '<div class="perime c3-info"><span>' + '${T("Aperçu 3D · version {0} · {1}")}'.split('{0}').join(String(t.version)).split('{1}').join(c3Usd(t.cout)) + '</span>'
+        + (ch && ch.length ? '<b>' + '${T("Le modèle a changé depuis : {0}")}'.split('{0}').join(ch.join(', ')) + '</b>' : '') + '</div>';
+    } else {
+      var P = C3.prix, total = P ? Number(P.prix) : null, cred = P ? Number(P.credits) : null;
+      var meme = t && Number(t.version) === Number(V3.m.version || 1) && !(ch && ch.length);
+      h += '<div class="c3-pan"><div class="t1">' + (t ? (meme ? '${T("Reconstruire l’aperçu 3D")}' : '${T("Régénérer l’aperçu 3D")}') : '${T("Construire l’aperçu 3D")}') + '</div>'
+        + '<div class="t2">${T("La vue de face part chez The New Black en deux étapes : un rendu sans mannequin (photoréaliste), puis un modèle 3D construit d’après ce rendu. Rien ne part sans votre confirmation.")}</div>'
+        + '<div class="c3-grille"><div class="c3-ctl" role="list" aria-label="${T("Prêt à construire ?")}"><div class="lib">${T("Prêt à construire ?")}</div>'
+        + (C3.ctl ? C3.ctl.map(function(c, i){
+            return '<div class="c3-l ' + (c.ok ? 'ok' : 'non') + '" role="listitem"><span class="s" aria-hidden="true">' + (c.ok ? '✓' : '✕') + '</span><span><b>' + esc(c.lib) + '</b>'
+              + (c.raison ? '<small>' + esc(c.raison) + '</small>' : '') + '</span>' + (!c.ok && c.lien ? '<button type="button" data-c3g="' + c.geste + '">' + esc(c.lien) + '</button>' : '') + '</div>';
+          }).join('') : '<div class="c3-l"><span class="s">…</span><span>${T("Vérification du modèle…")}</span></div>')
+        + '</div>' + (C3.source ? '<figure class="c3-src"><img src="' + C3.source + '" alt=""><figcaption>${T("La vue qui part")}</figcaption></figure>' : '') + '</div>'
+        + '<div class="t2 c3-cout">' + '${T("Coût : {0} ({1} crédits : sans mannequin {2} + modèle 3D {3})")}'.split('{0}').join(c3Usd(total)).split('{1}').join(cred == null ? '…' : String(cred))
+            .split('{2}').join(P ? String(P.fantome.credits) : '…').split('{3}').join(P ? String(P.modele3d.credits) : '…')
+        + '<br>' + depense + ' · ' + '${T("{0} sur {1} constructions en 24 h")}'.split('{0}').join(String(et.recentes)).split('{1}').join(String(et.plafond)) + '</div>'
+        + (et.plafondAtteint ? '<div class="t2 c3-non">${T("Plafond atteint : trois constructions pour ce modèle dans les dernières 24 heures. Réessayez plus tard.")}</div>' : '')
+        + (D.peutModifier ? '<button type="button" class="gen" data-c3="construire"' + (c3Pret() && total != null && !et.plafondAtteint ? '' : ' disabled') + '>'
+            + (meme ? '${T("Reconstruire… ({0})")}' : '${T("Construire l’aperçu 3D ({0})")}').split('{0}').join(c3Usd(total)) + '</button>' : '')
+        + '</div><div class="coin">' + (t ? '<button type="button" data-c3="retour">${T("Annuler")}</button>' : '')
+        + '<button type="button" data-c3="photo">${T("Rendu photo…")}</button><button type="button" data-c3="tech">${T("Vue technique 3D")}</button></div>';
+      if (!C3.prix) chargerPrixC3();
+      if (!C3.ctl && C3.verifPour !== V3.id + ':' + (V3.m.version || 1)) { C3.verifPour = V3.id + ':' + (V3.m.version || 1); setTimeout(verifierC3, 60); }
+    }
+    z.innerHTML = h;
+    Array.prototype.forEach.call(z.querySelectorAll('[data-c3]'), function(b){
+      b.onclick = function(){
+        var g = b.getAttribute('data-c3');
+        if (g === 'tech') { V3.technique = true; peindreTnb3d(); return; }
+        if (g === 'photo') { V3.vuePrinc = 'photo'; peindreTnb3d(); return; }
+        if (g === 'panneau') { C3.panneau = true; C3.ctl = null; C3.verifPour = ''; peindreTnb3d(); return; }
+        if (g === 'retour') { C3.panneau = false; peindreTnb3d(); return; }
+        if (g === 'construire') construireC3();
+      };
+    });
+    Array.prototype.forEach.call(z.querySelectorAll('[data-c3g]'), function(b){
+      b.onclick = function(){
+        var g = b.getAttribute('data-c3g');
+        if (g === 'enreg') { enregistrer3d(); return; }
+        if (g === 'tech') { V3.technique = true; peindreTnb3d(); return; }
+        if (g === 'patron') { if (V3.dsale) { dire('${T("Enregistrez d’abord vos modifications de la vue 3D.")}', 'att'); return; } ouvrirEditeur(V3.id); return; }
+        if (g === 'motif') { if (V3.dsale) { dire('${T("Enregistrez d’abord vos modifications de la vue 3D.")}', 'att'); return; } ouvrirMotif(V3.id, '3d'); return; }
+        if (g === 'couleur') { var c = document.querySelector('[data-v3c]'); if (c) c.focus(); dire('${T("Choisissez la couleur du tissu dans le panneau Tissu (une pastille).")}', 'att'); }
+      };
+    });
+  }
+  function construireC3(){
+    if (!V3 || OCCUPE || C3.gen || !c3Pret() || !C3.prix || !C3.source) return;
+    var P = C3.prix, total = Number(P.prix), cred = Number(P.credits), t = c3Construit(), et = c3Etat();
+    var meme = t && Number(t.version) === Number(V3.m.version || 1) && !(c3Changements() || []).length;
+    var d = [['${T("Envoyé")}', '${T("la vue de face du modèle (900 × 1200, fond blanc, sans mannequin)")}'],
+      ['${T("Chez")}', 'The New Black'],
+      ['${T("Étapes")}', '${T("1) rendu sans mannequin ({0} crédit) · 2) modèle 3D d’après ce rendu ({1} crédits)")}'.split('{0}').join(String(P.fantome.credits)).split('{1}').join(String(P.modele3d.credits))],
+      ['${T("Montant total")}', c3Usd(total)], ['${T("Déjà dépensé pour ce modèle")}', c3Usd(et.total)]];
+    if (C3.solde != null) d.push(['${T("Solde après")}', '${T("{0} crédits")}'.split('{0}').join(String(Math.round((C3.solde - cred) * 10) / 10))]);
+    d.push(['${T("Durée estimée")}', '${T("environ 3 à 4 minutes")}']);
+    var q = meme
+      ? { danger: true, titre: '${T("Reconstruire l’aperçu 3D")}',
+          texte: '${T("Un aperçu existe déjà pour cette version ({0}) : il a coûté {1}. Le reconstruire coûte de nouveau {2}, engagés dès l’envoi et non remboursés.")}'
+            .split('{0}').join('v' + (V3.m.version || 1)).split('{1}').join(c3Usd(t.cout)).split('{2}').join(c3Usd(total)),
+          details: d, oui: '${T("Reconstruire ({0})")}'.split('{0}').join(c3Usd(total)) }
+      : { prudent: true, titre: t ? '${T("Régénérer l’aperçu 3D")}' : '${T("Construire l’aperçu 3D")}',
+          texte: '${T("Le coût est engagé dès l’envoi : il n’est pas remboursé si vous arrêtez la construction ensuite.")}',
+          details: d, oui: '${T("Construire ({0})")}'.split('{0}').join(c3Usd(total)) };
+    szConfirmer(q).then(function(ok){
+      if (!ok || !V3) return;
+      var id = V3.id;
+      dire('${T("Envoi à The New Black…")}');
+      appeler('atelier:modele3dLancer', [{ id: id, version: V3.m.version || 1, image: C3.source, prixAnnonce: total, prix3d: Number(P.modele3d.prix),
+        vetement: (V3.m.nom || '') + (V3.m.base ? ' (' + V3.m.base + ')' : ''), couleur: V3.couleur || '', reconstruire: !!meme }]).then(function(r){
+        if (r && r.motif === 'prix_change') { C3.prix = null; dire('${T("Le prix a changé : {0}. Rien n’a été lancé — relancez pour confirmer ce prix.")}'.split('{0}').join(c3Usd(r.prixReel)), 'att'); peindreTnb3d(); return; }
+        if (r && r.motif === 'non_enregistre') { dire('${T("Le modèle a changé depuis la vérification : enregistrez, puis recommencez.")}', 'att'); return; }
+        if (r && r.motif === 'plafond') { dire('${T("Plafond atteint : trois constructions pour ce modèle dans les dernières 24 heures.")}', 'att'); return; }
+        if (r && r.motif === 'deja_construit') { dire('${T("Un aperçu existe déjà pour cette version.")}', 'att'); return; }
+        if (!r || !r.ok) { dire(r && (r.detail || r.error) ? '${T("The New Black : {0}")}'.split('{0}').join(r.detail || r.error) : expliquer(r), 'err'); return; }
+        C3.gen = r.id; C3.pct = 3; C3.panneau = false; suivreC3(id);
+        dire('${T("Construction lancée — suivie dans la petite fenêtre de suivi.")}', 'bon');
+      });
+    });
+  }
+  function suivreC3(modeleId){
+    peindreTnb3d();
+    if (C3.t) return;
+    C3.t = setInterval(function(){
+      appeler('generations:etat', []).then(function(r){
+        var g = (r && r.ok && r.liste ? r.liste : []).filter(function(x){ return x.id === C3.gen; })[0];
+        if (!g) return;
+        var e = g.etapes || [], tot = 0, fait = 0;
+        e.forEach(function(x){ var w = x.d || 4; tot += w; if (x.etat === 'fait') fait += w; else if (x.etat === 'cours' && x.t0) fait += Math.min(0.95, (Date.now() - x.t0) / 1000 / w) * w; });
+        C3.pct = Math.round(Math.min(99, fait / Math.max(1, tot) * 100));
+        if (g.etat !== 'cours') {
+          clearInterval(C3.t); C3.t = null; C3.gen = '';
+          if (g.etat === 'fini') appeler('atelier:donnees', []).then(function(d){
+            if (d && d.ok) { D = d; var m = (D.modeles || []).filter(function(x){ return x.id === modeleId; })[0]; if (m && V3 && V3.id === modeleId) V3.m = m; }
+            dire('${T("Aperçu 3D construit.")}', 'bon'); peindreTnb3d();
+          });
+          else { dire(g.message || '${T("La construction n’a pas abouti.")}', 'err'); peindreTnb3d(); }
+          return;
+        }
+        if (V3 && V3.id === modeleId) peindreTnb3d();
+      });
+    }, 2000);
+  }
   function peindreTnb3d(){
     var z = document.getElementById('v3-tnb'); if (!z || !V3) return;
-    var rendus = V3.m.rendusPhoto || {}, dispo = RP_ANGLES.filter(function(a){ return rendus[a[0]] || RP.images[a[0]]; });
     var sc = document.getElementById('v3-scene');
     if (V3.technique) {
       z.style.display = 'none';
       var rb = document.getElementById('v3-rp-retour');
       if (!rb && sc) { rb = document.createElement('button'); rb.type = 'button'; rb.id = 'v3-rp-retour'; rb.className = 'v3-rp-retour';
-        rb.textContent = '${T("Rendu photo")}'; rb.onclick = function(){ V3.technique = false; peindreTnb3d(); }; sc.appendChild(rb); }
+        rb.textContent = '${T("Aperçu 3D")}'; rb.onclick = function(){ V3.technique = false; peindreTnb3d(); }; sc.appendChild(rb); }
       return;
     }
     var rr = document.getElementById('v3-rp-retour'); if (rr) rr.remove();
     z.style.display = '';
+    if (V3.vuePrinc === 'photo') peindreRp(z); else peindreC3(z);
+  }
+  function peindreRp(z){
+    var rendus = V3.m.rendusPhoto || {}, dispo = RP_ANGLES.filter(function(a){ return rendus[a[0]] || RP.images[a[0]]; });
     var h = '';
     if (dispo.length && !RP.panneau) {
       if (!rendus[RP.vue] && !RP.images[RP.vue]) RP.vue = dispo[0][0];
@@ -6237,12 +6479,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<div class="coin">' + (perime ? '<span>' + '${T("Le modèle a changé depuis ce rendu (version {0}).")}'.split('{0}').join(String(V3.m.version || 1)) + '</span>' : '')
         + (D.peutModifier ? '<button type="button" data-rp="regen">${T("Régénérer…")}</button><button type="button" data-rp="vign">${T("Utiliser comme vignette")}</button>' : '')
         + ((D.produits || []).length && D.peutModifier ? '<button type="button" data-rp="fiche">${T("Vers la fiche produit")}</button>' : '')
-        + '<button type="button" data-rp="tech">${T("Vue technique 3D")}</button></div>';
+        + '<button type="button" data-rp="ap3d">${T("Aperçu 3D")}</button><button type="button" data-rp="tech">${T("Vue technique 3D")}</button></div>';
     } else if (rpEnCours()) {
       var ks = Object.keys(RP.gens), moy = Math.round(ks.reduce(function(a, k){ return a + (RP.pct[k] || 0); }, 0) / ks.length);
       h += '<div class="t1">${T("Rendu photo en cours…")}</div><div class="t2">' + '${T("{0} angle(s) chez The New Black — environ 30 secondes chacun.")}'.split('{0}').join(String(ks.length)) + '</div>'
         + '<div class="barre" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + moy + '"><i style="width:' + moy + '%"></i></div>'
-        + '<div class="coin"><button type="button" data-rp="tech">${T("Vue technique 3D")}</button></div>';
+        + '<div class="coin"><button type="button" data-rp="ap3d">${T("Aperçu 3D")}</button><button type="button" data-rp="tech">${T("Vue technique 3D")}</button></div>';
     } else {
       var n = rpChoisis().length, p = rpPrix();
       h += '<div class="t1">' + (dispo.length ? '${T("Régénérer le rendu photo")}' : '${T("Aucun rendu pour ce modèle")}') + '</div>'
@@ -6253,7 +6495,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<div class="rp-opts"><span class="lib">${T("Qualité")}</span>' + RP_PALIERS.map(function(a){ return '<label><input type="radio" name="rp-pal" data-rpp="' + a[0] + '"' + (RP.palier === a[0] ? ' checked' : '') + '>' + a[1] + '</label>'; }).join('') + '</div>'
         // le bouton est TOUJOURS là pour qui peut modifier : un vêtement encore en calcul est refusé au clic, avec sa raison
         + (D.peutModifier ? '<button type="button" class="gen" data-rp="gen"' + (n && p != null ? '' : ' disabled') + '>' + '${T("Générer le rendu photo ({0})")}'.split('{0}').join(rpUsd(p == null ? null : p * n)) + '</button>' : '')
-        + '<div class="coin">' + (dispo.length ? '<button type="button" data-rp="retour">${T("Annuler")}</button>' : '') + '<button type="button" data-rp="tech">${T("Vue technique 3D")}</button></div>';
+        + '<div class="coin">' + (dispo.length ? '<button type="button" data-rp="retour">${T("Annuler")}</button>' : '') + '<button type="button" data-rp="ap3d">${T("Aperçu 3D")}</button><button type="button" data-rp="tech">${T("Vue technique 3D")}</button></div>';
       if (!RP.bareme) chargerBaremeRp();
     }
     z.innerHTML = h;
@@ -6265,6 +6507,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       b.onclick = function(){
         var g = b.getAttribute('data-rp');
         if (g === 'tech') { V3.technique = true; peindreTnb3d(); return; }
+        if (g === 'ap3d') { V3.vuePrinc = '3d'; RP.panneau = false; peindreTnb3d(); return; }
         if (g === 'regen') { RP.panneau = true; peindreTnb3d(); return; }
         if (g === 'retour') { RP.panneau = false; peindreTnb3d(); return; }
         if (g === 'gen') { genererRp(); return; }
@@ -6379,7 +6622,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if ((b = t.closest('[data-v3g]'))) { genreChoisi3d(b.getAttribute('data-v3g')); return; }
     if ((b = t.closest('[data-v3t]'))) { taille3d(b.getAttribute('data-v3t')); return; }
     if ((b = t.closest('[data-v3v]'))) { vue3d(b.getAttribute('data-v3v')); return; }
-    if ((b = t.closest('[data-v3c]'))) { V3.couleur = b.getAttribute('data-v3c'); dessiner(); return; }
+    if ((b = t.closest('[data-v3c]'))) { V3.couleur = b.getAttribute('data-v3c'); V3.couleurChoisie = true; if (C3.ctl) { C3.ctl = null; C3.verifPour = ''; } dessiner(); return; }
     if ((b = t.closest('[data-v3f]'))) { V3.fond = b.getAttribute('data-v3f'); dessiner(); return; }
     if ((b = t.closest('[data-v3plis]')) || (b = t.closest('[data-v3tissu]'))) {
       if (b.hasAttribute('data-v3plis')) vie3d('plis', b.getAttribute('data-v3plis')); else vie3d('tissu', b.getAttribute('data-v3tissu'));

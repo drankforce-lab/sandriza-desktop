@@ -42,9 +42,19 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
 ${CSS_SUIVI}
 /* Dans SA fenêtre, la boîte n est plus posée en position fixe : la fenêtre la suit. */
 #pile .suivi{position:relative;right:auto;bottom:auto;width:100%;max-height:none}
-#pile .suivi .lst{max-height:16rem}
-#pile .suivi .st .lien{cursor:pointer;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#pile .suivi .st .lien:hover{text-decoration:underline}
+/* COMPACTE PAR DÉFAUT (2026-10-19, sa capture 102 : onze étapes dans une glissière, on ne voyait que les « faite ») :
+   une ligne — « Chemise Walla — Génération 3D chez The New Black · 8/11 · 94 % », la jauge, le temps restant, Annuler.
+   Un clic sur la ligne DÉPLIE les étapes (la fenêtre grandit) ; un autre les replie. Pas de glissière. */
+#pile .suivi .lst{max-height:none;overflow:visible}
+#pile .suivi .st{cursor:pointer;text-transform:none;letter-spacing:0;font-size:.8rem}
+#pile .suivi .st .tt{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx)}
+#pile .suivi .st .tt b{font-weight:700}
+#pile .suivi .st .pli{flex:0 0 auto;color:var(--tx2);font-weight:400}
+#pile .suivi .st .n{white-space:nowrap;flex:0 0 auto}
+#pile .suivi .st:hover .tt{text-decoration:underline}
+#pile .suivi .lg.faites{cursor:pointer;color:var(--tx2)}
+#pile .suivi .lg.faites:hover .nm{text-decoration:underline}
+#pile .suivi .pd .lien{background:none;border:0;padding:0;color:var(--tx2);text-decoration:underline;cursor:pointer;font-size:.72rem;min-height:0}
 /* Un refus du pont (l arrêt n a pas pu être demandé) se dit ICI, sous la pile ; vide, la zone ne prend aucune place. */
 #msg{margin:-.4rem 16px 12px;padding:.4rem .7rem;border-radius:9px;font-size:.74rem;background:var(--f-carte);
   color:var(--tx-err);border:1px solid rgba(248,113,113,.45)}
@@ -60,7 +70,7 @@ ${CSS_SUIVI}
 const REGLE = `<script>
 var TERMINE_MS = 8000;
 function chezTnb(lib){ return /New Black/.test(String(lib || '')); }
-function poids(g, e){ return chezTnb(e && e.lib) ? (Number(g.dureeEstimee) || 60) : 4; }
+function poids(g, e){ return (e && e.d) ? Number(e.d) : (chezTnb(e && e.lib) ? (Number(g.dureeEstimee) || 60) : 4); }
 function avancement(g, maintenant){
   var et = Array.isArray(g.etapes) ? g.etapes : [];
   var tot = 0, fait = 0, reste = 0, n = 0;
@@ -167,25 +177,51 @@ ${JS_MESURES()}
   }
 
   /* LA BOÎTE : le balisage de suiviOuvrir (fenêtre Photos), une ligne par étape. */
+  /* LA BOÎTE : compacte (en-tête + jauge), dépliée sur un clic. Dépliée, l étape EN COURS est TOUJOURS EN HAUT : en cours
+     (ou en échec), puis à venir, puis les faites, repliées en une ligne « n étapes faites ✓ » qu on peut ouvrir. */
+  var OUVERT = {}, FAITES = {};
+  function courante(g){
+    for (var i = 0; i < g.etapes.length; i++) if (g.etapes[i].etat === 'cours' || g.etapes[i].etat === 'echec') return i;
+    for (var k = 0; k < g.etapes.length; k++) if (g.etapes[k].etat !== 'faite') return k;
+    return g.etapes.length - 1;
+  }
+  function ligne(e, i, N){
+    var c = e.etat === 'cours' ? 'encours' : (e.etat === 'faite' ? 'ok' : (e.etat === 'echec' ? 'non' : ''));
+    var m = e.etat === 'cours' ? '…' : (e.etat === 'faite' ? '✓' : (e.etat === 'echec' ? '✕' : ''));
+    return '<div class="lg"><span class="nm">' + '${T("Étape {n}/{N}")}'.replace('{n}', String(i + 1)).replace('{N}', String(N))
+      + ' · ' + esc(e.lib) + '</span><span class="et ' + e.etat + '">' + MOTS[e.etat] + '</span>'
+      + '<span class="ep">' + (e.duree != null && c ? '<i class="' + c + '">' + m + ' ' + duree(e.duree) + '</i>' : '') + '</span></div>';
+  }
   function boite(g){
-    var N = g.etapes.length;
-    var h = '<div class="st"><span class="lien" data-ouvrir="1" role="link" title="${T("Ouvrir la fenêtre Générations")}">'
-      + esc(type(g) + ' · ' + g.titre) + '</span><span class="n">' + g.n + ' / ' + N + '</span></div>'
-      + '<div class="lst">'
-      + g.etapes.map(function(e, i){
-          var c = e.etat === 'cours' ? 'encours' : (e.etat === 'faite' ? 'ok' : (e.etat === 'echec' ? 'non' : ''));
-          var m = e.etat === 'cours' ? '…' : (e.etat === 'faite' ? '✓' : (e.etat === 'echec' ? '✕' : ''));
-          return '<div class="lg"><span class="nm">' + '${T("Étape {n}/{N}")}'.replace('{n}', String(i + 1)).replace('{N}', String(N))
-            + ' · ' + esc(e.lib) + '</span><span class="et ' + e.etat + '">' + MOTS[e.etat] + '</span>'
-            + '<span class="ep">' + (e.duree != null && c ? '<i class="' + c + '">' + m + ' ' + duree(e.duree) + '</i>' : '') + '</span></div>';
-        }).join('')
-      + '</div><div class="pd">'
+    var N = g.etapes.length, i = courante(g), e = g.etapes[i] || {};
+    var quoi = g.etat === 'fini' ? '${T("Terminé")}' : (g.etat === 'attente' ? '${T("À confirmer")}'
+      : (g.etat === 'interrompu' ? '${T("Arrêtée")}' : (g.etat === 'echec' ? '${T("Échec")}' + (e.lib ? ' · ' + e.lib : '') : (e.lib || type(g)))));
+    var num = g.etat === 'fini' ? N : i + 1;
+    var h = '<div class="st" data-plier="1" role="button" aria-expanded="' + (!!OUVERT[g.id]) + '" title="${T("Voir les étapes en détail")}">'
+      + '<span class="tt"><b>' + esc(g.titre) + '</b> — ' + esc(quoi) + '</span>'
+      + '<span class="n">' + num + '/' + N + ' · ' + g.pct + ' %</span><span class="pli" aria-hidden="true">' + (OUVERT[g.id] ? '▴' : '▾') + '</span></div>';
+    if (OUVERT[g.id]) {
+      var ordre = [], faites = [];
+      g.etapes.forEach(function(x, k){ if (x.etat === 'faite') faites.push(k); });
+      // en cours (ou en échec) d abord, puis à venir dans l ordre
+      g.etapes.forEach(function(x, k){ if (x.etat === 'cours' || x.etat === 'echec') ordre.push(k); });
+      g.etapes.forEach(function(x, k){ if (x.etat === 'attente') ordre.push(k); });
+      h += '<div class="lst">' + ordre.map(function(k){ return ligne(g.etapes[k], k, N); }).join('');
+      if (faites.length) {
+        h += '<div class="lg faites" data-faites="1" role="button" aria-expanded="' + (!!FAITES[g.id]) + '"><span class="nm">'
+          + '${T("{n} étapes faites ✓")}'.replace('{n}', String(faites.length)) + '</span><span class="pli">' + (FAITES[g.id] ? '▴' : '▾') + '</span></div>';
+        if (FAITES[g.id]) h += faites.map(function(k){ return ligne(g.etapes[k], k, N); }).join('');
+      }
+      h += '</div>';
+    }
+    h += '<div class="pd">'
       + '<div class="jauge"><i style="width:' + g.pct + '%"></i></div>'
-      + '<span class="pc">' + g.pct + ' %</span><span>' + phrase(g) + '</span>'
+      + '<span>' + phrase(g) + '</span>'
       + '<span class="bt">';
     if (CONF[g.id]) h += '<button class="mini dgr" data-g="arreter">${T("Arrêter la génération")}</button>'
       + '<button class="mini" data-g="continuer">${T("Continuer")}</button>';
     else {
+      h += '<button class="lien" data-ouvrir="1">${T("Tout le détail")}</button>';
       if (g.etat === 'cours' && !ARRET[g.id]) h += '<button class="mini dgr" data-g="annuler">${T("Annuler")}</button>';
       h += '<button class="mini" data-g="fermer">${T("Fermer")}</button>';
     }
@@ -212,11 +248,13 @@ ${JS_MESURES()}
   };
 
   pile.addEventListener('click', function(ev){
-    var b = ev.target.closest('[data-g],[data-ouvrir]'); if (!b) return;
+    var b = ev.target.closest('[data-g],[data-ouvrir],[data-plier],[data-faites]'); if (!b) return;
     var box = b.closest('.suivi'); if (!box) return;
     var id = box.getAttribute('data-id');
     var g = LISTE.filter(function(x){ return x.id === id; })[0]; if (!g) return;
     if (b.hasAttribute('data-ouvrir')) { ouvrirGenerations(); return; }
+    if (b.hasAttribute('data-plier')) { OUVERT[id] = !OUVERT[id]; peindre(); return; }
+    if (b.hasAttribute('data-faites')) { FAITES[id] = !FAITES[id]; peindre(); return; }
     var geste = b.getAttribute('data-g');
     if (geste === 'annuler') { CONF[id] = true; peindre(); return; }
     if (geste === 'continuer') { delete CONF[id]; peindre(); return; }

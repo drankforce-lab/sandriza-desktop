@@ -28,6 +28,8 @@ const P = require('./projection3d');
 let S = null;   // { doc, prim, mat, etat, ext, io }
 
 const CIBLE_SOMMETS = 120000;
+// la marque du BRUT ALLÉGÉ (asset.generator) : un modèle de The New Black, simplifié, sans aucun autre traitement
+const GENERATEUR_BRUT = 'Sandriza brut allégé (The New Black)';
 
 async function preparer(m){
   const { io, ext, MeshoptSimplifier } = await outils();
@@ -36,15 +38,36 @@ async function preparer(m){
   const prims = []; r.listMeshes().forEach((me) => me.listPrimitives().forEach((p) => prims.push(p)));
   if (prims.length !== 1) throw new Error('modèle à ' + prims.length + ' parties (une seule attendue)');
   const prim = prims[0];
+  /* ⚠⚠ JAMAIS UN MODÈLE DÉJÀ TRAITÉ (2026-10-19, sa capture imagesC.png : après « Refaire le rendu », le col de la
+     Walla encore en dents de scie). « Refaire » repartait du modèle POSÉ quand le lien brut de The New Black manquait :
+     déjà simplifié, déjà aplani (les dents de l'ancien aplanissement étaient DANS sa géométrie), déjà tourné. Le
+     retraiter ne pouvait que reproduire, ou empirer, ses défauts. Un modèle sorti de cette chaîne (sa matière porte
+     notre nom) est donc refusé, en le disant. */
+  const mat0 = prim.getMaterial();
+  if (mat0 && /^sz-photo/.test(mat0.getName() || '')) throw new Error('modèle déjà traité : le modèle brut de The New Black est introuvable');
   const nv = prim.getAttribute('POSITION').getCount();
-  simplifierPrimitive(doc, prim, Math.min(1, CIBLE_SOMMETS / nv), MeshoptSimplifier);
+  // le BRUT ALLÉGÉ (voir plus bas) est déjà à la bonne taille : il n'est pas resimplifié — le même rendu qu'au premier jour
+  const estAllege = r.getAsset().generator === GENERATEUR_BRUT;
+  if (!estAllege) simplifierPrimitive(doc, prim, Math.min(1, CIBLE_SOMMETS / nv), MeshoptSimplifier);
+  /* LE BRUT ALLÉGÉ, CONSERVÉ (2026-10-19) : le modèle de The New Black tel quel (sa géométrie simplifiée comme ci-dessus,
+     ses textures d'origine), avant TOUT traitement — ~3,5 Mo en Draco, contre 45 Mo pour le brut (le stockage refuse
+     plus de 20 Mo). Le lien de The New Black expire : c'est ce fichier que « Refaire le rendu » reprendra. Écrit ici,
+     avant que la projection ne touche aux positions ni aux textures. */
+  let brut = null;
+  if (m.garderBrut && !estAllege) {
+    r.getAsset().generator = GENERATEUR_BRUT;
+    const dr = doc.createExtension(ext.KHRDracoMeshCompression).setRequired(true)
+      .setEncoderOptions({ method: ext.KHRDracoMeshCompression.EncoderMethod.EDGEBREAKER });
+    try { const b = await io.writeBinary(doc); brut = b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength); }
+    finally { dr.dispose(); }
+  }
   const uvA = prim.getAttribute('TEXCOORD_0');
   if (!uvA) throw new Error('modèle sans coordonnées de texture');
   const maillage = { pos: prim.getAttribute('POSITION').getArray(), nor: prim.getAttribute('NORMAL') ? prim.getAttribute('NORMAL').getArray() : null,
     uv: uvA.getArray(), idx: prim.getIndices().getArray() };
   const etat = P.preparer(maillage, m.tex, m.devant, m.dos, { normale: m.normale || null });
   S = { doc, prim, mat: prim.getMaterial(), etat, io, ext, sommetsAvant: nv };
-  return { sens: etat.sens, recalage: { devant: arrondir(etat.recalage.devant), dos: arrondir(etat.recalage.dos) }, avant: etat.avant };
+  return { sens: etat.sens, recalage: { devant: arrondir(etat.recalage.devant), dos: arrondir(etat.recalage.dos) }, avant: etat.avant, brut };
 }
 const arrondir = (c) => c ? { iou: +c.iou.toFixed(3), sx: +c.sx.toFixed(4), sy: +c.sy.toFixed(4) } : null;
 
@@ -139,7 +162,7 @@ function vignette(){
 /* Le traitement d'un message — le même, qu'il tourne dans le fil (cas normal) ou, en REPLI, dans le processus
    principal (si le fil n'a pas pu démarrer : on le dit dans le journal, et l'application ne fait que ralentir). */
 async function traiter(m){
-  if (m.type === 'preparer') return { r: await preparer(m) };
+  if (m.type === 'preparer') { const r = await preparer(m); return { r, transfert: r.brut ? [r.brut] : [] }; }
   if (!S) throw new Error('session absente');
   if (m.type === 'projeter') return { r: P.projeterPhotos(S.etat) };
   if (m.type === 'aplanir') return { r: P.aplanirRelief(S.etat) };
@@ -170,4 +193,4 @@ function local(){
   delete require.cache[chemin];
   return mod;
 }
-module.exports = { traiter, local };
+module.exports = { traiter, local, GENERATEUR_BRUT };

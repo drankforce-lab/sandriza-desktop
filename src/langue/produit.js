@@ -799,4 +799,10 @@ module.exports = {
   "Aperçu 3D en attente de votre confirmation": "3D preview awaiting your confirmation",
   "Aperçu 3D : échec": "3D preview: failed",
   "Aperçu 3D en cours — {0} %": "3D preview in progress — {0}%",
+  "Original supprimé après 30 jours — générez un nouvel aperçu 3D pour pouvoir refaire le rendu.": "Original deleted after 30 days — generate a new 3D preview to be able to redo the rendering.",
+  "L’original de The New Black n’a pas été conservé pour cet aperçu — générez un nouvel aperçu 3D pour pouvoir refaire le rendu.": "The New Black original was not kept for this preview — generate a new 3D preview to be able to redo the rendering.",
+  "Source": "Source",
+  "l’original de The New Black, conservé 30 jours après la génération": "the The New Black original, kept for 30 days after generation",
+  "Retraite l’aperçu au poste depuis l’original de The New Black — sans nouvel appel payant. Original conservé jusqu’au": "Reprocesses the preview on this computer from the The New Black original — no new paid call. Original kept until",
+  "jusqu’au": "until",
 };

@@ -134,13 +134,23 @@ const attendre = () => new Promise((r) => setImmediate(r));
     const h = m.maj(taches.aMontrer([gc], T0));
     const html = m.pile.innerHTML;
     dit(h > 0, 'szMaj rend la hauteur à donner à la fenêtre (' + h + ' px)');
-    const morceaux = ['class="suivi', 'class="st"', 'class="n"', 'class="lst"', 'class="lg"', 'class="nm"', 'class="et ', 'class="ep"',
-      'class="pd"', 'class="jauge"', 'class="pc"', 'class="bt"', 'class="mini dgr"', 'class="mini"'];
+    // COMPACTE par défaut (sa capture 102) : une ligne « produit — étape en cours · n/N · % », la jauge, Annuler — pas la liste
+    dit(/Atelier · Robe portefeuille<\/b> — Génération chez The New Black/.test(html) && />3\/4 · \d+ %</.test(html),
+      'compacte : « Atelier · Robe portefeuille — Génération chez The New Black · 3/4 · ' + ((html.match(/3\/4 · (\d+) %/) || [])[1]) + ' % »');
+    dit(html.indexOf('class="lst"') < 0, 'compacte : la liste des étapes n’est PAS dessinée');
+    const morceaux = ['class="suivi', 'class="st"', 'class="n"', 'class="pd"', 'class="jauge"', 'class="bt"', 'class="mini dgr"', 'class="mini"'];
     const manque = morceaux.filter((x) => html.indexOf(x) < 0);
-    dit(!manque.length, 'le balisage de suiviOuvrir (Photos) : ' + (manque.length ? 'MANQUE ' + manque.join(', ') : 'st, n, lst, lg, nm, et, ep, pd, jauge, pc, bt, Annuler, Fermer'));
-    dit((html.match(/class="lg"/g) || []).length === 4 && /Étape 3\/4 · Génération chez The New Black/.test(html), 'une ligne par étape : « Étape 3/4 · Génération chez The New Black »');
-    dit(/>2 \/ 4</.test(html), 'l’en-tête dit « 2 / 4 »');
-    dit(/Rendu photo · Atelier · Robe portefeuille/.test(html), 'le titre : type · produit');
+    dit(!manque.length, 'le balisage de la boîte des Photos : ' + (manque.length ? 'MANQUE ' + manque.join(', ') : 'st, n, pd, jauge, bt, Annuler, Fermer'));
+    // UN CLIC DÉPLIE : l'étape EN COURS en haut, puis à venir, puis « 2 étapes faites ✓ » repliées
+    m.cliquer(gc.id, 'data-plier', '1');
+    const dep = m.pile.innerHTML;
+    const ordre = (dep.match(/Étape (\d)\/4/g) || []).join(',');
+    dit(ordre === 'Étape 3/4,Étape 4/4' && /2 étapes faites ✓/.test(dep), 'dépliée : en cours en haut, puis à venir, puis « 2 étapes faites ✓ » (' + ordre + ')');
+    dit(dep.indexOf(dep.match(/Étape 3\/4/) ? 'Étape 3/4' : 'x') < dep.indexOf('étapes faites'), 'jamais les faites avant l’étape en cours');
+    m.cliquer(gc.id, 'data-faites', '1');
+    dit(/Étape 1\/4/.test(m.pile.innerHTML) && /Étape 2\/4/.test(m.pile.innerHTML), 'un clic sur « étapes faites » les montre');
+    m.cliquer(gc.id, 'data-plier', '1');
+    dit(m.pile.innerHTML.indexOf('class="lst"') < 0, 'un re-clic replie');
     dit(/0,07 \$ US engagés/.test(html), 'la phrase d’état dit le montant engagé (0,07 $ US)');
     m.cliquer(gc.id, 'data-g', 'annuler');
     dit(!m.appels.some((a) => a[0] === 'generations:agir'), '« Annuler » n’arrête RIEN tout seul…');

@@ -268,13 +268,93 @@ async function controlerStructure(glb, photos, options){
   return out;
 }
 
+/* ══ L'APERÇU 3D DE L'ATELIER (2026-10-19) : la même chaîne que les fiches, sans les photos à projeter ══════════════
+   Le modèle vient d'« Image to 3D » sur un rendu SANS MANNEQUIN de The New Black (photoréaliste) : sa texture EST la
+   photo. On le ramène donc à : allègement (Draco, textures 2048), matière NON ÉCLAIRÉE (sz-photo-unlit, exposition 1 :
+   la boutique et l'Atelier l'affichent tel quel), ORIENTATION DE FACE, uniformité MESURÉE au rendu.
+   ⚠ L'ORIENTATION (constatée sur l'essai du 2026-10-19 : le modèle brut ne regardait pas la caméra de face) : le modèle
+   est rendu sous 8 angles (puis ±22,5° autour du meilleur), chacun comparé à l'image source (silhouette + SSIM, recadrés
+   sur la silhouette) ; le meilleur angle est ramené à 0° par une rotation posée dans le GLB (un nœud parent). */
+const W_OR = 48, H_OR = 64;
+function scoreFace(brut, src){
+  const fondR = (k) => { const d = brut.data, B = d[k * 4], G = d[k * 4 + 1], R = d[k * 4 + 2]; return R > G + 40 && B > G + 40 && Math.abs(R - B) < 60; };
+  const lum = (d, k, bgr) => bgr ? 0.299 * d[k * 4 + 2] + 0.587 * d[k * 4 + 1] + 0.114 * d[k * 4] : 0.299 * d[k * 4] + 0.587 * d[k * 4 + 1] + 0.114 * d[k * 4 + 2];
+  const a = grisRecadre((k) => lum(brut.data, k, true), brut.w, brut.h, fondR, W_OR, H_OR);
+  if (!a || !src) return -1;
+  let inter = 0, uni = 0;
+  for (let q = 0; q < a.m.length; q++) { inter += a.m[q] & src.m[q]; uni += a.m[q] | src.m[q]; }
+  return (uni ? inter / uni : 0) + ssim(a, src, W_OR, H_OR);
+}
+async function tournerGlb(octets, deg){
+  const { io } = await outils();
+  const doc = await io.readBinary(new Uint8Array(octets));
+  const t = -deg * Math.PI / 180;
+  doc.getRoot().listScenes().forEach((sc) => {
+    const p = doc.createNode('sz-orientation').setRotation([0, Math.sin(t / 2), 0, Math.cos(t / 2)]);
+    sc.listChildren().forEach((n) => { sc.removeChild(n); p.addChild(n); });
+    sc.addChild(p);
+  });
+  return Buffer.from(await io.writeBinary(doc));
+}
+async function atelierConstruire(url, source){
+  const { mesurerAngles } = require('./rendu-boutique');
+  const { masquePhoto, lab } = require('./projection3d');
+  const u = new URL(String(url || ''));
+  if (u.protocol !== 'https:' || u.hostname !== 'cloud.thenewblack.ai' || !/\.glb$/i.test(u.pathname)) throw new Error('adresse refusée');
+  const r = await fetch(u.href, { signal: AbortSignal.timeout(180000) });
+  if (!r.ok) throw new Error('téléchargement ' + r.status);
+  const brut = Buffer.from(await r.arrayBuffer());
+  if (brut.length > 120 * 1024 * 1024) throw new Error('modèle trop lourd');
+  const c = await compresserGlb(brut, { unlit: true, cote: 2048, cible: 80000 });
+  // l'image source (le rendu sans mannequin), détourée et recadrée comme les rendus
+  let src = null;
+  const pd = depuisDataUrl(source);
+  if (pd) {
+    const ph = decoderImage(pd, 480);
+    if (ph) {
+      const pm = masquePhoto(ph).m;
+      src = grisRecadre((k) => 0.299 * ph.data[k * 4] + 0.587 * ph.data[k * 4 + 1] + 0.114 * ph.data[k * 4 + 2], ph.w, ph.h, (k) => !pm[k], W_OR, H_OR);
+    }
+  }
+  let orientation = 0, scores = [];
+  if (src) {
+    const tour = [0, 45, 90, 135, 180, 225, 270, 315];
+    const m1 = await mesurerAngles(c.glb, 0, tour, { brut: true, L: 300, H: 400 });
+    if (m1) {
+      scores = m1.map((x) => ({ a: x.a, s: +scoreFace(x.brut, src).toFixed(3) }));
+      let best = scores.reduce((p, q) => (q.s > p.s ? q : p));
+      const fins = [best.a - 22.5, best.a + 22.5];
+      const m2 = await mesurerAngles(c.glb, 0, fins, { brut: true, L: 300, H: 400 });
+      if (m2) m2.forEach((x) => { const s2 = +scoreFace(x.brut, src).toFixed(3); scores.push({ a: x.a, s: s2 }); if (s2 > best.s) best = { a: x.a, s: s2 }; });
+      orientation = ((best.a % 360) + 360) % 360;
+    }
+  }
+  const glb = orientation ? await tournerGlb(c.glb, orientation) : c.glb;
+  // l'uniformité AU RENDU (8 angles, aux réglages de la boutique) : l'écart de teinte de chaque angle contre la face
+  let uniformite = null, vignette = '';
+  try {
+    const mu = await mesurerAngles(glb, 0, [0, 45, 90, 135, 180, 225, 270, 315]);
+    if (mu) { const F = lab(mu[0].rgb); uniformite = +Math.max(...mu.map((x) => { const A = lab(x.rgb); return Math.hypot(F[0] - A[0], F[1] - A[1], F[2] - A[2]); })).toFixed(1); }
+    const v = await mesurerAngles(glb, 0, [0], { images: true, fond: '#F3EEE5', L: 300, H: 400 });
+    if (v && v[0] && v[0].png) {
+      const im = nativeImage.createFromBuffer(v[0].png).resize({ width: 300, height: 400, quality: 'best' });
+      vignette = 'data:image/jpeg;base64,' + im.toJPEG(82).toString('base64');
+    }
+  } catch (e) { /* mesure indisponible : le modèle reste bon */ }
+  if (glb.length > 8 * 1024 * 1024) throw new Error('modèle compressé encore trop lourd (' + Math.round(glb.length / 1048576) + ' Mo)');
+  return { glb: 'data:model/gltf-binary;base64,' + glb.toString('base64'), octets: glb.length, avant: brut.length, sommets: c.sommets,
+    orientation, scores, uniformite, vignette };
+}
+
 async function tnb(etape, jeton, a, b){
   jeton = String(jeton || '');
   if (!/^[A-Za-z0-9_-]{8,80}$/.test(jeton)) throw new Error('jeton refusé');
+  // (2026-10-19) l'aperçu 3D de l'Atelier : a = l'adresse du GLB brut, b = l'image source (le rendu sans mannequin)
+  if (etape === 'atelier') return atelierConstruire(a, b);
   if (etape === 'telecharger') {
-    /* Deux sources permises : le modèle BRUT de The New Black (lecture gratuite), et — pour « Refaire la couleur »
-       (2026-10-19), quand le lien brut a expiré — le modèle déjà POSÉ, dans notre stockage public R2. `b` est la
-       source de repli, essayée si la première ne répond pas. */
+    /* Deux sources permises : le modèle BRUT de The New Black (lecture gratuite), et — pour « Refaire le rendu », quand
+       son lien a expiré — le BRUT ALLÉGÉ conservé dans notre stockage public R2. `b` est la source de repli, essayée si
+       la première ne répond pas. ⚠ (2026-10-19) Plus JAMAIS le modèle déjà posé : le fil le refuse (modele3d-tache). */
     const permise = (x) => { try { const u = new URL(String(x || '')); return u.protocol === 'https:' && /\.glb$/i.test(u.pathname)
       && (u.hostname === 'cloud.thenewblack.ai' || /^pub-[0-9a-f]{32}\.r2\.dev$/.test(u.hostname)) ? u.href : null; } catch (e) { return null; } };
     const sources = [permise(a), permise(b)].filter(Boolean);
@@ -290,7 +370,9 @@ async function tnb(etape, jeton, a, b){
     if (!buf) throw new Error(dernier || 'téléchargement impossible');
     if (buf.length > 120 * 1024 * 1024) throw new Error('modèle trop lourd');
     const s = ouvrir(jeton); s.glb = buf;
-    return { octets: buf.length, source: utilisee.indexOf('thenewblack') > 0 ? 'tnb' : 'pose' };
+    // 'tnb' : le brut de The New Black (son lien) ; 'stocke' : le brut allégé conservé dans notre stockage (R2)
+    s.source = utilisee.indexOf('thenewblack') > 0 ? 'tnb' : 'stocke';
+    return { octets: buf.length, source: s.source };
   }
   if (etape === 'fermer') { fermer(jeton); return {}; }
   const s = session(jeton);
@@ -312,7 +394,10 @@ async function tnb(etape, jeton, a, b){
     const normale = nt ? decoderImage(nt.getImage(), 1024) : null;
     const glb = s.glb.buffer.slice(s.glb.byteOffset, s.glb.byteOffset + s.glb.byteLength);
     s.glb = null;
-    return demander(s, 'preparer', { glb, tex, normale, devant, dos }, [glb]);
+    // le BRUT ALLÉGÉ (modele3d-tache.preparer) : écrit une fois, quand on part du lien de The New Black ; la page le dépose
+    const r = await demander(s, 'preparer', { glb, tex, normale, devant, dos, garderBrut: s.source === 'tnb' }, [glb]);
+    if (r && r.brut) r.brut = 'data:model/gltf-binary;base64,' + Buffer.from(r.brut).toString('base64');
+    return r;
   }
   if (etape === 'projeter') return demander(s, 'projeter');
   if (etape === 'aplanir') return demander(s, 'aplanir');
