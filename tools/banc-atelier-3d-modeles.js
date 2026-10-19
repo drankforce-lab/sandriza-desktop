@@ -195,6 +195,8 @@ for (const vb of ['cartes', 'liste']) for (const ch of CHEMINS) {
     Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 200);
   }
   fermerNosChrome(tmp);
+  // Relire une fois Chrome fermé : sous charge, la lecture de la boucle peut tomber sur un journal pas encore vidé.
+  try { txt = fs.readFileSync(journal, 'utf8'); } catch (e) {}
   const parts = {};
   txt.split(/\r?\n/).forEach((l) => { const m = /"B3M\|([^|]+)\|([^|]+)\|(.*)", source/.exec(l); if (!m) return; (parts[m[1]] = parts[m[1]] || {})[m[2]] = m[3]; });
   const lire = (k) => { const p = parts[k]; if (!p || p.fin === undefined) return null; return Object.keys(p).filter((x) => x !== 'fin').sort((a, b) => a - b).map((x) => p[x]).join(''); };

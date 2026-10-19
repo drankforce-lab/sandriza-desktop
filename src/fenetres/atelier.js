@@ -2670,13 +2670,34 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       yaw: 0, pitch: 0.26, zoom: 1, px: 0, py: 0, carte: false, fil: false, auto: false, mannequin: (function(){ try { return localStorage.getItem('sz-atelier-mannequin') !== '0'; } catch (e) { return true; } })(), couleur: m.photo3d ? m.photo3d.couleur : COUL3[0][0], fond: 'beige', sale: true, photo: !!m.photo3d,
       outil: 'tourner', dec: { forme: 'rond', l: 3, h: 3 }, el: { type: 'perle', matiere: 'or', taille: 0.8 }, pile: [], dsale: false,
       design: { decoupes: ((m.design3d && m.design3d.decoupes) || []).slice(), elements: ((m.design3d && m.design3d.elements) || []).slice() } };
-    VUE = '3d'; dessiner(); charger3d();
+    /* ⚠ (2026-10-18, son bogue : « j ouvre un autre modèle en vue 3D, ça me ramène dans l ancien » — non reproduit au banc,
+       correctif défensif) Le canevas WebGL est GARDÉ d une ouverture à l autre et garde sa dernière image (preserveDrawingBuffer) :
+       si son contexte a été perdu sans que la perte soit encore signalée, rien ne s y redessinait, et le vêtement d AVANT restait
+       sous l en-tête du nouveau. Donc : un contexte perdu n est pas repris (dessiner3d pose un canevas neuf) ; et l image d un
+       AUTRE modèle est effacée tout de suite, la barre d état disant ce qui se charge. */
+    if (GLV && GLV.gl && GLV.gl.isContextLost()) GLV = null;
+    VUE = '3d'; dessiner();
+    if (GLV && GLV.gl && GLV.dessineId !== id) { var gl0 = GLV.gl; gl0.clearColor(0, 0, 0, 0); gl0.clear(gl0.COLOR_BUFFER_BIT | gl0.DEPTH_BUFFER_BIT); GLV.dessineId = ''; }
+    dire('${T("Chargement de « {0} »…")}'.split('{0}').join(m.nom || ''), 'att');
+    charger3d();
+  }
+  // un canevas NEUF pour la vue 3D (nouvel élément, nouveau contexte) : l ancien ne se dessine plus (contexte perdu, ou pris en 2D)
+  // ⚠ (2026-10-18, contrôle « contrastes » rouge en construction, Linux sans carte graphique) UNE SEULE fois par ouverture : un
+  // contexte qui se reperd à chaque construction (WebGL logiciel trop lent) faisait reconstruire la scène sans fin (~2 s chaque fois),
+  // et la page ne rendait jamais la main. Au-delà, la vue passe au dessin 2D (V3.glNon), qui finit toujours.
+  function canevasNeuf3d(){
+    var cv = document.getElementById('v3-canevas'); if (!cv || !cv.parentNode || !V3) return;
+    V3.neufs = (V3.neufs || 0) + 1; if (V3.neufs > 1) V3.glNon = true;
+    var nv = cv.cloneNode(false); cv.parentNode.replaceChild(nv, cv);
+    if (GLV && GLV.cv === cv) GLV = null;
+    if (V3.neufs <= 2) demander3d();
   }
   function charger3d(){
     var n = ++v3N;
     appeler('atelier:apercu3d', [{ id: V3.id, taille: V3.taille, stature: V3.stature, genre: V3.genre }]).then(function(r){
       if (n !== v3N || VUE !== '3d' || !V3) return;
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+      dire('');
       V3.r = r; V3.mesh = maillage(r); V3.sale = true; peindrePanneau3d(); peindreDesign3d(); entete3d(); imagesMotif3d(); demander3d();
       programmerVignette();
     });
@@ -3251,7 +3272,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      sans lumière ni mannequin) pour compter les fentes au pixel près. En usage normal, rien de tout cela n existe. */
   if (window.__szBanc3d) window.__szBanc3d.moteur = { v3: function(){ return V3; }, glv: function(){ return GLV; },
     peindre: function(){ peindre3d(); }, tubes: function(){ return corpsDrape((V3 && V3.r && V3.r.corps) || []); },
-    diag: function(on){ if (GLV) GLV.diag = !!on; } };
+    diag: function(on){ if (GLV) GLV.diag = !!on; },
+    // (tools/banc-atelier-3d-modeles.js) la vue courante, la sélection, la mini-vue de la fiche
+    vue: function(){ return VUE; }, sel: function(){ return SEL; }, mini: function(){ return MINI; } };
   var MAT3 = { or: [0.83, 0.66, 0.26, 1, 60], argent: [0.80, 0.81, 0.84, 1, 80], nacre: [0.94, 0.91, 0.86, 0.25, 40], noir: [0.07, 0.07, 0.08, 0, 90], cristal: [0.86, 0.93, 1.0, 0.7, 140] };
   function webglDispo(){
     if (GL_DISPO !== null) return GL_DISPO;
@@ -4050,7 +4073,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // ⚠ les petits textes et les images fines du motif demandent de la définition : 32 px/cm, borné par la carte
     GLV.maxTex = Math.max(1024, Math.min(4096, gl.getParameter(gl.MAX_TEXTURE_SIZE) || 2048));
     GLV.aniso = gl.getExtension('EXT_texture_filter_anisotropic') || gl.getExtension('WEBKIT_EXT_texture_filter_anisotropic');
-    cv.addEventListener('webglcontextlost', function(ev){ ev.preventDefault(); GLV = null; });
+    // ⚠ (2026-10-18) seulement si le GLV courant est CELUI de ce canevas : la perte, signalée après coup, de la mini-vue ou d un canevas
+    // déjà remplacé effaçait le contexte NEUF de la vue 3D (rien ne s y redessinait plus)
+    cv.addEventListener('webglcontextlost', function(ev){ ev.preventDefault(); if (GLV && GLV.cv === cv) { GLV = null; if (VUE === '3d' && V3 && !(V3.neufs > 1)) demander3d(); } });
     return true;
   }
 
@@ -4992,8 +5017,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var mieux = function(e1, e0){ return e1.ecl <= e0.ecl && e1.rt <= e0.rt && (e1.nc < e0.nc || (e1.nc === e0.nc && e1.cos > e0.cos + 1e-3)); };
     var un = new Float32Array(3);
     for (var tour = 0; tour < 40; tour++) {
-      var bouge = 0;
+      var bouge = 0, casse = new Uint8Array(n), fnT = {};
+      // (les candidats d abord : les sommets d une arête à plus de 75° — évaluer tous les sommets libres à chaque tour coûtait ~400 ms)
+      Object.keys(ar).forEach(function(k){ var l2 = ar[k]; if (l2.length !== 2) return; var a2 = fnT[l2[0]] || (fnT[l2[0]] = nrm(l2[0])), b2 = fnT[l2[1]] || (fnT[l2[1]] = nrm(l2[1]));
+        if (pt3(a2, b2) < COS) { var ab = k.split('_'); casse[+ab[0]] = 1; casse[+ab[1]] = 1; } });
       libre.forEach(function(v){
+        if (!casse[v]) { var pres = false; for (var iv = 0; iv < vois[v].length && !pres; iv++) if (casse[vois[v][iv]]) pres = true; if (!pres) return; }
         var e0 = etat(v); if (e0.cos > COS) return;
         var l = vois[v], m = [0, 0, 0]; l.forEach(function(q){ m[0] += PZ[q * 3] / l.length; m[1] += PZ[q * 3 + 1] / l.length; m[2] += PZ[q * 3 + 2] / l.length; });
         var old = [PZ[v * 3], PZ[v * 3 + 1], PZ[v * 3 + 2]], pn = [0, 0, 0];
@@ -5644,11 +5673,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var omb = new Float32Array(pos.length / 3).fill(1), cases = {}, CS = 2;
     (GLV && GLV.mailles || []).forEach(function(ma){ var P = (ma.rendu || ma).pos; for (var k = 0; k < P.length; k += 3) {
       var cl = Math.floor(P[k] / CS) + '_' + Math.floor(P[k + 1] / CS) + '_' + Math.floor(P[k + 2] / CS); (cases[cl] = cases[cl] || []).push(P[k], P[k + 1], P[k + 2]); } });
+    var deja = {};      // (le mannequin est une soupe de triangles : chaque point y revient ~6 fois — calculé une fois)
     for (var w = 0; w < omb.length; w++) {
-      var x = pos[w * 3], y = pos[w * 3 + 1], z = pos[w * 3 + 2], gx = Math.floor(x / CS), gy = Math.floor(y / CS), gz = Math.floor(z / CS), d2 = 16;
+      var x = pos[w * 3], y = pos[w * 3 + 1], z = pos[w * 3 + 2], cleP = Math.round(x * 100) + '_' + Math.round(y * 100) + '_' + Math.round(z * 100);
+      if (deja[cleP] != null) { omb[w] = deja[cleP]; continue; }
+      var gx = Math.floor(x / CS), gy = Math.floor(y / CS), gz = Math.floor(z / CS), d2 = 16;
       for (var ax2 = -2; ax2 <= 2; ax2++) for (var ay = -2; ay <= 2; ay++) for (var az = -2; az <= 2; az++) { var l = cases[(gx + ax2) + '_' + (gy + ay) + '_' + (gz + az)]; if (!l) continue;
         for (var q = 0; q < l.length; q += 3) { var dd = (l[q] - x) * (l[q] - x) + (l[q + 1] - y) * (l[q + 1] - y) + (l[q + 2] - z) * (l[q + 2] - z); if (dd < d2) d2 = dd; } }
-      var t2 = Math.min(1, Math.sqrt(d2) / 4); omb[w] = 0.5 + 0.5 * t2 * t2 * (3 - 2 * t2);
+      var t2 = Math.min(1, Math.sqrt(d2) / 4); omb[w] = deja[cleP] = 0.5 + 0.5 * t2 * t2 * (3 - 2 * t2);
     }
     return { pos: new Float32Array(pos), nor: new Float32Array(nor), omb: omb, n: pos.length / 3 };
   }
@@ -5658,19 +5690,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      un trait noir). La couleur du bord est étendue de quelques pixels dans le vide — l alpha reste 0, rien n apparaît là. Sur une
      ImageData : un canevas ne garde pas la couleur d un pixel transparent. */
   function deborder(cv, passes){
-    var W = cv.width, H = cv.height, im = cv.getContext('2d').getImageData(0, 0, W, H), d = im.data, N = W * H, etat = new Uint8Array(N), neuf = new Uint8Array(N);
+    // (par FRONTIÈRE : seuls les pixels vides qui touchent la couleur sont visités — une image entière par passe coûtait ~180 ms par pièce)
+    var W = cv.width, H = cv.height, im = cv.getContext('2d').getImageData(0, 0, W, H), d = im.data, N = W * H, etat = new Uint8Array(N);
+    var fr = new Int32Array(N), nf = 0, suite = new Int32Array(N), ns = 0, vu = new Uint8Array(N);
     for (var p = 0; p < N; p++) if (d[p * 4 + 3] > 0) etat[p] = 1;
-    for (var ps = 0; ps < passes; ps++) {
-      var n0 = 0;
-      for (var y = 0; y < H; y++) for (var x = 0; x < W; x++) { var q = y * W + x; if (etat[q]) continue;
-        var r = 0, g = 0, b = 0, n = 0, z;
-        if (x > 0 && etat[z = q - 1]) { r += d[z * 4]; g += d[z * 4 + 1]; b += d[z * 4 + 2]; n++; }
-        if (x < W - 1 && etat[z = q + 1]) { r += d[z * 4]; g += d[z * 4 + 1]; b += d[z * 4 + 2]; n++; }
-        if (y > 0 && etat[z = q - W]) { r += d[z * 4]; g += d[z * 4 + 1]; b += d[z * 4 + 2]; n++; }
-        if (y < H - 1 && etat[z = q + W]) { r += d[z * 4]; g += d[z * 4 + 1]; b += d[z * 4 + 2]; n++; }
-        if (n) { d[q * 4] = r / n; d[q * 4 + 1] = g / n; d[q * 4 + 2] = b / n; neuf[q] = 1; n0++; } }
-      if (!n0) break;
-      for (var k = 0; k < N; k++) if (neuf[k]) { etat[k] = 1; neuf[k] = 0; }
+    var pousser = function(q){ if (q >= 0 && q < N && !etat[q] && !vu[q]) { vu[q] = 1; suite[ns++] = q; } };
+    for (var p2 = 0; p2 < N; p2++) { if (!etat[p2]) continue; var x0 = p2 % W; if (x0 > 0) pousser(p2 - 1); if (x0 < W - 1) pousser(p2 + 1); pousser(p2 - W); pousser(p2 + W); }
+    for (var ps = 0; ps < passes && ns; ps++) {
+      var t = fr; fr = suite; suite = t; nf = ns; ns = 0; vu.fill(0);
+      for (var i2 = 0; i2 < nf; i2++) { var q = fr[i2], x = q % W, r = 0, g = 0, b = 0, n = 0, z;
+        if (x > 0 && etat[z = q - 1] === 1) { r += d[z * 4]; g += d[z * 4 + 1]; b += d[z * 4 + 2]; n++; }
+        if (x < W - 1 && etat[z = q + 1] === 1) { r += d[z * 4]; g += d[z * 4 + 1]; b += d[z * 4 + 2]; n++; }
+        if (q >= W && etat[z = q - W] === 1) { r += d[z * 4]; g += d[z * 4 + 1]; b += d[z * 4 + 2]; n++; }
+        if (q < N - W && etat[z = q + W] === 1) { r += d[z * 4]; g += d[z * 4 + 1]; b += d[z * 4 + 2]; n++; }
+        if (n) { d[q * 4] = r / n; d[q * 4 + 1] = g / n; d[q * 4 + 2] = b / n; etat[q] = 2; } }
+      for (var i3 = 0; i3 < nf; i3++) { var q2 = fr[i3]; if (etat[q2] !== 2) continue; etat[q2] = 1; var x2 = q2 % W;
+        if (x2 > 0) pousser(q2 - 1); if (x2 < W - 1) pousser(q2 + 1); pousser(q2 - W); pousser(q2 + W); }
     }
     return im;
   }
@@ -5739,6 +5774,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function peindreGL(cv, dims){
+    // ⚠ (2026-10-18) un contexte PERDU (la carte graphique l a repris) dessine sans erreur… et sans rien : on le lâche, la vue en
+    // prend un neuf (voir canevasNeuf3d)
+    if (GLV && GLV.cv === cv && GLV.gl && GLV.gl.isContextLost()) { GLV = null; return false; }
     if (!GLV || GLV.cv !== cv) { if (!initGL(cv)) return false; }
     var gl = GLV.gl;
     if (GLV.r !== V3.r || GLV.vie !== VIE.plis + '|' + VIE.tissu) { construireGL(V3.r); GLV.vie = VIE.plis + '|' + VIE.tissu; }
@@ -5797,6 +5835,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       gl.uniform3f(po.u.uB, mt[0], mt[1], mt[2]); gl.uniform1f(po.u.uMet, mt[3]); gl.uniform1f(po.u.uBr, mt[4]);
       gl.drawArrays(gl.TRIANGLES, 0, ob.n);
     });
+    GLV.dessineId = V3.id;          // ce que montre le canevas (voir ouvrir3d : rien d un autre modèle sous son en-tête)
     return true;
   }
 
@@ -5976,10 +6015,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   /* ── La peinture 2D (sans WebGL, ou pour un pantalon) : rotation, perspective, ombrage, tri des faces ── */
   function peindre3d(){
     var cv = document.getElementById('v3-canevas'); if (!cv || !V3 || !V3.mesh) return;
-    if (plaque3d() && peindreGL(cv)) return;
+    if (plaque3d()) { if (peindreGL(cv)) return;
+      // le contexte vient d être perdu (peindreGL l a lâché) : un canevas neuf, qui prendra un contexte neuf
+      if (!GLV && !V3.glNon) { canevasNeuf3d(); return; } }
     var W = cv.clientWidth, H = cv.clientHeight, dpr = window.devicePixelRatio || 1;
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
-    var g = cv.getContext('2d'); if (!g) return;
+    // ⚠ un canevas qui porte déjà un contexte WebGL refuse le 2D : il garderait l image d avant — un canevas neuf
+    var g = cv.getContext('2d'); if (!g) { canevasNeuf3d(); return; }
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
     var cyw = Math.cos(V3.yaw), syw = Math.sin(V3.yaw), cp = Math.cos(V3.pitch), sp = Math.sin(V3.pitch);
     var Dst = 520, f = Math.min(W, H) * 2.9 * V3.zoom * (Dst - 60) / Math.max(120, V3.mesh.h) / Dst * 0.33;

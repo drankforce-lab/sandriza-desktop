@@ -630,6 +630,7 @@ module.exports = {
     'The blue outline is the proposed front, at the photo scale. Correct the ease, the length or the scale until it hugs the silhouette.',
   'Choisissez la photo de face du vêtement.': 'Choose the front photo of the garment.',
   'Chargement de la photo…': 'Loading the photo…',
+  'Chargement de « {0} »…': 'Loading “{0}”…',
   'Analyse de la photo…': 'Analyzing the photo…',
   'L’IA n’a pas reconnu le type : choisissez-le, puis analysez de nouveau.': 'The AI did not recognize the type: choose it, then analyze again.',
   'Le fond de la photo n’est pas uni : le vêtement ne se détache pas.': 'The photo background is not plain: the garment does not stand out.',
