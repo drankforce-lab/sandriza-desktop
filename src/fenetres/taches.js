@@ -29,8 +29,11 @@ const T = require('../langue').tr('taches');
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
+/* (2026-10-19, sa capture : « c'est écrit trop petit ») La boîte reprend la feuille des Photos, toute en rem : dans SA
+   fenêtre, la racine passe de 16 à 19 px — tout grandit d'environ 20 %, les proportions restent celles des Photos. */
+html{font-size:19px}
 html,body{margin:0;background:transparent!important}
-body{color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+body{color:var(--tx);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
 button{font:inherit;color:var(--tx);background:var(--v05);border:1px solid var(--v16);border-radius:8px;
   padding:.3rem .55rem;cursor:pointer}
 button:focus{outline:none;border-color:var(--or)}

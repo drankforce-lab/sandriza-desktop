@@ -27,7 +27,7 @@
  *   les éprouve sans Electron.
  */
 
-const LARGEUR = 444;        // la boîte des Photos (26rem) + la marge de son ombre
+const LARGEUR = 520;        // la boîte des Photos, agrandie d'environ 20 % (racine 19 px), + la marge de son ombre
 const MARGE = 8;
 
 /* LA RÈGLE (ce qui se montre, l'avancement, les lignes) est écrite UNE fois, dans la page (REGLE_JS, src/fenetres/taches.js) :
