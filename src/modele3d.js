@@ -147,6 +147,8 @@ setInterval(() => { const t = Date.now(); SESSIONS.forEach((s, j) => { if (t - s
 const ANGLES_TEINTE = [0, 45, 90, 135, 180, 225, 270, 315];
 // (2026-10-19) trois corrections au plus : la lumière de la boutique demande un peu plus que la seule texture
 const MAX_ESSAIS_TEINTE = 3;
+// Le modèle est rendu NON ÉCLAIRÉ (modele3d-tache.matiereMate) : voir verifierAuRendu
+const NON_ECLAIRE = true;
 async function verifierAuRendu(s, reference){
   const { mesurerAngles, comparerTeinte } = require('./rendu-boutique');
   const { lab } = require('./projection3d');
@@ -172,7 +174,9 @@ async function verifierAuRendu(s, reference){
     cmp.uniformite = +Math.max(...abs.map((v) => Math.hypot(v[0], v[1], v[2]))).toFixed(1);
     cmp.angles.forEach((x, i) => { x.dERendu = +Math.hypot(abs[i][0], abs[i][1], abs[i][2]).toFixed(1); });
     essais.push(cmp);
-    if ((cmp.uniformite < 3 && (cmp.ecartPhoto == null || cmp.ecartPhoto < 3)) || it === MAX_ESSAIS_TEINTE) break;
+    /* ⚠ NON ÉCLAIRÉ (2026-10-19) : la face EST la photo, le dos EST la photo du dos ; la lumière de la scène n'y ajoute
+       plus rien. On MESURE, on ne corrige plus — toucher aux pixels des photos les rendrait moins fidèles. */
+    if (NON_ECLAIRE || (cmp.uniformite < 3 && (cmp.ecartPhoto == null || cmp.ecartPhoto < 3)) || it === MAX_ESSAIS_TEINTE) break;
     const global = [0, 1, 2].map((k) => (Rf[k] - F[k]) * 0.9);
     // par direction : (rendu de la face − rendu de cet angle) ; la face elle-même ne bouge pas
     const secteurs = m.map((x, i) => ({ a: x.a, d: [0, 1, 2].map((k) => abs[i][k] * 0.95) }));

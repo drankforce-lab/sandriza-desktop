@@ -25,7 +25,7 @@ const { BrowserWindow } = require('electron');
 const { medianeGroupe } = require('./projection3d');
 
 const L = 480, H = 640;
-const PAGE = (fond) => '<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0;background:' + (fond || '#ff00ff') + ';overflow:hidden">'
+const PAGE = (fond, L, H) => '<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0;background:' + (fond || '#ff00ff') + ';overflow:hidden">'
   + '<script type="module" src="https://unpkg.com/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>'
   + '<model-viewer id="mv" style="width:' + L + 'px;height:' + H + 'px;background:transparent;--poster-color:transparent"'
   + ' camera-orbit="0deg 80deg auto" disable-zoom disable-pan shadow-intensity="1" tone-mapping="neutral" exposure="0.78"'
@@ -56,26 +56,27 @@ function teinteTorse(bmp, w, h){
 async function mesurerAngles(glb, theta0, angles, options){
   // images : le PNG de chaque angle ; brut : la capture en BGRA (contrôle de structure) ; fond : une autre couleur que
   // le magenta (une planche) — la teinte du torse n'est alors plus mesurée
-  const o = Object.assign({ images: false, brut: false, fond: '' }, options || {});
+  // phi : l'élévation de la caméra (80° = celle de la boutique ; 90° = à l'horizontale, comme l'appareil des photos)
+  const o = Object.assign({ images: false, brut: false, fond: '', L: L, H: H, phi: 80 }, options || {});
   const srv = http.createServer((q, r) => {
     if (q.url.indexOf('/m.glb') === 0) { r.writeHead(200, { 'Content-Type': 'model/gltf-binary', 'Cache-Control': 'no-store' }); r.end(glb); return; }
-    r.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' }); r.end(PAGE(o.fond));
+    r.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' }); r.end(PAGE(o.fond, o.L, o.H));
   });
   await new Promise((ok, ko) => { srv.once('error', ko); srv.listen(0, '127.0.0.1', ok); });
   const port = srv.address().port;
-  const w = new BrowserWindow({ show: false, width: L, height: H, useContentSize: true, skipTaskbar: true,
+  const w = new BrowserWindow({ show: false, width: o.L, height: o.H, useContentSize: true, skipTaskbar: true,
     webPreferences: { offscreen: true, contextIsolation: true, sandbox: true, nodeIntegration: false } });
   try {
     w.webContents.setFrameRate(30);
     await w.loadURL('http://127.0.0.1:' + port + '/');
     const ex = (js) => w.webContents.executeJavaScript(js, true);
     const pret = await ex('Promise.race([customElements.whenDefined("model-viewer").then(function(){ return new Promise(function(ok){ var mv = document.getElementById("mv");'
-      + ' mv.addEventListener("load", function(){ ok(true); }, { once: true }); mv.addEventListener("error", function(){ ok(false); }, { once: true }); mv.src = "/m.glb?t=' + Date.now() + '"; }); }),'
+      + ' mv.addEventListener("load", function(){ var m = (mv.model && mv.model.materials) || []; if (m.some(function(x){ return /^sz-photo/.test(x.name || ""); })) mv.exposure = 1; ok(true); }, { once: true }); mv.addEventListener("error", function(){ ok(false); }, { once: true }); mv.src = "/m.glb?t=' + Date.now() + '"; }); }),'
       + ' new Promise(function(ok){ setTimeout(function(){ ok(false); }, 60000); })])');
     if (!pret) return null;
     const out = [];
     for (const a of angles) {
-      await ex('(async function(){ var mv = document.getElementById("mv"); mv.cameraOrbit = "' + (theta0 + a).toFixed(2) + 'deg 80deg auto"; mv.jumpCameraToGoal();'
+      await ex('(async function(){ var mv = document.getElementById("mv"); mv.cameraOrbit = "' + (theta0 + a).toFixed(2) + 'deg ' + o.phi + 'deg auto"; mv.jumpCameraToGoal();'
         + ' await new Promise(function(ok){ requestAnimationFrame(function(){ requestAnimationFrame(ok); }); }); })()');
       await new Promise((ok) => setTimeout(ok, 450));
       const im = await w.webContents.capturePage();

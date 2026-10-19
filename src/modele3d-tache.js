@@ -68,8 +68,17 @@ function matiereMate(doc, mat, ext){
     try { mat.setExtension(n, null); } catch (e) {}
   }
   try { mat.setEmissiveFactor([0, 0, 0]); mat.setEmissiveTexture(null); } catch (e) {}
-  const sp = doc.createExtension(ext.KHRMaterialsSpecular).createSpecular().setSpecularFactor(0);
-  mat.setExtension('KHR_materials_specular', sp);
+  try { mat.setExtension('KHR_materials_specular', null); } catch (e) {}
+  /* ⚠⚠ NON ÉCLAIRÉ (2026-10-19, ses captures images\97.png et 98.png : une ligne pointillée au dos, des lueurs sur les
+     plis du devant). Même mate, la matière recevait la lumière de la boutique PAR-DESSUS celle des photos : chaque pli
+     sculpté par The New Black s'éclairait ou s'ombrait une seconde fois. En KHR_materials_unlit, <model-viewer> affiche
+     la texture TELLE QUELLE : les photos, avec leur vraie lumière ; ailleurs, l'ombrage doux cuit au poste
+     (projection3d.ombrageDoux). La carte de normales ne sert plus à rien : elle part (le modèle s'allège d'autant).
+     Le NOM de la matière dit à la boutique de ne plus assombrir (exposition 1 — shop.js et rendu-boutique.js). */
+  const nt = mat.getNormalTexture();
+  if (nt) { mat.setNormalTexture(null); if (!nt.listParents().some((p) => p !== r)) nt.dispose(); }
+  mat.setExtension('KHR_materials_unlit', doc.createExtension(ext.KHRMaterialsUnlit).createUnlit());
+  mat.setName('sz-photo-unlit');
 }
 async function ecrire(m){
   const { doc, prim, mat, etat, io, ext } = S;

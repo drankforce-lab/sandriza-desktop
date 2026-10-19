@@ -349,7 +349,10 @@ function projeterPhotos(etat){
   etat.ref = ref;
   const nTex = tex.w * tex.h;
   const cDos = medianeGroupe(pixelsMasque(dos, mDos.m, 3), ref);
-  const gDos = gainsVers(ref, cDos);
+  /* ⚠ ESSAYÉ ET ÉCARTÉ (2026-10-19) : la photo du dos laissée TELLE QUELLE (plus claire que le devant) faisait ressortir
+     en ligne nette (creux de 9 à 14 L) la bande de la crête que la photo du dos ne couvre pas, peinte à la teinte du
+     devant. Le dos reste donc ramené sur la teinte du devant — une seule teinte, sa demande du 2026-10-19. */
+  const gDos0 = gainsVers(ref, cDos), gDos = gDos0;
   const dosC = { w: dos.w, h: dos.h, data: new Uint8ClampedArray(dos.data) };
   appliquerGains(dosC.data, dos.w * dos.h, gDos, cDos);
   vues[1].phC = dosC; vues[0].phC = devant;
@@ -359,6 +362,8 @@ function projeterPhotos(etat){
   const texTri = new Int32Array(nTex).fill(-1), texB1 = new Float32Array(nTex), texB2 = new Float32Array(nTex);
   const wVue = [new Float32Array(nTex), new Float32Array(nTex)];   // le poids de CHAQUE photo (devant, dos), par texel
   const nvMax = new Float32Array(nTex);                              // l'orientation vers la photo qui le couvre (1 = de face)
+  // les texels cachés de PEU (le dessous d'une crête sculptée) : la couleur de la photo à cet endroit, gardée à part
+  const accO = new Float32Array(nTex * 4), vueO = new Uint8Array(nTex);
   const TW = tex.w, TH = tex.h;
   let couverts = 0;
   for (let t = 0; t < idx.length; t += 3) {
@@ -383,16 +388,33 @@ function projeterPhotos(etat){
         const [X, Y, Z] = vu.v.projeter(P);
         const xi = Math.floor(X), yi = Math.floor(Y);
         if (xi < 0 || yi < 0 || xi >= vu.v.W || yi >= vu.v.H) continue;
-        if (Z > vu.v.prof[yi * vu.v.W + xi] + vu.v.tolerance) continue;          // caché par une autre surface
+        const cache = Z > vu.v.prof[yi * vu.v.W + xi] + vu.v.tolerance;
+        // caché par une autre surface — mais de PEU (une crête, un repli sculpté par The New Black) : voir accO
+        if (cache && Z > vu.v.prof[yi * vu.v.W + xi] + vu.v.tolerance * 4) continue;
         const pxx = (X - vu.cal.tx) / vu.cal.sx, py = (Y - vu.cal.ty) / vu.cal.sy;
         const pi = Math.floor(py) * vu.ph.w + Math.floor(pxx);
         if (pxx < 0 || py < 0 || pxx >= vu.ph.w || py >= vu.ph.h || !vu.mErode[pi]) continue;
         const col = echantillon(vu.phC, pxx, py), wgt = lisse((nv - o.seuilNV) / (o.finNV - o.seuilNV));
+        if (cache) { accO[k4] += col[0] * wgt; accO[k4 + 1] += col[1] * wgt; accO[k4 + 2] += col[2] * wgt; accO[k4 + 3] += wgt; vueO[y * TW + x] = vu === vues[0] ? 1 : 2; continue; }
         acc[k4] += col[0] * wgt; acc[k4 + 1] += col[1] * wgt; acc[k4 + 2] += col[2] * wgt; acc[k4 + 3] += wgt;
         wVue[vu === vues[0] ? 0 : 1][y * TW + x] += wgt;
         if (nv > nvMax[y * TW + x]) nvMax[y * TW + x] = nv;
       }
     }
+  }
+  /* ⚠⚠ LA LIGNE POINTILLÉE DU HAUT DU DOS (2026-10-19, sa capture images\97.png). The New Black avait sculpté un
+     empiècement : une CRÊTE. Le dessous de la crête est caché de l'appareil de quelques millimètres — la photo ne le
+     couvrait donc pas, et la texture de The New Black (sa couture peinte, sombre) y restait : vue de la boutique,
+     d'un peu plus haut, une ligne pointillée en travers du dos, absente de la photo. Ces texels cachés de PEU (moins de
+     quatre fois la tolérance de profondeur) prennent maintenant la couleur de la photo à l'endroit où ils se
+     projettent — celle du tissu juste au-dessus, qui est la vraie. */
+  for (let k = 0; k < nTex; k++) {
+    const wo = accO[k * 4 + 3]; if (!wo) continue;
+    const w = acc[k * 4 + 3]; if (w >= 1) continue;
+    const f = Math.min(1, wo) * (1 - w) / wo;
+    for (let c = 0; c < 3; c++) acc[k * 4 + c] += accO[k * 4 + c] * f;
+    acc[k * 4 + 3] += wo * f;
+    wVue[vueO[k] === 1 ? 0 : 1][k] += wo * f;
   }
   /* ⚠⚠ UNE SEULE TEINTE, CELLE DE LA PHOTO PRINCIPALE (2026-10-19, sa plainte : « la couleur du devant et du derrière
      n'est pas pareille dans l'aperçu 3D » ; mesuré sur la Walla en ligne, aux réglages de la boutique : face 118,86,61,
@@ -492,7 +514,11 @@ function projeterPhotos(etat){
     if (w) couverts++;
     for (let c = 0; c < 3; c++) tex.data[i + c] = Math.max(0, Math.min(255, Math.round(base[c] * (1 - f) + (w ? acc[i + c] / w : 0) * f)));
   }
-  remplirMarges(tex, dansTri);
+  // seuls les texels du bord À DEMI couverts sont repeints : un bord pleinement photo, ou sans photo du tout, reste
+  // (un petit îlot ne disparaît pas tout entier)
+  const interieur = interieurIlots(dansTri, TW, TH, 2);
+  for (let k = 0; k < nTex; k++) { if (!dansTri[k] || interieur[k]) continue; const w = acc[k * 4 + 3]; if (w >= 0.95 || w === 0) interieur[k] = 1; }
+  remplirMarges(tex, interieur);
   /* ⚠ LA LUMIÈRE DES PHOTOS, SUR LES FLANCS (essai Walla, mesuré au rendu) : une photo de face, prise sous une lampe
      de côté, a un bord ÉCLAIRÉ et un bord dans l'OMBRE. Projetés en biais sur les flancs, ces bords donnaient, une fois
      le vêtement tourné, un flanc clair (+15 ΔE) et l'autre sombre (−11). Et le raccord, qui étale l'écart photo −
@@ -504,7 +530,7 @@ function projeterPhotos(etat){
     const Rl = lab(etat.appariement.reference), { G, rep: rp } = champBasse(tex, maillage, texTri, texB1, texB2), o = [0, 0, 0], q = [0, 0, 0];
     for (let k = 0; k < nTex; k++) {
       const t = texTri[k]; if (t < 0) continue;
-      const w = acc[k * 4 + 3], st = w > 0 ? 1 - lisse((nvMax[k] - 0.6) / 0.32) : 1;
+      const w = acc[k * 4 + 3], st = w > 0 ? 1 - lisse((nvMax[k] - 0.75) / 0.2) : 1;
       if (st <= 0.01) continue;
       const b1 = texB1[k], b2 = texB2[k], b0 = 1 - b1 - b2, va = rp[idx[t]], vb = rp[idx[t + 1]], vc = rp[idx[t + 2]];
       const B = [0, 1, 2].map((c) => b0 * G[va * 3 + c] + b1 * G[vb * 3 + c] + b2 * G[vc * 3 + c]);
@@ -516,9 +542,9 @@ function projeterPhotos(etat){
       rgbDeLab(o[0] + (Rl[0] - B[0]) * f, o[1] + (Rl[1] - B[1]) * f, o[2] + (Rl[2] - B[2]) * f, q);
       tex.data[i] = q[0]; tex.data[i + 1] = q[1]; tex.data[i + 2] = q[2];
     }
-    remplirMarges(tex, dansTri);
+    remplirMarges(tex, interieur);
   }
-  etat.dansTri = dansTri;
+  etat.dansTri = interieur;
   /* LE RELIEF INVENTÉ S'EFFACE LÀ OÙ LA PHOTO PARLE : la carte de normales de The New Black porte SES coutures (un
      empiècement au dos que le vrai vêtement n'a pas) ; sous la photo projetée, elle est aplanie au prorata du poids
      — sinon on voyait deux coutures, la vraie (photo) et l'inventée (relief). Les côtés gardent leur relief. */
@@ -534,7 +560,7 @@ function projeterPhotos(etat){
     }
   }
   etat.couverture = Math.round(couverts / nTex * 1000) / 10;
-  etat.couleurDos = { dos: cDos, gains: gDos.map((g) => +g.toFixed(3)) };
+  etat.couleurDos = { dos: cDos, gains: gDos.map((g) => +g.toFixed(3)), gainsNonAppliques: gDos0.map((g) => +g.toFixed(3)) };
   return { couverture: etat.couverture, gainsDos: etat.couleurDos.gains };
 }
 
@@ -542,22 +568,57 @@ function projeterPhotos(etat){
    mêlait au bord des îlots la couleur d'AVANT, et des lignes claires quadrillaient le modèle. ⚠ À REFAIRE APRÈS
    CHAQUE RETOUCHE des texels (la passe des flancs, les corrections mesurées au rendu) — vu sur la Walla : sans cela,
    les frontières d'îlots ressortaient en lignes claires sur les flancs. */
-function remplirMarges(tex, dansTri){
-  const TW = tex.w, TH = tex.h;
-  const fait = new Uint8Array(dansTri);
-  for (let passe = 0; passe < 6; passe++) {
-    const neufs = [];
+/* ⚠ LE BORD DES ÎLOTS EST REPEINT AUSSI (2026-10-19, la ligne fine en travers du haut du dos, rendu non éclairé — la
+   carte de couverture l'a montrée : le long de chaque coupure d'îlot de The New Black, une bande de deux texels à demi
+   couverts par la photo, où la texture d'origine transparaissait). Les deux texels du bord de chaque îlot sont donc
+   traités comme la marge : repeints depuis l'intérieur, qui est la vraie photo. Rendu : le masque « intérieur ». */
+function interieurIlots(dansTri, TW, TH, r){
+  let m = new Uint8Array(dansTri);
+  for (let p = 0; p < (r || 2); p++) {
+    const n = new Uint8Array(m);
     for (let y = 0; y < TH; y++) for (let x = 0; x < TW; x++) {
-      const k = y * TW + x; if (fait[k]) continue;
+      const k = y * TW + x; if (!m[k]) continue;
+      if (x === 0 || y === 0 || x === TW - 1 || y === TH - 1 || !m[k - 1] || !m[k + 1] || !m[k - TW] || !m[k + TW]) n[k] = 0;
+    }
+    m = n;
+  }
+  return m;
+}
+function remplirMarges(tex, dansTri){
+  /* ⚠ PAR FRONTS, ET LOIN (2026-10-19, la ligne fine en travers du haut du dos, vue au rendu non éclairé) : six pixels de
+     marge ne suffisaient pas. Un modèle vu de loin est lu dans des niveaux réduits de la texture (mipmaps) où chaque
+     texel en moyenne 4, 16, 64 : la couleur d'avant, restée à sept pixels d'un îlot, remontait le long de ses bords — une
+     ligne là où The New Black avait coupé ses îlots (l'empiècement). On propage donc la couleur du bord le plus proche
+     jusqu'à 48 pixels, front après front (chaque passe ne visite que la nouvelle bordure). */
+  const TW = tex.w, TH = tex.h, d = tex.data;
+  const fait = new Uint8Array(dansTri);
+  let front = [];
+  for (let k = 0; k < TW * TH; k++) {
+    if (fait[k]) continue;
+    const x = k % TW, y = (k - x) / TW;
+    if ((x > 0 && fait[k - 1]) || (x < TW - 1 && fait[k + 1]) || (y > 0 && fait[k - TW]) || (y < TH - 1 && fait[k + TW])) front.push(k);
+  }
+  for (let passe = 0; passe < 48 && front.length; passe++) {
+    const neufs = [];
+    for (const k of front) {
+      if (fait[k]) continue;
+      const x = k % TW, y = (k - x) / TW;
       let r = 0, g = 0, b = 0, n = 0;
-      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-        const xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= TW || yy >= TH) continue;
-        const j = yy * TW + xx; if (!fait[j]) continue;
-        r += tex.data[j * 4]; g += tex.data[j * 4 + 1]; b += tex.data[j * 4 + 2]; n++;
-      }
+      if (x > 0 && fait[k - 1]) { r += d[(k - 1) * 4]; g += d[(k - 1) * 4 + 1]; b += d[(k - 1) * 4 + 2]; n++; }
+      if (x < TW - 1 && fait[k + 1]) { r += d[(k + 1) * 4]; g += d[(k + 1) * 4 + 1]; b += d[(k + 1) * 4 + 2]; n++; }
+      if (y > 0 && fait[k - TW]) { r += d[(k - TW) * 4]; g += d[(k - TW) * 4 + 1]; b += d[(k - TW) * 4 + 2]; n++; }
+      if (y < TH - 1 && fait[k + TW]) { r += d[(k + TW) * 4]; g += d[(k + TW) * 4 + 1]; b += d[(k + TW) * 4 + 2]; n++; }
       if (n) neufs.push(k, r / n, g / n, b / n);
     }
-    for (let i = 0; i < neufs.length; i += 4) { const k = neufs[i]; tex.data[k * 4] = neufs[i + 1]; tex.data[k * 4 + 1] = neufs[i + 2]; tex.data[k * 4 + 2] = neufs[i + 3]; fait[k] = 1; }
+    const suivant = [];
+    for (let i = 0; i < neufs.length; i += 4) {
+      const k = neufs[i]; if (fait[k]) continue;
+      d[k * 4] = neufs[i + 1]; d[k * 4 + 1] = neufs[i + 2]; d[k * 4 + 2] = neufs[i + 3]; fait[k] = 1;
+      const x = k % TW, y = (k - x) / TW;
+      if (x > 0 && !fait[k - 1]) suivant.push(k - 1); if (x < TW - 1 && !fait[k + 1]) suivant.push(k + 1);
+      if (y > 0 && !fait[k - TW]) suivant.push(k - TW); if (y < TH - 1 && !fait[k + TW]) suivant.push(k + TW);
+    }
+    front = suivant;
   }
 }
 
@@ -691,6 +752,16 @@ function aplanirRelief(etat, options){
     geo.voisins.forEach((nb, v) => { let s2 = poids[v], n = 1; nb.forEach((u) => { s2 += poids[u]; n++; }); neuf[v] = Math.min(poids[v], s2 / n); });
     poids.set(neuf);
   }
+  /* ⚠ LA CONTREMARCHE D'UNE CRÊTE (2026-10-19, la ligne du haut du dos, rendu non éclairé) : les sommets de la face
+     verticale d'une marche sculptée ne regardent pas l'appareil — leur poids était nul, ils restaient en place, et la
+     marche survivait à l'aplanissement. Le poids est donc ÉTENDU de trois anneaux de voisinage (décroissant) : la
+     contremarche suit les deux paliers qu'elle relie, et la marche s'efface. */
+  const poidsFace = new Float32Array(poids);
+  for (let p = 0; p < 3; p++) {
+    const neuf = new Float32Array(poids);
+    geo.voisins.forEach((nb, v) => { let m = poids[v]; nb.forEach((u) => { if (poids[u] * 0.85 > m) m = poids[u] * 0.85; }); neuf[v] = m; });
+    poids.set(neuf);
+  }
   const actifs = []; geo.voisins.forEach((_, v) => { if (poids[v] > 0.01) actifs.push(v); });
   /* ⚠ UN LISSAGE DE VOISINAGE NE SUFFIT PAS (mesuré sur la Walla : l'empiècement du dos est une MARCHE, pas un creux —
      vingt passes de Taubin la laissaient entière, rendu à texture unie à l'appui). On lisse donc la PROFONDEUR vue par
@@ -745,13 +816,14 @@ function aplanirRelief(etat, options){
     const k = axe[v], vu = vues[k].v, P = [pos[v * 3], pos[v * 3 + 1], pos[v * 3 + 2]];
     const [X, Y, Z] = vu.projeter(P), xi = Math.floor(X), yi = Math.floor(Y);
     if (xi < 0 || yi < 0 || xi >= vu.W || yi >= vu.H) continue;
-    if (Z > vu.prof[yi * vu.W + xi] + vu.tolerance * 0.25) continue;   // caché (tolérance serrée : une doublure juste derrière ne compte pas)
+    // caché (tolérance serrée : une doublure juste derrière ne compte pas) — sauf la contremarche d'une crête, cachée de peu
+    if (Z > vu.prof[yi * vu.W + xi] + vu.tolerance * (poidsFace[v] > 0.01 ? 0.25 : 3)) continue;
     const cible = bilin(cartes[k], vu.W, vu.H, X, Y); if (!isFinite(cible)) continue;
     const pb = lisse(bords[k][yi * vu.W + xi] / (3 * sigma));
     // ⚠ BORNÉ : une couture, une marche inventée ne font que quelques millimètres ; un écart plus grand est une vraie
     // forme (un ourlet, un revers) — on n'y touche pas au-delà de 4 ‰ de la hauteur du vêtement
     // (2026-10-19) borne relevée de 4 à 10 ‰ : la marche de l'empiècement et le pli du milieu du dos se voyaient encore
-    const lim = (o.borne || 0.010) * etat.hauteurModele;
+    const lim = (o.borne || 0.025) * etat.hauteurModele;
     const dz = Math.max(-lim, Math.min(lim, cible - Z)) * poids[v] * pb;
     pos[v * 3] += dz * d[k][0]; pos[v * 3 + 1] += dz * d[k][1]; pos[v * 3 + 2] += dz * d[k][2];
   }
@@ -816,6 +888,56 @@ function aplanirRelief(etat, options){
 
 /* (6) LA COULEUR FIDÈLE : la teinte du vêtement sur TOUT le modèle (côtés de The New Black compris) ramenée sur celle
    de la photo du DEVANT — médiane du groupe dominant, gains bornés 0,7–1,4, sur la seule couleur dominante. */
+/* L'OMBRAGE DOUX, PRÉ-CUIT (2026-10-19, sa direction : « sous les photos, l'éclairage de la scène ne doit plus rien
+   ajouter »). Le modèle est rendu NON ÉCLAIRÉ : la texture dit TOUT. Sous les photos, leurs vrais pixels — leur vraie
+   lumière. Ailleurs (les flancs, les dessous des manches), la texture de The New Black, aplanie à la teinte de la photo,
+   n'aurait plus aucun modelé : on y CUIT un ombrage doux, calculé ici sans lumière de scène ni reflet :
+     · une lumière de ciel (le dessus un peu plus clair que le dessous) ;
+     · une occlusion de cavité (un creux s'assombrit : la profondeur du sommet sous la moyenne de ses voisins, le long de
+       sa normale, sur trois anneaux de voisinage).
+   Normalisé à 1 en moyenne sur les zones qu'il touche (la teinte, réglée sur la photo, ne bouge pas), et fondu à zéro
+   sous les photos. */
+function ombrageDoux(etat){
+  if (etat.ombrageCuit) return etat.ombrageCuit;
+  const { tex, maillage, geo, wTex } = etat, { pos, idx, nor } = maillage, nV = pos.length / 3, nTex = tex.w * tex.h;
+  const H = etat.hauteurModele || 1;
+  const vois = geo.voisins, rep = geo.rep;
+  // la moyenne des positions sur trois anneaux (lissage de Laplace répété)
+  let M = new Float32Array(pos.length); M.set(pos);
+  for (let it = 0; it < 3; it++) {
+    const N2 = new Float32Array(M);
+    vois.forEach((nb, v) => { let x = M[v * 3], y = M[v * 3 + 1], z = M[v * 3 + 2], n = 1; nb.forEach((u) => { x += M[u * 3]; y += M[u * 3 + 1]; z += M[u * 3 + 2]; n++; });
+      N2[v * 3] = x / n; N2[v * 3 + 1] = y / n; N2[v * 3 + 2] = z / n; });
+    M = N2;
+  }
+  const S = new Float32Array(nV);
+  vois.forEach((nb, v) => {
+    const n = unit([nor[v * 3], nor[v * 3 + 1], nor[v * 3 + 2]]);
+    const creux = ((M[v * 3] - pos[v * 3]) * n[0] + (M[v * 3 + 1] - pos[v * 3 + 1]) * n[1] + (M[v * 3 + 2] - pos[v * 3 + 2]) * n[2]) / H;
+    const ao = Math.max(0.72, Math.min(1, 1 - Math.max(0, creux) * 60));
+    const ciel = 0.9 + 0.1 * (0.5 + 0.5 * n[1]);
+    S[v] = ao * ciel;
+  });
+  // la moyenne, sur ce qu'aucune photo ne couvre
+  let sm = 0, sn = 0;
+  for (let k = 0; k < nTex; k += 7) { const t = etat.texTri[k]; if (t < 0 || wTex[k] > 0.2) continue;
+    const b1 = etat.texB1[k], b2 = etat.texB2[k], s0 = (1 - b1 - b2) * S[rep[idx[t]]] + b1 * S[rep[idx[t + 1]]] + b2 * S[rep[idx[t + 2]]]; sm += s0; sn++; }
+  const moy = sn ? sm / sn : 1;
+  let n = 0;
+  for (let k = 0; k < nTex; k++) {
+    const t = etat.texTri[k]; if (t < 0) continue;
+    const f = 1 - Math.min(1, wTex[k] * 1.5); if (f <= 0.01) continue;
+    const b1 = etat.texB1[k], b2 = etat.texB2[k];
+    const s0 = ((1 - b1 - b2) * S[rep[idx[t]]] + b1 * S[rep[idx[t + 1]]] + b2 * S[rep[idx[t + 2]]]) / moy;
+    const m = 1 + (s0 - 1) * f, i = k * 4;
+    tex.data[i] = Math.min(255, Math.round(tex.data[i] * m)); tex.data[i + 1] = Math.min(255, Math.round(tex.data[i + 1] * m)); tex.data[i + 2] = Math.min(255, Math.round(tex.data[i + 2] * m));
+    n++;
+  }
+  if (etat.dansTri) remplirMarges(tex, etat.dansTri);
+  etat.ombrageCuit = { texels: n, moyenne: +moy.toFixed(3) };
+  return etat.ombrageCuit;
+}
+
 /* (6) LA COULEUR FIDÈLE. Sans argument : le rapport (l'appariement fait à la projection, et la teinte d'ensemble).
    Avec une CORRECTION mesurée au rendu de la boutique ({ global: [dL, da, db], secteurs: [{ a, d: [dL, da, db] }] }) :
    un décalage Lab sur toute la texture (la face rendue ramenée sur la photo), et un décalage PAR DIRECTION — chaque
@@ -864,8 +986,10 @@ function couleurFidele(etat, correction){
   if (!g.every((x) => Math.abs(x - 1) < 0.02)) appliquerGains(tex.data, nTex, g, avant);
   const px2 = []; for (let k = 0; k < nTex; k += 5) { const i = k * 4; if (tex.data[i] + tex.data[i + 1] + tex.data[i + 2] > 30) px2.push(tex.data[i], tex.data[i + 1], tex.data[i + 2]); }
   const apres = medianeGroupe(px2, ref);
+  // le rendu est NON ÉCLAIRÉ : l'ombrage doux est cuit ici, une fois, sur ce qu'aucune photo ne couvre
+  const ombrage = ombrageDoux(etat);
   etat.couleur = { reference: ref, avant, apres, gains: g.map((x) => +x.toFixed(3)), ecartAvant: +deltaE(avant, ref).toFixed(1), ecartApres: +deltaE(apres, ref).toFixed(1),
-    appariement: etat.appariement || null };
+    appariement: etat.appariement || null, ombrage };
   return etat.couleur;
 }
 
