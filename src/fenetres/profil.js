@@ -199,6 +199,17 @@ input.t:focus,select.t:focus{outline:none;border-color:var(--or);box-shadow:0 0 
 .ferr{display:none;color:var(--tx-err2);font-size:.85rem;padding:.65rem .85rem;background:rgba(248,113,113,.1);
   border:1px solid rgba(248,113,113,.3);border-radius:11px;margin:.35rem 0 0;
   max-width:34rem;overflow-wrap:anywhere;line-height:1.5}
+/* ══ LES CLES D IDENTIFICATION (2026-10-19) — une ligne par cle ══════════
+   Jetons du theme seulement : le mode jour les redefinit, rien a reprendre. */
+.cles{display:flex;flex-direction:column;gap:.55rem;margin:0 0 1.35rem}
+.cle{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;padding:.75rem .9rem;
+  border:1px solid var(--v08);border-radius:12px;background:var(--v02)}
+.cle .t{flex:1 1 14rem;min-width:0}
+.cle .t b{font-size:.92rem;font-weight:600;overflow-wrap:anywhere}
+.cle .t span.q{display:block;font-size:.78rem;color:var(--tx2);margin-top:.15rem}
+.cle .g{display:flex;gap:.4rem;flex:0 0 auto}
+.cle input.t{padding-right:.8rem;max-width:20rem}
+.cle-vide{font-size:.86rem;color:var(--tx2);margin:0 0 1.35rem}
 .cols2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.1rem}
 @media(max-width:760px){.cols2{grid-template-columns:1fr}}
 .vide{padding:2.4rem 1rem;text-align:center;color:var(--tx2);font-size:.86rem}
@@ -268,6 +279,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
     invalide:'${T("Saisie invalide.")}',
     refus:'${T("Le serveur a refusé la modification.")}',
+    droit:'${T("Ce geste n’est pas permis.")}',
     indisponible:'${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
     pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
     delai:"${T('La fenêtre principale n\'a pas répondu à temps.')}",
@@ -295,6 +307,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      enregistre ses questions, on reste sur les questions — se faire renvoyer
      ailleurs par sa propre reussite est desagreable. */
   var ONGLET = 'pw';
+  // La cle en cours de renommage (son id), ou rien.
+  var RENOMME = '';
 
   /* Les INITIALES, tirees du nom. Meme regle que la pastille du compte dans la
      barre de menu : on coupe sur les espaces et les separateurs, on garde les
@@ -366,6 +380,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + (qOk ? '${T("Elles permettront de retrouver votre accès si vous perdez votre mot de passe.")}'
                    : '${T("Sans elles, votre compte ne pourra pas être récupéré par cette voie.")}')
             + '</span></span></div>'
+          + '<div class="l">'
+            + ((D.cles || []).length ? '<span class="rf-pill vert">' + (D.cles || []).length + '</span>' : '<span class="rf-pill">${T("Aucune")}</span>')
+            + '<span class="t"><b>${T("Clés d’identification")}</b><span>'
+            + (D.cleIci ? '${T("Ce poste en a une : vous entrez ici d’un seul geste.")}'
+                        : '${T("Aucune sur ce poste — l’onglet Clés d’identification permet d’en ajouter une.")}')
+            + '</span></span></div>'
         + '</div>'
       + '</div>'
       + '</div>';
@@ -381,7 +401,89 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<button type="button" class="onglet' + (ONGLET === 'q' ? ' on' : '') + '"'
         + ' data-ong="q" role="tab" aria-selected="' + (ONGLET === 'q') + '">'
         + '${T("Questions de sécurité")}' + etat + '</button>'
+      + '<button type="button" class="onglet' + (ONGLET === 'cle' ? ' on' : '') + '"'
+        + ' data-ong="cle" role="tab" aria-selected="' + (ONGLET === 'cle') + '">${T("Clés d’identification")}</button>'
       + '</div>';
+  }
+
+  /* ══ SES CLES D IDENTIFICATION (2026-10-19) ═══════════════════════════════
+     Sa demande : << je me connecte sur deux postes differents, je veux pouvoir
+     utiliser plus d une cle >>. Une ligne par cle (nom, creee le, derniere
+     utilisation), << Renommer >>, << Retirer >> (boite de confirmation), et
+     << Ajouter une cle sur ce poste >> avec le nom de l ordinateur propose.
+     ⚠ C EST LE SERVEUR QUI DIT << SOI >> : il refuse d ajouter une cle pour un
+     autre compte, et ne retire que les cles de la session (staff_mfa). */
+  function panneauCles(){
+    var cles = D.cles || [];
+    var h = '<div class="carte">'
+      + '<h3>${T("Clés d’identification")}</h3>'
+      + '<p class="intro">${T("Une clé par poste ou par appareil — Windows Hello, téléphone ou clé de sécurité. Sur l’appareil où elle vit, elle remplace le mot de passe et le code.")}</p>';
+    if (!cles.length) h += '<p class="cle-vide">${T("Aucune clé pour le moment.")}</p>';
+    else {
+      h += '<div class="cles">';
+      for (var i = 0; i < cles.length; i++) {
+        var c = cles[i];
+        if (RENOMME === c.id) {
+          h += '<div class="cle"><span class="t"><input class="t" id="k-ren" maxlength="60" value="' + esc(c.nom) + '"'
+            + ' aria-label="${T("Nom de la clé")}"></span>'
+            + '<span class="g"><button class="mini" data-k-ok="' + esc(c.id) + '">${T("Enregistrer")}</button>'
+            + '<button class="mini" data-k-annuler="1">${T("Annuler")}</button></span></div>';
+          continue;
+        }
+        h += '<div class="cle"><span class="t"><b>' + esc(c.nom || '${T("Clé")}') + '</b>'
+          + (c.ici ? ' <span class="rf-pill vert">${T("Ce poste")}</span>' : '')
+          + '<span class="q">${T("Créée le ")}' + esc(fmtTs(c.creeLe)) + ' · '
+          + (c.vuLe ? '${T("dernière utilisation ")}' + esc(fmtTs(c.vuLe)) : '${T("jamais utilisée")}') + '</span></span>'
+          + '<span class="g"><button class="mini" data-k-ren="' + esc(c.id) + '">${T("Renommer")}</button>'
+          + '<button class="mini" data-k-ret="' + esc(c.id) + '">${T("Retirer")}</button></span></div>';
+      }
+      h += '</div>';
+    }
+    if (!D.mfa) {
+      h += '<p class="cle-vide">${T("Une clé s’ajoute à la vérification en deux étapes : demandez à un administrateur de l’activer pour votre compte.")}</p>';
+    } else if (!D.clePossible) {
+      h += '<p class="cle-vide">${T("Ce poste ne propose pas de clé d’identification.")}</p>';
+    } else {
+      h += '<div class="mince">'
+        + '<label class="champ"><span class="lbl">${T("Nom de la clé")}</span>'
+        + '<input class="t" id="k-nom" maxlength="60" style="padding-right:.8rem" value="' + esc(D.cleNom || '${T("Ce poste")}') + '">'
+        + '<span class="sub">' + (D.cleIci ? '${T("Ce poste a déjà une clé : vous pouvez en ajouter une autre, par exemple une clé de sécurité USB ou votre téléphone.")}'
+                                           : '${T("Le nom de l’ordinateur est proposé ; vous pouvez le changer.")}') + '</span></label>'
+        + '<div class="ferr" id="k-err" role="alert"></div>'
+        + '<div class="actions"><button class="prim" id="k-go">${T("Ajouter une clé sur ce poste")}</button></div>'
+        + '</div>';
+    }
+    return h + '</div>';
+  }
+  function cleAjouter(){
+    if (OCCUPE) return; OCCUPE=true; ferr('k-err','');
+    var b = document.getElementById('k-go'); if (b) b.disabled = true;
+    dire('${T("En attente de la clé (Windows Hello, téléphone ou clé de sécurité)…")}');
+    appeler('profil:cleAjouter',[txv('k-nom')]).then(function(r){ OCCUPE=false;
+      if (r&&r.ok){ if (r.nom) D=r; ONGLET='cle'; dessiner(); dire('${T("Clé d’identification ajoutée.")}', 'bon'); }
+      else { var b2=document.getElementById('k-go'); if (b2) b2.disabled=false; ferr('k-err', expliquer(r)); } });
+  }
+  function cleRenommer(id){
+    if (OCCUPE) return; OCCUPE=true; dire('${T("Enregistrement…")}');
+    appeler('profil:cleRenommer',[id, txv('k-ren')]).then(function(r){ OCCUPE=false;
+      if (r&&r.ok){ if (r.nom) D=r; RENOMME=''; dessiner(); dire('${T("Clé renommée.")}', 'bon'); }
+      else dire(expliquer(r), 'err'); });
+  }
+  function cleRetirer(id){
+    if (OCCUPE) return;
+    var cles = D.cles || [];
+    var c = cles.filter(function(x){ return x.id === id; })[0] || {};
+    szConfirmer({ danger: true, titre: '${T("Retirer la clé d’identification")}',
+      texte: '${T("La clé")}' + ' « ' + (c.nom || '${T("Clé")}') + ' » ' + '${T("ne permettra plus d’entrer dans votre compte. Vos autres clés, votre mot de passe et votre code restent valides.")}'
+        + (cles.length > 1 ? '' : ' ${T("C’est votre dernière clé : vous entrerez avec le mot de passe et le code.")}'),
+      details: [['${T("Créée le")}', fmtTs(c.creeLe)], ['${T("Dernière utilisation")}', c.vuLe ? fmtTs(c.vuLe) : '${T("jamais utilisée")}']],
+      oui: '${T("Retirer la clé")}' }).then(function(ok){
+        if (!ok) return;
+        OCCUPE=true; dire('${T("Enregistrement…")}');
+        appeler('profil:cleRetirer',[id]).then(function(r){ OCCUPE=false;
+          if (r&&r.ok){ if (r.nom) D=r; dessiner(); dire('${T("Clé d’identification retirée.")}', 'bon'); }
+          else dire(expliquer(r), 'err'); });
+      });
   }
 
   /* Un champ de mot de passe avec son oeil. L oeil PORTE le sens (il n a pas de
@@ -460,7 +562,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        le geste a gauche, l etat du compte a droite. */
     corps.innerHTML = carteIdentite()
       + '<div class="grille"><div>' + barreOnglets()
-      + (ONGLET === 'q' ? panneauQuestions() : panneauMotDePasse())
+      + (ONGLET === 'q' ? panneauQuestions() : (ONGLET === 'cle' ? panneauCles() : panneauMotDePasse()))
       + '</div>' + coteDroit() + '</div>';
 
     var ongs = corps.querySelectorAll('.onglet');
@@ -468,7 +570,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       ongs[i].onclick = function(){ ONGLET = this.getAttribute('data-ong'); dessiner(); };
     }
 
-    if (ONGLET === 'q') {
+    if (ONGLET === 'cle') {
+      var kg = document.getElementById('k-go'); if (kg) kg.onclick = cleAjouter;
+      var l = corps.querySelectorAll('[data-k-ren]');
+      for (var a = 0; a < l.length; a++) l[a].onclick = function(){ RENOMME = this.getAttribute('data-k-ren'); dessiner();
+        var ch = document.getElementById('k-ren'); if (ch) { ch.focus(); ch.select(); } };
+      l = corps.querySelectorAll('[data-k-ret]');
+      for (a = 0; a < l.length; a++) l[a].onclick = function(){ cleRetirer(this.getAttribute('data-k-ret')); };
+      l = corps.querySelectorAll('[data-k-ok]');
+      for (a = 0; a < l.length; a++) l[a].onclick = function(){ cleRenommer(this.getAttribute('data-k-ok')); };
+      l = corps.querySelectorAll('[data-k-annuler]');
+      for (a = 0; a < l.length; a++) l[a].onclick = function(){ RENOMME = ''; dessiner(); };
+      var kr = document.getElementById('k-ren');
+      if (kr) kr.onkeydown = function(ev){ if (ev.key === 'Enter') cleRenommer(RENOMME); else if (ev.key === 'Escape') { RENOMME = ''; dessiner(); } };
+    } else if (ONGLET === 'q') {
       document.getElementById('q-go').onclick = questions;
       /* ⚠ LES DEUX LISTES S EXCLUENT L UNE L AUTRE. Choisir deux fois la meme
          question ne protege plus rien, et le serveur refuse : autant l empecher

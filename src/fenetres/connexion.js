@@ -332,6 +332,9 @@ ${JS_DIRE()}
      redessine n est pas un état. */
   var DEJA_RATE = false;
   var ECRAN_DONNEE = null;
+  /* La proposition de cle (2026-10-19, plusieurs cles) : combien le compte en a
+     deja AILLEURS, et le nom de ce poste (propose, modifiable). */
+  var CLE_PROP = { autres: 0, nom: '' };
   var LANGUE = 'fr';
 
   /* ══ LES DEUX LANGUES DE CET ÉCRAN ═══════════════════════════════════
@@ -372,6 +375,11 @@ ${JS_DIRE()}
       "Ajouter une clé": "Add a passkey",
       "Plus tard": "Later",
       "Clé d’identification ajoutée.": "Passkey added.",
+      "Une clé pour ce poste ?": "A passkey for this computer?",
+      "Votre compte a déjà une clé sur un autre poste. Ajoutez-en une ici pour entrer aussi d’un seul geste sur ce poste-ci.": "Your account already has a passkey on another computer. Add one here to sign in with a single gesture on this computer too.",
+      "Votre compte a déjà {0} clés sur d’autres postes. Ajoutez-en une ici pour entrer aussi d’un seul geste sur ce poste-ci.": "Your account already has {0} passkeys on other computers. Add one here to sign in with a single gesture on this computer too.",
+      "Ajouter une clé pour ce poste": "Add a passkey for this computer",
+      "« Plus tard » ne vaut que pour ce poste : la question reviendra dans 30 jours, et Mon profil permet d’en ajouter une à tout moment.": "“Later” applies to this computer only: the question will come back in 30 days, and My profile lets you add one at any time.",
       "Entrez le code de votre application d’authentification": "Enter the code from your authenticator app",
       "⏱ Temps restant : ": "⏱ Time remaining: ",
       "Code à 6 chiffres": "6-digit code",
@@ -735,19 +743,29 @@ ${JS_DIRE()}
       + '</div>';
   }
 
-  /* ══ LA PROPOSITION DE CLÉ — une fois, juste après le code ═══════════════
-     « optionnelle mais proposée lors de l enrôlement une fois ». « Plus tard »
-     l écarte pour de bon ; Accès Utilisateurs peut la reproposer. */
+  /* ══ LA PROPOSITION DE CLÉ — juste après le code ══════════════════════════
+     « optionnelle mais proposée lors de l enrôlement une fois ». Depuis le
+     2026-10-19 (plusieurs clés) : proposée à chaque POSTE qui n en a pas, et
+     « Plus tard » ne vaut que pour ce poste, 30 jours (staff.js, _cleRefusPoste). */
   /* 2026-09-30 — << un plus beau visuel au moment de la creation >> : un
      embleme qui respire pendant que Windows attend et passe au vert quand la
      cle est prise, les trois facons de faire nommees par ce qu on a sous la
      main, et ce que la cle change, dit en une ligne. */
   function ecranCle(prenom){
+    /* 2026-10-19 — << je me connecte sur deux postes differents, je veux
+       pouvoir utiliser plus d une cle >>. Le compte a deja une cle ailleurs :
+       la meme boite, qui dit qu il s agit de CE poste, et le nom de l ordinateur
+       propose (modifiable). */
+    var autres = (CLE_PROP && CLE_PROP.autres) || 0;
+    var nomDefaut = (CLE_PROP && CLE_PROP.nom) || T('Ce poste');
     return '<div>'
       + '<div class="cx-cle-tete">'
       + '<div class="cx-embleme" id="sl-cle-em">' + IC.empreinte(38) + '</div>'
-      + '<div class="cx-titre">' + T('Une clé d’identification ?') + '</div>'
-      + '<div class="cx-sous">' + T('Entrez d’un seul geste, sans mot de passe ni code. Facultatif — le mot de passe reste toujours possible.') + '</div>'
+      + '<div class="cx-titre">' + (autres ? T('Une clé pour ce poste ?') : T('Une clé d’identification ?')) + '</div>'
+      + '<div class="cx-sous">' + (autres > 1
+          ? T('Votre compte a déjà {0} clés sur d’autres postes. Ajoutez-en une ici pour entrer aussi d’un seul geste sur ce poste-ci.', autres)
+          : (autres ? T('Votre compte a déjà une clé sur un autre poste. Ajoutez-en une ici pour entrer aussi d’un seul geste sur ce poste-ci.')
+                    : T('Entrez d’un seul geste, sans mot de passe ni code. Facultatif — le mot de passe reste toujours possible.'))) + '</div>'
       + '</div>'
       + '<div class="cx-methodes">'
       + '<div class="cx-methode">' + IC.visage + '<b>Windows Hello</b><span>' + T('Visage, empreinte ou NIP') + '</span></div>'
@@ -757,11 +775,12 @@ ${JS_DIRE()}
       + '<div class="cx-cle-plus">' + IC.bouclier + '<div>' + T('La prochaine fois, votre nom d’utilisateur suffira : le champ du mot de passe se retire de lui-même.') + '</div></div>'
       + '<div style="margin-bottom:1.1rem">'
       + '<label class="cx-lbl" for="sl-cle-nom">' + T('Nom de la clé') + '</label>'
-      + '<input type="text" id="sl-cle-nom" maxlength="60" value="' + T('Ce poste') + '">'
+      + '<input type="text" id="sl-cle-nom" maxlength="60" value="' + esc(nomDefaut) + '">'
       + '</div>'
       + '<div class="cx-err" id="sl-cle-error"></div>'
-      + '<button type="button" class="cx-btn" id="sl-cle-oui" style="' + btnStyle() + '">' + T('Ajouter une clé') + '</button>'
+      + '<button type="button" class="cx-btn" id="sl-cle-oui" style="' + btnStyle() + '">' + (autres ? T('Ajouter une clé pour ce poste') : T('Ajouter une clé')) + '</button>'
       + '<div style="margin-top:.9rem;text-align:center"><button type="button" class="admlogin-back" id="sl-cle-non">' + T('Plus tard') + '</button></div>'
+      + '<div class="cx-cle-plus" style="margin-top:.8rem;margin-bottom:0">' + IC.bouclier + '<div>' + T('« Plus tard » ne vaut que pour ce poste : la question reviendra dans 30 jours, et Mon profil permet d’en ajouter une à tout moment.') + '</div></div>'
       + '</div>';
   }
 
@@ -1463,7 +1482,11 @@ ${JS_DIRE()}
      connexion web une fraction de seconde, juste avant le panneau - exactement
      le clignotement du #38, mais a l entree. */
   function finir(r){
-    if (r && r.proposerCle) { if (MFA_T) { clearInterval(MFA_T); MFA_T = null; } dessiner('cle', r.prenom || ''); return; }
+    if (r && r.proposerCle) {
+      if (MFA_T) { clearInterval(MFA_T); MFA_T = null; }
+      CLE_PROP = { autres: +r.cleAutres || 0, nom: String(r.cleNom || '').slice(0, 60) };
+      dessiner('cle', r.prenom || ''); return;
+    }
     reussi(r && r.prenom);
   }
   function cleProposee(ajouter){

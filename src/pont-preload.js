@@ -193,6 +193,14 @@ contextBridge.exposeInMainWorld('szPont', {
     String(label || ''), Math.round(x) || 0, Math.round(y) || 0, 'bas'),
   menuPanneauFermer: () => ipcRenderer.send('menu:panneau:fermer'),
   fermer: () => ipcRenderer.send('pont:fermer'),
+  /* (2026-10-19) La fenêtre se remet AU PREMIER PLAN (restaurée si réduite). La préparation l'appelle
+     après la création et l'impression d'une étiquette : elle passait derrière la fenêtre principale. */
+  premierPlan: () => ipcRenderer.send('pont:premierPlan'),
+  /* Les vignettes d'étiquette, fichiers TEMPORAIRES du poste (2026-10-19) : voir main.js. */
+  vignettesLire: (id) => ipcRenderer.invoke('etiquette:vignettes:lire', String(id || '')).catch(() => []),
+  vignettesGarder: (id, pages) => ipcRenderer.invoke('etiquette:vignettes:garder', String(id || ''), Array.isArray(pages) ? pages.slice(0, 8) : []).catch(() => false),
+  vignettesPurger: (id) => ipcRenderer.invoke('etiquette:vignettes:purger', String(id || '')).catch(() => false),
+  vignettesListe: () => ipcRenderer.invoke('etiquette:vignettes:liste').catch(() => []),
   /* LA PHOTO EN GRAND, DANS SA PROPRE FENETRE (2026-10-01, sa demande). Un canal
      etroit : un identifiant et la liste de la page (id, nom, code) — jamais
      l image elle-meme, que la fenetre demande seule par studio:vignettes. */

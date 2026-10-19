@@ -1353,7 +1353,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<button class="b" id="m-annuler">${T("Annuler")}</button><button class="b dgr" id="m-off">${T("Désactiver MFA")}</button><button class="prim" id="m-save">${T("Enregistrer")}</button></div></div>';
     document.body.appendChild(sur);
     var bs=document.getElementById('m-sess'); if (bs) bs.onclick=function(){ fermerSessions(id); };
-    var kr=document.getElementById('m-cle-ret'); if (kr) kr.onclick=function(){ cleGeste(id, 'securite:mfa:clesRetirer', '${T("Clés d’identification retirées.")}'); };
+    var krs=document.querySelectorAll('[data-cle-ret]');
+    for (var ki=0; ki<krs.length; ki++) krs[ki].onclick=function(){ cleRetirerUne(id, e, this.getAttribute('data-cle-ret')); };
     var kp=document.getElementById('m-cle-rep'); if (kp) kp.onclick=function(){ cleGeste(id, 'securite:mfa:cleReproposer', '${T("La clé lui sera proposée à sa prochaine connexion.")}'); };
     document.getElementById('m-x').onclick=fermerMfa;
     document.getElementById('m-annuler').onclick=fermerMfa;
@@ -1406,18 +1407,44 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      re-ecrire l exemption a l identique ferait une ligne de journal pour rien. */
   /* ══ LA CLÉ D IDENTIFICATION (2026-09-29) ══════════════════════════════
      « retirable ou réamorçable directement de la gestion du personnel ».
-     Retirer : toutes ses clés partent, le code reste. Reproposer : la
-     proposition revient à sa prochaine connexion, une fois. */
+     Retirer : UNE clé a la fois (2026-10-19), le code reste. Reproposer : la
+     proposition revient a sa prochaine connexion. */
+  /* 2026-10-19 — plusieurs cles, une par poste (sa demande : << je me connecte
+     sur deux postes differents, je veux pouvoir utiliser plus d une cle >>).
+     Une LIGNE PAR CLE : son nom, creee le, derniere utilisation, et << Retirer >>
+     pour CELLE-LA seulement, apres confirmation. Ajouter une cle pour quelqu un
+     d autre n existe pas : elle se cree sur son poste, par elle (Mon profil). */
   function cleSectionHtml(e){
     var cles = e.cles || [];
-    var noms = cles.map(function(c){ return esc(c.nom || '${T("Clé")}') + (c.vuLe ? ' <span class="quoi" style="display:inline">· ${T("vue le ")}' + esc(szJour(c.vuLe)) + '</span>' : ''); });
-    return '<div class="sess"><span><b>${T("Clé d’identification")}</b><span class="quoi">'
-      + (cles.length ? cles.length + ' ' + szPl(cles.length, '${T("clé enregistrée")}', '${T("clés enregistrées")}') + ' : ' + noms.join(', ')
+    var h = '<div class="sess"><span><b>${T("Clés d’identification")}</b><span class="quoi">'
+      + (cles.length ? cles.length + ' ' + szPl(cles.length, '${T("clé enregistrée")}', '${T("clés enregistrées")}') + ' — ${T("une par poste ou par appareil.")}'
                      : (e.cleProposee ? '${T("Aucune — la proposition a été déclinée ou ses clés retirées.")}' : '${T("Aucune — elle lui sera proposée à sa prochaine connexion.")}'))
       + '</span></span><span style="display:flex;gap:.4rem;flex:0 0 auto">'
-      + (cles.length ? '<button class="b" id="m-cle-ret">${T("Retirer")}</button>' : '')
       + (e.cleProposee ? '<button class="b" id="m-cle-rep">${T("Reproposer")}</button>' : '')
       + '</span></div>';
+    for (var i = 0; i < cles.length; i++) {
+      var c = cles[i];
+      h += '<div class="sess" style="padding-left:1.1rem"><span><b>' + esc(c.nom || '${T("Clé")}') + '</b><span class="quoi">'
+        + (c.creeLe ? '${T("créée le ")}' + esc(szJour(c.creeLe)) : '')
+        + (c.creeLe ? ' · ' : '') + (c.vuLe ? '${T("vue le ")}' + esc(szJour(c.vuLe)) : '${T("jamais utilisée")}')
+        + '</span></span><button class="b" data-cle-ret="' + esc(c.id) + '">${T("Retirer")}</button></div>';
+    }
+    return h;
+  }
+  function cleRetirerUne(id, e, cleId){
+    if (OCCUPE) return;
+    var c = ((e && e.cles) || []).filter(function(x){ return x.id === cleId; })[0] || {};
+    var reste = ((e && e.cles) || []).length - 1;
+    szConfirmer({ danger: true, titre: '${T("Retirer la clé d’identification")}',
+      texte: '${T("La clé")}' + ' « ' + (c.nom || '${T("Clé")}') + ' » ' + '${T("ne permettra plus d’entrer dans ce compte. Les autres clés et le code de l’application restent valides.")}'
+        + (reste > 0 ? '' : ' ${T("C’était sa dernière clé : la connexion se fera par le code.")}'),
+      details: [['${T("Compte")}', String((e && e.nom) || '—')], ['${T("Dernière utilisation")}', c.vuLe ? szJour(c.vuLe) : '${T("jamais utilisée")}']],
+      oui: '${T("Retirer la clé")}' }).then(function(ok){
+        if (!ok) return;
+        OCCUPE=true; dire('${T("Enregistrement…")}');
+        appeler('securite:mfa:clesRetirer',[id, cleId]).then(function(r){ OCCUPE=false;
+          if (r&&r.ok){ fermerMfa(); recharger('${T("Clé d’identification retirée.")}', 'bon'); } else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
+      });
   }
   function cleGeste(id, op, msg){
     if (OCCUPE) return; OCCUPE=true; dire('${T("Enregistrement…")}');

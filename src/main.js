@@ -2491,7 +2491,7 @@ const OPS_PONT = new Set([
   // transporteurs, XML) reste dans le site ; le pont ne porte que le service et
   // le poids, qui sont précisément ce que la fenêtre doit pouvoir choisir.
   'expedition:contexte', 'expedition:lire', 'expedition:comparer', 'expedition:etiquette',
-  'expedition:pdf', 'expedition:imprimer', 'expedition:bordereau',
+  'expedition:pdf', 'expedition:imprimer', 'expedition:bordereau', 'expedition:vignettes', 'commandes:statuts',
   'expedition:confirmer',
   // Les deux listes. ⚠ `commandes:liste` sert les DEUX vues (en cours / parties) :
   // ce sont les memes lignes filtrees autrement, et deux operations jumelles
@@ -2731,6 +2731,8 @@ const OPS_PONT = new Set([
   'fidelisation:sondage:form', 'fidelisation:sondage:ecrire',
   'listenoire:donnees', 'listenoire:ajouter', 'listenoire:retirer', 'adresse:suggerer',
   'profil:donnees', 'profil:motdepasse', 'profil:questions',
+  // Ses clés d'identification, une par poste (2026-10-19).
+  'profil:cleAjouter', 'profil:cleRetirer', 'profil:cleRenommer',
   'sociaux:liste', 'sociaux:publier', 'sociaux:publierTout', 'sociaux:ignorer',
   'sociaux:viderHistorique',
   // Fidelisation (fenetre Fidelisation, 1.71.0). La LISTE attend la
@@ -3100,9 +3102,17 @@ ipcMain.handle('fenetre:commande', (e, id) => {
   const _avant = fenetresNatives.get(cle);
   const _reutilisee = !!(_avant && !_avant.isDestroyed());
   const win = ouvrirNative(cle, TF('Préparation de commande'), () => pageCommande(String(id || '')),
-    { width: 880, height: 700, minHeight: 520 });
+    { width: 880, height: 700, minHeight: 520, maximiser: true });
   if (_reutilisee && win && !win.isDestroyed()) {
     win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
+  } else if (win && !win.isDestroyed()) {
+    /* ⚠ LE CHAMP DE SCAN REPREND LE CLAVIER À CHAQUE RETOUR DE LA FENÊTRE (2026-10-19) : on revient
+       d'une autre application, de la barre des tâches, d'une boîte du système — le lecteur doit taper
+       dans le champ, sans clic. La page décide (elle ne vole pas un vrai champ de saisie). */
+    win.on('focus', () => {
+      try { win.webContents.focus(); } catch {}
+      win.webContents.executeJavaScript('window.szFocusScan && window.szFocusScan()', true).catch(() => {});
+    });
   }
   return true;
 });
@@ -3595,7 +3605,7 @@ const LIMITES_PONT = {
   /* le gros plan sur la fibre : la zone se trouve au poste (court) ; l agrandissement passe par fal.ai */
   'produit:grosPlanZone': 30000, 'produit:grosPlan': 120000,
   'marges:analyser': 60000, 'marges:appliquer': 90000,
-  'stock:endommagesRapport': 30000, 'stock:rabaisComptoirRapport': 30000, 'facture:imprimer': 30000, 'expedition:comparer': 30000, 'commande:bon': 30000,
+  'stock:endommagesRapport': 30000, 'stock:rabaisComptoirRapport': 30000, 'facture:imprimer': 30000, 'expedition:comparer': 30000, 'expedition:vignettes': 30000, 'commande:bon': 30000,
   // La liste des retours RESYNCHRONISE les demandes avant de repondre (la
   // meme fraicheur que l ecran du site) : laisser le temps du nuage.
   'retours:liste': 20000,
@@ -3785,6 +3795,8 @@ const LIMITES_PONT = {
   'listenoire:donnees': 20000, 'listenoire:ajouter': 30000, 'listenoire:retirer': 30000,
   'adresse:suggerer': 15000,
   'profil:donnees': 20000, 'profil:motdepasse': 60000, 'profil:questions': 60000,
+  // Ajouter une clé attend Windows Hello (ou le téléphone) : le même plafond que connexion:cleAjouter.
+  'profil:cleAjouter': 130000, 'profil:cleRetirer': 20000, 'profil:cleRenommer': 20000,
   'sociaux:publierTout': 180000,
   'ramassages:annuler': 30000,
   'ramassages:planifier': 45000,
@@ -4062,7 +4074,7 @@ async function executerOpSite(nom, args, emetteur) {
      (NotAllowedError) — or c'est la fenêtre native de connexion qui l'a, pas la
      page du site qui exécute la cérémonie. On le lui donne le temps du geste ;
      la boîte de Windows (Hello, téléphone, clé) passe de toute façon devant. */
-  if (nom === 'connexion:cle' || nom === 'connexion:cleEntrer' || nom === 'connexion:cleAjouter') { try { wc.focus(); } catch {} }
+  if (nom === 'connexion:cle' || nom === 'connexion:cleEntrer' || nom === 'connexion:cleAjouter' || nom === 'profil:cleAjouter') { try { wc.focus(); } catch {} }
   try {
     let fini = false;
     const travail = wc.executeJavaScript(code, true).then((r) => { fini = true; return r; });
@@ -4684,6 +4696,61 @@ ipcMain.on('vue:tuiles', (e, cle, off) => {
   reglages.ecrire({ tuilesMasquees: t });
 });
 
+/* ══ LES VIGNETTES D'ÉTIQUETTE, FICHIERS TEMPORAIRES DU POSTE (2026-10-19) ══════════════════════
+   <temp>/sandriza-etiquettes/<id de commande>/page-N.png — jamais dans la photothèque. Détruites à
+   l'expédition (la fenêtre le demande), au balayage de la préparation (commandes expédiées, livrées
+   ou annulées) et au-delà de 30 jours. Le serveur garde, lui, le PDF de l'étiquette (réimpression,
+   preuve) : on n'y touche pas d'ici. */
+const VIGN_RACINE = () => path.join(app.getPath('temp'), 'sandriza-etiquettes');
+const _vignDossier = (id) => {
+  const sid = String(id || '').replace(/[^\w-]/g, '').slice(0, 80);
+  return sid ? path.join(VIGN_RACINE(), sid) : '';
+};
+const _vignPurger = (id) => { const d = _vignDossier(id); if (!d) return false; try { fs.rmSync(d, { recursive: true, force: true }); return true; } catch { return false; } };
+ipcMain.handle('etiquette:vignettes:lire', (_e, id) => {
+  const d = _vignDossier(id); if (!d || !fs.existsSync(d)) return [];
+  try {
+    return fs.readdirSync(d).filter((f) => /^page-\d+\.png$/.test(f)).sort((a, b) => parseInt(a.slice(5), 10) - parseInt(b.slice(5), 10)).slice(0, 8)
+      .map((f) => { const m = (() => { try { return JSON.parse(fs.readFileSync(path.join(d, f + '.json'), 'utf8')); } catch { return {}; } })();
+        return { src: 'data:image/png;base64,' + fs.readFileSync(path.join(d, f)).toString('base64'), widthIn: m.widthIn || 4, heightIn: m.heightIn || 6 }; });
+  } catch { return []; }
+});
+ipcMain.handle('etiquette:vignettes:garder', (_e, id, pages) => {
+  const d = _vignDossier(id); if (!d || !Array.isArray(pages)) return false;
+  try {
+    _vignPurger(id); fs.mkdirSync(d, { recursive: true });
+    pages.slice(0, 8).forEach((p, i) => {
+      const src = String((p && p.src) || '');
+      if (!/^data:image\/png;base64,/.test(src) || src.length > 8 * 1024 * 1024) return;
+      fs.writeFileSync(path.join(d, 'page-' + (i + 1) + '.png'), Buffer.from(src.split(',')[1], 'base64'));
+      fs.writeFileSync(path.join(d, 'page-' + (i + 1) + '.png.json'), JSON.stringify({ widthIn: +p.widthIn || 4, heightIn: +p.heightIn || 6 }));
+    });
+    return true;
+  } catch { return false; }
+});
+ipcMain.handle('etiquette:vignettes:purger', (_e, id) => _vignPurger(id));
+// La liste des commandes qui ont une vignette ; au passage, celles de plus de 30 jours partent.
+ipcMain.handle('etiquette:vignettes:liste', () => {
+  const r = VIGN_RACINE(); const ids = [];
+  try {
+    if (!fs.existsSync(r)) return [];
+    fs.readdirSync(r).forEach((n) => {
+      const d = path.join(r, n);
+      try {
+        const st = fs.statSync(d);
+        if (Date.now() - st.mtimeMs > 30 * 86400e3) fs.rmSync(d, { recursive: true, force: true });
+        else ids.push(n);
+      } catch {}
+    });
+  } catch {}
+  return ids;
+});
+
+ipcMain.on('pont:premierPlan', (e) => {
+  const w = BrowserWindow.fromWebContents(e.sender);
+  if (!w || w.isDestroyed() || w === mainWindow) return;
+  try { if (w.isMinimized()) w.restore(); if (!w.isVisible()) w.show(); w.moveTop(); w.focus(); w.webContents.focus(); } catch {}
+});
 ipcMain.on('pont:fermer', (e) => {
   // Une vue ANCREE qui << ferme >> (Echap) se cache — fermer la fenetre
   // principale a sa place serait la pire des surprises.
@@ -5153,7 +5220,9 @@ const ouvrirNative = (cle, titre, page, opts = {}) => {
   win.on('closed', () => { fenetresNatives.delete(cle); fenSale.delete(wcId); });
   brancherOutils(win);
   win.webContents.on('did-finish-load', () => appliquerTheme(win.webContents));
-  win.once('ready-to-show', () => win.show());
+  // `maximiser` (2026-10-19) : la préparation de commande s'ouvre en plein écran de TRAVAIL (agrandie,
+  // pas le mode kiosque).
+  win.once('ready-to-show', () => { if (opts.maximiser) { try { win.maximize(); } catch {} } win.show(); });
   win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html));
   return win;
 };
@@ -7066,6 +7135,20 @@ ipcMain.handle('module:ouvrir', (e, nom) => {
 ipcMain.handle('menu:reglages', () => reglages.lire());
 ipcMain.handle('menu:set', (e, cle, valeur) => {
   if (cle === 'menuMode' || cle === 'menuTaille') { poserReglage(cle, valeur); }
+  /* « PLUS TARD » À LA CLÉ D IDENTIFICATION, RETENU PAR POSTE (2026-10-19). Sa demande :
+     plusieurs clés, une par poste — le refus d un poste ne doit pas valoir pour l autre,
+     donc il vit ICI (reglages.json du poste), pas dans le compte. { staffId: dateISO },
+     vingt au plus ; staff.js le fait expirer après 30 jours. Rien de secret. */
+  if (cle === 'cleRefus') {
+    const o = {};
+    if (valeur && typeof valeur === 'object' && !Array.isArray(valeur)) {
+      Object.keys(valeur).slice(-20).forEach((k) => {
+        const v = String(valeur[k] || '');
+        if (/^[\w.@-]{1,80}$/.test(k) && !isNaN(Date.parse(v))) o[k] = v.slice(0, 40);
+      });
+    }
+    reglages.set('cleRefus', o);
+  }
   /* ⚠ LE JEU DE COULEURS S APPLIQUE TOUT DE SUITE, PARTOUT (#26). Sans
      `appliquerThemePartout`, il ne se verrait qu au prochain chargement de
      chaque fenetre — donc jamais sur celles deja ouvertes, et l on croirait

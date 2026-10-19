@@ -399,4 +399,18 @@ module.exports = {
   'Toutes les sessions ouvertes du compte': 'All open sessions of the account',
   'seront fermées et une reconnexion sera exigée. Son travail non enregistré sera perdu.':
     'will be closed and a new sign-in will be required. Any unsaved work will be lost.',
+  // 2026-10-19 — plusieurs clés, une par poste.
+  'Clés d’identification': 'Passkeys',
+  'une par poste ou par appareil.': 'one per computer or device.',
+  'créée le ': 'created ',
+  'jamais utilisée': 'never used',
+  'Retirer la clé d’identification': 'Remove passkey',
+  'La clé': 'The passkey',
+  'ne permettra plus d’entrer dans ce compte. Les autres clés et le code de l’application restent valides.':
+    'will no longer sign in to this account. Other passkeys and the authenticator code remain valid.',
+  ' C’était sa dernière clé : la connexion se fera par le code.': ' This was the last passkey: sign-in will use the code.',
+  'C’était sa dernière clé : la connexion se fera par le code.': 'This was the last passkey: sign-in will use the code.',
+  'Dernière utilisation': 'Last used',
+  'Retirer la clé': 'Remove passkey',
+  'Clé d’identification retirée.': 'Passkey removed.',
 };

@@ -774,6 +774,8 @@ jobs:
           # Les cartes de transporteurs gardent leur nom (2026-10-11 : la case « Clé » de
           # Purolator, nommée `cle`, écrasait le nom du transporteur — rien ne s'enregistrait).
           node tools/banc-transporteurs-cles.js
+          # La vérification à 20 articles : restants seuls et paginés, validés à part (2026-10-19).
+          node tools/banc-preparation-liste.js
 
       - name: Construire (${{ matrix.arch }})
         shell: bash

@@ -102,5 +102,44 @@ module.exports = {
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
   'Courriel': 'Email',
   'Identifiant': 'Username',
-  'Actif': 'Active'
+  'Actif': 'Active',
+
+  /* ── LES CLÉS D’IDENTIFICATION, UNE PAR POSTE (2026-10-19) ──────────────── */
+  'Clés d’identification': 'Passkeys',
+  'Une clé par poste ou par appareil — Windows Hello, téléphone ou clé de sécurité. Sur l’appareil où elle vit, elle remplace le mot de passe et le code.':
+    'One passkey per computer or device — Windows Hello, phone or security key. On the device where it lives, it replaces the password and the code.',
+  'Aucune clé pour le moment.': 'No passkey yet.',
+  'Nom de la clé': 'Passkey name',
+  'Enregistrer': 'Save',
+  'Annuler': 'Cancel',
+  'Clé': 'Passkey',
+  'Ce poste': 'This computer',
+  'Créée le ': 'Created ',
+  'Créée le': 'Created',
+  'dernière utilisation ': 'last used ',
+  'Dernière utilisation': 'Last used',
+  'jamais utilisée': 'never used',
+  'Renommer': 'Rename',
+  'Retirer': 'Remove',
+  'Une clé s’ajoute à la vérification en deux étapes : demandez à un administrateur de l’activer pour votre compte.':
+    'A passkey comes on top of two-step verification: ask an administrator to turn it on for your account.',
+  'Ce poste ne propose pas de clé d’identification.': 'This computer does not offer passkeys.',
+  'Ce poste a déjà une clé : vous pouvez en ajouter une autre, par exemple une clé de sécurité USB ou votre téléphone.':
+    'This computer already has a passkey: you can add another one, for example a USB security key or your phone.',
+  'Le nom de l’ordinateur est proposé ; vous pouvez le changer.': 'The computer’s name is suggested; you can change it.',
+  'Ajouter une clé sur ce poste': 'Add a passkey on this computer',
+  'En attente de la clé (Windows Hello, téléphone ou clé de sécurité)…': 'Waiting for the passkey (Windows Hello, phone or security key)…',
+  'Clé d’identification ajoutée.': 'Passkey added.',
+  'Clé renommée.': 'Passkey renamed.',
+  'Retirer la clé d’identification': 'Remove passkey',
+  'La clé': 'The passkey',
+  'ne permettra plus d’entrer dans votre compte. Vos autres clés, votre mot de passe et votre code restent valides.':
+    'will no longer sign in to your account. Your other passkeys, your password and your code remain valid.',
+  'C’est votre dernière clé : vous entrerez avec le mot de passe et le code.': 'This is your last passkey: you will sign in with your password and code.',
+  'Retirer la clé': 'Remove passkey',
+  'Clé d’identification retirée.': 'Passkey removed.',
+  'Aucune': 'None',
+  'Ce poste en a une : vous entrez ici d’un seul geste.': 'This computer has one: you sign in here with a single gesture.',
+  'Aucune sur ce poste — l’onglet Clés d’identification permet d’en ajouter une.': 'None on this computer — the Passkeys tab lets you add one.',
+  'Ce geste n’est pas permis.': 'This action is not allowed.'
 };

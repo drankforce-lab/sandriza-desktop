@@ -63,6 +63,7 @@ html.jour .fil button.fait .n{color:var(--tx-sur-accent)}
 .etape.on{display:flex}
 .col{flex:1 1 auto;min-width:0;min-height:0;display:flex;flex-direction:column;gap:.75rem;overflow-y:auto}
 .cote{flex:0 0 19rem;min-height:0;display:flex;flex-direction:column;gap:.75rem;overflow-y:auto}
+.cote.fixe{overflow:hidden}
 .boite{background:var(--f-carte);border:1px solid var(--v08);border-radius:13px;padding:.9rem 1rem;
   display:flex;flex-direction:column;gap:.55rem}
 .boite .t{font-size:.76rem;color:var(--tx2)}
@@ -100,7 +101,31 @@ html.jour .retour.err{color:#9b1c1c}
 html.jour .retour.ok{color:#1f6b3d}
 html.jour .retour.att{color:#7a4b00}
 .retour b{font-family:ui-monospace,Consolas,monospace}
-.lignes{flex:1 1 auto;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:.5rem;padding-right:.2rem}
+.lignes{flex:1 1 auto;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:.5rem}
+/* LA GRANDE LISTE = SEULEMENT CE QUI RESTE À SCANNER (2026-10-19), paginée à la hauteur disponible. */
+.lg.sort{opacity:0;transform:translateX(1.5rem);transition:opacity .22s,transform .22s}
+.v-pagi{flex:0 0 auto;display:flex;align-items:center;justify-content:flex-end;gap:.5rem;font-size:.8rem;color:var(--tx2);min-height:1.9rem}
+.v-pagi[hidden]{display:none}
+.v-pagi button{min-width:2rem;min-height:1.8rem;padding:0 .4rem}
+.v-pagi .pos{font-variant-numeric:tabular-nums}
+.v-pagi .reste{margin-right:auto}
+/* « PROGRESSION + VALIDÉS » : la barre, puis la liste COMPACTE des articles complets, qui défile dans
+   SA boîte — la colonne ne pousse jamais « Continuer » hors de la fenêtre. */
+.boite.prog-v{flex:1 1 auto;min-height:9rem;overflow:hidden}
+.v-tete{display:flex;justify-content:space-between;align-items:baseline;font-size:.76rem;color:var(--tx2);margin-top:.2rem}
+.valides{flex:1 1 auto;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:.2rem;margin:0 -.3rem;padding:0 .3rem}
+.vl{display:grid;grid-template-columns:28px minmax(0,1fr) auto auto auto;gap:.45rem;align-items:center;font-size:.8rem;
+  padding:.18rem .3rem;border-radius:7px}
+.vl:hover{background:var(--v05)}
+.vl.arrive{background:var(--v08)}
+.vl .mv{width:28px;height:28px;border-radius:6px;overflow:hidden;background:var(--f-pied);display:flex;align-items:center;justify-content:center;font-size:.66rem;font-weight:800;color:var(--tx3)}
+.vl .mv .rf-av{width:28px!important;height:28px!important;border-radius:6px!important;font-size:.66rem}
+.vl .mv img{width:100%;height:100%;object-fit:cover}
+.vl .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vl .ok{color:var(--tx-ok);font-weight:800}
+.vl .q{color:var(--tx2);font-variant-numeric:tabular-nums}
+.vl button{min-width:1.7rem;min-height:1.6rem;padding:0;font-size:.82rem;line-height:1}
+.valides .rien{font-size:.76rem;color:var(--tx3);padding:.2rem 0}
 .lg{display:grid;grid-template-columns:3.4rem minmax(0,1fr) auto 7.2rem;gap:.85rem;align-items:center;
   padding:.55rem .75rem;border-radius:12px;background:var(--f-carte);border:1px solid var(--v08);
   transition:border-color .2s, background .2s}
@@ -185,10 +210,16 @@ html.jour .e-note .prod{color:#9a4a00}
 
 /* ══ EXPEDITION ══ */
 .boite.recu{flex-direction:row;gap:1.2rem;align-items:center}
-.etq{flex:0 0 8.5rem;height:11rem;border-radius:8px;background:#f4f4f2;color:#15171c;display:flex;flex-direction:column;
-  padding:.65rem;gap:.25rem;font-size:.66rem;line-height:1.3;overflow:hidden}
-.etq strong{font-size:.76rem}
-.etq .cb{flex:1 1 auto;margin-top:.4rem;background:repeating-linear-gradient(90deg,#15171c 0 2px,#f4f4f2 2px 4px,#15171c 4px 5px,#f4f4f2 5px 8px)}
+/* LA VRAIE ÉTIQUETTE (2026-10-19) : la vignette du PDF du transporteur, une par page ; un clic l agrandit. */
+.etq{flex:0 0 auto;display:flex;gap:.6rem;flex-wrap:wrap;max-width:34rem}
+.etq button.vg-e{padding:0;border:1px solid var(--v16);border-radius:8px;background:var(--f-pied);cursor:zoom-in;overflow:hidden;
+  width:16.25rem;line-height:0}
+.etq button.vg-e img{width:100%;height:auto;display:block}
+.etq .sans{width:16.25rem;aspect-ratio:2/3;border:1px dashed var(--v22);border-radius:8px;display:flex;align-items:center;
+  justify-content:center;text-align:center;padding:1rem;font-size:.8rem;color:var(--tx2);line-height:1.4}
+.etq .att{width:16.25rem;aspect-ratio:2/3;border-radius:8px;background:var(--v05)}
+.agr{position:fixed;inset:0;z-index:9400;background:rgba(8,12,20,.82);display:flex;align-items:center;justify-content:center;padding:1.2rem;cursor:zoom-out}
+.agr img{max-height:100%;max-width:100%;background:var(--tx-blanc);border-radius:6px}
 .recu .inf{display:flex;flex-direction:column;gap:.4rem;min-width:0;flex:1 1 auto}
 .recu .ok{font-size:.82rem;color:var(--tx-ok);font-weight:700}
 html.jour .recu .ok{color:#1f6b3d}
@@ -347,19 +378,22 @@ function pageCommande(id) {
       + '<div class="scan" id="v-scan"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 8v8M11 8v8M15 8v8M18 8v8"></path></svg>'
       + '<input id="c-scan" placeholder="${T("En attente du lecteur…")}" autocomplete="off" spellcheck="false"></div>'
       + '<div class="retour cache" id="v-retour" role="status" aria-live="polite"></div>'
-      + '<div class="lignes" id="v-lignes" aria-label="${T("Articles de la commande")}"></div>'
+      + '<div class="lignes" id="v-lignes" aria-label="${T("Articles à scanner")}"></div>'
+      + '<div class="v-pagi" id="v-pagi" hidden><span class="reste" id="v-reste"></span>'
+      + '<button type="button" data-vpg="-1" aria-label="${T("Page précédente")}">‹</button><span class="pos" id="v-pos"></span>'
+      + '<button type="button" data-vpg="1" aria-label="${T("Page suivante")}">›</button></div>'
       + '</div>'
-      + '<aside class="cote" aria-label="${T("Progression")}">'
-      + '<div class="boite"><div class="t">${T("Progression")}</div>'
+      + '<aside class="cote fixe" aria-label="${T("Progression")}">'
+      + '<div class="boite prog-v"><div class="t">${T("Progression")}</div>'
       + '<div class="prog"><b id="v-n">0</b> <span id="v-sur"></span></div>'
       + '<div class="barre"><i id="v-barre"></i></div>'
-      + '<div class="e-note">${T("Quand tout est scanné, l’étiquette s’ouvre d’elle-même. La progression est gardée si vous fermez.")}</div></div>'
+      + '<div class="v-tete"><span id="v-valides-t">${T("Validés")} (0)</span></div>'
+      + '<div class="valides" id="v-valides" aria-label="${T("Articles validés")}"></div></div>'
       + '<div class="boite"><div class="t">${T("Lecteur absent ?")}</div>'
       + '<button type="button" id="v-main">${T("Cocher à la main")}</button></div>'
       + '<div class="boite"><div class="t">${T("Documents")}</div>'
       + '<button type="button" id="c-bon"><span class="ic">🖨</span> ${T("Bon de commande")}<span class="kb">Ctrl+B</span></button>'
       + '<button type="button" id="c-colis"><span class="ic">🧾</span> ${T("Bordereau")}</button></div>'
-      + '<div class="pousse"></div>'
       + '<button type="button" class="prim gros-btn" id="v-continuer" disabled>${T("Continuer → Étiquette")}<span class="kb">F9</span></button>'
       + '</aside><div class="coche" id="v-coche"><div><span>✓</span> ${T("Colis vérifié")}</div></div></div>');
 
@@ -421,27 +455,84 @@ function pageCommande(id) {
     fil();
   }
 
-  /* ══ LES LIGNES — toujours TOUTES visibles, la ligne complète se coche ══════════════════ */
-  var FLASH = '';
-  function dessinerLignes(){
+  /* ══ LES LIGNES (2026-10-19, sa demande) ══════════════════════════════════════════════
+     La GRANDE liste ne montre que ce qui RESTE à scanner (un article à 1/2 y reste, avec son
+     compteur) ; un article COMPLET la quitte (courte sortie) pour la liste « Validés » compacte du
+     panneau. La grande liste est PAGINÉE à la hauteur réellement disponible (ResizeObserver) : pas
+     de défilement de la fenêtre. La règle de partage est une fonction PURE, éprouvée par le banc. */
+  function vueVerif(articles, comptes, parPage, page){
+    var restants = [], valides = [];
+    (articles || []).forEach(function(a){ ((comptes[a.cle] || 0) >= a.quantite ? valides : restants).push(a); });
+    var pp = Math.max(1, parPage | 0);
+    var pages = Math.max(1, Math.ceil(restants.length / pp));
+    var pg = Math.max(0, Math.min(pages - 1, page | 0));
+    return { restants: restants, valides: valides, pages: pages, page: pg, vues: restants.slice(pg * pp, pg * pp + pp) };
+  }
+  var FLASH = '', ARRIVE = '', PAGE = 0, PAR_PAGE = 0;
+  // Combien de lignes tiennent : hauteur de la zone ÷ hauteur d une ligne (mesurée, sinon 78 px).
+  function mesurerParPage(){
+    var z = document.getElementById('v-lignes');
+    var h = z && z.clientHeight ? z.clientHeight : 0;
+    var l = z && z.querySelector ? z.querySelector('.lg') : null;
+    var lh = (l && l.offsetHeight) ? l.offsetHeight : 78;
+    var gap = 8;
+    return h > 0 ? Math.max(1, Math.floor((h + gap) / (lh + gap))) : 6;
+  }
+  function pageDe(cle){
+    var v = vueVerif(CMD.articles, COMPTES, PAR_PAGE || mesurerParPage(), 0);
+    var i = v.restants.findIndex(function(a){ return a.cle === cle; });
+    return i < 0 ? -1 : Math.floor(i / Math.max(1, PAR_PAGE || mesurerParPage()));
+  }
+  function ligneHtml(a){
+    var v = COMPTES[a.cle] || 0;
+    return '<div class="lg' + (FLASH === a.cle ? ' flash' : '') + '" data-cle="' + esc(a.cle) + '" data-reste="' + esc(a.cle) + '">'
+      + '<div class="vg">' + szVignette(a.image, a.nom, '', a.nom) + '</div>'
+      + '<div style="min-width:0"><div class="nm">' + esc(a.nom) + '</div>'
+      + '<div class="sk">' + esc([a.sku, a.couleur, a.taille].filter(Boolean).join(' · ')) + '</div></div>'
+      + '<div class="cp">' + v + ' <small>/ ' + a.quantite + '</small></div>'
+      + '<div><div class="et a">${T("À scanner")}</div><div class="mn"><button type="button" data-moins="' + esc(a.cle) + '" aria-label="${T("Retirer une unité")}">−</button>'
+      + '<button type="button" data-plus="' + esc(a.cle) + '" aria-label="${T("Ajouter une unité")}">+</button></div></div>'
+      + '</div>';
+  }
+  function valideHtml(a){
+    return '<div class="vl' + (ARRIVE === a.cle ? ' arrive' : '') + '" data-valide="' + esc(a.cle) + '" title="' + esc(a.nom + ' — ' + [a.sku, a.couleur, a.taille].filter(Boolean).join(' · ')) + '">'
+      + '<span class="mv">' + szVignette(a.image, a.nom, '', a.nom) + '</span>'
+      + '<span class="nm">' + esc(a.nom) + '</span><span class="ok" aria-hidden="true">✓</span>'
+      + '<span class="q">×' + a.quantite + '</span>'
+      + '<button type="button" data-annuler="' + esc(a.cle) + '" title="${T("Annuler un scan — remettre à scanner")}" aria-label="${T("Annuler un scan")}">↺</button></div>';
+  }
+  function dessinerLignes(mesure){
     var z = document.getElementById('v-lignes'); if (!z) return;
     z.classList.toggle('main-libre', MAIN_LIBRE);
-    z.innerHTML = CMD.articles.map(function(a){
-      var v = COMPTES[a.cle] || 0;
-      var cl = v === a.quantite ? ' fait' : (v > a.quantite ? ' trop' : '');
-      var et = v === a.quantite
-        ? '<div class="et ok"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>${T("Scanné")}</div>'
-        : '<div class="et a">${T("À scanner")}</div>';
-      return '<div class="lg' + cl + (FLASH === a.cle ? ' flash' : '') + '" data-cle="' + esc(a.cle) + '">'
-        + '<div class="vg">' + szVignette(a.image, a.nom, '', a.nom) + '</div>'
-        + '<div style="min-width:0"><div class="nm">' + esc(a.nom) + '</div>'
-        + '<div class="sk">' + esc([a.sku, a.couleur, a.taille].filter(Boolean).join(' · ')) + '</div></div>'
-        + '<div class="cp">' + v + ' <small>/ ' + a.quantite + '</small></div>'
-        + '<div>' + et + '<div class="mn"><button type="button" data-moins="' + esc(a.cle) + '" aria-label="${T("Retirer une unité")}">−</button>'
-        + '<button type="button" data-plus="' + esc(a.cle) + '" aria-label="${T("Ajouter une unité")}">+</button></div></div>'
-        + '</div>';
-    }).join('') || '<div class="vide">${T("Aucun article à préparer dans cette commande.")}</div>';
+    if (!PAR_PAGE) PAR_PAGE = mesurerParPage();
+    var v = vueVerif(CMD.articles, COMPTES, PAR_PAGE, PAGE);
+    PAGE = v.page;
+    z.innerHTML = v.vues.map(ligneHtml).join('')
+      || (CMD.articles.length ? '<div class="vide">${T("Tout est scanné.")}</div>' : '<div class="vide">${T("Aucun article à préparer dans cette commande.")}</div>');
+    // Une fois dessinée, on MESURE pour de vrai (la première passe a supposé 78 px par ligne).
+    var pp = mesurerParPage();
+    if (!mesure && pp !== PAR_PAGE && z.clientHeight) { PAR_PAGE = pp; return dessinerLignes(true); }
+    var pg = document.getElementById('v-pagi');
+    if (pg) {
+      pg.hidden = v.pages <= 1 && !v.restants.length;
+      document.getElementById('v-reste').textContent = v.restants.length + ' ' + szPl(v.restants.length, '${T("restant")}', '${T("restants")}');
+      document.getElementById('v-pos').textContent = v.pages > 1 ? (v.page + 1) + ' / ' + v.pages : '';
+      Array.prototype.forEach.call(pg.querySelectorAll('[data-vpg]'), function(b){
+        b.hidden = v.pages <= 1;
+        b.disabled = (b.getAttribute('data-vpg') === '-1') ? v.page === 0 : v.page >= v.pages - 1;
+      });
+    }
+    var zv = document.getElementById('v-valides');
+    if (zv) zv.innerHTML = v.valides.map(valideHtml).join('') || '<div class="rien">${T("Aucun article validé pour l’instant.")}</div>';
+    var tv = document.getElementById('v-valides-t'); if (tv) tv.textContent = '${T("Validés")} (' + v.valides.length + ')';
     majProgres();
+  }
+  // La page se recalcule quand la fenêtre change de taille.
+  function suivreTaille(){
+    var z = document.getElementById('v-lignes');
+    if (!z || typeof ResizeObserver === 'undefined') { window.addEventListener('resize', function(){ PAR_PAGE = 0; if (ETAPE === 0) dessinerLignes(); }); return; }
+    var dernier = 0;
+    new ResizeObserver(function(){ var h = z.clientHeight; if (h && h !== dernier) { dernier = h; PAR_PAGE = 0; if (ETAPE === 0 && CMD) dessinerLignes(); } }).observe(z);
   }
   function majProgres(){
     var att = attendus(), f = comptes();
@@ -459,11 +550,39 @@ function pageCommande(id) {
     var sc = document.getElementById('v-scan');
     if (sc) { sc.classList.remove('ok', 'err'); if (genre === 'ok' || genre === 'err') { sc.classList.add(genre); setTimeout(function(){ sc.classList.remove('ok', 'err'); }, 700); } }
   }
+  /* ⚠ LE CHAMP DE SCAN A LE CLAVIER, TOUJOURS (2026-10-19, sa demande) — à l ouverture, au retour de
+     la fenêtre (la coquille appelle szFocusScan), après chaque scan, après un clic ailleurs que dans un
+     vrai champ, après une boîte de confirmation. Jamais au détriment d un VRAI champ de saisie (poids,
+     suivi, NIP…) ni d une boîte ouverte. À l étape Vérification seulement. */
+  function champActif(){
+    var a = document.activeElement;
+    if (!a || a === document.body || a.id === 'c-scan') return false;
+    return /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName || '') || a.isContentEditable;
+  }
   function focusScan(){
     if (ETAPE !== 0) return;
     var s = document.getElementById('c-scan');
-    if (s && document.activeElement !== s && !document.querySelector('.szc-voile, #bc-voile')) { try { s.focus(); } catch (e) {} }
+    if (!s || document.activeElement === s || champActif() || document.querySelector('.szc-voile, #bc-voile')) return;
+    try { s.focus(); } catch (e) {}
   }
+  window.szFocusScan = function(){ setTimeout(focusScan, 0); };
+  // Un clic ailleurs que dans un champ de saisie (pastille, ligne, fond, bouton) rend le clavier au scan.
+  document.addEventListener('click', function(ev){
+    if (ETAPE !== 0) return;
+    var t = ev.target;
+    if (t && (/^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName || '') || (t.closest && (t.closest('.szc-voile') || t.closest('#bc-voile'))))) return;
+    setTimeout(focusScan, 0);
+  });
+  // Une boîte de confirmation (szConfirmer) qui se ferme rend aussi le clavier au scan.
+  try {
+    new MutationObserver(function(ms){
+      for (var i = 0; i < ms.length; i++) {
+        var r = ms[i].removedNodes || [];
+        for (var j = 0; j < r.length; j++) { if (r[j].classList && (r[j].classList.contains('szc-voile') || r[j].id === 'bc-voile')) { setTimeout(focusScan, 0); return; } }
+      }
+    }).observe(document.body, { childList: true });
+  } catch (e) {}
+  function premierPlan(){ try { if (P && P.premierPlan) P.premierPlan(); } catch (e) {} }
 
   /* ══ LE SCAN ══════════════════════════════════════════════════════════════════════════
      - code inconnu / article d une autre commande -> message ROUGE, rien n est compté, le champ
@@ -517,12 +636,22 @@ function pageCommande(id) {
   }
   function compter(cle, d){
     var a = CMD.articles.find(function(x){ return x.cle === cle; }); if (!a) return;
-    COMPTES[cle] = Math.max(0, Math.min(a.quantite, (COMPTES[cle] || 0) + d));
+    var avant = COMPTES[cle] || 0;
+    COMPTES[cle] = Math.max(0, Math.min(a.quantite, avant + d));
     if (d > 0) statutVerification();
-    FLASH = cle; setTimeout(function(){ FLASH = ''; var l = document.querySelector('.lg.flash'); if (l) l.classList.remove('flash'); }, 450);
-    dessinerLignes();
-    var l = document.querySelector('.lg[data-cle="' + (window.CSS && CSS.escape ? CSS.escape(cle) : cle) + '"]');
-    if (l && l.scrollIntoView) { try { l.scrollIntoView({ block: 'nearest' }); } catch (e) {} }
+    var complet = COMPTES[cle] >= a.quantite && avant < a.quantite;
+    var sel = '.lg[data-cle="' + (window.CSS && CSS.escape ? CSS.escape(cle) : cle) + '"]';
+    if (complet) {
+      // L article COMPLET quitte la grande liste (courte sortie) et arrive dans « Validés ».
+      var l = document.querySelector(sel);
+      ARRIVE = cle; setTimeout(function(){ ARRIVE = ''; var x = document.querySelector('.vl.arrive'); if (x) x.classList.remove('arrive'); }, 900);
+      if (l) { l.classList.add('sort'); setTimeout(dessinerLignes, 230); } else dessinerLignes();
+    } else {
+      // Encore à scanner : on va à SA page (il peut être sur une autre) et on le met en évidence.
+      var pg = pageDe(cle); if (pg >= 0) PAGE = pg;
+      FLASH = cle; setTimeout(function(){ FLASH = ''; var x = document.querySelector('.lg.flash'); if (x) x.classList.remove('flash'); }, 700);
+      dessinerLignes();
+    }
     garderBientot();
     if (toutVerifie() && !AUTO_FAIT) {
       AUTO_FAIT = true;
@@ -794,11 +923,13 @@ function pageCommande(id) {
     b.disabled = true; dire('${T("Demande au transporteur…")}', 'att');
     P.appeler('expedition:etiquette', ID, CHOIX.t, CHOIX.service, poids, forcer).then(function(r){
       b.disabled = false;
+      premierPlan();   // ⚠ la fenêtre passait derrière la fenêtre principale pendant la création
       if (!r || !r.ok) { dire(expliquerD(r), 'err'); return; }
       if (!r.suivi) { dire('${T("Aucun numéro reçu : l’étiquette n’a PAS été générée.")}', 'err'); return; }
       poser('c-suivi', r.suivi);
       PDF = r.pdf || null;
       CMD.aUneEtiquette = true; CMD.suivi = r.suivi; CMD.transporteur = CHOIX.t;
+      VIGN = null; chargerVignettes(true);   // la vignette de la NOUVELLE étiquette
       CMD.etiquette = { t: CHOIX.t, nom: CHOIX.nom, reel: CHOIX.reel };
       majExpedier();
       aller(2);
@@ -810,17 +941,80 @@ function pageCommande(id) {
     if (LECTURE) { dire('${T("Commande en traitement ailleurs — lecture seule.")}', 'err'); return; }
     dire('${T("Impression de l’étiquette et du bordereau…")}');
     P.appeler('expedition:imprimer', ID, PDF).then(function(r){
-      dire(r && r.ok ? '${T("Étiquette et bordereau envoyés à l’impression.")}' : expliquerD(r), r && r.ok ? 'bon' : 'err');
+      premierPlan();
+      // ⚠ Le succès ne se dit que sur un VERDICT réel ; sinon le vrai motif (imprimante, pilote, PDF).
+      if (!r || !r.ok) { dire(expliquerD(r), 'err'); return; }
+      if (r.bordereau === false) { dire('${T("Étiquette imprimée — le bordereau ne l’a PAS été :")} ' + (r.bordereauMotif || '?'), 'err'); return; }
+      dire(r.etat === 'running' ? '${T("Étiquette partie vers l’imprimante — plus longue que d’habitude.")}'
+        : '${T("Étiquette et bordereau imprimés")}' + (r.imprimante ? ' (' + r.imprimante + ')' : '') + '.', 'bon');
     });
   }
 
   /* ══ L EXPÉDITION ═════════════════════════════════════════════════════════════════════ */
+  /* ══ LA VIGNETTE DE L ÉTIQUETTE ══════════════════════════════════════════════════════════
+     D abord le fichier TEMPORAIRE du poste ; sinon le site la dessine depuis le PDF (celui qu on vient
+     de recevoir, ou celui que la commande garde) et on la range dans le dossier temporaire. Un rendu
+     impossible se DIT — jamais un faux code-barres. */
+  var VIGN = null;            // null : pas encore cherché · [] : indisponible · [{src}] : prête
+  var VIGN_EN_COURS = false;
+  function dessinerVignettes(){
+    var z = document.getElementById('x-etq'); if (!z) return;
+    var aEtiq = CMD && (CMD.aUneEtiquette || aSuivi());
+    if (!aEtiq) { z.innerHTML = '<div class="sans">${T("Aucune étiquette — remise en main propre ou à créer.")}</div>'; return; }
+    if (VIGN === null) { z.innerHTML = '<div class="att" aria-label="${T("Chargement de l’aperçu")}"></div>'; chargerVignettes(false); return; }
+    if (!VIGN.length) { z.innerHTML = '<div class="sans">${T("Aperçu indisponible — l’étiquette reste imprimable.")}</div>'; return; }
+    z.innerHTML = VIGN.map(function(p, i){
+      return '<button type="button" class="vg-e" data-agr="' + i + '" title="${T("Agrandir")}" aria-label="${T("Agrandir l’étiquette, page")} ' + (i + 1) + '">'
+        + '<img src="' + esc(p.src) + '" alt=""></button>';
+    }).join('');
+  }
+  function chargerVignettes(neuve){
+    if (VIGN_EN_COURS) return;
+    VIGN_EN_COURS = true;
+    var fini = function(p){ VIGN_EN_COURS = false; VIGN = p || []; if (ETAPE === 2) dessinerVignettes(); };
+    var depuisSite = function(){
+      P.appeler('expedition:vignettes', ID, PDF || null).then(function(r){
+        if (r && r.ok && r.pages && r.pages.length) {
+          fini(r.pages);
+          try { if (P.vignettesGarder) P.vignettesGarder(ID, r.pages); } catch (e) {}
+        } else fini([]);
+      }).catch(function(){ fini([]); });
+    };
+    if (neuve || !P.vignettesLire) { depuisSite(); return; }
+    P.vignettesLire(ID).then(function(l){ if (l && l.length) fini(l); else depuisSite(); }).catch(depuisSite);
+  }
+  function agrandir(i){
+    if (!VIGN || !VIGN[i]) return;
+    var v = document.createElement('div');
+    v.className = 'agr'; v.setAttribute('role', 'dialog'); v.setAttribute('aria-label', '${T("Étiquette agrandie")}');
+    v.innerHTML = '<img src="' + esc(VIGN[i].src) + '" alt="">';
+    var fermer = function(){ document.removeEventListener('keydown', clav, true); if (v.parentNode) v.parentNode.removeChild(v); };
+    var clav = function(ev){ if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); fermer(); } };
+    document.addEventListener('keydown', clav, true);
+    v.onclick = fermer;
+    document.body.appendChild(v);
+  }
+  // Détruire la vignette temporaire : expédiée (ici), et au balayage de l ouverture.
+  function purgerVignettes(id){ try { if (P.vignettesPurger) P.vignettesPurger(id || ID); } catch (e) {} }
+  function balayerVignettes(){
+    if (!P.vignettesListe) return;
+    P.vignettesListe().then(function(ids){
+      ids = (ids || []).filter(function(x){ return x && x !== ID; });
+      if (!ids.length) return;
+      return P.appeler('commandes:statuts', ids).then(function(r){
+        if (!r || !r.ok || !r.statuts) return;
+        Object.keys(r.statuts).forEach(function(k){
+          if (/^(shipped|delivered|cancelled|absente)$/.test(r.statuts[k])) purgerVignettes(k);
+        });
+      });
+    }).catch(function(){});
+  }
+
   function recap(){
     var e = CMD.etiquette || {};
     var t = e.t || CMD.transporteur || (CHOIX && CHOIX.t) || '';
     var suivi = String(val('c-suivi') || '').trim();
-    document.getElementById('x-etq').innerHTML = '<strong>' + esc(nomT(t) || '—') + '</strong><span>' + esc(CMD.client || '') + '</span>'
-      + '<span>' + esc([CMD.ville, CMD.province, CMD.codePostal].filter(Boolean).join(' ')) + '</span><div class="cb"></div>';
+    dessinerVignettes();
     document.getElementById('x-etat').textContent = suivi ? '${T("Étiquette créée")}' : (coché('c-sans') ? '${T("Sans étiquette — remise en main propre")}' : '${T("Aucune étiquette")}');
     document.getElementById('x-quoi').textContent = (nomT(t) || '') + (e.nom ? ' · ' + e.nom : '') + (e.reel ? ' · ' + argent(e.reel) : '');
     var bi = document.getElementById('c-etiq-imp'); if (bi) bi.disabled = !(CMD.aUneEtiquette || suivi);
@@ -851,6 +1045,7 @@ function pageCommande(id) {
     }).then(function(r){
       if (!r || !r.ok) { majExpedier(); dire(expliquerD(r), 'err'); return; }
       rendreVerrou();
+      purgerVignettes(ID);   // commande complétée : la vignette temporaire est détruite
       dire(r.sansSuivi ? '${T("Expédiée sans numéro de suivi.")}' : '${T("Expédiée — courriel envoyé.")}', 'bon');
       var s = CMD.suivante;
       if (s && s.id) {
@@ -895,6 +1090,23 @@ function pageCommande(id) {
       if (p) compter(p.getAttribute('data-plus'), 1);
       else if (m) { compter(m.getAttribute('data-moins'), -1); }
     });
+    document.getElementById('v-pagi').addEventListener('click', function(ev){
+      var b = ev.target.closest('[data-vpg]'); if (!b || b.disabled) return;
+      PAGE += parseInt(b.getAttribute('data-vpg'), 10) || 0; dessinerLignes(); focusScan();
+    });
+    // « Annuler un scan » : l article repasse à scanner (une unité de moins), gardé au serveur.
+    document.getElementById('v-valides').addEventListener('click', function(ev){
+      var b = ev.target.closest('[data-annuler]'); if (!b) return;
+      if (LECTURE) { dire('${T("Commande en traitement ailleurs — lecture seule.")}', 'err'); return; }
+      var cle = b.getAttribute('data-annuler');
+      var a = CMD.articles.find(function(x){ return x.cle === cle; }); if (!a) return;
+      szConfirmer({ titre: '${T("Annuler un scan")}', texte: a.nom + ' — ${T("repasse dans les articles à scanner.")}',
+        oui: '${T("Remettre à scanner")}', prudent: true }).then(function(ok){
+        if (ok) { AUTO_FAIT = false; compter(cle, -1); retour('<span>↺ <b>' + esc(a.sku || a.nom) + '</b> ${T("remis à scanner.")}</span>', 'att'); }
+        focusScan();
+      });
+    });
+    suivreTaille();
     document.getElementById('v-main').onclick = function(){
       MAIN_LIBRE = !MAIN_LIBRE;
       this.textContent = MAIN_LIBRE ? '${T("Revenir au lecteur")}' : '${T("Cocher à la main")}';
@@ -923,6 +1135,9 @@ function pageCommande(id) {
     document.getElementById('c-sans').onchange = function(){ fil(); majExpedier(); };
     document.getElementById('c-suivi').oninput = function(){ dire(''); fil(); majExpedier(); recap(); };
     document.getElementById('c-etiq-imp').onclick = imprimerEtiquette;
+    document.getElementById('x-etq').addEventListener('click', function(ev){
+      var b = ev.target.closest('[data-agr]'); if (b) agrandir(parseInt(b.getAttribute('data-agr'), 10) || 0);
+    });
     ['x-c1', 'x-c2', 'x-c3'].forEach(function(i){ document.getElementById(i).onchange = majExpedier; });
     document.getElementById('btn-enr').onclick = expedier;
     document.getElementById('x-suivante').onclick = suivante;
@@ -1057,6 +1272,7 @@ function pageCommande(id) {
           + (r.prioritaire ? ' · ${T("Prioritaire")}' : '') + (r.notes ? ' · ${T("Note :")} ' + r.notes : '');
         dessiner();
         majReprise();
+        balayerVignettes();
         return verrou().then(function(){
           chargerExpedition();
           accueillir(statutOuverture);
