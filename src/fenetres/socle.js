@@ -859,7 +859,9 @@ html.sz-lots-on .sz-gen-pan{bottom:4.5rem}
 .sz-gen-it .l2{color:var(--tx2)}
 .sz-gen-it .l2.err{color:var(--tx-err)}
 .sz-gen-it .l2.bon{color:var(--tx-ok)}
-.sz-gen-it button,.sz-gen-pied button{font-size:.72rem;padding:.18rem .55rem}
+.sz-gen-it .l2.att{color:var(--tx-att)}
+.sz-gen-it .pas i.attente{background:var(--tx-att)}
+.sz-gen-it button,.sz-gen-pied button{font-size:.72rem;padding:.18rem .55rem;white-space:nowrap;flex:0 0 auto}
 .sz-gen-pied{display:flex;gap:.4rem;justify-content:flex-end;flex-wrap:wrap;margin-top:.55rem;padding-top:.5rem;border-top:1px solid var(--v08)}
 .sz-gen-pied .plus{margin-right:auto;color:var(--tx2);align-self:center}
 `;
@@ -870,8 +872,11 @@ function _szGenOuvert(){ try { return localStorage.getItem('sz_gen_ouvert') === 
 function _szGenOuvrir(v){ try { localStorage.setItem('sz_gen_ouvert', v ? '1' : '0'); } catch (e) {} _szGenPeindre(_szGenDer); }
 function _szGenEsc(x){ return String(x == null ? '' : x).replace(/[&<>"]/g, function(c){ return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
 function _szGenArgent(n){ return (Math.round((Number(n) || 0) * 100) / 100).toFixed(2).replace('.', ',') + ' $ US'; }
-var _SZ_GEN_ETAPES = ['${T("Envoi des photos")}', '${T("Génération chez The New Black")}', '${T("Téléchargement de la vidéo")}',
-  '${T("Découpage en 36 images")}', '${T("Correction de couleur")}', '${T("Dépôt dans R2 et la photothèque")}', '${T("Posé sur la fiche")}'];
+// Les dix étapes de l'aperçu 3D (2026-10-18) — sa condition : « aucune étape silencieuse ».
+var _SZ_GEN_ETAPES = ['${T("Envoi des photos")}', '${T("Génération 3D chez The New Black")}', '${T("Téléchargement du modèle")}',
+  '${T("Détourage et recalage des photos devant/dos")}', '${T("Projection des photos sur le modèle")}', '${T("Couleur fidèle")}',
+  '${T("Compression")}', '${T("Contrôle de conformité")}', '${T("Dépôt (R2 et photothèque)")}', '${T("Posé sur la fiche")}'];
+function _szGenConf(c){ return (c && c.devant != null) ? '${T("Conforme au devant : {d} % · au dos : {o} %")}'.replace('{d}', String(c.devant)).replace('{o}', String(c.dos)) : ''; }
 function _szGenPeindre(r){
   _szGenDer = r;
   var l = (r && r.ok && r.liste) ? r.liste : [];
@@ -880,7 +885,7 @@ function _szGenPeindre(r){
     if (_szGenPan && _szGenPan.parentNode) _szGenPan.parentNode.removeChild(_szGenPan);
     _szGenPill = _szGenPan = null; return;
   }
-  var cours = l.filter(function(g){ return g.etat === 'cours'; });
+  var cours = l.filter(function(g){ return g.etat === 'cours'; }), attente = l.filter(function(g){ return g.etat === 'attente'; });
   var cout = cours.reduce(function(s, g){ return s + (Number(g.cout) || 0); }, 0);
   if (!_szGenPill) {
     _szGenPill = document.createElement('button'); _szGenPill.type = 'button'; _szGenPill.className = 'sz-gen';
@@ -893,6 +898,8 @@ function _szGenPeindre(r){
   _szGenPill.setAttribute('aria-expanded', _szGenOuvert() ? 'true' : 'false');
   _szGenPill.innerHTML = cours.length
     ? '<span class="roue" aria-hidden="true">⟳</span> ' + cours.length + ' ' + (cours.length > 1 ? '${T("générations en cours")}' : '${T("génération en cours")}') + ' · ' + _szGenArgent(cout)
+      + (attente.length ? ' · ' + attente.length + ' ${T("à confirmer")}' : '')
+    : attente.length ? '<span aria-hidden="true">?</span> ' + attente.length + ' ' + (attente.length > 1 ? '${T("modèles à confirmer")}' : '${T("modèle à confirmer")}')
     : '<span aria-hidden="true">✓</span> ' + l.length + ' ' + (l.length > 1 ? '${T("générations terminées")}' : '${T("génération terminée")}');
   if (!_szGenOuvert()) { if (_szGenPan && _szGenPan.parentNode) _szGenPan.parentNode.removeChild(_szGenPan); _szGenPan = null; return; }
   if (!_szGenPan) {
@@ -906,17 +913,20 @@ function _szGenPeindre(r){
   _szGenPan.innerHTML = '<h4>${T("Générations")}</h4>' + montre.map(function(g){
     var e = g.etapes[g.etapeCourante] || {}, sec = e.t0 ? Math.round(((e.t1 || maintenant) - e.t0) / 1000) : 0;
     var l2 = g.etat === 'cours'
-      ? '${T("Étape")} ' + (g.etapeCourante + 1) + '/7 · ' + _szGenEsc(_SZ_GEN_ETAPES[g.etapeCourante] || e.lib) + ' · ' + sec + ' s' + (g.etapeCourante === 1 ? ' / ≈ ' + (g.dureeEstimee || 135) + ' s' : '')
-      : (g.etat === 'fini' ? '✓ ${T("Terminée")}' : (g.etat === 'interrompu' ? '${T("Interrompue")}' : '✕ ${T("Échec")}')) + (g.message ? ' — ' + _szGenEsc(g.message) : '');
-    return '<div class="sz-gen-it" data-id="' + _szGenEsc(g.id) + '"><div class="l1"><span class="nom">' + _szGenEsc(g.produitNom) + ' · ${T("Vue 360°")}</span>'
-      + '<span class="cout">' + _szGenArgent(g.cout) + '</span>'
-      + (g.etat === 'cours' ? '<button type="button" data-g="interrompre">${T("Interrompre")}</button>' : '<button type="button" data-g="retirer">${T("Retirer")}</button>')
+      ? '${T("Étape")} ' + (g.etapeCourante + 1) + '/' + g.etapes.length + ' · ' + _szGenEsc(_SZ_GEN_ETAPES[g.etapeCourante] || e.lib) + ' · ' + sec + ' s' + (g.etapeCourante === 1 ? ' / ≈ ' + (g.dureeEstimee || 150) + ' s' : '')
+      : (g.etat === 'attente' ? '? ${T("En attente de votre confirmation")} — ' + _szGenEsc(_szGenConf(g.conformite))
+      : (g.etat === 'fini' ? '✓ ${T("Terminée")}' : (g.etat === 'interrompu' ? '${T("Interrompue")}' : (g.etat === 'rejete' ? '${T("Rejetée")}' : '✕ ${T("Échec")}'))) + (g.message ? ' — ' + _szGenEsc(g.message) : ''));
+    var gestes = g.etat === 'cours' ? '<button type="button" data-g="interrompre">${T("Interrompre")}</button>'
+      : (g.etat === 'attente' ? '<button type="button" data-g="confirmer">${T("Publier quand même")}</button><button type="button" data-g="rejeter">${T("Rejeter")}</button>'
+      : '<button type="button" data-g="retirer">${T("Retirer")}</button>');
+    return '<div class="sz-gen-it" data-id="' + _szGenEsc(g.id) + '"><div class="l1"><span class="nom">' + _szGenEsc(g.produitNom) + ' · ${T("Aperçu 3D")}</span>'
+      + '<span class="cout">' + _szGenArgent(g.cout) + '</span>' + gestes
       + '</div><div class="pas">' + g.etapes.map(function(x){ return '<i class="' + x.etat + '"></i>'; }).join('') + '</div>'
-      + '<div class="l2' + (g.etat === 'echec' ? ' err' : (g.etat === 'fini' ? ' bon' : '')) + '">' + l2 + '</div></div>';
+      + '<div class="l2' + (g.etat === 'echec' ? ' err' : (g.etat === 'fini' ? ' bon' : (g.etat === 'attente' ? ' att' : ''))) + '">' + l2 + '</div></div>';
   }).join('')
   + '<div class="sz-gen-pied">' + (reste > 0 ? '<span class="plus">+ ' + reste + ' ${T("autre(s)")}</span>' : '')
   + (cours.length > 1 ? '<button type="button" data-g="interrompreTout">${T("Tout interrompre")}</button>' : '')
-  + (l.length > cours.length ? '<button type="button" data-g="retirerTout">${T("Retirer les terminées")}</button>' : '')
+  + (l.length > cours.length + attente.length ? '<button type="button" data-g="retirerTout">${T("Retirer les terminées")}</button>' : '')
   + '<button type="button" data-g="reduire">${T("Réduire")}</button></div>';
 }
 function _szGenClic(ev){
@@ -926,6 +936,14 @@ function _szGenClic(ev){
   var agir = function(geste){ window.szPont.appeler('generations:agir', id, geste).then(function(){ _szGenLire(); }).catch(function(){}); };
   if (g === 'retirer' || g === 'retirerTout') { agir('retirer'); return; }
   var l = (_szGenDer && _szGenDer.liste) || [];
+  if (g === 'confirmer' || g === 'rejeter') {
+    var x = l.filter(function(y){ return y.id === id; })[0];
+    var q = g === 'rejeter'
+      ? { danger: true, titre: '${T("Rejeter le modèle 3D")}', texte: '${T("Le modèle sera retiré de la photothèque et rien ne sera posé sur la fiche. Le coût engagé chez The New Black n’est pas remboursé.")}', oui: '${T("Rejeter le modèle")}' }
+      : { prudent: true, titre: '${T("Publier le modèle 3D")}', texte: '${T("Le modèle ne correspond pas bien aux photos. Il sera posé sur la fiche tel quel, et visible en boutique.")}' + ' ' + _szGenConf(x && x.conformite), oui: '${T("Publier quand même")}' };
+    (typeof szConfirmer === 'function' ? szConfirmer(q) : Promise.resolve(true)).then(function(ok){ if (ok) agir(g); });
+    return;
+  }
   var cibles = l.filter(function(x){ return x.etat === 'cours' && (id === '*' || x.id === id); });
   var engage = cibles.reduce(function(s, x){ return s + (Number(x.cout) || 0); }, 0);
   var question = { danger: true, titre: cibles.length > 1 ? '${T("Interrompre toutes les générations")}' : '${T("Interrompre la génération")}',

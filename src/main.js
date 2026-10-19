@@ -3044,7 +3044,7 @@ const OPS_PONT = new Set([
   'produit:teinter',
   // La vue 360° générée (Product 360 de The New Black, 2026-10-18 — remplace l'aperçu 3D Hunyuan), les coûts par
   // article et le contrôle des marges (7.16.0).
-  'generations:etat', 'generations:lancer360', 'generations:agir', 'produit:photosVerrou', 'produit:couts', 'produit:grosPlanZone', 'produit:grosPlan', 'marges:analyser', 'marges:appliquer',
+  'generations:etat', 'generations:lancer3d', 'generations:agir', 'produit:photosVerrou', 'produit:couts', 'produit:grosPlanZone', 'produit:grosPlan', 'marges:analyser', 'marges:appliquer',
   'commandes:preparer', 'commandes:expedier',
   // Retours. ⚠ retour:finaliser peut REMBOURSER (Square ou credit boutique) et
   // retour:enregistrer peut generer une etiquette FACTUREE : toute la regle vit
@@ -3580,7 +3580,7 @@ const LIMITES_PONT = {
   // Detourage, impressions et rapports.
   'produit:photoIa': 120000,
   'produit:detourer': 30000, 'produit:teinter': 30000, 'stock:etiquettes': 30000,
-  'generations:etat': 10000, 'generations:lancer360': 120000, 'generations:agir': 20000, 'produit:photosVerrou': 15000, 'produit:couts': 30000,
+  'generations:etat': 10000, 'generations:lancer3d': 120000, 'generations:agir': 20000, 'produit:photosVerrou': 15000, 'produit:couts': 30000,
   /* le gros plan sur la fibre : la zone se trouve au poste (court) ; l agrandissement passe par fal.ai */
   'produit:grosPlanZone': 30000, 'produit:grosPlan': 120000,
   'marges:analyser': 60000, 'marges:appliquer': 90000,
@@ -3987,6 +3987,16 @@ ipcMain.handle('modele3d:preparer', async (_e, url) => {
     if (c.apres > 5.5 * 1024 * 1024) return { ok: false, detail: 'modèle compressé encore trop lourd' };
     return { ok: true, dataUrl: 'data:model/gltf-binary;base64,' + c.glb.toString('base64'), avant: c.avant, apres: c.apres };
   } catch (e) { return { ok: false, detail: String((e && e.message) || e).slice(0, 200) }; }
+});
+// L'APERÇU 3D DE THE NEW BLACK, ÉTAPE PAR ÉTAPE (2026-10-18) — appelé par la FILE DES GÉNÉRATIONS de la page principale
+// (sandrizaDesktop.modele3dTnb) : téléchargement, recalage et projection des vraies photos devant/dos, couleur,
+// compression, conformité. Le calcul lourd tourne dans un fil à part (modele3d-tache.js). Voir modele3d.js.
+ipcMain.handle('modele3d:tnb', async (_e, etape, jeton, a, b) => {
+  try {
+    const { tnb } = require('./modele3d');
+    const r = await tnb(String(etape || ''), jeton, a, b);
+    return Object.assign({ ok: true }, r);
+  } catch (e) { return { ok: false, detail: String((e && e.message) || e).slice(0, 300) }; }
 });
 // LA PHOTO EN LIGNE RENDUE EN DONNEE (voir imageLocale, pont-preload.js). HTTPS, domaines de la
 // boutique et de son stockage seulement, une image, 15 Mo au plus, 15 s au plus.

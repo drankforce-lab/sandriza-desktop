@@ -257,7 +257,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + '<th class="r">${T("Coûts numériques")}</th><th class="r">${T("Coût / unité")}</th><th class="r">${T("Marge")}</th><th class="r">${T("Prix proposé")}</th><th class="r">${T("Marge après")}</th><th></th></tr></thead><tbody>'
         + L.map(function(l){
           var prop = l.proposition;
-          var NOMS_GESTE = { vue360: '${T("Vue 360°")}', apercu3d: '${T("Aperçu 3D")}', fantome: '${T("Mannequin retiré")}' };
+          var NOMS_GESTE = { apercu3d_tnb: '${T("Aperçu 3D (The New Black)")}', vue360: '${T("Vue 360°")}', apercu3d: '${T("Aperçu 3D")}', fantome: '${T("Mannequin retiré")}' };
           var det = (l.detail || []).map(function(x){ return x.n + ' × ' + (NOMS_GESTE[x.geste] || x.geste || x.modele) + ' (' + argent(x.cout) + ')'; }).join(' · ');
           return '<tr><td><input type="checkbox" aria-label="' + esc('${T("Sélectionner")} ' + l.nom) + '" data-c="' + esc(l.id) + '"' + (prop ? ' checked' : '') + (l.sansAchat ? ' disabled' : '') + '></td>'
             + '<td>' + esc(l.nom) + '<span class="sous">' + esc(l.sku || '') + (det ? ' — ' + esc(det) : '') + '</span></td>'

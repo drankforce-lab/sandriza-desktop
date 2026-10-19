@@ -235,7 +235,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
     detourage: '${T("Détourage")}', masque: '${T("Repérage du vêtement")}',
     fantome: '${T("Mannequin retiré")}',
     humain: '${T("Porté par un mannequin")}', essayage: '${T("Essayage virtuel")}',
-    plat: '${T("Mise à plat")}', apercu3d: '${T("Aperçu 3D")}', vue360: '${T("Vue 360° (The New Black)")}',
+    plat: '${T("Mise à plat")}', apercu3d: '${T("Aperçu 3D")}', apercu3d_tnb: '${T("Aperçu 3D (The New Black)")}', vue360: '${T("Vue 360° (The New Black)")}',
     gros_plan: '${T("Gros plan de la fibre")}', gros_plan_pro: '${T("Gros plan de la fibre (rendu IA)")}'
   };
   // Un mot que la fenêtre ne connaît pas encore se lit au moins sans ses soulignés.

@@ -161,4 +161,6 @@ module.exports = {
   "Vue 360°": "360° view",
   "Aperçu 3D": "3D preview",
   "Mannequin retiré": "Mannequin removed",
+  /* ── L’aperçu 3D par The New Black (2026-10-18) ── */
+  "Aperçu 3D (The New Black)": "3D preview (The New Black)",
 };

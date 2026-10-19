@@ -251,4 +251,6 @@ module.exports = {
   'trente derniers jours': 'last thirty days',
   'Aucun mouvement ces trente derniers jours.': 'No movement in the last thirty days.',
   'Détail': 'Detail',
+  /* ── L’aperçu 3D par The New Black (2026-10-18) ── */
+  "Aperçu 3D (The New Black)": "3D preview (The New Black)",
 };
