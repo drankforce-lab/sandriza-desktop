@@ -296,4 +296,9 @@ module.exports = {
   'Aucune clé The New Black : Configuration › Sécurité › Clé et plafond de dépense IA.': 'No The New Black key: Configuration › Security › AI key and spending ceiling.',
   'Solde The New Black indisponible :': 'The New Black balance unavailable:',
   'Crédits du compte The New Black, lus chez The New Black — forfait {0} : {1} crédits par mois, cumul de {2} au plus': 'The New Black account credits, read from The New Black — {0} plan: {1} credits a month, up to {2} accumulated',
+  // Refonte de la préparation, deux jeux de clés des transporteurs (2026-10-19).
+  "Préparation déjà ouverte": "Preparation already open",
+  "Ouverture en cours…": "Opening…",
+  "Une préparation est déjà en cours d’ouverture…": "A preparation is already opening…",
+  "L’ouverture a échoué.": "Opening failed.",
 };

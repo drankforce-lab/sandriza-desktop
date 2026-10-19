@@ -2439,6 +2439,8 @@ const OPS_PONT = new Set([
   // du SKU n est pas la forme affichee, et la reecrire ici cesserait de marcher
   // le jour ou l encodage change, sans que rien ne le signale.
   'commande:scan', 'commande:statut',
+  // L'avancement du scan, gardé au serveur sur la commande (2026-10-19).
+  'commande:verifEcrire', 'commande:verifEffacer',
   'verrou:prendre', 'verrou:rendre',
   // « Il y a quelqu'un » — sans ceci, travailler dans une fenêtre native passe
   // pour une absence et le minuteur d'inactivité déconnecte une personne affairée.

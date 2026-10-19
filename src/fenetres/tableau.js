@@ -875,26 +875,46 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     for (var j = 0; j < ecs.length; j++){
       var v = VERROUS[ecs[j].getAttribute('data-eclair')];
       var pris = !!(v && !v.mine);
-      ecs[j].disabled = pris;
-      ecs[j].title = pris ? ('${T("En traitement par")} ' + (v.par || '${T("un collegue")}')) : '${T("Lancer la préparation")}';
+      /* ⚠ LA MÊME GARDE QUE LA FENÊTRE COMMANDES (2026-10-19, sa demande : « on peut relancer le module
+         en boucle »). Ce sondage de 3 s RÉARMAIT l'éclair pendant l'ouverture, et notre PROPRE verrou
+         (la préparation déjà ouverte) le laissait actif. Désormais : désarmé pendant une ouverture, et
+         tant que la préparation est ouverte chez nous — comme « En traitement » dans Commandes. */
+      var mien = !!(v && v.mine);
+      ecs[j].disabled = pris || mien || PREP_OUVERTURE;
+      ecs[j].title = pris ? ('${T("En traitement par")} ' + (v.par || '${T("un collegue")}'))
+        : mien ? '${T("Préparation déjà ouverte")}'
+        : PREP_OUVERTURE ? '${T("Ouverture en cours…")}' : '${T("Lancer la préparation")}';
     }
   }
   /* ⚠ LE VERROU EST RELU AU CLIC : le sondage a jusqu a trois secondes de retard. */
+  /* UNE SEULE OUVERTURE À LA FOIS : tous les éclairs restent désarmés de la demande jusqu'à
+     l'ouverture (ou l'échec) — puis le verrou relu dit lequel reste éteint. */
+  var PREP_OUVERTURE = false;
+  function finOuverture(){
+    PREP_OUVERTURE = false;
+    appliquerVerrous();
+    // La fenêtre prend son verrou à l'ouverture : on le relit pour éteindre SON éclair.
+    setTimeout(chargerVerrous, 1200);
+  }
   function lancerPreparation(oid, bouton){
+    if (PREP_OUVERTURE) { dire('${T("Une préparation est déjà en cours d’ouverture…")}', 'att'); return; }
+    PREP_OUVERTURE = true;
     if (bouton) bouton.disabled = true;
+    appliquerVerrous();
     appeler('tableau:verrous', []).then(function(r){
-      if (r && r.ok && r.orders) { VERROUS = r.orders; appliquerVerrous(); }
+      if (r && r.ok && r.orders) { VERROUS = r.orders; }
       var v = VERROUS[oid];
       if (v && !v.mine) {
+        finOuverture();
         dire('${T("En traitement par")} ' + (v.par || '${T("un collegue")}') + '${T(" — la préparation reste fermée tant qu’elle n’est pas libérée.")}', 'att');
         return;
       }
       dire('${T("Ouverture…")}');
       return appeler('commandes:preparer', [oid]).then(function(x){
-        if (bouton) bouton.disabled = false;
+        finOuverture();
         dire(x && x.ok ? '${T("Préparation ouverte dans sa fenêtre.")}' : expliquer(x), x && x.ok ? 'bon' : 'err');
       });
-    });
+    }).catch(function(){ finOuverture(); dire('${T("L’ouverture a échoué.")}', 'err'); });
   }
   function chargerVerrous(){
     appeler('tableau:verrous', []).then(function(r){

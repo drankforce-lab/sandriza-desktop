@@ -1,78 +1,207 @@
 'use strict';
 
 /*
- * ASSISTANT « PRÉPARATION DE COMMANDE » — NATIF, TROIS ÉTAPES
+ * ASSISTANT « PRÉPARATION DE COMMANDE » — NATIF, PENSÉ POUR LE LECTEUR (refonte 2026-10-19, piste A)
  * =============================================================================
- * Vérification, étiquette, expédition. (L'étape « Préparation » a été retirée le
- * 2026-08-07 à la demande de l'utilisateur : sa liste d'articles faisait doublon
- * avec celle de la vérification ; ses boutons d'impression y ont migré, et la
- * question du bon de commande se pose toujours à l'ouverture.) Aucune page du
- * site chargée, aucun appel web : la fenêtre demande au pont, qui fait faire au
- * site ce que lui seul peut faire — imprimer, appeler le transporteur, écrire.
+ * Sa demande, en cinq points : la liste des articles « disparue », un mauvais code qui
+ * « bloque l'écran », une ligne complète qui ne se coche pas, le passage à l'étiquette
+ * qui attendait « Suivant », et une étiquette choisie à l'aveugle. Elle a choisi la PISTE A :
+ * un en-tête (commande, client, fil de 4 étapes), une colonne principale et un panneau
+ * latéral d'environ 300 px qui porte la progression, l'argent et LE bouton de l'étape.
  *
- * ⚠ POURQUOI CETTE FENÊTRE-LÀ COMPTE PLUS QUE LES AUTRES.
- * On la tient à côté d'un colis, souvent debout, parfois sur un second écran
- * posé dans l'entrepôt. Elle doit se lire de loin et se manœuvrer sans chercher :
- * de gros compteurs, une ligne par article, aucun défilement, et un bouton par
- * étape. C'est aussi pour ça que la liste des articles est PAGINÉE.
+ * ⚠⚠ POURQUOI LA LISTE AVAIT « DISPARU » (cause trouvée le 2026-10-19). Le moteur de liste
+ * paginée du socle (Pagi) branche son FILTRE sur le PREMIER `.rech input` de sa zone — or
+ * depuis le 2026-08-07, le premier était… le champ de SCAN. Chaque frappe du lecteur
+ * filtrait donc la liste par le code scanné (« Aucun résultat », « 0 sur 0 »), et le
+ * champ vidé après Entrée ne relançait aucun `input` : le filtre restait collé. D'où aussi
+ * le « mauvais code qui bloque » : la liste vide se lisait comme un écran figé.
+ * ➡ Ici, PLUS DE PAGI : la liste se dessine elle-même, toujours entière, et défile dans sa
+ * colonne. Le champ de scan ne filtre rien.
  *
- * ⚠ CE QUI N'EN SORT PAS. Ni moyen de paiement, ni coût d'acquisition, ni marge.
- * Une fenêtre de préparation n'a aucune raison de les connaître, et elle est
- * posée là où passent des gens qui n'ont pas à les voir.
+ * ⚠ CE QUI N'EN SORT PAS. Ni moyen de paiement, ni coût d'acquisition. L'ÉTIQUETTE montre,
+ * elle, ce que le client a payé pour la livraison et le coût réel de l'étiquette (sa
+ * demande du 2026-10-19) : c'est le personnel qui expédie qui choisit le transporteur.
  *
- * ⚠ L'ÉTAT DE VÉRIFICATION VIT DANS `COMPTES`, PAS DANS LES CHAMPS AFFICHÉS.
- * La liste est paginée et redessinée à chaque page : lire les champs au moment
- * de conclure n'aurait rendu que la page visible, et les articles des autres
- * pages auraient compté pour zéro — un colis déclaré vérifié sans l'être.
+ * ⚠ L'ÉTAT DE VÉRIFICATION VIT DANS `COMPTES`, et il est GARDÉ AU SERVEUR sur la commande
+ * (commande:verifEcrire) : fermer la fenêtre, l'application ou changer de poste le retrouve.
+ *
+ * ⚠ AUCUN CARACTÈRE accent grave dans la portion de script, COMMENTAIRES COMPRIS : le
+ * script vit dans un littéral de gabarit.
  */
 
-const { CSS_SOCLE, CSS_JOUR, CSS_FICHE, JS_SOCLE, ICO, TETE } = require('./socle');
+const { CSS_SOCLE, CSS_JOUR, JS_SOCLE, ICO, TETE } = require('./socle');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
 const T = require('../langue').tr('commande');
 
 const CSS_PROPRE = `
-.entete{display:flex;gap:1.1rem;align-items:baseline;flex-wrap:wrap;margin-bottom:.55rem}
-/* La refonte de l Inventaire (2026-09-25) : le numero et le montant en gras,
-   dans la police de l ecran — plus la Georgia de l ancien dessin. */
-.entete .num{font-weight:800;font-size:1.2rem;line-height:1;color:var(--tx-creme)}
-.entete .cli{font-size:.9rem}
-.entete .adr{font-size:.78rem;color:var(--tx2);flex:1 1 100%}
-.art{display:flex;align-items:center;gap:.6rem;padding:.3rem .35rem;border-radius:7px;
-  border:1px solid transparent}
-.art:hover{background:var(--v035)}
-.art.ok{border-color:rgba(74,222,128,.5);background:rgba(74,222,128,.08)}
-.art.trop{border-color:rgba(248,113,113,.6);background:rgba(248,113,113,.08)}
-.art .pt{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:1px solid var(--v22);
-  display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700}
-.art.ok .pt{background:#4ade80;border-color:#4ade80;color:#0e1522}
-.art.trop .pt{background:#f87171;border-color:#f87171;color:#0e1522}
-.art .d{flex:1 1 auto;min-width:0}
-.art .n{font-size:.92rem;font-weight:600;line-height:1.25}
-.art .v{font-size:.76rem;color:var(--tx2)}
-.art .cpt{flex:0 0 auto;font-variant-numeric:tabular-nums;font-size:.88rem;min-width:3rem;text-align:right}
-.art .q{flex:0 0 4.4rem}
-.barre{flex:0 0 auto;height:6px;border-radius:6px;background:var(--v09);overflow:hidden;margin:.5rem 0 .2rem}
-.barre span{display:block;height:100%;background:#4ade80;width:0;transition:width .18s}
-.gros{font-weight:800;font-size:1.7rem;line-height:1;color:var(--tx-creme)}
-.duo{display:flex;gap:.7rem;flex-wrap:wrap}
-.duo>*{flex:1 1 220px}
-.etat{display:flex;align-items:center;gap:.5rem;font-size:.86rem;padding:.4rem 0}
-/* ══ LA NOUVELLE REFONTE (2026-10-01) — le volet « Colis », comme la « Fiche »
-   du Produit : le numero, le client et l adresse quittent le haut de la liste
-   (qui gagne sa hauteur), la verification se suit en direct, et « Pour
-   expedier » dit ce qui manque — les memes gardes que majExpedier(). */
-.pf-fiche .num{font-size:1.15rem;font-weight:800;color:var(--tx-creme);line-height:1.1}
-.pf-fiche .prio{display:inline-flex;align-items:center;gap:.25rem;font-size:.7rem;font-weight:700;
-  padding:.08rem .5rem;border-radius:99px;background:#7c2d12;color:#fdba74;margin-top:.3rem}
-html.jour .pf-fiche .prio{background:#fde7d6;color:#7c2d12;border:1px solid rgba(124,45,18,.25)}
-.pf-fiche .adr{font-size:.76rem;color:var(--tx2);line-height:1.4;margin-top:.15rem}
-.pf-fiche .note{font-size:.76rem;color:var(--tx-or2);line-height:1.4}
-.pf-fiche .prog{display:flex;align-items:baseline;gap:.4rem}
-.pf-fiche .prog b{font-size:1.5rem;font-weight:800;color:var(--tx-creme);line-height:1}
-.pf-fiche .prog span{font-size:.76rem;color:var(--tx2)}
-.pf-fiche .barre{margin:.35rem 0 0}
+/* ══ L EN-TETE : la commande, le client, et le fil des 4 etapes ══ */
+.tete .qui{display:flex;flex-direction:column;gap:.1rem;min-width:0}
+.tete .qui .cli{font-size:.8rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bas{display:inline-flex;align-items:center;gap:.35rem;font-size:.7rem;font-weight:800;letter-spacing:.06em;
+  padding:.18rem .6rem;border-radius:99px;background:rgba(251,191,36,.16);color:var(--tx-att);
+  border:1px solid rgba(251,191,36,.45);text-transform:uppercase;white-space:nowrap}
+.bas[hidden]{display:none}
+html.jour .bas{background:#fff4d6;color:#7a4b00;border-color:rgba(122,75,0,.35)}
+.fil{flex:0 0 auto;display:flex;gap:1.1rem;flex-wrap:wrap;align-items:center;padding:.55rem 1.1rem;
+  border-bottom:1px solid var(--v08)}
+.fil button{display:inline-flex;align-items:center;gap:.5rem;background:none;border:0;padding:.2rem .1rem;
+  font:inherit;font-size:.82rem;color:var(--tx2);cursor:pointer}
+.fil button .n{width:1.55rem;height:1.55rem;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:.74rem;border:1.5px solid var(--v22)}
+.fil button.fait .n{background:var(--tx-ok);border-color:var(--tx-ok);color:#0e1522}
+.fil button.on{color:var(--tx);font-weight:700}
+.fil button.on .n{background:var(--or);border-color:var(--or);color:#17202c}
+.fil button:disabled{cursor:default;opacity:.55}
+.fil .kbd{font-size:.64rem;color:var(--tx3);margin-left:.15rem}
+
+/* ══ LE CORPS : colonne principale + panneau lateral ══ */
+.corps{gap:1.1rem;padding:1rem 1.1rem}
+.etape{display:none;flex:1 1 auto;min-width:0;min-height:0;gap:1.1rem;flex-direction:row;position:relative}
+.etape.on{display:flex}
+.col{flex:1 1 auto;min-width:0;min-height:0;display:flex;flex-direction:column;gap:.75rem;overflow-y:auto}
+.cote{flex:0 0 19rem;min-height:0;display:flex;flex-direction:column;gap:.75rem;overflow-y:auto}
+.boite{background:var(--f-carte);border:1px solid var(--v08);border-radius:13px;padding:.9rem 1rem;
+  display:flex;flex-direction:column;gap:.55rem}
+.boite .t{font-size:.76rem;color:var(--tx2)}
+.cote .pousse{flex:1 1 auto}
+.gros-btn{min-height:2.9rem;font-size:.95rem;font-weight:700;width:100%;justify-content:center;display:inline-flex;align-items:center;gap:.45rem}
+.kb{font:600 .64rem/1 ui-monospace,Consolas,monospace;padding:.12rem .32rem;border-radius:5px;border:1px solid var(--v16);
+  color:var(--tx3);margin-left:.35rem}
+button.prim .kb{border-color:rgba(23,32,44,.35);color:#17202c}
+
+/* ══ VERIFICATION ══ */
+.reprise{display:flex;align-items:center;gap:.7rem;background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.35);
+  border-radius:11px;padding:.55rem .8rem;font-size:.84rem}
+.reprise[hidden]{display:none}
+.reprise span{flex:1 1 auto;min-width:0}
+.scan-l{font-size:.8rem;color:var(--tx2)}
+.scan{display:flex;align-items:center;gap:.8rem;background:var(--f-champ);border:2px solid var(--or);border-radius:14px;
+  padding:0 1rem;height:72px;flex:0 0 auto}
+.scan.ok{border-color:var(--tx-ok)}
+.scan.err{border-color:var(--tx-err)}
+.scan svg{flex:0 0 auto;color:var(--or)}
+.scan input{flex:1 1 auto;min-width:0;background:transparent;border:0;outline:none;color:var(--tx);
+  font:600 1.35rem/1 ui-monospace,Consolas,monospace;letter-spacing:.02em;padding:0}
+.scan input::placeholder{color:var(--tx3);font-weight:500}
+.retour{display:flex;align-items:center;gap:.6rem;border-radius:11px;padding:.55rem .8rem;font-size:.9rem;
+  min-height:2.6rem;border:1px solid transparent}
+.retour.cache{visibility:hidden}
+.retour.err{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.45);color:var(--tx-err2)}
+.retour.ok{background:rgba(74,222,128,.1);border-color:rgba(74,222,128,.4);color:var(--tx-ok)}
+.retour.att{background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.4);color:var(--tx-att)}
+html.jour .retour.err{color:#9b1c1c}
+html.jour .retour.ok{color:#1f6b3d}
+html.jour .retour.att{color:#7a4b00}
+.retour b{font-family:ui-monospace,Consolas,monospace}
+.lignes{flex:1 1 auto;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:.5rem;padding-right:.2rem}
+.lg{display:grid;grid-template-columns:3.4rem minmax(0,1fr) auto 7.2rem;gap:.85rem;align-items:center;
+  padding:.55rem .75rem;border-radius:12px;background:var(--f-carte);border:1px solid var(--v08);
+  transition:border-color .2s, background .2s}
+.lg.fait{border-color:rgba(74,222,128,.55);background:rgba(74,222,128,.06)}
+.lg.trop{border-color:rgba(248,113,113,.6)}
+.lg.flash{background:rgba(74,222,128,.18)}
+.lg .vg{width:3.4rem;height:3.4rem;border-radius:10px;overflow:hidden;background:var(--f-pied);display:flex;
+  align-items:center;justify-content:center;color:var(--tx3);font-weight:800}
+.lg .vg .rf-av{width:3.4rem!important;height:3.4rem!important;border-radius:10px!important;font-size:1rem}
+.lg .vg img{width:100%;height:100%;object-fit:cover}
+.lg .nm{font-weight:700;font-size:.98rem;line-height:1.25;overflow:hidden;text-overflow:ellipsis}
+.lg .sk{font:600 .76rem/1.3 ui-monospace,Consolas,monospace;color:var(--tx2);margin-top:.12rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lg .cp{font-variant-numeric:tabular-nums;font-size:1.3rem;font-weight:800;white-space:nowrap}
+.lg .cp small{font-size:.86rem;color:var(--tx2);font-weight:600}
+.lg .et{display:flex;align-items:center;justify-content:flex-end;gap:.35rem;font-size:.84rem;font-weight:700}
+.lg .et.ok{color:var(--tx-ok)}
+.lg .et.a{color:var(--tx-bleu)}
+.lg .et.tr{color:var(--tx-err)}
+html.jour .lg .et.ok{color:#1f6b3d}
+html.jour .lg .et.a{color:#1d4f91}
+.lg .mn{display:none;gap:.3rem;justify-content:flex-end}
+.main-libre .lg .mn{display:flex}
+.main-libre .lg .et{display:none}
+.lg .mn button{min-width:2.2rem;min-height:2.2rem;padding:0;font-size:1.05rem;font-weight:800}
+.prog b{font-size:2.3rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;color:var(--tx)}
+.prog span{font-size:1rem;color:var(--tx2);font-weight:600}
+.barre{height:10px;border-radius:99px;background:var(--v09);overflow:hidden}
+.barre i{display:block;height:100%;width:0;background:var(--tx-ok);transition:width .25s}
+.coche{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;
+  opacity:0;transition:opacity .25s}
+.coche.on{opacity:1}
+.coche div{background:var(--f-carte);border:2px solid var(--tx-ok);color:var(--tx-ok);border-radius:18px;
+  padding:1rem 1.6rem;font-size:1.25rem;font-weight:800;display:flex;align-items:center;gap:.6rem;
+  box-shadow:0 18px 40px rgba(0,0,0,.35)}
+
+/* ══ ETIQUETTE ══ */
+.tt{display:flex;justify-content:space-between;align-items:baseline;gap:.8rem;flex-wrap:wrap}
+.tt h2{margin:0;font-size:1rem}
+.tt .note{font-size:.76rem;color:var(--tx2)}
+.colis{display:flex;gap:.6rem;flex-wrap:wrap;align-items:flex-end}
+.colis .ch{flex:0 0 6.2rem}
+.colis .ch input{width:100%}
+.tarifs{flex:1 1 auto;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:.45rem;padding-right:.2rem}
+.tf{display:grid;grid-template-columns:1.6rem minmax(0,1fr) 6.5rem 5.5rem;gap:.8rem;align-items:center;
+  padding:.65rem .85rem;border-radius:12px;background:var(--f-carte);border:1px solid var(--v08);cursor:pointer;
+  min-height:2.9rem;text-align:left;font:inherit;color:inherit;width:100%;flex:0 0 auto;box-sizing:border-box}
+.tf:hover:not(:disabled){border-color:var(--v22)}
+.tf.on{border:2px solid var(--or);background:rgba(var(--or-rgb),.08)}
+.tf:disabled{cursor:default;opacity:.62}
+.tf .rd{width:1.15rem;height:1.15rem;border-radius:50%;border:2px solid var(--v30);display:inline-block}
+.tf.on .rd{border-color:var(--or);background:radial-gradient(circle,var(--or) 0 45%,transparent 50%)}
+.tf .nm{font-weight:700;font-size:.92rem;display:flex;gap:.45rem;align-items:center;flex-wrap:wrap}
+.tf .sb{display:block;font-size:.76rem;line-height:1.35;color:var(--tx2);margin-top:.25rem}
+.tf .px{font-size:1.08rem;font-weight:800;text-align:right;font-variant-numeric:tabular-nums}
+.tf .px.moins{color:var(--tx-ok)}
+.tf .ec{font-size:.8rem;text-align:right;color:var(--tx-att);font-variant-numeric:tabular-nums}
+.tf .ec.zero{color:var(--tx3)}
+.pl{font-size:.66rem;font-weight:800;padding:.12rem .5rem;border-radius:99px;white-space:nowrap}
+.pl.vente{background:rgba(96,165,250,.16);color:var(--tx-bleu)}
+.pl.moins{background:rgba(74,222,128,.16);color:var(--tx-ok)}
+.pl.bas2{background:rgba(251,191,36,.16);color:var(--tx-att)}
+html.jour .pl.vente{color:#1d4f91}
+html.jour .pl.moins{color:#1f6b3d}
+html.jour .pl.bas2{color:#7a4b00}
+.argent .l{display:flex;justify-content:space-between;gap:.6rem;font-size:.9rem}
+.argent .sep{height:1px;background:var(--v08)}
+.argent .gain{font-size:1.45rem;font-weight:800;font-variant-numeric:tabular-nums}
+.argent .gain.pos{color:var(--tx-ok)}
+.argent .gain.neg{color:var(--tx-err)}
+html.jour .argent .gain.pos{color:#1f6b3d}
+html.jour .argent .gain.neg{color:#9b1c1c}
+.e-note{font-size:.8rem;line-height:1.45;color:var(--tx2)}
+.e-note b.bac{color:var(--tx-att)}
+.e-note .prod{color:var(--tx-att);font-weight:700}
+.e-note b,.e-note span{display:inline}
+html.jour .e-note b.bac{color:#7a4b00}
+html.jour .e-note .prod{color:#9a4a00}
+.deja{display:flex;gap:.7rem;align-items:center;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.35);
+  border-radius:11px;padding:.55rem .8rem;font-size:.86rem}
+.deja[hidden]{display:none}
+.deja span{flex:1 1 auto}
+
+/* ══ EXPEDITION ══ */
+.boite.recu{flex-direction:row;gap:1.2rem;align-items:center}
+.etq{flex:0 0 8.5rem;height:11rem;border-radius:8px;background:#f4f4f2;color:#15171c;display:flex;flex-direction:column;
+  padding:.65rem;gap:.25rem;font-size:.66rem;line-height:1.3;overflow:hidden}
+.etq strong{font-size:.76rem}
+.etq .cb{flex:1 1 auto;margin-top:.4rem;background:repeating-linear-gradient(90deg,#15171c 0 2px,#f4f4f2 2px 4px,#15171c 4px 5px,#f4f4f2 5px 8px)}
+.recu .inf{display:flex;flex-direction:column;gap:.4rem;min-width:0;flex:1 1 auto}
+.recu .ok{font-size:.82rem;color:var(--tx-ok);font-weight:700}
+html.jour .recu .ok{color:#1f6b3d}
+.recu .qq{font-size:1.1rem;font-weight:800}
+.recu .sv{font:600 .95rem/1.2 ui-monospace,Consolas,monospace;color:var(--tx2);word-break:break-all}
+.recu .bt{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.2rem}
+.cases{display:flex;flex-direction:column;gap:.45rem}
+.cases label{display:flex;align-items:center;gap:.75rem;background:var(--f-carte);border:1px solid var(--v08);
+  border-radius:11px;padding:.6rem .85rem;font-size:.92rem;min-height:2.8rem;cursor:pointer}
+.cases input{width:1.2rem;height:1.2rem;accent-color:var(--tx-ok)}
+.envoi div:not(.t){display:flex;gap:.5rem;align-items:flex-start;font-size:.86rem}
+.envoi div:not(.t)::before{content:"✓";color:var(--tx-ok);font-weight:800}
+.lien{background:none;border:0;color:var(--tx-bleu);font:inherit;font-size:.86rem;cursor:pointer;padding:.3rem;text-align:center}
+.lien:hover{text-decoration:underline}
+html.jour .lien{color:#1d4f91}
+.petit{font-size:.78rem;color:var(--tx2)}
+.petit label{display:flex;align-items:center;gap:.45rem;cursor:pointer}
+@media (max-width:860px){.cote{flex-basis:15rem}.lg{grid-template-columns:2.8rem minmax(0,1fr) auto 6rem}}
 `;
 
 /** Page complète de l'assistant. `id` = commande à préparer. */
@@ -80,25 +209,20 @@ function pageCommande(id) {
   const ident = JSON.stringify(String(id || ''));
   return `${TETE()}
 <title>${T("Préparation — Administration Sandriza")}</title>
-<style>${CSS_SOCLE}${CSS_FICHE}${CSS_PROPRE}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.orders}</span><h1 id="titre">${T("Préparation")}</h1>
+<style>${CSS_SOCLE}${CSS_PROPRE}${CSS_JOUR}</style></head><body>
+<div class="tete"><span class="ico">${ICO.orders}</span>
+  <div class="qui"><h1 id="titre">${T("Préparation")}</h1><span class="cli" id="cli"></span></div>
+  <span class="bas" id="bas" hidden title="${T("Les étiquettes de ce transporteur se créent avec les clés de test : rien n’est facturé.")}">${T("BAC À SABLE")}</span>
   <span class="sous" id="sous"></span></div>
-<div class="pas" id="pas"></div>
+<div class="fil" id="fil" role="tablist" aria-label="${T("Étapes de la préparation")}"></div>
 <div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
-  <span class="actions">
-    <button id="btn-prec">${T("Précédent")}</button>
-    <button id="btn-suiv">${T("Suivant")}</button>
-    <button id="btn-enr" class="prim" disabled>${T("Expédier")}</button>
-  </span></div>
+  <span class="actions"><button id="btn-prec">${T("Précédent")}</button></span></div>
 <script>
 (function(){
   'use strict';
   ${JS_SOCLE()}
   MOTIFS.suivi_requis = '${T("Entrez un numéro de suivi, ou cochez « expédier sans numéro ».")}';
-  // Les motifs de l etiquette et de l impression — le dictionnaire de la
-  // fenetre Expedition, repris : les codes AA de Postes Canada et les motifs
-  // du transporteur n arrivaient jamais jusqu ici (releve du 2026-08-08).
   MOTIFS.poids_invalide = '${T("Le poids du colis doit être supérieur à zéro.")}';
   MOTIFS.deja_etiquetee = '${T("Une étiquette existe déjà pour cette commande — rien n’a été commandé.")}';
   MOTIFS.secrets = '${T("Identifiants du transporteur indisponibles. Reconnectez-vous, puis réessayez.")}';
@@ -109,28 +233,39 @@ function pageCommande(id) {
   MOTIFS.etiquette_absente = '${T("Aucune étiquette enregistrée pour cette commande.")}';
   MOTIFS.impression = '${T("L’impression a échoué.")}';
   MOTIFS.reseau = '${T("Le réseau a échoué — rien n’a été commandé.")}';
-  // Le DETAIL du transporteur est conserve tel quel (les codes AA de Postes
-  // Canada designent toujours les identifiants) — l expliquer du socle le
-  // jetait, et l on cherchait la panne du mauvais cote.
-  function expliquerD(r){ return (r && r.detail) ? String(r.detail) : expliquer(r); }
+  MOTIFS.deja_expediee = '${T("Cette commande est déjà expédiée.")}';
+  // Le DETAIL (motif du transporteur, de l imprimante) est rendu TEL QUEL : « L impression a
+  // échoué. » seul ne disait pas quoi corriger (sa capture du 2026-10-19).
+  function expliquerD(r){
+    if (r && r.detail) return expliquer(r).replace(/[.]$/, '') + ' — ' + String(r.detail);
+    return expliquer(r);
+  }
 
-  var ID   = ${ident};
-  var bEnr = document.getElementById('btn-enr');
+  var ID = ${ident};
   var sous = document.getElementById('sous');
-  var CTX = null, CMD = null, COMPTES = {};
-  var PDF = null;        // etiquette en base64, gardee pour imprimer sans repasser par le nuage
-  var LECTURE = false;   // verrou refuse : cette fenetre ne fait que regarder
+  var CTX = null, CMD = null, EXP = null, COMPTES = {};
+  var PDF = null;            // etiquette en base64, gardee pour imprimer sans repasser par le nuage
+  var LECTURE = false;       // verrou refuse : cette fenetre ne fait que regarder
+  var ETAPE = 0;             // 0 verification, 1 etiquette, 2 expedition
+  var BON_IMPRIME = false;   // le bon de commande est sorti (cette seance, ou la commande est deja en preparation)
+  var MAIN_LIBRE = false;    // « Cocher à la main » : le lecteur est absent
+  var TARIFS = {};           // transporteur -> { etat:'attente'|'ok'|'non', r }
+  var CHOIX = null;          // { t, service, reel, nom }
+  var AUTO_FAIT = false;     // le passage automatique a l etiquette n a lieu qu une fois
 
-  /* Le bandeau de message : une seule regle, dans le socle (szDire) —
-     tout verdict s efface seul apres cinq secondes, sauf ce qui se termine
-     par des points de suspension, qui annonce un travail en cours. */
   function dire(t, cl){ szDire(t, cl); }
   function vide(titre, detail){
     document.getElementById('corps').innerHTML =
       '<div class="vide"><div class="gros">' + esc(titre) + '</div><div>' + esc(detail || '') + '</div></div>';
-    document.getElementById('pas').innerHTML = '';
-    ['btn-enr','btn-prec','btn-suiv'].forEach(function(b){ document.getElementById(b).disabled = true; });
+    document.getElementById('fil').innerHTML = '';
+    document.getElementById('btn-prec').disabled = true;
   }
+  function argent(n){ return szArgent(Math.round((Number(n) || 0) * 100) / 100); }
+  function nomT(cle){
+    var t = ((CTX && CTX.transporteurs) || []).find(function(x){ return x.cle === cle; });
+    return (t && t.nom) || ({ eshipper: 'eShipper', intelcom: 'Intelcom', purolator: 'Purolator' })[cle] || cle;
+  }
+  function infoT(cle){ return ((CTX && CTX.transporteurs) || []).find(function(x){ return x.cle === cle; }) || {}; }
 
   function attendus(){ return CMD.articles.reduce(function(n, a){ return n + a.quantite; }, 0); }
   function comptes(){
@@ -139,349 +274,200 @@ function pageCommande(id) {
     return n;
   }
   function toutVerifie(){
-    return CMD.articles.every(function(a){ return (COMPTES[a.cle] || 0) === a.quantite; });
+    return CMD.articles.length > 0 && CMD.articles.every(function(a){ return (COMPTES[a.cle] || 0) === a.quantite; });
+  }
+  function aSuivi(){ return !!String(val('c-suivi') || '').trim(); }
+  function etiquetteFaite(){ return aSuivi() || coché('c-sans'); }
+
+  /* ══ LE FIL : Bon de commande / Vérification / Étiquette / Expédition ═════════════════════
+     Le bon n est pas une étape de travail : c est la question posée à l ouverture. Il porte ✓
+     quand il est sorti, et un clic le réimprime. Les trois autres se suivent ; avancer par le fil
+     passe par la même garde que le bouton de l étape. */
+  function fil(){
+    var et = [
+      { k: 'bon', t: '${T("Bon de commande")}', fait: BON_IMPRIME },
+      { k: 0, t: '${T("Vérification")}', fait: toutVerifie() },
+      { k: 1, t: '${T("Étiquette")}', fait: etiquetteFaite() },
+      { k: 2, t: '${T("Expédition")}', fait: false }
+    ];
+    document.getElementById('fil').innerHTML = et.map(function(e, n){
+      var on = e.k === ETAPE;
+      return '<button type="button" role="tab" data-fil="' + e.k + '" aria-selected="' + on + '" class="' + (on ? 'on' : (e.fait ? 'fait' : '')) + '"'
+        + (e.k === 'bon' ? ' title="${T("Imprimer (ou réimprimer) le bon de commande")}"' : ' title="Alt+' + n + '"') + '>'
+        + '<span class="n">' + (e.fait && !on ? '✓' : (n + 1)) + '</span>' + esc(e.t) + '</button>';
+    }).join('');
+  }
+  document.getElementById('fil').addEventListener('click', function(ev){
+    var b = ev.target.closest('[data-fil]'); if (!b) return;
+    var k = b.getAttribute('data-fil');
+    if (k === 'bon') { imprimer('bon', b); return; }
+    aller(parseInt(k, 10) || 0);
+  });
+
+  function refusAvancer(cible){
+    if (cible >= 1 && !toutVerifie()) return '${T("Vérifiez le colis d’abord —")} ' + comptes() + ' ${T("sur")} ' + attendus() + ' ' + szPl(attendus(), '${T("unité confirmée.")}', '${T("unités confirmées.")}');
+    if (cible >= 2 && !etiquetteFaite()) return '${T("Créez l’étiquette, ou cochez « Expédier sans numéro de suivi ».")}';
+    return '';
+  }
+  function aller(k){
+    k = Math.max(0, Math.min(2, k));
+    if (k > ETAPE) { var r = refusAvancer(k); if (r) { dire(r, 'att'); return; } }
+    ETAPE = k;
+    Array.prototype.forEach.call(document.querySelectorAll('.etape'), function(el, n){ el.classList.toggle('on', n === ETAPE); });
+    document.getElementById('btn-prec').disabled = ETAPE === 0;
+    fil();
+    if (ETAPE === 0) { dessinerLignes(); focusScan(); }
+    if (ETAPE === 1) { entrerEtiquette(); }
+    if (ETAPE === 2) { recap(); }
+    majBac();
+  }
+  document.getElementById('btn-prec').onclick = function(){ aller(ETAPE - 1); };
+
+  /* ══ LE BADGE « BAC À SABLE » : le transporteur choisi crée ses étiquettes avec les clés de test ══ */
+  function majBac(){
+    var t = (CHOIX && CHOIX.t) || (CMD && CMD.transporteur) || '';
+    var i = infoT(t);
+    var b = document.getElementById('bas');
+    if (b) b.hidden = !(t && i.etiquette && i.mode !== 'production');
   }
 
   function dessiner(){
     var h = [];
-
-    /* 1 — Vérification.
-       ⚠ L ETAPE << PREPARATION >> A ETE RETIREE (demande le 2026-08-07 : << elle
-       ne sert a rien >>). Sa liste d articles faisait DOUBLON avec celle-ci, qui
-       montre les memes lignes AVEC les compteurs — strictement plus. Apres la
-       question du bon de commande, on arrive donc directement ici.
-       ⚠ RIEN N EST PERDU : l en-tete (numero, client, adresse) et les DEUX
-       boutons d impression (Bon de commande, Bordereau) ont migre dans cette
-       etape — ils n ont pas disparu avec elle. */
-    /* ⚠ L EN-TETE ET LE COMPTEUR VIVENT DANS LE VOLET « COLIS » (2026-10-01) :
-       visibles aux trois etapes, et non plus seulement a la premiere. */
-    h.push('<div class="etape"><div class="carte plein" id="c-zone2">'
-      + '<h2>${T("Vérification du colis")}</h2>'
-      /* ⚠ LE CHAMP DE SCAN, ET IL EST EN PREMIER. On verifie un colis un lecteur
-         a la main, sans regarder l ecran : le champ doit avoir le focus, avaler
-         le retour du lecteur, se vider et le reprendre aussitot. Un champ qu il
-         faut recliquer entre deux articles rend le lecteur inutile. */
-      + '<div class="rech" style="margin-bottom:.35rem">'
-      + '<input aria-label="${T("Scannez le code-barres de l’article")}" id="c-scan" placeholder="${T("Scannez le code-barres de l’article…")}" autocomplete="off">'
+    /* 1 — VÉRIFICATION. Champ de scan EN PREMIER et TOUJOURS sous le curseur : on vérifie un
+       colis le lecteur à la main, sans regarder l écran. */
+    h.push('<div class="etape"><div class="col">'
+      + '<div class="reprise" id="v-reprise" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 3v6h6"></path></svg>'
+      + '<span id="v-reprise-t"></span><button type="button" id="v-recommencer">${T("Recommencer")}</button></div>'
+      + '<label class="scan-l" for="c-scan">${T("Scannez l’étiquette de chaque article")}</label>'
+      + '<div class="scan" id="v-scan"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 8v8M11 8v8M15 8v8M18 8v8"></path></svg>'
+      + '<input id="c-scan" placeholder="${T("En attente du lecteur…")}" autocomplete="off" spellcheck="false"></div>'
+      + '<div class="retour cache" id="v-retour" role="status" aria-live="polite"></div>'
+      + '<div class="lignes" id="v-lignes" aria-label="${T("Articles de la commande")}"></div>'
       + '</div>'
-      + '<div id="c-scan-msg" style="min-height:1.2em;font-size:.8rem;color:var(--tx2);margin-bottom:.4rem"></div>'
-      + '<div class="rech"><input aria-label="${T("Filtrer")}" placeholder="${T("Filtrer…")}"><span class="cpt" id="c-cpt2"></span></div>'
-      + '<div class="liste"></div><div class="pagi"></div>'
-      + '<div style="margin-top:.6rem;display:flex;gap:.45rem;flex-wrap:wrap">'
-      + '<button type="button" id="c-bon"><span class="ic">🖨</span> ${T("Bon de commande")}</button>'
-      + '<button type="button" id="c-colis"><span class="ic">🧾</span> ${T("Bordereau")}</button>'
-      + '</div></div></div>');
+      + '<aside class="cote" aria-label="${T("Progression")}">'
+      + '<div class="boite"><div class="t">${T("Progression")}</div>'
+      + '<div class="prog"><b id="v-n">0</b> <span id="v-sur"></span></div>'
+      + '<div class="barre"><i id="v-barre"></i></div>'
+      + '<div class="e-note">${T("Quand tout est scanné, l’étiquette s’ouvre d’elle-même. La progression est gardée si vous fermez.")}</div></div>'
+      + '<div class="boite"><div class="t">${T("Lecteur absent ?")}</div>'
+      + '<button type="button" id="v-main">${T("Cocher à la main")}</button></div>'
+      + '<div class="boite"><div class="t">${T("Documents")}</div>'
+      + '<button type="button" id="c-bon"><span class="ic">🖨</span> ${T("Bon de commande")}<span class="kb">Ctrl+B</span></button>'
+      + '<button type="button" id="c-colis"><span class="ic">🧾</span> ${T("Bordereau")}</button></div>'
+      + '<div class="pousse"></div>'
+      + '<button type="button" class="prim gros-btn" id="v-continuer" disabled>${T("Continuer → Étiquette")}<span class="kb">F9</span></button>'
+      + '</aside><div class="coche" id="v-coche"><div><span>✓</span> ${T("Colis vérifié")}</div></div></div>');
 
-    /* 2 — Étiquette. ⚠ ELLE SE FABRIQUE ICI, DANS L ASSISTANT (2026-08-07).
-       Une premiere correction l avait renvoyee vers la fenetre Expedition parce
-       que l ancien chemin (Admin.printLabel) LIT LE FORMULAIRE DU SITE et
-       commandait donc une etiquette FACTUREE au service par defaut et a 0,5 kg.
-       Deplacer n etait pas reparer : on prepare un colis d un seul tenant, et
-       sortir de l assistant pour l etiqueter casse le geste.
-       On garde donc l etiquette ICI, et l on y ajoute ce qui manquait — le
-       SERVICE et le POIDS, qui fixent le prix — en passant par expedition:etiquette,
-       la seule operation qui les recoit explicitement. */
-    h.push('<div class="etape"><div class="carte"><h2>${T("Étiquette d’expédition")}</h2><div class="duo">'
-      /* ⚠ UN TRANSPORTEUR NON CONFIGURE SE DIT ICI, PAS AU MOMENT DE PAYER.
-         Le contexte rend maintenant « pret » (une seule source, la meme que les
-         services) : on le marque dans la liste. Avant, un transporteur sans
-         identifiants s offrait comme les autres, on preparait le colis, et l on
-         ne l apprenait qu a l achat de l etiquette. */
-      + '<div class="ch"><label for="c-transp">${T("Transporteur")}</label><select id="c-transp">'
-      + CTX.transporteurs.map(function(t){
-          return '<option value="' + esc(t.cle) + '">' + esc(t.nom)
-            + (t.pret === false ? ' ${T("— non configuré")}' : '') + '</option>'; }).join('')
-      + '</select></div>'
-      + '<div class="ch"><label for="c-service">Service</label><select id="c-service"></select></div>'
-      + '</div><div class="duo" style="margin-top:.5rem">'
-      + '<div class="ch"><label for="c-poids">${T("Poids du colis (kg)")}</label>'
-      + '<input id="c-poids" type="number" min="0.001" step="0.001" value="0.5"></div>'
-      + '<div class="ch"><label>&nbsp;</label><button type="button" id="c-etiq">${T("Générer l’étiquette")}</button></div>'
-      + '<div class="ch"><label>&nbsp;</label><button type="button" id="c-etiq-imp" style="display:none"><span class="ic">🖨</span> ${T("Imprimer l’étiquette")}</button></div>'
+    /* 2 — ÉTIQUETTE. Les tarifs RÉELS de tous les transporteurs configurés, lus en production
+       (une cotation ne facture rien), triés ; le choix de la vente présélectionné. */
+    h.push('<div class="etape"><div class="col">'
+      + '<div class="deja" id="e-deja" hidden><span id="e-deja-t"></span><button type="button" id="e-deja-voir">${T("Aller à l’expédition")}</button></div>'
+      + '<div class="tt"><h2 id="e-titre">${T("Tarifs réels")}</h2><span class="note">${T("Lus en production · aucune facturation")}</span></div>'
+      + '<div class="colis">'
+      + '<div class="ch"><label for="c-poids">${T("Poids (kg)")}</label><input id="c-poids" type="number" min="0.001" step="0.001" value="0.5"></div>'
+      + '<div class="ch"><label for="c-dl">${T("Long. (cm)")}</label><input id="c-dl" type="number" min="1" step="1" value="30"></div>'
+      + '<div class="ch"><label for="c-dw">${T("Larg. (cm)")}</label><input id="c-dw" type="number" min="1" step="1" value="25"></div>'
+      + '<div class="ch"><label for="c-dh">${T("Haut. (cm)")}</label><input id="c-dh" type="number" min="1" step="1" value="8"></div>'
+      + '<button type="button" id="e-recoter">${T("Recoter")}</button></div>'
+      + '<div class="aide" id="c-poids-note"></div>'
+      + '<div class="tarifs" id="e-tarifs" role="radiogroup" aria-label="${T("Tarifs des transporteurs")}"></div>'
+      + '<div class="aide">${T("Écart affiché par rapport au tarif le moins cher. Coût réel hors taxes.")}</div>'
       + '</div>'
-      + '<div class="aide" id="c-poids-note" style="margin-top:.4rem"></div>'
-      + '</div>'
-      + '<div class="carte plein"><h2>${T("Numéro de suivi")}</h2><div class="duo">'
-      + '<div class="ch"><label for="c-suivi">${T("Numéro")}</label><input id="c-suivi" placeholder="${T("rempli par l’étiquette")}"></div>'
-      + '</div>'
-      + '<label style="display:flex;align-items:center;gap:.45rem;font-size:.85rem;margin-top:.7rem;cursor:pointer">'
-      + '<input type="checkbox" id="c-sans"> ${T("Expédier sans numéro de suivi")}</label>'
-      + '</div></div>');
+      + '<aside class="cote" aria-label="${T("Livraison de cette commande")}">'
+      + '<div class="boite argent"><div class="t">${T("Livraison de cette commande")}</div>'
+      + '<div class="l"><span>${T("Le client a payé")}</span><strong id="e-paye">—</strong></div>'
+      + '<div class="l"><span>${T("Étiquette choisie")}</span><strong id="e-cout">—</strong></div>'
+      + '<div class="sep"></div>'
+      + '<div class="l" style="align-items:baseline"><span>${T("Gain sur la livraison")}</span><strong class="gain" id="e-gain">—</strong></div></div>'
+      + '<div class="boite e-note"><div id="e-avis"></div></div>'
+      + '<div class="petit"><label><input type="checkbox" id="c-sans"> ${T("Expédier sans numéro de suivi (remise en main propre)")}</label></div>'
+      + '<div class="pousse"></div>'
+      + '<button type="button" class="prim gros-btn" id="e-creer" disabled><span id="e-creer-t">${T("Créer l’étiquette")}</span><span class="kb">F9</span></button>'
+      + '<button type="button" class="gros-btn" id="e-moins" disabled>${T("Prendre le moins cher")}</button>'
+      + '</aside></div>');
 
-    // 3 — Expédition
-    h.push('<div class="etape"><div class="carte plein"><h2>${T("Récapitulatif")}</h2>'
-      + '<div id="c-recap"></div>'
-      + '<label style="display:flex;align-items:center;gap:.45rem;font-size:.86rem;margin-top:.8rem;cursor:pointer">'
-      + '<input type="checkbox" id="c-pret"> ${T("Marquer « prête à l’expédition »")}</label>'
-      + '<div class="aide" style="margin-top:.5rem">${T("« Expédier » écrit le statut, envoie le courriel de suivi")} '
-      + '${T("au client et referme cette fenêtre.")}</div></div></div>');
+    // 3 — EXPÉDITION
+    h.push('<div class="etape"><div class="col">'
+      + '<div class="boite recu"><div class="etq" id="x-etq"></div><div class="inf">'
+      + '<div class="ok" id="x-etat"></div><div class="qq" id="x-quoi"></div>'
+      + '<div class="ch"><label for="c-suivi">${T("Numéro de suivi")}</label><input id="c-suivi" placeholder="${T("rempli par l’étiquette")}"></div>'
+      + '<div class="bt"><button type="button" class="prim" id="c-etiq-imp"><span class="ic">🖨</span> ${T("Imprimer l’étiquette")}</button>'
+      + '<button type="button" id="x-bordereau"><span class="ic">🧾</span> ${T("Imprimer le bordereau")}</button></div>'
+      + '</div></div>'
+      + '<h2 style="margin:.3rem 0 0;font-size:1rem">${T("Avant de fermer la boîte")}</h2>'
+      + '<div class="cases"><label><input type="checkbox" id="x-c1"> ${T("Bordereau glissé dans le colis")}</label>'
+      + '<label><input type="checkbox" id="x-c2"> ${T("Étiquette collée sur le dessus")}</label>'
+      + '<label><input type="checkbox" id="x-c3"> ${T("Carte de remerciement ajoutée (facultatif)")}</label></div>'
+      + '<div class="petit"><label><input type="checkbox" id="c-pret"> ${T("Marquer « prête à l’expédition » (on y revient plus tard)")}</label></div>'
+      + '</div>'
+      + '<aside class="cote" aria-label="${T("À l’envoi")}">'
+      + '<div class="boite envoi"><div class="t">${T("À l’envoi")}</div>'
+      + '<div>${T("La commande passe à « Expédiée »")}</div><div>${T("Le client reçoit son courriel avec le suivi")}</div><div>${T("Le stock est déjà ajusté")}</div></div>'
+      + '<div class="boite argent"><div class="l" style="align-items:baseline"><span>${T("Gain sur la livraison")}</span><strong class="gain" id="x-gain">—</strong></div></div>'
+      + '<div class="pousse"></div>'
+      + '<button type="button" class="prim gros-btn" id="btn-enr" disabled>${T("Marquer comme expédiée")}<span class="kb">F9</span></button>'
+      + '<button type="button" class="lien" id="x-suivante" hidden></button>'
+      + '</aside></div>');
 
-    document.getElementById('corps').innerHTML = h.join('')
-      + '<aside class="pf-fiche" id="pf-fiche" aria-label="${T("Le colis")}"></aside>';
-    var corpsEl = document.getElementById('corps');
-    corpsEl.addEventListener('input', majFicheBientot);
-    corpsEl.addEventListener('change', majFicheBientot);
+    document.getElementById('corps').innerHTML = h.join('');
     document.getElementById('c-pret').checked = !!CMD.dejaPret;
-    /* ⚠ LA CASE S ENREGISTRE AU CLIC, PAS A L EXPEDITION. Elle n etait poussee
-       qu au moment d expedier : cocher << prete >> puis fermer la fenetre perdait
-       l information, alors que c est justement l etat qu on pose pour SORTIR du
-       dossier et y revenir plus tard. L ecran du site l enregistre au clic
-       (toggleReadyToShip), on fait pareil. */
-    document.getElementById('c-pret').onchange = function(){
-      if (LECTURE) { this.checked = !this.checked; dire('${T("Commande en traitement ailleurs — lecture seule.")}', 'err'); return; }
-      var v = this.checked;
-      P.appeler('commande:prete', ID, v).then(function(r){
-        if (r && r.ok) { CMD.dejaPret = v; dire(v ? '${T("Marquée prête à l’expédition.")}' : '${T("Marque « prête » retirée.")}', 'bon'); }
-        else dire(expliquer(r), 'err');
-      });
-    };
     poser('c-suivi', CMD.suivi || '');
-    if (CMD.transporteur) poser('c-transp', CMD.transporteur);
-
-    listes();
     brancher();
-
-    Assist.poser([
-      /* ⚠ CHAQUE ETAPE PORTE SA REGLE (fait/refus, voir le socle), et elle sert
-         aux DEUX endroits : le vert du fil ET le refus d avancer — Suivant comme
-         un clic direct dans le fil. Signale le 2026-08-07 : << Suivant ne doit
-         pas etre disponible tant que la verification n est pas complete >>. */
-      { t: '${T("Vérification")}', obl: [],
-        fait: toutVerifie,
-        refus: function(){ return '${T("Vérifiez le colis d’abord —")} ' + comptes() + ' ${T("sur")} ' + attendus() + ' ' + szPl(attendus(), '${T("unité confirmée.")}', '${T("unités confirmées.")}'); } },
-      /* ⚠ << suivi rempli OU envoi sans numero assume >>. L ancienne forme
-         (obl: c-suivi) rendait l etape Expedition INATTEIGNABLE pour une remise
-         en main propre : la case cochee ne remplit aucun champ, et le fil comme
-         Suivant refusaient — alors que le bouton Expedier, lui, acceptait. Deux
-         regles pour le meme etat finissent toujours par se contredire. */
-      { t: '${T("Étiquette")}',    obl: [],
-        fait: function(){ return !!String(val('c-suivi') || '').trim() || coché('c-sans'); },
-        refus: '${T("Générez l’étiquette, ou cochez « Expédier sans numéro de suivi ».")}' },
-      { t: '${T("Expédition")}',   obl: [] }
-    ], function(i){
-      if (i === 0 && PAGI2) { PAGI2.dessiner(); majProgres(); }
-      if (i === 2) recap();
-    });
-
-    majExpedier();
-    majFiche();
-    if (!CTX.peutExpedier) dire('${T("Votre rôle ne permet pas d’expédier.")}', 'att');
+    fil();
   }
 
-  /* ══ LE VOLET « COLIS » ══════════════════════════════════════════════════
-     ⚠ IL NE DECIDE RIEN : il relit CMD, COMPTES et les champs — les memes
-     sources que majExpedier(), dont « Pour expedier » reprend les gardes dans
-     le meme ordre. Un clic mene a l etape. */
-  var FICHE_T = null;
-  function majFicheBientot(){ clearTimeout(FICHE_T); FICHE_T = setTimeout(majFiche, 60); }
-  function majFiche(){
-    var z = document.getElementById('pf-fiche');
-    if (!z || !CMD || !CTX) return;
-    var att = attendus(), f = comptes(), complet = toutVerifie();
-    var lignes = CMD.articles.length;
-    var t = (CTX.transporteurs.find(function(x){ return x.cle === val('c-transp'); }) || {}).nom || val('c-transp');
-    var suivi = String(val('c-suivi') || '').trim(), sans = coché('c-sans');
-    var ligne = function(k, v){ return '<div class="l"><span class="k">' + k + '</span><span class="v">' + v + '</span></div>'; };
-    var h = '<div><div class="num">' + esc(CMD.numero) + '</div>'
-      + (CMD.prioritaire ? '<span class="prio">${T("Prioritaire")}</span>' : '')
-      + '<div class="nm" style="margin-top:.45rem">' + esc(CMD.client || '—') + '</div>'
-      + (CMD.adresse ? '<div class="adr">' + esc(CMD.adresse) + '</div>' : '') + '</div>'
-      + (CMD.notes ? '<div class="note"><span class="ic">📝</span> ' + esc(CMD.notes) + '</div>' : '');
-    h += '<div><div class="prog"><b id="c-prog">' + f + '</b><span>${T("sur")} ' + att + ' '
-      + szPl(att, '${T("unité confirmée")}', '${T("unités confirmées")}') + '</span></div>'
-      + '<div class="barre"><span id="c-barre" style="width:' + (att ? Math.round(f / att * 100) : 100) + '%"></span></div></div>';
-    h += ligne('${T("Articles")}', szNombre(lignes) + ' ' + szPl(lignes, '${T("ligne")}', '${T("lignes")}'));
-    h += ligne('${T("Transporteur")}', esc(t || '—'));
-    h += ligne('${T("Suivi")}', suivi ? esc(suivi) : (sans ? '${T("aucun — assumé")}' : '—'));
-    h += ligne('${T("Statut")}', '<span class="etat ' + (coché('c-pret') ? 'on">${T("Prête")}' : 'off">${T("En préparation")}') + '</span>');
-    var manque = [];
-    if (LECTURE) manque.push([-1, '${T("Commande en traitement ailleurs — lecture seule.")}']);
-    else if (!CTX.peutExpedier) manque.push([-1, '${T("Votre rôle ne permet pas d’expédier.")}']);
-    else {
-      if (!complet) manque.push([0, '${T("Vérifier le colis")} (' + f + ' / ' + att + ')']);
-      if (!suivi && !sans) manque.push([1, '${T("L’étiquette, ou « sans numéro de suivi »")}']);
-    }
-    h += '<div class="reste">' + (manque.length
-      ? '<div class="t">${T("Pour expédier")}</div>' + manque.map(function(m){
-          return m[0] < 0 ? '<div class="aide">' + m[1] + '</div>'
-            : '<button type="button" data-pfaller="' + m[0] + '"><span class="o"></span>' + m[1] + '</button>'; }).join('')
-      : '<div class="ok"><span class="ic">✓</span> ${T("Prête à expédier")}</div>') + '</div>';
-    z.innerHTML = h;
-    z.querySelectorAll('[data-pfaller]').forEach(function(b){
-      b.onclick = function(){ Assist.aller(parseInt(b.getAttribute('data-pfaller'), 10) || 0); };
-    });
+  /* ══ LES LIGNES — toujours TOUTES visibles, la ligne complète se coche ══════════════════ */
+  var FLASH = '';
+  function dessinerLignes(){
+    var z = document.getElementById('v-lignes'); if (!z) return;
+    z.classList.toggle('main-libre', MAIN_LIBRE);
+    z.innerHTML = CMD.articles.map(function(a){
+      var v = COMPTES[a.cle] || 0;
+      var cl = v === a.quantite ? ' fait' : (v > a.quantite ? ' trop' : '');
+      var et = v === a.quantite
+        ? '<div class="et ok"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>${T("Scanné")}</div>'
+        : '<div class="et a">${T("À scanner")}</div>';
+      return '<div class="lg' + cl + (FLASH === a.cle ? ' flash' : '') + '" data-cle="' + esc(a.cle) + '">'
+        + '<div class="vg">' + szVignette(a.image, a.nom, '', a.nom) + '</div>'
+        + '<div style="min-width:0"><div class="nm">' + esc(a.nom) + '</div>'
+        + '<div class="sk">' + esc([a.sku, a.couleur, a.taille].filter(Boolean).join(' · ')) + '</div></div>'
+        + '<div class="cp">' + v + ' <small>/ ' + a.quantite + '</small></div>'
+        + '<div>' + et + '<div class="mn"><button type="button" data-moins="' + esc(a.cle) + '" aria-label="${T("Retirer une unité")}">−</button>'
+        + '<button type="button" data-plus="' + esc(a.cle) + '" aria-label="${T("Ajouter une unité")}">+</button></div></div>'
+        + '</div>';
+    }).join('') || '<div class="vide">${T("Aucun article à préparer dans cette commande.")}</div>';
+    majProgres();
   }
-
-  /* ⚠ LE STATUT SUIT LES GESTES, PLUS LES INDEX D ETAPES (revu au retrait de
-     l etape Preparation — piloter par index aurait fait passer une commande en
-     << Verification >> a la simple OUVERTURE, puisque l etape 0 EST la
-     verification desormais). << En preparation >> se pose a l ouverture de
-     l assistant ; << Verification >> a la PREMIERE unite confirmee (scan ou
-     saisie) — c est le geste qui prouve qu on verifie, pas un ecran affiche.
-     L expedition, elle, passe par son propre chemin (courriel, stock).
-     ⚠ Le site REFUSE de reculer un statut (voir commande:statut) : rouvrir une
-     commande deja expediee ne la remet pas en preparation. */
-  function avancerStatut(voulu){
-    if (LECTURE) return;
-    if (!voulu || !CTX || !CTX.peutExpedier) return;
-    P.appeler('commande:statut', ID, voulu).then(function(r){
-      if (r && r.ok && r.statut && !r.inchange) { CMD.statut = r.statut; }
-    }).catch(function(){ /* un statut qui ne monte pas ne doit pas bloquer la preparation */ });
-  }
-  // La premiere unite confirmee fait passer en << Verification >> — une seule
-  // fois : le garde local evite un aller-retour de pont a chaque frappe.
-  function statutVerification(){
-    if (CMD && (CMD.statut === 'pending' || CMD.statut === 'confirmed' || CMD.statut === 'preparing')) {
-      avancerStatut('verification');
-    }
-  }
-
-  var PAGI2 = null;
-  function listes(){
-    // L unique liste : les articles AVEC leur compteur. Celle de l ancienne
-    // etape Preparation (les memes lignes, sans compteur) est partie avec elle.
-    PAGI2 = new Pagi(document.getElementById('c-zone2'), {
-      ligne: function(a){
-        var v = COMPTES[a.cle] || 0;
-        var cl = v === a.quantite ? ' ok' : (v > a.quantite ? ' trop' : '');
-        return '<div class="art' + cl + '" data-cle="' + esc(a.cle) + '">'
-          + '<span class="pt">' + (v === a.quantite ? '✓' : (v > a.quantite ? '!' : '')) + '</span>'
-          + '<div class="d"><div class="n">' + esc(a.nom) + '</div>'
-          + '<div class="v">' + esc([[a.taille, a.couleur].filter(Boolean).join(' · '), a.sku]
-              .filter(Boolean).join(' · ')) + '</div></div>'
-          + '<span class="cpt">' + v + '/' + a.quantite + '</span>'
-          + '<input class="q" type="number" min="0" step="1" data-cle="' + esc(a.cle) + '" value="' + v + '"'
-      +   ' aria-label="' + esc('${T("Quantité préparée —")} ' + (a.nom || a.cle)) + '">'
-          + '</div>';
-      },
-      surMaj: function(){
-        var c = document.getElementById('c-cpt2');
-        if (c) c.textContent = toutVerifie() ? '${T("colis complet")}' : '${T("incomplet")}';
-      }
-    });
-    PAGI2.tout = CMD.articles;
-    PAGI2.brancher();
-    document.getElementById('c-zone2').querySelector('.liste').addEventListener('input', function(ev){
-      var q = ev.target.closest('.q'); if (!q) return;
-      COMPTES[q.dataset.cle] = Math.max(0, parseInt(q.value, 10) || 0);
-      statutVerification();
-      majExpedier();
-      PAGI2.dessiner(); majProgres();
-    });
-  }
-
   function majProgres(){
-    majFicheBientot();
     var att = attendus(), f = comptes();
-    var g = document.getElementById('c-prog'); if (g) g.textContent = f;
-    var b = document.getElementById('c-barre');
-    if (b) b.style.width = (att ? Math.round((f / att) * 100) : 100) + '%';
+    var n = document.getElementById('v-n'); if (n) n.textContent = f;
+    var s = document.getElementById('v-sur'); if (s) s.textContent = '${T("sur")} ' + att;
+    var b = document.getElementById('v-barre'); if (b) b.style.width = (att ? Math.round(f / att * 100) : 0) + '%';
+    var c = document.getElementById('v-continuer'); if (c) c.disabled = !toutVerifie();
+    fil();
+    majExpedier();
+  }
+  function retour(t, genre){
+    var r = document.getElementById('v-retour'); if (!r) return;
+    r.className = 'retour ' + (t ? (genre || 'ok') : 'cache');
+    r.innerHTML = t || '';
+    var sc = document.getElementById('v-scan');
+    if (sc) { sc.classList.remove('ok', 'err'); if (genre === 'ok' || genre === 'err') { sc.classList.add(genre); setTimeout(function(){ sc.classList.remove('ok', 'err'); }, 700); } }
+  }
+  function focusScan(){
+    if (ETAPE !== 0) return;
+    var s = document.getElementById('c-scan');
+    if (s && document.activeElement !== s && !document.querySelector('.szc-voile, #bc-voile')) { try { s.focus(); } catch (e) {} }
   }
 
-  function recap(){
-    var z = document.getElementById('c-recap'); if (!z) return;
-    function lg(k, v, alerte){
-      return '<div class="art" style="border:0"><div class="d"><div class="v">' + esc(k) + '</div>'
-        + '<div class="n"' + (alerte ? ' style="color:var(--tx-att)"' : '') + '>' + (v || '—') + '</div></div></div>';
-    }
-    var t = (CTX.transporteurs.find(function(x){ return x.cle === val('c-transp'); }) || {}).nom || val('c-transp');
-    var complet = toutVerifie();
-    z.innerHTML = lg('${T("Commande")}', esc(CMD.numero))
-      + lg('${T("Client")}', esc(CMD.client))
-      + lg('${T("Vérification")}', complet ? '${T("colis complet")}' : (comptes() + ' ${T("sur")} ' + attendus() + ' ${T("— INCOMPLET")}'), !complet)
-      + lg('${T("Transporteur")}', esc(t))
-      + lg('${T("Numéro de suivi")}', val('c-suivi') ? esc(val('c-suivi'))
-            : (coché('c-sans') ? '${T("aucun — assumé")}' : '${T("aucun")}'), !val('c-suivi') && !coché('c-sans'));
-  }
-
-  function brancher(){
-    var sc = document.getElementById('c-scan');
-    if (sc) {
-      sc.onkeydown = function(ev){
-        if (ev.key !== 'Enter') return;
-        ev.preventDefault();
-        var code = this.value;
-        this.value = '';
-        scanner(code);
-        try { this.focus(); } catch (e) {}
-      };
-    }
-    document.getElementById('c-bon').onclick = function(){ imprimer('bon', this); };
-    document.getElementById('c-colis').onclick = function(){ imprimer('colisage', this); };
-    document.getElementById('c-etiq').onclick = etiquette;
-    var sn = document.getElementById('c-sans');
-    if (sn) sn.onchange = majExpedier;
-    /* ⚠ UN SEUL oninput. Il y en avait DEUX poses l un apres l autre : le
-       second (dire('')) ECRASAIT le premier (majExpedier) — coller un numero
-       de suivi a la main ne rearmait pas Expedier. */
-    var su = document.getElementById('c-suivi');
-    if (su) su.oninput = function(){ dire(''); majExpedier(); majBoutonImpression(); };
-    var tr = document.getElementById('c-transp');
-    if (tr) tr.onchange = majServices;
-    var ei = document.getElementById('c-etiq-imp');
-    if (ei) ei.onclick = imprimerEtiquette;
-    majBoutonImpression();
-  }
-
-  /* ⚠⚠ ON DEMANDE D IMPRIMER LE BON DE COMMANDE, COMME LE FAIT L ECRAN DU SITE.
-     Demande par l utilisateur le 2026-08-07 : la fenetre posait deux boutons
-     d impression et n en proposait aucun, alors que le site OUVRE le travail par
-     cette question (_confirmPrintPickingSlip). Preparer une commande commence par
-     sortir le bon : ne pas le proposer, c est obliger a y penser chaque fois, et
-     le bon finit par etre oublie.
-     ⚠ LES MEMES MOTS QUE LE SITE, y compris la nuance de la RE-ENTREE : revenir
-     dans une commande deja en preparation ne se dit pas comme la commencer, et
-     l ecran du site distingue deja les deux. Reinventer la phrase ici, c est
-     deux formulations pour un meme geste.
-     ⚠ ET ELLE NE BLOQUE RIEN : << Non, continuer >> ferme et laisse travailler.
-     Les deux boutons d impression restent dans l etape, pour reimprimer plus tard. */
-  function demanderBon(deja){
-    var v = document.createElement('div');
-    /* ⚠ Le voile porte un identifiant : szRevenir doit pouvoir le REFERMER quand
-       le bouton du site ramene une fenetre deja ouverte — le laisser trainer,
-       c est reposer la question a chaque focus, le defaut signale. */
-    v.id = 'bc-voile';
-    v.setAttribute('style', 'position:fixed;inset:0;background:rgba(8,12,20,.82);'
-      + 'display:flex;align-items:center;justify-content:center;padding:1.5rem;z-index:60');
-    v.innerHTML = '<div style="background:var(--f-carte);border:1px solid var(--v12);'
-      + 'border-radius:13px;padding:1.15rem 1.3rem;max-width:34rem;width:100%">'
-      /* ⚠ LA PHRASE ENTIERE, PAS « Préparation » PUIS « de la commande ». La
-         moitie longue etait restee en francais derriere un T() pose sur le seul
-         premier mot — « Preparation de la commande » a l ecran anglais. */
-      + '<h3 style="margin:0 0 .6rem;font:700 1.05rem/1.25 system-ui,sans-serif"><span class="ic">🚀</span> ${T("Préparation de la commande")} '
-      + esc(CMD.numero) + '</h3>'
-      + '<p style="margin:.35rem 0;font-size:.9rem">' + (deja
-          ? '${T("Cette commande est déjà en préparation.")}'
-          : '${T("Vous vous apprêtez à commencer la préparation de cette commande.")}') + '</p>'
-      + '<p style="margin:.35rem 0;font-size:.9rem">' + (deja
-          ? '${T("Désirez-vous (ré)imprimer un ")}<strong>${T("bon de commande")}</strong>${T(" avant de poursuivre ?")}'
-          : '${T("Pour débuter, désirez-vous imprimer un ")}<strong>${T("bon de commande")}</strong> ?') + '</p>'
-      + '<div style="display:flex;gap:.45rem;justify-content:flex-end;margin-top:.9rem;flex-wrap:wrap">'
-      + '<button type="button" id="bc-non">${T("Non, continuer sans imprimer")}</button>'
-      + '<button type="button" class="prim" id="bc-oui"><span class="ic">🖨</span> ${T("Oui, imprimer le bon")}</button>'
-      + '</div></div>';
-    document.body.appendChild(v);
-    var fermer = function(){ if (v.parentNode) v.parentNode.removeChild(v); };
-    document.getElementById('bc-non').onclick = fermer;
-    document.getElementById('bc-oui').onclick = function(){
-      var b = this;
-      fermer();
-      // On reutilise le meme chemin que le bouton de l etape : une seule facon
-      // d imprimer un bon, donc un seul endroit ou la corriger.
-      var vrai = document.getElementById('c-bon');
-      imprimer('bon', vrai || b);
-    };
-  }
-
-  /* ══ LE SCAN ═══════════════════════════════════════════════════════════════
-     ⚠ LES MEMES REGLES QUE L ECRAN DU SITE, reprises une par une :
-       - code inconnu  -> refus, son grave, message rouge ;
-       - ligne DEJA complete -> refus, son grave, message ambre (sans quoi on
-         scanne deux fois le meme article et le compte ment) ;
-       - sinon +1, son aigu, message vert avec le compte et le mot
-         << ligne complete >> quand elle l est.
-     ⚠ LA CORRESPONDANCE DU CODE SE FAIT DANS LE SITE (commande:scan) : le
-     code-barres porte la forme COMPACTE du SKU, pas la forme affichee. */
+  /* ══ LE SCAN ══════════════════════════════════════════════════════════════════════════
+     - code inconnu / article d une autre commande -> message ROUGE, rien n est compté, le champ
+       se vide et GARDE le focus : on scanne le bon article tout de suite ;
+     - ligne déjà complète -> message ambre (sinon on scanne deux fois le même article) ;
+     - sinon +1, la ligne se coche quand elle est complète, et quand TOUT est scanné on passe
+       SEUL à l étiquette, après un court ✓.
+     La correspondance du code se fait dans le site (commande:scan) : le code-barres porte la
+     forme COMPACTE du SKU. */
   function bip(ok){
     try {
       var C = window.AudioContext || window.webkitAudioContext;
@@ -494,216 +480,520 @@ function pageCommande(id) {
       setTimeout(function(){ try { o.stop(); a.close(); } catch (e) {} }, ok ? 70 : 190);
     } catch (e) { /* un poste sans son ne doit pas empecher de verifier */ }
   }
-  function scanMsg(t, couleur){
-    var el = document.getElementById('c-scan-msg');
-    if (el) { el.textContent = t || ''; el.style.color = couleur || 'var(--tx2)'; }
-  }
+  var FILE_SCAN = Promise.resolve();
   function scanner(code){
-    if (!String(code || '').trim()) return;
-    if (LECTURE) { bip(false); scanMsg('${T("Commande en traitement ailleurs — lecture seule.")}', 'var(--tx-err)'); return; }
-    P.appeler('commande:scan', ID, code).then(function(r){
-      if (!r || !r.ok) {
-        bip(false);
-        scanMsg(r && r.motif === 'code_inconnu'
-          ? '${T("Code inconnu :")} ' + (r.code || code)
-          : expliquer(r), 'var(--tx-err)');
-        return;
-      }
-      var att = 0;
-      CMD.articles.forEach(function(a){ if (a.cle === r.cle) att = a.quantite; });
-      var v = COMPTES[r.cle] || 0;
-      if (v >= att) {
-        bip(false);
-        scanMsg('${T("Déjà complet :")} ' + r.sku + ' (' + att + '/' + att + ')', 'var(--tx-att)');
-        return;
-      }
-      COMPTES[r.cle] = v + 1;
-      statutVerification();
-      bip(true);
-      scanMsg('✓ ' + r.sku + ' — ' + (v + 1) + '/' + att
-        + ((v + 1) === att ? ' ${T("(ligne complète)")}' : ''), 'var(--tx-ok)');
-      if (PAGI2) { PAGI2.dessiner(); }
-      majProgres();
-      majExpedier();
-      // Le fil se rafraichit sur les evenements input/change du corps — or un
-      // scan valide au lecteur ne produit que le keydown Entree : sans cet appel,
-      // la derniere unite confirmee laissait l etape << incomplete >> a l ecran.
-      Assist.fil();
+    code = String(code || '').trim();
+    if (!code) return;
+    if (LECTURE) { bip(false); retour('${T("Commande en traitement ailleurs — lecture seule.")}', 'err'); return; }
+    // Les scans s enchaînent dans l ORDRE (un lecteur rapide envoie deux codes avant la réponse du premier).
+    FILE_SCAN = FILE_SCAN.then(function(){
+      return P.appeler('commande:scan', ID, code).then(function(r){
+        if (!r || !r.ok) {
+          bip(false);
+          if (r && r.motif === 'pas_dans_commande') {
+            retour('<span><b>' + esc(r.sku || code) + '</b> ' + esc(r.nom ? '(' + r.nom + ') ' : '') + '${T("n’est pas dans cette commande. Rien n’a été compté — scannez l’article suivant.")}</span>', 'err');
+          } else if (r && r.motif === 'code_inconnu') {
+            retour('<span>${T("Code inconnu :")} <b>' + esc(r.code || code) + '</b>${T(". Rien n’a été compté — scannez l’article suivant.")}</span>', 'err');
+          } else {
+            retour(esc(expliquer(r)), 'err');
+          }
+          return;
+        }
+        var att = 0;
+        CMD.articles.forEach(function(a){ if (a.cle === r.cle) att = a.quantite; });
+        var v = COMPTES[r.cle] || 0;
+        if (!att) { bip(false); retour('<span><b>' + esc(r.sku) + '</b> ${T("n’est plus à expédier (remboursé). Rien n’a été compté.")}</span>', 'att'); return; }
+        if (v >= att) { bip(false); retour('<span>${T("Déjà complet :")} <b>' + esc(r.sku) + '</b> (' + att + '/' + att + ')</span>', 'att'); return; }
+        compter(r.cle, 1);
+        bip(true);
+        retour('<span>✓ <b>' + esc(r.sku) + '</b> — ' + (v + 1) + '/' + att + ((v + 1) === att ? ' ${T("(ligne complète)")}' : '') + '</span>', 'ok');
+      });
+    }).catch(function(){ bip(false); retour('${T("Le scan n’a pas pu être vérifié — réessayez.")}', 'err'); });
+  }
+  function compter(cle, d){
+    var a = CMD.articles.find(function(x){ return x.cle === cle; }); if (!a) return;
+    COMPTES[cle] = Math.max(0, Math.min(a.quantite, (COMPTES[cle] || 0) + d));
+    if (d > 0) statutVerification();
+    FLASH = cle; setTimeout(function(){ FLASH = ''; var l = document.querySelector('.lg.flash'); if (l) l.classList.remove('flash'); }, 450);
+    dessinerLignes();
+    var l = document.querySelector('.lg[data-cle="' + (window.CSS && CSS.escape ? CSS.escape(cle) : cle) + '"]');
+    if (l && l.scrollIntoView) { try { l.scrollIntoView({ block: 'nearest' }); } catch (e) {} }
+    garderBientot();
+    if (toutVerifie() && !AUTO_FAIT) {
+      AUTO_FAIT = true;
+      var co = document.getElementById('v-coche'); if (co) co.classList.add('on');
+      setTimeout(function(){ if (co) co.classList.remove('on'); if (ETAPE === 0 && toutVerifie()) aller(1); }, 900);
+    } else if (!toutVerifie()) { AUTO_FAIT = false; }
+  }
+
+  /* ══ L AVANCEMENT, GARDÉ AU SERVEUR (commande:verifEcrire) ══════════════════════════════ */
+  var GARDE_T = null;
+  function garderBientot(){
+    if (LECTURE) return;
+    clearTimeout(GARDE_T);
+    GARDE_T = setTimeout(function(){
+      P.appeler('commande:verifEcrire', ID, COMPTES).then(function(r){
+        if (!r || !r.ok) dire('${T("L’avancement du scan n’a pas pu être gardé :")} ' + expliquer(r), 'att');
+      });
+    }, 500);
+  }
+  function majReprise(){
+    var z = document.getElementById('v-reprise'); if (!z) return;
+    var v = CMD.verif;
+    if (!v || !v.comptes) { z.hidden = true; return; }
+    var n = 0; Object.keys(v.comptes).forEach(function(k){ n += v.comptes[k]; });
+    if (!n) { z.hidden = true; return; }
+    z.hidden = false;
+    document.getElementById('v-reprise-t').textContent = '${T("Vérification reprise là où elle avait été laissée —")} ' + n + ' '
+      + szPl(n, '${T("article déjà scanné")}', '${T("articles déjà scannés")}')
+      + (v.au ? ', ' + szQuand(v.au) : '') + (v.par ? ' ${T("par")} ' + v.par : '') + '.';
+  }
+  function recommencer(){
+    szConfirmer({ titre: '${T("Recommencer la vérification")}',
+      texte: '${T("Tous les articles déjà scannés de cette commande repassent à zéro, ici et sur les autres postes.")}',
+      oui: '${T("Remettre à zéro")}', prudent: true }).then(function(ok){
+      if (!ok) { focusScan(); return; }
+      COMPTES = {}; AUTO_FAIT = false; CMD.verif = null;
+      P.appeler('commande:verifEffacer', ID).then(function(r){
+        if (!r || !r.ok) dire(expliquer(r), 'err'); else dire('${T("Vérification remise à zéro.")}', 'bon');
+      });
+      majReprise(); dessinerLignes(); retour(''); focusScan();
     });
+  }
+
+  /* ══ LE STATUT SUIT LES GESTES (voir l historique : ouverture = « En préparation », première
+     unité confirmée = « Vérification »). Le site refuse de reculer un statut. */
+  function avancerStatut(voulu){
+    if (LECTURE || !voulu || !CTX || !CTX.peutExpedier) return;
+    P.appeler('commande:statut', ID, voulu).then(function(r){
+      if (r && r.ok && r.statut && !r.inchange) { CMD.statut = r.statut; }
+    }).catch(function(){});
+  }
+  function statutVerification(){
+    if (CMD && (CMD.statut === 'pending' || CMD.statut === 'confirmed' || CMD.statut === 'preparing')) avancerStatut('verification');
   }
 
   function imprimer(genre, b){
     if (LECTURE) { dire('${T("Commande en traitement ailleurs — lecture seule.")}', 'err'); return; }
-    b.disabled = true; dire('${T("Envoi à l’impression…")}');
+    if (b) b.disabled = true;
+    dire(genre === 'bon' ? '${T("Impression du bon de commande…")}' : '${T("Impression du bordereau…")}');
     P.appeler('commande:bon', ID, genre).then(function(r){
-      b.disabled = false;
-      // ⚠ Le pont rend maintenant un VERDICT (releve du 2026-08-08) : avant,
-      // << Envoye a l impression >> s affichait meme quand rien ne sortait.
-      if (!r || !r.ok) { dire(expliquerD(r), 'err'); return; }
-      dire('${T("Envoyé à l’impression.")}', 'bon');
+      if (b) b.disabled = false;
+      if (!r || !r.ok) { dire(expliquerD(r), 'err'); focusScan(); return; }
+      if (genre === 'bon') { BON_IMPRIME = true; fil(); }
+      dire(genre === 'bon' ? '${T("Bon de commande envoyé à l’impression.")}' : '${T("Bordereau envoyé à l’impression.")}', 'bon');
+      focusScan();
     });
   }
 
-  /* ⚠ SERVICES ET POIDS VIENNENT DU SITE (expedition:contexte / expedition:lire) :
-     ce sont les memes listes et le meme calcul que la fenetre Expedition, donc une
-     seule source. Le poids est le poids NET (articles moins remboursements), et
-     une estimation se DIT — c est lui qui fixe le prix. */
-  var EXP = null;   // { transporteurs: [{cle,nom,pret,services}] }
-  function chargerExpedition(){
-    return P.appeler('expedition:contexte').then(function(c){
-      if (c && c.ok) EXP = c;
-      return P.appeler('expedition:lire', ID);
-    }).then(function(r){
-      if (r && r.ok && r.poids) {
-        var p = document.getElementById('c-poids');
-        if (p && r.poids.calcule > 0) p.value = r.poids.calcule;
-        var n = document.getElementById('c-poids-note');
-        if (n) {
-          n.textContent = r.poids.estime
-            ? '${T("Certains articles n’ont pas de poids configuré — estimation à 300 g par article. Vérifiez : le poids fixe le prix.")}'
-            : '${T("Poids calculé depuis les articles de la commande.")}';
-          n.style.color = r.poids.estime ? '#f0c987' : '#86e5a8';
+  /* ══ L ÉTIQUETTE ══════════════════════════════════════════════════════════════════════ */
+  /* (2026-10-19, sa règle) SEULS les transporteurs ACTIVÉS et munis d identifiants sont interrogés et
+     montrés : la liste vient du site (commande:contexte → cotables). Un transporteur désactivé n apparaît
+     nulle part — ni tarif, ni ligne d erreur. */
+  var COTEURS = [];
+  function coteurs(){ return (CTX && Array.isArray(CTX.cotables)) ? CTX.cotables : ['postes-canada', 'fedex', 'purolator', 'intelcom', 'eshipper']; }
+  var COTE_N = 0;
+  function poidsDims(){
+    return { poids: parseFloat(val('c-poids')) || 0,
+      dims: { l: parseFloat(val('c-dl')) || 0, w: parseFloat(val('c-dw')) || 0, h: parseFloat(val('c-dh')) || 0 } };
+  }
+  function entrerEtiquette(){
+    var d = document.getElementById('e-deja');
+    if (d) {
+      var deja = CMD.aUneEtiquette || aSuivi();
+      d.hidden = !deja;
+      if (deja) document.getElementById('e-deja-t').textContent = '${T("Une étiquette existe déjà")}' + (CMD.suivi ? ' (${T("suivi")} ' + CMD.suivi + ')' : '') + '${T(" — en créer une autre la facturerait une seconde fois.")}';
+    }
+    if (!Object.keys(TARIFS).length) coter();
+    else dessinerTarifs();
+  }
+  /* Les transporteurs interrogés EN PARALLÈLE, un appel chacun : la liste se remplit à mesure
+     que chacun répond, le plus lent ne retient pas les autres. */
+  function coter(){
+    var pd = poidsDims();
+    if (!(pd.poids > 0)) { dire('${T("Le poids du colis doit être supérieur à zéro.")}', 'err'); return; }
+    var n = ++COTE_N;
+    COTEURS = coteurs();
+    TARIFS = {};
+    COTEURS.forEach(function(t){ TARIFS[t] = { etat: 'attente' }; });
+    dessinerTarifs();
+    COTEURS.forEach(function(t){
+      P.appeler('expedition:comparer', ID, pd.poids, { transporteurs: [t], dims: pd.dims }).then(function(r){
+        if (n !== COTE_N) return;
+        if (!r || !r.ok) { TARIFS[t] = { etat: 'non', motif: expliquerD(r) }; }
+        else {
+          var x = (r.resultats || []).find(function(y){ return y.transporteur === t; });
+          TARIFS[t] = x ? (x.ok ? { etat: 'ok', r: x } : { etat: 'non', motif: x.motif || '' }) : { etat: 'eteint' };
         }
-      }
-      majServices();
-    }).catch(function(){ majServices(); });
+        dessinerTarifs();
+      }).catch(function(){ if (n === COTE_N) { TARIFS[t] = { etat: 'non', motif: '${T("pas de réponse")}' }; dessinerTarifs(); } });
+    });
   }
-
-  function majServices(){
-    var sel = document.getElementById('c-service');
-    var tr = val('c-transp');
-    if (!sel) return;
-    var liste = [];
-    ((EXP && EXP.transporteurs) || []).forEach(function(t){ if (t.cle === tr) liste = t.services || []; });
-    /* ⚠ AVOIR DES SERVICES N EST PAS ETRE PRET. CARRIERS_PONT liste les services
-       de Postes Canada et de FedEx en dur, mais « pret » dit s il y a des
-       identifiants. Sans cette seconde condition, le bouton restait actif pour
-       un transporteur sans identifiants et l on ne l apprenait qu au moment de
-       payer — apres avoir prepare le colis. */
-    var pret = true;
-    (CTX.transporteurs || []).forEach(function(t){ if (t.cle === tr && t.pret === false) pret = false; });
-    var utilisable = liste.length > 0 && pret;
-    sel.innerHTML = liste.length
-      ? liste.map(function(x){
-          // Le service choisi par le client à la caisse est présélectionné (2026-10-02).
-          var pris = CMD && CMD.service && CMD.transporteur === tr && CMD.service === x.cle;
-          return '<option value="' + esc(x.cle) + '"' + (pris ? ' selected' : '') + '>' + esc(x.libelle) + '</option>'; }).join('')
-      : '<option value="">${T("— transporteur non configuré —")}</option>';
-    sel.disabled = !utilisable;
-    var b = document.getElementById('c-etiq');
-    if (b) {
-      b.disabled = !utilisable;
-      b.title = utilisable ? ''
-        : '${T("Ce transporteur n’a pas d’identifiants : Configuration → Transporteurs.")}';
+  // Toutes les options cotées, à plat : une par service (Postes Canada et FedEx en donnent plusieurs).
+  function options(){
+    var l = [];
+    COTEURS.forEach(function(t){
+      var e = TARIFS[t]; if (!e || e.etat !== 'ok') return;
+      var svcs = (e.r.services && e.r.services.length) ? e.r.services : [{ service: e.r.service, nomService: e.r.nomService, reel: e.r.reel, jours: e.r.jours }];
+      var i = infoT(t);
+      svcs.forEach(function(s){
+        l.push({ t: t, service: s.service, nom: s.nomService || s.service, reel: Number(s.reel) || 0, jours: s.jours || 0,
+          etiquette: !!i.etiquette && i.pret !== false, mode: i.mode || 'sandbox' });
+      });
+    });
+    l.sort(function(a, b){ return a.reel - b.reel; });
+    return l;
+  }
+  function venteCle(){
+    var c = (EXP && EXP.choixClient) || null;
+    return { t: (c && c.transporteur) || CMD.transporteur || '', service: (c && c.service) || CMD.service || '' };
+  }
+  function prixVente(l){
+    var v = venteCle();
+    var o = l.find(function(x){ return x.t === v.t && x.service === v.service; });
+    if (o) return o.reel;
+    var c = EXP && EXP.choixClient;
+    return (c && c.coutReel && c.coutReel.reel > 0) ? Number(c.coutReel.reel) : null;
+  }
+  function dessinerTarifs(){
+    var z = document.getElementById('e-tarifs'); if (!z) return;
+    var pd = poidsDims();
+    document.getElementById('e-titre').textContent = '${T("Tarifs réels — colis")} ' + szNombre(pd.poids, 3) + ' kg · '
+      + szNombre(pd.dims.l) + ' × ' + szNombre(pd.dims.w) + ' × ' + szNombre(pd.dims.h) + ' cm';
+    var l = options();
+    var v = venteCle();
+    var moins = l.length ? l[0].reel : 0;
+    var creables = l.filter(function(o){ return o.etiquette; });
+    // La PRÉSÉLECTION : le choix de la vente s il est coté et étiquetable, sinon le moins cher étiquetable.
+    if (!CHOIX || !l.some(function(o){ return o.t === CHOIX.t && o.service === CHOIX.service; })) {
+      var pv = creables.find(function(o){ return o.t === v.t && o.service === v.service; })
+        || creables.find(function(o){ return o.t === v.t; }) || creables[0] || null;
+      CHOIX = pv ? { t: pv.t, service: pv.service, reel: pv.reel, nom: pv.nom } : CHOIX;
+    } else {
+      var re = l.find(function(o){ return o.t === CHOIX.t && o.service === CHOIX.service; });
+      if (re) CHOIX.reel = re.reel;
     }
-    var n = document.getElementById('c-poids-note');
-    if (!pret && n) {
-      n.textContent = '${T("Ce transporteur n’a pas d’identifiants — aucune étiquette ne peut être achetée. Configuration → Transporteurs.")}';
-      n.style.color = '#f0c987';
+    var h = l.map(function(o, i){
+      var on = CHOIX && CHOIX.t === o.t && CHOIX.service === o.service;
+      var vente = o.t === v.t && o.service === v.service;
+      var ec = o.reel - moins;
+      return '<button type="button" class="tf' + (on ? ' on' : '') + '" role="radio" aria-checked="' + on + '"'
+        + (o.etiquette ? '' : ' disabled') + ' data-t="' + esc(o.t) + '" data-s="' + esc(o.service) + '">'
+        + '<span class="rd" aria-hidden="true"></span>'
+        + '<span><span class="nm">' + esc(nomT(o.t)) + ' · ' + esc(o.nom)
+        + (vente ? ' <span class="pl vente">${T("Choisi à la vente")}</span>' : '')
+        + (i === 0 ? ' <span class="pl moins">${T("Le moins cher")}</span>' : '')
+        + (o.etiquette && o.mode !== 'production' ? ' <span class="pl bas2">${T("bac à sable")}</span>' : '') + '</span>'
+        + '<span class="sb">' + (o.jours ? o.jours + ' ' + szPl(o.jours, '${T("jour ouvrable")}', '${T("jours ouvrables")}') : '')
+        + (o.etiquette ? '' : (o.jours ? ' · ' : '') + '${T("cotation seulement — étiquette non branchée dans l’application")}') + '</span></span>'
+        + '<span class="px' + (i === 0 ? ' moins' : '') + '">' + argent(o.reel) + '</span>'
+        + '<span class="ec' + (ec > 0.004 ? '' : ' zero') + '">' + (ec > 0.004 ? '+' + argent(ec) : '—') + '</span></button>';
+    });
+    var enCours = [], sans = [];
+    COTEURS.forEach(function(t){
+      var e = TARIFS[t];
+      if (!e || e.etat === 'ok' || e.etat === 'eteint') return;
+      if (e.etat === 'attente') { enCours.push(nomT(t)); return; }
+      // Identifiants refusés = « sans identifiants valides » : on ne le montre pas (sa règle).
+      if (/jeton refus|401|403|authent|identifiants|unauthori/i.test(String(e.motif || ''))) return;
+      sans.push(nomT(t) + (e.motif ? ' (' + e.motif + ')' : ''));
+    });
+    if (enCours.length) h.push('<div class="aide">${T("Interrogation :")} ' + esc(enCours.join(', ')) + '…</div>');
+    if (sans.length) h.push('<div class="aide">${T("Sans tarif pour ce colis :")} ' + esc(sans.join(' · ')) + '</div>');
+    // Le transporteur de la vente n est plus activé : on ne le liste pas, on le DIT, et le moins cher est présélectionné.
+    if (v.t && COTEURS.length && COTEURS.indexOf(v.t) < 0) {
+      h.push('<div class="aide">${T("Le transporteur choisi à la vente")} (' + esc(nomT(v.t)) + ') ${T("n’est plus activé.")}</div>');
+    }
+    var attente = COTEURS.some(function(t){ return TARIFS[t] && TARIFS[t].etat === 'attente'; });
+    if (!l.length && !attente && !COTEURS.length) h.unshift('<div class="vide">${T("Aucun transporteur activé. Configuration → Transporteurs.")}</div>');
+    else if (!l.length) h.unshift('<div class="vide">' + (attente ? '${T("Interrogation des transporteurs…")}' : '${T("Aucun transporteur actif n’a donné de tarif. Vérifiez Configuration → Transporteurs.")}') + '</div>');
+    z.innerHTML = h.join('');
+    majArgent(l, creables);
+    majBac();
+  }
+  function majArgent(l, creables){
+    l = l || options(); creables = creables || l.filter(function(o){ return o.etiquette; });
+    var paye = EXP && EXP.payeClient != null ? Number(EXP.payeClient) : null;
+    var cout = CHOIX ? CHOIX.reel : null;
+    document.getElementById('e-paye').textContent = paye == null ? '—' : argent(paye);
+    document.getElementById('e-cout').textContent = cout == null ? '—' : '− ' + argent(cout);
+    var g = document.getElementById('e-gain'), xg = document.getElementById('x-gain');
+    var gain = (paye != null && cout != null) ? paye - cout : null;
+    [g, xg].forEach(function(el){
+      if (!el) return;
+      el.textContent = gain == null ? '—' : (gain >= 0 ? '+' : '−') + argent(Math.abs(gain));
+      el.className = 'gain' + (gain == null ? '' : (gain >= 0 ? ' pos' : ' neg'));
+    });
+    var av = document.getElementById('e-avis');
+    var i = CHOIX ? infoT(CHOIX.t) : {};
+    if (av) av.innerHTML = !CHOIX ? '${T("Choisissez un tarif.")}'
+      : (i.mode === 'production'
+        ? '<span class="prod">${T("L’étiquette sera créée en PRODUCTION : elle sera facturée.")}</span>'
+        : '${T("L’étiquette est créée dans le")} <b class="bac">${T("bac à sable")}</b>${T(" : rien n’est facturé pendant les essais.")}')
+        + (paye === 0 ? '<br>${T("Livraison offerte au client : l’étiquette est une dépense.")}' : '');
+    var bc = document.getElementById('e-creer');
+    if (bc) {
+      bc.disabled = LECTURE || !CTX.peutExpedier || !CHOIX;
+      var bct = document.getElementById('e-creer-t');
+      if (bct) bct.textContent = CHOIX ? '${T("Créer l’étiquette ·")} ' + argent(CHOIX.reel) : '${T("Créer l’étiquette")}';
+    }
+    var bm = document.getElementById('e-moins');
+    if (bm) {
+      var m = creables[0];
+      bm.disabled = LECTURE || !CTX.peutExpedier || !m || (CHOIX && m.t === CHOIX.t && m.service === CHOIX.service);
+      bm.textContent = m ? '${T("Prendre le moins cher")} (' + argent(m.reel) + ')' : '${T("Prendre le moins cher")}';
     }
   }
-
-  /* ⚠ ON PASSE PAR expedition:etiquette, qui RECOIT le service et le poids.
-     L ancien chemin (commande:etiquette -> Admin.printLabel) les lisait dans le
-     formulaire du SITE : absents ici, il commandait une etiquette FACTUREE au
-     service par defaut et a 0,5 kg. L operation reste en place pour les coquilles
-     anterieures, mais cette fenetre ne l emprunte plus. */
-  function etiquette(){
+  function choisir(t, s){
+    var o = options().find(function(x){ return x.t === t && x.service === s; });
+    if (!o || !o.etiquette) return;
+    CHOIX = { t: o.t, service: o.service, reel: o.reel, nom: o.nom };
+    dessinerTarifs();
+  }
+  function creer(){
     if (LECTURE) { dire('${T("Commande en traitement ailleurs — lecture seule.")}', 'err'); return; }
-    var poids = parseFloat(val('c-poids'));
-    if (!(poids > 0)) { dire('${T("Le poids du colis doit être supérieur à zéro.")}', 'err'); return; }
-    /* ⚠ UNE ETIQUETTE EXISTE DEJA ? La question se pose ICI, dans la fenetre —
-       plus dans des modales du site invisibles depuis l entrepot (releve du
-       2026-08-08 : double achat possible, modale du site detournee, appel
-       natif qui expirait a 60 s). L aveu part au pont (forcer) : sans lui, le
-       garde du site refuse. */
-    if (CMD.aUneEtiquette || String(val('c-suivi') || '').trim()) {
-      voileEtiq('${T("Une étiquette existe déjà")}',
-        '<p style="margin:.35rem 0;font-size:.9rem">${T("Une étiquette a déjà été facturée pour cette commande")}'
-        + (CMD.suivi ? ' (suivi <strong>' + esc(CMD.suivi) + '</strong>)' : '') + '.</p>'
-        + '<p style="margin:.35rem 0;font-size:.9rem">${T("En commander une seconde sera ")}<strong>${T("facturé une ")}'
-        + '${T("seconde fois")}</strong>${T(". Pour réimprimer celle qui existe, « ")}<span class="ic">🖨</span>${T(" Imprimer l’étiquette » suffit.")}</p>',
-        '${T("Commander quand même")}', function(){ acheterEtiquette(poids, true); });
-      return;
+    if (!CHOIX) { dire('${T("Choisissez un tarif.")}', 'att'); return; }
+    var pd = poidsDims();
+    if (!(pd.poids > 0)) { dire('${T("Le poids du colis doit être supérieur à zéro.")}', 'err'); return; }
+    var etapes = [];
+    var pv = prixVente(options());
+    var v = venteCle();
+    // Plus cher que le choix de la vente : on le DIT et on demande.
+    if (pv != null && CHOIX.reel > pv + 0.004 && !(CHOIX.t === v.t && CHOIX.service === v.service)) {
+      etapes.push({ titre: '${T("Étiquette plus chère que le choix de la vente")}',
+        texte: '${T("Le client a choisi un autre service à la caisse. Celui-ci coûte plus cher.")}',
+        details: [['${T("Choix de la vente")}', nomT(v.t) + ' · ' + argent(pv)], ['${T("Votre choix")}', nomT(CHOIX.t) + ' · ' + CHOIX.nom + ' · ' + argent(CHOIX.reel)],
+          ['${T("Écart")}', '+' + argent(CHOIX.reel - pv)]],
+        oui: '${T("Créer quand même")}', prudent: true });
     }
-    acheterEtiquette(poids, false);
+    var forcer = false;
+    if (CMD.aUneEtiquette || aSuivi()) {
+      forcer = true;
+      etapes.push({ titre: '${T("Une étiquette existe déjà")}',
+        texte: '${T("Une étiquette a déjà été créée pour cette commande. En créer une seconde la facturerait une seconde fois (sauf en bac à sable).")}',
+        details: CMD.suivi ? [['${T("Suivi actuel")}', CMD.suivi]] : [], oui: '${T("Créer une seconde étiquette")}', danger: true });
+    }
+    var i = infoT(CHOIX.t);
+    if (i.mode === 'production') {
+      etapes.push({ titre: '${T("Étiquette facturée")}',
+        texte: '${T("Ce transporteur est en PRODUCTION : l’étiquette sera facturée.")}',
+        details: [['${T("Transporteur")}', nomT(CHOIX.t) + ' · ' + CHOIX.nom], ['${T("Coût estimé")}', argent(CHOIX.reel)]],
+        oui: '${T("Créer et payer l’étiquette")}', prudent: true });
+    }
+    var suite = Promise.resolve(true);
+    etapes.forEach(function(e){ suite = suite.then(function(ok){ return ok ? szConfirmer(e) : false; }); });
+    suite.then(function(ok){ if (ok) acheter(pd.poids, forcer); });
   }
-  function acheterEtiquette(poids, forcer){
-    var b = document.getElementById('c-etiq');
+  function acheter(poids, forcer){
+    var b = document.getElementById('e-creer');
     b.disabled = true; dire('${T("Demande au transporteur…")}', 'att');
-    P.appeler('expedition:etiquette', ID, val('c-transp'), val('c-service'), poids, forcer).then(function(r){
+    P.appeler('expedition:etiquette', ID, CHOIX.t, CHOIX.service, poids, forcer).then(function(r){
       b.disabled = false;
       if (!r || !r.ok) { dire(expliquerD(r), 'err'); return; }
-      // ⚠ Pas de numero = pas d etiquette, meme sans exception levee. Annoncer un
-      // succes ici ferait expedier une commande sans etiquette.
       if (!r.suivi) { dire('${T("Aucun numéro reçu : l’étiquette n’a PAS été générée.")}', 'err'); return; }
       poser('c-suivi', r.suivi);
-      /* ⚠ LE PDF EST GARDE ET S IMPRIME — il etait JETE (releve du 2026-08-08) :
-         la fenetre achetait l etiquette et ne l imprimait jamais, ni le
-         bordereau qui la suit. Meme patron que la fenetre Expedition. */
       PDF = r.pdf || null;
-      CMD.aUneEtiquette = true;
-      CMD.suivi = r.suivi;
+      CMD.aUneEtiquette = true; CMD.suivi = r.suivi; CMD.transporteur = CHOIX.t;
+      CMD.etiquette = { t: CHOIX.t, nom: CHOIX.nom, reel: CHOIX.reel };
       majExpedier();
-      majBoutonImpression();
-      voileEtiq('${T("Étiquette créée")}',
-        '<p style="margin:.35rem 0;font-size:.9rem">${T("Suivi :")} <strong>' + esc(r.suivi) + '</strong></p>'
-        + '<p style="margin:.35rem 0;font-size:.9rem">${T("Imprimer l’étiquette et le bordereau maintenant ?")}</p>',
-        '${T("Imprimer maintenant")}', imprimerEtiquette);
+      aller(2);
+      // On imprime TOUT DE SUITE l étiquette (et le bordereau qui la suit) : c est le geste suivant.
+      imprimerEtiquette();
     }).catch(function(){ b.disabled = false; dire('${T("L’opération a échoué.")}', 'err'); });
-  }
-  // Un voile a deux boutons, pour la question du rachat et la proposition
-  // d impression — meme peau que la question du bon de commande.
-  function voileEtiq(titre, corps, libelle, surOui){
-    var v = document.createElement('div');
-    v.setAttribute('style', 'position:fixed;inset:0;background:rgba(8,12,20,.82);'
-      + 'display:flex;align-items:center;justify-content:center;padding:1.5rem;z-index:60');
-    v.innerHTML = '<div style="background:var(--f-carte);border:1px solid var(--v12);'
-      + 'border-radius:13px;padding:1.15rem 1.3rem;max-width:30rem;width:100%">'
-      + '<h3 style="margin:0 0 .6rem;font:700 1.05rem/1.25 system-ui,sans-serif">' + titre + '</h3>'
-      + corps
-      + '<div style="display:flex;gap:.45rem;justify-content:flex-end;margin-top:.9rem;flex-wrap:wrap">'
-      + '<button type="button" id="ve-non">${T("Annuler")}</button>'
-      + '<button type="button" class="prim" id="ve-oui">' + libelle + '</button></div></div>';
-    document.body.appendChild(v);
-    var fermer = function(){ if (v.parentNode) v.parentNode.removeChild(v); };
-    document.getElementById('ve-non').onclick = fermer;
-    document.getElementById('ve-oui').onclick = function(){ fermer(); surOui(); };
   }
   function imprimerEtiquette(){
     if (LECTURE) { dire('${T("Commande en traitement ailleurs — lecture seule.")}', 'err'); return; }
     dire('${T("Impression de l’étiquette et du bordereau…")}');
     P.appeler('expedition:imprimer', ID, PDF).then(function(r){
-      dire(r && r.ok ? '${T("Étiquette et bordereau envoyés à l’impression.")}' : expliquerD(r),
-        r && r.ok ? 'bon' : 'err');
+      dire(r && r.ok ? '${T("Étiquette et bordereau envoyés à l’impression.")}' : expliquerD(r), r && r.ok ? 'bon' : 'err');
     });
   }
-  // Le bouton de reimpression n apparait que s il y a une etiquette a imprimer.
-  function majBoutonImpression(){
-    var b = document.getElementById('c-etiq-imp');
-    if (!b) return;
-    b.style.display = (CMD && CMD.aUneEtiquette) || String(val('c-suivi') || '').trim() ? '' : 'none';
+
+  /* ══ L EXPÉDITION ═════════════════════════════════════════════════════════════════════ */
+  function recap(){
+    var e = CMD.etiquette || {};
+    var t = e.t || CMD.transporteur || (CHOIX && CHOIX.t) || '';
+    var suivi = String(val('c-suivi') || '').trim();
+    document.getElementById('x-etq').innerHTML = '<strong>' + esc(nomT(t) || '—') + '</strong><span>' + esc(CMD.client || '') + '</span>'
+      + '<span>' + esc([CMD.ville, CMD.province, CMD.codePostal].filter(Boolean).join(' ')) + '</span><div class="cb"></div>';
+    document.getElementById('x-etat').textContent = suivi ? '${T("Étiquette créée")}' : (coché('c-sans') ? '${T("Sans étiquette — remise en main propre")}' : '${T("Aucune étiquette")}');
+    document.getElementById('x-quoi').textContent = (nomT(t) || '') + (e.nom ? ' · ' + e.nom : '') + (e.reel ? ' · ' + argent(e.reel) : '');
+    var bi = document.getElementById('c-etiq-imp'); if (bi) bi.disabled = !(CMD.aUneEtiquette || suivi);
+    majArgent();
+    majExpedier();
+  }
+  function majExpedier(){
+    var b = document.getElementById('btn-enr'); if (!b) return '';
+    var pourquoi = '';
+    if (LECTURE) pourquoi = '${T("Commande en traitement ailleurs — lecture seule.")}';
+    else if (!CTX || !CTX.peutExpedier) pourquoi = '${T("Votre rôle ne permet pas d’expédier.")}';
+    else if (!toutVerifie()) pourquoi = '${T("Vérifiez le colis d’abord —")} ' + comptes() + ' ${T("sur")} ' + attendus() + ' ' + szPl(attendus(), '${T("unité confirmée.")}', '${T("unités confirmées.")}');
+    else if (!etiquetteFaite()) pourquoi = '${T("Créez l’étiquette (étape Étiquette), ou cochez « Expédier sans numéro de suivi ».")}';
+    else if (!coché('x-c1') || !coché('x-c2')) pourquoi = '${T("Cochez « Bordereau glissé » et « Étiquette collée » avant de fermer la boîte.")}';
+    b.disabled = !!pourquoi;
+    b.title = pourquoi || '${T("Marquer la commande expédiée et prévenir le client")}';
+    return pourquoi;
+  }
+  function expedier(){
+    var refus = majExpedier();
+    if (refus) { dire(refus, 'att'); return; }
+    var b = document.getElementById('btn-enr');
+    b.disabled = true;
+    dire('${T("Expédition…")}');
+    var t = (CMD.etiquette && CMD.etiquette.t) || CMD.transporteur || (CHOIX && CHOIX.t) || '';
+    P.appeler('commande:prete', ID, coché('c-pret')).then(function(){
+      return P.appeler('commande:expedier', ID, t, val('c-suivi'), coché('c-sans'));
+    }).then(function(r){
+      if (!r || !r.ok) { majExpedier(); dire(expliquerD(r), 'err'); return; }
+      rendreVerrou();
+      dire(r.sansSuivi ? '${T("Expédiée sans numéro de suivi.")}' : '${T("Expédiée — courriel envoyé.")}', 'bon');
+      var s = CMD.suivante;
+      if (s && s.id) {
+        b.textContent = '✓ ${T("Expédiée")}';
+        var l = document.getElementById('x-suivante');
+        l.hidden = false;
+        l.textContent = '${T("Commande suivante")} ' + (s.numero || '') + ' (' + s.reste + ' ${T("en attente")}) →';
+        l.focus();
+      } else {
+        setTimeout(function(){ P.fermer(); }, 900);
+      }
+    });
+  }
+  function suivante(){
+    var s = CMD && CMD.suivante; if (!s || !s.id) return;
+    P.appeler('commandes:preparer', s.id).then(function(r){
+      if (r && r.ok) setTimeout(function(){ P.fermer(); }, 300);
+      else dire(expliquer(r), 'err');
+    });
   }
 
-  /* ⚠ LE VERROU SE REND A LA FERMETURE (2026-08-07). Il etait pris a l ouverture
-     mais JAMAIS rendu : fermer l assistant laissait la commande << En
-     traitement >> pour tout le monde jusqu a la peremption du verrou. Or c est
-     precisement ce verrou qui pilote le bouton des listes — demande de
-     l utilisateur : << si on sort de l assistant, tu ramenes le bouton >>. */
+  function brancher(){
+    var sc = document.getElementById('c-scan');
+    sc.addEventListener('keydown', function(ev){
+      if (ev.key !== 'Enter') return;
+      ev.preventDefault();
+      var code = this.value;
+      this.value = '';
+      scanner(code);
+    });
+    // Le FOCUS RESTE sur le champ de scan : un clic ailleurs dans l étape (hors champ, hors bouton)
+    // le lui rend aussitôt.
+    sc.addEventListener('blur', function(){ setTimeout(function(){
+      var a = document.activeElement;
+      var actif = a && a !== document.body && (/^(INPUT|BUTTON|SELECT|TEXTAREA|A)$/.test(a.tagName || '') || (a.closest && a.closest('.szc-voile')));
+      if (ETAPE === 0 && !actif) focusScan();
+    }, 0); });
+    window.addEventListener('focus', function(){ setTimeout(focusScan, 0); });
+    document.getElementById('v-lignes').addEventListener('click', function(ev){
+      var p = ev.target.closest('[data-plus]'), m = ev.target.closest('[data-moins]');
+      if (LECTURE && (p || m)) { dire('${T("Commande en traitement ailleurs — lecture seule.")}', 'err'); return; }
+      if (p) compter(p.getAttribute('data-plus'), 1);
+      else if (m) { compter(m.getAttribute('data-moins'), -1); }
+    });
+    document.getElementById('v-main').onclick = function(){
+      MAIN_LIBRE = !MAIN_LIBRE;
+      this.textContent = MAIN_LIBRE ? '${T("Revenir au lecteur")}' : '${T("Cocher à la main")}';
+      dessinerLignes();
+      if (!MAIN_LIBRE) focusScan();
+    };
+    document.getElementById('v-recommencer').onclick = recommencer;
+    document.getElementById('v-continuer').onclick = function(){ aller(1); };
+    document.getElementById('c-bon').onclick = function(){ imprimer('bon', this); };
+    document.getElementById('c-colis').onclick = function(){ imprimer('colisage', this); };
+    document.getElementById('x-bordereau').onclick = function(){ imprimer('colisage', this); };
+    document.getElementById('e-tarifs').addEventListener('click', function(ev){
+      var b = ev.target.closest('.tf[data-t]'); if (!b || b.disabled) return;
+      choisir(b.getAttribute('data-t'), b.getAttribute('data-s'));
+    });
+    document.getElementById('e-recoter').onclick = coter;
+    ['c-poids', 'c-dl', 'c-dw', 'c-dh'].forEach(function(i){
+      document.getElementById(i).addEventListener('keydown', function(ev){ if (ev.key === 'Enter') { ev.preventDefault(); coter(); } });
+    });
+    document.getElementById('e-creer').onclick = creer;
+    document.getElementById('e-moins').onclick = function(){
+      var m = options().filter(function(o){ return o.etiquette; })[0];
+      if (m) { CHOIX = { t: m.t, service: m.service, reel: m.reel, nom: m.nom }; dessinerTarifs(); }
+    };
+    document.getElementById('e-deja-voir').onclick = function(){ aller(2); };
+    document.getElementById('c-sans').onchange = function(){ fil(); majExpedier(); };
+    document.getElementById('c-suivi').oninput = function(){ dire(''); fil(); majExpedier(); recap(); };
+    document.getElementById('c-etiq-imp').onclick = imprimerEtiquette;
+    ['x-c1', 'x-c2', 'x-c3'].forEach(function(i){ document.getElementById(i).onchange = majExpedier; });
+    document.getElementById('btn-enr').onclick = expedier;
+    document.getElementById('x-suivante').onclick = suivante;
+    /* ⚠ LA CASE « PRÊTE » S ENREGISTRE AU CLIC : c est l état qu on pose pour sortir du dossier. */
+    document.getElementById('c-pret').onchange = function(){
+      if (LECTURE) { this.checked = !this.checked; dire('${T("Commande en traitement ailleurs — lecture seule.")}', 'err'); return; }
+      var v = this.checked;
+      P.appeler('commande:prete', ID, v).then(function(r){
+        if (r && r.ok) { CMD.dejaPret = v; dire(v ? '${T("Marquée prête à l’expédition.")}' : '${T("Marque « prête » retirée.")}', 'bon'); }
+        else dire(expliquer(r), 'err');
+      });
+    };
+  }
+
+  /* ══ LES RACCOURCIS CLAVIER ══
+     F9 : le bouton principal de l étape · Alt+1/2/3 : les étapes · Ctrl+B : bon de commande ·
+     Échap : fermer (une boîte de confirmation ouverte la ferme d abord, voir le socle). */
+  document.addEventListener('keydown', function(ev){
+    if (document.querySelector('.szc-voile')) return;
+    if (ev.key === 'Escape') {
+      if (document.getElementById('bc-voile')) return;
+      ev.preventDefault(); P.fermer(); return;
+    }
+    if (!CMD) return;
+    if (ev.key === 'F9') {
+      ev.preventDefault();
+      var b = ETAPE === 0 ? document.getElementById('v-continuer') : (ETAPE === 1 ? document.getElementById('e-creer') : document.getElementById('btn-enr'));
+      if (b && !b.disabled) b.click(); else if (ETAPE === 2) expedier(); else if (ETAPE === 0) dire(refusAvancer(1), 'att');
+      return;
+    }
+    if (ev.altKey && /^[1-3]$/.test(ev.key)) { ev.preventDefault(); aller(parseInt(ev.key, 10) - 1); return; }
+    if (ev.ctrlKey && (ev.key === 'b' || ev.key === 'B')) { ev.preventDefault(); imprimer('bon', document.getElementById('c-bon')); return; }
+    // Une frappe « perdue » (aucun champ actif) à l étape de vérification part dans le champ de scan :
+    // un lecteur qui tape alors que le focus s est égaré ne perd pas son premier caractère.
+    if (ETAPE === 0 && !ev.ctrlKey && !ev.altKey && ev.key.length === 1) {
+      var a = document.activeElement;
+      if (!a || a === document.body) focusScan();
+    }
+  });
+
+  /* ══ LA QUESTION DU BON DE COMMANDE, À L OUVERTURE ══
+     Entrée = imprimer, Échap = continuer sans. Elle ne bloque rien : le bon se réimprime par le
+     fil (« Bon de commande ») ou par Ctrl+B. */
+  function demanderBon(deja){
+    var v = document.createElement('div');
+    v.id = 'bc-voile';
+    v.className = 'szc-voile';
+    v.innerHTML = '<div class="szc-boite" role="alertdialog" aria-modal="true">'
+      + '<h3><span class="ic">🚀</span> ${T("Préparation de la commande")} ' + esc(CMD.numero) + '</h3>'
+      + '<p>' + (deja ? '${T("Cette commande est déjà en préparation. Réimprimer le bon de commande avant de poursuivre ?")}'
+                      : '${T("Pour débuter, imprimer le bon de commande ?")}') + '</p>'
+      + '<div class="szc-pied"><button type="button" class="szc-non" id="bc-non">${T("Non, continuer")}</button>'
+      + '<button type="button" class="szc-oui" id="bc-oui"><span class="ic">🖨</span> ${T("Imprimer le bon")}</button></div></div>';
+    document.body.appendChild(v);
+    var fermer = function(){ document.removeEventListener('keydown', clav, true); if (v.parentNode) v.parentNode.removeChild(v); setTimeout(focusScan, 0); };
+    var clav = function(ev){
+      if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); fermer(); }
+      else if (ev.key === 'Enter') { ev.preventDefault(); ev.stopPropagation(); fermer(); imprimer('bon', document.getElementById('c-bon')); }
+    };
+    document.addEventListener('keydown', clav, true);
+    document.getElementById('bc-non').onclick = fermer;
+    document.getElementById('bc-oui').onclick = function(){ fermer(); imprimer('bon', document.getElementById('c-bon')); };
+    try { document.getElementById('bc-oui').focus(); } catch (e) {}
+  }
+
+  /* ⚠ LE VERROU SE REND À LA FERMETURE (2026-08-07) — c est lui qui pilote le bouton des listes. */
   var VERROU_PRIS = false;
   function verrou(){
     return P.appeler('verrou:prendre', 'orders', ID).then(function(v){
       if (!v || !v.ok) { sous.textContent = ''; return; }
       if (v.obtenu) { VERROU_PRIS = true; sous.textContent = v.horsLigne ? '${T("hors ligne")}' : '${T("Section verrouillée en modification par :")} ' + (v.par || '${T("vous")}'); return; }
       sous.textContent = '${T("en traitement par")} ' + (v.parQui || '${T("quelqu’un d’autre")}');
-      /* ⚠ EN LECTURE POUR DE BON (releve du 2026-08-08) : on ne desarmait que
-         le bouton Expedier, que majExpedier REARMAIT au premier input — et le
-         scan, le statut, l impression et meme l ACHAT D UNE ETIQUETTE
-         restaient permis. Deux personnes sur le meme colis, c est deux
-         etiquettes facturees et deux courriels au client. */
+      // EN LECTURE POUR DE BON : ni scan, ni impression, ni ACHAT D ÉTIQUETTE (deux étiquettes facturées sinon).
       LECTURE = true;
-      bEnr.disabled = true;
       dire('${T("Cette commande est déjà en traitement ailleurs — lecture seule.")}', 'err');
+      majExpedier();
     });
   }
   function rendreVerrou(){
@@ -711,46 +1001,36 @@ function pageCommande(id) {
     VERROU_PRIS = false;
     try { P.appeler('verrou:rendre'); } catch (e) {}
   }
-  // Toutes les sorties passent par la : le X de la fenetre, Echap, Fermer, et la
-  // fermeture apres expedition.
   window.addEventListener('beforeunload', function(){ rendreVerrou(); });
 
-  /* ⚠⚠ L ETAPE D ARRIVEE SUIT LE STATUT — LA MEME REGLE QUE L ECRAN DU SITE.
-     _startFulfillmentFlow (admin.js) route deja ainsi : en verification, ecran
-     de verification SANS question ; en preparation sans suivi, question du bon en
-     re-entree ; sinon, debut du parcours. Cette fenetre ouvrait TOUJOURS a
-     l etape 1 avec la question — signale le 2026-08-07 : << je clique sur
-     Verifier et je n arrive pas a la verification >>. Reinventer un routage ici
-     plutot que reprendre celui du site, c est deux regles pour un meme geste. */
+  /* ⚠ L ÉTAPE D ARRIVÉE SUIT L ÉTAT : étiquette déjà créée -> Expédition ; colis déjà entièrement
+     vérifié -> Étiquette ; sinon Vérification. La question du bon : au début du parcours, ou en
+     re-entrée d une préparation sans étiquette — jamais quand on vient vérifier ou expédier. */
   function accueillir(statut){
-    // Plus de saut d etape : l etape 0 EST la verification, pour tout statut.
-    // Ouvrir l assistant, c est commencer la preparation : le statut le dit
-    // tout de suite, et la liste des commandes derriere le voit.
     avancerStatut('preparing');
-    // La question du bon : au DEBUT du parcours, ou en re-entree d une
-    // preparation sans etiquette — jamais quand on vient verifier ou expedier.
-    if (statut === 'verification') return;
-    if (statut === 'preparing' && String(val('c-suivi') || '').trim()) return;
+    if (statut !== 'pending' && statut !== 'confirmed') BON_IMPRIME = true;
+    if (CMD.aUneEtiquette || aSuivi()) { AUTO_FAIT = true; aller(toutVerifie() ? 2 : 0); return; }
+    if (toutVerifie()) { AUTO_FAIT = true; aller(1); return; }
+    aller(0);
+    if (statut === 'verification' || LECTURE) return;
     demanderBon(statut === 'preparing');
   }
 
-  /* ⚠ APPELE PAR LA COQUILLE quand le bouton du site rouvre une fenetre DEJA
-     ouverte. ouvrirNative la ramene au premier plan SANS RIEN CHANGER : on
-     restait plante sur l ecran d avant, question du bon comprise — d ou
-     l impression que << l assistant se recharge et repose toujours la meme
-     question >>. On relit la commande (le statut a pu bouger entre-temps) et on
-     se place a l etape que ce statut commande. */
+  /* ⚠ APPELÉ PAR LA COQUILLE quand le bouton du site rouvre une fenêtre DÉJÀ ouverte : on relit
+     la commande (statut, suivi, avancement du scan venu d un autre poste) sans perdre la saisie. */
   window.szRevenir = function(){
     var v = document.getElementById('bc-voile');
     if (v && v.parentNode) v.parentNode.removeChild(v);
     P.appeler('commande:lire', ID).then(function(r){
       if (!r || !r.ok || !CMD) return;
       CMD.statut = r.statut;
-      // Le suivi peut etre arrive par la fenetre Expedition pendant qu on etait
-      // ailleurs : on le reprend, sans ecraser une saisie en cours.
-      if (r.suivi && !String(val('c-suivi') || '').trim()) poser('c-suivi', r.suivi);
-      Assist.aller(0);
-      majExpedier();
+      CMD.suivante = r.suivante;
+      if (r.suivi && !aSuivi()) { poser('c-suivi', r.suivi); CMD.suivi = r.suivi; CMD.aUneEtiquette = true; }
+      if (r.verif && r.verif.comptes) {
+        Object.keys(r.verif.comptes).forEach(function(k){ COMPTES[k] = Math.max(COMPTES[k] || 0, r.verif.comptes[k]); });
+      }
+      if (ETAPE === 0) dessinerLignes();
+      fil(); majExpedier(); focusScan();
     });
   };
 
@@ -761,72 +1041,48 @@ function pageCommande(id) {
       return P.appeler('commande:lire', ID).then(function(r){
         if (!r || !r.ok) { vide('${T("Commande indisponible")}', expliquer(r)); return; }
         CMD = r;
-        /* ⚠ Le statut D OUVERTURE est capture ICI : accueillir() passe la
-           commande a << preparing >> des l ouverture, et lire CMD.statut apres
-           coup aurait fait dire << deja en preparation >> a une commande qu on
-           vient tout juste de commencer. */
+        // L avancement GARDÉ AU SERVEUR : on reprend là où on s était arrêté.
+        COMPTES = {};
+        if (r.verif && r.verif.comptes) Object.keys(r.verif.comptes).forEach(function(k){ COMPTES[k] = r.verif.comptes[k]; });
         var statutOuverture = r.statut;
         document.getElementById('titre').textContent = '${T("Préparation —")} ' + r.numero;
+        document.title = '${T("Préparation —")} ' + r.numero;
+        document.getElementById('cli').textContent = [r.client, attendus() + ' ' + szPl(attendus(), '${T("article")}', '${T("articles")}'),
+          [r.ville, r.province, r.codePostal].filter(Boolean).join(' ')].filter(Boolean).join(' · ')
+          + (r.prioritaire ? ' · ${T("Prioritaire")}' : '') + (r.notes ? ' · ${T("Note :")} ' + r.notes : '');
         dessiner();
-        return verrou().then(function(){ chargerExpedition(); accueillir(statutOuverture); });
+        majReprise();
+        return verrou().then(function(){
+          chargerExpedition();
+          accueillir(statutOuverture);
+          if (!CTX.peutExpedier) dire('${T("Votre rôle ne permet pas d’expédier.")}', 'att');
+        });
       });
     });
   }
-
-  /* ⚠⚠ EXPEDIER RESTE DESARME TANT QUE LES DEUX CONDITIONS NE SONT PAS REMPLIES
-     — la verification COMPLETE et l etiquette GENEREE. C etait le comportement
-     d avant, et il a ete perdu en reecrivant : le bouton etait actif des
-     l ouverture, sur un colis dont rien n avait ete verifie (signale le
-     2026-08-07, capture a l appui).
-     Ce n est pas du zele : expedier, c est changer le statut, decompter le stock
-     et ENVOYER UN COURRIEL au client avec un lien de suivi. Fait avant d avoir
-     verifie le colis, on annonce un envoi qu on n a pas prepare ; fait sans
-     etiquette, on annonce un suivi qui n existe pas.
-     ⚠ L ENVOI SANS NUMERO RESTE POSSIBLE — remise en main propre, cueillette,
-     transporteur local — mais il faut cocher la case, donc l assumer. Sans cette
-     porte, on aurait ferme un cas legitime en croyant bien faire.
-     ⚠ ET LE BOUTON DIT POURQUOI il est desarme : un bouton gris sans explication
-     se lit comme une panne, et l on cherche ailleurs. */
-  function majExpedier(){
-    if (!bEnr) return;
-    var sansNum = coché('c-sans');
-    var aSuivi = !!String(val('c-suivi') || '').trim();
-    var verifOk = toutVerifie();
-    var etiqOk = aSuivi || sansNum;
-    var pret = !LECTURE && !!(CTX && CTX.peutExpedier) && verifOk && etiqOk;
-    bEnr.disabled = !pret;
-    var pourquoi = '';
-    if (LECTURE) pourquoi = '${T("Commande en traitement ailleurs — lecture seule.")}';
-    else if (!CTX || !CTX.peutExpedier) pourquoi = '${T("Votre rôle ne permet pas d’expédier.")}';
-    else if (!verifOk) pourquoi = '${T("Vérifiez le colis d’abord —")} ' + comptes() + ' ${T("sur")} ' + attendus() + ' ' + szPl(attendus(), '${T("unité confirmée.")}', '${T("unités confirmées.")}');
-    else if (!etiqOk) pourquoi = '${T("Générez l’étiquette (étape 2), ou cochez « Expédier sans numéro de suivi ».")}';
-    bEnr.title = pourquoi || '${T("Marquer la commande expédiée et prévenir le client")}';
-    majFicheBientot();
-    return pourquoi;
+  /* Le poids NET (articles moins remboursements) et ce que le client a payé viennent du site
+     (expedition:lire) — la même source que la fenêtre Expédition. Une estimation se DIT. */
+  function chargerExpedition(){
+    return P.appeler('expedition:lire', ID).then(function(r){
+      if (!r || !r.ok) return;
+      EXP = r.commande || {};
+      if (r.poids) {
+        var p = document.getElementById('c-poids');
+        if (p && r.poids.calcule > 0) p.value = r.poids.calcule;
+        var n = document.getElementById('c-poids-note');
+        if (n) {
+          n.textContent = r.poids.estime
+            ? '${T("Certains articles n’ont pas de poids configuré — estimation à 300 g par article. Vérifiez : le poids fixe le prix.")}'
+            : '${T("Poids calculé depuis les articles de la commande.")}';
+          n.style.color = r.poids.estime ? 'var(--tx-att)' : 'var(--tx2)';
+        }
+      }
+      if (ETAPE === 1) coter();
+      else majArgent();
+      majBac();
+    }).catch(function(){});
   }
 
-  function expedier(){
-    // ⚠ UN COLIS INCOMPLET NE PART PAS SANS UN SECOND CLIC. La verification ne
-    // sert a rien si on peut l ignorer d un geste distrait ; mais l interdire
-    // bloquerait les cas legitimes (envoi partiel assume).
-    var refus = majExpedier();
-    if (refus) { dire(refus, 'att'); return; }
-    bEnr.disabled = true;
-    dire('${T("Expédition")}…');
-    var pret = coché('c-pret');
-    P.appeler('commande:prete', ID, pret).then(function(){
-      return P.appeler('commande:expedier', ID, val('c-transp'), val('c-suivi'), coché('c-sans'));
-    }).then(function(r){
-      if (!r || !r.ok) { majExpedier(); dire(expliquer(r), "err"); return; }
-      dire(r.sansSuivi ? '${T("Expédiée sans numéro de suivi.")}' : '${T("Expédiée — courriel envoyé.")}', 'bon');
-      setTimeout(function(){ P.fermer(); }, 900);
-    });
-  }
-
-  bEnr.onclick = expedier;
-  document.addEventListener('keydown', function(ev){
-    if (ev.key === 'Escape') { ev.preventDefault(); P.fermer(); }
-  });
   charger();
 })();
 </script></body></html>`;

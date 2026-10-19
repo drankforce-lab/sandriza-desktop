@@ -217,4 +217,17 @@ module.exports = {
   "Le numéro de client Postes Canada et, s’il y a lieu, le contrat commercial.": "Your Canada Post customer number and, if any, the commercial contract.",
   "Le point de départ des colis : il sert à la cotation de tous les transporteurs.": "Where parcels leave from: used to quote every carrier.",
   "Propose l’adresse complète pendant que le client tape la sienne.": "Suggests the full address while the customer types theirs.",
+  // Refonte de la préparation, deux jeux de clés des transporteurs (2026-10-19).
+  "Posée": "Set",
+  "actif": "active",
+  "Jeu complet": "Complete set",
+  "Incomplet": "Incomplete",
+  "Jeu actif": "Active set",
+  "Le jeu qui sert à CRÉER les étiquettes. Les tarifs se lisent toujours en production quand elle est posée (gratuit).": "The set used to CREATE labels. Rates are always read in production when it is set (free).",
+  "Créer les étiquettes avec": "Create labels with",
+  "Bac à sable — rien n’est facturé": "Sandbox — nothing is billed",
+  "Production — étiquettes facturées": "Production — labels are billed",
+  "Numéros de suivi": "Tracking numbers",
+  "Nouvelle plateforme (OAuth) — un seul hôte : c’est la clé qui est de test ou de production.": "New platform (OAuth) — a single host: the key itself is test or production.",
+  "Ancienne passerelle (soa-gw) — hôte de test ct.soa-gw.canadapost.ca.": "Legacy gateway (soa-gw) — test host ct.soa-gw.canadapost.ca.",
 };

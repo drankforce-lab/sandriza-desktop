@@ -128,6 +128,12 @@ button.prim:hover:not(:disabled){background:var(--or-clair)}
 .cot.mal b{color:var(--tx-err)}
 .cot.mal{flex-wrap:nowrap}
 .cot .mt{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* LES DEUX JEUX (2026-10-19) : le bloc du jeu ACTIF porte un liseré or et la mention « actif ». */
+.szr-sec.jeu{position:relative}
+.szr-sec.jeu.actif{border-color:var(--or)}
+.szr-sec.jeu .jt{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap}
+.szr-sec.jeu .jt .rf-pill{font-size:.66rem}
+.jeu-actif{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
 `;
 
 function pageTransporteurs() {
@@ -228,7 +234,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (m.defini ? '${T("inchangé")}' : esc(place || '')) + '" autocomplete="new-password"' + (RO ? ' disabled' : '') + '>'
       + '<button type="button" class="mini voir" data-voir="' + id + '"' + (RO ? ' disabled' : '') + '>${T("Afficher")}</button></div>'
       + '<div class="etat' + (m.defini ? '' : ' non') + '">'
-      + (m.defini ? '<span class="rf-pill vert">${T("Enregistré")}</span><span class="rf-code">…' + esc(m.fin) + '</span>'
+      + (m.defini ? '<span class="rf-pill vert">${T("Posée")}</span><span class="rf-code">●●●●' + esc(m.fin) + '</span>'
                   : '<span class="rf-pill ambre">${T("Aucun secret enregistré")}</span>') + '</div></div>';
   }
   function texteHtml(id, label, v, place, mono, aide){
@@ -325,7 +331,52 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<option value="sandbox"' + ((mode || 'sandbox') === 'sandbox' ? ' selected' : '') + '>' + libTest + '</option>'
       + '<option value="production"' + (mode === 'production' ? ' selected' : '') + '>${T("Production")}</option></select></div>';
   }
+  /* ══ LES DEUX JEUX DE CLÉS (2026-10-19, sa demande) ═══════════════════════════════════════════
+     « Basculer entre bac à sable et production oblige à ressaisir clés et secrets. » Chaque
+     transporteur garde maintenant DEUX blocs côte à côte — Bac à sable, Production — et le
+     commutateur « Jeu actif » choisit simplement lequel sert aux étiquettes. Les cotations, elles,
+     se lisent en production dès que son jeu est posé (gratuit ; une clé de test ne rend que des
+     prix d exemple). Ids des champs : <base>-sandbox / <base>-production. */
+  var JEUX = [{ k: 'sandbox', n: '${T("Bac à sable (test)")}' }, { k: 'production', n: '${T("Production")}' }];
+  function aDeuxJeux(d){ return !!(D && D.deuxJeux && d && d.jeux); }
+  function jeuTeteHtml(j, d){
+    var e = (d.jeux || {})[j.k] || {};
+    var actif = (d.mode || 'sandbox') === j.k;
+    return '<div class="jt"><h3>' + esc(j.n) + '</h3>'
+      + (actif ? '<span class="rf-pill bleu">${T("actif")}</span>' : '')
+      + (e.complet ? '<span class="rf-pill vert">${T("Jeu complet")}</span>' : '<span class="rf-pill ambre">${T("Incomplet")}</span>')
+      + '</div>';
+  }
+  function jeuActifHtml(id, mode){
+    return '<section class="szr-sec"><h3>${T("Jeu actif")}</h3><p class="szr-sous">${T("Le jeu qui sert à CRÉER les étiquettes. Les tarifs se lisent toujours en production quand elle est posée (gratuit).")}</p>'
+      + '<div class="ch"><label for="' + id + '">${T("Créer les étiquettes avec")}</label><select id="' + id + '"' + (RO ? ' disabled' : '') + '>'
+      + '<option value="sandbox"' + ((mode || 'sandbox') === 'sandbox' ? ' selected' : '') + '>${T("Bac à sable — rien n’est facturé")}</option>'
+      + '<option value="production"' + (mode === 'production' ? ' selected' : '') + '>${T("Production — étiquettes facturées")}</option></select></div></section>';
+  }
   function carteSimpleHtml(sp){
+    var d0 = (D.carriers || {})[sp.cle] || {};
+    if (aDeuxJeux(d0) && sp.mode) return carteDeuxJeuxHtml(sp, d0);
+    return carteSimpleUnJeuHtml(sp);
+  }
+  function carteDeuxJeuxHtml(sp, d){
+    var h = teteHtml(sp.titre, sp.enId, d.enabled, sp.cle) + '<div class="szr-sections">';
+    JEUX.forEach(function(j){
+      var e = d.jeux[j.k] || {};
+      var actif = (d.mode || 'sandbox') === j.k;
+      h += '<section class="szr-sec jeu' + (actif ? ' actif' : '') + '">' + jeuTeteHtml(j, d)
+        + texteHtml(sp.user.id + '-' + j.k, sp.user.label, e[sp.user.champ], sp.user.place, true)
+        + secretHtml(sp.sec.id + '-' + j.k, sp.sec.label, e[sp.sec.champ], sp.sec.place)
+        + (sp.cleApi ? secretHtml(sp.cleApi.id + '-' + j.k, sp.cleApi.label, e[sp.cleApi.champ], sp.cleApi.place) : '')
+        + (sp.cle === 'intelcom' ? '' : texteHtml(sp.acct.id + '-' + j.k, sp.acct.label, e.accountNumber, sp.acct.place, false))
+        + (sp.tests && j.k === 'sandbox' ? sp.tests.map(function(t){ return texteHtml(t.id + '-' + j.k, t.label, e[t.champ], '', false); }).join('') : '')
+        + '</section>';
+    });
+    h += jeuActifHtml(sp.mode.id, d.mode);
+    // Intelcom : le préfixe des numéros de suivi est COMMUN aux deux jeux.
+    if (sp.cle === 'intelcom') h += '<section class="szr-sec"><h3>${T("Numéros de suivi")}</h3>' + texteHtml(sp.acct.id, sp.acct.label, d.accountNumber, sp.acct.place, false) + '</section>';
+    return h + '</div>';
+  }
+  function carteSimpleUnJeuHtml(sp){
     var d = (D.carriers || {})[sp.cle] || {};
     var h = teteHtml(sp.titre, sp.enId, d.enabled, sp.cle) + '<div class="szr-sections">';
     h += '<section class="szr-sec"><h3>${T("Identifiants API")}</h3><p class="szr-sous">${T("Fournis par le portail des développeurs du transporteur.")}</p>'
@@ -344,6 +395,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function cartePcHtml(){
     var pc = (D.carriers || {})['postes-canada'] || {};
+    if (aDeuxJeux(pc)) {
+      var h2 = teteHtml('${T("Postes Canada")}', 'cp-en', pc.enabled, 'postes-canada') + '<div class="szr-sections">';
+      JEUX.forEach(function(j){
+        var e = pc.jeux[j.k] || {};
+        var actif = (pc.mode || 'sandbox') === j.k;
+        h2 += '<section class="szr-sec jeu' + (actif ? ' actif' : '') + '">' + jeuTeteHtml(j, pc)
+          + secretHtml('cp-cle-' + j.k, '${T("Clé API:Secret")}', e.cle, '${T("clé:secret")}')
+          + texteHtml('cp-cust-' + j.k, '${T("Numéro client")}', e.customerNumber, j.k === 'sandbox' ? '${T("Ex : 2004381")}' : '${T("Ex : 0001234567")}', false)
+          + texteHtml('cp-contract-' + j.k, '${T("ID contrat")}', e.contractId, '${T("Vide sans entente commerciale")}', false)
+          + (e.plateforme ? '<div class="aide">' + (e.plateforme === 'oauth' ? '${T("Nouvelle plateforme (OAuth) — un seul hôte : c’est la clé qui est de test ou de production.")}' : '${T("Ancienne passerelle (soa-gw) — hôte de test ct.soa-gw.canadapost.ca.")}') + '</div>' : '')
+          + '</section>';
+      });
+      h2 += jeuActifHtml('cp-mode', pc.mode);
+      return h2 + '</div>';
+    }
     var m = pc.cle || { defini: false, fin: '' };
     var h = teteHtml('${T("Postes Canada")}', 'cp-en', pc.enabled, 'postes-canada') + '<div class="szr-sections">';
     /* ⚠ LA NOUVELLE PLATEFORME (2026-10-05) : Clé API et Secret collés ensemble, « clé:secret ». */
@@ -448,7 +514,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       originName: val('cp-oname'), originPhone: val('cp-ophone'), originAddress: val('cp-oaddr'),
       originCity: val('cp-ocity'), originProvince: val('cp-oprov'), originPostal: val('cp-opostal'),
     };
+    if (document.getElementById('cp-cle-sandbox')) {
+      s['postes-canada'].jeux = {};
+      JEUX.forEach(function(j){
+        s['postes-canada'].jeux[j.k] = { cle: val('cp-cle-' + j.k), customerNumber: val('cp-cust-' + j.k), contractId: val('cp-contract-' + j.k) };
+      });
+    }
     SIMPLES.forEach(function(sp){
+      if (document.getElementById(sp.user.id + '-sandbox')) {
+        var oj = { enabled: chk(sp.enId), mode: val(sp.mode.id), jeux: {} };
+        if (sp.cle === 'intelcom') oj.accountNumber = val(sp.acct.id);
+        JEUX.forEach(function(j){
+          var x = {};
+          x[sp.user.champ] = val(sp.user.id + '-' + j.k);
+          x[sp.sec.champ] = val(sp.sec.id + '-' + j.k);
+          if (sp.cleApi) x[sp.cleApi.champ] = val(sp.cleApi.id + '-' + j.k);
+          if (sp.cle !== 'intelcom') x.accountNumber = val(sp.acct.id + '-' + j.k);
+          (sp.tests || []).forEach(function(t){ if (document.getElementById(t.id + '-' + j.k)) x[t.champ] = val(t.id + '-' + j.k); });
+          oj.jeux[j.k] = x;
+        });
+        s[sp.cle] = oj;
+        return;
+      }
       var o = { enabled: chk(sp.enId), accountNumber: val(sp.acct.id) };
       o[sp.user.champ] = val(sp.user.id);
       o[sp.sec.champ] = val(sp.sec.id);
