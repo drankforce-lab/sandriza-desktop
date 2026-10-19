@@ -759,6 +759,12 @@ jobs:
           # personne ne l'attendait, rien n'arrivait : pas d'erreur, pas de
           # fenêtre, pas un mot. Le bouton a l'air cassé, le code a l'air juste.
           node tools/banc-modules-ouvrables.js
+          # ⚠ LA PASTILLE DES GÉNÉRATIONS (2026-10-18, sa capture : « je clique, rien ne
+          # se passe »). Le panneau retenait son état dans localStorage, qui LÈVE dans
+          # une page data: : le clic ne faisait rien dans AUCUNE fenêtre. Ce banc clique
+          # la vraie pastille (localStorage levant), suit le chemin jusqu'à la fenêtre
+          # Générations, et vérifie qu'elle s'en va quand il n'y a rien à traiter.
+          node tools/banc-pastille-generations.js
           # ⚠⚠ CELUI-CI GARDE UNE FENÊTRE QUI SURVIVAIT À LA DÉCONNEXION : une fiche
           # client native, nom et adresse lisibles, posée par-dessus l'écran de
           # connexion (2026-09-25). Trois maillons dans deux dépôts — clearSession,

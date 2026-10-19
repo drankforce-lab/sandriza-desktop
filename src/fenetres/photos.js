@@ -463,6 +463,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   var D = null;
   var Q = '';
   var TRI = 'recent';
+  /* LE FILTRE ATTACHÉES / LIBRES (2026-10-18, sa demande) — « attachée » = une fiche l'emploie (voir Photos._fichesDe). */
+  var ATT = 'tout';
   var PAGE = 0;
   var DETAIL = null;        // la ligne ouverte
   var ATTACHE = false;      // le selecteur d article est deploye
@@ -521,10 +523,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (!z || !(z.clientHeight > 40) || !(z.clientWidth > 40)) return;
     var n, gap = 10;
     if (VUE === 'vignettes') {
-      var c = z.querySelector('.vcarte');
-      var w = c ? c.offsetWidth + gap : 190, hC = c ? c.offsetHeight + gap : 250;
-      var cols = Math.max(1, Math.floor((z.clientWidth + gap) / w));
-      var rangs = Math.max(1, Math.floor((z.clientHeight + gap) / hC));
+      /* ⚠ LES COLONNES SE LISENT DANS LA GRILLE, LA LIGNE « TOUT CHOISIR » SE RETRANCHE (2026-10-18, sa capture à
+         2000 × 1200 : 12 vignettes, une rangée de 7 et une de 5, la place d'une troisième rangée vide). On divisait la
+         largeur par celle d'une carte — or une carte s'ÉTIRE (1fr) : le compte tombait juste à une largeur, faux à
+         une autre. La grille, elle, dit combien de colonnes elle a posées ; et la page est un multiple exact du nombre
+         de colonnes — la dernière rangée est toujours pleine. */
+      var c = z.querySelector('.vcarte'), gr = z.querySelector('.vgrille'), te = z.querySelector('.vtete');
+      var hC = c ? c.offsetHeight + gap : 250;
+      var cols = 0;
+      try { cols = gr ? String(getComputedStyle(gr).gridTemplateColumns || '').split(' ').filter(function(x){ return x && x !== 'none'; }).length : 0; } catch (e) { cols = 0; }
+      if (!cols) cols = Math.max(1, Math.floor((z.clientWidth + gap) / 180));
+      var rangs = Math.max(1, Math.floor((z.clientHeight - (te ? te.offsetHeight : 0) + gap) / hC));
       n = cols * rangs;
     } else {
       var tr = z.querySelector('tbody tr'), th = z.querySelector('thead');
@@ -550,6 +559,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   window.addEventListener('resize', function(){
     clearTimeout(_autoT); _autoT = setTimeout(mesurerAuto, 200);
   });
+  /* ⚠ LA FENÊTRE ANCRÉE OU DÉTACHÉE NE CHANGE PAS TOUJOURS DE TAILLE « À LA FENÊTRE » : le panneau de détail qui s'ouvre,
+     la barre qui passe sur deux lignes changent la place de la grille sans événement resize. On observe donc le corps. */
+  try {
+    new ResizeObserver(function(){ clearTimeout(_autoT); _autoT = setTimeout(mesurerAuto, 120); }).observe(document.body);
+  } catch (e) {}
+  /* LE RATTRAPAGE DES ATTACHES (2026-10-18) : une fois par jour et par poste, les photos LIBRES qu'une fiche emploie
+     déjà (copie recompressée, depuis avant le lien) sont retrouvées à l'empreinte visuelle et attachées — la Chemise
+     Walla et ses PH-000072 / PH-000074, par exemple. Le résultat est dit. */
+  var _rattrapeFait = false;
+  function rattraperUneFois(){
+    if (_rattrapeFait || !D || !D.peutModifier) return;
+    _rattrapeFait = true;
+    var jour = new Date().toISOString().slice(0, 10);
+    try { if (localStorage.getItem('sz-photos-rattrapage') === jour) return; } catch (e) {}
+    appeler('photos:rattraper', []).then(function(r){
+      try { localStorage.setItem('sz-photos-rattrapage', jour); } catch (e) {}
+      if (!r || !r.ok || !(r.attachees || []).length) return;
+      dire(r.attachees.length + ' ' + (r.attachees.length > 1 ? '${T("photos retrouvées dans des fiches et attachées :")}' : '${T("photo retrouvée dans une fiche et attachée :")}') + ' '
+        + r.attachees.slice(0, 6).map(function(a){ return a.code + ' (' + a.produit + ')'; }).join(', ') + (r.attachees.length > 6 ? '…' : ''), 'bon');
+      charger();
+    });
+  }
   var LOTS = null;          // l historique, quand il est ouvert
   /* ══════════════════════════════════════════════════════════════════════════
      L ASSISTANT DE TRAITEMENT EN LOT — trois etapes
@@ -705,6 +736,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '<select id="p-tri" aria-label="${T("Nombre de photos par page")}">'
       + opt('recent', '${T("Plus récentes")}') + opt('code', '${T("Par code")}') + opt('name', '${T("Par nom")}')
       + opt('linked', '${T("Liées d’abord")}') + opt('size', '${T("Plus lourdes")}')
+      + '</select>'
+      + '<select id="p-att" aria-label="${T("Attachées ou libres")}">'
+      + '<option value="tout"' + (ATT === 'tout' ? ' selected' : '') + '>${T("Toutes")}</option>'
+      + '<option value="attachees"' + (ATT === 'attachees' ? ' selected' : '') + '>${T("Attachées")}</option>'
+      + '<option value="libres"' + (ATT === 'libres' ? ' selected' : '') + '>${T("Libres")}</option>'
       + '</select>'
       + '<span class="vues" role="group" aria-label="${T("Mode d’affichage")}">'
       + [['vignettes', '${T("Vignettes")}'], ['compacte', '${T("Liste compacte")}'], ['liste', '${T("Liste")}']].map(function(v){
@@ -2065,7 +2101,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var t = traits(r);
     var h = t.map(function(x){ return '<span class="pill info">' + esc(cap(x)) + '</span>'; }).join(' ');
     if (!h && r.isole) h = '<span class="pill info">' + cap('${T("détourée")}') + '</span>';
-    if (r.lieId) h = '<span class="pill bon">' + cap('${T("attachée")}') + '</span>' + (h ? ' ' + h : '');
+    if (r.genre === 'rendu3d') h = '<span class="pill info">${T("Rendu 3D")}</span>' + (h ? ' ' + h : '');
+    if (r.genre === 'grosplan') h = '<span class="pill info">${T("Gros plan fibre")}</span>' + (h ? ' ' + h : '');
+    if (r.lieId) h = '<span class="pill bon" title="' + esc('${T("Utilisée dans :")} ' + (r.fiches || [r.lieNom]).join(', ')) + '">'
+      + cap('${T("attachée")}') + '</span>' + (h ? ' ' + h : '');
     return h || '<span class="pill neutre">' + esc(cap(r.statut || '${T("importée")}')) + '</span>';
   }
   function gain(r){
@@ -2623,6 +2662,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     };
     var tri = document.getElementById('p-tri');
     if (tri) tri.onchange = function(){ TRI = tri.value; PAGE = 0; charger(); };
+    var att = document.getElementById('p-att');
+    if (att) att.onchange = function(){ ATT = att.value; PAGE = 0; charger(); };
     var bp = document.getElementById('p-prec');
     if (bp) bp.onclick = function(){ PAGE = Math.max(0, (D.page || 0) - 1); charger(); };
     var bs = document.getElementById('p-suiv');
@@ -2719,7 +2760,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       });
       occuper('${T("Suppression de")} ' + ids.length + ' ' + szPl(ids.length, '${T("photo")}', '${T("photos")}') + '…');
       suiviOuvrir(titres, '${T("Suppression ·")} ' + ids.length + ' ' + szPl(ids.length, '${T("photo")}', '${T("photos")}'));
-      var faits = 0, rates = 0, abandon = 0;
+      var faits = 0, rates = 0, abandon = 0, gardees = 0;
       var pas = function(k){
         suiviCompte(k, ids.length);
         if (ANNULE && k < ids.length) {
@@ -2730,6 +2771,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         if (k >= ids.length) {
           liberer();
           var t = faits + ' ' + (faits > 1 ? '${T("retirées")}' : '${T("retirée")}');
+          if (gardees) t += ' · ' + gardees + ' ' + (gardees > 1 ? '${T("attachées, gardées")}' : '${T("attachée, gardée")}');
           if (rates) t += ' · ' + rates + ' ' + (rates > 1 ? '${T("refusées")}' : '${T("refusée")}');
           if (abandon) t += ' · ' + abandon + ' ' + (abandon > 1 ? '${T("abandonnées")}' : '${T("abandonnée")}');
           suiviFin(t + '.', abandon ? '${T("Suppression interrompue")}' : '${T("Suppression terminée")}');
@@ -2741,6 +2783,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         suiviLigne(k, 'cours', '${T("en cours")}');
         appeler('photos:supprimer', [ids[k]]).then(function(r){
           if (r && r.ok) { faits++; delete CHOIX[ids[k]]; suiviLigne(k, 'faite', '${T("retirée")}'); }
+          else if (r && (r.motif === 'photo_attachee' || r.motif === 'generation_en_cours')) {
+            gardees++;
+            suiviLigne(k, 'echec', '${T("attachée — gardée")}');
+            suiviEtapes(k, [{ nom: '${T("utilisée par")}', ok: false, chiffre: (r.produits || []).join(', ') }]);
+          }
           else {
             rates++;
             suiviLigne(k, 'echec', '${T("refusée")}');
@@ -2843,7 +2890,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         if (!l.length) { liberer(); dire('${T("La photothèque est déjà vide.")}', 'att'); return; }
         var titres = l.map(function(x){ return x.code + ' · ' + x.nom; });
         suiviOuvrir(titres, '${T("Vidage ·")} ' + l.length + ' ' + szPl(l.length, '${T("photo")}', '${T("photos")}'));
-        var faits = 0, rates = 0, abandon = 0;
+        var faits = 0, rates = 0, abandon = 0, gardees = 0;
         var pas = function(k){
           suiviCompte(k, l.length);
           if (ANNULE && k < l.length) {
@@ -2854,6 +2901,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
           if (k >= l.length) {
             liberer();
             var m = faits + ' ' + (faits > 1 ? '${T("retirées")}' : '${T("retirée")}');
+            if (gardees) m += ' · ' + gardees + ' ' + (gardees > 1 ? '${T("attachées, gardées")}' : '${T("attachée, gardée")}');
             if (rates) m += ' · ' + rates + ' ' + (rates > 1 ? '${T("refusées")}' : '${T("refusée")}');
             if (abandon) m += ' · ' + abandon + ' '
               + (abandon > 1 ? '${T("abandonnées")}' : '${T("abandonnée")}');
@@ -2868,7 +2916,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
           suiviEtapes(k, [{ nom: 'fiche', etat: 'encours' }]);
           occuper('Retrait ' + (k + 1) + ' / ' + l.length + '…');
           appeler('photos:supprimer', [l[k].id]).then(function(r){
-            if (r && r.ok) {
+            if (r && (r.motif === 'photo_attachee' || r.motif === 'generation_en_cours')) {
+              gardees++;
+              suiviLigne(k, 'echec', '${T("attachée — gardée")}');
+              suiviEtapes(k, [{ nom: '${T("utilisée par")}', ok: false, chiffre: (r.produits || []).join(', ') }]);
+            } else if (r && r.ok) {
               faits++;
               suiviLigne(k, 'faite', '${T("retirée")}');
               suiviEtapes(k, [{ nom: 'fiche', ok: true }, { nom: '${T("images du stockage")}', ok: true }]);
@@ -2957,12 +3009,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       }
       SUPPR_ARME_INSP = false;
       dire('${T("Retrait…")}');
-      appeler('photos:supprimer', [DETAIL.id]).then(function(r){
-        if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      var finInsp = function(r){
         dire(r.code + ' ${T("retirée de la médiathèque")}'
           + (r.lie ? ' ${T("— la fiche de l’article garde son image.")}' : '.'), 'bon');
         DETAIL = null; ATTACHE = false; PRODUITS = null;
         charger();
+      };
+      var idInsp = DETAIL.id;
+      appeler('photos:supprimer', [idInsp]).then(function(r){
+        if (r && (r.motif === 'photo_attachee' || r.motif === 'generation_en_cours')) { dire(''); supprimerAttachee(idInsp, r, finInsp); return; }
+        if (!r.ok) { dire(expliquer(r), 'err'); return; }
+        finInsp(r);
       });
     };
   }
@@ -2987,6 +3044,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   function gesteOuvrir(id){ var t = lignePar(id); if (t) { DETAIL = t; dessiner(); } }
   /* ⚠ LA SUPPRESSION DEMANDE DANS UNE BOITE A PART (2026-10-15) : szConfirmer ;
      confirmee, on arme puis on rappelle le geste, qui agit comme avant. */
+  /* ⚠ UNE PHOTO ATTACHÉE (2026-10-18, sa capture : « risque de les supprimer par erreur ») : le site refuse sans
+     confirmation et dit QUELLES fiches l'emploient ; on repose la question en les nommant, puis on confirme. Pendant une
+     génération 3D sur une de ces fiches, c'est non (ce sont ses photos sources). */
+  function supprimerAttachee(id, r, fini){
+    if (r && r.motif === 'generation_en_cours') {
+      dire('${T("Cette photo sert à un aperçu 3D en cours de génération pour")} ' + (r.produits || []).join(', ') + ' — ${T("réessayez à la fin.")}', 'err');
+      return;
+    }
+    szConfirmer({ danger: true, titre: '${T("Supprimer une photo attachée")}',
+      texte: '${T("Cette photo est utilisée par :")} ' + (r.produits || []).join(', ') + '. ${T("La fiche garde sa propre copie de l’image, mais le lien vers la photothèque sera perdu.")}',
+      oui: '${T("Supprimer quand même")}' }).then(function(ok){
+        if (!ok) return;
+        appeler('photos:supprimer', [id, true]).then(function(r2){ if (!r2 || !r2.ok) { dire(expliquer(r2), 'err'); return; } fini(r2); });
+      });
+  }
   function gesteSupprimer(id){
     if (SUPPR_ARME !== id) {
       var lS = lignePar(id);
@@ -2997,11 +3069,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     }
     SUPPR_ARME = '';
     dire('${T("Suppression…")}');
+    var finUne = function(){ delete CHOIX[id]; dire('${T("Photo retirée de la photothèque.")}', 'bon'); charger(); };
     appeler('photos:supprimer', [id]).then(function(r){
+      if (r && (r.motif === 'photo_attachee' || r.motif === 'generation_en_cours')) { dire(''); supprimerAttachee(id, r, finUne); return; }
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      delete CHOIX[id];
-      dire('${T("Photo retirée de la photothèque.")}', 'bon');
-      charger();
+      finUne();
     });
   }
 
@@ -3283,8 +3355,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   function charger(garderSaisie){
     if (enCours) { RELANCE = true; return; }
     enCours = true;
-    appeler('photos:donnees', [{ q: Q, tri: TRI, taille: TAILLE, page: PAGE }]).then(function(r){
+    appeler('photos:donnees', [{ q: Q, tri: TRI, taille: TAILLE, page: PAGE, attache: ATT }]).then(function(r){
       enCours = false;
+      rattraperUneFois();
       if (RELANCE) { RELANCE = false; charger(garderSaisie); return; }
       if (!r || !r.ok) { vide('${T("Photothèque indisponible")}', expliquer(r)); return; }
       D = r;

@@ -61,7 +61,7 @@ async function compresserGlb(octets, options){
      3 telecharger(url)              — le GLB, depuis le stockage public de The New Black seulement ;
      4 recaler(devant, dos)          — les photos décodées ICI (PNG/JPEG en data:), le modèle simplifié et la photo
                                         de chaque face recalée sur sa silhouette (dans le fil) ;
-     5 projeter · 6 couleur          — dans le fil (projection3d.js) ;
+     5 projeter · 6 aplanir · 7 couleur — dans le fil (projection3d.js) ;
      7 compresser                    — textures encodées ici (2048 px, JPEG 85 ; relief 1024 px), Draco dans le fil ;
      8 controler                     — la conformité, et la vignette (le devant rendu) ;
    puis fermer. Une session par jeton, un FIL par session : l'application ne se fige jamais. */
@@ -132,18 +132,70 @@ function fermer(jeton){
 // une session oubliée (génération interrompue sans adieu) s'éteint après 20 minutes
 setInterval(() => { const t = Date.now(); SESSIONS.forEach((s, j) => { if (t - s.vu > 20 * 60000) fermer(j); }); }, 60000).unref();
 
+/* (6) LA TEINTE VÉRIFIÉE AU RENDU DE LA BOUTIQUE (2026-10-19, sa plainte : « fidèle à UNE teinte, celle de la photo
+   principale »). Huit angles, aux réglages exacts de la boutique (rendu-boutique.js), et le même modèle peint d'une
+   seule couleur sous les mêmes angles — la lumière de la boutique varie à elle seule de ΔE ~12 autour du vêtement ;
+   ce qu'on juge est la part de la TEXTURE (voir comparerTeinte). Deux exigences :
+     · l'UNIFORMITÉ : la teinte de chaque angle à moins de ΔE 3 de celle de la face ;
+     · la FIDÉLITÉ : la face rendue à moins de ΔE 3 de la photo du devant.
+   Sinon, deux corrections au plus : un décalage Lab GLOBAL (la face ramenée sur la photo) et un décalage PAR
+   DIRECTION (chaque angle ramené sur la face, interpolé selon l'azimut de la normale de chaque texel). */
+const ANGLES_TEINTE = [0, 45, 90, 135, 180, 225, 270, 315];
+async function verifierAuRendu(s, reference){
+  const { mesurerAngles, comparerTeinte } = require('./rendu-boutique');
+  const { lab } = require('./projection3d');
+  const essais = [];
+  const t0 = await demander(s, 'textures');
+  const normaleImage = t0.normale ? versNative(t0.normale).toJPEG(90) : null;
+  // le témoin : le même modèle, d'une seule couleur (celle de la photo), rendu une fois
+  const c = (reference || [128, 128, 128]).map(Math.round), uni = { w: 8, h: 8, data: new Uint8ClampedArray(256) };
+  for (let k = 0; k < 64; k++) { uni.data[k * 4] = c[0]; uni.data[k * 4 + 1] = c[1]; uni.data[k * 4 + 2] = c[2]; uni.data[k * 4 + 3] = 255; }
+  const apU = await demander(s, 'apercu', { texImage: versNative(uni).toJPEG(95), normaleImage });
+  const mUni = await mesurerAngles(Buffer.from(apU.glb), apU.theta0, ANGLES_TEINTE);
+  if (!mUni) return { indisponible: true };
+  for (let it = 0; it <= 2; it++) {
+    const t = it ? await demander(s, 'textures') : t0;
+    const ap = await demander(s, 'apercu', { texImage: versNative(t.tex).toJPEG(85), normaleImage });
+    const m = await mesurerAngles(Buffer.from(ap.glb), ap.theta0, ANGLES_TEINTE);
+    if (!m) return { indisponible: true, essais };
+    const cmp = comparerTeinte(m, mUni, reference, lab);
+    essais.push(cmp);
+    if ((cmp.uniformite < 3 && (cmp.ecartPhoto == null || cmp.ecartPhoto < 3)) || it === 2) break;
+    const F = lab(m[0].rgb), Rf = reference ? lab(reference) : F;
+    const global = [0, 1, 2].map((k) => (Rf[k] - F[k]) * 0.9);
+    // par direction : (part de la texture à la face − part à cet angle) ; la face elle-même ne bouge pas
+    const secteurs = m.map((x, i) => ({ a: x.a, d: [0, 1, 2].map((k) => (cmp.rel[0][k] - cmp.rel[i][k]) * 0.9) }));
+    await demander(s, 'couleur', { correction: { global, secteurs } });
+  }
+  const der = essais[essais.length - 1];
+  return { uniformite: der.uniformite, ecartPhoto: der.ecartPhoto, angles: der.angles, iterations: essais.length - 1,
+    premier: { uniformite: essais[0].uniformite, ecartPhoto: essais[0].ecartPhoto },
+    lumiere: +Math.max(...mUni.map((x) => require('./projection3d').deltaE(x.rgb, mUni[0].rgb))).toFixed(1) };
+}
+
 async function tnb(etape, jeton, a, b){
   jeton = String(jeton || '');
   if (!/^[A-Za-z0-9_-]{8,80}$/.test(jeton)) throw new Error('jeton refusé');
   if (etape === 'telecharger') {
-    const u = new URL(String(a || ''));
-    if (u.protocol !== 'https:' || u.hostname !== 'cloud.thenewblack.ai' || !/\.glb$/i.test(u.pathname)) throw new Error('adresse refusée');
-    const r = await fetch(u.href, { signal: AbortSignal.timeout(180000) });
-    if (!r.ok) throw new Error('téléchargement ' + r.status);
-    const buf = Buffer.from(await r.arrayBuffer());
+    /* Deux sources permises : le modèle BRUT de The New Black (lecture gratuite), et — pour « Refaire la couleur »
+       (2026-10-19), quand le lien brut a expiré — le modèle déjà POSÉ, dans notre stockage public R2. `b` est la
+       source de repli, essayée si la première ne répond pas. */
+    const permise = (x) => { try { const u = new URL(String(x || '')); return u.protocol === 'https:' && /\.glb$/i.test(u.pathname)
+      && (u.hostname === 'cloud.thenewblack.ai' || /^pub-[0-9a-f]{32}\.r2\.dev$/.test(u.hostname)) ? u.href : null; } catch (e) { return null; } };
+    const sources = [permise(a), permise(b)].filter(Boolean);
+    if (!sources.length) throw new Error('adresse refusée');
+    let buf = null, dernier = '', utilisee = '';
+    for (const src of sources) {
+      try {
+        const r = await fetch(src, { signal: AbortSignal.timeout(180000) });
+        if (!r.ok) { dernier = 'téléchargement ' + r.status; continue; }
+        buf = Buffer.from(await r.arrayBuffer()); utilisee = src; break;
+      } catch (e) { dernier = String((e && e.message) || e); }
+    }
+    if (!buf) throw new Error(dernier || 'téléchargement impossible');
     if (buf.length > 120 * 1024 * 1024) throw new Error('modèle trop lourd');
     const s = ouvrir(jeton); s.glb = buf;
-    return { octets: buf.length };
+    return { octets: buf.length, source: utilisee.indexOf('thenewblack') > 0 ? 'tnb' : 'pose' };
   }
   if (etape === 'fermer') { fermer(jeton); return {}; }
   const s = session(jeton);
@@ -166,7 +218,13 @@ async function tnb(etape, jeton, a, b){
     return demander(s, 'preparer', { glb, tex, normale, devant, dos }, [glb]);
   }
   if (etape === 'projeter') return demander(s, 'projeter');
-  if (etape === 'couleur') return demander(s, 'couleur');
+  if (etape === 'aplanir') return demander(s, 'aplanir');
+  if (etape === 'couleur') {
+    const r = await demander(s, 'couleur');
+    let rendu = null;
+    try { rendu = await verifierAuRendu(s, r.reference); } catch (e) { rendu = { indisponible: true, detail: String((e && e.message) || e).slice(0, 200) }; }
+    return Object.assign(r, { rendu });
+  }
   if (etape === 'compresser') {
     const t = await demander(s, 'textures');
     const texImage = versNative(t.tex).toJPEG(85), normaleImage = t.normale ? versNative(t.normale).toJPEG(90) : null;

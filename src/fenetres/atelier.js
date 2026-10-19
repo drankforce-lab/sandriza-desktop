@@ -2670,13 +2670,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       yaw: 0, pitch: 0.26, zoom: 1, px: 0, py: 0, carte: false, fil: false, auto: false, mannequin: (function(){ try { return localStorage.getItem('sz-atelier-mannequin') !== '0'; } catch (e) { return true; } })(), couleur: m.photo3d ? m.photo3d.couleur : COUL3[0][0], fond: 'beige', sale: true, photo: !!m.photo3d,
       outil: 'tourner', dec: { forme: 'rond', l: 3, h: 3 }, el: { type: 'perle', matiere: 'or', taille: 0.8 }, pile: [], dsale: false,
       design: { decoupes: ((m.design3d && m.design3d.decoupes) || []).slice(), elements: ((m.design3d && m.design3d.elements) || []).slice() } };
-    VUE = '3d'; dessiner(); charger3d();
+    /* ⚠ (2026-10-18, son bogue : « j ouvre un autre modèle en vue 3D, ça me ramène dans l ancien » — non reproduit au banc,
+       correctif défensif) Le canevas WebGL est GARDÉ d une ouverture à l autre et garde sa dernière image (preserveDrawingBuffer) :
+       si son contexte a été perdu sans que la perte soit encore signalée, rien ne s y redessinait, et le vêtement d AVANT restait
+       sous l en-tête du nouveau. Donc : un contexte perdu n est pas repris (dessiner3d pose un canevas neuf) ; et l image d un
+       AUTRE modèle est effacée tout de suite, la barre d état disant ce qui se charge. */
+    if (GLV && GLV.gl && GLV.gl.isContextLost()) GLV = null;
+    VUE = '3d'; dessiner();
+    if (GLV && GLV.gl && GLV.dessineId !== id) { var gl0 = GLV.gl; gl0.clearColor(0, 0, 0, 0); gl0.clear(gl0.COLOR_BUFFER_BIT | gl0.DEPTH_BUFFER_BIT); GLV.dessineId = ''; }
+    dire('${T("Chargement de « {0} »…")}'.split('{0}').join(m.nom || ''), 'att');
+    charger3d();
+  }
+  // un canevas NEUF pour la vue 3D (nouvel élément, nouveau contexte) : l ancien ne se dessine plus (contexte perdu, ou pris en 2D)
+  function canevasNeuf3d(){
+    var cv = document.getElementById('v3-canevas'); if (!cv || !cv.parentNode) return;
+    var nv = cv.cloneNode(false); cv.parentNode.replaceChild(nv, cv);
+    if (GLV && GLV.cv === cv) GLV = null;
+    demander3d();
   }
   function charger3d(){
     var n = ++v3N;
     appeler('atelier:apercu3d', [{ id: V3.id, taille: V3.taille, stature: V3.stature, genre: V3.genre }]).then(function(r){
       if (n !== v3N || VUE !== '3d' || !V3) return;
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+      dire('');
       V3.r = r; V3.mesh = maillage(r); V3.sale = true; peindrePanneau3d(); peindreDesign3d(); entete3d(); imagesMotif3d(); demander3d();
       programmerVignette();
     });
@@ -3251,7 +3268,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      sans lumière ni mannequin) pour compter les fentes au pixel près. En usage normal, rien de tout cela n existe. */
   if (window.__szBanc3d) window.__szBanc3d.moteur = { v3: function(){ return V3; }, glv: function(){ return GLV; },
     peindre: function(){ peindre3d(); }, tubes: function(){ return corpsDrape((V3 && V3.r && V3.r.corps) || []); },
-    diag: function(on){ if (GLV) GLV.diag = !!on; } };
+    diag: function(on){ if (GLV) GLV.diag = !!on; },
+    // (tools/banc-atelier-3d-modeles.js) la vue courante, la sélection, la mini-vue de la fiche
+    vue: function(){ return VUE; }, sel: function(){ return SEL; }, mini: function(){ return MINI; } };
   var MAT3 = { or: [0.83, 0.66, 0.26, 1, 60], argent: [0.80, 0.81, 0.84, 1, 80], nacre: [0.94, 0.91, 0.86, 0.25, 40], noir: [0.07, 0.07, 0.08, 0, 90], cristal: [0.86, 0.93, 1.0, 0.7, 140] };
   function webglDispo(){
     if (GL_DISPO !== null) return GL_DISPO;
@@ -4050,7 +4069,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // ⚠ les petits textes et les images fines du motif demandent de la définition : 32 px/cm, borné par la carte
     GLV.maxTex = Math.max(1024, Math.min(4096, gl.getParameter(gl.MAX_TEXTURE_SIZE) || 2048));
     GLV.aniso = gl.getExtension('EXT_texture_filter_anisotropic') || gl.getExtension('WEBKIT_EXT_texture_filter_anisotropic');
-    cv.addEventListener('webglcontextlost', function(ev){ ev.preventDefault(); GLV = null; });
+    // ⚠ (2026-10-18) seulement si le GLV courant est CELUI de ce canevas : la perte, signalée après coup, de la mini-vue ou d un canevas
+    // déjà remplacé effaçait le contexte NEUF de la vue 3D (rien ne s y redessinait plus)
+    cv.addEventListener('webglcontextlost', function(ev){ ev.preventDefault(); if (GLV && GLV.cv === cv) { GLV = null; if (VUE === '3d') demander3d(); } });
     return true;
   }
 
@@ -5739,6 +5760,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   function peindreGL(cv, dims){
+    // ⚠ (2026-10-18) un contexte PERDU (la carte graphique l a repris) dessine sans erreur… et sans rien : on le lâche, la vue en
+    // prend un neuf (voir canevasNeuf3d)
+    if (GLV && GLV.cv === cv && GLV.gl && GLV.gl.isContextLost()) { GLV = null; return false; }
     if (!GLV || GLV.cv !== cv) { if (!initGL(cv)) return false; }
     var gl = GLV.gl;
     if (GLV.r !== V3.r || GLV.vie !== VIE.plis + '|' + VIE.tissu) { construireGL(V3.r); GLV.vie = VIE.plis + '|' + VIE.tissu; }
@@ -5797,6 +5821,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       gl.uniform3f(po.u.uB, mt[0], mt[1], mt[2]); gl.uniform1f(po.u.uMet, mt[3]); gl.uniform1f(po.u.uBr, mt[4]);
       gl.drawArrays(gl.TRIANGLES, 0, ob.n);
     });
+    GLV.dessineId = V3.id;          // ce que montre le canevas (voir ouvrir3d : rien d un autre modèle sous son en-tête)
     return true;
   }
 
@@ -5976,10 +6001,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   /* ── La peinture 2D (sans WebGL, ou pour un pantalon) : rotation, perspective, ombrage, tri des faces ── */
   function peindre3d(){
     var cv = document.getElementById('v3-canevas'); if (!cv || !V3 || !V3.mesh) return;
-    if (plaque3d() && peindreGL(cv)) return;
+    if (plaque3d()) { if (peindreGL(cv)) return;
+      // le contexte vient d être perdu (peindreGL l a lâché) : un canevas neuf, qui prendra un contexte neuf
+      if (!GLV && !V3.glNon) { canevasNeuf3d(); return; } }
     var W = cv.clientWidth, H = cv.clientHeight, dpr = window.devicePixelRatio || 1;
     if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
-    var g = cv.getContext('2d'); if (!g) return;
+    // ⚠ un canevas qui porte déjà un contexte WebGL refuse le 2D : il garderait l image d avant — un canevas neuf
+    var g = cv.getContext('2d'); if (!g) { canevasNeuf3d(); return; }
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
     var cyw = Math.cos(V3.yaw), syw = Math.sin(V3.yaw), cp = Math.cos(V3.pitch), sp = Math.sin(V3.pitch);
     var Dst = 520, f = Math.min(W, H) * 2.9 * V3.zoom * (Dst - 60) / Math.max(120, V3.mesh.h) / Dst * 0.33;

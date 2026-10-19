@@ -230,6 +230,35 @@ function lab(c){
   return [116 * t(Y) - 16, 500 * (t(X) - t(Y)), 200 * (t(Y) - t(Z))];
 }
 const deltaE = (a, b) => { const A = lab(a), B = lab(b); return Math.hypot(A[0] - B[0], A[1] - B[1], A[2] - B[2]); };
+// Lab RAPIDE (4 millions de texels) : la table sRGB → linéaire, et le retour Lab → sRGB.
+const _LIN = new Float32Array(256);
+for (let i = 0; i < 256; i++) { const u = i / 255; _LIN[i] = u <= 0.04045 ? u / 12.92 : Math.pow((u + 0.055) / 1.055, 2.4); }
+function labRapide(r, g, b, o){
+  const R = _LIN[r], G = _LIN[g], B = _LIN[b];
+  const X = (R * 0.4124 + G * 0.3576 + B * 0.1805) / 0.95047, Y = R * 0.2126 + G * 0.7152 + B * 0.0722, Z = (R * 0.0193 + G * 0.1192 + B * 0.9505) / 1.08883;
+  const fx = X > 0.008856 ? Math.cbrt(X) : 7.787 * X + 16 / 116, fy = Y > 0.008856 ? Math.cbrt(Y) : 7.787 * Y + 16 / 116, fz = Z > 0.008856 ? Math.cbrt(Z) : 7.787 * Z + 16 / 116;
+  o[0] = 116 * fy - 16; o[1] = 500 * (fx - fy); o[2] = 200 * (fy - fz);
+}
+function rgbDeLab(L, a, b, o){
+  const fy = (L + 16) / 116, fx = fy + a / 500, fz = fy - b / 200;
+  const inv = (t) => (t > 0.206893 ? t * t * t : (t - 16 / 116) / 7.787);
+  const X = inv(fx) * 0.95047, Y = inv(fy), Z = inv(fz) * 1.08883;
+  const lin = [3.2406 * X - 1.5372 * Y - 0.4986 * Z, -0.9689 * X + 1.8758 * Y + 0.0415 * Z, 0.0557 * X - 0.2040 * Y + 1.0570 * Z];
+  for (let c = 0; c < 3; c++) { const u = Math.max(0, lin[c]); o[c] = Math.max(0, Math.min(255, Math.round(255 * (u <= 0.0031308 ? 12.92 * u : 1.055 * Math.pow(u, 1 / 2.4) - 0.055)))); }
+}
+/* La TEINTE d'un ensemble de pixels : le centre (médiane du groupe principal — les boutons, l'étiquette et le fond
+   n'y pèsent pas), en Lab, et l'étendue de la luminance (écart interquartile) dans ce groupe. */
+function statsTeinte(px){
+  const c = medianeGroupe(px), C = lab(c), L = [], A = [], B = [], o = [0, 0, 0];
+  for (let k = 0; k < px.length; k += 3) {
+    labRapide(px[k] | 0, px[k + 1] | 0, px[k + 2] | 0, o);
+    if (Math.hypot(o[0] - C[0], o[1] - C[1], o[2] - C[2]) > 30) continue;
+    L.push(o[0]); A.push(o[1]); B.push(o[2]);
+  }
+  const q = (a, f) => { if (!a.length) return 0; a.sort((x, y) => x - y); return a[Math.min(a.length - 1, Math.floor(a.length * f))]; };
+  const Lm = q(L, 0.5), iqr = Math.max(1, q(L, 0.75) - q(L, 0.25));
+  return { rgb: c, lab: [Lm, q(A, 0.5), q(B, 0.5)], iqr, n: L.length };
+}
 
 /* LA CONFORMITÉ d'une vue : la silhouette rendue contre la photo recalée (IoU), et la couleur médiane du
    vêtement de part et d'autre (ΔE). */
@@ -328,6 +357,8 @@ function projeterPhotos(etat){
   const acc = new Float32Array(nTex * 4);   // r, v, b pondérés + poids
   const dansTri = new Uint8Array(nTex);      // les texels qu'un triangle utilise (le reste : les marges entre îlots)
   const texTri = new Int32Array(nTex).fill(-1), texB1 = new Float32Array(nTex), texB2 = new Float32Array(nTex);
+  const wVue = [new Float32Array(nTex), new Float32Array(nTex)];   // le poids de CHAQUE photo (devant, dos), par texel
+  const nvMax = new Float32Array(nTex);                              // l'orientation vers la photo qui le couvre (1 = de face)
   const TW = tex.w, TH = tex.h;
   let couverts = 0;
   for (let t = 0; t < idx.length; t += 3) {
@@ -358,9 +389,24 @@ function projeterPhotos(etat){
         if (pxx < 0 || py < 0 || pxx >= vu.ph.w || py >= vu.ph.h || !vu.mErode[pi]) continue;
         const col = echantillon(vu.phC, pxx, py), wgt = lisse((nv - o.seuilNV) / (o.finNV - o.seuilNV));
         acc[k4] += col[0] * wgt; acc[k4 + 1] += col[1] * wgt; acc[k4 + 2] += col[2] * wgt; acc[k4 + 3] += wgt;
+        wVue[vu === vues[0] ? 0 : 1][y * TW + x] += wgt;
+        if (nv > nvMax[y * TW + x]) nvMax[y * TW + x] = nv;
       }
     }
   }
+  /* ⚠⚠ UNE SEULE TEINTE, CELLE DE LA PHOTO PRINCIPALE (2026-10-19, sa plainte : « la couleur du devant et du derrière
+     n'est pas pareille dans l'aperçu 3D » ; mesuré sur la Walla en ligne, aux réglages de la boutique : face 118,86,61,
+     dos 117,86,60, mais CÔTÉS 155,124,101 — en tournant, le vêtement changeait de teinte). Le raccord ci-dessous ne
+     corrigeait que le VOISINAGE des photos, et s'éteignait au loin : les côtés et les manches gardaient la teinte
+     inventée par The New Black.
+     ➡ Ici, AVANT le raccord, TOUTE la texture de The New Black est ramenée sur la teinte de la photo du devant, telle
+     que projetée dans cette même texture (même éclairage au rendu) : correspondance en Lab — la luminance centrée et
+     mise à l'échelle (son étendue, donc les plis et le relief peint, garde ses proportions), la chrominance décalée
+     sur celle de la photo. Ce qui est loin de la teinte du tissu (boutons, étiquette) est épargné en fondu. */
+  etat.appariement = apparierTeinte(tex, acc, wVue[0], dansTri, maillage, texTri, texB1, texB2);
+  etat.texTri = texTri; etat.texB1 = texB1; etat.texB2 = texB2;
+  etat.wTex = new Float32Array(nTex);
+  for (let k = 0; k < nTex; k++) etat.wTex[k] = Math.min(1, acc[k * 4 + 3]);
   /* LE RACCORD : L'ÉCART DE TON, ÉTALÉ SUR LE MAILLAGE (essai Walla : sans lui, le dos projeté et l'épaule de The New
      Black se rejoignaient sur une ligne nette — qui suivait justement l'empiècement inventé). Sous la photo, on mesure
      l'écart photo − texture d'origine, par SOMMET ; puis on l'étale aux sommets voisins (lissage de Laplace, sommets
@@ -391,6 +437,15 @@ function projeterPhotos(etat){
   const lier = (a, b) => { a = rep[a]; b = rep[b]; if (a === b) return; if (!voisins.has(a)) voisins.set(a, new Set()); if (!voisins.has(b)) voisins.set(b, new Set()); voisins.get(a).add(b); voisins.get(b).add(a); };
   for (let t = 0; t < idx.length; t += 3) { lier(idx[t], idx[t + 1]); lier(idx[t + 1], idx[t + 2]); lier(idx[t + 2], idx[t]); }
   const libres = []; voisins.forEach((_, v) => { if (!fixe[v]) libres.push(v); });
+  // la COUVERTURE de chaque photo, par sommet soudé (0 à 1) : ce que l'aplanissement du relief lira ensuite
+  const cVue = [new Float32Array(nV), new Float32Array(nV)], cN = new Float32Array(nV);
+  for (let k = 0; k < nTex; k++) {
+    if (texTri[k] < 0) continue;
+    const t = texTri[k], b1 = texB1[k], b2 = texB2[k], bs = [1 - b1 - b2, b1, b2];
+    for (let j = 0; j < 3; j++) { const r0 = rep[idx[t + j]], f = bs[j]; if (f <= 0) continue; cVue[0][r0] += f * Math.min(1, wVue[0][k]); cVue[1][r0] += f * Math.min(1, wVue[1][k]); cN[r0] += f; }
+  }
+  for (let v = 0; v < nV; v++) if (cN[v] > 0) { cVue[0][v] /= cN[v]; cVue[1][v] /= cN[v]; }
+  etat.geo = { rep, voisins, cVue };
   for (let it = 0; it < 80; it++) {
     for (const v of libres) {
       const nb = voisins.get(v); let r = 0, g = 0, b = 0, n = 0;
@@ -399,31 +454,71 @@ function projeterPhotos(etat){
     }
   }
   const DD = (v, c) => D[rep[v] * 3 + c];
+  /* ⚠ LE DESSIN INVENTÉ DANS LE FONDU (essai Walla : l'empiècement du dos restait visible en clair) : là où la photo
+     n'est qu'en partie (le haut du dos, qui penche), la texture de The New Black transparaissait — avec SES coutures
+     peintes. On y prend donc sa version FLOUE (moyenne 13 × 13, îlot par îlot) : son ton reste, son dessin s'efface. */
+  const flou = new Float32Array(nTex * 3);
+  {
+    const R = 6, tmp = new Float32Array(nTex * 4);
+    for (let y = 0; y < TH; y++) {   // horizontal, sur les seuls texels d'un triangle
+      let sr = 0, sg = 0, sb = 0, n = 0;
+      const ajouter = (x, sg2) => { if (x < 0 || x >= TW) return; const k = y * TW + x; if (!dansTri[k]) return; sr += sg2 * tex.data[k * 4]; sg += sg2 * tex.data[k * 4 + 1]; sb += sg2 * tex.data[k * 4 + 2]; n += sg2; };
+      for (let x = -R; x < R; x++) ajouter(x, 1);
+      for (let x = 0; x < TW; x++) {
+        ajouter(x + R, 1);
+        const k = y * TW + x; tmp[k * 4] = sr; tmp[k * 4 + 1] = sg; tmp[k * 4 + 2] = sb; tmp[k * 4 + 3] = n;
+        ajouter(x - R, -1);
+      }
+    }
+    for (let x = 0; x < TW; x++) {   // vertical
+      let sr = 0, sg = 0, sb = 0, n = 0;
+      const ajouter = (y, sg2) => { if (y < 0 || y >= TH) return; const k = y * TW + x; sr += sg2 * tmp[k * 4]; sg += sg2 * tmp[k * 4 + 1]; sb += sg2 * tmp[k * 4 + 2]; n += sg2 * tmp[k * 4 + 3]; };
+      for (let y = -R; y < R; y++) ajouter(y, 1);
+      for (let y = 0; y < TH; y++) {
+        ajouter(y + R, 1);
+        const k = y * TW + x;
+        if (n > 0) { flou[k * 3] = sr / n; flou[k * 3 + 1] = sg / n; flou[k * 3 + 2] = sb / n; }
+        else { flou[k * 3] = tex.data[k * 4]; flou[k * 3 + 1] = tex.data[k * 4 + 1]; flou[k * 3 + 2] = tex.data[k * 4 + 2]; }
+        ajouter(y - R, -1);
+      }
+    }
+  }
   for (let k = 0; k < nTex; k++) {
     if (texTri[k] < 0) continue;
     const t = texTri[k], b1 = texB1[k], b2 = texB2[k], b0 = 1 - b1 - b2, i = k * 4;
-    const base = [0, 1, 2].map((c) => tex.data[i + c] + b0 * DD(idx[t], c) + b1 * DD(idx[t + 1], c) + b2 * DD(idx[t + 2], c));
+    const af = Math.min(1, acc[i + 3] * 2.5);   // la part du flou : pleine dès 40 % de photo
+    const base = [0, 1, 2].map((c) => tex.data[i + c] * (1 - af) + flou[k * 3 + c] * af + b0 * DD(idx[t], c) + b1 * DD(idx[t + 1], c) + b2 * DD(idx[t + 2], c));
     const w = acc[i + 3], f = Math.min(1, w);
     if (w) couverts++;
     for (let c = 0; c < 3; c++) tex.data[i + c] = Math.max(0, Math.min(255, Math.round(base[c] * (1 - f) + (w ? acc[i + c] / w : 0) * f)));
   }
-  /* LES MARGES ENTRE ÎLOTS (gutters) prennent la couleur du bord le plus proche : sans cela, le filtrage de la
-     texture mêlait au raccord des îlots la couleur d'AVANT, et des lignes claires quadrillaient le devant. */
-  const fait = new Uint8Array(dansTri);
-  for (let passe = 0; passe < 6; passe++) {
-    const neufs = [];
-    for (let y = 0; y < TH; y++) for (let x = 0; x < TW; x++) {
-      const k = y * TW + x; if (fait[k]) continue;
-      let r = 0, g = 0, b = 0, n = 0;
-      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-        const xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= TW || yy >= TH) continue;
-        const j = yy * TW + xx; if (!fait[j]) continue;
-        r += tex.data[j * 4]; g += tex.data[j * 4 + 1]; b += tex.data[j * 4 + 2]; n++;
-      }
-      if (n) neufs.push(k, r / n, g / n, b / n);
+  remplirMarges(tex, dansTri);
+  /* ⚠ LA LUMIÈRE DES PHOTOS, SUR LES FLANCS (essai Walla, mesuré au rendu) : une photo de face, prise sous une lampe
+     de côté, a un bord ÉCLAIRÉ et un bord dans l'OMBRE. Projetés en biais sur les flancs, ces bords donnaient, une fois
+     le vêtement tourné, un flanc clair (+15 ΔE) et l'autre sombre (−11). Et le raccord, qui étale l'écart photo −
+     texture, emportait cette ombre plus loin encore. ➡ Une dernière passe ramène la teinte LOCALE (basse fréquence,
+     sur le maillage) à celle de la photo de face : pleinement là où aucune photo ne regarde de face, en fondu sous une
+     photo vue de biais, PAS DU TOUT là où la photo regarde le tissu de face (ses vrais pixels, ses vraies ombres).
+     Le détail (grain, plis, coutures) n'est jamais touché : on ne déplace que la basse fréquence. */
+  if (etat.appariement && etat.appariement.applique) {
+    const Rl = lab(etat.appariement.reference), { G, rep: rp } = champBasse(tex, maillage, texTri, texB1, texB2), o = [0, 0, 0], q = [0, 0, 0];
+    for (let k = 0; k < nTex; k++) {
+      const t = texTri[k]; if (t < 0) continue;
+      const w = acc[k * 4 + 3], st = w > 0 ? 1 - lisse((nvMax[k] - 0.6) / 0.32) : 1;
+      if (st <= 0.01) continue;
+      const b1 = texB1[k], b2 = texB2[k], b0 = 1 - b1 - b2, va = rp[idx[t]], vb = rp[idx[t + 1]], vc = rp[idx[t + 2]];
+      const B = [0, 1, 2].map((c) => b0 * G[va * 3 + c] + b1 * G[vb * 3 + c] + b2 * G[vc * 3 + c]);
+      const e = Math.hypot((B[0] - Rl[0]) * 0.3, B[1] - Rl[1], B[2] - Rl[2]);
+      const tt = e <= 16 ? 1 : (e >= 30 ? 0 : 1 - (e - 16) / 14);
+      if (!tt) continue;
+      const f = st * tt, i = k * 4;
+      labRapide(tex.data[i], tex.data[i + 1], tex.data[i + 2], o);
+      rgbDeLab(o[0] + (Rl[0] - B[0]) * f, o[1] + (Rl[1] - B[1]) * f, o[2] + (Rl[2] - B[2]) * f, q);
+      tex.data[i] = q[0]; tex.data[i + 1] = q[1]; tex.data[i + 2] = q[2];
     }
-    for (let i = 0; i < neufs.length; i += 4) { const k = neufs[i]; tex.data[k * 4] = neufs[i + 1]; tex.data[k * 4 + 1] = neufs[i + 2]; tex.data[k * 4 + 2] = neufs[i + 3]; fait[k] = 1; }
+    remplirMarges(tex, dansTri);
   }
+  etat.dansTri = dansTri;
   /* LE RELIEF INVENTÉ S'EFFACE LÀ OÙ LA PHOTO PARLE : la carte de normales de The New Black porte SES coutures (un
      empiècement au dos que le vrai vêtement n'a pas) ; sous la photo projetée, elle est aplanie au prorata du poids
      — sinon on voyait deux coutures, la vraie (photo) et l'inventée (relief). Les côtés gardent leur relief. */
@@ -441,16 +536,318 @@ function projeterPhotos(etat){
   return { couverture: etat.couverture, gainsDos: etat.couleurDos.gains };
 }
 
+/* LES MARGES ENTRE ÎLOTS (gutters) prennent la couleur du bord le plus proche : sans cela, le filtrage de la texture
+   mêlait au bord des îlots la couleur d'AVANT, et des lignes claires quadrillaient le modèle. ⚠ À REFAIRE APRÈS
+   CHAQUE RETOUCHE des texels (la passe des flancs, les corrections mesurées au rendu) — vu sur la Walla : sans cela,
+   les frontières d'îlots ressortaient en lignes claires sur les flancs. */
+function remplirMarges(tex, dansTri){
+  const TW = tex.w, TH = tex.h;
+  const fait = new Uint8Array(dansTri);
+  for (let passe = 0; passe < 6; passe++) {
+    const neufs = [];
+    for (let y = 0; y < TH; y++) for (let x = 0; x < TW; x++) {
+      const k = y * TW + x; if (fait[k]) continue;
+      let r = 0, g = 0, b = 0, n = 0;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= TW || yy >= TH) continue;
+        const j = yy * TW + xx; if (!fait[j]) continue;
+        r += tex.data[j * 4]; g += tex.data[j * 4 + 1]; b += tex.data[j * 4 + 2]; n++;
+      }
+      if (n) neufs.push(k, r / n, g / n, b / n);
+    }
+    for (let i = 0; i < neufs.length; i += 4) { const k = neufs[i]; tex.data[k * 4] = neufs[i + 1]; tex.data[k * 4 + 1] = neufs[i + 2]; tex.data[k * 4 + 2] = neufs[i + 3]; fait[k] = 1; }
+  }
+}
+
+/* LA TEINTE LOCALE (basse fréquence) de la texture, portée par les SOMMETS soudés et lissée de voisin en voisin :
+   rend G (Lab par sommet soudé) et rep (le sommet soudé de chaque sommet). */
+function champBasse(tex, maillage, texTri, texB1, texB2){
+  /* ⚠ LE FLOU SUR LE MAILLAGE, PAS DANS LA TEXTURE (essai Walla, première version) : flouté dans l'image, un texel
+     au bord d'un îlot d'UV se moyennait avec l'îlot VOISIN DANS L'IMAGE — sans rapport sur le vêtement — et chaque
+     frontière d'îlot devenait une ligne sombre au rendu (un quadrillage sur le dos). Ici, la teinte locale est
+     portée par les SOMMETS (soudés par position : une couture d'UV n'existe pas pour eux), lissée de voisin en
+     voisin, puis interpolée dans chaque triangle : continue partout. */
+  const { pos, idx } = maillage, nV = pos.length / 3, nTex = tex.w * tex.h, d = tex.data, o = [0, 0, 0];
+  const cle = new Map(), rep = new Int32Array(nV);
+  for (let v = 0; v < nV; v++) {
+    const k = Math.round(pos[v * 3] * 2000) + ',' + Math.round(pos[v * 3 + 1] * 2000) + ',' + Math.round(pos[v * 3 + 2] * 2000);
+    if (!cle.has(k)) cle.set(k, v); rep[v] = cle.get(k);
+  }
+  const F = new Float32Array(nV * 3), P = new Float32Array(nV);
+  for (let k = 0; k < nTex; k++) {
+    const t = texTri[k]; if (t < 0) continue;
+    labRapide(d[k * 4], d[k * 4 + 1], d[k * 4 + 2], o);
+    const b1 = texB1[k], b2 = texB2[k], bs = [1 - b1 - b2, b1, b2];
+    for (let j = 0; j < 3; j++) { const v = rep[idx[t + j]], f = bs[j]; if (f <= 0) continue; F[v * 3] += f * o[0]; F[v * 3 + 1] += f * o[1]; F[v * 3 + 2] += f * o[2]; P[v] += f; }
+  }
+  const actifs = [];
+  for (let v = 0; v < nV; v++) if (rep[v] === v) { if (P[v] > 0) { F[v * 3] /= P[v]; F[v * 3 + 1] /= P[v]; F[v * 3 + 2] /= P[v]; } actifs.push(v); }
+  const vois = new Map();
+  const lier = (a, b) => { a = rep[a]; b = rep[b]; if (a === b) return; if (!vois.has(a)) vois.set(a, new Set()); if (!vois.has(b)) vois.set(b, new Set()); vois.get(a).add(b); vois.get(b).add(a); };
+  for (let t = 0; t < idx.length; t += 3) { lier(idx[t], idx[t + 1]); lier(idx[t + 1], idx[t + 2]); lier(idx[t + 2], idx[t]); }
+  const nb = actifs.map((v) => Int32Array.from(vois.get(v) || []));
+  // un sommet sans texel (P = 0) prend la moyenne de ses voisins dès la première passe
+  let G = F, H2 = new Float32Array(nV * 3);
+  const PASSES = 160;
+  for (let it = 0; it < PASSES; it++) {
+    for (let i = 0; i < actifs.length; i++) {
+      const v = actifs[i], n = nb[i]; let r = G[v * 3], g = G[v * 3 + 1], b = G[v * 3 + 2], c = 1;
+      if (!P[v] && it === 0) { r = g = b = 0; c = 0; }
+      for (let j = 0; j < n.length; j++) { const u = n[j]; if (!P[u] && it === 0) continue; r += G[u * 3]; g += G[u * 3 + 1]; b += G[u * 3 + 2]; c++; }
+      if (c) { H2[v * 3] = r / c; H2[v * 3 + 1] = g / c; H2[v * 3 + 2] = b / c; } else { H2[v * 3] = G[v * 3]; H2[v * 3 + 1] = G[v * 3 + 1]; H2[v * 3 + 2] = G[v * 3 + 2]; }
+    }
+    const tmp = G === F ? new Float32Array(nV * 3) : G; G = H2; H2 = tmp;
+  }
+  return { G, rep };
+}
+
+/* L'APPARIEMENT DE LA TEINTE : la référence = les texels que la photo du DEVANT couvre (sa vraie couleur, dans la
+   texture) ; la source = les texels que AUCUNE photo ne couvre (ce qu'a peint The New Black).
+   ⚠⚠ CE N'EST PAS UNE AFFAIRE DE TEINTE MOYENNE (mesuré sur la Walla) : la médiane de la texture de The New Black
+   (123,92,66) est déjà proche de la photo (123,94,73) — et pourtant les côtés sortaient à 171,142,120 au rendu. The
+   New Black PEINT LA LUMIÈRE dans sa texture : des flancs éclairés, un dos dans l'ombre. Un décalage global ne
+   l'enlève pas. On sépare donc, en Lab, la BASSE fréquence (la lumière peinte, la teinte locale : un flou large,
+   îlot par îlot) de la HAUTE (le grain, les plis, les coutures) ; la basse est remplacée par la teinte de la photo,
+   la haute est gardée. Une grande zone d'une autre couleur (col contrasté, doublure) est épargnée en fondu. */
+function apparierTeinte(tex, acc, wDevant, dansTri, maillage, texTri, texB1, texB2){
+  const nTex = tex.w * tex.h, refPx = [], tnbPx = [];
+  for (let k = 0; k < nTex; k += 3) {
+    if (!dansTri[k]) continue;
+    const w = acc[k * 4 + 3];
+    if (wDevant[k] >= 0.8 && w > 0) refPx.push(acc[k * 4] / w, acc[k * 4 + 1] / w, acc[k * 4 + 2] / w);
+    else if (w === 0) tnbPx.push(tex.data[k * 4], tex.data[k * 4 + 1], tex.data[k * 4 + 2]);
+  }
+  if (refPx.length < 3000 || tnbPx.length < 3000) return { applique: false, raison: 'trop peu de texels (' + refPx.length / 3 + ' / ' + tnbPx.length / 3 + ')' };
+  const R = statsTeinte(refPx), S = statsTeinte(tnbPx);
+  const d = tex.data, o = [0, 0, 0], q = [0, 0, 0];
+  const { G, rep } = champBasse(tex, maillage, texTri, texB1, texB2), idx = maillage.idx;
+  for (let k = 0; k < nTex; k++) {
+    const t = texTri[k]; if (t < 0) continue;
+    const b1 = texB1[k], b2 = texB2[k], b0 = 1 - b1 - b2, va = rep[idx[t]], vb = rep[idx[t + 1]], vc = rep[idx[t + 2]];
+    const B0 = b0 * G[va * 3] + b1 * G[vb * 3] + b2 * G[vc * 3], B1 = b0 * G[va * 3 + 1] + b1 * G[vb * 3 + 1] + b2 * G[vc * 3 + 1], B2 = b0 * G[va * 3 + 2] + b1 * G[vb * 3 + 2] + b2 * G[vc * 3 + 2];
+    /* une grande zone d'une AUTRE COULEUR que le tissu (col contrasté, doublure) : épargnée, en fondu. ⚠ Jugée surtout
+       sur la CHROMINANCE : la lumière peinte assombrit ou éclaircit un flanc (la luminance) sans changer sa teinte —
+       à pleine distance Lab, les flancs les plus « éclairés » étaient justement ceux qu'on épargnait (essai Walla). */
+    const e = Math.hypot((B0 - S.lab[0]) * 0.3, B1 - S.lab[1], B2 - S.lab[2]);
+    const tt = e <= 16 ? 1 : (e >= 30 ? 0 : 1 - (e - 16) / 14);
+    if (!tt) continue;
+    labRapide(d[k * 4], d[k * 4 + 1], d[k * 4 + 2], o);
+    /* le détail GARDÉ, mais ADOUCI : The New Black peint aussi des REFLETS (un satin brillant sur un suède mat — essai
+       Walla, vu au rendu) ; à pleine amplitude ils faisaient luire les flancs. Le grain et les coutures restent lisibles. */
+    const dl = Math.max(-14, Math.min(14, (o[0] - B0) * 0.5)), da = Math.max(-6, Math.min(6, (o[1] - B1) * 0.3)), db = Math.max(-6, Math.min(6, (o[2] - B2) * 0.3));
+    rgbDeLab(o[0] + (R.lab[0] + dl - o[0]) * tt, o[1] + (R.lab[1] + da - o[1]) * tt, o[2] + (R.lab[2] + db - o[2]) * tt, q);
+    d[k * 4] = q[0]; d[k * 4 + 1] = q[1]; d[k * 4 + 2] = q[2];
+  }
+  const apres = []; for (let k = 0; k < nTex; k += 3) { if (dansTri[k] && acc[k * 4 + 3] === 0) apres.push(d[k * 4], d[k * 4 + 1], d[k * 4 + 2]); }
+  const A = statsTeinte(apres);
+  const de = (x, y) => +Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]).toFixed(1);
+  return { applique: true, reference: R.rgb.map(Math.round), tnbAvant: S.rgb.map(Math.round), tnbApres: A.rgb.map(Math.round),
+    passes: 160, ecartAvant: de(S.lab, R.lab), ecartApres: de(A.lab, R.lab) };
+}
+
+/* (5 bis) LE RELIEF INVENTÉ, EFFACÉ SOUS LA PHOTO (2026-10-18, sa demande : « effacer le relief inventé par TNB — ex.
+   l'empiècement horizontal du dos de la Walla — sous la zone couverte par la photo ; aplanir la géométrie localement
+   vers une surface lisse, sans toucher la silhouette »).
+   ⚠ LE MOUVEMENT SE FAIT DANS LA PROFONDEUR SEULEMENT (l'axe de la caméra de la photo) : un sommet ne bouge ni à
+   gauche ni à droite ni en hauteur — la silhouette vue de face ou de dos ne change donc pas d'un pixel.
+   ⚠ LISSAGE DE TAUBIN (λ puis μ) : un lissage de Laplace simple « dégonfle » la surface ; l'alternance λ/μ garde le
+   volume et n'efface que les petits creux (coutures, plis fins inventés).
+   ⚠ PONDÉRÉ : par la couverture de la photo (rien ne bouge là où la photo n'est pas projetée) et par l'orientation
+   (un sommet presque de profil — le bord de la silhouette — ne bouge pas) ; les bords de zone sont fondus.
+   Le RELIEF se mesure avant/après : l'écart de chaque sommet au plan de ses voisins, dans la profondeur, en
+   millièmes de la hauteur du vêtement (moyenne et 95ᵉ centile). */
+function mesurerRelief(etat){
+  const { maillage, vues, geo } = etat, { pos } = maillage, H = etat.hauteurModele || 1, d = [vues[0].v.d, vues[1].v.d];
+  const e = [];
+  geo.voisins.forEach((nb, v) => {
+    const k = geo.cVue[0][v] >= geo.cVue[1][v] ? 0 : 1; if (geo.cVue[k][v] < 0.6) return;
+    let mx = 0, my = 0, mz = 0, n = 0; nb.forEach((u) => { mx += pos[u * 3]; my += pos[u * 3 + 1]; mz += pos[u * 3 + 2]; n++; });
+    if (!n) return;
+    const dx = pos[v * 3] - mx / n, dy = pos[v * 3 + 1] - my / n, dz = pos[v * 3 + 2] - mz / n;
+    e.push(Math.abs(dx * d[k][0] + dy * d[k][1] + dz * d[k][2]) / H * 1000);
+  });
+  if (!e.length) return { moyenne: 0, p95: 0, sommets: 0 };
+  e.sort((a, b) => a - b);
+  return { moyenne: +(e.reduce((s2, x) => s2 + x, 0) / e.length).toFixed(3), p95: +e[Math.floor(e.length * 0.95)].toFixed(3), sommets: e.length };
+}
+function aplanirRelief(etat, options){
+  const o = Object.assign({ iterations: 6, lambda: 0.55, mu: -0.58 }, options || {});
+  const { maillage, vues, geo } = etat, { pos, idx } = maillage, nor = maillage.nor, d = [vues[0].v.d, vues[1].v.d];
+  let y0 = 1e9, y1 = -1e9; for (let i = 1; i < pos.length; i += 3) { if (pos[i] < y0) y0 = pos[i]; if (pos[i] > y1) y1 = pos[i]; }
+  etat.hauteurModele = y1 - y0;
+  const avant = mesurerRelief(etat);
+  // le poids de chaque sommet soudé : couverture × orientation, puis fondu sur deux voisinages
+  const nV = pos.length / 3, poids = new Float32Array(nV), axe = new Uint8Array(nV);
+  geo.voisins.forEach((_, v) => {
+    const k = geo.cVue[0][v] >= geo.cVue[1][v] ? 0 : 1; axe[v] = k;
+    // FACE à la caméra (signe compris) : une doublure, un revers vu de l'intérieur, regarde ailleurs — elle ne bouge pas
+    const nv = -(nor[v * 3] * d[k][0] + nor[v * 3 + 1] * d[k][1] + nor[v * 3 + 2] * d[k][2]);
+    poids[v] = lisse((geo.cVue[k][v] - 0.3) / 0.5) * lisse((nv - 0.35) / 0.35);
+  });
+  for (let p = 0; p < 2; p++) {
+    const neuf = new Float32Array(poids);
+    geo.voisins.forEach((nb, v) => { let s2 = poids[v], n = 1; nb.forEach((u) => { s2 += poids[u]; n++; }); neuf[v] = Math.min(poids[v], s2 / n); });
+    poids.set(neuf);
+  }
+  const actifs = []; geo.voisins.forEach((_, v) => { if (poids[v] > 0.01) actifs.push(v); });
+  /* ⚠ UN LISSAGE DE VOISINAGE NE SUFFIT PAS (mesuré sur la Walla : l'empiècement du dos est une MARCHE, pas un creux —
+     vingt passes de Taubin la laissaient entière, rendu à texture unie à l'appui). On lisse donc la PROFONDEUR vue par
+     la caméra de la photo : la carte de profondeur de la vue (900 px de haut), floutée (gaussienne normalisée, σ ≈ 1,3 %
+     de la hauteur — les coutures et marches inventées, pas la forme du vêtement), puis chaque sommet VISIBLE de cette
+     vue est ramené vers la profondeur floutée, au prorata de son poids. Seule la profondeur change. */
+  const sigma = o.sigma || 12;
+  const flouProf = (v) => {
+    const W = v.W, H = v.H, z = new Float32Array(W * H), m = new Float32Array(W * H);
+    for (let k = 0; k < W * H; k++) if (isFinite(v.prof[k])) { z[k] = v.prof[k]; m[k] = 1; }
+    const R = Math.ceil(sigma * 2.5), noyau = []; for (let i2 = -R; i2 <= R; i2++) noyau.push(Math.exp(-i2 * i2 / (2 * sigma * sigma)));
+    const passe = (src, dst, horizontal) => {
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+        let sz = 0; for (let i2 = -R; i2 <= R; i2++) { const xx = horizontal ? x + i2 : x, yy = horizontal ? y : y + i2; if (xx < 0 || yy < 0 || xx >= W || yy >= H) continue; sz += src[yy * W + xx] * noyau[i2 + R]; }
+        dst[y * W + x] = sz;
+      }
+    };
+    const t1 = new Float32Array(W * H), t2 = new Float32Array(W * H), zm = new Float32Array(W * H);
+    for (let k = 0; k < W * H; k++) zm[k] = z[k] * m[k];
+    passe(zm, t1, true); passe(t1, t2, false);
+    const n1 = new Float32Array(W * H), n2 = new Float32Array(W * H);
+    passe(m, n1, true); passe(n1, n2, false);
+    const out = new Float32Array(W * H);
+    for (let k = 0; k < W * H; k++) out[k] = (m[k] && n2[k] > 1e-6) ? t2[k] / n2[k] : NaN;
+    return out;
+  };
+  const cartes = vues.map((x) => flouProf(x.v));
+  /* LA DISTANCE AU BORD de la silhouette (chanfrein 3-4) : près du bord, la carte floutée mêle la surface et ce qui
+     est derrière (l'ourlet, la doublure) — essai Walla : une frange sombre et dentelée au bas du dos. Le poids s'y
+     éteint sur 2σ. */
+  const distBord = (v) => {
+    const W = v.W, H = v.H, D2 = new Float32Array(W * H);
+    for (let k = 0; k < W * H; k++) D2[k] = v.masque[k] ? 1e9 : 0;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const k = y * W + x; if (!D2[k]) continue;
+      let m = D2[k]; if (x > 0) m = Math.min(m, D2[k - 1] + 3); if (y > 0) m = Math.min(m, D2[k - W] + 3);
+      if (x > 0 && y > 0) m = Math.min(m, D2[k - W - 1] + 4); if (x < W - 1 && y > 0) m = Math.min(m, D2[k - W + 1] + 4); D2[k] = m; }
+    for (let y = H - 1; y >= 0; y--) for (let x = W - 1; x >= 0; x--) { const k = y * W + x; if (!D2[k]) continue;
+      let m = D2[k]; if (x < W - 1) m = Math.min(m, D2[k + 1] + 3); if (y < H - 1) m = Math.min(m, D2[k + W] + 3);
+      if (x < W - 1 && y < H - 1) m = Math.min(m, D2[k + W + 1] + 4); if (x > 0 && y < H - 1) m = Math.min(m, D2[k + W - 1] + 4); D2[k] = m; }
+    for (let k = 0; k < W * H; k++) D2[k] /= 3;
+    return D2;
+  };
+  const bords = vues.map((x) => distBord(x.v));
+  const bilin = (c, W, H, X, Y) => {
+    const x0 = Math.max(0, Math.min(W - 2, Math.floor(X - 0.5))), y0 = Math.max(0, Math.min(H - 2, Math.floor(Y - 0.5)));
+    const fx = Math.max(0, Math.min(1, X - 0.5 - x0)), fy = Math.max(0, Math.min(1, Y - 0.5 - y0));
+    const a = c[y0 * W + x0], b = c[y0 * W + x0 + 1], e = c[(y0 + 1) * W + x0], f = c[(y0 + 1) * W + x0 + 1];
+    if (!isFinite(a) || !isFinite(b) || !isFinite(e) || !isFinite(f)) { const n = c[Math.floor(Y) * W + Math.floor(X)]; return n; }
+    return (a * (1 - fx) + b * fx) * (1 - fy) + (e * (1 - fx) + f * fx) * fy;
+  };
+  for (const v of actifs) {
+    const k = axe[v], vu = vues[k].v, P = [pos[v * 3], pos[v * 3 + 1], pos[v * 3 + 2]];
+    const [X, Y, Z] = vu.projeter(P), xi = Math.floor(X), yi = Math.floor(Y);
+    if (xi < 0 || yi < 0 || xi >= vu.W || yi >= vu.H) continue;
+    if (Z > vu.prof[yi * vu.W + xi] + vu.tolerance * 0.25) continue;   // caché (tolérance serrée : une doublure juste derrière ne compte pas)
+    const cible = bilin(cartes[k], vu.W, vu.H, X, Y); if (!isFinite(cible)) continue;
+    const pb = lisse(bords[k][yi * vu.W + xi] / (3 * sigma));
+    // ⚠ BORNÉ : une couture, une marche inventée ne font que quelques millimètres ; un écart plus grand est une vraie
+    // forme (un ourlet, un revers) — on n'y touche pas au-delà de 4 ‰ de la hauteur du vêtement
+    const lim = 0.004 * etat.hauteurModele;
+    const dz = Math.max(-lim, Math.min(lim, cible - Z)) * poids[v] * pb;
+    pos[v * 3] += dz * d[k][0]; pos[v * 3 + 1] += dz * d[k][1]; pos[v * 3 + 2] += dz * d[k][2];
+  }
+  // quelques passes de Taubin, dans la profondeur, pour effacer le grain laissé par l'échantillonnage de la carte
+  const pas = (f) => {
+    const dep = new Float32Array(actifs.length);
+    actifs.forEach((v, i) => {
+      const nb = geo.voisins.get(v), k = axe[v]; let mx = 0, my = 0, mz = 0, n = 0;
+      nb.forEach((u) => { mx += pos[u * 3]; my += pos[u * 3 + 1]; mz += pos[u * 3 + 2]; n++; });
+      const lx = mx / n - pos[v * 3], ly = my / n - pos[v * 3 + 1], lz = mz / n - pos[v * 3 + 2];
+      dep[i] = (lx * d[k][0] + ly * d[k][1] + lz * d[k][2]) * f * poids[v];
+    });
+    actifs.forEach((v, i) => { const k = axe[v]; pos[v * 3] += dep[i] * d[k][0]; pos[v * 3 + 1] += dep[i] * d[k][1]; pos[v * 3 + 2] += dep[i] * d[k][2]; });
+  };
+  for (let it = 0; it < o.iterations; it++) { pas(o.lambda); pas(o.mu); }
+  // les doublons d'UV suivent leur sommet soudé
+  for (let v = 0; v < nV; v++) { const r0 = geo.rep[v]; if (r0 !== v && poids[r0] > 0.01) { pos[v * 3] = pos[r0 * 3]; pos[v * 3 + 1] = pos[r0 * 3 + 1]; pos[v * 3 + 2] = pos[r0 * 3 + 2]; } }
+  // les normales des sommets déplacés, recalculées sur la nouvelle surface (fondues par le poids)
+  const ng = new Float32Array(nV * 3);
+  for (let t = 0; t < idx.length; t += 3) {
+    const a = idx[t], b = idx[t + 1], c = idx[t + 2];
+    const A = [pos[a * 3], pos[a * 3 + 1], pos[a * 3 + 2]];
+    const f = croix(sous([pos[b * 3], pos[b * 3 + 1], pos[b * 3 + 2]], A), sous([pos[c * 3], pos[c * 3 + 1], pos[c * 3 + 2]], A));
+    for (const v of [a, b, c]) { const r0 = geo.rep[v]; ng[r0 * 3] += f[0]; ng[r0 * 3 + 1] += f[1]; ng[r0 * 3 + 2] += f[2]; }
+  }
+  /* ⚠ LES NORMALES DE FACETTES, LISSÉES (essai Walla : prises telles quelles, elles montraient les facettes du maillage
+     simplifié — un suède « froissé », taché en diagonale) : moyenne de voisinage, quatre passes, sur la zone aplanie. */
+  for (let v = 0; v < nV; v++) { if (geo.rep[v] !== v) continue; const g = unit([ng[v * 3], ng[v * 3 + 1], ng[v * 3 + 2]]); ng[v * 3] = g[0]; ng[v * 3 + 1] = g[1]; ng[v * 3 + 2] = g[2]; }
+  for (let p = 0; p < 4; p++) {
+    const neuf = new Float32Array(ng);
+    actifs.forEach((v) => { let x = ng[v * 3], y = ng[v * 3 + 1], z = ng[v * 3 + 2]; geo.voisins.get(v).forEach((u) => { x += ng[u * 3]; y += ng[u * 3 + 1]; z += ng[u * 3 + 2]; }); const g = unit([x, y, z]); neuf[v * 3] = g[0]; neuf[v * 3 + 1] = g[1]; neuf[v * 3 + 2] = g[2]; });
+    ng.set(neuf);
+  }
+  let bouges = 0;
+  for (let v = 0; v < nV; v++) {
+    const r0 = geo.rep[v], w = poids[r0]; if (w <= 0.01) continue;
+    bouges++;
+    const g = unit([ng[r0 * 3], ng[r0 * 3 + 1], ng[r0 * 3 + 2]]);
+    if (scal(g, [nor[v * 3], nor[v * 3 + 1], nor[v * 3 + 2]]) < 0) { g[0] = -g[0]; g[1] = -g[1]; g[2] = -g[2]; }
+    const n2 = unit([nor[v * 3] * (1 - w) + g[0] * w, nor[v * 3 + 1] * (1 - w) + g[1] * w, nor[v * 3 + 2] * (1 - w) + g[2] * w]);
+    nor[v * 3] = n2[0]; nor[v * 3 + 1] = n2[1]; nor[v * 3 + 2] = n2[2];
+  }
+  const apres = mesurerRelief(etat);
+  etat.relief = { avant, apres, sommetsAplanis: bouges };
+  return etat.relief;
+}
+
 /* (6) LA COULEUR FIDÈLE : la teinte du vêtement sur TOUT le modèle (côtés de The New Black compris) ramenée sur celle
    de la photo du DEVANT — médiane du groupe dominant, gains bornés 0,7–1,4, sur la seule couleur dominante. */
-function couleurFidele(etat){
+/* (6) LA COULEUR FIDÈLE. Sans argument : le rapport (l'appariement fait à la projection, et la teinte d'ensemble).
+   Avec une CORRECTION mesurée au rendu de la boutique ({ global: [dL, da, db], secteurs: [{ a, d: [dL, da, db] }] }) :
+   un décalage Lab sur toute la texture (la face rendue ramenée sur la photo), et un décalage PAR DIRECTION — chaque
+   texel prend, selon l'azimut de sa normale (0° = le devant), l'interpolation des corrections des deux angles de
+   mesure qui l'encadrent ; le devant (0°) n'en reçoit aucune. */
+function couleurFidele(etat, correction){
   const { tex, ref } = etat, nTex = tex.w * tex.h;
+  if (correction && (correction.global || correction.secteurs)) {
+    const g = correction.global || [0, 0, 0], sec = (correction.secteurs || []).slice().sort((x, y) => x.a - y.a);
+    const d = tex.data, o = [0, 0, 0], q = [0, 0, 0], C = lab(ref);
+    const { idx, nor } = etat.maillage, f = etat.sens.devant, th0 = Math.atan2(f[0], f[2]);
+    const parAngle = (a) => {
+      if (!sec.length) return [0, 0, 0];
+      a = ((a % 360) + 360) % 360;
+      let i = sec.findIndex((x) => x.a > a); if (i < 0) i = sec.length;
+      const A = sec[(i - 1 + sec.length) % sec.length], B = sec[i % sec.length];
+      const span = ((B.a - A.a) + 360) % 360 || 360, u = (((a - A.a) + 360) % 360) / span;
+      return [0, 1, 2].map((c) => A.d[c] * (1 - u) + B.d[c] * u);
+    };
+    for (let k = 0; k < nTex; k++) {
+      const t = etat.texTri[k];
+      const i = k * 4;
+      labRapide(d[i], d[i + 1], d[i + 2], o);
+      const e = Math.hypot((o[0] - C[0]) * 0.3, o[1] - C[1], o[2] - C[2]);
+      const tt = e <= 20 ? 1 : (e >= 36 ? 0 : 1 - (e - 20) / 16);
+      if (!tt) continue;
+      let s2 = [0, 0, 0];
+      if (t >= 0 && sec.length) {
+        const b1 = etat.texB1[k], b2 = etat.texB2[k], b0 = 1 - b1 - b2;
+        const nx = b0 * nor[idx[t] * 3] + b1 * nor[idx[t + 1] * 3] + b2 * nor[idx[t + 2] * 3];
+        const ny = b0 * nor[idx[t] * 3 + 1] + b1 * nor[idx[t + 1] * 3 + 1] + b2 * nor[idx[t + 2] * 3 + 1];
+        const nz = b0 * nor[idx[t] * 3 + 2] + b1 * nor[idx[t + 1] * 3 + 2] + b2 * nor[idx[t + 2] * 3 + 2];
+        const h = Math.hypot(nx, nz), l = Math.hypot(nx, ny, nz) || 1;
+        const a = (Math.atan2(nx, nz) - th0) * 180 / Math.PI, poids = h / l;   // une surface horizontale n'a pas de direction
+        s2 = parAngle(a).map((x) => x * poids);
+      }
+      rgbDeLab(o[0] + (g[0] + s2[0]) * tt, o[1] + (g[1] + s2[1]) * tt, o[2] + (g[2] + s2[2]) * tt, q);
+      d[i] = q[0]; d[i + 1] = q[1]; d[i + 2] = q[2];
+    }
+    if (etat.dansTri) remplirMarges(tex, etat.dansTri);
+    etat.corrections = (etat.corrections || []).concat([{ global: g.map((x) => +x.toFixed(2)), secteurs: sec.map((x) => ({ a: x.a, d: x.d.map((y) => +y.toFixed(1)) })) }]);
+    return { corrige: true, corrections: etat.corrections };
+  }
   const px = []; for (let k = 0; k < nTex; k += 5) { const i = k * 4; if (tex.data[i] + tex.data[i + 1] + tex.data[i + 2] > 30) px.push(tex.data[i], tex.data[i + 1], tex.data[i + 2]); }
   const avant = medianeGroupe(px, ref), g = gainsVers(ref, avant);
   if (!g.every((x) => Math.abs(x - 1) < 0.02)) appliquerGains(tex.data, nTex, g, avant);
   const px2 = []; for (let k = 0; k < nTex; k += 5) { const i = k * 4; if (tex.data[i] + tex.data[i + 1] + tex.data[i + 2] > 30) px2.push(tex.data[i], tex.data[i + 1], tex.data[i + 2]); }
   const apres = medianeGroupe(px2, ref);
-  etat.couleur = { reference: ref, avant, apres, gains: g.map((x) => +x.toFixed(3)), ecartAvant: +deltaE(avant, ref).toFixed(1), ecartApres: +deltaE(apres, ref).toFixed(1) };
+  etat.couleur = { reference: ref, avant, apres, gains: g.map((x) => +x.toFixed(3)), ecartAvant: +deltaE(avant, ref).toFixed(1), ecartApres: +deltaE(apres, ref).toFixed(1),
+    appariement: etat.appariement || null };
   return etat.couleur;
 }
 
@@ -465,16 +862,16 @@ function controler(etat){
     apres[x.nom].motif = +correlation(x.v, col, x.phC, x.cal).toFixed(3);
     avant[x.nom].motif = +x.motifAvant.toFixed(3);
   }
-  etat.conformite = { avant, apres };
+  etat.conformite = { avant, apres, relief: etat.relief || null };
   return etat.conformite;
 }
 
 // Les quatre temps d'un coup (les essais).
 function projeter(maillage, tex, devant, dos, options){
   const e = preparer(maillage, tex, devant, dos, options);
-  projeterPhotos(e); couleurFidele(e);
+  projeterPhotos(e); aplanirRelief(e); couleurFidele(e);
   const c = controler(e);
-  return { sens: e.sens, recalage: e.recalage, avant: c.avant, apres: c.apres, couverture: e.couverture, couleur: e.couleur, couleurDos: e.couleurDos };
+  return { sens: e.sens, recalage: e.recalage, avant: c.avant, apres: c.apres, relief: e.relief, couverture: e.couverture, couleur: e.couleur, couleurDos: e.couleurDos };
 }
 
 function normales(pos, idx){
@@ -488,4 +885,5 @@ function normales(pos, idx){
   return n;
 }
 
-module.exports = { projeter, preparer, projeterPhotos, couleurFidele, controler, vue, couleurVue, masquePhoto, recaler };
+module.exports = { projeter, preparer, projeterPhotos, aplanirRelief, mesurerRelief, couleurFidele, controler, vue, couleurVue, masquePhoto, recaler,
+  lab, deltaE, medianeGroupe };

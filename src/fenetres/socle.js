@@ -818,22 +818,32 @@ window.addEventListener('pagehide', function(){
 });
 `;
 
-/* ══ LE PANNEAU DES GÉNÉRATIONS (2026-10-18, sa demande : « un indicateur global où elle peut la minimiser, la
-   rouvrir ou l'INTERROMPRE ; plusieurs générations en même temps, chacune avec sa barre d'étapes ; le coût de
-   chacune ») ══
-   La file vit dans la page principale (generations:etat) ; ce panneau, posé ICI dans le socle comme le témoin des
-   lots, suit la personne dans TOUTES les fenêtres sans qu'aucune n'ait à y penser.
-   ⚠ IL NE PARAÎT QUE S'IL Y A UNE GÉNÉRATION (en cours, ou terminée depuis moins d'une heure). Une pastille en bas
-   à droite ; un clic ouvre le panneau, « Réduire » le referme — le choix est retenu sur ce poste.
-   ⚠ INTERROMPRE DIT CE QUI EST DÉJÀ FACTURÉ : la génération continue chez The New Black, le montant n'en revient pas.
-   ⚠ PAS DE BARRE DE DÉFILEMENT (la règle de la maison) : quatre générations au plus dans le panneau, et « + N
-   autres » pour le reste. */
+/* ══ LA PASTILLE DES GÉNÉRATIONS (2026-10-18) ══
+   La file vit dans la page principale (generations:etat) ; la pastille, posée ICI dans le socle comme le témoin des
+   lots, suit la personne dans TOUTES les fenêtres sans qu'aucune n'ait à y penser. Un clic ouvre la FENÊTRE
+   « Générations » (src/fenetres/generations.js) : liste complète, étapes détaillées, pourcentage, arrêt.
+   ⚠⚠ ELLE NE S'APPUIE PLUS SUR localStorage — C'ÉTAIT LA PANNE (sa capture images\93.png, « je clique, rien ne se
+   passe »). Le petit panneau d'avant retenait « ouvert » dans localStorage ; or chaque fenêtre native est une page
+   `data:`, où localStorage LÈVE (SecurityError) : la lecture rendait toujours « fermé », le clic ne changeait rien.
+   Le clic passe maintenant par la coquille (`ouvrirModule('generations')`), et à défaut par le pont.
+   ⚠ QUAND ELLE PARAÎT (sa règle, capture images\94.png — « ✓ 1 génération terminée » restait là pour toujours) :
+     · une génération EN COURS : la roue, le nombre et le coût engagé ;
+     · une génération À CONFIRMER (conformité sous le seuil) : couleur d'alerte, jusqu'à ce qu'on la traite ;
+     · une génération ÉCHOUÉE pas encore ouverte dans la fenêtre : couleur d'erreur, jusqu'à ce qu'on l'y ouvre ;
+     · une génération TERMINÉE : « ✓ Génération terminée » pendant 8 s, puis la pastille s'en va d'elle-même
+       (la génération reste dans l'historique de la fenêtre) ;
+     · rien de tout cela : AUCUNE pastille. */
 const CSS_GEN = `
 .sz-gen{position:fixed;right:.8rem;bottom:.3rem;z-index:61;display:flex;align-items:center;gap:.45rem;
   padding:.38rem .8rem;border-radius:99px;font-size:.78rem;cursor:pointer;color:var(--tx);
   background:var(--f-carte2);border:1px solid rgba(var(--or-rgb),.55);box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.sz-gen:hover{background:var(--v10)}
+.sz-gen:focus-visible{outline:2px solid var(--or);outline-offset:2px}
 .sz-gen .roue{display:inline-block;animation:szGenTourne 1.6s linear infinite}
 .sz-gen.calme .roue{animation:none}
+.sz-gen.alerte{border-color:rgba(251,191,36,.7);color:var(--tx-att)}
+.sz-gen.erreur{border-color:rgba(248,113,113,.7);color:var(--tx-err)}
+.sz-gen.bon{border-color:rgba(74,222,128,.6);color:var(--tx-ok)}
 @keyframes szGenTourne{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion: reduce){.sz-gen .roue{animation:none}}
 html.sz-lots-on .sz-gen{bottom:2.2rem}
@@ -841,115 +851,67 @@ html.sz-lots-on .sz-gen{bottom:2.2rem}
    Une fenêtre qui a un PIED la reçoit DANS son pied, à gauche des boutons — à sa place, sans rien pousser ; les
    autres l'ont en bas à droite. */
 .sz-gen.dans-pied{position:static;box-shadow:none;margin-left:auto;margin-right:.6rem;padding:.28rem .7rem}
-.sz-gen-pan{position:fixed;right:.8rem;bottom:2.6rem;z-index:62;width:min(27rem,calc(100vw - 1.6rem));
-  background:var(--f-carte);border:1px solid var(--v16);border-radius:12px;box-shadow:0 14px 34px rgba(0,0,0,.45);
-  padding:.7rem .8rem;font-size:.78rem;color:var(--tx)}
-html.sz-lots-on .sz-gen-pan{bottom:4.5rem}
-.sz-gen-pan h4{margin:0 0 .5rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
-.sz-gen-it{padding:.5rem 0;border-top:1px solid var(--v08)}
-.sz-gen-it:first-of-type{border-top:0}
-.sz-gen-it .l1{display:flex;align-items:center;gap:.45rem}
-.sz-gen-it .nom{font-weight:600;flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sz-gen-it .cout{font-variant-numeric:tabular-nums;color:var(--tx2);white-space:nowrap}
-.sz-gen-it .pas{display:flex;gap:3px;margin:.35rem 0 .2rem}
-.sz-gen-it .pas i{flex:1 1 0;height:.32rem;border-radius:99px;background:var(--v12)}
-.sz-gen-it .pas i.fait{background:var(--tx-ok)}
-.sz-gen-it .pas i.cours{background:var(--or)}
-.sz-gen-it .pas i.err{background:var(--tx-err)}
-.sz-gen-it .l2{color:var(--tx2)}
-.sz-gen-it .l2.err{color:var(--tx-err)}
-.sz-gen-it .l2.bon{color:var(--tx-ok)}
-.sz-gen-it .l2.att{color:var(--tx-att)}
-.sz-gen-it .pas i.attente{background:var(--tx-att)}
-.sz-gen-it button,.sz-gen-pied button{font-size:.72rem;padding:.18rem .55rem;white-space:nowrap;flex:0 0 auto}
-.sz-gen-pied{display:flex;gap:.4rem;justify-content:flex-end;flex-wrap:wrap;margin-top:.55rem;padding-top:.5rem;border-top:1px solid var(--v08)}
-.sz-gen-pied .plus{margin-right:auto;color:var(--tx2);align-self:center}
+/* La fenêtre Générations elle-même n'a pas besoin de la pastille qui l'ouvre. */
+body.sz-fen-generations .sz-gen{display:none!important}
 `;
 
 const JS_GEN = () => `
-var _szGenT = null, _szGenPill = null, _szGenPan = null, _szGenDer = null;
-function _szGenOuvert(){ try { return localStorage.getItem('sz_gen_ouvert') === '1'; } catch (e) { return false; } }
-function _szGenOuvrir(v){ try { localStorage.setItem('sz_gen_ouvert', v ? '1' : '0'); } catch (e) {} _szGenPeindre(_szGenDer); }
-function _szGenEsc(x){ return String(x == null ? '' : x).replace(/[&<>"]/g, function(c){ return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
+var _szGenT = null, _szGenPill = null, _szGenDer = null, _szGenFin = null;
+var _SZ_GEN_TERMINEE_MS = 8000;
 function _szGenArgent(n){ return (Math.round((Number(n) || 0) * 100) / 100).toFixed(2).replace('.', ',') + ' $ US'; }
-// Les dix étapes de l'aperçu 3D (2026-10-18) — sa condition : « aucune étape silencieuse ».
-var _SZ_GEN_ETAPES = ['${T("Envoi des photos")}', '${T("Génération 3D chez The New Black")}', '${T("Téléchargement du modèle")}',
-  '${T("Détourage et recalage des photos devant/dos")}', '${T("Projection des photos sur le modèle")}', '${T("Couleur fidèle")}',
-  '${T("Compression")}', '${T("Contrôle de conformité")}', '${T("Dépôt (R2 et photothèque)")}', '${T("Posé sur la fiche")}'];
-function _szGenConf(c){ return (c && c.devant != null) ? '${T("Conforme au devant : {d} % · au dos : {o} %")}'.replace('{d}', String(c.devant)).replace('{o}', String(c.dos)) : ''; }
+/* Ce que la pastille doit dire — une fonction PURE, éprouvée par tools/banc-pastille-generations.js.
+   Rend null quand rien n'est en cours ni à traiter : la pastille disparaît. */
+function szGenPastille(l, maintenant){
+  l = Array.isArray(l) ? l : [];
+  var cours = l.filter(function(g){ return g.etat === 'cours'; });
+  var attente = l.filter(function(g){ return g.etat === 'attente'; });
+  var echec = l.filter(function(g){ return g.etat === 'echec' && !g.vu; });
+  var recentes = l.filter(function(g){ return g.etat === 'fini' && g.fin && (maintenant - g.fin) < _SZ_GEN_TERMINEE_MS; });
+  var fois = function(n, un, plusieurs){ return n + ' ' + (n > 1 ? plusieurs : un); };
+  if (cours.length) {
+    var cout = cours.reduce(function(s, g){ return s + (Number(g.cout) || 0); }, 0);
+    return { ton: (attente.length ? 'alerte' : (echec.length ? 'erreur' : '')), roue: true,
+      texte: fois(cours.length, '${T("génération en cours")}', '${T("générations en cours")}') + ' · ' + _szGenArgent(cout)
+        + (attente.length ? ' · ' + attente.length + ' ${T("à confirmer")}' : '')
+        + (echec.length ? ' · ' + fois(echec.length, '${T("échouée")}', '${T("échouées")}') : '') };
+  }
+  if (attente.length) return { ton: 'alerte', signe: '?', texte: fois(attente.length, '${T("génération à confirmer")}', '${T("générations à confirmer")}') };
+  if (echec.length) return { ton: 'erreur', signe: '✕', texte: fois(echec.length, '${T("génération échouée")}', '${T("générations échouées")}') };
+  if (recentes.length) {
+    var reste = Math.max.apply(null, recentes.map(function(g){ return _SZ_GEN_TERMINEE_MS - (maintenant - g.fin); }));
+    return { ton: 'bon', signe: '✓', reste: reste, texte: recentes.length > 1
+      ? recentes.length + ' ${T("générations terminées")}' : '${T("Génération terminée")}' };
+  }
+  return null;
+}
+function _szGenRetirer(){ if (_szGenPill && _szGenPill.parentNode) _szGenPill.parentNode.removeChild(_szGenPill); _szGenPill = null; }
+function szGenOuvrirFenetre(){
+  var P = window.szPont;
+  if (!P) return;
+  var repli = function(){ try { var q = P.appeler && P.appeler('generations:ouvrir'); if (q && q.catch) q.catch(function(){}); } catch (e) {} };
+  try {
+    var r = P.ouvrirModule ? P.ouvrirModule('generations') : null;
+    if (r && typeof r.then === 'function') r.then(function(ok){ if (!ok) repli(); }).catch(repli); else repli();
+  } catch (e) { repli(); }
+}
 function _szGenPeindre(r){
   _szGenDer = r;
-  var l = (r && r.ok && r.liste) ? r.liste : [];
-  if (!l.length) {
-    if (_szGenPill && _szGenPill.parentNode) _szGenPill.parentNode.removeChild(_szGenPill);
-    if (_szGenPan && _szGenPan.parentNode) _szGenPan.parentNode.removeChild(_szGenPan);
-    _szGenPill = _szGenPan = null; return;
-  }
-  var cours = l.filter(function(g){ return g.etat === 'cours'; }), attente = l.filter(function(g){ return g.etat === 'attente'; });
-  var cout = cours.reduce(function(s, g){ return s + (Number(g.cout) || 0); }, 0);
+  if (_szGenFin) { clearTimeout(_szGenFin); _szGenFin = null; }
+  var etat = szGenPastille((r && r.ok && r.liste) ? r.liste : [], Date.now());
+  if (!etat) { _szGenRetirer(); return; }
   if (!_szGenPill) {
     _szGenPill = document.createElement('button'); _szGenPill.type = 'button'; _szGenPill.className = 'sz-gen';
-    _szGenPill.addEventListener('click', function(){ _szGenOuvrir(!_szGenOuvert()); });
+    _szGenPill.title = '${T("Ouvrir la fenêtre Générations")}';
+    _szGenPill.addEventListener('click', szGenOuvrirFenetre);
     var act = document.querySelector('.pied .actions');
     if (act && act.parentNode) { _szGenPill.classList.add('dans-pied'); act.parentNode.insertBefore(_szGenPill, act); }
     else document.body.appendChild(_szGenPill);
   }
-  _szGenPill.classList.toggle('calme', !cours.length);
-  _szGenPill.setAttribute('aria-expanded', _szGenOuvert() ? 'true' : 'false');
-  _szGenPill.innerHTML = cours.length
-    ? '<span class="roue" aria-hidden="true">⟳</span> ' + cours.length + ' ' + (cours.length > 1 ? '${T("générations en cours")}' : '${T("génération en cours")}') + ' · ' + _szGenArgent(cout)
-      + (attente.length ? ' · ' + attente.length + ' ${T("à confirmer")}' : '')
-    : attente.length ? '<span aria-hidden="true">?</span> ' + attente.length + ' ' + (attente.length > 1 ? '${T("modèles à confirmer")}' : '${T("modèle à confirmer")}')
-    : '<span aria-hidden="true">✓</span> ' + l.length + ' ' + (l.length > 1 ? '${T("générations terminées")}' : '${T("génération terminée")}');
-  if (!_szGenOuvert()) { if (_szGenPan && _szGenPan.parentNode) _szGenPan.parentNode.removeChild(_szGenPan); _szGenPan = null; return; }
-  if (!_szGenPan) {
-    _szGenPan = document.createElement('div'); _szGenPan.className = 'sz-gen-pan'; _szGenPan.setAttribute('role', 'region');
-    _szGenPan.setAttribute('aria-label', '${T("Générations")}');
-    _szGenPan.addEventListener('click', _szGenClic);
-    document.body.appendChild(_szGenPan);
-  }
-  var montre = l.slice(0, 4), reste = l.length - montre.length;
-  var maintenant = Date.now();
-  _szGenPan.innerHTML = '<h4>${T("Générations")}</h4>' + montre.map(function(g){
-    var e = g.etapes[g.etapeCourante] || {}, sec = e.t0 ? Math.round(((e.t1 || maintenant) - e.t0) / 1000) : 0;
-    var l2 = g.etat === 'cours'
-      ? '${T("Étape")} ' + (g.etapeCourante + 1) + '/' + g.etapes.length + ' · ' + _szGenEsc(_SZ_GEN_ETAPES[g.etapeCourante] || e.lib) + ' · ' + sec + ' s' + (g.etapeCourante === 1 ? ' / ≈ ' + (g.dureeEstimee || 150) + ' s' : '')
-      : (g.etat === 'attente' ? '? ${T("En attente de votre confirmation")} — ' + _szGenEsc(_szGenConf(g.conformite))
-      : (g.etat === 'fini' ? '✓ ${T("Terminée")}' : (g.etat === 'interrompu' ? '${T("Interrompue")}' : (g.etat === 'rejete' ? '${T("Rejetée")}' : '✕ ${T("Échec")}'))) + (g.message ? ' — ' + _szGenEsc(g.message) : ''));
-    var gestes = g.etat === 'cours' ? '<button type="button" data-g="interrompre">${T("Interrompre")}</button>'
-      : (g.etat === 'attente' ? '<button type="button" data-g="confirmer">${T("Publier quand même")}</button><button type="button" data-g="rejeter">${T("Rejeter")}</button>'
-      : '<button type="button" data-g="retirer">${T("Retirer")}</button>');
-    return '<div class="sz-gen-it" data-id="' + _szGenEsc(g.id) + '"><div class="l1"><span class="nom">' + _szGenEsc(g.produitNom) + ' · ${T("Aperçu 3D")}</span>'
-      + '<span class="cout">' + _szGenArgent(g.cout) + '</span>' + gestes
-      + '</div><div class="pas">' + g.etapes.map(function(x){ return '<i class="' + x.etat + '"></i>'; }).join('') + '</div>'
-      + '<div class="l2' + (g.etat === 'echec' ? ' err' : (g.etat === 'fini' ? ' bon' : (g.etat === 'attente' ? ' att' : ''))) + '">' + l2 + '</div></div>';
-  }).join('')
-  + '<div class="sz-gen-pied">' + (reste > 0 ? '<span class="plus">+ ' + reste + ' ${T("autre(s)")}</span>' : '')
-  + (cours.length > 1 ? '<button type="button" data-g="interrompreTout">${T("Tout interrompre")}</button>' : '')
-  + (l.length > cours.length + attente.length ? '<button type="button" data-g="retirerTout">${T("Retirer les terminées")}</button>' : '')
-  + '<button type="button" data-g="reduire">${T("Réduire")}</button></div>';
-}
-function _szGenClic(ev){
-  var b = ev.target.closest('button[data-g]'); if (!b) return;
-  var g = b.getAttribute('data-g'), it = b.closest('[data-id]'), id = it ? it.getAttribute('data-id') : '*';
-  if (g === 'reduire') { _szGenOuvrir(false); return; }
-  var agir = function(geste){ window.szPont.appeler('generations:agir', id, geste).then(function(){ _szGenLire(); }).catch(function(){}); };
-  if (g === 'retirer' || g === 'retirerTout') { agir('retirer'); return; }
-  var l = (_szGenDer && _szGenDer.liste) || [];
-  if (g === 'confirmer' || g === 'rejeter') {
-    var x = l.filter(function(y){ return y.id === id; })[0];
-    var q = g === 'rejeter'
-      ? { danger: true, titre: '${T("Rejeter le modèle 3D")}', texte: '${T("Le modèle sera retiré de la photothèque et rien ne sera posé sur la fiche. Le coût engagé chez The New Black n’est pas remboursé.")}', oui: '${T("Rejeter le modèle")}' }
-      : { prudent: true, titre: '${T("Publier le modèle 3D")}', texte: '${T("Le modèle ne correspond pas bien aux photos. Il sera posé sur la fiche tel quel, et visible en boutique.")}' + ' ' + _szGenConf(x && x.conformite), oui: '${T("Publier quand même")}' };
-    (typeof szConfirmer === 'function' ? szConfirmer(q) : Promise.resolve(true)).then(function(ok){ if (ok) agir(g); });
-    return;
-  }
-  var cibles = l.filter(function(x){ return x.etat === 'cours' && (id === '*' || x.id === id); });
-  var engage = cibles.reduce(function(s, x){ return s + (Number(x.cout) || 0); }, 0);
-  var question = { danger: true, titre: cibles.length > 1 ? '${T("Interrompre toutes les générations")}' : '${T("Interrompre la génération")}',
-    texte: '${T("{n} $ US sont déjà engagés chez The New Black : ce montant ne sera pas remboursé. Les photos de la fiche seront déverrouillées et rien ne sera posé.")}'.replace('{n}', _szGenArgent(engage).replace(' $ US', '')),
-    oui: '${T("Interrompre")}' };
-  (typeof szConfirmer === 'function' ? szConfirmer(question) : Promise.resolve(true)).then(function(ok){ if (ok) agir('interrompre'); });
+  _szGenPill.className = 'sz-gen' + (_szGenPill.classList.contains('dans-pied') ? ' dans-pied' : '') + (etat.ton ? ' ' + etat.ton : '') + (etat.roue ? '' : ' calme');
+  _szGenPill.innerHTML = (etat.roue ? '<span class="roue" aria-hidden="true">⟳</span> ' : '<span aria-hidden="true">' + etat.signe + '</span> ')
+    + etat.texte.replace(/[&<>]/g, function(c){ return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]; });
+  // « Terminée » : la pastille s'en va à l'heure dite, sans attendre la prochaine lecture
+  if (etat.reste) _szGenFin = setTimeout(function(){ _szGenPeindre(_szGenDer); }, etat.reste + 50);
 }
 function _szGenLire(){
   if (document.hidden) return;

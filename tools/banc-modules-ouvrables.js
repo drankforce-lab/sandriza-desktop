@@ -78,7 +78,9 @@ const ouvreEnNatif = (nom) => {
     const suite = apres.replace(/^case\s*'[^']+'\s*:\s*/, '');
     const fin = suite.search(/\n\s{4}case\s+'/);
     const bloc = fin > 0 ? suite.slice(0, fin) : suite.slice(0, 1500);
-    if (/ouvrirNative\s*\(/.test(bloc)) return true;
+    /* `_dockOuvrir` (2026-10-18) : le corps de dock:ouvrir, appelé d'ici — la vue native ancrable, née sans
+       jumeau web (la fenêtre Générations). Elle s'ouvre sans demander de section au site. */
+    if (/ouvrirNative\s*\(|_dockOuvrir\s*\(/.test(bloc)) return true;
   }
   return false;
 };

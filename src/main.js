@@ -2783,7 +2783,7 @@ const OPS_PONT = new Set([
   // 'photos:attacher' ECRIT SUR UNE FICHE PRODUIT : c est ce que la boutique
   // affichera, d ou un second droit exige cote site.
   'photos:donnees', 'photos:importer', 'photos:isoler', 'photos:fond',
-  'photos:attacher', 'photos:produits', 'photos:supprimer', 'photos:vider',
+  'photos:attacher', 'photos:produits', 'photos:supprimer', 'photos:vider', 'photos:rattraper', 'photos:rattraper',
   'photos:usb', 'photos:enregistrer',
   // Traitements nommes (detourage, mannequin retire, porte par un mannequin)
   // et le meme geste sur un LOT.
@@ -3044,7 +3044,7 @@ const OPS_PONT = new Set([
   'produit:teinter',
   // La vue 360° générée (Product 360 de The New Black, 2026-10-18 — remplace l'aperçu 3D Hunyuan), les coûts par
   // article et le contrôle des marges (7.16.0).
-  'generations:etat', 'generations:lancer3d', 'generations:agir', 'produit:photosVerrou', 'produit:couts', 'produit:grosPlanZone', 'produit:grosPlan', 'marges:analyser', 'marges:appliquer',
+  'generations:etat', 'generations:lancer3d', 'generations:agir', 'generations:ouvrir', 'generations:refaireCouleur', 'produit:photosVerrou', 'produit:couts', 'produit:grosPlanZone', 'produit:grosPlan', 'marges:analyser', 'marges:appliquer',
   'commandes:preparer', 'commandes:expedier',
   // Retours. ⚠ retour:finaliser peut REMBOURSER (Square ou credit boutique) et
   // retour:enregistrer peut generer une etiquette FACTUREE : toute la regle vit
@@ -3454,7 +3454,7 @@ const LIMITES_PONT = {
      << delai >>, affichait un verdict, et le travail CONTINUAIT derriere — d ou
      une phototheque a moitie vide et un ecran qui pretendait avoir fini.
      Un plafond trop court ne rate pas une operation : il ment sur son sort. */
-  'photos:vider': 600000, 'photos:supprimer': 45000, 'photos:toutes': 30000,
+  'photos:vider': 600000, 'photos:rattraper': 240000, 'photos:supprimer': 45000, 'photos:toutes': 30000,
   'photos:pivoter': 90000, 'photos:ranger': 180000, 'photos:espace': 60000,
   'lot:jeter': 600000, 'lot:sources': 90000, 'lot:vignette': 30000,
   'lot:importer': 90000, 'lot:traiter': 180000, 'lot:liste': 30000,
@@ -3580,7 +3580,7 @@ const LIMITES_PONT = {
   // Detourage, impressions et rapports.
   'produit:photoIa': 120000,
   'produit:detourer': 30000, 'produit:teinter': 30000, 'stock:etiquettes': 30000,
-  'generations:etat': 10000, 'generations:lancer3d': 120000, 'generations:agir': 20000, 'produit:photosVerrou': 15000, 'produit:couts': 30000,
+  'generations:etat': 10000, 'generations:lancer3d': 120000, 'generations:agir': 20000, 'generations:ouvrir': 15000, 'generations:refaireCouleur': 30000, 'produit:photosVerrou': 15000, 'produit:couts': 30000,
   /* le gros plan sur la fibre : la zone se trouve au poste (court) ; l agrandissement passe par fal.ai */
   'produit:grosPlanZone': 30000, 'produit:grosPlan': 120000,
   'marges:analyser': 60000, 'marges:appliquer': 90000,
@@ -4276,6 +4276,11 @@ const PAGES_ANCRABLES = () => ({
      pour un apercu. Aucun reglage ne corrigeait ca — il fallait sortir l ecran
      de la colonne. Large par defaut : c est un explorateur. */
   'explorateur': ['Explorateur de photos', () => pageExplorateur()],
+  /* ⚠ LES GÉNÉRATIONS (2026-10-18, sa capture images\93.png : « je clique, rien ne se passe »). La pastille des
+     fenêtres ouvrait un petit panneau dont l'état vivait dans localStorage — or une page `data:` n'y a pas droit
+     (SecurityError) : le panneau ne s'ouvrait JAMAIS. Ici, une vraie fenêtre, née native, sans jumeau web : elle
+     s'ouvre par `_dockOuvrir` (module:ouvrir), détachée par défaut, et s'ancre si on le veut. */
+  'generations': ['Générations', () => pageGenerations()],
 });
 // L ETAT ANCRE OU DETACHE EST RETENU PAR ECRAN (demande du 2026-08-08 :
 // << tu charges la fenetre native appropriee dans son etat enregistre, soit
@@ -4302,7 +4307,7 @@ const NON_DETACHABLES = new Set(['tableau', 'connexion']);
    vignettes minuscules, aucune place pour l apercu — qu il a fallu l en
    sortir. Il s ouvre donc en fenetre, large, des la premiere fois. Rien
    n empeche de l ancrer ensuite : le choix est retenu comme pour les autres. */
-const DETACHES_PAR_DEFAUT = new Set(['explorateur']);
+const DETACHES_PAR_DEFAUT = new Set(['explorateur', 'generations']);
 const etatAncrage = (cle) => {
   if (NON_DETACHABLES.has(cle)) return 'ancre';
   const retenu = (reglages.get('ancrage') || {})[cle];
@@ -4416,6 +4421,12 @@ ipcMain.on('dock:zone', (e, rect) => {
 });
 ipcMain.handle('dock:ouvrir', async (e, cle, etat) => {
   if (!_deLaPrincipale(e)) return false;
+  return _dockOuvrir(cle, etat);
+});
+/* ⚠ LE CORPS DE `dock:ouvrir`, APPELABLE D'ICI (2026-10-18). La fenêtre « Générations » s'ouvre depuis la pastille
+   de N'IMPORTE QUELLE fenêtre (module:ouvrir), et non depuis la seule page principale : elle a besoin du même chemin
+   — une seule instance, ancrée ou détachée selon ce qui a été retenu — sans passer par le contrôle d'origine. */
+const _dockOuvrir = async (cle, etat) => {
   const defs = PAGES_ANCRABLES();
   const c = String(cle || '');
   if (!defs[c]) return false;
@@ -4547,7 +4558,7 @@ ipcMain.handle('dock:ouvrir', async (e, cle, etat) => {
     new Promise((r) => setTimeout(r, 600)),
   ]);
   return { ok: true };
-});
+};
 // Le site navigue vers une section ordinaire : les vues ancrees se cachent
 // (JAMAIS detruites — revenir est instantane et l etat survit).
 ipcMain.on('dock:cacher', (e) => {
@@ -6481,6 +6492,7 @@ const { pageListeNoire } = require('./fenetres/listenoire');
 const { pageProfil } = require('./fenetres/profil');
 const { pageJournaux } = require('./fenetres/journaux');
 const { pageVerrous } = require('./fenetres/verrous');
+const { pageGenerations } = require('./fenetres/generations');
 const { pagePresence } = require('./fenetres/presence');
 const { pageGardien } = require('./fenetres/gardien');
 const { pageMaintenance } = require('./fenetres/maintenance');
@@ -6730,6 +6742,14 @@ const actionApp = (nom, arg) => {
       if (_reuC && winC && !winC.isDestroyed()) {
         winC.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
       }
+      break;
+    }
+    /* ⚠ LES GÉNÉRATIONS (2026-10-18) : ni `dock:naviguer` (aucune section du site ne la porte — le clic serait
+       muet, le piège de la corbeille), ni `ouvrirNative` (elle ne pourrait plus s'ancrer) : `_dockOuvrir`, le corps
+       de dock:ouvrir. Ancrée, elle a besoin de la fenêtre principale à l'écran. */
+    case 'generations': {
+      if (etatAncrage('generations') !== 'detache' && mainWindow && !mainWindow.isDestroyed()) { mainWindow.show(); mainWindow.focus(); }
+      _dockOuvrir('generations').catch(() => {});
       break;
     }
     case 'verrous': {
@@ -6983,7 +7003,7 @@ ipcMain.handle('journaux:ouvrir', (e, onglet) => {
    Les deux ont leur section hote cote site : le chemin d ancrage les trouve. */
 /* ⚠ Les modules qu un RAPPEL peut ouvrir (bouton « Ouvrir » de la fenetre
    Rappels, 2026-10-02) : les cles de `Rappels.MODULES` du site. */
-const _MODULES_OUVRABLES = ['verrous', 'journaux', 'securite', 'incidents', 'config-logotheque', 'corbeille', 'depenses', 'vehicules',
+const _MODULES_OUVRABLES = ['generations', 'verrous', 'journaux', 'securite', 'incidents', 'config-logotheque', 'corbeille', 'depenses', 'vehicules',
   'rappels', 'impot', 'bankrec', 'livre', 'compta', 'factures', 'inventaire', 'commandes'];
 ipcMain.handle('module:ouvrir', (e, nom) => {
   const n = String(nom || '').toLowerCase();

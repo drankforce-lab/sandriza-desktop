@@ -2619,6 +2619,35 @@ const JEU = {
      - la liste normale (un verrou tenu, un verrou eteint) ;
      - la liste VIDE, l'etat le plus frequent en vrai (personne ne tient rien) ;
      - le REFUS de droit, qui doit se lire en clair et non en code. */
+  /* Générations (2026-10-18) — la fenêtre née de « je clique, rien ne se passe ». Quatre cas : la liste COMPLÈTE (une
+     en cours chez The New Black, une à confirmer, une terminée, une échouée, une interrompue) ; une seule EN COURS ;
+     la liste VIDE ; le pont qui ne répond pas. Les heures sont relatives au chargement : les durées vivent. */
+  'generations.js': (function(){
+    var T0 = Date.now();
+    var LIBS = ['Envoi des photos', 'Génération 3D chez The New Black', 'Téléchargement du modèle', 'Détourage et recalage des photos devant/dos',
+      'Projection des photos sur le modèle', 'Relief inventé effacé sous les photos', 'Couleur fidèle', 'Compression', 'Contrôle de conformité',
+      'Dépôt (R2 et photothèque)', 'Posé sur la fiche'];
+    var et = function(n, cours, t0){ return LIBS.map(function(lib, i){ return { lib: lib, etat: i < n ? 'fait' : (i === n && cours ? cours : 'att'),
+      t0: i <= n ? t0 + i * 4000 : 0, t1: i < n ? t0 + i * 4000 + (i === 1 ? 142000 : 3500) : 0 }; }); };
+    var g = function(id, nom, etat, n, cours, age, extra){ var x = { id: id, genre: '3d', produit: 'p_' + id, produitNom: nom, sku: 'SZ-' + id.toUpperCase(),
+      par: 'Bob Brousseau', etat: etat, etapeCourante: Math.min(n, 10), etapes: et(n, cours, T0 - age), cout: 0.65, debut: T0 - age,
+      fin: (etat === 'cours' || etat === 'attente') ? 0 : T0 - age + 200000, dureeEstimee: 150 }; for (var k in (extra || {})) x[k] = extra[k]; return x; };
+    var tout = [
+      g('walla', 'Chemise Walla', 'cours', 1, 'cours', 74000),
+      g('mila', 'Robe Mila en lin', 'attente', 10, 'attente', 3600000, { conformite: { devant: 81, dos: 92, reliefEfface: 54 } }),
+      g('odile', 'Veste Odile', 'fini', 11, '', 7200000, { conformite: { devant: 97, dos: 93, reliefEfface: 58 },
+        message: 'Aperçu 3D posé sur la fiche (1214 Ko) · conforme au devant : 97 %, au dos : 93 % · relief inventé effacé à 58 % · rendu PH-000091 dans la photothèque.' }),
+      g('anais', 'Jupe Anaïs', 'echec', 2, 'err', 86400000, { message: 'Téléchargement du modèle : le lien du modèle a expiré chez The New Black.' }),
+      g('celeste', 'Pull Céleste', 'interrompu', 1, 'err', 172800000, { vu: true, message: 'Interrompue — 0,65 $ US déjà engagés chez The New Black.' })
+    ];
+    return [
+      { nom: 'liste complete', reponses: { identite: IDENTITE, 'generations:etat': { ok: true, liste: tout }, 'generations:agir': { ok: true, n: 1 }, 'produits:ouvrir': { ok: true } } },
+      { nom: 'une seule en cours', reponses: { identite: IDENTITE, 'generations:etat': { ok: true, liste: [tout[0]] }, 'generations:agir': { ok: true, n: 1 } } },
+      { nom: 'aucune generation', reponses: { identite: IDENTITE, 'generations:etat': { ok: true, liste: [] } } },
+      { nom: 'pont muet', reponses: { identite: IDENTITE, 'generations:etat': { ok: false, motif: 'pont_indisponible' } } }
+    ];
+  })(),
+
   'verrous.js': (function(){
     var verrous = { ok: true, peutModifier: true, locks: [
       { scope: 'orders', scopeLabel: 'Commandes', id: 'ord_1', label: 'CMD-1042', who: 'Marie Tremblay', age: '3 min', since: '2026-08-13T11:57:00Z', expired: false, sessionAlive: true, expiresIn: 45, mine: false },

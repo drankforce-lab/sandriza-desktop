@@ -13,7 +13,9 @@
  * Messages (une session = un fil) :
  *   preparer { glb, tex, normale, devant, dos } → { sens, recalage, avant }        (étape 4)
  *   projeter                                    → { couverture, gainsDos }         (étape 5)
- *   couleur                                     → { reference, avant, apres, … }   (étape 6)
+ *   aplanir                                     → { avant, apres, sommetsAplanis } (étape 6 : le relief inventé)
+ *   couleur { correction? }                     → { reference, avant, apres, … }   (étape 6)
+ *   apercu { texImage, normaleImage }           → { glb, theta0 } (pour la mesure au rendu de la boutique)
  *   textures                                    → { tex, normale } (RVBA, à encoder)
  *   ecrire { texImage, normaleImage }           → { glb, sommets, triangles }      (étape 7)
  *   controler                                   → { avant, apres, vignette (RVBA) } (étape 8)
@@ -77,6 +79,24 @@ async function ecrire(m){
     triangles: prim.getIndices().getCount() / 3, sommetsAvant: S.sommetsAvant };
 }
 
+/* L'APERÇU POUR LA MESURE AU RENDU (2026-10-19) : le modèle tel qu'il est À CET INSTANT (textures du moment, matière
+   mate), SANS rotation ni Draco — la rotation, `ecrire` la fera une fois, à la fin ; le rendu, lui, tourne la caméra
+   de `theta0` (l'azimut du devant). */
+async function apercu(m){
+  const { doc, mat, io, etat } = S;
+  const r = doc.getRoot();
+  const tc = mat.getBaseColorTexture();
+  if (tc && m.texImage) tc.setImage(new Uint8Array(m.texImage)).setMimeType('image/jpeg');
+  const nt = mat.getNormalTexture();
+  if (nt && m.normaleImage) nt.setImage(new Uint8Array(m.normaleImage)).setMimeType('image/jpeg');
+  const mr = mat.getMetallicRoughnessTexture();
+  if (mr) { mat.setMetallicRoughnessTexture(null); if (!mr.listParents().some((p) => p !== r)) mr.dispose(); }
+  mat.setMetallicFactor(0).setRoughnessFactor(0.85);
+  const glb = await io.writeBinary(doc);
+  const f = etat.sens.devant;
+  return { glb: glb.buffer.slice(glb.byteOffset, glb.byteOffset + glb.byteLength), theta0: Math.atan2(f[0], f[2]) * 180 / Math.PI };
+}
+
 function vignette(){
   const { etat } = S, v = P.vue(etat.maillage, etat.vues[0].v.d, 512);
   const col = P.couleurVue(v, etat.maillage, etat.tex);
@@ -89,7 +109,9 @@ async function traiter(m){
   if (m.type === 'preparer') return { r: await preparer(m) };
   if (!S) throw new Error('session absente');
   if (m.type === 'projeter') return { r: P.projeterPhotos(S.etat) };
-  if (m.type === 'couleur') return { r: P.couleurFidele(S.etat) };
+  if (m.type === 'aplanir') return { r: P.aplanirRelief(S.etat) };
+  if (m.type === 'couleur') return { r: P.couleurFidele(S.etat, m.correction || null) };
+  if (m.type === 'apercu') { const r = await apercu(m); return { r, transfert: [r.glb] }; }
   if (m.type === 'textures') {
     const t = S.etat.tex, n = S.etat.o.normale;
     return { r: { tex: { w: t.w, h: t.h, data: t.data }, normale: n ? { w: n.w, h: n.h, data: n.data } : null } };
