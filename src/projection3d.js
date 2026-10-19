@@ -525,7 +525,9 @@ function projeterPhotos(etat){
   if (o.normale) {
     const nm = o.normale;
     for (let y = 0; y < nm.h; y++) for (let x = 0; x < nm.w; x++) {
-      const k = ((Math.floor(y * TH / nm.h)) * TW + Math.floor(x * TW / nm.w)) * 4, w = Math.min(1, acc[k + 3]) * 0.9;
+      /* (2026-10-19, sa plainte : « au dos, le relief inventé domine encore ») : EFFACÉE, plus atténuée — pleinement dès
+         60 % de photo, en fondu vers les côtés. Seules les coutures PEINTES de la photo doivent se lire. */
+      const k = ((Math.floor(y * TH / nm.h)) * TW + Math.floor(x * TW / nm.w)) * 4, w = lisse(Math.min(1, acc[k + 3]) / 0.6);
       if (!w) continue;
       const i = (y * nm.w + x) * 4;
       nm.data[i] = nm.data[i] * (1 - w) + 128 * w; nm.data[i + 1] = nm.data[i + 1] * (1 - w) + 128 * w; nm.data[i + 2] = nm.data[i + 2] * (1 - w) + 255 * w;
@@ -748,7 +750,8 @@ function aplanirRelief(etat, options){
     const pb = lisse(bords[k][yi * vu.W + xi] / (3 * sigma));
     // ⚠ BORNÉ : une couture, une marche inventée ne font que quelques millimètres ; un écart plus grand est une vraie
     // forme (un ourlet, un revers) — on n'y touche pas au-delà de 4 ‰ de la hauteur du vêtement
-    const lim = 0.004 * etat.hauteurModele;
+    // (2026-10-19) borne relevée de 4 à 10 ‰ : la marche de l'empiècement et le pli du milieu du dos se voyaient encore
+    const lim = (o.borne || 0.010) * etat.hauteurModele;
     const dz = Math.max(-lim, Math.min(lim, cible - Z)) * poids[v] * pb;
     pos[v * 3] += dz * d[k][0]; pos[v * 3 + 1] += dz * d[k][1]; pos[v * 3 + 2] += dz * d[k][2];
   }

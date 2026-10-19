@@ -51,6 +51,26 @@ const arrondir = (c) => c ? { iou: +c.iou.toFixed(3), sx: +c.sx.toFixed(4), sy: 
 /* (7) L'ÉCRITURE : les textures encodées par le processus principal, la matière MATE (le suède n'est pas du
    plastique : plus de carte métal/rugosité, métal 0, rugosité 0,85), le modèle TOURNÉ pour que le devant regarde
    la caméra de la boutique (+Z : <model-viewer> s'ouvre de face), puis Draco. */
+/* ⚠⚠ LA MATIÈRE MATE (2026-10-19, sa plainte sur la Walla : « trop lumineux et RÉFLÉCHISSANT sur le devant ») — un
+   suède ne brille pas. Rugosité 0,85 laissait un reflet spéculaire (le Fresnel d'un diélectrique, 4 %) que la lumière
+   de la boutique allumait sur les plis du devant. Ici : métal 0, rugosité 1, et la RÉFLEXION SPÉCULAIRE COUPÉE
+   (KHR_materials_specular, facteur 0 — lu par <model-viewer>) ; toute extension qui ferait briller (vernis, lustre,
+   transmission, iridescence) est retirée. Le vêtement ne renvoie plus que sa couleur diffuse. */
+function matiereMate(doc, mat, ext){
+  const r = doc.getRoot();
+  const mr = mat.getMetallicRoughnessTexture();
+  if (mr) { mat.setMetallicRoughnessTexture(null); if (!mr.listParents().some((p) => p !== r)) mr.dispose(); }
+  const oc = mat.getOcclusionTexture && mat.getOcclusionTexture();
+  if (oc && oc === mr) mat.setOcclusionTexture(null);
+  mat.setMetallicFactor(0).setRoughnessFactor(1);
+  for (const n of ['KHR_materials_clearcoat', 'KHR_materials_sheen', 'KHR_materials_ior', 'KHR_materials_transmission',
+    'KHR_materials_iridescence', 'KHR_materials_volume', 'KHR_materials_anisotropy', 'KHR_materials_emissive_strength']) {
+    try { mat.setExtension(n, null); } catch (e) {}
+  }
+  try { mat.setEmissiveFactor([0, 0, 0]); mat.setEmissiveTexture(null); } catch (e) {}
+  const sp = doc.createExtension(ext.KHRMaterialsSpecular).createSpecular().setSpecularFactor(0);
+  mat.setExtension('KHR_materials_specular', sp);
+}
 async function ecrire(m){
   const { doc, prim, mat, etat, io, ext } = S;
   const r = doc.getRoot();
@@ -58,12 +78,7 @@ async function ecrire(m){
   if (tc && m.texImage) tc.setImage(new Uint8Array(m.texImage)).setMimeType('image/jpeg');
   const nt = mat.getNormalTexture();
   if (nt && m.normaleImage) nt.setImage(new Uint8Array(m.normaleImage)).setMimeType('image/jpeg');
-  const mr = mat.getMetallicRoughnessTexture();
-  mat.setMetallicRoughnessTexture(null);
-  if (mr && !mr.listParents().some((p) => p !== r)) mr.dispose();
-  const oc = mat.getOcclusionTexture && mat.getOcclusionTexture();
-  if (oc && oc === mr) mat.setOcclusionTexture(null);
-  mat.setMetallicFactor(0).setRoughnessFactor(0.85);
+  matiereMate(doc, mat, ext);
   // la rotation autour de Y : le devant (sens.devant) vers +Z
   const f = etat.sens.devant, a = -Math.atan2(f[0], f[2]), ca = Math.cos(a), sa = Math.sin(a);
   for (const sem of ['POSITION', 'NORMAL']) {
@@ -83,15 +98,12 @@ async function ecrire(m){
    mate), SANS rotation ni Draco — la rotation, `ecrire` la fera une fois, à la fin ; le rendu, lui, tourne la caméra
    de `theta0` (l'azimut du devant). */
 async function apercu(m){
-  const { doc, mat, io, etat } = S;
-  const r = doc.getRoot();
+  const { doc, mat, io, etat, ext } = S;
   const tc = mat.getBaseColorTexture();
   if (tc && m.texImage) tc.setImage(new Uint8Array(m.texImage)).setMimeType('image/jpeg');
   const nt = mat.getNormalTexture();
   if (nt && m.normaleImage) nt.setImage(new Uint8Array(m.normaleImage)).setMimeType('image/jpeg');
-  const mr = mat.getMetallicRoughnessTexture();
-  if (mr) { mat.setMetallicRoughnessTexture(null); if (!mr.listParents().some((p) => p !== r)) mr.dispose(); }
-  mat.setMetallicFactor(0).setRoughnessFactor(0.85);
+  matiereMate(doc, mat, ext);
   const glb = await io.writeBinary(doc);
   const f = etat.sens.devant;
   return { glb: glb.buffer.slice(glb.byteOffset, glb.byteOffset + glb.byteLength), theta0: Math.atan2(f[0], f[2]) * 180 / Math.PI };

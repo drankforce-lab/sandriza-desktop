@@ -691,4 +691,9 @@ module.exports = {
   "Cette photo est utilisée par :": "This photo is used by:",
   "La fiche garde sa propre copie de l’image, mais le lien vers la photothèque sera perdu.": "The product keeps its own copy of the image, but the link to the photo library will be lost.",
   "Supprimer quand même": "Delete anyway",
+  "Créée au Studio pour cet article ; elle s’attachera à l’enregistrement de sa fiche.": "Created in the Studio for this item; it will be attached when its product is saved.",
+  "Pour : {p}": "For: {p}",
+  "Dos": "Back",
+  "Devant": "Front",
+  "Autre": "Other",
 };

@@ -85,4 +85,16 @@ module.exports = {
   "Couleur refaite · sans nouvel appel payant": "Colour redone · no new paid call",
   "Une génération est déjà en cours pour cet article.": "A generation is already in progress for this item.",
   "Couleur en cours de retraitement.": "Colour being reprocessed.",
+  /* ── Le Studio rattaché au produit (2026-10-19) ── */
+  "Contrôle du prix": "Price check",
+  "Le prix est redemandé et comparé au montant affiché ; s’il a changé, rien ne part.": "The price is asked again and compared with the amount shown; if it changed, nothing is sent.",
+  "Retrait du mannequin chez The New Black": "Mannequin removal at The New Black",
+  "The New Black refait le vêtement sans mannequin, au palier choisi (Standard, Pro ou Ultra).": "The New Black remakes the garment without the mannequin, at the chosen tier (Standard, Pro or Ultra).",
+  "La couleur du rendu est ramenée sur celle de la photo source.": "The render’s colour is brought to that of the source photo.",
+  "Détourage et finition": "Cut-out and finishing",
+  "Le fond est retiré ou mis à la couleur de l’ambiance, le contour lissé, le cadrage resserré.": "The background is removed or set to the scene colour, the outline smoothed, the framing tightened.",
+  "Sans mannequin": "No mannequin",
+  "Vêtement sans mannequin · The New Black": "Garment without mannequin · The New Black",
+  "le résultat s’affiche dans le Studio, où il s’enregistre ou se place.": "the result appears in the Studio, where it is saved or placed.",
+  "Photo": "Photo",
 };

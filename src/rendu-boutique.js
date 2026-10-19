@@ -25,7 +25,7 @@ const { BrowserWindow } = require('electron');
 const { medianeGroupe } = require('./projection3d');
 
 const L = 480, H = 640;
-const PAGE = '<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0;background:#ff00ff;overflow:hidden">'
+const PAGE = (fond) => '<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0;background:' + (fond || '#ff00ff') + ';overflow:hidden">'
   + '<script type="module" src="https://unpkg.com/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>'
   + '<model-viewer id="mv" style="width:' + L + 'px;height:' + H + 'px;background:transparent;--poster-color:transparent"'
   + ' camera-orbit="0deg 80deg auto" disable-zoom disable-pan shadow-intensity="1" tone-mapping="neutral" exposure="0.78"'
@@ -54,10 +54,12 @@ function teinteTorse(bmp, w, h){
 
 /** Rend le GLB (Buffer) sous `angles` (degrés, autour du devant `theta0`) ; rend [{ a, rgb, png? }] ou null. */
 async function mesurerAngles(glb, theta0, angles, options){
-  const o = Object.assign({ images: false }, options || {});
+  // images : le PNG de chaque angle ; brut : la capture en BGRA (contrôle de structure) ; fond : une autre couleur que
+  // le magenta (une planche) — la teinte du torse n'est alors plus mesurée
+  const o = Object.assign({ images: false, brut: false, fond: '' }, options || {});
   const srv = http.createServer((q, r) => {
     if (q.url.indexOf('/m.glb') === 0) { r.writeHead(200, { 'Content-Type': 'model/gltf-binary', 'Cache-Control': 'no-store' }); r.end(glb); return; }
-    r.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' }); r.end(PAGE);
+    r.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' }); r.end(PAGE(o.fond));
   });
   await new Promise((ok, ko) => { srv.once('error', ko); srv.listen(0, '127.0.0.1', ok); });
   const port = srv.address().port;
@@ -78,8 +80,8 @@ async function mesurerAngles(glb, theta0, angles, options){
       await new Promise((ok) => setTimeout(ok, 450));
       const im = await w.webContents.capturePage();
       const t = im.getSize(), bmp = im.toBitmap();
-      const rgb = teinteTorse(bmp, t.width, t.height);
-      out.push(Object.assign({ a, rgb }, o.images ? { png: im.toPNG() } : {}));
+      const rgb = o.fond ? [0, 0, 0] : teinteTorse(bmp, t.width, t.height);
+      out.push(Object.assign({ a, rgb }, o.images ? { png: im.toPNG() } : {}, o.brut ? { brut: { w: t.width, h: t.height, data: bmp } } : {}));
     }
     return out.every((x) => x.rgb) ? out : null;
   } finally {

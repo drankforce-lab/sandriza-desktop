@@ -670,7 +670,10 @@ function pageProduit(id) {
       + '<button type="button" id="p-detourer" class="mini-decor" disabled '
       + 'title="${T("Détourer la photo et poser un décor (studio, jardin, Paris…)")}"><span class="ic">✂</span> ${T("Décor")}</button>'
       + '<button type="button" id="p-fibre" class="mini-decor" disabled '
-      + 'title="${T("Un gros plan sur la matière, tiré de la photo principale, ajouté aux photos")}"><span class="ic">🔍</span> ${T("Gros plan fibre")}</button></div>'
+      + 'title="${T("Un gros plan sur la matière, tiré de la photo principale, ajouté aux photos")}"><span class="ic">🔍</span> ${T("Gros plan fibre")}</button>'
+      + '<button type="button" id="p-studio" class="mini-decor" '
+      + 'title="${T("Ouvrir le Studio virtuel pour cet article : les photos créées reviennent ici, dans leur case")}"><span class="ic">📷</span> ${T("Créer au studio")}</button></div>'
+      + '<div class="aide p-studio-attente" id="p-studio-attente" style="display:none"></div>'
       + '<div class="vues" id="p-vues"></div>'
       + '</div></div>'
       /* ⚠ LES MÉDIAS (2026-10-07, sa demande : « Sophie mesure 1,68 m et porte
@@ -1045,6 +1048,8 @@ function pageProduit(id) {
       }
       if (ev.target.closest('#p-detourer')) { ouvrirDetourage(); return; }
       if (ev.target.closest('#p-fibre')) { ouvrirGrosPlan(); return; }
+      if (ev.target.closest('#p-studio')) { ouvrirStudio(); return; }
+      if (ev.target.closest('#p-studio-placer')) { placerPrevues(); return; }
       if (ev.target.closest('#p-cv-gen')) { genererVariantes(); return; }
       if (ev.target.closest('#p-vign')) {
         choisirPhoto(function(ds){ IMAGE = ds[0]; montrerImage(IMAGE); majIa(); });
@@ -1962,6 +1967,117 @@ function pageProduit(id) {
     });
   }
 
+  /* ══ L ALLER-RETOUR ASSISTANT → STUDIO → ASSISTANT (2026-10-19, sa demande) ══════════════════════════════════
+     « Créer au studio » ouvre le Studio POUR cet article (un identifiant PROVISOIRE s il n est pas encore
+     enregistré) ; « Placer dans la fiche », au Studio, dépose la photo dans la boîte aux lettres de cette fiche :
+     ce qui suit la relève toutes les 2 s et la pose dans sa case — le devant en photo principale, le dos dans la
+     case « Derrière » (ou marqué « Dos »), le reste dans une case libre — ⚠ EN DEMANDANT avant de remplacer une
+     photo. L enregistrement de la fiche les attache ; un article provisoire passe alors à son vrai identifiant.
+     ⚠ Fenêtre fermée : rien ne se perd — la photo attend, étiquetée, et la fiche la propose à son ouverture. */
+  var PROV = 'prov_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  var RET_VU = {}, RET_OCC = false, RET_T = null, PREVUES = [];
+  function cleStudio(){ return ID ? String(ID) : PROV; }
+  function ouvrirStudio(){
+    var dos = photoDos();
+    P.appeler('studio:ouvrirPour', { produit: cleStudio(), provisoire: !ID, nom: val('p-nom').trim(), sku: val('p-sku'),
+      devant: IMAGE || '', dos: dos || '', role: IMAGE ? (dos ? 'autre' : 'dos') : 'devant' }).then(function(r){
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+      dire('${T("Studio ouvert pour cet article : « Placer dans la fiche » y renvoie les photos, ici, dans leur case.")}', 'bon');
+      suivreStudio();
+    });
+  }
+  function suivreStudio(){
+    if (RET_T) return;
+    var tour = function(){ if (!document.hidden) releverStudio(); };
+    tour();
+    RET_T = setInterval(tour, 2000);
+  }
+  function releverStudio(){
+    if (RET_OCC) return;
+    P.appeler('studio:retours', cleStudio()).then(function(r){
+      if (!r || !r.ok) return;
+      var l = (r.retours || []).filter(function(x){ return !RET_VU[x.id]; });
+      if (!l.length) return;
+      RET_OCC = true;
+      var suite = function(i){
+        if (i >= l.length) { RET_OCC = false; return; }
+        RET_VU[l[i].id] = 1;
+        poserDuStudio(l[i], function(){ P.appeler('studio:retourPris', cleStudio(), l[i].id); suite(i + 1); });
+      };
+      suite(0);
+    });
+  }
+  // Une case libre pour une photo : la première libre (mode simple), ou « Autre » puis les côtés (mode angles).
+  function caseLibre(){
+    var cles = modeStandard() ? (function(){ var x = []; for (var i = 1; i <= MAX_PHOTOS; i++) x.push('libre' + i); return x; })() : ['autres', 'coteG', 'coteD'];
+    for (var i = 0; i < cles.length; i++) if (!VUES[cles[i]]) return cles[i];
+    return '';
+  }
+  function ajouterLibre(url){ var k = caseLibre(); if (k) VUES[k] = url; return k; }
+  function nomRoleStudio(r){ return r === 'dos' ? '${T("Dos")}' : (r === 'autre' ? '${T("Autre")}' : '${T("Devant")}'); }
+  function poserDuStudio(it, fini){
+    var url = it.url, role = it.role || 'autre';
+    var conclure = function(ou){
+      dessinerVues(); montrerImage(IMAGE); majIa(); dessiner3d();
+      dire(ou ? '${T("Photo du Studio posée ({r}) — {c}. Enregistrez la fiche pour l’attacher.")}'.replace('{r}', nomRoleStudio(role)).replace('{c}', ou)
+        : '${T("Plus de case libre pour la photo du Studio {c} : retirez une photo, puis rouvrez la fiche.")}'.replace('{c}', it.code || ''), ou ? 'bon' : 'att');
+      fini();
+    };
+    var deja = function(){ return url === IMAGE || Object.keys(VUES).some(function(k){ return VUES[k] === url; }); };
+    if (deja()) { fini(); return; }
+    if (role === 'devant') {
+      if (!IMAGE) { IMAGE = url; conclure('${T("photo principale")}'); return; }
+      szConfirmer({ prudent: true, titre: '${T("Remplacer la photo principale ?")}',
+        texte: '${T("Le Studio envoie une nouvelle photo du devant ({c}). L’actuelle passera dans une case libre.")}'.replace('{c}', it.code || ''),
+        oui: '${T("Remplacer")}', non: '${T("Ajouter aux photos")}' }).then(function(ok){
+          if (ok) { var a = IMAGE; IMAGE = url; ajouterLibre(a); conclure('${T("photo principale")}'); }
+          else conclure(ajouterLibre(url) ? '${T("case libre")}' : '');
+        });
+      return;
+    }
+    if (role === 'dos') {
+      if (!modeStandard()) {
+        if (!VUES.derriere) { VUES.derriere = url; conclure('${T("case « Derrière »")}'); return; }
+        szConfirmer({ prudent: true, titre: '${T("Remplacer la photo « Derrière » ?")}',
+          texte: '${T("Le Studio envoie une nouvelle photo du dos ({c}). L’actuelle passera dans une case libre.")}'.replace('{c}', it.code || ''),
+          oui: '${T("Remplacer")}', non: '${T("Ajouter aux photos")}' }).then(function(ok){
+            if (ok) { var a = VUES.derriere; VUES.derriere = url; ajouterLibre(a); conclure('${T("case « Derrière »")}'); }
+            else conclure(ajouterLibre(url) ? '${T("case libre")}' : '');
+          });
+        return;
+      }
+      var marquer = function(){ var k = ajouterLibre(url); if (k) DOS_SRC = url; conclure(k ? '${T("marquée « Dos »")}' : ''); };
+      if (!photoDos()) { marquer(); return; }
+      szConfirmer({ prudent: true, titre: '${T("Marquer la nouvelle photo « Dos » ?")}',
+        texte: '${T("Le Studio envoie une nouvelle photo du dos ({c}). L’actuelle reste parmi les photos, sans la marque « Dos ».")}'.replace('{c}', it.code || ''),
+        oui: '${T("Marquer « Dos »")}', non: '${T("Ajouter aux photos")}' }).then(function(ok){
+          if (ok) marquer(); else conclure(ajouterLibre(url) ? '${T("case libre")}' : '');
+        });
+      return;
+    }
+    conclure(ajouterLibre(url) ? '${T("case libre")}' : '');
+  }
+  // À l ouverture d une fiche : les photos du Studio étiquetées pour elle et pas encore posées sont PROPOSÉES.
+  function proposerPrevues(){
+    if (!ID) return;
+    P.appeler('studio:retours', String(ID), { prevues: true }).then(function(r){
+      var b = document.getElementById('p-studio-attente');
+      PREVUES = (r && r.ok && r.prevues) ? r.prevues : [];
+      if ((r && r.ok && (r.retours || []).length)) suivreStudio();
+      if (!b) return;
+      b.style.display = PREVUES.length ? '' : 'none';
+      b.innerHTML = PREVUES.length ? (PREVUES.length > 1 ? '${T("{n} photos du Studio attendent cette fiche.")}' : '${T("{n} photo du Studio attend cette fiche.")}').replace('{n}', String(PREVUES.length))
+        + ' <button type="button" id="p-studio-placer">${T("Les placer")}</button>' : '';
+    });
+  }
+  function placerPrevues(){
+    var l = PREVUES.slice(); PREVUES = [];
+    var b = document.getElementById('p-studio-attente'); if (b) b.style.display = 'none';
+    var suite = function(i){ if (i < l.length) poserDuStudio({ url: l[i].url, role: l[i].role, code: l[i].code }, function(){ suite(i + 1); }); };
+    suite(0);
+  }
+  window.addEventListener('pagehide', function(){ if (RET_T) { clearInterval(RET_T); RET_T = null; } });
+
   function montrerImage(src){
     dessiner3d();   // le devant de l'aperçu 3D est la photo principale
     var v = document.getElementById('p-vign'); if (!v) return;
@@ -2676,6 +2792,8 @@ function pageProduit(id) {
     dessinerMedias();
     // Une génération en cours pour cette fiche (ici ou ailleurs) : ses étapes, et le verrou des photos.
     if (ID) suivre3d();
+    // Des photos du Studio l attendent peut-être (étiquetées pour elle, ou déposées pendant qu elle était fermée).
+    if (ID) proposerPrevues();
   }
 
   // ⚠ LA FICHE PEUT PORTER TROIS FORMES de photos supplémentaires : un TABLEAU
@@ -3732,6 +3850,8 @@ function pageProduit(id) {
       // et la prochaine ouverture proposerait de reprendre une fiche déjà créée.
       BR_FINI = true; brArreter();
       if (!ID) P.appeler('produit:brouillonJeter');
+      // l article provisoire du Studio prend son vrai identifiant : ses photos étiquetées et sa boîte aux lettres suivent
+      if (!ID && r.id) P.appeler('studio:lierProvisoire', PROV, String(r.id), val('p-nom').trim());
       dire('${T("Enregistré.")}', 'bon');
       setTimeout(function(){ P.fermer(); }, 700);
     });

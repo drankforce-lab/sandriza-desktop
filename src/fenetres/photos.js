@@ -2103,6 +2103,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (!h && r.isole) h = '<span class="pill info">' + cap('${T("détourée")}') + '</span>';
     if (r.genre === 'rendu3d') h = '<span class="pill info">${T("Rendu 3D")}</span>' + (h ? ' ' + h : '');
     if (r.genre === 'grosplan') h = '<span class="pill info">${T("Gros plan fibre")}</span>' + (h ? ' ' + h : '');
+    // l'ÉTIQUETTE du Studio (2026-10-19) : la fiche à laquelle la photo est destinée, et son rôle — tant qu'elle n'y est pas attachée
+    if (r.prevuPour && !r.lieId) h = '<span class="pill info" title="' + esc('${T("Créée au Studio pour cet article ; elle s’attachera à l’enregistrement de sa fiche.")}') + '">'
+      + esc('${T("Pour : {p}")}'.replace('{p}', r.prevuPour)) + (r.role ? ' · ' + (r.role === 'dos' ? '${T("Dos")}' : (r.role === 'devant' ? '${T("Devant")}' : '${T("Autre")}')) : '') + '</span>' + (h ? ' ' + h : '');
     if (r.lieId) h = '<span class="pill bon" title="' + esc('${T("Utilisée dans :")} ' + (r.fiches || [r.lieNom]).join(', ')) + '">'
       + cap('${T("attachée")}') + '</span>' + (h ? ' ' + h : '');
     return h || '<span class="pill neutre">' + esc(cap(r.statut || '${T("importée")}')) + '</span>';

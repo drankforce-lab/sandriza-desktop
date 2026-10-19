@@ -2638,7 +2638,12 @@ const JEU = {
       g('odile', 'Veste Odile', 'fini', 11, '', 7200000, { conformite: { devant: 97, dos: 93, reliefEfface: 58 },
         message: 'Aperçu 3D posé sur la fiche (1214 Ko) · conforme au devant : 97 %, au dos : 93 % · relief inventé effacé à 58 % · rendu PH-000091 dans la photothèque.' }),
       g('anais', 'Jupe Anaïs', 'echec', 2, 'err', 86400000, { message: 'Téléchargement du modèle : le lien du modèle a expiré chez The New Black.' }),
-      g('celeste', 'Pull Céleste', 'interrompu', 1, 'err', 172800000, { vu: true, message: 'Interrompue — 0,65 $ US déjà engagés chez The New Black.' })
+      g('celeste', 'Pull Céleste', 'interrompu', 1, 'err', 172800000, { vu: true, message: 'Interrompue — 0,65 $ US déjà engagés chez The New Black.' }),
+      // (2026-10-19) le vêtement sans mannequin du Studio : quatre étapes, la deuxième chez The New Black
+      { id: 'fant1', genre: 'fantome', produit: 'p_walla', produitNom: 'Chemise Walla', sku: 'HAU-000072', par: 'Bob Brousseau', etat: 'cours',
+        etapeCourante: 1, palier: 'pro', dureeEstimee: 75, cout: 0.13, debut: T0 - 30000, fin: 0,
+        etapes: [{ lib: 'Contrôle du prix', etat: 'fait', t0: T0 - 30000, t1: T0 - 29000 }, { lib: 'Retrait du mannequin chez The New Black', etat: 'cours', t0: T0 - 29000, t1: 0 },
+          { lib: 'Couleur fidèle', etat: 'att', t0: 0, t1: 0 }, { lib: 'Détourage et finition', etat: 'att', t0: 0, t1: 0 }] }
     ];
     return [
       { nom: 'liste complete', reponses: { identite: IDENTITE, 'generations:etat': { ok: true, liste: tout }, 'generations:agir': { ok: true, n: 1 }, 'produits:ouvrir': { ok: true } } },
@@ -3037,6 +3042,32 @@ const JEU = {
           identite: IDENTITE,
           'studio:presets': PRESETS,
           'studio:compte': COMPTE,
+        },
+      },
+      /* LE STUDIO RATTACHÉ AU PRODUIT (2026-10-19) : ouvert par l'assistant pour la Chemise Walla, rôle « Dos » —
+         la barre Produit, la référence couleur (le devant), et, au résultat, le garde-fou de teinte EN ALERTE et le
+         bouton « Placer dans la fiche ». Sans ces deux cas, rien de cela n'était dessiné par un banc. */
+      {
+        nom: 'rattache au produit (assistant)',
+        id: '',
+        exige: ['Chemise Walla', 'Référence couleur'],
+        reponses: {
+          'panier:lire': { ok: true, quand: 1757000000000, photos: [] },
+          identite: IDENTITE, 'studio:presets': PRESETS, 'studio:compte': COMPTE,
+          'studio:contexte': { ok: true, contexte: { n: 1, produit: 'p_walla', provisoire: false, nom: 'Chemise Walla', sku: 'HAU-000072',
+            devant: IMAGE, dos: '', role: 'dos' } },
+        },
+      },
+      {
+        nom: 'rattache au produit — resultat et teinte en alerte',
+        id: 'resultat',
+        exige: ['Placer dans la fiche'],
+        reponses: {
+          'panier:lire': { ok: true, quand: 1757000000000, photos: [] },
+          identite: IDENTITE, 'studio:presets': PRESETS, 'studio:compte': COMPTE,
+          'studio:contexte': { ok: true, contexte: { n: 1, produit: 'p_walla', provisoire: false, nom: 'Chemise Walla', sku: 'HAU-000072',
+            devant: IMAGE, dos: '', role: 'dos' } },
+          'studio:teinte': { ok: true, resultat: [150, 120, 96], reference: [123, 94, 73], deltaE: 14.2, teinte: 6, meme: true },
         },
       },
       /* ⚠ L'ÉTAT VIDE, QU'AUCUN CAS NE DESSINAIT (2026-10-01). Tous les autres
@@ -7280,6 +7311,9 @@ const JEU = {
       nom: 'modification, avec journal',
       id: 'p_0001',
       reponses: {
+        /* (2026-10-19) Deux photos du Studio étiquetées pour cette fiche, pas encore posées : la fiche les PROPOSE. */
+        'studio:retours': { ok: true, retours: [], prevues: [{ id: 'ph_s1', code: 'PH-000120', role: 'dos', url: 'https://img.sandriza.com/divers/p2.jpg' },
+          { id: 'ph_s2', code: 'PH-000121', role: 'autre', url: 'https://img.sandriza.com/divers/p3.jpg' }] },
         /* L apercu boutique (2026-09-26) : la FORME de produit:apercu — la carte
            de la grille, son libelle et les quatre chiffres, avec les classes que
            pose le site (Admin._pfApercuHtml). Sert a mesurer le fond de l apercu. */

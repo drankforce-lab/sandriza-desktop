@@ -139,8 +139,14 @@ setInterval(() => { const t = Date.now(); SESSIONS.forEach((s, j) => { if (t - s
      · l'UNIFORMITÉ : la teinte de chaque angle à moins de ΔE 3 de celle de la face ;
      · la FIDÉLITÉ : la face rendue à moins de ΔE 3 de la photo du devant.
    Sinon, deux corrections au plus : un décalage Lab GLOBAL (la face ramenée sur la photo) et un décalage PAR
-   DIRECTION (chaque angle ramené sur la face, interpolé selon l'azimut de la normale de chaque texel). */
+   DIRECTION (chaque angle ramené sur la face, interpolé selon l'azimut de la normale de chaque texel).
+   ⚠⚠ MESURÉ AU RENDU, PAS SUR LA TEXTURE (2026-10-19, sa plainte : « le devant plus clair que le dos ») : la lumière de
+   la boutique laisse le dos ~ΔE 15 plus sombre que la face, quelle que soit la texture. Elle veut le MÊME vêtement
+   devant et derrière : la cible est donc le rendu lui-même — chaque angle ramené sur la face, la lumière comprise (le
+   dos est peint un peu plus clair pour paraître pareil). La part de la seule texture reste mesurée, pour information. */
 const ANGLES_TEINTE = [0, 45, 90, 135, 180, 225, 270, 315];
+// (2026-10-19) trois corrections au plus : la lumière de la boutique demande un peu plus que la seule texture
+const MAX_ESSAIS_TEINTE = 3;
 async function verifierAuRendu(s, reference){
   const { mesurerAngles, comparerTeinte } = require('./rendu-boutique');
   const { lab } = require('./projection3d');
@@ -153,24 +159,101 @@ async function verifierAuRendu(s, reference){
   const apU = await demander(s, 'apercu', { texImage: versNative(uni).toJPEG(95), normaleImage });
   const mUni = await mesurerAngles(Buffer.from(apU.glb), apU.theta0, ANGLES_TEINTE);
   if (!mUni) return { indisponible: true };
-  for (let it = 0; it <= 2; it++) {
+  for (let it = 0; it <= MAX_ESSAIS_TEINTE; it++) {
     const t = it ? await demander(s, 'textures') : t0;
     const ap = await demander(s, 'apercu', { texImage: versNative(t.tex).toJPEG(85), normaleImage });
     const m = await mesurerAngles(Buffer.from(ap.glb), ap.theta0, ANGLES_TEINTE);
     if (!m) return { indisponible: true, essais };
     const cmp = comparerTeinte(m, mUni, reference, lab);
-    essais.push(cmp);
-    if ((cmp.uniformite < 3 && (cmp.ecartPhoto == null || cmp.ecartPhoto < 3)) || it === 2) break;
+    // l'uniformité AU RENDU (lumière comprise) : chaque angle contre la face
     const F = lab(m[0].rgb), Rf = reference ? lab(reference) : F;
+    const abs = m.map((x) => { const A = lab(x.rgb); return [F[0] - A[0], F[1] - A[1], F[2] - A[2]]; });
+    cmp.texture = cmp.uniformite;
+    cmp.uniformite = +Math.max(...abs.map((v) => Math.hypot(v[0], v[1], v[2]))).toFixed(1);
+    cmp.angles.forEach((x, i) => { x.dERendu = +Math.hypot(abs[i][0], abs[i][1], abs[i][2]).toFixed(1); });
+    essais.push(cmp);
+    if ((cmp.uniformite < 3 && (cmp.ecartPhoto == null || cmp.ecartPhoto < 3)) || it === MAX_ESSAIS_TEINTE) break;
     const global = [0, 1, 2].map((k) => (Rf[k] - F[k]) * 0.9);
-    // par direction : (part de la texture à la face − part à cet angle) ; la face elle-même ne bouge pas
-    const secteurs = m.map((x, i) => ({ a: x.a, d: [0, 1, 2].map((k) => (cmp.rel[0][k] - cmp.rel[i][k]) * 0.9) }));
+    // par direction : (rendu de la face − rendu de cet angle) ; la face elle-même ne bouge pas
+    const secteurs = m.map((x, i) => ({ a: x.a, d: [0, 1, 2].map((k) => abs[i][k] * 0.95) }));
     await demander(s, 'couleur', { correction: { global, secteurs } });
   }
   const der = essais[essais.length - 1];
-  return { uniformite: der.uniformite, ecartPhoto: der.ecartPhoto, angles: der.angles, iterations: essais.length - 1,
+  return { uniformite: der.uniformite, texture: der.texture, ecartPhoto: der.ecartPhoto, angles: der.angles, iterations: essais.length - 1,
     premier: { uniformite: essais[0].uniformite, ecartPhoto: essais[0].ecartPhoto },
     lumiere: +Math.max(...mUni.map((x) => require('./projection3d').deltaE(x.rgb, mUni[0].rgb))).toFixed(1) };
+}
+
+/* (8 bis) LE CONTRÔLE DE STRUCTURE (2026-10-19, sa plainte : « la ligne de couture du milieu haut du dos n'apparaît
+   pas en 3D ; il faut que ce soit fidèle à 100 % »). Le modèle FINAL est rendu aux réglages de la boutique, de face et
+   de dos, et comparé à la photo correspondante : chacun détouré, recadré sur sa silhouette, ramené à 120 × 160 en
+   niveaux de gris, puis
+     · SSIM (similarité de structure, fenêtres 8 × 8) — l'image d'ensemble ;
+     · CONTOURS : la corrélation des gradients (Sobel), à l'intérieur du vêtement — les coutures, les plis, la fermeture.
+   Rend { devant: { ssim, contours }, dos: { ssim, contours } } ; c'est la page principale qui en tire un seuil. */
+function grisRecadre(px, w, h, estFond, W2, H2){
+  let x0 = w, x1 = -1, y0 = h, y1 = -1;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { if (estFond(y * w + x)) continue; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  if (x1 < 0) return null;
+  const g = new Float32Array(W2 * H2), m = new Uint8Array(W2 * H2);
+  for (let y = 0; y < H2; y++) for (let x = 0; x < W2; x++) {
+    const sx = Math.min(w - 1, Math.round(x0 + (x + 0.5) * (x1 - x0 + 1) / W2 - 0.5)), sy = Math.min(h - 1, Math.round(y0 + (y + 0.5) * (y1 - y0 + 1) / H2 - 0.5));
+    const k = sy * w + sx;
+    g[y * W2 + x] = px(k); m[y * W2 + x] = estFond(k) ? 0 : 1;
+  }
+  return { g, m };
+}
+function ssim(a, b, W, H){
+  const C1 = 6.5025, C2 = 58.5225; let s = 0, n = 0;
+  for (let y = 0; y + 8 <= H; y += 4) for (let x = 0; x + 8 <= W; x += 4) {
+    let ma = 0, mb = 0, k = 0, dedans = 0;
+    for (let j = 0; j < 8; j++) for (let i = 0; i < 8; i++) { const q = (y + j) * W + x + i; ma += a.g[q]; mb += b.g[q]; dedans += a.m[q] & b.m[q]; k++; }
+    if (dedans < 40) continue;
+    ma /= k; mb /= k; let va = 0, vb = 0, cv = 0;
+    for (let j = 0; j < 8; j++) for (let i = 0; i < 8; i++) { const q = (y + j) * W + x + i; const da = a.g[q] - ma, db = b.g[q] - mb; va += da * da; vb += db * db; cv += da * db; }
+    va /= k - 1; vb /= k - 1; cv /= k - 1;
+    s += ((2 * ma * mb + C1) * (2 * cv + C2)) / ((ma * ma + mb * mb + C1) * (va + vb + C2)); n++;
+  }
+  return n ? s / n : 0;
+}
+function contours(a, b, W, H){
+  const gr = (g, x, y) => g[Math.max(0, Math.min(H - 1, y)) * W + Math.max(0, Math.min(W - 1, x))];
+  const sob = (g, x, y) => { const gx = gr(g, x + 1, y - 1) + 2 * gr(g, x + 1, y) + gr(g, x + 1, y + 1) - gr(g, x - 1, y - 1) - 2 * gr(g, x - 1, y) - gr(g, x - 1, y + 1);
+    const gy = gr(g, x - 1, y + 1) + 2 * gr(g, x, y + 1) + gr(g, x + 1, y + 1) - gr(g, x - 1, y - 1) - 2 * gr(g, x, y - 1) - gr(g, x + 1, y - 1); return Math.hypot(gx, gy); };
+  const A = [], B = [];
+  for (let y = 2; y < H - 2; y++) for (let x = 2; x < W - 2; x++) {
+    // à l'intérieur des DEUX silhouettes, loin du bord (le bord du vêtement n'est pas une couture)
+    let dedans = true; for (let j = -2; j <= 2 && dedans; j++) for (let i = -2; i <= 2; i++) { const q = (y + j) * W + x + i; if (!a.m[q] || !b.m[q]) { dedans = false; break; } }
+    if (!dedans) continue;
+    A.push(sob(a.g, x, y)); B.push(sob(b.g, x, y));
+  }
+  const n = A.length; if (n < 200) return 0;
+  const ma = A.reduce((s2, v) => s2 + v, 0) / n, mb = B.reduce((s2, v) => s2 + v, 0) / n;
+  let sab = 0, saa = 0, sbb = 0; for (let i = 0; i < n; i++) { const da = A[i] - ma, db = B[i] - mb; sab += da * db; saa += da * da; sbb += db * db; }
+  return sab / Math.sqrt(saa * sbb || 1);
+}
+async function controlerStructure(glb, photos, options){
+  if (!photos || !photos.devant || !photos.dos) return { indisponible: true };
+  const { mesurerAngles } = require('./rendu-boutique');
+  const { masquePhoto } = require('./projection3d');
+  const m = await mesurerAngles(glb, 0, [0, 180], { images: true, brut: true });
+  if (!m) return { indisponible: true };
+  const W2 = 120, H2 = 160, out = {};
+  [['devant', 0], ['dos', 1]].forEach(([nom, i]) => {
+    const r = m[i].brut, ph = photos[nom], pm = masquePhoto(ph).m;
+    const lum = (d, k, bgr) => bgr ? 0.299 * d[k * 4 + 2] + 0.587 * d[k * 4 + 1] + 0.114 * d[k * 4] : 0.299 * d[k * 4] + 0.587 * d[k * 4 + 1] + 0.114 * d[k * 4 + 2];
+    const fondR = (k) => { const d = r.data, B = d[k * 4], G = d[k * 4 + 1], R = d[k * 4 + 2]; return R > G + 40 && B > G + 40 && Math.abs(R - B) < 60; };
+    const a = grisRecadre((k) => lum(r.data, k, true), r.w, r.h, fondR, W2, H2);
+    const b = grisRecadre((k) => lum(ph.data, k, false), ph.w, ph.h, (k) => !pm[k], W2, H2);
+    if (!a || !b) { out[nom] = null; return; }
+    // la luminance de chaque image centrée-réduite dans le vêtement : la lumière seule ne doit pas compter
+    [a, b].forEach((x) => { let s2 = 0, n = 0; for (let q = 0; q < x.g.length; q++) if (x.m[q]) { s2 += x.g[q]; n++; } const mu = n ? s2 / n : 0;
+      let v = 0; for (let q = 0; q < x.g.length; q++) if (x.m[q]) v += (x.g[q] - mu) * (x.g[q] - mu); const sd = Math.sqrt(v / Math.max(1, n)) || 1;
+      for (let q = 0; q < x.g.length; q++) x.g[q] = x.m[q] ? 128 + (x.g[q] - mu) / sd * 32 : 128; });
+    out[nom] = { ssim: +ssim(a, b, W2, H2).toFixed(3), contours: +contours(a, b, W2, H2).toFixed(3) };
+  });
+  if (options && options.images) out.images = m;
+  return out;
 }
 
 async function tnb(etape, jeton, a, b){
@@ -204,6 +287,8 @@ async function tnb(etape, jeton, a, b){
     if (!pd || !pb) throw new Error('photos illisibles (PNG ou JPEG attendus)');
     const devant = decoderImage(pd, 1600), dos = decoderImage(pb, 1600);
     if (!devant || !dos) throw new Error('photos illisibles');
+    // gardées pour le CONTRÔLE DE STRUCTURE, à la fin (le rendu de face et de dos contre ces photos)
+    s.photos = { devant: decoderImage(pd, 640), dos: decoderImage(pb, 640) };
     // les textures du modèle, décodées ici (le fil n'a pas nativeImage)
     const { io } = await outils();
     const doc = await io.readBinary(new Uint8Array(s.glb));
@@ -235,14 +320,16 @@ async function tnb(etape, jeton, a, b){
   if (etape === 'controler') {
     const r = await demander(s, 'controler');
     const vg = versNative(r.vignette, true).toPNG();
-    const glb = s.glbFinal;
+    const glb = s.glbFinal, photos = s.photos;
     fermer(jeton);
     if (!glb) throw new Error('modèle non compressé');
     if (glb.length > 5.5 * 1024 * 1024) throw new Error('modèle compressé encore trop lourd (' + Math.round(glb.length / 1048576) + ' Mo)');
-    return { avant: r.avant, apres: r.apres, vignette: 'data:image/png;base64,' + vg.toString('base64'),
+    let structure = null;
+    try { structure = await controlerStructure(glb, photos); } catch (e) { structure = { indisponible: true, detail: String((e && e.message) || e).slice(0, 200) }; }
+    return { avant: r.avant, apres: r.apres, structure, vignette: 'data:image/png;base64,' + vg.toString('base64'),
       glb: 'data:model/gltf-binary;base64,' + glb.toString('base64'), octets: glb.length };
   }
   throw new Error('étape inconnue');
 }
 
-module.exports = { compresserGlb, outils, simplifierPrimitive, tnb };
+module.exports = { compresserGlb, outils, simplifierPrimitive, tnb, controlerStructure };

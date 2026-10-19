@@ -104,6 +104,47 @@ body{background:var(--f-page);color:var(--tx);
 /* REFONTE 2026-09-29 (« plus moderne et simple ») : une LIGNE, plus une carte.
    Trois cartes empilées à gauche faisaient trois cadres pour un seul travail. */
 .rcbar{flex:0 0 auto;display:flex;align-items:center;gap:.45rem;padding:0 .15rem}
+/* ── LE PRODUIT (2026-10-19, la partie 3) : la fiche à laquelle les photos sont DESTINÉES, et leur rôle. Une ligne,
+   comme la barre des profils : ce n est pas une étape, c est le destinataire. ── */
+.pdbar{flex:0 0 auto;display:flex;align-items:center;gap:.45rem;padding:.2rem .3rem;position:relative;min-width:0;
+  background:var(--f-page);border-radius:9px}   /* opaque : la texture d un thème ne passe pas sous le texte */
+.pdbar>label{flex:0 0 auto;font:700 .7rem/1 system-ui;color:var(--tx)}
+.pdin{flex:1 1 auto;min-width:0;position:relative}
+.pdin input{width:100%;font-size:.78rem;padding:.3rem .5rem}
+.pdsug{display:none;position:absolute;left:0;right:0;top:calc(100% + 3px);z-index:30;background:var(--f-carte);
+  border:1px solid var(--v16);border-radius:9px;box-shadow:0 12px 28px rgba(0,0,0,.4);padding:.25rem}
+.pdsug.ouvert{display:block}
+.pdsug button{display:flex;align-items:center;gap:.5rem;width:100%;text-align:left;font:inherit;font-size:.78rem;color:var(--tx);
+  background:none;border:0;border-radius:7px;padding:.28rem .4rem;cursor:pointer}
+.pdsug button:hover,.pdsug button:focus-visible{background:var(--v08);outline:none}
+.pdsug img,.pdsug .ph{width:26px;height:26px;border-radius:5px;object-fit:cover;background:var(--v06);flex:0 0 auto}
+.pdsug .vide{font-size:.76rem;color:var(--tx2);padding:.3rem .45rem}
+.pdchip{flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:.4rem;font-size:.78rem;padding:.15rem .25rem .15rem .2rem;
+  border:1px solid rgba(var(--or-rgb),.45);border-radius:9px;background:rgba(var(--or-rgb),.08)}
+.pdchip img{width:24px;height:24px;border-radius:5px;object-fit:cover;flex:0 0 auto}
+.pdn{font-weight:600;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pds{color:var(--tx2);font-size:.72rem;white-space:nowrap}
+.pdp{font-size:.66rem;padding:.02rem .4rem;border-radius:99px;background:rgba(251,191,36,.16);color:var(--tx-att);white-space:nowrap}
+.pdchip button{margin-left:auto;flex:0 0 auto;font:inherit;font-size:.72rem;border:0;background:none;color:var(--tx2);cursor:pointer;padding:.1rem .35rem;border-radius:6px}
+.pdchip button:hover{background:var(--v10);color:var(--tx)}
+.pdrole{flex:0 0 auto;display:flex;gap:.2rem}
+.pdrole .jeton{font-size:.72rem;padding:.2rem .5rem}
+.pdref{flex:0 0 auto;display:flex;align-items:center;gap:.5rem;font-size:.74rem;color:var(--tx2);padding:.15rem .3rem;min-width:0;
+  background:var(--f-page);border-radius:9px}
+.pdref span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pdref .att{color:var(--tx-att)}
+.pdref button{flex:0 0 auto;margin-left:auto;font:inherit;font-size:.72rem;padding:.18rem .5rem;border-radius:7px;cursor:pointer;
+  color:var(--tx-bleute);background:var(--v05);border:1px solid var(--v16)}
+.pdres{display:flex;flex-direction:column;gap:.45rem;margin-top:.2rem}
+.pdres .teinte{font-size:.76rem;line-height:1.45;padding:.4rem .55rem;border-radius:8px;background:var(--v03);border:1px solid var(--v08);color:var(--tx2)}
+.pdres .teinte.ok{color:var(--tx-ok);border-color:rgba(74,222,128,.3)}
+.pdres .teinte.alerte{color:var(--tx-att);border-color:rgba(251,191,36,.4)}
+.pdres button{font:inherit;font-size:.8rem;padding:.4rem .7rem;border-radius:9px;cursor:pointer}
+.refg{display:grid;grid-template-columns:repeat(auto-fill,minmax(7rem,1fr));gap:.5rem;margin:.6rem 0}
+.refg button{display:flex;flex-direction:column;gap:.3rem;align-items:stretch;font:inherit;font-size:.74rem;color:var(--tx);
+  background:var(--v04);border:1px solid var(--v12);border-radius:9px;padding:.35rem;cursor:pointer}
+.refg button:hover{background:var(--v08)}
+.refg img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:6px;background:var(--v06)}
 .rcbar label{flex:0 0 auto;font:700 .7rem/1 system-ui;text-transform:none;
   letter-spacing:0;color:var(--tx2)}
 .rcbar select{flex:1 1 auto;min-width:0;font-size:.78rem;padding:.3rem .45rem}
@@ -694,6 +735,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var PHOTO_ID = '';     // id d une photo CHOISIE dans la phototheque (l image reste au site)
   var PHOTO_URL = '';    // adresse de la vignette choisie (affichage seulement)
   var PHOTO_NOM = '';    // son nom, dit en tete de l etape 1
+  /* ══ LE STUDIO RATTACHÉ AU PRODUIT (2026-10-19, la partie 3 de sa demande) ═══════════════════════════════
+     « Un champ Produit (recherche + code-barres), le rôle Devant / Dos / Autre, un étiquetage persistant, la
+     référence couleur du dos = le devant du même produit (sinon Harmoniser avec…), un garde-fou de teinte avec
+     confirmation, Placer dans la fiche ; et l aller-retour assistant, Studio, assistant. »
+     ⚠ LE STUDIO N ÉCRIT PAS LA FICHE : Placer range la photo (étiquetée) et la dépose dans la boîte aux lettres de
+     l assistant de la fiche (studio:placer), qui la pose — en demandant avant de remplacer — et l attache en
+     enregistrant. Une seule porte d écriture de la fiche. */
+  var PROD = null;        // { id, nom, sku, devant, dos, provisoire }
+  var ROLE = 'devant';    // devant | dos | autre
+  var REF_CHOIX = null;   // la référence choisie par « Harmoniser avec… » : { src, lib }
+  var PD_Q = '', PD_SUG = [], PD_T = null, PD_VU = '';
+  var TEINTE = null;      // la mesure du résultat contre la référence : { deltaE, teinte, meme, lib, accepte }
+  var CTX_N = 0;          // le dernier contexte de l assistant appliqué
+  var ENREG_CODE = '';    // le code photothèque du résultat enregistré
   /* ⚠⚠ LE SELECTEUR INTERNE PLEIN ECRAN EST RETIRE (#30, le 2026-09-19, sur sa
      decision #31). Il etait devenu injoignable le 2026-09-09 avec le bouton
      << Depuis la photothèque >>, et son retrait avait ete inscrit comme tache a
@@ -2225,6 +2280,190 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var RC_SEL = '';     // identifiant du profil applique, '' = aucun
   var RC_VOILE_DEP = false;  // identifiant d ouverture du banc — voir le pied du script
 
+  function refCouleur(){
+    if (REF_CHOIX) return REF_CHOIX;
+    if (!PROD) return null;
+    // le DEVANT se compare à sa photo source ; le dos et les autres vues, au devant du même produit
+    if (ROLE === 'devant') { var s0 = photoAvant(); return s0 ? { src: s0, lib: '${T("la photo source")}' } : null; }
+    if (PROD.devant) return { src: PROD.devant, lib: '${T("le devant de {p}")}'.replace('{p}', PROD.nom) };
+    return null;
+  }
+  function produitHtml(){
+    var roles = [['devant', '${T("Devant")}'], ['dos', '${T("Dos")}'], ['autre', '${T("Autre")}']];
+    var h = '<div class="pdbar" id="pdbar"><label for="pd-q">${T("Produit")}</label>';
+    if (PROD) {
+      h += '<span class="pdchip" title="' + esc(PROD.nom) + '">' + (PROD.devant ? '<img src="' + esc(PROD.devant) + '" alt="">' : '')
+        + '<span class="pdn">' + esc(PROD.nom) + '</span>' + (PROD.sku ? '<span class="pds">' + esc(PROD.sku) + '</span>' : '')
+        + (PROD.provisoire ? '<span class="pdp">${T("non enregistré")}</span>' : '')
+        + '<button type="button" id="pd-x" title="${T("Ne plus rattacher à ce produit")}" aria-label="${T("Ne plus rattacher à ce produit")}">✕</button></span>';
+    } else {
+      h += '<span class="pdin"><input id="pd-q" type="search" autocomplete="off" aria-label="${T("Produit")}"'
+        + ' placeholder="${T("Nom, SKU ou code-barres…")}" value="' + esc(PD_Q) + '"' + (RO ? ' disabled' : '') + '>'
+        + '<span class="pdsug" id="pd-sug" role="listbox"></span></span>';
+    }
+    h += '<span class="pdrole" role="group" aria-label="${T("Rôle de la photo")}">' + roles.map(function(r){
+      return '<button type="button" class="jeton' + (ROLE === r[0] ? ' on' : '') + '" data-role="' + r[0] + '"' + (PROD ? '' : ' disabled')
+        + ' aria-pressed="' + (ROLE === r[0]) + '">' + r[1] + '</button>'; }).join('') + '</span></div>';
+    if (PROD) {
+      var rf = refCouleur();
+      h += '<div class="pdref">' + (rf ? '<span>${T("Référence couleur :")} ' + esc(rf.lib) + '</span>'
+          : '<span class="att">${T("Pas encore de photo du devant pour ce produit : choisissez une référence de couleur.")}</span>')
+        + '<button type="button" id="pd-harm">${T("Harmoniser avec…")}</button></div>';
+    }
+    return h;
+  }
+  function brancherProduit(){
+    var q = document.getElementById('pd-q');
+    if (q) {
+      q.oninput = function(){ PD_Q = q.value; clearTimeout(PD_T); PD_T = setTimeout(function(){ chercherProduit(false); }, 220); };
+      // le lecteur de codes-barres tape le code puis Entrée : le produit exact est choisi sans liste
+      q.onkeydown = function(ev){ if (ev.key === 'Enter') { ev.preventDefault(); clearTimeout(PD_T); chercherProduit(true); }
+        if (ev.key === 'Escape') { PD_SUG = []; peindreSuggestions(); } };
+    }
+    var x = document.getElementById('pd-x');
+    if (x) x.onclick = function(){ PROD = null; REF_CHOIX = null; TEINTE = null; dessiner(); };
+    corps.querySelectorAll('[data-role]').forEach(function(b){
+      b.onclick = function(){ if (!PROD) return; ROLE = b.getAttribute('data-role'); REF_CHOIX = null; TEINTE = null; dessiner(); verifierTeinte(); };
+    });
+    var hm = document.getElementById('pd-harm');
+    if (hm) hm.onclick = choisirReference;
+    peindreSuggestions();
+  }
+  function chercherProduit(entree){
+    var t = PD_Q.trim();
+    if (!t) { PD_SUG = []; PD_VU = ''; peindreSuggestions(); return; }
+    appeler('studio:produits', [t]).then(function(r){
+      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      if (PD_Q.trim() !== t) return;
+      PD_SUG = r.produits || []; PD_VU = t;
+      if ((r.exact || entree) && PD_SUG.length === 1) { choisirProduit(PD_SUG[0]); return; }
+      peindreSuggestions();
+    });
+  }
+  function peindreSuggestions(){
+    var el = document.getElementById('pd-sug'); if (!el) return;
+    var t = PD_Q.trim();
+    if (!t || PD_VU !== t) { el.className = 'pdsug'; el.innerHTML = ''; return; }
+    el.className = 'pdsug ouvert';
+    el.innerHTML = PD_SUG.length ? PD_SUG.map(function(p, i){
+      return '<button type="button" role="option" data-pdi="' + i + '">' + (p.devant ? '<img src="' + esc(p.devant) + '" alt="">' : '<span class="ph"></span>')
+        + '<span class="pdn">' + esc(p.nom) + '</span>' + (p.sku ? '<span class="pds">' + esc(p.sku) + '</span>' : '') + '</button>'; }).join('')
+      : '<div class="vide">' + (t.length < 2 ? '${T("Tapez au moins deux caractères, ou scannez le code-barres.")}' : '${T("Aucun produit ne correspond.")}') + '</div>';
+    el.querySelectorAll('[data-pdi]').forEach(function(b){
+      b.onclick = function(){ choisirProduit(PD_SUG[parseInt(b.getAttribute('data-pdi'), 10) || 0]); };
+    });
+  }
+  function choisirProduit(p){
+    if (!p) return;
+    PROD = { id: p.id, nom: p.nom, sku: p.sku || '', devant: p.devant || '', dos: p.dos || '', provisoire: false };
+    PD_Q = ''; PD_SUG = []; PD_VU = ''; REF_CHOIX = null; TEINTE = null;
+    // sans devant, la première photo est le devant ; avec un devant, on vient le plus souvent pour le dos
+    ROLE = p.devant ? (p.dos ? 'autre' : 'dos') : 'devant';
+    dessiner(); verifierTeinte();
+    dire('${T("Photos rattachées à {p} — rôle : {r}.")}'.replace('{p}', p.nom).replace('{r}', nomRole(ROLE)), 'bon');
+  }
+  function nomRole(r){ return r === 'dos' ? '${T("Dos")}' : (r === 'autre' ? '${T("Autre")}' : '${T("Devant")}'); }
+  // « Harmoniser avec… » : la photo source, le devant et le dos du produit, et les photos du panier
+  function choisirReference(){
+    var c = [];
+    var s0 = photoAvant(); if (s0) c.push({ src: s0, lib: '${T("la photo source")}' });
+    if (PROD && PROD.devant) c.push({ src: PROD.devant, lib: '${T("le devant de {p}")}'.replace('{p}', PROD.nom) });
+    if (PROD && PROD.dos) c.push({ src: PROD.dos, lib: '${T("le dos de {p}")}'.replace('{p}', PROD.nom) });
+    (PANIER || []).forEach(function(p){ var u = PLEIN[p.id] || p.apercu || VIGN[p.id] || ''; if (u) c.push({ src: u, lib: p.code || p.nom || p.id }); });
+    if (!c.length) { dire('${T("Aucune photo à proposer : choisissez d’abord une photo dans l’explorateur.")}', 'att'); return; }
+    var h = '<h3>${T("Harmoniser la couleur avec…")}</h3><p>${T("La teinte du résultat sera comparée à celle de la photo choisie, et ramenée sur elle si vous le demandez.")}</p>'
+      + '<div class="refg">' + c.slice(0, 12).map(function(x, i){ return '<button type="button" data-ref="' + i + '"><img src="' + esc(x.src) + '" alt=""><span>' + esc(x.lib) + '</span></button>'; }).join('')
+      + '</div><div class="fin2"><button id="ref-non">${T("Annuler")}</button></div>';
+    voile(h, function(fermer){
+      document.getElementById('ref-non').onclick = fermer;
+      document.querySelectorAll('[data-ref]').forEach(function(b){
+        b.onclick = function(){ REF_CHOIX = c[parseInt(b.getAttribute('data-ref'), 10) || 0]; fermer(); TEINTE = null; dessiner(); verifierTeinte(); };
+      });
+    });
+  }
+  // LE GARDE-FOU DE TEINTE : le résultat comparé à la référence (ΔE ; teinte en degrés, la lumière à part)
+  function verifierTeinte(){
+    var rf = refCouleur();
+    if (!RESULT || !PROD || !rf) { if (TEINTE) { TEINTE = null; peindreResultat(); } return; }
+    var img = RESULT.image, src = rf.src;
+    appeler('studio:teinte', [{ image: img, reference: src }]).then(function(r){
+      if (!RESULT || RESULT.image !== img) return;
+      TEINTE = r.ok ? { deltaE: r.deltaE, teinte: r.teinte, meme: r.meme, lib: rf.lib } : { erreur: true, lib: rf.lib };
+      peindreResultat();
+    });
+  }
+  function teinteAlerte(){ return !!(TEINTE && !TEINTE.erreur && !TEINTE.accepte && (!TEINTE.meme || TEINTE.deltaE > 12)); }
+  function teinteHtml(){
+    if (!PROD) return '';
+    var h = '<div class="pdres">';
+    if (TEINTE && !TEINTE.erreur) {
+      var al = !TEINTE.meme || TEINTE.deltaE > 12;
+      h += '<div class="teinte ' + (al ? 'alerte' : 'ok') + '">' + (al ? '<span class="ic">⚠</span> ' : '<span class="ic">✓</span> ')
+        + '${T("Teinte contre {r} : écart ΔE {e}")}'.replace('{r}', esc(TEINTE.lib)).replace('{e}', szNombre(TEINTE.deltaE, 1))
+        + (!TEINTE.meme ? ' — ' + '${T("la teinte diffère (pas le même vêtement ?)")}' : (al ? ' — ' + '${T("nettement plus claire ou plus foncée")}' : '')) + '</div>';
+    } else if (refCouleur() && RESULT) h += '<div class="teinte">${T("Mesure de la teinte…")}</div>';
+    h += '<button class="prim" id="o-placer"' + (RO || !RESULT ? ' disabled' : '') + '><span class="ic">📌</span> ' + '${T("Placer dans la fiche — {r}")}'.replace('{r}', nomRole(ROLE)) + '</button></div>';
+    return h;
+  }
+  /* La teinte s écarte : on le DIT avant de ranger ou de placer, avec trois sorties. */
+  function gardeTeinte(suite){
+    if (!teinteAlerte()) { suite(); return; }
+    var h = '<h3><span class="ic">⚠</span> ${T("La teinte s’écarte de la référence")}</h3>'
+      + '<p>' + '${T("Comparé à {r}, le vêtement a un écart de ΔE {e}.")}'.replace('{r}', '<strong>' + esc(TEINTE.lib) + '</strong>').replace('{e}', szNombre(TEINTE.deltaE, 1))
+      + (!TEINTE.meme ? ' ${T("Sa teinte diffère de {t}° : vérifiez qu’il s’agit bien du même vêtement.")}'.replace('{t}', String(TEINTE.teinte)) : '') + '</p>'
+      + '<div class="fin2"><button id="tg-non">${T("Annuler")}</button><button id="tg-garder">${T("Garder tel quel")}</button>'
+      + '<button class="conf" id="tg-harm">${T("Harmoniser, puis continuer")}</button></div>';
+    voile(h, function(fermer){
+      document.getElementById('tg-non').onclick = function(){ fermer(); dire('${T("Rien n’a été enregistré.")}', 'att'); };
+      document.getElementById('tg-garder').onclick = function(){ fermer(); TEINTE.accepte = true; suite(); };
+      document.getElementById('tg-harm').onclick = function(){ fermer(); harmoniser(suite); };
+    });
+  }
+  function harmoniser(suite){
+    var rf = refCouleur(); if (!RESULT || !rf) return;
+    occuper(true); dire('${T("Harmonisation de la teinte…")}');
+    appeler('studio:harmoniser', [{ image: RESULT.image, reference: rf.src }]).then(function(r){
+      occuper(false);
+      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      RESULT.image = r.image; ENREG = false; ENREG_CODE = ''; FORMATS = [];
+      TEINTE = null; peindreResultat();
+      dire('${T("Teinte harmonisée sur {r}.")}'.replace('{r}', rf.lib), 'bon');
+      appeler('studio:teinte', [{ image: r.image, reference: rf.src }]).then(function(t){
+        TEINTE = t.ok ? { deltaE: t.deltaE, teinte: t.teinte, meme: t.meme, lib: rf.lib, accepte: true } : null;
+        peindreResultat();
+        if (suite) suite();
+      });
+    });
+  }
+  function placerDansFiche(){
+    if (!RESULT || !PROD || OCCUPE || RO) return;
+    gardeTeinte(function(){
+      occuper(true); dire('${T("Placement dans la fiche…")}');
+      appeler('studio:placer', [{ image: ENREG_CODE ? '' : RESULT.image, code: ENREG_CODE, produit: PROD.id, produitNom: PROD.nom,
+        role: ROLE, nom: nomRendu() + '-' + ROLE }]).then(function(r){
+        occuper(false);
+        if (!r.ok) { dire(expliquer(r), 'err'); return; }
+        ENREG = true; ENREG_CODE = r.code || ENREG_CODE;
+        try { szBrouillonJeter(); } catch (e) {}
+        peindreResultat();
+        dire(r.envoye === 'assistant' ? '${T("Envoyée à l’assistant de la fiche ({r}) — il la pose dans sa case.")}'.replace('{r}', nomRole(ROLE))
+          : (r.envoye === 'fiche' ? '${T("La fiche est ouverte : la photo y est proposée ({r}). Enregistrez la fiche pour l’attacher.")}'.replace('{r}', nomRole(ROLE))
+          : '${T("Rangée dans la photothèque, étiquetée pour cet article : elle sera proposée à l’enregistrement de la fiche.")}'), 'bon');
+      });
+    });
+  }
+  // L ASSISTANT OUVRE LE STUDIO POUR UN ARTICLE : son contexte est appliqué une fois
+  function lireContexte(){
+    appeler('studio:contexte', []).then(function(r){
+      var c = r && r.ok ? r.contexte : null;
+      if (!c || c.n === CTX_N) return;
+      CTX_N = c.n;
+      PROD = { id: c.produit, nom: c.nom || '${T("Nouvel article")}', sku: c.sku || '', devant: c.devant || '', dos: c.dos || '', provisoire: !!c.provisoire };
+      ROLE = c.role || (c.devant ? 'dos' : 'devant'); REF_CHOIX = null; TEINTE = null;
+      dessiner(); verifierTeinte();
+      dire('${T("Studio ouvert pour {p} : « Placer dans la fiche » renvoie les photos à l’assistant.")}'.replace('{p}', PROD.nom), 'bon');
+    });
+  }
   function recetteChoisie(){
     for (var i = 0; i < RECETTES.length; i++) { if (RECETTES[i].id === RC_SEL) return RECETTES[i]; }
     return null;
@@ -2785,6 +3024,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (RESULT.upNote) nt += '<div class="avis">' + esc(RESULT.upNote) + '</div>';
     if (RESULT.largeur) h += '<div class="dims">' + RESULT.largeur + ' × ' + RESULT.hauteur + ' px</div>';
     if (nt) h += '<div class="notes">' + nt + '</div>';
+    h += teinteHtml();
     /* ⚠ PLUS DE BOUTONS ICI (2026-10-01, sa demande : « retire ces options, et le
        texte aussi »). Telecharger et enregistrer l image a son cadrage d ORIGINE
        vivent dans « Enregistrer et formats », carte « Original » — sans elle,
@@ -2860,7 +3100,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     /* ⚠ LA BARRE DES RECETTES EST HORS DES ONGLETS, ET AU-DESSUS D EUX. Elle ne
        regle rien elle-meme : elle remplit les neuf onglets d un coup. Rangee
        DANS un onglet, il faudrait savoir lequel avant de pouvoir s en servir. */
-    corps.innerHTML = '<div class="rail">' + recettesHtml()
+    corps.innerHTML = '<div class="rail">' + produitHtml() + recettesHtml()
       + '<div class="railc"><div class="onglets" id="onglets" role="tablist">' + ongletsHtml() + '</div>'
       + '<section class="panneau" id="panneau">' + panneauHtml() + '</section></div></div>'
       + '<div class="scene">' + recapHtml()
@@ -2938,6 +3178,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     brancherLots();
     brancherOnglets();
     brancherRecettes();
+    brancherProduit();
     /* ⚠ LE BRANCHEMENT DU SELECTEUR EST PARTI AVEC LUI (#30, 2026-09-19) :
        ph-retour, ph-q, ph-grille et la barre de filtres. Un branchement qui
        cherche un element absent n est pas une erreur, mais il fait croire que
@@ -2994,6 +3235,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (dl && RESULT) dl.onclick = telecharger;
     var sv = document.getElementById('o-sv');
     if (sv && RESULT) sv.onclick = enregistrerResultat;
+    var pl = document.getElementById('o-placer');
+    if (pl && RESULT) pl.onclick = placerDansFiche;
     var c1 = document.getElementById('cmp-on');
     if (c1) c1.onclick = function(){ if (CMP && VUE_RES === 'image') return; CMP = true; VUE_RES = 'image'; peindreResultat(); };
     var c0 = document.getElementById('cmp-off');
@@ -3593,6 +3836,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function saisie(apercu){
     var s = { geste: VOIE, preset: presetEnvoye(), apercu: apercu };
+    if (PROD) { s.produit = PROD.provisoire ? '' : PROD.id; s.produitNom = PROD.nom; s.produitSku = PROD.sku; }
     if (transparentChoisi()) s.fondTransparent = true;
     if (VOIE === 'fantome') s.palier = FANT_PALIER;
     if ((!apercu || VOIE === 'fantome') && PRIX_ANNONCE != null) s.prixAnnonce = PRIX_ANNONCE;
@@ -3615,11 +3859,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function enregistrerResultat(){
     if (!RESULT || !RESULT.image || OCCUPE) return;
     if (ENREG) { dire('${T("Déjà enregistrée dans la photothèque.")}', 'att'); return; }
+    if (PROD && teinteAlerte()) { gardeTeinte(enregistrerResultat); return; }
     occuper(true); dire('${T("Enregistrement dans la photothèque…")}');
-    appeler('studio:enregistrer', [{ image: RESULT.image, nom: nomRendu() }]).then(function(r){
+    // ÉTIQUETÉE pour sa fiche et son rôle quand le Studio est rattaché à un produit
+    var e0 = { image: RESULT.image, nom: nomRendu() };
+    if (PROD) { e0.produit = PROD.id; e0.produitNom = PROD.nom; e0.role = ROLE; }
+    appeler('studio:enregistrer', [e0]).then(function(r){
       occuper(false);
       if (r && r.ok) {
-        ENREG = true;
+        ENREG = true; ENREG_CODE = r.code || '';
         var sv = document.getElementById('o-sv');
         if (sv) { sv.textContent = '✓'; sv.disabled = true; }
         dire('${T("Enregistrée dans la photothèque — vous pouvez l’attacher à un article de là.")}', 'bon');
@@ -3661,7 +3909,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         FORMATS = [];
         // peindreResultat redessine tout si le volet de droite n existe pas
         // (plein ecran) : sinon l image serait produite, facturee, et jamais vue.
+        ENREG_CODE = ''; TEINTE = null;
         peindreResultat();
+        verifierTeinte();
         dire(apercu ? '${T("Aperçu prêt (gratuit).")}' : '${T("Image générée.")}', 'bon');
         chargerCredits();
         // Le filigrane pose avant ce rendu se repose sur la nouvelle image.
@@ -3923,8 +4173,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       chargerCredits();
       chargerLogos();
       chargerRecettes();
+      lireContexte();
     });
   }
+  window.szRevenir = function(){ lireContexte(); };
 
   /* Le résultat témoin du mode de contrôle : une image d un pixel, aucun appel,
      aucun crédit. Il allume EXPRÈS tous les avis (aperçu filigrané, décor
@@ -4030,7 +4282,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       return { v: 1, VOIE: VOIE, VOIE_CHOISIE: VOIE_CHOISIE, PRESET: PRESET, FIL: FIL,
         MODELE_SEL: MODELE_SEL, POSE_SEL: POSE_SEL, AV: AV,
         PHOTO_ID: PHOTO_ID, PHOTO_NOM: PHOTO_NOM,
-        PHOTO: (PHOTO && PHOTO.length < 1200000) ? PHOTO : '' };
+        PHOTO: (PHOTO && PHOTO.length < 1200000) ? PHOTO : '',
+        PROD: PROD && !(PROD.devant && PROD.devant.length > 300000) ? PROD : null, ROLE: ROLE };
     },
     remplir: function(b){
       if (!b || b.v !== 1) return;
@@ -4043,6 +4296,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       AV = Object.assign(e0.AV, b.AV || {});
       MODELE_SEL = b.MODELE_SEL || MODELE_SEL; POSE_SEL = b.POSE_SEL || POSE_SEL;
       PHOTO = b.PHOTO || null; PHOTO_ID = b.PHOTO_ID || ''; PHOTO_NOM = b.PHOTO_NOM || '';
+      if (b.PROD && b.PROD.id) { PROD = b.PROD; ROLE = b.ROLE || 'devant'; }
       PHOTO_URL = '';
       if (PHOTO_ID && !PHOTO) {
         var id = PHOTO_ID;
@@ -4061,7 +4315,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   charger();
   lotsSuivre();
   chargerPanier();
-  var PANIER_T = setInterval(function(){ if (!document.hidden) chargerPanier(); }, 2000);
+  var PANIER_T = setInterval(function(){ if (!document.hidden) { chargerPanier(); if (PRESETS && PRESETS.length) lireContexte(); } }, 2000);
   window.addEventListener('pagehide', function(){ clearInterval(PANIER_T); });
   if (${lotsDep ? 'true' : 'false'}) { LOTS_VUE = true; chargerLots(); }
 })();

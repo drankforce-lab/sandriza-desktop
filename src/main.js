@@ -2915,6 +2915,9 @@ const OPS_PONT = new Set([
   // Studio ↔ photothèque : lister pour choisir, ouvrir depuis la photothèque,
   // enregistrer le résultat (import → dépôt R2).
   'studio:phototheque', 'studio:ouvrir', 'studio:enregistrer',
+  // Le Studio rattaché au produit (2026-10-19) : recherche, contexte de l'assistant, teinte, placement, boîte aux lettres.
+  'studio:produits', 'studio:produit', 'studio:ouvrirPour', 'studio:contexte', 'studio:teinte', 'studio:harmoniser',
+  'studio:placer', 'studio:retours', 'studio:retourPris', 'studio:lierProvisoire',
   /* ⚠⚠ studio:modeles, studio:modeleGenerer et studio:modelesVider ONT ETE
      RETIREES (3.50.0, a sa demande). ⚠ SANS GUILLEMETS DANS CE COMMENTAIRE, ET
      C EST OBLIGATOIRE : le controle de parite extrait les chaines CITEES de ce
@@ -3565,6 +3568,9 @@ const LIMITES_PONT = {
   // touche a une image, donc pas de plafond de temps genereux ici.
   'studio:estimer': 20000, 'fal:plafondPoser': 20000,
   'studio:phototheque': 20000, 'studio:ouvrir': 8000, 'studio:enregistrer': 90000,
+  'studio:produits': 10000, 'studio:produit': 8000, 'studio:ouvrirPour': 15000, 'studio:contexte': 8000,
+  'studio:teinte': 30000, 'studio:harmoniser': 60000, 'studio:placer': 120000, 'studio:retours': 10000,
+  'studio:retourPris': 8000, 'studio:lierProvisoire': 30000,
   /* ⚠ 'studio:logos' est GÉNÉREUX : il rapatrie jusqu'à quarante logos depuis R2,
      un par un. 'studio:filigraner' porte une photo de studio dans les deux sens —
      le même ordre de grandeur que l'enregistrement. */

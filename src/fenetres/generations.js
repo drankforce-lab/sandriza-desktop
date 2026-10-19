@@ -239,15 +239,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var RANG = { cours: 0, attente: 1, fini: 2, echec: 3, interrompu: 3, rejete: 3 };
   var GROUPES = ['${T("En cours")}', '${T("À confirmer")}', '${T("Terminées")}', '${T("Échouées, interrompues ou rejetées")}'];
 
-  function poids(g, i){ return i === 1 ? (Number(g.dureeEstimee) || ETAPES[1][2]) : ETAPES[i][2]; }
+  /* LE VÊTEMENT SANS MANNEQUIN (2026-10-19) entre aussi dans la file : quatre étapes, le travail chez The New Black
+     au palier choisi. Chaque genre a ses étapes ; le reste de la fenêtre lit celles de la génération montrée. */
+  var ETAPES_FANT = [
+    ['${T("Contrôle du prix")}', '${T("Le prix est redemandé et comparé au montant affiché ; s’il a changé, rien ne part.")}', 2],
+    ['${T("Retrait du mannequin chez The New Black")}', '${T("The New Black refait le vêtement sans mannequin, au palier choisi (Standard, Pro ou Ultra).")}', 45],
+    ['${T("Couleur fidèle")}', '${T("La couleur du rendu est ramenée sur celle de la photo source.")}', 2],
+    ['${T("Détourage et finition")}', '${T("Le fond est retiré ou mis à la couleur de l’ambiance, le contour lissé, le cadrage resserré.")}', 6]
+  ];
+  function etapesDe(g){ return g && g.genre === 'fantome' ? ETAPES_FANT : ETAPES; }
+  function typeDe(g){ return g && g.genre === 'fantome' ? '${T("Sans mannequin")}' : '${T("Aperçu 3D")}'; }
+  function poids(g, i){ var E = etapesDe(g); return i === 1 ? (Number(g.dureeEstimee) || E[1][2]) : E[i][2]; }
   /* Le POURCENTAGE et le TEMPS RESTANT : pondérés par la durée habituelle de chaque étape. L étape en cours compte
      au temps écoulé sur sa durée habituelle, plafonnée à 95 % — elle n est pas finie tant qu elle ne l a pas dit. */
   function avancement(g, maintenant){
     var tot = 0, fait = 0, reste = 0;
     var et = g.etapes || [];
-    for (var i = 0; i < ETAPES.length; i++) tot += poids(g, i);
+    var E = etapesDe(g);
+    for (var i = 0; i < E.length; i++) tot += poids(g, i);
     if (g.etat === 'fini') return { pct: 100, reste: 0 };
-    for (var k = 0; k < ETAPES.length; k++) {
+    for (var k = 0; k < E.length; k++) {
       var e = et[k] || {}, w = poids(g, k);
       if (e.etat === 'fait') fait += w;
       else if (e.etat === 'cours') {
@@ -284,7 +295,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function vignette(g){
     var u = g.vignette || g.imageProduit || '';
-    return /^https?:/.test(u) ? ' style="background-image:url(' + esc(u).replace(/[()]/g, '') + ')"' : '';
+    // une adresse, ou la petite vignette JPEG du vêtement sans mannequin (gardée sur ce poste)
+    return /^(https?:|data:image[/]jpeg;base64,)/.test(u) ? ' style="background-image:url(' + esc(u).replace(/[()]/g, '') + ')"' : '';
   }
 
   function peindreFiltres(l){
@@ -322,11 +334,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (gr !== der) { h += '<div class="grp">' + GROUPES[gr] + '</div>'; der = gr; }
       var av = avancement(g, maintenant);
       var n2 = g.etat === 'cours'
-        ? '${T("Étape")} ' + ((g.etapeCourante || 0) + 1) + '/' + ETAPES.length + ' · ' + av.pct + ' %'
+        ? '${T("Étape")} ' + ((g.etapeCourante || 0) + 1) + '/' + etapesDe(g).length + ' · ' + av.pct + ' %'
         : fdate(g.debut);
       h += '<div class="it' + (g.id === SEL ? ' sel' : '') + '" role="option" tabindex="0" aria-selected="' + (g.id === SEL) + '" data-id="' + esc(g.id) + '">'
-        + '<span class="vg"' + vignette(g) + '>' + (vignette(g) ? '' : '3D') + '</span>'
-        + '<span class="tx"><div class="n1">' + esc(g.produitNom || g.produit) + '</div><div class="n2">${T("Aperçu 3D")} · ' + n2 + '</div>'
+        + '<span class="vg"' + vignette(g) + '>' + (vignette(g) ? '' : (g.genre === 'fantome' ? '${T("Photo")}' : '3D')) + '</span>'
+        + '<span class="tx"><div class="n1">' + esc(g.produitNom || g.produit) + '</div><div class="n2">' + typeDe(g) + ' · ' + n2 + '</div>'
         + (g.etat === 'cours' ? '<div class="bar"><i style="width:' + av.pct + '%"></i></div>' : '') + '</span>'
         + '<span class="dr"><span class="etq ' + esc(g.etat) + '">' + (ETATS[g.etat] || esc(g.etat)) + '</span><div class="c">' + argent(g.cout) + '</div></span></div>';
     });
@@ -364,15 +376,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var sousTitre = etat === 'cours' ? (av.reste > 0 ? '${T("≈ {t} restantes")}'.replace('{t}', duree(av.reste)) : '${T("presque fini")}')
       : (ETATS[etat] || etat);
     var total = (g.fin || maintenant) - (g.debut || maintenant);
-    var h = '<div class="ent"><span class="vg"' + vignette(g) + '>' + (vignette(g) ? '' : '3D') + '</span>'
+    var h = '<div class="ent"><span class="vg"' + vignette(g) + '>' + (vignette(g) ? '' : (g.genre === 'fantome' ? '${T("Photo")}' : '3D')) + '</span>'
       + '<div class="tx"><h2>' + esc(g.produitNom || g.produit) + '</h2>'
-      + '<div class="meta">' + (g.refaite ? '${T("Couleur refaite · sans nouvel appel payant")}' : '${T("Aperçu 3D · The New Black, Image to 3D")}') + (g.sku ? ' · ' + esc(g.sku) : '') + '</div>'
+      + '<div class="meta">' + (g.genre === 'fantome' ? '${T("Vêtement sans mannequin · The New Black")}' + (g.palier ? ' (' + esc(g.palier) + ')' : '')
+          : (g.refaite ? '${T("Couleur refaite · sans nouvel appel payant")}' : '${T("Aperçu 3D · The New Black, Image to 3D")}')) + (g.sku ? ' · ' + esc(g.sku) : '') + '</div>'
       + '<div class="meta">' + '${T("Lancée le {d} par {p}")}'.replace('{d}', fdate(g.debut)).replace('{p}', esc(g.par || '—'))
       + ' · ' + '${T("durée {t}")}'.replace('{t}', duree(total)) + ' · ' + '${T("coût {c}")}'.replace('{c}', argent(g.cout)) + '</div></div>'
       + '<div class="pct"><b>' + av.pct + ' %</b><span>' + sousTitre + '</span></div></div>'
       + '<div class="prog ' + esc(etat) + '" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + av.pct + '"><i style="width:' + av.pct + '%"></i></div>';
     h += '<div class="etapes">';
-    for (var i = 0; i < ETAPES.length; i++) {
+    var ET = etapesDe(g);
+    for (var i = 0; i < ET.length; i++) {
       var e = et[i] || { etat: 'att' };
       var cl = e.etat === 'fait' ? 'fait' : (e.etat === 'cours' ? 'cours' : (e.etat === 'err' ? 'err' : (e.etat === 'attente' ? 'attente' : 'att')));
       var ic = cl === 'fait' ? '✓' : (cl === 'err' ? '✕' : (cl === 'attente' ? '?' : (cl === 'cours' ? '•' : String(i + 1))));
@@ -382,7 +396,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       else if (cl === 'attente') du = '${T("votre décision")}';
       else du = '≈ ' + duree(poids(g, i) * 1000);
       h += '<div class="et ' + cl + '"><span class="ic" aria-hidden="true">' + ic + '</span>'
-        + '<div class="lb"><div class="nm">' + ETAPES[i][0] + '</div><div class="ds" title="' + esc(ETAPES[i][1]) + '">' + ETAPES[i][1] + '</div></div>'
+        + '<div class="lb"><div class="nm">' + ET[i][0] + '</div><div class="ds" title="' + esc(ET[i][1]) + '">' + ET[i][1] + '</div></div>'
         + '<span class="du">' + du + '</span></div>';
     }
     h += '</div>';
@@ -391,8 +405,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     else if (etat === 'echec') h += '<div class="bilan err" title="' + esc(g.message || '') + '">✕ ' + esc(g.message || '${T("Échec")}') + '</div>';
     else if (etat === 'fini') h += '<div class="bilan bon" title="' + esc(g.message || '') + '">✓ ' + esc(g.message || conf || '${T("Terminée")}') + '</div>';
     else if (etat === 'interrompu' || etat === 'rejete') h += '<div class="bilan" title="' + esc(g.message || '') + '">' + esc(g.message || ETATS[etat]) + '</div>';
-    else h += '<div class="bilan">' + '${T("Étape {n} sur {t} : {e}")}'.replace('{n}', String((g.etapeCourante || 0) + 1)).replace('{t}', String(ETAPES.length))
-      .replace('{e}', ETAPES[g.etapeCourante || 0] ? ETAPES[g.etapeCourante || 0][0] : '') + ' — ' + '${T("Vous pouvez fermer cette fenêtre, la génération continue.")}' + '</div>';
+    else h += '<div class="bilan">' + '${T("Étape {n} sur {t} : {e}")}'.replace('{n}', String((g.etapeCourante || 0) + 1)).replace('{t}', String(ET.length))
+      .replace('{e}', ET[g.etapeCourante || 0] ? ET[g.etapeCourante || 0][0] : '') + ' — ' + (g.genre === 'fantome'
+        ? '${T("le résultat s’affiche dans le Studio, où il s’enregistre ou se place.")}' : '${T("Vous pouvez fermer cette fenêtre, la génération continue.")}') + '</div>';
     var z = zones();
     poser(z.haut, h);
     h = '';
