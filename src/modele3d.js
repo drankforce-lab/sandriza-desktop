@@ -40,6 +40,14 @@ async function compresserGlb(octets, options){
     m.setMetallicRoughnessTexture(null);
     if (mr && !mr.listParents().some((p) => p !== r)) mr.dispose();
     m.setMetallicFactor(0).setRoughnessFactor(0.85);
+    /* (2026-10-19) NON ÉCLAIRÉ, sur demande : le modèle 3D de l'Atelier par The New Black porte sa propre lumière dans
+       sa texture — la boutique et l'Atelier l'affichent tel quel (exposition 1 : voir la matière « sz-photo-unlit »). */
+    if (o.unlit) {
+      const nt = m.getNormalTexture();
+      if (nt) { m.setNormalTexture(null); if (!nt.listParents().some((p) => p !== r)) nt.dispose(); }
+      m.setExtension('KHR_materials_unlit', doc.createExtension(ext.KHRMaterialsUnlit).createUnlit());
+      m.setName('sz-photo-unlit');
+    }
   }
   for (const t of r.listTextures()) {
     const j = reduireTexture(t.getImage(), o.cote);

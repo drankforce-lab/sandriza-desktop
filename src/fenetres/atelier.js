@@ -426,6 +426,33 @@ html.jour .v3-cam button[aria-pressed="true"]{background:#DDD5C8}
 .ph-vign button.face{border-color:var(--or)}.ph-vign button.dos{border-color:var(--tx2)}
 .ph-vign button b{position:absolute;left:0;right:0;bottom:0;font-size:.68rem;font-weight:600;background:var(--f-carte);color:var(--tx);padding:.05rem 0}
 .v3-scene canvas{display:block;position:absolute;left:0;top:0;width:100%;height:100%}
+/* LE RENDU PHOTO DE THE NEW BLACK (2026-10-19) : la VUE PRINCIPALE, sur la scène ; la vue 3D du poste devient la « Vue technique 3D » */
+.v3-tnb{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.7rem;
+  background:inherit;cursor:default;text-align:center;padding:1.2rem;color-scheme:light}
+.v3-tnb .rp-grand{position:absolute;inset:0 0 5.2rem;width:100%;height:calc(100% - 5.2rem);object-fit:contain}
+.v3-tnb .rp-vign{position:absolute;left:0;right:0;bottom:.5rem;display:flex;justify-content:center;gap:.5rem}
+.v3-tnb .rp-vign button{display:flex;flex-direction:column;align-items:center;gap:.15rem;padding:.2rem;border-radius:9px;cursor:pointer;
+  border:2px solid transparent;background:#F7F4EF;color:#2b2621;font:inherit;font-size:.7rem}
+.v3-tnb .rp-vign button.on{border-color:var(--or-jour)}
+.v3-tnb .rp-vign img{width:3rem;height:4rem;object-fit:cover;border-radius:6px}
+.v3-tnb .rp-opts{display:flex;flex-wrap:wrap;gap:.35rem .8rem;align-items:center;justify-content:center;font-size:.8rem;color:#2b2621}
+.v3-tnb .rp-opts .lib{font-weight:700;color:#4f463d}
+.v3-tnb .rp-opts label{display:inline-flex;align-items:center;gap:.3rem;cursor:pointer}
+.v3-rp-retour{position:absolute;right:.7rem;top:.7rem;z-index:4;font:inherit;font-size:.75rem;padding:.25rem .6rem;border-radius:8px;cursor:pointer;
+  border:1px solid rgba(0,0,0,.25);background:#FBF9F6;color:#2b2621}
+.v3-tnb .t1{font:700 1.02rem/1.3 system-ui;color:#2b2621}
+.v3-tnb .t2{font-size:.84rem;color:#4f463d;max-width:30rem;line-height:1.5}
+.v3-tnb .gen{font:inherit;font-size:.9rem;font-weight:600;padding:.55rem 1.1rem;border-radius:9px;cursor:pointer;border:1px solid var(--or-jour);
+  background:var(--or-jour);color:var(--tx-sur-accent)}
+.v3-tnb .gen:hover{filter:brightness(1.08)}
+.v3-tnb .barre{width:min(22rem,80%);height:.5rem;border-radius:99px;background:rgba(0,0,0,.12);overflow:hidden}
+.v3-tnb .barre i{display:block;height:100%;background:var(--or)}
+.v3-tnb .coin{position:absolute;right:.7rem;top:.7rem;z-index:4;display:flex;gap:.4rem;align-items:center}
+.v3-tnb .coin span{font-size:.72rem;color:#3d362f;background:#F7F4EF;border-radius:99px;padding:.15rem .55rem}
+.v3-tnb .coin button,.v3-tnb .perime button{font:inherit;font-size:.75rem;padding:.25rem .6rem;border-radius:8px;cursor:pointer;
+  border:1px solid rgba(0,0,0,.25);background:#FBF9F6;color:#2b2621}
+.v3-tnb .perime{position:absolute;left:50%;transform:translateX(-50%);bottom:.8rem;z-index:4;font-size:.78rem;color:#5c3d0e;
+  background:rgba(255,236,200,.95);border:1px solid rgba(160,110,30,.45);border-radius:9px;padding:.35rem .6rem;display:flex;gap:.5rem;align-items:center}
 /* le fond de studio : un léger dégradé, plus clair derrière le vêtement (le cyclo d un photographe) */
 .v3-scene.beige{background:#EFE8DD;background:radial-gradient(ellipse 70% 60% at 50% 42%,#F7F3EC 0%,#EFE8DD 58%,#E3DACB 100%)}.v3-scene.blanc{background:#FFFFFF;background:radial-gradient(ellipse 70% 60% at 50% 42%,#FFFFFF 0%,#FAFAF8 60%,#EEEDEA 100%)}
 .v3-aide{position:absolute;left:.7rem;bottom:.55rem;font-size:.76rem;color:#3F3A32;background:rgba(243,238,229,.92);padding:.12rem .5rem;border-radius:6px;pointer-events:none}
@@ -3106,69 +3133,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }, 1800);
   }
 
-  /* ══ LE RENDU RÉALISTE (2026-10-17, sa demande : « je veux la même précision que FAL.AI ») ══════════
-     Le moteur du poste donne la FORME exacte (le patron, le motif, le logo à sa place) ; Fal.ai (FLUX
-     Kontext) en fait une photo de studio : la matière, les coutures, les plis. Payant (~0,04 $ le rendu) :
-     rien ne part sans un clic qui en dit le prix. Le résultat s enregistre, devient la vignette, ou va
-     vers la fiche produit. */
-  function ouvrirRenduIa(){
-    if (!V3 || !plaque3d() || OCCUPE) return;
-    // st.prix : le montant AFFICHÉ sur le bouton, envoyé avec la demande ; le relais le vérifie avant tout appel
-    var st = { vue: 'face', fantome: true, source: '', image: '', prix: 0.04 };
-    var prixTxt = function(){ return szArgentSymbole(szArgentNombre(st.prix, st.prix < 0.01 ? 3 : 2)); };
-    var v = document.createElement('div'); v.className = 'szc-voile';
-    document.body.appendChild(v);
-    var fermer = function(){ if (v.parentNode) v.parentNode.removeChild(v); };
-    var peindre = function(){
-      if (!st.image) st.source = rendreVues3d([st.vue], st.fantome, [900, 1200])[0] || '';
-      var prods = D.produits || [];
-      v.innerHTML = '<div class="szc-boite v3-fiche" role="dialog" aria-modal="true" aria-labelledby="v3r-t"><h3 id="v3r-t">${T("Rendu réaliste (Fal.ai)")}</h3>'
-        + '<p>${T("Le moteur 3D donne la forme exacte du vêtement, son motif et son logo ; Fal.ai en fait une photo de studio (matière, coutures, plis). Environ 0,04 $ par rendu, compté dans le plafond Fal.ai.")}</p>'
-        + (st.image ? '' : '<div class="im-cases">' + VUES_FICHE.map(function(x){ return '<label><input type="radio" name="v3r-vue" data-v3rv="' + x[0] + '"' + (st.vue === x[0] ? ' checked' : '') + '>' + x[1] + '</label>'; }).join('')
-          + '<label><input type="checkbox" id="v3r-fantome"' + (st.fantome ? ' checked' : '') + '>${T("Style mannequin fantôme")}</label></div>')
-        + '<div class="v3f-vign v3r-duo">' + (st.source ? '<figure><img src="' + st.source + '" alt=""><figcaption>${T("Moteur 3D")}</figcaption></figure>' : '')
-        + (st.image ? '<figure><img src="' + st.image + '" alt=""><figcaption>${T("Rendu réaliste")}</figcaption></figure>' : '') + '</div>'
-        + '<div class="szc-pied"><button type="button" class="szc-non">' + (st.image ? '${T("Fermer")}' : '${T("Annuler")}') + '</button>'
-        + (st.image ? '<button type="button" id="v3r-fichier">${T("Enregistrer le fichier")}</button>'
-            + (D.peutModifier ? '<button type="button" id="v3r-vign">${T("Utiliser comme vignette")}</button>' : '')
-            + (D.peutModifier && prods.length ? '<button type="button" class="szc-oui" id="v3r-fiche">${T("Vers la fiche produit")}</button>' : '')
-          : '<button type="button" class="szc-oui" id="v3r-go"' + (st.source ? '' : ' disabled') + '>' + '${T("Générer (≈ {0})")}'.split('{0}').join(prixTxt()) + '</button>')
-        + '</div></div>';
-      v.querySelector('.szc-non').onclick = fermer;
-      Array.prototype.forEach.call(v.querySelectorAll('[data-v3rv]'), function(c){ c.onchange = function(){ st.vue = c.getAttribute('data-v3rv'); peindre(); }; });
-      var cf = v.querySelector('#v3r-fantome'); if (cf) cf.onchange = function(ev){ st.fantome = ev.target.checked; peindre(); };
-      var go = v.querySelector('#v3r-go'); if (go) go.onclick = generer;
-      var bf = v.querySelector('#v3r-fichier'); if (bf) bf.onclick = function(){
-        if (!P || typeof P.enregistrerExport !== 'function') { dire('${T("Cette version de l’application ne sait pas enregistrer un export.")}', 'err'); return; }
-        var nom = String((V3.m.ref || V3.m.nom) + '-v' + (V3.m.version || 1) + '-rendu-' + st.vue).replace(/[^A-Za-z0-9._-]+/g, '-') + '.jpg';
-        Promise.resolve(P.enregistrerExport(nom, st.image)).then(function(w){
-          if (w && w.ok) dire('${T("Enregistré : {0}")}'.split('{0}').join(w.path || nom), 'bon');
-          else if (w && w.annule) dire('${T("Export annulé : le code d’export n’a pas été donné.")}', 'att');
-          else dire('${T("L’enregistrement a échoué : {0}")}'.split('{0}').join((w && w.error) || '?'), 'err');
-        });
-      };
-      var bv = v.querySelector('#v3r-vign'); if (bv) bv.onclick = function(){ vignetteDepuis(st.image); };
-      var bp = v.querySelector('#v3r-fiche'); if (bp) bp.onclick = function(){ versFiche(st.image); };
-    };
-    var generer = function(){
-      if (OCCUPE || !st.source) return;
-      OCCUPE = true; var b = v.querySelector('#v3r-go'); if (b) { b.disabled = true; b.textContent = '${T("Génération… (environ 20 s)")}'; }
-      dire('${T("Rendu réaliste en cours…")}');
-      appeler('atelier:rendrePhoto', [{ id: V3.id, image: st.source, vue: st.vue, prixAnnonce: st.prix }]).then(function(r){
-        OCCUPE = false;
-        // LE PRIX A CHANGÉ depuis l affichage : rien n est parti ; le bouton prend le vrai montant, la personne relance si elle veut
-        if (r && r.motif === 'prix_change' && r.prixReel != null) {
-          var avant = prixTxt(); st.prix = Number(r.prixReel);
-          if (b) { b.disabled = false; b.textContent = '${T("Générer (≈ {0})")}'.split('{0}').join(prixTxt()); }
-          dire('${T("Le prix a changé : {0} au lieu de {1}. Rien n’a été lancé — cliquez de nouveau pour générer à ce prix.")}'.split('{0}').join(prixTxt()).split('{1}').join(avant), 'att');
-          return;
-        }
-        if (!r || !r.ok || !r.image) { if (b) { b.disabled = false; b.textContent = '${T("Générer (≈ {0})")}'.split('{0}').join(prixTxt()); } dire(r && r.detail ? '${T("Fal.ai : {0}")}'.split('{0}').join(r.detail) : expliquer(r), 'err'); return; }
-        st.image = r.image; peindre(); dire('${T("Rendu réaliste prêt.")}', 'bon');
-      });
-    };
-    // une image (adresse ou data:) : petite vignette 300 × 400, recadrée au centre
-    var vignetteDepuis = function(src){
+  /* « Rendu photo (The New Black) », depuis le menu ou la barre : la VUE PRINCIPALE de l aperçu, panneau de génération
+     ouvert (2026-10-19, sa décision — voir peindreTnb3d). */
+  function ouvrirRenduIa(){ if (!V3) return; V3.technique = false; RP.panneau = true; peindreTnb3d(); }
+  // une image (adresse ou data:) : petite vignette 300 × 400, recadrée au centre — et l envoi vers la fiche produit
+  function vignetteDepuis(src){
       var im = new Image(); im.crossOrigin = 'anonymous';
       im.onload = function(){
         var c = document.createElement('canvas'); c.width = 300; c.height = 400;
@@ -3185,8 +3154,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       };
       im.onerror = function(){ dire('${T("Cette image ne peut pas devenir une vignette.")}', 'err'); };
       im.src = src;
-    };
-    var versFiche = function(src){
+  }
+  function versFiche(src){
       var prods = D.produits || [], pid = V3.m.produitId && prods.some(function(p){ return p.id === V3.m.produitId; }) ? V3.m.produitId : (prods[0] && prods[0].id);
       if (!pid || OCCUPE) return;
       var envoi = function(d){
@@ -3203,10 +3172,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       im.onload = function(){ var c = document.createElement('canvas'); c.width = im.width; c.height = im.height; c.getContext('2d').drawImage(im, 0, 0); try { envoi(c.toDataURL('image/jpeg', 0.92)); } catch (e) { dire('${T("Cette image ne peut pas être envoyée.")}', 'err'); } };
       im.onerror = function(){ dire('${T("Cette image ne peut pas être envoyée.")}', 'err'); };
       im.src = src;
-    };
-    v.addEventListener('keydown', function(ev){ if (ev.key === 'Escape' && !OCCUPE) fermer(); });
-    v.addEventListener('mousedown', function(ev){ if (ev.target === v && !OCCUPE) fermer(); });
-    peindre();
   }
   function ouvrirEnvoiFiche(){
     if (!V3 || !plaque3d() || OCCUPE) return;
@@ -5935,7 +5900,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var g = document.getElementById('v3-gestes'), pq = plaque3d();
     if (g) g.innerHTML = '<button type="button" id="v3-annuler" aria-label="${T("Annuler la modification")}" title="${T("Annuler la modification")} (Ctrl+Z)"' + (pq && V3.pile.length ? '' : ' disabled') + '>↶</button>'
       + '<button type="button" id="v3-photo" title="${T("Enregistrer l’image de la scène")}">${T("Photo du rendu")}</button>'
-      + '<button type="button" id="v3-ia"' + (pq ? '' : ' disabled') + '>${T("Rendu réaliste (Fal.ai)")}</button>'
+      + '<button type="button" id="v3-ia"' + (pq ? '' : ' disabled') + '>${T("Rendu photo (The New Black)")}</button>'
       + (D.peutModifier ? '<button type="button" class="prim" id="v3-enreg" title="Ctrl+S"' + (pq && V3.dsale ? '' : ' disabled') + '>${T("Enregistrer")}</button>' : '');
     // les outils de design s ouvrent quand l aperçu plaqué est prêt (il arrive après le premier dessin)
     corps.querySelectorAll('.v3 [data-v3out]').forEach(function(b){ b.disabled = b.getAttribute('data-v3out') !== 'tourner' && !pq; });
@@ -6144,7 +6109,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       l.push({ lib: '${T("Enregistrer")}', rac: 'Ctrl+S', off: !D.peutModifier || !pq || !V3.dsale, fn: enregistrer3d });
       tr();
       l.push({ lib: '${T("Photo du rendu")}', fn: photo3d });
-      l.push({ lib: '${T("Rendu réaliste (Fal.ai)")}', off: !pq, fn: ouvrirRenduIa });
+      l.push({ lib: '${T("Rendu photo (The New Black)")}', off: !pq, fn: ouvrirRenduIa });
       l.push({ lib: '${T("Vers la fiche produit")}', off: !(pq && D.peutModifier && (D.produits || []).length), fn: ouvrirEnvoiFiche });
       tr();
       l.push({ lib: V3.retour === 'editeur' ? '${T("Retour à l’éditeur")}' : '${T("Retour à la bibliothèque")}', rac: '${T("Échap")}', fn: quitter3d });
@@ -6212,6 +6177,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         return '<button type="button" class="st-outil' + (V3.outil === o[0] ? ' on' : '') + '" data-v3out="' + o[0] + '" aria-pressed="' + (V3.outil === o[0]) + '" title="' + o[1] + '"' + (off ? ' disabled' : '') + '>' + ico(o[2]) + '<span>' + o[1] + '</span></button>';
       }).join('') + '</nav>';
     var sc = '<div class="v3-plan"><div class="v3-scene ' + V3.fond + (V3.outil !== 'tourner' ? ' vise' : '') + '" id="v3-scene" role="region" aria-label="${T("Scène 3D")}"><canvas id="v3-canevas" role="img" aria-label="${T("Le vêtement en 3D")}"></canvas>'
+      + '<div class="v3-tnb" id="v3-tnb" role="region" aria-label="${T("Rendu 3D de The New Black")}"></div>'
       + '<div class="v3-cam" role="group" aria-label="${T("Caméra")}">'
       + '<button type="button" data-v3zoom="-" title="${T("Zoom arrière")} (Ctrl+-)" aria-label="${T("Zoom arrière")}">−</button><span class="val" id="v3-zoomv">' + Math.round(V3.zoom * 100) + ' %</span>'
       + '<button type="button" data-v3zoom="+" title="${T("Zoom avant")} (Ctrl++)" aria-label="${T("Zoom avant")}">+</button>'
@@ -6226,10 +6192,154 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // le canevas WebGL est GARDÉ d une vue à l autre : son contexte et ses toiles restent
     var nv = document.getElementById('v3-canevas');
     if (GLV && GLV.cv && nv && GLV.cv !== nv && V3.m.base !== 'pantalon') nv.parentNode.replaceChild(GLV.cv, nv);
-    peindrePanneau3d(); peindreDesign3d();
+    peindrePanneau3d(); peindreDesign3d(); peindreTnb3d();
     var z = document.getElementById('v3-scene');
     if (window.ResizeObserver && z) { if (window._v3RO) window._v3RO.disconnect(); window._v3RO = new ResizeObserver(function(){ demander3d(); }); window._v3RO.observe(z); }
     demander3d();
+  }
+  /* ══ LE RENDU PHOTO, VUE PRINCIPALE DE L APERÇU (2026-10-19, sa décision — « comme CLO AI Studio ») ════════════════
+     Le moteur du poste ne sert plus qu EN COULISSE : il fabrique l image de chaque angle (fond blanc, sans le mannequin
+     blanc), qui part chez The New Black et revient en PHOTO — portée par un mannequin (femme ou homme, celui de la vue),
+     sans mannequin, ou à plat, sur un fond de studio gris clair uni. La scène montre ces photos en grand, avec des
+     vignettes d angles ; sans rendu : « Aucun rendu » et « Générer le rendu photo » — ⚠ JAMAIS de génération
+     automatique, et une confirmation qui dit tout du coût. Les corrections se font sur le modèle (les outils de la
+     vue, le patron, le motif), puis « Régénérer ». La vue 3D du poste reste un outil : « Vue technique 3D ».
+     (L essai « Image to 3D » depuis l Atelier est ABANDONNÉ — sa décision du même jour.) */
+  var RP = { angles: { face: true, dos: false, tq: false }, style: 'porte', palier: 'standard', bareme: null, solde: null,
+    gens: {}, pct: {}, vue: 'face', panneau: false, t: null, images: {} };
+  var RP_ANGLES = [['face', '${T("Face")}'], ['dos', '${T("Dos")}'], ['tq', '${T("3/4")}']];
+  var RP_STYLES = [['porte', '${T("Porté par un mannequin")}'], ['fantome', '${T("Sans mannequin")}'], ['plat', '${T("À plat")}']];
+  var RP_PALIERS = [['standard', '${T("Standard")}'], ['pro', '${T("Pro (2K)")}'], ['ultra', '${T("Ultra (4K)")}']];
+  function rpPrix(){ var b = RP.bareme && RP.bareme[RP.style] && RP.bareme[RP.style][RP.palier]; return b ? Number(b.prix) : null; }
+  function rpChoisis(){ return RP_ANGLES.filter(function(a){ return RP.angles[a[0]]; }).map(function(a){ return a[0]; }); }
+  function rpUsd(x){ return x == null ? '…' : '${T("{0} $ US")}'.split('{0}').join(szArgentNombre(x, 3)); }
+  function rpEnCours(){ return Object.keys(RP.gens).length > 0; }
+  function peindreTnb3d(){
+    var z = document.getElementById('v3-tnb'); if (!z || !V3) return;
+    var rendus = V3.m.rendusPhoto || {}, dispo = RP_ANGLES.filter(function(a){ return rendus[a[0]] || RP.images[a[0]]; });
+    var sc = document.getElementById('v3-scene');
+    if (V3.technique) {
+      z.style.display = 'none';
+      var rb = document.getElementById('v3-rp-retour');
+      if (!rb && sc) { rb = document.createElement('button'); rb.type = 'button'; rb.id = 'v3-rp-retour'; rb.className = 'v3-rp-retour';
+        rb.textContent = '${T("Rendu photo")}'; rb.onclick = function(){ V3.technique = false; peindreTnb3d(); }; sc.appendChild(rb); }
+      return;
+    }
+    var rr = document.getElementById('v3-rp-retour'); if (rr) rr.remove();
+    z.style.display = '';
+    var h = '';
+    if (dispo.length && !RP.panneau) {
+      if (!rendus[RP.vue] && !RP.images[RP.vue]) RP.vue = dispo[0][0];
+      var src = RP.images[RP.vue] || rendus[RP.vue].url, perime = rendus[RP.vue] && Number(rendus[RP.vue].version || 1) !== Number(V3.m.version || 1);
+      h += '<img class="rp-grand" src="' + esc(src) + '" alt="' + esc(V3.m.nom || '') + '">'
+        + '<div class="rp-vign" role="group" aria-label="${T("Angles")}">' + dispo.map(function(a){
+            return '<button type="button" data-rpv="' + a[0] + '" class="' + (RP.vue === a[0] ? 'on' : '') + '" aria-pressed="' + (RP.vue === a[0]) + '"><img src="' + esc(RP.images[a[0]] || rendus[a[0]].url) + '" alt=""><span>' + a[1] + '</span></button>'; }).join('') + '</div>'
+        + '<div class="coin">' + (perime ? '<span>' + '${T("Le modèle a changé depuis ce rendu (version {0}).")}'.split('{0}').join(String(V3.m.version || 1)) + '</span>' : '')
+        + (D.peutModifier ? '<button type="button" data-rp="regen">${T("Régénérer…")}</button><button type="button" data-rp="vign">${T("Utiliser comme vignette")}</button>' : '')
+        + ((D.produits || []).length && D.peutModifier ? '<button type="button" data-rp="fiche">${T("Vers la fiche produit")}</button>' : '')
+        + '<button type="button" data-rp="tech">${T("Vue technique 3D")}</button></div>';
+    } else if (rpEnCours()) {
+      var ks = Object.keys(RP.gens), moy = Math.round(ks.reduce(function(a, k){ return a + (RP.pct[k] || 0); }, 0) / ks.length);
+      h += '<div class="t1">${T("Rendu photo en cours…")}</div><div class="t2">' + '${T("{0} angle(s) chez The New Black — environ 30 secondes chacun.")}'.split('{0}').join(String(ks.length)) + '</div>'
+        + '<div class="barre" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + moy + '"><i style="width:' + moy + '%"></i></div>'
+        + '<div class="coin"><button type="button" data-rp="tech">${T("Vue technique 3D")}</button></div>';
+    } else {
+      var n = rpChoisis().length, p = rpPrix();
+      h += '<div class="t1">' + (dispo.length ? '${T("Régénérer le rendu photo")}' : '${T("Aucun rendu pour ce modèle")}') + '</div>'
+        + '<div class="t2">${T("Chaque angle choisi part chez The New Black (la vue du modèle, fond blanc) et revient en photo de studio, fond gris clair uni. Rien ne part sans votre confirmation.")}</div>'
+        + '<div class="rp-opts"><span class="lib">${T("Angles")}</span>' + RP_ANGLES.map(function(a){ return '<label><input type="checkbox" data-rpa="' + a[0] + '"' + (RP.angles[a[0]] ? ' checked' : '') + '>' + a[1] + ' · ' + rpUsd(p) + '</label>'; }).join('') + '</div>'
+        + '<div class="rp-opts"><span class="lib">${T("Style")}</span>' + RP_STYLES.map(function(a){ return '<label><input type="radio" name="rp-style" data-rps="' + a[0] + '"' + (RP.style === a[0] ? ' checked' : '') + '>' + a[1] + '</label>'; }).join('')
+        + (RP.style === 'porte' ? '<span class="lib">' + '${T("Mannequin : {0}")}'.split('{0}').join(V3.genre === 'homme' ? '${T("homme")}' : '${T("femme")}') + '</span>' : '') + '</div>'
+        + '<div class="rp-opts"><span class="lib">${T("Qualité")}</span>' + RP_PALIERS.map(function(a){ return '<label><input type="radio" name="rp-pal" data-rpp="' + a[0] + '"' + (RP.palier === a[0] ? ' checked' : '') + '>' + a[1] + '</label>'; }).join('') + '</div>'
+        // le bouton est TOUJOURS là pour qui peut modifier : un vêtement encore en calcul est refusé au clic, avec sa raison
+        + (D.peutModifier ? '<button type="button" class="gen" data-rp="gen"' + (n && p != null ? '' : ' disabled') + '>' + '${T("Générer le rendu photo ({0})")}'.split('{0}').join(rpUsd(p == null ? null : p * n)) + '</button>' : '')
+        + '<div class="coin">' + (dispo.length ? '<button type="button" data-rp="retour">${T("Annuler")}</button>' : '') + '<button type="button" data-rp="tech">${T("Vue technique 3D")}</button></div>';
+      if (!RP.bareme) chargerBaremeRp();
+    }
+    z.innerHTML = h;
+    Array.prototype.forEach.call(z.querySelectorAll('[data-rpv]'), function(b){ b.onclick = function(){ RP.vue = b.getAttribute('data-rpv'); peindreTnb3d(); }; });
+    Array.prototype.forEach.call(z.querySelectorAll('[data-rpa]'), function(c){ c.onchange = function(){ RP.angles[c.getAttribute('data-rpa')] = c.checked; peindreTnb3d(); }; });
+    Array.prototype.forEach.call(z.querySelectorAll('[data-rps]'), function(c){ c.onchange = function(){ RP.style = c.getAttribute('data-rps'); peindreTnb3d(); }; });
+    Array.prototype.forEach.call(z.querySelectorAll('[data-rpp]'), function(c){ c.onchange = function(){ RP.palier = c.getAttribute('data-rpp'); peindreTnb3d(); }; });
+    Array.prototype.forEach.call(z.querySelectorAll('[data-rp]'), function(b){
+      b.onclick = function(){
+        var g = b.getAttribute('data-rp');
+        if (g === 'tech') { V3.technique = true; peindreTnb3d(); return; }
+        if (g === 'regen') { RP.panneau = true; peindreTnb3d(); return; }
+        if (g === 'retour') { RP.panneau = false; peindreTnb3d(); return; }
+        if (g === 'gen') { genererRp(); return; }
+        var src = RP.images[RP.vue] || ((V3.m.rendusPhoto || {})[RP.vue] || {}).url;
+        if (g === 'vign' && src) vignetteDepuis(src);
+        if (g === 'fiche' && src) versFiche(src);
+      };
+    });
+  }
+  function chargerBaremeRp(){
+    if (RP.chargement) return; RP.chargement = true;
+    appeler('atelier:renduPrix', []).then(function(r){
+      RP.chargement = false;
+      if (r && r.ok && r.prix) { RP.bareme = r.prix; RP.solde = r.solde; peindreTnb3d(); }
+      else dire(r && (r.detail || r.error) ? '${T("The New Black : {0}")}'.split('{0}').join(r.detail || r.error) : expliquer(r), 'err');
+    });
+  }
+  function genererRp(){
+    var angles = rpChoisis(), p = rpPrix();
+    if (!V3 || OCCUPE || rpEnCours() || !angles.length || p == null) return;
+    if (!plaque3d()) { dire('${T("Le vêtement n’est pas encore prêt : attendez la fin du calcul, puis recommencez.")}', 'att'); return; }
+    var sources = {}, img = rendreVues3d(angles, true, [900, 1200], '#FFFFFF');
+    angles.forEach(function(a, i){ sources[a] = img[i]; });
+    if (angles.some(function(a){ return !sources[a]; })) { dire('${T("La vue du modèle n’a pas pu être capturée.")}', 'err'); return; }
+    var tot = p * angles.length, cred = (RP.bareme[RP.style][RP.palier].credits || 1) * angles.length;
+    var d = [['${T("Envoyé")}', '${T("la vue du modèle, fond blanc, pour chaque angle :")} ' + angles.map(function(a){ return RP_ANGLES.filter(function(x){ return x[0] === a; })[0][1]; }).join(', ')],
+      ['${T("Chez")}', 'The New Black'], ['${T("Style")}', RP_STYLES.filter(function(x){ return x[0] === RP.style; })[0][1]],
+      ['${T("Crédits")}', String(cred)], ['${T("Montant")}', rpUsd(tot)]];
+    if (RP.solde != null) d.push(['${T("Solde après")}', '${T("{0} crédits")}'.split('{0}').join(String(Math.round((RP.solde - cred) * 10) / 10))]);
+    d.push(['${T("Durée estimée")}', '${T("environ 30 secondes par angle")}']);
+    szConfirmer({ prudent: true, titre: '${T("Générer le rendu photo")}',
+      texte: '${T("Le coût est engagé dès l’envoi : il n’est pas remboursé si vous arrêtez la génération ensuite.")}',
+      details: d, oui: '${T("Générer ({0})")}'.split('{0}').join(rpUsd(tot)) }).then(function(ok){
+        if (!ok) return;
+        RP.panneau = false; var modeleId = V3.id, suite = angles.slice();
+        var un = function(){
+          if (!suite.length) { peindreTnb3d(); return; }
+          var a = suite.shift();
+          appeler('atelier:renduTnb', [{ id: modeleId, nom: V3.m.nom || V3.m.ref || '', version: V3.m.version || 1, angle: a, image: sources[a], rendu: RP.style,
+            palier: RP.palier, genre: V3.genre === 'homme' ? 'homme' : 'femme', prixAnnonce: p }]).then(function(r){
+            if (r && r.motif === 'prix_change') { RP.bareme = null; dire('${T("Le prix a changé : {0}. Rien n’a été lancé — relancez pour confirmer ce prix.")}'.split('{0}').join(rpUsd(r.prixReel)), 'att'); peindreTnb3d(); return; }
+            if (!r || !r.ok) { dire(r && (r.detail || r.error) ? '${T("The New Black : {0}")}'.split('{0}').join(r.detail || r.error) : expliquer(r), 'err'); peindreTnb3d(); return; }
+            RP.gens[a] = r.id; RP.pct[a] = 5; suivreRp(modeleId); un();
+          });
+        };
+        dire('${T("Envoi à The New Black…")}');
+        un();
+      });
+  }
+  function suivreRp(modeleId){
+    peindreTnb3d();
+    if (RP.t) return;
+    RP.t = setInterval(function(){
+      appeler('generations:etat', []).then(function(r){
+        var l = r && r.ok && r.liste ? r.liste : [];
+        Object.keys(RP.gens).forEach(function(a){
+          var g = l.filter(function(x){ return x.id === RP.gens[a]; })[0]; if (!g) return;
+          var e = g.etapes || [], fait = e.filter(function(x){ return x.etat === 'fait'; }).length, c = e[g.etapeCourante] || {};
+          var ec = c.etat === 'cours' && c.t0 ? Math.min(0.95, (Date.now() - c.t0) / 1000 / (g.etapeCourante === 2 ? (g.dureeEstimee || 35) : 3)) : 0;
+          RP.pct[a] = Math.round(Math.min(99, (fait + ec) / Math.max(1, e.length) * 100));
+          if (g.etat === 'cours') return;
+          var id = RP.gens[a]; delete RP.gens[a];
+          if (g.etat === 'fini') appeler('atelier:renduResultat', [id]).then(function(x){
+            if (!x || !x.ok) return;
+            var rend = { url: x.url || x.image, style: RP.style, version: (V3 && V3.m.version) || 1 };
+            (D.modeles || []).forEach(function(m){ if (m.id === modeleId) { m.rendusPhoto = Object.assign({}, m.rendusPhoto || {}); m.rendusPhoto[a] = rend; } });
+            if (V3 && V3.id === modeleId) { V3.m.rendusPhoto = Object.assign({}, V3.m.rendusPhoto || {}); V3.m.rendusPhoto[a] = rend; if (x.image) RP.images[a] = x.image; RP.vue = a; peindreTnb3d(); }
+            dire('${T("Rendu photo prêt — rangé dans la photothèque.")}', 'bon');
+          });
+          else dire(g.message || '${T("Le rendu photo n’a pas abouti.")}', 'err');
+        });
+        if (!rpEnCours()) { clearInterval(RP.t); RP.t = null; }
+        if (V3 && V3.id === modeleId) peindreTnb3d();
+      });
+    }, 1500);
   }
   function peindrePanneau3d(){
     var z = document.getElementById('v3-pan'), r = V3 ? V3.r : null;
@@ -6380,7 +6490,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   /* ── La souris : tourner, zoomer, déplacer ── */
   corps.addEventListener('mousedown', function(ev){
-    if (VUE !== '3d' || !V3 || !(ev.target && ev.target.closest && ev.target.closest('#v3-scene')) || ev.target.closest('.v3-cam')) return;   // les commandes de caméra sont DANS la scène : ni glisser ni poser
+    if (VUE !== '3d' || !V3 || !(ev.target && ev.target.closest && ev.target.closest('#v3-scene')) || ev.target.closest('.v3-cam') || ev.target.closest('#v3-tnb')) return;   // les commandes de caméra sont DANS la scène : ni glisser ni poser
     ev.preventDefault();
     if (V3.outil !== 'tourner' && ev.button === 0 && !ev.shiftKey && plaque3d() && GLV && poser3d(ev)) return;
     V3.glisse = { x: ev.clientX, y: ev.clientY, yaw: V3.yaw, pitch: V3.pitch, px: V3.px, py: V3.py, dep: ev.shiftKey || ev.button === 1 };
@@ -6399,7 +6509,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (V3.auto) demander3d();
   });
   corps.addEventListener('wheel', function(ev){
-    if (VUE !== '3d' || !V3 || !(ev.target && ev.target.closest && ev.target.closest('#v3-scene'))) return;
+    if (VUE !== '3d' || !V3 || !(ev.target && ev.target.closest && ev.target.closest('#v3-scene')) || ev.target.closest('#v3-tnb')) return;
     ev.preventDefault();
     zoom3d(V3.zoom * (ev.deltaY < 0 ? 1.12 : 1 / 1.12));
   }, { passive: false });

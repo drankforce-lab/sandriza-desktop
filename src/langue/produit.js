@@ -796,4 +796,7 @@ module.exports = {
   "{n} photo du Studio attend cette fiche.": "{n} Studio photo is waiting for this product.",
   "Les placer": "Place them",
   "structure du dos {s}": "back structure {s}",
+  "Aperçu 3D en attente de votre confirmation": "3D preview awaiting your confirmation",
+  "Aperçu 3D : échec": "3D preview: failed",
+  "Aperçu 3D en cours — {0} %": "3D preview in progress — {0}%",
 };

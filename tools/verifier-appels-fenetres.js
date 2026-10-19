@@ -82,7 +82,9 @@ const litSocle = () => {
    autres : Node le résout avant que le script existe. */
 /* JS_BORNER (2026-10-16) : le sixieme, avec un argument lui aussi — la table des bornes de
    saisie de la fenetre : `${JS_BORNER({'m-name':40})}`. */
-const BLOCS_SOCLE = ['JS_SOCLE', 'JS_ACTIVITE', 'JS_DIRE', 'JS_BROUILLON', 'JS_TUILES', 'JS_BORNER', 'T'];
+/* JS_MESURES (2026-10-19) : le septieme, pose SEUL par la petite fenetre du suivi des generations (taches.js),
+   qui ne prend pas JS_DIRE (il poserait le temoin des lots dans une fenetre de notification). */
+const BLOCS_SOCLE = ['JS_SOCLE', 'JS_ACTIVITE', 'JS_DIRE', 'JS_BROUILLON', 'JS_TUILES', 'JS_BORNER', 'JS_MESURES', 'T'];
 
 const GLOBALES = new Set([
   ...BLOCS_SOCLE,  'setTimeout', 'clearTimeout', 'setInterval', 'clearInterval',

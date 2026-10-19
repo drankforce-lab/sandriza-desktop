@@ -213,6 +213,9 @@ const LIBELLES_EN = {
      perte finale, 2026-10-02). Memes mots que le labelEn de backup.js. */
   'DPA — véhicules': 'CCA — vehicles',
   'Perte finale — véhicule': 'Terminal loss — vehicle',
+  // (2026-10-19) le genre du mannequin, envoyé par le pont au rendu The New Black de l Atelier
+  "homme": "man",
+  "femme": "woman",
 };
 
 /* ══ LE MODÈLE DES PERMISSIONS VIENT DE SON PROPRE FICHIER ══════════════════

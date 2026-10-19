@@ -247,8 +247,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     ['${T("Couleur fidèle")}', '${T("La couleur du rendu est ramenée sur celle de la photo source.")}', 2],
     ['${T("Détourage et finition")}', '${T("Le fond est retiré ou mis à la couleur de l’ambiance, le contour lissé, le cadrage resserré.")}', 6]
   ];
-  function etapesDe(g){ return g && g.genre === 'fantome' ? ETAPES_FANT : ETAPES; }
-  function typeDe(g){ return g && g.genre === 'fantome' ? '${T("Sans mannequin")}' : '${T("Aperçu 3D")}'; }
+  /* (2026-10-19) les rendus de l Atelier (photo, modèle 3D) : leurs étapes viennent de la file elle-même */
+  function etapesDe(g){
+    if (g && g.genre === 'fantome') return ETAPES_FANT;
+    if (g && (g.genre === 'atelier' || g.genre === 'atelier3d')) return (g.etapes || []).map(function(e){ return [esc(e.lib), '', /New Black/.test(e.lib) ? (Number(g.dureeEstimee) || 60) : 4]; });
+    return ETAPES;
+  }
+  function typeDe(g){ return g && g.genre === 'fantome' ? '${T("Sans mannequin")}' : (g && g.genre === 'atelier' ? '${T("Rendu photo")}' : (g && g.genre === 'atelier3d' ? '${T("Rendu 3D")}' : '${T("Aperçu 3D")}')); }
   function poids(g, i){ var E = etapesDe(g); return i === 1 ? (Number(g.dureeEstimee) || E[1][2]) : E[i][2]; }
   /* Le POURCENTAGE et le TEMPS RESTANT : pondérés par la durée habituelle de chaque étape. L étape en cours compte
      au temps écoulé sur sa durée habituelle, plafonnée à 95 % — elle n est pas finie tant qu elle ne l a pas dit. */
@@ -379,7 +384,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var total = (g.fin || maintenant) - (g.debut || maintenant);
     var h = '<div class="ent"><span class="vg"' + vignette(g) + '>' + (vignette(g) ? '' : (g.genre === 'fantome' ? '${T("Photo")}' : '3D')) + '</span>'
       + '<div class="tx"><h2>' + esc(g.produitNom || g.produit) + '</h2>'
-      + '<div class="meta">' + (g.genre === 'fantome' ? '${T("Vêtement sans mannequin · The New Black")}' + (g.palier ? ' (' + esc(g.palier) + ')' : '')
+      + '<div class="meta">' + (g.genre === 'atelier' ? '${T("Atelier · rendu photo par The New Black")}' + (g.palier ? ' (' + esc(g.palier) + ')' : '')
+          : g.genre === 'atelier3d' ? '${T("Atelier · modèle 3D par The New Black (Image to 3D)")}'
+          : g.genre === 'fantome' ? '${T("Vêtement sans mannequin · The New Black")}' + (g.palier ? ' (' + esc(g.palier) + ')' : '')
           : (g.refaite ? '${T("Rendu refait · sans nouvel appel payant")}' : '${T("Aperçu 3D · The New Black, Image to 3D")}')) + (g.sku ? ' · ' + esc(g.sku) : '') + '</div>'
       + '<div class="meta">' + '${T("Lancée le {d} par {p}")}'.replace('{d}', fdate(g.debut)).replace('{p}', esc(g.par || '—'))
       + ' · ' + '${T("durée {t}")}'.replace('{t}', duree(total)) + ' · ' + '${T("coût {c}")}'.replace('{c}', argent(g.cout)) + '</div></div>'

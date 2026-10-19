@@ -213,6 +213,19 @@ function pixelsMasque(im, m, pas){
   for (let k = 0; k < im.w * im.h; k += (pas || 1)) if (m[k]) o.push(im.data[k * 4], im.data[k * 4 + 1], im.data[k * 4 + 2]);
   return o;
 }
+/* Le TORSE d'une photo : la fenêtre que la mesure au rendu lit (rendu-boutique.teinteTorse : 28 % à 55 % de la hauteur
+   de la silhouette, le tiers central de sa largeur). Comparer le devant et le dos sur la MÊME région, et non sur tout
+   le vêtement (où le drapé du col assombrit le devant), est ce qui rend la face et le dos pareils au rendu. */
+function pixelsTorse(im, m){
+  let x0 = im.w, x1 = -1, y0 = im.h, y1 = -1;
+  for (let y = 0; y < im.h; y++) for (let x = 0; x < im.w; x++) if (m[y * im.w + x]) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  const o = []; if (x1 < 0) return o;
+  const bh = y1 - y0, bw = x1 - x0, cx = (x0 + x1) / 2;
+  for (let y = Math.round(y0 + bh * 0.28); y <= Math.round(y0 + bh * 0.55); y++) for (let x = Math.round(cx - bw * 0.16); x <= Math.round(cx + bw * 0.16); x++) {
+    const k = y * im.w + x; if (m[k]) o.push(im.data[k * 4], im.data[k * 4 + 1], im.data[k * 4 + 2]);
+  }
+  return o;
+}
 const gainsVers = (ref, c) => [0, 1, 2].map((k) => Math.max(0.7, Math.min(1.4, ref[k] / Math.max(1, c[k]))));
 function appliquerGains(d, n, gains, centre){
   for (let k = 0; k < n; k++) {
@@ -348,11 +361,17 @@ function projeterPhotos(etat){
   const ref = medianeGroupe(pixelsMasque(devant, mDev.m, 3));
   etat.ref = ref;
   const nTex = tex.w * tex.h;
-  const cDos = medianeGroupe(pixelsMasque(dos, mDos.m, 3), ref);
+  /* ⚠⚠ LA CIBLE UNIQUE (2026-10-19, sa demande : « une couleur UNIFORME ») : à mi-chemin, en Lab, entre la teinte de
+     toute la photo du devant (ref) et celle de son TORSE (ce que la boutique montre de face). Le dos et les côtés sont
+     ramenés sur elle : la face, le dos et les flancs se lisent alors pareils au rendu, et à moins de ΔE 3 de la photo. */
+  const refT = medianeGroupe(pixelsTorse(devant, mDev.m), ref), LR = lab(ref), LT = lab(refT), cible = [0, 0, 0];
+  rgbDeLab((LR[0] + LT[0]) / 2, (LR[1] + LT[1]) / 2, (LR[2] + LT[2]) / 2, cible);
+  etat.cible = cible;
+  const cDos = medianeGroupe(pixelsTorse(dos, mDos.m), ref);
   /* ⚠ ESSAYÉ ET ÉCARTÉ (2026-10-19) : la photo du dos laissée TELLE QUELLE (plus claire que le devant) faisait ressortir
      en ligne nette (creux de 9 à 14 L) la bande de la crête que la photo du dos ne couvre pas, peinte à la teinte du
      devant. Le dos reste donc ramené sur la teinte du devant — une seule teinte, sa demande du 2026-10-19. */
-  const gDos0 = gainsVers(ref, cDos), gDos = gDos0;
+  const gDos0 = gainsVers(cible, cDos), gDos = gDos0;
   const dosC = { w: dos.w, h: dos.h, data: new Uint8ClampedArray(dos.data) };
   appliquerGains(dosC.data, dos.w * dos.h, gDos, cDos);
   vues[1].phC = dosC; vues[0].phC = devant;
@@ -427,6 +446,7 @@ function projeterPhotos(etat){
      sur celle de la photo. Ce qui est loin de la teinte du tissu (boutons, étiquette) est épargné en fondu. */
   etat.appariement = apparierTeinte(tex, acc, wVue[0], dansTri, maillage, texTri, texB1, texB2);
   etat.texTri = texTri; etat.texB1 = texB1; etat.texB2 = texB2;
+  etat.nvMax = nvMax;
   etat.wTex = new Float32Array(nTex);
   for (let k = 0; k < nTex; k++) etat.wTex[k] = Math.min(1, acc[k * 4 + 3]);
   /* LE RACCORD : L'ÉCART DE TON, ÉTALÉ SUR LE MAILLAGE (essai Walla : sans lui, le dos projeté et l'épaule de The New
@@ -624,7 +644,7 @@ function remplirMarges(tex, dansTri){
 
 /* LA TEINTE LOCALE (basse fréquence) de la texture, portée par les SOMMETS soudés et lissée de voisin en voisin :
    rend G (Lab par sommet soudé) et rep (le sommet soudé de chaque sommet). */
-function champBasse(tex, maillage, texTri, texB1, texB2){
+function champBasse(tex, maillage, texTri, texB1, texB2, passes){
   /* ⚠ LE FLOU SUR LE MAILLAGE, PAS DANS LA TEXTURE (essai Walla, première version) : flouté dans l'image, un texel
      au bord d'un îlot d'UV se moyennait avec l'îlot VOISIN DANS L'IMAGE — sans rapport sur le vêtement — et chaque
      frontière d'îlot devenait une ligne sombre au rendu (un quadrillage sur le dos). Ici, la teinte locale est
@@ -651,7 +671,7 @@ function champBasse(tex, maillage, texTri, texB1, texB2){
   const nb = actifs.map((v) => Int32Array.from(vois.get(v) || []));
   // un sommet sans texel (P = 0) prend la moyenne de ses voisins dès la première passe
   let G = F, H2 = new Float32Array(nV * 3);
-  const PASSES = 160;
+  const PASSES = passes || 160;
   for (let it = 0; it < PASSES; it++) {
     for (let i = 0; i < actifs.length; i++) {
       const v = actifs[i], n = nb[i]; let r = G[v * 3], g = G[v * 3 + 1], b = G[v * 3 + 2], c = 1;
@@ -792,9 +812,20 @@ function aplanirRelief(etat, options){
   /* LA DISTANCE AU BORD de la silhouette (chanfrein 3-4) : près du bord, la carte floutée mêle la surface et ce qui
      est derrière (l'ourlet, la doublure) — essai Walla : une frange sombre et dentelée au bas du dos. Le poids s'y
      éteint sur 2σ. */
+  /* ⚠⚠ LE BORD LIBRE D'UN RABAT EST UN BORD AUSSI (2026-10-19, sa capture images\101.png : le col de la Walla vu de
+     profil, en DENTS DE SCIE). Le col croisé passe DEVANT le corps : dans la carte de profondeur, son bord est une
+     MARCHE, pas une silhouette. Les sommets le long de ce bord tombaient tantôt sur le col, tantôt sur le corps
+     (flouté avec le col) et partaient chacun à une profondeur différente — invisible de face, des dents de scie de
+     profil. Une marche de profondeur entre deux pixels voisins (plus de 5 pixels de pente : un rabat, pas une couture)
+     compte donc comme un bord, et le poids s'y éteint comme au bord de la silhouette. Rendu à l'appui : sans
+     l'aplanissement, le même col est net. */
   const distBord = (v) => {
-    const W = v.W, H = v.H, D2 = new Float32Array(W * H);
+    const W = v.W, H = v.H, D2 = new Float32Array(W * H), marche = 5 * etat.hauteurModele / (H * 0.92), pf = v.prof;
     for (let k = 0; k < W * H; k++) D2[k] = v.masque[k] ? 1e9 : 0;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const k = y * W + x; if (!D2[k]) continue;
+      if ((x < W - 1 && Math.abs(pf[k + 1] - pf[k]) > marche) || (y < H - 1 && Math.abs(pf[k + W] - pf[k]) > marche)) D2[k] = 0;
+    }
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const k = y * W + x; if (!D2[k]) continue;
       let m = D2[k]; if (x > 0) m = Math.min(m, D2[k - 1] + 3); if (y > 0) m = Math.min(m, D2[k - W] + 3);
       if (x > 0 && y > 0) m = Math.min(m, D2[k - W - 1] + 4); if (x < W - 1 && y > 0) m = Math.min(m, D2[k - W + 1] + 4); D2[k] = m; }
@@ -897,6 +928,62 @@ function aplanirRelief(etat, options){
        sa normale, sur trois anneaux de voisinage).
    Normalisé à 1 en moyenne sur les zones qu'il touche (la teinte, réglée sur la photo, ne bouge pas), et fondu à zéro
    sous les photos. */
+/* LA LUMIÈRE PEINTE, RETIRÉE HORS DES PHOTOS (2026-10-19, sa demande : « une couleur UNIFORME devant et derrière »).
+   Mesuré au rendu boutique non éclairé sur la Walla : le trois-quarts et le profil droit sortaient à ΔE 8 à 9 de la face
+   (141,110,88 contre 115,88,67), et marbrés. Cause : The New Black PEINT sa lumière dans la texture — des reflets
+   satinés, des flancs éclairés, à l'échelle de quelques centimètres. L'appariement de la projection ne retire que la
+   très basse fréquence (160 passes) et garde la moitié de l'écart au-dessus : ces reflets passaient.
+   ➡ HORS DES PHOTOS (la texture de The New Black) : la fréquence MOYENNE (40 passes sur le maillage, quelques
+   centimètres) est remplacée par la cible unique (etat.cible) ; ne reste que le détail fin (grain, coutures, plis),
+   dont l'amplitude de luminance est ramenée sur celle du détail des photos elles-mêmes (pas plus marbré qu'elles).
+   SOUS LES PHOTOS : seule la TRÈS basse fréquence (160 passes : la lampe du studio, un flanc éclairé, l'autre dans
+   l'ombre — le flanc droit sortait à ΔE 6,5) est remplacée ; plis, ombres et grain restent leurs vrais pixels.
+   Fondu selon la couverture ; une zone d'une autre couleur (fermeture, étiquette) est épargnée en fondu.
+   Mesuré au rendu (Walla, 8 angles) : uniformité ΔE 9,3 → 2,6 ; pire écart à la photo 6,6 → 2,2. */
+function egaliserLumiere(etat){
+  const { tex, maillage, texTri, texB1, texB2, wTex, nvMax, ref } = etat;
+  if (!nvMax || !texTri) return null;
+  const nTex = tex.w * tex.h, d = tex.data, idx = maillage.idx, o = [0, 0, 0], q = [0, 0, 0], Rl = lab(etat.cible || ref);
+  // deux échelles, portées par les sommets : MOYENNE (40 passes, quelques centimètres) et TRÈS BASSE (160 passes)
+  const { G, rep } = champBasse(tex, maillage, texTri, texB1, texB2, 40), G2 = champBasse(tex, maillage, texTri, texB1, texB2, 160).G;
+  const hf = new Float32Array(nTex * 3), lf = new Float32Array(nTex * 3), tt = new Float32Array(nTex), pp = new Float32Array(nTex);
+  let sP = 0, nP = 0, sC = 0, nC = 0;
+  for (let k = 0; k < nTex; k++) {
+    const t = texTri[k]; if (t < 0) continue;
+    const b1 = texB1[k], b2 = texB2[k], b0 = 1 - b1 - b2, va = rep[idx[t]], vb = rep[idx[t + 1]], vc = rep[idx[t + 2]];
+    labRapide(d[k * 4], d[k * 4 + 1], d[k * 4 + 2], o);
+    for (let c = 0; c < 3; c++) {
+      hf[k * 3 + c] = o[c] - (b0 * G[va * 3 + c] + b1 * G[vb * 3 + c] + b2 * G[vc * 3 + c]);
+      lf[k * 3 + c] = o[c] - (b0 * G2[va * 3 + c] + b1 * G2[vb * 3 + c] + b2 * G2[vc * 3 + c]);
+    }
+    const e = Math.hypot((o[0] - hf[k * 3] - Rl[0]) * 0.3, o[1] - hf[k * 3 + 1] - Rl[1], o[2] - hf[k * 3 + 2] - Rl[2]);
+    tt[k] = e <= 16 ? 1 : (e >= 30 ? 0 : 1 - (e - 16) / 14);
+    pp[k] = Math.min(1, wTex[k] * 1.5);
+    if (!tt[k]) continue;
+    const l = Math.max(-25, Math.min(25, hf[k * 3]));
+    if (pp[k] > 0.95 && nvMax[k] > 0.8) { sP += l * l; nP++; } else if (pp[k] < 0.05) { sC += l * l; nC++; }
+  }
+  const sdP = nP ? Math.sqrt(sP / nP) : 0, sdC = nC ? Math.sqrt(sC / nC) : 0;
+  const kL = sdC > 0 && sdP > 0 ? Math.max(0.3, Math.min(1, sdP / sdC)) : 1;
+  let n = 0;
+  for (let k = 0; k < nTex; k++) {
+    if (texTri[k] < 0) continue;
+    const f = tt[k]; if (f <= 0.01) continue;
+    const i = k * 4, w = pp[k];
+    labRapide(d[i], d[i + 1], d[i + 2], o);
+    // sous la photo : seule la très basse fréquence (la lampe du studio) est remplacée — plis, ombres et grain restent
+    // ses vrais pixels ; ailleurs : la fréquence moyenne aussi, et le détail ramené à l'amplitude de celui des photos
+    const L2 = Rl[0] + w * lf[k * 3] + (1 - w) * hf[k * 3] * kL;
+    const a2 = Rl[1] + w * lf[k * 3 + 1] + (1 - w) * hf[k * 3 + 1] * 0.5;
+    const b2 = Rl[2] + w * lf[k * 3 + 2] + (1 - w) * hf[k * 3 + 2] * 0.5;
+    rgbDeLab(o[0] + (L2 - o[0]) * f, o[1] + (a2 - o[1]) * f, o[2] + (b2 - o[2]) * f, q);
+    d[i] = q[0]; d[i + 1] = q[1]; d[i + 2] = q[2];
+    n++;
+  }
+  if (etat.dansTri) remplirMarges(tex, etat.dansTri);
+  return { texels: n, detailPhotos: +sdP.toFixed(2), detailCotesAvant: +sdC.toFixed(2), echelle: +kL.toFixed(3) };
+}
+
 function ombrageDoux(etat){
   if (etat.ombrageCuit) return etat.ombrageCuit;
   const { tex, maillage, geo, wTex } = etat, { pos, idx, nor } = maillage, nV = pos.length / 3, nTex = tex.w * tex.h;
@@ -984,12 +1071,13 @@ function couleurFidele(etat, correction){
   const px = []; for (let k = 0; k < nTex; k += 5) { const i = k * 4; if (tex.data[i] + tex.data[i + 1] + tex.data[i + 2] > 30) px.push(tex.data[i], tex.data[i + 1], tex.data[i + 2]); }
   const avant = medianeGroupe(px, ref), g = gainsVers(ref, avant);
   if (!g.every((x) => Math.abs(x - 1) < 0.02)) appliquerGains(tex.data, nTex, g, avant);
+  const egalisation = egaliserLumiere(etat);
   const px2 = []; for (let k = 0; k < nTex; k += 5) { const i = k * 4; if (tex.data[i] + tex.data[i + 1] + tex.data[i + 2] > 30) px2.push(tex.data[i], tex.data[i + 1], tex.data[i + 2]); }
   const apres = medianeGroupe(px2, ref);
   // le rendu est NON ÉCLAIRÉ : l'ombrage doux est cuit ici, une fois, sur ce qu'aucune photo ne couvre
   const ombrage = ombrageDoux(etat);
   etat.couleur = { reference: ref, avant, apres, gains: g.map((x) => +x.toFixed(3)), ecartAvant: +deltaE(avant, ref).toFixed(1), ecartApres: +deltaE(apres, ref).toFixed(1),
-    appariement: etat.appariement || null, ombrage };
+    appariement: etat.appariement || null, egalisation, ombrage };
   return etat.couleur;
 }
 

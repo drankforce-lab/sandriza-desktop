@@ -98,4 +98,8 @@ module.exports = {
   "le résultat s’affiche dans le Studio, où il s’enregistre ou se place.": "the result appears in the Studio, where it is saved or placed.",
   "Photo": "Photo",
   "structure du dos {s}": "back structure {s}",
+  "Rendu photo": "Photo render",
+  "Rendu 3D": "3D render",
+  "Atelier · rendu photo par The New Black": "Studio · photo render by The New Black",
+  "Atelier · modèle 3D par The New Black (Image to 3D)": "Studio · 3D model by The New Black (Image to 3D)",
 };

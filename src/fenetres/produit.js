@@ -2239,18 +2239,21 @@ function pageProduit(id) {
   var ETAPES_3D = ['${T("Envoi des photos")}', '${T("Génération 3D chez The New Black")}', '${T("Téléchargement du modèle")}',
     '${T("Détourage et recalage des photos devant/dos")}', '${T("Projection des photos sur le modèle")}', '${T("Relief inventé effacé sous les photos")}',
     '${T("Couleur fidèle")}', '${T("Compression")}', '${T("Contrôle de conformité")}', '${T("Dépôt (R2 et photothèque)")}', '${T("Posé sur la fiche")}'];
+  /* (2026-10-19, sa demande) PLUS DE LONGUE BARRE D ÉTAPES ICI : le suivi détaillé passe par la NOTIFICATION (une petite
+     fenêtre à part, en bas à droite de l écran) et la fenêtre Générations. La fiche garde UNE ligne d état discrète. */
   function dessinerEtapes3d(){
     var z = document.getElementById('p-3dg-etapes'); if (!z) return;
     if (!G3D.etapes) { z.style.display = 'none'; z.innerHTML = ''; return; }
-    z.style.display = '';
-    z.innerHTML = G3D.etapes.map(function(e, i){
-      var sec = e.t0 ? Math.round(((e.t1 || Date.now()) - e.t0) / 1000) : 0;
-      var duree = e.etat === 'cours' ? sec + ' s' + (i === 1 ? ' / ≈ ' + (G3D.duree || 150) + ' s' : '') : (e.etat === 'fait' ? sec + ' s' : '');
-      var lib = (e.etat === 'attente') ? '${T("En attente de votre confirmation")}' : (ETAPES_3D[i] || e.lib);
-      var marque = e.etat === 'fait' ? '✓' : (e.etat === 'cours' ? '…' : (e.etat === 'err' ? '✕' : (e.etat === 'attente' ? '?' : String(i + 1))));
-      return '<li class="' + e.etat + '"><span class="m">' + marque + '</span>' + esc(lib)
-        + (duree ? ' <span class="d">' + esc(duree) + '</span>' : '') + '</li>';
-    }).join('');
+    var e = G3D.etapes, n = e.length || 1, fait = 0, ic = -1;
+    e.forEach(function(x, i){ if (x.etat === 'fait') fait++; if (x.etat === 'cours' && ic < 0) ic = i; });
+    var att = e.some(function(x){ return x.etat === 'attente'; }), err = e.some(function(x){ return x.etat === 'err'; });
+    var frac = 0;
+    if (ic >= 0 && e[ic].t0) frac = Math.min(0.95, (Date.now() - e[ic].t0) / 1000 / (ic === 1 ? (G3D.duree || 150) : 6));
+    var pct = Math.round(Math.min(99, (fait + frac) / n * 100));
+    var t = att ? '${T("Aperçu 3D en attente de votre confirmation")}' : (err ? '${T("Aperçu 3D : échec")}'
+      : (ic >= 0 ? '${T("Aperçu 3D en cours — {0} %")}'.replace('{0}', String(pct)) : ''));
+    z.style.display = t ? '' : 'none';
+    z.innerHTML = t ? '<li class="' + (att ? 'attente' : (err ? 'err' : 'cours')) + '">' + esc(t) + '</li>' : '';
   }
   // Le verrou des photos : posé par une génération de CE produit (ici ou sur un autre poste), levé à sa fin.
   function verrouPhotos(v){

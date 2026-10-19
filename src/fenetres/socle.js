@@ -818,118 +818,61 @@ window.addEventListener('pagehide', function(){
 });
 `;
 
-/* ══ LA PASTILLE DES GÉNÉRATIONS (2026-10-18) ══
-   La file vit dans la page principale (generations:etat) ; la pastille, posée ICI dans le socle comme le témoin des
-   lots, suit la personne dans TOUTES les fenêtres sans qu'aucune n'ait à y penser. Un clic ouvre la FENÊTRE
-   « Générations » (src/fenetres/generations.js) : liste complète, étapes détaillées, pourcentage, arrêt.
-   ⚠⚠ ELLE NE S'APPUIE PLUS SUR localStorage — C'ÉTAIT LA PANNE (sa capture images\93.png, « je clique, rien ne se
-   passe »). Le petit panneau d'avant retenait « ouvert » dans localStorage ; or chaque fenêtre native est une page
-   `data:`, où localStorage LÈVE (SecurityError) : la lecture rendait toujours « fermé », le clic ne changeait rien.
-   Le clic passe maintenant par la coquille (`ouvrirModule('generations')`), et à défaut par le pont.
-   ⚠ QUAND ELLE PARAÎT (sa règle, capture images\94.png — « ✓ 1 génération terminée » restait là pour toujours) :
-     · une génération EN COURS : la roue, le nombre et le coût engagé ;
-     · une génération À CONFIRMER (conformité sous le seuil) : couleur d'alerte, jusqu'à ce qu'on la traite ;
-     · une génération ÉCHOUÉE pas encore ouverte dans la fenêtre : couleur d'erreur, jusqu'à ce qu'on l'y ouvre ;
-     · une génération TERMINÉE : « ✓ Génération terminée » pendant 8 s, puis la pastille s'en va d'elle-même
-       (la génération reste dans l'historique de la fenêtre) ;
-     · rien de tout cela : AUCUNE pastille. */
-const CSS_GEN = `
-.sz-gen{position:fixed;right:.8rem;bottom:.3rem;z-index:61;display:flex;align-items:center;gap:.45rem;
-  padding:.38rem .8rem;border-radius:99px;font-size:.78rem;cursor:pointer;color:var(--tx);
-  background:var(--f-carte2);border:1px solid rgba(var(--or-rgb),.55);box-shadow:0 6px 18px rgba(0,0,0,.35)}
-.sz-gen:hover{background:var(--v10)}
-.sz-gen:focus-visible{outline:2px solid var(--or);outline-offset:2px}
-.sz-gen .roue{display:inline-block;animation:szGenTourne 1.6s linear infinite}
-.sz-gen.calme .roue{animation:none}
-.sz-gen.alerte{border-color:rgba(251,191,36,.7);color:var(--tx-att)}
-.sz-gen.erreur{border-color:rgba(248,113,113,.7);color:var(--tx-err)}
-.sz-gen.bon{border-color:rgba(74,222,128,.6);color:var(--tx-ok)}
-@keyframes szGenTourne{to{transform:rotate(360deg)}}
-@media (prefers-reduced-motion: reduce){.sz-gen .roue{animation:none}}
-html.sz-lots-on .sz-gen{bottom:2.2rem}
-/* ⚠ LA PASTILLE NE RECOUVRE RIEN (capture du 2026-10-18 : posée en bas à droite, elle masquait « Enregistrer »).
-   Une fenêtre qui a un PIED la reçoit DANS son pied, à gauche des boutons — à sa place, sans rien pousser ; les
-   autres l'ont en bas à droite. */
-.sz-gen.dans-pied{position:static;box-shadow:none;margin-left:auto;margin-right:.6rem;padding:.28rem .7rem}
-/* La fenêtre Générations elle-même n'a pas besoin de la pastille qui l'ouvre. */
-body.sz-fen-generations .sz-gen{display:none!important}
+/* ══ LA PASTILLE DES GÉNÉRATIONS — RETIRÉE LE 2026-10-19 ══
+   Sa demande : « la notification de génération ne doit PAS être dessinée DANS les fenêtres de l'application (rien
+   qui déforme ou recouvre l'administration) ». Le suivi des générations vit maintenant dans SA petite fenêtre Windows
+   (src/taches.js, processus principal ; page src/fenetres/taches.js), avec la boîte de suivi des Photos (CSS_SUIVI).
+   Le clic sur son titre ouvre la fenêtre Générations. */
+/* ══ LE SUIVI (2026-10-19, sa décision : « le suivi des photos devient LE MODÈLE ») ══
+   La boîte de suivi de la fenêtre Photos (suiviOuvrir : titre + « n / N », une ligne par élément avec son état et ses
+   mesures, jauge + %, phrase d'état, Annuler / Fermer), extraite TELLE QUELLE pour être partagée : la fenêtre Photos
+   l'emploie comme avant, et la petite fenêtre des générations (src/fenetres/taches.js) avec le même rendu. */
+const CSS_SUIVI = `
+/* Le SUIVI d import : une ligne par fichier, son etat, et ce qui lui arrive.
+   ⚠ Un compteur << 3 / 12 >> dans le bandeau ne dit pas LESQUELLES ont echoue,
+   ni pourquoi. Sur douze photos dont deux sont refusees, c est precisement ce
+   qu on veut savoir. */
+.suivi{position:fixed;right:1rem;bottom:3rem;width:min(26rem,calc(100vw - 2rem));
+  max-height:60vh;display:flex;flex-direction:column;background:var(--f-carte);
+  border:1px solid rgba(var(--or-rgb),.45);border-radius:11px;
+  box-shadow:0 18px 44px rgba(0,0,0,.5);z-index:60}
+.suivi .st{display:flex;align-items:center;gap:.5rem;padding:.55rem .8rem;
+  border-bottom:1px solid var(--v08);font:700 .78rem/1.2 system-ui;
+  text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
+.suivi .st .n{margin-left:auto;font-weight:600;text-transform:none;letter-spacing:0}
+.suivi .lst{flex:1 1 auto;overflow-y:auto;padding:.3rem .5rem .5rem}
+.suivi .lg{display:flex;align-items:center;gap:.5rem;padding:.26rem .3rem;
+  border-top:1px solid var(--v05);font-size:.76rem}
+.suivi .lg:first-child{border-top:0}
+.suivi .lg{flex-wrap:wrap}
+.suivi .lg .nm{flex:1 1 8rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Les etapes, sous le nom : ce que l import a REELLEMENT fait, avec ses
+   chiffres. << 6,2 Mo vers 88 Ko >> se verifie ; << compression reussie >> non. */
+.suivi .lg .ep{flex:1 0 100%;font-size:.6875rem;color:var(--tx2);padding-left:.1rem;
+  display:flex;gap:.45rem;flex-wrap:wrap}
+.suivi .lg .ep i{font-style:normal}
+.suivi .lg .ep i.ok{color:var(--tx-ok)}
+.suivi .lg .ep i.non{color:var(--tx-err2)}
+.suivi .lg .ep i.encours{color:var(--tx-or2)}
+.suivi .lg .et{flex:0 0 auto;font-size:.6875rem;font-weight:700;padding:.03rem .4rem;border-radius:99px}
+.suivi .lg .et.attente{background:rgba(148,163,184,.16);color:var(--tx-94a3b8)}
+.suivi .lg .et.cours{background:rgba(var(--or-rgb),.2);color:var(--tx-or2)}
+.suivi .lg .et.faite{background:rgba(34,197,94,.15);color:var(--tx-ok)}
+.suivi .lg .et.double{background:rgba(234,179,8,.15);color:var(--tx-jaune)}
+.suivi .lg .et.echec{background:rgba(248,113,113,.15);color:var(--tx-err2)}
+.suivi .pd{padding:.45rem .8rem;border-top:1px solid var(--v08);
+  display:flex;align-items:center;gap:.5rem;font-size:.74rem;color:var(--tx2);flex-wrap:wrap}
+.suivi .pd .bt{margin-left:auto;display:flex;gap:.4rem}
+/* La barre de progression : elle avance par TACHE TERMINEE, jamais toute seule.
+   Une barre qui glisse pendant qu il ne se passe rien est un mensonge poli. */
+.suivi .jauge{flex:1 0 100%;height:5px;border-radius:99px;background:var(--v10);
+  overflow:hidden;margin:0 0 .1rem}
+.suivi .jauge i{display:block;height:100%;background:linear-gradient(90deg,var(--or),#e0c9a6);
+  border-radius:99px;transition:width .25s ease}
+.suivi .pc{font-variant-numeric:tabular-nums;font-weight:700;color:var(--tx)}
+.suivi.annule{border-color:rgba(248,113,113,.5)}
 `;
 
-const JS_GEN = () => `
-var _szGenT = null, _szGenPill = null, _szGenDer = null, _szGenFin = null;
-var _SZ_GEN_TERMINEE_MS = 8000;
-function _szGenArgent(n){ return (Math.round((Number(n) || 0) * 100) / 100).toFixed(2).replace('.', ',') + ' $ US'; }
-/* Ce que la pastille doit dire — une fonction PURE, éprouvée par tools/banc-pastille-generations.js.
-   Rend null quand rien n'est en cours ni à traiter : la pastille disparaît. */
-function szGenPastille(l, maintenant){
-  l = Array.isArray(l) ? l : [];
-  var cours = l.filter(function(g){ return g.etat === 'cours'; });
-  var attente = l.filter(function(g){ return g.etat === 'attente'; });
-  var echec = l.filter(function(g){ return g.etat === 'echec' && !g.vu; });
-  var recentes = l.filter(function(g){ return g.etat === 'fini' && g.fin && (maintenant - g.fin) < _SZ_GEN_TERMINEE_MS; });
-  var fois = function(n, un, plusieurs){ return n + ' ' + (n > 1 ? plusieurs : un); };
-  if (cours.length) {
-    var cout = cours.reduce(function(s, g){ return s + (Number(g.cout) || 0); }, 0);
-    return { ton: (attente.length ? 'alerte' : (echec.length ? 'erreur' : '')), roue: true,
-      texte: fois(cours.length, '${T("génération en cours")}', '${T("générations en cours")}') + ' · ' + _szGenArgent(cout)
-        + (attente.length ? ' · ' + attente.length + ' ${T("à confirmer")}' : '')
-        + (echec.length ? ' · ' + fois(echec.length, '${T("échouée")}', '${T("échouées")}') : '') };
-  }
-  if (attente.length) return { ton: 'alerte', signe: '?', texte: fois(attente.length, '${T("génération à confirmer")}', '${T("générations à confirmer")}') };
-  if (echec.length) return { ton: 'erreur', signe: '✕', texte: fois(echec.length, '${T("génération échouée")}', '${T("générations échouées")}') };
-  if (recentes.length) {
-    var reste = Math.max.apply(null, recentes.map(function(g){ return _SZ_GEN_TERMINEE_MS - (maintenant - g.fin); }));
-    return { ton: 'bon', signe: '✓', reste: reste, texte: recentes.length > 1
-      ? recentes.length + ' ${T("générations terminées")}' : '${T("Génération terminée")}' };
-  }
-  return null;
-}
-function _szGenRetirer(){ if (_szGenPill && _szGenPill.parentNode) _szGenPill.parentNode.removeChild(_szGenPill); _szGenPill = null; }
-function szGenOuvrirFenetre(){
-  var P = window.szPont;
-  if (!P) return;
-  var repli = function(){ try { var q = P.appeler && P.appeler('generations:ouvrir'); if (q && q.catch) q.catch(function(){}); } catch (e) {} };
-  try {
-    var r = P.ouvrirModule ? P.ouvrirModule('generations') : null;
-    if (r && typeof r.then === 'function') r.then(function(ok){ if (!ok) repli(); }).catch(repli); else repli();
-  } catch (e) { repli(); }
-}
-function _szGenPeindre(r){
-  _szGenDer = r;
-  if (_szGenFin) { clearTimeout(_szGenFin); _szGenFin = null; }
-  var etat = szGenPastille((r && r.ok && r.liste) ? r.liste : [], Date.now());
-  if (!etat) { _szGenRetirer(); return; }
-  if (!_szGenPill) {
-    _szGenPill = document.createElement('button'); _szGenPill.type = 'button'; _szGenPill.className = 'sz-gen';
-    _szGenPill.title = '${T("Ouvrir la fenêtre Générations")}';
-    _szGenPill.addEventListener('click', szGenOuvrirFenetre);
-    var act = document.querySelector('.pied .actions');
-    if (act && act.parentNode) { _szGenPill.classList.add('dans-pied'); act.parentNode.insertBefore(_szGenPill, act); }
-    else document.body.appendChild(_szGenPill);
-  }
-  _szGenPill.className = 'sz-gen' + (_szGenPill.classList.contains('dans-pied') ? ' dans-pied' : '') + (etat.ton ? ' ' + etat.ton : '') + (etat.roue ? '' : ' calme');
-  _szGenPill.innerHTML = (etat.roue ? '<span class="roue" aria-hidden="true">⟳</span> ' : '<span aria-hidden="true">' + etat.signe + '</span> ')
-    + etat.texte.replace(/[&<>]/g, function(c){ return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]; });
-  // « Terminée » : la pastille s'en va à l'heure dite, sans attendre la prochaine lecture
-  if (etat.reste) _szGenFin = setTimeout(function(){ _szGenPeindre(_szGenDer); }, etat.reste + 50);
-}
-function _szGenLire(){
-  if (document.hidden) return;
-  if (!window.szPont || !window.szPont.appeler) return;
-  var p;
-  try { p = window.szPont.appeler('generations:etat'); } catch (e) { return; }
-  if (!p || typeof p.then !== 'function') return;
-  p.then(_szGenPeindre).catch(function(){});
-}
-function szGenSuivre(){
-  if (_szGenT) return;
-  _szGenLire();
-  _szGenT = setInterval(_szGenLire, 2000);
-}
-if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', szGenSuivre); else szGenSuivre();
-document.addEventListener('visibilitychange', function(){ if (!document.hidden) _szGenLire(); });
-window.addEventListener('pagehide', function(){ if (_szGenT) { clearInterval(_szGenT); _szGenT = null; } });
-`;
 
 /* ══ PAGINATION AUTOMATIQUE (#30) ═══════════════════════════════════════════
    Sa demande : << tous les journaux devraient avoir de la pagination auto >>,
@@ -2208,7 +2151,7 @@ const JS_BORNER = (table) => `
   })();
 `;
 const JS_DIRE = () => JS_DIRE_BASE() + JS_PLEIN() + JS_PLEIN_AUTO() + JS_FENPLEIN()
-  + JS_VERROUS() + JS_LOTS() + JS_GEN() + JS_AUTOPAGE() + JS_PAGES() + JS_COMPTE() + JS_MESURES()
+  + JS_VERROUS() + JS_LOTS() + JS_AUTOPAGE() + JS_PAGES() + JS_COMPTE() + JS_MESURES()
   + JS_DATES() + JS_FINITIONS() + JS_JUMEAUX + JS_CTX() + JS_CONFIRMER();
 
 const JS_SOCLE = () => `
@@ -4672,8 +4615,8 @@ html.jour:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) .onglets button.on
   color:#1d2433!important;box-shadow:inset 0 -2px 0 var(--sz-repere)}
 `;
 
-module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_GEN + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX,
-  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_GEN + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX,
-  JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_BROUILLON, JS_TUILES, JS_BORNER, CSS_THEMES, CSS_FICHE, ICO,
+module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX,
+  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX,
+  JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_MESURES, JS_BROUILLON, JS_TUILES, JS_BORNER, CSS_THEMES, CSS_FICHE, ICO,
   /* La page, pas son texte : voir l en-tete de ce fichier. */
-  TETE, LIEU, SEP_DEC };
+  TETE, LIEU, SEP_DEC, CSS_SUIVI };

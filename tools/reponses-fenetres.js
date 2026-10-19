@@ -2653,6 +2653,29 @@ const JEU = {
     ];
   })(),
 
+  /* Le suivi des générations dans sa petite fenêtre (2026-10-19) : la boîte des Photos, une par génération. Trois cas :
+     un rendu photo de l'Atelier EN COURS avec un aperçu 3D TERMINÉ à l'instant et un sans-mannequin ÉCHOUÉ ; une seule
+     en cours ; la file vide (rien ne se dessine, la fenêtre se cache). */
+  'taches.js': (function(){
+    var T0 = Date.now();
+    var atl = { id: 'atl1', genre: 'atelier', produit: '', produitNom: 'Atelier · Robe portefeuille', etat: 'cours', etapeCourante: 2, cout: 0.065,
+      debut: T0 - 20000, fin: 0, dureeEstimee: 30,
+      etapes: [{ lib: 'Capture de la vue 3D', etat: 'fait', t0: T0 - 20000, t1: T0 - 18500 }, { lib: 'Contrôle du prix', etat: 'fait', t0: T0 - 18500, t1: T0 - 17000 },
+        { lib: 'Génération chez The New Black', etat: 'cours', t0: T0 - 17000, t1: 0 }, { lib: 'Rangement dans la photothèque', etat: 'att', t0: 0, t1: 0 }] };
+    var fini = { id: 'g3d', genre: '3d', produit: 'p_walla', produitNom: 'Chemise Walla', etat: 'fini', etapeCourante: 1, cout: 0.65, debut: T0 - 200000,
+      fin: T0 - 2000, dureeEstimee: 150, etapes: [{ lib: 'Envoi des photos', etat: 'fait', t0: T0 - 200000, t1: T0 - 196000 },
+        { lib: 'Génération 3D chez The New Black', etat: 'fait', t0: T0 - 196000, t1: T0 - 2000 }] };
+    var echec = { id: 'fan1', genre: 'fantome', produit: 'p_mila', produitNom: 'Robe Mila en lin', etat: 'echec', etapeCourante: 1, cout: 0.195,
+      debut: T0 - 60000, fin: T0 - 30000, dureeEstimee: 45, message: 'Le prix a changé : 0,26 $ US. Rien n’a été lancé.',
+      etapes: [{ lib: 'Contrôle du prix', etat: 'err', t0: T0 - 60000, t1: T0 - 59000 }, { lib: 'Retrait du mannequin chez The New Black', etat: 'att', t0: 0, t1: 0 }] };
+    return [
+      { nom: 'trois generations', reponses: { 'generations:etat': { ok: true, liste: [atl, fini, echec] }, 'generations:agir': { ok: true } },
+        exige: ['class="suivi', 'Étape 3/4', 'Annuler', 'Fermer', 'class="jauge"'] },
+      { nom: 'une seule en cours', reponses: { 'generations:etat': { ok: true, liste: [atl] }, 'generations:agir': { ok: true } } },
+      { nom: 'file vide', reponses: { 'generations:etat': { ok: true, liste: [] } } }
+    ];
+  })(),
+
   'verrous.js': (function(){
     var verrous = { ok: true, peutModifier: true, locks: [
       { scope: 'orders', scopeLabel: 'Commandes', id: 'ord_1', label: 'CMD-1042', who: 'Marie Tremblay', age: '3 min', since: '2026-08-13T11:57:00Z', expired: false, sessionAlive: true, expiresIn: 45, mine: false },
@@ -3800,7 +3823,9 @@ const JEU = {
     var MOC = {"ok":true,"controles":[{"niveau":"bon","cle":"zone","v":{},"texte":"Tout le design est dans la zone d’impression."},{"niveau":"err","cle":"trait","calque":"c3","v":{"nom":"Cadre","mm":0.3,"min":0.5},"texte":"« Cadre » : trait de 0,3 mm, trop fin pour ce procédé (min. 0,5 mm)."},{"niveau":"bon","cle":"souscouche","v":{"pleine":false},"texte":"Sous-couche blanche : automatique (sous ce qui est imprimé) — à régler dans le logiciel de l’imprimante."}],"motif":{"mode":"place","piece":"devant","zone":{"x":-15,"y":12,"l":30,"h":35},"raccord":"droit","procede":"dtf","ppp":300,"souscouche":"auto","fond":"transparent","calques":[{"id":"c1","type":"forme","nom":"Soleil","x":7,"y":4,"l":16,"h":16,"rot":0,"opacite":1,"miroir":false,"visible":true,"forme":"ellipse","couleur":"#B4583C","contour":0,"plein":true},{"id":"c2","type":"texte","nom":"","x":4,"y":24,"l":22,"h":3.2,"rot":0,"opacite":1,"miroir":false,"visible":true,"texte":"SANDRIZA","police":"Arial","couleur":"#1C1B18","gras":true},{"id":"c3","type":"forme","nom":"Cadre","x":2,"y":2,"l":26,"h":31,"rot":0,"opacite":1,"miroir":false,"visible":true,"forme":"rect","couleur":"#1E3A5F","contour":0.03,"plein":false}]}};
     var gestes = { 'atelier:ecrire': { ok: true, id: 'atl_essai1' }, 'atelier:dupliquer': { ok: true, id: 'atl_essai4' },
       'atelier:supprimer': { ok: true, id: 'atl_essai3' }, 'atelier:analyser': AN, 'atelier:preparer': PR, 'atelier:graduer': GR,
-      'atelier:egaliser': { ok: true, pieces: PR.pieces, deplacement: 0.3, ecart: 0 }, 'atelier:restaurer': { ok: true, id: 'atl_essai1' }, 'atelier:exporter': EXP, 'atelier:apercu3d': V3D, identite: IDENTITE };
+      'atelier:egaliser': { ok: true, pieces: PR.pieces, deplacement: 0.3, ecart: 0 }, 'atelier:restaurer': { ok: true, id: 'atl_essai1' }, 'atelier:exporter': EXP, 'atelier:apercu3d': V3D, identite: IDENTITE,
+      // (2026-10-19) le rendu photo de The New Black, vue principale de l aperçu : le barème lu avant toute génération
+      'atelier:renduPrix': { ok: true, prix: { porte: { standard: { credits: 1, prix: 0.065 }, pro: { credits: 3, prix: 0.195 }, ultra: { credits: 7, prix: 0.455 } }, fantome: { standard: { credits: 1, prix: 0.065 }, pro: { credits: 3, prix: 0.195 }, ultra: { credits: 7, prix: 0.455 } }, plat: { standard: { credits: 1, prix: 0.065 }, pro: { credits: 3, prix: 0.195 }, ultra: { credits: 7, prix: 0.455 } } }, solde: 1147, soldeDollars: 74.56 } };
     var avec = function(o){ var r = {}; Object.keys(gestes).forEach(function(k){ r[k] = gestes[k]; }); Object.keys(o).forEach(function(k){ r[k] = o[k]; }); return r; };
     var vide = JSON.parse(JSON.stringify(D)); vide.modeles = [];
     return [

@@ -23,7 +23,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU, CSS_SUIVI } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -206,51 +206,7 @@ html.jour .boite .apercu{background:conic-gradient(#e6e1d6 25%,#f4f2ec 0 50%,#e6
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
-  text-overflow:ellipsis;white-space:nowrap}
-/* Le SUIVI d import : une ligne par fichier, son etat, et ce qui lui arrive.
-   ⚠ Un compteur << 3 / 12 >> dans le bandeau ne dit pas LESQUELLES ont echoue,
-   ni pourquoi. Sur douze photos dont deux sont refusees, c est precisement ce
-   qu on veut savoir. */
-.suivi{position:fixed;right:1rem;bottom:3rem;width:min(26rem,calc(100vw - 2rem));
-  max-height:60vh;display:flex;flex-direction:column;background:var(--f-carte);
-  border:1px solid rgba(var(--or-rgb),.45);border-radius:11px;
-  box-shadow:0 18px 44px rgba(0,0,0,.5);z-index:60}
-.suivi .st{display:flex;align-items:center;gap:.5rem;padding:.55rem .8rem;
-  border-bottom:1px solid var(--v08);font:700 .78rem/1.2 system-ui;
-  text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
-.suivi .st .n{margin-left:auto;font-weight:600;text-transform:none;letter-spacing:0}
-.suivi .lst{flex:1 1 auto;overflow-y:auto;padding:.3rem .5rem .5rem}
-.suivi .lg{display:flex;align-items:center;gap:.5rem;padding:.26rem .3rem;
-  border-top:1px solid var(--v05);font-size:.76rem}
-.suivi .lg:first-child{border-top:0}
-.suivi .lg{flex-wrap:wrap}
-.suivi .lg .nm{flex:1 1 8rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-/* Les etapes, sous le nom : ce que l import a REELLEMENT fait, avec ses
-   chiffres. << 6,2 Mo vers 88 Ko >> se verifie ; << compression reussie >> non. */
-.suivi .lg .ep{flex:1 0 100%;font-size:.6875rem;color:var(--tx2);padding-left:.1rem;
-  display:flex;gap:.45rem;flex-wrap:wrap}
-.suivi .lg .ep i{font-style:normal}
-.suivi .lg .ep i.ok{color:var(--tx-ok)}
-.suivi .lg .ep i.non{color:var(--tx-err2)}
-.suivi .lg .ep i.encours{color:var(--tx-or2)}
-.suivi .lg .et{flex:0 0 auto;font-size:.6875rem;font-weight:700;padding:.03rem .4rem;border-radius:99px}
-.suivi .lg .et.attente{background:rgba(148,163,184,.16);color:var(--tx-94a3b8)}
-.suivi .lg .et.cours{background:rgba(var(--or-rgb),.2);color:var(--tx-or2)}
-.suivi .lg .et.faite{background:rgba(34,197,94,.15);color:var(--tx-ok)}
-.suivi .lg .et.double{background:rgba(234,179,8,.15);color:var(--tx-jaune)}
-.suivi .lg .et.echec{background:rgba(248,113,113,.15);color:var(--tx-err2)}
-.suivi .pd{padding:.45rem .8rem;border-top:1px solid var(--v08);
-  display:flex;align-items:center;gap:.5rem;font-size:.74rem;color:var(--tx2);flex-wrap:wrap}
-.suivi .pd .bt{margin-left:auto;display:flex;gap:.4rem}
-/* La barre de progression : elle avance par TACHE TERMINEE, jamais toute seule.
-   Une barre qui glisse pendant qu il ne se passe rien est un mensonge poli. */
-.suivi .jauge{flex:1 0 100%;height:5px;border-radius:99px;background:var(--v10);
-  overflow:hidden;margin:0 0 .1rem}
-.suivi .jauge i{display:block;height:100%;background:linear-gradient(90deg,var(--or),#e0c9a6);
-  border-radius:99px;transition:width .25s ease}
-.suivi .pc{font-variant-numeric:tabular-nums;font-weight:700;color:var(--tx)}
-.suivi.annule{border-color:rgba(248,113,113,.5)}
-/* La barre de LOT : elle ne parait que s il y a un choix, et elle dit ce que
+  text-overflow:ellipsis;white-space:nowrap}${CSS_SUIVI}/* La barre de LOT : elle ne parait que s il y a un choix, et elle dit ce que
    les traitements engendrent — une image inventee n a pas la meme valeur qu une
    photo, et cela doit se lire avant de cliquer. */
 .lot{position:sticky;bottom:0;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;

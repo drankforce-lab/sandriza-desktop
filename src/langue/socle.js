@@ -307,9 +307,6 @@ module.exports = {
   "Posé sur la fiche": "Placed on the product",
   "Réduire": "Minimise",
   "Terminée": "Finished",
-  "génération en cours": "generation in progress",
-  "générations en cours": "generations in progress",
-  "générations terminées": "generations finished",
   "Échec": "Failed",
   "Étape": "Step",
   /* ── L’aperçu 3D par The New Black (2026-10-18) ── */
@@ -332,16 +329,6 @@ module.exports = {
   "Rejeter le modèle 3D": "Reject the 3D model",
   "Rejetée": "Rejected",
   "Téléchargement du modèle": "Downloading the model",
-  "à confirmer": "to confirm",
   "Relief inventé effacé sous les photos": "Invented relief erased under the photos",
   "relief inventé effacé à {r} %": "invented relief {r}% erased",
-  /* ── La pastille des générations (2026-10-18, sa règle : à traiter = alerte ; terminée = 8 s puis rien) ── */
-  "Génération terminée": "Generation finished",
-  "génération à confirmer": "generation to confirm",
-  "générations à confirmer": "generations to confirm",
-  "génération échouée": "generation failed",
-  "générations échouées": "generations failed",
-  "échouée": "failed",
-  "échouées": "failed",
-  "Ouvrir la fenêtre Générations": "Open the Generations window",
 };
