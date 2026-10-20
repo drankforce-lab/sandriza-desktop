@@ -168,6 +168,7 @@ module.exports = {
   'Une étiquette est ': 'A label is ',
   'facturée dès sa création': 'billed as soon as it is created',
   ' et ne s’annule pas.': ' and cannot be cancelled.',
+  ' ; elle ne s’annule que tant que le colis n’est pas parti (« Annuler l’étiquette »).': '; it can only be cancelled until the parcel has left (“Cancel the label”).',
   'Une étiquette est facturée dès sa création et ne s’annule pas.':
     'A label is billed as soon as it is created and cannot be cancelled.',
   'Transporteur : ': 'Carrier: ',
@@ -247,5 +248,13 @@ module.exports = {
   'Coût réel hors taxes, pour ': 'Actual cost before taxes, for ',
   'Coût réel hors taxes, pour': 'Actual cost before taxes, for',
   'Cliquez une ligne pour la choisir.': 'Click a line to choose it.',
-  'Recomparer': 'Compare again'
+  'Recomparer': 'Compare again',
+  'Annuler l’étiquette': 'Cancel the label',
+  'L’envoi': 'The shipment',
+  'sera annulé chez': 'will be cancelled with',
+  ' : il ne sera pas facturé et l’étiquette imprimée ne sera plus valide. Le numéro de suivi est retiré de la commande ; une nouvelle étiquette pourra ensuite être créée. Cette action est irréversible.': ': it will not be billed and the printed label will no longer be valid. The tracking number is removed from the order; a new label can then be created. This cannot be undone.',
+  'Annuler l’envoi': 'Cancel the shipment',
+  'Annulation…': 'Cancelling…',
+  'Demande d’annulation au transporteur…': 'Asking the carrier to cancel…',
+  'Étiquette annulée chez le transporteur — rien ne sera facturé.': 'Label cancelled with the carrier — nothing will be billed.'
 };

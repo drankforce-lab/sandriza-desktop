@@ -2493,6 +2493,8 @@ const OPS_PONT = new Set([
   'expedition:contexte', 'expedition:lire', 'expedition:comparer', 'expedition:etiquette',
   'expedition:pdf', 'expedition:imprimer', 'expedition:bordereau', 'expedition:vignettes', 'commandes:statuts',
   'expedition:confirmer',
+  // (2026-10-20) Annuler l'étiquette : le serveur annule l'envoi chez le transporteur, puis nettoie la commande.
+  'expedition:annulerEtiquette',
   // Les deux listes. ⚠ `commandes:liste` sert les DEUX vues (en cours / parties) :
   // ce sont les memes lignes filtrees autrement, et deux operations jumelles
   // finiraient par diverger. Le tri, le filtre et la pagination se font dans le
@@ -3419,7 +3421,7 @@ const LIMITES_PONT = {
   // Depot des photos dans le stockage : le plus long de tous.
   'produit:enregistrer': 90000,
   // Etiquettes demandees a un transporteur (Postes Canada, FedEx).
-  'commande:etiquette': 60000, 'expedition:etiquette': 60000,
+  'commande:etiquette': 60000, 'expedition:etiquette': 60000, 'expedition:annulerEtiquette': 60000,
   /* Reprendre une etiquette de retour va CHERCHER l imprime chez Postes Canada :
      c est le meme aller-retour que d en creer une, donc le meme plafond. Au
      plafond ordinaire de 8 s, le recours annoncerait un delai pendant que le PDF

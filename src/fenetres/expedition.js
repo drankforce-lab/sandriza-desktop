@@ -357,6 +357,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         '<button id="btn-apercu"' + (c.aUneEtiquette ? '' : ' disabled') + '>${T("Aperçu")}</button>'
       + '<button id="btn-imprimer"' + (c.aUneEtiquette ? '' : ' disabled') + '>${T("Étiquette + bordereau")}</button>'
       + '<button id="btn-bordereau">${T("Bordereau seul")}</button>'
+      + (c.etiquetteAnnulable ? '<button id="btn-annuler-etiq">${T("Annuler l’étiquette")}</button>' : '')
       + '<button class="prim" id="btn-etiquette"' + (pret ? '' : ' disabled') + '>'
       + (c.aUneEtiquette ? '${T("Créer une AUTRE étiquette")}' : '${T("Créer l’étiquette")}') + '</button>';
     brancher();
@@ -382,6 +383,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (be) be.onclick = commanderEtiquette;
     var bx = document.getElementById('btn-expedier');
     if (bx) bx.onclick = expedier;
+    var bn = document.getElementById('btn-annuler-etiq');
+    if (bn) bn.onclick = annulerEtiquette;
     var ba = document.getElementById('btn-apercu');
     if (ba) ba.onclick = apercu;
     var bi = document.getElementById('btn-imprimer');
@@ -480,7 +483,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        relire ici, en toutes lettres, est la derniere occasion de voir qu on
        s apprete a etiqueter quatre kilos pour cinq cents grammes. */
     voile('<h3><span class="ic">💳</span> ${T("Commander l’étiquette ?")}</h3>'
-      + '<p>${T("Une étiquette est ")}<strong>${T("facturée dès sa création")}</strong>${T(" et ne s’annule pas.")}</p>'
+      + '<p>${T("Une étiquette est ")}<strong>${T("facturée dès sa création")}</strong>${T(" ; elle ne s’annule que tant que le colis n’est pas parti (« Annuler l’étiquette »).")}</p>'
       + '<p>${T("Transporteur : ")}<strong>' + esc(t ? t.nom : TRANSPORTEUR) + '</strong><br>'
       + '${T("Service : ")}<strong>' + esc(libelle || service || '—') + '</strong><br>'
       + '${T("Poids : ")}<strong>' + esc(poids) + ' kg</strong></p>'
@@ -524,6 +527,36 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             document.getElementById('v-non').onclick = fermer;
             document.getElementById('v-oui').onclick = function(){ fermer(); imprimer(); };
           });
+      });
+    });
+  }
+
+  /* ══ ANNULER L ETIQUETTE (2026-10-20) ══════════════════════════════════════
+     L envoi est annule CHEZ LE TRANSPORTEUR (le site, puis le serveur, decident
+     de tout) : tant que le colis n est pas parti, rien n est facture. La
+     commande ne change que sur son « oui » ; un refus est dit tel quel. */
+  function annulerEtiquette(){
+    if (enCours) return;
+    var c = CMD.commande;
+    var nomT = NOMS_T[c.transporteur] || c.transporteur || '';
+    szConfirmer({ danger: true, titre: '${T("Annuler l’étiquette")}',
+      texte: '${T("L’envoi")}' + ' ' + (c.suivi ? '« ' + c.suivi + ' » ' : '') + '${T("sera annulé chez")}' + ' ' + nomT + '${T(" : il ne sera pas facturé et l’étiquette imprimée ne sera plus valide. Le numéro de suivi est retiré de la commande ; une nouvelle étiquette pourra ensuite être créée. Cette action est irréversible.")}',
+      oui: '${T("Annuler l’envoi")}' }).then(function(ok){
+      if (!ok) return;
+      enCours = true;
+      var b = document.getElementById('btn-annuler-etiq');
+      if (b) { b.disabled = true; b.textContent = '${T("Annulation…")}'; }
+      dire('${T("Demande d’annulation au transporteur…")}', 'att');
+      appeler('expedition:annulerEtiquette', [c.id]).then(function(r){
+        enCours = false;
+        if (!r.ok) {
+          if (b) { b.disabled = false; b.textContent = '${T("Annuler l’étiquette")}'; }
+          dire(r.detail ? r.detail : expliquer(r), 'err');
+          return;
+        }
+        PDF = null;
+        dire('${T("Étiquette annulée chez le transporteur — rien ne sera facturé.")}', 'bon');
+        recharger();
       });
     });
   }
