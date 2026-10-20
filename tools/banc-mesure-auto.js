@@ -99,5 +99,27 @@ else console.log('  ✓ feuille trouvée par son X sur un mur de sa couleur : ' 
 // …et un X ne s'invente pas : le t-shirt synthétique n'en porte aucun.
 if (trouverX(canvas(100 * K, 95 * K, tee), 'lettre')) { fautes++; console.log('  ✗ un X inventé sur une photo qui n en a pas'); }
 else console.log('  ✓ aucun X inventé sur une photo sans feuille');
+
+// LE CONTOUR DE L'IA ET LES DEUX BRAS (sa règle du 2026-10-20) : un manteau sur mannequin, bras DROIT qui pend
+// à droite (main visible sous le poignet), bras PLIÉ à gauche (main sur la hanche, DANS la bande du corps).
+// La manche doit venir du bras droit ; sans bras droit, la manche est laissée à la main.
+const a4 = src.indexOf('  function mvMesurerMasque('), b4 = src.indexOf('  function mvOutilPhoto(');
+const masque = new Function(src.slice(a4, b4) + '; return mvMesurerMasque;')();
+const plan = (W, H, f) => { const d = new Uint8ClampedArray(W * H * 4); for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const i = (y * W + x) * 4, c = f(x / K, y / K); d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2]; d[i + 3] = 255; } return { width: W, height: H, getContext: () => ({ getImageData: () => ({ data: d }) }) }; };
+const manteau = (x, y, droit) => (x >= 30 && x <= 74 && y >= 10 && y <= 110)                 // corps : 44 cm, 100 cm de long
+  || (x > 74 && x <= 82 && y >= 12 && y <= 70)                                                  // manche droite qui pend
+  || (droit && x >= 22 && x < 30 && y >= 12 && y <= 70)                                         // (variante : manche gauche droite aussi)
+  || (!droit && x >= 22 && x < 30 && y >= 12 && y <= 38);                                       // manche gauche pliée, courte
+const BLANC = [255, 255, 255], NOIR = [0, 0, 0], PEAU = [190, 140, 110], MUR = [205, 205, 220];
+const mq1 = masque(plan(110 * K, 125 * K, (x, y) => manteau(x, y, false) ? BLANC : NOIR), 'haut', K,
+  plan(110 * K, 125 * K, (x, y) => manteau(x, y, false) ? [150, 150, 160] : (x > 74 && x <= 82 && y > 70 && y < 80) ? PEAU : (x >= 30 && x < 40 && y > 38 && y < 46) ? PEAU : MUR));
+const m1 = mq1.mesures;
+const okM = m1.manche && Math.abs(m1.manche.cm - Math.hypot(8, 58)) < 3 && m1.manche.a[0] > 70 * K;
+if (!okM) { fautes++; console.log('  ✗ deux bras : la manche ne vient pas du bras droit — ' + JSON.stringify(m1.manche && m1.manche.cm)); }
+else console.log('  ✓ deux bras : la manche vient du bras qui pend (' + m1.manche.cm + ' cm), le bras plié est écarté');
+const mq2 = masque(plan(110 * K, 125 * K, (x, y) => (x >= 30 && x <= 74 && y >= 10 && y <= 110) ? BLANC : NOIR), 'haut', K,
+  plan(110 * K, 125 * K, (x, y) => (x >= 30 && x <= 74 && y >= 10 && y <= 110) ? [150, 150, 160] : MUR));
+if (mq2.mesures.manche || !mq2.mancheManuelle) { fautes++; console.log('  ✗ sans bras droit : une manche inventée ou pas de message'); }
+else console.log('  ✓ sans bras droit : pas de manche inventée, la saisie à la main est demandée');
 console.log(fautes ? '>>> ' + fautes + ' faute(s)' : '>>> mesure automatique : tout est juste');
 process.exit(fautes ? 1 : 0);

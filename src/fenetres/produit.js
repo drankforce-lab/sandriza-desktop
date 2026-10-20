@@ -273,6 +273,7 @@ table.mesv .mv-cm input{width:4.2rem;height:auto;min-height:0;border:0;border-ra
 .mesv-auto-txt{min-width:0;flex:1 1 auto}
 .mesv-auto-txt b{display:flex;align-items:center;gap:.4rem;font-size:.84rem;margin-bottom:.15rem}
 .mesv-auto-txt b .ok{color:var(--tx-ok)}
+.mesv-auto-txt .aide b.att{display:inline;font-size:inherit;color:var(--tx)}
 .mesv-auto-act{flex:0 0 auto}
 .mv-boite{max-width:62rem!important}
 .mv-barre{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-bottom:.5rem;font-size:.82rem}
@@ -1980,6 +1981,17 @@ function pageProduit(id) {
     if (/^data:/.test(src) || !(P && P.imageLocale)) { img.src = src; return; }
     P.imageLocale(src).then(function(d){ img.src = d || src; }, function(){ img.src = src; });
   }
+  // Le résultat de l IA, gardé sur le poste par photo (on ne paie pas deux fois la même photo).
+  function mvMemoIA(cle, val){
+    var K = 'sz-mesure-ia', o = {};
+    try { o = JSON.parse(localStorage.getItem(K) || '{}') || {}; } catch (e) { o = {}; }
+    if (val === undefined) return o[cle] || null;
+    o[cle] = { mesures: val.mesures, n: val.n, ecartes: val.ecartes || 0, mancheManuelle: !!val.mancheManuelle, au: Date.now() };
+    var cles = Object.keys(o).sort(function(a, b){ return (o[b].au || 0) - (o[a].au || 0); });
+    cles.slice(60).forEach(function(k){ delete o[k]; });
+    try { localStorage.setItem(K, JSON.stringify(o)); } catch (e) {}
+    return o[cle];
+  }
   function mvAnalyser(){
     var ty = mvType(), z = document.getElementById('p-mesv-auto');
     if (!z) return;
@@ -2001,10 +2013,39 @@ function pageProduit(id) {
         feuille = mvTrouverX(cv, 'lettre') || mvTrouverFeuille(cv, 'lettre');
         if (feuille) res = mvMesurerAuto(cv, ty, feuille.pxParCm, feuille);
       } catch (e) { feuille = null; res = null; }
-      MV_AUTO = { cle: cle, cv: cv, feuille: feuille, res: res, t: mvTaillePhoto(), poses: [] };
-      mvPoserAuto();
-      mvAutoGraduer(false);
-      dessinerMesures();
+      var finir = function(res2, viaIA, note){
+        if (!MV_AUTO || MV_AUTO.cle !== cle) return;
+        MV_AUTO = { cle: cle, cv: cv, feuille: feuille, res: res2, t: mvTaillePhoto(), poses: [], ia: !!viaIA, note: note || '' };
+        mvPoserAuto();
+        mvAutoGraduer(false);
+        dessinerMesures();
+      };
+      /* SUR MANNEQUIN : LE CONTOUR PAR L IA (2026-10-20, essai validé sur sa photo du manteau gris). Quand la
+         feuille est trouvée mais que la silhouette locale ne donne pas l essentiel, on demande le contour du
+         vêtement (produit:mesureMasque, ~0,007 $ CA) — UNE fois par photo : le résultat est gardé sur le poste. */
+      if (!feuille || (res && res.n >= 3)) { finir(res, false); return; }
+      var memo = mvMemoIA(cle);
+      if (memo) { finir(memo, true); return; }
+      if (!(P && P.appeler)) { finir(res, false); return; }
+      MV_AUTO.enCours = true;
+      z.innerHTML = '<div class="mesv-auto"><div class="aide">${T("Feuille trouvée — le contour du vêtement est demandé au service d’images (quelques secondes)…")}</div></div>';
+      P.appeler('produit:mesureMasque', IMAGE, ty).then(function(rm){
+        if (!MV_AUTO || MV_AUTO.cle !== cle) return;
+        if (!rm || !rm.ok || !rm.masque) {
+          finir(res, false, rm && rm.motif === 'plafond' ? '${T("Plafond des traitements d’images atteint : mesure automatique impossible pour le moment.")}' : '${T("Le service d’images n’a pas répondu : mesure automatique impossible pour le moment.")}');
+          return;
+        }
+        var mi = new Image();
+        mi.onload = function(){
+          var mc = document.createElement('canvas'); mc.width = cv.width; mc.height = cv.height;
+          var r3 = null;
+          try { mc.getContext('2d').drawImage(mi, 0, 0, mc.width, mc.height); r3 = mvMesurerMasque(mc, ty, feuille.pxParCm, cv); } catch (e) { r3 = null; }
+          if (r3 && r3.n) mvMemoIA(cle, r3);
+          finir(r3 && r3.n ? r3 : res, !!(r3 && r3.n));
+        };
+        mi.onerror = function(){ finir(res, false); };
+        mi.src = rm.masque;
+      }, function(){ finir(res, false); });
     });
   }
   // Inscrit les mesures estimées dans la taille photographiée — seulement dans les cases vides.
@@ -2038,10 +2079,13 @@ function pageProduit(id) {
       return;
     }
     var n = A.res ? A.res.n : 0, poses = (A.poses || []).length;
+    var plus = (A.res && A.res.mancheManuelle && mvType() === 'haut')
+      ? ' <b class="att">${T("Manche : aucun des deux bras n’est assez droit sur la photo pour la mesurer — prenez-la au ruban et tapez-la dans le tableau.")}</b>' : '';
+    if (A.note) plus += ' ' + esc(A.note);
     var txt = n
       ? (poses ? poses + '${T(" mesure(s) estimée(s) inscrite(s) pour la taille ")}' + esc(A.t) + '.' : '${T("Mesures estimées : les cases étaient déjà remplies, rien n’a été remplacé.")}')
-        + ' ${T("Vérifiez chaque trait sur l’aperçu.")}'
-      : '${T("Échelle posée. Le vêtement se confond avec le mur ou le mannequin : tracez ses mesures sur la photo — deux clics chacune, les autres tailles suivent.")}';
+        + ' ${T("Vérifiez chaque trait sur l’aperçu.")}' + plus
+      : '${T("Échelle posée. Le vêtement se confond avec le mur ou le mannequin : tracez ses mesures sur la photo — deux clics chacune, les autres tailles suivent.")}' + plus;
     z.innerHTML = '<div class="mesv-auto"><canvas id="p-mesv-apercu"></canvas><div class="mesv-auto-txt">'
       + '<b><span class="ok">✓</span>${T("Feuille trouvée dans la photo principale")}</b><div class="aide">' + txt + '</div></div>'
       + '<div class="mesv-auto-act"><button type="button" class="' + (n ? 'mini' : 'prim') + '" id="p-mesv-ajuster">' + (n ? '${T("Ajuster sur la photo")}' : '${T("Tracer les mesures")}') + '</button></div></div>';
@@ -2055,6 +2099,105 @@ function pageProduit(id) {
       g.beginPath(); g.moveTo(m.a[0] * s, m.a[1] * s); g.lineTo(m.b[0] * s, m.b[1] * s); g.stroke();
     });
     document.getElementById('p-mesv-ajuster').onclick = mvOutilPhoto;
+  }
+
+  /* LES MESURES D APRÈS LE CONTOUR DU VÊTEMENT (2026-10-20, essai sur sa photo du manteau gris).
+     Le contour vient du service de segmentation (fal, evf-sam : « le vêtement », sans le mannequin ni
+     le mur). Sur un mannequin, les bras pendent le long du corps : on ne cherche donc pas l aisselle
+     à l œil, on lit les largeurs DANS LA BANDE DES ÉPAULES, aux hauteurs d usage du prêt-à-porter
+     féminin (épaules à 4 cm sous le haut, poitrine à 22 cm, taille à 38 cm, hanches à 56 cm). La
+     manche va de l épaule au point du vêtement le plus éloigné HORS de cette bande. */
+  function mvMesurerMasque(cv, ty, echelle, orig){
+    var W = cv.width, H = cv.height, pas = Math.max(1, Math.round(Math.max(W, H) / 600));
+    var w = Math.floor(W / pas), h = Math.floor(H / pas), N = w * h;
+    var px = cv.getContext('2d').getImageData(0, 0, W, H).data, m = new Uint8Array(N);
+    var po = orig ? orig.getContext('2d').getImageData(0, 0, W, H).data : null;
+    // La peau du mannequin (orangée, chaude) dans la photo d origine : c est elle qui montre où sort la main.
+    var peau = function(xx, yy){ if (!po) return false; var i = ((yy * pas) * W + xx * pas) * 4, r = po[i], g = po[i + 1], b = po[i + 2];
+      return r > g && g >= b - 4 && r - b > 32 && r - g > 10; };
+    for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
+      var i = ((y * pas) * W + x * pas) * 4;
+      // Masque blanc sur noir, ou détourage transparent : les deux disent « vêtement ».
+      m[y * w + x] = (px[i + 3] > 127 && px[i] + px[i + 1] + px[i + 2] > 382) ? 1 : 0;
+    }
+    var parCm = echelle / pas;
+    var ext = [], top = -1, bas = -1, larg = Math.max(3, 5 * parCm);
+    for (var y1 = 0; y1 < h; y1++) {
+      var g = -1, d = -1;
+      for (var x1 = 0; x1 < w; x1++) if (m[y1 * w + x1]) { if (g < 0) g = x1; d = x1; }
+      ext.push([g, d]);
+      if (g >= 0 && d - g >= larg) { if (top < 0) top = y1; bas = y1; }   // une rangée de 5 cm au moins : pas un fil
+    }
+    var out = {}, ecartes = 0, mancheManuelle = false;
+    if (top < 0 || bas - top < 20 * parCm) return { mesures: out, n: 0, ecartes: 0 };
+    var P = function(xx, yy){ return [xx * pas + pas / 2, yy * pas + pas / 2]; };
+    var BORNES = { poitrine: [25, 80], taille: [20, 75], hanches: [25, 85], epaules: [25, 60], longueur: [30, 160], manche: [10, 90], entrejambe: [30, 100] };
+    var auBord = function(p){ return p[0] < W * 0.01 || p[1] < H * 0.01 || p[0] > W * 0.99 || p[1] > H * 0.99; };
+    var ligne = function(k, a, b){
+      var l = Math.hypot(b[0] - a[0], b[1] - a[1]); if (!(l > 2)) return;
+      var v = Math.round(l / echelle * 2) / 2, bo = BORNES[k] || [1, 300];
+      if (auBord(a) || auBord(b) || v < bo[0] || v > bo[1]) { ecartes++; return; }
+      out[k] = { a: a, b: b, cm: v };
+    };
+    var bande = function(yy, ga, dr){
+      if (yy < 0 || yy >= h) return null;
+      var g2 = -1, d2 = -1;
+      for (var xx = Math.max(0, Math.round(ga)); xx <= Math.min(w - 1, Math.round(dr)); xx++) if (m[yy * w + xx]) { if (g2 < 0) g2 = xx; d2 = xx; }
+      return g2 < 0 ? null : [g2, d2];
+    };
+    var rang = function(cm){ return Math.min(bas, Math.round(top + cm * parCm)); };
+    var ys = rang(4), es = ext[ys];
+    if (!es || es[0] < 0) return { mesures: out, n: 0, ecartes: 0 };
+    var axe = Math.round((es[0] + es[1]) / 2);
+    var basAxe = bas; for (var y2 = bas; y2 > top; y2--) if (m[y2 * w + axe]) { basAxe = y2; break; }
+    if (ty === 'bas') {
+      var yc = rang(1.5), c = ext[yc]; if (c && c[0] >= 0) ligne('taille', P(c[0], yc), P(c[1] + 1, yc));
+      var yh = rang(20), c2 = ext[yh]; if (c2 && c2[0] >= 0) ligne('hanches', P(c2[0], yh), P(c2[1] + 1, yh));
+      ligne('longueur', P(ext[top][0], top), P(ext[top][0], bas));
+      return { mesures: out, n: Object.keys(out).length, ecartes: ecartes };
+    }
+    ligne('longueur', P(axe, top), P(axe, basAxe));
+    var marge = 2 * parCm, ga = es[0] + marge, dr = es[1] - marge;   // la bande du corps : un peu EN DEDANS des épaules
+    if (ty === 'haut') ligne('epaules', P(es[0], ys), P(es[1] + 1, ys));
+    var yp = rang(22), cp = bande(yp, ga - 2 * marge, dr + 2 * marge);
+    if (cp) ligne('poitrine', P(cp[0], yp), P(cp[1] + 1, yp));
+    if (ty === 'robe') {
+      var yt = rang(38), ct = bande(yt, ga - 2 * marge, dr + 2 * marge); if (ct) ligne('taille', P(ct[0], yt), P(ct[1] + 1, yt));
+      var yh2 = rang(56), ch = bande(yh2, ga - 6 * marge, dr + 6 * marge); if (ch) ligne('hanches', P(ch[0], yh2), P(ch[1] + 1, yh2));
+    } else {
+      // La manche : du bout de l épaule au point le plus éloigné, du côté où le vêtement sort de la bande.
+      /* LES DEUX BRAS, TOUJOURS (2026-10-20, sa règle : « il faut toujours que tu regardes les deux bras ;
+         il y en a toujours un de correct ; si ni l un ni l autre ne l est, un message, et on le remplit à la
+         main »). Pour chaque côté : le POIGNET est la peau du mannequin, hors du vêtement et hors de la bande
+         du corps, qui touche la manche, la plus proche de l épaule ; le bras est DROIT si la ligne épaule →
+         poignet reste dans la manche (95 % au moins). Un bras plié (main sur la hanche) sort de sa manche
+         ou n a pas de poignet de son côté : il est écarté. Deux bras droits : le plus long (l autre est
+         raccourci par la perspective). */
+      var meilleur = null, vus = 0;
+      [[es[1], 1], [es[0], -1]].forEach(function(cote){
+        var sxp = cote[0], sg = cote[1], poignet = null;
+        for (var y9 = Math.round(ys + 15 * parCm); y9 < Math.min(h - 1, ys + 90 * parCm); y9++) for (var x9 = 1; x9 < w - 1; x9++) {
+          if (sg > 0 ? x9 <= dr : x9 >= ga) continue;
+          if (m[y9 * w + x9] || !peau(x9, y9)) continue;
+          var pres = m[y9 * w + x9 - 1] || m[y9 * w + x9 + 1] || m[(y9 - 1) * w + x9] || m[(y9 + 1) * w + x9];
+          if (!pres) continue;
+          var dd = Math.hypot(x9 - sxp, y9 - ys);
+          if (!poignet || dd < poignet.d) poignet = { x: x9, y: y9, d: dd };
+        }
+        if (!poignet) return;
+        vus++;
+        var n = 0, dans = 0;
+        for (var t = 0; t <= 1.0001; t += 0.01) { var X = Math.round(sxp + (poignet.x - sxp) * t), Y = Math.round(ys + (poignet.y - ys) * t); n++; if (m[Y * w + X]) dans++; }
+        if (dans / n < 0.95) return;
+        if (!meilleur || poignet.d > meilleur.d) meilleur = { d: poignet.d, a: P(sxp, ys), b: P(poignet.x, poignet.y) };
+      });
+      if (!meilleur) mancheManuelle = true;
+      if (meilleur) ligne('manche', meilleur.a, meilleur.b);
+    }
+    if (out.epaules && out.poitrine && out.epaules.cm > out.poitrine.cm * 1.25) { delete out.epaules; ecartes++; }
+    if (out.manche && out.longueur && out.manche.cm > out.longueur.cm * 1.1) { delete out.manche; ecartes++; }
+    if (ty === 'haut' && !out.manche) mancheManuelle = true;
+    return { mesures: out, n: Object.keys(out).length, ecartes: ecartes, mancheManuelle: mancheManuelle };
   }
 
   function mvOutilPhoto(){

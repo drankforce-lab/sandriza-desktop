@@ -853,4 +853,8 @@ module.exports = {
   "complétée d’après la taille mesurée — tapez-y pour la remplacer": "filled from the measured size — type in it to replace it",
   "Échelle posée. Le vêtement se confond avec le mur ou le mannequin : tracez ses mesures sur la photo — deux clics chacune, les autres tailles suivent.": "Scale set. The garment blends into the wall or the mannequin: draw its measurements on the photo — two clicks each, the other sizes follow.",
   "Tracer les mesures": "Draw the measurements",
+  "Feuille trouvée — le contour du vêtement est demandé au service d’images (quelques secondes)…": "Sheet found — the garment outline is being requested from the image service (a few seconds)…",
+  "Plafond des traitements d’images atteint : mesure automatique impossible pour le moment.": "Image processing cap reached: automatic measuring is not possible for now.",
+  "Le service d’images n’a pas répondu : mesure automatique impossible pour le moment.": "The image service did not respond: automatic measuring is not possible for now.",
+  "Manche : aucun des deux bras n’est assez droit sur la photo pour la mesurer — prenez-la au ruban et tapez-la dans le tableau.": "Sleeve: neither arm is straight enough in the photo to measure it — take it with a tape and type it in the table.",
 };

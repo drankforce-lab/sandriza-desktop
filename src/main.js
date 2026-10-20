@@ -2445,6 +2445,8 @@ const OPS_PONT = new Set([
   'fournisseur:contexte', 'fournisseur:lire', 'fournisseur:enregistrer',
   'collection:contexte', 'collection:decrire', 'collection:lire', 'collection:enregistrer',
   'produit:contexte', 'produit:sku', 'produit:nip', 'produit:nipExige',
+  // Le contour du vêtement pour les mesures (fal, evf-sam ; payant, journalisé au relais).
+  'produit:mesureMasque',
   'photos:liste', 'photos:source',   // (lot VOLUME 2) la photo entiere, au choix dans le selecteur pagine
   'produit:decrire', 'produit:lire', 'produit:enregistrer',
   // Le brouillon GENERIQUE de n importe quelle fenetre d edition (portee + cle).
