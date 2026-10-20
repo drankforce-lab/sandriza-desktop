@@ -28,6 +28,14 @@
 
 module.exports = {
   RESTE: {
+  /* ⚠ L ÉCRAN FILMÉ DE L ENCAN (2026-10-20) : un écran de DIFFUSION, sur son propre fond NOIR fixe (#111111),
+     forcé dans les deux modes (html.jour body compris) — c est la caméra du direct qui le lit. Le banc mesure ces
+     encres contre le fond de jour, qu elles ne touchent jamais ; au rendu, banc-contraste-rendu les trouve toutes
+     au-dessus du seuil, de jour comme de nuit. */
+  "#d9a86c": 8,           // 1.92  encan-ecran.js — le caramel Sandriza, sur noir
+  "#c9c2b8": 7,           // 1.58  encan-ecran.js — libellés secondaires, sur noir
+  "#f8f6f3": 3,           // 1.04  encan-ecran.js — le crème, sur noir
+  "#e4ded5": 2,           // 1.19  encan-ecran.js — consignes de l adjudication, sur noir
   /* ⚠ LE BLANC DU PLAN DE TRAVAIL DE L EDITEUR, ET IL NE SE CONVERTIRA JAMAIS :
      ce n est pas une couleur d interface, c est du PAPIER. Une etiquette sort
      blanche de l imprimante de jour comme de nuit ; teinter la scene ferait

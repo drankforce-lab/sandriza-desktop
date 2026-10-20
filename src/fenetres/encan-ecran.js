@@ -21,7 +21,7 @@ const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, TETE } = require('./socle.js');
 const T = require('../langue').tr('encan-ecran');
 
 const CSS = `
-:root{color-scheme:dark;--car:#D9A86C}
+:root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden;background:#111111}
 /* ⚠ L ECRAN FILME RESTE SOMBRE, QUEL QUE SOIT LE THEME DU POSTE : le mode jour repeignait son fond en
@@ -34,33 +34,33 @@ body{color:#F8F6F3;font:16px/1.3 system-ui,-apple-system,"Segoe UI",Roboto,sans-
 .scene{position:relative;height:100vh;width:56.25vh;max-width:100vw;overflow:hidden;
   display:flex;flex-direction:column;align-items:center;padding:4vh 3.6vh 0;gap:2.2vh}
 .marque{display:flex;align-items:center;gap:1vh;font-size:1.55vh;letter-spacing:.32em;color:#C9C2B8}
-.marque .sz{font-family:Georgia,serif;font-size:2.3vh;letter-spacing:0;color:var(--car)}
+.marque .sz{font-family:Georgia,serif;font-size:2.3vh;letter-spacing:0;color:#D9A86C}
 .marque .sz i{font-style:italic}
-.marque .filet{width:1px;height:2vh;background:var(--car)}
+.marque .filet{width:1px;height:2vh;background:#D9A86C}
 .essai{position:absolute;top:1.4vh;right:1.4vh;font-size:1.25vh;font-weight:800;letter-spacing:.14em;
   color:#111;background:#F8F6F3;border-radius:99px;padding:.35vh 1vh}
 .titre{text-align:center}
-.titre .n{font-size:4.4vh;font-weight:900;line-height:1.05;color:var(--car);text-transform:uppercase}
+.titre .n{font-size:4.4vh;font-weight:900;line-height:1.05;color:#D9A86C;text-transform:uppercase}
 .titre .v{font-size:2.2vh;font-weight:600;margin-top:.6vh}
-.temps{width:100%;border:.3vh solid var(--car);border-radius:1.8vh;padding:1.8vh 2.4vh 2.2vh;
+.temps{width:100%;border:.3vh solid #D9A86C;border-radius:1.8vh;padding:1.8vh 2.4vh 2.2vh;
   display:flex;flex-direction:column;align-items:center;gap:.6vh;position:relative}
 .temps.pause{border-style:dashed;border-color:#8A8A8A}
 .temps.plus{background:#241C12}
 .lbl{font-size:1.5vh;font-weight:800;letter-spacing:.2em;color:#C9C2B8}
-.chrono{font-size:12vh;font-weight:900;line-height:1;color:var(--car);font-variant-numeric:tabular-nums}
+.chrono{font-size:12vh;font-weight:900;line-height:1;color:#D9A86C;font-variant-numeric:tabular-nums}
 .temps.pause .chrono{color:#F8F6F3}
 .barre{width:100%;height:1vh;border-radius:.6vh;background:#2B2B2B;overflow:hidden;margin-top:.8vh}
-.barre i{display:block;height:100%;background:var(--car);transition:width .2s linear}
-.bulle{position:absolute;top:-1.8vh;right:1.8vh;background:var(--car);color:#111;font-weight:900;
+.barre i{display:block;height:100%;background:#D9A86C;transition:width .2s linear}
+.bulle{position:absolute;top:-1.8vh;right:1.8vh;background:#D9A86C;color:#111;font-weight:900;
   font-size:2.2vh;padding:.4vh 1.4vh;border-radius:99px;display:none}
 .temps.plus .bulle{display:block}
 .prix{display:flex;flex-direction:column;align-items:center;gap:.8vh}
 .prix .m{font-size:13.2vh;font-weight:900;line-height:.95;font-variant-numeric:tabular-nums}
-.pastille{background:var(--car);color:#111;font-weight:800;font-size:2.4vh;padding:.6vh 1.8vh;border-radius:.8vh}
+.pastille{background:#D9A86C;color:#111;font-weight:800;font-size:2.4vh;padding:.6vh 1.8vh;border-radius:.8vh}
 .pastille.vide{background:transparent;color:#F8F6F3;border:1px solid #3A3A3A}
 .appel{font-size:2.2vh;font-weight:600;margin-top:.4vh;text-align:center}
 .sous{font-size:1.7vh;color:#C9C2B8;margin-top:-1.4vh;text-align:center}
-.bas{position:absolute;left:0;right:0;bottom:0;background:var(--car);color:#111;display:flex;
+.bas{position:absolute;left:0;right:0;bottom:0;background:#D9A86C;color:#111;display:flex;
   flex-direction:column;padding:1.4vh 2.4vh 1.8vh;gap:.4vh}
 .bas .l{display:flex;justify-content:space-between;font-size:1.8vh;font-weight:600}
 .bas .l:first-child{font-size:2.2vh;font-weight:800}
@@ -69,35 +69,33 @@ body{color:#F8F6F3;font:16px/1.3 system-ui,-apple-system,"Segoe UI",Roboto,sans-
 .garde{justify-content:space-between;padding:7vh 4vh 5.6vh}
 .logo{display:flex;align-items:center;gap:2.2vh;margin-top:9vh}
 .logo .sz{font-family:Georgia,serif;font-size:9.6vh;line-height:1}
-.logo .sz i{color:var(--car)}
-.logo .filet{width:.2vh;height:9.6vh;background:var(--car)}
+.logo .sz i{color:#D9A86C}
+.logo .filet{width:.2vh;height:9.6vh;background:#D9A86C}
 .logo .nom{font-family:Georgia,serif;font-size:4vh;letter-spacing:.16em}
 .logo .dev{font-size:1.2vh;letter-spacing:.3em;color:#C9C2B8;margin-top:.8vh}
 .annonce{display:flex;flex-direction:column;align-items:center;gap:2.8vh}
 .annonce .t{font-size:3vh;font-weight:800;text-align:center;line-height:1.25}
 .annonce .s{font-size:1.8vh;color:#C9C2B8;text-align:center}
 .regles{width:100%;border:1px solid #3A3A3A;border-radius:1.6vh;padding:2.2vh 2.4vh;display:flex;flex-direction:column;gap:1.4vh}
-.regles .h{font-size:1.4vh;font-weight:800;letter-spacing:.2em;color:var(--car)}
+.regles .h{font-size:1.4vh;font-weight:800;letter-spacing:.2em;color:#D9A86C}
 .regles .r{display:flex;gap:1.4vh;font-size:1.8vh;line-height:1.35}
-.regles .r b.k{font-weight:900;color:var(--car)}
+.regles .r b.k{font-weight:900;color:#D9A86C}
 .regles .f{font-size:1.4vh;color:#C9C2B8}
 /* Adjuge */
 .adj{padding-bottom:4.8vh;gap:2.4vh}
-.adj .mot{font-family:Georgia,serif;font-size:9.6vh;font-weight:700;color:var(--car);margin-top:4vh}
+.adj .mot{font-family:Georgia,serif;font-size:9.6vh;font-weight:700;color:#D9A86C;margin-top:4vh}
 .adj .art{font-size:2.6vh;font-weight:600;text-align:center}
 .adj .m{font-size:15vh;font-weight:900;line-height:.95;font-variant-numeric:tabular-nums}
 .adj .pastille{font-size:3.4vh;padding:1vh 2.6vh;border-radius:1vh;font-weight:900}
 .cadre{width:100%;border:1px solid #3A3A3A;border-radius:1.6vh;padding:2.2vh 2.4vh;display:flex;
   flex-direction:column;gap:1vh;margin-top:auto}
 .cadre .a{font-size:2.2vh;font-weight:800}
-.cadre .b{font-size:2.6vh;font-weight:900;color:var(--car);line-height:1.25}
+.cadre .b{font-size:2.6vh;font-weight:900;color:#D9A86C;line-height:1.25}
 .cadre .c{display:flex;align-items:baseline;gap:1.2vh}
 .cadre .c span{font-size:1.8vh;color:#E4DED5}
 .cadre .c b{font-size:5.4vh;font-weight:900;font-variant-numeric:tabular-nums}
 .cadre .d{font-size:1.8vh;line-height:1.4;color:#E4DED5}
 .cadre .e{font-size:1.4vh;color:#C9C2B8}
-.relie{position:absolute;left:50%;bottom:1vh;transform:translateX(-50%);font-size:1.3vh;color:#f5d18a;display:none}
-.relie.on{display:block}
 `;
 
 function pageEncanEcran() {
@@ -172,7 +170,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     if (!pause && E.offres && E.offres.length) {
       h += '<div class="bas">' + E.offres.slice(0, 3).map(function(o, i){
-        return '<div class="l"><span>' + esc(o.pseudo) + '</span><span>' + argent(o.montant) + (i === 0 ? ' ★' : '') + '</span></div>';
+        return '<div class="l"><span>' + esc(o.pseudo) + '</span><span>' + argent(o.montant) + (i === 0 ? ' <span class="ic">★</span>' : '') + '</span></div>';
       }).join('') + '</div>';
     }
     scene.className = 'scene';

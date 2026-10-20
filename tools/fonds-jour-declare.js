@@ -27,6 +27,9 @@ module.exports = {
      html.jour dans leur fenetre — sans quoi le bouton de paiement perdait sa
      couleur en plein jour. Trouve par ce banc meme, le 2026-09-04. */
   fonds: {
+    /* L'ÉCRAN FILMÉ DE L'ENCAN (2026-10-20) : un écran de DIFFUSION, sombre quel que soit le thème du poste —
+       c'est la caméra du direct qui le regarde, pas l'animatrice ; il reste noir et caramel, en jour comme en nuit. */
+    'encan-ecran.js': { 'html,body': '#111111', '.temps.plus': '#241C12', '.barre': '#2B2B2B' },
     // Atelier (lot 5) : la pastille ROUGE d'un contrôle avant impression en erreur — le rouge EST le message.
     'atelier.js': { '.mo-ctl.err i': '#DC2626' },
     'chat-config.js': { '.b.prim': '#8f6f42' },
@@ -57,6 +60,8 @@ module.exports = {
      dangereux ou definitif, dans les deux modes. Les contours de SURFACE, eux,
      sont passes aux jetons translucides le 2026-09-04 (79 declarations). */
   bordures: {
+    // L'écran filmé de l'encan : toujours sombre (voir « fonds »).
+    'encan-ecran.js': { '.pastille.vide': '#3A3A3A', '.regles': '#3A3A3A', '.cadre': '#3A3A3A' },
     'config-navigation.js': { 'button.danger.arme': '#b91c1c' },
     'liquidation.js': { '.resume.vfin': '#dc2626' },
   },

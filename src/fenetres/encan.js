@@ -47,8 +47,7 @@ button{font:inherit;cursor:pointer;border-radius:8px;padding:.4rem .8rem;border:
 button:hover:not(:disabled){background:var(--v10);border-color:var(--v30)}
 button:disabled{opacity:.4;cursor:default}
 button.prim{background:var(--or);border-color:var(--or);color:#17202c;font-weight:700}
-button.danger{border-color:#c4554d;color:#ff9b93}
-html.jour button.danger{color:#a3262a;border-color:#a3262a}
+button.danger{border-color:var(--tx-err);color:var(--tx-err)}
 .gestes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem}
 .gestes button{padding:.75rem .5rem;font-weight:700}
 .compte{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem;align-items:end}
@@ -61,7 +60,7 @@ html.jour button.danger{color:#a3262a;border-color:#a3262a}
 .liste{display:flex;flex-direction:column;gap:.3rem;max-height:30vh;overflow:hidden}
 .ln{display:flex;justify-content:space-between;gap:.6rem;padding:.35rem .55rem;border-radius:7px;background:var(--v05);font-size:.84rem}
 .ln .v{color:var(--tx2);white-space:nowrap}
-.ln.bon{background:rgba(46,139,78,.16)}.ln.bon .v{color:var(--tx-vert,#7fd39a);font-weight:700}
+.ln.bon{background:rgba(46,139,78,.16)}.ln.bon .v{color:var(--tx-ok);font-weight:700}
 .ln.non .v{color:var(--tx2)}
 .res{display:flex;flex-direction:column;gap:.4rem;margin-top:.5rem}
 .res .art{border:1px solid var(--v08);border-radius:8px;padding:.45rem .55rem}
@@ -236,7 +235,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }).join('') || '<div class="aide">${T("Aucun commentaire pour l’instant.")}</div>';
     $('file-titre').textContent = '${T("À suivre")}' + ' (' + (E.nbFile || 0) + ')';
     $('file').innerHTML = (E.file || []).map(function(f){
-      return '<div class="ln"><span>' + esc([f.nom, f.variante].filter(Boolean).join(' · ')) + '</span><button class="mini" data-retirer="' + esc(f.cle) + '" aria-label="${T("Retirer")}">✕</button></div>';
+      return '<div class="ln"><span>' + esc([f.nom, f.variante].filter(Boolean).join(' · ')) + '</span><button class="mini" data-retirer="' + esc(f.cle) + '" aria-label="${T("Retirer")}"><span class="ic">✕</span></button></div>';
     }).join('') || '<div class="aide">${T("Rien en file.")}</div>';
     $('histo').innerHTML = (E.historique || []).map(function(h){
       var lib = h.issue === 'vendu' ? '${T("vendu")}' : h.issue === 'remis' ? '${T("remis en vente")}' : '${T("annulé")}';
