@@ -258,6 +258,12 @@ table.mesv tbody tr:hover{background:var(--v03)}
 table.mesv .mv-cm input{width:4.4rem;height:auto;min-height:0;border:0;border-radius:0;background:transparent;text-align:right;padding:.3rem .35rem;box-shadow:none}
 .mv-cm i{font-style:normal;font-size:.72rem;color:var(--tx2);padding:0 .5rem 0 .1rem}
 .mesv-note{margin-top:.55rem}
+.mesv-auto{display:flex;gap:.8rem;align-items:center;border:1px solid var(--v10);border-radius:11px;padding:.55rem .7rem;margin:0 0 .7rem;background:var(--v03)}
+.mesv-auto.vide{display:block}
+.mesv-auto canvas{flex:0 0 auto;border-radius:8px;border:1px solid var(--v12);max-height:120px;width:auto}
+.mesv-auto-txt{min-width:0;flex:1 1 auto}
+.mesv-auto-txt b{display:block;font-size:.84rem;margin-bottom:.15rem}
+.mesv-auto-act{margin-top:.4rem}
 .mv-boite{max-width:62rem!important}
 .mv-barre{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-bottom:.5rem;font-size:.82rem}
 .mv-q{font-weight:600;color:var(--tx)!important}
@@ -774,12 +780,14 @@ function pageProduit(id) {
       + '<div class="mesv-barre"><label for="p-mesv-type">${T("Type")}</label><select id="p-mesv-type">'
       + '<option value="haut">${T("Haut (chandail, chemisier, veste)")}</option><option value="bas">${T("Bas (pantalon, jupe, short)")}</option>'
       + '<option value="robe">${T("Robe ou combinaison")}</option><option value="aucun">${T("Aucune mesure")}</option></select>'
+      + '<label for="p-mesv-t">${T("Taille photographiée")}</label><select id="p-mesv-t"></select>'
       + '<span class="esp"></span><button type="button" id="p-mesv-photo" class="prim"><span class="ic">📏</span> ${T("Mesurer sur une photo")}</button>'
       + '<button type="button" id="p-mesv-grad">${T("Compléter les autres tailles")}</button></div>'
-      + '<div id="p-mesv-table"></div></div>'
+      + '<div id="p-mesv-auto"></div><div id="p-mesv-table"></div></div></div>');
+    h.push('<div class="etape">'
       /* COMPOSITION ET ENTRETIEN (2026-10-11, sa demande) : des cases, pas du texte libre — la
          boutique affiche chaque consigne dans la langue de la cliente, avec son pictogramme. */
-      + '<div class="carte plein" id="p-ent-carte" style="margin-top:.8rem"><h2>${T("Composition et entretien")}</h2>'
+      + '<div class="carte plein" id="p-ent-carte"><h2>${T("Composition et entretien")}</h2>'
       + '<div class="ent-haut"><div class="ch"><label for="p-compo">${T("Composition")}</label>'
       + '<input id="p-compo" maxlength="200" placeholder="${T("Ex : 95 % polyester, 5 % élasthanne")}"></div>'
       + '<div class="ch"><label for="p-ent-autre">${T("Autre consigne (facultatif)")}</label>'
@@ -902,10 +910,13 @@ function pageProduit(id) {
       { t: '${T("Tailles et couleurs")}',     obl: [] },
       { t: 'Photo',                   obl: [] },
       { t: '${T("Couleurs")}',                obl: [] },
-      { t: '${T("Mesures et entretien")}',    obl: [] },
+      /* « Composition et entretien » A PART (2026-10-20, sa demande : « tu vas me mettre ça dans une
+         section à part ») : sous les mesures, la carte tombait sous le pied de la fenêtre. */
+      { t: '${T("Mesures")}',                 obl: [] },
+      { t: '${T("Composition et entretien")}', obl: [] },
       { t: '${T("Mise en marché")}',          obl: [] },
       { t: 'Stock',                   obl: [] }
-    ], function(i){ if (i === 2) { dessinerVues(); dessinerMedias(); } if (i === 3) dessinerVues(); if (i === 4) { dessinerMesures(); dessinerEntretien(); } if (i === 6) majStock(); });
+    ], function(i){ if (i === 2) { dessinerVues(); dessinerMedias(); } if (i === 3) dessinerVues(); if (i === 4) dessinerMesures(); if (i === 5) dessinerEntretien(); if (i === 7) majStock(); });
 
     bEnr.disabled = !(ID ? CTX.peutModifier : CTX.peutAjouter);
     chargerCouts();   // les coûts numériques de l'article (journal des appels payants)
@@ -972,7 +983,7 @@ function pageProduit(id) {
     ];
     if (c.length > 1) exig.push([3, '${T("Une photo par couleur secondaire")}',
       c.slice(1).every(function(x){ return !!(PARCOUL[x] && (PARCOUL[x].main || PARCOUL[x].principale)); })]);
-    if (!ID && t.length && c.length) exig.push([6, '${T("Une quantité en stock")}', tot > 0]);
+    if (!ID && t.length && c.length) exig.push([7, '${T("Une quantité en stock")}', tot > 0]);
     var nManque = exig.filter(function(m){ return !m[2]; }).length;
     h += '<div class="reste">' + (nManque
       ? '<div class="t">${T("Pour enregistrer")}</div>'
@@ -1557,6 +1568,14 @@ function pageProduit(id) {
     var bp = document.getElementById('p-mesv-photo'); if (bp) bp.onclick = mvOutilPhoto;
     var bg = document.getElementById('p-mesv-grad'); if (bg) bg.onclick = mvGraduer;
     var ts = tailles();
+    var st = document.getElementById('p-mesv-t');
+    if (st) {
+      var tp = mvTaillePhoto();
+      st.innerHTML = ts.map(function(t){ return '<option' + (t === tp ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('');
+      st.disabled = !ty || !ts.length;
+      st.onchange = function(){ mvChangerTaille(st.value); };
+    }
+    mvAnalyser();
     if (!ty) { z.innerHTML = '<div class="aide">${T("Aucune mesure pour ce type d’article. Choisissez un type ci-dessus si le vêtement en a besoin.")}</div>'; return; }
     if (!ts.length) { z.innerHTML = '<div class="aide">${T("Choisissez d’abord les tailles à l’étape « Tailles et couleurs ».")}</div>'; return; }
     var cols = MV_TYPES[ty];
@@ -1676,7 +1695,9 @@ function pageProduit(id) {
     var fr = med(R), fg = med(G), fb = med(B);
     var dist = function(j){ return Math.sqrt((R[j] - fr) * (R[j] - fr) + (G[j] - fg) * (G[j] - fg) + (B[j] - fb) * (B[j] - fb)); };
     var db = bord.map(dist).sort(function(p, q){ return p - q; });
-    var seuil = Math.max(30, db[Math.floor(db.length * 0.9)] + 14);
+    /* Le pourtour n est pas tout fond (2026-10-20, sa photo : un cadre de porte à gauche, de la brique à
+       droite) : l écart se lit sur la MOITIÉ du pourtour la plus proche de la médiane, le vrai fond. */
+    var seuil = Math.max(30, db[Math.floor(db.length * 0.45)] + 14);
     var dans = function(xx, yy){
       if (!feuille) return false;
       var dx = xx * pas - feuille.cx, dy = yy * pas - feuille.cy, c = Math.cos(-feuille.ang), s = Math.sin(-feuille.ang);
@@ -1709,6 +1730,8 @@ function pageProduit(id) {
         if (cy > 0 && m2[c - w] && !lab[c - w]) { lab[c - w] = nlab; pile.push(c - w); }
         if (cy < h - 1 && m2[c + w] && !lab[c + w]) { lab[c + w] = nlab; pile.push(c + w); }
       }
+      // Une pièce collée au pourtour sur plus du dixième de sa longueur est le décor (porte, mur), pas le vêtement.
+      if (tb > (w + h) * 0.2) continue;
       if (n > meilN) { meilN = n; meil = nlab; touche = tb; }
     }
     if (meilN < N * 0.03) return { erreur: 'fond' };
@@ -1740,7 +1763,18 @@ function pageProduit(id) {
     var parCm = echelle / pas;
     var P = function(xx, yy){ return [xx * pas + pas / 2, yy * pas + pas / 2]; };
     var out = {};
-    var ligne = function(k, a, b){ var l = Math.hypot(b[0] - a[0], b[1] - a[1]); if (l > 2) out[k] = { a: a, b: b, cm: Math.round(l / echelle * 2) / 2 }; };
+    /* LA VRAISEMBLANCE (2026-10-20, sa photo sur mannequin : « épaules 156 cm ») : un trait qui touche le
+       bord de la photo mesure le cadrage, pas le vêtement ; une valeur hors de ce qu un vêtement à plat
+       peut mesurer vient d une silhouette mêlée au décor. Dans les deux cas : rien plutôt qu un chiffre faux. */
+    var BORNES = { poitrine: [25, 80], taille: [20, 75], hanches: [25, 85], epaules: [25, 60], longueur: [30, 160], manche: [10, 90], entrejambe: [30, 100] };
+    var auBord = function(p){ return p[0] < W * 0.015 || p[1] < H * 0.015 || p[0] > W * 0.985 || p[1] > H * 0.985; };
+    var ecartes = 0;
+    var ligne = function(k, a, b){
+      var l = Math.hypot(b[0] - a[0], b[1] - a[1]); if (!(l > 2)) return;
+      var v = Math.round(l / echelle * 2) / 2, bo = BORNES[k] || [1, 300];
+      if (auBord(a) || auBord(b) || v < bo[0] || v > bo[1]) { ecartes++; return; }
+      out[k] = { a: a, b: b, cm: v };
+    };
     var haut0 = top, bas0 = bas, L = bas0 - haut0;
     if (L < 10) return { erreur: 'fond' };
     var basAxe = bas0;
@@ -1806,7 +1840,179 @@ function pageProduit(id) {
       ligne('longueur', P(eg[0], haut0), P(eg[0], bas0));
       if (yE != null && bas0 - yE > 10 * parCm) ligne('entrejambe', P(axe, yE), P(axe, bas0));
     }
-    return { mesures: out, n: Object.keys(out).length };
+    if (out.epaules && out.poitrine && out.epaules.cm > out.poitrine.cm * 1.2) { delete out.epaules; ecartes++; }
+    if (out.manche && out.longueur && out.manche.cm > out.longueur.cm * 1.1) { delete out.manche; ecartes++; }
+    return { mesures: out, n: Object.keys(out).length, ecartes: ecartes };
+  }
+
+  /* LA FEUILLE PAR SON X (2026-10-20, sa photo : une feuille blanche sur un mur blanc — 205 contre
+     206 sur 255, aucune blancheur ne l en distingue). Le X tracé au feutre d un coin à l autre,
+     lui, tranche sur n importe quel fond : ses quatre bouts SONT les coins de la feuille.
+     On cherche les traits fins (un pixel qui s écarte de son voisinage immédiat), on les regroupe
+     d un seul tenant, et l on garde le groupe dont presque tous les pixels tombent sur les deux
+     diagonales de son cadre, au rapport de côtés d une feuille. */
+  function mvTrouverX(cv, format){
+    var W = cv.width, H = cv.height, N = W * H;
+    var px = cv.getContext('2d').getImageData(0, 0, W, H).data;
+    var R = 4;   // le voisinage : assez large pour qu un trait de 1 à 3 px s en écarte
+    // Moyennes locales par images intégrales (une par canal).
+    var I = [new Float64Array((W + 1) * (H + 1)), new Float64Array((W + 1) * (H + 1)), new Float64Array((W + 1) * (H + 1))];
+    for (var y = 0; y < H; y++) {
+      var s0 = 0, s1 = 0, s2 = 0;
+      for (var x = 0; x < W; x++) {
+        var i = (y * W + x) * 4; s0 += px[i]; s1 += px[i + 1]; s2 += px[i + 2];
+        var o = (y + 1) * (W + 1) + x + 1;
+        I[0][o] = I[0][o - W - 1] + s0; I[1][o] = I[1][o - W - 1] + s1; I[2][o] = I[2][o - W - 1] + s2;
+      }
+    }
+    var ecart = new Float32Array(N);
+    for (var y2 = 0; y2 < H; y2++) for (var x2 = 0; x2 < W; x2++) {
+      var xa = Math.max(0, x2 - R), xb = Math.min(W, x2 + R + 1), ya = Math.max(0, y2 - R), yb = Math.min(H, y2 + R + 1);
+      var aire = (xb - xa) * (yb - ya), j = (y2 * W + x2) * 4, d = 0;
+      for (var c = 0; c < 3; c++) {
+        var T = I[c], m = (T[yb * (W + 1) + xb] - T[ya * (W + 1) + xb] - T[yb * (W + 1) + xa] + T[ya * (W + 1) + xa]) / aire;
+        d += Math.abs(px[j + c] - m);
+      }
+      ecart[y2 * W + x2] = d;
+    }
+    // Seuils à hystérésis : un trait fort amorce, un trait plus faible prolonge.
+    var FORT = 24, FAIBLE = 12, vu = new Uint8Array(N), meilleur = null;
+    for (var s = 0; s < N; s++) {
+      if (vu[s] || ecart[s] < FORT) continue;
+      var pile = [s], pts = [], minx = W, maxx = 0, miny = H, maxy = 0; vu[s] = 1;
+      while (pile.length && pts.length < 60000) {
+        var q = pile.pop(), qx = q % W, qy = (q - qx) / W; pts.push(q);
+        if (qx < minx) minx = qx; if (qx > maxx) maxx = qx; if (qy < miny) miny = qy; if (qy > maxy) maxy = qy;
+        for (var dy = -3; dy <= 3; dy++) for (var dx = -3; dx <= 3; dx++) {
+          var nx = qx + dx, ny = qy + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+          var nq = ny * W + nx; if (!vu[nq] && ecart[nq] >= FAIBLE) { vu[nq] = 1; pile.push(nq); }
+        }
+      }
+      var bw = maxx - minx, bh = maxy - miny;
+      if (bw < Math.max(W, H) * 0.04 || bh < Math.max(W, H) * 0.04 || pts.length < 30) continue;
+      if (minx <= 1 || miny <= 1 || maxx >= W - 2 || maxy >= H - 2) continue;
+      var ratio = Math.max(bw, bh) / Math.min(bw, bh), cible = format === 'a4' ? 297 / 210 : 279.4 / 215.9;
+      if (Math.abs(ratio - cible) > 0.22) continue;
+      // Sur les deux diagonales du cadre ?
+      var diag = Math.hypot(bw, bh), tol = Math.max(2.5, diag * 0.035), sur1 = 0, sur2 = 0;
+      var A = [[minx, miny, maxx, maxy], [maxx, miny, minx, maxy]], couv = [new Uint8Array(20), new Uint8Array(20)];
+      for (var k = 0; k < pts.length; k++) {
+        var X = pts[k] % W, Y = (pts[k] - X) / W, best = -1, bd = 1e9;
+        for (var g = 0; g < 2; g++) {
+          var a = A[g], ux = (a[2] - a[0]) / diag, uy = (a[3] - a[1]) / diag;
+          var dd = Math.abs((X - a[0]) * uy - (Y - a[1]) * ux);
+          if (dd < bd) { bd = dd; best = g; }
+        }
+        if (bd > tol) continue;
+        if (best === 0) sur1++; else sur2++;
+        var a2 = A[best], tt = ((X - a2[0]) * (a2[2] - a2[0]) + (Y - a2[1]) * (a2[3] - a2[1])) / (diag * diag);
+        couv[best][Math.max(0, Math.min(19, Math.floor(tt * 20)))] = 1;
+      }
+      var part = (sur1 + sur2) / pts.length;
+      var c1 = 0, c2 = 0; for (var b = 0; b < 20; b++) { c1 += couv[0][b]; c2 += couv[1][b]; }
+      if (part < 0.8 || sur1 < pts.length * 0.25 || sur2 < pts.length * 0.25 || c1 < 16 || c2 < 16) continue;
+      var score = diag * part;
+      if (!meilleur || score > meilleur.score) meilleur = { score: score, L: Math.max(bw, bh), l: Math.min(bw, bh),
+        cx: (minx + maxx) / 2, cy: (miny + maxy) / 2, ang: bw >= bh ? 0 : Math.PI / 2, parX: true };
+    }
+    if (!meilleur) return null;
+    var dims = format === 'a4' ? [29.7, 21] : [27.94, 21.59];
+    meilleur.pxParCm = (meilleur.L / dims[0] + meilleur.l / dims[1]) / 2;
+    return meilleur;
+  }
+
+  /* L'ANALYSE SUR PLACE (2026-10-20, sa demande : « ça devrait analyser la photo automatiquement, sans
+     avoir à ouvrir un autre écran, s il détecte la feuille »). Dès que l étape s ouvre, la photo
+     principale est lue en arrière-plan : feuille trouvée → l échelle est posée, les mesures que la
+     silhouette permet sont inscrites dans le tableau (jamais par-dessus une valeur saisie), et l aperçu
+     montre chaque trait. L outil « Mesurer sur une photo » ne sert plus qu à AJUSTER ou à tracer ce
+     qui manque. Une seule lecture par photo et par type : revenir à l étape ne relit rien. */
+  var MV_AUTO = null, MV_T = '';
+  function mvTaillePhoto(){
+    var ts = tailles();
+    if (MV_T && ts.indexOf(MV_T) >= 0) return MV_T;
+    return ts[Math.floor((ts.length - 1) / 2)] || '';   // la taille du milieu : celle qu on photographie d ordinaire
+  }
+  function mvChargerImage(src, fini){
+    var img = new Image();
+    img.onload = function(){ fini(img); };
+    img.onerror = function(){ fini(null); };
+    if (/^data:/.test(src) || !(P && P.imageLocale)) { img.src = src; return; }
+    P.imageLocale(src).then(function(d){ img.src = d || src; }, function(){ img.src = src; });
+  }
+  function mvAnalyser(){
+    var ty = mvType(), z = document.getElementById('p-mesv-auto');
+    if (!z) return;
+    if (!ty || !tailles().length) { z.innerHTML = ''; return; }
+    if (!IMAGE) { z.innerHTML = '<div class="mesv-auto vide"><div class="aide">${T("Ajoutez la photo principale (étape « Photo ») : si une feuille marquée d’un X y figure, les mesures se prennent toutes seules ici.")}</div></div>'; return; }
+    var cle = IMAGE + '|' + ty;
+    if (MV_AUTO && MV_AUTO.cle === cle) { mvMontrerAuto(); return; }
+    MV_AUTO = { cle: cle, enCours: true };
+    z.innerHTML = '<div class="mesv-auto"><div class="aide">${T("Analyse de la photo principale…")}</div></div>';
+    mvChargerImage(IMAGE, function(img){
+      if (!MV_AUTO || MV_AUTO.cle !== cle) return;   // la photo a changé entre-temps
+      if (!img) { MV_AUTO = { cle: cle, erreur: true }; mvMontrerAuto(); return; }
+      var r = Math.min(1, 1200 / img.naturalWidth, 900 / img.naturalHeight);
+      var cv = document.createElement('canvas');
+      cv.width = Math.round(img.naturalWidth * r); cv.height = Math.round(img.naturalHeight * r);
+      var feuille = null, res = null;
+      try {
+        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+        feuille = mvTrouverX(cv, 'lettre') || mvTrouverFeuille(cv, 'lettre');
+        if (feuille) res = mvMesurerAuto(cv, ty, feuille.pxParCm, feuille);
+      } catch (e) { feuille = null; res = null; }
+      MV_AUTO = { cle: cle, cv: cv, feuille: feuille, res: res, t: mvTaillePhoto(), poses: [] };
+      mvPoserAuto();
+      dessinerMesures();
+    });
+  }
+  // Inscrit les mesures estimées dans la taille photographiée — seulement dans les cases vides.
+  function mvPoserAuto(){
+    var A = MV_AUTO; if (!A || !A.res || !A.res.mesures) return;
+    var t = A.t; if (!t) return;
+    MESV.type = mvType();
+    MESV.tailles[t] = MESV.tailles[t] || {};
+    A.poses = [];
+    Object.keys(A.res.mesures).forEach(function(k){
+      if (MESV.tailles[t][k] > 0) return;
+      MESV.tailles[t][k] = A.res.mesures[k].cm; A.poses.push(k);
+    });
+  }
+  // Changer la taille photographiée déplace ce que l analyse a posé (et rien de ce qu on a tapé).
+  function mvChangerTaille(t){
+    var A = MV_AUTO;
+    if (A && A.t && A.poses) A.poses.forEach(function(k){
+      var r = MESV.tailles[A.t]; if (r && A.res && A.res.mesures[k] && r[k] === A.res.mesures[k].cm) delete r[k];
+    });
+    MV_T = t; if (A) { A.t = t; mvPoserAuto(); }
+    dessinerMesures();
+  }
+  function mvMontrerAuto(){
+    var z = document.getElementById('p-mesv-auto'), A = MV_AUTO; if (!z || !A) return;
+    if (A.enCours) return;
+    if (A.erreur) { z.innerHTML = '<div class="mesv-auto vide"><div class="aide">${T("La photo principale n’a pas pu être lue.")}</div></div>'; return; }
+    if (!A.feuille) {
+      z.innerHTML = '<div class="mesv-auto vide"><div class="aide">${T("Aucune feuille repérée dans la photo principale. Pour une mesure automatique : une feuille lettre posée à plat près du vêtement, marquée d’un X au feutre d’un coin à l’autre. Sinon, « Mesurer sur une photo » pour poser l’échelle à la main.")}</div></div>';
+      return;
+    }
+    var n = A.res ? A.res.n : 0, poses = (A.poses || []).length;
+    var txt = n
+      ? (poses ? poses + '${T(" mesure(s) estimée(s) inscrite(s) pour la taille ")}' + esc(A.t) + '.' : '${T("Mesures estimées : les cases étaient déjà remplies, rien n’a été remplacé.")}')
+        + ' ${T("Vérifiez chaque trait sur l’aperçu.")}'
+      : '${T("Feuille trouvée, mais le vêtement ne se détache pas assez du fond (mannequin, décor) pour être mesuré tout seul : cliquez « Ajuster sur la photo » — l’échelle est déjà posée, il ne reste qu’à tracer.")}';
+    z.innerHTML = '<div class="mesv-auto"><canvas id="p-mesv-apercu"></canvas><div class="mesv-auto-txt">'
+      + '<b>${T("Feuille trouvée dans la photo principale")}</b><div class="aide">' + txt + '</div>'
+      + '<div class="mesv-auto-act"><button type="button" class="mini" id="p-mesv-ajuster">${T("Ajuster sur la photo")}</button></div></div></div>';
+    var c = document.getElementById('p-mesv-apercu'), s = Math.min(1, 220 / A.cv.width, 220 / A.cv.height);
+    c.width = Math.round(A.cv.width * s); c.height = Math.round(A.cv.height * s);
+    var g = c.getContext('2d'); g.drawImage(A.cv, 0, 0, c.width, c.height);
+    var f = A.feuille; g.save(); g.scale(s, s); g.translate(f.cx, f.cy); g.rotate(f.ang || 0);
+    g.strokeStyle = '#22c55e'; g.lineWidth = 3 / s; g.strokeRect(-f.L / 2, -f.l / 2, f.L, f.l); g.restore();
+    if (A.res) Object.keys(A.res.mesures).forEach(function(k){
+      var m = A.res.mesures[k]; g.strokeStyle = '#c9a97e'; g.lineWidth = 2;
+      g.beginPath(); g.moveTo(m.a[0] * s, m.a[1] * s); g.lineTo(m.b[0] * s, m.b[1] * s); g.stroke();
+    });
+    document.getElementById('p-mesv-ajuster').onclick = mvOutilPhoto;
   }
 
   function mvOutilPhoto(){
@@ -1829,7 +2035,7 @@ function pageProduit(id) {
       var v = document.createElement('div');
       v.className = 'voile';
       v.innerHTML = '<div class="boite mv-boite"><h3 style="color:var(--tx)">${T("Mesurer sur la photo")}</h3>'
-        + '<div class="mv-barre"><label>${T("Taille photographiée")} <select id="mv-t">' + ts.map(function(t){ return '<option>' + esc(t) + '</option>'; }).join('') + '</select></label>'
+        + '<div class="mv-barre"><label>${T("Taille photographiée")} <select id="mv-t">' + ts.map(function(t){ return '<option' + (t === mvTaillePhoto() ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('') + '</select></label>'
         + '<label>${T("Échelle")} <select id="mv-mode"><option value="feuille">${T("Feuille dans la photo (automatique)")}</option>'
         + '<option value="connue">${T("Une mesure que je connais")}</option><option value="memo">${T("Échelle retenue du poste photo")}</option>'
         + '<option value="main">${T("Feuille, à la main")}</option></select></label>'
@@ -1913,7 +2119,7 @@ function pageProduit(id) {
       function appliquerMode(m){
         mode = m; $('mv-mode').value = m; echelle = null; feuille = null; segment = null; $('mv-connue').hidden = true;
         if (m === 'feuille') {
-          try { feuille = mvTrouverFeuille(propre(), $('mv-f').value); } catch (e) { feuille = null; }
+          try { var pp = propre(); feuille = mvTrouverX(pp, $('mv-f').value) || mvTrouverFeuille(pp, $('mv-f').value); } catch (e) { feuille = null; }
           if (feuille) { poserEchelle(feuille.pxParCm, '${T("Feuille trouvée : l’échelle est posée.")}'); return; }
           var mm = memoLire();
           if (mm) { mode = 'memo'; $('mv-mode').value = 'memo'; poserEchelle(mm * r, '${T("Pas de feuille : l’échelle retenue du poste photo est utilisée.")}'); return; }
@@ -3868,7 +4074,7 @@ function pageProduit(id) {
     dessinerJetons(); majMarge(); majIa(); majNom();
     // On repart de l'étape où la personne s'était arrêtée : la ramener à la
     // première l'obligerait à retraverser ce qu'elle avait déjà rempli.
-    if (typeof d.etape === 'number') Assist.aller(Math.max(0, Math.min(6, d.etape)));
+    if (typeof d.etape === 'number') Assist.aller(Math.max(0, Math.min(7, d.etape)));
     else Assist.fil();
     // Le brouillon restauré est déjà celui du stockage : sans cette ligne, le
     // premier tic le réécrirait à l'identique.
@@ -4073,14 +4279,14 @@ function pageProduit(id) {
       if ((STOCK[t + '-' + c] || 0) > 0) enStock.push(t + '-' + c);
     }); });
     if (!ID && !enStock.length) {
-      Assist.aller(6);
+      Assist.aller(7);
       dire('${T("Saisissez une quantité pour au moins une variante avant d’enregistrer.")}', 'err');
       return;
     }
     if (CTX && (CTX.entrepots || []).length) {
       var sansLieu = enStock.filter(function(k){ return !LOCS[k]; });
       if (sansLieu.length) {
-        Assist.aller(6);
+        Assist.aller(7);
         dire('${T("Sélectionnez un emplacement d’entrepôt pour :")} '
           + sansLieu.slice(0, 3).join(', ')
           + (sansLieu.length > 3 ? '… (' + sansLieu.length + ' variantes)' : '') + '.', 'err');
@@ -4203,7 +4409,7 @@ function pageProduit(id) {
         if (r && r.motif === 'tailles_couleurs_requises') Assist.aller(1);
         if (r && r.motif === 'photo_requise') Assist.aller(2);
         if (r && /^(mannequin_|video_|vue360_)/.test(String(r.motif || ''))) Assist.aller(2);
-        if (r && r.motif === 'stock_requis') Assist.aller(6);
+        if (r && r.motif === 'stock_requis') Assist.aller(7);
         // LE NIP DES PHOTOS : demandé (et redemandé s'il est faux) ; annuler laisse la fiche telle qu'à l'écran.
         if (r && (r.motif === 'photos_nip_requis' || r.motif === 'photos_nip_faux')) {
           dire('');
@@ -4216,7 +4422,7 @@ function pageProduit(id) {
           return;
         }
         if (r && r.motif === 'emplacement_requis') {
-          Assist.aller(6);
+          Assist.aller(7);
           dire('${T("Sélectionnez un emplacement d’entrepôt pour :")} '
             + (r.manquants || []).join(', ') + '.', 'err');
           return;

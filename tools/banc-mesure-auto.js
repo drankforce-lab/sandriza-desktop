@@ -78,5 +78,26 @@ const cvF = (() => { const W = 110 * K, H = 105 * K, d = new Uint8ClampedArray(W
 const fe = trouver(cvF, 'lettre');
 if (!fe || Math.abs(fe.pxParCm - K) > 0.4) { fautes++; console.log('  ✗ feuille sur mur blanc : ' + (fe ? fe.pxParCm.toFixed(2) + ' px/cm (attendu 8)' : 'introuvable')); }
 else console.log('  ✓ feuille trouvée, pas le mur : ' + fe.pxParCm.toFixed(2) + ' px/cm');
+// LA FEUILLE PAR SON X (sa photo du 2026-10-20) : une feuille presque de la couleur du mur (205 contre 206),
+// marquée d'un X rose d'un coin à l'autre. La blancheur ne la trouve pas ; le X, si.
+const a3 = src.indexOf('  function mvTrouverX('), b3 = src.indexOf('  /* L\'ANALYSE SUR PLACE');
+const trouverX = new Function(src.slice(a3, b3) + '; return mvTrouverX;')();
+const cvX = (() => { const W = 110 * K, H = 105 * K, d = new Uint8ClampedArray(W * H * 4);
+  const x0 = 60, y0 = 40, L = 27.94, l = 21.59;           // feuille portrait, coin haut-gauche (60, 40) cm
+  const surTrait = (X, Y) => { const u = (X - x0) / l, v = (Y - y0) / L; if (u < 0 || u > 1 || v < 0 || v > 1) return false;
+    return Math.abs(u - v) * Math.min(l, L) < 0.18 || Math.abs(u - (1 - v)) * Math.min(l, L) < 0.18; };
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const i = (y * W + x) * 4, X = x / K, Y = y / K;
+    const dans = X > x0 && X < x0 + l && Y > y0 && Y < y0 + L, n = ((x * 7 + y * 13) % 5) - 2;
+    let c = dans ? [205, 204, 222] : [206, 208, 228];
+    if (surTrait(X, Y)) c = [190, 150, 175];
+    if (X < 30 && Y > 20 && Y < 95) c = [120, 120, 130];  // un vêtement gris à gauche
+    d[i] = c[0] + n; d[i + 1] = c[1] + n; d[i + 2] = c[2] + n; d[i + 3] = 255; }
+  return { width: W, height: H, getContext: () => ({ getImageData: () => ({ data: d }) }) }; })();
+const fx = trouverX(cvX, 'lettre');
+if (!fx || Math.abs(fx.pxParCm - K) > 0.5) { fautes++; console.log('  ✗ feuille par son X : ' + (fx ? fx.pxParCm.toFixed(2) + ' px/cm (attendu 8)' : 'introuvable')); }
+else console.log('  ✓ feuille trouvée par son X sur un mur de sa couleur : ' + fx.pxParCm.toFixed(2) + ' px/cm');
+// …et un X ne s'invente pas : le t-shirt synthétique n'en porte aucun.
+if (trouverX(canvas(100 * K, 95 * K, tee), 'lettre')) { fautes++; console.log('  ✗ un X inventé sur une photo qui n en a pas'); }
+else console.log('  ✓ aucun X inventé sur une photo sans feuille');
 console.log(fautes ? '>>> ' + fautes + ' faute(s)' : '>>> mesure automatique : tout est juste');
 process.exit(fautes ? 1 : 0);
