@@ -254,7 +254,7 @@ table.mesv thead th b{display:block;font-size:.72rem;text-transform:uppercase;le
 table.mesv thead th small{display:block;font-size:.7rem;color:var(--tx2);font-weight:400;margin-top:.12rem;line-height:1.25;letter-spacing:0;text-transform:none;white-space:normal}
 table.mesv tbody th{padding:.32rem .8rem;text-align:left;background:transparent}
 table.mesv tbody th span{display:inline-flex;align-items:center;justify-content:center;min-width:2.4rem;height:1.8rem;padding:0 .5rem;border-radius:8px;border:1px solid var(--v12);font-weight:700;font-size:.8rem}
-table.mesv tbody tr.photo th span{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
+table.mesv tbody tr.mv-ref th span{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
 table.mesv td{padding:.32rem .8rem}
 table.mesv tbody tr+tr th,table.mesv tbody tr+tr td{border-top:1px solid var(--v05)}
 .mv-cm{display:inline-flex;align-items:center;border:1px solid var(--v12);border-radius:8px;overflow:hidden;max-width:100%}
@@ -264,11 +264,12 @@ table.mesv .mv-cm input{width:4.2rem;height:auto;min-height:0;border:0;border-ra
 /* Une case COMPLÉTÉE par la gradation : pointillée et en italique — on voit ce qui a été mesuré. */
 .mv-cm.grad{border-style:dashed}
 .mv-cm.grad input{font-style:italic;color:var(--tx2)}
+.mesv-pages{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;margin-top:.5rem;font-size:.8rem;color:var(--tx2)}
 .mesv-note{margin-top:.55rem;display:flex;flex-wrap:wrap;gap:.3rem 1rem}
 .mesv-note .lg{display:inline-flex;align-items:center;gap:.35rem}
 .mesv-note .lg i{display:inline-block;width:1.4rem;height:.85rem;border:1px dashed var(--v22);border-radius:4px}
 .mesv-auto{display:flex;gap:.9rem;align-items:center;border:1px solid var(--v10);border-radius:11px;padding:.5rem .8rem .5rem .5rem;margin:0 0 .8rem;background:var(--v03)}
-.mesv-auto.vide{display:block;padding:.55rem .8rem}
+.mesv-auto.mv-vide{display:block;padding:.55rem .8rem}
 .mesv-auto canvas{flex:0 0 auto;border-radius:8px;border:1px solid var(--v12);height:84px;width:auto}
 .mesv-auto-txt{min-width:0;flex:1 1 auto}
 .mesv-auto-txt b{display:flex;align-items:center;gap:.4rem;font-size:.84rem;margin-bottom:.15rem}
@@ -1589,16 +1590,25 @@ function pageProduit(id) {
     if (!ts.length) { z.innerHTML = '<div class="aide">${T("Choisissez d’abord les tailles à l’étape « Tailles et couleurs ».")}</div>'; return; }
     var cols = MV_TYPES[ty];
     var tpo = mvTaillePhoto();
+    /* DES PAGES, PAS UNE GLISSIÈRE (2026-10-20, sa question : « as-tu prévu une vingtaine de lignes ? ») : au-delà
+       de 8 tailles, le tableau se lit page par page ; la page s ouvre sur la taille photographiée. */
+    var PAR = 8, nbP = Math.max(1, Math.ceil(ts.length / PAR));
+    if (MV_PAGE == null || MV_PAGE >= nbP) MV_PAGE = Math.max(0, Math.floor(Math.max(0, ts.indexOf(tpo)) / PAR));
+    var tsP = ts.slice(MV_PAGE * PAR, MV_PAGE * PAR + PAR);
     z.innerHTML = '<div class="mesv-cadre"><table class="mesv"><colgroup><col class="c-t">' + cols.map(function(){ return '<col>'; }).join('') + '</colgroup><thead><tr><th><b>${T("Taille")}</b></th>'
       + cols.map(function(c){ return '<th><b>' + c[1] + '</b><small>' + c[2] + '</small></th>'; }).join('') + '</tr></thead><tbody>'
-      + ts.map(function(t){
+      + tsP.map(function(t){
           var r = MESV.tailles[t] || {};
-          return '<tr' + (t === tpo ? ' class="photo"' : '') + '><th><span>' + esc(t) + '</span></th>' + cols.map(function(c){
+          return '<tr' + (t === tpo ? ' class="mv-ref"' : '') + '><th><span>' + esc(t) + '</span></th>' + cols.map(function(c){
             return '<td><span class="mv-cm' + (MV_GRAD[t + '|' + c[0]] ? ' grad' : '') + '"><input type="number" min="0" step="0.5" inputmode="decimal" data-mvt="' + esc(t) + '" data-mvk="' + c[0] + '" value="' + (r[c[0]] || '') + '" aria-label="' + esc(t + ' — ' + c[1]) + '"><i>cm</i></span></td>';
           }).join('') + '</tr>';
         }).join('') + '</tbody></table></div>'
+      + (nbP > 1 ? '<div class="mesv-pages"><button type="button" class="mini" data-mvp="-1"' + (MV_PAGE ? '' : ' disabled') + '>‹</button><span>${T("Tailles")} '
+          + (MV_PAGE * PAR + 1) + '–' + Math.min(ts.length, MV_PAGE * PAR + PAR) + ' ${T("sur")} ' + ts.length + '</span>'
+          + '<button type="button" class="mini" data-mvp="1"' + (MV_PAGE < nbP - 1 ? '' : ' disabled') + '>›</button></div>' : '')
       + '<div class="aide mesv-note"><span>${T("En centimètres, vêtement à plat : la boutique double les tours (poitrine, taille, hanches).")}</span>'
       + '<span class="lg"><i></i>${T("complétée d’après la taille mesurée — tapez-y pour la remplacer")}</span></div>';
+    z.querySelectorAll('[data-mvp]').forEach(function(b){ b.onclick = function(){ MV_PAGE += +b.getAttribute('data-mvp'); dessinerMesures(); }; });
     z.querySelectorAll('input[data-mvt]').forEach(function(el){
       el.oninput = function(){
         var t = el.getAttribute('data-mvt'), k = el.getAttribute('data-mvk'), n = parseFloat(String(el.value).replace(',', '.'));
@@ -1614,7 +1624,7 @@ function pageProduit(id) {
      lues sur la photo) ; chaque autre taille reçoit, dans ses cases vides, la gradation standard du
      prêt-à-porter (MV_PAS). Une case complétée ainsi reste marquée (MV_GRAD) : elle suit la référence
      si celle-ci change, et ne bouge plus dès qu on y tape. */
-  var MV_GRAD = {};
+  var MV_GRAD = {}, MV_PAGE = null;
   function mvAutoGraduer(enPlace){
     var ty = mvType(), ts = tailles(); if (!ty || ts.length < 2) return;
     var cles = MV_TYPES[ty].map(function(x){ return x[0]; });
@@ -1996,7 +2006,7 @@ function pageProduit(id) {
     var ty = mvType(), z = document.getElementById('p-mesv-auto');
     if (!z) return;
     if (!ty || !tailles().length) { z.innerHTML = ''; return; }
-    if (!IMAGE) { z.innerHTML = '<div class="mesv-auto vide"><div class="aide">${T("Ajoutez la photo principale (étape « Photo ») : si une feuille marquée d’un X y figure, les mesures se prennent toutes seules ici.")}</div></div>'; return; }
+    if (!IMAGE) { z.innerHTML = '<div class="mesv-auto mv-vide"><div class="aide">${T("Ajoutez la photo principale (étape « Photo ») : si une feuille marquée d’un X y figure, les mesures se prennent toutes seules ici.")}</div></div>'; return; }
     var cle = IMAGE + '|' + ty;
     if (MV_AUTO && MV_AUTO.cle === cle) { mvMontrerAuto(); return; }
     MV_AUTO = { cle: cle, enCours: true };
@@ -2066,16 +2076,16 @@ function pageProduit(id) {
     if (A && A.t && A.poses) A.poses.forEach(function(k){
       var r = MESV.tailles[A.t]; if (r && A.res && A.res.mesures[k] && r[k] === A.res.mesures[k].cm) delete r[k];
     });
-    MV_T = t; if (A) { A.t = t; mvPoserAuto(); }
+    MV_T = t; MV_PAGE = null; if (A) { A.t = t; mvPoserAuto(); }
     mvAutoGraduer(false);
     dessinerMesures();
   }
   function mvMontrerAuto(){
     var z = document.getElementById('p-mesv-auto'), A = MV_AUTO; if (!z || !A) return;
     if (A.enCours) return;
-    if (A.erreur) { z.innerHTML = '<div class="mesv-auto vide"><div class="aide">${T("La photo principale n’a pas pu être lue.")}</div></div>'; return; }
+    if (A.erreur) { z.innerHTML = '<div class="mesv-auto mv-vide"><div class="aide">${T("La photo principale n’a pas pu être lue.")}</div></div>'; return; }
     if (!A.feuille) {
-      z.innerHTML = '<div class="mesv-auto vide"><div class="aide">${T("Aucune feuille repérée dans la photo principale. Pour une mesure automatique : une feuille lettre posée à plat près du vêtement, marquée d’un X au feutre d’un coin à l’autre. Sinon, « Mesurer sur une photo » pour poser l’échelle à la main.")}</div></div>';
+      z.innerHTML = '<div class="mesv-auto mv-vide"><div class="aide">${T("Aucune feuille repérée dans la photo principale. Pour une mesure automatique : une feuille lettre posée à plat près du vêtement, marquée d’un X au feutre d’un coin à l’autre. Sinon, « Mesurer sur une photo » pour poser l’échelle à la main.")}</div></div>';
       return;
     }
     var n = A.res ? A.res.n : 0, poses = (A.poses || []).length;
@@ -2085,10 +2095,9 @@ function pageProduit(id) {
     var txt = n
       ? (poses ? poses + '${T(" mesure(s) estimée(s) inscrite(s) pour la taille ")}' + esc(A.t) + '.' : '${T("Mesures estimées : les cases étaient déjà remplies, rien n’a été remplacé.")}')
         + ' ${T("Vérifiez chaque trait sur l’aperçu.")}' + plus
-      : '${T("Échelle posée. Le vêtement se confond avec le mur ou le mannequin : tracez ses mesures sur la photo — deux clics chacune, les autres tailles suivent.")}' + plus;
+      : '${T("Le vêtement n’a pas pu être mesuré automatiquement sur cette photo : tapez les mesures d’une taille dans le tableau, les autres suivront.")}' + plus;
     z.innerHTML = '<div class="mesv-auto"><canvas id="p-mesv-apercu"></canvas><div class="mesv-auto-txt">'
-      + '<b><span class="ok">✓</span>${T("Feuille trouvée dans la photo principale")}</b><div class="aide">' + txt + '</div></div>'
-      + '<div class="mesv-auto-act"><button type="button" class="' + (n ? 'mini' : 'prim') + '" id="p-mesv-ajuster">' + (n ? '${T("Ajuster sur la photo")}' : '${T("Tracer les mesures")}') + '</button></div></div>';
+      + '<b><span class="ok">✓</span>' + (A.ia ? '${T("Mesures prises d’après le contour du vêtement")}' : '${T("Feuille trouvée dans la photo principale")}') + '</b><div class="aide">' + txt + '</div></div></div>';
     var c = document.getElementById('p-mesv-apercu'), s = Math.min(1, 220 / A.cv.width, 220 / A.cv.height);
     c.width = Math.round(A.cv.width * s); c.height = Math.round(A.cv.height * s);
     var g = c.getContext('2d'); g.drawImage(A.cv, 0, 0, c.width, c.height);
@@ -2098,7 +2107,6 @@ function pageProduit(id) {
       var m = A.res.mesures[k]; g.strokeStyle = '#c9a97e'; g.lineWidth = 2;
       g.beginPath(); g.moveTo(m.a[0] * s, m.a[1] * s); g.lineTo(m.b[0] * s, m.b[1] * s); g.stroke();
     });
-    document.getElementById('p-mesv-ajuster').onclick = mvOutilPhoto;
   }
 
   /* LES MESURES D APRÈS LE CONTOUR DU VÊTEMENT (2026-10-20, essai sur sa photo du manteau gris).

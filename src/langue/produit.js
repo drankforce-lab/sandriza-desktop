@@ -857,4 +857,6 @@ module.exports = {
   "Plafond des traitements d’images atteint : mesure automatique impossible pour le moment.": "Image processing cap reached: automatic measuring is not possible for now.",
   "Le service d’images n’a pas répondu : mesure automatique impossible pour le moment.": "The image service did not respond: automatic measuring is not possible for now.",
   "Manche : aucun des deux bras n’est assez droit sur la photo pour la mesurer — prenez-la au ruban et tapez-la dans le tableau.": "Sleeve: neither arm is straight enough in the photo to measure it — take it with a tape and type it in the table.",
+  "Le vêtement n’a pas pu être mesuré automatiquement sur cette photo : tapez les mesures d’une taille dans le tableau, les autres suivront.": "The garment could not be measured automatically on this photo: type the measurements of one size in the table, the others will follow.",
+  "Mesures prises d’après le contour du vêtement": "Measurements taken from the garment outline",
 };

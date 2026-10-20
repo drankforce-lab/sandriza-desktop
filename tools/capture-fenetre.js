@@ -9,7 +9,7 @@
  * va à l'étape demandée, et en prend une capture PNG — pour REGARDER avant de livrer.
  *
  *   node tools/capture-fenetre.js <fenetre> [--etape N] [--jeu N] [--jour] [--l 1400] [--h 900]
- *                                 [--js "code à jouer avant la capture"] [--sortie f.png]
+ *                                 [--js "code à jouer avant la capture"] [--fusion '{"op":{…}}'] [--sortie f.png]
  *
  * Un seul Chrome sans tête, lancé une fois, qui se ferme tout seul.
  */
@@ -32,6 +32,9 @@ const brut = REPONSES[nom + '.js'];
 const nJeu = Number(opt('--jeu', 0));
 const jeu = Array.isArray(brut) ? brut[Math.min(nJeu, brut.length - 1)] : { id: '', reponses: brut || {} };
 const ops = Object.assign({ 'session:activite': { ok: true }, 'lots:etat': { ok: true, lots: [] } }, jeu.reponses || {});
+// --fusion '{"op":{"champ":valeur}}' : retouche une réponse du jeu pour un cas limite (vingt tailles, texte long…).
+const fusion = opt('--fusion', '');
+if (fusion) { const f = JSON.parse(fusion); for (const k of Object.keys(f)) ops[k] = Object.assign({}, ops[k] || {}, f[k]); }
 
 let page = String(fabrique(jeu.id || ''));
 // L'assistant vit dans la fermeture de la page : on le rend joignable pour aller à l'étape voulue
@@ -56,10 +59,16 @@ const sortie = path.resolve(opt('--sortie', path.join(tmp, nom + (etape != null 
 const chrome = ['C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',
   '/usr/bin/google-chrome', '/usr/bin/chromium'].find((c) => fs.existsSync(c));
 if (!chrome) { console.error('✗ Chrome introuvable.'); process.exit(1); }
-const r = spawnSync(chrome, ['--headless=new', '--disable-gpu', '--allow-file-access-from-files', '--hide-scrollbars',
-  '--no-first-run', '--disable-extensions', '--window-size=' + opt('--l', 1400) + ',' + opt('--h', 900),
-  '--virtual-time-budget=5000', '--user-data-dir=' + path.join(tmp, 'profil'),
-  '--screenshot=' + sortie, 'file:///' + f.split(path.sep).join('/')], { timeout: 90000 });
+/* ⚠ CHROME SANS TÊTE RATE PARFOIS SA CAPTURE (statut 0, aucun fichier — vu deux fois le 2026-10-20) :
+   on réessaie, jusqu'à trois fois, un seul navigateur à la fois. */
+let r = null;
+for (let essai = 0; essai < 3 && !fs.existsSync(sortie); essai++) {
+  try { fs.rmSync(path.join(tmp, 'profil'), { recursive: true, force: true }); } catch (e) {}
+  r = spawnSync(chrome, ['--headless=new', '--disable-gpu', '--allow-file-access-from-files', '--hide-scrollbars',
+    '--no-first-run', '--disable-extensions', '--window-size=' + opt('--l', 1400) + ',' + opt('--h', 900),
+    '--virtual-time-budget=5000', '--user-data-dir=' + path.join(tmp, 'profil'),
+    '--screenshot=' + sortie, 'file:///' + f.split(path.sep).join('/')], { timeout: 90000 });
+}
 try { fs.rmSync(path.join(tmp, 'profil'), { recursive: true, force: true }); } catch (e) {}
 if (!fs.existsSync(sortie)) { console.error('✗ aucune capture (statut ' + r.status + ')'); process.exit(1); }
 console.log(sortie);
