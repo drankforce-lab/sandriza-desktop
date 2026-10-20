@@ -4162,7 +4162,8 @@ ipcMain.on('pos:diffuser', (e, etat) => {
    écoute, il ne peut rien déclencher — même règle que l'affichage client. */
 const { Encan } = require('./encan');
 const ENCAN_GESTES = new Set(['regler', 'modeEssai', 'charger', 'enFile', 'retirerDeFile', 'suivant', 'demarrer', 'pause',
-  'reprendre', 'ajouterTemps', 'remettre', 'adjuger', 'annuler', 'confirmerGagne', 'remettreEnVente', 'garde', 'commentaire']);
+  'reprendre', 'ajouterTemps', 'remettre', 'adjuger', 'annuler', 'confirmerGagne', 'remettreEnVente', 'garde', 'commentaire',
+  'confirmerAttente', 'remettreAttente', 'annulerOffre', 'bloquer', 'debloquer']);
 let _encan = null, _encanBattement = null, _encanDernierEnvoi = 0;
 const _encanPousser = (etat) => {
   _encanDernierEnvoi = Date.now();
@@ -4179,7 +4180,7 @@ const encanMoteur = () => {
      en cours de route se recale sans rien demander. */
   _encanBattement = setInterval(() => {
     _encan.battre();
-    const vivant = ['encours', 'pause', 'adjuge'].includes(_encan.phase);
+    const vivant = ['encours', 'pause', 'adjuge'].includes(_encan.phase) || _encan.attentes.length > 0;
     if (vivant && Date.now() - _encanDernierEnvoi > 1000) _encanPousser(_encan.etat());
   }, 100);
   return _encan;

@@ -91,9 +91,6 @@ body{color:#F8F6F3;font:16px/1.3 system-ui,-apple-system,"Segoe UI",Roboto,sans-
   flex-direction:column;gap:1vh;margin-top:auto}
 .cadre .a{font-size:2.2vh;font-weight:800}
 .cadre .b{font-size:2.6vh;font-weight:900;color:#D9A86C;line-height:1.25}
-.cadre .c{display:flex;align-items:baseline;gap:1.2vh}
-.cadre .c span{font-size:1.8vh;color:#E4DED5}
-.cadre .c b{font-size:5.4vh;font-weight:900;font-variant-numeric:tabular-nums}
 .cadre .d{font-size:1.8vh;line-height:1.4;color:#E4DED5}
 .cadre .e{font-size:1.4vh;color:#C9C2B8}
 `;
@@ -185,10 +182,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="m">' + argent(g.montant) + '</div>'
       + '<div class="pastille">' + esc(g.pseudo) + '</div><div class="cadre">';
     if (E.phase === 'adjuge') {
+      /* (2026-10-20, sa remarque) PAS DE MINUTEUR ICI : on enchaîne sur l'article suivant. Le délai court quand
+         même (console : « En attente de GAGNÉ ») ; l'écran ne dit que la règle. */
       h += '<div class="a">${T("Bravo, tu as gagné !")}</div>'
         + '<div class="b">${T("Envoie « GAGNÉ » en message privé")}</div>'
-        + '<div class="c"><span>${T("Il te reste")}</span><b id="delai">' + chrono(g.restantMs) + '</b></div>'
-        + '<div class="d">' + '${T("Passé {n} minutes, l’article est remis en vente. On te répond avec ton lien pour payer.")}'.replace('{n}', String(Math.round((E.reglages.delaiGagne || 900) / 60))) + '</div>';
+        + '<div class="d">' + '${T("Tu as {n} minutes pour nous écrire ; sinon, l’article est remis en vente. On te répond avec ton lien pour payer.")}'.replace('{n}', String(Math.round((E.reglages.delaiGagne || 900) / 60))) + '</div>';
     } else if (E.phase === 'expire') {
       h += '<div class="a">${T("Délai passé")}</div><div class="d">${T("L’article est remis en vente dans un instant.")}</div>';
     } else {
@@ -212,9 +210,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var r = restant();
       if (c) c.textContent = chrono(r);
       if (b && E.dureeMs) b.style.width = Math.max(0, Math.min(100, r / E.dureeMs * 100)).toFixed(1) + '%';
-    } else if (E && E.phase === 'adjuge' && E.gagnant) {
-      var d = document.getElementById('delai');
-      if (d) d.textContent = chrono(E.gagnant.restantMs - (Date.now() - RECU));
     }
   }
 

@@ -63,9 +63,7 @@ verif('le délai du message « GAGNÉ » est de 15 minutes', Math.abs(e.etat().g
 r = e.commentaire('@tard', '50');
 verif('une offre après l adjudication ne compte pas', r.verdict === 'fermee' && e.gagnant.montant === 16);
 avancer(15 * 60000, e);
-verif('passé 15 minutes sans « GAGNÉ » : délai expiré', e.phase === 'expire');
-e.remettreEnVente();
-verif('remis en vente : même article, prix de départ, aucune offre', e.phase === 'pret' && e.article.nom === 'Bottes chelsea' && e.prix === 15 && e.offres.length === 0 && e.historique[0].issue === 'remis');
+verif('remis en vente TOUT SEUL après 15 minutes sans « GAGNÉ » : même article, prix de départ, aucune offre', e.phase === 'pret' && e.article.nom === 'Bottes chelsea' && e.prix === 15 && e.offres.length === 0 && e.historique[0].issue === 'remis');
 
 console.log('— Gestes refusés quand ils n ont pas de sens');
 e = neuf();
@@ -74,6 +72,28 @@ verif('changer d article pendant un encan : refusé', e.charger({ nom: 'Autre' }
 e.commentaire('@a', '20'); e.adjuger();
 verif('« GAGNÉ » reçu : vendu, à l historique', e.confirmerGagne().ok && e.phase === 'vendu' && e.historique[0].issue === 'vendu');
 verif('le mode essai coupé refuse les faux commentaires', (() => { const x = neuf(); x.modeEssai(false); x.demarrer(); return x.commentaire('@a', '20', 'essai').motif === 'essai_coupe'; })());
+
+console.log('— On enchaîne : la gagnante attend « GAGNÉ » pendant l encan suivant');
+e = neuf(); e.demarrer(); e.commentaire('@ana', '20'); e.adjuger();
+e.charger({ nom: 'Gilet bleu', variante: 'L' });
+verif('passer à l article suivant garde la gagnante EN ATTENTE (rien ne se perd)', e.attentes.length === 1 && e.attentes[0].gagnant.pseudo === '@ana' && e.article.nom === 'Gilet bleu');
+e.demarrer();
+avancer(10 * 60000, e);
+verif('son délai court pendant l encan suivant', e.etat().attentes.length === 1 && e.etat().attentes[0].restantMs <= 5 * 60000 + 300);
+verif('« GAGNÉ » reçu pour une attente : vendu', (() => { const x = neuf(); x.demarrer(); x.commentaire('@b', '20'); x.adjuger(); x.garde(); const k = x.attentes[0].cle; return x.confirmerAttente(k).ok && !x.attentes.length && x.historique[0].issue === 'vendu'; })());
+avancer(5 * 60000 + 500, e);
+verif('au terme des 15 minutes : l article revient EN TÊTE de file, tout seul', e.attentes.length === 0 && e.file.length >= 1 && e.file[0].nom === 'Bottes chelsea' && e.historique[0].issue === 'remis');
+
+console.log('— La modération de l encan');
+e = neuf(); e.demarrer(); e.commentaire('@a', '20'); e.commentaire('@troll', '999'); 
+verif('une offre farfelue (999 $) mène…', e.meneur === '@troll' && e.prix === 999);
+e.annulerOffre(e.offres[0].id);
+verif('« Annuler l offre » : le prix et la meneuse reviennent à l offre précédente', e.meneur === '@a' && e.prix === 20 && e.journal[0].verdict === 'annulee');
+e.commentaire('@troll', '1000'); e.bloquer('@troll');
+verif('« Bloquer » retire ses offres en cours', e.meneur === '@a' && e.prix === 20);
+verif('…et les suivantes ne comptent plus', e.commentaire('troll', '2000').verdict === 'bloque' && e.prix === 20);
+e.debloquer('@troll');
+verif('« Débloquer » : de nouveau admis', e.commentaire('@troll', '25').verdict === 'retenue');
 
 console.log(ok + ' vérifiés, ' + ko + ' en échec');
 process.exit(ko ? 1 : 0);
