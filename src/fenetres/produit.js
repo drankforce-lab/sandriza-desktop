@@ -786,7 +786,7 @@ function pageProduit(id) {
 
     /* 5 ter — MESURES DU VÊTEMENT (7.13.0) : facultatives, elles font la taille suggérée. */
     h.push('<div class="etape"><div class="carte plein" id="p-mesv-carte"><h2>${T("Mesures du vêtement")}</h2>'
-      + '<div class="aide" style="margin-bottom:.7rem">${T("Facultatif : sert à suggérer la bonne taille à chaque cliente. Mesurez une taille — sur la photo ou au ruban — et les autres se complètent toutes seules.")}</div>'
+      + '<div class="aide" style="margin-bottom:.7rem">${T("Facultatif : sert à suggérer la bonne taille à chaque client. Mesurez une taille — sur la photo ou au ruban — et les autres se complètent toutes seules.")}</div>'
       + '<div class="mesv-barre"><div class="mv-ch"><label for="p-mesv-type">${T("Type")}</label><select id="p-mesv-type">'
       + '<option value="haut">${T("Haut (chandail, chemisier, veste)")}</option><option value="bas">${T("Bas (pantalon, jupe, short)")}</option>'
       + '<option value="robe">${T("Robe ou combinaison")}</option><option value="aucun">${T("Aucune mesure")}</option></select></div>'
