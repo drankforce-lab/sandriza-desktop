@@ -239,31 +239,41 @@ html.jour .vue .depl button{background:rgba(255,255,255,.92);color:#1d2433;borde
 /* Mesures du vêtement (7.13.0, refaites le 2026-10-20) : les cartes ne se compriment plus
    (c est ce qui faisait déborder le tableau de sa carte), cases étroites avec leur unité. */
 #p-mesv-carte,#p-ent-carte{flex:0 0 auto}
-.mesv-barre{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin-bottom:.8rem}
-.mesv-barre label{font-size:.8rem;color:var(--tx2);font-weight:600;margin:0}
-.mesv-barre select{width:auto;min-width:16rem;flex:0 0 auto}
+.mesv-barre{display:flex;flex-wrap:wrap;align-items:flex-end;gap:.6rem 1rem;margin-bottom:.9rem}
+.mesv-barre .mv-ch{display:flex;flex-direction:column;gap:.25rem}
+.mesv-barre label{font-size:.74rem;color:var(--tx2);font-weight:600;margin:0}
+#p-mesv-type{width:16.5rem;min-width:0}
+#p-mesv-t{width:7rem;min-width:0}
 .mesv-barre .esp{flex:1 1 auto}
 .mesv-cadre{border:1px solid var(--v10);border-radius:11px;overflow-x:auto;overflow-y:hidden}
-table.mesv{width:100%;border-collapse:collapse;font-size:.84rem;font-variant-numeric:tabular-nums}
-table.mesv thead th{text-align:left;vertical-align:bottom;padding:.55rem .7rem .45rem;border-bottom:1px solid var(--v10);background:var(--v05)}
-table.mesv thead th b{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx);font-weight:700}
-table.mesv thead th small{display:block;font-size:.7rem;color:var(--tx2);font-weight:400;margin-top:.1rem;line-height:1.25;letter-spacing:0;text-transform:none;font-family:inherit}
-table.mesv tbody th{width:4.5rem;padding:.28rem .7rem;text-align:left}
-table.mesv tbody th span{display:inline-flex;align-items:center;justify-content:center;min-width:2.4rem;height:1.75rem;padding:0 .45rem;border-radius:8px;border:1px solid var(--v12);font-weight:700;font-size:.8rem}
-table.mesv td{padding:.28rem .7rem}
+table.mesv{width:100%;border-collapse:collapse;font-size:.84rem;font-variant-numeric:tabular-nums;table-layout:fixed}
+table.mesv col.c-t{width:5.5rem}
+table.mesv thead th{text-align:left;vertical-align:bottom;padding:.6rem .8rem .5rem;border-bottom:1px solid var(--v10);background:var(--v05)}
+html table.mesv thead th:first-child{background-image:none}
+table.mesv thead th b{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx);font-weight:700}
+table.mesv thead th small{display:block;font-size:.7rem;color:var(--tx2);font-weight:400;margin-top:.12rem;line-height:1.25;letter-spacing:0;text-transform:none;white-space:normal}
+table.mesv tbody th{padding:.32rem .8rem;text-align:left;background:transparent}
+table.mesv tbody th span{display:inline-flex;align-items:center;justify-content:center;min-width:2.4rem;height:1.8rem;padding:0 .5rem;border-radius:8px;border:1px solid var(--v12);font-weight:700;font-size:.8rem}
+table.mesv tbody tr.photo th span{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
+table.mesv td{padding:.32rem .8rem}
 table.mesv tbody tr+tr th,table.mesv tbody tr+tr td{border-top:1px solid var(--v05)}
-table.mesv tbody tr:hover{background:var(--v03)}
-.mv-cm{display:inline-flex;align-items:center;border:1px solid var(--v12);border-radius:8px;overflow:hidden}
+.mv-cm{display:inline-flex;align-items:center;border:1px solid var(--v12);border-radius:8px;overflow:hidden;max-width:100%}
 .mv-cm:focus-within{border-color:var(--or)}
-table.mesv .mv-cm input{width:4.4rem;height:auto;min-height:0;border:0;border-radius:0;background:transparent;text-align:right;padding:.3rem .35rem;box-shadow:none}
-.mv-cm i{font-style:normal;font-size:.72rem;color:var(--tx2);padding:0 .5rem 0 .1rem}
-.mesv-note{margin-top:.55rem}
-.mesv-auto{display:flex;gap:.8rem;align-items:center;border:1px solid var(--v10);border-radius:11px;padding:.55rem .7rem;margin:0 0 .7rem;background:var(--v03)}
-.mesv-auto.vide{display:block}
-.mesv-auto canvas{flex:0 0 auto;border-radius:8px;border:1px solid var(--v12);max-height:120px;width:auto}
+table.mesv .mv-cm input{width:4.2rem;height:auto;min-height:0;border:0;border-radius:0;background:transparent;text-align:right;padding:.34rem .3rem;box-shadow:none}
+.mv-cm i{font-style:normal;font-size:.72rem;color:var(--tx3,var(--tx2));padding:0 .55rem 0 .15rem}
+/* Une case COMPLÉTÉE par la gradation : pointillée et en italique — on voit ce qui a été mesuré. */
+.mv-cm.grad{border-style:dashed}
+.mv-cm.grad input{font-style:italic;color:var(--tx2)}
+.mesv-note{margin-top:.55rem;display:flex;flex-wrap:wrap;gap:.3rem 1rem}
+.mesv-note .lg{display:inline-flex;align-items:center;gap:.35rem}
+.mesv-note .lg i{display:inline-block;width:1.4rem;height:.85rem;border:1px dashed var(--v22);border-radius:4px}
+.mesv-auto{display:flex;gap:.9rem;align-items:center;border:1px solid var(--v10);border-radius:11px;padding:.5rem .8rem .5rem .5rem;margin:0 0 .8rem;background:var(--v03)}
+.mesv-auto.vide{display:block;padding:.55rem .8rem}
+.mesv-auto canvas{flex:0 0 auto;border-radius:8px;border:1px solid var(--v12);height:84px;width:auto}
 .mesv-auto-txt{min-width:0;flex:1 1 auto}
-.mesv-auto-txt b{display:block;font-size:.84rem;margin-bottom:.15rem}
-.mesv-auto-act{margin-top:.4rem}
+.mesv-auto-txt b{display:flex;align-items:center;gap:.4rem;font-size:.84rem;margin-bottom:.15rem}
+.mesv-auto-txt b .ok{color:var(--tx-ok)}
+.mesv-auto-act{flex:0 0 auto}
 .mv-boite{max-width:62rem!important}
 .mv-barre{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-bottom:.5rem;font-size:.82rem}
 .mv-q{font-weight:600;color:var(--tx)!important}
@@ -776,13 +786,12 @@ function pageProduit(id) {
 
     /* 5 ter — MESURES DU VÊTEMENT (7.13.0) : facultatives, elles font la taille suggérée. */
     h.push('<div class="etape"><div class="carte plein" id="p-mesv-carte"><h2>${T("Mesures du vêtement")}</h2>'
-      + '<div class="aide" style="margin-bottom:.6rem">${T("Facultatif, mais c’est ce qui permet de suggérer la bonne taille à chaque client d’après ses propres mesures — et d’éviter les retours. Photographiez le vêtement à plat sur un fond NON blanc, avec une feuille lettre posée à côté.")}</div>'
-      + '<div class="mesv-barre"><label for="p-mesv-type">${T("Type")}</label><select id="p-mesv-type">'
+      + '<div class="aide" style="margin-bottom:.7rem">${T("Facultatif : sert à suggérer la bonne taille à chaque cliente. Mesurez une taille — sur la photo ou au ruban — et les autres se complètent toutes seules.")}</div>'
+      + '<div class="mesv-barre"><div class="mv-ch"><label for="p-mesv-type">${T("Type")}</label><select id="p-mesv-type">'
       + '<option value="haut">${T("Haut (chandail, chemisier, veste)")}</option><option value="bas">${T("Bas (pantalon, jupe, short)")}</option>'
-      + '<option value="robe">${T("Robe ou combinaison")}</option><option value="aucun">${T("Aucune mesure")}</option></select>'
-      + '<label for="p-mesv-t">${T("Taille photographiée")}</label><select id="p-mesv-t"></select>'
-      + '<span class="esp"></span><button type="button" id="p-mesv-photo" class="prim"><span class="ic">📏</span> ${T("Mesurer sur une photo")}</button>'
-      + '<button type="button" id="p-mesv-grad">${T("Compléter les autres tailles")}</button></div>'
+      + '<option value="robe">${T("Robe ou combinaison")}</option><option value="aucun">${T("Aucune mesure")}</option></select></div>'
+      + '<div class="mv-ch"><label for="p-mesv-t">${T("Taille photographiée")}</label><select id="p-mesv-t"></select></div>'
+      + '<span class="esp"></span><button type="button" id="p-mesv-photo"><span class="ic">📏</span> ${T("Mesurer sur une photo")}</button></div>'
       + '<div id="p-mesv-auto"></div><div id="p-mesv-table"></div></div></div>');
     h.push('<div class="etape">'
       /* COMPOSITION ET ENTRETIEN (2026-10-11, sa demande) : des cases, pas du texte libre — la
@@ -1566,7 +1575,6 @@ function pageProduit(id) {
     var ty = mvType();
     if (sel) { sel.value = ty || 'aucun'; sel.onchange = function(){ MESV.type = sel.value; dessinerMesures(); }; }
     var bp = document.getElementById('p-mesv-photo'); if (bp) bp.onclick = mvOutilPhoto;
-    var bg = document.getElementById('p-mesv-grad'); if (bg) bg.onclick = mvGraduer;
     var ts = tailles();
     var st = document.getElementById('p-mesv-t');
     if (st) {
@@ -1579,21 +1587,53 @@ function pageProduit(id) {
     if (!ty) { z.innerHTML = '<div class="aide">${T("Aucune mesure pour ce type d’article. Choisissez un type ci-dessus si le vêtement en a besoin.")}</div>'; return; }
     if (!ts.length) { z.innerHTML = '<div class="aide">${T("Choisissez d’abord les tailles à l’étape « Tailles et couleurs ».")}</div>'; return; }
     var cols = MV_TYPES[ty];
-    z.innerHTML = '<div class="mesv-cadre"><table class="mesv"><thead><tr><th><b>${T("Taille")}</b></th>'
+    var tpo = mvTaillePhoto();
+    z.innerHTML = '<div class="mesv-cadre"><table class="mesv"><colgroup><col class="c-t">' + cols.map(function(){ return '<col>'; }).join('') + '</colgroup><thead><tr><th><b>${T("Taille")}</b></th>'
       + cols.map(function(c){ return '<th><b>' + c[1] + '</b><small>' + c[2] + '</small></th>'; }).join('') + '</tr></thead><tbody>'
       + ts.map(function(t){
           var r = MESV.tailles[t] || {};
-          return '<tr><th><span>' + esc(t) + '</span></th>' + cols.map(function(c){
-            return '<td><span class="mv-cm"><input type="number" min="0" step="0.5" inputmode="decimal" placeholder="—" data-mvt="' + esc(t) + '" data-mvk="' + c[0] + '" value="' + (r[c[0]] || '') + '" aria-label="' + esc(t + ' — ' + c[1]) + '"><i>cm</i></span></td>';
+          return '<tr' + (t === tpo ? ' class="photo"' : '') + '><th><span>' + esc(t) + '</span></th>' + cols.map(function(c){
+            return '<td><span class="mv-cm' + (MV_GRAD[t + '|' + c[0]] ? ' grad' : '') + '"><input type="number" min="0" step="0.5" inputmode="decimal" data-mvt="' + esc(t) + '" data-mvk="' + c[0] + '" value="' + (r[c[0]] || '') + '" aria-label="' + esc(t + ' — ' + c[1]) + '"><i>cm</i></span></td>';
           }).join('') + '</tr>';
         }).join('') + '</tbody></table></div>'
-      + '<div class="aide mesv-note">${T("En centimètres, vêtement posé à plat. Les tours (poitrine, taille, hanches) se mesurent d’un côté à l’autre : la boutique les double.")}</div>';
+      + '<div class="aide mesv-note"><span>${T("En centimètres, vêtement à plat : la boutique double les tours (poitrine, taille, hanches).")}</span>'
+      + '<span class="lg"><i></i>${T("complétée d’après la taille mesurée — tapez-y pour la remplacer")}</span></div>';
     z.querySelectorAll('input[data-mvt]').forEach(function(el){
       el.oninput = function(){
         var t = el.getAttribute('data-mvt'), k = el.getAttribute('data-mvk'), n = parseFloat(String(el.value).replace(',', '.'));
         MESV.tailles[t] = MESV.tailles[t] || {};
         if (n > 0) MESV.tailles[t][k] = n; else delete MESV.tailles[t][k];
+        delete MV_GRAD[t + '|' + k]; el.parentNode.classList.remove('grad');
+        mvAutoGraduer(true);
       };
+    });
+  }
+  /* LES AUTRES TAILLES SE COMPLÈTENT TOUTES SEULES (2026-10-20, sa demande : « au minimum, que mes tailles
+     se complètent seules »). La taille de référence est celle qui a le plus de mesures PRISES (tapées ou
+     lues sur la photo) ; chaque autre taille reçoit, dans ses cases vides, la gradation standard du
+     prêt-à-porter (MV_PAS). Une case complétée ainsi reste marquée (MV_GRAD) : elle suit la référence
+     si celle-ci change, et ne bouge plus dès qu on y tape. */
+  var MV_GRAD = {};
+  function mvAutoGraduer(enPlace){
+    var ty = mvType(), ts = tailles(); if (!ty || ts.length < 2) return;
+    var cles = MV_TYPES[ty].map(function(x){ return x[0]; });
+    var prises = function(t){ var r = MESV.tailles[t] || {}; return cles.filter(function(k){ return r[k] > 0 && !MV_GRAD[t + '|' + k]; }).length; };
+    var ref = null, max = 0;
+    ts.forEach(function(t){ var n = prises(t); if (n > max) { max = n; ref = t; } });
+    var iRef = ts.indexOf(ref);
+    ts.forEach(function(t, i){
+      MESV.tailles[t] = MESV.tailles[t] || {};
+      cles.forEach(function(k){
+        var cle = t + '|' + k, r = MESV.tailles[t];
+        if (r[k] > 0 && !MV_GRAD[cle]) return;              // une valeur prise : on n y touche jamais
+        var base = ref && t !== ref ? (MESV.tailles[ref] || {})[k] : 0;
+        var v = (base > 0 && !MV_GRAD[ref + '|' + k]) ? Math.round((base + (i - iRef) * (MV_PAS[k] || 0)) * 2) / 2 : 0;
+        if (v > 0) { r[k] = v; MV_GRAD[cle] = 1; } else if (MV_GRAD[cle]) { delete r[k]; delete MV_GRAD[cle]; }
+        if (enPlace) {
+          var el = document.querySelector('input[data-mvt="' + t + '"][data-mvk="' + k + '"]');
+          if (el && document.activeElement !== el) { el.value = r[k] || ''; el.parentNode.classList.toggle('grad', !!MV_GRAD[cle]); }
+        }
+      });
     });
   }
   // Complète les cases VIDES à partir de la taille la mieux remplie (gradation standard).
@@ -1963,6 +2003,7 @@ function pageProduit(id) {
       } catch (e) { feuille = null; res = null; }
       MV_AUTO = { cle: cle, cv: cv, feuille: feuille, res: res, t: mvTaillePhoto(), poses: [] };
       mvPoserAuto();
+      mvAutoGraduer(false);
       dessinerMesures();
     });
   }
@@ -1985,6 +2026,7 @@ function pageProduit(id) {
       var r = MESV.tailles[A.t]; if (r && A.res && A.res.mesures[k] && r[k] === A.res.mesures[k].cm) delete r[k];
     });
     MV_T = t; if (A) { A.t = t; mvPoserAuto(); }
+    mvAutoGraduer(false);
     dessinerMesures();
   }
   function mvMontrerAuto(){
@@ -1999,10 +2041,10 @@ function pageProduit(id) {
     var txt = n
       ? (poses ? poses + '${T(" mesure(s) estimée(s) inscrite(s) pour la taille ")}' + esc(A.t) + '.' : '${T("Mesures estimées : les cases étaient déjà remplies, rien n’a été remplacé.")}')
         + ' ${T("Vérifiez chaque trait sur l’aperçu.")}'
-      : '${T("Feuille trouvée, mais le vêtement ne se détache pas assez du fond (mannequin, décor) pour être mesuré tout seul : cliquez « Ajuster sur la photo » — l’échelle est déjà posée, il ne reste qu’à tracer.")}';
+      : '${T("Échelle posée. Le vêtement se confond avec le mur ou le mannequin : tracez ses mesures sur la photo — deux clics chacune, les autres tailles suivent.")}';
     z.innerHTML = '<div class="mesv-auto"><canvas id="p-mesv-apercu"></canvas><div class="mesv-auto-txt">'
-      + '<b>${T("Feuille trouvée dans la photo principale")}</b><div class="aide">' + txt + '</div>'
-      + '<div class="mesv-auto-act"><button type="button" class="mini" id="p-mesv-ajuster">${T("Ajuster sur la photo")}</button></div></div></div>';
+      + '<b><span class="ok">✓</span>${T("Feuille trouvée dans la photo principale")}</b><div class="aide">' + txt + '</div></div>'
+      + '<div class="mesv-auto-act"><button type="button" class="' + (n ? 'mini' : 'prim') + '" id="p-mesv-ajuster">' + (n ? '${T("Ajuster sur la photo")}' : '${T("Tracer les mesures")}') + '</button></div></div>';
     var c = document.getElementById('p-mesv-apercu'), s = Math.min(1, 220 / A.cv.width, 220 / A.cv.height);
     c.width = Math.round(A.cv.width * s); c.height = Math.round(A.cv.height * s);
     var g = c.getContext('2d'); g.drawImage(A.cv, 0, 0, c.width, c.height);
@@ -2189,7 +2231,8 @@ function pageProduit(id) {
         var t = $('mv-t').value;
         MESV.type = ty;
         MESV.tailles[t] = MESV.tailles[t] || {};
-        Object.keys(res).forEach(function(k){ MESV.tailles[t][k] = res[k].cm; });
+        Object.keys(res).forEach(function(k){ MESV.tailles[t][k] = res[k].cm; delete MV_GRAD[t + '|' + k]; });
+        mvAutoGraduer(false);
         fermer(); dessinerMesures();
         dire('${T("Mesures de la taille ")}' + t + '${T(" enregistrées dans le tableau. « Compléter les autres tailles » remplit le reste.")}', 'bon');
       };

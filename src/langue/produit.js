@@ -848,4 +848,9 @@ module.exports = {
   "Feuille trouvée, mais le vêtement ne se détache pas assez du fond (mannequin, décor) pour être mesuré tout seul : cliquez « Ajuster sur la photo » — l’échelle est déjà posée, il ne reste qu’à tracer.": "Sheet found, but the garment does not stand out enough from the background (mannequin, setting) to be measured automatically: click “Adjust on the photo” — the scale is already set, you only need to draw.",
   "Feuille trouvée dans la photo principale": "Sheet found in the main photo",
   "Ajuster sur la photo": "Adjust on the photo",
+  "Facultatif : sert à suggérer la bonne taille à chaque cliente. Mesurez une taille — sur la photo ou au ruban — et les autres se complètent toutes seules.": "Optional: used to suggest the right size to each customer. Measure one size — on the photo or with a tape — and the others fill in automatically.",
+  "En centimètres, vêtement à plat : la boutique double les tours (poitrine, taille, hanches).": "In centimetres, garment laid flat: the store doubles the circumferences (chest, waist, hips).",
+  "complétée d’après la taille mesurée — tapez-y pour la remplacer": "filled from the measured size — type in it to replace it",
+  "Échelle posée. Le vêtement se confond avec le mur ou le mannequin : tracez ses mesures sur la photo — deux clics chacune, les autres tailles suivent.": "Scale set. The garment blends into the wall or the mannequin: draw its measurements on the photo — two clicks each, the other sizes follow.",
+  "Tracer les mesures": "Draw the measurements",
 };
