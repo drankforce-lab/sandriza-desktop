@@ -256,5 +256,6 @@ module.exports = {
   'Annuler l’envoi': 'Cancel the shipment',
   'Annulation…': 'Cancelling…',
   'Demande d’annulation au transporteur…': 'Asking the carrier to cancel…',
-  'Étiquette annulée chez le transporteur — rien ne sera facturé.': 'Label cancelled with the carrier — nothing will be billed.'
+  'Étiquette annulée chez le transporteur — rien ne sera facturé.': 'Label cancelled with the carrier — nothing will be billed.',
+  ' et l’étiquette imprimée ne sera plus valide. Si elle est déjà payée (compte payé par carte), son remboursement est demandé à la place : il prend quelques jours. Le numéro de suivi est retiré de la commande ; une nouvelle étiquette pourra ensuite être créée. Cette action est irréversible.': ' and the printed label will no longer be valid. If it is already paid (credit-card account), a refund is requested instead: it takes a few days. The tracking number is removed from the order; a new label can then be created. This cannot be undone.',
 };

@@ -1200,7 +1200,7 @@ function pageCommande(id) {
     document.getElementById('x-annuler-etiq').onclick = function(){
       var b = this;
       szConfirmer({ danger: true, titre: '${T("Annuler l’étiquette")}',
-        texte: '${T("L’envoi est annulé chez le transporteur : il n’est pas facturé et l’étiquette imprimée n’est plus valable. Le numéro de suivi est retiré de la commande ; vous pourrez ensuite créer une nouvelle étiquette. Cette action est irréversible.")}',
+        texte: '${T("L’envoi est annulé chez le transporteur et l’étiquette imprimée n’est plus valable. Si elle est déjà payée (compte payé par carte), son remboursement est demandé à la place : il prend quelques jours. Le numéro de suivi est retiré de la commande ; vous pourrez ensuite créer une nouvelle étiquette. Cette action est irréversible.")}',
         oui: '${T("Annuler l’envoi")}' }).then(function(ok){
         if (!ok) return;
         b.disabled = true;
@@ -1210,7 +1210,7 @@ function pageCommande(id) {
           if (!r || !r.ok) { dire((r && r.detail) ? r.detail : expliquer(r), 'err'); return; }
           CMD.suivi = ''; CMD.aUneEtiquette = false; CMD.etiquette = null; CMD.etiquetteBloquee = '';
           PDF = null; VIGN = null; poser('c-suivi', '');
-          dire('${T("Étiquette annulée chez le transporteur — rien n’est facturé. Vous pouvez en créer une nouvelle.")}', 'bon');
+          dire(r.remboursement ? r.detail : '${T("Étiquette annulée chez le transporteur — rien n’est facturé. Vous pouvez en créer une nouvelle.")}', 'bon');
           aller(1);
         });
       });

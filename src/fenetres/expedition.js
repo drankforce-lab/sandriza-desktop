@@ -540,7 +540,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var c = CMD.commande;
     var nomT = NOMS_T[c.transporteur] || c.transporteur || '';
     szConfirmer({ danger: true, titre: '${T("Annuler l’étiquette")}',
-      texte: '${T("L’envoi")}' + ' ' + (c.suivi ? '« ' + c.suivi + ' » ' : '') + '${T("sera annulé chez")}' + ' ' + nomT + '${T(" : il ne sera pas facturé et l’étiquette imprimée ne sera plus valide. Le numéro de suivi est retiré de la commande ; une nouvelle étiquette pourra ensuite être créée. Cette action est irréversible.")}',
+      texte: '${T("L’envoi")}' + ' ' + (c.suivi ? '« ' + c.suivi + ' » ' : '') + '${T("sera annulé chez")}' + ' ' + nomT + '${T(" et l’étiquette imprimée ne sera plus valide. Si elle est déjà payée (compte payé par carte), son remboursement est demandé à la place : il prend quelques jours. Le numéro de suivi est retiré de la commande ; une nouvelle étiquette pourra ensuite être créée. Cette action est irréversible.")}',
       oui: '${T("Annuler l’envoi")}' }).then(function(ok){
       if (!ok) return;
       enCours = true;
@@ -555,7 +555,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           return;
         }
         PDF = null;
-        dire('${T("Étiquette annulée chez le transporteur — rien ne sera facturé.")}', 'bon');
+        dire(r.remboursement ? r.detail : '${T("Étiquette annulée chez le transporteur — rien ne sera facturé.")}', 'bon');
         recharger();
       });
     });
