@@ -835,6 +835,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      identifiants dont on ignore l etat. Le compte est donc un MINIMUM — et le
      compte rendu du serveur, lui, dit la verite (voir << sansPrecedent >>). */
   function nAnnulables(){
+    // (2026-10-20) Sur TOUTE la selection (le site envoie les ids marques du resultat entier) ; repli : la page.
+    if (D && D.marques && D.marques.annulables) return D.marques.annulables.filter(function(id){ return SEL[id]; }).length;
     var ph = (D && D.photos) || [];
     var k = 0;
     ph.forEach(function(p){ if (SEL[p.id] && p.annulable) k++; });
@@ -911,12 +913,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      la fiche : la boutique continuait d afficher la copie faite au moment du
      rattachement. On payait un traitement que personne ne voyait. */
   function nAppliquer(){
+    // (2026-10-20) Sur TOUTE la selection (le site envoie les ids marques du resultat entier) ; repli : la page.
+    if (D && D.marques && D.marques.lies) return D.marques.lies.filter(function(id){ return SEL[id]; }).length;
     var ph = (D && D.photos) || [];
     var k = 0;
     ph.forEach(function(p){ if (SEL[p.id] && p.lieId) k++; });
     return k;
   }
   function nEnRetard(){
+    // (2026-10-20) Sur TOUTE la selection (le site envoie les ids marques du resultat entier) ; repli : la page.
+    if (D && D.marques && D.marques.enRetard) return D.marques.enRetard.filter(function(id){ return SEL[id]; }).length;
     var ph = (D && D.photos) || [];
     var k = 0;
     ph.forEach(function(p){ if (SEL[p.id] && p.produitEnRetard) k++; });

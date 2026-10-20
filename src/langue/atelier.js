@@ -1058,4 +1058,11 @@ module.exports = {
   "Y (cm)": "Y (cm)",
   "px Résolution à cette taille": "px Resolution at this size",
   "+ MOIMG[u] +": "+ MOIMG[u] +",
+  'Une construction 3D est déjà en cours pour ce modèle, peut-être sur un autre poste. Elle apparaîtra ici dès qu’elle sera terminée ; rien n’a été facturé une seconde fois.': 'A 3D build is already running for this model, perhaps on another computer. It will appear here as soon as it is done; nothing was billed a second time.',
+  'Un aperçu 3D existe déjà pour cette version du modèle : rien n’a été lancé.': 'A 3D preview already exists for this version of the model: nothing was started.',
+  'Plafond atteint : trois constructions 3D par modèle en 24 heures. Réessayez plus tard.': 'Limit reached: three 3D builds per model in 24 hours. Try again later.',
+  'Le budget mensuel des images est atteint : rien n’a été lancé.': 'The monthly image budget has been reached: nothing was started.',
+  'Le modèle a changé depuis la vérification : enregistrez-le, puis recommencez.': 'The model changed since it was checked: save it, then try again.',
+  'Le prix annoncé a changé : rien n’a été lancé. Relisez le prix, puis recommencez.': 'The announced price changed: nothing was started. Check the price, then try again.',
+  'Le serveur ne répond pas : rien n’a été lancé.': 'The server is not responding: nothing was started.'
 };

@@ -639,6 +639,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     image_format: '${T("Choisissez une image PNG ou JPEG.")}',
     image_lourde: '${T("Image trop lourde (20 Mo au plus).")}',
     televersement: '${T("Le dépôt de l’image a échoué. Réessayez.")}',
+    // (2026-10-20, reste de l audit) Les refus de la construction 3D, dits proprement (et traduits).
+    en_cours: '${T("Une construction 3D est déjà en cours pour ce modèle, peut-être sur un autre poste. Elle apparaîtra ici dès qu’elle sera terminée ; rien n’a été facturé une seconde fois.")}',
+    deja_construit: '${T("Un aperçu 3D existe déjà pour cette version du modèle : rien n’a été lancé.")}',
+    plafond: '${T("Plafond atteint : trois constructions 3D par modèle en 24 heures. Réessayez plus tard.")}',
+    plafond_mensuel: '${T("Le budget mensuel des images est atteint : rien n’a été lancé.")}',
+    non_enregistre: '${T("Le modèle a changé depuis la vérification : enregistrez-le, puis recommencez.")}',
+    prix_change: '${T("Le prix annoncé a changé : rien n’a été lancé. Relisez le prix, puis recommencez.")}',
+    serveur_indisponible: '${T("Le serveur ne répond pas : rien n’a été lancé.")}',
     echec: '${T("L’opération a échoué.")}'
   };
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){

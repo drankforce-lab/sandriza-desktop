@@ -248,7 +248,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
       + '<label class="rf-rch" style="max-width:none">${ICO.loupe}<input aria-label="${T("Nom, courriel, téléphone")}" type="search" id="ch-q" placeholder="${T("Nom, courriel, téléphone…")}" value="' + esc(Q) + '"></label>'
       + '<span class="rf-droite"><span class="dt">' + rows.length + ' '
       + (rows.length > 1 ? '${T("conversations")}' : '${T("conversation")}')
-      + (D.horsLigne ? ' · ' + D.horsLigne + ' ${T("hors ligne")}' : '') + '</span></span></div></div>';
+      + (D.horsLigne ? ' · ' + D.horsLigne + ' ${T("hors ligne")}' : '') + '</span></span></div>'
+      /* (2026-10-20, reste de l audit) La durée de conservation, DITE ici : le serveur l applique
+         (lib-retention.php) et l annonce avec la liste ; la phrase vit dans la fenêtre pour être traduite. */
+      + (D.conservation ? '<div class="aide" style="margin-top:.45rem">${T("Conservation : 24 h ; jusqu’à 30 jours si la conversation attend une réponse (politique de confidentialité, § 8).")}</div>' : '')
+      + '</div>';
 
     if (!rows.length) {
       h += '<div class="vide">' + (Q || FILTRE ? '${T("Rien ne correspond.")}' : '${T("Aucune conversation à traiter.")}') + '</div>';

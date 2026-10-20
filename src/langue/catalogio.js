@@ -256,8 +256,8 @@ module.exports = {
     '<strong>recognised automatically</strong> from the headers, which accept accents, capitals ',
   'et les noms anglais courants (<em>price</em>, <em>sale price</em>, <em>qty</em>…).<br>':
     'and the usual English names (<em>price</em>, <em>sale price</em>, <em>qty</em>…).<br>',
-  'Maximum 8 Mo et 5000 lignes. <strong>Rien n’est écrit avant l’aperçu et votre confirmation.</strong>':
-    'Maximum 8 MB and 5000 rows. <strong>Nothing is written before the preview and your confirmation.</strong>',
+  'Maximum 8 Mo et 50 000 lignes par fichier (écrites par lots de 500). <strong>Rien n’est écrit avant l’aperçu et votre confirmation.</strong>':
+    'Maximum 8 MB and 50,000 rows per file (written in batches of 500). <strong>Nothing is written before the preview and your confirmation.</strong>',
   'Un fichier CSV avec les <strong>bons en-têtes, dans le bon ordre</strong>, ':
     'A CSV file with the <strong>right headers, in the right order</strong>, ',
   'Le séparateur suit ce que vous avez choisi dans <strong>Exporter</strong> (actuellement ':

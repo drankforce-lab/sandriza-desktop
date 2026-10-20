@@ -422,7 +422,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
       + '<div class="avis" style="margin-top:.7rem">${T("La feuille (catalogue ou inventaire) et le séparateur sont")} '
       +   '${T("<strong>reconnus automatiquement</strong> d’après les en-têtes, qui acceptent les accents, les majuscules ")}'
       +   '${T("et les noms anglais courants (<em>price</em>, <em>sale price</em>, <em>qty</em>…).<br>")}'
-      +   '${T("Maximum 8 Mo et 5000 lignes. <strong>Rien n’est écrit avant l’aperçu et votre confirmation.</strong>")}</div>'
+      +   '${T("Maximum 8 Mo et 50 000 lignes par fichier (écrites par lots de 500). <strong>Rien n’est écrit avant l’aperçu et votre confirmation.</strong>")}</div>'
       /* ⚠ LE MODÈLE SE TÉLÉCHARGE D ICI, et pas seulement de l onglet Exporter.
          C est ici qu on en a besoin : quelqu un qui veut importer en lot n a pas
          de fichier, et l envoyer chercher dans l autre onglet suppose qu il
