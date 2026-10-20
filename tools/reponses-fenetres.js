@@ -9016,6 +9016,9 @@ const JEU = {
 function _produitContexte() {
   return {
     ok: true,
+    // Les consignes d'entretien, telles que le site les envoie (assets/js/shop.js, relevées le
+    // 2026-10-20) : sans elles, la carte « Composition et entretien » n'était dessinée par aucun banc.
+    ...require('./donnees-entretien.json'),
     categories: [
       { cle: 'robes', libelle: 'Robes' },
       { cle: 'hauts', libelle: 'Hauts' },

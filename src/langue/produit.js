@@ -832,4 +832,10 @@ module.exports = {
   "NIP incorrect — retraits de photos bloqués 15 minutes.": "Incorrect PIN — photo removals blocked for 15 minutes.",
   "Non enregistré — la fiche est restée à l’écran.": "Not saved — the item is still on screen.",
   "Enregistrer": "Save",
+  "Effacer les mesures": "Clear the measurements",
+  "Mesurer automatiquement": "Measure automatically",
+  "Posez d’abord l’échelle.": "Set the scale first.",
+  "Le vêtement touche le bord de la photo (ou le fond n’est pas uni) : les mesures ne peuvent pas se prendre toutes seules. Cliquez-les.": "The garment touches the edge of the photo (or the background is not plain): the measurements cannot be taken automatically. Click them.",
+  "Le vêtement ne se détache pas assez du fond pour être mesuré tout seul. Cliquez les mesures, ou reprenez la photo à plat sur un fond uni qui tranche.": "The garment does not stand out enough from the background to be measured automatically. Click the measurements, or retake the photo laid flat on a plain, contrasting background.",
+  " mesure(s) estimée(s) d’après la silhouette. Vérifiez chaque trait sur la photo ; cliquez une mesure en bas pour la refaire.": " measurement(s) estimated from the outline. Check each line on the photo; click a measurement below to redo it.",
 };

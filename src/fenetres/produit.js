@@ -93,16 +93,31 @@ html.photos-verrou #p-360-choisir,html.photos-verrou #p-360-retirer,html.photos-
 .cote.pf-bas{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}
 /* Composition et entretien (2026-10-11) : les consignes en cases, par groupe, le pictogramme
    de la boutique a cote (il vient du site par le pont, avec la liste). */
-.ent-modeles{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;margin:.55rem 0 .7rem}
-.ent-modeles .aide{margin-right:.2rem}
-.ent-groupe{margin-top:.55rem}
-.ent-groupe h3{font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin:0 0 .3rem;font-weight:700}
-.ent-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:.25rem .9rem}
-.ent-grille label{display:flex;align-items:center;gap:.5rem;font-size:.84rem;cursor:pointer;padding:.18rem .3rem;border-radius:7px}
+.ent-modeles{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin:.7rem 0 .7rem}
+.ent-modeles .aide{margin-right:.15rem;font-weight:600}
+.ent-seg{display:inline-flex;border:1px solid var(--v12);border-radius:10px;overflow:hidden}
+.ent-seg button{border:0;border-radius:0;background:transparent;padding:.42rem .8rem;font-size:.8rem}
+.ent-seg button+button{border-left:1px solid var(--v12)}
+.ent-seg button:hover{background:var(--v05)}
+.ent-seg button.on{background:rgba(var(--or-rgb),.18);color:var(--tx);font-weight:700}
+.ent-vider{font-size:.78rem}
+/* En colonnes (et non en grille) : les groupes se tassent l un sous l autre — « Lavage » et ses neuf
+   consignes ne laissent plus un trou sous « Javellisant », et l etape tient dans l ecran. */
+#p-ent{columns:3 250px;column-gap:.7rem}
+.ent-groupe{border:1px solid var(--v10);border-radius:11px;padding:.5rem .55rem .45rem;background:var(--v03);break-inside:avoid;margin:0 0 .7rem;display:inline-block;width:100%;box-sizing:border-box}
+.ent-groupe h3{display:flex;justify-content:space-between;align-items:center;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);margin:0 0 .35rem;padding:0 .2rem;font-weight:700}
+.ent-groupe h3 .n{font-size:.7rem;letter-spacing:0;text-transform:none;font-weight:700;color:var(--tx);background:rgba(var(--or-rgb),.2);border-radius:999px;padding:.05rem .45rem}
+.ent-grille{display:flex;flex-direction:column;gap:2px}
+.ent-grille label{display:flex;align-items:center;gap:.5rem;font-size:.8rem;line-height:1.2;cursor:pointer;padding:.22rem .35rem;border-radius:7px;border:1px solid transparent;min-width:0}
+.ent-grille label span{min-width:0;overflow-wrap:anywhere}
 .ent-grille label:hover{background:var(--v05)}
-.ent-grille label.on{background:rgba(var(--or-rgb),.14)}
-.ent-grille svg{width:22px;height:22px;flex:0 0 auto;color:var(--tx)}
-.ent-grille input{margin:0;flex:0 0 auto}
+.ent-grille label.on{background:rgba(var(--or-rgb),.13);border-color:rgba(var(--or-rgb),.45)}
+.ent-grille svg{width:20px;height:20px;flex:0 0 auto;color:var(--tx2)}
+.ent-grille label.on svg{color:var(--tx)}
+.ent-grille input{margin:0;flex:0 0 auto;accent-color:var(--or)}
+#p-ent-carte .ent-haut{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:0 .9rem}
+#p-ent-carte .ent-haut .ch{margin:0}
+#p-ent-autre{min-height:0;height:2.45rem;resize:vertical}
 /* L ajustement du modele, sous les tailles (2026-10-07). */
 .pf-aj{margin-top:.7rem;max-width:30rem}
 .pf-aj .aide .mini{margin-left:.4rem}
@@ -221,14 +236,28 @@ html.jour .vue .depl button{background:rgba(255,255,255,.92);color:#1d2433;borde
 /* Photo de couleur OBLIGATOIRE encore vide (2026-10-09) : le contour or la signale. */
 .vue .cadre.requise{border-color:var(--or);color:var(--tx2)}
 .vue img{width:100%;height:100%;object-fit:cover}
-/* Mesures du vêtement (7.13.0) */
-.mesv-barre{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin-bottom:.7rem}
-.mesv-barre select{min-width:14rem}
-table.mesv{width:100%;border-collapse:collapse;font-size:.84rem}
-table.mesv th{text-align:left;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);padding:.35rem .4rem;border-bottom:1px solid var(--v10)}
-table.mesv tbody th{font-size:.84rem;text-transform:none;letter-spacing:0;color:var(--tx);font-weight:700}
-table.mesv td{padding:.25rem .4rem;border-bottom:1px solid var(--v05)}
-table.mesv input{width:100%;max-width:7rem}
+/* Mesures du vêtement (7.13.0, refaites le 2026-10-20) : les cartes ne se compriment plus
+   (c est ce qui faisait déborder le tableau de sa carte), cases étroites avec leur unité. */
+#p-mesv-carte,#p-ent-carte{flex:0 0 auto}
+.mesv-barre{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin-bottom:.8rem}
+.mesv-barre label{font-size:.8rem;color:var(--tx2);font-weight:600;margin:0}
+.mesv-barre select{width:auto;min-width:16rem;flex:0 0 auto}
+.mesv-barre .esp{flex:1 1 auto}
+.mesv-cadre{border:1px solid var(--v10);border-radius:11px;overflow-x:auto;overflow-y:hidden}
+table.mesv{width:100%;border-collapse:collapse;font-size:.84rem;font-variant-numeric:tabular-nums}
+table.mesv thead th{text-align:left;vertical-align:bottom;padding:.55rem .7rem .45rem;border-bottom:1px solid var(--v10);background:var(--v05)}
+table.mesv thead th b{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx);font-weight:700}
+table.mesv thead th small{display:block;font-size:.7rem;color:var(--tx2);font-weight:400;margin-top:.1rem;line-height:1.25;letter-spacing:0;text-transform:none;font-family:inherit}
+table.mesv tbody th{width:4.5rem;padding:.28rem .7rem;text-align:left}
+table.mesv tbody th span{display:inline-flex;align-items:center;justify-content:center;min-width:2.4rem;height:1.75rem;padding:0 .45rem;border-radius:8px;border:1px solid var(--v12);font-weight:700;font-size:.8rem}
+table.mesv td{padding:.28rem .7rem}
+table.mesv tbody tr+tr th,table.mesv tbody tr+tr td{border-top:1px solid var(--v05)}
+table.mesv tbody tr:hover{background:var(--v03)}
+.mv-cm{display:inline-flex;align-items:center;border:1px solid var(--v12);border-radius:8px;overflow:hidden}
+.mv-cm:focus-within{border-color:var(--or)}
+table.mesv .mv-cm input{width:4.4rem;height:auto;min-height:0;border:0;border-radius:0;background:transparent;text-align:right;padding:.3rem .35rem;box-shadow:none}
+.mv-cm i{font-style:normal;font-size:.72rem;color:var(--tx2);padding:0 .5rem 0 .1rem}
+.mesv-note{margin-top:.55rem}
 .mv-boite{max-width:62rem!important}
 .mv-barre{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-bottom:.5rem;font-size:.82rem}
 .mv-q{font-weight:600;color:var(--tx)!important}
@@ -740,23 +769,23 @@ function pageProduit(id) {
       + '</div>');
 
     /* 5 ter — MESURES DU VÊTEMENT (7.13.0) : facultatives, elles font la taille suggérée. */
-    h.push('<div class="etape"><div class="carte plein"><h2>${T("Mesures du vêtement")}</h2>'
+    h.push('<div class="etape"><div class="carte plein" id="p-mesv-carte"><h2>${T("Mesures du vêtement")}</h2>'
       + '<div class="aide" style="margin-bottom:.6rem">${T("Facultatif, mais c’est ce qui permet de suggérer la bonne taille à chaque client d’après ses propres mesures — et d’éviter les retours. Photographiez le vêtement à plat sur un fond NON blanc, avec une feuille lettre posée à côté.")}</div>'
       + '<div class="mesv-barre"><label for="p-mesv-type">${T("Type")}</label><select id="p-mesv-type">'
       + '<option value="haut">${T("Haut (chandail, chemisier, veste)")}</option><option value="bas">${T("Bas (pantalon, jupe, short)")}</option>'
       + '<option value="robe">${T("Robe ou combinaison")}</option><option value="aucun">${T("Aucune mesure")}</option></select>'
-      + '<button type="button" id="p-mesv-photo" class="prim"><span class="ic">📏</span> ${T("Mesurer sur une photo")}</button>'
+      + '<span class="esp"></span><button type="button" id="p-mesv-photo" class="prim"><span class="ic">📏</span> ${T("Mesurer sur une photo")}</button>'
       + '<button type="button" id="p-mesv-grad">${T("Compléter les autres tailles")}</button></div>'
       + '<div id="p-mesv-table"></div></div>'
       /* COMPOSITION ET ENTRETIEN (2026-10-11, sa demande) : des cases, pas du texte libre — la
          boutique affiche chaque consigne dans la langue de la cliente, avec son pictogramme. */
       + '<div class="carte plein" id="p-ent-carte" style="margin-top:.8rem"><h2>${T("Composition et entretien")}</h2>'
-      + '<div class="ch"><label for="p-compo">${T("Composition")}</label>'
+      + '<div class="ent-haut"><div class="ch"><label for="p-compo">${T("Composition")}</label>'
       + '<input id="p-compo" maxlength="200" placeholder="${T("Ex : 95 % polyester, 5 % élasthanne")}"></div>'
+      + '<div class="ch"><label for="p-ent-autre">${T("Autre consigne (facultatif)")}</label>'
+      + '<textarea id="p-ent-autre" rows="1" maxlength="400"></textarea></div></div>'
       + '<div class="ent-modeles" id="p-ent-modeles"></div>'
       + '<div id="p-ent"></div>'
-      + '<div class="ch" style="margin-top:.7rem"><label for="p-ent-autre">${T("Autre consigne (facultatif)")}</label>'
-      + '<textarea id="p-ent-autre" rows="2" maxlength="400"></textarea></div>'
       + '</div></div>');
 
     // 6 — Détails
@@ -1483,9 +1512,10 @@ function pageProduit(id) {
     if (!liste.length) { z.innerHTML = '<div class="aide">${T("Liste des consignes indisponible — mettez le site à jour.")}</div>'; return; }
     var zm = document.getElementById('p-ent-modeles');
     if (zm) {
-      zm.innerHTML = '<span class="aide">${T("Ensembles rapides :")}</span>' + modeles.map(function(m){
-        return '<button type="button" data-ent-modele="' + esc(m.cle) + '">' + esc(m[ENT_LG] || m.fr) + '</button>';
-      }).join('') + (ENT.size ? '<button type="button" data-ent-vider="1">${T("Tout décocher")}</button>' : '');
+      var pareil = function(m){ return m.codes.length === ENT.size && m.codes.every(function(c){ return ENT.has(c); }); };
+      zm.innerHTML = '<span class="aide">${T("Ensembles rapides :")}</span><span class="ent-seg">' + modeles.map(function(m){
+        return '<button type="button" data-ent-modele="' + esc(m.cle) + '"' + (pareil(m) ? ' class="on"' : '') + '>' + esc(m[ENT_LG] || m.fr) + '</button>';
+      }).join('') + '</span>' + (ENT.size ? '<button type="button" class="mini ent-vider" data-ent-vider="1">${T("Tout décocher")}</button>' : '');
       zm.querySelectorAll('[data-ent-modele]').forEach(function(b){
         b.onclick = function(){
           var m = modeles.filter(function(x){ return x.cle === b.getAttribute('data-ent-modele'); })[0];
@@ -1499,7 +1529,8 @@ function pageProduit(id) {
     z.innerHTML = groupes.map(function(g){
       var items = liste.filter(function(c){ return c.groupe === g.cle; });
       if (!items.length) return '';
-      return '<div class="ent-groupe"><h3>' + esc(g[ENT_LG] || g.fr) + '</h3><div class="ent-grille">'
+      var pris = items.filter(function(c){ return ENT.has(c.cle); }).length;
+      return '<div class="ent-groupe"><h3><span>' + esc(g[ENT_LG] || g.fr) + '</span>' + (pris ? '<span class="n">' + pris + '</span>' : '') + '</h3><div class="ent-grille">'
         + items.map(function(c){
           var on = ENT.has(c.cle);
           return '<label class="' + (on ? 'on' : '') + '"><input type="checkbox" data-ent="' + esc(c.cle) + '"' + (on ? ' checked' : '') + '>'
@@ -1510,9 +1541,8 @@ function pageProduit(id) {
       cb.onchange = function(){
         var k = cb.getAttribute('data-ent');
         if (cb.checked) ENT.add(k); else ENT.delete(k);
-        cb.parentNode.classList.toggle('on', cb.checked);
-        var zm2 = document.getElementById('p-ent-modeles');
-        if (zm2 && !!zm2.querySelector('[data-ent-vider]') !== (ENT.size > 0)) dessinerEntretien();
+        dessinerEntretien(); majFicheBientot();
+        var re = document.querySelector('input[data-ent="' + k + '"]'); if (re) re.focus();
       };
     });
   }
@@ -1530,15 +1560,15 @@ function pageProduit(id) {
     if (!ty) { z.innerHTML = '<div class="aide">${T("Aucune mesure pour ce type d’article. Choisissez un type ci-dessus si le vêtement en a besoin.")}</div>'; return; }
     if (!ts.length) { z.innerHTML = '<div class="aide">${T("Choisissez d’abord les tailles à l’étape « Tailles et couleurs ».")}</div>'; return; }
     var cols = MV_TYPES[ty];
-    z.innerHTML = '<table class="mesv"><thead><tr><th>${T("Taille")}</th>'
-      + cols.map(function(c){ return '<th title="' + esc(c[2]) + '">' + c[1] + '</th>'; }).join('') + '</tr></thead><tbody>'
+    z.innerHTML = '<div class="mesv-cadre"><table class="mesv"><thead><tr><th><b>${T("Taille")}</b></th>'
+      + cols.map(function(c){ return '<th><b>' + c[1] + '</b><small>' + c[2] + '</small></th>'; }).join('') + '</tr></thead><tbody>'
       + ts.map(function(t){
           var r = MESV.tailles[t] || {};
-          return '<tr><th>' + esc(t) + '</th>' + cols.map(function(c){
-            return '<td><input type="number" min="0" step="0.5" inputmode="decimal" data-mvt="' + esc(t) + '" data-mvk="' + c[0] + '" value="' + (r[c[0]] || '') + '" aria-label="' + esc(t + ' — ' + c[1]) + '"></td>';
+          return '<tr><th><span>' + esc(t) + '</span></th>' + cols.map(function(c){
+            return '<td><span class="mv-cm"><input type="number" min="0" step="0.5" inputmode="decimal" placeholder="—" data-mvt="' + esc(t) + '" data-mvk="' + c[0] + '" value="' + (r[c[0]] || '') + '" aria-label="' + esc(t + ' — ' + c[1]) + '"><i>cm</i></span></td>';
           }).join('') + '</tr>';
-        }).join('') + '</tbody></table>'
-      + '<div class="aide" style="margin-top:.4rem">${T("En centimètres, vêtement posé à plat. Les tours (poitrine, taille, hanches) se mesurent d’un côté à l’autre : la boutique les double.")}</div>';
+        }).join('') + '</tbody></table></div>'
+      + '<div class="aide mesv-note">${T("En centimètres, vêtement posé à plat. Les tours (poitrine, taille, hanches) se mesurent d’un côté à l’autre : la boutique les double.")}</div>';
     z.querySelectorAll('input[data-mvt]').forEach(function(el){
       el.oninput = function(){
         var t = el.getAttribute('data-mvt'), k = el.getAttribute('data-mvk'), n = parseFloat(String(el.value).replace(',', '.'));
@@ -1586,9 +1616,10 @@ function pageProduit(id) {
     var vu = new Uint8Array(w * h), meilleur = null;
     for (var s0 = 0; s0 < w * h; s0++) {
       if (vu[s0] || blanc[s0] < seuil) continue;
-      var pile = [s0], n = 0, sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0; vu[s0] = 1;
+      var pile = [s0], n = 0, sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0, auBord = false; vu[s0] = 1;
       while (pile.length) {
         var c = pile.pop(), cx = c % w, cy = (c - cx) / w;
+        if (cx === 0 || cy === 0 || cx === w - 1 || cy === h - 1) auBord = true;
         n++; sx += cx; sy += cy; sxx += cx * cx; syy += cy * cy; sxy += cx * cy;
         var v = [c - 1, c + 1, c - w, c + w];
         for (var k = 0; k < 4; k++) {
@@ -1597,14 +1628,16 @@ function pageProduit(id) {
           if (blanc[q] >= seuil) { vu[q] = 1; pile.push(q); }
         }
       }
-      if (n < w * h * 0.01 || n > w * h * 0.5) continue;
+      /* Une feuille est POSÉE dans la photo : elle ne touche pas le bord et n en couvre pas le
+         quart (2026-10-20 : sur un mur blanc, le mur lui-même passait pour la feuille). */
+      if (auBord || n < w * h * 0.01 || n > w * h * 0.25) continue;
       var mx = sx / n, my = sy / n, a = sxx / n - mx * mx, d = syy / n - my * my, bb = sxy / n - mx * my;
       var t2 = (a + d) / 2, del = Math.sqrt(Math.max(0, (a - d) * (a - d) / 4 + bb * bb));
       var L = Math.sqrt(12 * (t2 + del)), l2 = Math.sqrt(12 * Math.max(0, t2 - del));
       if (!(l2 > 0)) continue;
       var ratio = L / l2, cible = format === 'a4' ? 297 / 210 : 279.4 / 215.9;
       var plein = n / (L * l2);
-      if (Math.abs(ratio - cible) > 0.16 || plein < 0.82) continue;
+      if (Math.abs(ratio - cible) > 0.16 || plein < 0.78) continue;
       if (!meilleur || n > meilleur.n) meilleur = { n: n, L: L * pas, l: l2 * pas, cx: mx * pas, cy: my * pas,
         ang: 0.5 * Math.atan2(2 * bb, a - d) };
     }
@@ -1612,6 +1645,168 @@ function pageProduit(id) {
     var dims = format === 'a4' ? [29.7, 21] : [27.94, 21.59];
     meilleur.pxParCm = (meilleur.L / dims[0] + meilleur.l / dims[1]) / 2;
     return meilleur;
+  }
+
+  /* LES MESURES, PRISES TOUTES SEULES (2026-10-20, sa demande : « ne mesure pas automatiquement
+     les mesures et ça le devrait »). Le vêtement est ce qui ne ressemble pas au FOND — le fond
+     étant lu sur le pourtour de la photo — moins la feuille ; on garde la plus grande pièce
+     d un seul tenant, puis on lit sa silhouette rangée par rangée :
+       · la rangée « du corps » est le segment qui contient l axe du vêtement ;
+       · l aisselle est là où ce segment SAUTE (les manches s y rattachent, ou l emmanchure
+         d un sans-manches le rétrécit) ; la poitrine se lit 2,5 cm plus bas ;
+       · les épaules, 3 cm sous le haut ; la manche, de l épaule au point le plus éloigné ;
+       · pour un bas, l entrejambe commence où l axe sort du tissu.
+     Ce sont des ESTIMATIONS : chaque trait est dessiné sur la photo et se refait d un clic.
+     Elles ne valent que pour un vêtement À PLAT sur un fond qui tranche ; sur un mannequin ou
+     un fond de la couleur du tissu, la silhouette n est pas celle du vêtement — on le dit. */
+  function mvMesurerAuto(cv, ty, echelle, feuille){
+    var W = cv.width, H = cv.height, pas = Math.max(1, Math.round(Math.max(W, H) / 420));
+    var w = Math.floor(W / pas), h = Math.floor(H / pas), N = w * h;
+    var px = cv.getContext('2d').getImageData(0, 0, W, H).data;
+    var R = new Float32Array(N), G = new Float32Array(N), B = new Float32Array(N);
+    for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
+      var i = ((y * pas) * W + x * pas) * 4, j = y * w + x;
+      R[j] = px[i]; G[j] = px[i + 1]; B[j] = px[i + 2];
+    }
+    // Le fond : la médiane du pourtour, et son écart (un fond texturé élargit le seuil).
+    var bord = [];
+    for (var x2 = 0; x2 < w; x2++) { bord.push(x2, (h - 1) * w + x2); }
+    for (var y2 = 0; y2 < h; y2++) { bord.push(y2 * w, y2 * w + w - 1); }
+    var med = function(t){ var a = bord.map(function(j){ return t[j]; }).sort(function(p, q){ return p - q; }); return a[a.length >> 1]; };
+    var fr = med(R), fg = med(G), fb = med(B);
+    var dist = function(j){ return Math.sqrt((R[j] - fr) * (R[j] - fr) + (G[j] - fg) * (G[j] - fg) + (B[j] - fb) * (B[j] - fb)); };
+    var db = bord.map(dist).sort(function(p, q){ return p - q; });
+    var seuil = Math.max(30, db[Math.floor(db.length * 0.9)] + 14);
+    var dans = function(xx, yy){
+      if (!feuille) return false;
+      var dx = xx * pas - feuille.cx, dy = yy * pas - feuille.cy, c = Math.cos(-feuille.ang), s = Math.sin(-feuille.ang);
+      return Math.abs(dx * c - dy * s) < feuille.L * 0.56 && Math.abs(dx * s + dy * c) < feuille.l * 0.56;
+    };
+    var m = new Uint8Array(N);
+    for (var y3 = 0; y3 < h; y3++) for (var x3 = 0; x3 < w; x3++) {
+      var j3 = y3 * w + x3; m[j3] = (dist(j3) > seuil && !dans(x3, y3)) ? 1 : 0;
+    }
+    // Fermeture 3 × 3 : bouche les petits trous (un imprimé de la couleur du fond).
+    var dil = new Uint8Array(N), m2 = new Uint8Array(N);
+    for (var y4 = 1; y4 < h - 1; y4++) for (var x4 = 1; x4 < w - 1; x4++) {
+      var j4 = y4 * w + x4;
+      dil[j4] = (m[j4] | m[j4 - 1] | m[j4 + 1] | m[j4 - w] | m[j4 + w] | m[j4 - w - 1] | m[j4 - w + 1] | m[j4 + w - 1] | m[j4 + w + 1]) ? 1 : 0;
+    }
+    for (var y5 = 1; y5 < h - 1; y5++) for (var x5 = 1; x5 < w - 1; x5++) {
+      var j5 = y5 * w + x5;
+      m2[j5] = (dil[j5] & dil[j5 - 1] & dil[j5 + 1] & dil[j5 - w] & dil[j5 + w] & dil[j5 - w - 1] & dil[j5 - w + 1] & dil[j5 + w - 1] & dil[j5 + w + 1]) ? 1 : 0;
+    }
+    // La plus grande pièce d un seul tenant.
+    var lab = new Int32Array(N), meil = 0, meilN = 0, nlab = 0, touche = 0;
+    for (var s0 = 0; s0 < N; s0++) {
+      if (!m2[s0] || lab[s0]) continue;
+      nlab++; var pile = [s0], n = 0, tb = 0; lab[s0] = nlab;
+      while (pile.length) {
+        var c = pile.pop(), cx = c % w, cy = (c - cx) / w; n++;
+        if (cx <= 1 || cy <= 1 || cx >= w - 2 || cy >= h - 2) tb++;
+        if (cx > 0 && m2[c - 1] && !lab[c - 1]) { lab[c - 1] = nlab; pile.push(c - 1); }
+        if (cx < w - 1 && m2[c + 1] && !lab[c + 1]) { lab[c + 1] = nlab; pile.push(c + 1); }
+        if (cy > 0 && m2[c - w] && !lab[c - w]) { lab[c - w] = nlab; pile.push(c - w); }
+        if (cy < h - 1 && m2[c + w] && !lab[c + w]) { lab[c + w] = nlab; pile.push(c + w); }
+      }
+      if (n > meilN) { meilN = n; meil = nlab; touche = tb; }
+    }
+    if (meilN < N * 0.03) return { erreur: 'fond' };
+    if (touche > (w + h) * 0.25) return { erreur: 'bord' };
+    var top = h, bas = -1, sxm = 0;
+    var ext = [];
+    for (var y6 = 0; y6 < h; y6++) {
+      var g = -1, d = -1;
+      for (var x6 = 0; x6 < w; x6++) if (lab[y6 * w + x6] === meil) { if (g < 0) g = x6; d = x6; sxm += x6; }
+      ext.push([g, d]);
+      if (g >= 0) { if (y6 < top) top = y6; bas = y6; }
+    }
+    var axe = Math.round(sxm / meilN);
+    // Le segment du corps sur une rangée : celui qui contient l axe (ou le plus proche).
+    var corps = function(yy){
+      if (yy < 0 || yy >= h || ext[yy][0] < 0) return null;
+      var best = null, a = -1;
+      for (var xx = 0; xx <= w; xx++) {
+        var on = xx < w && lab[yy * w + xx] === meil;
+        if (on && a < 0) a = xx;
+        if (!on && a >= 0) {
+          var dd = axe < a ? a - axe : axe > xx - 1 ? axe - xx + 1 : 0;
+          if (!best || dd < best.dd || (dd === best.dd && xx - a > best.d - best.g)) best = { g: a, d: xx - 1, dd: dd };
+          a = -1;
+        }
+      }
+      return best && best.dd <= Math.max(3, w * 0.03) ? best : null;
+    };
+    var parCm = echelle / pas;
+    var P = function(xx, yy){ return [xx * pas + pas / 2, yy * pas + pas / 2]; };
+    var out = {};
+    var ligne = function(k, a, b){ var l = Math.hypot(b[0] - a[0], b[1] - a[1]); if (l > 2) out[k] = { a: a, b: b, cm: Math.round(l / echelle * 2) / 2 }; };
+    var haut0 = top, bas0 = bas, L = bas0 - haut0;
+    if (L < 10) return { erreur: 'fond' };
+    var basAxe = bas0;
+    for (var y8 = bas0; y8 > haut0; y8--) { if (lab[y8 * w + axe] === meil) { basAxe = y8; break; } }
+    var aisselle = function(){
+      var lw = [];
+      for (var yy = Math.round(haut0 + L * 0.7); yy > haut0 + L * 0.12; yy--) {
+        var c2 = corps(yy); if (!c2) continue;
+        var wd = c2.d - c2.g + 1;
+        if (lw.length >= 6) {
+          var t = lw.slice(-12).sort(function(p, q){ return p - q; }), md = t[t.length >> 1];
+          if (wd > md * 1.14 || wd < md * 0.86) return yy + 1;
+        }
+        lw.push(wd);
+      }
+      return null;
+    };
+    if (ty === 'haut' || ty === 'robe') {
+      ligne('longueur', P(axe, haut0), P(axe, basAxe));   // du point haut de l épaule, pas du creux du col
+      var ya = aisselle();
+      if (ya != null) {
+        var yp = Math.min(bas0, Math.round(ya + 2.5 * parCm)), cp = corps(yp);
+        if (cp) ligne('poitrine', P(cp.g, yp), P(cp.d + 1, yp));
+      }
+      if (ty === 'haut') {
+        var ys = Math.round(haut0 + 3 * parCm);
+        var cs = corps(ys);
+        if (cs) {
+          // Plus large que la poitrine : la rangée court déjà dans les manches — on ne devine pas.
+          if (!out.poitrine || (cs.d - cs.g + 1) * pas <= (out.poitrine.b[0] - out.poitrine.a[0]) * 1.04) ligne('epaules', P(cs.g, ys), P(cs.d + 1, ys));
+          // La manche : de l épaule au point du vêtement le plus éloigné, côté droit de la photo.
+          var torse = out.poitrine ? (out.poitrine.b[0] - out.poitrine.a[0]) / pas : cs.d - cs.g;
+          var large = 0; ext.forEach(function(e){ if (e[0] >= 0 && e[1] - e[0] > large) large = e[1] - e[0]; });
+          if (large > torse * 1.18) {
+            var sx = cs.d + 1, sy = ys, loin = 0, lx = sx, ly = sy;
+            for (var y9 = haut0; y9 <= bas0; y9++) for (var x9 = sx; x9 < w; x9++) {
+              if (lab[y9 * w + x9] !== meil) continue;
+              var dd2 = (x9 - sx) * (x9 - sx) + (y9 - sy) * (y9 - sy);
+              if (dd2 > loin) { loin = dd2; lx = x9; ly = y9; }
+            }
+            if (loin > 0) ligne('manche', P(sx, sy), P(lx, ly));
+          }
+        }
+      } else {
+        // Robe : la taille au plus étroit entre l aisselle et la mi-longueur ; les hanches 18 cm plus bas.
+        var y0 = ya != null ? ya + 4 * parCm : haut0 + L * 0.25, yt = null, wt = 1e9;
+        for (var yy2 = Math.round(y0); yy2 < haut0 + L * 0.6; yy2++) { var c3 = corps(yy2); if (c3 && c3.d - c3.g < wt) { wt = c3.d - c3.g; yt = yy2; } }
+        if (yt != null) {
+          var c4 = corps(yt); ligne('taille', P(c4.g, yt), P(c4.d + 1, yt));
+          var yh = Math.min(bas0, Math.round(yt + 18 * parCm)), c5 = corps(yh);
+          if (c5) ligne('hanches', P(c5.g, yh), P(c5.d + 1, yh));
+        }
+      }
+    } else if (ty === 'bas') {
+      var yc = Math.round(haut0 + 1.5 * parCm), c6 = corps(yc);
+      if (c6) ligne('taille', P(c6.g, yc), P(c6.d + 1, yc));
+      // L entrejambe : la première rangée, sous la ceinture, où l axe n est plus dans le tissu.
+      var yE = null;
+      for (var y10 = Math.round(haut0 + L * 0.15); y10 < bas0; y10++) if (lab[y10 * w + axe] !== meil) { yE = y10; break; }
+      var yH = Math.round(haut0 + (yE != null ? (yE - haut0) * 0.8 : 20 * parCm)), c7 = corps(yH);
+      if (c7) ligne('hanches', P(c7.g, yH), P(c7.d + 1, yH));
+      var eg = ext[haut0] || [axe, axe];
+      ligne('longueur', P(eg[0], haut0), P(eg[0], bas0));
+      if (yE != null && bas0 - yE > 10 * parCm) ligne('entrejambe', P(axe, yE), P(axe, bas0));
+    }
+    return { mesures: out, n: Object.keys(out).length };
   }
 
   function mvOutilPhoto(){
@@ -1647,7 +1842,8 @@ function pageProduit(id) {
         + '<label class="mv-retenir"><input type="checkbox" id="mv-ret"> ${T("Retenir cette échelle pour mes photos de même format (poste photo fixe)")}</label>'
         + '<div class="mv-res" id="mv-res"></div>'
         + '<div class="pied2"><button type="button" id="mv-annuler">${T("Annuler")}</button>'
-        + '<button type="button" id="mv-recommencer">${T("Recommencer les mesures")}</button>'
+        + '<button type="button" id="mv-recommencer">${T("Effacer les mesures")}</button>'
+        + '<button type="button" id="mv-auto">${T("Mesurer automatiquement")}</button>'
         + '<button type="button" class="prim" id="mv-ok" disabled>${T("✓ Garder ces mesures")}</button></div></div>';
       document.body.appendChild(v);
       var $ = function(id){ return document.getElementById(id); };
@@ -1657,6 +1853,23 @@ function pageProduit(id) {
       function memoLire(){ try { var o = JSON.parse(localStorage.getItem(CLE_MEMO) || '{}'); return o[img.naturalWidth + 'x' + img.naturalHeight] || null; } catch (e) { return null; } }
       function memoEcrire(){ try { var o = JSON.parse(localStorage.getItem(CLE_MEMO) || '{}'); o[img.naturalWidth + 'x' + img.naturalHeight] = echelle / r; localStorage.setItem(CLE_MEMO, JSON.stringify(o)); } catch (e) {} }
       function q(t){ $('mv-q').textContent = t; }
+      /* Les pixels de la PHOTO SEULE (2026-10-20) : le canevas visible porte les traits déjà
+         tracés, et il est vide tant que rien n y a été peint — la feuille était cherchée dans
+         une image vide à l ouverture, puis dans la photo barrée de ses propres traits. */
+      function propre(){ var c = document.createElement('canvas'); c.width = cv.width; c.height = cv.height; c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); return c; }
+      function auto(silence){
+        if (!echelle) { if (!silence) dire('${T("Posez d’abord l’échelle.")}', 'att'); return; }
+        var o = null;
+        try { o = mvMesurerAuto(propre(), ty, echelle, feuille); } catch (e) { o = null; }
+        if (!o || o.erreur || !o.n) {
+          dire(o && o.erreur === 'bord'
+            ? '${T("Le vêtement touche le bord de la photo (ou le fond n’est pas uni) : les mesures ne peuvent pas se prendre toutes seules. Cliquez-les.")}'
+            : '${T("Le vêtement ne se détache pas assez du fond pour être mesuré tout seul. Cliquez les mesures, ou reprenez la photo à plat sur un fond uni qui tranche.")}', 'att');
+          return;
+        }
+        res = o.mesures; iDim = 0; peindre(); resume(); suivante();
+        dire(o.n + '${T(" mesure(s) estimée(s) d’après la silhouette. Vérifiez chaque trait sur la photo ; cliquez une mesure en bas pour la refaire.")}', 'bon');
+      }
       function fermer(){ v.remove(); }
       function peindre(){
         ctx.drawImage(img, 0, 0, cv.width, cv.height);
@@ -1692,13 +1905,15 @@ function pageProduit(id) {
       function poserEchelle(px, message){
         echelle = px; segment = null; $('mv-connue').hidden = true;
         if ($('mv-ret').checked) memoEcrire();
-        dire(message + ' ${T("Cliquez maintenant vos mesures : elles se calculent toutes seules.")}', 'bon'); peindre(); suivante();
+        peindre(); suivante();
+        if (!Object.keys(res).length) { dire(message, 'bon'); auto(true); if (!Object.keys(res).length) dire(message + ' ${T("Cliquez maintenant vos mesures : elles se calculent toutes seules.")}', 'bon'); }
+        else dire(message, 'bon');
       }
       // Le mode choisi ; « feuille » cherche, et se rabat sur l'échelle retenue puis sur la mesure connue.
       function appliquerMode(m){
         mode = m; $('mv-mode').value = m; echelle = null; feuille = null; segment = null; $('mv-connue').hidden = true;
         if (m === 'feuille') {
-          try { feuille = mvTrouverFeuille(cv, $('mv-f').value); } catch (e) { feuille = null; }
+          try { feuille = mvTrouverFeuille(propre(), $('mv-f').value); } catch (e) { feuille = null; }
           if (feuille) { poserEchelle(feuille.pxParCm, '${T("Feuille trouvée : l’échelle est posée.")}'); return; }
           var mm = memoLire();
           if (mm) { mode = 'memo'; $('mv-mode').value = 'memo'; poserEchelle(mm * r, '${T("Pas de feuille : l’échelle retenue du poste photo est utilisée.")}'); return; }
@@ -1762,6 +1977,7 @@ function pageProduit(id) {
         delete res[cols[i][0]]; iDim = i; peindre(); resume(); suivante();
       };
       $('mv-recommencer').onclick = function(){ res = {}; iDim = 0; peindre(); resume(); suivante(); };
+      $('mv-auto').onclick = function(){ auto(false); };
       $('mv-annuler').onclick = fermer;
       $('mv-ok').onclick = function(){
         var t = $('mv-t').value;
