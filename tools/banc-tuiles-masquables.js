@@ -74,6 +74,8 @@ const DEROGATIONS = {
 const PAS_UN_BANDEAU = {
   affichage: 'en-tête de l’écran client : le nom de la marque en gros, « Votre commande » '
     + 'en capitales dessous. Un en-tête, pas des totaux',
+  encan: 'le minuteur et l’enchère EN DIRECT de la console d’encan : c’est l’objet même de '
+    + 'l’écran pendant le direct, pas des statistiques à replier',
   banque: 'l’encadré d’ÉCART du rapprochement — une seule valeur, verte ou rouge, '
     + 'qui est le verdict de l’écran. La masquer viderait l’écran de son sens',
   marque: 'l’aperçu d’un thème de marque (pastille, titre, sous-titre) : c’est un '

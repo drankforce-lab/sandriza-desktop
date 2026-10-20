@@ -4154,6 +4154,71 @@ ipcMain.on('pos:diffuser', (e, etat) => {
   try { w.webContents.send('pos:etat', etat || {}); } catch {}
 });
 
+/* ══ ENCAN EN DIRECT (2026-10-20, lot 1) ═══════════════════════════════════
+   Le MOTEUR vit ici (src/encan.js) : fermer ou recharger la console n'arrête pas
+   l'encan, et l'écran filmé ne dépend pas d'elle. La console envoie des GESTES
+   (encan:geste) ; le moteur rend un ÉTAT, poussé aux deux fenêtres (encan:etat).
+   ⚠ SEULE LA CONSOLE COMMANDE. L'écran filmé est posé devant tout le direct : il
+   écoute, il ne peut rien déclencher — même règle que l'affichage client. */
+const { Encan } = require('./encan');
+const ENCAN_GESTES = new Set(['regler', 'modeEssai', 'charger', 'enFile', 'retirerDeFile', 'suivant', 'demarrer', 'pause',
+  'reprendre', 'ajouterTemps', 'remettre', 'adjuger', 'annuler', 'confirmerGagne', 'remettreEnVente', 'garde', 'commentaire']);
+let _encan = null, _encanBattement = null, _encanDernierEnvoi = 0;
+const _encanPousser = (etat) => {
+  _encanDernierEnvoi = Date.now();
+  for (const cle of ['encan', 'encan-ecran']) {
+    const w = fenetresNatives.get(cle);
+    if (w && !w.isDestroyed()) { try { w.webContents.send('encan:etat', etat); } catch {} }
+  }
+};
+const encanMoteur = () => {
+  if (_encan) return _encan;
+  _encan = new Encan({ surChangement: _encanPousser });
+  /* Le battement : la relance à 2 s, le zéro et le délai « GAGNÉ » tombent à 100 ms près.
+     Une poussée par seconde au moins tant que l'encan vit, pour qu'un écran ouvert
+     en cours de route se recale sans rien demander. */
+  _encanBattement = setInterval(() => {
+    _encan.battre();
+    const vivant = ['encours', 'pause', 'adjuge'].includes(_encan.phase);
+    if (vivant && Date.now() - _encanDernierEnvoi > 1000) _encanPousser(_encan.etat());
+  }, 100);
+  return _encan;
+};
+const _deLaConsoleEncan = (e) => {
+  const w = fenetresNatives.get('encan');
+  return !!(w && !w.isDestroyed() && e.sender === w.webContents);
+};
+ipcMain.handle('encan:geste', (e, nom, args) => {
+  if (!_deLaConsoleEncan(e)) return { ok: false, motif: 'droit' };
+  if (!ENCAN_GESTES.has(String(nom))) return { ok: false, motif: 'operation_inconnue' };
+  try { return encanMoteur()[nom](...(Array.isArray(args) ? args.slice(0, 4) : [])) || { ok: true }; }
+  catch (er) { return { ok: false, motif: 'echec', detail: String((er && er.message) || er) }; }
+});
+ipcMain.handle('encan:lire', (e) => {
+  const de = ['encan', 'encan-ecran'].some((c) => { const w = fenetresNatives.get(c); return w && !w.isDestroyed() && e.sender === w.webContents; });
+  return de ? encanMoteur().etat() : null;
+});
+ipcMain.handle('encan:copier', (e, texte) => {
+  if (!_deLaConsoleEncan(e)) return false;
+  try { require('electron').clipboard.writeText(String(texte || '').slice(0, 1000)); return true; } catch { return false; }
+});
+/* L'écran filmé : en fenêtre, ou en PLEIN ÉCRAN sur le moniteur qui n'est pas celui
+   de la console (le 2e écran posé devant la caméra). Un seul moniteur : en fenêtre. */
+ipcMain.handle('encan:ecran', (e, o) => {
+  if (!_deLaConsoleEncan(e)) return { ok: false, motif: 'droit' };
+  const w = ouvrirNative('encan-ecran', TF('Écran de l’encan'), () => pageEncanEcran(),
+    { width: 540, height: 960, minWidth: 360, minHeight: 640 });
+  if (!(o && o.pleinEcran)) return { ok: true };
+  const { screen } = require('electron');   // ⚠ seulement après « ready »
+  const console_ = fenetresNatives.get('encan');
+  const ecrans = screen.getAllDisplays();
+  const ici = console_ && !console_.isDestroyed() ? screen.getDisplayMatching(console_.getBounds()) : screen.getPrimaryDisplay();
+  const autre = ecrans.find((d) => d.id !== ici.id);
+  if (!autre) return { ok: true, motif: 'un_seul_ecran' };
+  try { w.setFullScreen(false); w.setBounds(autre.bounds); w.setFullScreen(true); } catch {}
+  return { ok: true };
+});
+
 /* ══ ÉCRANS NATIFS ANCRÉS DANS LA FENÊTRE PRINCIPALE (2026-08-08) ═══════════
    << c est toujours la portion web qui s ouvre >> : la barre laterale du site
    naviguait vers les ecrans web, seules les entrees de MENU ouvraient les
@@ -6619,6 +6684,8 @@ const { pageFournisseurs } = require('./fenetres/fournisseurs');
 const { pageRetours } = require('./fenetres/retours');
 const { pageCommande } = require('./fenetres/commande');
 const { pageAffichage } = require('./fenetres/affichage');
+const { pageEncan } = require('./fenetres/encan');
+const { pageEncanEcran } = require('./fenetres/encan-ecran');
 const { pageCaisse } = require('./fenetres/caisse');
 const { pageInventaire } = require('./fenetres/inventaire');
 const { pageExpedition } = require('./fenetres/expedition');
@@ -6760,6 +6827,11 @@ const actionApp = (nom, arg) => {
     case 'affichage-client':
       ouvrirNative('pos-client', TF('Affichage client'), () => pageAffichage(),
         { width: 1000, height: 720, minWidth: 620, minHeight: 480 });
+      break;
+    // (2026-10-20) L'encan en direct : la console de l'animatrice (l'écran filmé s'ouvre depuis elle).
+    case 'encan':
+      ouvrirNative('encan', TF('Encan en direct'), () => pageEncan(),
+        { width: 1280, height: 820, minWidth: 760, minHeight: 560 });
       break;
     /* ⚠ TOUS LES ECRANS ANCRABLES DU MENU PASSENT PAR LE FLUX D ANCRAGE
        (demande du 2026-08-09 : << si je passe par le menu, ca doit etre ancre,

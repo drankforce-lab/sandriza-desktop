@@ -222,6 +222,7 @@ const MENU_APP_EN = {
   'Téléphonie': 'Telephony',
   'Veille des commandes (icône)': 'Order watch (icon)',
   'Vente au comptoir': 'Counter sale',
+  'Encan en direct (TikTok)': 'Live auction (TikTok)',
   // Registre des deplacements (2026-10-02). « mileage » : le mot du guide T4002
   // de l ARC en anglais (« mileage log »), plus juste que « trips » pour un ecran
   // qui sert d abord a etablir une part d utilisation.

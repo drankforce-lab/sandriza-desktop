@@ -294,6 +294,17 @@ function executerPage(script, reponses, opts) {
     langueEcrire: (l) => surveille(Promise.resolve(String(l || 'fr'))),
     menuPanneau() {}, menuPanneauFermer() {},
     surEtatCaisse: () => () => {}, ajusterHauteur() {},
+    /* (2026-10-20) L'ENCAN : un canal à part du préchargement (le moteur vit dans le principal). L'état se
+       pilote sous `encan:etat`, chaque geste sous `encan:geste` (relevés dans `appels`, op « encan:<geste> »). */
+    encan: {
+      geste: (nom, args) => { appels.push({ op: 'encan:' + nom, args: args || [] });
+        const v = Object.prototype.hasOwnProperty.call(rep, 'encan:geste') ? rep['encan:geste'] : { ok: true };
+        return surveille(Promise.resolve(typeof v === 'function' ? v(nom, args) : v)); },
+      lire: () => surveille(Promise.resolve(Object.prototype.hasOwnProperty.call(rep, 'encan:etat') ? rep['encan:etat'] : null)),
+      ecran: () => surveille(Promise.resolve({ ok: true })),
+      copier: () => surveille(Promise.resolve(true)),
+      surEtat: () => () => {},
+    },
     /* ⚠ LE FAUX GROUPE `veilleur` EST PARTI LE 2026-09-09, avec la fenêtre qu'il
        servait et avec le groupe réel du préchargement. Il n'y a plus une seule
        fenêtre native qui l'appelle : le simuler encore ferait croire à une

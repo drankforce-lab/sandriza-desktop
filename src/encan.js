@@ -1,0 +1,295 @@
+'use strict';
+
+/*
+ * ENCAN EN DIRECT — LE MOTEUR (2026-10-20, lot 1)
+ * =============================================================================
+ * Sa demande : des encans pendant un direct TikTok, un minuteur à l écran, les
+ * offres écrites en COMMENTAIRE. Ce module ne connaît ni TikTok, ni les fenêtres,
+ * ni le site : il reçoit des gestes (démarrer, pause, +15 s…) et des commentaires
+ * (pseudo, texte), et il rend un ÉTAT. Le processus principal l envoie à la
+ * console et à l écran ; le lot 3 lui donnera les vrais commentaires du direct.
+ *
+ * ⚠ SES RÈGLES, MOT POUR MOT (2026-10-20) :
+ *   · SANS offre : arrivé à 2 s, le minuteur repart à 15 s — en boucle, jusqu à
+ *     la première offre. Un article ne finit donc jamais sans acheteuse.
+ *   · AVEC offre : chaque offre plus haute AJOUTE 15 s au temps restant.
+ *   · À zéro : la gagnante est déclarée ; elle a 15 MINUTES (d abord 5, corrigé
+ *     le jour même) pour écrire « GAGNÉ » en message privé, sinon l article est
+ *     remis en vente.
+ * ⚠ L heure vient de `maintenant()` (injectée) : le banc fait avancer le temps
+ *   sans attendre, et deux postes ne se disputent rien — l encan vit sur UN poste.
+ */
+
+const REGLAGES_DEFAUT = {
+  depart: 10,          // prix de départ, en dollars
+  duree: 30,           // secondes au démarrage
+  ajout: 15,           // secondes ajoutées par offre retenue
+  hausse: 1,           // hausse minimale sur l enchère courante, en dollars
+  relanceSous: 2,      // sans offre : quand il reste ce nombre de secondes…
+  relanceA: 15,        // …le minuteur repart à ce nombre de secondes
+  delaiGagne: 15 * 60, // secondes pour le message « GAGNÉ »
+};
+
+const BORNES = {
+  depart: [0, 100000], duree: [5, 600], ajout: [1, 120], hausse: [0.01, 10000],
+  relanceSous: [1, 30], relanceA: [5, 120], delaiGagne: [60, 3600],
+};
+
+function _borner(r) {
+  const out = { ...REGLAGES_DEFAUT };
+  for (const k of Object.keys(REGLAGES_DEFAUT)) {
+    const v = Number(r && r[k]);
+    if (Number.isFinite(v)) out[k] = Math.min(BORNES[k][1], Math.max(BORNES[k][0], v));
+  }
+  out.depart = Math.round(out.depart * 100) / 100;
+  out.hausse = Math.round(out.hausse * 100) / 100;
+  if (out.relanceA <= out.relanceSous) out.relanceA = out.relanceSous + 5;
+  return out;
+}
+
+/* UNE OFFRE = un commentaire qui n est QU UN montant : « 45 », « 45 $ », « 45$ »,
+   « $45 », « 45,50 », « 45.50 ». ⚠ Volontairement strict : « 2 robes svp » ou
+   « j ai 30 ans » ne sont pas des offres — une offre fantôme ajoute 15 s et met un
+   faux nom sous le prix, devant tout le direct. */
+const RE_OFFRE = /^\s*\$?\s*(\d{1,6})(?:[.,](\d{1,2}))?\s*(?:\$|dollars?|piasses?)?\s*$/i;
+function lireOffre(texte) {
+  const m = RE_OFFRE.exec(String(texte == null ? '' : texte));
+  if (!m) return null;
+  const cents = m[2] ? Number((m[2] + '0').slice(0, 2)) : 0;
+  return Number(m[1]) + cents / 100;
+}
+
+function _pseudo(p) {
+  const s = String(p == null ? '' : p).trim().replace(/^@+/, '').slice(0, 40);
+  return s ? '@' + s : '';
+}
+
+class Encan {
+  constructor(opts = {}) {
+    this.maintenant = opts.maintenant || (() => Date.now());
+    this.surChangement = opts.surChangement || (() => {});
+    this.reglages = _borner(opts.reglages);
+    this.essai = opts.essai !== false;
+    this.file = [];          // articles à suivre : { id, nom, variante, ... }
+    this.historique = [];    // encans terminés de la séance
+    this._remettreAZero(null);
+    this.phase = 'garde';
+  }
+
+  _remettreAZero(article) {
+    this.article = article;
+    this.phase = article ? 'pret' : 'garde';
+    this.finA = 0;           // heure (ms) où le minuteur tombe à zéro
+    this.restantFige = 0;    // ms restantes, quand l encan est en pause
+    this.dureeTotale = 0;    // pour la barre de progression
+    this.prix = this.reglages.depart;
+    this.meneur = '';
+    this.offres = [];        // { pseudo, montant, t }
+    this.journal = [];       // { pseudo, texte, verdict, t } — les 50 derniers
+    this.gagnant = null;     // { pseudo, montant, le, limite }
+    this.relances = 0;
+  }
+
+  _avertir() { try { this.surChangement(this.etat()); } catch (e) {} }
+  _noter(pseudo, texte, verdict) {
+    this.journal.unshift({ pseudo, texte: String(texte || '').slice(0, 140), verdict, t: this.maintenant() });
+    if (this.journal.length > 50) this.journal.length = 50;
+  }
+
+  // ── Les gestes de la console ─────────────────────────────────────────────
+  regler(r) {
+    if (this.phase === 'encours' || this.phase === 'pause') return { ok: false, motif: 'encan_en_cours' };
+    this.reglages = _borner({ ...this.reglages, ...(r || {}) });
+    if (this.phase === 'pret' || this.phase === 'garde') this.prix = this.reglages.depart;
+    this._avertir();
+    return { ok: true };
+  }
+  modeEssai(oui) { this.essai = !!oui; this._avertir(); return { ok: true }; }
+
+  charger(article) {
+    if (this.phase === 'encours' || this.phase === 'pause') return { ok: false, motif: 'encan_en_cours' };
+    if (!article || !article.nom) return { ok: false, motif: 'article_requis' };
+    this._remettreAZero({ id: String(article.id || ''), nom: String(article.nom).slice(0, 80),
+      variante: String(article.variante || '').slice(0, 80), produitId: String(article.produitId || ''),
+      taille: String(article.taille || ''), couleur: String(article.couleur || ''), image: String(article.image || '') });
+    if (Number.isFinite(Number(article.depart))) this.prix = this.reglages.depart = _borner({ ...this.reglages, depart: article.depart }).depart;
+    this._avertir();
+    return { ok: true };
+  }
+  enFile(article) {
+    if (!article || !article.nom) return { ok: false, motif: 'article_requis' };
+    if (this.file.length >= 200) return { ok: false, motif: 'file_pleine' };
+    this.file.push({ ...article, cle: 'f' + this.maintenant().toString(36) + Math.random().toString(36).slice(2, 6) });
+    this._avertir();
+    return { ok: true };
+  }
+  retirerDeFile(cle) { this.file = this.file.filter((a) => a.cle !== cle); this._avertir(); return { ok: true }; }
+  suivant() {
+    if (this.phase === 'encours' || this.phase === 'pause') return { ok: false, motif: 'encan_en_cours' };
+    const a = this.file.shift();
+    if (!a) return { ok: false, motif: 'file_vide' };
+    return this.charger(a);
+  }
+
+  demarrer() {
+    if (this.phase !== 'pret') return { ok: false, motif: this.article ? 'deja_lance' : 'article_requis' };
+    const t = this.maintenant();
+    this.phase = 'encours';
+    this.dureeTotale = this.reglages.duree * 1000;
+    this.finA = t + this.dureeTotale;
+    this._avertir();
+    return { ok: true };
+  }
+  pause() {
+    if (this.phase !== 'encours') return { ok: false, motif: 'pas_en_cours' };
+    this.restantFige = Math.max(0, this.finA - this.maintenant());
+    this.phase = 'pause';
+    this._avertir();
+    return { ok: true };
+  }
+  reprendre() {
+    if (this.phase !== 'pause') return { ok: false, motif: 'pas_en_pause' };
+    this.finA = this.maintenant() + this.restantFige;
+    this.phase = 'encours';
+    this._avertir();
+    return { ok: true };
+  }
+  ajouterTemps(s) {
+    const ms = Math.max(1, Math.min(600, Number(s) || this.reglages.ajout)) * 1000;
+    if (this.phase === 'encours') this.finA += ms;
+    else if (this.phase === 'pause') this.restantFige += ms;
+    else return { ok: false, motif: 'pas_en_cours' };
+    this._allonger();
+    this._avertir();
+    return { ok: true };
+  }
+  /* « Remettre à zéro » : le même article, au prix de départ, prêt à relancer. */
+  remettre() {
+    if (!this.article) return { ok: false, motif: 'article_requis' };
+    const a = this.article;
+    this._remettreAZero(a);
+    this._avertir();
+    return { ok: true };
+  }
+  adjuger() {
+    if (this.phase !== 'encours' && this.phase !== 'pause') return { ok: false, motif: 'pas_en_cours' };
+    if (!this.offres.length) return { ok: false, motif: 'aucune_offre' };
+    this._declarer();
+    return { ok: true };
+  }
+  annuler() {
+    if (!this.article) return { ok: false, motif: 'article_requis' };
+    this._fin('annule');
+    return { ok: true };
+  }
+  /* Le message « GAGNÉ » est arrivé (lot 1 : la console le dit ; lot 2 : la vente s en charge). */
+  confirmerGagne() {
+    if (this.phase !== 'adjuge') return { ok: false, motif: 'pas_adjuge' };
+    this.gagnant.confirmeLe = this.maintenant();
+    this._fin('vendu');
+    return { ok: true };
+  }
+  /* Passé le délai : remis en vente — même article, au prix de départ. */
+  remettreEnVente() {
+    if (this.phase !== 'adjuge' && this.phase !== 'expire') return { ok: false, motif: 'pas_adjuge' };
+    const a = this.article;
+    this.historique.unshift({ article: a, gagnant: this.gagnant, issue: 'remis', le: this.maintenant() });
+    this._remettreAZero(a);
+    this._avertir();
+    return { ok: true };
+  }
+  garde() {
+    if (this.phase === 'encours' || this.phase === 'pause') return { ok: false, motif: 'encan_en_cours' };
+    this._remettreAZero(null);
+    this._avertir();
+    return { ok: true };
+  }
+
+  // ── Un commentaire (vrai direct au lot 3, mode essai dès maintenant) ──────
+  commentaire(pseudoBrut, texte, source) {
+    const pseudo = _pseudo(pseudoBrut);
+    if (!pseudo) return { ok: false, motif: 'pseudo_requis' };
+    if (source === 'essai' && !this.essai) return { ok: false, motif: 'essai_coupe' };
+    const montant = lireOffre(texte);
+    let verdict;
+    if (montant === null) verdict = 'pas_offre';
+    else if (this.phase === 'pause') verdict = 'pause';
+    else if (this.phase !== 'encours') verdict = 'fermee';
+    else {
+      const premier = !this.offres.length;
+      const mini = premier ? this.reglages.depart : Math.round((this.prix + this.reglages.hausse) * 100) / 100;
+      if (montant < mini) verdict = premier ? 'sous_depart' : 'trop_basse';
+      else {
+        verdict = 'retenue';
+        this.prix = montant;
+        this.meneur = pseudo;
+        this.offres.unshift({ pseudo, montant, t: this.maintenant() });
+        if (this.offres.length > 200) this.offres.length = 200;
+        this.finA += this.reglages.ajout * 1000;
+        this._allonger();
+      }
+    }
+    this._noter(pseudo, texte, verdict);
+    this._avertir();
+    return { ok: true, verdict, montant };
+  }
+
+  // La barre de progression suit le plus long temps restant vu : elle ne « recule » pas d un coup.
+  _allonger() {
+    const r = this.phase === 'pause' ? this.restantFige : this.finA - this.maintenant();
+    if (r > this.dureeTotale) this.dureeTotale = r;
+  }
+
+  _declarer() {
+    const t = this.maintenant();
+    this.gagnant = { pseudo: this.meneur, montant: this.prix, le: t, limite: t + this.reglages.delaiGagne * 1000 };
+    this.phase = 'adjuge';
+    this._avertir();
+  }
+  _fin(issue) {
+    this.historique.unshift({ article: this.article, gagnant: this.gagnant, issue, le: this.maintenant() });
+    if (this.historique.length > 200) this.historique.length = 200;
+    this.phase = issue === 'vendu' ? 'vendu' : 'annule';
+    this._avertir();
+  }
+
+  /* Le battement : à appeler souvent (le processus principal le fait toutes les 100 ms). */
+  battre() {
+    const t = this.maintenant();
+    if (this.phase === 'encours') {
+      const r = this.finA - t;
+      if (!this.offres.length && r <= this.reglages.relanceSous * 1000) {
+        this.finA = t + this.reglages.relanceA * 1000;
+        this.dureeTotale = Math.max(this.dureeTotale, this.reglages.relanceA * 1000);
+        this.relances++;
+        this._avertir();
+      } else if (this.offres.length && r <= 0) {
+        this._declarer();
+      }
+    } else if (this.phase === 'adjuge' && this.gagnant && t >= this.gagnant.limite) {
+      this.phase = 'expire';
+      this._avertir();
+    }
+  }
+
+  etat() {
+    const t = this.maintenant();
+    const restant = this.phase === 'encours' ? Math.max(0, this.finA - t)
+      : this.phase === 'pause' ? this.restantFige
+        : this.phase === 'pret' ? this.reglages.duree * 1000 : 0;
+    const premier = !this.offres.length;
+    return {
+      phase: this.phase, essai: this.essai, reglages: { ...this.reglages },
+      article: this.article, prix: this.prix, meneur: this.meneur,
+      prochaine: premier ? this.reglages.depart : Math.round((this.prix + this.reglages.hausse) * 100) / 100,
+      restantMs: restant, dureeMs: this.dureeTotale || this.reglages.duree * 1000,
+      offres: this.offres.slice(0, 5), nbOffres: this.offres.length, relances: this.relances,
+      journal: this.journal.slice(0, 30),
+      gagnant: this.gagnant ? { ...this.gagnant, restantMs: Math.max(0, this.gagnant.limite - t) } : null,
+      file: this.file.slice(0, 50), nbFile: this.file.length,
+      historique: this.historique.slice(0, 20),
+    };
+  }
+}
+
+module.exports = { Encan, lireOffre, REGLAGES_DEFAUT };

@@ -557,6 +557,9 @@ jobs:
           # seul l'enveloppement retire le texte de la page.
           # ⚠ Premier relevé : 207 textes dans 48 fenêtres, traduction existante.
           node tools/banc-langue-effet.js
+          # (2026-10-20) Le moteur de l'encan en direct : ses règles (relance à 15 s sans offre, +15 s par offre,
+          # 15 minutes pour « GAGNÉ »), le temps simulé — rien n'attend.
+          node tools/banc-encan.js
           # ⚠⚠ ET CE QUI N'EST PAS DU TEXTE : LES MESURES. Sa capture du
           # 2026-09-13 disait « 417 Mo » sur une page anglaise — `Mo`, `Ko`, `Go`
           # sont FRANÇAIS (l'anglais écrit MB, KB, GB), et le symbole de la

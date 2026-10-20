@@ -247,6 +247,21 @@ contextBridge.exposeInMainWorld('szPont', {
   // ⚠ ÉCOUTE SEULEMENT. Cette fenêtre ne peut RIEN émettre vers la caisse — elle
   // affiche, elle ne décide de rien, et on doit pouvoir la poser devant une
   // cliente sans y penser à deux fois.
+  /* ══ L'ENCAN EN DIRECT (2026-10-20) ══ La console envoie des GESTES ; les deux fenêtres reçoivent
+     l'ÉTAT poussé par le moteur (processus principal). ⚠ Le principal refuse tout geste qui ne vient
+     pas de la console : l'écran filmé n'a que `lire` et `surEtat` d'utiles. */
+  encan: {
+    geste: (nom, args) => ipcRenderer.invoke('encan:geste', String(nom || ''), Array.isArray(args) ? args : []).catch(() => ({ ok: false, motif: 'indisponible' })),
+    lire: () => ipcRenderer.invoke('encan:lire').catch(() => null),
+    ecran: (o) => ipcRenderer.invoke('encan:ecran', { pleinEcran: !!(o && o.pleinEcran) }).catch(() => ({ ok: false })),
+    copier: (t) => ipcRenderer.invoke('encan:copier', String(t || '')).catch(() => false),
+    surEtat: (cb) => {
+      const h = (e, etat) => { try { cb(etat); } catch {} };
+      ipcRenderer.on('encan:etat', h);
+      return () => ipcRenderer.removeListener('encan:etat', h);
+    },
+  },
+
   surEtatCaisse: (cb) => {
     const h = (e, etat) => { try { cb(etat); } catch {} };
     ipcRenderer.on('pos:etat', h);
