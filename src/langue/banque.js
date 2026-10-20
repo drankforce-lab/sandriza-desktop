@@ -275,4 +275,8 @@ module.exports = {
   'de la conciliation. Si la ligne est appariée, l’appariement sera défait. Cette action est irréversible.': 'from the reconciliation. If the line is matched, the match will be undone. This action cannot be undone.',
   'Supprimer la conciliation': 'Delete reconciliation',
   'sera supprimée définitivement, avec ses lignes et ses appariements. Les transactions bancaires et les dépenses ne sont pas touchées. Cette action est irréversible.': 'will be permanently deleted, along with its lines and matches. Bank transactions and expenses are not affected. This action cannot be undone.',
+  'Filtrer : montant, date…': 'Filter: amount, date…',
+  'Filtrer les versements': 'Filter the deposits',
+  'Plus': 'More',
+  'Apparier…': 'Match…',
 };

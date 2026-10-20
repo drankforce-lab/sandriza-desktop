@@ -977,11 +977,46 @@ function _szPgPied(c){
   p.addEventListener('click', function(ev){
     var b = ev.target.closest('[data-szpg]'); if (!b || b.disabled) return;
     var st = _szPg.pages[cle] || (_szPg.pages[cle] = { page: 0, n: -1 });
-    st.page = Math.max(0, st.page + parseInt(b.getAttribute('data-szpg'), 10));
+    var d = parseInt(b.getAttribute('data-szpg'), 10);
     var prec = p.previousElementSibling;
+    /* (lot VOLUME 2) Au bord de la page du CŒUR : on demande la page voisine a la fenetre. */
+    var co = prec ? _szPgCoeur(prec) : null;
+    if (co && ((d < 0 && st.page <= 0) || (d > 0 && st.page >= (st.nbVis || 1) - 1))) {
+      var aller = co.page + d;
+      if (aller < 0 || aller >= co.pages) return;
+      var fn = window.szPagesCoeur && window.szPagesCoeur[cle];
+      if (typeof fn !== 'function') return;
+      st.dir = d;
+      fn(aller);
+      return;
+    }
+    st.page = Math.max(0, st.page + d);
     if (prec && prec.getAttribute('data-pages') === cle) szPagesAjuster(prec);
   });
   return p;
+}
+/* ══ LA PAGE DEMANDEE AU COEUR (2026-10-19, audit — lot VOLUME 2) ═════════════
+   SA DECISION : data-pages RESTE, mais pour ce qu il sait faire — faire TENIR des lignes dans
+   la hauteur de la fenetre, sans glissiere. Il ne sert plus a CACHER une grande liste : pour
+   celle-la, la fenetre demande au coeur { page, parPage } et ne recoit que la page (le vrai
+   total avec). Elle marque alors son conteneur :
+     <div data-pages="coupons" data-pages-coeur="PAGE,PAGES,TOTAL,PARPAGE">
+   et declare window.szPagesCoeur.coupons = function(page){ ...recharger cette page... }.
+   Le pied reste UNIQUE : ses fleches parcourent les pages mesurees de la page du coeur, et au
+   bord demandent la page voisine au coeur (la precedente s ouvre sur sa DERNIERE page mesuree).
+   Le compte dit la position dans TOUTE la liste : « 51–65 sur 10 000 ». */
+function _szPgCoeur(c){
+  var v = c && c.getAttribute && c.getAttribute('data-pages-coeur');
+  if (!v) return null;
+  var x = String(v).split(',');
+  var o = { page: parseInt(x[0], 10) || 0, pages: Math.max(1, parseInt(x[1], 10) || 1),
+    total: Math.max(0, parseInt(x[2], 10) || 0), parPage: Math.max(1, parseInt(x[3], 10) || 1) };
+  return o;
+}
+window.szPagesCoeur = window.szPagesCoeur || {};
+function szPagesCoeurAttr(r){
+  if (!r || !r.pagine) return '';
+  return ' data-pages-coeur="' + (r.page || 0) + ',' + (r.pages || 1) + ',' + (r.total || 0) + ',' + (r.parPage || 50) + '"';
 }
 function szPagesAjuster(c){
   if (!c || !c.isConnected || !c.parentNode) return;
@@ -991,7 +1026,9 @@ function szPagesAjuster(c){
   var pied = _szPgPied(c);
   /* data-pages-fin : une liste qui s ALLONGE montre sa DERNIERE page (la caisse : l article qu on vient de
      scanner doit se voir). Sinon un changement de compte ramene a la page 1. */
-  if (els.length !== st.n) { st.page = (c.hasAttribute('data-pages-fin') && els.length > st.n && st.n >= 0) ? 1e6 : 0; st.n = els.length; }
+  var co = _szPgCoeur(c);
+  if (co && st.cp !== co.page) { st.cp = co.page; st.page = (st.dir < 0) ? 1e6 : 0; st.dir = 0; st.n = els.length; }
+  else if (els.length !== st.n) { st.page = (c.hasAttribute('data-pages-fin') && els.length > st.n && st.n >= 0) ? 1e6 : 0; st.n = els.length; }
   for (var i = 0; i < els.length; i++) els[i].style.display = '';
   if (!els.length) { pied.innerHTML = ''; pied.style.display = 'none'; return; }
   pied.style.display = '';
@@ -1027,15 +1064,19 @@ function szPagesAjuster(c){
     if (k >= pg[0] && k <= pg[1]) continue;
     for (var m = 0; m < lignes[k].el.length; m++) lignes[k].el[m].style.display = 'none';
   }
-  if (pages.length < 2) { pied.innerHTML = ''; pied.style.display = 'none'; return; }
+  st.nbVis = pages.length;
+  if (pages.length < 2 && !(co && co.pages > 1)) { pied.innerHTML = ''; pied.style.display = 'none'; return; }
   var premier = 0;
   for (var a = 0; a < pg[0]; a++) premier += lignes[a].el.length;
   var dernier = premier;
   for (var b2 = pg[0]; b2 <= pg[1]; b2++) dernier += lignes[b2].el.length;
   var hAvant = c.clientHeight;
-  pied.innerHTML = '<button type="button" class="pgf" data-szpg="-1" title="${T("Page précédente")}" aria-label="${T("Page précédente")}"' + (st.page === 0 ? ' disabled' : '') + '>‹</button>'
-    + '<button type="button" class="pgf" data-szpg="1" title="${T("Page suivante")}" aria-label="${T("Page suivante")}"' + (st.page >= pages.length - 1 ? ' disabled' : '') + '>›</button>'
-    + '<span class="pos">' + (premier + 1) + '–' + dernier + ' ${T("sur")} ' + els.length + '  ·  ${T("page")} ' + (st.page + 1) + ' / ' + pages.length + '</span>';
+  var base = co ? co.page * co.parPage : 0;
+  var debut = st.page === 0 && (!co || co.page === 0), fin = st.page >= pages.length - 1 && (!co || co.page >= co.pages - 1);
+  pied.innerHTML = '<button type="button" class="pgf" data-szpg="-1" title="${T("Page précédente")}" aria-label="${T("Page précédente")}"' + (debut ? ' disabled' : '') + '>‹</button>'
+    + '<button type="button" class="pgf" data-szpg="1" title="${T("Page suivante")}" aria-label="${T("Page suivante")}"' + (fin ? ' disabled' : '') + '>›</button>'
+    + '<span class="pos">' + (base + premier + 1) + '–' + (base + dernier) + ' ${T("sur")} ' + (co ? co.total : els.length)
+    + (co ? '' : '  ·  ${T("page")} ' + (st.page + 1) + ' / ' + pages.length) + '</span>';
   // Le pied vient de prendre sa place : si le conteneur a retreci, on remesure une fois.
   if (c.clientHeight + 1 < hAvant && !c.__szPgRe) { c.__szPgRe = true; try { szPagesAjuster(c); } finally { c.__szPgRe = false; } }
 }

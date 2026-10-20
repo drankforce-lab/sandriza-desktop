@@ -231,11 +231,20 @@ ${JS_MESURES()}
     return h + '</span></div>';
   }
 
+  /* (2026-10-19, audit — lot VOLUME) TROIS BOITES AU PLUS, PUIS « +k autres ». Cette petite fenetre grandit avec
+     sa pile : 30 generations lancees d un coup donnaient 30 boites empilees — une fenetre plus haute que l ecran,
+     dont le bas (et ses boutons) sortait de la vue. Les plus urgentes passent d abord (aMontrer les trie : en
+     cours, en attente, echouees) ; le reste se resume en une ligne qui ouvre la fenetre Generations. */
+  var MAX_BOITES = 3;
   function peindre(){
     var vis = LISTE.filter(function(g){ return !FERMES[g.id]; });
-    pile.innerHTML = vis.map(function(g){
+    var montrees = vis.slice(0, MAX_BOITES), autres = vis.length - montrees.length;
+    pile.innerHTML = montrees.map(function(g){
       return '<div class="suivi' + ((CONF[g.id] || ARRET[g.id] || g.etat === 'interrompu') ? ' annule' : '') + '" data-id="' + esc(g.id) + '">' + boite(g) + '</div>';
-    }).join('');
+    }).join('')
+      + (autres > 0 ? '<div class="suivi plus" data-id="__plus"><button class="lien" data-ouvrir="1">'
+          + (autres > 1 ? '${T("+{0} autres générations — tout voir")}'.split('{0}').join(autres) : '${T("+1 autre génération — tout voir")}')
+          + '</button></div>' : '');
     if (!vis.length) { if (msg) msg.textContent = ''; return 0; }
     return Math.ceil(pile.getBoundingClientRect().height + (msg && msg.textContent ? msg.getBoundingClientRect().height + 12 : 0));
   }
@@ -254,6 +263,7 @@ ${JS_MESURES()}
     var b = ev.target.closest('[data-g],[data-ouvrir],[data-plier],[data-faites]'); if (!b) return;
     var box = b.closest('.suivi'); if (!box) return;
     var id = box.getAttribute('data-id');
+    if (id === '__plus') { ouvrirGenerations(); return; }
     var g = LISTE.filter(function(x){ return x.id === id; })[0]; if (!g) return;
     if (b.hasAttribute('data-ouvrir')) { ouvrirGenerations(); return; }
     if (b.hasAttribute('data-plier')) { OUVERT[id] = !OUVERT[id]; peindre(); return; }

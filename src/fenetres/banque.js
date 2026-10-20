@@ -188,6 +188,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
   var VUE = 'releve';
   var EDIT_E = null;            // '' = nouveau, sinon l id
   var EDIT_V = null;
+  /* (2026-10-19, audit — lot VOLUME) UN SEUL SELECTEUR D APPARIEMENT, OUVERT A LA DEMANDE. Chaque ligne du releve
+     portait son propre <select> avec TOUS les versements non apparies : 800 lignes x 800 versements = 640 000
+     options construites a chaque dessin (la fenetre gelait plusieurs secondes). Maintenant chaque ligne porte un
+     bouton ; un clic ouvre UN selecteur sous cette ligne, filtre (montant, date, description) et classe par
+     proximite du montant, 40 par page (<< Plus >> en ajoute). */
+  var APP_OUVERT = '', APP_Q = '', APP_LIM = 40;
+  function candidatsApp(liste, e, q, lim){
+    var cible = Math.abs(+(e && e.amount) || 0);
+    var qq = String(q || '').trim().toLowerCase();
+    var l = liste.filter(function(p){
+      if (!qq) return true;
+      return (String(p.description || '') + ' ' + String(p.arrivalDate || '') + ' ' + String(p.amount)).toLowerCase().indexOf(qq) >= 0;
+    }).sort(function(a, b){ return Math.abs(Math.abs(+a.amount || 0) - cible) - Math.abs(Math.abs(+b.amount || 0) - cible); });
+    return { total: l.length, vus: l.slice(0, lim) };
+  }
+  function optionsApp(liste, e){
+    var c = candidatsApp(liste, e, APP_Q, APP_LIM);
+    return { total: c.total, html: '<option value="">${T("— apparier avec…")}</option>' + c.vus.map(function(p){
+      return '<option value="' + esc(p.id) + '">' + esc(szQuand(p.arrivalDate) || '?') + ' · ' + sou(p.amount)
+        + (p.description ? ' · ' + esc(String(p.description).slice(0, 40)) : '') + '</option>';
+    }).join('') };
+  }
   var ARME = '';
 
   var STATUTS = { open: '${T("Ouvert")}', in_progress: '${T("En cours")}', completed: '${T("Complété")}', locked: '${T("Verrouillé")}' };
@@ -615,12 +637,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
         + '<div class="dt">' + esc(szQuand(e.date) || '—') + ' · ' + esc(e.type || '—') + '</div></div>'
         + '<div style="font-variant-numeric:tabular-nums;font-weight:700">' + sou(e.amount) + '</div>'
         + (D.verrouille || !D.peutEcrire || !seulesV.length ? ''
-            : '<select data-app="' + esc(e.id) + '" aria-label="${T("Apparier cette écriture avec un versement")}"'
-              + ' style="width:auto;max-width:11rem">'
-              + '<option value="">${T("— apparier avec…")}</option>'
-              + seulesV.map(function(p){
-                  return '<option value="' + esc(p.id) + '">' + esc(szQuand(p.arrivalDate) || '?') + ' · ' + sou(p.amount) + '</option>';
-                }).join('') + '</select>')
+            : (APP_OUVERT === e.id ? (function(){
+                var o = optionsApp(seulesV, e);
+                return '<span class="app-choix" style="display:flex;flex-direction:column;gap:.25rem;max-width:16rem">'
+                  + '<input type="search" data-app-q="' + esc(e.id) + '" value="' + esc(APP_Q) + '" placeholder="${T("Filtrer : montant, date…")}"'
+                  + ' aria-label="${T("Filtrer les versements")}">'
+                  + '<select data-app="' + esc(e.id) + '" aria-label="${T("Apparier cette écriture avec un versement")}">' + o.html + '</select>'
+                  + '<span class="dt" data-app-compte>' + Math.min(o.total, APP_LIM) + ' / ' + o.total
+                  + (o.total > APP_LIM ? ' <button type="button" data-app-plus>${T("Plus")}</button>' : '') + '</span></span>';
+              })()
+              : '<button type="button" data-app-ouvrir="' + esc(e.id) + '">${T("Apparier…")}</button>'))
         + '</div>');
     });
     if (seulesB.length) h.push('</div>');
@@ -817,9 +843,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
     Array.prototype.forEach.call(corps.querySelectorAll('[data-app]'), function(sel){
       sel.onchange = function(){
         if (!sel.value) return;
+        APP_OUVERT = ''; APP_Q = ''; APP_LIM = 40;
         agir('banque:apparier', [ANNEE, REC, sel.getAttribute('data-app'), sel.value], '${T("Apparié.")}');
       };
     });
+    Array.prototype.forEach.call(corps.querySelectorAll('[data-app-ouvrir]'), function(b){
+      b.onclick = function(){ APP_OUVERT = b.getAttribute('data-app-ouvrir'); APP_Q = ''; APP_LIM = 40; dessiner(); };
+    });
+    /* Le filtre ne redessine QUE le selecteur (le champ garde le focus et le curseur). */
+    Array.prototype.forEach.call(corps.querySelectorAll('[data-app-q]'), function(inp){
+      inp.oninput = function(){
+        APP_Q = inp.value; APP_LIM = 40;
+        var id = inp.getAttribute('data-app-q');
+        var e = (D.rec.bankEntries || []).filter(function(x){ return x.id === id; })[0];
+        var libres = (D.rec.squarePayouts || []).filter(function(p){ return p.status !== 'matched'; });
+        var o = optionsApp(libres, e);
+        var sel = corps.querySelector('select[data-app="' + id + '"]');
+        if (sel) sel.innerHTML = o.html;
+        var cpt = corps.querySelector('[data-app-compte]');
+        if (cpt) cpt.textContent = Math.min(o.total, APP_LIM) + ' / ' + o.total;
+      };
+    });
+    var plus = corps.querySelector('[data-app-plus]');
+    if (plus) plus.onclick = function(){ APP_LIM += 40; dessiner(); };
     Array.prototype.forEach.call(corps.querySelectorAll('[data-desapp]'), function(b){
       b.onclick = function(){
         agir('banque:desapparier', [ANNEE, REC, b.getAttribute('data-desapp')], '${T("Appariement défait.")}');

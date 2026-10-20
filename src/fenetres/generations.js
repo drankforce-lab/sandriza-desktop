@@ -529,8 +529,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       GENS = r.liste || [];
       choisirDefaut(GENS);
       peindre();
+      /* (2026-10-19, lot VOLUME) La memoire du poste est pleine : la file n est plus gardee — un redemarrage
+         perdrait les generations en cours. Le DIRE une fois (pas a chaque seconde de la lecture vivante). */
+      if (r.quota && !QUOTA_DIT) { QUOTA_DIT = true; dire('${T("La mémoire du poste est pleine : la file des générations n’est plus gardée — ne fermez pas l’application avant la fin des générations en cours.")}', 'err'); }
+      if (!r.quota) QUOTA_DIT = false;
     });
   }
+  var QUOTA_DIT = false;
   /* VIVANTE : une lecture par seconde (la file vit dans la page principale, la lecture ne coûte rien) — les durées
      et le pourcentage avancent sous les yeux. On ne redessine pas pendant une confirmation. */
   function suivre(){

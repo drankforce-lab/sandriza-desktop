@@ -132,6 +132,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('paiements')}
     production:         '${T("Réservé au bac à sable — on ne masque pas des paiements réels.")}',
     rien_en_cache:      '${T("Aucune transaction en mémoire à masquer.")}',
     square:             '${T("Square n’a pas répondu.")}',
+    quota:              '${T("La mémoire du poste est pleine : ces paiements sont affichés, mais ne seront pas gardés après la fermeture.")}',
     echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
@@ -393,29 +394,53 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('paiements')}
     };
   }
 
+  /* (2026-10-19, audit — lot VOLUME) MOIS PAR MOIS, AVEC LA PROGRESSION. Une annee de 10 000 paiements, c etait
+     50 pages lues en serie dans UN appel du pont borne a 60 s : il expirait, et la fenetre disait << Square n a
+     pas repondu >> alors que Square repondait tres bien, lentement. Chaque mois est maintenant son propre appel
+     (court), le compte monte a l ecran, et un echec dit A QUEL MOIS il s est arrete — les mois deja lus restent.
+     L annee en cours s arrete au mois courant (rien a lire dans le futur). */
   function chercherChezSquare(){
     if (OCCUPE) return;
     OCCUPE = true;
+    var an = D ? D.annee : ANNEE;
+    var maint = new Date();
+    var dernier = (+an === maint.getFullYear()) ? (maint.getMonth() + 1) : 12;
+    if (+an > maint.getFullYear()) dernier = 1;
+    var nb = 0, nbR = 0, quota = false;
     dire('${T("Lecture chez Square…")}', 'att');
     dessiner();
-    appeler('paiements:charger', [D ? D.annee : ANNEE]).then(function(r){
-      OCCUPE = false;
-      if (!r.ok) {
-        /* ⚠ UN ECHEC RESEAU N EFFACE RIEN : ce qui etait en memoire reste
-           affiche. Dire << aucune donnee >> apres un refus de Square ferait
-           croire a des transactions disparues. */
-        dire(expliquer(r), 'err');
-        dessiner();
+    function mois(m){
+      if (m > dernier) {
+        OCCUPE = false;
+        dire(nb + (nb > 1 ? '${T(" paiements")}' : '${T(" paiement")}')
+          + (nbR
+              ? '${T(" et ")}' + nbR
+                + (nbR > 1 ? '${T(" remboursements")}' : '${T(" remboursement")}')
+              : '')
+          + '${T(" relus chez Square.")}'
+          + (quota ? ' ' + MOTIFS.quota : ''), quota ? 'err' : 'bon');
+        charger();
         return;
       }
-      dire(r.nb + (r.nb > 1 ? '${T(" paiements")}' : '${T(" paiement")}')
-        + (r.nbRemboursements
-            ? '${T(" et ")}' + r.nbRemboursements
-              + (r.nbRemboursements > 1 ? '${T(" remboursements")}' : '${T(" remboursement")}')
-            : '')
-        + '${T(" relus chez Square.")}', 'bon');
-      charger();
-    });
+      dire('${T("Lecture chez Square…")} ' + '${T("mois")} ' + m + '/' + dernier
+        + ' · ' + nb + (nb > 1 ? '${T(" paiements")}' : '${T(" paiement")}'), 'att');
+      appeler('paiements:charger', [an, m]).then(function(r){
+        if (!r.ok) {
+          /* ⚠ UN ECHEC RESEAU N EFFACE RIEN : ce qui etait en memoire reste
+             affiche. Dire << aucune donnee >> apres un refus de Square ferait
+             croire a des transactions disparues. */
+          OCCUPE = false;
+          dire('${T("Arrêté au mois")} ' + m + '/' + dernier + ' — ' + expliquer(r), 'err');
+          dessiner();
+          if (m > 1) charger();
+          return;
+        }
+        nb += (+r.nb || 0); nbR += (+r.nbRemboursements || 0);
+        if (r.quota) quota = true;
+        mois(m + 1);
+      });
+    }
+    mois(1);
   }
 
   /* (2026-10-15, sa demande : « le chargement des données doit se faire automatiquement au lancement

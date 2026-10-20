@@ -178,6 +178,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
   var SAISIE = null;         /* le budget en cours d edition : { cle: [12] } */
   var OUVERTS = {};          /* postes dont les douze mois sont deplies */
   var VOIR_VIDES = false;    /* montrer les postes sans budget ni activite */
+  /* (7.66.0 du site) Les exercices clos, tels que le SERVEUR les tient : { clotures: { an: { date, par, le } },
+     superadmin }. null tant qu on ne les a pas lus — on n affiche alors ni pastille ni bouton. */
+  var CLOT = null;
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -211,6 +214,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
     operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
     annee:              '${T("Cette année n’est pas valable.")}',
     saisie:             '${T("Le budget envoyé n’a pas la forme attendue.")}',
+    superadmin_requis:  '${T("Réservé au super-administrateur.")}',
+    role_perime:        '${T("Votre rôle a changé depuis la connexion. Reconnectez-vous.")}',
+    date_cloture:       '${T("Cette date de clôture n’est pas valable (elle ne peut pas être dans le futur).")}',
     echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
@@ -251,6 +257,121 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
       ANNEES = (r.annees || []).slice();
       SAISIE = null; OUVERTS = {};
       dessiner();
+      chargerClotures();
+    });
+  }
+
+  /* ── LA CLÔTURE D UN EXERCICE (7.66.0 du site) ─────────────────────────────
+     Clore un exercice FIGE ses chiffres : une depense ou une ecriture datee de
+     cette periode ne se cree, ne se modifie et ne se supprime plus (le serveur
+     refuse, 423). C est le geste qu on fait une fois la declaration remise.
+     ⚠ RESERVE AU SUPER-ADMINISTRATEUR, ET C EST LE SERVEUR QUI LE VERIFIE (role
+     courant, relu) : CLOT.superadmin ne sert qu a montrer ou cacher le bouton.
+     ⚠ CONFIRMATION FORTE : une boite a part (szConfirmer) qui dit l effet, puis
+     l annee a RETAPER — un clic de trop ne ferme pas une annee. */
+  function chargerClotures(){
+    return appeler('compta:cloturesDonnees', []).then(function(r){
+      CLOT = (r && r.ok) ? r : null;
+      outils();
+    });
+  }
+  function dateLongue(iso){
+    var p = String(iso || '').split('-');
+    if (p.length !== 3) return esc(iso);
+    return new Date(+p[0], +p[1] - 1, +p[2]).toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+  function anneesCloses(){
+    var c = (CLOT && CLOT.clotures) || {};
+    return Object.keys(c).filter(function(a){ return c[a] && c[a].date; }).sort();
+  }
+  /* La pastille des exercices clos, et le bouton du super-administrateur pour l exercice affiche. */
+  function outilsCloture(an){
+    if (!CLOT) return '';
+    var c = CLOT.clotures || {};
+    var clos = anneesCloses();
+    var h = '';
+    if (clos.length) {
+      var detail = clos.map(function(a){ return a + ' — ${T("clos au")} ' + dateLongue(c[a].date); }).join(' · ');
+      h += '<span class="rf-pill vert" id="clos" title="' + esc(detail) + '">${T("Exercices clos :")} ' + clos.join(', ') + '</span>';
+    }
+    if (!CLOT.superadmin || ONGLET === 'comparer' || !an) return h;
+    if (c[String(an)] && c[String(an)].date) {
+      h += '<button class="mini" id="rouvrir">${T("Rouvrir l’exercice")} ' + an + '</button>';
+    } else if (an < new Date().getFullYear()) {
+      h += '<button class="mini" id="clore">${T("Clôturer l’exercice")}</button>';
+    }
+    return h;
+  }
+  /* L annee a retaper, dans une boite a part (memes habits que szConfirmer). Rend true si elle est exacte. */
+  function retaperAnnee(an){
+    return new Promise(function(resoudre){
+      var v = document.createElement('div');
+      v.className = 'szc-voile';
+      v.innerHTML = '<div class="szc-boite danger" role="dialog" aria-modal="true" aria-labelledby="cl-t">'
+        + '<h3 id="cl-t">${T("Clôturer l’exercice")} ' + an + '</h3>'
+        + '<p>${T("Pour confirmer, tapez l’année de l’exercice à clore.")}</p>'
+        + '<label class="szc-nip"><span>${T("Exercice")}</span><input id="cl-an" type="text" inputmode="numeric" autocomplete="off" maxlength="4" aria-label="${T("Année de l’exercice à clore")}"></label>'
+        + '<div class="szc-nip-err" role="alert"></div>'
+        + '<div class="szc-pied"><button type="button" class="szc-non">${T("Annuler")}</button>'
+        + '<button type="button" class="szc-oui">${T("Clôturer")} ' + an + '</button></div></div>';
+      document.body.appendChild(v);
+      var champ = v.querySelector('input');
+      var fini = function(ok){
+        if (v.parentNode) v.parentNode.removeChild(v);
+        document.removeEventListener('keydown', clavier, true);
+        resoudre(!!ok);
+      };
+      var valider = function(){
+        if (String(champ.value).trim() !== String(an)) {
+          v.querySelector('.szc-nip-err').textContent = '${T("L’année tapée ne correspond pas à l’exercice")} ' + an + '.';
+          champ.focus(); return;
+        }
+        fini(true);
+      };
+      var clavier = function(ev){
+        if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); fini(false); }
+        else if (ev.key === 'Enter') { ev.preventDefault(); ev.stopPropagation(); valider(); }
+      };
+      document.addEventListener('keydown', clavier, true);
+      v.addEventListener('mousedown', function(ev){ if (ev.target === v) fini(false); });
+      v.querySelector('.szc-non').onclick = function(){ fini(false); };
+      v.querySelector('.szc-oui').onclick = valider;
+      try { champ.focus(); } catch (e) {}
+    });
+  }
+  function cloreExercice(an){
+    if (OCCUPE || !CLOT || !CLOT.superadmin) return;
+    var fin = an + '-12-31';
+    szConfirmer({ danger: true, titre: '${T("Clôturer l’exercice")} ' + an,
+      texte: '${T("Les dépenses et les écritures manuelles datées jusqu’au")} ' + dateLongue(fin)
+        + ' ${T("ne pourront plus être ajoutées, modifiées ni supprimées. Faites-le une fois la déclaration remise. Seul un super-administrateur peut rouvrir l’exercice, et le geste est inscrit au journal.")}',
+      details: [['${T("Exercice")}', String(an)], ['${T("Date de clôture")}', dateLongue(fin)]],
+      oui: '${T("Continuer")}' }).then(function(oui){
+      if (!oui) return false;
+      return retaperAnnee(an);
+    }).then(function(ok){
+      if (!ok) return;
+      OCCUPE = true;
+      dire('${T("Clôture en cours…")}', 'att');
+      appeler('compta:cloturer', [an, fin, false]).then(function(r){
+        OCCUPE = false;
+        if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+        chargerClotures().then(function(){ dire('${T("Exercice")} ' + an + ' ${T("clos au")} ' + dateLongue(fin) + '.', 'bon'); });
+      });
+    });
+  }
+  function rouvrirExercice(an){
+    if (OCCUPE || !CLOT || !CLOT.superadmin) return;
+    szConfirmer({ danger: true, titre: '${T("Rouvrir l’exercice")} ' + an,
+      texte: '${T("Les dépenses et les écritures de cet exercice redeviendront modifiables. Le geste est inscrit au journal.")}',
+      oui: '${T("Rouvrir l’exercice")} ' + an }).then(function(oui){
+      if (!oui) return;
+      OCCUPE = true;
+      appeler('compta:cloturer', [an, '', true]).then(function(r){
+        OCCUPE = false;
+        if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+        chargerClotures().then(function(){ dire('${T("Exercice")} ' + an + ' ${T("rouvert.")}', 'bon'); });
+      });
     });
   }
 
@@ -280,6 +401,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
            }).join('')
          + '</select>';
     }
+    h += outilsCloture(ONGLET === 'comparer' ? 0 : (ANNEES.length ? ANNEES[ANNEES.length - 1] : (dispo[0] || 0)));
     if (ONGLET === 'budget' && !RO) {
       h += '<button class="mini" id="egal">${T("Répartir également")}</button>'
          + '<button class="prim" id="enr">${T("Enregistrer le budget")}</button>';
@@ -307,6 +429,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
     });
     var eg = document.getElementById('egal'); if (eg) eg.onclick = repartirEgalement;
     var en = document.getElementById('enr');  if (en) en.onclick = enregistrer;
+    var anAff = ANNEES.length ? ANNEES[ANNEES.length - 1] : (dispo[0] || 0);
+    var cl = document.getElementById('clore');   if (cl) cl.onclick = function(){ cloreExercice(anAff); };
+    var ro = document.getElementById('rouvrir'); if (ro) ro.onclick = function(){ rouvrirExercice(anAff); };
   }
 
   function onglets(){

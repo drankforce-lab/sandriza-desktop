@@ -94,6 +94,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   var D = null;
   var ONGLET = 'pending';
   var Q = '';
+  /* (2026-10-19, audit — lot VOLUME 2) LA PAGE EST FAITE PAR LE COEUR : { onglet, q, page, parPage } → la page
+     mise en forme et le vrai total ; les comptes restent calcules sur toutes les demandes. Ancien site
+     (sans pagine) : la liste entiere, comme avant. */
+  var PG = 0, PAR_PAGE = 50;
 
   var ONGLETS = [
     ['pending', '${T("En attente")}'], ['approved', '${T("Approuvées")}'], ['in_transit', '${T("En transit")}'],
@@ -193,7 +197,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + (ONGLET !== 'all' ? '${T("Aucune demande dans cette catégorie.")}' : '${T("Aucune demande.")}')
         + '</div>';
     } else {
-      t += '<div class="cx-pages" data-pages="retours"><table><thead><tr><th>${T("Client")}</th><th>${T("Commande")}</th>'
+      t += '<div class="cx-pages" data-pages="retours"' + szPagesCoeurAttr(D) + '><table><thead><tr><th>${T("Client")}</th><th>${T("Commande")}</th>'
         + '<th>${T("Motif")}</th><th>${T("Statut")}</th><th class="r">${T("Date")}</th></tr></thead><tbody>'
         + rows.map(function(r){
             var badges = '<span class="rf-pill ' + (TONS[r.statut] || '') + '">' + esc(szTd(r.statutLibelle)) + '</span>';
@@ -214,7 +218,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
           }).join('')
         + '</tbody></table></div>';
     }
-    t += '<div class="cx-pied"><span>' + esc(nbDem(rows.length)) + '</span></div></div>';
+    t += '<div class="cx-pied"><span>' + esc(nbDem(D.pagine ? (D.total || 0) : rows.length)) + '</span></div></div>';
 
     /* ── LE PANNEAU D APPUI : ou en sont les retours, et ce qui presse — tout depuis les comptes
        deja recus (retours:liste) ; aucune donnee de plus. ── */
@@ -250,8 +254,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
        criteres sur lesquels on va trier et compter. Une pastille perdue dans
        un export, c est une question a laquelle le fichier ne repondra pas. */
     var exr = document.getElementById('r-exporter');
+    /* (lot VOLUME 2) En pages, la fenetre ne tient que la page : l export RELIT la liste ENTIERE de
+       l onglet et de la recherche (appel sans parPage). */
     if (exr) exr.onclick = function(){
-      var lignes = (D.lignes || []).map(function(r){
+      if (!D.pagine) { exporterRetours(D.lignes || []); return; }
+      exr.disabled = true;
+      appeler('retours:liste', [{ onglet: ONGLET, q: Q }]).then(function(r){
+        exr.disabled = false;
+        if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+        exporterRetours(r.lignes || []);
+      });
+    };
+    function exporterRetours(liste){
+      var lignes = liste.map(function(r){
         return [r.commande || '', r.client || '', r.courriel || '', r.motif || '',
           r.statutLibelle || '', fmtDate(r.date), r.suivi || '',
           r.etiquette || '',
@@ -265,14 +280,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         '${T("Frais pris en charge")}'], lignes);
       szExporter('retours-' + new Date().toISOString().slice(0, 10) + '.csv', csv,
         '${T("La liste des retours")}');
-    };
+    }
 
     var q = document.getElementById('r-q');
     if (q) {
       q.oninput = function(){
         Q = q.value;
         clearTimeout(window._rq);
-        window._rq = setTimeout(function(){ charger(true); }, 300);
+        window._rq = setTimeout(function(){ PG = 0; charger(true); }, 300);
       };
     }
   }
@@ -281,7 +296,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var t = ev.target;
     if (!t || !t.closest) return;
     var og = t.closest('[data-onglet]');
-    if (og) { ONGLET = og.getAttribute('data-onglet'); charger(); return; }
+    if (og) { ONGLET = og.getAttribute('data-onglet'); PG = 0; charger(); return; }
     if (t.closest('button') || t.closest('input')) return;
     var li = t.closest('tr[data-id]');
     if (!li) return;
@@ -295,16 +310,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   function charger(garderSaisie){
     if (enCours) { RELANCE = true; return; }
     enCours = true;
-    appeler('retours:liste', [{ onglet: ONGLET, q: Q }]).then(function(r){
+    appeler('retours:liste', [{ onglet: ONGLET, q: Q, page: PG, parPage: PAR_PAGE }]).then(function(r){
       enCours = false;
       if (RELANCE) { RELANCE = false; charger(garderSaisie); return; }
       if (!r || !r.ok) { vide('${T("Retours indisponibles")}', expliquer(r)); return; }
       D = r;
+      if (D.pagine) PG = D.page || 0;
       dire('');
       if (garderSaisie) redessinerSansPerdreLaSaisie();
       else dessiner();
     });
   }
+
+  // (lot VOLUME 2) Le pied du socle demande la page voisine au coeur.
+  (window.szPagesCoeur = window.szPagesCoeur || {}).retours = function(p){ PG = p; charger(); };
 
   /* ⚠ NE JAMAIS REDESSINER LE CHAMP SOUS LES DOIGTS. */
   function redessinerSansPerdreLaSaisie(){

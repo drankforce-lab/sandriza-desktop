@@ -238,7 +238,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('recherches')}
     corps.innerHTML = h;
 
     var q = document.getElementById('rs-q');
-    if (q) q.oninput = function(){ Q = q.value; redessinerSansPerdreLaSaisie(); };
+    /* (2026-10-19, audit — lot VOLUME) TEMPORISEE, 250 ms : chaque frappe redessinait toute la fenetre (le
+       journal de 10 000 recherches et l archive de 5 ans) ; on attend que la frappe se pose. */
+    if (q) q.oninput = function(){
+      Q = q.value;
+      clearTimeout(window.__rsMinu);
+      window.__rsMinu = setTimeout(redessinerSansPerdreLaSaisie, 250);
+    };
 
     var rvj = document.getElementById('rs-vers-journaux');
     if (rvj) rvj.onclick = function(){ if (P && P.ouvrirJournaux) P.ouvrirJournaux('recherches'); };

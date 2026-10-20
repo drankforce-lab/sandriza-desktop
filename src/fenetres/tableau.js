@@ -825,10 +825,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      ➡ Une panne PASSAGÈRE (délai, administration pas encore chargée, pont muet) garde le squelette
      de chargement et RÉESSAIE seule ; l échec ne se dit qu après ~1 minute d essais. */
   var ESSAIS = 0, PASSAGERES = { delai: 1, indisponible: 1, pont_indisponible: 1 };
-  function charger(){
+  /* sonde (lot VOLUME, 2026-10-19) : la relecture des 12 s prend le calcul GARDE par le pont tant que les donnees
+     du poste n ont pas change ; tout autre appel (clic, szActualiser, periode, retour) le refait. */
+  function charger(sonde){
     if (CHARGE_EN_COURS) return Promise.resolve();
     CHARGE_EN_COURS = true;
-    return appeler('tableau:lire', ['all', PERIODE]).then(function(r){
+    return appeler('tableau:lire', ['all', PERIODE, sonde !== true]).then(function(r){
       CHARGE_EN_COURS = false;
       if (!r || !r.ok) {
         if (!D && r && PASSAGERES[r.motif] && ESSAIS < 10) { ESSAIS++; setTimeout(charger, Math.min(8000, 1500 * ESSAIS)); return; }
@@ -846,11 +848,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
   }
   /* Il se relit seul toutes les 12 s, meme derriere un autre module (sa demande) — sauf pendant que
-     la pastille des zeros est ouverte (on ne redessine pas sous les doigts). */
+     la pastille des zeros est ouverte (on ne redessine pas sous les doigts).
+     (lot VOLUME, 2026-10-19) FENETRE CACHEE (reduite, onglet masque) : la relecture se SUSPEND — personne ne
+     la regarde — et repart d un coup au retour (visibilitychange), pour qu elle soit fraiche quand on la voit.
+     Le calcul lui-meme est garde par le pont tant que les donnees ne changent pas. */
   function demarrerDirect(){
     if (VIF_TIMER) return;
-    VIF_TIMER = setInterval(function(){ if (!ZEROS && !TOP100) charger(); }, 12000);
+    VIF_TIMER = setInterval(function(){ if (!document.hidden && !ZEROS && !TOP100) charger(true); }, 12000);
   }
+  document.addEventListener('visibilitychange', function(){
+    if (document.hidden) return;
+    if (VIF_TIMER && !ZEROS && !TOP100) charger(true);
+    if (VERROU_TIMER) chargerVerrous();
+  });
 
   function chargerSauvegarde(forcer){
     if (SAUV_EN_COURS) return;
@@ -939,10 +949,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       appliquerVerrous();
     });
   }
+  /* (lot VOLUME) Les verrous : 3 s quand la fenetre a le focus, 12 s sans le focus, RIEN quand elle est cachee. */
+  var VERROU_TIC = 0;
   function demarrerVerrous(){
     if (VERROU_TIMER) return;
     chargerVerrous();
-    VERROU_TIMER = setInterval(chargerVerrous, 3000);
+    VERROU_TIMER = setInterval(function(){
+      if (document.hidden) return;
+      VERROU_TIC++;
+      if (document.hasFocus && !document.hasFocus() && (VERROU_TIC % 4)) return;
+      chargerVerrous();
+    }, 3000);
   }
   window.addEventListener('pagehide', function(){
     if (VERROU_TIMER) { clearInterval(VERROU_TIMER); VERROU_TIMER = null; }

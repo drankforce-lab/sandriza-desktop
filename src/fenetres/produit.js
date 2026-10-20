@@ -1911,47 +1911,70 @@ function pageProduit(id) {
   // cette phrase, un sélecteur vide ressemble à une panne alors que c est un plan
   // de travail neuf. On renvoie aussi vers l endroit où l on importe.
   function ouvrirTheque(surChoix, multiple){
-    P.appeler('photos:liste').then(function(r){
-      var v = document.createElement('div');
-      v.className = 'voile';
-      var corps;
+    /* (2026-10-19, audit — lot VOLUME 2) LA PHOTOTHEQUE PAR PAGES, EN VIGNETTES. Elle recevait TOUTES les
+       photos en pleine taille (des data URL de centaines de Ko) pour en montrer une grille : 2 000 photos
+       faisaient des centaines de Mo sur le pont. On demande { page, parPage: 24, q } ; le pont rend la
+       page, le vrai total et une VIGNETTE reduite par photo. La photo ENTIERE se demande au choix
+       (photos:source). Un site plus ancien (sans « pagine ») rend tout : l ancienne grille, en lazy. */
+    var TH = { page: 0, q: '', minu: null, v: null };
+    function bulleDe(x){
+      var sku = x.codeProduit || '';
+      // ⚠ DOUBLE ANTISLASH VOULU (le script vit dans un litteral de gabarit).
+      return x.nom + (x.rattacheA ? '\\nDéjà utilisée par : ' + x.rattacheA
+        + (sku ? ' (' + sku + ')' : '') : '\\nJamais utilisée');
+    }
+    function caseDe(x, img, entiere){
+      var sku = x.codeProduit || '';
+      return '<div class="ph" data-src="' + esc(entiere ? '' : img) + '" data-id="' + esc(x.id) + '"'
+        + (entiere ? ' data-entiere="1"' : '') + ' title="' + esc(bulleDe(x)) + '">'
+        + (img ? '<img src="' + esc(img) + '" alt="" loading="lazy" decoding="async">' : '<div style="height:88px"></div>')
+        + '<div class="lg">' + esc(x.code) + '</div>'
+        + (x.rattacheA
+            ? '<div class="lg sku" title="' + esc(x.rattacheA) + '">' + esc(sku || x.rattacheA) + '</div>'
+            : '<div class="lg libre">libre</div>')
+        + '</div>';
+    }
+    function corpsDe(r){
       if (!r || !r.ok) {
-        // ⚠ « INDISPONIBLE » N EST PAS « VIDE ». Un refus du pont affiche ici son
-        // motif : sans lui, on croirait la photothèque vide et l on importerait
-        // a la main sans jamais savoir qu elle n avait pas repondu.
-        corps = '<p style="font-size:.86rem;line-height:1.5;color:var(--tx-att)">${T("Photothèque")} '
+        // ⚠ « INDISPONIBLE » N EST PAS « VIDE » : le motif du refus s affiche.
+        return '<p style="font-size:.86rem;line-height:1.5;color:var(--tx-att)">${T("Photothèque")} '
           + '${T("indisponible : ")}' + esc(expliquer(r)) + '</p>';
-      } else if (r.photos.length) {
-        // ⚠ ON MONTRE LE CODE DE L ARTICLE QUI SE SERT DEJA DE CETTE PHOTO.
-        // Deux articles peuvent porter des noms voisins ; le SKU, lui, ne trompe
-        // pas — et c est celui qu on relit sur l etiquette et sur le bon. Une
-        // photo deja employee ailleurs n est pas interdite, mais on doit le
-        // SAVOIR avant de la reprendre.
-        corps = '<div class="theque">' + r.photos.map(function(x){
-            var sku = x.codeProduit || '';
-            // ⚠ DOUBLE ANTISLASH VOULU. Ce script part dans un litteral de
-            // gabarit : un « \\n » simple serait resolu ICI, a la lecture du
-            // module, et la page recevrait un vrai saut de ligne au milieu d une
-            // chaine entre apostrophes — donc un script casse. Le garde-fou l a
-            // attrape, sinon la fenetre serait restee sur « Chargement… ».
-            var bulle = x.nom + (x.rattacheA ? '\\nDéjà utilisée par : ' + x.rattacheA
-              + (sku ? ' (' + sku + ')' : '') : '\\nJamais utilisée');
-            return '<div class="ph" data-src="' + esc(x.src) + '" title="' + esc(bulle) + '">'
-              + '<img src="' + esc(x.src) + '" alt="">'
-              + '<div class="lg">' + esc(x.code) + '</div>'
-              + (x.rattacheA
-                  ? '<div class="lg sku" title="' + esc(x.rattacheA) + '">'
-                    + esc(sku || x.rattacheA) + '</div>'
-                  : '<div class="lg libre">libre</div>')
-              + '</div>';
-          }).join('') + '</div>';
-      } else {
-        corps = '<p style="font-size:.86rem;line-height:1.5;color:var(--tx2)">${T("La photothèque est vide. ")}'
+      }
+      var l = r.pagine ? (r.lignes || []) : (r.photos || []);
+      if (!l.length) {
+        if (r.pagine && TH.q) return '<p style="font-size:.86rem;color:var(--tx2)">${T("Aucune photo ne correspond.")}</p>';
+        return '<p style="font-size:.86rem;line-height:1.5;color:var(--tx2)">${T("La photothèque est vide. ")}'
           + '${T("Elle se remplit par ")}<strong>${T("Catalogue → Photos")}</strong>${T(", dans la fenêtre principale, ")}'
           + '${T("et repart à zéro à chaque démarrage de l’application.")}</p>';
       }
+      var h = '<div class="theque">' + l.map(function(x){
+        if (r.pagine) return caseDe(x, x.vignette || '', !!x.entiere);
+        return caseDe(x, x.src, false);
+      }).join('') + '</div>';
+      if (r.pagine && r.pages > 1) {
+        h += '<div class="pied2" style="justify-content:center;gap:.5rem;margin-top:.4rem">'
+          + '<button type="button" data-thpg="-1"' + (r.page <= 0 ? ' disabled' : '') + ' aria-label="${T("Page précédente")}">‹</button>'
+          + '<span style="font-size:.8rem;color:var(--tx2)">' + (r.page * r.parPage + 1) + '–' + Math.min(r.total, (r.page + 1) * r.parPage)
+          + ' ${T("sur")} ' + r.total + '</span>'
+          + '<button type="button" data-thpg="1"' + (r.page >= r.pages - 1 ? ' disabled' : '') + ' aria-label="${T("Page suivante")}">›</button></div>';
+      }
+      return h;
+    }
+    function charger(premier){
+      P.appeler('photos:liste', { page: TH.page, parPage: 24, q: TH.q }).then(function(r){
+        if (premier) monter(r);
+        else { var z = document.getElementById('th-corps'); if (z) z.innerHTML = corpsDe(r); }
+        if (r && r.ok && r.pagine) TH.page = r.page;
+      });
+    }
+    function monter(r){
+      var v = document.createElement('div');
+      TH.v = v;
+      v.className = 'voile';
       v.innerHTML = '<div class="boite" style="max-width:620px"><h3 style="color:var(--tx-creme)">${T("Photothèque")}</h3>'
-        + corps
+        + ((r && r.ok && r.pagine) ? '<input type="search" id="th-q" placeholder="${T("Chercher : code, nom ou SKU…")}"'
+            + ' aria-label="${T("Chercher une photo")}" style="margin-bottom:.4rem;width:100%">' : '')
+        + '<div id="th-corps">' + corpsDe(r) + '</div>'
         + '<div class="pied2" style="justify-content:space-between">'
         + '<button type="button" id="th-fich"><span class="ic">📂</span> ${T("Importer de l’ordinateur…")}</button>'
         + '<button type="button" id="th-non">${T("Annuler")}</button></div></div>';
@@ -1960,14 +1983,32 @@ function pageProduit(id) {
       document.getElementById('th-fich').onclick = function(){
         v.remove(); choisirFichier(surChoix, multiple);
       };
+      var q = document.getElementById('th-q');
+      if (q) q.oninput = function(){
+        clearTimeout(TH.minu);
+        TH.minu = setTimeout(function(){ TH.q = q.value.trim(); TH.page = 0; charger(false); }, 250);
+      };
       v.addEventListener('click', function(ev){
         if (ev.target === v) return;   // le voile ne ferme plus (2026-10-07) : seulement Fermer
+        var pg = ev.target.closest('[data-thpg]');
+        if (pg) { if (pg.disabled) return; TH.page = Math.max(0, TH.page + parseInt(pg.getAttribute('data-thpg'), 10)); charger(false); return; }
         var p2 = ev.target.closest('.ph'); if (!p2) return;
+        if (p2.getAttribute('data-entiere') === '1') {
+          // La photo ENTIERE se demande maintenant, une seule.
+          P.appeler('photos:source', p2.getAttribute('data-id')).then(function(rs){
+            if (!rs || !rs.ok || !rs.src) { dire(expliquer(rs), 'err'); return; }
+            v.remove();
+            surChoix([rs.src]);
+            dire('${T("Photo reprise de la photothèque.")}', 'bon');
+          });
+          return;
+        }
         v.remove();
         surChoix([p2.getAttribute('data-src')]);
         dire('${T("Photo reprise de la photothèque.")}', 'bon');
       });
-    });
+    }
+    charger(true);
   }
 
   /* ══ L ALLER-RETOUR ASSISTANT → STUDIO → ASSISTANT (2026-10-19, sa demande) ══════════════════════════════════

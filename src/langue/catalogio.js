@@ -114,6 +114,10 @@ module.exports = {
   'Modèle vide (en-têtes seuls)': 'Empty template (headers only)',
   'Préparation du fichier…': 'Preparing the file…',
   'Préparation du modèle': 'Preparing the template',
+  // (lot VOLUME 2) l import par lots attendus
+  'Import arrêté': 'Import stopped',
+  'passés': 'done',
+  'lot': 'batch',
   '(en-têtes seuls)': '(headers only)',
 
   /* ── LE DETAIL DES COLONNES ─────────────────────────────────────────────── */

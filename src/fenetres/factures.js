@@ -109,7 +109,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
      les met en pages a la hauteur reelle de la fenetre (data-pages="factures"). */
   var TUILES = null;                     // absentes sur un vieux site
   var PEUT_ENC = false, PEUT_SUP = false;
-  var CLIENTS = [];                      // pour l'etat de compte
+  var CLIENTS = [];                      // pour l'etat de compte (ancien site : la liste entiere)
+  /* (2026-10-19, audit — lot VOLUME) LA PAGE EST FAITE PAR LE PONT. 10 000 factures ne traversent plus l IPC
+     et ne s ecrivent plus dans la page pour en montrer 50 : on demande { page, parPage, q, statut } et on
+     recoit la page, les comptes par statut et les prochaines echeances. Un ancien site (sans le champ pagine)
+     rend toujours la liste entiere : la fenetre la filtre alors elle-meme, comme avant. */
+  var PAGINE = false, PAGE = 0, PAR_PAGE = 50, TOTAL = 0, PAGES = 1, COMPTES = null, PROCH = [], NB_AREC = 0;
+  var A_CLIENTS = false, MINU_Q = null, MINU_CLI = null;
   var SUPPR_ARME = '';                   // id de la facture a confirmer
   var ETAT_OUVERT = false;
 
@@ -169,6 +175,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
   }
 
   function filtrees(){
+    if (PAGINE) return LIGNES || [];     // deja filtrees et coupees par le pont
     var q = Q.trim().toLowerCase();
     return (LIGNES || []).filter(function(r){
       if (STATUT && r.statut !== STATUT) return false;
@@ -185,14 +192,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
     var vue = rows;
 
     var h = '';
-    var nbTout = (LIGNES || []).length;
+    var nbTout = PAGINE ? (COMPTES ? COMPTES[''] : 0) : (LIGNES || []).length;
     var compte = { '': nbTout, paid: 0, unpaid: 0, overdue: 0, cancelled: 0 };
     var aRec = [];                       // non payees et en retard, pour l echeance
-    (LIGNES || []).forEach(function(r){
-      if (compte[r.statut] != null) compte[r.statut]++;
-      if (r.statut === 'unpaid' || r.statut === 'overdue') aRec.push(r);
-    });
-    aRec.sort(function(a, b){ return String(a.echeance || '').localeCompare(String(b.echeance || '')); });
+    if (PAGINE) {
+      if (COMPTES) Object.keys(compte).forEach(function(k){ compte[k] = COMPTES[k] || 0; });
+      aRec = PROCH.slice();
+    } else {
+      (LIGNES || []).forEach(function(r){
+        if (compte[r.statut] != null) compte[r.statut]++;
+        if (r.statut === 'unpaid' || r.statut === 'overdue') aRec.push(r);
+      });
+      aRec.sort(function(a, b){ return String(a.echeance || '').localeCompare(String(b.echeance || '')); });
+    }
+    var nbARec = PAGINE ? NB_AREC : aRec.length;
     function nbFact(n){ return n + ' ' + (n > 1 ? '${T("factures")}' : '${T("facture")}'); }
     function pct(part, tout){
       var v = tout > 0 ? Math.max(0, Math.min(100, part / tout * 100)) : 0;
@@ -208,7 +221,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
     if (sousT) sousT.textContent = nbFact(nbTout)
       + (TUILES ? ' · ' + '${T("{0} à recevoir")}'.split('{0}').join(fmt(TUILES.aRecevoir)) : '');
     var act = document.getElementById('f-actions');
-    if (act) act.innerHTML = CLIENTS.length ? '<button class="prim" id="f-etat">${T("État de compte client")}</button>' : '';
+    if (act) act.innerHTML = (CLIENTS.length || A_CLIENTS) ? '<button class="prim" id="f-etat">${T("État de compte client")}</button>' : '';
 
     /* ── LES QUATRE CHIFFRES (.cx-kpis) — les six tuiles d avant y sont toutes : le nombre de factures
        sous « Facturé », les depenses dans le panneau d appui. Absents sur un vieux site. ── */
@@ -225,8 +238,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
         + kpi('${T("Encaissé")}', esc(fmt(TUILES.encaisse)), 'ok',
             esc('${T("{0} % du facturé")}'.split('{0}').join(pctTexte(pct(Number(TUILES.encaisse) || 0, tot)))))
         + kpi('${T("À recevoir")}', esc(fmt(TUILES.aRecevoir)), 'att',
-            esc(!aRec.length ? '${T("Aucune facture impayée")}'
-              : (aRec.length > 1 ? '${T("{0} factures impayées")}'.split('{0}').join(aRec.length) : '${T("1 facture impayée")}')
+            esc(!nbARec ? '${T("Aucune facture impayée")}'
+              : (nbARec > 1 ? '${T("{0} factures impayées")}'.split('{0}').join(nbARec) : '${T("1 facture impayée")}')
                 + (proch && proch.echeance ? ' · ' + '${T("échéance {0}")}'.split('{0}').join(fmtDate(proch.echeance)) : '')))
         /* Deux formes ENTIERES : un << s >> colle a part ne se traduit pas. */
         + kpi('${T("Remboursé")}', esc(fmt(TUILES.rembourse)), '',
@@ -252,7 +265,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
       t += '<div class="vide">${T("Aucune facture ne correspond.")}</div>';
     } else {
       var avecGestes = PEUT_ENC || PEUT_SUP;
-      t += '<div class="cx-pages" data-pages="factures"><table><thead><tr><th>${T("Facture")}</th><th>${T("Client")}</th>'
+      t += (PAGINE ? '<div class="cx-pages-srv">' : '<div class="cx-pages" data-pages="factures">') + '<table><thead><tr><th>${T("Facture")}</th><th>${T("Client")}</th>'
         + '<th>${T("Échéance")}</th><th class="r">${T("Total")}</th><th>${T("Statut")}</th>' + (avecGestes ? '<th></th>' : '') + '</tr></thead><tbody>'
         + vue.map(function(r){
             var gestes = '';
@@ -279,7 +292,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
           }).join('')
         + '</tbody></table></div>';
     }
-    t += '<div class="cx-pied"><span>' + esc(nbFact(rows.length)) + '</span></div>';
+    t += '<div class="cx-pied"><span>' + esc(nbFact(PAGINE ? TOTAL : rows.length)) + '</span>'
+      + (PAGINE && PAGES > 1 ? '<span class="droite"><button class="mini" data-fpg="-1"' + (PAGE <= 0 ? ' disabled' : '') + ' aria-label="${T("Page précédente")}">‹</button> '
+          + (PAGE + 1) + ' / ' + PAGES
+          + ' <button class="mini" data-fpg="1"' + (PAGE >= PAGES - 1 ? ' disabled' : '') + ' aria-label="${T("Page suivante")}">›</button></span>' : '')
+      + '</div>';
     t += '</div>';
 
     /* ── LE PANNEAU D APPUI : encaissement, prochaines echeances, depenses — tout depuis la liste et
@@ -316,8 +333,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
     if (ETAT_OUVERT) {
       h += '<div class="voile" id="f-voile"><div class="boite">'
         + '<h3>${T("État de compte client")}</h3>'
+        /* (lot VOLUME) Le client se CHERCHE : un menu de 5 000 clients n etait ni lisible ni rapide. */
+        + (A_CLIENTS ? '<input type="search" id="f-client-q" placeholder="${T("Chercher un client : nom ou courriel…")}"'
+            + ' aria-label="${T("Chercher un client")}" style="margin-bottom:.4rem">' : '')
         + '<select id="f-client" aria-label="${T("Client de la facture")}">'
-        + '<option value="">${T("— Choisir un client —")}</option>'
+        + '<option value="">' + (A_CLIENTS ? '${T("— Tapez quelques lettres —")}' : '${T("— Choisir un client —")}') + '</option>'
         + CLIENTS.map(function(c){
             return '<option value="' + esc(c.id) + '">' + esc(c.nom) + ' (' + esc(c.courriel) + ')</option>';
           }).join('')
@@ -345,10 +365,32 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
       });
     };
     var vo = document.getElementById('f-voile');
+    var cq = document.getElementById('f-client-q');
+    if (cq) cq.oninput = function(){
+      clearTimeout(MINU_CLI);
+      MINU_CLI = setTimeout(function(){
+        appeler('factures:clients', [cq.value]).then(function(r){
+          var sel = document.getElementById('f-client');
+          if (!sel || !r || !r.ok) return;
+          var l = r.clients || [];
+          sel.innerHTML = '<option value="">' + (l.length ? (r.total > l.length
+              ? '${T("— {0} clients, les 20 premiers —")}'.split('{0}').join(r.total) : '${T("— Choisir un client —")}')
+              : (cq.value.trim() ? '${T("Aucun client ne correspond.")}' : '${T("— Tapez quelques lettres —")}')) + '</option>'
+            + l.map(function(c){ return '<option value="' + esc(c.id) + '">' + esc(c.nom) + ' (' + esc(c.courriel) + ')</option>'; }).join('');
+          if (l.length === 1) sel.value = l[0].id;
+        });
+      }, 250);
+    };
 
     var q = document.getElementById('f-q');
     if (q) {
-      q.oninput = function(){ Q = q.value; redessinerSansPerdreLaSaisie(); };
+      q.oninput = function(){
+        Q = q.value;
+        if (!PAGINE) { redessinerSansPerdreLaSaisie(); return; }
+        // Le filtre part au pont, temporise (250 ms), et revient a la premiere page.
+        clearTimeout(MINU_Q);
+        MINU_Q = setTimeout(function(){ PAGE = 0; charger(true); }, 250);
+      };
     }
     var s = document.getElementById('f-statut');
     if (s) s.onchange = function(){ STATUT = s.value; dessiner(); };
@@ -373,7 +415,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
     var t = ev.target;
     if (!t || !t.closest) return;
     var fst = t.closest('[data-fst]');
-    if (fst) { STATUT = fst.getAttribute('data-fst') || ''; dessiner(); return; }
+    if (fst) { STATUT = fst.getAttribute('data-fst') || ''; if (PAGINE) { PAGE = 0; charger(); } else dessiner(); return; }
+    var fpg = t.closest('[data-fpg]');
+    if (fpg) { PAGE = Math.max(0, Math.min(PAGES - 1, PAGE + Number(fpg.getAttribute('data-fpg')))); charger(); return; }
     var bpay = t.closest('[data-payer]');
     if (bpay) {
       SUPPR_ARME = '';
@@ -429,16 +473,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
     });
   };
 
-  function charger(){
-    appeler('factures:liste', []).then(function(r){
+  function charger(garderSaisie){
+    appeler('factures:liste', [{ page: PAGE, parPage: PAR_PAGE, q: Q, statut: STATUT }]).then(function(r){
       if (!r || !r.ok) { vide('${T("Factures indisponibles")}', expliquer(r)); return; }
       LIGNES = r.lignes || [];
       TUILES = r.tuiles || null;
       PEUT_ENC = !!r.peutEncaisser;
       PEUT_SUP = !!r.peutSupprimer;
       CLIENTS = r.clients || [];
+      PAGINE = !!r.pagine;
+      if (PAGINE) {
+        TOTAL = r.total || 0; PAGES = r.pages || 1; PAGE = r.page || 0;
+        COMPTES = r.comptes || null; PROCH = r.prochaines || []; NB_AREC = r.nbARecevoir || 0;
+        A_CLIENTS = !!r.aClients;
+      }
       dire('');
-      dessiner();
+      if (garderSaisie) redessinerSansPerdreLaSaisie(); else dessiner();
     });
   }
 

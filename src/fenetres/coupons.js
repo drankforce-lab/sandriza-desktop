@@ -153,6 +153,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
   var ETAT = '';            // '' | 'actifs' | 'inactifs'
   var FORM = null;          // null | {} (creation) | {…} (modification)
   var SUPPR_ARME = '';
+  /* (2026-10-19, audit — lot VOLUME 2) LA PAGE EST FAITE PAR LE COEUR : on demande { page, parPage, q, etat }
+     et on recoit la page, le vrai total et les comptes des tuiles (sur TOUS les coupons). Un ancien site
+     (reponse sans pagine) rend toute la liste : la fenetre filtre alors elle-meme, comme avant. */
+  var PG = 0, PAR_PAGE = 50, MINU_Q = null;
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -200,8 +204,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
   }
 
   function filtres(){
+    if (D && D.pagine) return D.coupons || [];   // deja filtres et coupes par le coeur
+    return filtrerListe(D.coupons || []);
+  }
+  function filtrerListe(liste){
     var q = Q.trim().toLowerCase();
-    return (D.coupons || []).filter(function(c){
+    return (liste || []).filter(function(c){
       if (ETAT === 'actifs' && !c.enCours) return false;
       if (ETAT === 'inactifs' && c.enCours) return false;
       if (!q) return true;
@@ -295,6 +303,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
     var tous = D.coupons || [];
     var nEnCours = tous.filter(function(c){ return c.enCours; }).length;
     var nUtil = tous.reduce(function(a, c){ return a + (Number(c.utilise) || 0); }, 0);
+    var nTous = tous.length;
+    if (D.pagine && D.comptes) { nTous = D.comptes.tous || 0; nEnCours = D.comptes.enCours || 0; nUtil = D.comptes.utilisations || 0; }
     var tu = function(etat, lib, val, sous){
       // etat null = un COMPTEUR, pas un filtre : ni clic, ni cadre.
       var f = etat !== null;
@@ -319,7 +329,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
       + '</div></div>';
     h += szTuiles('<div class="tuiles">'
       + tu('actifs', '${T("En cours")}', nEnCours, '${T("utilisables en boutique")}')
-      + tu('inactifs', '${T("Hors service")}', tous.length - nEnCours, '${T("désactivés ou hors période")}')
+      + tu('inactifs', '${T("Hors service")}', nTous - nEnCours,'${T("désactivés ou hors période")}')
       + tu(null, '${T("Utilisations")}', nUtil, '${T("tous coupons confondus")}')
       + '</div>');
 
@@ -328,7 +338,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
     if (!rows.length) {
       h += '<div class="ls-vide">' + (Q || ETAT ? '${T("Rien ne correspond.")}' : '${T("Aucun coupon. Créez le premier.")}') + '</div>';
     } else {
-      h += '<div data-pages="coupons">' + rows.map(function(c){
+      h += '<div data-pages="coupons"' + szPagesCoeurAttr(D) + '>' + rows.map(function(c){
         var gestes = '';
         if (D.peutModifier) {
           gestes = '<button class="mini geste" data-modifier="' + esc(c.id) + '">${T("Modifier")}</button>'
@@ -362,8 +372,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
        appartient a la liste, et un pied dessine par-dessus une boite ouverte
        flotterait au milieu de rien. */
     if (rows.length) {
+      var nPied = D.pagine ? (D.total || 0) : rows.length;
       h += szPied(
-        rows.length + ' ' + (rows.length > 1 ? '${T("coupons")}' : '${T("coupon")}'),
+        nPied + ' ' + (nPied > 1 ? '${T("coupons")}' : '${T("coupon")}'),
         '<button class="mini" id="cp-exporter"><span class="ic">⬇</span>${T(" Exporter")}</button>');
     }
 
@@ -377,8 +388,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
        ⚠ Les dates partent en ISO, pas en << 19 sept. >> : un tableur sait
        trier du 2026-09-19, il ne sait pas trier un mois abrege. */
     var exc = document.getElementById('cp-exporter');
-    if (exc) exc.onclick = function(){
-      var lignes = rows.map(function(c){
+    /* (lot VOLUME 2) En pages, la fenetre ne tient que la page : l export RELIT la liste ENTIERE
+       (appel sans parPage) et la filtre comme l ecran. */
+    function exporterListe(liste){
+      var lignes = liste.map(function(c){
         return [c.code || '', c.reduction || '', c.minimum || 0,
           c.cumulSolde ? '${T("autorisé")}' : '${T("refusé")}',
           c.utilise, c.maximum || '', c.debut || '', c.fin || '',
@@ -390,12 +403,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
         '${T("Début")}', '${T("Fin")}', '${T("Statut")}'], lignes);
       szExporter('coupons-' + new Date().toISOString().slice(0, 10) + '.csv', csv,
         '${T("La liste des coupons")}');
+    }
+    if (exc) exc.onclick = function(){
+      if (!D.pagine) { exporterListe(rows); return; }
+      exc.disabled = true;
+      appeler('coupons:liste', []).then(function(r){
+        exc.disabled = false;
+        if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+        exporterListe(filtrerListe(r.coupons || []));
+      });
     };
   }
 
   function brancher(){
     var q = document.getElementById('cp-q');
-    if (q) q.oninput = function(){ Q = q.value; redessinerSansPerdreLaSaisie(); };
+    if (q) q.oninput = function(){
+      Q = q.value;
+      if (!D || !D.pagine) { redessinerSansPerdreLaSaisie(); return; }
+      // (lot VOLUME 2) Le filtre part au coeur, temporise, et revient a la premiere page.
+      clearTimeout(MINU_Q);
+      MINU_Q = setTimeout(function(){ PG = 0; charger(); }, 250);
+    };
     var bn = document.getElementById('cp-nouveau');
     if (bn) bn.onclick = function(){ FORM = {}; dessiner(); szBrouillonProposer(); };
     var ba = document.getElementById('cp-annuler');
@@ -482,7 +510,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
     if (!t || !t.closest || t.closest('.boite')) return;
 
     var be = t.closest('[data-etat]');
-    if (be) { ETAT = be.getAttribute('data-etat'); SUPPR_ARME = ''; dessiner(); return; }
+    if (be) { ETAT = be.getAttribute('data-etat'); SUPPR_ARME = ''; if (D && D.pagine) { PG = 0; charger(); } else dessiner(); return; }
 
     var bm = t.closest('[data-modifier]');
     if (bm) {
@@ -531,13 +559,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
   });
 
   function charger(){
-    appeler('coupons:liste', []).then(function(r){
+    appeler('coupons:liste', [{ page: PG, parPage: PAR_PAGE, q: Q, etat: ETAT }]).then(function(r){
       if (!r || !r.ok) { vide('${T("Coupons indisponibles")}', expliquer(r)); return; }
       D = r;
+      if (D.pagine) PG = D.page || 0;
       if (sous) sous.textContent = D.peutModifier ? '' : 'consultation seulement';
-      dessiner();
+      // La recherche en cours garde son curseur (le rechargement vient de la frappe).
+      var qa = document.getElementById('cp-q');
+      if (qa && document.activeElement === qa) redessinerSansPerdreLaSaisie(); else dessiner();
     });
   }
+  // (lot VOLUME 2) Le pied du socle demande la page voisine au coeur.
+  (window.szPagesCoeur = window.szPagesCoeur || {}).coupons = function(p){ PG = p; charger(); };
 
   window.szActualiser = function(){
     var q = document.getElementById('cp-q');

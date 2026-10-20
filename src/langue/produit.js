@@ -21,6 +21,11 @@
  */
 
 module.exports = {
+  /* (lot VOLUME 2) la phototheque paginee du selecteur */
+  'Aucune photo ne correspond.': 'No photo matches.',
+  'Chercher : code, nom ou SKU…': 'Search: code, name or SKU…',
+  'Chercher une photo': 'Search for a photo',
+  'sur': 'of',
   /* ⚠ L EXEMPLE du champ suit la langue du poste ; ce qu on TAPE reste de la
      donnee. « Solde » est le LIBELLE de l etiquette — sa VALEUR, elle, reste
      'Solde' et part telle quelle dans la fiche. */

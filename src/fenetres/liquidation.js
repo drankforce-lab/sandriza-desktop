@@ -594,8 +594,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
         return charger().then(function(ok){
           if (ok) dessiner();
           /* ⚠ Le singulier, le pluriel et le regime : chacun entier. */
+          /* (lot VOLUME) n = confirmes par le serveur ; le reste est NOMME, jamais compte comme fait. */
+          var reste = r.nonConfirmes ? ' ' + r.nonConfirmes + ' ${T("non confirmé(s) par le serveur — relancez pour les reprendre.")}' : '';
           dire(n + (n === 1 ? '${T(" produit")}' : '${T(" produits")}')
-            + (r.mode === 'liq_no' ? '${T(" en liquidation.")}' : '${T(" en vente finale.")}'), 'bon');
+            + (r.mode === 'liq_no' ? '${T(" en liquidation.")}' : '${T(" en vente finale.")}') + reste, reste ? 'att' : 'bon');
         });
       });
   }
@@ -673,7 +675,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
         var quoiTxt = mode === 'normal' ? '${T(" — régime retiré.")}'
           : mode === 'liq_no' ? '${T(" — liquidation.")}' : '${T(" — vente finale.")}';
         dire(n + (n === 1 ? '${T(" produit dans ")}' : '${T(" produits dans ")}') + nc
-          + (nc === 1 ? '${T(" catégorie")}' : '${T(" catégories")}') + quoiTxt, 'bon');
+          + (nc === 1 ? '${T(" catégorie")}' : '${T(" catégories")}') + quoiTxt
+          + (r.nonConfirmes ? ' ' + r.nonConfirmes + ' ${T("non confirmé(s) par le serveur — relancez pour les reprendre.")}' : ''),
+          r.nonConfirmes ? 'att' : 'bon');
       });
     });
   }

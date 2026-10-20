@@ -15,6 +15,9 @@
  */
 
 module.exports = {
+  /* (lot VOLUME 2) la recherche de produit, au lieu d un menu de tout le catalogue */
+  'Chercher un produit': 'Search for a product',
+  'Nom ou SKU…': 'Name or SKU…',
   /* ── LA FENÊTRE ─────────────────────────────────────────────────────────── */
   'Atelier de création — Administration Sandriza': 'Design studio — Sandriza Administration',
   'Atelier de création': 'Design studio',

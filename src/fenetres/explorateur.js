@@ -494,10 +494,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function pageCourante(){
     var ph = (D && D.photos) || [];
+    /* (2026-10-19, lot VOLUME 2) LA PAGE VIENT DU COEUR : D.photos EST la page (page PAGE, taille
+       PARPAGE), D.pages et D.trouvees disent le reste. On ne coupe plus rien ici. */
+    if (D && D.srvPage) {
+      var n = D.trouvees || 0;
+      return { ph: ph, n: n, pages: Math.max(1, D.pages || 1), debut: (D.page || 0) * (D.taille || PARPAGE), vue: ph };
+    }
     var pages = Math.max(1, Math.ceil(ph.length / PARPAGE));
     if (PAGE >= pages) PAGE = pages - 1;
     if (PAGE < 0) PAGE = 0;
-    return { ph: ph, pages: pages, debut: PAGE * PARPAGE,
+    return { ph: ph, n: ph.length, pages: pages, debut: PAGE * PARPAGE,
       vue: ph.slice(PAGE * PARPAGE, PAGE * PARPAGE + PARPAGE) };
   }
 
@@ -505,7 +511,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (pc.pages <= 1) return '';
     return '<div class="pagi"><button class="jeton" id="p-prec"' + (PAGE <= 0 ? ' disabled' : '')
       + '>${T("‹ Précédent")}</button><span>${T("Page")} ' + (PAGE + 1) + '${T(" sur ")}' + pc.pages
-      + ' — ' + pc.ph.length + ' ' + (pc.ph.length > 1 ? '${T("photos")}' : '${T("photo")}') + '</span>'
+      + ' — ' + pc.n + ' ' + (pc.n > 1 ? '${T("photos")}' : '${T("photo")}') + '</span>'
       + '<button class="jeton" id="p-suiv"' + (PAGE >= pc.pages - 1 ? ' disabled' : '')
       + '>${T("Suivant ›")}</button></div>';
   }
@@ -627,7 +633,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var ph = (D && D.photos) || [];
     if (ev.shiftKey && ANCRE != null) {
       var a = Math.min(ANCRE, i), b = Math.max(ANCRE, i);
-      for (var k = a; k <= b; k++) if (ph[k]) SEL[ph[k].id] = true;
+      /* (lot VOLUME 2) i est l index dans TOUT le resultat : la plage se prend dans tousLesIds, elle
+         peut donc traverser des pages pas encore lues. */
+      if (D && D.srvPage && D.tousLesIds) { for (var k2 = a; k2 <= b; k2++) if (D.tousLesIds[k2]) SEL[D.tousLesIds[k2]] = true; }
+      else for (var k = a; k <= b; k++) if (ph[k]) SEL[ph[k].id] = true;
     } else {
       /* ⚠ UN CLIC COCHE, UN AUTRE DECOCHE (demande du 2026-08-14 : << quand on
          clique sur une photo ça devrait automatiquement la cocher et un autre
@@ -722,9 +731,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       });
     });
     var pp = document.getElementById('p-prec');
-    if (pp) pp.onclick = function(){ PAGE = Math.max(0, PAGE - 1); dessiner(); };
+    if (pp) pp.onclick = function(){ PAGE = Math.max(0, PAGE - 1); if (D && D.srvPage) charger(); else dessiner(); };
     var ps = document.getElementById('p-suiv');
-    if (ps) ps.onclick = function(){ PAGE = PAGE + 1; dessiner(); };
+    if (ps) ps.onclick = function(){ PAGE = PAGE + 1; if (D && D.srvPage) charger(); else dessiner(); };
   }
 
   /* ══ LA VISIONNEUSE — LA PHOTO EN GRAND, AVEC SON ZOOM (#143) ═════════════
@@ -1060,7 +1069,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        CHANGE — sinon on redessinerait en boucle. La grille n est pas mesuree
        (ses tuiles n ont pas de hauteur de ligne) : elle garde son compte. */
     if (VUE === 'liste') {
-      szAutoPagination('.liste', function(n){ PARPAGE = n; PAGE = 0; dessiner(); });
+      szAutoPagination('.liste', function(n){ PARPAGE = n; PAGE = 0; if (D && D.srvPage) charger(); else dessiner(); });
     }
     chargerVignettes();
   }
@@ -1118,16 +1127,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      DECIDE. */
 
   /* ══ CHARGEMENT ════════════════════════════════════════════════════════ */
+  /* (2026-10-19, lot VOLUME 2) LA PAGE AFFICHEE, PLUS 0 × 500. Le coeur (_photosExplorerCoeur)
+     pagine deja et renvoie tousLesIds (des chaines) : le Maj-clic et « tout selectionner » prennent
+     leur plage dans tousLesIds, sans avoir lu les pages. Un filtre qui change ramene a la page 1. */
+  var CLE_FILTRE = null, RELANCE = false;
   function charger(){
-    if (OCC) return;
+    if (OCC) { RELANCE = true; return; }
     OCC = true;
-    /* ⚠ TAILLE 500 : c est un explorateur, pas un defilement infini. Charger
-       page par page rendrait le Maj-clic inutile — on ne peut pas prendre une
-       plage qui traverse une page pas encore lue. */
+    var cle = JSON.stringify([Q, FILTRES, SANS, LOT, TRI]);
+    if (cle !== CLE_FILTRE) { if (CLE_FILTRE !== null) PAGE = 0; CLE_FILTRE = cle; }
     appeler('studio:explorer', [{ q: Q, filtres: FILTRES, sansTraitement: SANS, lot: LOT,
-      tri: TRI, page: 0, taille: 500 }]).then(function(r){
+      tri: TRI, page: PAGE, taille: PARPAGE }]).then(function(r){
       OCC = false;
+      if (RELANCE) { RELANCE = false; charger(); return; }
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+      // Une page au-dela de la fin (des photos sont parties) : on revient a la derniere.
+      if (r.pages && PAGE > 0 && PAGE >= r.pages) { PAGE = r.pages - 1; charger(); return; }
+      r.srvPage = typeof r.pages === 'number';
       D = r;
       dessinerBarre();
       dessiner();

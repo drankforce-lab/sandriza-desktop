@@ -32,6 +32,7 @@ module.exports = {
   ' pour ': ' for ',
   'produit.': 'product.',
   'produits.': 'products.',
+  'non confirmé(s) par le serveur — relancez pour les reprendre.': 'not confirmed by the server — run again to retry them.',
   /* ── L EXPORT DE LA LISTE (2026-09-19) ─────────────────────────────────
      ⚠ LE PRIX ET LE SOLDE SONT DEUX COLONNES dans le fichier, pas une chaine
      barree. A l ecran le solde se lit d un coup d oeil par-dessus le prix

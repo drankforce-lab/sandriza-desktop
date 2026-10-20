@@ -621,6 +621,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
     if (BUSY) {
       ongletsEl.innerHTML = '';
       corps.innerHTML = '<div class="avancement"><div style="font-size:.9rem">${T("Import en cours — ne fermez pas cette fenêtre.")}</div>'
+        + (AVANCE ? '<div style="font-size:.84rem;margin-top:.3rem">' + AVANCE.fait + ' / ' + AVANCE.total
+            + ' · ${T("lot")} ' + AVANCE.lot + ' / ' + AVANCE.lots + '</div>' : '')
         + '<div class="tourne"></div></div>';
       return;
     }
@@ -729,12 +731,31 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
     });
   }
 
+  /* (2026-10-19, audit — lot VOLUME 2) L EXPORT PAR TRANCHES. On demande { lot: 500, depuis } et le coeur
+     rend UNE tranche de produits deja en texte : la fenetre garde les morceaux (des chaines, jamais des
+     objets ligne) et les joint UNE fois a la fin. L avancement se voit (« 1 500 / 10 000 »). Un ancien
+     site ignore lot et rend le fichier entier (pas de champ parLots) : on l ecrit tel quel, comme avant. */
+  var EXP_LOT = 500;
   function exporter(){
     dire('${T("Préparation du fichier…")}');
-    appeler('catalogio:exporter', optsExport()).then(function(r){
-      if (r && r.ok) ecrireExport(r, 'Fichier');
-      else dire(expliquer(r), 'err');
-    });
+    var morceaux = [], nom = '', lignes = 0;
+    function tranche(depuis){
+      var o = optsExport(); o.lot = EXP_LOT; o.depuis = depuis;
+      appeler('catalogio:exporter', o).then(function(r){
+        if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+        if (!r.parLots) { ecrireExport(r, 'Fichier'); return; }
+        if (depuis === 0) { nom = r.nom; morceaux.push(r.entete); }
+        if (r.lignes) { morceaux.push(r.morceau); lignes += r.lignes; }
+        if (!r.fin) {
+          dire('${T("Préparation du fichier…")} ' + r.suivant + ' / ' + r.total);
+          tranche(r.suivant);
+          return;
+        }
+        ecrireExport({ ok: true, nom: nom, contenu: morceaux.join('\\r\\n') }, 'Fichier');
+        morceaux = null;
+      });
+    }
+    tranche(0);
   }
   /* Le modèle, avec une feuille EXPLICITE quand on le demande depuis l onglet
      Importer. ⚠ Là-bas il n y a pas de sélecteur de feuille : prendre celui de
@@ -779,18 +800,48 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
     if (!(IMP.compte.creation + IMP.compte.maj)) { dire('${T("Rien à appliquer.")}', 'att'); return; }
     CONFIRM = true; dessiner();
   }
+  /* (lot VOLUME 2) L IMPORT PAR LOTS ATTENDUS. { attendre: false } : le coeur lance l ecriture (par lots de
+     500, chacun attendu avant le suivant) et repond tout de suite ; la fenetre suit catalogio:etat
+     (avance : fait / total, lot / lots) jusqu au rapport. Un gros fichier ne bute plus sur le delai du pont.
+     Un ancien site ignore l option et repond a la fin, avec le rapport : meme fin qu avant. */
+  var AVANCE = null, SUIVI = null;
+  function finImport(rap){
+    BUSY = false; AVANCE = null;
+    if (SUIVI) { clearTimeout(SUIVI); SUIVI = null; }
+    RAP = rap; IMP = null; LIGNES = null;
+    dessiner();
+    var tot = (RAP.crees || 0) + (RAP.majs || 0);
+    var refus = ((RAP.conflits || []).length + (RAP.echecs || []).length);
+    if (RAP.interrompu) {
+      dire('${T("Import arrêté")} (' + RAP.interrompu.passes + ' / ' + RAP.interrompu.total + ' ${T("passés")}) : '
+        + (RAP.interrompu.detail || ''), 'err');
+      return;
+    }
+    dire(tot + ' fiche' + plur(tot) + ' ${T("enregistrée")}' + plur(tot) + (refus ? ', ' + refus + ' ${T("refusée")}' + plur(refus) : '') + '.', refus ? 'att' : 'bon');
+  }
+  function suivre(){
+    SUIVI = setTimeout(function(){
+      appeler('catalogio:etat', optsExport()).then(function(r){
+        if (!BUSY) return;
+        if (r && r.ok && r.busy) {
+          AVANCE = r.avance || null;
+          if (AVANCE) dire('${T("Application en cours, ne fermez pas cette fenêtre…")} ' + AVANCE.fait + ' / ' + AVANCE.total
+            + ' · ${T("lot")} ' + AVANCE.lot + ' / ' + AVANCE.lots);
+          dessiner(); suivre(); return;
+        }
+        if (r && r.ok && r.rapport) { finImport(r.rapport); return; }
+        suivre();
+      });
+    }, 700);
+  }
   function appliquer(){
     if (BUSY) return;
-    CONFIRM = false; BUSY = true; dessiner();
+    CONFIRM = false; BUSY = true; AVANCE = null; dessiner();
     dire('${T("Application en cours, ne fermez pas cette fenêtre…")}');
-    appeler('catalogio:appliquer', {}).then(function(r){
-      BUSY = false;
-      if (!r || !r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
-      RAP = r.rapport; IMP = null; LIGNES = null;
-      dessiner();
-      var tot = (RAP.crees || 0) + (RAP.majs || 0);
-      var refus = (RAP.conflits.length + RAP.echecs.length);
-      dire(tot + ' fiche' + plur(tot) + ' ${T("enregistrée")}' + plur(tot) + (refus ? ', ' + refus + ' ${T("refusée")}' + plur(refus) : '') + '.', refus ? 'att' : 'bon');
+    appeler('catalogio:appliquer', { attendre: false }).then(function(r){
+      if (!r || !r.ok) { BUSY = false; dire(expliquer(r), 'err'); dessiner(); return; }
+      if (r.lance) { suivre(); return; }
+      finImport(r.rapport);
     });
   }
   function reinit(){

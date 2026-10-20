@@ -37,6 +37,8 @@ module.exports = {
   'emplacements sont dans le lieu': 'locations are in the site',
   'SKU assigné automatiquement.': 'SKU assigned automatically.',
   'SKU assignés automatiquement.': 'SKUs assigned automatically.',
+  'Attribution des SKU et envoi au serveur…': 'Assigning SKUs and sending them to the server…',
+  'non confirmé(s) par le serveur — relancez pour les reprendre.': 'not confirmed by the server — run again to retry them.',
   'produit sera renuméroté (ex.': 'product will be renumbered (e.g.',
   'produits seront renumérotés (ex.': 'products will be renumbered (e.g.',
   'SKU normalisé.': 'SKU normalized.',

@@ -210,6 +210,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
   var ONGLET = 'general';
   var MENU = [];   // options du menu IVR, tenues en memoire entre les redessins
   var RESUME = null; // dernier retour de tel:resume (solde, appels, vm, sms)
+  /* (2026-10-19, lot VOLUME 2) LE JOURNAL DES SMS SE PAGINE AU SERVEUR : tel:sms:page { page, parPage }
+     → sms, total (COUNT), pages, nonLus. La page 1 vient de tel:resume (ses 30) ; le total se demande
+     une fois quand elle est pleine. Un ancien site refuse l op : on garde les 30, comme avant. */
+  var SMS_PAGE = 0, SMS_PG = null, SMS_PAR_PAGE = 30, SMS_OCC = false;
+  function chargerSmsPage(pg){
+    if (SMS_OCC) return; SMS_OCC = true;
+    appeler('tel:sms:page', [{ page: pg, parPage: SMS_PAR_PAGE }]).then(function(r){
+      SMS_OCC = false;
+      if (!r || !r.ok || !r.pagine) { if (!SMS_PG) SMS_PG = { refuse: true }; return; }
+      SMS_PG = r; SMS_PAGE = r.page || 0;
+      if (ONGLET === 'sms') rendreSms();
+    });
+  }
+  window.szPagesCoeur = window.szPagesCoeur || {};
+  window.szPagesCoeur['tel-sms'] = function(pg){ chargerSmsPage(Math.max(0, pg | 0)); };
 
   var ONGLETS = [
     ['general', '${T("Général")}'], ['accueil', '${T("Accueil & routage")}'], ['menu', '${T("Menu IVR")}'],
@@ -782,6 +797,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
     if (!RESUME) { box.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     if (RESUME.erreur) { box.innerHTML = '<div class="vide">' + esc(RESUME.erreur) + '</div>'; return; }
     var sms = RESUME.sms || [];
+    var pagine = !!(SMS_PG && SMS_PG.pagine);
+    if (pagine && SMS_PAGE > 0) sms = SMS_PG.sms || [];
+    // Page 1 pleine et total pas encore connu : on le demande (une fois).
+    if (!SMS_PG && sms.length >= SMS_PAR_PAGE) chargerSmsPage(0);
     // (2026-10-19, lot M) Les non-lus COMPTÉS PAR LE SERVEUR (tout le journal) ; repli : les 30 affichés.
     var nonlus = 0; for (var k = 0; k < sms.length; k++) if (sms[k].direction === 'inbound' && !sms[k].read) nonlus++;
     if (typeof RESUME.nonLus === 'number') nonlus = RESUME.nonLus;
@@ -803,6 +822,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
         + '</div></div></div>';
     }
     box.innerHTML = h;
+    if (pagine && SMS_PG.pages > 1) {
+      box.setAttribute('data-pages', 'tel-sms');
+      box.setAttribute('data-pages-coeur', szPagesCoeurAttr(SMS_PG).replace(/^ data-pages-coeur="|"$/g, ''));
+    } else box.removeAttribute('data-pages-coeur');
     var reps = box.querySelectorAll('[data-smsrep]'); for (var a = 0; a < reps.length; a++) reps[a].onclick = function(){ var t = document.getElementById('t-sms-to'); if (t) { t.value = this.getAttribute('data-smsrep'); var bd = document.getElementById('t-sms-body'); if (bd) bd.focus(); } };
     var lus = box.querySelectorAll('[data-smslu]'); for (var b = 0; b < lus.length; b++) lus[b].onclick = function(){ smsAction('sms:lu', this.getAttribute('data-smslu')); };
     var dels = box.querySelectorAll('[data-smsdel]'); for (var c = 0; c < dels.length; c++) dels[c].onclick = function(){ smsAction('sms:suppr', this.getAttribute('data-smsdel')); };
@@ -880,7 +903,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
   function smsAction(op, id){
     dire('…');
     appeler('tel:' + op, [{ id: id }]).then(function(r){
-      if (r && r.ok) { chargerResume(); dire(op === 'sms:suppr' ? '${T("SMS supprimé.")}' : '${T("Marqué lu.")}', 'bon'); }
+      if (r && r.ok) { chargerResume(); if (SMS_PG && SMS_PG.pagine) { SMS_PG = null; chargerSmsPage(SMS_PAGE); } dire(op === 'sms:suppr' ? '${T("SMS supprimé.")}' : '${T("Marqué lu.")}', 'bon'); }
       else dire('${T("Échec :")} ' + expliquer(r), 'err');
     });
   }

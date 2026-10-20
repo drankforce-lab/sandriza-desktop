@@ -97,7 +97,7 @@ const GLOBALES = new Set([
   'FormData', 'Blob', 'File', 'FileReader', 'URL', 'URLSearchParams',
   'Image', 'Audio', 'Intl', 'Symbol', 'WeakMap', 'WeakSet', 'Proxy', 'Reflect',
   'AbortController', 'MutationObserver', 'ResizeObserver', 'IntersectionObserver',
-  'Notification', 'CustomEvent', 'Event', 'DOMParser', 'TextEncoder', 'TextDecoder',
+  'Notification', 'CustomEvent', 'Event', 'MouseEvent', 'DOMParser', 'TextEncoder', 'TextDecoder',
   'getComputedStyle', 'matchMedia', 'print', 'open', 'close', 'focus', 'blur',
   'scrollTo', 'scrollBy', 'require', 'importScripts',
   /* ⚠ AJOUTÉES PARCE QUE L OUTIL LES A RÉCLAMÉES, pas par anticipation. Une

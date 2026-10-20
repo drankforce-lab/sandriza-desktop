@@ -472,6 +472,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
   var ONGLET = 'produits'; // 'produits' | 'reappro' | 'endommages' | 'entrepots'
   var VUE = 'reappro'; // 'reappro' | 'recherche' | 'produit' (la grille)
   var REAPPRO = [];    // lignes de la liste de reachat
+  /* (2026-10-19, lot VOLUME 2) LA PAGE EST DEMANDEE AU COEUR (stock:reappro { page, parPage }) : la
+     reponse porte pagine, total, nbAlertes. Un ancien site rend toute la liste (REAPPRO_PG reste null). */
+  var REAPPRO_PG = null, REAPPRO_PAGE = 0;
   var TROUVES = [];    // resultats de la recherche par nom
   var PROD = null;     // { id, nom, sku, seuilHerite }
   var VARS = [];       // ⚠ L ETAT DE LA GRILLE, HORS de la liste affichee
@@ -634,6 +637,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
   function dessinerListe(){
     var enRecherche = VUE === 'recherche';
     var lignes = enRecherche ? TROUVES : REAPPRO;
+    var nbListe = (!enRecherche && REAPPRO_PG) ? (REAPPRO_PG.total || 0) : lignes.length;
     var h = '<div class="carte">'
       + '<input aria-label="${T("Scannez une étiquette, ou tapez un nom de produit")}" id="rech" autocomplete="off" placeholder="${T("Scannez une étiquette, ou tapez un nom de produit…")}">'
       + '<div class="aide" style="margin-top:.35rem">${T("Un code de variante scanné ouvre directement sa fiche.")} '
@@ -645,8 +649,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
           + (lignes.length > 1 ? '${T("produits")}' : '${T("produit")}') + '</span>'
         /* ⚠ LES DEUX ALTERNATIVES EN ENTIER, plus de << s >> colle : c est la
            faute qui donnait << 11 variantes to restock >> sur sa capture. */
-        : '${T("À réapprovisionner")} <span class="note">— ' + lignes.length + ' '
-          + (lignes.length > 1 ? '${T("variantes sous leur seuil")}' : '${T("variante sous son seuil")}')
+        : '${T("À réapprovisionner")} <span class="note">— ' + nbListe + ' '
+          + (nbListe > 1 ? '${T("variantes sous leur seuil")}' : '${T("variante sous son seuil")}')
           + '</span>') + '</h2>';
 
     if (!lignes.length) {
@@ -672,7 +676,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
         // a zero d abord, puis le plus proche de la rupture EN PROPORTION.
         /* AU LOOK DE LA GRILLE PRODUITS (2026-10-12, sa demande) : la photo dans le rond, le nom et sa
            ligne secondaire, la variante, la quantite en grand contre son seuil, une pastille. */
-        h += '<div class="grille gp' + (COMPACT ? ' compacte' : '') + '" data-pages="inventaire-reappro"><table><thead><tr>'
+        h += '<div class="grille gp' + (COMPACT ? ' compacte' : '') + '" data-pages="inventaire-reappro"' + (REAPPRO_PG ? szPagesCoeurAttr(REAPPRO_PG) : '') + '><table><thead><tr>'
           + '<th>${T("Produit")}</th><th>${T("Variante")}</th><th>${T("Inventaire")}</th><th></th></tr></thead><tbody>';
         lignes.forEach(function(r){
           var ini = String(r.categorieNom || r.nom || '?').charAt(0).toUpperCase();
@@ -1393,8 +1397,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
   }
   function skusTous(b){
     b.disabled = true;
+    dire('${T("Attribution des SKU et envoi au serveur…")}', 'att');
     appeler('stock:skuTous').then(function(r){
-      dire(r.ok ? r.n + ' ' + szPl(r.n, '${T("SKU assigné automatiquement.")}', '${T("SKU assignés automatiquement.")}') : expliquer(r), r.ok ? 'bon' : 'err');
+      /* (lot VOLUME) n = ce que le SERVEUR a confirme ; le reste est nomme, jamais compte comme fait. */
+      var reste = (r && r.nonConfirmes) ? ' ' + r.nonConfirmes + ' ${T("non confirmé(s) par le serveur — relancez pour les reprendre.")}' : '';
+      dire(r.ok ? r.n + ' ' + szPl(r.n, '${T("SKU assigné automatiquement.")}', '${T("SKU assignés automatiquement.")}') + reste : expliquer(r), r.ok && !reste ? 'bon' : (r.ok ? 'att' : 'err'));
       if (r.ok) chargerOnglet();
       else b.disabled = false;
     });
@@ -2048,6 +2055,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
 
   // Recharge les donnees de L ONGLET COURANT, et lui seul : la fenetre ne
   // demande jamais les quatre a la fois.
+  // (lot VOLUME 2) Le pied du socle demande la page voisine du reachat au coeur.
+  window.szPagesCoeur = window.szPagesCoeur || {};
+  window.szPagesCoeur['inventaire-reappro'] = function(pg){ REAPPRO_PAGE = Math.max(0, pg | 0); chargerOnglet(); };
   function chargerOnglet(garderFocus){
     dessinerOnglets();
     if (ONGLET === 'produits') {
@@ -2070,10 +2080,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
       return;
     }
     if (ONGLET === 'reappro') {
-      appeler('stock:reappro').then(function(r){
+      appeler('stock:reappro', [{ page: REAPPRO_PAGE, parPage: 50 }]).then(function(r){
         if (!r || !r.ok) { vide('${T("Inventaire indisponible")}', expliquer(r)); return; }
         REAPPRO = r.lignes || [];
-        NB_REAPPRO = REAPPRO.length;
+        REAPPRO_PG = r.pagine ? r : null;
+        if (r.pagine) REAPPRO_PAGE = r.page || 0;
+        NB_REAPPRO = r.pagine ? (r.total || 0) : REAPPRO.length;
         dessiner();
       });
       return;

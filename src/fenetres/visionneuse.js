@@ -88,6 +88,19 @@ function pageVisionneuse(id, liste) {
   var LISTE = D.liste, I = 0;
   for (var k = 0; k < LISTE.length; k++) if (LISTE[k].id === D.id) I = k;
   var PLEIN = {};
+  /* (2026-10-19, audit — lot VOLUME) LES IMAGES PLEINES SONT GARDEES PAR HUIT AU PLUS (LRU). Chacune est une
+     adresse data: de plusieurs Mo ; feuilleter 500 photos les gardait TOUTES en memoire (des Go) jusqu a la
+     fermeture. Les huit dernieres vues restent instantanees ; une plus ancienne se relit au besoin. */
+  var PLEIN_MAX = 8, PLEIN_ORDRE = [];
+  function pleinGarder(id, src){
+    PLEIN[id] = src;
+    var i = PLEIN_ORDRE.indexOf(id); if (i >= 0) PLEIN_ORDRE.splice(i, 1);
+    PLEIN_ORDRE.push(id);
+    while (PLEIN_ORDRE.length > PLEIN_MAX) delete PLEIN[PLEIN_ORDRE.shift()];
+  }
+  function pleinToucher(id){
+    var i = PLEIN_ORDRE.indexOf(id); if (i >= 0) { PLEIN_ORDRE.splice(i, 1); PLEIN_ORDRE.push(id); }
+  }
   var Z = 1, X = 0, Y = 0, FIT = 1;
   var cadre = document.getElementById('cadre');
 
@@ -140,7 +153,7 @@ function pageVisionneuse(id, liste) {
       im.onerror = function(){ if (LISTE[I].id === id) { cadre.innerHTML = '<div class="attente">${T("Cette photo n’a pas pu être lue.")}</div>'; appliquer(); } };
       im.src = src;
     };
-    if (PLEIN[id] !== undefined) { poser(PLEIN[id]); return; }
+    if (PLEIN[id] !== undefined) { pleinToucher(id); poser(PLEIN[id]); return; }
     cadre.innerHTML = '<div class="attente">${T("Chargement de l’image…")}</div>';
     appliquer();
     var pr;
@@ -148,7 +161,7 @@ function pageVisionneuse(id, liste) {
     if (!pr || typeof pr.then !== 'function') { poser(''); return; }
     pr.then(function(r){
       var src = (r && r.ok && r.vignettes && r.vignettes[id]) || '';
-      PLEIN[id] = src;
+      pleinGarder(id, src);
       poser(src);
     }, function(){ poser(''); });
   }

@@ -175,6 +175,9 @@ function pageTransferts(ouverture) {
   var RECH = '';
   var F_LIEU = '';           // filtre par lieu (ou '_sans')
   var F_SECTION = '';        // filtre par section
+  /* (2026-10-19, audit — lot VOLUME 2) LES CANDIDATS SE PAGINENT DANS LE COEUR : { q, lieuId, section, page,
+     parPage } → la page et le vrai total. Ancien site (sans pagine) : la liste entiere, comme avant. */
+  var CAND_PG = null, CAND_PAR_PAGE = 50;
   var OUVERT = '';           // id du transfert dont le volet Recevoir est ouvert
   var BUSY = false;
 
@@ -468,7 +471,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '<div class="dt" style="margin-top:.4rem">${T("Le transfert emporte <strong>toute</strong> la quantité de la variante.")}</div></div>';
     if (!CAND) return haut + '<div class="vide">${T("Lancez une recherche pour voir ce qui peut partir.")}</div>';
     if (!CAND.length) return haut + '<div class="vide">${T("Aucune variante avec du stock <em>et</em> un emplacement connu.")}</div>';
-    return haut + '<div class="carte sz-pagee"><div data-pages="transferts-candidats"><table><thead><tr>'
+    return haut + '<div class="carte sz-pagee"><div data-pages="transferts-candidats"' + szPagesCoeurAttr(CAND_PG) + '><table><thead><tr>'
       + '<th>${T("Article")}</th><th class="num">${T("Qté")}</th><th>${T("Depuis")}</th><th>${T("Vers")}</th><th></th>'
       + '</tr></thead><tbody>'
       + CAND.map(function(c){
@@ -496,24 +499,34 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   }
 
   /* ══ GESTES ══════════════════════════════════════════════════════════════ */
-  function chercher(){
-    var el = document.getElementById('q');
-    RECH = el ? el.value : '';
-    var fl = document.getElementById('f-lieu');
-    var fs = document.getElementById('f-section');
-    F_LIEU = fl ? fl.value : '';
-    F_SECTION = fs ? fs.value : '';
+  // page : absente = nouvelle recherche (page 0, filtres relus) ; un nombre = la page voisine (memes filtres).
+  function chercher(page){
+    var tourner = typeof page === 'number';
+    if (!tourner) {
+      var el = document.getElementById('q');
+      RECH = el ? el.value : '';
+      var fl = document.getElementById('f-lieu');
+      var fs = document.getElementById('f-section');
+      F_LIEU = fl ? fl.value : '';
+      F_SECTION = fs ? fs.value : '';
+    }
     dire('${T("Recherche…")}');
-    appeler('transfert:candidats', [{ q: RECH, lieuId: F_LIEU, section: F_SECTION }]).then(function(r){
+    appeler('transfert:candidats', [{ q: RECH, lieuId: F_LIEU, section: F_SECTION,
+      page: tourner ? page : 0, parPage: CAND_PAR_PAGE }]).then(function(r){
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       CAND = r.lignes || [];
+      CAND_PG = r.pagine ? r : null;
       dessiner();
+      if (tourner) { dire(''); return; }
       /* ⚠ Et l accord du verbe suit le nombre — << 3 variantes peut partir >>
          se lisait ainsi depuis le debut ; la recombinaison l a fait voir. */
-      dire(CAND.length + (CAND.length > 1 ? '${T(" variantes peuvent partir.")}' : '${T(" variante peut partir.")}'),
-        CAND.length ? 'bon' : 'att');
+      var n = CAND_PG ? (CAND_PG.total || 0) : CAND.length;
+      dire(n + (n > 1 ? '${T(" variantes peuvent partir.")}' : '${T(" variante peut partir.")}'),
+        n ? 'bon' : 'att');
     });
   }
+  // (lot VOLUME 2) Le pied du socle demande la page voisine au coeur.
+  (window.szPagesCoeur = window.szPagesCoeur || {})['transferts-candidats'] = function(p){ chercher(p); };
 
   function partir(id){
     if (BUSY) return;

@@ -107,4 +107,5 @@ module.exports = {
   "Source": "Source",
   "l’original de The New Black, conservé 30 jours après la génération": "the The New Black original, kept for 30 days after generation",
   "Retraite l’aperçu au poste depuis l’original de The New Black (conservé 30 jours) — sans nouvel appel payant": "Reprocesses the preview on this computer from the The New Black original (kept for 30 days) — no new paid call",
+  "La mémoire du poste est pleine : la file des générations n’est plus gardée — ne fermez pas l’application avant la fin des générations en cours.": "This computer’s storage is full: the generation queue is no longer saved — do not close the application before the running generations finish.",
 };

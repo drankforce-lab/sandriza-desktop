@@ -58,6 +58,26 @@ module.exports = {
   'Cette année n’est pas valable.': 'That year is not valid.',
   'Le budget envoyé n’a pas la forme attendue.': 'The budget sent is not in the expected form.',
   'L’opération a échoué.': 'The operation failed.',
+  /* ── La clôture d un exercice (7.66.0 du site) ──────────────────────────── */
+  'Réservé au super-administrateur.': 'Reserved for the super administrator.',
+  'Votre rôle a changé depuis la connexion. Reconnectez-vous.': 'Your role has changed since you signed in. Sign in again.',
+  'Cette date de clôture n’est pas valable (elle ne peut pas être dans le futur).': 'This closing date is not valid (it cannot be in the future).',
+  'clos au': 'closed as of',
+  'Exercices clos :': 'Closed fiscal years:',
+  'Rouvrir l’exercice': 'Reopen fiscal year',
+  'Clôturer l’exercice': 'Close the fiscal year',
+  'Pour confirmer, tapez l’année de l’exercice à clore.': 'To confirm, type the year of the fiscal year to close.',
+  'Année de l’exercice à clore': 'Year of the fiscal year to close',
+  'Clôturer': 'Close',
+  'L’année tapée ne correspond pas à l’exercice': 'The year typed does not match fiscal year',
+  'Les dépenses et les écritures manuelles datées jusqu’au': 'Expenses and manual entries dated up to',
+  'ne pourront plus être ajoutées, modifiées ni supprimées. Faites-le une fois la déclaration remise. Seul un super-administrateur peut rouvrir l’exercice, et le geste est inscrit au journal.':
+    'can no longer be added, changed or deleted. Do this once the return has been filed. Only a super administrator can reopen the fiscal year, and the action is recorded in the log.',
+  'Date de clôture': 'Closing date',
+  'Clôture en cours…': 'Closing…',
+  'Les dépenses et les écritures de cet exercice redeviendront modifiables. Le geste est inscrit au journal.':
+    'Expenses and entries for this fiscal year will become editable again. The action is recorded in the log.',
+  'rouvert.': 'reopened.',
   'Erreur inattendue (': 'Unexpected error (',
 
   /* ── Les mois, abreges a trois lettres comme dans la version francaise ──── */

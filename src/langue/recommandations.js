@@ -222,4 +222,6 @@ module.exports = {
   'sera retirée des recommandations. Vous pourrez la restaurer ultérieurement.': 'will be removed from recommendations. You can restore it later.',
   'La règle': 'The rule',
   'sera supprimée définitivement. Cette action est irréversible.': 'will be permanently deleted. This action cannot be undone.',
+  'Produit source : chercher un nom ou un SKU…': 'Source product: search a name or SKU…',
+  'Tapez quelques lettres du nom ou du SKU.': 'Type a few letters of the name or SKU.',
 };

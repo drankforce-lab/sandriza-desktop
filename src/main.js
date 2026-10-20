@@ -2424,7 +2424,7 @@ const OPS_PONT = new Set([
   'fournisseur:contexte', 'fournisseur:lire', 'fournisseur:enregistrer',
   'collection:contexte', 'collection:decrire', 'collection:lire', 'collection:enregistrer',
   'produit:contexte', 'produit:sku', 'produit:nip', 'produit:nipExige',
-  'photos:liste',
+  'photos:liste', 'photos:source',   // (lot VOLUME 2) la photo entiere, au choix dans le selecteur pagine
   'produit:decrire', 'produit:lire', 'produit:enregistrer',
   // Le brouillon GENERIQUE de n importe quelle fenetre d edition (portee + cle).
   'brouillon:lire', 'brouillon:ecrire', 'brouillon:jeter',
@@ -2520,6 +2520,8 @@ const OPS_PONT = new Set([
   // La LISTE des factures (fenetre Factures) et l ouverture d une facture
   // depuis cette liste (fenetre Facture existante, une par facture).
   'factures:liste', 'factures:ouvrir',
+  // (lot VOLUME) L etat de compte : le client se CHERCHE (20 au plus) au lieu d un menu de 5 000.
+  'factures:clients',
   // La LISTE des produits en vente (fenetre Produits) : la page filtree par le
   // site, l ouverture de l assistant sur une fiche, et l assistant vierge.
   'produits:liste', 'produits:ouvrir', 'produits:nouveau',
@@ -2589,7 +2591,7 @@ const OPS_PONT = new Set([
   // Offres et annonces (fenetre Promotions, 1.68.0). Offres, annonces et
   // badges partagent une meme liste : bascule et suppression sont communes.
   'offres:liste', 'offres:enregistrer', 'annonces:liste', 'annonces:enregistrer',
-  'promos:basculer', 'promos:supprimer', 'promos:bandeau',
+  'promos:basculer', 'promos:supprimer', 'promos:bandeau', 'promos:catalogue',
   // Chat en ligne (fenetre Chat, 1.69.0) : les OPERATIONS seulement — la
   // liste ATTEND la resynchronisation, quelqu un attend une reponse.
   'chat:liste', 'chat:lire', 'chat:repondre', 'chat:statut', 'chat:supprimer',
@@ -2846,7 +2848,7 @@ const OPS_PONT = new Set([
   // Automatisations (fenetre Automations, 2.40.0) — pas de secret.
   'config:automations:donnees', 'config:automations:email', 'config:automations:stats',
   'config:telephonie:donnees', 'config:telephonie:ecrire', 'config:telephonie:bloquer', 'config:telephonie:debloquer',
-  'tel:resume', 'tel:sms:envoyer', 'tel:sms:lu', 'tel:sms:suppr', 'tel:vm:lu', 'tel:vm:suppr',
+  'tel:resume', 'tel:sms:envoyer', 'tel:sms:lu', 'tel:sms:suppr', 'tel:sms:page', 'tel:vm:lu', 'tel:vm:suppr',
   'config:modeles:donnees', 'config:modeles:ecrire', 'config:modeles:retirer',
   // Bibliotheque de MANNEQUINS de l habillage IA (2026-08-20, meme fenetre que
   // les modeles par vue). Portage AVANT retrait : produit:modeles la LISAIT
@@ -3006,6 +3008,9 @@ const OPS_PONT = new Set([
   // resultats, la comparaison pluriannuelle, le budget et ses ecarts d un coup.
   // Deux portes pour la meme donnee, ce sont deux reponses qui divergent.
   'compta:donnees', 'compta:budgetEcrire',
+  // Cloture d un exercice (7.66.0 du site) : lire les exercices clos, clore ou
+  // rouvrir. Le super-administrateur est revérifié AU SERVEUR (op compta_cloturer).
+  'compta:cloturesDonnees', 'compta:cloturer',
   // Livre de comptes en partie double (fenetre Livre, #128 phase 2).
   // ⚠ LA FENETRE NE CALCULE RIEN NON PLUS : une seule porte de lecture, qui rend
   // le journal, le grand livre, la balance, le bilan ET le rapprochement avec le
@@ -3035,7 +3040,7 @@ const OPS_PONT = new Set([
   'vehicules:catalogue',
   // Atelier de creation (2026-10-16) : les modeles de vetements. ⚠ `atelier:donnees` est l op de
   // LECTURE (nom repere par l etape 2 du verificateur du site) ; `atelier:apercu` trace sans ecrire.
-  'atelier:donnees', 'atelier:apercu', 'atelier:analyser', 'atelier:preparer', 'atelier:graduer', 'atelier:egaliser', 'atelier:restaurer', 'atelier:exporter', 'atelier:apercu3d', 'atelier:motifControler', 'atelier:motifExporter', 'atelier:motifImage', 'atelier:motifDetourer', 'atelier:depuisPhoto', 'atelier:croquis', 'atelier:verrou', 'atelier:envoyerFiche', 'atelier:vignette', 'atelier:rendrePhoto', 'atelier:renduPrix', 'atelier:renduTnb', 'atelier:renduResultat', 'atelier:modele3dPrix', 'atelier:modele3dLancer', 'atelier:ecrire', 'atelier:dupliquer', 'atelier:supprimer',
+  'atelier:donnees', 'atelier:apercu', 'atelier:modele', 'atelier:produits', 'atelier:analyser', 'atelier:preparer', 'atelier:graduer', 'atelier:egaliser', 'atelier:restaurer', 'atelier:exporter', 'atelier:apercu3d', 'atelier:motifControler', 'atelier:motifExporter', 'atelier:motifImage', 'atelier:motifDetourer', 'atelier:depuisPhoto', 'atelier:croquis', 'atelier:verrou', 'atelier:envoyerFiche', 'atelier:vignette', 'atelier:rendrePhoto', 'atelier:renduPrix', 'atelier:renduTnb', 'atelier:renduResultat', 'atelier:modele3dPrix', 'atelier:modele3dLancer', 'atelier:ecrire', 'atelier:dupliquer', 'atelier:supprimer',
   // Rappels (fenetre Rappels, 2026-10-02). ⚠ `rappels:etat` sert AUSSI au
   // processus principal : c est lui que src/rappels-notif.js interroge pour
   // les notifications de bureau, par la meme porte (executerOpSite).
@@ -3511,7 +3516,7 @@ const LIMITES_PONT = {
   'config:transporteurs:donnees': 30000, 'config:transporteurs:ecrire': 45000, 'config:transporteurs:reessayer': 30000, 'config:transporteurs:tester': 70000,
   'config:automations:donnees': 15000, 'config:automations:email': 20000, 'config:automations:stats': 20000,
   'config:telephonie:donnees': 15000, 'config:telephonie:ecrire': 30000, 'config:telephonie:bloquer': 20000, 'config:telephonie:debloquer': 20000,
-  'tel:resume': 20000, 'tel:sms:envoyer': 20000, 'tel:sms:lu': 15000, 'tel:sms:suppr': 15000, 'tel:vm:lu': 15000, 'tel:vm:suppr': 15000,
+  'tel:resume': 20000, 'tel:sms:envoyer': 20000, 'tel:sms:lu': 15000, 'tel:sms:suppr': 15000, 'tel:sms:page': 20000, 'tel:vm:lu': 15000, 'tel:vm:suppr': 15000,
   'config:modeles:donnees': 15000, 'config:modeles:ecrire': 60000, 'config:modeles:retirer': 20000,
   // Meme profil que les modeles par vue : l ajout televerse une photo dans R2
   // (60 s), le retrait ecrit la liste puis efface l objet (20 s).
@@ -3594,6 +3599,10 @@ const LIMITES_PONT = {
   'studio:logos': 60000, 'studio:filigraner': 90000,
   // les soldes : trois services externes interrogés (Twilio, Photoroom, Fal.ai) — 8 s ne suffisaient pas, la barre restait vide
   'tableau:soldes': 40000,
+  /* (2026-10-19, lot VOLUME) Les lots de produits ATTENDENT le serveur (quatre envois à la fois) pour rendre le
+     compte de ce qui a été CONFIRMÉ : 10 000 SKU ≈ 500 s. Au plafond ordinaire de 8 s, on rendait « délai »
+     alors que le travail avançait très bien. */
+  'stock:skuTous': 600000, 'stock:venteFinale': 300000,
   /* Les recettes ne portent que du texte et des nombres — aucune image. La
      lecture sort du cache local ; les deux ecritures attendent le verdict de la
      base avant de repondre, d ou un delai d ecriture de configuration ordinaire. */
@@ -3650,7 +3659,8 @@ const LIMITES_PONT = {
   // chaque produit part vers Turso. Un delai court ferait dire << echec >> a une
   // ecriture qui aboutit — le pire des verdicts, puisqu on la refait.
   'liquidation:donnees': 20000, 'liquidation:choix': 20000, 'liquidation:cats': 20000,
-  'liquidation:retirer': 30000, 'liquidation:lot': 120000, 'liquidation:parCategorie': 120000,
+  // (lot VOLUME) Les lots ATTENDENT le serveur (quatre envois à la fois) : 3 000 produits ≈ 150 s.
+  'liquidation:retirer': 30000, 'liquidation:lot': 300000, 'liquidation:parCategorie': 300000,
   /* Import / Export : appliquer ECRIT des CENTAINES de fiches et peut reprendre
      des dizaines de photos (chacune un transfert serveur) — c est de loin l op la
      plus longue, d ou 10 min, comme la creation de sauvegarde. L export attend au
@@ -3688,6 +3698,7 @@ const LIMITES_PONT = {
      couperait une demande legitime et l ecran dirait << la fenetre principale
      n a pas repondu a temps >> pour un calcul qui allait aboutir. */
   'compta:donnees': 30000, 'compta:budgetEcrire': 20000,
+  'compta:cloturesDonnees': 20000, 'compta:cloturer': 20000,
   /* Le livre RECONSTRUIT toutes ses ecritures a chaque lecture — une par
      commande, par remboursement et par depense de l annee — puis les range en
      comptes. C est le meme ordre de grandeur que le rapport, et pour la meme

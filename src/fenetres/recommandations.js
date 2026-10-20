@@ -431,14 +431,31 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'ag-nom':60})}${JS_BROUILLON()}
     return h;
   }
 
+  var QSRC = '', MINU_SRC = null, MINU_PROD = null;
+  function listeSources(tout){
+    var q = QSRC.trim().toLowerCase();
+    if (!q) return '<div class="dt">${T("Tapez quelques lettres du nom ou du SKU.")}</div>';
+    var l = [];
+    for (var i = 0; i < tout.length && l.length < 20; i++) {
+      var p = tout[i];
+      if ((String(p.nom) + ' ' + String(p.sku)).toLowerCase().indexOf(q) !== -1) l.push(p);
+    }
+    if (!l.length) return '<div class="dt">${T("Aucun produit ne correspond.")}</div>';
+    return l.map(function(p){
+      return '<button type="button" class="mini" data-src="' + esc(p.id) + '">' + esc(p.nom)
+        + ' <span class="sku">' + esc(p.sku || '') + '</span></button>';
+    }).join('');
+  }
   function boiteLiaison(){
     var L = LIAISON;
     if (!L) return '';
     var q = QPROD.trim().toLowerCase();
     var tout = D.catalogue || [];
-    var choisis = tout.filter(function(p){ return L.choisis.indexOf(p.id) >= 0; });
+    /* (lot VOLUME) un ensemble, pas indexOf dans la boucle : 10 000 produits x 200 choisis = 2 M comparaisons. */
+    var pris = {}; L.choisis.forEach(function(id){ pris[id] = 1; });
+    var choisis = tout.filter(function(p){ return pris[p.id] === 1; });
     var reste = tout.filter(function(p){
-      if (p.id === L.id || L.choisis.indexOf(p.id) >= 0) return false;
+      if (p.id === L.id || pris[p.id] === 1) return false;
       if (!q) return true;
       return (String(p.nom) + ' ' + String(p.sku)).toLowerCase().indexOf(q) !== -1;
     });
@@ -446,10 +463,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'ag-nom':60})}${JS_BROUILLON()}
 
     return '<div class="voile" id="rc-voile"><div class="boite">'
       + '<h3>' + (L.nom ? '${T("Articles liés à «")} ' + esc(L.nom) + ' »' : '${T("Associer des produits")}') + '</h3>'
-      + (L.id ? '' : '<div class="ch" style="margin-bottom:.5rem"><select id="rc-source" aria-label="${T("Produit source")}">'
-          + '<option value="">${T("— Choisir le produit source —")}</option>'
-          + tout.map(function(p){ return '<option value="' + esc(p.id) + '">' + esc(p.nom) + '</option>'; }).join('')
-          + '</select></div>')
+      /* (2026-10-19, audit — lot VOLUME) LE PRODUIT SOURCE SE CHERCHE, IL NE SE DEROULE PLUS. Le <select> portait
+         TOUT le catalogue (10 000 <option> reconstruites a chaque frappe dans la boite) : une recherche, et les
+         20 premiers qui correspondent, suffisent a trouver un produit. */
+      + (L.id ? '' : '<div class="ch" style="margin-bottom:.5rem">'
+          + '<input type="search" id="rc-qsrc" aria-label="${T("Produit source")}" placeholder="${T("Produit source : chercher un nom ou un SKU…")}" value="' + esc(QSRC) + '">'
+          + '<div class="choix" id="rc-src-liste">' + listeSources(tout) + '</div></div>')
       + '<input aria-label="${T("Chercher un nom ou un SKU")}" type="search" id="rc-qprod" placeholder="${T("Chercher un nom ou un SKU…")}" value="' + esc(QPROD) + '" style="margin-bottom:.4rem">'
       // Les articles en PAGES mesurees (la boite ne defile plus) ; cocher ne redessine rien.
       + '<div class="choix" id="rc-choix" data-pages="reco-choix">'
@@ -528,6 +547,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'ag-nom':60})}${JS_BROUILLON()}
     }
   }
 
+  function brancherSources(){
+    [].forEach.call(document.querySelectorAll('[data-src]'), function(b){
+      b.onclick = function(){
+        var id = b.getAttribute('data-src');
+        var p = (D.catalogue || []).filter(function(x){ return x.id === id; })[0];
+        var l = (D.liaisons || []).filter(function(x){ return x.id === id; })[0];
+        LIAISON = { id: id, nom: (p && p.nom) || '',
+                    choisis: l ? l.lies.map(function(x){ return x.id; }) : [] };
+        QSRC = '';
+        dessiner();
+      };
+    });
+  }
   function brancher(){
     var bl = document.getElementById('rc-lier');
     if (bl) bl.onclick = function(){ LIAISON = { id: '', nom: '', choisis: [] }; QPROD = ''; dessiner(); };
@@ -535,25 +567,33 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'ag-nom':60})}${JS_BROUILLON()}
     if (ba) ba.onclick = function(){ LIAISON = null; dessiner(); };
     var vo = document.getElementById('rc-voile');
 
-    var src = document.getElementById('rc-source');
-    if (src) src.onchange = function(){
-      var p = (D.catalogue || []).filter(function(x){ return x.id === src.value; })[0];
-      var l = (D.liaisons || []).filter(function(x){ return x.id === src.value; })[0];
-      LIAISON = { id: src.value, nom: (p && p.nom) || '',
-                  choisis: l ? l.lies.map(function(x){ return x.id; }) : [] };
-      dessiner();
+    var qs = document.getElementById('rc-qsrc');
+    /* Temporisee (250 ms) : on ne cherche qu une fois la frappe posee, et on ne redessine QUE la liste. */
+    if (qs) qs.oninput = function(){
+      QSRC = qs.value;
+      clearTimeout(MINU_SRC);
+      MINU_SRC = setTimeout(function(){
+        var z = document.getElementById('rc-src-liste');
+        if (z) { z.innerHTML = listeSources(D.catalogue || []); brancherSources(); }
+      }, 250);
     };
+    brancherSources();
 
     var qp = document.getElementById('rc-qprod');
     if (qp) qp.oninput = function(){
       QPROD = qp.value;
-      var z = document.getElementById('rc-choix');
-      if (!z) return;
-      // On ne redessine QUE la liste : le champ garde le curseur.
-      var deb = qp.selectionStart, fin = qp.selectionEnd;
-      dessiner();
-      var q2 = document.getElementById('rc-qprod');
-      if (q2) { q2.focus({ preventScroll: true }); try { q2.setSelectionRange(deb, fin); } catch (e) {} }
+      /* (lot VOLUME) TEMPORISEE, 250 ms : chaque frappe refiltrait 10 000 produits et redessinait la boite. */
+      clearTimeout(MINU_PROD);
+      MINU_PROD = setTimeout(function(){
+        var z = document.getElementById('rc-choix');
+        if (!z) return;
+        // On ne redessine QUE la liste : le champ garde le curseur.
+        var q1 = document.getElementById('rc-qprod');
+        var deb = q1 ? q1.selectionStart : 0, fin = q1 ? q1.selectionEnd : 0;
+        dessiner();
+        var q2 = document.getElementById('rc-qprod');
+        if (q2) { q2.focus({ preventScroll: true }); try { q2.setSelectionRange(deb, fin); } catch (e) {} }
+      }, 250);
     };
 
     [].forEach.call(document.querySelectorAll('.rc-p'), function(cb){

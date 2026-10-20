@@ -570,7 +570,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (!ids.length) { dire('${T("Aucun produit sélectionné.")}', 'att'); return; }
     appeler('stock:venteFinale', [ids, activer]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      dire('${T("Vente finale")} ' + (activer ? '${T("activée")}' : '${T("retirée")}') + '${T(" pour ")}' + r.n + ' ' + szPl(r.n, '${T("produit.")}', '${T("produits.")}'), 'bon');
+      var reste = r.nonConfirmes ? ' ' + r.nonConfirmes + ' ${T("non confirmé(s) par le serveur — relancez pour les reprendre.")}' : '';
+      dire('${T("Vente finale")} ' + (activer ? '${T("activée")}' : '${T("retirée")}') + '${T(" pour ")}' + r.n + ' ' + szPl(r.n, '${T("produit.")}', '${T("produits.")}') + reste, reste ? 'att' : 'bon');
       LOT = false; COCHES = {};
       charger();
     });

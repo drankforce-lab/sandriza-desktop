@@ -203,6 +203,7 @@ function executerPage(script, reponses, opts) {
   // Absent → on garde le faux document complaisant d'avant.
   const idsConnus = (opts && opts.ids) ? new Set(opts.ids) : null;
   const compteur = { ecritures: 0, ecrit: [] };
+  const appels = [];
   const journal = [];
   const rep = reponses || {};
 
@@ -255,9 +256,14 @@ function executerPage(script, reponses, opts) {
   // prévue rend `{ ok:true }` : la page prend donc le chemin du SUCCÈS — celui où
   // vivait la faute — au lieu de celui du refus.
   const szPont = {
-    appeler: (op) => surveille(Promise.resolve(
-      Object.prototype.hasOwnProperty.call(rep, op) ? rep[op] : { ok: true }
-    )),
+    /* (2026-10-19, lot VOLUME) Une réponse peut être une FONCTION des arguments — un appel par mois, une page
+       par numéro : sans ça, un banc ne pouvait pas éprouver une fenêtre qui pagine ou découpe ses appels. Chaque
+       appel est aussi RELEVÉ (`appels` du résultat) pour qu'un banc compte ce que la page a demandé. */
+    appeler: (op, ...args) => {
+      appels.push({ op, args });
+      const v = Object.prototype.hasOwnProperty.call(rep, op) ? rep[op] : { ok: true };
+      return surveille(Promise.resolve(typeof v === 'function' ? v(...args) : v));
+    },
     fermer() {}, pleinEcran: () => surveille(Promise.resolve(false)),
     /* ⚠ LA DÉCISION DE MISE À JOUR (2026-09-10, #64). Elle ne passe PAS par
        `appeler` — c est un canal étroit du préchargement, parce qu une mise à
@@ -401,11 +407,12 @@ function executerPage(script, reponses, opts) {
   };
   process.on('unhandledRejection', rejet);
   return new Promise((fin) => {
-    let reste = 4;
+    // `opts.tours` : plus de tours pour une page qui enchaîne ses appels (une lecture mois par mois).
+    let reste = Math.max(4, (opts && +opts.tours) || 4);
     const tour = () => {
       if (--reste > 0) { setImmediate(tour); return; }
       process.removeListener('unhandledRejection', rejet);
-      fin({ fautes, journal, ecritures: compteur.ecritures, html: compteur.ecrit.join('\n') });
+      fin({ fautes, journal, ecritures: compteur.ecritures, html: compteur.ecrit.join('\n'), appels });
     };
     setImmediate(tour);
   });

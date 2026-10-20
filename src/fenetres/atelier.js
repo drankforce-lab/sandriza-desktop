@@ -527,6 +527,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var DEPART = ${depart};
 
   var D = null;            // atelier:donnees
+  /* (2026-10-19, audit — lot VOLUME 2) LA BIBLIOTHEQUE LEGERE ET PAR PAGES. atelier:donnees { leger: true,
+     page, parPage, q, categorie, etat } rend 24 RESUMES (ni pieces, ni tableaux, ni historique) et le vrai
+     total ; le modele ENTIER se lit quand on le touche (atelier:modele) et remplace son resume dans
+     D.modeles ; les produits se CHERCHENT (atelier:produits). Un site plus ancien (sans « leger ») rend tout :
+     la fenetre fait alors exactement comme avant. */
+  var LEGER = false, PGA = null, PG_PAGE = 0, PRODS = null, MINU_PQ = null;
   var VUE = 'biblio';      // 'biblio' | 'modele'
   var CAT = '', ETAT = '', Q = '';
   var SEL = '';            // modèle choisi dans la bibliothèque
@@ -846,7 +852,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function listeCompacte(liste){
     var th = function(cle, lib){ return '<th><button type="button" class="at-tri' + (TRI.cle === cle ? ' on' : '') + '" data-tri="' + cle + '">' + lib + (TRI.cle === cle ? (TRI.sens > 0 ? ' ▲' : ' ▼') : '') + '</button></th>'; };
-    return '<div class="cx-pages" data-pages="atelier"><table class="at-liste"><thead><tr>' + th('nom', '${T("Nom")}') + th('type', '${T("Type")}')
+    return '<div class="cx-pages" data-pages="atelier"' + (LEGER ? szPagesCoeurAttr(PGA) : '') + '><table class="at-liste"><thead><tr>' + th('nom', '${T("Nom")}') + th('type', '${T("Type")}')
       + '<th>${T("État")}</th>' + th('version', '${T("Version")}') + th('cree', '${T("Créé le")}') + th('maj', '${T("Modifié le")}') + '</tr></thead><tbody>'
       + trierModeles(liste).map(function(m){
           return '<tr class="' + (SEL === m.id ? 'on' : '') + '" data-sel="' + esc(m.id) + '" data-ctx-ligne="' + esc(m.id) + '" tabindex="0">'
@@ -860,6 +866,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   /* ══ LA BIBLIOTHÈQUE ═══════════════════════════════════════════════════ */
   function filtres(){
+    if (LEGER && PGA) {
+      var ids = PGA.ids || [];
+      return ids.map(function(id){ return (D.modeles || []).filter(function(x){ return x.id === id; })[0]; })
+        .filter(function(m){ return m && (ETAT || m.etat !== 'archive'); });
+    }
     var q = Q.trim().toLowerCase();
     return (D.modeles || []).filter(function(m){
       if (CAT && m.categorie !== CAT) return false;
@@ -871,9 +882,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function dessinerBiblio(){
     var tous = D.modeles || [];
-    var nbBr = tous.filter(function(m){ return m.etat === 'brouillon'; }).length;
+    var nbBr = LEGER ? 0 : tous.filter(function(m){ return m.etat === 'brouillon'; }).length;
+    var nbTous = LEGER ? (D.nbModeles || 0) : tous.length;
+    if (LEGER && !nbTous) tous = [];
     document.getElementById('titre').textContent = '${T("Atelier de création")}';
-    document.getElementById('sous').textContent = (tous.length > 1 ? '${T("{0} modèles")}'.split('{0}').join(tous.length) : '${T("{0} modèle")}'.split('{0}').join(tous.length))
+    document.getElementById('sous').textContent = (nbTous > 1 ? '${T("{0} modèles")}'.split('{0}').join(nbTous) : '${T("{0} modèle")}'.split('{0}').join(nbTous))
       + (nbBr ? ' · ' + (nbBr > 1 ? '${T("{0} brouillons")}'.split('{0}').join(nbBr) : '${T("1 brouillon")}') : '');
     document.getElementById('actions').innerHTML = D.peutAjouter ? '<button type="button" id="a-photo">${T("Depuis une photo")}</button><button type="button" class="prim" id="a-nouveau">${T("Nouveau modèle")}</button>' : '';
 
@@ -894,7 +907,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       t += '<div class="vide">${T("Aucun modèle pour l’instant. Partez d’un patron de base : il se trace à vos mesures.")}</div>';
     }
     if (VUEB === 'liste') t += listeCompacte(liste);
-    else t += '<div class="at-grille" data-pages="atelier">' + liste.map(function(m){
+    else t += '<div class="at-grille" data-pages="atelier"' + (LEGER ? szPagesCoeurAttr(PGA) : '') + '>' + liste.map(function(m){
       return '<button type="button" class="at-carte' + (SEL === m.id ? ' on' : '') + '" data-sel="' + esc(m.id) + '" data-ctx-ligne="' + esc(m.id) + '" title="${T("Clic : détails · double-clic : ouvrir")}">'
         // le croquis de face (le vêtement qu on reconnaît) ; à défaut, les pièces à plat
         + '<span class="vig">' + (m.vignette || svgPieces([{ pieces: m.pieces || [] }], 176, 150, { mini: true, titre: m.nom })) + '</span>'
@@ -905,7 +918,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }).join('') + '</div>';
     // (2026-10-17, sa demande « retire ça » : la carte « Partir d un patron de base » doublait le bouton « Nouveau modèle » de la tête.)
     if (tous.length && !liste.length) t += '<div class="vide">${T("Aucun modèle ne correspond.")}</div>';
-    t += '<div class="cx-pied"><span>' + liste.length + ' ' + (liste.length > 1 ? '${T("modèles")}' : '${T("modèle")}') + '</span></div></div>';
+    var nbVue = (LEGER && PGA) ? PGA.total : liste.length;
+    t += '<div class="cx-pied"><span>' + nbVue + ' ' + (nbVue > 1 ? '${T("modèles")}' : '${T("modèle")}') + '</span></div></div>';
 
     var m = SEL ? (D.modeles || []).filter(function(x){ return x.id === SEL; })[0] : null;
     var p = '<div class="cx-carte' + (m ? ' at-fiche' : '') + '">';
@@ -1149,6 +1163,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             return '<option value="' + c.cle + '"' + (M.categorie === c.cle ? ' selected' : '') + '>' + esc(LCAT[c.cle] || szTd(c.nom)) + '</option>'; }).join('') + '</select></label>'
         + '<label>${T("État")}<select id="m-etat">' + (D.etats || []).map(function(e){
             return '<option value="' + e.cle + '"' + (M.etat === e.cle ? ' selected' : '') + '>' + esc(LETAT[e.cle] || szTd(e.nom)) + '</option>'; }).join('') + '</select></label>'
+        + (LEGER ? '<label>${T("Chercher un produit")}<input type="search" id="m-prodq" data-prodq="m-prod" maxlength="60" placeholder="${T("Nom ou SKU…")}"></label>' : '')
         + '<label>${T("Produit lié")}<select id="m-prod"><option value="">${T("— Aucun —")}</option>' + (D.produits || []).map(function(pr){
             return '<option value="' + esc(pr.id) + '"' + (M.produitId === pr.id ? ' selected' : '') + '>' + esc(pr.nom) + '</option>'; }).join('') + '</select></label>'
         + '<label class="haut">${T("Notes")}<textarea id="m-notes" maxlength="600">' + esc(M.notes) + '</textarea></label>'
@@ -2176,7 +2191,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       OCCUPE = false;
       if (!r.ok) { if (btn) btn.disabled = false; dire(expliquer(r), 'err'); return; }
       SALE = false;
-      appeler('atelier:donnees', []).then(function(d){
+      relireDonnees().then(function(d){
         if (d && d.ok) { D = d; var m = (D.modeles || []).filter(function(x){ return x.id === E.m.id; })[0]; if (m && E) E.m = copie(m); }
         if (VUE === 'editeur' && E) { teteEditeur(); dire('${T("Version enregistrée.")}', 'bon'); }
         if (apres) apres();
@@ -2444,7 +2459,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       appeler('atelier:restaurer', [E.m.id, nv]).then(function(r){
         if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
         var mid = E.m.id;
-        appeler('atelier:donnees', []).then(function(d){
+        relireDonnees().then(function(d){
           if (d && d.ok) D = d;
           E = null; ouvrirEditeur(mid);
           setTimeout(function(){ dire('${T("Version restaurée.")}', 'bon'); }, 400);
@@ -2878,7 +2893,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       OCCUPE = false;
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       PL.sale = false; PL.pile = [];
-      appeler('atelier:donnees', []).then(function(d){
+      relireDonnees().then(function(d){
         if (d && d.ok) { D = d; var m = (D.modeles || []).filter(function(x){ return x.id === PL.id; })[0]; if (m && PL) PL.m = m; }
         if (VUE === 'planche' && PL) { dessinerPlanche(); dire('${T("Planche enregistrée.")}', 'bon'); }
       });
@@ -2961,7 +2976,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (PH.r ? '<button type="button" class="prim" id="ph-creer">${T("Créer le modèle")}</button>' : '');
     var seg = function(attr, k, lib, on){ return '<button type="button" class="' + (on ? 'on' : '') + '" ' + attr + '="' + k + '">' + lib + '</button>'; };
     var prods = produitsAvecPhoto(), pr = prods.filter(function(p){ return p.id === PH.produit; })[0];
-    var g = '<div class="cx-carte"><h2>${T("Photo")}</h2><div class="at-champs"><label class="large">${T("Produit de la boutique")}<select id="ph-produit"><option value="">${T("— Choisir un produit —")}</option>'
+    var g = '<div class="cx-carte"><h2>${T("Photo")}</h2><div class="at-champs">'
+      + (LEGER ? '<label class="large">${T("Chercher un produit")}<input type="search" id="ph-prodq" data-prodq="ph-produit" maxlength="60" placeholder="${T("Nom ou SKU…")}"></label>' : '')
+      + '<label class="large">${T("Produit de la boutique")}<select id="ph-produit"><option value="">${T("— Choisir un produit —")}</option>'
       + prods.map(function(p){ return '<option value="' + esc(p.id) + '"' + (PH.produit === p.id ? ' selected' : '') + '>' + esc(p.nom) + '</option>'; }).join('') + '</select></label></div>';
     if (pr) g += '<div class="ed-seg" role="group" aria-label="${T("Photo choisie")}" style="margin:.5rem 0">' + seg('data-phchoix', 'face', '${T("Face")}', PH.choix === 'face') + seg('data-phchoix', 'dos', '${T("Dos (facultatif)")}', PH.choix === 'dos') + '</div>'
       + '<div class="ph-vign">' + pr.photos.map(function(u){ var im = PHIMG[u] && PHIMG[u].im;
@@ -3059,7 +3076,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       OCCUPE = false;
       if (!w || !w.ok) { dire(expliquer(w), 'err'); return; }
       var id = w.id || (w.entree && w.entree.id);
-      appeler('atelier:donnees', []).then(function(d){
+      relireDonnees(id ? [id] : []).then(function(d){
         if (d && d.ok) D = d;
         PH = null; if (window._phRO) { window._phRO.disconnect(); window._phRO = null; }
         if (id) ouvrir3d(id, 'biblio'); else { VUE = 'biblio'; dessiner(); }
@@ -5899,7 +5916,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       OCCUPE = false;
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       V3.dsale = false; V3.pile = [];
-      appeler('atelier:donnees', []).then(function(d){
+      relireDonnees().then(function(d){
         if (d && d.ok) { D = d; var m = (D.modeles || []).filter(function(x){ return x.id === V3.id; })[0]; if (m && V3) { V3.m = m; V3.design = copie(m.design3d || V3.design); } }
         if (VUE === '3d' && V3) { entete3d(); peindreDesign3d(); dire('${T("Design 3D enregistré.")}', 'bon'); programmerVignette(); }
       });
@@ -6442,7 +6459,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         C3.pct = Math.round(Math.min(99, fait / Math.max(1, tot) * 100));
         if (g.etat !== 'cours') {
           clearInterval(C3.t); C3.t = null; C3.gen = '';
-          if (g.etat === 'fini') appeler('atelier:donnees', []).then(function(d){
+          if (g.etat === 'fini') relireDonnees().then(function(d){
             if (d && d.ok) { D = d; var m = (D.modeles || []).filter(function(x){ return x.id === modeleId; })[0]; if (m && V3 && V3.id === modeleId) V3.m = m; }
             dire('${T("Aperçu 3D construit.")}', 'bon'); peindreTnb3d();
           });
@@ -7378,7 +7395,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       OCCUPE = false;
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       MO.sale = false;
-      appeler('atelier:donnees', []).then(function(d){
+      relireDonnees().then(function(d){
         if (d && d.ok) { D = d; var m = (D.modeles || []).filter(function(x){ return x.id === MO.id; })[0]; if (m && MO) { MO.m = m; MO.motif = copie(m.motif || MO.motif); } }
         if (VUE === 'motif' && MO) { apresMo(false); dire('${T("Motif enregistré.")}', 'bon'); }
         if (apres) apres();
@@ -7495,12 +7512,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if ((b = t.closest('[data-v3]'))) { ouvrir3d(b.getAttribute('data-v3'), 'biblio'); return; }
     if ((b = t.closest('[data-imprimer]'))) { ouvrirImpression(b.getAttribute('data-imprimer'), 'biblio'); return; }
     if ((b = t.closest('[data-editer]'))) { ouvrirEditeur(b.getAttribute('data-editer')); return; }
-    if ((b = t.closest('[data-cat]'))) { CAT = b.getAttribute('data-cat'); dessiner(); return; }
-    if ((b = t.closest('[data-etat]'))) { var e = b.getAttribute('data-etat'); ETAT = ETAT === e ? '' : e; dessiner(); return; }
+    if ((b = t.closest('[data-cat]'))) { CAT = b.getAttribute('data-cat'); if (LEGER) { PG_PAGE = 0; charger(); } else dessiner(); return; }
+    if ((b = t.closest('[data-etat]'))) { var e = b.getAttribute('data-etat'); ETAT = ETAT === e ? '' : e; if (LEGER) { PG_PAGE = 0; charger(); } else dessiner(); return; }
     if ((b = t.closest('[data-ouvrir]'))) { ouvrirModele(b.getAttribute('data-ouvrir')); return; }
     if ((b = t.closest('[data-dupl]'))) { dupliquer(b.getAttribute('data-dupl')); return; }
     if ((b = t.closest('[data-suppr]'))) { supprimer(b.getAttribute('data-suppr')); return; }
-    if ((b = t.closest('[data-sel]'))) { SEL = b.getAttribute('data-sel'); dessiner(); return; }
+    if ((b = t.closest('[data-sel]'))) { SEL = b.getAttribute('data-sel'); pleinDe(SEL, function(){ dessiner(); }); return; }
     if ((b = t.closest('[data-base]'))) {
       var nb = b.getAttribute('data-base'); if (nb === M.base) return;
       var bs = (D.bases || []).filter(function(x){ return x.cle === nb; })[0];
@@ -7519,7 +7536,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   corps.addEventListener('input', function(ev){
     if (VUE === 'editeur' || VUE === 'impression' || VUE === '3d' || VUE === 'motif' || VUE === 'photo' || VUE === 'planche') return;
     var t = ev.target;
-    if (t && t.id === 'a-q') { Q = t.value; clearTimeout(window._atQ); window._atQ = setTimeout(redessinerSansPerdreLaSaisie, 200); return; }
+    if (t && t.id === 'a-q') { Q = t.value; clearTimeout(window._atQ); window._atQ = setTimeout(LEGER ? function(){ PG_PAGE = 0; charger(); } : redessinerSansPerdreLaSaisie, LEGER ? 250 : 200); return; }
     ramasser(t);
   });
   corps.addEventListener('change', function(ev){
@@ -7662,22 +7679,123 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var q2 = document.getElementById('a-q');
     if (q2) { q2.focus({ preventScroll: true }); try { if (d0 != null) q2.setSelectionRange(d0, f0); } catch (e) {} }
   }
+  /* ── LE MODE LEGER (lot VOLUME 2) ── */
+  function demandeLegere(){
+    return { leger: true, page: PG_PAGE, parPage: 24, q: Q.trim(), categorie: CAT, etat: ETAT, sansArchive: !ETAT };
+  }
+  // La page legere ; les modeles deja lus EN ENTIER restent (ceux qu on touche), relus a leur version.
+  function lireLeger(extra){
+    var garder = LEGER && D ? (D.modeles || []).filter(function(m){ return !m.leger; }).map(function(m){ return m.id; }) : [];
+    (extra || []).forEach(function(id){ if (id && garder.indexOf(id) < 0) garder.push(id); });
+    return appelerBrut('atelier:donnees', [demandeLegere()]).then(function(r){
+      if (!r || !r.ok || !r.leger) return r;
+      r.ids = (r.modeles || []).map(function(m){ return m.id; });
+      return Promise.all(garder.map(function(id){ return appelerBrut('atelier:modele', [id]); })).then(function(pl){
+        pl.forEach(function(x){
+          if (!x || !x.ok || !x.modele) return;
+          var i = -1; (r.modeles || []).forEach(function(m, k){ if (m.id === x.modele.id) i = k; });
+          if (i >= 0) r.modeles[i] = x.modele; else r.modeles.push(x.modele);
+        });
+        if (PRODS) r.produits = PRODS;
+        return r;
+      });
+    });
+  }
+  function relireDonnees(extra){
+    if (!LEGER) return appeler('atelier:donnees', []);
+    return lireLeger(extra).then(function(r){ if (r && r.ok && r.leger) { PGA = r; PG_PAGE = r.page || 0; } return r; });
+  }
+  // Le modele ENTIER d un resume leger (ou absent de la page) ; le rappel recoit vrai s il est la.
+  function pleinDe(id, fn){
+    if (!LEGER || !id) { fn(true); return; }
+    var m = (D.modeles || []).filter(function(x){ return x.id === id; })[0];
+    if (m && !m.leger) { fn(true); return; }
+    appelerBrut('atelier:modele', [id]).then(function(r){
+      if (!r || !r.ok || !r.modele) { dire(expliquer(r), 'err'); fn(false); return; }
+      var i = -1; (D.modeles || []).forEach(function(x, k){ if (x.id === id) i = k; });
+      if (i >= 0) D.modeles[i] = r.modele; else (D.modeles = D.modeles || []).push(r.modele);
+      fn(true);
+    });
+  }
+  // Les produits CHERCHES (le menu du produit lie, le patron depuis une photo, l envoi a la fiche).
+  function chercherProduits(q, fn){
+    var lie = (M && M.produitId) || (PH && PH.produit) || (V3 && V3.m && V3.m.produitId) || '';
+    Promise.all([appelerBrut('atelier:produits', [{ q: q || '', max: 20 }]),
+      lie ? appelerBrut('atelier:produits', [{ id: lie, max: 1 }]) : Promise.resolve(null)]).then(function(rs){
+      var l = (rs[0] && rs[0].ok) ? (rs[0].lignes || []) : [];
+      var l2 = (rs[1] && rs[1].ok) ? (rs[1].lignes || []) : [];
+      l2.forEach(function(p){ if (!l.some(function(x){ return x.id === p.id; })) l.unshift(p); });
+      PRODS = l; if (D) D.produits = l;
+      if (fn) fn(l);
+    });
+  }
+  /* Un geste sur un modele encore LEGER (clic, double-clic, clic droit) : on lit le modele entier, puis
+     on rejoue le geste — chaque fonction d ouverture trouve alors le modele complet, comme avant. */
+  var ATTR_ID = ['data-sel', 'data-ouvrir', 'data-editer', 'data-plus', 'data-v3', 'data-planche', 'data-motif',
+    'data-imprimer', 'data-protection', 'data-dupl', 'data-suppr', 'data-ctx-ligne'];
+  function idDuGeste(t){
+    if (!t || !t.closest) return '';
+    for (var i = 0; i < ATTR_ID.length; i++) {
+      var b = t.closest('[' + ATTR_ID[i] + ']');
+      if (b) return b.getAttribute(ATTR_ID[i]) || '';
+    }
+    var n = t.closest('[data-nip]');
+    return n ? n.getAttribute('data-nip').split(':').slice(1).join(':') : '';
+  }
+  ['click', 'dblclick', 'contextmenu'].forEach(function(type){
+    corps.addEventListener(type, function(ev){
+      if (!LEGER || VUE !== 'biblio' || ev.__szRejoue) return;
+      var id = idDuGeste(ev.target);
+      var m = id && D ? (D.modeles || []).filter(function(x){ return x.id === id; })[0] : null;
+      if (!m || !m.leger) return;
+      ev.preventDefault(); ev.stopPropagation();
+      var cible = ev.target, x = ev.clientX, y = ev.clientY;
+      pleinDe(id, function(ok){
+        if (!ok || !cible.isConnected) { if (ok) dessiner(); return; }
+        var e2 = new MouseEvent(type, { bubbles: true, cancelable: true, clientX: x, clientY: y, button: type === 'contextmenu' ? 2 : 0 });
+        e2.__szRejoue = true;
+        cible.dispatchEvent(e2);
+      });
+    }, true);
+  });
+  // La recherche d un produit (mode leger) : temporisee, le menu se regarnit sur place.
+  document.addEventListener('input', function(ev){
+    var t = ev.target; if (!t || !t.getAttribute || !t.getAttribute('data-prodq')) return;
+    var sid = t.getAttribute('data-prodq');
+    clearTimeout(MINU_PQ);
+    MINU_PQ = setTimeout(function(){
+      chercherProduits(t.value.trim(), function(l){
+        var sel = document.getElementById(sid); if (!sel) return;
+        var v = sel.value;
+        var avecPhoto = sid === 'ph-produit';
+        sel.innerHTML = '<option value="">' + (avecPhoto ? '${T("— Choisir un produit —")}' : '${T("— Aucun —")}') + '</option>'
+          + l.filter(function(p){ return !avecPhoto || (p.photos || []).length; }).map(function(p){
+              return '<option value="' + esc(p.id) + '"' + (p.id === v ? ' selected' : '') + '>' + esc(p.nom) + '</option>'; }).join('');
+      });
+    }, 250);
+  }, true);
+  window.szPagesCoeur.atelier = function(page){ PG_PAGE = Math.max(0, page); charger(); };
+
   function charger(apres){
-    appeler('atelier:donnees', []).then(function(r){
+    var dem = (LEGER || PGA === null) ? lireLeger(SEL ? [SEL] : []) : appeler('atelier:donnees', []);
+    dem.then(function(r){
+      if (r && r.ok && !r.leger && !LEGER && PGA === null) { PGA = false; }   // site ancien : la liste entiere
       if (!r || !r.ok) {
         corps.innerHTML = '<div class="vide"><strong>${T("Atelier indisponible")}</strong><div style="margin-top:.4rem">' + esc(expliquer(r)) + '</div></div>';
         dire(expliquer(r), 'err'); return;
       }
+      LEGER = !!r.leger;
+      if (LEGER) { PGA = r; PG_PAGE = r.page || 0; if (!PRODS) chercherProduits('', null); }
       D = r;
       if (SEL && !(D.modeles || []).some(function(m){ return m.id === SEL; })) SEL = '';
       if (DEPART === 'nouveau' && D.peutAjouter) { DEPART = ''; ouvrirNeuf(); }
-      else if (DEPART.indexOf('editeur:') === 0) { var de = DEPART.slice(8); DEPART = ''; ouvrirEditeur(de); }
-      else if (DEPART.indexOf('impression:') === 0) { var di = DEPART.slice(11); DEPART = ''; ouvrirImpression(di, 'biblio'); }
-      else if (DEPART.indexOf('3d:') === 0) { var d3 = DEPART.slice(3); DEPART = ''; ouvrir3d(d3, 'biblio'); }
+      else if (DEPART.indexOf('editeur:') === 0) { var de = DEPART.slice(8); DEPART = ''; pleinDe(de, function(){ ouvrirEditeur(de); }); }
+      else if (DEPART.indexOf('impression:') === 0) { var di = DEPART.slice(11); DEPART = ''; pleinDe(di, function(){ ouvrirImpression(di, 'biblio'); }); }
+      else if (DEPART.indexOf('3d:') === 0) { var d3 = DEPART.slice(3); DEPART = ''; pleinDe(d3, function(){ ouvrir3d(d3, 'biblio'); }); }
       else if (DEPART === 'photo' && D.peutAjouter) { DEPART = ''; ouvrirPhoto(); }
       else if (DEPART === 'liste') { DEPART = ''; VUEB = 'liste'; SEL = ((D.modeles || [])[0] || {}).id || ''; dessiner(); }
-      else if (DEPART.indexOf('planche:') === 0) { var dp = DEPART.slice(8); DEPART = ''; ouvrirPlanche(dp, 'biblio'); }
-      else if (DEPART.indexOf('motif:') === 0) { var dm = DEPART.slice(6); DEPART = ''; ouvrirMotif(dm, 'biblio'); }
+      else if (DEPART.indexOf('planche:') === 0) { var dp = DEPART.slice(8); DEPART = ''; pleinDe(dp, function(){ ouvrirPlanche(dp, 'biblio'); }); }
+      else if (DEPART.indexOf('motif:') === 0) { var dm = DEPART.slice(6); DEPART = ''; pleinDe(dm, function(){ ouvrirMotif(dm, 'biblio'); }); }
       else dessiner();
       if (apres) apres(); else dire('');
     });

@@ -386,18 +386,44 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
      choisis puis les premiers qui repondent, CINQ lignes en tout ; le reste se
      trouve en precisant la recherche (quatre lignes), et la ligne du bas le dit. */
   var CHOIX_MAX = 4;
+  /* (2026-10-19, lot VOLUME 2) LE CATALOGUE EST CHERCHE AU COEUR. Il ne voyage plus avec les offres
+     (offres:liste { sansCatalogue: true }) : la boite demande promos:catalogue { q, ids, max } et recoit
+     les produits choisis, les premiers qui repondent et le VRAI nombre de reponses. Un ancien site
+     envoie encore D.catalogue : on le filtre ici, comme avant. */
+  var CATA = null, CATA_CLE = '';
+  function chercherCatalogue(prefixe){
+    var cle = QPROD.trim().toLowerCase() + '|' + CHOISIS.join(',');
+    if (CATA_CLE === cle) return;
+    CATA_CLE = cle;
+    appeler('promos:catalogue', [{ q: QPROD.trim(), ids: CHOISIS.slice(), max: CHOIX_MAX }]).then(function(r){
+      if (CATA_CLE !== cle || !r || !r.ok) return;
+      CATA = r;
+      var z = document.getElementById(prefixe + '-choix');
+      if (z) { z.innerHTML = listeCatalogue(prefixe); brancherCases(prefixe); }
+    });
+  }
   function listeCatalogue(prefixe){
     var q = QPROD.trim().toLowerCase();
-    var tout = (D.catalogue || []);
-    var choisis = tout.filter(function(p){ return CHOISIS.indexOf(p.id) >= 0; });
-    var reste = tout.filter(function(p){
-      if (CHOISIS.indexOf(p.id) >= 0) return false;
-      if (!q) return true;
-      return (String(p.nom) + ' ' + String(p.sku)).toLowerCase().indexOf(q) !== -1;
-    });
+    var choisis, reste, nbReste;
+    if (!D.catalogue && D.catalogueCherche) {
+      chercherCatalogue(prefixe);
+      if (!CATA) return '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i></div>';
+      choisis = CATA.choisis || [];
+      reste = (CATA.lignes || []).filter(function(p){ return CHOISIS.indexOf(p.id) < 0; });
+      nbReste = Math.max(reste.length, (CATA.trouves || 0) - ((CATA.lignes || []).length - reste.length));
+    } else {
+      var tout = (D.catalogue || []);
+      choisis = tout.filter(function(p){ return CHOISIS.indexOf(p.id) >= 0; });
+      reste = tout.filter(function(p){
+        if (CHOISIS.indexOf(p.id) >= 0) return false;
+        if (!q) return true;
+        return (String(p.nom) + ' ' + String(p.sku)).toLowerCase().indexOf(q) !== -1;
+      });
+      nbReste = reste.length;
+    }
     var place = Math.max(0, CHOIX_MAX - choisis.length);
     var vus = choisis.concat(reste.slice(0, place));
-    var autres = reste.length - Math.min(reste.length, place);
+    var autres = nbReste - Math.min(reste.length, place);
     if (!vus.length) return '<div class="plus">${T("Aucun produit ne correspond.")}</div>';
     return vus.map(function(p){
       var on = CHOISIS.indexOf(p.id) >= 0;
@@ -1081,7 +1107,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
   });
 
   function charger(){
-    appeler(ONGLET === 'offres' ? 'offres:liste' : 'annonces:liste', []).then(function(r){
+    appeler(ONGLET === 'offres' ? 'offres:liste' : 'annonces:liste', [{ sansCatalogue: true }]).then(function(r){
       if (!r || !r.ok) { vide('${T("Promotions indisponibles")}', expliquer(r)); return; }
       D = r;
       if (sous) sous.textContent = D.peutModifier ? '' : '${T("consultation seulement")}';

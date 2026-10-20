@@ -1449,12 +1449,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   });
   window.addEventListener('beforeunload', function(){ rendreVerrou(); });
 
+  /* (2026-10-19, audit — lot VOLUME) LA RELECTURE DES 5 S SE SUSPEND quand la fenetre est cachee et RALENTIT
+     (une sur trois, soit 15 s) quand elle n a pas le focus ; au retour, une relecture immediate. Sur 10 000
+     commandes, chaque relecture coute : la faire pour une fenetre que personne ne regarde n a pas de sens. */
+  var SONDE_TIC = 0;
   setInterval(function(){
+    if (document.hidden) return;
+    SONDE_TIC++;
+    if (document.hasFocus && !document.hasFocus() && (SONDE_TIC % 3)) return;
     if (enCours || VUE !== 'liste') return;
     var a = document.activeElement;
     if (a && (a.tagName === 'INPUT' || a.tagName === 'SELECT')) return;
     if (CTX && DONNEES) charger();
   }, 5000);
+  document.addEventListener('visibilitychange', function(){
+    if (document.hidden || enCours || VUE !== 'liste') return;
+    if (CTX && DONNEES) charger();
+  });
 
   demarrer();
 })();

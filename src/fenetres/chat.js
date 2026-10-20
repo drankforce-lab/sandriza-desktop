@@ -114,6 +114,14 @@ button .n.hi{background:rgba(239,68,68,.28);color:var(--tx-err2)}
 .bulle.bot{align-self:flex-start;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.25)}
 .bulle .qd{display:block;font-size:.6875rem;color:var(--tx2);margin-top:.15rem}
 .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.7rem;flex-wrap:wrap}
+/* (2026-10-19, audit — lot VOLUME 2) LA SAISIE AGRANDIE, MAIS BORNEE. Elle s ouvre plus haute (6,5 lignes)
+   et grandit a la poignee, mais jamais au-dela de min(14rem, 30vh) : passe cette hauteur, elle defile EN
+   ELLE-MEME. Le fil cede la place (min-height:0, flex 1 1), la saisie et les boutons ne cedent jamais
+   (flex 0 0) : les boutons d envoi restent dans la fenetre, quelle que soit la longueur de la reponse. */
+.boite .fil{min-height:0;flex:1 1 auto}
+.boite .ch-saisie{flex:0 0 auto;margin-top:.6rem;min-height:0}
+.boite .pied-boite{flex:0 0 auto}
+#ch-reponse{min-height:6.5em;max-height:min(14rem,30vh);overflow-y:auto;resize:vertical;box-sizing:border-box;display:block}
 .vide{padding:1.3rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
@@ -402,7 +410,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
     h += '</div>';
 
     if (D.peutModifier) {
-      h += '<div style="margin-top:.6rem"><textarea aria-label="${T("Votre réponse")}" id="ch-reponse" placeholder="${T("Votre réponse…")}"></textarea></div>'
+      h += '<div class="ch-saisie"><textarea aria-label="${T("Votre réponse")}" id="ch-reponse" rows="5" placeholder="${T("Votre réponse…")}"></textarea></div>'
         + '<div class="pied-boite">'
         + '<button class="mini danger" id="ch-suppr">' + '${T("Supprimer")}' + '</button>'
         + '<select id="ch-statut" aria-label="${T("Changer l’état de la conversation")}" style="max-width:11rem">'

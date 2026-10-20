@@ -169,6 +169,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
   var STATUT = '';
   var BOITE = null;        // null | 'creer' | 'recompense' | detail
   var DETAIL = null;
+  /* (2026-10-19, audit — lot VOLUME 2) LA PAGE EST FAITE PAR LE COEUR : { page, parPage, q, statut } →
+     la page, le vrai total, les tuiles sur TOUTES les cartes. Ancien site (sans pagine) : filtre local. */
+  var PG = 0, PAR_PAGE = 50, MINU_Q = null;
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -221,6 +224,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
   }
 
   function filtrees(){
+    if (D && D.pagine) return D.cartes || [];   // deja filtrees et coupees par le coeur
     var q = Q.trim().toLowerCase();
     return (D.cartes || []).filter(function(g){
       if (STATUT && g.statut !== STATUT) return false;
@@ -407,7 +411,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
     if (!rows.length) {
       h += '<div class="ls-vide">' + (Q || STATUT ? '${T("Rien ne correspond.")}' : '${T("Aucune carte-cadeau.")}') + '</div>';
     } else {
-      h += '<div data-pages="cartescadeaux">' + rows.map(function(g){
+      h += '<div data-pages="cartescadeaux"' + szPagesCoeurAttr(D) + '>' + rows.map(function(g){
         var pc = g.initial > 0 ? Math.max(0, Math.min(100, Math.round(100 * g.solde / g.initial))) : 0;
         return '<div class="ls-rang cc-rang' + (g.statut === 'active' || g.statut === 'pending' ? '' : ' eteinte') + '" data-id="' + esc(g.id) + '" title="${T("Voir le détail")}">'
           + '<div class="qui"><span class="gc-mini" aria-hidden="true"><b>SANDRIZA</b><strong>' + fmt(g.solde) + '</strong></span>'
@@ -434,12 +438,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
 
   function brancher(){
     var q = document.getElementById('cc-q');
-    if (q) q.oninput = function(){ Q = q.value; redessinerSansPerdreLaSaisie(); };
+    if (q) q.oninput = function(){
+      Q = q.value;
+      if (!D || !D.pagine) { redessinerSansPerdreLaSaisie(); return; }
+      // (lot VOLUME 2) Le filtre part au coeur, temporise, et revient a la premiere page.
+      clearTimeout(MINU_Q);
+      MINU_Q = setTimeout(function(){ PG = 0; charger(); }, 250);
+    };
+    var refiltrer = function(){ if (D && D.pagine) { PG = 0; charger(); } else dessiner(); };
     var fs = document.getElementById('cc-f-statut');
-    if (fs) fs.onchange = function(){ STATUT = fs.value; dessiner(); };
+    if (fs) fs.onchange = function(){ STATUT = fs.value; refiltrer(); };
     // Les statuts en pastilles (refonte du 2026-09-25).
     corps.querySelectorAll('[data-ccst]').forEach(function(b){
-      b.onclick = function(){ STATUT = b.getAttribute('data-ccst') || ''; dessiner(); };
+      b.onclick = function(){ STATUT = b.getAttribute('data-ccst') || ''; refiltrer(); };
     });
     var bn = document.getElementById('cc-nouvelle');
     if (bn) bn.onclick = function(){ BOITE = 'creer'; dessiner(); szBrouillonProposer(); };
@@ -610,13 +621,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
   };
 
   function charger(){
-    appeler('cartescadeaux:liste', []).then(function(r){
+    appeler('cartescadeaux:liste', [{ page: PG, parPage: PAR_PAGE, q: Q, statut: STATUT }]).then(function(r){
       if (!r || !r.ok) { vide('${T("Cartes-cadeaux indisponibles")}', expliquer(r)); return; }
       D = r;
+      if (D.pagine) PG = D.page || 0;
       if (sous) sous.textContent = D.peutModifier ? '' : 'consultation seulement';
-      dessiner();
+      var qa = document.getElementById('cc-q');
+      if (qa && document.activeElement === qa) redessinerSansPerdreLaSaisie(); else dessiner();
     });
   }
+  // (lot VOLUME 2) Le pied du socle demande la page voisine au coeur.
+  (window.szPagesCoeur = window.szPagesCoeur || {}).cartescadeaux = function(p){ PG = p; charger(); };
 
   window.szActualiser = function(){
     var q = document.getElementById('cc-q');

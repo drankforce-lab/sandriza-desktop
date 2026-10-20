@@ -778,8 +778,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
     return !!(a && (a.id === 'h-q' || a.id === 'h-prov'
       || a.id === 'pl-montant' || a.id === 'pl-actif'));
   }
+  /* (2026-10-19, audit — lot VOLUME) La veille des 5 s (deux appels distants : fal.ai et Photoroom) se SUSPEND
+     quand la fenetre est cachee et RALENTIT a 20 s sans le focus. */
+  var VEILLE_TIC = 0;
   function veille(){
+    document.addEventListener('visibilitychange', function(){ if (!document.hidden) VEILLE_TIC = -1; });
     setInterval(function(){
+      if (document.hidden) return;
+      VEILLE_TIC++;
+      if (VEILLE_TIC > 0 && document.hasFocus && !document.hasFocus() && (VEILLE_TIC % 4)) return;
       if (saisieActive()) return;
       var avant = signatureCourante();
       Promise.all([appeler('fal:suivi', ['resume']), appeler('photoroom:compte')]).then(function(rs){

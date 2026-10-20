@@ -229,4 +229,5 @@ module.exports = {
   'sera retiré de la vente finale et reviendra au régime normal.': 'will be removed from final sale and return to regular status.',
   'La boutique cessera aussitôt d’annoncer l’offre, et le produit redeviendra admissible aux retours et aux échanges.': 'The store will stop advertising the offer immediately, and the product will again be eligible for returns and exchanges.',
   'SKU': 'SKU',
+  'non confirmé(s) par le serveur — relancez pour les reprendre.': 'not confirmed by the server — run again to retry them.',
 };

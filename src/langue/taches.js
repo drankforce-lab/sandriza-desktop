@@ -45,4 +45,6 @@ module.exports = {
   'Voir les étapes en détail': 'See the steps in detail',
   '{n} étapes faites ✓': '{n} steps done ✓',
   'Tout le détail': 'Full details',
+  '+{0} autres générations — tout voir': '+{0} more generations — see all',
+  '+1 autre génération — tout voir': '+1 more generation — see all',
 };

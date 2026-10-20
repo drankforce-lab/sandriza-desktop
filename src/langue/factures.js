@@ -128,4 +128,11 @@ module.exports = {
   '1 facture en retard.': '1 overdue invoice.',
   'Aucune facture en retard.': 'No overdue invoice.',
   'Total saisi': 'Total entered',
+  'Page précédente': 'Previous page',
+  'Page suivante': 'Next page',
+  'Chercher un client : nom ou courriel…': 'Search a customer: name or email…',
+  'Chercher un client': 'Search a customer',
+  '— Tapez quelques lettres —': '— Type a few letters —',
+  '— {0} clients, les 20 premiers —': '— {0} customers, first 20 —',
+  'Aucun client ne correspond.': 'No customer matches.',
 };

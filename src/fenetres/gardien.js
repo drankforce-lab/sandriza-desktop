@@ -314,13 +314,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (s.indexOf('cfg:') === 0) return '${T("Liste : ")}' + esc(s.slice(4));
     return esc(s);
   }
+  /* (2026-10-19, lot VOLUME 2) LA CORBEILLE SE PAGINE AU SERVEUR : gardien:etat { corbPage, corbParPage }
+     → la page (LIMIT/OFFSET) et son VRAI total (COUNT). Un ancien serveur n envoie pas corbeillePage :
+     les 200 dernieres, comme avant. */
+  var CORB_PAGE = 0, CORB_PAR_PAGE = 50;
+  function nbCorbeille(){ return (ETAT && ETAT.corbeillePage) ? (ETAT.corbeillePage.total || 0) : ((ETAT && ETAT.corbeille) || []).length; }
+  window.szPagesCoeur = window.szPagesCoeur || {};
+  window.szPagesCoeur['gardien-corbeille'] = function(pg){ CORB_PAGE = Math.max(0, pg | 0); charger(); };
   function zoneCorbeille(){
     var c = ETAT.corbeille || [];
-    var h = '<div class="carte sz-pagee"><h3>${T("Corbeille du serveur (")}' + c.length + ')</h3>'
+    var cp = ETAT.corbeillePage;
+    var h = '<div class="carte sz-pagee"><h3>${T("Corbeille du serveur (")}' + nbCorbeille() + ')</h3>'
       + '<div class="intro">${T("Ce qui a été supprimé dort ici pendant ")}' + esc(ETAT.corbeilleJours || 30)
       + '${T(" jours avant d’être effacé pour de bon. Restaurer remet la fiche telle qu’elle était au moment de la suppression, ou le fichier à son adresse d’origine.")}</div>';
     if (!c.length) return h + '<div class="vide">${T("La corbeille est vide.")}</div></div>';
-    h += '<div data-pages="gardien-corbeille"><table><thead><tr><th>${T("Supprimé le")}</th><th>${T("Quoi")}</th><th>${T("Par")}</th><th></th></tr></thead><tbody>';
+    h += '<div data-pages="gardien-corbeille"' + (cp ? szPagesCoeurAttr({ pagine: true, page: cp.page, pages: cp.pages, total: cp.total, parPage: cp.parPage }) : '') + '><table><thead><tr><th>${T("Supprimé le")}</th><th>${T("Quoi")}</th><th>${T("Par")}</th><th></th></tr></thead><tbody>';
     for (var i = 0; i < c.length; i++) {
       var l = c[i], cle = 'r' + l.id;
       h += '<tr><td style="white-space:nowrap">' + esc(fdate(l.quand)) + '</td>'
@@ -411,7 +419,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       bord: [(ETAT.verrous || []).length, true],
       activite: [(ETAT.evenements || []).length, false],
       journal: [nbJournalTouche(), true],
-      corbeille: [(ETAT.corbeille || []).length, false]
+      corbeille: [nbCorbeille(), false]
     };
     var h = '';
     for (var i = 0; i < ONGLETS.length; i++) {
@@ -447,7 +455,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 
   function tuilesBord(){
     var c = ETAT.cfg || {};
-    var nv = (ETAT.verrous || []).length, ne = (ETAT.evenements || []).length, nc = (ETAT.corbeille || []).length;
+    var nv = (ETAT.verrous || []).length, ne = (ETAT.evenements || []).length, nc = nbCorbeille();
     var tu = function(lib, val, sous, ton){
       return '<div class="tuile"><div class="lbl">' + lib + '</div><div class="val' + (ton ? ' ' + ton : '') + '">'
         + val + '</div><div class="sub">' + sous + '</div></div>';
@@ -576,7 +584,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     appeler('gardien:deverrouiller', [id]).then(function(r){
       OCC = false;
       if (!r.ok) { dire(expliquer(r), 'err'); redessinerVivant(); return; }
-      ETAT = { cfg: SALE ? ETAT.cfg : r.cfg, verrous: r.verrous || [], evenements: r.evenements || [], journal: r.journal || [], corbeille: r.corbeille || [], corbeilleJours: r.corbeilleJours };
+      ETAT = { cfg: SALE ? ETAT.cfg : r.cfg, verrous: r.verrous || [], evenements: r.evenements || [], journal: r.journal || [], corbeille: r.corbeille || [], corbeilleJours: r.corbeilleJours, corbeillePage: r.corbeillePage || null };
       redessinerVivant();
       dire(id === '*' ? '${T("Tous les comptes sont rouverts.")}' : '${T("Compte rouvert : il peut se connecter de nouveau.")}', 'bon');
     });
@@ -597,9 +605,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         dire(REFUS_REST[d] || (d.indexOf('existe_deja') >= 0 ? REFUS_REST.existe_deja : expliquer(r)), 'err');
         redessinerVivant(); return;
       }
-      ETAT = { cfg: SALE ? ETAT.cfg : r.cfg, verrous: r.verrous || [], evenements: r.evenements || [], journal: r.journal || [], corbeille: r.corbeille || [], corbeilleJours: r.corbeilleJours };
+      ETAT = { cfg: SALE ? ETAT.cfg : r.cfg, verrous: r.verrous || [], evenements: r.evenements || [], journal: r.journal || [], corbeille: r.corbeille || [], corbeilleJours: r.corbeilleJours, corbeillePage: r.corbeillePage || null };
       redessinerVivant();
       dire('${T("Restauré. Rechargez l’écran concerné pour le revoir.")}', 'bon');
+      // (lot VOLUME 2) la reponse porte la premiere page par defaut : on relit CELLE qu on regardait.
+      if (r.corbeillePage && (r.corbeillePage.page !== CORB_PAGE || r.corbeillePage.parPage !== CORB_PAR_PAGE)) charger();
     });
   }
   function panique(){
@@ -607,7 +617,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     appeler('gardien:panique', ['PANIQUE']).then(function(r){
       OCC = false;
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      ETAT = { cfg: SALE ? ETAT.cfg : r.cfg, verrous: r.verrous || [], evenements: r.evenements || [], journal: r.journal || [], corbeille: r.corbeille || [], corbeilleJours: r.corbeilleJours };
+      ETAT = { cfg: SALE ? ETAT.cfg : r.cfg, verrous: r.verrous || [], evenements: r.evenements || [], journal: r.journal || [], corbeille: r.corbeille || [], corbeilleJours: r.corbeilleJours, corbeillePage: r.corbeillePage || null };
       PANIQ = false; CONF = ''; dessiner();
       dire('${T("Fait : les autres sessions sont fermées et les comptes verrouillés. Changez les mots de passe avant de rouvrir.")}', 'bon');
     });
@@ -617,7 +627,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     appeler('gardien:regler', [cfg]).then(function(r){
       OCC = false;
       if (!r.ok) { dire(expliquer(r), 'err'); dessinerBouton(); return; }
-      ETAT = { cfg: r.cfg, verrous: r.verrous || [], evenements: r.evenements || [], journal: r.journal || [], corbeille: r.corbeille || [], corbeilleJours: r.corbeilleJours };
+      ETAT = { cfg: r.cfg, verrous: r.verrous || [], evenements: r.evenements || [], journal: r.journal || [], corbeille: r.corbeille || [], corbeilleJours: r.corbeilleJours, corbeillePage: r.corbeillePage || null };
       SALE = false; dessiner();
       dire('${T("Réglages enregistrés — l’alerte de changement est partie.")}', 'bon');
     });
@@ -626,14 +636,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 
   function charger(fort){
     if (OCC) return;
-    appeler('gardien:etat', []).then(function(r){
+    appeler('gardien:etat', [{ corbPage: CORB_PAGE, corbParPage: CORB_PAR_PAGE }]).then(function(r){
       if (!r || !r.ok) {
         if (ETAT === null) corps.innerHTML = '<div class="carte"><div class="vide">' + expliquer(r) + '</div></div>';
         if (fort) dire(expliquer(r), 'err');
         return;
       }
       var premier = ETAT === null;
-      ETAT = { cfg: (SALE && ETAT) ? ETAT.cfg : r.cfg, verrous: r.verrous || [], evenements: r.evenements || [], journal: r.journal || [], corbeille: r.corbeille || [], corbeilleJours: r.corbeilleJours };
+      ETAT = { cfg: (SALE && ETAT) ? ETAT.cfg : r.cfg, verrous: r.verrous || [], evenements: r.evenements || [], journal: r.journal || [], corbeille: r.corbeille || [], corbeilleJours: r.corbeilleJours, corbeillePage: r.corbeillePage || null };
       if (premier || (fort && !SALE)) dessiner(); else redessinerVivant();
       if (fort) dire('');
     });
