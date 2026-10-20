@@ -1992,11 +1992,13 @@ function pageProduit(id) {
     P.imageLocale(src).then(function(d){ img.src = d || src; }, function(){ img.src = src; });
   }
   // Le résultat de l IA, gardé sur le poste par photo (on ne paie pas deux fois la même photo).
+  var MV_REESSAI = {};
   function mvMemoIA(cle, val){
     var K = 'sz-mesure-ia', o = {};
     try { o = JSON.parse(localStorage.getItem(K) || '{}') || {}; } catch (e) { o = {}; }
     if (val === undefined) return o[cle] || null;
-    o[cle] = { mesures: val.mesures, n: val.n, ecartes: val.ecartes || 0, mancheManuelle: !!val.mancheManuelle, au: Date.now() };
+    o[cle] = val.echec ? { echec: String(val.echec), au: Date.now() }
+      : { mesures: val.mesures, n: val.n, ecartes: val.ecartes || 0, mancheManuelle: !!val.mancheManuelle, au: Date.now() };
     var cles = Object.keys(o).sort(function(a, b){ return (o[b].au || 0) - (o[a].au || 0); });
     cles.slice(60).forEach(function(k){ delete o[k]; });
     try { localStorage.setItem(K, JSON.stringify(o)); } catch (e) {}
@@ -2025,7 +2027,7 @@ function pageProduit(id) {
       } catch (e) { feuille = null; res = null; }
       var finir = function(res2, viaIA, note){
         if (!MV_AUTO || MV_AUTO.cle !== cle) return;
-        MV_AUTO = { cle: cle, cv: cv, feuille: feuille, res: res2, t: mvTaillePhoto(), poses: [], ia: !!viaIA, note: note || '' };
+        MV_AUTO = { cle: cle, cv: cv, feuille: feuille, res: res2, t: mvTaillePhoto(), poses: [], ia: !!viaIA, note: note || '', forcer: forcer && !!viaIA };
         mvPoserAuto();
         mvAutoGraduer(false);
         dessinerMesures();
@@ -2033,16 +2035,28 @@ function pageProduit(id) {
       /* SUR MANNEQUIN : LE CONTOUR PAR L IA (2026-10-20, essai validé sur sa photo du manteau gris). Quand la
          feuille est trouvée mais que la silhouette locale ne donne pas l essentiel, on demande le contour du
          vêtement (produit:mesureMasque, ~0,007 $ CA) — UNE fois par photo : le résultat est gardé sur le poste. */
-      if (!feuille || (res && res.n >= 3)) { finir(res, false); return; }
+      var forcer = !!MV_REESSAI[cle];
+      if (!feuille || (res && res.n >= 3 && !forcer)) { finir(res, false); if (feuille && MV_AUTO) MV_AUTO.proposerIA = true; return; }
       var memo = mvMemoIA(cle);
-      if (memo) { finir(memo, true); return; }
+      if (memo && memo.n && !forcer) { finir(memo, true); return; }
+      /* L APPEL PAYANT NE PART QUE SUR SON CLIC (2026-10-20, sa décision : « mets-moi un bouton pour lancer la
+         demande manuellement : comme c est payant, je ne veux peut-être pas le faire pour tous les items »).
+         À l arrivée sur l étape, seul le travail GRATUIT se fait (feuille, échelle, silhouette locale) ; un
+         résultat déjà payé pour cette photo est relu sans rien payer. */
+      if (!forcer) { finir(res && res.n ? res : null, false, memo && memo.echec ? memo.echec : ''); if (MV_AUTO) MV_AUTO.proposerIA = true; mvMontrerAuto(); return; }
+      /* ⚠ PAS DE FACTURE POUR RIEN (2026-10-20, sa règle : « je ne veux pas être facturée pour le fun ») : une
+         photo n est envoyée QU UNE FOIS d office. Un échec est retenu lui aussi ; le réessai ne part que
+         sur son clic, prix affiché. */
       if (!(P && P.appeler)) { finir(res, false); return; }
+      delete MV_REESSAI[cle];
       MV_AUTO.enCours = true;
       z.innerHTML = '<div class="mesv-auto"><div class="aide">${T("Feuille trouvée — le contour du vêtement est demandé au service d’images (quelques secondes)…")}</div></div>';
       P.appeler('produit:mesureMasque', IMAGE, ty).then(function(rm){
         if (!MV_AUTO || MV_AUTO.cle !== cle) return;
         if (!rm || !rm.ok || !rm.masque) {
-          finir(res, false, rm && rm.motif === 'plafond' ? '${T("Plafond des traitements d’images atteint : mesure automatique impossible pour le moment.")}' : '${T("Le service d’images n’a pas répondu : mesure automatique impossible pour le moment.")}');
+          var pourquoi = rm && rm.motif === 'plafond' ? '${T("Plafond des traitements d’images atteint : mesure automatique impossible pour le moment.")}' : '${T("Le service d’images n’a pas répondu : mesure automatique impossible pour le moment.")}';
+          mvMemoIA(cle, { echec: pourquoi });
+          finir(res, false, pourquoi); if (MV_AUTO) MV_AUTO.proposerIA = true; mvMontrerAuto();
           return;
         }
         var mi = new Image();
@@ -2050,7 +2064,7 @@ function pageProduit(id) {
           var mc = document.createElement('canvas'); mc.width = cv.width; mc.height = cv.height;
           var r3 = null;
           try { mc.getContext('2d').drawImage(mi, 0, 0, mc.width, mc.height); r3 = mvMesurerMasque(mc, ty, feuille.pxParCm, cv); } catch (e) { r3 = null; }
-          if (r3 && r3.n) mvMemoIA(cle, r3);
+          mvMemoIA(cle, r3 && r3.n ? r3 : { echec: '${T("Le contour du vêtement a été reçu, mais aucune mesure n’a pu en être tirée.")}' });
           finir(r3 && r3.n ? r3 : res, !!(r3 && r3.n));
         };
         mi.onerror = function(){ finir(res, false); };
@@ -2066,8 +2080,8 @@ function pageProduit(id) {
     MESV.tailles[t] = MESV.tailles[t] || {};
     A.poses = [];
     Object.keys(A.res.mesures).forEach(function(k){
-      if (MESV.tailles[t][k] > 0) return;
-      MESV.tailles[t][k] = A.res.mesures[k].cm; A.poses.push(k);
+      if (MESV.tailles[t][k] > 0 && !A.forcer) return;   // « Relancer le calcul » remplace la taille photographiée
+      MESV.tailles[t][k] = A.res.mesures[k].cm; delete MV_GRAD[t + '|' + k]; A.poses.push(k);
     });
   }
   // Changer la taille photographiée déplace ce que l analyse a posé (et rien de ce qu on a tapé).
@@ -2089,20 +2103,26 @@ function pageProduit(id) {
       return;
     }
     var n = A.res ? A.res.n : 0, poses = (A.poses || []).length;
+
     var plus = (A.res && A.res.mancheManuelle && mvType() === 'haut')
       ? ' <b class="att">${T("Manche : aucun des deux bras n’est assez droit sur la photo pour la mesurer — prenez-la au ruban et tapez-la dans le tableau.")}</b>' : '';
     if (A.note) plus += ' ' + esc(A.note);
     var txt = n
       ? (poses ? poses + '${T(" mesure(s) estimée(s) inscrite(s) pour la taille ")}' + esc(A.t) + '.' : '${T("Mesures estimées : les cases étaient déjà remplies, rien n’a été remplacé.")}')
         + ' ${T("Vérifiez chaque trait sur l’aperçu.")}' + plus
-      : '${T("Le vêtement n’a pas pu être mesuré automatiquement sur cette photo : tapez les mesures d’une taille dans le tableau, les autres suivront.")}' + plus;
+      : (A.proposerIA ? '${T("Échelle posée. Sur un mannequin, l’application ne sait pas isoler le vêtement seule : « Mesurer par l’IA » le fait pour cette photo (≈ 0,007 $, une seule fois — le résultat est gardé). Sinon, tapez les mesures d’une taille : les autres suivront.")}'
+        : '${T("Le vêtement n’a pas pu être mesuré automatiquement sur cette photo : tapez les mesures d’une taille dans le tableau, les autres suivront.")}') + plus;
     z.innerHTML = '<div class="mesv-auto"><canvas id="p-mesv-apercu"></canvas><div class="mesv-auto-txt">'
-      + '<b><span class="ok">✓</span>' + (A.ia ? '${T("Mesures prises d’après le contour du vêtement")}' : '${T("Feuille trouvée dans la photo principale")}') + '</b><div class="aide">' + txt + '</div></div></div>';
+      + '<b><span class="ok">✓</span>' + (A.ia ? '${T("Mesures prises d’après le contour du vêtement")}' : '${T("Feuille trouvée dans la photo principale")}') + '</b><div class="aide">' + txt + '</div></div>'
+      + '<div class="mesv-auto-act"><button type="button" class="' + (A.ia ? 'mini' : 'prim') + '" id="p-mesv-reessai">'
+      + (A.ia ? '${T("Relancer par l’IA (≈ 0,007 $)")}' : '${T("Mesurer par l’IA (≈ 0,007 $)")}') + '</button></div></div>';
     var c = document.getElementById('p-mesv-apercu'), s = Math.min(1, 220 / A.cv.width, 220 / A.cv.height);
     c.width = Math.round(A.cv.width * s); c.height = Math.round(A.cv.height * s);
     var g = c.getContext('2d'); g.drawImage(A.cv, 0, 0, c.width, c.height);
     var f = A.feuille; g.save(); g.scale(s, s); g.translate(f.cx, f.cy); g.rotate(f.ang || 0);
     g.strokeStyle = '#22c55e'; g.lineWidth = 3 / s; g.strokeRect(-f.L / 2, -f.l / 2, f.L, f.l); g.restore();
+    var br = document.getElementById('p-mesv-reessai');
+    if (br) br.onclick = function(){ var k0 = A.cle; MV_REESSAI[k0] = 1; MV_AUTO = null; mvAnalyser(); };
     if (A.res) Object.keys(A.res.mesures).forEach(function(k){
       var m = A.res.mesures[k]; g.strokeStyle = '#c9a97e'; g.lineWidth = 2;
       g.beginPath(); g.moveTo(m.a[0] * s, m.a[1] * s); g.lineTo(m.b[0] * s, m.b[1] * s); g.stroke();

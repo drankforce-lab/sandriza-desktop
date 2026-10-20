@@ -3415,6 +3415,10 @@ const LIMITES_PONT = {
      redessine un écran. Au plafond ordinaire de 8 s, on obtiendrait un << délai >>
      sur la seule écriture qui n'a pas droit à l'échec. */
   'brouillon:ecrire': 20000, 'brouillon:lire': 20000,
+  /* LE CONTOUR DU VÊTEMENT (2026-10-20) : fal.ai segmente puis le relais rapatrie le masque — 10 à 40 s. Au
+     plafond de 8 s, la fenêtre renonçait pendant que l appel AUSSI FACTURÉ aboutissait (sa photo du manteau,
+     23 h 29 : 0,005 $ payés, rien d inscrit). */
+  'produit:mesureMasque': 120000,
   // Groq a 6 s de delai cote site : 10 s couvre l aller-retour.
   'langue:traduire': 10000,
   /* ⚠⚠ LA CONNEXION A UN PLAFOND LARGE, ET C EST LE CAS OU UN DELAI COUTE LE

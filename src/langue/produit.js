@@ -859,4 +859,8 @@ module.exports = {
   "Manche : aucun des deux bras n’est assez droit sur la photo pour la mesurer — prenez-la au ruban et tapez-la dans le tableau.": "Sleeve: neither arm is straight enough in the photo to measure it — take it with a tape and type it in the table.",
   "Le vêtement n’a pas pu être mesuré automatiquement sur cette photo : tapez les mesures d’une taille dans le tableau, les autres suivront.": "The garment could not be measured automatically on this photo: type the measurements of one size in the table, the others will follow.",
   "Mesures prises d’après le contour du vêtement": "Measurements taken from the garment outline",
+  "Le contour du vêtement a été reçu, mais aucune mesure n’a pu en être tirée.": "The garment outline was received, but no measurement could be taken from it.",
+  "Échelle posée. Sur un mannequin, l’application ne sait pas isoler le vêtement seule : « Mesurer par l’IA » le fait pour cette photo (≈ 0,007 $, une seule fois — le résultat est gardé). Sinon, tapez les mesures d’une taille : les autres suivront.": "Scale set. On a mannequin, the app cannot isolate the garment by itself: “Measure with AI” does it for this photo (≈ $0.007, once — the result is kept). Otherwise, type the measurements of one size: the others will follow.",
+  "Relancer par l’IA (≈ 0,007 $)": "Redo with AI (≈ $0.007)",
+  "Mesurer par l’IA (≈ 0,007 $)": "Measure with AI (≈ $0.007)",
 };

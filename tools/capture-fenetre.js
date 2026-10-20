@@ -33,17 +33,19 @@ const nJeu = Number(opt('--jeu', 0));
 const jeu = Array.isArray(brut) ? brut[Math.min(nJeu, brut.length - 1)] : { id: '', reponses: brut || {} };
 const ops = Object.assign({ 'session:activite': { ok: true }, 'lots:etat': { ok: true, lots: [] } }, jeu.reponses || {});
 // --fusion '{"op":{"champ":valeur}}' : retouche une réponse du jeu pour un cas limite (vingt tailles, texte long…).
-const fusion = opt('--fusion', '');
+const fusion = opt('--fusion-fichier', '') ? fs.readFileSync(opt('--fusion-fichier', ''), 'utf8') : opt('--fusion', '');
 if (fusion) { const f = JSON.parse(fusion); for (const k of Object.keys(f)) ops[k] = Object.assign({}, ops[k] || {}, f[k]); }
 
 let page = String(fabrique(jeu.id || ''));
 // L'assistant vit dans la fermeture de la page : on le rend joignable pour aller à l'étape voulue
 // sans remplir les étapes précédentes (leur garde refuserait le passage).
 page = page.replace('var Assist = {', 'var Assist = window.Assist = {');
+// Fenêtre Produit : poser la photo principale depuis --js (window.__szImage(dataURL)) pour éprouver l analyse.
+page = page.replace("var CTX = null, FICHE = null, IMAGE = '',", "window.__szImage = function(v){ IMAGE = v; }; var CTX = null, FICHE = null, IMAGE = '',");
 page = page.replace(/<head([^>]*)>/i, (m) => m + '\n' + PROLOGUE.replace('__REPONSES__', () => JSON.stringify(ops)));
 const etape = opt('--etape', null);
 const jour = args.includes('--jour');
-const js = opt('--js', '');
+const js = (opt('--js-fichier', '') ? fs.readFileSync(opt('--js-fichier', ''), 'utf8') : '') + opt('--js', '');
 const pilote = '<script>window.addEventListener("load",function(){setTimeout(function(){try{'
   + (jour ? 'document.documentElement.classList.add("jour");' : 'document.documentElement.classList.remove("jour");')
   + js
@@ -68,6 +70,9 @@ for (let essai = 0; essai < 3 && !fs.existsSync(sortie); essai++) {
     '--no-first-run', '--disable-extensions', '--window-size=' + opt('--l', 1400) + ',' + opt('--h', 900),
     '--virtual-time-budget=5000', '--user-data-dir=' + path.join(tmp, 'profil'),
     '--screenshot=' + sortie, 'file:///' + f.split(path.sep).join('/')], { timeout: 90000 });
+  // ⚠ Sous Windows, le lanceur rend la main (statut 21) AVANT que le navigateur ait écrit la capture : on l attend.
+  for (let t = 0; t < 40 && !fs.existsSync(sortie); t++) { try { Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 500); } catch (e) {} }
+  if (process.env.SZ_CAP_DEBUG) console.error('essai', essai, 'statut', r.status, String(r.stderr || '').slice(-600));
 }
 try { fs.rmSync(path.join(tmp, 'profil'), { recursive: true, force: true }); } catch (e) {}
 if (!fs.existsSync(sortie)) { console.error('✗ aucune capture (statut ' + r.status + ')'); process.exit(1); }
