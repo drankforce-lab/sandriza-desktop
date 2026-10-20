@@ -95,5 +95,12 @@ verif('…et les suivantes ne comptent plus', e.commentaire('troll', '2000').ver
 e.debloquer('@troll');
 verif('« Débloquer » : de nouveau admis', e.commentaire('@troll', '25').verdict === 'retenue');
 
+// ── La console : le lecteur de codes-barres et la vignette (2026-10-20, ses deux signalements) ──
+const _page = require('fs').readFileSync(require('path').join(__dirname, '..', 'src', 'fenetres', 'encan.js'), 'utf8');
+verif('un code scanné (réponse « sku » du site) met l article à l encan sans passer par la liste', _page.includes('if (r.sku) { scanne(r.sku); return; }'));
+verif('Entrée lance la recherche tout de suite (le lecteur tape le code puis Entrée)', _page.includes("if (ev.key === 'Enter') { ev.preventDefault(); chercher(this.value, true); }"));
+verif('la vignette est une image, pas un fond (le damier des thèmes Carbone/Lin la répétait en mosaïque)',
+  !_page.includes("$('vign').style.background") && _page.includes('<img id="vign"'));
+
 console.log(ok + ' vérifiés, ' + ko + ' en échec');
 process.exit(ko ? 1 : 0);

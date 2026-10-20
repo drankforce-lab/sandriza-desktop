@@ -82,7 +82,12 @@ button.mini{padding:.12rem .45rem;font-size:.74rem;border-radius:6px}
 /* La scene */
 .scene{display:flex;flex-direction:column;gap:.9rem;padding:1rem 1.1rem}
 .art-ligne{display:flex;align-items:center;gap:.8rem;min-width:0}
-.vign{flex:0 0 auto;width:52px;height:64px;border-radius:9px;background:var(--v06);background-size:cover;background-position:center;border:1px solid var(--v08)}
+.vign{flex:0 0 auto;width:52px;height:64px;border-radius:9px;background:var(--v06);border:1px solid var(--v08);overflow:hidden;display:flex;align-items:center;justify-content:center}
+/* ⚠ UNE VRAIE IMAGE, PAS UN FOND (2026-10-20, sa capture : la robe répétée en mosaïque). Sous les thèmes
+   Carbone et Lin, le socle peint le damier de transparence de TOUTES les .vign avec un fond de 12 px :
+   une photo posée en background-image prenait cette taille et se répétait. */
+.vign img{width:100%;height:100%;object-fit:contain;display:block}
+.vign img[hidden]{display:none}
 .sur{font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;color:var(--tx2);font-weight:700}
 .nom-art{font-size:1.15rem;font-weight:800;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .chiffres{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.9rem}
@@ -176,7 +181,7 @@ function pageEncan() {
 
   <div class="col">
     <div class="carte scene">
-      <div class="art-ligne"><div class="vign" id="vign"></div>
+      <div class="art-ligne"><div class="vign"><img id="vign" alt="" hidden></div>
         <div style="min-width:0"><div class="sur">${T("Article en cours")}</div><div class="nom-art" id="article"></div><div class="aide" id="art-sous"></div></div></div>
       <div class="chiffres">
         <div class="bloc"><div class="lbl" id="lbl-temps">${T("Temps restant")}</div><div class="chrono" id="chrono">0:00</div><div class="barre"><i id="barre"></i></div></div>
@@ -318,7 +323,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     $('carte-essai').hidden = !E.essai;
     $('article').textContent = a ? a.nom : '${T("Aucun article")}';
     $('art-sous').textContent = a ? (a.variante || '') : '${T("Cherchez un article à gauche, ou passez à l’article suivant.")}';
-    $('vign').style.backgroundImage = (a && a.image) ? 'url(' + JSON.stringify(String(a.image)) + ')' : '';
+    var vi = $('vign'), src = (a && a.image) ? String(a.image) : '';
+    if (vi.getAttribute('src') !== src) { if (src) vi.setAttribute('src', src); else vi.removeAttribute('src'); }
+    vi.hidden = !src;
     $('lbl-prix').textContent = aucune ? '${T("Mise de départ")}' : '${T("Enchère")}' + ' · ' + E.nbOffres + ' ' + (E.nbOffres > 1 ? '${T("offres")}' : '${T("offre")}');
     $('prix').textContent = argent(aucune ? E.reglages.depart : E.prix);
     $('meneur').textContent = aucune ? '' : E.meneur;
@@ -459,13 +466,34 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return { id: x.id + (v ? ':' + v.cle : ''), produitId: x.id, nom: x.nom, image: x.image || '',
       variante: v ? [v.taille, v.couleur].filter(Boolean).join(' · ') : '', taille: v ? v.taille : '', couleur: v ? v.couleur : '' };
   }
-  $('recherche').oninput = function(){
+  /* LE LECTEUR DE CODES-BARRES (2026-10-20, sa demande : « ça doit fonctionner avec le scan aussi »).
+     Le lecteur tape le code puis Entrée ; le site reconnaît le code d une VARIANTE (forme longue ou compacte)
+     et répond « sku » — la réponse que la caisse utilise depuis toujours et que cette fenêtre ignorait :
+     le code scanné ne trouvait rien. Un code reconnu met l article à l encan (ou en file si un encan
+     tourne) sans passer par la liste, et le champ se vide pour le scan suivant. */
+  function scanne(sku){
+    P.appeler('caisse:article', sku.produitId, sku.taille, sku.couleur).then(function(r){
+      if (!r || !r.ok) { szDire((r && MOTIFS[r.motif]) || '${T("Article introuvable.")}', 'err'); return; }
+      var l = r.ligne || {};
+      var a = { id: l.productId + ':' + [sku.taille, sku.couleur].join('-'), produitId: l.productId, nom: l.name || '', image: r.image || '',
+        variante: [sku.taille, sku.couleur].filter(Boolean).join(' · '), taille: sku.taille || '', couleur: sku.couleur || '' };
+      var enJeu = E && (E.phase === 'encours' || E.phase === 'pause');
+      geste(enJeu ? 'enFile' : 'charger', [a]).then(function(g){
+        if (!g.ok) return;
+        $('recherche').value = ''; $('res').innerHTML = ''; $('recherche').focus();
+        szDire((enJeu ? '${T("Scanné et ajouté à la file :")} ' : '${T("Scanné, prêt à démarrer :")} ') + a.nom + (a.variante ? ' — ' + a.variante : ''), 'bon');
+      });
+    });
+  }
+  function chercher(q, entree){
     clearTimeout(minuterie);
-    var q = this.value;
     minuterie = setTimeout(function(){
-      if (q.trim().length < 3) { $('res').innerHTML = ''; return; }
+      if (!q.trim()) { $('res').innerHTML = ''; return; }
+      if (!entree && q.trim().length < 3) { $('res').innerHTML = ''; return; }
       P.appeler('caisse:chercher', q).then(function(r){
         if (!r || !r.ok) { $('res').innerHTML = '<div class="aide">' + esc((r && MOTIFS[r.motif]) || '') + '</div>'; return; }
+        if (r.sku) { scanne(r.sku); return; }
+        if (r.court) { $('res').innerHTML = '<div class="aide">${T("Trois caractères minimum pour chercher.")}</div>'; return; }
         TROUVES = r.articles || [];
         $('res').innerHTML = TROUVES.slice(0, 5).map(function(x, i){
           return '<div class="art"><b>' + esc(x.nom) + '</b><span class="aide">' + esc(x.code) + '</span><div class="vars">'
@@ -474,8 +502,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             }).join('') + '</div></div>';
         }).join('') || '<div class="aide">${T("Aucun article trouvé.")}</div>';
       });
-    }, 250);
-  };
+    }, entree ? 0 : 250);
+  }
+  $('recherche').oninput = function(){ chercher(this.value, false); };
+  $('recherche').onkeydown = function(ev){ if (ev.key === 'Enter') { ev.preventDefault(); chercher(this.value, true); } };
   $('res').onclick = function(ev){
     var b = ev.target.closest('[data-a]'); if (!b) return;
     var x = TROUVES[+b.getAttribute('data-a')]; var v = x && (x.variantes || [])[+b.getAttribute('data-v')];

@@ -184,4 +184,8 @@ module.exports = {
   'Offre annulée : le prix revient à l’offre précédente.': 'Bid cancelled: the price goes back to the previous bid.',
   'Bloquer ce pseudo': 'Block this username',
   'Les offres de {p} sont retirées de cet encan et ne compteront plus de la séance. Son commentaire reste visible dans TikTok : pour le masquer, faites-le dans TikTok.': 'The bids from {p} are removed from this auction and will not count for the rest of the session. The comment stays visible on TikTok: to hide it, do so in TikTok.',
+  'Article introuvable.': 'Item not found.',
+  'Scanné et ajouté à la file :': 'Scanned and added to the queue:',
+  'Scanné, prêt à démarrer :': 'Scanned, ready to start:',
+  'Trois caractères minimum pour chercher.': 'Type at least three characters to search.',
 };
