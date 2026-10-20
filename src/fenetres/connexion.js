@@ -114,6 +114,10 @@ input:focus{border-color:#C49A6C;box-shadow:0 0 0 3px rgba(196,154,108,0.18)}
   border-radius:8px;padding:0.55rem 0.8rem;font-size:0.8rem;color:#b91c1c;
   margin-bottom:0.75rem;line-height:1.5}
 .cx-err.on{display:block}
+/* (2026-10-20) Pourquoi la session precedente a ete fermee (connexion sur un autre poste) : un avis, pas un refus. */
+.cx-ferme{background:#fff7ed;border:1px solid #fdba74;border-radius:8px;padding:0.6rem 0.8rem;font-size:0.8rem;
+  color:#7c2d12;margin-bottom:1rem;line-height:1.5}
+.cx-ferme b{display:block}
 /* Les trois tons que la page peut demander. L orange previent PENDANT qu on
    peut encore agir ; le sombre annonce un courriel parti, pas un refus. */
 .cx-err.orange{background:#fff7ed;border-color:#fdba74;color:#9a3412}
@@ -463,6 +467,8 @@ ${JS_DIRE()}
       "motif.a1nom": "Answer 1: cannot contain your name or username.",
       "motif.a2nom": "Answer 2: cannot contain your name or username.",
       "Panneau d’administration": "Administration panel",
+      "Déconnecté : connexion à un autre poste": "Signed out: signed in on another computer",
+      "Le {d} à {h}": "On {d} at {h}",
     }
   };
   function T(k, a){
@@ -679,12 +685,26 @@ ${JS_DIRE()}
   }
 
   /* ══ L ECRAN DE CONNEXION ════════════════════════════════════════════════ */
+  /* (2026-10-20, sa demande) La session de ce poste a ete fermee par une connexion du meme compte sur un AUTRE
+     poste : on le dit, avec la date et l heure (le serveur les a notees, la page les a transmises). */
+  function avisFermeture(){
+    var f = CTX && CTX.fermeture;
+    if (!f || f.raison !== 'autre_poste') return '';
+    var quand = '';
+    try {
+      var d = new Date(f.le), loc = (LANGUE === 'en') ? 'en-CA' : 'fr-CA';
+      quand = T('Le {d} à {h}').replace('{d}', d.toLocaleDateString(loc, { day: 'numeric', month: 'long', year: 'numeric' }))
+        .replace('{h}', d.toLocaleTimeString(loc, { hour: '2-digit', minute: '2-digit' }));
+    } catch (e) {}
+    return '<div class="cx-ferme" role="status"><b>' + T('Déconnecté : connexion à un autre poste') + '</b>' + esc(quand) + '</div>';
+  }
   function ecranLogin(){
     return '<div>'
       + '<div style="margin-bottom:1.75rem">'
       + '<div class="cx-titre">' + T('Connexion sécurisée') + '</div>'
       + '<div class="cx-sous">' + T('Réservé au personnel autorisé uniquement') + '</div>'
       + '</div>'
+      + avisFermeture()
       + '<form id="cx-form" novalidate>'
       + '<div style="margin-bottom:1rem">'
       + '<label class="cx-lbl" for="sl-email">' + T('Nom d’utilisateur') + '</label>'

@@ -1819,6 +1819,27 @@ const createWindow = () => {
   mainWindow.on('unmaximize', suivreLeCadre);
   mainWindow.on('enter-full-screen', suivreLeCadre);
   mainWindow.on('leave-full-screen', suivreLeCadre);
+  /* ⚠⚠ (2026-10-20) LE RETOUR DE LA FENÊTRE : sa PAGE BLANCHE (seuls les boutons réduire / agrandir / fermer) après
+     une mise à jour installée. Les vues étaient reposées au redimensionnement, à l'agrandissement et au plein
+     écran — JAMAIS quand la fenêtre revient de la barre des tâches ou réapparaît. Posées pendant qu'elle était
+     réduite, elles restaient à 0 × 0. */
+  const _auRetour = () => { suivreLeCadre(); try { _ajusterVuesCadre(); } catch (e) {} };
+  mainWindow.on('restore', _auRetour);
+  mainWindow.on('show', _auRetour);
+  mainWindow.on('focus', _auRetour);
+  /* Le FILET : toutes les 2 s, une vue visible à 0 × 0 dans une fenêtre visible est reposée, et c'est dit au journal. */
+  setInterval(() => {
+    try {
+      if (!mainWindow || mainWindow.isDestroyed() || !mainWindow.isVisible() || mainWindow.isMinimized()) return;
+      const [w, h] = mainWindow.getContentSize();
+      if (!(w > 0 && h > 0)) return;
+      const nulle = (v) => { try { if (!v) return false; const b = v.getBounds(); return !(b.width > 1 && b.height > 1); } catch (e) { return false; } };
+      if (nulle(vueConnexion) || nulle(vueSite) || nulle(vueCadre)) {
+        cnxDire('filet : vue a 0 x 0 dans une fenetre visible — reposee a ' + w + ' x ' + h);
+        _auRetour();
+      }
+    } catch (e) {}
+  }, 2000);
   /* ⚠ LE BOUTON RESTAURER DE WINDOWS NE RÉPOND PAS sur une fenêtre agrandie avec
      `titleBarOverlay` (défaut d'Electron, prouvé) : la fenêtre n'est donc jamais
      « agrandie », elle prend la pleine zone. Voir `_pleineZoneArmer`. */
@@ -5510,6 +5531,10 @@ const poserVueConnexion = () => {
   if (!vueConnexion || !mainWindow || mainWindow.isDestroyed()) return;
   try {
     const [w, h] = mainWindow.getContentSize();
+    /* ⚠ (2026-10-20, sa page BLANCHE après une mise à jour, sur son 2e poste) Une fenêtre RÉDUITE ou cachée rend
+       une taille de contenu nulle : poser la vue à 0 × 0 la rendait invisible pour de bon, rien ne la reposant au
+       retour. On garde donc la taille précédente ; le retour de la fenêtre (restore/show) reposera. */
+    if (!(w > 0 && h > 0)) { cnxDire('pose ignoree : fenetre de taille nulle (reduite ou cachee)'); return; }
     vueConnexion.setBounds({ x: 0, y: 0, width: w, height: h });
   } catch (e) {}
 };
@@ -5732,7 +5757,9 @@ const _ajusterVuesCadre = () => {
   if (!mainWindow || mainWindow.isDestroyed()) return;
   let l = 0, h = 0;
   try { const t = mainWindow.getContentSize(); l = t[0]; h = t[1]; } catch (e) { return; }
-  const b = { x: 0, y: 0, width: Math.max(1, l), height: Math.max(1, h) };
+  // ⚠ Même règle que poserVueConnexion : une fenêtre réduite rend 0 × 0 — on ne rétrécit pas les vues à rien.
+  if (!(l > 0 && h > 0)) return;
+  const b = { x: 0, y: 0, width: l, height: h };
   try { if (vueSite) vueSite.setBounds(b); } catch (e) {}
   try { if (vueCadre) vueCadre.setBounds(b); } catch (e) {}
 };
