@@ -442,7 +442,10 @@ function pageCommande(id) {
       + '<div class="ok" id="x-etat"></div><div class="qq" id="x-quoi"></div>'
       + '<div class="ch"><label for="c-suivi">${T("Numéro de suivi")}</label><input id="c-suivi" placeholder="${T("rempli par l’étiquette")}"></div>'
       + '<div class="bt"><button type="button" class="prim" id="c-etiq-imp"><span class="ic">🖨</span> ${T("Imprimer l’étiquette")}</button>'
-      + '<button type="button" id="x-bordereau"><span class="ic">🧾</span> ${T("Imprimer le bordereau")}</button></div>'
+      + '<button type="button" id="x-bordereau"><span class="ic">🧾</span> ${T("Imprimer le bordereau")}</button>'
+      /* (2026-10-20, sa question : « où va se trouver le bouton Annuler l étiquette ») ICI aussi, pas seulement dans la
+         fenêtre Expédier : l envoi est annulé chez le transporteur (le site, puis le serveur décident de tout). */
+      + '<button type="button" id="x-annuler-etiq" style="color:var(--tx-err)">${T("Annuler l’étiquette")}</button></div>'
       + '</div></div>'
       + '<h2 style="margin:.3rem 0 0;font-size:1rem">${T("Avant de fermer la boîte")}</h2>'
       + '<div class="cases"><label><input type="checkbox" id="x-c1"> ${T("Bordereau glissé dans le colis")}</label>'
@@ -1072,6 +1075,9 @@ function pageCommande(id) {
     document.getElementById('x-etat').textContent = suivi ? '${T("Étiquette créée")}' : (coché('c-sans') ? '${T("Sans étiquette — remise en main propre")}' : '${T("Aucune étiquette")}');
     document.getElementById('x-quoi').textContent = (nomT(t) || '') + (e.nom ? ' · ' + e.nom : '') + (e.reel ? ' · ' + argent(e.reel) : '');
     var bi = document.getElementById('c-etiq-imp'); if (bi) bi.disabled = !(CMD.aUneEtiquette || suivi) || !!CMD.etiquetteBloquee;
+    // Annulable : un envoi de Postes Canada ou FedEx existe, et le colis n est pas parti (le serveur revérifie).
+    var ba = document.getElementById('x-annuler-etiq');
+    if (ba) ba.hidden = !(suivi && (t === 'postes-canada' || t === 'fedex') && CMD.statut !== 'shipped' && CMD.statut !== 'delivered');
     if (CMD.etiquetteBloquee) document.getElementById('x-etat').textContent = '${T("Étiquette BLOQUÉE :")} ' + CMD.etiquetteBloquee;
     majArgent();
     majExpedier();
@@ -1191,6 +1197,24 @@ function pageCommande(id) {
     document.getElementById('c-sans').onchange = function(){ fil(); majExpedier(); };
     document.getElementById('c-suivi').oninput = function(){ dire(''); fil(); majExpedier(); recap(); };
     document.getElementById('c-etiq-imp').onclick = imprimerEtiquette;
+    document.getElementById('x-annuler-etiq').onclick = function(){
+      var b = this;
+      szConfirmer({ danger: true, titre: '${T("Annuler l’étiquette")}',
+        texte: '${T("L’envoi est annulé chez le transporteur : il n’est pas facturé et l’étiquette imprimée n’est plus valable. Le numéro de suivi est retiré de la commande ; vous pourrez ensuite créer une nouvelle étiquette. Cette action est irréversible.")}',
+        oui: '${T("Annuler l’envoi")}' }).then(function(ok){
+        if (!ok) return;
+        b.disabled = true;
+        dire('${T("Demande d’annulation au transporteur…")}', 'att');
+        P.appeler('expedition:annulerEtiquette', ID).then(function(r){
+          b.disabled = false;
+          if (!r || !r.ok) { dire((r && r.detail) ? r.detail : expliquer(r), 'err'); return; }
+          CMD.suivi = ''; CMD.aUneEtiquette = false; CMD.etiquette = null; CMD.etiquetteBloquee = '';
+          PDF = null; VIGN = null; poser('c-suivi', '');
+          dire('${T("Étiquette annulée chez le transporteur — rien n’est facturé. Vous pouvez en créer une nouvelle.")}', 'bon');
+          aller(1);
+        });
+      });
+    };
     document.getElementById('x-etq').addEventListener('click', function(ev){
       var b = ev.target.closest('[data-agr]'); if (b) agrandir(parseInt(b.getAttribute('data-agr'), 10) || 0);
     });

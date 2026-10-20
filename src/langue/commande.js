@@ -390,4 +390,10 @@ module.exports = {
   "La commande a été remise à Confirmée par": "The order was set back to Confirmed by",
   " — la préparation recommence.": " — preparation starts over.",
   "quelqu’un": "someone",
+  /* (2026-10-20) Annuler l’étiquette, depuis la préparation. */
+  'Annuler l’étiquette': 'Cancel the label',
+  'Annuler l’envoi': 'Cancel the shipment',
+  'L’envoi est annulé chez le transporteur : il n’est pas facturé et l’étiquette imprimée n’est plus valable. Le numéro de suivi est retiré de la commande ; vous pourrez ensuite créer une nouvelle étiquette. Cette action est irréversible.': 'The shipment is cancelled with the carrier: it is not billed and the printed label is no longer valid. The tracking number is removed from the order; you can then create a new label. This cannot be undone.',
+  'Demande d’annulation au transporteur…': 'Asking the carrier to cancel…',
+  'Étiquette annulée chez le transporteur — rien n’est facturé. Vous pouvez en créer une nouvelle.': 'Label cancelled with the carrier — nothing is billed. You can create a new one.',
 };
