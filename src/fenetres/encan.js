@@ -106,8 +106,6 @@ function pageEncan() {
       </div>
       <div class="aide" style="margin-top:.4rem">${T("Les réglages se changent entre deux encans.")}</div>
     </div>
-    <div class="carte"><h2 id="file-titre">${T("À suivre")}</h2><div class="liste" id="file"></div>
-      <button id="suivant" style="margin-top:.5rem;width:100%">${T("Article suivant")}</button></div>
   </div>
   <div class="col">
     <div class="carte"><span class="phase" id="phase"></span><div id="article" style="font-weight:800;font-size:1.05rem"></div>
@@ -131,14 +129,16 @@ function pageEncan() {
       <button id="g-remise" style="margin-top:.5rem;width:100%">${T("Remettre en vente")}</button>
     </div>
     <div class="r2"><button id="g-garde">${T("Afficher la page de garde")}</button><button id="g-suivant2">${T("Article suivant")}</button></div>
-    <div class="carte"><h2>${T("Ventes de la séance")}</h2><div class="liste" id="histo"></div></div>
+    <div class="carte"><h2>${T("Ventes de la séance")}</h2><div class="liste" id="histo" style="max-height:18vh"></div></div>
   </div>
   <div class="col">
-    <div class="carte"><h2>${T("Commentaires lus")}</h2><div class="liste" id="journal" style="max-height:52vh"></div></div>
+    <div class="carte"><h2>${T("Commentaires lus")}</h2><div class="liste" id="journal" style="max-height:30vh"></div></div>
     <div class="carte" id="carte-essai"><h2>${T("Mode essai — simuler un commentaire")}</h2>
       <div class="r2"><input id="e-pseudo" maxlength="40" aria-label="${T("Pseudo")}" value="@essai_1"><input id="e-texte" maxlength="140" aria-label="${T("Commentaire")}" placeholder="${T("ex. 25")}"></div>
       <div class="r2" style="margin-top:.45rem"><button class="prim" id="e-envoyer">${T("Envoyer")}</button><button id="e-rafale">${T("Rafale de 10 offres")}</button></div>
     </div>
+    <div class="carte"><h2 id="file-titre">${T("À suivre")}</h2><div class="liste" id="file" style="max-height:16vh"></div>
+      <button id="suivant" style="margin-top:.5rem;width:100%">${T("Article suivant")}</button></div>
   </div>
 </div>
 <div class="pied"><span class="msg" id="msg"></span></div>
