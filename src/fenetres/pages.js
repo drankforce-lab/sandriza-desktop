@@ -373,6 +373,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'pol-t':120,'pol-s':200})}${JS_BROUILLO
     slug_pris:'${T("Ce slug est déjà utilisé par une autre page.")}',
     introuvable:'${T("Élément introuvable.")}',
     protege:'${T("Cette page est protégée et ne peut pas être supprimée.")}',
+    perime:'${T("Modifié depuis un autre poste pendant que vous travailliez : rien n’a été écrit.")}',
+    nuage:'${T("L’enregistrement dans le nuage a échoué. Réessayez.")}',
     pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
     operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
     echec:'${T("L’opération a échoué.")}'

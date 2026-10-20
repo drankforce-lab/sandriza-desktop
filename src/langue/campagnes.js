@@ -726,4 +726,16 @@ module.exports = {
   /* (2026-10-19) Décisions pour banc-langue-fenetres : les fragments de code, sélecteurs, polices et noms
      de services se rendent à l’identique ; les textes d’interface sont traduits. */
   "\"] .btx span": "\"] .btx span",
+  /* (2026-10-19, lot M) Envoi confié au serveur, idempotence, publicité honnête. */
+  "Cette campagne est déjà en cours d’envoi (lancée ici ou depuis un autre poste). Le serveur la termine : rien n’est relancé.": "This campaign is already being sent (launched here or from another workstation). The server is finishing it: nothing is relaunched.",
+  "Un traitement des chaînes tourne déjà sur le serveur. Réessayez dans quelques minutes.": "Sequences are already being processed on the server. Try again in a few minutes.",
+  "En envoi…": "Sending…",
+  "Renvoyer les échecs": "Resend failures",
+  "Envoi lancé au serveur… la progression s’affiche ici (fermer la fenêtre n’interrompt plus l’envoi).": "Sending started on the server… progress is shown here (closing the window no longer stops the send).",
+  "— l’envoi continue sur le serveur.": "— sending continues on the server.",
+  "Renvoi des échecs…": "Resending failures…",
+  "renvoi réussi": "successful resend",
+  "renvois réussis": "successful resends",
+  "— la suite continue sur le serveur.": "— the rest continues on the server.",
+  "Aucun échec à renvoyer.": "No failures to resend.",
 };

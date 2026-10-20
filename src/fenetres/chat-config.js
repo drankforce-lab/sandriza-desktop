@@ -164,6 +164,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'c-nom':40,'c-photo':500,'c-courriel':1
     trop_gros:'${T("Image trop lourde : 800 Ko au maximum.")}',
     courriel:'${T("Le courriel de notification est mal écrit.")}',
     agents:'${T("Il faut au moins un agent portant un nom.")}',
+    perime:'${T("Modifié depuis un autre poste pendant que vous travailliez : rien n’a été écrit.")}',
+    nuage:'${T("L’enregistrement dans le nuage a échoué. Réessayez.")}',
     pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
     delai:'${T("La fenêtre principale n’a pas répondu à temps.")}',
     operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',

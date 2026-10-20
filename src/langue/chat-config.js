@@ -147,5 +147,8 @@ module.exports = {
 
   /* ── LE RECHARGEMENT ────────────────────────────────────────────────────── */
   'Saisie en cours : les réglages ne sont pas rechargés.':
-    'Entry under way: the settings are not reloaded.'
+    'Entry under way: the settings are not reloaded.',
+  /* (2026-10-19, lot M) version optimiste */
+  "Modifié depuis un autre poste pendant que vous travailliez : rien n’a été écrit.": "Changed from another workstation while you were working: nothing was written.",
+  "L’enregistrement dans le nuage a échoué. Réessayez.": "Saving to the cloud failed. Try again.",
 };

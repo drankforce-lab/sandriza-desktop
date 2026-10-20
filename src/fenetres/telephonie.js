@@ -290,6 +290,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
     session:            '${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
     droit:              '${T("Votre rôle ne donne pas accès à la configuration.")}',
     lecture_seule:      '${T("Votre rôle est en lecture seule.")}',
+    perime:             '${T("Ces réglages ont été modifiés depuis un autre poste. La version actuelle est rechargée : refaites vos changements.")}',
     indisponible:       "${T('L\'administration n\'est pas encore chargée dans la fenêtre principale.')}",
     pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
     delai:              "${T('La fenêtre principale n\'a pas répondu à temps.')}",
@@ -781,7 +782,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
     if (!RESUME) { box.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     if (RESUME.erreur) { box.innerHTML = '<div class="vide">' + esc(RESUME.erreur) + '</div>'; return; }
     var sms = RESUME.sms || [];
+    // (2026-10-19, lot M) Les non-lus COMPTÉS PAR LE SERVEUR (tout le journal) ; repli : les 30 affichés.
     var nonlus = 0; for (var k = 0; k < sms.length; k++) if (sms[k].direction === 'inbound' && !sms[k].read) nonlus++;
+    if (typeof RESUME.nonLus === 'number') nonlus = RESUME.nonLus;
     if (badge) badge.innerHTML = nonlus ? '<span class="qlive">' + nonlus + ' ' + (nonlus > 1 ? '${T("non lus")}' : '${T("non lu")}') + '</span>' : '';
     if (!sms.length) { box.innerHTML = '<div class="vide">${T("Aucun SMS.")}</div>'; return; }
     var h = '';
@@ -881,12 +884,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
       else dire('${T("Échec :")} ' + expliquer(r), 'err');
     });
   }
+  /* (2026-10-19, lot M) LE BOUTON ATTEND LE VERDICT, ET LE MESSAGE PORTE UNE CLÉ D'IDEMPOTENCE : la même
+     clé tant que le numéro et le texte ne changent pas — un second clic (ou un réessai après une réponse
+     perdue) est refusé par le serveur (« déjà envoyé ») au lieu de partir deux fois. */
+  var SMS_CLE = null, SMS_SIG = '';
   function smsEnvoyer(){
     var to = telE164(val('t-sms-to')), body = val('t-sms-body');
     if (!to || !body) { dire('${T("Numéro et message requis.")}', 'err'); return; }
+    var sb = document.getElementById('t-sms-send');
+    if (sb && sb.disabled) return;
+    var sig = to + '|' + body;
+    if (!SMS_CLE || SMS_SIG !== sig) { SMS_CLE = 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10); SMS_SIG = sig; }
+    if (sb) sb.disabled = true;
     dire('${T("Envoi du SMS…")}');
-    appeler('tel:sms:envoyer', [{ to: to, body: body }]).then(function(r){
-      if (r && r.ok) { dire('${T("SMS envoyé.")}', 'bon'); var bd = document.getElementById('t-sms-body'); if (bd) bd.value = ''; chargerResume(); }
+    appeler('tel:sms:envoyer', [{ to: to, body: body, cle: SMS_CLE }]).then(function(r){
+      if (sb) sb.disabled = RO;
+      if (r && r.ok) { SMS_CLE = null; dire('${T("SMS envoyé.")}', 'bon'); var bd = document.getElementById('t-sms-body'); if (bd) bd.value = ''; chargerResume(); }
+      else if (r && (r.motif === 'deja_envoye' || r.error === 'deja_envoye' || /deja_envoye/.test(String(r.detail || '')))) { SMS_CLE = null; dire('${T("Ce SMS est déjà parti : il n’a pas été renvoyé.")}', 'att'); chargerResume(); }
       else dire('${T("Échec SMS :")} ' + expliquer(r), 'err');
     });
   }
@@ -922,6 +936,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
     appeler('config:telephonie:ecrire', [saisie()]).then(function(r){
       occuper(false);
       if (r && r.ok) { adopter(r); dessiner(); dire('${T("Téléphonie enregistrée.")}', 'bon'); avertirRedirection(); }
+      // (2026-10-19, lot M) Version périmée : on recharge celle du serveur, et on le dit.
+      else if (r && r.motif === 'perime') {
+        appeler('config:telephonie:donnees', []).then(function(d){ if (d && d.ok) { adopter(d); dessiner(); } dire(expliquer({ motif: 'perime' }), 'err'); });
+      }
       else dire(expliquer(r), 'err');
     });
   }

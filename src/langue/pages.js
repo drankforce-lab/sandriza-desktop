@@ -300,4 +300,7 @@ module.exports = {
   "Tous les messages reçus par le formulaire de contact seront supprimés définitivement. Cette action est irréversible.": "All messages received through the contact form will be permanently deleted. This action cannot be undone.",
   "Messages": "Messages",
   "Supprimer les messages": "Delete the messages",
+  /* (2026-10-19, lot M) version optimiste */
+  "Modifié depuis un autre poste pendant que vous travailliez : rien n’a été écrit.": "Changed from another workstation while you were working: nothing was written.",
+  "L’enregistrement dans le nuage a échoué. Réessayez.": "Saving to the cloud failed. Try again.",
 };

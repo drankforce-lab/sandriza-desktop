@@ -332,4 +332,7 @@ module.exports = {
   'Bloquer le numéro': 'Block the number',
   'Le numéro': 'The number',
   'sera bloqué : ses appels et ses textos ne seront plus acceptés. Vous pourrez le débloquer en tout temps dans l’onglet « Numéros bloqués ».': 'will be blocked: its calls and text messages will no longer be accepted. You can unblock it at any time in the “Blocked numbers” tab.',
+  /* (2026-10-19, lot M) Envoi confié au serveur, idempotence, publicité honnête. */
+  "Ce SMS est déjà parti : il n’a pas été renvoyé.": "This SMS has already been sent: it was not sent again.",
+  "Ces réglages ont été modifiés depuis un autre poste. La version actuelle est rechargée : refaites vos changements.": "These settings were changed from another workstation. The current version has been reloaded: redo your changes.",
 };

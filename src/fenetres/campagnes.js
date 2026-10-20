@@ -1144,6 +1144,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
     introuvable:        '${T("Cet élément n’existe plus.")}',
     deja_envoyee:       '${T("Cette campagne est déjà partie. Une campagne ne s’envoie pas deux fois.")}',
+    en_envoi:           '${T("Cette campagne est déjà en cours d’envoi (lancée ici ou depuis un autre poste). Le serveur la termine : rien n’est relancé.")}',
+    occupe:             '${T("Un traitement des chaînes tourne déjà sur le serveur. Réessayez dans quelques minutes.")}',
     resend_absent:      '${T("Aucune clé Resend n’est configurée : rien ne peut partir. Écran Infolettre, onglet Configuration.")}',
     envois_suspendus:   '${T("Les « Séquences automatisées » sont en pause dans les contrôles d’envoi. Traiter maintenant abandonnerait les inscriptions sans rien envoyer.")}',
     rien_en_attente:    '${T("Aucune inscription en attente.")}',
@@ -2174,7 +2176,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
         var gestes = '';
         if (D.peutModifier) {
           // ⚠ MEME REGLE QUE LE WEB : une campagne PARTIE ne se modifie plus.
-          if (c.etat !== 'sent') {
+          // (2026-10-19, lot M) « En envoi » : ni modifier, ni envoyer — le serveur sert la file.
+          if (c.etat === 'sending') gestes += '<button class="mini geste" disabled>${T("En envoi…")}</button>';
+          if (c.etat !== 'sent' && c.etat !== 'sending') {
             gestes += '<button class="mini geste" data-modif="' + esc(c.id) + '">${T("Modifier")}</button>';
             var armeE = (ARME === 'env:' + c.id);
             gestes += '<button class="mini geste' + (armeE ? ' arme' : ' prim') + '" data-envoyer="'
@@ -2184,6 +2188,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
           // (2026-10-15, sa demande) Une campagne, même ENVOYÉE, se duplique en brouillon.
           // (2026-10-15, sa demande) Les statistiques d une campagne partie : ouvertures, clics, liens, audience.
           if (c.etat === 'sent') gestes += '<button class="mini geste" data-stats="' + esc(c.id) + '">${T("Statistiques")}</button>';
+          if (c.peutRenvoyerEchecs) gestes += '<button class="mini geste" data-renvoyer="' + esc(c.id) + '">${T("Renvoyer les échecs")}</button>';
           gestes += '<button class="mini geste" data-dupliquer="' + esc(c.id) + '">${T("Dupliquer")}</button>';
           var armeS = (ARME === 'sup:' + c.id);
           gestes += '<button class="mini geste danger' + (armeS ? ' arme' : '') + '" data-suppr="'
@@ -2776,14 +2781,32 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       OCCUPE = true;
       be.disabled = true;
       be.textContent = '${T("Envoi…")}';
-      dire('${T("Envoi en cours… ne fermez pas cette fenêtre.")}', 'att');
+      dire('${T("Envoi lancé au serveur… la progression s’affiche ici (fermer la fenêtre n’interrompt plus l’envoi).")}', 'att');
       appeler('campagnes:envoyer', [idE]).then(function(r){
         OCCUPE = false;
         if (!r.ok) { dire(expliquer(r), 'err'); charger(); return; }
         dire(esc(r.nom) + ' — ' + pluriel(r.envoyes, '${T("envoi réussi")}', '${T("envois réussis")}')
           + (r.echecs ? ', ' + pluriel(r.echecs, '${T("échec")}', '${T("échecs")}') : '')
+          + (r.enCours ? ' ${T("— l’envoi continue sur le serveur.")}' : '')
           + (r.modeTest ? ' ${T("(mode test : la campagne reste en brouillon).")}' : '.'),
           r.echecs ? 'att' : 'bon');
+        charger();
+      });
+      return;
+    }
+
+    // (2026-10-19, lot M) Renvoyer les ÉCHECS d'une campagne envoyée (eux seuls).
+    var bre = t.closest('[data-renvoyer]');
+    if (bre) {
+      if (OCCUPE) return;
+      OCCUPE = true; bre.disabled = true;
+      dire('${T("Renvoi des échecs…")}', 'att');
+      appeler('campagnes:renvoyer-echecs', [bre.getAttribute('data-renvoyer')]).then(function(r){
+        OCCUPE = false;
+        if (!r || !r.ok) { dire(expliquer(r), 'err'); charger(); return; }
+        dire(r.remis ? (pluriel(r.sent || 0, '${T("renvoi réussi")}', '${T("renvois réussis")}')
+          + (r.failed ? ', ' + pluriel(r.failed, '${T("échec")}', '${T("échecs")}') : '') + (r.enCours ? ' ${T("— la suite continue sur le serveur.")}' : '.'))
+          : '${T("Aucun échec à renvoyer.")}', r.failed ? 'att' : 'bon');
         charger();
       });
       return;

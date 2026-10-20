@@ -168,6 +168,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'input[data-field=label]':30,'input[dat
     delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
     operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
     nuage:              '${T("L’enregistrement dans le nuage a échoué. Réessayez.")}',
+    perime:             '${T("Modifié depuis un autre poste pendant que vous travailliez : rien n’a été écrit.")}',
     echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
@@ -324,6 +325,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'input[data-field=label]':30,'input[dat
         D = r; RO = !r.peutModifier;
         if (redraw) dessiner(); else { bAdd.disabled = RO; bReset.disabled = RO; }
         dire('${T("Enregistré.")}', 'bon');
+      } else if (r && r.motif === 'perime' && r.items) {
+        // (2026-10-19, lot M) Modifié ailleurs : on montre la version du serveur, rien n'a été écrit.
+        D = r; RO = !r.peutModifier; dessiner(); dire(expliquer(r), 'err');
       } else {
         if (redraw) dessiner(); else { bAdd.disabled = RO; bReset.disabled = RO; }
         dire(expliquer(r), 'err');
@@ -337,7 +341,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'input[data-field=label]':30,'input[dat
     appeler('config:nav:reinit').then(function(r){
       OCCUPE = false; RESET = false;
       if (r && r.ok) { D = r; RO = !r.peutModifier; dessiner(); dire('${T("Navigation réinitialisée.")}', 'bon'); }
-      else { dessiner(); dire(expliquer(r), 'err'); }
+      else { if (r && r.motif === 'perime' && r.items) { D = r; RO = !r.peutModifier; } dessiner(); dire(expliquer(r), 'err'); }
     });
   }
 

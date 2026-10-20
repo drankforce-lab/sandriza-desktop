@@ -291,6 +291,17 @@ function pageMaintenance() {
     return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate())
       + 'T' + p(d.getHours()) + ':' + p(d.getMinutes());
   }
+  /* (2026-10-19, lot S2) ET L INVERSE A L ENVOI : la valeur du champ est une heure LOCALE sans fuseau
+     (2026-10-19T22:00) que le serveur, a l heure UTC, lisait quatre ou cinq heures trop tot. On envoie
+     l ISO complete AVEC le decalage du poste (2026-10-19T22:00:00-04:00). */
+  function mxIso(v){
+    var d = new Date(v);
+    if (isNaN(d.getTime())) return v;
+    var p = function(n){ return (n < 10 ? '0' : '') + n; };
+    var o = -d.getTimezoneOffset(), s = o >= 0 ? '+' : '-';
+    o = Math.abs(o);
+    return mxLocal(d.getTime()) + ':00' + s + p(Math.floor(o / 60)) + ':' + p(o % 60);
+  }
 
   function brancher(){
     var p = document.getElementById('mx-poser');
@@ -337,7 +348,7 @@ function pageMaintenance() {
     var b = document.getElementById('mx-poser');
     if (b) b.disabled = true;
     dire('${T("Activation…")}');
-    appeler('maintenance:ecrire',['poser', { debut: d.value, fin: f.value,
+    appeler('maintenance:ecrire',['poser', { debut: mxIso(d.value), fin: mxIso(f.value),
       message: m ? m.value : '', nip: n.value }]).then(function(r){
       var b2 = document.getElementById('mx-poser');
       if (b2) b2.disabled = false;
@@ -367,7 +378,7 @@ function pageMaintenance() {
     /* ⚠ ON N ENVOIE QUE LA FIN. Le NIP, l initiateur et le compte de tentatives
        restent ceux du mode en cours — c est tout le sens de << sans devoir
        relancer >> : le NIP noté ailleurs reste valable. */
-    appeler('maintenance:ecrire',['prolonger', { fin: f.value }]).then(function(r){
+    appeler('maintenance:ecrire',['prolonger', { fin: mxIso(f.value) }]).then(function(r){
       var b2 = document.getElementById('mx-prolonger');
       if (b2) b2.disabled = false;
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }

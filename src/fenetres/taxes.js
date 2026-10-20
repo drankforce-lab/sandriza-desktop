@@ -344,7 +344,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (!cible[nom][i]) cible[nom][i] = {};
       cible[nom][i][f] = el.value;
     }
-    return { canada: canada };
+    /* (2026-10-19, lot S2) l empreinte de la grille AFFICHEE : si un autre poste l a changee entre-temps,
+       le site refuse (concurrence) au lieu d ecraser des taux qu on n a jamais vus. */
+    return { canada: canada, empreinte: (D && D.empreinte) || '' };
   }
 
   function occuper(o){

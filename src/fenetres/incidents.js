@@ -187,6 +187,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
   var NOUV = '${NOUV0}', EDIT = '${EDIT0}', VUE = '${VUE0}';
   var ETAPE = 0;         // etape courante de l'assistant
   var EDITID = '';       // id en cours d'edition ('' = creation)
+  var ATTENDU = '';      // (lot S2) updatedAt de l incident ouvert
   var DELID = '';        // id en attente de confirmation de suppression (2 clics)
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -395,6 +396,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
     if (id && !incParId(id)) { dire('${T("Incident introuvable.")}', 'err'); return; }
     EDITID = id||''; ETAPE = 0;
     var inc = id ? incParId(id) : null;
+    /* (lot S2) la version OUVERTE : modifiee ailleurs entre-temps, le serveur refuse au lieu d ecraser. */
+    ATTENDU = inc ? (inc.updatedAt || '') : '';
     var et = D.etapes||[];
     var pasH='';
     for (var i=0;i<et.length;i++){
@@ -468,6 +471,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
       var c=et[i].champs[j]; d[c.cle]=txv('f-'+c.cle);
     }
     OCCUPE=true; dire('${T("Enregistrement…")}');
+    if (EDITID) d._attendu = ATTENDU;
     appeler('incidents:ecrire',[EDITID||'', d]).then(function(r){ OCCUPE=false;
       if (r&&r.ok){
         /* ⚠ JETER AVANT DE FERMER : fermerAssistant() ecrit le brouillon, et il le

@@ -609,7 +609,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
     var annee = D.budget ? D.budget.annee : (ANNEES[ANNEES.length - 1] || 0);
     OCCUPE = true;
     dire('${T("Enregistrement…")}', 'att');
-    appeler('compta:budgetEcrire', [annee, SAISIE]).then(function(r){
+    /* (lot S2) l annee telle qu elle a ete AFFICHEE : changee ailleurs entre-temps, le serveur refuse. */
+    appeler('compta:budgetEcrire', [annee, SAISIE, (D.budget && D.budget.postes) || {}]).then(function(r){
       OCCUPE = false;
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       SAISIE = null;

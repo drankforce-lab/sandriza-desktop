@@ -266,4 +266,7 @@ module.exports = {
   'Publication sur le compte de la boutique.': 'Post on the store account.',
   'Courriel aux abonnés du segment.': 'Email to the segment subscribers.',
   'Épingle sur le tableau de la boutique.': 'Pin on the store board.',
+  /* (2026-10-19, lot M) Envoi confié au serveur, idempotence, publicité honnête. */
+  "client(s) avec courriel visé(s) — aucun courriel n’est envoyé d’ici : créez la campagne dans Infolettre.": "customer(s) with email targeted — no email is sent from here: create the campaign in Newsletter.",
+  "Cette campagne est déjà lancée.": "This campaign has already been launched.",
 };

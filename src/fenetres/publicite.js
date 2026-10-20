@@ -454,18 +454,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
         + (r.count !== 1 ? '${T("contacts")}' : '${T("contact")}');
     });
   }
+  // (2026-10-19, lot M) Un enregistrement / un lancement à la fois : les boutons attendent le verdict.
+  var PUB_OCCUPE = false;
   function enregistrerCamp(launch){
+    if (PUB_OCCUPE) return;
     var channels = ['facebook','instagram','newsletter','pinterest'].filter(function(c){ return chk('cf-ch-' + c); });
     var d = { name:val('cf-name'), segment:val('cf-seg'), promoId:val('cf-promo') || null, message:val('cf-msg'), channels:channels, launch:launch };
     dire('${T("Enregistrement…")}');
+    PUB_OCCUPE = true; basculerBoutons(true);
     appeler('analytics:campSave', d).then(function(r){
+      PUB_OCCUPE = false; basculerBoutons(false);
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       FORM = null;
       relire().then(function(){
-        var m = r.launched ? ('${T("Campagne lancée ! ")}' + r.audienceCount + ' ${T("contact")}' + plur(r.audienceCount) + (r.mailCount ? ' · ' + r.mailCount + ' courriel' + plur(r.mailCount) + '${T(" ciblé")}' + plur(r.mailCount) : '')) : '${T("Brouillon enregistré.")}';
+        // ⚠ Le canal infolettre de Publicité n'ENVOIE aucun courriel : on le dit (l'envoi se fait dans Infolettre).
+        var m = r.launched ? ('${T("Campagne lancée ! ")}' + r.audienceCount + ' ${T("contact")}' + plur(r.audienceCount)
+          + (r.mailCount ? ' · ' + r.mailCount + ' ${T("client(s) avec courriel visé(s) — aucun courriel n’est envoyé d’ici : créez la campagne dans Infolettre.")}' : '')) : '${T("Brouillon enregistré.")}';
         dire(m, 'bon');
       });
     });
+  }
+  function basculerBoutons(off){
+    var bs = document.querySelectorAll('[data-cf="lancer"],[data-cf="brouillon"],[data-launch]');
+    for (var i = 0; i < bs.length; i++) bs[i].disabled = !!off;
   }
   function copierUtm(){
     var el = document.getElementById('utm-result'); if (!el) return;
@@ -496,7 +507,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
     else if (act === 'newcamp') ouvrirForm('all');
     else if (act === 'copyutm') copierUtm();
     else if (g('data-cibler')) { SEGF = g('data-cibler'); TAB = 'segments'; charger().then(function(ok){ if (ok) dessiner(); }); }
-    else if (g('data-launch')) { appeler('analytics:campLaunch', { id:g('data-launch') }).then(function(r){ if (!r || !r.ok) { dire(expliquer(r), 'err'); return; } relire().then(function(){ dire('${T("Campagne lancée.")}', 'bon'); }); }); }
+    else if (g('data-launch')) { if (PUB_OCCUPE) return; PUB_OCCUPE = true; b.disabled = true;
+      appeler('analytics:campLaunch', { id:g('data-launch') }).then(function(r){ PUB_OCCUPE = false; if (!r || !r.ok) { b.disabled = false; dire(r && r.motif === 'deja_lancee' ? '${T("Cette campagne est déjà lancée.")}' : expliquer(r), 'err'); relire(); return; } relire().then(function(){ dire('${T("Campagne lancée.")}', 'bon'); }); }); }
     else if (g('data-del')) { appeler('analytics:campDelete', { id:g('data-del') }).then(function(r){ if (!r || !r.ok) { dire(expliquer(r), 'err'); return; } relire().then(function(){ dire('${T("Campagne supprimée.")}', 'att'); }); }); }
   });
 

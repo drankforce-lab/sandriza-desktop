@@ -2780,6 +2780,8 @@ const OPS_PONT = new Set([
   // << envoyer >> part vers toute la liste, << traiter >> envoie les etapes
   // echues de toutes les chaines. Les deux sont armes en deux clics.
   'campagnes:liste', 'campagnes:envoyer', 'campagnes:supprimer', 'campagnes:dupliquer', 'campagnes:stats',
+  // (lot M, 2026-10-20) Renvoyer les seuls echecs d une campagne : remis dans la file d envoi du SERVEUR.
+  'campagnes:renvoyer-echecs',
   'chaines:liste', 'chaines:basculer', 'chaines:supprimer', 'chaines:traiter',
   // Statistiques distantes (fenetre Statistiques, 2.2.0). ⚠ Elles ne lisent PAS
   // la base : la fenetre principale interroge Google et Twilio par le reseau.

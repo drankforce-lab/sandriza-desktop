@@ -667,7 +667,7 @@ function pageCommande(id) {
     if (toutVerifie() && !AUTO_FAIT) {
       AUTO_FAIT = true;
       var co = document.getElementById('v-coche'); if (co) co.classList.add('on');
-      setTimeout(function(){ if (co) co.classList.remove('on'); if (ETAPE === 0 && toutVerifie()) aller(1); }, 900);
+      setTimeout(function(){ if (co) co.classList.remove('on'); if (ETAPE === 0 && toutVerifie()) aller((CMD.aUneEtiquette || aSuivi()) ? 2 : 1); }, 900);
     } else if (!toutVerifie()) { AUTO_FAIT = false; }
   }
 
@@ -1057,7 +1057,8 @@ function pageCommande(id) {
       return P.appeler('commandes:statuts', ids).then(function(r){
         if (!r || !r.ok || !r.statuts) return;
         Object.keys(r.statuts).forEach(function(k){
-          if (/^(shipped|delivered|cancelled|absente)$/.test(r.statuts[k])) purgerVignettes(k);
+          // Expédiée, livrée, annulée, supprimée — ou remise à « Confirmée » (la préparation repart du début).
+          if (/^(shipped|delivered|cancelled|absente|pending|confirmed)$/.test(r.statuts[k])) purgerVignettes(k);
         });
       });
     }).catch(function(){});
@@ -1284,12 +1285,35 @@ function pageCommande(id) {
   function accueillir(statut){
     avancerStatut('preparing');
     if (statut !== 'pending' && statut !== 'confirmed') BON_IMPRIME = true;
-    if (CMD.aUneEtiquette || aSuivi()) { AUTO_FAIT = true; aller(toutVerifie() ? 2 : 0); return; }
+    // Une étiquette existe déjà : la vérification (remise à zéro au retour à « Confirmée ») se refait, puis
+    // on va DIRECTEMENT à l expédition — l étiquette est conservée, on ne la recrée pas.
+    if (CMD.aUneEtiquette || aSuivi()) { if (toutVerifie()) { AUTO_FAIT = true; aller(2); } else aller(0); return; }
     if (toutVerifie()) { AUTO_FAIT = true; aller(1); return; }
     aller(0);
     if (statut === 'verification' || LECTURE) return;
     demanderBon(statut === 'preparing');
   }
+
+  /* ══ REMISE À « CONFIRMÉE » AILLEURS (2026-10-19, sa demande) ══════════════════════════════════
+     Un retour à « Confirmée » (autre poste, fenêtre Commandes…) remet la préparation À ZÉRO côté
+     serveur (prepRemise). La fenêtre ouverte le voit au prochain relevé (toutes les 10 s, et à chaque
+     retour de la fenêtre) : la vérification recommence ; l étiquette, elle, est conservée. */
+  var PREP_REMISE_VUE = '';
+  function verifierRemise(r){
+    var pr = r && r.prepRemise;
+    if (!pr || !pr.au || pr.au === PREP_REMISE_VUE) return false;
+    PREP_REMISE_VUE = pr.au;
+    COMPTES = {}; AUTO_FAIT = false; CMD.verif = null; CMD.statut = r.statut; PAGE = 0; PAR_PAGE = 0;
+    if (ETAPE === 0) dessinerLignes(); else aller(0);
+    majReprise(); fil(); majExpedier();
+    retour('<span>${T("La commande a été remise à Confirmée par")} <b>' + esc(pr.par || '${T("quelqu’un")}') + '</b>${T(" — la préparation recommence.")}</span>', 'att');
+    dire('${T("La commande a été remise à Confirmée par")} ' + (pr.par || '${T("quelqu’un")}') + '${T(" — la préparation recommence.")}', 'att');
+    return true;
+  }
+  setInterval(function(){
+    if (!CMD || document.hidden) return;
+    P.appeler('commande:lire', ID).then(function(r){ if (r && r.ok) verifierRemise(r); }).catch(function(){});
+  }, 10000);
 
   /* ⚠ APPELÉ PAR LA COQUILLE quand le bouton du site rouvre une fenêtre DÉJÀ ouverte : on relit
      la commande (statut, suivi, avancement du scan venu d un autre poste) sans perdre la saisie. */
@@ -1298,6 +1322,7 @@ function pageCommande(id) {
     if (v && v.parentNode) v.parentNode.removeChild(v);
     P.appeler('commande:lire', ID).then(function(r){
       if (!r || !r.ok || !CMD) return;
+      if (verifierRemise(r)) return;
       CMD.statut = r.statut;
       CMD.suivante = r.suivante;
       if (r.suivi && !aSuivi()) { poser('c-suivi', r.suivi); CMD.suivi = r.suivi; CMD.aUneEtiquette = true; }
@@ -1316,6 +1341,7 @@ function pageCommande(id) {
       return P.appeler('commande:lire', ID).then(function(r){
         if (!r || !r.ok) { vide('${T("Commande indisponible")}', expliquer(r)); return; }
         CMD = r;
+        PREP_REMISE_VUE = (r.prepRemise && r.prepRemise.au) || '';
         // L avancement GARDÉ AU SERVEUR : on reprend là où on s était arrêté.
         COMPTES = {};
         if (r.verif && r.verif.comptes) Object.keys(r.verif.comptes).forEach(function(k){ COMPTES[k] = r.verif.comptes[k]; });
@@ -1328,6 +1354,8 @@ function pageCommande(id) {
         dessiner();
         majReprise();
         balayerVignettes();
+        // Plus d étiquette sur la commande (retirée, remplacée) : la vignette temporaire du poste n a plus d objet.
+        if (!CMD.aUneEtiquette && !CMD.suivi) purgerVignettes(ID);
         return verrou().then(function(){
           chargerExpedition();
           accueillir(statutOuverture);

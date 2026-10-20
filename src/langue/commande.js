@@ -387,4 +387,7 @@ module.exports = {
   "service non offert avec les clés de test": "service not offered with the test keys",
   "Prix de création non vérifié — rien n’a été envoyé.": "Creation price not verified — nothing was sent.",
   "Étiquette BLOQUÉE :": "Label BLOCKED:",
+  "La commande a été remise à Confirmée par": "The order was set back to Confirmed by",
+  " — la préparation recommence.": " — preparation starts over.",
+  "quelqu’un": "someone",
 };

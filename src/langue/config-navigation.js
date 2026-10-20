@@ -81,5 +81,7 @@ module.exports = {
   'Supprimer l’élément': 'Delete item',
   'Réinitialiser la navigation': 'Reset navigation',
   'Le menu de la boutique reprendra sa composition d’origine. Les éléments et sous-menus que vous avez ajoutés seront perdus. Cette action est irréversible.':
-    'The store menu will return to its original layout. The items and submenus you added will be lost. This action cannot be undone.'
+    'The store menu will return to its original layout. The items and submenus you added will be lost. This action cannot be undone.',
+  /* (2026-10-19, lot M) version optimiste */
+  "Modifié depuis un autre poste pendant que vous travailliez : rien n’a été écrit.": "Changed from another workstation while you were working: nothing was written.",
 };

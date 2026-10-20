@@ -165,4 +165,7 @@ module.exports = {
   'Supprimer la conversation': 'Delete conversation',
   'La conversation avec': 'The conversation with',
   'sera supprimée définitivement, avec l’ensemble de ses messages. Cette action est irréversible.': 'will be permanently deleted, along with all of its messages. This action cannot be undone.',
+  /* (2026-10-19, lot M) */
+  "Cette conversation a été fermée depuis un autre poste : elle n’a pas été rouverte.": "This conversation was closed from another workstation: it was not reopened.",
+  "prise par": "taken by",
 };

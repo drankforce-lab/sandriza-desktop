@@ -168,6 +168,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
   var MOTIFS = {
     session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
     droit:              '${T("Votre rôle ne donne pas accès au chat.")}',
+    conversation_fermee: '${T("Cette conversation a été fermée depuis un autre poste : elle n’a pas été rouverte.")}',
     indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
     pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
     delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
@@ -252,6 +253,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
         + '<div class="haut"><span class="rf-nom">' + esc(c.nom) + '</span>'
         + '<span class="rf-pill ' + (TONS[c.statut] || '') + '">' + esc(szTd(c.statutLibelle)) + '</span>'
         + (c.horsLigne ? '<span class="rf-pill">${T("hors ligne")}</span>' : '')
+        // (2026-10-19, lot M) « prise par » : qui a répondu le premier (posé par le serveur).
+        + (c.priseePar ? '<span class="rf-pill">${T("prise par")} ' + esc(c.priseePar) + '</span>' : '')
         + '<span class="droite"><span class="dt">' + esc(c.date) + '</span>'
         + '<div class="dt">' + c.nbMessages + ' '
         + (c.nbMessages > 1 ? '${T("messages")}' : '${T("message")}') + '</div></span></div>'
