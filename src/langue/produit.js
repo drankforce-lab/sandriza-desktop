@@ -893,4 +893,5 @@ module.exports = {
   "Génération…": "Generating…",
   "Devant": "Front",
   "Fermer": "Close",
+  "Accord de la couleur sur l’original…": "Matching the colour to the original…",
 };

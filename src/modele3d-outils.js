@@ -31,7 +31,10 @@ function simplifierPrimitive(doc, prim, ratio, Simp){
   if (!pos || !idx || ratio >= 1) return;
   const P = pos.getArray(), I = idx.getArray();
   const cible = Math.max(3, Math.floor(I.length * ratio / 3) * 3);
-  const [neufs] = Simp.simplify(new Uint32Array(I), new Float32Array(P), 3, cible, 0.002);
+  /* ⚠ LES BORDURES VERROUILLÉES (2026-10-20, sa capture : « il a inventé des trous dans le vêtement »). Un modèle texturé
+     porte ses coutures de texture en sommets DÉDOUBLÉS : vus par la simplification, ce sont des bords ouverts, qu elle
+     déplaçait chacun de son côté — la couture s ouvrait en fente. « LockBorder » les garde en place. */
+  const [neufs] = Simp.simplify(new Uint32Array(I), new Float32Array(P), 3, cible, 0.002, ['LockBorder']);
   if (!neufs || !neufs.length) return;
   // Compactage : les sommets encore cités, renumérotés.
   const remap = new Int32Array(pos.getCount()).fill(-1); let n = 0;

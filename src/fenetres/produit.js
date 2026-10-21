@@ -2725,14 +2725,15 @@ function pageProduit(id) {
     v.innerHTML = '<div class="boite stm-boite" role="dialog" aria-modal="true"><div class="aide">${T("Chargement du Studio…")}</div></div>';
     document.body.appendChild(v);
     STM = { voile: v, photos: [{ role: 'devant', src: IMAGE || '', on: !!IMAGE }, { role: 'dos', src: dos || '', on: !!dos }],
-      voie: 'humain', modele: 'sophia', preset: '', prix: null, etats: {}, enCours: false };
+      // Par défaut : le vêtement SANS mannequin, fond transparent (2026-10-20, sa demande : « c est lui qui sera le plus utilisé »).
+      voie: 'fantome', modele: 'sophia', preset: 'transparent', prix: null, etats: {}, enCours: false };
     v.addEventListener('mousedown', function(ev){ if (ev.target === v) stmFermer(); });
     var charger = STM_PRESETS ? Promise.resolve({ ok: true, presets: STM_PRESETS }) : P.appeler('studio:presets');
     charger.then(function(r){
       if (!STM) return;
       if (!r || !r.ok) { STM.erreur = expliquer(r); stmDessiner(); return; }
       STM_PRESETS = r.presets || [];
-      STM.preset = (STM_PRESETS[0] || {}).cle || 'transparent';
+      if (STM.voie !== 'fantome') STM.preset = (STM_PRESETS[0] || {}).cle || '';
       stmDessiner(); stmEstimer();
     });
   }
@@ -2768,9 +2769,10 @@ function pageProduit(id) {
     b.querySelectorAll('[data-stm-voie]').forEach(function(x){ x.onclick = function(){
       STM.voie = x.getAttribute('data-stm-voie');
       if (STM.voie !== 'fantome' && STM.preset === 'transparent') STM.preset = (STM_PRESETS[0] || {}).cle || '';
+      if (STM.voie === 'fantome' && !STM.choisiFond) STM.preset = 'transparent';
       stmDessiner(); stmEstimer(); }; });
     if ($('stm-modele')) $('stm-modele').onchange = function(){ STM.modele = this.value; stmEstimer(); };
-    if ($('stm-fond')) $('stm-fond').onchange = function(){ STM.preset = this.value; stmEstimer(); };
+    if ($('stm-fond')) $('stm-fond').onchange = function(){ STM.preset = this.value; STM.choisiFond = true; stmEstimer(); };
     $('stm-annuler').onclick = stmFermer;
     $('stm-go').onclick = stmGenerer;
   }
@@ -2804,11 +2806,13 @@ function pageProduit(id) {
               STM.etats[p.role] = '✓ ${T("Placée dans la fiche")}'; suite(i + 1);
             });
           };
-          var ref = p.role === 'dos' ? (refDevant || STM.photos[0].src) : '';
-          if (!ref) { poser(r.image); return; }
-          STM.etats[p.role] = '${T("Accord de la couleur sur le devant…")}'; stmDessiner();
+          /* LA COULEUR DE L ORIGINAL (2026-10-20, sa capture : le gris taupe devenu gris bleuté). Chaque résultat est
+             mesuré contre SA photo d origine et ramené sur elle dès qu il s en écarte (ΔE > 6) ; le dos, contre le
+             devant déjà accordé — les deux faces portent alors la même teinte. */
+          var ref = p.role === 'dos' && refDevant ? refDevant : img;
+          STM.etats[p.role] = '${T("Accord de la couleur sur l’original…")}'; stmDessiner();
           P.appeler('studio:teinte', { image: r.image, reference: ref }).then(function(t){
-            if (t && t.ok && t.meme && t.deltaE <= 12) { poser(r.image); return; }
+            if (t && t.ok && t.meme && t.deltaE <= 6) { poser(r.image); return; }
             P.appeler('studio:harmoniser', { image: r.image, reference: ref }).then(function(hh){ poser(hh && hh.ok ? hh.image : r.image); });
           });
         });
@@ -2858,10 +2862,13 @@ function pageProduit(id) {
     var deja = function(){ return url === IMAGE || Object.keys(VUES).some(function(k){ return VUES[k] === url; }); };
     if (deja()) { fini(); return; }
     try { if (P && P.premierPlan) P.premierPlan(); } catch (e) {}
-    var original = function(a){ if (a && ORIG_A_EFFACER.indexOf(a) < 0) ORIG_A_EFFACER.push(a); };
+    var retirerVue = function(a){ if (!a) return; Object.keys(VUES).forEach(function(k){ if (VUES[k] === a) delete VUES[k]; }); if (DOS_SRC === a) DOS_SRC = ''; };
     if (role === 'devant') {
       if (!IMAGE) { IMAGE = url; conclure('${T("photo principale")}'); return; }
-      if (STU_ORIG && STU_ORIG.devant && IMAGE === STU_ORIG.devant) { var a0 = IMAGE; IMAGE = url; ajouterLibre(a0); original(a0); STU_ORIG.devant = ''; conclure('${T("photo principale")}'); return; }
+      /* L ORIGINALE EST RETIRÉE (2026-10-20, sa demande : « quand tu termines les photos avec le Studio, tu dois retirer
+         les anciennes aussi ») : la photo traitée prend sa place, et l originale quitte la fiche — l enregistrement
+         efface du stockage ce qui n est plus cité. */
+      if (STU_ORIG && STU_ORIG.devant && IMAGE === STU_ORIG.devant) { var a0 = IMAGE; IMAGE = url; retirerVue(a0); STU_ORIG.devant = ''; conclure('${T("photo principale")}'); return; }
       szConfirmer({ prudent: true, titre: '${T("Remplacer la photo principale ?")}',
         texte: '${T("Le Studio envoie une nouvelle photo du devant ({c}). L’actuelle passera dans une case libre.")}'.replace('{c}', it.code || ''),
         oui: '${T("Remplacer")}', non: '${T("Ajouter aux photos")}' }).then(function(ok){
@@ -2873,7 +2880,7 @@ function pageProduit(id) {
     if (role === 'dos') {
       if (!modeStandard()) {
         if (!VUES.derriere) { VUES.derriere = url; conclure('${T("case « Derrière »")}'); return; }
-        if (STU_ORIG && STU_ORIG.dos && VUES.derriere === STU_ORIG.dos) { var a1 = VUES.derriere; VUES.derriere = url; ajouterLibre(a1); original(a1); STU_ORIG.dos = ''; conclure('${T("case « Derrière »")}'); return; }
+        if (STU_ORIG && STU_ORIG.dos && VUES.derriere === STU_ORIG.dos) { var a1 = VUES.derriere; VUES.derriere = url; retirerVue(a1); STU_ORIG.dos = ''; conclure('${T("case « Derrière »")}'); return; }
         szConfirmer({ prudent: true, titre: '${T("Remplacer la photo « Derrière » ?")}',
           texte: '${T("Le Studio envoie une nouvelle photo du dos ({c}). L’actuelle passera dans une case libre.")}'.replace('{c}', it.code || ''),
           oui: '${T("Remplacer")}', non: '${T("Ajouter aux photos")}' }).then(function(ok){
@@ -2884,7 +2891,7 @@ function pageProduit(id) {
       }
       var marquer = function(){ var k = ajouterLibre(url); if (k) DOS_SRC = url; conclure(k ? '${T("marquée « Dos »")}' : ''); };
       if (!photoDos()) { marquer(); return; }
-      if (STU_ORIG && STU_ORIG.dos && photoDos() === STU_ORIG.dos) { original(STU_ORIG.dos); STU_ORIG.dos = ''; marquer(); return; }
+      if (STU_ORIG && STU_ORIG.dos && photoDos() === STU_ORIG.dos) { var a2 = STU_ORIG.dos; STU_ORIG.dos = ''; retirerVue(a2); marquer(); return; }
       szConfirmer({ prudent: true, titre: '${T("Marquer la nouvelle photo « Dos » ?")}',
         texte: '${T("Le Studio envoie une nouvelle photo du dos ({c}). L’actuelle reste parmi les photos, sans la marque « Dos ».")}'.replace('{c}', it.code || ''),
         oui: '${T("Marquer « Dos »")}', non: '${T("Ajouter aux photos")}' }).then(function(ok){
