@@ -183,6 +183,8 @@ body.insp .suivi{right:calc(min(27rem,52vw) + 1rem)}
 html.jour .vign{background:conic-gradient(#e6e1d6 25%,#f4f2ec 0 50%,#e6e1d6 0 75%,#f4f2ec 0) 0 0/12px 12px}
 html.jour .boite .apercu{background:conic-gradient(#e6e1d6 25%,#f4f2ec 0 50%,#e6e1d6 0 75%,#f4f2ec 0) 0 0/14px 14px}
 .boite .apercu img{max-width:100%;max-height:24rem;object-fit:contain}
+/* (2026-10-21) L aperçu gratuit venait de Photoroom, retiré : ses boutons ne s affichent plus. */
+#rt-apercu,#sc-apercu{display:none!important}
 .boite .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.5rem;
   padding:.55rem 0;border-top:1px solid var(--v08);
   border-bottom:1px solid var(--v08);margin-bottom:.6rem}

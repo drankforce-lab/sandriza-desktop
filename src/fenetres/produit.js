@@ -282,6 +282,9 @@ table.mesv .mv-cm input{width:4.2rem;height:auto;min-height:0;border:0;border-ra
 .stm-voie span{font-size:.76rem;color:var(--tx2);font-weight:400}
 .stm-voie.on{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
 .stm-regl{display:flex;flex-wrap:wrap;gap:1rem;margin-top:.7rem;font-size:.84rem}
+.stm-desc{display:flex;flex-direction:column;gap:.3rem;margin-top:.7rem;font-size:.82rem}
+.stm-desc textarea{min-height:0;resize:vertical}
+.stm-sourire{display:flex;align-items:center;gap:.4rem;color:var(--tx)}
 .stm-regl label{display:flex;align-items:center;gap:.45rem}
 /* Une section MODIFIÉE depuis l ouverture : un point dans son onglet, jusqu à l enregistrement. */
 #pas button.modif .n{box-shadow:0 0 0 2px var(--or)}
@@ -2702,14 +2705,16 @@ function pageProduit(id) {
     var s = { geste: STM.voie, preset: stmPreset(), apercu: false, image: image,
       produit: ID ? String(ID) : '', produitNom: val('p-nom').trim(), produitSku: val('p-sku') };
     if (STM.voie === 'fantome') { s.palier = 'standard'; if (STM.preset === 'transparent') s.fondTransparent = true; }
-    if (STM.voie === 'humain') s.options = { modele: STM.modele, pose: '34turn', sourire: 1 };
+    // LA DESCRIPTION LIBRE (2026-10-21, sa demande : « garde la possibilité de décrire ce que l on veut ») : scène, tenue,
+    // accessoires — The New Black génère le mannequin d après ces mots (le sourire est demandé d office).
+    if (STM.voie === 'humain') s.options = { pose: STM.pose || 'standing', sourire: STM.sourire === false ? 0 : 1, extra: STM.desc || '' };
     if (STM.prix != null) s.prixAnnonce = STM.prix;
     return s;
   }
   function stmEstimer(){
     STM.prix = null;
     P.appeler('studio:estimer', { geste: STM.voie, palier: STM.voie === 'fantome' ? 'standard' : '', preset: stmPreset(), nb: 1,
-      finition: {}, options: STM.voie === 'humain' ? { modele: STM.modele, pose: '34turn', sourire: 1 } : {} }).then(function(r){
+      finition: {}, options: STM.voie === 'humain' ? { pose: STM.pose || 'standing', sourire: 1 } : {} }).then(function(r){
       if (!STM) return;
       STM.prix = (r && r.ok && r.coutMax != null) ? r.coutMax : null;
       stmDessiner();
@@ -2758,8 +2763,10 @@ function pageProduit(id) {
       + '<p class="aide">${T("Choisissez les photos, la présentation et le fond, puis générez : les photos se placent toutes seules dans la fiche. Le devant sert de référence de couleur au dos.")}</p>'
       + '<div class="stm-titre">${T("1. Les photos")}</div><div class="stm-photos">' + cartes + '</div>'
       + '<div class="stm-titre">${T("2. La présentation")}</div><div class="stm-voies">' + voies + '</div>'
-      + '<div class="stm-regl">' + (STM.voie === 'humain' ? '<label>${T("Modèle")} <select id="stm-modele"' + (occ ? ' disabled' : '') + '>'
-          + STM_MODELES.map(function(m){ return '<option value="' + m + '"' + (m === STM.modele ? ' selected' : '') + '>' + stmNom(m) + '</option>'; }).join('') + '</select></label>' : '')
+      + (STM.voie === 'humain' ? '<div class="stm-desc"><label for="stm-desc">${T("Décrivez la scène, la tenue et les accessoires (facultatif)")}</label>'
+          + '<textarea id="stm-desc" rows="2" maxlength="300" placeholder="${T("Ex. : sur une plage au coucher du soleil, chapeau de paille, sandales, souriante")}"' + (occ ? ' disabled' : '') + '>' + esc(STM.desc || '') + '</textarea>'
+          + '<label class="stm-sourire"><input type="checkbox" id="stm-sourire"' + (STM.sourire === false ? '' : ' checked') + (occ ? ' disabled' : '') + '> ${T("Mannequin souriant")}</label></div>' : '')
+      + '<div class="stm-regl">'
       + '<label>${T("Fond")} <select id="stm-fond"' + (occ ? ' disabled' : '') + '>'
       + fonds.map(function(p){ return '<option value="' + esc(p.cle) + '"' + (p.cle === STM.preset ? ' selected' : '') + '>' + esc(p.label) + '</option>'; }).join('') + '</select></label></div>'
       + '<div class="pied2"><button type="button" id="stm-annuler"' + (occ ? ' disabled' : '') + '>${T("Fermer")}</button>'
@@ -2771,8 +2778,9 @@ function pageProduit(id) {
       if (STM.voie !== 'fantome' && STM.preset === 'transparent') STM.preset = (STM_PRESETS[0] || {}).cle || '';
       if (STM.voie === 'fantome' && !STM.choisiFond) STM.preset = 'transparent';
       stmDessiner(); stmEstimer(); }; });
-    if ($('stm-modele')) $('stm-modele').onchange = function(){ STM.modele = this.value; stmEstimer(); };
     if ($('stm-fond')) $('stm-fond').onchange = function(){ STM.preset = this.value; STM.choisiFond = true; stmEstimer(); };
+    if ($('stm-desc')) $('stm-desc').oninput = function(){ STM.desc = this.value; };
+    if ($('stm-sourire')) $('stm-sourire').onchange = function(){ STM.sourire = this.checked; };
     $('stm-annuler').onclick = stmFermer;
     $('stm-go').onclick = stmGenerer;
   }

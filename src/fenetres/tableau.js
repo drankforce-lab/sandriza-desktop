@@ -435,8 +435,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           : (f.motifReel === 'cle_admin_requise' ? '${T("Pour le vrai solde : une clé de lecture du solde dans Configuration › Clés (Fal.ai). En attendant : ")}' : '')
             + '${T("Estimation : solde saisi le {0} ({1}) moins la consommation mesurée depuis ({2}).")}'
               .split('{0}').join(String(f.date || '').slice(0, 10)).split('{1}').join(szArgentSymbole(szArgentNombre(f.saisi, 2))).split('{2}').join(szArgentSymbole(szArgentNombre(f.conso, 2))), 'fal-suivi')
-      + puce('Photoroom', ph, !p.erreur && p.disponibles != null && p.disponibles < 20, p.erreur ? '${T("Solde Photoroom indisponible :")} ' + p.erreur
-          : '${T("Crédits restants du compte Photoroom")}' + (p.plan ? ' (' + p.plan + ')' : ''), 'fal-suivi')
       + puce('The New Black', tn, !nb.erreur && nb.credits < 20, nb.erreur
           ? (nb.motif === 'cle_absente' ? '${T("Aucune clé The New Black : Configuration › Sécurité › Clé et plafond de dépense IA.")}' : '${T("Solde The New Black indisponible :")} ' + nb.erreur)
           : '${T("Crédits du compte The New Black, lus chez The New Black — forfait {0} : {1} crédits par mois, cumul de {2} au plus")}'

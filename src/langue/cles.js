@@ -153,4 +153,6 @@ module.exports = {
   'The New Black — Vêtement sans mannequin': 'The New Black — Garment without mannequin',
   'Le mannequin retiré, le col et le volume reconstruits (Studio virtuel). Facturé en crédits du forfait.': 'Mannequin removed, collar and volume rebuilt (Virtual studio). Billed in plan credits.',
   'Payant en crédits. La clé reste au serveur : elle n’est jamais recopiée dans l’application.': 'Paid in credits. The key stays on the server: it is never copied into the application.',
+  "The New Black — Studio virtuel": "The New Black — Virtual studio",
+  "Le vêtement sans mannequin, le mannequin virtuel et le produit à plat (Studio virtuel, photothèque). Facturé en crédits du forfait.": "Garment without mannequin, virtual model and flat lay (Virtual studio, photo library). Billed in plan credits.",
 };

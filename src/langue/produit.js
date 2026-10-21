@@ -894,4 +894,7 @@ module.exports = {
   "Devant": "Front",
   "Fermer": "Close",
   "Accord de la couleur sur l’original…": "Matching the colour to the original…",
+  "Décrivez la scène, la tenue et les accessoires (facultatif)": "Describe the scene, outfit and accessories (optional)",
+  "Mannequin souriant": "Smiling model",
+  "Ex. : sur une plage au coucher du soleil, chapeau de paille, sandales, souriante": "E.g.: on a beach at sunset, straw hat, sandals, smiling",
 };

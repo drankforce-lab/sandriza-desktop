@@ -1158,7 +1158,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     bApercu.hidden = bFinal.hidden = !!LOTS_VUE;
     /* (2026-10-18, sa demande : « retirer aperçu gratuit avec le vêtement sans mannequin, il consomme des crédits
        Fal.ai de toute façon ») : un seul bouton, Générer. */
-    if (VOIE === 'fantome') bApercu.hidden = true;
+    // (2026-10-21, sa décision) L aperçu gratuit venait de Photoroom, retiré : un seul bouton, Générer.
+    bApercu.hidden = true;
     var br = document.getElementById('b-reset'); if (br) br.hidden = !!LOTS_VUE;
     if (!pret && ARME) { ARME = false; bFinal.className = 'prim'; bFinal.textContent = '${T("Générer en pleine qualité")}'; }
   }
@@ -1579,18 +1580,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     // est retirée. Les aperçus par mannequin sortaient identiques et n'aidaient pas
     // au choix ; le nom suffit. Le modèle et la pose se choisissent dans deux listes.
     // Deux menus courts : cote a cote quand la place le permet, empiles sinon.
-    var h = '<div class="duo"><div class="ch"><label for="modele-sel">${T("Modèle")}</label>'
-      + '<select id="modele-sel"' + (RO ? ' disabled' : '') + '>'
-      + MODELES.map(function(m){ return '<option value="' + esc(m) + '"'
-          + (MODELE_SEL === m ? ' selected' : '') + '>' + esc(nomModele(m)) + '</option>'; }).join('')
-      + '</select></div>'
-      + '<div class="ch"><label for="pose">Pose</label>'
+    /* (2026-10-21) LE NOM DE MANNEQUIN EST RETIRÉ (sa demande) : The New Black décrit la personne en mots — la
+       scène, la tenue et les accessoires se décrivent dans les réglages avancés (Décor, Précisions). */
+    var h = '<div class="duo"><div class="ch"><label for="pose">Pose</label>'
       + '<select id="pose"' + (RO ? ' disabled' : '') + '>'
       + POSES.map(function(p){ return '<option value="' + p.cle + '"'
           + (POSE_SEL === p.cle ? ' selected' : '') + '>' + esc(p.t) + '</option>'; }).join('')
       + '</select></div></div>'
-      + '<div class="aidep">${T("L’aperçu est gratuit : essayez plusieurs mannequins et plusieurs")} '
-      + '${T("poses avant de dépenser un crédit.")}</div>';
+      + '<div class="aidep">${T("Décrivez la scène, la tenue et les accessoires dans les réglages avancés (Décor, Précisions) : le mannequin est généré d’après votre description.")}</div>';
     return h;
   }
   /* REFONTE 2026-09-29 : chaque ambiance porte une BANDE DE COULEUR qui évoque son
@@ -2512,8 +2509,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var voies = VOIES.map(function(v){
       return '<button type="button" class="fs-voie' + (VOIE === v.cle ? ' on' : '') + '" data-fs-voie="' + v.cle + '"' + (FS.enCours ? ' disabled' : '') + '><b>' + v.t + '</b><span>' + v.d + '</span></button>';
     }).join('');
-    var modele = VOIE === 'humain' ? '<label class="fs-ch">${T("Modèle")} <select id="fs-modele"' + (FS.enCours ? ' disabled' : '') + '>'
-      + MODELES.map(function(m){ return '<option value="' + m + '"' + (m === MODELE_SEL ? ' selected' : '') + '>' + nomModele(m) + '</option>'; }).join('') + '</select></label>' : '';
+    var modele = '';   // (2026-10-21) plus de nom de mannequin : The New Black décrit la personne
     var fonds = (VOIE === 'fantome' ? [AMB_TRANSP] : []).concat(PRESETS);
     var fond = '<label class="fs-ch">${T("Fond")} <select id="fs-fond"' + (FS.enCours ? ' disabled' : '') + '>'
       + fonds.map(function(p){ return '<option value="' + esc(p.cle) + '"' + (p.cle === PRESET ? ' selected' : '') + '>' + esc(p.label) + '</option>'; }).join('') + '</select></label>';

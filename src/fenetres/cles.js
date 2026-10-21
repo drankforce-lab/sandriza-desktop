@@ -193,19 +193,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       solde: true },
     /* (2026-10-18, sa décision) The New Black fait le vêtement sans mannequin du Studio. Sa clé dépense des crédits :
        elle reste au serveur (tnb-proxy.php), l écran n en connaît que les quatre derniers caractères. */
-    { titre: '${T("The New Black — Vêtement sans mannequin")}',
-      sous: '${T("Le mannequin retiré, le col et le volume reconstruits (Studio virtuel). Facturé en crédits du forfait.")}',
+    { titre: '${T("The New Black — Studio virtuel")}',
+      sous: '${T("Le vêtement sans mannequin, le mannequin virtuel et le produit à plat (Studio virtuel, photothèque). Facturé en crédits du forfait.")}',
       lien: ['thenewblack.ai', 'https://thenewblack.ai'],
       champs: [{ k: 'tnb', label: '${T("Clé API")}', place: 'tnb_live_…',
         aide: '${T("Payant en crédits. La clé reste au serveur : elle n’est jamais recopiée dans l’application.")}' }] },
-    { titre: '${T("Photoroom — Retrait du mannequin")}',
-      sous: '${T("Le « mannequin fantôme ». Sans clé, la photothèque se rabat sur un détourage par masque.")}',
-      lien: ['photoroom.com', 'https://www.photoroom.com/api'],
-      champs: [
-        { k: 'photoroom', label: '${T("Clé de PRODUCTION")}', place: '${T("clé de production (sans préfixe)")}',
-          aide: '${T("Vrais traitements, pleine qualité, sans filigrane. Exige le plan Plus.")}' },
-        { k: 'photoroomSandbox', label: '${T("Clé SANDBOX (aperçus)")}', place: '${T("sandbox_… (facultatif)")}',
-          aide: '${T("Aperçus gratuits (filigranés, aucun crédit). Vide : dérivée de la clé de production.")}' }] },
+    // (2026-10-21, sa décision) Photoroom est retiré : The New Black fait le sans mannequin, le mannequin virtuel et le produit à plat.
     { titre: '${T("Groq — Description IA")}',
       sous: '${T("Génération de descriptions de produits à partir de la photo.")}',
       lien: ['console.groq.com', 'https://console.groq.com/keys'],
