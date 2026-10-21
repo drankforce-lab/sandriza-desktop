@@ -3086,7 +3086,7 @@ const OPS_PONT = new Set([
   'produit:teinter',
   // La vue 360° générée (Product 360 de The New Black, 2026-10-18 — remplace l'aperçu 3D Hunyuan), les coûts par
   // article et le contrôle des marges (7.16.0).
-  'generations:etat', 'generations:lancer3d', 'generations:agir', 'generations:ouvrir', 'generations:refaireCouleur', 'produit:photosVerrou', 'produit:couts', 'produit:grosPlanZone', 'produit:grosPlan', 'marges:analyser', 'marges:appliquer',
+  'generations:etat', 'generations:lancer3d', 'generations:rattraper', 'generations:agir', 'generations:ouvrir', 'generations:refaireCouleur', 'produit:photosVerrou', 'produit:couts', 'produit:grosPlanZone', 'produit:grosPlan', 'marges:analyser', 'marges:appliquer',
   'commandes:preparer', 'commandes:expedier',
   // Retours. ⚠ retour:finaliser peut REMBOURSER (Square ou credit boutique) et
   // retour:enregistrer peut generer une etiquette FACTUREE : toute la regle vit
@@ -3641,7 +3641,7 @@ const LIMITES_PONT = {
   // Detourage, impressions et rapports.
   'produit:photoIa': 120000,
   'produit:detourer': 30000, 'produit:teinter': 30000, 'stock:etiquettes': 30000,
-  'generations:etat': 10000, 'generations:lancer3d': 120000, 'generations:agir': 20000, 'generations:ouvrir': 15000, 'generations:refaireCouleur': 30000, 'produit:photosVerrou': 15000, 'produit:couts': 30000,
+  'generations:etat': 10000, 'generations:lancer3d': 120000, 'generations:rattraper': 30000, 'generations:agir': 20000, 'generations:ouvrir': 15000, 'generations:refaireCouleur': 30000, 'produit:photosVerrou': 15000, 'produit:couts': 30000,
   /* le gros plan sur la fibre : la zone se trouve au poste (court) ; l agrandissement passe par fal.ai */
   'produit:grosPlanZone': 30000, 'produit:grosPlan': 120000,
   'marges:analyser': 60000, 'marges:appliquer': 90000,
@@ -7215,7 +7215,7 @@ ipcMain.handle('menu:action', (e, nom) => { actionApp(String(nom || '')); return
 // sur un onglet. Ouverture FRAÎCHE : la carte lit `_journauxOnglet`. DÉJÀ ouverte
 // (dock ou détachée) : on lui envoie `szAllerOnglet`. Onglet réduit aux lettres —
 // aucune donnée n'entre dans le code exécuté.
-const _ONGLETS_JOURNAUX = ['recherche', 'acces', 'automatisations', 'impressions', 'sms', 'comptable', 'recherches', 'jserreurs'];
+const _ONGLETS_JOURNAUX = ['recherche', 'acces', 'automatisations', 'impressions', 'sms', 'appels', 'comptable', 'recherches', 'jserreurs'];
 ipcMain.handle('journaux:ouvrir', (e, onglet) => {
   const t = _ONGLETS_JOURNAUX.indexOf(String(onglet || '').toLowerCase()) >= 0 ? String(onglet).toLowerCase() : '';
   _journauxOnglet = t;

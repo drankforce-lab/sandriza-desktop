@@ -429,7 +429,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var fo = nb.forfait || {};
     var tn = nb.erreur ? '' : '${T("{0} crédits")}'.split('{0}').join(szArgentNombre(nb.credits, 0)) + ' ≈ ' + szArgentSymbole(szArgentNombre(nb.dollars, 2)) + ' US';
     return '<span id="tb-soldes" class="soldes" aria-label="${T("Soldes des services")}" title="${T("Soldes des services")}' + esc(vu) + '">'
-      + puce('Twilio', tw, !t.erreur && t.solde < 5, t.erreur ? '${T("Solde Twilio indisponible :")} ' + t.erreur : '${T("Solde du compte Twilio (appels et textos)")}')
+      + puce('Twilio', tw, !t.erreur && t.solde < 5, t.erreur ? '${T("Solde Twilio indisponible :")} ' + t.erreur : '${T("Solde du compte Twilio (appels et textos)")}', 'journaux-appels')
       + puce('Fal.ai', fa, !f.erreur && f.restant < 3, f.erreur ? '${T("Solde Fal.ai indisponible :")} ' + f.erreur
           : !f.estime ? '${T("Solde du compte Fal.ai, lu chez Fal.ai")}'
           : (f.motifReel === 'cle_admin_requise' ? '${T("Pour le vrai solde : une clé de lecture du solde dans Configuration › Clés (Fal.ai). En attendant : ")}' : '')
@@ -743,6 +743,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var ec = t.closest('button[data-prep]');
     if (ec) { if (!ec.disabled) lancerPreparation(ec.getAttribute('data-prep'), ec); return; }
     var ou = t.closest('[data-ouvre]');
+    // La pastille Twilio mène au journal des appels (2026-10-21, sa demande), dans la fenêtre Journaux.
+    if (ou && ou.getAttribute('data-ouvre') === 'journaux-appels') { if (P && P.ouvrirJournaux) P.ouvrirJournaux('appels'); return; }
     if (ou) { ouvrir(ou.getAttribute('data-ouvre')); return; }
     var li = t.closest('[data-ligne]');
     if (li && li.getAttribute('data-ligne')) {

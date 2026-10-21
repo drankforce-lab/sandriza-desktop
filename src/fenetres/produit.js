@@ -2813,7 +2813,16 @@ function pageProduit(id) {
           STM.etats[p.role] = '${T("Accord de la couleur sur l’original…")}'; stmDessiner();
           P.appeler('studio:teinte', { image: r.image, reference: ref }).then(function(t){
             if (t && t.ok && t.meme && t.deltaE <= 6) { poser(r.image); return; }
-            P.appeler('studio:harmoniser', { image: r.image, reference: ref }).then(function(hh){ poser(hh && hh.ok ? hh.image : r.image); });
+            /* ⚠ L ACCORD EST VÉRIFIÉ (2026-10-21, sa capture : un dos nettement plus foncé que le devant) : après un
+               passage, on remesure ; encore à plus de ΔE 4, un second passage — on ne pose jamais un accord à moitié fait. */
+            P.appeler('studio:harmoniser', { image: r.image, reference: ref }).then(function(hh){
+              var im1 = hh && hh.ok ? hh.image : r.image;
+              if (!(hh && hh.ok)) { poser(im1); return; }
+              P.appeler('studio:teinte', { image: im1, reference: ref }).then(function(t2){
+                if (t2 && t2.ok && t2.meme && t2.deltaE <= 4) { poser(im1); return; }
+                P.appeler('studio:harmoniser', { image: im1, reference: ref }).then(function(h2){ poser(h2 && h2.ok ? h2.image : im1); });
+              });
+            });
           });
         });
       });
@@ -3124,7 +3133,10 @@ function pageProduit(id) {
       P.appeler('generations:etat').then(function(r){
         var l = (r && r.ok && r.liste) ? r.liste.filter(function(x){ return x.produit === String(ID) && x.genre === '3d'; }) : [];
         var g = l.filter(function(x){ return x.id === G3D.genId; })[0]
-          || l.filter(function(x){ return x.etat === 'cours' || x.etat === 'attente'; })[0] || null;
+          || l.filter(function(x){ return x.etat === 'cours' || x.etat === 'attente'; })[0]
+          // À l ouverture : la plus récente des dernières 24 h, pour DIRE ce qu il est advenu (échec, interrompue…).
+          || (!G3D.vu ? l.filter(function(x){ return Date.now() - (x.fin || x.debut || 0) < 24 * 3600000; })
+               .sort(function(a, b){ return (b.fin || b.debut || 0) - (a.fin || a.debut || 0); })[0] : null) || null;
         if (!g) {
           // rien ici : peut-être sur un autre poste (le serveur le sait)
           P.appeler('produit:photosVerrou', ID).then(function(v){
@@ -4608,6 +4620,9 @@ function pageProduit(id) {
           document.getElementById('corps').addEventListener('change', majPastille);
           majPastille();
           etapesSuivre();
+          /* UN APERÇU 3D PAYÉ DONT LE SUIVI S EST PERDU (2026-10-21) : la fiche demande au site de le reprendre, puis
+             montre l état de la génération de cet article (en cours, en attente de confirmation, échouée). */
+          if (P.appeler) P.appeler('generations:rattraper').then(function(){ suivre3d(); }, function(){ suivre3d(); });
         } else {
           // Autosauvegarde toutes les 5 secondes, comme l'éditeur du site.
           BR_T = setInterval(brEnregistrer, 5000);

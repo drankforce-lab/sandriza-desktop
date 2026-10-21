@@ -129,7 +129,7 @@ function pageJournaux(onglet) {
   // Aller directement à un onglet quand la fenêtre est DÉJÀ ouverte (lien de
   // retour depuis une autre fenêtre — #7 7b-2c).
   window.szAllerOnglet = function(t){
-    if (['recherche','acces','automatisations','impressions','sms','comptable','recherches','jserreurs'].indexOf(String(t||'')) < 0) return;
+    if (['recherche','acces','automatisations','impressions','sms','appels','comptable','recherches','jserreurs'].indexOf(String(t||'')) < 0) return;
     ONGLET = String(t); rendre();
   };
 ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
