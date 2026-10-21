@@ -264,6 +264,28 @@ table.mesv .mv-cm input{width:4.2rem;height:auto;min-height:0;border:0;border-ra
 /* Une case COMPLÉTÉE par la gradation : pointillée et en italique — on voit ce qui a été mesuré. */
 .mv-cm.grad{border-style:dashed}
 .mv-cm.grad input{font-style:italic;color:var(--tx2)}
+.stm-voile{z-index:60}
+.stm-boite{max-width:58rem!important;width:min(58rem,calc(100vw - 2rem))}
+.stm-tete{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
+.stm-boite .stm-tete h3{margin:0 7rem .2rem 0;color:var(--tx)}
+.stm-x{border:0;background:transparent;font-size:1rem;padding:.2rem .5rem;color:var(--tx2)}
+.stm-titre{margin:.75rem 0 .35rem;font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700}
+.stm-photos{display:flex;gap:.8rem}
+.stm-photo{width:12rem;border:1px dashed var(--v22);border-radius:12px;padding:.5rem;display:flex;flex-direction:column;gap:.4rem}
+.stm-photo.on{border-style:solid;border-color:var(--or)}
+.stm-vign{aspect-ratio:3/4;border-radius:9px;background:var(--v05);display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--tx2);font-size:.8rem;text-align:center;padding:.3rem}
+.stm-vign img{width:100%;height:100%;object-fit:contain}
+.stm-photo label{display:flex;align-items:center;gap:.35rem;cursor:pointer}
+.stm-etat{font-size:.78rem;color:var(--tx2)}
+.stm-voies{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem}
+.stm-voie{display:flex;flex-direction:column;align-items:flex-start;gap:.2rem;text-align:left;padding:.6rem .75rem;border-radius:11px;white-space:normal}
+.stm-voie span{font-size:.76rem;color:var(--tx2);font-weight:400}
+.stm-voie.on{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
+.stm-regl{display:flex;flex-wrap:wrap;gap:1rem;margin-top:.7rem;font-size:.84rem}
+.stm-regl label{display:flex;align-items:center;gap:.45rem}
+/* Une section MODIFIÉE depuis l ouverture : un point dans son onglet, jusqu à l enregistrement. */
+#pas button.modif .n{box-shadow:0 0 0 2px var(--or)}
+#pas button.modif::after{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--or);margin-left:.4rem;vertical-align:middle}
 .mesv-pages{display:flex;align-items:center;justify-content:flex-end;gap:.5rem;margin-top:.5rem;font-size:.8rem;color:var(--tx2)}
 .mesv-note{margin-top:.55rem;display:flex;flex-wrap:wrap;gap:.3rem 1rem}
 .mesv-note .lg{display:inline-flex;align-items:center;gap:.35rem}
@@ -2661,16 +2683,140 @@ function pageProduit(id) {
      question (c est pour ça qu on est allé au Studio) ; l originale passe dans une case libre, et l enregistrement
      demandera s il faut l effacer. */
   var STU_ORIG = null, ORIG_A_EFFACER = [];
-  function ouvrirStudio(){
-    var dos = photoDos();
-    STU_ORIG = { devant: IMAGE || '', dos: dos || '' };
-    P.appeler('studio:ouvrirPour', { produit: cleStudio(), provisoire: !ID, nom: val('p-nom').trim(), sku: val('p-sku'),
-      devant: IMAGE || '', dos: dos || '', role: IMAGE ? (dos ? 'autre' : 'dos') : 'devant' }).then(function(r){
-      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
-      dire('${T("Studio ouvert pour cet article : « Placer dans la fiche » y renvoie les photos, ici, dans leur case.")}', 'bon');
-      suivreStudio();
+  /* ══ LE STUDIO DANS LA FICHE (2026-10-20, sa demande, capture à l appui) ═══════════════════════════════════════
+     « J aimerais plutôt voir cela, mais sans le module Studio en arrière : garder l inventaire ouvert, comme gelé en
+     attente le temps du traitement. » Le Studio séparé se réduisait au premier clic et cachait la fiche : l écran
+     simple s ouvre donc ICI, en voile par-dessus la fiche. Les photos traitées se posent directement dans leurs
+     cases (les originales passent en case libre ; l enregistrement proposera de les effacer). Pendant un
+     traitement, le voile ne se ferme pas ; sinon « Fermer » (ou Échap) le quitte sans rien changer. */
+  var STM = null, STM_PRESETS = null;
+  var STM_VOIES = [
+    { cle: 'humain',  t: '${T("Mannequin virtuel")}', d: '${T("Porté par un modèle, décor intégré")}' },
+    { cle: 'fantome', t: '${T("Vêtement sans mannequin")}', d: '${T("Mannequin retiré, col et volume reconstruits, fond transparent ou uni")}' },
+    { cle: 'plat',    t: '${T("Produit à plat")}', d: '${T("Détourage + décor + ombre")}' }
+  ];
+  var STM_MODELES = ['sophia', 'emma', 'ava', 'zoe', 'maya', 'lena', 'julia', 'fiona'];
+  function stmNom(m){ return m.charAt(0).toUpperCase() + m.slice(1); }
+  function stmPreset(){ return STM.preset === 'transparent' ? ((STM_PRESETS[0] || {}).cle || '') : STM.preset; }
+  function stmSaisie(image){
+    var s = { geste: STM.voie, preset: stmPreset(), apercu: false, image: image,
+      produit: ID ? String(ID) : '', produitNom: val('p-nom').trim(), produitSku: val('p-sku') };
+    if (STM.voie === 'fantome') { s.palier = 'standard'; if (STM.preset === 'transparent') s.fondTransparent = true; }
+    if (STM.voie === 'humain') s.options = { modele: STM.modele, pose: '34turn', sourire: 1 };
+    if (STM.prix != null) s.prixAnnonce = STM.prix;
+    return s;
+  }
+  function stmEstimer(){
+    STM.prix = null;
+    P.appeler('studio:estimer', { geste: STM.voie, palier: STM.voie === 'fantome' ? 'standard' : '', preset: stmPreset(), nb: 1,
+      finition: {}, options: STM.voie === 'humain' ? { modele: STM.modele, pose: '34turn', sourire: 1 } : {} }).then(function(r){
+      if (!STM) return;
+      STM.prix = (r && r.ok && r.coutMax != null) ? r.coutMax : null;
+      stmDessiner();
     });
   }
+  function stmChoisies(){ return STM.photos.filter(function(p){ return p.on && p.src; }); }
+  function stmFermer(){ if (!STM || STM.enCours) return; var v = STM.voile; STM = null; if (v) v.remove(); }
+  function ouvrirStudio(){
+    if (!P || !P.appeler) return;
+    var dos = photoDos();
+    STU_ORIG = { devant: IMAGE || '', dos: dos || '' };
+    var v = document.createElement('div'); v.className = 'voile stm-voile';
+    v.innerHTML = '<div class="boite stm-boite" role="dialog" aria-modal="true"><div class="aide">${T("Chargement du Studio…")}</div></div>';
+    document.body.appendChild(v);
+    STM = { voile: v, photos: [{ role: 'devant', src: IMAGE || '', on: !!IMAGE }, { role: 'dos', src: dos || '', on: !!dos }],
+      voie: 'humain', modele: 'sophia', preset: '', prix: null, etats: {}, enCours: false };
+    v.addEventListener('mousedown', function(ev){ if (ev.target === v) stmFermer(); });
+    var charger = STM_PRESETS ? Promise.resolve({ ok: true, presets: STM_PRESETS }) : P.appeler('studio:presets');
+    charger.then(function(r){
+      if (!STM) return;
+      if (!r || !r.ok) { STM.erreur = expliquer(r); stmDessiner(); return; }
+      STM_PRESETS = r.presets || [];
+      STM.preset = (STM_PRESETS[0] || {}).cle || 'transparent';
+      stmDessiner(); stmEstimer();
+    });
+  }
+  function stmDessiner(){
+    if (!STM) return;
+    var b = STM.voile.querySelector('.stm-boite'), occ = STM.enCours;
+    if (STM.erreur) { b.innerHTML = '<h3>${T("Studio")}</h3><p class="aide">' + esc(STM.erreur) + '</p><div class="pied2"><button type="button" id="stm-x">${T("Fermer")}</button></div>'; document.getElementById('stm-x').onclick = stmFermer; return; }
+    var lib = { devant: '${T("Devant")}', dos: '${T("Dos")}' };
+    var cartes = STM.photos.map(function(p, i){
+      var et = STM.etats[p.role] || '';
+      return '<div class="stm-photo' + (p.on && p.src ? ' on' : '') + '"><div class="stm-vign">'
+        + (p.src ? '<img src="' + esc(p.src) + '" alt="">' : '<span>' + (p.role === 'dos' ? '${T("Pas de photo du dos")}' : '${T("Aucune photo")}') + '</span>') + '</div>'
+        + '<label><input type="checkbox" data-stm-on="' + i + '"' + (p.on && p.src ? ' checked' : '') + (p.src && !occ ? '' : ' disabled') + '> <b>' + lib[p.role] + '</b></label>'
+        + (et ? '<div class="stm-etat">' + esc(et) + '</div>' : '') + '</div>';
+    }).join('');
+    var voies = STM_VOIES.map(function(x){
+      return '<button type="button" class="stm-voie' + (STM.voie === x.cle ? ' on' : '') + '" data-stm-voie="' + x.cle + '"' + (occ ? ' disabled' : '') + '><b>' + x.t + '</b><span>' + x.d + '</span></button>';
+    }).join('');
+    var fonds = (STM.voie === 'fantome' ? [{ cle: 'transparent', label: '${T("Fond transparent")}' }] : []).concat(STM_PRESETS || []);
+    var n = stmChoisies().length, prix = STM.prix != null && n ? ' — ≈ ' + szArgentSymbole(szArgentNombre(STM.prix * n, 2)) : '';
+    b.innerHTML = '<div class="stm-tete"><h3>' + '${T("Photos de « {p} »")}'.replace('{p}', esc(val('p-nom').trim() || '${T("cet article")}')) + '</h3></div>'
+      + '<p class="aide">${T("Choisissez les photos, la présentation et le fond, puis générez : les photos se placent toutes seules dans la fiche. Le devant sert de référence de couleur au dos.")}</p>'
+      + '<div class="stm-titre">${T("1. Les photos")}</div><div class="stm-photos">' + cartes + '</div>'
+      + '<div class="stm-titre">${T("2. La présentation")}</div><div class="stm-voies">' + voies + '</div>'
+      + '<div class="stm-regl">' + (STM.voie === 'humain' ? '<label>${T("Modèle")} <select id="stm-modele"' + (occ ? ' disabled' : '') + '>'
+          + STM_MODELES.map(function(m){ return '<option value="' + m + '"' + (m === STM.modele ? ' selected' : '') + '>' + stmNom(m) + '</option>'; }).join('') + '</select></label>' : '')
+      + '<label>${T("Fond")} <select id="stm-fond"' + (occ ? ' disabled' : '') + '>'
+      + fonds.map(function(p){ return '<option value="' + esc(p.cle) + '"' + (p.cle === STM.preset ? ' selected' : '') + '>' + esc(p.label) + '</option>'; }).join('') + '</select></label></div>'
+      + '<div class="pied2"><button type="button" id="stm-annuler"' + (occ ? ' disabled' : '') + '>${T("Fermer")}</button>'
+      + '<button type="button" class="prim" id="stm-go"' + (occ || !n ? ' disabled' : '') + '>' + (occ ? '${T("Génération en cours…")}' : '${T("Générer et placer dans la fiche")}' + prix) + '</button></div>';
+    var $ = function(id){ return document.getElementById(id); };
+    b.querySelectorAll('[data-stm-on]').forEach(function(cb){ cb.onchange = function(){ STM.photos[+cb.getAttribute('data-stm-on')].on = cb.checked; stmDessiner(); }; });
+    b.querySelectorAll('[data-stm-voie]').forEach(function(x){ x.onclick = function(){
+      STM.voie = x.getAttribute('data-stm-voie');
+      if (STM.voie !== 'fantome' && STM.preset === 'transparent') STM.preset = (STM_PRESETS[0] || {}).cle || '';
+      stmDessiner(); stmEstimer(); }; });
+    if ($('stm-modele')) $('stm-modele').onchange = function(){ STM.modele = this.value; stmEstimer(); };
+    if ($('stm-fond')) $('stm-fond').onchange = function(){ STM.preset = this.value; stmEstimer(); };
+    $('stm-annuler').onclick = stmFermer;
+    $('stm-go').onclick = stmGenerer;
+  }
+  function stmSource(src, fini){
+    if (/^data:/.test(src) || !(P && P.imageLocale)) { fini(src); return; }
+    P.imageLocale(src).then(function(d){ fini(d || src); }, function(){ fini(src); });
+  }
+  function stmGenerer(){
+    if (!STM || STM.enCours) return;
+    var liste = stmChoisies(); if (!liste.length) return;
+    STM.enCours = true; STM.etats = {}; stmDessiner();
+    var refDevant = '', echec = false;
+    var suite = function(i){
+      if (!STM) return;
+      if (i >= liste.length) {
+        STM.enCours = false;
+        if (!echec) { dire('${T("Photos du Studio placées dans la fiche. Enregistrez la fiche pour les attacher.")}', 'bon'); stmFermer(); }
+        else stmDessiner();
+        return;
+      }
+      var p = liste[i];
+      STM.etats[p.role] = '${T("Génération…")}'; stmDessiner();
+      stmSource(p.src, function(img){
+        P.appeler('studio:traiter', stmSaisie(img)).then(function(r){
+          if (!STM) return;
+          if (!r || !r.ok) { STM.etats[p.role] = '✗ ' + expliquer(r); echec = true; suite(liste.length); return; }
+          var poser = function(im){
+            if (p.role === 'devant') refDevant = im;
+            poserDuStudio({ url: im, role: p.role, code: '' }, function(){
+              if (!STM) return;
+              STM.etats[p.role] = '✓ ${T("Placée dans la fiche")}'; suite(i + 1);
+            });
+          };
+          var ref = p.role === 'dos' ? (refDevant || STM.photos[0].src) : '';
+          if (!ref) { poser(r.image); return; }
+          STM.etats[p.role] = '${T("Accord de la couleur sur le devant…")}'; stmDessiner();
+          P.appeler('studio:teinte', { image: r.image, reference: ref }).then(function(t){
+            if (t && t.ok && t.meme && t.deltaE <= 12) { poser(r.image); return; }
+            P.appeler('studio:harmoniser', { image: r.image, reference: ref }).then(function(hh){ poser(hh && hh.ok ? hh.image : r.image); });
+          });
+        });
+      });
+    };
+    suite(0);
+  }
+  document.addEventListener('keydown', function(ev){ if (ev.key === 'Escape' && STM && !STM.enCours) { ev.stopPropagation(); stmFermer(); } }, true);
   function suivreStudio(){
     if (RET_T) return;
     var tour = function(){ if (!document.hidden) releverStudio(); };
@@ -2704,6 +2850,7 @@ function pageProduit(id) {
     var url = it.url, role = it.role || 'autre';
     var conclure = function(ou){
       dessinerVues(); montrerImage(IMAGE); majIa(); dessiner3d();
+      try { Assist.fil(); } catch (e) {}
       dire(ou ? '${T("Photo du Studio posée ({r}) — {c}. Enregistrez la fiche pour l’attacher.")}'.replace('{r}', nomRoleStudio(role)).replace('{c}', ou)
         : '${T("Plus de case libre pour la photo du Studio {c} : retirez une photo, puis rouvrez la fiche.")}'.replace('{c}', it.code || ''), ou ? 'bon' : 'att');
       fini();
@@ -4067,6 +4214,42 @@ function pageProduit(id) {
       if (document.getElementById('jrn-corps')) dessinerJournal();
     });
   }
+  /* L ÉTAT DES ÉTAPES ET LES SECTIONS MODIFIÉES (2026-10-20, sa demande : « enregistre le statut dans le produit
+     si c est rempli : à la réouverture, ça devrait rester complété, sauf si on retire les obligatoires ; et si une
+     section se fait mettre à jour, un petit signe dans l onglet, temporairement »).
+     · Une fiche ENREGISTRÉE a été remplie : toutes ses étapes comptent comme vues ; le crochet vert ne tombe que si
+       une étape cesse d être complète (un obligatoire vidé).
+     · Une section touchée depuis l ouverture porte un point or dans son onglet jusqu à l enregistrement : une saisie
+       dans l étape, ou ses photos, mesures ou consignes qui diffèrent de l ouverture. */
+  var MODIF = {}, SIG0 = null;
+  function etapeSigs(){
+    return { 2: (IMAGE || '') + '|' + JSON.stringify(VUES || {}) + '|' + (DOS_SRC || ''), 4: JSON.stringify(MESV || {}),
+      5: JSON.stringify(entPourEnvoi()) };
+  }
+  function etapesSuivre(){
+    for (var k = 0; k < (Assist.etapes || []).length; k++) Assist.vus[k] = true;
+    SIG0 = etapeSigs(); MODIF = {};
+    var corps = document.getElementById('corps');
+    var noter = function(ev){
+      var e = ev.target && ev.target.closest && ev.target.closest('.etape'); if (!e) return;
+      var k = Array.prototype.indexOf.call(document.querySelectorAll('.etape'), e);
+      if (k >= 0 && !MODIF[k]) { MODIF[k] = 1; Assist.fil(); }
+    };
+    corps.addEventListener('input', noter); corps.addEventListener('change', noter);
+    var filOrig = Assist.fil;
+    Assist.fil = function(){ filOrig.apply(this, arguments); marquerModifs(); };
+    Assist.fil();
+  }
+  function marquerModifs(){
+    if (!SIG0) return;
+    var sig = etapeSigs();
+    document.querySelectorAll('#pas [data-etape]').forEach(function(b){
+      var k = +b.getAttribute('data-etape');
+      var m = !!MODIF[k] || (sig[k] != null && sig[k] !== SIG0[k]);
+      b.classList.toggle('modif', m);
+      if (m) b.title = '${T("Section modifiée depuis l’ouverture — enregistrez pour la conserver")}'; else b.removeAttribute('title');
+    });
+  }
   function majPastille(){
     var b = document.getElementById('btn-jrn'), n = document.getElementById('jrn-n');
     if (!b || !n) return;
@@ -4417,6 +4600,7 @@ function pageProduit(id) {
           document.getElementById('corps').addEventListener('input', majPastille);
           document.getElementById('corps').addEventListener('change', majPastille);
           majPastille();
+          etapesSuivre();
         } else {
           // Autosauvegarde toutes les 5 secondes, comme l'éditeur du site.
           BR_T = setInterval(brEnregistrer, 5000);
