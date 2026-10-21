@@ -670,6 +670,26 @@ function pageStudio(mode) {
 .tuile .paliers label{display:inline-flex;align-items:center;gap:.4rem;cursor:pointer}
 .tuile .paliers label b{color:var(--tx);font-weight:600}
 .tuile .paliers .px{color:var(--tx2);font-variant-numeric:tabular-nums}
+.fs{max-width:62rem;margin:0 auto;display:flex;flex-direction:column;gap:.35rem}
+.fs h2{margin:0 0 .1rem;font-size:1.15rem}
+.fs h3{margin:.7rem 0 .35rem;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
+.fs-photos{display:grid;grid-template-columns:repeat(2,minmax(0,15rem));gap:.8rem}
+.fs-photo{border:1px solid var(--v12);border-radius:12px;padding:.5rem;display:flex;flex-direction:column;gap:.45rem;opacity:.6}
+.fs-photo.on{opacity:1;border-color:var(--or)}
+.fs-vign{aspect-ratio:3/4;border-radius:9px;background:var(--v05);display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--tx2);font-size:.8rem;text-align:center;padding:.4rem}
+.fs-vign img{width:100%;height:100%;object-fit:contain}
+.fs-bas{display:flex;align-items:center;justify-content:space-between;gap:.4rem}
+.fs-bas label{display:flex;align-items:center;gap:.35rem;cursor:pointer}
+.fs-etat{font-size:.78rem;color:var(--tx2)}
+.fs-voies{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem}
+.fs-voie{display:flex;flex-direction:column;align-items:flex-start;gap:.2rem;text-align:left;padding:.6rem .75rem;border-radius:11px;white-space:normal}
+.fs-voie span{font-size:.76rem;color:var(--tx2);font-weight:400}
+.fs-voie.on{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
+.fs-reglages{display:flex;flex-wrap:wrap;gap:1rem;margin-top:.6rem}
+.fs-ch{display:flex;align-items:center;gap:.45rem;font-size:.84rem}
+.fs-fin{display:flex;align-items:center;gap:.6rem;margin-top:1rem}
+.fs-fin .esp{flex:1 1 auto}
+html.mode-fiche #b-reset,html.mode-fiche #b-lot,html.mode-fiche #b-apercu,html.mode-fiche #b-final,html.mode-fiche #prix-est{display:none}
 </style></head><body>
 <div class="tete"><span class="ico">${ICO.studio}</span><h1>${T("Studio virtuel")}</h1>
   <span class="credits" id="credits"></span>
@@ -2452,6 +2472,130 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       });
     });
   }
+  /* ══ LE STUDIO OUVERT DEPUIS UNE FICHE : UN ÉCRAN SIMPLE (2026-10-20, sa demande) ══════════════════════════════
+     « Limite les options : tu choisis les photos, tu génères et hop, tu reviens dans la fiche, les photos sont
+     placées. » Ouvert par « Créer au studio », le Studio montre trois choses seulement : les photos de l article
+     (devant, dos s il y en a un — le devant sert de référence de couleur au dos), la présentation (mannequin
+     virtuel, sans mannequin, à plat) et le fond. « Générer » traite chaque photo l une après l autre, harmonise la
+     teinte du dos sur le devant, place chaque résultat dans la fiche, puis ramène la fiche au premier plan et ferme
+     le Studio. Le Studio complet reste à un clic (« Toutes les options »). */
+  var MODE_FICHE = false, FS = null;
+  function ficheEntrer(c){
+    MODE_FICHE = true;
+    FS = { photos: [{ role: 'devant', src: c.devant || '', on: !!c.devant }, { role: 'dos', src: c.dos || '', on: !!c.dos }],
+           etats: {}, enCours: false, fini: false, prix: null };
+    if (!estVoie(VOIE) || !VOIE_CHOISIE) VOIE = 'humain';
+    if (!PRESET) PRESET = (PRESETS[0] || {}).cle || 'transparent';
+    ficheEstimer();
+  }
+  function ficheChoisies(){ return FS ? FS.photos.filter(function(p){ return p.on && p.src; }) : []; }
+  function ficheEstimer(){
+    var n = ficheChoisies().length; if (!n) { FS.prix = null; return; }
+    appeler('studio:estimer', [{ geste: VOIE, palier: VOIE === 'fantome' ? FANT_PALIER : '', preset: presetEnvoye(), nb: 1,
+      finition: finitionPour(VOIE) || {}, options: VOIE === 'humain' ? optionsPour('humain') : {} }]).then(function(r){
+      if (!FS) return;
+      FS.prix = (r && r.ok && r.coutMax != null) ? r.coutMax : null;
+      if (MODE_FICHE) dessiner();
+    });
+  }
+  function ficheHtml(){
+    var lib = { devant: '${T("Devant")}', dos: '${T("Dos")}' };
+    var cartes = FS.photos.map(function(p, i){
+      var et = FS.etats[p.role] || '';
+      return '<div class="fs-photo' + (p.on && p.src ? ' on' : '') + '">'
+        + '<div class="fs-vign">' + (p.src ? '<img src="' + esc(p.src) + '" alt="">' : '<span>' + (p.role === 'dos' ? '${T("Pas de photo du dos")}' : '${T("Aucune photo")}') + '</span>') + '</div>'
+        + '<div class="fs-bas"><label><input type="checkbox" data-fs-on="' + i + '"' + (p.on && p.src ? ' checked' : '') + (p.src && !FS.enCours ? '' : ' disabled') + '> <b>' + lib[p.role] + '</b></label>'
+        + '<button type="button" class="mini" data-fs-chg="' + i + '"' + (FS.enCours ? ' disabled' : '') + '>' + (p.src ? '${T("Changer…")}' : '${T("Ajouter…")}') + '</button></div>'
+        + (et ? '<div class="fs-etat">' + esc(et) + '</div>' : '')
+        + '</div>';
+    }).join('');
+    var voies = VOIES.map(function(v){
+      return '<button type="button" class="fs-voie' + (VOIE === v.cle ? ' on' : '') + '" data-fs-voie="' + v.cle + '"' + (FS.enCours ? ' disabled' : '') + '><b>' + v.t + '</b><span>' + v.d + '</span></button>';
+    }).join('');
+    var modele = VOIE === 'humain' ? '<label class="fs-ch">${T("Modèle")} <select id="fs-modele"' + (FS.enCours ? ' disabled' : '') + '>'
+      + MODELES.map(function(m){ return '<option value="' + m + '"' + (m === MODELE_SEL ? ' selected' : '') + '>' + nomModele(m) + '</option>'; }).join('') + '</select></label>' : '';
+    var fonds = (VOIE === 'fantome' ? [AMB_TRANSP] : []).concat(PRESETS);
+    var fond = '<label class="fs-ch">${T("Fond")} <select id="fs-fond"' + (FS.enCours ? ' disabled' : '') + '>'
+      + fonds.map(function(p){ return '<option value="' + esc(p.cle) + '"' + (p.cle === PRESET ? ' selected' : '') + '>' + esc(p.label) + '</option>'; }).join('') + '</select></label>';
+    var n = ficheChoisies().length;
+    var prix = FS.prix != null && n ? ' — ≈ ' + szArgentSymbole(argent(FS.prix * n)) : '';
+    return '<div class="carte fs">'
+      + '<h2>' + '${T("Photos de « {p} »")}'.replace('{p}', esc(PROD.nom)) + '</h2>'
+      + '<p class="aide">${T("Choisissez les photos, la présentation et le fond, puis générez : les photos reviennent toutes seules dans la fiche. Le devant sert de référence de couleur au dos.")}</p>'
+      + '<h3>${T("1. Les photos")}</h3><div class="fs-photos">' + cartes + '</div>'
+      + '<h3>${T("2. La présentation")}</h3><div class="fs-voies">' + voies + '</div>'
+      + '<div class="fs-reglages">' + modele + fond + '</div>'
+      + '<div class="fs-fin"><button type="button" class="lien" id="fs-complet"' + (FS.enCours ? ' disabled' : '') + '>${T("Toutes les options du Studio…")}</button>'
+      + '<span class="esp"></span><button type="button" class="prim" id="fs-go"' + (FS.enCours || !n || RO ? ' disabled' : '') + '>'
+      + (FS.enCours ? '${T("Génération en cours…")}' : '${T("Générer et placer dans la fiche")}' + prix) + '</button></div></div>';
+  }
+  function brancherFiche(){
+    var $ = function(id){ return document.getElementById(id); };
+    corps.querySelectorAll('[data-fs-on]').forEach(function(cb){ cb.onchange = function(){ FS.photos[+cb.getAttribute('data-fs-on')].on = cb.checked; dessiner(); }; });
+    corps.querySelectorAll('[data-fs-chg]').forEach(function(b){ b.onclick = function(){
+      var i = +b.getAttribute('data-fs-chg');
+      var inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*';
+      inp.onchange = function(){ var f = inp.files && inp.files[0]; if (!f) return; var rd = new FileReader();
+        rd.onload = function(){ reduire(String(rd.result), function(d){ FS.photos[i].src = d; FS.photos[i].on = true; ficheEstimer(); dessiner(); }); }; rd.readAsDataURL(f); };
+      inp.click(); }; });
+    corps.querySelectorAll('[data-fs-voie]').forEach(function(b){ b.onclick = function(){
+      VOIE = b.getAttribute('data-fs-voie'); VOIE_CHOISIE = true;
+      if (VOIE !== 'fantome' && PRESET === 'transparent') PRESET = (PRESETS[0] || {}).cle || '';
+      ficheEstimer(); dessiner(); }; });
+    if ($('fs-modele')) $('fs-modele').onchange = function(){ MODELE_SEL = this.value; ficheEstimer(); };
+    if ($('fs-fond')) $('fs-fond').onchange = function(){ PRESET = this.value; ficheEstimer(); };
+    if ($('fs-complet')) $('fs-complet').onclick = function(){ MODE_FICHE = false; dessiner(); };
+    if ($('fs-go')) $('fs-go').onclick = ficheGenerer;
+  }
+  // Une photo de la fiche en data URL (une adresse en ligne passe par l application : ses pixels se lisent).
+  function ficheSource(src, fini){
+    if (/^data:/.test(src) || !(P && P.imageLocale)) { fini(src); return; }
+    P.imageLocale(src).then(function(d){ fini(d || src); }, function(){ fini(src); });
+  }
+  function ficheGenerer(){
+    if (!FS || FS.enCours || RO) return;
+    var liste = ficheChoisies(); if (!liste.length) return;
+    FS.enCours = true; FS.etats = {}; dessiner();
+    PRIX_ANNONCE = FS.prix;
+    var refDevant = '';
+    var suite = function(i){
+      if (i >= liste.length) {
+        FS.enCours = false; FS.fini = true; dessiner();
+        dire('${T("Photos placées dans la fiche.")}', 'bon');
+        // La fiche revient au premier plan ; le Studio se ferme (il a fait son travail).
+        setTimeout(function(){ try { if (P && P.fermer) P.fermer(); } catch (e) {} }, 1200);
+        return;
+      }
+      var p = liste[i];
+      FS.etats[p.role] = '${T("Génération…")}'; dessiner();
+      ficheSource(p.src, function(img){
+        PHOTO = img; PHOTO_ID = ''; ROLE = p.role;
+        appeler('studio:traiter', [saisie(false)]).then(function(r){
+          if (!r || !r.ok) { FS.etats[p.role] = '✗ ' + expliquer(r); FS.enCours = false; dessiner(); dire(expliquer(r), 'err'); return; }
+          var image = r.image;
+          var placer = function(im){
+            FS.etats[p.role] = '${T("Placement dans la fiche…")}'; dessiner();
+            appeler('studio:placer', [{ image: im, code: '', produit: PROD.id, produitNom: PROD.nom, role: p.role,
+              nom: (PROD.sku || 'studio') + '-' + p.role, simple: true }]).then(function(r2){
+              if (!r2 || !r2.ok) { FS.etats[p.role] = '✗ ' + expliquer(r2); FS.enCours = false; dessiner(); return; }
+              if (p.role === 'devant') refDevant = im;
+              FS.etats[p.role] = '✓ ${T("Placée dans la fiche")}'; suite(i + 1);
+            });
+          };
+          // Le dos prend la couleur du devant : harmonisé d office quand la teinte s écarte.
+          var ref = p.role === 'dos' ? (refDevant || (FS.photos[0].src || '')) : '';
+          if (!ref) { placer(image); return; }
+          appeler('studio:teinte', [{ image: image, reference: ref }]).then(function(t){
+            if (t && t.ok && t.meme && t.deltaE <= 12) { placer(image); return; }
+            FS.etats[p.role] = '${T("Harmonisation de la couleur sur le devant…")}'; dessiner();
+            appeler('studio:harmoniser', [{ image: image, reference: ref }]).then(function(h){ placer(h && h.ok ? h.image : image); });
+          });
+        });
+      });
+    };
+    suite(0);
+  }
+
   // L ASSISTANT OUVRE LE STUDIO POUR UN ARTICLE : son contexte est appliqué une fois
   function lireContexte(){
     appeler('studio:contexte', []).then(function(r){
@@ -2460,6 +2604,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       CTX_N = c.n;
       PROD = { id: c.produit, nom: c.nom || '${T("Nouvel article")}', sku: c.sku || '', devant: c.devant || '', dos: c.dos || '', provisoire: !!c.provisoire };
       ROLE = c.role || (c.devant ? 'dos' : 'devant'); REF_CHOIX = null; TEINTE = null;
+      ficheEntrer(c);
       dessiner(); verifierTeinte();
       dire('${T("Studio ouvert pour {p} : « Placer dans la fiche » renvoie les photos à l’assistant.")}'.replace('{p}', PROD.nom), 'bon');
     });
@@ -3094,6 +3239,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       corps.innerHTML = '<div class="carte">' + pleinHtml() + '</div>';
       brancher();
       majBoutons();
+      return;
+    }
+    document.documentElement.classList.toggle('mode-fiche', !!(MODE_FICHE && PROD && FS));
+    if (MODE_FICHE && PROD && FS) {
+      corps.className = 'corps plein';
+      corps.innerHTML = ficheHtml();
+      brancherFiche();
       return;
     }
     corps.className = 'corps';

@@ -863,4 +863,8 @@ module.exports = {
   "Échelle posée. Sur un mannequin, l’application ne sait pas isoler le vêtement seule : « Mesurer par l’IA » le fait pour cette photo (≈ 0,007 $, une seule fois — le résultat est gardé). Sinon, tapez les mesures d’une taille : les autres suivront.": "Scale set. On a mannequin, the app cannot isolate the garment by itself: “Measure with AI” does it for this photo (≈ $0.007, once — the result is kept). Otherwise, type the measurements of one size: the others will follow.",
   "Relancer par l’IA (≈ 0,007 $)": "Redo with AI (≈ $0.007)",
   "Mesurer par l’IA (≈ 0,007 $)": "Measure with AI (≈ $0.007)",
+  "Effacer les photos originales ?": "Delete the original photos?",
+  "Effacer les originales": "Delete the originals",
+  "Les garder": "Keep them",
+  "Le Studio a traité {n} photo(s) de cet article. Les originales, non traitées, sont encore dans la fiche. Les effacer ?": "The Studio processed {n} photo(s) of this item. The unprocessed originals are still in the sheet. Delete them?",
 };

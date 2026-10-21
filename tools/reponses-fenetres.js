@@ -3108,7 +3108,8 @@ const JEU = {
       {
         nom: 'rattache au produit (assistant)',
         id: '',
-        exige: ['Chemise Walla', 'Référence couleur'],
+        // Ouvert depuis une fiche : l écran SIMPLE (2026-10-20) — les photos, la présentation, « Générer et placer dans la fiche ».
+        exige: ['Chemise Walla', 'Générer et placer dans la fiche', 'La présentation'],
         reponses: {
           'panier:lire': { ok: true, quand: 1757000000000, photos: [] },
           identite: IDENTITE, 'studio:presets': PRESETS, 'studio:compte': COMPTE,

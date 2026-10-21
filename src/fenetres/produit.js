@@ -2657,8 +2657,13 @@ function pageProduit(id) {
   var PROV = 'prov_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   var RET_VU = {}, RET_OCC = false, RET_T = null, PREVUES = [];
   function cleStudio(){ return ID ? String(ID) : PROV; }
+  /* LES ORIGINALES ENVOYÉES AU STUDIO (2026-10-20, sa demande) : la photo traitée qui revient les REMPLACE sans
+     question (c est pour ça qu on est allé au Studio) ; l originale passe dans une case libre, et l enregistrement
+     demandera s il faut l effacer. */
+  var STU_ORIG = null, ORIG_A_EFFACER = [];
   function ouvrirStudio(){
     var dos = photoDos();
+    STU_ORIG = { devant: IMAGE || '', dos: dos || '' };
     P.appeler('studio:ouvrirPour', { produit: cleStudio(), provisoire: !ID, nom: val('p-nom').trim(), sku: val('p-sku'),
       devant: IMAGE || '', dos: dos || '', role: IMAGE ? (dos ? 'autre' : 'dos') : 'devant' }).then(function(r){
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
@@ -2705,8 +2710,11 @@ function pageProduit(id) {
     };
     var deja = function(){ return url === IMAGE || Object.keys(VUES).some(function(k){ return VUES[k] === url; }); };
     if (deja()) { fini(); return; }
+    try { if (P && P.premierPlan) P.premierPlan(); } catch (e) {}
+    var original = function(a){ if (a && ORIG_A_EFFACER.indexOf(a) < 0) ORIG_A_EFFACER.push(a); };
     if (role === 'devant') {
       if (!IMAGE) { IMAGE = url; conclure('${T("photo principale")}'); return; }
+      if (STU_ORIG && STU_ORIG.devant && IMAGE === STU_ORIG.devant) { var a0 = IMAGE; IMAGE = url; ajouterLibre(a0); original(a0); STU_ORIG.devant = ''; conclure('${T("photo principale")}'); return; }
       szConfirmer({ prudent: true, titre: '${T("Remplacer la photo principale ?")}',
         texte: '${T("Le Studio envoie une nouvelle photo du devant ({c}). L’actuelle passera dans une case libre.")}'.replace('{c}', it.code || ''),
         oui: '${T("Remplacer")}', non: '${T("Ajouter aux photos")}' }).then(function(ok){
@@ -2718,6 +2726,7 @@ function pageProduit(id) {
     if (role === 'dos') {
       if (!modeStandard()) {
         if (!VUES.derriere) { VUES.derriere = url; conclure('${T("case « Derrière »")}'); return; }
+        if (STU_ORIG && STU_ORIG.dos && VUES.derriere === STU_ORIG.dos) { var a1 = VUES.derriere; VUES.derriere = url; ajouterLibre(a1); original(a1); STU_ORIG.dos = ''; conclure('${T("case « Derrière »")}'); return; }
         szConfirmer({ prudent: true, titre: '${T("Remplacer la photo « Derrière » ?")}',
           texte: '${T("Le Studio envoie une nouvelle photo du dos ({c}). L’actuelle passera dans une case libre.")}'.replace('{c}', it.code || ''),
           oui: '${T("Remplacer")}', non: '${T("Ajouter aux photos")}' }).then(function(ok){
@@ -2728,6 +2737,7 @@ function pageProduit(id) {
       }
       var marquer = function(){ var k = ajouterLibre(url); if (k) DOS_SRC = url; conclure(k ? '${T("marquée « Dos »")}' : ''); };
       if (!photoDos()) { marquer(); return; }
+      if (STU_ORIG && STU_ORIG.dos && photoDos() === STU_ORIG.dos) { original(STU_ORIG.dos); STU_ORIG.dos = ''; marquer(); return; }
       szConfirmer({ prudent: true, titre: '${T("Marquer la nouvelle photo « Dos » ?")}',
         texte: '${T("Le Studio envoie une nouvelle photo du dos ({c}). L’actuelle reste parmi les photos, sans la marque « Dos ».")}'.replace('{c}', it.code || ''),
         oui: '${T("Marquer « Dos »")}', non: '${T("Ajouter aux photos")}' }).then(function(ok){
@@ -4460,6 +4470,21 @@ function pageProduit(id) {
   function enregistrer(nipPhotos){
     NIP_PHOTOS = (typeof nipPhotos === 'string') ? nipPhotos : '';
     if (!Assist.toutValide()) return;
+    /* LES ORIGINALES NON TRAITÉES (2026-10-20, sa demande : « au moment d enregistrer, on doit nous demander si on
+       veut effacer les photos originales non traitées utilisées dans le Studio »). Oui : elles quittent la fiche —
+       et l enregistrement efface du stockage les photos devenues orphelines. Non : elles restent parmi les photos. */
+    var restes = ORIG_A_EFFACER.filter(function(u){ return u !== IMAGE && Object.keys(VUES).some(function(k){ return VUES[k] === u; }); });
+    if (restes.length && typeof nipPhotos !== 'string') {
+      ORIG_A_EFFACER = [];
+      szConfirmer({ prudent: true, titre: '${T("Effacer les photos originales ?")}',
+        texte: '${T("Le Studio a traité {n} photo(s) de cet article. Les originales, non traitées, sont encore dans la fiche. Les effacer ?")}'.replace('{n}', String(restes.length)),
+        oui: '${T("Effacer les originales")}', non: '${T("Les garder")}' }).then(function(ok){
+          if (ok) Object.keys(VUES).forEach(function(k){ if (restes.indexOf(VUES[k]) >= 0) { if (DOS_SRC === VUES[k]) DOS_SRC = ''; delete VUES[k]; } });
+          dessinerVues();
+          enregistrer(nipPhotos);
+        });
+      return;
+    }
     if (!tailles().length || !couleurs().length) {
       Assist.aller(1);
       dire('${T("Choisissez au moins une taille ET une couleur avant d’enregistrer.")}', 'err');
