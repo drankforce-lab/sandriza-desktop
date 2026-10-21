@@ -896,5 +896,7 @@ module.exports = {
   "Accord de la couleur sur l’original…": "Matching the colour to the original…",
   "Décrivez la scène, la tenue et les accessoires (facultatif)": "Describe the scene, outfit and accessories (optional)",
   "Mannequin souriant": "Smiling model",
+  "Défroisser le vêtement": "Remove garment wrinkles",
+  "(+ {p} par photo)": "(+ {p} per photo)",
   "Ex. : sur une plage au coucher du soleil, chapeau de paille, sandales, souriante": "E.g.: on a beach at sunset, straw hat, sandals, smiling",
 };

@@ -1106,6 +1106,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
      « 4K — Ultra », leur prix à côté. Aucune cochée = Standard. Jamais retenu d une séance à l autre : un palier plus
      cher se choisit à chaque fois, il ne se retrouve pas coché par mégarde. */
   var FANT_PALIER = 'standard';
+  // LE DÉFROISSAGE (2026-10-21, sa décision après l essai réel) : seconde passe The New Black, cochée par défaut
+  var DEFROISSER = true;
   function presetEnvoye(){ return PRESET === 'transparent' ? ((PRESETS[0] || {}).cle || '') : PRESET; }
   /* LE PRIX, AVANT DE LANCER (2026-10-18, sa demande : « un précalcul que l on peut voir, selon les options choisies,
      basé sur la réalité ; on doit savoir combien ça va coûter avant de lancer, et la confirmation doit le rappeler »).
@@ -1122,7 +1124,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var el = document.getElementById('prix-est');
     // dès qu une photo est là — sans ambiance choisie, celle que prendrait « Générer maintenant » (la première)
     if (!aUnePhoto() || RO || LOTS_VUE) { if (el) el.hidden = true; PRIX_EST = null; PRIX_CLE = ''; peindrePrix(); return; }
-    var dem = { geste: VOIE, palier: VOIE === 'fantome' ? FANT_PALIER : '', preset: presetEnvoye() || (PRESETS[0] || {}).cle || '', nb: 1, finition: finitionPour(VOIE) || {}, options: VOIE === 'humain' ? optionsPour('humain') : {} };
+    var dem = { geste: VOIE, palier: VOIE === 'fantome' ? FANT_PALIER : '', preset: presetEnvoye() || (PRESETS[0] || {}).cle || '', nb: 1, finition: finitionPour(VOIE) || {}, options: VOIE === 'humain' ? optionsPour('humain') : {}, defroisser: VOIE === 'fantome' && DEFROISSER };
     var cle = JSON.stringify(dem); if (cle === PRIX_CLE) { peindrePrix(); return; }   // redessiné : on repeint, sans redemander
     PRIX_CLE = cle; clearTimeout(PRIX_T);
     PRIX_T = setTimeout(function(){
@@ -1553,7 +1555,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         // (2026-10-18, sa demande : « lancer la génération directement, sans option, avec un seul bouton ») —
         // l ambiance choisie (ou la première), aucun réglage facultatif
         + (v.cle === 'fantome' ? '<div class="paliers" role="group" aria-label="${T("Qualité The New Black")}" title="${T("Standard (1K) sans case cochée ; une case monte la résolution, et le prix.")}">'
-          + caseP('pro', '${T("2K — Pro")}') + caseP('ultra', '${T("4K — Ultra")}') + '</div>' : '')
+          + caseP('pro', '${T("2K — Pro")}') + caseP('ultra', '${T("4K — Ultra")}') + '</div>'
+          + '<div class="paliers"><label><input type="checkbox" data-fantdefr' + (DEFROISSER ? ' checked' : '') + (RO ? ' disabled' : '') + '> <b>${T("Défroisser le vêtement")}</b> <span class="px">' + '${T("+ {p} par photo")}'.replace('{p}', szArgentNombre(0.065, 3) + ' $ US') + '</span></label></div>' : '')
         + (v.cle === 'fantome' ? '<button type="button" class="prim direct" data-direct="fantome"' + (RO || !aUnePhoto() ? ' disabled' : '')
           + ' title="${T("Lance tout de suite, avec les réglages par défaut")}">${T("Générer maintenant")}<span data-prix-direct></span></button>' : '')
         + '</div>';
@@ -1964,7 +1967,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       if (OCCUPE) return;
       FIL_POSE = false;
       var b = (bApercu && !bApercu.disabled) ? bApercu : ((bFinal && !bFinal.disabled) ? bFinal : null);
-      dire(b ? '${T("Filigrane ignoré — lancez l’aperçu en bas de la fenêtre.")}' : '${T("Filigrane ignoré.")}', 'bon');
+      dire(b ? '${T("Filigrane ignoré — lancez la génération en bas de la fenêtre.")}' : '${T("Filigrane ignoré.")}', 'bon');
       if (b) b.focus();
     };
   }
@@ -2214,7 +2217,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     } else if (cle === 'filigrane' && LOGOS.length) {
       h += filigraneActionsHtml();
     } else {
-      h += '<span class="pnf">${T("Dernière étape — l’aperçu se lance en bas de la fenêtre.")}</span>';
+      h += '<span class="pnf">${T("Dernière étape — la génération se lance en bas de la fenêtre.")}</span>';
     }
     return h + '</div>';
   }
@@ -2489,7 +2492,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function ficheEstimer(){
     var n = ficheChoisies().length; if (!n) { FS.prix = null; return; }
     appeler('studio:estimer', [{ geste: VOIE, palier: VOIE === 'fantome' ? FANT_PALIER : '', preset: presetEnvoye(), nb: 1,
-      finition: finitionPour(VOIE) || {}, options: VOIE === 'humain' ? optionsPour('humain') : {} }]).then(function(r){
+      finition: finitionPour(VOIE) || {}, options: VOIE === 'humain' ? optionsPour('humain') : {}, defroisser: VOIE === 'fantome' && DEFROISSER }]).then(function(r){
       if (!FS) return;
       FS.prix = (r && r.ok && r.coutMax != null) ? r.coutMax : null;
       if (MODE_FICHE) dessiner();
@@ -2510,6 +2513,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       return '<button type="button" class="fs-voie' + (VOIE === v.cle ? ' on' : '') + '" data-fs-voie="' + v.cle + '"' + (FS.enCours ? ' disabled' : '') + '><b>' + v.t + '</b><span>' + v.d + '</span></button>';
     }).join('');
     var modele = '';   // (2026-10-21) plus de nom de mannequin : The New Black décrit la personne
+    var defr = VOIE === 'fantome' ? '<label class="fs-ch"><input type="checkbox" id="fs-defroisser"' + (DEFROISSER ? ' checked' : '') + (FS.enCours ? ' disabled' : '') + '> ${T("Défroisser le vêtement")} (' + '${T("+ {p} par photo")}'.replace('{p}', szArgentNombre(0.065, 3) + ' $ US') + ')</label>' : '';
     var fonds = (VOIE === 'fantome' ? [AMB_TRANSP] : []).concat(PRESETS);
     var fond = '<label class="fs-ch">${T("Fond")} <select id="fs-fond"' + (FS.enCours ? ' disabled' : '') + '>'
       + fonds.map(function(p){ return '<option value="' + esc(p.cle) + '"' + (p.cle === PRESET ? ' selected' : '') + '>' + esc(p.label) + '</option>'; }).join('') + '</select></label>';
@@ -2520,7 +2524,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '<p class="aide">${T("Choisissez les photos, la présentation et le fond, puis générez : les photos reviennent toutes seules dans la fiche. Le devant sert de référence de couleur au dos.")}</p>'
       + '<h3>${T("1. Les photos")}</h3><div class="fs-photos">' + cartes + '</div>'
       + '<h3>${T("2. La présentation")}</h3><div class="fs-voies">' + voies + '</div>'
-      + '<div class="fs-reglages">' + modele + fond + '</div>'
+      + '<div class="fs-reglages">' + modele + fond + defr + '</div>'
       + '<div class="fs-fin"><button type="button" class="lien" id="fs-complet"' + (FS.enCours ? ' disabled' : '') + '>${T("Toutes les options du Studio…")}</button>'
       + '<span class="esp"></span><button type="button" class="prim" id="fs-go"' + (FS.enCours || !n || RO ? ' disabled' : '') + '>'
       + (FS.enCours ? '${T("Génération en cours…")}' : '${T("Générer et placer dans la fiche")}' + prix) + '</button></div></div>';
@@ -2540,6 +2544,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       ficheEstimer(); dessiner(); }; });
     if ($('fs-modele')) $('fs-modele').onchange = function(){ MODELE_SEL = this.value; ficheEstimer(); };
     if ($('fs-fond')) $('fs-fond').onchange = function(){ PRESET = this.value; ficheEstimer(); };
+    if ($('fs-defroisser')) $('fs-defroisser').onchange = function(){ DEFROISSER = this.checked; ficheEstimer(); };
     if ($('fs-complet')) $('fs-complet').onclick = function(){ MODE_FICHE = false; dessiner(); };
     if ($('fs-go')) $('fs-go').onclick = ficheGenerer;
   }
@@ -3220,7 +3225,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     return '<div class="guide">'
       + l(e1, !e1, '1', '${T("Choisissez une photo")}')
       + l(e2, e1 && !e2, '2', '${T("Choisissez une ambiance")}')
-      + l(false, e1 && e2, '3', '${T("Cliquez « Aperçu gratuit », en bas de la fenêtre")}')
+      + l(false, e1 && e2, '3', '${T("Cliquez « Générer en pleine qualité », en bas de la fenêtre")}')
       + '</div>';
   }
 
@@ -3334,6 +3339,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
        ph-ouvrir avait ete debranche le 2026-09-09. */
     // ⚠ data-FANTPALIER, pas data-fmode : ce nom-là appartient aux formats (Recadrer / Marges), branchés plus bas.
     // Les deux cases s excluent : cocher l une décoche l autre ; décocher revient à Standard.
+    corps.querySelectorAll('[data-fantdefr]').forEach(function(el){
+      el.onclick = function(ev){ ev.stopPropagation(); };
+      el.onchange = function(){ if (RO || OCCUPE) { el.checked = DEFROISSER; return; }
+        DEFROISSER = el.checked; VOIE = 'fantome'; VOIE_CHOISIE = true; if (!PRESET) PRESET = 'transparent'; dessiner(); };
+    });
     corps.querySelectorAll('[data-fantpalier]').forEach(function(el){
       el.onclick = function(ev){ ev.stopPropagation(); };
       el.onchange = function(){ if (RO || OCCUPE) { el.checked = FANT_PALIER === el.getAttribute('data-fantpalier'); return; }
@@ -3986,7 +3996,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var s = { geste: VOIE, preset: presetEnvoye(), apercu: apercu };
     if (PROD) { s.produit = PROD.provisoire ? '' : PROD.id; s.produitNom = PROD.nom; s.produitSku = PROD.sku; }
     if (transparentChoisi()) s.fondTransparent = true;
-    if (VOIE === 'fantome') s.palier = FANT_PALIER;
+    if (VOIE === 'fantome') { s.palier = FANT_PALIER; if (DEFROISSER) s.defroisser = true; }
     if ((!apercu || VOIE === 'fantome') && PRIX_ANNONCE != null) s.prixAnnonce = PRIX_ANNONCE;
     if (PHOTO_ID) { s.photoId = PHOTO_ID; } else { s.image = PHOTO; }
     if (VOIE === 'humain') {
@@ -4132,7 +4142,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var bC = apercu ? bApercu : bFinal;
     occuper(true);
     boutonAttente(bC, '${T("Calcul du coût…")}');
-    appeler('studio:estimer', [{ geste: VOIE, palier: VOIE === 'fantome' ? FANT_PALIER : '', preset: presetEnvoye(), nb: 1, finition: fin, options: opt }])
+    appeler('studio:estimer', [{ geste: VOIE, palier: VOIE === 'fantome' ? FANT_PALIER : '', preset: presetEnvoye(), nb: 1, finition: fin, options: opt, defroisser: VOIE === 'fantome' && DEFROISSER }])
       .then(function(r){
         boutonAttente(bC, '');
         occuper(false);

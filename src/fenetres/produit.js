@@ -285,6 +285,7 @@ table.mesv .mv-cm input{width:4.2rem;height:auto;min-height:0;border:0;border-ra
 .stm-desc{display:flex;flex-direction:column;gap:.3rem;margin-top:.7rem;font-size:.82rem}
 .stm-desc textarea{min-height:0;resize:vertical}
 .stm-sourire{display:flex;align-items:center;gap:.4rem;color:var(--tx)}
+.stm-defr{margin-top:.7rem;font-size:.85rem}.stm-defr .aide{margin:0}
 .stm-regl label{display:flex;align-items:center;gap:.45rem}
 /* Une section MODIFIÉE depuis l ouverture : un point dans son onglet, jusqu à l enregistrement. */
 #pas button.modif .n{box-shadow:0 0 0 2px var(--or)}
@@ -746,7 +747,7 @@ function pageProduit(id) {
       + 'title="${T("Détourer la photo et poser un décor (studio, jardin, Paris…)")}"><span class="ic">✂</span> ${T("Décor")}</button>'
       + '<button type="button" id="p-fibre" class="mini-decor" disabled '
       + 'title="${T("Un gros plan sur la matière, tiré de la photo principale, ajouté aux photos")}"><span class="ic">🔍</span> ${T("Gros plan fibre")}</button>'
-      + '<button type="button" id="p-studio" class="mini-decor" '
+      + '<button type="button" id="p-studio" class="mini-decor" disabled '
       + 'title="${T("Ouvrir le Studio virtuel pour cet article : les photos créées reviennent ici, dans leur case")}"><span class="ic">📷</span> ${T("Créer au studio")}</button></div>'
       + '<div class="aide p-studio-attente" id="p-studio-attente" style="display:none"></div>'
       + '<div class="vues" id="p-vues"></div>'
@@ -2439,6 +2440,8 @@ function pageProduit(id) {
 
   function dessinerVues(){
     majFicheBientot();   // la photo principale a pu changer (volet « Fiche »)
+    var bs0 = document.getElementById('p-studio');
+    if (bs0) bs0.disabled = !IMAGE && !photoDos();   // le Studio part d au moins une photo (2026-10-21)
     var t = document.getElementById('p-vues-titre');
     if (t) t.textContent = modeStandard()
       ? '${T("Photos — 1 principale +")} ' + MAX_PHOTOS + ' ${T("supplémentaires maximum")}'
@@ -2704,7 +2707,7 @@ function pageProduit(id) {
   function stmSaisie(image){
     var s = { geste: STM.voie, preset: stmPreset(), apercu: false, image: image,
       produit: ID ? String(ID) : '', produitNom: val('p-nom').trim(), produitSku: val('p-sku') };
-    if (STM.voie === 'fantome') { s.palier = 'standard'; if (STM.preset === 'transparent') s.fondTransparent = true; }
+    if (STM.voie === 'fantome') { s.palier = 'standard'; if (STM.preset === 'transparent') s.fondTransparent = true; if (STM.defroisser !== false) s.defroisser = true; }
     // LA DESCRIPTION LIBRE (2026-10-21, sa demande : « garde la possibilité de décrire ce que l on veut ») : scène, tenue,
     // accessoires — The New Black génère le mannequin d après ces mots (le sourire est demandé d office).
     if (STM.voie === 'humain') s.options = { pose: STM.pose || 'standing', sourire: STM.sourire === false ? 0 : 1, extra: STM.desc || '' };
@@ -2714,9 +2717,10 @@ function pageProduit(id) {
   function stmEstimer(){
     STM.prix = null;
     P.appeler('studio:estimer', { geste: STM.voie, palier: STM.voie === 'fantome' ? 'standard' : '', preset: stmPreset(), nb: 1,
-      finition: {}, options: STM.voie === 'humain' ? { pose: STM.pose || 'standing', sourire: 1 } : {} }).then(function(r){
+      defroisser: STM.voie === 'fantome' && STM.defroisser !== false, finition: {}, options: STM.voie === 'humain' ? { pose: STM.pose || 'standing', sourire: 1 } : {} }).then(function(r){
       if (!STM) return;
       STM.prix = (r && r.ok && r.coutMax != null) ? r.coutMax : null;
+      if (r && r.ok && Number(r.prixDefroisse) > 0) STM.prixDefr = Number(r.prixDefroisse);
       stmDessiner();
     });
   }
@@ -2725,6 +2729,7 @@ function pageProduit(id) {
   function ouvrirStudio(){
     if (!P || !P.appeler) return;
     var dos = photoDos();
+    if (!IMAGE && !dos) return;   // au moins une photo (2026-10-21, sa demande) : le bouton est grisé sans elle
     STU_ORIG = { devant: IMAGE || '', dos: dos || '' };
     var v = document.createElement('div'); v.className = 'voile stm-voile';
     v.innerHTML = '<div class="boite stm-boite" role="dialog" aria-modal="true"><div class="aide">${T("Chargement du Studio…")}</div></div>';
@@ -2766,6 +2771,8 @@ function pageProduit(id) {
       + (STM.voie === 'humain' ? '<div class="stm-desc"><label for="stm-desc">${T("Décrivez la scène, la tenue et les accessoires (facultatif)")}</label>'
           + '<textarea id="stm-desc" rows="2" maxlength="300" placeholder="${T("Ex. : sur une plage au coucher du soleil, chapeau de paille, sandales, souriante")}"' + (occ ? ' disabled' : '') + '>' + esc(STM.desc || '') + '</textarea>'
           + '<label class="stm-sourire"><input type="checkbox" id="stm-sourire"' + (STM.sourire === false ? '' : ' checked') + (occ ? ' disabled' : '') + '> ${T("Mannequin souriant")}</label></div>' : '')
+      // LE DÉFROISSAGE (2026-10-21, sa décision après l essai réel) : une seconde passe The New Black, cochée par défaut
+      + (STM.voie === 'fantome' ? '<label class="stm-sourire stm-defr"><input type="checkbox" id="stm-defroisser"' + (STM.defroisser === false ? '' : ' checked') + (occ ? ' disabled' : '') + '> ${T("Défroisser le vêtement")} <span class="aide">' + '${T("(+ {p} par photo)")}'.replace('{p}', szArgentSymbole(szArgentNombre(STM.prixDefr != null ? STM.prixDefr : 0.065, 3))) + '</span></label>' : '')
       + '<div class="stm-regl">'
       + '<label>${T("Fond")} <select id="stm-fond"' + (occ ? ' disabled' : '') + '>'
       + fonds.map(function(p){ return '<option value="' + esc(p.cle) + '"' + (p.cle === STM.preset ? ' selected' : '') + '>' + esc(p.label) + '</option>'; }).join('') + '</select></label></div>'
@@ -2781,6 +2788,7 @@ function pageProduit(id) {
     if ($('stm-fond')) $('stm-fond').onchange = function(){ STM.preset = this.value; STM.choisiFond = true; stmEstimer(); };
     if ($('stm-desc')) $('stm-desc').oninput = function(){ STM.desc = this.value; };
     if ($('stm-sourire')) $('stm-sourire').onchange = function(){ STM.sourire = this.checked; };
+    if ($('stm-defroisser')) $('stm-defroisser').onchange = function(){ STM.defroisser = this.checked; stmEstimer(); };
     $('stm-annuler').onclick = stmFermer;
     $('stm-go').onclick = stmGenerer;
   }
@@ -2948,6 +2956,8 @@ function pageProduit(id) {
     if (bd) bd.disabled = !src;
     var bf = document.getElementById('p-fibre');
     if (bf) bf.disabled = !src;
+    var bs = document.getElementById('p-studio');
+    if (bs) bs.disabled = !src && !photoDos();
     v.innerHTML = src
       ? '<img src="' + esc(src) + '" alt="" draggable="false">'
         + '<button type="button" class="x" id="p-vider" title="${T("Retirer la photo")}">×</button>'

@@ -3613,7 +3613,7 @@ const LIMITES_PONT = {
   'sauvegarde:restaurer': 600000, 'sauvegarde:supprimer': 45000, 'sauvegarde:purger': 120000,
   // Studio virtuel : les presets et le compte sont legers ; un traitement peut
   // enchainer plusieurs appels Photoroom de ~120 s chacun.
-  'studio:presets': 15000, 'studio:compte': 20000, 'studio:traiter': 300000,
+  'studio:presets': 15000, 'studio:compte': 20000, 'studio:traiter': 480000,
   // L estimation est une addition apres UNE lecture de la table des couts ;
   // poser le plafond est une ecriture de configuration. Ni l une ni l autre ne
   // touche a une image, donc pas de plafond de temps genereux ici.

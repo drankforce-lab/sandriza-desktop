@@ -376,8 +376,8 @@ module.exports = {
   'Une ou plusieurs — studio, fond blanc, un vêtement.': 'One or several — studio, white background, one garment.',
   'Ouvrir l’explorateur…': 'Open the explorer…',
   'Ce qui sera généré': 'What will be generated',
-  'Cliquez « Aperçu gratuit », en bas de la fenêtre':
-    'Click « Free preview », at the bottom of the window',
+  'Cliquez « Générer en pleine qualité », en bas de la fenêtre':
+    'Click « Generate in full quality », at the bottom of the window',
   'Voie :': 'Method:',
   'Pose :': 'Pose:',
   'Modèle :': 'Model:',
@@ -784,7 +784,7 @@ module.exports = {
   "Suivant": "Next",
   "Passer": "Skip",
   "Choisissez d’abord une ambiance": "Choose a mood first",
-  "Dernière étape — l’aperçu se lance en bas de la fenêtre.": "Last step — the preview starts at the bottom of the window.",
+  "Dernière étape — la génération se lance en bas de la fenêtre.": "Last step — generation starts at the bottom of the window.",
   "Aucune photo choisie": "No photo chosen",
   "Une ou plusieurs, dans la photothèque — studio, fond blanc, un vêtement.": "One or more, from the photo library — studio, white background, one garment.",
   "photos choisies": "photos chosen",
@@ -792,7 +792,7 @@ module.exports = {
   "Enregistrer et formats": "Save and formats",
   "Original": "Original",
   "cadrage du rendu": "as rendered",
-  "Filigrane ignoré — lancez l’aperçu en bas de la fenêtre.": "Watermark skipped — start the preview at the bottom of the window.",
+  "Filigrane ignoré — lancez la génération en bas de la fenêtre.": "Watermark skipped — start generation at the bottom of the window.",
   "Filigrane ignoré.": "Watermark skipped.",
   // 2026-10-15 : confirmations en boîte à part.
   "Le rendu en pleine qualité est un traitement payant : il consomme des crédits du service de génération d’images. Utilisez l’aperçu filigrané, gratuit, pour valider le résultat au préalable.": "Full-quality rendering is a paid process: it uses credits from the image generation service. Use the free watermarked preview to check the result first.",
@@ -887,4 +887,6 @@ module.exports = {
   "Changer…": "Change…",
   "Ajouter…": "Add…",
   "Décrivez la scène, la tenue et les accessoires dans les réglages avancés (Décor, Précisions) : le mannequin est généré d’après votre description.": "Describe the scene, outfit and accessories in the advanced settings (Setting, Details): the model is generated from your description.",
+  "Défroisser le vêtement": "Remove garment wrinkles",
+  "+ {p} par photo": "+ {p} per photo",
 };
