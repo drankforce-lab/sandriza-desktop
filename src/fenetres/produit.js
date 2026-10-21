@@ -2717,10 +2717,9 @@ function pageProduit(id) {
   function stmEstimer(){
     STM.prix = null;
     P.appeler('studio:estimer', { geste: STM.voie, palier: STM.voie === 'fantome' ? 'standard' : '', preset: stmPreset(), nb: 1,
-      defroisser: STM.voie === 'fantome' && STM.defroisser !== false, finition: {}, options: STM.voie === 'humain' ? { pose: STM.pose || 'standing', sourire: 1 } : {} }).then(function(r){
+      finition: {}, options: STM.voie === 'humain' ? { pose: STM.pose || 'standing', sourire: 1 } : {} }).then(function(r){
       if (!STM) return;
       STM.prix = (r && r.ok && r.coutMax != null) ? r.coutMax : null;
-      if (r && r.ok && Number(r.prixDefroisse) > 0) STM.prixDefr = Number(r.prixDefroisse);
       stmDessiner();
     });
   }
@@ -2771,8 +2770,8 @@ function pageProduit(id) {
       + (STM.voie === 'humain' ? '<div class="stm-desc"><label for="stm-desc">${T("Décrivez la scène, la tenue et les accessoires (facultatif)")}</label>'
           + '<textarea id="stm-desc" rows="2" maxlength="300" placeholder="${T("Ex. : sur une plage au coucher du soleil, chapeau de paille, sandales, souriante")}"' + (occ ? ' disabled' : '') + '>' + esc(STM.desc || '') + '</textarea>'
           + '<label class="stm-sourire"><input type="checkbox" id="stm-sourire"' + (STM.sourire === false ? '' : ' checked') + (occ ? ' disabled' : '') + '> ${T("Mannequin souriant")}</label></div>' : '')
-      // LE DÉFROISSAGE (2026-10-21, sa décision après l essai réel) : une seconde passe The New Black, cochée par défaut
-      + (STM.voie === 'fantome' ? '<label class="stm-sourire stm-defr"><input type="checkbox" id="stm-defroisser"' + (STM.defroisser === false ? '' : ' checked') + (occ ? ' disabled' : '') + '> ${T("Défroisser le vêtement")} <span class="aide">' + '${T("(+ {p} par photo)")}'.replace('{p}', szArgentSymbole(szArgentNombre(STM.prixDefr != null ? STM.prixDefr : 0.065, 3))) + '</span></label>' : '')
+      // LE DÉFROISSAGE (7.70.8) : sans mannequin ET défroissé en un seul appel The New Black, au même prix ; coché par défaut
+      + (STM.voie === 'fantome' ? '<label class="stm-sourire stm-defr"><input type="checkbox" id="stm-defroisser"' + (STM.defroisser === false ? '' : ' checked') + (occ ? ' disabled' : '') + '> ${T("Défroisser le vêtement")} <span class="aide">${T("(même prix)")}</span></label>' : '')
       + '<div class="stm-regl">'
       + '<label>${T("Fond")} <select id="stm-fond"' + (occ ? ' disabled' : '') + '>'
       + fonds.map(function(p){ return '<option value="' + esc(p.cle) + '"' + (p.cle === STM.preset ? ' selected' : '') + '>' + esc(p.label) + '</option>'; }).join('') + '</select></label></div>'
@@ -2788,7 +2787,7 @@ function pageProduit(id) {
     if ($('stm-fond')) $('stm-fond').onchange = function(){ STM.preset = this.value; STM.choisiFond = true; stmEstimer(); };
     if ($('stm-desc')) $('stm-desc').oninput = function(){ STM.desc = this.value; };
     if ($('stm-sourire')) $('stm-sourire').onchange = function(){ STM.sourire = this.checked; };
-    if ($('stm-defroisser')) $('stm-defroisser').onchange = function(){ STM.defroisser = this.checked; stmEstimer(); };
+    if ($('stm-defroisser')) $('stm-defroisser').onchange = function(){ STM.defroisser = this.checked; };
     $('stm-annuler').onclick = stmFermer;
     $('stm-go').onclick = stmGenerer;
   }

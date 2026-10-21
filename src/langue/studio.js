@@ -888,5 +888,5 @@ module.exports = {
   "Ajouter…": "Add…",
   "Décrivez la scène, la tenue et les accessoires dans les réglages avancés (Décor, Précisions) : le mannequin est généré d’après votre description.": "Describe the scene, outfit and accessories in the advanced settings (Setting, Details): the model is generated from your description.",
   "Défroisser le vêtement": "Remove garment wrinkles",
-  "+ {p} par photo": "+ {p} per photo",
+  "même prix": "same price",
 };
