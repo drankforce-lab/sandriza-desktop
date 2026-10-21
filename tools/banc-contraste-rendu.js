@@ -378,7 +378,10 @@ function suivant() {
   minuterie = setTimeout(function () {
     console.log('ELG-CR|MUETTE ' + LISTE[i].split('/').pop());
     suivant();
-  }, 4000);
+  // ⚠ 9 s, PAS 4 (2026-10-21) : l Atelier en vue 3D (atelier_c4, nuit) dépassait parfois 4 s sur l exécuteur Linux et
+  // ressortait « sans verdict » — quatre livraisons bloquées en un jour (7.69.8, 7.70.1, 7.70.3, 7.70.4) pour un écran
+  // qui n avait rien. Le délai ne coûte que pour les pages lentes : les autres répondent avant et passent à la suivante.
+  }, 9000);
 }
 window.addEventListener('message', function (e) { if (e.data === 'sz-fini') suivant(); });
 suivant();
