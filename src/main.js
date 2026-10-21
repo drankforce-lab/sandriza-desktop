@@ -4085,7 +4085,42 @@ ipcMain.handle('image:locale', async (_e, url) => {
    libelles. La recopier aurait fait une seconde porte qui divergerait au
    premier correctif. `emetteur` : la fenetre qui appelle (null depuis le
    processus principal) — elle n est pas rafraichie par sa propre ecriture. */
+/* ══ UNE OPÉRATION PAYANTE EN COURS DE DÉPART RETIENT SA FENÊTRE (2026-10-21, son signalement : « j ai fermé la
+   fenêtre avant que la génération 3D ne démarre : je ne sais pas si l appel a eu lieu ni si j ai été facturée —
+   assure-toi, au moment où tu commets un frais, que l opération soit bien démarrée avant de permettre de quitter »).
+   Tant qu une opération qui ENGAGE UN FRAIS n a pas répondu (lancée, ou refusée), sa fenêtre ne se ferme pas : elle
+   le dit, et se ferme d elle-même dès la réponse. (L appel, lui, vit dans la page principale : fermer la fenêtre ne
+   l arrêtait pas — mais rien ne permettait de le savoir.) ════════════════════════════════════════════════════════ */
+const PAYANT_RE = /(:traiter|:lancer|lancer3d|:generer|:lot$|:lotCreer|grosPlan|mesureMasque|fondAppliquer|:isoler|apercu3d|:vton|:fantome|:porte|:redige|:rendre3d)/i;
+const payantsEnCours = new Map();   // wc.id -> nombre d opérations payantes en vol
+const fermerApres = new Map();      // wc.id -> () => fermer, quand la personne a demandé à fermer pendant ce temps
+const payantsDe = (wcId) => payantsEnCours.get(wcId) || 0;
+const retenirFermeture = (wc, fermer) => {
+  if (!wc || !payantsDe(wc.id)) return false;
+  fermerApres.set(wc.id, fermer);
+  try {
+    wc.executeJavaScript('window.szDire && szDire(' + JSON.stringify(
+      'Un traitement payant est en train de démarrer : la fenêtre se fermera d’elle-même dès qu’il sera lancé.') + ', "att")', true).catch(() => {});
+  } catch (e) {}
+  return true;
+};
 async function executerOpSite(nom, args, emetteur) {
+  const payant = !!(emetteur && !emetteur.isDestroyed() && PAYANT_RE.test(nom));
+  if (!payant) return executerOpSite0(nom, args, emetteur);
+  const id = emetteur.id;
+  payantsEnCours.set(id, payantsDe(id) + 1);
+  try { return await executerOpSite0(nom, args, emetteur); }
+  finally {
+    const n = payantsDe(id) - 1;
+    if (n > 0) payantsEnCours.set(id, n);
+    else {
+      payantsEnCours.delete(id);
+      const f = fermerApres.get(id); fermerApres.delete(id);
+      if (f) setTimeout(() => { try { f(); } catch (e) {} }, 300);
+    }
+  }
+}
+async function executerOpSite0(nom, args, emetteur) {
   if (!OPS_PONT.has(nom)) return { ok: false, motif: 'operation_inconnue' };
   const wc = siteWC();
   if (!wc) return { ok: false, motif: 'pont_indisponible' };
@@ -4860,6 +4895,8 @@ ipcMain.on('pont:premierPlan', (e) => {
   try { if (w.isMinimized()) w.restore(); if (!w.isVisible()) w.show(); w.moveTop(); w.focus(); w.webContents.focus(); } catch {}
 });
 ipcMain.on('pont:fermer', (e) => {
+  // Un traitement payant en train de démarrer retient la fermeture (voir retenirFermeture).
+  if (retenirFermeture(e.sender, () => { try { ipcMain.emit('pont:fermer', { sender: e.sender }); } catch (er) {} })) return;
   // Une vue ANCREE qui << ferme >> (Echap) se cache — fermer la fenetre
   // principale a sa place serait la pire des surprises.
   for (const [c, a] of ancrees) {
@@ -5115,6 +5152,8 @@ ipcMain.on('pont:brouillonSale', (e, on) => {
 const brancherGardeBrouillon = (win, wc) => {
   const wcId = wc.id;
   win.on('close', (ev) => {
+    // Un traitement payant en train de démarrer : on attend sa réponse, puis la fenêtre se ferme d elle-même.
+    if (!win._szFermeOk && retenirFermeture(wc, () => { if (!win.isDestroyed()) win.close(); })) { ev.preventDefault(); return; }
     /* ⚠ LA MÊME DÉCISION QUE LA FENÊTRE PRINCIPALE, prise au même endroit.
        Les deux gardes divergeaient : celui-ci laissait passer quand une mise à
        jour bloquait (`return` sans `preventDefault`), l'autre refusait. C'est
