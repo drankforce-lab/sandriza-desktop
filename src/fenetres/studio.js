@@ -674,8 +674,8 @@ function pageStudio(mode) {
 .fs h2{margin:0 0 .1rem;font-size:1.15rem}
 .fs h3{margin:.7rem 0 .35rem;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
 .fs-photos{display:grid;grid-template-columns:repeat(2,minmax(0,15rem));gap:.8rem}
-.fs-photo{border:1px solid var(--v12);border-radius:12px;padding:.5rem;display:flex;flex-direction:column;gap:.45rem;opacity:.6}
-.fs-photo.on{opacity:1;border-color:var(--or)}
+.fs-photo{border:1px dashed var(--v22);border-radius:12px;padding:.5rem;display:flex;flex-direction:column;gap:.45rem}
+.fs-photo.on{border-style:solid;border-color:var(--or)}
 .fs-vign{aspect-ratio:3/4;border-radius:9px;background:var(--v05);display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--tx2);font-size:.8rem;text-align:center;padding:.4rem}
 .fs-vign img{width:100%;height:100%;object-fit:contain}
 .fs-bas{display:flex;align-items:center;justify-content:space-between;gap:.4rem}
