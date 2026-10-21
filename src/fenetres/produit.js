@@ -3086,6 +3086,10 @@ function pageProduit(id) {
      l'enregistrement). COUTS : ce que le journal dit avoir dépensé pour cet article.
      G3D : la génération en cours, suivie dans la FILE DES GÉNÉRATIONS de la page principale. */
   var MOD3D = '', CLE_COUTS = '', COUTS = null;
+  /* LE MODÈLE 3D NE PART QUE S IL A ÉTÉ CHANGÉ ICI (2026-10-21) : sinon une fiche ouverte avant qu une génération pose
+     un nouveau modèle renvoyait l ancien (ou aucun) et l écrasait — et le nouveau fichier quittait le stockage. */
+  var MOD3D0 = '';
+  function sansModele3d(o){ if (MOD3D === MOD3D0) delete o.modele3d; return o; }
   var G3D = { conf: false, forcer: false, enCours: false, genId: '', etapes: null, minuterie: 0, verrou: null, vu: '', attente: null };
   /* LES DIX ÉTAPES viennent de la FILE (generations:etat) — sa condition : « aucune étape silencieuse ». Les libellés
      sont traduits ICI, par rang. The New Black met ~2 min 30 s à rendre le modèle ; le travail au poste, ~15 s. */
@@ -3158,7 +3162,7 @@ function pageProduit(id) {
           if (G3D.vu !== g.id + g.etat) {
             G3D.vu = g.id + g.etat;
             if (g.etat === 'fini' && g.modele3d) {
-              MOD3D = g.modele3d; dessinerMedias();
+              MOD3D = g.modele3d; MOD3D0 = g.modele3d; dessinerMedias();
               dire('${T("Aperçu 3D posé sur la fiche.")} ' + texteConformite(g.conformite), 'bon');
             } else if (g.etat === 'attente') dire('${T("Le modèle 3D ne correspond pas bien aux photos : il attend votre confirmation.")} ' + texteConformite(g.conformite), 'att');
             else if (g.etat === 'echec') dire('${T("L’aperçu 3D a échoué :")} ' + (g.message || ''), 'err');
@@ -3729,7 +3733,7 @@ function pageProduit(id) {
     poser('p-mq-cm', mq.tailleCm ? String(mq.tailleCm) : '');
     MQ_TAILLE = String(mq.taillePortee || '');
     VIDEO = (typeof p.video === 'string') ? p.video : '';
-    MOD3D = (typeof p.modele3d === 'string') ? p.modele3d : '';
+    MOD3D = (typeof p.modele3d === 'string') ? p.modele3d : ''; MOD3D0 = MOD3D;
     VIDEO_OCTETS = 0;
     VUE360 = Array.isArray(p.vue360) ? p.vue360.filter(Boolean).map(String) : [];
     dessinerMedias();
@@ -4792,7 +4796,7 @@ function pageProduit(id) {
     var medNeufs = VIDEO.indexOf('data:') === 0 || VUE360.some(function(x){ return String(x).indexOf('data:') === 0; });
     dire(medNeufs ? '${T("Dépôt des médias et enregistrement…")}'
       : (IMAGE && IMAGE.indexOf('data:') === 0 ? '${T("Dépôt de la photo et enregistrement…")}' : '${T("Enregistrement…")}'));
-    P.appeler('produit:enregistrer', ID, {
+    P.appeler('produit:enregistrer', ID, sansModele3d({
       name: val('p-nom').trim(), category: val('p-cat'), sku: val('p-sku'),
       brand: val('p-marque'), description: val('p-desc'),
       genre: val('p-genre'), ageGroup: val('p-age'), style: val('p-style'),
@@ -4835,7 +4839,7 @@ function pageProduit(id) {
       modele3d: MOD3D || null,
       brouillonCouts: (!ID && CLE_COUTS) ? CLE_COUTS : '',
       photosNip: NIP_PHOTOS
-    }).then(function(r){
+    })).then(function(r){
       // Le prochain envoi repart de zéro : les photos ont pu changer entre-temps.
       VAR_FAITES = false;
       if (!r || !r.ok) {
