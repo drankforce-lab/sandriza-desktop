@@ -180,4 +180,12 @@ module.exports = {
   'Du brut au net': 'From gross to net',
   'Frais nets': 'Net fees',
   'Net Square': 'Square net',
+  "Carte de crédit": "Credit card",
+  "Débit": "Debit",
+  "Comptant": "Cash",
+  "Terminal": "Terminal",
+  "Autre": "Other",
+  "Catégorie": "Category",
+  "Toutes": "All",
+  "Aucune transaction de cette catégorie pour ": "No transactions in this category for ",
 };

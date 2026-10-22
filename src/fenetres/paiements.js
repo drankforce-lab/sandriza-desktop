@@ -53,7 +53,17 @@ details.cx-detail{min-width:0}
 details.cx-detail>summary{cursor:pointer;list-style:none}
 details.cx-detail>summary::-webkit-details-marker{display:none}
 details.cx-detail>.cx-sub{margin:.5rem .2rem 0;line-height:1.5}
-.cx-carte .vide{margin:auto 0}
+.cx-carte .vide{margin:auto;align-self:center}
+/* (7.70.16) la categorie de chaque paiement, et le filtre des listes */
+.cx-tete{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.cx-carte .cx-tete h2{margin:0 auto 0 0}
+.cx-tete{margin-bottom:.6rem}
+.cat{display:inline-block;font-size:.7rem;font-weight:600;padding:.12rem .5rem;border-radius:99px;white-space:nowrap;
+  background:var(--v08);color:var(--tx)}
+.cat.credit{background:rgba(59,130,246,.16)}.cat.debit{background:rgba(34,197,94,.16)}
+.cat.googlepay{background:rgba(234,179,8,.18)}.cat.applepay{background:rgba(148,163,184,.22)}
+.cat.afterpay{background:rgba(20,184,166,.18)}.cat.comptant,.cat.terminal{background:rgba(245,158,11,.16)}
+.cat-det{margin-left:.4rem;color:var(--tx2);font-size:.74rem;white-space:nowrap}
 select,button{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.3rem .55rem;cursor:pointer}
 select:focus,button:focus{outline:none;border-color:var(--or)}
@@ -109,6 +119,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('paiements')}
   var ONGLET = 'transactions';   // transactions | reconciliation
   var ANNEE = 0;                 // 0 = celle que le site propose
   var OCCUPE = false;            // une requete Square est en cours
+  var FILTRE = '';               // (7.70.16) categorie montree : '' = toutes
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -216,49 +227,67 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('paiements')}
     /* (2026-10-16, vu a la capture) Moitie-moitie, la carte des transactions n en montrait qu UNE :
        chaque carte prend une part de hauteur selon ses lignes (bornee de 1 a 3). */
     var part = function(n){ return Math.min(3, Math.max(1, n + 1)); };
-    g += '<div class="cx-carte sz-pagee" style="flex-grow:' + part(D.paiements.length) + '"><h2>${T("Transactions — ")}' + D.annee + '</h2>';
-    if (!D.paiements.length) {
-      g += '<div class="vide">${T("Aucune transaction pour ")}' + D.annee + '.</div>';
+    /* (7.70.16, sa demande) LE FILTRE PAR CATEGORIE : il vaut pour les transactions ET les remboursements, et les
+       totaux des tableaux suivent ce qui est montre (les tuiles du haut restent celles de l annee entiere). */
+    var CATS = D.categories || {};
+    var nom = function(c){ return ({ credit: '${T("Carte de crédit")}', debit: '${T("Débit")}', googlepay: 'Google Pay', applepay: 'Apple Pay',
+      afterpay: 'Afterpay', comptant: '${T("Comptant")}', terminal: '${T("Terminal")}', autre: '${T("Autre")}' })[c] || CATS[c] || c; };
+    var presentes = {};
+    (D.paiements || []).concat(D.remboursements || []).forEach(function(x){ if (x.cat) presentes[x.cat] = (presentes[x.cat] || 0) + 1; });
+    if (FILTRE && !presentes[FILTRE]) FILTRE = '';
+    var pay = (D.paiements || []).filter(function(p){ return !FILTRE || p.cat === FILTRE; });
+    var remb = (D.remboursements || []).filter(function(r){ return !FILTRE || r.cat === FILTRE; });
+    var filtre = Object.keys(presentes).length > 1
+      ? '<label class="cx-filtre">${T("Catégorie")} <select id="p-filtre"><option value="">${T("Toutes")}</option>'
+        + Object.keys(presentes).map(function(c){ return '<option value="' + esc(c) + '"' + (c === FILTRE ? ' selected' : '') + '>' + esc(nom(c)) + ' (' + presentes[c] + ')</option>'; }).join('')
+        + '</select></label>' : '';
+    var pastille = function(x){ return x.cat ? '<span class="cat ' + esc(x.cat) + '">' + esc(nom(x.cat)) + '</span>' : ''; };
+    var somme = function(l, k){ return Math.round(l.reduce(function(s, x){ return s + (Number(x[k]) || 0); }, 0) * 100) / 100; };
+    g += '<div class="cx-carte sz-pagee" style="flex-grow:' + part(pay.length) + '"><div class="cx-tete"><h2>${T("Transactions — ")}' + D.annee
+      + (FILTRE ? ' · ' + esc(nom(FILTRE)) : '') + '</h2>' + filtre + '</div>';
+    if (!pay.length) {
+      g += '<div class="vide">' + (FILTRE ? '${T("Aucune transaction de cette catégorie pour ")}' : '${T("Aucune transaction pour ")}') + D.annee + '.</div>';
     } else {
       g += '<div class="cx-pages" data-pages="paiements-transactions"><table><thead><tr><th>${T("Date")}</th><th>${T("Réf. Square")}</th><th>${T("Mode de paiement")}</th>'
         + '<th class="num">${T("Brut")}</th><th class="num">${T("Frais")}</th><th class="num">${T("Net reçu")}</th></tr></thead><tbody>'
-        + D.paiements.map(function(p){
+        + pay.map(function(p){
             return '<tr><td style="white-space:nowrap">' + esc(p.date) + '</td>'
               + '<td><span class="cx-code">' + esc(p.ref) + '</span></td>'
-              + '<td>' + esc(p.moyen) + '</td>'
+              + '<td>' + (p.cat ? pastille(p) + (p.detail ? '<span class="cat-det">' + esc(p.detail) + '</span>' : '') : esc(p.moyen)) + '</td>'
               + '<td class="num">' + fmt(p.brut) + '</td>'
               + '<td class="num err">' + (p.frais > 0 ? '−' + fmt(p.frais) : '—') + '</td>'
               + '<td class="num bon"><b>' + fmt(p.net) + '</b></td></tr>';
           }).join('')
-        + '<tr class="tot"><td colspan="3">${T("Total ")}' + D.annee + '</td>'
-        + '<td class="num">' + fmt(t.brut) + '</td>'
-        + '<td class="num err">−' + fmt(t.frais) + '</td>'
+        + '<tr class="tot"><td colspan="3">${T("Total ")}' + D.annee + (FILTRE ? ' · ' + esc(nom(FILTRE)) : '') + '</td>'
+        + '<td class="num">' + fmt(FILTRE ? somme(pay, 'brut') : t.brut) + '</td>'
+        + '<td class="num err">−' + fmt(FILTRE ? somme(pay, 'frais') : t.frais) + '</td>'
         /* Le total d une colonne est la somme de SES lignes (2026-09-29) : t.net +
            t.rembourse y ajoutait les frais recuperes sur remboursement, que les
            lignes n ont pas - 238,06 $ sous 149,49 + 87,47. Le recupere est dit
            dans la tuile << Frais Square >>. */
-        + '<td class="num bon">' + fmt(Math.round((t.brut - t.frais) * 100) / 100) + '</td></tr>'
+        + '<td class="num bon">' + fmt(FILTRE ? somme(pay, 'net') : Math.round((t.brut - t.frais) * 100) / 100) + '</td></tr>'
         + '</tbody></table></div>';
     }
     if (D.bacASable) g += '<div class="cx-pied"><span>${T("Transactions d’essai : masquables en bac à sable seulement.")}</span></div>';
     g += '</div>';
 
     /* Les remboursements restent A LEUR PLACE : sous les transactions, dans la meme colonne. */
-    if (D.remboursements.length) {
-      g += '<div class="cx-carte sz-pagee" style="flex-grow:' + part(D.remboursements.length) + '"><h2>${T("Remboursements — ")}' + D.annee
-        + ' <span class="rf-pill">' + D.remboursements.length + '</span></h2>'
-        + '<div class="cx-pages" data-pages="paiements-remboursements"><table><thead><tr><th>${T("Date")}</th><th>${T("Réf.")}</th><th>${T("Paiement d’origine")}</th><th>${T("Motif")}</th>'
+    if (remb.length) {
+      g += '<div class="cx-carte sz-pagee" style="flex-grow:' + part(remb.length) + '"><h2>${T("Remboursements — ")}' + D.annee
+        + (FILTRE ? ' · ' + esc(nom(FILTRE)) : '') + ' <span class="rf-pill">' + remb.length + '</span></h2>'
+        + '<div class="cx-pages" data-pages="paiements-remboursements"><table><thead><tr><th>${T("Date")}</th><th>${T("Réf.")}</th><th>${T("Paiement d’origine")}</th><th>${T("Catégorie")}</th><th>${T("Motif")}</th>'
         + '<th class="num">${T("Montant")}</th></tr></thead><tbody>'
-        + D.remboursements.map(function(r){
+        + remb.map(function(r){
             return '<tr><td style="white-space:nowrap">' + esc(r.date) + '</td>'
               + '<td><span class="cx-code">' + esc(r.ref) + '</span></td>'
               + '<td><span class="cx-code">' + esc(r.paiement) + '</span></td>'
+              + '<td>' + pastille(r) + '</td>'
               + '<td>' + esc(r.motif || '—')
               + (r.enAttente ? ' <span class="rf-pill ambre">${T("en attente")}</span>' : '') + '</td>'
               + '<td class="num err">−' + fmt(r.montant) + '</td></tr>';
           }).join('')
-        + '<tr class="tot"><td colspan="4">${T("Total des remboursements")}</td>'
-        + '<td class="num err">−' + fmt(t.rembourse) + '</td></tr>'
+        + '<tr class="tot"><td colspan="5">${T("Total des remboursements")}</td>'
+        + '<td class="num err">−' + fmt(FILTRE ? somme(remb, 'montant') : t.rembourse) + '</td></tr>'
         + '</tbody></table></div></div>';
     }
     g += '</div>';
@@ -369,6 +398,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('paiements')}
     }
     corps.innerHTML = h;
 
+    var pf = document.getElementById('p-filtre');
+    if (pf) pf.onchange = function(){ FILTRE = pf.value; dessiner(); };
     var sel = document.getElementById('p-annee');
     if (sel) sel.onchange = function(){ ANNEE = +sel.value; charger(); };
     var bc = document.getElementById('p-charger');
