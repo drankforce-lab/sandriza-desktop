@@ -2814,11 +2814,22 @@ function pageProduit(id) {
         P.appeler('studio:traiter', stmSaisie(img)).then(function(r){
           if (!STM) return;
           if (!r || !r.ok) { STM.etats[p.role] = '✗ ' + expliquer(r); echec = true; suite(liste.length); return; }
+          /* RANGÉE DANS LA PHOTOTHÈQUE D ABORD (7.70.10, sa remarque : « tu n enregistres pas les photos de dos dans la
+             photothèque ») : le Studio de la fiche posait le rendu tel quel, en donnée — ni le devant ni le dos n étaient
+             rangés. Chaque photo est maintenant importée, étiquetée (article et rôle), et la fiche reçoit son ADRESSE ;
+             un rangement raté garde la donnée, rien ne se perd. */
           var poser = function(im){
             if (p.role === 'devant') refDevant = im;
-            poserDuStudio({ url: im, role: p.role, code: '' }, function(){
+            STM.etats[p.role] = '${T("Rangement dans la photothèque…")}'; stmDessiner();
+            var nom = (val('p-sku') || val('p-nom').trim() || 'studio') + '-' + (p.role === 'dos' ? 'dos' : 'devant');
+            P.appeler('studio:enregistrer', { image: im, nom: nom, produit: ID ? String(ID) : '', produitNom: val('p-nom').trim(), role: p.role }).then(function(e){
               if (!STM) return;
-              STM.etats[p.role] = '✓ ${T("Placée dans la fiche")}'; suite(i + 1);
+              var ok = !!(e && e.ok && e.url);
+              poserDuStudio({ url: ok ? e.url : im, role: p.role, code: (e && e.code) || '' }, function(){
+                if (!STM) return;
+                STM.etats[p.role] = '✓ ' + (ok ? '${T("Placée dans la fiche et rangée dans la photothèque")}' : '${T("Placée dans la fiche (non rangée dans la photothèque)")}');
+                suite(i + 1);
+              });
             });
           };
           /* LA COULEUR DE L ORIGINAL (2026-10-20, sa capture : le gris taupe devenu gris bleuté). Chaque résultat est

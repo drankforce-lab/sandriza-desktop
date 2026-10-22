@@ -898,5 +898,8 @@ module.exports = {
   "Mannequin souriant": "Smiling model",
   "Défroisser le vêtement": "Remove garment wrinkles",
   "(même prix)": "(same price)",
+  "Rangement dans la photothèque…": "Saving to the photo library…",
+  "Placée dans la fiche et rangée dans la photothèque": "Placed in the item and saved to the photo library",
+  "Placée dans la fiche (non rangée dans la photothèque)": "Placed in the item (not saved to the photo library)",
   "Ex. : sur une plage au coucher du soleil, chapeau de paille, sandales, souriante": "E.g.: on a beach at sunset, straw hat, sandals, smiling",
 };
