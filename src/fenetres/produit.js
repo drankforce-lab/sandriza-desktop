@@ -3288,66 +3288,12 @@ function pageProduit(id) {
       rf.title = rr || (BRUT3D && BRUT3D.expireLe ? '${T("Retraite l’aperçu au poste depuis l’original de The New Black — sans nouvel appel payant. Original conservé jusqu’au")} ' + dateCourte3d(BRUT3D.expireLe) + '.' : '');
       if (e3 && MOD3D && rr) e3.textContent = rr;
       rf.onclick = refaireCouleur3d;
-      lienRattacher3d(rf);   // TEMPORAIRE (2026-10-19) — voir plus bas
     }
   }
   var BRUT3D = null, BRUT3D_DEMANDE = false;
-  /* ══ TEMPORAIRE (2026-10-19) — à retirer une fois les anciens aperçus réparés ═══════════════════════════════════════
-     « Rattacher un original… » : pour les aperçus faits AVANT la conservation des originaux (la Walla), dont « Refaire le
-     rendu » est grisé. Un petit lien sous le bouton, visible seulement quand l'original manque et pour qui peut modifier
-     les produits. Le fichier .glb choisi est vérifié ici (≤ 20 Mo ; jamais un modèle déjà traité — matière sz-photo*),
-     puis RATTACHÉ seul (le pont dépose et mémorise 30 jours ; « verifier » : rien n'est lancé) ; « Refaire le rendu »
-     redevient actif et elle le lance elle-même. Pour retirer : ce bloc, et l'appel lienRattacher3d(rf) plus haut. */
-  function lienRattacher3d(rf){
-    var a = document.getElementById('p-3d-rattacher');
-    if (!a) {
-      a = document.createElement('a'); a.id = 'p-3d-rattacher'; a.href = '#'; a.className = 'aide';
-      a.style.cssText = 'display:block;margin-top:4px;font-size:12px';
-      a.textContent = '${T("Rattacher un original…")}';
-      a.title = '${T("Pour un aperçu fait avant la conservation des originaux : choisissez l’original de The New Black (.glb, 20 Mo au plus).")}';
-      var f = document.createElement('input'); f.type = 'file'; f.accept = '.glb,model/gltf-binary'; f.id = 'p-3d-rattacher-f'; f.style.display = 'none';
-      a.onclick = function(ev){ ev.preventDefault(); f.value = ''; f.click(); };
-      f.onchange = function(){ if (f.files && f.files[0]) rattacherOriginal3d(f.files[0]); };
-      rf.parentNode.appendChild(a); rf.parentNode.appendChild(f);
-    }
-    var manque = BRUT3D && !BRUT3D.ok && (BRUT3D.motif === 'original_absent' || BRUT3D.motif === 'original_supprime');
-    a.style.display = (MOD3D && ID && CTX && CTX.peutModifier && manque && !G3D.enCours) ? 'block' : 'none';
-  }
-  function rattacherOriginal3d(fic){
-    if (fic.size > 20 * 1024 * 1024) { dire('${T("Fichier trop lourd (20 Mo au plus) — utilisez l’original ALLÉGÉ (environ 3,5 Mo), pas le modèle brut de The New Black.")}', 'err'); return; }
-    var lr = new FileReader();
-    lr.onerror = function(){ dire('${T("Fichier illisible.")}', 'err'); };
-    lr.onload = function(){
-      var buf = lr.result, dv = new DataView(buf), mats = null;
-      try {
-        if (dv.getUint32(0, true) !== 0x46546C67 || dv.getUint32(16, true) !== 0x4E4F534A) throw new Error('glb');
-        var js = JSON.parse(new TextDecoder().decode(new Uint8Array(buf, 20, dv.getUint32(12, true))));
-        mats = (js.materials || []).map(function(m){ return String(m.name || ''); });
-      } catch (e) { dire('${T("Ce fichier n’est pas un modèle 3D .glb valide.")}', 'err'); return; }
-      if (mats.some(function(n){ return n.indexOf('sz-photo') === 0; })) {
-        dire('${T("Ce modèle a déjà été traité (c’est un aperçu posé, pas l’original de The New Black) : il ne peut pas servir à refaire le rendu.")}', 'err'); return;
-      }
-      szConfirmer({ prudent: true, titre: '${T("Rattacher un original")}',
-        texte: '${T("Cet original servira à Refaire le rendu pendant 30 jours. Rien n’est lancé : vous ferez ensuite « Refaire le rendu » vous-même (gratuit).")}',
-        details: [['${T("Fichier")}', String(fic.name)], ['${T("Taille")}', (fic.size / 1048576).toFixed(1) + ' ${T("Mo")}']],
-        oui: '${T("Rattacher")}' }).then(function(ok){
-          if (!ok) return;
-          var lr2 = new FileReader();
-          lr2.onload = function(){
-            var du = 'data:model/gltf-binary;base64,' + String(lr2.result).split(';base64,')[1];
-            dire('${T("Rattachement de l’original…")}', 'att');
-            P.appeler('generations:refaireCouleur', String(ID), { rattacher: du, verifier: true }).then(function(r){
-              BRUT3D = r || { ok: false, motif: 'echec' }; dessiner3d();
-              if (r && r.ok) dire('${T("Original rattaché — « Refaire le rendu » est de nouveau disponible pendant 30 jours.")}', 'bon');
-              else dire(expliquer(r), 'err');
-            });
-          };
-          lr2.readAsDataURL(fic);
-        });
-    };
-    lr.readAsArrayBuffer(fic);
-  }
-  /* ══ fin du bloc TEMPORAIRE ══ */
+  /* (2026-10-22, sa demande) Le lien TEMPORAIRE « Rattacher un original… » (2026-10-19) est retiré : les aperçus 3D
+     d'avant la conservation des originaux sont réparés (la Walla a son original). Passé 30 jours, l'original part
+     (cron-maintenance 5d) et « Refaire le rendu » se grise en le disant : on génère alors un nouvel aperçu 3D. */
   function dateCourte3d(ms){ try { return new Date(ms).toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return ''; } }
   function raisonRefaire3d(){
     if (!BRUT3D || BRUT3D.ok) return '';
