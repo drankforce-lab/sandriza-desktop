@@ -169,6 +169,7 @@ function pageEncan() {
           <label class="champ">${T("Départ")}<span class="unite"><input id="r-depart" type="number" min="0" max="100000" step="1"><span>$</span></span></label>
           <label class="champ">${T("Durée")}<span class="unite"><input id="r-duree" type="number" min="5" max="600" step="5"><span>s</span></span></label>
           <label class="champ">${T("Ajout par offre")}<span class="unite"><input id="r-ajout" type="number" min="1" max="120" step="1"><span>s</span></span></label>
+          <label class="champ">${T("Jamais plus de")}<span class="unite"><input id="r-plafond" type="number" min="5" max="600" step="5"><span>s</span></span></label>
           <label class="champ">${T("Hausse minimale")}<span class="unite"><input id="r-hausse" type="number" min="0.01" max="10000" step="0.5"><span>$</span></span></label>
           <label class="champ">${T("Sans offre, relance à")}<span class="unite"><input id="r-sous" type="number" min="1" max="30" step="1"><span>s</span></span></label>
           <label class="champ">${T("…et repart à")}<span class="unite"><input id="r-a" type="number" min="5" max="120" step="1"><span>s</span></span></label>
@@ -300,14 +301,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function poserReglages(){
     if (!E || !E.reglages) return;
     var g = E.reglages;
-    $('r-depart').value = g.depart; $('r-duree').value = g.duree; $('r-ajout').value = g.ajout; $('r-hausse').value = g.hausse;
+    $('r-depart').value = g.depart; $('r-duree').value = g.duree; $('r-ajout').value = g.ajout; $('r-plafond').value = g.plafond; $('r-hausse').value = g.hausse;
     $('r-sous').value = g.relanceSous; $('r-a').value = g.relanceA; $('r-delai').value = Math.round(g.delaiGagne / 60);
   }
   function lireReglages(){
-    return { depart: +$('r-depart').value, duree: +$('r-duree').value, ajout: +$('r-ajout').value, hausse: +$('r-hausse').value,
+    return { depart: +$('r-depart').value, duree: +$('r-duree').value, ajout: +$('r-ajout').value, plafond: +$('r-plafond').value, hausse: +$('r-hausse').value,
       relanceSous: +$('r-sous').value, relanceA: +$('r-a').value, delaiGagne: (+$('r-delai').value || 15) * 60 };
   }
-  ['r-depart','r-duree','r-ajout','r-hausse','r-sous','r-a','r-delai'].forEach(function(id){
+  ['r-depart','r-duree','r-ajout','r-plafond','r-hausse','r-sous','r-a','r-delai'].forEach(function(id){
     $(id).onchange = function(){ geste('regler', [lireReglages()]).then(function(r){ if (!r.ok) poserReglages(); }); };
   });
 
@@ -343,7 +344,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     $('g-remise').hidden = !(E.phase === 'adjuge' || E.phase === 'expire');
     $('g-annuler').disabled = !a || E.phase === 'vendu' || E.phase === 'annule' || E.phase === 'garde';
     if (!REGLAGES_POSES) { poserReglages(); REGLAGES_POSES = true; }
-    ['r-depart','r-duree','r-ajout','r-hausse','r-sous','r-a','r-delai'].forEach(function(id){ $(id).disabled = enJeu; });
+    ['r-depart','r-duree','r-ajout','r-plafond','r-hausse','r-sous','r-a','r-delai'].forEach(function(id){ $(id).disabled = enJeu; });
 
     var g = E.gagnant, montre = E.phase === 'adjuge' || E.phase === 'expire';
     $('carte-gagnant').hidden = !(g && (montre || E.phase === 'vendu'));

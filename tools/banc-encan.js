@@ -35,9 +35,18 @@ console.log('— Les offres');
 e = neuf(); e.demarrer();
 let r = e.commentaire('@marie', '10');
 verif('sous le prix de départ (15 $) : refusée', r.verdict === 'sous_depart' && e.nbOffres === undefined && e.offres.length === 0);
+avancer(20000, e);   // 10 s restantes : l ajout entier tient sous le plafond
 const avant = e.etat().restantMs;
 r = e.commentaire('julie.mtl', '15');
 verif('première offre au prix de départ : retenue, +15 s, meneuse affichée', r.verdict === 'retenue' && e.meneur === '@julie.mtl' && e.etat().restantMs - avant >= 14900, e.etat().restantMs - avant);
+// SA RÈGLE (2026-10-21) : +15 s par offre, mais jamais plus de 30 s restantes ; un temps plus long n est pas raccourci
+{ const e1 = neuf(); e1.demarrer(); avancer(5000, e1);   // ~25 s restantes
+  let r1 = e1.commentaire('@ana', '15');
+  verif('plafond : à ~25 s restantes, une offre ramène à 30 s, pas 40', r1.verdict === 'retenue' && Math.abs(e1.etat().restantMs - 30000) <= 100, e1.etat().restantMs);
+  r1 = e1.commentaire('@bea', '16');
+  verif('plafond : à 30 s, une offre n ajoute rien', r1.verdict === 'retenue' && Math.abs(e1.etat().restantMs - 30000) <= 100, e1.etat().restantMs); }
+{ const e2 = neuf({ duree: 60 }); e2.demarrer(); const r0 = e2.etat().restantMs; e2.commentaire('@cleo', '15');
+  verif('plafond : un temps de départ de 60 s n est pas raccourci par une offre', Math.abs(e2.etat().restantMs - r0) <= 100, e2.etat().restantMs); }
 r = e.commentaire('@sophie_b', '15,50');
 verif('hausse minimale de 1 $ : 15,50 refusée', r.verdict === 'trop_basse' && e.prix === 15);
 r = e.commentaire('@sophie_b', '16');

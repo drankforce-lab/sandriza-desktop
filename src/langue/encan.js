@@ -157,6 +157,7 @@ module.exports = {
   'Départ': 'Start',
   'Durée': 'Duration',
   'Ajout par offre': 'Added per bid',
+  'Jamais plus de': 'Never more than',
   'Hausse minimale': 'Minimum raise',
   'Sans offre, relance à': 'No bid: restart at',
   '…et repart à': '…and restarts at',

@@ -12,7 +12,9 @@
  * ⚠ SES RÈGLES, MOT POUR MOT (2026-10-20) :
  *   · SANS offre : arrivé à 2 s, le minuteur repart à 15 s — en boucle, jusqu à
  *     la première offre. Un article ne finit donc jamais sans acheteuse.
- *   · AVEC offre : chaque offre plus haute AJOUTE 15 s au temps restant.
+ *   · AVEC offre : chaque offre plus haute AJOUTE 15 s au temps restant — mais jamais au-delà de 30 s
+ *     (2026-10-21, sa règle : « tu ajoutes 15 s, mais jamais plus de 30 »). Un temps déjà plus long (durée de
+ *     départ de 60 s, par exemple) n est pas raccourci : l offre n y ajoute simplement rien.
  *   · À zéro : la gagnante est déclarée ; elle a 15 MINUTES (d abord 5, corrigé
  *     le jour même) pour écrire « GAGNÉ » en message privé, sinon l article est
  *     remis en vente.
@@ -24,6 +26,7 @@ const REGLAGES_DEFAUT = {
   depart: 10,          // prix de départ, en dollars
   duree: 30,           // secondes au démarrage
   ajout: 15,           // secondes ajoutées par offre retenue
+  plafond: 30,         // …sans que le temps restant dépasse ce nombre de secondes
   hausse: 1,           // hausse minimale sur l enchère courante, en dollars
   relanceSous: 2,      // sans offre : quand il reste ce nombre de secondes…
   relanceA: 15,        // …le minuteur repart à ce nombre de secondes
@@ -31,7 +34,7 @@ const REGLAGES_DEFAUT = {
 };
 
 const BORNES = {
-  depart: [0, 100000], duree: [5, 600], ajout: [1, 120], hausse: [0.01, 10000],
+  depart: [0, 100000], duree: [5, 600], ajout: [1, 120], plafond: [5, 600], hausse: [0.01, 10000],
   relanceSous: [1, 30], relanceA: [5, 120], delaiGagne: [60, 3600],
 };
 
@@ -264,7 +267,8 @@ class Encan {
         this.meneur = pseudo;
         this.offres.unshift({ pseudo, montant, t: this.maintenant(), id: 'o' + this.maintenant().toString(36) + Math.random().toString(36).slice(2, 6) });
         if (this.offres.length > 200) this.offres.length = 200;
-        this.finA += this.reglages.ajout * 1000;
+        const maintenant = this.maintenant();
+        this.finA = Math.max(this.finA, Math.min(this.finA + this.reglages.ajout * 1000, maintenant + this.reglages.plafond * 1000));
         this._allonger();
       }
     }
