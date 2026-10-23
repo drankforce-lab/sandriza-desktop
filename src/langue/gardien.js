@@ -212,5 +212,8 @@ module.exports = {
   'Enregistrer les réglages du gardien': 'Save guardian settings',
   'Les nouveaux réglages seront appliqués immédiatement. Une alerte sera envoyée aux anciens et aux nouveaux destinataires afin qu’aucun changement ne passe inaperçu.':
     'The new settings will take effect immediately. An alert will be sent to both the previous and the new recipients so that no change goes unnoticed.',
-  'Enregistrer et alerter': 'Save and send alert'
+  'Enregistrer et alerter': 'Save and send alert',
+  "Activer le bouton panique ?": "Activate the panic button?",
+  "Toutes les sessions du personnel sont fermées immédiatement, sauf celle-ci (vos autres sessions aussi), et tous les autres comptes sont verrouillés. Personne ne peut se reconnecter tant que vous ne rouvrez pas les comptes ici. Une alerte part par texto et par courriel.": "All staff sessions are closed immediately, except this one (your other sessions too), and every other account is locked. No one can sign in again until you reopen the accounts here. An alert is sent by text message and email.",
+  "Oui, activer le bouton panique": "Yes, activate the panic button",
 };

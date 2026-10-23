@@ -555,7 +555,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var gp = document.getElementById('g-pan'), gpb = document.getElementById('g-pan-go');
     if (gp && gpb) {
       gp.oninput = function(){ PANIQ = gp.value !== ''; gpb.disabled = gp.value.trim() !== 'PANIQUE'; };
-      gpb.onclick = function(){ if (gp.value.trim() === 'PANIQUE') panique(); };
+      /* (2026-10-22, sa décision) LA BOÎTE À PART, COMME PARTOUT AILLEURS : le mot PANIQUE arme le bouton, puis une
+         confirmation dit exactement ce qui va se passer avant que rien ne parte. Deux gestes délibérés pour le plus
+         lourd de l application — on ne met pas toute l équipe dehors sur un mot tapé trop vite. */
+      gpb.onclick = function(){
+        if (gp.value.trim() !== 'PANIQUE') return;
+        szConfirmer({ prudent: true, titre: '${T("Activer le bouton panique ?")}',
+          texte: '${T("Toutes les sessions du personnel sont fermées immédiatement, sauf celle-ci (vos autres sessions aussi), et tous les autres comptes sont verrouillés. Personne ne peut se reconnecter tant que vous ne rouvrez pas les comptes ici. Une alerte part par texto et par courriel.")}',
+          oui: '${T("Oui, activer le bouton panique")}' }).then(function(ok){ if (ok) panique(); });
+      };
     }
     var zc = document.getElementById('z-cfg');
     if (zc) zc.addEventListener('input', function(){
