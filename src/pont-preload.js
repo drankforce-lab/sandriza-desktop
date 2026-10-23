@@ -255,6 +255,8 @@ contextBridge.exposeInMainWorld('szPont', {
     lire: () => ipcRenderer.invoke('encan:lire').catch(() => null),
     ecran: (o) => ipcRenderer.invoke('encan:ecran', { pleinEcran: !!(o && o.pleinEcran) }).catch(() => ({ ok: false })),
     copier: (t) => ipcRenderer.invoke('encan:copier', String(t || '')).catch(() => false),
+    // (2026-10-23, lot 3) La lecture du vrai direct : { action: 'brancher', compte } | { action: 'debrancher' } | { action: 'vu' }.
+    direct: (o) => ipcRenderer.invoke('encan:direct', { action: String((o && o.action) || ''), compte: String((o && o.compte) || '') }).catch(() => ({ ok: false, motif: 'indisponible' })),
     surEtat: (cb) => {
       const h = (e, etat) => { try { cb(etat); } catch {} };
       ipcRenderer.on('encan:etat', h);

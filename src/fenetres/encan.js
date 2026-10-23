@@ -140,6 +140,18 @@ button.mini{padding:.12rem .45rem;font-size:.74rem;border-radius:6px}
 .compo .ligne{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1fr) auto;gap:.4rem}
 .bloques{margin-top:.5rem;display:flex;flex-wrap:wrap;gap:.3rem;align-items:center}
 
+/* La lecture du vrai direct (2026-10-23, lot 3) */
+.direct{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.6rem;padding-bottom:.6rem;border-bottom:1px solid var(--v08)}
+.direct .ligne-d{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.4rem}
+.etat-d{display:flex;align-items:center;gap:.4rem;font-size:.8rem;color:var(--tx2)}
+.etat-d i{width:.55rem;height:.55rem;border-radius:50%;background:var(--v30);flex:0 0 auto}
+.etat-d.ok i{background:var(--tx-ok)}
+.etat-d.att i{background:var(--or)}
+.etat-d.err i{background:var(--tx-err)}
+.alerte-d{border:1px solid var(--tx-err);color:var(--tx-err);border-radius:10px;padding:.6rem .75rem;font-size:.86rem;font-weight:600;display:flex;gap:.6rem;align-items:center;justify-content:space-between}
+.alerte-d.att{border-color:var(--or);color:var(--tx-or)}
+.alerte-d[hidden]{display:none}
+.src{font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2);margin-left:.35rem}
 .pied{flex:0 0 auto;border-top:1px solid var(--v08);padding:.4rem 1.1rem;min-height:2.1rem}
 .pied .msg{font-size:.84rem}
 `;
@@ -191,6 +203,7 @@ function pageEncan() {
 
   <div class="col">
     <div class="carte scene">
+      <div class="alerte-d" id="alerte-d" hidden><span id="alerte-d-texte"></span><button class="mini" id="alerte-d-vu">${T("Compris")}</button></div>
       <div class="art-ligne"><div class="vign"><img id="vign" alt="" hidden></div>
         <div style="min-width:0"><div class="sur">${T("Article en cours")}</div><div class="nom-art" id="article"></div><div class="aide" id="art-sous"></div></div></div>
       <div class="chiffres">
@@ -237,10 +250,18 @@ function pageEncan() {
   <div class="col">
     <div class="carte flux" style="flex:1 1 auto">
       <div class="flux-tete"><h2>${T("Commentaires du direct")}</h2><span class="aide" id="flux-etat"></span></div>
+      <div class="direct" id="bloc-direct">
+        <div class="ligne-d">
+          <input id="d-compte" maxlength="60" autocomplete="off" aria-label="${T("Compte TikTok du direct")}" placeholder="${T("@compte TikTok du direct")}">
+          <button class="prim" id="d-bascule">${T("Se brancher")}</button>
+        </div>
+        <div class="etat-d" id="d-etat"><i></i><span id="d-texte">${T("Non branché : les commentaires du direct ne sont pas lus.")}</span></div>
+        <div class="aide" id="d-silence"></div>
+      </div>
       <div class="fil" id="journal"></div>
       <div class="bloques" id="bloques"></div>
       <div class="compo" id="carte-essai">
-        <div class="champ">${T("Simuler un commentaire")}</div>
+        <div class="champ" id="compo-titre">${T("Simuler un commentaire")}</div>
         <div class="ligne">
           <input id="e-pseudo" maxlength="40" aria-label="${T("Pseudo")}" value="@essai_1">
           <input id="e-texte" maxlength="140" aria-label="${T("Commentaire")}" placeholder="${T("ex. 25")}">
@@ -290,7 +311,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     adjuge: '${T("Adjugé — en attente de « GAGNÉ »")}', expire: '${T("Délai passé")}', vendu: '${T("Vendu")}', annule: '${T("Annulé")}' };
   var VERDICTS = { retenue: '${T("offre retenue")}', trop_basse: '${T("trop basse")}', sous_depart: '${T("sous le départ")}',
     pas_offre: '${T("commentaire")}', pause: '${T("pendant la pause")}', fermee: '${T("encan fermé")}',
-    annulee: '${T("offre annulée")}', bloque: '${T("pseudo bloqué")}' };
+    annulee: '${T("offre annulée")}', bloque: '${T("pseudo bloqué")}', gagne_ecrit: '${T("a écrit GAGNÉ ici — le lien part en message privé")}' };
 
   function esc(s){ return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
   function argent(n){ return szArgent(Number(n) || 0); }
@@ -345,7 +366,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     $('phase').classList.toggle('vif', enJeu || E.phase === 'adjuge');
     $('essai').checked = !!E.essai;
     $('badge-essai').hidden = !E.essai;
-    $('carte-essai').hidden = !E.essai;
+    /* La saisie : simulee en mode essai ; hors essai, c est le SECOURS (une offre lue dans TikTok, tapee ici). */
+    $('carte-essai').hidden = false;
+    $('compo-titre').textContent = E.essai ? '${T("Simuler un commentaire")}' : '${T("Saisie manuelle (secours) : une offre lue dans TikTok")}';
+    $('e-rafale').hidden = !E.essai;
+    if (!E.essai && $('e-pseudo').value === '@essai_1') $('e-pseudo').value = '';
+    $('e-pseudo').placeholder = '@pseudo';
+    dessinerDirect();
     $('article').textContent = a ? a.nom : '${T("Aucun article")}';
     $('art-sous').textContent = a ? (a.variante || '') : '${T("Cherchez un article à gauche, ou passez à l’article suivant.")}';
     var vi = $('vign'), src = (a && a.image) ? String(a.image) : '';
@@ -387,11 +414,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var modo = '';
       if (j.verdict === 'retenue' && j.offre && enJeu) modo += '<button class="mini" data-annuler="' + esc(j.offre) + '">${T("Annuler l’offre")}</button>';
       if (!bloques[pseudoBas]) modo += '<button class="mini danger" data-bloquer="' + esc(j.pseudo) + '">${T("Bloquer")}</button>';
-      return '<div class="cm v-' + esc(j.verdict) + '"><div class="h"><b>' + esc(j.pseudo) + '</b><span class="aide">' + heure(j.t) + '</span></div>'
+      var src = j.source === 'manuel' ? '<span class="src">${T("saisi")}</span>' : j.source === 'essai' ? '<span class="src">${T("simulé")}</span>' : '';
+      return '<div class="cm v-' + esc(j.verdict) + '"><div class="h"><b>' + esc(j.pseudo) + src + '</b><span class="aide">' + heure(j.t) + '</span></div>'
         + '<div class="t">' + esc(j.texte) + '</div>'
         + '<div class="pied-cm"><span class="puce">' + esc(VERDICTS[j.verdict] || j.verdict) + '</span><span class="modo">' + modo + '</span></div></div>';
     }).join('') || '<div class="aide">' + (E.essai ? '${T("Aucun commentaire pour l’instant. Simulez-en un ci-dessous.")}' : '${T("Aucun commentaire pour l’instant.")}') + '</div>';
-    $('flux-etat').textContent = E.essai ? '${T("commentaires simulés")}' : '${T("lecture du direct : prochain lot")}';
+    $('flux-etat').textContent = E.essai ? '${T("mode essai : simulés et direct")}' : '';
     $('bloques').innerHTML = (E.bloques || []).length ? '<span class="aide">${T("Bloqués :")}</span>' + E.bloques.map(function(p){
       return '<button class="mini" data-debloquer="' + esc(p) + '" title="${T("Débloquer")}">' + esc(p) + ' <span class="ic">✕</span></button>';
     }).join('') : '';
@@ -414,6 +442,56 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }).join('') || '<div class="aide">${T("Aucune vente encore.")}</div>';
     temps();
   }
+  /* ── La lecture du vrai direct (2026-10-23, lot 3) ── */
+  var D_TEXTES = {
+    eteint: '${T("Non branché : les commentaires du direct ne sont pas lus.")}',
+    connexion: '${T("Connexion au direct…")}',
+    branche: '${T("Branché sur le direct")}',
+    hors_ligne: '${T("Ce compte n’est pas en direct : nouvel essai toutes les 30 s.")}',
+    coupe: '${T("Lecture coupée : reconnexion…")}',
+    fin: '${T("Le direct est terminé.")}',
+    erreur: '${T("Lecture impossible")}'
+  };
+  function dessinerDirect(){
+    var d = E && E.direct;
+    var st = d ? d.statut : 'eteint';
+    var el = $('d-etat');
+    el.className = 'etat-d ' + (st === 'branche' ? 'ok' : (st === 'connexion' || st === 'hors_ligne' || st === 'coupe') ? 'att' : (st === 'erreur' || st === 'fin') ? 'err' : '');
+    var t = D_TEXTES[st] || st;
+    if (d && st === 'branche') t += ' @' + d.compte + ' · ' + d.parMinute + ' ' + '${T("comm./min")}' + ' · ' + d.nb + ' ' + '${T("reçus")}';
+    if (d && st === 'erreur' && d.detail) t += ' : ' + d.detail + '. ' + '${T("Utilisez la saisie manuelle.")}';
+    if (d && (st === 'coupe' || st === 'hors_ligne') && d.prochainEssai) t += ' (' + Math.max(0, Math.ceil((d.prochainEssai - Date.now()) / 1000)) + ' s)';
+    $('d-texte').textContent = t;
+    var actif = st !== 'eteint';
+    $('d-bascule').textContent = actif ? '${T("Se débrancher")}' : '${T("Se brancher")}';
+    $('d-bascule').className = actif ? '' : 'prim';
+    $('d-compte').disabled = actif;
+    // L alerte de coupure, au centre : l encan a ete mis en pause.
+    var al = d && d.alerte ? d.alerte : '', zone = $('alerte-d');
+    zone.hidden = !al;
+    zone.className = 'alerte-d' + (/_retabli$/.test(al) ? ' att' : '');
+    $('alerte-d-texte').textContent = al === 'coupe' ? '${T("Commentaires coupés : l’encan est EN PAUSE. Reconnexion en cours…")}'
+      : al === 'fin' ? '${T("Le direct est terminé : l’encan est en pause.")}'
+      : /_retabli$/.test(al) ? '${T("Lecture rétablie. L’encan est toujours en pause : vérifiez dans TikTok les offres faites pendant la coupure (saisie manuelle), puis Reprendre.")}' : '';
+  }
+  // Silence anormal pendant un encan : rien recu depuis 45 s alors que la lecture se dit branchee.
+  function silence(){
+    var d = E && E.direct;
+    if (!d || d.statut !== 'branche' || !E || E.phase !== 'encours') return '';
+    var depuis = Date.now() - Math.max(d.dernier || 0, d.depuis || 0);
+    return depuis > 45000 ? '${T("Aucun commentaire reçu depuis {n} s : vérifiez que le direct est bien celui-ci.")}'.replace('{n}', String(Math.round(depuis / 1000))) : '';
+  }
+  setInterval(function(){ if (E) { $('d-silence').textContent = silence(); if (E.direct && (E.direct.statut === 'coupe' || E.direct.statut === 'hors_ligne')) dessinerDirect(); } }, 1000);
+  $('d-bascule').onclick = function(){
+    if (!EN || !EN.direct) { szDire(MOTIFS.indisponible, 'err'); return; }
+    var actif = E && E.direct && E.direct.statut !== 'eteint';
+    EN.direct(actif ? { action: 'debrancher' } : { action: 'brancher', compte: $('d-compte').value }).then(function(r){
+      if (r && !r.ok) szDire(r.motif === 'compte_invalide' ? '${T("Compte TikTok invalide : écrivez le @pseudo du direct (ou collez son lien).")}' : ('${T("Refusé : ")}' + (r.motif || '?')), 'err');
+    });
+  };
+  $('d-compte').onkeydown = function(ev){ if (ev.key === 'Enter') $('d-bascule').click(); };
+  $('alerte-d-vu').onclick = function(){ if (EN && EN.direct) EN.direct({ action: 'vu' }); };
+
   /* ── La vente de la gagnante (2026-10-23, lot 2) : le lien de paiement personnel et son etat ── */
   function heureFin(t){ try { var d = new Date(t * 1000); return deux(d.getHours()) + ' h ' + deux(d.getMinutes()); } catch (e) { return ''; } }
   function messagePrive(g, a){
@@ -469,7 +547,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   setInterval(temps, 200);
 
-  function recevoir(etat){ if (!etat || !etat.reglages) return; E = etat; RECU = Date.now(); dessiner(); }
+  var COMPTE_POSE = false;
+  function recevoir(etat){
+    if (!etat || !etat.reglages) return;
+    E = etat; RECU = Date.now();
+    if (!COMPTE_POSE && etat.compteDirect !== undefined) { $('d-compte').value = etat.compteDirect ? '@' + etat.compteDirect : ''; COMPTE_POSE = true; }
+    dessiner();
+  }
   if (EN) { EN.surEtat(recevoir); EN.lire().then(recevoir); }
   else szDire(MOTIFS.indisponible, 'err');
 
@@ -529,7 +613,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   // ── Le mode essai ──
   $('e-envoyer').onclick = function(){
-    geste('commentaire', [$('e-pseudo').value, $('e-texte').value, 'essai']).then(function(r){ if (r.ok) { $('e-texte').value = ''; $('e-texte').focus(); } });
+    geste('commentaire', [$('e-pseudo').value, $('e-texte').value, E && E.essai ? 'essai' : 'manuel']).then(function(r){ if (r.ok) { $('e-texte').value = ''; $('e-texte').focus(); } });
   };
   $('e-texte').onkeydown = function(ev){ if (ev.key === 'Enter') $('e-envoyer').click(); };
   var NOMS = ['@julie.mtl', '@sophie_b', '@marie.g', '@karine.qc', '@ana_lav', '@nath_22'];

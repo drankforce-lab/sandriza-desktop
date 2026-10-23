@@ -181,6 +181,74 @@ x.m.remettreEnVente();   // AVANT que le site ait répondu
 await pause(); await pause(); await pause();
 verif('remis en vente PENDANT la création : appliqué dès la réponse (annulée au serveur)', x.etat.ev_1 === 'annulee', x.appels);
 
+// ── LES VRAIS COMMENTAIRES (2026-10-23, lot 3) : src/encan-direct.js, avec une fausse bibliothèque ──
+console.log('— Le direct : branchement, commentaires, coupure, reconnexion, hors ligne, fin');
+const { DirectTikTok, normaliserCompte } = require(path.join(__dirname, '..', 'src', 'encan-direct.js'));
+verif('compte : « @sandriza », « sandriza », le lien tiktok.com/@sandriza/live → sandriza ; « a b » refusé',
+  normaliserCompte('@sandriza') === 'sandriza' && normaliserCompte('https://www.tiktok.com/@sandriza/live') === 'sandriza' && normaliserCompte('a b') === '');
+const fausseBiblio = (comportement) => {
+  const conns = [];
+  class UserOfflineError extends Error {}
+  class TikTokLiveConnection {
+    constructor(u) { this.u = u; this.h = {}; conns.push(this); }
+    on(e, f) { this.h[e] = f; }
+    removeAllListeners() { this.h = {}; }
+    emit(e, d) { if (this.h[e]) this.h[e](d); }
+    async connect() { const c = comportement.shift() || 'ok'; if (c === 'hors_ligne') throw new UserOfflineError('offline'); if (c === 'panne') throw new Error('panne'); return { roomId: '42' }; }
+    async disconnect() { this.ferme = true; }
+  }
+  return { conns, m: { TikTokLiveConnection, UserOfflineError, WebcastEvent: { CHAT: 'chat', STREAM_END: 'streamEnd' }, ControlEvent: { DISCONNECTED: 'disconnected', ERROR: 'error' } } };
+};
+const montageDirect = (comportement) => {
+  const fb = fausseBiblio(comportement || []), plans = [], etats = [];
+  let ve2 = null;
+  const m = new Encan({ maintenant: horloge, reglages: { depart: 10, duree: 30 }, essai: false });
+  const d = new DirectTikTok({ charger: async () => fb.m, maintenant: horloge,
+    surCommentaire: (p, t) => m.commentaire(p, t, 'direct'),
+    surEtat: (e) => { etats.push(e.statut); if ((e.statut === 'coupe' || e.statut === 'fin') && m.phase === 'encours') m.pause(); },
+    planifier: (f, ms) => { plans.push({ f, ms }); return plans.length; }, annulerPlan: () => {} });
+  void ve2;
+  return { fb, plans, etats, m, d };
+};
+let md = montageDirect();
+verif('compte invalide : refusé sans rien lancer', md.d.brancher('a b').motif === 'compte_invalide' && !md.fb.conns.length);
+md.d.brancher('@sandriza'); await pause(); await pause();
+verif('branché : connexion au bon compte, état « branche »', md.d.statut === 'branche' && md.fb.conns[0].u === 'sandriza', md.etats);
+md.m.charger({ nom: 'Robe' }); md.m.demarrer();
+md.fb.conns[0].emit('chat', { user: { uniqueId: 'julie.mtl', nickname: 'Julie' }, comment: '25' });
+md.fb.conns[0].emit('chat', { user: { uniqueId: 'sophie_b' }, comment: 'trop belle' });
+verif('un commentaire « 25 » du direct devient une offre (hors mode essai)', md.m.meneur === '@julie.mtl' && md.m.prix === 25 && md.m.journal[1].source === 'direct', md.m.journal);
+verif('un commentaire ordinaire est noté sans être une offre ; compté', md.m.journal[0].verdict === 'pas_offre' && md.d.etat().nb === 2 && md.d.etat().parMinute === 2);
+md.fb.conns[0].emit('disconnected', { code: 1006 });
+verif('coupure pendant l encan : état « coupe », encan EN PAUSE, reconnexion planifiée à 2 s', md.d.statut === 'coupe' && md.m.phase === 'pause' && md.plans[0].ms === 2000, { st: md.d.statut, ph: md.m.phase, plans: md.plans.map((x) => x.ms) });
+md.plans[0].f(); await pause(); await pause();
+verif('reconnexion : rebranché sur une NOUVELLE connexion', md.d.statut === 'branche' && md.fb.conns.length === 2);
+md.fb.conns[0].emit('chat', { user: { uniqueId: 'fantome' }, comment: '99' });
+verif('l ancienne connexion ne parle plus (aucune offre fantôme)', md.m.prix === 25);
+md.fb.conns[1].emit('streamEnd', {});
+verif('fin du direct : état « fin », plus de reconnexion', md.d.statut === 'fin' && md.plans.length === 1);
+md = montageDirect(['hors_ligne', 'ok']);
+md.d.brancher('sandriza'); await pause(); await pause();
+verif('compte pas en direct : « hors_ligne », nouvel essai dans 30 s', md.d.statut === 'hors_ligne' && md.plans[0].ms === 30000, md.etats);
+md.plans[0].f(); await pause(); await pause();
+verif('…le direct commence : branché tout seul', md.d.statut === 'branche');
+md.d.debrancher();
+verif('se débrancher : état « eteint », connexion fermée', md.d.statut === 'eteint' && md.fb.conns[1].ferme === true);
+md = montageDirect();
+const dd = new DirectTikTok({ charger: async () => { throw new Error('Cannot find package'); }, maintenant: horloge, planifier: () => 0, annulerPlan: () => {} });
+dd.brancher('sandriza'); await pause(); await pause();
+verif('bibliothèque absente : « erreur » dite, pas de plantage', dd.statut === 'erreur' && /bibliotheque/.test(dd.detail), dd.etat());
+
+console.log('— Sources des commentaires et « GAGNÉ » écrit dans le direct');
+let ms = new Encan({ maintenant: horloge, reglages: { depart: 10 }, essai: false });
+ms.charger({ nom: 'Robe' }); ms.demarrer();
+verif('hors essai : un commentaire SIMULÉ est refusé', ms.commentaire('@x', '20', 'essai').motif === 'essai_coupe');
+verif('hors essai : une offre SAISIE à la main (secours) est retenue', ms.commentaire('@lea', '20', 'manuel').verdict === 'retenue' && ms.journal[0].source === 'manuel');
+ms.adjuger();
+verif('la gagnante écrit « Gagné ! » dans les commentaires : signalé', ms.commentaire('lea', 'Gagné !', 'direct').verdict === 'gagne_ecrit');
+verif('quelqu un d autre écrit « gagné » : simple commentaire', ms.commentaire('@autre', 'gagné', 'direct').verdict === 'pas_offre');
+verif('« WON » aussi reconnu', ms.commentaire('@lea', 'won', 'direct').verdict === 'gagne_ecrit');
+
 // ── La console : le lecteur de codes-barres et la vignette (2026-10-20, ses deux signalements) ──
 const _page = require('fs').readFileSync(require('path').join(__dirname, '..', 'src', 'fenetres', 'encan.js'), 'utf8');
 verif('un code scanné (réponse « sku » du site) met l article à l encan sans passer par la liste', _page.includes('if (r.sku) { scanne(r.sku); return; }'));

@@ -1,7 +1,7 @@
 {
   "name": "sandriza-admin-desktop",
   "productName": "Administration Sandriza",
-  "version": "7.71.0",
+  "version": "7.72.0",
   "description": "Coquille de bureau (prototype) pour l'administration SANDRIZA — ouvre le site en ligne, impression silencieuse directe (sans agent).",
   "author": "SANDRIZA",
   "license": "UNLICENSED",
@@ -16,7 +16,8 @@
     "@gltf-transform/extensions": "^4.1.1",
     "draco3dgltf": "^1.5.7",
     "electron-updater": "^6.3.9",
-    "meshoptimizer": "^0.22.0"
+    "meshoptimizer": "^0.22.0",
+    "tiktok-live-connector": "2.5.0"
   },
   "devDependencies": {
     "electron": "^31.7.7",

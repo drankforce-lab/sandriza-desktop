@@ -55,6 +55,7 @@ function _borner(r) {
    « j ai 30 ans » ne sont pas des offres — une offre fantôme ajoute 15 s et met un
    faux nom sous le prix, devant tout le direct. */
 const RE_OFFRE = /^\s*\$?\s*(\d{1,6})(?:[.,](\d{1,2}))?\s*(?:\$|dollars?|piasses?)?\s*$/i;
+const RE_GAGNE = /^\s*(gagn[ée]e?|won)\s*[!.]*\s*$/i;
 function lireOffre(texte) {
   const m = RE_OFFRE.exec(String(texte == null ? '' : texte));
   if (!m) return null;
@@ -104,8 +105,8 @@ class Encan {
 
   _avertir() { try { this.surChangement(this.etat()); } catch (e) {} }
   _issue(g, issue) { try { this.surIssue(g, issue); } catch (e) {} }
-  _noter(pseudo, texte, verdict, offre) {
-    this.journal.unshift({ pseudo, texte: String(texte || '').slice(0, 140), verdict, t: this.maintenant(), offre: offre || '' });
+  _noter(pseudo, texte, verdict, offre, source) {
+    this.journal.unshift({ pseudo, texte: String(texte || '').slice(0, 140), verdict, t: this.maintenant(), offre: offre || '', source: source || '' });
     if (this.journal.length > 50) this.journal.length = 50;
   }
 
@@ -256,14 +257,18 @@ class Encan {
     this.file.unshift({ ...a.article, cle: 'f' + this.maintenant().toString(36) + Math.random().toString(36).slice(2, 6) });
   }
 
-  // ── Un commentaire (vrai direct au lot 3, mode essai dès maintenant) ──────
+  /* ── Un commentaire. source : 'direct' (le vrai direct, lot 3), 'manuel' (lu dans TikTok et tapé à la
+     console, en secours), 'essai' (simulé — refusé hors du mode essai). ── */
   commentaire(pseudoBrut, texte, source) {
     const pseudo = _pseudo(pseudoBrut);
     if (!pseudo) return { ok: false, motif: 'pseudo_requis' };
     if (source === 'essai' && !this.essai) return { ok: false, motif: 'essai_coupe' };
     const montant = lireOffre(texte);
     let verdict;
-    if (montant !== null && this.bloques.has(pseudo.toLowerCase())) verdict = 'bloque';
+    /* (2026-10-23, lot 3) Une gagnante qui écrit « GAGNÉ » (GAGNE, WON) dans les COMMENTAIRES au lieu du message
+       privé : signalé à la console — le lien, lui, ne part qu en privé (sa règle : personne d autre ne doit le voir). */
+    if (montant === null && RE_GAGNE.test(String(texte || '')) && this._gagnanteEnAttente(pseudo)) verdict = 'gagne_ecrit';
+    else if (montant !== null && this.bloques.has(pseudo.toLowerCase())) verdict = 'bloque';
     else if (montant === null) verdict = 'pas_offre';
     else if (this.phase === 'pause') verdict = 'pause';
     else if (this.phase !== 'encours') verdict = 'fermee';
@@ -282,9 +287,14 @@ class Encan {
         this._allonger();
       }
     }
-    this._noter(pseudo, texte, verdict, verdict === 'retenue' ? this.offres[0].id : '');
+    this._noter(pseudo, texte, verdict, verdict === 'retenue' ? this.offres[0].id : '', source);
     this._avertir();
     return { ok: true, verdict, montant };
+  }
+  _gagnanteEnAttente(pseudo) {
+    const p = pseudo.toLowerCase();
+    if (this.phase === 'adjuge' && this.gagnant && String(this.gagnant.pseudo).toLowerCase() === p) return true;
+    return this.attentes.some((a) => String(a.gagnant.pseudo).toLowerCase() === p);
   }
 
   /* Annuler UNE offre (farfelue, en double, d'une personne qui s'est trompée) : le prix et la meneuse reviennent à

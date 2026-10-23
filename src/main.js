@@ -4230,12 +4230,15 @@ ipcMain.on('pos:diffuser', (e, etat) => {
    écoute, il ne peut rien déclencher — même règle que l'affichage client. */
 const { Encan } = require('./encan');
 const { VentesEncan } = require('./encan-vente');
+const { DirectTikTok } = require('./encan-direct');
 const ENCAN_GESTES = new Set(['regler', 'modeEssai', 'charger', 'enFile', 'retirerDeFile', 'suivant', 'demarrer', 'pause',
   'reprendre', 'ajouterTemps', 'remettre', 'adjuger', 'annuler', 'confirmerGagne', 'remettreEnVente', 'garde', 'commentaire',
   'confirmerAttente', 'remettreAttente', 'annulerOffre', 'bloquer', 'debloquer']);
-let _encan = null, _encanBattement = null, _encanDernierEnvoi = 0, _ventesEncan = null;
+let _encan = null, _encanBattement = null, _encanDernierEnvoi = 0, _ventesEncan = null, _directEncan = null, _directAlerte = '';
 const _encanPousser = (etat) => {
   _encanDernierEnvoi = Date.now();
+  // (2026-10-23, lot 3) L'état de la lecture du direct voyage avec celui du moteur.
+  etat = Object.assign({}, etat, { direct: _directEncan ? Object.assign(_directEncan.etat(), { alerte: _directAlerte }) : null });
   for (const cle of ['encan', 'encan-ecran']) {
     const w = fenetresNatives.get(cle);
     if (w && !w.isDestroyed()) { try { w.webContents.send('encan:etat', etat); } catch {} }
@@ -4252,6 +4255,21 @@ const encanMoteur = () => {
   _ventesEncan = new VentesEncan({ moteur: _encan, appeler: (op, ...args) => executerOpSite(op, args, null),
     avertir: () => _encanPousser(_encan.etat()) });
   setInterval(() => { _ventesEncan.suivre().catch(() => {}); }, 10000);
+  /* (2026-10-23, lot 3) LES VRAIS COMMENTAIRES : chaque commentaire du direct est remis au moteur. Si la lecture se
+     COUPE ou que le direct se termine pendant un encan en cours, l'encan se met en PAUSE : le temps ne doit pas
+     courir pendant que les offres ne nous parviennent plus. La console le dit ; la reprise est à la main. */
+  _directEncan = new DirectTikTok({
+    charger: () => import('tiktok-live-connector'),
+    surCommentaire: (pseudo, texte) => { try { _encan.commentaire(pseudo, texte, 'direct'); } catch {} },
+    surEtat: (d) => {
+      if ((d.statut === 'coupe' || d.statut === 'fin' || d.statut === 'erreur') && _encan.phase === 'encours') {
+        _encan.pause();
+        _directAlerte = d.statut === 'fin' ? 'fin' : 'coupe';
+      }
+      if (d.statut === 'branche') _directAlerte = _directAlerte ? _directAlerte + '_retabli' : '';
+      _encanPousser(_encan.etat());
+    },
+  });
   /* Le battement : la relance à 2 s, le zéro et le délai « GAGNÉ » tombent à 100 ms près.
      Une poussée par seconde au moins tant que l'encan vit, pour qu'un écran ouvert
      en cours de route se recale sans rien demander. */
@@ -4274,7 +4292,23 @@ ipcMain.handle('encan:geste', (e, nom, args) => {
 });
 ipcMain.handle('encan:lire', (e) => {
   const de = ['encan', 'encan-ecran'].some((c) => { const w = fenetresNatives.get(c); return w && !w.isDestroyed() && e.sender === w.webContents; });
-  return de ? encanMoteur().etat() : null;
+  if (!de) return null;
+  const m = encanMoteur();
+  return Object.assign(m.etat(), { direct: _directEncan ? Object.assign(_directEncan.etat(), { alerte: _directAlerte }) : null,
+    compteDirect: String(reglages.get('encanCompte') || '') });
+});
+/* (2026-10-23, lot 3) Se brancher sur le direct (le compte est retenu par POSTE, dans reglages.json), s'en débrancher,
+   effacer l'alerte de coupure. Seule la console commande. */
+ipcMain.handle('encan:direct', (e, o) => {
+  if (!_deLaConsoleEncan(e)) return { ok: false, motif: 'droit' };
+  encanMoteur();
+  const a = String((o && o.action) || '');
+  let r = { ok: false, motif: 'operation_inconnue' };
+  if (a === 'brancher') { r = _directEncan.brancher(o && o.compte); if (r.ok) { reglages.set('encanCompte', r.compte); _directAlerte = ''; } }
+  else if (a === 'debrancher') { r = _directEncan.debrancher(); _directAlerte = ''; }
+  else if (a === 'vu') { _directAlerte = ''; r = { ok: true }; }
+  _encanPousser(_encan.etat());
+  return r;
 });
 ipcMain.handle('encan:copier', (e, texte) => {
   if (!_deLaConsoleEncan(e)) return false;
