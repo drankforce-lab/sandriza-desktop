@@ -2473,6 +2473,8 @@ const OPS_PONT = new Set([
   // Vente au comptoir. ⚠ `caisse:vendre` est la SEULE opération de ce pont qui
   // encaisse de l'argent : toute la règle de vente reste dans le site
   // (`Admin._posVente`), le pont ne porte que des valeurs.
+  // L'encan en direct, la vente (2026-10-23) : appelées par le PROCESSUS PRINCIPAL (src/encan-vente.js), jamais par une page.
+  'encan:vendre', 'encan:gagne', 'encan:annuler', 'encan:etat',
   'caisse:contexte', 'caisse:chercher', 'caisse:article',
   'caisse:totaux', 'caisse:client', 'caisse:vendre',
   /* Verifier a la main un paiement par LIEN. ⚠ Ce recours n existait que dans
@@ -4034,7 +4036,11 @@ const _traduireLibelles = (x, prof) => {
   return x;
 };
 
-ipcMain.handle('pont:appeler', (e, op, args) => executerOpSite(String(op || ''), args, e.sender));
+ipcMain.handle('pont:appeler', (e, op, args) => {
+  // Les ventes de l'encan ne partent QUE du processus principal (src/encan-vente.js) : aucune page ne les déclenche.
+  if (/^encan:/.test(String(op || ''))) return { ok: false, motif: 'droit' };
+  return executerOpSite(String(op || ''), args, e.sender);
+});
 // L'APERÇU 3D, PRÉPARÉ AU POSTE (7.16.0) : le modèle rendu par Fal.ai (17 à 20 Mo) est téléchargé
 // ICI puis compressé (modele3d.js : matière mate, textures 1024 px, géométrie simplifiée + Draco),
 // et rendu en donnée à la fenêtre Produit, qui le dépose à l'enregistrement. Domaines de Fal.ai
@@ -4223,10 +4229,11 @@ ipcMain.on('pos:diffuser', (e, etat) => {
    ⚠ SEULE LA CONSOLE COMMANDE. L'écran filmé est posé devant tout le direct : il
    écoute, il ne peut rien déclencher — même règle que l'affichage client. */
 const { Encan } = require('./encan');
+const { VentesEncan } = require('./encan-vente');
 const ENCAN_GESTES = new Set(['regler', 'modeEssai', 'charger', 'enFile', 'retirerDeFile', 'suivant', 'demarrer', 'pause',
   'reprendre', 'ajouterTemps', 'remettre', 'adjuger', 'annuler', 'confirmerGagne', 'remettreEnVente', 'garde', 'commentaire',
   'confirmerAttente', 'remettreAttente', 'annulerOffre', 'bloquer', 'debloquer']);
-let _encan = null, _encanBattement = null, _encanDernierEnvoi = 0;
+let _encan = null, _encanBattement = null, _encanDernierEnvoi = 0, _ventesEncan = null;
 const _encanPousser = (etat) => {
   _encanDernierEnvoi = Date.now();
   for (const cle of ['encan', 'encan-ecran']) {
@@ -4236,7 +4243,15 @@ const _encanPousser = (etat) => {
 };
 const encanMoteur = () => {
   if (_encan) return _encan;
-  _encan = new Encan({ surChangement: _encanPousser });
+  /* (2026-10-23, lot 2) LA VENTE : chaque gagnante devient une vente au serveur du site (lien de paiement personnel,
+     article réservé), suivie jusqu'au paiement — src/encan-vente.js, par le pont du site (ops encan:*). */
+  _encan = new Encan({
+    surChangement: (etat) => { _encanPousser(etat); if (_ventesEncan) _ventesEncan.observer(); },
+    surIssue: (g, issue) => { if (_ventesEncan) _ventesEncan.surIssue(g, issue); },
+  });
+  _ventesEncan = new VentesEncan({ moteur: _encan, appeler: (op, ...args) => executerOpSite(op, args, null),
+    avertir: () => _encanPousser(_encan.etat()) });
+  setInterval(() => { _ventesEncan.suivre().catch(() => {}); }, 10000);
   /* Le battement : la relance à 2 s, le zéro et le délai « GAGNÉ » tombent à 100 ms près.
      Une poussée par seconde au moins tant que l'encan vit, pour qu'un écran ouvert
      en cours de route se recale sans rien demander. */

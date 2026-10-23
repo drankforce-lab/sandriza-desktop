@@ -587,6 +587,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
           +     (o.prioritaire ? ' <span class="rf-pill ambre" title="${T("Traitement prioritaire")}">${T("Prioritaire")}</span>' : '')
           // Vente saisie a la caisse (2026-10-15, sa demande) : rien a preparer, on la reconnait d un coup d oeil.
           +     (o.manuelle ? ' <span class="rf-pill bleu" title="${T("Vente saisie à la caisse")}">${T("Manuelle")}</span>' : '')
+          // Vente d un encan en direct (2026-10-23) : canal TikTok, vente finale.
+          +     (o.tiktok ? ' <span class="rf-pill ambre" title="${T("Vente d’un encan en direct — vente finale, aucun retour")}">TikTok</span>' : '')
           +     (attente ? ' <span class="rf-pill bleu">${T("étiquette prête")}</span>' : '') + '</div>'
           +   '<div class="rf-sous"><span class="rf-code">' + esc(o.numero) + '</span><span>·</span><span>'
           +     esc(dateCourte(o.date)) + '</span>' + (o.ville ? '<span>·</span><span>' + esc(o.ville) + '</span>' : '')
@@ -734,6 +736,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     }
     h += (c.prioritaire ? '<span class="badge2 or"><span class="ic" aria-hidden="true">⚡</span> ${T("Prioritaire")}</span>' : '')
       + (c.manuelle ? '<span class="badge2" title="${T("Vente saisie à la caisse")}">${T("Manuelle")}</span>' : '')
+      + (c.tiktok ? '<span class="badge2 or" title="${T("Vente d’un encan en direct")}' + (c.encanPseudo ? ' — ' + esc(c.encanPseudo) : '') + '">TikTok</span>' : '')
+      + (c.venteFinale ? '<span class="badge2">${T("Vente finale")}</span>' : '')
       + (d.remboursements.complet ? '<span class="badge2 vertf"><span class="ic">✅</span> ${T("Remboursée")}</span>'
           : (d.remboursements.lignes.length
               ? '<span class="badge2 or">↩ ' + d.remboursements.lignes.length + ' ' + szPl(d.remboursements.lignes.length, '${T("remboursement")}', '${T("remboursements")}') + '</span>' : ''))

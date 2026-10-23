@@ -71,6 +71,9 @@ class Encan {
   constructor(opts = {}) {
     this.maintenant = opts.maintenant || (() => Date.now());
     this.surChangement = opts.surChangement || (() => {});
+    /* (2026-10-23, lot 2) Le SORT d'une gagnante, pour la vente au serveur (src/encan-vente.js) :
+       surIssue(gagnant, 'gagne' | 'remis' | 'annule'). */
+    this.surIssue = opts.surIssue || (() => {});
     this.reglages = _borner(opts.reglages);
     this.essai = opts.essai !== false;
     this.file = [];          // articles à suivre : { id, nom, variante, ... }
@@ -100,6 +103,7 @@ class Encan {
   }
 
   _avertir() { try { this.surChangement(this.etat()); } catch (e) {} }
+  _issue(g, issue) { try { this.surIssue(g, issue); } catch (e) {} }
   _noter(pseudo, texte, verdict, offre) {
     this.journal.unshift({ pseudo, texte: String(texte || '').slice(0, 140), verdict, t: this.maintenant(), offre: offre || '' });
     if (this.journal.length > 50) this.journal.length = 50;
@@ -184,6 +188,7 @@ class Encan {
   remettre() {
     if (!this.article) return { ok: false, motif: 'article_requis' };
     const a = this.article;
+    if (this.phase === 'adjuge' && this.gagnant) this._issue(this.gagnant, 'annule');
     this._remettreAZero(a);
     this._avertir();
     return { ok: true };
@@ -196,6 +201,7 @@ class Encan {
   }
   annuler() {
     if (!this.article) return { ok: false, motif: 'article_requis' };
+    if ((this.phase === 'adjuge' || this.phase === 'expire') && this.gagnant) this._issue(this.gagnant, 'annule');
     this._fin('annule');
     return { ok: true };
   }
@@ -203,6 +209,7 @@ class Encan {
   confirmerGagne() {
     if (this.phase !== 'adjuge') return { ok: false, motif: 'pas_adjuge' };
     this.gagnant.confirmeLe = this.maintenant();
+    this._issue(this.gagnant, 'gagne');
     this._fin('vendu');
     return { ok: true };
   }
@@ -210,6 +217,7 @@ class Encan {
   remettreEnVente() {
     if (this.phase !== 'adjuge' && this.phase !== 'expire') return { ok: false, motif: 'pas_adjuge' };
     const a = this.article;
+    if (this.gagnant) this._issue(this.gagnant, 'remis');
     this.historique.unshift({ article: a, gagnant: this.gagnant, issue: 'remis', le: this.maintenant() });
     this._remettreAZero(a);
     this._avertir();
@@ -229,6 +237,7 @@ class Encan {
     if (i < 0) return { ok: false, motif: 'introuvable' };
     const a = this.attentes.splice(i, 1)[0];
     a.gagnant.confirmeLe = this.maintenant();
+    this._issue(a.gagnant, 'gagne');
     this.historique.unshift({ article: a.article, gagnant: a.gagnant, issue: 'vendu', le: this.maintenant() });
     this._avertir();
     return { ok: true };
@@ -242,6 +251,7 @@ class Encan {
     return { ok: true };
   }
   _remettreEnFile(a) {
+    this._issue(a.gagnant, 'remis');
     this.historique.unshift({ article: a.article, gagnant: a.gagnant, issue: 'remis', le: this.maintenant() });
     this.file.unshift({ ...a.article, cle: 'f' + this.maintenant().toString(36) + Math.random().toString(36).slice(2, 6) });
   }
@@ -373,7 +383,8 @@ class Encan {
       journal: this.journal.slice(0, 50), bloques: [...this.bloques],
       gagnant: this.gagnant ? { ...this.gagnant, restantMs: Math.max(0, this.gagnant.limite - t) } : null,
       file: this.file.slice(0, 50), nbFile: this.file.length,
-      attentes: this.attentes.map((a) => ({ cle: a.cle, article: a.article, pseudo: a.gagnant.pseudo, montant: a.gagnant.montant, restantMs: Math.max(0, a.gagnant.limite - t) })),
+      attentes: this.attentes.map((a) => ({ cle: a.cle, article: a.article, pseudo: a.gagnant.pseudo, montant: a.gagnant.montant, restantMs: Math.max(0, a.gagnant.limite - t),
+        vente: a.gagnant.vente || null })),
       historique: this.historique.slice(0, 20),
     };
   }

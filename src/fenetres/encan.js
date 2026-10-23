@@ -104,6 +104,15 @@ button.mini{padding:.12rem .45rem;font-size:.74rem;border-radius:6px}
 .gagnant{border:1px solid var(--or);border-radius:11px;padding:.75rem .9rem;display:flex;flex-direction:column;gap:.45rem}
 .gagnant .qui-g{font-size:1.1rem;font-weight:800}
 .copie{font-size:.84rem;background:var(--v05);border-radius:8px;padding:.45rem .6rem}
+/* La vente (2026-10-23, lot 2) : le lien de paiement de la gagnante et son etat */
+.vente{border-top:1px solid var(--v08);padding-top:.5rem;display:flex;flex-direction:column;gap:.4rem}
+.vente .etat-v{font-size:.84rem;font-weight:700}
+.vente .etat-v.ok{color:var(--tx-ok)}
+.vente .etat-v.err{color:var(--tx-err)}
+.vente .lien-v{font-size:.78rem;color:var(--tx2);word-break:break-all;user-select:all}
+.puce-v{font-size:.7rem;font-weight:700;border-radius:99px;padding:.05rem .5rem;border:1px solid var(--v14);color:var(--tx2);white-space:nowrap}
+.puce-v.ok{border-color:var(--tx-ok);color:var(--tx-ok)}
+.puce-v.err{border-color:var(--tx-err);color:var(--tx-err)}
 
 /* Listes du bas */
 .bas{flex:1 1 auto;display:flex;flex-direction:column}
@@ -194,6 +203,11 @@ function pageEncan() {
         <div class="aide" id="gagnant-delai"></div>
         <div class="copie" id="copie"></div>
         <div class="r2"><button id="copier">${T("Copier le message pour les commentaires")}</button><button class="prim" id="g-gagne">${T("Message GAGNÉ reçu")}</button></div>
+        <div class="vente" id="vente">
+          <div class="etat-v" id="vente-etat"></div>
+          <div class="lien-v" id="vente-lien"></div>
+          <button id="copier-prive" hidden>${T("Copier le message privé (avec son lien de paiement)")}</button>
+        </div>
       </div>
       <div class="actions">
         <button class="prim" id="g-principal">${T("Démarrer")}</button>
@@ -261,6 +275,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     essai_coupe: '${T("Le mode essai est coupé.")}',
     introuvable: '${T("Cet élément n’existe plus.")}',
     indisponible: '${T("Cette version de l’application ne connaît pas l’encan.")}'
+  };
+  /* La vente au serveur (2026-10-23) : pourquoi il n y a pas de lien. */
+  var MOTIFS_VENTE = {
+    article_catalogue: '${T("Article libre : pas de lien de paiement. Mettez à l’encan un article du catalogue.")}',
+    epuise: '${T("Article épuisé : plus aucune unité à réserver. Aucun lien n’a été créé.")}',
+    variante_inconnue: '${T("Cette taille ou couleur n’existe plus sur la fiche : aucun lien n’a été créé.")}',
+    produit_introuvable: '${T("La fiche de l’article est introuvable : aucun lien n’a été créé.")}',
+    session: '${T("Session expirée : reconnectez-vous dans la fenêtre principale.")}',
+    droit: '${T("Votre rôle ne permet pas de vendre (droit « commandes »).")}',
+    pont_indisponible: '${T("Fenêtre principale fermée : le lien n’a pas pu être créé.")}'
   };
   var PHASES = { garde: '${T("Page de garde")}', pret: '${T("Prêt")}', encours: '${T("En cours")}', pause: '${T("En pause")}',
     adjuge: '${T("Adjugé — en attente de « GAGNÉ »")}', expire: '${T("Délai passé")}', vendu: '${T("Vendu")}', annule: '${T("Annulé")}' };
@@ -353,6 +377,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       $('copie').textContent = '${T("{p} tu as gagné {a} à {m} ! Écris-nous GAGNÉ en message privé dans les {n} minutes.")}'
         .replace('{p}', g.pseudo).replace('{a}', a ? a.nom : '').replace('{m}', argent(g.montant)).replace('{n}', String(Math.round(E.reglages.delaiGagne / 60)));
       $('g-gagne').disabled = E.phase !== 'adjuge';
+      dessinerVente(g, a);
     }
 
     // Le fil : le plus recent en haut, avec la moderation de l encan.
@@ -376,16 +401,59 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return '<div class="ln"><span>' + esc([f.nom, f.variante].filter(Boolean).join(' · ')) + '</span><span class="act"><button class="mini" data-retirer="' + esc(f.cle) + '">${T("Retirer")}</button></span></div>';
     }).join('') || '<div class="aide">${T("Rien en file : ajoutez des articles depuis la gauche.")}</div>';
     $('l-att').innerHTML = (E.attentes || []).map(function(x){
+      var lien = x.vente && x.vente.url ? '<button class="mini" data-prive="' + esc(x.cle) + '">${T("Copier le message privé")}</button>' : '';
       return '<div class="ln"><span><b>' + esc(x.pseudo) + '</b> · ' + esc(x.article ? x.article.nom : '') + ' · ' + argent(x.montant)
-        + ' · <span class="v" data-reste="' + esc(x.cle) + '">' + chrono(x.restantMs) + '</span></span>'
-        + '<span class="act"><button class="mini" data-gagne="' + esc(x.cle) + '">${T("GAGNÉ reçu")}</button><button class="mini" data-remise="' + esc(x.cle) + '">${T("Remettre en vente")}</button></span></div>';
+        + ' · <span class="v" data-reste="' + esc(x.cle) + '">' + chrono(x.restantMs) + '</span> ' + puceVente(x.vente) + '</span>'
+        + '<span class="act">' + lien + '<button class="mini" data-gagne="' + esc(x.cle) + '">${T("GAGNÉ reçu")}</button><button class="mini" data-remise="' + esc(x.cle) + '">${T("Remettre en vente")}</button></span></div>';
     }).join('') || '<div class="aide">${T("Personne n’attend : chaque gagnante a écrit « GAGNÉ ».")}</div>';
     $('l-ventes').innerHTML = (E.historique || []).map(function(h){
       var lib = h.issue === 'vendu' ? '${T("vendu")}' : h.issue === 'remis' ? '${T("remis en vente")}' : '${T("annulé")}';
-      return '<div class="ln ' + (h.issue === 'vendu' ? 'bon' : '') + '"><span>' + esc(h.article ? h.article.nom : '') + (h.gagnant ? ' · ' + esc(h.gagnant.pseudo) + ' ' + argent(h.gagnant.montant) : '') + '</span><span class="v">' + lib + '</span></div>';
+      var v = h.gagnant && h.gagnant.vente;
+      var copie = (h.issue === 'vendu' && v && v.url && v.etat === 'attente') ? ' <button class="mini" data-prive-h="' + esc(v.id) + '">${T("Copier le message privé")}</button>' : '';
+      return '<div class="ln ' + (h.issue === 'vendu' ? 'bon' : '') + '"><span>' + esc(h.article ? h.article.nom : '') + (h.gagnant ? ' · ' + esc(h.gagnant.pseudo) + ' ' + argent(h.gagnant.montant) : '') + '</span><span class="v">' + lib + ' ' + (h.issue === 'vendu' ? puceVente(v) : '') + copie + '</span></div>';
     }).join('') || '<div class="aide">${T("Aucune vente encore.")}</div>';
     temps();
   }
+  /* ── La vente de la gagnante (2026-10-23, lot 2) : le lien de paiement personnel et son etat ── */
+  function heureFin(t){ try { var d = new Date(t * 1000); return deux(d.getHours()) + ' h ' + deux(d.getMinutes()); } catch (e) { return ''; } }
+  function messagePrive(g, a){
+    var v = g && g.vente;
+    if (!v || !v.url) return '';
+    return '${T("Bravo {p} ! Voici ton lien personnel pour payer {a} ({m}) : {u} La livraison et les taxes sont calculées sur la page. Vente finale, aucun retour. Le lien est valide 24 h.")}'
+      .replace('{p}', g.pseudo).replace('{a}', a ? a.nom : '').replace('{m}', argent(g.montant)).replace('{u}', v.url);
+  }
+  function puceVente(v){
+    if (!v) return '';
+    if (v.etat === 'creation') return '<span class="puce-v">${T("lien en création")}</span>';
+    if (v.etat === 'erreur') return '<span class="puce-v err">${T("pas de lien")}</span>';
+    if (v.etat === 'payee') return '<span class="puce-v ok">${T("payée")}' + (v.commande ? ' · ' + esc(v.commande) : '') + '</span>';
+    if (v.etat === 'expiree') return '<span class="puce-v err">${T("non payée — délai passé")}</span>';
+    if (v.etat === 'annulee' || v.etat === 'fermeture') return '<span class="puce-v">${T("lien annulé")}</span>';
+    if (v.essai) return '<span class="puce-v">${T("lien d’essai")}</span>';
+    return '<span class="puce-v">' + (v.courriel ? '${T("lien envoyé par courriel")}' : v.paiementOuvert ? '${T("paiement en cours")}' : v.adresse ? '${T("adresse saisie")}' : '${T("en attente de paiement")}') + '</span>';
+  }
+  function dessinerVente(g, a){
+    var v = g.vente, et = $('vente-etat'), li = $('vente-lien'), cp = $('copier-prive');
+    et.className = 'etat-v'; li.textContent = ''; cp.hidden = true;
+    if (!v || v.etat === 'creation') { et.textContent = '${T("Création du lien de paiement…")}'; return; }
+    if (v.etat === 'erreur') { et.className = 'etat-v err'; et.textContent = MOTIFS_VENTE[v.motif] || ('${T("Le lien de paiement n’a pas pu être créé : ")}' + (v.motif || '?')); return; }
+    if (v.etat === 'payee') { et.className = 'etat-v ok'; et.textContent = '${T("Payé — commande {c}, prête pour la préparation.")}'.replace('{c}', v.commande || ''); return; }
+    if (v.etat === 'expiree') { et.className = 'etat-v err'; et.textContent = '${T("Non payé dans le délai : l’article est revenu en stock.")}'; return; }
+    if (v.etat === 'annulee' || v.etat === 'fermeture') { et.textContent = '${T("Lien annulé : l’article est revenu en stock.")}'; return; }
+    et.textContent = (v.essai ? '${T("Lien d’ESSAI (aucun paiement possible)")}' : v.courriel ? '${T("Lien envoyé par courriel à {c}")}'.replace('{c}', v.courriel)
+      : '${T("Lien de paiement prêt — à envoyer en réponse à son message GAGNÉ")}') + (v.expire ? ' · ' + '${T("valide jusqu’à {h}")}'.replace('{h}', heureFin(v.expire)) : '');
+    li.textContent = v.url || '';
+    cp.hidden = !v.url;
+  }
+  function trouverVente(id){
+    var h = (E.historique || []).find(function(x){ return x.gagnant && x.gagnant.vente && x.gagnant.vente.id === id; });
+    return h ? { g: h.gagnant, a: h.article } : null;
+  }
+  function copierTexte(t, bon){
+    if (!EN || !t) return;
+    EN.copier(t).then(function(ok){ szDire(ok ? bon : '${T("La copie a échoué.")}', ok ? 'bon' : 'err'); });
+  }
+
   function temps(){
     if (!E) return;
     var r = E.phase === 'encours' ? Math.max(0, E.restantMs - (Date.now() - RECU)) : E.restantMs;
@@ -423,12 +491,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!EN) return;
     EN.copier($('copie').textContent).then(function(ok){ szDire(ok ? '${T("Message copié : collez-le dans les commentaires du direct.")}' : '${T("La copie a échoué.")}', ok ? 'bon' : 'err'); });
   };
+  $('copier-prive').onclick = function(){
+    if (!E || !E.gagnant) return;
+    copierTexte(messagePrive(E.gagnant, E.article), '${T("Message copié : collez-le en réponse à son message privé dans TikTok.")}');
+  };
+  $('l-ventes').onclick = function(ev){
+    var b = ev.target.closest('[data-prive-h]'); if (!b) return;
+    var x = trouverVente(b.getAttribute('data-prive-h'));
+    if (x) copierTexte(messagePrive(x.g, x.a), '${T("Message copié : collez-le en réponse à son message privé dans TikTok.")}');
+  };
   $('essai').onchange = function(){ geste('modeEssai', [this.checked]); };
   $('ecran').onclick = function(){ if (EN) EN.ecran({ pleinEcran: false }); };
   $('ecran-plein').onclick = function(){ if (EN) EN.ecran({ pleinEcran: true }).then(function(r){ if (r && r.motif === 'un_seul_ecran') szDire('${T("Un seul moniteur branché : l’écran s’ouvre en fenêtre.")}', 'att'); }); };
   $('l-file').onclick = function(ev){ var b = ev.target.closest('[data-retirer]'); if (b) geste('retirerDeFile', [b.getAttribute('data-retirer')]); };
   $('l-att').onclick = function(ev){
-    var g = ev.target.closest('[data-gagne]'), r = ev.target.closest('[data-remise]');
+    var g = ev.target.closest('[data-gagne]'), r = ev.target.closest('[data-remise]'), pv = ev.target.closest('[data-prive]');
+    if (pv) {
+      var x = (E.attentes || []).find(function(y){ return y.cle === pv.getAttribute('data-prive'); });
+      if (x) copierTexte(messagePrive({ pseudo: x.pseudo, montant: x.montant, vente: x.vente }, x.article), '${T("Message copié : collez-le en réponse à son message privé dans TikTok.")}');
+      return;
+    }
     if (g) geste('confirmerAttente', [g.getAttribute('data-gagne')]).then(function(x){ if (x.ok) szDire('${T("Vendu — noté aux ventes de la séance.")}', 'bon'); });
     else if (r) geste('remettreAttente', [r.getAttribute('data-remise')]).then(function(x){ if (x.ok) szDire('${T("Remis en vente : en tête de la file.")}', 'bon'); });
   };

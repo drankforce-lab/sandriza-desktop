@@ -392,4 +392,8 @@ module.exports = {
   /* (2026-10-19) Décisions pour banc-langue-fenetres : les fragments de code, sélecteurs, polices et noms
      de services se rendent à l’identique ; les textes d’interface sont traduits. */
   "cx-carte cx-liste seule": "cx-carte cx-liste seule",
+  // (2026-10-23) Vente d'un encan en direct
+  'Vente d’un encan en direct — vente finale, aucun retour': 'Live auction sale — final sale, no returns',
+  'Vente d’un encan en direct': 'Live auction sale',
+  'Vente finale': 'Final sale',
 };

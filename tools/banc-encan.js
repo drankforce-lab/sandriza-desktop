@@ -104,6 +104,83 @@ verif('…et les suivantes ne comptent plus', e.commentaire('troll', '2000').ver
 e.debloquer('@troll');
 verif('« Débloquer » : de nouveau admis', e.commentaire('@troll', '25').verdict === 'retenue');
 
+// ── LA VENTE AU SERVEUR (2026-10-23, lot 2) : src/encan-vente.js, avec un faux site ──
+(async () => {
+console.log('— La vente : adjugé → vente au serveur, GAGNÉ, remise en vente, paiement');
+const { VentesEncan } = require(path.join(__dirname, '..', 'src', 'encan-vente.js'));
+const monte = (opts) => {
+  const appels = [], etat = {};
+  let n = 0;
+  const site = async (op, ...a) => {
+    appels.push([op, ...a]);
+    if (op === 'encan:vendre') {
+      if (!a[0].article.produitId && !a[0].essai) return { ok: false, motif: 'article_catalogue' };
+      const id = 'ev_' + (++n); etat[id] = 'attente';
+      return { ok: true, id, url: 'https://www.sandriza.com/encan/' + 'a'.repeat(31) + n, expire: 999, reserve: true, courriel: (opts && opts.courriel) || '' };
+    }
+    if (op === 'encan:gagne') return { ok: true, expire: 86400 };
+    if (op === 'encan:annuler') { if (etat[a[0]] === 'payee') return { ok: false, motif: 'payee' }; etat[a[0]] = 'annulee'; return { ok: true }; }
+    if (op === 'encan:etat') { const v = {}; a[0].forEach((id) => { v[id] = { statut: etat[id], commande: etat[id] === 'payee' ? 'CMD-0002-22400' : '' }; }); return { ok: true, ventes: v }; }
+    return { ok: false };
+  };
+  let ve = null;
+  const m = new Encan({ maintenant: horloge, reglages: { depart: 10, duree: 30 }, essai: !!(opts && opts.essai),
+    surChangement: () => { if (ve) ve.observer(); }, surIssue: (g, i) => ve && ve.surIssue(g, i) });
+  ve = new VentesEncan({ moteur: m, appeler: site, maintenant: horloge });
+  return { m, ve, appels, etat };
+};
+const pause = () => new Promise((r) => setImmediate(r));
+const adjugeSur = async (x, article) => { x.m.charger(article || { produitId: 'pA', nom: 'Robe', taille: 'M', couleur: 'Noir' }); x.m.demarrer(); x.m.commentaire('@lea', '20'); x.m.adjuger(); await pause(); await pause(); };
+
+let x = monte();
+await adjugeSur(x);
+verif('adjugé : UNE vente demandée au site, avec article, montant, pseudo', x.appels.filter((a) => a[0] === 'encan:vendre').length === 1
+  && x.appels[0][1].montant === 20 && x.appels[0][1].pseudo === '@lea' && x.appels[0][1].article.produitId === 'pA', x.appels);
+verif('…le lien est porté par la gagnante (état poussé aux fenêtres)', x.m.etat().gagnant.vente && /\/encan\//.test(x.m.etat().gagnant.vente.url), x.m.etat().gagnant);
+x.ve.observer();
+verif('un second passage ne crée pas de doublon', x.appels.filter((a) => a[0] === 'encan:vendre').length === 1);
+x.m.confirmerGagne(); await pause();
+verif('« GAGNÉ » reçu : le délai de paiement est allongé au serveur', x.appels.some((a) => a[0] === 'encan:gagne' && a[1] === 'ev_1'), x.appels);
+x.etat.ev_1 = 'payee';
+await x.ve.suivre();
+verif('payée : le suivi le voit, avec le numéro de commande', x.m.historique[0].gagnant.vente.etat === 'payee' && x.m.historique[0].gagnant.vente.commande === 'CMD-0002-22400', x.m.historique[0]);
+
+x = monte();
+await adjugeSur(x);
+x.m.remettreEnVente(); await pause();
+verif('remis en vente : la vente est annulée au serveur (l article revient en stock)', x.appels.some((a) => a[0] === 'encan:annuler' && a[1] === 'ev_1') && x.etat.ev_1 === 'annulee', x.appels);
+
+x = monte();
+await adjugeSur(x);
+x.m.garde();
+const cleAtt = x.m.attentes[0].cle;
+verif('en attente pendant l encan suivant : la vente suit la gagnante', x.m.etat().attentes[0].vente && x.m.etat().attentes[0].vente.id === 'ev_1');
+x.etat.ev_1 = 'payee';
+await x.ve.suivre();
+verif('payée PENDANT l attente : notée vendue sans geste, sortie des attentes', !x.m.attentes.length && x.m.historique[0].issue === 'vendu' && x.m.historique[0].gagnant.vente.etat === 'payee', x.m.historique[0]);
+verif('…et rien n est annulé au serveur', !x.appels.some((a) => a[0] === 'encan:annuler'));
+void cleAtt;
+
+x = monte();
+await adjugeSur(x);
+x.m.garde();
+avancer(15 * 60000 + 500, x.m); await pause();
+verif('15 min sans « GAGNÉ » : remis en file ET la vente annulée au serveur', x.m.file.length === 1 && x.appels.some((a) => a[0] === 'encan:annuler'), x.appels);
+
+x = monte({ courriel: 'm•••@x.test' });
+await adjugeSur(x);
+verif('pseudo déjà rattaché : lien parti par courriel ⇒ vendu sans attendre « GAGNÉ »', x.m.phase === 'vendu' && x.m.historique[0].gagnant.vente.courriel === 'm•••@x.test', { phase: x.m.phase });
+
+x = monte();
+await adjugeSur(x, { nom: 'Article libre' });
+verif('article libre hors essai : pas de lien, la raison est dite', x.m.etat().gagnant.vente.etat === 'erreur' && x.m.etat().gagnant.vente.motif === 'article_catalogue', x.m.etat().gagnant.vente);
+
+x = monte();
+x.m.charger({ produitId: 'pA', nom: 'Robe' }); x.m.demarrer(); x.m.commentaire('@lea', '20'); x.m.adjuger();
+x.m.remettreEnVente();   // AVANT que le site ait répondu
+await pause(); await pause(); await pause();
+verif('remis en vente PENDANT la création : appliqué dès la réponse (annulée au serveur)', x.etat.ev_1 === 'annulee', x.appels);
+
 // ── La console : le lecteur de codes-barres et la vignette (2026-10-20, ses deux signalements) ──
 const _page = require('fs').readFileSync(require('path').join(__dirname, '..', 'src', 'fenetres', 'encan.js'), 'utf8');
 verif('un code scanné (réponse « sku » du site) met l article à l encan sans passer par la liste', _page.includes('if (r.sku) { scanne(r.sku); return; }'));
@@ -113,3 +190,4 @@ verif('la vignette est une image, pas un fond (le damier des thèmes Carbone/Lin
 
 console.log(ok + ' vérifiés, ' + ko + ' en échec');
 process.exit(ko ? 1 : 0);
+})();
