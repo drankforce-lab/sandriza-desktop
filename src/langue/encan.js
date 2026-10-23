@@ -222,7 +222,7 @@ module.exports = {
   'Message copié : collez-le en réponse à son message privé dans TikTok.': 'Message copied: paste it in reply to her private message on TikTok.',
   // ── La lecture du vrai direct (2026-10-23, lot 3) ──
   'Compte TikTok du direct': 'TikTok account of the live',
-  '@compte TikTok du direct': '@TikTok account of the live',
+  '@compte TikTok': '@TikTok account',
   'Se brancher': 'Connect',
   'Se débrancher': 'Disconnect',
   'Non branché : les commentaires du direct ne sont pas lus.': 'Not connected: the live comments are not being read.',

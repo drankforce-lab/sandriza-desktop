@@ -252,7 +252,7 @@ function pageEncan() {
       <div class="flux-tete"><h2>${T("Commentaires du direct")}</h2><span class="aide" id="flux-etat"></span></div>
       <div class="direct" id="bloc-direct">
         <div class="ligne-d">
-          <input id="d-compte" maxlength="60" autocomplete="off" aria-label="${T("Compte TikTok du direct")}" placeholder="${T("@compte TikTok du direct")}">
+          <input id="d-compte" maxlength="60" autocomplete="off" aria-label="${T("Compte TikTok du direct")}" placeholder="${T("@compte TikTok")}">
           <button class="prim" id="d-bascule">${T("Se brancher")}</button>
         </div>
         <div class="etat-d" id="d-etat"><i></i><span id="d-texte">${T("Non branché : les commentaires du direct ne sont pas lus.")}</span></div>
