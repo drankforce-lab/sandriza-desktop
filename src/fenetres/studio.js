@@ -700,6 +700,10 @@ html.mode-fiche #b-reset,html.mode-fiche #b-lot,html.mode-fiche #b-final,html.mo
        détaillé — celui où l'on met en pause et où l'on arrête. Ajouter un
        compteur ici aurait dit deux fois la même chose, et le premier des deux
        était périmé : le sondage des lots ne tournait que sur l'écran des lots. -->
+  <!-- (2026-10-25, sa capture : devant et dos du gilet « pas à la même hauteur ») Le cadrage uniforme s applique de
+       lui-même aux nouvelles générations ; ce bouton le passe sur les photos DÉJÀ en place, après confirmation. -->
+  <button class="tj" id="recadrer" title="${T("Uniformiser le cadrage des photos déjà en place (même hauteur, centrées)")}"
+    aria-label="${T("Uniformiser le cadrage des photos")}">⛶</button>
   <button class="tj" id="lots-voir" title="${T("Traitements par lot — voir la file, mettre en pause, arrêter")}"
     aria-label="${T("Traitements par lot")}">${ICO.clock}</button></div>
 <div class="ro" id="ro" hidden>${T("Lecture seule : votre rôle ne permet pas de lancer de traitement.")}</div>
@@ -3293,6 +3297,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     }
     var lv = document.getElementById('lots-voir');
     if (lv) lv.onclick = function(){ LOTS_VUE = true; chargerLots(); dessiner(); };
+    var rc = document.getElementById('recadrer');
+    if (rc) rc.onclick = function(){
+      if (OCCUPE || rc.disabled) return;
+      szConfirmer({ titre: '${T("Uniformiser le cadrage des photos")}',
+        texte: '${T("Chaque photo des fiches produits sur fond uni sera recadrée au même gabarit : le vêtement à la même hauteur et centré, pour que rien ne saute en changeant de photo. Les gros plans et les photos sur fond chargé ne sont pas touchés. Les nouvelles générations sont déjà recadrées d’elles-mêmes.")}',
+        details: [['${T("Originales")}', '${T("gardées 30 jours dans le stockage (retour possible)")}'], ['${T("Durée")}', '${T("quelques secondes par photo — la fenêtre peut rester ouverte en arrière-plan")}']],
+        oui: '${T("Recadrer les photos")}' }).then(function(ok){
+        if (!ok) return;
+        rc.disabled = true;
+        dire('${T("Recadrage des photos en cours…")}', 'att');
+        appeler('studio:recadrerExistants', []).then(function(r){
+          rc.disabled = false;
+          if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+          dire('${T("Cadrage uniformisé :")} ' + r.recadrees + ' ${T("photo(s) recadrée(s) dans")} ' + r.produits + ' ${T("fiche(s)")}'
+            + (r.ignorees ? ' · ' + r.ignorees + ' ${T("déjà au gabarit ou sur fond chargé")}' : '')
+            + (r.echecs ? ' · ' + r.echecs + ' ${T("illisible(s)")}' : '') + '.', r.echecs ? 'att' : 'bon');
+        });
+      });
+    };
     var pnv = document.getElementById('pn-vider');
     if (pnv) pnv.onclick = function(){
       if (OCCUPE) return;

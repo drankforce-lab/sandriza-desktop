@@ -2954,7 +2954,7 @@ const OPS_PONT = new Set([
   'studio:estimer', 'fal:plafondPoser',
   // Studio ↔ photothèque : lister pour choisir, ouvrir depuis la photothèque,
   // enregistrer le résultat (import → dépôt R2).
-  'studio:phototheque', 'studio:ouvrir', 'studio:enregistrer',
+  'studio:phototheque', 'studio:ouvrir', 'studio:enregistrer', 'studio:recadrerExistants',
   // Le Studio rattaché au produit (2026-10-19) : recherche, contexte de l'assistant, teinte, placement, boîte aux lettres.
   'studio:produits', 'studio:produit', 'studio:ouvrirPour', 'studio:contexte', 'studio:teinte', 'studio:harmoniser',
   'studio:placer', 'studio:retours', 'studio:retourPris', 'studio:lierProvisoire',
@@ -3628,6 +3628,8 @@ const LIMITES_PONT = {
   // touche a une image, donc pas de plafond de temps genereux ici.
   'studio:estimer': 20000, 'fal:plafondPoser': 20000,
   'studio:phototheque': 20000, 'studio:ouvrir': 8000, 'studio:enregistrer': 90000,
+  /* Toutes les photos de toutes les fiches, une à une (lecture, recadrage, dépôt) : jusqu à 30 min. */
+  'studio:recadrerExistants': 1800000,
   'studio:produits': 10000, 'studio:produit': 8000, 'studio:ouvrirPour': 15000, 'studio:contexte': 8000,
   'studio:teinte': 30000, 'studio:harmoniser': 60000, 'studio:placer': 120000, 'studio:retours': 10000,
   'studio:retourPris': 8000, 'studio:lierProvisoire': 30000,
