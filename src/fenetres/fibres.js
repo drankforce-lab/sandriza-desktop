@@ -124,8 +124,15 @@ button.danger{border-color:rgba(248,113,113,.45);color:var(--tx-err2)}
 .apercu{display:flex;justify-content:center;padding:.6rem;border-radius:10px;background:var(--v04);border:1px solid var(--v08)}
 .apercu canvas{display:block}
 .lecture-txt{font-size:.78rem;line-height:1.5}
+.filtres .q #f-scan{width:11rem}
+/* Le bandeau de l analyse retrouvée par le scan : le produit, en grand. */
+.trouve{display:flex;flex-direction:column;gap:.1rem;padding:.6rem .75rem;border-radius:10px;background:rgba(34,197,94,.10);border:1px solid rgba(34,197,94,.32)}
+.trouve span{font-size:.7rem;color:var(--tx-ok);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.trouve strong{font-size:1.1rem}
+html.jour .trouve span{color:#1b5631}
 /* Deux lignes au plus dans le détail (le texte entier au survol) : la colonne ne défile pas. */
 .coupe2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.coupe1{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
 .coupe3{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .detail{gap:.4rem}
 
@@ -157,6 +164,7 @@ button.danger{border-color:rgba(248,113,113,.45);color:var(--tx-err2)}
 .pl>div:first-child>*,.duo>div:last-child>*{flex:0 0 auto}
 .depot{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.45rem;min-height:11rem;
   border:1.5px dashed var(--v20);border-radius:12px;text-align:center;padding:.8rem;cursor:pointer;background:var(--v03)}
+.depot.compact{min-height:5.5rem}
 .depot.survol{border-color:var(--or);background:rgba(var(--or-rgb),.08)}
 .vignettes{display:flex;gap:.45rem;flex-wrap:wrap}
 .vig{position:relative;width:5.2rem;height:3.9rem;border-radius:8px;overflow:hidden;border:1px solid var(--v12)}
@@ -170,6 +178,12 @@ button.danger{border-color:rgba(248,113,113,.45);color:var(--tx-err2)}
 .estim strong{font-size:1rem}
 .avert{font-size:.76rem;line-height:1.45;border-radius:10px;padding:.5rem .65rem;
   background:rgba(251,191,36,.10);border:1px solid rgba(251,191,36,.35)}
+/* SA RÈGLE DES 95 % (2026-10-25) : sous le seuil, l encadré dit pourquoi et propose une seconde analyse. */
+.nonconcl{border-radius:10px;padding:.6rem .75rem;margin-top:.55rem;font-size:.79rem;line-height:1.45;
+  background:rgba(251,191,36,.10);border:1px solid rgba(251,191,36,.40)}
+.nonconcl h3{margin:0 0 .25rem;font-size:.86rem;color:var(--tx-att)}
+.nonconcl p{margin:.15rem 0}
+.nonconcl .boutons{margin-top:.5rem;display:flex;gap:.5rem;flex-wrap:wrap;justify-content:flex-start;align-items:center}
 .fib{display:grid;grid-template-columns:minmax(0,1fr) 4.6rem 1.9rem;gap:.5rem;align-items:center;margin-bottom:.55rem}
 .fib input{text-align:right}
 .total{display:flex;justify-content:space-between;align-items:center;font-size:.78rem}
@@ -196,6 +210,11 @@ button.danger{border-color:rgba(248,113,113,.45);color:var(--tx-err2)}
 .lot .nom{font-size:.8rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lot .sous{font-size:.72rem;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pas{display:flex;align-items:center;border:1px solid var(--v16);border-radius:8px;overflow:hidden}
+/* ⚠ LE SOCLE A SA PROPRE .pas (la barre d étapes : marges, retour à la ligne) : ici, par .lot, le compteur reste
+   sur UNE ligne — empilé (− / 1 / +) sous 1100 px, il triplait la hauteur de chaque ligne et la liste défilait. */
+.mini.dup{padding:.05rem .55rem;font-size:.72rem}
+.lot .pas{flex-wrap:nowrap;flex-direction:row;gap:0;padding:0;background:transparent;min-width:0}
+.lot .pas button{padding:.1rem .45rem;font-size:.86rem;border:0;border-radius:0;background:transparent}
 .pas button{border:0;border-radius:0;padding:.1rem .5rem;background:transparent;line-height:1.2}
 .pas input{border:0;border-radius:0;width:3.2rem;min-width:48px;text-align:center;padding:.15rem 0;background:transparent}
 .feuilles{display:flex;gap:.4rem;flex-wrap:wrap}
@@ -204,7 +223,8 @@ button.danger{border-color:rgba(248,113,113,.45);color:var(--tx-err2)}
 .scene .note{font-size:.78rem;line-height:1.5;color:var(--tx2);display:flex;flex-direction:column;gap:.5rem;max-width:20rem}
 .badge{align-self:flex-start;padding:.18rem .6rem;border-radius:999px;font-size:.72rem;font-weight:650;
   background:rgba(251,191,36,.16);color:var(--tx-att)}
-@media (max-width:1100px){.assist{grid-template-columns:minmax(0,1fr) 21rem}.et-deux,.et-compo{grid-template-columns:1fr}.duo{grid-template-columns:1fr}}
+/* ⚠ .et-deux GARDE SES DEUX COLONNES sous 1100 px : empilées, la photo et la lecture sortaient par le bas (banc à 1080 × 700). */
+@media (max-width:1100px){.assist{grid-template-columns:minmax(0,1fr) 21rem}.et-compo{grid-template-columns:1fr}.duo{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -253,6 +273,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var PHOTOS = [];             /* data URL réduites — JAMAIS enregistrées */
   var LECTURE_EN_COURS = false;
   var RES = null;              /* résultats de la recherche de produit */
+  var SCANNE = '';             /* l analyse retrouvée par le dernier scan (bandeau dans le détail) */
   var PL = null;               /* la planche */
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
@@ -364,12 +385,33 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (videC) compo = ['${T("COMPOSITION À CONFIRMER")}'];
     /* Hauteurs des blocs, puis l espace libre réparti également entre eux. */
     var fsC = 17 * u, lhC = 1.12;
-    var hC = Math.max(e.taille ? 30 * u : 0, compo.length * fsC * lhC);
+    /* (2026-10-25, sa demande) LA CASE TAILLE SUIT LA COMPOSITION : plus grande quand il y a plusieurs lignes,
+       jamais sous 36. LA TAILLE A TOUJOURS PRIORITÉ (sa règle) : la case se calcule sur la police de départ, et quand
+       la place manque — en hauteur comme en largeur — c est la COMPOSITION qui se resserre, jamais la case. */
+    function tailleBoite(){ return e.taille ? Math.max(36 * u, Math.min(46 * u, compo.length * 17 * u * lhC * 0.82)) : 0; }
+    var hC = Math.max(tailleBoite(fsC), compo.length * fsC * lhC);
     var fsS = 10.5 * u, lhS = 1.38, hS = soins.length * fsS * lhS;
     var tI = 26 * u, hI = sym.length ? tI : 0;
-    var fsP = 10 * u, lhP = 1.35, hP = 2 * fsP * lhP;
-    var blocs = [hC, hS, hI, hP].filter(function(v){ return v > 0; });
+    /* (2026-10-25, sa demande : « espace la distance et grossis un peu ») le pied plus grand et plus aéré. */
+    var fsP = 11.5 * u, lhP = 1.7, hP = 2 * fsP * lhP;
+    /* 5. LE CODE-BARRES DU NUMÉRO D ANALYSE (2026-10-25, sa demande : « sur la longueur, sous SANDRIZA », discret).
+       Le site l encode (Code 128, celui des étiquettes de produits) ; ici on le dessine. Module de 0,254 mm
+       (3 points à 300 ppp : des bords francs, lisibles à travers le tissu), barres de 2,5 mm. */
+    var aCode = !!(e.barres && e.barres.length && e.modules);
+    var hB = aCode ? 2.5 * 7.6 * u + 6 * u : 0;
+    var blocs = [hC, hS, hI, hP, hB].filter(function(v){ return v > 0; });
     var somme = blocs.reduce(function(s, v){ return s + v; }, 0);
+    /* (2026-10-25, sa demande : « 3 compositions doivent aussi entrer ») TROP HAUT : la composition et les consignes
+       rapetissent ensemble, juste assez pour garder un écart de 5 entre les blocs (jamais sous 70 % de leur taille). */
+    var manque = somme + 28 * u + 5 * u * (blocs.length - 1) - h;
+    if (manque > 0 && (hC + hS) > 0) {
+      var kf = Math.max(0.7, (hC + hS - manque) / (hC + hS));
+      fsC *= kf; fsS *= kf;
+      hC = Math.max(tailleBoite(fsC), compo.length * fsC * lhC);
+      hS = soins.length * fsS * lhS;
+      blocs = [hC, hS, hI, hP, hB].filter(function(v){ return v > 0; });
+      somme = blocs.reduce(function(s, v){ return s + v; }, 0);
+    }
     var ecart = blocs.length > 1 ? Math.max(0, (h - 28 * u - somme) / (blocs.length - 1)) : 0;
     // Peu de blocs (étiquette en cours) : l ensemble est centré, au lieu de coller au haut.
     var yy = 14 * u;
@@ -378,17 +420,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (hC) {
       ctx.font = '700 ' + fsC + 'px ' + POLICE;
       var lmax = 0; compo.forEach(function(l){ lmax = Math.max(lmax, ctx.measureText(l).width); });
-      var boite = e.taille ? 30 * u : 0, esp = e.taille ? 10 * u : 0;
-      var tot = boite + esp + lmax;
-      if (tot > dispo && lmax > 0) { var k = Math.max(0.55, (dispo - boite - esp) / lmax); fsC = fsC * k; ctx.font = '700 ' + fsC + 'px ' + POLICE; lmax = lmax * k; tot = boite + esp + lmax; }
+      var boite = tailleBoite(fsC), esp = e.taille ? 6 * u : 0;
+      /* Une taille longue (6XL, 10/12…) : la case S ÉLARGIT en rectangle au lieu de rapetisser la lettre. */
+      var lb = boite, fT0 = 0;
+      if (e.taille) {
+        fT0 = boite * (String(e.taille).length > 2 ? 0.56 : 0.62);
+        ctx.font = '800 ' + fT0 + 'px ' + POLICE; lb = Math.max(boite, ctx.measureText(e.taille).width + 9 * u);
+        ctx.font = '700 ' + fsC + 'px ' + POLICE;
+      }
+      var tot = lb + esp + lmax;
+      if (tot > dispo && lmax > 0) { var k = Math.max(0.55, (dispo - lb - esp) / lmax); fsC = fsC * k; ctx.font = '700 ' + fsC + 'px ' + POLICE; lmax = lmax * k; tot = lb + esp + lmax; }
+      // De la place en largeur : la case s écarte du texte (jusqu à 16) ; serré, elle reste à 6.
+      else if (e.taille) { esp = Math.max(6 * u, Math.min(16 * u, (dispo - lb - lmax) * 0.25)); tot = lb + esp + lmax; }
       var x0 = (w - tot) / 2;
       var hTxt = compo.length * fsC * lhC;
       if (e.taille) {
         var by = yy + (hC - boite) / 2;
-        ctx.fillStyle = encre; ctx.fillRect(x0, by, boite, boite);
+        ctx.fillStyle = encre; ctx.fillRect(x0, by, lb, boite);
         ctx.fillStyle = e.couleurFond;
-        var fT = ajuster(ctx, e.taille, '800', 19 * u, boite - 6 * u);
-        ctx.textAlign = 'center'; ctx.fillText(e.taille, x0 + boite / 2, by + boite / 2 + fT * 0.36);
+        var fT = ajuster(ctx, e.taille, '800', fT0, lb - 6 * u);
+        ctx.textAlign = 'center'; ctx.fillText(e.taille, x0 + lb / 2, by + boite / 2 + fT * 0.36);
         ctx.fillStyle = encre;
       }
       ctx.font = '700 ' + fsC + 'px ' + POLICE; ctx.textAlign = e.taille ? 'left' : 'center';
@@ -396,7 +447,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (videC) ctx.globalAlpha = 0.45;
       compo.forEach(function(l, i){
         var bl = ty + (i + 0.82) * fsC * lhC;
-        ctx.fillText(l, e.taille ? x0 + boite + esp : w / 2, bl);
+        ctx.fillText(l, e.taille ? x0 + lb + esp : w / 2, bl);
       });
       ctx.globalAlpha = 1;
       yy += hC + ecart;
@@ -438,6 +489,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     ctx.font = '700 ' + fL + 'px ' + SZ_DONNEES.serif; ctx.fillStyle = encre; ctx.fillText('S', lx, bl2);
     ctx.font = 'italic 700 ' + fL + 'px ' + SZ_DONNEES.serif; ctx.fillStyle = '#C49A6C'; ctx.fillText('z', lx + wS, bl2);
     ctx.font = '600 ' + fI + 'px ' + POLICE; ctx.fillStyle = encre; ctx.fillText(e.identite, lx + wS + wZ + espL, bl2);
+    if (aCode) {
+      yy += hP + ecart;
+      /* La largeur d un module : un nombre ENTIER de points à l export (o.modPx), sinon 0,254 mm à l échelle. */
+      var mw = o.modPx || (0.254 * 7.6 * u);
+      var qz = 10 * mw, lc = e.modules * mw, bh = 2.5 * 7.6 * u;
+      var x0b = Math.round((w - lc) / 2), y0b = Math.round(yy + 4 * u);
+      /* Un scanneur lit des barres FONCÉES sur fond CLAIR : sur le vêtement foncé, une fine bande claire. */
+      if (e.fond !== 'pale') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(Math.round(x0b - qz), Math.round(y0b - 1.5 * u), Math.round(lc + 2 * qz), Math.round(bh + 3 * u)); }
+      ctx.fillStyle = '#111111';
+      e.barres.forEach(function(b){ ctx.fillRect(Math.round(x0b + b[0] * mw), y0b, Math.max(1, Math.round(b[1] * mw)), Math.round(bh)); });
+    }
     ctx.restore();
   }
   /* Une étiquette dans un canevas d aperçu (à l endroit, toujours lisible). */
@@ -541,7 +603,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var L = (D.analyses || []);
     var h = '<div class="filtres"><div class="puces" role="group" aria-label="${T("Filtrer les analyses")}">'
       + FILTRES.map(function(f){ return '<button type="button" class="puce" data-filtre="' + f[0] + '" aria-pressed="' + (FILTRE === f[0]) + '">' + f[1] + '</button>'; }).join('')
-      + '</div><div class="q"><label class="lbl" for="f-q">${T("Rechercher")}</label><input type="search" id="f-q" maxlength="80" value="' + esc(Q) + '" placeholder="${T("N°, fibre, produit, remarque…")}"></div></div>';
+      + '</div><div class="q"><label class="lbl" for="f-scan">${T("Scanner")}</label><input type="text" id="f-scan" maxlength="40" autocomplete="off" placeholder="${T("Étiquette d’analyse…")}" title="${T("Scannez le code de l’étiquette thermocollante, ou tapez le numéro d’analyse : l’analyse s’ouvre.")}">'
+      + '<label class="lbl" for="f-q">${T("Rechercher")}</label><input type="search" id="f-q" maxlength="80" value="' + esc(Q) + '" placeholder="${T("N°, fibre, produit, remarque…")}"></div></div>';
     if (!L.length) {
       return h + '<div class="cx-carte appel"><strong>${T("Aucune analyse pour l’instant")}</strong>'
         + '<div class="aide">${T("Prenez une photo de la surface du vêtement au microscope (1200×), déposez-la ici : l’IA décrit la fibre étape par étape, vous confirmez la composition avec la fiche du fournisseur, puis l’étiquette se prépare toute seule.")}</div>'
@@ -564,6 +627,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var soins = (a.entretien || []).map(function(k){ var s = soin(k); return s ? (EN ? s.en : s.fr) : ''; }).filter(Boolean);
     var l = a.lecture;
     return '<div class="cx-carte detail"><h2>' + esc(a.no) + ' <span class="cx-sub">' + esc(szJour(a.majLe || a.creeLe)) + '</span></h2>'
+      + (SCANNE === a.id ? '<div class="trouve"><span>${T("Étiquette scannée")}</span><strong>' + esc(nomProduit(a) || a.no) + '</strong></div>' : '')
       + '<div class="apercu"><canvas id="cv-choix" width="300" height="180" style="width:300px;height:180px" aria-label="${T("Aperçu de l’étiquette")}" role="img"></canvas></div>'
       + '<div class="ligne" data-opt="6"><b>${T("Composition confirmée")}</b>' + esc(a.resume || '${T("pas encore confirmée")}') + '</div>'
       + '<div class="ligne"><b>${T("Produit")}</b>' + esc(nomProduit(a)) + (a.produit ? ' <span class="gris">' + esc(a.produit.ref) + '</span>' : ' <span class="gris">${T("(nom provisoire — produit à créer)")}</span>')
@@ -580,6 +644,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + '<div class="boutons" style="margin-top:.35rem"><button type="button" class="prim" data-rattacher="' + esc(a.id) + '">${T("Rattacher à un produit")}</button></div></div>' : '')
       + '<div class="boutons">'
       + (PS ? '<button type="button" class="danger gauche" data-sup="' + esc(a.id) + '">${T("Supprimer")}</button>' : '')
+      + '<button type="button" data-temp="' + esc(a.id) + '" title="${T("Une petite étiquette, au format de vos codes-barres, à coller sur le vêtement le temps de poser l’étiquette thermocollante.")}">${T("Étiquette temporaire")}</button>'
       + (PM ? '<button type="button" class="prim" data-ouvrir="' + esc(a.id) + '">${T("Ouvrir")}</button>' : '')
       + '</div></div>';
   }
@@ -600,6 +665,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       Array.prototype.forEach.call(col.querySelectorAll('[data-opt="' + p + '"]') || [], function(e){ e.style.display = 'none'; var br = e.previousSibling; if (br && br.nodeName === 'BR') br.style.display = 'none'; });
     }
   }
+  /* L ÉTAPE 1 sur une petite fenêtre : la lecture (et l encadré non concluant) sortait par le bas (banc à 700 px).
+     Les textes se resserrent — trois lignes, puis deux, puis une, le texte entier au survol — jusqu à tenir.
+     Jamais de glissière (sa règle). */
+  function ajusterEtape1(){
+    var bas = Math.min(corps.getBoundingClientRect().bottom, window.innerHeight);
+    function depasse(){ return Array.prototype.some.call(corps.querySelectorAll('.et-deux>.cx-carte'), function(c){ return c.getBoundingClientRect().bottom > bas + 1; }); }
+    var niv = ['coupe3', 'coupe2', 'coupe1'];
+    for (var i = 1; i < niv.length && depasse(); i++) {
+      Array.prototype.forEach.call(corps.querySelectorAll(['.etape', '.nonconcl'].map(function(s){ return s + ' p.' + niv[i - 1]; }).join()), function(p){ p.classList.remove(niv[i - 1]); p.classList.add(niv[i]); });
+    }
+  }
   function peindreChoix(){
     var cv = document.getElementById('cv-choix');
     if (cv && APERCU_CHOIX) apercuDans(cv, APERCU_CHOIX, 300);
@@ -610,13 +686,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     VUE = 'analyse'; PHOTOS = []; RES = null;
     ETAPE = etape || (a && (a.lecture || (a.composition || []).length) ? 2 : 1);
     FORM = a ? {
-      id: a.id, no: a.no, lecture: a.lecture || null,
+      id: a.id, no: a.no, lecture: a.lecture || null, tentatives: (a.tentatives || []).slice(),
       composition: (a.composition || []).map(function(x){ return { fibre: x.fibre, pct: String(x.pct) }; }),
       entretien: (a.entretien || []).slice(), fond: a.fond || 'fonce', pays: a.pays || D.paysDefaut,
       produit: a.produit || null, nomProvisoire: a.nomProvisoire || '', mode: a.produit ? 'inventaire' : 'provisoire',
       remarque: a.remarque || '', copierFiche: !!a.produit, apercu: null, verdict: null
     } : {
-      id: '', no: '', lecture: null, composition: [], entretien: [], fond: dernierFond(), pays: D.paysDefaut,
+      id: '', no: '', lecture: null, tentatives: [], composition: [], entretien: [], fond: dernierFond(), pays: D.paysDefaut,
       produit: null, nomProvisoire: '', mode: 'inventaire', remarque: '', copierFiche: true, apercu: null, verdict: null
     };
     redemanderApercu();
@@ -624,7 +700,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dernierFond(){ try { return localStorage.getItem('sz-fibres-fond') === 'pale' ? 'pale' : 'fonce'; } catch (e) { return 'fonce'; } }
   function saisie(){
     var f = FORM;
-    return { id: f.id || undefined, lecture: f.lecture,
+    return { id: f.id || undefined, lecture: f.lecture, tentatives: f.tentatives || [],
       composition: f.composition.filter(function(x){ return x.fibre && parseFloat(x.pct) > 0; }).map(function(x){ return { fibre: x.fibre, pct: Math.round(parseFloat(String(x.pct).replace(',', '.'))) }; }),
       entretien: f.entretien.slice(), fond: f.fond, pays: f.pays,
       produitId: f.mode === 'inventaire' && f.produit ? f.produit.id : '', nomProvisoire: f.mode === 'provisoire' ? f.nomProvisoire : '',
@@ -643,7 +719,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       });
     }, 140);
   }
-  function peindreForm(){ var cv = document.getElementById('cv-form'); if (cv && FORM && FORM.apercu) apercuDans(cv, FORM.apercu, 360); }
+  /* L aperçu suit sa carte (360 au plus) : à 21rem de colonne, 360 px débordaient du cadre. */
+  function peindreForm(){
+    var cv = document.getElementById('cv-form'); if (!cv || !FORM || !FORM.apercu) return;
+    var boite = cv.parentNode && cv.parentNode.clientWidth ? cv.parentNode.clientWidth - 20 : 360;
+    apercuDans(cv, FORM.apercu, Math.max(220, Math.min(360, boite)));
+  }
   /* Le côté se refait sans toucher à l étape (la saisie en cours garde son focus). */
   function majCote(){ var c = document.querySelector('.et-droite'); if (!c || !FORM) return; c.innerHTML = cote(); peindreForm(); }
   function totalPct(){ return FORM.composition.reduce(function(s, x){ var v = parseFloat(String(x.pct).replace(',', '.')); return s + (isFinite(v) ? Math.round(v) : 0); }, 0); }
@@ -661,14 +742,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var ETAPES = [[1, '${T("Photo et lecture de l’IA")}'], [2, '${T("Composition et entretien")}'], [3, '${T("Produit et étiquette")}']];
   function etapePhotos(){
     var f = FORM, l = f.lecture;
+    /* Non concluante : l encadré va SOUS LE DÉPÔT DE PHOTO (la seconde analyse se fait là, et la colonne a la place). */
+    var nc = nonConcluante(l);
     var h = '<div class="et-deux"><div class="cx-carte"><h2>${T("Photo de surface · microscope 1200×")}</h2>'
-      + '<div class="depot" id="f-depot" role="button" tabindex="0" aria-label="${T("Déposer ou choisir des photos")}">'
+      + '<div class="depot' + (nc ? ' compact' : '') + '" id="f-depot" role="button" tabindex="0" aria-label="${T("Déposer ou choisir des photos")}">'
       + '<strong>${T("Glissez une photo ici")}</strong><span class="aide">${T("ou cliquez pour choisir (JPEG, PNG, WEBP — 4 au plus). Plusieurs vues du même tissu donnent une lecture plus sûre.")}</span></div>';
     if (PHOTOS.length) h += '<div class="vignettes" style="margin-top:.7rem">' + PHOTOS.map(function(p, i){
       return '<div class="vig"><img src="' + p + '" alt="${T("Photo")} ' + (i + 1) + '"><button type="button" data-otph="' + i + '" aria-label="${T("Retirer la photo")} ' + (i + 1) + '">✕</button></div>'; }).join('') + '</div>';
-    h += '<div class="aide" style="margin-top:.8rem">${T("Conseil : une photo de la surface, une du ruban adhésif collé sur une lame, et une fibre dans une goutte de glycérine.")}</div>'
+    // Non concluante : l encadré donne déjà le conseil propre à CETTE photo.
+    h += (nc ? '' : '<div class="aide" style="margin-top:.8rem">${T("Conseil : une photo de la surface, une du ruban adhésif collé sur une lame, et une fibre dans une goutte de glycérine.")}</div>')
       + '<div class="boutons" style="margin-top:.9rem"><span class="aide gauche">${T("≈ 0,01 à 0,02 $ par lecture (clé API). Les photos ne sont pas conservées.")}</span>'
-      + '<button type="button" class="prim" id="f-lire"' + (PHOTOS.length && !LECTURE_EN_COURS ? '' : ' disabled') + '>' + (LECTURE_EN_COURS ? '${T("Lecture en cours…")}' : (l ? '${T("Relire les photos")}' : '${T("Lire les photos")}')) + '</button></div></div>';
+      + '<button type="button" class="prim" id="f-lire"' + (PHOTOS.length && !LECTURE_EN_COURS ? '' : ' disabled') + '>' + (LECTURE_EN_COURS ? '${T("Lecture en cours…")}' : (l ? '${T("Relire les photos")}' : '${T("Lire les photos")}')) + '</button></div>'
+      + (nc ? '<div class="nonconcl" role="status"><h3>${T("Analyse non concluante")} · ' + esc(String(l.certitude || 0)) + ' % (${T("seuil")} ' + SEUIL + ' %)</h3>'
+          + '<p>${T("L’étiquette passe à « 100 % fibres mixtes », avec l’entretien des fibres reconnues.")}</p>'
+          + (l.raison ? '<p class="coupe3" title="' + esc(l.raison) + '"><strong>${T("Pourquoi :")}</strong> ' + esc(l.raison) + '</p>' : '')
+          + (l.conseil ? '<p class="coupe3" title="' + esc(l.conseil) + '"><strong>${T("Pour trancher :")}</strong> ' + esc(l.conseil) + '</p>' : '')
+          + '<div class="boutons"><button type="button" class="prim" id="f-seconde">${T("Faire une seconde analyse")}</button>'
+          + ((f.tentatives || []).length ? '<span class="aide">' + f.tentatives.length + ' ${T("lecture(s) précédente(s) gardée(s)")}</span>' : '') + '</div></div>' : '')
+      + '</div>';
     h += '<div class="cx-carte"><h2>${T("Lecture de l’IA")} <span class="cx-sub">${T("expert en microscopie textile")}</span></h2>';
     if (!l) h += '<div class="aide">${T("La lecture paraît ici, en quatre étapes : morphologie, parois et diamètre, comparaison aux fibres connues, estimation finale.")}</div>';
     else {
@@ -676,7 +767,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         if (x[1]) h += '<div class="etape"><h3>' + x[0] + '</h3><p class="coupe3" title="' + esc(x[1]) + '">' + esc(x[1]) + '</p></div>';
       });
       h += '<div class="estim"><span class="lbl">${T("ESTIMATION")}</span><strong>' + esc(l.principale ? nomFibre(l.principale) : '${T("indéterminée")}') + '</strong>'
-        + '<span class="aide">${T("confiance :")} ' + esc(CONF[l.confiance] || '') + (l.possibles && l.possibles.length ? ' · ${T("aussi vu :")} ' + esc(l.possibles.map(nomFibre).join(', ')) : '') + '</span>'
+        + '<span class="aide">' + (l.certitude != null ? '${T("certitude :")} ' + esc(String(l.certitude)) + ' %' : '${T("confiance :")} ' + esc(CONF[l.confiance] || '')) + (l.possibles && l.possibles.length ? ' · ${T("aussi vu :")} ' + esc(l.possibles.map(nomFibre).join(', ')) : '') + '</span>'
         + (l.principale ? '<button type="button" class="mini" id="f-utiliser" style="margin-left:auto">${T("Utiliser l’estimation")}</button>' : '') + '</div>'
         + (l.le ? '<div class="aide" style="margin-top:.5rem">${T("Lue le")} ' + esc(szQuand(l.le)) + (l.cout ? ' · ' + szArgent(l.cout) : '') + ' · ${T("photos effacées après la lecture")}</div>' : '');
     }
@@ -791,6 +882,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
     if (PHOTOS.length + L.length > 4) szDire('${T("4 photos au plus : les suivantes sont ignorées.")}', 'att');
   }
+  /* Une lecture qui NE CONCLUT PAS (sa règle des 95 %). Une ancienne lecture, d avant la certitude, n en a pas : rien. */
+  var SEUIL = 95;
+  function nonConcluante(l){ return !!l && l.concluante === false && l.certitude != null && !!(l.raison || l.conseil || l.certitude > 0 || !l.principale); }
+  /* « 100 % fibres mixtes », et l entretien des fibres que l analyse a quand même reconnues (le site en décide). */
+  function passerEnMixte(){
+    FORM.composition = [{ fibre: 'mixte', pct: '100' }];
+    appeler('fibres:apercu', [saisie(), '']).then(function(r){
+      if (!FORM || !r || !r.ok) return;
+      if (r.propose && r.propose.length) FORM.entretien = r.propose.slice();
+      dessiner(); redemanderApercu();
+    });
+  }
   function lire(){
     if (!PHOTOS.length || LECTURE_EN_COURS) return;
     LECTURE_EN_COURS = true; dessiner();
@@ -798,10 +901,44 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('fibres:analyser', [PHOTOS.slice()]).then(function(r){
       LECTURE_EN_COURS = false;
       if (!r || !r.ok) { szDire(expliquer(r), 'err'); dessiner(); return; }
+      // Une seconde analyse : la lecture précédente est GARDÉE (5 au plus), pas écrasée.
+      if (FORM.lecture) FORM.tentatives = (FORM.tentatives || []).concat([FORM.lecture]).slice(-5);
       FORM.lecture = r.lecture;
       PHOTOS = [];           /* sa consigne : on ne garde que les résultats */
+      if (nonConcluante(r.lecture)) {
+        szDire('${T("Analyse non concluante : l’étiquette passe à « 100 % fibres mixtes ». Une seconde analyse peut trancher.")}', 'att');
+        passerEnMixte();
+        return;
+      }
       szDire('${T("Lecture terminée. Confirmez la composition avec la fiche du fournisseur.")}', 'bon');
       dessiner();
+    });
+  }
+
+  /* ══ L ÉTIQUETTE TEMPORAIRE ET LE SCAN (2026-10-25, sa demande) ══════════════
+     Une petite étiquette au format des codes-barres de produits (même imprimante) :
+     « ANALYSE DE FIBRES », le numéro EN GROS, le produit — sans code-barres (sa
+     décision). Le scan de l étiquette thermocollante (ou le numéro tapé) rouvre
+     son analyse. Le site imprime et retrouve (fibres:etiquetteTemp, fibres:scanner). */
+  function etiquetteTemp(id){
+    szDire('${T("Impression de l’étiquette temporaire…")}');
+    appeler('fibres:etiquetteTemp', [id, 1]).then(function(r){
+      if (!r || !r.ok) { szDire(r && r.motif === 'imprimante' ? '${T("Aucune imprimante de codes-barres n’est choisie pour ce poste (Configuration › Imprimantes).")}' : expliquer(r), 'err'); return; }
+      szDire('${T("Étiquette temporaire envoyée à")} ' + (r.imprimante || '${T("l’imprimante")}') + '.', 'bon');
+    });
+  }
+  function scanner(code){
+    code = String(code || '').trim(); if (!code) return;
+    appeler('fibres:scanner', [code]).then(function(r){
+      var el = document.getElementById('f-scan'); if (el) { el.value = ''; el.focus(); }
+      if (!r || !r.ok) { szDire(r && r.motif === 'introuvable' ? '${T("Aucune analyse ne porte ce code :")} ' + code : expliquer(r), 'err'); return; }
+      SCANNE = r.id; CHOIX = r.id; FILTRE = 'toutes'; Q = '';
+      var L = visibles(), i = -1; L.forEach(function(a, k){ if (a.id === r.id) i = k; });
+      if (i >= 0 && BU > 0) PG = Math.floor(i / BU);
+      choisir(r.id); dessiner();
+      var e2 = document.getElementById('f-scan'); if (e2) e2.focus();
+      var a = analyse(r.id);
+      szDire('${T("Étiquette scannée :")} ' + (a ? a.no + ' — ' + nomProduit(a) : r.id), 'bon');
     });
   }
 
@@ -838,7 +975,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var a = analyse(l.id); if (!a) return;
       var f = fond(a.fond);
       var tailles = a.produit && a.produit.tailles && a.produit.tailles.length ? a.produit.tailles : null;
-      h += '<div class="lot" style="margin-bottom:.4rem"><span class="pap" style="background:' + esc(f.fond) + '" title="' + esc(f.papier) + '"></span>'
+      h += '<div class="lot" style="margin-bottom:.25rem"><span class="pap" style="background:' + esc(f.fond) + '" title="' + esc(f.papier) + '"></span>'
         + '<div style="min-width:0"><div class="nom" title="' + esc(nomProduit(a)) + '">' + esc(nomProduit(a)) + '</div><div class="sous">' + esc(a.no + ' · ' + a.resume) + '</div></div>'
         + (tailles ? '<select id="pl-t-' + i + '" aria-label="${T("Taille de la ligne")} ' + (i + 1) + '"><option value="">${T("Sans taille")}</option>'
             + tailles.map(function(t){ return '<option value="' + esc(t) + '"' + (l.taille === t ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('') + '</select>'
@@ -847,7 +984,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<input type="text" inputmode="numeric" maxlength="3" id="pl-n-' + i + '" value="' + l.n + '" aria-label="${T("Nombre d’étiquettes de la ligne")} ' + (i + 1) + '">'
         + '<button type="button" data-plus="' + i + '" aria-label="${T("Une de plus")}">+</button></div>'
         + '<button type="button" class="mini" data-otlot="' + i + '" aria-label="${T("Retirer la ligne")} ' + (i + 1) + '">✕</button></div>'
-        + '<div style="margin:-.15rem 0 .45rem 1.2rem"><button type="button" class="mini" data-dup="' + i + '">${T("+ une autre taille")}</button></div>';
+        + '<div style="margin:0 0 .35rem 1.2rem"><button type="button" class="mini dup" data-dup="' + i + '">${T("+ une autre taille")}</button></div>';
     });
     var tot = PL.lignes.reduce(function(s, l){ return s + (l.n > 0 ? l.n : 0); }, 0);
     var R = PL.R, nf = R ? R.feuilles.length : 0;
@@ -858,10 +995,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '<div class="cx-carte"><h2>${T("Découpe")}</h2><div class="puces" role="group" aria-label="${T("Découpe")}">'
       + (D.modes || []).map(function(m){ return '<button type="button" class="puce" data-modepl="' + esc(m.cle) + '" aria-pressed="' + (PL.mode === m.cle) + '">'
           + esc(m.cle === 'cricut' ? '${T("Cricut — 21 par feuille")}' : '${T("Ciseaux ou massicot — 32 par feuille")}') + '</button>'; }).join('')
-      + '</div><div class="aide" style="margin-top:.4rem">' + (PL.mode === 'cricut'
+      + '</div><div class="aide" data-optpl="2" style="margin-top:.4rem">' + (PL.mode === 'cricut'
         ? '${T("Un PNG par feuille (300 ppp, fond transparent). Dans Design Space : Téléverser › image › « Imprimer puis couper », mettre la largeur indiquée dans le nom du fichier, puis imprimer depuis Design Space (il ajoute son cadre de repérage).")}'
         : '${T("Un PDF Lettre, 32 étiquettes par feuille, traits de coupe dans la marge. Imprimer à 100 % (« Taille réelle »), sans ajuster à la page.")}')
-      + '</div><div class="aide" style="margin-top:.4rem">${T("Feuille déjà entamée ? Cliquez dans l’aperçu les cases déjà utilisées : elles restent vides. Chaque papier a les siennes.")}</div></div>';
+      + '</div><div class="aide" data-optpl="1" style="margin-top:.4rem">${T("Feuille déjà entamée ? Cliquez dans l’aperçu les cases déjà utilisées : elles restent vides. Chaque papier a les siennes.")}</div></div>';
     return h;
   }
   /* L export, AU-DESSUS de l aperçu : toujours à l écran, jamais au bas d une colonne qui défile. */
@@ -972,7 +1109,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (avecMarques) { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, cv.width, cv.height); }
     d.cases.forEach(function(p, i){
       var c = f.cases[i]; if (!c) return;
-      peindreEtiquette(ctx, c.etiquette, p.x * MM, p.y * MM, 50 * MM, 30 * MM, { miroir: !!f.miroir });
+      // Module ENTIER à l export : 0,254 mm = 3 points à 300 ppp.
+      peindreEtiquette(ctx, c.etiquette, Math.round(p.x * MM), Math.round(p.y * MM), Math.round(50 * MM), Math.round(30 * MM), { miroir: !!f.miroir, modPx: Math.max(2, Math.round(0.254 * MM)) });
     });
     if (avecMarques) {
       /* Les traits de coupe, DANS LA MARGE seulement (rien ne se dessine sur une étiquette). */
@@ -1092,14 +1230,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     elSous.textContent = L.length + ' ' + (L.length > 1 ? '${T("analyses")}' : '${T("analyse")}') + (nc ? ' · ' + nc + ' ${T("à confirmer")}' : '')
       + ' · ' + H.total + ' ${T("étiquette(s) imprimée(s)")}' + (H.ceMois ? ' (' + H.ceMois + ' ${T("ce mois-ci")})' : '')
       + (D.ca && D.ca.manquant ? ' · ${T("numéro CA à saisir")}' : '');
-    if (VUE === 'analyse' && FORM) { corps.innerHTML = lecture() + formulaire(); majTotal(); peindreForm(); brancherDepot(); return; }
-    if (VUE === 'planche' && PL) { corps.innerHTML = '<div class="pl"><div>' + lots() + '</div><div>' + scene() + '</div></div>'; peindrePlan(); return; }
+    if (VUE === 'analyse' && FORM) { corps.innerHTML = lecture() + formulaire(); majTotal(); peindreForm(); brancherDepot(); if (ETAPE === 1) ajusterEtape1(); return; }
+    if (VUE === 'planche' && PL) { corps.innerHTML = '<div class="pl"><div>' + lots() + '</div><div>' + scene() + '</div></div>'; peindrePlan(); ajusterPlanche(); return; }
     if (VUE === 'historique') { corps.innerHTML = historiqueVue(); return; }
     corps.innerHTML = lecture() + banque();
     var tours = 0;
     while (corps.scrollHeight > corps.clientHeight + 1 && BU > 2 && tours < 60) { BU--; tours++; corps.innerHTML = lecture() + banque(); }
     ajusterDetail();
     peindreChoix();
+  }
+  /* LA COLONNE DE GAUCHE DE LA PLANCHE sur une petite fenêtre : les aides de la découpe cèdent la place
+     (la feuille entamée d abord, puis le mode d emploi en deux lignes, texte entier au survol). Jamais de glissière. */
+  function ajusterPlanche(){
+    var col = corps.querySelector('.pl>div:first-child'); if (!col) return;
+    var trop = function(){ return col.scrollHeight > col.clientHeight + 1; };
+    if (trop()) Array.prototype.forEach.call(col.querySelectorAll('[data-optpl="1"]'), function(e){ e.style.display = 'none'; });
+    if (trop()) Array.prototype.forEach.call(col.querySelectorAll('[data-optpl="2"]'), function(e){ e.title = e.textContent; e.classList.add('coupe2'); });
+    if (trop()) Array.prototype.forEach.call(col.querySelectorAll('[data-optpl="2"]'), function(e){ e.style.display = 'none'; });
   }
   function brancherDepot(){
     var z = document.getElementById('f-depot'); if (!z) return;
@@ -1142,7 +1289,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (r.fiche) msg += r.fiche.ok ? ' ${T("Fiche produit mise à jour.")}' : ' ${T("La fiche produit n’a PAS été mise à jour.")}';
       if (!s.composition.length) msg += ' ${T("Elle reste « à confirmer » tant que la composition n’est pas saisie.")}';
       szDire(msg, r.fiche && !r.fiche.ok ? 'att' : 'bon');
-      CHOIX = r.id || CHOIX; FORM = null; VUE = 'banque'; charger().then(function(){ if (CHOIX) choisir(CHOIX); });
+      var neuve = !FORM.id;
+      CHOIX = r.id || CHOIX; FORM = null; VUE = 'banque'; charger().then(function(){
+        if (CHOIX) choisir(CHOIX);
+        /* Sa demande : une petite étiquette au numéro de l analyse, collée sur le vêtement tout de suite. */
+        if (neuve && r.id) szConfirmer({ titre: '${T("Étiquette temporaire")}',
+          texte: '${T("Imprimer l’étiquette de l’analyse")} ' + (r.no || '') + ' ${T("sur l’imprimante de codes-barres, pour la coller sur le vêtement en attendant l’étiquette thermocollante ?")}',
+          oui: '${T("Imprimer l’étiquette")}' }).then(function(ok){ if (ok) etiquetteTemp(r.id); });
+      });
     });
   }
   var _tQ = null;
@@ -1184,6 +1338,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       outils(); return;
     }
     if ((x = t.closest('[data-ouvrir]'))) { var ao = analyse(x.getAttribute('data-ouvrir')); if (ao) { ouvrirForm(ao); dessiner(); } return; }
+    if ((x = t.closest('[data-temp]'))) { etiquetteTemp(x.getAttribute('data-temp')); return; }
     if ((x = t.closest('[data-sup]'))) {
       var ids = x.getAttribute('data-sup'), as = analyse(ids);
       szConfirmer({ danger: true, titre: '${T("Supprimer l’analyse")}',
@@ -1203,6 +1358,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (t.closest('#f-depot')) { var fi = document.getElementById('f-fichier'); if (fi) { fi.value = ''; fi.click(); } return; }
       if ((x = t.closest('[data-otph]'))) { PHOTOS.splice(parseInt(x.getAttribute('data-otph'), 10), 1); dessiner(); return; }
       if (t.id === 'f-lire') { lire(); return; }
+      /* La seconde analyse : une nouvelle photo ; la lecture actuelle sera gardée au moment de relire. */
+      if (t.id === 'f-seconde') {
+        PHOTOS = []; ETAPE = 1; dessiner();
+        szDire('${T("Seconde analyse : déposez une nouvelle photo (une fibre isolée donne le meilleur résultat), puis « Relire les photos ».")}');
+        var fs = document.getElementById('f-fichier'); if (fs) { fs.value = ''; fs.click(); }
+        return;
+      }
       if (t.id === 'f-utiliser' && FORM.lecture) {
         ramasser();
         var l = FORM.lecture;
@@ -1290,6 +1452,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   document.addEventListener('keydown', function(ev){
     var t = ev.target;
     if ((ev.key === 'Enter' || ev.key === ' ') && t && t.id === 'f-depot') { ev.preventDefault(); var fi = document.getElementById('f-fichier'); if (fi) { fi.value = ''; fi.click(); } return; }
+    if (ev.key === 'Enter' && t && t.id === 'f-scan') { ev.preventDefault(); scanner(t.value); return; }
     if (ev.key !== 'Escape') return;
     ev.preventDefault();
     if (VUE !== 'banque') { FORM = null; PL = null; PHOTOS = []; VUE = 'banque'; dessiner(); if (CHOIX) choisir(CHOIX); return; }

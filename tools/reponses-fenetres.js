@@ -3943,7 +3943,9 @@ const JEU = {
     var ETQ = function(fond){ return { ok: true, motif: '', fond: fond, couleurFond: fond === 'pale' ? '#FFFFFF' : '#1C1C1E', couleurEncre: fond === 'pale' ? '#111111' : '#FFFFFF',
       miroir: fond === 'pale', taille: 'M', compo: ['95 % COTON / COTTON', '5 % ÉLASTHANNE / SPANDEX'],
       soins: ['LAVER À FROID · MACHINE WASH COLD', 'SÉCHER BASSE TEMP. · TUMBLE DRY LOW', 'REPASSER À BASSE TEMP. · IRON LOW'],
-      symboles: ['lav_froid', 'pas_javel', 'sech_bas', 'rep_bas', 'pas_sec'], pays: 'FAIT EN CHINE / MADE IN CHINA', identite: 'SANDRIZA · CA xxxxxxx', caManquant: true }; };
+      symboles: ['lav_froid', 'pas_javel', 'sech_bas', 'rep_bas', 'pas_sec'], pays: 'FAIT EN CHINE / MADE IN CHINA', identite: 'SANDRIZA · CA xxxxxxx', caManquant: true,
+      // « AF0012 », encodé par Barcode.code128Modules (assets/js/barcode.js du site), sans zone de silence
+      code: 'AF0012', modules: 90, barres: [[0,2],[3,1],[6,1],[11,1],[13,1],[17,2],[22,1],[26,2],[31,1],[33,1],[35,3],[39,4],[44,2],[47,2],[51,2],[55,1],[57,2],[61,3],[66,3],[70,1],[74,2],[77,2],[82,3],[86,1],[88,2]] }; };
     var cases = []; for (var r = 0; r < 7; r++) for (var c = 0; c < 3; c++) cases.push({ x: c * 62, y: r * 36 });
     var PLANCHE = { ok: true, mode: 'cricut', caManquant: true, invalides: [],
       disposition: { mode: 'cricut', cols: 3, rangs: 7, parFeuille: 21, page: { l: 174, h: 246 }, etiquette: { l: 50, h: 30 }, cases: cases, zone: { l: 189, h: 252 } },
@@ -3960,15 +3962,25 @@ const JEU = {
         'fibres:analyser': { ok: true, lecture: LECT, budget: { plafond: 500, depense: 12.4 } },
         'fibres:ecrire': { ok: true, id: 'fib_5', no: 'AF-0013', fiche: null, n: 0 },
         'fibres:supprimer': { ok: true, id: '', no: '', fiche: null, n: 0 },
-        'fibres:imprimee': { ok: true, id: '', no: '', fiche: null, n: 13 } };
+        'fibres:imprimee': { ok: true, id: '', no: '', fiche: null, n: 13 },
+        'fibres:etiquetteTemp': { ok: true, imprimante: 'Phomemo D245BT' },
+        'fibres:scanner': { ok: true, id: 'fib_1', no: 'AF-0012' } };
     };
     var cas = function(nom, id, d, exige){ return { nom: nom, id: id, reponses: rep(d), exige: exige }; };
     return [
       cas('banque garnie (confirmée, provisoire, à confirmer, produit disparu)', '', GARNI,
-        ['data-coche="fib_1"', 'data-ana="fib_3"', 'data-act="historique"', 'id="cv-choix"']),
+        ['data-coche="fib_1"', 'data-ana="fib_3"', 'data-act="historique"', 'id="cv-choix"', 'id="f-scan"', 'data-temp="fib_1"']),
       cas('banque vide — appel à la première analyse', '', donnees([], { historique: { total: 0, ceMois: 0, planches: 0, liste: [] } }), ['data-act="nouvelle"']),
       cas('nouvelle analyse — étape 1 (dépôt des photos)', 'nouvelle', GARNI, ['id="f-depot"', 'id="f-lire"', 'id="f-ok"', 'id="f-suiv"', 'aria-current="step"']),
       cas('analyse ouverte — étape 1 (lecture de l’IA)', 'modifier', GARNI, ['id="f-utiliser"', 'id="cv-form"']),
+      // SA RÈGLE DES 95 % : une lecture à 72 % → l encadré, la raison, le conseil, la seconde analyse.
+      cas('analyse non concluante — 72 %, fibres mixtes, seconde analyse', 'modifier', donnees([A('fib_5', 'AF-0013', { etat: 'a_confirmer', resume: '100 % fibres mixtes',
+        composition: [{ fibre: 'mixte', pct: 100 }], entretien: ['lav_froid', 'pas_javel', 'sech_bas', 'rep_bas'], impressions: [], imprime: 0,
+        tentatives: [Object.assign({}, LECT, { certitude: 64, concluante: false, raison: 'Tissage trop serré.', conseil: 'Une fibre isolée.' })],
+        lecture: Object.assign({}, LECT, { certitude: 72, concluante: false, possibles: ['polyester'],
+          raison: 'La surface tissée est trop serrée : les fibres se chevauchent, ni leur section ni leurs parois ne sont visibles.',
+          conseil: 'Prélever une fibre au ruban adhésif, la poser seule dans une goutte de glycérine sous lamelle, en lumière rasante.' }) })]),
+        ['class="nonconcl"', 'id="f-seconde"', '72 % (seuil 95 %)', '1 lecture(s) précédente(s) gardée(s)']),
       cas('analyse ouverte — étape 2 (composition, entretien)', 'composition', GARNI, ['data-soin="lav_froid"', 'id="f-pct-0"', 'id="f-prec"']),
       cas('analyse ouverte — étape 3 (produit, étiquette)', 'produit', GARNI, ['data-mode="provisoire"', 'id="f-pays"', 'data-fond="pale"']),
       cas('planche (deux papiers, CA manquant)', 'planche', GARNI, ['id="pl-export"', 'id="cv-plan"', 'data-vue="1"', 'id="pl-fisc"']),
