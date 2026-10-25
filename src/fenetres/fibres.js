@@ -982,7 +982,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<div style="min-width:0"><div class="nom" title="' + esc(nomProduit(a)) + '">' + esc(nomProduit(a)) + '</div><div class="sous">' + esc(a.no + ' · ' + a.resume) + '</div></div>'
         + (tailles ? '<select id="pl-t-' + i + '" aria-label="${T("Taille de la ligne")} ' + (i + 1) + '"><option value="">${T("Sans taille")}</option>'
             + tailles.map(function(t){ return '<option value="' + esc(t) + '"' + (l.taille === t ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('') + '</select>'
-          : '<input type="text" id="pl-t-' + i + '" maxlength="4" value="' + esc(l.taille) + '" placeholder="${T("Taille")}" aria-label="${T("Taille de la ligne")} ' + (i + 1) + '">')
+          : '<input type="text" id="pl-t-' + i + '" maxlength="6" value="' + esc(l.taille) + '" placeholder="${T("Taille")}" aria-label="${T("Taille de la ligne")} ' + (i + 1) + '">')
         + '<div class="pas"><button type="button" data-moins="' + i + '" aria-label="${T("Une de moins")}">−</button>'
         + '<input type="text" inputmode="numeric" maxlength="3" id="pl-n-' + i + '" value="' + l.n + '" aria-label="${T("Nombre d’étiquettes de la ligne")} ' + (i + 1) + '">'
         + '<button type="button" data-plus="' + i + '" aria-label="${T("Une de plus")}">+</button></div>'
