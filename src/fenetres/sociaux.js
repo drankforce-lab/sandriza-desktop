@@ -250,10 +250,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     publication:        '${T("La publication a échoué.")}',
     echec:              '${T("L’opération a échoué.")}'
   };
+  /* (2026-10-25, audit) SANS esc : ce texte part vers dire() (textContent) ; ce qui le pose en HTML l echappe. */
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
-    if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 160)) + ')';
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + (m || '?') + ').');
+    if (r && r.detail) t += ' (' + String(r.detail).slice(0, 160) + ')';
     return t;
   }
   function appeler(op, args){
@@ -412,13 +413,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
      chaque frappe ferait six images de 1080 x 1920 par lettre tapee. Les autres
      se peignent au moment ou on les regarde, et TOUTES a l export — la seule
      fois ou l on en a vraiment besoin. */
+  /* ⚠ UNE DEMANDE ARRIVEE PENDANT UN RENDU N EST PLUS PERDUE (2026-10-25, audit) : elle etait ignoree, et
+     l apercu montrait l avant-derniere frappe. Elle est retenue (EP_REDEMANDE) et relancee au retour. */
+  var EP_REDEMANDE = false;
   function epDemanderRendu(){
-    if (!EP || EPRENDU) return;
-    EPRENDU = true;
+    if (!EP) return;
+    if (EPRENDU) { EP_REDEMANDE = true; return; }
+    EPRENDU = true; EP_REDEMANDE = false;
     appeler('nl:epingleRendu', [epModeleRendu()]).then(function(r){
       EPRENDU = false;
       if (r && r.ok) { EPIMG = r.image || ''; epMajVue(); }
       else { EPIMG = ''; epMajVue(); if (r && r.motif) dire(epExpliquer(r), 'err'); }
+      if (EP_REDEMANDE) epDemanderRendu();
     });
   }
   /* ⚠ LE RENDU EST DIFFERE, PAS IMMEDIAT. Chaque frappe demanderait sinon une
@@ -435,6 +441,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     z.innerHTML = EPIMG
       ? '<img src="' + esc(EPIMG) + '" alt="${T("Aperçu de la publication")}">'
       : '<div class="rien">' + (EPRENDU ? '${T("Rendu…")}' : '${T("Choisissez un produit, ou écrivez une accroche.")}') + '</div>';
+    epMajBoutons();
+  }
+  /* ⚠ LES BOUTONS SUIVENT L APERCU (2026-10-25, audit) : leur etat etait fige au dessin (EPIMG vide a ce
+     moment-la, apres un changement de reseau ou de diapo), et le retour du rendu ne touchait que l image —
+     « Enregistrer la publication » et « Envoyer » restaient grises. EPENVOI : un envoi en vol garde
+     « Envoyer » ferme. */
+  var EPENVOI = false;
+  function epMajBoutons(){
+    var be = document.getElementById('ep-enr');
+    if (be) be.disabled = !EPIMG;
+    var bv = document.getElementById('ep-envoi');
+    if (bv) bv.disabled = !EPIMG || EPENVOI || !!(EPD && EPD.resendPret === false);
   }
 
   function epChoix(id, lib, opts, val){
@@ -589,7 +607,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       + '<div class="epenv"><label for="ep-a">${T("Vers le téléphone")}</label>'
       + '<input id="ep-a" type="email" value="' + esc((EPD && EPD.courrielDefaut) || '') + '" placeholder="${T("votre@courriel.com")}"'
       + ((EPD && EPD.resendPret === false) ? ' disabled' : '') + '>'
-      + '<button type="button" id="ep-envoi"' + ((EPIMG && !(EPD && EPD.resendPret === false)) ? '' : ' disabled') + '>${T("Envoyer")}</button>'
+      + '<button type="button" id="ep-envoi"' + ((EPIMG && !EPENVOI && !(EPD && EPD.resendPret === false)) ? '' : ' disabled') + '>${T("Envoyer")}</button>'
       + ((EPD && EPD.resendPret === false)
           ? '<div class="epinfo">${T("Aucune clé Resend : l’envoi de courriel n’est pas configuré.")}</div>'
           : '<div class="epinfo">${T("Images en pièces jointes, texte prêt à coller.")}</div>')
@@ -746,17 +764,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       clics ? '' : null, clics,
       F.lienCliquable ? '' : null, F.lienCliquable ? EP.lien : null]
       .filter(function(x){ return x !== null; }).join('\\n');
-    var b = document.getElementById('ep-envoi');
-    if (b) b.disabled = true;
+    if (EPENVOI) return;
+    EPENVOI = true; epMajBoutons();
     dire('${T("Préparation des images…")}');
     epPeindreTout(base, function(images, rates){
-      if (!images.length) { if (b) b.disabled = false; dire('${T("Aucune image à envoyer.")}', 'err'); return; }
+      if (!images.length) { EPENVOI = false; epMajBoutons(); dire('${T("Aucune image à envoyer.")}', 'err'); return; }
       dire('${T("Envoi…")}');
       appeler('nl:publicationCourriel', [{ reseau: F.cle, a: a, texte: texte,
         note: EP.alt || '', images: images }]).then(function(r){
-        if (b) b.disabled = false;
+        EPENVOI = false; epMajBoutons();
         if (r && r.ok) {
-          dire('${T("Envoyé à ")}' + esc(a) + ' ${T("· ")}' + r.images + ' ' + szPl(r.images, '${T("image")}', '${T("images")}')
+          // dire() ecrit en texte brut : l adresse s y pose telle quelle (2026-10-25, audit — esc y affichait « &amp; »).
+          dire('${T("Envoyé à ")}' + a + ' ${T("· ")}' + r.images + ' ' + szPl(r.images, '${T("image")}', '${T("images")}')
             + (rates ? (' ${T(" — ")}' + rates + ' ' + szPl(rates, '${T("non rendue")}', '${T("non rendues")}')) : ''),
             rates ? 'att' : 'bon');
         } else dire(epExpliquer(r), 'err');
@@ -1305,7 +1324,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
   }
 
   window.szActualiser = function(){ if (!OCCUPE && !ARME) charger(); };
-  window.szRevenir = function(){ if (!OCCUPE) charger(); };
+  /* (2026-10-25, audit) Pas de rechargement pendant l edition d un patron : l editeur repartait de PAT et le
+     texte tape etait perdu. Meme garde que Promotions, Recommandations et Pages. */
+  window.szRevenir = function(){ if (!OCCUPE && !EDIT) charger(); };
 
   /* ── MODE ANCRE ── Le meme bouton que les autres ecrans.
      ⚠⚠ LE PARAMETRE NE S APPELLE PLUS << actif >> ICI, ET C EST DELIBERE. Le

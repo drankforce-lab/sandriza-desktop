@@ -1557,8 +1557,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     }
     tours = 0;
     while (cle && corps.scrollHeight > corps.clientHeight + 1 && BU[cle] > 1 && tours < 60) {
+      var avant = corps.scrollHeight;
       BU[cle]--; tours++;
       corps.innerHTML = rendu(); poserBarre();
+      /* (2026-10-25, audit) Une ligne de moins qui ne fait RIEN gagner : le debordement vient
+         d ailleurs (le formulaire de droite). Continuer ramenait la liste a UNE ligne par page
+         sans rien regler ; on rend la ligne et on s arrete. */
+      if (corps.scrollHeight >= avant) { BU[cle]++; corps.innerHTML = rendu(); poserBarre(); break; }
     }
     var b = document.getElementById('v-nom');
     if (b && VFORM && !VFORM._vu) { VFORM._vu = true; try { b.focus(); } catch (e) {} }
@@ -1640,16 +1645,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
   }
 
   /* ── LES GESTES ─────────────────────────────────────────────────────── */
+  /* (2026-10-25, audit) VFORM0 : la fiche telle qu ouverte. Echap sur une fiche
+     EXISTANTE modifiee la fermait d un coup (seule une fiche neuve etait gardee). */
+  var VFORM0 = '';
+  /* (2026-10-25, audit) ENVOI : une ecriture part. Deux Entree rapides inscrivaient
+     deux deplacements (km d affaires doubles), deux changements ou deux vehicules —
+     la voie du clavier ne consultait pas le bouton desactive. */
+  var ENVOI = false;
   function ouvrirVehicule(id){
     if (id) { var v = vehicule(id); if (!v) return; VFORM = poserAutres(depuisVehicule(v)); }
     else VFORM = vehiculeVierge();
     CATMSG = null;
     ECHAP = false;
     dessiner();
+    // Releve APRES le dessin : la fiche passe par les champs, comme a l Echap qui la compare.
+    ramasser();
+    VFORM0 = JSON.stringify(VFORM);
   }
   function fermerVehicule(){ VFORM = null; ECHAP = false; dessiner(); }
 
   function enregistrerDeplacement(b){
+    if (ENVOI) return;
     ramasser();
     var s = SAISIE;
     if (!s) return;
@@ -1661,8 +1677,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
       destination: s.destination, raison: s.raison, detail: s.detail, km: k, allerRetour: !!s.allerRetour,
       odoDebut: a, odoFin: z, commande: s.commande };
     if (b) b.disabled = true;
+    ENVOI = true;
     szDire('${T("Enregistrement…")}');
     appeler('vehicules:deplacement', [charge]).then(function(r){
+      ENVOI = false;
       if (b) b.disabled = false;
       if (!r || !r.ok) { szDire(expliquer(r, 'deplacement'), 'err'); if (r && r.motif === 'introuvable') charger(); return; }
       var autreAnnee = String(s.date || '').slice(0, 4) !== String(ANNEE);
@@ -1675,6 +1693,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     });
   }
   function enregistrerVehicule(b){
+    if (ENVOI) return;
     ramasser();
     var f = VFORM;
     if (!f) return;
@@ -1698,8 +1717,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
       plafondDpa: plaf, prixDisposition: f.retireLe ? pv : null,
       prixDetailSuggere: f.modeAcquisition === 'location' ? pds : null };
     if (b) b.disabled = true;
+    ENVOI = true;
     szDire('${T("Enregistrement…")}');
     appeler('vehicules:ecrire', [charge]).then(function(r){
+      ENVOI = false;
       if (b) b.disabled = false;
       if (!r || !r.ok) { szDire(expliquer(r, 'vehicule'), 'err'); return; }
       szDire(f.id ? '${T("Fiche du véhicule enregistrée.")}' : '${T("Véhicule inscrit. Saisissez maintenant son odomètre de l’année.")}', 'bon');
@@ -1759,6 +1780,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     });
   }
   function enregistrerChangement(b){
+    if (ENVOI) return;
     ramasser();
     var c = CHG;
     if (!c) return;
@@ -1767,9 +1789,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
       szDire('${T("Odomètre illisible : des chiffres seulement.")}', 'err'); return;
     }
     if (b) b.disabled = true;
+    ENVOI = true;
     szDire('${T("Enregistrement…")}');
     appeler('vehicules:changement', [{ date: c.date, ancienId: c.ancienId, odoAncien: oa,
       nouveauId: c.nouveauId, odoNouveau: on, motif: c.motif }]).then(function(r){
+      ENVOI = false;
       if (b) b.disabled = false;
       if (!r || !r.ok) { szDire(expliquer(r, 'changement'), 'err'); return; }
       szDire('${T("Changement enregistré : les dates et les odomètres des deux véhicules sont à jour.")}', 'bon');
@@ -1963,7 +1987,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     if (DPATAB) { DPATAB = ''; dessiner(); return; }
     if (VFORM) {
       ramasser();
-      var rempli = !!(String(VFORM.nom || '').trim() && !VFORM.id);
+      var rempli = VFORM.id ? JSON.stringify(VFORM) !== VFORM0 : !!String(VFORM.nom || '').trim();
       if (rempli && !ECHAP) { ECHAP = true; szDire('${T("Appuyez de nouveau sur Échap pour fermer sans enregistrer.")}', 'att'); return; }
       fermerVehicule(); return;
     }

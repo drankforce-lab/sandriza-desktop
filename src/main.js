@@ -3679,6 +3679,15 @@ const LIMITES_PONT = {
   // SMS envoie un appel par numero : c est legitimement long. Abandonner en
   // cours de route ne l arreterait pas — cela ne ferait que cacher le verdict.
   'campagnes:envoyer': 180000,
+  // (2026-10-25, audit) Le renvoi des echecs suit la meme file que l envoi : au
+  // defaut de 8 s, la fenetre disait « pas repondu » pendant que le renvoi continuait.
+  // Le site rend la main avant (enCours) — voir campagnesRenvoyerEchecs, pont.js.
+  'campagnes:renvoyer-echecs': 180000,
+  // (2026-10-25, audit) Lectures a distance (nl-stats.php, taux de change, liste
+  // de configuration du nuage) : un aller-retour reseau, pas une lecture locale.
+  'campagnes:stats': 30000,
+  'depenses:convertir': 20000,
+  'depenses:annuaireEcrire': 30000,
   // Le traitement des chaines envoie une etape par inscription echue.
   'chaines:traiter': 180000,
   // Google assemble plusieurs rapports pour une seule reponse, et Twilio
@@ -4914,6 +4923,39 @@ ipcMain.on('vue:tuiles', (e, cle, off) => {
   const t = { ...(reglages.lire().tuilesMasquees || {}) };
   if (off) t[c] = true; else delete t[c];
   reglages.ecrire({ tuilesMasquees: t });
+});
+
+/* ══ LES MÉMOIRES DE POSTE DES FENÊTRES NATIVES (2026-10-25, audit) ══════════
+   Une fenêtre chargée en data:text/html n a pas de localStorage : la fiche
+   produit promettait « le résultat est gardé » (mesure IA payante) et « Retenir
+   cette échelle » sans rien garder, et la photothèque oubliait sa vue.
+   ⚠ UN FICHIER À PART (memo-poste.json), PAS reglages.json : reglages.json est
+   renvoyé en entier au site (menu:reglages) ; des mesures n ont rien à y faire.
+   ⚠ LISTE FERMÉE de clés, chacune avec son plafond : la valeur vient d une PAGE. */
+const MEMO_POSTE_PLAFONDS = { mesureIA: 60000, echelleMv: 8000, photosVue: 40, photosRattrapage: 40 };
+let _memoPoste = null;
+const _memoPosteChemin = () => path.join(app.getPath('userData'), 'memo-poste.json');
+const _memoPosteTout = () => {
+  if (_memoPoste) return _memoPoste;
+  try { _memoPoste = JSON.parse(fs.readFileSync(_memoPosteChemin(), 'utf8')) || {}; } catch { _memoPoste = {}; }
+  if (typeof _memoPoste !== 'object' || Array.isArray(_memoPoste)) _memoPoste = {};
+  return _memoPoste;
+};
+ipcMain.handle('poste:memo', (_e, o) => {
+  const c = String((o && o.cle) || '');
+  if (!Object.prototype.hasOwnProperty.call(MEMO_POSTE_PLAFONDS, c)) return null;
+  const tout = _memoPosteTout();
+  if (o && o.ecrire) {
+    let s;
+    try { s = JSON.stringify(o.valeur === undefined ? null : o.valeur); } catch { return null; }
+    if (s.length > MEMO_POSTE_PLAFONDS[c]) return null;
+    if (o.valeur == null) delete tout[c]; else tout[c] = JSON.parse(s);
+    try {
+      fs.mkdirSync(path.dirname(_memoPosteChemin()), { recursive: true });
+      fs.writeFileSync(_memoPosteChemin(), JSON.stringify(tout), 'utf8');
+    } catch { /* disque refusé : le cache tient jusqu à la fermeture */ }
+  }
+  return tout[c] === undefined ? null : tout[c];
 });
 
 /* ══ LES VIGNETTES D'ÉTIQUETTE, FICHIERS TEMPORAIRES DU POSTE (2026-10-19) ══════════════════════

@@ -223,6 +223,8 @@ select.statut{width:auto;font-size:.78rem;padding:.16rem .4rem}
   margin-top:.6rem;border-top:1px solid var(--v08);padding-top:.55rem}
 .bas2 .totaux{margin-top:0;border-top:0;padding-top:0}
 .bas2 .remb{margin-top:0}
+/* (2026-10-25, audit) Freres de la .liste paginee dans la carte du detail : ils gardent leur hauteur. */
+.carte.plein>.totaux,.carte.plein>.bas2,.carte.plein>.det-notes{flex:0 0 auto}
 /* Un trait discret, pas un pointille AMBRE : un remboursement n est pas une
    alerte (la couleur ne dit qu un probleme — 2026-09-29). */
 .remb{margin-top:.7rem;border-top:1px solid var(--v10);padding-top:.45rem}
@@ -732,7 +734,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
               + '>' + esc(szTd(x.libelle)) + '</option>'; }).join('')
         + '</select>';
     } else {
-      h += '<span class="et ' + couleurStatut(c.statut) + '">' + esc(libelleStatut(c.statut)) + '</span>';
+      h += '<span class="et ' + couleurStatut(c.statut) + '">' + esc(szTd(libelleStatut(c.statut))) + '</span>';
     }
     h += (c.prioritaire ? '<span class="badge2 or"><span class="ic" aria-hidden="true">⚡</span> ${T("Prioritaire")}</span>' : '')
       + (c.manuelle ? '<span class="badge2" title="${T("Vente saisie à la caisse")}">${T("Manuelle")}</span>' : '')
@@ -795,23 +797,32 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
                d une : « 179,98 $ » seul ne disait pas que c etait deux robes. */
             + (a.qte > 1 ? '<div class="dt">' + argent(a.montant / a.qte) + ' ${T("/ unité")}</div>' : '')
             + '</td></tr>'; }).join('')
-      + '</tbody></table>';
+      + '</tbody></table></div>';
+    /* ⚠ LA .liste NE PORTE QUE LA TABLE (2026-10-25, audit) : elle est mise en pages d office (_SZ_PG_AUTO,
+       overflow:hidden), et la hauteur offerte aux lignes allait jusqu au bas de la liste. Les totaux, les
+       remboursements et les notes, places dedans apres la table, etaient COUPES sous la carte. Ils en sont
+       maintenant les freres (flex:0 0 auto) : la pagination se fait dans la place qui reste. */
 
     var t = d.totaux;
     /* Totaux a droite, remboursements a gauche, dans la meme bande : la place
-       sous les articles etait vide et le detail defilait (2026-09-26). */
-    var hTot = '<div class="totaux"><div>'
-      + '<div>${T("Sous-total")}</div>'
-      + t.taxes.map(function(x){ return '<div>' + esc(x.nom) + ' (' + szNombre(Math.round(x.taux * 1000000) / 10000, 4) + ' %)</div>'; }).join('')
-      + (t.livraison > 0 ? '<div>${T("Livraison")}</div>' : '')
-      + (t.prioritaire > 0 ? '<div><span class="ic">⚡</span> ${T("Traitement prioritaire")}</div>' : '')
-      + (t.coupon > 0 ? '<div>${T("Coupon")}</div>' : '')
+       sous les articles etait vide et le detail defilait (2026-09-26).
+       ⚠ CHAQUE MONTANT QUE LE TOTAL DEDUIT A SA LIGNE (2026-10-25, audit) : promotion automatique, rabais
+       du comptoir, carte-cadeau, credit, points. Sans elles, « Sous-total + taxes » ne donnait pas le Total. */
+    var lib = [], mt = [];
+    function ligneTot(l, m){ lib.push('<div>' + l + '</div>'); mt.push('<div>' + m + '</div>'); }
+    ligneTot('${T("Sous-total")}', argent(t.sousTotal));
+    if (t.rabaisAuto > 0) ligneTot('${T("Promotion automatique")}', '−' + argent(t.rabaisAuto));
+    if (t.rabaisComptoir > 0) ligneTot('${T("Rabais sur la vente")}', '−' + argent(t.rabaisComptoir));
+    if (t.coupon > 0) ligneTot('${T("Coupon")}', '−' + argent(t.coupon));
+    if (t.livraison > 0) ligneTot('${T("Livraison")}', argent(t.livraison));
+    if (t.prioritaire > 0) ligneTot('<span class="ic">⚡</span> ${T("Traitement prioritaire")}', argent(t.prioritaire));
+    t.taxes.forEach(function(x){ ligneTot(esc(x.nom) + ' (' + szNombre(Math.round(x.taux * 1000000) / 10000, 4) + ' %)', argent(x.montant)); });
+    if (t.carteCadeau > 0) ligneTot('${T("Carte-cadeau")}', '−' + argent(t.carteCadeau));
+    if (t.credit > 0) ligneTot('${T("Crédit boutique")}', '−' + argent(t.credit));
+    if (t.points > 0) ligneTot('${T("Points de fidélité")}', '−' + argent(t.points));
+    var hTot = '<div class="totaux"><div>' + lib.join('')
       + '<div class="tt">${T("Total")}</div></div>'
-      + '<div class="d"><div>' + argent(t.sousTotal) + '</div>'
-      + t.taxes.map(function(x){ return '<div>' + argent(x.montant) + '</div>'; }).join('')
-      + (t.livraison > 0 ? '<div>' + argent(t.livraison) + '</div>' : '')
-      + (t.prioritaire > 0 ? '<div>' + argent(t.prioritaire) + '</div>' : '')
-      + (t.coupon > 0 ? '<div>−' + argent(t.coupon) + '</div>' : '')
+      + '<div class="d">' + mt.join('')
       + '<div class="tt">' + argent(t.total) + '</div></div></div>';
 
     var rb = d.remboursements, hRemb = '';
@@ -819,7 +830,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       hRemb += '<div class="remb"><div class="t">${T("↩ Remboursements émis")}</div>'
         + rb.lignes.map(function(r){
             return '<div class="lg2"><span><strong>' + esc(r.numero) + '</strong> · '
-              + esc(dateCourte(r.date)) + ' · <em>' + esc(r.type) + '</em>'
+              + esc(dateCourte(r.date)) + ' · <em>' + esc(szTd(r.type)) + '</em>'
               + (r.fraisRetenus > 0 ? ' <span style="color:var(--tx-att);font-size:.72rem">${T("(frais retenus :")} ' + argent(r.fraisRetenus) + ')</span>' : '')
               + '</span><span style="font-weight:700;color:var(--tx-att)">−' + argent(r.montant) + '</span></div>'; }).join('');
       if (rb.fraisRetenus > 0) {
@@ -834,8 +845,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + (rb.complet ? ' <span class="badge2 vertf"><span class="ic">✅</span> ${T("Entièrement remboursée")}</span>' : '') + '</div></div>';
     }
     h += hRemb ? '<div class="bas2">' + hRemb + hTot + '</div>' : hTot;
-    if (c.notes) h += '<div class="mut" style="margin-top:.6rem"><strong>${T("Notes :")}</strong> ' + esc(c.notes) + '</div>';
-    h += '</div></div>';
+    if (c.notes) h += '<div class="mut det-notes" style="margin-top:.6rem"><strong>${T("Notes :")}</strong> ' + esc(c.notes) + '</div>';
+    h += '</div>';
     corps.innerHTML = h;
 
     actions.innerHTML = (SEUL ? '' : '<button id="btn-retour">${T("← Liste")}</button>')
@@ -1008,8 +1019,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         return;
       }
       var h = '<h3>${T("Changer le statut")}</h3>'
-        + '<p>${T("Passer")} <strong>' + esc(ap.numero) + '</strong> de « <strong>' + esc(ap.deLibelle)
-        + '</strong> » à « <strong>' + esc(ap.aLibelle) + '</strong> » ?</p>'
+        // Une phrase ENTIERE (2026-10-25, audit) : « de … à … » restait en francais dans la fenetre anglaise.
+        + '<p>' + '${T("Passer {0} de « {1} » à « {2} » ?")}'.split('{0}').join('<strong>' + esc(ap.numero) + '</strong>')
+            .split('{1}').join('<strong>' + esc(szTd(ap.deLibelle)) + '</strong>')
+            .split('{2}').join('<strong>' + esc(szTd(ap.aLibelle)) + '</strong>') + '</p>'
         + ((ap.implications || []).length
             ? '<ul>' + ap.implications.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '')
         + (ap.peutReinitCourriels
@@ -1054,7 +1067,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + '<p>${T("Rembourser")} <strong>' + argent(ap.montant) + '</strong> ${T("de frais de service retenus")} '
         + '${T("au client via Square ?")}'
         + (ap.dejaRembourse > 0 ? '<br><span style="color:var(--tx2)">(' + argent(ap.dejaRembourse)
-            + ' ${T("déjà remboursés sur")} ' + argent(ap.totalRetenu) + ' retenus)</span>' : '')
+            + ' ${T("déjà remboursés sur")} ' + argent(ap.totalRetenu) + ' ${T("retenus")})</span>' : '')
         + ' <strong>${T("Cette opération est irréversible.")}</strong></p>'
         + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
         + '<button class="prim" id="v-oui">${T("Rembourser")}</button></div>',
@@ -1089,7 +1102,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         ? '${T("actuellement liée à")} <strong>' + esc(ap.actuel.nom) + '</strong> ('
           + esc(ap.actuel.courriel) + ')'
         : '${T("en mode <strong>invité</strong> (aucun compte)")}';
-      voile('<h3><span class="ic">🔗</span> ${T("Rattacher la commande")} à un client</h3>'
+      voile('<h3><span class="ic">🔗</span> ${T("Rattacher la commande à un client")}</h3>'
         + '<p>${T("Commande")} <strong>' + esc(ap.numero) + '</strong> — ' + etat + '.</p>'
         + '<label style="font-size:.82rem;color:var(--tx-bleute)">${T("Rechercher un client (nom ou courriel)")}'
         + '<input class="rech" id="v-rech" placeholder="ex : marie@example.com" autocomplete="off"></label>'
@@ -1150,7 +1163,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   // sont recalculees. On le dit avant, pas apres.
   function confirmerLien(fermerListe, ap, clientId, libelle){
     voile('<h3>${T("Rattacher la commande")}</h3>'
-      + '<p>${T("Lier")} <strong>' + esc(ap.numero) + '</strong> à <strong>' + esc(libelle) + '</strong> ?</p>'
+      + '<p>' + '${T("Lier {0} à {1} ?")}'.split('{0}').join('<strong>' + esc(ap.numero) + '</strong>')
+          .split('{1}').join('<strong>' + esc(libelle) + '</strong>') + '</p>'
       + '<p style="color:var(--tx2)">${T("La facture associée sera mise à jour et les statistiques")} '
       + '${T("d’achat des comptes concernés recalculées.")}</p>'
       + '<div class="fin2"><button id="v2-non">${T("Annuler")}</button>'
@@ -1201,7 +1215,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
                 : sq.etat === 'echec' ? ' ${T("Remboursement Square échoué :")} ' + (sq.detail || '?')
                 : sq.etat === 'reseau' ? ' ${T("Erreur réseau Square :")} ' + (sq.detail || '?') : '';
               if (!r.ok) {
-                dire('${T("Suppression non confirmée par le serveur (")}' + (r.detail || 'erreur inconnue') + '${T(") — réessayez.")}' + note, 'err');
+                dire('${T("Suppression non confirmée par le serveur (")}' + (r.detail || '${T("erreur inconnue")}') + '${T(") — réessayez.")}' + note, 'err');
                 rechargerDetail();
                 return;
               }
@@ -1229,7 +1243,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
           return ['pending', 'cancelled'].indexOf(x.cle) < 0 && x.cle !== o.statut;
         });
         if (cibles.length) l.push({ trait: true });
-        cibles.forEach(function(x){ l.push({ lib: '${T("Passer à : ")}' + x.libelle, fn: function(){ flowStatut(o.id, o.statut, x.cle, null); } }); });
+        cibles.forEach(function(x){ l.push({ lib: '${T("Passer à : ")}' + szTd(x.libelle), fn: function(){ flowStatut(o.id, o.statut, x.cle, null); } }); });
       }
     }
     if (CTX && CTX.peutSupprimer && !o.enTraitement) {
@@ -1240,46 +1254,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     szCtxMenu(ev.clientX, ev.clientY, o.numero || '', l);
   }
 
-  // ══ MENU CONTEXTUEL (clic droit sur une ligne) ════════════════════
-  // ⚠ AUCUNE option quand la commande est en traitement — juste la raison,
-  // comme le menu du site (la neutralisation d une fiche ne l atteignait pas).
-  var menuEl = null;
-  function fermerMenu(){
-    if (menuEl && menuEl.parentNode) menuEl.parentNode.removeChild(menuEl);
-    menuEl = null;
-  }
-  function menuStatut(ev, o){
-    fermerMenu();
-    if (!CTX || !CTX.peutEditer) return;
-    menuEl = document.createElement('div');
-    menuEl.className = 'ctx';
-    if (o.enTraitement) {
-      menuEl.innerHTML = '<div class="t"><span class="ic">🔒</span> ' + esc(o.numero) + '</div>'
-        + '<div class="warn">${T("En traitement par")} <strong>' + esc(o.par || '${T("quelqu’un d’autre")}')
-        + '${T("</strong>.<br>Changement de statut impossible pour l’instant.")}</div>';
-    } else {
-      var cibles = ((CTX && CTX.statuts) || []).filter(function(x){
-        return ['pending', 'cancelled'].indexOf(x.cle) < 0 && x.cle !== o.statut;
-      });
-      menuEl.innerHTML = '<div class="t">${T("Statut de")} ' + esc(o.numero) + '</div>'
-        + cibles.map(function(x){
-            return '<button data-ctx="' + esc(x.cle) + '"><span class="et ' + couleurStatut(x.cle)
-              + '">' + esc(x.libelle) + '</span></button>'; }).join('');
-    }
-    document.body.appendChild(menuEl);
-    menuEl.style.left = Math.max(6, Math.min(ev.clientX, window.innerWidth - menuEl.offsetWidth - 8)) + 'px';
-    menuEl.style.top = Math.max(6, Math.min(ev.clientY, window.innerHeight - menuEl.offsetHeight - 8)) + 'px';
-    menuEl.onclick = function(e2){
-      var b = e2.target && e2.target.closest ? e2.target.closest('[data-ctx]') : null;
-      if (!b) return;
-      var cible = b.getAttribute('data-ctx');
-      fermerMenu();
-      flowStatut(o.id, o.statut, cible, null);
-    };
-  }
-  document.addEventListener('mousedown', function(ev){
-    if (menuEl && ev.target && menuEl !== ev.target && !menuEl.contains(ev.target)) fermerMenu();
-  }, true);
+  /* (2026-10-25, audit) L ANCIEN MENU DE STATUT (menuStatut / fermerMenu) EST RETIRE : depuis le 2026-10-13,
+     le clic droit passe par menuLigne (szCtxMenu du socle) et plus rien ne l appelait — mais son ecouteur
+     « mousedown » restait pose en capture, et le code laissait croire a un second menu. */
 
   // ══ VOILE ══════════════════════════════════════════════════════════
   function voile(html, apres){
@@ -1444,7 +1421,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   document.addEventListener('keydown', function(ev){
     if (ev.key !== 'Escape') return;
     ev.preventDefault();
-    if (menuEl) { fermerMenu(); return; }
     var v = document.querySelector('.voile');
     if (v && v.parentNode) { v.parentNode.removeChild(v); return; }
     if (VUE === 'detail') { retourListe(); return; }

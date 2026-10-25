@@ -377,7 +377,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'g-name':60,'g-sub':160,'g-hfrom-t':7,'
   }
   function copier(id){
     if (RO || OCCUPE) return;
-    occuper(true); dire('Duplication…');
+    occuper(true); dire('${T("Duplication…")}');
     appeler('config:gabarits:copier', [id]).then(function(r){
       occuper(false);
       if (r && r.ok) { adopter(r); EDIT = r.id || null; dessiner(); dire('${T("Gabarit dupliqué.")}', 'bon'); }

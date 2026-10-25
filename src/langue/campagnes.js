@@ -103,7 +103,6 @@ module.exports = {
   'Mode visuel. Le HTML est rangé dans un bloc « HTML libre ».':
     'Visual mode. The HTML is tucked into a « Free HTML » block.',
   'Mode HTML — c’est exactement ce qui partira.': 'HTML mode — this is exactly what will go out.',
-  'Construction de l’aperçu…': 'Building the preview…',
   'Assemblage du courriel…': 'Assembling the email…',
   /* Les champs d un bloc. ⚠ `choix:left=Gauche` — la CLE reste, seul le libelle
      apres le « = » se traduit : c est elle qui part dans le gabarit. */
@@ -294,7 +293,6 @@ module.exports = {
    * comme un autre : il lui faut SA cle, sinon une cle voisine le decoupe.
    * ══════════════════════════════════════════════════════════════════════════ */
   'Téléphonie non configurée : l’envoi SMS échouera.': 'Telephony not configured: the SMS send will fail.',
-  'Aperçu — marie@example.com': 'Preview — marie@example.com',
   'Aperçu': 'Preview',
   'Enregistrée en brouillon : ': 'Saved as a draft: ',
   'dont le déclencheur est <strong>Panier abandonné</strong>. Ailleurs, elles ressortent vides.':
@@ -510,11 +508,8 @@ module.exports = {
   'Créer la séquence panier en 3 temps': 'Create the 3-step cart sequence',
   'Création de la séquence…': 'Creating the sequence…',
   'modèle introuvable — le site doit être à jour': 'template not found — the site must be up to date',
-  'Panier abandonné — séquence en 3 temps': 'Abandoned cart — 3-step sequence',
-  '1 h : rappel · 24 h : avis et rareté · 72 h : 10 % pendant 48 h': '1 h: reminder · 24 h: reviews and scarcity · 72 h: 10% for 48 h',
+  // (2026-10-25, audit) Le nom et la description de la séquence panier sont des DONNÉES : retirés d’ici.
   'Séquence créée, en pause : relisez-la puis activez-la.': 'Sequence created, paused: review it then activate it.',
-  // 2026-10-12 : l apercu se pose par-dessus la colonne de droite, et se ferme par son bouton.
-  'Fermer l’aperçu': 'Close the preview',
   // 2026-10-15 : l editeur de campagne refait (blocs | apercu | reglages, panneau IA).
   '+ Ajouter un bloc': '+ Add a block',
   'Aperçu du courriel': 'Email preview',
@@ -743,4 +738,7 @@ module.exports = {
   "renvois réussis": "successful resends",
   "— la suite continue sur le serveur.": "— the rest continues on the server.",
   "Aucun échec à renvoyer.": "No failures to resend.",
+  // (2026-10-25, audit)
+  "consultation seulement": "view only",
+  "Le courriel n’a pas pu être assemblé. Réessayez.": "The email could not be assembled. Try again.",
 };

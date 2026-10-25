@@ -228,7 +228,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
 
   var ONGLETS = [
     ['general', '${T("Général")}'], ['accueil', '${T("Accueil & routage")}'], ['menu', '${T("Menu IVR")}'],
-    ['redirection', '${T("Redirection")}'], ['messagerie', '${T("Messagerie")}'], ['sms', 'SMS'], ['file', "${T('File d\'attente')}"],
+    ['redirection', '${T("Redirection")}'], ['messagerie', '${T("Messagerie")}'], ['sms', 'SMS'], ['file', '${T("File d’attente")}'],
     ['bloques', '${T("Numéros bloqués")}'],
   ];
   var VOIX_FR = [
@@ -306,22 +306,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
     droit:              '${T("Votre rôle ne donne pas accès à la configuration.")}',
     lecture_seule:      '${T("Votre rôle est en lecture seule.")}',
     perime:             '${T("Ces réglages ont été modifiés depuis un autre poste. La version actuelle est rechargée : refaites vos changements.")}',
-    indisponible:       "${T('L\'administration n\'est pas encore chargée dans la fenêtre principale.')}",
+    indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
     pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
-    delai:              "${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
     operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
-    nuage:              "${T('L\'enregistrement dans le nuage a échoué. Réessayez.')}",
+    nuage:              '${T("L’enregistrement dans le nuage a échoué. Réessayez.")}',
     tel_desactive:      '${T("La téléphonie est désactivée.")}',
     numero_invalide:    '${T("Numéro invalide.")}',
     tel_sans_compte:    '${T("Aucun identifiant Twilio enregistré (onglet Général).")}',
     refus:              '${T("Twilio a refusé la requête. Vérifiez les identifiants.")}',
     reseau:             '${T("Erreur réseau en joignant Twilio.")}',
-    echec:              "${T('L\'opération a échoué.')}",
+    echec:              '${T("L’opération a échoué.")}',
   };
+  /* (2026-10-25, audit) SANS esc : ce texte part vers dire() (textContent) ; ce qui le pose en HTML l echappe. */
   function expliquer(r){
     var m = r && r.motif;
-    return (MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').'))
-      + (r && r.detail ? ' (' + esc(r.detail) + ')' : '');
+    return (MOTIFS[m] || ('${T("Erreur inattendue (")}' + (m || '?') + ').'))
+      + (r && r.detail ? ' (' + r.detail + ')' : '');
   }
   function appeler(op, args){
     var p;
@@ -387,7 +388,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
           // l application, on decrit celle que le TELEPHONE parlera, et cette
           // description se lit dans la langue de celui qui la regle.
           ['fr', '${T("Français")}'], ['en', '${T("Anglais")}'],
-          ['bilingual', '${T("Bilingue (FR + EN)")}'], ['select', "${T('Français d\'abord, anglais sur le #')}"]]) + '</div>';
+          ['bilingual', '${T("Bilingue (FR + EN)")}'], ['select', '${T("Français d’abord, anglais sur le #")}']]) + '</div>';
     h += '<div class="gr2">'
       + selectHtml('t-voice-fr', '${T("Voix française (fr-CA)")}', C.voiceFr || 'Polly.Gabrielle-Neural', VOIX_FR)
       + selectHtml('t-voice-en', '${T("Voix anglaise (en-US)")}', C.voiceEn || 'Polly.Joanna-Neural', VOIX_EN) + '</div>';
@@ -431,20 +432,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
        chacune garde ses deux langues l une sous l autre. */
     var h = '<div class="trio"><div class="carte"><div class="stitre">${T("Message d’accueil")}</div>';
     h += ''
-      + taHtml('t-greet-fr', '${T("Accueil (FR)")}', g.fr, "${T('Bonjour et merci d\'avoir appelé…')}")
+      + taHtml('t-greet-fr', '${T("Accueil (FR)")}', g.fr, '${T("Bonjour et merci d’avoir appelé…")}')
       + taHtml('t-greet-en', '${T("Accueil (EN)")}', g.en, '${T("Hello and thank you for calling…")}');
     h += ''
-      + texteHtml('t-greet-pause', "${T('Délai après l\'accueil (secondes)')}", (C.greetingPause != null ? C.greetingPause : 5), '5', false, '', 'number')
+      + texteHtml('t-greet-pause', '${T("Délai après l’accueil (secondes)")}', (C.greetingPause != null ? C.greetingPause : 5), '5', false, '', 'number')
       + texteHtml('t-menu-timeout', '${T("Attente au menu avant de raccrocher (secondes)")}', (C.menuTimeout != null ? C.menuTimeout : 10), '10', false, '', 'number');
     h += '</div><div class="carte"><div class="stitre">${T("Aucun choix au menu")}</div>'
       + '<div class="aide" style="margin:0 0 .6rem">${T("Si l’appelant ne fait aucun choix après le délai, on joue ce message (FR + EN) puis on raccroche.")}</div>';
     h += ''
-      + taHtml('t-noinput-fr', '${T("Message « aucun choix » (FR)")}', ni.fr, "${T('Merci d\'avoir contacté SANDRIZA. Au revoir !')}")
+      + taHtml('t-noinput-fr', '${T("Message « aucun choix » (FR)")}', ni.fr, '${T("Merci d’avoir contacté SANDRIZA. Au revoir !")}')
       + taHtml('t-noinput-en', '${T("Message « aucun choix » (EN)")}', ni.en, '${T("Thank you for contacting SANDRIZA. Goodbye!")}');
-    h += selectHtml('t-default', "${T('Action par défaut (à l\'ouverture)')}", C.defaultAction || 'menu', [
+    h += selectHtml('t-default', '${T("Action par défaut (à l’ouverture)")}', C.defaultAction || 'menu', [
         ['menu', '${T("Robot / menu (IVR)")}'], ['forward', '${T("Rediriger directement")}'], ['voicemail', '${T("Messagerie vocale")}']]);
     h += '</div><div class="carte"><div class="stitre">${T("Heures d’ouverture")}</div>';
-    h += checkHtml('t-usehours', "${T('Utiliser les heures d\'ouverture — hors heures, message + messagerie')}", !!hr.useHours);
+    h += checkHtml('t-usehours', '${T("Utiliser les heures d’ouverture — hors heures, message + messagerie")}', !!hr.useHours);
     h += ''
       + taHtml('t-closed-fr', '${T("Message « fermé » (FR)")}', cm.fr, '${T("Nos bureaux sont fermés…")}')
       + taHtml('t-closed-en', '${T("Message « fermé » (EN)")}', cm.en, '${T("Our offices are closed…")}');
@@ -467,7 +468,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
       + '<div class="ch" style="margin:0"><label>${T("Numéro (Rediriger / File)")}</label><input aria-label="${T("Numéro (Rediriger / File)")}" data-mf="number" style="width:10rem" value="' + esc(o.number || '') + '" placeholder="+1…"' + (RO ? ' disabled' : '') + '></div>'
       + (RO ? '' : '<button class="b dgr" type="button" data-mdel="' + i + '" title="${T("Retirer")}"><span class="ic">🗑</span></button>')
       + '</div><div class="l2">'
-      + '<div class="ch"><textarea aria-label="${T("Message vocal")} FR (si action = Message)" data-mf="messageFr" rows="1" placeholder="${T("Message vocal")} FR (si action = Message)"' + (RO ? ' disabled' : '') + '>' + esc(m.fr || '') + '</textarea></div>'
+      + '<div class="ch"><textarea aria-label="${T("Message vocal FR (si action = Message)")}" data-mf="messageFr" rows="1" placeholder="${T("Message vocal FR (si action = Message)")}"' + (RO ? ' disabled' : '') + '>' + esc(m.fr || '') + '</textarea></div>'
       + '<div class="ch"><textarea aria-label="${T("Message vocal")} EN" data-mf="messageEn" rows="1" placeholder="${T("Message vocal")} EN"' + (RO ? ' disabled' : '') + '>' + esc(m.en || '') + '</textarea></div>'
       + '</div></div>';
     return h;
@@ -487,11 +488,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
       + texteHtml('t-forward', '${T("Numéros (séparés par des virgules)")}', (f.numbers || []).join(', '), '+1 514 555 0100, +1 514 555 0101', true)
       + texteHtml('t-timeout', '${T("Délai de sonnerie (secondes)")}', (f.timeout != null ? f.timeout : 20), '20', false, '', 'number') + '</div>';
     h += selectHtml('t-strategy', '${T("Stratégie (si plusieurs numéros)")}', f.strategy || 'simul', [
-        ['simul', '${T("Simultané — tous sonnent en même temps")}'], ['cascade', "${T('Cascade — l\'un après l\'autre')}"]]);
+        ['simul', '${T("Simultané — tous sonnent en même temps")}'], ['cascade', '${T("Cascade — l’un après l’autre")}']]);
     h += selectHtml('t-callerid', '${T("Afficheur lors des transferts")}', f.callerIdMode || 'business', [
-        ['business', '${T("Numéro SANDRIZA (recommandé)")}'], ['caller', "${T('Numéro réel de l\'appelant')}"]],
+        ['business', '${T("Numéro SANDRIZA (recommandé)")}'], ['caller', '${T("Numéro réel de l’appelant")}']],
         '${T("Numéro SANDRIZA : enregistrez votre numéro Twilio comme contact « SANDRIZA » pour voir le nom.")}');
-    h += checkHtml('t-no-forward', "${T('Pas de numéro de renvoi pour l\'instant — messagerie directe (ne plus avertir)')}", !!f.noForwardAck);
+    h += checkHtml('t-no-forward', '${T("Pas de numéro de renvoi pour l’instant — messagerie directe (ne plus avertir)")}', !!f.noForwardAck);
     return h + '</div>';
   }
 
@@ -522,7 +523,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
     h += checkHtml('t-sms-enabled', '${T("Activer les SMS (réponse automatique aux entrants)")}', !!sms.enabled);
     h += '<div class="gr2">'
       + taHtml('t-sms-fr', '${T("Réponse automatique (FR)")}', ar.fr, '${T("Merci pour votre message, nous vous répondrons bientôt.")}')
-      + taHtml('t-sms-en', '${T("Réponse automatique (EN)")}', ar.en, "${T('Thanks for your message, we\'ll reply soon.')}") + '</div>';
+      + taHtml('t-sms-en', '${T("Réponse automatique (EN)")}', ar.en, '${T("Thanks for your message, we’ll reply soon.")}') + '</div>';
     h += texteHtml('t-sms-email', '${T("Courriel de notification des SMS reçus")}', sms.notifyEmail, '${T("vous@exemple.com")}');
     h += '</div><div class="carte"><div class="stitre"><span class="ic">💬</span> ${T("Messages SMS")} <span id="t-sms-badge"></span> <button class="b" type="button" id="t-sms-journaux" title="${T("Voir les SMS dans le module Journaux")}" style="float:right;font-size:.76rem"><span class="ic">🔎</span> ${T("Dans Journaux")}</button></div>';
     h += '<div class="smsbox">'
@@ -545,7 +546,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
       + texteHtml('t-q-maxwait', '${T("Attente max avant messagerie (minutes)")}', Math.round((q.maxWaitSec || 180) / 60), '3', false, '', 'number')
       + texteHtml('t-q-firstdelay', '${T("Délai avant la 1re sonnerie (secondes)")}', (q.firstRingDelaySec != null ? q.firstRingDelaySec : 30), '30', false, '', 'number') + '</div>';
     h += '<div class="gr2">'
-      + texteHtml('t-q-dialto', "${T('Durée de sonnerie de l\'agent (secondes)')}", (q.dialTimeout || 15), '15', false, '', 'number')
+      + texteHtml('t-q-dialto', '${T("Durée de sonnerie de l’agent (secondes)")}', (q.dialTimeout || 15), '15', false, '', 'number')
       + texteHtml('t-q-vmdigit', '${T("Touche pour laisser un message pendant l’attente")}', (q.vmDigit || '9'), '9') + '</div>';
     var opts = MUSIQUES.slice(); opts.push(['custom', '${T("URL personnalisée…")}']);
     h += selectHtml('t-q-music-preset', '${T("Musique d’attente")}', selMus, opts);
@@ -598,7 +599,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
     occuper(true);
     return appeler(op, args).then(function(r){
       occuper(false);
-      if (r && r.ok) { adopter(r); dessinerOnglets(); dessinerCorps(); dire(msgBon, 'bon'); }
+      /* ⚠ ON NE REPREND QUE LA LISTE (2026-10-25, audit) : adopter(r) remplacait C et MENU par la
+         configuration du serveur, et les reglages modifies mais pas encore enregistres (accueil, menu,
+         SID…) disparaissaient sans un mot — « Enregistrer » renvoyait ensuite l ancienne. L onglet ouvert
+         est relu avant le redessin, pour la meme raison. */
+      if (r && r.ok) {
+        fusionnerOngletActif();
+        C.bloques = (r.cfg && Array.isArray(r.cfg.bloques)) ? r.cfg.bloques : [];
+        dessinerOnglets(); dessinerCorps(); dire(msgBon, 'bon');
+      }
       else dire(expliquer(r), 'err');
       return r;
     });
@@ -871,7 +880,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
   function majBandeau(){
     majTuiles();
     if (!RESUME) { soldeEl.textContent = '…'; return; }
-    if (RESUME.erreur) { soldeEl.innerHTML = '<span style="color:var(--tx-err);font-size:.8rem">indisponible</span>'; qliveEl.innerHTML = ''; return; }
+    if (RESUME.erreur) { soldeEl.innerHTML = '<span style="color:var(--tx-err);font-size:.8rem">${T("indisponible")}</span>'; qliveEl.innerHTML = ''; return; }
     var b = RESUME.balance;
     if (b && b.balance != null && b.balance !== '') {
       var cur = String(b.currency || 'USD');
@@ -990,7 +999,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
     dire('${T("Lecture…")}');
     appeler('config:telephonie:donnees').then(function(r){
       if (!r || !r.ok) {
-        corps.innerHTML = '<div class="carte"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div></div>';
+        corps.innerHTML = '<div class="carte"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + esc(expliquer(r)) + '</div></div>';
         dire(expliquer(r), 'err'); return;
       }
       adopter(r); dessiner(); dire('');

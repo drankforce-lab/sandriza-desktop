@@ -469,6 +469,35 @@ ${JS_DIRE()}
       "Panneau d’administration": "Administration panel",
       "Déconnecté : connexion à un autre poste": "Signed out: signed in on another computer",
       "Le {d} à {h}": "On {d} at {h}",
+      /* (2026-10-25, audit) Les refus par CONTEXTE (voir TM) et les textes sortis des littéraux. */
+      "motif.mfa.refus": "Invalid code.",
+      "motif.mfa.forme": "Enter the 6-digit code.",
+      "motif.cle.refus": "Passkey rejected.",
+      "motif.cle.annule": "Cancelled, or timed out. You can also enter the code.",
+      "motif.cleAjout.annule": "Cancelled — no passkey was created.",
+      "motif.cleAjout.indisponible": "This computer does not offer passkeys.",
+      "motif.nip.forme": "The PIN is too short.",
+      "motif.nip.refus": "PIN rejected.",
+      "motif.annule": "Cancelled.",
+      "Deux chemins fonctionnent, et les voici. La récupération par questions de sécurité n’est pas disponible : les réponses sont chiffrées côté serveur et cet écran n’a pas de session pour les vérifier.": "Two ways work, and here they are. Recovery through security questions is not available: the answers are encrypted on the server and this screen has no session to check them.",
+      "Le lien de renouvellement": "The renewal link",
+      "Si votre mot de passe a expiré, un courriel part automatiquement à votre adresse à la prochaine tentative. Le lien vaut 24 heures.": "If your password has expired, an email is sent to your address automatically on the next attempt. The link is valid for 24 hours.",
+      "Un accès réémis": "A reissued access",
+      "Demandez à {0} de vous réémettre un mot de passe temporaire depuis la fiche du personnel. Il vous sera demandé de le changer à la première connexion.": "Ask {0} to reissue a temporary password from your staff record. You will be asked to change it when you first sign in.",
+      "Bonjour {0} — votre administrateur exige cette configuration avant l’accès au panneau.": "Hello {0} — your administrator requires this setup before you can open the panel.",
+      "Étape 1 — une application TOTP": "Step 1 — a TOTP app",
+      "Installez <strong>Google Authenticator</strong>, <strong>Authy</strong> ou toute application TOTP sur votre téléphone.": "Install <strong>Google Authenticator</strong>, <strong>Authy</strong> or any TOTP app on your phone.",
+      "Étape 2 — la clé": "Step 2 — the key",
+      "SHA-1 · 6 chiffres · 30 s — cette clé ne quitte pas ce poste.": "SHA-1 · 6 digits · 30 s — this key never leaves this computer.",
+      "Étape 3 — confirmez": "Step 3 — confirm",
+      "Bienvenue {0} — définissez votre mot de passe avant d’accéder au panneau.": "Welcome {0} — set your password before you open the panel.",
+      "{0}, choisissez deux questions. Elles servent à confirmer votre identité auprès d’un administrateur si vous perdez votre accès.": "{0}, choose two questions. They confirm your identity to an administrator if you lose your access.",
+      "Bienvenue.": "Welcome.",
+      "Bienvenue, {0}.": "Welcome, {0}.",
+      "Vérification visuelle indisponible sur ce poste — le verrou de sécurité reste actif.": "Visual check unavailable on this computer — the security lock remains active.",
+      "Entrez le NIP posé à l’activation du mode exclusif.": "Enter the PIN set when exclusive mode was turned on.",
+      "NIP": "PIN",
+      "Maintenance levée. Vous pouvez vous connecter.": "Maintenance lifted. You can sign in.",
     }
   };
   function T(k, a){
@@ -480,12 +509,18 @@ ${JS_DIRE()}
      texte : comparer des phrases françaises pour retrouver leur sens est
      un piège qui casse au premier mot changé côté serveur. Motif inconnu
      = on garde la phrase du serveur, telle quelle. */
-  function TM(r){
-    var m = r && r.motif ? ('motif.' + r.motif) : '';
-    if (LANGUE === 'fr' || !m) return (r && r.message) || '';
-    var d = DICT[LANGUE] || {};
-    return Object.prototype.hasOwnProperty.call(d, m)
-      ? d[m] : ((r && r.message) || '');
+  /* ⚠ ET PAR CONTEXTE (2026-10-25, audit) : les cœurs réemploient « refus » et « forme » pour le
+     code à six chiffres, la clé et le NIP — traduits par le seul motif, un code faux disait
+     « Incorrect username or password. ». Un écran qui n est pas celui du mot de passe passe son
+     contexte ; sans entrée « motif.<contexte>.<motif> », un refus ou une forme y garde la phrase
+     du serveur plutôt que celle du mot de passe. */
+  function TM(r, ctx){
+    var mo = r && r.motif ? String(r.motif) : '';
+    if (LANGUE === 'fr' || !mo) return (r && r.message) || '';
+    var d = DICT[LANGUE] || {}, a = Object.prototype.hasOwnProperty;
+    if (ctx && a.call(d, 'motif.' + ctx + '.' + mo)) return d['motif.' + ctx + '.' + mo];
+    if (ctx && (mo === 'refus' || mo === 'forme' || mo === 'annule')) return (r && r.message) || '';
+    return a.call(d, 'motif.' + mo) ? d['motif.' + mo] : ((r && r.message) || '');
   }
   var MAINT = null;        // dernier etat de maintenance connu
   var MAINT_T = null;
@@ -821,21 +856,16 @@ ${JS_DIRE()}
     return '<div>'
       + '<div style="margin-bottom:1.2rem">'
       + '<div class="cx-titre">' + T('Mot de passe oublié') + '</div>'
-      + '<div class="cx-sous">Deux chemins fonctionnent, et les voici. La récupération '
-      + 'par questions de sécurité n’est pas disponible : les réponses sont chiffrées '
-      + 'côté serveur et cet écran n’a pas de session pour les vérifier.</div>'
+      + '<div class="cx-sous">' + T('Deux chemins fonctionnent, et les voici. La récupération par questions de sécurité n’est pas disponible : les réponses sont chiffrées côté serveur et cet écran n’a pas de session pour les vérifier.') + '</div>'
       + '</div>'
       + '<ul class="cx-voies">'
       + '<li class="cx-voie"><span class="n">1</span><div>'
-      + '<b>Le lien de renouvellement</b>'
-      + '<span>Si votre mot de passe a expiré, un courriel part automatiquement à '
-      + 'votre adresse à la prochaine tentative. Le lien vaut 24 heures.</span>'
+      + '<b>' + T('Le lien de renouvellement') + '</b>'
+      + '<span>' + T('Si votre mot de passe a expiré, un courriel part automatiquement à votre adresse à la prochaine tentative. Le lien vaut 24 heures.') + '</span>'
       + '</div></li>'
       + '<li class="cx-voie"><span class="n">2</span><div>'
-      + '<b>Un accès réémis</b>'
-      + '<span>Demandez à ' + contact + ' de vous réémettre un mot de passe '
-      + 'temporaire depuis la fiche du personnel. Il vous sera demandé de le '
-      + 'changer à la première connexion.</span>'
+      + '<b>' + T('Un accès réémis') + '</b>'
+      + '<span>' + T('Demandez à {0} de vous réémettre un mot de passe temporaire depuis la fiche du personnel. Il vous sera demandé de le changer à la première connexion.', contact) + '</span>'
       + '</div></li>'
       + '</ul>'
       + '<div class="cx-centre" style="margin-top:1.4rem">'
@@ -858,18 +888,16 @@ ${JS_DIRE()}
     return '<div>'
       + '<div style="margin-bottom:1.3rem">'
       + '<div class="cx-titre">' + T('Authentification à deux facteurs') + '</div>'
-      + '<div class="cx-sous">Bonjour ' + esc(d.prenom) + ' — votre administrateur exige '
-      + 'cette configuration avant l’accès au panneau.</div>'
+      + '<div class="cx-sous">' + T('Bonjour {0} — votre administrateur exige cette configuration avant l’accès au panneau.', esc(d.prenom)) + '</div>'
       + '</div>'
       + '<div class="cx-etape">'
-      + '<div class="cx-etl">Étape 1 — une application TOTP</div>'
-      + '<div class="cx-etc">Installez <strong>Google Authenticator</strong>, '
-      + '<strong>Authy</strong> ou toute application TOTP sur votre téléphone.</div>'
+      + '<div class="cx-etl">' + T('Étape 1 — une application TOTP') + '</div>'
+      + '<div class="cx-etc">' + T('Installez <strong>Google Authenticator</strong>, <strong>Authy</strong> ou toute application TOTP sur votre téléphone.') + '</div>'
       + '</div>'
       + '<div class="cx-etape">'
-      + '<div class="cx-etl">Étape 2 — la clé</div>'
+      + '<div class="cx-etl">' + T('Étape 2 — la clé') + '</div>'
       + '<div class="cx-cle"><code id="wz-cle">' + esc(d.secretGroupe) + '</code>'
-      + '<div class="fine">SHA-1 · 6 chiffres · 30 s — cette clé ne quitte pas ce poste.</div>'
+      + '<div class="fine">' + T('SHA-1 · 6 chiffres · 30 s — cette clé ne quitte pas ce poste.') + '</div>'
       + '<button type="button" id="wz-copier">' + T('Copier la clé') + '</button></div>'
       + '<div class="cx-etc" style="margin-top:0.7rem">' + T('Ou scannez le code ci-dessous.') + '</div>'
       /* ⚠⚠ LE DESSIN ARRIVE TOUT FAIT, IL N EST PLUS ALLE LE CHERCHER. Jusqu au
@@ -887,7 +915,7 @@ ${JS_DIRE()}
       + '<div class="cx-err" id="wz-qr-err">' + T('Code QR indisponible — utilisez la clé ci-dessus.') + '</div>'
       + '</div>'
       + '<div class="cx-etape">'
-      + '<div class="cx-etl">Étape 3 — confirmez</div>'
+      + '<div class="cx-etl">' + T('Étape 3 — confirmez') + '</div>'
       + '<form id="cx-form-wz" novalidate>'
       + '<div class="cx-bloc">'
       + '<label class="cx-lbl" for="wz-code">' + T('Code à 6 chiffres') + '</label>'
@@ -896,7 +924,7 @@ ${JS_DIRE()}
       + '</div>'
       + '<div class="cx-err" id="wz-err"></div>'
       + '<button type="submit" class="cx-btn" id="wz-btn" style="' + btnStyle() + '">'
-      + 'Activer et accéder au panneau</button>'
+      + T('Activer et accéder au panneau') + '</button>'
       + '</form></div>'
       + '<div class="cx-centre">'
       + '<button type="button" class="admlogin-back" id="wz-annuler">' + T('← Annuler') + '</button>'
@@ -911,8 +939,7 @@ ${JS_DIRE()}
     return '<div>'
       + '<div style="margin-bottom:1.5rem">'
       + '<div class="cx-titre">' + T('Changement de mot de passe requis') + '</div>'
-      + '<div class="cx-sous">Bienvenue ' + esc(d.prenom) + ' — définissez votre mot de '
-      + 'passe avant d’accéder au panneau.</div>'
+      + '<div class="cx-sous">' + T('Bienvenue {0} — définissez votre mot de passe avant d’accéder au panneau.', esc(d.prenom)) + '</div>'
       + (ex ? ('<ul class="cx-exig">' + ex + '</ul>') : '')
       + '</div>'
       + '<form id="cx-form-mdp" novalidate>'
@@ -926,7 +953,7 @@ ${JS_DIRE()}
       + '</div>'
       + '<div class="cx-err" id="pc-err"></div>'
       + '<button type="submit" class="cx-btn" id="pc-btn" style="' + btnStyle() + '">'
-      + 'Enregistrer et accéder</button>'
+      + T('Enregistrer et accéder') + '</button>'
       + '</form>'
       + '<div class="cx-centre">'
       + '<button type="button" class="admlogin-back" id="pc-annuler">' + T('← Retour à la connexion') + '</button>'
@@ -951,8 +978,7 @@ ${JS_DIRE()}
     return '<div>'
       + '<div style="margin-bottom:1.4rem">'
       + '<div class="cx-titre">' + T('Questions de sécurité') + '</div>'
-      + '<div class="cx-sous">' + esc(d.prenom) + ', choisissez deux questions. Elles servent '
-      + 'à confirmer votre identité auprès d’un administrateur si vous perdez votre accès.</div>'
+      + '<div class="cx-sous">' + T('{0}, choisissez deux questions. Elles servent à confirmer votre identité auprès d’un administrateur si vous perdez votre accès.', esc(d.prenom)) + '</div>'
       + '</div>'
       + '<form id="cx-form-q" novalidate>'
       + '<div class="cx-bloc">'
@@ -973,7 +999,7 @@ ${JS_DIRE()}
       + '</div>'
       + '<div class="cx-err" id="sq-err"></div>'
       + '<button type="submit" class="cx-btn" id="sq-btn" style="' + btnStyle() + '">'
-      + 'Enregistrer et accéder</button>'
+      + T('Enregistrer et accéder') + '</button>'
       + '</form>'
       + '<div class="cx-centre">'
       + '<button type="button" class="admlogin-back" id="sq-annuler">' + T('← Retour à la connexion') + '</button>'
@@ -1054,7 +1080,7 @@ ${JS_DIRE()}
       var c2 = el('wz-code'), b2 = el('wz-btn');
       if (b2) { b2.disabled = false; b2.textContent = T('Activer et accéder au panneau'); }
       if (c2) { c2.disabled = false; c2.value = ''; c2.focus(); }
-      faute('wz-err', r);
+      faute('wz-err', r, 'mfa');
     });
   }
 
@@ -1197,7 +1223,7 @@ ${JS_DIRE()}
       var zc = el('cap-zone');
       if (zc) zc.innerHTML = '';
       CAPTCHA_OK = true;          // sinon la tentative serait refusee sans recours
-      szDire('Vérification visuelle indisponible sur ce poste — le verrou de sécurité reste actif.', 'att');
+      szDire(T('Vérification visuelle indisponible sur ce poste — le verrou de sécurité reste actif.'), 'att');
       return;
     }
     /* Un fond DESSINE, pas une image telechargee : une fenetre native ne doit
@@ -1265,11 +1291,11 @@ ${JS_DIRE()}
   }
 
   /* ══ LES MESSAGES D ERREUR — LE TEXTE ET LE TON VIENNENT DE LA PAGE ══════ */
-  function faute(id, r){
+  function faute(id, r, ctx){
     var z = el(id);
     if (!z) return;
     z.className = 'cx-err on' + (r && r.ton === 'orange' ? ' orange' : (r && r.ton === 'sombre' ? ' sombre' : ''));
-    var txt = esc(TM(r) || T('L’opération a échoué.'));
+    var txt = esc(TM(r, ctx) || T('L’opération a échoué.'));
     if (r && typeof r.restant === 'number' && r.restant > 0) {
       txt += '<br><span style="font-size:0.78rem">'
         + (r.restant > 1
@@ -1407,7 +1433,9 @@ ${JS_DIRE()}
     if (!v) { modeCle(false); captchaRetirer(); return; }
     appeler('connexion:captcha', [v]).then(function(r){
       if (n !== NOM_N || !r || !r.ok) return;   // une frappe plus recente a gagne
-      if (r.requis && !r.verrouille) captchaPoser(); else captchaRetirer();
+      /* Déjà posé : on n y touche pas (2026-10-25, audit). Le refaire remettait la glissière à zéro
+         et changeait la cible quand le nom perdait le foyer au moment de saisir la poignée. */
+      if (r.requis && !r.verrouille) { if (!el('sl-captcha')) captchaPoser(); } else captchaRetirer();
       modeCle(!!r.cle, MDP_CHOISI !== v.toLowerCase());
     });
   }
@@ -1452,7 +1480,8 @@ ${JS_DIRE()}
   }
   function mfaExpire(){
     appeler('connexion:mfaAbandon').then(function(){
-      dessiner('login');
+      // apresLogin() comme tous les autres retours (2026-10-25, audit) : casse-tête, mode clé, curseur.
+      dessiner('login'); apresLogin();
       faute('sl-error', { message: T('Délai de vérification dépassé — veuillez vous reconnecter.') });
     });
   }
@@ -1480,19 +1509,27 @@ ${JS_DIRE()}
       if (c2) { c2.disabled = false; c2.value = ''; c2.focus(); }
       var ch2 = el('sl-mfa-timer');
       if (ch2 && ch2.parentElement) ch2.parentElement.style.display = '';
-      faute('sl-mfa-error', r);
-      /* Le chrono reprend la ou il en etait : le remettre a soixante offrirait
-         du temps que la page n accorde pas, et le laisser mort ferait attendre
-         un delai qui ne viendrait jamais. */
-      var reste = Math.max(0, Math.ceil((MFA_FIN - Date.now()) / 1000));
-      if (reste <= 0) { mfaExpire(); return; }
-      MFA_T = setInterval(function(){
-        var x = Math.max(0, Math.ceil((MFA_FIN - Date.now()) / 1000));
-        var zz = el('sl-mfa-timer');
-        if (zz) { zz.textContent = x + ' s'; if (x <= 5) zz.className = 'presse'; }
-        if (x <= 0) { clearInterval(MFA_T); MFA_T = null; mfaExpire(); }
-      }, 250);
+      faute('sl-mfa-error', r, 'mfa');
+      mfaReprendre();
     });
+  }
+  /* Le chrono reprend la ou il en etait : le remettre a soixante offrirait
+     du temps que la page n accorde pas, et le laisser mort ferait attendre
+     un delai qui ne viendrait jamais. (Mis en commun le 2026-10-25, audit :
+     la cle refusee ou annulee le laissait MORT — plus de chrono, plus
+     d expiration, alors que le serveur, lui, expirait.) */
+  function mfaReprendre(){
+    var ch2 = el('sl-mfa-timer');
+    if (ch2 && ch2.parentElement) ch2.parentElement.style.display = '';
+    var reste = Math.max(0, Math.ceil((MFA_FIN - Date.now()) / 1000));
+    if (reste <= 0) { mfaExpire(); return; }
+    if (MFA_T) clearInterval(MFA_T);
+    MFA_T = setInterval(function(){
+      var x = Math.max(0, Math.ceil((MFA_FIN - Date.now()) / 1000));
+      var zz = el('sl-mfa-timer');
+      if (zz) { zz.textContent = x + ' s'; if (x <= 5) zz.className = 'presse'; }
+      if (x <= 0) { clearInterval(MFA_T); MFA_T = null; mfaExpire(); }
+    }, 250);
   }
 
   /* ══ LA REUSSITE ═════════════════════════════════════════════════════════
@@ -1534,9 +1571,10 @@ ${JS_DIRE()}
         return;
       }
       if (em2) em2.className = 'cx-embleme';
-      if (b) { b.disabled = false; b.textContent = T('Ajouter une clé'); }
+      // Le même libellé qu au dessin (2026-10-25, audit) : il redevenait « Ajouter une clé » tout court.
+      if (b) { b.disabled = false; b.textContent = (CLE_PROP && CLE_PROP.autres) ? T('Ajouter une clé pour ce poste') : T('Ajouter une clé'); }
       if (n) n.disabled = false;
-      faute('sl-cle-error', r || {});
+      faute('sl-cle-error', r || {}, 'cleAjout');
     });
   }
   function mfaCle(){
@@ -1549,11 +1587,12 @@ ${JS_DIRE()}
     appeler('connexion:cle').then(function(r){
       if (r && r.ok) { reussi(r.prenom); return; }
       if (b) { b.disabled = false; b.textContent = T('Utiliser ma clé d’identification'); }
-      faute('sl-mfa-error', r || {});
+      faute('sl-mfa-error', r || {}, 'cle');
+      mfaReprendre();
     });
   }
   function reussi(prenom){
-    szDire('Bienvenue' + (prenom ? ', ' + prenom : '') + '.', 'bon');
+    szDire(prenom ? T('Bienvenue, {0}.', prenom) : T('Bienvenue.'), 'bon');
     appeler('connexion:ouvrir').then(function(){ setTimeout(partir, 220); });
   }
   function partir(){
@@ -1589,8 +1628,12 @@ ${JS_DIRE()}
       if (n) n.innerHTML = '';
       return;
     }
-    z.innerHTML = '<div class="admlogin-maint"><strong>' + T('Maintenance en cours') + '</strong>'
-      + '<div>' + esc(MAINT.phrase) + '</div></div>';
+    /* .amt / .amd : les classes que CSS_WEB style (titre ambré à pictogramme, texte) — un <strong>
+       nu ne prenait rien (2026-10-25, audit). Le pictogramme est celui de l écran web. */
+    z.innerHTML = '<div class="admlogin-maint"><div class="amt">'
+      + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
+      + '<span>' + T('Maintenance en cours') + '</span></div>'
+      + '<div class="amd">' + esc(MAINT.phrase) + '</div></div>';
   }
 
   /* ══ LE NIP D URGENCE — Ctrl + Maj + 0 ═══════════════════════════════════
@@ -1603,12 +1646,12 @@ ${JS_DIRE()}
     var n = el('al-nipbox');
     if (!n || n.firstChild) return;
     n.innerHTML = '<div class="admlogin-nipbox">'
-      + '<strong>' + T('Désactivation d’urgence') + '</strong>'
-      + '<div style="font-size:0.76rem;margin:0.3rem 0 0.5rem">Entrez le NIP posé à '
-      + 'l’activation du mode exclusif.</div>'
+      // .npt / .npm : les classes de CSS_WEB (2026-10-25, audit) ; le texte passe par T().
+      + '<div class="npt">' + T('Désactivation d’urgence') + '</div>'
+      + '<div class="npm" style="margin:0 0 0.5rem">' + T('Entrez le NIP posé à l’activation du mode exclusif.') + '</div>'
       + '<label class="cx-lbl" for="nip-champ">' + T('NIP de désactivation') + '</label>'
       + '<input type="password" id="nip-champ" inputmode="numeric" maxlength="12" '
-      + 'autocomplete="off" placeholder="NIP">'
+      + 'autocomplete="off" placeholder="' + T('NIP') + '">'
       + '<div class="cx-err" id="nip-err"></div>'
       + '<div class="npr"><button type="button" id="nip-ok">' + T('Lever la maintenance') + '</button>'
       + '<button type="button" id="nip-non">' + T('Annuler') + '</button></div></div>';
@@ -1626,8 +1669,10 @@ ${JS_DIRE()}
     appeler('connexion:nip', [c.value]).then(function(r){
       var b2 = el('nip-ok');
       if (b2) b2.disabled = false;
-      if (!r.ok) { faute('nip-err', r); var cc = el('nip-champ'); if (cc) { cc.value = ''; cc.focus(); } return; }
-      szDire(r.message || 'Maintenance levée.', 'bon');
+      if (!r.ok) { faute('nip-err', r, 'nip'); var cc = el('nip-champ'); if (cc) { cc.value = ''; cc.focus(); } return; }
+      // Le message du cœur est français : on le traduit s il est connu (2026-10-25, audit).
+      // Le site ne rend qu'une phrase ici (staff.js) : on l'écrit en toutes lettres, pour que le dictionnaire la voie.
+      szDire(T('Maintenance levée. Vous pouvez vous connecter.'), 'bon');
       MAINT = { actif: false, phrase: '' };
       maintPeindre();
     });

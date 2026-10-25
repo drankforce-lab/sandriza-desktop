@@ -308,10 +308,8 @@ function pageCaisse(mode) {
         <label class="ch"><span>${T("Valeur")}</span><input id="v-rab" class="num" inputmode="decimal" value="" placeholder="0${SEP_DEC()}00" title="${T("Rabais")}"></label>
         <label class="ch"><span>${T("Remarque")}</span><input id="v-rabnote" list="sugg-rab" maxlength="200" autocomplete="off" placeholder="${T("ex. : client fidèle")}"></label>
       </div>
-      <datalist id="sugg-rab">
-        <option value="${T("Petit défaut")}"><option value="${T("Fin de série")}"><option value="${T("Article de démonstration")}">
-        <option value="${T("Dernier en stock")}"><option value="${T("Geste commercial")}"><option value="${T("Client fidèle")}"><option value="${T("Rabais employé")}">
-      </datalist>
+      <!-- Rempli par le script depuis SZ_DONNEES.suggRab (voir plus bas). -->
+      <datalist id="sugg-rab"></datalist>
     </div>
     <div class="carte">
       <h2>${T("Encaissement")}</h2>
@@ -360,10 +358,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var RABNIP = null;         // autorisation du rabais sur la vente : { jeton, type, valeur } (NIP verifie)
   var enVente = false;
   var PUCES = [10, 15, 20, 25, 30, 40, 50];
+  /* ⚠ LES SUGGESTIONS DE REMARQUE SONT DES DONNEES (2026-10-25, audit). Choisies, elles deviennent la
+     remarque, conservee a la facture, au registre des rabais et au journal. Passees par T(), une caisse
+     en anglais y ecrivait « Minor defect ». Elles restent donc en francais, declarees ici : le nom
+     SZ_DONNEES est reconnu par les bancs de langue (voir tools/textes-visibles.js). */
+  var SZ_DONNEES = {
+    suggRab: 'Petit défaut|Fin de série|Article de démonstration|Dernier en stock|Geste commercial|Client fidèle|Rabais employé'
+  };
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
+  (function(){
+    var dl = document.getElementById('sugg-rab');
+    if (dl) dl.innerHTML = SZ_DONNEES.suggRab.split('|').map(function(s){ return '<option value="' + esc(s) + '">'; }).join('');
+  })();
   /* ⚠ Le symbole change de COTE en anglais : << $12.50 >>. Voir szArgent (socle). */
   function argent(n){ return szArgent(n); }
   function pctTxt(n){ return szNombre(n, 2).replace(/[.,]00$/, '') + ' %'; }
@@ -470,8 +479,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // ⚠ LE NOM DU CLIENT FAIT PARTIE DES CONDITIONS : le site refuse une vente
     // anonyme, autant le dire avant d avoir tout saisi.
     var nomOk = !!val('c-nom').trim();
-    // « Courriel seulement » sans adresse valide : la cliente repartirait sans aucune facture.
-    var mailOk = val('v-remise') !== 'courriel' || /^[^s@]+@[^s@]+.[^s@]+$/.test(val('c-mail').trim());
+    // « Courriel seulement » sans adresse valide : le client repartirait sans aucune facture.
+    /* ⚠ ANTISLASHS DOUBLES (2026-10-25, audit) : on est dans un gabarit Node, qui mange un antislash
+       simple. Ecrit « [^s@] », le motif excluait la LETTRE s : « sophie@gmail.com » etait refuse et la
+       vente devenait impossible en « Courriel seulement ». Meme motif que _posVente (admin.js). */
+    var mailOk = val('v-remise') !== 'courriel' || /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(val('c-mail').trim());
     /* ⚠ PLUS DE CADRE ROUGE SUR « NOM » (2026-10-14, sa demande : « pas besoin de me mettre le champ en rouge
        dès que l on a entré un produit »). Le bouton dit déjà « Nom du client requis » : le rouge, posé au premier
        article, accusait d une faute qu on n avait pas encore eu le temps de ne pas commettre. */
@@ -570,7 +582,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   // « 12,50 », « 12.50 $ », « 1 234,5 » : un montant saisi a la quebecoise, ou NaN.
   function lirePrix(s){
     var t = String(s == null ? '' : s).replace(/[\\s  $]/g, '').replace(',', '.');
-    if (!/^[0-9]+(\.[0-9]{0,2})?$/.test(t)) return NaN;
+    // ⚠ Antislash DOUBLE devant le point (2026-10-25, audit) : simple, le gabarit le mangeait, le point
+    // valait alors « tout caractere », et « 12-50 » passait pour 12,00 $.
+    if (!/^[0-9]+(\\.[0-9]{0,2})?$/.test(t)) return NaN;
     return Math.round(parseFloat(t) * 100) / 100;
   }
 
@@ -672,7 +686,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   // La ligne a pu etre retiree pendant l aller-retour : on ne pose jamais une autorisation sur une autre.
   function ligneChangee(){ dire('${T("La vente a changé pendant la vérification — refaites la modification.")}', 'err'); }
-  function demanderNipPrix(i, prix, note){
+  // apres : la suite (la vente reprend quand l autorisation de prix etait echue au moment d encaisser).
+  function demanderNipPrix(i, prix, note, apres){
     var l = LIGNES[i]; if (!l) return;
     demanderNip({
       resume: esc(l.name) + ' : ' + argent(l.price) + ' → <strong>' + argent(prix) + '</strong><br>${T("Modifier un prix exige le NIP de la boutique.")}',
@@ -684,6 +699,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         l.rabaisNote = note;
         EDIT = -1; dessinerLignes(); majTotaux();
         dire('${T("Prix modifié — NIP vérifié.")}', 'bon');
+        if (apres) { apres(); return; }
         var s = document.getElementById('scan'); if (s) s.focus();
       }
     });
@@ -734,7 +750,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     else lien(false);
   }
 
+  /* ⚠ RIEN NE CHANGE PENDANT L ENREGISTREMENT (2026-10-25, audit) : la vente part avec LIGNES tel quel et,
+     au retour, reinitialiser() vide tout. Un article scanne, une quantite ou un retrait faits pendant
+     l attente etaient effaces sans un mot, et ce qui etait enregistre n etait plus ce qu on voyait. */
+  function venteEnCours(){
+    if (!enVente) return false;
+    dire('${T("Vente en cours d’enregistrement — attendez la fin avant de modifier les articles.")}', 'att');
+    return true;
+  }
+
   function ajouter(pid, taille, couleur){
+    if (venteEnCours()) return;
     var cle = pid + '|' + (taille || '') + '|' + (couleur || '');
     var ex = null;
     for (var i = 0; i < LIGNES.length; i++) {
@@ -745,6 +771,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // promotions en cours.
     appeler('caisse:article', [pid, taille, couleur]).then(function(r){
       if (!r.ok) { dire(expliquer(r.motif), 'err'); return; }
+      // La vente est partie pendant la recherche de l article : on ne l ajoute pas en douce.
+      if (venteEnCours()) return;
       if (r.image) IMGS[r.ligne.productId] = r.image;
       LIGNES.push(r.ligne);
       apresAjout();
@@ -950,6 +978,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!(CTX && CTX.superadmin)) {
       for (var k = 0; k < LIGNES.length; k++) {
         var lk = LIGNES[k], nk = parseFloat(String(lk.rabaisPct || '').replace(',', '.')) || 0;
+        /* ⚠ UN PRIX MODIFIE DONT L AUTORISATION EST TOMBEE (2026-10-25, audit) : apres « prix_nip_echu », la
+           ligne ne garde que prixVoulu. Sans cette garde, le clic suivant encaissait AU PRIX COURANT, sans
+           NIP : le client payait un autre prix que celui convenu. On redemande le NIP, puis la vente reprend. */
+        if (!lk.prixForce && lk.prixVoulu > 0) { demanderNipPrix(k, lk.prixVoulu, lk.rabaisNote || '', vendre); return; }
         if (!lk.prixForce && nk > 0 && !(lk.rabaisNip && lk.rabaisNip.pct === nk)) { demanderNipRabais(k, nk, lk.rabaisNote || '', vendre); return; }
       }
       if ((parseFloat(String(val('v-rab') || '').replace(',', '.')) || 0) > 0 && !rabVenteAutorise()) { demanderNipVente(vendre); return; }
@@ -1062,7 +1094,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var bvf = document.getElementById('btn-verif');
     if (bvf) bvf.onclick = function(){
       var hc = bvf.getAttribute('data-hc');
-      if (!hc) { dire('${T("Aucun lien de paiement a verifier.")}', 'err'); return; }
+      if (!hc) { dire('${T("Aucun lien de paiement à vérifier.")}', 'err'); return; }
       bvf.disabled = true;
       dire('${T("Vérification auprès de Square…")}');
       appeler('caisse:verifierPaiement', [hc, bvf.getAttribute('data-cmd')]).then(function(res){
@@ -1147,13 +1179,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (${rabaisTemoin ? 'true' : 'false'}) {
         /* Une vente TEMOIN, inerte : deux articles, le premier rabaisse de 25 %
            avec sa remarque, et son editeur ouvert. Rien n est enregistre. */
+        /* Le nom de la vente TÉMOIN est une DONNÉE posée dans un champ : elle ne se traduit pas.
+           Sa remarque aussi (2026-10-25, audit) : une remarque est une donnée enregistrée. */
+        var SZ_DONNEES = { clientTemoin: 'Marie Tremblay', noteTemoin: 'Petit défaut' };
         LIGNES = [
-          { productId: 'p_0001', name: 'Aurora', sku: 'ROB-0001-M-NOI', size: 'M', color: 'Noir', price: 129.95, quantity: 1, rabaisPct: '25', rabaisNote: '${T("Petit défaut")}' },
+          { productId: 'p_0001', name: 'Aurora', sku: 'ROB-0001-M-NOI', size: 'M', color: 'Noir', price: 129.95, quantity: 1, rabaisPct: '25', rabaisNote: SZ_DONNEES.noteTemoin },
           { productId: 'p_0002', name: 'Lina', sku: 'HAU-0007-S-IVO', size: 'S', color: 'Ivoire', price: 89, quantity: 2 }
         ];
         EDIT = 0;
-        /* Le nom de la vente TÉMOIN est une DONNÉE posée dans un champ : elle ne se traduit pas. */
-        var SZ_DONNEES = { clientTemoin: 'Marie Tremblay' };
         document.getElementById('c-nom').value = SZ_DONNEES.clientTemoin;
         majTotaux();
       }
@@ -1196,10 +1229,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   document.getElementById('c-tel').oninput = function(){
     masquerTel(this);
     chercherClient(this.value);
+    // Un telephone seul suffit a rendre « Reinitialiser la vente » utile (2026-10-25, audit).
+    majBouton();
   };
   document.getElementById('v-remise').onchange = majBouton;
+  /* Les totaux suivent la FRAPPE du rabais (2026-10-25, audit) : sur « change » seulement, le bouton
+     « Effectuer la vente (X $) » et l afficheur client gardaient l ancien total jusqu a la sortie du
+     champ. majTotaux a deja son anti-rebond de 150 ms. */
   ['v-rab'].forEach(function(id){
     document.getElementById(id).onchange = function(){ majTotaux(); };
+    document.getElementById(id).addEventListener('input', majTotaux);
   });
   // La remarque et la note ne changent aucun total, mais elles suffisent a rendre
   // « Reinitialiser » utile : le bouton doit s allumer des la frappe.
@@ -1243,6 +1282,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   document.getElementById('corps').addEventListener('click', function(ev){
     var t = ev.target;
     if (!t || !t.closest) return;
+    // Pendant l enregistrement, les gestes qui changent les articles sont refuses (voir venteEnCours).
+    if (enVente && t.closest('[data-q], [data-retirer], [data-rab], [data-puce], [data-rab-appliquer], [data-rab-retirer]')) { venteEnCours(); return; }
     var v = t.closest('.vars button');
     if (v && !v.disabled) { ajouter(v.getAttribute('data-pid'), v.getAttribute('data-sz'), v.getAttribute('data-col')); return; }
     var q = t.closest('[data-q]');

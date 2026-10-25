@@ -152,8 +152,6 @@ module.exports = {
   'réversible': 'reversible',
   ' — le même bouton rétablira ce que ': ' — the same button will restore what ',
   'venez d’annuler.': 'have just undone.',
-  ' n’a': ' has',
-  ' pas.': ' not.',
   /* Les formes RENDUES, pour le compteur. */
   'Aucun crédit n’est dépensé : l’image d’avant est déjà rangée,':
     'No credit is spent: the earlier image is already stored,',
@@ -163,8 +161,6 @@ module.exports = {
     'Only one step back is kept per photo: a photo',
   'passée par deux traitements ne remonte qu’au précédent, pas à l’originale.':
     'that went through two treatments only goes back to the previous one, not to the original.',
-  's n’ont': 's have',
-  'rien à annuler et ne bougera': 'nothing to undo and will not move',
   'Revenir en arrière': 'Go back',
   'Retour en arrière…': 'Going back…',
   'à l’état précédent.': 'to the previous state.',
@@ -275,4 +271,9 @@ module.exports = {
   "nouvelle": "new",
   // La touche du clavier : « Maj » au Québec, « Shift » en anglais.
   "Maj": "Shift",
+  // (2026-10-25, audit) Deux phrases entières au lieu d’un pluriel recollé, et oui / non.
+  '{0} photos n’ont rien à annuler et ne bougeront pas.': '{0} photos have nothing to undo and will not move.',
+  '{0} photo n’a rien à annuler et ne bougera pas.': '{0} photo has nothing to undo and will not move.',
+  'oui': 'yes',
+  'non': 'no',
 };

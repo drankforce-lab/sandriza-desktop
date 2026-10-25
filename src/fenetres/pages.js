@@ -718,7 +718,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'pol-t':120,'pol-s':200})}${JS_BROUILLO
     for (var i=m.length-1;i>=0;i--){ var s=m[i];
       var dt=''; try{ dt=new Date(s.createdAt).toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'short', year: 'numeric' }); }catch(e){}
       corpsl+='<div class="mailmsg"><div class="hh"><div><b>'+esc(s.name)+'</b> <a href="mailto:'+esc(s.email)+'">'+esc(s.email)+'</a></div>'
-        +'<div style="display:flex;gap:.5rem;align-items:center">'+(s.status==='new'?'<span class="pastille" style="background:rgba(234,179,8,.2);color:#e0b93a">${T("Nouveau")}</span>':'')
+        +'<div style="display:flex;gap:.5rem;align-items:center">'+(s.status==='new'?'<span class="rf-pill ambre">${T("Nouveau")}</span>':'')
         +'<span style="font-size:.76rem;color:var(--tx2)">'+esc(dt)+'</span>'+(RO?'':'<button class="mini" data-mdel="'+esc(s.id)+'">✕</button>')+'</div></div>'
         +'<div style="font-size:.85rem;font-weight:600;margin-bottom:.2rem">'+esc(s.subject)+'</div>'
         +'<div style="font-size:.84rem;color:var(--tx-c0cad8);line-height:1.5">'+esc(s.message)+'</div></div>';
@@ -814,7 +814,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'pol-t':120,'pol-s':200})}${JS_BROUILLO
       +'<button type="button" data-plein title="${T("Plein écran")}">'+IC.pl+'</button>'
       +'</div>'
       +'<div class="zone" id="'+id+'" contenteditable="'+(RO?'false':'true')+'" spellcheck="false" '
-      +'data-vide="Rédigez le contenu de cette section…">'+(contenu||'<p><br></p>')+'</div>'
+      +'data-vide="${T("Rédigez le contenu de cette section…")}">'+(contenu||'<p><br></p>')+'</div>'
       +'<input type="file" accept="image/*" id="f-'+id+'" style="display:none"></div>';
     return h;
   }
@@ -909,7 +909,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'pol-t':120,'pol-s':200})}${JS_BROUILLO
       cs[i].onmouseenter=function(){ var R=+this.getAttribute('data-r'), C=+this.getAttribute('data-c');
         for (var j=0;j<cs.length;j++){ var el=cs[j];
           el.classList.toggle('on', +el.getAttribute('data-r')<=R && +el.getAttribute('data-c')<=C); }
-        document.getElementById('lgd-tb').textContent=C+' × '+R+' tableau'; };
+        document.getElementById('lgd-tb').textContent=C+' × '+R+' ${T("tableau")}'; };
       cs[i].onclick=function(){ var R=+this.getAttribute('data-r'), C=+this.getAttribute('data-c');
         g.remove(); edPoserTableau(id,R,C); };
     }
@@ -1179,8 +1179,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'pol-t':120,'pol-s':200})}${JS_BROUILLO
     for (var gi=0; gi<GUIDES.length; gi++){ var g=GUIDES[gi];
       if (gi!==GSEL) continue;
       h+='<div class="carte sz-pagee"><div class="entete" style="margin-bottom:.7rem"><div style="display:flex;gap:.4rem;flex:1;flex-wrap:wrap">'
-        +'<input aria-label="Nom du guide" class="t" data-gname="'+gi+'" value="'+esc(g.name)+'" placeholder="Nom du guide" style="max-width:280px;font-weight:600"'+(RO?' disabled':'')+'>'
-        +'<input aria-label="Nom (EN)" class="t" data-gnameen="'+gi+'" value="'+esc(g.nameEN)+'" placeholder="Nom (EN)" style="max-width:240px"'+(RO?' disabled':'')+'>'
+        +'<input aria-label="${T("Nom du guide")}" class="t" data-gname="'+gi+'" value="'+esc(g.name)+'" placeholder="${T("Nom du guide")}" style="max-width:280px;font-weight:600"'+(RO?' disabled':'')+'>'
+        +'<input aria-label="${T("Nom (EN)")}" class="t" data-gnameen="'+gi+'" value="'+esc(g.nameEN)+'" placeholder="${T("Nom (EN)")}" style="max-width:240px"'+(RO?' disabled':'')+'>'
         +'<label style="display:inline-flex;align-items:center;gap:.35rem;font-size:.82rem;cursor:pointer"><input type="checkbox" data-gconv="'+gi+'"'+(g.conversion!==false?' checked':'')+(RO?' disabled':'')+'> ${T("Conversion US / EU…")}</label></div>'
         +(RO?'':'<div style="display:flex;gap:.3rem"><button class="b" data-grow="'+gi+'">${T("＋ Ligne")}</button><button class="b dgr" data-gdel="'+gi+'">${T("Supprimer")}</button></div>')+'</div>';
       // Les lignes du guide en PAGES mesurees ; l en-tete reste en place.
@@ -1291,8 +1291,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'pol-t':120,'pol-s':200})}${JS_BROUILLO
     else vueListe();
   }
 
+  /* ⚠ RELIRE, C EST AUSSI REDESSINER (2026-10-25, audit) : D changeait sans rendre(), et une page supprimee
+     restait dans la liste (« Modifier » donnait alors « Élément introuvable ») ; une case « pied de page »
+     refusee par le serveur restait cochee. On ne redessine pas sous une surcouche ouverte (editeur, boite
+     de reception) : le dessous serait refait sous les yeux, et une saisie en cours pourrait se perdre. */
   function recharger(msg, cl){
-    appeler('pages:donnees',[]).then(function(r){ if (r&&r.ok){ D=r; RO=!r.peutModifier; if (msg) dire(msg, cl); } });
+    appeler('pages:donnees',[]).then(function(r){ if (r&&r.ok){ D=r; RO=!r.peutModifier;
+      if (!document.getElementById('sur-cp') && !document.getElementById('sur-inbox')) rendre();
+      if (msg) dire(msg, cl); } });
   }
   function charger(){
     dire('${T("Chargement…")}');

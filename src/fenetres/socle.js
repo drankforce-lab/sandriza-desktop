@@ -1322,7 +1322,7 @@ function _brEcrire(v){
          montre, sinon on croit son travail a l abri alors qu il ne l est pas. */
       if (typeof szDire === 'function') {
         szDire(r && r.motif === 'trop_gros'
-          ? '${T("Cette saisie est trop volumineuse pour etre gardee en brouillon (images). Enregistrez pour ne rien perdre.")}'
+          ? '${T("Cette saisie est trop volumineuse pour être gardée en brouillon (images). Enregistrez pour ne rien perdre.")}'
           : '${T("Le brouillon n’a pas pu être conservé (stockage du poste plein).")}', 'att');
       }
       return r || { ok: false };
@@ -2212,7 +2212,8 @@ function szDemanderNip(o){
     };
     var clavier = function(ev){
       if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); fini(null); }
-      else if (ev.key === 'Enter') { ev.preventDefault(); ev.stopPropagation(); valider(); }
+      // (2026-10-25, audit) Entrée sur « Annuler » (atteint par Tab) ANNULE : elle validait le NIP.
+      else if (ev.key === 'Enter') { ev.preventDefault(); ev.stopPropagation(); if (document.activeElement === v.querySelector('.szc-non')) fini(null); else valider(); }
     };
     document.addEventListener('keydown', clavier, true);
     v.addEventListener('mousedown', function(ev){ if (ev.target === v) fini(null); });
@@ -2408,7 +2409,15 @@ var Assist = {
   },
   pointer: function(id, texte){
     var e = document.getElementById(id);
-    if (e) { e.classList.add('manque'); e.focus(); }
+    if (e) {
+      e.classList.add('manque'); e.focus();
+      /* Le rouge part dès qu on y touche (2026-10-25, audit) : sinon il restait après la saisie. */
+      if (!e.__szManque) {
+        e.__szManque = true;
+        var ote = function(){ e.classList.remove('manque'); };
+        e.addEventListener('input', ote); e.addEventListener('change', ote);
+      }
+    }
     dire(texte, 'err');
   },
   // Verifie TOUTES les etapes : on peut enregistrer depuis n importe laquelle.
@@ -2433,7 +2442,18 @@ Pagi.prototype.mesurer = function(){
   var l = this.zone.querySelector('.liste');
   if (!l) return 8;
   var h = l.clientHeight;
-  return Math.max(3, Math.floor(h / 30));
+  /* (2026-10-25, audit) La hauteur d une VRAIE ligne, une fois qu une ligne a été dessinée :
+     30 px devinés, c était trop peu pour une ligne avec champ et liste (~42 px) — les
+     dernières lignes de chaque page débordaient, cachées par overflow:hidden. */
+  return Math.max(3, Math.floor(h / (this._hl || 30)));
+};
+Pagi.prototype._hauteurLigne = function(l){
+  var e = l && l.firstElementChild;
+  if (!e || e.classList.contains('aide')) return 0;
+  var hl = e.getBoundingClientRect().height;
+  if (!(hl > 0)) return 0;
+  var g = 0; try { g = parseFloat(getComputedStyle(l).rowGap) || 0; } catch (x) {}
+  return hl + g;
 };
 Pagi.prototype.filtrees = function(){
   var q = this.filtre.trim().toLowerCase();
@@ -2451,6 +2471,14 @@ Pagi.prototype.dessiner = function(){
   var self = this;
   l.innerHTML = vues.length ? vues.map(function(x){ return self.ligne(x); }).join('')
     : '<div class="aide" style="padding:.4rem .3rem">${T("Aucun résultat.")}</div>';
+  /* La première vraie ligne mesurée : si elle change le compte par page, on redessine UNE fois. */
+  if (!this.parPage && !this._re) {
+    var hl = this._hauteurLigne(l);
+    if (hl > 0 && Math.abs(hl - (this._hl || 30)) > 1) {
+      this._hl = hl;
+      if (this.mesurer() !== pp) { this._re = true; try { this.dessiner(); } finally { this._re = false; } return; }
+    }
+  }
   var p = this.zone.querySelector('.pagi');
   if (p) {
     /* ⚠ DES FLECHES, PAS « PRECEDENT / SUIVANT » (2026-10-01). Cette liste ne vit
@@ -2722,7 +2750,10 @@ html.jour .ico{color:#414e66}
 .prim .ic,.paie .ic,.ong.on .oi,.badge2 .ic,.pt .ic,.pt.ic,button.ic.prim,button.ic.plus,
 html.jour .prim .ic,html.jour .paie .ic,html.jour .ong.on .oi,
 html.jour .badge2 .ic,html.jour .pt .ic,html.jour .pt.ic,
-html.jour button.ic.prim,html.jour button.ic.plus{
+html.jour button.ic.prim,html.jour button.ic.plus,
+/* (2026-10-25, audit) le bouton d action des confirmations, désormais caramel le jour : son icône assombrie par le
+   filtre tombait à 1,26:1 (🖨 de « Imprimer », fenêtre Commande). */
+.szc-oui .ic,html.jour .szc-oui .ic{
   filter:none;opacity:1}
 
 /* ══ LA BOITE DU BROUILLON ══════════════════════════════════
@@ -3988,6 +4019,12 @@ html.jour .tuile.on{border-color:#a8804e;box-shadow:inset 0 0 0 1px rgba(168,128
 .ch input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):focus,.ch select:focus,.ch textarea:focus,.champ input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):focus,.champ select:focus,.champ textarea:focus{outline:none;border-color:var(--or);box-shadow:0 0 0 3px rgba(var(--or-rgb),.18)}
 html.jour .ch input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),html.jour .ch select,html.jour .ch textarea,html.jour .champ input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),html.jour .champ select,html.jour .champ textarea{border-color:rgba(15,23,42,.16)}
 html.jour .ch input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):focus,html.jour .ch select:focus,html.jour .ch textarea:focus,html.jour .champ input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):focus,html.jour .champ select:focus,html.jour .champ textarea:focus{border-color:#a8864f;box-shadow:0 0 0 3px rgba(168,134,79,.2)}
+/* (2026-10-25, audit) LE CHAMP MANQUANT RESTE ROUGE. Assist.pointer pose .manque, mais
+   input.manque (0,1,1) perdait contre les règles ci-dessus (0,5,1 à 0,7,2) : « Remplissez ce
+   champ » ne désignait jamais le champ. !important parce que le champ pointé a AUSSI le
+   foyer (:focus). Champs seulement : des fenêtres ont des <div class="manque">. */
+input.manque,select.manque,textarea.manque{border-color:#f87171!important;box-shadow:0 0 0 2px rgba(248,113,113,.25)!important}
+html.jour input.manque,html.jour select.manque,html.jour textarea.manque{border-color:#c0392b!important;box-shadow:0 0 0 2px rgba(192,57,43,.18)!important}
 /* ══ LES FINITIONS DE LA REFONTE FINE (2026-09-26) ═══════════════════════
    Sa demande : « la refonte, c est partout, et ameliore le visuel dans les
    moindres details ». Les pieces que TOUTES les fenetres partagent, reprises
@@ -4542,6 +4579,12 @@ const CSS_RESPIRE = `
    (html.jour button) le repeindrait en blanc. Texte : #fff sur #b42318 = 6,5:1. */
 .szc-boite.danger .szc-oui{background:#b42318;border-color:#b42318;color:var(--tx-sur-accent)}
 .szc-boite.danger .szc-oui:hover:not(:disabled){background:#912018;border-color:#912018}
+/* (2026-10-25, audit) Et l action ORDINAIRE garde sa couleur d action en jour : sans cette reprise,
+   html.jour button (0,1,2) battait .szc-oui (0,1,0) — « Continuer » devenait un bouton blanc
+   identique à « Annuler ». Placée AVANT la reprise .danger, de spécificité plus haute. */
+html.jour .szc-oui{background:var(--sz-btn-prim);border-color:var(--sz-btn-prim);color:var(--sz-btn-prim-txt)}
+html.jour .szc-oui:hover:not(:disabled){background:var(--sz-btn-prim-fort);border-color:var(--sz-btn-prim-fort);color:var(--sz-btn-prim-txt)}
+
 html.jour .szc-boite.danger .szc-oui{background:#b42318;border-color:#b42318;color:var(--tx-sur-accent)}
 html.jour .szc-boite.danger .szc-oui:hover:not(:disabled){background:#912018;border-color:#912018}
 html.jour .szc-voile{background:rgba(29,36,51,.38)}
@@ -4709,7 +4752,9 @@ html.jour:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) .onglets button{co
 /* LES DERNIERS RESTES BLEUTES (balayage des 108 fenetres sous Carbone, 2026-10-12) : les voiles des boites,
    le damier de transparence des vignettes photo, le bouton d enregistrement de l acces anticipe. */
 html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]):not(.jour) :is(.voile,#bc-voile){background-color:rgba(4,4,6,.76)!important}
-html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]):not(.jour) .vign{background:conic-gradient(#3a3a40 25%,#2a2a2f 0 50%,#3a3a40 0 75%,#2a2a2f 0) 0 0/12px 12px}
+/* (2026-10-25, audit) .vign.damier seulement : sur toutes les .vign, le damier recouvrait la case vide
+   « choisir une photo » de la fiche produit, et les vignettes d autres fenêtres (promo, encan). */
+html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]):not(.jour) .vign.damier{background:conic-gradient(#3a3a40 25%,#2a2a2f 0 50%,#3a3a40 0 75%,#2a2a2f 0) 0 0/12px 12px}
 html:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) button#v-ecrire.bsc:not(:disabled){background:var(--sz-btn-prim)!important}
 html.jour:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) .onglets button.on,html.jour:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) .onglets button.actif{
   background:linear-gradient(180deg,rgba(var(--or-rgb),.16),rgba(var(--or-rgb),.05))!important;border-color:rgba(var(--or-rgb),.55)!important;

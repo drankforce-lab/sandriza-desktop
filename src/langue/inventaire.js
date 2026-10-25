@@ -389,7 +389,6 @@ module.exports = {
      qu il ne croie pas ses clients prevenus : la cle d envoi n est pas posee,
      les demandes restent en attente. L affaiblir ferait perdre des ventes en
      silence — elle reste aussi nette en anglais. */
-  'cette variante, et': 'this variant, and',
   'aucun courriel n’est parti — la clé d’envoi n’est pas configurée':
     'no email was sent — the sending key is not configured',
   '(Configuration puis Infolettre). Les demandes restent en attente.':
@@ -599,5 +598,14 @@ module.exports = {
   'Ouvrir la facture': 'Open the invoice',
   'par': 'by',
   'Registre envoyé à l’impression.': 'Register sent to the printer.',
-  'Aucune facture liée à cette vente.': 'No invoice linked to this sale.'
+  'Aucune facture liée à cette vente.': 'No invoice linked to this sale.',
+  // (2026-10-25, audit)
+  'Tout': 'All',
+  'ses': 'its',
+  'contient': 'contains',
+  '{0} clients attendent cette variante, et': '{0} customers are waiting for this variant, and',
+  '1 client attend cette variante, et': '1 customer is waiting for this variant, and',
+  'Abandonner la saisie': 'Discard the changes',
+  'Les quantités, seuils et emplacements modifiés de ce produit seront perdus.': 'The modified quantities, thresholds and locations of this product will be lost.',
+  'Abandonner': 'Discard'
 };

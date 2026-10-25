@@ -264,4 +264,10 @@ module.exports = {
   // L indication de la recherche (2026-10-16) : elle etait a moitie non traduite.
   'Nom ou format…': 'Name or format…',
   'Nom ou format (3 caractères au moins)': 'Name or format (at least 3 characters)',
+  // (2026-10-25, audit) Textes visibles qui échappaient au dictionnaire, et une phrase entière.
+  'image non<br>lisible': 'image not<br>readable',
+  '(rond)': '(round)',
+  'Duplication…': 'Duplicating…',
+  '{0} étiquettes envoyées à {1}.': '{0} labels sent to {1}.',
+  '{0} étiquette envoyée à {1}.': '{0} label sent to {1}.',
 };

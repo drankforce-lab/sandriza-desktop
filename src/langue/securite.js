@@ -135,7 +135,6 @@ module.exports = {
   /* ⚠ L APOSTROPHE DROITE : la source ecrit cette phrase-la entre guillemets
      doubles, avec un « n'a » droit. Une cle avec l apostrophe courbe ne la
      trouverait pas. */
-  "La fenêtre principale n'a pas répondu à temps.": 'The main window did not answer in time.',
   'Échec : ': 'Failed: ',
   'Échec :': 'Failed:',
 
@@ -413,4 +412,9 @@ module.exports = {
   'Dernière utilisation': 'Last used',
   'Retirer la clé': 'Remove passkey',
   'Clé d’identification retirée.': 'Passkey removed.',
+  // (2026-10-25, audit)
+  'Groupes de modules': 'Module groups',
+  'Le prénom est obligatoire.': 'The first name is required.',
+  'Le nom est obligatoire.': 'The last name is required.',
+  'Nom d’utilisateur invalide : de 2 à 30 caractères (minuscules, chiffres, tiret ou soulignement).': 'Invalid username: 2 to 30 characters (lowercase letters, digits, hyphen or underscore).',
 };

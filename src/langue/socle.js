@@ -75,6 +75,8 @@ module.exports = {
   /* ⚠ « un collègue » est le repli quand le serveur ne nomme personne : il se
      glisse DANS « En traitement par … », d ou la minuscule. */
   'un collègue': 'a colleague',
+  // La pastille de verrou sur ses propres fiches (2026-10-25, audit : elle restait « Vous » en anglais).
+  'Vous': 'You',
   'Vous tenez cette fiche en modification': 'You have this record open for editing',
   'En traitement par': 'Being edited by',
 
@@ -172,7 +174,7 @@ module.exports = {
   'Un brouillon disparaît de lui-même après': 'A draft disappears on its own after',
   'heures, et il est jeté dès que la fiche est enregistrée.':
     'hours, and it is discarded as soon as the record is saved.',
-  'Cette saisie est trop volumineuse pour etre gardee en brouillon (images). Enregistrez pour ne rien perdre.':
+  'Cette saisie est trop volumineuse pour être gardée en brouillon (images). Enregistrez pour ne rien perdre.':
     'This entry is too large to keep as a draft (images). Save it so nothing is lost.',
   'Le brouillon n’a pas pu être conservé (stockage du poste plein).':
     'The draft could not be kept (this computer’s storage is full).',

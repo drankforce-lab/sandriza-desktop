@@ -262,11 +262,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     badge:              '${T("Le texte du badge est requis.")}',
     echec:              '${T("L’opération a échoué.")}'
   };
+  /* (2026-10-25, audit) SANS esc : ce texte part vers dire() (textContent) ; ce qui le pose en HTML l echappe. */
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
-    if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 140)) + ')';
-    if (r && m === 'priorite' && r.libre) t += ' ${T("Premier numéro libre :")} ' + esc(String(r.libre)) + '.';
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + (m || '?') + ').');
+    if (r && r.detail) t += ' (' + String(r.detail).slice(0, 140) + ')';
+    if (r && m === 'priorite' && r.libre) t += ' ${T("Premier numéro libre :")} ' + String(r.libre) + '.';
     return t;
   }
   function appeler(op, args){
@@ -284,7 +285,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     e.addEventListener('input', function(){
       var n = parseInt(e.value, 10) || 0, soi = (FORM && FORM.id) || '';
       var pris = ((D && D.prioritesPrises) || []).filter(function(x){ return x.id !== soi && x.n === n; })[0];
-      if (pris) dire('${T("La priorité")} ' + n + ' ${T("est déjà prise par")} « ' + esc(pris.nom) + ' ». ${T("Premier numéro libre :")} ' + ((D && D.prioriteLibre) || '?') + '.', 'att');
+      if (pris) dire('${T("La priorité")} ' + n + ' ${T("est déjà prise par")} « ' + pris.nom + ' ». ${T("Premier numéro libre :")} ' + ((D && D.prioriteLibre) || '?') + '.', 'att');
       else dire('');
     });
   }

@@ -348,4 +348,12 @@ module.exports = {
   'fournisseurs': 'suppliers',
   'vos corrections': 'your corrections',
   'elles priment': 'they take precedence',
+  // (2026-10-25, audit) Morceaux de messages qui restaient en français.
+  '(taxes incluses)': '(taxes included)',
+  'approximatif': 'approximate',
+  '(approximatif)': '(approximate)',
+  'montant': 'amount',
+  'total': 'total',
+  'du': 'of',
+  'Revenez à l’onglet Dépenses pour y déposer une facture.': 'Go back to the Expenses tab to drop an invoice there.',
 };

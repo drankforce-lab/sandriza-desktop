@@ -566,7 +566,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     if (genre === 'produits') {
       // Choix multiple (Ctrl + clic) : la valeur gardee est la liste des references.
       var pris = v.split(/[,;\\s]+/).filter(Boolean);
-      return '<div><label for="' + id + '">' + esc(lib) + ' <span style="opacity:.7">${T("(Ctrl + clic pour en choisir plusieurs)")}</span></label>'
+      return '<div><label for="' + id + '">' + esc(lib) + ' <span style="color:var(--tx2)">${T("(Ctrl + clic pour en choisir plusieurs)")}</span></label>'
         + '<select multiple size="6" id="' + id + '" data-bi="' + i + '" data-bc="' + cle + '">'
         + BPRODUITS.map(function(p){
             return '<option value="' + esc(p.ref) + '"' + (pris.indexOf(p.ref) >= 0 ? ' selected' : '') + '>'
@@ -1153,10 +1153,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     refus:              '${T("L’envoi a été refusé.")}',
     echec:              '${T("L’opération a échoué.")}'
   };
+  /* (2026-10-25, audit) Plus d esc() ici ni devant dire() : szDire ecrit en
+     textContent, un « & » s affichait « &amp; ». vide() echappe de lui-meme. */
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
-    if (r && r.detail) t += ' ' + esc(String(r.detail).slice(0, 160));
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + (m || '?') + ').');
+    if (r && r.detail) t += ' ' + String(r.detail).slice(0, 160);
     return t;
   }
   function appeler(op, args){
@@ -1449,14 +1451,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     if (t) t.textContent = titreEtape();
   }
 
-  /* L apercu du courriel, pose par-dessus la colonne de droite : il se ferme par son
-     bouton, et le formulaire n a jamais a defiler pour le montrer. */
-  function apercuBloc(){
-    return '<div class="apercu" id="f-apercu-bloc" style="display:none">'
-      + '<div class="chrome"><span class="ic">✉</span> ${T("Aperçu — marie@example.com")}'
-      + '<button type="button" class="mini" id="f-apercu-x">${T("Fermer l’aperçu")}</button></div>'
-      + '<iframe id="f-frame" sandbox=""></iframe></div>';
-  }
+  /* (2026-10-25, audit) L ancien apercu par-dessus la colonne (apercuBloc, apercuDans,
+     #f-apercu, #f-apercu-x, [data-etapercu]) est retire : plus rien ne le dessinait
+     depuis l editeur en trois colonnes, qui a son apercu vivant. */
 
   function vueEtapes(){
     var et = ETAPES || [];
@@ -1671,49 +1668,37 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
      est IMMEDIATE, avant que charger() ne redessine tout. */
   function fermerForm(){ szFermerBoite(function(){ FORM = null; ETAPES = null; CRITERES = null; charger(); }); }
 
-  function apercuDans(html){
-    var bloc = document.getElementById('f-apercu-bloc');
-    var cadre = document.getElementById('f-frame');
-    if (!bloc || !cadre) return;
-    dire('${T("Construction de l’aperçu…")}');
-    appeler('nl:apercu', [html]).then(function(r){
-      if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      bloc.style.display = '';
-      // ⚠ srcdoc avec un bac a sable VIDE : le courriel est du HTML etranger,
-      // il ne doit ni executer de script ni atteindre cette fenetre.
-      cadre.setAttribute('srcdoc', r.html);
-      dire('');
-      // Plus de scrollIntoView : l apercu est pose par-dessus la colonne, il est deja en vue
-      // (et faire defiler un corps sans glissiere le laisserait decale).
-    });
-  }
-
-  function soumettreForm(){
+  function soumettreForm(htmConverti){
     var g = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
     var b = document.getElementById('f-ok');
+    /* Le bouton passe un evenement en argument : seul un TEXTE est un HTML converti. */
+    var conv = (typeof htmConverti === 'string') ? htmConverti : null;
     if (FORM.type === 'campagne') {
       /* ⚠⚠ EN MODE VISUEL, LE CHAMP HTML EST VIDE — il est masque et personne ne
          l a rempli. Enregistrer g(f-html) tel quel ecrirait un corps VIDE sur
          une campagne pleine de blocs, et l on ne s en apercevrait qu a l envoi.
-         On convertit donc d abord, puis on repasse par ici. */
-      if (BMODE === 'visuel') {
+         On convertit donc d abord, puis on repasse par ici AVEC le HTML en argument.
+         (2026-10-25, audit) On ne touche plus a BMODE : le poser a « html » ici
+         figeait l apercu et faisait renvoyer l ANCIEN HTML apres un refus
+         (nom vide, coupon manquant, refus du serveur). */
+      if (BMODE === 'visuel' && conv === null) {
         if (b) b.disabled = true;
         dire('${T("Assemblage du courriel…")}');
         blocsVersHtml(function(htm){
-          var ta = document.getElementById('f-html');
-          if (ta) ta.value = htm;
-          BMODE = 'html';              // on ne reconvertira pas deux fois
           if (b) b.disabled = false;
-          soumettreForm();
+          // Conversion ratee (blocsVersHtml rend '' sur un refus) : ne pas ecrire un corps VIDE.
+          if (!htm && BLOCS.length) { dire('${T("Le courriel n’a pas pu être assemblé. Réessayez.")}', 'err'); return; }
+          soumettreForm(String(htm || ''));
         });
         return;
       }
       var data = { nom: g('f-nom').trim(), sujet: g('f-suj').trim(), segment: g('f-seg'),
-        canal: g('f-canal'), sms: g('f-sms').trim(), html: g('f-html'), offre: offreReleve() };
+        canal: g('f-canal'), sms: g('f-sms').trim(), html: (conv !== null ? conv : g('f-html')), offre: offreReleve() };
       if (data.offre.mode === 'coupon' && !data.offre.couponId) { dire('${T("Choisissez le coupon de la campagne, ou un autre réglage de code promo.")}', 'err'); return; }
       if (data.offre.mode === 'auto' && data.offre.type !== 'freeshipping' && !(data.offre.valeur > 0)) { dire('${T("Indiquez la valeur du rabais du code automatique.")}', 'err'); return; }
       // ⚠ Le courriel emploie {{promoCode}} sans code : on le dit à l'enregistrement, pas au moment d'envoyer.
-      if (data.offre.mode === 'aucun' && /\{\{\s*(promoCode|discountPercent|expiryDate)\s*\}\}/.test(data.sujet + data.html + data.sms)) {
+      // (2026-10-25, audit) Antislashs DOUBLES : le gabarit Node mangeait les simples (\\s devenait s).
+      if (data.offre.mode === 'aucun' && /\\{\\{\\s*(promoCode|discountPercent|expiryDate)\\s*\\}\\}/.test(data.sujet + data.html + data.sms)) {
         dire('${T("Ce courriel contient un code promo : choisissez « Créer automatiquement » ou un coupon existant, sinon l’envoi sera refusé.")}', 'err'); return;
       }
       if (!data.nom) { dire('${T("Le nom interne est requis.")}', 'err'); return; }
@@ -1729,7 +1714,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
         /* Jeter AVANT de fermer : fermerForm ecrit le brouillon, et il reecrirait
            par-dessus celui qu on vient de jeter. */
         szBrouillonJeter();
-        dire(esc(r.nom) + (r.cree ? ' ${T("créée")}' : ' ${T("mise à jour")}') + ' ${T("— en brouillon.")}', 'bon');
+        dire((r.nom || '') + (r.cree ? ' ${T("créée")}' : ' ${T("mise à jour")}') + ' ${T("— en brouillon.")}', 'bon');
         fermerForm();
       });
       return;
@@ -1748,7 +1733,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       if (b) b.disabled = false;
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       szBrouillonJeter();
-      dire(esc(r.nom) + (r.cree ? ' ${T("créée")}' : ' ${T("mise à jour")}') + ' — '
+      dire((r.nom || '') + (r.cree ? ' ${T("créée")}' : ' ${T("mise à jour")}') + ' — '
         + pluriel(r.etapes, '${T("étape")}', '${T("étapes")}') + '.', 'bon');
       fermerForm();
     });
@@ -1890,16 +1875,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
           document.getElementById('f-html').value = r.html;
           var s = document.getElementById('f-suj');
           if (s && !s.value.trim()) s.value = r.sujet;
-          dire('${T("Modèle «")} ' + esc(r.nom) + ' ${T("» chargé.")}', 'bon');
+          dire('${T("Modèle «")} ' + (r.nom || '') + ' ${T("» chargé.")}', 'bon');
         });
-      };
-      var ap = document.getElementById('f-apercu');
-      if (ap) ap.onclick = function(){
-        // ⚠ L apercu montre TOUJOURS ce qui partira : en mode visuel, on convertit
-        // d abord. Montrer le contenu du champ HTML — vide en visuel — annoncerait
-        // un courriel vide sur une campagne pleine.
-        if (BMODE === 'visuel') { blocsVersHtml(function(h){ apercuDans(h); }); return; }
-        apercuDans(document.getElementById('f-html').value);
       };
       return;
     }
@@ -2100,7 +2077,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       if (br) br.style.width = (r.total ? Math.round(100 * r.compte / r.total) : 0) + '%';
       dire(r.compte === 0
         ? '${T("Aucune abonnée ne correspond : ce segment n’enverrait rien.")}'
-        : pluriel(r.compte, '${T("abonnée")}', '${T("abonnées")}') + ' sur ' + r.total + '.', r.compte === 0 ? 'att' : 'bon');
+        : pluriel(r.compte, '${T("abonnée")}', '${T("abonnées")}') + ' ${T("sur")} ' + r.total + '.', r.compte === 0 ? 'att' : 'bon');
     });
   }
 
@@ -2115,7 +2092,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     appeler('segments:ecrire', [FORM.id, { nom: nom, criteres: CRITERES }]).then(function(r){
       if (b) b.disabled = false;
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      dire(esc(r.nom) + (r.cree ? ' ${T("créé")}' : ' ${T("mis à jour")}') + ' — ' + pluriel(r.compte, '${T("abonnée")}', '${T("abonnées")}') + '.'
+      dire((r.nom || '') + (r.cree ? ' ${T("créé")}' : ' ${T("mis à jour")}') + ' — ' + pluriel(r.compte, '${T("abonnée")}', '${T("abonnées")}') + '.'
         + (r.nuage ? '' : ' ${T("Enregistré sur ce poste seulement — le nuage n’a pas confirmé.")}'),
         r.nuage ? 'bon' : 'att');
       szBrouillonJeter();
@@ -2538,7 +2515,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     // La mention suit l ONGLET affiche : dire << consultation seulement >> en
     // regardant les segments parce que les campagnes le sont serait faux.
     var vu = (ONGLET === 'chaines') ? DH : (ONGLET === 'segments') ? DS : DC;
-    if (sous) sous.textContent = (vu && !vu.peutModifier) ? 'consultation seulement' : '';
+    if (sous) sous.textContent = (vu && !vu.peutModifier) ? '${T("consultation seulement")}' : '';
     corps.classList.remove('formulaire');
     corps.classList.remove('ed-corps');
     corps.classList.add('ls-corps');
@@ -2566,8 +2543,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
         var etapes = rs.map(function(r, i){
           return { sujet: r.sujet, html: r.html, jours: Math.floor(heures[i] / 24), heures: heures[i] % 24 };
         });
-        return appeler('chaines:ecrire', ['', { nom: '${T("Panier abandonné — séquence en 3 temps")}',
-          description: '${T("1 h : rappel · 24 h : avis et rareté · 72 h : 10 % pendant 48 h")}',
+        /* (2026-10-25, audit) Le nom et la description sont des DONNÉES enregistrées : en
+           français littéral, jamais traduits par T() (un poste en anglais écrivait la chaîne
+           en anglais). SZ_DONNEES les déclare comme tels aux bancs de langue. */
+        var SZ_DONNEES = { seqNom: 'Panier abandonné — séquence en 3 temps',
+          seqDesc: '1 h : rappel · 24 h : avis et rareté · 72 h : 10 % pendant 48 h' };
+        return appeler('chaines:ecrire', ['', { nom: SZ_DONNEES.seqNom,
+          description: SZ_DONNEES.seqDesc,
           declencheur: 'abandoned_cart', statut: 'paused', etapes: etapes }]);
       }).then(function(r){
         OCCUPE = false; bsp.disabled = false;
@@ -2599,7 +2581,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
         /* Le verdict dit ce qui est PARTI, pas ce qui a ete tente. */
         dire(pluriel(r.envoyes, '${T("courriel parti")}', '${T("courriels partis")}')
           + (r.echecs ? ', ' + pluriel(r.echecs, '${T("échec")}', '${T("échecs")}') : '')
-          + ' sur ' + pluriel(r.traitees, '${T("étape traitée")}', '${T("étapes traitées")}') + '.',
+          + ' ${T("sur")} ' + pluriel(r.traitees, '${T("étape traitée")}', '${T("étapes traitées")}') + '.',
           r.echecs ? 'att' : 'bon');
         charger();
       });
@@ -2694,19 +2676,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
           // La ligne du temps (sujet) et l apercu suivent le modele charge.
           if (s2) s2.dispatchEvent(new Event('input', { bubbles: true }));
           etApercuPlusTard();
-          dire('${T("Modèle «")} ' + esc(r.nom) + ' ${T("» chargé dans l’étape")} ' + (parseInt(ic, 10) + 1) + '.', 'bon');
+          dire('${T("Modèle «")} ' + (r.nom || '') + ' ${T("» chargé dans l’étape")} ' + (parseInt(ic, 10) + 1) + '.', 'bon');
         });
-        return;
-      }
-      if (t.closest('#f-apercu-x')) {
-        var ab = document.getElementById('f-apercu-bloc');
-        if (ab) ab.style.display = 'none';
-        return;
-      }
-      var eta = t.closest('[data-etapercu]');
-      if (eta) {
-        var b3 = document.getElementById('e-b-' + eta.getAttribute('data-etapercu'));
-        apercuDans(b3 ? b3.value : '');
         return;
       }
       return;   // rien d autre ne s ecoute tant qu un formulaire est ouvert
@@ -2743,7 +2714,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
           dessiner();
           return;
         }
-        dire(esc(r.nom) + ' ${T("supprimé.")}'
+        dire((r.nom || '') + ' ${T("supprimé.")}'
           + (r.nuage ? '' : ' ${T("Retiré sur ce poste seulement — le nuage n’a pas confirmé.")}'),
           r.nuage ? 'bon' : 'att');
         charger();
@@ -2785,7 +2756,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       appeler('campagnes:envoyer', [idE]).then(function(r){
         OCCUPE = false;
         if (!r.ok) { dire(expliquer(r), 'err'); charger(); return; }
-        dire(esc(r.nom) + ' — ' + pluriel(r.envoyes, '${T("envoi réussi")}', '${T("envois réussis")}')
+        dire((r.nom || '') + ' — ' + pluriel(r.envoyes, '${T("envoi réussi")}', '${T("envois réussis")}')
           + (r.echecs ? ', ' + pluriel(r.echecs, '${T("échec")}', '${T("échecs")}') : '')
           + (r.enCours ? ' ${T("— l’envoi continue sur le serveur.")}' : '')
           + (r.modeTest ? ' ${T("(mode test : la campagne reste en brouillon).")}' : '.'),
@@ -2835,7 +2806,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       appeler('campagnes:dupliquer', [bdu.getAttribute('data-dupliquer')]).then(function(r){
         bdu.disabled = false;
         if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
-        dire(esc(r.nom) + ' ${T("créée en brouillon.")}', 'bon');
+        dire((r.nom || '') + ' ${T("créée en brouillon.")}', 'bon');
         // La copie s'ouvre tout de suite : on la duplique pour la retoucher.
         if (r.id) ouvrirForm('campagne', r.id); else charger();
       });
@@ -2855,7 +2826,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       ARME = '';
       appeler('campagnes:supprimer', [idS]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
-        dire(esc(r.nom) + ' ${T("supprimée.")}', 'bon');
+        dire((r.nom || '') + ' ${T("supprimée.")}', 'bon');
         charger();
       });
       return;
@@ -2881,7 +2852,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       bb.disabled = true;
       appeler('chaines:basculer', [idB, versActive]).then(function(r){
         if (!r.ok) { bb.disabled = false; dire(expliquer(r), 'err'); return; }
-        dire(esc(r.nom) + (r.active ? ' ${T("est active.")}' : ' ${T("est suspendue.")}')
+        dire((r.nom || '') + (r.active ? ' ${T("est active.")}' : ' ${T("est suspendue.")}')
           + (r.nuage ? '' : ' ${T("Enregistré sur ce poste seulement — le nuage n’a pas confirmé.")}'),
           r.nuage ? 'bon' : 'att');
         charger();
@@ -2904,7 +2875,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       ARME = '';
       appeler('chaines:supprimer', [idC]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
-        dire(esc(r.nom) + ' ${T("supprimée")}'
+        dire((r.nom || '') + ' ${T("supprimée")}'
           + (r.perdues ? ' — ' + pluriel(r.perdues, '${T("inscription abandonnée")}', '${T("inscriptions abandonnées")}') + '.' : '.')
           + (r.nuage ? '' : ' ${T("Retiré sur ce poste seulement — le nuage n’a pas confirmé.")}'),
           r.nuage ? 'bon' : 'att');
@@ -3000,6 +2971,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       // ferait disparaitre tout ce qui vient d etre saisi.
       if (FORM) { fermerForm(); return; }
       if (ARME) { ARME = ''; dessiner(); return; }
+      // (2026-10-25, audit) Les statistiques d une campagne : Echap revient a la liste.
+      if (STATS) { STATS = null; ST_ONG = 'apercu'; ST_FILTRE = 'tous'; dessiner(); return; }
       P.fermer();
     }
   });

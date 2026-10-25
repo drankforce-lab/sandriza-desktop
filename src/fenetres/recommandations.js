@@ -849,7 +849,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'ag-nom':60})}${JS_BROUILLON()}
       + '<div class="dt" style="margin-top:.4rem">${T("Deux articles au minimum — chaque pièce du look sera")} '
       + '${T("liée à toutes les autres.")}</div>'
       + '<div class="pied-boite"><button class="mini prim" id="ag-publier"'
-      + (LOOK.length < 2 ? ' disabled' : '') + '>${T("Publier la suggestion")}</button></div>'
+      + ((LOOK.length < 2 || PUBLIE_EN_COURS) ? ' disabled' : '') + '>${T("Publier la suggestion")}</button></div>'
       + '</div>';
     return h;
   }
@@ -862,18 +862,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'ag-nom':60})}${JS_BROUILLON()}
     });
   }
 
+  /* ⚠ UNE PUBLICATION A LA FOIS (2026-10-25, audit) : le bouton restait actif pendant l appel, et un
+     double-clic creait deux suggestions identiques (regle et liaisons). Ferme pendant l appel, rouvert
+     sur un echec ; le drapeau tient meme si un redessin recree le bouton entre-temps. */
+  var PUBLIE_EN_COURS = false;
   function publierAgencement(){
+    if (PUBLIE_EN_COURS) return;
     var n = document.getElementById('ag-nom');
     var ou = [];
     var cp = document.getElementById('ag-produit');
     var cc = document.getElementById('ag-panier');
     if (cp && cp.checked) ou.push('product');
     if (cc && cc.checked) ou.push('cart');
+    PUBLIE_EN_COURS = true;
+    var bp = document.getElementById('ag-publier'); if (bp) bp.disabled = true;
     dire('${T("Publication…")}');
     appeler('reco:agencement:publier', [{
       nom: n ? n.value : '', style: STYLE || '', articles: LOOK, afficher: ou
     }]).then(function(r){
-      if (!r || !r.ok) { dire('${T("Échec :")} ' + expliquer(r), 'err'); return; }
+      PUBLIE_EN_COURS = false;
+      if (!r || !r.ok) {
+        var bp2 = document.getElementById('ag-publier'); if (bp2) bp2.disabled = false;
+        dire('${T("Échec :")} ' + expliquer(r), 'err'); return;
+      }
       LOOK = []; STYLE = null; CATF = 'all'; AGEN = null;
       chargerAgencement();
       /* On revient aux REGLES : la suggestion vient d y naitre, et c est la

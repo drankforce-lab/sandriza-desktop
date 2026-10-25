@@ -397,4 +397,7 @@ module.exports = {
   'Demande d’annulation au transporteur…': 'Asking the carrier to cancel…',
   'Étiquette annulée chez le transporteur — rien n’est facturé. Vous pouvez en créer une nouvelle.': 'Label cancelled with the carrier — nothing is billed. You can create a new one.',
   'L’envoi est annulé chez le transporteur et l’étiquette imprimée n’est plus valable. Si elle est déjà payée (compte payé par carte), son remboursement est demandé à la place : il prend quelques jours. Le numéro de suivi est retiré de la commande ; vous pourrez ensuite créer une nouvelle étiquette. Cette action est irréversible.': 'The shipment is cancelled with the carrier and the printed label is no longer valid. If it is already paid (credit-card account), a refund is requested instead: it takes a few days. The tracking number is removed from the order; you can then create a new label. This cannot be undone.',
+  // (2026-10-25, audit) Une commande ne s’expédie qu’une fois.
+  'Cette commande est déjà expédiée.': 'This order has already been shipped.',
+  'Cette commande est déjà expédiée — aucun second courriel n’est parti.': 'This order has already been shipped — no second email was sent.',
 };

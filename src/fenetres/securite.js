@@ -312,6 +312,11 @@ label.case .quoi{color:var(--tx2);font-size:.75rem;display:block}
   border:1px solid var(--v16);background:var(--v05);color:var(--tx2);cursor:pointer;flex:0 0 auto;padding:0}
 .expl:hover{background:var(--v12);color:var(--tx)}
 .expl.on{background:rgba(var(--or-rgb),.25);border-color:rgba(var(--or-rgb),.5);color:var(--tx-or)}
+.permtb tr.horsgrp{display:none}
+/* (2026-10-25, audit) La matrice se lit PAR GROUPE de modules (sous-onglets) : les ~143 droits
+   d un coup faisaient defiler la boite. Les lignes cachees restent dans la page : la lecture
+   des cases (data-perm) les voit toutes. */
+.ongEd.pgrp{padding:0;margin:0 0 .5rem}
 .permtb tr.aide td{padding:.1rem .5rem .6rem 1.4rem;text-align:left;font-size:.75rem;color:var(--tx2);line-height:1.6}
 .permtb tr.aide b{color:var(--tx)}
 .chaud{color:var(--tx-or2);font-size:.72rem;margin-left:.15rem}
@@ -422,11 +427,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     indisponible:'${T("Service injoignable.")}',
     refus:'${T("Action refusée par le serveur.")}',
     pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
-    delai:"${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    delai:'${T("La fenêtre principale n’a pas répondu à temps.")}',
     operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
     echec:'${T("L’opération a échoué.")}'
   };
-  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+esc(m||'?')+').'))+(r&&r.detail?' — '+esc(r.detail):''); }
+  // (2026-10-25, audit) Sans esc() : le texte part vers dire() (textContent) ; « & » s affichait « &amp; ».
+  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+(m||'?')+').'))+(r&&r.detail?' — '+r.detail:''); }
   function appeler(op, args){
     var p; try { p = P.appeler.apply(P, [op].concat(args||[])); } catch(e){ return Promise.resolve({ok:false,motif:'pont_indisponible'}); }
     if (!p || typeof p.then !== 'function') return Promise.resolve({ok:false,motif:'pont_indisponible'});
@@ -752,16 +758,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      facon la plus ordinaire d accorder trop.
      ⚠ LES MODULES SENSIBLES PORTENT UN SIGNE. Ce n est pas une garde — c est un
      avertissement, et il est a cote de la case, pas dans une note en bas. */
+  var PGRP = 0;   // le groupe de modules affiche dans la matrice (2026-10-25, audit)
   function permMatrice(F2, cochees){
     var acts = F2.actions||[], lbls = F2.actionLabels||{}, model = F2.permModel||[];
     var eff = cochees || [];
-    var h = '<table class="permtb"><thead><tr><th class="mod">${T("Module")}</th>';
+    if (PGRP >= model.length) PGRP = 0;
+    var h = '';
+    if (model.length > 1) {
+      h += '<div class="ongEd pgrp" role="group" aria-label="${T("Groupes de modules")}">';
+      for (var gb=0;gb<model.length;gb++) h += '<button type="button" data-pgrp="'+gb+'" class="'+(gb===PGRP?'on':'')+'">'+esc(model[gb].label)+'</button>';
+      h += '</div>';
+    }
+    h += '<table class="permtb"><thead><tr><th class="mod">${T("Module")}</th>';
     for (var a=0;a<acts.length;a++) h += '<th>'+esc(lbls[acts[a]]||acts[a])+'</th>';
     h += '</tr></thead><tbody>';
     for (var g=0;g<model.length;g++){ var grp=model[g];
-      h += '<tr class="grp"><td colspan="'+(acts.length+1)+'">'+esc(grp.label)+'</td></tr>';
+      var hg = (model.length > 1 && g !== PGRP) ? ' horsgrp' : '';
+      h += '<tr class="grp'+hg+'" data-g="'+g+'"><td colspan="'+(acts.length+1)+'">'+esc(grp.label)+'</td></tr>';
       for (var m=0;m<grp.modules.length;m++){ var mod=grp.modules[m];
-        h += '<tr><td class="mod"><span class="mnom">'
+        h += '<tr data-g="'+g+'" class="'+hg.trim()+'"><td class="mod"><span class="mnom">'
           + (mod.desc ? '<button type="button" class="expl" data-expl="'+esc(mod.key)+'" aria-expanded="false" title="${T("Ce que ce droit ouvre")}">?</button>' : '')
           /* ⚠ LE SIGNE PASSE PAR LA CLASSE ic — la regle du depot : un
              pictogramme nu reste sombre sur fond sombre et blanc sur fond
@@ -781,13 +796,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + (eff.indexOf(key)>=0?'checked':'')+'></td>';
         }
         h += '</tr>';
-        if (mod.desc) h += '<tr class="aide" data-aide="'+esc(mod.key)+'" hidden><td colspan="'+(acts.length+1)+'">'+riche(mod.desc)+'</td></tr>';
+        if (mod.desc) h += '<tr class="aide'+hg+'" data-g="'+g+'" data-aide="'+esc(mod.key)+'" hidden><td colspan="'+(acts.length+1)+'">'+riche(mod.desc)+'</td></tr>';
       }
     }
     return h + '</tbody></table>';
   }
 
   function cablerExpl(racine){
+    // Les sous-onglets de groupe : on montre et on cache, sans redessiner (les cases restent).
+    var gs = racine.querySelectorAll('[data-pgrp]');
+    for (var k=0;k<gs.length;k++) gs[k].onclick=function(){
+      PGRP = Number(this.getAttribute('data-pgrp')) || 0;
+      var tb = racine.querySelectorAll('[data-pgrp]');
+      for (var i3=0;i3<tb.length;i3++) tb[i3].className = (Number(tb[i3].getAttribute('data-pgrp'))===PGRP)?'on':'';
+      var rs = racine.querySelectorAll('.permtb tr[data-g]');
+      for (var j3=0;j3<rs.length;j3++) rs[j3].classList.toggle('horsgrp', Number(rs[j3].getAttribute('data-g'))!==PGRP);
+    };
     var bs = racine.querySelectorAll('[data-expl]');
     for (var i=0;i<bs.length;i++) bs[i].onclick=function(){
       var k=this.getAttribute('data-expl');
@@ -904,9 +928,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (cle === 'qui') {
       vol = '<p class="aideOng">${T("Qui est cette personne. Le <b>nom d’utilisateur</b> lui sert à se connecter ; le courriel reçoit l’invitation et les avis de sécurité.")}</p>'
         + '<div class="cols2">'
-        + '<label class="champ"><span class="lbl">${T("Prénom")}</span><input class="t" id="a-first" value="'+esc(A.first)+'"></label>'
-        + '<label class="champ"><span class="lbl">${T("Nom")}</span><input class="t" id="a-last" value="'+esc(A.last)+'"></label>'
-        + '<label class="champ"><span class="lbl">${T("Nom d’utilisateur")}</span><input class="t" id="a-username" value="'+esc(A.username)+'" placeholder="${T("ex : marie_b")}">'
+        + '<label class="champ"><span class="lbl">${T("Prénom")} <span class="req">*</span></span><input class="t" id="a-first" value="'+esc(A.first)+'"></label>'
+        + '<label class="champ"><span class="lbl">${T("Nom")} <span class="req">*</span></span><input class="t" id="a-last" value="'+esc(A.last)+'"></label>'
+        + '<label class="champ"><span class="lbl">${T("Nom d’utilisateur")} <span class="req">*</span></span><input class="t" id="a-username" value="'+esc(A.username)+'" placeholder="${T("ex : marie_b")}">'
         + '<span class="sub">${T("Minuscules, chiffres, tiret et soulignement.")}</span></label>'
         + '<label class="champ"><span class="lbl">${T("Courriel")} <span class="req">*</span></span>'
         + '<input class="t" type="email" id="a-email" value="'+esc(A.email)+'">'
@@ -1068,6 +1092,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function validerEtape(cle){
     if (cle === 'qui'){
+      /* (2026-10-25, audit) Les memes exigences que le serveur (Staff.secCompteEcrireCoeur) :
+         sinon l echec n arrivait qu a « Créer le compte », trois etapes plus loin. */
+      if (!String(A.first||'').trim()) return '${T("Le prénom est obligatoire.")}';
+      if (!String(A.last||'').trim()) return '${T("Le nom est obligatoire.")}';
+      if (!/^[a-z0-9_-]{2,30}$/.test(String(A.username||'').trim().toLowerCase())) return '${T("Nom d’utilisateur invalide : de 2 à 30 caractères (minuscules, chiffres, tiret ou soulignement).")}';
       if (!A.email.trim()) return '${T("Le courriel est obligatoire.")}';
       if (A.email.indexOf('@') < 1) return '${T("Ce courriel ne ressemble pas à une adresse.")}';
     }
@@ -1116,7 +1145,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (OCCUPE) return; OCCUPE=true; dire('${T("Ouverture…")}');
     appeler('securite:form',[id||'']).then(function(r){ OCCUPE=false;
       if (r&&r.ok){ dire('');
-        ONGED = (onglet === 'droits' && MODE === 'avance') ? 'droits' : 'identite';
+        // (2026-10-25, audit) L onglet s appelle « perms » (et existe dans les deux modes) :
+        // « droits » ouvrait un editeur VIDE en mode avance.
+        ONGED = (onglet === 'droits') ? 'perms' : 'identite';
         dessinerEditeurCompte(r); } else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
   function fermerEditeurCompte(){ szPleinReinit(); var s=document.getElementById('sur-u'); if (s) s.remove(); }

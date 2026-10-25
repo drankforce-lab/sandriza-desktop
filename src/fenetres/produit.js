@@ -31,7 +31,7 @@
  * ⚠ LE COIN DROIT DE L'EN-TÊTE EST RÉSERVÉ AU VERROU, et à rien d'autre.
  */
 
-const { CSS_SOCLE, CSS_JOUR, CSS_FICHE, JS_SOCLE, ICO, TETE, LIEU, JS_BORNER } = require('./socle');
+const { CSS_SOCLE, CSS_JOUR, CSS_FICHE, JS_SOCLE, ICO, TETE, LIEU, JS_BORNER, SEP_DEC } = require('./socle');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -325,8 +325,11 @@ html.jour .mv-zone{background:#e9e6df}
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vue .x,.vign .x{position:absolute;top:3px;right:3px;width:20px;height:20px;padding:0;
   border-radius:50%;font-size:.78rem;line-height:1;font-weight:700;
-  background:rgba(200,40,40,.94);border:1px solid var(--v28);color:var(--tx-blanc)}
+  background:rgba(200,40,40,.94);border:1px solid var(--v28);color:var(--tx-sur-accent)}
 .vue .x:hover,.vign .x:hover{background:#e04141;border-color:var(--v50)}
+/* (2026-10-25, audit) Le × reste BLANC sur le rouge en jour (--tx-blanc y vaut #1d2433),
+   et le survol reste rouge : html.jour button:hover:not(:disabled) le rendait beige. */
+html.jour .vue .x:hover:not(:disabled),html.jour .vign .x:hover:not(:disabled){background:#e04141;color:var(--tx-sur-accent)}
 /* La pastille « Dos » (mode photos simples, 2026-10-18) : désigne la photo du dos de l’aperçu 3D. */
 .vue .dos{position:absolute;top:3px;left:3px;height:20px;padding:0 .5rem;border-radius:99px;
   font-size:.6875rem;font-weight:700;line-height:1;background:var(--f-carte);border:1px solid var(--v28);color:var(--tx2)}
@@ -343,6 +346,10 @@ html.jour .mv-zone{background:#e9e6df}
 #p-vues .vue{flex:0 0 auto;width:160px;max-width:160px}
 #p-vues .vue .cadre{width:100%;height:auto;aspect-ratio:1/1;font-size:.72rem}
 .lgstk{display:flex;align-items:center;gap:.5rem;padding:.2rem .3rem;border-radius:6px}
+/* (2026-10-25, audit) La liste du stock est paginée par Pagi : elle vit dans un CADRE pour ne pas
+   être enfant direct de .carte.plein, sans quoi le socle (_SZ_PG_AUTO) la paginait une SECONDE fois
+   — deux barres de pages, et des lignes masquées que ni l une ni l autre ne montrait. */
+#p-zone>.stk-cadre{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;overflow:hidden}
 .lgstk .c1{flex:0 0 4.5rem}
 /* ⚠ LA COULEUR NE PREND PLUS TOUTE LA LARGEUR RESTANTE, l ENTREPOT l absorbe.
    Un nom de couleur tient en un mot ; un entrepot porte son CODE et sa
@@ -398,7 +405,10 @@ html.jour .lgstk.enstock .c1,html.jour .lgstk.enstock .c2{color:#166534}
   background:rgba(8,12,18,.6);padding:1.2rem}
 .voile .boite{width:100%;max-width:460px;background:var(--f-carte);border:1px solid var(--v10);
   border-radius:12px;padding:1rem 1.1rem;box-shadow:0 24px 64px rgba(0,0,0,.5)}
-.voile h3{margin:0 0 .5rem;font-size:1rem;font-weight:700;line-height:1.3;color:var(--tx-err2)}
+.voile h3{margin:0 0 .5rem;font-size:1rem;font-weight:700;line-height:1.3;color:var(--tx)}
+/* (2026-10-25, audit) Le rouge d erreur seulement pour l alerte (prix sous le coût) :
+   « Détourer », « Gros plan », le Studio sont des boîtes neutres. */
+.voile .boite.alerte h3{color:var(--tx-err2)}
 .voile p{margin:0 0 .7rem;font-size:.86rem;line-height:1.5;color:var(--tx-bleute)}
 .voile .pied2{display:flex;justify-content:flex-end;gap:.45rem;margin-top:.8rem}
 .cote{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;align-items:start}
@@ -849,14 +859,17 @@ function pageProduit(id) {
       + '<div class="cote" style="margin-top:.3rem">'
       + '<div class="ch"><label for="p-regime">${T("Régime de vente")}</label>'
       + '<select id="p-regime">'
-      + '<option value="normal"><span class="ic">🛍</span> ${T("Normal")}</option>'
-      + '<option value="liq"><span class="ic">🟡</span> ${T("Liquidation")}</option>'
-      + '<option value="final"><span class="ic">🔴</span> ${T("Vente finale")}</option>'
+      // (2026-10-25, audit) Pas d émoji dans un <option> : l analyseur y jette le
+      // <span class="ic">, l émoji brut restait EN COULEUR, hors de la règle des
+      // pictogrammes monochromes.
+      + '<option value="normal">${T("Normal")}</option>'
+      + '<option value="liq">${T("Liquidation")}</option>'
+      + '<option value="final">${T("Vente finale")}</option>'
       + '</select></div>'
       + '<div class="ch"><label for="p-retours">${T("Retours")}</label>'
       + '<select id="p-retours">'
-      + '<option value="ok"><span class="ic">✅</span> ${T("Acceptés")}</option>'
-      + '<option value="aucun"><span class="ic">🚫</span> ${T("Aucun retour")}</option>'
+      + '<option value="ok">${T("Acceptés")}</option>'
+      + '<option value="aucun">${T("Aucun retour")}</option>'
       + '</select></div>'
       + '</div>'
       // ⚠ DEUX ENCARTS RETIRES le 2026-08-07, a la demande : ils EXPLIQUAIENT ce
@@ -913,7 +926,7 @@ function pageProduit(id) {
       + '<div class="rech"><input aria-label="${T("Filtrer par taille ou couleur")}" placeholder="${T("Filtrer par taille ou couleur…")}"><span class="cpt" id="p-somme"></span></div>'
       + '<div class="lgstk entete"><span class="c1">${T("Taille")}</span><span class="c2">${T("Couleur")}</span>'
       + '<span class="c3">${T("Quantité")}</span><span class="c4">${T("Entrepôt")}</span></div>'
-      + '<div class="liste"></div><div class="pagi"></div></div></div>');
+      + '<div class="stk-cadre"><div class="liste"></div></div><div class="pagi"></div></div></div>');
 
     document.getElementById('corps').innerHTML = h.join('')
       + '<aside class="pf-fiche" id="pf-fiche" aria-label="${T("Fiche du produit")}"></aside>';
@@ -995,7 +1008,7 @@ function pageProduit(id) {
       var det = (COUTS.detail || []).map(function(x){ return x.n + ' × ' + (NOMS_GESTE[x.geste] || x.geste || x.modele) + ' : ' + szArgent(x.cout); }).join(' · ');
       var parU = COUTS.total / Math.max(1, totU);
       h += '<div class="l" title="' + esc(det) + '"><span class="k">${T("Coûts numériques")}</span><span class="v">' + esc(szArgent(COUTS.total))
-        + ' <span class="sous" style="font-size:.72rem;color:var(--tx3)">(' + COUTS.n + '${T(" appel(s)")})</span></span></div>';
+        + ' <span class="sous" style="font-size:.72rem;color:var(--tx3)">(' + COUTS.n + ' ' + szPl(COUTS.n, '${T("appel")}', '${T("appels")}') + ')</span></span></div>';
       if (p > 0 && co > 0) h += ligne('${T("Marge après coûts numériques")}', esc(szArgent(eff - co - parU)) + ' (' + Math.round((eff - co - parU) / eff * 100) + ' %)');
     }
     h += ligne('${T("Catégorie")}', esc(libCat(val('p-cat')) || '—'));
@@ -1232,7 +1245,7 @@ function pageProduit(id) {
       // prefixe configure. Trois causes, un seul symptome, aucun message.
       if (!r || !r.ok) {
         poser('p-sku', '');
-        e.placeholder = 'code indisponible';
+        e.placeholder = '${T("code indisponible")}';
         dire('${T("Code (SKU) :")} ' + expliquer(r), 'att');
         return;
       }
@@ -1415,8 +1428,25 @@ function pageProduit(id) {
   // tape « 125,50 » a raison, et un champ qui lui rend zero a tort.
   // A la prise de focus on montre le nombre NU — on ne corrige pas « 125.00 $ »
   // en se battant contre le curseur. Au depart du champ, on met en forme.
+  // ⚠ ET LE SEPARATEUR DE MILLIERS AUSSI (2026-10-25, audit). « 1,234.50 » tapé
+  // en anglais devenait « 1.234.50 » → 1,23 $ : le prix divisé par mille. Règle :
+  // si les deux signes sont présents, le DERNIER est la décimale ; un signe
+  // répété est un groupement ; en anglais, une virgule seule suivie de trois
+  // chiffres groupe les milliers. Un point seul reste décimal dans les deux
+  // langues (argentFocus écrit « 125.5 »).
   function argentNombre(v){
-    var n = parseFloat(String(v || '').replace(/[^0-9.,-]/g, '').replace(',', '.'));
+    var s = String(v || '').replace(/[^0-9.,-]/g, '');
+    var pv = s.lastIndexOf(','), pp = s.lastIndexOf('.');
+    if (pv >= 0 && pp >= 0) {
+      s = (pv > pp) ? s.split('.').join('').replace(',', '.') : s.split(',').join('');
+    } else if (pv >= 0) {
+      if (s.indexOf(',') !== pv) s = s.split(',').join('');
+      else if ('${SEP_DEC()}' === '.' && /^-?[0-9]{1,3},[0-9]{3}$/.test(s)) s = s.replace(',', '');
+      else s = s.replace(',', '.');
+    } else if (pp >= 0 && s.indexOf('.') !== pp) {
+      s = s.split('.').join('');
+    }
+    var n = parseFloat(s);
     return isNaN(n) ? null : n;
   }
   function argentFocus(e){ var n = argentNombre(e.value); e.value = (n === null) ? '' : String(n); }
@@ -2019,16 +2049,35 @@ function pageProduit(id) {
   }
   // Le résultat de l IA, gardé sur le poste par photo (on ne paie pas deux fois la même photo).
   var MV_REESSAI = {};
+  /* ⚠ PAS DE localStorage ICI (2026-10-25, audit) : la page est en data:text/html,
+     il lève SecurityError — rien n était gardé, et la mesure payante était
+     redemandée à chaque ouverture. Les deux mémoires (mesure IA par photo, échelle
+     du poste photo par format) vivent dans le principal (szPont.memoPoste*),
+     lues UNE fois à l ouverture et gardées ici en cache.
+     ⚠ La clé est une EMPREINTE de « photo|type » : la photo peut être une donnée
+     base64 de plusieurs mégaoctets. */
+  var MEMO_IA = {}, MEMO_ECH = {};
+  try {
+    if (P && P.memoPosteLire) {
+      P.memoPosteLire('mesureIA').then(function(o){ if (o && typeof o === 'object') MEMO_IA = Object.assign(o, MEMO_IA); });
+      P.memoPosteLire('echelleMv').then(function(o){ if (o && typeof o === 'object') MEMO_ECH = Object.assign(o, MEMO_ECH); });
+    }
+  } catch (e) {}
+  function memoPosteEcrire(cle, o){ try { if (P && P.memoPosteEcrire) P.memoPosteEcrire(cle, o); } catch (e) {} }
+  function mvEmpreinte(c){
+    c = String(c || ''); var h1 = 5381, h2 = 52711;
+    for (var i = 0; i < c.length; i++) { var ch = c.charCodeAt(i); h1 = ((h1 * 33) ^ ch) | 0; h2 = ((h2 * 31) ^ ch) | 0; }
+    return c.length + '-' + (h1 >>> 0).toString(36) + (h2 >>> 0).toString(36);
+  }
   function mvMemoIA(cle, val){
-    var K = 'sz-mesure-ia', o = {};
-    try { o = JSON.parse(localStorage.getItem(K) || '{}') || {}; } catch (e) { o = {}; }
-    if (val === undefined) return o[cle] || null;
-    o[cle] = val.echec ? { echec: String(val.echec), au: Date.now() }
+    var o = MEMO_IA, k = mvEmpreinte(cle);
+    if (val === undefined) return o[k] || null;
+    o[k] = val.echec ? { echec: String(val.echec), au: Date.now() }
       : { mesures: val.mesures, n: val.n, ecartes: val.ecartes || 0, mancheManuelle: !!val.mancheManuelle, au: Date.now() };
     var cles = Object.keys(o).sort(function(a, b){ return (o[b].au || 0) - (o[a].au || 0); });
-    cles.slice(60).forEach(function(k){ delete o[k]; });
-    try { localStorage.setItem(K, JSON.stringify(o)); } catch (e) {}
-    return o[cle];
+    cles.slice(40).forEach(function(x){ delete o[x]; });
+    memoPosteEcrire('mesureIA', o);
+    return o[k];
   }
   function mvAnalyser(){
     var ty = mvType(), z = document.getElementById('p-mesv-auto');
@@ -2294,9 +2343,13 @@ function pageProduit(id) {
       var $ = function(id){ return document.getElementById(id); };
       var cv = $('mv-cv'), ctx = cv.getContext('2d');
       var img = new Image(), r = 1, echelle = null, feuille = null, clics = [], iDim = 0, res = {}, mode = 'feuille', segment = null;
-      var CLE_MEMO = 'sz-mesure-echelle';
-      function memoLire(){ try { var o = JSON.parse(localStorage.getItem(CLE_MEMO) || '{}'); return o[img.naturalWidth + 'x' + img.naturalHeight] || null; } catch (e) { return null; } }
-      function memoEcrire(){ try { var o = JSON.parse(localStorage.getItem(CLE_MEMO) || '{}'); o[img.naturalWidth + 'x' + img.naturalHeight] = echelle / r; localStorage.setItem(CLE_MEMO, JSON.stringify(o)); } catch (e) {} }
+      // L échelle retenue du poste photo, par format : la mémoire de poste (MEMO_ECH), pas localStorage (2026-10-25, audit).
+      function memoLire(){ var x = Number(MEMO_ECH[img.naturalWidth + 'x' + img.naturalHeight]); return x > 0 ? x : null; }
+      function memoEcrire(){
+        MEMO_ECH[img.naturalWidth + 'x' + img.naturalHeight] = echelle / r;
+        var cles = Object.keys(MEMO_ECH); if (cles.length > 30) delete MEMO_ECH[cles[0]];
+        memoPosteEcrire('echelleMv', MEMO_ECH);
+      }
       function q(t){ $('mv-q').textContent = t; }
       /* Les pixels de la PHOTO SEULE (2026-10-20) : le canevas visible porte les traits déjà
          tracés, et il est vide tant que rien n y a été peint — la feuille était cherchée dans
@@ -2464,7 +2517,7 @@ function pageProduit(id) {
           + '</div>' : '';
         return '<div class="vue"><div class="cadre' + (src ? ' pleine" draggable="true' : '') + '" data-vue="' + esc(cle) + '"'
           + (src ? ' title="${T("Glisser sur une autre case pour l’y déplacer ou l’échanger, ou sur la principale")}"' : '') + '>'
-          + (src ? '<img src="' + esc(src) + '" alt="" draggable="false">' : 'ajouter') + '</div>'
+          + (src ? '<img src="' + esc(src) + '" alt="" draggable="false">' : '${T("ajouter")}') + '</div>'
           + (src ? '<button type="button" class="x" data-vuex="' + esc(cle) + '" title="${T("Retirer")}">×</button>' : '')
           + depl
           + ((src && cle.indexOf('libre') === 0) ? '<button type="button" class="dos' + (src === DOS_SRC ? ' on' : '')
@@ -2538,7 +2591,7 @@ function pageProduit(id) {
       fs = fs.filter(function(f){ return f.size <= MAX_MO * 1024 * 1024; });
       if (trop.length) {
         dire(trop.length + (trop.length > 1 ? '${T(" photos ignorées : plus de ")}' : '${T(" photo ignorée : plus de ")}')
-          + MAX_MO + ' Mo.', 'att');
+          + szOctets(MAX_MO * 1048576) + '.', 'att');
       }
       if (!fs.length) return;
       // ⚠ Les lectures sont ASYNCHRONES : sans ce compteur, les photos
@@ -2584,8 +2637,8 @@ function pageProduit(id) {
     function bulleDe(x){
       var sku = x.codeProduit || '';
       // ⚠ DOUBLE ANTISLASH VOULU (le script vit dans un litteral de gabarit).
-      return x.nom + (x.rattacheA ? '\\nDéjà utilisée par : ' + x.rattacheA
-        + (sku ? ' (' + sku + ')' : '') : '\\nJamais utilisée');
+      return x.nom + (x.rattacheA ? '\\n' + '${T("Déjà utilisée par :")} ' + x.rattacheA
+        + (sku ? ' (' + sku + ')' : '') : '\\n' + '${T("Jamais utilisée")}');
     }
     function caseDe(x, img, entiere){
       var sku = x.codeProduit || '';
@@ -2595,7 +2648,7 @@ function pageProduit(id) {
         + '<div class="lg">' + esc(x.code) + '</div>'
         + (x.rattacheA
             ? '<div class="lg sku" title="' + esc(x.rattacheA) + '">' + esc(sku || x.rattacheA) + '</div>'
-            : '<div class="lg libre">libre</div>')
+            : '<div class="lg libre">${T("libre")}</div>')
         + '</div>';
     }
     function corpsDe(r){
@@ -2686,9 +2739,9 @@ function pageProduit(id) {
   var RET_VU = {}, RET_OCC = false, RET_T = null, PREVUES = [];
   function cleStudio(){ return ID ? String(ID) : PROV; }
   /* LES ORIGINALES ENVOYÉES AU STUDIO (2026-10-20, sa demande) : la photo traitée qui revient les REMPLACE sans
-     question (c est pour ça qu on est allé au Studio) ; l originale passe dans une case libre, et l enregistrement
-     demandera s il faut l effacer. */
-  var STU_ORIG = null, ORIG_A_EFFACER = [];
+     question (c est pour ça qu on est allé au Studio) ; l originale est RETIRÉE (poserDuStudio) — l enregistrement ne
+     pose plus de question (2026-10-25, audit). */
+  var STU_ORIG = null;
   /* ══ LE STUDIO DANS LA FICHE (2026-10-20, sa demande, capture à l appui) ═══════════════════════════════════════
      « J aimerais plutôt voir cela, mais sans le module Studio en arrière : garder l inventaire ouvert, comme gelé en
      attente le temps du traitement. » Le Studio séparé se réduisait au premier clic et cachait la fiche : l écran
@@ -2736,7 +2789,8 @@ function pageProduit(id) {
     STM = { voile: v, photos: [{ role: 'devant', src: IMAGE || '', on: !!IMAGE }, { role: 'dos', src: dos || '', on: !!dos }],
       // Par défaut : le vêtement SANS mannequin, fond transparent (2026-10-20, sa demande : « c est lui qui sera le plus utilisé »).
       voie: 'fantome', modele: 'sophia', preset: 'transparent', prix: null, etats: {}, enCours: false };
-    v.addEventListener('mousedown', function(ev){ if (ev.target === v) stmFermer(); });
+    // (2026-10-25, audit) Plus de fermeture d un clic à côté : comme les autres
+    // boîtes de cette fenêtre, le Studio ne se ferme que par son bouton (ou Échap).
     var charger = STM_PRESETS ? Promise.resolve({ ok: true, presets: STM_PRESETS }) : P.appeler('studio:presets');
     charger.then(function(r){
       if (!STM) return;
@@ -3494,7 +3548,7 @@ function pageProduit(id) {
         return;
       }
       var trop = fs.filter(function(f){ return f.size > MAX_MO * 1024 * 1024; });
-      if (trop.length) { dire(trop.length + ' ${T("image(s) de plus de")} ' + MAX_MO + ' Mo — ${T("rien n’a été ajouté.")}', 'err'); return; }
+      if (trop.length) { dire(trop.length + ' ${T("image(s) de plus de")} ' + szOctets(MAX_MO * 1048576) + ' — ${T("rien n’a été ajouté.")}', 'err'); return; }
       var lues = new Array(fs.length), reste = fs.length, rates = 0;
       dire('${T("Préparation des vues 360°…")}');
       fs.forEach(function(f, i){
@@ -3557,7 +3611,7 @@ function pageProduit(id) {
     var s = parseInt(val('p-seuil'), 10);
     if (!(s > 0) || !(q > 0) || q >= s) return '';
     return '<span class="al" title="${T("Sous le seuil d’alerte")} (' + s + '). '
-      + '${T("Il en manque")} ' + (s - q) + ' pour l’atteindre."><span class="ic">⚠</span></span>';
+      + '${T("Il en manque {n} pour l’atteindre.")}'.replace('{n}', s - q) + '"><span class="ic">⚠</span></span>';
   }
 
   function majStock(){
@@ -3675,7 +3729,14 @@ function pageProduit(id) {
     // de retour d un article par ailleurs normal. Les confondre ferait perdre
     // l un des deux a chaque ouverture.
     poser('p-regime', p.liquidation ? 'liq' : (p.finalSale ? 'final' : 'normal'));
-    poser('p-retours', p.noReturn ? '${T("aucun")}' : 'ok');
+    // ⚠ « aucun » est la VALEUR de l option, pas un texte affiché : la passer par
+    // T() donnait « none » en anglais, aucune option ne correspondait, et
+    // enregistrer remettait l article en « retours acceptés » (2026-10-25, audit).
+    poser('p-retours', p.noReturn ? 'aucun' : 'ok');
+    // Le régime impose « Aucun retour » et vide l étiquette : majRegime() a tourné
+    // dans brancher(), AVANT que la fiche soit posée — on le rappelle ici, comme
+    // la reprise du brouillon (2026-10-25, audit).
+    majRegime();
     (p.sizes || []).forEach(function(t){
       var j = document.querySelector('#p-tailles .jeton[data-t="' + String(t).replace(/"/g, '') + '"]');
       if (j) j.classList.add('on');
@@ -4021,10 +4082,12 @@ function pageProduit(id) {
     el('gp-non').onclick = function(){ v.remove(); };
     el('gp-oui').onclick = function(){
       if (!RESULTAT) return;
-      var n = Object.keys(VUES).filter(function(k){ return k.indexOf('libre') === 0 && VUES[k]; }).length;
-      if (n >= MAX_PHOTOS) { dire('${T("Les photos supplémentaires sont toutes prises : retirez-en une, puis recommencez.")}', 'att'); return; }
-      var k = 1; while (VUES['libre' + k]) k++;
-      VUES['libre' + k] = RESULTAT; dessinerVues();
+      // ⚠ caseLibre() connaît les DEUX modes (2026-10-25, audit) : en mode
+      // « angles », une clé libreN n était dessinée par aucune case — le gros plan
+      // était « ajouté » sans que personne puisse le voir ni le retirer.
+      var k = caseLibre();
+      if (!k) { dire('${T("Les photos supplémentaires sont toutes prises : retirez-en une, puis recommencez.")}', 'att'); return; }
+      VUES[k] = RESULTAT; dessinerVues();
       v.remove();
       dire('${T("Gros plan ajouté aux photos du produit. Il sera enregistré avec la fiche.")}', 'bon');
     };
@@ -4144,11 +4207,11 @@ function pageProduit(id) {
   // « chic_decontracte », les deux écrans ne diraient plus la même chose de la
   // même modification. À corriger DES DEUX CÔTÉS, pas d'un seul.
   var SUIVIS = [
-    { c: 'nom',      l: 'Nom' },
+    { c: 'nom',      l: '${T("Nom")}' },
     { c: 'cat',      l: '${T("Catégorie")}',            f: libCat },
-    { c: 'marque',   l: 'Marque' },
+    { c: 'marque',   l: '${T("Marque")}' },
     { c: 'etiq',     l: '${T("Étiquette")}',            f: libEtiq },
-    { c: 'actif',    l: '${T("Visible en boutique")}',  f: function(x){ return x === '1' ? 'Oui' : 'Non'; } },
+    { c: 'actif',    l: '${T("Visible en boutique")}',  f: function(x){ return x === '1' ? '${T("Oui")}' : '${T("Non")}'; } },
     { c: 'prix',     l: '${T("Prix régulier")}',        f: argentTxt },
     { c: 'solde',    l: '${T("Prix soldé")}',           f: argentTxt },
     { c: 'cout',     l: '${T("Coût d’acquisition")}',   f: argentTxt },
@@ -4156,9 +4219,9 @@ function pageProduit(id) {
     { c: 'age',      l: '${T("Groupe d’âge")}' },
     { c: 'style',    l: '${T("Style")}' },
     { c: 'guide',    l: '${T("Guide des tailles")}' },
-    { c: 'desc',     l: 'Description' },
-    { c: 'tailles',  l: 'Tailles',   f: function(x){ return String(x).split(',').filter(Boolean).join(', '); } },
-    { c: 'couleurs', l: 'Couleurs',  f: function(x){ return String(x).split(',').filter(Boolean).join(', '); } }
+    { c: 'desc',     l: '${T("Description")}' },
+    { c: 'tailles',  l: '${T("Tailles")}',   f: function(x){ return String(x).split(',').filter(Boolean).join(', '); } },
+    { c: 'couleurs', l: '${T("Couleurs")}',  f: function(x){ return String(x).split(',').filter(Boolean).join(', '); } }
   ];
   function instantane(){
     return {
@@ -4185,9 +4248,9 @@ function pageProduit(id) {
   function ilYa(ts){
     var m = Math.max(0, Math.round((Date.now() - ts) / 60000));
     if (m < 1) return '${T("à l’instant")}';
-    if (m < 60) return 'il y a ' + m + ' min';
+    if (m < 60) return '${T("il y a {m} min")}'.replace('{m}', m);
     var h = Math.floor(m / 60);
-    return 'il y a ' + h + ' h' + (m % 60 ? ' ' + (m % 60) + ' min' : '');
+    return (m % 60 ? '${T("il y a {h} h {m} min")}' : '${T("il y a {h} h")}').replace('{h}', h).replace('{m}', m % 60);
   }
   function dateLongue(ts){
     try { return new Date(ts).toLocaleString('${LIEU()}', { dateStyle: 'long', timeStyle: 'short' }); }
@@ -4370,7 +4433,7 @@ function pageProduit(id) {
               + (l.length > 1 ? '${T("modifications")}' : '${T("modification")}') + '</div>'
               + l.map(function(e){
                   return '<div class="bl"><div class="qd"><span>' + esc(dateCourte(e.ts)) + '</span>'
-                    + (e.par ? '<span>par ' + esc(e.par) + '</span>' : '') + '</div>'
+                    + (e.par ? '<span>${T("par")} ' + esc(e.par) + '</span>' : '') + '</div>'
                     + (e.changements || []).map(function(c){
                         return '<div style="margin-bottom:.3rem"><div class="et">' + esc(c.libelle) + '</div>'
                           + dif(c.avant || '—', c.apres || '—') + '</div>';
@@ -4453,7 +4516,7 @@ function pageProduit(id) {
     // croit tout retrouver.
     poser('p-regime', f.regime === 'liq' || f.regime === '3' ? 'liq'
       : (f.regime === 'final' || f.regime === '1' ? 'final' : 'normal'));
-    poser('p-retours', f.retours === '${T("aucun")}' || f.regime === '4' ? '${T("aucun")}' : 'ok');
+    poser('p-retours', f.retours === 'aucun' || f.regime === '4' ? 'aucun' : 'ok');   // la valeur, pas le texte (2026-10-25, audit)
     majRegime();
     // ⚠ L UNITÉ ET SA MÉMOIRE VONT ENSEMBLE. dataset.prec sert à convertir le
     // poids au changement d'unité ; le laisser sur « g » après avoir restauré
@@ -4621,7 +4684,7 @@ function pageProduit(id) {
       return new Promise(function(resoudre){
         var v = document.createElement('div');
         v.className = 'voile';
-        v.innerHTML = '<div class="boite"><h3><span class="ic">⚠</span> ${T("Prix inférieur au coût d’acquisition")}</h3>'
+        v.innerHTML = '<div class="boite alerte"><h3><span class="ic">⚠</span> ${T("Prix inférieur au coût d’acquisition")}</h3>'
           + '<p>${T("Le prix de vente effectif (")}<strong>' + szArgent(eff) + '</strong>${T(") est inférieur au coût d’acquisition (")}<strong>' + szArgent(cout) + '</strong>).</p>'
           + '<div class="ch"><label for="bc-raison">${T("Raison ")}<span class="req">*</span></label>'
           + '<textarea id="bc-raison" rows="3" placeholder="${T("Écoulement de fin de série, article abîmé…")}"></textarea></div>'
@@ -4654,21 +4717,9 @@ function pageProduit(id) {
   function enregistrer(nipPhotos){
     NIP_PHOTOS = (typeof nipPhotos === 'string') ? nipPhotos : '';
     if (!Assist.toutValide()) return;
-    /* LES ORIGINALES NON TRAITÉES (2026-10-20, sa demande : « au moment d enregistrer, on doit nous demander si on
-       veut effacer les photos originales non traitées utilisées dans le Studio »). Oui : elles quittent la fiche —
-       et l enregistrement efface du stockage les photos devenues orphelines. Non : elles restent parmi les photos. */
-    var restes = ORIG_A_EFFACER.filter(function(u){ return u !== IMAGE && Object.keys(VUES).some(function(k){ return VUES[k] === u; }); });
-    if (restes.length && typeof nipPhotos !== 'string') {
-      ORIG_A_EFFACER = [];
-      szConfirmer({ prudent: true, titre: '${T("Effacer les photos originales ?")}',
-        texte: '${T("Le Studio a traité {n} photo(s) de cet article. Les originales, non traitées, sont encore dans la fiche. Les effacer ?")}'.replace('{n}', String(restes.length)),
-        oui: '${T("Effacer les originales")}', non: '${T("Les garder")}' }).then(function(ok){
-          if (ok) Object.keys(VUES).forEach(function(k){ if (restes.indexOf(VUES[k]) >= 0) { if (DOS_SRC === VUES[k]) DOS_SRC = ''; delete VUES[k]; } });
-          dessinerVues();
-          enregistrer(nipPhotos);
-        });
-      return;
-    }
+    /* (2026-10-25, audit) LA QUESTION « Effacer les photos originales ? » EST RETIRÉE : ORIG_A_EFFACER n était
+       plus jamais rempli depuis que le retour du Studio RETIRE lui-même l originale (poserDuStudio, 2026-10-20).
+       Le bloc ne pouvait plus s exécuter et laissait croire à une question qui ne venait jamais. */
     if (!tailles().length || !couleurs().length) {
       Assist.aller(1);
       dire('${T("Choisissez au moins une taille ET une couleur avant d’enregistrer.")}', 'err');
@@ -4950,6 +5001,10 @@ function pageProduit(id) {
       // ⚠ ÉCHAP FERME D ABORD CE QUI EST PAR-DESSUS. Sans ce test, fermer une
       // boîte de dialogue fermait LA FENÊTRE : on demandait à quitter un journal
       // et l'on perdait la fiche en cours de saisie.
+      // (2026-10-25, audit) Pendant une génération du Studio, Échap ne retire
+      // RIEN : le traitement continue derrière, et le voile ôté laissait STM
+      // pointer une boîte disparue.
+      if (STM && STM.enCours) return;
       var voiles = document.querySelectorAll('.voile');
       if (voiles.length) { voiles[voiles.length - 1].remove(); return; }
       fermerProprement();

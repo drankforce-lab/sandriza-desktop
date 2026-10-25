@@ -268,6 +268,7 @@ function pageCommande(id) {
   MOTIFS.refus_transporteur = '${T("Le transporteur a refusé la demande.")}';
   MOTIFS.etiquette_absente = '${T("Aucune étiquette enregistrée pour cette commande.")}';
   MOTIFS.impression = '${T("L’impression a échoué.")}';
+  MOTIFS.deja_expediee = '${T("Cette commande est déjà expédiée — aucun second courriel n’est parti.")}';
   MOTIFS.reseau = '${T("Le réseau a échoué — rien n’a été commandé.")}';
   MOTIFS.deja_expediee = '${T("Cette commande est déjà expédiée.")}';
   // Les refus du SERVEUR à la création (2026-10-19) : le détail donne la raison exacte.
@@ -299,6 +300,11 @@ function pageCommande(id) {
   var TARIFS = {};           // transporteur -> { etat:'attente'|'ok'|'non', r }
   var CHOIX = null;          // { t, service, reel, nom }
   var AUTO_FAIT = false;     // le passage automatique a l etiquette n a lieu qu une fois
+  /* ⚠ L EXPEDITION N A LIEU QU UNE FOIS (2026-10-25, audit) : '' | 'cours' | 'faite'. Sans ce drapeau, F9
+     pendant l envoi, F9 apres le succes, ou une case touchee apres le succes (qui rallumait le bouton)
+     expediaient une seconde fois — et le client recevait deux courriels « en route ». Le site refuse
+     aussi (deja_expediee) : ceci evite d y aller. */
+  var EXPEDITION = '';
 
   function dire(t, cl){ szDire(t, cl); }
   function vide(titre, detail){
@@ -763,6 +769,10 @@ function pageCommande(id) {
     var n = ++COTE_N;
     COTEURS = coteurs();
     TARIFS = {};
+    /* Le prix de test retenu pour l etiquette depend du poids et des dimensions (2026-10-25, audit) :
+       garde d une cotation a l autre, le bouton « Créer l’étiquette · X $ » montrait le prix de l ancien
+       poids, et la creation etait refusee une fois (« prix différent »). */
+    PRIX_CREE = {};
     COTEURS.forEach(function(t){ TARIFS[t] = { etat: 'attente' }; });
     dessinerTarifs();
     COTEURS.forEach(function(t){
@@ -918,13 +928,15 @@ function pageCommande(id) {
     var i = infoT(CHOIX.t); if (i.mode === 'production') return;
     var k = cleChoix(CHOIX); if (PRIX_CREE[k]) return;
     PRIX_CREE[k] = { etat: 'attente' };
-    var pd = poidsDims(), c = CHOIX;
+    // La table de CE poids : une reponse arrivee apres un « Recoter » (qui la remplace) est jetee.
+    var pd = poidsDims(), c = CHOIX, tab = PRIX_CREE;
     P.appeler('expedition:comparer', ID, pd.poids, { transporteurs: [c.t], dims: pd.dims, jeu: 'actif' }).then(function(r){
+      if (tab !== PRIX_CREE) return;
       var x = r && r.ok && (r.resultats || []).find(function(y){ return y.transporteur === c.t && y.ok; });
       var sv = x ? ((x.services && x.services.length ? x.services : [x]).find(function(z){ return z.service === c.service; })) : null;
       PRIX_CREE[k] = sv ? { etat: 'ok', reel: Number(sv.reel) } : { etat: 'non', motif: (x ? '${T("service non offert avec les clés de test")}' : ((r && r.detail) || '${T("pas de réponse")}')) };
       majArgent();
-    }).catch(function(){ PRIX_CREE[k] = { etat: 'non', motif: '${T("pas de réponse")}' }; majArgent(); });
+    }).catch(function(){ if (tab !== PRIX_CREE) return; PRIX_CREE[k] = { etat: 'non', motif: '${T("pas de réponse")}' }; majArgent(); });
   }
   function choisir(t, s){
     var o = options().find(function(x){ return x.t === t && x.service === s; });
@@ -1085,7 +1097,9 @@ function pageCommande(id) {
   function majExpedier(){
     var b = document.getElementById('btn-enr'); if (!b) return '';
     var pourquoi = '';
-    if (LECTURE) pourquoi = '${T("Commande en traitement ailleurs — lecture seule.")}';
+    if (EXPEDITION === 'cours') pourquoi = '${T("Expédition…")}';
+    else if (EXPEDITION === 'faite' || (CMD && (CMD.statut === 'shipped' || CMD.statut === 'delivered'))) pourquoi = '${T("Cette commande est déjà expédiée.")}';
+    else if (LECTURE) pourquoi = '${T("Commande en traitement ailleurs — lecture seule.")}';
     else if (!CTX || !CTX.peutExpedier) pourquoi = '${T("Votre rôle ne permet pas d’expédier.")}';
     else if (!toutVerifie()) pourquoi = '${T("Vérifiez le colis d’abord —")} ' + comptes() + ' ${T("sur")} ' + attendus() + ' ' + szPl(attendus(), '${T("unité confirmée.")}', '${T("unités confirmées.")}');
     else if (!etiquetteFaite()) pourquoi = '${T("Créez l’étiquette (étape Étiquette), ou cochez « Expédier sans numéro de suivi ».")}';
@@ -1099,13 +1113,19 @@ function pageCommande(id) {
     var refus = majExpedier();
     if (refus) { dire(refus, 'att'); return; }
     var b = document.getElementById('btn-enr');
+    EXPEDITION = 'cours';
     b.disabled = true;
     dire('${T("Expédition…")}');
     var t = (CMD.etiquette && CMD.etiquette.t) || CMD.transporteur || (CHOIX && CHOIX.t) || '';
     P.appeler('commande:prete', ID, coché('c-pret')).then(function(){
       return P.appeler('commande:expedier', ID, t, val('c-suivi'), coché('c-sans'));
     }).then(function(r){
-      if (!r || !r.ok) { majExpedier(); dire(expliquerD(r), 'err'); return; }
+      if (!r || !r.ok) {
+        // Refus « deja_expediee » : la commande EST expediee (ailleurs, ou par un essai precedent).
+        if (r && r.motif === 'deja_expediee') { EXPEDITION = 'faite'; CMD.statut = 'shipped'; } else EXPEDITION = '';
+        majExpedier(); dire(expliquerD(r), 'err'); return;
+      }
+      EXPEDITION = 'faite'; CMD.statut = 'shipped';
       rendreVerrou();
       purgerVignettes(ID);   // commande complétée : la vignette temporaire est détruite
       dire(r.sansSuivi ? '${T("Expédiée sans numéro de suivi.")}' : '${T("Expédiée — courriel envoyé.")}', 'bon');
@@ -1119,6 +1139,9 @@ function pageCommande(id) {
       } else {
         setTimeout(function(){ P.fermer(); }, 900);
       }
+    }).catch(function(){
+      // Aucune reponse : on rend la main (le site refuserait de toute facon une seconde expedition).
+      EXPEDITION = ''; majExpedier(); dire(expliquer({ motif: 'echec' }), 'err');
     });
   }
   function suivante(){
@@ -1245,7 +1268,9 @@ function pageCommande(id) {
     if (ev.key === 'F9') {
       ev.preventDefault();
       var b = ETAPE === 0 ? document.getElementById('v-continuer') : (ETAPE === 1 ? document.getElementById('e-creer') : document.getElementById('btn-enr'));
-      if (b && !b.disabled) b.click(); else if (ETAPE === 2) expedier(); else if (ETAPE === 0) dire(refusAvancer(1), 'att');
+      /* Bouton desactive a l etape d expedition : on DIT pourquoi, sans jamais expedier (2026-10-25, audit —
+         F9 appelait expedier() directement, pendant l envoi comme apres le succes). */
+      if (b && !b.disabled) b.click(); else if (ETAPE === 2) { var pq = majExpedier(); if (pq) dire(pq, 'att'); } else if (ETAPE === 0) dire(refusAvancer(1), 'att');
       return;
     }
     if (ev.altKey && /^[1-3]$/.test(ev.key)) { ev.preventDefault(); aller(parseInt(ev.key, 10) - 1); return; }

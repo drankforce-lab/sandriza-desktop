@@ -788,7 +788,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
         + '<option value="auto"' + (GRILLE_AUTO ? ' selected' : '') + '>Auto</option>'
         + [5, 10, 25, 50, 9999].map(function(n){
             return '<option value="' + n + '"' + (!GRILLE_AUTO && TAILLE_PAGE === n ? ' selected' : '') + '>'
-              + (n === 9999 ? 'Tout' : n) + '</option>'; }).join('')
+              + (n === 9999 ? '${T("Tout")}' : n) + '</option>'; }).join('')
         + '</select><span>${T("par page")}</span>'
         + '<span class="pos">'
         + (pages > 1
@@ -1453,7 +1453,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
         ? '<label style="display:flex;align-items:flex-start;gap:.5rem;margin-top:.6rem;'
           + 'font-size:.83rem;cursor:pointer;text-align:left">'
           + '<input type="checkbox" id="v-ph" style="width:auto;margin-top:.2rem">'
-          + '<span>${T("Retirer aussi")} ' + (photos.length > 1 ? 'ses ' + photos.length + ' ${T("photos")}' : '${T("sa photo")}')
+          + '<span>${T("Retirer aussi")} ' + (photos.length > 1 ? '${T("ses")} ' + photos.length + ' ${T("photos")}' : '${T("sa photo")}')
           + ' ${T("de la photothèque (")}' + photos.map(function(x){ return esc(x.code); }).join(', ') + '). '
           + '${T("Sans cette case,")} ' + (photos.length > 1 ? '${T("elles y restent")}' : '${T("elle y reste")}')
           + ' ${T("pour servir à d’autres fiches.")}</span></label>'
@@ -1462,7 +1462,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
         + '<p>${T("Supprimer définitivement")} <strong>' + esc(nom) + '</strong> ${T("de l’inventaire ?")} '
         + '${T("Cette action est <strong>irréversible</strong>.")}</p>' + q
         + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
-        + '<button class="prim" id="v-oui" style="background:#dc2626;border-color:#dc2626;color:var(--tx-blanc)">${T("Supprimer")}</button></div>',
+        + '<button class="rouge" id="v-oui">${T("Supprimer")}</button></div>',
         function(fermer){
           document.getElementById('v-non').onclick = fermer;
           document.getElementById('v-oui').onclick = function(){
@@ -1809,7 +1809,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     corps.innerHTML = h;
     actions.innerHTML = '';
     brancherEntrepots();
-    var champ = document.getElementById('wh-code');
+    // (2026-10-25, audit) « wh-code » n existe plus : le curseur va au champ du formulaire ouvert.
+    var champ = document.getElementById(WH_EDIT ? 'wh-casier' : (LX_EDIT ? 'lx-nom' : ''));
     if (champ) { champ.focus(); try { champ.setSelectionRange(champ.value.length, champ.value.length); } catch (e) {} }
   }
 
@@ -1870,8 +1871,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     };
   }
 
+  /* (2026-10-25, audit) Deux Entree rapides envoyaient deux ecritures, et la seconde
+     reponse lisait LX_EDIT.id / WH_EDIT.id deja remis a null (TypeError). Un drapeau
+     bloque la seconde soumission, et l identifiant est garde AVANT l appel. */
+  var LX_ENVOI = false, WH_ENVOI = false;
   function lieuEnregistrer(){
-    if (!LX_EDIT) return;
+    if (!LX_EDIT || LX_ENVOI) return;
     var nom = (document.getElementById('lx-nom') || {}).value || '';
     var adr = (document.getElementById('lx-adr') || {}).value || '';
     if (!String(nom).trim()) {
@@ -1880,9 +1885,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
       if (c) { c.className = 'manque'; c.focus(); }
       return;
     }
-    appeler('stock:lieuEcrire', [LX_EDIT.id || '', nom, adr]).then(function(r){
+    var idLx = LX_EDIT.id || '';
+    LX_ENVOI = true;
+    appeler('stock:lieuEcrire', [idLx, nom, adr]).then(function(r){
+      LX_ENVOI = false;
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      dire(LX_EDIT.id ? '${T("Lieu modifié.")}' : '${T("Lieu créé.")}', 'bon');
+      dire(idLx ? '${T("Lieu modifié.")}' : '${T("Lieu créé.")}', 'bon');
       LX_EDIT = null;
       chargerOnglet();
     });
@@ -1897,7 +1905,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
        moitie de leur libelle — et c est ce libelle que l import CSV retrouve. */
     if (n > 0) {
       voile('<h3>${T("Suppression impossible")}</h3>'
-        + '<p>${T("Le lieu")} <strong>' + esc(l.nom) + '</strong> contient <strong>'
+        + '<p>${T("Le lieu")} <strong>' + esc(l.nom) + '</strong> ${T("contient")} <strong>'
         + n + ' ' + szPl(n, '${T("emplacement")}', '${T("emplacements")}') + '</strong>.</p>'
         + '<p style="color:var(--tx2);font-size:.8rem">${T("Déplacez ou supprimez ces emplacements")} '
         + '${T("avant de supprimer le lieu.")}</p>'
@@ -1923,7 +1931,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
   }
 
   function entrepotEnregistrer(){
-    if (!WH_EDIT) return;
+    if (!WH_EDIT || WH_ENVOI) return;
     var lieuId = (document.getElementById('wh-lieu') || {}).value || '';
     var casier = (document.getElementById('wh-casier') || {}).value || '';
     var section = (document.getElementById('wh-section') || {}).value || '';
@@ -1937,10 +1945,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
       if (c) { c.className = 'manque'; c.focus(); }
       return;
     }
-    appeler('stock:entrepotEcrire', [WH_EDIT.id || '',
+    var idWh = WH_EDIT.id || '';
+    WH_ENVOI = true;
+    appeler('stock:entrepotEcrire', [idWh,
       { lieuId: lieuId, casier: casier, section: section, reference: ref }]).then(function(r){
+      WH_ENVOI = false;
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      dire(WH_EDIT.id ? '${T("Emplacement modifié.")}' : '${T("Emplacement créé.")}', 'bon');
+      dire(idWh ? '${T("Emplacement modifié.")}' : '${T("Emplacement créé.")}', 'bon');
       WH_EDIT = null;
       chargerOnglet();
     });
@@ -2011,9 +2022,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
       // comparer l etat courant a lui-meme, donc a ne rien detecter du tout.
       BASE = r.base;
       VARS = (r.variantes || []).map(function(v){
-        return { cle: v.cle, taille: v.taille, couleur: v.couleur, sku: v.sku,
+        // (2026-10-25, audit) couleurLibelle garde : c est le libelle TRADUIT de la
+        // couleur (main.js) ; sans lui, la grille montrait « rouge » sur un poste en anglais.
+        return { cle: v.cle, taille: v.taille, couleur: v.couleur, couleurLibelle: v.couleurLibelle, sku: v.sku,
                  teinte: v.teinte, qte: v.qte, seuil: v.seuil, entrepot: v.entrepot };
       });
+      VARS0 = signatureGrille();
       FILTRE = { couleur: [], taille: [], menu: null };
       PAGE = 0;
       // Un code scanne designe une variante : on la met en avant en filtrant sur
@@ -2233,8 +2247,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     if (c && c.manuel) {
       // ⚠ ON NE PRETEND PAS QUE C EST PARTI. Resend n est pas configure : aucun
       // courriel n a ete envoye, et les demandes restent en attente en base.
-      h += '<p class="" style="color:var(--tx-att)"><span class="ic">⚠</span> ' + c.adresses.length + ' client'
-        + (c.adresses.length > 1 ? 's attendent' : ' attend') + ' ${T("cette variante, et")} '
+      h += '<p class="" style="color:var(--tx-att)"><span class="ic">⚠</span> '
+        // (2026-10-25, audit) Phrases ENTIERES traduites : « client(s) attend(ent) » restait en français.
+        + (c.adresses.length > 1
+            ? '${T("{0} clients attendent cette variante, et")}'.replace('{0}', c.adresses.length)
+            : '${T("1 client attend cette variante, et")}') + ' '
         + '<strong>${T("aucun courriel n’est parti")}</strong> ${T("— la clé d’envoi n’est pas configurée")} '
         + '${T("(Configuration puis Infolettre). Les demandes restent en attente.")}</p>'
         + '<textarea rows="2" readonly aria-label="${T("Adresses des demandes en attente")}">' + esc(c.adresses.join(', ')) + '</textarea>';
@@ -2356,10 +2373,31 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
 
   function quitter(){ rendreVerrou(); P.fermer(); }
 
+  /* (2026-10-25, audit) LA GRILLE D UN PRODUIT NE SE PERD PLUS D UN ECHAP. Echap
+     fermait toute la fenetre, saisie comprise, sans question. Il ramene maintenant
+     a la liste (comme « ← Liste »), et demande d abord si la grille a change. */
+  var VARS0 = '';
+  function signatureGrille(){
+    return JSON.stringify((VARS || []).map(function(v){
+      return [String(v.qte == null ? '' : v.qte), String(v.seuil == null ? '' : v.seuil), String(v.entrepot || '')];
+    }));
+  }
+  function sortirGrille(){ rendreVerrou(); VUE = 'reappro'; PROD = null; charger(); }
+
   // Echap ferme, comme partout ailleurs — mais pas quand un voile est ouvert :
   // il fermerait la fenetre entiere au lieu de la question posee.
   document.addEventListener('keydown', function(ev){
-    if (ev.key === 'Escape' && !document.querySelector('.voile')) { ev.preventDefault(); quitter(); }
+    if (ev.key !== 'Escape' || document.querySelector('.voile')) return;
+    ev.preventDefault();
+    if (VUE === '${T("produit")}' && PROD) {
+      if (enCours) return;   // un enregistrement part : on attend son verdict
+      if (signatureGrille() === VARS0) { sortirGrille(); return; }
+      szConfirmer({ danger: true, titre: '${T("Abandonner la saisie")}',
+        texte: '${T("Les quantités, seuils et emplacements modifiés de ce produit seront perdus.")}',
+        oui: '${T("Abandonner")}' }).then(function(ok){ if (ok) sortirGrille(); });
+      return;
+    }
+    quitter();
   });
   window.addEventListener('beforeunload', function(){ rendreVerrou(); });
 

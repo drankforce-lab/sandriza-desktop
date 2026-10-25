@@ -286,10 +286,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     rien:               '${T("Il n’y a aucune invitation à supprimer.")}',
     echec:              '${T("L’opération a échoué.")}'
   };
+  /* (2026-10-25, audit) Plus d esc() : le texte part vers dire(), qui l ecrit en
+     textContent — un « & » s affichait « &amp; ». vide() echappe de lui-meme. */
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
-    if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 140)) + ')';
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + (m || '?') + ').');
+    if (r && r.detail) t += ' (' + String(r.detail).slice(0, 140) + ')';
     return t;
   }
   function appeler(op, args){
@@ -330,14 +332,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
        commentaire — ils se lisent ICI, les 365 derniers jours ; le serveur efface les plus
        anciens chaque nuit. Les avis sur les articles ne sont pas concernés. */
     var com = D.commentaires || [];
-    h += '<div class="carte"><h2>${T("Journal des commentaires")}</h2>'
+    /* (2026-10-25, audit) En pages mesurees (data-pages) au lieu d une boite a glissiere
+       (max-height + overflow:auto) : « aucune barre de défilement ». ⚠ flex en ligne :
+       « .corps.plein>* » (0,2,0) l emporterait sur .sz-pagee, et la carte ne serait plus
+       bornee ; base 0, elle partage la hauteur avec la liste des sondages. */
+    h += '<div class="carte' + (com.length ? ' sz-pagee" style="flex:1 1 0;min-height:7rem' : '') + '"><h2>${T("Journal des commentaires")}</h2>'
       + '<div class="dt" style="margin-bottom:.4rem">${T("Les commentaires des 365 derniers jours. Plus anciens : effacés automatiquement.")}</div>';
     if (!com.length) {
       h += '<div class="vide">${T("Aucun commentaire pour l’instant.")}</div>';
     } else {
-      h += '<div class="journal-com" style="max-height:16rem;overflow:auto"><table><thead><tr><th>${T("Date")}</th><th>${T("Client")}</th><th>${T("Note")}</th><th>${T("Commentaire")}</th></tr></thead><tbody>'
+      h += '<div class="journal-com" data-pages="fidelisation-journal"><table><thead><tr><th>${T("Date")}</th><th>${T("Client")}</th><th>${T("Note")}</th><th>${T("Commentaire")}</th></tr></thead><tbody>'
         + com.map(function(c){
-            return '<tr><td style="white-space:nowrap">' + esc(String(c.date || '').slice(0, 10)) + '</td>'
+            // (2026-10-25, audit) szJour : date locale formatee, et plus decalee d un jour le soir (UTC).
+            return '<tr><td style="white-space:nowrap">' + esc(c.date ? szJour(c.date) : '—') + '</td>'
               + '<td>' + esc(c.client || '—') + (c.commande ? '<div class="dt">' + esc(c.commande) + '</div>' : '') + '</td>'
               + '<td style="white-space:nowrap">' + (c.note == null ? '—' : note5(c.note)) + '</td>'
               + '<td>' + esc(c.texte) + '<div class="dt">' + esc(c.sondage || '') + '</div></td></tr>';
@@ -381,12 +388,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     h += '</div>';
     return h;
   }
-  var SPAGE = 0, SPARPAGE = 50;
-  function pageSondages(){
-    var tout = D.sondages || [], pages = Math.max(1, Math.ceil(tout.length / SPARPAGE));
-    if (SPAGE >= pages) SPAGE = pages - 1;
-    return tout.slice(SPAGE * SPARPAGE, SPAGE * SPARPAGE + SPARPAGE);
-  }
+  /* (2026-10-25, audit) L ancienne pagination a la main des sondages (SPAGE, pageSondages,
+     fi-prec / fi-suiv, szAutoPagination('.liste')) est retiree : la liste est en data-pages. */
 
   /* Les listes de ce cœur sont PLAFONNEES a 100 (la reponse traverserait le pont
      autrement). Afficher << 100 invitations >> quand il y en a 4 500 fait mentir
@@ -418,8 +421,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     var ppd = v('pt-ppd', 1), vp = v('pt-vp', 0.01), pl = v('pt-pl', 25);
     var gagne = Math.floor(100 * ppd), valeur = Math.round(gagne * vp * 100) / 100;
     var max = Math.round(100 * pl) / 100;
-    return '${T("Exemple : 100 $ d’articles donnent")} <b>' + gagne + ' ${T("points")}</b> (' + valeur.toFixed(2) + ' $). '
-      + '${T("Un client qui a 100 $ en points ne peut en utiliser que")} <b>' + max.toFixed(2) + ' $</b> ${T("sur une commande de 100 $")} (' + pl + ' %).';
+    return '${T("Exemple : 100 $ d’articles donnent")} <b>' + gagne + ' ${T("points")}</b> (' + szArgent(valeur) + '). '
+      + '${T("Un client qui a 100 $ en points ne peut en utiliser que")} <b>' + szArgent(max) + '</b> ${T("sur une commande de 100 $")} (' + pl + ' %).';
   }
   function vuePoints(){
     if (!PTS) return '<div class="carte plein"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i></div></div>';
@@ -664,7 +667,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       z.onkeydown = function(e){
         if (!e.target || (e.target.id !== 'pt-n' && e.target.id !== 'pt-motif')) return;
         if (e.key === 'Enter') { e.preventDefault(); ptsConfirmer(); }
-        else if (e.key === 'Escape') { POUV = ''; ptsRedessinerTable(); }
+        // (2026-10-25, audit) stopPropagation : sinon l Echap du document fermait ENSUITE la fenetre.
+        else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); POUV = ''; ptsRedessinerTable(); }
       };
     }
 
@@ -827,7 +831,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
                         + '<td class="num">' + ambVal(d.montant, d.points) + '</td><td>' + ambEtat(d) + '</td></tr>';
                     }).join('') + '</tbody></table>'
                   : '<div class="dt">${T("Aucune commande avec son code pour l’instant.")}</div>')
-              + ((a.versements || []).length ? '<div class="dt" style="margin-top:.35rem">${T("Dernier versement :")} ' + esc(String(a.versements[0].at || '').slice(0, 10)) + ' — ' + ambVal(a.versements[0].montant, a.versements[0].points) + '</div>' : '')
+              + ((a.versements || []).length ? '<div class="dt" style="margin-top:.35rem">${T("Dernier versement :")} ' + esc(a.versements[0].at ? szJour(a.versements[0].at) : '—') + ' — ' + ambVal(a.versements[0].montant, a.versements[0].points) + '</div>' : '')
               + '</td></tr>';
           }
           return ligne;
@@ -884,7 +888,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       + '<th>${T("Message")}</th>' + '<th>${T("État")}</th><th></th></tr></thead><tbody>'
       + ambMorceau(l).map(function(d){
           var msg = String(d.message || '');
-          return '<tr><td class="dt" style="white-space:nowrap">' + esc(String(d.createdAt || '').slice(0, 10)) + '</td>'
+          return '<tr><td class="dt" style="white-space:nowrap">' + esc(d.createdAt ? szJour(d.createdAt) : '—') + '</td>'
             + '<td><div class="pt-nom">' + esc(d.nom) + '</div><div class="dt">' + esc(d.courriel) + (d.lang === 'en' ? ' · EN' : '') + '</div></td>'
             + '<td class="dt" style="overflow-wrap:anywhere">' + esc(d.reseaux).replace(/\\n/g, '<br>') + '</td>'
             + '<td class="dt" title="' + esc(msg) + '">' + esc(msg.length > 140 ? msg.slice(0, 140) + '…' : msg) + '</td>'
@@ -1000,7 +1004,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
           return;
         }
         AMBARME = ''; b.disabled = true;
-        appeler('fidelisation:amb:demande', [id, 'supprimer']).then(function(r){ ambApres(r, '${T("Candidature supprimée.")}'); });
+        // (2026-10-25, audit) Le bouton se reactive : sur un echec, il restait grise.
+        appeler('fidelisation:amb:demande', [id, 'supprimer']).then(function(r){ b.disabled = false; ambApres(r, '${T("Candidature supprimée.")}'); });
       }
     };
     var moissonner = function(ev){
@@ -1619,7 +1624,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
 
   function dessiner(){
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
-    if (sous) sous.textContent = D.peutModifier ? '' : 'consultation seulement';
+    if (sous) sous.textContent = D.peutModifier ? '' : '${T("consultation seulement")}';
 
     /* ══ LA TETE REFAITE (2026-10-15, lot D de la refonte du marketing) : les onglets en boutons a
        choix — le mot seul, jamais de compte (les comptes vivent dans les tuiles) — et le geste
@@ -1667,14 +1672,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
        avant d adopter, parce qu une vue coupee ne previent jamais. */
     corps.className = 'corps plein';
     corps.innerHTML = h;
-    if (ONGLET !== 'recompenses' && ONGLET !== 'invitations' && ONGLET !== 'points' && ONGLET !== 'ambassadrices' && ONGLET !== 'parrainage' && ONGLET !== 'paliers' && ONGLET !== 'anticipe') {
-      var bp = document.getElementById('fi-prec'), bs = document.getElementById('fi-suiv');
-      if (bp) bp.onclick = function(){ SPAGE = Math.max(0, SPAGE - 1); dessiner(); };
-      if (bs) bs.onclick = function(){ SPAGE = SPAGE + 1; dessiner(); };
-      /* Une ligne de moins : la place de la barre de pages, qui n existe pas encore
-         au moment ou l on mesure. */
-      szAutoPagination('.liste', function(n){ SPARPAGE = Math.max(3, n - 1); SPAGE = 0; dessiner(); });
-    }
     brancher();
     if (ONGLET === 'ambassadrices') brancherAmb();
     if (ONGLET === 'parrainage') brancherPar();
@@ -1689,18 +1686,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
   }
 
   function brancher(){
-    var bm = document.getElementById('fi-mail-enr');
-    if (bm) bm.onclick = function(){
-      var e = document.getElementById('fi-mail');
-      bm.disabled = true;
-      appeler('fidelisation:notification', [e ? e.value : '']).then(function(r){
-        bm.disabled = false;
-        if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        dire(r.courriel ? '${T("Les commentaires partiront à ")}' + r.courriel + '.'
-                        : '${T("Plus aucune notification de commentaire.")}', 'bon');
-        charger();
-      });
-    };
+    /* (2026-10-25, audit) Le reglage de notification par courriel (fi-mail, fi-mail-enr) n est
+       plus dessine depuis le Journal des commentaires (2026-10-06) : son branchement est retire. */
     var bf = document.getElementById('fi-fermer');
     if (bf) bf.onclick = function(){ DETAIL = null; dessiner(); };
     var vo = document.getElementById('fi-voile');
@@ -1841,8 +1828,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
   }
 
   window.szActualiser = function(){
-    var e = document.getElementById('fi-mail');
-    if (e && document.activeElement === e) return;
     if (DETAIL || ARME) return;
     // L onglet Ambassadrices : une saisie ou une confirmation en cours n est pas redessinée.
     if (ONGLET === 'ambassadrices' && ambOccupe()) return;
@@ -1884,8 +1869,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       ev.preventDefault();
       if (DETAIL) { DETAIL = null; dessiner(); return; }
       if (ARME) { ARME = ''; dessiner(); return; }
+      /* (2026-10-25, audit) Echap fermait la FENETRE avec l editeur de sondage ouvert, le
+         panneau « Ajuster » des points, ou des reglages modifies non enregistres. */
+      if (EDIT) { szFermerBoite(function(){ EDIT = null; FORM = null; dessiner(); dire(''); }); return; }
+      if (POUV) { POUV = ''; ptsRedessinerTable(); return; }
       if (AMBARME || AMBED) { AMBARME = ''; AMBED = null; dessiner(); return; }
       if (PARARME) { PARARME = ''; dessiner(); return; }
+      if (palOccupe() || parOccupe() || (AMBCFG && !AMBCFG._vierge)) {
+        dire('${T("Des réglages ne sont pas enregistrés : enregistrez-les ou annulez les changements avant de fermer.")}', 'att');
+        return;
+      }
       P.fermer();
     }
   });

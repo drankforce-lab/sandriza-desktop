@@ -465,7 +465,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '</div>';
     // Le Mode exclusif vit dans l en-tete, a cote de la date : la barre garde sa ligne pour les puces.
     var slot = document.getElementById('tb-mx-slot');
-    var mxH = (MX && MX.ok) ? '<button class="mini" id="tb-mx" title="${T("Empecher toute autre connexion pendant une maintenance")}">'
+    var mxH = (MX && MX.ok) ? '<button class="mini" id="tb-mx" title="${T("Empêcher toute autre connexion pendant une maintenance")}">'
       + (MX.actif ? '\u{1F512} ${T("Mode exclusif : ACTIF")}' : '\u{1F512} ${T("Mode exclusif")}…') + '</button>' : '';
     if (slot && slot._src !== mxH) { slot.innerHTML = mxH; slot._src = mxH; }   // (même règle : rien ne se repeint sans changement)
     return h;
@@ -827,11 +827,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var ESSAIS = 0, PASSAGERES = { delai: 1, indisponible: 1, pont_indisponible: 1 };
   /* sonde (lot VOLUME, 2026-10-19) : la relecture des 12 s prend le calcul GARDE par le pont tant que les donnees
      du poste n ont pas change ; tout autre appel (clic, szActualiser, periode, retour) le refait. */
+  /* ⚠ UN GESTE PENDANT UNE LECTURE N EST PLUS AVALE (2026-10-25, audit) : un clic sur « Aujourd hui / 7 jours /
+     Ce mois » pendant la relecture de 12 s etait ignore, et l ancienne periode restait affichee jusqu a la
+     suivante. Il est retenu (RELANCE) et rejoue au retour, dont la reponse — l ancienne periode — est jetee.
+     Meme patron que Commandes. La relecture automatique, elle, ne se met pas en file. */
+  var RELANCE = false;
   function charger(sonde){
-    if (CHARGE_EN_COURS) return Promise.resolve();
+    if (CHARGE_EN_COURS) { if (sonde !== true) RELANCE = true; return Promise.resolve(); }
     CHARGE_EN_COURS = true;
     return appeler('tableau:lire', ['all', PERIODE, sonde !== true]).then(function(r){
       CHARGE_EN_COURS = false;
+      if (RELANCE) { RELANCE = false; return charger(); }
       if (!r || !r.ok) {
         if (!D && r && PASSAGERES[r.motif] && ESSAIS < 10) { ESSAIS++; setTimeout(charger, Math.min(8000, 1500 * ESSAIS)); return; }
         if (!D) vide('${T("Tableau de bord indisponible")}', expliquer(r));
@@ -891,7 +897,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function cadInner(oid){
     if (!oid || !VERROUS[oid]) return '';
     var v = VERROUS[oid];
-    var t = v.mine ? '${T("Vous tenez cette fiche en modification")}' : ('${T("En traitement par")} ' + (v.par || '${T("un collegue")}'));
+    var t = v.mine ? '${T("Vous tenez cette fiche en modification")}' : ('${T("En traitement par")} ' + (v.par || '${T("un collègue")}'));
     return '<span class="cad' + (v.mine ? ' mine' : '') + '" title="' + esc(t) + '"><span class="ic">🔒</span></span>';
   }
   function appliquerVerrous(){
@@ -907,7 +913,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          tant que la préparation est ouverte chez nous — comme « En traitement » dans Commandes. */
       var mien = !!(v && v.mine);
       ecs[j].disabled = pris || mien || PREP_OUVERTURE;
-      ecs[j].title = pris ? ('${T("En traitement par")} ' + (v.par || '${T("un collegue")}'))
+      ecs[j].title = pris ? ('${T("En traitement par")} ' + (v.par || '${T("un collègue")}'))
         : mien ? '${T("Préparation déjà ouverte")}'
         : PREP_OUVERTURE ? '${T("Ouverture en cours…")}' : '${T("Lancer la préparation")}';
     }
@@ -932,7 +938,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var v = VERROUS[oid];
       if (v && !v.mine) {
         finOuverture();
-        dire('${T("En traitement par")} ' + (v.par || '${T("un collegue")}') + '${T(" — la préparation reste fermée tant qu’elle n’est pas libérée.")}', 'att');
+        dire('${T("En traitement par")} ' + (v.par || '${T("un collègue")}') + '${T(" — la préparation reste fermée tant qu’elle n’est pas libérée.")}', 'att');
         return;
       }
       dire('${T("Ouverture…")}');

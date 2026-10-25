@@ -251,6 +251,13 @@ table.grille td.num{text-align:right;font-variant-numeric:tabular-nums;white-spa
 .ctx button:hover,.ctx button:focus{background:var(--v09);outline:none}
 .ctx button.dgr{color:var(--tx-f6a6a6)}
 html.jour .ctx button.dgr{color:#b91c1c}
+/* (2026-10-25, audit) Les boutons destructeurs HORS du menu (« Supprimer le lot », « Supprimer »,
+   « Annuler » du suivi) et les encarts .franc n avaient AUCUNE règle : boutons neutres, texte nu. */
+button.dgr{color:var(--tx-err2);border-color:rgba(239,68,68,.5)}
+html.jour button.dgr{color:#b91c1c;border-color:rgba(185,28,28,.45)}
+.franc{padding:.55rem .7rem;border-radius:9px;border:1px solid rgba(var(--or-rgb),.35);background:rgba(var(--or-rgb),.08);
+  font-size:.82rem;line-height:1.5;color:var(--tx)}
+html.jour .franc{border-color:rgba(var(--or-jour-rgb),.35);background:rgba(var(--or-jour-rgb),.07)}
 .ctx .trait{height:1px;background:var(--v08);margin:.25rem .2rem}
 tr.arme td,tr[data-arme] td{background:rgba(248,113,113,.12)}
 .act{display:flex;gap:.12rem;white-space:nowrap}
@@ -299,10 +306,12 @@ html .visio button:disabled,html.jour .visio button:disabled{opacity:.25;cursor:
 .asst .tt{display:flex;align-items:center;gap:.6rem;padding:.7rem .9rem;
   border-bottom:1px solid var(--v08)}
 .asst .tt h3{margin:0;font:700 1rem/1.2 Georgia,serif}
-.asst .tt .pas{margin-left:auto;display:flex;gap:.3rem;align-items:center;font-size:.72rem;color:var(--tx2)}
-.asst .tt .pas b{display:inline-flex;width:1.35rem;height:1.35rem;border-radius:50%;
+/* (2026-10-25, audit) .etapes et non .pas : la classe .pas du socle (barre d etapes des assistants)
+   dessinait ici de grosses pastilles de 2,3 rem et une bande grise en jour. */
+.asst .tt .etapes{margin-left:auto;display:flex;gap:.3rem;align-items:center;font-size:.72rem;color:var(--tx2)}
+.asst .tt .etapes b{display:inline-flex;width:1.35rem;height:1.35rem;border-radius:50%;
   align-items:center;justify-content:center;background:var(--v08);font-size:.7rem}
-.asst .tt .pas b.on{background:var(--or);color:#1a1208}
+.asst .tt .etapes b.on{background:var(--or);color:#1a1208}
 .asst .co{flex:1 1 auto;min-height:0;overflow-y:auto;padding:.85rem .9rem}
 /* Le choix de la mise en scene : des couples etiquette/valeur, alignes. */
 .ch{display:flex;align-items:center;gap:.7rem;margin-bottom:.7rem}
@@ -357,24 +366,6 @@ html.jour .asst .pi{background:#faf8f3}
   display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--tx-or)}
 .pl .v.on .ck{background:var(--or);color:#1a1208;border-color:var(--or)}
 /* Le chargement, au centre, avant la planche. */
-/* Le fond uni du catalogue (2026-10-06) : une ligne par photo de fiche, avant / apres. */
-.fd-l{display:grid;grid-template-columns:1.6rem 9rem 9rem 1fr;gap:.7rem;align-items:center;
-  padding:.5rem .6rem;border:1px solid var(--v10);border-radius:10px;margin-bottom:.45rem}
-.fd-ch{cursor:pointer}
-.fd-ch.on{border-color:var(--or);background:rgba(var(--or-rgb),.08)}
-.fd-ch .ck{width:1.3rem;height:1.3rem;border:1px solid var(--v16);border-radius:5px;display:inline-flex;
-  align-items:center;justify-content:center;font-size:.8rem;color:#1a1208}
-.fd-ch.on .ck{background:var(--or);border-color:var(--or)}
-.fd-im{display:flex;flex-direction:column;gap:.2rem}
-.fd-im img{width:9rem;height:9rem;object-fit:contain;border-radius:8px;background-color:#ecd9d4;
-  background-image:linear-gradient(45deg,#f6eeeb 25%,transparent 25%,transparent 75%,#f6eeeb 75%),
-  linear-gradient(45deg,#f6eeeb 25%,transparent 25%,transparent 75%,#f6eeeb 75%);
-  background-size:18px 18px;background-position:0 0,9px 9px}
-.fd-mute{display:block;color:var(--tx2);font-size:.84rem}
-.fd-t{font-size:.84rem}
-.fd-pied{display:flex;align-items:center;gap:.5rem;justify-content:flex-end;padding:.65rem .9rem;
-  border-top:1px solid var(--v08)}
-.fd-pied .aide{margin-right:auto}
 .chargement{display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:.6rem;min-height:16rem;text-align:center}
 .chargement .gros{font-weight:700;font-size:1rem;line-height:1.3}
@@ -460,17 +451,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
        lignes, ou colonnes x rangees de vignettes — puis redemandee au site.
        Recalculee au redimensionnement. ⚠ Plus de nombre fixe (2026-10-12) :
        24 a 500 par page faisaient defiler la zone. Aucune glissiere.
-     ⚠ Retenus sur le POSTE (localStorage, sous garde) : c est l ecran qui
-       decide, et l ecran du comptoir n est pas celui du bureau. */
-  var VUE = 'liste', AUTO = true;
+     ⚠ Retenus sur le POSTE : c est l ecran qui decide, et l ecran du comptoir
+       n est pas celui du bureau.
+     ⚠ PAR LE PRINCIPAL, PAS localStorage (2026-10-25, audit) : la page est en
+       data:text/html, localStorage y leve SecurityError — la vue choisie n etait
+       JAMAIS retenue. La reponse arrive apres le premier dessin : on redessine
+       seulement si personne n a change de vue entre-temps. */
+  var VUE = 'liste', AUTO = true, _vueChoisie = false;
   try {
-    var _vu = localStorage.getItem('sz-photos-vue');
-    if (_vu === 'liste' || _vu === 'compacte' || _vu === 'vignettes') VUE = _vu;
+    if (P && P.memoPosteLire) P.memoPosteLire('photosVue').then(function(_vu){
+      if (_vueChoisie || _vu === VUE) return;
+      if (_vu === 'liste' || _vu === 'compacte' || _vu === 'vignettes') { VUE = _vu; if (D) dessiner(); }
+    });
   } catch (e) {}
   function retenir(){
-    try {
-      localStorage.setItem('sz-photos-vue', VUE);
-    } catch (e) {}
+    _vueChoisie = true;
+    try { if (P && P.memoPosteEcrire) P.memoPosteEcrire('photosVue', VUE); } catch (e) {}
   }
   /* Combien d elements tiennent dans la zone, sans defiler. Rien n est fait
      tant que la zone n a pas de hauteur (fenetre cachee, banc sans rendu). */
@@ -501,12 +497,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         var esp = tb ? parseFloat(String(getComputedStyle(tb).borderSpacing || '').split(' ')[1]) : 0;
         if (esp > 0) hL += esp;
       } catch (e) {}
-      n = Math.max(3, Math.floor((z.clientHeight - ((th && th.offsetHeight) || 32)) / hL));
+      n = Math.max(1, Math.floor((z.clientHeight - ((th && th.offsetHeight) || 32)) / hL));
     }
-    /* ⚠ LE SITE BORNE LA PAGE ENTRE 5 ET 500 (Photos._photosDonnees) : demander
-       moins rendrait 5 photos dans une zone taillee pour 3, et la derniere serait
-       coupee sans que rien ne le dise. */
-    n = Math.min(500, Math.max(5, n));
+    /* ⚠ LE SITE BORNE LA PAGE ENTRE 1 ET 500 (Photos._photosDonnees, plancher abaisse de 5 a 1 le
+       2026-10-25, audit). On demande EXACTEMENT ce qui tient : forcer 5 dans une zone taillee pour 3
+       coupait les deux dernieres, et la page suivante commencait apres elles — jamais visibles.
+       (Un site encore au plancher de 5 rend 5 : le defaut d avant, pas pire.) */
+    n = Math.min(500, Math.max(1, n));
     if (!isFinite(n) || n === TAILLE) return;
     /* On garde la premiere photo affichee en vue : la page change de taille,
        pas de contenu. */
@@ -530,14 +527,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (_rattrapeFait || !D || !D.peutModifier) return;
     _rattrapeFait = true;
     var jour = new Date().toISOString().slice(0, 10);
-    try { if (localStorage.getItem('sz-photos-rattrapage') === jour) return; } catch (e) {}
-    appeler('photos:rattraper', []).then(function(r){
-      try { localStorage.setItem('sz-photos-rattrapage', jour); } catch (e) {}
+    // « Une fois par jour et par poste » : la mémoire du poste, pas localStorage
+    // (absent en data:text/html — le rattrapage repartait à CHAQUE ouverture ; 2026-10-25, audit).
+    var lire = (P && P.memoPosteLire) ? P.memoPosteLire('photosRattrapage') : Promise.resolve(null);
+    lire.then(function(dernier){ if (dernier !== jour) lancer(); }, lancer);
+    function lancer(){ appeler('photos:rattraper', []).then(function(r){
+      try { if (P && P.memoPosteEcrire) P.memoPosteEcrire('photosRattrapage', jour); } catch (e) {}
       if (!r || !r.ok || !(r.attachees || []).length) return;
       dire(r.attachees.length + ' ' + (r.attachees.length > 1 ? '${T("photos retrouvées dans des fiches et attachées :")}' : '${T("photo retrouvée dans une fiche et attachée :")}') + ' '
         + r.attachees.slice(0, 6).map(function(a){ return a.code + ' (' + a.produit + ')'; }).join(', ') + (r.attachees.length > 6 ? '…' : ''), 'bon');
       charger();
-    });
+    }); }
   }
   var LOTS = null;          // l historique, quand il est ouvert
   /* ══════════════════════════════════════════════════════════════════════════
@@ -548,8 +548,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
        3. LE TRAITEMENT : nommer le lot et choisir ce qu on veut en faire.
      ⚠ LIRE N EST PAS IMPORTER : rien n entre dans la photothèque avant l etape 3.
      ══════════════════════════════════════════════════════════════════════════ */
-  /* Le fond uni du catalogue : null, ou { etape: 'calcul'|'choix'|'envoi', lignes, choix }. */
-  var FOND = null;
   var ASSIST = null;        // { etape, sources, lecteur, fichiers, choix, tri, nom, but }
   var VIGNETTES = {};       // chemin -> data URL, chargees a la demande
   var ORIENT = {};          // chemin -> orientation EXIF (1 a 8)
@@ -695,8 +693,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       /* « Studio virtuel » (mise en scène Photoroom) RETIRÉ de la barre le 2026-10-14, sa demande. Le gestionnaire
          plus bas ne trouve plus le bouton (garde « if (stud) »). */
       + '<span class="sep"></span>'
-      + '<input aria-label="${T("Code")}, nom, article" type="search" id="p-q" placeholder="${T("Code")}, nom, article…" value="' + esc(Q) + '">'
-      + '<select id="p-tri" aria-label="${T("Nombre de photos par page")}">'
+      // (2026-10-25, audit) Phrases entières dans T() ; le tri n est pas « Nombre de photos par page ».
+      + '<input aria-label="${T("Code, nom, article")}" type="search" id="p-q" placeholder="${T("Code, nom, article…")}" value="' + esc(Q) + '">'
+      + '<select id="p-tri" aria-label="${T("Ordre de tri")}">'
       + opt('recent', '${T("Plus récentes")}') + opt('code', '${T("Par code")}') + opt('name', '${T("Par nom")}')
       + opt('linked', '${T("Liées d’abord")}') + opt('size', '${T("Plus lourdes")}')
       + '</select>'
@@ -749,7 +748,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     /* ⚠ LA LIGNE D ETAT EST RETIREE (2026-09-26, sa capture : « retire cela
        aussi » sur « mesurer l espace R2 »). Son « N affichees sur N » repetait la
        tuile Photos, et il ne restait qu elle autour du lien. La mesure de R2
-       (mesurerEspace) reste dans le code, sans entree a l ecran. */
+       (mesurerEspace) a ete retiree du code le 2026-10-25 (audit). */
 
     if (!ro && !D.total) {
       h += '<div class="depot" id="p-depot">'
@@ -795,7 +794,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (DETAIL) h += boiteDetail();
     // ⚠ La classe se pose sur BODY et non sur le corps : c est elle qui decale
     // a la fois le tableau et le panneau de suivi, qui vit hors du corps.
-    if (FOND) h += fondHtml();
     else if (ASSIST) h += assistHtml();
     else if (SCENE_OUVERT) h += sceneHtml();
     else if (RETRAIT_OUVERT) h += retraitHtml();
@@ -812,11 +810,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   /* ══════════════════════════════════════════════════════════════════════════
      L ASSISTANT — dessin et conduite
      ══════════════════════════════════════════════════════════════════════════ */
-  var BUTS = [
-    ['detourage', '${T("Retirer le fond")}', '${T("Isole le vêtement de son arrière-plan.")}'],
-    ['fantome', '${T("Retirer le mannequin")}', '${T("Retire le fond PUIS le mannequin. Le col et les manches sont reconstruits.")}'],
-    ['humain', '${T("Mannequin humain")}', '${T("Retire le fond, retire le mannequin, PUIS engendre une personne qui porte le vêtement.")}'],
-  ];
+  /* (2026-10-25, audit) La liste BUTS (trois traitements sans bouton depuis le 2026-10-17) est retirée. */
 
   /* ══════════════════════════════════════════════════════════════════════════
      L HISTORIQUE DES LOTS
@@ -860,7 +854,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       });
       if (par['@avant']) {
         par['@avant'].nom = '${T("Avant le suivi des lots")}';
-        par['@avant'].source = 'origine inconnue';
+        par['@avant'].source = '${T("origine inconnue")}';
       }
       LOTS = Object.keys(par).map(function(k){ return par[k]; })
         .sort(function(a, b){ return (b.ts || 0) - (a.ts || 0); });
@@ -881,51 +875,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         var champs = [];
         try { champs = Object.keys(LOTS[0]); } catch (e) { champs = []; }
         dire('${T("Les lots arrivent sans leurs compteurs (champs reçus :")} '
-          + esc(champs.join(', ') || 'aucun') + '${T("). Rechargez avec")} '
+          + esc(champs.join(', ') || '${T("aucun")}') + '${T("). Rechargez avec")} '
           + '${T("« Affichage ▸ Recharger (vider le cache) » ; si cela persiste,")} '
           + '${T("transmettez-moi cette ligne.")}', 'err');
-      }
-      dire('');
+      } else dire('');   // (2026-10-25, audit) en else : il effaçait aussitôt le diagnostic ci-dessus
       dessiner();
     });
   }
-  /* ══════════════════════════════════════════════════════════════════════════
-     L ESPACE OCCUPE DANS R2
-     ⚠ IL SE DEMANDE, IL NE SE CHARGE PAS TOUT SEUL : mesurer, c est enumerer
-     tout le dossier du stockage, page par page. Le faire a chaque ouverture de
-     l ecran ferait payer une enumeration complete pour une ligne que l on ne
-     regarde pas toujours.
-     ⚠ ET IL DIT CE QU IL NE SAIT PAS : une enumeration interrompue rend
-     << au moins tant >>, jamais un total qui aurait l air complet.
-     ══════════════════════════════════════════════════════════════════════════ */
-  var ESPACE = null;
-
-  function espaceTexte(e){
-    var t = 'R2 : <b>' + poids(e.octets) + '</b>';
-    if (!e.complet) t = '${T("R2 : <b>au moins ")}' + poids(e.octets) + '</b>';
-    t += ' <span class="pt">(' + e.objets + ' ' + (e.objets > 1 ? '${T("objets")}' : '${T("objet")}');
-    if (e.orphelins && e.orphelins.sur && e.orphelins.objets) {
-      t += '${T(", dont")} <b class="att">' + e.orphelins.objets + ' '
-        + (e.orphelins.objets > 1 ? '${T("orphelins")}' : '${T("orphelin")}')
-        + ' — ' + poids(e.orphelins.octets) + '</b>';
-    }
-    t += ')</span>';
-    return t;
-  }
-
-  function mesurerEspace(){
-    var z = document.getElementById('p-r2');
-    if (z) z.innerHTML = '${T("mesure de l’espace R2…")}';
-    appeler('photos:espace', []).then(function(r){
-      ESPACE = r;
-      dessiner();
-      if (r && r.ok && r.orphelins && r.orphelins.sur && r.orphelins.objets) {
-        dire(r.orphelins.objets + ' ' + szPl(r.orphelins.objets, '${T("objet n’est cité par aucune photo :")}', '${T("objets ne sont cités par aucune photo :")}') + ' '
-          + poids(r.orphelins.octets) + ' ' + szPl(r.orphelins.objets, '${T("payés pour rien. Le passage de nuit le retire.")}', '${T("payés pour rien. Le passage de nuit les retire.")}'), 'att');
-      }
-    });
-  }
-
+  /* (2026-10-25, audit) LA MESURE DE L ESPACE R2 (photos:espace) EST RETIRÉE : aucun bouton ne la lançait
+     depuis le 2026-09-26 — du code qui faisait croire à une fonction. */
   function lotsFermer(){ LOTS = null; LOT_ARME = ''; dessiner(); }
 
   function nb(v){ return (typeof v === 'number' && isFinite(v)) ? v : '—'; }
@@ -933,7 +891,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   function lotsHtml(){
     var h = '<div class="asst"><div class="bo">'
       + '<div class="tt"><h3>${T("Lots importés")}</h3>'
-      + '<span class="pas">' + LOTS.length + ' '
+      + '<span class="etapes">' + LOTS.length + ' '
       + (LOTS.length > 1 ? '${T("lots")}' : '${T("lot")}') + '</span></div>'
       + '<div class="co">';
     /* ⚠⚠ LE DIAGNOSTIC EST DANS LE PANNEAU, PAS DANS LE BANDEAU DU BAS. Un
@@ -954,7 +912,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     }
     if (!LOTS.length) h += '<div class="vide">${T("Aucune photo dans la photothèque.")}</div>';
     else {
-      h += '<table><thead><tr><th>Lot</th><th>${T("Entré")}</th><th class="num">${T("Photos")}</th>'
+      h += '<table><thead><tr><th>${T("Lot")}</th><th>${T("Entré")}</th><th class="num">${T("Photos")}</th>'
         + '<th class="num">${T("Traitées")}</th><th class="num">${T("Attachées")}</th><th class="num">${T("Poids")}</th>'
         + '<th></th></tr></thead><tbody>';
       LOTS.forEach(function(l){
@@ -1007,9 +965,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         dire(n
           ? (n + ' ' + szPl(n, '${T("photo cochée")}', '${T("photos cochées")}')
              + (lot && lot.nombre > n
-                 ? (' ${T("— le lot en compte")} ' + lot.nombre + ' ${T("; augmentez « photos par page » pour toutes les voir.")}')
+                 ? (' ${T("— le lot en compte")} ' + lot.nombre + ' ${T("; seules celles de cette page sont cochées — agrandissez la fenêtre pour en voir davantage.")}')
                  : '.'))
-          : '${T("Aucune photo de ce lot sur cette page — augmentez « photos par page ».")}',
+          : '${T("Aucune photo de ce lot sur cette page — passez aux autres pages, ou agrandissez la fenêtre.")}',
           n ? 'bon' : 'att');
       };
     });
@@ -1040,90 +998,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     });
   }
 
-  /* ── LE FOND UNI DU CATALOGUE (2026-10-06) ─────────────────────────────────
-     RIEN N EST REMPLACE SANS ETRE VU : l apercu montre avant / apres, et seules
-     les photos cochees partent — comme l ecran web, avec les MEMES coeurs
-     (photos:fondApercu / photos:fondAppliquer). L originale reste citee dans la
-     fiche. L APRES arrive en VIGNETTE (320 px) : il n a pas encore d adresse. */
-  function fondOuvrir(){
-    FOND = { etape: 'calcul', lignes: [], choix: {} };
-    dessiner();
-    appeler('photos:fondApercu', []).then(function(r){
-      if (!FOND) return; // fermee pendant le calcul
-      if (!r.ok) { FOND = null; dessiner(); dire(expliquer(r), 'err'); return; }
-      FOND.lignes = r.lignes || [];
-      FOND.etape = 'choix';
-      FOND.lignes.forEach(function(l){ if (l.statut === 'pret') FOND.choix[l.i] = true; });
-      dessiner();
-    });
-  }
-  function fondHtml(){
-    var F = FOND;
-    var h = '<div class="asst"><div class="bo">'
-      + '<div class="tt"><h3>${T("Retirer le fond uni du catalogue")}</h3>'
-      + '<button class="mini" id="f-fermer" style="margin-left:auto" title="${T("Fermer")}"' + (F.etape === 'envoi' ? ' disabled' : '') + '>✕</button></div>'
-      + '<div class="co">';
-    if (F.etape !== 'choix') {
-      h += '<div class="chargement"><div class="tourne"></div><div class="gros">'
-        + (F.etape === 'calcul' ? '${T("Détourage des photos des fiches…")}' : '${T("Remplacement des photos cochées…")}')
-        + '</div><div class="aide">${T("Le calcul se fait dans la fenêtre principale : laissez-la ouverte.")}</div></div>';
-    } else {
-      h += '<p class="aide" style="margin:0 0 .6rem">${T("Vérifiez chaque photo : le vêtement doit être intact et le fond disparu. Décochez celles qui ne vous plaisent pas. Les originales restent conservées dans la fiche.")}</p>';
-      if (!F.lignes.length) h += '<div class="vide">${T("Aucune photo sur les fiches produits.")}</div>';
-      F.lignes.forEach(function(l){
-        var titre = esc(l.nom) + (l.champ === 'additionalImages' ? ' · ${T("photo")} ' + (l.index + 2) : ' · ${T("photo principale")}');
-        if (l.statut !== 'pret') {
-          h += '<div class="fd-l fd-mute">' + titre + ' — '
-            + (l.statut === 'deja' ? '${T("déjà sans fond, laissée telle quelle")}' : '${T("échec :")} ' + esc(l.detail || '')) + '</div>';
-          return;
-        }
-        var on = !!F.choix[l.i];
-        h += '<div class="fd-l fd-ch' + (on ? ' on' : '') + '" data-fi="' + l.i + '" role="checkbox" aria-checked="' + on + '" tabindex="0">'
-          + '<span class="ck">' + (on ? '✓' : '') + '</span>'
-          + '<span class="fd-im"><span class="aide">${T("Avant")}</span>' + (l.avant ? '<img src="' + esc(l.avant) + '" alt="">' : '') + '</span>'
-          + '<span class="fd-im"><span class="aide">${T("Après")}</span>' + (l.apres ? '<img src="' + esc(l.apres) + '" alt="">' : '') + '</span>'
-          + '<span class="fd-t">' + titre + '</span></div>';
-      });
-    }
-    h += '</div>';
-    if (F.etape === 'choix') {
-      var n = Object.keys(F.choix).length;
-      h += '<div class="fd-pied"><span class="aide">' + n + ' ' + (n > 1 ? '${T("photos cochées")}' : '${T("photo cochée")}') + '</span>'
-        + '<button id="f-annuler">${T("Annuler")}</button>'
-        + '<button class="prim" id="f-ok"' + (n ? '' : ' disabled') + '>${T("Remplacer les photos cochées")}</button></div>';
-    }
-    return h + '</div></div>';
-  }
-  function fondBrancher(){
-    var fermer = function(){ if (FOND && FOND.etape === 'envoi') return; FOND = null; dessiner(); };
-    var x = document.getElementById('f-fermer'); if (x) x.onclick = fermer;
-    var an = document.getElementById('f-annuler'); if (an) an.onclick = fermer;
-    Array.prototype.forEach.call(document.querySelectorAll('.fd-ch'), function(el){
-      var basculer = function(){
-        var i = +el.getAttribute('data-fi');
-        if (FOND.choix[i]) delete FOND.choix[i]; else FOND.choix[i] = true;
-        dessiner();
-      };
-      el.onclick = basculer;
-      el.onkeydown = function(ev){ if (ev.key === ' ' || ev.key === 'Enter') { ev.preventDefault(); basculer(); } };
-    });
-    var ok = document.getElementById('f-ok');
-    if (ok) ok.onclick = function(){
-      var idx = Object.keys(FOND.choix).map(Number);
-      if (!idx.length) return;
-      FOND.etape = 'envoi'; dessiner();
-      appeler('photos:fondAppliquer', [idx]).then(function(r){
-        FOND = null; dessiner();
-        if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        var ech = r.echecs || [];
-        dire(r.faits + ' ' + (r.faits > 1 ? '${T("photos remplacées")}' : '${T("photo remplacée")}')
-          + (ech.length ? ' · ${T("échec pour :")} ' + ech.join(', ') : '')
-          + ' — ${T("originales conservées.")}', ech.length ? 'att' : 'bon');
-        charger();
-      });
-    };
-  }
-
+  /* (2026-10-25, audit) LE « FOND UNI DU CATALOGUE » EST RETIRÉ (photos:fondApercu / fondAppliquer) : son
+     bouton #p-fondcat n existait plus — le fond se choisit dans le studio virtuel. */
   function assistOuvrir(){
     ASSIST = { etape: 1, sources: null, lecteur: '', fichiers: [], choix: {},
                tri: 'date', nom: '', but: 'aucun' };
@@ -1157,12 +1033,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
          Elle ne vaut PAS entre deux chevrons : ce qui est ecrit la est lu,
          majuscule ou pas. Sa capture du 2026-09-13 : << 1 source 2 choix
          3 traitement >> sur un ecran entierement anglais. */
-      + '<span class="pas">' + pas(1) + '<span>${T("source")}</span>' + pas(2) + '<span>${T("choix")}</span>'
+      + '<span class="etapes">' + pas(1) + '<span>${T("source")}</span>' + pas(2) + '<span>${T("choix")}</span>'
       + pas(3) + '<span>${T("traitement")}</span></span>'
       /* ⚠ VRAI PLEIN ECRAN DU SYSTEME, pas une classe CSS qui etire un panneau :
          on ouvre cet ecran pour VOIR les photos, et une planche de soixante-six
          vignettes gagne plus a la place qu a n importe quel reglage. */
-      + '<button class="mini" id="a-plein" title="${T("Plein écran")}">⛶</button>'
+      // sz-btnplein : le socle voit qu un bouton de plein écran existe déjà et n en pose pas un second (2026-10-25, audit).
+      + '<button class="mini sz-btnplein" id="a-plein" title="${T("Plein écran")}">⛶</button>'
       + '</div><div class="co">';
 
     if (A.etape === 1) {
@@ -1172,7 +1049,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
          avoir a le reimporter. */
       h += '<div class="l' + (A.lecteur === '@lib' ? ' on' : '') + '" data-src="@lib">'
         + '<b>${T("Photos déjà importées")}</b><span class="aide">'
-        + (D.total || 0) + ' ${T("dans la photothèque")}</span></div>';
+        /* ⚠ LA SOURCE EST LA PAGE AFFICHÉE (2026-10-25, audit) : l étape 2 reprend D.lignes. Annoncer
+           D.total (« 1 240 dans la photothèque ») promettait ce que la planche n offrait pas. */
+        + '${T("{0} sur la page affichée (photothèque : {1})")}'.replace('{0}', (D.lignes || []).length).replace('{1}', D.total || 0)
+        + '</span></div>';
       if (!A.sources) h += '<div class="vide charge">${T("Lecture des clés branchées…")}</div>';
       else if (!A.sources.length) {
         h += '<div class="vide">' + (A.erreurSource
@@ -1217,7 +1097,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + '<button class="mini" id="a-rien">${T("Tout décocher")}</button>'
         + '<span class="droite">'
         + '<span id="a-apercus" class="aide"></span>'
-        + '<b id="a-nb">' + n + '</b> sur ' + A.fichiers.length + ' '
+        + '<b id="a-nb">' + n + '</b> ${T("sur")} ' + A.fichiers.length + ' '
         + (n > 1 ? '${T("choisies")}' : '${T("choisie")}') + '</span></div>';
       if (!A.fichiers.length) h += '<div class="vide">${T("Cette source ne contient aucune photo lisible.")}</div>';
       else {
@@ -1379,7 +1259,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var nomLot = A.nom.trim();
     var but = A.but;
     var libelle = but === 'aucun' ? '${T("Import")}' : ({ detourage: '${T("Retrait du fond")}', fantome: '${T("Retrait du mannequin")}',
-                    humain: '${T("Mannequin humain")}' }[but] || 'Traitement');
+                    humain: '${T("Mannequin humain")}' }[but] || '${T("Traitement")}');
     var titres = fichiers.map(function(f, i){
       return nomLot ? (nomLot + ' ' + (i + 1 < 10 ? '0' : '') + (i + 1)) : f.nom;
     });
@@ -1413,7 +1293,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         if (sautees) t += ' · ' + sautees + ' ${T("déjà à jour")}';
         if (echecs) t += ' · ' + echecs + ' ${T("en échec")}';
         if (abandon) t += ' · ' + abandon + ' ' + (abandon > 1 ? '${T("abandonnées")}' : '${T("abandonnée")}');
-        suiviFin(t + '.', abandon ? (libelle + ' interrompu') : (libelle + ' ${T("terminé")}'));
+        suiviFin(t + '.', abandon ? (libelle + ' ${T("interrompu")}') : (libelle + ' ${T("terminé")}'));
         if (!echecs && !abandon) suiviAutoFermer(3000);
         dire(t + '.', echecs ? 'att' : 'bon');
         charger();
@@ -1470,7 +1350,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         return;
       }
       suiviEtapes(k, [{ nom: 'import', etat: 'encours' }]);
-      occuper('Import ' + (k + 1) + ' / ' + fichiers.length + '…');
+      occuper('${T("Import")} ' + (k + 1) + ' / ' + fichiers.length + '…');
       appeler('lot:importer', [f.chemin, nom]).then(function(r){
         if (!r.ok) {
           echecs++;
@@ -1594,24 +1474,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
      deux echecs, on veut savoir LESQUELLES pendant que ca tourne. On boucle donc
      photo par photo et l on rend compte a chaque pas.
      ══════════════════════════════════════════════════════════════════════════ */
-  /* ⚠⚠ CETTE LISTE S'APPELAIT « LOTS », COMME L'HISTORIQUE DES IMPORTS.
-     Deux déclarations « var » du MÊME NOM dans un même fichier ne font qu'UNE
-     variable : « var » est hissé, et la seconde écrase la première au
-     chargement.
-     L'écran des lots affichait donc CES TROIS TRAITEMENTS : « 3 lots », trois
-     lignes « Sans nom », des compteurs vides, et un diagnostic qui annonçait
-     « champs reçus : 0, 1, 2 » — les INDEX d'un tableau de trois chaînes, pas
-     des noms de champs.
-     ⚠ ET RIEN NE PROTESTAIT : c'est du JavaScript parfaitement légal. Le
-     contrôle de syntaxe était vert, le garde-fou des fenêtres disait « tout est
-     sain », et le défaut a été cherché dans la sérialisation du pont pendant
-     deux versions. Le contrôle qui manquait est maintenant posé
-     (tools/verifier-fenetres.js, § « un nom, une déclaration »). */
-  var TRAITEMENTS_LOT = [
-    ['detourage', '${T("Détourer")}', '${T("Isole le vêtement de son fond.")}'],
-    ['fantome', '${T("Retirer le mannequin")}', '${T("Ne garde que le vêtement, col et manches reconstruits.")}'],
-    ['humain', '${T("Mettre sur un mannequin")}', '${T("Fait porter le vêtement par une personne engendrée.")}'],
-  ];
+  /* (2026-10-25, audit) La liste TRAITEMENTS_LOT (sans bouton depuis le 2026-10-17) est retirée. Elle portait
+     la leçon « un nom, une déclaration » (deux « var LOTS » n en font qu une) : le contrôle vit dans
+     tools/verifier-fenetres.js. */
 
   /* ══════════════════════════════════════════════════════════════════════════
      LE CHOIX DE LA MISE EN SCENE
@@ -1657,7 +1522,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var n = RETRAIT_IDS ? RETRAIT_IDS.length : 0;
     return '<div class="asst"><div class="bo">'
       + '<div class="tt"><h3>${T("Retrait du mannequin")}</h3>'
-      + '<span class="pas">' + n + ' ' + (n > 1 ? '${T("photos")}' : '${T("photo")}') + '</span></div>'
+      + '<span class="etapes">' + n + ' ' + (n > 1 ? '${T("photos")}' : '${T("photo")}') + '</span></div>'
       + '<div class="co">'
       + ''
       + '<div class="aide" style="margin-top:.5rem;color:var(--tx-or2)">${T("Chaque photo coûte")} '
@@ -1703,7 +1568,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var n = SCENE_IDS ? SCENE_IDS.length : 0;
     return '<div class="asst"><div class="bo">'
       + '<div class="tt"><h3>${T("Mise en scène")}</h3>'
-      + '<span class="pas">' + n + ' ' + (n > 1 ? '${T("photos")}' : '${T("photo")}') + '</span></div>'
+      + '<span class="etapes">' + n + ' ' + (n > 1 ? '${T("photos")}' : '${T("photo")}') + '</span></div>'
       + '<div class="co">'
       /* ⚠ L ETIQUETTE ETAIT LA, ET ELLE NE SERVAIT A RIEN AU LECTEUR D ECRAN :
          sans lien, un <label> voisin est du texte, pas un nom. Le nom passe par
@@ -1714,8 +1579,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '<div class="ch"><label><input type="checkbox" id="sc-sourire" checked> '
       + '${T("Sourire naturel, regard vers l’objectif")}</label></div>'
       + '<div class="ch col"><label>${T("Précisions (facultatif)")}</label>'
-      + '<textarea id="sc-extra" aria-label="${T("Précisions (facultatif)")}" rows="3" maxlength="240" placeholder="ex. talons assortis, '
-      + 'bijoux dorés discrets, cheveux attachés, lumière chaude de fin de journée"></textarea>'
+      + '<textarea id="sc-extra" aria-label="${T("Précisions (facultatif)")}" rows="3" maxlength="240" placeholder="${T("ex. talons assortis, bijoux dorés discrets, cheveux attachés, lumière chaude de fin de journée")}"></textarea>'
       + '<div class="sugg">'
       + '<button type="button" data-sugg="chaussures assorties au vêtement">${T("+ Chaussures")}</button>'
       + '<button type="button" data-sugg="bijoux fins et discrets">${T("+ Bijoux")}</button>'
@@ -1744,8 +1608,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '<button class="mini dgr" id="p-lot-sup">'
       + '${T("Supprimer")}' + '</button>'
       + '<button class="mini" id="p-rien">${T("Tout décocher")}</button>'
-      + '<span class="av">${T("Les deux derniers traitements <strong>engendrent</strong> une image&nbsp;: ")}'
-      + '${T("l’original est conservé à côté.")}</span></div>';
+      // (2026-10-25, audit) La phrase « Les deux derniers traitements engendrent une image » est
+      // retirée : la barre n offre plus aucun traitement depuis le 2026-10-17.
+      + '</div>';
   }
 
   /* L AVERTISSEMENT DES FRAIS, GROUPE ET FRANC. Une decision qui coute de l argent
@@ -1779,7 +1644,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '<h2 style="margin:0 0 .5rem;font:700 1rem/1.3 system-ui,sans-serif;color:var(--tx-or2)">'
       + '${T("Des photos ont déjà été facturées")}</h2>'
       + '<p style="margin:0;color:var(--tx);font-size:.86rem;line-height:1.6"><b>' + n
-      + '</b> ' + (n > 1 ? '${T("photos")}' : '${T("photo")}') + ' sur ' + total + ' '
+      + '</b> ' + (n > 1 ? '${T("photos")}' : '${T("photo")}') + ' ${T("sur")} ' + total + ' '
       + (n > 1 ? '${T("ont")}' : '${T("a")}') + ' ${T("déjà coûté un crédit Photoroom. Les relancer")} '
       + '${T("entraînera de nouveaux frais.")}</p>' + liste
       + '<div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem">'
@@ -1932,8 +1797,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       return (c && c.code) ? (c.code + ' · ' + c.nom) : ((c && c.nom) || i);
     });
     var nomLot = { detourage: '${T("Détourage")}', fantome: '${T("Retrait du mannequin")}',
-                   humain: '${T("Mise sur un mannequin")}' }[quoi] || 'Traitement';
-    occuper(nomLot + ' de ' + ids.length + ' '
+                   humain: '${T("Mise sur un mannequin")}' }[quoi] || '${T("Traitement")}';
+    occuper(nomLot + ' ${T("de")} ' + ids.length + ' '
       + (ids.length > 1 ? '${T("photos")}' : '${T("photo")}') + '…');
     suiviOuvrir(titres, nomLot + ' · ' + ids.length + ' ' + szPl(ids.length, '${T("photo")}', '${T("photos")}'));
     var faites = 0, echecs = 0, replis = 0, abandon = 0;
@@ -1953,7 +1818,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         if (replis) t += ' · ' + replis + ' ${T("en repli local")}';
         if (echecs) t += ' · ' + echecs + ' ${T("en échec")}';
         if (abandon) t += ' · ' + abandon + ' ' + (abandon > 1 ? '${T("abandonnées")}' : '${T("abandonnée")}');
-        suiviFin(t + '.', abandon ? (nomLot + ' interrompu') : (nomLot + ' ${T("terminé")}'));
+        suiviFin(t + '.', abandon ? (nomLot + ' ${T("interrompu")}') : (nomLot + ' ${T("terminé")}'));
         if (!echecs && !replis && !abandon) suiviAutoFermer(2500);
         dire(t + '.', echecs ? 'att' : 'bon');
         CHOIX = {};
@@ -1962,13 +1827,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       }
       suiviLigne(k, 'cours', '${T("en cours")}');
       suiviEtapes(k, [{ nom: '${T("envoi au modèle")}', etat: 'encours' }]);
-      occuper('Traitement ' + (k + 1) + ' / ' + ids.length + '…');
+      occuper('${T("Traitement")} ' + (k + 1) + ' / ' + ids.length + '…');
       appeler('photos:traiter', [ids[k], quoi, scene || {}]).then(function(r){
         if (r && r.ok) {
           faites++;
           if (r.par === 'canevas') replis++;
           suiviLigne(k, r.par === 'canevas' ? 'double' : 'faite',
-            r.par === 'canevas' ? 'repli local' : '${T("traitée")}');
+            r.par === 'canevas' ? '${T("repli local")}' : '${T("traitée")}');
           suiviEtapes(k, [
             { nom: (r.par === 'canevas' ? '${T("détourage local")}' : '${T("modèle")}'), ok: true,
               chiffre: r.ms ? (Math.round(r.ms / 100) / 10) + ' s' : '' },
@@ -2043,10 +1908,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
      si elle servait. */
 
   function vignette(r){
-    if (r.apercu) return '<div class="vign"><img src="' + esc(r.apercu) + '" alt=""></div>';
+    // .damier : le damier de transparence des thèmes Carbone/Lin ne vise QUE ces vignettes-ci (2026-10-25, audit).
+    if (r.apercu) return '<div class="vign damier"><img src="' + esc(r.apercu) + '" alt=""></div>';
     /* Pas d aperçu = l image n a pas atteint le stockage. On le DIT : un cadre
-       vide passerait pour une photo perdue. */
-    return '<div class="vign"><span class="att">non<br>${T("rangée")}</span></div>';
+       vide passerait pour une photo perdue. (« non » passait hors T() : 2026-10-25, audit.) */
+    return '<div class="vign damier"><span class="att">${T("non rangée")}</span></div>';
   }
   /* ⚠ LE NOM DES TRAITEMENTS, TEL QU'ON L'A CLIQUÉ. La ligne annonçait
      « isolée » quel que soit le traitement subi : on retirait un mannequin et
@@ -2155,22 +2021,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '<div><div class="l">${T("Poids rangé")}</div><div class="v">' + gain(r) + '</div></div>'
       + (r.poidsSrc ? '<div><div class="l">${T("Avant compression")}</div><div class="v">' + poids(r.poidsSrc) + '</div></div>' : '')
       + '<div><div class="l">${T("Traitements")}</div><div class="v">'
-      + (traits(r).join(' · ') || (r.isole ? '${T("détourée")}' : 'aucun')) + '</div></div>'
+      + (traits(r).join(' · ') || (r.isole ? '${T("détourée")}' : '${T("aucun")}')) + '</div></div>'
       + (r.lieId ? '<div><div class="l">${T("Article")}</div><div class="v">' + esc(r.lieNom)
           + (r.lieSku ? ' · ' + esc(r.lieSku) : '') + '</div></div>' : '')
       + '</div>';
 
-    if (false && !ro && r.isole && (D.fonds || []).length) {   // (2026-10-17) le fond se choisit dans le studio virtuel
-      h += '<div class="l" style="font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)">${T("Fond")}</div>'
-        + '<div class="jetons">'
-        + '<button data-fond="__transp" class="' + (!r.fond || r.fond === '__transp' ? 'on' : '') + '">Transparent</button>'
-        + D.fonds.map(function(f){
-            return '<button data-fond="' + esc(f.cle) + '" class="' + (r.fond === f.cle ? 'on' : '') + '">'
-              + esc(f.libelle) + '</button>';
-          }).join('')
-        + '<button id="p-fondperso" class="' + (r.fond === '__custom' ? 'on' : '') + '">${T("+ Mon fond…")}</button>'
-        + '</div>';
-    }
+    // (2026-10-25, audit) Le choix du fond de l inspecteur (désactivé par « if (false && …) ») est retiré : il se fait au studio virtuel.
 
     if (ATTACHE) {
       h += '<div class="carte" style="margin-top:.4rem">'
@@ -2205,14 +2061,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
        cinquante, sans un mot. On croit alors que l article cherche n existe pas
        et l on va le creer une deuxieme fois. */
     var coupe = (PRODUITS_TOTAL && PRODUITS_TOTAL > PRODUITS.length)
-      ? '<div class="aide" style="padding:.35rem">' + szCompte(PRODUITS.length, PRODUITS_TOTAL, 'article', 'articles')
-        + ' ${T("— precisez la recherche pour voir les autres.")}</div>'
+      ? '<div class="aide" style="padding:.35rem">' + szCompte(PRODUITS.length, PRODUITS_TOTAL, '${T("article")}', '${T("articles")}')
+        + ' ${T("— précisez la recherche pour voir les autres.")}</div>'
       : '';
     return coupe + PRODUITS.map(function(p){
       return '<div class="p" data-pid="' + esc(p.id) + '">'
         + (p.image ? '<img src="' + esc(p.image) + '" alt="">' : '<span class="creux"></span>')
         + '<div style="min-width:0"><div class="nm">' + esc(p.nom) + '</div>'
-        + '<div class="sk">' + esc(p.sku || '${T("sans SKU")}') + (p.enVente ? '' : ' · hors vente') + '</div></div></div>';
+        + '<div class="sk">' + esc(p.sku || '${T("sans SKU")}') + (p.enVente ? '' : ' · ${T("hors vente")}') + '</div></div></div>';
     }).join('');
   }
 
@@ -2342,13 +2198,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   }
   /* Les etapes d une ligne. L etat << encours >> marque celle qui tourne ; les autres
      portent leur verdict ET leur mesure. */
+  /* Les noms d etapes sont des CLES (le coeur du site en rend aussi : compression, depot accentue — la cle
+     se lit SANS accents) : on ne traduit qu a l affichage (2026-10-25, audit — ils restaient en francais dans l interface anglaise). */
+  var NOMS_ETAPE = { 'import': '${T("import")}', 'lecture': '${T("lecture")}', 'compression': '${T("compression")}',
+    'depot': '${T("dépôt")}', 'rotation': '${T("rotation")}', 'retrait': '${T("retrait")}', 'fiche': '${T("fiche")}' };
   function suiviEtapes(i, etapes){
     var z = document.getElementById('sv-e-' + i);
     if (!z) return;
     z.innerHTML = (etapes || []).map(function(e){
       var c = (e.etat === 'encours') ? 'encours' : (e.ok ? 'ok' : 'non');
       var m = (e.etat === 'encours') ? '…' : (e.ok ? '✓' : '✕');
-      return '<i class="' + c + '">' + m + ' ' + esc(e.nom)
+      return '<i class="' + c + '">' + m + ' ' + esc(NOMS_ETAPE[String(e.nom || '').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')] || e.nom)
         + (e.chiffre ? ' ' + esc(e.chiffre) : '') + '</i>';
     }).join('');
   }
@@ -2397,9 +2257,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     /* ⚠ MEME UN GLISSER-DEPOSER EST UN LOT. Sans cela, l historique ne montrerait
        que les imports passes par l assistant, et l on ne pourrait pas defaire un
        depot fait a la main — c est-a-dire le plus courant. */
-    appeler('lot:ouvrir', [LOT_NOM || ('${T("Import du")} ' + new Date().toLocaleDateString('${LIEU()}')), 'fichiers']);
+    /* ⚠ ON ATTEND LE LOT avant le premier fichier (2026-10-25, audit), comme l assistant : sinon la
+       premiere photo pouvait partir avant que le lot existe, et le lot ne se defaisait plus en entier. */
+    var lotPret = appeler('lot:ouvrir', [LOT_NOM || ('${T("Import du")} ' + new Date().toLocaleDateString('${LIEU()}')), 'fichiers']);
     suiviOuvrir(liste.map(function(f, i){ return nommer(f, i); }),
-      (LOT_NOM ? ('${T("Import ·")} ' + LOT_NOM) : 'Import') + ' · ' + liste.length + ' ' + szPl(liste.length, '${T("photo")}', '${T("photos")}'));
+      (LOT_NOM ? ('${T("Import ·")} ' + LOT_NOM) : '${T("Import")}') + ' · ' + liste.length + ' ' + szPl(liste.length, '${T("photo")}', '${T("photos")}'));
     var faites = 0, doubles = 0, refuses = 0, echoues = 0;
     var abandonnees = 0;
     var suite = function(k){
@@ -2436,18 +2298,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       var f = liste[k];
       if (f.size > MAX_OCTETS) {
         refuses++;
-        suiviLigne(k, 'echec', 'trop lourde');
+        suiviLigne(k, 'echec', '${T("trop lourde")}');
         suite(k + 1); return;
       }
       suiviLigne(k, 'cours', '${T("en cours")}');
       suiviEtapes(k, [{ nom: 'lecture', etat: 'encours' }]);
       // Chaque fichier relance le chien de garde : c est le TRAVAIL qui doit
       // avancer, pas l ensemble qui doit tenir dans une minute.
-      occuper('Import ' + (k + 1) + ' / ' + liste.length + ' · ' + f.name + '…');
+      occuper('${T("Import")} ' + (k + 1) + ' / ' + liste.length + ' · ' + f.name + '…');
       lireFichier(f).then(function(data){
         if (!data) {
           echoues++;
-          suiviLigne(k, 'echec', 'illisible');
+          suiviLigne(k, 'echec', '${T("illisible")}');
           suiviEtapes(k, [{ nom: 'lecture', ok: false }]);
           suite(k + 1); return;
         }
@@ -2486,7 +2348,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         });
       });
     };
-    suite(0);
+    Promise.resolve(lotPret).then(function(){ suite(0); }, function(){ suite(0); });
   }
 
   function choisirFichiers(){
@@ -2524,16 +2386,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     });
   }
 
-  function fond(cle, image){
-    if (occupeDeja('${T("Opération")}')) return;
-    occuper('${T("Application du fond…")}');
-    appeler('photos:fond', [DETAIL.id, cle, image || '']).then(function(r){
-      liberer();
-      if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      dire('${T("Fond appliqué.")}', 'bon');
-      rouvrir(r.photo);
-    });
-  }
 
   function chercherProduits(){
     appeler('photos:produits', [PQ]).then(function(r){
@@ -2558,7 +2410,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 
   /* ── BRANCHEMENTS ──────────────────────────────────────────────────────── */
   function brancher(){
-    if (FOND) { fondBrancher(); return; }
     if (ASSIST) { assistBrancher(); return; }
     if (SCENE_OUVERT) {
       var non = document.getElementById('sc-non');
@@ -2654,13 +2505,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (champRen) {
       champRen.onclick = stop;
       champRen.onkeydown = function(ev){
-        if (ev.key === 'Escape') { RENOMME = ''; dessiner(); return; }
+        // preventDefault : sans la marque, l Échap du bas fermait TOUTE la fenêtre (2026-10-25, audit).
+        if (ev.key === 'Escape') { ev.preventDefault(); RENOMME = ''; dessiner(); return; }
         if (ev.key !== 'Enter') return;
         var n = champRen.value.trim();
         if (!n) { dire('${T("Le nom ne peut pas être vide.")}', 'err'); return; }
         var id = RENOMME;
         RENOMME = '';
-        dire('Renommage…');
+        dire('${T("Renommage…")}');
         appeler('photos:renommer', [id, n]).then(function(r){
           dire(r.ok ? '${T("Photo renommée.")}' : expliquer(r), r.ok ? 'bon' : 'err');
           charger();
@@ -2778,7 +2630,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (nomOk) nomOk.onclick = function(){
       var c = document.getElementById('p-nom');
       if (!c || !c.value.trim()) { dire('${T("Le nom ne peut pas être vide.")}', 'err'); return; }
-      dire('Renommage…');
+      dire('${T("Renommage…")}');
       appeler('photos:renommer', [DETAIL.id, c.value.trim()]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
         dire('${T("Photo renommée.")}', 'bon');
@@ -2799,8 +2651,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var asst = document.getElementById('p-assistant');
     if (asst) asst.onclick = assistOuvrir;
 
-    var fcat = document.getElementById('p-fondcat');
-    if (fcat) fcat.onclick = fondOuvrir;
 
     var stud = document.getElementById('p-studio');
     if (stud) stud.onclick = function(){
@@ -2849,7 +2699,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
          ⚠ Et chaque retrait efface AUSSI les images dans le stockage : la fiche
          seule partait, les objets restaient. << C est efface >> ne doit pas
          vouloir dire << ce le sera peut-etre demain >>. */
-      occuper('${T("Lecture de ce qu il y a à retirer…")}');
+      occuper('${T("Lecture de ce qu’il y a à retirer…")}');
       appeler('photos:toutes', []).then(function(t){
         if (!t.ok) { liberer(); dire(expliquer(t), 'err'); return; }
         var l = t.photos || [];
@@ -2880,7 +2730,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
           }
           suiviLigne(k, 'cours', '${T("en cours")}');
           suiviEtapes(k, [{ nom: 'fiche', etat: 'encours' }]);
-          occuper('Retrait ' + (k + 1) + ' / ' + l.length + '…');
+          occuper('${T("Retrait")} ' + (k + 1) + ' / ' + l.length + '…');
           appeler('photos:supprimer', [l[k].id]).then(function(r){
             if (r && (r.motif === 'photo_attachee' || r.motif === 'generation_en_cours')) {
               gardees++;
@@ -2901,17 +2751,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         pas(0);
       });
       return;
-      /* eslint-disable no-unreachable */
-      appeler('photos:vider', []).then(function(r){
-        liberer();
-        if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        dire(r.echecs
-          ? (r.retirees + ' ' + szPl(r.retirees, '${T("retirée,")}', '${T("retirées,")}') + ' ' + r.echecs + ' ' + szPl(r.echecs, '${T("refusée par le nuage.")}', '${T("refusées par le nuage.")}'))
-          : '${T("Photothèque vidée — les fiches produits gardent leurs images.")}',
-          r.echecs ? 'att' : 'bon');
-        DETAIL = null;
-        charger();
-      });
+      // (2026-10-25, audit) L ancien vidage en bloc (photos:vider), inatteignable après ce return, est retiré.
     };
 
     if (!DETAIL) return;
@@ -2919,8 +2759,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var f = document.getElementById('p-fermer');
     if (f) f.onclick = fermerDetail;
     rangerUneFois();
-    var me = document.getElementById('p-mesurer');
-    if (me) me.onclick = function(ev){ stop(ev); mesurerEspace(); };
     var iso = document.getElementById('p-isoler');
     if (iso) iso.onclick = isoler;
     var vst = document.getElementById('p-vers-studio');
@@ -2940,21 +2778,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       window._ppq = setTimeout(chercherProduits, 300);
     };
 
-    var fp = document.getElementById('p-fondperso');
-    if (fp) fp.onclick = function(){
-      var e = document.createElement('input');
-      e.type = 'file'; e.accept = 'image/*';
-      e.onchange = function(){
-        var fi = e.files && e.files[0];
-        if (!fi) return;
-        if (fi.size > MAX_OCTETS) { dire('${T("Ce fond est trop lourd (25 Mo maximum).")}', 'att'); return; }
-        lireFichier(fi).then(function(data){
-          if (!data) { dire('${T("Fond illisible.")}', 'err'); return; }
-          fond('__custom', data);
-        });
-      };
-      e.click();
-    };
 
     var en = document.getElementById('p-enreg');
     if (en) en.onclick = function(){
@@ -3123,7 +2946,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   /* Trois façons de le refermer : un menu resté ouvert finit par recevoir un
      clic qu'on ne lui destinait pas — et une de ses entrées supprime. */
   document.addEventListener('mousedown', function(e){ var m = document.getElementById('p-ctx'); if (m && !m.contains(e.target)) fermerMenuPhoto(); });
-  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') fermerMenuPhoto(); });
+  // Échap ferme le menu ET le marque pris : sinon il fermait aussi la fenêtre (2026-10-25, audit).
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && document.getElementById('p-ctx')) { e.preventDefault(); fermerMenuPhoto(); } });
   window.addEventListener('blur', fermerMenuPhoto);
   window.addEventListener('resize', fermerMenuPhoto);
   corps.addEventListener('scroll', fermerMenuPhoto, true);
@@ -3195,9 +3019,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   /* Relit le filtre entier (meme recherche, meme tri), page apres page de 500. */
   function visioToutLire(jeton){
     if ((D.pages || 1) <= 1) return;
-    var q = Q, tri = TRI, tout = [], p = 0;
+    // Le filtre « Attachées / Libres » (ATT) voyage aussi : sans lui, la visionneuse
+    // passait à TOUTE la photothèque une seconde après l ouverture (2026-10-25, audit).
+    var q = Q, tri = TRI, att = ATT, tout = [], p = 0;
     var suite = function(){
-      appeler('photos:donnees', [{ q: q, tri: tri, taille: 500, page: p }]).then(function(r){
+      appeler('photos:donnees', [{ q: q, tri: tri, taille: 500, page: p, attache: att }]).then(function(r){
         if (!VISIO || VISIO.jeton !== jeton) return;
         if (!r || !r.ok) return;   // on garde la page visible
         tout = tout.concat(r.lignes || []);
@@ -3269,8 +3095,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   corps.onclick = function(ev){
     var t = ev.target;
     if (!t || !t.closest) return;
-    var jf = t.closest('[data-fond]');
-    if (jf) { fond(jf.getAttribute('data-fond'), ''); return; }
     var pp = t.closest('[data-pid]');
     if (pp) { attacher(pp.getAttribute('data-pid')); return; }
     if (t.closest('.boite')) {
@@ -3425,7 +3249,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (ev.key === 'Escape') {
       if (ev.defaultPrevented) return;   // deja pris (la visionneuse s est fermee)
       ev.preventDefault();
+      /* ⚠ ÉCHAP FERME D ABORD CE QUI EST PAR-DESSUS (2026-10-25, audit). Il fermait TOUTE la
+         fenêtre dès qu aucun inspecteur n était ouvert — un assistant, l historique des lots,
+         et même un import en cours, arrêté au milieu sans clore son lot. */
+      var fv = document.getElementById('frais-voile');
+      if (fv) { if (fv.parentNode) fv.parentNode.removeChild(fv); dire('${T("Traitement annulé : rien n’a été refait ni facturé.")}', 'att'); return; }
+      if (document.getElementById('apr-voile')) { apercuFermer(); return; }
       if (DETAIL) { fermerDetail(); return; }
+      if (OCCUPE) return;   // un travail tourne : on ne ferme rien sous lui
+      if (ASSIST) { assistFermer(); return; }
+      if (SCENE_OUVERT) { sceneFermer(); return; }
+      if (RETRAIT_OUVERT) { retraitFermer(); return; }
+      if (LOTS) { lotsFermer(); return; }
       P.fermer();
     }
   });

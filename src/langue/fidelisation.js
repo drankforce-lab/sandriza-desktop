@@ -176,9 +176,6 @@ module.exports = {
     'it is forwarded to you at this address. Leave empty to receive nothing.',
   'Courriel de notification des sondages': 'Survey notification email',
   'sondages@exemple.com': 'surveys@example.com',
-  'Les commentaires partiront à ': 'The comments will go to ',
-  'Les commentaires partiront à': 'The comments will go to',
-  'Plus aucune notification de commentaire.': 'No more comment notification.',
 
   /* ── LA LISTE DES SONDAGES ──────────────────────────────────────────────── */
   'Sondages': 'Surveys',
@@ -523,4 +520,7 @@ module.exports = {
   'Supprimer le sondage': 'Delete survey',
   'et toutes ses réponses seront supprimés définitivement. Cette action est irréversible.': 'and all its responses will be permanently deleted. This action cannot be undone.',
   'Réponses perdues': 'Responses lost',
+  // (2026-10-25, audit)
+  'consultation seulement': 'view only',
+  'Des réglages ne sont pas enregistrés : enregistrez-les ou annulez les changements avant de fermer.': 'Some settings are not saved: save them or cancel the changes before closing.',
 };

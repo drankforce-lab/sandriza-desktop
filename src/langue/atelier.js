@@ -1064,5 +1064,24 @@ module.exports = {
   'Le budget mensuel des images est atteint : rien n’a été lancé.': 'The monthly image budget has been reached: nothing was started.',
   'Le modèle a changé depuis la vérification : enregistrez-le, puis recommencez.': 'The model changed since it was checked: save it, then try again.',
   'Le prix annoncé a changé : rien n’a été lancé. Relisez le prix, puis recommencez.': 'The announced price changed: nothing was started. Check the price, then try again.',
-  'Le serveur ne répond pas : rien n’a été lancé.': 'The server is not responding: nothing was started.'
+  'Le serveur ne répond pas : rien n’a été lancé.': 'The server is not responding: nothing was started.',
+  /* (2026-10-25, audit) les refus du site dits en clair, les sorties du studio du modèle, le choix de la fiche produit,
+     les constructions et rendus liés à LEUR modèle */
+  'La photo n’a pas pu être lue. Essayez une autre image.': 'The photo could not be read. Try another image.',
+  'La silhouette du vêtement n’a pas pu être détectée sur la photo. Essayez une photo sur fond uni, le vêtement entier.': 'The garment outline could not be detected in the photo. Try a photo on a plain background, showing the whole garment.',
+  'Aucune image à envoyer : la vue du modèle n’a pas été capturée.': 'No image to send: the view of the design was not captured.',
+  'Ce style de rendu n’est pas offert.': 'This render style is not available.',
+  'Cette version de l’application ne permet pas ce geste : installez la mise à jour.': 'This version of the application cannot do this: install the update.',
+  'Le rendu photo reçu est incomplet : rien n’a été rangé.': 'The photo render received is incomplete: nothing was stored.',
+  'Le modèle n’existe plus sur le serveur, ou le modèle 3D reçu est incomplet.': 'The design no longer exists on the server, or the 3D model received is incomplete.',
+  'Le modèle a été modifié ailleurs entre-temps : rechargez-le, puis recommencez.': 'The design was changed elsewhere in the meantime: reload it, then try again.',
+  'Les changements non enregistrés de ce modèle seront perdus.': 'The unsaved changes to this design will be lost.',
+  'La photo n’a pas pu être chargée.': 'The photo could not be loaded.',
+  'Vers quelle fiche produit ?': 'To which product page?',
+  'Ce modèle n’est lié à aucun produit de la boutique : choisissez la fiche qui reçoit ce rendu.': 'This design is not linked to any store product: choose the product page that receives this render.',
+  'Envoyer': 'Send',
+  'Choisissez un produit.': 'Choose a product.',
+  'Une construction d’aperçu 3D est déjà en cours pour un autre modèle : attendez sa fin, puis recommencez.': 'A 3D preview build is already running for another design: wait for it to finish, then try again.',
+  'Un rendu photo est déjà en cours pour un autre modèle : attendez sa fin, puis recommencez.': 'A photo render is already running for another design: wait for it to finish, then try again.',
+  '← Aperçu 3D': '← 3D preview'
 };

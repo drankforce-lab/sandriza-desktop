@@ -233,7 +233,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
   var NOUVEAU = false;       // le formulaire de format est deploye
   var NOUVMOD = false;       // le choix de format pour un NOUVEAU MODELE est deploye (onglet Modeles)
   var EN_COURS = false;      // un travail long est en cours
-  var JOB = null;            // { faites, total, arret }
+  var JOB = null;            // { id, faites, total, arret }
+  var JOB_N = 0;             // compteur des travaux : chaque lancement a son id (2026-10-25, audit)
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -259,10 +260,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
     planche:            '${T("La planche n’a pas pu être générée.")}',
     echec:              '${T("L’opération a échoué.")}'
   };
+  /* (2026-10-25, audit) SANS esc : ce texte part vers dire() (textContent) ; ce qui le pose en HTML l echappe. */
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
-    if (r && r.detail && m !== 'image_illisible') t += ' (' + esc(String(r.detail).slice(0, 160)) + ')';
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + (m || '?') + ').');
+    if (r && r.detail && m !== 'image_illisible') t += ' (' + String(r.detail).slice(0, 160) + ')';
     return t;
   }
   function appeler(op, args){
@@ -349,7 +351,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
     /* Pas d aperçu = le canevas a ete teinte par une image du modele, et c est
        exactement ce qui empechera de l imprimer. On le DIT ici plutot que de
        laisser decouvrir au moment du lot. */
-    return '<div class="vign"><span class="att">image non<br>lisible</span></div>';
+    return '<div class="vign"><span class="att">${T("image non<br>lisible")}</span></div>';
   }
 
   function vueModeles(ro){
@@ -496,7 +498,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
     // L état de l imprimante : un tiret tant qu on ne sait pas, jamais une
     // affirmation qu on dementira 100 ms plus tard.
     h += '<div style="margin:.5rem 0">'
-      + rang('${T("Format du modèle")}', cible ? (cible.dim + (cible.rond ? ' (rond)' : '')) : '—')
+      + rang('${T("Format du modèle")}', cible ? (cible.dim + (cible.rond ? ' ${T("(rond)")}' : '')) : '—')
       + rang('${T("Imprimante")}', IMPR ? (IMPR.imprimante || '${T("non détectée")}') : '—')
       + rang('${T("Résolution détectée")}', IMPR ? (IMPR.dpi + ' dpi') : '—')
       + rang('${T("Rendu envoyé")}', CAL ? CAL.rendu : '—')
@@ -627,24 +629,34 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
        casse, un bouton qui dit pourquoi passe pour occupe. */
     if (EN_COURS) { dire('${T("Une impression est déjà en cours — attendez-la ou arrêtez-la.")}', 'att'); return; }
     EN_COURS = true;
-    JOB = { faites: 0, total: total, arret: false };
+    // L identifiant du travail : une reponse d un travail precedent (abandonne par le chien de garde) est ignoree.
+    var jobId = ++JOB_N;
+    JOB = { id: jobId, faites: 0, total: total, arret: false };
     var nomModele = '';
     (D && D.lignes || []).forEach(function(x){ if (x.id === CIBLE) nomModele = x.nom; });
     suiviOuvrir(total, nomModele);
     dessiner();
     /* ⚠ CHIEN DE GARDE. Le drapeau etait pose a la main et rendu a la main :
        une reponse perdue laissait la fenetre bloquee jusqu a sa reouverture,
-       sans un mot. Meme defaut que la phototheque, meme remede. */
-    var veille = setTimeout(function(){
-      if (!EN_COURS) return;
-      EN_COURS = false; JOB = null;
-      dessiner();
-      suiviFin('${T("Sans réponse")}', '${T("La fenêtre principale n’a pas répondu. Des étiquettes ont peut-être été imprimées — vérifiez l’imprimante.")}');
-      dire('${T("Aucune réponse pour cette impression. Vérifiez l’imprimante avant de relancer.")}', 'err');
-    }, 240000);
+       sans un mot. Meme defaut que la phototheque, meme remede.
+       ⚠ IL VEILLE SUR CHAQUE LOT, PAS SUR LE TRAVAIL ENTIER (2026-10-25, audit) : un seul delai de 240 s
+       coupait toute impression de plus de quelques lots (un promo:lot peut durer 90 s, LIMITES_PONT), en
+       disant « n a pas repondu » alors qu elle repondait. Il est rearme a chaque lot (120 s). */
+    var veille = null;
+    var armer = function(){
+      clearTimeout(veille);
+      veille = setTimeout(function(){
+        if (!EN_COURS || !JOB || JOB.id !== jobId) return;
+        EN_COURS = false; JOB = null;
+        dessiner();
+        suiviFin('${T("Sans réponse")}', '${T("La fenêtre principale n’a pas répondu. Des étiquettes ont peut-être été imprimées — vérifiez l’imprimante.")}');
+        dire('${T("Aucune réponse pour cette impression. Vérifiez l’imprimante avant de relancer.")}', 'err');
+      }, 120000);
+    };
     var fini = function(){ clearTimeout(veille); EN_COURS = false; JOB = null; dessiner(); };
 
     var suite = function(){
+      if (!JOB || JOB.id !== jobId) return;
       if (JOB.arret || JOB.faites >= JOB.total) {
         var faites = JOB.faites, arrete = JOB.arret;
         fini();
@@ -654,8 +666,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
         dire(arrete
           ? ('${T("Impression arrêtée après")} ' + faites + ' / ' + total + ' '
              + (total > 1 ? '${T("étiquettes")}' : '${T("étiquette")}') + '.')
-          : (faites + ' ' + (faites > 1 ? '${T("étiquettes envoyées")}' : '${T("étiquette envoyée")}')
-             + ' à ' + ((IMPR && IMPR.imprimante) || '${T("l’imprimante")}') + '.'),
+          : (faites > 1 ? '${T("{0} étiquettes envoyées à {1}.")}' : '${T("{0} étiquette envoyée à {1}.")}')
+             .split('{0}').join(faites).split('{1}').join((IMPR && IMPR.imprimante) || '${T("l’imprimante")}'),
           arrete ? 'att' : 'bon');
         charger();
         return;
@@ -663,7 +675,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
       var n = Math.min(25, JOB.total - JOB.faites);
       suiviAvance(JOB.faites, JOB.total, '${T("Lot de")} ' + n + ' ${T("en cours d’envoi…")}');
       dire('${T("Impression")} ' + (JOB.faites + n) + ' / ' + JOB.total + '…');
+      armer();
       appeler('promo:lot', [CIBLE, n]).then(function(r){
+        // Reponse d un travail abandonne (chien de garde, ou travail relance depuis) : elle n est plus a nous.
+        if (!JOB || JOB.id !== jobId) return;
         if (!r.ok) {
           var faites = JOB.faites;
           fini();
@@ -830,7 +845,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
     }
     var du = t.closest('[data-dup]');
     if (du) {
-      dire('Duplication…');
+      dire('${T("Duplication…")}');
       appeler('promo:dupliquer', [du.getAttribute('data-dup')]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
         dire('« ' + r.nom + ' ${T("» créé.")}', 'bon');
@@ -978,12 +993,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
       if (RELANCE) { RELANCE = false; charger(garderSaisie); return; }
       if (!r || !r.ok) { vide('${T("Centre d’impression indisponible")}', expliquer(r)); return; }
       D = r;
+      /* Ouverture directe sur « Impression par lot » (2026-10-25, audit) : le premier preparerImpression()
+         partait avant cette reponse, CIBLE vide, et imprimante, resolution et « Ajustement fin » restaient a
+         « — » jusqu a « Relire l imprimante ». Le premier modele connu, on la relance une fois. */
+      var premiereCible = !CIBLE && (D.lignes || []).length;
       if (!CIBLE && (D.lignes || []).length) CIBLE = D.lignes[0].id;
       var s = document.getElementById('sous');
       if (s) s.textContent = (D.kpis && D.kpis.modeles || 0) + ' '
         + ((D.kpis && D.kpis.modeles || 0) > 1 ? '${T("modèles")}' : '${T("modèle")}');
       if (garderSaisie) redessinerSansPerdreLaSaisie();
       else dessiner();
+      if (premiereCible && ONGLET === 'impression') preparerImpression();
     });
   }
 

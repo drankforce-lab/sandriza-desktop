@@ -314,10 +314,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
     service:     '${T("Reçu joint. Le service de lecture n’a pas répondu — saisie manuelle.")}',
     non_fiable:  '${T("Reçu joint. La lecture a été refusée : elle ne correspondait pas au document.")}'
   };
+  /* (2026-10-25, audit) Plus d esc() : le texte part vers dire() (textContent), ou vers
+     vide() qui echappe de lui-meme — un « & » s affichait « &amp; ». */
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
-    if (r && r.detail && m !== 'recu') t += ' (' + esc(String(r.detail).slice(0, 150)) + ')';
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + (m || '?') + ').');
+    if (r && r.detail && m !== 'recu') t += ' (' + String(r.detail).slice(0, 150) + ')';
     return t;
   }
   function appeler(op, args){
@@ -610,7 +612,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
       + '<div class="gros-montant">' + esc(e.totalTTC)
       + (e.usd ? ' <span class="rf-pill bleu">USD→CAD</span>' : '') + '</div>'
       + '<div class="aide" style="text-align:center;margin-bottom:.5rem">${T("Total payé")}'
-      + (e.aTaxes ? ' (taxes incluses)' : '') + '</div>'
+      + (e.aTaxes ? ' ${T("(taxes incluses)")}' : '') + '</div>'
       + '<div class="grille">'
       + '<div><div class="l">${T("Date")}</div><div class="v">' + esc(szJour(e.date) || e.dateFr) + '</div></div>'
       + '<div><div class="l">${T("Mode de paiement")}</div><div class="v">' + esc(szTd(e.paiementLbl)) + '</div></div>'
@@ -651,7 +653,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
         + esc(e.origine || '—') + '</strong>'
         + (e.fxTaux ? ' ${T("× taux")} <strong>' + esc(e.fxTaux) + '</strong>'
             + (e.fxDate ? ' (' + esc(szQuand(e.fxDate)) + ')' : '')
-            + (e.fxApprox ? ' approximatif' : '') : '') + '.</div>';
+            + (e.fxApprox ? ' ${T("approximatif")}' : '') : '') + '.</div>';
     }
     if (e.aRecu) {
       /* ⚠ L IMAGE S AFFICHE ICI, LE PDF S OUVRE DANS LA FENETRE PRINCIPALE : un
@@ -753,13 +755,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
       + (f.origine
           ? '<div class="aide" style="margin-top:.35rem;color:var(--tx-bleu)"><span class="ic">💵</span> ${T("Facture en ")}'
             + esc(f.origine.devise || 'USD') + ' ${T("— original :")} '
-            + [['montant', 'montant'], ['tps', 'TPS'], ['tvq', 'TVQ']].map(function(p){
+            + [['montant', '${T("montant")}'], ['tps', 'TPS'], ['tvq', 'TVQ']].map(function(p){
                 var v = f.origine[p[0]];
                 return (v == null) ? '' : (p[1] + ' ' + szArgentChamp(v) + ' US');
               }).filter(Boolean).join(' · ')
-            + (f.origine.total != null ? ' · total ' + szArgentChamp(f.origine.total) + ' US' : '')
+            + (f.origine.total != null ? ' · ${T("total")} ' + szArgentChamp(f.origine.total) + ' US' : '')
             + (f.fx ? ' ${T("— taux")} ' + esc(f.fx.taux)
-                + (f.fx.date ? ' du ' + esc(szQuand(f.fx.date)) : '')
+                + (f.fx.date ? ' ${T("du")} ' + esc(szQuand(f.fx.date)) : '')
                 + (f.fx.approx ? ' ${T("(taux du jour, faute de mieux)")}' : '') : '')
             + '</div>'
           : '')
@@ -926,6 +928,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
 
   function importerFacture(file){
     if (!file) return;
+    /* (2026-10-25, audit) Sur l onglet Fournisseurs, le formulaire de depense n est pas dessine :
+       la facture etait lue (appel payant) sans que rien n apparaisse. On refuse avant de lire. */
+    if (VUE === 'annuaire') { dire('${T("Revenez à l’onglet Dépenses pour y déposer une facture.")}', 'att'); return; }
     if (file.size > MAX_OCTETS) { dire(MOTIFS.trop_lourd + ' (' + file.name + ')', 'att'); return; }
     if (OCCUPE) { dire('${T("Une lecture est déjà en cours.")}', 'att'); return; }
     OCCUPE = true;
@@ -968,15 +973,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
           FORM.lectureErr = !r.verifie;
           var dd = (r.depuisDocument || []);
           FORM.lecture = (r.verifie
-              ? ('${T("✓ Lu directement dans le document :")} ' + esc(dd.join(', ') || '${T("les montants")}') + '.')
+              ? ('${T("✓ Lu directement dans le document :")} ' + (dd.join(', ') || '${T("les montants")}') + '.')
               : '${T("Aucun texte à lire dans ce document (photo ou numérisation) : tout vient de la lecture automatique. Vérifiez CHAQUE champ.")}')
             + (r.modeleEcarte
                 ? ' ${T("La lecture automatique a été écartée (elle ne correspondait pas au document) — complétez la description et la catégorie.")}'
                 : '')
-            + (r.preuve && !r.verifie ? ' ${T("Lu : «")} ' + esc(r.preuve) + ' »' : '')
+            // (2026-10-25, audit) Sans esc() ici : FORM.lecture est echappe UNE fois, a l affichage.
+            + (r.preuve && !r.verifie ? ' ${T("Lu : «")} ' + r.preuve + ' »' : '')
             + (r.devise === 'USD' && r.fxTaux
-                ? ' ${T("Montants convertis depuis le dollar US au taux")} ' + esc(r.fxTaux)
-                  + (r.fxDate ? ' du ' + esc(szQuand(r.fxDate)) : '') + (r.fxApprox ? ' (approximatif)' : '') + '.'
+                ? ' ${T("Montants convertis depuis le dollar US au taux")} ' + r.fxTaux
+                  + (r.fxDate ? ' ${T("du")} ' + szQuand(r.fxDate) : '') + (r.fxApprox ? ' ${T("(approximatif)")}' : '') + '.'
                 : '');
           dire(complet
             ? '${T("Facture lue — vérifiez les informations, puis enregistrez.")}'
@@ -989,7 +995,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
           FORM.lectureErr = true;
           FORM.lecture = (r.motifLecture === 'non_fiable')
             ? ('${T("Lecture REFUSÉE : ce qui a été proposé ne correspond pas au document (")}'
-               + esc((r.ecarts || []).join(' ; ') || '${T("écart détecté")}')
+               + ((r.ecarts || []).join(' ; ') || '${T("écart détecté")}')
                + '${T("), et le document lui-même n’a pas pu être lu (photo ou numérisation).")} '
                + '${T("Rien n’a été rempli — saisissez à la main. Le reçu, lui, est joint.")}')
             : (LECTURE[r.motifLecture] || '${T("Reçu joint — saisie manuelle.")}');
@@ -1245,7 +1251,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
         if (r.tvq != null) FORM.tvq = r.tvq.toFixed(2);
         dessiner();
         brouillonMaintenant();
-        dire('${T("Converti au taux")} ' + r.taux + (r.date ? ' du ' + r.date : '')
+        dire('${T("Converti au taux")} ' + r.taux + (r.date ? ' ${T("du")} ' + szJour(r.date) : '')
           + (r.source ? ' (' + r.source + ')' : '')
           + (r.approx ? ' ${T("— taux du jour, faute d’avoir trouvé celui de la date.")}' : '.'),
           r.approx ? 'att' : 'bon');
@@ -1510,6 +1516,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
       if (FERMER_DEMANDE) { FERMER_DEMANDE = false; dessiner(); return; }
       if (FORM) { demanderFermeture(); return; }
       if (DETAIL) { fermer(); return; }
+      // (2026-10-25, audit) Le formulaire d un fournisseur se ferme avant la fenetre.
+      if (ANN_FORM) { ANN_FORM = null; dessiner(); return; }
       P.fermer();
     }
   });

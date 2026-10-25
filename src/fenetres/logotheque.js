@@ -360,7 +360,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     inp.focus(); try { inp.select(); } catch(e){}
     var fini = false;
     var valider = function(){ if (fini) return; fini = true; var v=(inp.value||'').trim(); if (!v || v===cur) { dessiner(); return; }
-      occuper(true); dire('Renommage…');
+      occuper(true); dire('${T("Renommage…")}');   // passé par T() (2026-10-25, audit — lot A, banc résiduel)
       appeler('config:logotheque:renommer', [{ id: id, name: v }]).then(function(r){ occuper(false);
         if (r && r.ok) { D=r; RO=!r.peutModifier; dessiner(); dire('${T("Renommé.")}', 'bon'); } else { dessiner(); dire(expliquer(r), 'err'); } }); };
     inp.onblur = valider;

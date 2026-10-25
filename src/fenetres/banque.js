@@ -168,10 +168,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
     aucune_depense:     '${T("Aucune dépense enregistrée pour cette année.")}',
     echec:              '${T("L’opération a échoué.")}'
   };
+  /* (2026-10-25, audit) SANS esc : ce texte part vers dire() (textContent) ; ce qui le pose en HTML l echappe. */
   function expliquer(r){
     var m = r && r.motif;
-    var base = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
-    return base + (r && r.detail ? ' (' + esc(r.detail) + ')' : '');
+    var base = MOTIFS[m] || ('${T("Erreur inattendue (")}' + (m || '?') + ').');
+    return base + (r && r.detail ? ' (' + r.detail + ')' : '');
   }
   function appeler(op, args){
     var p;
@@ -561,8 +562,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
           + '<button class="prim" id="v-ajouter">${T("+ Ligne")}</button></span>')
       + '</h2>');
     h.push('<div class="cx-sub">${T("Square en mémoire pour")} ' + ANNEE + '&nbsp;: ' + (sq.nbTx || 0)
-      + ' ' + ((sq.nbTx || 0) > 1 ? '${T("transactions")}' : '${T("transaction")}') + ' · brut ' + sou(sq.brut)
-      + ' · frais ' + sou(sq.frais) + ' · net ' + sou(sq.net) + '.</div>');
+      + ' ' + ((sq.nbTx || 0) > 1 ? '${T("transactions")}' : '${T("transaction")}') + ' · ${T("brut")} ' + sou(sq.brut)
+      + ' · ${T("frais")} ' + sou(sq.frais) + ' · ${T("net")} ' + sou(sq.net) + '.</div>');
     if (EDIT_V !== null) h.push(formVersement());
     if (!r.squarePayouts.length) {
       h.push('<div class="vide">${T("Aucun dépôt ni sortie.")}</div>');
@@ -607,7 +608,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
       + '<div class="duo">'
       + '<div><label for="v-date">${T("Arrivée")}</label><input id="v-date" type="date" value="' + esc(p.arrivalDate || '') + '"></div>'
       + '<div><label for="v-du">${T("Période du")}</label><input id="v-du" type="date" value="' + esc(p.periodFrom || '') + '"></div>'
-      + '<div><label for="v-au">au</label><input id="v-au" type="date" value="' + esc(p.periodTo || '') + '"></div>'
+      + '<div><label for="v-au">${T("au")}</label><input id="v-au" type="date" value="' + esc(p.periodTo || '') + '"></div>'
       + '<div><label for="v-mnt">${T("Montant")}</label><input id="v-mnt" type="number" step="0.01" value="' + esc(p.amount != null ? p.amount : '') + '"></div>'
       + '</div>'
       /* ⚠ DESCRIPTION ET NOTE COTE A COTE, l aide sur la ligne des boutons
@@ -860,12 +861,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
         var o = optionsApp(libres, e);
         var sel = corps.querySelector('select[data-app="' + id + '"]');
         if (sel) sel.innerHTML = o.html;
+        /* Le compteur est refait AVEC son bouton « Plus » (2026-10-25, audit) : textContent effacait le
+           bouton, et il ne revenait plus apres un filtrage meme s il restait plus de 40 resultats. */
         var cpt = corps.querySelector('[data-app-compte]');
-        if (cpt) cpt.textContent = Math.min(o.total, APP_LIM) + ' / ' + o.total;
+        if (cpt) {
+          cpt.innerHTML = Math.min(o.total, APP_LIM) + ' / ' + o.total
+            + (o.total > APP_LIM ? ' <button type="button" data-app-plus>${T("Plus")}</button>' : '');
+          brancherPlus();
+        }
       };
     });
-    var plus = corps.querySelector('[data-app-plus]');
-    if (plus) plus.onclick = function(){ APP_LIM += 40; dessiner(); };
+    function brancherPlus(){
+      var plus = corps.querySelector('[data-app-plus]');
+      if (plus) plus.onclick = function(){ APP_LIM += 40; dessiner(); };
+    }
+    brancherPlus();
     Array.prototype.forEach.call(corps.querySelectorAll('[data-desapp]'), function(b){
       b.onclick = function(){
         agir('banque:desapparier', [ANNEE, REC, b.getAttribute('data-desapp')], '${T("Appariement défait.")}');
@@ -910,10 +920,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
      l'ecriture avait abouti. En cas d'echec, la saisie etait donc perdue et il ne
      restait qu'un message d'erreur. Avec le brouillon elle survit — a condition de
      ne le jeter QU'ICI. */
-  function agir(op, args, mot, apres){
+  /* bouton (2026-10-25, audit) : l id du bouton qui a lance le geste, FERME pendant l appel. L ecriture passe
+     par la garde « verdict serveur », qui dure plusieurs secondes : un double-clic sur « Enregistrer » creait
+     deux lignes, et l ecart de la conciliation devenait faux. Il se rouvre sur un refus ; au succes, charger()
+     redessine. */
+  function agir(op, args, mot, apres, bouton){
+    var b = bouton ? document.getElementById(bouton) : null;
+    if (b) { if (b.disabled) return; b.disabled = true; }
     dire('…');
     appeler(op, args).then(function(r){
-      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      if (!r.ok) { if (b) b.disabled = false; dire(expliquer(r), 'err'); return; }
       if (typeof apres === 'function') apres();
       dire(mot, 'bon');
       charger();
@@ -970,20 +986,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
        cela, enregistrer moins de trois secondes apres la derniere frappe laisserait
        un brouillon perime derriere, si l'ecriture echouait. */
     szBrouillonMaintenant();
+    /* ⚠ EDIT_E NE RETOMBE A null QU AU SUCCES (2026-10-25, audit) : remis a null avant la reponse, alors que le
+       formulaire restait affiche, un nouvel essai apres un echec envoyait EDIT_E || '' — une CREATION au lieu
+       de la modification de la ligne d origine. */
     agir('banque:entree', [ANNEE, REC, EDIT_E || '', {
       date: g('e-date'), description: g('e-desc'), type: g('e-type'),
       amount: g('e-mnt'), notes: g('e-notes')
-    }], '${T("Ligne enregistrée.")}', szBrouillonJeter);
-    EDIT_E = null;
+    }], '${T("Ligne enregistrée.")}', function(){ szBrouillonJeter(); EDIT_E = null; }, 'e-enregistrer');
   }
   function enregistrerVersement(){
     var g = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
     szBrouillonMaintenant();
+    // Meme regle que enregistrerEntree : EDIT_V ne retombe qu au succes, et le bouton est ferme pendant l appel.
     agir('banque:versement', [ANNEE, REC, EDIT_V || '', {
       arrivalDate: g('v-date'), periodFrom: g('v-du'), periodTo: g('v-au'),
       amount: g('v-mnt'), description: g('v-desc'), notes: g('v-notes')
-    }], '${T("Ligne enregistrée.")}', szBrouillonJeter);
-    EDIT_V = null;
+    }], '${T("Ligne enregistrée.")}', function(){ szBrouillonJeter(); EDIT_V = null; }, 'v-enregistrer');
   }
   function importer(quoi){
     dire('Import…');
@@ -1010,7 +1028,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
   function charger(){
     appeler('banque:donnees', [{ annee: ANNEE || undefined, id: REC || undefined }]).then(function(r){
       if (!r.ok) {
-        corps.innerHTML = '<div class="cx-carte"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div></div>';
+        corps.innerHTML = '<div class="cx-carte"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + esc(expliquer(r)) + '</div></div>';
         dire(expliquer(r), 'err');
         return;
       }

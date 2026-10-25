@@ -126,4 +126,6 @@ module.exports = {
   "Supprimer le gabarit": "Delete the template",
   "Le gabarit": "The template",
   "sera supprimé définitivement. Les courriels qui lui étaient attribués utiliseront le gabarit par défaut. Cette action est irréversible.": "will be permanently deleted. Emails assigned to it will use the default template. This action cannot be undone.",
+  // (2026-10-25, audit) Message de travail qui échappait au dictionnaire.
+  "Duplication…": "Duplicating…",
 };

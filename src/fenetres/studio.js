@@ -153,7 +153,7 @@ body{background:var(--f-page);color:var(--tx);
   border:1px solid var(--v16)}
 .rcbar button:hover:not(:disabled){background:var(--v10)}
 .rcbar button:disabled{opacity:.4;cursor:default}
-.rcbar button.x{color:#e79a9a}
+.rcbar button.x{color:var(--tx-err2)}   /* (2026-10-25, audit) #e79a9a : 2,2:1 sur blanc en mode jour */
 /* L avertissement d ecrasement du voile d enregistrement. */
 .rcav{color:var(--tx-or)}
 /* ── LE VOLET DE GAUCHE EN ONGLETS (lot 3g du #29) ─────────────────────────
@@ -599,11 +599,8 @@ button.attente{display:inline-flex;align-items:center;justify-content:center;gap
 button.attente:disabled{opacity:.85;cursor:progress}
 @media (prefers-reduced-motion:reduce){.sz-spin{animation-duration:2.4s}}
 button.prim:hover:not(:disabled){background:var(--or-clair)}
-/* ⚠ L APERCU EST GRATUIT, ET C EST LE LEVIER CREDITS : la seule facon de juger
-   sans depenser. Un bouton gris a cote d un bouton dore se lit comme le choix
-   secondaire — exactement l inverse de ce qu on veut. */
-button.gratuit{border-color:rgba(74,222,128,.42);color:#c9ead6}
-button.gratuit:hover:not(:disabled){background:rgba(74,222,128,.12)}
+/* (2026-10-25, audit) le bouton « Aperçu gratuit » est RETIRÉ (caché en permanence depuis le 2026-10-21 : l aperçu
+   venait de Photoroom, retiré) — son style, son branchement et ses branches dans le code partent avec lui. */
 button.conf{background:#f0a05a;border-color:#f0a05a;color:#241703;font-weight:700}
 .vide{padding:1rem;text-align:center;color:var(--tx2);font-size:.82rem}
 /* ⚠ LA SURCOUCHE DU LANCEMENT DE LOT. Elle manquait — habillage ET fonction :
@@ -689,7 +686,7 @@ function pageStudio(mode) {
 .fs-ch{display:flex;align-items:center;gap:.45rem;font-size:.84rem}
 .fs-fin{display:flex;align-items:center;gap:.6rem;margin-top:1rem}
 .fs-fin .esp{flex:1 1 auto}
-html.mode-fiche #b-reset,html.mode-fiche #b-lot,html.mode-fiche #b-apercu,html.mode-fiche #b-final,html.mode-fiche #prix-est{display:none}
+html.mode-fiche #b-reset,html.mode-fiche #b-lot,html.mode-fiche #b-final,html.mode-fiche #prix-est{display:none}
 </style></head><body>
 <div class="tete"><span class="ico">${ICO.studio}</span><h1>${T("Studio virtuel")}</h1>
   <span class="credits" id="credits"></span>
@@ -711,7 +708,6 @@ html.mode-fiche #b-reset,html.mode-fiche #b-lot,html.mode-fiche #b-apercu,html.m
   <span class="prix-est" id="prix-est" hidden title="${T("Calculé au tarif réel des services, selon les options choisies")}"></span>
   <button id="b-reset" title="${T("Tout effacer : photo, réglages et rendu")}">${T("↺ Recommencer")}</button>
   <button id="b-lot">${T("⚙ Traiter en lot…")}</button>
-  <button class="gratuit" id="b-apercu" disabled>${T("Aperçu gratuit")}</button>
   <button class="prim" id="b-final" disabled>${T("Générer en pleine qualité")}</button></div>
 <script>
 (function(){
@@ -746,7 +742,6 @@ html.mode-fiche #b-reset,html.mode-fiche #b-lot,html.mode-fiche #b-apercu,html.m
   };
 ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var corps = document.getElementById('corps');
-  var bApercu = document.getElementById('b-apercu');
   var bFinal = document.getElementById('b-final');
   var bLot = document.getElementById('b-lot');
   var creditsEl = document.getElementById('credits');
@@ -1051,6 +1046,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     tnb_erreur:           '${T("The New Black a refusé la demande.")}',
     detourage:            '${T("Le détourage du vêtement généré a échoué.")}',
     plafond:              '${T("Plafond mensuel de dépense atteint.")}',
+    // (2026-10-25, audit) s affichait « Erreur inattendue (prix_change). » en mode fiche
+    prix_change:          '${T("Le prix annoncé a changé : rien n’a été lancé. Relisez le prix, puis recommencez.")}',
     echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
@@ -1124,7 +1121,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var el = document.getElementById('prix-est');
     // dès qu une photo est là — sans ambiance choisie, celle que prendrait « Générer maintenant » (la première)
     if (!aUnePhoto() || RO || LOTS_VUE) { if (el) el.hidden = true; PRIX_EST = null; PRIX_CLE = ''; peindrePrix(); return; }
-    var dem = { geste: VOIE, palier: VOIE === 'fantome' ? FANT_PALIER : '', preset: presetEnvoye() || (PRESETS[0] || {}).cle || '', nb: 1, finition: finitionPour(VOIE) || {}, options: VOIE === 'humain' ? optionsPour('humain') : {} };
+    // (2026-10-25, audit) « Défroisser » part avec l estimation : le relais chiffre alors le workflow qui sera VRAIMENT lancé
+    // (sans lui, il chiffrait l autre, et le contrôle du prix au lancement pouvait refuser chaque génération : prix_change)
+    var dem = { geste: VOIE, palier: VOIE === 'fantome' ? FANT_PALIER : '', defroisser: VOIE === 'fantome' && DEFROISSER, preset: presetEnvoye() || (PRESETS[0] || {}).cle || '', nb: 1, finition: finitionPour(VOIE) || {}, options: VOIE === 'humain' ? optionsPour('humain') : {} };
     var cle = JSON.stringify(dem); if (cle === PRIX_CLE) { peindrePrix(); return; }   // redessiné : on repeint, sans redemander
     PRIX_CLE = cle; clearTimeout(PRIX_T);
     PRIX_T = setTimeout(function(){
@@ -1148,7 +1147,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (PRESET === 'transparent' && VOIE !== 'fantome') PRESET = (PRESETS[0] || {}).cle || '';
     setTimeout(majPrix, 0);
     var pret = pretALancer() && !OCCUPE;
-    bApercu.disabled = !pret;
     bFinal.disabled = !pret;
     /* ⚠ LE LANCEUR DE LOT NE SUIT PAS LA MEME REGLE, et c est voulu : un lot ne
        part pas de la photo ouverte a l ecran mais de photos choisies dans la
@@ -1157,11 +1155,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (bLot) bLot.disabled = RO || OCCUPE;
     /* Le suivi des lots n'a rien à générer ni à recommencer : ses boutons de
        rendu restaient au pied, grisés, sans rapport avec l'écran. */
-    bApercu.hidden = bFinal.hidden = !!LOTS_VUE;
+    bFinal.hidden = !!LOTS_VUE;
     /* (2026-10-18, sa demande : « retirer aperçu gratuit avec le vêtement sans mannequin, il consomme des crédits
        Fal.ai de toute façon ») : un seul bouton, Générer. */
     // (2026-10-21, sa décision) L aperçu gratuit venait de Photoroom, retiré : un seul bouton, Générer.
-    bApercu.hidden = true;
     var br = document.getElementById('b-reset'); if (br) br.hidden = !!LOTS_VUE;
     if (!pret && ARME) { ARME = false; bFinal.className = 'prim'; bFinal.textContent = '${T("Générer en pleine qualité")}'; }
   }
@@ -1179,7 +1176,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     } else {
       b.classList.remove('attente');
       b.removeAttribute('aria-busy');
-      b.textContent = (b === bApercu) ? '${T("Aperçu gratuit")}' : '${T("Générer en pleine qualité")}';
+      b.textContent = '${T("Générer en pleine qualité")}';
     }
   }
 
@@ -1218,7 +1215,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         if (x.etat === 'encours' || x.etat === 'file' || x.etat === 'pause') {
           g += '<button class="jeton' + (x.priorite ? ' on' : '') + '" data-lot="' + esc(x.id)
             + '" data-geste="priorite" data-val="' + (x.priorite ? '0' : '1') + '">'
-            + (x.priorite ? 'Prioritaire' : 'Prioriser') + '</button>';
+            + (x.priorite ? '${T("Prioritaire")}' : '${T("Prioriser")}') + '</button>';
         }
         if (x.etat !== 'encours') {
           g += '<button class="jeton" data-lot="' + esc(x.id) + '" data-geste="retirer">${T("✕ Retirer")}</button>';
@@ -1235,8 +1232,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         // ⚠ << photo 15 sur 500 >>, et QUELLE photo : sans le nom, un lot bloque
         // sur une image abimee ne se diagnostique pas.
         + '<span>' + (x.etat === 'encours' && x.courant
-            ? ('Photo ' + (fait + 1) + ' sur ' + x.total + ' — ' + esc(x.courant.nom))
-            : (fait + ' sur ' + x.total)) + '</span>'
+            ? '${T("Photo {0} sur {1} — {2}")}'.split('{0}').join(String(fait + 1)).split('{1}').join(String(x.total)).split('{2}').join(esc(x.courant.nom))
+            : '${T("{0} sur {1}")}'.split('{0}').join(String(fait)).split('{1}').join(String(x.total))) + '</span>'
         + (x.echecs ? '<span class="mal">' + x.echecs + ' '
             + (x.echecs > 1 ? '${T("échecs")}' : '${T("échec")}') + '</span>' : '')
         + '<span class="droite">' + g + '</span></div>'
@@ -1516,8 +1513,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       h += '<div class="depot" id="depot">'
         + (apercu ? '<img src="' + apercu + '" alt="photo">'
                   : '<span class="gros"><span class="ico" aria-hidden="true">${ICO.image}</span></span><span>${T("Photo de la photothèque sélectionnée")}</span>')
-        + '<span class="refaire">${T("Choisir une autre photo")}</span></div>'
-        + '<input type="file" id="fichier" accept="image/*" hidden>';
+        + '<span class="refaire">${T("Choisir une autre photo")}</span></div>';
       return h;
     }
     // ③ Rien de choisi : l explorateur, seul chemin (plus de zone de dépôt — 2026-09-30).
@@ -1585,7 +1581,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     // Deux menus courts : cote a cote quand la place le permet, empiles sinon.
     /* (2026-10-21) LE NOM DE MANNEQUIN EST RETIRÉ (sa demande) : The New Black décrit la personne en mots — la
        scène, la tenue et les accessoires se décrivent dans les réglages avancés (Décor, Précisions). */
-    var h = '<div class="duo"><div class="ch"><label for="pose">Pose</label>'
+    var h = '<div class="duo"><div class="ch"><label for="pose">${T("Pose")}</label>'
       + '<select id="pose"' + (RO ? ' disabled' : '') + '>'
       + POSES.map(function(p){ return '<option value="' + p.cle + '"'
           + (POSE_SEL === p.cle ? ' selected' : '') + '>' + esc(p.t) + '</option>'; }).join('')
@@ -1684,7 +1680,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var b = [];
     if (voie === 'humain') {
       if (AV.decor) b.push('${T("décor")} ' + nomDecor(AV.decor));
-      if (!AV.sourire) b.push('expression neutre');
+      if (!AV.sourire) b.push('${T("expression neutre")}');
       if (String(AV.extra || '').trim()) b.push('${T("précisions libres")}');
     } else {
       if (String(AV.fondPrompt || '').trim()) b.push('${T("décor décrit")}');
@@ -1737,7 +1733,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       h.push(chSel('av-decor', '${T("Décor")}', [{ cle: '', t: '${T("Celui de l’ambiance choisie")}' }].concat(DECORS),
         AV.decor, '${T("Choisi ici, il remplace celui de l’ambiance. Ce sont les 23 décors que le service")} '
         + '${T("connaît : un nom hors liste serait refusé.")}'));
-      h.push(chSel('av-sourire', 'Expression',
+      h.push(chSel('av-sourire', '${T("Expression")}',
         [{ cle: '1', t: '${T("Sourire naturel (défaut)")}' }, { cle: '0', t: '${T("Neutre")}' }],
         AV.sourire ? '1' : '0', '${T("Sans consigne, le service rend un visage presque fermé — mesuré sur")} '
         + '${T("pièce. Le sourire se demande, il ne vient pas tout seul.")}'));
@@ -1763,7 +1759,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         + '<div class="aidep">${T("Ce que le décor ne doit pas contenir.")}</div></div>');
       h.push('<div class="ch"><label for="av-seed">${T("Graine")}</label>'
         + '<input type="text" id="av-seed" inputmode="numeric" maxlength="9"' + (RO ? ' disabled' : '')
-        + ' value="' + esc(AV.fondGraine) + '" placeholder="vide = au hasard">'
+        + ' value="' + esc(AV.fondGraine) + '" placeholder="${T("vide = au hasard")}">'
         + '</div>');
     }
     return '<div class="avgrille">' + h.join('') + '</div>';
@@ -1827,10 +1823,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     h.push('<div class="avsec prem">${T("Agrandissement")}</div>');
     h.push('<label class="bascule avun"><input type="checkbox" id="av-up"'
       + (AV.upActive ? ' checked' : '') + (RO ? ' disabled' : '')
-      + '> <span><strong>${T("Agrandir ×4")}</strong><span class="d">${T("Un appel de plus, facturé, après le")} '
-      + 'traitement.</span></span></label>');
+      + '> <span><strong>${T("Agrandir ×4")}</strong><span class="d">${T("Un appel de plus, facturé, après le traitement.")}'
+      + '</span></span></label>');
     if (AV.upActive) {
-      h.push(chSel('av-up-mode', 'Mode', [
+      h.push(chSel('av-up-mode', '${T("Mode")}', [
         { cle: 'ai.fast', t: '${T("Rapide — entrée jusqu’à 1000 px")}' },
         { cle: 'ai.slow', t: '${T("Lent, plus fin — entrée jusqu’à 512 px")}' }], AV.upMode, ''));
       h.push('');
@@ -1966,7 +1962,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (pas) pas.onclick = function(){
       if (OCCUPE) return;
       FIL_POSE = false;
-      var b = (bApercu && !bApercu.disabled) ? bApercu : ((bFinal && !bFinal.disabled) ? bFinal : null);
+      // (2026-10-25, audit) vise « Générer » seul : l aperçu, caché, ne prenait pas le focus
+      var b = (bFinal && !bFinal.disabled && !bFinal.hidden) ? bFinal : null;
       dire(b ? '${T("Filigrane ignoré — lancez la génération en bas de la fenêtre.")}' : '${T("Filigrane ignoré.")}', 'bon');
       if (b) b.focus();
     };
@@ -2085,8 +2082,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       ? (AV.decor ? nomDecor(AV.decor) : '')
       : (String(AV.fondPrompt || '').trim() ? '${T("décrit au texte")}' : '');
     if (cle === 'ombres')    return AV.ombreActive ? '${T("réglée à la main")}' : '';
-    if (cle === 'lumiere')   return AV.lumiere ? 'active' : '';
-    if (cle === 'interieur') return INTERIEUR ? (INTERIEUR_NOM || 'photo choisie') : '';
+    if (cle === 'lumiere')   return AV.lumiere ? '${T("active")}' : '';
+    if (cle === 'interieur') return INTERIEUR ? (INTERIEUR_NOM || '${T("photo choisie")}') : '';
     if (cle === 'agrandir')  return AV.upActive ? '×4' : '';
     /* ⚠⚠ LE FILIGRANE SE DIT POSÉ, PAS PRÉSÉLECTIONNÉ (2026-10-01, sa capture :
        « Filigrane se marque en vert » alors qu il n avait rien fait). Un logo
@@ -2265,11 +2262,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function majAvResume(){
     var b = document.getElementById('onglets');
     if (b) b.innerHTML = ongletsHtml();
-    brancherOnglets();
   }
-  /* Le rail ne se clique plus (2026-10-01) : voir .onglets .ong. La fonction
-     reste, vide, parce que les deux repeintures l appellent encore. */
-  function brancherOnglets(){}
+  /* Le rail ne se clique plus (2026-10-01) : voir .onglets .ong. (2026-10-25, audit) sa fonction de branchement, restée
+     vide, est retirée avec ses deux appels : elle laissait croire que les onglets se branchaient quelque part. */
 
   /* ══ LES RECETTES DE MISE EN SCÈNE (lot 3d du #29) ═════════════════════════
      Sa demande : << enregistrer des presets d option, les nommer, les reutiliser
@@ -2491,7 +2486,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function ficheChoisies(){ return FS ? FS.photos.filter(function(p){ return p.on && p.src; }) : []; }
   function ficheEstimer(){
     var n = ficheChoisies().length; if (!n) { FS.prix = null; return; }
-    appeler('studio:estimer', [{ geste: VOIE, palier: VOIE === 'fantome' ? FANT_PALIER : '', preset: presetEnvoye(), nb: 1,
+    appeler('studio:estimer', [{ geste: VOIE, palier: VOIE === 'fantome' ? FANT_PALIER : '', defroisser: VOIE === 'fantome' && DEFROISSER, preset: presetEnvoye(), nb: 1,
       finition: finitionPour(VOIE) || {}, options: VOIE === 'humain' ? optionsPour('humain') : {}}]).then(function(r){
       if (!FS) return;
       FS.prix = (r && r.ok && r.coutMax != null) ? r.coutMax : null;
@@ -2542,9 +2537,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       VOIE = b.getAttribute('data-fs-voie'); VOIE_CHOISIE = true;
       if (VOIE !== 'fantome' && PRESET === 'transparent') PRESET = (PRESETS[0] || {}).cle || '';
       ficheEstimer(); dessiner(); }; });
-    if ($('fs-modele')) $('fs-modele').onchange = function(){ MODELE_SEL = this.value; ficheEstimer(); };
     if ($('fs-fond')) $('fs-fond').onchange = function(){ PRESET = this.value; ficheEstimer(); };
-    if ($('fs-defroisser')) $('fs-defroisser').onchange = function(){ DEFROISSER = this.checked; };
+    if ($('fs-defroisser')) $('fs-defroisser').onchange = function(){ DEFROISSER = this.checked; ficheEstimer(); };
     if ($('fs-complet')) $('fs-complet').onclick = function(){ MODE_FICHE = false; dessiner(); };
     if ($('fs-go')) $('fs-go').onclick = ficheGenerer;
   }
@@ -2555,8 +2549,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
   function ficheGenerer(){
     if (!FS || FS.enCours || RO) return;
-    var liste = ficheChoisies(); if (!liste.length) return;
-    FS.enCours = true; FS.etats = {}; dessiner();
+    // (2026-10-25, audit) une reprise (après un prix changé) ne refait pas, ni ne refacture, les photos déjà placées
+    FS.places = FS.places || {};
+    var liste = ficheChoisies().filter(function(p){ return !FS.places[p.role]; }); if (!liste.length) return;
+    var etats = {}; Object.keys(FS.places).forEach(function(k){ etats[k] = FS.etats[k]; });
+    FS.enCours = true; FS.etats = etats; dessiner();
     PRIX_ANNONCE = FS.prix;
     var refDevant = '';
     var suite = function(i){
@@ -2572,6 +2569,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       ficheSource(p.src, function(img){
         PHOTO = img; PHOTO_ID = ''; ROLE = p.role;
         appeler('studio:traiter', [saisie(false)]).then(function(r){
+          // (2026-10-25, audit) LE PRIX A CHANGÉ : rien n est parti. Le vrai prix devient celui de la fiche, et
+          // « Générer » relance au prix dit (seule la voie normale, « lancer », le traitait)
+          if (r && r.motif === 'prix_change' && r.prixReel != null) {
+            FS.prix = Number(r.prixReel); FS.enCours = false;
+            FS.etats[p.role] = '✗ ' + '${T("Le prix a changé : {0}. Rien n’a été lancé — relancez pour confirmer ce prix.")}'.split('{0}').join(szArgentSymbole(argent(r.prixReel)));
+            dessiner(); dire('${T("Le prix a changé : à confirmer.")}', 'att'); return;
+          }
           if (!r || !r.ok) { FS.etats[p.role] = '✗ ' + expliquer(r); FS.enCours = false; dessiner(); dire(expliquer(r), 'err'); return; }
           var image = r.image;
           var placer = function(im){
@@ -2580,6 +2584,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
               nom: (PROD.sku || 'studio') + '-' + p.role, simple: true }]).then(function(r2){
               if (!r2 || !r2.ok) { FS.etats[p.role] = '✗ ' + expliquer(r2); FS.enCours = false; dessiner(); return; }
               if (p.role === 'devant') refDevant = im;
+              FS.places[p.role] = true;
               FS.etats[p.role] = '✓ ${T("Placée dans la fiche")}'; suite(i + 1);
             });
           };
@@ -2676,7 +2681,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (r.formMode === 'recadrer' || r.formMode === 'marges') FORM_MODE = r.formMode;
     if (r.preset) {
       if (r.preset === 'transparent' || PRESETS.filter(function(p){ return p.cle === r.preset; }).length) PRESET = r.preset;
-      else perdus.push('l’ambiance');
+      else perdus.push('${T("l’ambiance")}');
     }
     AV = fusionner(AV_DEF, r.av);
     FIL = fusionner(FIL_DEF, r.fil);
@@ -2691,7 +2696,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     dessiner();
     var m = '${T("Profil «")} ' + x.nom +' ${T("» appliqué.")}';
     if (perdus.length) {
-      dire(m + ' ' + perdus.join(' et ') + ' ${T("de ce profil")} '
+      dire(m + ' ' + (perdus.length > 1 ? '${T("{0} et {1}")}'.split('{0}').join(perdus[0]).split('{1}').join(perdus[1]) : perdus[0]) + ' ${T("de ce profil")} '
         + (perdus.length > 1 ? '${T("n’existent plus")}' : '${T("n’existe plus")}')
         + ' ${T("— ce réglage est resté au défaut.")}', 'att');
     } else {
@@ -2895,7 +2900,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     'background.negativePrompt': '${T("l’anti-consigne du décor")}',
     'background.seed': '${T("la graine du décor")}',
     'lighting.mode': '${T("la relumière")}',
-    'upscale.mode': 'l’agrandissement',
+    'upscale.mode': '${T("l’agrandissement")}',
     'shadow.mode': '${T("l’ombre portée")}',
     'shadow.intensityOverride': '${T("l’intensité de l’ombre")}',
     'shadow.softnessOverride': '${T("la douceur de l’ombre")}',
@@ -3099,7 +3104,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       }
       var f = FORMATS[i]; i++;
       if (f.enreg) { faits++; suite(); return; }
-      dire('Enregistrement ' + i + ' sur ' + FORMATS.length + ' — ' + f.label + '…');
+      dire('${T("Enregistrement {0} sur {1} — {2}…")}'.split('{0}').join(String(i)).split('{1}').join(String(FORMATS.length)).split('{2}').join(f.label));
       appeler('studio:enregistrer', [{ image: f.image, nom: nomFormat(f) }]).then(function(r){
         if (r && r.ok) { f.enreg = true; faits++; } else rate++;
         suite();
@@ -3117,7 +3122,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       if (r && r.ok) {
         f.enreg = true;
         peindreResultat();
-        dire('Format ' + f.label + ' ${T("enregistré dans la photothèque.")}', 'bon');
+        dire('${T("Format {0} enregistré dans la photothèque.")}'.split('{0}').join(f.label), 'bon');
       } else dire(expliquer(r), 'err');
     });
   }
@@ -3125,9 +3130,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   /* Les fleches pour passer d une photo du panier a l autre, dans l apercu. */
   function navPanierHtml(){
     if (!DU_PANIER || PANIER.length < 2) return '';
-    return '<div class="navp"><button id="pn-prec" aria-label="${T("Photo précédente")}"' + (OCCUPE ? ' disabled' : '') + '>‹</button>'
+    return '<div class="navp"><button id="pn-prec" aria-label="${T("Photo précédente")}"' + (OCCUPE ? ' disabled data-szocc="1"' : '') + '>‹</button>'
       + '<span>' + (PANIER_IDX + 1) + ' / ' + PANIER.length + '</span>'
-      + '<button id="pn-suiv" aria-label="${T("Photo suivante")}"' + (OCCUPE ? ' disabled' : '') + '>›</button></div>';
+      + '<button id="pn-suiv" aria-label="${T("Photo suivante")}"' + (OCCUPE ? ' disabled data-szocc="1"' : '') + '>›</button></div>';
   }
 
   function resultatHtml(){
@@ -3200,7 +3205,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     j.push(PRESET ? '<span class="jt">' + esc(nomPreset(PRESET)) + '</span>'
                   : '<span class="jt gris">${T("ambiance à choisir")}</span>');
     if (VOIE === 'humain') {
-      j.push('<span class="jt">' + esc(nomModele(MODELE_SEL)) + '</span>');
+      // (2026-10-25, audit) plus de nom de mannequin : le choix est retiré (The New Black décrit la personne)
       j.push('<span class="jt">' + esc(nomPose(POSE_SEL)) + '</span>');
     }
     var a = resumeAvance(VOIE);
@@ -3265,15 +3270,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function brancher(){
     brancherPnav();
     var depot = document.getElementById('depot');
-    var fichier = document.getElementById('fichier');
-    if (depot && fichier && !RO && !aUnePhoto()) {
-      depot.onclick = function(){ fichier.click(); };
-      depot.ondragover = function(e){ e.preventDefault(); depot.classList.add('survol'); };
-      depot.ondragleave = function(){ depot.classList.remove('survol'); };
-      depot.ondrop = function(e){ e.preventDefault(); depot.classList.remove('survol');
-        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) lireFichier(e.dataTransfer.files[0]); };
-      fichier.onchange = function(){ if (fichier.files && fichier.files[0]) lireFichier(fichier.files[0]); };
-    }
+    /* (2026-10-25, audit) le glisser-déposer et le champ fichier caché sont RETIRÉS : #depot n existe qu une photo déjà
+       choisie, donc leur condition (« aucune photo ») n était jamais vraie — la photo vient de l explorateur seulement. */
     // « Choisir une autre photo » : on repart de zéro.
     if (depot && aUnePhoto() && !RO) { depot.onclick = function(){ reinitPhoto(); }; }
     /* ⚠⚠ ph-ouvrir N EXISTE PLUS (2026-09-09) : le bouton << Depuis la
@@ -3329,7 +3327,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       ouvrirLotVoile();
     };
     brancherLots();
-    brancherOnglets();
     brancherRecettes();
     brancherProduit();
     /* ⚠ LE BRANCHEMENT DU SELECTEUR EST PARTI AVEC LUI (#30, 2026-09-19) :
@@ -3356,7 +3353,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     });
     corps.querySelectorAll('[data-voie]').forEach(function(el){
       el.onclick = function(){ if (RO || OCCUPE) return; VOIE = el.getAttribute('data-voie'); VOIE_CHOISIE = true; RESULT = null; FORMATS = []; ENREG = false; dessiner();
-        dire('${T("Voie :")} ' + VOIE + '.', 'att'); };
+        dire('${T("Voie :")} ' + nomVoie(VOIE) + '.', 'att'); };
     });
     corps.querySelectorAll('[data-preset]').forEach(function(el){
       el.onclick = function(){ if (RO || OCCUPE) return; PRESET = el.getAttribute('data-preset'); dessiner(); };
@@ -3367,8 +3364,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       dessiner();
       dire('${T("Pose :")} ' + (POSES.filter(function(p){ return p.cle === POSE_SEL; })[0] || {}).t + '.', 'att');
     };
-    var msel = document.getElementById('modele-sel');
-    if (msel) msel.onchange = function(){ choisirModele(msel.value); };
     brancherAvance();
     brancherFiligrane();
     brancherResultat();
@@ -3510,15 +3505,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     };
   }
 
-  /* ⚠ ON NE REDESSINE PAS TOUT, et surtout on n arrete plus la fabrication en
-     cours. Choisir un mannequin pendant que les portraits se fabriquent est
-     naturel — l ancienne version arretait la generation a ce clic, ce qui
-     laissait la liste a moitie remplie sans le dire. */
-  function choisirModele(m){
-    var av = MODELE_SEL;
-    MODELE_SEL = m;
-    if (av !== m) dire('${T("Modèle :")} ' + nomModele(m) + '.', 'bon');
-  }
+  /* (2026-10-25, audit) choisirModele et le menu #modele-sel sont RETIRÉS : le choix du mannequin n existe plus
+     (2026-10-21 — The New Black décrit la personne en mots). */
 
   /* ⚠ << fabriquerPortraits >>, << refairePortraits >> et
      << genererApercusModeles >> ONT ETE RETIREES en 3.50.0, a sa demande. Elles
@@ -3583,19 +3571,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       });
   }
 
-  function lireFichier(f){
-    if (!f || String(f.type).indexOf('image/') !== 0) { dire('${T("Ce n’est pas une image.")}', 'err'); return; }
-    dire('${T("Lecture de la photo…")}');
-    var fr = new FileReader();
-    fr.onload = function(){ reduire(String(fr.result || ''), function(petite){
-      PHOTO = petite; PHOTO_ID = ''; PHOTO_URL = ''; PHOTO_NOM = String(f.name || '');
-      RESULT = null; ENREG = false;
-      INTERIEUR = null; INTERIEUR_NOM = '';   // elle appartenait au vêtement précédent
-      dessiner(); dire('${T("Photo prête.")}', 'bon'); }); };
-    fr.onerror = function(){ dire('${T("Lecture impossible.")}', 'err'); };
-    fr.readAsDataURL(f);
-  }
-
   /* ══ LANCER UN LOT (#27) ══════════════════════════════════════════════════
      ⚠ ON ANNONCE CE QUE CA COUTE AVANT, PAS APRES. Chaque photo est un appel
      facture : lancer 500 photos sans le dire serait la pire surprise possible.
@@ -3619,9 +3594,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (!plein) v.setAttribute('data-szplein', '1');
     v.innerHTML = '<div class="boite">' + html + '</div>';
     document.body.appendChild(v);
-    var fermer = function(){ if (v.parentNode) v.parentNode.removeChild(v); };
-    // Clic hors de la boite = annuler (rien n est lance tant qu on n a pas
-    // clique << Lancer le lot >>).
+    /* Clic hors de la boite = annuler (rien n est lance tant qu on n a pas clique << Lancer le lot >>) — et Échap aussi.
+       (2026-10-25, audit) Ce commentaire le promettait, rien ne le faisait : la surcouche ne se fermait que par ses boutons.
+       Échap ne ferme que la surcouche du DESSUS (deux peuvent s empiler). */
+    var clavier = function(e){
+      if (e.key !== 'Escape') return;
+      var tous = document.querySelectorAll('.voile');
+      if (tous[tous.length - 1] !== v) return;
+      if (document.querySelector('.szc-voile')) return;   // une confirmation du socle par-dessus : elle d abord
+      e.preventDefault(); e.stopPropagation(); fermer();
+    };
+    var fermer = function(){ document.removeEventListener('keydown', clavier, true); if (v.parentNode) v.parentNode.removeChild(v); };
+    document.addEventListener('keydown', clavier, true);
+    v.addEventListener('mousedown', function(e){ if (e.target === v) fermer(); });
     if (apres) apres(fermer);
     return fermer;
   }
@@ -3662,9 +3647,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var b = [];
     if (PRESET) {
       var p = PRESETS.filter(function(x){ return x.cle === PRESET; })[0];
-      b.push('ambiance ' + ((p && p.label) || PRESET));
+      b.push('${T("ambiance {0}")}'.split('{0}').join((p && p.label) || PRESET));
     }
-    if (voie === 'humain') { b.push(nomModele(MODELE_SEL)); b.push(nomPose(POSE_SEL)); }
+    if (voie === 'humain') { b.push(nomPose(POSE_SEL)); }   // (2026-10-25, audit) sans le mannequin, qu on ne choisit plus
     var a = resumeAvance(voie);
     if (a) b.push(a);
     return b.join(' · ');
@@ -3690,7 +3675,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (quoi === 'filigrane') {
       var lg = logoChoisi();
       if (!lg) {
-        return '<p style="color:#e08a8a;margin:.6rem 0 0"><span class="ic">⚠</span> <strong>${T("Aucun logo choisi.")}</strong> '
+        return '<p style="color:var(--tx-err);margin:.6rem 0 0"><span class="ic">⚠</span> <strong>${T("Aucun logo choisi.")}</strong> '
           + '${T("Allez à l’étape « Filigrane » et choisissez-en un : sans logo,")} '
           + '${T("le lot échouerait photo après photo.")}</p>';
       }
@@ -3891,7 +3876,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
                   .split('{1}').join(szArgentSymbole(sous(r.coutMax)))
               : szArgentSymbole(sous(r.coutMax));
             var app = (r.appelsMax > r.appelsMin)
-              ? (r.appelsMin + ' à ' + r.appelsMax) : String(r.appelsMax);
+              ? '${T("{0} à {1}")}'.split('{0}').join(String(r.appelsMin)).split('{1}').join(String(r.appelsMax)) : String(r.appelsMax);
             var h = '<strong>' + nP + ' ' + (nP > 1 ? '${T("photos")}' : '${T("photo")}') + ' · ' + app
               + ' ' + (r.appelsMax > 1 ? '${T("appels facturés")}' : '${T("appel facturé")}')
               + ' ≈ ' + mt + '</strong>';
@@ -3914,7 +3899,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
                  sec laisse deviner ; le nombre de photos qui rentrent permet de
                  découper le lot et de lancer tout de suite ce qui est possible. */
               var n2 = (r.photosPossibles == null) ? 0 : r.photosPossibles;
-              h += '<br><span style="color:#e08a8a"><strong>${T("Ce lot ne rentre pas dans le plafond.")}</strong> '
+              h += '<br><span style="color:var(--tx-err)"><strong>${T("Ce lot ne rentre pas dans le plafond.")}</strong> '
                 + (n2 > 0
                     ? ('${T("Il reste de quoi en traiter")} ' + n2 + ' ${T("— désélectionnez-en")} '
                        + (nP - n2) + '${T(", ou relevez le plafond.")}')
@@ -3964,7 +3949,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
             fermer();
             if (!r.ok) {
               dire(r.motif === 'toutes_deja_faites'
-                ? ('Ces ' + (r.deja || ids.length) + ' ${T("photos ont déjà ce traitement. Cochez « Refaire » pour les repasser.")}')
+                ? '${T("Ces {0} photos ont déjà ce traitement. Cochez « Refaire » pour les repasser.")}'.split('{0}').join(String(r.deja || ids.length))
                 : expliquer(r), 'err');
               return;
             }
@@ -3983,11 +3968,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function occuper(o){
     OCCUPE = o;
     if (!o && A_REDESSINER) { A_REDESSINER = false; if (!LOTS_VUE) dessiner(); }
-    corps.querySelectorAll('button, [data-voie], [data-preset], [data-ph], .depot').forEach(function(b){
-      if (b.tagName === 'BUTTON') b.disabled = o; });
+    /* (2026-10-25, audit) on ne grise QUE ce qui était actif, et l on ne rend la main qu à ceux-là (data-szocc) :
+       tout réactiver à l aveugle rendait cliquables des boutons qui devaient rester grisés (« Appliquer à la photo »
+       sans logo, « ✕ » sans profil, les rôles sans produit) — et qui ne faisaient rien. */
+    if (o) corps.querySelectorAll('button').forEach(function(b){ if (!b.disabled) { b.disabled = true; b.setAttribute('data-szocc', '1'); } });
+    else corps.querySelectorAll('button[data-szocc]').forEach(function(b){ b.disabled = false; b.removeAttribute('data-szocc'); });
     majBoutons();
     var pret = pretALancer();
-    bApercu.disabled = o || !pret;
     bFinal.disabled = o || !pret;
     if (bLot) bLot.disabled = o || RO;
   }
@@ -4000,8 +3987,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if ((!apercu || VOIE === 'fantome') && PRIX_ANNONCE != null) s.prixAnnonce = PRIX_ANNONCE;
     if (PHOTO_ID) { s.photoId = PHOTO_ID; } else { s.image = PHOTO; }
     if (VOIE === 'humain') {
-      var sel = document.getElementById('modele-sel');
-      if (sel) MODELE_SEL = sel.value;   // le menu déroulant reste la source si présent
       s.options = optionsPour('humain');
     }
     /* ⚠ « finition » VA À LA RACINE DU CORPS, jamais dans « options » : le relais ne
@@ -4035,14 +4020,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     });
   }
 
-  function lancer(apercu){
+  // (2026-10-25, audit) plus de paramètre « aperçu » : le bouton d aperçu gratuit est retiré, seul « Générer » lance
+  function lancer(){
+    var apercu = false;
     if (RO || OCCUPE) return;
     if (!aUnePhoto()) { dire('${T("Importez d’abord une photo.")}', 'err'); return; }
     if (!PRESET) { dire('${T("Choisissez une ambiance.")}', 'err'); return; }
     occuper(true);
-    var bT = apercu ? bApercu : bFinal;
-    boutonAttente(bT, apercu ? '${T("Aperçu en cours…")}' : '${T("Génération en cours…")}');
-    dire(VOIE === 'fantome' ? '${T("Retrait du mannequin par The New Black…")}' : apercu ? '${T("Aperçu gratuit en cours…")}' : '${T("Génération en pleine qualité…")}');
+    var bT = bFinal;
+    boutonAttente(bT, '${T("Génération en cours…")}');
+    dire(VOIE === 'fantome' ? '${T("Retrait du mannequin par The New Black…")}' : '${T("Génération en pleine qualité…")}');
     appeler('studio:traiter', [saisie(apercu)]).then(function(r){
       boutonAttente(bT, '');
       occuper(false);
@@ -4070,7 +4057,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         ENREG_CODE = ''; TEINTE = null;
         peindreResultat();
         verifierTeinte();
-        dire(apercu ? '${T("Aperçu prêt (gratuit).")}' : '${T("Image générée.")}', 'bon');
+        dire('${T("Image générée.")}', 'bon');
         chargerCredits();
         // Le filigrane pose avant ce rendu se repose sur la nouvelle image.
         if (FIL_POSE && logoChoisi()) appliquerFiligrane();
@@ -4087,7 +4074,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         voile(h, function(fermer){
           var non = document.getElementById('pc-non'), oui = document.getElementById('pc-oui');
           if (non) non.onclick = function(){ fermer(); dire('${T("Annulé : rien n’a été facturé.")}', 'att'); };
-          if (oui) oui.onclick = function(){ fermer(); PRIX_ANNONCE = r.prixReel; lancer(false); };
+          if (oui) oui.onclick = function(){ fermer(); PRIX_ANNONCE = r.prixReel; lancer(); };
         });
       } else {
         dire(expliquer(r), 'err');
@@ -4132,17 +4119,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     return c;
   }
 
-  function confirmerDepense(apercu, suite){
+  function confirmerDepense(suite){
     if (RO || OCCUPE) return;
     var fin = finitionPour(VOIE) || {};
     var opt = (VOIE === 'humain') ? optionsPour('humain') : {};
     dire('${T("Calcul du coût…")}');
     /* ⚠ OCCUPE DES LE PREMIER CLIC : sans lui, deux clics pendant le calcul du
        cout ouvraient deux voiles de confirmation l un sur l autre. */
-    var bC = apercu ? bApercu : bFinal;
+    var bC = bFinal;
     occuper(true);
     boutonAttente(bC, '${T("Calcul du coût…")}');
-    appeler('studio:estimer', [{ geste: VOIE, palier: VOIE === 'fantome' ? FANT_PALIER : '', preset: presetEnvoye(), nb: 1, finition: fin, options: opt }])
+    appeler('studio:estimer', [{ geste: VOIE, palier: VOIE === 'fantome' ? FANT_PALIER : '', defroisser: VOIE === 'fantome' && DEFROISSER, preset: presetEnvoye(), nb: 1, finition: fin, options: opt }])
       .then(function(r){
         boutonAttente(bC, '');
         occuper(false);
@@ -4151,27 +4138,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         // (2026-10-18) le vêtement sans mannequin passe par The New Black (voie « tnb ») : une génération au palier
         // choisi + le détourage — son prix se dit (et ses crédits) et se vérifie avant l envoi
         var parTnb = r.voie === 'tnb';
-        PRIX_ANNONCE = (apercu && !parTnb) ? null : r.coutMax;
+        PRIX_ANNONCE = r.coutMax;
         if (parTnb) { dire('${T("Vêtement sans mannequin par The New Black ({1}, {2} crédit(s)) ≈ {0} — vérifié avant l’envoi.")}'
           .split('{0}').join(szArgentSymbole(szArgentNombre(r.coutMax, 3))).split('{1}').join(String(r.resolution || '1K'))
           .split('{2}').join(String(r.credits || 1))); suite(); return; }
         // Un seul appel par image : rien a confirmer, on ne met pas un voile
         // entre lui et le bouton pour le cas ordinaire — mais le PRIX se dit (c est lui que le relais vérifie)
-        if (n <= 1) { dire(apercu ? '' : '${T("1 appel facturé ≈ {0} — vérifié avant l’envoi.")}'.split('{0}').join(szArgentSymbole(argent(r.coutMax)))); suite(); return; }
+        if (n <= 1) { dire('${T("1 appel facturé ≈ {0} — vérifié avant l’envoi.")}'.split('{0}').join(szArgentSymbole(argent(r.coutMax)))); suite(); return; }
         var causes = causesAppels();
         var bu = r.budget || {};
-        var h = '<h3>' + (apercu ? '<span class="ic">👁</span> ${T("Aperçu —")} ' : '')
+        var h = '<h3>'
       /* ⚠ LE <em> COUPAIT LA PHRASE EN TROIS, et c est la FORME SOURCE contre la
          FORME RENDUE : le poseur cherche << appels pour >>, << une seule >> et
          << photo >> separement, la page rendue lit << appels pour une seule
          photo >> d un seul tenant. On enveloppe les DEUX morceaux de part et
          d autre, en gardant l emphase. */
       + n + ' ${T("appels pour")} <em>${T("une seule")}</em> ${T("photo")}</h3>';
-        if (apercu) {
-          h += ''
-            + '<p>${T("Ce qu’il consomme, ce sont vos <strong>aperçus du mois</strong> — ")}' + n
-            + '${T(" d’un coup — et le résultat sera <strong>filigrané</strong>.")}</p>';
-        } else {
+        {
           h += '<p><strong>' + n + ' ${T("appels facturés ≈")} ' + szArgentSymbole(argent(r.coutMax))
             + ' ${T("pour cette")} '
             + '${T("photo. Un mannequin virtuel n’en coûterait qu’un seul.")}</p>';
@@ -4197,13 +4180,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           if (AV.upActive) sortie.push('${T("décochez l’agrandissement")}');
           if (VOIE === 'fantome') sortie.push('${T("passez au « Mannequin virtuel »")}');
           if (sortie.length) {
-            h += '<p class="rcav">${T("Pour n’en payer qu’un :")} ' + sortie.join(', ou ') + '.</p>';
+            h += '<p class="rcav">${T("Pour n’en payer qu’un :")} ' + (sortie.length > 1 ? '${T("{0}, ou {1}")}'.split('{0}').join(sortie[0]).split('{1}').join(sortie[1]) : sortie[0]) + '.</p>';
           }
         }
         h += '<div class="fin2"><button id="cd-non">${T("Annuler")}</button>'
-          + '<button class="' + (apercu ? 'prim' : 'conf') + '" id="cd-oui">'
-          + (apercu ? '${T("Lancer l’aperçu")}'
-              : '${T("Lancer —")} ' + szArgentSymbole(argent(r.coutMax))) + '</button></div>';
+          + '<button class="conf" id="cd-oui">'
+          + '${T("Lancer —")} ' + szArgentSymbole(argent(r.coutMax)) + '</button></div>';
         dire('');
         voile(h, function(fermer){
           var non = document.getElementById('cd-non');
@@ -4214,12 +4196,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       });
   }
 
-  // Aperçu : gratuit, mais il passe par la même confirmation dès qu il demande
-  // plus d un appel — c est la demande, et le voile dit franchement « 0 crédit ».
-  bApercu.onclick = function(){
-    if (RO || OCCUPE) return;
-    confirmerDepense(true, function(){ lancer(true); });
-  };
   // Pleine qualité : consomme des crédits → armement en deux temps.
   bFinal.onclick = function(){
     if (RO || OCCUPE) return;
@@ -4229,14 +4205,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       clearTimeout(ARME_T);
       szConfirmer({ prudent: true, titre: '${T("Générer en pleine qualité")}',
         texte: (VOIE === 'fantome' ? '${T("Le vêtement sans mannequin est un traitement payant de The New Black (crédits du forfait). Son prix est vérifié avant l’envoi.")}'
-          : '${T("Le rendu en pleine qualité est un traitement payant : il consomme des crédits du service de génération d’images. Utilisez l’aperçu filigrané, gratuit, pour valider le résultat au préalable.")}')
+          // (2026-10-25, audit) sans renvoi vers « l aperçu filigrané, gratuit » : ce bouton n existe plus
+          : '${T("Le rendu en pleine qualité est un traitement payant : il consomme des crédits du service de génération d’images.")}')
           + (prixTexte(PRIX_EST) ? ' ' + '${T("Coût estimé : {0}.")}'.split('{0}').join(prixTexte(PRIX_EST)) : ''),
         details: PRIX_EST ? [['${T("Coût estimé")}', prixTexte(PRIX_EST)], ['${T("Appels facturés")}', String(PRIX_EST.appelsMax || 1)]] : null,
         oui: prixTexte(PRIX_EST) ? '${T("Lancer — {0}")}'.split('{0}').join(prixTexte(PRIX_EST)) : '${T("Lancer le rendu payant")}' }).then(function(ok){ if (ok) { ARME = true; bFinal.onclick(); } });
       return;
     }
     ARME = false; bFinal.className = 'prim'; bFinal.textContent = '${T("Générer en pleine qualité")}';
-    confirmerDepense(false, function(){ lancer(false); });
+    confirmerDepense(function(){ lancer(); });
   };
 
   /* ⚠ LE LANCEUR DE LOT EST AU PIED DE PAGE, ET C EST TOUT L INTERET : il ne

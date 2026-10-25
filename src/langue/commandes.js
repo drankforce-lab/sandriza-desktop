@@ -174,7 +174,6 @@ module.exports = {
   'Changer le statut': 'Change the status',
   'Statut déjà changé ailleurs (actuel :': 'Status already changed elsewhere (currently:',
   'Statut mis à jour.': 'Status updated.',
-  'Statut de': 'Status of',
   '. Changement de statut impossible pour l’instant.':
     '. Status cannot be changed for now.',
   /* ⚠ LA CASE DES TESTS DIT CE QU ELLE FAIT AU CLIENT : elle réautorise de
@@ -222,8 +221,6 @@ module.exports = {
   'en mode <strong>invité</strong> (aucun compte)': 'in <strong>guest</strong> mode (no account)',
   'Détacher (remettre en mode invité)': 'Unlink (back to guest mode)',
   'Cette action est irréversible.': 'This action cannot be undone.',
-  '</strong>.<br>Changement de statut impossible pour l’instant.':
-    '</strong>.<br>Status cannot be changed for now.',
   ' initié.': ' started.',
 
   /* ── LES TITRES DES FENETRES OUVERTES D ICI ─────────────────────────────── */
@@ -293,7 +290,6 @@ module.exports = {
   'Livraison': 'Shipping',
   'Sous-total': 'Subtotal',
   'Coupon': 'Coupon',
-  'Passer': 'Skip',
   'Confirmer': 'Confirm',
   'Rembourser': 'Refund',
   'Fermer': 'Close',
@@ -396,4 +392,16 @@ module.exports = {
   'Vente d’un encan en direct — vente finale, aucun retour': 'Live auction sale — final sale, no returns',
   'Vente d’un encan en direct': 'Live auction sale',
   'Vente finale': 'Final sale',
+  // (2026-10-25, audit) Les totaux complets du détail, et des phrases entières.
+  'Promotion automatique': 'Automatic promotion',
+  'Rabais sur la vente': 'Discount on the sale',
+  'Carte-cadeau': 'Gift card',
+  'Crédit boutique': 'Store credit',
+  'Points de fidélité': 'Loyalty points',
+  'Passer {0} de « {1} » à « {2} » ?': 'Change {0} from “{1}” to “{2}”?',
+  'Lier {0} à {1} ?': 'Link {0} to {1}?',
+  'Rattacher la commande à un client': 'Link the order to a customer',
+  'retenus': 'withheld',
+  'erreur inconnue': 'unknown error',
+  'TikTok': 'TikTok',
 };

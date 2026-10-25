@@ -130,6 +130,9 @@ button.mini{padding:.12rem .5rem;font-size:.76rem}
 .at-actions{display:flex;gap:.45rem;padding:0 1.1rem}
 .at-actions button{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;padding:.5rem .8rem;font-size:.84rem;border-radius:10px;white-space:nowrap}
 .at-actions button{min-width:0;flex:1 1 0}
+/* (2026-10-25, audit) « Éditer le patron » et son icône (~150 px) dépassaient du bouton (~133 px dans la colonne de 22 rem) :
+   le libellé se coupe en « … » DANS le bouton, le texte entier reste dans l infobulle */
+.at-actions button>span{min-width:0;overflow:hidden;text-overflow:ellipsis}
 .at-actions button.prim{font-weight:600}
 .at-actions button svg,.at-outil svg{width:1.05rem;height:1.05rem;flex:0 0 auto}
 .at-actions .at-plus{flex:0 0 auto;padding:.5rem .55rem}
@@ -647,6 +650,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     non_enregistre: '${T("Le modèle a changé depuis la vérification : enregistrez-le, puis recommencez.")}',
     prix_change: '${T("Le prix annoncé a changé : rien n’a été lancé. Relisez le prix, puis recommencez.")}',
     serveur_indisponible: '${T("Le serveur ne répond pas : rien n’a été lancé.")}',
+    // (2026-10-25, audit) des refus du site et du pont qui s affichaient en code brut (« Erreur inattendue (photo_illisible). »)
+    photo_illisible: '${T("La photo n’a pas pu être lue. Essayez une autre image.")}',
+    silhouette_illisible: '${T("La silhouette du vêtement n’a pas pu être détectée sur la photo. Essayez une photo sur fond uni, le vêtement entier.")}',
+    photo_absente: '${T("Aucune image à envoyer : la vue du modèle n’a pas été capturée.")}',
+    rendu_inconnu: '${T("Ce style de rendu n’est pas offert.")}',
+    version_coquille: '${T("Cette version de l’application ne permet pas ce geste : installez la mise à jour.")}',
+    rendu_absent: '${T("Le rendu photo reçu est incomplet : rien n’a été rangé.")}',
+    modele_absent: '${T("Le modèle n’existe plus sur le serveur, ou le modèle 3D reçu est incomplet.")}',
+    modele_modifie: '${T("Le modèle a été modifié ailleurs entre-temps : rechargez-le, puis recommencez.")}',
     echec: '${T("L’opération a échoué.")}'
   };
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
@@ -783,7 +795,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       };
       v.querySelector('.szc-non').onclick = function(){ fermer(null); };
       v.querySelector('.szc-oui').onclick = valider;
-      v.addEventListener('keydown', function(ev){ if (ev.key === 'Escape') { ev.preventDefault(); fermer(null); } else if (ev.key === 'Enter') { ev.preventDefault(); valider(); } });
+      // (2026-10-25, audit) stopPropagation : sans lui, Échap fermait la boîte ET toute la fenêtre (le geste « quitter » global)
+      v.addEventListener('keydown', function(ev){ if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); fermer(null); } else if (ev.key === 'Enter') { ev.preventDefault(); ev.stopPropagation(); valider(); } });
       v.addEventListener('mousedown', function(ev){ if (ev.target === v) fermer(null); });
       try { v.querySelector('input').focus(); } catch (e) {}
     });
@@ -911,7 +924,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
     var liste = filtres();
     var t = '<div class="cx-carte sz-pagee">';
-    if (!tous.length) {
+    // (2026-10-25, audit) en mode léger, D.modeles n est que la PAGE : une recherche sans résultat disait « Aucun modèle
+    // pour l’instant » — c est le TOTAL (nbTous) qui dit s il n y a encore aucun modèle
+    if (!nbTous) {
       t += '<div class="vide">${T("Aucun modèle pour l’instant. Partez d’un patron de base : il se trace à vos mesures.")}</div>';
     }
     if (VUEB === 'liste') t += listeCompacte(liste);
@@ -925,7 +940,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<span class="l3">' + esc('${T("modifié le {0}")}'.split('{0}').join(jour(m.updatedAt))) + '</span></span></button>';
     }).join('') + '</div>';
     // (2026-10-17, sa demande « retire ça » : la carte « Partir d un patron de base » doublait le bouton « Nouveau modèle » de la tête.)
-    if (tous.length && !liste.length) t += '<div class="vide">${T("Aucun modèle ne correspond.")}</div>';
+    if (nbTous && !liste.length) t += '<div class="vide">${T("Aucun modèle ne correspond.")}</div>';
     var nbVue = (LEGER && PGA) ? PGA.total : liste.length;
     t += '<div class="cx-pied"><span>' + nbVue + ' ' + (nbVue > 1 ? '${T("modèles")}' : '${T("modèle")}') + '</span></div></div>';
 
@@ -948,8 +963,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<span class="at-scene-vig">' + (m.vignette || svgPieces([{ pieces: m.pieces || [] }], 300, 220, { mini: true, titre: m.nom })) + '</span>'
         + '<span class="at-scene-3d">3D</span><span class="at-scene-aide">${T("Glisser pour tourner")}</span></div>'
         + '<div class="at-actions">'
-        + '<button type="button" class="prim" data-ouvrir="' + esc(m.id) + '">${T("Ouvrir le modèle")}</button>'
-        + '<button type="button" data-editer="' + esc(m.id) + '">' + ICA.patron + '${T("Éditer le patron")}</button>'
+        + '<button type="button" class="prim" data-ouvrir="' + esc(m.id) + '" title="${T("Ouvrir le modèle")}"><span>${T("Ouvrir le modèle")}</span></button>'
+        + '<button type="button" data-editer="' + esc(m.id) + '" title="${T("Éditer le patron")}">' + ICA.patron + '<span>${T("Éditer le patron")}</span></button>'
         + '<button type="button" class="at-plus" data-plus="' + esc(m.id) + '" data-ctx-ligne="' + esc(m.id) + '" title="${T("Plus d’actions")}" aria-label="${T("Plus d’actions")}" aria-haspopup="menu">' + ICA.plus + '</button>'
         + '</div>'
         + '<div class="at-outils">'
@@ -1136,7 +1151,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   /* Annuler / Rétablir : un instantané du modèle avant chaque changement (premier caractère d un champ, choix d une
      liste, type, tailles, tableau standard). */
-  function memoM(){ if (!M) return; PILEM.push({ m: copie(M), t: TRACE }); if (PILEM.length > 60) PILEM.shift(); REFM = []; }
+  function memoM(){ if (!M) return; PILEM.push({ m: copie(M), t: TRACE }); if (PILEM.length > 60) PILEM.shift(); REFM = []; SALEM = true; }
+  /* (2026-10-25, audit) SALEM : un changement du modèle QUEL QU IL SOIT (nom, référence, catégorie, état, produit lié,
+     notes — que TRACE ne voit pas, parce qu ils ne retracent rien). Sans lui, « ← Bibliothèque », Échap, « Éditer le
+     patron », Fichier ▸ Aperçu 3D / Imprimer et Ctrl+P jetaient ces changements sans rien demander — et un modèle neuf
+     tout entier. Toute sortie du studio passe donc par quitterModele. */
+  var SALEM = false;
+  function modeleSale(){ return !!M && (M.id ? (TRACE || SALEM) : (SALEM || !!String(M.nom || '').trim())); }
+  function quitterModele(fn){
+    if (!modeleSale()) { fn(); return; }
+    szConfirmer({ titre: '${T("Quitter sans enregistrer ?")}', texte: '${T("Les changements non enregistrés de ce modèle seront perdus.")}', oui: '${T("Quitter")}', danger: true })
+      .then(function(ok){ if (ok) fn(); });
+  }
   function annulerM(){
     if (!PILEM.length) { dire('${T("Rien à annuler.")}', 'att'); return; }
     REFM.push({ m: copie(M), t: TRACE }); var s = PILEM.pop(); M = s.m; TRACE = s.t; dessinerModele(); dire('${T("Annulé.")}');
@@ -1269,7 +1295,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   /* ── les menus ── */
   function stNouveau(){
     if (!D.peutAjouter) return;
-    if ((M && M.id && TRACE) || (M && !M.id && String(M.nom || '').trim())) {
+    if (modeleSale()) {
       szConfirmer({ titre: '${T("Quitter sans enregistrer ?")}', texte: '${T("Les changements de base, d’options ou de mesures seront perdus.")}', oui: '${T("Nouveau modèle")}', danger: true })
         .then(function(ok){ if (ok) ouvrirNeuf(); });
       return;
@@ -1280,7 +1306,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function stEntrees(k){
     var neuf = !M.id, peut = neuf ? D.peutAjouter : D.peutModifier, fige = neuf || TRACE, tl = D.tailles || [], l = [];
     var sec = function(t){ l.push({ sec: t }); }, tr = function(){ l.push({ trait: true }); };
-    var quitterVers = function(fn){ return function(){ var mid = M.id; M = null; fn(mid); }; };
+    var quitterVers = function(fn){ return function(){ var mid = M.id; quitterModele(function(){ M = null; SALEM = false; fn(mid); }); }; };
     if (k === 'fichier') {
       l.push({ lib: '${T("Nouveau modèle")}', rac: 'Ctrl+N', off: !D.peutAjouter, fn: stNouveau });
       tr();
@@ -1448,6 +1474,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   corps.addEventListener('input', function(ev){
     if (VUE !== 'modele' || !M) return;
     var t = ev.target; if (!t || !t.closest || !t.closest('.st') || t._szMemo) return;
+    // (2026-10-25, audit) une case de taille déclenche aussi « input » : son instantané est pris par « change » ci-dessous,
+    // sinon il en fallait deux « Annuler » au premier cochage
+    if (t.hasAttribute && t.hasAttribute('data-taille')) return;
     memoM(); t._szMemo = true;
   });
   corps.addEventListener('change', function(ev){
@@ -1498,7 +1527,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var kl = String(k).toLowerCase();
     if (kl === 's') { stop(); var be = document.getElementById('m-enreg'); if (be && !be.disabled) enregistrer(be); return; }
     if (kl === 'n') { stop(); stNouveau(); return; }
-    if (kl === 'p') { stop(); if (M.id && !TRACE) { var mid = M.id; M = null; ouvrirImpression(mid, 'biblio'); } return; }
+    if (kl === 'p') { stop(); if (M.id && !TRACE) { var mid = M.id; quitterModele(function(){ M = null; SALEM = false; ouvrirImpression(mid, 'biblio'); }); } return; }
     if (kl === 'z' && !ev.shiftKey && !champ) { stop(); annulerM(); return; }
     if ((kl === 'y' || (kl === 'z' && ev.shiftKey)) && !champ) { stop(); retablirM(); return; }
     if (k === '+' || k === '=') { stop(); stZoom(ZOOM * 1.25); return; }
@@ -1557,6 +1586,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function ramasser(cible){
     if (!M || !cible) return;
     var id = cible.id || '';
+    // (2026-10-25, audit) les champs qui ne retracent rien rendent quand même le modèle « à enregistrer » (voir SALEM)
+    if (/^m-(nom|ref|cat|etat|prod|notes)$/.test(id)) SALEM = true;
     if (id === 'm-nom') M.nom = cible.value;
     else if (id === 'm-ref') M.ref = cible.value;
     else if (id === 'm-cat') M.categorie = cible.value;
@@ -1592,7 +1623,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('atelier:ecrire', [s]).then(function(r){
       OCCUPE = false; if (btn) btn.disabled = false;
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      SEL = r.id || SEL; TRACE = false; VUE = 'biblio'; M = null;
+      SEL = r.id || SEL; TRACE = false; SALEM = false; VUE = 'biblio'; M = null;
       charger(function(){ dire('${T("Modèle enregistré.")}', 'bon'); });
     });
   }
@@ -2742,6 +2773,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        sous l en-tête du nouveau. Donc : un contexte perdu n est pas repris (dessiner3d pose un canevas neuf) ; et l image d un
        AUTRE modèle est effacée tout de suite, la barre d état disant ce qui se charge. */
     if (GLV && GLV.gl && GLV.gl.isContextLost()) GLV = null;
+    /* (2026-10-25, audit) « Prêt à construire ? » et le rendu photo sont des états GLOBAUX : ouverts sur un modèle A, ils
+       restaient affichés sur le modèle B — et « Construire » partait, PAYANT, pour B avec la vue de face de A ; un rendu
+       photo de A devenait la vignette ou la photo de fiche de B. Chaque ouverture repart donc de zéro (le contrôle est refait,
+       la vue qui part recapturée) ; une construction ou un rendu en cours reste suivi, mais seulement chez SON modèle. */
+    C3.verif++; C3.ctl = null; C3.ctlPour = ''; C3.source = ''; C3.verifPour = ''; C3.panneau = false; C3.essais = 0;
+    if (RP.de !== id) { RP.images = {}; RP.vue = 'face'; RP.de = id; }
+    RP.panneau = false;
     VUE = '3d'; dessiner();
     if (GLV && GLV.gl && GLV.dessineId !== id) { var gl0 = GLV.gl; gl0.clearColor(0, 0, 0, 0); gl0.clear(gl0.COLOR_BUFFER_BIT | gl0.DEPTH_BUFFER_BIT); GLV.dessineId = ''; }
     dire('${T("Chargement de « {0} »…")}'.split('{0}').join(m.nom || ''), 'att');
@@ -2970,13 +3008,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!url) return null;
     var e = PHIMG[url];
     if (e && e.im) return e.im;
+    // (2026-10-25, audit) une photo illisible (domaine refusé, réseau) laissait « Chargement de la photo… » sans fin : l échec
+    // est NOTÉ (la toile le dit), et un nouvel essai se fait au prochain dessin, passé quelques secondes
+    if (e && e.err && Date.now() - e.t > 5000) { delete PHIMG[url]; e = null; }
     if (e) return null;
-    PHIMG[url] = { im: null };
-    var poser = function(src){ if (!src) return; var im = new Image(); im.onload = function(){ PHIMG[url].im = im; if (rappel) rappel(); }; im.src = src; };
+    var ent = PHIMG[url] = { im: null };
+    var rate = function(){ if (PHIMG[url] !== ent) return; ent.err = true; ent.t = Date.now(); dire('${T("La photo n’a pas pu être chargée.")}', 'err'); if (rappel) rappel(); };
+    var poser = function(src){ if (!src) { rate(); return; } var im = new Image(); im.onload = function(){ if (PHIMG[url] === ent) { ent.im = im; if (rappel) rappel(); } }; im.onerror = rate; im.src = src; };
     if (/^data:/.test(url)) poser(url);
-    else if (P && P.imageLocale) Promise.resolve(P.imageLocale(url)).then(poser);
+    else if (P && P.imageLocale) Promise.resolve(P.imageLocale(url)).then(poser, rate);
+    else rate();
     return null;
   }
+  function imagePHRatee(url){ var e = url && PHIMG[url]; return !!(e && e.err); }
   function dessinerPhoto(){
     document.getElementById('titre').textContent = '${T("Patron depuis une photo")}';
     document.getElementById('sous').textContent = '${T("Une photo sur mannequin fantôme, fond uni : le patron de même allure, puis le vêtement en 3D")}';
@@ -3038,7 +3082,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var url = r ? r.face.url : PH.face, im = imagePH(url, function(){ if (VUE === 'photo') { peindrePH(); if (!r) dessinerPhoto(); } });
     var l = r ? r.face.l : (im ? im.naturalWidth : 0), h = r ? r.face.h : (im ? im.naturalHeight : 0);
     if (!url) s = '<text x="' + W / 2 + '" y="' + H / 2 + '" text-anchor="middle" font-size="14" fill="#3F3A32" font-family="Segoe UI, sans-serif">${T("Choisissez la photo de face du vêtement.")}</text>';
-    else if (!im || !l) s = '<text x="' + W / 2 + '" y="' + H / 2 + '" text-anchor="middle" font-size="14" fill="#3F3A32" font-family="Segoe UI, sans-serif">${T("Chargement de la photo…")}</text>';
+    else if (!im || !l) s = '<text x="' + W / 2 + '" y="' + H / 2 + '" text-anchor="middle" font-size="14" fill="#3F3A32" font-family="Segoe UI, sans-serif">' + (imagePHRatee(url) ? '${T("La photo n’a pas pu être chargée.")}' : '${T("Chargement de la photo…")}') + '</text>';
     else {
       var f = Math.min((W - 40) / l, (H - 40) / h), ox = (W - l * f) / 2, oy = (H - h * f) / 2;
       s += '<image href="' + im.src + '" x="' + ox + '" y="' + oy + '" width="' + l * f + '" height="' + h * f + '"/>';
@@ -3196,9 +3240,50 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       im.onerror = function(){ dire('${T("Cette image ne peut pas devenir une vignette.")}', 'err'); };
       im.src = src;
   }
+  /* (2026-10-25, audit) « Vers la fiche produit » envoyait au PREMIER produit de la liste dès que le produit lié n y était
+     pas (en mode léger, la liste n a que 20 résultats de recherche) — sans rien demander. Désormais : le produit lié, chargé
+     au besoin ; sans produit lié, une boîte de choix (avec recherche) ; jamais un produit pris au hasard. */
+  function choisirProduitFiche(fn){
+    var v = document.createElement('div'); v.className = 'szc-voile';
+    var prods = D.produits || [];
+    v.innerHTML = '<div class="szc-boite" role="dialog" aria-modal="true" aria-labelledby="v3p-t"><h3 id="v3p-t">${T("Vers quelle fiche produit ?")}</h3>'
+      + '<p>${T("Ce modèle n’est lié à aucun produit de la boutique : choisissez la fiche qui reçoit ce rendu.")}</p>'
+      + '<div class="at-champs"><label class="large">${T("Chercher un produit")}<input type="search" id="v3p-q" data-prodq="v3p-produit" maxlength="60" placeholder="${T("Nom ou SKU…")}"></label>'
+      + '<label class="large">${T("Produit de la boutique")}<select id="v3p-produit"><option value="">${T("— Choisir un produit —")}</option>'
+      + prods.map(function(p){ return '<option value="' + esc(p.id) + '">' + esc(p.nom) + '</option>'; }).join('') + '</select></label></div>'
+      + '<div class="nip-err" role="alert"></div><div class="szc-pied"><button type="button" class="szc-non">${T("Annuler")}</button><button type="button" class="szc-oui">${T("Envoyer")}</button></div></div>';
+    document.body.appendChild(v);
+    var fermer = function(){ if (v.parentNode) v.parentNode.removeChild(v); };
+    var valider = function(){
+      var pid = v.querySelector('#v3p-produit').value;
+      if (!pid) { v.querySelector('.nip-err').textContent = '${T("Choisissez un produit.")}'; return; }
+      fermer(); fn(pid);
+    };
+    v.querySelector('.szc-non').onclick = fermer;
+    v.querySelector('.szc-oui').onclick = valider;
+    v.addEventListener('keydown', function(ev){ if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); fermer(); } });
+    v.addEventListener('mousedown', function(ev){ if (ev.target === v) fermer(); });
+    try { v.querySelector('#v3p-q').focus(); } catch (e) {}
+  }
   function versFiche(src){
-      var prods = D.produits || [], pid = V3.m.produitId && prods.some(function(p){ return p.id === V3.m.produitId; }) ? V3.m.produitId : (prods[0] && prods[0].id);
-      if (!pid || OCCUPE) return;
+      if (!V3 || OCCUPE) return;
+      var lie = V3.m.produitId || '', modeleId = V3.id;
+      var pret = function(pid){ return (D.produits || []).some(function(p){ return p.id === pid; }); };
+      var choisir = function(){ choisirProduitFiche(function(pid){ if (V3 && V3.id === modeleId) envoyerVersFiche(src, pid); }); };
+      if (!lie) { choisir(); return; }
+      if (!pret(lie)) {
+        // le produit lié n est pas dans la liste chargée : on le lit (chercherProduits ajoute toujours le produit lié)
+        chercherProduits('', function(){
+          if (!V3 || V3.id !== modeleId) return;
+          if (pret(lie)) envoyerVersFiche(src, lie); else choisir();
+        });
+        return;
+      }
+      envoyerVersFiche(src, lie);
+  }
+  function envoyerVersFiche(src, pid){
+      var prods = D.produits || [];
+      if (!pid || OCCUPE || !V3) return;
       var envoi = function(d){
         OCCUPE = true; dire('${T("Envoi des rendus…")}');
         appeler('atelier:envoyerFiche', [{ id: V3.id, produitId: pid, images: [d], principale: false }]).then(function(r){
@@ -3217,8 +3302,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function ouvrirEnvoiFiche(){
     if (!V3 || !plaque3d() || OCCUPE) return;
     var prods = D.produits || [];
+    // (2026-10-25, audit) le produit lié absent de la liste chargée (mode léger) : on le lit d abord, une seule fois
+    if (V3.m.produitId && !prods.some(function(p){ return p.id === V3.m.produitId; }) && !ouvrirEnvoiFiche.relu) {
+      ouvrirEnvoiFiche.relu = true; var mid = V3.id;
+      chercherProduits('', function(){ if (V3 && V3.id === mid) ouvrirEnvoiFiche(); ouvrirEnvoiFiche.relu = false; });
+      return;
+    }
     if (!prods.length) { dire('${T("Aucun produit dans la boutique : créez d’abord la fiche du vêtement.")}', 'att'); return; }
-    var st = { produit: V3.m.produitId && prods.some(function(p){ return p.id === V3.m.produitId; }) ? V3.m.produitId : prods[0].id, vues: ['face', 'tq', 'dos'], fantome: true, principale: false, images: [] };
+    // jamais le premier produit venu : le produit lié, sinon un choix explicite
+    var st = { produit: V3.m.produitId && prods.some(function(p){ return p.id === V3.m.produitId; }) ? V3.m.produitId : '', q: '', vues: ['face', 'tq', 'dos'], fantome: true, principale: false, images: [] };
     var v = document.createElement('div'); v.className = 'szc-voile';
     document.body.appendChild(v);
     var fermer = function(){ if (v.parentNode) v.parentNode.removeChild(v); };
@@ -3226,21 +3318,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       st.images = rendreVues3d(st.vues, st.fantome);
       v.innerHTML = '<div class="szc-boite v3-fiche" role="dialog" aria-modal="true" aria-labelledby="v3f-t"><h3 id="v3f-t">${T("Envoyer les rendus vers la fiche produit")}</h3>'
         + '<p>${T("Rendus du moteur 3D, à 1200 × 1600 sur fond blanc, sans frais. Les rendus envoyés avant à ce produit sont remplacés ; vos photos ne sont jamais écrasées.")}</p>'
-        + '<div class="at-champs"><label class="large">${T("Produit de la boutique")}<select id="v3f-produit">' + prods.map(function(p){ return '<option value="' + esc(p.id) + '"' + (st.produit === p.id ? ' selected' : '') + '>' + esc(p.nom) + '</option>'; }).join('') + '</select></label></div>'
+        + '<div class="at-champs"><label class="large">${T("Chercher un produit")}<input type="search" id="v3f-q" data-prodq="v3f-produit" maxlength="60" placeholder="${T("Nom ou SKU…")}" value="' + esc(st.q) + '"></label>'
+        + '<label class="large">${T("Produit de la boutique")}<select id="v3f-produit"><option value="">${T("— Choisir un produit —")}</option>' + (D.produits || prods).map(function(p){ return '<option value="' + esc(p.id) + '"' + (st.produit === p.id ? ' selected' : '') + '>' + esc(p.nom) + '</option>'; }).join('') + '</select></label></div>'
         + '<div class="im-cases">' + VUES_FICHE.map(function(x){ return '<label><input type="checkbox" data-v3fv="' + x[0] + '"' + (st.vues.indexOf(x[0]) >= 0 ? ' checked' : '') + '>' + x[1] + '</label>'; }).join('')
         + '<label><input type="checkbox" id="v3f-fantome"' + (st.fantome ? ' checked' : '') + '>${T("Style mannequin fantôme")}</label>'
         + '<label><input type="checkbox" id="v3f-principale"' + (st.principale ? ' checked' : '') + '>${T("Le premier rendu devient la photo principale")}</label></div>'
         + '<div class="v3f-vign">' + st.images.map(function(d){ return '<img src="' + d + '" alt="">'; }).join('') + (st.images.length ? '' : '<span class="cx-sub">${T("Choisissez au moins une vue.")}</span>') + '</div>'
-        + '<div class="szc-pied"><button type="button" class="szc-non">${T("Annuler")}</button><button type="button" class="szc-oui"' + (st.images.length ? '' : ' disabled') + '>' + '${T("Envoyer {0} rendu(s)")}'.split('{0}').join(st.images.length) + '</button></div></div>';
+        + '<div class="nip-err" role="alert"></div><div class="szc-pied"><button type="button" class="szc-non">${T("Annuler")}</button><button type="button" class="szc-oui"' + (st.images.length ? '' : ' disabled') + '>' + '${T("Envoyer {0} rendu(s)")}'.split('{0}').join(st.images.length) + '</button></div></div>';
       v.querySelector('.szc-non').onclick = fermer;
       v.querySelector('.szc-oui').onclick = envoyer;
       v.querySelector('#v3f-produit').onchange = function(ev){ st.produit = ev.target.value; };
+      v.querySelector('#v3f-q').oninput = function(ev){ st.q = ev.target.value; };
       Array.prototype.forEach.call(v.querySelectorAll('[data-v3fv]'), function(c){ c.onchange = function(){ var k = c.getAttribute('data-v3fv'); st.vues = c.checked ? st.vues.concat([k]) : st.vues.filter(function(x){ return x !== k; }); st.vues = VUES_FICHE.map(function(x){ return x[0]; }).filter(function(x){ return st.vues.indexOf(x) >= 0; }); peindre(); }; });
       v.querySelector('#v3f-fantome').onchange = function(ev){ st.fantome = ev.target.checked; peindre(); };
       v.querySelector('#v3f-principale').onchange = function(ev){ st.principale = ev.target.checked; };
     };
     var envoyer = function(){
+      if (!V3) { fermer(); return; }
       if (!st.images.length || OCCUPE) return;
+      var sp = v.querySelector('#v3f-produit'); if (sp) st.produit = sp.value;
+      if (!st.produit) { v.querySelector('.nip-err').textContent = '${T("Choisissez un produit.")}'; return; }
       OCCUPE = true; var b = v.querySelector('.szc-oui'); if (b) b.disabled = true;
       dire('${T("Envoi des rendus…")}');
       appeler('atelier:envoyerFiche', [{ id: V3.id, produitId: st.produit, images: st.images, principale: st.principale }]).then(function(r){
@@ -3251,13 +3348,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           return;
         }
         fermer();
-        var pr = prods.filter(function(p){ return p.id === r.produitId; })[0];
+        var pr = (D.produits || prods).filter(function(p){ return p.id === r.produitId; })[0];
         dire('${T("{0} rendu(s) ajouté(s) à la fiche « {1} ».")}'.split('{0}').join(r.envoyees).split('{1}').join(pr ? pr.nom : r.produitId) + (r.principale ? ' ${T("Le premier est la photo principale.")}' : ''), 'bon');
       });
     };
-    v.addEventListener('keydown', function(ev){ if (ev.key === 'Escape') fermer(); });
+    v.addEventListener('keydown', function(ev){ if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); fermer(); } });
     v.addEventListener('mousedown', function(ev){ if (ev.target === v) fermer(); });
     peindre();
+    // le focus DANS la boîte : sans lui, Échap n arrivait pas à son écouteur
+    try { (v.querySelector('select') || v.querySelector('button')).focus(); } catch (e) {}
   }
 
   /* ══ LE MOTEUR WebGL (lot 6, 2026-10-17 — sa décision : « moteur 3D au poste ») ══════════════
@@ -5924,9 +6023,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       OCCUPE = false;
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       V3.dsale = false; V3.pile = [];
+      // (2026-10-25, audit) « Prêt à construire ? » disait encore « Modèle enregistré ✕ » après le lien « Enregistrer » :
+      // le contrôle est refait sur la version qu on vient d écrire
+      C3.ctl = null; C3.verifPour = ''; peindreTnb3d();
       relireDonnees().then(function(d){
-        if (d && d.ok) { D = d; var m = (D.modeles || []).filter(function(x){ return x.id === V3.id; })[0]; if (m && V3) { V3.m = m; V3.design = copie(m.design3d || V3.design); } }
-        if (VUE === '3d' && V3) { entete3d(); peindreDesign3d(); dire('${T("Design 3D enregistré.")}', 'bon'); programmerVignette(); }
+        if (d && d.ok) { D = d; var m = V3 ? (D.modeles || []).filter(function(x){ return x.id === V3.id; })[0] : null; if (m) { V3.m = m; V3.design = copie(m.design3d || V3.design); } }
+        if (VUE === '3d' && V3) { entete3d(); peindreDesign3d(); C3.ctl = null; C3.verifPour = ''; peindreTnb3d(); dire('${T("Design 3D enregistré.")}', 'bon'); programmerVignette(); }
       });
     });
   }
@@ -6255,6 +6357,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function rpChoisis(){ return RP_ANGLES.filter(function(a){ return RP.angles[a[0]]; }).map(function(a){ return a[0]; }); }
   function rpUsd(x){ return x == null ? '…' : '${T("{0} $ US")}'.split('{0}').join(szArgentNombre(x, 3)); }
   function rpEnCours(){ return Object.keys(RP.gens).length > 0; }
+  // (2026-10-25, audit) un rendu en cours n appartient qu à SON modèle (RP.genModele) : ailleurs, ni barre ni blocage muet
+  function rpEnCoursIci(){ return rpEnCours() && !!V3 && RP.genModele === V3.id; }
   /* ══ L APERÇU 3D CONSTRUIT PAR THE NEW BLACK — LA VUE PRINCIPALE (2026-10-19, sa demande : « la vue 3D des plans de
      l Atelier devra produire une demande chez The New Black pour CONSTRUIRE l aperçu 3D, et ensuite on travaille avec le
      rendu généré ; pour la construction initiale, demande et confirmation ; et des VALIDATIONS côté Atelier avant de
@@ -6321,7 +6425,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function verifierC3(){
     if (!V3) return;
     var n = ++C3.verif, m = V3.m, ctl = [];
-    var fin = function(){ if (n !== C3.verif || !V3) return; C3.ctl = ctl; peindreTnb3d(); };
+    var pour = V3.id + ':' + (m.version || 1);
+    var fin = function(){ if (n !== C3.verif || !V3 || V3.id + ':' + (V3.m.version || 1) !== pour) return; C3.ctl = ctl; C3.ctlPour = pour; peindreTnb3d(); };
     ctl.push(V3.dsale
       ? { ok: false, lib: '${T("Modèle enregistré")}', raison: '${T("Des modifications ne sont pas enregistrées : l’aperçu représenterait une version qui n’existe pas.")}', lien: '${T("Enregistrer")}', geste: 'enreg' }
       : { ok: true, lib: '${T("Modèle enregistré")}', raison: '${T("Version {0}")}'.split('{0}').join(String(m.version || 1)) });
@@ -6351,9 +6456,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           ? { ok: false, lib: '${T("Motif / impression")}', raison: String(alertes[0].texte || '') + (alertes.length > 1 ? ' (+' + (alertes.length - 1) + ')' : ''), lien: '${T("Ouvrir le motif")}', geste: 'motif' }
           : { ok: true, lib: '${T("Motif / impression")}', raison: '${T("Placé et validé")}' });
       }
+      if (n !== C3.verif || !V3 || V3.id !== m.id) return;
       C3.source = cap && cap.image ? cap.image : '';
       // le vêtement encore en calcul : on revérifie toute seule, sans clic (au plus une minute)
-      if (cap && cap.attente && (C3.essais = (C3.essais || 0) + 1) < 40) setTimeout(function(){ if (n === C3.verif && V3 && !C3.gen) verifierC3(); }, 1500);
+      if (cap && cap.attente && (C3.essais = (C3.essais || 0) + 1) < 40) setTimeout(function(){ if (n === C3.verif && V3 && !(C3.gen && C3.genModele === V3.id)) verifierC3(); }, 1500);
       else if (cap && !cap.attente) C3.essais = 0;
       ctl.push(cap && cap.ok
         ? { ok: true, lib: '${T("Vue de face sans défaut")}', raison: '${T("Le vêtement entier, sans mannequin, sur fond blanc")}' }
@@ -6366,7 +6472,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     c3ModelViewer();
     var t = c3Construit(), et = c3Etat(), ch = c3Changements(), h = '';
     var depense = '${T("Déjà dépensé pour ce modèle : {0} ({1} construction(s))")}'.split('{0}').join(c3Usd(et.total)).split('{1}').join(String(et.constructions));
-    if (C3.gen) {
+    if (C3.gen && C3.genModele === V3.id) {
       h += '<div class="t1">${T("Construction de l’aperçu 3D…")}</div><div class="t2">${T("Sans mannequin, puis modèle 3D chez The New Black — environ 3 à 4 minutes. Suivie dans la petite fenêtre de suivi et la fenêtre Générations.")}</div>'
         + '<div class="barre" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + C3.pct + '"><i style="width:' + C3.pct + '%"></i></div>'
         + '<div class="coin"><button type="button" data-c3="photo">${T("Rendu photo…")}</button><button type="button" data-c3="tech">${T("Vue technique 3D")}</button></div>';
@@ -6422,7 +6528,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
   }
   function construireC3(){
-    if (!V3 || OCCUPE || C3.gen || !c3Pret() || !C3.prix || !C3.source) return;
+    if (!V3 || OCCUPE || !c3Pret() || !C3.prix || !C3.source) return;
+    if (C3.gen) { dire('${T("Une construction d’aperçu 3D est déjà en cours pour un autre modèle : attendez sa fin, puis recommencez.")}', 'att'); return; }
+    // (2026-10-25, audit) garde finale : le contrôle et la vue qui part doivent être ceux de CE modèle, à CETTE version
+    if (C3.ctlPour !== V3.id + ':' + (V3.m.version || 1)) { C3.ctl = null; C3.verifPour = ''; peindreTnb3d(); return; }
     var P = C3.prix, total = Number(P.prix), cred = Number(P.credits), t = c3Construit(), et = c3Etat();
     var meme = t && Number(t.version) === Number(V3.m.version || 1) && !(c3Changements() || []).length;
     var d = [['${T("Envoyé")}', '${T("la vue de face du modèle (900 × 1200, fond blanc, sans mannequin)")}'],
@@ -6440,17 +6549,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           texte: '${T("Le coût est engagé dès l’envoi : il n’est pas remboursé si vous arrêtez la construction ensuite.")}',
           details: d, oui: '${T("Construire ({0})")}'.split('{0}').join(c3Usd(total)) };
     szConfirmer(q).then(function(ok){
-      if (!ok || !V3) return;
-      var id = V3.id;
+      if (!ok || !V3 || C3.gen || C3.ctlPour !== V3.id + ':' + (V3.m.version || 1)) return;
+      var id = V3.id, image = C3.source;
       dire('${T("Envoi à The New Black…")}');
-      appeler('atelier:modele3dLancer', [{ id: id, version: V3.m.version || 1, image: C3.source, prixAnnonce: total, prix3d: Number(P.modele3d.prix),
+      appeler('atelier:modele3dLancer', [{ id: id, version: V3.m.version || 1, image: image, prixAnnonce: total, prix3d: Number(P.modele3d.prix),
         vetement: (V3.m.nom || '') + (V3.m.base ? ' (' + V3.m.base + ')' : ''), couleur: V3.couleur || '', reconstruire: !!meme }]).then(function(r){
         if (r && r.motif === 'prix_change') { C3.prix = null; dire('${T("Le prix a changé : {0}. Rien n’a été lancé — relancez pour confirmer ce prix.")}'.split('{0}').join(c3Usd(r.prixReel)), 'att'); peindreTnb3d(); return; }
         if (r && r.motif === 'non_enregistre') { dire('${T("Le modèle a changé depuis la vérification : enregistrez, puis recommencez.")}', 'att'); return; }
         if (r && r.motif === 'plafond') { dire('${T("Plafond atteint : trois constructions pour ce modèle dans les dernières 24 heures.")}', 'att'); return; }
         if (r && r.motif === 'deja_construit') { dire('${T("Un aperçu existe déjà pour cette version.")}', 'att'); return; }
         if (!r || !r.ok) { dire(r && (r.detail || r.error) ? '${T("The New Black : {0}")}'.split('{0}').join(r.detail || r.error) : expliquer(r), 'err'); return; }
-        C3.gen = r.id; C3.pct = 3; C3.panneau = false; suivreC3(id);
+        C3.gen = r.id; C3.genModele = id; C3.pct = 3; C3.panneau = false; suivreC3(id);
         dire('${T("Construction lancée — suivie dans la petite fenêtre de suivi.")}', 'bon');
       });
     });
@@ -6505,7 +6614,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + (D.peutModifier ? '<button type="button" data-rp="regen">${T("Régénérer…")}</button><button type="button" data-rp="vign">${T("Utiliser comme vignette")}</button>' : '')
         + ((D.produits || []).length && D.peutModifier ? '<button type="button" data-rp="fiche">${T("Vers la fiche produit")}</button>' : '')
         + '<button type="button" data-rp="ap3d">${T("Aperçu 3D")}</button><button type="button" data-rp="tech">${T("Vue technique 3D")}</button></div>';
-    } else if (rpEnCours()) {
+    } else if (rpEnCoursIci()) {
       var ks = Object.keys(RP.gens), moy = Math.round(ks.reduce(function(a, k){ return a + (RP.pct[k] || 0); }, 0) / ks.length);
       h += '<div class="t1">${T("Rendu photo en cours…")}</div><div class="t2">' + '${T("{0} angle(s) chez The New Black — environ 30 secondes chacun.")}'.split('{0}').join(String(ks.length)) + '</div>'
         + '<div class="barre" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + moy + '"><i style="width:' + moy + '%"></i></div>'
@@ -6552,7 +6661,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function genererRp(){
     var angles = rpChoisis(), p = rpPrix();
-    if (!V3 || OCCUPE || rpEnCours() || !angles.length || p == null) return;
+    if (!V3 || OCCUPE || !angles.length || p == null) return;
+    if (rpEnCours()) { dire('${T("Un rendu photo est déjà en cours pour un autre modèle : attendez sa fin, puis recommencez.")}', 'att'); return; }
     if (!plaque3d()) { dire('${T("Le vêtement n’est pas encore prêt : attendez la fin du calcul, puis recommencez.")}', 'att'); return; }
     var sources = {}, img = rendreVues3d(angles, true, [900, 1200], '#FFFFFF');
     angles.forEach(function(a, i){ sources[a] = img[i]; });
@@ -6567,7 +6677,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       texte: '${T("Le coût est engagé dès l’envoi : il n’est pas remboursé si vous arrêtez la génération ensuite.")}',
       details: d, oui: '${T("Générer ({0})")}'.split('{0}').join(rpUsd(tot)) }).then(function(ok){
         if (!ok) return;
+        if (!V3 || rpEnCours()) return;
         RP.panneau = false; var modeleId = V3.id, suite = angles.slice();
+        RP.genModele = modeleId; RP.genStyle = RP.style; RP.genVersion = V3.m.version || 1;
         var un = function(){
           if (!suite.length) { peindreTnb3d(); return; }
           var a = suite.shift();
@@ -6597,9 +6709,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           var id = RP.gens[a]; delete RP.gens[a];
           if (g.etat === 'fini') appeler('atelier:renduResultat', [id]).then(function(x){
             if (!x || !x.ok) return;
-            var rend = { url: x.url || x.image, style: RP.style, version: (V3 && V3.m.version) || 1 };
+            var rend = { url: x.url || x.image, style: RP.genStyle || RP.style, version: RP.genVersion || 1 };
             (D.modeles || []).forEach(function(m){ if (m.id === modeleId) { m.rendusPhoto = Object.assign({}, m.rendusPhoto || {}); m.rendusPhoto[a] = rend; } });
-            if (V3 && V3.id === modeleId) { V3.m.rendusPhoto = Object.assign({}, V3.m.rendusPhoto || {}); V3.m.rendusPhoto[a] = rend; if (x.image) RP.images[a] = x.image; RP.vue = a; peindreTnb3d(); }
+            if (V3 && V3.id === modeleId) { V3.m.rendusPhoto = Object.assign({}, V3.m.rendusPhoto || {}); V3.m.rendusPhoto[a] = rend; if (x.image && RP.de === modeleId) RP.images[a] = x.image; RP.vue = a; peindreTnb3d(); }
             dire('${T("Rendu photo prêt — rangé dans la photothèque.")}', 'bon');
           });
           else dire(g.message || '${T("Le rendu photo n’a pas abouti.")}', 'err');
@@ -6948,7 +7060,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var m = MO.m, mo = MO.motif;
     document.getElementById('titre').textContent = '${T("Motif")}';
     document.getElementById('sous').textContent = m.nom + (m.ref ? ' · ' + m.ref : '') + (MO.sale ? ' · ${T("modifications non enregistrées")}' : '');
-    document.getElementById('actions').innerHTML = '<button type="button" id="mo-retour">${T("← Bibliothèque")}</button>'
+    document.getElementById('actions').innerHTML = '<button type="button" id="mo-retour">' + (MO.retour === 'editeur' ? '${T("← Éditeur")}' : MO.retour === '3d' ? '${T("← Aperçu 3D")}' : '${T("← Bibliothèque")}') + '</button>'
       + '<button type="button" id="mo-annuler" aria-label="${T("Annuler")}" title="${T("Annuler (Ctrl+Z)")}"' + (MOPILE.length ? '' : ' disabled') + '>↶</button>'
       + (D.peutModifier ? '<button type="button" class="prim" id="mo-enreg"' + (MO.sale ? '' : ' disabled') + '>${T("Enregistrer")}</button>' : '');
     var seg = function(attr, k, lib, on){ return '<button type="button" class="' + (on ? 'on' : '') + '" ' + attr + '="' + k + '">' + lib + '</button>'; };
@@ -7484,7 +7596,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function quitterMo(){
     var sortir = function(){ var r = MO ? MO.retour : 'biblio', id = MO ? MO.id : ''; MO = null; if (window._moRO) { window._moRO.disconnect(); window._moRO = null; }
-      if (r === 'editeur' && id) { VUE = 'biblio'; ouvrirEditeur(id); return; } VUE = 'biblio'; dessiner(); dire(''); };
+      if (r === 'editeur' && id) { VUE = 'biblio'; ouvrirEditeur(id); return; }
+      // (2026-10-25, audit) ouvert depuis l aperçu 3D (« Ouvrir le motif » de « Prêt à construire ? ») : on y revient
+      if (r === '3d' && id) { VUE = 'biblio'; pleinDe(id, function(ok){ if (ok) ouvrir3d(id, 'biblio'); else dessiner(); }); return; }
+      VUE = 'biblio'; dessiner(); dire(''); };
     if (!MO || !MO.sale) { sortir(); return; }
     szConfirmer({ titre: '${T("Quitter sans enregistrer ?")}', texte: '${T("Les changements du motif seront perdus.")}', oui: '${T("Quitter")}', danger: true }).then(function(ok){ if (ok) sortir(); });
   }
@@ -7513,7 +7628,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return;
     }
     if ((b = t.closest('[data-vueb]'))) { VUEB = b.getAttribute('data-vueb'); try { localStorage.setItem('sz-atelier-vue', VUEB); } catch (e) {} dessiner(); return; }
-    if ((b = t.closest('[data-tri]'))) { var tk = b.getAttribute('data-tri'); TRI = { cle: tk, sens: TRI.cle === tk ? -TRI.sens : (tk === 'nom' || tk === 'ref' || tk === 'type' ? 1 : -1) }; dessiner(); return; }
+    if ((b = t.closest('[data-tri]'))) { var tk = b.getAttribute('data-tri'); TRI = { cle: tk, sens: TRI.cle === tk ? -TRI.sens : (tk === 'nom' || tk === 'ref' || tk === 'type' ? 1 : -1) }; if (LEGER) { PG_PAGE = 0; charger(); } else dessiner(); return; }
     if ((b = t.closest('[data-nip]'))) { var gn = b.getAttribute('data-nip').split(':'); protegerModele(gn.slice(1).join(':'), gn[0]); return; }
     if ((b = t.closest('[data-protection]'))) { exporterPdfModele(b.getAttribute('data-protection'), 'protection', b); return; }
     if ((b = t.closest('[data-motif]'))) { ouvrirMotif(b.getAttribute('data-motif'), 'biblio'); return; }
@@ -7544,7 +7659,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   corps.addEventListener('input', function(ev){
     if (VUE === 'editeur' || VUE === 'impression' || VUE === '3d' || VUE === 'motif' || VUE === 'photo' || VUE === 'planche') return;
     var t = ev.target;
-    if (t && t.id === 'a-q') { Q = t.value; clearTimeout(window._atQ); window._atQ = setTimeout(LEGER ? function(){ PG_PAGE = 0; charger(); } : redessinerSansPerdreLaSaisie, LEGER ? 250 : 200); return; }
+    // (2026-10-25, audit) en mode léger, la page relue se redessine SANS perdre le curseur (il sautait à chaque pause de frappe)
+    if (t && t.id === 'a-q') { Q = t.value; clearTimeout(window._atQ); window._atQ = setTimeout(LEGER ? function(){ PG_PAGE = 0; var fin = function(){ dire(''); }; fin.garderSaisie = true; charger(fin); } : redessinerSansPerdreLaSaisie, LEGER ? 250 : 200); return; }
     ramasser(t);
   });
   corps.addEventListener('change', function(ev){
@@ -7596,7 +7712,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (t.closest('#e-annuler')) { annuler(); return; }
     if (t.closest('#e-refaire')) { refaire(); return; }
     if (t.closest('#e-enreg')) { enregistrerEditeur(t.closest('#e-enreg')); return; }
-    if (t.closest('#m-editer')) { if (M && M.id && !TRACE) { var mid = M.id; M = null; ouvrirEditeur(mid); } return; }
+    if (t.closest('#m-editer')) { if (M && M.id && !TRACE) { var mid = M.id; quitterModele(function(){ M = null; SALEM = false; ouvrirEditeur(mid); }); } return; }
     if (t.closest('#a-nouveau')) { ouvrirNeuf(); return; }
     if (t.closest('#a-photo')) { ouvrirPhoto(); return; }
     if (t.closest('#ph-retour')) { quitterPH(); return; }
@@ -7609,19 +7725,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (t.closest('#m-enreg')) { enregistrer(t.closest('#m-enreg')); return; }
   });
 
-  function ouvrirNeuf(){ if (!D) return; M = modeleNeuf('robe'); TRACE = true; TAP = 'M'; TOUTES = false; PILEM = []; REFM = []; FLY = ''; VUE = 'modele'; dessiner(); var n = document.getElementById('m-nom'); if (n) n.focus(); }
+  function ouvrirNeuf(){ if (!D) return; M = modeleNeuf('robe'); TRACE = true; SALEM = false; TAP = 'M'; TOUTES = false; PILEM = []; REFM = []; FLY = ''; VUE = 'modele'; dessiner(); var n = document.getElementById('m-nom'); if (n) n.focus(); }
   function ouvrirModele(id){
     var m = (D.modeles || []).filter(function(x){ return x.id === id; })[0];
     if (!m) { dire(MOTIFS.introuvable, 'err'); return; }
-    SEL = id; M = copie(m); TRACE = false; TAP = m.tailleBase || 'M'; TOUTES = false; PILEM = []; REFM = []; FLY = ''; VUE = 'modele'; dessiner();
+    SEL = id; M = copie(m); TRACE = false; SALEM = false; TAP = m.tailleBase || 'M'; TOUTES = false; PILEM = []; REFM = []; FLY = ''; VUE = 'modele'; dessiner();
   }
   function revenir(){
-    if (TRACE && M && M.id) {
-      szConfirmer({ titre: '${T("Quitter sans enregistrer ?")}', texte: '${T("Les changements de base, d’options ou de mesures seront perdus.")}', oui: '${T("Quitter")}', danger: true })
-        .then(function(ok){ if (ok) { M = null; TRACE = false; VUE = 'biblio'; dessiner(); } });
-      return;
-    }
-    M = null; TRACE = false; VUE = 'biblio'; dessiner();
+    // (2026-10-25, audit) un modèle neuf, ou un nom / des notes changés, demandaient aussi confirmation : voir quitterModele
+    quitterModele(function(){ M = null; TRACE = false; SALEM = false; VUE = 'biblio'; dessiner(); });
   }
   function dupliquer(id){
     if (OCCUPE) return; OCCUPE = true; dire('${T("Copie…")}');
@@ -7689,7 +7801,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   /* ── LE MODE LEGER (lot VOLUME 2) ── */
   function demandeLegere(){
-    return { leger: true, page: PG_PAGE, parPage: 24, q: Q.trim(), categorie: CAT, etat: ETAT, sansArchive: !ETAT };
+    // (2026-10-25, audit) le tri part avec la demande : le site range TOUTE la liste avant de la couper en pages
+    return { leger: true, page: PG_PAGE, parPage: 24, q: Q.trim(), categorie: CAT, etat: ETAT, sansArchive: !ETAT, tri: TRI.cle, sens: TRI.sens };
   }
   // La page legere ; les modeles deja lus EN ENTIER restent (ceux qu on touche), relus a leur version.
   function lireLeger(extra){
@@ -7776,7 +7889,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         var sel = document.getElementById(sid); if (!sel) return;
         var v = sel.value;
         var avecPhoto = sid === 'ph-produit';
-        sel.innerHTML = '<option value="">' + (avecPhoto ? '${T("— Choisir un produit —")}' : '${T("— Aucun —")}') + '</option>'
+        // (2026-10-25, audit) les boîtes d envoi à la fiche (v3…) exigent un choix : pas de « — Aucun — »
+        sel.innerHTML = '<option value="">' + (avecPhoto || sid.indexOf('v3') === 0 ? '${T("— Choisir un produit —")}' : '${T("— Aucun —")}') + '</option>'
           + l.filter(function(p){ return !avecPhoto || (p.photos || []).length; }).map(function(p){
               return '<option value="' + esc(p.id) + '"' + (p.id === v ? ' selected' : '') + '>' + esc(p.nom) + '</option>'; }).join('');
       });
@@ -7804,6 +7918,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       else if (DEPART === 'liste') { DEPART = ''; VUEB = 'liste'; SEL = ((D.modeles || [])[0] || {}).id || ''; dessiner(); }
       else if (DEPART.indexOf('planche:') === 0) { var dp = DEPART.slice(8); DEPART = ''; pleinDe(dp, function(){ ouvrirPlanche(dp, 'biblio'); }); }
       else if (DEPART.indexOf('motif:') === 0) { var dm = DEPART.slice(6); DEPART = ''; pleinDe(dm, function(){ ouvrirMotif(dm, 'biblio'); }); }
+      else if (apres && apres.garderSaisie && VUE === 'biblio' && document.activeElement && document.activeElement.id === 'a-q') redessinerSansPerdreLaSaisie();
       else dessiner();
       if (apres) apres(); else dire('');
     });
@@ -7817,6 +7932,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   window.szActualiser = function(){ if (VUE === 'biblio' && !OCCUPE) charger(); };
   window.szRevenir = window.szActualiser;
   document.addEventListener('keydown', function(ev){
+    // (2026-10-25, audit) une boîte ouverte (NIP, envoi à la fiche, confirmation) garde ses touches : Échap n y ferme
+    // qu ELLE — il fermait aussi la vue, voire toute la fenêtre, et laissait la boîte orpheline
+    if (document.querySelector('.szc-voile') || (ev.key === 'Escape' && ev.defaultPrevented)) return;
     if (VUE === 'editeur' && E && ev.key !== 'Escape' && toucheEditeur(ev)) return;
     if (VUE === 'motif' && MO && ev.key !== 'Escape' && toucheMo(ev)) return;
     if (VUE === 'motif' && MO && ev.key === 'Escape' && (MO.sel || MO.zoneSel)) { ev.preventDefault(); MO.sel = ''; MO.zoneSel = false; dessinerMo(); return; }

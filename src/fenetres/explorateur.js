@@ -614,7 +614,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + ligne('${T("Produit lié")}', p.lieNom || '${T("aucun")}')
       + (p.lieSku ? ligne('${T("SKU")}', p.lieSku) : '')
       + ligne('${T("Traitements")}', faits || '${T("aucun")}')
-      + ligne('${T("Détourée")}', p.isole ? 'oui' : 'non')
+      + ligne('${T("Détourée")}', p.isole ? '${T("oui")}' : '${T("non")}')
       + ligne('${T("Poids")}', poids(p.poids))
       + (p.lotNom ? ligne('${T("Lot d’import")}', p.lotNom) : '')
       + '</div>';
@@ -879,9 +879,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<p style="color:var(--tx2)">${T("Un seul pas en arrière est conservé par photo : une photo")} '
       + '${T("passée par deux traitements ne remonte qu’au précédent, pas à l’originale.")}</p>'
       + (k < ids.length
-          ? ('<p style="color:var(--tx-or)"><span class="ic">⚠</span> ' + (ids.length - k) + '${T(" photo")}'
-             + ((ids.length - k) > 1 ? '${T("s n’ont")}' : '${T(" n’a")}') + ' ${T("rien à annuler et ne bougera")}'
-             + ((ids.length - k) > 1 ? 'nt' : '') + '${T(" pas.")}</p>')
+          /* DEUX PHRASES ENTIERES (2026-10-25, audit) : le pluriel recolle a la main (« nt » ecrit en dur)
+             donnait en anglais « will not movent not ». */
+          ? ('<p style="color:var(--tx-or)"><span class="ic">⚠</span> '
+             + ((ids.length - k) > 1 ? '${T("{0} photos n’ont rien à annuler et ne bougeront pas.")}'
+                                    : '${T("{0} photo n’a rien à annuler et ne bougera pas.")}').split('{0}').join(ids.length - k)
+             + '</p>')
           : '')
       + '<div class="fin2"><button id="an-non">${T("Annuler")}</button>'
       + '<button class="prim" id="an-oui">${T("Revenir en arrière")}</button></div>',
@@ -1179,8 +1182,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       ev.preventDefault(); fermerGrand(); return;
     }
     if (ev.key === 'Escape' && !document.querySelector('.voile')) { ev.preventDefault(); P.fermer(); }
-    // Ctrl+A : tout selectionner, comme partout ailleurs.
-    if ((ev.ctrlKey || ev.metaKey) && (ev.key === 'a' || ev.key === 'A')) {
+    // Ctrl+A : tout selectionner, comme partout ailleurs — sauf dans un champ, ou il selectionne le TEXTE
+    // (2026-10-25, audit : dans la recherche, il selectionnait toutes les photos).
+    var foc = document.activeElement, tag = foc && foc.tagName;
+    if ((ev.ctrlKey || ev.metaKey) && (ev.key === 'a' || ev.key === 'A') && !(tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (foc && foc.isContentEditable))) {
       ev.preventDefault();
       ((D && D.tousLesIds) || []).forEach(function(id){ SEL[id] = true; });
       dessiner();

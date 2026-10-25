@@ -279,4 +279,9 @@ module.exports = {
   'Filtrer les versements': 'Filter the deposits',
   'Plus': 'More',
   'Apparier…': 'Match…',
+  // (2026-10-25, audit) Mots visibles qui échappaient au dictionnaire.
+  'brut': 'gross',
+  'frais': 'fees',
+  'net': 'net',
+  'au': 'to',
 };

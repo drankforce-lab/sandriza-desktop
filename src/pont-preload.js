@@ -226,6 +226,14 @@ contextBridge.exposeInMainWorld('szPont', {
      que le bandeau revienne à la prochaine ouverture.
      ⚠ Canal ÉTROIT : une clé et un booléen, validés côté principal. */
   tuilesMasquer: (cle, off) => ipcRenderer.send('vue:tuiles', String(cle || ''), !!off),
+  /* ⚠ LES MÉMOIRES DE POSTE D UNE FENÊTRE NATIVE (2026-10-25, audit). Chargée en
+     data:text/html, la page n a PAS de localStorage (SecurityError) : l échelle
+     retenue du poste photo, la mesure IA déjà payée, la vue de la photothèque ne
+     survivaient pas à la fermeture. Canal ÉTROIT : une clé d une liste fermée
+     (validée côté principal) et une valeur JSON bornée. Lire : valeur omise. */
+  memoPosteLire: (cle) => ipcRenderer.invoke('poste:memo', { cle: String(cle || '') }).catch(() => null),
+  memoPosteEcrire: (cle, valeur) => ipcRenderer.invoke('poste:memo', { cle: String(cle || ''), ecrire: true, valeur: valeur })
+    .catch(() => null),
 
   // ⚠ LE PLEIN ÉCRAN EST UNE ACTION DE FENÊTRE, PAS UNE DONNÉE. Il ne passe donc
   // pas par `appeler` : cette voie-là mène aux données du site et à sa session,

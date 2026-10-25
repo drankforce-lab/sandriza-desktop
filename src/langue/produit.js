@@ -890,4 +890,18 @@ module.exports = {
   "Placée dans la fiche et rangée dans la photothèque": "Placed in the item and saved to the photo library",
   "Placée dans la fiche (non rangée dans la photothèque)": "Placed in the item (not saved to the photo library)",
   "Ex. : sur une plage au coucher du soleil, chapeau de paille, sandales, souriante": "E.g.: on a beach at sunset, straw hat, sandals, smiling",
+  // (2026-10-25, audit) Textes sortis des littéraux.
+  "appel": "call",
+  "appels": "calls",
+  "code indisponible": "code unavailable",
+  "ajouter": "add",
+  "Déjà utilisée par :": "Already used by:",
+  "Jamais utilisée": "Never used",
+  "libre": "free",
+  "Il en manque {n} pour l’atteindre.": "{n} more needed to reach it.",
+  "Nom": "Name",
+  "il y a {m} min": "{m} min ago",
+  "il y a {h} h {m} min": "{h} h {m} min ago",
+  "il y a {h} h": "{h} h ago",
+  "par": "by",
 };

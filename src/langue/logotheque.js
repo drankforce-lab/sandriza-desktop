@@ -123,5 +123,6 @@ module.exports = {
   'Retrait…': 'Removing…',
   'Image ajoutée (': 'Image added (',
   'Image retirée.': 'Image removed.',
-  'Adresse copiée.': 'Address copied.'
+  'Adresse copiée.': 'Address copied.',
+  'Renommage…': 'Renaming…'
 };

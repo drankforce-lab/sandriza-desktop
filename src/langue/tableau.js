@@ -234,7 +234,7 @@ module.exports = {
 
   /* ── CE QUE LE BANC RESIDUEL A TROUVE ──────────────────────────────────── */
   'Afficher ou masquer des tuiles': 'Show or hide tiles',
-  'Empecher toute autre connexion pendant une maintenance': 'Prevent anyone else from signing in during maintenance',
+  'Empêcher toute autre connexion pendant une maintenance': 'Prevent anyone else from signing in during maintenance',
   'Mode exclusif : ACTIF': 'Exclusive mode: ON',
   'Mode exclusif': 'Exclusive mode',
 
@@ -261,7 +261,7 @@ module.exports = {
   'aucune demande en attente': 'no request waiting',
   'aucun colis en route': 'no parcel on its way',
   'aucun avis en attente': 'no review waiting',
-  'un collegue': 'a colleague',
+  'un collègue': 'a colleague',
   // La refonte (2026-09-25).
   'Client et commande': 'Customer and order',
   'Client et commande Total Statut': 'Customer and order Total Status',

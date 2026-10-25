@@ -119,7 +119,7 @@ module.exports = {
   'de créer le lien :': 'to create the link:',
   '. Réessayez depuis la': '. Try again from the',
   'commande, ou encaissez autrement.': 'order, or take payment another way.',
-  'Aucun lien de paiement a verifier.': 'No payment link to check.',
+  'Aucun lien de paiement à vérifier.': 'No payment link to check.',
   'Vérification auprès de Square…': 'Checking with Square…',
   'Paiement confirmé': 'Payment confirmed',
   '· stock décompté.': '· stock deducted.',
@@ -172,21 +172,14 @@ module.exports = {
   'Les totaux s’afficheront ici.': 'Totals will appear here.',
 
   /* ── LES RABAIS DU COMPTOIR (2026-10-04) ──────────────────────────────────
-     ⚠ Les suggestions de remarque (« Petit défaut »…) ne sont que des MODÈLES
-     proposés à la saisie : la remarque est un texte libre, écrit dans la langue
-     de la personne au comptoir, puis conservé tel quel sur la facture. */
+     ⚠ Les suggestions de remarque (« Petit défaut »…) ne se traduisent PLUS
+     (2026-10-25, audit) : choisies, elles deviennent la remarque, une DONNÉE
+     conservée sur la facture, au registre des rabais et au journal. */
   'Rabais sur la vente': 'Discount on the sale',
   'Rabais en dollars ou en pourcentage': 'Discount in dollars or as a percentage',
   'Valeur': 'Value',
   'Remarque': 'Remark',
   'ex. : client fidèle': 'e.g. loyal customer',
-  'Petit défaut': 'Minor defect',
-  'Fin de série': 'End of line',
-  'Article de démonstration': 'Display item',
-  'Dernier en stock': 'Last one in stock',
-  'Geste commercial': 'Goodwill gesture',
-  'Client fidèle': 'Loyal customer',
-  'Rabais employé': 'Staff discount',
   'Rabais sur les articles': 'Item discounts',
   'Retirer un': 'Remove one',
   'Ajouter un': 'Add one',
@@ -270,4 +263,6 @@ module.exports = {
   'Le NIP de sécurité de la caisse sera retiré. Plus aucun prix ne pourra être modifié à la caisse tant qu’un nouveau NIP n’aura pas été enregistré.': 'The register’s security PIN will be removed. No price can be changed at the register until a new PIN has been saved.',
   'La vente en cours sera effacée : les articles, le client, la note et le rabais saisis seront perdus. Aucune vente n’a encore été enregistrée ni encaissée.': 'The current sale will be cleared: the items, customer, note and discount entered will be lost. No sale has been recorded or collected yet.',
   'Le NIP de la caisse se règle dans Configuration › Sécurité › NIP.': 'The register PIN is set in Settings › Security › PINs.',
+  // (2026-10-25, audit) Gestes refusés pendant l’enregistrement d’une vente.
+  'Vente en cours d’enregistrement — attendez la fin avant de modifier les articles.': 'Sale being recorded — wait until it finishes before changing the items.',
 };

@@ -48,15 +48,14 @@ module.exports = {
   'Actualiser le solde, la file et les messages': 'Refresh the balance, the queue and the messages',
   'Accueil & routage': 'Greeting & routing',
   'Menu IVR': 'IVR menu',
-  "File d'attente": 'Call queue',
   'File d’attente': 'Call queue',
   '⏳ File d’attente d’appels': '⏳ Call queue',
 
   /* ── LES REFUS ──────────────────────────────────────────────────────────── */
-  "L'administration n'est pas encore chargée dans la fenêtre principale.":
+  'L’administration n’est pas encore chargée dans la fenêtre principale.':
     'The administration is not loaded in the main window yet.',
-  "La fenêtre principale n'a pas répondu à temps.": 'The main window did not answer in time.',
-  "L'enregistrement dans le nuage a échoué. Réessayez.":
+  'La fenêtre principale n’a pas répondu à temps.': 'The main window did not answer in time.',
+  'L’enregistrement dans le nuage a échoué. Réessayez.':
     'Saving to the cloud failed. Try again.',
   'La téléphonie est désactivée.': 'Telephony is switched off.',
   'Aucun identifiant Twilio enregistré (onglet Général).':
@@ -64,7 +63,7 @@ module.exports = {
   'Twilio a refusé la requête. Vérifiez les identifiants.':
     'Twilio refused the request. Check the credentials.',
   'Erreur réseau en joignant Twilio.': 'Network error reaching Twilio.',
-  "L'opération a échoué.": 'The operation failed.',
+  'L’opération a échoué.': 'The operation failed.',
 
   /* ── LES VOIX ET LES MUSIQUES ───────────────────────────────────────────── */
   /* ⚠ On DECRIT la voix a l administratrice ; la cle Polly ne bouge pas. Les
@@ -88,7 +87,7 @@ module.exports = {
   'Numéro Twilio': 'Twilio number',
   'Mode de langue': 'Language mode',
   'Bilingue (FR + EN)': 'Bilingual (FR + EN)',
-  "Français d'abord, anglais sur le #": 'French first, English on #',
+  'Français d’abord, anglais sur le #': 'French first, English on #',
   'Voix française (fr-CA)': 'French voice (fr-CA)',
   'Voix anglaise (en-US)': 'English voice (en-US)',
   'Identifiants Twilio': 'Twilio credentials',
@@ -108,7 +107,7 @@ module.exports = {
   'Message d’accueil': 'Greeting message',
   'Accueil (FR)': 'Greeting (FR)',
   'Accueil (EN)': 'Greeting (EN)',
-  "Délai après l'accueil (secondes)": 'Delay after the greeting (seconds)',
+  'Délai après l’accueil (secondes)': 'Delay after the greeting (seconds)',
   'Attente au menu avant de raccrocher (secondes)':
     'Wait at the menu before hanging up (seconds)',
   'Aucun choix au menu': 'No choice at the menu',
@@ -116,12 +115,12 @@ module.exports = {
     'If the caller makes no choice after the delay, this message is played (FR + EN) and the call ends.',
   'Message « aucun choix » (FR)': '« No choice » message (FR)',
   'Message « aucun choix » (EN)': '« No choice » message (EN)',
-  "Action par défaut (à l'ouverture)": 'Default action (on answer)',
+  'Action par défaut (à l’ouverture)': 'Default action (on answer)',
   'Robot / menu (IVR)': 'Robot / menu (IVR)',
   'Rediriger directement': 'Forward directly',
   'Messagerie vocale': 'Voicemail',
   'Heures d’ouverture': 'Opening hours',
-  "Utiliser les heures d'ouverture — hors heures, message + messagerie":
+  'Utiliser les heures d’ouverture — hors heures, message + messagerie':
     'Use the opening hours — outside them, message + voicemail',
   'Message « fermé » (FR)': '« Closed » message (FR)',
   'Message « fermé » (EN)': '« Closed » message (EN)',
@@ -132,6 +131,9 @@ module.exports = {
   'Libellé FR': 'Label FR',
   'Libellé EN': 'Label EN',
   'Message vocal': 'Voice message',
+  // (2026-10-25, audit) Une phrase entière, et un état qui échappait au dictionnaire.
+  'Message vocal FR (si action = Message)': 'Voice message FR (if action = Message)',
+  'indisponible': 'unavailable',
   'Répéter l’accueil': 'Repeat the greeting',
   'Numéro (Rediriger / File)': 'Number (Forward / Queue)',
   'Aucune option — ajoutez-en pour activer le robot de réception.':
@@ -144,13 +146,13 @@ module.exports = {
   'Délai de sonnerie (secondes)': 'Ring time (seconds)',
   'Stratégie (si plusieurs numéros)': 'Strategy (if several numbers)',
   "Simultané — tous sonnent en même temps": 'Simultaneous — all ring at once',
-  "Cascade — l'un après l'autre": 'Cascade — one after the other',
+  'Cascade — l’un après l’autre': 'Cascade — one after the other',
   'Afficheur lors des transferts': 'Caller ID on transfers',
   'Numéro SANDRIZA (recommandé)': 'SANDRIZA number (recommended)',
-  "Numéro réel de l'appelant": 'The caller’s real number',
+  'Numéro réel de l’appelant': 'The caller’s real number',
   'Numéro SANDRIZA : enregistrez votre numéro Twilio comme contact « SANDRIZA » pour voir le nom.':
     'SANDRIZA number: save your Twilio number as a « SANDRIZA » contact to see the name.',
-  "Pas de numéro de renvoi pour l'instant — messagerie directe (ne plus avertir)":
+  'Pas de numéro de renvoi pour l’instant — messagerie directe (ne plus avertir)':
     'No forwarding number for now — straight to voicemail (stop warning)',
   'Aucun numéro à composer (onglet Redirection) — les appels iront en messagerie.':
     'No number to dial (Forwarding tab) — calls will go to voicemail.',
@@ -203,7 +205,7 @@ module.exports = {
     'Switch the queue on (hold with music when the line is busy)',
   'Attente max avant messagerie (minutes)': 'Max wait before voicemail (minutes)',
   'Délai avant la 1re sonnerie (secondes)': 'Delay before the 1st ring (seconds)',
-  "Durée de sonnerie de l'agent (secondes)": 'Agent ring time (seconds)',
+  'Durée de sonnerie de l’agent (secondes)': 'Agent ring time (seconds)',
   'Touche pour laisser un message pendant l’attente':
     'Key to leave a message while holding',
   'Annoncer la position dans la file (« vous êtes en position 2… »)':
@@ -221,9 +223,9 @@ module.exports = {
    * l accueil en anglais. Les exemples anglais, eux, sont deja anglais.
    * ➡ Une entree qui rend LE MEME TEXTE est une DECISION, pas un oubli.
    * ══════════════════════════════════════════════════════════════════════════ */
-  "Bonjour et merci d'avoir appelé…": "Bonjour et merci d'avoir appelé…",
+  'Bonjour et merci d’avoir appelé…': 'Bonjour et merci d’avoir appelé…',
   'Hello and thank you for calling…': 'Hello and thank you for calling…',
-  "Merci d'avoir contacté SANDRIZA. Au revoir !": "Merci d'avoir contacté SANDRIZA. Au revoir !",
+  'Merci d’avoir contacté SANDRIZA. Au revoir !': 'Merci d’avoir contacté SANDRIZA. Au revoir !',
   'Thank you for contacting SANDRIZA. Goodbye!': 'Thank you for contacting SANDRIZA. Goodbye!',
   'Nos bureaux sont fermés…': 'Nos bureaux sont fermés…',
   'Our offices are closed…': 'Our offices are closed…',
@@ -233,7 +235,7 @@ module.exports = {
   'Our offices are closed. Leave a message…': 'Our offices are closed. Leave a message…',
   'Merci pour votre message, nous vous répondrons bientôt.':
     'Merci pour votre message, nous vous répondrons bientôt.',
-  "Thanks for your message, we'll reply soon.": "Thanks for your message, we'll reply soon.",
+  'Thanks for your message, we’ll reply soon.': 'Thanks for your message, we’ll reply soon.',
   'Merci de patienter, toutes nos lignes sont occupées…':
     'Merci de patienter, toutes nos lignes sont occupées…',
   'Please hold, all our lines are busy…': 'Please hold, all our lines are busy…',

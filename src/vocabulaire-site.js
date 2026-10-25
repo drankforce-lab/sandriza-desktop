@@ -83,6 +83,10 @@ module.exports = {
   'En livraison': 'Out for delivery',
   'Livrée': 'Delivered',
   'Annulée': 'Cancelled',
+  // Types de remboursement (pont.js commandesDetail, 2026-10-25, audit)
+  'Moyen original': 'Original method',
+  'Crédit boutique': 'Store credit',
+  'Frais de service': 'Service fee',
   // Factures (_FACT_LIBELLES)
   'Non payée': 'Unpaid',
   'Payée': 'Paid',
