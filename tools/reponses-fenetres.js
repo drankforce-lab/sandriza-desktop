@@ -3889,6 +3889,94 @@ const JEU = {
       { nom: 'rôle sans droit', id: '', reponses: { 'atelier:donnees': { ok: false, motif: 'droit' }, identite: IDENTITE } },
     ];
   })(),
+  // ── ANALYSES DE FIBRES ET ÉTIQUETTES (2026-10-25) ───────────────────────────
+  // ⚠ Formes prises dans assets/js/pont.js du site (fibresDonnees, fibresApercu,
+  // fibresPlanche) et dans le moteur assets/js/fibres.js (etiquette, disposition).
+  'fibres.js': (function(){
+    var ICO = '<svg class="sz-ent-ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3.5 8.5l1.8 10h13.4l1.8-10"/></svg>';
+    var ENT = [
+      ['lav_froid', 'lavage', 'Laver à la machine à l’eau froide', 'Machine wash cold', ['LAVER À FROID', 'MACHINE WASH COLD']],
+      ['lav_main', 'lavage', 'Laver à la main à l’eau froide', 'Hand wash cold', ['LAVER À LA MAIN', 'HAND WASH']],
+      ['pas_javel', 'javel', 'Ne pas utiliser de javellisant', 'Do not bleach', ['PAS DE JAVELLISANT', 'DO NOT BLEACH']],
+      ['sech_bas', 'sechage', 'Sécher par culbutage à basse température', 'Tumble dry low', ['SÉCHER BASSE TEMP.', 'TUMBLE DRY LOW']],
+      ['sech_plat', 'sechage', 'Sécher à plat', 'Dry flat', ['SÉCHER À PLAT', 'DRY FLAT']],
+      ['rep_bas', 'repassage', 'Repasser à basse température au besoin', 'Low iron if needed', ['REPASSER À BASSE TEMP.', 'IRON LOW']],
+      ['pas_sec', 'sec', 'Ne pas nettoyer à sec', 'Do not dry clean', ['PAS DE NETTOYAGE À SEC', 'DO NOT DRY CLEAN']],
+    ].map(function(e){ return { cle: e[0], groupe: e[1], fr: e[2], en: e[3], ico: ICO, court: e[4] }; });
+    var GROUPES = [{ cle: 'lavage', fr: 'Lavage', en: 'Washing' }, { cle: 'javel', fr: 'Javellisant', en: 'Bleach' },
+      { cle: 'sechage', fr: 'Séchage', en: 'Drying' }, { cle: 'repassage', fr: 'Repassage', en: 'Ironing' }, { cle: 'sec', fr: 'Nettoyage à sec', en: 'Dry cleaning' }];
+    var FIB = [['coton', 'Coton', 'Cotton'], ['lin', 'Lin', 'Linen'], ['laine', 'Laine', 'Wool'], ['soie', 'Soie', 'Silk'], ['viscose', 'Viscose', 'Viscose'],
+      ['polyester', 'Polyester', 'Polyester'], ['nylon', 'Nylon', 'Nylon'], ['elasthanne', 'Élasthanne', 'Spandex']].map(function(f){ return { cle: f[0], fr: f[1], en: f[2] }; });
+    var PAYS = [{ cle: 'CN', nom: 'Chine', fr: 'Fait en Chine', en: 'Made in China' }, { cle: 'VN', nom: 'Vietnam', fr: 'Fait au Vietnam', en: 'Made in Vietnam' }];
+    var FONDS = [{ cle: 'fonce', nom: 'Vêtement foncé', papier: 'Papier opaque (foncé)', miroir: false, fond: '#1C1C1E', encre: '#FFFFFF' },
+      { cle: 'pale', nom: 'Vêtement pâle', papier: 'Papier transparent (pâle)', miroir: true, fond: '#FFFFFF', encre: '#111111' }];
+    var LECT = { morphologie: 'Fibres plates en ruban, tordues à intervalles irréguliers ; aucune écaille.', parois: 'Parois épaisses, lumen affaissé ; 12 à 20 µm.',
+      comparaison: 'Correspond au coton ; pas d’écailles (laine), pas de nœuds (lin).', estimation: 'Matière principale visible : coton. Quelques fibres lisses : élasthanne possible.',
+      principale: 'coton', confiance: 'elevee', possibles: ['elasthanne'], modele: 'claude-sonnet-5', cout: 0.0142, le: '2026-10-25T14:10:00.000Z' };
+    var A = function(id, no, o){ return Object.assign({ id: id, no: no, etat: 'confirmee', resume: '95 % coton, 5 % élasthanne', lecture: LECT,
+      composition: [{ fibre: 'coton', pct: 95 }, { fibre: 'elasthanne', pct: 5 }], entretien: ['lav_froid', 'pas_javel', 'sech_bas', 'rep_bas', 'pas_sec'],
+      fond: 'fonce', pays: 'CN', produitId: 'prod_0007', produit: { id: 'prod_0007', nom: 'Robe ZENXAS', ref: 'ROB-0007', tailles: ['S', 'M', 'L'] }, produitAbsent: false,
+      nomProvisoire: '', remarque: 'Fiche fournisseur 95/5', impressions: [{ le: '2026-10-24T18:00:00.000Z', n: 8, par: 'Brigitte Brousseau', tailles: { S: 3, M: 3, L: 2 } }],
+      imprime: 8, creeLe: '2026-10-22T15:00:00.000Z', creePar: 'Brigitte Brousseau', majLe: '2026-10-24T18:00:00.000Z' }, o || {}); };
+    var LISTE = [
+      A('fib_1', 'AF-0012'),
+      A('fib_2', 'AF-0011', { resume: '100 % polyester', composition: [{ fibre: 'polyester', pct: 100 }], fond: 'pale', pays: 'VN', produitId: '', produit: null,
+        nomProvisoire: 'Blouse Lina à venir', remarque: 'Arrivage nov., 40 pièces', impressions: [], imprime: 0, entretien: ['lav_main', 'pas_javel', 'sech_plat', 'rep_bas'] }),
+      A('fib_3', 'AF-0010', { etat: 'a_confirmer', resume: '', composition: [], produitId: '', produit: null, nomProvisoire: 'Jupe plissée noire',
+        remarque: 'Nylon ou polyester ? Demander la fiche', impressions: [], imprime: 0,
+        lecture: { morphologie: 'Cylindres lisses, diamètre régulier.', parois: 'Parois minces.', comparaison: 'Synthétique : la surface ne tranche pas entre nylon et polyester.',
+          estimation: 'Synthétique lisse, nylon ou polyester.', principale: 'polyester', confiance: 'faible', possibles: ['nylon'], modele: 'claude-sonnet-5', cout: 0.0131, le: '2026-10-25T13:00:00.000Z' } }),
+      A('fib_4', 'AF-0009', { resume: '70 % laine, 30 % nylon', composition: [{ fibre: 'laine', pct: 70 }, { fibre: 'nylon', pct: 30 }], produitAbsent: true, imprime: 21 }),
+    ];
+    var HIST = { total: 29, ceMois: 29, planches: 2, liste: [
+      { id: 'imp_2', le: '2026-10-24T18:00:00.000Z', par: 'Brigitte Brousseau', mode: 'cricut', feuilles: { fonce: 1, pale: 0 }, total: 8,
+        lignes: [{ analyseId: 'fib_1', no: 'AF-0012', nom: 'Robe ZENXAS', resume: '95 % coton, 5 % élasthanne', taille: 'S', n: 3, rattache: true, supprimee: false },
+          { analyseId: 'fib_1', no: 'AF-0012', nom: 'Robe ZENXAS', resume: '95 % coton, 5 % élasthanne', taille: 'M', n: 5, rattache: true, supprimee: false }] },
+      { id: 'imp_1', le: '2026-10-20T15:30:00.000Z', par: 'Brigitte Brousseau', mode: 'ciseaux', feuilles: { fonce: 1, pale: 0 }, total: 21,
+        lignes: [{ analyseId: 'fib_x', no: 'AF-0003', nom: 'Cardigan crème', resume: '70 % laine, 30 % nylon', taille: '', n: 21, rattache: false, supprimee: true }] } ] };
+    var donnees = function(liste, o){
+      return Object.assign({ ok: true, analyses: liste, fibres: FIB, pays: PAYS, paysDefaut: 'CN', fonds: FONDS,
+        modes: [{ cle: 'cricut', nom: 'Cricut — Imprimer puis couper', parFeuille: 21 }, { cle: 'ciseaux', nom: 'Ciseaux ou massicot', parFeuille: 32 }],
+        entretien: ENT, entretienGroupes: GROUPES, ca: { numero: '', manquant: true, gabarit: 'xxxxxxx' }, historique: HIST,
+        peutAjouter: true, peutModifier: true, peutSupprimer: true }, o || {});
+    };
+    var ETQ = function(fond){ return { ok: true, motif: '', fond: fond, couleurFond: fond === 'pale' ? '#FFFFFF' : '#1C1C1E', couleurEncre: fond === 'pale' ? '#111111' : '#FFFFFF',
+      miroir: fond === 'pale', taille: 'M', compo: ['95 % COTON / COTTON', '5 % ÉLASTHANNE / SPANDEX'],
+      soins: ['LAVER À FROID · MACHINE WASH COLD', 'SÉCHER BASSE TEMP. · TUMBLE DRY LOW', 'REPASSER À BASSE TEMP. · IRON LOW'],
+      symboles: ['lav_froid', 'pas_javel', 'sech_bas', 'rep_bas', 'pas_sec'], pays: 'FAIT EN CHINE / MADE IN CHINA', identite: 'SANDRIZA · CA xxxxxxx', caManquant: true }; };
+    var cases = []; for (var r = 0; r < 7; r++) for (var c = 0; c < 3; c++) cases.push({ x: c * 62, y: r * 36 });
+    var PLANCHE = { ok: true, mode: 'cricut', caManquant: true, invalides: [],
+      disposition: { mode: 'cricut', cols: 3, rangs: 7, parFeuille: 21, page: { l: 174, h: 246 }, etiquette: { l: 50, h: 30 }, cases: cases, zone: { l: 189, h: 252 } },
+      feuilles: [
+        { fond: 'fonce', miroir: false, papier: 'Papier opaque (foncé)', utilisees: [0], cases: cases.map(function(x, i){ return i === 0 || i > 8 ? null : { id: 'fib_1', taille: 'M', etiquette: ETQ('fonce') }; }) },
+        { fond: 'pale', miroir: true, papier: 'Papier transparent (pâle)', utilisees: [], cases: cases.map(function(x, i){ return i > 3 ? null : { id: 'fib_2', taille: '', etiquette: ETQ('pale') }; }) },
+      ] };
+    var GARNI = donnees(LISTE);
+    var rep = function(d){
+      return { 'fibres:donnees': d, identite: IDENTITE,
+        'fibres:apercu': { ok: true, composition: { ok: true, motif: '', total: 100 }, etiquette: ETQ('fonce'), propose: ['lav_froid', 'pas_javel', 'sech_bas', 'rep_bas'] },
+        'fibres:produits': { ok: true, total: 1, produits: [{ id: 'prod_0007', nom: 'Robe ZENXAS', ref: 'ROB-0007', tailles: ['S', 'M', 'L'] }] },
+        'fibres:planche': PLANCHE,
+        'fibres:analyser': { ok: true, lecture: LECT, budget: { plafond: 500, depense: 12.4 } },
+        'fibres:ecrire': { ok: true, id: 'fib_5', no: 'AF-0013', fiche: null, n: 0 },
+        'fibres:supprimer': { ok: true, id: '', no: '', fiche: null, n: 0 },
+        'fibres:imprimee': { ok: true, id: '', no: '', fiche: null, n: 13 } };
+    };
+    var cas = function(nom, id, d, exige){ return { nom: nom, id: id, reponses: rep(d), exige: exige }; };
+    return [
+      cas('banque garnie (confirmée, provisoire, à confirmer, produit disparu)', '', GARNI,
+        ['data-coche="fib_1"', 'data-ana="fib_3"', 'data-act="historique"', 'id="cv-choix"']),
+      cas('banque vide — appel à la première analyse', '', donnees([], { historique: { total: 0, ceMois: 0, planches: 0, liste: [] } }), ['data-act="nouvelle"']),
+      cas('nouvelle analyse (dépôt des photos)', 'nouvelle', GARNI, ['id="f-depot"', 'id="f-lire"', 'id="f-ok"', 'data-mode="provisoire"']),
+      cas('analyse ouverte (lecture de l’IA, composition, entretien)', 'modifier', GARNI, ['id="f-utiliser"', 'data-soin="lav_froid"', 'id="f-pct-0"', 'id="cv-form"']),
+      cas('planche (deux papiers, CA manquant)', 'planche', GARNI, ['id="pl-export"', 'id="cv-plan"', 'data-vue="1"', 'id="pl-fisc"']),
+      cas('planche avec le numéro CA', 'planche', donnees(LISTE, { ca: { numero: '12345', manquant: false, gabarit: 'xxxxxxx' } }), ['id="pl-export"']),
+      cas('historique d’impression', 'historique', GARNI, ['class="compteur"', 'class="imp"']),
+      cas('lecture seule', '', donnees(LISTE, { peutAjouter: false, peutModifier: false, peutSupprimer: false }), ['class="avis"']),
+      { nom: 'module des analyses absent', id: '', reponses: { 'fibres:donnees': { ok: false, motif: 'indisponible' }, identite: IDENTITE } },
+    ];
+  })(),
+
   'rappels.js': (function(){
     var FREQ = [
       { cle: 'unique', nom: 'Une seule fois' }, { cle: 'quotidien', nom: 'Chaque jour' },

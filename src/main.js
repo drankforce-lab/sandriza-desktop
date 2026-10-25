@@ -3068,6 +3068,9 @@ const OPS_PONT = new Set([
   // Atelier de creation (2026-10-16) : les modeles de vetements. ⚠ `atelier:donnees` est l op de
   // LECTURE (nom repere par l etape 2 du verificateur du site) ; `atelier:apercu` trace sans ecrire.
   'atelier:donnees', 'atelier:apercu', 'atelier:modele', 'atelier:produits', 'atelier:analyser', 'atelier:preparer', 'atelier:graduer', 'atelier:egaliser', 'atelier:restaurer', 'atelier:exporter', 'atelier:apercu3d', 'atelier:motifControler', 'atelier:motifExporter', 'atelier:motifImage', 'atelier:motifDetourer', 'atelier:depuisPhoto', 'atelier:croquis', 'atelier:verrou', 'atelier:envoyerFiche', 'atelier:vignette', 'atelier:rendrePhoto', 'atelier:renduPrix', 'atelier:renduTnb', 'atelier:renduResultat', 'atelier:modele3dPrix', 'atelier:modele3dLancer', 'atelier:ecrire', 'atelier:dupliquer', 'atelier:supprimer',
+  // Analyses de fibres et etiquettes thermocollantes (2026-10-25). ⚠ `fibres:donnees` est l op de
+  // LECTURE ; `fibres:apercu` et `fibres:planche` composent sans ecrire ; `fibres:analyser` porte les photos.
+  'fibres:donnees', 'fibres:produits', 'fibres:apercu', 'fibres:analyser', 'fibres:ecrire', 'fibres:supprimer', 'fibres:imprimee', 'fibres:planche',
   // Rappels (fenetre Rappels, 2026-10-02). ⚠ `rappels:etat` sert AUSSI au
   // processus principal : c est lui que src/rappels-notif.js interroge pour
   // les notifications de bureau, par la meme porte (executerOpSite).
@@ -3754,6 +3757,10 @@ const LIMITES_PONT = {
   /* une image d'impression (jusqu'à 20 Mo) part vers R2 : sur une connexion lente, il faut du temps */
   'atelier:motifImage': 180000, 'atelier:motifDetourer': 180000, 'atelier:depuisPhoto': 180000, 'atelier:envoyerFiche': 180000, 'atelier:rendrePhoto': 180000, 'atelier:renduPrix': 30000, 'atelier:renduTnb': 120000, 'atelier:renduResultat': 20000, 'atelier:modele3dPrix': 30000, 'atelier:modele3dLancer': 90000,
   'atelier:ecrire': 30000, 'atelier:dupliquer': 30000, 'atelier:supprimer': 30000, 'atelier:restaurer': 30000,
+  /* Les analyses de fibres : lecture et apercus locaux ; la LECTURE PAR L IA envoie jusqu a 4 photos et attend
+     le modele (jusqu a 90 s chez le relais) ; une impression note chaque analyse puis l historique. */
+  'fibres:donnees': 15000, 'fibres:produits': 15000, 'fibres:apercu': 15000, 'fibres:planche': 15000,
+  'fibres:analyser': 150000, 'fibres:ecrire': 30000, 'fibres:supprimer': 30000, 'fibres:imprimee': 60000,
   /* Les rappels se lisent en local ; les ecritures passent par le nuage. */
   'rappels:donnees': 15000, 'rappels:etat': 15000,
   'rappels:ecrire': 30000, 'rappels:modele': 30000, 'rappels:fait': 30000,
@@ -4407,6 +4414,7 @@ const PAGES_ANCRABLES = () => ({
   vehicules: ['Véhicules et déplacements', () => pageVehicules()],
   rappels: ['Rappels', () => pageRappels()],
   atelier: ['Atelier de création', () => pageAtelier('')],
+  fibres: ['Analyses de fibres et étiquettes', () => pageFibres('')],
   liens: ['Liens d’installation', () => pageLiens('')],
   comptable: ['Liens comptables', () => pageComptable('')],
   bankrec: ['Conciliation bancaire', () => pageBanque('')],
@@ -6743,6 +6751,7 @@ const { pageLivre } = require('./fenetres/livre');
 const { pageVehicules } = require('./fenetres/vehicules');
 const { pageRappels } = require('./fenetres/rappels');
 const { pageAtelier } = require('./fenetres/atelier');
+const { pageFibres } = require('./fenetres/fibres');
 const { pageLiens } = require('./fenetres/liens');
 const { pageComptable } = require('./fenetres/comptable');
 const { pageInactivite } = require('./fenetres/inactivite');
@@ -6992,6 +7001,8 @@ const actionApp = (nom, arg) => {
     case 'rappels':
     // Atelier de creation (2026-10-16) : meme cas, nee native.
     case 'atelier':
+    // Analyses de fibres et etiquettes (2026-10-25) : meme cas, nee native.
+    case 'fibres':
     case 'config-heures': case 'config-footer': case 'config-apparence':
     case 'config-marque': case 'config-icones': case 'config-taxes': case 'config-conformite':
     case 'compte-paiement':
@@ -7305,7 +7316,9 @@ ipcMain.handle('journaux:ouvrir', (e, onglet) => {
 const _MODULES_OUVRABLES = ['generations', 'verrous', 'journaux', 'securite', 'incidents', 'config-logotheque', 'corbeille', 'depenses', 'vehicules',
   'rappels', 'impot', 'bankrec', 'livre', 'compta', 'factures', 'inventaire', 'commandes',
   // Configuration > NIP (2026-10-19) : ses liens (Atelier, mode usage exclusif) et le lien des anciens emplacements vers elle.
-  'nips', 'atelier', 'maintenance'];
+  'nips', 'atelier', 'maintenance',
+  // Analyses de fibres (2026-10-25) : un rappel ou un lien peut l ouvrir ; elle-meme ouvre « impot » (le numero CA).
+  'fibres'];
 ipcMain.handle('module:ouvrir', (e, nom) => {
   const n = String(nom || '').toLowerCase();
   if (_MODULES_OUVRABLES.indexOf(n) < 0) return false;

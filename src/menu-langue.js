@@ -229,6 +229,7 @@ const MENU_APP_EN = {
   'Véhicules et déplacements': 'Vehicles and mileage',
   // L atelier (2026-10-16) : « design studio » est le mot des logiciels de patronage en anglais.
   'Atelier de création': 'Design studio',
+  'Analyses de fibres et étiquettes': 'Fibre analyses and labels',
   'Verrous (fiches en cours)': 'Locks (records in progress)',
   /* ⚠ LES SIX JEUX DE COULEURS viennent d'une TABLE d'`appbar.js`
      (`THEMES_COULEUR`) et non d'un `label:` écrit à la main — c'est pour ça que

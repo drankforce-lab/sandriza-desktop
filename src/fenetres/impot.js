@@ -332,6 +332,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
       + champ('e-nom', '${T("Raison sociale")}', p.name, '', false, true)
       + champ('e-neq', '${T("NEQ — Numéro d’entreprise du Québec")}', p.neq, '${T("10 chiffres · Registraire des entreprises du Québec")}', true, true)
       + champ('e-ne', '${T("Numéro d’entreprise ARC (NE)")}', p.sinBn, '${T("9 chiffres · Agence du revenu du Canada")}', true, false)
+      /* (2026-10-25) Le numéro CA du Bureau de la concurrence : imprimé sur les étiquettes de composition
+         (Analyses de fibres). Vide, l étiquette porte « CA xxxxxxx » et l export attend. */
+      + champ('e-ca', '${T("Numéro CA (étiquettes de vêtements)")}', p.caNo, '${T("Bureau de la concurrence · imprimé sur les étiquettes")}', true, false)
       + '<label class="champ"><span class="lbl">${T("Type d’entreprise")}</span>'
       + '<select class="t" id="e-type"' + (RO ? ' disabled' : '') + '>'
       + ((PROFIL && PROFIL.types) || []).map(function(t){
@@ -640,7 +643,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
     dire('${T("Enregistrement…")}');
     appeler('impot:profil:ecrire', [{
       name: v('e-nom'), neq: v('e-neq'), sinBn: v('e-ne'), type: v('e-type'),
-      tpsNo: v('e-tps'), tvqNo: v('e-tvq'),
+      tpsNo: v('e-tps'), tvqNo: v('e-tvq'), caNo: v('e-ca'),
       address: v('e-adresse'), city: v('e-ville'), postal: v('e-cp'),
       phone: v('e-tel'), email: v('e-courriel')
     }]).then(function(r){

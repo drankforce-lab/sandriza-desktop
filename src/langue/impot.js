@@ -92,6 +92,8 @@ module.exports = {
   '10 chiffres · Registraire des entreprises du Québec':
     '10 digits · Registraire des entreprises du Québec',
   'Numéro d’entreprise ARC (NE)': 'CRA business number (BN)',
+  'Numéro CA (étiquettes de vêtements)': 'CA number (garment labels)',
+  'Bureau de la concurrence · imprimé sur les étiquettes': 'Competition Bureau · printed on labels',
   '9 chiffres · Agence du revenu du Canada': '9 digits · Canada Revenue Agency',
   'Type d’entreprise': 'Business type',
   'Numéros d’inscription aux taxes': 'Tax registration numbers',
