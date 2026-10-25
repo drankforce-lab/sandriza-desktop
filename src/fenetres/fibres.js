@@ -1167,7 +1167,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         texte: '${T("Chaque étiquette est une forme pleine aux coins arrondis : Design Space coupe exactement son contour. Ces réglages évitent tout liseré ou résidu de papier au transfert.")}',
         details: [
           ['${T("Fond perdu")}', '${T("ACTIVÉ (« Ajouter un fond perdu ») : l’encre dépasse un peu sous la ligne de coupe, donc aucun liseré de papier blanc autour d’une étiquette foncée.")}'],
-          ['${T("Taille")}', '${T("Ne pas redimensionner : largeur")} ' + po(d.page.l) + ' ${T("po, comme dans le nom du fichier.")}'],
+          /* Testé pour la Cricut Joy Xtra (sa machine) : zone Imprimer puis couper Lettre 7,44 × 9,94 po au plus, mais
+             coins réservés aux repères — une image de 6,92 × 9,72 po passe à coup sûr ; la planche fait 6,85 × 9,45. */
+          ['${T("Taille")}', '${T("Régler la largeur à")} ' + po(d.page.l).replace('.', ',') + ' ${T("po exactement (comme dans le nom du fichier), et REFUSER le redimensionnement automatique : la planche entre déjà dans la zone de la Cricut Joy Xtra.")}'],
           ['${T("Miroir")}', aPale ? '${T("DÉSACTIVÉ dans Design Space : le fichier transparent est déjà en miroir (sinon il serait retourné deux fois).")}' : '${T("DÉSACTIVÉ.")}'],
           ['${T("Étalonnage")}', '${T("Une fois par machine : Menu › Étalonnage › Imprimer puis couper. Sans lui, la coupe peut glisser d’un millimètre.")}'],
           ['${T("Matériau")}', '${T("Celui de votre papier (ex. « Printable Iron-On »). Si un bord ne se détache pas tout seul : pression « Plus », lame propre.")}'],
