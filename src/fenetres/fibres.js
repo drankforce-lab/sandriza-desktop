@@ -29,7 +29,7 @@
  * String.fromCharCode(10).
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, SEP_DEC } = require('./socle.js');
 const LANGUE = require('../langue');
 const T = LANGUE.tr('fibres');
 
@@ -1169,7 +1169,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           ['${T("Fond perdu")}', '${T("ACTIVÉ (« Ajouter un fond perdu ») : l’encre dépasse un peu sous la ligne de coupe, donc aucun liseré de papier blanc autour d’une étiquette foncée.")}'],
           /* La Cricut Joy Xtra (sa machine) : Design Space, chez elle, plafonne cette forme à 6,72 × 9,26 po sur Lettre ;
              la planche fait 6,54 × 9,09 po (écarts 8 et 3,5 mm). Le redimensionnement automatique la rapetisserait. */
-          ['${T("Taille")}', '${T("Régler la largeur à")} ' + po(d.page.l).replace('.', ',') + ' ${T("po exactement (comme dans le nom du fichier), et REFUSER le redimensionnement automatique : la planche entre déjà dans la zone de la Cricut Joy Xtra.")}'],
+          ['${T("Taille")}', '${T("Régler la largeur à")} ' + po(d.page.l).replace('.', '${SEP_DEC()}') + ' ${T("po exactement (comme dans le nom du fichier), et REFUSER le redimensionnement automatique : la planche entre déjà dans la zone de la Cricut Joy Xtra.")}'],
           ['${T("Miroir")}', aPale ? '${T("DÉSACTIVÉ dans Design Space : le fichier transparent est déjà en miroir (sinon il serait retourné deux fois).")}' : '${T("DÉSACTIVÉ.")}'],
           ['${T("Étalonnage")}', '${T("Une fois par machine : Menu › Étalonnage › Imprimer puis couper. Sans lui, la coupe peut glisser d’un millimètre.")}'],
           ['${T("Matériau")}', '${T("Celui de votre papier (ex. « Printable Iron-On »). Si un bord ne se détache pas tout seul : pression « Plus », lame propre.")}'],
