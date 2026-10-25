@@ -1560,10 +1560,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
       var avant = corps.scrollHeight;
       BU[cle]--; tours++;
       corps.innerHTML = rendu(); poserBarre();
-      /* (2026-10-25, audit) Une ligne de moins qui ne fait RIEN gagner : le debordement vient
-         d ailleurs (le formulaire de droite). Continuer ramenait la liste a UNE ligne par page
-         sans rien regler ; on rend la ligne et on s arrete. */
-      if (corps.scrollHeight >= avant) { BU[cle]++; corps.innerHTML = rendu(); poserBarre(); break; }
+      /* ⚠ (2026-10-25) On NE S ARRÊTE PAS quand une ligne de moins ne gagne rien : l essai de l audit (rendre la
+         ligne et s arrêter) laissait une GLISSIÈRE sur #corps (banc de débordement, 1400 × 833, V+50) — sa règle :
+         jamais de barre. Mieux vaut une liste courte qu une page qui défile. */
     }
     var b = document.getElementById('v-nom');
     if (b && VFORM && !VFORM._vu) { VFORM._vu = true; try { b.focus(); } catch (e) {} }
