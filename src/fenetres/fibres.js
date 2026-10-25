@@ -172,14 +172,14 @@ button.danger{border-color:rgba(248,113,113,.45);color:var(--tx-err2)}
 .pl{display:grid;grid-template-columns:minmax(0,27rem) minmax(0,1fr);gap:.9rem;flex:1 1 0;min-height:0}
 .pl>div{display:flex;flex-direction:column;gap:.8rem;min-width:0;min-height:0}
 .pl>div:first-child{overflow:auto;padding-right:.15rem}
-.lot{display:grid;grid-template-columns:.8rem minmax(0,1fr) 6.6rem 6.4rem 1.6rem;gap:.45rem;align-items:center;
+.lot{display:grid;grid-template-columns:.8rem minmax(0,1fr) 6.6rem 7.2rem 1.6rem;gap:.45rem;align-items:center;
   border:1px solid var(--v08);border-radius:10px;padding:.4rem .5rem}
 .lot .pap{width:.8rem;height:.8rem;border-radius:50%;border:1px solid var(--v30,var(--v20))}
 .lot .nom{font-size:.8rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lot .sous{font-size:.72rem;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pas{display:flex;align-items:center;border:1px solid var(--v16);border-radius:8px;overflow:hidden}
 .pas button{border:0;border-radius:0;padding:.1rem .5rem;background:transparent;line-height:1.2}
-.pas input{border:0;border-radius:0;width:2.6rem;text-align:center;padding:.15rem 0;background:transparent}
+.pas input{border:0;border-radius:0;width:3.2rem;min-width:48px;text-align:center;padding:.15rem 0;background:transparent}
 .feuilles{display:flex;gap:.4rem;flex-wrap:wrap}
 .scene{flex:1 1 0;min-height:0;display:flex;gap:1rem;align-items:flex-start}
 .scene .plan{flex:0 0 auto;border-radius:6px;box-shadow:0 2px 14px rgba(0,0,0,.35)}
@@ -510,7 +510,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var L = (D.analyses || []);
     var h = '<div class="filtres"><div class="puces" role="group" aria-label="${T("Filtrer les analyses")}">'
       + FILTRES.map(function(f){ return '<button type="button" class="puce" data-filtre="' + f[0] + '" aria-pressed="' + (FILTRE === f[0]) + '">' + f[1] + '</button>'; }).join('')
-      + '</div><div class="q"><label class="lbl" for="f-q">${T("Rechercher")}</label><input type="search" id="f-q" value="' + esc(Q) + '" placeholder="${T("N°, fibre, produit, remarque…")}"></div></div>';
+      + '</div><div class="q"><label class="lbl" for="f-q">${T("Rechercher")}</label><input type="search" id="f-q" maxlength="80" value="' + esc(Q) + '" placeholder="${T("N°, fibre, produit, remarque…")}"></div></div>';
     if (!L.length) {
       return h + '<div class="cx-carte appel"><strong>${T("Aucune analyse pour l’instant")}</strong>'
         + '<div class="aide">${T("Prenez une photo de la surface du vêtement au microscope (1200×), déposez-la ici : l’IA décrit la fibre étape par étape, vous confirmez la composition avec la fiche du fournisseur, puis l’étiquette se prépare toute seule.")}</div>'
@@ -649,7 +649,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       h += '<div class="fib" style="margin-bottom:.35rem"><select id="f-fib-' + i + '" aria-label="${T("Fibre")} ' + (i + 1) + '">'
         + '<option value="">${T("— fibre —")}</option>'
         + (D.fibres || []).map(function(k){ return '<option value="' + esc(k.cle) + '"' + (x.fibre === k.cle ? ' selected' : '') + '>' + esc(EN ? k.en : k.fr + ' / ' + k.en) + '</option>'; }).join('')
-        + '</select><input type="text" inputmode="numeric" id="f-pct-' + i + '" aria-label="${T("Pourcentage de la fibre")} ' + (i + 1) + '" value="' + esc(x.pct) + '" placeholder="%">'
+        + '</select><input type="text" inputmode="numeric" maxlength="3" id="f-pct-' + i + '" aria-label="${T("Pourcentage de la fibre")} ' + (i + 1) + '" value="' + esc(x.pct) + '" placeholder="%">'
         + '<button type="button" class="mini" data-otfib="' + i + '" aria-label="${T("Retirer la fibre")} ' + (i + 1) + '">✕</button></div>';
     });
     h += '<div class="total"><button type="button" class="mini" id="f-ajfib">${T("+ Ajouter une fibre")}</button><span id="f-total"></span></div>'
@@ -674,7 +674,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (f.mode === 'inventaire') {
       if (f.produit) h += '<div class="choisi"><span><strong>' + esc(f.produit.nom) + '</strong> <span class="gris">' + esc(f.produit.ref) + '</span></span><button type="button" class="mini" id="f-changer">${T("Changer")}</button></div>';
       else {
-        h += '<div class="champ"><label for="f-chercher">${T("Chercher un produit (nom, numéro, SKU)")}</label><input type="search" id="f-chercher" autocomplete="off"></div>';
+        h += '<div class="champ"><label for="f-chercher">${T("Chercher un produit (nom, numéro, SKU)")}</label><input type="search" id="f-chercher" maxlength="80" autocomplete="off"></div>';
         if (RES) h += '<div class="res" style="margin-top:.3rem">' + (RES.produits.length ? RES.produits.map(function(p){
             return '<button type="button" data-prod="' + esc(p.id) + '">' + esc(p.nom) + ' <span class="gris">' + esc(p.ref) + '</span></button>'; }).join('') : '<span class="aide" style="padding:.3rem">${T("Aucun produit trouvé.")}</span>')
           + (RES.total > RES.produits.length ? '<span class="aide" style="padding:.3rem">' + RES.total + ' ${T("résultats — précisez la recherche.")}</span>' : '') + '</div>';
