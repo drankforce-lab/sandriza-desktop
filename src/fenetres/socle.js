@@ -2369,9 +2369,26 @@ var Assist = {
     document.getElementById('pas').innerHTML = this.etapes.map(function(e, k){
       var faite = !!self.vus[k] && self.faite(k);
       var cl = k === self.i ? ' class="on"' : (faite ? ' class="fait"' : '');
-      return '<button type="button" data-etape="' + k + '"' + cl + '><span class="n">'
-        + (faite && k !== self.i ? '✓' : (k + 1)) + '</span> ' + esc(e.t) + '</button>';
+      return '<button type="button" data-etape="' + k + '"' + cl + ' title="' + esc(e.t) + '"><span class="n">'
+        + (faite && k !== self.i ? '✓' : (k + 1)) + '</span> <span class="t">' + esc(e.t) + '</span></button>';
     }).join('');
+    self.ajusterFil();
+    if (!self._filResize) {
+      self._filResize = true;
+      var tm = null;
+      window.addEventListener('resize', function(){ clearTimeout(tm); tm = setTimeout(function(){ self.ajusterFil(); }, 120); });
+    }
+  },
+  /* (2026-10-25, sa capture « il faut faire attention à ce que ça ne tombe pas sur 2 lignes ») LA BARRE D ÉTAPES
+     RESTE SUR UNE LIGNE. Huit étapes (la fiche produit) passaient à la ligne sur un écran moyen. On resserre d abord
+     (marges et police), puis, s il le faut encore, les étapes autres que l étape EN COURS ne gardent que leur
+     numéro (le nom reste au survol). Jamais de seconde ligne, jamais de glissière. */
+  ajusterFil: function(){
+    var p = document.getElementById('pas'); if (!p) return;
+    p.classList.remove('serre', 'court');
+    var deborde = function(){ return p.scrollWidth > p.clientWidth + 1; };
+    if (deborde()) p.classList.add('serre');
+    if (deborde()) p.classList.add('court');
   },
   aller: function(k){
     this.i = Math.max(0, Math.min(this.etapes.length - 1, k));
@@ -4090,6 +4107,12 @@ label.champ .lbl,.champ label,.ch label,.champ .lbl,.form .champ .lbl,.lbl,.doss
 .pas .n{display:inline-flex;align-items:center;justify-content:center;width:1.55rem;height:1.55rem;
   min-width:0;border-radius:99px;background:var(--v08);font-weight:800;font-size:.74rem}
 .pas button.on,.pas > span.on{background:rgba(var(--or-rgb),.14);border-color:rgba(var(--or-rgb),.55);color:var(--tx-or2);font-weight:700}
+/* Une seule ligne, toujours (Assist.ajusterFil) : resserrée, puis les étapes non courantes en numéro seul. */
+#pas.pas{flex-wrap:nowrap;overflow:hidden}
+#pas.pas.serre{gap:.25rem;padding-left:.8rem;padding-right:.8rem}
+#pas.pas.serre button{padding:0 .6rem 0 .3rem;gap:.35rem;font-size:.75rem}
+#pas.pas.court button:not(.on) .t{display:none}
+#pas.pas.court button:not(.on){padding:0 .3rem}
 .pas button.on .n,.pas > span.on .n{background:var(--or);color:#17202c}
 .pas button.fait,.pas > span.fait{color:var(--tx-ok)}
 .pas button.fait .n,.pas > span.fait .n{background:rgba(34,197,94,.18)}
@@ -4439,7 +4462,7 @@ body{line-height:1.55}
 @media (max-height:560px){ html:not(.sz-zoom):not(.sz-zoom-fen){font-size:76%} }
 @media (max-width:1240px){
   .rf-tb{flex-wrap:wrap;row-gap:.4rem}
-  .pas{flex-wrap:wrap;row-gap:.3rem;overflow-x:visible}
+  /* .pas reste sur UNE ligne (Assist.ajusterFil la resserre au besoin) — plus de retour à la ligne. */
   .rf-rch{min-width:7rem}
   td.fin,td.acts,td:has(>button~button),td:has(>.mini~.mini){white-space:normal!important}
   td.fin>button,td.fin>.mini,td.acts>button,td:has(>button~button)>button{margin:.1rem 0}
