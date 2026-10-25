@@ -148,8 +148,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('paiements')}
   };
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
-    if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 160)) + ')';
+    // (2026-10-25, audit) Texte BRUT : szDire l ecrit en textContent, et vide() echappe deja.
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + (m || '?') + ').');
+    if (r && r.detail) t += ' (' + String(r.detail).slice(0, 160) + ')';
     return t;
   }
   function appeler(op, args){
@@ -178,7 +179,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('paiements')}
      (#p-masquer) et le geste principal (#p-charger) montent dans .cx-actions — memes ids, memes
      conditions qu avant. Les onglets restent dans le corps (data-onglet). */
   function gestes(){
-    var h = '<select id="p-annee" title="${T("Année")}" aria-label="${T("Année")}">'
+    /* (2026-10-25, audit) L ANNEE SE FIGE PENDANT UNE LECTURE CHEZ SQUARE : la changer en plein « mois 3/12 »
+       montrait la nouvelle annee pendant que les messages comptaient l ancienne, puis relancait une lecture. */
+    var h = '<select id="p-annee" title="${T("Année")}" aria-label="${T("Année")}"' + (OCCUPE ? ' disabled' : '') + '>'
       + (D.annees || []).map(function(a){
           return '<option value="' + a + '"' + (a === D.annee ? ' selected' : '') + '>' + a + '</option>';
         }).join('')
@@ -401,7 +404,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('paiements')}
     var pf = document.getElementById('p-filtre');
     if (pf) pf.onchange = function(){ FILTRE = pf.value; dessiner(); };
     var sel = document.getElementById('p-annee');
-    if (sel) sel.onchange = function(){ ANNEE = +sel.value; charger(); };
+    if (sel) sel.onchange = function(){ if (OCCUPE) return; ANNEE = +sel.value; charger(); };
     var bc = document.getElementById('p-charger');
     if (bc) bc.onclick = chercherChezSquare;
     var bm = document.getElementById('p-masquer');

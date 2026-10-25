@@ -199,4 +199,17 @@ module.exports = {
   'étape en attente': 'step pending',
   // 2026-10-15 : l offre de bienvenue refaite (lot C), avec son apercu vivant.
   'Aperçu en direct — ce que la visiteuse verra': 'Live preview — what the visitor will see',
+  // 2026-10-25, audit : pluriels entiers, conflit de version, saisie non enregistrée, chaînes confirmées.
+  ' envoyés': ' sent',
+  ' échecs': ' failures',
+  'La configuration a été modifiée ailleurs : la version actuelle est rechargée.': 'The configuration was changed elsewhere: the current version has been reloaded.',
+  'La configuration n’a pas pu être enregistrée sur le serveur. Réessayez.': 'The configuration could not be saved on the server. Try again.',
+  'Changements non enregistrés': 'Unsaved changes',
+  'Des changements de cet onglet ne sont pas enregistrés. Continuer les perdra.': 'Some changes on this tab are not saved. Continuing will discard them.',
+  'Continuer sans enregistrer': 'Continue without saving',
+  'Traiter les chaînes': 'Process the chains',
+  'Les étapes en attente des chaînes d’automation seront envoyées maintenant, par courriel, aux clients concernés.': 'The pending steps of the automation chains will be sent now, by email, to the customers concerned.',
+  'Étapes en attente': 'Pending steps',
+  'Envoyer {0} étape': 'Send {0} step',
+  'Envoyer {0} étapes': 'Send {0} steps',
 };

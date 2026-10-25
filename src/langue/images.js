@@ -36,12 +36,12 @@ module.exports = {
   /* ── LES MOTIFS DE REFUS ────────────────────────────────────────────────── */
   'Votre rôle ne permet pas de modifier les fiches produits.':
     'Your role does not allow changing the product records.',
-  /* ⚠ L apostrophe DROITE : la source ecrit ces trois-la entre guillemets. */
-  "Le catalogue n'est pas encore chargé dans la fenêtre principale.":
+  /* (2026-10-25, audit) Apostrophe typographique, comme dans toutes les autres fenetres. */
+  'Le catalogue n’est pas encore chargé dans la fenêtre principale.':
     'The catalogue is not loaded in the main window yet.',
-  "La fenêtre principale n'a pas répondu à temps.":
+  'La fenêtre principale n’a pas répondu à temps.':
     'The main window did not answer in time.',
-  "L'opération a échoué.": 'The operation failed.',
+  'L’opération a échoué.': 'The operation failed.',
 
   /* ══ LES TROIS ECHECS PAR IMAGE ════════════════════════════════════════════
    * ⚠⚠⚠ Voir l en-tete : trois pannes, trois gestes. Ne pas les rapprocher. */

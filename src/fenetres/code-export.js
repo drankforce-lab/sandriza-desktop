@@ -88,6 +88,10 @@ ${JS_DIRE()}
   var P = window.szPont;
   var D = ${JSON.stringify({ quoi })};
   var envoye = false;
+  /* (2026-10-25, audit) APRES « Trop de codes faux », PLUS AUCUN CODE NE PART : le bouton etait grise,
+     mais Entree renvoyait (envoye retombe a false a chaque refus). Annuler et Echap restent permis :
+     ils rendent la main sans code. */
+  var BLOQUE = false;
 
   document.getElementById('corps').innerHTML =
     '<p class="q">${T("Entrez le code à 6 chiffres de votre application d’authentification pour enregistrer ce fichier.")}</p>'
@@ -116,6 +120,7 @@ ${JS_DIRE()}
     }
   }
   function valider(){
+    if (BLOQUE) return;
     var c = String(champ.value || '').replace(/[^0-9]/g, '');
     if (c.length !== 6) { szDire('${T("Le code a 6 chiffres.")}', 'err'); champ.focus(); return; }
     envoyer(c);
@@ -129,7 +134,7 @@ ${JS_DIRE()}
     champ.focus();
     if (motif === 'code') szDire('${T("Code refusé. Essais restants : ")}' + (restant | 0), 'err');
     else if (motif === 'sans_code') szDire('${T("Ce compte n’a pas de second facteur : activez le code à 6 chiffres dans votre profil pour pouvoir exporter.")}', 'err');
-    else if (motif === 'essais') { oui.disabled = true; szDire('${T("Trop de codes faux : la session est fermée. Reconnectez-vous.")}', 'err'); }
+    else if (motif === 'essais') { BLOQUE = true; oui.disabled = true; champ.disabled = true; szDire('${T("Trop de codes faux : la session est fermée. Reconnectez-vous.")}', 'err'); }
     else if (motif === 'session') szDire('${T("Votre session n’est plus active : reconnectez-vous, puis réessayez.")}', 'err');
     else szDire('${T("Le serveur n’a pas répondu. Vérifiez la connexion et réessayez.")}', 'err');
   };
@@ -143,7 +148,9 @@ ${JS_DIRE()}
   champ.addEventListener('input', function(){ champ.value = String(champ.value || '').replace(/[^0-9]/g, '').slice(0, 6); });
   window.addEventListener('keydown', function(e){
     if (e.key === 'Escape') { e.preventDefault(); envoyer(null); }
-    else if (e.key === 'Enter') { e.preventDefault(); valider(); }
+    /* (2026-10-25, audit) Entree sur « Annuler » (atteint par Tab) annule — elle envoyait le code.
+       Meme correction que szDemanderNip. */
+    else if (e.key === 'Enter') { e.preventDefault(); if (document.activeElement === non) envoyer(null); else valider(); }
   });
   window.addEventListener('beforeunload', function(){ if (!envoye) { try { P && P.codeExportReponse && P.codeExportReponse(null); } catch (e) {} } });
   champ.focus();

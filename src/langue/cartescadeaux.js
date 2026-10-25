@@ -171,4 +171,9 @@ module.exports = {
   'sera supprimée et ne pourra plus être utilisée en boutique.': 'will be deleted and can no longer be used in the store.',
   'Son solde restant sera perdu.': 'Its remaining balance will be lost.',
   'Elle reste restaurable pendant 30 jours depuis Gardien → Corbeille.': 'It can be restored for 30 days from Guard → Recycle bin.',
+  // (2026-10-25, audit)
+  'consultation seulement': 'view only',
+  // (2026-10-25, audit)
+  'Un pourcentage de récompense ne peut pas dépasser 90 %.': 'A reward percentage cannot exceed 90%.',
+  'Une récompense en montant fixe ne peut pas dépasser 1 000 $.': 'A fixed-amount reward cannot exceed $1,000.',
 };

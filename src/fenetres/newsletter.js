@@ -178,7 +178,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'nl-from-n':60,'nl-trans-from-n':60,'nl
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
-  function plur(n){ return n === 1 ? '' : 's'; }
   function val(id){ var e = document.getElementById(id); return e ? e.value : ''; }
   function chk(id){ var e = document.getElementById(id); return e ? e.checked : false; }
 
@@ -186,9 +185,34 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'nl-from-n':60,'nl-trans-from-n':60,'nl
     session:'${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
     droit:'${T("Votre rôle ne permet pas cette modification.")}',
     indisponible:'${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
-    format:'${T("Format d’image invalide.")}', echec:'${T("L’opération a échoué.")}'
+    format:'${T("Format d’image invalide.")}', echec:'${T("L’opération a échoué.")}',
+    /* (2026-10-25, audit) Le conflit de version, dit dans la langue du poste (le
+       detail du site est en francais) ; l ecran est relu aussitot (saveCfg). */
+    perime:'${T("La configuration a été modifiée ailleurs : la version actuelle est rechargée.")}',
+    nuage:'${T("La configuration n’a pas pu être enregistrée sur le serveur. Réessayez.")}'
   };
-  function expliquer(r){ if (!r) return '${T("Aucune réponse de la fenêtre principale.")}'; if (r.detail) return String(r.detail); return MOTIFS[r.motif] || MOTIFS.echec; }
+  function expliquer(r){ if (!r) return '${T("Aucune réponse de la fenêtre principale.")}'; if (r.motif === 'perime' || r.motif === 'nuage') return MOTIFS[r.motif]; if (r.detail) return String(r.detail); return MOTIFS[r.motif] || MOTIFS.echec; }
+  /* (2026-10-25, audit) CE QUI EST TAPE ET PAS ENREGISTRE, par bloc : Echap et le
+     changement d onglet le jetaient sans question (cle API comprise). Remis a
+     zero a chaque dessin (les champs repartent alors de D). */
+  var SALE = {};
+  function estSale(){ return Object.keys(SALE).some(function(k){ return SALE[k]; }); }
+  function noterSaisie(ev){
+    var id = (ev.target && ev.target.id) || '';
+    if (!id || id === 'offer-file') return;
+    if (id.indexOf('nl-ctrl-') === 0) SALE.ctrl = true;
+    else if (id.indexOf('nl-') === 0) SALE.cfg = true;
+    else if (id.indexOf('offer-') === 0) SALE.offer = true;
+  }
+  corps.addEventListener('input', noterSaisie);
+  corps.addEventListener('change', noterSaisie);
+  /* Demande avant de perdre une saisie ; suite() part tout de suite s il n y a rien. */
+  function siPerte(suite){
+    if (!estSale()) { suite(); return; }
+    szConfirmer({ prudent: true, titre: '${T("Changements non enregistrés")}',
+      texte: '${T("Des changements de cet onglet ne sont pas enregistrés. Continuer les perdra.")}',
+      oui: '${T("Continuer sans enregistrer")}' }).then(function(oui){ if (oui) { SALE = {}; suite(); } });
+  }
   function appeler(op, arg){ if (!P || !P.appeler) return Promise.resolve({ ok:false, motif:'indisponible' }); return P.appeler(op, arg).catch(function(){ return { ok:false, motif:'echec' }; }); }
 
   var OPTAB = { dashboard:'newsletter:dash', config:'newsletter:cfgDonnees', offer:'newsletter:offerDonnees' };
@@ -384,6 +408,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'nl-from-n':60,'nl-trans-from-n':60,'nl
   function vueApercu(){
     return '<div class="voile" id="ap-voile">' + popHtml(D.cfg, false) + '</div>';
   }
+  /* (2026-10-25, audit) L APERCU SE POSE PAR-DESSUS L ONGLET, SANS LE REDESSINER :
+     redessiner reconstruisait les champs depuis D.cfg (la version ENREGISTREE) —
+     tout ce qui etait modifie disparaissait, et le popup montrait l ancienne
+     version. Il montre maintenant ce qui est tape. */
+  function offreSaisie(){
+    var c = {}, b = D.cfg || {};
+    Object.keys(b).forEach(function(k){ c[k] = b[k]; });
+    if (document.getElementById('offer-title')) {
+      c.title = val('offer-title'); c.subtitle = val('offer-sub'); c.cta = val('offer-cta');
+      c.legal = val('offer-legal'); c.imageUrl = val('offer-img');
+    }
+    return c;
+  }
+  function ouvrirApercu(){
+    fermerApercu();
+    APERCU = true;
+    corps.insertAdjacentHTML('beforeend', '<div class="voile" id="ap-voile">' + popHtml(offreSaisie(), false) + '</div>');
+  }
+  function fermerApercu(){
+    APERCU = false;
+    var v = document.getElementById('ap-voile'); if (v && v.parentNode) v.parentNode.removeChild(v);
+  }
 
   /* ══ DESSIN ════════════════════════════════════════════════════════════════ */
   function dessiner(){
@@ -393,6 +439,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'nl-from-n':60,'nl-trans-from-n':60,'nl
     var h = TAB === 'config' ? vueConfig() : TAB === 'offer' ? vueOffer() : vueDash();
     if (APERCU && TAB === 'offer') h += vueApercu();
     corps.innerHTML = h;
+    SALE = {};
     var f = document.getElementById('offer-file');
     if (f) f.onchange = function(){ if (f.files && f.files[0]) televerserImage(f.files[0]); };
     brancherApercuOffre();
@@ -409,7 +456,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'nl-from-n':60,'nl-trans-from-n':60,'nl
     };
     dire('${T("Enregistrement…")}');
     appeler('newsletter:cfgEcrire', d).then(function(r){
-      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+      if (!r || !r.ok) {
+        /* (2026-10-25, audit) Sur un conflit, le message promet la version actuelle : on la relit. */
+        if (r && r.motif === 'perime') { relire().then(function(){ dire(expliquer(r), 'err'); }); return; }
+        dire(expliquer(r), 'err'); return;
+      }
       relire().then(function(){ dire('${T("Configuration enregistrée.")}', 'bon'); });
     });
   }
@@ -419,6 +470,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'nl-from-n':60,'nl-trans-from-n':60,'nl
     dire('${T("Enregistrement…")}');
     appeler('newsletter:controls', { controls: ctrl }).then(function(r){
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+      SALE.ctrl = false;
       dire('${T("Contrôles d’envoi enregistrés.")}', 'bon');
     });
   }
@@ -448,7 +500,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'nl-from-n':60,'nl-trans-from-n':60,'nl
       dire('${T("Téléversement…")}');
       appeler('newsletter:offerImage', { dataUrl: fr.result }).then(function(r){
         if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
-        var inp = document.getElementById('offer-img'); if (inp) inp.value = r.url;
+        /* (2026-10-25, audit) L evenement input fait suivre l apercu vivant (et marque la saisie). */
+        var inp = document.getElementById('offer-img');
+        if (inp) { inp.value = r.url; try { inp.dispatchEvent(new Event('input', { bubbles: true })); } catch (x) {} }
         var prev = document.querySelector('.apercu-img');
         if (!prev) { var box = inp && inp.parentNode; if (box) box.insertAdjacentHTML('afterbegin', '<img class="apercu-img" src="' + r.url.replace(/"/g, '&quot;') + '" alt="${T("Aperçu")}">'); }
         else prev.src = r.url;
@@ -463,12 +517,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'nl-from-n':60,'nl-trans-from-n':60,'nl
       relire().then(function(){ dire('${T("Réinitialisé.")}', 'bon'); });
     });
   }
+  /* (2026-10-25, audit) Traiter les chaines ENVOIE des courriels aux clients : une
+     boite a part le dit avant (regle maison des confirmations). */
   function traiterChaines(){
+    var n = (D && D.pendingSteps) || 0;
+    szConfirmer({ prudent: true, titre: '${T("Traiter les chaînes")}',
+      texte: '${T("Les étapes en attente des chaînes d’automation seront envoyées maintenant, par courriel, aux clients concernés.")}',
+      details: [['${T("Étapes en attente")}', String(n)]],
+      oui: szPl(n, '${T("Envoyer {0} étape")}', '${T("Envoyer {0} étapes")}').split('{0}').join(n) }).then(function(oui){
+      if (oui) traiterChainesMaintenant();
+    });
+  }
+  function traiterChainesMaintenant(){
     dire('${T("Traitement des chaînes…")}');
     appeler('newsletter:processChains', {}).then(function(r){
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       if (r.rien) { dire('${T("Aucune étape en attente.")}', 'att'); return; }
-      relire().then(function(){ dire(r.sent + '${T(" envoyé")}' + plur(r.sent) + (r.failed ? ', ' + r.failed + '${T(" échec")}' + plur(r.failed) : '') + '.', 'bon'); });
+      /* (2026-10-25, audit) Singulier et pluriel ENTIERS : « 3 sents » en anglais. */
+      relire().then(function(){ dire(r.sent + szPl(r.sent, '${T(" envoyé")}', '${T(" envoyés")}') + (r.failed ? ', ' + r.failed + szPl(r.failed, '${T(" échec")}', '${T(" échecs")}') : '') + '.', 'bon'); });
     });
   }
 
@@ -477,8 +543,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'nl-from-n':60,'nl-trans-from-n':60,'nl
     var t = e.target; if (!t || !t.closest) return;
     var b = t.closest('button'); if (!b) return;
     var g = function(n){ return b.getAttribute(n); };
-    if (APERCU) { if (g('data-act') === 'apclose') { APERCU = false; dessiner(); return; } if (g('data-act') !== 'apercu') return; }
-    if (g('data-tab')) { TAB = g('data-tab'); APERCU = false; charger().then(function(ok){ if (ok) dessiner(); }); return; }
+    if (APERCU) { if (g('data-act') === 'apclose') { fermerApercu(); return; } if (g('data-act') !== 'apercu') return; }
+    if (g('data-tab')) { var tb = g('data-tab'); siPerte(function(){ TAB = tb; APERCU = false; charger().then(function(ok){ if (ok) dessiner(); }); }); return; }
     var act = g('data-act');
     if (act === 'cfgsave') saveCfg();
     else if (act === 'ctrlsave') saveCtrls();
@@ -486,13 +552,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'nl-from-n':60,'nl-trans-from-n':60,'nl
     else if (act === 'offersave') saveOffer();
     else if (act === 'offerreset') resetOffer();
     else if (act === 'chains') traiterChaines();
-    else if (act === 'apercu') { APERCU = true; dessiner(); }
-    else if (act === 'apclose') { APERCU = false; dessiner(); }
+    else if (act === 'apercu') ouvrirApercu();
+    else if (act === 'apclose') fermerApercu();
   });
   document.addEventListener('keydown', function(e){
     if (e.key !== 'Escape') return;
-    if (APERCU) { APERCU = false; dessiner(); return; }
-    if (P && P.fermer) P.fermer();
+    if (document.querySelector('.szc-voile')) return;
+    if (APERCU) { fermerApercu(); return; }
+    siPerte(function(){ if (P && P.fermer) P.fermer(); });
   });
 
   window.szModeAncre = function(actif){ document.documentElement.classList.toggle('ancre', !!actif); };

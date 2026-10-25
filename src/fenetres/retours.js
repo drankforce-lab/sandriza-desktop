@@ -127,8 +127,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
      tout verdict s efface seul apres cinq secondes, sauf ce qui se termine
      par des points de suspension, qui annonce un travail en cours. */
   function dire(t, cl){ szDire(t, cl); }
+  /* (2026-10-25, audit) Une date absente ou illisible rend un tiret : toLocaleDateString
+     d une date invalide ne leve pas, il ECRIT « Invalid Date ». */
   function fmtDate(d){
-    try { return (String(d).length === 10 && String(d).charAt(4) === '-' ? new Date(+String(d).slice(0, 4), +String(d).slice(5, 7) - 1, +String(d).slice(8, 10)) : new Date(d)).toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'short', year: 'numeric' }); } catch (e) { return String(d || ''); }
+    if (d == null || d === '') return '—';
+    try {
+      var x = (String(d).length === 10 && String(d).charAt(4) === '-' ? new Date(+String(d).slice(0, 4), +String(d).slice(5, 7) - 1, +String(d).slice(8, 10)) : new Date(d));
+      if (isNaN(x.getTime())) return String(d);
+      return x.toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'short', year: 'numeric' });
+    } catch (e) { return String(d || ''); }
   }
 
   var MOTIFS = {

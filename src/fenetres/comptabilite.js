@@ -190,15 +190,32 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
   function argent(n){ var v = Number(n) || 0; return szArgent(v === 0 ? 0 : v); }
   /* Un montant SAISI se relit avec virgule ou point, et SANS les espaces de
      milliers que l affichage y met (« 28 800,00 ») : sans ca, parseFloat
-     s arrete au premier espace et lit 28. Pas d expression reguliere ici. */
+     s arrete au premier espace et lit 28. Pas d expression reguliere ici.
+     ⚠ (2026-10-25, audit) EN ANGLAIS, LA VIRGULE EST LE SEPARATEUR DE MILLIERS :
+     l affichage rend « 28,800.00 », et la changer en point lisait 28.8 — chaque
+     poste de 1 000 $ ou plus etait divise par mille a l enregistrement. La
+     virgule n est une decimale qu en francais ; en anglais, on la saute. */
+  var DEC = '${SEP_DEC()}';
   function nbLu(t){
     var s = String(t == null ? '' : t), o = '';
     for (var k = 0; k < s.length; k++) {
       var c = s.charCodeAt(k);
       if (c === 32 || c === 160 || c === 8239 || c === 8201) continue;
-      o += (s.charAt(k) === ',') ? '.' : s.charAt(k);
+      var ch = s.charAt(k);
+      if (ch === ',') { if (DEC === '.') continue; o += '.'; }
+      else o += ch;
     }
-    return parseFloat(o) || 0;
+    return Math.round((parseFloat(o) || 0) * 100) / 100;
+  }
+  /* (2026-10-25, audit) Un total reparti sur douze mois GARDE SON TOTAL : onze
+     mois a la part arrondie, l ecart d arrondi sur le douzieme (1 000 $ donnait
+     12 x 83,33 = 999,96 $). */
+  function douzeParts(total){
+    var v = Math.round((Number(total) || 0) * 100) / 100;
+    var par = Math.round((v / 12) * 100) / 100;
+    var t = []; for (var i = 0; i < 11; i++) t.push(par);
+    t.push(Math.round((v - 11 * par) * 100) / 100);
+    return t;
   }
   function pct(n){
     if (n === null || n === undefined) return '—';
@@ -414,7 +431,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
     elOutils.innerHTML = h;
 
     var sel = document.getElementById('an');
-    if (sel) sel.onchange = function(){ ANNEES = [parseInt(sel.value, 10)]; charger(); };
+    /* (2026-10-25, audit) Changer d exercice RECHARGE et remet SAISIE a zero : avec
+       un budget tape et non enregistre, on demande d abord (et on remet le menu
+       sur l exercice affiche si l on renonce). */
+    if (sel) sel.onchange = function(){
+      var choisi = parseInt(sel.value, 10);
+      var avant = ANNEES.length ? ANNEES[ANNEES.length - 1] : choisi;
+      if (!saisieModifiee()) { ANNEES = [choisi]; charger(); return; }
+      szConfirmer({ prudent: true, titre: '${T("Changer d’exercice")}',
+        texte: '${T("Le budget saisi n’est pas enregistré. Changer d’exercice le perdra.")}',
+        oui: '${T("Changer sans enregistrer")}' }).then(function(oui){
+        if (!oui) { sel.value = String(avant); return; }
+        ANNEES = [choisi]; charger();
+      });
+    };
     Array.prototype.forEach.call(elOutils.querySelectorAll('button[data-an]'), function(b){
       b.onclick = function(){
         var a = parseInt(b.getAttribute('data-an'), 10);
@@ -441,6 +471,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
     }).join('');
     Array.prototype.forEach.call(elOnglets.querySelectorAll('button[data-o]'), function(b){
       b.onclick = function(){
+        /* (2026-10-25, audit) On RELIT les champs du budget avant de quitter
+           l onglet : sans ca, les montants tapes disparaissaient au retour. */
+        ramasser();
         ONGLET = b.getAttribute('data-o');
         /* ⚠ PASSER A << COMPARER >> N AJOUTE PAS D ANNEE TOUT SEUL : on montre ce
            qui est deja choisi. Ajouter d office l annee precedente ferait
@@ -705,9 +738,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
       var actuel = (SAISIE[cle] || []).reduce(function(s, x){ return s + (parseFloat(x) || 0); }, 0);
       if (Math.abs(v - actuel) < 0.005) return;   /* inchange : on garde le detail mensuel */
       /* Le total annuel a change : on repartit egalement, c est le geste attendu. */
-      var par = Math.round((v / 12) * 100) / 100;
-      var t = []; for (var i = 0; i < 12; i++) t.push(par);
-      SAISIE[cle] = t;
+      SAISIE[cle] = douzeParts(v);
     });
     Array.prototype.forEach.call(corps.querySelectorAll('input[data-m]'), function(inp){
       var cle = inp.getAttribute('data-m'), i = parseInt(inp.getAttribute('data-i'), 10);
@@ -716,13 +747,31 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
     });
   }
 
+  /* (2026-10-25, audit) LA SAISIE DIFFERE-T-ELLE DU BUDGET ENREGISTRE ? Visiter
+     l onglet Budget initialise SAISIE sans rien taper : « SAISIE existe » ne
+     voulait donc pas dire « quelque chose a perdre », et bloquait pour toujours
+     la relecture au retour au premier plan. */
+  function saisieModifiee(){
+    if (!SAISIE) return false;
+    ramasser();
+    var b = (D && D.budget && D.budget.postes) || {};
+    var cles = {};
+    Object.keys(SAISIE).forEach(function(k){ cles[k] = 1; });
+    Object.keys(b).forEach(function(k){ cles[k] = 1; });
+    return Object.keys(cles).some(function(k){
+      var a = SAISIE[k] || [], o = b[k] || [];
+      for (var i = 0; i < 12; i++) {
+        if (Math.abs((parseFloat(a[i]) || 0) - (parseFloat(o[i]) || 0)) >= 0.005) return true;
+      }
+      return false;
+    });
+  }
+
   function repartirEgalement(){
     ramasser();
     Object.keys(SAISIE || {}).forEach(function(cle){
       var t = SAISIE[cle].reduce(function(s, v){ return s + (parseFloat(v) || 0); }, 0);
-      var par = Math.round((t / 12) * 100) / 100;
-      var n = []; for (var i = 0; i < 12; i++) n.push(par);
-      SAISIE[cle] = n;
+      SAISIE[cle] = douzeParts(t);
     });
     dessiner();
     dire('${T("Chaque poste a été réparti également sur les douze mois.")}', 'bon');
@@ -827,7 +876,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
      << SAISIE >> a zero : quelqu un qui a tape dix postes, change de fenetre pour
      verifier un chiffre et revient perdrait tout, sans message. */
   document.addEventListener('visibilitychange', function(){
-    if (!document.hidden && !SAISIE) charger();
+    if (!document.hidden && !saisieModifiee()) charger();
   });
 
   charger();

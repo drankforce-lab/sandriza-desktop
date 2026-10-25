@@ -230,4 +230,9 @@ module.exports = {
   'unités manquantes': 'units missing',
   'unité manquante': 'unit missing',
   'Fermer': 'Close',
+  /* (2026-10-25, audit) Textes visibles qui restaient hors T(). */
+  'Annuler le transfert': 'Cancel the transfer',
+  'Le transfert est clos comme annulé et la quantité partie est rendue à l’entrepôt d’origine.': 'The transfer is closed as cancelled and the quantity sent is returned to the origin warehouse.',
+  'Quantité': 'Quantity',
+  'Garder le transfert': 'Keep the transfer',
 };

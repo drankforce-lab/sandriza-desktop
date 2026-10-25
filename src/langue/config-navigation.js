@@ -84,4 +84,9 @@ module.exports = {
     'The store menu will return to its original layout. The items and submenus you added will be lost. This action cannot be undone.',
   /* (2026-10-19, lot M) version optimiste */
   "Modifié depuis un autre poste pendant que vous travailliez : rien n’a été écrit.": "Changed from another workstation while you were working: nothing was written.",
+  /* (2026-10-25, audit) */
+  "Afficher": "Show",
+  "Masquer": "Hide",
+  "#shop ou https://…": "#shop or https://…",
+  "Enregistrement en cours… le geste suivra.": "Saving… your action will follow.",
 };

@@ -127,13 +127,16 @@ input.t.manque{border-color:#f87171;background:rgba(248,113,113,.08)}
   line-height:1.25;overflow-wrap:break-word;padding:0 .2rem}
 .fil .et.ici .nom{color:var(--tx);font-weight:700}
 .fil .et.fait .nom{color:var(--tx)}
-.pas{display:none}
+/* ⚠ CLASSE .inc-pas, PAS .pas (2026-10-25, audit) : .pas est la barre d etapes des assistants du socle
+   (padding .6rem 1.1rem, gap) et touchait ces PANNEAUX — chaque etape etait decalee de 1,1 rem a
+   droite et 0,6 rem en haut par rapport au fil et au texte. Meme remede que photos.js (.etapes). */
+.inc-pas{display:none}
 /* RELOOKING 2026 (2026-10-04) : les champs d une etape sur deux colonnes ;
    une zone de texte prend toute la largeur. Intertitre au style du reste. */
-.pas.ici{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.15rem 1rem;align-items:start}
-.pas h4{grid-column:1/-1;margin:0 0 .7rem;font-size:.6875rem;text-transform:uppercase;letter-spacing:.07em;color:var(--tx-or);font-weight:700}
-.pas .champ:has(textarea){grid-column:1/-1}
-html.jour .pas h4{color:#6b5a40}   /* l or du jour tombait a 4,44 sur le fond beige */
+.inc-pas.ici{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.15rem 1rem;align-items:start}
+.inc-pas h4{grid-column:1/-1;margin:0 0 .7rem;font-size:.6875rem;text-transform:uppercase;letter-spacing:.07em;color:var(--tx-or);font-weight:700}
+.inc-pas .champ:has(textarea){grid-column:1/-1}
+html.jour .inc-pas h4{color:#6b5a40}   /* l or du jour tombait a 4,44 sur le fond beige */
 .nav{display:flex;justify-content:space-between;align-items:center;gap:.75rem;width:100%}
 /* ⚠ LE MESSAGE DE L'ASSISTANT VIT DANS L'ASSISTANT. Il partait au pied de la
    FENÊTRE, c'est-à-dire DERRIÈRE le voile de la surcouche : l'avertissement
@@ -209,11 +212,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
     introuvable:'${T("Incident introuvable.")}',
     refus:'${T("Action refusée par le serveur.")}',
     pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
-    delai:"${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    delai:'${T("La fenêtre principale n’a pas répondu à temps.")}',
     operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
     echec:'${T("L’opération a échoué.")}'
   };
-  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+esc(m||'?')+').'))+(r&&r.detail?' — '+esc(r.detail):''); }
+  // (2026-10-25, audit) Texte BRUT : szDire et ferr l ecrivent en textContent ; ce qui va dans du HTML est echappe sur place.
+  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+(m||'?')+').'))+(r&&r.detail?' — '+r.detail:''); }
   function appeler(op, args){
     var p; try { p = P.appeler.apply(P, [op].concat(args||[])); } catch(e){ return Promise.resolve({ok:false,motif:'pont_indisponible'}); }
     if (!p || typeof p.then !== 'function') return Promise.resolve({ok:false,motif:'pont_indisponible'});
@@ -262,21 +266,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
       corps.innerHTML = h; lier(); return;
     }
 
-    var nc = 7 + (D.peutModifier||D.peutSupprimer ? 1 : 0);
+    /* (2026-10-25, audit) « DETAIL » POUR TOUS : le bandeau dit a un role en lecture seule qu il peut
+       consulter le registre, mais le bouton n existait que pour qui peut modifier ou retirer — la fiche
+       (recits, mesures, avis CAI) lui restait fermee. Seuls Modifier et Retirer dependent du droit. */
     // Le registre en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
     h += '<div class="carte sz-pagee"><div data-pages="incidents"><table><thead><tr>'
       + '<th>${T("Incident")}</th><th>${T("Prise de connaissance")}</th><th style="text-align:center">${T("Personnes")}</th>'
       + '<th>${T("Risque")}</th><th>${T("Avis CAI")}</th><th>${T("État")}</th>'
-      + ((D.peutModifier||D.peutSupprimer) ? '<th></th>' : '')
+      + '<th></th>'
       + '</tr></thead><tbody>';
     for (var i=0;i<lg.length;i++){ var r=lg[i];
-      var acts = '';
-      if (D.peutModifier||D.peutSupprimer){
-        acts = '<td class="acts"><button class="b" data-vue="'+esc(r.id)+'" title="${T("Voir le détail")}"><span class="ic">👁</span>${T(" Détail")}</button>'
+      var acts = '<td class="acts"><button class="b" data-vue="'+esc(r.id)+'" title="${T("Voir le détail")}"><span class="ic">👁</span>${T(" Détail")}</button>'
           + (D.peutModifier ? '<button class="b" data-edit="'+esc(r.id)+'"><span class="ic">✎</span>${T(" Modifier")}</button>' : '')
           + (D.peutSupprimer ? '<button class="b dgr" data-del="'+esc(r.id)+'">'+'${T("Retirer")}'+'</button>' : '')
           + '</td>';
-      }
       h += '<tr><td><div class="rf-nom">'+esc(szTd(r.type)||'—')+'</div>'
         + '<div class="rf-sous">'+(r.ref?'<span class="rf-code">'+esc(r.ref)+'</span><span>·</span>':'')
         + '<span>${T("survenu le")} '+esc(szQuand(r.occurredAt)||'—')+'</span></div></td>'
@@ -358,8 +361,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
 
   function majAssistant(){
     var f=document.getElementById('a-fil'); if (f){ f.innerHTML=filHtml(); lierFil(); }
-    var pas=document.querySelectorAll('#sur-inc .pas');
-    for (var i=0;i<pas.length;i++) pas[i].className = 'pas' + (i===ETAPE?' ici':'');
+    var pas=document.querySelectorAll('#sur-inc .inc-pas');
+    for (var i=0;i<pas.length;i++) pas[i].className = 'inc-pas' + (i===ETAPE?' ici':'');
     var n=document.getElementById('a-nav'); if (n){ n.innerHTML=navHtml(); lierNav(); }
   }
   function lierFil(){
@@ -403,7 +406,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
     for (var i=0;i<et.length;i++){
       var ch='';
       for (var j=0;j<et[i].champs.length;j++) ch += champHtml(et[i].champs[j], inc);
-      pasH += '<div class="pas'+(i===0?' ici':'')+'"><h4>'+esc(et[i].label)+'</h4>'+ch+'</div>';
+      pasH += '<div class="inc-pas'+(i===0?' ici':'')+'"><h4>'+esc(et[i].label)+'</h4>'+ch+'</div>';
     }
     var sur=document.createElement('div'); sur.className='sur'; sur.id='sur-inc';
     sur.innerHTML = '<div class="boite"><div class="tt"><h3><span class="ic">🛡</span> '+(id?'${T("Modifier l’incident")}':'${T("Consigner un incident")}')+'</h3>'
@@ -542,7 +545,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
   function charger(){
     dire('${T("Chargement…")}');
     appeler('incidents:donnees',[]).then(function(r){
-      if (!r||!r.ok){ corps.innerHTML='<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
+      if (!r||!r.ok){ corps.innerHTML='<div class="vide m-'+esc((r&&r.motif)||'echec')+'">'+esc(expliquer(r))+'</div>'; dire(expliquer(r), 'err'); return; }
       D=r; RO=!r.peutModifier; rendre(); dire('');
       // Ouverture directe (banc / lien profond), une fois D disponible et le
       // registre dessiné — sinon l'assistant n'aurait ni etapes ni incident.

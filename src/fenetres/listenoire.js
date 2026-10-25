@@ -126,11 +126,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     doublon:'${T("Cette valeur est déjà dans la liste.")}',
     introuvable:'${T("Entrée introuvable.")}',
     pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
-    delai:"${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    delai:'${T("La fenêtre principale n’a pas répondu à temps.")}',
     operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
     echec:'${T("L’opération a échoué.")}'
   };
-  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+esc(m||'?')+').'))+(r&&r.detail?' — '+esc(r.detail):''); }
+  // (2026-10-25, audit) Texte BRUT : szDire l ecrit en textContent ; ce qui va dans du HTML est echappe sur place.
+  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+(m||'?')+').'))+(r&&r.detail?' — '+r.detail:''); }
   function appeler(op, args){
     var p; try { p = P.appeler.apply(P, [op].concat(args||[])); } catch(e){ return Promise.resolve({ok:false,motif:'pont_indisponible'}); }
     if (!p || typeof p.then !== 'function') return Promise.resolve({ok:false,motif:'pont_indisponible'});
@@ -144,7 +145,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   var FT = '';      // '' | email | postal | address — filtre local (la liste est entiere)
   var QL = '';      // recherche locale
   function libType(e){ return LIB_TYPE[e.type] || szTd(e.typeLabel || ''); }
+  /* (2026-10-25, audit) LE FORMULAIRE D AJOUT SURVIT AU REDESSIN. Chercher dans la liste (pour
+     verifier qu une valeur n y est pas deja), cliquer un type ou retirer une autre entree redessine
+     tout : la valeur, la ville et la note saisies disparaissaient. On les relit avant et on les
+     repose apres. Un changement de TYPE vide d abord la valeur et la ville (une adresse ne se
+     colle pas dans une case de courriel) ; la note, elle, reste. */
   function dessiner(){
+    var g = null;
+    if (document.getElementById('l-note')) g = { v: txv('l-valeur'), ville: txv('l-ville'), note: txv('l-note') };
+    dessiner0();
+    if (!g || !AJOUT) return;
+    var pose = function(id, x){ var e = document.getElementById(id); if (e && x) e.value = x; };
+    pose('l-valeur', g.v); pose('l-ville', g.ville); pose('l-note', g.note);
+  }
+  function dessiner0(){
     var toutes = D.entrees || [];
     var ql = QL.trim().toLowerCase();
     var l = toutes.filter(function(e){
@@ -279,7 +293,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     // ⚠ Changer le type REDESSINE le formulaire : une adresse demande deux
     // champs, un courriel un seul. Garder un champ inadapte inviterait a saisir
     // une adresse dans une case prevue pour un courriel.
-    if (t) t.onchange=function(){ TYPE=this.value; dessiner(); };
+    // La valeur et la ville ne suivent pas un changement de type ; la note, si (dessiner).
+    if (t) t.onchange=function(){ TYPE=this.value;
+      ['l-valeur','l-ville'].forEach(function(k){ var e=document.getElementById(k); if (e) e.value=''; });
+      dessiner(); };
     var ds=corps.querySelectorAll('[data-del]');
     for (var i=0;i<ds.length;i++) ds[i].onclick=function(){
       var id=this.getAttribute('data-del');
@@ -350,7 +367,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   function charger(){
     dire('${T("Chargement…")}');
     appeler('listenoire:donnees',[]).then(function(r){
-      if (!r||!r.ok){ corps.innerHTML='<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
+      if (!r||!r.ok){ corps.innerHTML='<div class="vide m-'+esc((r&&r.motif)||'echec')+'">'+esc(expliquer(r))+'</div>'; dire(expliquer(r), 'err'); return; }
       D=r; RO=!r.peutAjouter;
       var av=document.getElementById('ro'); if (av) av.hidden=!(!r.peutAjouter && !r.peutRetirer);
       dessiner(); dire('');

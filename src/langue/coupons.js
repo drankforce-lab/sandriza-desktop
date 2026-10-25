@@ -157,4 +157,6 @@ module.exports = {
   'Supprimer le coupon': 'Delete coupon',
   'sera supprimé définitivement et ne pourra plus être utilisé. Les commandes déjà réglées conservent leur réduction. Cette action est irréversible.': 'will be permanently deleted and can no longer be used. Orders already paid keep their discount. This action cannot be undone.',
   'Un pourcentage ne peut pas dépasser 100 %.': 'A percentage cannot exceed 100%.',
+  // 2026-10-25, audit
+  'Consultation seulement': 'View only',
 };

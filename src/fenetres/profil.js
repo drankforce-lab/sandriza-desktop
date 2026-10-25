@@ -282,11 +282,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     droit:'${T("Ce geste n’est pas permis.")}',
     indisponible:'${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
     pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
-    delai:"${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    delai:'${T("La fenêtre principale n’a pas répondu à temps.")}',
     operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
     echec:'${T("L’opération a échoué.")}'
   };
-  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+esc(m||'?')+').'))+(r&&r.detail?' — '+esc(r.detail):''); }
+  // (2026-10-25, audit) Texte BRUT : szDire / ferr l ecrivent en textContent (echappe, « & » s y lisait « &amp; »).
+  // Ce qui part dans du HTML est echappe a l endroit ou on l y met.
+  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+(m||'?')+').'))+(r&&r.detail?' — '+r.detail:''); }
   function appeler(op, args){
     var p; try { p = P.appeler.apply(P, [op].concat(args||[])); } catch(e){ return Promise.resolve({ok:false,motif:'pont_indisponible'}); }
     if (!p || typeof p.then !== 'function') return Promise.resolve({ok:false,motif:'pont_indisponible'});
@@ -651,7 +653,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function charger(){
     dire('${T("Chargement…")}');
     appeler('profil:donnees',[]).then(function(r){
-      if (!r||!r.ok){ corps.innerHTML='<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
+      if (!r||!r.ok){ corps.innerHTML='<div class="vide m-'+esc((r&&r.motif)||'echec')+'">'+esc(expliquer(r))+'</div>'; dire(expliquer(r), 'err'); return; }
       D=r; dessiner(); dire('');
     });
   }

@@ -125,4 +125,8 @@ module.exports = {
   // 2026-10-16 : la refonte de la Comptabilité.
   'ouvre': 'opens',
   'Historique': 'History',
+  // 2026-10-25, audit : Échap sur un formulaire modifié.
+  'Abandonner le rappel': 'Discard the reminder',
+  'Le titre ou la note saisis ne sont pas enregistrés. Fermer le formulaire les perdra.': 'The title or note you entered is not saved. Closing the form will discard it.',
+  'Fermer sans enregistrer': 'Close without saving',
 };

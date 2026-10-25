@@ -258,4 +258,15 @@ module.exports = {
   'Demande d’annulation au transporteur…': 'Asking the carrier to cancel…',
   'Étiquette annulée chez le transporteur — rien ne sera facturé.': 'Label cancelled with the carrier — nothing will be billed.',
   ' et l’étiquette imprimée ne sera plus valide. Si elle est déjà payée (compte payé par carte), son remboursement est demandé à la place : il prend quelques jours. Le numéro de suivi est retiré de la commande ; une nouvelle étiquette pourra ensuite être créée. Cette action est irréversible.': ' and the printed label will no longer be valid. If it is already paid (credit-card account), a refund is requested instead: it takes a few days. The tracking number is removed from the order; a new label can then be created. This cannot be undone.',
+  // (2026-10-25, audit)
+  'La comparaison des transporteurs est en cours — attendez son prix avant de commander.': 'The carrier comparison is still running — wait for its price before ordering.',
+  'Le poids a changé depuis la comparaison — cliquez « Recomparer » avant de commander.': 'The weight changed since the comparison — click “Compare again” before ordering.',
+  'Aucun prix coté pour ce transporteur et ce service — choisissez une ligne de la comparaison ou recomparez. Rien n’a été commandé.': 'No quoted price for this carrier and service — choose a line in the comparison or compare again. Nothing was ordered.',
+  'Prix coté : ': 'Quoted price: ',
+  'Opération en cours — attendez sa réponse avant de fermer.': 'Operation in progress — wait for its answer before closing.',
+  'Fermer sans enregistrer ?': 'Close without saving?',
+  'Le numéro de suivi saisi n’a pas été enregistré. Il sera perdu.': 'The tracking number you entered has not been saved. It will be lost.',
+  // (2026-10-25, audit)
+  'cotation seulement': 'quote only',
+  'Rester': 'Stay',
 };

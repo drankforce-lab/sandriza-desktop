@@ -116,7 +116,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var D = null, RO = false, OCCUPE = false;
   var VUE = 'liste';       // 'liste' | 'import'
   var IMP = null;          // etat du recadrage en cours
-  var DELCONF = '';        // id en attente de confirmation de suppression
   var MAXPX = 1400;
   var RATIOS = [['1:1',1,1],['4:3',4,3],['3:2',3,2],['2:1',2,1],['16:9',16,9],['3:4',3,4],['${T("libre")}',0,0]];
 
@@ -129,17 +128,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
     droit:'${T("Votre rôle ne donne pas accès à la configuration.")}',
     lecture_seule:'${T("Votre rôle est en lecture seule.")}',
-    indisponible:"${T('L\'administration n\'est pas encore chargée dans la fenêtre principale.')}",
+    indisponible:'${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
     pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
-    delai:"${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    delai:'${T("La fenêtre principale n’a pas répondu à temps.")}',
     operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
     image_invalide:'${T("Le fichier choisi n’est pas une image.")}',
     nom_requis:'${T("Le nom est requis.")}',
     introuvable:'${T("Cette image n’existe plus.")}',
     nuage:'${T("Le téléversement a échoué. Réessayez.")}',
-    echec:"${T('L\'opération a échoué.')}",
+    echec:'${T("L’opération a échoué.")}',
   };
-  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+esc(m||'?')+').'))+(r&&r.detail?' ('+esc(r.detail)+')':''); }
+  // (2026-10-25, audit) Texte BRUT : szDire l ecrit en textContent ; ce qui va dans du HTML est echappe sur place.
+  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+(m||'?')+').'))+(r&&r.detail?' ('+r.detail+')':''); }
   function appeler(op, args){
     var p; try { p = P.appeler.apply(P, [op].concat(args||[])); } catch(e){ return Promise.resolve({ok:false,motif:'pont_indisponible'}); }
     if (!p || typeof p.then !== 'function') return Promise.resolve({ok:false,motif:'pont_indisponible'});
@@ -168,21 +168,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   // ── LISTE ───────────────────────────────────────────────────────────────────
   function carteHtml(l){
-    var q = l.dpi ? quality(l.dpi) : null;
+    /* (2026-10-25, audit) quality() TOUJOURS : sa branche « < 200 » couvre 0. Une petite image
+       pour une grande largeur donne dpi = 0 ; q valait null et q.b levait — la liste entiere ne se
+       dessinait plus, a chaque ouverture. */
+    var q = quality(+l.dpi || 0);
     var meta = '<span>' + (l.w && l.h ? l.w + ' × ' + l.h + ' px' : '${T("dimensions ?")}') + '</span>'
       + (l.w && l.h ? '<span>' + ratioLbl(l.w, l.h) + '</span>' : '')
       + (l.alpha ? '<span>${T("transparent")}</span>' : '');
-    var editing = (DELCONF === '') ? false : false; // (rename gere par data-ren)
     return '<div class="lcard" data-card="' + esc(l.id) + '">'
       + '<div class="th"><img src="' + esc(l.url) + '" alt="' + esc(l.name) + '" loading="lazy"></div>'
       + '<div class="bd">'
       + '<div class="nm" data-nm="' + esc(l.id) + '" title="' + esc(l.name) + '">' + esc(l.name || '${T("Sans nom")}') + '</div>'
       + '<div class="mt">' + meta + '</div>'
-      + (l.printW ? '<div class="pr" style="border-color:' + q.b + ';color:' + q.c + '">' + fr(l.printW) + ' × ' + fr(l.printH) + '${T(" po")} · ' + l.dpi + ' dpi</div>' : '')
+      + (l.printW && q ? '<div class="pr" style="border-color:' + q.b + ';color:' + q.c + '">' + fr(l.printW) + ' × ' + fr(l.printH) + '${T(" po")} · ' + l.dpi + ' dpi</div>' : '')
       + (RO ? '' : '<div class="acts">'
         + '<button class="b" type="button" data-ren="' + esc(l.id) + '" title="${T("Renommer")}"><span class="ic">✎</span></button>'
         + '<button class="b" type="button" data-cp="' + esc(l.id) + '" title="${T("Copier l’adresse")}"><span class="ic">🔗</span></button>'
-        + '<button class="b dgr" type="button" data-del="' + esc(l.id) + '" title="${T("Retirer")}">' + (DELCONF === l.id ? '✓?' : '<span class="ic">🗑</span>') + '</button>'
+        + '<button class="b dgr" type="button" data-del="' + esc(l.id) + '" title="${T("Retirer")}"><span class="ic">🗑</span></button>'
         + '</div>')
       + '</div></div>';
   }
@@ -232,7 +234,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (out) {
       var printW = num((document.getElementById('lg-printw')||{}).value, 0);
       var dpi = printW > 0 ? Math.round(p.cw/printW) : 0;
-      var q = dpi ? quality(dpi) : null;
+      var q = quality(dpi);   // (2026-10-25, audit) dpi 0 = insuffisant, jamais null
       out.innerHTML = '<div class="row"><span>${T("Image produite")}</span><strong>' + p.cw + ' × ' + p.ch + ' px</strong></div>'
         + '<div class="row"><span>${T("Rapport")}</span><strong>' + ratioLbl(p.cw, p.ch) + '</strong></div>'
         + (p.cropped ? '<div class="row"><span>${T("Recadrage")}</span><strong>${T("centré, ")}' + Math.round((1-(p.sw*p.sh)/(st.natW*st.natH))*100) + '${T(" % retiré")}</strong></div>' : '')
@@ -253,7 +255,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       +     '<div class="row"><span>${T("Dimensions")}</span><strong>' + st.natW + ' × ' + st.natH + ' px</strong></div>'
       +     '<div class="row"><span>${T("Rapport")}</span><strong>' + ratioLbl(st.natW, st.natH) + ' · ' + (Math.abs(st.natW-st.natH)<2?'${T("carré")}':st.natW>st.natH?'${T("paysage")}':'${T("portrait")}') + '</strong></div>'
       +     '<div class="row"><span>${T("Transparence")}</span><strong>' + (st.alpha?'${T("oui")}':'${T("non")}') + '</strong></div>'
-      +     '<div class="row"><span>${T("Fichier")}</span><strong>' + esc(st.mime.replace('image/','').toUpperCase()) + ' · ' + Math.max(1,Math.round(st.bytes/1024)) + ' Ko</strong></div>'
+      +     '<div class="row"><span>${T("Fichier")}</span><strong>' + esc(st.mime.replace('image/','').toUpperCase()) + ' · ' + szOctets(st.bytes) + '</strong></div>'   // (2026-10-25, audit) KB en anglais
       +   '</div>'
       +   '<div class="h" style="margin-top:1rem">${T("Aperçu du résultat")}</div>'
       +   '<div class="prevbox"><canvas id="lg-canvas"></canvas></div>'
@@ -295,7 +297,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var upl = document.getElementById('upl-input'); if (upl) upl.onchange = function(){ var f=upl.files&&upl.files[0]; upl.value=''; if (f) ouvrirImport(f); };
     var rens = corps.querySelectorAll('[data-ren]'); for (var a=0;a<rens.length;a++) rens[a].onclick = function(){ renommer(this.getAttribute('data-ren')); };
     var cps = corps.querySelectorAll('[data-cp]'); for (var b=0;b<cps.length;b++) cps[b].onclick = function(){ copier(this.getAttribute('data-cp')); };
-    var dls = corps.querySelectorAll('[data-del]'); for (var c=0;c<dls.length;c++) dls[c].onclick = function(){ var id=this.getAttribute('data-del'); if (DELCONF===id){ DELCONF=''; retirer(id); } else { DELCONF=id; dessiner(); } };
+    /* (2026-10-25, audit) LE RETRAIT SE CONFIRME DANS SA BOITE (regle du 2026-10-15) — plus de « ✓? »
+       ambigu dans le bouton, arme sans jamais se desarmer. */
+    var dls = corps.querySelectorAll('[data-del]'); for (var c=0;c<dls.length;c++) dls[c].onclick = function(){
+      var id = this.getAttribute('data-del');
+      var l = ((D && D.logos) || []).find(function(x){ return x.id === id; });
+      szConfirmer({ danger: true, titre: '${T("Retirer l’image")}',
+        texte: '${T("« {0} » sera retirée de la logothèque. Les pages qui utilisent son adresse ne l’afficheront plus.")}'.split('{0}').join((l && l.name) || '${T("Sans nom")}'),
+        oui: '${T("Retirer")}' }).then(function(ok){ if (ok) retirer(id); });
+    };
   }
 
   function ouvrirImport(f){
@@ -384,7 +394,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function charger(){
     dire('${T("Lecture…")}');
     appeler('config:logotheque:donnees').then(function(r){
-      if (!r || !r.ok) { corps.innerHTML = '<div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div>'; dire(expliquer(r), 'err'); return; }
+      if (!r || !r.ok) { corps.innerHTML = '<div class="vide m-' + esc((r && r.motif) || 'echec') + '">' + esc(expliquer(r)) + '</div>'; dire(expliquer(r), 'err'); return; }
       D = r; RO = !r.peutModifier; VUE='liste'; dessiner(); dire('');
     });
   }

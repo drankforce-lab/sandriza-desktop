@@ -67,7 +67,7 @@ body{background:var(--f-page);color:var(--tx);
    voulue - le second alarme, le premier informe. */
 body.presse .tete{background:linear-gradient(180deg,#2a1418,#0e1522)}
 body.presse .tete h1{color:var(--tx-err2)}
-.corps{flex:1 1 auto;min-height:0;overflow-y:auto;padding:1rem .95rem}
+.corps{flex:1 1 auto;min-height:0;overflow:hidden;padding:1rem .95rem}
 .pied{flex:0 0 auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;
   padding:.6rem .95rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 button{font:inherit;color:var(--tx);background:var(--v05);
@@ -277,7 +277,13 @@ ${JS_DIRE()}
     if (v) v.onclick = function(){
       v.disabled = true;
       szDire('${T("Redémarrage…")}');
-      decider(0);
+      /* (2026-10-25, audit) Un refus se dit et rend le bouton : sinon il restait
+         grise sous un « Redémarrage… » qui ne venait pas. */
+      decider(0).then(function(r){
+        if (r && r.ok) return;
+        v.disabled = false;
+        szDire((r && r.message) || ('${T("Refusé (")}' + ((r && r.motif) || 'inconnu') + ').'), 'err');
+      });
     };
     demarrerTic();
   }

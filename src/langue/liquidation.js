@@ -230,4 +230,10 @@ module.exports = {
   'La boutique cessera aussitôt d’annoncer l’offre, et le produit redeviendra admissible aux retours et aux échanges.': 'The store will stop advertising the offer immediately, and the product will again be eligible for returns and exchanges.',
   'SKU': 'SKU',
   'non confirmé(s) par le serveur — relancez pour les reprendre.': 'not confirmed by the server — run again to retry them.',
+  // (2026-10-25, audit)
+  'Abandonner la sélection ?': 'Discard the selection?',
+  '{0} produit choisi sera oublié.': '{0} chosen product will be forgotten.',
+  '{0} produits choisis seront oubliés.': '{0} chosen products will be forgotten.',
+  'Abandonner': 'Discard',
+  'Continuer la sélection': 'Keep selecting',
 };

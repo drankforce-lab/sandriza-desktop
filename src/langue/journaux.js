@@ -69,7 +69,7 @@ module.exports = {
   'Journaux': 'Logs',
   'Votre rôle ne donne pas accès aux journaux.': 'Your role does not give access to the logs.',
   'La fenêtre principale n\'a pas répondu à temps.': 'The main window did not answer in time.',
-  'Qui tient une fiche en ce moment (ecran a part, en direct)':
+  'Qui tient une fiche en ce moment (écran à part, en direct)':
     'Who is holding a record right now (separate screen, live)',
 
   /* ── LES HUIT ONGLETS ───────────────────────────────────────────────────── */
@@ -339,4 +339,22 @@ module.exports = {
   'Toutes les erreurs rapportées seront effacées pour l’ensemble des utilisateurs, ainsi que leurs compteurs, qui ne pourront pas être reconstitués. Cette action est irréversible.': 'All reported errors will be deleted for every user, along with their counters, which cannot be rebuilt. This action cannot be undone.',
   'Défauts distincts': 'Distinct faults',
   'Vider le journal': 'Clear the log',
+  /* (2026-10-25, audit) Textes visibles qui restaient hors T(), et les genres reels du journal des liens. */
+  'Verrous': 'Locks',
+  'Page {0} sur {1}': 'Page {0} of {1}',
+  'Infolettre': 'Newsletter',
+  'poste': 'workstation',
+  'pile disponible (survolez)': 'stack trace available (hover)',
+  'ligne': 'line',
+  'navigateur': 'browser',
+  'Ouvert (comptable)': 'Opened (accountant)',
+  'Classeur ouvert (comptable)': 'Workbook opened (accountant)',
+  'Mot de passe refusé (comptable)': 'Password refused (accountant)',
+  'Bloqué : trop d’essais': 'Blocked: too many attempts',
+  'Mot de passe renouvelé': 'Password renewed',
+  'Mot de passe refusé': 'Password refused',
+  'Supprimé': 'Deleted',
+  'Freiné : trop de demandes': 'Throttled: too many requests',
+  'Expiré': 'Expired',
+  'Relais refusé': 'Relay refused',
 };

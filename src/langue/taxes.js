@@ -106,5 +106,10 @@ module.exports = {
   'écart': 'gap',
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
-  'la composante': 'the component'
+  'la composante': 'the component',
+  // 2026-10-25, audit : réinitialisation confirmée, comparaison sur la grille enregistrée.
+  'Réinitialiser les taux': 'Reset the rates',
+  'Toute la grille sera remplacée par les taux par défaut. Les taux saisis à la main, enregistrés ou non, seront perdus.': 'The whole grid will be replaced with the default rates. Rates entered by hand, saved or not, will be lost.',
+  'Réinitialiser la grille': 'Reset the grid',
+  'Enregistrez d’abord vos changements : la comparaison porte sur la grille enregistrée.': 'Save your changes first: the comparison uses the saved grid.'
 };

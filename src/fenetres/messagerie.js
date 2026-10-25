@@ -406,7 +406,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   function majRetention(){
     var box = document.getElementById('ret'); if (!box) return;
     box.hidden = false;
-    var inp = document.getElementById('ret-${T("mois")}');
+    /* (2026-10-25, audit) Un identifiant ne se traduit pas : en anglais on
+       cherchait « ret-months » et le reglage ne marchait jamais. */
+    var inp = document.getElementById('ret-mois');
     var btn = document.getElementById('ret-save');
     if (inp) inp.value = (D && D.retention) || 12;
     var ro = !(D && D.peutModifier);
@@ -458,7 +460,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   document.addEventListener('keydown', function(ev){
     if (ev.key === 'Escape') {
       ev.preventDefault();
-      if (DETAIL) { DETAIL = null; SUPPR_ARME = false; dessiner(); return; }
+      if (document.querySelector('.szc-voile')) return;
+      if (DETAIL) {
+        /* (2026-10-25, audit) Une reponse redigee ne se perd pas sur Echap : le
+           clic sur le voile est deja coupe pour elle ; on demande avant de fermer. */
+        var rt = document.getElementById('m-reptxt');
+        if (rt && String(rt.value).trim() && rt.value !== String(DETAIL.reponse || '')) {
+          szConfirmer({ prudent: true, titre: '${T("Abandonner la réponse")}',
+            texte: '${T("La réponse rédigée n’a pas été envoyée. Fermer la demande la perdra.")}',
+            oui: '${T("Fermer sans envoyer")}' }).then(function(oui){
+            if (!oui) return;
+            DETAIL = null; SUPPR_ARME = false; dessiner();
+          });
+          return;
+        }
+        DETAIL = null; SUPPR_ARME = false; dessiner(); return;
+      }
       P.fermer();
     }
   });

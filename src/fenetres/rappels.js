@@ -519,8 +519,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('rappels')}
   function fait(id){
     var r = rappel(id);
     appeler('rappels:fait', [id]).then(function(x){
-      apres(x, 'fait', r && r.frequence === 'unique' ? '${T("C’est fait : le rappel est terminé.")}' : '${T("C’est fait : le rappel revient à sa prochaine échéance.")}');
+      var ok = apres(x, 'fait', r && r.frequence === 'unique' ? '${T("C’est fait : le rappel est terminé.")}' : '${T("C’est fait : le rappel revient à sa prochaine échéance.")}');
+      /* (2026-10-25, audit) Sur un echec (nuage, delai), le bouton se rallume : on
+         pouvait sinon ne plus reessayer sans recharger. */
+      if (!ok) {
+        Array.prototype.forEach.call(document.querySelectorAll('[data-fait]'), function(b){
+          if (b.getAttribute('data-fait') === String(id)) b.disabled = false;
+        });
+      }
     });
+  }
+  /* (2026-10-25, audit) Le titre ou la note ont-ils change depuis l ouverture du
+     formulaire ? Echap les jetait sans question. */
+  function formModifie(){
+    if (!FORM) return false;
+    ramasser();
+    var o = FORM.id ? rappel(FORM.id) : null;
+    return String(FORM.titre || '') !== String((o && o.titre) || '')
+      || String(FORM.note || '') !== String((o && o.note) || '');
   }
   function reporter(id, j, date){
     appeler('rappels:reporter', [id, j || null, date || '']).then(function(x){
@@ -651,7 +667,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('rappels')}
     ev.preventDefault();
     if (ARME) { desarmer(); return; }
     if (REPORT) { REPORT = ''; dessiner(); return; }
-    if (FORM) { FORM = null; dessiner(); return; }
+    if (document.querySelector('.szc-voile')) return;
+    if (FORM) {
+      if (!formModifie()) { FORM = null; dessiner(); return; }
+      szConfirmer({ prudent: true, titre: '${T("Abandonner le rappel")}',
+        texte: '${T("Le titre ou la note saisis ne sont pas enregistrés. Fermer le formulaire les perdra.")}',
+        oui: '${T("Fermer sans enregistrer")}' }).then(function(oui){ if (oui) { FORM = null; dessiner(); } });
+      return;
+    }
     if (P && P.fermer) P.fermer();
   });
   window.addEventListener('resize', function(){

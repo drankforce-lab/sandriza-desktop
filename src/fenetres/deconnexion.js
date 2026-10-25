@@ -48,7 +48,7 @@ body{background:radial-gradient(ellipse at 50% 0%,rgba(var(--or-rgb),0.10),trans
   display:flex;flex-direction:column}
 /* (2026-10-18, sa capture : « refais cette fenêtre, c est pas beau ») UNE CARTE CENTRÉE : qui l on est, la question,
    ce qui se passe. Plus de bandeau de titre (la barre de la fenêtre le dit déjà), plus de texte flottant à gauche. */
-.corps{flex:1 1 auto;min-height:0;overflow-y:auto;padding:1.3rem 1.6rem .9rem;
+.corps{flex:1 1 auto;min-height:0;overflow:hidden;padding:1.3rem 1.6rem .9rem;
   display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:.15rem}
 .avatar{width:56px;height:56px;border-radius:50%;flex:0 0 auto;margin-bottom:.55rem;
   display:flex;align-items:center;justify-content:center;

@@ -644,9 +644,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
     brancherFiltres();
     if (VUE === 'ens' && SOUS.ens === 'resume') brancherPlafond();
   }
+  /* (2026-10-25, audit) UN PLAFOND MODIFIE ET NON ENREGISTRE N EST PLUS EFFACE PAR LA VEILLE : le foyer
+     seul ne le protegeait pas (on tape le montant, on clique ailleurs, 5 s plus tard le redessin le
+     remettait). Les champs fraichement dessines portent la valeur enregistree : le drapeau repart a faux. */
+  var PLAF_SALE = false;
   function brancherPlafond(){
     var bt = document.getElementById('pl-poser');
+    PLAF_SALE = false;
     if (!bt) return;
+    var acS = document.getElementById('pl-actif'), moS = document.getElementById('pl-montant');
+    if (acS) acS.addEventListener('change', function(){ PLAF_SALE = true; });
+    if (moS) moS.addEventListener('input', function(){ PLAF_SALE = true; });
     bt.onclick = function(){
       var ac = document.getElementById('pl-actif');
       var mo = document.getElementById('pl-montant');
@@ -668,6 +676,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
           dire(expliquer(r), 'err');
           return;
         }
+        PLAF_SALE = false;
         dire('${T("Plafond enregistré.")}', 'bon');
         /* ⚠ ON RECHARGE : la jauge se calcule sur la dépense du mois, que seul le relais connaît. */
         charger(false);
@@ -776,7 +785,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
     var a = document.activeElement;
     /* ⚠⚠ LE MONTANT DU PLAFOND EN FAIT PARTIE : un montant à moitié tapé serait effacé sous les doigts. */
     return !!(a && (a.id === 'h-q' || a.id === 'h-prov'
-      || a.id === 'pl-montant' || a.id === 'pl-actif'));
+      || a.id === 'pl-montant' || a.id === 'pl-actif'))
+      || !!(PLAF_SALE && document.getElementById('pl-montant'));
   }
   /* (2026-10-19, audit — lot VOLUME) La veille des 5 s (deux appels distants : fal.ai et Photoroom) se SUSPEND
      quand la fenetre est cachee et RALENTIT a 20 s sans le focus. */

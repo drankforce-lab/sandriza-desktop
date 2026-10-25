@@ -112,7 +112,6 @@ module.exports = {
   'ramassé': 'picked up',
 
   /* ── CE QUE LE BANC RESIDUEL A TROUVE ──────────────────────────────────── */
-  'Le choix des colis, de la date et du poids se fait dans la fenêtre principale': 'The parcels, the date and the weight are chosen in the main window',
   'Poids estimé par colis en kilogrammes': 'Estimated weight per parcel in kilograms',
   'Ramassages': 'Pickups',
   'Rapport transporteurs': 'Carrier report',
@@ -134,4 +133,6 @@ module.exports = {
   'du': 'on',
   'sera annulé auprès du transporteur. Pour le rétablir, il faudra en planifier un nouveau.': 'will be cancelled with the carrier. To restore it, a new pickup will have to be scheduled.',
   'Conserver': 'Keep',
+  /* (2026-10-25, audit) Textes visibles qui restaient hors T(). */
+  'Choisir les colis, la date et le poids du ramassage': 'Choose the parcels, date and weight of the pickup',
 };

@@ -126,7 +126,7 @@ html.jour .graph .b2{background:rgba(168,128,78,.38)}
 .chans label{display:flex;align-items:center;gap:.35rem;font-size:.85rem;cursor:pointer}
 .rec{padding:.45rem 0;border-bottom:1px solid var(--v06);font-size:.82rem;line-height:1.5}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.78);display:flex;align-items:center;justify-content:center;z-index:50;padding:1rem}
-.boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;max-width:34rem;width:100%;max-height:88vh;overflow:auto;padding:.9rem 1rem}
+.boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;max-width:34rem;width:100%;max-height:88vh;overflow:hidden;padding:.9rem 1rem}
 .boite h3{margin:0 0 .7rem;font:700 .98rem/1.3 Georgia,serif}
 .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.85rem;flex-wrap:wrap}
 .pied-boite .gauche{margin-right:auto}
@@ -217,9 +217,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
       D = r; if (r.peut) PEUT = r.peut; return true;
     });
   }
+  /* (2026-10-25, audit) Un onglet qui ne repond pas ne fait plus disparaitre la
+     rangee d onglets : on peut changer d onglet, ou reessayer, sans fermer. */
   function vide(titre, detail){
-    ongletsEl.innerHTML = '';
-    corps.innerHTML = '<div class="vide"><div style="font:700 1.3rem/1 system-ui,sans-serif;color:var(--tx-creme)">' + esc(titre) + '</div><div style="margin-top:.35rem">' + esc(detail || '') + '</div></div>';
+    dessinerOnglets();
+    corps.innerHTML = '<div class="vide"><div style="font:700 1.3rem/1 system-ui,sans-serif;color:var(--tx-creme)">' + esc(titre) + '</div><div style="margin-top:.35rem">' + esc(detail || '') + '</div>'
+      + '<div style="margin-top:.8rem"><button type="button" data-act="reessayer">${T("Réessayer")}</button></div></div>';
   }
   function relire(){ return charger().then(function(ok){ if (ok) dessiner(); return ok; }); }
 
@@ -284,7 +287,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
       return '<tr><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(ini(c.nom)) + '</span><span class="rf-nom">' + esc(c.nom || '—') + '</span></div></td><td style="color:var(--tx2)">' + esc(c.email || '—') + '</td>'
         + '<td><span class="badge def">' + esc(c.segLabel) + '</span></td><td class="ctr" style="font-weight:700">' + c.orderCount + '</td>'
         + '<td class="num" style="color:var(--tx-creme);font-weight:600">' + argent(c.totalSpent) + '</td>'
-        + '<td style="color:var(--tx2)">' + esc(c.lastO || '—') + (c.daysSince !== null ? ' <span style="color:' + col + ';font-size:.7rem">(' + c.daysSince + 'j)</span>' : '') + '</td>'
+        + '<td style="color:var(--tx2)">' + esc(c.lastO || '—') + (c.daysSince !== null ? ' <span style="color:' + col + ';font-size:.7rem">(' + c.daysSince + ' ${T("j")})</span>' : '') + '</td>'
         + '<td class="ctr">' + (c.isPromo ? '<span style="color:var(--tx-err2);font-weight:700">✓</span>' : '<span style="color:var(--tx2)">—</span>') + '</td></tr>';
     }).join('') : '<tr><td colspan="7" class="vide">${T("Aucun client dans ce segment.")}</td></tr>';
     var reste = (D.filteredTotal > 50) ? '<tr><td colspan="7" class="vide">+' + (D.filteredTotal - 50) + ' ${T("autres — exportez en CSV pour la liste complète")}</td></tr>' : '';
@@ -410,13 +413,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
       return '<div style="display:flex;gap:.7rem;padding:.4rem 0;border-bottom:1px solid var(--v055)"><span style="font-size:1.1rem">' + (c.score ? '<span class="ic">👍</span>' : '<span class="ic">👎</span>') + '</span>'
         + '<div style="flex:1;min-width:0"><div style="font-size:.83rem">"' + esc(c.comment) + '"</div><div style="font-size:.7rem;color:var(--tx2);margin-top:.1rem">' + esc(c.name) + ' · ' + esc(szQuand(c.date)) + '</div></div></div>';
     }).join('') + '</div></div>' : '';
-    return szTuiles('<div class="tuiles">'
-      + '<div class="tuile" style="text-align:center"><div class="v" style="color:' + (D.rate >= 70 ? 'var(--tx-ok)' : 'var(--tx-err)') + ';font-size:2rem">' + szNombre(D.rate, 1) + ' %</div><div class="z">${T("Taux de satisfaction")}</div></div>'
-      + '<div class="carte" style="grid-column:span 2"><h2>${T("Répartition des évaluations")}</h2>'
+    /* ⚠ PLUS DE TUILES (2026-10-25, audit) : le taux et toute la carte de
+       repartition etaient dans szTuiles(), qui rend '' depuis la regle du
+       2026-10-16 (aucune cellule de chiffres hors du tableau de bord) — l onglet
+       n avait plus que ses commentaires, ou rien. Le taux devient UNE LIGNE de la
+       carte de repartition, qui sort de l enveloppe. */
+    return '<div class="carte"><h2>${T("Répartition des évaluations")}</h2>'
+      +   '<div style="font-size:.85rem;margin-bottom:.5rem">${T("Taux de satisfaction :")} <b style="color:' + (D.rate >= 70 ? 'var(--tx-ok)' : 'var(--tx-err)') + '">' + szNombre(D.rate, 1) + ' %</b></div>'
       +   '<div style="font-size:.8rem;margin-bottom:.2rem"><span class="ic">👍</span> ${T("Satisfaits")}</div>' + bar(D.satisfied, D.rated, '#4ade80')
       +   '<div style="font-size:.8rem;margin-bottom:.2rem"><span class="ic">👎</span> ${T("Insatisfaits")}</div>' + bar(D.unsatisfied, D.rated, '#f87171')
-      +   '<div style="font-size:.74rem;color:var(--tx2);margin-top:.4rem">' + D.rated + '${T(" éval. sur ")}' + D.total + ' conversations (' + (D.total ? Math.round(D.rated / D.total * 100) : 0) + '${T("% de couverture)")}</div></div>'
-      + '</div>') + comments;
+      +   '<div style="font-size:.74rem;color:var(--tx2);margin-top:.4rem">' + D.rated + '${T(" éval. sur ")}' + D.total + ' ${T("conversations")} (' + (D.total ? Math.round(D.rated / D.total * 100) : 0) + '${T("% de couverture)")}</div></div>'
+      + comments;
   }
 
   /* ══ DESSIN ════════════════════════════════════════════════════════════════ */
@@ -434,7 +441,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
   /* ══ GESTES ════════════════════════════════════════════════════════════════ */
   function exporter(){
     appeler('analytics:segExport', { seg:SEGF }).then(function(r){
-      if (r && r.ok) dire(r.n + ' client' + plur(r.n) + '${T(" exporté")}' + plur(r.n) + ' ${T("dans la fenêtre principale.")}', 'bon');
+      /* Deux phrases entieres (2026-10-25, audit) : un << s >> colle a la traduction donnait << exporteds >>. */
+      if (r && r.ok) dire(r.n + ' ' + szPl(r.n, '${T("client exporté dans la fenêtre principale.")}', '${T("clients exportés dans la fenêtre principale.")}'), 'bon');
       else dire(expliquer(r), 'err');
     });
   }
@@ -474,6 +482,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
       });
     });
   }
+  /* La confirmation d un lancement (2026-10-25, audit) : il publie TOUT DE SUITE sur les reseaux. */
+  function confirmerLancement(nom, audience, canaux){
+    return szConfirmer({ prudent: true, titre: '${T("Lancer la campagne")}',
+      texte: '${T("La campagne")} « ' + (nom || '—') + ' » ${T("sera publiée tout de suite sur les canaux choisis.")}',
+      details: [['${T("Audience")}', audience], ['${T("Canaux")}', canaux]],
+      oui: '${T("Lancer la campagne")}' });
+  }
   function basculerBoutons(off){
     var bs = document.querySelectorAll('[data-cf="lancer"],[data-cf="brouillon"],[data-launch]');
     for (var i = 0; i < bs.length; i++) bs[i].disabled = !!off;
@@ -494,7 +509,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
       var cf = b.getAttribute('data-cf');
       if (cf === 'annuler') { FORM = null; dessiner(); return; }
       if (cf === 'brouillon') { enregistrerCamp(false); return; }
-      if (cf === 'lancer') { enregistrerCamp(true); return; }
+      /* (2026-10-25, audit) Lancer PUBLIE sur les reseaux : on confirme d abord. */
+      if (cf === 'lancer') {
+        var chs = ['facebook','instagram','newsletter','pinterest'].filter(function(c){ return chk('cf-ch-' + c); });
+        var aud = document.getElementById('cf-aud');
+        confirmerLancement(val('cf-name'), aud ? aud.textContent : '—', chs.join(', ') || '—').then(function(ok){ if (ok) enregistrerCamp(true); });
+        return;
+      }
       return;
     }
     if (seg && !b) { SEGF = seg.getAttribute('data-seg'); charger().then(function(ok){ if (ok) dessiner(); }); return; }
@@ -506,10 +527,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
     else if (act === 'cibler') ouvrirForm(SEGF);
     else if (act === 'newcamp') ouvrirForm('all');
     else if (act === 'copyutm') copierUtm();
+    else if (act === 'reessayer') relire();
     else if (g('data-cibler')) { SEGF = g('data-cibler'); TAB = 'segments'; charger().then(function(ok){ if (ok) dessiner(); }); }
-    else if (g('data-launch')) { if (PUB_OCCUPE) return; PUB_OCCUPE = true; b.disabled = true;
-      appeler('analytics:campLaunch', { id:g('data-launch') }).then(function(r){ PUB_OCCUPE = false; if (!r || !r.ok) { b.disabled = false; dire(r && r.motif === 'deja_lancee' ? '${T("Cette campagne est déjà lancée.")}' : expliquer(r), 'err'); relire(); return; } relire().then(function(){ dire('${T("Campagne lancée.")}', 'bon'); }); }); }
-    else if (g('data-del')) { appeler('analytics:campDelete', { id:g('data-del') }).then(function(r){ if (!r || !r.ok) { dire(expliquer(r), 'err'); return; } relire().then(function(){ dire('${T("Campagne supprimée.")}', 'att'); }); }); }
+    else if (g('data-launch')) { if (PUB_OCCUPE) return;
+      var cL = (D.camps || []).filter(function(x){ return String(x.id) === g('data-launch'); })[0] || {};
+      confirmerLancement(cL.name || '—', String(cL.audienceCount == null ? '—' : cL.audienceCount), cL.channels || '—').then(function(ok){
+      if (!ok || PUB_OCCUPE) return; PUB_OCCUPE = true; b.disabled = true;
+      appeler('analytics:campLaunch', { id:g('data-launch') }).then(function(r){ PUB_OCCUPE = false; if (!r || !r.ok) { b.disabled = false; dire(r && r.motif === 'deja_lancee' ? '${T("Cette campagne est déjà lancée.")}' : expliquer(r), 'err'); relire(); return; } relire().then(function(){ dire('${T("Campagne lancée.")}', 'bon'); }); }); }); }
+    else if (g('data-del')) {
+      /* (2026-10-25, audit) Le ✕ supprimait d un clic : on confirme, dans sa boite. */
+      var idD = g('data-del'), cD = (D.camps || []).filter(function(x){ return String(x.id) === idD; })[0] || {};
+      szConfirmer({ danger: true, titre: '${T("Supprimer la campagne")}',
+        texte: '${T("La campagne")} « ' + (cD.name || idD) + ' » ${T("sera supprimée définitivement. Cette action est irréversible.")}',
+        oui: '${T("Supprimer la campagne")}' }).then(function(ok){
+        if (!ok) return;
+        appeler('analytics:campDelete', { id:idD }).then(function(r){ if (!r || !r.ok) { dire(expliquer(r), 'err'); return; } relire().then(function(){ dire('${T("Campagne supprimée.")}', 'att'); }); });
+      });
+    }
   });
 
   document.addEventListener('change', function(e){
@@ -524,7 +558,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
   });
   document.addEventListener('keydown', function(e){
     if (e.key !== 'Escape') return;
-    if (FORM) { FORM = null; dessiner(); return; }
+    /* (2026-10-25, audit) Echap ne jette plus un nom ou un message tapes : on demande. */
+    if (FORM) {
+      if (!(String(val('cf-name') || '').trim() || String(val('cf-msg') || '').trim())) { FORM = null; dessiner(); return; }
+      szConfirmer({ danger: true, titre: '${T("Abandonner la campagne ?")}',
+        texte: '${T("Le nom et le message tapés seront perdus.")}',
+        oui: '${T("Abandonner")}' }).then(function(ok){ if (ok) { FORM = null; dessiner(); } });
+      return;
+    }
     if (P && P.fermer) P.fermer();
   });
 

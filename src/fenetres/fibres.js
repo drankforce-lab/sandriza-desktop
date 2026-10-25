@@ -722,7 +722,35 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       id: '', no: '', lecture: null, tentatives: [], composition: [], entretien: [], fond: dernierFond(), pays: D.paysDefaut,
       produit: null, nomProvisoire: '', mode: 'inventaire', remarque: '', copierFiche: true, apercu: null, verdict: null
     };
+    FORM_SIG = sigForm();
     redemanderApercu();
+  }
+  /* (2026-10-25, audit) L EMPREINTE DE L ANALYSE A L OUVERTURE : Echap ou « Retour
+     a la banque » jetaient sans question une lecture de l IA (payee), une
+     composition ou un entretien saisis. On compare a cette empreinte. */
+  var FORM_SIG = '';
+  function sigForm(){
+    if (!FORM) return '';
+    var f = FORM;
+    return JSON.stringify([f.lecture || null, (f.tentatives || []).length,
+      f.composition.map(function(x){ return [x.fibre || '', String(x.pct == null ? '' : x.pct)]; }),
+      f.entretien || [], f.pays || '', f.mode, f.produit ? f.produit.id : '', f.nomProvisoire || '', f.remarque || '']);
+  }
+  function analyseModifiee(){
+    if (!FORM) return false;
+    ramasser();
+    return PHOTOS.length > 0 || sigForm() !== FORM_SIG;
+  }
+  /* Quitter l analyse vers la banque : jamais pendant une lecture de l IA (elle
+     serait perdue), et jamais sans demander quand une saisie n est pas enregistree. */
+  function quitterAnalyse(){
+    var partir = function(){ FORM = null; PL = null; PHOTOS = []; VUE = 'banque'; dessiner(); if (CHOIX) choisir(CHOIX); };
+    if (VUE !== 'analyse') { partir(); return; }
+    if (LECTURE_EN_COURS) { szDire('${T("Lecture des photos en cours : attendez son résultat avant de quitter l’analyse.")}', 'att'); return; }
+    if (!analyseModifiee()) { partir(); return; }
+    szConfirmer({ prudent: true, titre: '${T("Quitter l’analyse")}',
+      texte: '${T("Cette analyse a des changements non enregistrés (lecture de l’IA, composition, entretien ou photos). Les quitter les perdra.")}',
+      oui: '${T("Quitter sans enregistrer")}' }).then(function(oui){ if (oui) partir(); });
   }
   function dernierFond(){ try { return localStorage.getItem('sz-fibres-fond') === 'pale' ? 'pale' : 'fonce'; } catch (e) { return 'fonce'; } }
   function saisie(){
@@ -948,6 +976,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     szDire('${T("Lecture des photos par l’IA… (10 à 30 secondes)")}');
     appeler('fibres:analyser', [PHOTOS.slice()]).then(function(r){
       LECTURE_EN_COURS = false;
+      /* (2026-10-25, audit) L analyse a pu etre fermee pendant la lecture (FORM nul) :
+         sans ce garde, une TypeError laissait le bandeau sur « Lecture… ». */
+      if (!FORM) { szDire('${T("Lecture terminée, mais l’analyse a été fermée entre-temps.")}', 'att'); return; }
       if (!r || !r.ok) { szDire(expliquer(r), 'err'); dessiner(); return; }
       // Une seconde analyse : la lecture précédente est GARDÉE (5 au plus), pas écrasée.
       if (FORM.lecture) FORM.tentatives = (FORM.tentatives || []).concat([FORM.lecture]).slice(-5);
@@ -1334,7 +1365,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var c = document.getElementById('f-copier'); if (c) FORM.copierFiche = !!c.checked;
     }
     if (PL) PL.lignes.forEach(function(l, i){
-      var t = val('pl-t-' + i); if (t != null) l.taille = String(t).trim().toUpperCase().slice(0, 4);
+      /* (2026-10-25, audit) 6 caracteres, comme le site (« 10/12 », « UNIQUE ») et
+         le maxlength du champ : slice(0, 4) coupait l etiquette imprimee. Une taille
+         choisie au MENU garde la valeur de son option, telle quelle, sinon le menu
+         ne la retrouve plus. */
+      var te = document.getElementById('pl-t-' + i), t = val('pl-t-' + i);
+      if (t != null) l.taille = (te && te.tagName === 'SELECT') ? String(t) : String(t).trim().toUpperCase().slice(0, 6);
       var n = val('pl-n-' + i); if (n != null) { var k = parseInt(n, 10); l.n = isFinite(k) ? Math.max(0, Math.min(500, k)) : 0; }
     });
   }
@@ -1386,7 +1422,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (a && !a.disabled) {
       var act = a.getAttribute('data-act');
       if (act === 'nouvelle' && PA) { ouvrirForm(null); dessiner(); return; }
-      if (act === 'banque') { ramasser(); FORM = null; PL = null; PHOTOS = []; VUE = 'banque'; dessiner(); if (CHOIX) choisir(CHOIX); return; }
+      if (act === 'banque') { ramasser(); quitterAnalyse(); return; }
       if (act === 'planche') { ouvrirPlanche(); dessiner(); return; }
       if (act === 'historique') { VUE = 'historique'; HPG = 0; dessiner(); return; }
     }
@@ -1396,7 +1432,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if ((x = t.closest('[data-hpg]'))) { HPG += parseInt(x.getAttribute('data-hpg'), 10) || 0; dessiner(); return; }
     if ((x = t.closest('[data-rattacher]'))) {
       var ar = analyse(x.getAttribute('data-rattacher'));
-      if (ar) { ouvrirForm(ar, 3); FORM.mode = 'inventaire'; FORM.produit = null; FORM.copierFiche = true; dessiner(); var ch0 = document.getElementById('f-chercher'); if (ch0) ch0.focus();
+      if (ar) { ouvrirForm(ar, 3); FORM.mode = 'inventaire'; FORM.produit = null; FORM.copierFiche = true; FORM_SIG = sigForm(); dessiner(); var ch0 = document.getElementById('f-chercher'); if (ch0) ch0.focus();
         szDire('${T("Cherchez le produit créé, choisissez-le, puis enregistrez : l’analyse et son historique lui seront rattachés.")}', 'att'); }
       return;
     }
@@ -1523,7 +1559,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (ev.key === 'Enter' && t && t.id === 'f-scan') { ev.preventDefault(); scanner(t.value); return; }
     if (ev.key !== 'Escape') return;
     ev.preventDefault();
-    if (VUE !== 'banque') { FORM = null; PL = null; PHOTOS = []; VUE = 'banque'; dessiner(); if (CHOIX) choisir(CHOIX); return; }
+    if (document.querySelector('.szc-voile')) return;
+    if (VUE !== 'banque') { quitterAnalyse(); return; }
     if (P && P.fermer) P.fermer();
   });
   window.addEventListener('resize', function(){

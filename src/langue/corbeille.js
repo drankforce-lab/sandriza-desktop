@@ -184,4 +184,8 @@ module.exports = {
   'Le dossier de la commande': 'The record for order',
   'et les photos des demandes de retour seront effacés définitivement. Cette commande ne pourra plus être remise en place. Cette action est irréversible.': 'and the return request photos will be permanently deleted. This order can no longer be restored. This action cannot be undone.',
   'Montant': 'Amount',
+  // 2026-10-25, audit : la remise en place se confirme.
+  'Remettre la commande en place': 'Restore the order',
+  'La commande revient dans la liste des commandes, avec ses factures, ses crédits et son stock.': 'The order returns to the order list, with its invoices, credits and stock.',
+  'Remettre en place': 'Restore',
 };

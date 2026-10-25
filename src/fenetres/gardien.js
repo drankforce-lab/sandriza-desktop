@@ -159,7 +159,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     ['reglages', '${T("Réglages")}']
   ];
   var ONG = 'bord';
-  try { var _o = localStorage.getItem('sz-gardien-onglet'); if (_o && ONGLETS.some(function(x){ return x[0] === _o; })) ONG = _o; } catch (e) {}
+  /* ⚠ PAR LA MEMOIRE DU POSTE, PAS localStorage (2026-10-25, audit) : dans une
+     page data: il leve SecurityError, le try l avalait, et l onglet n etait
+     jamais retenu. La lecture est asynchrone : on n impose l onglet retenu que
+     si personne n a encore choisi entre-temps. */
+  var ONG_CHOISI = false;
+  try {
+    if (P && P.memoPosteLire) P.memoPosteLire('gardienOnglet').then(function(_o){
+      if (ONG_CHOISI || !_o || _o === ONG || !ONGLETS.some(function(x){ return x[0] === _o; })) return;
+      ONG = _o; if (ETAT !== null) dessiner();
+    });
+  } catch (e) {}
 
   var ETAT = null;      // null = pas encore lu ; sinon { cfg, verrous, evenements }
   var CONF = '';        // confirmation deux clics : '' | 'regler' | user_id
@@ -441,7 +451,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (k === ONG) return;
     if (ONG === 'reglages' && SALE) dire('${T("Modifications des réglages abandonnées.")}', 'att');
     PANIQ = false; SALE = false; CONF = ''; ONG = k;
-    try { localStorage.setItem('sz-gardien-onglet', k); } catch (e) {}
+    ONG_CHOISI = true;
+    try { if (P && P.memoPosteEcrire) P.memoPosteEcrire('gardienOnglet', k); } catch (e) {}
     dessiner(); corps.scrollTop = 0;
     var o = document.getElementById('o-' + k); if (o) o.focus();
   }
@@ -672,7 +683,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   window.szRevenir = function(){ charger(!SALE); };
 
   document.addEventListener('keydown', function(ev){
-    if (ev.key === 'Escape') { ev.preventDefault(); P.fermer(); }
+    if (ev.key !== 'Escape') return;
+    ev.preventDefault();
+    /* (2026-10-25, audit) Echap ne ferme plus en jetant des reglages modifies ni
+       le mot PANIQUE tape : on demande d abord, dans sa boite. Oui = on annule la
+       saisie ET on ferme ; non = on reste, rien n est perdu. */
+    if (!SALE && !PANIQ) { P.fermer(); return; }
+    szConfirmer({ danger: true, titre: '${T("Fermer sans enregistrer ?")}',
+      texte: '${T("Des réglages modifiés n’ont pas été enregistrés. Ils seront perdus.")}',
+      oui: '${T("Fermer sans enregistrer")}' }).then(function(ok){ if (ok) { SALE = false; PANIQ = false; P.fermer(); } });
   });
 
   charger(true);

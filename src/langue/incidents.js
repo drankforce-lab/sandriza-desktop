@@ -41,8 +41,8 @@ module.exports = {
   'Formulaire invalide.': 'Invalid form.',
   'Incident introuvable.': 'Incident not found.',
   'Action refusée par le serveur.': 'Action refused by the server.',
-  /* ⚠ L apostrophe DROITE : la source ecrit celle-la entre guillemets doubles. */
-  "La fenêtre principale n'a pas répondu à temps.": 'The main window did not answer in time.',
+  /* (2026-10-25, audit) Apostrophe typographique, comme dans toutes les autres fenetres. */
+  'La fenêtre principale n’a pas répondu à temps.': 'The main window did not answer in time.',
   'Échec : ': 'Failed: ',
   'Échec :': 'Failed:',
 

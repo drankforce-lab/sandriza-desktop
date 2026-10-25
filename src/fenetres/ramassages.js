@@ -182,7 +182,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '<button class="rf-jet' + (ONGLET === 'rapport' ? ' on' : '') + '" data-onglet="rapport">${T("Rapport transporteurs")}</button>'
       + (ONGLET === 'ramassages'
           ? '<span class="rf-droite"><button class="prim" id="rm-planifier" style="height:2.4rem;padding:0 .9rem" '
-            + 'title="${T("Le choix des colis, de la date et du poids se fait dans la fenêtre principale")}">'
+            + 'title="${T("Choisir les colis, la date et le poids du ramassage")}">'
             + '${T("Planifier un ramassage")}</button></span>'
           : '')
       + '</div></div>';
@@ -404,15 +404,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     }
   };
 
-  var enCours = false;
+  /* (2026-10-25, audit) LA REPONSE EST RANGEE SELON L ONGLET DEMANDE, pas celui de l arrivee : un clic
+     sur « Rapport transporteurs » pendant la lecture des ramassages rangeait la liste dans RAP. Si
+     l onglet a change entre-temps, on relit celui qui est affiche. */
+  var enCours = false, RELIRE = false;
   function charger(){
-    if (enCours) return;
-    enCours = true;
-    var op = (ONGLET === 'rapport') ? 'expeditions:rapport' : 'ramassages:liste';
+    if (enCours) { RELIRE = true; return; }
+    enCours = true; RELIRE = false;
+    var pour = ONGLET;
+    var op = (pour === 'rapport') ? 'expeditions:rapport' : 'ramassages:liste';
     appeler(op, []).then(function(r){
       enCours = false;
+      if (RELIRE || ONGLET !== pour) { if (r && r.ok) { if (pour === 'rapport') RAP = r; else RAM = r.lignes || []; } charger(); return; }
       if (!r || !r.ok) { vide('${T("Expéditions indisponibles")}', expliquer(r)); return; }
-      if (ONGLET === 'rapport') RAP = r;
+      if (pour === 'rapport') RAP = r;
       else RAM = r.lignes || [];
       dire('');
       dessiner();

@@ -39,11 +39,9 @@ body{background:var(--f-page);color:var(--tx);
 /* ⚠ LA ZONE EST PLEINE PAGE, ET LES CARTES DOIVENT LA REMPLIR (2026-08-10) :
    plafonnees en largeur, elles laissaient la moitie de l ecran vide une fois la
    fenetre ANCREE. On repartit en colonnes qui se replient seules. */
-.corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow:hidden;
   display:grid;grid-template-columns:repeat(auto-fit,minmax(28rem,1fr));
   gap:1rem;align-content:start}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:1rem 1.1rem;margin:0;min-width:0}
 .pleine{grid-column:1/-1}

@@ -312,7 +312,7 @@ function pagePromoEditeur(id) {
   'use strict';
   var P = window.szPont;
 ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
-  var ID = '${cible}';
+  var ID = ${JSON.stringify(cible)};   // (2026-10-25, audit) jamais brut : une apostrophe casserait le script
   var M = null;          // le modele, tel qu il voyage
   var SEL = '';          // id de l element choisi ; vide = le MODELE lui-meme
   var SALE = false;      // des modifications non enregistrees
@@ -667,7 +667,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '<div class="note">${T("Les éléments sont placés en pourcentage : ils suivent le nouveau format sans se")}'
       + ' ${T("déformer. Attention : ce changement s’enregistre tout de suite, et il ne s’annule pas")}'
       + ' ${T("par Ctrl+Z — il ne passe pas par le même chemin que le reste.")}</div></div>';
-    h += '<div class="note">${T("Forme :")} ' + (M.shape === 'circle' ? 'ronde' : 'rectangulaire')
+    h += '<div class="note">${T("Forme :")} ' + (M.shape === 'circle' ? '${T("ronde")}' : '${T("rectangulaire")}')
       + '${T(". Elle se choisit à la création du modèle, dans le Centre d’impression.")}</div>';
     prop.innerHTML = h;
   }
@@ -838,7 +838,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
 
   /* ══ CHARGEMENT ══════════════════════════════════════════════════════════ */
-  function charger(){
+  function charger(garderSel){
     dire('${T("Lecture du modèle…")}');
     /* ⚠ LES LISTES DE L INSPECTEUR VIENNENT DU SITE, ET ON NE BLOQUE PAS DESSUS.
        Si elles manquent, l inspecteur perd son menu de polices et ses pastilles,
@@ -857,7 +857,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       }
       M = r.modele || null;
       IMG = r.image || '';
-      SEL = '';
+      SEL = (garderSel && parId(garderSel)) ? garderSel : '';
       SALE = false; bEnr.disabled = true;
       HIST = []; REFAIRE = []; boutonsHist();
       document.getElementById('titre').textContent = (M && M.name) || '${T("Éditeur visuel")}';
@@ -946,9 +946,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
          par ecraser une version plus recente avec une plus ancienne. */
       szBrouillonJeter();
       dire('${T("Enregistré —")} ' + r.elements + ' ' + szPl(r.elements, '${T("élément.")}', '${T("éléments.")}'), 'bon');
-      var garde = SEL;
-      charger();
-      setTimeout(function(){ SEL = garde; dessiner(); }, 0);
+      /* (2026-10-25, audit) La selection passe A charger, qui la repose a la reponse : le setTimeout
+         d avant s executait AVANT la relecture, qui remettait ensuite SEL a vide. */
+      charger(SEL);
     });
   }
 
@@ -1389,9 +1389,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   document.getElementById('b-recharger').addEventListener('click', function(){
     /* ⚠ RECHARGER JETTE CE QUI N EST PAS ENREGISTRE : on le demande avant, une
        seule fois. Un bouton qui efface sans prevenir est une porte piegee. */
-    if (SALE && !window.confirm('${T("Des modifications ne sont pas enregistrées. Les abandonner ?")}')) return;
-    LOGOS = null;
-    charger();
+    /* (2026-10-25, audit) Dans une boite dessinee (szConfirmer), plus window.confirm ; et le brouillon
+       part AVEC l abandon : sinon charger() proposait aussitot de « reprendre » ce qu on venait de jeter. */
+    if (!SALE) { LOGOS = null; charger(); return; }
+    szConfirmer({ danger: true, titre: '${T("Abandonner les modifications")}',
+      texte: '${T("Des modifications ne sont pas enregistrées. Les abandonner ?")}',
+      oui: '${T("Abandonner les modifications")}' }).then(function(ok){
+        if (!ok) return;
+        szBrouillonJeter();
+        LOGOS = null;
+        charger();
+      });
   });
 
   /* ⚠ LA SCENE SE REFAIT AU REDIMENSIONNEMENT : ses pixels dependent de la
@@ -1439,14 +1447,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
        moyen de placer au dixieme pres sans viser a la souris — et ce sont les
        memes pas que l ecran web, pour que le geste se transporte. */
     if (!el || el.locked) return;
-    var pas = ev.shiftKey ? 5 : 0.5, bouge = false;
-    if (ev.key === 'ArrowLeft')  { el.xPct = nb(el.xPct, 0) - pas; bouge = true; }
-    if (ev.key === 'ArrowRight') { el.xPct = nb(el.xPct, 0) + pas; bouge = true; }
-    if (ev.key === 'ArrowUp')    { el.yPct = nb(el.yPct, 0) - pas; bouge = true; }
-    if (ev.key === 'ArrowDown')  { el.yPct = nb(el.yPct, 0) + pas; bouge = true; }
-    if (bouge) {
+    /* (2026-10-25, audit) L INSTANTANE AVANT LE DEPLACEMENT, comme partout ailleurs : pris apres, il
+       gardait la position deja deplacee et Ctrl+Z ne ramenait rien. */
+    var pas = ev.shiftKey ? 5 : 0.5;
+    var dx = ev.key === 'ArrowLeft' ? -pas : ev.key === 'ArrowRight' ? pas : 0;
+    var dy = ev.key === 'ArrowUp' ? -pas : ev.key === 'ArrowDown' ? pas : 0;
+    if (dx || dy) {
       ev.preventDefault();
       instantaneDoux();
+      if (dx) el.xPct = nb(el.xPct, 0) + dx;
+      if (dy) el.yPct = nb(el.yPct, 0) + dy;
       salir();
       dessinerPlan();
       dessinerProp();

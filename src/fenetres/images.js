@@ -121,11 +121,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var MOTIFS = {
     session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
     droit:'${T("Votre rôle ne permet pas de modifier les fiches produits.")}',
-    indisponible:"${T('Le catalogue n\'est pas encore chargé dans la fenêtre principale.')}",
+    indisponible:'${T("Le catalogue n’est pas encore chargé dans la fenêtre principale.")}',
     pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
-    delai:"${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    delai:'${T("La fenêtre principale n’a pas répondu à temps.")}',
     operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
-    echec:"${T('L\'opération a échoué.')}",
+    echec:'${T("L’opération a échoué.")}',
   };
   /* Les motifs d'un ÉCHEC PAR IMAGE. Ils ne sont pas décoratifs : chacun mène à
      un geste différent, et confondre les deux premiers ferait chercher au
@@ -135,7 +135,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     illisible:'${T("l’image a bien été déposée, mais impossible de la relire ensuite — rien n’a donc été remplacé")}',
     enregistrement:'${T("les images sont déposées, mais la fiche n’a pas pu être enregistrée")}',
   };
-  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+esc(m||'?')+').'))+(r&&r.detail?' ('+esc(r.detail)+')':''); }
+  // (2026-10-25, audit) Texte BRUT : szDire l ecrit en textContent ; ce qui va dans du HTML est echappe sur place.
+  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+(m||'?')+').'))+(r&&r.detail?' ('+r.detail+')':''); }
   function appeler(op, args){
     var p; try { p = P.appeler.apply(P, [op].concat(args||[])); } catch(e){ return Promise.resolve({ok:false,motif:'pont_indisponible'}); }
     if (!p || typeof p.then !== 'function') return Promise.resolve({ok:false,motif:'pont_indisponible'});
@@ -210,21 +211,38 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + esc(MOTIFS_IMG[e.motif] || e.motif) + '</li>';
     });
     h += '</ul>';
-    if (ECHECS.length > 12) h += '<div style="margin-top:.3rem">… et ' + (ECHECS.length - 12) + ' ' + szPl(ECHECS.length - 12, '${T("autre.")}', '${T("autres.")}') + '</div>';
+    if (ECHECS.length > 12) h += '<div style="margin-top:.3rem">${T("… et ")}' + (ECHECS.length - 12) + ' ' + szPl(ECHECS.length - 12, '${T("autre.")}', '${T("autres.")}') + '</div>';
     return h + '</div>';
   }
 
   function charger(){
     dire('${T("Lecture…")}');
     return appeler('images:etat').then(function(r){
-      if (!r || !r.ok) { corps.innerHTML = '<div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div>'; dire(expliquer(r), 'err'); bmig.disabled = true; return false; }
+      if (!r || !r.ok) { corps.innerHTML = '<div class="vide m-' + esc((r && r.motif) || 'echec') + '">' + esc(expliquer(r)) + '</div>'; dire(expliquer(r), 'err'); bmig.disabled = true; return false; }
       E = r; dessiner(); dire(''); return true;
     });
   }
 
   /* La boucle. Elle s'arrête sur trois conditions, et la troisième est la plus
      importante : SI UN TOUR NE FAIT PLUS RIEN AVANCER, on s'arrête. Sans elle,
-     une fiche qui échoue toujours ferait tourner la fenêtre indéfiniment. */
+     une fiche qui échoue toujours ferait tourner la fenêtre indéfiniment.
+     ⚠ LES FICHES EN ÉCHEC SONT SAUTÉES (2026-10-25, audit) : le cœur prenait toujours les trois
+     PREMIÈRES fiches à faire — trois fiches qui échouent toujours bloquaient toutes les suivantes
+     (et le motif « illisible » re-déposait l'image dans R2 à chaque tour). Chaque tour envoie donc
+     la liste des fiches déjà en échec (sauter), et « rien n'a avancé » veut dire désormais : aucune
+     fiche de moins ET aucun échec nouveau. Les échecs sont dédoublonnés (fiche + chemin). */
+  function idsEchec(){
+    var vus = {}, l = [];
+    ECHECS.forEach(function(e){ var k = String(e.id); if (!vus[k]) { vus[k] = 1; l.push(k); } });
+    return l;
+  }
+  function ajouterEchecs(n){
+    var cles = {};
+    ECHECS.forEach(function(e){ cles[e.id + '|' + e.chemin] = 1; });
+    var neufs = 0;
+    (n || []).forEach(function(e){ var k = e.id + '|' + e.chemin; if (!cles[k]) { cles[k] = 1; ECHECS.push(e); neufs++; } });
+    return neufs;
+  }
   function migrer(){
     if (OCCUPE || !E || !E.base64) return;
     OCCUPE = true; bmig.disabled = true; ECHECS = []; DEPART = E.fiches.length;
@@ -234,13 +252,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       tours++;
       dire('${T("Déplacement en cours… (")}' + Math.max(0, DEPART - (E ? E.fiches.length : 0)) + ' / ' + DEPART + ')', 'att');
       var avant = E.fiches.length;
-      return appeler('images:migrer', [{ lot: 3 }]).then(function(r){
+      return appeler('images:migrer', [{ lot: 3, sauter: idsEchec() }]).then(function(r){
         if (!r || !r.ok) { OCCUPE = false; bmig.disabled = false; dire(expliquer(r), 'err'); return; }
-        if (r.echecs && r.echecs.length) ECHECS = ECHECS.concat(r.echecs);
+        var neufs = ajouterEchecs(r.echecs);
         return charger().then(function(bon){
           if (!bon) { OCCUPE = false; return; }
           if (!E.base64) { OCCUPE = false; bmig.disabled = true; dessiner(); dire('${T("Terminé : toutes les images sont dans le seau.")}', 'bon'); return; }
-          if (E.fiches.length >= avant) {
+          // Plus rien a examiner hors des fiches en echec : la passe est finie, les echecs sont montres.
+          if (r.examines === 0 || (E.fiches.length >= avant && !neufs)) {
             OCCUPE = false; bmig.disabled = false; dessiner();
             dire('${T("Arrêté : le dernier tour n’a rien fait avancer. Voyez les échecs ci-dessus.")}', 'err');
             return;

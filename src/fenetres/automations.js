@@ -36,10 +36,8 @@ body{background:var(--f-page);color:var(--tx);
 .ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
 .intro{flex:0 0 auto;padding:.75rem 1.05rem .2rem;font-size:.8rem;color:var(--tx2);line-height:1.5}
-.corps{flex:1 1 auto;min-height:0;padding:.7rem 1.05rem .9rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.7rem 1.05rem .9rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.8rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:.85rem 1rem}
 .th{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin:0 0 .3rem}
 .th .em{font-size:1.05rem;filter:grayscale(1) brightness(1.55);opacity:.9}
@@ -86,7 +84,7 @@ function pageAutomations() {
 <div class="tete"><span class="ico">${ICO.config}</span><h1>${T("Automatisations")}</h1></div>
 <div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter, pas modifier.")}</div>
 
-<div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
+<div class="corps" id="corps" data-pages="automations-taches"><div class="carte"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
@@ -192,13 +190,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var st = document.getElementById('b-stats'); if (st) st.onclick = enregistrerStats;
   }
 
+  /* ⚠ execCommand ET NON navigator.clipboard (2026-10-25, audit) : la page est
+     chargee en data:, son origine est nulle, ce n est PAS un contexte securise —
+     l API moderne y est refusee (mesure sur ce projet, voir liens.js et
+     comptable.js). Un champ temporaire, select(), puis la copie. */
   function copier(url){
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(url).then(function(){ dire('${T("URL copiée.")}', 'bon'); },
-          function(){ dire('${T("Copie impossible — sélectionnez et copiez à la main.")}', 'att'); });
-      } else { dire('${T("Sélectionnez le champ et copiez à la main.")}', 'att'); }
-    } catch (e) { dire('${T("Copie impossible.")}', 'err'); }
+    var z = document.createElement('input');
+    z.value = url;
+    document.body.appendChild(z);
+    z.select();
+    var fait = false;
+    try { fait = document.execCommand('copy'); } catch (e) { fait = false; }
+    z.remove();
+    dire(fait ? '${T("URL copiée.")}' : '${T("Copie impossible — sélectionnez et copiez à la main.")}', fait ? 'bon' : 'att');
   }
 
   function enregistrerEmail(key){

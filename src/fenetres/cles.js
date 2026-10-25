@@ -357,7 +357,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     occuper(true); dire('${T("Retrait…")}');
     appeler('config:cles:retirer', [k]).then(function(r){
       occuper(false);
-      if (r && r.ok) { D = r; RO = !r.peutModifier; ARME = {}; dessiner(); dire('${T("Clé retirée.")}', 'bon'); }
+      if (r && r.ok) {
+        /* (2026-10-25, audit) Le redessin recree tous les champs : une cle collee
+           dans un AUTRE service (pas encore enregistree) etait effacee. On releve
+           les champs remplis avant, on les repose apres. */
+        var tapes = {};
+        Array.prototype.forEach.call(corps.querySelectorAll('input[id^="f-"], textarea[id^="f-"]'), function(e){
+          if (String(e.value || '').trim()) tapes[e.id] = e.value;
+        });
+        D = r; RO = !r.peutModifier; ARME = {}; dessiner();
+        Object.keys(tapes).forEach(function(id){ var e = document.getElementById(id); if (e && !e.disabled) e.value = tapes[id]; });
+        dire('${T("Clé retirée.")}', 'bon');
+      }
       else dire(expliquer(r), 'err');
     });
   }

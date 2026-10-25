@@ -193,12 +193,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
     introuvable:        '${T("Cette carte n’existe plus.")}',
     montant:            '${T("Le montant doit être d’au moins 1 $.")}',
     destinataire:       '${T("Le nom et un courriel valide du destinataire sont requis.")}',
+    // (2026-10-25, audit) Les bornes du serveur pour la recompense (il refuse au-dela, et rien ne partait).
+    pct_max:            '${T("Un pourcentage de récompense ne peut pas dépasser 90 %.")}',
+    valeur_max:         '${T("Une récompense en montant fixe ne peut pas dépasser 1 000 $.")}',
     echec:              '${T("L’opération a échoué.")}'
   };
+  // (2026-10-25, audit) Texte BRUT : szDire / ferr l ecrivent en textContent (echappe, « & » s y lisait « &amp; »).
+  // Ce qui part dans du HTML est echappe a l endroit ou on l y met.
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
-    if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 140)) + ')';
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + (m || '?') + ').');
+    if (r && r.detail) t += ' (' + String(r.detail).slice(0, 140) + ')';
     return t;
   }
   function appeler(op, args){
@@ -243,7 +248,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
   function apercuCarte(montant, dest, exp){
     var m = parseFloat(String(montant || '').replace(',', '.'));
     return '<div class="gc-carte"><div class="gc-marque">SANDRIZA</div>'
-      + '<div class="gc-montant">' + (m > 0 ? fmt(m) : '— $') + '</div>'
+      + '<div class="gc-montant">' + (m > 0 ? fmt(m) : szArgentSymbole('—')) + '</div>'   // (2026-10-25, audit) « $— » en anglais
       + '<div class="gc-pour">${T("Pour")} <strong>' + esc(dest || '${T("le destinataire")}') + '</strong></div>'
       + '<div class="gc-de">${T("De la part de")} ' + esc(exp || '${T("la boutique")}') + '</div></div>';
   }
@@ -306,7 +311,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
       + '<option value="percent"' + ((c.type || 'percent') === 'percent' ? ' selected' : '') + '>${T("Pourcentage (%)")}</option>'
       + '<option value="fixed"' + (c.type === 'fixed' ? ' selected' : '') + '>${T("Montant fixe ($)")}</option></select></div>'
       + '<div class="ch"><label for="cc-r-val">${T("Valeur")}</label>'
-      + '<input type="number" id="cc-r-val" min="1" value="' + esc(c.value || 10) + '"></div>'
+      + '<input type="number" id="cc-r-val" min="1" max="' + (c.type === 'fixed' ? '1000' : '90') + '" value="' + esc(c.value || 10) + '"></div>'
       + '<div class="ch"><label for="cc-r-exp">${T("Validité du code (jours)")}</label>'
       + '<input type="number" id="cc-r-exp" min="1" value="' + esc(c.expiryDays || 30) + '"></div>'
       + '</div></section></div></div>'
@@ -446,8 +451,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
       MINU_Q = setTimeout(function(){ PG = 0; charger(); }, 250);
     };
     var refiltrer = function(){ if (D && D.pagine) { PG = 0; charger(); } else dessiner(); };
-    var fs = document.getElementById('cc-f-statut');
-    if (fs) fs.onchange = function(){ STATUT = fs.value; refiltrer(); };
     // Les statuts en pastilles (refonte du 2026-09-25).
     corps.querySelectorAll('[data-ccst]').forEach(function(b){
       b.onclick = function(){ STATUT = b.getAttribute('data-ccst') || ''; refiltrer(); };
@@ -481,6 +484,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
       });
     };
 
+    // La borne du champ suit le type : 90 % ou 1 000 $ (les memes que le serveur).
+    var brt = document.getElementById('cc-r-type');
+    if (brt) brt.onchange = function(){ var v = document.getElementById('cc-r-val'); if (v) v.max = brt.value === 'fixed' ? '1000' : '90'; };
     var bre = document.getElementById('cc-r-enr');
     if (bre) bre.onclick = function(){
       bre.disabled = true;
@@ -510,13 +516,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
             // (2026-10-15, vérifié au serveur : turso-proxy recopie la carte dans corbeille_serveur, catégorie « finances ».)
             + ' ' + '${T("Elle reste restaurable pendant 30 jours depuis Gardien → Corbeille.")}',
           details: dS,
-          oui: '${T("Supprimer la carte")}' }).then(function(ok){ if (ok) { SUPPR_ARME = true; bsu.onclick(); } });
+          /* (2026-10-25, audit) L id est retenu AVANT la boite et passe tel quel : la suppression ne
+             depend plus de ce que DETAIL ou le bouton sont devenus pendant la confirmation. */
+          oui: '${T("Supprimer la carte")}' }).then(function(ok){ if (ok) { SUPPR_ARME = true; supprimerCarte(gS.id); } });
         return;
       }
-      bsu.disabled = true;
-      appeler('cartescadeaux:supprimer', [DETAIL && DETAIL.id]).then(function(r){
+      supprimerCarte(DETAIL && DETAIL.id);
+    };
+    function supprimerCarte(idC){
+      if (!idC) return;
+      var bsu = document.getElementById('cc-suppr');
+      if (bsu) bsu.disabled = true;
+      appeler('cartescadeaux:supprimer', [idC]).then(function(r){
         SUPPR_ARME = false;
-        if (!r || !r.ok) { bsu.disabled = false; dire(expliquer(r), 'err'); dessiner(); return; }
+        if (!r || !r.ok) { if (bsu) bsu.disabled = false; dire(expliquer(r), 'err'); dessiner(); return; }
         BOITE = null; DETAIL = null;
         dire('${T("Carte ")}' + (r.code || '') + '${T(" supprimée.")}', 'bon');
         charger();
@@ -601,6 +614,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
     ouvrirCarte(tr.getAttribute('data-id'), false);
   });
 
+  /* (2026-10-25, audit) COPIER SANS SE TAIRE. La page est chargee en data: (origine opaque) :
+     navigator.clipboard peut y manquer ou refuser, et l exception etait avalee — rien dans le
+     presse-papiers, aucun message. Repli : la copie par selection (comme la logotheque), puis,
+     si elle echoue aussi, le code est affiche pour etre copie a la main. */
+  function copierCode(code){
+    var parSelection = function(){
+      var ok = false;
+      try { var ta = document.createElement('textarea'); ta.value = code; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select(); ok = document.execCommand('copy'); document.body.removeChild(ta); } catch (e) { ok = false; }
+      dire(ok ? '${T("Code copié : ")}' + code : code, ok ? 'bon' : 'att');
+    };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(function(){ dire('${T("Code copié : ")}' + code, 'bon'); }, parSelection);
+        return;
+      }
+    } catch (e) {}
+    parSelection();
+  }
   /* LE CLIC DROIT SUR UNE CARTE (2026-10-13) — memes gestes que la fiche, memes droits. « Supprimer… » ouvre
      la fiche et pose dessus la boite de confirmation, qui dit le solde perdu. */
   window.szCtxEntrees = function(ligne){
@@ -609,8 +641,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
     var c = (D.cartes || []).filter(function(x){ return x.id === id; })[0];
     if (!c) return null;
     var l = [{ lib: '${T("Ouvrir la carte")}', fn: function(){ ouvrirCarte(id, false); } },
-      { lib: '${T("Copier le code")}', fn: function(){
-          try { navigator.clipboard.writeText(c.code); dire('${T("Code copié : ")}' + c.code, 'bon'); } catch (e) {} } }];
+      { lib: '${T("Copier le code")}', fn: function(){ copierCode(c.code); } }];
     if (c.statut === 'pending' && D.peutModifier) l.push({ lib: '${T("Activer à la main")}', fn: function(){
       appeler('cartescadeaux:activer', [id]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
@@ -625,7 +656,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
       if (!r || !r.ok) { vide('${T("Cartes-cadeaux indisponibles")}', expliquer(r)); return; }
       D = r;
       if (D.pagine) PG = D.page || 0;
-      if (sous) sous.textContent = D.peutModifier ? '' : 'consultation seulement';
+      if (sous) sous.textContent = D.peutModifier ? '' : '${T("consultation seulement")}';
       var qa = document.getElementById('cc-q');
       if (qa && document.activeElement === qa) redessinerSansPerdreLaSaisie(); else dessiner();
     });

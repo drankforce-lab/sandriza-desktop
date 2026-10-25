@@ -300,7 +300,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('codesbarres')}
       + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Nom ou SKU")}" type="search" id="cb-q" placeholder="${T("Nom ou SKU…")}" value="' + esc(Q) + '"></label>'
       + '<select id="cb-cat"><option value="">${T("Toutes les catégories")}</option>'
       + (D.cats || []).map(function(c){
-          return '<option value="' + esc(c.cle) + '"' + (CAT === c.cle ? ' selected' : '') + '>' + esc(c.nom) + '</option>';
+          /* Le NOM se traduit a l affichage, comme dans les lignes ; la valeur (c.cle) jamais (2026-10-25, audit). */
+          return '<option value="' + esc(c.cle) + '"' + (CAT === c.cle ? ' selected' : '') + '>' + esc(szTd(c.nom)) + '</option>';
         }).join('')
       + '</select>'
       + '<span class="rf-droite"><span class="dt">' + (D.total || 0) + (D.total > 1 ? '${T(" produits")}' : '${T(" produit")}') + '</span></span>'
@@ -683,6 +684,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('codesbarres')}
     if (ev.key === 'Escape') {
       ev.preventDefault();
       if (PICKER) { PICKER = null; dessiner(); return; }
+      /* (2026-10-25, audit) Echap ferme d abord la surcouche ouverte (<< Ces codes ne
+         se scanneront pas >>) — par son bouton Annuler, qui rend aussi le bouton
+         Imprimer — et jamais la fenetre en jetant une file construite a la main. */
+      var vo = document.querySelector('.voile');
+      if (vo) { var vn = document.getElementById('v-non'); if (vn) vn.click(); else if (vo.parentNode) vo.parentNode.removeChild(vo); return; }
+      if (FILE.length) {
+        szConfirmer({ danger: true, titre: '${T("Fermer et perdre la file ?")}',
+          texte: '${T("La file d’impression n’existe que dans cette fenêtre : elle sera perdue.")}',
+          oui: '${T("Fermer et perdre la file")}' }).then(function(ok){ if (ok) P.fermer(); });
+        return;
+      }
       P.fermer();
     }
   });

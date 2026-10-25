@@ -171,4 +171,7 @@ module.exports = {
   'Visible dans Chrome et sur Android, avec une carte enregistrée dans un compte Google.': 'Shown in Chrome and on Android, with a card saved in a Google account.',
   'Des boutons Apple Pay et Google Pay sur la fiche produit et le panier, pour ceux activés ci-dessus. Apple Pay ne paraît que sur iPhone ou iPad (Safari, carte dans Wallet) ; Google Pay dans Chrome et sur Android.':
     'Apple Pay and Google Pay buttons on the product page and the cart, for those turned on above. Apple Pay only appears on iPhone or iPad (Safari, card in Wallet); Google Pay in Chrome and on Android.',
+  // 2026-10-25, audit : tarifs mis en forme, test des identifiants enregistrés.
+  'max.': 'max.',
+  'Enregistrez d’abord : le test éprouve les identifiants enregistrés, pas ceux affichés.': 'Save first: the test checks the saved credentials, not the ones shown.',
 };

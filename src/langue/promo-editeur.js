@@ -336,4 +336,8 @@ module.exports = {
     'set aside: unreadable here, they would not come out on paper either',
   "Centrer horizontalement": "Centre horizontally",
   "Centrer verticalement": "Centre vertically",
+  /* (2026-10-25, audit) Textes visibles qui restaient hors T(). */
+  'ronde': 'round',
+  'rectangulaire': 'rectangular',
+  'Abandonner les modifications': 'Discard the changes',
 };

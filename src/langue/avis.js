@@ -157,4 +157,9 @@ module.exports = {
   'L’avis de': 'The review by',
   'sur': 'on',
   'sera supprimé définitivement, avec ses photos et sa réponse. Pour le retirer de la boutique sans le perdre, utilisez plutôt « Masquer ». Cette action est irréversible.': 'will be permanently deleted, along with its photos and reply. To remove it from the store without losing it, use “Hide” instead. This action cannot be undone.',
+  /* (2026-10-25, audit) Textes visibles qui restaient hors T(). */
+  'Photo {0} de l’avis': 'Photo {0} of the review',
+  'Page {0} / {1}': 'Page {0} / {1}',
+  'Abandonner la réponse': 'Discard the reply',
+  'La réponse tapée n’a pas été enregistrée. Fermer l’avis l’abandonne.': 'The reply you typed has not been saved. Closing the review discards it.',
 };

@@ -216,4 +216,8 @@ module.exports = {
   'en crédit boutique ; un courriel lui sera envoyé avec le numéro du crédit.': 'in store credit; an email with the credit number will be sent to them.',
   'sur son moyen de paiement original, par Square.': 'to their original payment method, through Square.',
   'Un remboursement émis ne peut pas être annulé.': 'An issued refund cannot be cancelled.',
+  // 2026-10-25, audit : Échap avec une saisie en cours.
+  'Fermer le remboursement': 'Close the refund',
+  'Les quantités et le motif saisis seront perdus. Aucun remboursement n’a été émis.': 'The quantities and reason you entered will be lost. No refund has been issued.',
+  'Fermer sans rembourser': 'Close without refunding',
 };

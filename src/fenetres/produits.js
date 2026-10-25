@@ -235,8 +235,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     }
     function majBouton(){ var n = selection().length; var b = document.getElementById('mg-appliquer');
       b.disabled = !n; b.textContent = n > 1 ? '${T("Appliquer aux ")}' + n + '${T(" articles")}' : '${T("Appliquer à la sélection")}'; }
+    /* (2026-10-25, audit) Changer des prix EN BOUTIQUE passe par une boite a part
+       qui nomme le nombre d articles et les ecarts (regle maison). */
     function appliquer(liste){
       if (!liste.length) return;
+      var det = liste.slice(0, 6).map(function(x){
+        var l = L.find(function(y){ return y.id === x.id; }) || {};
+        return [l.nom || x.id, argent(l.prix) + ' → ' + argent(x.prix)];
+      });
+      if (liste.length > 6) det.push(['…', '+ ' + (liste.length - 6)]);
+      szConfirmer({ prudent: true, titre: '${T("Appliquer les nouveaux prix")}',
+        texte: szPl(liste.length, '${T("Le prix de {0} article sera changé en boutique, et inscrit à son historique.")}',
+          '${T("Le prix de {0} articles sera changé en boutique, et inscrit à l’historique de chacun.")}').split('{0}').join(liste.length),
+        details: det,
+        oui: szPl(liste.length, '${T("Changer le prix")}', '${T("Changer {0} prix")}').split('{0}').join(liste.length) }).then(function(oui){
+        if (oui) appliquerMaintenant(liste);
+      });
+    }
+    function appliquerMaintenant(liste){
       dire('${T("Application des nouveaux prix…")}');
       appeler('marges:appliquer', [liste]).then(function(r){
         if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
@@ -291,6 +307,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     document.getElementById('mg-rien').onclick = function(){ v.querySelectorAll('input[data-c]').forEach(function(c){ c.checked = false; }); majBouton(); };
     document.getElementById('mg-appliquer').onclick = function(){ appliquer(selection()); };
     v.addEventListener('keydown', function(ev){ if (ev.key === 'Escape') { ev.stopPropagation(); fermer(); } });
+    /* (2026-10-25, audit) Le focus restait sur #p-marges, hors du voile : Echap
+       passait au document et fermait TOUTE la fenetre. On donne le focus a la
+       boite, et le document sait refermer la boite (v._fermer). */
+    v._fermer = fermer;
+    try { document.getElementById('mg-fermer').focus(); } catch (e) {}
     analyser();
   }
   function fmt(n){
@@ -440,7 +461,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       if (rows.length) {
         h += '<div class="pagi">'
           + '<button class="mini" id="p-prec"' + (D.page <= 0 ? ' disabled' : '') + '>◀</button>'
-          + '<span>Page ' + (D.page + 1) + ' / ' + D.pages + '</span>'
+          + '<span>${T("Page")} ' + (D.page + 1) + ' / ' + D.pages + '</span>'
           + '<button class="mini" id="p-suiv"' + (D.page >= D.pages - 1 ? ' disabled' : '') + '>▶</button>'
           + '</div>';
       }
@@ -568,6 +589,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   function venteFinaleLot(activer){
     var ids = Object.keys(COCHES);
     if (!ids.length) { dire('${T("Aucun produit sélectionné.")}', 'att'); return; }
+    /* (2026-10-25, audit) Un geste en lot sur la boutique se confirme dans une boite
+       a part, qui nomme le nombre de produits (activer : plus de retour possible). */
+    szConfirmer({ prudent: true,
+      titre: activer ? '${T("Activer la vente finale")}' : '${T("Retirer la vente finale")}',
+      texte: (activer
+        ? szPl(ids.length, '${T("{0} produit passera en vente finale : il ne pourra plus être retourné.")}', '${T("{0} produits passeront en vente finale : ils ne pourront plus être retournés.")}')
+        : szPl(ids.length, '${T("{0} produit redeviendra retournable.")}', '${T("{0} produits redeviendront retournables.")}')).split('{0}').join(ids.length),
+      oui: (activer ? '${T("Activer pour {0}")}' : '${T("Retirer pour {0}")}').split('{0}').join(ids.length) }).then(function(oui){
+      if (oui) venteFinaleEcrire(ids, activer);
+    });
+  }
+  function venteFinaleEcrire(ids, activer){
     appeler('stock:venteFinale', [ids, activer]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       var reste = r.nonConfirmes ? ' ' + r.nonConfirmes + ' ${T("non confirmé(s) par le serveur — relancez pour les reprendre.")}' : '';
@@ -661,7 +694,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   };
 
   document.addEventListener('keydown', function(ev){
-    if (ev.key === 'Escape') { ev.preventDefault(); P.fermer(); }
+    if (ev.key !== 'Escape') return;
+    ev.preventDefault();
+    /* (2026-10-25, audit) Ce qui est par-dessus se ferme d abord : la boite de
+       confirmation se gere seule, la boite des marges se referme — jamais toute
+       la fenetre Produits. */
+    if (document.querySelector('.szc-voile')) return;
+    var vo = document.querySelector('.voile');
+    if (vo) { if (vo._fermer) vo._fermer(); else vo.remove(); return; }
+    P.fermer();
   });
 
   var sous = document.getElementById('sous');

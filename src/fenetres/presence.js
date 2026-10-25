@@ -224,8 +224,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var bouts = [];
     if (r.motif) bouts.push('${T("motif : ")}' + esc(r.motif));
     if (v) {
-      bouts.push('${T("jeton de session dans la page : ")}' + (v.session ? 'oui' : 'NON'));
-      bouts.push('${T("rôle vu par la page : ")}' + esc(v.role || '(aucun)'));
+      bouts.push('${T("jeton de session dans la page : ")}' + (v.session ? '${T("oui")}' : '${T("NON")}'));
+      bouts.push('${T("rôle vu par la page : ")}' + esc(v.role || '${T("(aucun)")}'));
     }
     if (!bouts.length) return '';
     /* ⚠⚠ PAS D OPACITE ICI, ET C EST LE BANC AU RENDU QUI L A TROUVE. Le
@@ -459,7 +459,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   }
 
   function deconnecter(id){
-    if (OCC) return; OCC = true; dire('Deconnexion…');
+    if (OCC) return; OCC = true; dire('${T("Déconnexion…")}');
     appeler('presence:deconnecter', [id]).then(function(r){
       OCC = false;
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
@@ -514,7 +514,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
        refermer le formulaire — et c est le reflexe de tout le monde. */
     if (ev.key !== 'Escape') return;
     ev.preventDefault();
-    if (ECRIS) { delete BROUILLON[ECRIS]; ECRIS = ''; dessiner(); dire(''); return; }
+    // (2026-10-25, audit) Le texte est GARDE en brouillon (il etait efface, a l inverse de ce qui precede).
+    if (ECRIS) { retenirBrouillon(); ECRIS = ''; dessiner(); dire(''); return; }
     P.fermer();
   });
 

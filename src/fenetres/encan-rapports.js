@@ -17,7 +17,7 @@
  * ⚠ AUCUN CARACTÈRE accent grave NI ANTISLASH dans la portion de script.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, SEP_DEC } = require('./socle.js');
 const T = require('../langue').tr('encan-rapports');
 
 const CSS = `
@@ -143,7 +143,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function iso(ms){ try { return new Date(ms).toISOString(); } catch (e) { return ''; } }
   function duree(min){ min = Math.max(0, Math.round(min || 0)); return min >= 60 ? Math.floor(min / 60) + ' h ' + ('0' + (min % 60)).slice(-2) : min + ' min'; }
   function pct(x){ return x == null ? '—' : String(x).replace('.', szSepDec()) + ' %'; }
-  function szSepDec(){ var s = (1.5).toLocaleString(); return s.indexOf(',') >= 0 ? ',' : '.'; }
+  /* Le separateur de la LANGUE DU POSTE, resolu a la generation (2026-10-25, audit) : la locale du
+     systeme donnait << 12.5 % >> dans une interface francaise sur un Windows anglais. */
+  function szSepDec(){ return '${SEP_DEC()}'; }
   function nb(x){ return String(x == null ? 0 : x).replace('.', szSepDec()); }
   var ISSUES = { vendu: ['${T("vendu")}', 'vert'], adjuge: ['${T("adjugé")}', 'bleu'], remis: ['${T("remis en vente")}', 'ambre'],
     annule: ['${T("annulé")}', ''], en_cours: ['${T("en cours")}', 'bleu'] };

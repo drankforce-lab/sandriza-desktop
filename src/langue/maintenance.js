@@ -154,5 +154,9 @@ module.exports = {
     'Maintenance extended. The PIN has not changed.',
   'Levée…': 'Lifting…',
   'Mode levé. Les connexions sont de nouveau possibles.':
-    'Mode lifted. Signing in is possible again.'
+    'Mode lifted. Signing in is possible again.',
+  // (2026-10-25, audit)
+  'Fermer sans enregistrer ?': 'Close without saving?',
+  'Ce qui a été saisi (période, message, NIP) n’a pas été envoyé. Il sera perdu.': 'What was entered (period, message, PIN) has not been sent. It will be lost.',
+  'Rester': 'Stay',
 };

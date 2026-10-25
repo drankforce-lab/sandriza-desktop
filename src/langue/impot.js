@@ -324,4 +324,13 @@ module.exports = {
   'États des résultats': 'Income statements',
   'Registres': 'Registers',
   'L’en-tête de ces documents vient de l’onglet': 'The header of these documents comes from the tab',
+  // 2026-10-25, audit : libellés sortis du texte en dur, ligne 8230, Échap protégé.
+  '(CTI / RTI)': '(ITC / ITR)',
+  'ligne': 'line',
+  'remb.': 'refunds',
+  'Récupération de DPA — véhicules': 'Recapture of CCA — vehicles',
+  'Fermer sans enregistrer le profil ?': 'Close without saving the profile?',
+  'Les modifications du profil d’entreprise n’ont pas été enregistrées. Elles seront perdues.':
+    'The changes to the business profile have not been saved. They will be lost.',
+  'Fermer sans enregistrer': 'Close without saving',
 };

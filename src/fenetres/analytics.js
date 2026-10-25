@@ -113,14 +113,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
     droit:'${T("Votre rôle ne donne pas accès à la configuration.")}',
     lecture_seule:'${T("Votre rôle est en lecture seule.")}',
-    indisponible:"${T('L\'administration n\'est pas encore chargée dans la fenêtre principale.')}",
+    /* (2026-10-25, audit) L apostrophe typographique, comme le reste de l application. */
+    indisponible:'${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
     pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
-    delai:"${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    delai:'${T("La fenêtre principale n’a pas répondu à temps.")}',
     operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
     json_invalide:'${T("La clé du compte de service n’est pas un JSON valide.")}',
     json_incomplet:'${T("La clé JSON doit contenir « client_email » et « private_key ».")}',
-    nuage:"${T('L\'enregistrement dans le nuage a échoué. Réessayez.')}",
-    echec:"${T('L\'opération a échoué.')}",
+    nuage:'${T("L’enregistrement dans le nuage a échoué. Réessayez.")}',
+    echec:'${T("L’opération a échoué.")}',
   };
   function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+esc(m||'?')+').'))+(r&&r.detail?' ('+esc(r.detail)+')':''); }
   function appeler(op, args){

@@ -230,7 +230,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
-  function plur(n){ return n === 1 ? '' : 's'; }
+  /* (2026-10-25, audit) DES PHRASES ENTIERES, PLUS DE « s » COLLE. plur() fabriquait « 3 lignes »
+     en accolant un « s » francais — la page anglaise lisait « 3 ligne », « 3 variantes sur 4 produit »…
+     nb() choisit l une des deux phrases (szPl, regle de la langue) et y pose le nombre a la place de {0}. */
+  function nb(n, sing, plu){ return szPl(n, sing, plu).split('{0}').join(n); }
+  function nomFeuille(s){ return s === 'inventaire' ? '${T("Inventaire")}' : '${T("Catalogue")}'; }
 
   var MOTIFS = {
     session:      '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
@@ -354,9 +358,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
   function vueExport(){
     var e = ETAT || {};
     var coutsOk = !!e.coutsCharges;
+    var nP = nb(e.nbProduits || 0, '${T("{0} produit")}', '${T("{0} produits")}');
     var compte = SHEET === 'inventaire'
-      ? ((e.nbVariantes || 0) + ' variante' + plur(e.nbVariantes || 0) + ' sur ' + (e.nbProduits || 0) + ' produit' + plur(e.nbProduits || 0))
-      : ((e.nbProduits || 0) + ' produit' + plur(e.nbProduits || 0));
+      ? '${T("{0} sur {1}")}'.split('{0}').join(nb(e.nbVariantes || 0, '${T("{0} variante")}', '${T("{0} variantes")}')).split('{1}').join(nP)
+      : nP;
     var caseCout = PEUT.edit
       ? '<label class="case"><input type="checkbox" data-opt="cout"' + (INCL_COUT ? ' checked' : '')
         + (coutsOk ? '' : ' disabled') + '><span>${T("Inclure le coût d’acquisition et le motif de vente à perte")}'
@@ -397,7 +402,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
       + blocDossier()
       + '<div style="margin-top:1.4rem">'
       +   '<div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">'
-      +     '<div class="lbl" style="margin:0">${T("Colonnes de la feuille")} ' + esc(SHEET) + '</div>'
+      +     '<div class="lbl" style="margin:0">${T("Colonnes de la feuille")} ' + esc(nomFeuille(SHEET)) + '</div>'
       +     '<button class="ghost mini" data-act="colrepli">${T("Voir le détail des colonnes")}</button>'
       +   '</div>'
       /* ⚠ LE DETAIL S OUVRE EN BOITE (sa demande du 2026-09-26 : aucune barre de
@@ -405,7 +410,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
          fenetre — et il grandit avec chaque colonne du catalogue. On le consulte,
          on le ferme : c est une boite, pas un etage. */
       +   (!COL_BOITE ? '' :
-            '<div class="voile" id="col-voile"><div class="boite" style="max-width:52rem"><h3>${T("Colonnes de la feuille")} ' + esc(SHEET) + '</h3>'
+            '<div class="voile" id="col-voile"><div class="boite" style="max-width:52rem"><h3>${T("Colonnes de la feuille")} ' + esc(nomFeuille(SHEET)) + '</h3>'
           + '<div class="avis" style="margin:.7rem 0">${T("À l’import, <strong>seules les colonnes présentes dans votre fichier sont touchées</strong> : ")}'
           +   '${T("un fichier « SKU ; Prix » ne change que le prix. Les colonnes <em>information</em> sont exportées pour vous repérer et ignorées à la relecture.")}</div>'
           + '<div class="carte"><table><thead><tr><th>${T("Colonne")}</th><th>${T("Rôle")}</th></tr></thead><tbody>' + lignesCol + '</tbody></table></div>'
@@ -449,8 +454,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
   }
 
   function badge(etat){
-    var M = { creation:'${T("À créer")}', maj:'${T("À modifier")}', inchange:'${T("Inchangée")}', erreur:'Erreur',
-              fait:'${T("Écrit")}', conflit:'Conflit', echec:'${T("Échec")}' };
+    var M = { creation:'${T("À créer")}', maj:'${T("À modifier")}', inchange:'${T("Inchangée")}', erreur:'${T("Erreur")}',
+              fait:'${T("Écrit")}', conflit:'${T("Conflit")}', echec:'${T("Échec")}' };
     return '<span class="pill ' + etat + '">' + (M[etat] || etat) + '</span>';
   }
   function ligneApercu(L, inv){
@@ -476,12 +481,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
     var nav = '';
     if (LIGNES.pages > 1) {
       nav = '<button class="mini" data-page="' + (LIGNES.page - 1) + '"' + (LIGNES.page === 0 ? ' disabled' : '') + '>${T("← Précédent")}</button>'
-        + '<span>Page ' + (LIGNES.page + 1) + ' / ' + LIGNES.pages + '</span>'
+        + '<span>' + '${T("Page {0} / {1}")}'.split('{0}').join(LIGNES.page + 1).split('{1}').join(LIGNES.pages) + '</span>'
         + '<button class="mini" data-page="' + (LIGNES.page + 1) + '"' + (LIGNES.page >= LIGNES.pages - 1 ? ' disabled' : '') + '>${T("Suivant →")}</button>';
     }
     return '<div class="pager"><span class="gauche">${T("Afficher")} '
       + '<select id="taille" aria-label="${T("Nombre de lignes par page")}">' + opts + '</select> ${T("par page ·")} '
-      + LIGNES.total + ' ligne' + plur(LIGNES.total) + '</span>' + nav + '</div>';
+      + nb(LIGNES.total, '${T("{0} ligne")}', '${T("{0} lignes")}') + '</span>' + nav + '</div>';
   }
   function vueApercu(){
     var c = IMP.compte, inv = IMP.feuille === 'inventaire';
@@ -494,13 +499,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
       ? '<div class="avis" style="margin-bottom:.7rem">' + szPl(IMP.ignorees.length, '${T("Colonne non reconnue, donc <strong>ignorée</strong> :")}', '${T("Colonnes non reconnues, donc <strong>ignorées</strong> :")}') + ' '
         + esc(IMP.ignorees.slice(0,12).join(', ')) + (IMP.ignorees.length > 12 ? '…' : '') + '</div>' : '';
     var notePhoto = IMP.nbPhotos
-      ? '<div class="avis jaune" style="margin-bottom:.7rem"><span class="ic">📷</span> <strong>' + IMP.nbPhotos + ' photo' + plur(IMP.nbPhotos)
+      ? '<div class="avis jaune" style="margin-bottom:.7rem"><span class="ic">📷</span> <strong>' + nb(IMP.nbPhotos, '${T("{0} photo")}', '${T("{0} photos")}')
         + '</strong> ${T("seront téléchargées depuis les adresses du fichier et copiées dans votre stockage — la boutique")} '
         + '${T("ne pointera jamais sur le site du fournisseur. Une photo introuvable n’empêche pas le reste de sa ligne de passer.")}</div>' : '';
     return ''
       + '<div class="barre" style="border:none;padding:0;margin:0 0 .3rem">'
-      +   '<div style="font-size:.85rem"><strong>' + esc(IMP.fichier) + '</strong> · feuille <strong>' + esc(IMP.feuille)
-      +     '</strong> · ' + IMP.total + ' ligne' + plur(IMP.total) + '</div>'
+      +   '<div style="font-size:.85rem"><strong>' + esc(IMP.fichier) + '</strong> · ${T("feuille")} <strong>' + esc(nomFeuille(IMP.feuille))
+      +     '</strong> · ' + nb(IMP.total, '${T("{0} ligne")}', '${T("{0} lignes")}') + '</div>'
       +   '<span style="flex:1"></span>'
       +   '<button class="ghost mini" data-act="reinit">${T("Choisir un autre fichier")}</button>'
       + '</div>'
@@ -510,7 +515,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
          pour ce poste. Voir JS_TUILES dans socle.js. */
       + szTuiles('<div class="tuiles" style="margin-bottom:.2rem">'
       +   '<div class="tuile"><div class="k">${T("À créer")}</div><div class="v">' + c.creation + '</div><div class="z">${T("hors vente")}</div></div>'
-      +   '<div class="tuile"><div class="k">${T("À modifier")}</div><div class="v">' + c.maj + '</div><div class="z">' + (inv ? 'variantes' : 'fiches') + '</div></div>'
+      +   '<div class="tuile"><div class="k">${T("À modifier")}</div><div class="v">' + c.maj + '</div><div class="z">' + (inv ? '${T("variantes")}' : '${T("fiches")}') + '</div></div>'
       +   '<div class="tuile"><div class="k">${T("Inchangées")}</div><div class="v">' + c.inchange + '</div><div class="z">${T("rien à écrire")}</div></div>'
       +   '<div class="tuile' + (c.erreur ? ' err' : '') + '"><div class="k">${T("Erreurs")}</div><div class="v">' + c.erreur + '</div><div class="z">${T("ignorées")}</div></div>'
       + '</div>')
@@ -522,12 +527,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
       +     '<button class="ghost mini" data-act="rapport">${T("⬇ Aperçu en CSV")}</button>'
       +   '</div>'
       +   '<table><thead><tr><th style="width:52px">${T("Ligne")}</th><th style="width:120px">${T("SKU")}</th>'
-      +     '<th>' + (inv ? 'Variante' : '${T("Produit")}') + '</th><th style="width:96px">${T("État")}</th><th>${T("Ce qui change")}</th></tr></thead>'
+      +     '<th>' + (inv ? '${T("Variante")}' : '${T("Produit")}') + '</th><th style="width:96px">${T("État")}</th><th>${T("Ce qui change")}</th></tr></thead>'
       +     '<tbody>' + lignes + '</tbody></table>' + pager()
       + '</div>'
       + '<div class="barre">'
-      +   '<button class="prim" ' + ((c.creation + c.maj) ? '' : 'disabled') + ' data-act="confirmer">${T("Appliquer")} '
-      +     (c.creation + c.maj) + ' changement' + plur(c.creation + c.maj) + '</button>'
+      +   '<button class="prim" ' + ((c.creation + c.maj) ? '' : 'disabled') + ' data-act="confirmer">'
+      +     nb(c.creation + c.maj, '${T("Appliquer {0} changement")}', '${T("Appliquer {0} changements")}') + '</button>'
       +   '<span class="compte">${T("Les lignes en erreur et inchangées sont ignorées. Aucun produit n’est supprimé,")} '
       +     '${T("et aucun produit absent du fichier n’est touché.")}</span>'
       + '</div>';
@@ -546,7 +551,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
     var r = RAP, refus = (r.conflits.length + r.echecs.length);
     var cartesPhoto = (r.photos || r.photosEchecs.length)
       ? '<div class="tuile"><div class="k">${T("Photos reprises")}</div><div class="v">' + r.photos + '</div>'
-        + (r.photosEchecs.length ? '<div class="z rouge">' + r.photosEchecs.length + ' ${T("échec")}' + plur(r.photosEchecs.length) + '</div>' : '') + '</div>' : '';
+        + (r.photosEchecs.length ? '<div class="z rouge">' + nb(r.photosEchecs.length, '${T("{0} échec")}', '${T("{0} échecs")}') + '</div>' : '') + '</div>' : '';
     var tblPhotos = r.photosEchecs.length
       ? '<div class="carte" style="margin-top:.8rem"><h2>${T("Photos non reprises — le reste de la ligne est passé")}</h2>'
         + '<table><thead><tr><th style="width:52px">${T("Ligne")}</th><th style="width:120px">${T("SKU")}</th><th>${T("Adresse")}</th><th>${T("Motif")}</th></tr></thead><tbody>'
@@ -554,15 +559,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
             + '<td style="word-break:break-all"><code>' + esc(x.src) + '</code></td><td class="rouge">' + esc(x.msg) + '</td></tr>'; }).join('')
         + '</tbody></table>' + reste(r.photosEchecs.length) + '</div>' : '';
     var noteCrees = r.crees
-      ? '<div class="avis" style="margin-top:.8rem">${T("Les")} ' + r.crees + ' produit' + plur(r.crees)
-        + '${T(" créés sont <strong>hors vente</strong> : ils attendent dans <strong>Inventaire</strong>. Ajoutez leurs photos, puis mettez-les en vente.")}</div>' : '';
+      ? '<div class="avis" style="margin-top:.8rem">' + nb(r.crees,
+          '${T("Le produit créé est <strong>hors vente</strong> : il attend dans <strong>Inventaire.</strong> Ajoutez ses photos, puis mettez-le en vente.")}',
+          '${T("Les {0} produits créés sont <strong>hors vente</strong> : ils attendent dans <strong>Inventaire.</strong> Ajoutez leurs photos, puis mettez-les en vente.")}') + '</div>' : '';
     var noteHist = r.histEchecs
-      ? '<div class="avis" style="margin-top:.8rem">' + r.histEchecs + ' modification' + plur(r.histEchecs)
-        + ' ${T("enregistrée")}' + plur(r.histEchecs) + ' mais absente' + plur(r.histEchecs) + ' ${T("de l’historique du produit.")}</div>' : '';
+      ? '<div class="avis" style="margin-top:.8rem">' + nb(r.histEchecs,
+          '${T("{0} modification enregistrée mais absente de l’historique du produit.")}',
+          '${T("{0} modifications enregistrées mais absentes de l’historique du produit.")}') + '</div>' : '';
     var blocNotifs = r.notifs.length
       ? '<div class="carte" style="margin-top:.8rem"><h2><span class="ic">🔔</span> ${T("Demandes « avisez-moi » satisfaites")}</h2>'
         + '<div class="dt" style="margin-bottom:.4rem">${T("Des clients attendaient le retour de ces articles. Les avis ne partent pas tout seuls.")}</div>'
-        + r.notifs.map(function(g){ return '<div class="notif"><span>' + esc(g.nom) + ' <span class="dt">— ' + g.count + ' personne' + plur(g.count) + '</span></span>'
+        + r.notifs.map(function(g){ return '<div class="notif"><span>' + esc(g.nom) + ' <span class="dt">— ' + nb(g.count, '${T("{0} personne")}', '${T("{0} personnes")}') + '</span></span>'
             + '<button class="mini" data-avis="' + esc(g.pid) + '">${T("Envoyer les avis (")}' + g.count + ')</button></div>'; }).join('')
         + '</div>' : '';
     var tblRefus = refus
@@ -594,14 +601,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
   function vueConfirmer(){
     if (!IMP) return '';
     var c = IMP.compte, inv = IMP.feuille === 'inventaire', parts = [];
-    if (c.creation) parts.push('<li><strong>' + c.creation + '</strong> produit' + plur(c.creation) + ' <strong>${T("créé")}' + plur(c.creation) + '</strong> ${T("— hors vente, à relire et publier ensuite")}</li>');
-    if (c.maj) parts.push('<li><strong>' + c.maj + '</strong> ' + (inv ? 'variante' + plur(c.maj) : 'fiche' + plur(c.maj)) + ' <strong>${T("modifiée")}' + plur(c.maj) + '</strong></li>');
-    if (IMP.nbPhotos) parts.push('<li><strong>' + IMP.nbPhotos + '</strong> photo' + plur(IMP.nbPhotos) + ' <strong>${T("téléchargée")}' + plur(IMP.nbPhotos) + '</strong> ${T("depuis des sites externes et copiée")}' + plur(IMP.nbPhotos) + ' ${T("dans votre stockage")}</li>');
-    if (c.inchange) parts.push('<li>' + c.inchange + ' ligne' + plur(c.inchange) + ' identique' + plur(c.inchange) + ' ${T(": rien ne sera écrit")}</li>');
-    if (c.erreur) parts.push('<li>' + c.erreur + ' ligne' + plur(c.erreur) + '${T(" en erreur : ")}<strong>${T("ignorée")}' + plur(c.erreur) + '</strong></li>');
+    // (2026-10-25, audit) Chaque puce est une phrase entiere, au singulier ou au pluriel (nb).
+    if (c.creation) parts.push('<li>' + nb(c.creation, '${T("<strong>{0}</strong> produit <strong>créé</strong> — hors vente, à relire et publier ensuite")}',
+      '${T("<strong>{0}</strong> produits <strong>créés</strong> — hors vente, à relire et publier ensuite")}') + '</li>');
+    if (c.maj) parts.push('<li>' + (inv
+      ? nb(c.maj, '${T("<strong>{0}</strong> variante <strong>modifiée</strong>")}', '${T("<strong>{0}</strong> variantes <strong>modifiées</strong>")}')
+      : nb(c.maj, '${T("<strong>{0}</strong> fiche <strong>modifiée</strong>")}', '${T("<strong>{0}</strong> fiches <strong>modifiées</strong>")}')) + '</li>');
+    if (IMP.nbPhotos) parts.push('<li>' + nb(IMP.nbPhotos, '${T("<strong>{0}</strong> photo <strong>téléchargée</strong> depuis des sites externes et copiée dans votre stockage")}',
+      '${T("<strong>{0}</strong> photos <strong>téléchargées</strong> depuis des sites externes et copiées dans votre stockage")}') + '</li>');
+    if (c.inchange) parts.push('<li>' + nb(c.inchange, '${T("{0} ligne identique : rien ne sera écrit")}', '${T("{0} lignes identiques : rien ne sera écrit")}') + '</li>');
+    if (c.erreur) parts.push('<li>' + nb(c.erreur, '${T("{0} ligne en erreur : <strong>ignorée</strong>")}', '${T("{0} lignes en erreur : <strong>ignorées</strong>")}') + '</li>');
     return '<div class="voile" id="conf-voile"><div class="boite">'
       + '<h3>${T("Appliquer l’import")}</h3>'
-      + '<p style="margin:0 0 .6rem;font-size:.86rem">${T("Fichier")} <strong>' + esc(IMP.fichier) + '</strong> ${T("— feuille")} ' + esc(IMP.feuille) + '.</p>'
+      + '<p style="margin:0 0 .6rem;font-size:.86rem">${T("Fichier")} <strong>' + esc(IMP.fichier) + '</strong> ${T("— feuille")} ' + esc(nomFeuille(IMP.feuille)) + '.</p>'
       + '<ul>' + parts.join('') + '</ul>'
       + '<div class="gare">${T("Aucun produit absent du fichier n’est touché, et rien n’est supprimé. Une fiche")} '
       +   '${T("qu’un collègue est en train de modifier sera refusée et listée à la fin.")}</div>'
@@ -666,7 +678,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
     }
     P.enregistrerExport(r.nom, r.contenu).then(function(res){
       if (!res || !res.ok) {
-        dire('${T("Écriture impossible :")} ' + ((res && res.error) || 'motif inconnu'), 'err');
+        dire('${T("Écriture impossible :")} ' + ((res && res.error) || '${T("motif inconnu")}'), 'err');
         return;
       }
       DERNIER_EXPORT = r.nom;
@@ -719,7 +731,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
           + '${T("ou demandez les droits d’écriture sur celui-là.")}', 'err');
         return;
       }
-      dire('${T("Le dossier n’a pas pu être changé :")} ' + ((r && r.detail) || 'motif inconnu'), 'err');
+      dire('${T("Le dossier n’a pas pu être changé :")} ' + ((r && r.detail) || '${T("motif inconnu")}'), 'err');
     });
   }
   function dossierStandard(){
@@ -727,7 +739,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
     P.dossierExportsDefaut().then(function(r){
       if (r && r.info) { DOSSIER = r.info; dessiner(); }
       if (r && r.ok) dire('${T("Retour au dossier standard :")} ' + r.info.dir + '.', 'bon');
-      else dire('${T("Le retour au dossier standard a échoué :")} ' + ((r && r.detail) || 'motif inconnu'), 'err');
+      else dire('${T("Le retour au dossier standard a échoué :")} ' + ((r && r.detail) || '${T("motif inconnu")}'), 'err');
     });
   }
 
@@ -736,14 +748,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
      objets ligne) et les joint UNE fois a la fin. L avancement se voit (« 1 500 / 10 000 »). Un ancien
      site ignore lot et rend le fichier entier (pas de champ parLots) : on l ecrit tel quel, comme avant. */
   var EXP_LOT = 500;
+  /* (2026-10-25, audit) UN SEUL EXPORT A LA FOIS : un double clic lancait deux exports par tranches
+     et ecrivait deux fichiers. Le drapeau tombe a l ecriture du fichier ou au premier echec. */
+  var EXPORT_EN_COURS = false;
   function exporter(){
+    if (EXPORT_EN_COURS) return;
+    EXPORT_EN_COURS = true;
     dire('${T("Préparation du fichier…")}');
     var morceaux = [], nom = '', lignes = 0;
     function tranche(depuis){
       var o = optsExport(); o.lot = EXP_LOT; o.depuis = depuis;
       appeler('catalogio:exporter', o).then(function(r){
-        if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
-        if (!r.parLots) { ecrireExport(r, 'Fichier'); return; }
+        if (!r || !r.ok) { EXPORT_EN_COURS = false; dire(expliquer(r), 'err'); return; }
+        if (!r.parLots) { EXPORT_EN_COURS = false; ecrireExport(r, '${T("Fichier")}'); return; }
         if (depuis === 0) { nom = r.nom; morceaux.push(r.entete); }
         if (r.lignes) { morceaux.push(r.morceau); lignes += r.lignes; }
         if (!r.fin) {
@@ -751,7 +768,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
           tranche(r.suivant);
           return;
         }
-        ecrireExport({ ok: true, nom: nom, contenu: morceaux.join('\\r\\n') }, 'Fichier');
+        EXPORT_EN_COURS = false;
+        ecrireExport({ ok: true, nom: nom, contenu: morceaux.join('\\r\\n') }, '${T("Fichier")}');
         morceaux = null;
       });
     }
@@ -765,10 +783,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
   function modele(feuille){
     var o = optsExport();
     if (feuille) o.sheet = feuille;
-    var quoi = (o.sheet === 'inventaire') ? 'inventaire' : 'catalogue';
-    dire('${T("Préparation du modèle")} ' + quoi + '…');
+    // (2026-10-25, audit) Le nom LU de la feuille, jamais sa valeur interne.
+    var inv = (o.sheet === 'inventaire');
+    dire(inv ? '${T("Préparation du modèle inventaire…")}' : '${T("Préparation du modèle catalogue…")}');
     appeler('catalogio:modele', o).then(function(r){
-      if (r && r.ok) ecrireExport(r, '${T("Modèle ")}' + quoi + ' ${T("(en-têtes seuls)")}');
+      if (r && r.ok) ecrireExport(r, inv ? '${T("Modèle inventaire (en-têtes seuls)")}' : '${T("Modèle catalogue (en-têtes seuls)")}');
       else dire(expliquer(r), 'err');
     });
   }
@@ -805,6 +824,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
      (avance : fait / total, lot / lots) jusqu au rapport. Un gros fichier ne bute plus sur le delai du pont.
      Un ancien site ignore l option et repond a la fin, avec le rapport : meme fin qu avant. */
   var AVANCE = null, SUIVI = null;
+  /* (2026-10-25, audit) LE SUIVI A UNE SORTIE. Il se relancait a chaque reponse qui n etait ni « en cours »
+     ni le rapport (pont en echec, fenetre principale rechargee, session perdue) : l ecran restait pour
+     toujours sur « Import en cours — ne fermez pas cette fenetre ». Dix reponses en echec d affilee, ou
+     trois reponses « ok » sans import ni rapport (l etat a ete perdu), et on le DIT. */
+  var SUIVI_ECHECS = 0, SUIVI_VIDES = 0;
+  function suiviPerdu(){
+    BUSY = false; AVANCE = null;
+    if (SUIVI) { clearTimeout(SUIVI); SUIVI = null; }
+    dessiner();
+    dire('${T("Suivi de l’import perdu — vérifiez l’inventaire avant de relancer quoi que ce soit.")}', 'err');
+  }
   function finImport(rap){
     BUSY = false; AVANCE = null;
     if (SUIVI) { clearTimeout(SUIVI); SUIVI = null; }
@@ -817,26 +847,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
         + (RAP.interrompu.detail || ''), 'err');
       return;
     }
-    dire(tot + ' fiche' + plur(tot) + ' ${T("enregistrée")}' + plur(tot) + (refus ? ', ' + refus + ' ${T("refusée")}' + plur(refus) : '') + '.', refus ? 'att' : 'bon');
+    dire(nb(tot, '${T("{0} fiche enregistrée")}', '${T("{0} fiches enregistrées")}')
+      + (refus ? ', ' + nb(refus, '${T("{0} refusée")}', '${T("{0} refusées")}') : '') + '.', refus ? 'att' : 'bon');
   }
   function suivre(){
     SUIVI = setTimeout(function(){
       appeler('catalogio:etat', optsExport()).then(function(r){
         if (!BUSY) return;
         if (r && r.ok && r.busy) {
+          SUIVI_ECHECS = 0; SUIVI_VIDES = 0;
           AVANCE = r.avance || null;
           if (AVANCE) dire('${T("Application en cours, ne fermez pas cette fenêtre…")} ' + AVANCE.fait + ' / ' + AVANCE.total
             + ' · ${T("lot")} ' + AVANCE.lot + ' / ' + AVANCE.lots);
           dessiner(); suivre(); return;
         }
         if (r && r.ok && r.rapport) { finImport(r.rapport); return; }
+        if (r && r.ok) { if (++SUIVI_VIDES >= 3) { suiviPerdu(); return; } }
+        else if (++SUIVI_ECHECS >= 10) { suiviPerdu(); return; }
         suivre();
       });
     }, 700);
   }
   function appliquer(){
     if (BUSY) return;
-    CONFIRM = false; BUSY = true; AVANCE = null; dessiner();
+    CONFIRM = false; BUSY = true; AVANCE = null; SUIVI_ECHECS = 0; SUIVI_VIDES = 0; dessiner();
     dire('${T("Application en cours, ne fermez pas cette fenêtre…")}');
     appeler('catalogio:appliquer', { attendre: false }).then(function(r){
       if (!r || !r.ok) { BUSY = false; dire(expliquer(r), 'err'); dessiner(); return; }
@@ -851,7 +885,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
   }
   function telechargerRapport(){
     appeler('catalogio:rapport', { sep:SEP, natif:true }).then(function(r){
-      if (r && r.ok) ecrireExport(r, 'Rapport');
+      if (r && r.ok) ecrireExport(r, '${T("Rapport")}');
       else dire(expliquer(r), 'err');
     });
   }
@@ -861,7 +895,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       if (r.rapport) RAP = r.rapport;
       dessiner();
-      dire(r.sent ? (r.sent + ' ${T("avis envoyé")}' + plur(r.sent) + '.') : '${T("Aucun avis envoyé — voir la configuration des courriels.")}', r.sent ? 'bon' : 'att');
+      dire(r.sent ? nb(r.sent, '${T("{0} avis envoyé.")}', '${T("{0} avis envoyés.")}') : '${T("Aucun avis envoyé — voir la configuration des courriels.")}', r.sent ? 'bon' : 'att');
     });
   }
 
@@ -910,6 +944,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
 
   document.addEventListener('keydown', function(e){
     if (e.key !== 'Escape') return;
+    // (2026-10-25, audit) Pendant l ecriture, Echap ne ferme pas : l ecran dit « ne fermez pas cette fenetre ».
+    if (BUSY) { e.preventDefault(); dire('${T("Import en cours — ne fermez pas cette fenêtre.")}', 'att'); return; }
     if (CONFIRM) { CONFIRM = false; dessiner(); return; }
     if (COL_BOITE) { COL_BOITE = false; dessiner(); return; }
     if (P && P.fermer) P.fermer();

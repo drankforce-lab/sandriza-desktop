@@ -121,7 +121,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   };
   function expliquer(r){
     var m = r && r.motif;
-    return MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
+    // (2026-10-25, audit) Texte BRUT : szDire l ecrit en textContent, et vide() echappe deja.
+    return MOTIFS[m] || ('${T("Erreur inattendue (")}' + (m || '?') + ').');
   }
   function appeler(op, args){
     var p;
@@ -355,10 +356,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         if (!r.ok) {
           ra.disabled = false;
           dire(r.motif === 'deja_present'
-            ? (esc(nom) + '${T(" est déjà dans vos fournisseurs.")}') : expliquer(r), 'err');
+            ? (nom + '${T(" est déjà dans vos fournisseurs.")}') : expliquer(r), 'err');
           return;
         }
-        dire(esc(r.nom) + '${T(" ajouté à vos fournisseurs.")}', 'bon');
+        dire(r.nom + '${T(" ajouté à vos fournisseurs.")}', 'bon');
         chargerRepertoire();   // la carte passe a << Deja dans vos fournisseurs >>
       });
       return;

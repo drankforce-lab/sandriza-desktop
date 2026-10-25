@@ -243,6 +243,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
      OUVRE LEUR ONGLET. Les charger avec le reste ferait attendre l ecran
      d ouverture pour deux panneaux qu on consulte quelques fois par annee. */
   var PROFIL = null;        // impot:profil — le profil COMPLET, editable
+  var PROFIL_LU = '';      // le profil tel que LU au serveur (JSON), pour savoir s il a change
+  /* ⚠ LA SAISIE DU PROFIL SURVIT AUX REDESSINS (2026-10-25, audit). dessiner()
+     refait les champs depuis PROFIL : un aller-retour d onglet, ou une
+     actualisation poussee par la coquille, rendait NEQ, TPS et TVQ a leur
+     valeur lue. On releve les champs dans PROFIL.profil avant chaque dessin. */
+  var CHAMPS_E = [['e-nom','name'],['e-neq','neq'],['e-ne','sinBn'],['e-type','type'],['e-tps','tpsNo'],['e-tvq','tvqNo'],
+    ['e-ca','caNo'],['e-adresse','address'],['e-ville','city'],['e-cp','postal'],['e-tel','phone'],['e-courriel','email']];
+  function profilVu(p){ var o = {}; CHAMPS_E.forEach(function(c){ o[c[1]] = String((p && p[c[1]]) || ''); }); return JSON.stringify(o); }
+  function releverProfil(){
+    if (!PROFIL || !document.getElementById('e-nom')) return;
+    PROFIL.profil = PROFIL.profil || {};
+    CHAMPS_E.forEach(function(c){ var el = document.getElementById(c[0]); if (el) PROFIL.profil[c[1]] = el.value; });
+  }
+  function profilModifie(){ releverProfil(); return !!PROFIL && !RO && profilVu(PROFIL.profil) !== PROFIL_LU; }
   var MEMO = null;          // impot:memo — echeances, deductions, formulaires
   var RO = true;            // pas de droit d ecriture tant qu on ne l a pas lu
 
@@ -314,6 +328,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
   }
 
   function dessiner(){
+    releverProfil();
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var h = '';
 
@@ -342,7 +357,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
     document.getElementById('onglets').innerHTML =
         ong('taxes', IC_O.taxes, 'TPS / TVQ')
       + ong('revenus', IC_O.revenus, '${T("Revenus")}')
-      + ong('documents', IC_O.documents, 'Documents')
+      + ong('documents', IC_O.documents, '${T("Documents")}')
       + ong('entreprise', IC_O.entreprise, '${T("Mon entreprise")}', D.profil.complet ? '' : '<span class="n hi">!</span>')
       + ong('memo', IC_O.memo, '${T("Aide-mémoire")}');
     /* Le nom de l entreprise passe dans le resume de la tete (il s abrege au
@@ -522,10 +537,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
        quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
        ce poste. Voir JS_TUILES dans socle.js. */
     var h = szTuiles('<div class="cx-kpis">'
-      + tuile(t.ventesNettes, '${T("Ventes nettes taxables")}', t.nbCommandes + ' ' + (t.nbCommandes > 1 ? '${T("commandes")}' : '${T("commande")}'), '')
-      + tuile(t.tps, '${T("TPS perçue (5 %)")}', '${T("à remettre — ARC")}', '')
-      + tuile(t.tvq, '${T("TVQ perçue (9,975 %)")}', '${T("à remettre — Revenu Québec")}', '')
-      + tuile(t.totalRemettre, '${T("Net à remettre")}', t.enFaveur ? '${T("remboursement en votre faveur")}' : '${T("après crédits sur intrants")}',
+      + tuile(arg(t.ventesNettes), '${T("Ventes nettes taxables")}', t.nbCommandes + ' ' + (t.nbCommandes > 1 ? '${T("commandes")}' : '${T("commande")}'), '')
+      + tuile(arg(t.tps), '${T("TPS perçue (5 %)")}', '${T("à remettre — ARC")}', '')
+      + tuile(arg(t.tvq), '${T("TVQ perçue (9,975 %)")}', '${T("à remettre — Revenu Québec")}', '')
+      + tuile(arg(t.totalRemettre), '${T("Net à remettre")}', t.enFaveur ? '${T("remboursement en votre faveur")}' : '${T("après crédits sur intrants")}',
           t.enFaveur ? 'ok' : 'or')
       + '</div>');
 
@@ -540,13 +555,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
     var av = '<div class="cx-barre">';
     av += '<details class="cx-det"><summary class="' + (t.souSeuil ? 'cx-bon' : 'cx-averti') + '"><span>'
       + (t.souSeuil
-          ? '<b>${T("Sous le seuil de")} ' + esc(t.seuil) + '</b>'
-          : '<b>${T("Seuil de")} ' + esc(t.seuil) + ' ${T("dépassé")}</b> ${T("· inscription obligatoire")}')
+          ? '<b>${T("Sous le seuil de")} ' + arg(t.seuil) + '</b>'
+          : '<b>${T("Seuil de")} ' + arg(t.seuil) + ' ${T("dépassé")}</b> ${T("· inscription obligatoire")}')
       + '</span></summary><div class="cx-sub">'
       + (t.souSeuil
-          ? ('${T("Vos ventes (")}' + esc(t.ventesNettes) + '${T(") sont sous le seuil de")} ' + esc(t.seuil)
+          ? ('${T("Vos ventes (")}' + arg(t.ventesNettes) + '${T(") sont sous le seuil de")} ' + arg(t.seuil)
              + ' ${T(": l’inscription aux taxes n’est pas obligatoire. À confirmer avec votre comptable.")}')
-          : ('${T("Vos ventes dépassent le seuil de")} ' + esc(t.seuil)
+          : ('${T("Vos ventes dépassent le seuil de")} ' + arg(t.seuil)
              + ' ${T(": l’inscription aux taxes est obligatoire, et les remises doivent être faites régulièrement.")}'))
       + '</div></details>';
 
@@ -555,12 +570,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
          CHAQUE province de destination. La taire ferait croire a une remise
          complete alors qu il en manque une par province. */
       av += '<details class="cx-det"><summary class="cx-info"><span><b>${T("PST / RST perçues hors Québec")}</b> : '
-        + t.pst.map(function(p){ return esc(p.province) + ' ' + esc(p.montant); }).join(' · ')
+        + t.pst.map(function(p){ return esc(p.province) + ' ' + arg(p.montant); }).join(' · ')
         + '</span></summary><div class="cx-sub">${T("<strong>Taxes provinciales perçues (PST / RST)</strong> — ")}'
         + '${T("à remettre à CHAQUE province séparément, elles ne sont ni dans les chiffres")} '
         + '${T("ci-dessus ni dans GST34 / FPZ-500-V :")} '
         + t.pst.map(function(p){
-            return '<span class="rf-pill bleu">' + esc(p.province) + ' : ' + esc(p.montant) + '</span>'; }).join(' ')
+            return '<span class="rf-pill bleu">' + esc(p.province) + ' : ' + arg(p.montant) + '</span>'; }).join(' ')
         + '</div></details>';
     }
     av += '</div>';
@@ -570,21 +585,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
     if (t.nbRemb) {
       remb = '<div class="cx-sub">↩ ' + t.nbRemb + ' '
         + (t.nbRemb > 1 ? '${T("remboursements déduits")}' : '${T("remboursement déduit")}')
-        + ' ${T("de ces chiffres : −")}' + esc(t.rembSousTotal)
-        + ' ${T("taxable, −")}' + esc(t.rembTps) + ' TPS, −' + esc(t.rembTvq) + ' TVQ.</div>';
+        + ' ${T("de ces chiffres : −")}' + arg(t.rembSousTotal)
+        + ' ${T("taxable, −")}' + arg(t.rembTps) + ' ${T("TPS")}, −' + arg(t.rembTvq) + ' ${T("TVQ.")}</div>';
     }
 
     h += '<div class="cx-deux moitie"><div class="cx-col">';
-    h += '<div class="cx-carte"><h2>${T("Taxe nette")} ${T("à remettre")} <span class="cx-sub">${T("après crédits sur intrants")} (CTI / RTI)</span></h2>'
+    h += '<div class="cx-carte"><h2>${T("Taxe nette")} ${T("à remettre")} <span class="cx-sub">${T("après crédits sur intrants")} ${T("(CTI / RTI)")}</span></h2>'
       + '<table><thead><tr><th></th><th style="text-align:right">TPS</th>'
       + '<th style="text-align:right">TVQ</th><th style="text-align:right">${T("Total")}</th></tr></thead><tbody>'
-      + '<tr><td>${T("Taxes perçues sur les ventes")}</td><td class="arg">' + esc(t.tps)
-      + '</td><td class="arg">' + esc(t.tvq) + '</td><td class="arg">' + esc(t.total) + '</td></tr>'
-      + '<tr class="credit"><td>${T("Moins : taxes payées sur les dépenses")}</td><td class="arg">−' + esc(t.cti)
-      + '</td><td class="arg">−' + esc(t.rti) + '</td><td class="arg">−' + esc(t.ctiTotal) + '</td></tr>'
-      + '<tr class="total"><td>${T("Net à remettre")}</td><td class="arg">' + esc(t.tpsRemettre)
-      + '</td><td class="arg">' + esc(t.tvqRemettre) + '</td><td class="arg">'
-      + esc(t.totalRemettre) + '</td></tr>'
+      + '<tr><td>${T("Taxes perçues sur les ventes")}</td><td class="arg">' + arg(t.tps)
+      + '</td><td class="arg">' + arg(t.tvq) + '</td><td class="arg">' + arg(t.total) + '</td></tr>'
+      + '<tr class="credit"><td>${T("Moins : taxes payées sur les dépenses")}</td><td class="arg">−' + arg(t.cti)
+      + '</td><td class="arg">−' + arg(t.rti) + '</td><td class="arg">−' + arg(t.ctiTotal) + '</td></tr>'
+      + '<tr class="total"><td>${T("Net à remettre")}</td><td class="arg">' + arg(t.tpsRemettre)
+      + '</td><td class="arg">' + arg(t.tvqRemettre) + '</td><td class="arg">'
+      + arg(t.totalRemettre) + '</td></tr>'
       + '</tbody></table>'
       + '<div class="cx-sub">'
       + (t.aucunCredit
@@ -601,20 +616,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
       + '<th style="text-align:right">TPS</th><th style="text-align:right">TVQ</th>'
       + '<th style="text-align:right">${T("À remettre")}</th><th style="text-align:right">${T("Cmdes")}</th></tr></thead><tbody>'
       + (t.trimestres || []).map(function(q){
-          return '<tr><td style="white-space:nowrap">' + esc(nomTrim(q)) + '</td><td class="arg">' + esc(q.net)
-            + '</td><td class="arg">' + esc(q.tps) + '</td><td class="arg">' + esc(q.tvq)
-            + '</td><td class="arg">' + esc(q.total) + '</td><td class="arg">' + q.n + '</td></tr>';
+          return '<tr><td style="white-space:nowrap">' + esc(nomTrim(q)) + '</td><td class="arg">' + arg(q.net)
+            + '</td><td class="arg">' + arg(q.tps) + '</td><td class="arg">' + arg(q.tvq)
+            + '</td><td class="arg">' + arg(q.total) + '</td><td class="arg">' + q.n + '</td></tr>';
         }).join('')
-      + '<tr class="total"><td>${T("Année")} ' + D.annee + '</td><td class="arg">' + esc(t.ventesNettes)
-      + '</td><td class="arg">' + esc(t.tps) + '</td><td class="arg">' + esc(t.tvq)
-      + '</td><td class="arg">' + esc(t.total) + '</td><td class="arg">' + t.nbCommandes + '</td></tr>'
+      + '<tr class="total"><td>${T("Année")} ' + D.annee + '</td><td class="arg">' + arg(t.ventesNettes)
+      + '</td><td class="arg">' + arg(t.tps) + '</td><td class="arg">' + arg(t.tvq)
+      + '</td><td class="arg">' + arg(t.total) + '</td><td class="arg">' + t.nbCommandes + '</td></tr>'
       + '</tbody></table></div></div>'
       + '<div data-perv="mois"' + (PER === 'mois' ? '' : ' hidden') + '><div class="cx-pages" data-pages="impot-mois"><table><thead><tr><th>${T("Mois")}</th><th style="text-align:right">${T("Ventes nettes")}</th>'
       + '<th style="text-align:right">TPS</th><th style="text-align:right">TVQ</th>'
       + '<th style="text-align:right">${T("Cmdes")}</th></tr></thead><tbody>'
       + (t.mensuel || []).map(function(m, i){
-          return '<tr><td>' + esc(nomMois(m.mois, i, 'long')) + '</td><td class="arg">' + esc(m.net)
-            + '</td><td class="arg">' + esc(m.tps) + '</td><td class="arg">' + esc(m.tvq)
+          return '<tr><td>' + esc(nomMois(m.mois, i, 'long')) + '</td><td class="arg">' + arg(m.net)
+            + '</td><td class="arg">' + arg(m.tps) + '</td><td class="arg">' + arg(m.tvq)
             + '</td><td class="arg">' + m.n + '</td></tr>';
         }).join('') + '</tbody></table></div></div></div>';
     h += '</div></div>';
@@ -626,20 +641,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
     /* Deux colonnes (aucune barre de defilement) : resultats et encaissements a
        gauche, depenses et graphique a droite. */
     var h = '<div class="cx-deux moitie"><div class="cx-col">' + '<div class="cx-carte"><h2>${T("État des résultats")} <span class="cx-sub">${T("T2125 fédéral · TP-80-V Québec")}</span></h2>'
-      + rang('${T("Ventes brutes de marchandises")}', r.brut, 'ligne 8000')
-      + rang('${T("Remises et coupons")}', '−' + r.remises, '')
-      + (r.nbRemb ? rang('${T("Remboursements émis")}', '−' + r.rembourse, r.nbRemb + ' remb.') : '')
-      + rang('${T("Revenus d’expédition facturés")}', r.livraison, 'ligne 8290')
-      + rang('${T("Revenus nets d’entreprise")}', r.totalRevenus, 'ligne 8299', true)
-      + rang('${T("Total des dépenses")}', '−' + r.depenses, '${T("section Dépenses")}')
-      + rang(r.perte ? '${T("Perte nette d’entreprise")}' : '${T("Bénéfice net d’entreprise")}', r.benefice, 'ligne 9946', true)
+      + rang('${T("Ventes brutes de marchandises")}', arg(r.brut), '${T("ligne")} 8000')
+      + rang('${T("Remises et coupons")}', '−' + arg(r.remises), '')
+      + (r.nbRemb ? rang('${T("Remboursements émis")}', '−' + arg(r.rembourse), r.nbRemb + ' ${T("remb.")}') : '')
+      + rang('${T("Revenus d’expédition facturés")}', arg(r.livraison), '${T("ligne")} 8290')
+      /* (2026-10-25, audit) Le site compte la recuperation de DPA des vehicules
+         dans le total des revenus : sans cette ligne, l etat ne s additionnait
+         plus a son propre total. */
+      + (r.recuperationDpa ? rang('${T("Récupération de DPA — véhicules")}', arg(r.recuperationDpa), '${T("ligne")} 8230') : '')
+      + rang('${T("Revenus nets d’entreprise")}', arg(r.totalRevenus), '${T("ligne")} 8299', true)
+      + rang('${T("Total des dépenses")}', '−' + arg(r.depenses), '${T("section Dépenses")}')
+      + rang(r.perte ? '${T("Perte nette d’entreprise")}' : '${T("Bénéfice net d’entreprise")}', arg(r.benefice), '${T("ligne")} 9946', true)
       + '</div>';
 
     if (D.square) {
       h += '<div class="cx-carte"><h2>${T("Encaissements réels ")}<span class="cx-sub">Square</span></h2>'
-        + rang('${T("Revenu brut encaissé")}', D.square.brut, D.square.n + ' ' + (D.square.n > 1 ? '${T("transactions")}' : '${T("transaction")}'))
-        + rang('${T("Frais de traitement")}', '−' + D.square.frais, '${T("déductibles · ligne 8710")}')
-        + rang('${T("Revenu net après frais")}', D.square.net, '', true)
+        + rang('${T("Revenu brut encaissé")}', arg(D.square.brut), D.square.n + ' ' + (D.square.n > 1 ? '${T("transactions")}' : '${T("transaction")}'))
+        + rang('${T("Frais de traitement")}', '−' + arg(D.square.frais), '${T("déductibles · ligne 8710")}')
+        + rang('${T("Revenu net après frais")}', arg(D.square.net), '', true)
         + '</div>';
     }
 
@@ -651,8 +670,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
         + '</tr></thead><tbody>'
         + r.categories.map(function(c){
             return '<tr><td>' + esc(c.libelle) + '</td><td>' + esc(c.ligne)
-              + '</td><td class="arg">' + esc(c.montant) + '</td></tr>'; }).join('')
-        + '<tr class="total"><td colspan="2">Total</td><td class="arg">' + esc(r.depenses)
+              + '</td><td class="arg">' + arg(c.montant) + '</td></tr>'; }).join('')
+        + '<tr class="total"><td colspan="2">${T("Total")}</td><td class="arg">' + arg(r.depenses)
         + '</td></tr></tbody></table></div></div>';
     } else {
       h += '<div class="cx-carte"><div class="cx-sub">${T("Aucune dépense saisie pour")} ' + D.annee
@@ -664,7 +683,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
       + '<div class="graphe">' + (r.mensuel || []).map(function(m, i){
           var p = Math.max(2, Math.round((m.brutN / mx) * 100));
           return '<div class="b" style="height:' + p + '%" title="' + esc(nomMois(m.mois, i, 'short')) + ' : '
-            + esc(m.net) + '"></div>'; }).join('') + '</div>'
+            + arg(m.net) + '"></div>'; }).join('') + '</div>'
       + '<div class="mois">' + (r.mensuel || []).map(function(m, i){
           return '<span>' + esc(nomMois(m.mois, i, 'short')) + '</span>'; }).join('') + '</div></div>';
     h += '</div></div>';
@@ -720,6 +739,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
     return 'Q' + (k + 1) + ' — ' + [0, 1, 2].map(function(j){ return nomMoisLieu(k * 3 + j, 'short'); }).join(' · ');
   }
 
+  /* LES MONTANTS ARRIVENT DEJA MIS EN FORME PAR LE SITE (fmt : << 1234.56 $ >>,
+     point decimal, sans espace des milliers). Les afficher tels quels donnait,
+     sur un meme ecran francais, << 1 234,56 $ >> dans la tete et << 1234.56 $ >>
+     dans les tableaux (2026-10-25, audit). On relit le nombre et on le remet en
+     forme dans la langue du poste ; ce qui ne se lit pas reste tel quel. */
+  function arg(s){
+    var t = String(s == null ? '' : s).replace(/[^0-9.\\-]/g, '');
+    var n = parseFloat(t);
+    return (t === '' || isNaN(n)) ? esc(s) : szArgent(n);
+  }
   function tuile(v, l, sub, cl){
     return '<div class="cx-kpi' + (cl ? ' ' + cl : '') + '"><span>' + esc(l) + '</span><b>' + esc(v) + '</b>'
       + '<small>' + esc(sub) + '</small></div>';
@@ -752,7 +781,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
     }]).then(function(r){
       OCCUPE = false;
       if (!r || !r.ok) { dire('${T("Échec :")} ' + expliquer(r), 'err'); return; }
-      PROFIL = r; RO = !r.peutEcrire;
+      PROFIL = r; RO = !r.peutEcrire; PROFIL_LU = profilVu(r.profil);
       /* On relit le reste : l en-tete et l avis << profil incomplet >> viennent
          de l op impot:donnees, ils mentiraient sinon jusqu au prochain passage. */
       charger();
@@ -769,7 +798,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
     if (ONGLET === 'entreprise' && !PROFIL) {
       appeler('impot:profil', []).then(function(r){
         if (!r || !r.ok) { dire('${T("Profil illisible :")} ' + expliquer(r), 'err'); return; }
-        PROFIL = r; RO = !r.peutEcrire;
+        PROFIL = r; RO = !r.peutEcrire; PROFIL_LU = profilVu(r.profil);
         if (ONGLET === 'entreprise') dessiner();
       });
       return;
@@ -864,7 +893,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
   };
 
   document.addEventListener('keydown', function(ev){
-    if (ev.key === 'Escape') { ev.preventDefault(); P.fermer(); }
+    /* ⚠ (2026-10-25, audit) Echap ne ferme plus en jetant un profil modifie :
+       on demande d abord, dans sa boite. */
+    if (ev.key !== 'Escape') return;
+    ev.preventDefault();
+    if (!profilModifie()) { P.fermer(); return; }
+    szConfirmer({ danger: true, titre: '${T("Fermer sans enregistrer le profil ?")}',
+      texte: '${T("Les modifications du profil d’entreprise n’ont pas été enregistrées. Elles seront perdues.")}',
+      oui: '${T("Fermer sans enregistrer")}' }).then(function(ok){ if (ok) P.fermer(); });
   });
 
   charger();

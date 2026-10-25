@@ -128,4 +128,8 @@ module.exports = {
   'Migrer les images vers R2': 'Migrate images to R2',
   'Les images encore stockées en base64 dans la base de données seront déplacées vers Cloudflare R2. L’opération peut durer plusieurs minutes et n’est à lancer qu’une seule fois.': 'Images still stored as base64 in the database will be moved to Cloudflare R2. The operation may take several minutes and only needs to be run once.',
   'Lancer la migration': 'Start the migration',
+  /* (2026-10-25, audit) Textes visibles qui restaient hors T(). */
+  'Pousser la configuration locale': 'Push the local configuration',
+  'La configuration de ce poste remplacera celle enregistrée dans Turso, pour tous les postes. Si ce poste a un cache périmé, il écrasera les réglages faits ailleurs.': 'This workstation’s configuration will replace the one saved in Turso, for every workstation. If this workstation has a stale cache, it will overwrite settings made elsewhere.',
+  'Pousser vers Turso': 'Push to Turso',
 };

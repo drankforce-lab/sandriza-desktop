@@ -131,4 +131,8 @@ module.exports = {
   'La demande de': 'The request from',
   'concernant la commande': 'regarding order',
   'sera supprimée définitivement, avec son contenu. Cette action est irréversible.': 'will be permanently deleted, along with its content. This action cannot be undone.',
+  // 2026-10-25, audit : Échap sur une réponse rédigée.
+  'Abandonner la réponse': 'Discard the reply',
+  'La réponse rédigée n’a pas été envoyée. Fermer la demande la perdra.': 'The reply you wrote has not been sent. Closing the request will discard it.',
+  'Fermer sans envoyer': 'Close without sending',
 };

@@ -186,6 +186,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'input[data-field=label]':30,'input[dat
   }
 
   function items(){ return (D && Array.isArray(D.items)) ? D.items : []; }
+  /* (2026-10-25, audit) LA DERNIERE VERSION ENREGISTREE. Chaque geste modifie
+     D.items AVANT l ecriture : sur un echec, l ecran montrait quand meme le
+     changement, qui partait ensuite avec l ecriture suivante. On la retablit. */
+  var SAUVE = null;
+  function retenir(){ try { SAUVE = JSON.stringify(items()); } catch (e) { SAUVE = null; } }
+  function retablir(){ if (D && SAUVE) { try { D.items = JSON.parse(SAUVE); } catch (e) {} } }
+  /* (2026-10-25, audit) Un geste clique PENDANT une ecriture (le change d une
+     etiquette part juste avant le clic sur ↑, ↓ ou 🗑) n est plus avale : il est
+     rejoue quand l ecriture a reussi. */
+  var EN_ATTENTE = null;
+  function rejouer(ok){
+    var q = EN_ATTENTE; EN_ATTENTE = null;
+    if (!q || !ok) return;
+    var sel = 'button[data-act="' + q.act + '"][data-id="' + q.id + '"]' + (q.cid ? '[data-cid="' + q.cid + '"]' : '');
+    var b2 = corps.querySelector(sel);
+    if (b2 && !b2.disabled) b2.click();
+  }
   function trouver(id){ var l = items(); for (var i=0;i<l.length;i++){ if (l[i].id === id) return l[i]; } return null; }
 
   function dessiner(){
@@ -210,12 +227,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'input[data-field=label]':30,'input[dat
            pas une description : repris tel quel il aurait donne un nom absurde.
            Les deux noms disent de quelle entree de menu il s agit. */
         h.push('<input class="lab" data-field="label" data-id="' + esc(it.id) + '" aria-label="' + esc('${T("Étiquette du menu — ")}' + (it.label || it.id)) + '" value="' + esc(it.label) + '" placeholder="${T("Étiquette")}"' + dis + '>');
-        h.push('<input class="href" data-field="href" data-id="' + esc(it.id) + '" aria-label="' + esc('${T("Lien du menu — ")}' + (it.label || it.id)) + '" value="' + esc(it.href) + '" placeholder="#shop ou https://…"' + dis + '>');
+        h.push('<input class="href" data-field="href" data-id="' + esc(it.id) + '" aria-label="' + esc('${T("Lien du menu — ")}' + (it.label || it.id)) + '" value="' + esc(it.href) + '" placeholder="${T("#shop ou https://…")}"' + dis + '>');
       }
       h.push('</div><div class="gestes">');
       h.push('<button class="mini" data-act="up" data-id="' + esc(it.id) + '" title="${T("Monter")}"' + (i===0||RO?' disabled':'') + '>↑</button>');
       h.push('<button class="mini" data-act="down" data-id="' + esc(it.id) + '" title="${T("Descendre")}"' + (i===l.length-1||RO?' disabled':'') + '>↓</button>');
-      h.push('<button class="mini" data-act="toggle" data-id="' + esc(it.id) + '" title="' + (masque?'Afficher':'Masquer') + '"' + dis + '>' + (masque?'<span class="ic">🙈</span>':'<span class="ic">👁</span>') + '</button>');
+      h.push('<button class="mini" data-act="toggle" data-id="' + esc(it.id) + '" title="' + (masque?'${T("Afficher")}':'${T("Masquer")}') + '"' + dis + '>' + (masque?'<span class="ic">🙈</span>':'<span class="ic">👁</span>') + '</button>');
       h.push('<button class="mini" data-act="form" data-id="' + esc(it.id) + '"' + dis + '>${T("+ Sous-menu")}</button>');
       if (!it.fixed) {
         var arme = (SUPPR === it.id);
@@ -322,15 +339,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'input[data-field=label]':30,'input[dat
     appeler('config:nav:ecrire', [items()]).then(function(r){
       OCCUPE = false;
       if (r && r.ok) {
-        D = r; RO = !r.peutModifier;
+        D = r; RO = !r.peutModifier; retenir();
         if (redraw) dessiner(); else { bAdd.disabled = RO; bReset.disabled = RO; }
         dire('${T("Enregistré.")}', 'bon');
+        rejouer(true);
       } else if (r && r.motif === 'perime' && r.items) {
         // (2026-10-19, lot M) Modifié ailleurs : on montre la version du serveur, rien n'a été écrit.
-        D = r; RO = !r.peutModifier; dessiner(); dire(expliquer(r), 'err');
+        D = r; RO = !r.peutModifier; retenir(); dessiner(); dire(expliquer(r), 'err');
+        rejouer(false);
       } else {
-        if (redraw) dessiner(); else { bAdd.disabled = RO; bReset.disabled = RO; }
+        // (2026-10-25, audit) Rien n a ete ecrit : l ecran revient a la version enregistree.
+        retablir(); FOCUS_ID = null;
+        dessiner(); bAdd.disabled = RO; bReset.disabled = RO;
         dire(expliquer(r), 'err');
+        rejouer(false);
       }
     });
   }
@@ -340,15 +362,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'input[data-field=label]':30,'input[dat
     OCCUPE = true; bAdd.disabled = true; bReset.disabled = true; dire('${T("Réinitialisation…")}');
     appeler('config:nav:reinit').then(function(r){
       OCCUPE = false; RESET = false;
-      if (r && r.ok) { D = r; RO = !r.peutModifier; dessiner(); dire('${T("Navigation réinitialisée.")}', 'bon'); }
-      else { if (r && r.motif === 'perime' && r.items) { D = r; RO = !r.peutModifier; } dessiner(); dire(expliquer(r), 'err'); }
+      if (r && r.ok) { D = r; RO = !r.peutModifier; retenir(); dessiner(); dire('${T("Navigation réinitialisée.")}', 'bon'); }
+      else { if (r && r.motif === 'perime' && r.items) { D = r; RO = !r.peutModifier; retenir(); } else retablir(); dessiner(); dire(expliquer(r), 'err'); }
     });
   }
 
   // ── GESTES (clic delegue) ───────────────────────────────────────────────────
   corps.addEventListener('click', function(ev){
     var b = ev.target.closest ? ev.target.closest('button[data-act]') : null;
-    if (!b || RO || OCCUPE) return;
+    if (!b || RO) return;
+    if (OCCUPE) {
+      EN_ATTENTE = { act: b.getAttribute('data-act'), id: b.getAttribute('data-id'), cid: b.getAttribute('data-cid') || '' };
+      dire('${T("Enregistrement en cours… le geste suivra.")}', 'att');
+      return;
+    }
     var act = b.getAttribute('data-act');
     var id = b.getAttribute('data-id');
     var prevSuppr = SUPPR; SUPPR = null;
@@ -445,7 +472,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'input[data-field=label]':30,'input[dat
         dire(expliquer(r), 'err');
         return;
       }
-      D = r; RO = !r.peutModifier; dessiner(); dire('');
+      D = r; RO = !r.peutModifier; retenir(); dessiner(); dire('');
     });
   }
 

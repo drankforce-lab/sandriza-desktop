@@ -63,6 +63,12 @@ button .n{display:inline-block;margin-left:.3rem;font-size:.6875rem;font-weight:
   letter-spacing:.07em;color:var(--tx-or)}
 .detail ul{margin:.15rem 0 .3rem;padding-left:1.1rem}
 .detail li{margin:.16rem 0}
+/* (2026-10-25, audit) La note OUVERTE se lit seule, ses points en pages mesurees. */
+.ligne.ouverte{flex:0 0 auto}
+.pile.lecture{gap:.15rem;font-size:.86rem;line-height:1.55}
+.pile.lecture h4{margin:.45rem 0 .1rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--tx-or)}
+.pile.lecture .pt{padding-left:1.1rem;position:relative}
+.pile.lecture .pt::before{content:"•";position:absolute;left:.35rem;color:var(--tx2)}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
@@ -99,7 +105,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   var D = null;
   var ONGLET = 'recentes';   // recentes | archives
-  var DEPLIE = {};           // v -> true
+  /* (2026-10-25, audit) UNE SEULE NOTE OUVERTE A LA FOIS, LUE SEULE. Depliee dans
+     la liste, une note longue (celle de la version installee s ouvre d elle-meme)
+     depassait la hauteur de la page : la pagination decoupe la liste par note,
+     et la fin d une note plus haute que la page etait coupee, sans glissiere.
+     Ouverte, la note montre son en-tete puis ses points, eux-memes en pages. */
+  var OUVERTE = '';          // version ouverte, ou ''
 
   /* La mise en forme AUTORISEE dans le corps d une note. On ne rend pas le HTML
      tel quel les yeux fermes : on garde les quelques balises d emphase qui y
@@ -160,6 +171,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '${T("Archives")}<span class="n">' + archives.length + '</span></button>'
       + '</div>';
 
+    var ouv = OUVERTE ? liste.filter(function(e){ return e.v === OUVERTE; })[0] : null;
+    if (ouv) {
+      var iciO = (D.installee && ouv.v === D.installee) ? ' <span class="rf-pill vert">${T('installée ici')}</span>' : '';
+      h += '<div class="ligne ouverte" data-v="' + esc(ouv.v) + '" title="${T('Revenir à la liste')}">'
+        + '<div class="haut"><span class="num">' + esc(ouv.v) + '</span>' + iciO
+        + '<span class="titre">' + esc(ouv.t || '') + '</span>'
+        + '<span class="droite">' + esc(szJour(ouv.d) || '') + ' ▾</span></div></div>';
+      /* ⚠ LE CORPS D UNE NOTE EST DU HTML, ET IL DOIT LE RESTER. Il etait ECHAPPE :
+         les <strong> ecrits dans NOTES (pont.js) se lisaient en toutes lettres
+         (signale le 2026-08-14). Ces textes sont ecrits dans le code du site ; on
+         les passe par nettoyer(). Le TITRE, la VERSION et la DATE restent echappes.
+         Chaque point est un element de la pile, donc une unite de page. */
+      var pts = [];
+      if (ouv.r) pts.push('<div>' + nettoyer(ouv.r) + '</div>');
+      (ouv.s || []).forEach(function(sec){
+        if (sec.h) pts.push('<h4>' + esc(sec.h) + '</h4>');
+        (sec.p || []).forEach(function(par){ pts.push('<div class="pt">' + nettoyer(par) + '</div>'); });
+      });
+      h += '<div class="sz-pagee"><div class="pile lecture" data-pages="note-' + esc(ouv.v) + '">' + pts.join('') + '</div></div>';
+      corps.innerHTML = h;
+      return;
+    }
     if (!liste.length) {
       h += '<div class="vide">' + (ONGLET === 'archives'
         ? '${T('Rien aux archives pour l’instant : les versions au-delà des {0} dernières viendront ici.')}'.split('{0}').join(n)
@@ -167,33 +200,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     } else {
       // Les notes en PAGES mesurees (JS_PAGES du socle) : la pile prend la hauteur qui reste.
       h += '<div class="sz-pagee"><div class="pile" data-pages="notes-' + ONGLET + '">' + liste.map(function(e){
-        var ouverte = !!DEPLIE[e.v];
         var ici = (D.installee && e.v === D.installee)
           ? ' <span class="rf-pill vert">${T('installée ici')}</span>' : '';
-        var det = '';
-        if (ouverte) {
-          /* ⚠ LE CORPS D UNE NOTE EST DU HTML, ET IL DOIT LE RESTER.
-             Il etait ECHAPPE : les <strong> ecrits dans NOTES (pont.js) se
-             lisaient en toutes lettres au milieu de la phrase, comme du code
-             oublie (signale le 2026-08-14, capture a l appui). Ces textes ne
-             viennent d aucun visiteur ni d aucune base : ils sont ecrits dans le
-             code du site, au meme titre que les libelles de cette fenetre. Les
-             echapper ne protegeait de rien et abimait chaque note.
-             ⚠ Le TITRE, la VERSION et la DATE restent echappes : eux ne sont pas
-             censes porter de mise en forme, et rien ne justifie d y ouvrir la
-             porte au HTML. */
-          det = '<div class="detail">' + nettoyer(e.r || '');
-          (e.s || []).forEach(function(sec){
-            det += (sec.h ? '<h4>' + esc(sec.h) + '</h4>' : '')
-              + '<ul>' + (sec.p || []).map(function(par){ return '<li>' + nettoyer(par) + '</li>'; }).join('') + '</ul>';
-          });
-          det += '</div>';
-        }
+        /* (2026-10-25, audit) Le corps d une note ne se deplie plus ICI : il se lit
+           seul (voir OUVERTE plus haut). */
         return '<div class="ligne" data-v="' + esc(e.v) + '">'
           + '<div class="haut"><span class="num">' + esc(e.v) + '</span>' + ici
           + '<span class="titre">' + esc(e.t || '') + '</span>'
-          + '<span class="droite">' + esc(szJour(e.d) || '') + ' ' + (ouverte ? '▾' : '▸') + '</span></div>'
-          + det + '</div>';
+          + '<span class="droite">' + esc(szJour(e.d) || '') + ' ▸</span></div></div>';
       }).join('') + '</div></div>';
     }
     corps.innerHTML = h;
@@ -203,11 +217,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var t = ev.target;
     if (!t || !t.closest) return;
     var og = t.closest('[data-onglet]');
-    if (og) { ONGLET = og.getAttribute('data-onglet'); dessiner(); return; }
+    if (og) { ONGLET = og.getAttribute('data-onglet'); OUVERTE = ''; dessiner(); return; }
     var li = t.closest('.ligne[data-v]');
     if (li) {
       var v = li.getAttribute('data-v');
-      DEPLIE[v] = !DEPLIE[v];
+      OUVERTE = (OUVERTE === v) ? '' : v;
       dessiner();
     }
   };
@@ -217,8 +231,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (!r || !r.ok) { vide('${T('Notes indisponibles')}', expliquer(r)); return; }
       D = r;
       // La version installee ICI s ouvre d elle-meme : c est celle qu on vient lire.
-      if (D.installee && (D.entrees || []).some(function(e){ return e.v === D.installee; })) {
-        DEPLIE[D.installee] = true;
+      if (!OUVERTE && D.installee && (D.entrees || []).some(function(e){ return e.v === D.installee; })) {
+        OUVERTE = D.installee;
       }
       dire('');
       dessiner();
@@ -228,7 +242,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   window.szRevenir = function(){ charger(); };
 
   document.addEventListener('keydown', function(ev){
-    if (ev.key === 'Escape') { ev.preventDefault(); P.fermer(); }
+    if (ev.key !== 'Escape') return;
+    ev.preventDefault();
+    /* Une note ouverte se referme d abord (retour a la liste). */
+    if (OUVERTE) { OUVERTE = ''; dessiner(); return; }
+    P.fermer();
   });
 
   var sous = document.getElementById('sous');

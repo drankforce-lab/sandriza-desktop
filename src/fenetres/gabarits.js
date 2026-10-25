@@ -97,7 +97,7 @@ body{background:var(--f-page);color:var(--tx);
 .tbl td{padding:.4rem .6rem;border-bottom:1px solid var(--v05);vertical-align:middle}
 .tbl td .mod{color:var(--tx2)}
 .tbl select{width:100%;font:inherit;font-size:.8rem;color:var(--tx);background:var(--f-page);border:1px solid var(--v12);border-radius:7px;padding:.3rem .4rem}
-.pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-${T("pied")})}
+.pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 button.b{font:inherit;color:var(--tx);background:var(--v05);border:1px solid var(--v16);
@@ -183,14 +183,33 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'g-name':60,'g-sub':160,'g-hfrom-t':7,'
   function gabParId(id){ var g = (D && D.gabarits) || []; for (var i = 0; i < g.length; i++) if (g[i].id === id) return g[i]; return null; }
 
   // ── VUE LISTE + ATTRIBUTIONS ────────────────────────────────────────────────
+  /* (2026-10-25, audit) LA COULEUR QUI S ENREGISTRE EST CELLE DU CHAMP TEXTE. Le nuancier (input
+     type=color) assainit sa valeur : « #fff » ou une valeur non hexadecimale y devenait #000000, et
+     c est lui qu on lisait — la couleur partait en NOIR. On lit le texte : #rrggbb ou #rgb (deplie) ;
+     inchange, une ancienne valeur d un autre format est gardee telle quelle ; modifie et invalide, on refuse. */
+  function hex6(v){
+    var s = String(v || '').trim();
+    if (/^#[0-9a-fA-F]{6}$/.test(s)) return s;
+    if (/^#[0-9a-fA-F]{3}$/.test(s)) return '#' + s[1] + s[1] + s[2] + s[2] + s[3] + s[3];
+    return '';
+  }
+  function coul(id){
+    var tx = document.getElementById(id + '-t');
+    if (!tx) return { ok: true, v: val(id) };
+    var h = hex6(tx.value);
+    if (h) return { ok: true, v: h };
+    var orig = tx.getAttribute('data-orig') || '';
+    if (orig && tx.value.trim() === orig) return { ok: true, v: orig };
+    return { ok: false, el: tx };
+  }
   function coulChamp(id, label, v){
     /* ⚠ DEUX CHAMPS POUR UNE SEULE ETIQUETTE : le nuancier et sa valeur en
        texte. Le for= ne peut en designer qu UN — il va au nuancier, et le
        champ texte porte son propre nom, sinon il annoncait << zone de texte >>
        sans dire de quelle couleur il s agit. */
     return '<div class="ch"><label for="' + id + '">' + esc(label) + '</label><div class="coul">'
-      + '<input type="color" id="' + id + '" value="' + esc(v) + '"' + (RO ? ' disabled' : '') + '>'
-      + '<input type="text" id="' + id + '-t" aria-label="' + esc(label) + '${T(" — code hexadécimal")}" value="' + esc(v) + '"' + (RO ? ' disabled' : '') + '></div></div>';
+      + '<input type="color" id="' + id + '" value="' + esc(hex6(v) || '#000000') + '"' + (RO ? ' disabled' : '') + '>'
+      + '<input type="text" id="' + id + '-t" aria-label="' + esc(label) + '${T(" — code hexadécimal")}" value="' + esc(v) + '" data-orig="' + esc(v) + '"' + (RO ? ' disabled' : '') + '></div></div>';
   }
   function editeurHtml(){
     var t = (EDIT ? gabParId(EDIT) : null) || { name: '', headerBgFrom: '#1a1a2e', headerBgTo: '#2d1b69',
@@ -324,7 +343,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'g-name':60,'g-sub':160,'g-hfrom-t':7,'
     ['g-hfrom','g-hto','g-fcol'].forEach(function(id){
       var c = document.getElementById(id), tx = document.getElementById(id + '-t');
       if (c) c.oninput = function(){ var tt = document.getElementById(this.id + '-t'); if (tt) tt.value = this.value; majApercu(); planGif(); };
-      if (tx) tx.oninput = function(){ var cc = document.getElementById(this.id.replace('-t','')); if (cc && /^#[0-9a-fA-F]{6}$/.test(this.value)) cc.value = this.value; majApercu(); planGif(); };
+      if (tx) tx.oninput = function(){ var cc = document.getElementById(this.id.replace('-t','')); if (cc && hex6(this.value)) cc.value = hex6(this.value); majApercu(); planGif(); };
     });
     var sub = document.getElementById('g-sub'); if (sub) sub.oninput = function(){ majApercu(); planGif(); };
     var anim = document.getElementById('g-anim'); if (anim) anim.onchange = majApercu;
@@ -335,8 +354,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'g-name':60,'g-sub':160,'g-hfrom-t':7,'
   }
 
   function majApercu(){
-    var hFrom = val('g-hfrom') || '#1a1a2e', hTo = val('g-hto') || '#2d1b69';
-    var fCol = val('g-fcol') || '#c4a882';
+    var hFrom = coul('g-hfrom').v || '#1a1a2e', hTo = coul('g-hto').v || '#2d1b69';
+    var fCol = coul('g-fcol').v || '#c4a882';
     var sub = val('g-sub'), anim = chk('g-anim');
     var head = document.getElementById('g-prev-head');
     if (head) {
@@ -350,7 +369,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'g-name':60,'g-sub':160,'g-hfrom-t':7,'
     if (gifTimer) { clearTimeout(gifTimer); gifTimer = null; }
     var img = document.getElementById('g-gifimg'); if (!img) return;
     var sub = val('g-sub') || (D && D.tagline) || '';
-    appeler('config:gabarits:gifApercu', [{ h1: val('g-hfrom'), h2: val('g-hto'), tc: val('g-fcol'),
+    appeler('config:gabarits:gifApercu', [{ h1: coul('g-hfrom').v || val('g-hfrom'), h2: coul('g-hto').v || val('g-hto'), tc: coul('g-fcol').v || val('g-fcol'),
       brand: (D && D.marque) || 'SANDRIZA', sub: sub }]).then(function(r){
       if (r && r.ok && r.dataUrl) img.src = r.dataUrl;
       else { img.removeAttribute('src'); dire('${T("Aperçu GIF indisponible : ")}' + expliquer(r), 'att'); }
@@ -359,14 +378,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'g-name':60,'g-sub':160,'g-hfrom-t':7,'
 
   function saisieEditeur(){
     return { id: (EDIT || '__new__'), name: val('g-name'),
-      headerBgFrom: val('g-hfrom'), headerBgTo: val('g-hto'), headerSubtitle: val('g-sub'),
-      footerTextColor: val('g-fcol'), animated: chk('g-anim'), gifBanner: chk('g-gif') };
+      headerBgFrom: coul('g-hfrom').v, headerBgTo: coul('g-hto').v, headerSubtitle: val('g-sub'),
+      footerTextColor: coul('g-fcol').v, animated: chk('g-anim'), gifBanner: chk('g-gif') };
   }
   function adopter(r){ D = r; RO = !r.peutModifier; }
 
   function enregistrer(){
     if (RO || OCCUPE) return;
     if (!val('g-name').trim()) { dire('${T("Le nom du gabarit est requis.")}', 'err'); return; }
+    var mauvaise = ['g-hfrom', 'g-hto', 'g-fcol'].map(coul).filter(function(c){ return !c.ok; })[0];
+    if (mauvaise) { dire('${T("Couleur invalide : utilisez un code hexadécimal comme #1a1a2e.")}', 'err'); mauvaise.el.focus(); return; }
     occuper(true); dire('${T("Enregistrement…")}');
     var avant = ((D && D.gabarits) || []).map(function(x){ return x.id; });
     appeler('config:gabarits:ecrire', [saisieEditeur()]).then(function(r){

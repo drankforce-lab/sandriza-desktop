@@ -819,7 +819,7 @@ const ouvrirDecompte = (secondes) => {
     ...(Number.isFinite(x) && Number.isFinite(y) ? { x, y } : {}),
     resizable: false, minimizable: false, maximizable: false, fullscreenable: false,
     alwaysOnTop: true, skipTaskbar: false, show: false,
-    title: 'Déconnexion imminente', autoHideMenuBar: true, backgroundColor: _fondTheme(),
+    title: TF('Déconnexion imminente'), autoHideMenuBar: true, backgroundColor: _fondTheme(),
     webPreferences: {
       preload: path.join(__dirname, 'pont-preload.js'), minimumFontSize: 11,
       contextIsolation: true, nodeIntegration: false, sandbox: true,
@@ -831,7 +831,7 @@ const ouvrirDecompte = (secondes) => {
   try { decompteWin.setAlwaysOnTop(true, 'screen-saver'); } catch {}
   try { decompteWin.setVisibleOnAllWorkspaces(true); } catch {}
   decompteWin.on('page-title-updated', (ev) => { ev.preventDefault(); });
-  decompteWin.setTitle('Déconnexion imminente');
+  decompteWin.setTitle(TF('Déconnexion imminente'));   // (2026-10-25, audit) traduit, comme le titre de la page
   /* ⚠ FERMER CETTE FENÊTRE NE PROLONGE RIEN ET NE DÉCONNECTE RIEN. Le site tient
      l'horloge ; si l'on pouvait s'en débarrasser d'un clic sur la croix, on aurait
      un décompte invisible qui court toujours — précisément le défaut qu'on corrige. */
@@ -3916,6 +3916,13 @@ const LIMITES_PONT = {
   // du plafond ordinaire. L operation donnees fait un aller-retour au registre
   // distant des partages.
   'comptable:creer': 90000, 'comptable:donnees': 20000,
+  /* (2026-10-25, audit) DES ÉCRITURES QUI HÉRITAIENT DES 8 s ORDINAIRES. La fenêtre annonçait « délai »
+     pendant que le travail continuait derrière — et le geste naturel (recommencer) le DOUBLAIT :
+     une carte-cadeau créée deux fois avec de l argent dessus, deux migrations d images sur les mêmes
+     fiches, une expédition confirmée (verrou, serveur, courriel) annoncée ratée. */
+  'images:migrer': 300000, 'images:etat': 30000,
+  'cartescadeaux:creer': 30000, 'cartescadeaux:activer': 30000, 'cartescadeaux:supprimer': 30000,
+  'expedition:confirmer': 45000, 'expedition:imprimer': 30000, 'expedition:pdf': 30000, 'expedition:bordereau': 30000,
 };
 
 /* Le prechargement demande la table ICI, une fois, plutot que d en tenir une
@@ -4934,7 +4941,8 @@ ipcMain.on('vue:tuiles', (e, cle, off) => {
    ⚠ UN FICHIER À PART (memo-poste.json), PAS reglages.json : reglages.json est
    renvoyé en entier au site (menu:reglages) ; des mesures n ont rien à y faire.
    ⚠ LISTE FERMÉE de clés, chacune avec son plafond : la valeur vient d une PAGE. */
-const MEMO_POSTE_PLAFONDS = { mesureIA: 60000, echelleMv: 8000, photosVue: 40, photosRattrapage: 40 };
+const MEMO_POSTE_PLAFONDS = { mesureIA: 60000, echelleMv: 8000, photosVue: 40, photosRattrapage: 40,
+  gardienOnglet: 40 };   // l onglet ouvert du Gardien (2026-10-25, audit : localStorage n y marchait pas)
 let _memoPoste = null;
 const _memoPosteChemin = () => path.join(app.getPath('userData'), 'memo-poste.json');
 const _memoPosteTout = () => {

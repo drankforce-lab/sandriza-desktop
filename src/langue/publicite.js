@@ -269,4 +269,19 @@ module.exports = {
   /* (2026-10-19, lot M) Envoi confié au serveur, idempotence, publicité honnête. */
   "client(s) avec courriel visé(s) — aucun courriel n’est envoyé d’ici : créez la campagne dans Infolettre.": "customer(s) with email targeted — no email is sent from here: create the campaign in Newsletter.",
   "Cette campagne est déjà lancée.": "This campaign has already been launched.",
+  // 2026-10-25, audit : satisfaction hors tuiles, confirmations, phrases entières.
+  "Taux de satisfaction :": "Satisfaction rate:",
+  "conversations": "conversations",
+  "Réessayer": "Try again",
+  "client exporté dans la fenêtre principale.": "customer exported in the main window.",
+  "clients exportés dans la fenêtre principale.": "customers exported in the main window.",
+  "j": "d",
+  "Supprimer la campagne": "Delete the campaign",
+  "La campagne": "The campaign",
+  "sera supprimée définitivement. Cette action est irréversible.": "will be permanently deleted. This action cannot be undone.",
+  "Abandonner la campagne ?": "Discard the campaign?",
+  "Le nom et le message tapés seront perdus.": "The name and message you typed will be lost.",
+  "Abandonner": "Discard",
+  "Lancer la campagne": "Launch the campaign",
+  "sera publiée tout de suite sur les canaux choisis.": "will be published right away on the chosen channels.",
 };

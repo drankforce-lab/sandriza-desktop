@@ -272,8 +272,8 @@ module.exports = {
     '<strong>Export</strong>: the file you get goes back up as it is after editing,',
   'Colonne(s) non reconnue(s), donc <strong>ignorée(s)</strong> : ':
     'Column(s) not recognised, so <strong>ignored</strong>: ',
-  'créés sont hors vente : ils attendent dans <strong>Inventaire</strong>. Ajoutez leurs photos, puis mettez-les en vente.':
-    'created are not for sale: they are waiting in <strong>Inventory</strong>. Add their photos, then put them on sale.',
+  'créés sont hors vente : ils attendent dans <strong>Inventaire.</strong> Ajoutez leurs photos, puis mettez-les en vente.':
+    'created are not for sale: they are waiting in <strong>Inventory.</strong> Add their photos, then put them on sale.',
   'Demandes « avisez-moi » satisfaites': '« Notify me » requests fulfilled',
 
   /* ── LES EN-TETES, UNE CELLULE A LA FOIS ────────────────────────────────── */
@@ -301,8 +301,8 @@ module.exports = {
   /* ⚠ DEUX <strong> DANS LA MEME PHRASE : « hors vente » ET « Inventaire ». Ma
      cle n en portait qu un, elle n a rien attrape, et « Inventaire » s est
      traduit seul au milieu du francais. La source decide, toujours. */
-  ' créés sont <strong>hors vente</strong> : ils attendent dans <strong>Inventaire</strong>. Ajoutez leurs photos, puis mettez-les en vente.':
-    ' created are <strong>not for sale</strong>: they are waiting in <strong>Inventory</strong>. Add their photos, then put them on sale.',
+  ' créés sont <strong>hors vente</strong> : ils attendent dans <strong>Inventaire.</strong> Ajoutez leurs photos, puis mettez-les en vente.':
+    ' created are <strong>not for sale</strong>: they are waiting in <strong>Inventory.</strong> Add their photos, then put them on sale.',
   'hors vente': 'not for sale',
   'Modèle ': 'Template ',
   'refusée': 'refused',
@@ -330,5 +330,58 @@ module.exports = {
   'Voir le détail des colonnes': 'See the column details',
   'Fermer': 'Close',
   '… et': '… and',
-  'autre(s) — téléchargez le rapport pour la liste complète.': 'more — download the report for the full list.'
+  'autre(s) — téléchargez le rapport pour la liste complète.': 'more — download the report for the full list.',
+  // (2026-10-25, audit)
+  '{0} produit': '{0} product',
+  '{0} produits': '{0} products',
+  '{0} sur {1}': '{0} of {1}',
+  '{0} variante': '{0} variant',
+  '{0} variantes': '{0} variants',
+  'Erreur': 'Error',
+  'Conflit': 'Conflict',
+  'Page {0} / {1}': 'Page {0} / {1}',
+  '{0} ligne': '{0} row',
+  '{0} lignes': '{0} rows',
+  '{0} photo': '{0} photo',
+  '{0} photos': '{0} photos',
+  'feuille': 'sheet',
+  'variantes': 'variants',
+  'fiches': 'records',
+  'Variante': 'Variant',
+  'Appliquer {0} changement': 'Apply {0} change',
+  'Appliquer {0} changements': 'Apply {0} changes',
+  '{0} échec': '{0} failure',
+  '{0} échecs': '{0} failures',
+  'Le produit créé est <strong>hors vente</strong> : il attend dans <strong>Inventaire.</strong> Ajoutez ses photos, puis mettez-le en vente.': 'The created product is <strong>not for sale</strong>: it is waiting in <strong>Inventory.</strong> Add its photos, then put it on sale.',
+  'Les {0} produits créés sont <strong>hors vente</strong> : ils attendent dans <strong>Inventaire.</strong> Ajoutez leurs photos, puis mettez-les en vente.': 'The {0} created products are <strong>not for sale</strong>: they are waiting in <strong>Inventory.</strong> Add their photos, then put them on sale.',
+  '{0} modification enregistrée mais absente de l’historique du produit.': '{0} change saved but missing from the product history.',
+  '{0} modifications enregistrées mais absentes de l’historique du produit.': '{0} changes saved but missing from the product history.',
+  '{0} personne': '{0} person',
+  '{0} personnes': '{0} people',
+  '<strong>{0}</strong> produit <strong>créé</strong> — hors vente, à relire et publier ensuite': '<strong>{0}</strong> product <strong>created</strong> — not for sale, to review and publish afterwards',
+  '<strong>{0}</strong> produits <strong>créés</strong> — hors vente, à relire et publier ensuite': '<strong>{0}</strong> products <strong>created</strong> — not for sale, to review and publish afterwards',
+  '<strong>{0}</strong> variante <strong>modifiée</strong>': '<strong>{0}</strong> variant <strong>changed</strong>',
+  '<strong>{0}</strong> variantes <strong>modifiées</strong>': '<strong>{0}</strong> variants <strong>changed</strong>',
+  '<strong>{0}</strong> fiche <strong>modifiée</strong>': '<strong>{0}</strong> record <strong>changed</strong>',
+  '<strong>{0}</strong> fiches <strong>modifiées</strong>': '<strong>{0}</strong> records <strong>changed</strong>',
+  '<strong>{0}</strong> photo <strong>téléchargée</strong> depuis des sites externes et copiée dans votre stockage': '<strong>{0}</strong> photo <strong>downloaded</strong> from external sites and copied to your storage',
+  '<strong>{0}</strong> photos <strong>téléchargées</strong> depuis des sites externes et copiées dans votre stockage': '<strong>{0}</strong> photos <strong>downloaded</strong> from external sites and copied to your storage',
+  '{0} ligne identique : rien ne sera écrit': '{0} identical row: nothing will be written',
+  '{0} lignes identiques : rien ne sera écrit': '{0} identical rows: nothing will be written',
+  '{0} ligne en erreur : <strong>ignorée</strong>': '{0} row with errors: <strong>ignored</strong>',
+  '{0} lignes en erreur : <strong>ignorées</strong>': '{0} rows with errors: <strong>ignored</strong>',
+  'motif inconnu': 'unknown reason',
+  'Suivi de l’import perdu — vérifiez l’inventaire avant de relancer quoi que ce soit.': 'Import tracking lost — check the inventory before restarting anything.',
+  '{0} fiche enregistrée': '{0} record saved',
+  '{0} fiches enregistrées': '{0} records saved',
+  '{0} refusée': '{0} refused',
+  '{0} refusées': '{0} refused',
+  'Rapport': 'Report',
+  '{0} avis envoyé.': '{0} notice sent.',
+  '{0} avis envoyés.': '{0} notices sent.',
+  // (2026-10-25, audit)
+  'Préparation du modèle inventaire…': 'Preparing the inventory template…',
+  'Préparation du modèle catalogue…': 'Preparing the catalogue template…',
+  'Modèle inventaire (en-têtes seuls)': 'Inventory template (headers only)',
+  'Modèle catalogue (en-têtes seuls)': 'Catalogue template (headers only)',
 };

@@ -131,4 +131,9 @@ module.exports = {
   'Client et commande Statut Motif Archivé le': 'Customer and order Status Reason Archived on',
   'Client et facture Montant Statut Archivée le': 'Customer and invoice Amount Status Archived on',
   'Client et remboursement Mode Total Archivé le': 'Customer and refund Method Total Archived on',
+  // 2026-10-25, audit : les quatre tuiles.
+  'Commandes': 'Orders',
+  'Retours': 'Returns',
+  'Factures': 'Invoices',
+  'Remboursements': 'Refunds',
 };

@@ -353,7 +353,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        pouvait cliquer « Rembourser — 129,95 $ » motif vide, et la fenetre
        refusait APRES le clic. Le garde de confirmer() reste, en filet. */
     var motifOk = !!String(val('m-motif') || '').trim();
-    var pret = !!(TOT && TOT.nbArticles && TOT.total > 0) && motifOk && !enCours;
+    /* (2026-10-25, audit) Une commande verrouillee ailleurs garde le bouton eteint :
+       la premiere frappe le rallumait, et le serveur refusait ensuite le clic. */
+    var pret = !!(TOT && TOT.nbArticles && TOT.total > 0) && motifOk && !enCours && !VERROU_REFUSE;
     b.title = (TOT && TOT.nbArticles && !motifOk) ? '${T("Écrivez d’abord le motif du remboursement.")}' : '';
     b.disabled = !pret;
     b.textContent = enCours ? '${T("Remboursement…")}'
@@ -383,6 +385,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         if (!a) return;
         var v = Math.min(Math.max(0, parseInt(t.value, 10) || 0), a.maxQty);
         QTE[cle(a)] = v;
+        /* (2026-10-25, audit) Le champ montre la quantite PLAFONNEE, celle des totaux
+           (5 tape pour un maximum de 2 restait affiche 5). Un champ vide reste vide. */
+        if (t.value !== '' && String(v) !== t.value) t.value = v;
         /* L etat de la carte suit la saisie SUR PLACE : un redessin volerait le
            focus du champ qu on est en train de taper. */
         var carte = t.closest ? t.closest('.art') : null;
@@ -493,7 +498,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             if (r.squareErreur) t += '${T(" Remboursement local créé mais Square a échoué : ")}' + r.squareErreur;
             else if (!r.credit) t += '${T(" Square : ")}' + argent(r.net) + '${T(" initié.")}';
             dire(t, r.squareErreur ? 'att' : 'bon');
-            QTE = {}; TOT = null;
+            /* (2026-10-25, audit) L exemption des frais vaut pour CE remboursement :
+               sans la remise a zero, le suivant dans la meme fenetre y renoncait encore. */
+            QTE = {}; TOT = null; NIP_OK = false; NIP_SAISI = '';
             recharger();
           });
       });
@@ -513,10 +520,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   var VERROU_PRIS = false;
+  var VERROU_REFUSE = false;
   function prendreVerrou(){
     appeler('verrou:prendre', ['orders', ID]).then(function(v){
       if (!v || !v.ok) return;
       VERROU_PRIS = !!v.obtenu;
+      VERROU_REFUSE = !v.obtenu;
       if (v.obtenu) { sous.textContent = (sous.textContent ? sous.textContent + ' · ' : '') + '${T("Section verrouillée en modification par :")} ' + (v.par || '${T("vous")}'); return; }
       sous.textContent = '${T("ouverte par ")}' + (v.parQui || '${T("quelqu’un d’autre")}');
       var b = document.getElementById('btn-rembourser');
@@ -542,8 +551,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return fermer;
   }
 
+  /* (2026-10-25, audit) Echap ne jette pas une saisie sans demander : quantites,
+     motif redige. Rien de saisi : on ferme comme avant. */
+  function saisieEnCours(){
+    if (String(val('m-motif') || '').trim()) return true;
+    return Object.keys(QTE).some(function(k){ return QTE[k] > 0; });
+  }
   document.addEventListener('keydown', function(ev){
-    if (ev.key === 'Escape' && !document.querySelector('.voile')) { ev.preventDefault(); rendreVerrou(); P.fermer(); }
+    if (ev.key !== 'Escape' || document.querySelector('.voile') || document.querySelector('.szc-voile')) return;
+    ev.preventDefault();
+    if (enCours) return;
+    if (!saisieEnCours()) { rendreVerrou(); P.fermer(); return; }
+    szConfirmer({ prudent: true, titre: '${T("Fermer le remboursement")}',
+      texte: '${T("Les quantités et le motif saisis seront perdus. Aucun remboursement n’a été émis.")}',
+      oui: '${T("Fermer sans rembourser")}' }).then(function(oui){
+      if (oui) { rendreVerrou(); P.fermer(); }
+    });
   });
 
   recharger().then(function(){ if (R) prendreVerrou(); });

@@ -61,7 +61,9 @@ label.case input{width:16px;height:16px;accent-color:var(--or)}
 .prim:disabled{opacity:.5;cursor:default}
 .b{font:inherit;font-size:.8rem;border:1px solid var(--v16);border-radius:8px;padding:.42rem .8rem;background:var(--v05);color:var(--tx);cursor:pointer}
 .b:hover{background:var(--v09)}
-.exempts{display:flex;flex-direction:column;gap:.35rem;max-height:240px;overflow-y:auto;
+/* (2026-10-25, audit) Plus de glissiere : la liste des comptes exemptes va en PAGES mesurees
+   (data-pages) dans la meme hauteur bornee. Les cases cachees gardent leur etat a l enregistrement. */
+.exempts{display:flex;flex-direction:column;gap:.35rem;max-height:240px;overflow:hidden;
   border:1px solid var(--v08);border-radius:9px;padding:.6rem .7rem}
 .vide{padding:1rem;text-align:center;color:var(--tx2);font-size:.82rem}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
@@ -239,7 +241,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (RO?'':'<button class="b" id="geo-loc"><span class="ic">🔍</span> ${T("Détecter ma localisation actuelle")}</button>')
       + '</div>'
       + '<div><div class="grpH">${T("Comptes exclus de cette restriction")}</div>'
-      + '<div class="exempts">'+exempts+'</div>'
+      + '<div class="exempts" data-pages="securite-exempts">'+exempts+'</div>'
       + '<div class="sub" style="margin-top:.4rem;color:var(--tx-gris)">${T("Ces comptes peuvent se connecter depuis n’importe quel pays.")}</div>'
       + '</div>'
       + '</div></div>';

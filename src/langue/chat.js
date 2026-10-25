@@ -168,5 +168,8 @@ module.exports = {
   /* (2026-10-19, lot M) */
   "Cette conversation a été fermée depuis un autre poste : elle n’a pas été rouverte.": "This conversation was closed from another workstation: it was not reopened.",
   "prise par": "taken by",
-  'Conservation : 24 h ; jusqu’à 30 jours si la conversation attend une réponse (politique de confidentialité, § 8).': 'Retention: 24 h; up to 30 days if the conversation is awaiting a reply (privacy policy, § 8).'
+  'Conservation : 24 h ; jusqu’à 30 jours si la conversation attend une réponse (politique de confidentialité, § 8).': 'Retention: 24 h; up to 30 days if the conversation is awaiting a reply (privacy policy, § 8).',
+  /* (2026-10-25, audit) Textes visibles qui restaient hors T(). */
+  'Abandonner la réponse': 'Discard the reply',
+  'La réponse tapée n’a pas été envoyée. Fermer la conversation l’abandonne.': 'The reply you typed has not been sent. Closing the conversation discards it.',
 };

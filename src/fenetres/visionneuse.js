@@ -143,9 +143,11 @@ function pageVisionneuse(id, liste) {
     document.getElementById('b-prec').disabled = LISTE.length < 2;
     document.getElementById('b-suiv').disabled = LISTE.length < 2;
     var id = p.id;
-    var poser = function(src){
+    /* << raison >> : le motif du refus (delai, session tombee…), dit dans le cadre
+       au lieu d un << n a pas pu etre lue >> muet (2026-10-25, audit). */
+    var poser = function(src, raison){
       if (LISTE[I].id !== id) return;   // on a change de photo entre-temps
-      if (!src) { cadre.innerHTML = '<div class="attente">${T("Cette photo n’a pas pu être lue.")}</div>'; appliquer(); return; }
+      if (!src) { cadre.innerHTML = '<div class="attente">${T("Cette photo n’a pas pu être lue.")}' + (raison ? '<br>' + raison : '') + '</div>'; appliquer(); return; }
       cadre.innerHTML = '<img id="v-img" alt="">';
       var im = img();
       im.onload = ajuster;
@@ -161,9 +163,12 @@ function pageVisionneuse(id, liste) {
     if (!pr || typeof pr.then !== 'function') { poser(''); return; }
     pr.then(function(r){
       var src = (r && r.ok && r.vignettes && r.vignettes[id]) || '';
-      pleinGarder(id, src);
-      poser(src);
-    }, function(){ poser(''); });
+      /* ⚠ ON NE GARDE QUE CE QUI A REUSSI (2026-10-25, audit) : un echec passager
+         mis en cache rendait la photo illisible pour toute la vie de la fenetre,
+         meme en y revenant. */
+      if (src) pleinGarder(id, src);
+      poser(src, (r && r.ok) ? '' : expliquer(r || { motif: 'echec' }));
+    }, function(){ poser('', expliquer({ motif: 'echec' })); });
   }
   /* L explorateur rouvre CETTE fenetre sur une autre photo plutot que d en
      empiler une seconde : la coquille appelle cette fonction. */

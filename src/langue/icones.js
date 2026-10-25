@@ -100,4 +100,9 @@ module.exports = {
   /* ── LES MOTS SEULS (2026-09-13) ─────────────────────────────────────────── */
   'Nom': 'Name',
   "Aucune image : l’icône ne s’affichera pas": "No image: the icon will not show",
+  // (2026-10-25, audit)
+  'coeur, etoile, feu…': 'heart, star, fire…',
+  'Supprimer l’icône': 'Delete the icon',
+  'Le code {0} ne s’affichera plus dans les textes du site. Cette action est irréversible.': 'The code {0} will no longer display in the site’s texts. This cannot be undone.',
+  'Conversion…': 'Converting…',
 };

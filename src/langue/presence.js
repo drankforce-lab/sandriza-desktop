@@ -160,4 +160,9 @@ module.exports = {
   'sera déconnectée immédiatement, sans être consultée. Son travail non enregistré sera perdu et ses fiches ouvertes seront libérées.': 'will be signed out immediately, without being asked. Any unsaved work will be lost and their open records will be released.',
   'Courriel': 'Email',
   'Une confirmation vous est demandée.': 'You will be asked to confirm.',
+  /* (2026-10-25, audit) Textes visibles qui restaient hors T(). */
+  'Déconnexion…': 'Signing out…',
+  'oui': 'yes',
+  'NON': 'NO',
+  '(aucun)': '(none)',
 };

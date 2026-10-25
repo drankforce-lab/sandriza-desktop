@@ -42,10 +42,8 @@ body{background:var(--f-page);color:var(--tx);
 .ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;
   padding:.5rem .7rem;font-size:.78rem}
-.corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:1rem}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 /* ⚠ LES CARTES D UNE MEME RANGEE SE TERMINENT A LA MEME HAUTEUR (2026-08-10,
    capture a l appui). Avec << align-items:start >>, chacune prenait sa hauteur
    naturelle et la rangee finissait en escalier. On laisse donc l etirement par
@@ -190,11 +188,31 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   var TARIFS = [
-    ['${T("En ligne (carte)")}', '2,8 % + 0,30 $', '${T("Par transaction web")}'],
-    ['${T("En personne (lecteur)")}', '2,65 %', '${T("Glissement, puce, sans contact")}'],
-    ['${T("Saisie manuelle")}', '3,5 % + 0,15 $', '${T("Numéro entré à la main")}'],
-    ['${T("Virement ACH")}', '1 % (max 10 $)', '${T("Transfert bancaire")}']
+    /* Les taux et les montants mis en forme dans la langue du poste (2026-10-25,
+       audit) : ecrits en dur, l anglais lisait << 2,8 % + 0,30 $ >>. */
+    ['${T("En ligne (carte)")}', szNombre(2.8) + ' % + ' + szArgent(0.30), '${T("Par transaction web")}'],
+    ['${T("En personne (lecteur)")}', szNombre(2.65) + ' %', '${T("Glissement, puce, sans contact")}'],
+    ['${T("Saisie manuelle")}', szNombre(3.5) + ' % + ' + szArgent(0.15), '${T("Numéro entré à la main")}'],
+    ['${T("Virement ACH")}', szNombre(1) + ' % (${T("max.")} ' + szArgent(10) + ')', '${T("Transfert bancaire")}']
   ];
+
+  /* ⚠ UN ENREGISTREMENT NE REDESSINE PLUS L AUTRE CARTE PAR-DESSUS SA SAISIE
+     (2026-10-25, audit). << D = r; dessiner(); >> reconstruisait les deux cartes :
+     enregistrer les modes de paiement effacait un jeton tape, et l inverse. On
+     lit les champs de l autre carte avant, et on les repose apres. */
+  var IDS_IDENT = ['f-app', 'f-loc', 'f-jeton'];
+  var IDS_OPTIONS = ['o-heb', 'o-after', 'o-apple', 'o-google', 'o-express'];
+  function lireChamps(ids){
+    var o = {};
+    ids.forEach(function(id){ var e = document.getElementById(id); if (e) o[id] = (e.type === 'checkbox') ? e.checked : e.value; });
+    return o;
+  }
+  function reposerChamps(o){
+    Object.keys(o || {}).forEach(function(id){
+      var e = document.getElementById(id); if (!e) return;
+      if (e.type === 'checkbox') e.checked = !!o[id]; else e.value = o[id];
+    });
+  }
 
   function envDe(m){ return (D && D[m]) || { appId: '', locId: '', jeton: { defini: false, fin: '' } }; }
 
@@ -301,7 +319,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (RO) return;
     MODE = e.currentTarget.value === 'production' ? 'production' : 'sandbox';
     TEST = null;
+    var gO = lireChamps(IDS_OPTIONS);
     dessiner();
+    reposerChamps(gO);
     var en = envDe(MODE);
     /* ⚠⚠ LA PHRASE ENTIERE, PAS LE MOT SEUL. Ecrit
        << (MODE === 'production' ? 'production' : 'bac à sable') >>, le meme mot
@@ -349,8 +369,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       .then(function(r){
         occuper(false);
         if (r && r.ok) {
+          var gO = lireChamps(IDS_OPTIONS);
           D = r; RO = !r.peutModifier; MODE = r.mode; TEST = null;
           dessiner();
+          reposerChamps(gO);
           /* ⚠ Meme raison qu au-dessus : la phrase entiere, la comparaison nue. */
           dire(r.mode === 'production'
             ? '${T("Identifiants enregistrés — environnement production.")}'
@@ -367,13 +389,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('config:paiements:options', [{ hebergee: c('o-heb'), afterpay: c('o-after'),
       applepay: c('o-apple'), googlepay: c('o-google'), express: c('o-express') }]).then(function(r){
       occuper(false);
-      if (r && r.ok) { D = r; RO = !r.peutModifier; dessiner(); dire('${T("Modes de paiement enregistrés.")}', 'bon'); }
+      if (r && r.ok) { var gI = lireChamps(IDS_IDENT); D = r; RO = !r.peutModifier; dessiner(); reposerChamps(gI); dire('${T("Modes de paiement enregistrés.")}', 'bon'); }
       else dire(expliquer(r), 'err');
     });
   }
 
   btest.onclick = function(){
     if (OCCUPE) return;
+    /* ⚠ (2026-10-25, audit) LE TEST EPROUVE LES IDENTIFIANTS ENREGISTRES, du mode
+       enregistre — pas ceux de l ecran. Un << Connexion reussie >> sur un autre
+       environnement que celui affiche tromperait : on demande d enregistrer d abord. */
+    var en0 = envDe(MODE), vu = lireChamps(IDS_IDENT);
+    if (D && (MODE !== (D.mode === 'production' ? 'production' : 'sandbox') || (vu['f-app'] || '') !== (en0.appId || '') || (vu['f-loc'] || '') !== (en0.locId || '') || (vu['f-jeton'] || ''))) {
+      dire('${T("Enregistrez d’abord : le test éprouve les identifiants enregistrés, pas ceux affichés.")}', 'att');
+      return;
+    }
     occuper(true); dire('${T("Connexion à Square…")}');
     appeler('config:paiements:tester').then(function(r){
       occuper(false);

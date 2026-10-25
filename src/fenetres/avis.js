@@ -190,6 +190,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   var SUPPR_ARME = false;    // Supprimer attend une confirmation
   var PHOTO_ARMEE = -1;      // retrait d une photo : index arme, -1 = aucun
   var REPONDRE = false;      // le champ de reponse est ouvert
+  /* (2026-10-25, audit) Le texte de la reponse EN COURS : un redessin (photo retiree, etc.) reposait
+     la reponse enregistree et jetait la frappe. null = rien tape depuis l ouverture du champ. */
+  var REP_TXT = null;
+  var OCCUPE = false;        // (2026-10-25, audit) un geste (approuver, masquer, supprimer) est parti
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -327,7 +331,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       if (rows.length) {
         h += '<div class="pagi">'
           + '<button class="mini" id="a-prec"' + (D.page <= 0 ? ' disabled' : '') + '>◀</button>'
-          + '<span>Page ' + (D.page + 1) + ' / ' + D.pages + '</span>'
+          + '<span>' + '${T("Page {0} / {1}")}'.split('{0}').join(D.page + 1).split('{1}').join(D.pages) + '</span>'
           + '<button class="mini" id="a-suiv"' + (D.page >= D.pages - 1 ? ' disabled' : '') + '>▶</button>'
           + '</div>';
       }
@@ -405,8 +409,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + (r.taille ? '<div><div class="l">${T("Taille achetée")}</div><div class="v">' + esc(r.taille) + '</div></div>' : '')
       + '<div><div class="l">${T("Langue")}</div><div class="v">' + esc(r.langue) + '</div></div>'
       + '<div><div class="l">${T("Déposé le")}</div><div class="v">' + esc(szQuand(r.date)) + '</div></div>'
-      + (r.approuveLe ? '<div><div class="l">${T("Approuvé le")}</div><div class="v">' + esc(r.approuveLe) + '</div></div>' : '')
-      + (r.photos ? '<div><div class="l">Photos</div><div class="v">' + r.photos + '</div></div>' : '')
+      + (r.approuveLe ? '<div><div class="l">${T("Approuvé le")}</div><div class="v">' + esc(szQuand(r.approuveLe)) + '</div></div>' : '')
+      + (r.photos ? '<div><div class="l">${T("Photos")}</div><div class="v">' + r.photos + '</div></div>' : '')
       + '</div>'
       /* ⚠ LES VIGNETTES SONT DES <img>, PAS UN fetch. Une balise image n a pas
          besoin de CORS ; un fetch vers R2 echouerait sans un mot (voir
@@ -420,7 +424,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
                    defaut de la fenetre plutot qu a une image introuvable. Le
                    repli se pose en JS, jamais dans un onerror= en ligne (une
                    apostrophe echappee y est avalee par le gabarit). */
-                + '<img src="' + esc(u) + '" alt="" title="Photo ' + (i + 1) + ' de l’avis">'
+                + '<img src="' + esc(u) + '" alt="" title="' + '${T("Photo {0} de l’avis")}'.split('{0}').join(i + 1) + '">'
                 + (r.peutModifier
                     ? '<button class="phx" data-photo="' + i + '" title="${T("Retirer cette photo de l’avis et du stockage")}">'
                       + '✕' + '</button>'
@@ -442,7 +446,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
          anglais — le banc du residuel les a dits. */
       h += '<div style="margin-top:.6rem"><textarea id="a-reptxt" aria-label="${T("Votre réponse publique à cet avis")}" '
         + 'placeholder="${T("Votre réponse sera affichée publiquement sous l’avis.")}">'
-        + esc(r.reponse || '') + '</textarea>'
+        + esc(REP_TXT != null ? REP_TXT : (r.reponse || '')) + '</textarea>'
         + '<div class="pied-boite"><button id="a-repannuler">${T("Annuler")}</button>'
         + '<button class="prim" id="a-repenvoyer">${T("Enregistrer la réponse")}</button></div></div>';
     }
@@ -490,13 +494,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     });
   }
 
+  /* (2026-10-25, audit) UN GESTE A LA FOIS. « Masquer » est une BASCULE au site : un double-clic
+     masquait puis republiait l avis. Les boutons du pied restent desactives jusqu a la reponse. */
   function geste(op, apres){
+    if (OCCUPE || !DETAIL) return;
+    OCCUPE = true;
+    var pb = document.querySelectorAll('#a-voile .pied-boite button');
+    for (var ib = 0; ib < pb.length; ib++) pb[ib].disabled = true;
     dire('…');
     appeler(op, [DETAIL.id]).then(function(r){
-      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      OCCUPE = false;
+      if (!r.ok) { for (var jb = 0; jb < pb.length; jb++) pb[jb].disabled = false; dire(expliquer(r), 'err'); return; }
       /* Les avis récompensés (2026-10-07) : le serveur dit ce qu il vient de verser. */
       dire(apres + (r.points > 0 ? ' ' + szNombre(r.points, 0) + ' ${T("points versés au client.")}' : ''), 'bon');
-      DETAIL = null; SUPPR_ARME = false; PHOTO_ARMEE = -1; REPONDRE = false;
+      DETAIL = null; SUPPR_ARME = false; PHOTO_ARMEE = -1; REPONDRE = false; REP_TXT = null;
       charger();
     });
   }
@@ -523,7 +534,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (bs) bs.onclick = function(){ PAGE = (D.page || 0) + 1; charger(); };
 
     var f = document.getElementById('a-fermer');
-    if (f) f.onclick = function(){ DETAIL = null; SUPPR_ARME = false; PHOTO_ARMEE = -1; REPONDRE = false; dessiner(); };
+    if (f) f.onclick = function(){ fermerAvis(); };
     var ap = document.getElementById('a-approuver');
     if (ap) ap.onclick = function(){ geste('avis:approuver', '${T("Avis approuvé — il est maintenant visible en boutique.")}'); };
     var ma = document.getElementById('a-masquer');
@@ -563,9 +574,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       phs[ip].onclick = function(){ retirerPhoto(Number(this.getAttribute('data-photo'))); };
     }
     var re = document.getElementById('a-repondre');
-    if (re) re.onclick = function(){ REPONDRE = true; dessiner(); };
+    if (re) re.onclick = function(){ REPONDRE = true; REP_TXT = null; dessiner(); };
     var ra = document.getElementById('a-repannuler');
-    if (ra) ra.onclick = function(){ REPONDRE = false; dessiner(); };
+    if (ra) ra.onclick = function(){ REPONDRE = false; REP_TXT = null; dessiner(); };
+    var rt = document.getElementById('a-reptxt');
+    if (rt) rt.oninput = function(){ REP_TXT = rt.value; };
     var rv = document.getElementById('a-repenvoyer');
     if (rv) rv.onclick = function(){
       var t = document.getElementById('a-reptxt');
@@ -574,7 +587,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       appeler('avis:repondre', [DETAIL.id, txt]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
         dire('${T("Réponse enregistrée.")}', 'bon');
-        REPONDRE = false;
+        REPONDRE = false; REP_TXT = null;
         ouvrirDetail(DETAIL.id);
       });
     };
@@ -651,6 +664,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     charger();
   };
   window.szRevenir = function(){ if (!DETAIL) charger(); };
+  /* (2026-10-25, audit) Fermer l avis avec une reponse TAPEE et non enregistree DEMANDE d abord :
+     Echap jetait la reponse publique en cours. */
+  function fermerAvis(){
+    var t = document.getElementById('a-reptxt');
+    var tape = REPONDRE && t && t.value.trim() && t.value !== ((DETAIL && DETAIL.reponse) || '');
+    var clore = function(){ DETAIL = null; SUPPR_ARME = false; PHOTO_ARMEE = -1; REPONDRE = false; REP_TXT = null; dessiner(); };
+    if (!tape) { clore(); return; }
+    szConfirmer({ prudent: true, titre: '${T("Abandonner la réponse")}',
+      texte: '${T("La réponse tapée n’a pas été enregistrée. Fermer l’avis l’abandonne.")}',
+      oui: '${T("Abandonner la réponse")}' }).then(function(ok){
+        if (ok) { clore(); return; }
+        var t2 = document.getElementById('a-reptxt'); if (t2) t2.focus();
+      });
+  }
 
   /* ── MODE ANCRE ── Le meme bouton que les autres ecrans. */
   window.szModeAncre = function(actif){
@@ -680,7 +707,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   document.addEventListener('keydown', function(ev){
     if (ev.key === 'Escape') {
       ev.preventDefault();
-      if (DETAIL) { DETAIL = null; SUPPR_ARME = false; PHOTO_ARMEE = -1; REPONDRE = false; dessiner(); return; }
+      if (DETAIL) { fermerAvis(); return; }
       P.fermer();
     }
   });

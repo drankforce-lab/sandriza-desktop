@@ -193,4 +193,6 @@ module.exports = {
   'Aucun destinataire enregistré': 'No recipient recorded',
   'Copier le lien': 'Copy link',
   'un lien par exercice, à durée limitée': 'one link per fiscal year, time-limited',
+  // 2026-10-25, audit : adresse saisie validée avant la fabrication.
+  "Courriel invalide : ": "Invalid email: ",
 };

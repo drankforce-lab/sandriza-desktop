@@ -117,7 +117,7 @@ function pageModeles() {
   <div class="grille" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 
   <div class="sect"><h2>${T("Mannequins (habillage IA)")}</h2><span class="tr"></span></div>
-  
+  <div class="aide" id="mq-cle"></div>
   <div class="mqs" id="mqs" data-pages="modeles-mannequins"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 </div>
 <input type="file" id="fichier" accept="image/*" style="display:none">
@@ -238,7 +238,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       })(cadres[i]);
     }
     var dels = grille.querySelectorAll('[data-del]');
-    for (var j = 0; j < dels.length; j++) dels[j].onclick = function(e){ e.stopPropagation(); retirer(this.getAttribute('data-del')); };
+    /* (2026-10-25, audit) CONFIRME dans une boite a part : l image part du stockage, un clic suffisait. */
+    for (var j = 0; j < dels.length; j++) dels[j].onclick = function(e){
+      e.stopPropagation();
+      var k = this.getAttribute('data-del');
+      var vv = ((D && D.vues) || []).filter(function(x){ return x.key === k; })[0] || {};
+      szConfirmer({ danger: true, titre: '${T("Supprimer le modèle")}',
+        texte: '${T("L’image de cet angle de vue sera supprimée du stockage. Cette action est irréversible.")}',
+        details: [['${T("Angle de vue")}', szTd(vv.label) || k]],
+        oui: '${T("Supprimer le modèle")}' }).then(function(ok){ if (ok) retirer(k); });
+    };
   }
 
   fichier.onchange = function(){ var f = fichier.files && fichier.files[0]; fichier.value = ''; if (f) deposer(f); };
@@ -327,7 +336,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     var dels = grilleMq.querySelectorAll('[data-delmq]');
     for (var j = 0; j < dels.length; j++) {
-      dels[j].onclick = function(e){ e.stopPropagation(); retirerMq(this.getAttribute('data-delmq')); };
+      dels[j].onclick = function(e){
+        e.stopPropagation();
+        // (2026-10-25, audit) Confirme, comme les angles de vue.
+        var id = this.getAttribute('data-delmq');
+        var mm = ((DM && DM.mannequins) || []).filter(function(x){ return x.id === id; })[0] || {};
+        szConfirmer({ danger: true, titre: '${T("Supprimer le mannequin")}',
+          texte: '${T("Ce mannequin et son image seront supprimés du stockage ; l’habillage IA ne le proposera plus. Cette action est irréversible.")}',
+          details: [['${T("Mannequin")}', mm.nom || '—']],
+          oui: '${T("Supprimer le mannequin")}' }).then(function(ok){ if (ok) retirerMq(id); });
+      };
     }
   }
 

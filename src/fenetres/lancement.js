@@ -118,11 +118,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     lecture_seule:'${T("Votre rôle est en lecture seule.")}',
     indisponible:'${T("État du serveur indisponible (endpoint injoignable).")}',
     pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
-    delai:"${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    delai:'${T("La fenêtre principale n’a pas répondu à temps.")}',
     operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
     refus:'${T("Le serveur a refusé le changement.")}',
     reseau:'${T("Erreur réseau en joignant le serveur.")}',
-    echec:"${T('L\'opération a échoué.')}",
+    echec:'${T("L’opération a échoué.")}',
     pas_lance:'${T("Le site n’est pas lancé : le serveur refuse l’envoi des codes.")}',
     role:'${T("L’envoi des codes est réservé aux administrateurs.")}',
     resend:'${T("Aucune clé Resend configurée (Infolettre) : aucun courriel ne peut partir.")}',
@@ -277,9 +277,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       } else { dessinerVip(); dire('${T("Échec : ")}' + expliquer(r), 'err'); }
     });
   }
-  function chargerVip(){
+  /* << garder >> : la saisie VIP non enregistree (V.cfg, deja relevee) survit a la
+     relecture (2026-10-25, audit) — basculer le mode lancement l effacait. */
+  function chargerVip(garder){
+    var cfg = (garder && V && V.cfg) ? V.cfg : null;
     appeler('config:vip:donnees').then(function(r){
-      V = r || { ok: false, motif: 'echec' }; VCONF = false; dessinerVip();
+      V = r || { ok: false, motif: 'echec' }; VCONF = false;
+      if (cfg && V.ok) V.cfg = cfg;
+      dessinerVip();
     });
   }
 
@@ -303,8 +308,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('config:lancement:basculer', [action]).then(function(r){
       OCCUPE = false;
       if (r && r.ok) {
+        relever();      // la saisie VIP, avant que dessiner() ne refasse ses champs
         D = r; RO = !r.peutModifier; dessiner();
-        chargerVip();   // le bouton des codes VIP suit l etat du lancement
+        chargerVip(true);   // le bouton des codes VIP suit l etat du lancement ; la saisie reste
         dire(r.enLigne ? '${T("Site EN LIGNE au public.")}' : '${T("Mode pré-lancement activé.")}', r.enLigne ? 'att' : 'bon');
       } else dire('${T("Échec : ")}' + expliquer(r), 'err');
     });

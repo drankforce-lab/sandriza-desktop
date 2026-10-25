@@ -32,12 +32,11 @@ module.exports = {
 
   /* ── LES MOTIFS DE REFUS ────────────────────────────────────────────────── */
   'Votre rôle est en lecture seule.': 'Your role is read only.',
-  /* ⚠ L apostrophe DROITE : la source ecrit ces trois-la entre guillemets
-     doubles. */
-  "L'administration n'est pas encore chargée dans la fenêtre principale.":
+  /* (2026-10-25, audit) Apostrophe typographique, comme dans toutes les autres fenetres. */
+  'L’administration n’est pas encore chargée dans la fenêtre principale.':
     'The administration is not loaded yet in the main window.',
-  "La fenêtre principale n'a pas répondu à temps.": 'The main window did not answer in time.',
-  "L'opération a échoué.": 'The operation failed.',
+  'La fenêtre principale n’a pas répondu à temps.': 'The main window did not answer in time.',
+  'L’opération a échoué.': 'The operation failed.',
   'Le fichier choisi n’est pas une image.': 'The chosen file is not an image.',
   'Le nom est requis.': 'The name is required.',
   'Cette image n’existe plus.': 'This image no longer exists.',
@@ -124,5 +123,8 @@ module.exports = {
   'Image ajoutée (': 'Image added (',
   'Image retirée.': 'Image removed.',
   'Adresse copiée.': 'Address copied.',
-  'Renommage…': 'Renaming…'
+  'Renommage…': 'Renaming…',
+  // (2026-10-25, audit)
+  'Retirer l’image': 'Remove the image',
+  '« {0} » sera retirée de la logothèque. Les pages qui utilisent son adresse ne l’afficheront plus.': '“{0}” will be removed from the logo library. Pages that use its address will no longer display it.',
 };

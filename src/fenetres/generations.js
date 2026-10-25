@@ -536,13 +536,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
   }
   var QUOTA_DIT = false;
+  var EN_VOL = false;   // une lecture du suivi vivant est en cours (2026-10-25, audit)
   /* VIVANTE : une lecture par seconde (la file vit dans la page principale, la lecture ne coûte rien) — les durées
      et le pourcentage avancent sous les yeux. On ne redessine pas pendant une confirmation. */
   function suivre(){
     if (TIMER) return;
     TIMER = setInterval(function(){
       if (document.hidden || OCC || document.querySelector('.szc-voile')) return;
-      charger();
+      /* (2026-10-25, audit) Une lecture a la fois : si la page principale ralentit
+         (plafond 10 s), les appels ne s empilent plus d une seconde a l autre. */
+      if (EN_VOL) return;
+      EN_VOL = true;
+      var fin = function(){ EN_VOL = false; };
+      var pr = charger();
+      if (pr && typeof pr.then === 'function') pr.then(fin, fin); else fin();
     }, 1000);
   }
   window.addEventListener('pagehide', function(){ if (TIMER) { clearInterval(TIMER); TIMER = null; } });

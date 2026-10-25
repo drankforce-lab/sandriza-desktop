@@ -180,6 +180,16 @@ function pageTransferts(ouverture) {
   var CAND_PG = null, CAND_PAR_PAGE = 50;
   var OUVERT = '';           // id du transfert dont le volet Recevoir est ouvert
   var BUSY = false;
+  /* (2026-10-25, audit) LA SAISIE DU VOLET « RECEVOIR », PAR TRANSFERT : { q, mo, no }. Echap (qui
+     referme le volet) et un redessin (fenetre ramenee, actualisation) la remettaient aux valeurs par
+     defaut. Elle est relevee avant chaque dessin et reposee dans le volet ; effacee une fois enregistree. */
+  var SAISIE = {};
+  function retenirRecevoir(){
+    if (!OUVERT) return;
+    var q = document.getElementById('rq-' + OUVERT); if (!q) return;
+    var mo = document.getElementById('rmo-' + OUVERT), no = document.getElementById('rn-' + OUVERT);
+    SAISIE[OUVERT] = { q: q.value, mo: mo ? mo.value : '', no: no ? no.value : '' };
+  }
 
 ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 
@@ -246,6 +256,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   /* ══ DESSIN ══════════════════════════════════════════════════════════════ */
   function dessiner(){
     if (!D) return;
+    retenirRecevoir();
     var nT = enTransit().length;
     ongletsEl.innerHTML =
         '<button data-tab="transit" class="' + (TAB==='transit'?'actif':'') + '">${T("En transit")}'
@@ -341,21 +352,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
      OBLIGATOIRE. L afficher tout le temps ferait choisir une cause a une
      reception complete ; ne jamais l afficher laisserait le manque passer. */
   function voletRecevoir(t){
+    var sv = SAISIE[t.id] || {};
+    var qv = (sv.q != null && sv.q !== '') ? sv.q : String(t.quantite);
+    var ecv = t.quantite - (parseInt(qv, 10) || 0);
+    if (!(ecv > 0)) ecv = 0;
     return '<div class="recevoir">'
       + '<div class="rangee">'
       +   '<label for="rq-' + t.id + '">${T("Quantité réellement reçue")}</label>'
-      +   '<input type="number" id="rq-' + t.id + '" min="0" max="' + t.quantite + '" value="' + t.quantite + '" data-qte="' + t.id + '">'
+      +   '<input type="number" id="rq-' + t.id + '" min="0" max="' + t.quantite + '" value="' + esc(qv) + '" data-qte="' + t.id + '">'
       +   '<span class="dt">${T("sur ")}' + t.quantite + (t.quantite > 1 ? '${T(" parties")}' : '${T(" partie")}') + '</span>'
       + '</div>'
-      + '<div class="rangee" id="rm-' + t.id + '" style="display:none">'
+      + '<div class="rangee" id="rm-' + t.id + '"' + (ecv > 0 ? '' : ' style="display:none"') + '>'
       +   '<label for="rmo-' + t.id + '">${T("Motif de l’écart")}</label>'
       +   '<select id="rmo-' + t.id + '"><option value="">${T("— choisir —")}</option>'
-      +     (D.motifs || []).map(function(m){ return '<option value="' + esc(m.v) + '">' + esc(m.l) + '</option>'; }).join('')
+      +     (D.motifs || []).map(function(m){ return '<option value="' + esc(m.v) + '"' + (sv.mo === m.v ? ' selected' : '') + '>' + esc(m.l) + '</option>'; }).join('')
       +   '</select>'
-      +   '<input aria-label="${T("Note (facultative)")}" type="text" id="rn-' + t.id + '" placeholder="${T("Note (facultative)")}" style="flex:1;min-width:12rem">'
+      +   '<input aria-label="${T("Note (facultative)")}" type="text" id="rn-' + t.id + '" value="' + esc(sv.no || '') + '" placeholder="${T("Note (facultative)")}" style="flex:1;min-width:12rem">'
       + '</div>'
-      + '<div class="rangee" id="rw-' + t.id + '" style="display:none">'
-      +   '<div class="avis jaune" style="flex:1">${T("Il manque ")}<strong id="re-' + t.id + '">0</strong> <span id="reu-' + t.id + '">' + szPl(0, '${T("unité")}', '${T("unités")}') + '</span>. '
+      + '<div class="rangee" id="rw-' + t.id + '"' + (ecv > 0 ? '' : ' style="display:none"') + '>'
+      +   '<div class="avis jaune" style="flex:1">${T("Il manque ")}<strong id="re-' + t.id + '">' + ecv + '</strong> <span id="reu-' + t.id + '">' + szPl(ecv, '${T("unité")}', '${T("unités")}') + '</span>. '
       +     '${T("Ce manque sera <strong>inscrit au journal</strong> avec son motif — il ne disparaît pas de l’inventaire tout seul.")}</div>'
       + '</div>'
       + '<div class="rangee">'
@@ -573,6 +588,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       BUSY = false;
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       OUVERT = '';
+      delete SAISIE[id];
       charger().then(function(){
         dire(r.ecart
           ? '${T("Réception enregistrée — écart de ")}' + r.ecart
@@ -582,8 +598,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     });
   }
 
-  function annuler(id){
+  /* (2026-10-25, audit) CONFIRME dans une boite a part : un seul clic rendait le stock a l origine et
+     classait le transfert comme annule. */
+  function annuler(id, confirme){
     if (BUSY) return;
+    if (!confirme) {
+      var tA = enTransit().filter(function(x){ return x.id === id; })[0] || {};
+      szConfirmer({ danger: true, titre: '${T("Annuler le transfert")}',
+        texte: '${T("Le transfert est clos comme annulé et la quantité partie est rendue à l’entrepôt d’origine.")}',
+        details: [['${T("Article")}', (tA.nom || '—') + (tA.cle ? ' · ' + tA.cle : '')],
+          ['${T("Trajet")}', String(tA.deNom || '—') + ' → ' + String(tA.versNom || '—')],
+          ['${T("Quantité")}', String(tA.quantite || 0)]],
+        oui: '${T("Annuler le transfert")}', non: '${T("Garder le transfert")}' }).then(function(ok){ if (ok) annuler(id, true); });
+      return;
+    }
     BUSY = true;
     appeler('transfert:annuler', [{ id: id }]).then(function(r){
       BUSY = false;
@@ -606,7 +634,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (act === 'chercher') { chercher(); return; }
     if (act === 'exporter') { exporterHisto(); return; }
     var rec = b.getAttribute('data-rec');
-    if (rec) { OUVERT = (OUVERT === rec) ? '' : rec; dessiner(); return; }
+    if (rec) { retenirRecevoir(); OUVERT = (OUVERT === rec) ? '' : rec; dessiner(); return; }
     var ok = b.getAttribute('data-recok');
     if (ok) { recevoir(ok); return; }
     var ann = b.getAttribute('data-ann');
@@ -637,7 +665,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 
   document.addEventListener('keydown', function(e){
     if (e.key !== 'Escape') return;
-    if (OUVERT) { OUVERT = ''; dessiner(); return; }
+    // (2026-10-25, audit) La saisie est relevee AVANT de refermer le volet : elle revient a sa reouverture.
+    if (OUVERT) { retenirRecevoir(); OUVERT = ''; dessiner(); return; }
     if (P && P.fermer) P.fermer();
   });
 

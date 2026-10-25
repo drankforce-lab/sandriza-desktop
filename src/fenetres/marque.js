@@ -47,11 +47,9 @@ body{background:var(--f-page);color:var(--tx);
    largeur, elles laissaient la moitie de l ecran vide une fois la fenetre
    ANCREE (releve le 2026-08-10, capture a l appui). Une colonne unique etiree a
    1900 px serait pire : on repartit donc en colonnes qui se replient seules. */
-.corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow:hidden;
   display:grid;grid-template-columns:repeat(auto-fit,minmax(30rem,1fr));
   gap:1rem;align-content:start}
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:1rem 1.1rem;margin:0;min-width:0}
 .pleine{grid-column:1/-1}
@@ -357,7 +355,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'m-name':40,'m-slogan':80,'m-slogan-en'
       occuper(true); dire('${T("Changement du logo…")}');
       appeler('config:marque:jeu', [k]).then(function(r){
         occuper(false);
-        if (r && r.ok) { ENATTENTE = {}; D = r; RO = !r.peutModifier; dessiner(); dire(k === 'nouveau' ? '${T("Nouveau logo en place.")}' : '${T("Ancien logo remis en place.")}', 'bon'); }
+        if (r && r.ok) { ENATTENTE = {}; poserGarde(r, ['marque', 'clientLogin', 'loginTheme']); dessiner(); dire(k === 'nouveau' ? '${T("Nouveau logo en place.")}' : '${T("Ancien logo remis en place.")}', 'bon'); }
         else dire(expliquer(r), 'err');
       });
     });
@@ -414,14 +412,32 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'m-name':40,'m-slogan':80,'m-slogan-en'
     };
     inp.click();
   }
+  /* ⚠ UNE REPONSE DU SERVEUR NE REMPLACE QUE CE QU ELLE CONCERNE (2026-10-25,
+     audit). << D = r >> ecrasait aussi la marque et les couleurs de connexion
+     retenues (retenir) mais pas encore enregistrees : supprimer un logo ou
+     changer de jeu effacait des modifications d un autre onglet. On garde les
+     parties nommees, telles que retenues. */
+  function poserGarde(r, garder){
+    retenir();
+    var g = {};
+    (garder || []).forEach(function(k){ if (D && D[k] !== undefined) g[k] = D[k]; });
+    D = r; RO = !r.peutModifier;
+    Object.keys(g).forEach(function(k){ D[k] = g[k]; });
+  }
   function effacerLogo(type){
     if (RO) return;
+    /* (2026-10-25, audit) Le logo s efface AU SERVEUR : on confirme d abord. */
+    szConfirmer({ danger: true, titre: '${T("Supprimer ce logo ?")}',
+      texte: '${T("Le logo sera retiré de la boutique tout de suite. Cette action est irréversible.")}',
+      oui: '${T("Supprimer le logo")}' }).then(function(ok){
+    if (!ok) return;
     occuper(true);
     dire('${T("Suppression…")}');
     appeler('config:marque:ecrire', [{ logosEffaces: [type] }]).then(function(r){
       occuper(false);
-      if (r && r.ok) { D = r; RO = !r.peutModifier; dessiner(); dire('${T("Logo supprimé.")}', 'bon'); }
+      if (r && r.ok) { poserGarde(r, ['marque', 'clientLogin', 'loginTheme']); dessiner(); dire('${T("Logo supprimé.")}', 'bon'); }
       else dire(expliquer(r), 'err');
+    });
     });
   }
 
@@ -574,16 +590,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'m-name':40,'m-slogan':80,'m-slogan-en'
   breinit.onclick = function(){
     if (RO) return;
     var quoi = ONGLET === 'connexion' ? 'theme' : 'logos';
+    /* ⚠ (2026-10-25, audit) UN SEUL CLIC EFFACAIT AU SERVEUR le nom, les slogans,
+       la lettre, le degrade ET LES SIX LOGOS. On confirme, dans sa boite. */
+    szConfirmer({ danger: true,
+      titre: quoi === 'theme' ? '${T("Réinitialiser les couleurs de connexion")}' : '${T("Réinitialiser la marque et les logos")}',
+      texte: quoi === 'theme'
+        ? '${T("Les couleurs de la page de connexion de l’administration reviennent à celles d’origine. Cette action est irréversible.")}'
+        : '${T("Le nom de marque, les slogans, la lettre, le dégradé et les six logos de la boutique seront effacés. Cette action est irréversible.")}',
+      oui: quoi === 'theme' ? '${T("Réinitialiser les couleurs")}' : '${T("Tout réinitialiser")}' }).then(function(ok){
+    if (!ok) return;
     occuper(true);
     dire('${T("Remise à zéro…")}');
     appeler('config:marque:reinit', [quoi]).then(function(r){
       occuper(false);
       if (r && r.ok) {
         if (quoi === 'logos') ENATTENTE = {};
-        D = r; RO = !r.peutModifier;
+        poserGarde(r, quoi === 'theme' ? ['marque', 'clientLogin'] : ['clientLogin', 'loginTheme']);
         dessiner();
         dire(quoi === 'theme' ? '${T("Couleurs de connexion réinitialisées.")}' : '${T("Marque et logos réinitialisés.")}', 'bon');
       } else dire(expliquer(r), 'err');
+    });
     });
   };
 

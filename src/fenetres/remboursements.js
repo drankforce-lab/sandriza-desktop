@@ -61,7 +61,9 @@ button.mini{padding:.12rem .42rem;font-size:.74rem}
 button.actif{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
 table{width:100%;font-size:.84rem}
 thead th{text-align:left}
-tbody tr{cursor:pointer}
+/* La main seulement sur les lignes qui s ouvrent (2026-10-25, audit) : les
+   lignes de l onglet Credits la montraient sans rien faire au clic. */
+tbody tr[data-cmd]{cursor:pointer}
 tbody td{vertical-align:middle}
 tbody .arg{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 tbody .dt{font-size:.78rem;color:var(--tx2)}
@@ -162,20 +164,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('remboursements')}
        Les melanger dans un total unique donnerait un chiffre qui ne veut rien
        dire ni pour la caisse ni pour le comptable. Le solde est en AMBRE (a
        surveiller : c est une dette envers les clients), jamais en vert. */
-    var kpi = function(lbl, val, ton, sub){
-      return '<div class="cx-kpi' + (ton ? ' ' + ton : '') + '"><span>' + lbl + '</span><b>' + esc(val) + '</b>'
-        + '<small>' + sub + '</small></div>';
-    };
-    var h = '<div class="cx-kpis">'
-      /* Deux formes ENTIERES : un << s >> colle a part ne se traduit pas. */
-      + kpi('${T("Total remboursé")}', t.rembourse, '', (t.nbRemb || 0)
-          + ((t.nbRemb || 0) > 1 ? '${T(" remboursements")}' : '${T(" remboursement")}'))
-      + kpi('${T("Solde à honorer")}', t.solde, 'att', '${T("passif · ")}' + (t.nbActifs || 0)
-          + ((t.nbActifs || 0) > 1 ? '${T(" actifs")}' : '${T(" actif")}'))
-      + kpi('${T("Crédits émis")}', t.emis, '', (t.nbCredits || 0)
-          + ((t.nbCredits || 0) > 1 ? '${T(" crédits")}' : '${T(" crédit")}'))
-      + kpi('${T("Crédits utilisés")}', t.utilise, '', '${T("déjà dépensés")}')
-      + '</div>';
+    /* ⚠⚠ LA BANDE DE QUATRE CHIFFRES EST RETIREE (2026-10-25, audit), selon la
+       regle du 2026-10-16 : « retirer ces cellules partout, sauf dans le tableau
+       de bord ». Elle etait ecrite en dur, hors de szTuiles(), et avait survecu
+       au retrait. Rien n est perdu : le rembourse et le solde a honorer sont dans
+       la tete (#sous), et chaque onglet porte son compte. */
+    var h = '';
 
     h += '<div class="cx-barre"><div class="ed-seg">'
       + '<button type="button" class="' + (ONGLET === 'remboursements' ? 'on' : '') + '" data-onglet="remboursements">'
@@ -290,7 +284,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('remboursements')}
             + '<td class="dt" style="max-width:13rem;overflow:hidden;text-overflow:ellipsis;'
             + 'white-space:nowrap" title="' + esc(r.motif) + '">' + esc(r.motif || '—') + '</td>'
             + '<td class="arg"><b>' + esc(r.total) + '</b>'
-            + '<span class="cx-l2">' + esc(r.sousTotal) + ' + TPS ' + esc(r.tps) + ' + TVQ ' + esc(r.tvq) + '</span></td></tr>';
+            + '<span class="cx-l2">' + esc(r.sousTotal) + ' + ${T("TPS")} ' + esc(r.tps) + ' + ${T("TVQ")} ' + esc(r.tvq) + '</span></td></tr>';
         }).join('') + '</tbody></table>';
   }
   function tableCredits(rows){

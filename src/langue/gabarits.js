@@ -91,7 +91,6 @@ module.exports = {
     'The style (colours, subtitle, banner) shared by the emails.',
   '(défaut)': '(default)',
   'en-tête': 'header',
-  'pied': 'footer',
   ' Modifier': ' Edit',
   ' Supprimer': ' Delete',
   '✎ Modifier': '✎ Edit',
@@ -128,4 +127,6 @@ module.exports = {
   "sera supprimé définitivement. Les courriels qui lui étaient attribués utiliseront le gabarit par défaut. Cette action est irréversible.": "will be permanently deleted. Emails assigned to it will use the default template. This action cannot be undone.",
   // (2026-10-25, audit) Message de travail qui échappait au dictionnaire.
   "Duplication…": "Duplicating…",
+  /* (2026-10-25, audit) Textes visibles qui restaient hors T(). */
+  'Couleur invalide : utilisez un code hexadécimal comme #1a1a2e.': 'Invalid colour: use a hexadecimal code such as #1a1a2e.',
 };

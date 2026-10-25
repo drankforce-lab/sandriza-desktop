@@ -163,4 +163,13 @@ module.exports = {
   'Changement du logo…': 'Changing the logo…',
   'Nouveau logo en place.': 'New logo in place.',
   'Ancien logo remis en place.': 'Previous logo restored.',
+  // 2026-10-25, audit : confirmations avant d’effacer au serveur.
+  'Supprimer ce logo ?': 'Delete this logo?',
+  'Le logo sera retiré de la boutique tout de suite. Cette action est irréversible.': 'The logo will be removed from the store right away. This action cannot be undone.',
+  'Supprimer le logo': 'Delete the logo',
+  'Réinitialiser les couleurs de connexion': 'Reset the sign-in colours',
+  'Réinitialiser la marque et les logos': 'Reset the brand and logos',
+  'Les couleurs de la page de connexion de l’administration reviennent à celles d’origine. Cette action est irréversible.': 'The colours of the administration sign-in page go back to the original ones. This action cannot be undone.',
+  'Le nom de marque, les slogans, la lettre, le dégradé et les six logos de la boutique seront effacés. Cette action est irréversible.': 'The brand name, slogans, letter, gradient and the store’s six logos will be erased. This action cannot be undone.',
+  'Tout réinitialiser': 'Reset everything',
 };

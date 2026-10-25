@@ -169,6 +169,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="cles">' + cles.map(function(k){ return '<code>' + esc(k) + '</code>'; }).join('') + '</div></div>';
     corps.innerHTML = h;
     brancher();
+    /* (2026-10-25, audit) Les boutons recrees ne prenaient que RO : pendant une migration de plusieurs
+       minutes, ils paraissaient actifs. occuper() les redesactive. */
+    if (OCCUPE) occuper(true);
   }
   function brancher(){
     var bs = corps.querySelectorAll('button[data-act]');
@@ -178,11 +181,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function agir(act){
     if (OCCUPE) return;
     if (act === 'tester') return tester();
-    if (act === 'pousser') return pousser();
     // Restaurer et migrer : gestes lourds, confirmes dans une boite a part (szConfirmer, 2026-10-15).
-    if (act === 'restaurer' || act === 'migrer') {
+    // (2026-10-25, audit) Pousser aussi : la configuration LOCALE remplace celle du nuage pour tous les postes.
+    if (act === 'restaurer' || act === 'migrer' || act === 'pousser') {
       if (CONF !== act) {
-        var oC = (act === 'restaurer')
+        var oC = (act === 'pousser')
+          ? { prudent: true, titre: '${T("Pousser la configuration locale")}',
+              texte: '${T("La configuration de ce poste remplacera celle enregistrée dans Turso, pour tous les postes. Si ce poste a un cache périmé, il écrasera les réglages faits ailleurs.")}',
+              oui: '${T("Pousser vers Turso")}' }
+          : (act === 'restaurer')
           ? { danger: true, titre: '${T("Restaurer depuis Turso")}',
               texte: '${T("La configuration enregistrée dans Turso remplacera la configuration locale, puis la fenêtre principale sera rechargée. Les réglages locaux qui n’ont pas été poussés vers Turso seront perdus.")}',
               oui: '${T("Restaurer la configuration")}' }
@@ -193,7 +200,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         return;
       }
       CONF = '';
-      return (act === 'restaurer') ? restaurer() : migrer();
+      return (act === 'restaurer') ? restaurer() : (act === 'pousser') ? pousser() : migrer();
     }
   }
   function tester(){
@@ -211,8 +218,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function restaurer(){
     occuper(true); dessiner(); dire('${T("Restauration depuis Turso…")}');
     appeler('config:bd:restaurer').then(function(r){
+      // (2026-10-25, audit) Le succes libere aussi les boutons : ils restaient bloques jusqu a la reouverture.
+      occuper(false); dessiner();
       if (r && r.ok) dire('${T("Restauré — la fenêtre principale se recharge…")}', 'bon');
-      else { occuper(false); dessiner(); dire('${T("Échec : ")}' + expliquer(r), 'err'); }
+      else dire('${T("Échec : ")}' + expliquer(r), 'err');
     });
   }
   function migrer(){

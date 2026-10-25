@@ -266,7 +266,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 
   /* ⚠ ACTUALISATION POUSSEE PAR LA COQUILLE : un enregistrement de collection
      fait relire la liste sans geste. */
-  window.szActualiser = function(){ charger(); };
+  /* (2026-10-25, audit) Pas pendant la frappe dans la recherche : le redessin volait le curseur du champ
+     « Nom ou saison… ». Meme garde que fournisseurs et abonnes ; la liste se relira au prochain retour. */
+  window.szActualiser = function(){
+    if (document.activeElement && document.activeElement.id === 'col-q') return;
+    charger();
+  };
   window.szRevenir = function(){ charger(); };
 
   /* ── MODE ANCRE ── Le meme bouton que les autres ecrans. */

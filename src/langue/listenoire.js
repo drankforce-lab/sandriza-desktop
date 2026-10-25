@@ -41,8 +41,8 @@ module.exports = {
   'Saisie invalide.': 'Invalid entry.',
   'Cette valeur est déjà dans la liste.': 'This value is already in the list.',
   'Entrée introuvable.': 'Entry not found.',
-  /* ⚠ L apostrophe DROITE : la source ecrit celle-la entre guillemets. */
-  "La fenêtre principale n'a pas répondu à temps.":
+  /* (2026-10-25, audit) Apostrophe typographique, comme dans toutes les autres fenetres. */
+  'La fenêtre principale n’a pas répondu à temps.':
     'The main window did not answer in time.',
 
   /* ══ CE QUE LA LISTE FAIT ══════════════════════════════════════════════════

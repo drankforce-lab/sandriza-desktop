@@ -85,17 +85,20 @@ body{background:var(--f-page);color:var(--tx);
 /* La liste des icones, en PAGES mesurees par rangee (JS_PAGES du socle, 2026-10-12) :
    jamais de glissiere. align-content:start, sinon les rangees s etirent pour remplir la hauteur. */
 .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));gap:.7rem;align-content:start}
-.ico{display:grid;grid-template-columns:3.4rem 1fr;gap:.7rem;align-items:center;min-width:0;
+/* ⚠ CLASSE .icone, PAS .ico (2026-10-25, audit) : .ico est le pictogramme d en-tete du socle. La regle
+   locale habillait aussi l icone du titre (bordure, fond), et celle du socle (CSS_JOUR, placee apres)
+   rendait aux cartes un display:inline-flex centre et un nom gris — la grille des cartes se defaisait. */
+.icone{display:grid;grid-template-columns:3.4rem 1fr;gap:.7rem;align-items:center;min-width:0;
   border:1px solid var(--v07);border-radius:10px;padding:.6rem .7rem;background:var(--f-pill)}
-.ico .im{width:3.4rem;height:3.4rem;border-radius:8px;background:#f5f2ec;display:flex;
+.icone .im{width:3.4rem;height:3.4rem;border-radius:8px;background:#f5f2ec;display:flex;
   align-items:center;justify-content:center;padding:.3rem;overflow:hidden}
-.ico .im img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.icone .im img{max-width:100%;max-height:100%;object-fit:contain;display:block}
 /* Sans image, la case le DIT (2026-10-01) : un carre blanc muet laissait croire a
    une icone blanche, ou a un chargement en cours. */
-.ico .im .sansimg{display:flex;color:#5f6670}
-.ico .im .sansimg svg{width:20px;height:20px}
-.ico .nm{font-size:.84rem;font-weight:700;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ico .gestes{display:flex;gap:.35rem;flex-wrap:wrap;align-items:center;margin-top:.3rem}
+.icone .im .sansimg{display:flex;color:#5f6670}
+.icone .im .sansimg svg{width:20px;height:20px}
+.icone .nm{font-size:.84rem;font-weight:700;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.icone .gestes{display:flex;gap:.35rem;flex-wrap:wrap;align-items:center;margin-top:.3rem}
 code{font-family:ui-monospace,Consolas,monospace;font-size:.75rem;color:#cfe0f5;
   background:var(--f-champ);border:1px solid var(--v12);border-radius:5px;padding:.1rem .35rem;
   cursor:pointer;-webkit-user-select:none;user-select:none}
@@ -188,8 +191,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   };
   function expliquer(r){
     var m = r && r.motif;
-    return (MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').'))
-      + (r && r.detail ? ' (' + esc(r.detail) + ')' : '');
+    // (2026-10-25, audit) Texte BRUT : szDire l ecrit en textContent ; l echapper y montrait « &amp; ».
+    return (MOTIFS[m] || ('${T("Erreur inattendue (")}' + (m || '?') + ').'))
+      + (r && r.detail ? ' (' + r.detail + ')' : '');
   }
   function appeler(op, args){
     var p;
@@ -228,7 +232,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
              : '<span class="rien">${T("Choisir<br>une image")}</span>') + '</div>';
   }
 
+  /* (2026-10-25, audit) LA SAISIE SURVIT AU REDESSIN. Choisir l image (ou supprimer une autre icone)
+     redessine tout : le nom deja tape et les deux cases « Retirer le fond » se vidaient. On les relit
+     avant et on les repose apres — sauf apres un ajout reussi (VIDER), ou le formulaire repart a zero. */
+  var VIDER = false;
   function dessiner(){
+    var gN = document.getElementById('i-nom'), gF = document.getElementById('i-fond'), gC = document.getElementById('c-fond');
+    var garde = VIDER ? null : { nom: gN ? gN.value : '', fond: !!(gF && gF.checked), conv: !!(gC && gC.checked) };
+    VIDER = false;
+    dessiner0();
+    if (garde) {
+      var n = document.getElementById('i-nom'); if (n) n.value = garde.nom;
+      var a = document.getElementById('i-fond'); if (a) a.checked = garde.fond;
+      var c = document.getElementById('c-fond'); if (c) c.checked = garde.conv;
+    }
+  }
+  function dessiner0(){
     var av = document.getElementById('ro');
     if (av) av.hidden = !RO;
     var liste = (D && D.icones) || [];
@@ -240,7 +259,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h.push('<div class="carte"><h2>${T("Ajouter une icône")}</h2>');
     h.push('<p class="sous">${T("Insérez ensuite son code dans n’importe quel texte du site : il devient l’image.")}</p>');
     h.push('<div class="pose">' + vignette('pose', POSE, RO) + '<div>');
-    h.push('<div class="ch"><label for="i-nom">${T("Nom")}</label><input id="i-nom" type="text" placeholder="coeur, etoile, feu…"'
+    h.push('<div class="ch"><label for="i-nom">${T("Nom")}</label><input id="i-nom" type="text" placeholder="${T("coeur, etoile, feu…")}"'
       + (RO ? ' disabled' : '') + '></div>');
     h.push('<label class="bascule"><input type="checkbox" id="i-fond"' + (RO ? ' disabled' : '')
       + '> ${T("Retirer le fond de l’image")}</label>');
@@ -263,7 +282,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     } else {
       h.push('<div class="grille" data-pages="icones">');
       liste.forEach(function(ic){
-        h.push('<div class="ico"><div class="im">'
+        h.push('<div class="icone"><div class="im">'
           + (ic.url ? '<img src="' + esc(ic.url) + '" alt="">' : '<span class="sansimg" title="${T("Aucune image : l’icône ne s’affichera pas")}">'+'${ICO.image}'+'</span>') + '</div><div style="min-width:0">'
           + '<p class="nm" title="' + esc(ic.name) + '">' + esc(ic.name) + '</p>'
           + '<div class="gestes"><code data-copier="' + esc(ic.tag) + '" title="${T("Copier le code")}">[icon:'
@@ -322,6 +341,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         // pas faire perdre le fichier que la personne vient de choisir.
         POSE = null;
         D = r; RO = !r.peutModifier;
+        VIDER = true;
         dessiner();
         // ⚠ [icon:xxx] est un CODE : il se tape dans les textes du site et se
         // relit tel quel. Le prefixe se lit, le code ne se traduit pas.
@@ -330,7 +350,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
   }
 
+  /* (2026-10-25, audit) LA SUPPRESSION SE CONFIRME DANS SA BOITE (regle du 2026-10-15) : un clic
+     retirait l icone, et partout ou le site affiche [icon:xxx] l image disparaissait sans retour. */
   function supprimer(id){
+    if (RO || OCCUPE) return;
+    var ic = ((D && D.icones) || []).filter(function(x){ return String(x.id) === String(id); })[0];
+    var code = ic ? '[icon:' + ic.tag + ']' : '';
+    szConfirmer({ danger: true, titre: '${T("Supprimer l’icône")}',
+      texte: '${T("Le code {0} ne s’affichera plus dans les textes du site. Cette action est irréversible.")}'.split('{0}').join(code),
+      oui: '${T("Supprimer")}' }).then(function(ok){ if (ok) supprimer2(id); });
+  }
+  function supprimer2(id){
     if (RO || OCCUPE) return;
     occuper(true);
     dire('${T("Suppression…")}');
@@ -344,10 +374,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function enIco(id){
     if (OCCUPE) return;
     occuper(true);
-    dire('Conversion…');
+    dire('${T("Conversion…")}');
     appeler('config:icones:ico', [id]).then(function(r){
       occuper(false);
-      dire(r && r.ok ? '${T("Fichier ")}' + esc(r.fichier) + '${T(" téléchargé.")}' : expliquer(r), r && r.ok ? 'bon' : 'err');
+      dire(r && r.ok ? '${T("Fichier ")}' + r.fichier + '${T(" téléchargé.")}' : expliquer(r), r && r.ok ? 'bon' : 'err');
     });
   }
 
@@ -356,10 +386,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var fond = !!(document.getElementById('c-fond') || {}).checked;
     var nom = ((document.getElementById('i-nom') || {}).value || 'icone');
     occuper(true);
-    dire('Conversion…');
+    dire('${T("Conversion…")}');
     appeler('config:icones:convertir', [{ image: CONV, retirerFond: fond, nom: nom }]).then(function(r){
       occuper(false);
-      dire(r && r.ok ? '${T("Fichier ")}' + esc(r.fichier) + '${T(" téléchargé.")}' : expliquer(r), r && r.ok ? 'bon' : 'err');
+      dire(r && r.ok ? '${T("Fichier ")}' + r.fichier + '${T(" téléchargé.")}' : expliquer(r), r && r.ok ? 'bon' : 'err');
     });
   }
 
@@ -367,7 +397,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     dire('${T("Lecture…")}');
     appeler('config:icones:donnees').then(function(r){
       if (!r || !r.ok) {
-        corps.innerHTML = '<div class="carte"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div></div>';
+        corps.innerHTML = '<div class="carte"><div class="vide m-' + esc((r && r.motif) || 'echec') + '">' + esc(expliquer(r)) + '</div></div>';
         dire(expliquer(r), 'err');
         return;
       }

@@ -216,4 +216,8 @@ module.exports = {
   "Activer le bouton panique ?": "Activate the panic button?",
   "Toutes les sessions du personnel sont fermées immédiatement, sauf celle-ci (vos autres sessions aussi), et tous les autres comptes sont verrouillés. Personne ne peut se reconnecter tant que vous ne rouvrez pas les comptes ici. Une alerte part par texto et par courriel.": "All staff sessions are closed immediately, except this one (your other sessions too), and every other account is locked. No one can sign in again until you reopen the accounts here. An alert is sent by text message and email.",
   "Oui, activer le bouton panique": "Yes, activate the panic button",
+  // 2026-10-25, audit : Échap ne jette plus les réglages.
+  "Fermer sans enregistrer ?": "Close without saving?",
+  "Des réglages modifiés n’ont pas été enregistrés. Ils seront perdus.": "Some changed settings have not been saved. They will be lost.",
+  "Fermer sans enregistrer": "Close without saving",
 };

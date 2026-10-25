@@ -134,8 +134,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'f-name':80,'f-street':120,'f-city':60,
   };
   function expliquer(r){
     var m = r && r.motif;
-    return (MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').'))
-      + (r && r.detail ? ' (' + esc(r.detail) + ')' : '');
+    // (2026-10-25, audit) Texte BRUT : szDire l ecrit en textContent ; le corps l echappe ou il le pose.
+    return (MOTIFS[m] || ('${T("Erreur inattendue (")}' + (m || '?') + ').'))
+      + (r && r.detail ? ' (' + r.detail + ')' : '');
   }
   function appeler(op, args){
     var p;
@@ -227,7 +228,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'f-name':80,'f-street':120,'f-city':60,
     dire('${T("Lecture…")}');
     appeler('config:retours:donnees').then(function(r){
       if (!r || !r.ok) {
-        corps.innerHTML = '<div class="carte"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div></div>';
+        corps.innerHTML = '<div class="carte"><div class="vide m-' + esc((r && r.motif) || 'echec') + '">' + esc(expliquer(r)) + '</div></div>';
         dire(expliquer(r), 'err');
         return;
       }

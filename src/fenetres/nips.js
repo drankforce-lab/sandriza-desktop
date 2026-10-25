@@ -42,9 +42,10 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;padding:.55rem 1.1rem;
   border-bottom:1px solid var(--v08);background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete h1{margin:0;font:700 1.05rem/1.2 Georgia,serif}
-.corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow-y:auto}
+.corps{flex:1 1 auto;min-height:0;padding:1rem 1.1rem;overflow:hidden;display:flex;flex-direction:column}
 .intro{font-size:.82rem;color:var(--tx2);margin:0 0 1rem;line-height:1.55;max-width:60rem}
-.grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(19rem,1fr));gap:1rem}
+/* (2026-10-25, audit) Aucune glissiere : les cartes vont en PAGES mesurees (data-pages). */
+.grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(19rem,1fr));gap:1rem;flex:1 1 auto;min-height:0;overflow:hidden;align-content:start}
 .carte{background:var(--v03);border:1px solid var(--v08);border-radius:12px;padding:1rem 1.1rem;display:flex;flex-direction:column;gap:.55rem}
 .carte h3{margin:0;font:700 .98rem/1.3 Georgia,serif}
 .carte p{margin:0;font-size:.8rem;line-height:1.55;color:var(--tx2)}
@@ -146,7 +147,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessiner(){
     var a = (D && D.atelier) || {}, u = (D && D.urgence) || {};
     var h = '<p class="intro">${T("Tous les NIP de l’entreprise, au même endroit. Un NIP ne s’affiche jamais : on le pose, on le change ou on le retire. Le serveur n’en garde que l’empreinte, et cinq essais faux le bloquent pour un moment.")}</p>'
-      + '<div class="grille">' + NIPS.map(carteNip).join('')
+      + '<div class="grille" data-pages="nips-cartes">' + NIPS.map(carteNip).join('')
       + '<div class="carte"><h3>${T("Modèles de l’Atelier")}</h3>'
       + '<p>${T("Chaque modèle de l’Atelier peut avoir son propre NIP, posé ou retiré dans la fiche du modèle. Le super-administrateur peut y retirer un NIP oublié.")}</p>'
       + '<span class="etat ' + (a.proteges ? 'oui' : 'non') + '">' + a.proteges + ' / ' + a.modeles + ' ${T("modèles protégés")}</span>'
@@ -181,7 +182,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       };
       var clavier = function(ev){
         if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); fini(null); }
-        else if (ev.key === 'Enter') { ev.preventDefault(); ev.stopPropagation(); valider(); }
+        /* (2026-10-25, audit) Entree sur << Annuler >> annule — comme szDemanderNip
+           depuis le 2026-10-25 : Tab jusqu a Annuler puis Entree enregistrait le NIP. */
+        else if (ev.key === 'Enter') { ev.preventDefault(); ev.stopPropagation();
+          if (document.activeElement === v.querySelector('.szc-non')) fini(null); else valider(); }
       };
       document.addEventListener('keydown', clavier, true);
       v.addEventListener('mousedown', function(ev){ if (ev.target === v) fini(null); });

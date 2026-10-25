@@ -197,8 +197,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   };
   function expliquer(r){
     var m = r && r.motif;
-    return (MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').'))
-      + (r && r.detail ? ' (' + esc(r.detail) + ')' : '');
+    // (2026-10-25, audit) Texte BRUT : szDire l ecrit en textContent (echappe, « & » devenait « &amp; »).
+    // Ce qui part dans du HTML est echappe a l endroit ou on l y met.
+    return (MOTIFS[m] || ('${T("Erreur inattendue (")}' + (m || '?') + ').'))
+      + (r && r.detail ? ' (' + r.detail + ')' : '');
   }
   function appeler(op, args){
     var p;
@@ -292,7 +294,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       acct: { id: 'fdx-acct', label: '${T("Numéro de compte")}', place: '${T("Ex : 123456789")}' },
       mode: { id: 'fdx-mode' } },
     { cle: 'ups', titre: 'UPS', enId: 'ups-en',
-      user: { id: 'ups-cid', label: 'Client ID', champ: 'clientId', place: 'votre_client_id' },
+      user: { id: 'ups-cid', label: 'Client ID', champ: 'clientId', place: '${T("votre_client_id")}' },
       sec:  { id: 'ups-sec', label: 'Client Secret', champ: 'clientSecret', place: '••••••••' },
       acct: { id: 'ups-acct', label: '${T("Numéro de compte (optionnel)")}', place: '${T("Ex : A1B2C3")}' } },
     { cle: 'canpar', titre: 'Canpar', enId: 'can-en',
@@ -465,6 +467,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     corps.innerHTML = pans.map(function(p){
       return '<section class="pan" role="tabpanel" id="pan-' + p.k + '" aria-labelledby="ong-' + p.k + '"' + (p.k === ONGLET ? '' : ' hidden') + '>' + p.h + '</section>';
     }).join('');
+    dessinerOnglets(pans);
+    brancher();
+    // On n'autorise l'enregistrement que si la config complète est chargée.
+    bsave.disabled = RO || OCCUPE || (D && D.charge === false);
+    SAISIE0 = JSON.stringify(saisie());
+  }
+
+  /* (2026-10-25, audit) La saisie telle qu elle etait au dernier dessin : « Tester la cotation »
+     interroge la configuration ENREGISTREE. Lancer le test avec une cle collee mais pas encore
+     enregistree testait l ancienne — et la reponse redessinait tout, effacant la cle collee. */
+  var SAISIE0 = '';
+  function dessinerOnglets(pans){
     var ob = document.getElementById('onglets');
     if (ob) {
       ob.innerHTML = pans.map(function(p){
@@ -479,9 +493,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         b.onclick = function(){ montrerOnglet(b.getAttribute('data-ong')); };
       });
     }
-    brancher();
-    // On n'autorise l'enregistrement que si la config complète est chargée.
-    bsave.disabled = RO || OCCUPE || (D && D.charge === false);
+  }
+  /* (2026-10-25, audit) LA REPONSE DU TEST NE TOUCHE QU AUX PASTILLES : l etat de cotation de
+     chaque carte et les points des onglets. Les champs restent tels quels. */
+  function majCotation(){
+    var cles = ['postes-canada'].concat(SIMPLES.map(function(sp){ return sp.cle; }));
+    cles.forEach(function(k){
+      var tete = document.querySelector('#pan-' + k + ' .szr-tete');
+      if (!tete) return;
+      var vieux = tete.querySelector('.cot');
+      if (vieux) vieux.parentNode.removeChild(vieux);
+      tete.insertAdjacentHTML('beforeend', etatCotationHtml(k));
+    });
+    var pans = [{ k: 'general', n: '${T("Général")}' }, { k: 'postes-canada', n: '${T("Postes Canada")}' }];
+    SIMPLES.forEach(function(sp){ pans.push({ k: sp.cle, n: sp.titre }); });
+    dessinerOnglets(pans);
   }
 
   // Changer d onglet ne redessine rien : les champs gardent ce qui vient d etre tapé.
@@ -497,12 +523,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (r) r.onclick = reessayer;
     var bt = document.getElementById('b-tester');
     if (bt) { bt.disabled = RO; bt.onclick = function(){
+      if (D && JSON.stringify(saisie()) !== SAISIE0) {
+        dire('${T("Enregistrez d’abord : le test porte sur la configuration enregistrée, pas sur ce qui vient d’être saisi.")}', 'att');
+        return;
+      }
       bt.disabled = true; dire('${T("Cotation d’essai en cours… (jusqu’à 30 s)")}');
       appeler('config:transporteurs:tester').then(function(x){
         bt.disabled = false;
         if (!x || !x.ok) { dire(expliquer(x), 'err'); return; }
         D.cotation = x.cotation || {};
-        dessiner();
+        majCotation();
         var mal = Object.keys(D.cotation).filter(function(k){ var e = D.cotation[k]; return e && e.actif !== false && !e.ok; });
         dire(mal.length ? '${T("Un transporteur actif n’a pas coté — voir sa carte.")}' : '${T("Tous les transporteurs actifs ont coté.")}', mal.length ? 'err' : 'bon');
       });
@@ -565,7 +595,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (r && r.ok) { D = r; RO = !r.peutModifier; dessiner(); dire('${T("Transporteurs enregistrés — vérification de la cotation…")}', 'bon');
         appeler('config:transporteurs:tester').then(function(x){
           if (!x || !x.ok) { dire('${T("Transporteurs enregistrés.")}', 'bon'); return; }
-          D.cotation = x.cotation || {}; dessiner();
+          D.cotation = x.cotation || {}; majCotation();   // la saisie faite pendant le test reste
           var mal = Object.keys(D.cotation).filter(function(k){ var e = D.cotation[k]; return e && e.actif !== false && !e.ok; });
           dire(mal.length ? '${T("Enregistré — mais un transporteur actif ne cote pas : voir sa carte.")}' : '${T("Enregistré — tous les transporteurs actifs cotent.")}', mal.length ? 'err' : 'bon');
         }); }
@@ -590,7 +620,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     dire('${T("Lecture…")}');
     appeler('config:transporteurs:donnees').then(function(r){
       if (!r || !r.ok) {
-        corps.innerHTML = '<div class="carte"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div></div>';
+        corps.innerHTML = '<div class="carte"><div class="vide m-' + esc((r && r.motif) || 'echec') + '">' + esc(expliquer(r)) + '</div></div>';
         dire(expliquer(r), 'err');
         return;
       }

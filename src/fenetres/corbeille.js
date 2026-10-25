@@ -422,13 +422,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('corbeille')}
 
     var br = t.closest('[data-remettre]');
     if (br) {
-      br.disabled = true;
-      dire('${T("Remise en place en cours…")}', 'att');
-      appeler('commandes:corbeille:restaurer', [br.getAttribute('data-remettre')]).then(function(r){
-        if (!r.ok) { br.disabled = false; dire(expliquer(r), 'err'); return; }
-        FICHE = null; ARME = '';
-        direRestauration(r.rapport);
-        charger();
+      /* (2026-10-25, audit) Remettre reprend factures, credits et stock d un clic :
+         on confirme d abord, comme le Gardien pour le meme genre de geste. */
+      var idR = br.getAttribute('data-remettre');
+      var dR = ((D && D.dossiers) || []).filter(function(d){ return d.id === idR; })[0];
+      szConfirmer({ prudent: true, titre: '${T("Remettre la commande en place")}',
+        texte: '${T("La commande revient dans la liste des commandes, avec ses factures, ses crédits et son stock.")}',
+        details: dR ? [['${T("Commande")}', dR.orderNumber || dR.orderId || idR], ['${T("Client")}', dR.client || '—'], ['${T("Montant")}', argent(dR.total)]] : [],
+        oui: '${T("Remettre en place")}' }).then(function(ok){
+        if (!ok) return;
+        br.disabled = true;
+        dire('${T("Remise en place en cours…")}', 'att');
+        appeler('commandes:corbeille:restaurer', [idR]).then(function(r){
+          if (!r.ok) { br.disabled = false; dire(expliquer(r), 'err'); return; }
+          FICHE = null; ARME = '';
+          direRestauration(r.rapport);
+          charger();
+        });
       });
       return;
     }
@@ -444,24 +454,36 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('corbeille')}
           texte: '${T("Le dossier de la commande")}' + ' « ' + (dP ? (dP.orderNumber || dP.orderId || '') : id) + ' » '
             + '${T("et les photos des demandes de retour seront effacés définitivement. Cette commande ne pourra plus être remise en place. Cette action est irréversible.")}',
           details: dP ? [['${T("Client")}', dP.client || '—'], ['${T("Montant")}', argent(dP.total)]] : [],
-          oui: '${T("Purger le dossier")}' }).then(function(ok){ if (ok) { ARME = id; bp.click(); } });
+          oui: '${T("Purger le dossier")}' }).then(function(ok){ if (ok) purger(id); });
         return;
       }
-      ARME = '';
-      bp.disabled = true;
-      appeler('commandes:corbeille:purger', [id]).then(function(r){
-        if (!r.ok) { bp.disabled = false; dire(expliquer(r), 'err'); return; }
-        dire('${T("Dossier purgé")}'
-          + (r.photos ? (' — ' + r.photos + (r.photos > 1 ? '${T(" photos effacées")}' : '${T(" photo effacée")}')) : '')
-          + '.', 'bon');
-        charger();
-      });
+      purger(id);
       return;
     }
 
     if (t.closest('button, input, select, label')) return;
     if (ARME) { ARME = ''; dessiner(); }
   });
+
+  /* ⚠ (2026-10-25, audit) LA PURGE NE REJOUE PLUS LE CLIC sur le bouton d origine :
+     si la liste avait ete redessinee pendant la boite, << bp.click() >> tombait sur
+     un noeud detache — rien ne partait et ARME restait arme. Apres la confirmation,
+     on appelle la purge directement ; le bouton, s il existe encore, est retrouve. */
+  function purger(id){
+    ARME = '';
+    var bp = null;
+    Array.prototype.forEach.call(corps.querySelectorAll('[data-purger]'), function(x){
+      if (x.getAttribute('data-purger') === id) bp = x;
+    });
+    if (bp) bp.disabled = true;
+    appeler('commandes:corbeille:purger', [id]).then(function(r){
+      if (!r.ok) { if (bp) bp.disabled = false; dire(expliquer(r), 'err'); return; }
+      dire('${T("Dossier purgé")}'
+        + (r.photos ? (' — ' + r.photos + (r.photos > 1 ? '${T(" photos effacées")}' : '${T(" photo effacée")}')) : '')
+        + '.', 'bon');
+      charger();
+    });
+  }
 
   function charger(){
     appeler('commandes:corbeille:liste', []).then(function(r){

@@ -299,4 +299,10 @@ module.exports = {
   'Seconde analyse : déposez une nouvelle photo (une fibre isolée donne le meilleur résultat), puis « Relire les photos ».': 'Second analysis: drop a new photo (a single isolated fibre works best), then “Read the photos again”.',
   'Faites d’abord lire la photo par l’IA (étape 1).': 'First have the photo read by the AI (step 1).',
   'La composition doit d’abord faire 100 % (étape 2).': 'The composition must first total 100% (step 2).',
+  // 2026-10-25, audit : quitter une analyse non enregistrée.
+  'Lecture des photos en cours : attendez son résultat avant de quitter l’analyse.': 'The photos are being read: wait for the result before leaving the analysis.',
+  'Quitter l’analyse': 'Leave the analysis',
+  'Cette analyse a des changements non enregistrés (lecture de l’IA, composition, entretien ou photos). Les quitter les perdra.': 'This analysis has unsaved changes (AI reading, composition, care or photos). Leaving will discard them.',
+  'Quitter sans enregistrer': 'Leave without saving',
+  'Lecture terminée, mais l’analyse a été fermée entre-temps.': 'Reading finished, but the analysis was closed in the meantime.',
 };

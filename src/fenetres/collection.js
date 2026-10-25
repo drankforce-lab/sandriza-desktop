@@ -79,18 +79,24 @@ function pageCollection(id) {
 
   function dessiner(fiche){
     var h = [];
+    /* (2026-10-25, audit) L ANNEE ET LA SAISON ENREGISTREES RESTENT CHOISISSABLES. Le pont n offre que
+       an-1 .. an+2 : une collection de 2024 ouverte en 2026 trouvait un menu sans son annee, le champ
+       restait vide et l enregistrement posait l annee par defaut, sans un mot. */
+    var annees = (CTX.annees || []).slice(), saisons = (CTX.saisons || []).slice();
+    if (fiche && fiche.year && annees.map(String).indexOf(String(fiche.year)) < 0) { annees.push(fiche.year); annees.sort(function(a, b){ return a - b; }); }
+    if (fiche && fiche.season && saisons.indexOf(fiche.season) < 0) saisons.push(fiche.season);
 
     h.push('<div class="etape"><div class="carte"><h2>${T("La collection")}</h2><div class="grille">'
-      + '<div class="ch large"><label for="c-nom">Nom <span class="req">*</span></label><input id="c-nom"></div>'
+      + '<div class="ch large"><label for="c-nom">${T("Nom")} <span class="req">*</span></label><input id="c-nom"></div>'
       + '<div class="ch large"><label for="c-desc">Description</label>'
       + '<textarea id="c-desc" rows="4"></textarea>'
       + '<div style="margin-top:.35rem">'
       + '<button type="button" id="c-ia"><span class="ic">✨</span>${T(" Rédiger avec l’IA")}</button></div></div>'
       + '<div class="ch"><label for="c-saison">${T("Saison")}</label><select id="c-saison">'
-      + CTX.saisons.map(function(s){ return '<option value="' + esc(s) + '">' + (s ? esc(s) : '—') + '</option>'; }).join('')
+      + saisons.map(function(s){ return '<option value="' + esc(s) + '">' + (s ? esc(s) : '—') + '</option>'; }).join('')
       + '</select></div>'
       + '<div class="ch"><label for="c-annee">${T("Année")}</label><select id="c-annee">'
-      + CTX.annees.map(function(a){ return '<option value="' + a + '">' + a + '</option>'; }).join('')
+      + annees.map(function(a){ return '<option value="' + a + '">' + a + '</option>'; }).join('')
       + '</select></div>'
       + '<div class="ch"><label for="c-actif">${T("Statut")}</label><select id="c-actif">'
       + '<option value="1">${T("Active")}</option><option value="0">${T("Inactive")}</option></select></div>'
@@ -149,7 +155,7 @@ function pageCollection(id) {
       surMaj: function(){
         var n = nbChoisis();
         var c = document.getElementById('c-cpt');
-        if (c) c.textContent = n + (n > 1 ? ' produits choisis' : ' produit choisi');
+        if (c) c.textContent = n + ' ' + (n > 1 ? '${T("produits choisis")}' : '${T("produit choisi")}');
       }
     });
     PAGI.tout = CTX.produits;

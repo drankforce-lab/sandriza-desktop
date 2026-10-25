@@ -261,4 +261,11 @@ module.exports = {
   'saisi': 'typed',
   'simulé': 'simulated',
   'a écrit GAGNÉ ici — le lien part en message privé': 'wrote WON here — the link goes by private message',
+  /* (2026-10-25, audit) Textes visibles qui restaient hors T(). */
+  'Votre rôle ne donne pas accès au catalogue de la caisse.': 'Your role does not give access to the checkout catalogue.',
+  'La fenêtre principale ne répond pas.': 'The main window is not responding.',
+  'La recherche a échoué.': 'The search failed.',
+  'L’adjudication est annulée : la gagnante perd l’article et son lien de paiement est annulé. Toutes les offres sont effacées.': 'The sale is cancelled: the winner loses the item and her payment link is cancelled. All bids are erased.',
+  'Toutes les offres reçues pour cet article sont effacées et l’encan revient au prix de départ.': 'All bids received for this item are erased and the auction returns to the starting price.',
+  'Offres': 'Bids',
 };

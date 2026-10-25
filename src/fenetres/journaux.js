@@ -129,7 +129,7 @@ function pageJournaux(onglet) {
   // Aller directement à un onglet quand la fenêtre est DÉJÀ ouverte (lien de
   // retour depuis une autre fenêtre — #7 7b-2c).
   window.szAllerOnglet = function(t){
-    if (['recherche','acces','automatisations','impressions','sms','appels','comptable','recherches','jserreurs'].indexOf(String(t||'')) < 0) return;
+    if (['recherche','acces','automatisations','envois','impressions','sms','appels','comptable','recherches','jserreurs'].indexOf(String(t||'')) < 0) return;
     ONGLET = String(t); rendre();
   };
 ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
@@ -208,8 +208,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
     b = document.createElement('button');
     b.id = 'j-verrous'; b.type = 'button'; b.className = 'mini';
     b.style.marginLeft = '.6rem';
-    b.textContent = 'Verrous';
-    b.title = '${T("Qui tient une fiche en ce moment (ecran a part, en direct)")}';
+    b.textContent = '${T("Verrous")}';
+    b.title = '${T("Qui tient une fiche en ce moment (écran à part, en direct)")}';
     b.onclick = function(){ if (P && P.ouvrirModule) P.ouvrirModule('verrous'); };
     var d = document.getElementById('sz-detacher');
     if (d) t.insertBefore(b, d); else t.appendChild(b);
@@ -374,7 +374,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
     h += '</tbody></table></div>';
     if (apages > 1) {
       h += '<div class="pagi"><button class="mini" id="ac-prec"'+(AC_PAGE<=0?' disabled':'')+'>${T("‹ Précédent")}</button>'
-        + '<span>Page '+(AC_PAGE+1)+' sur '+apages+'</span>'
+        + '<span>'+'${T("Page {0} sur {1}")}'.split('{0}').join(AC_PAGE+1).split('{1}').join(apages)+'</span>'
         + '<button class="mini" id="ac-suiv"'+(AC_PAGE>=apages-1?' disabled':'')+'>${T("Suivant ›")}</button></div>';
     }
     h += '</div>';
@@ -392,7 +392,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
 
   // ── Automatisations ──────────────────────────────────────────────
   var SECT = { orders:'${T("Livraison")}', stats:'${T("Statistiques")}', marketing:'${T("Marketing")}', staff:'${T("Mot de passe")}',
-    'returns-mgmt':'${T("↩ Retours")}', sociaux:'${T("Réseaux sociaux")}', newsletter:'Infolettre', systeme:'${T("Entretien")}', app:'${T("Application")}' };
+    'returns-mgmt':'${T("↩ Retours")}', sociaux:'${T("Réseaux sociaux")}', newsletter:'${T("Infolettre")}', systeme:'${T("Entretien")}', app:'${T("Application")}' };
   function vueAuto(){
     var rows = D.automations||[];
     var h = '<div class="carte sz-pagee"><div class="barre"><span class="sub">'+szCompte(rows.length, D.autoTotal, '${T("entrée")}', '${T("entrées")}')+'${T(" · conservation 30 jours")}</span><span class="pousse"></span>'
@@ -457,7 +457,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
         + '<td>'+esc(r.label||'—')+(r.size?'<div class="sub">'+esc(r.size)+(r.dpi?' · '+esc(r.dpi)+' dpi':'')+'</div>':'')+'</td>'
         + '<td style="text-align:center"><strong>'+esc(r.qty||1)+'</strong></td>'
         + '<td>'+esc(r.printer||'—')+'<div class="sub">'+esc(VIA[r.via]||r.via||'')+'</div></td>'
-        + '<td class="sub">'+esc(r.who||'—')+(r.poste?'<div class="sub">poste '+esc(r.poste)+'</div>':'')+'</td>'
+        + '<td class="sub">'+esc(r.who||'—')+(r.poste?'<div class="sub">${T("poste")} '+esc(r.poste)+'</div>':'')+'</td>'
         + '<td>'+(r.ok===false?'<span class="pill err" title="'+esc(r.note||'')+'">${T("Échec")}</span>':'<span class="pill bon">${T("Imprimé")}</span>')+'</td></tr>';
     }
     h += '</tbody></table></div></div>';
@@ -503,6 +503,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
     'failed':'${T("Échoué")}', 'canceled':'${T("Annulé")}', 'in-progress':'${T("En cours")}', 'ringing':'${T("Sonne")}', 'queued':'${T("En attente")}' };
   /* Plus de pages fixes de 8 (2026-10-12) : tous les appels sont ecrits, le socle les met en
      pages a la hauteur reelle de la fenetre (data-pages="journaux-appels"). */
+  /* (2026-10-25, audit) Twilio rend le cout en NEGATIF (un debit) et toFixed ignorait la langue :
+     on lisait « -0.42 USD ». Valeur absolue, nombre a la mode du poste, symbole a sa place. */
+  function appCout(v, dec, unite){
+    var u = String(unite || '').toUpperCase();
+    return szArgentSymbole(szArgentNombre(Math.abs(Number(v) || 0), dec)) + (u === 'USD' ? ' US' : (u && u !== 'CAD' ? ' ' + esc(u) : ''));
+  }
   function appDuree(s){ s = parseInt(s, 10) || 0; var m = Math.floor(s / 60), r = s % 60; return m + ':' + (r < 10 ? '0' : '') + r; }
   function vueAppels(){
     if (APP_D===null){
@@ -521,7 +527,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
     var h = '<div class="note">ℹ ${T("Les appels reçus et émis (Twilio) des 90 derniers jours. Rappeler ou écouter la messagerie se fait dans ")}<b>${T("Communications → Téléphonie")}</b>.</div>'
       + '<div class="carte sz-pagee"><div class="barre"><span class="sub">'+rows.length+' '+szPl(rows.length,'${T("appel")}','${T("appels")}')
       + ' · '+manques+' '+szPl(manques,'${T("manqué")}','${T("manqués")}')+' · '+Math.round(sec/60)+' min'
-      + (cout ? ' · '+cout.toFixed(2)+' '+esc(unite) : '')
+      + (cout ? ' · '+appCout(cout, 2, unite) : '')
       + (APP_D.tronque ? ' · <b>${T("liste coupée à 5 000 appels")}</b>' : '')
       + '</span><span class="pousse"></span>'
       + '<button class="b" id="app-reload"><span class="ic">🔄</span> ${T("Actualiser")}</button></div>'
@@ -535,7 +541,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
         + '<td class="mono">'+esc(c.from||'—')+'</td><td class="mono">'+esc(c.to||'—')+(c.renvoyeA?'<div class="mut" style="font-size:.72rem">${T("renvoyé à ")}'+esc(c.renvoyeA)+'</div>':'')+'</td>'
         + '<td'+(rate?' style="color:var(--tx-err2)"':'')+'>'+issue+'</td>'
         + '<td class="mono">'+appDuree(c.duration)+'</td>'
-        + '<td class="mono mut">'+(c.price!=null ? (+c.price).toFixed(4)+' '+esc(c.priceUnit||'') : '—')+'</td></tr>';
+        + '<td class="mono mut">'+(c.price!=null ? appCout(c.price, 4, c.priceUnit) : '—')+'</td></tr>';
     }
     h += '</tbody></table></div></div>';
     corps.innerHTML = h;
@@ -639,7 +645,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
 
   // ── Accès comptables (#7 Lot 7b-2 — reutilise liens:journal) ─────
   var CANAUX = { telechargement:'${T("Installation")}', comptable:'${T("Comptable")}', courriel:'${T("Courriel")}' };
-  var EVEN = { visite:'${T("Visite")}', refuse:'${T("Refusé")}', ouvert:'${T("Ouvert")}', classeur:'${T("Classeur ouvert")}', cree:'${T("Créé")}', revoque:'${T("Révoqué")}', telecharge:'${T("Téléchargé")}', envoye:'${T("Courriel envoyé")}' };
+  var EVEN = { visite:'${T("Visite")}', refuse:'${T("Refusé")}', ouvert:'${T("Ouvert")}', classeur:'${T("Classeur ouvert")}', cree:'${T("Créé")}', revoque:'${T("Révoqué")}', telecharge:'${T("Téléchargé")}', envoye:'${T("Courriel envoyé")}',
+    /* (2026-10-25, audit) Les genres que le serveur ecrit VRAIMENT (adm-invite.php, accountant.php,
+       cron-maintenance.php, liens-commun) : sans eux, la colonne montrait des codes bruts. */
+    comptable_ouvert:'${T("Ouvert (comptable)")}', comptable_classeur:'${T("Classeur ouvert (comptable)")}',
+    comptable_refuse:'${T("Mot de passe refusé (comptable)")}', comptable_bloque:'${T("Bloqué : trop d’essais")}',
+    mdp_renouvele:'${T("Mot de passe renouvelé")}', mdp_refuse:'${T("Mot de passe refusé")}', supprime:'${T("Supprimé")}',
+    etrangle:'${T("Freiné : trop de demandes")}', expire:'${T("Expiré")}', relais_refuse:'${T("Relais refusé")}' };
   /* ══ ACCÈS AUX LIENS — LE JOURNAL UNIFIÉ (#31) ═══════════════════════════
      Sa demande : « les journaux des accès lien devraient aussi être unifiés
      sur journal ». Ils l'étaient déjà à moitié — cet onglet lisait bien TOUS
@@ -670,7 +682,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
     var h = ''
       + '<div class="carte sz-pagee"><div class="barre">'
       + '<select id="cp-canal"><option value="">${T("Tous les canaux")}</option>'
-      + '<option value="installation"' + (CP_CANAL==='installation'?' selected':'') + '>${T("Installation")}</option>'
+      + '<option value="telechargement"' + (CP_CANAL==='telechargement'?' selected':'') + '>${T("Installation")}</option>'
       + '<option value="comptable"' + (CP_CANAL==='comptable'?' selected':'') + '>${T("Comptable")}</option>'
       + '<option value="courriel"' + (CP_CANAL==='courriel'?' selected':'') + '>${T("Courriel")}</option>'
       + '</select>'
@@ -687,7 +699,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
     h += '</tbody></table></div>';
     if (pages > 1) {
       h += '<div class="pagi"><button class="mini" id="cp-prec"'+(CP_PAGE<=0?' disabled':'')+'>${T("‹ Précédent")}</button>'
-        + '<span>Page '+(CP_PAGE+1)+' sur '+pages+'</span>'
+        + '<span>'+'${T("Page {0} sur {1}")}'.split('{0}').join(CP_PAGE+1).split('{1}').join(pages)+'</span>'
         + '<button class="mini" id="cp-suiv"'+(CP_PAGE>=pages-1?' disabled':'')+'>${T("Suivant ›")}</button></div>';
     }
     h += '</div>';
@@ -761,18 +773,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
       h += '<tr' + (x.vu ? ' style="opacity:.62"' : '') + '>'
         + '<td><strong>' + esc(x.message) + '</strong>'
         +   '<div class="mut" style="font-size:.72rem">' + genre
-        +     (x.pile ? ' · <span title="' + esc(x.pile) + '">pile disponible (survolez)</span>' : '') + '</div></td>'
+        +     (x.pile ? ' · <span title="' + esc(x.pile) + '">${T("pile disponible (survolez)")}</span>' : '') + '</div></td>'
         /* ⚠ LE FICHIER PORTE SON ?v= : c est la VERSION servie au moment du
            plantage. Sans elle, on relit un fichier qui a change depuis. */
         + '<td class="mut" style="font-size:.76rem;word-break:break-all">' + (x.fichier ? esc(x.fichier) : '—')
-        +   (x.ligne ? '<br>ligne ' + esc(x.ligne) + (x.colonne ? ':' + esc(x.colonne) : '') : '') + '</td>'
+        +   (x.ligne ? '<br>${T("ligne")} ' + esc(x.ligne) + (x.colonne ? ':' + esc(x.colonne) : '') : '') + '</td>'
         + '<td style="text-align:center"><b>' + esc(x.n || 1) + '</b></td>'
         + '<td class="mut" style="font-size:.76rem">'
         +   ((x.routes && x.routes.length) ? x.routes.map(esc).join('<br>') : '—') + '</td>'
         + '<td class="mut" style="font-size:.76rem;white-space:nowrap">' + esc(szQuand(x.dernier))
         +   (x.premier && x.premier !== x.dernier
                 ? '<br><span style="font-size:.7rem">${T("depuis ")}' + esc(szJour(String(x.premier).slice(0, 10))) + '</span>' : '')
-        +   (x.agent ? '<br><span style="font-size:.7rem" title="' + esc(x.agent) + '">navigateur</span>' : '') + '</td>'
+        +   (x.agent ? '<br><span style="font-size:.7rem" title="' + esc(x.agent) + '">${T("navigateur")}</span>' : '') + '</td>'
         + '</tr>';
     }
     h += '</tbody></table></div></div>';

@@ -137,6 +137,9 @@ tbody tr:hover td{background:var(--v04)}
 .bloc{border:1px solid var(--v10);border-radius:10px;padding:.5rem .6rem}
 .bloc .titre{font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;
   color:var(--tx2);font-weight:700;margin:0 0 .4rem}
+/* (2026-10-25, audit) Les listes des surcouches (choisis, resume, categories) se paginent (data-pages :
+   le socle les passe en overflow:hidden et pose un pied ‹ ›) ; seule la liste des produits du lot garde
+   son defilement, elle est deja coupee en pages de 10 par le coeur. */
 .liste{max-height:15rem;overflow-y:auto;display:flex;flex-direction:column;gap:.25rem}
 .liste::-webkit-scrollbar{width:8px}
 .liste::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
@@ -296,7 +299,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
         + (g.page >= g.pages - 1 ? ' disabled' : '') + '>${T("Suivant →")}</button>';
     }
     return '<div class="pager"><span class="gauche">${T("Afficher ")}'
-      + '<select id="taille" aria-label="${T("Nombre de produits par page")}">' + opts + '</select>${T(" par page · ")}' + g.total
+      // (2026-10-25, audit) class, PAS id : la recherche montre DEUX pagers (les deux regimes) et un id
+      // en double ne branchait que le premier — le « par page » de la carte Vente finale ne faisait rien.
+      + '<select class="taille" aria-label="${T("Nombre de produits par page")}">' + opts + '</select>${T(" par page · ")}' + g.total
       + (g.total === 1 ? '${T(" produit")}' : '${T(" produits")}') + '</span>' + nav + '</div>';
   }
 
@@ -333,7 +338,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
        Deux tuiles qui menent au regime qu elles comptent, UNE barre a loupe
        (recherche, les deux regimes en pastilles, les ajouts), lignes riches a
        la pastille de categorie. Crochets gardes : #rech, data-onglet,
-       data-ouvrir, data-retirer, data-confirmer, data-page, #taille. */
+       data-ouvrir, data-retirer, data-confirmer, data-page, select.taille. */
     var tu = function(o, lib, n, sous){
       return '<div class="tuile cliq' + (!Q && ONGLET === o ? ' on' : '') + '" data-liqt="' + o + '" title="${T("Cliquer pour afficher")}">'
         + '<div class="lbl">' + lib + '</div><div class="val">' + n + '</div>'
@@ -407,9 +412,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
         });
       }, 250);
     };
-    var t = document.getElementById('taille');
-    if (t) t.onchange = function(){
-      TAILLE = parseInt(t.value, 10) || 20; PLIQ = 0; PFIN = 0;
+    var ts = document.querySelectorAll('select.taille');
+    for (var ti = 0; ti < ts.length; ti++) ts[ti].onchange = function(){
+      TAILLE = parseInt(this.value, 10) || 20; PLIQ = 0; PFIN = 0;
       charger().then(function(ok){ if (ok) dessiner(); });
     };
   }
@@ -548,7 +553,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
       +       chkPer + '> ${T("Période fixe")}</label>'
       +     blocDates
       +     '<div class="titre" style="margin:.7rem 0 .4rem">${T("Choisis ")}<span class="n">' + LOT.ordre.length + '</span></div>'
-      +     '<div class="liste" style="max-height:11rem">' + choisis + '</div>'
+      +     '<div class="liste" style="max-height:11rem" data-pages="liq-choisis">' + choisis + '</div>'
       +   '</div></div>'
       + '</div>'
       + '<div class="pied-boite">'
@@ -572,7 +577,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
       +   '<div class="quand">⏳ ' + quand + '</div></div>'
       + '<div class="titre" style="font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700;margin:0 0 .4rem">'
       +   LOT.ordre.length + (LOT.ordre.length === 1 ? '${T(" produit qui change de régime")}' : '${T(" produits qui changent de régime")}') + '</div>'
-      + '<div class="liste">' + liste + '</div>'
+      + '<div class="liste" data-pages="liq-resume">' + liste + '</div>'
       + '<div class="gare"><span class="ic">⚠</span> ${T("Ces produits n’accepteront plus de retour, et la boutique l’annoncera sur ")}'
       +   '${T("leur fiche. Vous pourrez les retirer un par un depuis cet écran.")}</div>'
       + '<div class="pied-boite">'
@@ -583,11 +588,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
       + '</div></div>';
   }
 
+  /* (2026-10-25, audit) UNE ECRITURE A LA FOIS : un double clic sur « Appliquer » envoyait deux
+     ecritures (plafond 300 s) pour les memes produits. Le drapeau tombe a la reponse. */
+  var ENVOI = false;
+  function bloquer(sel){ var b = document.querySelectorAll(sel); for (var i = 0; i < b.length; i++) b[i].disabled = true; }
   function appliquerLot(){
+    if (ENVOI) return;
+    ENVOI = true; bloquer('[data-lotappliquer]');
     dire('${T("Application…")}');
     appeler('liquidation:lot', { ids:LOT.ordre, mode:LOT.mode, duree:LOT.duree, du:LOT.du, au:LOT.au })
       .then(function(r){
-        if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+        ENVOI = false;
+        if (!r || !r.ok) { dessiner(); dire(expliquer(r), 'err'); return; }
         var n = r.n;
         LOT = null; PLIQ = 0; PFIN = 0;
         ONGLET = (r.mode === 'liq_no') ? 'liq' : 'final';
@@ -650,7 +662,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
       + '<div class="barreoutils" style="margin-bottom:.5rem">'
       +   '<input aria-label="${T("Rechercher une catégorie")}" class="rech" id="cat-rech" type="search" placeholder="${T("Rechercher une catégorie…")}" value="' + esc(CAT.q) + '">'
       +   fil('', '${T("Toutes")}') + fil('liq', '<span class="ic">🟡</span> ${T("déjà")}') + fil('final', '<span class="ic">🔴</span> ${T("déjà")}') + '</div>'
-      + '<div class="liste">' + lignes + '</div>'
+      + '<div class="liste" data-pages="liq-cats">' + lignes + '</div>'
       + '<div class="pied-boite">'
       +   '<button class="gauche" data-catfermer="1">${T("Annuler")}</button>'
       +   '<button class="danger" data-catappliquer="normal"' + (n ? '' : ' disabled') + '>${T("Retirer du régime")}</button>'
@@ -661,11 +673,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
   }
 
   function appliquerCat(quoi){
+    if (ENVOI) return;
     var cles = Object.keys(CAT.pris);
     var mode = (quoi === 'normal') ? 'normal' : CAT.mode;
+    ENVOI = true; bloquer('[data-catappliquer]');
     dire('${T("Application…")}');
     appeler('liquidation:parCategorie', { cats:cles, mode:mode }).then(function(r){
-      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+      ENVOI = false;
+      if (!r || !r.ok) { dessiner(); dire(expliquer(r), 'err'); return; }
       var n = r.n, nc = r.cats;
       CAT = null; PLIQ = 0; PFIN = 0;
       if (mode !== 'normal') ONGLET = (mode === 'liq_no') ? 'liq' : 'final';
@@ -838,6 +853,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
 
   document.addEventListener('keydown', function(e){
     if (e.key !== 'Escape') return;
+    if (ENVOI) return;   // une ecriture est partie : sa reponse doit se lire ici
+    /* (2026-10-25, audit) ECHAP NE JETTE PAS UNE SELECTION. Deux cents produits choisis page par page
+       se perdaient sur un Echap, meme a l etape 2 : on demande d abord. */
+    if (LOT && LOT.ordre && LOT.ordre.length) {
+      var nSel = LOT.ordre.length;
+      szConfirmer({ titre: '${T("Abandonner la sélection ?")}',
+        texte: szPl(nSel, '${T("{0} produit choisi sera oublié.")}', '${T("{0} produits choisis seront oubliés.")}').split('{0}').join(nSel),
+        oui: '${T("Abandonner")}', non: '${T("Continuer la sélection")}', prudent: true })
+        .then(function(ok){ if (ok && LOT) { LOT = null; dessiner(); } });
+      return;
+    }
     if (LOT) { LOT = null; dessiner(); return; }
     if (CAT) { CAT = null; dessiner(); return; }
     if (ARME) { ARME = ''; dessiner(); return; }

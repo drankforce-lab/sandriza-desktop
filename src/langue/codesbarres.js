@@ -189,4 +189,8 @@ module.exports = {
   "Toutes les lignes de la file d’impression seront retirées. Aucune étiquette ne sera imprimée et aucun stock n’est modifié.": "Every line in the print queue will be removed. No labels will be printed and no stock is changed.",
   "Lignes": "Lines",
   "Vider la file": "Clear the queue",
+  // 2026-10-25, audit : Échap ne jette plus la file.
+  "Fermer et perdre la file ?": "Close and lose the queue?",
+  "La file d’impression n’existe que dans cette fenêtre : elle sera perdue.": "The print queue only exists in this window: it will be lost.",
+  "Fermer et perdre la file": "Close and lose the queue",
 };

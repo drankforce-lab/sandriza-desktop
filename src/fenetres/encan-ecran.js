@@ -221,7 +221,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (avant && avant.phase === 'encours' && etat.phase === 'encours' && etat.nbOffres > (avant.nbOffres || 0)) PLUS_JUSQUA = RECU + 1500;
     var redessiner = !avant || avant.phase !== etat.phase || avant.nbOffres !== etat.nbOffres || avant.prix !== etat.prix
       || avant.essai !== etat.essai || JSON.stringify(avant.article) !== JSON.stringify(etat.article)
-      || (PLUS_JUSQUA && RECU > PLUS_JUSQUA - 200);
+      || (PLUS_JUSQUA && RECU > PLUS_JUSQUA - 200)
+      /* (2026-10-25, audit) Hors du decompte, un reglage change (duree, « +15 s », delai GAGNE) se
+         redessine aussi : battre() n avance le chrono qu en cours, l ecran filmé gardait l ancien chiffre. */
+      || JSON.stringify(avant.reglages) !== JSON.stringify(etat.reglages)
+      || (etat.phase !== 'encours' && avant.restantMs !== etat.restantMs);
     E = etat;
     if (redessiner) dessiner();
   }

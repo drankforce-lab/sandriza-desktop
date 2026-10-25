@@ -265,7 +265,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
       t += '<div class="vide">${T("Aucune facture ne correspond.")}</div>';
     } else {
       var avecGestes = PEUT_ENC || PEUT_SUP;
-      t += (PAGINE ? '<div class="cx-pages-srv">' : '<div class="cx-pages" data-pages="factures">') + '<table><thead><tr><th>${T("Facture")}</th><th>${T("Client")}</th>'
+      /* (2026-10-25, audit) La page du PONT (50 lignes) passe AUSSI en pages mesurees : l ancien
+         « cx-pages-srv » n etait pas borne en hauteur, la carte coupait ses lignes et poussait le
+         pagineur hors de vue. data-pages-coeur : le pied unique du socle parcourt les pages mesurees,
+         puis demande la page voisine au pont (window.szPagesCoeur.factures, plus bas). */
+      t += '<div class="cx-pages" data-pages="factures"'
+        + (PAGINE ? szPagesCoeurAttr({ pagine: true, page: PAGE, pages: PAGES, total: TOTAL, parPage: PAR_PAGE }) : '')
+        + '><table><thead><tr><th>${T("Facture")}</th><th>${T("Client")}</th>'
         + '<th>${T("Échéance")}</th><th class="r">${T("Total")}</th><th>${T("Statut")}</th>' + (avecGestes ? '<th></th>' : '') + '</tr></thead><tbody>'
         + vue.map(function(r){
             var gestes = '';
@@ -292,11 +298,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
           }).join('')
         + '</tbody></table></div>';
     }
-    t += '<div class="cx-pied"><span>' + esc(nbFact(PAGINE ? TOTAL : rows.length)) + '</span>'
-      + (PAGINE && PAGES > 1 ? '<span class="droite"><button class="mini" data-fpg="-1"' + (PAGE <= 0 ? ' disabled' : '') + ' aria-label="${T("Page précédente")}">‹</button> '
-          + (PAGE + 1) + ' / ' + PAGES
-          + ' <button class="mini" data-fpg="1"' + (PAGE >= PAGES - 1 ? ' disabled' : '') + ' aria-label="${T("Page suivante")}">›</button></span>' : '')
-      + '</div>';
+    t += '<div class="cx-pied"><span>' + esc(nbFact(PAGINE ? TOTAL : rows.length)) + '</span></div>';
     t += '</div>';
 
     /* ── LE PANNEAU D APPUI : encaissement, prochaines echeances, depenses — tout depuis la liste et
@@ -416,8 +418,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
     if (!t || !t.closest) return;
     var fst = t.closest('[data-fst]');
     if (fst) { STATUT = fst.getAttribute('data-fst') || ''; if (PAGINE) { PAGE = 0; charger(); } else dessiner(); return; }
-    var fpg = t.closest('[data-fpg]');
-    if (fpg) { PAGE = Math.max(0, Math.min(PAGES - 1, PAGE + Number(fpg.getAttribute('data-fpg')))); charger(); return; }
     var bpay = t.closest('[data-payer]');
     if (bpay) {
       SUPPR_ARME = '';
@@ -498,10 +498,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
   window.szActualiser = function(){
     var q = document.getElementById('f-q');
     if (q && document.activeElement === q && q.value) return;
+    /* (2026-10-25, audit) Ni pendant la boite « Etat de compte client » : le redessin
+       effacait la recherche tapee et le client choisi. */
+    if (ETAT_OUVERT) return;
     charger();
   };
   // Ramenee au premier plan par le menu ou << Tout voir >> : la liste se relit.
-  window.szRevenir = function(){ charger(); };
+  window.szRevenir = function(){ if (ETAT_OUVERT) return; charger(); };
+  /* (2026-10-25, audit) Au bord d une page du pont, le pied du socle demande la voisine. */
+  window.szPagesCoeur.factures = function(page){ PAGE = Math.max(0, page | 0); charger(); };
 
   /* ── MODE ANCRE (1.55.0) ── Le meme bouton que les autres ecrans : detacher
      la vue ancree, ou RAMENER la vue detachee dans la fenetre principale. */
@@ -530,7 +535,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
   };
 
   document.addEventListener('keydown', function(ev){
-    if (ev.key === 'Escape') { ev.preventDefault(); P.fermer(); }
+    if (ev.key !== 'Escape') return;
+    ev.preventDefault();
+    // (2026-10-25, audit) Echap ferme d abord la boite ouverte, pas toute la fenetre.
+    if (ETAT_OUVERT) { ETAT_OUVERT = false; dessiner(); return; }
+    P.fermer();
   });
 
   var sous = document.getElementById('sous');

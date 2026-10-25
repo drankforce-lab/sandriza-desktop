@@ -218,6 +218,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function argent(n){ return szArgent(n); }
+  /* LIRE UN MONTANT SAISI, OU LE REFUSER (2026-10-25, audit). Vide = 0 ;
+     espaces (ordinaires, insecables, fines) retires ; si la saisie porte les
+     DEUX separateurs, le dernier est le decimal (<< 1.200,50 >> comme
+     << 1,200.50 >>) ; une virgule seule est decimale. Ce qui ne se lit pas
+     ENTIEREMENT comme un nombre a deux decimales au plus rend NaN : mieux vaut
+     un refus nomme qu un montant faux enregistre sans un mot. */
+  function lireMontant(s){
+    var t = String(s == null ? '' : s).replace(/[\\s\\u00a0\\u202f]/g, '');
+    if (!t) return 0;
+    var pv = t.lastIndexOf(','), pp = t.lastIndexOf('.');
+    if (pv >= 0 && pp >= 0) {
+      t = (pv > pp) ? t.replace(/\\./g, '').replace(',', '.') : t.replace(/,/g, '');
+    } else if (pv >= 0) {
+      t = t.replace(',', '.');
+    }
+    if (!/^-?\\d+(\\.\\d{1,2})?$/.test(t)) return NaN;
+    return Math.round(parseFloat(t) * 100) / 100;
+  }
 
   var MOTIFS = {
     session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
@@ -293,7 +311,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
            + esc(o[1]) + '</button>';
     }).join('');
     Array.prototype.forEach.call(elOnglets.querySelectorAll('button'), function(b){
-      b.onclick = function(){ ONGLET = b.getAttribute('data-o'); SAISIE = null; dessiner(); };
+      /* ⚠ (2026-10-25, audit) ON NE JETTE PLUS L ECRITURE EN COURS au changement
+         d onglet : << SAISIE = null >> effacait date, libelle et six lignes d un
+         clic, y compris sur l onglet << Ecritures manuelles >> lui-meme. Chaque
+         frappe est deja ramassee (ramasser) : la garder suffit, on la retrouve
+         en revenant. Seul << Annuler >> la jette. */
+      b.onclick = function(){ ONGLET = b.getAttribute('data-o'); dessiner(); };
     });
   }
 
@@ -322,14 +345,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
        igrfImport) : celui qui se LIT (Excel, avec les comptes d origine) et
        celui qui s IMPORTE tel quel dans le logiciel d impot du comptable. */
     if (ONGLET === 'igrf' && D.igrf) {
+      /* (2026-10-25, audit) Un controle qui diverge BLOQUE le fichier d import :
+         c est lui qui part dans le logiciel d impot, sans relecture. Le tableau
+         (.csv) reste offert — il sert justement a chercher l ecart. */
+      var gc = D.igrf.controles || {};
+      var igrfOk = !!(gc.resultat && gc.resultat.concorde && gc.bilan && gc.bilan.concorde);
       h += '<button id="igrf-csv">${T("Exporter le tableau (.csv)")}</button>'
-         + '<button class="prim" id="igrf-imp">${T("Fichier d’import IGRF")}</button>';
+         + '<button class="prim" id="igrf-imp"' + (igrfOk ? '' : ' disabled title="${T("Un contrôle IGRF diverge : le fichier d’import reste bloqué tant que l’écart n’est pas expliqué.")}"') + '>${T("Fichier d’import IGRF")}</button>';
     }
     elOutils.innerHTML = h;
     var sel = document.getElementById('an');
     if (sel) sel.onchange = function(){ ANNEE = parseInt(sel.value, 10); charger(); };
     var nv = document.getElementById('neuve');
-    if (nv) nv.onclick = function(){ SAISIE = ecritureNeuve(); dessiner(); };
+    /* Une ecriture deja commencee n est pas remplacee par une neuve (2026-10-25, audit). */
+    if (nv) nv.onclick = function(){ if (!SAISIE) SAISIE = ecritureNeuve(); dessiner(); };
     var ic = document.getElementById('igrf-csv');
     if (ic) ic.onclick = function(){
       szExporter(D.igrf.nomCsv || ('igrf-' + ANNEE + '.csv'), D.igrf.csv, '${T("Le tableau IGRF")}');
@@ -607,20 +636,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
     var moitie = Math.ceil(toutes.length / 2);
     var gauche = toutes.slice(0, moitie), droite = toutes.slice(moitie);
     var tete = '<thead><tr><th>${T("Compte")}</th><th class="n">${T("Débit")}</th><th class="n">${T("Crédit")}</th></tr></thead>';
-    /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
-       quel, la piece commune y ajoute le bouton de repli et retient l etat pour
-       ce poste (#114). Sans elle, ce bandeau-ci serait le seul des vingt-sept a
-       ne pas se replier — et une exception qu on ne peut pas expliquer se lit
-       comme un oubli. << banc-tuiles-masquables >> a d ailleurs mordu ici. */
-    return szTuiles('<div class="cx-kpis k3">'
-      + '<div class="cx-kpi ' + (b.equilibree ? 'ok' : 'err') + '"><span>${T("Verdict")}</span>'
-      + '<b class="mot">' + (b.equilibree ? '${T("Équilibrée")}' : '${T("DÉSÉQUILIBRÉE")}') + '</b>'
-      + '<small>${T("écart")} ' + argent(b.ecart) + '</small></div>'
-      + '<div class="cx-kpi"><span>${T("Total des débits")}</span><b>'
-      + argent(b.totalDebit) + '</b></div>'
-      + '<div class="cx-kpi"><span>${T("Total des crédits")}</span><b>'
-      + argent(b.totalCredit) + '</b></div>'
-      + '</div>')
+    /* ⚠ LE VERDICT N EST PLUS UNE TUILE (2026-10-25, audit). Il vivait dans
+       szTuiles(), qui rend '' depuis la regle du 2026-10-16 (aucune cellule de
+       chiffres hors du tableau de bord) : l onglet avait perdu son seul verdict
+       binaire. Il revient en UNE LIGNE, comme le rapprochement — les totaux
+       sont deja dans la derniere rangee du tableau. */
+    return '<div class="rappro ' + (b.equilibree ? 'ok' : 'non') + '"><span class="t">${T("Verdict :")} '
+      + (b.equilibree ? '${T("Équilibrée")}' : '<span class="mauvais">${T("DÉSÉQUILIBRÉE")}</span>') + '</span>'
+      + '<span>${T("écart")} <b' + (b.equilibree ? '' : ' class="mauvais"') + '>' + argent(b.ecart) + '</b></span></div>'
       + '<div class="cx-carte"><h2>${T("Balance de vérification")}</h2><div class="duo">'
       + '<div><table>' + tete + '<tbody>' + gauche.map(lg).join('') + '</tbody></table></div>'
       + '<div><table>' + tete + '<tbody>' + droite.map(lg).join('')
@@ -689,14 +712,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
         + '<td>' + esc(EN && l.nomEn ? l.nomEn : l.nom) + '</td><td class="n">' + argent(l.montant) + '</td></tr>';
     }
     var tete = '<thead><tr><th>${T("Code")}</th><th>${T("Poste")}</th><th class="n">${T("Montant")}</th></tr></thead>';
-    var h = szTuiles('<div class="cx-kpis k2">'
-      + '<div class="cx-kpi ' + (okR ? 'ok' : 'err') + '"><span>${T("9999 — bénéfice net")}</span>'
-      + '<b>' + argent(c.resultat ? c.resultat.igrf : 0) + '</b>'
-      + '<small>' + (okR ? '${T("égale le résultat du livre")}' : '${T("DIFFÈRE du livre :")} ' + argent(c.resultat ? c.resultat.livre : 0)) + '</small></div>'
-      + '<div class="cx-kpi ' + (okB ? 'ok' : 'err') + '"><span>${T("2599 — total de l’actif")}</span>'
-      + '<b>' + argent(c.bilan ? c.bilan.actif : 0) + '</b>'
-      + '<small>' + (okB ? '${T("égale 3585, passif et capital")}' : '${T("DIFFÈRE de 3585 :")} ' + argent(c.bilan ? c.bilan.passifEtCapital : 0)) + '</small></div>'
-      + '</div>');
+    /* ⚠⚠ LES DEUX CONTROLES NE SONT PLUS DES TUILES (2026-10-25, audit). Ils
+       vivaient dans szTuiles(), qui rend '' depuis la regle du 2026-10-16
+       (aucune cellule de chiffres hors du tableau de bord) : le controle avait
+       disparu avec la cellule, et le fichier d import partait sans garde. Ce ne
+       sont pas des chiffres a contempler, c est un VERDICT : une ligne, comme le
+       rapprochement des moteurs — verte quand tout concorde, bloc rouge sinon. */
+    var h = '<div class="rappro ' + (okR && okB ? 'ok' : 'non') + '">'
+      + '<span' + (okR ? '' : ' class="mauvais"') + '><span class="t">${T("9999 — bénéfice net")}</span> <b>'
+      + argent(c.resultat ? c.resultat.igrf : 0) + '</b> · '
+      + (okR ? '${T("égale le résultat du livre")}' : '${T("DIFFÈRE du livre :")} <b>' + argent(c.resultat ? c.resultat.livre : 0) + '</b>') + '</span>'
+      + '<span' + (okB ? '' : ' class="mauvais"') + '><span class="t">${T("2599 — total de l’actif")}</span> <b>'
+      + argent(c.bilan ? c.bilan.actif : 0) + '</b> · '
+      + (okB ? '${T("égale 3585, passif et capital")}' : '${T("DIFFÈRE de 3585 :")} <b>' + argent(c.bilan ? c.bilan.passifEtCapital : 0) + '</b>') + '</span>'
+      + (okR && okB ? '' : '<span class="gris">${T("Un contrôle IGRF diverge : le fichier d’import reste bloqué tant que l’écart n’est pas expliqué.")}</span>')
+      + '</div>';
     var notes = [];
     (g.aReclasser || []).forEach(function(x){
       notes.push('<li><b>' + esc(x.igrf) + '</b> ' + esc(x.nom) + ' (' + argent(x.montant) + ') — ' + esc(x.motif) + '</li>');
@@ -868,7 +898,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
     });
     var fm = document.getElementById('mv-fermer');
     if (fm) fm.onclick = function(){ OUVERT = null; dessiner(); };
+    /* Un clic A COTE de la boite (sur le voile) la ferme, comme le promet la
+       note de boiteMouvements (2026-10-25, audit : vm etait lu puis oublie). */
     var vm = document.getElementById('v-mv');
+    if (vm) vm.onmousedown = function(e){ if (e.target === vm) { OUVERT = null; dessiner(); } };
     if (!SAISIE) { brancherSup(); return; }
     /* ⚠ ON RAMASSE LA SAISIE À CHAQUE FRAPPE. Redessiner sans la relire d abord
        rendrait les champs a leur valeur d origine — la faute qu on ne voit
@@ -884,6 +917,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
     }
     Array.prototype.forEach.call(corps.querySelectorAll('[data-l]'), function(el){
       el.onchange = ramasser; el.oninput = ramasser;
+    });
+    /* (2026-10-25, audit) La date et le libelle aussi : ils n etaient relus que
+       lorsqu un champ de LIGNE bougeait, et un redimensionnement (qui redessine)
+       les rendait a leur valeur d avant. */
+    ['ec-date', 'ec-lib'].forEach(function(id){
+      var el = document.getElementById(id);
+      if (el) { el.onchange = ramasser; el.oninput = ramasser; }
     });
     Array.prototype.forEach.call(corps.querySelectorAll('button[data-retire]'), function(b){
       b.onclick = function(){
@@ -908,11 +948,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
          le fichier meme ou l en-tete le met en garde, et trois lignes sous ce
          garde. La garde ecrite ne suffit pas : ce qui attrape, c est
          << node --check >> juste apres avoir ecrit, et c est lui qui l a eu. */
-      var lignes = SAISIE.lignes.filter(function(l){ return l.compte; }).map(function(l){
-        return { compte: l.compte,
-                 debit:  parseFloat(String(l.debit  || '0').replace(',', '.')) || 0,
-                 credit: parseFloat(String(l.credit || '0').replace(',', '.')) || 0 };
+      /* ⚠⚠ (2026-10-25, audit) parseFloat s arretait a l espace des milliers :
+         << 1 200,50 >> au debit ET au credit devenait 1,00 $ — equilibre, donc
+         accepte par le coeur, sans un mot. lireMontant() lit le nombre ENTIER
+         ou le refuse ; un montant illisible arrete l enregistrement et nomme
+         la ligne. */
+      var illisible = null;
+      var lignes = [];
+      SAISIE.lignes.forEach(function(l, i){
+        if (!l.compte || illisible) return;
+        var d = lireMontant(l.debit), c = lireMontant(l.credit);
+        if (isNaN(d)) { illisible = [i + 1, l.debit]; return; }
+        if (isNaN(c)) { illisible = [i + 1, l.credit]; return; }
+        lignes.push({ compte: l.compte, debit: d, credit: c });
       });
+      if (illisible) {
+        szDire('${T("Montant illisible à la ligne")} ' + illisible[0] + ' : « ' + illisible[1] + ' ». ${T("Tapez par exemple 1 200,50.")}', 'err');
+        return;
+      }
       enr.disabled = true;
       appeler('compta:ecritureAjouter', [{ date: SAISIE.date, libelle: SAISIE.libelle, lignes: lignes }])
         .then(function(r){

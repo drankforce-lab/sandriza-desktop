@@ -298,7 +298,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       if (rows.length) {
         h += '<div class="pagi">'
           + '<button class="mini" id="c-prec"' + (D.page <= 0 ? ' disabled' : '') + '>◀</button>'
-          + '<span>Page ' + (D.page + 1) + ' / ' + D.pages + '</span>'
+          + '<span>${T("Page")} ' + (D.page + 1) + ' / ' + D.pages + '</span>'
           + '<button class="mini" id="c-suiv"' + (D.page >= D.pages - 1 ? ' disabled' : '') + '>▶</button>'
           + '</div>';
       }

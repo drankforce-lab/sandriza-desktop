@@ -124,6 +124,15 @@ html.jour .col{background:rgba(168,128,78,.55)}html.jour .col:hover{background:r
 /* La tête refaite (2026-10-15, lot F). */
 .st-tete .st-lu{font-size:.76rem;color:var(--tx2)}
 .corps{padding:1rem 1.6rem .9rem}
+/* (2026-10-25, audit) LA VUE GOOGLE ANALYTICS NE SORT PLUS DU CORPS : les cinq tableaux du bas
+   prennent la hauteur QUI RESTE (rangees egales), et chacun va en pages mesurees (data-pages) ;
+   les « Pages populaires » ont la hauteur du graphique voisin. Avant, rien n etait pagine et
+   .corps{overflow:hidden} coupait Appareils, Sources et Nouveaux / connus. */
+.grilles{flex:1 1 0;min-height:9rem;grid-auto-rows:minmax(0,1fr)}
+.grilles>.carte{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.grilles>.carte>[data-pages]{flex:1 1 0;min-height:0}
+.rang2>.carte.pop{display:flex;flex-direction:column}
+.rang2 .pgpop{height:9.5rem}
 `;
 
 /** Page complète de la fenêtre native « Statistiques ». */
@@ -280,7 +289,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('statistiques')}
     catch (e) { return String(iso); }
   }
 
-  function tableau(titre, colonne, valeur, lignes, cleNom, cleVal){
+  function tableau(titre, colonne, valeur, lignes, cleNom, cleVal, clePg){
     var maxT = (lignes || []).reduce(function(m, x){ return Math.max(m, Number(x[cleVal]) || 0); }, 0) || 1;
     var corpsT = lignes && lignes.length
       ? lignes.map(function(x){
@@ -289,9 +298,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('statistiques')}
             + '</td><td class="num"><b>' + nb(x[cleVal]) + '</b></td></tr>';
         }).join('')
       : '<tr><td colspan="2" class="dt" style="text-align:center">—</td></tr>';
-    return '<div class="carte"><h3>' + esc(titre) + '</h3><table><thead><tr><th>'
+    return '<div class="carte"><h3>' + esc(titre) + '</h3><div data-pages="stat-' + clePg + '"><table><thead><tr><th>'
       + esc(colonne) + '</th><th class="num">' + esc(valeur) + '</th></tr></thead><tbody>'
-      + corpsT + '</tbody></table></div>';
+      + corpsT + '</tbody></table></div></div>';
   }
 
   /* ══ ONGLET GOOGLE ANALYTICS ════════════════════════════════════════════ */
@@ -332,16 +341,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('statistiques')}
             + '</td><td class="num">' + nb(p.vues) + '</td></tr>';
         }).join('')
       : '<tr><td colspan="2" class="dt" style="text-align:center">—</td></tr>';
-    h += '<div class="carte"><h3><span class="ic">🔝</span>${T(" Pages populaires")}</h3><table><thead><tr><th>${T("Page")}</th>'
-      + '<th class="num">${T("Vues")}</th></tr></thead><tbody>' + pages + '</tbody></table></div>';
+    h += '<div class="carte pop"><h3><span class="ic">🔝</span>${T(" Pages populaires")}</h3><div class="pgpop" data-pages="stat-pages"><table><thead><tr><th>${T("Page")}</th>'
+      + '<th class="num">${T("Vues")}</th></tr></thead><tbody>' + pages + '</tbody></table></div></div>';
     h += '</div>';
 
     h += '<div class="grilles">'
-      + tableau('${T("Pays")}', '${T("Pays")}', '${T("Visiteurs")}', DGA.pays, 'nom', 'visiteurs')
-      + tableau('${T("Villes")}', '${T("Ville")}', '${T("Visiteurs")}', DGA.villes, 'nom', 'visiteurs')
-      + tableau('${T("Appareils")}', '${T("Type")}', '${T("Visiteurs")}', DGA.appareils, 'nom', 'visiteurs')
-      + tableau('${T("Sources de trafic")}', '${T("Canal")}', '${T("Sessions")}', DGA.sources, 'nom', 'sessions')
-      + tableau('${T("Nouveaux / connus")}', '${T("Type")}', '${T("Visiteurs")}', DGA.nouveauxConnus, 'nom', 'visiteurs')
+      + tableau('${T("Pays")}', '${T("Pays")}', '${T("Visiteurs")}', DGA.pays, 'nom', 'visiteurs', 'pays')
+      + tableau('${T("Villes")}', '${T("Ville")}', '${T("Visiteurs")}', DGA.villes, 'nom', 'visiteurs', 'villes')
+      + tableau('${T("Appareils")}', '${T("Type")}', '${T("Visiteurs")}', DGA.appareils, 'nom', 'visiteurs', 'appareils')
+      + tableau('${T("Sources de trafic")}', '${T("Canal")}', '${T("Sessions")}', DGA.sources, 'nom', 'sessions', 'sources')
+      + tableau('${T("Nouveaux / connus")}', '${T("Type")}', '${T("Visiteurs")}', DGA.nouveauxConnus, 'nom', 'visiteurs', 'nouveaux')
       + '</div>';
     return h;
   }
@@ -370,7 +379,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('statistiques')}
       + tuile('${T("Durée moyenne")}', t.dureeMoyenne)
       + tuile('${T("Coût total")}', t.cout, 'att') + '</div>');
     h += '<div class="carte"><h3><span class="ic">📈</span>${T(" Appels par jour")}</h3>'
-      + graphique(DTEL.serie, '${T("appels")}', '${T("appels")}') + '</div>';
+      + graphique(DTEL.serie, 'appels', '${T("appels")}') + '</div>';
 
     /* Refonte (2026-09-26) : le statut d un appel se DIT en pastille. Le site
        l envoie en francais (_PH_STATUTS, admin.js) ; un statut inconnu garde

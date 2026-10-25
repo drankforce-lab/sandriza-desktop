@@ -37,14 +37,14 @@ module.exports = {
 
   /* ── LES MOTIFS DE REFUS ────────────────────────────────────────────────── */
   'Votre rôle est en lecture seule.': 'Your role is read only.',
-  /* ⚠ L apostrophe DROITE : la source ecrit ces quatre-la entre guillemets. */
-  "L'administration n'est pas encore chargée dans la fenêtre principale.":
+  /* (2026-10-25, audit) Ces quatre-la passent a l apostrophe typographique, comme la source. */
+  'L’administration n’est pas encore chargée dans la fenêtre principale.':
     'The administration is not loaded in the main window yet.',
-  "La fenêtre principale n'a pas répondu à temps.":
+  'La fenêtre principale n’a pas répondu à temps.':
     'The main window did not answer in time.',
-  "L'enregistrement dans le nuage a échoué. Réessayez.":
+  'L’enregistrement dans le nuage a échoué. Réessayez.':
     'Saving to the cloud failed. Try again.',
-  "L'opération a échoué.": 'The operation failed.',
+  'L’opération a échoué.': 'The operation failed.',
   'La clé du compte de service n’est pas un JSON valide.':
     'The service account key is not valid JSON.',
   /* ⚠ Les deux noms de champs JSON restent tels quels : ils sont LUS. */

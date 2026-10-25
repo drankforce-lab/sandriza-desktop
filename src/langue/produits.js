@@ -164,4 +164,18 @@ module.exports = {
   "Mannequin retiré": "Mannequin removed",
   /* ── L’aperçu 3D par The New Black (2026-10-18) ── */
   "Aperçu 3D (The New Black)": "3D preview (The New Black)",
+  /* ── 2026-10-25, audit : prix et vente finale confirmés dans une boîte ── */
+  "Appliquer les nouveaux prix": "Apply the new prices",
+  "Le prix de {0} article sera changé en boutique, et inscrit à son historique.": "The price of {0} item will be changed in the store and recorded in its history.",
+  "Le prix de {0} articles sera changé en boutique, et inscrit à l’historique de chacun.": "The price of {0} items will be changed in the store and recorded in each one’s history.",
+  "Changer le prix": "Change the price",
+  "Changer {0} prix": "Change {0} prices",
+  "Activer la vente finale": "Turn on final sale",
+  "Retirer la vente finale": "Remove final sale",
+  "{0} produit passera en vente finale : il ne pourra plus être retourné.": "{0} product will become final sale: it can no longer be returned.",
+  "{0} produits passeront en vente finale : ils ne pourront plus être retournés.": "{0} products will become final sale: they can no longer be returned.",
+  "{0} produit redeviendra retournable.": "{0} product will be returnable again.",
+  "{0} produits redeviendront retournables.": "{0} products will be returnable again.",
+  "Activer pour {0}": "Turn on for {0}",
+  "Retirer pour {0}": "Remove for {0}",
 };

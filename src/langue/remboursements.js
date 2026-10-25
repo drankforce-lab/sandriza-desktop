@@ -116,4 +116,7 @@ module.exports = {
   'Par mode': 'By method',
   'Écran de consultation : on rembourse depuis la commande. Un clic sur une ligne l’ouvre.': 'Read-only screen: refunds are made from the order. Click a row to open it.',
   'Expiration : {0}': 'Expiry: {0}',
+  // 2026-10-25, audit : TPS et TVQ du détail traduits (comme langue/depenses.js).
+  'TPS': 'GST',
+  'TVQ': 'QST',
 };

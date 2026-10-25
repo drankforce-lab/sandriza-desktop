@@ -893,9 +893,23 @@ const CSS_SUIVI = `
    c est le cas au banc, ou rien n est reellement dispose. Un compte devine
    dans ces conditions ferait recharger la liste avec une valeur inventee. */
 const JS_AUTOPAGE = () => `
-var _szAutoT = null, _szAutoDernier = 0;
+/* (2026-10-25, audit) UN ENREGISTREMENT PAR SELECTEUR, LE DERNIER GAGNE. Avant : l ecouteur
+   resize gardait la fermeture du PREMIER appel, et le dernier compte etait global. Journaux
+   (deux onglets sur la meme « .liste ») redessinait l onglet d ouverture au redimensionnement,
+   et un onglet dont la mesure egalait la precedente gardait son compte par defaut.
+   Le dernier compte est remis a zero quand le rappel vient d un AUTRE endroit du code (son
+   texte differe) — jamais quand la fenetre rappelle le meme depuis son propre redessin, sans
+   quoi rappel -> redessin -> szAutoPagination -> rappel tournerait sans fin.
+   ⚠ _szAutoDernier RESTE, et garde son sens : des fenetres (fidelisation, depenses) le remettent a 0
+   pour forcer la prochaine mesure. A 0, la mesure suivante oublie le dernier compte de SON selecteur ;
+   il vaut ensuite le dernier compte annonce. */
+var _szAutoT = null, _szAutoReg = {}, _szAutoDernier = 0;
 
 function szAutoPagination(selecteur, surChangement){
+  var site = String(surChangement);
+  var ent = _szAutoReg[selecteur];
+  if (!ent || ent.site !== site) ent = _szAutoReg[selecteur] = { site: site, dernier: 0 };
+  ent.rappel = surChangement;
   function mesurer(){
     var g = document.querySelector(selecteur);
     if (!g) return;
@@ -915,15 +929,20 @@ function szAutoPagination(selecteur, surChangement){
     var dispo = g.clientHeight - ((th && th.offsetHeight) || 30);
     if (!(dispo > 0)) return;
     var n = Math.max(5, Math.floor(dispo / hL));
-    if (!isFinite(n) || n === _szAutoDernier) return;
-    _szAutoDernier = n;
-    try { surChangement(n); } catch (e) {}
+    if (_szAutoDernier === 0) ent.dernier = 0;
+    if (!isFinite(n) || n === ent.dernier) return;
+    ent.dernier = n; _szAutoDernier = n;
+    try { ent.rappel(n); } catch (e) {}
   }
+  ent.mesurer = mesurer;
   mesurer();
   if (!_szAutoT) {
     window.addEventListener('resize', function(){
       clearTimeout(_szAutoT);
-      _szAutoT = setTimeout(mesurer, 180);
+      _szAutoT = setTimeout(function(){
+        // Chaque selecteur avec SON dernier rappel ; un absent ou cache ne mesure rien.
+        Object.keys(_szAutoReg).forEach(function(k){ try { _szAutoReg[k].mesurer(); } catch (e) {} });
+      }, 180);
     });
     _szAutoT = -1;   // l ecouteur n est pose qu une fois
   }

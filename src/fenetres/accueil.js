@@ -159,13 +159,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
     droit:'${T("Votre rôle ne donne pas accès à la configuration.")}',
     lecture_seule:'${T("Votre rôle est en lecture seule.")}',
-    indisponible:"${T('L\'administration n\'est pas encore chargée dans la fenêtre principale.')}",
+    indisponible:'${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
     pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
-    delai:"${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    delai:'${T("La fenêtre principale n’a pas répondu à temps.")}',
     operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
-    echec:"${T('L\'opération a échoué.')}",
+    echec:'${T("L’opération a échoué.")}',
   };
-  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+esc(m||'?')+').'))+(r&&r.detail?' ('+esc(r.detail)+')':''); }
+  // (2026-10-25, audit) Texte BRUT : szDire / ferr l ecrivent en textContent (echappe, « & » s y lisait « &amp; »).
+  // Ce qui part dans du HTML est echappe a l endroit ou on l y met.
+  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+(m||'?')+').'))+(r&&r.detail?' ('+r.detail+')':''); }
   function appeler(op, args){
     var p; try { p = P.appeler.apply(P, [op].concat(args||[])); } catch(e){ return Promise.resolve({ok:false,motif:'pont_indisponible'}); }
     if (!p || typeof p.then !== 'function') return Promise.resolve({ok:false,motif:'pont_indisponible'});
@@ -180,9 +182,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   // ── ENVOI (tableau entier) ──────────────────────────────────────────────────
   function adopter(r){ D=r; BLOCS = (r.blocs||[]).slice(); RO = !r.peutModifier; GRADS = r.gradients || GRADS; }
-  function ecrire(apres){
+  /* (2026-10-25, audit) LE CHANGEMENT SE FAIT SUR UNE COPIE. BLOCS (et b.content) etait modifie AVANT
+     l ecriture et jamais restaure sur un echec : l ecran montrait l ancien etat, mais la prochaine ecriture
+     (un simple clic sur l oeil ou une fleche) publiait en boutique le contenu abandonne. modif(copie)
+     applique le geste a une copie ; seule la reponse du site (adopter) remplace BLOCS. */
+  function ecrire(modif, apres){
+    var copie = JSON.parse(JSON.stringify(BLOCS));
+    if (modif) modif(copie);
     occuper(true); dire('${T("Enregistrement…")}');
-    appeler('config:accueil:ecrire', [BLOCS]).then(function(r){
+    appeler('config:accueil:ecrire', [copie]).then(function(r){
       occuper(false);
       if (r && r.ok) { adopter(r); if (apres) apres(); dessiner(); dire('${T("Page d’accueil enregistrée.")}', 'bon'); }
       else dire(expliquer(r), 'err');
@@ -338,13 +346,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
 
   // ── Actions liste ──
-  function basculer(id){ var b=BLOCS.filter(function(x){return x.id===id;})[0]; if(!b)return; b.visible=!b.visible; ecrire(); }
+  function basculer(id){
+    if (!BLOCS.some(function(x){ return x.id===id; })) return;
+    ecrire(function(c){ c.forEach(function(b){ if (b.id===id) b.visible = !b.visible; }); });
+  }
   function deplacer(id, dir){
     var i = BLOCS.findIndex(function(x){ return x.id===id; }); var ni=i+dir;
     if (i<0 || ni<0 || ni>=BLOCS.length) return;
-    var tmp=BLOCS[i]; BLOCS[i]=BLOCS[ni]; BLOCS[ni]=tmp; VOIR = id;
-    BLOCS.forEach(function(b,k){ b.order = k; });   // renumérote l'ordre
-    ecrire();
+    VOIR = id;
+    ecrire(function(c){
+      var tmp=c[i]; c[i]=c[ni]; c[ni]=tmp;
+      c.forEach(function(b,k){ b.order = k; });   // renumérote l'ordre
+    });
   }
 
   // ── Éditeur héro ──
@@ -473,18 +486,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function enregistrerBloc(){
     if (RO) return;
     var b = BLOCS.filter(function(x){ return x.id===EDIT; })[0]; if(!b) return;
+    // Le contenu se calcule ici, mais ne s applique qu a la COPIE envoyee (voir ecrire).
+    var contenu;
     if (EDIT === 'hero') {
       lireDiapos();
-      b.content = { sliderEffect: val('a-effect')||'fade', sliderInterval: parseInt(val('a-interval'),10)||6,
+      contenu = { sliderEffect: val('a-effect')||'fade', sliderInterval: parseInt(val('a-interval'),10)||6,
         sliderAutoplay: chk('a-autoplay'), slides: SLIDES };
     } else if (EDIT === 'banner') {
-      b.content = Object.assign({}, b.content||{}, { eyebrow:val('a-eyebrow'), title:val('a-title'), subtitle:val('a-subtitle'), ctaText:val('a-ctat'), ctaHref:val('a-ctah') });
+      contenu = Object.assign({}, b.content||{}, { eyebrow:val('a-eyebrow'), title:val('a-title'), subtitle:val('a-subtitle'), ctaText:val('a-ctat'), ctaHref:val('a-ctah') });
     } else {
-      b.content = Object.assign({}, b.content||{}, { eyebrow:val('a-eyebrow'), title:val('a-title') });
+      contenu = Object.assign({}, b.content||{}, { eyebrow:val('a-eyebrow'), title:val('a-title') });
     }
+    var cible = EDIT;
     /* ⚠ LE BROUILLON MEURT DANS LA SUITE D'ecrire(), donc SEULEMENT si l'ecriture
        a abouti : le jeter avant perdrait la saisie en cas d'echec. */
-    ecrire(function(){ szBrouillonJeter(); EDIT=null; SLIDES=[]; });
+    ecrire(function(c){ c.forEach(function(x){ if (x.id === cible) x.content = JSON.parse(JSON.stringify(contenu)); }); },
+      function(){ szBrouillonJeter(); EDIT=null; SLIDES=[]; });
   }
 
   breinit.onclick = function(){
@@ -505,7 +522,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function charger(){
     dire('${T("Lecture…")}');
     appeler('config:accueil:donnees').then(function(r){
-      if (!r || !r.ok) { corps.innerHTML = '<div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div>'; dire(expliquer(r), 'err'); return; }
+      if (!r || !r.ok) { corps.innerHTML = '<div class="vide m-' + esc((r && r.motif) || 'echec') + '">' + esc(expliquer(r)) + '</div>'; dire(expliquer(r), 'err'); return; }
       adopter(r);
       if (OUVERTURE && BLOCS.some(function(b){ return b.id === OUVERTURE; })) { ouvrirEdit(OUVERTURE); }
       else { EDIT=null; dessiner(); dire(''); }

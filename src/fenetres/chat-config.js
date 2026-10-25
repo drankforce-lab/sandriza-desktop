@@ -156,6 +156,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'c-nom':40,'c-photo':500,'c-courriel':1
   function txv(id){ var e=el(id); return e?String(e.value||''):''; }
   function coche(id){ var e=el(id); return !!(e&&e.checked); }
 
+  /* ⚠ LA SAISIE DES DEUX ONGLETS SURVIT AU CHANGEMENT D ONGLET (2026-10-25, audit).
+     dessiner() refait le formulaire depuis D : passer a << Assistant IA >> et
+     revenir rendait nom, courriel et accueils a leur valeur lue. On releve le
+     DOM dans D avant chaque changement d onglet (comme rot.onchange le faisait
+     deja), et deux drapeaux disent ce qui n est pas enregistre — pour ne pas
+     l ecraser au retour au premier plan, ni a l enregistrement de l autre onglet. */
+  var SALE_W = false, SALE_I = false;
+  var CHAMPS_W = [['c-nom','nomAgent'],['c-photo','photoAgent'],['c-courriel','courrielAvis'],['c-accueil','accueil'],
+    ['c-accueil-en','accueilEN'],['c-horsligne','horsLigne'],['c-horsligne-en','horsLigneEN']];
+  var COCHES_W = [['c-actif','actif'],['c-enligne','enLigne'],['c-rotation','rotation']];
+  function relever(){
+    if (!D) return;
+    CHAMPS_W.forEach(function(c){ if (el(c[0])) D[c[1]] = txv(c[0]); });
+    COCHES_W.forEach(function(c){ if (el(c[0])) D[c[1]] = coche(c[0]); });
+    if (el('i-regles')) {
+      D.ia = D.ia || {};
+      D.ia.active = coche('i-actif'); D.ia.regles = txv('i-regles'); D.ia.transfert = txv('i-transfert');
+      for (var i=0;i<SOURCES.length;i++) D.ia[SOURCES[i][0]] = coche('i-'+SOURCES[i][0]);
+    }
+  }
+  function widgetRetenu(){ var o = {}; CHAMPS_W.concat(COCHES_W).forEach(function(c){ o[c[1]] = D[c[1]]; }); return o; }
+
   var MOTIFS = {
     session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
     droit:'${T("Votre rôle ne donne pas accès au chat en ligne.")}',
@@ -216,7 +238,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'c-nom':40,'c-photo':500,'c-courriel':1
       + '<label class="bascule"><input type="checkbox" id="c-rotation"'+(d.rotation?' checked':'')+dis+'> ${T("Rotation des noms")}</label>'
       + '</div>'
       + '<label class="champ"><span class="lbl">${T("Nom de l’agent")}</span>'
-      + '<input class="t" id="c-nom" value="'+esc(d.nomAgent||'')+'" placeholder="Support"'+dis+'>'
+      + '<input class="t" id="c-nom" value="'+esc(d.nomAgent||'')+'" placeholder="${T("Support")}"'+dis+'>'
       + '</label>'
       + '<label class="champ"><span class="lbl">${T("Courriel d’avis (hors ligne)")}</span>'
       + '<input class="t" id="c-courriel" type="email" value="'+esc(d.courrielAvis||'')+'" placeholder="admin@sandriza.com"'+dis+'>'
@@ -275,7 +297,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'c-nom':40,'c-photo':500,'c-courriel':1
            trois fois « zone de texte » sans dire de quel agent. Le placeholder
            ne compte pas — il disparait des qu on tape. */
         + '<input type="checkbox" aria-label="${T("Agent actif")}" data-ag-actif="'+i+'"'+(a.actif?' checked':'')+dis+' style="width:15px;height:15px;accent-color:var(--or);flex:0 0 auto">'
-        + '<input class="t nom" aria-label="${T("Nom de l’agent")}" data-ag-nom="'+i+'" value="'+esc(a.nom)+'" placeholder="Nom"'+dis+'>'
+        + '<input class="t nom" aria-label="${T("Nom de l’agent")}" data-ag-nom="'+i+'" value="'+esc(a.nom)+'" placeholder="${T("Nom")}"'+dis+'>'
         + '<input class="t ph" aria-label="${T("URL de la photo de l’agent")}" data-ag-photo="'+i+'" value="'+esc(a.photo)+'" placeholder="${T("URL de la photo (vide = sans photo)")}"'+dis+'>'
         + (RO ? '' : '<button class="mini" type="button" data-ag-imp="'+i+'" title="${T("Importer une photo")}"><span class="ic">📁</span></button>')
         + (a.photo ? '<img class="vign" src="'+esc(a.photo)+'" alt="">' : '<span class="sansph"><span class="ic">👤</span></span>')
@@ -336,7 +358,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'c-nom':40,'c-photo':500,'c-courriel':1
     var lecteur = new FileReader();
     lecteur.onerror = function(){ dire('${T("Lecture du fichier impossible.")}', 'err'); };
     lecteur.onload = function(ev){
-      if (OCCUPE) return; OCCUPE = true;
+      /* (2026-10-25, audit) Une photo choisie pendant un enregistrement n est plus abandonnee en silence. */
+      if (OCCUPE) { dire('${T("Enregistrement en cours — réessayez dans un instant.")}', 'att'); return; }
+      OCCUPE = true; SALE_W = true;
       dire('${T("Envoi de la photo…")}');
       appeler('chat:cfg:photo', [String(ev.target.result||'')]).then(function(r){
         OCCUPE = false;
@@ -367,7 +391,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'c-nom':40,'c-photo':500,'c-courriel':1
     }]).then(function(r){
       OCCUPE = false;
       if (!r || !r.ok) { dire('${T("Échec : ")}'+expliquer(r), 'err'); return; }
-      poser(r); dessiner(); dire('${T("Réglages du widget enregistrés.")}', 'bon');
+      /* L onglet IA garde ce qui y est tape et non enregistre. */
+      var gI = (SALE_I && D) ? D.ia : null;
+      poser(r); if (gI) D.ia = gI; SALE_W = false;
+      dessiner(); dire('${T("Réglages du widget enregistrés.")}', 'bon');
     });
   }
 
@@ -415,7 +442,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'c-nom':40,'c-photo':500,'c-courriel':1
     appeler('chat:cfg:ia', [p]).then(function(r){
       OCCUPE = false;
       if (!r || !r.ok) { dire('${T("Échec : ")}'+expliquer(r), 'err'); return; }
-      poser(r); dessiner(); dire('${T("Assistant enregistré.")}', 'bon');
+      /* L onglet Widget (champs ET agents) garde ce qui y est tape et non enregistre. */
+      var gW = (SALE_W && D) ? widgetRetenu() : null, gA = SALE_W ? AGENTS : null;
+      poser(r); if (gW) Object.assign(D, gW); if (gA) AGENTS = gA; SALE_I = false;
+      dessiner(); dire('${T("Assistant enregistré.")}', 'bon');
     });
   }
 
@@ -464,8 +494,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'c-nom':40,'c-photo':500,'c-courriel':1
   }
 
   var ow = el('o-widget'), oi = el('o-ia');
-  if (ow) ow.onclick = function(){ if (ONGLET!=='widget'){ ONGLET='widget'; dessiner(); } };
-  if (oi) oi.onclick = function(){ if (ONGLET!=='ia'){ ONGLET='ia'; dessiner(); } };
+  if (ow) ow.onclick = function(){ if (ONGLET!=='widget'){ relever(); ONGLET='widget'; dessiner(); } };
+  if (oi) oi.onclick = function(){ if (ONGLET!=='ia'){ relever(); ONGLET='ia'; dessiner(); } };
+  function marquer(){ if (ONGLET === 'ia') SALE_I = true; else SALE_W = true; }
+  corps.addEventListener('input', marquer);
+  corps.addEventListener('change', marquer);
+  corps.addEventListener('click', function(e){
+    if (e.target && e.target.closest && e.target.closest('[data-ag-suppr],#c-agent-plus')) SALE_W = true;
+  });
 
   function charger(){
     dire('${T("Chargement…")}');
@@ -481,7 +517,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'c-nom':40,'c-photo':500,'c-courriel':1
   window.szRevenir = function(){
     if (OCCUPE) return;
     var a = document.activeElement;
-    if (a && /^(INPUT|TEXTAREA)$/.test(a.tagName)) { dire('${T("Saisie en cours : les réglages ne sont pas rechargés.")}', 'att'); return; }
+    /* (2026-10-25, audit) Le foyer ne suffit pas : taper puis cliquer dans le vide
+       le rend au corps, et le rechargement effacait tout. Les drapeaux, eux, restent. */
+    if (SALE_W || SALE_I || (a && /^(INPUT|TEXTAREA)$/.test(a.tagName))) { dire('${T("Saisie en cours : les réglages ne sont pas rechargés.")}', 'att'); return; }
     charger();
   };
   charger();

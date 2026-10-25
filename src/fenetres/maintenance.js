@@ -165,8 +165,9 @@ function pageMaintenance() {
      cycle construction + publication + installation. */
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
-    if (r && r.detail) t += ' (' + esc(String(r.detail).slice(0, 140)) + ')';
+    // (2026-10-25, audit) Texte BRUT : szDire l ecrit en textContent ; le corps l echappe ou il le pose.
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + (m || '?') + ').');
+    if (r && r.detail) t += ' (' + String(r.detail).slice(0, 140) + ')';
     return t;
   }
 
@@ -187,7 +188,7 @@ function pageMaintenance() {
     if (!MX.ok) {
       sousEl.textContent = '';
       corps.innerHTML = '<div class="carte"><div class="vide">'
-        + '<span class="ic">\\u26a0</span>' + expliquer(MX)
+        + '<span class="ic">\\u26a0</span>' + esc(expliquer(MX))
         + '<div class="diag">${T("motif : ")}' + esc((MX && MX.motif) || '?') + '</div>'
         + '</div></div>';
       return;
@@ -415,10 +416,22 @@ function pageMaintenance() {
   window.szRevenir = function(){ charger(); };
   window.szActualiser = function(){};
 
+  /* (2026-10-25, audit) ECHAP NE JETTE PAS UNE SAISIE. Debut, fin, message et NIP tapes se perdaient sur
+     un Echap. Un champ « modifie » est celui dont la valeur differe de celle posee au dessin (defaultValue) :
+     la fin pre-remplie de « Prolonger » n est donc pas une saisie tant qu on n y touche pas. La boite de
+     confirmation (szConfirmer) prend elle-meme Echap pendant qu elle est ouverte. */
+  function saisieModifiee(){
+    var l = document.querySelectorAll('input[id^="mx-"]');
+    for (var i = 0; i < l.length; i++) if (l[i].value !== l[i].defaultValue) return true;
+    return false;
+  }
   document.addEventListener('keydown', function(ev){
     if (ev.key !== 'Escape') return;
     ev.preventDefault();
-    P.fermer();
+    if (!saisieModifiee()) { P.fermer(); return; }
+    szConfirmer({ titre: '${T("Fermer sans enregistrer ?")}',
+      texte: '${T("Ce qui a été saisi (période, message, NIP) n’a pas été envoyé. Il sera perdu.")}',
+      oui: '${T("Fermer")}', non: '${T("Rester")}', prudent: true }).then(function(ok){ if (ok) P.fermer(); });
   });
 
   charger();

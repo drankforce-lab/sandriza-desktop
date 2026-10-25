@@ -323,4 +323,14 @@ module.exports = {
   'Le colis de retour de la commande': 'The return parcel for order',
   'sera marqué comme reçu en entrepôt. Le client peut en être avisé par courriel.': 'will be marked as received at the warehouse. The customer may be notified by email.',
   'Marquer comme reçu': 'Mark as received',
+  // 2026-10-25, audit : motifs bruts, fragments restés en français, rejet confirmé.
+  'Ce retour a déjà été réglé (remboursé ou complété). Rien n’a été refait.': 'This return has already been settled (refunded or completed). Nothing was redone.',
+  'Le serveur a refusé l’enregistrement du retour. Rien n’a été modifié — réessayez.': 'The server refused to save the return. Nothing was changed — try again.',
+  'moyen original': 'original payment method',
+  'suivi': 'tracking',
+  'ligne': 'line',
+  'livraison': 'shipping',
+  'Confirmer le rejet': 'Confirm the rejection',
+  'Le rejet de la demande de retour de la commande': 'The rejection of the return request for order',
+  'sera confirmé malgré la réponse du client.': 'will be confirmed despite the customer’s reply.',
 };

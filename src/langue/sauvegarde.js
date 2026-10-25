@@ -54,7 +54,7 @@ module.exports = {
     'Read only: creating, restoring, deleting and purging are reserved for the super administrator.',
   'Votre rôle ne donne pas accès aux sauvegardes.':
     'Your role does not give access to the backups.',
-  'La fenêtre principale n\'a pas répondu à temps.': 'The main window did not answer in time.',
+  'La fenêtre principale n’a pas répondu à temps.': 'The main window did not answer in time.',
 
   /* ── LA BARRE D OUTILS ──────────────────────────────────────────────────── */
   '＋ Créer une sauvegarde': '＋ Create a backup',

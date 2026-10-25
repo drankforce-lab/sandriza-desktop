@@ -33,12 +33,11 @@ module.exports = {
 
   /* ── LES MOTIFS DE REFUS ────────────────────────────────────────────────── */
   'Votre rôle est en lecture seule.': 'Your role is read only.',
-  /* ⚠ L apostrophe DROITE : la source ecrit ces trois-la entre guillemets
-     doubles. */
-  "L'administration n'est pas encore chargée dans la fenêtre principale.":
+  /* (2026-10-25, audit) Apostrophe typographique, comme dans toutes les autres fenetres. */
+  'L’administration n’est pas encore chargée dans la fenêtre principale.':
     'The administration is not loaded yet in the main window.',
-  "La fenêtre principale n'a pas répondu à temps.": 'The main window did not answer in time.',
-  "L'opération a échoué.": 'The operation failed.',
+  'La fenêtre principale n’a pas répondu à temps.': 'The main window did not answer in time.',
+  'L’opération a échoué.': 'The operation failed.',
 
   /* ── L ORDRE ET LA VISIBILITE ───────────────────────────────────────────── */
   'Ordre et visibilité': 'Order and visibility',

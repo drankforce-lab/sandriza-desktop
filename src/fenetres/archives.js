@@ -146,10 +146,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   }
 
   var ONGLETS = [
-    { k: 'commandes', l: 'Commandes' },
-    { k: 'retours', l: 'Retours' },
-    { k: 'factures', l: 'Factures' },
-    { k: 'remboursements', l: 'Remboursements' }
+    /* (2026-10-25, audit) Les libelles des tuiles passent par T() ; les cles k restent. */
+    { k: 'commandes', l: '${T("Commandes")}' },
+    { k: 'retours', l: '${T("Retours")}' },
+    { k: 'factures', l: '${T("Factures")}' },
+    { k: 'remboursements', l: '${T("Remboursements")}' }
   ];
 
   function filtrees(){

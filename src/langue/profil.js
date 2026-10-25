@@ -31,8 +31,8 @@ module.exports = {
   /* ── LES MOTIFS DE REFUS ────────────────────────────────────────────────── */
   'Saisie invalide.': 'Invalid entry.',
   'Le serveur a refusé la modification.': 'The server refused the change.',
-  /* ⚠ L apostrophe DROITE : la source ecrit celle-la entre guillemets doubles. */
-  "La fenêtre principale n'a pas répondu à temps.": 'The main window did not answer in time.',
+  /* (2026-10-25, audit) Apostrophe typographique, comme dans toutes les autres fenetres. */
+  'La fenêtre principale n’a pas répondu à temps.': 'The main window did not answer in time.',
 
   /* ── LE COMPTE ──────────────────────────────────────────────────────────── */
   'Votre compte': 'Your account',

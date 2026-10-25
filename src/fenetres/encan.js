@@ -116,8 +116,13 @@ button.mini{padding:.12rem .45rem;font-size:.74rem;border-radius:6px}
 .puce-v.err{border-color:var(--tx-err);color:var(--tx-err)}
 
 /* Listes du bas */
-.bas{flex:1 1 auto;display:flex;flex-direction:column}
-.liste{display:flex;flex-direction:column;gap:.3rem;overflow:hidden;min-height:0}
+/* (2026-10-25, audit) BORNEES ET EN PAGES MESUREES (data-pages) : au-dela de quelques articles
+   « A suivre », d attentes ou de ventes, les lignes du bas sortaient de la carte avec leurs boutons
+   (Retirer, GAGNE recu, Remettre en vente, Copier). Chaque liste vit dans une enveloppe .pgl, que
+   l onglet cache : le pied de pages du socle (pose juste apres la liste) se cache avec elle. */
+.bas{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+.pgl{flex:1 1 0;min-height:0;display:flex;flex-direction:column}
+.liste{display:flex;flex-direction:column;gap:.3rem;overflow:hidden;min-height:0;flex:1 1 0}
 .ln{display:flex;justify-content:space-between;align-items:center;gap:.6rem;padding:.38rem .55rem;border-radius:8px;background:var(--v05);font-size:.84rem}
 .ln .v{color:var(--tx2);white-space:nowrap}
 .ln.bon .v{color:var(--tx-ok);font-weight:700}
@@ -244,9 +249,9 @@ function pageEncan() {
         <button type="button" data-liste="att" role="tab">${T("En attente de « GAGNÉ »")}</button>
         <button type="button" data-liste="ventes" role="tab">${T("Ventes de la séance")}</button>
       </div>
-      <div class="liste" id="l-file"></div>
-      <div class="liste" id="l-att" hidden></div>
-      <div class="liste" id="l-ventes" hidden></div>
+      <div class="pgl" id="w-file"><div class="liste" id="l-file" data-pages="encan-file"></div></div>
+      <div class="pgl" id="w-att" hidden><div class="liste" id="l-att" data-pages="encan-att"></div></div>
+      <div class="pgl" id="w-ventes" hidden><div class="liste" id="l-ventes" data-pages="encan-ventes"></div></div>
     </div>
   </div>
 
@@ -298,7 +303,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     pseudo_requis: '${T("Le pseudo est obligatoire.")}',
     essai_coupe: '${T("Le mode essai est coupé.")}',
     introuvable: '${T("Cet élément n’existe plus.")}',
-    indisponible: '${T("Cette version de l’application ne connaît pas l’encan.")}'
+    indisponible: '${T("Cette version de l’application ne connaît pas l’encan.")}',
+    /* (2026-10-25, audit) Les refus de la CAISSE (scan, recherche) : sans eux, une session expiree
+       se lisait « Article introuvable. » et la recherche restait vide sans un mot. */
+    session: '${T("Session expirée : reconnectez-vous dans la fenêtre principale.")}',
+    droit: '${T("Votre rôle ne donne pas accès au catalogue de la caisse.")}',
+    pont_indisponible: '${T("La fenêtre principale ne répond pas.")}'
   };
   /* La vente au serveur (2026-10-23) : pourquoi il n y a pas de lien. */
   var MOTIFS_VENTE = {
@@ -341,7 +351,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     b.onclick = function(){
       var k = b.getAttribute('data-liste');
       Array.prototype.forEach.call(document.querySelectorAll('[data-liste]'), function(x){ x.classList.toggle('on', x === b); });
-      $('l-file').hidden = k !== 'file'; $('l-att').hidden = k !== 'att'; $('l-ventes').hidden = k !== 'ventes';
+      $('w-file').hidden = k !== 'file'; $('w-att').hidden = k !== 'att'; $('w-ventes').hidden = k !== 'ventes';
+      // Un attribut hidden ne reveille pas l observateur du socle : la liste montree se remesure ici.
+      if (typeof szPagesTout === 'function') szPagesTout();
     };
   });
 
@@ -574,7 +586,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   $('g-principal').onclick = function(){ if (!E) return; geste(E.phase === 'encours' ? 'pause' : E.phase === 'pause' ? 'reprendre' : 'demarrer'); };
   $('g-plus').onclick = function(){ geste('ajouterTemps', [E ? E.reglages.ajout : 15]); };
   $('g-adjuger').onclick = function(){ geste('adjuger'); };
-  $('g-remettre').onclick = function(){ geste('remettre'); };
+  /* (2026-10-25, audit) Remettre a zero efface les offres (et, apres l adjudication, la gagnante et
+     son lien de paiement) : CONFIRME des qu il y a quelque chose a perdre. */
+  $('g-remettre').onclick = function(){
+    if (!E || (!(E.nbOffres > 0) && E.phase !== 'adjuge')) { geste('remettre'); return; }
+    szConfirmer({ danger: true, titre: '${T("Remettre à zéro")}',
+      texte: E.phase === 'adjuge'
+        ? '${T("L’adjudication est annulée : la gagnante perd l’article et son lien de paiement est annulé. Toutes les offres sont effacées.")}'
+        : '${T("Toutes les offres reçues pour cet article sont effacées et l’encan revient au prix de départ.")}',
+      details: [['${T("Offres")}', String(E.nbOffres || 0)]],
+      oui: '${T("Remettre à zéro")}' }).then(function(ok){ if (ok) geste('remettre'); });
+  };
   $('g-remise').onclick = function(){ geste('remettreEnVente'); };
   $('g-annuler').onclick = function(){
     szConfirmer({ danger: true, titre: '${T("Annuler l’encan")}',
@@ -641,10 +663,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   };
   $('e-texte').onkeydown = function(ev){ if (ev.key === 'Enter') $('e-envoyer').click(); };
   var NOMS = ['@julie.mtl', '@sophie_b', '@marie.g', '@karine.qc', '@ana_lav', '@nath_22'];
+  /* (2026-10-25, audit) UNE rafale a la fois : un double-clic lancait deux minuteries (20 offres). */
+  var RAFALE = null;
   $('e-rafale').onclick = function(){
-    var n = 0;
-    var t = setInterval(function(){
-      if (!E || n >= 10 || E.phase !== 'encours') { clearInterval(t); return; }
+    if (RAFALE) return;
+    var n = 0, bR = $('e-rafale');
+    bR.disabled = true;
+    var t = RAFALE = setInterval(function(){
+      if (!E || n >= 10 || E.phase !== 'encours') { clearInterval(t); RAFALE = null; bR.disabled = false; return; }
       var monte = (E.nbOffres ? E.prix : E.reglages.depart - E.reglages.hausse) + E.reglages.hausse * (1 + Math.floor(Math.random() * 3));
       geste('commentaire', [NOMS[Math.floor(Math.random() * NOMS.length)], String(Math.ceil(monte)), 'essai']);
       n++;
@@ -682,7 +708,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (!q.trim()) { $('res').innerHTML = ''; return; }
       if (!entree && q.trim().length < 3) { $('res').innerHTML = ''; return; }
       P.appeler('caisse:chercher', q).then(function(r){
-        if (!r || !r.ok) { $('res').innerHTML = '<div class="aide">' + esc((r && MOTIFS[r.motif]) || '') + '</div>'; return; }
+        if (!r || !r.ok) { $('res').innerHTML = '<div class="aide">' + esc((r && MOTIFS[r.motif]) || '${T("La recherche a échoué.")}') + '</div>'; return; }
         if (r.sku) { scanne(r.sku); return; }
         if (r.court) { $('res').innerHTML = '<div class="aide">${T("Trois caractères minimum pour chercher.")}</div>'; return; }
         TROUVES = r.articles || [];

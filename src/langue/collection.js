@@ -108,4 +108,8 @@ module.exports = {
   'Nom de la collection': 'Collection name',
   'Pour enregistrer': 'To save',
   'Prête à enregistrer': 'Ready to save',
+  /* (2026-10-25, audit) Textes visibles qui restaient hors T(). */
+  'Nom': 'Name',
+  'produits choisis': 'products selected',
+  'produit choisi': 'product selected',
 };

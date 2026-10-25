@@ -222,4 +222,8 @@ module.exports = {
     'These figures are computed from what the shop records: sales, refunds, expenses, payments and inventory. An owner contribution, a loan, depreciation, payroll outside of expenses, or an adjustment requested by your accountant do not appear here — that will be the job of the full general ledger.',
   // 2026-10-16 : la refonte de la Comptabilité.
   'La barre : le revenu du mois.': 'The bar: the month’s revenue.',
+  // 2026-10-25, audit : changer d’exercice avec un budget non enregistré.
+  'Changer d’exercice': 'Change fiscal year',
+  'Le budget saisi n’est pas enregistré. Changer d’exercice le perdra.': 'The budget you entered is not saved. Changing fiscal year will discard it.',
+  'Changer sans enregistrer': 'Change without saving',
 };

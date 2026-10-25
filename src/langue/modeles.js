@@ -80,5 +80,12 @@ module.exports = {
   'Modèle enregistré.': 'Model saved.',
   'Modèle retiré.': 'Model removed.',
   'Mannequin ajouté.': 'Model added.',
-  'Mannequin retiré.': 'Model removed.'
+  'Mannequin retiré.': 'Model removed.',
+  /* (2026-10-25, audit) Textes visibles qui restaient hors T(). */
+  'Supprimer le modèle': 'Delete the view image',
+  'L’image de cet angle de vue sera supprimée du stockage. Cette action est irréversible.': 'The image for this view angle will be deleted from storage. This action cannot be undone.',
+  'Angle de vue': 'View angle',
+  'Supprimer le mannequin': 'Delete the model',
+  'Ce mannequin et son image seront supprimés du stockage ; l’habillage IA ne le proposera plus. Cette action est irréversible.': 'This model and its image will be deleted from storage; AI try-on will no longer offer it. This action cannot be undone.',
+  'Mannequin': 'Model',
 };

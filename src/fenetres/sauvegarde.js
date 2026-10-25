@@ -217,11 +217,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('sauvegarde')}
     droit:'${T("Votre rôle ne donne pas accès aux sauvegardes.")}',
     indisponible:'${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
     pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
-    delai:"${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    delai:'${T("La fenêtre principale n’a pas répondu à temps.")}',
     operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
     echec:'${T("L’opération a échoué.")}'
   };
-  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+esc(m||'?')+').'))+(r&&r.detail?'${T(" — ")}'+esc(r.detail):''); }
+  // (2026-10-25, audit) Texte BRUT : szDire / ferr l ecrivent en textContent (echappe, « & » s y lisait « &amp; »).
+  // Ce qui part dans du HTML est echappe a l endroit ou on l y met.
+  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+(m||'?')+').'))+(r&&r.detail?'${T(" — ")}'+r.detail:''); }
   function appeler(op, args){
     var p; try { p = P.appeler.apply(P, [op].concat(args||[])); } catch(e){ return Promise.resolve({ok:false,motif:'pont_indisponible'}); }
     if (!p || typeof p.then !== 'function') return Promise.resolve({ok:false,motif:'pont_indisponible'});
@@ -420,7 +422,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('sauvegarde')}
       '<button class="b" id="s-annuler">${T("Annuler")}</button><button class="prim" id="s-go"><span class="ic">💾</span> ${T("Créer la sauvegarde")}</button>');
     document.getElementById('s-annuler').onclick=fermerSur;
     document.getElementById('s-go').onclick=creer;
-    var n=document.getElementById('s-${T("note")}'); if (n) try { n.focus(); } catch(e){}
+    // (2026-10-25, audit) Un IDENTIFIANT ne passe jamais par T() : traduit, le champ n etait plus trouve.
+    var n=document.getElementById('s-note'); if (n) try { n.focus(); } catch(e){}
   }
   /* ══ OU EN EST LA SAUVEGARDE — sa demande du 2026-09-09 ════════════════════
      Ses mots : << un pourcentage et un avancement de la sauvegarde, exemple
@@ -492,7 +495,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('sauvegarde')}
       + '<div class="pg-b"><i style="width:0%"></i></div>';
     dire('');
     suivreProgres(jeton);
-    appeler('sauvegarde:creer',[txv('s-${T("note")}'), jeton]).then(function(r){ OCCUPE=false;
+    appeler('sauvegarde:creer',[txv('s-note'), jeton]).then(function(r){ OCCUPE=false;
       arreterProgres();
       if (r&&r.ok){
         fermerSur(); D=r; RO=!r.peutEcrire; vueListe();
@@ -580,10 +583,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('sauvegarde')}
        visibles ne le voyait pas : sa liste de mots ne connaissait ni
        « integrite » ni « refusee ». Ils y sont maintenant. */
     if (z) z.innerHTML = '<div class="ch">${T("Vérification de l’intégrité de la sauvegarde…")}</div>';
+    /* (2026-10-25, audit) LE VERDICT EST CELUI DE CETTE SAUVEGARDE-CI. Ouvrir A, annuler, ouvrir B : la
+       reponse de A (jusqu a 180 s) arrivait dans la surcouche de B et y allumait « Restaurer maintenant ».
+       La zone porte la cle qu elle attend ; une reponse pour une autre cle est ignoree. */
+    if (z) z.setAttribute('data-cle', encKey);
     appeler('sauvegarde:integrite',[encKey]).then(function(r){
       var z2 = document.getElementById('s-intg');
       var go = document.getElementById('s-go');
-      if (!z2) return;
+      if (!z2 || z2.getAttribute('data-cle') !== encKey) return;
       /* ⚠ TROIS SORTIES, PAS DEUX. Un refus DU PONT (session, droit, reseau) n est
          pas une sauvegarde corrompue : les deux empechent de restaurer, mais pas
          pour la meme raison et pas avec le meme geste ensuite. Les confondre
@@ -608,7 +615,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('sauvegarde')}
         : '<div class="ch ko">${T("Restauration refusée — cette sauvegarde ne peut pas être restaurée")}</div>';
       for (var i=0;i<g.controles.length;i++){
         var c = g.controles[i];
-        var cl = c.etat === 'faute' ? ' ko' : (c.etat === '${T("note")}' ? ' ${T("note")}' : '');
+        // (2026-10-25, audit) « note » est un ETAT et une classe CSS : il ne passe jamais par T().
+        var cl = c.etat === 'faute' ? ' ko' : (c.etat === 'note' ? ' note' : '');
         h += '<div class="it' + cl + '"><span class="p">'
           + (PICTO_INTG[c.etat] || '\u00b7') + '</span>'
           + '<span class="n">' + esc(c.nom) + '</span>'
@@ -783,7 +791,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('sauvegarde')}
   function charger(){
     dire('${T("Chargement…")}');
     appeler('sauvegarde:donnees',[]).then(function(r){
-      if (!r||!r.ok){ corps.innerHTML='<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
+      if (!r||!r.ok){ corps.innerHTML='<div class="vide m-'+esc((r&&r.motif)||'echec')+'">'+esc(expliquer(r))+'</div>'; dire(expliquer(r), 'err'); return; }
       D=r; RO=!r.peutEcrire; rendre(); dire('');
       if (CREER){ CREER=''; ouvrirCreer(); }
       else if (REST){ var e=REST; REST=''; ouvrirRestaurer(e, e); }

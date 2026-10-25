@@ -36,10 +36,10 @@ module.exports = {
   'Votre rôle est en lecture seule.': 'Your role is read only.',
   'État du serveur indisponible (endpoint injoignable).':
     'Server state unavailable (endpoint unreachable).',
-  /* ⚠ L apostrophe DROITE : la source ecrit ces deux-la entre guillemets
-     doubles. */
-  "La fenêtre principale n'a pas répondu à temps.": 'The main window did not answer in time.',
-  "L'opération a échoué.": 'The operation failed.',
+  /* (2026-10-25, audit) Apostrophe typographique ici comme dans la source : la
+     version droite s affichait seule de son espece dans la fenetre. */
+  'La fenêtre principale n’a pas répondu à temps.': 'The main window did not answer in time.',
+  'L’opération a échoué.': 'The operation failed.',
   'Le serveur a refusé le changement.': 'The server refused the change.',
   'Erreur réseau en joignant le serveur.': 'Network error reaching the server.',
   'Échec : ': 'Failed: ',

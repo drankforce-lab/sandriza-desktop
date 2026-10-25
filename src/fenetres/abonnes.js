@@ -145,8 +145,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('abonnes')}
   };
   function expliquer(r){
     var m = r && r.motif;
-    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
-    if (r && r.detail) t += ' ' + esc(String(r.detail).slice(0, 140));
+    // (2026-10-25, audit) Texte BRUT : szDire l ecrit en textContent, et vide() echappe deja.
+    var t = MOTIFS[m] || ('${T("Erreur inattendue (")}' + (m || '?') + ').');
+    if (r && r.detail) t += ' ' + String(r.detail).slice(0, 140);
     return t;
   }
   function appeler(op, args){
@@ -356,6 +357,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('abonnes')}
     }
   }
 
+  /* (2026-10-25, audit) LE RETRAIT CONFIRME APPELLE LA FONCTION, il ne reclique plus le bouton : si la
+     liste s etait redessinee pendant la boite (actualisation poussee), le bouton capture etait detache —
+     son clic ne remontait plus jusqu a l ecouteur, et « Retirer de la liste » confirme ne faisait rien. */
+  function retirerAbonne(idS){
+    SUPPR_ARME = '';
+    appeler('abonnes:supprimer', [idS]).then(function(r){
+      if (!r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
+      dire(r.courriel + '${T(" retiré de la liste.")}', 'bon');
+      charger();
+    });
+  }
   corps.addEventListener('click', function(ev){
     var t = ev.target;
     if (!t || !t.closest || t.closest('.boite')) return;
@@ -385,15 +397,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('abonnes')}
         var aS = (D.abonnes || []).filter(function(a){ return a.id === idS; })[0];
         szConfirmer({ danger: true, titre: '${T("Retirer l’abonné de la liste")}',
           texte: '${T("L’adresse")}' + ' « ' + (aS ? aS.courriel : '') + ' » ' + '${T("sera retirée définitivement de la liste, y compris la trace d’un éventuel désabonnement. Pour seulement cesser les envois, utilisez plutôt « Désabonner ». Cette action est irréversible.")}',
-          oui: '${T("Retirer de la liste")}' }).then(function(ok){ if (ok) { SUPPR_ARME = idS; bs.click(); } });
+          oui: '${T("Retirer de la liste")}' }).then(function(ok){ if (ok) retirerAbonne(idS); });
         return;
       }
-      SUPPR_ARME = '';
-      appeler('abonnes:supprimer', [idS]).then(function(r){
-        if (!r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
-        dire(r.courriel + '${T(" retiré de la liste.")}', 'bon');
-        charger();
-      });
+      retirerAbonne(idS);
       return;
     }
 
@@ -447,7 +454,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('abonnes')}
   document.addEventListener('keydown', function(ev){
     if (ev.key === 'Escape') {
       ev.preventDefault();
-      if (BOITE) { BOITE = null; dessiner(); return; }
+      /* (2026-10-25, audit) Echap dans une boite passe par le MEME chemin que « Annuler » (szFermerBoite) :
+         une liste collee depuis moins de 3 s (brouillon pas encore ecrit) se perdait sans question, et
+         l indicateur de saisie non enregistree restait leve. */
+      if (BOITE) { szFermerBoite(function(){ BOITE = null; dessiner(); }); return; }
       if (SUPPR_ARME) { SUPPR_ARME = ''; dessiner(); return; }
       P.fermer();
     }

@@ -455,7 +455,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
         /* Le brouillon meurt a l enregistrement reussi, pas avant. */
         szBrouillonJeter();
         FORM = null;
-        dire('Coupon ' + r.code + (r.creation ? '${T(" créé.")}' : '${T(" mis à jour.")}'), 'bon');
+        dire('${T("Coupon ")}' + r.code + (r.creation ? '${T(" créé.")}' : '${T(" mis à jour.")}'), 'bon');
         charger();
       });
     };
@@ -487,7 +487,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
       return String(v['cp-code'] || '') !== String(c.code || '')
         || String(v['cp-nom'] || '') !== String(c.nom || '')
         || String(v['cp-type'] || '') !== String(c.type || 'percent')
-        || String(v['cp-val'] || '') !== String(c.valeur != null ? c.valeur : '');
+        || String(v['cp-val'] || '') !== String(c.valeur != null ? c.valeur : '')
+        /* (2026-10-25, audit) Les autres champs comptent aussi : changer seulement le
+           minimum, le maximum, les dates ou un interrupteur se perdait sans question. */
+        || (parseFloat(v['cp-min']) || 0) !== (parseFloat(c.minimum) || 0)
+        || String(v['cp-max'] || '') !== String(c.maximum || '')
+        || String(v['cp-sd'] || '') !== String(c.debut || '')
+        || String(v['cp-ed'] || '') !== String(c.fin || '')
+        || !!(v._c && v._c['cp-act']) !== (c.actif !== false)
+        || !!(v._c && v._c['cp-per']) !== !!c.parClient
+        || !!(v._c && v._c['cp-onsale']) !== !!c.cumulSolde;
     },
     remplir: function(v){ szBrouillonAuDom(v); },
   });
@@ -564,7 +573,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
       if (!r || !r.ok) { vide('${T("Coupons indisponibles")}', expliquer(r)); return; }
       D = r;
       if (D.pagine) PG = D.page || 0;
-      if (sous) sous.textContent = D.peutModifier ? '' : 'consultation seulement';
+      if (sous) sous.textContent = D.peutModifier ? '' : '${T("Consultation seulement")}';
       // La recherche en cours garde son curseur (le rechargement vient de la frappe).
       var qa = document.getElementById('cp-q');
       if (qa && document.activeElement === qa) redessinerSansPerdreLaSaisie(); else dessiner();

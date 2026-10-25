@@ -122,7 +122,7 @@ tbody tr:hover td{background:var(--v03)}
 .boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;width:100%;max-width:52rem;max-height:96vh;display:flex;flex-direction:column;overflow:hidden}
 .bt-tete{padding:.85rem 1.2rem .7rem;border-bottom:1px solid var(--v08)}
 .bt-tete h3{margin:0;font-size:1.05rem;font-weight:600}
-.bt-corps{padding:.9rem 1.2rem;overflow:auto;display:flex;flex-direction:column;gap:.6rem}
+.bt-corps{padding:.9rem 1.2rem;overflow:hidden;min-height:0;display:flex;flex-direction:column;gap:.6rem}
 .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;padding:.7rem 1.2rem;border-top:1px solid var(--v08)}
 .pied-boite button{min-height:2.2rem;padding:0 1rem}
 `;
@@ -197,7 +197,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
                conservation: 365, neuf: null, formulaire: (DEPART === 'nouveau') };
 
   var ETATS = { actif: '${T("Actif")}', revoque: '${T("Révoqué")}', expire: '${T("Expiré")}', epuise: '${T("Épuisé")}' };
-  var GENRES = { manuel: 'Manuel', inscription: 'Inscription' };
+  var GENRES = { manuel: '${T("Manuel")}', inscription: '${T("Inscription")}' };
   var EVENEMENTS = {
     cree: '${T("Créé")}', visite: '${T("Page ouverte")}', ouvert: '${T("Mot de passe accepté")}',
     mdp_refuse: '${T("Mot de passe refusé")}', etrangle: '${T("Trop de tentatives")}',
@@ -363,6 +363,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     var b = document.getElementById('rv-envoyer');
     if (!a || !a.value.trim()) { dire('${T("Indiquez une adresse de courriel.")}', 'err'); return; }
     var adresse = a.value.trim();
+    /* ⚠ L ADRESSE SE VALIDE ICI, AVANT TOUT APPEL (2026-10-25, audit) : le serveur
+       ne la refusait qu APRES avoir change le mot de passe — l ancien ne marchait
+       plus et le nouveau n etait montre a personne. */
+    if (!/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(adresse)) { dire('${T("Courriel invalide : ")}' + adresse, 'err'); return; }
     var coche = corps.querySelector('input[name="rv-quoi"]:checked');
     var avecMdp = !!(coche && coche.value === 'mdp');
     b.disabled = true;
@@ -381,7 +385,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
         destinataire: adresse, url: l.url, mdp: r.mdp || '', echeance: jour(l.expireLe)
       }]).then(function(e){
         b.disabled = false;
-        if (!e.ok) { dire(expliquer(e), 'err'); return; }
+        if (!e.ok) {
+          /* ⚠ LE MOT DE PASSE A DEJA CHANGE (2026-10-25, audit) : s il n est pas
+             montre maintenant, le lien devient inutilisable et personne ne le
+             connait. On le montre quand meme, en disant que le courriel n est pas parti. */
+          if (avecMdp && r.mdp) {
+            RENVOI = null;
+            dire('${T("Mot de passe changé, mais le courriel n’est pas parti :")} ' + expliquer(e), 'err');
+            charger(false);
+            montrerMdpLien(r.mdp, adresse, true);
+          } else dire(expliquer(e), 'err');
+          return;
+        }
         RENVOI = null;
         dire(avecMdp
           ? ('${T("Courriel envoyé à ")}' + adresse + '${T(" avec un lien sécurisé vers le nouveau mot de passe. L’ancien ne fonctionne plus.")}')
@@ -393,14 +408,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
   }
 
   // Le nouveau mot de passe d'un lien renvoyé : à l'écran, jamais dans le courriel.
-  function montrerMdpLien(mdp, adresse){
+  /* ⚠ (2026-10-25, audit) LA BOITE PREND LES JETONS DU SOCLE (szc-voile /
+     szc-boite) : elle s ecrivait en var(--bg2,#fff), un jeton qui n existe pas,
+     donc blanc — avec le texte clair du mode nuit dessus, le mot de passe montre
+     UNE SEULE FOIS etait illisible. << sansCourriel >> : le courriel n est pas parti,
+     la boite le dit au lieu d annoncer un lien qui n existe pas. */
+  function montrerMdpLien(mdp, adresse, sansCourriel){
     var vieux = document.getElementById('sur-mdp'); if (vieux) vieux.remove();
-    var sur = document.createElement('div'); sur.className = 'sur'; sur.id = 'sur-mdp';
-    sur.setAttribute('style', 'position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:50');
-    sur.innerHTML = '<div style="background:var(--bg2,#fff);color:var(--tx,#111);border-radius:10px;padding:18px 20px;max-width:460px;width:92%;box-shadow:0 10px 40px rgba(0,0,0,.3)">'
+    var sur = document.createElement('div'); sur.className = 'szc-voile'; sur.id = 'sur-mdp';
+    sur.innerHTML = '<div class="szc-boite" role="dialog" aria-modal="true">'
       + '<h3 style="margin:0 0 8px">${T("Nouveau mot de passe d’ouverture")}</h3>'
-      + '<p style="margin:0 0 10px;font-size:.85rem">${T("Le courriel envoyé à ")}' + esc(adresse) + '${T(" contient un lien sécurisé (une seule lecture, 24 heures) vers ce mot de passe.")}</p>'
-      + '<div style="display:flex;gap:8px"><input id="mdp-l" readonly value="' + esc(mdp) + '" aria-label="${T("Mot de passe d’ouverture")}" style="flex:1;font-family:Consolas,monospace;font-size:18px;letter-spacing:.06em">'
+      + '<p style="margin:0 0 10px;font-size:.85rem">' + (sansCourriel
+          ? '${T("Le courriel n’est pas parti : remettez ce mot de passe vous-même. L’ancien ne fonctionne plus.")}'
+          : '${T("Le courriel envoyé à ")}' + esc(adresse) + '${T(" contient un lien sécurisé (une seule lecture, 24 heures) vers ce mot de passe.")}') + '</p>'
+      + '<div style="display:flex;gap:8px"><input id="mdp-l" readonly value="' + esc(mdp) + '" aria-label="${T("Mot de passe d’ouverture")}" style="flex:1;font-family:Consolas,monospace;font-size:18px;letter-spacing:.06em;background:var(--v05);color:var(--tx);border:1px solid var(--v16)">'
       + '<button id="mdp-l-copier"><span class="ic">📋</span> ${T("Copier")}</button></div>'
       + '<div class="barreoutils" style="margin-top:12px"><span class="droite"><button id="mdp-l-x">${T("Fermer")}</button></span></div></div>';
     document.body.appendChild(sur);
@@ -708,7 +729,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
       h.push('</tbody></table></div>');
       if (pages > 1) {
         h.push('<div class="pagi"><button class="mini" id="j-prec"' + (JPAGE <= 0 ? ' disabled' : '')
-          + '>${T("‹ Précédent")}</button><span>${T("Page")} ' + (JPAGE + 1) + ' sur ' + pages
+          + '>${T("‹ Précédent")}</button><span>${T("Page")} ' + (JPAGE + 1) + ' ${T("sur")} ' + pages
           + ' — ' + tot + ' ' + (tot > 1 ? '${T("événements")}' : '${T("événement")}') + '</span>'
           + '<button class="mini" id="j-suiv"' + (JPAGE >= pages - 1 ? ' disabled' : '')
           + '>${T("Suivant ›")}</button></div>');

@@ -152,7 +152,7 @@ module.exports = {
   'Prénom': 'First name',
 
   /* ── CE QUE LE BANC RESIDUEL A TROUVE ──────────────────────────────────── */
-  'Min. 6 caractères': 'Min. 6 characters',
+  'Min. 8 caractères': 'Min. 8 characters',
 
   /* ── LES MOTS SEULS (2026-09-13) — onglets et étiquettes de la fiche.
      ⚠ « English » n'est PAS ici : c'est la langue du client, une DONNÉE de sa
@@ -183,4 +183,8 @@ module.exports = {
   /* L intention venue du clic droit de la liste Clients (2026-10-14) : le bouton
      demande n existe pas sur cette fiche (droit, cadenas, dossier non purgeable). */
   'Ce geste n’est pas offert sur cette fiche.': 'This action is not available on this record.',
+  /* (2026-10-25, audit) Textes visibles qui restaient hors T(). */
+  'Client': 'Customer',
+  'Actif': 'Active',
+  'Inactif': 'Inactive',
 };

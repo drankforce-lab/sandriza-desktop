@@ -110,18 +110,33 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     refus:'${T("Le réseau a refusé la connexion.")}',
     reseau:'${T("Le réseau social est injoignable.")}',
     pont_indisponible:'${T("La fenêtre principale ne répond pas.")}',
-    delai:"${T('La fenêtre principale n\'a pas répondu à temps.')}",
+    delai:'${T("La fenêtre principale n’a pas répondu à temps.")}',
     operation_inconnue:'${T("Cette version de l’application ne connaît pas cette opération.")}',
     echec:'${T("L’opération a échoué.")}'
   };
-  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+esc(m||'?')+').'))+(r&&r.detail?' — '+esc(r.detail):''); }
+  // (2026-10-25, audit) Texte BRUT : szDire / ferr l ecrivent en textContent (echappe, « & » s y lisait « &amp; »).
+  // Ce qui part dans du HTML est echappe a l endroit ou on l y met.
+  function expliquer(r){ var m=r&&r.motif; return (MOTIFS[m]||('${T("Erreur inattendue (")}'+(m||'?')+').'))+(r&&r.detail?' — '+r.detail:''); }
   function appeler(op, args){
     var p; try { p = P.appeler.apply(P, [op].concat(args||[])); } catch(e){ return Promise.resolve({ok:false,motif:'pont_indisponible'}); }
     if (!p || typeof p.then !== 'function') return Promise.resolve({ok:false,motif:'pont_indisponible'});
     return p.then(function(r){ return r||{ok:false,motif:'echec'}; }).catch(function(e){ return {ok:false,motif:'echec',detail:(e&&e.message)||e}; });
   }
 
+  /* (2026-10-25, audit) CE QUI EST TAPE DANS LES AUTRES CARTES SURVIT A UN ENREGISTREMENT. Chaque
+     ecriture redessine toutes les cartes : un jeton colle mais pas encore enregistre disparaissait des
+     qu on cochait « Activer » sur un autre reseau. On relit les champs modifies (valeur differente de
+     celle posee au dessin) et on les repose — sauf celui qui vient d etre enregistre (JUSTE). */
+  var JUSTE = '';
   function dessiner(){
+    var garde = {};
+    var vus = corps.querySelectorAll('input[id^="tok-"],input[id^="ext-"]');
+    for (var g = 0; g < vus.length; g++) if (vus[g].value !== vus[g].defaultValue && vus[g].id !== JUSTE) garde[vus[g].id] = vus[g].value;
+    JUSTE = '';
+    dessiner0();
+    Object.keys(garde).forEach(function(id){ var e = document.getElementById(id); if (e && !e.disabled) e.value = garde[id]; });
+  }
+  function dessiner0(){
     var l = D.reseaux || [];
     var h = '';
 
@@ -176,7 +191,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function ecrire(net, champ, valeur, bon){
     if (RO || OCCUPE) return; OCCUPE=true; dire('${T("Enregistrement…")}');
     appeler('sociaux:config:ecrire',[net, champ, valeur]).then(function(r){ OCCUPE=false;
-      if (r&&r.ok){ D=r; RO=!r.peutEcrire; dessiner(); dire(bon, 'bon'); }
+      if (r&&r.ok){ D=r; RO=!r.peutEcrire; JUSTE = champ === 'token' ? 'tok-' + net : (champ === 'extra' ? 'ext-' + net : ''); dessiner(); dire(bon, 'bon'); }
       else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
 
@@ -186,14 +201,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     dire('${T("Interrogation du réseau…")}');
     appeler('sociaux:config:tester',[net]).then(function(r){ OCCUPE=false;
       if (bouton){ bouton.disabled=false; bouton.textContent='${T("Tester la connexion")}'; }
-      if (r&&r.ok) dire('${T("Connecté — ")}'+esc(r.quoi||''), 'bon');
+      if (r&&r.ok) dire('${T("Connecté — ")}'+(r.quoi||''), 'bon');
       else dire('${T("Échec : ")}'+expliquer(r), 'err'); });
   }
 
   function charger(){
     dire('${T("Chargement…")}');
     appeler('sociaux:config:donnees',[]).then(function(r){
-      if (!r||!r.ok){ corps.innerHTML='<div class="vide m-'+((r&&r.motif)||'echec')+'">'+expliquer(r)+'</div>'; dire(expliquer(r), 'err'); return; }
+      if (!r||!r.ok){ corps.innerHTML='<div class="vide m-'+esc((r&&r.motif)||'echec')+'">'+esc(expliquer(r))+'</div>'; dire(expliquer(r), 'err'); return; }
       D=r; RO=!r.peutEcrire;
       var av=document.getElementById('ro'); if (av) av.hidden=!RO;
       dessiner(); dire('');

@@ -26,4 +26,6 @@ module.exports = {
   /* Les deux onglets. */
   'Récentes': 'Recent',
   'Archives': 'Archive',
+  /* (2026-10-25, audit) L’en-tête de la note ouverte ramène à la liste. */
+  'Revenir à la liste': 'Back to the list',
 };

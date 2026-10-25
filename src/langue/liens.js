@@ -278,4 +278,11 @@ module.exports = {
   "Retirer le lien de la liste": "Remove the link from the list",
   "sera retiré de la liste. Son journal d’accès est conservé et reste consultable.": "will be removed from the list. Its access log is kept and remains available.",
   "Retirer le lien": "Remove the link",
+  // 2026-10-25, audit : genres traduits, adresse validée avant le nouveau mot de passe.
+  "Manuel": "Manual",
+  "Inscription": "Sign-up",
+  "sur": "of",
+  "Courriel invalide : ": "Invalid email: ",
+  "Mot de passe changé, mais le courriel n’est pas parti :": "Password changed, but the email was not sent:",
+  "Le courriel n’est pas parti : remettez ce mot de passe vous-même. L’ancien ne fonctionne plus.": "The email was not sent: hand over this password yourself. The old one no longer works.",
 };

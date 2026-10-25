@@ -165,6 +165,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
   var Q = '';
   var DETAIL = null;
   var SUPPR_ARME = false;
+  /* (2026-10-25, audit) LA REPONSE EN COURS, PAR CONVERSATION. La boite se redessine (changer l etat,
+     fenetre ramenee, actualisation) et recreait un champ VIDE : la reponse tapee partait sans un mot.
+     Elle vit ici, reposee a chaque dessin, et n est effacee qu une fois envoyee ou abandonnee. */
+  var REP = {};
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -414,7 +418,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
     h += '</div>';
 
     if (D.peutModifier) {
-      h += '<div class="ch-saisie"><textarea aria-label="${T("Votre réponse")}" id="ch-reponse" rows="5" placeholder="${T("Votre réponse…")}"></textarea></div>'
+      h += '<div class="ch-saisie"><textarea aria-label="${T("Votre réponse")}" id="ch-reponse" rows="5" placeholder="${T("Votre réponse…")}">' + esc(REP[c.id] || '') + '</textarea></div>'
         + '<div class="pied-boite">'
         + '<button class="mini danger" id="ch-suppr">' + '${T("Supprimer")}' + '</button>'
         + '<select id="ch-statut" aria-label="${T("Changer l’état de la conversation")}" style="max-width:11rem">'
@@ -462,16 +466,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
     if (q) q.oninput = function(){ Q = q.value; redessinerSansPerdreLaSaisie(); };
 
     var bf = document.getElementById('ch-fermer-b');
-    if (bf) bf.onclick = function(){ DETAIL = null; SUPPR_ARME = false; dessiner(); };
+    if (bf) bf.onclick = function(){ fermerDetail(); };
     var vo = document.getElementById('ch-voile');
 
+    var taR = document.getElementById('ch-reponse');
+    if (taR) taR.oninput = function(){ if (DETAIL) REP[DETAIL.id] = taR.value; };
     var be = document.getElementById('ch-envoyer');
     if (be) be.onclick = function(){
       var ta = document.getElementById('ch-reponse');
       be.disabled = true;
-      appeler('chat:repondre', [DETAIL && DETAIL.id, ta ? ta.value : '']).then(function(r){
+      var idR = DETAIL && DETAIL.id;
+      appeler('chat:repondre', [idR, ta ? ta.value : '']).then(function(r){
         be.disabled = false;
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
+        delete REP[idR];
         dire('${T("Réponse envoyée à ")}' + (r.nom || '') + '.', 'bon');
         rouvrir(DETAIL.id);
       });
@@ -485,7 +493,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
       appeler('chat:statut', [DETAIL && DETAIL.id, v]).then(function(r){
         st.disabled = false;
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        dire('${T("Conversation de ")}' + (r.nom || '') + '${T(" marquée « ")}' + v + ' ».', 'bon');
+        // (2026-10-25, audit) Le LIBELLE choisi, pas le code (« pending »).
+        var libSt = (st.options[st.selectedIndex] || {}).text || v;
+        dire('${T("Conversation de ")}' + (r.nom || '') + '${T(" marquée « ")}' + libSt + ' ».', 'bon');
         rouvrir(DETAIL.id);
       });
     };
@@ -506,6 +516,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
       SUPPR_ARME = false;
       appeler('chat:supprimer', [DETAIL && DETAIL.id]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
+        if (DETAIL) delete REP[DETAIL.id];
         DETAIL = null;
         dire('${T("Conversation de ")}' + (r.nom || '') + '${T(" supprimée.")}', 'bon');
         charger();
@@ -568,7 +579,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
     if (ta && ta.value.trim()) return;   // jamais sous une réponse en cours
     charger();
   };
-  window.szRevenir = function(){ charger(); };
+  // (2026-10-25, audit) Meme garde que szActualiser : jamais sous une reponse en cours.
+  window.szRevenir = function(){
+    var ta = document.getElementById('ch-reponse');
+    if (ta && ta.value.trim()) return;
+    charger();
+  };
+  /* (2026-10-25, audit) Fermer la conversation avec une reponse tapee DEMANDE d abord (boite a part) :
+     Echap ou « Fermer » jetaient la reponse sans question. */
+  function fermerDetail(){
+    var ta = document.getElementById('ch-reponse');
+    if (DETAIL && ta && ta.value.trim()) {
+      var idF = DETAIL.id;
+      szConfirmer({ prudent: true, titre: '${T("Abandonner la réponse")}',
+        texte: '${T("La réponse tapée n’a pas été envoyée. Fermer la conversation l’abandonne.")}',
+        oui: '${T("Abandonner la réponse")}' }).then(function(ok){
+          if (!ok) { var t2 = document.getElementById('ch-reponse'); if (t2) t2.focus(); return; }
+          delete REP[idF]; DETAIL = null; SUPPR_ARME = false; dessiner();
+        });
+      return;
+    }
+    DETAIL = null; SUPPR_ARME = false; dessiner();
+  }
 
   /* ── MODE ANCRE ── Le meme bouton que les autres ecrans. */
   window.szModeAncre = function(actif){
@@ -598,7 +630,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
   document.addEventListener('keydown', function(ev){
     if (ev.key === 'Escape') {
       ev.preventDefault();
-      if (DETAIL) { DETAIL = null; SUPPR_ARME = false; dessiner(); return; }
+      if (DETAIL) { fermerDetail(); return; }
       P.fermer();
     }
   });

@@ -66,5 +66,7 @@ module.exports = {
   'Mode usage exclusif': 'Exclusive use mode',
   'Personnel connecté': 'Staff signed in',
   'Gardien': 'Guard',
-  'NIP': 'PINs'
+  'NIP': 'PINs',
+  // (2026-10-25, audit) La barre de titre du décompte d’inactivité.
+  'Déconnexion imminente': 'Signing out soon'
 };

@@ -107,6 +107,11 @@ button.mini{padding:.14rem .5rem;font-size:.76rem}
 .avis.vert{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.35);color:#86e5a8}
 .avis.rouge{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.38);color:var(--tx-f6a5a5)}
 .aide{font-size:.73rem;color:var(--tx2);line-height:1.45}
+/* (2026-10-25, audit) LE MODE JOUR REPEINT TOUT .avis EN AMBRE (html.jour .avis, specificite 0,2,1)
+   et l emportait sur .avis.rouge / .avis.vert (0,2,0) : « aucun code postal » sortait de la meme
+   teinte qu un simple avertissement. Ces deux reprises gagnent par specificite (0,3,1). */
+html.jour .avis.rouge{background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.4);color:#8f3a3a}
+html.jour .avis.vert{background:rgba(22,163,74,.08);border-color:rgba(22,163,74,.38);color:#225f39}
 
 /* Le pas-a-pas : cree, imprime, expedie. Il dit ce qui est FAIT. */
 .pas{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:.5rem}
@@ -185,6 +190,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var CMP = null;
   var SERVICE_PREF = '';       // service retenu par la comparaison
   var CMP_AUTO_FAIT = false;   // la presélection automatique n a lieu qu UNE fois
+  /* (2026-10-25, audit) CE QUE LA PERSONNE A SAISI SURVIT AU REDESSIN, comme POIDS :
+     dessiner() reconstruit toute la carte, et la reponse de la comparaison arrive
+     souvent APRES qu on a colle le numero de suivi ou choisi un service. Sans ces
+     deux variables, le numero revenait vide et le service revenait au suggere —
+     l etiquette se commandait alors sur un autre service que celui choisi.
+     null / '' = rien de saisi : on montre la valeur de la commande. */
+  var SUIVI_SAISI = null;
+  var SERVICE_CHOISI = '';
+  /* (2026-10-25, audit) LE VERROU REFUSE SE RETIENT. prendreVerrou() eteignait les
+     deux boutons UNE fois ; la reponse de la comparaison, arrivee apres, redessinait
+     et les rallumait — on pouvait acheter une etiquette pendant qu un collegue
+     preparait le meme colis. dessiner() le relit a chaque fois. */
+  var VERROU_REFUSE = false;
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -198,7 +216,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     droit:              '${T("Votre rôle ne permet pas d’expédier une commande.")}',
     indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
     pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',
-    delai:              '${T("Le transporteur n’a pas répondu à temps.")}',
+    /* (2026-10-25, audit) Un delai sur lire / confirmer / imprimer vient de la fenetre principale :
+       accuser le transporteur faisait chercher la panne du mauvais cote. Sa phrase est reservee
+       a la comparaison et a l etiquette (expliquer(r, true)). */
+    delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
+    delaiTransporteur:  '${T("Le transporteur n’a pas répondu à temps.")}',
     operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
     introuvable:        '${T("Cette commande n’existe plus.")}',
     verrou:             '${T("Commande ouverte par quelqu’un d’autre.")}',
@@ -215,15 +237,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     reseau:             '${T("Le réseau a échoué — rien n’a été commandé.")}',
     echec:              '${T("L’opération a échoué.")}'
   };
-  function expliquer(r){
+  function expliquer(r, transporteur){
     var m = r && r.motif;
+    if (m === 'delai' && transporteur) return MOTIFS.delaiTransporteur;
     if (m === 'verrou') return MOTIFS.verrou + (r.parQui ? ' (' + r.parQui + ')' : '');
     // ⚠ LE DETAIL DU TRANSPORTEUR EST CONSERVE TEL QUEL : les codes AA de Postes
     // Canada designent TOUJOURS les identifiants, jamais l etiquette, et le site
     // le dit deja en clair. Le remplacer par une phrase generique ferait chercher
     // la panne du mauvais cote pendant des heures.
     if (r && r.detail) return r.detail;
-    return MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').');
+    // (2026-10-25, audit) Texte BRUT : dire() ecrit en textContent, et vide() echappe deja.
+    return MOTIFS[m] || ('${T("Erreur inattendue (")}' + (m || '?') + ').');
   }
 
   function appeler(op, args){
@@ -300,7 +324,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       +   ((t && t.services) || []).map(function(s){
             // Le service choisi par le client à la caisse, s'il est de ce transporteur.
             var cc = CMD && CMD.commande && CMD.commande.choixClient;
-            var pris = SERVICE_PREF ? (s.cle === SERVICE_PREF)
+            var sv = serviceVise(t);
+            var pris = sv ? (s.cle === sv)
               : (cc && cc.transporteur === TRANSPORTEUR && cc.service === s.cle);
             return '<option value="' + esc(s.cle) + '"' + (pris ? ' selected' : '') + '>' + esc(s.libelle) + '</option>'; }).join('')
       +   ((t && t.services.length) ? '' : '<option value="">—</option>')
@@ -338,10 +363,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '<div class="carte"><h2>${T("Marquer expédiée")}</h2>'
       + '<div class="r2">'
       + '<div class="ch"><label for="e-suivi">${T("Numéro de suivi")}</label>'
-      +   '<input id="e-suivi" autocomplete="off" value="' + esc(c.suivi || '')
+      +   '<input id="e-suivi" autocomplete="off" value="' + esc(SUIVI_SAISI != null ? SUIVI_SAISI : (c.suivi || ''))
       +   '" placeholder="${T("Rempli tout seul par l’étiquette")}"></div>'
       + '<div class="ch"><label>&nbsp;</label>'
-      +   '<button id="btn-expedier"' + (expediee ? ' disabled' : '') + '>'
+      +   '<button id="btn-expedier"' + (expediee || VERROU_REFUSE ? ' disabled' : '') + '>'
       +   (expediee ? '${T("✓ Déjà expédiée")}' : '${T("✓ Marquer expédiée")}') + '</button></div>'
       + '</div>'
       + '<div class="aide" style="margin-top:.4rem">${T("Créer l’étiquette n’expédie pas : ")}'
@@ -349,7 +374,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '</div>';
     corps.innerHTML = h;
 
-    var pret = !!(t && t.pret) && !!CTX.peutExpedier && !expediee;
+    // (2026-10-25, audit) Ni sous le verrou d un collegue, ni pendant une creation en cours
+    // (la reponse de la comparaison redessine, et rallumait le bouton au milieu de l achat).
+    var pret = !!(t && t.pret) && !!CTX.peutExpedier && !expediee && !VERROU_REFUSE && !enCours;
     actions.innerHTML =
         /* RELOOKING 2026 (2026-10-04) : un seul accent, l or, pour l action
            principale (le violet « paiement » etait la seule autre couleur du
@@ -359,26 +386,41 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<button id="btn-bordereau">${T("Bordereau seul")}</button>'
       + (c.etiquetteAnnulable ? '<button id="btn-annuler-etiq">${T("Annuler l’étiquette")}</button>' : '')
       + '<button class="prim" id="btn-etiquette"' + (pret ? '' : ' disabled') + '>'
-      + (c.aUneEtiquette ? '${T("Créer une AUTRE étiquette")}' : '${T("Créer l’étiquette")}') + '</button>';
+      + libelleEtiquette() + '</button>';
     brancher();
+  }
+  // Le libelle du bouton qui depense : le meme au dessin et apres un echec (2026-10-25, audit).
+  function libelleEtiquette(){
+    return (CMD && CMD.commande.aUneEtiquette) ? '${T("Créer une AUTRE étiquette")}' : '${T("Créer l’étiquette")}';
+  }
+  /* Le service a montrer pour ce transporteur : le choix de la personne d abord, puis la
+     suggestion de la comparaison — seulement s il appartient bien a ce transporteur. */
+  function serviceVise(t){
+    var l = (t && t.services) || [];
+    var a = function(k){ for (var i = 0; i < l.length; i++) if (l[i].cle === k) return true; return false; };
+    if (SERVICE_CHOISI && a(SERVICE_CHOISI)) return SERVICE_CHOISI;
+    if (SERVICE_PREF && a(SERVICE_PREF)) return SERVICE_PREF;
+    return '';
   }
 
   // ══ ECOUTEURS ═════════════════════════════════════════════════════════════
   function brancher(){
     var tr = document.getElementById('e-transporteur');
-    if (tr) tr.onchange = function(){ TRANSPORTEUR = this.value; SERVICE_PREF = prefDe(TRANSPORTEUR); dessiner(); };
+    if (tr) tr.onchange = function(){ TRANSPORTEUR = this.value; SERVICE_PREF = prefDe(TRANSPORTEUR); SERVICE_CHOISI = ''; dessiner(); };
+    var se = document.getElementById('e-service');
+    if (se) se.onchange = function(){ SERVICE_CHOISI = this.value; };
     var po = document.getElementById('e-poids');
     // Le poids decide du prix : on recompare quand il change.
     if (po) po.onchange = function(){ var v = parseFloat(this.value); if (v > 0) { POIDS = v; comparer(); } };
     var lc = document.querySelectorAll('.cmp .l[data-t]');
     for (var k = 0; k < lc.length; k++) lc[k].onclick = function(){
-      TRANSPORTEUR = this.getAttribute('data-t'); SERVICE_PREF = this.getAttribute('data-s') || ''; dessiner(); };
+      TRANSPORTEUR = this.getAttribute('data-t'); SERVICE_PREF = this.getAttribute('data-s') || ''; SERVICE_CHOISI = SERVICE_PREF; dessiner(); };
     var rc = document.getElementById('btn-recomparer');
     if (rc) rc.onclick = function(){ comparer(); };
     var su = document.getElementById('e-suivi');
     // Retaper le numero annule l aveu : on ne veut pas expedier sans numero
     // alors que la personne vient d en saisir un.
-    if (su) su.oninput = function(){ aveuSansSuivi = false; majBoutonExpedier(); };
+    if (su) su.oninput = function(){ SUIVI_SAISI = this.value; aveuSansSuivi = false; majBoutonExpedier(); };
     var be = document.getElementById('btn-etiquette');
     if (be) be.onclick = commanderEtiquette;
     var bx = document.getElementById('btn-expedier');
@@ -402,6 +444,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   // ══ LE TRANSPORTEUR LE MOINS CHER ═════════════════════════════════════════
   var NOMS_T = { 'postes-canada': '${T("Postes Canada")}', fedex: 'FedEx', ups: 'UPS' };
+  function creeEtiquette(cle){
+    var l = (CTX && CTX.transporteurs) || [];
+    for (var i = 0; i < l.length; i++) if (l[i].cle === cle) return !!l[i].etiquette;
+    return false;
+  }
   function prefDe(t){
     var l = (CMP && CMP.resultats) || [];
     for (var i = 0; i < l.length; i++) if (l[i].transporteur === t && l[i].ok) return l[i].service;
@@ -427,11 +474,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         }
         h += '<button type="button" class="l' + (x.transporteur === TRANSPORTEUR ? ' sel' : '') + '" data-t="' + esc(x.transporteur)
           + '" data-s="' + esc(x.service) + '"><div><div class="nm">' + esc(nom) + '</div><div class="sv">' + esc(x.nomService || x.service)
-          + (x.jours ? ' · ' + x.jours + ' ${T("j")}' : '') + '</div></div>'
+          + (x.jours ? ' · ' + x.jours + ' ${T("j")}' : '')
+          + (creeEtiquette(x.transporteur) ? '' : ' · ${T("cotation seulement")}') + '</div></div>'
           + (i === 0 ? '<span class="mc">${T("Le moins cher")}</span>' : '<span></span>')
           + '<span class="px">' + szArgent(x.reel) + '</span></button>';
       });
-      h += '</div><div class="aide" style="margin-top:.35rem">${T("Coût réel hors taxes, pour ")}' + esc(String(CMP.poidsKg || ''))
+      h += '</div><div class="aide" style="margin-top:.35rem">${T("Coût réel hors taxes, pour ")}' + esc(szNombre(CMP.poidsKg, 3))
         + ' kg. ${T("Cliquez une ligne pour la choisir.")} <button class="mini" id="btn-recomparer" type="button">${T("Recomparer")}</button></div>';
     }
     return h + '</div>';
@@ -448,9 +496,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var pour = CMD.commande.id;
     appeler('expedition:comparer', [pour, POIDS]).then(function(r){
       if (!CMD || CMD.commande.id !== pour) return;
-      if (!r || !r.ok) { CMP = { etat: 'echec', motif: expliquer(r) }; dessiner(); return; }
+      if (!r || !r.ok) { CMP = { etat: 'echec', motif: expliquer(r, true) }; dessiner(); return; }
       CMP = { etat: 'pret', resultats: r.resultats || [], poidsKg: r.poidsKg, livraisonOfferte: !!r.livraisonOfferte };
-      var meilleur = (CMP.resultats || []).filter(function(x){ return x.ok; })[0];
+      /* (2026-10-25, audit) LE MOINS CHER QUI FAIT DES ETIQUETTES. eShipper, Purolator ou UPS
+         cotent sans creer d etiquette : presélectionnes, ils laissaient le bouton eteint sous
+         « n est pas configure ». Ils restent dans la liste, marques « cotation seulement ». */
+      var meilleur = (CMP.resultats || []).filter(function(x){ return x.ok && creeEtiquette(x.transporteur); })[0];
       if (meilleur && !CMP_AUTO_FAIT && !CMD.commande.aUneEtiquette) {
         TRANSPORTEUR = meilleur.transporteur; SERVICE_PREF = meilleur.service;
       } else if (!SERVICE_PREF) {
@@ -467,13 +518,48 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     b.textContent = aveuSansSuivi ? '${T("✓ Expédier SANS numéro")}' : '${T("✓ Marquer expédiée")}';
   }
 
+  /* ══ LE PRIX AFFICHE (2026-10-25, audit) ═══════════════════════════════════
+     Le relais refuse toute creation sans « prix affiche » (lt_garde_prix, motif
+     prix_absent), et en production le re-cote au cent pres avant de creer. Cette
+     fenetre n envoyait AUCUN prix : chaque clic etait refuse. Le prix est celui de
+     la ligne de la comparaison qui correspond au transporteur ET au service choisis,
+     cotee pour CE poids (le meme arrondi au centieme que le pont et le relais).
+     Pas de ligne, poids change, comparaison en cours : on ne commande pas — on le dit. */
+  function prixCote(tr, service, poids){
+    if (!CMP || CMP.etat === 'attente') return { motif: 'attente' };
+    if (CMP.etat !== 'pret') return { motif: 'absent' };
+    var pk = Number(Math.round(Number(poids + 'e2')) + 'e-2');
+    if (!(Math.abs((+CMP.poidsKg || 0) - pk) < 0.0001)) return { motif: 'poids' };
+    var l = CMP.resultats || [];
+    for (var i = 0; i < l.length; i++) {
+      var x = l[i];
+      if (!x.ok || x.transporteur !== tr) continue;
+      var sv = (x.services && x.services.length) ? x.services : [x];
+      for (var j = 0; j < sv.length; j++) {
+        if (sv[j].service === service && isFinite(+sv[j].reel) && +sv[j].reel > 0) return { reel: +sv[j].reel };
+      }
+    }
+    return { motif: 'absent' };
+  }
+  var PRIX_MOTIFS = {
+    attente: '${T("La comparaison des transporteurs est en cours — attendez son prix avant de commander.")}',
+    poids:   '${T("Le poids a changé depuis la comparaison — cliquez « Recomparer » avant de commander.")}',
+    absent:  '${T("Aucun prix coté pour ce transporteur et ce service — choisissez une ligne de la comparaison ou recomparez. Rien n’a été commandé.")}'
+  };
+
   // ══ ETIQUETTE — LE GESTE QUI COUTE ════════════════════════════════════════
   function commanderEtiquette(){
-    if (enCours) return;
+    if (enCours || VERROU_REFUSE) return;
     var t = transporteurCourant();
     var poids = parseFloat(val('e-poids'));
     if (!(poids > 0)) { dire(MOTIFS.poids_invalide, 'err'); return; }
     var service = val('e-service');
+    var px = prixCote(TRANSPORTEUR, service, poids);
+    if (px.motif) { dire(PRIX_MOTIFS[px.motif], 'err'); return; }
+    /* ⚠ « Creer une AUTRE etiquette » (2026-10-25, audit) : la boite ci-dessous previent
+       deja que la seconde sera facturee une seconde fois ; sur son « Commander », l aveu
+       part au site (forcer). Sans lui, le site refusait TOUJOURS (deja_etiquetee). */
+    var forcer = !!CMD.commande.aUneEtiquette;
     var libelle = '';
     ((t && t.services) || []).forEach(function(s){ if (s.cle === service) libelle = s.libelle; });
 
@@ -486,7 +572,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<p>${T("Une étiquette est ")}<strong>${T("facturée dès sa création")}</strong>${T(" ; elle ne s’annule que tant que le colis n’est pas parti (« Annuler l’étiquette »).")}</p>'
       + '<p>${T("Transporteur : ")}<strong>' + esc(t ? t.nom : TRANSPORTEUR) + '</strong><br>'
       + '${T("Service : ")}<strong>' + esc(libelle || service || '—') + '</strong><br>'
-      + '${T("Poids : ")}<strong>' + esc(poids) + ' kg</strong></p>'
+      + '${T("Poids : ")}<strong>' + esc(szNombre(poids, 3)) + ' kg</strong><br>'
+      + '${T("Prix coté : ")}<strong>' + esc(szArgent(px.reel)) + '</strong></p>'
       + (CMD.commande.aUneEtiquette
           ? '<p style="color:var(--tx-att)"><span class="ic">⚠</span> ${T("Une étiquette existe déjà pour cette commande. ")}'
             + '${T("En commander une seconde sera facturé une seconde fois.")}</p>' : '')
@@ -496,23 +583,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         document.getElementById('v-non').onclick = fermer;
         document.getElementById('v-oui').onclick = function(){
           fermer();
-          lancerEtiquette(service, poids);
+          lancerEtiquette(service, poids, px.reel, forcer);
         };
       });
   }
 
-  function lancerEtiquette(service, poids){
+  function lancerEtiquette(service, poids, prix, forcer){
     enCours = true;
     var b = document.getElementById('btn-etiquette');
     if (b) { b.disabled = true; b.textContent = '${T("⏳ Création… (jusqu’à 35 s)")}'; }
     dire('${T("Demande au transporteur…")}', 'att');
-    appeler('expedition:etiquette', [CMD.commande.id, TRANSPORTEUR, service, poids]).then(function(r){
+    // Les memes arguments que la fenetre Commande : forcer, puis { prixCents } (le prix affiche).
+    appeler('expedition:etiquette', [CMD.commande.id, TRANSPORTEUR, service, poids, !!forcer,
+      { prixCents: Math.round(prix * 100) }]).then(function(r){
       enCours = false;
       if (!r.ok) {
-        if (b) { b.disabled = false; b.textContent = '${T("Créer l’étiquette")}'; }
-        dire(expliquer(r), 'err');
+        // Le bouton d ou il vient (il a pu etre redessine pendant l attente) et SON libelle.
+        b = document.getElementById('btn-etiquette');
+        if (b) { b.disabled = VERROU_REFUSE; b.textContent = libelleEtiquette(); }
+        dire(expliquer(r, true), 'err');
+        // Le relais a re-cote un autre prix : on remet la comparaison a jour (le message reste au pied).
+        if (/prix/.test(String(r.motif || ''))) comparer();
         return;
       }
+      SUIVI_SAISI = null;   // le numero de l etiquette remplace ce qui etait tape
       PDF = r.pdf || null;
       dire('${T("Étiquette créée — suivi ")}' + (r.suivi || '?') + '.', 'bon');
       // ⚠ ON RELIT LA COMMANDE plutot que de rafistoler l etat en memoire : le
@@ -597,7 +691,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   // ══ EXPEDIER ══════════════════════════════════════════════════════════════
   function expedier(){
-    if (enCours) return;
+    if (enCours || VERROU_REFUSE) return;
     var suivi = val('e-suivi').trim();
     /* ⚠ LE DOUBLE GESTE, ET IL N EST PAS DECORATIF. Sans numero, le site refuse
        (motif suivi_requis) tant qu on n a pas explicitement assume : c est ce qui
@@ -623,6 +717,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         dire(expliquer(r), 'err');
         return;
       }
+      SUIVI_SAISI = null;
       dire('${T("Commande")} ' + (r.numero || '') + '${T(" expédiée — courriel envoyé.")}', 'bon');
       recharger();
     });
@@ -665,6 +760,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       VERROU_PRIS = !!v.obtenu; VERROU_ID = cid;
       if (v.obtenu) { sous.textContent = v.horsLigne ? '${T("hors ligne")}' : '${T("Section verrouillée en modification par :")} ' + (v.par || '${T("vous")}'); return; }
       sous.textContent = '${T("ouverte par ")}' + (v.parQui || '${T("quelqu’un d’autre")}');
+      VERROU_REFUSE = true;
       ['btn-etiquette', 'btn-expedier'].forEach(function(k){
         var b = document.getElementById(k); if (b) b.disabled = true;
       });
@@ -690,8 +786,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function quitter(){ rendreVerrou(); P.fermer(); }
 
+  /* (2026-10-25, audit) ECHAP NE JETTE PAS UNE SAISIE. Un numero de suivi colle et pas
+     encore enregistre se perdait sur un Echap : on demande d abord. Pendant une creation
+     ou une expedition en cours, Echap ne ferme rien (la reponse doit etre lue ici). */
+  function saisieEnCours(){
+    if (!CMD || SUIVI_SAISI == null) return false;
+    return SUIVI_SAISI.trim() !== String(CMD.commande.suivi || '').trim();
+  }
   document.addEventListener('keydown', function(ev){
-    if (ev.key === 'Escape' && !document.querySelector('.voile')) { ev.preventDefault(); quitter(); }
+    if (ev.key !== 'Escape' || document.querySelector('.voile') || document.querySelector('.szc-voile')) return;
+    ev.preventDefault();
+    if (enCours) { dire('${T("Opération en cours — attendez sa réponse avant de fermer.")}', 'att'); return; }
+    if (!saisieEnCours()) { quitter(); return; }
+    szConfirmer({ titre: '${T("Fermer sans enregistrer ?")}',
+      texte: '${T("Le numéro de suivi saisi n’a pas été enregistré. Il sera perdu.")}',
+      oui: '${T("Fermer")}', non: '${T("Rester")}', prudent: true }).then(function(ok){ if (ok) quitter(); });
   });
   window.addEventListener('beforeunload', function(){ rendreVerrou(); });
 

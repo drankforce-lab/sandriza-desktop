@@ -39,10 +39,8 @@ body{background:var(--f-page);color:var(--tx);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .ro{flex:0 0 auto;margin:.7rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.5rem .7rem;font-size:.78rem}
-.corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;
+.corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow:hidden;
   display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:1rem;align-content:start}  /* deux cartes en haut, sans troisieme piste vide (2026-10-04) */
-.corps::-webkit-scrollbar{width:8px}
-.corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:1rem 1.1rem;min-width:0;display:flex;flex-direction:column}
 .carte h2{margin:0 0 .1rem;font:700 .8rem/1.2 system-ui;text-transform:uppercase;letter-spacing:.05em;color:var(--tx-bleute)}
@@ -83,14 +81,14 @@ button.prim:hover:not(:disabled){background:var(--or-clair)}
 html.jour .onglets .nb{color:#3f4955}
 /* L onglet des pays : une seule carte qui remplit la fenêtre, le tableau défile seul. */
 .corps.plein{display:flex;flex-direction:column;overflow:hidden}
-.corps.plein .carte.large{flex:1 1 auto;min-height:0}
+.corps.plein .carte.large{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
 .corps.plein .ptab{flex:1 1 auto;min-height:0;max-height:none}
 .pbarre{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;flex-wrap:wrap}
 /* PAS << .info >> : le socle le peint en panneau BLEU en mode jour. */
 .pbarre .pinfo{font-size:.74rem;color:var(--tx2);flex:1 1 12rem;min-width:0}
-.ptab{max-height:22rem;overflow-y:auto;border:1px solid var(--v07);border-radius:9px}
-.ptab::-webkit-scrollbar{width:8px}
-.ptab::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
+/* AUCUNE GLISSIERE (2026-10-25, audit) : les quelque 200 pays vont en PAGES
+   mesurees (data-pages, JS_PAGES du socle) au lieu de defiler dans la carte. */
+.ptab{max-height:22rem;overflow:hidden;border:1px solid var(--v07);border-radius:9px}
 table.pays{width:100%;border-collapse:collapse}
 table.pays th{position:sticky;top:0;z-index:1;background:var(--f-carte);box-shadow:0 1px 0 var(--v10);text-align:left;font:700 .6875rem/1.3 system-ui;
   text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);padding:.45rem .7rem;
@@ -361,7 +359,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<span class="pinfo">' + PAYS.nbLivres
       + (PAYS.nbLivres > 1 ? '${T(" pays desservis")}' : '${T(" pays desservi")}')
       + '${T(" · aucune taxe hors du Canada")}</span></div>'
-      + '<div class="ptab"><table class="pays"><thead><tr>'
+      + '<div class="ptab" data-pages="livraison-pays"><table class="pays"><thead><tr>'
       + '<th>${T("Pays")}</th><th style="text-align:center">${T("On livre")}</th>'
       + '</tr></thead><tbody>'
       + (l.length ? l.map(ligne).join('')

@@ -258,7 +258,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptable')}${JS_BROUILLON()}
       + '</div></div>';
   }
 
+  /* ⚠ LA SAISIE SURVIT AUX REDESSINS (2026-10-25, audit). << Recharger >>, un
+     aller-retour d onglet ou une revocation redessinent tout, et les champs
+     repartaient de ETAT (ou vides) : une fiche de comptable ou un << Nouveau
+     lien >> a moitie rempli etait vide en silence. On ramasse les champs avant
+     chaque dessin et on les repose apres. Ouvrir un formulaire (nouveau,
+     modifier) oublie la saisie precedente : elle appartenait a un autre. */
+  var SAISIE_IDS = ['ct-name', 'ct-firm', 'ct-email', 'ct-phone', 'ct-note', 'f-annee', 'f-duree', 'f-manuel'];
+  var SAISIE = {}, SAISIE_SAUTER = false;
+  function oublierSaisie(){ SAISIE = {}; SAISIE_SAUTER = true; }
+  function garderSaisie(){
+    if (SAISIE_SAUTER) { SAISIE_SAUTER = false; return; }
+    SAISIE_IDS.forEach(function(id){ var el = document.getElementById(id); if (el) SAISIE[id] = el.value; });
+    if (document.getElementById('f-creer')) {
+      SAISIE.__rcpt = [];
+      Array.prototype.forEach.call(corps.querySelectorAll('input.rcpt:checked'), function(x){ SAISIE.__rcpt.push(x.value); });
+    }
+  }
+  function reposerSaisie(){
+    SAISIE_IDS.forEach(function(id){ var el = document.getElementById(id); if (el && SAISIE[id] !== undefined) el.value = SAISIE[id]; });
+    if (SAISIE.__rcpt) Array.prototype.forEach.call(corps.querySelectorAll('input.rcpt'), function(x){ x.checked = SAISIE.__rcpt.indexOf(x.value) >= 0; });
+  }
+
   function dessinerPartages(){
+    garderSaisie();
     var h = [];
     // Le geste principal dans la tete, a DROITE, comme dans toute la comptabilite.
     actions.innerHTML = '<button id="b-recharger">${T("Recharger")}</button>'
@@ -287,6 +310,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptable')}${JS_BROUILLON()}
     h.push('</div></div>');
 
     corps.innerHTML = h.join('');
+    reposerSaisie();
     brancherPartages();
   }
 
@@ -356,7 +380,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptable')}${JS_BROUILLON()}
 
   function brancherPartages(){
     var bn = document.getElementById('b-nouveau');
-    if (bn) bn.onclick = function(){ ETAT.formulaire = !ETAT.formulaire; dessinerPartages(); };
+    if (bn) bn.onclick = function(){ oublierSaisie(); ETAT.formulaire = !ETAT.formulaire; dessinerPartages(); };
     var br = document.getElementById('b-recharger');
     if (br) br.onclick = function(){ charger(true); };
 
@@ -396,7 +420,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptable')}${JS_BROUILLON()}
     var b = document.getElementById('f-creer');
     var dest = [];
     Array.prototype.forEach.call(corps.querySelectorAll('input.rcpt:checked'), function(x){ dest.push(x.value); });
-    if (man && man.value.trim()) dest.push(man.value.trim());
+    /* (2026-10-25, audit) Une adresse mal formee etait ecartee EN SILENCE par le
+       coeur : le lien partait sans elle et rien ne la nommait. On la refuse ici,
+       avec la meme regle que le Gardien, avant de fabriquer quoi que ce soit. */
+    if (man && man.value.trim()) {
+      var mv = man.value.trim();
+      if (!/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(mv)) { dire('${T("Courriel invalide : ")}' + mv, 'err'); man.focus(); return; }
+      dest.push(mv);
+    }
     b.disabled = true;
     dire('${T("Fabrication du lien de l’exercice…")}');
     appeler('comptable:creer', [{
@@ -441,6 +472,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptable')}${JS_BROUILLON()}
   // VUE « CARNET DES COMPTABLES »
   // ════════════════════════════════════════════════════════════════════════
   function dessinerCarnet(){
+    garderSaisie();
     var h = [];
     // Les gestes dans la tete, le principal a DROITE (grammaire du 2026-10-16).
     actions.innerHTML = '<button id="c-recharger">${T("Recharger")}</button>'
@@ -479,6 +511,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptable')}${JS_BROUILLON()}
     h.push('</div></div>');
 
     corps.innerHTML = h.join('');
+    reposerSaisie();
     brancherCarnet();
   }
 
@@ -542,7 +575,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptable')}${JS_BROUILLON()}
        replier, et l'on propose apres avoir ouvert. */
     if (ba) ba.onclick = function(){
       if (ETAT.contactForm) szBrouillonMaintenant();
-      ETAT.edition = ''; ETAT.contactForm = !ETAT.contactForm;
+      oublierSaisie(); ETAT.edition = ''; ETAT.contactForm = !ETAT.contactForm;
       dessinerCarnet();
       if (ETAT.contactForm) szBrouillonProposer();
     };
@@ -556,7 +589,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptable')}${JS_BROUILLON()}
 
     Array.prototype.forEach.call(corps.querySelectorAll('[data-modifier]'), function(b){
       b.onclick = function(){
-        ETAT.edition = b.getAttribute('data-modifier');
+        oublierSaisie(); ETAT.edition = b.getAttribute('data-modifier');
         ETAT.contactForm = true;
         dessinerCarnet();
         szBrouillonProposer();

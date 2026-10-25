@@ -161,8 +161,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptepaiement')}
   };
   function expliquer(r){
     var m = r && r.motif;
-    return (MOTIFS[m] || ('${T("Erreur inattendue (")}' + esc(m || '?') + ').'))
-      + (r && r.detail ? ' (' + esc(r.detail) + ')' : '');
+    // (2026-10-25, audit) Texte BRUT : szDire l ecrit en textContent ; le corps l echappe a l endroit ou il le pose.
+    return (MOTIFS[m] || ('${T("Erreur inattendue (")}' + (m || '?') + ').'))
+      + (r && r.detail ? ' (' + r.detail + ')' : '');
   }
   function appeler(op, args){
     var p;

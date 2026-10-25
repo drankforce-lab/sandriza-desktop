@@ -44,7 +44,10 @@ const liste = (f) => {
   ok(appel && appel.args[0] && appel.args[0].parPage === 50 && appel.args[0].page === 0, 'la fenêtre demande UNE page (page 0, 50 par page)');
   const rangs = (ex.html.match(/<tr data-id=/g) || []).length;
   ok(rangs > 0 && rangs <= 50, 'au plus 50 lignes écrites (vu ' + rangs + ', était 10 000)');
-  ok(/data-fpg="1"/.test(ex.html) && /1 \/ 200/.test(ex.html), 'un pagineur « 1 / 200 » est dessiné');
+  /* (2026-10-25, audit) Le pagineur maison (« 1 / 200 ») est parti : la page du pont passe en pages
+     mesurees du socle (data-pages-coeur), dont le pied unique demande la page voisine au pont. */
+  ok(/data-pages="factures" data-pages-coeur="0,200,10000,50"/.test(ex.html)
+    && /window\.szPagesCoeur\.factures = function\(page\)/.test(script), 'la page du pont est marquée pour le pied du socle (0 / 200 pages, 10 000)');
   ok(ms < 3000, 'temps borné : ' + ms + ' ms');
   // L'état de compte : un champ de recherche relié à factures:clients, jamais 5 000 <option>.
   ok(/id="f-client-q"/.test(script) && /appeler\('factures:clients', \[cq\.value\]\)/.test(script), 'état de compte : le client se cherche (factures:clients)');

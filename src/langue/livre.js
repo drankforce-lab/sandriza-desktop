@@ -280,4 +280,10 @@ module.exports = {
   'Supprimer l’écriture': 'Delete entry',
   'L’écriture manuelle': 'The manual entry',
   'sera supprimée définitivement du livre de comptes. Les soldes et les états financiers de l’exercice seront recalculés sans elle. Cette action est irréversible.': 'will be permanently deleted from the ledger. The balances and financial statements for the fiscal year will be recalculated without it. This action cannot be undone.',
+  // 2026-10-25, audit : contrôles hors tuiles, montants lus en entier.
+  'Un contrôle IGRF diverge : le fichier d’import reste bloqué tant que l’écart n’est pas expliqué.':
+    'A GIFI check does not match: the import file stays blocked until the difference is explained.',
+  'Verdict :': 'Verdict:',
+  'Montant illisible à la ligne': 'Unreadable amount on line',
+  'Tapez par exemple 1 200,50.': 'Type, for example, 1,200.50.',
 };

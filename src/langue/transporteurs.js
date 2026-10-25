@@ -234,4 +234,7 @@ module.exports = {
   "Clé d’API du portail": "API key from the portal",
   "Code API secret": "API secret",
   "Portail développeur de Postes Canada › Identifiants : Credential for [Test] = bac à sable, [Production] = production. Copiez la « Clé d’API » et le « Code API secret » dans le bloc correspondant.": "Canada Post developer portal › Credentials: Credential for [Test] = sandbox, [Production] = production. Copy the « API key » and the « API secret » into the matching block.",
+  // (2026-10-25, audit)
+  'votre_client_id': 'your_client_id',
+  'Enregistrez d’abord : le test porte sur la configuration enregistrée, pas sur ce qui vient d’être saisi.': 'Save first: the test uses the saved configuration, not what was just entered.',
 };

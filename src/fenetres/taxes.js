@@ -115,7 +115,7 @@ function pageTaxes(ouverture) {
 <div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter les taux, pas les modifier.")}</div>
 <div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
-  <button id="b-reinit">${T("Réinitialiser aux défauts")}</button>
+  <button id="b-reinit" disabled>${T("Réinitialiser aux défauts")}</button>
   <button id="b-verifier">${T("Comparer à la référence")}</button>
   <button class="prim" id="b-save" disabled>${T("Enregistrer les taux")}</button></div>
 <script>
@@ -380,10 +380,35 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   bsave.onclick = enregistrer;
 
+  /* (2026-10-25, audit) La reinitialisation remplace TOUTE la grille sur le
+     serveur : elle passe par une boite a part qui nomme l effet, et le bouton
+     reste eteint (HTML) jusqu au premier dessin de la grille. */
   function reinit(){
-    if (RO || OCCUPE) return;
-    occuper(true); dire('${T("Réinitialisation…")}');
-    appeler('config:taxes:reinit').then(function(r){ verdict(r, '${T("Taux réinitialisés aux valeurs par défaut.")}'); });
+    if (RO || OCCUPE || !D) return;
+    szConfirmer({ danger: true, titre: '${T("Réinitialiser les taux")}',
+      texte: '${T("Toute la grille sera remplacée par les taux par défaut. Les taux saisis à la main, enregistrés ou non, seront perdus.")}',
+      oui: '${T("Réinitialiser la grille")}' }).then(function(oui){
+      if (!oui || RO || OCCUPE) return;
+      occuper(true); dire('${T("Réinitialisation…")}');
+      appeler('config:taxes:reinit').then(function(r){ verdict(r, '${T("Taux réinitialisés aux valeurs par défaut.")}'); });
+    });
+  }
+  /* (2026-10-25, audit) La grille AFFICHEE differe-t-elle de la grille enregistree ?
+     La comparaison a la reference porte sur l enregistree : comparer avec des
+     changements non enregistres a l ecran (et, sans ecart, dater la revision)
+     disait « vos taux correspondent » d une grille que personne ne voyait. */
+  function grilleModifiee(){
+    if (!D) return false;
+    var c = lire().canada;
+    return (D.provinces || []).some(function(p){
+      var l = c[p.code] || [];
+      return (p.composantes || []).some(function(x, i){
+        var s = l[i] || {};
+        if (s.name != null && String(s.name) !== String(x.name == null ? '' : x.name)) return true;
+        if (s.pct != null && Math.abs((parseFloat(s.pct) || 0) - (parseFloat(x.pct) || 0)) > 1e-9) return true;
+        return false;
+      });
+    });
   }
   function appliquer(){
     if (RO || OCCUPE) return;
@@ -392,6 +417,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   bver.onclick = function(){
     if (OCCUPE) return;
+    if (grilleModifiee()) { dire('${T("Enregistrez d’abord vos changements : la comparaison porte sur la grille enregistrée.")}', 'att'); return; }
     var ec = (D && D.ecarts) || [];
     /* ⚠ Le singulier et le pluriel, chacun entier. */
     if (ec.length) {

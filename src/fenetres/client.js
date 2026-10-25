@@ -228,12 +228,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
     var c = R.client;
     document.getElementById('t-av').textContent =
       ((c.prenom[0] || '') + (c.nom[0] || '')).toUpperCase() || '?';
-    document.getElementById('titre').textContent = (c.prenom + ' ' + c.nom).trim() || 'Client';
+    document.getElementById('titre').textContent = (c.prenom + ' ' + c.nom).trim() || '${T("Client")}';
     document.getElementById('t-mail').textContent = c.courriel;
     var pill = document.getElementById('pill');
     pill.style.display = '';
     pill.className = 'pill ' + (c.supprime ? 'rouge' : (c.actif ? 'vert' : 'gris'));
-    pill.textContent = c.supprime ? '${T("Supprimé")}' : (c.actif ? 'Actif' : 'Inactif');
+    pill.textContent = c.supprime ? '${T("Supprimé")}' : (c.actif ? '${T("Actif")}' : '${T("Inactif")}');
     if (EDITION) dessinerEdition(); else dessinerFiche();
   }
 
@@ -314,7 +314,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
       + '<div class="ch large"><label for="e-rue">${T("Rue")}</label><input id="e-rue" value="' + esc(a.rue) + '"></div>'
       + '<div class="ch"><label for="e-ville">${T("Ville")}</label><input id="e-ville" value="' + esc(a.ville) + '"></div>'
       + '<div class="ch"><label for="e-prov">Province</label><select id="e-prov">'
-      + R.provinces.map(function(p){ return '<option value="' + p + '"' + (p === a.province ? ' selected' : '') + '>' + p + '</option>'; }).join('')
+      /* (2026-10-25, audit) Une province hors de la liste (adresse americaine, « Québec » ecrit en entier)
+         reste une option : sans elle, le menu prenait la premiere et l enregistrement la remplacait. */
+      + (a.province && R.provinces.indexOf(a.province) < 0 ? [a.province] : []).concat(R.provinces).map(function(p){ return '<option value="' + esc(p) + '"' + (p === a.province ? ' selected' : '') + '>' + esc(p) + '</option>'; }).join('')
       + '</select></div>'
       + '<div class="ch"><label for="e-postal">${T("Code postal")}</label><input id="e-postal" value="' + esc(a.codePostal) + '"></div>'
       + '<div class="ch"><label for="e-pays">${T("Pays")}</label><input id="e-pays" value="' + esc(a.pays) + '"></div>'
@@ -326,7 +328,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
     h += '<div class="carte"><h2>${T("Mot de passe")}</h2>'
       + '<div style="display:flex;gap:.45rem;align-items:flex-end">'
       + '<div class="ch" style="flex:1"><label for="e-mdp">${T("Nouveau (laisser vide = inchangé)")}</label>'
-      + '<input id="e-mdp" type="password" placeholder="${T("Min. 6 caractères")}" autocomplete="new-password"></div>'
+      + '<input id="e-mdp" type="password" placeholder="${T("Min. 8 caractères")}" autocomplete="new-password"></div>'
       + '<button class="mini" id="btn-voir" title="${T("Afficher / masquer")}"><span class="ic">👁</span></button>'
       + '<button class="mini" id="btn-gen"><span class="ic">🎲</span> ${T("Générer")}</button>'
       + '</div>'
@@ -534,7 +536,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
     try { P.appeler('verrou:rendre', 'users', ID); } catch (e) {}   // (2026-10-19) [portée, id] : cette fiche-ci
   }
   window.addEventListener('beforeunload', function(){ rendreVerrou(); });
-  window.szRevenir = function(){ EDITION = false; recharger(); };
+  /* (2026-10-25, audit) Rouvrir la fiche EN COURS DE MODIFICATION (double-clic dans Clients) ne jette
+     plus la saisie : la fenetre est seulement ramenee, le formulaire reste tel quel. */
+  window.szRevenir = function(){ if (EDITION) return; recharger(); };
   function appliquerIntention(){
     var q = INTENTION; INTENTION = '';
     if (!q || !R || document.querySelector('.voile')) return;
@@ -560,7 +564,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
   }
 
   document.addEventListener('keydown', function(ev){
-    if (ev.key === 'Escape' && !document.querySelector('.voile')) { ev.preventDefault(); rendreVerrou(); P.fermer(); }
+    /* (2026-10-25, audit) Le verrou n est plus rendu ICI : si l on repond « Revenir au formulaire » a la
+       question de la coquille, on continuait d editer SANS verrou. beforeunload le rend a la vraie fermeture. */
+    if (ev.key === 'Escape' && !document.querySelector('.voile')) { ev.preventDefault(); P.fermer(); }
   });
 
   recharger().then(function(){ if (R) return prendreVerrou(); }).then(appliquerIntention);

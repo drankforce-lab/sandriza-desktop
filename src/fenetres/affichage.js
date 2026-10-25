@@ -40,6 +40,10 @@ const T = require('../langue').tr('affichage');
 
 const CSS = `
 :root{color-scheme:dark}
+/* (2026-10-25, audit) LES GRIS SONT DES JETONS DU SOCLE, plus des couleurs ecrites en dur. En mode
+   jour, le fond creme du socle (html.jour body) l emporte sur le degrade sombre ci-dessous : les
+   #9fb0c4 / #b9c6d6 d avant y restaient gris clair (contraste 1,6 a 2) — la cliente ne lisait plus
+   le sous-total, les taxes ni les variantes. Les jetons, eux, changent avec le mode. */
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden}
 body{background:linear-gradient(160deg,#0d1420 0%,#141d2c 55%,#0d1420 100%);
@@ -49,18 +53,18 @@ body{background:linear-gradient(160deg,#0d1420 0%,#141d2c 55%,#0d1420 100%);
   padding:1.1rem 1.8rem;border-bottom:1px solid var(--v08);flex-shrink:0}
 .tete img{max-height:46px;width:auto;display:block}
 .tete .nom{font-family:Georgia,serif;font-size:1.5rem;font-weight:800;letter-spacing:.06em}
-.tete .sous{font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;color:#9fb0c4}
+.tete .sous{font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;color:var(--tx2)}
 .corps{flex:1 1 auto;display:flex;flex-direction:column;min-height:0;padding:1.1rem 1.8rem}
-/* ⚠ C'est la LISTE qui defile, pas la page : le bloc des totaux doit rester
-   visible en permanence, c'est la seule chose que la cliente cherche. */
-.liste{flex:1 1 auto;overflow-y:auto;min-height:0}
-.liste::-webkit-scrollbar{width:8px}
-.liste::-webkit-scrollbar-thumb{background:var(--v14);border-radius:8px}
+/* ⚠ C'est la LISTE qui se pagine, pas la page : le bloc des totaux doit rester
+   visible en permanence, c'est la seule chose que la cliente cherche.
+   (2026-10-25, audit) Plus de glissiere : data-pages-fin (le meme mecanisme que la caisse)
+   montre la DERNIERE page — l article qu on vient de scanner. */
+.liste{flex:1 1 auto;min-height:0}
 .ln{display:flex;align-items:baseline;gap:1rem;padding:.72rem 0;border-bottom:1px solid var(--v06)}
 .ln .q{flex:0 0 auto;min-width:2.6rem;font-variant-numeric:tabular-nums;color:var(--tx-or);font-weight:700;font-size:1.05rem}
 .ln .d{flex:1 1 auto;min-width:0}
 .ln .n{font-size:1.12rem;font-weight:600;line-height:1.3}
-.ln .v{font-size:.82rem;color:#9fb0c4;margin-top:.15rem}
+.ln .v{font-size:.82rem;color:var(--tx2);margin-top:.15rem}
 .ln .p{flex:0 0 auto;font-variant-numeric:tabular-nums;font-size:1.12rem;font-weight:600}
 .ln .p s{font-size:.88rem;font-weight:400;color:var(--tx2);margin-right:.6rem}
 .ln .p .rb{display:inline-block;font-size:.8rem;font-weight:700;color:var(--tx-or);
@@ -70,7 +74,7 @@ body{background:linear-gradient(160deg,#0d1420 0%,#141d2c 55%,#0d1420 100%);
 .ln.neuf{animation:surligne 1.4s ease-out}
 @keyframes surligne{0%{background:rgba(var(--or-rgb),.22)}100%{background:transparent}}
 .bas{flex:0 0 auto;border-top:1px solid var(--v10);padding-top:.9rem;margin-top:.6rem}
-.sl{display:flex;justify-content:space-between;font-size:.95rem;color:#b9c6d6;padding:.2rem 0}
+.sl{display:flex;justify-content:space-between;font-size:.95rem;color:var(--tx-c3cede);padding:.2rem 0}
 .sl b{font-variant-numeric:tabular-nums;font-weight:600;color:var(--tx-e6ded2)}
 .tot{display:flex;justify-content:space-between;align-items:baseline;margin-top:.7rem;
   padding-top:.8rem;border-top:2px solid rgba(var(--or-rgb),.45)}
@@ -79,12 +83,12 @@ body{background:linear-gradient(160deg,#0d1420 0%,#141d2c 55%,#0d1420 100%);
   font-family:Georgia,serif;color:var(--tx-blanc)}
 .vide{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;text-align:center}
 .vide img{max-width:min(340px,60vw);height:auto}
-.vide .msg{font-size:1.05rem;color:#9fb0c4}
+.vide .msg{font-size:1.05rem;color:var(--tx2)}
 /* ⚠ UN ETAT << PAS ENCORE RELIE >> DISTINCT DU PANIER VIDE. Si la fenetre
    principale ne repond pas, la cliente verrait << Bienvenue >> alors que rien
    n'est branche — et la caissiere croirait l'afficheur en marche. */
 .avis{position:fixed;left:50%;transform:translateX(-50%);bottom:1rem;
-  background:rgba(200,140,40,.16);border:1px solid rgba(240,180,80,.5);color:#f5d18a;
+  background:rgba(200,140,40,.16);border:1px solid rgba(240,180,80,.5);color:var(--tx-or2);
   border-radius:99px;padding:.3rem .9rem;font-size:.78rem;display:none}
 .avis.on{display:block}
 @media (max-width:760px){.tot .vl{font-size:2.3rem}.corps{padding:.9rem 1.1rem}}
@@ -121,7 +125,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      anglais. szArgent (socle) le place ; le coller apres le nombre etait un
      choix que la page n avait pas a faire. */
   function fmt(n){ return szArgent(n); }
-  function esc(s){ return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+  // (2026-10-25, audit) Les guillemets aussi : l adresse du logo part dans un attribut src="…".
+  function esc(s){ return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
 
   function dire(t){
     avis.textContent = t || '';
@@ -157,7 +162,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     dernierNb = lignes.length;
 
     var t = etat.totaux || {};
-    var h = ['<div class="liste">'];
+    var h = ['<div class="liste" data-pages="aff-lignes" data-pages-fin>'];
     lignes.forEach(function(l, i){
       var variante = [l.size, l.color].filter(Boolean).join(' · ');
       h.push('<div class="ln' + (i === neuve ? ' neuf' : '') + '">'

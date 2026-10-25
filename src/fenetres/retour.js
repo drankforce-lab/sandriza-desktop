@@ -179,7 +179,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   /* ⚠ LES DECISIONS D INVENTAIRE ET LES MONTANTS VIVENT ICI, hors de l ecran :
      changer d etape redessine tout, et lire les champs a la fin ne rendrait que
      l etape affichee. Meme lecon que la grille d inventaire. */
-  var DECISIONS = {};        // productId -> { backToStock, reason }
+  /* (2026-10-25, audit) INDEXEES PAR POSITION, plus par productId : deux tailles du
+     meme produit partageaient une decision (meme menu, meme raison). */
+  var DECISIONS = {};        // position de l article -> { backToStock, reason }
+  /* (2026-10-25, audit) Les champs de la Demande et du Reglement, gardes HORS de
+     l ecran comme DECISIONS : un aller-retour dans le fil les effacait. */
+  var DEMANDE_SAISIE = null; // releve szBrouillonDuDom de l etape Demande
+  var REGL = null;           // { note, statut, livraison, methode } de l etape Reglement
   var MONTANTS = null;       // montants par ligne (copies editables de la suggestion)
   var enCours = false;
 
@@ -221,6 +227,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     commande_introuvable: '${T("Commande introuvable sur le serveur.")}',
     square_indisponible: '${T("Aucun paiement Square lié à cette commande.")}',
     montant_invalide:   '${T("Montant du remboursement invalide.")}',
+    /* (2026-10-25, audit) Deux motifs de _retourFinaliser qui sortaient bruts. */
+    deja_finalise:      '${T("Ce retour a déjà été réglé (remboursé ou complété). Rien n’a été refait.")}',
+    refus_serveur:      '${T("Le serveur a refusé l’enregistrement du retour. Rien n’a été modifié — réessayez.")}',
     etiquette_absente:  '${T("Aucune étiquette générée pour cette demande.")}',
     /* Les motifs du RECOURS (reprendre l’étiquette chez Postes Canada). Chacun
        dit où aller : un « échec » sans direction fait rouvrir le dossier demain
@@ -303,7 +312,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (ETAPE === 0) dessinerDemande();
     else if (ETAPE === 1) dessinerTraitement();
     else dessinerReglement();
-    if (!BR_PROPOSE && ETAPE === 0 && document.getElementById('r-notes')) {
+    if (!BR_PROPOSE && R && !R.archive && (ETAPE > 0 || document.getElementById('r-notes'))) {
       BR_PROPOSE = true;
       szBrouillonProposer();
     }
@@ -323,7 +332,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + (d.description ? '<div class="large"><div class="k">${T("Description du client")}</div><div class="v" style="white-space:pre-wrap;font-weight:400">' + esc(d.description) + '</div></div>' : '')
       + (d.modeRemboursement ? '<div class="large"><div class="k">${T("Mode communiqué au client")}</div><div class="v">'
           + (d.modeRemboursement === 'creditOnly' ? '${T("Crédit boutique uniquement")}' : '${T("Moyen original ou crédit, au choix")}')
-          + (d.preference ? ' ${T("· préférence :")} ' + (d.preference === 'credit' ? '${T("crédit boutique")}' : 'moyen original') : '') + '</div></div>' : '')
+          + (d.preference ? ' ${T("· préférence :")} ' + (d.preference === 'credit' ? '${T("crédit boutique")}' : '${T("moyen original")}') : '') + '</div></div>' : '')
       + (d.fraisPayesPar ? '<div class="large"><div class="k">${T("Frais de retour")}</div><div class="v">'
           + (d.fraisPayesPar === 'store' ? '<span class="ic">🛠</span> ${T("Pris en charge par la boutique (défaut / erreur)")}' : '<span class="ic">📦</span> ${T("À la charge du client")}') + '</div></div>' : '')
       + '</div></div>';
@@ -390,7 +399,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         + '<div style="font-size:.72rem;color:var(--tx2);font-weight:700;text-transform:uppercase;letter-spacing:.07em"><span class="ic">📦</span> ${T("Étiquette de retour")}</div>'
         + (d.aUneEtiquette ? '<div class="avis jaune"><span class="ic">⚠</span> ${T("Une étiquette existe déjà (")}'
             + (d.etiquetteReelle ? '${T("réelle Postes Canada — la régénérer sera FACTURÉ une seconde fois")}' : '${T("PDF interne")}')
-            + (d.suivi ? ' · suivi ' + esc(d.suivi) : '') + ').</div>' : '')
+            + (d.suivi ? ' · ${T("suivi")} ' + esc(d.suivi) : '') + ').</div>' : '')
         + '<div class="r3" style="margin-top:.45rem">'
         + '<div class="ch"><label for="r-transp">${T("Transporteur")}</label><select id="r-transp">'
         + R.etiquette.transporteurs.map(function(t){
@@ -447,13 +456,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     }
     actions.innerHTML = boutons;
     brancherDemande(fige);
+    /* (2026-10-25, audit) La saisie d avant l aller-retour dans le fil revient, et
+       les blocs qui dependent du statut (refus, etiquette) la suivent. */
+    if (DEMANDE_SAISIE) {
+      szBrouillonAuDom(DEMANDE_SAISIE);
+      var st0 = document.getElementById('r-statut');
+      if (st0 && st0.onchange) st0.onchange.call(st0);
+    }
   }
 
   function dessinerTraitement(){
     var h = '<div class="carte"><h2>${T("Décision inventaire ")}<span class="note">${T("— par article")}</span></h2>'
       + '<div class="aide">${T("La remise en stock incrémente la VARIANTE (taille · couleur) reprise de la commande d’origine.")}</div>'
       + R.articles.map(function(a, i){
-          var dec = DECISIONS[a.productId] || { backToStock: true, reason: '' };
+          var dec = DECISIONS[i] || { backToStock: true, reason: '' };
           return '<div class="art"><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(String(a.nom || '?').trim().charAt(0).toUpperCase() || '?') + '</span><div>'
             + '<div class="rf-nom">' + esc(a.nom) + '</div>'
             + '<div class="rf-sous"><span>' + esc([a.taille, a.couleur].filter(Boolean).join(' · ') || '—') + '</span><span>·</span><span>× ' + a.quantite + '</span></div></div></div>'
@@ -493,7 +509,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
             return '<div class="ligne"><span>' + esc(l.nom)
               + (l.moitie ? ' <span style="color:var(--tx-or2);font-size:.74rem">${T("(2 pour 1 — 50 % suggéré, plein :")} ' + argent(l.base) + ')</span>' : '')
               + '</span><input type="number" step="0.01" min="0" data-mnt="' + i + '"'
-              + ' aria-label="' + esc('${T("Montant à rembourser —")} ' + (l.nom || l.libelle || ('ligne ' + (i + 1)))) + '"'
+              + ' aria-label="' + esc('${T("Montant à rembourser —")} ' + (l.nom || l.libelle || ('${T("ligne")} ' + (i + 1)))) + '"'
               + ' value="' + (MONTANTS[i]).toFixed(2) + '"></div>'; }).join('')
         + '<label style="display:flex;align-items:center;gap:.4rem;font-size:.84rem;margin-top:.5rem;cursor:pointer'
         + (R.demande.fauteMarchande ? '' : ';opacity:.55') + '">'
@@ -512,7 +528,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         + ((rb.dansFenetre && rb.squareDisponible && R.demande.preference !== 'credit') ? '' : ' checked') + '> ${T("Crédit boutique")}</label>'
         + '</div>'
         + (R.demande.preference ? '<div class="avis bleu"><span class="ic">👤</span> ${T("Préférence du client : ")}'
-            + (R.demande.preference === 'credit' ? '${T("crédit boutique")}' : 'moyen original') + '</div>' : '')
+            + (R.demande.preference === 'credit' ? '${T("crédit boutique")}' : '${T("moyen original")}') + '</div>' : '')
         + '</div>';
     }
     h += '<div class="carte"><h2>${T("Résolution finale")}</h2>'
@@ -525,6 +541,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '</div>';
     corps.innerHTML = h;
     actions.innerHTML = '<button class="paie" id="btn-finaliser"' + (R.peutEcrire ? '' : ' disabled') + '><span class="ic">✅</span> ${T("Finaliser le traitement")}</button>';
+    if (REGL) {
+      var gn = document.getElementById('g-note'); if (gn) gn.value = REGL.note;
+      var gs = document.getElementById('g-statut'); if (gs && REGL.statut) gs.value = REGL.statut;
+      var gl = document.getElementById('g-livraison'); if (gl) gl.checked = !!REGL.livraison;
+      var gm = REGL.methode ? document.querySelector('input[name="g-methode"][value="' + REGL.methode + '"]') : null;
+      if (gm && !gm.disabled) gm.checked = true;
+    }
     brancherReglement();
   }
 
@@ -532,9 +555,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   document.getElementById('pas').addEventListener('click', function(ev){
     var b = ev.target.closest('[data-et]');
     if (!b || b.disabled) return;
+    garderSaisie();
     ETAPE = parseInt(b.getAttribute('data-et'), 10) || 0;
     dessiner();
   });
+  /* (2026-10-25, audit) Releve les champs de l etape affichee AVANT tout redessin :
+     ils ne vivent que dans le DOM, et le fil les reconstruisait depuis R. */
+  function garderSaisie(){
+    if (ETAPE === 0) {
+      var v = szBrouillonDuDom(BR_CHAMPS, ['r-generer']);
+      if (v) DEMANDE_SAISIE = v;
+    } else if (ETAPE === 2) {
+      var n = document.getElementById('g-note');
+      if (n) {
+        var m = document.querySelector('input[name="g-methode"]:checked');
+        REGL = { note: n.value, statut: val('g-statut'), livraison: coche('g-livraison'), methode: m ? m.value : '' };
+      }
+    }
+  }
 
   function brancherDemande(fige){
     var st = document.getElementById('r-statut');
@@ -557,7 +595,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var ro = document.getElementById('btn-rouvrir');
     if (ro) ro.onclick = function(){ litige('reopen'); };
     var rj = document.getElementById('btn-rejeter');
-    if (rj) rj.onclick = function(){ litige('confirm'); };
+    /* (2026-10-25, audit) Confirmer le rejet est definitif pour le client : une
+       boite a part le nomme avant d agir. */
+    if (rj) rj.onclick = function(){
+      var dJ = (R && R.demande) || {};
+      szConfirmer({ danger: true, titre: '${T("Confirmer le rejet")}',
+        texte: '${T("Le rejet de la demande de retour de la commande")} ' + (dJ.commande || '—') + ' ${T("sera confirmé malgré la réponse du client.")}',
+        details: [['${T("Client")}', dJ.client || '—']],
+        oui: '${T("Confirmer le rejet")}' }).then(function(ok){ if (ok) litige('confirm'); });
+    };
     // La vignette s agrandit au clic ; un clic n importe ou (ou Echap) la referme.
     document.querySelectorAll('img.photo').forEach(function(im){
       im.onclick = function(){
@@ -581,7 +627,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       if (iv !== null && iv !== undefined) {
         var a = R.articles[parseInt(iv, 10)];
         if (!a) return;
-        var d = DECISIONS[a.productId] || (DECISIONS[a.productId] = { backToStock: true, reason: '' });
+        var d = DECISIONS[iv] || (DECISIONS[iv] = { backToStock: true, reason: '' });
         d.backToStock = t.value === '1';
         var z = corps.querySelector('[data-raison-z="' + iv + '"]');
         if (z) z.style.display = d.backToStock ? 'none' : '';
@@ -592,7 +638,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       var ir = t.getAttribute && t.getAttribute('data-raison');
       if (ir !== null && ir !== undefined) {
         var a = R.articles[parseInt(ir, 10)];
-        if (a) (DECISIONS[a.productId] || (DECISIONS[a.productId] = { backToStock: false, reason: '' })).reason = t.value;
+        if (a) (DECISIONS[ir] || (DECISIONS[ir] = { backToStock: false, reason: '' })).reason = t.value;
       }
     };
     var re = document.getElementById('btn-reexp');
@@ -621,7 +667,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       if (!b) return;
       var n = document.getElementById('g-note');
       var m2 = (R.modeles || [])[parseInt(b.getAttribute('data-modele'), 10)] || '';
-      if (n) { n.value = n.value.trim() ? n.value.trim() + ' ' + m2 : m2; n.focus(); }
+      if (n) { n.value = n.value.trim() ? n.value.trim() + ' ' + m2 : m2; n.focus(); szBrouillonPoser(); }
     };
     var f = document.getElementById('btn-finaliser');
     if (f) f.onclick = finaliser;
@@ -639,23 +685,50 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
      suivante, et l'on refuserait la mauvaise.
      ⚠ ET SEULEMENT CE QUI DIFFERE de ce qui est enregistre : on modifie une
      demande EXISTANTE. */
-  var BR_CHAMPS = ['r-statut', 'r-refus', 'r-transp', 'r-service', 'r-poids', 'r-notes'];
+  /* r-notes EN TETE (2026-10-25, audit) : szBrouillonDuDom rend null si le PREMIER
+     champ manque, et r-statut n existe pas sur un dossier fige (notes seules). */
+  var BR_CHAMPS = ['r-notes', 'r-statut', 'r-refus', 'r-transp', 'r-service', 'r-poids'];
   szBrouillonBrancher({
     portee: 'retour',
     libelle: '${T("Une modification de cette demande")}',
     ttlMin: 720,
     cle: function(){ return 'r:' + ID; },
-    actif: function(){ return !!document.getElementById('r-notes'); },
-    valeurs: function(){ return szBrouillonDuDom(BR_CHAMPS, ['r-generer']); },
+    /* (2026-10-25, audit) ACTIF AUSSI AU TRAITEMENT ET AU REGLEMENT : le brouillon
+       n existait qu a l etape Demande, et Echap (ou le X) jetait sans question les
+       raisons de non-remise en stock, les montants corriges et la note au client.
+       Il porte desormais DECISIONS, MONTANTS et REGL a cote des champs. */
+    actif: function(){ return !!R && !R.archive && (!!document.getElementById('r-notes') || ETAPE > 0); },
+    valeurs: function(){
+      garderSaisie();
+      var v = DEMANDE_SAISIE ? JSON.parse(JSON.stringify(DEMANDE_SAISIE)) : { _c: {} };
+      v._dec = DECISIONS; v._mnt = MONTANTS; v._regl = REGL;
+      return v;
+    },
     rempli: function(){
-      var v = szBrouillonDuDom(BR_CHAMPS, ['r-generer']); if (!v) return false;
+      garderSaisie();
       var d = (R && R.demande) || {};
-      if (String(v['r-notes'] || '') !== String(d.notes || '')) return true;
-      if (String(v['r-refus'] || '') !== String(d.noteRefus || '')) return true;
-      if (String(v['r-statut'] || '') !== String(d.statut || '')) return true;
+      var v = DEMANDE_SAISIE;
+      if (v) {
+        if (String(v['r-notes'] || '') !== String(d.notes || '')) return true;
+        if (String(v['r-refus'] || '') !== String(d.noteRefus || '')) return true;
+        if (v['r-statut'] != null && String(v['r-statut'] || '') !== String(d.statut || '')) return true;
+      }
+      var decSale = Object.keys(DECISIONS).some(function(k){
+        var x = DECISIONS[k]; return x && (!x.backToStock || String(x.reason || '').trim());
+      });
+      if (decSale) return true;
+      var lig = (R && R.remboursement && R.remboursement.lignes) || [];
+      if (MONTANTS && MONTANTS.some(function(m, i){ return !lig[i] || Math.abs((Number(m) || 0) - (Number(lig[i].montant) || 0)) >= 0.005; })) return true;
+      if (REGL && String(REGL.note || '') !== String(d.notes || '')) return true;
       return false;
     },
-    remplir: function(v){ szBrouillonAuDom(v); },
+    remplir: function(v){
+      if (v && v._dec && typeof v._dec === 'object') DECISIONS = v._dec;
+      if (v && Array.isArray(v._mnt)) MONTANTS = v._mnt;
+      if (v && v._regl && typeof v._regl === 'object') REGL = v._regl;
+      DEMANDE_SAISIE = (v && v['r-notes'] != null) ? v : null;
+      dessiner();
+    },
   });
   szBrouillonEcouter();
 
@@ -743,9 +816,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     });
   }
 
+  /* (2026-10-25, audit) Un double clic envoyait deux courriels : le bouton reste
+     eteint jusqu a la reponse. */
+  var RENVOI_EN_COURS = false;
   function renvoyer(){
+    if (RENVOI_EN_COURS) return;
+    RENVOI_EN_COURS = true;
+    var bR = document.getElementById('btn-renvoyer'); if (bR) bR.disabled = true;
     dire('${T("Envoi…")}', 'att');
     appeler('retour:renvoyer', [ID]).then(function(r){
+      RENVOI_EN_COURS = false;
+      var bR2 = document.getElementById('btn-renvoyer'); if (bR2) bR2.disabled = false;
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       dire(r.courriel && r.courriel.envoye ? '${T("Étiquette renvoyée au client.")}'
         : '${T("Étiquette prête, mais courriel non envoyé")}' + (r.courriel && r.courriel.erreur ? ' : ' + r.courriel.erreur : '.'),
@@ -755,8 +836,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
   function finaliser(){
     if (enCours || !R.peutEcrire) return;
-    var decisions = R.articles.map(function(a){
-      var d = DECISIONS[a.productId] || { backToStock: true, reason: '' };
+    var decisions = R.articles.map(function(a, i){
+      var d = DECISIONS[i] || { backToStock: true, reason: '' };
       return { productId: a.productId, backToStock: d.backToStock, reason: d.reason };
     });
     // Le refus de raison manquante se dit AVANT la confirmation d argent.
@@ -778,7 +859,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     voile('<h3>' + (statutFinal === 'refunded' ? '<span class="ic">💳</span> ${T("Rembourser et clore ?")}' : '${T("Clore le dossier ?")}') + '</h3>'
       + (statutFinal === 'refunded'
           ? '<p>${T("Articles :")} <strong>' + argent(montants.reduce(function(s,v){ return s+(parseFloat(v)||0); }, 0)) + '</strong>'
-            + (livraison && R.remboursement ? ' + livraison <strong>' + argent(R.remboursement.livraisonBase) + '</strong>' : '')
+            + (livraison && R.remboursement ? ' + ${T("livraison")} <strong>' + argent(R.remboursement.livraisonBase) + '</strong>' : '')
             + ' <span style="color:var(--tx2)">${T("(+ taxes aux taux réels)")}</span><br>'
             + '${T("Méthode :")} <strong>' + (methode === 'original' ? '${T("moyen de paiement original (Square)")}' : '${T("crédit boutique")}') + '</strong></p>'
             + '<p style="color:var(--tx-att)">${T("Un remboursement ne s’annule pas d’un clic.")}</p>'
@@ -823,7 +904,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       if (!r.ok) { vide('${T("Retour indisponible")}', expliquer(r)); return; }
       R = r;
       ETAPE = etapePour(r.demande.statut);
-      DECISIONS = {}; MONTANTS = null;
+      DECISIONS = {}; MONTANTS = null; DEMANDE_SAISIE = null; REGL = null;
       document.getElementById('titre').textContent = '${T("Retour —")} ' + r.demande.commande;
       var pill = document.getElementById('pill');
       pill.style.display = '';
@@ -911,7 +992,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
 
   document.addEventListener('keydown', function(ev){
-    if (ev.key === 'Escape' && !document.querySelector('.voile')) { ev.preventDefault(); rendreVerrou(); P.fermer(); }
+    if (ev.key !== 'Escape' || document.querySelector('.voile, .agrand, .szc-voile, .szbr-voile')) return;
+    ev.preventDefault();
+    /* (2026-10-25, audit) Une saisie en cours (brouillon sale) : la coquille pose
+       la question de fermeture ; le verrou ne se rend qu au vrai depart
+       (beforeunload), sinon « Revenir au formulaire » le perdait. La photo
+       agrandie se referme seule, sans fermer la fenetre. */
+    if (!szBrouillonEtat()) rendreVerrou();
+    P.fermer();
   });
 
   recharger().then(function(){ if (R) prendreVerrou(); });

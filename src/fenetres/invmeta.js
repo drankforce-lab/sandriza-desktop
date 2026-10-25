@@ -190,7 +190,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'inv-color-name':30,'inv-color-hex':7,'
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
-  function plur(n){ return n === 1 ? '' : 's'; }
+  /* (2026-10-25, audit) DES PHRASES ENTIERES, singulier et pluriel : plur() collait
+     un « s » (et des fragments francais hors T()) — l anglais lisait « 3 products
+     ont its own threshold ». {0} recoit le nombre. */
+  function phrase(n, sing, plu){ return szPl(n, sing, plu).split('{0}').join(n); }
+  /* (2026-10-25, audit) Une suppression passe par une boite a part (un clic, ou
+     Retour arriere dans le champ vide, retirait aussitot sur le serveur). */
+  function confirmerRetrait(titre, texte, oui, suite){
+    szConfirmer({ danger: true, titre: titre, texte: texte, oui: oui }).then(function(ok){ if (ok) suite(); });
+  }
   function val(id){ var e = document.getElementById(id); return e ? e.value : ''; }
 
   var MOTIFS = {
@@ -206,7 +214,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'inv-color-name':30,'inv-color-hex':7,'
   };
   function expliquer(r){
     if (!r) return '${T("Aucune réponse de la fenêtre principale.")}';
-    if (r.motif === 'utilise') return r.used + ' ${T("produit")}' + plur(r.used) + ' ${T("utilisent encore cette valeur — retirez-la d’abord des produits concernés.")}';
+    if (r.motif === 'utilise') return phrase(r.used, '${T("{0} produit utilise encore cette valeur — retirez-la d’abord du produit concerné.")}', '${T("{0} produits utilisent encore cette valeur — retirez-la d’abord des produits concernés.")}');
     if (r.motif === 'conflit') return '${T("Le code «")} ' + r.code + ' ${T("» est déjà pris par «")} ' + r.autre + ' ${T("». Choisissez-en un autre.")}';
     if (r.detail) return String(r.detail);
     return MOTIFS[r.motif] || MOTIFS.echec;
@@ -249,7 +257,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'inv-color-name':30,'inv-color-hex':7,'
   /* ══ ONGLET TAILLES ════════════════════════════════════════════════════════ */
   function vueSizes(){
     var chips = D.sizes.map(function(s){
-      var lock = s.used > 0 ? '<span class="lock" title="Utilisée par ' + s.used + ' ${T("produit")}' + plur(s.used) + '"><span class="ic">🔒</span></span>' : '';
+      var lock = s.used > 0 ? '<span class="lock" title="' + phrase(s.used, '${T("Utilisée par {0} produit")}', '${T("Utilisée par {0} produits")}') + '"><span class="ic">🔒</span></span>' : '';
       var x = D.peut.edit ? '<button data-sizerm="' + esc(s.nom) + '" title="' + (s.used > 0 ? '${T("Utilisée — suppression bloquée")}' : '${T("Retirer")}') + '">×</button>' : '';
       return '<span class="chip">' + esc(s.nom) + lock + x + '</span>';
     }).join('');
@@ -318,13 +326,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'inv-color-name':30,'inv-color-hex':7,'
       +   '<input type="color" id="inv-color-picker" aria-label="${T("Choisir la couleur au nuancier")}" value="#FF6B6B" data-syncHex="1" style="width:38px;height:34px;padding:2px"></div></div>'
       + '<div class="champ"><label>${T("Ou chercher par nom")}</label><button class="ghost mini" data-act="colorsearch"><span class="ic">🔍</span> ${T("Chercher")}</button></div>'
       + '</div>'
-      + (CVARIANTS && CVARIANTS.length ? '<div style="margin-top:.6rem"><div class="aide" style="margin:0 0 .35rem">' + CVARIANTS.length + ' variante' + plur(CVARIANTS.length) + ' ${T("— cliquez pour choisir")}</div><div class="swatches">'
+      + (CVARIANTS && CVARIANTS.length ? '<div style="margin-top:.6rem"><div class="aide" style="margin:0 0 .35rem">' + phrase(CVARIANTS.length, '${T("{0} variante — cliquez pour choisir")}', '${T("{0} variantes — cliquez pour choisir")}') + '</div><div class="swatches">'
           + CVARIANTS.map(function(v){ return '<button class="sw" data-pick="' + esc(v.nom) + '|' + esc(v.hex) + '"><span class="pt" style="background:' + esc(v.hex) + '"></span><span class="nm">' + esc(v.nom) + '</span></button>'; }).join('')
           + '</div></div>' : '')
       + '<div style="margin-top:.7rem"><button class="prim" data-act="coloradd">${T("+ Ajouter la couleur")}</button></div>';
   }
   function secCodes(){
-    var alerte = D.conflits.length ? '<div class="alerte"><span class="ic">⚠</span> <strong>' + D.conflits.length + ' code' + plur(D.conflits.length) + ' ${T("porté")}' + plur(D.conflits.length) + '${T(" par plusieurs couleurs</strong> — ")}'
+    var alerte = D.conflits.length ? '<div class="alerte"><span class="ic">⚠</span> <strong>' + phrase(D.conflits.length, '${T("{0} code porté par plusieurs couleurs")}', '${T("{0} codes portés par plusieurs couleurs")}') + '</strong> — '
       + D.conflits.map(function(c){ return '<code>' + esc(c.code) + '</code> : ' + esc(c.noms.join(', ')); }).join(' · ')
       + '${T(". Ces variantes partagent le même code-barres.")}</div>' : '';
     var bouton = D.suggestions.length ? '<div style="margin-bottom:.7rem"><button class="prim" data-act="codesassign">${T("Attribuer des codes courts (")}' + D.suggestions.length + ')</button> '
@@ -361,13 +369,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'inv-color-name':30,'inv-color-hex':7,'
     var dispo = D.builtin.length - used;
     var fbtn = function(v, txt){ return '<button class="mini ' + (CFILTER === v ? 'actif' : '') + '" data-cfilter="' + v + '">' + txt + '</button>'; };
     var sw = list.map(function(c){
-      return '<button class="sw" data-pick="' + esc(c.nom) + '|' + esc(c.hex) + '" title="' + esc(c.nom) + (c.used ? ' — ' + c.used + ' ${T("produit")}' + plur(c.used) : ' ${T("— non utilisée")}') + '"' + (c.used ? '' : ' style="opacity:.55"') + '>'
+      return '<button class="sw" data-pick="' + esc(c.nom) + '|' + esc(c.hex) + '" title="' + esc(c.nom) + (c.used ? ' — ' + phrase(c.used, '${T("{0} produit")}', '${T("{0} produits")}') : ' ${T("— non utilisée")}') + '"' + (c.used ? '' : ' style="opacity:.55"') + '>'
         + '<span class="pt" style="background:' + esc(c.hex) + '"></span><span class="nm">' + esc(c.nom) + '</span>'
         + (c.used ? '<span class="pill used" style="font-size:.6875rem">' + c.used + '×</span>' : '') + '</button>';
     }).join('');
     return '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:.4rem;margin-bottom:.5rem">'
-      + '<span class="aide" style="margin:0">' + used + ' ${T("utilisée")}' + plur(used) + ' · ' + dispo + ' ${T("disponible")}' + plur(dispo) + '</span>'
-      + '<span>' + fbtn('all', 'Toutes') + ' ' + fbtn('used', '${T("Utilisées (")}' + used + ')') + ' ' + fbtn('unused', 'Non (' + dispo + ')') + '</span></div>'
+      + '<span class="aide" style="margin:0">' + phrase(used, '${T("{0} utilisée")}', '${T("{0} utilisées")}') + ' · ' + phrase(dispo, '${T("{0} disponible")}', '${T("{0} disponibles")}') + '</span>'
+      + '<span>' + fbtn('all', '${T("Toutes")}') + ' ' + fbtn('used', '${T("Utilisées (")}' + used + ')') + ' ' + fbtn('unused', '${T("Non utilisées (")}' + dispo + ')') + '</span></div>'
       + '<div class="aide" style="margin:0 0 .5rem">${T("Cliquez une couleur pour la sélectionner dans le formulaire d’ajout.")}</div>'
       + '<div class="swatches">' + sw + '</div>';
   }
@@ -441,7 +449,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'inv-color-name':30,'inv-color-hex':7,'
       + '<div class="champ" style="max-width:220px"><label for="rc-low">${T("Seuil général")}</label>'
       + '<input type="number" min="0" step="1" id="rc-low" value="' + r.lowStockDefault + '"' + ro + ' style="width:100%"></div>'
       + '<div class="avis" style="margin:.7rem 0">${T("Le seuil se règle à trois niveaux, <strong>le plus précis l’emporte</strong> : exception sur la variante, sinon seuil du produit, sinon celui-ci.")}<br>'
-      + '${T("Actuellement :")} <strong>' + r.regles + '</strong> ${T("produit")}' + (r.regles > 1 ? 's ont' : ' a') + ' ${T("son propre seuil,")} <strong>' + r.exceptions + '</strong> variante' + (r.exceptions > 1 ? 's font' : ' fait') + ' exception.</div>'
+      + '${T("Actuellement :")} <strong>' + r.regles + '</strong> ' + szPl(r.regles, '${T("produit a son propre seuil,")}', '${T("produits ont leur propre seuil,")}')
+      + ' <strong>' + r.exceptions + '</strong> ' + szPl(r.exceptions, '${T("variante fait exception.")}', '${T("variantes font exception.")}') + '</div>'
       + (D.peut.edit ? '<button class="prim" data-act="reachatlow">${T("Enregistrer le seuil")}</button>' : '')
       + '<hr style="border:none;border-top:1px solid var(--v10);margin:1.3rem 0">'
       + ''
@@ -484,8 +493,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'inv-color-name':30,'inv-color-hex':7,'
   }
   /* ⚠ LES DEUX ALTERNATIVES EN ENTIER POUR CHAQUE ONGLET. Le depot a un banc
      pour ca (banc-pluriel-colle) : le pluriel ne se fabrique pas en ajoutant
-     une lettre. La fonction plur() de ce fichier fait exactement ca — elle est
-     anterieure, on ne s en sert pas ici.
+     une lettre. La fonction plur() de ce fichier faisait exactement ca — elle a
+     ete retiree le 2026-10-25 (audit) au profit de phrase().
      ⚠ Et le singulier porte son article (<< une taille >>), sinon l anglais
      dirait << 1 sizes >>. */
   function motsOnglet(n){
@@ -651,7 +660,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'inv-color-name':30,'inv-color-hex':7,'
     if (!nm.trim()) { dire('${T("Entrez un nom de couleur d’abord.")}', 'att'); return; }
     appeler('invmeta:colorSearch', { name: nm }).then(function(r){
       if (!r || !r.ok) { CVARIANTS = null; dire('${T("Couleur non trouvée. Entrez la valeur hex à la main.")}', 'err'); dessiner(); return; }
-      if (r.variants) { CVARIANTS = r.variants; dessiner(); dire(r.variants.length + ' variante' + plur(r.variants.length) + ' ${T("— cliquez pour choisir.")}', 'bon'); return; }
+      if (r.variants) { CVARIANTS = r.variants; dessiner(); dire(phrase(r.variants.length, '${T("{0} variante — cliquez pour choisir.")}', '${T("{0} variantes — cliquez pour choisir.")}'), 'bon'); return; }
       CVARIANTS = null;
       var hx = document.getElementById('inv-color-hex'); if (hx) hx.value = r.hex;
       var pk = document.getElementById('inv-color-picker'); if (pk) { try { pk.value = r.hex; } catch(e){} }
@@ -700,7 +709,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'inv-color-name':30,'inv-color-hex':7,'
       return;
     }
     if (g('data-tab')) { TAB = g('data-tab'); ADDING = null; CATEDIT = null; CVARIANTS = null; dessiner(); return; }
-    if (g('data-sizerm')) { ecrire('invmeta:sizeRemove', { sz: g('data-sizerm') }, function(){ return '${T("Taille retirée.")}'; }); return; }
+    if (g('data-sizerm')) { var szR = g('data-sizerm');
+      confirmerRetrait('${T("Retirer la taille")}', '${T("La taille")} « ' + szR + ' » ${T("sera retirée de la liste proposée dans les fiches produits.")}', '${T("Retirer la taille")}',
+        function(){ ecrire('invmeta:sizeRemove', { sz: szR }, function(){ return '${T("Taille retirée.")}'; }); }); return; }
     if (g('data-attradd')) { ADDING = g('data-attradd'); dessiner(); var f = document.getElementById(ADDING === 'labels' ? 'lb-fr' : 'at-key'); if (f) f.focus(); return; }
     if (g('data-attrcancel')) { ADDING = null; dessiner(); return; }
     if (g('data-attrsave')) { saveAttr(g('data-attrsave')); return; }
@@ -710,10 +721,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'inv-color-name':30,'inv-color-hex':7,'
     if (g('data-act') === 'exporter') { exporterOnglet(); return; }
     if (g('data-act') === 'coloradd') { addColor(); return; }
     if (g('data-act') === 'colorsearch') { searchColor(); return; }
-    if (g('data-act') === 'codesassign') { ecrire('invmeta:codesAssign', {}, function(r){ return r.n + ' code' + plur(r.n) + ' ${T("enregistré")}' + plur(r.n) + '.'; }); return; }
+    if (g('data-act') === 'codesassign') { ecrire('invmeta:codesAssign', {}, function(r){ return phrase(r.n, '${T("{0} code enregistré.")}', '${T("{0} codes enregistrés.")}'); }); return; }
     if (g('data-codesave')) { saveCode(g('data-codesave')); return; }
     if (g('data-coloredit')) { var cp = g('data-coloredit').split('|'); EDITCOLOR = { nom: cp[0], hex: cp[1] }; dessiner(); return; }
-    if (g('data-colorrm')) { ecrire('invmeta:colorRemove', { name: g('data-colorrm') }, function(){ return '${T("Couleur supprimée.")}'; }); return; }
+    if (g('data-colorrm')) { var coR = g('data-colorrm');
+      confirmerRetrait('${T("Supprimer la couleur")}', '${T("La couleur")} « ' + coR + ' » ${T("sera supprimée de la liste des couleurs.")}', '${T("Supprimer la couleur")}',
+        function(){ ecrire('invmeta:colorRemove', { name: coR }, function(){ return '${T("Couleur supprimée.")}'; }); }); return; }
     if (g('data-pick')) { var pk = g('data-pick').split('|'); var nEl = document.getElementById('inv-color-name'); var hEl = document.getElementById('inv-color-hex'); var pEl = document.getElementById('inv-color-picker'); if (nEl) nEl.value = pk[0]; if (hEl) hEl.value = pk[1]; if (pEl) { try { pEl.value = pk[1]; } catch(er){} } CVARIANTS = null; dire('« ' + pk[0] + ' ${T("» sélectionnée.")}', 'bon'); return; }
     if (g('data-cfilter')) { CFILTER = g('data-cfilter'); dessiner(); return; }
     if (g('data-coltoggle')) { appeler('invmeta:colToggle', { key: g('data-coltoggle') }).then(relire); return; }
@@ -722,7 +735,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'inv-color-name':30,'inv-color-hex':7,'
     if (g('data-catedit')) { CATEDIT = g('data-catedit'); dessiner(); var ce = document.getElementById('ic-name'); if (ce) { ce.focus(); ce.select(); } return; }
     if (g('data-catcancel')) { CATEDIT = null; dessiner(); return; }
     if (g('data-catsave') !== null && g('data-catsave') !== undefined) { saveCat(g('data-catsave')); return; }
-    if (g('data-catdel')) { ecrire('invmeta:catDelete', { id: g('data-catdel') }, function(r){ return '${T("Catégorie «")} ' + r.name + ' ${T("» supprimée.")}'; }); return; }
+    if (g('data-catdel')) { var caR = g('data-catdel');
+      confirmerRetrait('${T("Supprimer la catégorie")}', '${T("Cette catégorie sera supprimée de l’inventaire.")}', '${T("Supprimer la catégorie")}',
+        function(){ ecrire('invmeta:catDelete', { id: caR }, function(r){ return '${T("Catégorie «")} ' + r.name + ' ${T("» supprimée.")}'; }); }); return; }
     if (g('data-act') === 'reachatlow') { saveReachat('low'); return; }
     if (g('data-act') === 'reachatbuymax') { saveReachat('buymax'); return; }
   });
@@ -733,7 +748,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'inv-color-name':30,'inv-color-hex':7,'
       else if (e.key === 'Backspace' && !e.target.value && D && D.sizes.length && D.peut.edit) {
         e.preventDefault();
         var last = D.sizes[D.sizes.length - 1];
-        ecrire('invmeta:sizeRemove', { sz: last.nom }, function(){ return '${T("Taille retirée.")}'; });
+        confirmerRetrait('${T("Retirer la taille")}', '${T("La taille")} « ' + last.nom + ' » ${T("sera retirée de la liste proposée dans les fiches produits.")}', '${T("Retirer la taille")}',
+          function(){ ecrire('invmeta:sizeRemove', { sz: last.nom }, function(){ return '${T("Taille retirée.")}'; }); });
       }
       return;
     }
