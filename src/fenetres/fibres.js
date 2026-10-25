@@ -373,7 +373,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var u = h / 228;
     ctx.save();
     if (o.miroir) { ctx.translate(x + w, y); ctx.scale(-1, 1); } else ctx.translate(x, y);
-    rectArrondi(ctx, 0, 0, w, h, 6 * u);
+    /* (2026-10-25, sa demande : une coupe Cricut PROPRE, sans résidu de papier) des coins arrondis d environ 1,6 mm :
+       la lame tourne au lieu de pivoter sur un angle vif (pas de petite languette de papier), et le coin se décolle
+       moins au lavage. C est aussi le contour que Design Space coupe : la forme peinte EST la ligne de coupe. */
+    rectArrondi(ctx, 0, 0, w, h, 12 * u);
     ctx.fillStyle = e.couleurFond; ctx.fill();
     if (o.bord) { ctx.lineWidth = Math.max(1, u); ctx.strokeStyle = 'rgba(128,128,128,.55)'; ctx.stroke(); }
     var encre = e.couleurEncre;
@@ -1156,6 +1159,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     };
     if (PL.mode === 'cricut') {
       var d = R.disposition, po = function(mm){ return (Math.round(mm / 25.4 * 100) / 100).toFixed(2); };
+      /* LES RÉGLAGES DE DESIGN SPACE qui font une coupe PROPRE (sa demande : aucun résidu de papier au transfert),
+         rappelés avant CHAQUE export, dans sa boîte à part : c est là que se perd un liseré blanc. */
+      var aPale = R.feuilles.some(function(f){ return f.fond === 'pale'; });
+      b.disabled = false; szDire('');
+      szConfirmer({ titre: '${T("Pour une coupe propre dans Design Space")}',
+        texte: '${T("Chaque étiquette est une forme pleine aux coins arrondis : Design Space coupe exactement son contour. Ces réglages évitent tout liseré ou résidu de papier au transfert.")}',
+        details: [
+          ['${T("Fond perdu")}', '${T("ACTIVÉ (« Ajouter un fond perdu ») : l’encre dépasse un peu sous la ligne de coupe, donc aucun liseré de papier blanc autour d’une étiquette foncée.")}'],
+          ['${T("Taille")}', '${T("Ne pas redimensionner : largeur")} ' + po(d.page.l) + ' ${T("po, comme dans le nom du fichier.")}'],
+          ['${T("Miroir")}', aPale ? '${T("DÉSACTIVÉ dans Design Space : le fichier transparent est déjà en miroir (sinon il serait retourné deux fois).")}' : '${T("DÉSACTIVÉ.")}'],
+          ['${T("Étalonnage")}', '${T("Une fois par machine : Menu › Étalonnage › Imprimer puis couper. Sans lui, la coupe peut glisser d’un millimètre.")}'],
+          ['${T("Matériau")}', '${T("Celui de votre papier (ex. « Printable Iron-On »). Si un bord ne se détache pas tout seul : pression « Plus », lame propre.")}'],
+          ['${T("Avant de presser")}', '${T("Retirer tout le papier autour de l’étiquette. Sur papier transparent, une fine pellicule claire reste au format exact de l’étiquette : c’est normal, elle ne déborde pas.")}']
+        ],
+        oui: '${T("Exporter les feuilles")}' }).then(function(ok){
+      if (!ok) return;
+      b.disabled = true; szDire('${T("Fabrication des fichiers…")}');
       var faits = 0;
       R.feuilles.reduce(function(pr, f, i){
         return pr.then(function(){
@@ -1166,6 +1186,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           });
         });
       }, Promise.resolve()).then(function(){ fin(faits); }, function(e){ fin(faits, '${T("Export interrompu :")} ' + ((e && e.message) || e)); });
+      });
       return;
     }
     if (typeof P.documentPdf !== 'function') { b.disabled = false; szDire('${T("Cette version de l’application ne sait pas fabriquer de PDF.")}', 'err'); return; }
