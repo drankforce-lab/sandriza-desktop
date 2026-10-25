@@ -208,8 +208,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        Elle monte au nuage et n en revient pas ; ia-texte-proxy.php la lit au
        serveur. L ecran n en connait que les quatre derniers caracteres, assez
        pour dire << celle-ci est bien la bonne >>, rien pour s en servir. */
-    { titre: '${T("Anthropic — Écriture publicitaire IA")}',
-      sous: '${T("Rédige les courriels et les publications à partir du contenu du site. Facturé au texte produit : le plafond mensuel ci-dessous est la seule limite de dépense.")}',
+    /* (2026-10-25) La même clé sert aussi aux ANALYSES DE FIBRES (lecture des photos au microscope) : la carte le dit,
+       sinon on la cherche ailleurs (sa question : « où dois-je enregistrer ma clé pour les analyses ? »). */
+    { titre: '${T("Anthropic — Écriture IA et analyses de fibres")}',
+      sous: '${T("Rédige les courriels et les publications, et lit les photos au microscope des analyses de fibres (≈ 0,01 à 0,02 $ par lecture). Facturé à l’usage : le plafond mensuel ci-dessous est la seule limite de dépense, pour les deux.")}',
       lien: ['console.anthropic.com', 'https://console.anthropic.com/settings/keys'],
       champs: [{ k: 'iaTexte', label: '${T("Clé API")}', place: 'sk-ant-…',
         aide: '${T("Payant à l’usage. La clé reste au serveur : elle n’est jamais recopiée dans l’application.")}' }],

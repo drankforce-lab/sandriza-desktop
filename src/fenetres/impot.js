@@ -142,6 +142,71 @@ button .n.hi{background:rgba(245,158,11,.28);color:var(--tx-att)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
 [data-perv][hidden]{display:none}
+
+/* ══ LA REFONTE (2026-10-25, sa demande : « une interface plus claire, plus professionnelle, et les onglets aussi ») ══
+   Les ONGLETS quittent la tête (ils s y serraient contre le titre) : une barre pleine largeur, une icône par
+   onglet, l onglet courant souligné en caramel ; l année et le geste principal à droite de la même barre. */
+.ong-barre{flex:0 0 auto;display:flex;align-items:flex-end;gap:1rem;padding:0 1.3rem;border-bottom:1px solid var(--v10);background:var(--f-page)}
+.ongf{display:flex;gap:.25rem;flex:1 1 auto;min-width:0}
+.ongf button{display:inline-flex;align-items:center;gap:.5rem;background:transparent;border:0;border-bottom:2px solid transparent;
+  border-radius:0;padding:.85rem .95rem .7rem;color:var(--tx2);font-size:.88rem;font-weight:550;white-space:nowrap}
+.ongf button svg{width:17px;height:17px;flex:0 0 auto}
+.ongf button:hover:not(:disabled){background:transparent;color:var(--tx)}
+.ongf button.on{color:var(--tx);border-bottom-color:var(--or);font-weight:700}
+.ongf button.on svg{color:var(--tx-or)}
+/* Le mode jour habille les boutons en cartes blanches : pas les onglets. */
+html.jour .ongf button,html.jour .ongf button:hover:not(:disabled){background:transparent;border-color:transparent;border-bottom-color:transparent;box-shadow:none}
+html.jour .ongf button.on{border-bottom-color:var(--or)}
+.ongf .n{margin-left:.15rem}
+.ong-barre .cx-actions{display:flex;gap:.55rem;align-items:center;padding:.5rem 0}
+.tete h1{font-size:1.05rem}
+.corps.cx{padding:1.1rem 1.3rem}
+/* ── MON ENTREPRISE : la fiche ── */
+.ent{display:flex;flex-direction:column;gap:1rem;min-height:0}
+.ent-id{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;padding:1rem 1.2rem;border-radius:14px;
+  background:linear-gradient(135deg,rgba(var(--or-rgb),.10),rgba(var(--or-rgb),.02));border:1px solid rgba(var(--or-rgb),.28)}
+.ent-id .mono{width:3rem;height:3rem;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  font:700 1.45rem Georgia,"Times New Roman",serif;background:var(--or);color:#1a1208;flex:0 0 auto}
+.ent-nom{display:flex;flex-direction:column;min-width:0;flex:1 1 14rem}
+.ent-nom strong{font-size:1.15rem;letter-spacing:.01em}
+.ent-nom span{font-size:.8rem;color:var(--tx2)}
+.ent-etat{display:flex;flex-direction:column;font-weight:700;font-size:.84rem;padding:.4rem .8rem;border-radius:10px}
+.ent-etat small{font-weight:400;font-size:.72rem}
+.ent-etat.ok{color:var(--tx-ok);background:rgba(34,197,94,.10);border:1px solid rgba(34,197,94,.30)}
+.ent-etat.manque{color:var(--tx-att);background:rgba(245,158,11,.10);border:1px solid rgba(245,158,11,.32)}
+.ent-liens{display:flex;gap:.45rem;flex-wrap:wrap;width:100%;padding-top:.2rem}
+.ent-liens a{font-size:.76rem;color:var(--tx-or);text-decoration:none;padding:.22rem .65rem;border-radius:999px;border:1px solid var(--v14);background:var(--v03)}
+.ent-liens a:hover{background:var(--v08)}
+/* Le jour, sur le fond teinté du bandeau, le caramel tombait à 4.07 ; le vert de l état à 4.13 : textes plus foncés. */
+html.jour .ent-liens a{color:var(--tx);background:#ffffff}
+html.jour .ent-etat.ok{color:#1b5631;background:#e4f1e6}
+html.jour .ent-etat.manque{color:#6e4308;background:#fbf0dc}
+.ent-grille{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1rem;align-items:start}
+.ent-col{display:flex;flex-direction:column;gap:1rem;min-width:0}
+.sec{border:1px solid var(--v10);border-radius:14px;background:var(--f-carte);padding:1rem 1.15rem 1.05rem}
+.sec>header{display:flex;gap:.75rem;align-items:flex-start;margin-bottom:.85rem}
+.sec-ic{width:2rem;height:2rem;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;
+  background:rgba(var(--or-rgb),.12);color:var(--tx-or);flex:0 0 auto}
+.sec-ic svg{width:18px;height:18px}
+.sec h2{margin:0;font-size:.95rem}
+.sec header p{margin:.1rem 0 0;font-size:.76rem;color:var(--tx2);line-height:1.4}
+.chps{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.75rem .9rem}
+.chp{display:flex;flex-direction:column;gap:.3rem;min-width:0}
+.chp.large{grid-column:1/-1}
+.chp-l{display:flex;align-items:baseline;justify-content:space-between;gap:.5rem;font-size:.78rem;color:var(--tx2);font-weight:600}
+.chp-l .req{color:var(--tx-att)}
+.chp-a{font-size:.7rem;color:var(--tx3);line-height:1.35}
+.chp .t{padding:.5rem .65rem;font-size:.88rem}
+.et-ok{font-size:.68rem;color:var(--tx-ok);font-weight:600}
+.et-manque{font-size:.68rem;color:var(--tx-att);font-weight:700}
+.et-vide{font-size:.68rem;color:var(--tx3);font-weight:500}
+/* ── DOCUMENTS : groupés ── */
+.doc-grp{display:flex;flex-direction:column;gap:.55rem}
+.doc-grp h3{margin:.2rem 0 0;font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3)}
+.docs{grid-template-columns:repeat(2,minmax(0,1fr))}
+.docs-col{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;align-items:start}
+.cx-tuile{padding:.9rem 1rem;gap:.55rem}
+@media (max-width:1180px){.ent-grille{grid-template-columns:1fr}.docs-col{grid-template-columns:1fr 1fr}}
 `;
 
 /**
@@ -157,8 +222,8 @@ function pageImpot(onglet) {
 <title>${T("Fiscalité et impôt — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete" id="tete"><span class="ico">${ICO.impot}</span><h1>${T("Fiscalité et impôt")}</h1>
-  <div class="ed-seg" id="onglets" role="tablist"></div>
-  <span class="cx-resume" id="sous"></span>
+  <span class="cx-resume" id="sous"></span></div>
+<div class="ong-barre" id="barre-onglets"><nav class="ongf" id="onglets" role="tablist" aria-label="${T("Sections de la fiscalité")}"></nav>
   <div class="cx-actions" id="actions"></div></div>
 <div class="corps cx" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
@@ -232,6 +297,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
       desc: '${T("La valeur du stock à la date de clôture, au coût — nécessaire au calcul du coût des marchandises vendues.")}' }
   ];
 
+  /* Les icônes des onglets (trait courant : elles suivent le thème). */
+  var IC_O = {
+    taxes: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 5L5 19"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/></svg>',
+    revenus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+    documents: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg>',
+    entreprise: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V8l7-4 7 4v13"/><path d="M9 21v-5h6v5M9 11h.01M15 11h.01"/></svg>',
+    memo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>'
+  };
+  /* Le résumé de la tête : un montant NÉGATIF est un remboursement — il se dit « en votre faveur »,
+     dans la monnaie du poste (le site l envoie en « -52.55 $ »). */
+  function resumeTete(){
+    var t = D.taxes || {}, v = parseFloat(String(t.totalRemettre || '0').replace(/[^0-9.,-]/g, '').replace(',', '.')) || 0;
+    return (D.profil.nom || '${T("entreprise sans nom")}') + ' · ' + D.annee + ' · '
+      + (v < 0 ? szArgent(-v) + ' ${T("en votre faveur")}' : szArgent(v) + ' ${T("à remettre")}');
+  }
+
   function dessiner(){
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var h = '';
@@ -254,18 +335,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
     }
 
     /* Les onglets segmentes et les gestes vivent dans la TETE (esquisse Impot.dc). */
+    var ong = function(cle, ic, lbl, extra){
+      return '<button type="button" role="tab" aria-selected="' + (ONGLET === cle) + '" class="' + (ONGLET === cle ? 'on' : '') + '" data-onglet="' + cle + '">'
+        + ic + '<span>' + lbl + '</span>' + (extra || '') + '</button>';
+    };
     document.getElementById('onglets').innerHTML =
-        '<button type="button" class="' + (ONGLET === 'taxes' ? 'on' : '') + '" data-onglet="taxes">TPS / TVQ</button>'
-      + '<button type="button" class="' + (ONGLET === 'revenus' ? 'on' : '') + '" data-onglet="revenus">${T("Revenus")}</button>'
-      + '<button type="button" class="' + (ONGLET === 'documents' ? 'on' : '') + '" data-onglet="documents">Documents</button>'
-      + '<button type="button" class="' + (ONGLET === 'entreprise' ? 'on' : '') + '" data-onglet="entreprise">${T("Mon entreprise")}'
-      + (D.profil.complet ? '' : '<span class="n hi">!</span>') + '</button>'
-      + '<button type="button" class="' + (ONGLET === 'memo' ? 'on' : '') + '" data-onglet="memo">${T("Aide-mémoire")}</button>';
+        ong('taxes', IC_O.taxes, 'TPS / TVQ')
+      + ong('revenus', IC_O.revenus, '${T("Revenus")}')
+      + ong('documents', IC_O.documents, 'Documents')
+      + ong('entreprise', IC_O.entreprise, '${T("Mon entreprise")}', D.profil.complet ? '' : '<span class="n hi">!</span>')
+      + ong('memo', IC_O.memo, '${T("Aide-mémoire")}');
     /* Le nom de l entreprise passe dans le resume de la tete (il s abrege au
        besoin) : la tete porte deja cinq onglets, l annee et le geste principal. */
     var sr = document.getElementById('sous');
-    if (sr) sr.textContent = (D.profil.nom || '${T("entreprise sans nom")}') + ' · ' + D.annee
-      + ' · ' + D.taxes.totalRemettre + ' ${T("à remettre")}';
+    if (sr) sr.textContent = resumeTete();
     document.getElementById('actions').innerHTML = ''
       /* Le choix d annee n a aucun sens sur le profil ni sur l aide-memoire :
          l un decrit l entreprise, l autre le calendrier a venir. */
@@ -304,68 +387,81 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
     ['https://rqen.revenuquebec.ca', '${T("Mon dossier — Revenu Québec")}']
   ];
 
-  function champ(id, lbl, val, aide, mono, obligatoire){
-    return '<label class="champ"><span class="lbl">' + esc(lbl)
-      + (obligatoire ? ' <span class="req">obligatoire</span>' : '') + '</span>'
-      + '<input class="t' + (mono ? ' mono' : '') + '" id="' + id + '" value="' + esc(val || '') + '"'
-      + (RO ? ' disabled' : '') + '>'
-      + (aide ? '<span class="sub">' + esc(aide) + '</span>' : '') + '</label>';
+  /* ══ MON ENTREPRISE — LA FICHE (2026-10-25, sa demande : « plus clair, plus professionnel ») ══
+     En haut, l IDENTITÉ en un coup d oeil (monogramme, raison sociale, type, état
+     du profil, liens officiels) ; dessous, quatre sections nommées, chacune avec
+     ce qu elle sert à remplir. Les champs courts vont par deux. Chaque numéro dit
+     s il est renseigné. ⚠ Les IDENTIFIANTS des champs ne changent pas (e-nom,
+     e-neq, e-ne, e-ca, e-type, e-tps, e-tvq, e-adresse, e-ville, e-cp, e-tel,
+     e-courriel) : enregistrerProfil les lit. */
+  var IC_E = {
+    id: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="11" r="2.5"/><path d="M5.5 17c.8-1.8 2-2.6 3.5-2.6s2.7.8 3.5 2.6M14.5 9.5h4M14.5 13h4"/></svg>',
+    taxe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>',
+    etiq: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/></svg>',
+    lieu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>'
+  };
+  function champE(id, lbl, val, aide, opts){
+    var o = opts || {};
+    var rempli = String(val || '').trim() !== '';
+    var etat = o.statut ? (rempli ? '<span class="et-ok">✓ ${T("renseigné")}</span>'
+      : (o.obligatoire ? '<span class="et-manque">${T("à compléter")}</span>' : '<span class="et-vide">${T("facultatif")}</span>')) : '';
+    return '<label class="chp' + (o.large ? ' large' : '') + '" for="' + id + '"><span class="chp-l"><span>' + esc(lbl)
+      + (o.obligatoire && !o.statut ? ' <span class="req">*</span>' : '') + '</span>' + etat + '</span>'
+      + '<input class="t' + (o.mono ? ' mono' : '') + '" id="' + id + '" value="' + esc(val || '') + '"'
+      + (o.ph ? ' placeholder="' + esc(o.ph) + '"' : '') + (o.max ? ' maxlength="' + o.max + '"' : '') + (RO ? ' disabled' : '') + '>'
+      + (aide ? '<span class="chp-a">' + esc(aide) + '</span>' : '') + '</label>';
   }
-
+  function section(ic, titre, desc, corpsS){
+    return '<section class="sec"><header><span class="sec-ic">' + ic + '</span><div><h2>' + titre + '</h2>'
+      + (desc ? '<p>' + desc + '</p>' : '') + '</div></header><div class="sec-corps">' + corpsS + '</div></section>';
+  }
   function vueEntreprise(){
     if (!PROFIL) return '<div class="vide charge">${T("Lecture du profil…")}</div>';
     var p = PROFIL.profil || {};
-    /* L avis devient une pastille ; la phrase du manque reste entiere a cote. */
-    var h = '<div class="cx-barre">'
+    var typeL = ''; ((PROFIL && PROFIL.types) || []).forEach(function(t){ if (t.v === p.type) typeL = t.l; });
+    var nom = String(p.name || '').trim();
+    var h = '<div class="ent">';
+    /* L IDENTITÉ */
+    h += '<div class="ent-id"><div class="mono" aria-hidden="true">' + esc((nom || '?').charAt(0).toUpperCase()) + '</div>'
+      + '<div class="ent-nom"><strong>' + esc(nom || '${T("Entreprise sans nom")}') + '</strong>'
+      + '<span>' + esc(typeL) + (p.neq ? ' · NEQ ' + esc(p.neq) : '') + (p.city ? ' · ' + esc(p.city) : '') + '</span></div>'
       + (PROFIL.complet
-          ? '<span class="cx-bon"><span>${T("Profil complet — vos documents fiscaux se remplissent tout seuls.")}</span></span>'
-          : '<span class="cx-averti"><span><b>${T("Profil d’entreprise incomplet")}</b></span></span>'
-            + '<span class="cx-sub">${T("Il manque le nom, le NEQ ou vos numéros de taxes. Les documents s’imprimeront sans eux, et ils ne seront pas recevables.")}</span>')
-      + '</div>';
-
-    h += '<div class="cx-deux moitie"><div class="cx-col">';
-    h += '<div class="cx-carte"><h2>Identification</h2>'
-      /* ⚠ La propriete s appelle name, PAS nom : le coeur du profil rend la
-         forme BRUTE du stockage (name / tpsNo / sinBn), alors que la liste du
-         haut d ecran, elle, est francisee (D.profil.nom). Deux formes voisines
-         dans la meme fenetre : la raison sociale est arrivee VIDE au 1er rendu. */
-      + champ('e-nom', '${T("Raison sociale")}', p.name, '', false, true)
-      + champ('e-neq', '${T("NEQ — Numéro d’entreprise du Québec")}', p.neq, '${T("10 chiffres · Registraire des entreprises du Québec")}', true, true)
-      + champ('e-ne', '${T("Numéro d’entreprise ARC (NE)")}', p.sinBn, '${T("9 chiffres · Agence du revenu du Canada")}', true, false)
-      /* (2026-10-25) Le numéro CA du Bureau de la concurrence : imprimé sur les étiquettes de composition
-         (Analyses de fibres). Vide, l étiquette porte « CA xxxxxxx » et l export attend. */
-      + champ('e-ca', '${T("Numéro CA (étiquettes de vêtements)")}', p.caNo, '${T("Bureau de la concurrence · imprimé sur les étiquettes")}', true, false)
-      + '<label class="champ"><span class="lbl">${T("Type d’entreprise")}</span>'
+          ? '<span class="ent-etat ok">✓ ${T("Profil complet")}<small>${T("vos documents fiscaux se remplissent tout seuls")}</small></span>'
+          : '<span class="ent-etat manque">${T("Profil incomplet")}<small>${T("il manque le nom, le NEQ ou un numéro de taxe")}</small></span>')
+      + '<div class="ent-liens">' + LIENS_OFFICIELS.map(function(l){
+          return '<a href="' + esc(l[0]) + '" target="_blank" rel="noopener">' + esc(l[1]) + ' ↗</a>'; }).join('') + '</div></div>';
+    /* LES QUATRE SECTIONS */
+    h += '<div class="ent-grille"><div class="ent-col">';
+    h += section(IC_E.id, '${T("Identité légale")}', '${T("Telle qu’inscrite au Registraire des entreprises.")}',
+      '<div class="chps">'
+      + champE('e-nom', '${T("Raison sociale")}', p.name, '', { obligatoire: true, large: true, max: 120 })
+      + '<label class="chp large" for="e-type"><span class="chp-l"><span>${T("Type d’entreprise")}</span></span>'
       + '<select class="t" id="e-type"' + (RO ? ' disabled' : '') + '>'
       + ((PROFIL && PROFIL.types) || []).map(function(t){
-          return '<option value="' + esc(t.v) + '"' + (p.type === t.v ? ' selected' : '') + '>'
-            + esc(t.l) + '</option>'; }).join('')
+          return '<option value="' + esc(t.v) + '"' + (p.type === t.v ? ' selected' : '') + '>' + esc(t.l) + '</option>'; }).join('')
       + '</select></label>'
-      + '</div>';
-    /* Les liens officiels sous l identification (ils debordaient en bas). */
-    h += '<div class="liens">' + LIENS_OFFICIELS.map(function(l){
-      return '<a href="' + esc(l[0]) + '" target="_blank" rel="noopener"><span class="ic">🔗</span> ' + esc(l[1]) + '</a>';
-    }).join('') + '</div>';
-    h += '</div>';
-
-    /* Coordonnees SOUS les numeros, dans la colonne de droite : en pleine largeur
-       dessous, la carte faisait deborder l onglet (sonde, 2026-09-26). */
-    h += '<div class="cx-col"><div class="cx-carte"><h2>${T("Numéros d’inscription aux taxes")}</h2>'
-      + champ('e-tps', 'TPS / TVH (GST/HST)', p.tpsNo, '${T("Format : 123456789 RT0001 · ARC")}', true, true)
-      + champ('e-tvq', 'TVQ', p.tvqNo, '${T("Format : 1234567890 TQ0001 · Revenu Québec")}', true, true)
-      + '</div>';
-
-    h += '<div class="cx-carte"><h2>${T("Coordonnées")}</h2>'
-      + '<div class="deux">'
-      + champ('e-adresse', '${T("Adresse")}', p.address, '', false, false)
-      + champ('e-ville', '${T("Ville")}', p.city, '', false, false)
-      + champ('e-cp', '${T("Code postal")}', p.postal, '', true, false)
-      + champ('e-tel', '${T("Téléphone")}', p.phone, '', false, false)
-      + champ('e-courriel', '${T("Courriel professionnel")}', p.email, '', false, false)
-      + '</div></div></div>';
-    h += '</div>';
-    /* « Enregistrer le profil » (#e-enr) est monte dans la tete : c est le geste
-       principal de cet onglet (voir dessiner). */
+      + champE('e-neq', '${T("NEQ (Québec)")}', p.neq, '${T("10 chiffres · Registraire des entreprises")}', { mono: true, obligatoire: true, statut: true, max: 20 })
+      + champE('e-ne', '${T("Numéro d’entreprise (NE)")}', p.sinBn, '${T("9 chiffres · Agence du revenu du Canada")}', { mono: true, statut: true, max: 20 })
+      + '</div>');
+    h += section(IC_E.taxe, '${T("Numéros de taxes")}', '${T("Imprimés sur vos factures et vos remises TPS / TVQ.")}',
+      '<div class="chps">'
+      + champE('e-tps', 'TPS / TVH', p.tpsNo, '${T("123456789 RT0001 · ARC")}', { mono: true, obligatoire: true, statut: true, max: 30 })
+      + champE('e-tvq', 'TVQ', p.tvqNo, '${T("1234567890 TQ0001 · Revenu Québec")}', { mono: true, obligatoire: true, statut: true, max: 30 })
+      + '</div>');
+    h += '</div><div class="ent-col">';
+    h += section(IC_E.etiq, '${T("Étiquettes de vêtements")}', '${T("Le numéro CA du Bureau de la concurrence, imprimé sur les étiquettes de composition.")}',
+      '<div class="chps">'
+      + champE('e-ca', '${T("Numéro CA")}', p.caNo, p.caNo ? '' : '${T("Vide : les étiquettes portent « CA xxxxxxx » et l’export attend le vrai numéro.")}', { mono: true, statut: true, large: true, ph: 'CA 000000', max: 20 })
+      + '</div>');
+    h += section(IC_E.lieu, '${T("Coordonnées")}', '${T("L’en-tête de vos documents fiscaux et de vos factures.")}',
+      '<div class="chps">'
+      + champE('e-adresse', '${T("Adresse")}', p.address, '', { large: true, max: 120 })
+      + champE('e-ville', '${T("Ville")}', p.city, '', { max: 60 })
+      + champE('e-cp', '${T("Code postal")}', p.postal, '', { mono: true, max: 10 })
+      + champE('e-tel', '${T("Téléphone")}', p.phone, '', { max: 30 })
+      + champE('e-courriel', '${T("Courriel professionnel")}', p.email, '', { max: 120 })
+      + '</div>');
+    h += '</div></div></div>';
     return h;
   }
 
@@ -584,16 +680,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
           return '<button class="' + (TRIM === i ? 'on' : '') + '" data-trim="' + i + '">'
             + l + '</button>'; }).join('')
       + '</span></div>';
-    h += '<div class="docs">' + DOCS.map(function(d){
+    /* Les documents GROUPÉS par usage (2026-10-25) : on cherche « ma remise », pas un code de formulaire. */
+    var tuileDoc = function(d){
         return '<div class="cx-tuile"><div class="t">' + esc(d.titre) + '</div>'
           + '<div class="d">' + esc(d.desc) + '</div>'
           + '<div><button class="prim" data-doc="' + esc(d.cle) + '"'
           + (OCCUPE ? ' disabled' : '') + '>${T("Ouvrir")}'
           + (d.trim ? '${T(" — T")}' + (TRIM + 1) : '') + '</button></div></div>';
-      }).join('') + '</div>';
-    h += '<div class="cx-sub">${T("Le <strong>profil d’entreprise</strong> (nom, NEQ, numéros de TPS et ")}'
-      + '${T("de TVQ, adresse) se remplit à l’écran de la fenêtre principale — c’est lui qui garnit")} '
-      + '${T("l’en-tête de ces documents.")}</div>';
+      };
+    var groupe = function(titre, cles){
+      return '<div class="doc-grp"><h3>' + titre + '</h3>' + DOCS.filter(function(d){ return cles.indexOf(d.cle) >= 0; }).map(tuileDoc).join('') + '</div>';
+    };
+    h += '<div class="docs-col">'
+      + groupe('${T("Remises de taxes")}', ['tps-trim', 'tps-annuel'])
+      + groupe('${T("États des résultats")}', ['t2125', 'tp80'])
+      + groupe('${T("Registres")}', ['grand-livre', 'inventaire'])
+      + '</div>';
+    h += '<div class="cx-sub" style="margin-top:1rem">${T("L’en-tête de ces documents vient de l’onglet")} <button class="mini" data-onglet="entreprise">${T("Mon entreprise")}</button></div>';
     return h;
   }
 
@@ -713,6 +816,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
   };
   corps.onclick = aiguiller;
   document.getElementById('tete').onclick = aiguiller;
+  document.getElementById('barre-onglets').onclick = aiguiller;
 
   var enCours = false;
   function charger(){
@@ -724,8 +828,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
       D = r;
       ANNEE = D.annee;
       var s = document.getElementById('sous');
-      if (s) s.textContent = (D.profil.nom || '${T("entreprise sans nom")}') + ' · ' + D.annee
-        + ' · ' + D.taxes.totalRemettre + ' ${T("à remettre")}';
+      if (s) s.textContent = resumeTete();
       dessiner();
       chargerOnglet();
     });

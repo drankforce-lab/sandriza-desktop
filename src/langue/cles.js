@@ -72,9 +72,9 @@ module.exports = {
   /* ⚠ « La clé reste au serveur » n est pas une formule de politesse ici : c est
      la seule cle de la maison qui ne descend JAMAIS dans l application. La phrase
      anglaise doit dire la meme chose aussi platement. */
-  'Anthropic — Écriture publicitaire IA': 'Anthropic — AI ad writing',
-  'Rédige les courriels et les publications à partir du contenu du site. Facturé au texte produit : le plafond mensuel ci-dessous est la seule limite de dépense.':
-    'Writes the emails and the posts from the site content. Billed by the text produced: the monthly ceiling below is the only spending limit.',
+  'Anthropic — Écriture IA et analyses de fibres': 'Anthropic — AI writing and fibre analyses',
+  'Rédige les courriels et les publications, et lit les photos au microscope des analyses de fibres (≈ 0,01 à 0,02 $ par lecture). Facturé à l’usage : le plafond mensuel ci-dessous est la seule limite de dépense, pour les deux.':
+    'Writes emails and posts, and reads the microscope photos of fibre analyses (≈ $0.01 to $0.02 per reading). Billed per use: the monthly limit below is the only spending limit, for both.',
   'Payant à l’usage. La clé reste au serveur : elle n’est jamais recopiée dans l’application.':
     'Paid per use. The key stays on the server: it is never copied into the application.',
 

@@ -48,7 +48,7 @@ body{background:var(--f-page);color:var(--tx);
 .tete .ico svg{width:100%;height:100%}
 #corps{overflow:hidden}
 /* ⚠ PAR L IDENTIFIANT, comme Rappels : le socle fixe les enfants de .cx (flex:0 0 auto), une classe seule perd. */
-#corps>.duo,#corps>.trio,#corps>.pl{flex:1 1 0;min-height:0}
+#corps>.duo,#corps>.pl,#corps>.assist{flex:1 1 0;min-height:0}
 select,input,button,textarea{font:inherit;color:var(--tx);background:var(--v05);
   border:1px solid var(--v16);border-radius:8px;padding:.28rem .5rem;cursor:pointer}
 input,textarea{cursor:text}
@@ -130,18 +130,39 @@ button.danger{border-color:rgba(248,113,113,.45);color:var(--tx-err2)}
 .detail{gap:.4rem}
 
 /* ── L'ANALYSE ───────────────────────────────────────────────────────────── */
-.trio{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:.9rem;flex:1 1 0;min-height:0}
-.trio>div{display:flex;flex-direction:column;gap:.8rem;min-width:0;min-height:0;overflow:auto;padding-right:.15rem}
+/* L ASSISTANT EN TROIS ÉTAPES (2026-10-25, « trop condensé ») : l étape à gauche, l aperçu à droite. */
+.assist{display:grid;grid-template-columns:minmax(0,1fr) 25rem;gap:1.1rem;flex:1 1 0;min-height:0}
+.et-gauche{display:flex;flex-direction:column;gap:1rem;min-width:0;min-height:0}
+.et-droite{min-width:0}
+.etapes{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.et-b{display:inline-flex;align-items:center;gap:.5rem;padding:.4rem .85rem;border-radius:999px;font-size:.84rem;background:var(--v04);border:1px solid var(--v12)}
+.et-b .num{display:inline-flex;align-items:center;justify-content:center;width:1.45rem;height:1.45rem;border-radius:50%;font-size:.76rem;font-weight:700;background:var(--v10)}
+.et-b[aria-current=step]{background:rgba(var(--or-rgb),.14);border-color:var(--or);font-weight:650}
+.et-b[aria-current=step] .num{background:var(--or);color:#1a1208}
+.et-sep{color:var(--tx3)}
+.et-deux{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.1rem;align-items:start}
+.et-compo{display:grid;grid-template-columns:minmax(17rem,1fr) minmax(0,1.45fr);gap:1.1rem;align-items:start}
+.et-gauche .cx-carte{padding:1.15rem 1.25rem}
+.et-gauche .cx-carte h2{margin-bottom:.85rem}
+.ent-grille{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.4rem 1.2rem}
+.ent-grille .grpent{margin-bottom:.85rem}
+.ent-grille .puces{gap:.4rem}
+.cote{display:flex;flex-direction:column;gap:.9rem}
+.cote .apercu{padding:1rem}
+.manques{display:flex;flex-direction:column;gap:.35rem;font-size:.82rem}
+.manque.attn{color:var(--tx-att)}
+.boutons.nav{margin-top:.2rem}
+.boutons.nav #f-ok{margin-left:auto}
 /* Les cartes gardent leur hauteur : c est la COLONNE qui défile, jamais une carte rognée. */
-.trio>div>*,.pl>div:first-child>*,.duo>div:last-child>*{flex:0 0 auto}
-.depot{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.35rem;min-height:7.5rem;
+.pl>div:first-child>*,.duo>div:last-child>*{flex:0 0 auto}
+.depot{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.45rem;min-height:11rem;
   border:1.5px dashed var(--v20);border-radius:12px;text-align:center;padding:.8rem;cursor:pointer;background:var(--v03)}
 .depot.survol{border-color:var(--or);background:rgba(var(--or-rgb),.08)}
 .vignettes{display:flex;gap:.45rem;flex-wrap:wrap}
 .vig{position:relative;width:5.2rem;height:3.9rem;border-radius:8px;overflow:hidden;border:1px solid var(--v12)}
 .vig img{width:100%;height:100%;object-fit:cover;display:block}
 .vig button{position:absolute;top:.15rem;right:.15rem;padding:0 .3rem;font-size:.7rem;line-height:1.3;background:var(--f-page);color:var(--tx);border-color:var(--v16)}
-.etape{border:1px solid var(--v08);border-radius:10px;padding:.5rem .65rem;background:var(--v03)}
+.etape{border:1px solid var(--v08);border-radius:10px;padding:.55rem .75rem;background:var(--v03);margin-bottom:.55rem}
 .etape h3{margin:0 0 .15rem;font-size:.74rem;color:var(--tx-or);font-weight:700}
 .etape p{margin:0;font-size:.79rem;line-height:1.45}
 .estim{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;border-radius:10px;padding:.55rem .7rem;
@@ -149,14 +170,15 @@ button.danger{border-color:rgba(248,113,113,.45);color:var(--tx-err2)}
 .estim strong{font-size:1rem}
 .avert{font-size:.76rem;line-height:1.45;border-radius:10px;padding:.5rem .65rem;
   background:rgba(251,191,36,.10);border:1px solid rgba(251,191,36,.35)}
-.fib{display:grid;grid-template-columns:minmax(0,1fr) 4.6rem 1.9rem;gap:.4rem;align-items:center}
+.fib{display:grid;grid-template-columns:minmax(0,1fr) 4.6rem 1.9rem;gap:.5rem;align-items:center;margin-bottom:.55rem}
 .fib input{text-align:right}
 .total{display:flex;justify-content:space-between;align-items:center;font-size:.78rem}
 .grpent{display:flex;flex-direction:column;gap:.25rem}
 .grpent .t{font-size:.7rem;color:var(--tx2);font-weight:600}
-.soin{display:inline-flex;align-items:center;gap:.25rem;padding:.08rem .45rem .08rem .25rem;border-radius:999px;font-size:.7rem;
+.soin{display:inline-flex;align-items:center;gap:.35rem;padding:.22rem .65rem .22rem .4rem;border-radius:999px;font-size:.76rem;
   background:var(--v05);border:1px solid var(--v12)}
-.soin svg{width:15px;height:15px;flex:0 0 auto}
+.soin svg{width:17px;height:17px;flex:0 0 auto}
+.soin span{text-align:left}
 .soin[aria-pressed=true]{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:600}
 .deux{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
 .res{display:flex;flex-direction:column;gap:.2rem;max-height:11rem;overflow:auto;border:1px solid var(--v10);border-radius:8px;padding:.25rem}
@@ -182,7 +204,7 @@ button.danger{border-color:rgba(248,113,113,.45);color:var(--tx-err2)}
 .scene .note{font-size:.78rem;line-height:1.5;color:var(--tx2);display:flex;flex-direction:column;gap:.5rem;max-width:20rem}
 .badge{align-self:flex-start;padding:.18rem .6rem;border-radius:999px;font-size:.72rem;font-weight:650;
   background:rgba(251,191,36,.16);color:var(--tx-att)}
-@media (max-width:1100px){.trio{grid-template-columns:1fr 1fr}.duo{grid-template-columns:1fr}}
+@media (max-width:1100px){.assist{grid-template-columns:minmax(0,1fr) 21rem}.et-deux,.et-compo{grid-template-columns:1fr}.duo{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -190,11 +212,12 @@ button.danger{border-color:rgba(248,113,113,.45);color:var(--tx-err2)}
  * Page complète de la fenêtre native « Analyses de fibres et étiquettes ».
  * `ouverture` : '' (la banque), ou un état qui ne s'atteint autrement qu'au clic
  * — 'nouvelle' (une analyse vierge), 'modifier' (la première analyse ouverte),
+ * 'composition' et 'produit' (la première analyse, à son étape 2 ou 3),
  * 'planche' (les analyses confirmées, en planche), 'historique' (l historique d impression).
  * ⚠ Ils existent pour le garde-fou de rendu, qui ne simule aucun clic.
  */
 function pageFibres(ouverture) {
-  const ok = ['nouvelle', 'modifier', 'planche', 'historique'];
+  const ok = ['nouvelle', 'modifier', 'composition', 'produit', 'planche', 'historique'];
   const etat = ok.indexOf(String(ouverture || '')) >= 0 ? String(ouverture) : '';
   const en = LANGUE.langueCourante() === 'en';
   return `${TETE()}
@@ -226,6 +249,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var CHOIX = '';              /* la ligne montrée à droite */
   var APERCU_CHOIX = null;     /* son étiquette (fibres:apercu) */
   var FORM = null;             /* l analyse en cours de saisie */
+  var ETAPE = 1;               /* son étape : 1 photo et lecture, 2 composition et entretien, 3 produit et étiquette */
   var PHOTOS = [];             /* data URL réduites — JAMAIS enregistrées */
   var LECTURE_EN_COURS = false;
   var RES = null;              /* résultats de la recherche de produit */
@@ -335,6 +359,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     ctx.fillStyle = encre; ctx.textBaseline = 'alphabetic';
     var dispo = w - 32 * u;
     var compo = e.compo || [], soins = e.soins || [], sym = e.symboles || [];
+    /* À l APERÇU seulement : une composition pas encore confirmée se dit, en pâle (jamais à l export). */
+    var videC = !compo.length && o.bord;
+    if (videC) compo = ['${T("COMPOSITION À CONFIRMER")}'];
     /* Hauteurs des blocs, puis l espace libre réparti également entre eux. */
     var fsC = 17 * u, lhC = 1.12;
     var hC = Math.max(e.taille ? 30 * u : 0, compo.length * fsC * lhC);
@@ -344,7 +371,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var blocs = [hC, hS, hI, hP].filter(function(v){ return v > 0; });
     var somme = blocs.reduce(function(s, v){ return s + v; }, 0);
     var ecart = blocs.length > 1 ? Math.max(0, (h - 28 * u - somme) / (blocs.length - 1)) : 0;
+    // Peu de blocs (étiquette en cours) : l ensemble est centré, au lieu de coller au haut.
     var yy = 14 * u;
+    if (blocs.length <= 2) { ecart = Math.min(ecart, 22 * u); yy = Math.max(14 * u, (h - somme - ecart * (blocs.length - 1)) / 2); }
     /* 1. LA COMPOSITION, la taille dans son carré à gauche ; le groupe est centré. */
     if (hC) {
       ctx.font = '700 ' + fsC + 'px ' + POLICE;
@@ -364,10 +393,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       }
       ctx.font = '700 ' + fsC + 'px ' + POLICE; ctx.textAlign = e.taille ? 'left' : 'center';
       var ty = yy + (hC - hTxt) / 2;
+      if (videC) ctx.globalAlpha = 0.45;
       compo.forEach(function(l, i){
         var bl = ty + (i + 0.82) * fsC * lhC;
         ctx.fillText(l, e.taille ? x0 + boite + esp : w / 2, bl);
       });
+      ctx.globalAlpha = 1;
       yy += hC + ecart;
     }
     /* 2. LES CONSIGNES, en mots, centrées. */
@@ -440,7 +471,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       Object.keys(COCHES).forEach(function(id){ var a = analyse(id); if (!a || a.etat !== 'confirmee') delete COCHES[id]; });
       if (CHOIX && !analyse(CHOIX)) { CHOIX = ''; APERCU_CHOIX = null; }
       if (ETAT === 'nouvelle' && PA) ouvrirForm(null);
-      else if (ETAT === 'modifier' && PM && (r.analyses || []).length) ouvrirForm(r.analyses[0]);
+      else if (ETAT === 'modifier' && PM && (r.analyses || []).length) ouvrirForm(r.analyses[0], 1);
+      else if (ETAT === 'composition' && PM && (r.analyses || []).length) ouvrirForm(r.analyses[0], 2);
+      else if (ETAT === 'produit' && PM && (r.analyses || []).length) ouvrirForm(r.analyses[0], 3);
       else if (ETAT === 'planche') {
         (r.analyses || []).filter(function(a){ return a.etat === 'confirmee'; }).forEach(function(a){ COCHES[a.id] = true; });
         ouvrirPlanche();
@@ -573,8 +606,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   /* ══ L ANALYSE ═════════════════════════════════════════════════════════════ */
-  function ouvrirForm(a){
+  function ouvrirForm(a, etape){
     VUE = 'analyse'; PHOTOS = []; RES = null;
+    ETAPE = etape || (a && (a.lecture || (a.composition || []).length) ? 2 : 1);
     FORM = a ? {
       id: a.id, no: a.no, lecture: a.lecture || null,
       composition: (a.composition || []).map(function(x){ return { fibre: x.fibre, pct: String(x.pct) }; }),
@@ -609,95 +643,129 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       });
     }, 140);
   }
-  function peindreForm(){ var cv = document.getElementById('cv-form'); if (cv && FORM && FORM.apercu) apercuDans(cv, FORM.apercu, 330); }
+  function peindreForm(){ var cv = document.getElementById('cv-form'); if (cv && FORM && FORM.apercu) apercuDans(cv, FORM.apercu, 360); }
+  /* Le côté se refait sans toucher à l étape (la saisie en cours garde son focus). */
+  function majCote(){ var c = document.querySelector('.et-droite'); if (!c || !FORM) return; c.innerHTML = cote(); peindreForm(); }
   function totalPct(){ return FORM.composition.reduce(function(s, x){ var v = parseFloat(String(x.pct).replace(',', '.')); return s + (isFinite(v) ? Math.round(v) : 0); }, 0); }
   function majTotal(){
-    var el = document.getElementById('f-total'); if (!el || !FORM) return;
+    var el = document.getElementById('f-total'); if (FORM) { var mq = document.querySelector('.manques'); if (mq) majCote(); }
+    if (!el || !FORM) return;
     var t = totalPct();
     el.className = t === 100 ? 'bon' : (t ? 'attn' : 'gris');
     el.textContent = '${T("Total")} ' + t + ' %' + (t === 100 ? ' ✓' : '');
   }
-  function colPhotos(){
+  /* ══ L ANALYSE EN TROIS ÉTAPES (2026-10-25, sa remarque « trop condensé ») ═════
+     Une étape à la fois, à gauche, avec toute la place ; à droite, l aperçu de
+     l étiquette (plus grand), ce qui manque, et les boutons. Plus de colonne qui
+     défile : chaque étape tient dans la fenêtre. */
+  var ETAPES = [[1, '${T("Photo et lecture de l’IA")}'], [2, '${T("Composition et entretien")}'], [3, '${T("Produit et étiquette")}']];
+  function etapePhotos(){
     var f = FORM, l = f.lecture;
-    var h = '<div class="cx-carte"><h2>${T("Photo de surface · microscope 1200×")}</h2>'
+    var h = '<div class="et-deux"><div class="cx-carte"><h2>${T("Photo de surface · microscope 1200×")}</h2>'
       + '<div class="depot" id="f-depot" role="button" tabindex="0" aria-label="${T("Déposer ou choisir des photos")}">'
       + '<strong>${T("Glissez une photo ici")}</strong><span class="aide">${T("ou cliquez pour choisir (JPEG, PNG, WEBP — 4 au plus). Plusieurs vues du même tissu donnent une lecture plus sûre.")}</span></div>';
-    if (PHOTOS.length) h += '<div class="vignettes" style="margin-top:.5rem">' + PHOTOS.map(function(p, i){
+    if (PHOTOS.length) h += '<div class="vignettes" style="margin-top:.7rem">' + PHOTOS.map(function(p, i){
       return '<div class="vig"><img src="' + p + '" alt="${T("Photo")} ' + (i + 1) + '"><button type="button" data-otph="' + i + '" aria-label="${T("Retirer la photo")} ' + (i + 1) + '">✕</button></div>'; }).join('') + '</div>';
-    h += '<div class="boutons"><span class="aide gauche">${T("≈ 0,01 à 0,02 $ par lecture (clé API). Les photos ne sont pas conservées.")}</span>'
+    h += '<div class="aide" style="margin-top:.8rem">${T("Conseil : une photo de la surface, une du ruban adhésif collé sur une lame, et une fibre dans une goutte de glycérine.")}</div>'
+      + '<div class="boutons" style="margin-top:.9rem"><span class="aide gauche">${T("≈ 0,01 à 0,02 $ par lecture (clé API). Les photos ne sont pas conservées.")}</span>'
       + '<button type="button" class="prim" id="f-lire"' + (PHOTOS.length && !LECTURE_EN_COURS ? '' : ' disabled') + '>' + (LECTURE_EN_COURS ? '${T("Lecture en cours…")}' : (l ? '${T("Relire les photos")}' : '${T("Lire les photos")}')) + '</button></div></div>';
     h += '<div class="cx-carte"><h2>${T("Lecture de l’IA")} <span class="cx-sub">${T("expert en microscopie textile")}</span></h2>';
     if (!l) h += '<div class="aide">${T("La lecture paraît ici, en quatre étapes : morphologie, parois et diamètre, comparaison aux fibres connues, estimation finale.")}</div>';
     else {
       [['${T("1) Morphologie")}', l.morphologie], ['${T("2) Parois et diamètre")}', l.parois], ['${T("3) Comparaison aux standards")}', l.comparaison], ['${T("4) Estimation finale")}', l.estimation]].forEach(function(x){
-        if (x[1]) h += '<div class="etape" style="margin-bottom:.45rem"><h3>' + x[0] + '</h3><p class="coupe3" title="' + esc(x[1]) + '">' + esc(x[1]) + '</p></div>';
+        if (x[1]) h += '<div class="etape"><h3>' + x[0] + '</h3><p class="coupe3" title="' + esc(x[1]) + '">' + esc(x[1]) + '</p></div>';
       });
       h += '<div class="estim"><span class="lbl">${T("ESTIMATION")}</span><strong>' + esc(l.principale ? nomFibre(l.principale) : '${T("indéterminée")}') + '</strong>'
         + '<span class="aide">${T("confiance :")} ' + esc(CONF[l.confiance] || '') + (l.possibles && l.possibles.length ? ' · ${T("aussi vu :")} ' + esc(l.possibles.map(nomFibre).join(', ')) : '') + '</span>'
         + (l.principale ? '<button type="button" class="mini" id="f-utiliser" style="margin-left:auto">${T("Utiliser l’estimation")}</button>' : '') + '</div>'
-        + (l.le ? '<div class="aide" style="margin-top:.35rem">${T("Lue le")} ' + esc(szQuand(l.le)) + (l.cout ? ' · ' + szArgent(l.cout) : '') + ' · ${T("photos effacées après la lecture")}</div>' : '');
+        + (l.le ? '<div class="aide" style="margin-top:.5rem">${T("Lue le")} ' + esc(szQuand(l.le)) + (l.cout ? ' · ' + szArgent(l.cout) : '') + ' · ${T("photos effacées après la lecture")}</div>' : '');
     }
-    return h + '</div>';
+    return h + '</div></div>';
   }
-  function colComposition(){
+  function etapeComposition(){
     var f = FORM;
-    var h = '<div class="cx-carte"><h2>${T("Composition confirmée")} <span class="cx-sub">${T("ce qui s’imprime")}</span></h2>'
-      + '<div class="avert" style="margin-bottom:.55rem">${T("Une photo de surface dit QUELLE fibre on voit (fiable à 60-70 %) ; elle ne pèse pas un mélange. Les pourcentages viennent de la fiche du fournisseur — la loi tolère 5 % d’écart.")}</div>';
+    var h = '<div class="et-compo"><div class="cx-carte"><h2>${T("Composition confirmée")} <span class="cx-sub">${T("ce qui s’imprime")}</span></h2>'
+      + '<div class="avert" style="margin-bottom:.8rem">${T("Une photo de surface dit QUELLE fibre on voit (fiable à 60-70 %) ; elle ne pèse pas un mélange. Les pourcentages viennent de la fiche du fournisseur — la loi tolère 5 % d’écart.")}</div>';
+    if (!f.composition.length) h += '<div class="aide" style="margin-bottom:.6rem">${T("Aucune fibre pour l’instant : ajoutez-en une, ou reprenez l’estimation de l’IA (étape 1).")}</div>';
     f.composition.forEach(function(x, i){
-      h += '<div class="fib" style="margin-bottom:.35rem"><select id="f-fib-' + i + '" aria-label="${T("Fibre")} ' + (i + 1) + '">'
+      h += '<div class="fib"><select id="f-fib-' + i + '" aria-label="${T("Fibre")} ' + (i + 1) + '">'
         + '<option value="">${T("— fibre —")}</option>'
         + (D.fibres || []).map(function(k){ return '<option value="' + esc(k.cle) + '"' + (x.fibre === k.cle ? ' selected' : '') + '>' + esc(EN ? k.en : k.fr + ' / ' + k.en) + '</option>'; }).join('')
         + '</select><input type="text" inputmode="numeric" maxlength="3" id="f-pct-' + i + '" aria-label="${T("Pourcentage de la fibre")} ' + (i + 1) + '" value="' + esc(x.pct) + '" placeholder="%">'
         + '<button type="button" class="mini" data-otfib="' + i + '" aria-label="${T("Retirer la fibre")} ' + (i + 1) + '">✕</button></div>';
     });
     h += '<div class="total"><button type="button" class="mini" id="f-ajfib">${T("+ Ajouter une fibre")}</button><span id="f-total"></span></div>'
-      + '<div class="aide" style="margin-top:.3rem">${T("Moins de 5 % : imprimé « autre fibre / other fibre », à la fin (art. 31).")}</div></div>';
-    h += '<div class="cx-carte"><h2>${T("Entretien")} <button type="button" class="mini" id="f-proposer" style="margin-left:auto" title="${T("Cocher l’entretien proposé d’après les fibres")}">${T("Proposer d’après les fibres")}</button></h2>';
-    (D.entretienGroupes || []).forEach(function(g){
-      var L = (D.entretien || []).filter(function(s){ return s.groupe === g.cle; });
-      if (!L.length) return;
-      h += '<div class="grpent" style="margin-bottom:.45rem"><span class="t">' + esc(EN ? g.en : g.fr) + '</span><div class="puces">'
-        + L.map(function(s){ return '<button type="button" class="soin" data-soin="' + esc(s.cle) + '" aria-pressed="' + (f.entretien.indexOf(s.cle) >= 0) + '" title="' + esc(EN ? s.en : s.fr) + '">' + (s.ico || '') + '<span>' + esc(EN ? s.en : s.fr) + '</span></button>'; }).join('')
+      + '<div class="aide" style="margin-top:.6rem">${T("Moins de 5 % : imprimé « autre fibre / other fibre », à la fin (art. 31).")}</div></div>';
+    /* L entretien : les groupes en deux colonnes, des pastilles aérées. */
+    var G = (D.entretienGroupes || []).map(function(g){ return { g: g, L: (D.entretien || []).filter(function(s){ return s.groupe === g.cle; }) }; })
+      .filter(function(x){ return x.L.length; });
+    var bloc = function(x){
+      return '<div class="grpent"><span class="t">' + esc(EN ? x.g.en : x.g.fr) + '</span><div class="puces">'
+        + x.L.map(function(s){ return '<button type="button" class="soin" data-soin="' + esc(s.cle) + '" aria-pressed="' + (f.entretien.indexOf(s.cle) >= 0) + '" title="' + esc(EN ? s.en : s.fr) + '">' + (s.ico || '') + '<span>' + esc(EN ? s.en : s.fr) + '</span></button>'; }).join('')
         + '</div></div>';
-    });
-    h += '<div class="aide">${T("Symboles facultatifs au Canada ; présents, ils suivent la norme CAN/CGSB-86.1. L’étiquette en écrit trois en mots, en français et en anglais.")}</div></div>';
+    };
+    var gauche = G.filter(function(x){ return x.g.cle === 'lavage' || x.g.cle === 'javel' || x.g.cle === 'sec'; });
+    var droite = G.filter(function(x){ return gauche.indexOf(x) < 0; });
+    h += '<div class="cx-carte"><h2>${T("Entretien")} <button type="button" class="mini" id="f-proposer" style="margin-left:auto" title="${T("Cocher l’entretien proposé d’après les fibres")}">${T("Proposer d’après les fibres")}</button></h2>'
+      + '<div class="ent-grille"><div>' + gauche.map(bloc).join('') + '</div><div>' + droite.map(bloc).join('') + '</div></div>'
+      + '<div class="aide" style="margin-top:.6rem">${T("Symboles facultatifs au Canada ; présents, ils suivent la norme CAN/CGSB-86.1. L’étiquette en écrit trois en mots, en français et en anglais.")}</div></div></div>';
     return h;
   }
-  function colProduit(){
+  function etapeProduit(){
     var f = FORM;
-    var h = '<div class="cx-carte"><h2>${T("Produit et étiquette")}</h2>'
-      + '<div class="puces" role="group" aria-label="${T("Produit")}" style="margin-bottom:.45rem">'
+    var h = '<div class="et-deux"><div class="cx-carte"><h2>${T("Produit")}</h2>'
+      + '<div class="puces" role="group" aria-label="${T("Produit")}" style="margin-bottom:.8rem">'
       + '<button type="button" class="puce" data-mode="inventaire" aria-pressed="' + (f.mode === 'inventaire') + '">${T("Dans l’inventaire")}</button>'
       + '<button type="button" class="puce" data-mode="provisoire" aria-pressed="' + (f.mode === 'provisoire') + '">${T("Pas encore créé")}</button></div>';
     if (f.mode === 'inventaire') {
       if (f.produit) h += '<div class="choisi"><span><strong>' + esc(f.produit.nom) + '</strong> <span class="gris">' + esc(f.produit.ref) + '</span></span><button type="button" class="mini" id="f-changer">${T("Changer")}</button></div>';
       else {
         h += '<div class="champ"><label for="f-chercher">${T("Chercher un produit (nom, numéro, SKU)")}</label><input type="search" id="f-chercher" maxlength="80" autocomplete="off"></div>';
-        if (RES) h += '<div class="res" style="margin-top:.3rem">' + (RES.produits.length ? RES.produits.map(function(p){
+        if (RES) h += '<div class="res" style="margin-top:.4rem">' + (RES.produits.length ? RES.produits.map(function(p){
             return '<button type="button" data-prod="' + esc(p.id) + '">' + esc(p.nom) + ' <span class="gris">' + esc(p.ref) + '</span></button>'; }).join('') : '<span class="aide" style="padding:.3rem">${T("Aucun produit trouvé.")}</span>')
           + (RES.total > RES.produits.length ? '<span class="aide" style="padding:.3rem">' + RES.total + ' ${T("résultats — précisez la recherche.")}</span>' : '') + '</div>';
       }
-      h += '<label class="case" for="f-copier" style="margin-top:.4rem"><input type="checkbox" id="f-copier"' + (f.copierFiche ? ' checked' : '') + '> ${T("Copier aussi la composition et l’entretien sur la fiche produit")}</label>';
+      h += '<label class="case" for="f-copier" style="margin-top:.8rem"><input type="checkbox" id="f-copier"' + (f.copierFiche ? ' checked' : '') + '> ${T("Copier aussi la composition et l’entretien sur la fiche produit")}</label>';
     } else {
-      h += '<div class="champ"><label for="f-provisoire">${T("Nom provisoire (le produit sera créé plus tard)")}</label><input type="text" id="f-provisoire" maxlength="80" value="' + esc(f.nomProvisoire) + '" placeholder="${T("Ex. : Cardigan torsadé crème")}"></div>';
+      h += '<div class="champ"><label for="f-provisoire">${T("Nom provisoire (le produit sera créé plus tard)")}</label><input type="text" id="f-provisoire" maxlength="80" value="' + esc(f.nomProvisoire) + '" placeholder="${T("Ex. : Cardigan torsadé crème")}"></div>'
+        + '<div class="aide" style="margin-top:.6rem">${T("Une fois le produit créé, « Rattacher à un produit » relie l’analyse, son étiquette et son historique d’impression.")}</div>';
     }
-    h += '<div class="champ" style="margin-top:.45rem"><label for="f-remarque">${T("Remarque")}</label><textarea id="f-remarque" rows="2" maxlength="400" placeholder="${T("Lot, fournisseur, fiche reçue, essai de lavage…")}">' + esc(f.remarque) + '</textarea></div>'
-      + '<div class="deux" style="margin-top:.45rem"><div class="champ"><label for="f-pays">${T("Pays de fabrication")}</label><select id="f-pays">'
+    h += '<div class="champ" style="margin-top:.9rem"><label for="f-remarque">${T("Remarque")}</label><textarea id="f-remarque" rows="3" maxlength="400" placeholder="${T("Lot, fournisseur, fiche reçue, essai de lavage…")}">' + esc(f.remarque) + '</textarea></div></div>';
+    h += '<div class="cx-carte"><h2>${T("Étiquette")}</h2>'
+      + '<div class="champ"><label for="f-pays">${T("Pays de fabrication")}</label><select id="f-pays">'
       + (D.pays || []).map(function(p){ return '<option value="' + esc(p.cle) + '"' + (f.pays === p.cle ? ' selected' : '') + '>' + esc(EN ? (p.nomEn || p.nom) : p.nom) + '</option>'; }).join('')
-      + '</select></div><div class="champ"><span class="lbl" id="f-fond-l">${T("Couleur du vêtement")}</span><div class="puces" role="group" aria-labelledby="f-fond-l">'
+      + '</select></div>'
+      + '<div class="champ" style="margin-top:.9rem"><span class="lbl" id="f-fond-l">${T("Couleur du vêtement")}</span><div class="puces" role="group" aria-labelledby="f-fond-l">'
       + '<button type="button" class="puce" data-fond="fonce" aria-pressed="' + (f.fond === 'fonce') + '">${T("Foncé")}</button>'
-      + '<button type="button" class="puce" data-fond="pale" aria-pressed="' + (f.fond === 'pale') + '">${T("Pâle")}</button></div></div></div>'
-      + '<div class="aide" style="margin-top:.25rem">' + (f.fond === 'pale' ? '${T("Papier transparent : texte noir, imprimé en miroir.")}' : '${T("Papier opaque : fond foncé imprimé, texte blanc (le papier).")}') + '</div>'
-      + '<div class="apercu" style="margin-top:.55rem"><canvas id="cv-form" width="330" height="198" style="width:330px;height:198px" role="img" aria-label="${T("Aperçu de l’étiquette")}"></canvas></div>'
-      + (D.ca && D.ca.manquant ? '<div class="aide attn" style="margin-top:.3rem">${T("« CA xxxxxxx » : le numéro CA n’est pas encore saisi (Fiscalité › Mon entreprise). Il remplacera le gabarit tout seul.")}</div>' : '')
-      + '<div class="boutons"><button type="button" class="gauche" data-act="banque">${T("Annuler")}</button>'
-      + '<button type="button" class="prim" id="f-ok">' + (f.id ? '${T("Enregistrer")}' : '${T("Enregistrer l’analyse")}') + '</button></div></div>';
+      + '<button type="button" class="puce" data-fond="pale" aria-pressed="' + (f.fond === 'pale') + '">${T("Pâle")}</button></div></div>'
+      + '<div class="aide" style="margin-top:.5rem">' + (f.fond === 'pale' ? '${T("Papier transparent : texte noir, imprimé en miroir.")}' : '${T("Papier opaque : fond foncé imprimé, texte blanc (le papier).")}') + '</div>'
+      + (D.ca && D.ca.manquant ? '<div class="aide attn" style="margin-top:.8rem">${T("« CA xxxxxxx » : le numéro CA n’est pas encore saisi (Fiscalité › Mon entreprise). Il remplacera le gabarit tout seul.")}</div>' : '')
+      + '</div></div>';
     return h;
   }
-  function formulaire(){
-    return '<div class="trio"><div>' + colPhotos() + '</div><div>' + colComposition() + '</div><div>' + colProduit() + '</div></div>';
+  /* À droite : l aperçu, ce qui manque, et les boutons (toujours à l écran). */
+  function cote(){
+    var f = FORM, t = totalPct(), n = f.entretien.length;
+    var pr = f.mode === 'inventaire' ? (f.produit ? f.produit.nom : '') : String(f.nomProvisoire || '').trim();
+    var ligne = function(okk, txt){ return '<div class="manque ' + (okk ? 'bon' : 'attn') + '">' + (okk ? '✓ ' : '• ') + txt + '</div>'; };
+    return '<div class="cx-carte cote"><h2>${T("Aperçu de l’étiquette")} <span class="cx-sub">50 × 30 mm</span></h2>'
+      + '<div class="apercu"><canvas id="cv-form" width="360" height="216" style="width:360px;height:216px" role="img" aria-label="${T("Aperçu de l’étiquette")}"></canvas></div>'
+      + '<div class="manques">'
+      + ligne(t === 100, t === 100 ? '${T("Composition : 100 %")}' : '${T("Composition à confirmer")}' + (t ? ' (' + t + ' %)' : ''))
+      + ligne(n > 0, n ? n + ' ' + (n > 1 ? '${T("consignes d’entretien")}' : '${T("consigne d’entretien")}') : '${T("Aucune consigne d’entretien")}')
+      + ligne(!!pr, pr ? esc(pr) : '${T("Produit ou nom provisoire à choisir")}')
+      + '</div>'
+      + '<div class="boutons nav">'
+      + (ETAPE > 1 ? '<button type="button" id="f-prec">${T("‹ Précédent")}</button>' : '<button type="button" data-act="banque">${T("Annuler")}</button>')
+      + (ETAPE < 3 ? '<button type="button" id="f-suiv">${T("Suivant ›")}</button>' : '')
+      + '<button type="button" class="prim" id="f-ok">' + (f.id ? '${T("Enregistrer")}' : '${T("Enregistrer l’analyse")}') + '</button></div></div>';
   }
-
+  function formulaire(){
+    var corpsE = ETAPE === 1 ? etapePhotos() : ETAPE === 2 ? etapeComposition() : etapeProduit();
+    return '<div class="assist"><div class="et-gauche"><nav class="etapes" aria-label="${T("Étapes de l’analyse")}">'
+      + ETAPES.map(function(e){ return '<button type="button" class="et-b" data-etape="' + e[0] + '"' + (ETAPE === e[0] ? ' aria-current="step"' : '') + '><span class="num">' + e[0] + '</span>' + e[1] + '</button>'; }).join('<span class="et-sep">›</span>')
+      + '</nav>' + corpsE + '</div><div class="et-droite">' + cote() + '</div></div>';
+  }
   /* ── Les photos : réduites ICI (1568 px au plus, JPEG), jamais enregistrées ── */
   function reduire(dataUrl){
     return new Promise(function(res){
@@ -776,7 +844,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + tailles.map(function(t){ return '<option value="' + esc(t) + '"' + (l.taille === t ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('') + '</select>'
           : '<input type="text" id="pl-t-' + i + '" maxlength="4" value="' + esc(l.taille) + '" placeholder="${T("Taille")}" aria-label="${T("Taille de la ligne")} ' + (i + 1) + '">')
         + '<div class="pas"><button type="button" data-moins="' + i + '" aria-label="${T("Une de moins")}">−</button>'
-        + '<input type="text" inputmode="numeric" id="pl-n-' + i + '" value="' + l.n + '" aria-label="${T("Nombre d’étiquettes de la ligne")} ' + (i + 1) + '">'
+        + '<input type="text" inputmode="numeric" maxlength="3" id="pl-n-' + i + '" value="' + l.n + '" aria-label="${T("Nombre d’étiquettes de la ligne")} ' + (i + 1) + '">'
         + '<button type="button" data-plus="' + i + '" aria-label="${T("Une de plus")}">+</button></div>'
         + '<button type="button" class="mini" data-otlot="' + i + '" aria-label="${T("Retirer la ligne")} ' + (i + 1) + '">✕</button></div>'
         + '<div style="margin:-.15rem 0 .45rem 1.2rem"><button type="button" class="mini" data-dup="' + i + '">${T("+ une autre taille")}</button></div>';
@@ -1106,7 +1174,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if ((x = t.closest('[data-hpg]'))) { HPG += parseInt(x.getAttribute('data-hpg'), 10) || 0; dessiner(); return; }
     if ((x = t.closest('[data-rattacher]'))) {
       var ar = analyse(x.getAttribute('data-rattacher'));
-      if (ar) { ouvrirForm(ar); FORM.mode = 'inventaire'; FORM.produit = null; FORM.copierFiche = true; dessiner(); var ch0 = document.getElementById('f-chercher'); if (ch0) ch0.focus();
+      if (ar) { ouvrirForm(ar, 3); FORM.mode = 'inventaire'; FORM.produit = null; FORM.copierFiche = true; dessiner(); var ch0 = document.getElementById('f-chercher'); if (ch0) ch0.focus();
         szDire('${T("Cherchez le produit créé, choisissez-le, puis enregistrez : l’analyse et son historique lui seront rattachés.")}', 'att'); }
       return;
     }
@@ -1140,7 +1208,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         var l = FORM.lecture;
         FORM.composition = [{ fibre: l.principale, pct: String(100) }].concat((l.possibles || []).map(function(k){ return { fibre: k, pct: '' }; }));
         if (!FORM.entretien.length) FORM.entretien = [];
-        dessiner(); redemanderApercu();
+        ETAPE = 2; dessiner(); redemanderApercu();
         szDire('${T("Estimation reprise : ajustez les pourcentages avec la fiche du fournisseur.")}', 'att');
         return;
       }
@@ -1160,7 +1228,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         ramasser();
         var k = x.getAttribute('data-soin'), i = FORM.entretien.indexOf(k);
         if (i >= 0) FORM.entretien.splice(i, 1); else FORM.entretien.push(k);
-        x.setAttribute('aria-pressed', String(i < 0)); redemanderApercu(); return;
+        x.setAttribute('aria-pressed', String(i < 0)); majCote(); redemanderApercu(); return;
       }
       if ((x = t.closest('[data-mode]'))) { ramasser(); FORM.mode = x.getAttribute('data-mode'); RES = null; dessiner(); redemanderApercu(); return; }
       if ((x = t.closest('[data-fond]'))) { ramasser(); FORM.fond = x.getAttribute('data-fond'); dessiner(); redemanderApercu(); return; }
@@ -1172,6 +1240,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       }
       if (t.id === 'f-changer') { ramasser(); FORM.produit = null; RES = null; dessiner(); var ch = document.getElementById('f-chercher'); if (ch) ch.focus(); return; }
       if (t.id === 'f-ok') { enregistrer(t); return; }
+      if ((x = t.closest('[data-etape]'))) { ramasser(); ETAPE = parseInt(x.getAttribute('data-etape'), 10) || 1; RES = null; dessiner(); return; }
+      if (t.id === 'f-suiv') { ramasser(); ETAPE = Math.min(3, ETAPE + 1); RES = null; dessiner(); return; }
+      if (t.id === 'f-prec') { ramasser(); ETAPE = Math.max(1, ETAPE - 1); RES = null; dessiner(); return; }
     }
     /* La planche */
     if (PL) {
