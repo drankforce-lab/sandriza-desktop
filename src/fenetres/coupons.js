@@ -182,6 +182,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
     introuvable:        '${T("Ce coupon n’existe plus.")}',
     doublon:            '${T("Ce code est déjà pris par un autre coupon.")}',
     valeur:             '${T("Un code et une valeur supérieure à zéro sont requis.")}',
+    pct_max:            '${T("Un pourcentage ne peut pas dépasser 100 %.")}',
     echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){

@@ -157,7 +157,7 @@ function pageNewsletter(ouverture) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'nl-from-n':60,'nl-trans-from-n':60,'nl-co-name':80,'nl-co-addr':200,'nl-website-url':300,'nl-from-e':120,'nl-reply':120,'nl-trans-from-e':120,'nl-test-e':120,'offer-img':500})}${JS_TUILES('newsletter')}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'nl-from-n':60,'nl-trans-from-n':60,'nl-co-name':80,'nl-co-addr':200,'nl-website-url':300,'nl-from-e':120,'nl-reply':120,'nl-trans-from-e':120,'nl-test-e':120,'nl-test-t':16,'offer-img':500})}${JS_TUILES('newsletter')}
   var corps = document.getElementById('corps');
   var sous = document.getElementById('sous');
   var ongletsEl = document.getElementById('onglets');
@@ -295,8 +295,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'nl-from-n':60,'nl-trans-from-n':60,'nl
       +   ligneChamp('${T("Courriel expéditeur — transactionnel")}', 'nl-trans-from-e', c.fromEmailTransactional, 'email', '${T("Expédition, cartes-cadeaux, alertes. Vide = courriel infolettre.")}')
       +   ligneChamp('${T("Nom expéditeur — transactionnel")}', 'nl-trans-from-n', c.fromNameTransactional)
       +   '</div><hr class="sep"><div class="grc">'
-      +   '<div class="ctrl" style="border:none;padding:.2rem 0"><div><div class="t">${T("Mode test")}</div><div class="d">${T("Envoyer uniquement à l’adresse de test.")}</div></div>' + bascule('nl-testmode', c.testMode) + '</div>'
+      +   '<div class="ctrl" style="border:none;padding:.2rem 0"><div><div class="t">${T("Mode test")}</div><div class="d">${T("Envoyer uniquement au courriel et au téléphone de test — jamais aux clients.")}</div></div>' + bascule('nl-testmode', c.testMode) + '</div>'
       +   ligneChamp('${T("Courriel de test")}', 'nl-test-e', c.testEmail, 'email')
+      +   ligneChamp('${T("Téléphone de test (SMS)")}', 'nl-test-t', c.testTel, 'tel')
       +   '</div>'
       +   (PEUT.edit ? '<div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.5rem"><button class="prim" data-act="cfgsave">${T("Enregistrer")}</button><button class="ghost" data-act="testconn">${T("Envoyer un courriel de test")}</button></div>' : '')
       + '</div>'
@@ -404,7 +405,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'nl-from-n':60,'nl-trans-from-n':60,'nl
       fromEmail: val('nl-from-e'), fromName: val('nl-from-n'), replyTo: val('nl-reply'),
       companyName: val('nl-co-name'), companyAddress: val('nl-co-addr'), websiteUrl: val('nl-website-url'),
       fromEmailTransactional: val('nl-trans-from-e'), fromNameTransactional: val('nl-trans-from-n'),
-      testMode: chk('nl-testmode'), testEmail: val('nl-test-e'),
+      testMode: chk('nl-testmode'), testEmail: val('nl-test-e'), testTel: val('nl-test-t'),
     };
     dire('${T("Enregistrement…")}');
     appeler('newsletter:cfgEcrire', d).then(function(r){

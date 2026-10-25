@@ -251,6 +251,11 @@ module.exports = {
     'Test mode on: the emails will only go to',
   ', et la campagne restera en brouillon. Les SMS, eux, ne partent pas du tout.':
     ', and the campaign will stay a draft. SMS, for their part, do not go out at all.',
+  'Mode test allumé : les envois partiront <strong>uniquement</strong> à vos coordonnées de test':
+    'Test mode on: messages will go <strong>only</strong> to your test contacts',
+  ', jamais aux clients. La campagne restera en brouillon.': ', never to customers. The campaign will stay a draft.',
+  'Le mode test est activé : un seul envoi par canal, à vos coordonnées de test':
+    'Test mode is on: a single message per channel, to your test contacts',
   'Mode test : un seul courriel partira, à': 'Test mode: a single email will go, to',
   'l’adresse de test': 'the test address',
   'Confirmer l’envoi ?': 'Confirm the send?',

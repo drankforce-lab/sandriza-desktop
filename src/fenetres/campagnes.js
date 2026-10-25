@@ -2162,8 +2162,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       h += '<div class="avis mal">${T("Aucune clé Resend n’est configurée : <strong>rien ne peut partir</strong>. ")}'
         + '${T("Écran Infolettre → Configuration, dans la fenêtre principale.")}</div>';
     } else if (D.modeTest) {
-      h += '<div class="avis att">${T("Mode test allumé : les courriels partiront <strong>uniquement</strong> à ")}'
-        + esc(D.courrielTest) + '${T(", et la campagne restera en brouillon. Les SMS, eux, ne partent pas du tout.")}</div>';
+      h += '<div class="avis att">${T("Mode test allumé : les envois partiront <strong>uniquement</strong> à vos coordonnées de test")}'
+        + ' (' + esc([D.courrielTest, D.telTest].filter(Boolean).join(' · ') || '—') + ')' + '${T(", jamais aux clients. La campagne restera en brouillon.")}</div>';
     }
 
     // Les campagnes en PAGES mesurees (JS_PAGES du socle) : la liste prend la hauteur qui reste.
@@ -2769,7 +2769,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
         var test = !!(DC && DC.modeTest);
         szConfirmer({ prudent: true, titre: test ? '${T("Envoyer le courriel de test")}' : '${T("Envoyer la campagne")}',
           texte: test
-            ? ('${T("Le mode test est activé : un seul courriel sera envoyé, à")}' + ' ' + (DC.courrielTest || '${T("l’adresse de test")}') + '. ' + '${T("La campagne restera en brouillon.")}')
+            ? ('${T("Le mode test est activé : un seul envoi par canal, à vos coordonnées de test")}' + ' (' + ([DC.courrielTest, DC.telTest].filter(Boolean).join(' · ') || '—') + '). ' + '${T("La campagne restera en brouillon.")}')
             : ('${T("La campagne sera envoyée immédiatement. Un envoi ne peut pas être annulé.")}'),
           details: camp ? [['${T("Campagne")}', camp.nom], ['${T("Objet")}', camp.sujet || '—'],
             ['${T("Destinataires")}', camp.segmentLibelle], ['${T("Canal")}', camp.canalLibelle], ['${T("Envois")}', test ? '1' : combien]] : [],

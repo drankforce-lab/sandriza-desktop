@@ -251,6 +251,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     /* 2026-10-07, sa regle : deux priorites egales n existent jamais. */
     priorite:           '${T("Cette priorité est déjà prise par une autre offre ou annonce. Choisissez un numéro libre.")}',
     valeur:             '${T("La valeur du rabais doit être supérieure à zéro.")}',
+    pct_max:            '${T("Un pourcentage ne peut pas dépasser 100 %.")}',
     bogo:               '${T("Quantités « 2 pour 1 » invalides — la quantité gratuite doit être inférieure à la quantité achetée, qui vaut au moins 2.")}',
     paliers:            '${T("Ajoutez au moins un palier valable : quantité d’au moins 2, rabais entre 1 et 100 %.")}',
     ensemble_pct:       '${T("Le rabais d’un look complet va de 1 à 90 %.")}',

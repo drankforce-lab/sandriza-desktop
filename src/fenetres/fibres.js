@@ -146,14 +146,26 @@ html.jour .trouve span{color:#1b5631}
 .et-b .num{display:inline-flex;align-items:center;justify-content:center;width:1.45rem;height:1.45rem;border-radius:50%;font-size:.76rem;font-weight:700;background:var(--v10)}
 .et-b[aria-current=step]{background:rgba(var(--or-rgb),.14);border-color:var(--or);font-weight:650}
 .et-b[aria-current=step] .num{background:var(--or);color:#1a1208}
+.et-b:disabled{opacity:.45;cursor:not-allowed}
 .et-sep{color:var(--tx3)}
 .et-deux{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.1rem;align-items:start}
 .et-compo{display:grid;grid-template-columns:minmax(17rem,1fr) minmax(0,1.45fr);gap:1.1rem;align-items:start}
 .et-gauche .cx-carte{padding:1.15rem 1.25rem}
 .et-gauche .cx-carte h2{margin-bottom:.85rem}
-.ent-grille{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.4rem 1.2rem}
-.ent-grille .grpent{margin-bottom:.85rem}
-.ent-grille .puces{gap:.4rem}
+/* (2026-10-25, sa capture « ça coupe encore ») TROIS colonnes équilibrées : la vraie liste d entretien (une
+   quarantaine de consignes) sortait par le bas sur deux. Si la place manque encore, ajusterEtape2 resserre. */
+.ent-grille{columns:3 10.5rem;column-gap:1rem}
+.ent-grille .grpent{break-inside:avoid}
+.ent-grille .grpent{margin-bottom:.7rem}
+.ent-grille .puces{gap:.3rem}
+.ent-grille .soin{max-width:100%}
+.ent-grille.serre1 .soin{font-size:.7rem;padding:.14rem .55rem .14rem .35rem}
+.ent-grille.serre1 .soin svg{width:15px;height:15px}
+.ent-grille.serre1 .grpent{margin-bottom:.45rem}
+.ent-grille.serre2 .soin{font-size:.66rem;padding:.08rem .45rem .08rem .3rem;gap:.25rem}
+.ent-grille.serre2 .soin svg{width:13px;height:13px}
+.ent-grille.serre2 .puces{gap:.2rem}
+.ent-grille.serre2 .grpent{margin-bottom:.3rem}
 .cote{display:flex;flex-direction:column;gap:.9rem}
 .cote .apercu{padding:1rem}
 .manques{display:flex;flex-direction:column;gap:.35rem;font-size:.82rem}
@@ -224,7 +236,9 @@ html.jour .trouve span{color:#1b5631}
 .badge{align-self:flex-start;padding:.18rem .6rem;border-radius:999px;font-size:.72rem;font-weight:650;
   background:rgba(251,191,36,.16);color:var(--tx-att)}
 /* ⚠ .et-deux GARDE SES DEUX COLONNES sous 1100 px : empilées, la photo et la lecture sortaient par le bas (banc à 1080 × 700). */
-@media (max-width:1100px){.assist{grid-template-columns:minmax(0,1fr) 21rem}.et-compo{grid-template-columns:1fr}.duo{grid-template-columns:1fr}}
+/* ⚠ .et-compo AUSSI reste côte à côte sous 1100 px (empilées, la composition poussait l entretien hors de la fenêtre) ;
+   les colonnes de l entretien s équilibrent d elles-mêmes (columns), et ajusterEtape2 resserre au besoin. */
+@media (max-width:1100px){.assist{grid-template-columns:minmax(0,1fr) 21rem}.et-compo{grid-template-columns:minmax(14rem,.85fr) minmax(0,1.3fr)}.duo{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -679,6 +693,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       Array.prototype.forEach.call(corps.querySelectorAll(['.etape', '.nonconcl'].map(function(s){ return s + ' p.' + niv[i - 1]; }).join()), function(p){ p.classList.remove(niv[i - 1]); p.classList.add(niv[i]); });
     }
   }
+  /* L ÉTAPE 2 : la carte de l entretien doit tenir dans la fenêtre — resserrée en deux crans, puis l aide cachée. */
+  function ajusterEtape2(){
+    var g = corps.querySelector('.ent-grille'); if (!g) return;
+    var carte = g.closest('.cx-carte');
+    var bas = Math.min(corps.getBoundingClientRect().bottom, window.innerHeight);
+    var depasse = function(){ return carte && carte.getBoundingClientRect().bottom > bas + 1; };
+    if (depasse()) g.classList.add('serre1');
+    if (depasse()) { g.classList.remove('serre1'); g.classList.add('serre2'); }
+    if (depasse()) { var a = carte.querySelector(':scope > .aide'); if (a) a.style.display = 'none'; }
+  }
   function peindreChoix(){
     var cv = document.getElementById('cv-choix');
     if (cv && APERCU_CHOIX) apercuDans(cv, APERCU_CHOIX, 300);
@@ -736,6 +760,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!el || !FORM) return;
     var t = totalPct();
     el.className = t === 100 ? 'bon' : (t ? 'attn' : 'gris');
+    majEtapes();
     el.textContent = '${T("Total")} ' + t + ' %' + (t === 100 ? ' ✓' : '');
   }
   /* ══ L ANALYSE EN TROIS ÉTAPES (2026-10-25, sa remarque « trop condensé ») ═════
@@ -798,10 +823,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + x.L.map(function(s){ return '<button type="button" class="soin" data-soin="' + esc(s.cle) + '" aria-pressed="' + (f.entretien.indexOf(s.cle) >= 0) + '" title="' + esc(EN ? s.en : s.fr) + '">' + (s.ico || '') + '<span>' + esc(EN ? s.en : s.fr) + '</span></button>'; }).join('')
         + '</div></div>';
     };
-    var gauche = G.filter(function(x){ return x.g.cle === 'lavage' || x.g.cle === 'javel' || x.g.cle === 'sec'; });
-    var droite = G.filter(function(x){ return gauche.indexOf(x) < 0; });
+    /* Les groupes dans l ordre de la norme ; le navigateur les répartit en colonnes équilibrées (CSS columns). */
     h += '<div class="cx-carte"><h2>${T("Entretien")} <button type="button" class="mini" id="f-proposer" style="margin-left:auto" title="${T("Cocher l’entretien proposé d’après les fibres")}">${T("Proposer d’après les fibres")}</button></h2>'
-      + '<div class="ent-grille"><div>' + gauche.map(bloc).join('') + '</div><div>' + droite.map(bloc).join('') + '</div></div>'
+      + '<div class="ent-grille">' + G.map(bloc).join('') + '</div>'
       + '<div class="aide" style="margin-top:.6rem">${T("Symboles facultatifs au Canada ; présents, ils suivent la norme CAN/CGSB-86.1. L’étiquette en écrit trois en mots, en français et en anglais.")}</div></div></div>';
     return h;
   }
@@ -838,6 +862,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return h;
   }
   /* À droite : l aperçu, ce qui manque, et les boutons (toujours à l écran). */
+  /* (2026-10-25, sa demande) LES ÉTAPES SE SUIVENT : la 2 s ouvre quand la photo a été lue par l IA (ou qu une
+     composition existe déjà — une analyse rouverte) ; la 3, quand en plus la composition fait 100 %. */
+  function etapeOuverte(n){
+    if (n <= 1 || !FORM) return true;
+    var lu = !!FORM.lecture || FORM.composition.some(function(x){ return x.fibre; });
+    if (n === 2) return lu;
+    return lu && totalPct() === 100;
+  }
+  function raisonFermee(n){
+    if (!etapeOuverte(2)) return '${T("Faites d’abord lire la photo par l’IA (étape 1).")}';
+    if (n === 3 && !etapeOuverte(3)) return '${T("La composition doit d’abord faire 100 % (étape 2).")}';
+    return '';
+  }
+  function majEtapes(){
+    Array.prototype.forEach.call(document.querySelectorAll('.et-b[data-etape]'), function(b){
+      var n = parseInt(b.getAttribute('data-etape'), 10), ok = etapeOuverte(n);
+      b.disabled = !ok; b.title = ok ? '' : raisonFermee(n);
+    });
+    var s = document.getElementById('f-suiv');
+    if (s) { var ok2 = etapeOuverte(ETAPE + 1); s.disabled = !ok2; s.title = ok2 ? '' : raisonFermee(ETAPE + 1); }
+  }
   function cote(){
     var f = FORM, t = totalPct(), n = f.entretien.length;
     var pr = f.mode === 'inventaire' ? (f.produit ? f.produit.nom : '') : String(f.nomProvisoire || '').trim();
@@ -851,13 +896,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '</div>'
       + '<div class="boutons nav">'
       + (ETAPE > 1 ? '<button type="button" id="f-prec">${T("‹ Précédent")}</button>' : '<button type="button" data-act="banque">${T("Annuler")}</button>')
-      + (ETAPE < 3 ? '<button type="button" id="f-suiv">${T("Suivant ›")}</button>' : '')
+      + (ETAPE < 3 ? '<button type="button" id="f-suiv"' + (etapeOuverte(ETAPE + 1) ? '' : ' disabled title="' + esc(raisonFermee(ETAPE + 1)) + '"') + '>${T("Suivant ›")}</button>' : '')
       + '<button type="button" class="prim" id="f-ok">' + (f.id ? '${T("Enregistrer")}' : '${T("Enregistrer l’analyse")}') + '</button></div></div>';
   }
   function formulaire(){
     var corpsE = ETAPE === 1 ? etapePhotos() : ETAPE === 2 ? etapeComposition() : etapeProduit();
     return '<div class="assist"><div class="et-gauche"><nav class="etapes" aria-label="${T("Étapes de l’analyse")}">'
-      + ETAPES.map(function(e){ return '<button type="button" class="et-b" data-etape="' + e[0] + '"' + (ETAPE === e[0] ? ' aria-current="step"' : '') + '><span class="num">' + e[0] + '</span>' + e[1] + '</button>'; }).join('<span class="et-sep">›</span>')
+      + ETAPES.map(function(e){ var ok = etapeOuverte(e[0]); return '<button type="button" class="et-b" data-etape="' + e[0] + '"' + (ETAPE === e[0] ? ' aria-current="step"' : '') + (ok ? '' : ' disabled title="' + esc(raisonFermee(e[0])) + '"') + '><span class="num">' + e[0] + '</span>' + e[1] + '</button>'; }).join('<span class="et-sep">›</span>')
       + '</nav>' + corpsE + '</div><div class="et-droite">' + cote() + '</div></div>';
   }
   /* ── Les photos : réduites ICI (1568 px au plus, JPEG), jamais enregistrées ── */
@@ -1253,7 +1298,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     elSous.textContent = L.length + ' ' + (L.length > 1 ? '${T("analyses")}' : '${T("analyse")}') + (nc ? ' · ' + nc + ' ${T("à confirmer")}' : '')
       + ' · ' + H.total + ' ${T("étiquette(s) imprimée(s)")}' + (H.ceMois ? ' (' + H.ceMois + ' ${T("ce mois-ci")})' : '')
       + (D.ca && D.ca.manquant ? ' · ${T("numéro CA à saisir")}' : '');
-    if (VUE === 'analyse' && FORM) { corps.innerHTML = lecture() + formulaire(); majTotal(); peindreForm(); brancherDepot(); if (ETAPE === 1) ajusterEtape1(); return; }
+    if (VUE === 'analyse' && FORM) { corps.innerHTML = lecture() + formulaire(); majTotal(); peindreForm(); brancherDepot(); if (ETAPE === 1) ajusterEtape1(); if (ETAPE === 2) ajusterEtape2(); return; }
     if (VUE === 'planche' && PL) { corps.innerHTML = '<div class="pl"><div>' + lots() + '</div><div>' + scene() + '</div></div>'; peindrePlan(); ajusterPlanche(); return; }
     if (VUE === 'historique') { corps.innerHTML = historiqueVue(); return; }
     corps.innerHTML = lecture() + banque();
@@ -1425,8 +1470,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       }
       if (t.id === 'f-changer') { ramasser(); FORM.produit = null; RES = null; dessiner(); var ch = document.getElementById('f-chercher'); if (ch) ch.focus(); return; }
       if (t.id === 'f-ok') { enregistrer(t); return; }
-      if ((x = t.closest('[data-etape]'))) { ramasser(); ETAPE = parseInt(x.getAttribute('data-etape'), 10) || 1; RES = null; dessiner(); return; }
-      if (t.id === 'f-suiv') { ramasser(); ETAPE = Math.min(3, ETAPE + 1); RES = null; dessiner(); return; }
+      if ((x = t.closest('[data-etape]'))) { if (x.disabled) return; ramasser(); var ne = parseInt(x.getAttribute('data-etape'), 10) || 1; if (!etapeOuverte(ne)) return; ETAPE = ne; RES = null; dessiner(); return; }
+      if (t.id === 'f-suiv') { ramasser(); if (!etapeOuverte(ETAPE + 1)) { szDire(raisonFermee(ETAPE + 1), 'att'); return; } ETAPE = Math.min(3, ETAPE + 1); RES = null; dessiner(); return; }
       if (t.id === 'f-prec') { ramasser(); ETAPE = Math.max(1, ETAPE - 1); RES = null; dessiner(); return; }
     }
     /* La planche */

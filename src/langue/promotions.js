@@ -275,4 +275,5 @@ module.exports = {
   'Supprimer l’annonce': 'Delete announcement',
   'sera supprimée définitivement, et son bandeau sera retiré de la boutique. Cette action est irréversible.': 'will be permanently deleted, and its banner will be removed from the store. This action cannot be undone.',
   'sera supprimée définitivement et retirée de la boutique. Cette action est irréversible.': 'will be permanently deleted and removed from the store. This action cannot be undone.',
+  'Un pourcentage ne peut pas dépasser 100 %.': 'A percentage cannot exceed 100%.',
 };

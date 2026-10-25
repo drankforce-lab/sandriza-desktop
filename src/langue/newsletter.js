@@ -127,6 +127,8 @@ module.exports = {
   'Mode test Envoyer uniquement à l’adresse de test.':
     'Test mode Send only to the test address.',
   'Courriel de test': 'Test email',
+  'Envoyer uniquement au courriel et au téléphone de test — jamais aux clients.': 'Send only to the test email and phone — never to customers.',
+  'Téléphone de test (SMS)': 'Test phone (SMS)',
   'Enregistrer': 'Save',
   'Envoyer un courriel de test': 'Send a test email',
   'Enregistrer Envoyer un courriel de test': 'Save Send a test email',
