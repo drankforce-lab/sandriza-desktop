@@ -1167,8 +1167,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         texte: '${T("Chaque étiquette est une forme pleine aux coins arrondis : Design Space coupe exactement son contour. Ces réglages évitent tout liseré ou résidu de papier au transfert.")}',
         details: [
           ['${T("Fond perdu")}', '${T("ACTIVÉ (« Ajouter un fond perdu ») : l’encre dépasse un peu sous la ligne de coupe, donc aucun liseré de papier blanc autour d’une étiquette foncée.")}'],
-          /* Testé pour la Cricut Joy Xtra (sa machine) : zone Imprimer puis couper Lettre 7,44 × 9,94 po au plus, mais
-             coins réservés aux repères — une image de 6,92 × 9,72 po passe à coup sûr ; la planche fait 6,85 × 9,45. */
+          /* La Cricut Joy Xtra (sa machine) : Design Space, chez elle, plafonne cette forme à 6,72 × 9,26 po sur Lettre ;
+             la planche fait 6,54 × 9,09 po (écarts 8 et 3,5 mm). Le redimensionnement automatique la rapetisserait. */
           ['${T("Taille")}', '${T("Régler la largeur à")} ' + po(d.page.l).replace('.', ',') + ' ${T("po exactement (comme dans le nom du fichier), et REFUSER le redimensionnement automatique : la planche entre déjà dans la zone de la Cricut Joy Xtra.")}'],
           ['${T("Miroir")}', aPale ? '${T("DÉSACTIVÉ dans Design Space : le fichier transparent est déjà en miroir (sinon il serait retourné deux fois).")}' : '${T("DÉSACTIVÉ.")}'],
           ['${T("Étalonnage")}', '${T("Une fois par machine : Menu › Étalonnage › Imprimer puis couper. Sans lui, la coupe peut glisser d’un millimètre.")}'],
