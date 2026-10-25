@@ -106,6 +106,8 @@ button.danger{border-color:rgba(248,113,113,.45);color:var(--tx-err2)}
 .ana .compo{font-weight:600}
 .ent .rq,.ana .rq{grid-column:6/7;display:none}
 .ana .rem{font-size:.74rem;color:var(--tx2)}
+/* La pastille du papier en texte plein : en gris (--tx2) sur la ligne choisie, elle tombait à 4.46 la nuit. */
+.ana .rf-pill.papier{color:var(--tx)}
 .ent,.ana{grid-template-columns:1.6rem 5.2rem minmax(0,1fr) minmax(0,1.1fr) minmax(0,1fr) minmax(0,1fr) 4.4rem 5.4rem 6.4rem}
 .ana .nb{font-variant-numeric:tabular-nums;text-align:right}
 .ent .nb{text-align:right}
@@ -144,7 +146,7 @@ button.danger{border-color:rgba(248,113,113,.45);color:var(--tx-err2)}
 .vig img{width:100%;height:100%;object-fit:cover;display:block}
 .vig button{position:absolute;top:.15rem;right:.15rem;padding:0 .3rem;font-size:.7rem;line-height:1.3;background:var(--f-page);color:var(--tx);border-color:var(--v16)}
 .etape{border:1px solid var(--v08);border-radius:10px;padding:.5rem .65rem;background:var(--v03)}
-.etape h3{margin:0 0 .15rem;font-size:.74rem;color:var(--or-texte,var(--or));font-weight:700}
+.etape h3{margin:0 0 .15rem;font-size:.74rem;color:var(--tx-or);font-weight:700}
 .etape p{margin:0;font-size:.79rem;line-height:1.45}
 .estim{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;border-radius:10px;padding:.55rem .7rem;
   background:rgba(var(--or-rgb),.12);border:1px solid rgba(var(--or-rgb),.35)}
@@ -500,7 +502,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<span class="cel' + (a.produit ? '' : ' prov') + '" title="' + esc(nomProduit(a)) + '">' + esc(nomProduit(a)) + (a.produit ? '' : ' <span class="gris">${T("(à créer)")}</span>') + '</span>'
       + '<span class="cel rem rq" title="' + esc(a.remarque) + '">' + esc(a.remarque || '') + '</span>'
       + '<span class="nb" title="${T("Étiquettes déjà imprimées")}">' + (a.imprime || '—') + '</span>'
-      + '<span class="rf-pill" title="' + esc(f.papier || '') + '">' + (a.fond === 'pale' ? '${T("Pâle")}' : '${T("Foncé")}') + '</span>'
+      + '<span class="rf-pill papier" title="' + esc(f.papier || '') + '">' + (a.fond === 'pale' ? '${T("Pâle")}' : '${T("Foncé")}') + '</span>'
       + '<span class="rf-pill ' + (conf ? 'vert' : 'ambre') + '">' + (conf ? '${T("Confirmée")}' : '${T("À confirmer")}') + '</span>'
       + '</div>';
   }
