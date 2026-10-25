@@ -56,6 +56,7 @@ module.exports = {
   'Photo en grand': 'Photo, full size',
   'Affichage client': 'Customer display',
   'Encan en direct': 'Live auction',
+  'Rapports d’encan': 'Auction reports',
   'Écran de l’encan': 'Auction screen',
   'Notes des mises à jour': 'Release notes',
 

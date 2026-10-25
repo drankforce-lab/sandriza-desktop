@@ -112,10 +112,6 @@ button.danger{border-color:rgba(248,113,113,.45);color:var(--tx-err2)}
 .ana .nb{font-variant-numeric:tabular-nums;text-align:right}
 .ent .nb{text-align:right}
 /* ── L HISTORIQUE ──────────────────────────────────────────────────────── */
-.compteurs{display:flex;gap:.7rem;flex-wrap:wrap;margin-bottom:.7rem}
-.compteur{border:1px solid var(--v10);border-radius:12px;padding:.5rem .8rem;background:var(--v03);min-width:10rem}
-.compteur b{display:block;font-size:1.35rem;font-variant-numeric:tabular-nums}
-.compteur span{font-size:.72rem;color:var(--tx2)}
 .imp{border-top:1px solid var(--v08);padding:.5rem .3rem}
 .imp .t{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;font-size:.82rem}
 .imp .t strong{font-variant-numeric:tabular-nums}
@@ -280,7 +276,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   /* ── Les libellés venus du site (on AFFICHE la langue du poste, on ENVOIE la clé) ── */
   function nomFibre(k){ var L = (D && D.fibres) || []; for (var i = 0; i < L.length; i++) if (L[i].cle === k) return EN ? L[i].en : L[i].fr; return k || ''; }
-  function nomPays(k){ var L = (D && D.pays) || []; for (var i = 0; i < L.length; i++) if (L[i].cle === k) return EN ? L[i].en.replace('Made in ', '') : L[i].nom; return k || ''; }
+  function nomPays(k){ var L = (D && D.pays) || []; for (var i = 0; i < L.length; i++) if (L[i].cle === k) return EN ? (L[i].nomEn || L[i].nom) : L[i].nom; return k || ''; }
   function soin(k){ var L = (D && D.entretien) || []; for (var i = 0; i < L.length; i++) if (L[i].cle === k) return L[i]; return null; }
   function analyse(id){ var L = (D && D.analyses) || []; for (var i = 0; i < L.length; i++) if (L[i].id === id) return L[i]; return null; }
   function fond(k){ var L = (D && D.fonds) || []; for (var i = 0; i < L.length; i++) if (L[i].cle === k) return L[i]; return L[0] || { cle: 'fonce', fond: '#1C1C1E', encre: '#FFFFFF', miroir: false }; }
@@ -312,6 +308,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return Promise.all(att);
   }
   /* La police de l étiquette : celle de la fenêtre (Segoe UI sur Windows), lue au rendu. */
+  /* La police du petit logo : un NOM DE POLICE, pas un texte (rien à traduire). */
+  var SZ_DONNEES = { serif: 'Georgia,"Times New Roman",serif' };
   var POLICE = (window.getComputedStyle && document.body && getComputedStyle(document.body).fontFamily) || 'sans-serif';
   function ajuster(ctx, txt, poids, taille, max){
     ctx.font = poids + ' ' + taille + 'px ' + POLICE;
@@ -400,14 +398,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     ctx.fillText(e.pays, (w - wp) / 2, yy + 0.8 * fsP * lhP);
     var bl2 = yy + 1.8 * fsP * lhP;
     var fL = fsP * 1.2, fI = fsP;
-    ctx.font = '700 ' + fL + 'px Georgia,"Times New Roman",serif'; var wS = ctx.measureText('S').width;
-    ctx.font = 'italic 700 ' + fL + 'px Georgia,"Times New Roman",serif'; var wZ = ctx.measureText('z').width;
+    ctx.font = '700 ' + fL + 'px ' + SZ_DONNEES.serif; var wS = ctx.measureText('S').width;
+    ctx.font = 'italic 700 ' + fL + 'px ' + SZ_DONNEES.serif; var wZ = ctx.measureText('z').width;
     ctx.font = '600 ' + fI + 'px ' + POLICE; var wId = ctx.measureText(e.identite).width;
     var espL = 6 * u, totL = wS + wZ + espL + wId;
     if (totL > dispo) { var k3 = dispo / totL; fL *= k3; fI *= k3; wS *= k3; wZ *= k3; espL *= k3; wId *= k3; totL = dispo; }
     var lx = (w - totL) / 2;
-    ctx.font = '700 ' + fL + 'px Georgia,"Times New Roman",serif'; ctx.fillStyle = encre; ctx.fillText('S', lx, bl2);
-    ctx.font = 'italic 700 ' + fL + 'px Georgia,"Times New Roman",serif'; ctx.fillStyle = '#C49A6C'; ctx.fillText('z', lx + wS, bl2);
+    ctx.font = '700 ' + fL + 'px ' + SZ_DONNEES.serif; ctx.fillStyle = encre; ctx.fillText('S', lx, bl2);
+    ctx.font = 'italic 700 ' + fL + 'px ' + SZ_DONNEES.serif; ctx.fillStyle = '#C49A6C'; ctx.fillText('z', lx + wS, bl2);
     ctx.font = '600 ' + fI + 'px ' + POLICE; ctx.fillStyle = encre; ctx.fillText(e.identite, lx + wS + wZ + espL, bl2);
     ctx.restore();
   }
@@ -685,7 +683,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     h += '<div class="champ" style="margin-top:.45rem"><label for="f-remarque">${T("Remarque")}</label><textarea id="f-remarque" rows="2" maxlength="400" placeholder="${T("Lot, fournisseur, fiche reçue, essai de lavage…")}">' + esc(f.remarque) + '</textarea></div>'
       + '<div class="deux" style="margin-top:.45rem"><div class="champ"><label for="f-pays">${T("Pays de fabrication")}</label><select id="f-pays">'
-      + (D.pays || []).map(function(p){ return '<option value="' + esc(p.cle) + '"' + (f.pays === p.cle ? ' selected' : '') + '>' + esc(EN ? p.en.replace('Made in ', '') : p.nom) + '</option>'; }).join('')
+      + (D.pays || []).map(function(p){ return '<option value="' + esc(p.cle) + '"' + (f.pays === p.cle ? ' selected' : '') + '>' + esc(EN ? (p.nomEn || p.nom) : p.nom) + '</option>'; }).join('')
       + '</select></div><div class="champ"><span class="lbl" id="f-fond-l">${T("Couleur du vêtement")}</span><div class="puces" role="group" aria-labelledby="f-fond-l">'
       + '<button type="button" class="puce" data-fond="fonce" aria-pressed="' + (f.fond === 'fonce') + '">${T("Foncé")}</button>'
       + '<button type="button" class="puce" data-fond="pale" aria-pressed="' + (f.fond === 'pale') + '">${T("Pâle")}</button></div></div></div>'
@@ -986,15 +984,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var HPG = 0;
   function historiqueVue(){
     var H = D.historique || { total: 0, ceMois: 0, planches: 0, liste: [] };
-    var h = '<div class="compteurs">'
-      + '<div class="compteur"><b>' + H.total + '</b><span>${T("étiquettes imprimées en tout")}</span></div>'
-      + '<div class="compteur"><b>' + H.ceMois + '</b><span>${T("ce mois-ci")}</span></div>'
-      + '<div class="compteur"><b>' + H.planches + '</b><span>${T("planches exportées")}</span></div></div>';
+    /* ⚠ PAS DE CASES DE CHIFFRES (sa règle du 2026-10-16 : « retirer ces cellules partout, sauf dans le tableau de
+       bord », rapports compris) : les totaux sont une ligne de texte, dans le titre de la carte. */
+    var h = '';
+    var totaux = H.total + ' ${T("étiquettes imprimées en tout")} · ' + H.ceMois + ' ${T("ce mois-ci")} · ' + H.planches + ' ${T("planches exportées")}';
     if (!H.liste.length) return h + '<div class="cx-carte appel"><strong>${T("Rien d’imprimé pour l’instant")}</strong><div class="aide">${T("Chaque planche exportée s’inscrit ici, avec le détail par produit et par taille.")}</div></div>';
     var parPage = Math.max(3, Math.floor(((corps.clientHeight || 640) - 170) / 120));
     var nbp = Math.max(1, Math.ceil(H.liste.length / parPage));
     if (HPG >= nbp) HPG = nbp - 1; if (HPG < 0) HPG = 0;
-    h += '<div class="cx-carte"><h2>${T("Historique d’impression")} <span class="cx-sub">' + H.liste.length + ' ${T("planche(s)")}</span>'
+    h += '<div class="cx-carte"><h2>${T("Historique d’impression")} <span class="cx-sub">' + esc(totaux) + '</span>'
       + (nbp > 1 ? '<span class="pages"><button type="button" class="mini pgf" data-hpg="-1" aria-label="${T("Page précédente")}"' + (HPG <= 0 ? ' disabled' : '') + '>‹</button><span>${T("Page")} ' + (HPG + 1) + ' / ' + nbp + '</span><button type="button" class="mini pgf" data-hpg="1" aria-label="${T("Page suivante")}"' + (HPG >= nbp - 1 ? ' disabled' : '') + '>›</button></span>' : '') + '</h2>';
     H.liste.slice(HPG * parPage, (HPG + 1) * parPage).forEach(function(x){
       var pap = [];

@@ -35,8 +35,10 @@ class VentesEncan {
     g.vente = { etat: 'creation' };   // posé AVANT l attente : un second observer() ne crée pas de doublon
     let r = null;
     try {
+      /* (2026-10-25, lot 4) La séance et l'encan voyagent avec la vente : le rapport de séance relit l'ARGENT
+         au serveur (un paiement arrive souvent après le direct) et le rattache à son encan. */
       r = await this.appeler('encan:vendre', { article: article || {}, montant: g.montant, pseudo: g.pseudo, essai: !!m.essai,
-        delaiGagne: m.reglages && m.reglages.delaiGagne });
+        delaiGagne: m.reglages && m.reglages.delaiGagne, seance: (m.seance && m.seance.id) || '', ec: g.ec || '' });
     } catch (e) { r = null; }
     const issue = g.vente.issue;   // remis en vente / annulé / GAGNÉ pendant la création : appliqué maintenant
     if (!r || !r.ok) {

@@ -85,8 +85,61 @@ class Encan {
     /* (2026-10-20) LA MODÉRATION DE L'ENCAN : un pseudo bloqué n'enchérit plus de la séance. ⚠ Ce n'est pas la
        modération de TikTok (supprimer un commentaire, bloquer dans le direct) : celle-là se fait dans TikTok. */
     this.bloques = new Set();
+    /* (2026-10-25, lot 4) LA SÉANCE — un direct, du premier encan lancé jusqu'à « Nouvelle séance » (ou 3 h
+       sans encan). Elle compte ce que seule la console voit (articles présentés, offres, commentaires, remises
+       en vente, pseudos) ; l'ARGENT, lui, se lit au serveur (les ventes portent l'identifiant de la séance et
+       la clé de leur encan), parce qu'un paiement arrive souvent après la fin du direct.
+       `seanceSale` dit au processus principal qu'il y a du neuf à enregistrer (src/main.js). */
+    this.seance = this._nouvelleSeance();
+    this.seanceSale = false;
     this._remettreAZero(null);
     this.phase = 'garde';
+  }
+
+  _nouvelleSeance() {
+    const t = this.maintenant();
+    return { id: 'se_' + t.toString(36) + Math.random().toString(36).slice(2, 6), debut: 0, fin: 0, essai: null,
+      commentaires: 0, parSource: { direct: 0, manuel: 0, essai: 0 }, offresRetenues: 0, offresRefusees: 0,
+      gagneEcrits: 0, pseudos: [], bloques: [], encans: [] };
+  }
+  /* « Nouvelle séance » (la console) : la séance en cours est close telle quelle — déjà enregistrée — et une
+     neuve commence au prochain encan lancé. Refusé pendant un encan : on ne coupe pas un direct en deux. */
+  nouvelleSeance() {
+    if (this.phase === 'encours' || this.phase === 'pause') return { ok: false, motif: 'encan_en_cours' };
+    if (this.seance.debut) { this.seance.fin = this.seance.fin || this.maintenant(); this.seanceSale = true; }
+    this._seanceClose = this.seance;
+    this.seance = this._nouvelleSeance();
+    this._avertir();
+    return { ok: true };
+  }
+  // La séance À ENREGISTRER : la courante, et une séance tout juste close qui n'est pas encore partie.
+  seancesAEcrire() {
+    const L = [];
+    if (this._seanceClose) { L.push(this.instantaneSeance(this._seanceClose)); }
+    if (this.seance.debut) L.push(this.instantaneSeance(this.seance));
+    return L;
+  }
+  seancesEcrites() { this._seanceClose = null; this.seanceSale = false; }
+  instantaneSeance(s) {
+    const x = s || this.seance;
+    return { id: x.id, debut: x.debut, fin: x.fin, essai: !!x.essai, commentaires: x.commentaires, parSource: { ...x.parSource },
+      offresRetenues: x.offresRetenues, offresRefusees: x.offresRefusees, gagneEcrits: x.gagneEcrits,
+      pseudos: x.pseudos.length, bloques: x.bloques.slice(0, 100),
+      encans: x.encans.slice(-300).map((e) => ({ ...e })) };
+  }
+  _seanceToucher() { const t = this.maintenant(); if (this.seance.debut) this.seance.fin = t; this.seanceSale = true; }
+  // L'encan de la séance qu'un gagnant concerne (sa clé voyage sur l'objet gagnant : `ec`).
+  _seanceEncan(cle) {
+    if (!cle) return null;
+    for (const s of [this.seance, this._seanceClose]) {
+      if (!s) continue;
+      for (let i = s.encans.length - 1; i >= 0; i--) if (s.encans[i].cle === cle) return s.encans[i];
+    }
+    return null;
+  }
+  _seanceIssue(g, issue) {
+    const e = this._seanceEncan(g && g.ec);
+    if (e) { e.issue = issue; e.issueLe = this.maintenant(); this._seanceToucher(); }
   }
 
   _remettreAZero(article) {
@@ -156,6 +209,18 @@ class Encan {
   demarrer() {
     if (this.phase !== 'pret') return { ok: false, motif: this.article ? 'deja_lance' : 'article_requis' };
     const t = this.maintenant();
+    // 3 h sans encan : c'est un autre direct — la séance précédente se clôt d'elle-même.
+    if (this.seance.debut && t - (this.seance.fin || this.seance.debut) > 3 * 3600 * 1000) {
+      this._seanceClose = this.seance; this.seance = this._nouvelleSeance();
+    }
+    if (!this.seance.debut) this.seance.debut = t;
+    this.seance.essai = (this.seance.essai === null) ? this.essai : (this.seance.essai && this.essai);
+    const a = this.article || {};
+    this._ec = 'ec' + t.toString(36) + Math.random().toString(36).slice(2, 5);
+    this.seance.encans.push({ cle: this._ec, nom: String(a.nom || ''), variante: String(a.variante || ''), produitId: String(a.produitId || ''),
+      depart: this.prix, debut: t, fin: 0, offres: 0, relances: 0, adjuge: 0, pseudo: '', issue: 'en_cours', essai: !!this.essai });
+    if (this.seance.encans.length > 300) this.seance.encans.shift();
+    this._seanceToucher();
     this.phase = 'encours';
     this.dureeTotale = this.reglages.duree * 1000;
     this.finA = t + this.dureeTotale;
@@ -189,7 +254,11 @@ class Encan {
   remettre() {
     if (!this.article) return { ok: false, motif: 'article_requis' };
     const a = this.article;
-    if (this.phase === 'adjuge' && this.gagnant) this._issue(this.gagnant, 'annule');
+    if (this.phase === 'adjuge' && this.gagnant) { this._issue(this.gagnant, 'annule'); this._seanceIssue(this.gagnant, 'annule'); }
+    else if (this.phase === 'encours' || this.phase === 'pause') {
+      const e = this._seanceEncan(this._ec);
+      if (e && e.issue === 'en_cours') { e.fin = this.maintenant(); e.offres = this.offres.length; e.relances = this.relances; e.issue = 'annule'; this._seanceToucher(); }
+    }
     this._remettreAZero(a);
     this._avertir();
     return { ok: true };
@@ -218,7 +287,7 @@ class Encan {
   remettreEnVente() {
     if (this.phase !== 'adjuge' && this.phase !== 'expire') return { ok: false, motif: 'pas_adjuge' };
     const a = this.article;
-    if (this.gagnant) this._issue(this.gagnant, 'remis');
+    if (this.gagnant) { this._issue(this.gagnant, 'remis'); this._seanceIssue(this.gagnant, 'remis'); }
     this.historique.unshift({ article: a, gagnant: this.gagnant, issue: 'remis', le: this.maintenant() });
     this._remettreAZero(a);
     this._avertir();
@@ -239,6 +308,7 @@ class Encan {
     const a = this.attentes.splice(i, 1)[0];
     a.gagnant.confirmeLe = this.maintenant();
     this._issue(a.gagnant, 'gagne');
+    this._seanceIssue(a.gagnant, 'vendu');
     this.historique.unshift({ article: a.article, gagnant: a.gagnant, issue: 'vendu', le: this.maintenant() });
     this._avertir();
     return { ok: true };
@@ -253,6 +323,7 @@ class Encan {
   }
   _remettreEnFile(a) {
     this._issue(a.gagnant, 'remis');
+    this._seanceIssue(a.gagnant, 'remis');
     this.historique.unshift({ article: a.article, gagnant: a.gagnant, issue: 'remis', le: this.maintenant() });
     this.file.unshift({ ...a.article, cle: 'f' + this.maintenant().toString(36) + Math.random().toString(36).slice(2, 6) });
   }
@@ -288,6 +359,21 @@ class Encan {
       }
     }
     this._noter(pseudo, texte, verdict, verdict === 'retenue' ? this.offres[0].id : '', source);
+    // La séance compte les commentaires de son direct (pas ceux d'avant le premier encan).
+    if (this.seance.debut) {
+      const s = this.seance;
+      s.commentaires++;
+      const src = source === 'direct' || source === 'manuel' || source === 'essai' ? source : 'manuel';
+      s.parSource[src] = (s.parSource[src] || 0) + 1;
+      if (verdict === 'retenue') s.offresRetenues++;
+      else if (verdict === 'trop_basse' || verdict === 'sous_depart' || verdict === 'bloque' || verdict === 'fermee' || verdict === 'pause') s.offresRefusees++;
+      else if (verdict === 'gagne_ecrit') s.gagneEcrits++;
+      const p = pseudo.toLowerCase();
+      if (s.pseudos.length < 5000 && s.pseudos.indexOf(p) < 0) s.pseudos.push(p);
+      const e = this._seanceEncan(this._ec);
+      if (e && verdict === 'retenue') e.offres = this.offres.length;
+      this._seanceToucher();
+    }
     this._avertir();
     return { ok: true, verdict, montant };
   }
@@ -314,6 +400,7 @@ class Encan {
     const p = _pseudo(pseudoBrut);
     if (!p) return { ok: false, motif: 'pseudo_requis' };
     this.bloques.add(p.toLowerCase());
+    if (this.seance.bloques.indexOf(p) < 0 && this.seance.bloques.length < 100) { this.seance.bloques.push(p); this._seanceToucher(); }
     if (this.phase === 'encours' || this.phase === 'pause') {
       const avant = this.offres.length;
       this.offres = this.offres.filter((o) => o.pseudo.toLowerCase() !== p.toLowerCase());
@@ -342,11 +429,19 @@ class Encan {
 
   _declarer() {
     const t = this.maintenant();
-    this.gagnant = { pseudo: this.meneur, montant: this.prix, le: t, limite: t + this.reglages.delaiGagne * 1000 };
+    this.gagnant = { pseudo: this.meneur, montant: this.prix, le: t, limite: t + this.reglages.delaiGagne * 1000, ec: this._ec || '' };
+    const e = this._seanceEncan(this._ec);
+    if (e) { e.fin = t; e.adjuge = this.prix; e.pseudo = this.meneur; e.offres = this.offres.length; e.relances = this.relances; e.issue = 'adjuge'; this._seanceToucher(); }
     this.phase = 'adjuge';
     this._avertir();
   }
   _fin(issue) {
+    if (this.gagnant) this._seanceIssue(this.gagnant, issue);
+    else {
+      // Annulé avant toute adjudication (ou sans offre) : l'encan de la séance le dit.
+      const e = this._seanceEncan(this._ec);
+      if (e && e.issue === 'en_cours') { e.fin = this.maintenant(); e.offres = this.offres.length; e.relances = this.relances; e.issue = 'annule'; this._seanceToucher(); }
+    }
     this.historique.unshift({ article: this.article, gagnant: this.gagnant, issue, le: this.maintenant() });
     if (this.historique.length > 200) this.historique.length = 200;
     this.phase = issue === 'vendu' ? 'vendu' : 'annule';
@@ -362,6 +457,7 @@ class Encan {
         this.finA = t + this.reglages.relanceA * 1000;
         this.dureeTotale = Math.max(this.dureeTotale, this.reglages.relanceA * 1000);
         this.relances++;
+        const e = this._seanceEncan(this._ec); if (e) e.relances = this.relances;
         this._avertir();
       } else if (this.offres.length && r <= 0) {
         this._declarer();
@@ -396,6 +492,8 @@ class Encan {
       attentes: this.attentes.map((a) => ({ cle: a.cle, article: a.article, pseudo: a.gagnant.pseudo, montant: a.gagnant.montant, restantMs: Math.max(0, a.gagnant.limite - t),
         vente: a.gagnant.vente || null })),
       historique: this.historique.slice(0, 20),
+      seance: { id: this.seance.id, debut: this.seance.debut, fin: this.seance.fin, encans: this.seance.encans.length,
+        adjuges: this.seance.encans.filter((e) => e.adjuge > 0).length, commentaires: this.seance.commentaires },
     };
   }
 }

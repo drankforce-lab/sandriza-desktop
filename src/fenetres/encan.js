@@ -32,6 +32,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.45 system-ui,-apple-sy
 .tete .gauche{display:flex;align-items:center;gap:.6rem}
 .tete .droite{margin-left:auto;display:flex;align-items:center;flex-wrap:wrap;gap:.5rem}
 .phase{font-size:.74rem;font-weight:700;border-radius:99px;padding:.12rem .65rem;border:1px solid var(--v16);color:var(--tx2)}
+.seance{font-size:.74rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .phase.vif{border-color:var(--or);color:var(--tx-or)}
 .badge{font-size:.68rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;border-radius:6px;padding:.12rem .45rem;
   border:1px dashed var(--or);color:var(--tx-or)}
@@ -161,8 +162,10 @@ function pageEncan() {
 <title>${T("Encan en direct")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete">
-  <div class="gauche"><h1>${T("Encan en direct")}</h1><span class="phase" id="phase"></span><span class="badge" id="badge-essai">${T("Mode essai")}</span></div>
+  <div class="gauche"><h1>${T("Encan en direct")}</h1><span class="phase" id="phase"></span><span class="badge" id="badge-essai">${T("Mode essai")}</span><span class="seance" id="seance"></span></div>
   <div class="droite">
+    <button id="rapports" title="${T("Les rapports de séance : déroulement, argent, acheteuses, comparaison")}">${T("Rapports")}</button>
+    <button id="nouvelle-seance" title="${T("Clore la séance en cours ; la suivante commence au prochain encan lancé")}">${T("Nouvelle séance")}</button>
     <label class="bascule"><input type="checkbox" id="essai" checked>${T("Mode essai")}</label>
     <button id="ecran">${T("Écran filmé")}</button>
     <button id="ecran-plein">${T("Plein écran sur l’autre moniteur")}</button>
@@ -363,6 +366,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var enJeu = E.phase === 'encours' || E.phase === 'pause';
     var a = E.article, aucune = !E.nbOffres;
     $('phase').textContent = PHASES[E.phase] || E.phase;
+    /* (2026-10-25, lot 4) La séance du direct : depuis quand, combien d encans, combien d adjugés. */
+    var se = E.seance || null, elSe = $('seance');
+    if (elSe) {
+      if (se && se.debut) {
+        var mn = Math.max(0, Math.round(((se.fin || se.debut) - se.debut) / 60000));
+        elSe.textContent = '${T("Séance :")} ' + (mn >= 60 ? Math.floor(mn / 60) + ' h ' + ('0' + (mn % 60)).slice(-2) : mn + ' min') + ' · '
+          + se.encans + ' ' + (se.encans > 1 ? '${T("encans")}' : '${T("encan")}') + ' · ' + se.adjuges + ' ' + (se.adjuges > 1 ? '${T("adjugés")}' : '${T("adjugé")}');
+      } else elSe.textContent = '${T("Séance : commence au premier encan lancé")}';
+    }
+    var bNs = $('nouvelle-seance'); if (bNs) bNs.disabled = !(se && se.debut) || enJeu;
     $('phase').classList.toggle('vif', enJeu || E.phase === 'adjuge');
     $('essai').checked = !!E.essai;
     $('badge-essai').hidden = !E.essai;
@@ -586,6 +599,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   };
   $('essai').onchange = function(){ geste('modeEssai', [this.checked]); };
   $('ecran').onclick = function(){ if (EN) EN.ecran({ pleinEcran: false }); };
+  $('rapports').onclick = function(){
+    var P0 = window.szPont;
+    if (P0 && P0.ouvrirModule) { P0.ouvrirModule('encan-rapports'); szDire('${T("Ouverture des rapports d’encan…")}'); }
+  };
+  $('nouvelle-seance').onclick = function(){
+    szConfirmer({ titre: '${T("Nouvelle séance")}',
+      texte: '${T("La séance en cours est close et gardée dans les rapports. La suivante commencera au prochain encan lancé. Les ventes en attente de paiement restent suivies.")}',
+      oui: '${T("Clore la séance")}' }).then(function(ok){
+      if (ok) geste('nouvelleSeance').then(function(r){ if (r && r.ok) szDire('${T("Séance close : elle est dans les rapports.")}', 'bon'); });
+    });
+  };
   $('ecran-plein').onclick = function(){ if (EN) EN.ecran({ pleinEcran: true }).then(function(r){ if (r && r.motif === 'un_seul_ecran') szDire('${T("Un seul moniteur branché : l’écran s’ouvre en fenêtre.")}', 'att'); }); };
   $('l-file').onclick = function(ev){ var b = ev.target.closest('[data-retirer]'); if (b) geste('retirerDeFile', [b.getAttribute('data-retirer')]); };
   $('l-att').onclick = function(ev){

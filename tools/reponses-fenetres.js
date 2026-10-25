@@ -3907,7 +3907,7 @@ const JEU = {
       { cle: 'sechage', fr: 'Séchage', en: 'Drying' }, { cle: 'repassage', fr: 'Repassage', en: 'Ironing' }, { cle: 'sec', fr: 'Nettoyage à sec', en: 'Dry cleaning' }];
     var FIB = [['coton', 'Coton', 'Cotton'], ['lin', 'Lin', 'Linen'], ['laine', 'Laine', 'Wool'], ['soie', 'Soie', 'Silk'], ['viscose', 'Viscose', 'Viscose'],
       ['polyester', 'Polyester', 'Polyester'], ['nylon', 'Nylon', 'Nylon'], ['elasthanne', 'Élasthanne', 'Spandex']].map(function(f){ return { cle: f[0], fr: f[1], en: f[2] }; });
-    var PAYS = [{ cle: 'CN', nom: 'Chine', fr: 'Fait en Chine', en: 'Made in China' }, { cle: 'VN', nom: 'Vietnam', fr: 'Fait au Vietnam', en: 'Made in Vietnam' }];
+    var PAYS = [{ cle: 'CN', nom: 'Chine', nomEn: 'China', fr: 'Fait en Chine', en: 'Made in China' }, { cle: 'VN', nom: 'Vietnam', nomEn: 'Vietnam', fr: 'Fait au Vietnam', en: 'Made in Vietnam' }];
     var FONDS = [{ cle: 'fonce', nom: 'Vêtement foncé', papier: 'Papier opaque (foncé)', miroir: false, fond: '#1C1C1E', encre: '#FFFFFF' },
       { cle: 'pale', nom: 'Vêtement pâle', papier: 'Papier transparent (pâle)', miroir: true, fond: '#FFFFFF', encre: '#111111' }];
     var LECT = { morphologie: 'Fibres plates en ruban, tordues à intervalles irréguliers ; aucune écaille.', parois: 'Parois épaisses, lumen affaissé ; 12 à 20 µm.',
@@ -3971,9 +3971,45 @@ const JEU = {
       cas('analyse ouverte (lecture de l’IA, composition, entretien)', 'modifier', GARNI, ['id="f-utiliser"', 'data-soin="lav_froid"', 'id="f-pct-0"', 'id="cv-form"']),
       cas('planche (deux papiers, CA manquant)', 'planche', GARNI, ['id="pl-export"', 'id="cv-plan"', 'data-vue="1"', 'id="pl-fisc"']),
       cas('planche avec le numéro CA', 'planche', donnees(LISTE, { ca: { numero: '12345', manquant: false, gabarit: 'xxxxxxx' } }), ['id="pl-export"']),
-      cas('historique d’impression', 'historique', GARNI, ['class="compteur"', 'class="imp"']),
+      cas('historique d’impression', 'historique', GARNI, ['étiquettes imprimées en tout', 'class="imp"']),
       cas('lecture seule', '', donnees(LISTE, { peutAjouter: false, peutModifier: false, peutSupprimer: false }), ['class="avis"']),
       { nom: 'module des analyses absent', id: '', reponses: { 'fibres:donnees': { ok: false, motif: 'indisponible' }, identite: IDENTITE } },
+    ];
+  })(),
+
+  // ── RAPPORTS D'ENCAN (2026-10-25, lot 4) ───────────────────────────────────
+  // ⚠ Forme rendue par encanrapports:donnees (assets/js/pont.js) = EncanRapports.calculer (assets/js/encanrapports.js).
+  'encan-rapports.js': (function(){
+    var T0 = Date.UTC(2026, 9, 24, 23, 0, 0), H = 3600000;
+    var rap = function(id, debut, o){
+      return Object.assign({ id: id, essai: false, debut: debut, fin: debut + 1.5 * H,
+        deroulement: { debut: debut, fin: debut + 1.5 * H, dureeMin: 90, articles: 14, articlesDistincts: 12, adjuges: 11, sansOffre: 2, remisEnVente: 1,
+          offres: 63, offresRefusees: 18, commentaires: 1240, parMinute: 13.8, parSource: { direct: 1210, manuel: 30, essai: 0 }, gagneEcrits: 3,
+          pseudos: 214, bloques: ['@troll_qc'], offresParArticle: 4.5, hausseMoyenne: 46.2 },
+        argent: { ventes: 11, payees: 8, attente: 2, expirees: 1, annulees: 0, adjugeTotal: 412, adjugePaye: 318, encaisse: 452.37, livraison: 96,
+          enAttente: 70, tauxPaiement: 88.9, panierMoyen: 39.75, delaiPaiementMin: 42 },
+        acheteuses: { gagnantes: 9, nouvelles: 6, habituees: 3, jamaisPaye: ['@cleo.m'],
+          liste: [{ pseudo: '@dina', gagnes: 3, payes: 3, montant: 121, attente: 0, perdus: 0, habituee: true },
+            { pseudo: '@ana_b', gagnes: 2, payes: 2, montant: 64, attente: 0, perdus: 0, habituee: false },
+            { pseudo: '@cleo.m', gagnes: 1, payes: 0, montant: 0, attente: 0, perdus: 1, habituee: false }] },
+        detail: [
+          { nom: 'Robe ZENXAS', variante: 'M · Noir', depart: 20, adjuge: 34, pseudo: '@dina', offres: 7, relances: 0, issue: 'vendu', debut: debut, vente: { statut: 'payee', total: 49.9, commande: 'CMD-0002-22190' } },
+          { nom: 'Blouse Lina', variante: 'S', depart: 15, adjuge: 22, pseudo: '@ana_b', offres: 4, relances: 1, issue: 'adjuge', debut: debut, vente: { statut: 'attente', total: 0, commande: '' } },
+          { nom: 'Gilet bleu', variante: 'L', depart: 30, adjuge: 0, pseudo: '', offres: 0, relances: 3, issue: 'annule', debut: debut, vente: null },
+          { nom: 'Jupe plissée', variante: '', depart: 18, adjuge: 25, pseudo: '@cleo.m', offres: 5, relances: 0, issue: 'remis', debut: debut, vente: { statut: 'expiree', total: 0, commande: '' } },
+        ] }, o || {});
+    };
+    var LISTE = [rap('se_b', T0), rap('se_a', T0 - 7 * 24 * H, { essai: true }), rap('se_c', T0 - 30 * 24 * H)];
+    var donnees = function(seances){ return { ok: true, seances: seances, horsSeance: 2, csv: '﻿Date;Début\r\n', colonnes: ['Date', 'Début'] }; };
+    var rep = function(d){ return { 'encanrapports:donnees': d, identite: IDENTITE }; };
+    var cas = function(nom, id, d, exige){ return { nom: nom, id: id, reponses: rep(d), exige: exige }; };
+    return [
+      cas('séances (déroulement)', '', donnees(LISTE), ['data-se="se_b"', 'data-onglet="argent"', 'id="r-csv"', 'Offres retenues']),
+      cas('volet argent', 'argent', donnees(LISTE), ['Encaissé (livraison et taxes comprises)']),
+      cas('volet acheteuses', 'acheteuses', donnees(LISTE), ['@dina', 'habituée']),
+      cas('volet articles', 'articles', donnees(LISTE), ['Robe ZENXAS', 'Départ › adjugé']),
+      cas('aucune séance', '', donnees([]), ['Aucune séance pour l’instant']),
+      { nom: 'droit refusé', id: '', reponses: { 'encanrapports:donnees': { ok: false, motif: 'droit' }, identite: IDENTITE } },
     ];
   })(),
 

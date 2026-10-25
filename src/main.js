@@ -2475,6 +2475,8 @@ const OPS_PONT = new Set([
   // (`Admin._posVente`), le pont ne porte que des valeurs.
   // L'encan en direct, la vente (2026-10-23) : appelées par le PROCESSUS PRINCIPAL (src/encan-vente.js), jamais par une page.
   'encan:vendre', 'encan:gagne', 'encan:annuler', 'encan:etat',
+  // (2026-10-25, lot 4) La séance enregistrée par le processus principal, et la fenêtre des rapports.
+  'encan:seance', 'encanrapports:donnees',
   'caisse:contexte', 'caisse:chercher', 'caisse:article',
   'caisse:totaux', 'caisse:client', 'caisse:vendre',
   /* Verifier a la main un paiement par LIEN. ⚠ Ce recours n existait que dans
@@ -3761,6 +3763,8 @@ const LIMITES_PONT = {
      le modele (jusqu a 90 s chez le relais) ; une impression note chaque analyse puis l historique. */
   'fibres:donnees': 15000, 'fibres:produits': 15000, 'fibres:apercu': 15000, 'fibres:planche': 15000,
   'fibres:analyser': 150000, 'fibres:ecrire': 30000, 'fibres:supprimer': 30000, 'fibres:imprimee': 60000,
+  /* Les rapports d encan : la séance part au nuage ; la lecture des rapports relit les ventes au serveur. */
+  'encan:seance': 30000, 'encanrapports:donnees': 45000,
   /* Les rappels se lisent en local ; les ecritures passent par le nuage. */
   'rappels:donnees': 15000, 'rappels:etat': 15000,
   'rappels:ecrire': 30000, 'rappels:modele': 30000, 'rappels:fait': 30000,
@@ -4240,7 +4244,7 @@ const { VentesEncan } = require('./encan-vente');
 const { DirectTikTok } = require('./encan-direct');
 const ENCAN_GESTES = new Set(['regler', 'modeEssai', 'charger', 'enFile', 'retirerDeFile', 'suivant', 'demarrer', 'pause',
   'reprendre', 'ajouterTemps', 'remettre', 'adjuger', 'annuler', 'confirmerGagne', 'remettreEnVente', 'garde', 'commentaire',
-  'confirmerAttente', 'remettreAttente', 'annulerOffre', 'bloquer', 'debloquer']);
+  'confirmerAttente', 'remettreAttente', 'annulerOffre', 'bloquer', 'debloquer', 'nouvelleSeance']);
 let _encan = null, _encanBattement = null, _encanDernierEnvoi = 0, _ventesEncan = null, _directEncan = null, _directAlerte = '';
 const _encanPousser = (etat) => {
   _encanDernierEnvoi = Date.now();
@@ -4262,6 +4266,19 @@ const encanMoteur = () => {
   _ventesEncan = new VentesEncan({ moteur: _encan, appeler: (op, ...args) => executerOpSite(op, args, null),
     avertir: () => _encanPousser(_encan.etat()) });
   setInterval(() => { _ventesEncan.suivre().catch(() => {}); }, 10000);
+  /* (2026-10-25, lot 4) LA SÉANCE S'ENREGISTRE AU NUAGE, toutes les 15 s quand elle a changé (et la séance tout
+     juste close, une fois) : fermer la console ou l'application ne perd pas le rapport du direct. */
+  let _seanceEnvoi = false;
+  setInterval(() => {
+    if (!_encan || !_encan.seanceSale || _seanceEnvoi) return;
+    const L = _encan.seancesAEcrire();
+    if (!L.length) { _encan.seancesEcrites(); return; }
+    _seanceEnvoi = true;
+    L.reduce((p, s) => p.then((ok) => Promise.resolve(executerOpSite('encan:seance', [s], null))
+      .then((r) => ok && !!(r && r.ok)).catch(() => false)), Promise.resolve(true))
+      .then((ok) => { if (ok) _encan.seancesEcrites(); })
+      .finally(() => { _seanceEnvoi = false; });
+  }, 15000);
   /* (2026-10-23, lot 3) LES VRAIS COMMENTAIRES : chaque commentaire du direct est remis au moteur. Si la lecture se
      COUPE ou que le direct se termine pendant un encan en cours, l'encan se met en PAUSE : le temps ne doit pas
      courir pendant que les offres ne nous parviennent plus. La console le dit ; la reprise est à la main. */
@@ -6752,6 +6769,7 @@ const { pageVehicules } = require('./fenetres/vehicules');
 const { pageRappels } = require('./fenetres/rappels');
 const { pageAtelier } = require('./fenetres/atelier');
 const { pageFibres } = require('./fenetres/fibres');
+const { pageEncanRapports } = require('./fenetres/encan-rapports');
 const { pageLiens } = require('./fenetres/liens');
 const { pageComptable } = require('./fenetres/comptable');
 const { pageInactivite } = require('./fenetres/inactivite');
@@ -6958,6 +6976,11 @@ const actionApp = (nom, arg) => {
     case 'affichage-client':
       ouvrirNative('pos-client', TF('Affichage client'), () => pageAffichage(),
         { width: 1000, height: 720, minWidth: 620, minHeight: 480 });
+      break;
+    // (2026-10-25, lot 4) Les rapports d'encan : une séance par direct, et la comparaison entre séances.
+    case 'encan-rapports':
+      ouvrirNative('encan-rapports', TF('Rapports d’encan'), () => pageEncanRapports(''),
+        { width: 1280, height: 820, minWidth: 900, minHeight: 600 });
       break;
     // (2026-10-20) L'encan en direct : la console de l'animatrice (l'écran filmé s'ouvre depuis elle).
     case 'encan':
@@ -7318,7 +7341,9 @@ const _MODULES_OUVRABLES = ['generations', 'verrous', 'journaux', 'securite', 'i
   // Configuration > NIP (2026-10-19) : ses liens (Atelier, mode usage exclusif) et le lien des anciens emplacements vers elle.
   'nips', 'atelier', 'maintenance',
   // Analyses de fibres (2026-10-25) : un rappel ou un lien peut l ouvrir ; elle-meme ouvre « impot » (le numero CA).
-  'fibres'];
+  'fibres',
+  // Les rapports d encan (2026-10-25) : la console de l encan les ouvre (bouton « Rapports »).
+  'encan-rapports'];
 ipcMain.handle('module:ouvrir', (e, nom) => {
   const n = String(nom || '').toLowerCase();
   if (_MODULES_OUVRABLES.indexOf(n) < 0) return false;

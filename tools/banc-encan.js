@@ -137,6 +137,7 @@ await adjugeSur(x);
 verif('adjugé : UNE vente demandée au site, avec article, montant, pseudo', x.appels.filter((a) => a[0] === 'encan:vendre').length === 1
   && x.appels[0][1].montant === 20 && x.appels[0][1].pseudo === '@lea' && x.appels[0][1].article.produitId === 'pA', x.appels);
 verif('…le lien est porté par la gagnante (état poussé aux fenêtres)', x.m.etat().gagnant.vente && /\/encan\//.test(x.m.etat().gagnant.vente.url), x.m.etat().gagnant);
+verif('…la vente porte sa séance et la clé de son encan (rapports)', x.appels[0][1].seance === x.m.seance.id && x.appels[0][1].ec === x.m.seance.encans[0].cle, x.appels[0][1]);
 x.ve.observer();
 verif('un second passage ne crée pas de doublon', x.appels.filter((a) => a[0] === 'encan:vendre').length === 1);
 x.m.confirmerGagne(); await pause();
@@ -248,6 +249,50 @@ ms.adjuger();
 verif('la gagnante écrit « Gagné ! » dans les commentaires : signalé', ms.commentaire('lea', 'Gagné !', 'direct').verdict === 'gagne_ecrit');
 verif('quelqu un d autre écrit « gagné » : simple commentaire', ms.commentaire('@autre', 'gagné', 'direct').verdict === 'pas_offre');
 verif('« WON » aussi reconnu', ms.commentaire('@lea', 'won', 'direct').verdict === 'gagne_ecrit');
+
+// ── LA SÉANCE (2026-10-25, lot 4 : les rapports) ──
+console.log('— La séance du direct (rapports)');
+{
+  const s = new Encan({ maintenant: horloge, reglages: { depart: 10, duree: 30, hausse: 1 }, essai: false });
+  verif('aucune séance commencée avant le premier encan', s.seance.debut === 0 && s.seancesAEcrire().length === 0);
+  s.commentaire('@avant', '12', 'direct');
+  verif('un commentaire AVANT le premier encan ne compte pas', s.seance.commentaires === 0);
+  s.charger({ nom: 'Robe', variante: 'M', produitId: 'p1' }); s.demarrer();
+  const debut = s.seance.debut;
+  verif('le premier encan lancé ouvre la séance', debut === T && s.seance.encans.length === 1 && s.seance.encans[0].issue === 'en_cours');
+  s.commentaire('@ana', '9', 'direct'); s.commentaire('@ana', '10', 'direct'); s.commentaire('@bea', '12', 'manuel'); s.commentaire('@bea', 'bravo', 'direct');
+  verif('commentaires, sources, offres retenues / refusées, pseudos', s.seance.commentaires === 4 && s.seance.parSource.direct === 3 && s.seance.parSource.manuel === 1
+    && s.seance.offresRetenues === 2 && s.seance.offresRefusees === 1 && s.seance.pseudos.length === 2, s.seance);
+  s.adjuger();
+  const e1 = s.seance.encans[0];
+  verif('l adjudication note le prix, la gagnante et les offres sur l encan de la séance', e1.adjuge === 12 && e1.pseudo === '@bea' && e1.offres === 2 && e1.issue === 'adjuge', e1);
+  verif('la gagnante porte la clé de son encan (ec) — elle part avec la vente', s.gagnant.ec === e1.cle);
+  s.confirmerGagne();
+  verif('GAGNÉ reçu : l encan de la séance passe à « vendu »', e1.issue === 'vendu');
+  s.charger({ nom: 'Jupe' }); s.demarrer(); avancer(5000, s); s.annuler();
+  verif('un encan annulé sans offre : « annulé », sans prix', s.seance.encans[1].issue === 'annule' && s.seance.encans[1].adjuge === 0, s.seance.encans[1]);
+  s.charger({ nom: 'Gilet' }); s.demarrer(); s.commentaire('@cleo', '10', 'direct'); s.adjuger(); s.remettreEnVente();
+  verif('remis en vente : l encan d origine le dit', s.seance.encans[2].issue === 'remis');
+  s.bloquer('troll');
+  verif('les pseudos bloqués sont gardés', s.seance.bloques.indexOf('@troll') >= 0);
+  const snap = s.seancesAEcrire();
+  verif('l instantané à écrire : la séance, ses 3 encans, sans les pseudos en clair (un nombre)', snap.length === 1 && snap[0].encans.length === 3 && snap[0].pseudos === 3 && s.seanceSale, snap[0]);
+  s.seancesEcrites();
+  verif('écrite : plus rien à envoyer tant que rien ne change', !s.seanceSale);
+  s.demarrer();
+  verif('« Nouvelle séance » refusée pendant un encan', s.nouvelleSeance().motif === 'encan_en_cours');
+  s.annuler();
+  const ancienne = s.seance.id;
+  verif('« Nouvelle séance » : la précédente part une dernière fois, la neuve attend le prochain encan',
+    s.nouvelleSeance().ok && s.seance.id !== ancienne && s.seance.debut === 0 && s.seancesAEcrire().length === 1 && s.seancesAEcrire()[0].id === ancienne);
+  s.seancesEcrites();
+  s.charger({ nom: 'Bottes' }); s.demarrer(); s.annuler();
+  const s2 = s.seance.id;
+  T += 3 * 3600 * 1000 + 1000;
+  s.charger({ nom: 'Sac' }); s.demarrer();
+  verif('3 h sans encan : un nouveau direct, une nouvelle séance (la précédente part une dernière fois)',
+    s.seance.id !== s2 && s.seance.encans.length === 1 && s.seancesAEcrire().some((x) => x.id === s2));
+}
 
 // ── La console : le lecteur de codes-barres et la vignette (2026-10-20, ses deux signalements) ──
 const _page = require('fs').readFileSync(require('path').join(__dirname, '..', 'src', 'fenetres', 'encan.js'), 'utf8');
