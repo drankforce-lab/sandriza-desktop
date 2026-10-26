@@ -387,7 +387,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         : '${T("Dossier ")}' + (d.statut === 'refunded' ? '${T("remboursé")}' : '${T("complété")}') + ' ${T("— seules les notes s’enregistrent.")}') + '</div>';
     } else {
       h += '<div class="r2"><div class="ch"><label for="r-statut">${T("Statut")}</label><select id="r-statut">'
-        + ['pending','approved','rejected','in_transit','received','refunded','completed'].map(function(s){
+        // (2026-10-25, audit F1) « Remboursée » et « Complétée » ne se CHOISISSENT pas ici : ils fermaient le
+        // dossier sans remboursement ni remise en stock. Ils passent par la finalisation (_retourFinaliser).
+        + ['pending','approved','rejected','in_transit','received'].map(function(s){
             return '<option value="' + s + '"' + (d.statut === s ? ' selected' : '') + '>' + esc(STATUTS[s] || s) + '</option>'; }).join('')
         + '</select></div><div class="ch" id="z-refus" style="' + (d.statut === 'rejected' ? '' : 'display:none') + '">'
         + '<label for="r-refus">${T("Note de refus — visible au client")}</label>'

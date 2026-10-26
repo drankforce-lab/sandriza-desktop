@@ -426,6 +426,29 @@ const versLExterieur = (urlStr) => {
   if (!/^https?:\/\//.test(u)) return;
   try { shell.openExternal(urlStr); } catch {}
 };
+/* (2026-10-25, audit F2) LE GARDE DE NAVIGATION DES FENÊTRES NATIVES. `_poserGardesDeSite` ne couvrait que
+   la page du site : un lien `target="_blank"` d une fenêtre native (clés, impôt, téléphonie) s ouvrait dans
+   une fenêtre Electron nue — sans barre d adresse ni menu, et avec le préchargement par défaut. Posé sur
+   TOUT webContents à sa création, mais il ne tranche que pour un document `data:` (toutes les fenêtres
+   natives se chargent ainsi) : la page du site (https) garde son propre garde, posé ensuite et qui
+   remplace celui-ci pour l ouverture ; les autres documents gardent le comportement d Electron.
+   http(s) → le navigateur ; tout le reste → refusé. Aucune fenêtre native n ouvre ni ne navigue
+   d elle-même (vérifié : ni window.open ni location.href dans src/fenetres). */
+const _estDocNatif = (wc) => { try { return /^data:/i.test(String(wc.getURL() || '')); } catch { return false; } };
+app.on('web-contents-created', (_ev, wc) => {
+  try {
+    wc.setWindowOpenHandler(({ url }) => {
+      if (!_estDocNatif(wc)) return { action: 'allow' };
+      versLExterieur(url);
+      return { action: 'deny' };
+    });
+    wc.on('will-navigate', (e, url) => {
+      if (!_estDocNatif(wc)) return;
+      e.preventDefault();
+      versLExterieur(url);
+    });
+  } catch {}
+});
 
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -1342,6 +1365,12 @@ ipcMain.handle('export:dossierDefaut', () => {
 
 // ══ PHASE 5 (NATIF) — DÉTECTION DE CLÉ USB DE PHOTOS ══════════════════════════
 const IMG_RE = /\.(jpe?g|png|webp|heic|heif|bmp|tiff?)$/i;
+/* (2026-10-25, audit F2) LES SEULS FICHIERS QUE LA PAGE PEUT LIRE : ceux qu un balayage de clé a rendus
+   (usb:scan, ou la surveillance). `usb:read` lisait n importe quel fichier du poste et le rendait en base64 :
+   une faille de script dans l administration devenait une lecture du disque. */
+const _cheminsUsb = new Set();
+const _cleChemin = (c) => path.resolve(String(c || '')).toLowerCase();
+const _cheminUsbPermis = (c) => { const t = String(c || ''); return t !== '' && IMG_RE.test(t) && _cheminsUsb.has(_cleChemin(t)); };
 // Liste les lecteurs AMOVIBLES (DriveType=2) via CIM, en JSON.
 const listRemovableDrives = () => new Promise((resolve) => {
   const ps = 'Get-CimInstance Win32_LogicalDisk -Filter "DriveType=2" | ' +
@@ -1371,6 +1400,7 @@ const scanDrivePhotos = (drive) => {
         try {
           const st = fs.statSync(full);
           out.push({ path: full, name: en.name, size: st.size, mtime: st.mtimeMs });
+          if (_cheminsUsb.size < 20000) _cheminsUsb.add(_cleChemin(full));
         } catch {}
       }
     }
@@ -1441,6 +1471,7 @@ ipcMain.handle('usb:vignette', (e, filePath, cote) => {
   try {
     const c = Math.max(64, Math.min(512, parseInt(cote, 10) || 220));
     const chemin = String(filePath || '');
+    if (!_cheminUsbPermis(chemin)) return null;
     const img = nativeImage.createFromPath(chemin);
     if (img.isEmpty()) return null;
     const t = img.getSize();
@@ -1459,6 +1490,7 @@ ipcMain.handle('usb:vignette', (e, filePath, cote) => {
 // Renvoie les données d'une image du poste en data URL (pour l'aperçu / le traitement).
 ipcMain.handle('usb:read', (e, filePath) => {
   try {
+    if (!_cheminUsbPermis(filePath)) return null;
     const buf = fs.readFileSync(filePath);
     const ext = (path.extname(filePath).slice(1) || 'jpeg').toLowerCase();
     const mime = ext === 'jpg' ? 'image/jpeg' : ('image/' + ext);
@@ -3923,6 +3955,16 @@ const LIMITES_PONT = {
   'images:migrer': 300000, 'images:etat': 30000,
   'cartescadeaux:creer': 30000, 'cartescadeaux:activer': 30000, 'cartescadeaux:supprimer': 30000,
   'expedition:confirmer': 45000, 'expedition:imprimer': 30000, 'expedition:pdf': 30000, 'expedition:bordereau': 30000,
+  /* (2026-10-25, audit F2) LE MÊME PIÈGE, D AUTRES OPS. Elles enchaînent verrou, serveur, service d IA ou
+     courriel : à 8 s, la fenêtre disait « délai » pendant que la fiche, le courriel ou la vente aboutissait
+     derrière — et la personne recommençait. Mêmes valeurs que leurs jumelles (expedition:confirmer). */
+  'produit:decrire': 120000, 'collection:decrire': 120000, 'stock:enregistrer': 120000,
+  'commande:expedier': 45000, 'retour:enregistrer': 45000, 'retour:recu': 45000, 'client:ecrire': 30000,
+  'liens:creer': 45000, 'liens:courriel': 45000, 'chat:repondre': 30000, 'avis:repondre': 30000,
+  'abonnes:ajouter': 30000, 'factures:payer': 45000, 'transfert:partir': 45000, 'transfert:recevoir': 45000,
+  'tableau:lire': 60000, 'veilleur:annonces': 60000,
+  // L encan : une vente orpheline (créée au serveur, inconnue de la console) naissait du plafond de 8 s.
+  'encan:vendre': 45000, 'encan:gagne': 20000, 'encan:annuler': 20000, 'encan:etat': 20000,
 };
 
 /* Le prechargement demande la table ICI, une fois, plutot que d en tenir une
@@ -4068,9 +4110,15 @@ const _traduireLibelles = (x, prof) => {
   return x;
 };
 
+const VITRINES = ['pos-client', 'encan-ecran'];
+const _deVitrine = (e) => VITRINES.some((c) => { const w = fenetresNatives.get(c); return !!(w && !w.isDestroyed() && e && e.sender === w.webContents); });
 ipcMain.handle('pont:appeler', (e, op, args) => {
   // Les ventes de l'encan ne partent QUE du processus principal (src/encan-vente.js) : aucune page ne les déclenche.
   if (/^encan:/.test(String(op || ''))) return { ok: false, motif: 'droit' };
+  /* (2026-10-25, audit F2) LES ÉCRANS TOURNÉS VERS LE PUBLIC (affichage client, écran filmé de l encan) ne
+     commandent rien : ils portent le même préchargement que les autres fenêtres, donc `szPont.appeler` avec la
+     session de l administratrice. Seule la lecture de l état de la caisse leur est permise. */
+  if (_deVitrine(e) && String(op || '') !== 'caisse:etat') return { ok: false, motif: 'droit' };
   return executerOpSite(String(op || ''), args, e.sender);
 });
 // L'APERÇU 3D, PRÉPARÉ AU POSTE (7.16.0) : le modèle rendu par Fal.ai (17 à 20 Mo) est téléchargé
@@ -4129,7 +4177,16 @@ ipcMain.handle('image:locale', async (_e, url) => {
    Tant qu une opération qui ENGAGE UN FRAIS n a pas répondu (lancée, ou refusée), sa fenêtre ne se ferme pas : elle
    le dit, et se ferme d elle-même dès la réponse. (L appel, lui, vit dans la page principale : fermer la fenêtre ne
    l arrêtait pas — mais rien ne permettait de le savoir.) ════════════════════════════════════════════════════════ */
-const PAYANT_RE = /(:traiter|:lancer|lancer3d|:generer|:lot$|:lotCreer|grosPlan|mesureMasque|fondAppliquer|:isoler|apercu3d|:vton|:fantome|:porte|:redige|:rendre3d)/i;
+/* (2026-10-25, audit F2) UNE LISTE NOMMÉE, et non plus une expression : `:lancer` ne reconnaissait pas
+   `atelier:modele3dLancer` (10 crédits), et `renduTnb`, `rendrePhoto`, `photoIa`, `fibres:analyser` n y
+   figuraient pas — leur fenêtre se fermait pendant le départ du frais. Une op payante NOUVELLE s ajoute ICI,
+   à côté de LIMITES_PONT. */
+const PAYANTS = new Set([
+  'photos:isoler', 'studio:traiter', 'lot:traiter', 'photos:traiter', 'photos:lot', 'photos:fondAppliquer',
+  'promo:lot', 'atelier:apercu3d', 'produit:mesureMasque', 'chaines:traiter', 'liquidation:lot',
+  'produit:grosPlanZone', 'produit:grosPlan', 'generations:lancer3d',
+  'atelier:modele3dLancer', 'atelier:renduTnb', 'atelier:rendrePhoto', 'produit:photoIa', 'fibres:analyser',
+]);
 const payantsEnCours = new Map();   // wc.id -> nombre d opérations payantes en vol
 const fermerApres = new Map();      // wc.id -> () => fermer, quand la personne a demandé à fermer pendant ce temps
 const payantsDe = (wcId) => payantsEnCours.get(wcId) || 0;
@@ -4143,7 +4200,7 @@ const retenirFermeture = (wc, fermer) => {
   return true;
 };
 async function executerOpSite(nom, args, emetteur) {
-  const payant = !!(emetteur && !emetteur.isDestroyed() && PAYANT_RE.test(nom));
+  const payant = !!(emetteur && !emetteur.isDestroyed() && PAYANTS.has(nom));
   if (!payant) return executerOpSite0(nom, args, emetteur);
   const id = emetteur.id;
   payantsEnCours.set(id, payantsDe(id) + 1);
@@ -4158,6 +4215,7 @@ async function executerOpSite(nom, args, emetteur) {
     }
   }
 }
+const ATTENDRE_LE_SITE = new Set(['encan:vendre']);
 async function executerOpSite0(nom, args, emetteur) {
   if (!OPS_PONT.has(nom)) return { ok: false, motif: 'operation_inconnue' };
   const wc = siteWC();
@@ -4194,7 +4252,11 @@ async function executerOpSite0(nom, args, emetteur) {
     let fini = false;
     const travail = wc.executeJavaScript(code, true).then((r) => { fini = true; return r; });
     const plafond = new Promise((resoudre) => {
-      setTimeout(() => { if (!fini) resoudre({ ok: false, motif: 'delai' }); }, LIMITES_PONT[nom] || 8000);
+      /* (2026-10-25, audit F2) LA VENTE D ENCAN, demandée par le processus principal (encan-vente.js) : elle naît
+         au serveur (article réservé, lien, courriel) et la console a BESOIN de son id. Abandonner sur « délai »
+         laissait une vente orpheline, ni suivie ni annulée. On attend donc la page bien plus longtemps. */
+      const lim = (!emetteur && ATTENDRE_LE_SITE.has(nom)) ? 180000 : (LIMITES_PONT[nom] || 8000);
+      setTimeout(() => { if (!fini) resoudre({ ok: false, motif: 'delai' }); }, lim);
     });
     const r = await Promise.race([travail, plafond]);
     if (r && r.ok) {
@@ -5494,7 +5556,8 @@ const ouvrirNative = (cle, titre, page, opts = {}) => {
   // toutes les fenêtres (natives ET vues ancrables détachées).
   brancherGardeBrouillon(win, win.webContents);
   win.on('closed', () => { fenetresNatives.delete(cle); fenSale.delete(wcId); });
-  brancherOutils(win);
+  // (2026-10-25, audit F2) Pas d outil de développement sur un écran tourné vers le public (voir VITRINES).
+  if (!VITRINES.includes(cle)) brancherOutils(win);
   win.webContents.on('did-finish-load', () => appliquerTheme(win.webContents));
   // `maximiser` (2026-10-19) : la préparation de commande s'ouvre en plein écran de TRAVAIL (agrandie,
   // pas le mode kiosque).
@@ -7883,8 +7946,21 @@ ipcMain.on('palette:action', (e, it) => {
     if (mainWindow) mainWindow.focus();
     return;
   }
-  if (it.run) { runAdmin(String(it.run)); if (mainWindow) mainWindow.focus(); }
+  /* (2026-10-25, audit F2) `run` EXÉCUTE DU CODE DANS LA PAGE CONNECTÉE : il n est plus accepté que s il figure
+     tel quel dans le modèle de menu courant (`_modele`, envoyé par le site). Tout document chargé avec
+     palette-preload.js pouvait sinon faire exécuter n importe quoi avec la session de l administratrice. */
+  if (it.run && _runDuModele(String(it.run))) { runAdmin(String(it.run)); if (mainWindow) mainWindow.focus(); }
 });
+const _runDuModele = (code) => {
+  const vus = new Set();
+  const chercher = (x, prof) => {
+    if (!x || typeof x !== 'object' || prof > 12 || vus.has(x)) return false;
+    vus.add(x);
+    if (typeof x.run === 'string' && x.run === code) return true;
+    return Object.keys(x).some((k) => chercher(x[k], prof + 1));
+  };
+  try { return chercher(_modele, 0); } catch { return false; }
+};
 
 /* ══════════════════════════════════════════════════════════════════════════
    LE MENU DE L ÉCRAN DE CONNEXION — DES INTITULÉS D UN CÔTÉ, UN POPUP DE L AUTRE

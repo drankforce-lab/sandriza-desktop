@@ -300,7 +300,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'nl-from-n':60,'nl-trans-from-n':60,'nl
       return '<div class="ctrl"><div><div class="t">' + esc(s.label) + '</div><div class="d">' + esc(s.desc) + '</div></div>' + bascule('nl-ctrl-' + s.key, D.controls[s.key] !== false) + '</div>';
     }).join('');
     var cleField = PEUT.edit
-      ? ligneChamp('${T("Clé API Resend *")}', 'nl-key', c.apiKey, 'password', '${T("Créez votre clé sur ")}<strong>resend.com/api-keys</strong>')
+      /* (2026-10-25, audit) LA CLÉ NE DESCEND PLUS : le champ part vide, avec ses 4
+         derniers caractères en indice ; vide à l enregistrement = clé conservée. */
+      ? '<div class="champ"><label for="nl-key">${T("Clé API Resend *")}</label><input id="nl-key" type="password" value="" autocomplete="off" placeholder="' + (c.hasKey ? '${T("Enregistrée — laisser vide pour la conserver")}' : 're_xxxxxxxxxxxx') + '">'
+        + '<div class="hint">' + (c.hasKey ? '${T("Clé enregistrée")}' + (c.apiKeyFin ? ' (…' + esc(c.apiKeyFin) + ')' : '') + ' · ' : '') + '${T("Créez votre clé sur ")}<strong>resend.com/api-keys</strong></div></div>'
       : '<div class="champ"><label>${T("Clé API Resend")}</label><input aria-label="${T("Clé API Resend")}" value="' + (c.hasKey ? '••••••••••••' : '') + '" readonly></div>';
     return '<div class="deux">'
       + '<div class="carte"><h2><span class="ic">🔑</span> ${T("API Resend")}</h2>'

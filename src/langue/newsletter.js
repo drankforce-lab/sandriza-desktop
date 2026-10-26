@@ -110,6 +110,8 @@ module.exports = {
   'Clé API Resend *': 'Resend API key *',
   'Clé API Resend': 'Resend API key',
   'Créez votre clé sur ': 'Create your key at ',
+  'Enregistrée — laisser vide pour la conserver': 'Saved — leave blank to keep it',
+  'Clé enregistrée': 'Key saved',
   'Créez votre clé sur resend.com/api-keys': 'Create your key at resend.com/api-keys',
   'Courriel expéditeur *': 'Sender email *',
   'Le domaine doit être vérifié dans Resend': 'The domain must be verified in Resend',

@@ -92,6 +92,7 @@ class Encan {
        `seanceSale` dit au processus principal qu'il y a du neuf à enregistrer (src/main.js). */
     this.seance = this._nouvelleSeance();
     this.seanceSale = false;
+    this.seanceRev = 0;   // (2026-10-25, audit F2) chaque changement de séance l incrémente : voir seancesEcrites
     this._remettreAZero(null);
     this.phase = 'garde';
   }
@@ -107,6 +108,7 @@ class Encan {
   nouvelleSeance() {
     if (this.phase === 'encours' || this.phase === 'pause') return { ok: false, motif: 'encan_en_cours' };
     if (this.seance.debut) { this.seance.fin = this.seance.fin || this.maintenant(); this.seanceSale = true; }
+    this.seanceRev++;
     this._seanceClose = this.seance;
     this.seance = this._nouvelleSeance();
     this._avertir();
@@ -114,12 +116,20 @@ class Encan {
   }
   // La séance À ENREGISTRER : la courante, et une séance tout juste close qui n'est pas encore partie.
   seancesAEcrire() {
+    // (2026-10-25, audit F2) Ce qui part est RETENU : seancesEcrites ne videra que cela.
+    this._revEnvoyee = this.seanceRev; this._closeEnvoyee = this._seanceClose;
     const L = [];
     if (this._seanceClose) { L.push(this.instantaneSeance(this._seanceClose)); }
     if (this.seance.debut) L.push(this.instantaneSeance(this.seance));
     return L;
   }
-  seancesEcrites() { this._seanceClose = null; this.seanceSale = false; }
+  /* (2026-10-25, audit F2) L envoi dure jusqu à 15 s : un encan fini ou une « Nouvelle séance » pendant ce temps
+     était effacé par la réussite de l envoi PRÉCÉDENT (séance close perdue, heure de fin jamais écrite). On ne
+     vide que ce qui est parti, et seulement si rien n a bougé depuis. */
+  seancesEcrites() {
+    if (this._seanceClose === this._closeEnvoyee) this._seanceClose = null;
+    if (this.seanceRev === this._revEnvoyee) this.seanceSale = false;
+  }
   instantaneSeance(s) {
     const x = s || this.seance;
     return { id: x.id, debut: x.debut, fin: x.fin, essai: !!x.essai, commentaires: x.commentaires, parSource: { ...x.parSource },
@@ -127,7 +137,7 @@ class Encan {
       pseudos: x.pseudos.length, bloques: x.bloques.slice(0, 100),
       encans: x.encans.slice(-300).map((e) => ({ ...e })) };
   }
-  _seanceToucher() { const t = this.maintenant(); if (this.seance.debut) this.seance.fin = t; this.seanceSale = true; }
+  _seanceToucher() { const t = this.maintenant(); if (this.seance.debut) this.seance.fin = t; this.seanceSale = true; this.seanceRev++; }
   // L'encan de la séance qu'un gagnant concerne (sa clé voyage sur l'objet gagnant : `ec`).
   _seanceEncan(cle) {
     if (!cle) return null;
