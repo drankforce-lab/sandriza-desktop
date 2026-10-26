@@ -185,6 +185,24 @@ label.case input{width:15px;height:15px;accent-color:var(--or)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 /* La tete refaite (2026-10-15, lot E). */
 .so-tete .so-renvoi{font-size:.74rem;color:var(--tx2);max-width:22rem;text-align:right}
+/* ══ LOT F (2026-10-26, « Édition publicitaire ») : LA FILE, LE JOURNAL ET LES PATRONS EN RANGS AERES, le langage
+   des listes du marketing (lots A a E). Plus de grande carte qui descend jusqu au pied pour une seule entree :
+   chaque entree est SON rang (fond, bord, coins), la liste a la hauteur de ses rangs et ne va en pages que quand
+   ils ne tiennent plus. Le patron : ce qu il dit a gauche, son declencheur et ses gestes a droite, sur une ligne. */
+.so-liste{flex:0 1 auto;min-height:0;display:flex;flex-direction:column}
+.so-liste>[data-pages]{flex:0 1 auto;min-height:0}
+.so-liste .entree,.so-liste .entree:first-of-type{border:1px solid var(--sz-bord);border-radius:14px;background:var(--f-carte);
+  padding:.85rem 1rem;margin-bottom:.55rem}
+.so-liste .entree:hover{border-color:var(--sz-bord-fort)}
+.so-liste .entree .haut strong{font-size:.95rem;font-weight:650}
+.so-liste .entree .texte{color:var(--tx);margin-top:.4rem}
+.so-pat{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1.4rem;align-items:center}
+.so-pat .tx{display:flex;flex-direction:column;gap:.35rem;min-width:0}
+.so-pat .gab{font-size:.84rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.so-pat .res-l{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center}
+.so-pat .cote{display:flex;flex-direction:column;align-items:flex-end;gap:.5rem}
+.so-pat .gestes{display:flex;gap:.4rem;flex-wrap:nowrap;white-space:nowrap}
+.so-pat .gestes button{height:2.1rem;padding:0 .8rem;border-radius:9px}
 `;
 
 /**
@@ -919,31 +937,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     if (EDIT) return vuePatronEditeur();
     var l = PAT.patrons || [];
     // Les patrons en PAGES mesurees (JS_PAGES du socle) : la carte prend la hauteur qui reste.
-    var h = '<div class="carte sz-pagee">';
-    if (PAT.peutEcrire) {
-      h += '<div style="text-align:right;margin-bottom:.4rem">'
-        + '<button class="mini prim" id="pa-nouveau">${T("+ Nouveau patron")}</button></div>';
-    }
-    if (!l.length) { h += '<div class="vide">${T("Aucun patron.")}</div></div>'; return h; }
+    /* Lot F (2026-10-26) : la liste a la hauteur de ses rangs ; « + Nouveau patron » est dans la tete (dessiner),
+       comme le geste principal des autres listes. Crochet garde : #pa-nouveau. */
+    var h = '<div class="so-liste">';
+    if (!l.length) { h += '<div class="ls-vide">${T("Aucun patron.")}</div></div>'; return h; }
     h += '<div data-pages="sociaux-patrons">' + l.map(function(p){
-      return '<div class="entree">'
+      return '<div class="entree so-pat"><div class="tx">'
         + '<div class="haut"><strong>' + esc(p.nom) + '</strong>'
         + '<span class="pill ' + (p.actif ? 'bon' : 'neutre') + '">' + (p.actif ? '${T("actif")}' : '${T("inactif")}') + '</span>'
-        + (p.defaut ? '<span class="pill neutre">${T("fourni")}</span>' : '')
-        + '<span class="droite"><span class="dt">' + esc(szTd(p.declencheurLibelle)) + '</span></span></div>'
-        + '<div class="dt" style="white-space:pre-wrap;overflow-wrap:anywhere">'
+        + (p.defaut ? '<span class="pill neutre">${T("fourni")}</span>' : '') + '</div>'
+        + '<div class="gab">'
         /* ⚠ DOUBLE ANTISLASH OBLIGATOIRE : ce script vit dans un litteral de
            gabarit, ou un antislash-n simple devient un VRAI saut de ligne. La
            regex se retrouvait coupee en deux — << Invalid regular expression >>,
            attrape par le banc a l instant meme ou j ai ecrit cette ligne. */
         + esc(String(p.gabarit).replace(/\\n/g, ' ').slice(0, 120))
         + (String(p.gabarit).length > 120 ? '…' : '') + '</div>'
-        + '<div class="dt">' + (p.reseaux.length
+        + '<div class="res-l">' + (p.reseaux.length
             ? p.reseaux.map(function(r){ return '<span class="pill neutre">' + esc(r) + '</span>'; }).join('')
             : '<span class="pill neutre">${T("aucun réseau")}</span>')
           + (p.motsCles.length ? ' <span class="dt">#' + p.motsCles.map(esc).join(' #') + '</span>' : '')
-          + '</div>'
-        + '<div style="display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.3rem">'
+          + '</div></div>'
+        + '<div class="cote"><span class="dt">' + esc(szTd(p.declencheurLibelle)) + '</span>'
+        + '<div class="gestes">'
         + '<button class="mini" data-apercu="' + esc(p.id) + '">${T("Aperçu")}</button>'
         + (PAT.peutEcrire
             ? '<button class="mini" data-modifier="' + esc(p.id) + '">${T("Modifier")}</button>'
@@ -952,7 +968,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
                   : '<button class="mini danger" data-patsuppr="' + esc(p.id) + '">'
                     + '${T("Supprimer")}' + '</button>')
             : '')
-        + '</div></div>';
+        + '</div></div></div>';
     }).join('') + '</div>';
     h += '</div>';
     return h;
@@ -1117,6 +1133,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       h += '<button class="ed-bt fort" id="so-tout"' + (OCCUPE ? ' disabled' : '') + '>'
         + (OCCUPE ? '${T("Publication…")}' : '${T("Tout publier")}') + '</button>';
     }
+    if (ONGLET === 'patrons' && PAT && PAT.peutEcrire && !EDIT) {
+      h += '<button class="ed-bt fort" id="pa-nouveau">${T("+ Nouveau patron")}</button>';
+    }
     if (ONGLET === 'historique' && D.peutModifier && (D.historique || []).length) {
       h += '<button class="ed-bt danger" id="so-vider">'
         + '${T("Vider le journal")}' + '</button>';
@@ -1130,9 +1149,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     } else {
       var pile = ONGLET === 'file' ? (D.file || []) : (D.historique || []);
       // La file et le journal en PAGES mesurees (JS_PAGES du socle) : la carte prend la hauteur qui reste.
-      h += '<div class="carte sz-pagee">';
+      h += '<div class="so-liste">';
       if (!pile.length) {
-        h += '<div class="vide">' + (ONGLET === 'file'
+        h += '<div class="ls-vide">' + (ONGLET === 'file'
           ? '${T("Aucune publication en attente.")}' : '${T("Rien au journal pour l’instant.")}') + '</div>';
       } else {
         h += '<div data-pages="sociaux-' + ONGLET + '">' + pile.map(function(e){ return entree(e, ONGLET === 'file'); }).join('') + '</div>';
