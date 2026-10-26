@@ -3522,7 +3522,8 @@ const LIMITES_PONT = {
      c etait un seul appel ; elles ne suffisent plus, et un plafond trop court ne
      rate pas seulement un resultat — il MENT sur son sort, en affichant un echec
      pendant que le travail continue et se facture derriere. */
-  'photos:traiter': 300000, 'photos:lot': 600000, 'photos:isoler': 180000,
+  // (2026-10-26, audit H2-M13) The New Black : ~45 s au relais puis suivi par la page jusqu'a 4 min -> 6 min.
+  'photos:traiter': 360000, 'photos:lot': 600000, 'photos:isoler': 180000,
   /* ⚠ ANNULER NE TELEVERSE RIEN : on repointe des adresses deja dans R2, puis on
      ecrit la fiche. C est une ecriture de base, pas un traitement d image — d ou
      un delai ordinaire. Le LOT, lui, ecrit une fiche PAR photo : sur cinq cents,
@@ -3552,7 +3553,7 @@ const LIMITES_PONT = {
   'photos:vider': 600000, 'photos:rattraper': 240000, 'photos:supprimer': 45000, 'photos:toutes': 30000,
   'photos:pivoter': 90000, 'photos:ranger': 180000, 'photos:espace': 60000,
   'lot:jeter': 600000, 'lot:sources': 90000, 'lot:vignette': 30000,
-  'lot:importer': 90000, 'lot:traiter': 180000, 'lot:liste': 30000,
+  'lot:importer': 90000, 'lot:traiter': 360000, 'lot:liste': 30000,
   'photos:importer': 60000, 'photos:usb': 120000, 'fal:suivi': 20000,
   'config:heures:donnees': 15000, 'config:heures:ecrire': 20000,
   'config:footer:donnees': 15000, 'config:footer:ecrire': 20000,
