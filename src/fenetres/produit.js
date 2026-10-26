@@ -53,6 +53,50 @@ const CSS_PROPRE = `
    colonnes (nom sur deux, puis marque / poids / SKU), la description sur toute la largeur,
    des ecarts plus francs, et le Classement et le Prix a la meme hauteur. Mesure a
    1400 x 833 : tout tient, sans barre. */
+/* ══ L'ÉDITEUR REFAIT (2026-10-26, sa demande : « vraiment moderne, avec champs dynamiques » — direction A des
+   esquisses) ══
+   ① L'ÉTIQUETTE DANS LE CHAMP : le libellé se pose en petit dans le haut du cadre, la saisie dessous — un champ
+     se lit d'un seul bloc, et la grille respire. Seuls les champs simples (étiquette puis saisie) le prennent.
+   ② Des PASTILLES au lieu d'un menu pour les choix courts (genre, groupe d'âge) : le menu reste dans la page,
+     caché, et c'est toujours lui qu'on lit et qu'on enregistre (crochets p-genre, p-age gardés).
+   ③ Le prix soldé ne paraît que si l'on met en solde ; la marge se lit sur une barre.
+   ④ Aucune bulle ni texte d'aide (sa demande) : l'écran dit ce qu'il fait par ce qu'il montre. */
+.etape .ch:has(>label:first-child + :is(input:not([type=checkbox]):not([type=radio]),select,textarea,.paire)){position:relative;gap:0}
+.etape .ch:has(>label:first-child + :is(input:not([type=checkbox]):not([type=radio]),select,textarea,.paire))>label:first-child{
+  position:absolute;top:.5rem;left:.95rem;right:.95rem;z-index:1;margin:0;font-size:.68rem;font-weight:600;letter-spacing:.01em;
+  color:var(--tx2);pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.etape .ch:has(>label:first-child + :is(input:not([type=checkbox]):not([type=radio]),select,textarea,.paire)):focus-within>label:first-child{color:var(--tx-or)}
+.etape .ch>label:first-child + input:not([type=checkbox]):not([type=radio]),.etape .ch>label:first-child + select,
+.etape .ch>label:first-child + textarea,.etape .ch>label:first-child + .paire input,.etape .ch>label:first-child + .paire select{
+  padding-top:1.5rem!important;padding-bottom:.5rem!important;min-height:3.35rem;border-radius:12px!important;font-size:.95rem}
+.etape .ch>label:first-child + select{background-position:right .8rem top 1.55rem!important}
+.prixgrille{grid-template-rows:auto!important;align-items:start}
+.prixgrille .ch{display:flex!important;grid-row:auto!important}
+.carte{border-radius:16px}
+.carte>h2{font-size:.95rem;letter-spacing:0;text-transform:none;font-weight:650;color:var(--tx)}
+.pf-puces{display:flex;flex-wrap:wrap;gap:.45rem;padding-top:1.55rem}
+.pf-puces button{height:2.2rem;padding:0 .95rem;border-radius:99px;border:1px solid var(--v16);background:transparent;color:var(--tx2);font-size:.84rem}
+.pf-puces button.on{background:rgba(var(--or-rgb),.16);border-color:var(--or);color:var(--tx);font-weight:600}
+.ch.a-puces{position:relative}
+.ch.a-puces>select{display:none}
+.ch.a-puces>label:first-child{position:absolute;top:.2rem;left:.1rem;font-size:.68rem;font-weight:600;color:var(--tx2)}
+.pf-sw{margin-top:.8rem;padding-top:.75rem;border-top:1px solid var(--v08)}
+.sans-solde .prixgrille .ch:has(#p-solde),.sans-solde #p-rabais{display:none!important}
+.sans-solde .prixgrille{grid-template-columns:repeat(2,1fr)!important}
+.pf-marge-barre{height:.45rem;border-radius:99px;background:var(--v10);overflow:hidden;margin-top:.4rem}
+.pf-marge-barre i{display:block;height:100%;border-radius:99px;background:#6fae73}
+.pf-marge-barre i.perte{background:var(--tx-err)}
+.pf-ia{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-top:.5rem}
+.pf-ia .ed-seg button{height:1.85rem;font-size:.78rem;padding:0 .75rem}
+/* L'étape Photos (2026-10-26) : la principale en GRAND à gauche ; à droite, l'aperçu 3D EN HAUT (sa demande), puis les
+   autres photos. */
+.ligne-photos{display:grid!important;grid-template-columns:15.5rem minmax(0,1fr);column-gap:1.3rem;row-gap:.8rem;align-items:start}
+.ligne-photos>.vue-principale{grid-column:1;grid-row:1 / span 4;width:auto}
+.ligne-photos>:not(.vue-principale){grid-column:2}
+.ligne-photos .vue-principale .vign{width:15.5rem;height:19.5rem;border-radius:16px}
+.ligne-photos .vue-principale .mini-decor{width:100%}
+.pf-3d{margin:0;padding:.75rem .9rem;border-radius:14px;background:var(--v03);border:1px solid var(--v08)}
+.pf-3d .pf-med-l{margin:0}
 .pf-id{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.95rem 1.1rem}
 .pf-id .l2{grid-column:span 2}
 .pf-id .l4{grid-column:1 / -1}
@@ -639,6 +683,74 @@ function pageProduit(id) {
   function dessiner(){
     var h = [];
 
+    /* (2026-10-26, sa demande) LES PHOTOS D'ABORD : l'IA s'en sert ensuite pour rédiger la description. */
+    // 5 — Photos : principale, vues supplémentaires, et par couleur
+    h.push('<div class="etape">'
+      // ⚠ LA VIGNETTE EST LE CONTROLE, plus un bouton a cote d elle. Un bouton
+      // « Retirer » pose sous la carte n indique pas a quelle photo il
+      // s applique, et il occupait la place d une action principale pour un
+      // geste secondaire. On clique la photo pour la choisir, on clique la
+      // pastille rouge de son coin pour la retirer — la ou l oeil est deja.
+      /* ⚠ COTE A COTE, SANS TEXTE D AIDE (demande le 2026-08-07) : la vignette
+         principale laissait toute sa moitie droite vide, et les deux phrases
+         d explication n apprenaient rien apres la premiere utilisation. Le
+         MAXIMUM, seul renseignement qui compte, vit dans le TITRE. */
+      + '<div class="carte"><div class="p-verrou-photos" role="status"></div><h2 id="p-vues-titre">Photos</h2>'
+      + '<div class="ligne-photos">'
+      + '<div class="vue-principale">'
+      + '<div class="vign" id="p-vign" >${T("choisir une photo")}</div>'
+      + '<div class="lgd-principale">${T("Photo principale")}</div>'
+      + '<button type="button" id="p-detourer" class="mini-decor" disabled '
+      + '><span class="ic">✂</span> ${T("Décor")}</button>'
+      + '<button type="button" id="p-fibre" class="mini-decor" disabled '
+      + '><span class="ic">🔍</span> ${T("Gros plan fibre")}</button>'
+      + '<button type="button" id="p-studio" class="mini-decor" disabled '
+      + '><span class="ic">📷</span> ${T("Créer au studio")}</button></div>'
+      + '<div class="aide p-studio-attente" id="p-studio-attente" style="display:none"></div>'
+      + '<div class="pf-3d" id="p-3d-carte">'
+      + '<div class="pf-med-l" id="p-3dg-l">'
+      + '<button type="button" id="p-3d-gen"><span class="ic">🧊</span> ${T("Générer l’aperçu 3D")}</button>'
+      + '<span id="p-3d-vues"></span>'
+      + '<span class="aide" id="p-3dg-etat"></span></div>'
+      + '<ol id="p-3dg-etapes" style="display:none"></ol>'
+      + '<div class="pf-med-l" id="p-3d-attente" style="display:none">'
+      + '<button type="button" id="p-3d-publier">${T("Publier quand même")}</button>'
+      + '<button type="button" id="p-3d-rejeter">${T("Rejeter le modèle")}</button></div>'
+      + '<div class="pf-med-l" id="p-3d-l" style="display:none">'
+      + '<span class="aide" id="p-3d-etat"></span>'
+      + '<button type="button" id="p-3d-refaire" >${T("Refaire le rendu")}</button>'
+      + '<button type="button" id="p-3d-retirer">${T("Retirer l’aperçu 3D")}</button></div>'
+      + '</div>'
+      + '<div class="vues" id="p-vues"></div>'
+      + '</div></div>'
+      /* ⚠ LES MÉDIAS (2026-10-07, sa demande : « Sophie mesure 1,68 m et porte
+         un S », « une courte vidéo de 5 secondes qui montre le tombé », « un 360
+         degrés »). Tout est FACULTATIF : une fiche sans médias s affiche en
+         boutique exactement comme avant. La taille portée se CHOISIT parmi les
+         tailles offertes — tapée, elle finirait par annoncer une taille que la
+         fiche ne vend pas. */
+      + '<div hidden aria-hidden="true" id="p-med-carte">'
+      + '<div class="pf-med">'
+      + ch('p-mq-prenom', '${T("Prénom du mannequin")}', { placeholder: '${T("Ex : Sophie")}' })
+      + ch('p-mq-cm', '${T("Taille du mannequin (cm)")}', { type: 'number', min: 120, pas: '1', placeholder: '${T("Ex : 168")}' })
+      + sel('p-mq-taille', '${T("Taille portée")}', [{ v: '', l: '—' }])
+      + '</div>'
+      + '<div class="aide" id="p-mq-apercu" style="margin-top:.35rem"></div>'
+      + '<div class="pf-med-l">'
+      + '<button type="button" id="p-vid-choisir"><span class="ic">🎬</span> ${T("Choisir une vidéo (MP4, WebM)")}</button>'
+      + '<span id="p-vid-apercu"></span>'
+      + '<span class="aide" id="p-vid-etat"></span>'
+      + '<button type="button" id="p-vid-retirer" style="display:none">${T("Retirer la vidéo")}</button></div>'
+      + '<div class="pf-med-l">'
+      + '<button type="button" id="p-360-choisir"><span class="ic">🔄</span> ${T("Choisir les vues 360° (8 à 36 images)")}</button>'
+      + '<span class="aide" id="p-360-etat"></span>'
+      + '<button type="button" id="p-360-retirer" style="display:none">${T("Tout retirer")}</button></div>'
+      + '<div id="p-360-bande"></div>'
+      /* L'APERÇU 3D GÉNÉRÉ (2026-10-18, sa décision : « Image to 3D » de The New Black — la vue 360° en images est
+         retirée). Devant ET dos exigés (sinon le bouton est désactivé, avec la raison) ; ≈ 0,65 $ US (10 crédits). La
+         barre d'étapes, la conformité et, sous le seuil, « Publier quand même / Rejeter ». */
+      + '</div>'      + '</div></div>');
+
     // 1 — Identité ET classement (fusionnées : elles décrivent la même chose,
     // et les séparer obligeait à un aller-retour pour une poignée de listes).
     h.push('<div class="etape">'
@@ -652,7 +764,7 @@ function pageProduit(id) {
       + '<div class="paire"><input id="p-poids" type="number" step="0.001" min="0" placeholder="${T("Ex : 350")}">'
       + '<select id="p-unite" aria-label="${T("Unité du poids")}"><option value="g">g</option><option value="kg">kg</option>'
       + '<option value="lb">lb</option></select></div>'
-      + '<div class="aide" style="margin-top:.2rem">${T("Sert au calcul des frais d’expédition.")}</div></div>'
+      + '</div>'
       // ⚠ LE SKU EST VISIBLE, en lecture seule. Un code attribué « quelque part
       // plus tard » ne peut ni être lu, ni recopié sur une étiquette, ni
       // vérifié. Il se calcule dès que la catégorie est choisie.
@@ -665,8 +777,12 @@ function pageProduit(id) {
       // La redaction par IA passe par le PONT : la fenetre envoie la photo et les
       // renseignements, le SITE interroge le service avec sa cle. Rien ne sort
       // d ici, aucune cle ne voyage.
-      + '<div style="margin-top:.35rem">'
-      + '<button type="button" id="p-ia"><span class="ic">✨</span> ${T("Rédiger avec l’IA")}</button></div></div>'
+      + '<div class="pf-ia">'
+      + '<button type="button" id="p-ia"><span class="ic">✨</span> ${T("Rédiger avec l’IA")}</button>'
+      + '<span class="ed-seg" id="p-ia-ton" role="group" aria-label="${T("Ton de la description")}">'
+      + '<button type="button" data-ton="chaleureux" class="on">${T("Chaleureux")}</button>'
+      + '<button type="button" data-ton="sobre">${T("Sobre")}</button>'
+      + '<button type="button" data-ton="court">${T("Court")}</button></span></div></div>'
       + '</div></div>'
       + '<div class="cote pf-bas">'
       + '<div class="carte"><h2>${T("Classement")}</h2><div class="pf-cl">'
@@ -689,7 +805,7 @@ function pageProduit(id) {
             { v: 'Solde', l: '${T("En solde")}' }].concat(opt(CTX.etiquettes, 'cle', 'libelle')))
       + sel('p-fourn', '${T("Fournisseur")}', rien.concat(opt(CTX.fournisseurs, 'id', 'nom')))
       + '</div></div>'
-      + '<div class="carte"><h2>${T("Prix")}</h2>'
+      + '<div class="carte sans-solde" id="p-prix-carte"><h2>${T("Prix")}</h2>'
       + '<div class="prixgrille">'
       + ch('p-prix', '${T("Prix de vente ($)")}', { requis: true, argent: true })
       + '<div class="ch"><label for="p-solde">${T("Prix soldé ($)")}'
@@ -700,7 +816,8 @@ function pageProduit(id) {
       // Les rabais rapides sous TOUTE la carte (2026-09-30) : sous le seul champ
       // du prix solde, la carte plus etroite les coupait au cinquieme.
       + '<div id="p-rabais" class="rabais"></div>'
-      + '<div class="aide" id="p-marge" style="margin-top:.5rem"></div>'
+      + '<div class="aide" id="p-marge" style="margin-top:.7rem"></div><div class="pf-marge-barre" id="p-marge-barre" hidden><i></i></div>'
+      + '<div class="pf-sw">' + szInter('p-solde-on', '${T("Mettre en solde")}', '', false) + '</div>'
       + '<div id="p-alerte" style="display:none;color:var(--tx-err);font-size:.78rem;margin-top:.4rem"></div></div>'
       + '</div></div>');
 
@@ -737,71 +854,6 @@ function pageProduit(id) {
       + '<div class="aide" id="p-coul-vide" style="margin-top:.3rem">${T("Aucune couleur choisie.")}</div>'
       + '</div></div>');
 
-    // 5 — Photos : principale, vues supplémentaires, et par couleur
-    h.push('<div class="etape">'
-      // ⚠ LA VIGNETTE EST LE CONTROLE, plus un bouton a cote d elle. Un bouton
-      // « Retirer » pose sous la carte n indique pas a quelle photo il
-      // s applique, et il occupait la place d une action principale pour un
-      // geste secondaire. On clique la photo pour la choisir, on clique la
-      // pastille rouge de son coin pour la retirer — la ou l oeil est deja.
-      /* ⚠ COTE A COTE, SANS TEXTE D AIDE (demande le 2026-08-07) : la vignette
-         principale laissait toute sa moitie droite vide, et les deux phrases
-         d explication n apprenaient rien apres la premiere utilisation. Le
-         MAXIMUM, seul renseignement qui compte, vit dans le TITRE. */
-      + '<div class="carte"><div class="p-verrou-photos" role="status"></div><h2 id="p-vues-titre">Photos</h2>'
-      + '<div class="ligne-photos">'
-      + '<div class="vue-principale">'
-      + '<div class="vign" id="p-vign" title="${T("Photo principale — cliquer pour choisir, ou déposer une secondaire ici")}">${T("choisir une photo")}</div>'
-      + '<div class="lgd-principale">${T("Photo principale")}</div>'
-      + '<button type="button" id="p-detourer" class="mini-decor" disabled '
-      + 'title="${T("Détourer la photo et poser un décor (studio, jardin, Paris…)")}"><span class="ic">✂</span> ${T("Décor")}</button>'
-      + '<button type="button" id="p-fibre" class="mini-decor" disabled '
-      + 'title="${T("Un gros plan sur la matière, tiré de la photo principale, ajouté aux photos")}"><span class="ic">🔍</span> ${T("Gros plan fibre")}</button>'
-      + '<button type="button" id="p-studio" class="mini-decor" disabled '
-      + 'title="${T("Ouvrir le Studio virtuel pour cet article : les photos créées reviennent ici, dans leur case")}"><span class="ic">📷</span> ${T("Créer au studio")}</button></div>'
-      + '<div class="aide p-studio-attente" id="p-studio-attente" style="display:none"></div>'
-      + '<div class="vues" id="p-vues"></div>'
-      + '</div></div>'
-      /* ⚠ LES MÉDIAS (2026-10-07, sa demande : « Sophie mesure 1,68 m et porte
-         un S », « une courte vidéo de 5 secondes qui montre le tombé », « un 360
-         degrés »). Tout est FACULTATIF : une fiche sans médias s affiche en
-         boutique exactement comme avant. La taille portée se CHOISIT parmi les
-         tailles offertes — tapée, elle finirait par annoncer une taille que la
-         fiche ne vend pas. */
-      + '<div class="carte plein" id="p-med-carte"><h2>${T("Médias")}</h2>'
-      + '<div class="pf-med">'
-      + ch('p-mq-prenom', '${T("Prénom du mannequin")}', { placeholder: '${T("Ex : Sophie")}' })
-      + ch('p-mq-cm', '${T("Taille du mannequin (cm)")}', { type: 'number', min: 120, pas: '1', placeholder: '${T("Ex : 168")}' })
-      + sel('p-mq-taille', '${T("Taille portée")}', [{ v: '', l: '—' }])
-      + '</div>'
-      + '<div class="aide" id="p-mq-apercu" style="margin-top:.35rem"></div>'
-      + '<div class="pf-med-l">'
-      + '<button type="button" id="p-vid-choisir"><span class="ic">🎬</span> ${T("Choisir une vidéo (MP4, WebM)")}</button>'
-      + '<span id="p-vid-apercu"></span>'
-      + '<span class="aide" id="p-vid-etat"></span>'
-      + '<button type="button" id="p-vid-retirer" style="display:none">${T("Retirer la vidéo")}</button></div>'
-      + '<div class="pf-med-l">'
-      + '<button type="button" id="p-360-choisir"><span class="ic">🔄</span> ${T("Choisir les vues 360° (8 à 36 images)")}</button>'
-      + '<span class="aide" id="p-360-etat"></span>'
-      + '<button type="button" id="p-360-retirer" style="display:none">${T("Tout retirer")}</button></div>'
-      + '<div id="p-360-bande"></div>'
-      /* L'APERÇU 3D GÉNÉRÉ (2026-10-18, sa décision : « Image to 3D » de The New Black — la vue 360° en images est
-         retirée). Devant ET dos exigés (sinon le bouton est désactivé, avec la raison) ; ≈ 0,65 $ US (10 crédits). La
-         barre d'étapes, la conformité et, sous le seuil, « Publier quand même / Rejeter ». */
-      + '<div class="pf-med-l" id="p-3dg-l">'
-      + '<button type="button" id="p-3d-gen"><span class="ic">🧊</span> ${T("Générer l’aperçu 3D")}</button>'
-      + '<span id="p-3d-vues"></span>'
-      + '<span class="aide" id="p-3dg-etat"></span></div>'
-      + '<ol id="p-3dg-etapes" style="display:none"></ol>'
-      + '<div class="pf-med-l" id="p-3d-attente" style="display:none">'
-      + '<button type="button" id="p-3d-publier">${T("Publier quand même")}</button>'
-      + '<button type="button" id="p-3d-rejeter">${T("Rejeter le modèle")}</button></div>'
-      + '<div class="pf-med-l" id="p-3d-l" style="display:none">'
-      + '<span class="aide" id="p-3d-etat"></span>'
-      + '<button type="button" id="p-3d-refaire" title="${T("Retraite l’aperçu posé au poste — sans nouvel appel payant")}">${T("Refaire le rendu")}</button>'
-      + '<button type="button" id="p-3d-retirer">${T("Retirer l’aperçu 3D")}</button></div>'
-      + '</div></div>');
-
     /* 5 bis — PHOTOS PAR COULEUR, ÉTAPE À PART (2026-10-09, sa demande : « que les espaces pour
        les photos puissent prendre plusieurs couleurs sans déformer l’assistant ; au besoin ajoute
        des étapes »). Coincée sous les vues et les médias, la rangée de cases débordait dès cinq ou
@@ -818,13 +870,12 @@ function pageProduit(id) {
       + '<div class="aide" id="p-parcoul-aide" style="margin-bottom:.5rem"></div>'
       + '<div class="vues" id="p-parcoul"></div>'
       + '<div style="margin-top:.5rem"><button type="button" id="p-cv-gen" style="display:none" '
-      + 'title="${T("Teinter les photos du produit pour chaque couleur — local, sans crédit ni service")}">'
+      + '>'
       + '${T("Tout générer")}</button></div></div>'
       + '</div>');
 
     /* 5 ter — MESURES DU VÊTEMENT (7.13.0) : facultatives, elles font la taille suggérée. */
     h.push('<div class="etape"><div class="carte plein" id="p-mesv-carte"><h2>${T("Mesures du vêtement")}</h2>'
-      + '<div class="aide" style="margin-bottom:.7rem">${T("Facultatif : sert à suggérer la bonne taille à chaque client. Mesurez une taille — sur la photo ou au ruban — et les autres se complètent toutes seules.")}</div>'
       + '<div class="mesv-barre"><div class="mv-ch"><label for="p-mesv-type">${T("Type")}</label><select id="p-mesv-type">'
       + '<option value="haut">${T("Haut (chandail, chemisier, veste)")}</option><option value="bas">${T("Bas (pantalon, jupe, short)")}</option>'
       + '<option value="robe">${T("Robe ou combinaison")}</option><option value="aucun">${T("Aucune mesure")}</option></select></div>'
@@ -901,7 +952,7 @@ function pageProduit(id) {
       // ce que l ecran montre deja.
       + '<div class="ch"><label for="p-limclient">${T("Limite par client")}</label>'
       + '<input id="p-limclient" type="number" min="1" step="1" placeholder="${T("aucune")}" '
-      + 'title="${T("Unités de ce produit qu’un même client peut acheter, toutes commandes confondues (par adresse courriel).")}"></div>'
+      + '></div>'
       + '</div>'
       // L ACCES ANTICIPE DES PALIERS DE FIDELITE (2026-10-07) : avant la date, le
       // produit n est visible qu aux paliers qui y ont droit (Fidelisation > Paliers).
@@ -917,9 +968,7 @@ function pageProduit(id) {
       // croyant l emplacement facultatif, alors qu il est obligatoire des que la
       // quantite depasse zero.
       + (CTX.entrepots.length
-          ? '<div class="aide" style="margin:-.2rem 0 .5rem">${T("Au moins une variante doit porter")} '
-            + '${T("une quantité, et un emplacement d’entrepôt est obligatoire dès qu’une quantité")} '
-            + '${T("dépasse zéro.")}</div>'
+          ? ''
           : '<div class="aide" style="margin:-.2rem 0 .5rem;color:var(--tx-att)"><span class="ic">⚠</span> ${T("Aucun emplacement ")}'
             + '${T("configuré — créez-en un dans Inventaire → Entrepôt pour pouvoir en assigner un aux")} '
             + '${T("variantes en stock.")}</div>')
@@ -956,9 +1005,9 @@ function pageProduit(id) {
       // ⚠ Les obligations du prix rejoignent la PREMIERE etape avec ses champs :
       // une etape ne peut pas exiger un champ qui vit ailleurs — le fil dirait
       // « incomplet » sur une etape ou rien ne manque a l ecran.
+      { t: 'Photos',                  obl: [] },
       { t: '${T("Identité, prix et poids")}', obl: ['p-nom', 'p-cat', 'p-poids', 'p-prix', 'p-cout'] },
       { t: '${T("Tailles et couleurs")}',     obl: [] },
-      { t: 'Photo',                   obl: [] },
       { t: '${T("Couleurs")}',                obl: [] },
       /* « Composition et entretien » A PART (2026-10-20, sa demande : « tu vas me mettre ça dans une
          section à part ») : sous les mesures, la carte tombait sous le pied de la fenêtre. */
@@ -966,7 +1015,7 @@ function pageProduit(id) {
       { t: '${T("Composition et entretien")}', obl: [] },
       { t: '${T("Mise en marché")}',          obl: [] },
       { t: 'Stock',                   obl: [] }
-    ], function(i){ if (i === 2) { dessinerVues(); dessinerMedias(); } if (i === 3) dessinerVues(); if (i === 4) dessinerMesures(); if (i === 5) dessinerEntretien(); if (i === 7) majStock(); });
+    ], function(i){ if (i === 0) { dessinerVues(); dessinerMedias(); } if (i === 3) dessinerVues(); if (i === 4) dessinerMesures(); if (i === 5) dessinerEntretien(); if (i === 7) majStock(); });
 
     bEnr.disabled = !(ID ? CTX.peutModifier : CTX.peutAjouter);
     chargerCouts();   // les coûts numériques de l'article (journal des appels payants)
@@ -979,7 +1028,30 @@ function pageProduit(id) {
      les gardes d enregistrer() dans le meme ordre ; un clic mene a l etape. */
   var FICHE_T = null;
   function majFicheBientot(){ clearTimeout(FICHE_T); FICHE_T = setTimeout(majFiche, 60); }
+  /* LES PASTILLES (2026-10-26) : un menu court devient une rangée de pastilles. Le <select> reste la source :
+     une pastille le pose et émet « change » ; majPuces() relit le menu (fiche ouverte, brouillon repris). */
+  function pucer(id){
+    var se = document.getElementById(id); if (!se || se.options.length > 7) return;
+    var chp = se.parentNode; if (!chp || !chp.classList) return; chp.classList.add('a-puces');
+    var z = document.createElement('div'); z.className = 'pf-puces'; z.setAttribute('data-puces', id);
+    // « Non précisé » n'a pas de pastille : on DÉSÉLECTIONNE en recliquant la pastille choisie.
+    z.innerHTML = Array.prototype.filter.call(se.options, function(o){ return o.value !== ''; }).map(function(o){
+      return '<button type="button" data-v="' + esc(o.value) + '">' + esc(o.textContent) + '</button>';
+    }).join('');
+    z.onclick = function(ev){
+      var b = ev.target.closest && ev.target.closest('[data-v]'); if (!b) return;
+      var v = b.getAttribute('data-v'); se.value = (se.value === v) ? '' : v; se.dispatchEvent(new Event('change', { bubbles: true })); majPuces();
+    };
+    chp.appendChild(z); majPuces();
+  }
+  function majPuces(){
+    document.querySelectorAll('[data-puces]').forEach(function(z){
+      var se = document.getElementById(z.getAttribute('data-puces')); if (!se) return;
+      z.querySelectorAll('[data-v]').forEach(function(b){ if (b.classList) b.classList.toggle('on', b.getAttribute('data-v') === se.value); });
+    });
+  }
   function majFiche(){
+    majPuces();
     var z = document.getElementById('pf-fiche');
     if (!z || !CTX) return;
     var nom = String(val('p-nom') || '').trim();
@@ -1023,13 +1095,13 @@ function pageProduit(id) {
     // (2026-10-04, sa demande) : celle qui est remplie prend un crochet vert au lieu
     // de disparaitre — on voit ce qui est fait, pas seulement ce qui reste.
     var exig = [
-      [0, '${T("Nom du produit")}', !!nom],
-      [0, '${T("Catégorie")}', !!val('p-cat')],
-      [0, '${T("Poids unitaire")}', !!String(val('p-poids') || '').trim()],
-      [0, '${T("Prix de vente")}', p > 0],
-      [0, '${T("Coût d’achat")}', co > 0],
-      [1, '${T("Au moins une taille et une couleur")}', !!(t.length && c.length)],
-      [2, '${T("Photo principale")}', !!IMAGE]
+      [0, '${T("Photo principale")}', !!IMAGE],
+      [1, '${T("Nom du produit")}', !!nom],
+      [1, '${T("Catégorie")}', !!val('p-cat')],
+      [1, '${T("Poids unitaire")}', !!String(val('p-poids') || '').trim()],
+      [1, '${T("Prix de vente")}', p > 0],
+      [1, '${T("Coût d’achat")}', co > 0],
+      [2, '${T("Au moins une taille et une couleur")}', !!(t.length && c.length)]
     ];
     if (c.length > 1) exig.push([3, '${T("Une photo par couleur secondaire")}',
       c.slice(1).every(function(x){ return !!(PARCOUL[x] && (PARCOUL[x].main || PARCOUL[x].principale)); })]);
@@ -1079,6 +1151,17 @@ function pageProduit(id) {
     majNom();
     var bIa = document.getElementById('p-ia');
     if (bIa) bIa.onclick = rediger;
+    var tons = document.getElementById('p-ia-ton');
+    if (tons) tons.onclick = function(ev){
+      var b = ev.target.closest && ev.target.closest('[data-ton]'); if (!b) return;
+      tons.querySelectorAll('[data-ton]').forEach(function(x){ if (x.classList) x.classList.toggle('on', x === b); });
+    };
+    var sw = document.getElementById('p-solde-on');
+    if (sw) sw.onchange = function(){
+      if (!this.checked) { var so = document.getElementById('p-solde'); if (so && so.value) { so.value = ''; so.dispatchEvent(new Event('input', { bubbles: true })); } }
+      majMarge();
+    };
+    pucer('p-genre'); pucer('p-age');
     majIa();
     // Le SKU suit la categorie — sauf sur une fiche existante, dont le code est
     // deja attribue : le recalculer lui en donnerait un autre a chaque ouverture.
@@ -1307,9 +1390,7 @@ function pageProduit(id) {
     // ⚠ L explication passe par l INFOBULLE, pas par une ligne sous le bouton.
     // Une phrase d aide permanente occupe la place du formulaire pour dire une
     // chose qu on n a besoin de lire qu une fois.
-    b.title = pret
-      ? '${T("Analyse la photo du produit et propose une description.")}'
-      : '${T("Ajoutez d’abord une photo à l’étape « Photo » : le service regarde le vêtement.")}';
+
   }
 
   function rediger(){
@@ -1317,7 +1398,8 @@ function pageProduit(id) {
     b.disabled = true; dire('${T("Rédaction en cours…")}');
     var cat = (CTX.categories.find(function(c){ return c.cle === val('p-cat'); }) || {}).libelle || '';
     P.appeler('produit:decrire', {
-      nom: val('p-nom'), categorie: cat, couleurs: couleurs(), imageDataUrl: IMAGE
+      nom: val('p-nom'), categorie: cat, couleurs: couleurs(), imageDataUrl: IMAGE,
+      ton: ((document.querySelector('#p-ia-ton .on') || {}).getAttribute ? document.querySelector('#p-ia-ton .on').getAttribute('data-ton') : 'chaleureux')
     }).then(function(r){
       b.disabled = false;
       if (!r || !r.ok) { dire(expliquer(r) + (r && r.detail ? ' — ' + r.detail : ''), 'err'); return; }
@@ -1478,9 +1560,7 @@ function pageProduit(id) {
         var sousCout = c > 0 && sp > 0 && sp < c;
         var actif = s > 0 && p > 0 && Math.round((1 - s / p) * 100) === pct;
         return '<button type="button" data-pct="' + pct + '"' + (actif ? ' class="on"' : '')
-          + (!p || sousCout ? ' disabled' : '')
-          + ' title="' + (sousCout ? '${T("sous le coût d’acquisition")}'
-              : (actif ? '${T("recliquez pour retirer le rabais")}' : (sp ? szArgentChamp(sp) : ''))) + '">'
+          + (!p || sousCout ? ' disabled' : '') + '>'
           + '−' + pct + ' %</button>';
       }).join('');
     }
@@ -1513,9 +1593,15 @@ function pageProduit(id) {
       } else { al.style.display = 'none'; }
     }
 
+    // « Mettre en solde » (2026-10-26) : un prix soldé posé (fiche, brouillon, rabais rapide) ouvre la bascule.
+    var sw = document.getElementById('p-solde-on'), pc = document.getElementById('p-prix-carte');
+    if (sw && s > 0) sw.checked = true;
+    if (pc && sw && pc.classList) pc.classList.toggle('sans-solde', !sw.checked);
     var el = document.getElementById('p-marge'); if (!el) return;
-    if (!(eff > 0) || !(c > 0)) { el.textContent = ''; return; }
+    var mb = document.getElementById('p-marge-barre');
+    if (!(eff > 0) || !(c > 0)) { el.textContent = ''; if (mb) mb.hidden = true; return; }
     var m = eff - c, pct = Math.round((m / eff) * 100);
+    if (mb) { mb.hidden = false; var mi = mb.querySelector && mb.querySelector('i'); if (mi) mi.style.width = Math.max(2, Math.min(100, pct)) + '%'; if (mi && mi.classList) mi.classList.toggle('perte', m <= 0); }
     el.innerHTML = '${T("Marge :")} <strong>' + szArgent(m) + '</strong> (' + szNombre(pct, 1) + ' %)'
       + (s > 0 && s < p ? ' ${T("— calculée sur le prix soldé")}' : '')
       + (m <= 0 ? ' <span style="color:var(--tx-err)">${T("— vente à perte")}</span>' : '');
@@ -2516,14 +2602,14 @@ function pageProduit(id) {
           + ' title="${T("Déplacer vers la case suivante")}" aria-label="${T("Déplacer vers la case suivante")} — ' + nom + '">›</button>'
           + '</div>' : '';
         return '<div class="vue"><div class="cadre' + (src ? ' pleine" draggable="true' : '') + '" data-vue="' + esc(cle) + '"'
-          + (src ? ' title="${T("Glisser sur une autre case pour l’y déplacer ou l’échanger, ou sur la principale")}"' : '') + '>'
+          + (src ? ' ' : '') + '>'
           + (src ? '<img src="' + esc(src) + '" alt="" draggable="false">' : '${T("ajouter")}') + '</div>'
           + (src ? '<button type="button" class="x" data-vuex="' + esc(cle) + '" title="${T("Retirer")}">×</button>' : '')
           + depl
           /* (2026-10-26, sa demande) UN DOS A LA FOIS : une fois une photo marquée « Dos », le bouton ne reste que
              sur elle (pour la démarquer) ; il revient sur les autres quand on la démarque. */
           + ((src && cle.indexOf('libre') === 0 && (!DOS_SRC || src === DOS_SRC)) ? '<button type="button" class="dos' + (src === DOS_SRC ? ' on' : '')
-            + '" data-vuedos="' + esc(cle) + '" title="${T("Photo du dos — projetée sur l’aperçu 3D")}">${T("Dos")}</button>' : '')
+            + '" data-vuedos="' + esc(cle) + '" >${T("Dos")}</button>' : '')
           + '<div class="lgd">' + esc(nomVue(cle)) + '</div></div>';
       }).join('');
     }
@@ -3015,6 +3101,10 @@ function pageProduit(id) {
 
   function montrerImage(src){
     dessiner3d();   // le devant de l'aperçu 3D est la photo principale
+    /* (2026-10-26, sa remarque « la description IA ne marche pas ») Le bouton « Rédiger avec l'IA » suit la photo
+       principale ICI, à chaque affichage : à l'ouverture d'une fiche existante, il restait grisé — remplir() posait la
+       photo sans le réévaluer. */
+    majIa();
     var v = document.getElementById('p-vign'); if (!v) return;
     v.classList.toggle('pleine', !!src);
     v.setAttribute('draggable', src ? 'true' : 'false');
@@ -3304,7 +3394,6 @@ function pageProduit(id) {
     if (!b || !G3D) return;
     var raison = raison3d(), pv = document.getElementById('p-3d-vues');
     b.disabled = G3D.enCours || !!raison;
-    b.title = raison;
     b.innerHTML = G3D.enCours ? '<span class="ic">⏳</span> ${T("Génération en cours…")}'
       : (G3D.forcer ? '<span class="ic">⚠</span> ${T("Regénérer quand même")}'
         : '<span class="ic">🧊</span> ' + (MOD3D ? '${T("Regénérer l’aperçu 3D")}' : '${T("Générer l’aperçu 3D")}'))
@@ -4285,7 +4374,7 @@ function pageProduit(id) {
        dans l étape, ou ses photos, mesures ou consignes qui diffèrent de l ouverture. */
   var MODIF = {}, SIG0 = null;
   function etapeSigs(){
-    return { 2: (IMAGE || '') + '|' + JSON.stringify(VUES || {}) + '|' + (DOS_SRC || ''), 4: JSON.stringify(MESV || {}),
+    return { 0: (IMAGE || '') + '|' + JSON.stringify(VUES || {}) + '|' + (DOS_SRC || ''), 4: JSON.stringify(MESV || {}),
       5: JSON.stringify(entPourEnvoi()) };
   }
   function etapesSuivre(){
@@ -4309,7 +4398,7 @@ function pageProduit(id) {
       var k = +b.getAttribute('data-etape');
       var m = !!MODIF[k] || (sig[k] != null && sig[k] !== SIG0[k]);
       b.classList.toggle('modif', m);
-      if (m) b.title = '${T("Section modifiée depuis l’ouverture — enregistrez pour la conserver")}'; else b.removeAttribute('title');
+      b.removeAttribute('title');
     });
   }
   function majPastille(){
@@ -4457,7 +4546,7 @@ function pageProduit(id) {
   function brCapturer(){
     return {
       ts: Date.now(),
-      etape: Assist.i,
+      etape: Assist.i, ordre: 'photos-d-abord',
       f: {
         nom: val('p-nom'), cat: val('p-cat'), sku: val('p-sku'), marque: val('p-marque'),
         desc: val('p-desc'), genre: val('p-genre'), age: val('p-age'), style: val('p-style'),
@@ -4543,7 +4632,7 @@ function pageProduit(id) {
     dessinerJetons(); majMarge(); majIa(); majNom();
     // On repart de l'étape où la personne s'était arrêtée : la ramener à la
     // première l'obligerait à retraverser ce qu'elle avait déjà rempli.
-    if (typeof d.etape === 'number') Assist.aller(Math.max(0, Math.min(7, d.etape)));
+    if (typeof d.etape === 'number') Assist.aller(Math.max(0, Math.min(7, d.ordre === 'photos-d-abord' ? d.etape : ([1, 2, 0, 3, 4, 5, 6, 7][d.etape] || 0))));
     else Assist.fil();
     // Le brouillon restauré est déjà celui du stockage : sans cette ligne, le
     // premier tic le réécrirait à l'identique.
@@ -4723,25 +4812,23 @@ function pageProduit(id) {
        plus jamais rempli depuis que le retour du Studio RETIRE lui-même l originale (poserDuStudio, 2026-10-20).
        Le bloc ne pouvait plus s exécuter et laissait croire à une question qui ne venait jamais. */
     if (!tailles().length || !couleurs().length) {
-      Assist.aller(1);
+      Assist.aller(2);
       dire('${T("Choisissez au moins une taille ET une couleur avant d’enregistrer.")}', 'err');
       return;
     }
     if (!IMAGE) {
-      Assist.aller(2);
+      Assist.aller(0);
       dire('${T("La photo principale est obligatoire.")}', 'err');
       return;
     }
     // Les médias sont facultatifs, mais un mannequin à moitié décrit ou une
     // vue 360 trop courte se refusent ICI, l étape sous les yeux.
+    /* (2026-10-26) Le mannequin n'est plus à l'écran (sa demande) : une fiche ancienne au mannequin incomplet ne
+       doit pas bloquer l'enregistrement sur des champs qu'on ne voit plus — on n'envoie alors aucun mannequin. */
     var MQ = lireMannequin();
-    if (MQ === false) {
-      Assist.aller(2); dessinerMedias();
-      dire('${T("Mannequin : le prénom, la taille (120 à 220 cm) et la taille portée vont ensemble.")}', 'err');
-      return;
-    }
+    if (MQ === false) MQ = null;
     if (VUE360.length && (VUE360.length < 8 || VUE360.length > 36)) {
-      Assist.aller(2);
+      Assist.aller(0);
       dire('${T("La vue 360° demande de 8 à 36 images.")}', 'err');
       return;
     }
@@ -4882,9 +4969,9 @@ function pageProduit(id) {
         // Le DOUBLE FILET du pont : on RAMÈNE à l’étape fautive, exactement
         // comme les gardes locales — un refus sans l’écran concerné sous les
         // yeux oblige à chercher ce qui manque.
-        if (r && r.motif === 'tailles_couleurs_requises') Assist.aller(1);
-        if (r && r.motif === 'photo_requise') Assist.aller(2);
-        if (r && /^(mannequin_|video_|vue360_)/.test(String(r.motif || ''))) Assist.aller(2);
+        if (r && r.motif === 'tailles_couleurs_requises') Assist.aller(2);
+        if (r && r.motif === 'photo_requise') Assist.aller(0);
+        if (r && /^(mannequin_|video_|vue360_)/.test(String(r.motif || ''))) Assist.aller(0);
         if (r && r.motif === 'stock_requis') Assist.aller(7);
         // LE NIP DES PHOTOS : demandé (et redemandé s'il est faux) ; annuler laisse la fiche telle qu'à l'écran.
         if (r && (r.motif === 'photos_nip_requis' || r.motif === 'photos_nip_faux')) {

@@ -1437,7 +1437,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
   function vendre(pid, b){
     b.disabled = true;
     appeler('stock:vendre', [pid]).then(function(r){
-      dire(r.ok ? (r.nom || '${T("Le produit")}') + ' ${T("est maintenant en vente.")}' : expliquer(r), r.ok ? 'bon' : 'err');
+      /* (2026-10-26) Si le produit entre en accès anticipé (paliers), on le dit : « en vente » seul faisait croire
+         que les visiteurs le voyaient déjà (sa Chemise Walla). */
+      dire(r.ok ? (r.nom || '${T("Le produit")}') + (r.ouvertLe ? ' ${T("est en vente — en accès anticipé, ouvert à tous le")} ' + r.ouvertLe + '.' : ' ${T("est maintenant en vente.")}') : expliquer(r), r.ok ? (r.ouvertLe ? 'att' : 'bon') : 'err');
       if (r.ok) chargerOnglet();
       else b.disabled = false;
     });

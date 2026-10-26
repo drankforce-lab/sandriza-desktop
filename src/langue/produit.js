@@ -304,6 +304,11 @@ module.exports = {
    * le texte rendu, le POSEUR la source : il faut les deux formes.
    * ══════════════════════════════════════════════════════════════════════════ */
   'Rédiger avec l’IA': 'Write with AI',
+  'Ton de la description': 'Description tone',
+  'Chaleureux': 'Warm',
+  'Sobre': 'Plain',
+  'Court': 'Short',
+  'Mettre en solde': 'Put on sale',
   'Mannequin IA': 'AI model',
   'Décor': 'Scene',
   'Détourer et changer le décor': 'Cut out and change the scene',
