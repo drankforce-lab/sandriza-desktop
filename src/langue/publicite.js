@@ -96,6 +96,7 @@ module.exports = {
   'VIP (5+ cmd ou 500 $+)': 'VIP (5+ orders or $500+)',
   'Inactifs (90j+)': 'Inactive (90d+)',
   'Acheteurs promo': 'Promo buyers',
+  'Tous': 'All',
   'Ont utilisé une offre': 'Have used an offer',
   'Acheteurs promo Ont utilisé une offre': 'Promo buyers Have used an offer',
   'Aucun client dans ce segment.': 'No customer in this segment.',
@@ -218,6 +219,8 @@ module.exports = {
   '💬 Aucune évaluation chat pour le moment. Les données apparaissent après que des clients aient noté leur conversation.':
     '💬 No chat rating for now. The data appears once customers have rated their conversation.',
   'Commentaires récents': 'Recent comments',
+  'satisfait': 'satisfied',
+  'insatisfait': 'dissatisfied',
   'Taux de satisfaction': 'Satisfaction rate',
   '% Taux de satisfaction': '% Satisfaction rate',
   'Répartition des évaluations': 'Breakdown of the ratings',

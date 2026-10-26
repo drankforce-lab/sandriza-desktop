@@ -139,6 +139,29 @@ button .n.hi{background:rgba(239,68,68,.28);color:var(--tx-err2)}
 .onglets .droite{margin-left:auto}
 /* La tête refaite (2026-10-15, lot F). */
 .ch-renvoi{font-size:.74rem;color:var(--tx2);text-align:right}
+/* ══ LOT F (2026-10-26) ══ ① Les listes a la HAUTEUR DE LEURS LIGNES (avant : la carte s etirait jusqu au pied
+   pour une ligne), et elles retrecissent — donc vont en pages — quand elles ne tiennent plus.
+   ② Le filtre d etat de la file en boutons a choix AU MOT SEUL : les tuiles qui le portaient sont repliees
+   par la regle des chiffres (szTuiles rend '' hors du tableau de bord), le filtre n etait plus atteignable.
+   ③ La satisfaction : un resume (taux, barre coupee, legende) — elle n avait plus aucun chiffre. */
+.corps>.sz-pagee{flex:0 1 auto;min-height:5rem}
+.corps>.sz-pagee>[data-pages]{flex:0 1 auto}
+.ch-filtres{margin-left:.6rem}
+.ch-sat{display:flex;align-items:baseline;gap:.6rem;margin-bottom:.7rem}
+.ch-sat b{font-size:1.6rem;font-weight:750;line-height:1}
+.ch-sat span{font-size:.82rem;color:var(--tx2)}
+.ch-barre{display:flex;height:.7rem;border-radius:99px;overflow:hidden;background:var(--v10);gap:2px}
+.ch-barre i{display:block;height:100%}
+.ch-leg{display:flex;flex-wrap:wrap;gap:.4rem 1.6rem;margin-top:.6rem;font-size:.82rem}
+.ch-leg span{display:inline-flex;align-items:center;gap:.45rem}
+.ch-leg i{width:.6rem;height:.6rem;border-radius:3px}
+.ch-note{font-size:.74rem;color:var(--tx2);margin-top:.6rem}
+.ch-com{display:flex;align-items:flex-start;gap:.8rem;padding:.55rem 0;border-top:1px solid var(--v055)}
+.ch-com:first-child{border-top:none}
+.ch-com .rf-pill{min-width:6.6rem;justify-content:center}
+.ch-com .tx{flex:1 1 auto;min-width:0}
+.ch-com .tx div{font-size:.86rem;white-space:pre-wrap;overflow-wrap:anywhere}
+.ch-com .tx small{display:block;font-size:.72rem;color:var(--tx2);margin-top:.15rem}
 `;
 
 /** Page complète de la fenêtre native « Chat en ligne ». */
@@ -248,8 +271,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
       + tu('open', '${T("Ouvertes")}', cpt('open'), '${T("en cours")}', '')
       + tu('closed', '${T("Fermées")}', cpt('closed'), '${T("terminées")}', '')
       + '</div>');
+    /* Lot F (2026-10-26) : le filtre d etat, au mot seul, a cote de la recherche (crochet garde : data-filtre). */
+    var fb = function(f, lib){ return '<button type="button" data-filtre="' + f + '" class="' + (FILTRE === f ? 'on' : '') + '">' + lib + '</button>'; };
     h += '<div class="carte" style="margin:.6rem 0"><div class="rf-tb">'
       + '<label class="rf-rch" style="max-width:none">${ICO.loupe}<input aria-label="${T("Nom, courriel, téléphone")}" type="search" id="ch-q" placeholder="${T("Nom, courriel, téléphone…")}" value="' + esc(Q) + '"></label>'
+      + '<span class="ed-seg ch-filtres">' + fb('', '${T("Toutes")}') + fb('pending', '${T("En attente")}')
+      + fb('open', '${T("Ouvertes")}') + fb('closed', '${T("Fermées")}') + '</span>'
       + '<span class="rf-droite"><span class="dt">' + rows.length + ' '
       + (rows.length > 1 ? '${T("conversations")}' : '${T("conversation")}')
       + (D.horsLigne ? ' · ' + D.horsLigne + ' ${T("hors ligne")}' : '') + '</span></span></div>'
@@ -360,20 +387,33 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
       + '<div class="sub">' + (s.rate == null ? '${T("aucune évaluation")}' : '${T("des évaluations")}') + '</div></div>'
       + '</div>');
 
-    // Les commentaires en PAGES mesurees (JS_PAGES du socle) : la carte prend la hauteur qui reste.
+    /* Lot F (2026-10-26) : le RESUME, hors de l enveloppe des tuiles (qui rend '' : l onglet n avait plus aucun
+       chiffre). Le taux, une barre coupee satisfaites / insatisfaites, la couverture en une ligne. */
+    if (s.rated) {
+      var VERT = '#4ade80', ROUGE = '#f87171';
+      var pc = function(v){ return Math.round(100 * (v || 0) / s.rated); };
+      h += '<div class="carte"><h2>${T("Répartition des évaluations")}</h2>'
+        + '<div class="ch-sat"><b style="color:' + ((s.rate || 0) >= 70 ? 'var(--tx-ok)' : 'var(--tx-err)') + '">'
+        + (s.rate == null ? '—' : szNombre(s.rate, 1) + ' %') + '</b><span>${T("des évaluations sont satisfaites")}</span></div>'
+        + '<div class="ch-barre"><i style="flex:' + (s.satisfied || 0) + ' 1 0;background:' + VERT + '"></i>'
+        + '<i style="flex:' + (s.unsatisfied || 0) + ' 1 0;background:' + ROUGE + '"></i></div>'
+        + '<div class="ch-leg"><span><i style="background:' + VERT + '"></i>${T("Satisfaites")} <b>' + (s.satisfied || 0) + '</b> (' + pc(s.satisfied) + ' %)</span>'
+        + '<span><i style="background:' + ROUGE + '"></i>${T("Insatisfaites")} <b>' + (s.unsatisfied || 0) + '</b> (' + pc(s.unsatisfied) + ' %)</span></div>'
+        + '<div class="ch-note">' + s.rated + ' ${T("évaluations sur")} ' + (s.total || 0) + ' ${T("conversations")}</div></div>';
+    }
+    // Les commentaires en PAGES mesurees (JS_PAGES du socle) : la carte a la hauteur de ses lignes, au plus ce qui reste.
     h += '<div class="carte sz-pagee"><h2>${T("Commentaires laissés")}</h2>';
     var cs = s.comments || [];
     if (!cs.length) {
       h += '<div class="vide">${T("Aucun commentaire pour l’instant.")}</div>';
     } else {
       h += '<div data-pages="chat-commentaires">' + cs.map(function(c){
-        return '<div style="padding:.35rem 0;border-top:1px solid var(--v055)">'
+        return '<div class="ch-com">'
           + '<span class="rf-pill ' + (c.score === true ? 'vert' : 'rouge') + '">'
           /* ⚠ << satisfait >> et << insatisfait >> etaient ecrits en dur. */
-          + (c.score === true ? '${T("satisfait")}' : '${T("insatisfait")}') + '</span> '
-          + '<strong>' + esc(c.name || '${T("Visiteur")}') + '</strong>'
-          + '<div style="font-size:.86rem;white-space:pre-wrap;overflow-wrap:anywhere">'
-          + esc(c.comment || '') + '</div></div>';
+          + (c.score === true ? '${T("satisfait")}' : '${T("insatisfait")}') + '</span>'
+          + '<div class="tx"><div>' + esc(c.comment || '') + '</div>'
+          + '<small>' + esc(c.name || '${T("Visiteur")}') + (c.ts ? ' · ' + esc(szQuand(c.ts)) : '') + '</small></div></div>';
       }).join('') + '</div>';
       /* ⚠ LE PIED FERME LES COMMENTAIRES, PAS LES TUILES. Les tuiles du haut
          sont des TOTAUX deja calcules (evaluees, satisfaites, taux) : elles

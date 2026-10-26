@@ -90,7 +90,7 @@ module.exports = {
   'Villes': 'Cities',
   'Ville': 'City',
   'Appareils': 'Devices',
-  'Type': 'Type',
+  'Qui visite': 'Who visits',
   'Sources de trafic': 'Traffic sources',
   'Canal': 'Channel',
   'Nouveaux / connus': 'New / returning',

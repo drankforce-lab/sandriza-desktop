@@ -70,6 +70,9 @@ module.exports = {
 
   /* ══ LA SATISFACTION ═══════════════════════════════════════════════════════ */
   'Évaluées': 'Rated',
+  'Répartition des évaluations': 'Breakdown of the ratings',
+  'des évaluations sont satisfaites': 'of the ratings are satisfied',
+  'évaluations sur': 'ratings out of',
   'Satisfaites': 'Satisfied',
   'Insatisfaites': 'Unsatisfied',
   'Taux': 'Rate',

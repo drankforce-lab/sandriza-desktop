@@ -111,12 +111,6 @@ html.jour .graph .b2{background:rgba(168,128,78,.38)}
 .rang{display:flex;align-items:center;gap:.6rem;padding:.4rem 0;border-bottom:1px solid var(--v055)}
 .rang .pos{width:1.3rem;height:1.3rem;border-radius:50%;background:var(--or);color:#1a1a1a;font-size:.6875rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .rang .nm{flex:1;min-width:0;font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.segc{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.55rem;margin-bottom:.9rem}
-.seg{background:var(--f-carte);border:2px solid transparent;border-radius:11px;padding:.6rem .7rem;cursor:pointer}
-.seg.pris{border-color:var(--or)}
-.seg .n{font-size:1.5rem;font-weight:800}
-.seg .l{font-size:.78rem;font-weight:600}
-.seg .d{font-size:.6875rem;color:var(--tx2);margin-top:.1rem}
 .pill{display:inline-block;padding:.1rem .55rem;border-radius:99px;font-size:.7rem;font-weight:600;background:rgba(148,163,184,.18);color:var(--tx-gris2)}
 .champ{margin-bottom:.65rem}
 .champ label{display:block;font-size:.6875rem;text-transform:uppercase;letter-spacing:.04em;color:var(--tx2);margin:0 0 .22rem}
@@ -130,9 +124,6 @@ html.jour .graph .b2{background:rgba(168,128,78,.38)}
 .boite h3{margin:0 0 .7rem;font:700 .98rem/1.3 Georgia,serif}
 .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.85rem;flex-wrap:wrap}
 .pied-boite .gauche{margin-right:auto}
-.satbar{display:flex;align-items:center;gap:.7rem;margin-bottom:.4rem}
-.satbar .track{flex:1;height:10px;background:var(--v10);border-radius:5px;overflow:hidden}
-.satbar .track>div{height:100%;border-radius:5px}
 .vide{padding:1.5rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -141,6 +132,37 @@ html.jour .graph .b2{background:rgba(168,128,78,.38)}
 /* La tête refaite (2026-10-15, lot F) : les onglets en boutons à choix, le corps aux marges des éditeurs. */
 .pub-onglets{flex:0 0 auto;padding:1rem 1.6rem 0}
 .corps{padding:1rem 1.6rem .9rem}
+/* ══ LOT F (2026-10-26) : LES CARTES A LA HAUTEUR DE CE QU ELLES MONTRENT. Une carte de liste (.sz-pagee) prenait
+   TOUTE la hauteur qui restait, meme pour deux lignes : un grand cadre vide jusqu au pied, dans cinq onglets sur
+   six. Elle prend maintenant la hauteur de ses lignes, et RETRECIT quand elles ne tiennent plus — les pages
+   (JS_PAGES) se mesurent alors sur la place offerte, comme avant. */
+.corps>.carte.sz-pagee{flex:0 1 auto;min-height:7rem}
+.corps>.carte.sz-pagee>[data-pages]{flex:0 1 auto}
+.deuxb.borne{flex:0 1 auto;align-items:start;grid-template-rows:auto}
+.deuxb.borne>.carte.sz-pagee{max-height:100%}
+/* Les segments : des boutons a choix AU MOT SEUL (sa regle : un filtre ne porte pas de compte) ; le nombre de
+   clients et la definition du segment choisi sont dits dans le titre de la liste. */
+.pub-segs{flex:0 0 auto}
+.pub-segs .ed-seg{flex-wrap:wrap}
+/* La satisfaction (lot F) : UNE barre coupee satisfaits / insatisfaits et sa legende — deux longues jauges
+   presque vides disaient la meme chose sur deux fois la hauteur. Les commentaires : la pastille d abord. */
+.pub-sat{display:flex;align-items:baseline;gap:.6rem;margin-bottom:.7rem}
+.pub-sat b{font-size:1.6rem;font-weight:750;line-height:1}
+.pub-sat span{font-size:.82rem;color:var(--tx2)}
+.pub-barre{display:flex;height:.7rem;border-radius:99px;overflow:hidden;background:var(--v10);gap:2px}
+.pub-barre i{display:block;height:100%}
+.pub-leg{display:flex;flex-wrap:wrap;gap:.4rem 1.6rem;margin-top:.6rem;font-size:.82rem}
+.pub-leg span{display:inline-flex;align-items:center;gap:.45rem}
+.pub-leg i{width:.6rem;height:.6rem;border-radius:3px}
+.pub-leg b{font-variant-numeric:tabular-nums}
+.pub-note{font-size:.74rem;color:var(--tx2);margin-top:.6rem}
+.pub-com{display:flex;align-items:flex-start;gap:.8rem;padding:.55rem 0;border-bottom:1px solid var(--v055)}
+.pub-com:last-child{border-bottom:none}
+.pub-com .badge{min-width:6.6rem;justify-content:center}
+.pub-com .tx{flex:1 1 auto;min-width:0}
+.pub-com .tx div{font-size:.86rem}
+.pub-com .tx small{display:block;font-size:.72rem;color:var(--tx2);margin-top:.15rem}
+.carte h2 .pub-def{text-transform:none;letter-spacing:0;font-weight:400;color:var(--tx2);margin-left:.6rem}
 `;
 
 /**
@@ -278,10 +300,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
 
   /* ══ SEGMENTS ══════════════════════════════════════════════════════════════ */
   function vueSegments(){
-    var cards = D.segMeta.map(function(m){
-      return '<div class="seg' + (SEGF === m.key ? ' pris' : '') + '" data-seg="' + m.key + '"><div class="n">' + (D.segCounts[m.key] || 0) + '</div><div class="l">' + esc(m.label) + '</div><div class="d">' + esc(m.desc) + '</div></div>';
-    }).join('') + '<div class="seg' + (SEGF === 'promo' ? ' pris' : '') + '" data-seg="promo"><div class="n">' + D.promoCnt + '</div><div class="l">${T("Acheteurs promo")}</div><div class="d">${T("Ont utilisé une offre")}</div></div>';
-    var titre = SEGF === 'all' ? '${T("Tous les clients")}' : SEGF === 'promo' ? '${T("Acheteurs promo")}' : (function(){ var mm = D.segMeta.filter(function(x){ return x.key === SEGF; })[0]; return mm ? mm.label : SEGF; })();
+    /* ══ LOT F (2026-10-26) : le bandeau de six cartes chiffrees devient des boutons a choix AU MOT SEUL (sa regle,
+       feedback_boutons_filtre_sans_compte) ; « Tous » en tete, pour revenir. Le nombre de clients du segment
+       choisi et sa definition sont dits dans le titre de la liste. Crochet garde : data-seg. */
+    var segBt = function(k, lib){ return '<button type="button" data-seg="' + k + '" class="' + (SEGF === k ? 'on' : '') + '">' + esc(lib) + '</button>'; };
+    var cards = '<div class="pub-segs"><div class="ed-seg ls-onglets">' + segBt('all', '${T("Tous")}')
+      + D.segMeta.map(function(m){ return segBt(m.key, m.label); }).join('')
+      + segBt('promo', '${T("Acheteurs promo")}') + '</div></div>';
+    var mmS = D.segMeta.filter(function(x){ return x.key === SEGF; })[0];
+    var defS = SEGF === 'promo' ? '${T("Ont utilisé une offre")}' : (mmS ? mmS.desc : '');
+    var titre = SEGF === 'all' ? '${T("Tous les clients")}' : SEGF === 'promo' ? '${T("Acheteurs promo")}' : (mmS ? mmS.label : SEGF);
     var rows = D.clients.length ? D.clients.map(function(c){
       var col = c.daysSince > 60 ? 'var(--tx-err)' : c.daysSince > 30 ? 'var(--tx-att)' : 'var(--tx-ok)';
       return '<tr><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(ini(c.nom)) + '</span><span class="rf-nom">' + esc(c.nom || '—') + '</span></div></td><td style="color:var(--tx2)">' + esc(c.email || '—') + '</td>'
@@ -291,8 +319,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
         + '<td class="ctr">' + (c.isPromo ? '<span style="color:var(--tx-err2);font-weight:700">✓</span>' : '<span style="color:var(--tx2)">—</span>') + '</td></tr>';
     }).join('') : '<tr><td colspan="7" class="vide">${T("Aucun client dans ce segment.")}</td></tr>';
     var reste = (D.filteredTotal > 50) ? '<tr><td colspan="7" class="vide">+' + (D.filteredTotal - 50) + ' ${T("autres — exportez en CSV pour la liste complète")}</td></tr>' : '';
-    return '<div class="segc">' + cards + '</div>'
-      + '<div class="carte sz-pagee"><h2>' + esc(titre) + ' — ' + nb2(D.filteredTotal, '${T("client")}', '${T("clients")}') + '<span style="display:flex;gap:.5rem">'
+    return cards
+      + '<div class="carte sz-pagee"><h2><span>' + esc(titre) + ' — ' + nb2(D.filteredTotal, '${T("client")}', '${T("clients")}') + (defS ? '<span class="pub-def">' + esc(defS) + '</span>' : '') + '</span><span style="display:flex;gap:.5rem">'
       +   '<button class="ghost mini" data-act="export">${T("⬇ Exporter CSV")}</button>'
       +   (D.avecCourriel > 0 && PEUT.edit ? '<button class="prim mini" data-act="cibler"><span class="ic">📢</span> ${T("Cibler ce segment")}</button>' : '')
       + '</span></h2>'
@@ -408,10 +436,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
   function vueSatisfaction(){
     if (D.indisponible) return '<div class="vide">${T("Module chat non chargé.")}</div>';
     if (!D.rated) return '<div class="carte"><div class="vide"><div style="font-size:2rem"><span class="ic">💬</span></div>${T("Aucune évaluation chat pour le moment.")}<br><span style="font-size:.8rem">${T("Les données apparaissent après que des clients aient noté leur conversation.")}</span></div></div>';
-    var bar = function(v, tot, col){ var pct = tot ? Math.round(v / tot * 100) : 0; return '<div class="satbar"><div class="track"><div style="width:' + pct + '%;background:' + col + '"></div></div><span style="font-size:.78rem;color:var(--tx2);width:66px;text-align:right">' + v + ' (' + pct + '%)</span></div>'; };
+    /* Lot F (2026-10-26) : une barre coupee, une legende, la couverture en une ligne ; les commentaires en rangs,
+       la pastille « satisfait / insatisfait » d abord (la meme que la fenetre Chat). */
+    var pc = function(v){ return D.rated ? Math.round(v / D.rated * 100) : 0; };
+    var VERT = '#4ade80', ROUGE = '#f87171';
     var comments = D.comments.length ? '<div class="carte sz-pagee"><h2>${T("Commentaires récents")}</h2><div data-pages="publicite-commentaires">' + D.comments.map(function(c){
-      return '<div style="display:flex;gap:.7rem;padding:.4rem 0;border-bottom:1px solid var(--v055)"><span style="font-size:1.1rem">' + (c.score ? '<span class="ic">👍</span>' : '<span class="ic">👎</span>') + '</span>'
-        + '<div style="flex:1;min-width:0"><div style="font-size:.83rem">"' + esc(c.comment) + '"</div><div style="font-size:.7rem;color:var(--tx2);margin-top:.1rem">' + esc(c.name) + ' · ' + esc(szQuand(c.date)) + '</div></div></div>';
+      return '<div class="pub-com">' + (c.score ? '<span class="badge ok">${T("satisfait")}</span>' : '<span class="badge err">${T("insatisfait")}</span>')
+        + '<div class="tx"><div>« ' + esc(c.comment) + ' »</div><small>' + esc(c.name) + ' · ' + esc(szQuand(c.date)) + '</small></div></div>';
     }).join('') + '</div></div>' : '';
     /* ⚠ PLUS DE TUILES (2026-10-25, audit) : le taux et toute la carte de
        repartition etaient dans szTuiles(), qui rend '' depuis la regle du
@@ -419,10 +450,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
        n avait plus que ses commentaires, ou rien. Le taux devient UNE LIGNE de la
        carte de repartition, qui sort de l enveloppe. */
     return '<div class="carte"><h2>${T("Répartition des évaluations")}</h2>'
-      +   '<div style="font-size:.85rem;margin-bottom:.5rem">${T("Taux de satisfaction :")} <b style="color:' + (D.rate >= 70 ? 'var(--tx-ok)' : 'var(--tx-err)') + '">' + szNombre(D.rate, 1) + ' %</b></div>'
-      +   '<div style="font-size:.8rem;margin-bottom:.2rem"><span class="ic">👍</span> ${T("Satisfaits")}</div>' + bar(D.satisfied, D.rated, '#4ade80')
-      +   '<div style="font-size:.8rem;margin-bottom:.2rem"><span class="ic">👎</span> ${T("Insatisfaits")}</div>' + bar(D.unsatisfied, D.rated, '#f87171')
-      +   '<div style="font-size:.74rem;color:var(--tx2);margin-top:.4rem">' + D.rated + '${T(" éval. sur ")}' + D.total + ' ${T("conversations")} (' + (D.total ? Math.round(D.rated / D.total * 100) : 0) + '${T("% de couverture)")}</div></div>'
+      +   '<div class="pub-sat"><b style="color:' + (D.rate >= 70 ? 'var(--tx-ok)' : 'var(--tx-err)') + '">' + szNombre(D.rate, 1) + ' %</b><span>${T("Taux de satisfaction")}</span></div>'
+      +   '<div class="pub-barre"><i style="flex:' + D.satisfied + ' 1 0;background:' + VERT + '"></i><i style="flex:' + D.unsatisfied + ' 1 0;background:' + ROUGE + '"></i></div>'
+      +   '<div class="pub-leg"><span><i style="background:' + VERT + '"></i>${T("Satisfaits")} <b>' + D.satisfied + '</b> (' + pc(D.satisfied) + ' %)</span>'
+      +   '<span><i style="background:' + ROUGE + '"></i>${T("Insatisfaits")} <b>' + D.unsatisfied + '</b> (' + pc(D.unsatisfied) + ' %)</span></div>'
+      +   '<div class="pub-note">' + D.rated + '${T(" éval. sur ")}' + D.total + ' ${T("conversations")} (' + (D.total ? Math.round(D.rated / D.total * 100) : 0) + '${T("% de couverture)")}</div></div>'
       + comments;
   }
 
@@ -518,7 +550,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
       }
       return;
     }
-    if (seg && !b) { SEGF = seg.getAttribute('data-seg'); charger().then(function(ok){ if (ok) dessiner(); }); return; }
+    if (seg) { SEGF = seg.getAttribute('data-seg'); charger().then(function(ok){ if (ok) dessiner(); }); return; }
     if (!b) return;
     var g = function(n){ return b.getAttribute(n); };
     if (g('data-tab')) { TAB = g('data-tab'); charger().then(function(ok){ if (ok) dessiner(); }); return; }

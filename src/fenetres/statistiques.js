@@ -131,8 +131,38 @@ html.jour .col{background:rgba(168,128,78,.55)}html.jour .col:hover{background:r
 .grilles{flex:1 1 0;min-height:9rem;grid-auto-rows:minmax(0,1fr)}
 .grilles>.carte{display:flex;flex-direction:column;min-height:0;overflow:hidden}
 .grilles>.carte>[data-pages]{flex:1 1 0;min-height:0}
+/* ══ LOT F (2026-10-26) : LES TABLEAUX DU BAS, REFAITS. Quatre cartes au lieu de cinq, et chacune a la HAUTEUR
+   DE CE QU ELLE MONTRE — avant, cinq cartes s etiraient jusqu au pied pour deux lignes chacune : de grands
+   cadres vides. Une carte trop longue reste bornee par la rangee (max-height) et va en pages, comme avant.
+   Appareils et Nouveaux / connus (deux ou trois valeurs) deviennent des PARTS : une barre coupee, une
+   legende — un tableau de deux lignes disait la meme chose moins bien. */
+.grilles.st4{grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:auto;align-items:start;align-content:start}
+.grilles.st4>.carte{max-height:100%;padding:.85rem 1rem}
+.grilles.st4>.carte>[data-pages]{flex:0 1 auto}
+@media (max-width:1000px){.grilles.st4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.st-pc{font-weight:400;color:var(--tx2);font-size:.74rem;margin-left:.45rem}
+.st-parts+.st-parts{margin-top:1rem;padding-top:.85rem;border-top:1px solid var(--v07)}
+.st-parts h4{margin:0 0 .5rem;font-size:.76rem;font-weight:600;color:var(--tx2)}
+.st-barre{display:flex;height:.7rem;border-radius:99px;overflow:hidden;background:var(--v10);gap:2px}
+.st-barre i{display:block;height:100%}
+.st-leg{display:flex;flex-direction:column;gap:.3rem;margin-top:.55rem;font-size:.82rem}
+.st-leg div{display:flex;align-items:center;gap:.5rem;min-width:0}
+.st-leg .pt{width:.6rem;height:.6rem;border-radius:3px;flex:0 0 auto}
+.st-leg .nm{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.st-leg b{font-variant-numeric:tabular-nums}
+/* La valeur AU-DESSUS de chaque barre, quand il y en a peu (14 au plus) : on lit le jour sans survoler. */
+.graph.chiffres{padding-top:1.1rem}
+/* Le graphique un peu plus haut (170 px) : c est la piece principale de l onglet, et sa hauteur donne aux Pages
+   populaires voisines la place de deux pages par page. */
+.rang2 .graph{height:170px}
+.col>b{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:2px;font-size:.6875rem;
+  font-weight:600;color:var(--tx2);white-space:nowrap}
 .rang2>.carte.pop{display:flex;flex-direction:column}
 .rang2 .pgpop{height:9.5rem}
+/* Lot F (2026-10-26) : les Pages populaires ont la hauteur du GRAPHIQUE voisin, plus une hauteur fixe (9,5 rem
+   ne laissait voir qu une page sur deux, quand le graphique en offrait la place). */
+.rang2{align-items:stretch}
+.rang2 .pgpop{height:auto;flex:1 1 0;min-height:4rem}
 `;
 
 /** Page complète de la fenêtre native « Statistiques ». */
@@ -264,11 +294,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('statistiques')}
     if (!serie || !serie.length) return '<div class="vide">${T("Aucune donnée sur la période.")}</div>';
     var max = 1, i;
     for (i = 0; i < serie.length; i++) if (Number(serie[i][cle]) > max) max = Number(serie[i][cle]);
+    var peu = serie.length <= 14;
     var cols = serie.map(function(s){
       var v = Number(s[cle]) || 0;
       var h = Math.max(v > 0 ? 3 : 0, Math.round(v / max * 100));
       return '<div class="col" style="height:' + h + '%" title="' + esc(szQuand(s.date)) + ' — '
-        + nb(v) + ' ' + esc(mot) + '"></div>';
+        + nb(v) + ' ' + esc(mot) + '">' + (peu && v > 0 ? '<b>' + nb(v) + '</b>' : '') + '</div>';
     }).join('');
     /* La date sous la barre ; au-dela d une douzaine de jours, une sur k
        seulement — les autres cases restent vides pour garder l alignement. */
@@ -277,7 +308,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('statistiques')}
       return '<span>' + (k % pas === 0 ? esc(jourCourt(s.date)) : '') + '</span>';
     }).join('');
     return '<div class="gmax">${T("Maximum : ")}' + nb(max) + ' ' + esc(mot) + '${T(" en une journée")}</div>'
-      + '<div class="graph">' + cols + '</div><div class="axe">' + axe + '</div>';
+      + '<div class="graph' + (peu ? ' chiffres' : '') + '">' + cols + '</div><div class="axe">' + axe + '</div>';
   }
 
   /* « 6 août » : la date ISO (AAAA-MM-JJ) lue comme un jour LOCAL — un
@@ -289,18 +320,43 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('statistiques')}
     catch (e) { return String(iso); }
   }
 
-  function tableau(titre, colonne, valeur, lignes, cleNom, cleVal, clePg){
+  function tableau(titre, colonne, valeur, lignes, cleNom, cleVal, clePg, total){
     var maxT = (lignes || []).reduce(function(m, x){ return Math.max(m, Number(x[cleVal]) || 0); }, 0) || 1;
     var corpsT = lignes && lignes.length
       ? lignes.map(function(x){
           return '<tr><td class="tronq">' + esc(x[cleNom])
             + '<div class="jaugel"><i style="width:' + Math.max(3, Math.round(100 * (Number(x[cleVal]) || 0) / maxT)) + '%"></i></div>'
-            + '</td><td class="num"><b>' + nb(x[cleVal]) + '</b></td></tr>';
+            + '</td><td class="num"><b>' + nb(x[cleVal]) + '</b>' + pct(x[cleVal], total) + '</td></tr>';
         }).join('')
       : '<tr><td colspan="2" class="dt" style="text-align:center">—</td></tr>';
     return '<div class="carte"><h3>' + esc(titre) + '</h3><div data-pages="stat-' + clePg + '"><table><thead><tr><th>'
       + esc(colonne) + '</th><th class="num">' + esc(valeur) + '</th></tr></thead><tbody>'
       + corpsT + '</tbody></table></div></div>';
+  }
+
+  /* La part d un total, ecrite en clair (« 86 % ») — rien si le total manque. */
+  function pct(v, total){
+    var t = Number(total) || 0;
+    if (!(t > 0)) return '';
+    return '<span class="st-pc">' + Math.round(100 * (Number(v) || 0) / t) + ' %</span>';
+  }
+
+  /* LES PARTS (lot F, 2026-10-26) : une barre coupee en morceaux et sa legende. Pour les series de deux ou
+     trois valeurs (appareils, nouveaux / connus), ou un tableau ne montrait que deux lignes. Les teintes sont
+     celles de l accent, de la plus franche a la plus douce : la couleur ne juge rien. */
+  var TEINTES = ['rgba(var(--or-rgb),.85)', 'rgba(var(--or-rgb),.5)', 'rgba(var(--or-rgb),.3)', 'var(--v16)'];
+  function parts(titre, lignes, cleVal){
+    lignes = (lignes || []).filter(function(x){ return (Number(x[cleVal]) || 0) > 0; });
+    var tot = lignes.reduce(function(m, x){ return m + (Number(x[cleVal]) || 0); }, 0);
+    if (!tot) return '<div class="st-parts"><h4>' + esc(titre) + '</h4><div class="dt">—</div></div>';
+    var barre = '', leg = '';
+    lignes.forEach(function(x, i){
+      var v = Number(x[cleVal]) || 0, c = TEINTES[Math.min(i, TEINTES.length - 1)];
+      barre += '<i style="flex:' + v + ' 1 0;background:' + c + '" title="' + esc(x.nom) + ' — ' + nb(v) + '"></i>';
+      leg += '<div><span class="pt" style="background:' + c + '"></span><span class="nm">' + esc(x.nom) + '</span>'
+        + '<b>' + nb(v) + '</b><span class="st-pc">' + Math.round(100 * v / tot) + ' %</span></div>';
+    });
+    return '<div class="st-parts"><h4>' + esc(titre) + '</h4><div class="st-barre">' + barre + '</div><div class="st-leg">' + leg + '</div></div>';
   }
 
   /* ══ ONGLET GOOGLE ANALYTICS ════════════════════════════════════════════ */
@@ -345,13 +401,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('statistiques')}
       + '<th class="num">${T("Vues")}</th></tr></thead><tbody>' + pages + '</tbody></table></div></div>';
     h += '</div>';
 
-    h += '<div class="grilles">'
-      + tableau('${T("Pays")}', '${T("Pays")}', '${T("Visiteurs")}', DGA.pays, 'nom', 'visiteurs', 'pays')
-      + tableau('${T("Villes")}', '${T("Ville")}', '${T("Visiteurs")}', DGA.villes, 'nom', 'visiteurs', 'villes')
-      + tableau('${T("Appareils")}', '${T("Type")}', '${T("Visiteurs")}', DGA.appareils, 'nom', 'visiteurs', 'appareils')
-      + tableau('${T("Sources de trafic")}', '${T("Canal")}', '${T("Sessions")}', DGA.sources, 'nom', 'sessions', 'sources')
-      + tableau('${T("Nouveaux / connus")}', '${T("Type")}', '${T("Visiteurs")}', DGA.nouveauxConnus, 'nom', 'visiteurs', 'nouveaux')
-      + '</div>';
+    /* Lot F (2026-10-26) : trois classements (pays, villes, sources), puis les PARTS (appareils, nouveaux /
+       connus) reunies dans une quatrieme carte. Chaque nombre dit sa part du total de la periode. */
+    h += '<div class="grilles st4">'
+      + tableau('${T("Pays")}', '${T("Pays")}', '${T("Visiteurs")}', DGA.pays, 'nom', 'visiteurs', 'pays', t.visiteurs)
+      + tableau('${T("Villes")}', '${T("Ville")}', '${T("Visiteurs")}', DGA.villes, 'nom', 'visiteurs', 'villes', t.visiteurs)
+      + tableau('${T("Sources de trafic")}', '${T("Canal")}', '${T("Sessions")}', DGA.sources, 'nom', 'sessions', 'sources', t.sessions)
+      + '<div class="carte"><h3>${T("Qui visite")}</h3>'
+      +   parts('${T("Appareils")}', DGA.appareils, 'visiteurs')
+      +   parts('${T("Nouveaux / connus")}', DGA.nouveauxConnus, 'visiteurs')
+      + '</div></div>';
     return h;
   }
 
