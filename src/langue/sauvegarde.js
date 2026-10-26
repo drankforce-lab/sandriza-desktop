@@ -166,8 +166,8 @@ module.exports = {
   'réécrit': 'rewrites',
   ' les données actuelles de Turso avec le contenu de la sauvegarde ':
     ' the current Turso data with the contents of backup ',
-  '. Les enregistrements portant le même identifiant seront écrasés. Elle ne supprime pas ce qui a été créé après la sauvegarde.':
-    '. Records with the same identifier will be overwritten. It does not delete what was created after the backup.',
+  '. La base revient EXACTEMENT à cette date : ce qui a été créé depuis (commandes, fiches, comptes, réglages) sera supprimé. Une sauvegarde de l’état actuel est prise juste avant, pour pouvoir y revenir.':
+    '. The database returns EXACTLY to that date: what was created since (orders, products, accounts, settings) will be deleted. A backup of the current state is taken just before, so you can go back.',
   '⚠ Cette opération réécrit les données actuelles de Turso avec le contenu de la sauvegarde':
     '⚠ This operation rewrites the current Turso data with the contents of the backup',
   'Pour confirmer, tapez ': 'To confirm, type ',

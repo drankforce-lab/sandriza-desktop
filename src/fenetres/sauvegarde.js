@@ -544,7 +544,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('sauvegarde')}
   function ouvrirRestaurer(encKey, id){
     if (!D.peutEcrire) { dire(MOTIFS.droit, 'err'); return; }
     ouvrirSur('${T("↩ Restaurer la base de données")}',
-      '<div class="garde jaune"><span class="ic">⚠</span> ${T("Cette opération ")}<b>${T("réécrit")}</b>${T(" les données actuelles de Turso avec le contenu de la sauvegarde ")}<b>'+esc(id)+'</b>${T(". Les enregistrements portant le même identifiant seront écrasés. Elle ne supprime pas ce qui a été créé après la sauvegarde.")}</div>'
+      '<div class="garde jaune"><span class="ic">⚠</span> ${T("Cette opération ")}<b>${T("réécrit")}</b>${T(" les données actuelles de Turso avec le contenu de la sauvegarde ")}<b>'+esc(id)+'</b>${T(". La base revient EXACTEMENT à cette date : ce qui a été créé depuis (commandes, fiches, comptes, réglages) sera supprimé. Une sauvegarde de l’état actuel est prise juste avant, pour pouvoir y revenir.")}</div>'
       + '<label class="champ"><span class="lbl">${T("Pour confirmer, tapez ")}' + MOT_RESTAURER + '</span>'
       + '<input class="t" id="s-conf" autocomplete="off" placeholder="' + MOT_RESTAURER + '"></label>'
       /* Sa demande du 2026-09-09 : << le processus de restauration doit etre
