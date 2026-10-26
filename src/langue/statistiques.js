@@ -91,6 +91,7 @@ module.exports = {
   'Ville': 'City',
   'Appareils': 'Devices',
   'Qui visite': 'Who visits',
+  'Autres': 'Others',
   'Sources de trafic': 'Traffic sources',
   'Canal': 'Channel',
   'Nouveaux / connus': 'New / returning',

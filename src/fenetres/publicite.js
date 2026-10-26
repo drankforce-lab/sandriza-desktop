@@ -138,7 +138,9 @@ html.jour .graph .b2{background:rgba(168,128,78,.38)}
    (JS_PAGES) se mesurent alors sur la place offerte, comme avant. */
 .corps>.carte.sz-pagee{flex:0 1 auto;min-height:7rem}
 .corps>.carte.sz-pagee>[data-pages]{flex:0 1 auto}
-.deuxb.borne{flex:0 1 auto;align-items:start;grid-template-rows:auto}
+/* ⚠ La grille d Attribution GARDE sa hauteur bornee (ce qui reste du corps) : la carte de gauche s y aligne en
+   haut, a la hauteur de ses lignes, et son max-height:100% la ramene aux pages quand elles ne tiennent plus. */
+.deuxb.borne{align-items:start}
 .deuxb.borne>.carte.sz-pagee{max-height:100%}
 /* Les segments : des boutons a choix AU MOT SEUL (sa regle : un filtre ne porte pas de compte) ; le nombre de
    clients et la definition du segment choisi sont dits dans le titre de la liste. */

@@ -136,7 +136,9 @@ html.jour .col{background:rgba(168,128,78,.55)}html.jour .col:hover{background:r
    cadres vides. Une carte trop longue reste bornee par la rangee (max-height) et va en pages, comme avant.
    Appareils et Nouveaux / connus (deux ou trois valeurs) deviennent des PARTS : une barre coupee, une
    legende — un tableau de deux lignes disait la meme chose moins bien. */
-.grilles.st4{grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:auto;align-items:start;align-content:start}
+/* ⚠ La rangee GARDE sa hauteur bornee (minmax(0,1fr) : ce qui reste du corps) — c est elle qui donne un sens au
+   max-height:100% des cartes ; en rangee « auto », une longue liste sortait du corps sans aller en pages. */
+.grilles.st4{grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);align-items:start}
 .grilles.st4>.carte{max-height:100%;padding:.85rem 1rem}
 .grilles.st4>.carte>[data-pages]{flex:0 1 auto}
 @media (max-width:1000px){.grilles.st4{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -348,6 +350,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('statistiques')}
   function parts(titre, lignes, cleVal){
     lignes = (lignes || []).filter(function(x){ return (Number(x[cleVal]) || 0) > 0; });
     var tot = lignes.reduce(function(m, x){ return m + (Number(x[cleVal]) || 0); }, 0);
+    /* Quatre morceaux au plus (la carte n a pas de pages) : au-dela, le reste est reuni sous « Autres ». */
+    if (lignes.length > 4) {
+      var reste = lignes.slice(3).reduce(function(m, x){ return m + (Number(x[cleVal]) || 0); }, 0);
+      var autre = { nom: '${T("Autres")}' }; autre[cleVal] = reste;
+      lignes = lignes.slice(0, 3).concat([autre]);
+    }
     if (!tot) return '<div class="st-parts"><h4>' + esc(titre) + '</h4><div class="dt">—</div></div>';
     var barre = '', leg = '';
     lignes.forEach(function(x, i){
