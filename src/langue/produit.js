@@ -309,6 +309,7 @@ module.exports = {
   'Sobre': 'Plain',
   'Court': 'Short',
   'Mettre en solde': 'Put on sale',
+  'Mettre en vente directement, pour tout le monde (sans accès anticipé)': 'Put on sale right away, for everyone (no early access)',
   'Mannequin IA': 'AI model',
   'Décor': 'Scene',
   'Détourer et changer le décor': 'Cut out and change the scene',

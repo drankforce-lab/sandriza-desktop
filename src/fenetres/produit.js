@@ -901,6 +901,9 @@ function pageProduit(id) {
     // ne sait pas afficher. D ou deux menus dont les valeurs se contraignent.
     h.push('<div class="etape"><div class="carte"><h2>${T("Mise en marché")}</h2><div class="bascules">'
       + bascule('p-actif', '${T("Produit actif (visible en boutique)")}')
+      /* (2026-10-26, sa demande) METTRE EN VENTE DIRECTEMENT : le produit sort de l'accès anticipé automatique (48 h
+         réservées aux paliers de fidélité) et paraît à tous dès l'enregistrement. Champ de la fiche : anticipeExclu. */
+      + bascule('p-direct', '${T("Mettre en vente directement, pour tout le monde (sans accès anticipé)")}')
       // ⚠ DEUX CONTROLES, LES MEMES QUATRE ETATS QU AVANT. Un menu unique
       // melangeait deux questions sans rapport : comment l article est mis en
       // marche, et si la cliente peut le retourner. Rien ne disait que
@@ -997,6 +1000,7 @@ function pageProduit(id) {
       // des l ouverture, sinon il n arrive qu au premier changement.
       if (val('p-cat')) majSku();
     }
+    if (window.__pfMajDirect) window.__pfMajDirect();   // « directement » et l'accès anticipé s'excluent
     dessinerJetons();
     majMarge();
     majFiche();
@@ -1162,6 +1166,16 @@ function pageProduit(id) {
       majMarge();
     };
     pucer('p-genre'); pucer('p-age');
+    var pDir = document.getElementById('p-direct'), pAnt = document.getElementById('p-anticipe');
+    var majDirect = function(){
+      if (!pDir || !pAnt) return;
+      if (pDir.checked) pAnt.checked = false;
+      pAnt.disabled = pDir.checked;
+      var pu = document.getElementById('p-publie'); if (pu) pu.disabled = pDir.checked;
+    };
+    if (pDir) pDir.addEventListener('change', majDirect);
+    if (pAnt) pAnt.addEventListener('change', function(){ if (pAnt.checked && pDir) { pDir.checked = false; majDirect(); } });
+    window.__pfMajDirect = majDirect;
     majIa();
     // Le SKU suit la categorie — sauf sur une fiche existante, dont le code est
     // deja attribue : le recalculer lui en donnerait un autre a chaque ouverture.
@@ -3814,6 +3828,7 @@ function pageProduit(id) {
     document.getElementById('p-actif').checked = p.active !== false;
     // L acces anticipe (2026-10-07) : absent d une fiche ancienne = non marque.
     document.getElementById('p-anticipe').checked = !!p.accesAnticipe;
+    var pdi = document.getElementById('p-direct'); if (pdi) pdi.checked = !!p.anticipeExclu && !p.accesAnticipe;
     poser('p-publie', /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(String(p.publieLe || '')) ? String(p.publieLe) : '');
     // ⚠ LES DEUX AXES SE LISENT SEPAREMENT, comme dans l editeur du site : la
     // liquidation et la vente finale sont des REGIMES, noReturn est la politique
@@ -4925,7 +4940,8 @@ function pageProduit(id) {
       buyMaxClient: (parseInt(val('p-limclient'), 10) >= 1) ? parseInt(val('p-limclient'), 10) : null,
       active: coché('p-actif'), regime: val('p-regime'), retours: val('p-retours'),
       // L acces anticipe des paliers (2026-10-07) : le pont exige la date quand il est coche.
-      accesAnticipe: coché('p-anticipe'), publieLe: val('p-publie') || null,
+      accesAnticipe: coché('p-direct') ? false : coché('p-anticipe'), publieLe: coché('p-direct') ? null : (val('p-publie') || null),
+      anticipeExclu: coché('p-direct'),
       sizes: tailles(), colors: couleurs(),
       image: IMAGE,
       belowCost: !!SOUSCOUT,
