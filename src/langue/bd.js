@@ -87,6 +87,7 @@ module.exports = {
   'Reçus, photos, logos, documents, sauvegardes…':
     'Receipts, photos, logos, documents, backups…',
   ' Cloudflare R2 : en attente de connexion.': ' Cloudflare R2: waiting for a connection.',
+  '— au moins : l’inventaire s’est arrêté avant la fin.': '— at least: the inventory stopped before the end.',
   '📦 Cloudflare R2 : en attente de connexion.': '📦 Cloudflare R2: waiting for a connection.',
   'Occupation indisponible pour le moment.': 'Usage unavailable for now.',
   /* ⚠ Les cles listees sont des IDENTIFIANTS de configuration : elles nomment

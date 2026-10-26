@@ -142,7 +142,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (STOCK.erreur) return '<div class="vide">' + esc(STOCK.erreur) + '</div>';
     var h = '<div class="stock">';
     if (STOCK.turso && STOCK.turso.bytes != null) h += jauge('${T("Turso (base de données)")}', '${T("Produits, commandes, clients, dépenses…")}', STOCK.turso.bytes, STOCK.turso.limit);
-    if (STOCK.r2 && STOCK.r2.bytes != null) h += jauge('${T("Cloudflare R2 (fichiers)")}', '${T("Reçus, photos, logos, documents, sauvegardes…")}', STOCK.r2.bytes, STOCK.r2.limit);
+    // (audit H2-m18) une liste R2 interrompue donne un MINIMUM : on le dit plutôt que d'afficher un chiffre faux
+    if (STOCK.r2 && STOCK.r2.bytes != null) h += jauge('${T("Cloudflare R2 (fichiers)")}', '${T("Reçus, photos, logos, documents, sauvegardes…")}' + (STOCK.r2.complet === false ? ' ${T("— au moins : l’inventaire s’est arrêté avant la fin.")}' : ''), STOCK.r2.bytes, STOCK.r2.limit);
     else h += '<div class="jauge"><div class="sous"><span class="ic">📦</span>${T(" Cloudflare R2 : en attente de connexion.")}</div></div>';
     return h + '</div>';
   }
