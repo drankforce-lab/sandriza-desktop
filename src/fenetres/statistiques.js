@@ -158,7 +158,9 @@ html.jour .col{background:rgba(168,128,78,.55)}html.jour .col:hover{background:r
    populaires voisines la place de deux pages par page. */
 .rang2 .graph{height:170px}
 .col>b{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:2px;font-size:.6875rem;
-  font-weight:600;color:var(--tx2);white-space:nowrap}
+  font-weight:600;color:var(--tx2);white-space:nowrap;background:var(--f-carte);padding:0 .2rem;border-radius:4px}
+/* ⚠ Le fond de la CARTE, posé sur l étiquette (8.3.0, refus de « contrastes ») : elle est enfant de la barre et
+   peinte AU-DESSUS d elle, sur la carte — sans fond propre, le banc la mesurait contre la couleur de la barre. */
 .rang2>.carte.pop{display:flex;flex-direction:column}
 .rang2 .pgpop{height:9.5rem}
 /* Lot F (2026-10-26) : les Pages populaires ont la hauteur du GRAPHIQUE voisin, plus une hauteur fixe (9,5 rem

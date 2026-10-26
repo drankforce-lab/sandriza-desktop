@@ -2520,7 +2520,9 @@ function pageProduit(id) {
           + (src ? '<img src="' + esc(src) + '" alt="" draggable="false">' : '${T("ajouter")}') + '</div>'
           + (src ? '<button type="button" class="x" data-vuex="' + esc(cle) + '" title="${T("Retirer")}">×</button>' : '')
           + depl
-          + ((src && cle.indexOf('libre') === 0) ? '<button type="button" class="dos' + (src === DOS_SRC ? ' on' : '')
+          /* (2026-10-26, sa demande) UN DOS A LA FOIS : une fois une photo marquée « Dos », le bouton ne reste que
+             sur elle (pour la démarquer) ; il revient sur les autres quand on la démarque. */
+          + ((src && cle.indexOf('libre') === 0 && (!DOS_SRC || src === DOS_SRC)) ? '<button type="button" class="dos' + (src === DOS_SRC ? ' on' : '')
             + '" data-vuedos="' + esc(cle) + '" title="${T("Photo du dos — projetée sur l’aperçu 3D")}">${T("Dos")}</button>' : '')
           + '<div class="lgd">' + esc(nomVue(cle)) + '</div></div>';
       }).join('');
