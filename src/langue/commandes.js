@@ -26,6 +26,18 @@
  */
 
 module.exports = {
+  'Chronologie': 'Timeline',
+  '{0} geste(s) plus ancien(s)': '{0} earlier step(s)',
+  'Commande passée': 'Order placed',
+  'Étiquette créée': 'Label created',
+  'Ramassage demandé': 'Pickup requested',
+  'Expédiée': 'Shipped',
+  'Livrée': 'Delivered',
+  'Terminée': 'Completed',
+  'Remboursement': 'Refund',
+  'Archivée': 'Archived',
+  'Chronologie de la commande': 'Order timeline',
+  'au comptoir': 'in store',
   'Affichage de la liste': 'List display',
   'Affichage détaillé': 'Detailed view',
   'Affichage compact : une ligne par commande, plus de commandes par page': 'Compact view: one line per order, more orders per page',

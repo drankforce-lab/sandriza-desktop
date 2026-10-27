@@ -23,6 +23,15 @@
  */
 
 module.exports = {
+  'Glisser pour déplacer': 'Drag to move',
+  'Glissez un bloc (ou ↑ ↓) pour réorganiser · l’œil masque un bloc sans le supprimer · le crayon modifie le contenu.': 'Drag a block (or ↑ ↓) to reorder · the eye hides a block without deleting it · the pencil edits its content.',
+  'Aperçu': 'Preview',
+  'Aperçu de la page d’accueil': 'Home page preview',
+  'Vêtements': 'Clothing',
+  'Nouveautés': 'New arrivals',
+  'Soldes': 'Sale',
+  'Pied de page de la boutique': 'Shop footer',
+  'Un schéma de la page, dans l’ordre des blocs : les blocs masqués n’y paraissent pas.': 'A sketch of the page in block order: hidden blocks do not appear.',
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   'Page d’accueil — Administration Sandriza': 'Home page — Sandriza Administration',
   'Page d’accueil': 'Home page',
@@ -42,8 +51,6 @@ module.exports = {
   /* ── L ORDRE ET LA VISIBILITE ───────────────────────────────────────────── */
   'Ordre et visibilité': 'Order and visibility',
   /* ⚠⚠ MASQUER N EST PAS SUPPRIMER. */
-  '↑ ↓ pour réorganiser · l’œil masque un bloc sans le supprimer · le crayon modifie le contenu.':
-    '↑ ↓ to reorder · the eye hides a block without deleting it · the pencil changes the content.',
   '(masqué)': '(hidden)',
   'Modifier': 'Edit',
   'Masquer': 'Hide',

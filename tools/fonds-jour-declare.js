@@ -36,6 +36,8 @@ module.exports = {
     'commandes.js': { '.badge2.vertf': '#166534', '.banniere': '#7f1d1d', '.ctx .warn': '#7f1d1d' },
     'config-navigation.js': { 'button.danger.arme': '#7f1d1d' },
     'explorateur.js': { '.prim': '#8f6f42' },
+    // Aperçu de la page d'accueil (2026-10-27) : un schéma de la BOUTIQUE, toujours claire, au bouton sombre de la bannière.
+    'accueil.js': { '.ap .ap-ban i': '#1f1a16' },
     // Apercu du badge de fiche produit (2026-10-04) : les couleurs de la BOUTIQUE.
     'promotions.js': { '.bdg': '#7d5f36', '.bdg.success': '#15803d', '.bdg.error': '#b91c1c', '.bdg.info': '#1d4ed8', '.bdg.warning': '#c2410c' },
     /* ⚠ `button.vert` N EST PAS ICI, ET C EST LE BON CHOIX — appris le

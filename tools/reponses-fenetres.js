@@ -7390,7 +7390,8 @@ const JEU = {
           ],
           tuiles: { total: 243.38, encaisse: 89.12, aRecevoir: 154.26,
             rembourse: 25.00, nbRemboursements: 1, depenses: 1200.50,
-            annee: 2026, nb: 2 },
+            annee: 2026, nb: 2,
+            age: { courant: { montant: 0, nb: 0 }, j30: { montant: 0, nb: 0 }, j60: { montant: 154.26, nb: 1 }, plus: { montant: 0, nb: 0 } } },
           peutEncaisser: true, peutSupprimer: true,
           clients: [
             { id: 'u1', nom: 'Marie Tremblay', courriel: 'marie@example.com' },

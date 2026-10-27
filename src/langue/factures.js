@@ -26,6 +26,12 @@
  */
 
 module.exports = {
+  'Âge des comptes à recevoir': 'Accounts receivable aging',
+  'Pas encore dû': 'Not yet due',
+  '1 à 30 jours': '1 to 30 days',
+  'Retard sur l’échéance': 'Days past the due date',
+  '31 à 60 jours': '31 to 60 days',
+  'Plus de 60 jours': 'Over 60 days',
   '✓ Marquer payée': '✓ Mark paid',
   'Annuler le paiement': 'Undo payment',
   /* ⚠ LES DEUX ALTERNATIVES EN ENTIER — voir `tools/banc-pluriel-colle.js`. */

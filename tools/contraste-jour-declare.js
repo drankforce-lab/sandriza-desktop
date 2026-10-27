@@ -42,7 +42,7 @@ module.exports = {
      choisir des couleurs de texte lisibles sur un fond qui n existe pas, et le
      defaut ne se verrait qu une fois imprime. Le damier autour dit deja ce qui
      est transparent — c est lui qui empeche de confondre blanc et vide. */
-  "#fff": 1,              // 1.12  1 fenetre : promo-editeur.js (.scene — le papier)
+  "#fff": 3,              // 1.12  promo-editeur.js (.scene — le papier) ; accueil.js (2026-10-27) : le texte du héro et du bouton de l APERÇU, posés sur le héro sombre et le bouton #1f1a16 de la boutique, jamais sur le fond de la fenêtre
   /* ⚠ LES ETIQUETTES « AVANT » / « APRES » DU RIDEAU DU STUDIO (2026-09-30) : elles
      sont posees sur une PASTILLE SOMBRE fixe (rgba(8,12,20,.72)) par-dessus la photo,
      dans les deux modes. Le banc les mesure contre le fond de jour, qu elles ne

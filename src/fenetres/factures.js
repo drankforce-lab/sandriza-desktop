@@ -30,6 +30,10 @@ const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('
 const T = require('../langue').tr('factures');
 
 const CSS = `
+/* L age des comptes a recevoir (2026-10-27) : une tranche vide en pale, la plus vieille en rouge. */
+.cx-ligne.ag{grid-template-columns:7.5rem minmax(0,1fr) 6rem}
+.cx-ligne.nul>span{color:var(--tx2)}
+.cx-piste>i.att{background:var(--tx-att)}
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
@@ -323,10 +327,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
           ? esc(compte.overdue > 1 ? '${T("{0} factures en retard.")}'.split('{0}').join(compte.overdue) : '${T("1 facture en retard.")}')
           : '${T("Aucune facture en retard.")}') + '</div>';
       }
-      p += '<div class="cx-sep"></div>'
-        + '<h2>' + esc('${T("Dépenses ")}' + (TUILES.annee || '')) + '</h2>'
-        + '<div class="cx-etat"><span>${T("Total saisi")}</span><span>' + esc(fmt(TUILES.depenses)) + '</span></div>'
-        + '</div>';
+      /* L ÂGE DES COMPTES À RECEVOIR (2026-10-27, sa demande) remplace « Dépenses » : un total saisi n avait pas
+         sa place dans les factures. Quatre tranches de retard sur l échéance (billing.js, _facturationDonnees) ;
+         un vieux site qui ne les donne pas garde l ancienne ligne. */
+      p += '<div class="cx-sep"></div>';
+      if (TUILES.age) {
+        var AG = TUILES.age, totAge = ['courant', 'j30', 'j60', 'plus'].reduce(function(m, k){ return m + ((AG[k] && AG[k].montant) || 0); }, 0);
+        p += '<h2>${T("Âge des comptes à recevoir")}</h2><div class="cx-sub" style="margin:-.2rem 0 .35rem">${T("Retard sur l’échéance")}</div>'
+          + [['courant', '${T("Pas encore dû")}', 'ok'], ['j30', '${T("1 à 30 jours")}', ''], ['j60', '${T("31 à 60 jours")}', 'att'], ['plus', '${T("Plus de 60 jours")}', 'err']]
+            .map(function(x){
+              var a = AG[x[0]] || { montant: 0, nb: 0 };
+              return '<div class="cx-ligne ag' + (a.nb ? '' : ' nul') + '" title="' + esc(a.nb + ' ' + (a.nb > 1 ? '${T("factures")}' : '${T("facture")}')) + '"><span>' + x[1] + '</span>'
+                + '<div class="cx-piste"><i class="' + x[2] + '" style="width:' + pct(a.montant, totAge).toFixed(0) + '%"></i></div>'
+                + '<span>' + esc(fmt(a.montant)) + '</span></div>';
+            }).join('');
+      } else {
+        p += '<h2>' + esc('${T("Dépenses ")}' + (TUILES.annee || '')) + '</h2>'
+          + '<div class="cx-etat"><span>${T("Total saisi")}</span><span>' + esc(fmt(TUILES.depenses)) + '</span></div>';
+      }
+      p += '</div>';
       h += '<div class="cx-deux">' + t + p + '</div>';
     } else {
       h += t;

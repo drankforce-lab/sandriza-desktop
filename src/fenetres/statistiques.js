@@ -25,7 +25,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU, SEP_DEC } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -79,7 +79,7 @@ button.prim:hover:not(:disabled){background:#a3824f}
 .jaugel i{display:block;height:100%;border-radius:3px;background:rgba(var(--or-rgb),.7)}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;
   padding:.6rem .75rem}
-.carte h3{margin:0 0 .4rem;font:700 .82rem/1.3 Georgia,serif;color:var(--tx-gris2)}
+.carte h3{margin:0 0 .4rem;font:700 .82rem/1.3 Georgia,serif;color:var(--tx-gris2);display:flex;align-items:baseline;gap:.3rem}
 .grilles{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.55rem}
 table{width:100%;border-collapse:collapse;font-size:.83rem}
 thead th{text-align:left;padding:.22rem .4rem;font-size:.6875rem;text-transform:uppercase;
@@ -142,6 +142,8 @@ html.jour .col{background:rgba(168,128,78,.55)}html.jour .col:hover{background:r
 .grilles.st4>.carte{max-height:100%;padding:.85rem 1rem}
 .grilles.st4>.carte>[data-pages]{flex:0 1 auto}
 @media (max-width:1000px){.grilles.st4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.st-conv{margin-left:auto;font-size:.74rem;font-weight:400;color:var(--tx2);white-space:nowrap}
+.st-conv b{color:var(--tx);font-weight:700}
 .st-pc{font-weight:400;color:var(--tx2);font-size:.74rem;margin-left:.45rem}
 .st-parts+.st-parts{margin-top:1rem;padding-top:.85rem;border-top:1px solid var(--v07)}
 .st-parts h4{margin:0 0 .5rem;font-size:.76rem;font-weight:600;color:var(--tx2)}
@@ -294,6 +296,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('statistiques')}
 
   /* Le graphique : des barres proportionnelles au plus haut jour. Le maximum
      est ECRIT au-dessus — une barre sans echelle ne dit rien. */
+  /* LES JOURS SANS VISITE COMPTENT (2026-10-27, sa remarque : « 7 jours » ne montrait que deux barres). Google
+     Analytics ne rend AUCUNE ligne pour un jour à zéro : la série est complétée ici, jour par jour jusqu à
+     aujourd hui, pour que la période ait toutes ses colonnes — un trou se voit comme un trou. */
+  function serieComplete(serie, cle, n){
+    if (!serie || !serie.length || !(n > 0)) return serie;
+    var par = {}; serie.forEach(function(s){ par[String(s.date || '').slice(0, 10)] = s; });
+    var p2 = function(x){ return (x < 10 ? '0' : '') + x; }, L = [], d = new Date();
+    d.setHours(12, 0, 0, 0); d.setDate(d.getDate() - (n - 1));
+    for (var i = 0; i < n; i++) {
+      var k = d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate());
+      if (par[k]) L.push(par[k]); else { var z = { date: k }; z[cle] = 0; L.push(z); }
+      d.setDate(d.getDate() + 1);
+    }
+    return L;
+  }
   function graphique(serie, cle, mot){
     if (!serie || !serie.length) return '<div class="vide">${T("Aucune donnée sur la période.")}</div>';
     var max = 1, i;
@@ -397,8 +414,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('statistiques')}
     }
     h += szTuiles('<div class="tuiles sept">' + tu + '</div>');
     h += '<div class="rang2">';
-    h += '<div class="carte"><h3><span class="ic">📈</span>${T(" Pages vues par jour — ")}' + esc(DGA.plageLibelle) + '</h3>'
-      + graphique(DGA.serie, 'vues', '${T("pages vues")}') + '</div>';
+    /* LA CONVERSION (2026-10-27, sa demande) : les commandes EN LIGNE de la même période (lues dans la base par le
+       site, pont.js statsGa) rapportées aux sessions de Google Analytics. Absente si le site ne la donne pas. */
+    var conv = '';
+    if (DGA.commandesEnLigne != null && t.sessions > 0) {
+      var tx = Math.round(1000 * DGA.commandesEnLigne / t.sessions) / 10;
+      conv = '<span class="st-conv" title="${T("Commandes en ligne de la période divisées par les sessions de Google Analytics")}">'
+        + '${T("Conversion")} <b>' + String(tx).replace('.', '${SEP_DEC()}') + ' %</b> · '
+        + nb(DGA.commandesEnLigne) + ' ' + szPl(DGA.commandesEnLigne, '${T("commande")}', '${T("commandes")}') + ' / ' + nb(t.sessions) + ' ${T("sessions")}</span>';
+    }
+    h += '<div class="carte"><h3><span class="ic">📈</span>${T(" Pages vues par jour — ")}' + esc(DGA.plageLibelle) + conv + '</h3>'
+      + graphique(serieComplete(DGA.serie, 'vues', { '7d': 7, '30d': 30, '90d': 90 }[PLAGE] || 0), 'vues', '${T("pages vues")}') + '</div>';
 
     var pages = (DGA.pages || []).length
       ? DGA.pages.map(function(p){

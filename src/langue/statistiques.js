@@ -25,6 +25,11 @@
  */
 
 module.exports = {
+  'Commandes en ligne de la période divisées par les sessions de Google Analytics': 'Online orders in the period divided by Google Analytics sessions',
+  'Conversion': 'Conversion',
+  'commande': 'order',
+  'commandes': 'orders',
+  'sessions': 'sessions',
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   'Statistiques — Administration Sandriza': 'Statistics — Sandriza Administration',
   'Statistiques': 'Statistics',

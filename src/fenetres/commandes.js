@@ -228,6 +228,19 @@ select.statut{width:auto;font-size:.78rem;padding:.16rem .4rem}
 /* Un trait discret, pas un pointille AMBRE : un remboursement n est pas une
    alerte (la couleur ne dit qu un probleme — 2026-09-29). */
 .remb{margin-top:.7rem;border-top:1px solid var(--v10);padding-top:.45rem}
+/* LA CHRONOLOGIE (2026-10-27, sa demande) : les gestes datés, en colonne dans l en-tête (la place à droite de la
+   livraison était vide) — la liste des articles garde toute sa hauteur. Un point par geste, reliés par un trait. */
+.det2.a3{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.1fr)}
+.chv{display:flex;flex-direction:column;gap:.18rem;font-size:.76rem}
+.chv .ce{position:relative;display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:.5rem;align-items:center}
+.chv .ce::before{content:"";position:absolute;left:5px;top:-.55rem;height:.7rem;width:2px;background:rgba(var(--or-rgb),.45)}
+.chv .ce:first-child::before{display:none}
+.chv .ce b{width:12px;height:12px;border-radius:99px;background:var(--f-carte);border:2px solid var(--tx-or);box-sizing:border-box}
+.chv .ce:last-child b{background:var(--tx-or)}
+.chv .ce.rb b{border-color:var(--tx-att)}
+.chv .ce .l{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chv .ce .d{color:var(--tx2);white-space:nowrap;font-size:.72rem}
+.chv .plus{color:var(--tx2);font-size:.72rem;padding-left:1.25rem}
 .remb .t{font-size:.69rem;font-weight:700;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx-att);margin-bottom:.25rem}
 .remb .lg2{display:flex;justify-content:space-between;gap:1rem;font-size:.8rem;
@@ -745,7 +758,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
               ? '<span class="badge2 or">↩ ' + d.remboursements.lignes.length + ' ' + szPl(d.remboursements.lignes.length, '${T("remboursement")}', '${T("remboursements")}') + '</span>' : ''))
       + '<span style="margin-left:auto" class="mut">' + esc(dateCourte(c.creeLe)) + '</span>'
       + '</div>';
-    h += '<div class="det2">'
+    var hChrono = chronologieHtml(c.chronologie);
+    h += '<div class="det2' + (hChrono ? ' a3' : '') + '">'
       + '<div class="bloc"><h3>${T("Client")}</h3>'
       + '<div class="l"><strong>' + esc(c.client.nom || '—') + '</strong>'
       + '<span class="badge2">' + (c.membre ? '${T("membre")}' : '${T("invité")}') + '</span>'
@@ -776,7 +790,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + (c.suivi ? '<div class="mut" style="margin-top:.3rem"><span class="ic">📡</span> <span class="num">' + esc(c.suivi) + '</span>'
           + (c.suiviStatut ? ' — ' + esc(c.suiviStatut)
             + (c.suiviVerifieLe ? ' ${T("(vérifié le")} ' + esc(dateCourte(c.suiviVerifieLe)) + ')' : '') : '') + '</div>' : '')
-      + '</div></div></div>';
+      + '</div>' + hChrono + '</div></div>';
 
     h += '<div class="carte plein"><div class="liste">'
       + '<table><thead><tr><th>${T("Article")}</th>'
@@ -856,6 +870,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + (d.droits.rembourser && !ro ? '<button id="det-remb">${T("↩ Rembourser")}</button>' : '')
       + (d.droits.supprimer && !ro ? '<button class="danger" id="det-suppr"><span class="ic">🗑</span> ${T("Supprimer")}</button>' : '');
     brancherDetail();
+  }
+
+  /* La chronologie de la commande (2026-10-27) : le site rend des CODES datés (pont.js, commandesDetail) ;
+     les mots sont dits ici. Un seul geste (la commande vient d arriver) ne fait pas une chronologie. */
+  var MOTS_CHRONO = {
+    passee: '${T("Commande passée")}', etiquette: '${T("Étiquette créée")}', ramassage: '${T("Ramassage demandé")}',
+    expediee: '${T("Expédiée")}', livree: '${T("Livrée")}', terminee: '${T("Terminée")}',
+    remboursement: '${T("Remboursement")}', archivee: '${T("Archivée")}'
+  };
+  function chronologieHtml(L){
+    if (!L || L.length < 2) return '';
+    // L en-tête n a la hauteur que de six lignes : au-delà, les plus récents, et le compte de ce qui est caché.
+    var cache = Math.max(0, L.length - 6), V = L.slice(cache);
+    return '<div class="bloc"><h3>${T("Chronologie")}</h3><div class="chv" aria-label="${T("Chronologie de la commande")}">'
+      + (cache ? '<div class="plus">' + '${T("{0} geste(s) plus ancien(s)")}'.split('{0}').join(cache) + '</div>' : '')
+      + V.map(function(e){
+          var mot = MOTS_CHRONO[e.code] || e.code, titre = '';
+          if (e.code === 'passee' && e.detail === 'comptoir') mot += ' · ${T("au comptoir")}';
+          if (e.code === 'passee' && e.detail === 'tiktok') mot += ' · TikTok';
+          if (e.code === 'remboursement') { var p = String(e.detail || '').split('|'); mot += ' ' + argent(Number(p[1]) || 0); titre = p[0] || ''; }
+          else if (e.detail && e.code !== 'passee') titre = e.detail;
+          return '<div class="ce' + (e.code === 'remboursement' ? ' rb' : '') + '"' + (titre ? ' title="' + esc(titre) + '"' : '') + '><b></b>'
+            + '<span class="l">' + esc(mot) + '</span><span class="d">' + esc(szQuand(e.le)) + '</span></div>';
+        }).join('') + '</div></div>';
   }
 
   function brancherDetail(){

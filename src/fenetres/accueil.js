@@ -60,6 +60,42 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
    éteinte, ce qui est pourtant la seule raison de regarder cette liste. */
 .bloc.off{opacity:.9}
 .bloc .actes{display:flex;gap:.3rem;flex-shrink:0}
+/* GLISSER POUR RÉORGANISER (2026-10-27, sa demande) : la poignée à gauche ; les flèches restent pour le clavier. */
+.bloc[draggable=true]{cursor:grab}
+.bloc .poig{flex:0 0 auto;color:var(--tx3);font-size:.9rem;letter-spacing:-.12em;user-select:none;cursor:grab}
+.bloc.tire{opacity:.45}
+.bloc.cible-av{box-shadow:inset 0 3px 0 var(--or)}
+.bloc.cible-ap{box-shadow:inset 0 -3px 0 var(--or)}
+/* L APERÇU (2026-10-27, sa demande) : la page d accueil en réduction, dans l ordre des blocs. Un schéma fidèle à
+   l ordre et aux textes, pas une copie au pixel : le vrai rendu reste celui de la boutique. */
+.acc2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:1rem;height:100%}
+.acc2>.carte{margin:0;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+.ap{flex:1 1 auto;min-height:0;overflow:hidden;border:1px solid var(--v12);border-radius:9px;background:#fbf8f2;color:#2b2420;
+  display:flex;flex-direction:column;font-family:Georgia,serif}
+.ap .ap-tete{flex:0 0 auto;display:flex;align-items:center;gap:.8rem;padding:.4rem .7rem;border-bottom:1px solid #e6ddd0;font-size:.62rem;color:#5c5047}
+.ap .ap-tete b{font-size:.78rem;letter-spacing:.18em;color:#1f1a16;margin-right:auto}
+.ap .ap-b{flex:0 0 auto;position:relative}
+.ap .ap-b.off{display:none}
+.ap .ap-hero{height:9.5rem;background-size:cover;background-position:center;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;gap:.15rem;padding:0 1rem}
+.ap .ap-hero .v{position:absolute;inset:0}
+.ap .ap-hero>*:not(.v){position:relative}
+.ap .ap-hero small{font-size:.56rem;letter-spacing:.16em;text-transform:uppercase}
+.ap .ap-hero strong{font-size:1.05rem;font-weight:400;line-height:1.15}
+.ap .ap-hero span.s{font-size:.6rem;max-width:80%}
+.ap .ap-hero .btns{display:flex;gap:.35rem;margin-top:.3rem}
+.ap .ap-hero .btns i{font-style:normal;font-size:.55rem;padding:.18rem .55rem;border:1px solid #fff;border-radius:3px}
+.ap .ap-hero .btns i:first-child{background:#fff;color:#1f1a16}
+.ap .ap-sec{padding:.7rem .8rem;text-align:center}
+.ap .ap-sec small{display:block;font-size:.52rem;letter-spacing:.16em;text-transform:uppercase;color:#6e5432}
+.ap .ap-sec strong{display:block;font-size:.85rem;font-weight:400;margin:.1rem 0 .45rem}
+.ap .ap-grille{display:grid;grid-template-columns:repeat(4,1fr);gap:.35rem}
+.ap .ap-grille i{height:2.6rem;border-radius:3px;background:linear-gradient(160deg,#e9e0d3,#d9ccb9)}
+.ap .ap-ban{background:#efe6d8;padding:.65rem .8rem;text-align:center}
+.ap .ap-ban strong{display:block;font-size:.8rem;font-weight:400}
+.ap .ap-ban span{display:block;font-size:.58rem;color:#4f453d;margin:.1rem 0 .3rem}
+.ap .ap-ban i{font-style:normal;font-size:.55rem;padding:.16rem .55rem;border-radius:3px;background:#1f1a16;color:#fff}
+.ap .ap-pied{margin-top:auto;flex:0 0 auto;padding:.45rem .7rem;border-top:1px solid #e6ddd0;font-size:.55rem;color:#5c5047;text-align:center}
+.ap-note{font-size:.72rem;color:var(--tx2);margin:.45rem 0 0}
 .gr2{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
 .gr4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:.5rem}
 @media(max-width:720px){.gr2,.gr4{grid-template-columns:1fr 1fr}}
@@ -200,11 +236,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   // ── LISTE DES BLOCS ───────────────────────────────────────────────────────
   function listeHtml(){
     var h = '<div class="carte sz-pagee"><div class="stitre">${T("Ordre et visibilité")}</div>'
-      + '<div class="sdesc">${T("↑ ↓ pour réorganiser · l’œil masque un bloc sans le supprimer · le crayon modifie le contenu.")}</div>';
+      + '<div class="sdesc">${T("Glissez un bloc (ou ↑ ↓) pour réorganiser · l’œil masque un bloc sans le supprimer · le crayon modifie le contenu.")}</div>';
     // Les blocs en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
     h += '<div data-pages="accueil-blocs">';
     BLOCS.forEach(function(b, i){
-      h += '<div class="bloc' + (b.visible ? '' : ' off') + '">'
+      h += '<div class="bloc' + (b.visible ? '' : ' off') + '"' + (RO ? '' : ' draggable="true" data-glisse="' + esc(b.id) + '"') + '>'
+        + (RO ? '' : '<span class="poig" aria-hidden="true" title="${T("Glisser pour déplacer")}">⋮⋮</span>')
         + '<span class="em" aria-hidden="true">' + (ICOB[b.id] || ICOB._) + '</span>'
         + '<div class="nom"><b>' + esc(szTd(b.label)) + '</b>' + (b.visible ? '' : '<span class="masq">${T("(masqué)")}</span>')
         + '<div class="d">' + esc(szTd(b.desc)) + '</div></div>'
@@ -215,7 +252,34 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           + '<button class="b" type="button" data-down="' + esc(b.id) + '"' + (i===BLOCS.length-1?' disabled':'') + '>↓</button>')
         + '</div></div>';
     });
-    return h + '</div></div>';
+    h += '</div></div>';
+    return '<div class="acc2">' + h + apercuHtml() + '</div>';
+  }
+
+  /* ── L APERÇU (2026-10-27) ── la page en réduction, bloc par bloc, dans l ordre de la liste ; un bloc masqué
+     n y paraît pas (c est ce que verra la cliente). Le héro montre SA PREMIÈRE diapo. */
+  function apercuHtml(){
+    var corpsAp = BLOCS.map(function(b){
+      var c = b.content || {}, off = b.visible ? '' : ' off';
+      if (b.id === 'hero') {
+        var s = (c.slides || [])[0] || {};
+        return '<div class="ap-b ap-hero' + off + '" style="' + swatch(s) + '"><span class="v" style="background:rgba(0,0,0,' + (s.overlay != null ? s.overlay : 0.4) + ')"></span>'
+          + (s.eyebrow ? '<small>' + esc(s.eyebrow) + '</small>' : '') + '<strong>' + esc(s.title || '') + '</strong>'
+          + (s.subtitle ? '<span class="s">' + esc(s.subtitle) + '</span>' : '')
+          + ((s.cta1Text || s.cta2Text) ? '<span class="btns">' + (s.cta1Text ? '<i>' + esc(s.cta1Text) + '</i>' : '') + (s.cta2Text ? '<i>' + esc(s.cta2Text) + '</i>' : '') + '</span>' : '')
+          + '</div>';
+      }
+      if (b.id === 'banner') {
+        return '<div class="ap-b ap-ban' + off + '">' + (c.eyebrow ? '<span>' + esc(c.eyebrow) + '</span>' : '') + '<strong>' + esc(c.title || '') + '</strong>'
+          + (c.subtitle ? '<span>' + esc(c.subtitle) + '</span>' : '') + (c.ctaText ? '<i>' + esc(c.ctaText) + '</i>' : '') + '</div>';
+      }
+      return '<div class="ap-b ap-sec' + off + '">' + (c.eyebrow ? '<small>' + esc(c.eyebrow) + '</small>' : '') + '<strong>' + esc(c.title || szTd(b.label)) + '</strong>'
+        + (b.id === 'categories' ? '<div class="ap-grille"><i></i><i></i><i></i><i></i></div>' : '') + '</div>';
+    }).join('');
+    return '<div class="carte"><div class="stitre">${T("Aperçu")}</div>'
+      + '<div class="ap" aria-label="${T("Aperçu de la page d’accueil")}"><div class="ap-tete"><b>SANDRIZA</b><span>${T("Vêtements")}</span><span>${T("Nouveautés")}</span><span>${T("Soldes")}</span></div>'
+      + corpsAp + '<div class="ap-pied">${T("Pied de page de la boutique")}</div></div>'
+      + '<div class="ap-note">${T("Un schéma de la page, dans l’ordre des blocs : les blocs masqués n’y paraissent pas.")}</div></div>';
   }
 
   // ── ÉDITEUR ─────────────────────────────────────────────────────────────────
@@ -329,6 +393,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       corps.querySelectorAll('[data-vis]').forEach(function(el){ el.onclick = function(){ basculer(el.getAttribute('data-vis')); }; });
       corps.querySelectorAll('[data-up]').forEach(function(el){ el.onclick = function(){ deplacer(el.getAttribute('data-up'), -1); }; });
       corps.querySelectorAll('[data-down]').forEach(function(el){ el.onclick = function(){ deplacer(el.getAttribute('data-down'), 1); }; });
+      brancherGlisser();
       return;
     }
     var sadd = document.getElementById('a-sadd'); if (sadd) sadd.onclick = ajouterDiapo;
@@ -349,6 +414,41 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function basculer(id){
     if (!BLOCS.some(function(x){ return x.id===id; })) return;
     ecrire(function(c){ c.forEach(function(b){ if (b.id===id) b.visible = !b.visible; }); });
+  }
+  /* GLISSER-DÉPOSER (2026-10-27) : on lâche un bloc sur un autre ; la moitié haute le pose AVANT, la basse APRÈS.
+     Une seule écriture, comme une flèche. */
+  var TIRE = null;
+  function brancherGlisser(){
+    var nettoyer = function(){ corps.querySelectorAll('.bloc').forEach(function(x){ x.classList.remove('tire', 'cible-av', 'cible-ap'); }); };
+    corps.querySelectorAll('[data-glisse]').forEach(function(el){
+      el.ondragstart = function(ev){ TIRE = el.getAttribute('data-glisse'); el.classList.add('tire'); try { ev.dataTransfer.effectAllowed = 'move'; ev.dataTransfer.setData('text/plain', TIRE); } catch (e) {} };
+      el.ondragend = function(){ TIRE = null; nettoyer(); };
+      el.ondragover = function(ev){
+        if (!TIRE || TIRE === el.getAttribute('data-glisse')) return;
+        ev.preventDefault();
+        var r = el.getBoundingClientRect(), av = ev.clientY < r.top + r.height / 2;
+        el.classList.toggle('cible-av', av); el.classList.toggle('cible-ap', !av);
+      };
+      el.ondragleave = function(){ el.classList.remove('cible-av', 'cible-ap'); };
+      el.ondrop = function(ev){
+        ev.preventDefault();
+        var cible = el.getAttribute('data-glisse'), r = el.getBoundingClientRect(), av = ev.clientY < r.top + r.height / 2;
+        var id = TIRE; TIRE = null; nettoyer();
+        if (!id || id === cible) return;
+        poser(id, cible, av);
+      };
+    });
+  }
+  function poser(id, cible, avant){
+    var L = BLOCS.map(function(b){ return b.id; }).filter(function(x){ return x !== id; });
+    var k = L.indexOf(cible); if (k < 0) return;
+    L.splice(avant ? k : k + 1, 0, id);
+    if (L.join() === BLOCS.map(function(b){ return b.id; }).join()) return;
+    VOIR = id;
+    ecrire(function(c){
+      c.sort(function(a, b){ return L.indexOf(a.id) - L.indexOf(b.id); });
+      c.forEach(function(b, n){ b.order = n; });
+    });
   }
   function deplacer(id, dir){
     var i = BLOCS.findIndex(function(x){ return x.id===id; }); var ni=i+dir;
