@@ -60,6 +60,7 @@ module.exports = {
   'Statut': 'Status',
   'Actif': 'Active',
   'Inactif': 'Inactive',
+  'Dormant': 'Dormant',
   'Page': 'Page',
 
   /* ══ LE SEGMENT (#150, 2026-09-24) ═════════════════════════════════════════

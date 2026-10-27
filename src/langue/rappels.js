@@ -13,6 +13,9 @@
  */
 
 module.exports = {
+  'Supprimer': 'Delete',
+  'Reporter…': 'Postpone…',
+  'Autres actions': 'More actions',
   'Rappels — Administration Sandriza': 'Reminders — Sandriza Administration',
   'Rappels': 'Reminders',
   'Rappels indisponibles': 'Reminders unavailable',
@@ -59,7 +62,6 @@ module.exports = {
   'Fait': 'Done',
   'Reporter': 'Postpone',
   'Ouvrir': 'Open',
-  'Supprimer ce rappel': 'Delete this reminder',
   'Reporter de': 'Postpone by',
   '+1 jour': '+1 day',
   '+3 jours': '+3 days',

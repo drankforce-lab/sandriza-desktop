@@ -176,7 +176,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     prospect: '', inactif: '' };
   var MOTS_SEG = {
     prospect: '${T("Prospect")}', nouveau: '${T("Nouveau")}',
-    regulier: '${T("Régulier")}', vip: '${T("VIP")}', inactif: '${T("Inactif")}',
+    regulier: '${T("Régulier")}', vip: '${T("VIP")}', inactif: '${T("Dormant")}',   // (2026-10-27) « Inactif » se confondait avec le STATUT Inactif du compte
   };
   /* Les initiales, pour la pastille (Marie Tremblay -> MT). ⚠ Decoupe sur
      l espace : une expression \s ecrite ici deviendrait s dans le gabarit. */
@@ -252,7 +252,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Nom ou courriel")}" type="search" id="c-q" placeholder="${T("Nom ou courriel…")}" value="' + esc(Q) + '"></label>'
       + onglets.map(function(o){
           return '<button class="rf-jet' + (ONGLET === o[0] ? ' on' : '') + '" data-onglet="' + o[0] + '">'
-            + o[1] + ' (' + o[2] + ')</button>';
+            + o[1] + '</button>';   // (2026-10-27) le mot seul : sa règle des filtres sans compte (2026-10-15)
         }).join('')
       + '<span class="rf-droite">'
       + '<span class="vue-bascule" role="group" aria-label="${T("Affichage de la liste")}">'

@@ -110,6 +110,7 @@ tbody td{padding:.26rem .35rem;border-top:1px solid var(--v055);vertical-align:m
 tbody tr:hover td{background:var(--v03)}
 tbody tr.tot td{border-top:1px solid var(--v16);font-weight:700}
 tbody tr.sous td{color:var(--tx2)}
+tbody tr.msans td{color:var(--tx3)}
 .bon{color:var(--tx-ok)}.mauvais{color:var(--tx-err)}.gris{color:var(--tx2)}
 /* ── L'avertissement : une PASTILLE, et son détail au clic ────────────────── */
 .avert{display:flex;flex-direction:column;align-items:flex-start;gap:.45rem}
@@ -540,6 +541,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
       + '<th class="n">${T("Résultat")}</th></tr></thead><tbody>'
       + r.mois.map(function(m, i){
           var w = maxRev > 0 ? Math.max(0, Math.round(((Number(m.revenu) || 0) / maxRev) * 100)) : 0;
+          /* UN MOIS SANS RIEN (2026-10-27, sa demande) — un mois à venir, ou vide : des tirets pâles au lieu d une
+             rangée de « 0,00 $ » qui se lisait comme un vrai résultat nul. */
+          if (!m.commandes && !Number(m.revenu) && !Number(m.coutMarchandises) && !Number(m.depenses) && !Number(m.resultat)) {
+            return '<tr class="msans"><td>' + MOIS[i] + '</td><td aria-hidden="true"></td>'
+              + '<td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr>';
+          }
           return '<tr><td>' + MOIS[i] + '</td>'
             + '<td class="barre" aria-hidden="true"><div class="cx-piste"><i style="width:' + w + '%"></i></div></td>'
             + '<td class="n">' + (m.commandes || '—') + '</td>'

@@ -4102,7 +4102,7 @@ const JEU = {
     var cas = function(nom, id, d, exige){ return { nom: nom, id: id, reponses: rep(d), exige: exige }; };
     return [
       cas('liste garnie (retard, aujourd’hui, semaine, à venir, terminés)', '', GARNI,
-        ['data-fait="r1"', 'data-rep="r3"', 'data-ouvrir="depenses"', 'data-modele="acomptes"']),
+        ['data-fait="r1"', 'data-menu="r3"', 'data-ouvrir="depenses"', 'data-modele="acomptes"']),
       cas('terminés repliés sous une liste courte', '', donnees([LISTE[2], LISTE[7], LISTE[8]], MODELES(pris)), ['data-repli="termine"']),
       cas('modèle déjà ajouté (pastille, pas de bouton)', '', GARNI, ['déjà ajouté']),
       cas('aucun rappel — appel aux rappels proposés', '', VIDE, ['data-act="tout"', 'data-modele="depenses-semaine"']),

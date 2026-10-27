@@ -104,6 +104,16 @@ button.fait{border-color:rgba(74,222,128,.45);color:var(--tx-ok)}
 .rp .t{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rp .cx-l2{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rp .act{display:flex;gap:.3rem;align-items:center}
+/* LE MENU « ⋯ » (2026-10-27, sa demande : cinq boutons par ligne, trente-cinq à l écran). Fait et Ouvrir restent
+   visibles ; Reporter, Modifier et Supprimer passent dans le menu. Il s ouvre vers le haut sur la moitié basse. */
+.rp-menu{position:relative}
+.rp-menu>button{min-width:2rem;font-weight:800;letter-spacing:.05em}
+.rp-pop{position:absolute;right:0;top:calc(100% + 4px);z-index:30;min-width:11rem;padding:.3rem;border-radius:10px;
+  background:var(--f-carte);border:1px solid var(--v12);box-shadow:0 12px 28px rgba(0,0,0,.3);display:flex;flex-direction:column}
+.rp-pop.haut{top:auto;bottom:calc(100% + 4px)}
+.rp-pop button{border:0;background:transparent;text-align:left;border-radius:7px;padding:.36rem .6rem;font-size:.8rem;color:var(--tx)}
+.rp-pop button:hover{background:var(--v08)}
+.rp-pop button.danger{color:var(--tx-err)}
 .rep{grid-column:1/-1;display:flex;gap:.35rem;align-items:center;flex-wrap:wrap;
   padding:.35rem .45rem;border-radius:8px;background:var(--v04);border:1px solid var(--v08)}
 .rep label{font-size:.74rem;color:var(--tx2)}
@@ -167,6 +177,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('rappels')}
   var OCCUPE = false;
   var PA = false, PM = false, PS = false;
   var FORM = null;             /* le rappel en cours de saisie */
+  var MENU = '', MENU_HAUT = false;   /* le rappel dont le menu « ⋯ » est ouvert, et s il s ouvre vers le haut */
   var REPORT = '';             /* le rappel dont le menu « Reporter » est ouvert */
   var REPDATE = '';
   var REPLIS = { termine: true };   /* les groupes replies */
@@ -343,11 +354,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('rappels')}
       + (mod ? ' · ${T("ouvre")} ' + esc(mod) : '') + '</span></div>'
       + '<span class="rf-pill' + ({ retard: ' rouge', aujourdhui: ' ambre', bientot: ' bleu', termine: ' vert' }[r.etat] || '') + '">' + esc(relatif(r)) + '</span>'
       + '<div class="act">'
-      + (actif && PM ? '<button type="button" class="mini" data-rep="' + esc(r.id) + '" aria-expanded="' + (REPORT === r.id ? 'true' : 'false') + '">${T("Reporter")} ▾</button>'
-          + '<button type="button" class="mini fait" data-fait="' + esc(r.id) + '" title="${T("Fait : le rappel passe à sa prochaine échéance.")}">✓ ${T("Fait")}</button>' : '')
+      + (actif && PM ? '<button type="button" class="mini fait" data-fait="' + esc(r.id) + '" title="${T("Fait : le rappel passe à sa prochaine échéance.")}">✓ ${T("Fait")}</button>' : '')
       + (r.module ? '<button type="button" class="mini" data-ouvrir="' + esc(r.module) + '" title="${T("Ouvrir")} ' + esc(mod) + '">${T("Ouvrir")}</button>' : '')
-      + (PM ? '<button type="button" class="mini" data-mod="' + esc(r.id) + '">${T("Modifier")}</button>' : '')
-      + (PS ? '<button type="button" class="mini danger" data-sup="' + esc(r.id) + '" aria-label="${T("Supprimer ce rappel")}">✕</button>' : '')
+      + ((PM || PS) ? '<span class="rp-menu"><button type="button" class="mini" data-menu="' + esc(r.id) + '" aria-haspopup="true" aria-expanded="' + (MENU === r.id) + '" title="${T("Autres actions")}" aria-label="${T("Autres actions")}">⋯</button>'
+          + (MENU === r.id ? '<span class="rp-pop' + (MENU_HAUT ? ' haut' : '') + '" role="menu">'
+              + (actif && PM ? '<button type="button" role="menuitem" data-rep="' + esc(r.id) + '">${T("Reporter…")}</button>' : '')
+              + (PM ? '<button type="button" role="menuitem" data-mod="' + esc(r.id) + '">${T("Modifier")}</button>' : '')
+              + (PS ? '<button type="button" role="menuitem" class="danger" data-sup="' + esc(r.id) + '">${T("Supprimer")}</button>' : '')
+              + '</span>' : '')
+          + '</span>' : '')
       + '</div>';
     if (REPORT === r.id) {
       h += '<div class="rep"><label>${T("Reporter de")}</label>'
@@ -584,6 +599,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('rappels')}
         return;
       }
     }
+    var mb = t.closest('[data-menu]');
+    if (mb) {
+      var mid = mb.getAttribute('data-menu');
+      MENU_HAUT = mb.getBoundingClientRect().top > window.innerHeight / 2;
+      MENU = (MENU === mid) ? '' : mid; REPORT = ''; dessiner(); return;
+    }
+    // Tout autre clic referme le menu ; le geste choisi dans le menu s exécute ensuite.
+    if (MENU) { MENU = ''; dessiner(); }
     var pg = t.closest('[data-pg]');
     if (pg) { PG += parseInt(pg.getAttribute('data-pg'), 10) || 0; desarmer(); dessiner(); return; }
     var rp = t.closest('[data-repli]');

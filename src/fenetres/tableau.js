@@ -14,9 +14,10 @@
  *      leurs photos, et les commandes par canal.
  *
  * ⚠⚠ PLUS DE TUILES (sa décision du même jour : « il n'y a plus lieu de garder
- * aucune tuile de ce genre »). Ce qui attend un geste devient une PUCE « à faire »
- * dans la barre, et seulement quand ce n'est pas zéro ; ce qui est à zéro se
- * range dans la pastille « N à zéro » (un clic les montre).
+ * aucune tuile de ce genre »). Ce qui attend un geste se lit dans le bouton
+ * « À traiter » de la barre (2026-10-27 : les puces, une par sujet, passaient sur
+ * deux lignes) : il porte le total, et sa liste donne une ligne cliquable par
+ * sujet, ce qui presse en tête et ce qui est à zéro en gris, en bas.
  *
  * ⚠⚠ IL SE RELIT TOUT SEUL (toutes les 12 s), même quand on travaille dans un
  * autre module — mais il N'ENVOIE AUCUNE NOTIFICATION : les annonces sont le
@@ -83,15 +84,29 @@ html.jour .direct{color:#22663a}
 .periode{display:inline-flex;gap:3px;padding:3px;border-radius:9px;background:var(--v04);border:1px solid var(--v10)}
 .periode button{border:0;background:transparent;border-radius:6px;padding:.18rem .65rem;font-size:.76rem;font-weight:600;color:var(--tx2)}
 .periode button.on{background:var(--or);color:#1a1208}
-.faire{display:inline-flex;align-items:center;gap:.3rem;font-size:.76rem;padding:.18rem .6rem;border-radius:99px;
-  background:var(--v06);border:1px solid var(--v14);white-space:nowrap}
-.faire b{font-weight:800}
-.faire.urgent{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
 .zeros{position:relative}
-.zero-puce{font-size:.72rem;color:var(--tx3);background:transparent;border:1px dashed var(--v16);border-radius:99px;padding:.16rem .6rem}
 .zero-pop{position:absolute;top:130%;left:0;z-index:20;min-width:15rem;background:var(--f-carte);border:1px solid var(--v12);
   border-radius:10px;padding:.5rem .7rem;box-shadow:0 12px 28px rgba(0,0,0,.35);font-size:.78rem;color:var(--tx2)}
 .zero-pop div{display:flex;justify-content:space-between;gap:1rem;padding:.16rem 0}
+/* « À TRAITER » (2026-10-27, sa demande : la rangée de puces passait sur deux lignes). UN bouton ; la liste s ouvre
+   dessous, une ligne par sujet, cliquable. Les sujets à zéro restent en bas, en gris. */
+.afaire{display:inline-flex;align-items:center;gap:.4rem;font-size:.76rem;font-weight:600;padding:.18rem .65rem;border-radius:99px;
+  background:var(--v06);border:1px solid var(--v14);white-space:nowrap}
+.afaire b{font-size:.68rem;font-weight:800;min-width:1.2rem;padding:0 .35rem;border-radius:99px;background:var(--tx-att);color:#1a1208;text-align:center}
+html.jour .afaire b{color:var(--tx-sur-accent)}
+.afaire.urgent{border-color:rgba(248,113,113,.55);color:var(--tx-err2)}
+.afaire.urgent b{background:transparent;color:inherit;box-shadow:inset 0 0 0 1px currentColor}
+.afaire.rien{color:var(--tx2);font-weight:500;border-style:dashed}
+.zero-pop.af{min-width:19rem;padding:.4rem}
+.zero-pop.af button{display:flex;width:100%;justify-content:space-between;gap:1rem;border:0;background:transparent;border-radius:7px;
+  padding:.34rem .5rem;font-size:.8rem;color:var(--tx);text-align:left}
+.zero-pop.af button:hover{background:var(--v08)}
+.zero-pop.af button.urgent{color:var(--tx-err2)}
+.zero-pop.af button b{font-variant-numeric:tabular-nums}
+.zero-pop.af button span::first-letter{text-transform:uppercase}
+.zero-pop.af .sep{height:1px;background:var(--v10);margin:.35rem .3rem;padding:0}
+.zero-pop.af .z{padding:.14rem .5rem;color:var(--tx3);font-size:.74rem}
+.zero-pop.af .tit{padding:.1rem .5rem .25rem;font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3)}
 .barre .droite{margin-left:auto;display:flex;align-items:center;gap:.5rem;font-size:.76rem;color:var(--tx2);white-space:nowrap}
 
 /* ── LA GRILLE : trois rangées, celle du milieu prend ce qui reste ── */
@@ -449,19 +464,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + [['jour', '${T("Aujourd’hui")}'], ['7j', '${T("7 jours")}'], ['mois', '${T("Ce mois")}']].map(function(p){
           return '<button type="button" data-periode="' + p[0] + '" class="' + (PERIODE === p[0] ? 'on' : '') + '" aria-pressed="' + (PERIODE === p[0]) + '">' + p[1] + '</button>';
         }).join('') + '</span>'
-      + actifs.map(function(x){
-          return '<button type="button" class="faire' + (x.urgent ? ' urgent' : '') + '" data-ouvre="' + x.cible + '"><b>' + x.n + '</b>' + esc(x.n > 1 ? x.plus : x.un) + '</button>';
-        }).join('')
-      + (sv && sv.urgent ? '<button type="button" class="faire urgent" data-ouvre="sauvegarde">' + esc(sv.texte) + '</button>' : '');
-    h += soldesHtml();
-    var nz = zeros.length + (sv && !sv.urgent ? 1 : 0);
-    if (nz) {
-      h += '<span class="zeros"><button type="button" class="zero-puce" id="tb-zeros" aria-expanded="' + ZEROS + '">'
-        + '${T("{0} à zéro")}'.split('{0}').join(nz) + '</button>'
-        + (ZEROS ? '<span class="zero-pop">' + zeros.map(function(x){ return '<div><span>' + esc(x.nom) + '</span><b>0</b></div>'; }).join('')
-            + (sv && !sv.urgent ? '<div><span>' + esc(sv.texte) + '</span></div>' : '') + '</span>' : '')
-        + '</span>';
-    }
+      + '</span>';
+    /* « À TRAITER » (2026-10-27) : les puces d avant (une par sujet) passaient sur deux lignes. Le bouton porte le total ;
+       sa liste, une ligne cliquable par sujet — ce qui presse en rouge, en tête. La sauvegarde trop vieille en fait partie. */
+    var total = actifs.reduce(function(s, x){ return s + x.n; }, 0) + (sv && sv.urgent ? 1 : 0);
+    var presse = actifs.some(function(x){ return x.urgent; }) || !!(sv && sv.urgent);
+    var ordre = actifs.slice().sort(function(a, b){ return (b.urgent ? 1 : 0) - (a.urgent ? 1 : 0); });
+    h += '<span class="zeros"><button type="button" class="afaire' + (presse ? ' urgent' : '') + (total ? '' : ' rien') + '" id="tb-zeros" aria-expanded="' + ZEROS + '" aria-haspopup="true">'
+      + (total ? '${T("À traiter")} <b>' + total + '</b>' : '${T("Rien à traiter")}') + '</button>'
+      + (ZEROS ? '<span class="zero-pop af" role="menu">'
+          + (sv && sv.urgent ? '<button type="button" role="menuitem" class="urgent" data-ouvre="sauvegarde"><span>' + esc(sv.texte) + '</span></button>' : '')
+          + ordre.map(function(x){
+              return '<button type="button" role="menuitem" class="' + (x.urgent ? 'urgent' : '') + '" data-ouvre="' + x.cible + '"><span>' + esc(x.n > 1 ? x.plus : x.un) + '</span><b>' + x.n + '</b></button>';
+            }).join('')
+          + ((zeros.length || (sv && !sv.urgent)) ? ((total ? '<div class="sep"></div>' : '') + '<div class="tit">${T("À zéro")}</div>'
+              + zeros.map(function(x){ return '<div class="z"><span>' + esc(x.nom) + '</span><b>0</b></div>'; }).join('')
+              + (sv && !sv.urgent ? '<div class="z"><span>' + esc(sv.texte) + '</span></div>' : '')) : '')
+          + '</span>' : '')
+      + '</span>';
+    h += soldesHtml() + tauxPuce();
     h += '</div>';
     // Le Mode exclusif vit dans l en-tete, a cote de la date : la barre garde sa ligne pour les puces.
     var slot = document.getElementById('tb-mx-slot');
@@ -484,17 +505,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + ' <button type="button" class="mini" id="tb-etiq-vu" data-ids="' + esc(l.map(function(a){ return a.id; }).join(',')) + '">${T("Vu")}</button></div>';
   }
 
-  function tauxAvis(){
-    if (!D.taux) return '';
-    return '<div class="avis"><span class="ic">💱</span> ' + (D.taux.genre === 'secours'
-      ? '<strong>${T("Taux de change indisponible.")}</strong> ${T("Les prix affichés en USD utilisent un taux ")}'
-        + '${T("de secours (1 USD =")} ' + szNombre(D.taux.rate, 4) + ' ${T("CAD), donc approximatif.")} '
-        + '${T("Les commandes, elles, sont toujours facturées en dollars canadiens.")}'
-      : '<strong>${T("Taux de change vieux de")} ' + D.taux.ageHeures + ' h</strong> ${T("(relevé du ")}'
-        + esc(szQuand(D.taux.quand) || '') + ', 1 USD = ' + szNombre(D.taux.rate, 4) + ' CAD). '
-        + '${T("Les prix en USD peuvent s’écarter du marché.")}') + '</div>';
+  /* LE TAUX DE CHANGE EN PASTILLE (2026-10-27) : le bandeau prenait toute une rangée pour une information qui ne
+     demande aucun geste. La pastille (pointillée, comme un service muet) garde l explication entière au survol. */
+  function tauxPuce(){
+    if (!D || !D.taux) return '';
+    var titre = D.taux.genre === 'secours'
+      ? '${T("Taux de change indisponible.")} ${T("Les prix affichés en USD utilisent un taux ")}${T("de secours (1 USD =")} ' + szNombre(D.taux.rate, 4)
+        + ' ${T("CAD), donc approximatif.")} ${T("Les commandes, elles, sont toujours facturées en dollars canadiens.")}'
+      : '${T("Taux de change vieux de")} ' + D.taux.ageHeures + ' h ${T("(relevé du ")}' + (szQuand(D.taux.quand) || '') + ', 1 USD = ' + szNombre(D.taux.rate, 4) + ' CAD). '
+        + '${T("Les prix en USD peuvent s’écarter du marché.")}';
+    return '<span class="solde muet" title="' + esc(titre) + '">' + (D.taux.genre === 'secours' ? '${T("USD : taux approximatif")}' : '${T("USD : taux ancien")}') + '</span>';
   }
-
   /* inverse : une hausse est une MAUVAISE nouvelle (les retours) ; points : l écart est en points de pourcentage. */
   function ecart(v, inverse, points){
     if (v == null) return '<div class="d">&nbsp;</div>';
@@ -508,7 +529,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var V = D.vivant;
     if (!V) { vide('${T("Tableau de bord indisponible")}', '${T("Le site n’a pas encore cette version du tableau de bord.")}'); return; }
     var e = V.etapes || {}, pc = V.parcours || {}, iv = V.inventaire || {}, pr = V.produits || {}, k = V.kpi || {};
-    var h = barre() + tauxAvis() + alertesEtiquettes() + '<div class="grille">';
+    var h = barre() + alertesEtiquettes() + '<div class="grille">';
 
     // ── rangée 1 ──
     var etape = function(n, lib, c){ return '<div class="etape" data-ouvre="orders" style="color:' + c + '" title="${T("Ouvrir les commandes")}"><div class="n">' + (n || 0) + '</div><div class="lib">' + lib + '</div></div>'; };
@@ -743,7 +764,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var ou = t.closest('[data-ouvre]');
     // La pastille Twilio mène au journal des appels (2026-10-21, sa demande), dans la fenêtre Journaux.
     if (ou && ou.getAttribute('data-ouvre') === 'journaux-appels') { if (P && P.ouvrirJournaux) P.ouvrirJournaux('appels'); return; }
-    if (ou) { ouvrir(ou.getAttribute('data-ouvre')); return; }
+    if (ou) { if (ZEROS) { ZEROS = false; dessiner(); } ouvrir(ou.getAttribute('data-ouvre')); return; }
     var li = t.closest('[data-ligne]');
     if (li && li.getAttribute('data-ligne')) {
       appeler('commandes:ouvrirDetail', [li.getAttribute('data-ligne')]).then(function(r){
