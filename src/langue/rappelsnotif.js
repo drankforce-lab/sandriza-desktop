@@ -26,4 +26,8 @@ module.exports = {
   '{0} — cliquez pour ouvrir {1}': '{0} — click to open {1}',
   '{0} autres rappels à faire': '{0} more reminders due',
   'Cliquez pour ouvrir les Rappels': 'Click to open Reminders',
+  'Marquer fait': 'Mark done',
+  'Demain': 'Tomorrow',
+  'Rappel non modifié': 'Reminder not changed',
+  'Ouvrez l’application et réessayez depuis les Rappels.': 'Open the application and try again from Reminders.',
 };

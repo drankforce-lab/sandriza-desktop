@@ -42,6 +42,9 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   // appellent `Admin` directement dans la page, donc les gardes de permission
   // et de lecture seule du site s'appliquent sans qu'on ait rien à recopier.
   menuAction: (nom) => ipcRenderer.invoke('menu:action', String(nom || '')),
+  /* Les bulles du site (Toast.show) passent par une carte native quand la page est sous le cadre
+     (src/bulle.js) : rend vrai si l'application s'en est chargée — la page ne dessine alors rien. */
+  bulle: (type, msg) => { try { return ipcRenderer.sendSync('bulle:native', String(type || ''), String(msg == null ? '' : msg).slice(0, 2000)) === true; } catch (e) { return false; } },
   /* L'APERÇU 3D DE THE NEW BLACK (2026-10-18) : la file des générations de la page principale mène le modèle
      étape par étape (telecharger, recaler, projeter, couleur, compresser, controler, fermer) — voir modele3d.js. */
   modele3dTnb: (etape, jeton, a, b) => ipcRenderer.invoke('modele3d:tnb', String(etape || ''), String(jeton || ''), a, b)

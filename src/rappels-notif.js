@@ -103,7 +103,7 @@ function creer(o) {
       detail.forEach((x) => {
         const ok = o.notifier(TR('Rappel : {0}', titreLu(x.titre)),
           TR('{0} — cliquez pour ouvrir {1}', echeance(x, auj), nomModule(x.module)),
-          { aller: x.module || 'rappels' });
+          { aller: x.module || 'rappels', rappelId: x.id });
         if (ok !== false) annonces.push(x.id);
       });
       if (neufs.length > MAX_DETAIL + 1) {
@@ -140,4 +140,13 @@ function creer(o) {
   return { surSession, verifier, actif };
 }
 
-module.exports = { creer, nomModule, echeance };
+/* Les boutons de la notification et le refus d'un geste fait depuis elle — dessinés par main.js
+   (`_toastRappel`, `lienRappel`), mais demandés ICI pour que le banc de langue les voie. */
+const textes = () => ({
+  fait: TR('Marquer fait'),
+  demain: TR('Demain'),
+  refus: TR('Rappel non modifié'),
+  refusCorps: TR('Ouvrez l’application et réessayez depuis les Rappels.'),
+});
+
+module.exports = { creer, nomModule, echeance, textes };

@@ -963,6 +963,24 @@ ipcMain.handle('deconnexion:demander', (_e, nom, role) => new Promise((resolve) 
 /* La fin de session, dite par la page (Staff.clearSession) — voir la fiche de
    `_fermerFenetresDeSession`. On n'accepte que de la fenêtre principale : une
    fenêtre native n'a pas à pouvoir fermer toutes les autres. */
+/* ══ LES BULLES DU SITE, EN NATIF (2026-10-27) — voir src/bulle.js ══
+   Synchrone : `Toast.show` (app.js) doit savoir s'il dessine lui-même. On ne prend que si le SITE
+   est sous le cadre (alors invisible) ; sans cadre, le site reste son propre afficheur. */
+const BULLE = require('./bulle');
+ipcMain.on('bulle:native', (e, type, msg) => {
+  let pris = false;
+  try {
+    const duSite = (_vivant(vueSite) && e.sender === vueSite.webContents)
+      || (mainWindow && !mainWindow.isDestroyed() && e.sender === mainWindow.webContents);
+    if (duSite && _vivant(vueCadre)) {
+      const t = String(type || '');
+      // Les confirmations n'ont jamais été vues sous le cadre : elles restent muettes (même rendu qu'avant).
+      if (t === 'error' || t === 'warning') BULLE.montrer(mainWindow, t, msg, !!reglages.get('sombre'));
+      pris = true;
+    }
+  } catch (er) {}
+  e.returnValue = pris;
+});
 ipcMain.on('session:fermee', (e) => {
   if (!_deLaPrincipale(e)) return;
   try { _fermerFenetresDeSession(); } catch (er) {}
@@ -1028,13 +1046,38 @@ const ICON_PATH = [
    être ramassé par le nettoyage de mémoire, et Windows perd alors son clic (surtout depuis le Centre
    de notifications, plus tard). On les garde ici jusqu'au clic ou à la fermeture. */
 const _notifsVivantes = new Set();
+/* ⚠ LES BOUTONS D'UNE NOTIFICATION DE RAPPEL (2026-10-27, sa remarque : la notification « ne nous permet
+   pas de confirmer que c'est complété »). Windows seulement : `toastXml` porte « Marquer fait » et
+   « Demain », activés par le protocole `sandriza://rappel/…` — Windows le remet à la seconde instance,
+   que `ouvrirLienSandriza` traite SANS montrer la fenêtre. Le clic sur le corps passe aussi par le
+   protocole (`ouvrir`) : avec un `toastXml`, l'événement `click` n'est plus garanti. */
+const _xmlEsc = (v) => String(v == null ? '' : v).replace(/[<>&"']/g,
+  (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' }[c]));
+const _toastRappel = (titre, corps, options) => {
+  if (process.platform !== 'win32' || !options.rappelId || !/^[a-z0-9_-]{1,60}$/i.test(String(options.rappelId))) return undefined;
+  const id = String(options.rappelId);
+  const aller = /^[a-z0-9_-]{1,40}$/i.test(String(options.aller || '')) ? String(options.aller) : 'rappels';
+  const TX = require('./rappels-notif').textes();
+  const lien = (geste, val) => _xmlEsc('sandriza://rappel/' + geste + '/' + val);
+  return '<toast activationType="protocol" launch="' + lien('ouvrir', aller) + '">'
+    + '<visual><binding template="ToastGeneric">'
+    + '<text>' + _xmlEsc(titre) + '</text><text>' + _xmlEsc(corps) + '</text>'
+    + (fs.existsSync(ICON_PATH) ? '<image placement="appLogoOverride" src="' + _xmlEsc(ICON_PATH) + '"/>' : '')
+    + '</binding></visual>'
+    + '<actions>'
+    + '<action content="' + _xmlEsc(TX.fait) + '" activationType="protocol" arguments="' + lien('fait', id) + '"/>'
+    + '<action content="' + _xmlEsc(TX.demain) + '" activationType="protocol" arguments="' + lien('demain', id) + '"/>'
+    + '</actions></toast>';
+};
 const notifier = (titre, corps, options = {}) => {
   try {
+    const xml = _toastRappel(titre, corps, options);
     const n = new Notification({
       title: String(titre || 'Administration Sandriza'),
       body: String(corps || ''),
       icon: fs.existsSync(ICON_PATH) ? ICON_PATH : undefined,
       silent: !!options.silent,
+      ...(xml ? { toastXml: xml } : {}),
     });
     n.on('click', () => {
       if (!mainWindow || mainWindow.isDestroyed()) return;
@@ -2355,66 +2398,77 @@ const texteApropos = () => infosApropos()
 
 const pageApropos = () => {
   const b = porteMarque();
-  const bg = 'linear-gradient(135deg,' + b.bgFrom + ' 0%,' + b.bgMid + ' 50%,' + b.bgFrom + ' 100%)';
+  /* ══ REFAITE LE 2026-10-27 — sa remarque : « le logo n'est pas assez visible, améliore aussi le look ».
+     L'ancien côté marque était un DÉGRADÉ violet → sable → violet sous un logo SOMBRE : le « S » noir et
+     le « SANDRIZA » se perdaient dans le milieu du dégradé, « Administration » et la version étaient
+     presque illisibles. Désormais :
+       · la page suit le JEU DE COULEURS DU POSTE (comme l'écran de chargement, `_portePalette`), jour et nuit ;
+       · le logo est posé sur une PLAQUE IVOIRE, quel que soit le thème : il est dessiné pour un fond clair,
+         on lui donne un fond clair au lieu d'espérer que le thème en soit un ;
+       · boutons PLATS (reference_un_bouton_dapplication_est_plat) : la lumière change, jamais la position. */
+  const P = _portePalette() || { scheme: 'light', panel: '#f5f3ef', h1: '#2e2b27', sub: '#6f695f', kicker: '#55663f',
+    acc: '#5f7150', accTxt: '#55663f', rgb: '95,113,80' };
+  const nuitP = P.scheme === 'dark';
+  const C = nuitP
+    ? { cote: P.panel, fond: '#1b1a17', carte: P.panel, trait: 'rgba(255,255,255,.08)', txt: P.h1, sub: P.sub,
+        btn: 'rgba(255,255,255,.04)', btnH: 'rgba(255,255,255,.09)', btnB: 'rgba(255,255,255,.16)', pied: P.panel }
+    : { cote: '#ebe6dd', fond: P.panel, carte: '#ffffff', trait: 'rgba(0,0,0,.08)', txt: P.h1, sub: P.sub,
+        btn: '#ffffff', btnH: '#f4f1ec', btnB: 'rgba(0,0,0,.16)', pied: '#efebe4' };
+  if (nuitP) C.fond = P.panel === '#22201c' ? '#1a1916' : P.panel;
   const logo = b.logo
-    ? '<img src="' + b.logo + '" alt="" class="lg">'
-    : '<div class="bd" style="background:' + b.logoG + '">' + b.lettre + '</div>';
+    ? '<img src="' + b.logo + '" alt="' + String(b.nom).replace(/"/g, '&quot;') + '" class="lg">'
+    : '<div class="bd">' + b.lettre + '</div><div class="bn">' + String(b.nom).replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</div>';
   const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
   const sections = infosApropos().map(([titre, lignes]) =>
-    '<div class="sect"><div class="st">' + esc(titre) + '</div><dl class="grid">'
-    + lignes.map(([k, v]) => '<dt>' + esc(k) + '</dt><dd>' + esc(v) + '</dd>').join('')
-    + '</dl></div>').join('');
+    '<section class="sect"><h2 class="st">' + esc(titre) + '</h2><dl class="grid">'
+    + lignes.map(([k, v]) => '<div class="l"><dt>' + esc(k) + '</dt><dd>' + esc(v) + '</dd></div>').join('')
+    + '</dl></section>').join('');
 
   const css = ''
-    + ':root{color-scheme:light}*{box-sizing:border-box}'
+    + ':root{color-scheme:' + (nuitP ? 'dark' : 'light') + '}*{box-sizing:border-box}'
     + 'html,body{margin:0;height:100%;overflow:hidden}'
-    + 'body{display:flex;font:14px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#1a1207}'
-    + '.brand{flex:0 0 268px;background:' + bg + ';position:relative;overflow:hidden;'
-    +   'display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.6rem 1.2rem;text-align:center}'
-    + '.orb{position:absolute;border-radius:50%;filter:blur(52px);opacity:.5;pointer-events:none}'
-    + '.o1{width:230px;height:230px;background:' + b.logoG + ';top:-70px;left:-60px;animation:f1 17s ease-in-out infinite}'
-    + '.o2{width:190px;height:190px;opacity:.4;background:linear-gradient(135deg,#a855f7,#6d28d9);bottom:-60px;right:-40px;animation:f2 21s ease-in-out infinite}'
-    + '.bi{position:relative;z-index:2}'
-    + '.bd{width:62px;height:62px;border-radius:17px;display:flex;align-items:center;justify-content:center;'
-    +   'font:800 1.7rem/1 Georgia,serif;color:#fff;margin:0 auto .9rem;box-shadow:0 12px 30px rgba(0,0,0,.34)}'
-    + '.lg{display:block;width:100%;max-width:210px;height:auto;margin:0 auto 1.1rem}'
-    + '.bn{font-family:Georgia,serif;font-size:1.15rem;font-weight:800;color:' + b.titre + ';margin:0}'
-    + '.bs{font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:' + b.sous + ';margin-top:.45rem}'
-    + '.bv{margin-top:1.1rem;font-size:.7rem;color:' + b.sous + ';opacity:.75}'
-    + '.panel{flex:1 1 auto;background:#faf8f5;display:flex;flex-direction:column;min-width:0}'
-    + '.body{flex:1 1 auto;overflow:hidden;padding:1.4rem 1.7rem}'
-    + '.sect{margin-bottom:1.25rem}.sect:last-child{margin-bottom:0}'
-    + '.st{font-size:.66rem;font-weight:700;color:#9a7d62;text-transform:uppercase;letter-spacing:.1em;'
-    +   'padding-bottom:.4rem;margin-bottom:.55rem;border-bottom:1px solid rgba(196,154,108,.22)}'
-    // ⚠ LA GRILLE, C'EST TOUT LE CORRECTIF : deux colonnes, l'etiquette a largeur
-    //   fixe et la valeur qui prend le reste. Aucun espace de calage.
-    + '.grid{display:grid;grid-template-columns:118px 1fr;gap:.34rem .9rem;margin:0}'
-    + 'dt{color:#7a6652;font-size:.79rem}'
-    + 'dd{margin:0;font-size:.82rem;color:#1a1207;word-break:break-all;-webkit-user-select:text;user-select:text}'
-    + '.pied{flex:0 0 auto;display:flex;gap:.55rem;justify-content:flex-end;'
-    +   'padding:.9rem 1.7rem;border-top:1px solid rgba(196,154,108,.22);background:#f4f0ea}'
-    + 'button{font:inherit;font-size:.82rem;padding:.5rem 1.05rem;border-radius:9px;cursor:pointer;'
-    +   'border:1px solid rgba(196,154,108,.42);background:#fff;color:#8a6a44;font-weight:600;'
-    +   'transition:background .15s,transform .12s,box-shadow .18s}'
-    + 'button:hover{background:rgba(196,154,108,.12);transform:translateY(-1px);box-shadow:0 5px 14px rgba(196,154,108,.2)}'
-    + 'button:active{transform:none}'
-    + 'button.p{background:linear-gradient(135deg,#C49A6C,#a97f52);border-color:transparent;color:#fff}'
-    + '@keyframes f1{0%,100%{transform:translate(0,0)}50%{transform:translate(26px,32px)}}'
-    + '@keyframes f2{0%,100%{transform:translate(0,0)}50%{transform:translate(-22px,-26px)}}'
-    + '@media (prefers-reduced-motion:reduce){.orb{animation:none}}';
+    + 'body{display:flex;font:14px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif;color:' + C.txt + ';background:' + C.fond + '}'
+    + '.brand{flex:0 0 310px;background:' + C.cote + ';border-right:1px solid ' + C.trait + ';'
+    +   'display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.5rem;text-align:center;gap:1.1rem}'
+    // La plaque : ivoire dans les deux modes — le logo est fait pour un fond clair.
+    + '.plaque{width:100%;overflow:hidden;background:#fbf8f2;border:1px solid rgba(0,0,0,.07);border-radius:14px;padding:1.1rem .6rem;'
+    +   'box-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 6px 18px rgba(0,0,0,' + (nuitP ? '.35' : '.08') + ')}'
+    + '.lg{display:block;width:100%;height:auto;margin:.4rem auto;transform:scale(1.3)}'   // l'image porte sa propre marge blanche (le dessin en occupe 69 %)
+    + '.bd{width:64px;height:64px;border-radius:16px;margin:0 auto .7rem;display:grid;place-items:center;'
+    +   'font:700 1.9rem/1 Georgia,serif;color:#fbf8f2;background:#2e2b27}'
+    + '.bn{font:700 1.25rem/1.2 Georgia,serif;letter-spacing:.08em;color:#2e2b27}'
+    + '.bs{font-size:.72rem;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:' + P.accTxt + '}'
+    + '.bv{display:inline-block;font-size:.78rem;font-weight:600;color:' + C.txt + ';padding:.22rem .7rem;border-radius:99px;'
+    +   'border:1px solid ' + C.btnB + ';background:' + C.btn + '}'
+    + '.panel{flex:1 1 auto;display:flex;flex-direction:column;min-width:0;background:' + C.fond + '}'
+    + '.body{flex:1 1 auto;overflow:hidden;padding:1.5rem 1.7rem;display:flex;flex-direction:column;gap:1rem}'
+    + '.sect{margin:0;background:' + C.carte + ';border:1px solid ' + C.trait + ';border-radius:10px;padding:.85rem 1.05rem .7rem}'
+    + '.st{margin:0 0 .5rem;font-size:.68rem;font-weight:700;color:' + P.accTxt + ';text-transform:uppercase;letter-spacing:.12em}'
+    + '.grid{margin:0;display:flex;flex-direction:column}'
+    + '.l{display:grid;grid-template-columns:120px 1fr;gap:.9rem;padding:.32rem 0;border-top:1px solid ' + C.trait + '}'
+    + '.l:first-child{border-top:0}'
+    + 'dt{color:' + C.sub + ';font-size:.8rem}'
+    + 'dd{margin:0;font-size:.82rem;color:' + C.txt + ';overflow-wrap:anywhere;-webkit-user-select:text;user-select:text}'
+    + '.pied{flex:0 0 auto;display:flex;gap:.55rem;justify-content:flex-end;padding:.85rem 1.7rem;'
+    +   'border-top:1px solid ' + C.trait + ';background:' + C.pied + '}'
+    + 'button{font:inherit;font-size:.82rem;font-weight:600;padding:.48rem 1rem;border-radius:7px;cursor:pointer;'
+    +   'border:1px solid ' + C.btnB + ';background:' + C.btn + ';color:' + C.txt + ';box-shadow:none;transform:none;transition:background .12s}'
+    + 'button:hover{background:' + C.btnH + '}'
+    + 'button:active{background:' + C.btnB + '}'
+    + 'button:focus-visible{outline:2px solid ' + P.acc + ';outline-offset:2px}'
+    + 'button.p{background:' + P.acc + ';border-color:' + P.acc + ';color:' + (nuitP ? '#1a1916' : '#ffffff') + '}'
+    + 'button.p:hover{background:' + P.acc + ';box-shadow:inset 0 0 0 99px rgba(255,255,255,.1)}'
+    + 'button.p:active{box-shadow:inset 0 0 0 99px rgba(0,0,0,.14)}';
 
   /* ⚠ LA LANGUE DE LA PAGE, comme dans les 99 fenetres : c est elle que lisent
      la coupure des mots, le correcteur et le lecteur d ecran — pas le texte. */
   return '<!doctype html><html lang="' + require('./langue').langueCourante() + '">'
     + '<head><meta charset="utf-8"><title>' + esc(TA('À propos')) + '</title>'
     + '<style>' + css + '</style></head><body>'
-    + '<aside class="brand"><span class="orb o1"></span><span class="orb o2"></span>'
-    // ⚠ Le nom n'est ecrit QUE si le logo ne le porte pas deja. Le logo de
-    // marque contient le mot SANDRIZA : l'afficher en dessous le repetait deux
-    // fois, l'un sous l'autre.
-    +   '<div class="bi">' + logo + (b.logo ? '' : '<div class="bn">' + esc(b.nom) + '</div>')
+    + '<aside class="brand">'
+    +   '<div class="plaque">' + logo + '</div>'
     +   '<div class="bs">' + esc(TA('Administration')) + '</div>'
-    +   '<div class="bv">' + esc(TA('version {0}', app.getVersion())) + '</div></div></aside>'
+    +   '<div class="bv">' + esc(TA('version {0}', app.getVersion())) + '</div></aside>'
     + '<main class="panel"><div class="body">' + sections + '</div>'
     +   '<div class="pied">'
     +     '<button onclick="szPalette.action({app:\'about-copy\'})">' + esc(TA('Copier les détails')) + '</button>'
@@ -2440,9 +2494,9 @@ const pageApropos = () => {
 const ouvrirApropos = () => {
   if (aproposWin && !aproposWin.isDestroyed()) { aproposWin.focus(); return; }
   aproposWin = new BrowserWindow({
-    width: 830, height: 560, show: false, resizable: false, minimizable: false, maximizable: false,
+    width: 860, height: 560, show: false, resizable: false, minimizable: false, maximizable: false,
     title: TA('À propos'), parent: mainWindow || undefined, modal: false,
-    autoHideMenuBar: true, backgroundColor: '#faf8f5',
+    autoHideMenuBar: true, backgroundColor: (_portePalette() || {}).panel || '#f5f3ef',
     webPreferences: {
       preload: path.join(__dirname, 'palette-preload.js'),
       contextIsolation: true, nodeIntegration: false, sandbox: true,
@@ -8356,7 +8410,28 @@ const dessinerMenus = () => { buildMenu(); appliquerModeMenu(); };
    ICI. ⚠ Liste BLANCHE : un lien venu de l'extérieur ne peut ouvrir que ce qui est
    nommé ci-dessous — jamais une action arbitraire de `actionApp` (quitter, recharger…). */
 const LIENS_OUVRABLES = new Set(['config-taxes', 'rappels', 'journaux', 'securite', 'config-automations', 'chat-config', 'sauvegarde', 'incidents', 'config-telephonie']);
+/* Les liens des notifications de rappel (voir `_toastRappel`) : `fait` et `demain` agissent SANS
+   montrer la fenêtre (on répond à la notification, on ne change pas d'écran) ; `ouvrir` montre le
+   module du rappel. Un geste refusé (session fermée, droit) le dit par une notification. */
+const MODULES_RAPPEL = new Set(['depenses', 'vehicules', 'impot', 'bankrec', 'livre', 'compta', 'factures', 'inventaire', 'commandes', 'rappels']);
+const lienRappel = (url) => {
+  const m = String(url || '').match(/^sandriza:\/\/rappel\/(fait|demain|ouvrir)\/([a-z0-9_-]{1,60})\/?$/i);
+  if (!m) return false;
+  const geste = m[1].toLowerCase(), val = m[2];
+  const TX = require('./rappels-notif').textes();
+  if (geste === 'ouvrir') {
+    montrerAdministration();
+    if (MODULES_RAPPEL.has(val)) setTimeout(() => { try { cadreWC().send('dock:naviguer', val); } catch {} }, 900);
+    return true;
+  }
+  const op = geste === 'fait' ? executerOpSite('rappels:fait', [val], null) : executerOpSite('rappels:reporter', [val, 1], null);
+  Promise.resolve(op).then((r) => {
+    if (!r || !r.ok) notifier(TX.refus, TX.refusCorps, { aller: 'rappels' });
+  }).catch(() => notifier(TX.refus, TX.refusCorps, { aller: 'rappels' }));
+  return true;
+};
 const ouvrirLienSandriza = (url) => {
+  if (lienRappel(url)) return;
   montrerAdministration();
   const m = String(url || '').match(/^sandriza:\/\/ouvrir\/([a-z0-9-]+)/i);
   const nom = m ? m[1].toLowerCase() : '';
