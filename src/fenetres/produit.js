@@ -74,8 +74,9 @@ const CSS_PROPRE = `
 .prixgrille .ch{display:flex!important;grid-row:auto!important}
 .carte{border-radius:16px}
 .carte>h2{font-size:.95rem;letter-spacing:0;text-transform:none;font-weight:650;color:var(--tx)}
-.pf-puces{display:flex;flex-wrap:wrap;gap:.45rem;padding-top:1.55rem}
-.pf-puces button{height:2.2rem;padding:0 .95rem;border-radius:99px;border:1px solid var(--v16);background:transparent;color:var(--tx2);font-size:.84rem}
+.etape label[data-cpt]::after{content:attr(data-cpt);float:right;font-weight:400;color:var(--tx2)}
+.pf-puces{display:flex;flex-wrap:wrap;gap:.35rem;padding-top:1.55rem}
+.pf-puces button{height:2.05rem;padding:0 .7rem;font-size:.8rem!important;border-radius:99px;border:1px solid var(--v16);background:transparent;color:var(--tx2);font-size:.84rem}
 .pf-puces button.on{background:rgba(var(--or-rgb),.16);border-color:var(--or);color:var(--tx);font-weight:600}
 .ch.a-puces{position:relative}
 .ch.a-puces>select{display:none}
@@ -386,9 +387,24 @@ html.jour .vue .x:hover:not(:disabled),html.jour .vign .x:hover:not(:disabled){b
    largeur disponible ; « aspect-ratio » tient le carre, donc ils grandissent et
    se resserrent sans jamais se deformer, et « nowrap » interdit le retour a la
    ligne au lieu de compter sur la chance. */
-#p-vues{flex-wrap:nowrap}
-#p-vues .vue{flex:0 0 auto;width:160px;max-width:160px}
-#p-vues .vue .cadre{width:100%;height:auto;aspect-ratio:1/1;font-size:.72rem}
+/* (2026-10-26) Le dos à part, puis une GRILLE qui passe à la ligne : plus rien ne sort de la carte. */
+#p-vues{display:grid!important;grid-template-columns:7.5rem minmax(0,1fr);gap:1.1rem;align-items:start;overflow:visible}
+#p-vues .pv-grille{display:grid;grid-template-columns:repeat(auto-fill,7.5rem);gap:.6rem}
+#p-vues .vue{flex:none;width:auto;max-width:none;min-width:0}
+#p-vues .vue .cadre{width:100%;height:auto;aspect-ratio:3/4;font-size:.72rem}
+.pv-t{font-size:.76rem;font-weight:650;color:var(--tx2);margin:0 0 .4rem}
+.pv-opt{font-weight:400;color:var(--tx3);margin-left:.3rem}
+.pv-fibre{margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--v08)}
+.pv-fibre-l{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+.cadre-fibre{width:7.5rem;aspect-ratio:1/1;border-radius:12px;border:1.5px dashed var(--v16);display:flex;align-items:center;
+  justify-content:center;overflow:hidden;font-size:.72rem;color:var(--tx3);flex:0 0 auto}
+.cadre-fibre.pleine{border-style:solid;border-color:var(--v16)}
+.cadre-fibre img{width:100%;height:100%;object-fit:cover}
+.pv-fibre-g{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.pv-etat{font-size:.78rem;color:var(--tx2)}
+.pv-demarquer{display:block;width:100%;margin-top:.35rem;height:1.9rem;font-size:.76rem!important;padding:0 .4rem}
+/* Une fenêtre basse : des cases un peu plus petites, pour que la fibre reste au-dessus du pied. */
+@media (max-height:820px){#p-vues{grid-template-columns:6.5rem minmax(0,1fr)}#p-vues .pv-grille{grid-template-columns:repeat(auto-fill,6.5rem)}.cadre-fibre{width:6.5rem}.ligne-photos .vue-principale .vign{height:17rem}}
 .lgstk{display:flex;align-items:center;gap:.5rem;padding:.2rem .3rem;border-radius:6px}
 /* (2026-10-25, audit) La liste du stock est paginée par Pagi : elle vit dans un CADRE pour ne pas
    être enfant direct de .carte.plein, sans quoi le socle (_SZ_PG_AUTO) la paginait une SECONDE fois
@@ -702,8 +718,6 @@ function pageProduit(id) {
       + '<div class="lgd-principale">${T("Photo principale")}</div>'
       + '<button type="button" id="p-detourer" class="mini-decor" disabled '
       + '><span class="ic">✂</span> ${T("Décor")}</button>'
-      + '<button type="button" id="p-fibre" class="mini-decor" disabled '
-      + '><span class="ic">🔍</span> ${T("Gros plan fibre")}</button>'
       + '<button type="button" id="p-studio" class="mini-decor" disabled '
       + '><span class="ic">📷</span> ${T("Créer au studio")}</button></div>'
       + '<div class="aide p-studio-attente" id="p-studio-attente" style="display:none"></div>'
@@ -722,6 +736,10 @@ function pageProduit(id) {
       + '<button type="button" id="p-3d-retirer">${T("Retirer l’aperçu 3D")}</button></div>'
       + '</div>'
       + '<div class="vues" id="p-vues"></div>'
+      /* LA FIBRE AGRANDIE (2026-10-26, sa demande) : une case à part, FACULTATIVE, sous les photos ; un bouton qui
+         génère TOUJOURS le rendu le plus précis (la macro professionnelle) — pas de choix à faire. La boutique
+         l'affiche EN GRAND, dans sa propre section. Champ de la fiche : photoFibre. */
+      + '<div class="pv-fibre" id="p-fibre-bloc"></div>'
       + '</div></div>'
       /* ⚠ LES MÉDIAS (2026-10-07, sa demande : « Sophie mesure 1,68 m et porte
          un S », « une courte vidéo de 5 secondes qui montre le tombé », « un 360
@@ -772,7 +790,7 @@ function pageProduit(id) {
       + '<input id="p-sku" readonly style="font-family:ui-monospace,Consolas,monospace;'
       + 'background:var(--f-pied);color:var(--tx-or)" placeholder="${T("choisissez une catégorie")}"></div>'
       + '<div class="ch l4"><label for="p-desc">${T("Description")}'
-      + '<span id="p-desc-etat" style="float:right;color:var(--tx2);font-size:.72rem"></span></label>'
+      + '</label>'
       + '<textarea id="p-desc" rows="3"></textarea>'
       // La redaction par IA passe par le PONT : la fenetre envoie la photo et les
       // renseignements, le SITE interroge le service avec sa cle. Rien ne sort
@@ -1001,6 +1019,8 @@ function pageProduit(id) {
       if (val('p-cat')) majSku();
     }
     if (window.__pfMajDirect) window.__pfMajDirect();   // « directement » et l'accès anticipé s'excluent
+    majNom();
+    MODE_PH = modeStandard();
     dessinerJetons();
     majMarge();
     majFiche();
@@ -1215,7 +1235,7 @@ function pageProduit(id) {
     if (ret) ret.onchange = majRegime;
     majRegime();
     var cat = document.getElementById('p-cat');
-    if (cat) cat.addEventListener('change', function(){ if (!ID) majSku(); dessinerVues(); });
+    if (cat) cat.addEventListener('change', function(){ if (!ID) majSku(); suivreModePhotos(); dessinerVues(); });
     var rab = document.getElementById('p-rabais');
     if (rab) rab.addEventListener('click', function(ev){
       var b = ev.target.closest('[data-pct]'); if (!b || b.disabled) return;
@@ -1237,7 +1257,8 @@ function pageProduit(id) {
         return;
       }
       if (ev.target.closest('#p-detourer')) { ouvrirDetourage(); return; }
-      if (ev.target.closest('#p-fibre')) { ouvrirGrosPlan(); return; }
+      if (ev.target.closest('#p-fibre-gen')) { genererFibre(); return; }
+      if (ev.target.closest('#p-fibre-x')) { FIBRE = ''; dessinerFibre(); return; }
       if (ev.target.closest('#p-studio')) { ouvrirStudio(); return; }
       if (ev.target.closest('#p-studio-placer')) { placerPrevues(); return; }
       if (ev.target.closest('#p-cv-gen')) { genererVariantes(); return; }
@@ -1246,6 +1267,21 @@ function pageProduit(id) {
         return;
       }
       var c = ev.target.closest('[data-vue]');
+      if (c && modeStandard() && c.getAttribute('data-vue') === cleDos() && cleDos()) {
+        // La case Dos PLEINE du mode simple : une seule photo, qui remplace le dos.
+        var kr = c.getAttribute('data-vue');
+        choisirPhoto(function(ds){ VUES[kr] = ds[0]; DOS_SRC = ds[0]; dessinerVues(); }, false);
+        return;
+      }
+      if (c && c.getAttribute('data-vue') === '__dos__') {
+        // La case Dos du mode simple : la photo prend une case libre ET devient le dos.
+        choisirPhoto(function(ds){
+          var kd = ajouterLibre(ds[0]);
+          if (!kd) { dire('Maximum ' + MAX_PHOTOS + ' ${T("photos supplémentaires —")} ${T("retirez-en une pour ajouter le dos.")}', 'att'); return; }
+          DOS_SRC = ds[0]; dessinerVues();
+        }, false);
+        return;
+      }
       if (c) {
         var k = c.getAttribute('data-vue');
         // Les cases NOMMEES (angles) prennent une photo chacune ; les cases
@@ -1269,9 +1305,10 @@ function pageProduit(id) {
         return;
       }
       var x = ev.target.closest('[data-vuex]');
-      if (x) { delete VUES[x.getAttribute('data-vuex')]; dessinerVues(); return; }
+      if (x) { var kx = x.getAttribute('data-vuex'); if (DOS_SRC && VUES[kx] === DOS_SRC) DOS_SRC = ''; delete VUES[kx]; dessinerVues(); return; }
       var dp = ev.target.closest('[data-depl]');
       if (dp) { deplacerAuClavier(dp.getAttribute('data-cle'), dp.getAttribute('data-depl')); return; }
+      if (ev.target.closest('[data-dosnon]')) { DOS_SRC = ''; dessinerVues(); dire('${T("La photo redevient une photo supplémentaire.")}', 'bon'); return; }
       var xd = ev.target.closest('[data-vuedos]');
       if (xd) {
         var sd = VUES[xd.getAttribute('data-vuedos')] || '';
@@ -1355,8 +1392,10 @@ function pageProduit(id) {
   }
 
   function majNom(){
-    var e = document.getElementById('p-nom'), z = document.getElementById('p-desc-etat');
-    if (e && z) z.textContent = (e.value || '').length + '/70';
+    /* (2026-10-26) Le compteur du NOM (70 au plus) se lit dans SON étiquette : il était posé dans celle de la
+       Description, et ne suivait pas la fiche ouverte. */
+    var e = document.getElementById('p-nom'), z = document.querySelector('label[for="p-nom"]');
+    if (e && z && z.setAttribute) z.setAttribute('data-cpt', (e.value || '').length + '/70');
   }
 
   // ⚠ AU NIVEAU DU MODULE, PAS DANS brancher. Elle etait imbriquee dans
@@ -1762,7 +1801,7 @@ function pageProduit(id) {
       + (nbP > 1 ? '<div class="mesv-pages"><button type="button" class="mini" data-mvp="-1"' + (MV_PAGE ? '' : ' disabled') + '>‹</button><span>${T("Tailles")} '
           + (MV_PAGE * PAR + 1) + '–' + Math.min(ts.length, MV_PAGE * PAR + PAR) + ' ${T("sur")} ' + ts.length + '</span>'
           + '<button type="button" class="mini" data-mvp="1"' + (MV_PAGE < nbP - 1 ? '' : ' disabled') + '>›</button></div>' : '')
-      + '<div class="aide mesv-note"><span>${T("En centimètres, vêtement à plat : la boutique double les tours (poitrine, taille, hanches).")}</span>'
+      + '<div class="aide mesv-note">'
       + '<span class="lg"><i></i>${T("complétée d’après la taille mesurée — tapez-y pour la remplacer")}</span></div>';
     z.querySelectorAll('[data-mvp]').forEach(function(b){ b.onclick = function(){ MV_PAGE += +b.getAttribute('data-mvp'); dessinerMesures(); }; });
     z.querySelectorAll('input[data-mvt]').forEach(function(el){
@@ -2601,32 +2640,40 @@ function pageProduit(id) {
       : '${T("Photos — principale + vues")}';
     var z = document.getElementById('p-vues');
     if (z) {
-      var cles = clesVues();
-      z.innerHTML = cles.map(function(cle, i){
-        var src = VUES[cle] || '';
-        /* ⚠ LE CLAVIER AUSSI (2026-10-18) : ‹ et › échangent la photo avec la case voisine (ou l y déplacent si
-           elle est vide), ⇤ l échange avec la principale. Ils apparaissent au survol et au foyer. */
-        var nom = esc(nomVue(cle));
-        var depl = src ? '<div class="depl">'
+      /* ══ LES CASES REFAITES (2026-10-26, sa demande : « une case pour la photo de dos, et le reste ses photos
+         supplémentaires ») ══ Le DOS a SA case, à part et nommée ; les autres photos suivent dans une grille qui
+         PASSE À LA LIGNE (avant : une rangée fixe de cases de 160 px qui sortait de la carte sur une fenêtre
+         étroite — sa capture, « Côté droit » coupé).
+         · Mode « angles » : la case Dos est la vue « Derrière » (la clé derriere, inchangée).
+         · Mode « simple » : la case Dos montre la photo marquée dos (DOS_SRC, dans une case libreN) ; vide, elle
+           s'appelle « __dos__ » : la photo choisie va dans une case libre ET devient le dos. */
+      var std = modeStandard();
+      var kDos = std ? (cleDos() || '__dos__') : 'derriere';
+      var cles = clesGrille();
+      var tuile = function(cle, i, n, nom, dos){
+        var src = cle === '__dos__' ? '' : (VUES[cle] || '');
+        var lib = esc(nom);
+        var depl = (src && !dos) ? '<div class="depl">'
           + '<button type="button" data-depl="g" data-cle="' + esc(cle) + '"' + (i === 0 ? ' disabled' : '')
-          + ' title="${T("Déplacer vers la case précédente")}" aria-label="${T("Déplacer vers la case précédente")} — ' + nom + '">‹</button>'
+          + ' aria-label="${T("Déplacer vers la case précédente")} — ' + lib + '">‹</button>'
           + '<button type="button" data-depl="p" data-cle="' + esc(cle) + '"'
-          + ' title="${T("Échanger avec la photo principale")}" aria-label="${T("Échanger avec la photo principale")} — ' + nom + '">⇤</button>'
-          + '<button type="button" data-depl="d" data-cle="' + esc(cle) + '"' + (i === cles.length - 1 ? ' disabled' : '')
-          + ' title="${T("Déplacer vers la case suivante")}" aria-label="${T("Déplacer vers la case suivante")} — ' + nom + '">›</button>'
+          + ' aria-label="${T("Échanger avec la photo principale")} — ' + lib + '">⇤</button>'
+          + '<button type="button" data-depl="d" data-cle="' + esc(cle) + '"' + (i === n - 1 ? ' disabled' : '')
+          + ' aria-label="${T("Déplacer vers la case suivante")} — ' + lib + '">›</button>'
           + '</div>' : '';
-        return '<div class="vue"><div class="cadre' + (src ? ' pleine" draggable="true' : '') + '" data-vue="' + esc(cle) + '"'
-          + (src ? ' ' : '') + '>'
+        return '<div class="vue' + (dos ? ' vue-dos' : '') + '"><div class="cadre' + (src ? ' pleine" draggable="true' : '') + '" data-vue="' + esc(cle) + '">'
           + (src ? '<img src="' + esc(src) + '" alt="" draggable="false">' : '${T("ajouter")}') + '</div>'
-          + (src ? '<button type="button" class="x" data-vuex="' + esc(cle) + '" title="${T("Retirer")}">×</button>' : '')
-          + depl
-          /* (2026-10-26, sa demande) UN DOS A LA FOIS : une fois une photo marquée « Dos », le bouton ne reste que
-             sur elle (pour la démarquer) ; il revient sur les autres quand on la démarque. */
-          + ((src && cle.indexOf('libre') === 0 && (!DOS_SRC || src === DOS_SRC)) ? '<button type="button" class="dos' + (src === DOS_SRC ? ' on' : '')
-            + '" data-vuedos="' + esc(cle) + '" >${T("Dos")}</button>' : '')
-          + '<div class="lgd">' + esc(nomVue(cle)) + '</div></div>';
-      }).join('');
+          + (src ? '<button type="button" class="x" data-vuex="' + esc(cle) + '" aria-label="${T("Retirer")} — ' + lib + '">×</button>' : '')
+          + depl + '<div class="lgd">' + lib + '</div></div>';
+      };
+      z.innerHTML = '<div class="pv-dos"><div class="pv-t">${T("Dos")}</div>' + tuile(kDos, 0, 1, '${T("Photo du dos")}', true)
+        // Mode simple : la photo du dos peut redevenir une photo supplémentaire (elle garde sa place).
+        + (std && kDos !== '__dos__' ? '<button type="button" class="pv-demarquer" data-dosnon="1">${T("Démarquer")}</button>' : '') + '</div>'
+        + '<div class="pv-sup"><div class="pv-t">${T("Photos supplémentaires")}</div><div class="pv-grille">'
+        // En mode simple, les cases se NUMÉROTENT à l'écran sans trou (la case du dos est à part) : Photo 1, 2, 3…
+        + cles.map(function(cle, i){ return tuile(cle, i, cles.length, std ? ('Photo ' + (i + 1)) : nomVue(cle), false); }).join('') + '</div></div>';
     }
+    dessinerFibre();
     dessiner3d();   // le bouton de l'aperçu 3D dépend de la photo du dos
     var p = document.getElementById('p-parcoul');
     if (!p) return;
@@ -2644,10 +2691,7 @@ function pageProduit(id) {
     var titre = document.getElementById('p-parcoul-titre');
     if (titre) titre.textContent = '${T("Photo par couleur (obligatoire)")}';
     var aide = document.getElementById('p-parcoul-aide');
-    if (aide) aide.textContent = (auto
-      ? '${T("Générée en teintant la photo principale à l’enregistrement, si la case est vide — ou déposez-la vous-même.")} '
-      : '${T("Une photo pour chaque couleur secondaire.")} ')
-      + '${T("Sur la boutique, elle remplace la photo principale quand le client choisit cette couleur ; les photos supplémentaires restent les mêmes.")}';
+    if (aide) { aide.textContent = ''; aide.style.display = 'none'; }   // (2026-10-26) aucune aide dans l'éditeur, sa demande
     var cs = couleurs();
     var bg = document.getElementById('p-cv-gen');
     // ⚠ LA 1ʳᵉ COULEUR N’A PAS DE CASE : ses photos sont celles du produit, et
@@ -2920,7 +2964,6 @@ function pageProduit(id) {
     var fonds = (STM.voie === 'fantome' ? [{ cle: 'transparent', label: '${T("Fond transparent")}' }] : []).concat(STM_PRESETS || []);
     var n = stmChoisies().length, prix = STM.prix != null && n ? ' — ≈ ' + szArgentSymbole(szArgentNombre(STM.prix * n, 2)) : '';
     b.innerHTML = '<div class="stm-tete"><h3>' + '${T("Photos de « {p} »")}'.replace('{p}', esc(val('p-nom').trim() || '${T("cet article")}')) + '</h3></div>'
-      + '<p class="aide">${T("Choisissez les photos, la présentation et le fond, puis générez : les photos se placent toutes seules dans la fiche. Le devant sert de référence de couleur au dos.")}</p>'
       + '<div class="stm-titre">${T("1. Les photos")}</div><div class="stm-photos">' + cartes + '</div>'
       + '<div class="stm-titre">${T("2. La présentation")}</div><div class="stm-voies">' + voies + '</div>'
       + (STM.voie === 'humain' ? '<div class="stm-desc"><label for="stm-desc">${T("Décrivez la scène, la tenue et les accessoires (facultatif)")}</label>'
@@ -3113,12 +3156,51 @@ function pageProduit(id) {
   }
   window.addEventListener('pagehide', function(){ if (RET_T) { clearInterval(RET_T); RET_T = null; } });
 
+  /* La case FIBRE (2026-10-26). FIBRE : l'image (data: neuve, ou adresse déjà en ligne) — vide, rien n'est envoyé. */
+  var FIBRE = '', FIBRE_OCC = false, PRIX_FIBRE = 0.04;
+  function dessinerFibre(){
+    var z = document.getElementById('p-fibre-bloc'); if (!z) return;
+    z.innerHTML = '<div class="pv-t">${T("Fibre agrandie")} <span class="pv-opt">${T("facultatif")}</span></div>'
+      + '<div class="pv-fibre-l"><div class="cadre-fibre' + (FIBRE ? ' pleine' : '') + '">'
+      + (FIBRE ? '<img src="' + esc(FIBRE) + '" alt="">' : '<span>${T("aucune")}</span>') + '</div>'
+      + '<div class="pv-fibre-g">'
+      + '<button type="button" id="p-fibre-gen"' + (!IMAGE || FIBRE_OCC ? ' disabled' : '') + '>'
+      + (FIBRE_OCC ? '${T("Génération en cours…")}' : (FIBRE ? '${T("Regénérer le gros plan")}' : '${T("Générer le gros plan de la fibre")}'))
+      + ' · ' + szArgentSymbole(szArgentNombre(PRIX_FIBRE, 2)) + ' US</button>'
+      + (FIBRE ? '<button type="button" id="p-fibre-x">${T("Retirer")}</button>' : '')
+      + (!IMAGE ? '<span class="pv-etat">${T("Choisissez d’abord la photo principale.")}</span>' : '')
+      + '</div></div>';
+  }
+  function genererFibre(){
+    if (!IMAGE || FIBRE_OCC) return;
+    FIBRE_OCC = true; dessinerFibre(); dire('${T("Gros plan de la fibre : recherche de la zone de tissu…")}');
+    P.appeler('produit:grosPlanZone', IMAGE).then(function(rz){
+      if (!rz || !rz.ok) {
+        FIBRE_OCC = false; dessinerFibre();
+        dire(rz && rz.motif === 'zone_introuvable' ? '${T("Aucune zone de tissu assez grande et unie dans la photo principale.")}' : expliquer(rz), 'err');
+        return;
+      }
+      dire('${T("Gros plan de la fibre : rendu par l’IA… (environ 20 s)")}');
+      P.appeler('produit:grosPlan', IMAGE, rz.zone, 'pro', cleCouts(), PRIX_FIBRE).then(function(r){
+        FIBRE_OCC = false;
+        if (r && r.motif === 'prix_change' && r.prixReel != null) {
+          PRIX_FIBRE = Number(r.prixReel); dessinerFibre();
+          dire('${T("Le prix a changé : rien n’a été lancé. Le bouton affiche le nouveau prix — recliquez pour lancer.")}', 'att');
+          return;
+        }
+        if (!r || !r.ok || !r.image) { dessinerFibre(); dire((r && r.detail) || expliquer(r), 'err'); return; }
+        FIBRE = r.image; dessinerFibre(); chargerCouts(); majFicheBientot();
+        dire('${T("Gros plan de la fibre prêt — il sera enregistré avec la fiche.")}', 'bon');
+      });
+    });
+  }
   function montrerImage(src){
     dessiner3d();   // le devant de l'aperçu 3D est la photo principale
     /* (2026-10-26, sa remarque « la description IA ne marche pas ») Le bouton « Rédiger avec l'IA » suit la photo
        principale ICI, à chaque affichage : à l'ouverture d'une fiche existante, il restait grisé — remplir() posait la
        photo sans le réévaluer. */
     majIa();
+    dessinerFibre();
     var v = document.getElementById('p-vign'); if (!v) return;
     v.classList.toggle('pleine', !!src);
     v.setAttribute('draggable', src ? 'true' : 'false');
@@ -3179,8 +3261,13 @@ function pageProduit(id) {
     return true;
   }
   // Le clavier : ‹ › vers la case voisine, ⇤ avec la principale. Le foyer suit la photo dans sa nouvelle case.
+  // Les cases de la GRILLE des photos supplémentaires (sans la case Dos) — la même liste au dessin et au clavier.
+  function clesGrille(){
+    var kd = modeStandard() ? cleDos() : 'derriere';
+    return clesVues().filter(function(k){ return k !== 'derriere' && k !== kd; });
+  }
   function deplacerAuClavier(cle, sens){
-    var cles = clesVues();
+    var cles = clesGrille();
     var i = cles.indexOf(cle);
     if (i < 0) return;
     var cible = sens === 'p' ? 'principale' : cles[i + (sens === 'g' ? -1 : 1)];
@@ -3249,7 +3336,13 @@ function pageProduit(id) {
     finGlisser();
     if (!t) return;
     ev.preventDefault();
-    deplacer(src, cleDe(t));
+    var cib = cleDe(t);
+    if (cib === '__dos__' || (modeStandard() && cib === cleDos() && src !== 'principale')) {
+      var vs = valeurCase(src);
+      if (src === 'principale' || !vs) { dire('${T("La photo principale est le devant : glissez une photo supplémentaire dans la case Dos.")}', 'att'); return; }
+      DOS_SRC = vs; dessinerVues(); dire('${T("Photo marquée comme dos.")}', 'bon'); return;
+    }
+    deplacer(src, cib);
   });
   var MAX_MO = 8;
 
@@ -3862,6 +3955,7 @@ function pageProduit(id) {
     VUES = vuesDepuisFiche(p.additionalImages);
     // La photo du dos (mode simple) : retenue telle quelle ; photoDos() vérifie qu'elle est encore une des photos.
     DOS_SRC = (typeof p.photoDos === 'string' && p.photoDos) ? p.photoDos : '';
+    FIBRE = (typeof p.photoFibre === 'string' && p.photoFibre) ? p.photoFibre : '';
     // ⚠ COPIE PROFONDE : chaque couleur porte son propre objet. Une copie de
     // surface les partagerait avec la fiche d origine, et retirer une photo ici
     // la retirerait aussi de la reference qui sert a detecter les conflits.
@@ -3890,6 +3984,37 @@ function pageProduit(id) {
   // 1.43.0). On traduit vers ce que le MODE de la catégorie attend — sans ça,
   // les photos existaient dans la fiche mais les cases restaient vides ici.
   // La catégorie est déjà posée quand remplir nous appelle.
+  /* ══ LE MODE DES PHOTOS SUIT LA CATÉGORIE (2026-10-26, relecture) ══ Les Photos passent AVANT la catégorie : sur
+     une fiche neuve, on dépose ses photos en mode « angles » (catégorie vide), puis la catégorie choisie peut être en
+     mode « simple ». Sans cette bascule, les photos des clés d'angle n'étaient plus dessinées NULLE PART (ni voyables
+     ni retirables) et partaient quand même à l'enregistrement. On les transporte d'un mode à l'autre, dos compris. */
+  var MODE_PH = null;
+  function suivreModePhotos(){
+    var std = modeStandard();
+    if (MODE_PH === null) { MODE_PH = std; return; }
+    if (std === MODE_PH) return;
+    var ANG = ['devant', 'coteG', 'coteD', 'autres'];
+    if (std) {
+      // angles → simple : les vues dans l'ordre, le dos à la suite, marqué
+      var dos = VUES.derriere || '';
+      var l = ANG.map(function(k){ return VUES[k]; }).filter(Boolean);
+      if (dos) l.push(dos);
+      VUES = {}; l.slice(0, MAX_PHOTOS).forEach(function(u, i){ VUES['libre' + (i + 1)] = u; });
+      DOS_SRC = dos && l.slice(0, MAX_PHOTOS).indexOf(dos) >= 0 ? dos : '';
+    } else {
+      // simple → angles : le dos dans « Derrière », les autres dans les angles libres
+      var d2 = photoDosStd();
+      var libres = Object.keys(VUES).filter(function(k){ return k.indexOf('libre') === 0 && VUES[k]; })
+        .sort(function(a, b){ return (parseInt(a.slice(5), 10) || 0) - (parseInt(b.slice(5), 10) || 0); })
+        .map(function(k){ return VUES[k]; }).filter(function(u){ return u !== d2; });
+      VUES = {}; if (d2) VUES.derriere = d2;
+      ANG.forEach(function(k, i){ if (libres[i]) VUES[k] = libres[i]; });
+      if (libres.length > ANG.length) dire('${T("Cette catégorie prend 4 vues en plus du dos : la photo en trop a été retirée.")}', 'att');
+      DOS_SRC = '';
+    }
+    MODE_PH = std;
+  }
+  function photoDosStd(){ return (DOS_SRC && Object.keys(VUES).some(function(k){ return k.indexOf('libre') === 0 && VUES[k] === DOS_SRC; })) ? DOS_SRC : ''; }
   function vuesDepuisFiche(brut){
     var angles = ['devant', 'derriere', 'coteG', 'coteD', 'autres'];
     var liste = [];
@@ -4115,7 +4240,6 @@ function pageProduit(id) {
     v.className = 'voile';
     v.innerHTML = '<div class="boite" style="max-width:46rem">'
       + '<h3><span class="ic">🔍</span> ${T("Gros plan sur la fibre")}</h3>'
-      + '<div class="aide">${T("La zone de tissu est choisie automatiquement : dans le vêtement, loin des coutures, des boutons et des imprimés. Cliquez la photo pour la déplacer.")}</div>'
       + '<div class="gp-deux"><div><div class="gp-photo" id="gp-photo"><img id="gp-img" src="' + esc(IMAGE) + '" alt=""><div class="gp-cadre" id="gp-cadre" style="display:none"></div></div>'
       + '<div class="gp-lgd">${T("Photo principale")}</div></div>'
       + '<div><div class="gp-res" id="gp-res">${T("Recherche de la zone de tissu…")}</div><div class="gp-lgd" id="gp-lgd">${T("Aperçu du recadrage")}</div></div></div>'
@@ -4389,7 +4513,7 @@ function pageProduit(id) {
        dans l étape, ou ses photos, mesures ou consignes qui diffèrent de l ouverture. */
   var MODIF = {}, SIG0 = null;
   function etapeSigs(){
-    return { 0: (IMAGE || '') + '|' + JSON.stringify(VUES || {}) + '|' + (DOS_SRC || ''), 4: JSON.stringify(MESV || {}),
+    return { 0: (IMAGE || '') + '|' + JSON.stringify(VUES || {}) + '|' + (DOS_SRC || '') + '|' + (FIBRE || ''), 4: JSON.stringify(MESV || {}),
       5: JSON.stringify(entPourEnvoi()) };
   }
   function etapesSuivre(){
@@ -4569,10 +4693,11 @@ function pageProduit(id) {
         prix: val('p-prix'), solde: val('p-solde'), cout: val('p-cout'),
         poids: val('p-poids'), unite: val('p-unite'), seuil: val('p-seuil'),
         limclient: val('p-limclient'), compo: val('p-compo'), entAutre: val('p-ent-autre'),
-        regime: val('p-regime'), retours: val('p-retours'), actif: coché('p-actif')
+        regime: val('p-regime'), retours: val('p-retours'), actif: coché('p-actif'),
+        direct: coché('p-direct'), anticipe: coché('p-anticipe'), publie: val('p-publie')
       },
       tailles: tailles(), couleurs: couleurs(),
-      image: IMAGE || '', vues: VUES, dosCle: cleDos(), parcoul: PARCOUL, stock: STOCK, locs: LOCS, mesv: MESV,
+      image: IMAGE || '', vues: VUES, dosCle: cleDos(), fibre: FIBRE || '', parcoul: PARCOUL, stock: STOCK, locs: LOCS, mesv: MESV,
       ent: Array.from(ENT)
     };
   }
@@ -4630,6 +4755,10 @@ function pageProduit(id) {
     var uni = document.getElementById('p-unite');
     if (uni) { uni.value = f.unite || 'g'; uni.dataset.prec = uni.value; }
     var a = document.getElementById('p-actif'); if (a) a.checked = f.actif !== false;
+    var dr = document.getElementById('p-direct'); if (dr) dr.checked = !!f.direct;
+    var an = document.getElementById('p-anticipe'); if (an) an.checked = !!f.anticipe && !f.direct;
+    if (f.publie) poser('p-publie', f.publie);
+    if (window.__pfMajDirect) window.__pfMajDirect();
     Array.prototype.forEach.call(document.querySelectorAll('#p-tailles .jeton'), function(j){
       j.classList.toggle('on', (d.tailles || []).indexOf(j.getAttribute('data-t')) >= 0);
     });
@@ -4637,6 +4766,8 @@ function pageProduit(id) {
     IMAGE = d.image || '';
     VUES = Object.assign({}, d.vues || {});
     DOS_SRC = (d.dosCle && VUES[d.dosCle]) ? VUES[d.dosCle] : '';
+    FIBRE = typeof d.fibre === 'string' ? d.fibre : '';
+    MODE_PH = modeStandard();   // les photos reprises sont dans le mode de la catégorie reprise
     // Un brouillon d’une version antérieure porte encore la clé « principale ».
     PARCOUL = parcoulDepuisFiche(d.parcoul);
     MESV = mvDepuisFiche(d.mesv);
@@ -4842,11 +4973,9 @@ function pageProduit(id) {
        doit pas bloquer l'enregistrement sur des champs qu'on ne voit plus — on n'envoie alors aucun mannequin. */
     var MQ = lireMannequin();
     if (MQ === false) MQ = null;
-    if (VUE360.length && (VUE360.length < 8 || VUE360.length > 36)) {
-      Assist.aller(0);
-      dire('${T("La vue 360° demande de 8 à 36 images.")}', 'err');
-      return;
-    }
+    /* (2026-10-26, relecture) Le 360° n'est plus à l'écran : une ancienne vue au mauvais nombre d'images ne doit pas
+       bloquer l'enregistrement sur un champ invisible — elle n'est simplement plus envoyée (retirée de la fiche). */
+    if (VUE360.length && (VUE360.length < 8 || VUE360.length > 36)) VUE360 = [];
     // ⚠ REGLE ARRETEE le 2026-08-08 (2e passe, a sa demande) : l emplacement
     // suit la QUANTITE — une variante a zero n en exige pas — mais une
     // CREATION doit porter du stock : au moins une variante avec une
@@ -4949,6 +5078,7 @@ function pageProduit(id) {
       additionalImages: VUES,
       // La photo du dos en mode simple (l'aperçu 3D) ; en mode angles, c'est la vue « Derrière » — null.
       photoDos: (modeStandard() && photoDos()) ? photoDos() : null,
+      photoFibre: FIBRE || null,   // (2026-10-26) le gros plan de la fibre, affiché en grand en boutique
       // Les mesures du vêtement (7.13.0) : null = aucune. Le pont ne les écrit que si la clé est envoyée.
       mesuresVetement: mvPourEnvoi(),
       // Les photos des couleurs RETIREES ne partent pas : le site les
