@@ -197,6 +197,7 @@ module.exports = {
   'Le produit': 'The product',
   'est maintenant en vente.': 'is now for sale.',
   'est en vente — en accès anticipé, ouvert à tous le': 'is on sale — in early access, open to everyone on',
+  'En vente dans': 'On sale in',
 
   /* ── CE QUI PEUT EMPECHER D IMPRIMER ────────────────────────────────────── */
   /* ⚠ « Configuration » est le nom de l ecran, il ne se traduit pas — c est la

@@ -91,10 +91,15 @@ const CSS_PROPRE = `
 .pf-ia .ed-seg button{height:1.85rem;font-size:.78rem;padding:0 .75rem}
 /* L'étape Photos (2026-10-26) : la principale en GRAND à gauche ; à droite, l'aperçu 3D EN HAUT (sa demande), puis les
    autres photos. */
-.ligne-photos{display:grid!important;grid-template-columns:15.5rem minmax(0,1fr);column-gap:1.3rem;row-gap:.8rem;align-items:start}
+/* (2026-10-26, sa capture : « prends toute l'espace de haut en bas et agrandis les photos en conséquence ») La carte
+   Photos REMPLIT l'étape, et ajusterPhotos() calcule la taille des cases d'après la place réelle : la principale prend
+   la hauteur, les autres cases la plus grande taille qui tient sans rien couper (variables --pv-*). */
+.carte.pf-photos{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
+.carte.pf-photos>.ligne-photos{flex:1 1 auto;min-height:0}
+.ligne-photos{display:grid!important;grid-template-columns:var(--pv-main-w,15.5rem) minmax(0,1fr);column-gap:1.3rem;row-gap:.8rem;align-items:start;align-content:start}
 .ligne-photos>.vue-principale{grid-column:1;grid-row:1 / span 4;width:auto}
 .ligne-photos>:not(.vue-principale){grid-column:2}
-.ligne-photos .vue-principale .vign{width:15.5rem;height:19.5rem;border-radius:16px}
+.ligne-photos .vue-principale .vign{width:var(--pv-main-w,15.5rem);height:var(--pv-main-h,19.5rem);border-radius:16px}
 .ligne-photos .vue-principale .mini-decor{width:100%}
 .pf-3d{margin:0;padding:.75rem .9rem;border-radius:14px;background:var(--v03);border:1px solid var(--v08)}
 .pf-3d .pf-med-l{margin:0}
@@ -388,23 +393,23 @@ html.jour .vue .x:hover:not(:disabled),html.jour .vign .x:hover:not(:disabled){b
    se resserrent sans jamais se deformer, et « nowrap » interdit le retour a la
    ligne au lieu de compter sur la chance. */
 /* (2026-10-26) Le dos à part, puis une GRILLE qui passe à la ligne : plus rien ne sort de la carte. */
-#p-vues{display:grid!important;grid-template-columns:7.5rem minmax(0,1fr);gap:1.1rem;align-items:start;overflow:visible}
-#p-vues .pv-grille{display:grid;grid-template-columns:repeat(auto-fill,7.5rem);gap:.6rem}
+#p-vues{display:block!important;overflow:visible}
+#p-vues .pv-grille{display:grid;grid-template-columns:repeat(auto-fill,var(--pv-w,7.5rem));gap:.6rem}
+#p-vues .vue-dos .lgd{color:var(--tx-or);font-weight:650}
 #p-vues .vue{flex:none;width:auto;max-width:none;min-width:0}
 #p-vues .vue .cadre{width:100%;height:auto;aspect-ratio:3/4;font-size:.72rem}
 .pv-t{font-size:.76rem;font-weight:650;color:var(--tx2);margin:0 0 .4rem}
 .pv-opt{font-weight:400;color:var(--tx3);margin-left:.3rem}
 .pv-fibre{margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--v08)}
 .pv-fibre-l{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
-.cadre-fibre{width:7.5rem;aspect-ratio:1/1;border-radius:12px;border:1.5px dashed var(--v16);display:flex;align-items:center;
+.cadre-fibre{width:var(--pv-w,7.5rem);aspect-ratio:1/1;border-radius:12px;border:1.5px dashed var(--v16);display:flex;align-items:center;
   justify-content:center;overflow:hidden;font-size:.72rem;color:var(--tx3);flex:0 0 auto}
 .cadre-fibre.pleine{border-style:solid;border-color:var(--v16)}
 .cadre-fibre img{width:100%;height:100%;object-fit:cover}
 .pv-fibre-g{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .pv-etat{font-size:.78rem;color:var(--tx2)}
-.pv-demarquer{display:block;width:100%;margin-top:.35rem;height:1.9rem;font-size:.76rem!important;padding:0 .4rem}
+.pv-demarquer{display:block;width:100%;margin-top:.25rem;height:1.75rem;font-size:.74rem!important;padding:0 .4rem}
 /* Une fenêtre basse : des cases un peu plus petites, pour que la fibre reste au-dessus du pied. */
-@media (max-height:820px){#p-vues{grid-template-columns:6.5rem minmax(0,1fr)}#p-vues .pv-grille{grid-template-columns:repeat(auto-fill,6.5rem)}.cadre-fibre{width:6.5rem}.ligne-photos .vue-principale .vign{height:17rem}}
 .lgstk{display:flex;align-items:center;gap:.5rem;padding:.2rem .3rem;border-radius:6px}
 /* (2026-10-25, audit) La liste du stock est paginée par Pagi : elle vit dans un CADRE pour ne pas
    être enfant direct de .carte.plein, sans quoi le socle (_SZ_PG_AUTO) la paginait une SECONDE fois
@@ -711,7 +716,7 @@ function pageProduit(id) {
          principale laissait toute sa moitie droite vide, et les deux phrases
          d explication n apprenaient rien apres la premiere utilisation. Le
          MAXIMUM, seul renseignement qui compte, vit dans le TITRE. */
-      + '<div class="carte"><div class="p-verrou-photos" role="status"></div><h2 id="p-vues-titre">Photos</h2>'
+      + '<div class="carte pf-photos"><div class="p-verrou-photos" role="status"></div><h2 id="p-vues-titre">Photos</h2>'
       + '<div class="ligne-photos">'
       + '<div class="vue-principale">'
       + '<div class="vign" id="p-vign" >${T("choisir une photo")}</div>'
@@ -1039,7 +1044,7 @@ function pageProduit(id) {
       { t: '${T("Composition et entretien")}', obl: [] },
       { t: '${T("Mise en marché")}',          obl: [] },
       { t: 'Stock',                   obl: [] }
-    ], function(i){ if (i === 0) { dessinerVues(); dessinerMedias(); } if (i === 3) dessinerVues(); if (i === 4) dessinerMesures(); if (i === 5) dessinerEntretien(); if (i === 7) majStock(); });
+    ], function(i){ if (i === 0) { dessinerVues(); dessinerMedias(); setTimeout(ajusterPhotos, 30); } if (i === 3) dessinerVues(); if (i === 4) dessinerMesures(); if (i === 5) dessinerEntretien(); if (i === 7) majStock(); });
 
     bEnr.disabled = !(ID ? CTX.peutModifier : CTX.peutAjouter);
     chargerCouts();   // les coûts numériques de l'article (journal des appels payants)
@@ -2666,13 +2671,20 @@ function pageProduit(id) {
           + (src ? '<button type="button" class="x" data-vuex="' + esc(cle) + '" aria-label="${T("Retirer")} — ' + lib + '">×</button>' : '')
           + depl + '<div class="lgd">' + lib + '</div></div>';
       };
-      z.innerHTML = '<div class="pv-dos"><div class="pv-t">${T("Dos")}</div>' + tuile(kDos, 0, 1, '${T("Photo du dos")}', true)
-        // Mode simple : la photo du dos peut redevenir une photo supplémentaire (elle garde sa place).
-        + (std && kDos !== '__dos__' ? '<button type="button" class="pv-demarquer" data-dosnon="1">${T("Démarquer")}</button>' : '') + '</div>'
-        + '<div class="pv-sup"><div class="pv-t">${T("Photos supplémentaires")}</div><div class="pv-grille">'
-        // En mode simple, les cases se NUMÉROTENT à l'écran sans trou (la case du dos est à part) : Photo 1, 2, 3…
-        + cles.map(function(cle, i){ return tuile(cle, i, cles.length, std ? ('Photo ' + (i + 1)) : nomVue(cle), false); }).join('') + '</div></div>';
+      /* (2026-10-26, sa demande) Plus de « Devant / Côté gauche / Côté droit / Autre » : des PHOTOS ADDITIONNELLES
+         numérotées. Les clés enregistrées (devant, coteG…) ne changent pas — seul le nom affiché change. */
+      z.innerHTML = '<div class="pv-t">${T("Dos et photos additionnelles")}</div><div class="pv-grille">'
+        + tuile(kDos, 0, 1, '${T("Dos")}', true)
+        + cles.map(function(cle, i){ return tuile(cle, i, cles.length, 'Photo ' + (i + 1), false); }).join('')
+        + '</div>';
+      // Mode simple : la photo du dos peut redevenir une photo additionnelle (elle garde sa place).
+      if (std && kDos !== '__dos__') {
+        var vd = z.querySelector('.vue-dos');
+        if (vd) vd.insertAdjacentHTML('beforeend', '<button type="button" class="pv-demarquer" data-dosnon="1">${T("Démarquer")}</button>');
+      }
     }
+    // Deux passes : tout de suite, puis une fois la page entièrement posée (3D, fibre, polices).
+    setTimeout(ajusterPhotos, 0); setTimeout(ajusterPhotos, 180);
     dessinerFibre();
     dessiner3d();   // le bouton de l'aperçu 3D dépend de la photo du dos
     var p = document.getElementById('p-parcoul');
@@ -3156,6 +3168,45 @@ function pageProduit(id) {
   }
   window.addEventListener('pagehide', function(){ if (RET_T) { clearInterval(RET_T); RET_T = null; } });
 
+  /* LA TAILLE DES CASES (2026-10-26) : la carte Photos remplit l'étape ; on donne à la principale toute la hauteur
+     (moins ses gestes), puis on cherche la PLUS GRANDE case (3:4) qui tient — grille du dos et des photos
+     additionnelles, puis la fibre — dans la colonne de droite. Recalculée au dessin, à l'ouverture de l'étape, au
+     redimensionnement. */
+  function ajusterPhotos(){
+    var lp = document.querySelector('.carte.pf-photos .ligne-photos');
+    if (!lp || !lp.offsetParent) return;
+    // La hauteur OFFERTE : du haut de la rangée au bas de la CARTE (qui remplit l'étape) — pas la hauteur de la
+    // rangée elle-même, qui ne mesure que son contenu.
+    var carte = lp.closest('.carte') || lp, rc = carte.getBoundingClientRect(), rl = lp.getBoundingClientRect();
+    // La carte n'a pas toujours sa taille finale au premier calcul : on la SUIT (une fois) et l'on recalcule à chaque
+    // changement de taille réel — ouverture de l'étape, fenêtre redimensionnée, panneau voisin qui se dessine.
+    if (!carte.__pvSuivi && typeof ResizeObserver !== 'undefined') {
+      carte.__pvSuivi = true;
+      var dernier = 0;
+      new ResizeObserver(function(){ var hh = carte.clientHeight + 'x' + carte.clientWidth; if (hh !== dernier) { dernier = hh; requestAnimationFrame(ajusterPhotos); } }).observe(carte);
+    }
+    var H = Math.floor(rc.bottom - rl.top - (parseFloat(getComputedStyle(carte).paddingBottom) || 0) - 4), W = lp.clientWidth;
+    if (!(H > 150 && W > 300)) return;
+    var vp = lp.querySelector('.vue-principale'), gestes = 0;
+    if (vp) Array.prototype.forEach.call(vp.children, function(c){ if (!c.classList.contains('vign') && c.offsetParent) gestes += c.offsetHeight + 6; });
+    var mh = Math.max(180, H - gestes - 4), mw = Math.min(mh * 0.75, W * 0.42);
+    mh = mw / 0.75;
+    lp.style.setProperty('--pv-main-w', Math.floor(mw) + 'px');
+    lp.style.setProperty('--pv-main-h', Math.floor(mh) + 'px');
+    var rw = W - mw - 21, haut = 0;
+    ['p-studio-attente', 'p-3d-carte'].forEach(function(id){ var e = document.getElementById(id); if (e && e.offsetParent) haut += e.offsetHeight + 13; });
+    var n = Math.max(1, document.querySelectorAll('#p-vues .vue').length);
+    var demarquer = document.querySelector('.pv-demarquer') ? 32 : 0;
+    var fibre = document.getElementById('p-fibre-bloc'), fibreTete = fibre ? 64 : 0;
+    var meilleur = 88;
+    for (var w = 260; w >= 88; w -= 4) {
+      var cols = Math.max(1, Math.floor((rw + 10) / (w + 10))), rangs = Math.ceil(n / cols);
+      var besoin = haut + 24 + rangs * (w * 4 / 3 + 24) + (rangs - 1) * 10 + demarquer + (fibre ? fibreTete + w : 0);
+      if (besoin <= H) { meilleur = w; break; }
+    }
+    lp.style.setProperty('--pv-w', meilleur + 'px');
+  }
+  window.addEventListener('resize', function(){ clearTimeout(window.__pvT); window.__pvT = setTimeout(ajusterPhotos, 80); });
   /* La case FIBRE (2026-10-26). FIBRE : l'image (data: neuve, ou adresse déjà en ligne) — vide, rien n'est envoyé. */
   var FIBRE = '', FIBRE_OCC = false, PRIX_FIBRE = 0.04;
   function dessinerFibre(){

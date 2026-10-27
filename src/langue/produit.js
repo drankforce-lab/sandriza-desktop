@@ -321,6 +321,8 @@ module.exports = {
   'La photo principale est le devant : glissez une photo supplémentaire dans la case Dos.': 'The main photo is the front: drag an additional photo into the Back slot.',
   'Photo marquée comme dos.': 'Photo marked as the back.',
   'Démarquer': 'Unmark',
+  'Dos et photos additionnelles': 'Back and additional photos',
+  'Photo additionnelle': 'Additional photo',
   'La photo redevient une photo supplémentaire.': 'The photo is an additional photo again.',
   'Cette catégorie prend 4 vues en plus du dos : la photo en trop a été retirée.': 'This category takes 4 views plus the back: the extra photo was removed.',
   'Gros plan de la fibre : recherche de la zone de tissu…': 'Fabric close-up: finding a fabric area…',

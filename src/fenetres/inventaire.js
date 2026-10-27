@@ -222,6 +222,8 @@ tbody tr[data-ligne]:hover td{background:var(--v045)}
 .badge{display:inline-block;font-size:.6875rem;padding:0 .4rem;border-radius:99px;
   margin-left:.35rem;vertical-align:1px}
 .badge.vente{background:var(--or);color:#17202c}
+.badge.attente{background:rgba(245,158,11,.16);color:var(--tx-att);border:1px solid rgba(245,158,11,.35)}
+.prod .l1 .badge.attente{background:rgba(245,158,11,.16)!important;color:var(--tx-att)!important;border-color:rgba(245,158,11,.4)!important}
 .badge.finale{background:#dc2626;color:var(--tx-sur-accent)}
 .puce{width:10px;height:10px;border-radius:50%;display:inline-block;
   vertical-align:middle}
@@ -1155,7 +1157,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
         h += '<tr data-ligne="' + esc(l.id) + '" title="${T("Cliquer pour modifier la fiche produit")}">'
           + '<td><div class="prod">' + szVignette(l.image, initiale, l.couleurCat, l.categorieNom)
           +   '<div style="min-width:0"><div class="l1"><span class="nom">' + esc(l.nom) + '</span>'
-          +     (l.enVente ? '<span class="badge vente">${T("En vente")}</span>' : '')
+          /* (2026-10-26, sa demande) En accès anticipé : « En vente dans 41 h », qui se met à jour seul. */
+          +     (l.enVente ? (l.ouvertLe > Date.now()
+              ? '<span class="badge attente" data-ouvert="' + Number(l.ouvertLe) + '">' + venteDans(l.ouvertLe) + '</span>'
+              : '<span class="badge vente">${T("En vente")}</span>') : '')
           +     (l.venteFinale ? '<span class="badge finale">${T("Vente finale")}</span>' : '') + '</div>'
           +   '<div class="l2">' + (l.sku ? '<span class="code">' + esc(l.sku) + '</span>'
                                        : '<span class="rien">${T("sans SKU")}</span>')
@@ -1434,6 +1439,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
       dire(r.ok ? '${T("Fiche produit ouverte dans sa fenêtre.")}' : expliquer(r), r.ok ? 'bon' : 'err');
     });
   }
+  /* « En vente dans 41 h » (2026-10-26) : les heures qui restent avant l'ouverture à tous ; sous une heure, les minutes.
+     Un minuteur réécrit les pastilles chaque minute, et redessine la liste quand l'une arrive à zéro. */
+  function venteDans(ms){
+    var r = Number(ms) - Date.now();
+    if (!(r > 0)) return '${T("En vente")}';
+    if (r < 3600000) return '${T("En vente dans")} ' + Math.max(1, Math.ceil(r / 60000)) + ' min';
+    return '${T("En vente dans")} ' + Math.ceil(r / 3600000) + ' h';
+  }
+  setInterval(function(){
+    var fini = false;
+    document.querySelectorAll('[data-ouvert]').forEach(function(b){
+      var ms = Number(b.getAttribute('data-ouvert'));
+      if (!(ms > Date.now())) { fini = true; b.className = 'badge vente'; b.removeAttribute('data-ouvert'); }
+      b.textContent = venteDans(ms);
+    });
+    if (fini) { try { chargerOnglet(); } catch (e) {} }
+  }, 60000);
   function vendre(pid, b){
     b.disabled = true;
     appeler('stock:vendre', [pid]).then(function(r){
