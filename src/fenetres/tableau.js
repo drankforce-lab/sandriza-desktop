@@ -96,6 +96,7 @@ html.jour .direct{color:#22663a}
 html.jour .afaire b{color:var(--tx-sur-accent)}
 .afaire.urgent{border-color:rgba(248,113,113,.55);color:var(--tx-err2)}
 .afaire.urgent b{background:transparent;color:inherit;box-shadow:inset 0 0 0 1px currentColor}
+html.jour .afaire.urgent b{color:inherit}
 .afaire.rien{color:var(--tx2);font-weight:500;border-style:dashed}
 .zero-pop.af{min-width:19rem;padding:.4rem}
 .zero-pop.af button{display:flex;width:100%;justify-content:space-between;gap:1rem;border:0;background:transparent;border-radius:7px;
