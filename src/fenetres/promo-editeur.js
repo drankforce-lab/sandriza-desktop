@@ -478,7 +478,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       dessinerPlan();
       dessinerListe();
       var el = selEl();
-      if (el && el.kind === 'barcode' && avant[el.id] !== CODES[el.id]) dessinerProp();
+      if (el && (el.kind === 'barcode' || el.kind === 'qr') && avant[el.id] !== CODES[el.id]) dessinerProp();
       if (!r.rendable) dire('${T("L’aperçu n’a pas pu être peint")}' + (r.detail ? ' : ' + r.detail : '')
         + '${T(". Les poignées restent utilisables.")}', 'att');
     });
@@ -520,7 +520,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   }
 
   var GENRES = [['text', '${T("Texte")}'], ['image', '${T("Image")}'], ['shape', '${T("Forme")}'],
-                ['line', '${T("Ligne")}'], ['barcode', '${T("Code-barres")}']];
+                ['line', '${T("Ligne")}'], ['barcode', '${T("Code-barres")}'], ['qr', '${T("Code QR")}']];
   function dessinerOutils(){
     var h = '';
     GENRES.forEach(function(g){
@@ -560,9 +560,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     l.slice().reverse().forEach(function(el){
       h += '<div class="el' + (el.id === SEL ? ' sel' : '') + '" data-sel="' + esc(el.id) + '">'
         + '<span class="k">' + esc(el.kind === 'text' ? '${T("Txt")}' : (el.kind === 'image' ? '${T("Img")}'
-            : (el.kind === 'barcode' ? '${T("Cod")}' : (el.kind === 'line' ? '${T("Lig")}' : '${T("Frm")}')))) + '</span>'
+            : (el.kind === 'barcode' ? '${T("Cod")}' : (el.kind === 'qr' ? 'QR' : (el.kind === 'line' ? '${T("Lig")}' : '${T("Frm")}'))))) + '</span>'
         + '<span class="n">' + esc(el.name || el.text || '${T("Sans nom")}') + '</span>'
-        + (el.kind === 'barcode' && CODES[el.id] === false
+        + ((el.kind === 'barcode' || el.kind === 'qr') && CODES[el.id] === false
             ? '<span class="mal" title="${T("Ce code ne se lira pas au lecteur")}">✗</span>' : '')
         + (el.hidden ? '<span class="oeil" title="${T("Masqué")}">◌</span>' : '')
         + (el.locked ? '<span class="oeil" title="${T("Verrouillé")}">⌧</span>' : '')
@@ -758,6 +758,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '</div><div class="note">${T("Plus le code est large, plus il est lisible : prévoyez au moins 1,5 po.")}</div></div>';
     return h;
   }
+  /* Code QR (2026-10-28) : encodé par le SITE (qr.js), jamais par un service tiers. Sa lisibilité revient
+     avec l aperçu, comme celle d un code-barres (CODES) : trop long, il se dessine BARRÉ, jamais faux. */
+  function propCodeQr(el){
+    var h = '';
+    h += '<div class="bloc"><label>${T("Adresse ou texte")}</label><input type="text" data-txt="text" value="' + esc(el.text || '') + '">'
+      + (CODES[el.id] === false
+          ? '<div class="avert">${T("Trop long pour un code QR : 271 caractères au plus. Le code est barré sur l’aperçu et ne s’imprimera pas lisible.")}</div>'
+          : '<div class="note">${T("Le téléphone ouvre cette adresse en visant le code.")}</div>')
+      + '</div>';
+    h += couleur('color', '${T("Couleur du code")}', el.color || '#111111', 'txt');
+    h += '<div class="bloc"><label>${T("Fond derrière le code")}</label><div class="acts">'
+      + bascule('el:fondOn', el.fondOn ? '${T("Affiché")}' : '${T("Masqué")}', !!el.fondOn)
+      + '</div></div>';
+    if (el.fondOn) h += couleur('fond', '${T("Couleur du fond")}', el.fond || '#ffffff', 'txt');
+    h += '<div class="bloc"><div class="note">${T("Code foncé sur fond pâle, au moins 0,8 po de côté : c’est ce qui se lit du premier coup.")}</div></div>';
+    return h;
+  }
   function propForme(el){
     var h = '';
     if (el.kind === 'line') {
@@ -787,6 +804,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (el.kind === 'text') h += propTexte(el);
     else if (el.kind === 'image') h += propImage(el);
     else if (el.kind === 'barcode') h += propCodeBarres(el);
+    else if (el.kind === 'qr') h += propCodeQr(el);
     else h += propForme(el);
 
     h += '<div class="bloc"><label>${T("Position et taille (pouces)")}</label><div class="rang">'

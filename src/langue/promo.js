@@ -270,4 +270,8 @@ module.exports = {
   'Duplication…': 'Duplicating…',
   '{0} étiquettes envoyées à {1}.': '{0} labels sent to {1}.',
   '{0} étiquette envoyée à {1}.': '{0} label sent to {1}.',
+  /* (2026-10-28) Les modèles prêts au « Nouveau modèle ». */
+  'Modèles prêts': 'Ready-made designs',
+  'Format vierge': 'Blank format',
+  '» créés — déjà mis en page, prêts pour la planche Avery.': '» created — already laid out, ready for the Avery sheet.',
 };

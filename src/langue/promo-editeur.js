@@ -340,4 +340,14 @@ module.exports = {
   'ronde': 'round',
   'rectangulaire': 'rectangular',
   'Abandonner les modifications': 'Discard the changes',
+  /* (2026-10-28) L élément Code QR. */
+  'Code QR': 'QR code',
+  'Adresse ou texte': 'Address or text',
+  'Trop long pour un code QR : 271 caractères au plus. Le code est barré sur l’aperçu et ne s’imprimera pas lisible.':
+    'Too long for a QR code: 271 characters at most. The code is crossed out in the preview and will not print readable.',
+  'Le téléphone ouvre cette adresse en visant le code.': 'A phone opens this address when pointed at the code.',
+  'Couleur du code': 'Code colour',
+  'Fond derrière le code': 'Background behind the code',
+  'Code foncé sur fond pâle, au moins 0,8 po de côté : c’est ce qui se lit du premier coup.':
+    'Dark code on a light background, at least 0.8 in wide: that is what scans on the first try.',
 };

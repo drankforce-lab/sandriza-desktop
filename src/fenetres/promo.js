@@ -372,7 +372,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
       var fmts = D.formats || [];
       h += '<div class="carte" style="margin-bottom:.6rem"><div class="deux">'
         + '<div class="champ"><label for="p-newmod-fmt">${T("Format du nouveau modèle")}</label><select id="p-newmod-fmt">'
+        /* Les modèles PRÊTS d abord (2026-10-28) : déjà mis en page, il ne reste qu à imprimer. Un modèle prêt
+           peut en créer plusieurs — la carte d affaires Sandriza donne son recto ET son verso. */
+        + ((D.prets || []).length
+            ? '<optgroup label="${T("Modèles prêts")}">' + D.prets.map(function(x){
+                return '<option value="' + esc(x.cle) + '">' + esc(szTd(x.nom)) + ' — ' + esc(x.dim) + '</option>'; }).join('')
+              + '</optgroup><optgroup label="${T("Format vierge")}">'
+            : '')
         + fmts.map(function(x){ return '<option value="' + esc(x.cle) + '">' + esc(x.nom) + ' — ' + esc(x.dim) + '</option>'; }).join('')
+        + ((D.prets || []).length ? '</optgroup>' : '')
         + '</select></div>'
         + '<div class="champ" style="align-self:end"><button class="prim" id="p-newmod-ok">${T("Créer et ouvrir l’éditeur")}</button></div>'
         + '</div>'
@@ -884,7 +892,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
       appeler('promo:nouveau', [cleNm]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
         NOUVMOD = false;
-        dire('« ' + r.nom + ' ${T("» créé — ouvrez l’éditeur pour le mettre en page.")}', 'bon');
+        // Un modèle prêt en crée plusieurs (recto ET verso) : ils sont déjà mis en page.
+        if (r.ids && r.ids.length > 1) dire('« ' + r.nom + ' ${T("» créés — déjà mis en page, prêts pour la planche Avery.")}', 'bon');
+        else dire('« ' + r.nom + ' ${T("» créé — ouvrez l’éditeur pour le mettre en page.")}', 'bon');
         ONGLET = 'modeles';
         charger();
       });
