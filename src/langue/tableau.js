@@ -19,6 +19,20 @@
  */
 
 module.exports = {
+  'Objectif du mois': 'Monthly goal',
+  'Le revenu prévu de chaque mois se fixe dans Rapports et budget, onglet Budget': 'Each month’s planned revenue is set in Reports and budget, Budget tab',
+  'Fixer un objectif': 'Set a goal',
+  'Revenu du mois (comme les Rapports) contre le revenu prévu au budget': 'Revenue this month (as in Reports) against the budgeted revenue',
+  'de': 'of',
+  'en avance de': 'ahead by',
+  'en retard de': 'behind by',
+  'Bilan de la journée': 'Summary of the day',
+  'Commandes reçues': 'Orders received',
+  'Commandes expédiées': 'Orders shipped',
+  'Commandes livrées': 'Orders delivered',
+  'Pour demain': 'For tomorrow',
+  'Ce qui s’est passé aujourd’hui, et ce qui reste pour demain': 'What happened today, and what is left for tomorrow',
+  'Bilan du jour': 'Day summary',
   'Retours': 'Returns',
   'Nouveaux': 'New',
   'Approuvés': 'Approved',

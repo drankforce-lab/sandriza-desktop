@@ -20,6 +20,9 @@
  */
 
 module.exports = {
+  'Ctrl K': 'Ctrl K',
+  'Rechercher partout : commandes, clients, produits, factures': 'Search everywhere: orders, customers, products, invoices',
+  'Rechercher': 'Search',
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   'Cadre de l’administration — Sandriza': 'Administration frame — Sandriza',
   ' Remesurer': ' Measure again',

@@ -18,6 +18,22 @@
  */
 
 module.exports = {
+  'En bref': 'At a glance',
+  'Panier moyen': 'Average basket',
+  'Dernière commande': 'Last order',
+  'Dernière connexion': 'Last sign-in',
+  'Points de fidélité': 'Loyalty points',
+  'Ses habitudes': 'Habits',
+  'Tailles': 'Sizes',
+  'Catégories': 'Categories',
+  'Achète souvent': 'Buys often',
+  'Note interne': 'Internal note',
+  'vue du personnel seulement': 'seen by staff only',
+  'Ex. : préfère l’emballage cadeau, appeler avant de livrer…': 'E.g. prefers gift wrapping, call before delivery…',
+  'Rappelée à qui prépare ses commandes.': 'Shown to whoever prepares this customer’s orders.',
+  'Enregistrer la note': 'Save the note',
+  'Aucune note.': 'No note.',
+  'Note enregistrée.': 'Note saved.',
   'Ouvrir la commande': 'Open the order',
   /* ⚠ LES DEUX ALTERNATIVES EN ENTIER — voir tools/banc-pluriel-colle.js. */
   'autres': 'others',

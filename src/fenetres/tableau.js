@@ -107,6 +107,16 @@ html.jour .afaire.urgent b{color:inherit}
 .zero-pop.af button span::first-letter{text-transform:uppercase}
 .zero-pop.af .sep{height:1px;background:var(--v10);margin:.35rem .3rem;padding:0}
 .zero-pop.af .z{padding:.14rem .5rem;color:var(--tx3);font-size:.74rem}
+.kpi.obj{margin-left:auto;min-width:10.5rem}
+.kpi.obj .v small{font-size:.7rem;font-weight:500;color:var(--tx2)}
+.obj-barre{position:relative;height:6px;border-radius:99px;background:var(--v08);margin:.2rem 0 .15rem}
+.obj-barre i{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:var(--tx-or)}
+.obj-barre b{position:absolute;top:-3px;width:2px;height:12px;background:var(--tx2);transform:translateX(-1px)}
+.szc-boite.bilan{max-width:34rem}
+.bl-g{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin:.4rem 0 .2rem}
+.bl-g h4{margin:0 0 .35rem;font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:var(--tx2)}
+.bl-l{display:flex;justify-content:space-between;gap:1rem;padding:.22rem 0;border-bottom:1px solid var(--v07);font-size:.86rem}
+.bl-l b{font-variant-numeric:tabular-nums}
 .zero-pop.af .tit{padding:.1rem .5rem .25rem;font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3)}
 .barre .droite{margin-left:auto;display:flex;align-items:center;gap:.5rem;font-size:.76rem;color:var(--tx2);white-space:nowrap}
 
@@ -487,8 +497,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '</div>';
     // Le Mode exclusif vit dans l en-tete, a cote de la date : la barre garde sa ligne pour les puces.
     var slot = document.getElementById('tb-mx-slot');
-    var mxH = (MX && MX.ok) ? '<button class="mini" id="tb-mx" title="${T("Empêcher toute autre connexion pendant une maintenance")}">'
-      + (MX.actif ? '\u{1F512} ${T("Mode exclusif : ACTIF")}' : '\u{1F512} ${T("Mode exclusif")}…') + '</button>' : '';
+    var mxH = (D && D.bilan ? '<button class="mini" id="tb-bilan" title="${T("Ce qui s’est passé aujourd’hui, et ce qui reste pour demain")}">${T("Bilan du jour")}</button> ' : '')
+      + ((MX && MX.ok) ? '<button class="mini" id="tb-mx" title="${T("Empêcher toute autre connexion pendant une maintenance")}">'
+      + (MX.actif ? '\u{1F512} ${T("Mode exclusif : ACTIF")}' : '\u{1F512} ${T("Mode exclusif")}…') + '</button>' : '');
     if (slot && slot._src !== mxH) { slot.innerHTML = mxH; slot._src = mxH; }   // (même règle : rien ne se repeint sans changement)
     return h;
   }
@@ -517,6 +528,65 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '${T("Les prix en USD peuvent s’écarter du marché.")}';
     return '<span class="solde muet" title="' + esc(titre) + '">' + (D.taux.genre === 'secours' ? '${T("USD : taux approximatif")}' : '${T("USD : taux ancien")}') + '</span>';
   }
+  /* ══ L OBJECTIF DU MOIS (2026-10-27, sa demande) ══ Le poste « Revenu » du budget de l année (Rapports et
+     budget), contre le revenu du mois en cours calculé comme les Rapports (pont.js, tableau:lire). « En avance /
+     en retard » se lit contre le RYTHME : la part du mois écoulée. Toujours le MOIS, quelle que soit la période
+     choisie à gauche — d où son libellé. */
+  function objectifHtml(){
+    var o = D && D.objectif;
+    if (!o) return '';
+    if (!(o.cible > 0)) {
+      return o.peutFixer ? '<div class="kpi obj"><div class="k">${T("Objectif du mois")}</div>'
+        + '<button type="button" class="mini" data-ouvre="compta-rapports" title="${T("Le revenu prévu de chaque mois se fixe dans Rapports et budget, onglet Budget")}">${T("Fixer un objectif")}</button></div>' : '';
+    }
+    var pc = Math.max(0, Math.min(100, Math.round(100 * o.fait / o.cible)));
+    var av = Math.round((o.fait - o.attendu) * 100) / 100;
+    return '<div class="kpi obj" title="${T("Revenu du mois (comme les Rapports) contre le revenu prévu au budget")}">'
+      + '<div class="k">${T("Objectif du mois")}</div>'
+      + '<div class="v">' + pc + ' %<small> ${T("de")} ' + fmt(o.cible) + '</small></div>'
+      + '<div class="obj-barre"><i style="width:' + pc + '%"></i><b style="left:' + Math.max(0, Math.min(100, Math.round(100 * o.attendu / o.cible))) + '%"></b></div>'
+      + '<div class="d ' + (av >= 0 ? 'haut' : 'bas') + '">' + (av >= 0 ? '${T("en avance de")} ' : '${T("en retard de")} ') + fmt(Math.abs(av)) + '</div></div>';
+  }
+
+  /* ══ LE BILAN DU JOUR (2026-10-27, sa demande) ══ Ce qui s est passé aujourd hui et ce qui reste pour demain.
+     Il se montre de lui-même UNE fois par jour, à partir de 18 h, quand le tableau de bord est à l écran ; le bouton
+     « Bilan du jour » de l en-tête le rouvre à toute heure. Une boîte à part, fermée par Échap ou « Fermer ». */
+  var BILAN_OUVERT = false;
+  function bilanMontrer(){
+    var b = D && D.bilan;
+    if (!b || BILAN_OUVERT) return;
+    BILAN_OUVERT = true;
+    var ligne = function(lib, val){ return '<div class="bl-l"><span>' + lib + '</span><b>' + val + '</b></div>'; };
+    var v = document.createElement('div');
+    v.className = 'szc-voile';
+    v.innerHTML = '<div class="szc-boite bilan" role="dialog" aria-modal="true" aria-labelledby="bl-t">'
+      + '<h3 id="bl-t">${T("Bilan de la journée")}</h3>'
+      + '<p>' + esc(new Date().toLocaleDateString('${LIEU()}', { weekday: 'long', day: 'numeric', month: 'long' })) + '</p>'
+      + '<div class="bl-g"><div><h4>${T("Aujourd’hui")}</h4>'
+      + ligne('${T("Commandes reçues")}', b.recues) + ligne('${T("Ventes")}', fmt(b.ventes))
+      + ligne('${T("Commandes expédiées")}', b.expediees) + ligne('${T("Commandes livrées")}', b.livrees) + '</div>'
+      + '<div><h4>${T("Pour demain")}</h4>'
+      + ligne('${T("À préparer")}', b.aPreparer) + ligne('${T("À expédier")}', b.aExpedier)
+      + (D.objectif && D.objectif.cible > 0 ? ligne('${T("Objectif du mois")}', Math.round(100 * D.objectif.fait / D.objectif.cible) + ' %') : '')
+      + '</div></div>'
+      + '<div class="szc-pied"><button type="button" class="szc-oui" id="bl-ok">${T("Fermer")}</button></div></div>';
+    document.body.appendChild(v);
+    var fin = function(){ if (v.parentNode) v.parentNode.removeChild(v); document.removeEventListener('keydown', cl, true); BILAN_OUVERT = false; };
+    var cl = function(ev){ if (ev.key === 'Escape' || ev.key === 'Enter') { ev.preventDefault(); ev.stopPropagation(); fin(); } };
+    document.addEventListener('keydown', cl, true);
+    v.addEventListener('mousedown', function(ev){ if (ev.target === v) fin(); });
+    document.getElementById('bl-ok').onclick = fin;
+    try { document.getElementById('bl-ok').focus(); } catch (e) {}
+  }
+  // Une fois par jour et par poste, à partir de 18 h, si personne ne l a encore vu aujourd hui.
+  function bilanDuSoir(){
+    if (!D || !D.bilan || document.hidden) return;
+    var n = new Date(); if (n.getHours() < 18) return;
+    var cle = n.getFullYear() + '-' + (n.getMonth() + 1) + '-' + n.getDate();
+    try { if (localStorage.getItem('sz-tb-bilan') === cle) return; localStorage.setItem('sz-tb-bilan', cle); } catch (e) { return; }
+    bilanMontrer();
+  }
+
   /* inverse : une hausse est une MAUVAISE nouvelle (les retours) ; points : l écart est en points de pourcentage. */
   function ecart(v, inverse, points){
     if (v == null) return '<div class="d">&nbsp;</div>';
@@ -571,7 +641,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + '<div class="kpi"><div class="k">${T("Taux de retour")}</div><div class="v">' + (RK.taux == null ? '—' : String(RK.taux).replace('.', '${SEP_DEC()}') + ' %') + '</div>' + ecart(RK.ecartTaux, true, true) + '</div>'
           : '<div class="kpi"><div class="k">${T("Commandes")}</div><div class="v">' + (k.commandes || 0) + '</div>' + ecart(k.ecartCommandes) + '</div>'
             + '<div class="kpi"><div class="k">${T("Ventes")}</div><div class="v">' + fmt(k.ventes || 0) + '</div>' + ecart(k.ecartVentes) + '</div>'
-            + '<div class="kpi"><div class="k">${T("Panier moyen")}</div><div class="v">' + fmt(k.panier || 0) + '</div>' + ecart(k.ecartPanier) + '</div>')
+            + '<div class="kpi"><div class="k">${T("Panier moyen")}</div><div class="v">' + fmt(k.panier || 0) + '</div>' + ecart(k.ecartPanier) + '</div>'
+            + objectifHtml())
       + '</div>'
       + '<div class="zone" id="zone"><svg id="graphe" role="img" aria-label="' + (cR ? '${T("Retours par période")}' : '${T("Commandes par période")}') + '"></svg></div>'
       + '<div class="legende"><span>' + (PERIODE === 'jour' ? '${T("Aujourd’hui")}' : '${T("Cette période")}') + '</span><span class="avant">'
@@ -796,6 +867,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   };
   var slotMx = document.getElementById('tb-mx-slot');
   if (slotMx) slotMx.onclick = function(ev){
+    if (ev.target && ev.target.closest && ev.target.closest('#tb-bilan')) { bilanMontrer(); return; }
     if (ev.target && ev.target.closest && ev.target.closest('#tb-mx'))
       appeler('maintenance:ouvrir', []).then(function(r){ if (!r || !r.ok) dire(expliquer(r), 'err'); });
   };
@@ -872,6 +944,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       VUS = {}; fil.forEach(function(c){ if (c.oid) VUS[c.oid] = true; });
       D = r;
       dessiner();
+      bilanDuSoir();
       chargerSauvegarde();
     });
   }

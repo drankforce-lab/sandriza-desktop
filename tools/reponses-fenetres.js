@@ -1116,7 +1116,7 @@ const JEU = {
       id: '',
       reponses: {
         'produits:liste': {
-          ok: true, peutVenteFinale: true,
+          ok: true, peutVenteFinale: true, peutLot: true,
           lignes: [
             { id: 'prod_1', nom: 'Robe Élégance mi-longue', categorie: 'Robes', couleurCat: '#c97e9a', tag: 'Nouveauté',
               finalSale: false, liquidation: false, prix: 129.99, solde: 89.99,
@@ -5083,6 +5083,47 @@ const JEU = {
     },
   ],
 
+  /* ── BONS DE COMMANDE FOURNISSEURS (2026-10-27) ────────────────────────────
+     ⚠ TROIS JEUX, UN PAR ONGLET : le contrôle ne clique pas, et chaque onglet a son dessin propre — les
+     cartes « en cours » (avec un bon reçu en partie), les propositions par fournisseur (dont un groupe SANS
+     fournisseur, qui dessine le sélecteur) et l'historique (un bon clos avec son motif). */
+  'bons-commande.js': (() => {
+    const bons = [
+      { id: 'bc_1', numero: 'BC-0001', etat: 'partiel', etatLbl: 'Reçu en partie', fournisseurId: 'sup1', fournisseurNom: 'Atelier X',
+        note: 'Livrer avant le 15', creeLe: '2026-10-20T14:00:00Z', creePar: 'Banc Essai', envoyeLe: '2026-10-20T15:00:00Z', envoyePar: 'Banc Essai',
+        lignes: [{ productId: 'p1', cle: 'M-Rouge', nom: 'Robe Aurore', sku: 'ROB-001-M-RGE', quantite: 10, cout: 12.5, recue: 6 },
+                 { productId: 'p1', cle: 'S-Rouge', nom: 'Robe Aurore', sku: 'ROB-001-S-RGE', quantite: 4, cout: 12.5, recue: 4 }],
+        nbLignes: 2, unites: 14, recues: 10, reste: 4, total: 175 },
+      { id: 'bc_2', numero: 'BC-0002', etat: 'brouillon', etatLbl: 'Brouillon', fournisseurId: 'sup2', fournisseurNom: 'Tissus Y',
+        note: '', creeLe: '2026-10-27T10:00:00Z', creePar: 'Banc Essai', envoyeLe: null, envoyePar: '',
+        lignes: [{ productId: 'p2', cle: 'L-Noir', nom: 'Manteau Long', sku: 'MAN-002-L-NOI', quantite: 3, cout: 40, recue: 0 }],
+        nbLignes: 1, unites: 3, recues: 0, reste: 3, total: 120 },
+      { id: 'bc_3', numero: 'BC-0003', etat: 'clos', etatLbl: 'Clos', fournisseurId: 'sup1', fournisseurNom: 'Atelier X',
+        note: '', creeLe: '2026-09-01T10:00:00Z', creePar: 'Banc Essai', envoyeLe: '2026-09-01T11:00:00Z', envoyePar: 'Banc Essai',
+        closLe: '2026-09-20T10:00:00Z', closPar: 'Banc Essai', motifCloture: 'Rupture chez le fournisseur',
+        lignes: [{ productId: 'p1', cle: 'M-Rouge', nom: 'Robe Aurore', sku: 'ROB-001-M-RGE', quantite: 8, cout: 12.5, recue: 5 }],
+        nbLignes: 1, unites: 8, recues: 5, reste: 3, total: 100 },
+    ];
+    const donnees = { ok: true, peutEcrire: true, etats: [], bons,
+      fournisseurs: [{ id: 'sup1', nom: 'Atelier X' }, { id: 'sup2', nom: 'Tissus Y' }] };
+    const propositions = { ok: true, peutEcrire: true, fournisseurs: donnees.fournisseurs, groupes: [
+      { fournisseurId: 'sup1', fournisseurNom: 'Atelier X', inconnu: false, total: 50,
+        lignes: [{ productId: 'p1', cle: 'L-Rouge', nom: 'Robe Aurore', sku: 'ROB-001-L-RGE', stock: 0, seuil: 2, enCommande: 0, quantite: 4, cout: 12.5 }] },
+      { fournisseurId: '', fournisseurNom: '', inconnu: false, total: 0,
+        lignes: [{ productId: 'p3', cle: 'M-Vert', nom: 'Jupe Plissée', sku: '', stock: 1, seuil: 3, enCommande: 2, quantite: 3, cout: 0 }] },
+    ] };
+    const chercher = { ok: true, total: 3, lignes: [
+      { productId: 'p1', cle: 'XL-Rouge', nom: 'Robe Aurore', taille: 'XL', couleur: 'Rouge', sku: 'ROB-001-XL-RGE', stock: 5, cout: 12.5, fournisseurId: 'sup1' },
+      { productId: 'p2', cle: 'M-Noir', nom: 'Manteau Long à capuchon doublé de laine', taille: 'M', couleur: 'Noir', sku: 'MAN-002-M-NOI', stock: 0, cout: 40, fournisseurId: 'sup2' },
+      { productId: 'p2', cle: 'S-Noir', nom: 'Manteau Long à capuchon doublé de laine', taille: 'S', couleur: 'Noir', sku: 'MAN-002-S-NOI', stock: 2, cout: 40, fournisseurId: 'sup2' }] };
+    const rep = { 'bc:donnees': donnees, 'bc:propositions': propositions, 'bc:chercher': chercher, 'bc:voeu': { ok: true, voeu: '' }, identite: IDENTITE };
+    return [
+      { nom: 'en cours (un bon reçu en partie, un brouillon)', id: '', reponses: rep },
+      { nom: 'à commander (un groupe sans fournisseur)', id: 'proposer', reponses: rep },
+      { nom: 'historique (un bon clos avec son motif)', id: 'histo', reponses: rep },
+    ];
+  })(),
+
   /* ── IMAGES DES PRODUITS ───────────────────────────────────────────────────
      ⚠ DEUX JEUX, ET LE SECOND N'EST PAS DÉCORATIF. Cette fenêtre a deux états
      qui ne partagent AUCUN dessin : « il reste des fiches » (les compteurs, le
@@ -5222,6 +5263,17 @@ const JEU = {
     },
   ],
 
+  // La recherche partout (Ctrl+K, 2026-10-27) : la FORME de recherche:partout (pont.js, recherchePartout).
+  'recherche-partout.js': [
+    { nom: 'résultats des quatre sortes', id: '', reponses: { 'recherche:partout': { ok: true, resultats: [
+      { sorte: 'commande', id: 'o1', titre: 'SZ-100251', sous: 'Marie-Josée Lafleur · 2026-10-12', montant: 2345.45, statut: 'pending', ouvrir: 'commandes:ouvrirDetail' },
+      { sorte: 'commande', id: 'o2', titre: 'SZ-100207', sous: 'Marie Tremblay · 2026-08-05', montant: 260.9, statut: 'preparing', ouvrir: 'commandes:ouvrirDetail' },
+      { sorte: 'client', id: 'u1', titre: 'Marie Tremblay', sous: 'marie@example.com · 418 555-0142', ouvrir: 'clients:ouvrir' },
+      { sorte: 'produit', id: 'p1', titre: 'Robe Marie-Lou', sous: 'ROB-000014 · robes', montant: 89.99, image: '', ouvrir: 'produits:ouvrir' },
+      { sorte: 'facture', id: 'i1', titre: 'FAC-2026-0512', sous: 'Marie Tremblay · CMD-2026-0512', montant: 154.26, statut: 'unpaid', ouvrir: 'factures:ouvrir' },
+    ] }, 'commandes:ouvrirDetail': { ok: true } } },
+    { nom: 'aucun résultat', id: '', reponses: { 'recherche:partout': { ok: true, resultats: [] } } },
+  ],
   'recherches.js': [
     {
       // ⚠ FORME REELLE de recherches:liste (coeur Admin._recherchesDonnees).
@@ -8508,6 +8560,10 @@ const JEU = {
       ],
       provinces: ['QC','ON','BC','AB','MB','SK','NS','NB','NL','PE','NT','NU','YT'],
       purgeable: false,
+      // La fiche enrichie (2026-10-27) : la FORME de `profil` (pont.js, clientLire).
+      profil: { panierMoyen: 155.07, derniereCommande: '2026-08-06T15:20:00.000Z', derniereVisite: '2026-10-25T19:02:00.000Z', points: 420,
+        tailles: [{ nom: 'M', n: 9 }, { nom: 'S', n: 3 }], categories: [{ nom: 'Robes', n: 6 }, { nom: 'Hauts', n: 4 }],
+        articles: [{ nom: 'Robe cintrée', n: 3 }], note: 'Préfère l’emballage cadeau.' },
     };
     return [
       {

@@ -218,6 +218,8 @@ const MENU_APP_EN = {
   'Thème et apparence': 'Theme and appearance',
   'Thème sombre': 'Dark theme',
   'Transferts de stock': 'Stock transfers',
+  // (2026-10-27) « purchase orders », jamais « orders » seul : c est la commande d un CLIENT.
+  'Bons de commande fournisseurs': 'Purchase orders',
   'Transporteurs': 'Carriers',
   'Téléphonie': 'Telephony',
   'Veille des commandes (icône)': 'Order watch (icon)',

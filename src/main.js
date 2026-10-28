@@ -981,6 +981,47 @@ ipcMain.on('bulle:native', (e, type, msg) => {
   } catch (er) {}
   e.returnValue = pris;
 });
+/* ══ LA RECHERCHE PARTOUT (Ctrl+K, 2026-10-27, sa demande) — voir src/fenetres/recherche-partout.js ══
+   Une petite fenêtre sans cadre, fille de la fenêtre ACTIVE (la principale ou une fenêtre native), posée en
+   haut et au centre. Elle se ferme dès qu'elle perd le focus : c'est un geste, pas un écran qu'on garde.
+   ⚠ LE RACCOURCI N'EST PAS GLOBAL AU SYSTÈME : il n'est enregistré que pendant qu'une fenêtre de l'application a
+   le focus (browser-window-focus / blur), sinon Ctrl+K serait volé à tous les autres logiciels. */
+const { globalShortcut } = require('electron');
+let _palette = null;
+const ouvrirRecherchePartout = () => {
+  try {
+    if (_palette && !_palette.isDestroyed()) { _palette.focus(); return; }
+    const parent = BrowserWindow.getFocusedWindow() || (mainWindow && !mainWindow.isDestroyed() ? mainWindow : null);
+    if (!parent || parent.isDestroyed()) return;
+    const { pageRecherchePartout } = require('./fenetres/recherche-partout');
+    const b = parent.getContentBounds();
+    const L = Math.min(640, Math.max(420, b.width - 40)), H = Math.min(500, Math.max(300, b.height - 60));
+    const win = new BrowserWindow({
+      parent, x: Math.round(b.x + (b.width - L) / 2), y: Math.round(b.y + Math.min(90, b.height * 0.12)), width: L, height: H,
+      frame: false, transparent: true, resizable: false, movable: false, minimizable: false, maximizable: false,
+      fullscreenable: false, skipTaskbar: true, show: false, hasShadow: true,
+      webPreferences: { preload: path.join(__dirname, 'pont-preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: false },
+    });
+    _palette = win;
+    win.on('blur', () => { try { if (!win.isDestroyed()) win.close(); } catch {} });
+    win.on('closed', () => { if (_palette === win) _palette = null; try { if (!parent.isDestroyed()) parent.focus(); } catch {} });
+    win.webContents.on('will-navigate', (ev) => ev.preventDefault());
+    win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+    win.webContents.on('did-finish-load', () => appliquerTheme(win.webContents));
+    win.once('ready-to-show', () => { try { win.show(); win.focus(); } catch {} });
+    win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(pageRecherchePartout())).catch(() => {});
+  } catch (er) { console.error('[recherche partout]', er && er.message); }
+};
+ipcMain.on('recherche:partout:ouvrir', () => ouvrirRecherchePartout());
+app.on('browser-window-focus', () => {
+  try { if (!globalShortcut.isRegistered('CommandOrControl+K')) globalShortcut.register('CommandOrControl+K', ouvrirRecherchePartout); } catch {}
+});
+app.on('browser-window-blur', () => {
+  // Le focus passe d'une fenêtre de l'application à une autre : on attend de voir s'il est resté chez nous.
+  setTimeout(() => { try { if (!BrowserWindow.getFocusedWindow()) globalShortcut.unregister('CommandOrControl+K'); } catch {} }, 120);
+});
+app.on('will-quit', () => { try { globalShortcut.unregister('CommandOrControl+K'); } catch {} });
+
 ipcMain.on('session:fermee', (e) => {
   if (!_deLaPrincipale(e)) return;
   try { _fermerFenetresDeSession(); } catch (er) {}
@@ -2614,6 +2655,8 @@ const OPS_PONT = new Set([
   // site : envoyer trois mille commandes pour en afficher vingt ferait passer
   // plusieurs megaoctets par ce pont a chaque frappe dans la recherche.
   'commandes:contexte', 'commandes:liste',
+  // La recherche partout (Ctrl+K, 2026-10-27) : lecture seule, chaque sorte selon son droit (pont.js).
+  'recherche:partout',
   // Le DETAIL d une commande dans la fenetre Commandes : lecture complete,
   // statut (apercu/ecriture, case courriels), suppression (cascade, Square),
   // frais retenus, renvoi vers Remboursement, facture dans la fenetre principale.
@@ -2640,6 +2683,8 @@ const OPS_PONT = new Set([
   // La LISTE des produits en vente (fenetre Produits) : la page filtree par le
   // site, l ouverture de l assistant sur une fiche, et l assistant vierge.
   'produits:liste', 'produits:ouvrir', 'produits:nouveau',
+  // (2026-10-27) Les gestes groupés de la fenêtre Produits : catégorie, prix, solde (products:edit).
+  'produits:lot',
   // Les quatre listes restantes du palier 2 (1.54.0) : meme patron — la page
   // filtree par le site, le clic ouvre la fenetre native de la chose.
   'clients:liste', 'clients:ouvrir',
@@ -3166,6 +3211,10 @@ const OPS_PONT = new Set([
   // les notifications de bureau, par la meme porte (executerOpSite).
   'rappels:donnees', 'rappels:etat', 'rappels:ecrire', 'rappels:modele',
   'rappels:fait', 'rappels:reporter', 'rappels:supprimer',
+  // Bons de commande fournisseurs (2026-10-27). ⚠ `bc:donnees` est l op de LECTURE ; `bc:voeu` lit (ou pose,
+  // depuis l Inventaire) l onglet d ouverture.
+  'bc:donnees', 'bc:propositions', 'bc:chercher', 'bc:ecrire', 'bc:creerGroupes', 'bc:envoyer',
+  'bc:annuler', 'bc:clore', 'bc:recevoir', 'bc:imprimer', 'bc:voeu',
   'produit:apercu', 'produit:fonds', 'produit:detourer', 'produit:modeles', 'produit:photoIa',
   // Tableau de bord : lecture des chiffres, preference des tuiles, et le
   // clic d une tuile qui ouvre sa cible.
@@ -3201,6 +3250,8 @@ const OPS_PONT = new Set([
   // et hache serveur, purge refusee des qu il existe une commande) vit dans le
   // site ; le pont ne porte que des valeurs.
   'client:lire', 'client:ecrire', 'client:etat', 'client:corbeille',
+  // (2026-10-27) La note interne de la fiche client (customers:edit), rappelée dans la préparation.
+  'client:note',
   'client:restaurer', 'client:purger', 'client:etatCompte',
 ]);
 
@@ -3870,6 +3921,11 @@ const LIMITES_PONT = {
   'rappels:donnees': 15000, 'rappels:etat': 15000,
   'rappels:ecrire': 30000, 'rappels:modele': 30000, 'rappels:fait': 30000,
   'rappels:reporter': 30000, 'rappels:supprimer': 30000,
+  /* Les bons de commande fournisseurs : lecture locale ; chaque geste est UNE operation serveur (la reception fait
+     monter le stock de chaque ligne dans le meme lot) ; « Creer tous les bons » en enchaine une par fournisseur. */
+  'bc:donnees': 15000, 'bc:propositions': 15000, 'bc:chercher': 15000, 'bc:voeu': 15000,
+  'bc:ecrire': 30000, 'bc:envoyer': 30000, 'bc:annuler': 30000, 'bc:clore': 30000,
+  'bc:recevoir': 60000, 'bc:creerGroupes': 120000, 'bc:imprimer': 60000,
   /* Un repli : une lecture ou une ecriture d un seul booleen dans le profil. */
   'ui:repli': 15000,
   'patrons:liste': 20000, 'patrons:ecrire': 30000, 'patrons:basculer': 30000,
@@ -4550,6 +4606,8 @@ const PAGES_ANCRABLES = () => ({
      passe par son propre `case` dans `actionApp`, qui ouvre une vraie fenêtre. */
   corbeille: ['Corbeille des commandes', () => pageCorbeille()],
   transferts: ['Transferts de stock', () => pageTransferts()],
+  // Bons de commande FOURNISSEURS (2026-10-27) : nee native, section hote seule cote site.
+  'bons-commande': ['Bons de commande fournisseurs', () => pageBonsCommande()],
   images: ['Images des produits', () => pageImages()],
   abonnes: ['Abonnés de l’infolettre', () => pageAbonnes()],
   /* ⚠⚠ `journal` NE S'OUVRE PLUS SEUL — il est devenu un ONGLET des Journaux
@@ -6925,6 +6983,7 @@ const { pageRecommandations } = require('./fenetres/recommandations');
 const { pageRecherches } = require('./fenetres/recherches');
 const { pageCorbeille } = require('./fenetres/corbeille');
 const { pageTransferts } = require('./fenetres/transferts');
+const { pageBonsCommande } = require('./fenetres/bons-commande');
 const { pageImages } = require('./fenetres/images');
 const { pageAbonnes } = require('./fenetres/abonnes');
 const { pageCampagnes } = require('./fenetres/campagnes');
@@ -7182,6 +7241,8 @@ const actionApp = (nom, arg) => {
     // Ancrable depuis 4.11.0, sur sa demande. Sa section hote cote site
     // n existe que pour porter la zone (voir _DOCKABLES dans admin.js).
     case 'transferts':
+    // Bons de commande fournisseurs (2026-10-27) : meme cas, nee native.
+    case 'bons-commande':
     // Images des produits (4.13.0) : meme cas, section hote seule cote site.
     case 'images':
     case 'campagnes': case 'statistiques': case 'photos': case 'promo':
@@ -7516,7 +7577,9 @@ const _MODULES_OUVRABLES = ['generations', 'verrous', 'journaux', 'securite', 'i
   // Analyses de fibres (2026-10-25) : un rappel ou un lien peut l ouvrir ; elle-meme ouvre « impot » (le numero CA).
   'fibres',
   // Les rapports d encan (2026-10-25) : la console de l encan les ouvre (bouton « Rapports »).
-  'encan-rapports'];
+  'encan-rapports',
+  // Bons de commande fournisseurs (2026-10-27) : le bouton « Commander » de l Inventaire (Reapprovisionnement) les ouvre.
+  'bons-commande'];
 ipcMain.handle('module:ouvrir', (e, nom) => {
   const n = String(nom || '').toLowerCase();
   if (_MODULES_OUVRABLES.indexOf(n) < 0) return false;

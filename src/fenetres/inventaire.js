@@ -701,7 +701,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     h += '</div>';
     corps.innerHTML = h;
 
-    actions.innerHTML = enRecherche ? '<button id="btn-retour">${T("← Réapprovisionnement")}</button>' : '';
+    actions.innerHTML = enRecherche ? '<button id="btn-retour">${T("← Réapprovisionnement")}</button>'
+      /* (2026-10-27, point C de la refonte) De la liste « a commander » au BON DE COMMANDE FOURNISSEUR : la fenetre
+         des bons s ouvre sur son onglet « A commander », qui regroupe ces lignes par fournisseur. */
+      : ((lignes.length && CTX && CTX.peutEcrire) ? '<button class="prim" id="btn-commander"><span class="ic">🧾</span> ${T("Préparer les bons de commande fournisseurs")}</button>' : '');
+    var bc = document.getElementById('btn-commander');
+    if (bc) bc.onclick = function(){
+      appeler('bc:voeu', ['proposer']).then(function(){
+        if (P && P.ouvrirModule) { P.ouvrirModule('bons-commande'); dire('${T("Les bons de commande fournisseurs s’ouvrent…")}'); }
+      });
+    };
     brancherListe();
   }
 

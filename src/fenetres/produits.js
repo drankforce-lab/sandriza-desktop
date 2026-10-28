@@ -98,6 +98,10 @@ html.jour .rf-av.tc{color:color-mix(in srgb,var(--cc,#6d7f96) 55%,black);
 .vue-bascule button svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
 .vue-bascule button:hover:not(.on){color:var(--tx);background:var(--v06)!important}
 .vue-bascule button.on{background:var(--or)!important;color:#1a1208}
+.lt-ch{display:flex;flex-direction:column;gap:.55rem;margin:.2rem 0 .4rem}
+.lt-ch label{display:flex;align-items:center;gap:.5rem;font-size:.84rem}
+.lt-ch select,.lt-ch input[type=number]{font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid var(--v16);border-radius:8px;padding:.32rem .5rem}
+.lt-ch input[type=number]{width:6.5rem}
 .lot{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;
   background:var(--v04);border:1px solid rgba(var(--or-rgb),.45);border-radius:11px;
   padding:.5rem .8rem;font-size:.82rem}
@@ -406,7 +410,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       +   '<button type="button" data-vue="compact" aria-label="${T("Affichage compact : une ligne par produit, plus de produits par page")}" aria-pressed="' + COMPACT + '" class="' + (COMPACT ? 'on' : '') + '" title="${T("Affichage compact : une ligne par produit, plus de produits par page")}">'
       +     '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3.5h12M2 6.5h12M2 9.5h12M2 12.5h12"/></svg><span class="tx">${T("Compact")}</span></button>'
       + '</span>'
-      + (D.peutVenteFinale && !LOT ? '<button id="p-lot" title="${T("Appliquer ou retirer la vente finale sur plusieurs produits à la fois")}">${T("Vente finale en lot")}</button>' : '')
+      + ((D.peutVenteFinale || D.peutLot) && !LOT ? '<button id="p-lot" title="${T("Cocher plusieurs produits pour changer leur catégorie, leur prix, leur solde ou leur vente finale")}">${T("Sélectionner")}</button>' : '')
       + '<button id="p-marges" title="${T("Comparer les marges en tenant compte des coûts numériques (photos, IA, 3D)")}">${T("Vérifier mes marges")}</button>'
       + '<button class="prim" id="p-nouveau">${T("+ Nouveau produit")}</button></span>'
       + '</div></div>';
@@ -421,8 +425,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + '<span id="lot-n">' + nCoches + ' '
         + (nCoches > 1 ? '${T("produits sélectionnés")}' : '${T("produit sélectionné")}') + '</span>'
         + '<span style="flex:1 1 auto"></span>'
-        + '<button class="prim" id="lot-app">${T("Appliquer vente finale")}</button>'
-        + '<button id="lot-ret">${T("Retirer vente finale")}</button>'
+        /* LES GESTES GROUPÉS (2026-10-27, sa demande) : catégorie, prix, solde — à côté de la vente finale d avant. */
+        + (D.peutLot ? '<button id="lot-cat">${T("Catégorie…")}</button><button id="lot-prix">${T("Prix…")}</button><button id="lot-solde">${T("Solde…")}</button>' : '')
+        + (D.peutVenteFinale ? '<button id="lot-app">${T("Appliquer vente finale")}</button><button id="lot-ret">${T("Retirer vente finale")}</button>' : '')
         + '<button id="lot-annuler">${T("Annuler")}</button></div>';
     }
     h += '<div class="carte plein">';
@@ -555,6 +560,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (lap) lap.onclick = function(){ venteFinaleLot(true); };
     var lr = document.getElementById('lot-ret');
     if (lr) lr.onclick = function(){ venteFinaleLot(false); };
+    var lc = document.getElementById('lot-cat');
+    if (lc) lc.onclick = function(){ lotGeste('categorie'); };
+    var lpx = document.getElementById('lot-prix');
+    if (lpx) lpx.onclick = function(){ lotGeste('prix'); };
+    var ls = document.getElementById('lot-solde');
+    if (ls) ls.onclick = function(){ lotGeste('solde'); };
     var lp = document.getElementById('lot-page');
     if (lp) lp.onchange = function(){
       // Coche ou decoche LA PAGE AFFICHEE ; la selection des autres pages reste ce qu elle etait.
@@ -598,6 +609,62 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         : szPl(ids.length, '${T("{0} produit redeviendra retournable.")}', '${T("{0} produits redeviendront retournables.")}')).split('{0}').join(ids.length),
       oui: (activer ? '${T("Activer pour {0}")}' : '${T("Retirer pour {0}")}').split('{0}').join(ids.length) }).then(function(oui){
       if (oui) venteFinaleEcrire(ids, activer);
+    });
+  }
+  /* ══ LES GESTES GROUPÉS SUR LES PRODUITS (2026-10-27) ══════════════════════════════
+     Une boîte à part, comme toute confirmation (sa règle) : elle demande LA valeur, dit combien de produits
+     changent, et le verbe du bouton nomme l action. Le calcul (arrondi, prix soldé) vit dans le site
+     (pont.js, produitsLot) : la fenêtre n envoie que l intention. */
+  function lotSaisie(o){
+    return new Promise(function(fin){
+      var v = document.createElement('div');
+      v.className = 'szc-voile';
+      v.innerHTML = '<div class="szc-boite" role="dialog" aria-modal="true" aria-labelledby="lt-t">'
+        + '<h3 id="lt-t">' + esc(o.titre) + '</h3><p>' + esc(o.texte) + '</p>'
+        + '<div class="lt-ch">' + o.champ + '</div>'
+        + '<div class="szc-pied"><button type="button" class="szc-non">${T("Annuler")}</button><button type="button" class="szc-oui">' + esc(o.oui) + '</button></div></div>';
+      document.body.appendChild(v);
+      var ch = v.querySelector('.lt-ch select, .lt-ch input');
+      var sortir = function(val){ if (v.parentNode) v.parentNode.removeChild(v); document.removeEventListener('keydown', cl, true); fin(val); };
+      var valider = function(){ var x = o.lire(v); if (x === null) { if (ch) ch.focus(); return; } sortir(x); };
+      var cl = function(ev){ if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); sortir(null); } else if (ev.key === 'Enter') { ev.preventDefault(); valider(); } };
+      document.addEventListener('keydown', cl, true);
+      v.querySelector('.szc-non').onclick = function(){ sortir(null); };
+      v.querySelector('.szc-oui').onclick = valider;
+      if (ch) ch.focus();
+    });
+  }
+  function lotGeste(action){
+    var ids = Object.keys(COCHES);
+    if (!ids.length) { dire('${T("Aucun produit sélectionné.")}', 'att'); return; }
+    var n = ids.length, combien = szPl(n, '${T("{0} produit sélectionné.")}', '${T("{0} produits sélectionnés.")}').split('{0}').join(n);
+    var o;
+    if (action === 'categorie') {
+      o = { titre: '${T("Changer la catégorie")}', texte: combien, oui: '${T("Changer pour {0}")}'.split('{0}').join(n),
+        champ: '<label>${T("Nouvelle catégorie")} <select id="lt-v">' + (D.cats || []).map(function(c){ return '<option value="' + esc(c.cle) + '">' + esc(c.nom) + '</option>'; }).join('') + '</select></label>',
+        lire: function(v){ var x = v.querySelector('#lt-v'); return x && x.value ? x.value : null; } };
+    } else if (action === 'prix') {
+      o = { titre: '${T("Ajuster le prix")}', texte: combien + ' ${T("Un nombre négatif baisse le prix, positif le monte. Le prix soldé, s’il y en a un, suit dans la même proportion.")}',
+        oui: '${T("Ajuster {0} prix")}'.split('{0}').join(n),
+        champ: '<label>${T("Variation")} <input id="lt-v" type="number" step="1" min="-90" max="200" value="-10"> %</label>'
+          + '<label class="lt-c"><input id="lt-99" type="checkbox"> ${T("Arrondir à ,99")}</label>',
+        lire: function(v){ var x = Number(v.querySelector('#lt-v').value); if (!isFinite(x) || x === 0 || x < -90 || x > 200) return null; return { pct: x, arrondi99: !!v.querySelector('#lt-99').checked }; } };
+    } else {
+      o = { titre: '${T("Mettre en solde")}', texte: combien + ' ${T("Le rabais part du prix courant. 0 % retire le solde.")}',
+        oui: '${T("Appliquer à {0}")}'.split('{0}').join(n),
+        champ: '<label>${T("Rabais")} <input id="lt-v" type="number" step="5" min="0" max="90" value="20"> %</label>',
+        lire: function(v){ var x = Number(v.querySelector('#lt-v').value); if (!isFinite(x) || x < 0 || x > 90) return null; return x; } };
+    }
+    lotSaisie(o).then(function(val){
+      if (val === null) return;
+      dire('${T("Enregistrement…")}');
+      appeler('produits:lot', [ids, { action: action, valeur: val }]).then(function(r){
+        if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+        var reste = r.nonConfirmes ? ' ' + r.nonConfirmes + ' ${T("non confirmé(s) par le serveur — relancez pour les reprendre.")}' : '';
+        dire(szPl(r.n, '${T("{0} produit modifié.")}', '${T("{0} produits modifiés.")}').split('{0}').join(r.n) + reste, reste ? 'att' : 'bon');
+        LOT = false; COCHES = {};
+        charger();
+      });
     });
   }
   function venteFinaleEcrire(ids, activer){

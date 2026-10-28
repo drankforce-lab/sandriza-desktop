@@ -39,6 +39,10 @@ const CSS_PROPRE = `
 /* ══ L EN-TETE : la commande, le client, et le fil des 4 etapes ══ */
 .tete .qui{display:flex;flex-direction:column;gap:.1rem;min-width:0}
 .tete .qui .cli{font-size:.8rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* LA NOTE DE LA FICHE CLIENT (2026-10-27, sa demande) : « préfère l emballage cadeau » se lit AVANT d emballer. */
+.note-cli{flex:0 1 auto;min-width:0;max-width:42%;font-size:.78rem;padding:.25rem .65rem;border-radius:8px;border:1px solid rgba(var(--or-rgb),.5);
+  background:rgba(var(--or-rgb),.12);color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.note-cli b{color:var(--tx-or2)}
 .bas{display:inline-flex;align-items:center;gap:.35rem;font-size:.7rem;font-weight:800;letter-spacing:.06em;
   padding:.18rem .6rem;border-radius:99px;background:rgba(251,191,36,.16);color:var(--tx-att);
   border:1px solid rgba(251,191,36,.45);text-transform:uppercase;white-space:nowrap}
@@ -248,6 +252,7 @@ function pageCommande(id) {
 <style>${CSS_SOCLE}${CSS_PROPRE}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.orders}</span>
   <div class="qui"><h1 id="titre">${T("Préparation")}</h1><span class="cli" id="cli"></span></div>
+  <span class="note-cli" id="note-cli" hidden></span>
   <span class="bas" id="bas" hidden title="${T("Les étiquettes de ce transporteur se créent avec les clés de test : rien n’est facturé.")}">${T("BAC À SABLE")}</span>
   <span class="sous" id="sous"></span></div>
 <div class="fil" id="fil" role="tablist" aria-label="${T("Étapes de la préparation")}"></div>
@@ -1400,6 +1405,12 @@ function pageCommande(id) {
         document.getElementById('cli').textContent = [r.client, attendus() + ' ' + szPl(attendus(), '${T("article")}', '${T("articles")}'),
           [r.ville, r.province, r.codePostal].filter(Boolean).join(' ')].filter(Boolean).join(' · ')
           + (r.prioritaire ? ' · ${T("Prioritaire")}' : '') + (r.notes ? ' · ${T("Note :")} ' + r.notes : '');
+        var nc = document.getElementById('note-cli');
+        if (nc) {
+          nc.hidden = !r.noteClient;
+          nc.innerHTML = r.noteClient ? '<b>${T("Fiche client :")}</b> ' + esc(r.noteClient) : '';
+          nc.title = r.noteClient || '';
+        }
         dessiner();
         majReprise();
         balayerVignettes();

@@ -113,6 +113,17 @@ button.mini{padding:.14rem .5rem;font-size:.75rem}
 .duo-fiche{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:.7rem;align-items:start}
 .duo-fiche > .carte{margin:0}
 .coord .ligne{flex-direction:column;align-items:flex-start;gap:.12rem;padding:.42rem 0}
+.col-g{display:flex;flex-direction:column;gap:.7rem;min-width:0}
+.col-g>.carte{margin:0}
+.pf .pf-l{display:flex;justify-content:space-between;gap:1rem;padding:.3rem 0;border-bottom:1px solid var(--v07);font-size:.82rem}
+.pf .pf-l span,.pf .pf-b>span{color:var(--tx2)}
+.pf .pf-b{display:grid;grid-template-columns:7.5rem minmax(0,1fr);gap:.6rem;padding:.3rem 0;font-size:.82rem;border-bottom:1px solid var(--v07)}
+.pf .pf-n{color:var(--tx2);font-size:.74rem}
+.pf .pf-aide{font-size:.72rem;color:var(--tx2);font-weight:400;text-transform:none;letter-spacing:0}
+.pf textarea{width:100%;box-sizing:border-box;font:inherit;font-size:.84rem;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;padding:.4rem .55rem;resize:none}
+.pf textarea:focus{outline:none;border-color:var(--or)}
+.pf .pf-pied{display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin-top:.35rem}
+.pf .pf-txt{font-size:.84rem;white-space:pre-wrap}
 .coord .ligne .k{font-size:.7rem}
 `;
 
@@ -251,14 +262,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
     /* ⚠ DEUX COLONNES (2026-10-04) : les coordonnees a gauche, etiquette AU-DESSUS
        de la valeur (elle etait rejetee a l autre bout de la ligne) ; les commandes
        a droite. Empilees, la moitie basse de la fiche restait vide. */
-    h += '<div class="duo-fiche"><div class="carte coord"><h2>${T("Coordonnées")}</h2>'
+    h += '<div class="duo-fiche"><div class="col-g"><div class="carte coord"><h2>${T("Coordonnées")}</h2>'
       + (c.tel ? '<div class="ligne"><span class="k">${T("Téléphone")}</span><span>' + esc(c.tel) + '</span></div>' : '')
       + '<div class="ligne"><span class="k">${T("Adresse")}</span><span>'
       + esc([a.rue, a.ville, a.province, a.codePostal, a.pays].filter(Boolean).join(', ') || '—') + '</span></div>'
       + '<div class="ligne"><span class="k">${T("Langue des courriels")}</span><span>' + (c.langue === 'en' ? 'English' : '${T("Français")}') + '</span></div>'
       + (c.supprime && c.supprimeLe ? '<div class="ligne"><span class="k">${T("Supprimé le")}</span><span>' + esc(dateFr(c.supprimeLe)) + '</span></div>' : '')
-      + '</div>';
-    h += '<div class="carte"><h2>${T("Commandes récentes")} <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--tx3)">— '
+      + '</div>' + profilHtml() + '</div>';
+    h += '<div class="col-g"><div class="carte"><h2>${T("Commandes récentes")} <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--tx3)">— '
       + R.stats.commandes + ' ${T("au total")}</span></h2>'
       + (R.dernieres.length
         ? R.dernieres.map(function(o){
@@ -277,7 +288,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
             + (R.stats.commandes - R.dernieres.length > 1 ? '${T("autres")}' : '${T("autre")}')
             + ' ${T("— voir la fenêtre Commandes")}</div>' : '')
         : '<div class="aide">${T("Aucune commande.")}</div>')
-      + '</div></div>';
+      + '</div>' + noteHtml() + '</div></div>';
     corps.innerHTML = h;
 
     var c2 = R.client;
@@ -300,6 +311,41 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
       dire('${T("Suppression définitive impossible :")} ' + R.stats.commandes + ' ' + szPl(R.stats.commandes, '${T("commande — conservation fiscale de 6 ans.")}', '${T("commandes — conservation fiscale de 6 ans.")}'), 'att');
     }
     brancherFiche();
+  }
+
+  /* ══ LA FICHE ENRICHIE (2026-10-27, sa demande) ══ Sous les coordonnées : « En bref » et « Ses habitudes »
+     (tirées de SES commandes par le site — pont.js, clientLire), puis la NOTE INTERNE du personnel, qui
+     reparaît dans la préparation de ses commandes. Un vieux site sans profil : rien de plus qu avant. */
+  function profilHtml(){
+    var p = R.profil;
+    if (!p) return '';
+    var lg = function(k, v){ return v ? '<div class="pf-l"><span>' + k + '</span><b>' + v + '</b></div>' : ''; };
+    var liste = function(L){ return (L || []).map(function(x){ return esc(x.nom) + ' <span class="pf-n">×' + x.n + '</span>'; }).join(' · '); };
+    var h = '<div class="carte pf"><h2>${T("En bref")}</h2>'
+      + lg('${T("Panier moyen")}', p.panierMoyen ? argent(p.panierMoyen) : '')
+      + lg('${T("Dernière commande")}', p.derniereCommande ? esc(dateFr(p.derniereCommande)) : '')
+      + lg('${T("Dernière connexion")}', p.derniereVisite ? esc(dateFr(p.derniereVisite)) : '')
+      + lg('${T("Points de fidélité")}', p.points != null ? esc(String(p.points)) : '')
+      + '</div>';
+    if ((p.tailles || []).length || (p.categories || []).length || (p.articles || []).length) {
+      h += '<div class="carte pf"><h2>${T("Ses habitudes")}</h2>'
+        + ((p.tailles || []).length ? '<div class="pf-b"><span>${T("Tailles")}</span><div>' + liste(p.tailles) + '</div></div>' : '')
+        + ((p.categories || []).length ? '<div class="pf-b"><span>${T("Catégories")}</span><div>' + liste(p.categories) + '</div></div>' : '')
+        + ((p.articles || []).length ? '<div class="pf-b"><span>${T("Achète souvent")}</span><div>' + liste(p.articles) + '</div></div>' : '')
+        + '</div>';
+    }
+    return h;
+  }
+  function noteHtml(){
+    var p = R.profil;
+    if (!p) return '';
+    var h = '<div class="carte pf"><h2>${T("Note interne")} <span class="pf-aide">${T("vue du personnel seulement")}</span></h2>'
+      + (R.peutEcrire
+          ? '<textarea id="pf-note" maxlength="500" rows="2" aria-label="${T("Note interne")}" placeholder="${T("Ex. : préfère l’emballage cadeau, appeler avant de livrer…")}">' + esc(p.note) + '</textarea>'
+            + '<div class="pf-pied"><span class="pf-aide">${T("Rappelée à qui prépare ses commandes.")}</span><button class="mini" id="pf-enr" disabled>${T("Enregistrer la note")}</button></div>'
+          : '<div class="pf-txt">' + (p.note ? esc(p.note) : '<span class="pf-aide">${T("Aucune note.")}</span>') + '</div>')
+      + '</div>';
+    return h;
   }
 
   function dessinerEdition(){
@@ -344,6 +390,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
 
   // ══ ECOUTEURS ═════════════════════════════════════════════════════════════
   function brancherFiche(){
+    var pn = document.getElementById('pf-note'), pe = document.getElementById('pf-enr');
+    if (pn && pe) {
+      pn.oninput = function(){ pe.disabled = pn.value === ((R.profil && R.profil.note) || ''); };
+      pe.onclick = function(){
+        pe.disabled = true;
+        appeler('client:note', [ID, pn.value]).then(function(r){
+          if (r && r.ok) { if (R.profil) R.profil.note = r.note; dire('${T("Note enregistrée.")}', 'bon'); }
+          else { pe.disabled = false; dire(expliquer(r), 'err'); }
+        });
+      };
+    }
     var m = document.getElementById('btn-modifier');
     /* Le dessin D ABORD : la boite de reprise remplit des champs qui n existent
        qu apres lui. */

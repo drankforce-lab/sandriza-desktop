@@ -609,5 +609,8 @@ module.exports = {
   '1 client attend cette variante, et': '1 customer is waiting for this variant, and',
   'Abandonner la saisie': 'Discard the changes',
   'Les quantités, seuils et emplacements modifiés de ce produit seront perdus.': 'The modified quantities, thresholds and locations of this product will be lost.',
-  'Abandonner': 'Discard'
+  'Abandonner': 'Discard',
+  /* (2026-10-27) Le passage vers les bons de commande FOURNISSEURS — « purchase orders », jamais « orders » seul. */
+  'Préparer les bons de commande fournisseurs': 'Prepare purchase orders',
+  'Les bons de commande fournisseurs s’ouvrent…': 'Purchase orders are opening…'
 };

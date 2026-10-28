@@ -228,6 +228,12 @@ select.statut{width:auto;font-size:.78rem;padding:.16rem .4rem}
 /* Un trait discret, pas un pointille AMBRE : un remboursement n est pas une
    alerte (la couleur ne dit qu un probleme — 2026-09-29). */
 .remb{margin-top:.7rem;border-top:1px solid var(--v10);padding-top:.45rem}
+tbody tr.coche td{background:rgba(var(--or-rgb),.1)}
+/* La bande des actions groupées (2026-10-27) */
+.lotc{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.45rem .75rem;margin:0 0 .55rem;border:1px solid rgba(var(--or-rgb),.45);
+  border-radius:10px;background:rgba(var(--or-rgb),.08);font-size:.8rem}
+.lotc label{display:inline-flex;align-items:center;gap:.35rem;cursor:pointer;white-space:nowrap}
+.lotc>span{white-space:nowrap}
 /* LA CHRONOLOGIE (2026-10-27, sa demande) : les gestes datés, en colonne dans l en-tête (la place à droite de la
    livraison était vide) — la liste des articles garde toute sa hauteur. Un point par geste, reliés par un trait. */
 .det2.a3{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.1fr)}
@@ -375,6 +381,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   /* L AFFICHAGE COMPACT (2026-10-12, sa demande : « ajoute-moi aussi un mode compact dans les commandes »), le
      meme que l Inventaire et Produits en vente : une ligne par commande, retenu sur le poste (sous garde). */
   var COMPACT = false;
+  /* LES ACTIONS GROUPÉES (2026-10-27, sa demande) : « Sélectionner » coche des commandes, puis on imprime tous leurs
+     bons ou on les passe en préparation d'un seul geste. Les coches vivent ICI : une page qui change ne les perd pas. */
+  var SELM = false, SELC = {};
   try { COMPACT = localStorage.getItem('sz-cmd-compact') === '1'; } catch (e) {}
   var enCours = false;
   var VUE = 'liste';        // 'liste' | 'detail'
@@ -560,6 +569,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '<button class="rf-jet' + (F.manuelles ? ' on' : '') + '" data-manu="1" '
       + 'title="${T("N’afficher que les ventes saisies à la caisse, quel que soit leur statut")}">'
       + '${T("Ventes manuelles")}</button>'
+      + (!expedition && CTX && CTX.peutEditer
+          ? '<button class="rf-jet' + (SELM ? ' on' : '') + '" data-selm="1" title="${T("Cocher plusieurs commandes pour agir sur toutes à la fois")}">${T("Sélectionner")}</button>' : '')
       + '<div class="droite">'
       + '<label class="rf-rch">${ICO.loupe}<input id="rech" aria-label="${T("Rechercher une commande")}" autocomplete="off" placeholder="${T("Numéro de commande, nom, courriel")}'
       + (expedition ? '${T(", suivi")}' : '') + '…" value="' + esc(F.q) + '"></label>'
@@ -579,6 +590,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     }
     h += '</div></div>';
 
+    /* ── LA BANDE DES ACTIONS GROUPÉES ── */
+    if (SELM && !expedition) {
+      var nS = Object.keys(SELC).length;
+      h += '<div class="lotc"><label><input type="checkbox" id="lotc-page"> ${T("Toute la page")}</label>'
+        + '<span id="lotc-n">' + szPl(nS, '${T("{0} commande sélectionnée")}', '${T("{0} commandes sélectionnées")}').split('{0}').join(nS) + '</span>'
+        + '<span style="flex:1 1 auto"></span>'
+        + '<button class="mini" id="lotc-bons"' + (nS ? '' : ' disabled') + '>${T("Imprimer les bons")}</button>'
+        + '<button class="mini prim" id="lotc-prep"' + (nS ? '' : ' disabled') + '>${T("Passer en préparation")}</button>'
+        + '<button class="mini" id="lotc-annuler">${T("Annuler")}</button></div>';
+    }
+
     /* ── LE TABLEAU ── */
     var t = '<div class="cx-carte cx-liste">';
     if (!d || !d.lignes.length) {
@@ -587,6 +609,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         : (expedition ? '${T("Aucune commande expédiée.")}' : '${T("Aucune commande en cours.")}')) + '</div>';
     } else {
       t += '<div class="liste' + (COMPACT ? ' compacte' : '') + '"><table><thead><tr>'
+        + (SELM && !expedition ? '<th class="c"></th>' : '')
         + '<th>${T("Client et commande")}</th>'
         + (expedition ? '<th>${T("Suivi")}</th>' : '<th class="c">${T("Articles")}</th>')
         + '<th class="d">${T("Total")}</th><th>${T("Statut")}</th><th class="c"></th>'
@@ -595,8 +618,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         // ⚠ Etiquetee mais pas partie : la ligne se teinte. C est l etat qui se
         // perd le plus facilement, entre l impression et le depot au comptoir.
         var attente = o.aUneEtiquette && o.statut !== 'shipped' && o.statut !== 'delivered';
-        t += '<tr class="' + (attente ? 'attente' : '') + '" data-id="' + esc(o.id)
-          + '" style="cursor:pointer" title="${T("Clic : détails · clic droit : changer le statut")}">'
+        var selL = SELM && !expedition;
+        t += '<tr class="' + (attente ? 'attente' : '') + (selL && SELC[o.id] ? ' coche' : '') + '" data-id="' + esc(o.id)
+          + '" style="cursor:pointer" title="' + (selL ? '${T("Cliquer pour sélectionner")}' : '${T("Clic : détails · clic droit : changer le statut")}') + '">'
+          + (selL ? '<td class="c"><input type="checkbox" data-selc="' + esc(o.id) + '" aria-label="' + esc('${T("Sélectionner")} ' + o.numero) + '"' + (SELC[o.id] ? ' checked' : '') + '></td>' : '')
           + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(o.client)) + '</span>'
           +   '<div style="min-width:0"><div class="rf-nom">' + esc(o.client)
           +     (o.prioritaire ? ' <span class="rf-pill ambre" title="${T("Traitement prioritaire")}">${T("Prioritaire")}</span>' : '')
@@ -1378,6 +1403,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       }
       if (t.closest('[data-prio]')) { F.prioritaires = !F.prioritaires; F.page = 0; dessiner(); charger(); return; }
       if (t.closest('[data-manu]')) { F.manuelles = !F.manuelles; F.page = 0; dessiner(); charger(); return; }
+      if (t.closest('[data-selm]')) { SELM = !SELM; SELC = {}; dessiner(); return; }
+      if (t.id === 'lotc-annuler') { SELM = false; SELC = {}; dessiner(); return; }
+      if (t.id === 'lotc-bons') { lotBons(); return; }
+      if (t.id === 'lotc-prep') { lotPreparation(); return; }
+      if (t.closest('[data-selc]') || t.id === 'lotc-page') return;   // la case suit son propre « change »
       var pr = t.closest('[data-prep]');
       if (pr) {
         ouvrir('commandes:preparer', pr.getAttribute('data-prep'), '${T("Préparation")}');
@@ -1386,8 +1416,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         setTimeout(function(){ charger(); }, 1200);
         return;
       }
-      // Le reste de la ligne ouvre le DETAIL — dans SA fenetre native.
+      // Le reste de la ligne ouvre le DETAIL — dans SA fenetre native. En mode sélection, elle coche.
       var tr = t.closest('tr[data-id]');
+      if (tr && SELM && MODE !== 'expeditions') { var sid = tr.getAttribute('data-id'); selCocher(sid, !SELC[sid]); return; }
       if (tr) {
         ouvrir('commandes:ouvrirDetail', tr.getAttribute('data-id'), '${T("Détail")}');
         // Le detail prend le verrou : la ligne passe << En traitement >>.
@@ -1406,6 +1437,63 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       var o = ((DONNEES && DONNEES.lignes) || []).filter(function(x){ return x.id === id; })[0];
       if (o) menuLigne(ev, o, tr);
     };
+  }
+
+  /* ── LES ACTIONS GROUPÉES (2026-10-27) ── */
+  function selCompter(){
+    var n = Object.keys(SELC).length, e = document.getElementById('lotc-n');
+    if (e) e.textContent = szPl(n, '${T("{0} commande sélectionnée")}', '${T("{0} commandes sélectionnées")}').split('{0}').join(n);
+    ['lotc-bons', 'lotc-prep'].forEach(function(k){ var b = document.getElementById(k); if (b) b.disabled = !n; });
+  }
+  function selCocher(id, oui){
+    // On RETIENT le statut au moment de cocher : la sélection survit au changement de page, la ligne non.
+    var oL = ((DONNEES && DONNEES.lignes) || []).filter(function(x){ return x.id === id; })[0];
+    if (oui) SELC[id] = { statut: oL ? oL.statut : '', tenue: !!(oL && oL.enTraitement) }; else delete SELC[id];
+    var tr = corps.querySelector('tr[data-id="' + id + '"]');
+    if (tr) { tr.classList.toggle('coche', !!oui); var c = tr.querySelector('[data-selc]'); if (c) c.checked = !!oui; }
+    selCompter();
+  }
+  corps.addEventListener('change', function(ev){
+    var t = ev.target; if (!t || !t.getAttribute) return;
+    var id = t.getAttribute('data-selc');
+    if (id) { selCocher(id, t.checked); return; }
+    if (t.id === 'lotc-page') ((DONNEES && DONNEES.lignes) || []).forEach(function(o){ selCocher(o.id, t.checked); });
+  });
+  // Les bons, l un après l autre (l imprimante n en prend qu un à la fois) ; le bilan dit ce qui n est pas sorti.
+  function lotBons(){
+    var ids = Object.keys(SELC); if (!ids.length) return;
+    var ok = 0, rate = [];
+    dire('${T("Impression des bons…")}');
+    ids.reduce(function(p, id){
+      return p.then(function(){ return appeler('commande:bon', [id]).then(function(r){ if (r && r.ok) ok++; else rate.push(r && r.detail ? r.detail : expliquer(r)); }); });
+    }, Promise.resolve()).then(function(){
+      if (!rate.length) dire(szPl(ok, '${T("{0} bon envoyé à l’impression.")}', '${T("{0} bons envoyés à l’impression.")}').split('{0}').join(ok), 'bon');
+      else dire('${T("{0} sur {1} imprimés — ")}'.split('{0}').join(ok).split('{1}').join(ids.length) + rate[0], 'err');
+    });
+  }
+  /* Passer en préparation : seulement les commandes « Confirmée » (ou « En attente ») qui ne sont tenues par
+     personne ; les autres sont nommées dans la boîte et laissées telles quelles. Une confirmation à part. */
+  function lotPreparation(){
+    var par = SELC, ids = Object.keys(SELC);
+    var bons = ids.filter(function(id){ var o = par[id]; return o && !o.tenue && (o.statut === 'confirmed' || o.statut === 'pending'); });
+    var autres = ids.length - bons.length;
+    if (!bons.length) { dire('${T("Aucune des commandes sélectionnées n’est à confirmer ou confirmée et libre.")}', 'att'); return; }
+    szConfirmer({ titre: '${T("Passer en préparation")}',
+      texte: szPl(bons.length, '${T("{0} commande passera « En préparation ».")}', '${T("{0} commandes passeront « En préparation ».")}').split('{0}').join(bons.length)
+        + (autres ? ' ' + szPl(autres, '${T("{0} autre est déjà plus loin ou en traitement : elle ne change pas.")}', '${T("{0} autres sont déjà plus loin ou en traitement : elles ne changent pas.")}').split('{0}').join(autres) : ''),
+      oui: '${T("Passer en préparation")}' }).then(function(oui){
+      if (!oui) return;
+      var ok = 0, rate = 0;
+      dire('${T("Mise à jour des statuts…")}');
+      bons.reduce(function(p, id){
+        return p.then(function(){ return appeler('commandes:statutEcrire', [id, par[id].statut, 'preparing', false]).then(function(r){ if (r && r.ok) ok++; else rate++; }); });
+      }, Promise.resolve()).then(function(){
+        dire(szPl(ok, '${T("{0} commande passée en préparation.")}', '${T("{0} commandes passées en préparation.")}').split('{0}').join(ok)
+          + (rate ? ' ' + '${T("{0} refusée(s) : statut changé ailleurs entre-temps.")}'.split('{0}').join(rate) : ''), rate ? 'att' : 'bon');
+        SELM = false; SELC = {};
+        charger(true);
+      });
+    });
   }
 
   function ouvrir(op, id, quoi){

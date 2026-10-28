@@ -21,6 +21,7 @@
  */
 
 module.exports = {
+  'Fiche client :': 'Customer file:',
   'Préparation — Administration Sandriza': 'Preparation — Sandriza Administration',
   'Préparation': 'Preparation',
   'Préparation —': 'Preparation —',

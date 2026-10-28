@@ -119,6 +119,9 @@ body{background:var(--f-page);color:var(--tx);
 .btn{padding:.34rem .7rem;border-radius:7px;border:1px solid var(--v12);
   background:var(--v04);color:var(--tx);font:inherit;font-size:.8rem;cursor:pointer}
 .btn:hover{background:var(--v08)}
+#b-chercher{display:inline-flex;align-items:center;gap:.35rem}
+#b-chercher svg{width:14px;height:14px;color:var(--tx2)}
+#b-chercher kbd{font:600 .64rem system-ui,sans-serif;color:var(--tx2);border:1px solid var(--v16);border-radius:4px;padding:0 .3rem}
 .pied{flex:0 0 auto;padding:.42rem 1.05rem;border-top:1px solid var(--v08);
   font-size:.76rem;min-height:1.9rem;background:var(--f-carte)}
 
@@ -135,7 +138,8 @@ function pageCadre() {
 <div class="tete"><span class="ico">${ICO.tableau || ''}</span>
   <div class="barre" id="barre" role="menubar"></div>
   <span class="sous" id="sous"></span>
-  <span class="fin"><button class="btn" id="b-mesurer" type="button">${T("↻ Remesurer")}</button>
+  <span class="fin"><button class="btn" id="b-chercher" type="button" title="${T("Rechercher partout : commandes, clients, produits, factures")}">${ICO.loupe} ${T("Rechercher")} <kbd>${T("Ctrl K")}</kbd></button>
+    <button class="btn" id="b-mesurer" type="button">${T("↻ Remesurer")}</button>
     <!-- ⚠⚠⚠ LA SORTIE DE SECOURS, ET ELLE EST ICI PARCE QUE LE MENU PEUT
          MANQUER. L'interrupteur du cadre vit dans le menu Affichage ; ce cadre
          recouvre la page qui dessine ce menu, et sa propre barre dépend d'un
@@ -286,6 +290,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }, 5000);
 
   document.getElementById('b-mesurer').addEventListener('click', mesurerZone);
+  // La recherche partout (2026-10-27) : le bouton pour qui ne connaît pas encore Ctrl+K.
+  document.getElementById('b-chercher').addEventListener('click', function(){ try { window.szPont.recherchePartout(); } catch (e) {} });
   /* ⚠ ON ARME EN DEUX TEMPS, comme toute action qui redemarre l application :
      un clic distrait ne doit pas fermer la fenetre de quelqu un. */
   var CLASSIQUE_ARME = false;

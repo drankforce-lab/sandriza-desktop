@@ -166,6 +166,9 @@ contextBridge.exposeInMainWorld('szPont', {
      vue du cadre. Un passe-plat generique laisserait n importe quelle fenetre
      native declencher n importe quelle action de l application. */
   cadreEteindre: () => ipcRenderer.invoke('cadre:eteindre').catch(() => false),
+  /* La recherche partout (Ctrl+K, 2026-10-27) : un verbe étroit, qui n'ouvre que la palette — elle-même ne lit
+     que par l'opération recherche:partout du site, chaque sorte selon son droit. */
+  recherchePartout: () => ipcRenderer.send('recherche:partout:ouvrir'),
   /* ⚠ LE PANNEAU FLOTTANT, PAS LE MENU DU SYSTÈME. Le second s ouvrait bien
      au-dessus de la vue native, mais il PREND LA SOURIS : une fois ouvert,
      glisser sur l intitulé voisin ne faisait plus rien. Le panneau, lui, est une
