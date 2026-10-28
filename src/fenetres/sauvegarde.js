@@ -240,6 +240,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('sauvegarde')}
       + (D.peutEcrire ? '<button class="prim" id="s-nouveau">${T("＋ Créer une sauvegarde")}</button>' : '')
       + '<button class="b" id="s-refresh">${T("↻ Actualiser")}</button>'
       + (D.peutEcrire ? '<button class="b dgr" id="s-purger"><span class="ic">🗑</span> ${T("Purger (&gt; ")}'+(D.retentionMois||12)+'${T(" mois)")}</button>' : '')
+      + (D.peutEcrire ? '<button class="b" id="s-photos" title="${T("Faire passer l’adresse des photos à photos.sandriza.com")}">${T("Adresse des photos")}</button>' : '')
       + '</div></div>';
 
     /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
@@ -344,6 +345,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('sauvegarde')}
     b=document.getElementById('s-nouveau'); if (b) b.onclick=ouvrirCreer;
     b=document.getElementById('s-refresh'); if (b) b.onclick=function(){ recharger('${T("Liste actualisée.")}', 'bon'); };
     b=document.getElementById('s-purger');  if (b) b.onclick=ouvrirPurge;
+    b=document.getElementById('s-photos');  if (b) b.onclick=ouvrirPhotos;
     var ds=corps.querySelectorAll('[data-dl]');
     for (var i=0;i<ds.length;i++) ds[i].onclick=function(){ telecharger(this.getAttribute('data-dl'), this.getAttribute('data-id')); };
     var rs=corps.querySelectorAll('[data-rest]');
@@ -773,6 +775,45 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('sauvegarde')}
       if (r&&r.ok){ fermerSur(); D=r; RO=!r.peutEcrire; vueListe();
         dire(r.retirees ? (r.retirees + ' ' + szPl(r.retirees, '${T("sauvegarde supprimée.")}', '${T("sauvegardes supprimées.")}')) : '${T("Aucune sauvegarde à purger.")}', 'bon'); }
       else { if (go){ go.disabled=false; go.textContent='${T("Purger")}'; } dire('${T("Échec : ")}'+expliquer(r), 'err'); }
+    });
+  }
+
+  /* ── L ADRESSE DES PHOTOS (2026-10-28, sa demande) ─────────────────────
+     Les photos passent de pub-….r2.dev a photos.sandriza.com — le MEME stockage. Deux temps, dans la
+     meme boite : on COMPTE d abord (rien n est ecrit), et le bouton qui ecrit ne parait qu ensuite, avec
+     le nombre exact. Le serveur exige le super-administrateur et le mot DEMENAGER ; la base est reecrite
+     tout ou rien. Une sauvegarde d abord : c est elle, le retour en arrière. */
+  function ouvrirPhotos(){
+    if (!D.peutEcrire) { dire(MOTIFS.droit, 'err'); return; }
+    ouvrirSur('${T("Adresse des photos")}', '<div id="s-ph-corps"><p class="quoi" style="margin:0">${T("Décompte des adresses à changer…")}</p></div>',
+      '<button class="b" id="s-annuler">${T("Fermer")}</button>', '560px');
+    document.getElementById('s-annuler').onclick=fermerSur;
+    OCCUPE=true; verrouSur(true);
+    appeler('sauvegarde:photosAdresse',['compter']).then(function(r){ OCCUPE=false; verrouSur(false);
+      var c=document.getElementById('s-ph-corps'); if (!c) return;
+      if (!r||!r.ok){ c.innerHTML='<div class="garde rouge"><span class="ic">⚠</span> '+esc(expliquer(r))+'</div>'; return; }
+      var tables=Object.keys(r.parTable||{});
+      var h='<p class="quoi" style="margin:0 0 .6rem">${T("Ancienne adresse : ")}<b>'+esc(r.ancien)+'</b><br>${T("Nouvelle adresse : ")}<b>'+esc(r.nouveau)+'</b></p>';
+      if (!r.total){ c.innerHTML=h+'<div class="garde"><span class="ic">✓</span> ${T("Aucune adresse à changer : toutes les photos utilisent déjà la nouvelle adresse.")}</div>'; return; }
+      h+='<p class="quoi" style="margin:0 0 .4rem"><b>'+r.total+'</b> '+szPl(r.total, '${T("enregistrement cite l’ancienne adresse :")}', '${T("enregistrements citent l’ancienne adresse :")}')+'</p>'
+        +'<ul style="margin:0 0 .7rem 1.1rem;padding:0">'+tables.map(function(t){ return '<li>'+esc(t)+' — '+(+r.parTable[t]||0)+'</li>'; }).join('')+'</ul>'
+        +'<div class="garde rouge"><span class="ic">⚠</span> ${T("Créez d’abord une sauvegarde : c’est elle qui permet de revenir en arrière. Le journal inviolable et le journal des accès ne sont jamais réécrits.")}</div>';
+      c.innerHTML=h;
+      var pied=document.getElementById('s-annuler');
+      if (pied && !document.getElementById('s-go')){
+        var go=document.createElement('button'); go.className='b dgr'; go.id='s-go';
+        go.textContent='${T("Changer les adresses")} ('+r.total+')';
+        go.onclick=appliquerPhotos; pied.parentNode.appendChild(go);
+      }
+    });
+  }
+  function appliquerPhotos(){
+    if (OCCUPE) return; OCCUPE=true; verrouSur(true);
+    var go=document.getElementById('s-go'); if (go){ go.disabled=true; go.textContent='${T("⏳ Changement…")}'; }
+    appeler('sauvegarde:photosAdresse',['appliquer']).then(function(r){ OCCUPE=false; verrouSur(false);
+      if (r&&r.ok){ fermerSur();
+        dire(r.ecrit + ' ' + szPl(r.ecrit, '${T("enregistrement mis à jour : les photos utilisent maintenant ")}', '${T("enregistrements mis à jour : les photos utilisent maintenant ")}') + r.nouveau + '.', 'bon'); }
+      else { if (go){ go.disabled=false; go.textContent='${T("Changer les adresses")}'; } dire('${T("Échec : ")}'+expliquer(r)+'${T(" — rien n’a été changé.")}', 'err'); }
     });
   }
 

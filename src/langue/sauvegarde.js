@@ -283,5 +283,22 @@ module.exports = {
 
   /* ── LES FRAGMENTS EN MINUSCULES (2026-09-13) ───────────────────────────── */
   'au moins': 'at least',
-  'de base +': 'base +'
+  'de base +': 'base +',
+  /* ── L ADRESSE DES PHOTOS (2026-10-28) ─────────────────────────────────── */
+  'Adresse des photos': 'Photo address',
+  'Faire passer l’adresse des photos à photos.sandriza.com': 'Move the photo address to photos.sandriza.com',
+  'Décompte des adresses à changer…': 'Counting the addresses to change…',
+  'Ancienne adresse : ': 'Old address: ',
+  'Nouvelle adresse : ': 'New address: ',
+  'Aucune adresse à changer : toutes les photos utilisent déjà la nouvelle adresse.':
+    'Nothing to change: every photo already uses the new address.',
+  'enregistrement cite l’ancienne adresse :': 'record cites the old address:',
+  'enregistrements citent l’ancienne adresse :': 'records cite the old address:',
+  'Créez d’abord une sauvegarde : c’est elle qui permet de revenir en arrière. Le journal inviolable et le journal des accès ne sont jamais réécrits.':
+    'Create a backup first: it is what lets you go back. The tamper-proof log and the access log are never rewritten.',
+  'Changer les adresses': 'Change the addresses',
+  '⏳ Changement…': '⏳ Changing…',
+  'enregistrement mis à jour : les photos utilisent maintenant ': 'record updated: the photos now use ',
+  'enregistrements mis à jour : les photos utilisent maintenant ': 'records updated: the photos now use ',
+  ' — rien n’a été changé.': ' — nothing was changed.'
 };

@@ -3074,6 +3074,8 @@ const OPS_PONT = new Set([
      dechiffre la sauvegarde : quelques secondes, jamais plus. */
   'sauvegarde:integrite',
   'sauvegarde:restaurer', 'sauvegarde:supprimer', 'sauvegarde:purger',
+  // Demenagement des photos vers photos.sandriza.com (2026-10-28) : compter, puis appliquer.
+  'sauvegarde:photosAdresse',
   // Studio virtuel (fenetre Studio, 2.35.0) — mise en scene Photoroom guidee.
   // ⚠ 'studio:traiter' peut enchainer 2-3 appels Photoroom (fantome + decor +
   // agrandissement), chacun long : le plafond de temps est large.
@@ -3758,6 +3760,7 @@ const LIMITES_PONT = {
   'sauvegarde:progres': 12000,
   'sauvegarde:integrite': 180000,
   'sauvegarde:restaurer': 600000, 'sauvegarde:supprimer': 45000, 'sauvegarde:purger': 120000,
+  'sauvegarde:photosAdresse': 120000,
   // Studio virtuel : les presets et le compte sont legers ; un traitement peut
   // enchainer plusieurs appels Photoroom de ~120 s chacun.
   'studio:presets': 15000, 'studio:compte': 20000, 'studio:traiter': 480000,
