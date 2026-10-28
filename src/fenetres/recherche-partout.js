@@ -16,7 +16,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { CSS_JOUR, ICO, TETE, JS_MESURES } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la langue du
    poste. On ne traduit QUE ce qui se lit — jamais ce qu'on tape ni ce que la
    base rend (numéros, noms). */
@@ -77,6 +77,9 @@ function pageRecherchePartout() {
   var q = document.getElementById("rp-q"), res = document.getElementById("rp-res");
   var L = [], SEL = 0, MINUT = null, NUM = 0;
   var PICTO = ${JSON.stringify(PICTO)};
+  /* (2026-10-27) szArgent vient des MESURES du socle : cette palette ne charge pas JS_DIRE (qui les porte), il faut
+     les poser ici — sans elles, « Rechercher partout » tombait au premier resultat chiffre (construction 40608387952). */
+${JS_MESURES()}
   var GROUPES = { commande: '${T("Commandes")}', client: '${T("Clients")}', produit: '${T("Produits")}', facture: '${T("Factures")}' };
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
