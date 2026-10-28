@@ -4233,6 +4233,17 @@ ipcMain.handle('pont:appeler', (e, op, args) => {
      commandent rien : ils portent le même préchargement que les autres fenêtres, donc `szPont.appeler` avec la
      session de l administratrice. Seule la lecture de l état de la caisse leur est permise. */
   if (_deVitrine(e) && String(op || '') !== 'caisse:etat') return { ok: false, motif: 'droit' };
+  /* LA PLANCHE AVERY S'OUVRE DANS LA FENÊTRE PRINCIPALE (2026-10-28, signalé deux fois : « en arrière-plan »). Le
+     voile du site (_dockVoileBoite) règle la vue ancrée ; mais le Centre d'impression DÉTACHÉ restait devant la
+     fenêtre principale. Planche prête → la fenêtre principale passe au premier plan. */
+  if (String(op || '') === 'promo:planche') {
+    return Promise.resolve(executerOpSite('promo:planche', args, e.sender)).then((r) => {
+      if (r && r.ok && mainWindow && !mainWindow.isDestroyed()) {
+        try { if (mainWindow.isMinimized()) mainWindow.restore(); mainWindow.show(); mainWindow.focus(); } catch (er) {}
+      }
+      return r;
+    });
+  }
   return executerOpSite(String(op || ''), args, e.sender);
 });
 // L'APERÇU 3D, PRÉPARÉ AU POSTE (7.16.0) : le modèle rendu par Fal.ai (17 à 20 Mo) est téléchargé
