@@ -1455,8 +1455,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
           aide: '${T("Cotation de chaque commande, puis un récapitulatif du prix total à confirmer avant de rien acheter.")}',
           pour: function(f){ return !f.tenue && !finie(f) && !f.aUneEtiquette && !f.manuelle; } },
         { cle: 'expedier', libelle: '${T("Marquer expédiée")}', cache: function(){ return !peutX; },
-          aide: '${T("Seulement les commandes dont l’étiquette est créée : son numéro de suivi part à la cliente.")}',
-          pour: function(f){ return !f.tenue && !finie(f) && !!f.aUneEtiquette && !!f.suivi; } },
+          /* (2026-10-29, sa décision : « seulement si vérifiée ») la fiche exige le scan complet du colis avant
+             d expédier ; le lot aussi — verifiee vient du site (même règle que la fiche). */
+          aide: '${T("Seulement les commandes vérifiées en entier, avec leur étiquette : le numéro de suivi part au client.")}',
+          pour: function(f){ return !f.tenue && !finie(f) && !!f.aUneEtiquette && !!f.suivi && f.verifiee === true; } },
         { cle: 'csv', libelle: '${T("Exporter (CSV)")}' }
       ],
       geste: function(cle, ids, tous){ lotGeste(cle, ids, tous); }
@@ -1497,7 +1499,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     });
     if (cle === 'etiqCreer') return lotEtiquettes(ids, tous);
     if (cle === 'expedier') return szConfirmer({ titre: '${T("Marquer expédiée")}', prudent: true,
-        texte: szPl(ids.length, '${T("{0} commande passera « Expédiée » : la cliente reçoit son courriel avec le numéro de suivi de l’étiquette.")}', '${T("{0} commandes passeront « Expédiée » : chaque cliente reçoit son courriel avec le numéro de suivi de son étiquette.")}').split('{0}').join(ids.length) + lotEcartes(ids, tous),
+        texte: '${T("Avant de continuer : chaque colis a son étiquette collée et son bordereau glissé.")}' + ' ' + szPl(ids.length, '${T("{0} commande passera « Expédiée » : le client reçoit son courriel avec le numéro de suivi de l’étiquette.")}', '${T("{0} commandes passeront « Expédiée » : chaque client reçoit son courriel avec le numéro de suivi de son étiquette.")}').split('{0}').join(ids.length) + lotEcartes(ids, tous),
         details: ids.slice(0, 8).map(function(id){ var f = lotFiche(id); return [f.numero || id, (f.transporteur ? f.transporteur + ' · ' : '') + (f.suivi || '')]; }),
         oui: szPl(ids.length, '${T("Expédier {0} commande")}', '${T("Expédier {0} commandes")}').split('{0}').join(ids.length) }).then(function(oui){
       if (!oui) return;
@@ -1564,7 +1566,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       var total = cotes.reduce(function(m, x){ return m + x.prix; }, 0);
       dire('');
       var det = cotes.map(function(x){ return [lotNom(x.id), nomT(x.t) + ' · ' + x.nomS + ' · ' + szNombre(x.poids, 2) + ' kg'
-        + (x.estime ? ' ${T("(estimé)")}' : '') + (x.client ? ' · ${T("choix de la cliente")}' : '') + ' — ' + argent(x.prix)]; });
+        + (x.estime ? ' ${T("(estimé)")}' : '') + (x.client ? ' · ${T("choix du client")}' : '') + ' — ' + argent(x.prix)]; });
       ecartees.forEach(function(e){ det.push([e[0], '${T("laissée de côté : ")}' + e[1]]); });
       return szConfirmer({ titre: '${T("Créer les étiquettes")}', prudent: true,
         texte: szPl(cotes.length, '${T("{0} étiquette sera achetée maintenant — facturée dès sa création, annulable tant que le colis n’est pas parti.")}', '${T("{0} étiquettes seront achetées maintenant — facturées dès leur création, annulables tant que le colis n’est pas parti.")}').split('{0}').join(cotes.length)
