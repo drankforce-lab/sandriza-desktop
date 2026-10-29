@@ -2280,7 +2280,7 @@ const JS_BORNER = (table) => `
      var CK = szCoches({ zone: corps, barre: 'k-barre', lignes: function(){ return DONNEES.lignes; },
        id: function(r){ return r.id; }, fiche: function(r){ return { statut: r.statut, nom: r.numero }; },
        compte: ['{0} commande sélectionnée', '{0} commandes sélectionnées'],
-       actions: [{ cle: 'payer', libelle: 'Marquer payée', prim: true, pour: function(f){ return !f.payee; } }],
+       actions: [{ cle: 'payer', libelle: LIBELLE_TRADUIT, prim: true, pour: function(f){ return !f.payee; } }],
        geste: function(cle, ids, tous){ ... } });
      en-tête : CK.th() · ligne : CK.td(r) et CK.classe(r) · au-dessus du tableau : CK.barre() ·
      APRÈS chaque dessin : CK.apres() · au début du gestionnaire de clic : if (CK.clic(ev)) return;
@@ -2402,7 +2402,7 @@ function szCoches(o){
 function szLotDerouler(o){
   var ids = (o.ids || []).slice(), ok = 0, rates = [], i = 0;
   var nom = function(id){ try { return (o.nom && o.nom(id)) || id; } catch (e) { return id; } };
-  var motif = function(r){ try { return (o.motif && o.motif(r)) || (r && (r.detail || r.motif)) || '${T("échec")}'; } catch (e) { return '${T("échec")}'; } };
+  var motif = function(r){ try { return (o.motif && o.motif(r)) || (r && (r.detail || r.motif)) || '${T("opération refusée")}'; } catch (e) { return '${T("opération refusée")}'; } };
   szDire((o.titre || '${T("Traitement")}') + '… 0 / ' + ids.length);
   return ids.reduce(function(p, id){
     return p.then(function(){

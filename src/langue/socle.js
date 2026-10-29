@@ -347,7 +347,7 @@ module.exports = {
   "Tout cocher sur cette page": "Select all on this page",
   "Sélectionner": "Select",
   "Actions sur la sélection": "Actions on the selection",
-  "échec": "failed",
+  "opération refusée": "operation refused",
   "Traitement": "Processing",
   "{0} sur {1} faits.": "{0} of {1} done.",
   "{0} n’a pas passé.": "{0} did not go through.",

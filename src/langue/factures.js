@@ -167,4 +167,6 @@ module.exports = {
   "{0} factures marquées payées.": "{0} invoices marked as paid.",
   "{0} paiement annulé.": "{0} payment cancelled.",
   "{0} paiements annulés.": "{0} payments cancelled.",
+  // Gestes groupés (2026-10-29)
+  "Date": "Date",
 };
