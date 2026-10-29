@@ -138,6 +138,101 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
+
+  /* LES GESTES GROUPES (2026-10-29, sa demande : cases toujours visibles). Activer ou desactiver des comptes,
+     imprimer leurs etats de compte, copier les courriels, exporter — JAMAIS supprimer en lot (la suppression
+     passe par la fiche, qui dit ce qui est conserve). Les gestes sont ceux du clic droit : memes ops du pont
+     (client:etat avec le SENS explicite, client:etatCompte), memes droits (peutEcrire).
+     ⚠ UNE FICHE TENUE PAR UN COLLEGUE (cadenas 'users') est ecartee des gestes d ecriture, comme le clic droit
+     ne les offre plus — et revérifiee au moment d ecrire, le cadenas a pu arriver entre-temps. */
+  var CK = szCoches({
+    zone: corps, barre: 'k-barre',
+    lignes: function(){ return (D && D.lignes) || []; },
+    contexte: function(){ return ONGLET + '|' + Q; },   // un autre onglet ou une autre recherche vide la selection
+    id: function(r){ return r.id; },
+    nom: function(r){ return r.nom || r.courriel || r.id; },
+    fiche: function(r){ return Object.assign({}, r); },
+    compte: ['${T("{0} client sélectionné")}', '${T("{0} clients sélectionnés")}'],
+    actions: [
+      { cle: 'activer', libelle: '${T("Activer le compte")}', prim: true, cache: function(){ return !(D && D.peutEcrire); },
+        pour: function(f, id){ return !f.supprime && !f.actif && !lotPris(id); } },
+      { cle: 'desactiver', libelle: '${T("Désactiver le compte")}', cache: function(){ return !(D && D.peutEcrire); },
+        pour: function(f, id){ return !f.supprime && !!f.actif && !lotPris(id); } },
+      /* (2026-10-29, sa décision) 10 AU PLUS : chaque état de compte ouvre SA fenêtre ; au-delà, le bouton
+         s éteint et l aide dit d en cocher moins (trente fenêtres ouvertes par mégarde, sur un poste qui a déjà
+         manqué de mémoire). */
+      { cle: 'etats', libelle: '${T("Imprimer les états de compte")}', aide: '${T("Dix clients au plus à la fois : chaque état de compte s’ouvre dans sa fenêtre.")}',
+        pour: function(f, id){ return CK.n() <= 10; } },
+      { cle: 'courriels', libelle: '${T("Copier les courriels")}', pour: function(f){ return !!f.courriel; } },
+      { cle: 'csv', libelle: '${T("Exporter (CSV)")}' }
+    ],
+    geste: function(cle, ids, tous){ return lotGeste(cle, ids, tous); }
+  });
+  function lotPris(id){
+    var v = (typeof _szVerrous !== 'undefined' && _szVerrous) ? _szVerrous['users|' + id] : null;
+    return !!(v && !v.mine);
+  }
+  function lotFiche(id){ return CK.fiches()[id] || {}; }
+  function lotNom(id){ var f = lotFiche(id); return f.nom || f.courriel || id; }
+  function lotMotif(r){ return (r && r.detail) ? String(r.detail) : expliquer(r); }
+  function lotGeste(cle, ids, tous){
+    if (!ids.length) return;
+    if (cle === 'csv') {
+      var csv = szCSV(['${T("Nom")}', '${T("Courriel")}', '${T("Commandes")}',
+        '${T("Achat total")}', '${T("Segment")}', '${T("Statut")}'],
+        tous.map(function(id){ var r = lotFiche(id);
+          return [r.nom || '', r.courriel || '', r.commandes || 0, r.achats || 0,
+            (MOTS_SEG[r.segment] || r.segLabel || ''),
+            r.supprime ? '${T("Supprimé")}' : (r.actif ? '${T("Actif")}' : '${T("Inactif")}')]; }));
+      return szExporter('clients-' + new Date().toISOString().slice(0, 10) + '-selection.csv', csv,
+        szPl(tous.length, '${T("{0} client exporté")}', '${T("{0} clients exportés")}').split('{0}').join(tous.length));
+    }
+    if (cle === 'courriels') {
+      var l = ids.map(function(id){ return lotFiche(id).courriel; }).filter(Boolean);
+      var phrase = szPl(l.length, '${T("{0} courriel copié.")}', '${T("{0} courriels copiés.")}').split('{0}').join(l.length);
+      try {
+        var p = navigator.clipboard.writeText(l.join('; '));
+        return Promise.resolve(p).then(function(){ dire(phrase, 'bon'); }, function(){ dire('${T("La copie a échoué.")}', 'err'); });
+      } catch (e) { dire('${T("La copie a échoué.")}', 'err'); return; }
+    }
+    if (cle === 'etats') {
+      // Chaque etat de compte s ouvre dans SA fenetre (comme au clic droit) : on le dit avant d en ouvrir plusieurs.
+      var lancer = function(){
+        return szLotDerouler({ titre: '${T("États de compte")}', ids: ids, nom: lotNom, motif: lotMotif,
+          faire: function(id){ return appeler('client:etatCompte', [id]); },
+          fait: function(k){ return szPl(k, '${T("{0} état de compte ouvert pour l’impression.")}', '${T("{0} états de compte ouverts pour l’impression.")}').split('{0}').join(k); } });
+      };
+      if (ids.length === 1) return lancer();
+      return szConfirmer({ prudent: true, titre: '${T("Imprimer les états de compte")}',
+        texte: '${T("{0} états de compte s’ouvriront, chacun dans sa fenêtre, prêts à imprimer.")}'.split('{0}').join(ids.length),
+        details: ids.slice(0, 8).map(function(id){ var f = lotFiche(id); return [f.nom || '—', f.courriel || '']; })
+          .concat(ids.length > 8 ? [['…', '${T("et {0} autres")}'.split('{0}').join(ids.length - 8)]] : []),
+        oui: '${T("Ouvrir {0} états de compte")}'.split('{0}').join(ids.length) }).then(function(oui){
+        if (oui) return lancer();
+      });
+    }
+    var activer = cle === 'activer';
+    var n = tous.length - ids.length;
+    return szConfirmer({ prudent: true, titre: activer ? '${T("Activer le compte")}' : '${T("Désactiver le compte")}',
+      texte: (activer
+        ? szPl(ids.length, '${T("{0} compte client sera activé : le client pourra se connecter et commander.")}', '${T("{0} comptes clients seront activés : ces clients pourront se connecter et commander.")}')
+        : szPl(ids.length, '${T("{0} compte client sera désactivé : le client ne pourra plus se connecter. Ses commandes et factures sont conservées.")}', '${T("{0} comptes clients seront désactivés : ces clients ne pourront plus se connecter. Leurs commandes et factures sont conservées.")}')).split('{0}').join(ids.length)
+        + (n ? ' ' + szPl(n, '${T("{0} autre client sélectionné ne s’y prête pas (déjà dans cet état, supprimé ou fiche tenue par un collègue) : il ne change pas.")}', '${T("{0} autres clients sélectionnés ne s’y prêtent pas (déjà dans cet état, supprimés ou fiches tenues par un collègue) : ils ne changent pas.")}').split('{0}').join(n) : ''),
+      details: ids.slice(0, 8).map(function(id){ var f = lotFiche(id); return [f.nom || '—', f.courriel || '']; })
+        .concat(ids.length > 8 ? [['…', '${T("et {0} autres")}'.split('{0}').join(ids.length - 8)]] : []),
+      oui: activer ? szPl(ids.length, '${T("Activer {0} compte")}', '${T("Activer {0} comptes")}').split('{0}').join(ids.length)
+                   : szPl(ids.length, '${T("Désactiver {0} compte")}', '${T("Désactiver {0} comptes")}').split('{0}').join(ids.length) }).then(function(oui){
+      if (!oui) return;
+      return szLotDerouler({ titre: activer ? '${T("Activation des comptes")}' : '${T("Désactivation des comptes")}', ids: ids, nom: lotNom, motif: lotMotif,
+        faire: function(id){
+          if (lotPris(id)) return { ok: false, motif: 'verrou', detail: '${T("fiche tenue par un collègue")}' };
+          return appeler('client:etat', [id, activer]);
+        },
+        fait: function(k){ return (activer ? szPl(k, '${T("{0} compte activé.")}', '${T("{0} comptes activés.")}')
+          : szPl(k, '${T("{0} compte désactivé.")}', '${T("{0} comptes désactivés.")}')).split('{0}').join(k); } })
+        .then(function(){ CK.vider(); charger(); });
+    });
+  }
   /* Le bandeau de message : une seule regle, dans le socle (szDire) —
      tout verdict s efface seul apres cinq secondes, sauf ce qui se termine
      par des points de suspension, qui annonce un travail en cours. */
@@ -268,18 +363,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     /* ⚠ PLEINE HAUTEUR (2026-09-19) : la carte prend tout l espace restant et
        c est la LISTE qui defile, pas le corps. Avant, une liste de trois lignes
        s arretait a trois lignes et laissait 446 px morts sous elle — mesure. */
-    h += '<div class="carte plein">';
+    h += '<div class="carte plein">' + CK.barre();
     var rows = D.lignes || [];
     if (!rows.length) {
       h += '<div class="vide">${T("Aucun client ne correspond.")}</div>';
     } else {
-      h += '<div class="liste' + (COMPACT ? ' compacte' : '') + '"><table><thead><tr><th>${T("Client")}</th>'
+      h += '<div class="liste' + (COMPACT ? ' compacte' : '') + '"><table><thead><tr>' + CK.th() + '<th>${T("Client")}</th>'
         + '<th style="text-align:center">${T("Commandes")}</th><th style="text-align:right">${T("Achat total")}</th>'
         + '<th>${T("Segment")}</th><th>${T("Statut")}</th></tr></thead><tbody>'
         + rows.map(function(r){
             var st = r.supprime ? '<span class="rf-pill rouge">${T("Supprimé")}</span>'
               : (r.actif ? '<span class="rf-pill vert">${T("Actif")}</span>' : '<span class="rf-pill">${T("Inactif")}</span>');
-            return '<tr data-id="' + esc(r.id) + '" data-ctx-titre="' + esc(r.nom || r.courriel || '') + '" title="${T("Ouvrir la fiche client")}">'
+            return '<tr data-id="' + esc(r.id) + '" class="' + CK.classe(r) + '" data-ctx-titre="' + esc(r.nom || r.courriel || '') + '" title="${T("Ouvrir la fiche client")}">' + CK.td(r)
               // ⚠ LE CADENAS EST SUR LA LIGNE, pas seulement dans la fiche ouverte.
         // Sans lui, un collegue devait CLIQUER pour decouvrir que la fiche
         // etait prise — l information existait, mais pas la ou l on regarde.
@@ -318,6 +413,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         '<button class="mini" id="c-exporter"><span class="ic">⬇</span>${T(" Exporter")}</button>');
     }
     corps.innerHTML = h;
+    CK.apres();
     // Reposer les cadenas deja connus sur le tableau frais : sans cela, ils
     // disparaitraient a chaque redessin et ne reviendraient qu au sondage
     // suivant — un clignotement toutes les trois secondes.
@@ -368,6 +464,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   corps.onclick = function(ev){
     var t = ev.target;
     if (!t || !t.closest) return;
+    if (CK.clic(ev)) return;   // une case, « tout cocher » ou la barre d actions
     var og = t.closest('[data-onglet]');
     if (og) { ONGLET = og.getAttribute('data-onglet'); PAGE = 0; Q = ''; charger(); return; }
     var vb = t.closest('[data-vue]');

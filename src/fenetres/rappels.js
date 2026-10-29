@@ -114,6 +114,12 @@ button.fait{border-color:rgba(74,222,128,.45);color:var(--tx-ok)}
 .rp-pop button{border:0;background:transparent;text-align:left;border-radius:7px;padding:.36rem .6rem;font-size:.8rem;color:var(--tx)}
 .rp-pop button:hover{background:var(--v08)}
 .rp-pop button.danger{color:var(--tx-err)}
+/* LES CASES À COCHER (2026-10-29, gestes groupés) : la liste est faite de cartes, pas d un tableau — la case
+   du socle (szCoches) y est posée dans un span, et la ligne cochée se repère par :has. */
+.rp.lot{grid-template-columns:auto minmax(0,1fr) auto auto}
+span.szk-c{display:inline-flex;align-items:center;justify-content:center;width:1.4rem;cursor:pointer}
+.rp:has(input[data-szk]:checked){background:rgba(var(--or-rgb),.10)}
+.liste h2 span.szk-c{margin-right:.35rem;vertical-align:middle}
 .rep{grid-column:1/-1;display:flex;gap:.35rem;align-items:center;flex-wrap:wrap;
   padding:.35rem .45rem;border-radius:8px;background:var(--v04);border:1px solid var(--v08)}
 .rep label{font-size:.74rem;color:var(--tx2)}
@@ -184,6 +190,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('rappels')}
   var PG = 0, BU = 0;          /* page de la liste, lignes par page MESUREES */
   var ARME = null;
   var NOTIF = null;            /* l interrupteur des notifications (null : inconnu) */
+  var LOT_VUE = [];            /* les rappels de la page affichee : ce que « tout cocher » coche */
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -244,6 +251,99 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('rappels')}
     if (n === 0) return '${T("aujourd’hui")}';
     if (n === 1) return '${T("demain")}';
     return '${T("dans")} ' + n + ' ' + szPl(n, '${T("jour")}', '${T("jours")}');
+  }
+
+  /* ══ LES GESTES GROUPÉS (2026-10-29, sa demande : cases toujours visibles) ══
+     Marquer fait, reporter (+1, +3, +7 jours) et supprimer plusieurs rappels d un coup.
+     Chaque rappel passe par le MEME geste du site que le bouton de sa ligne (rappels:fait,
+     rappels:reporter, rappels:supprimer), un a la fois, et le site revérifie le droit.
+     ⚠ « +3 jours » part d AUJOURD HUI, pas de l échéance (reporterCoeur du site) : un rappel dont
+     l échéance tombe déjà après la date visée n est pas « reporté » — il serait AVANCÉ. Il est écarté
+     du lot et nommé à la confirmation. */
+  function lotOn(){ return PM || PS; }
+  function lotCible(j){
+    var a = (D && D.aujourdhui) || '';
+    if (!a) return '';
+    var t = Date.UTC(+a.slice(0, 4), +a.slice(5, 7) - 1, +a.slice(8, 10)) + j * 86400000;
+    return new Date(t).toISOString().slice(0, 10);
+  }
+  function lotReportable(f, j){
+    if (!f || f.etat === 'termine') return false;
+    var c = lotCible(j);
+    return !f.prochaine || !c || f.prochaine < c;
+  }
+  var CK = szCoches({
+    zone: corps, barre: 'k-barre',
+    lignes: function(){ return LOT_VUE; },
+    // Replier un groupe cache ses lignes : la sélection est vidée, on n agit pas sur ce qu on ne voit plus.
+    contexte: function(){ try { return JSON.stringify(REPLIS); } catch (e) { return ''; } },
+    id: function(r){ return r.id; },
+    nom: function(r){ return szTd(r.titre) || r.id; },
+    fiche: function(r){ return Object.assign({}, r); },
+    compte: ['${T("{0} rappel sélectionné")}', '${T("{0} rappels sélectionnés")}'],
+    actions: [
+      { cle: 'fait', libelle: '${T("Marquer fait")}', prim: true, cache: function(){ return !PM; },
+        pour: function(f){ return f.etat !== 'termine'; } },
+      { cle: 'rep1', libelle: '${T("+1 jour")}', aide: '${T("Reporter à demain")}', cache: function(){ return !PM; },
+        pour: function(f){ return lotReportable(f, 1); } },
+      { cle: 'rep3', libelle: '${T("+3 jours")}', aide: '${T("Reporter dans trois jours")}', cache: function(){ return !PM; },
+        pour: function(f){ return lotReportable(f, 3); } },
+      { cle: 'rep7', libelle: '${T("+7 jours")}', aide: '${T("Reporter dans sept jours")}', cache: function(){ return !PM; },
+        pour: function(f){ return lotReportable(f, 7); } },
+      { cle: 'sup', libelle: '${T("Supprimer")}', danger: true, cache: function(){ return !PS; } }
+    ],
+    geste: function(cle, ids, tous){ return lotGeste(cle, ids, tous); }
+  });
+  /* La case du socle est une cellule de tableau ; ici, la liste est faite de cartes. */
+  function lotCase(r){ return lotOn() ? CK.td(r).replace('<td', '<span').replace('</td>', '</span>') : ''; }
+  function lotTout(){ return lotOn() ? CK.th().replace('<th', '<span').replace('</th>', '</span>') : ''; }
+  function lotFiche(id){ return CK.fiches()[id] || {}; }
+  function lotNom(id){ var f = lotFiche(id); return szTd(f.titre) || id; }
+  function lotEcartes(ids, tous){
+    var n = tous.length - ids.length;
+    return n ? ' ' + szPl(n, '${T("{0} autre rappel sélectionné ne s’y prête pas : il ne change pas.")}', '${T("{0} autres rappels sélectionnés ne s’y prêtent pas : ils ne changent pas.")}').split('{0}').join(n) : '';
+  }
+  function lotGeste(cle, ids, tous){
+    if (!ids.length) return;
+    var details = ids.slice(0, 8).map(function(id){ var f = lotFiche(id);
+      return [szTd(f.titre) || id, f.etat === 'termine' ? '${T("terminé")}' : (f.prochaine ? szJour(f.prochaine) : '—')]; });
+    var n = ids.length, o, op, args, geste, titre, fait;
+    if (cle === 'fait') {
+      geste = 'fait'; op = 'rappels:fait'; args = function(id){ return [id]; };
+      titre = '${T("Marquage des rappels")}';
+      fait = function(k){ return szPl(k, '${T("{0} rappel marqué fait.")}', '${T("{0} rappels marqués faits.")}').split('{0}').join(k); };
+      o = { prudent: true, titre: '${T("Marquer les rappels faits")}',
+        texte: szPl(n, '${T("{0} rappel sera marqué fait : il passe à sa prochaine échéance, ou se termine s’il était unique.")}', '${T("{0} rappels seront marqués faits : chacun passe à sa prochaine échéance, ou se termine s’il était unique.")}').split('{0}').join(n) + lotEcartes(ids, tous),
+        oui: szPl(n, '${T("Marquer {0} rappel fait")}', '${T("Marquer {0} rappels faits")}').split('{0}').join(n) };
+    } else if (cle === 'sup') {
+      geste = 'supprimer'; op = 'rappels:supprimer'; args = function(id){ return [id]; };
+      titre = '${T("Suppression des rappels")}';
+      fait = function(k){ return szPl(k, '${T("{0} rappel supprimé.")}', '${T("{0} rappels supprimés.")}').split('{0}').join(k); };
+      o = { danger: true, titre: '${T("Supprimer les rappels")}',
+        texte: szPl(n, '${T("{0} rappel sera supprimé définitivement de votre liste. Cette action est irréversible.")}', '${T("{0} rappels seront supprimés définitivement de votre liste. Cette action est irréversible.")}').split('{0}').join(n) + lotEcartes(ids, tous),
+        oui: szPl(n, '${T("Supprimer {0} rappel")}', '${T("Supprimer {0} rappels")}').split('{0}').join(n) };
+    } else {
+      var j = parseInt(cle.slice(3), 10) || 1, cible = lotCible(j);
+      geste = 'reporter'; op = 'rappels:reporter'; args = function(id){ return [id, j, '']; };
+      titre = '${T("Report des rappels")}';
+      fait = function(k){ return szPl(k, '${T("{0} rappel reporté.")}', '${T("{0} rappels reportés.")}').split('{0}').join(k); };
+      o = { prudent: true, titre: '${T("Reporter les rappels")}',
+        texte: szPl(n, '${T("{0} rappel aura sa prochaine échéance le {1}.")}', '${T("{0} rappels auront leur prochaine échéance le {1}.")}').split('{0}').join(n).split('{1}').join(cible ? szJour(cible) : '—') + lotEcartes(ids, tous),
+        oui: szPl(n, '${T("Reporter {0} rappel")}', '${T("Reporter {0} rappels")}').split('{0}').join(n) };
+    }
+    o.details = details;
+    return szConfirmer(o).then(function(oui){
+      if (!oui) return;
+      MENU = ''; REPORT = ''; REPDATE = '';
+      return szLotDerouler({ titre: titre, ids: ids, nom: lotNom,
+        motif: function(r){ return expliquer(r, geste); },
+        faire: function(id){ return appeler(op, args(id)); },
+        fait: fait })
+        .then(function(){
+          if (geste === 'supprimer' && FORM && FORM.id && ids.indexOf(FORM.id) >= 0) FORM = null;
+          CK.vider(); return charger();
+        });
+    });
   }
 
   /* ── LE CHARGEMENT ──────────────────────────────────────────────────────── */
@@ -344,8 +444,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('rappels')}
   function ligne(r){
     var mod = nomModule(r.module);
     var actif = r.etat !== 'termine';
-    var h = '<div class="rp ' + r.etat + (FORM && FORM.id === r.id ? ' sel' : '') + '" data-rap="' + esc(r.id) + '"'
+    var h = '<div class="rp ' + r.etat + (FORM && FORM.id === r.id ? ' sel' : '') + (lotOn() ? ' lot' : '') + CK.classe(r) + '" data-rap="' + esc(r.id) + '"'
       + (PM ? ' title="${T("Double-cliquez pour modifier")}"' : '') + '>'
+      + lotCase(r)
       + '<div style="min-width:0"><div class="t">' + esc(szTd(r.titre)) + '</div>'
       + '<span class="cx-l2">'
       + (actif && r.prochaine ? esc(szJour(r.prochaine)) + ' · ' : '')
@@ -377,6 +478,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('rappels')}
   }
   function liste(){
     var L = (D.rappels || []);
+    LOT_VUE = [];
     if (!L.length) {
       var libres = (D.modeles || []).filter(function(m){ return !m.deja; }).length;
       return '<div class="cx-carte appel"><strong>${T("Aucun rappel pour l’instant")}</strong>'
@@ -392,11 +494,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('rappels')}
     if (PG >= nbp) PG = nbp - 1;
     if (PG < 0) PG = 0;
     var vue = flat.slice(PG * BU, (PG + 1) * BU);
+    LOT_VUE = vue.filter(function(it){ return !!it.r; }).map(function(it){ return it.r; });
     /* Un en-tete seul en bas de page ne dit rien : il passe a la page suivante,
        qui le redit en tete (voir plus bas). */
     var suite = flat[(PG + 1) * BU];
     if (vue.length > 1 && !vue[vue.length - 1].r && suite && suite.r) vue.pop();
-    var h = '<div class="cx-carte liste"><h2>${T("Mes rappels")} <span class="cx-sub">' + L.length + ' ' + szPl(L.length, '${T("rappel")}', '${T("rappels")}') + '</span>' + nav(nbp) + '</h2>';
+    var h = '<div class="cx-carte liste"><h2>' + lotTout() + '${T("Mes rappels")} <span class="cx-sub">' + L.length + ' ' + szPl(L.length, '${T("rappel")}', '${T("rappels")}') + '</span>' + nav(nbp) + '</h2>'
+      + (lotOn() ? CK.barre() : '');
     /* Une page qui commence au milieu d un groupe redit son en-tete. */
     if (vue.length && vue[0].r) {
       var g = null; flat.forEach(function(x){ if (!x.r && x.grp === vue[0].grp) g = x; });
@@ -491,6 +595,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('rappels')}
       BU--; tours++;
       corps.innerHTML = rendu();
     }
+    CK.apres();
   }
 
   /* ── LA SAISIE suit la frappe ─────────────────────────────────────────── */
@@ -579,6 +684,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('rappels')}
   }
 
   document.addEventListener('click', function(ev){
+    if (CK.clic(ev)) return;   // une case, « tout cocher » ou la barre d actions
     var t = ev.target;
     if (!t || !t.closest) return;
     var a = t.closest('[data-act]');
@@ -661,7 +767,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('rappels')}
   });
   document.addEventListener('dblclick', function(ev){
     var t = ev.target;
-    if (!t || !t.closest || t.closest('button') || t.closest('input')) return;
+    if (!t || !t.closest || t.closest('button') || t.closest('input') || t.closest('.szk-c')) return;
     var ln = t.closest('[data-rap]');
     if (ln && PM) { var r = rappel(ln.getAttribute('data-rap')); if (r) { FORM = depuis(r); REPORT = ''; dessiner(); } }
   });

@@ -135,4 +135,17 @@ module.exports = {
   'Abandonner la réponse': 'Discard the reply',
   'La réponse rédigée n’a pas été envoyée. Fermer la demande la perdra.': 'The reply you wrote has not been sent. Closing the request will discard it.',
   'Fermer sans envoyer': 'Close without sending',
+  // Gestes groupés (2026-10-29)
+  "Suppression des demandes": "Deleting requests",
+  "Supprimer les demandes": "Delete requests",
+  "Supprimer {0} demande": "Delete {0} request",
+  "Supprimer {0} demandes": "Delete {0} requests",
+  "Supprimer": "Delete",
+  "et {0} autres": "and {0} more",
+  "{0} demande sera supprimée définitivement, avec son contenu. Cette action est irréversible.": "{0} request will be permanently deleted, along with its content. This cannot be undone.",
+  "{0} demandes seront supprimées définitivement, avec leur contenu. Cette action est irréversible.": "{0} requests will be permanently deleted, along with their content. This cannot be undone.",
+  "{0} demande supprimée.": "{0} request deleted.",
+  "{0} demandes supprimées.": "{0} requests deleted.",
+  "{0} demande sélectionnée": "{0} request selected",
+  "{0} demandes sélectionnées": "{0} requests selected",
 };

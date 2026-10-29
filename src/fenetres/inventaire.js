@@ -304,6 +304,9 @@ button.vert:hover:not(:disabled){background:#166534;border-color:#166534}
 .gp tbody td:first-child{border-left:1px solid var(--v06);border-radius:11px 0 0 11px}
 .gp tbody td:last-child{border-right:1px solid var(--v06);border-radius:0 11px 11px 0}
 .gp tbody tr[data-ligne]:hover td{background:var(--v06);border-color:rgba(var(--or-rgb),.35)}
+/* La ligne cochee (gestes groupes, 2026-10-29) : le fond de carte de .gp passerait par-dessus celui du socle. */
+.gp tbody tr.coche td{background:rgba(var(--or-rgb),.1)}
+html.jour .gp tbody tr.coche td{background:rgba(143,111,66,.1)}
 .gp .prod{display:flex;align-items:center;gap:.8rem;min-width:0}
 .gp .cat{width:2.5rem;height:2.5rem;flex:0 0 auto;border-radius:10px;display:flex;
   align-items:center;justify-content:center;font-weight:800;font-size:.98rem;
@@ -499,6 +502,112 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
   /* << Vente finale en lot >> est parti dans la fenetre Produits en vente (2026-10-12, sa demande). */
   var NB_REAPPRO = null; // compte pour le libelle de l onglet (des qu on le sait)
 
+  /* LES GESTES GROUPES DE L ONGLET PRODUITS (2026-10-29, sa demande : cases toujours visibles). Imprimer les
+     etiquettes, assigner les SKU, mettre en vente, vente finale — JAMAIS supprimer en lot (la suppression passe
+     par son apercu, qui pose la question de la phototheque produit par produit).
+     · etiquettes : les variantes de chaque produit sont LUES (stock:lire, sans verrou), puis UN SEUL envoi a
+       l imprimante (stock:etiquettes prend une liste) — selon les quantites EN INVENTAIRE ;
+     · SKU et mise en vente : UN appel de lot (stock:skuLot, stock:vendreLot) dont le compte rendu est celui du
+       SERVEUR (relecture du 2026-10-29 : les ops unitaires n attendent pas le serveur) ;
+     · PAS de vente finale ici : elle vit dans la fenetre Produits en vente (2026-10-12, sa demande).
+     La selection vit a l onglet Produits : la quitter la vide (une selection invisible qui s appliquerait plus
+     tard serait un piege). */
+  var CK = szCoches({
+    zone: corps, barre: 'k-barre',
+    lignes: function(){ return (PRODS && PRODS.lignes) || []; },
+    // Un autre filtre ou une autre recherche vide la selection ; changer de page la garde.
+    contexte: function(){ return JSON.stringify([FP.q, FP.etat, FP.cats, FP.lieuId, FP.section]); },
+    id: function(l){ return l.id; },
+    nom: function(l){ return l.nom || l.sku || l.id; },
+    fiche: function(l){ return Object.assign({}, l); },
+    compte: ['${T("{0} produit sélectionné")}', '${T("{0} produits sélectionnés")}'],
+    actions: [
+      { cle: 'etiquettes', libelle: '${T("Imprimer les étiquettes")}', prim: true, cache: function(){ return !(PRODS && PRODS.peutEcrire); },
+        pour: function(f){ return !!f.sku && Number(f.unites) > 0; } },
+      { cle: 'sku', libelle: '${T("Assigner les SKU")}', cache: function(){ return !(PRODS && PRODS.peutEcrire); },
+        pour: function(f){ return !f.sku; } },
+      { cle: 'vendre', libelle: '${T("Mettre en vente")}', cache: function(){ return !(PRODS && PRODS.peutEcrire); },
+        pour: function(f){ return !!f.sku && !f.enVente; } }
+    ],
+    geste: function(cle, ids, tous){ return lotGeste(cle, ids, tous); }
+  });
+  function lotFiche(id){ return CK.fiches()[id] || {}; }
+  function lotNom(id){ var f = lotFiche(id); return f.nom || f.sku || id; }
+  function lotMotif(r){ return (r && r.detail && r.motif !== 'imprimante' && r.motif !== 'impression') ? String(r.detail) : expliquer(r); }
+  function lotDetails(ids){
+    return ids.slice(0, 8).map(function(id){ var f = lotFiche(id); return [f.nom || id, f.sku || '${T("sans SKU")}']; })
+      .concat(ids.length > 8 ? [['…', '${T("et {0} autres")}'.split('{0}').join(ids.length - 8)]] : []);
+  }
+  function lotEcartes(ids, tous){
+    var n = tous.length - ids.length;
+    return n ? ' ' + szPl(n, '${T("{0} autre produit sélectionné ne s’y prête pas : il ne change pas.")}', '${T("{0} autres produits sélectionnés ne s’y prêtent pas : ils ne changent pas.")}').split('{0}').join(n) : '';
+  }
+  function lotGeste(cle, ids, tous){
+    if (!ids.length) return;
+    if (cle === 'etiquettes') return lotEtiquettes(ids, tous);
+    var sku = cle === 'sku';
+    return szConfirmer({ prudent: true, titre: sku ? '${T("Assigner les SKU")}' : '${T("Mettre en vente")}',
+      texte: (sku
+        ? szPl(ids.length, '${T("{0} produit recevra un code SKU automatique : il deviendra disponible à l’achat.")}', '${T("{0} produits recevront un code SKU automatique : ils deviendront disponibles à l’achat.")}')
+        : szPl(ids.length, '${T("{0} produit sera mis en vente en boutique.")}', '${T("{0} produits seront mis en vente en boutique.")}')).split('{0}').join(ids.length) + lotEcartes(ids, tous),
+      details: lotDetails(ids),
+      oui: (sku ? szPl(ids.length, '${T("Assigner {0} SKU")}', '${T("Assigner {0} codes SKU")}')
+                : szPl(ids.length, '${T("Mettre {0} produit en vente")}', '${T("Mettre {0} produits en vente")}')).split('{0}').join(ids.length) }).then(function(oui){
+      if (!oui) return;
+      dire(sku ? '${T("Attribution des SKU…")}' : '${T("Mise en vente…")}');
+      return appeler(sku ? 'stock:skuLot' : 'stock:vendreLot', [ids]).then(function(r){
+        if (!r || !r.ok) { dire(lotMotif(r), 'err'); return; }
+        var k = Number(r.n) || 0;
+        var msg = sku ? szPl(k, '${T("{0} SKU assigné.")}', '${T("{0} SKU assignés.")}').split('{0}').join(k)
+          : szPl(k, '${T("{0} produit mis en vente.")}', '${T("{0} produits mis en vente.")}').split('{0}').join(k);
+        // (2026-10-26) Un produit en acces anticipe (paliers) n est pas encore visible de tous : on le dit.
+        if (!sku && r.anticipes) msg += ' ' + szPl(r.anticipes, '${T("{0} est en accès anticipé : il s’ouvrira à tous plus tard.")}', '${T("{0} sont en accès anticipé : ils s’ouvriront à tous plus tard.")}').split('{0}').join(r.anticipes);
+        if (sku && r.sansCode) msg += ' ' + szPl(r.sansCode, '${T("{0} produit est dans une catégorie sans code : aucun SKU possible.")}', '${T("{0} produits sont dans une catégorie sans code : aucun SKU possible.")}').split('{0}').join(r.sansCode);
+        if (r.nonConfirmes) msg += ' ' + r.nonConfirmes + ' ${T("non confirmé(s) par le serveur — relancez pour les reprendre.")}';
+        dire(msg, r.nonConfirmes ? 'att' : 'bon');
+        CK.vider(); chargerOnglet();
+      });
+    });
+  }
+  /* Les etiquettes de plusieurs produits : les variantes de chacun sont lues l une apres l autre (stock:lire ne
+     prend aucun verrou), puis la confirmation dit combien d etiquettes sortiront, et UN seul envoi part. */
+  function lotEtiquettes(ids, tous){
+    var items = [], prods = 0, illisibles = 0;
+    dire('${T("Lecture des variantes…")}');
+    return ids.reduce(function(p, id){
+      return p.then(function(){
+        return appeler('stock:lire', [id]).then(function(r){
+          if (!r || !r.ok) { illisibles++; return; }
+          var avant = items.length;
+          (r.variantes || []).forEach(function(v){
+            var q = parseInt(v.qte, 10) || 0;
+            if (v.sku && q > 0) items.push({ sku: v.sku, name: (r.produit && r.produit.nom) || lotNom(id), size: v.taille, color: v.couleur, qty: q });
+          });
+          if (items.length > avant) prods++;
+        });
+      });
+    }, Promise.resolve()).then(function(){
+      if (!items.length) { dire('${T("Aucune variante en stock à imprimer.")}', 'att'); return; }
+      var total = items.reduce(function(n, it){ return n + it.qty; }, 0);
+      // Tout ce qui n a rien donne a imprimer : ecarte par la barre, ou retenu mais sans variante en stock avec SKU.
+      var n = tous.length - prods - illisibles;
+      dire('');
+      return szConfirmer({ prudent: true, titre: '${T("Imprimer les étiquettes")}',
+        texte: szPl(total, '${T("{0} étiquette sera imprimée, selon les quantités en inventaire.")}', '${T("{0} étiquettes seront imprimées, selon les quantités en inventaire.")}').split('{0}').join(total)
+          + (n ? ' ' + szPl(n, '${T("{0} autre produit sélectionné n’a rien à imprimer (sans SKU ou sans stock).")}', '${T("{0} autres produits sélectionnés n’ont rien à imprimer (sans SKU ou sans stock).")}').split('{0}').join(n) : '')
+          + (illisibles ? ' ' + szPl(illisibles, '${T("{0} produit n’a pas pu être lu : il est laissé de côté.")}', '${T("{0} produits n’ont pas pu être lus : ils sont laissés de côté.")}').split('{0}').join(illisibles) : ''),
+        details: [['${T("Produits")}', String(prods)], ['${T("Variantes")}', String(items.length)], ['${T("Étiquettes")}', String(total)]],
+        oui: szPl(total, '${T("Imprimer {0} étiquette")}', '${T("Imprimer {0} étiquettes")}').split('{0}').join(total) }).then(function(oui){
+        if (!oui) return;
+        dire('${T("Impression…")}');
+        return appeler('stock:etiquettes', [items]).then(function(z){
+          dire(z.ok ? (z.envoyees + ' ' + szPl(z.envoyees, '${T("étiquette envoyée à «")}', '${T("étiquettes envoyées à «")}') + ' ' + z.imprimante + ' ».')
+                    : expliquer(z), z.ok ? 'bon' : 'err');
+        });
+      });
+    });
+  }
+
   // ── Onglet Produits endommages ──
   var DMG = null, DMG_AN = 'all';
 
@@ -627,6 +736,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     // l ecran du site. Quitter Produits sort du mode lot : une selection
     // invisible qui s appliquerait plus tard serait un piege.
     if (cible !== 'entrepots') { WH_EDIT = null; LX_EDIT = null; }
+    if (ONGLET === 'produits' && CK.n() && !CK.occupe()) CK.vider();   // la selection ne survit pas a l onglet
     ONGLET = cible;
     VUE = 'reappro';
     dire('');
@@ -1130,11 +1240,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
       + (d.peutAjouterProduit ? '<button class="mini prim" id="btn-nouveau-${T("produit")}">${T("+ Ajouter un produit")}</button>' : '')
       + '</span></div>';
 
+    h += CK.barre();
     if (!d.lignes.length) {
       h += '<div class="vide">${T("Aucun produit trouvé.")}</div>';
     } else {
       h += '<div class="grille gp' + (COMPACT ? ' compacte' : '') + '" data-pages="inventaire-produits"><table><thead><tr>'
-        + '<th>${T("Produit")}</th><th>${T("Variantes")}</th>'
+        + CK.th() + '<th>${T("Produit")}</th><th>${T("Variantes")}</th>'
         + '<th>${T("Inventaire")}</th><th style="text-align:right">${T("Actions")}</th>'
         + '</tr></thead><tbody>';
       d.lignes.forEach(function(l){
@@ -1163,7 +1274,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
           jauge += '</div>';
         }
         var initiale = String(l.categorieNom || l.categorie || '?').charAt(0).toUpperCase();
-        h += '<tr data-ligne="' + esc(l.id) + '" title="${T("Cliquer pour modifier la fiche produit")}">'
+        h += '<tr data-ligne="' + esc(l.id) + '" class="' + CK.classe(l) + '" title="${T("Cliquer pour modifier la fiche produit")}">' + CK.td(l)
           + '<td><div class="prod">' + szVignette(l.image, initiale, l.couleurCat, l.categorieNom)
           +   '<div style="min-width:0"><div class="l1"><span class="nom">' + esc(l.nom) + '</span>'
           /* (2026-10-26, sa demande) En accès anticipé : « En vente dans 41 h », qui se met à jour seul. */
@@ -1206,6 +1317,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     }
     h += '</div>';
     corps.innerHTML = h;
+    CK.apres();
 
     actions.innerHTML = '';
     brancherProduits();
@@ -1327,6 +1439,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     corps.onclick = function(ev){
       var t = ev.target;
       if (!t || !t.closest) return;
+      if (CK.clic(ev)) return;   // une case, « tout cocher » ou la barre d actions
       if (t.closest('[data-menu-cats]')) { FP.menu = !FP.menu; dessiner(); return; }
       if (t.closest('[data-vider-cats]')) { FP.cats = []; FP.page = 0; FP.menu = false; chargerOnglet(); return; }
       // Les tuiles-compteurs menent a leur liste : « En rupture » pose le

@@ -4965,9 +4965,13 @@ const CSS_COCHES = `
 th.szk-c,td.szk-c{width:2.2rem;min-width:2.2rem;padding-left:.55rem!important;padding-right:.2rem!important;text-align:center;cursor:pointer}
 .szk-c input[type=checkbox]{width:1rem;height:1rem;margin:0;vertical-align:middle;cursor:pointer;accent-color:var(--or)}
 tr.coche>td{background:rgba(var(--or-rgb),.1)}
-.szk-barre{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;flex:0 0 auto;padding:.45rem .75rem;margin:0 0 .55rem;
+.szk-barre{display:flex;align-items:center;gap:.5rem;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;flex:0 0 auto;padding:.45rem .75rem;margin:0 0 .55rem;
   border:1px solid rgba(var(--or-rgb),.45);border-radius:10px;background:rgba(var(--or-rgb),.08);font-size:.8rem}
 .szk-barre{min-height:2.55rem}
+/* UNE ligne, toujours (relecture du 2026-10-29) : une barre qui passe à deux lignes change la hauteur de la liste,
+   et la pagination mesurée retombe à la page 1. Trop de gestes pour la largeur : la barre défile, elle ne grandit pas. */
+.szk-barre>*{flex:0 0 auto}
+.szk-barre .szk-esp{flex:1 1 auto}
 .szk-barre.szk-repos{border-color:var(--v08);background:transparent}
 .szk-barre .szk-aide{color:var(--tx3,var(--tx2));font-size:.76rem}
 html.jour .szk-barre.szk-repos{border-color:rgba(0,0,0,.08);background:transparent}

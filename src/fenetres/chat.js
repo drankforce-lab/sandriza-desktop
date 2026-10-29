@@ -92,6 +92,15 @@ button .n.hi{background:rgba(239,68,68,.28);color:var(--tx-err2)}
 .ligne:hover{border-color:var(--or)}
 .ligne .haut{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}
 .ligne .droite{margin-left:auto;text-align:right}
+/* Les cases a cocher (gestes groupes, 2026-10-29) : la file est faite de <div>, pas d un tableau. La case vit
+   dans un <span class="szk-c"> (le socle la reconnait a cette classe) ; la surbrillance de la ligne cochee
+   est posee ici, le socle ne la pose que sur un <tr>. */
+.ligne .lot-c{flex:0 0 auto;align-self:stretch;display:flex;align-items:center;justify-content:center;width:1.3rem;cursor:pointer}
+.ligne.coche{border-color:rgba(var(--or-rgb),.6);background:rgba(var(--or-rgb),.1)}
+.lot-rang{flex:0 0 auto;display:flex;align-items:center;gap:.5rem;margin:0 0 .55rem}
+.lot-rang .szk-barre{flex:1 1 auto;margin:0}
+.lot-rang .lot-tout{flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:1.3rem;
+  margin-left:calc(.75rem + 1px);cursor:pointer}
 .dt{font-size:.72rem;color:var(--tx2)}
 .pill{display:inline-block;font-size:.6875rem;padding:.06rem .5rem;border-radius:99px;white-space:nowrap}
 .pill.bon{background:rgba(34,197,94,.14);color:var(--tx-ok)}
@@ -232,6 +241,76 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div>';
   }
 
+  /* LES GESTES GROUPES (2026-10-29, sa demande : cases toujours visibles). Fermer (chat:statut, valeur
+     << closed >> — celle du choix d etat de la fiche) et Supprimer (chat:supprimer). Memes droits que la fiche :
+     les deux n y paraissent qu avec D.peutModifier. Repondre reste une conversation a la fois.
+     ⚠ LA FILE EST FAITE DE <div>, PAS D UN TABLEAU. La case du socle (CK.td / CK.th) est reprise telle quelle,
+     sa cellule changee en <span> : szCoches la retrouve par .szk-c et [data-szk], seule la surbrillance (posee
+     par le socle sur un <tr>) est refaite ici (lotSurligner).
+     ⚠ << Tout cocher >> = ce qu on VOIT : le socle mesure la page affichee par le <tr> ; sans <tr>, il
+     prendrait toute la file, pages cachees comprises. lignes() ne rend donc que les conversations affichees. */
+  var CK = szCoches({
+    zone: corps, barre: 'k-barre',
+    lignes: function(){ return D ? lotVisibles(filtrees()) : []; },
+    contexte: function(){ return ONGLET + '|' + FILTRE + '|' + Q; },   // un autre onglet, filtre ou recherche vide la selection
+    id: function(r){ return r.id; },
+    nom: function(r){ return r.nom || r.courriel || r.id; },
+    fiche: function(r){ return Object.assign({}, r); },
+    compte: ['${T("{0} conversation sélectionnée")}', '${T("{0} conversations sélectionnées")}'],
+    actions: [
+      { cle: 'fermer', libelle: '${T("Marquer fermées")}', prim: true, cache: function(){ return !(D && D.peutModifier); },
+        pour: function(f){ return f.statut !== 'closed'; } },
+      { cle: 'supprimer', libelle: '${T("Supprimer")}', danger: true, cache: function(){ return !(D && D.peutModifier); } }
+    ],
+    geste: function(cle, ids, tous){ return lotGeste(cle, ids, tous); }
+  });
+  function lotVisibles(L){
+    var V = L.filter(function(r){ var c = corps.querySelector('[data-szk="' + String(r.id).replace(/"/g, '') + '"]');
+      return !!(c && c.getClientRects && c.getClientRects().length); });
+    return V.length ? V : L;
+  }
+  function lotCase(h){ return String(h).replace('<td', '<span').replace('<th', '<span').replace('</td>', '</span>').replace('</th>', '</span>'); }
+  function lotSurligner(){
+    corps.querySelectorAll('.ligne [data-szk]').forEach(function(c){ var l = c.closest('.ligne'); if (l) l.classList.toggle('coche', !!c.checked); });
+  }
+  function lotFiche(id){ return CK.fiches()[id] || {}; }
+  function lotNom(id){ var f = lotFiche(id); return f.nom || f.courriel || id; }
+  function lotMotif(r){ return (r && r.detail) ? String(r.detail) : expliquer(r); }
+  function lotEcartes(ids, tous){
+    var n = tous.length - ids.length;
+    return n ? ' ' + szPl(n, '${T("{0} autre conversation sélectionnée est déjà fermée : elle ne change pas.")}', '${T("{0} autres conversations sélectionnées sont déjà fermées : elles ne changent pas.")}').split('{0}').join(n) : '';
+  }
+  function lotGeste(cle, ids, tous){
+    if (!ids.length) return;
+    var details = ids.slice(0, 8).map(function(id){ var f = lotFiche(id); return [f.nom || id, (f.courriel || '—') + ' · ' + (szTd(f.statutLibelle) || f.statut || '')]; })
+      .concat(ids.length > 8 ? [['…', '${T("et {0} autres")}'.split('{0}').join(ids.length - 8)]] : []);
+    if (cle === 'fermer') {
+      return szConfirmer({ prudent: true, titre: '${T("Fermer les conversations")}',
+        texte: szPl(ids.length, '${T("{0} conversation sera marquée « Fermée ».")}', '${T("{0} conversations seront marquées « Fermée ».")}').split('{0}').join(ids.length) + lotEcartes(ids, tous),
+        details: details,
+        oui: szPl(ids.length, '${T("Fermer {0} conversation")}', '${T("Fermer {0} conversations")}').split('{0}').join(ids.length) }).then(function(oui){
+        if (!oui) return;
+        return szLotDerouler({ titre: '${T("Fermeture des conversations")}', ids: ids, nom: lotNom, motif: lotMotif,
+          faire: function(id){ return appeler('chat:statut', [id, 'closed']); },
+          fait: function(k){ return szPl(k, '${T("{0} conversation fermée.")}', '${T("{0} conversations fermées.")}').split('{0}').join(k); } })
+          .then(function(){ CK.vider(); charger(); });
+      });
+    }
+    if (cle !== 'supprimer') return;
+    // Meme garde que le geste unitaire : une conversation supprimee emporte tout l echange.
+    return szConfirmer({ danger: true, titre: '${T("Supprimer les conversations")}',
+      texte: szPl(ids.length, '${T("{0} conversation sera supprimée définitivement, avec l’ensemble de ses messages. Cette action est irréversible.")}',
+        '${T("{0} conversations seront supprimées définitivement, avec l’ensemble de leurs messages. Cette action est irréversible.")}').split('{0}').join(ids.length),
+      details: details,
+      oui: szPl(ids.length, '${T("Supprimer {0} conversation")}', '${T("Supprimer {0} conversations")}').split('{0}').join(ids.length) }).then(function(oui){
+      if (!oui) return;
+      return szLotDerouler({ titre: '${T("Suppression des conversations")}', ids: ids, nom: lotNom, motif: lotMotif,
+        faire: function(id){ return appeler('chat:supprimer', [id]).then(function(r){ if (r && r.ok) delete REP[id]; return r; }); },
+        fait: function(k){ return szPl(k, '${T("{0} conversation supprimée.")}', '${T("{0} conversations supprimées.")}').split('{0}').join(k); } })
+        .then(function(){ CK.vider(); charger(); });
+    });
+  }
+
   /* Une couleur = un sens (rf-pill, refonte du 2026-09-25) : ambre ce qui
      attend une reponse, bleu ce qui est en cours, gris ce qui est ferme. */
   var TONS = { pending: 'ambre', open: 'bleu', closed: '' };
@@ -290,8 +369,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
       return h;
     }
     // La file en PAGES mesurees (JS_PAGES du socle) : elle prend la hauteur qui reste.
-    h += '<div class="sz-pagee"><div class="pile" data-pages="chat-file">' + rows.map(function(c){
-      return '<div class="ligne" data-id="' + esc(c.id) + '" title="${T("Ouvrir la conversation")}">'
+    h += '<div class="sz-pagee"><div class="lot-rang">' + lotCase(CK.th()).replace('class="c szk-c"', 'class="szk-c lot-tout"') + CK.barre() + '</div>'
+      + '<div class="pile" data-pages="chat-file">' + rows.map(function(c){
+      return '<div class="ligne' + CK.classe(c) + '" data-id="' + esc(c.id) + '" title="${T("Ouvrir la conversation")}">'
+        + lotCase(CK.td(c)).replace('class="c szk-c"', 'class="szk-c lot-c"')
         + '<span class="rf-av" aria-hidden="true">' + esc(initiales(c.nom)) + '</span><div class="gauche">'
         + '<div class="haut"><span class="rf-nom">' + esc(c.nom) + '</span>'
         + '<span class="rf-pill ' + (TONS[c.statut] || '') + '">' + esc(szTd(c.statutLibelle)) + '</span>'
@@ -495,6 +576,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
     h += ONGLET === 'satisfaction' ? vueSatisfaction() : vueFile();
     if (DETAIL) h += boiteDetail();
     corps.innerHTML = h;
+    CK.apres(); lotSurligner();
     brancher();
     // Le fil s ouvre sur le DERNIER message : c est celui qu on vient lire.
     var fil = document.getElementById('ch-fil');
@@ -586,6 +668,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
   corps.addEventListener('click', function(ev){
     var t = ev.target;
     if (!t || !t.closest || t.closest('.boite')) return;
+    if (CK.clic(ev)) { lotSurligner(); return; }   // une case, << tout cocher >> ou la barre d actions
     var og = t.closest('[data-onglet]');
     if (og) { ONGLET = og.getAttribute('data-onglet'); dessiner(); return; }
     /* ⚠ AVANT le test de la ligne : le pied n est pas une .ligne, mais le

@@ -133,7 +133,16 @@ tbody td{padding:.32rem .4rem;border-top:1px solid var(--v055);vertical-align:mi
 .gc-pour{font-size:.84rem}
 .gc-de{font-size:.74rem;color:rgba(247,239,226,.75)}
 /* La liste refaite (2026-10-15, lot B) : un rang par carte, qui commence par la carte elle-meme en petit. */
-.cc-rang{grid-template-columns:minmax(0,1.9fr) 10rem minmax(0,1fr) minmax(0,1fr) 1.2rem;cursor:pointer}
+.cc-rang{grid-template-columns:1.3rem minmax(0,1.9fr) 10rem minmax(0,1fr) minmax(0,1fr) 1.2rem;cursor:pointer}
+/* Les cases a cocher (gestes groupes, 2026-10-29) : les rangs sont des <div> en grille, pas un tableau. La case
+   est la premiere colonne, dans un <span class="szk-c"> (le socle la reconnait a cette classe) ; la surbrillance
+   du rang coche est posee ici, le socle ne la pose que sur un <tr>. */
+.cc-rang .lot-c{display:flex;align-items:center;justify-content:center;align-self:stretch;margin-right:-.7rem;cursor:pointer}
+.cc-rang.coche{border-color:rgba(var(--or-rgb),.6);background:rgba(var(--or-rgb),.1)}
+.lot-rang{flex:0 0 auto;display:flex;align-items:center;gap:.5rem;margin:0 0 .55rem}
+.lot-rang .szk-barre{flex:1 1 auto;margin:0}
+.lot-rang .lot-tout{flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:1.3rem;
+  margin-left:calc(.9rem + 1px);cursor:pointer}
 .gc-mini{flex:0 0 auto;width:6.6rem;height:4.1rem;border-radius:9px;padding:.45rem .6rem;display:flex;flex-direction:column;justify-content:space-between;
   color:#f7efe2;background:linear-gradient(135deg,#1c2541 0%,#2a3358 55%,#8f6f42 140%);box-shadow:0 4px 12px rgba(0,0,0,.3)}
 .gc-mini b{font:700 .5rem/1 Georgia,serif;letter-spacing:.24em;color:#f0d6a0}
@@ -217,6 +226,92 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
   function vide(titre, detail){
     corps.innerHTML = '<div class="vide"><strong>' + esc(titre)
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div>';
+  }
+
+  /* LES GESTES GROUPES (2026-10-29, sa demande : cases toujours visibles). Activer (cartes en attente
+     d activation, droit D.peutModifier — comme << Activer a la main >>), Supprimer (droit DEDIE
+     D.peutSupprimer, boite << danger >> qui dit le solde perdu, comme la fiche), Exporter.
+     ⚠ LES RANGS SONT DES <div>, PAS UN TABLEAU. La case du socle (CK.td / CK.th) est reprise telle quelle, sa
+     cellule changee en <span> : szCoches la retrouve par .szk-c et [data-szk], seule la surbrillance (posee par
+     le socle sur un <tr>) est refaite ici (lotSurligner).
+     ⚠ << Tout cocher >> = ce qu on VOIT : le socle mesure la page affichee par le <tr> ; sans <tr>, il
+     prendrait toute la page du coeur, pages mesurees cachees comprises. lignes() ne rend donc que les rangs
+     affiches. Changer de page (mesuree ou du coeur) garde les coches ; un autre statut ou une autre recherche
+     les vide. */
+  var CK = szCoches({
+    zone: corps, barre: 'k-barre',
+    lignes: function(){ return D ? lotVisibles(filtrees()) : []; },
+    contexte: function(){ return STATUT + '|' + Q; },
+    id: function(r){ return r.id; },
+    nom: function(r){ return (r.code || '') + (r.destinataire ? ' — ' + r.destinataire : ''); },
+    fiche: function(r){ return Object.assign({}, r); },
+    compte: ['${T("{0} carte sélectionnée")}', '${T("{0} cartes sélectionnées")}'],
+    actions: [
+      { cle: 'activer', libelle: '${T("Activer")}', prim: true, cache: function(){ return !(D && D.peutModifier); },
+        pour: function(f){ return f.statut === 'pending'; } },
+      { cle: 'csv', libelle: '${T("Exporter (CSV)")}' },
+      /* (2026-10-29, sa décision) EN LOT, seulement une carte SANS solde : une carte qui porte encore de l argent dû
+         au client se supprime une par une, dans sa fiche. */
+      { cle: 'supprimer', libelle: '${T("Supprimer")}', danger: true, cache: function(){ return !(D && D.peutSupprimer); },
+        aide: '${T("Seulement les cartes sans solde : une carte qui a encore un solde se supprime depuis sa fiche.")}',
+        pour: function(f){ return !((Number(f.solde) || 0) > 0); } }
+    ],
+    geste: function(cle, ids, tous){ return lotGeste(cle, ids, tous); }
+  });
+  function lotVisibles(L){
+    var V = L.filter(function(r){ var c = corps.querySelector('[data-szk="' + String(r.id).replace(/"/g, '') + '"]');
+      return !!(c && c.getClientRects && c.getClientRects().length); });
+    return V.length ? V : L;
+  }
+  function lotCase(h){ return String(h).replace('<td', '<span').replace('<th', '<span').replace('</td>', '</span>').replace('</th>', '</span>'); }
+  function lotSurligner(){
+    corps.querySelectorAll('.cc-rang [data-szk]').forEach(function(c){ var l = c.closest('.cc-rang'); if (l) l.classList.toggle('coche', !!c.checked); });
+  }
+  function lotFiche(id){ return CK.fiches()[id] || {}; }
+  function lotNom(id){ var f = lotFiche(id); return (f.code || id) + (f.destinataire ? ' — ' + f.destinataire : ''); }
+  function lotMotif(r){ return (r && r.detail) ? String(r.detail) : expliquer(r); }
+  function lotGeste(cle, ids, tous){
+    if (!ids.length) return;
+    if (cle === 'csv') {
+      var csv = szCSV(['${T("Code")}', '${T("Destinataire")}', '${T("Courriel")}', '${T("Expéditeur")}', '${T("Valeur initiale")}',
+        '${T("Solde restant")}', '${T("Statut")}', '${T("Émise le")}'],
+        tous.map(function(id){ var f = lotFiche(id); return [f.code || '', f.destinataire || '', f.courriel || '', f.expediteur || '',
+          (Number(f.initial) || 0).toFixed(2), (Number(f.solde) || 0).toFixed(2), szTd(f.statutLibelle) || f.statut || '', String(f.date || '').slice(0, 10)]; }));
+      return szExporter('cartes-cadeaux-' + new Date().toISOString().slice(0, 10) + '.csv', csv,
+        szPl(tous.length, '${T("{0} carte exportée")}', '${T("{0} cartes exportées")}').split('{0}').join(tous.length));
+    }
+    var details = ids.slice(0, 8).map(function(id){ var f = lotFiche(id); return [f.code || id, (f.destinataire || '—') + ' · ' + fmt(f.solde || 0)]; })
+      .concat(ids.length > 8 ? [['…', '${T("et {0} autres")}'.split('{0}').join(ids.length - 8)]] : []);
+    if (cle === 'activer') {
+      var n = tous.length - ids.length;
+      return szConfirmer({ prudent: true, titre: '${T("Activer les cartes-cadeaux")}',
+        texte: szPl(ids.length, '${T("{0} carte en attente d’activation deviendra utilisable en boutique.")}', '${T("{0} cartes en attente d’activation deviendront utilisables en boutique.")}').split('{0}').join(ids.length)
+          + (n ? ' ' + szPl(n, '${T("{0} autre carte sélectionnée n’attend pas d’activation : elle ne change pas.")}', '${T("{0} autres cartes sélectionnées n’attendent pas d’activation : elles ne changent pas.")}').split('{0}').join(n) : ''),
+        details: details,
+        oui: szPl(ids.length, '${T("Activer {0} carte")}', '${T("Activer {0} cartes")}').split('{0}').join(ids.length) }).then(function(oui){
+        if (!oui) return;
+        return szLotDerouler({ titre: '${T("Activation des cartes")}', ids: ids, nom: lotNom, motif: lotMotif,
+          faire: function(id){ return appeler('cartescadeaux:activer', [id]); },
+          fait: function(k){ return szPl(k, '${T("{0} carte activée.")}', '${T("{0} cartes activées.")}').split('{0}').join(k); } })
+          .then(function(){ CK.vider(); charger(); });
+      });
+    }
+    if (cle !== 'supprimer') return;
+    /* Seules des cartes SANS solde arrivent ici (pour, plus haut) ; le compte du solde reste, par prudence. */
+    var perdu = ids.reduce(function(m, id){ return m + (Number(lotFiche(id).solde) || 0); }, 0);
+    var avecSolde = ids.filter(function(id){ return (Number(lotFiche(id).solde) || 0) > 0; }).length;
+    return szConfirmer({ danger: true, titre: '${T("Supprimer les cartes-cadeaux")}',
+      texte: szPl(ids.length, '${T("{0} carte-cadeau sera supprimée et ne pourra plus être utilisée en boutique.")}', '${T("{0} cartes-cadeaux seront supprimées et ne pourront plus être utilisées en boutique.")}').split('{0}').join(ids.length)
+        + (avecSolde ? ' ' + szPl(avecSolde, '${T("{0} d’entre elles a encore un solde : il sera perdu.")}', '${T("{0} d’entre elles ont encore un solde : il sera perdu.")}').split('{0}').join(avecSolde) : '')
+        + ' ' + szPl(ids.length, '${T("Elle reste restaurable pendant 30 jours depuis Gardien → Corbeille.")}', '${T("Elles restent restaurables pendant 30 jours depuis Gardien → Corbeille.")}'),
+      details: [['${T("Solde perdu")}', fmt(perdu)]].concat(details),
+      oui: szPl(ids.length, '${T("Supprimer {0} carte")}', '${T("Supprimer {0} cartes")}').split('{0}').join(ids.length) }).then(function(oui){
+      if (!oui) return;
+      return szLotDerouler({ titre: '${T("Suppression des cartes")}', ids: ids, nom: lotNom, motif: lotMotif,
+        faire: function(id){ return appeler('cartescadeaux:supprimer', [id]); },
+        fait: function(k){ return szPl(k, '${T("{0} carte supprimée.")}', '${T("{0} cartes supprimées.")}').split('{0}').join(k); } })
+        .then(function(){ CK.vider(); charger(); });
+    });
   }
 
   /* La pastille a point (rf-pill, refonte du 2026-09-25) : active en vert,
@@ -416,9 +511,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
     if (!rows.length) {
       h += '<div class="ls-vide">' + (Q || STATUT ? '${T("Rien ne correspond.")}' : '${T("Aucune carte-cadeau.")}') + '</div>';
     } else {
+      h += '<div class="lot-rang">' + lotCase(CK.th()).replace('class="c szk-c"', 'class="szk-c lot-tout"') + CK.barre() + '</div>';
       h += '<div data-pages="cartescadeaux"' + szPagesCoeurAttr(D) + '>' + rows.map(function(g){
         var pc = g.initial > 0 ? Math.max(0, Math.min(100, Math.round(100 * g.solde / g.initial))) : 0;
-        return '<div class="ls-rang cc-rang' + (g.statut === 'active' || g.statut === 'pending' ? '' : ' eteinte') + '" data-id="' + esc(g.id) + '" title="${T("Voir le détail")}">'
+        return '<div class="ls-rang cc-rang' + (g.statut === 'active' || g.statut === 'pending' ? '' : ' eteinte') + CK.classe(g) + '" data-id="' + esc(g.id) + '" title="${T("Voir le détail")}">'
+          + lotCase(CK.td(g)).replace('class="c szk-c"', 'class="szk-c lot-c"')
           + '<div class="qui"><span class="gc-mini" aria-hidden="true"><b>SANDRIZA</b><strong>' + fmt(g.solde) + '</strong></span>'
           + '<div class="tx"><b>' + esc(g.destinataire || '—') + '</b><span><span class="rf-code">' + esc(g.code) + '</span>'
           + (g.courriel ? ' · ' + esc(g.courriel) : '') + '</span></div></div>'
@@ -438,6 +535,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
 
     corps.classList.add('ls-corps');
     corps.innerHTML = h;
+    CK.apres(); lotSurligner();
     brancher();
   }
 
@@ -609,6 +707,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
     var t = ev.target;
     if (!t || !t.closest) return;
     if (t.closest('.boite')) return;
+    if (CK.clic(ev)) { lotSurligner(); return; }   // une case, << tout cocher >> ou la barre d actions
     var tr = t.closest('.cc-rang[data-id]');
     if (!tr) return;
     ouvrirCarte(tr.getAttribute('data-id'), false);

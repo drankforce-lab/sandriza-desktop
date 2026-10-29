@@ -2632,7 +2632,7 @@ const OPS_PONT = new Set([
   // Inventaire COMPLET (les 4 onglets). La pagination et les filtres vivent
   // dans le site ; les lots recoivent des IDENTIFIANTS, jamais des cases.
   'stock:produits', 'stock:skuUn', 'stock:skuTous', 'stock:skuPad6',
-  'stock:venteFinale', 'stock:vendre', 'stock:endommages', 'stock:rabaisComptoir', 'stock:rabaisComptoirRapport',
+  'stock:venteFinale', 'stock:vendre', 'stock:skuLot', 'stock:vendreLot', 'stock:endommages', 'stock:rabaisComptoir', 'stock:rabaisComptoirRapport',
   'stock:endommagesRapport', 'stock:entrepots', 'stock:entrepotEcrire',
   // Les LIEUX (batiment + adresse) au-dessus des emplacements — 2026-08-22.
   'stock:lieuEcrire', 'stock:lieuSupprimer',
@@ -3784,6 +3784,8 @@ const LIMITES_PONT = {
      compte de ce qui a été CONFIRMÉ : 10 000 SKU ≈ 500 s. Au plafond ordinaire de 8 s, on rendait « délai »
      alors que le travail avançait très bien. */
   'stock:skuTous': 600000, 'stock:venteFinale': 300000,
+  // (2026-10-29) les lots des cases cochées de l Inventaire : même attente du serveur que stock:skuTous
+  'stock:skuLot': 300000, 'stock:vendreLot': 300000,
   /* Les recettes ne portent que du texte et des nombres — aucune image. La
      lecture sort du cache local ; les deux ecritures attendent le verdict de la
      base avant de repondre, d ou un delai d ecriture de configuration ordinaire. */
@@ -4099,7 +4101,7 @@ ipcMain.on('pont:limites', (e) => { e.returnValue = LIMITES_PONT; });
 const OPS_QUI_CHANGENT_L_INVENTAIRE = new Set([
   'produit:enregistrer',
   'stock:enregistrer', 'stock:supprimer', 'stock:skuUn', 'stock:skuTous',
-  'stock:skuPad6', 'stock:venteFinale', 'stock:vendre',
+  'stock:skuPad6', 'stock:venteFinale', 'stock:vendre', 'stock:skuLot', 'stock:vendreLot',
   'stock:entrepotEcrire', 'stock:entrepotSupprimer',
   /* ⚠ RENOMMER UN LIEU RECOMPOSE LE LIBELLE DE SES EMPLACEMENTS : l Inventaire
      ouvert a cote afficherait encore l ancien nom du batiment. */

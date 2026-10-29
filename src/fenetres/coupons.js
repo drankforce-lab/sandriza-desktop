@@ -120,7 +120,15 @@ tbody tr:hover td{background:var(--v04)}
   padding:.15rem .55rem;border-radius:6px;background:var(--v06)}
 .cp-apercu .cp-fl{color:var(--tx3)}
 /* La liste refaite (2026-10-15, lot B) : un rang par coupon, qui commence par le coupon lui-meme (son code sur un ticket). */
-.cp-rang{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) 8rem minmax(0,1.1fr) 17rem}
+.cp-rang{grid-template-columns:1.4rem minmax(0,1.6fr) minmax(0,1fr) 8rem minmax(0,1.1fr) 17rem}
+/* Les cases a cocher (gestes groupes, 2026-10-29) : la liste est en RANGS, pas en tableau — la case est une
+   cellule de la grille, et « tout cocher » se pose a gauche de la barre d actions. */
+.ls-rang .szk-c{display:flex;align-items:center;justify-content:center;cursor:pointer;min-height:2rem}
+.ls-rang.coche{border-color:rgba(var(--or-rgb),.55);background:rgba(var(--or-rgb),.07)}
+html.jour .ls-rang.coche{background:rgba(143,111,66,.08)}
+.cp-lot{display:flex;align-items:flex-start;gap:.55rem;flex:0 0 auto}
+.cp-lot>.szk-c{flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:1.4rem;min-height:2.55rem;margin-left:1rem}
+.cp-lot>.szk-barre{flex:1 1 auto;min-width:0}
 .cp-ticket{flex:0 0 auto;width:9.5rem;height:2.6rem;padding:0 .8rem;display:flex;align-items:center;justify-content:center;
   border:1.5px dashed var(--sz-accent);border-radius:9px;background:var(--sz-accent-doux);color:var(--tx);
   font:700 .8rem/1 ui-monospace,"Courier New",monospace;letter-spacing:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -157,6 +165,117 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
      et on recoit la page, le vrai total et les comptes des tuiles (sur TOUS les coupons). Un ancien site
      (reponse sans pagine) rend toute la liste : la fenetre filtre alors elle-meme, comme avant. */
   var PG = 0, PAR_PAGE = 50, MINU_Q = null;
+
+  /* LES GESTES GROUPES (2026-10-29, sa demande : cases toujours visibles). Activer, suspendre, supprimer,
+     exporter. Chaque geste passe par l op unitaire du pont, une a la fois (memes regles qu un clic sur le rang).
+     ⚠ coupons:basculer est un BASCULEMENT : « Activer » ne l appelle que pour un coupon eteint, « Suspendre »
+     que pour un coupon actif — et l etat est RELU juste avant (liste entiere), pour ne jamais inverser un
+     coupon qu un collegue aurait change entre la coche et le clic.
+     ⚠ La liste est en RANGS (div), pas en tableau : la case du socle (une cellule de tableau) devient une
+     cellule de la grille, et « ce qu on voit » se lit ici (lotVisibles) puisque le socle cherche un tr. */
+  var CK = szCoches({
+    zone: corps, barre: 'k-barre',
+    lignes: function(){ return lotVisibles(); },
+    contexte: function(){ return ETAT + '|' + Q; },   // un autre filtre ou une autre recherche vide la selection
+    id: function(c){ return c.id; },
+    nom: function(c){ return c.code; },
+    fiche: function(c){ return Object.assign({}, c); },
+    compte: ['${T("{0} coupon sélectionné")}', '${T("{0} coupons sélectionnés")}'],
+    actions: [
+      { cle: 'activer', libelle: '${T("Activer")}', prim: true, cache: function(){ return !(D && D.peutModifier); },
+        pour: function(f){ return !f.actif; } },
+      { cle: 'suspendre', libelle: '${T("Suspendre")}', cache: function(){ return !(D && D.peutModifier); },
+        pour: function(f){ return !!f.actif; } },
+      { cle: 'csv', libelle: '${T("Exporter (CSV)")}' },
+      { cle: 'supprimer', libelle: '${T("Supprimer")}', danger: true, cache: function(){ return !(D && D.peutModifier); } }
+    ],
+    geste: function(cle, ids, tous){ return lotGeste(cle, ids, tous); }
+  });
+  function lotVisibles(){
+    if (!D) return [];
+    var L = filtres();
+    var V = L.filter(function(c){
+      var k = corps.querySelector('[data-szk="' + String(c.id).replace(/"/g, '') + '"]');
+      var r = k && k.closest('.ls-rang');
+      return !!(r && r.getClientRects && r.getClientRects().length);
+    });
+    return V.length ? V : L;
+  }
+  function lotCase(c){ return CK.td(c).replace('<td', '<div').replace('</td>', '</div>'); }
+  function lotTout(){ return CK.th().replace('<th', '<div').replace('</th>', '</div>'); }
+  // La couleur du rang coche (le socle la pose sur un tr : ici, sur le rang).
+  function lotSynchro(){
+    corps.querySelectorAll('[data-szk]').forEach(function(k){
+      var r = k.closest('.ls-rang'); if (r) r.classList.toggle('coche', !!k.checked); });
+  }
+  function lotFiche(id){ return CK.fiches()[id] || {}; }
+  function lotNom(id){ return lotFiche(id).code || id; }
+  function lotMotif(r){ return (r && r.detail) ? String(r.detail) : expliquer(r); }
+  function lotEcartes(ids, tous){
+    var n = tous.length - ids.length;
+    return n ? ' ' + szPl(n, '${T("{0} autre coupon sélectionné ne s’y prête pas : il ne change pas.")}', '${T("{0} autres coupons sélectionnés ne s’y prêtent pas : ils ne changent pas.")}').split('{0}').join(n) : '';
+  }
+  function lotFin(){ CK.vider(); lotSynchro(); charger(); }
+  function lotGeste(cle, ids, tous){
+    if (!ids.length) return;
+    if (cle === 'csv') {
+      var csv = szCSV(['${T("Code")}', '${T("Réduction")}', '${T("Minimum")}',
+        '${T("Cumul avec solde")}', '${T("Utilisé")}', '${T("Maximum")}',
+        '${T("Début")}', '${T("Fin")}', '${T("Statut")}'],
+        tous.map(function(id){ var c = lotFiche(id);
+          return [c.code || '', c.reduction || '', c.minimum || 0,
+            c.cumulSolde ? '${T("autorisé")}' : '${T("refusé")}',
+            c.utilise || 0, c.maximum || '', c.debut || '', c.fin || '',
+            c.enCours ? '${T("En cours")}' : '${T("Hors service")}']; }));
+      return szExporter('coupons-' + new Date().toISOString().slice(0, 10) + '.csv', csv,
+        szPl(tous.length, '${T("{0} coupon exporté")}', '${T("{0} coupons exportés")}').split('{0}').join(tous.length));
+    }
+    var details = ids.slice(0, 8).map(function(id){ var c = lotFiche(id); return [c.code || id, String(c.reduction || '')]; })
+      .concat(ids.length > 8 ? [['…', '${T("et {0} autres")}'.split('{0}').join(ids.length - 8)]] : []);
+    if (cle === 'supprimer') {
+      return szConfirmer({ danger: true, titre: '${T("Supprimer les coupons")}',
+        texte: szPl(ids.length, '${T("{0} coupon sera supprimé définitivement et ne pourra plus être utilisé. Les commandes déjà réglées conservent leur réduction. Cette action est irréversible.")}',
+          '${T("{0} coupons seront supprimés définitivement et ne pourront plus être utilisés. Les commandes déjà réglées conservent leur réduction. Cette action est irréversible.")}').split('{0}').join(ids.length),
+        details: details,
+        oui: szPl(ids.length, '${T("Supprimer {0} coupon")}', '${T("Supprimer {0} coupons")}').split('{0}').join(ids.length) }).then(function(oui){
+        if (!oui) return;
+        SUPPR_ARME = '';
+        return szLotDerouler({ titre: '${T("Suppression des coupons")}', ids: ids, nom: lotNom, motif: lotMotif,
+          faire: function(id){ return appeler('coupons:supprimer', [id]); },
+          fait: function(k){ return szPl(k, '${T("{0} coupon supprimé.")}', '${T("{0} coupons supprimés.")}').split('{0}').join(k); } })
+          .then(lotFin);
+      });
+    }
+    var activer = cle === 'activer';
+    return szConfirmer({ prudent: true, titre: activer ? '${T("Activer les coupons")}' : '${T("Suspendre les coupons")}',
+      texte: (activer
+        ? szPl(ids.length, '${T("{0} coupon sera activé : il sera accepté au paiement pendant sa période.")}', '${T("{0} coupons seront activés : ils seront acceptés au paiement pendant leur période.")}')
+        : szPl(ids.length, '${T("{0} coupon sera suspendu : il sera refusé au paiement.")}', '${T("{0} coupons seront suspendus : ils seront refusés au paiement.")}')).split('{0}').join(ids.length) + lotEcartes(ids, tous),
+      details: details,
+      oui: activer ? szPl(ids.length, '${T("Activer {0} coupon")}', '${T("Activer {0} coupons")}').split('{0}').join(ids.length)
+                   : szPl(ids.length, '${T("Suspendre {0} coupon")}', '${T("Suspendre {0} coupons")}').split('{0}').join(ids.length) }).then(function(oui){
+      if (!oui) return;
+      // L etat RELU avant de basculer : un coupon deja dans l etat voulu ne bascule pas.
+      return appeler('coupons:liste', []).then(function(r){
+        var ACT = {};
+        if (r && r.ok) (r.coupons || []).forEach(function(c){ ACT[c.id] = !!c.actif; });
+        return szLotDerouler({ titre: activer ? '${T("Activation des coupons")}' : '${T("Suspension des coupons")}', ids: ids, nom: lotNom, motif: lotMotif,
+          faire: function(id){
+            if (r && r.ok) {
+              if (!(id in ACT)) return { ok: false, motif: 'introuvable' };
+              if (ACT[id] === activer) return { ok: true };
+            }
+            return appeler('coupons:basculer', [id]).then(function(x){
+              if (x && x.ok && !!x.actif !== activer) return { ok: false, motif: 'echec', detail: '${T("le coupon a changé d’état entre-temps")}' };
+              return x;
+            });
+          },
+          fait: function(k){ return (activer ? szPl(k, '${T("{0} coupon activé.")}', '${T("{0} coupons activés.")}')
+            : szPl(k, '${T("{0} coupon suspendu.")}', '${T("{0} coupons suspendus.")}')).split('{0}').join(k); } })
+          .then(lotFin);
+      });
+    });
+  }
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -334,6 +453,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
       + tu(null, '${T("Utilisations")}', nUtil, '${T("tous coupons confondus")}')
       + '</div>');
 
+    // Les gestes groupes (2026-10-29) : « tout cocher » et la barre d actions, au-dessus des rangs.
+    h += '<div class="cp-lot">' + (rows.length ? lotTout() : '') + CK.barre() + '</div>';
     // La liste en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
     h += '<div class="ls-liste sz-pagee">';
     if (!rows.length) {
@@ -348,7 +469,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
             + '<button class="mini geste danger" data-suppr="' + esc(c.id) + '">'
             + '${T("Supprimer")}' + '</button>';
         }
-        return '<div data-ctx-ligne class="ls-rang cp-rang' + (c.enCours ? '' : ' eteint') + '">'
+        return '<div data-ctx-ligne class="ls-rang cp-rang' + (c.enCours ? '' : ' eteint') + CK.classe(c) + '">' + lotCase(c)
           + '<div class="qui"><span class="cp-ticket">' + esc(c.code) + '</span>'
           + '<div class="tx"><b>' + esc(c.nom || c.code) + '</b><span>'
           + (c.cumulSolde ? '${T("Cumulable avec les soldes et promotions")}' : '${T("Cumul soldes")} : ${T("refusé")}') + '</span></div></div>'
@@ -382,6 +503,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
     if (FORM) h += boiteForm();
     corps.classList.add('ls-corps');
     corps.innerHTML = h;
+    CK.apres(); lotSynchro();
     brancher();
 
     /* ⚠ ON EXPORTE LE RESULTAT DU FILTRE (rows), pas D.lignes : l ecran a des
@@ -518,6 +640,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
   corps.addEventListener('click', function(ev){
     var t = ev.target;
     if (!t || !t.closest || t.closest('.boite')) return;
+    if (CK.clic(ev)) { lotSynchro(); return; }   // une case, « tout cocher » ou la barre d actions
 
     var be = t.closest('[data-etat]');
     if (be) { ETAT = be.getAttribute('data-etat'); SUPPR_ARME = ''; if (D && D.pagine) { PG = 0; charger(); } else dessiner(); return; }

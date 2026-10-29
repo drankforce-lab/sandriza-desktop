@@ -102,6 +102,16 @@ button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* Les cases a cocher (gestes groupes, 2026-10-29) : la pile est faite de <div>, pas d un tableau. La case vit
+   dans un <span class="szk-c"> (le socle la reconnait a cette classe) ; la surbrillance de la ligne cochee
+   est posee ici, le socle ne la pose que sur un <tr>. */
+.ligne .lot-c{flex:0 0 auto;align-self:stretch;display:flex;align-items:center;justify-content:center;
+  width:1.3rem;cursor:pointer}
+.ligne.coche{border-color:rgba(var(--or-rgb),.6);background:rgba(var(--or-rgb),.1)}
+.lot-rang{flex:0 0 auto;display:flex;align-items:center;gap:.5rem;margin:0 0 .55rem}
+.lot-rang .szk-barre{flex:1 1 auto;margin:0}
+.lot-rang .lot-tout{flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:1.3rem;
+  margin-left:calc(.7rem + 1px);cursor:pointer}
 `;
 
 /** Page complète de la fenêtre native « Messagerie clients ». */
@@ -167,6 +177,55 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   function vide(titre, detail){
     corps.innerHTML = '<div class="vide"><strong>' + esc(titre)
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div>';
+  }
+
+  /* LES GESTES GROUPES (2026-10-29, sa demande : cases toujours visibles). Supprimer seulement : aucune op ne
+     marque une demande << lue >>, et repondre se fait une demande a la fois (le texte est propre a chacun).
+     ⚠ LA PILE EST FAITE DE <div>, PAS D UN TABLEAU. La case du socle (CK.td / CK.th) est reprise telle quelle,
+     sa cellule changee en <span> : szCoches la retrouve par .szk-c et [data-szk], seule la surbrillance (posee
+     par le socle sur un <tr>) est refaite ici (lotSurligner).
+     ⚠ << Tout cocher >> = ce qu on VOIT : le socle mesure la page affichee par le <tr> ; sans <tr>, il
+     prendrait toute la pile, pages cachees comprises. lignes() ne rend donc que les demandes affichees. */
+  var CK = szCoches({
+    zone: corps, barre: 'k-barre',
+    lignes: function(){ return lotVisibles((D && D.lignes) || []); },
+    contexte: function(){ return ONGLET; },   // une autre pile vide la selection
+    id: function(r){ return r.id; },
+    nom: function(r){ return (r.commande || '') + (r.client ? ' — ' + r.client : ''); },
+    fiche: function(r){ return Object.assign({}, r); },
+    compte: ['${T("{0} demande sélectionnée")}', '${T("{0} demandes sélectionnées")}'],
+    actions: [
+      { cle: 'supprimer', libelle: '${T("Supprimer")}', danger: true }
+    ],
+    geste: function(cle, ids, tous){ return lotGeste(cle, ids, tous); }
+  });
+  function lotVisibles(L){
+    var V = L.filter(function(r){ var c = corps.querySelector('[data-szk="' + String(r.id).replace(/"/g, '') + '"]');
+      return !!(c && c.getClientRects && c.getClientRects().length); });
+    return V.length ? V : L;
+  }
+  function lotCase(h){ return String(h).replace('<td', '<span').replace('<th', '<span').replace('</td>', '</span>').replace('</th>', '</span>'); }
+  function lotSurligner(){
+    corps.querySelectorAll('.ligne [data-szk]').forEach(function(c){ var l = c.closest('.ligne'); if (l) l.classList.toggle('coche', !!c.checked); });
+  }
+  function lotFiche(id){ return CK.fiches()[id] || {}; }
+  function lotNom(id){ var f = lotFiche(id); return (f.commande || id) + (f.client ? ' — ' + f.client : ''); }
+  function lotMotif(r){ return (r && r.detail) ? String(r.detail) : expliquer(r); }
+  function lotGeste(cle, ids, tous){
+    if (!ids.length || cle !== 'supprimer') return;
+    // Meme garde que le geste unitaire (boite << danger >>), mais elle nomme combien de demandes partent.
+    return szConfirmer({ danger: true, titre: '${T("Supprimer les demandes")}',
+      texte: szPl(ids.length, '${T("{0} demande sera supprimée définitivement, avec son contenu. Cette action est irréversible.")}',
+        '${T("{0} demandes seront supprimées définitivement, avec leur contenu. Cette action est irréversible.")}').split('{0}').join(ids.length),
+      details: ids.slice(0, 8).map(function(id){ var f = lotFiche(id); return [f.commande || id, (f.client || '—') + (f.raison ? ' · ' + f.raison : '')]; })
+        .concat(ids.length > 8 ? [['…', '${T("et {0} autres")}'.split('{0}').join(ids.length - 8)]] : []),
+      oui: szPl(ids.length, '${T("Supprimer {0} demande")}', '${T("Supprimer {0} demandes")}').split('{0}').join(ids.length) }).then(function(oui){
+      if (!oui) return;
+      return szLotDerouler({ titre: '${T("Suppression des demandes")}', ids: ids, nom: lotNom, motif: lotMotif,
+        faire: function(id){ return appeler('messagerie:supprimer', [id]); },
+        fait: function(k){ return szPl(k, '${T("{0} demande supprimée.")}', '${T("{0} demandes supprimées.")}').split('{0}').join(k); } })
+        .then(function(){ CK.vider(); charger(); });
+    });
   }
 
   function initiales(nom){
@@ -240,8 +299,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + '</div>';
     } else {
       // Les demandes en PAGES mesurees (JS_PAGES du socle) : la pile prend la hauteur qui reste.
-      h += '<div class="sz-pagee"><div class="pile" data-pages="messagerie">' + rows.map(function(r){
-        return '<div class="ligne" data-id="' + esc(r.id) + '" title="${T("Ouvrir la demande")}">'
+      h += '<div class="sz-pagee"><div class="lot-rang">' + lotCase(CK.th()).replace('class="c szk-c"', 'class="szk-c lot-tout"') + CK.barre() + '</div>'
+        + '<div class="pile" data-pages="messagerie">' + rows.map(function(r){
+        return '<div class="ligne' + CK.classe(r) + '" data-id="' + esc(r.id) + '" title="${T("Ouvrir la demande")}">'
+          + lotCase(CK.td(r)).replace('class="c szk-c"', 'class="szk-c lot-c"')
           + '<span class="rf-av" aria-hidden="true">' + esc(initiales(r.client)) + '</span>'
           + '<div class="gauche">'
           + '<div class="haut"><span class="rf-nom">' + esc(r.client || '—') + '</span>'
@@ -262,6 +323,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     }
     if (DETAIL) h += boiteDetail();
     corps.innerHTML = h;
+    CK.apres(); lotSurligner();
     brancher();
   }
 
@@ -361,6 +423,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   }
 
   corps.onclick = function(ev){
+    if (CK.clic(ev)) { lotSurligner(); return; }   // une case, << tout cocher >> ou la barre d actions
     var t = ev.target;
     if (!t || !t.closest) return;
     var og = t.closest('[data-onglet]');

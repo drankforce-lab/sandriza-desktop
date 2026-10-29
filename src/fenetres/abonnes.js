@@ -98,6 +98,11 @@ tbody tr:hover td{background:var(--v04)}
 /* La liste refaite (2026-10-15, lot C) : un rang par abonne. */
 .ab-rang{grid-template-columns:minmax(0,1.8fr) minmax(0,1.1fr) minmax(0,1fr) 15rem}
 .ab-rang.eteint .bico{color:var(--tx2)}
+/* LES CASES À COCHER (2026-10-29, gestes groupés) : la liste est faite de rangs, pas d un tableau — la case
+   du socle (szCoches) y est posée dans un span, et le rang coché se repère par :has. */
+.ab-rang{grid-template-columns:auto minmax(0,1.8fr) minmax(0,1.1fr) minmax(0,1fr) 15rem}
+span.szk-c{display:inline-flex;align-items:center;justify-content:center;width:1.4rem;cursor:pointer}
+.ls-rang:has(input[data-szk]:checked){background:rgba(var(--or-rgb),.10);border-color:rgba(var(--or-rgb),.45)}
 `;
 
 /** Page complète de la fenêtre native « Abonnés de l'infolettre ». */
@@ -173,6 +178,86 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('abonnes')}
     });
   }
 
+  /* ══ LES GESTES GROUPÉS (2026-10-29, sa demande : cases toujours visibles) ══
+     Désabonner, réactiver, retirer de la liste, exporter. Chaque abonné passe par le MEME geste du
+     site que les boutons de son rang (abonnes:basculer avec un SENS explicite, abonnes:supprimer),
+     un a la fois — le serveur rend son verdict pour chacun.
+     ⚠ « Désabonner » n est pas « Retirer » : le premier garde la trace du refus, le second l efface. */
+  function lotVues(L){
+    var V = L.filter(function(a){
+      var c = corps.querySelector('[data-szk="' + String(a.id).replace(/"/g, '') + '"]');
+      var l = c && c.closest('.ls-rang');
+      return !!(l && l.getClientRects().length);
+    });
+    return V.length ? V : L;
+  }
+  var CK = szCoches({
+    zone: corps, barre: 'k-barre',
+    lignes: function(){ return D ? lotVues(filtres()) : []; },   // « tout cocher » = la page affichée
+    contexte: function(){ return FILTRE + '|' + Q; },             // un autre filtre ou une autre recherche vide la sélection
+    id: function(a){ return a.id; },
+    nom: function(a){ return a.courriel || a.prenom || a.id; },
+    fiche: function(a){ return Object.assign({}, a); },
+    compte: ['${T("{0} abonné sélectionné")}', '${T("{0} abonnés sélectionnés")}'],
+    actions: [
+      { cle: 'desab', libelle: '${T("Désabonner")}', cache: function(){ return !(D && D.peutModifier); },
+        pour: function(f){ return !!f.actif; } },
+      { cle: 'reac', libelle: '${T("Réactiver")}', cache: function(){ return !(D && D.peutModifier); },
+        pour: function(f){ return !f.actif; } },
+      { cle: 'retirer', libelle: '${T("Retirer")}', danger: true, cache: function(){ return !(D && D.peutModifier); } },
+      { cle: 'csv', libelle: '${T("Exporter (CSV)")}' }
+    ],
+    geste: function(cle, ids, tous){ return lotGeste(cle, ids, tous); }
+  });
+  function lotCase(a){ return CK.td(a).replace('<td', '<span').replace('</td>', '</span>'); }
+  function lotFiche(id){ return CK.fiches()[id] || {}; }
+  function lotNom(id){ var f = lotFiche(id); return f.courriel || id; }
+  function lotEcartes(ids, tous){
+    var n = tous.length - ids.length;
+    return n ? ' ' + szPl(n, '${T("{0} autre abonné sélectionné ne s’y prête pas : il ne change pas.")}', '${T("{0} autres abonnés sélectionnés ne s’y prêtent pas : ils ne changent pas.")}').split('{0}').join(n) : '';
+  }
+  function lotGeste(cle, ids, tous){
+    if (!ids.length) return;
+    if (cle === 'csv') {
+      var csv = szCSV(['${T("Courriel")}', '${T("Prénom")}', '${T("Statut")}', '${T("Provenance")}', '${T("Inscrit le")}', '${T("Désabonné le")}'],
+        tous.map(function(id){ var f = lotFiche(id); return [f.courriel || '', f.prenom || '',
+          f.actif ? '${T("Abonné")}' : '${T("Désabonné")}', f.sourceLibelle || '', f.date || '', f.retireLe || '']; }));
+      return szExporter('abonnes-selection-' + new Date().toISOString().slice(0, 10) + '.csv', csv,
+        szPl(tous.length, '${T("{0} abonné exporté")}', '${T("{0} abonnés exportés")}').split('{0}').join(tous.length));
+    }
+    var n = ids.length, o, faire, titre, fait;
+    if (cle === 'retirer') {
+      o = { danger: true, titre: '${T("Retirer les abonnés de la liste")}',
+        texte: szPl(n, '${T("{0} adresse sera retirée définitivement de la liste, y compris la trace d’un éventuel désabonnement. Pour seulement cesser les envois, utilisez plutôt « Désabonner ». Cette action est irréversible.")}', '${T("{0} adresses seront retirées définitivement de la liste, y compris la trace d’un éventuel désabonnement. Pour seulement cesser les envois, utilisez plutôt « Désabonner ». Cette action est irréversible.")}').split('{0}').join(n) + lotEcartes(ids, tous),
+        oui: szPl(n, '${T("Retirer {0} adresse")}', '${T("Retirer {0} adresses")}').split('{0}').join(n) };
+      titre = '${T("Retrait de la liste")}';
+      faire = function(id){ return appeler('abonnes:supprimer', [id]); };
+      fait = function(k){ return szPl(k, '${T("{0} adresse retirée.")}', '${T("{0} adresses retirées.")}').split('{0}').join(k); };
+    } else {
+      var actif = cle === 'reac';
+      o = actif
+        ? { prudent: true, titre: '${T("Réactiver les abonnés")}',
+            texte: szPl(n, '${T("{0} abonné recevra de nouveau l’infolettre. Ne réactivez que des personnes qui l’ont demandé.")}', '${T("{0} abonnés recevront de nouveau l’infolettre. Ne réactivez que des personnes qui l’ont demandé.")}').split('{0}').join(n) + lotEcartes(ids, tous),
+            oui: szPl(n, '${T("Réactiver {0} abonné")}', '${T("Réactiver {0} abonnés")}').split('{0}').join(n) }
+        : { prudent: true, titre: '${T("Désabonner les abonnés")}',
+            texte: szPl(n, '${T("{0} abonné cessera de recevoir l’infolettre ; la trace du refus est gardée.")}', '${T("{0} abonnés cesseront de recevoir l’infolettre ; la trace du refus est gardée.")}').split('{0}').join(n) + lotEcartes(ids, tous),
+            oui: szPl(n, '${T("Désabonner {0} abonné")}', '${T("Désabonner {0} abonnés")}').split('{0}').join(n) };
+      titre = actif ? '${T("Réactivation")}' : '${T("Désabonnement")}';
+      faire = function(id){ return appeler('abonnes:basculer', [id, actif]); };
+      fait = actif
+        ? function(k){ return szPl(k, '${T("{0} abonné réactivé.")}', '${T("{0} abonnés réactivés.")}').split('{0}').join(k); }
+        : function(k){ return szPl(k, '${T("{0} abonné désabonné.")}', '${T("{0} abonnés désabonnés.")}').split('{0}').join(k); };
+    }
+    o.details = ids.slice(0, 8).map(function(id){ var f = lotFiche(id); return [f.courriel || id, f.prenom || '—']; });
+    return szConfirmer(o).then(function(oui){
+      if (!oui) return;
+      SUPPR_ARME = '';
+      return szLotDerouler({ titre: titre, ids: ids, nom: lotNom, motif: function(r){ return expliquer(r); },
+        faire: faire, fait: fait })
+        .then(function(){ CK.vider(); charger(); });
+    });
+  }
+
   function boiteAjout(){
     return '<div class="voile" id="ab-voile"><div class="boite">'
       + '<h3>${T("Ajouter un abonné")}</h3>'
@@ -226,7 +311,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('abonnes')}
        mot seul, jamais de compte —, recherche, import et ajout a droite), puis
        un RANG aere par abonne. Crochets gardes : #ab-q, data-filtre, #ab-import,
        #ab-nouveau, data-basculer, data-suppr. */
-    h = '<div class="ls"><div class="ls-tete"><div class="ed-seg ls-onglets">'
+    h = '<div class="ls"><div class="ls-tete">' + CK.th().replace('<th', '<span').replace('</th>', '</span>') + '<div class="ed-seg ls-onglets">'
       + [['all', '${T("Tous")}'], ['actifs', '${T("Actifs")}'], ['retires', '${T("Désabonnés")}']].map(function(f){
           return '<button type="button" class="' + (FILTRE === f[0] ? 'on' : '') + '" data-filtre="' + f[0] + '">' + f[1] + '</button>';
         }).join('')
@@ -240,7 +325,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('abonnes')}
       + '</div></div>' + h;
 
     // La liste en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
-    h += '<div class="ls-liste sz-pagee">';
+    h += '<div class="ls-liste sz-pagee">' + CK.barre();
     if (!rows.length) {
       h += '<div class="ls-vide">' + (Q || FILTRE !== 'all' ? '${T("Rien ne correspond.")}' : '${T("Aucun abonné.")}') + '</div>';
     } else {
@@ -253,7 +338,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('abonnes')}
             + '${T("Retirer")}' + '</button>';
         }
         var ini = String(a.prenom || a.courriel || '?').trim().charAt(0).toUpperCase();
-        return '<div data-ctx-ligne class="ls-rang ab-rang' + (a.actif ? '' : ' eteint') + '">'
+        return '<div data-ctx-ligne class="ls-rang ab-rang' + (a.actif ? '' : ' eteint') + CK.classe(a) + '">'
+          + lotCase(a)
           + '<div class="qui"><span class="bico" aria-hidden="true">' + esc(ini) + '</span>'
           + '<div class="tx"><b>' + esc(a.prenom || a.courriel) + '</b><span>' + (a.prenom ? esc(a.courriel) : '${T("sans prénom")}') + '</span></div></div>'
           + '<div class="ou"><b>' + esc(a.sourceLibelle) + '</b><span>' + esc(szQuand(a.date)) + '</span></div>'
@@ -270,6 +356,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('abonnes')}
 
     corps.classList.add('ls-corps');
     corps.innerHTML = h;
+    CK.apres();
     brancher();
   }
 
@@ -369,6 +456,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('abonnes')}
     });
   }
   corps.addEventListener('click', function(ev){
+    if (CK.clic(ev)) return;   // une case, « tout cocher » ou la barre d actions
     var t = ev.target;
     if (!t || !t.closest || t.closest('.boite')) return;
 

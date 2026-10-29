@@ -186,6 +186,82 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('corbeille')}
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div>';
   }
 
+  /* ══ LES GESTES GROUPÉS (2026-10-29, sa demande : cases toujours visibles) ══
+     Remettre en place et purger plusieurs dossiers d un coup. Chaque dossier passe par le MEME geste
+     du site que les boutons de sa ligne (commandes:corbeille:restaurer, commandes:corbeille:purger),
+     un a la fois — le site revérifie orders:delete pour chacun.
+     ⚠ Remettre ne prend pas un dossier dont la commande a été RECRÉÉE (même règle que la ligne).
+     ⚠ Un remboursement Square déjà parti ne revient pas : la confirmation compte ces dossiers AVANT
+     le clic, et le compte rendu les redit après. */
+  var CK = szCoches({
+    zone: corps, barre: 'k-barre',
+    lignes: function(){ return D ? filtres() : []; },
+    contexte: function(){ return Q; },   // une autre recherche vide la sélection
+    id: function(d){ return d.id; },
+    nom: function(d){ return (d.orderNumber || d.orderId || d.id) + (d.client ? ' — ' + d.client : ''); },
+    fiche: function(d){ return Object.assign({}, d); },
+    compte: ['${T("{0} dossier sélectionné")}', '${T("{0} dossiers sélectionnés")}'],
+    actions: [
+      { cle: 'remettre', libelle: '${T("Remettre")}', prim: true, cache: function(){ return !(D && D.peutRestaurer); },
+        pour: function(f){ return !f.dejaPresente; } },
+      { cle: 'purger', libelle: '${T("Purger")}', danger: true, cache: function(){ return !(D && D.peutRestaurer); } }
+    ],
+    geste: function(cle, ids, tous){ return lotGeste(cle, ids, tous); }
+  });
+  function lotOn(){ return !!(D && D.peutRestaurer); }
+  function lotFiche(id){ return CK.fiches()[id] || {}; }
+  function lotNom(id){ var f = lotFiche(id); return (f.orderNumber || f.orderId || id) + (f.client ? ' — ' + f.client : ''); }
+  function lotEcartes(ids, tous){
+    var n = tous.length - ids.length;
+    return n ? ' ' + szPl(n, '${T("{0} autre dossier sélectionné ne s’y prête pas (commande recréée depuis) : il ne change pas.")}', '${T("{0} autres dossiers sélectionnés ne s’y prêtent pas (commandes recréées depuis) : ils ne changent pas.")}').split('{0}').join(n) : '';
+  }
+  function lotGeste(cle, ids, tous){
+    if (!ids.length) return;
+    var n = ids.length;
+    var details = ids.slice(0, 8).map(function(id){ var f = lotFiche(id);
+      return [f.orderNumber || f.orderId || id, (f.client || '—') + ' · ' + argent(f.total)]; });
+    if (cle === 'remettre') {
+      var sq = ids.filter(function(id){ return lotFiche(id).squareRembourse; }).length;
+      var vus = 0;
+      return szConfirmer({ prudent: true, titre: '${T("Remettre les commandes en place")}',
+        texte: szPl(n, '${T("{0} commande revient dans la liste des commandes, avec ses factures, ses crédits et son stock.")}', '${T("{0} commandes reviennent dans la liste des commandes, avec leurs factures, leurs crédits et leur stock.")}').split('{0}').join(n)
+          + (sq ? ' ' + szPl(sq, '${T("{0} de ces commandes a un remboursement Square déjà parti : cet argent est chez le client et ne revient pas.")}', '${T("{0} de ces commandes ont un remboursement Square déjà parti : cet argent est chez le client et ne revient pas.")}').split('{0}').join(sq) : '')
+          + lotEcartes(ids, tous),
+        details: details,
+        oui: szPl(n, '${T("Remettre {0} commande")}', '${T("Remettre {0} commandes")}').split('{0}').join(n) }).then(function(oui){
+        if (!oui) return;
+        ARME = '';
+        return szLotDerouler({ titre: '${T("Remise en place")}', ids: ids, nom: lotNom, motif: function(r){ return expliquer(r); },
+          faire: function(id){ return appeler('commandes:corbeille:restaurer', [id]).then(function(r){
+            if (r && r.ok && r.rapport && (r.rapport.manque || []).some(function(x){ return x.quoi === 'square'; })) vus++;
+            return r; }); },
+          fait: function(k){ return szPl(k, '${T("{0} commande remise en place.")}', '${T("{0} commandes remises en place.")}').split('{0}').join(k); } })
+          .then(function(){
+            /* Le compte rendu redit ce qui ne revient pas : une restauration silencieuse laisserait croire
+               que l argent de Square est rentré avec le reste. */
+            if (vus) dire(szPl(vus, '${T("{0} commande remise en place avait un remboursement Square déjà parti : cet argent ne revient pas.")}', '${T("{0} commandes remises en place avaient un remboursement Square déjà parti : cet argent ne revient pas.")}').split('{0}').join(vus), 'att');
+            FICHE = null; CK.vider(); charger();
+          });
+      });
+    }
+    /* ⚠ LA PURGE : la même boîte que la purge d un dossier (danger), qui nomme la perte des photos. */
+    return szConfirmer({ danger: true, titre: '${T("Purger les dossiers")}',
+      texte: szPl(n, '${T("{0} dossier de commande et les photos de ses demandes de retour seront effacés définitivement. Cette commande ne pourra plus être remise en place. Cette action est irréversible.")}', '${T("{0} dossiers de commande et les photos de leurs demandes de retour seront effacés définitivement. Ces commandes ne pourront plus être remises en place. Cette action est irréversible.")}').split('{0}').join(n),
+      details: details,
+      oui: szPl(n, '${T("Purger {0} dossier")}', '${T("Purger {0} dossiers")}').split('{0}').join(n) }).then(function(oui){
+      if (!oui) return;
+      ARME = '';
+      var photos = 0;
+      return szLotDerouler({ titre: '${T("Purge des dossiers")}', ids: ids, nom: lotNom, motif: function(r){ return expliquer(r); },
+        faire: function(id){ return appeler('commandes:corbeille:purger', [id]).then(function(r){
+          if (r && r.ok && r.photos) photos += r.photos;
+          return r; }); },
+        fait: function(k){ return szPl(k, '${T("{0} dossier purgé.")}', '${T("{0} dossiers purgés.")}').split('{0}').join(k)
+          + (photos ? ' ' + szPl(photos, '${T("{0} photo effacée.")}', '${T("{0} photos effacées.")}').split('{0}').join(photos) : ''); } })
+        .then(function(){ CK.vider(); charger(); });
+    });
+  }
+
   function initiales(nom){
     var m = String(nom || '').trim().split(' ').filter(Boolean);
     if (!m.length || m[0] === '—') return '?';
@@ -245,16 +321,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('corbeille')}
       + (rows.length > 1 ? '${T(" dossiers")}' : '${T(" dossier")}') + '</span></span></div></div>';
 
     // La liste en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
-    h += '<div class="carte sz-pagee"><h2>${T("Commandes supprimées")}</h2>';
+    h += '<div class="carte sz-pagee"><h2>${T("Commandes supprimées")}</h2>' + (lotOn() ? CK.barre() : '');
     if (!rows.length) {
       h += '<div class="vide">' + (Q ? '${T("Rien ne correspond.")}'
         : '${T("Aucune commande supprimée. C’est la bonne nouvelle — la corbeille existe pour le jour où ça arrive.")}') + '</div>';
     } else {
-      h += '<div data-pages="corbeille"><table><thead><tr><th>${T("Client et commande")}</th>'
+      h += '<div data-pages="corbeille"><table><thead><tr>' + (lotOn() ? CK.th() : '') + '<th>${T("Client et commande")}</th>'
         + '<th class="num">${T("Total")}</th><th>${T("Supprimée")}</th>'
         + '<th>${T("Ce qui est gardé")}</th><th></th></tr></thead><tbody>'
         + rows.map(function(d){
-            return '<tr data-dossier="' + esc(d.id) + '">'
+            return '<tr data-dossier="' + esc(d.id) + '" class="' + CK.classe(d) + '">'
+              + (lotOn() ? CK.td(d) : '')
               + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(d.client)) + '</span>'
               + '<div style="min-width:0"><div class="rf-nom">' + esc(d.client || '—')
               + (d.dejaPresente ? ' <span class="rf-pill vert">${T("recréée")}</span>' : '')
@@ -280,6 +357,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('corbeille')}
       h += '<div class="avis">${T("Votre rôle vous laisse consulter la corbeille, mais pas remettre une commande en place ni purger un dossier.")}</div>';
     }
     corps.innerHTML = h;
+    CK.apres();
     lierListe();
   }
 
@@ -408,6 +486,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('corbeille')}
   }
 
   corps.addEventListener('click', function(ev){
+    if (CK.clic(ev)) return;   // une case, « tout cocher » ou la barre d actions
     var t = ev.target;
     if (!t || !t.closest) return;
 
