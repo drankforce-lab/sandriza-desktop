@@ -75,7 +75,7 @@ button:disabled{opacity:.5;cursor:default}
 button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:var(--or-clair)}
 button.mini{font-size:.72rem;padding:.16rem .45rem}
-button.dgr{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
+button.dgr,button.danger{border-color:rgba(248,113,113,.5);color:var(--tx-err2)}
 .duo{display:flex;gap:.65rem;flex-wrap:wrap}
 .duo>div{flex:1 1 10rem;min-width:0}
 .barreoutils{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
@@ -210,6 +210,67 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
   var CANAUX = { telechargement: '${T("Installation")}', comptable: '${T("Comptable")}',
                  courriel: '${T("Courriel")}' };
 
+  /* LES GESTES GROUPES (2026-10-29, sa demande : cases toujours visibles). Revoquer (liens ACTIFS seulement,
+     comme le bouton de la ligne), Supprimer (liens qui ne fonctionnent plus seulement : retirer un lien actif
+     le rendrait invisible ici tout en le laissant ouvrir la porte), Exporter.
+     ⚠ PAS DE << RENVOYER >> EN LOT : le geste unitaire demande une adresse et un choix (nouveau mot de passe
+     ou non) a chaque fois ; un lot ne saurait ni l un ni l autre sans les deviner.
+     ⚠ L EXPORT NE PORTE PAS L ADRESSE DU LIEN : un fichier circule, et l adresse est la moitie de la cle. */
+  var CK = szCoches({
+    zone: corps, barre: 'k-barre',
+    lignes: function(){ return ETAT.liens || []; },
+    // Les coches restent quand on passe au journal et qu on revient : les liens sont toujours là, et relus au retour.
+    contexte: function(){ return VUE; },
+    id: function(l){ return l.id; },
+    nom: function(l){ return l.etiquette || l.destinataire || l.id; },
+    fiche: function(l){ return Object.assign({}, l); },
+    compte: ['${T("{0} lien sélectionné")}', '${T("{0} liens sélectionnés")}'],
+    actions: [
+      { cle: 'revoquer', libelle: '${T("Révoquer")}', danger: true,
+        pour: function(f){ return f.etat === 'actif'; } },
+      { cle: 'csv', libelle: '${T("Exporter (CSV)")}' },
+      { cle: 'supprimer', libelle: '${T("Supprimer")}', danger: true,
+        aide: '${T("Seulement les liens qui ne fonctionnent plus : un lien actif se révoque d’abord.")}',
+        pour: function(f){ return f.etat !== 'actif'; } }
+    ],
+    geste: function(cle, ids, tous){ return lotGeste(cle, ids, tous); }
+  });
+  function lotFiche(id){ return CK.fiches()[id] || {}; }
+  function lotNom(id){ var f = lotFiche(id); return f.etiquette || f.destinataire || id; }
+  function lotMotif(r){ return (r && r.detail) ? String(r.detail) : expliquer(r); }
+  function lotEcartes(ids, tous){
+    var n = tous.length - ids.length;
+    return n ? ' ' + szPl(n, '${T("{0} autre lien sélectionné ne s’y prête pas : il ne change pas.")}', '${T("{0} autres liens sélectionnés ne s’y prêtent pas : ils ne changent pas.")}').split('{0}').join(n) : '';
+  }
+  function lotGeste(cle, ids, tous){
+    if (!ids.length) return;
+    if (cle === 'csv') {
+      var csv = szCSV(['${T("Pour")}', '${T("Destinataire")}', '${T("Genre")}', '${T("Compte")}', '${T("Usages")}', '${T("Usages permis")}',
+        '${T("Échéance")}', '${T("Créé")}', '${T("Créé par")}', '${T("État")}'],
+        tous.map(function(id){ var f = lotFiche(id); return [f.etiquette || '', f.destinataire || '', GENRES[f.genre] || f.genre || '',
+          nomCompte(f.staffId) || '', Number(f.usages) || 0, (Number(f.maxUsages) > 0) ? Number(f.maxUsages) : '∞',
+          String(f.expireLe || '').slice(0, 10), String(f.creeLe || '').slice(0, 10), f.creePar || '', ETATS[f.etat] || f.etat || '']; }));
+      return szExporter('liens-installation-' + new Date().toISOString().slice(0, 10) + '.csv', csv,
+        szPl(tous.length, '${T("{0} lien exporté")}', '${T("{0} liens exportés")}').split('{0}').join(tous.length));
+    }
+    var rev = cle === 'revoquer', n = ids.length;
+    return szConfirmer({ danger: true, titre: rev ? '${T("Révoquer les liens")}' : '${T("Retirer les liens de la liste")}',
+      texte: (rev
+        ? szPl(n, '${T("{0} lien cessera immédiatement de fonctionner, y compris pour une personne qui l’a déjà ouvert. La révocation sera inscrite au journal. Cette action est irréversible.")}', '${T("{0} liens cesseront immédiatement de fonctionner, y compris pour les personnes qui les ont déjà ouverts. Chaque révocation sera inscrite au journal. Cette action est irréversible.")}')
+        : szPl(n, '${T("{0} lien sera retiré de la liste. Son journal d’accès est conservé et reste consultable.")}', '${T("{0} liens seront retirés de la liste. Leur journal d’accès est conservé et reste consultable.")}')).split('{0}').join(n) + lotEcartes(ids, tous),
+      details: ids.slice(0, 8).map(function(id){ var f = lotFiche(id); return [lotNom(id), (ETATS[f.etat] || f.etat || '—') + (f.destinataire && f.etiquette ? ' · ' + f.destinataire : '')]; }),
+      oui: (rev ? szPl(n, '${T("Révoquer {0} lien")}', '${T("Révoquer {0} liens")}') : szPl(n, '${T("Retirer {0} lien")}', '${T("Retirer {0} liens")}')).split('{0}').join(n) }).then(function(oui){
+      if (!oui) return;
+      ARME = '';
+      if (RENVOI && ids.indexOf(RENVOI.id) >= 0) RENVOI = null;
+      return szLotDerouler({ titre: rev ? '${T("Révocation des liens")}' : '${T("Retrait des liens")}', ids: ids, nom: lotNom, motif: lotMotif,
+        faire: function(id){ return rev ? appeler('liens:revoquer', [id, '']) : appeler('liens:supprimer', [id]); },
+        fait: function(k){ return (rev ? szPl(k, '${T("{0} lien révoqué. La révocation est inscrite au journal.")}', '${T("{0} liens révoqués. Chaque révocation est inscrite au journal.")}')
+          : szPl(k, '${T("{0} lien retiré de la liste — son journal d’accès reste consultable.")}', '${T("{0} liens retirés de la liste — leur journal d’accès reste consultable.")}')).split('{0}').join(k); } })
+        .then(function(){ CK.vider(); charger(false); });
+    });
+  }
+
   function quand(iso){
     if (!iso) return '—';
     var d = new Date(iso);
@@ -280,11 +341,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     if (!ETAT.liens.length) {
       h.push('<div class="vide">${T("Aucun lien n’a encore été émis.")}</div>');
     } else {
-      h.push('<div data-pages="liens"><table><thead><tr><th>${T("Pour")}</th><th>${T("Compte")}</th>'
+      h.push(CK.barre());
+      h.push('<div data-pages="liens"><table><thead><tr>' + CK.th() + '<th>${T("Pour")}</th><th>${T("Compte")}</th>'
         + '<th>${T("Usages")}</th><th>${T("Échéance")}</th><th>${T("Créé")}</th><th>${T("État")}</th><th></th></tr></thead><tbody>');
       ETAT.liens.forEach(function(l){
         var u = (l.maxUsages > 0) ? (l.usages + ' / ' + l.maxUsages) : (l.usages + ' / ∞');
-        h.push('<tr>'
+        h.push('<tr data-id="' + esc(l.id) + '" class="' + CK.classe(l) + '">'
+          + CK.td(l)
           + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(l.etiquette || l.destinataire)) + '</span>'
           + '<div style="min-width:0"><div class="rf-nom">' + esc(l.etiquette || l.destinataire || '—') + '</div>'
           + '<div class="rf-sous">' + (l.destinataire && l.etiquette ? '<span>' + esc(l.destinataire) + '</span><span>·</span>' : '')
@@ -311,7 +374,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
           + '</td></tr>');
         if (RENVOI && RENVOI.id === l.id) h.push(ligneRenvoi(l));
         if (l.revoqueLe) {
-          h.push('<tr><td></td><td colspan="6" class="dt">${T("Révoqué le")} ' + quand(l.revoqueLe)
+          h.push('<tr><td colspan="2"></td><td colspan="6" class="dt">${T("Révoqué le")} ' + quand(l.revoqueLe)
             + '${T(" par ")}' + esc(l.revoquePar || '?')
             + (l.motif ? ' — ' + esc(l.motif) : '') + '</td></tr>');
         }
@@ -321,8 +384,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     h.push('</div>');
 
     corps.innerHTML = h.join('');
+    CK.apres();
     brancherLiens();
   }
+  // Les cases et la barre d actions : les autres boutons sont branches un par un (brancherLiens).
+  corps.addEventListener('click', function(ev){ if (CK.clic(ev)) return; });
 
   /* Renvoyer un lien déjà émis.
      ⚠⚠ « RENVOYER LE MOT DE PASSE » N'EXISTE PAS, et ce n'est pas une lacune :
@@ -336,7 +402,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
 
   function ligneRenvoi(l){
     var inscription = (l.genre === 'inscription');
-    return '<tr><td></td><td colspan="6">'
+    return '<tr><td colspan="2"></td><td colspan="6">'
       + '<div class="carte" style="margin:.3rem 0">'
       + '<h2>${T("Renvoyer ce lien")}</h2>'
       + '<label for="rv-a">${T("Adresse")}</label>'

@@ -78,6 +78,8 @@ td.acts{text-align:right;white-space:nowrap}
 .b:hover{background:var(--v09)}
 .b.dgr{color:var(--tx-f6a6a6);border-color:rgba(248,113,113,.35)}
 .b.dgr:hover{background:rgba(248,113,113,.16)}
+.szk-barre .mini.danger{color:var(--tx-f6a6a6);border-color:rgba(248,113,113,.35)}
+.szk-barre .mini:disabled{opacity:.5;cursor:default}
 .acts{white-space:nowrap;text-align:right}
 .acts .b{margin-left:.3rem}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
@@ -239,6 +241,58 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
     return '<span class="rf-pill ambre">${T("Ouvert")}</span>';
   }
 
+  /* LES GESTES GROUPES (2026-10-29, sa demande : cases toujours visibles). Retirer (droit DEDIE
+     D.peutSupprimer, boite << danger >> qui repete la regle des cinq ans, comme le bouton de la ligne) et
+     Exporter. ⚠ C EST UN REGISTRE LEGAL (Loi 25) : on n en retire qu une saisie erronee. Le lot existe pour
+     faire le menage de doublons, pas pour vider le registre — la boite le dit en toutes lettres. */
+  var CK = szCoches({
+    zone: corps, barre: 'k-barre',
+    lignes: function(){ return (D && D.lignes) || []; },
+    contexte: function(){ return 'registre'; },
+    id: function(r){ return r.id; },
+    nom: function(r){ return szTd(r.type) || r.ref || r.id; },
+    fiche: function(r){ return Object.assign({}, r); },
+    compte: ['${T("{0} entrée sélectionnée")}', '${T("{0} entrées sélectionnées")}'],
+    actions: [
+      /* (2026-10-29, sa décision) PAS DE RETRAIT EN LOT : un registre légal (Loi 25, cinq ans) ne se vide pas
+         d un geste. Chaque retrait d une saisie erronée se fait dans sa fiche ; en lot, l export seulement. */
+      { cle: 'csv', libelle: '${T("Exporter (CSV)")}' }
+    ],
+    geste: function(cle, ids, tous){ return lotGeste(cle, ids, tous); }
+  });
+  function lotFiche(id){ return CK.fiches()[id] || {}; }
+  function lotNom(id){ var f = lotFiche(id); return (szTd(f.type) || '—') + (f.ref ? ' · ' + f.ref : ''); }
+  function lotMotif(r){ return expliquer(r); }
+  function lotRisque(v){ return v === 'oui' ? '${T("Préjudice sérieux")}' : (v === 'evaluation' ? '${T("En évaluation")}' : '${T("Sans risque sérieux")}'); }
+  function lotEtat(v){ return v === 'clos' ? '${T("Clôturé")}' : (v === 'surveille' ? '${T("Surveillé")}' : '${T("Ouvert")}'); }
+  function lotGeste(cle, ids, tous){
+    if (!ids.length) return;
+    if (cle === 'csv') {
+      var csv = szCSV(['${T("Référence")}', '${T("Incident")}', '${T("Survenu le")}', '${T("Prise de connaissance")}', '${T("Personnes")}',
+        '${T("Risque")}', '${T("Avis CAI")}', '${T("État")}'],
+        tous.map(function(id){ var f = lotFiche(id); return [f.ref || '', szTd(f.type) || '', String(f.occurredAt || '').slice(0, 10),
+          String(f.knownAt || '').slice(0, 10), f.peopleCount || '', lotRisque(f.seriousRisk), szTd(f.cai) || '', lotEtat(f.status)]; }));
+      return szExporter('registre-incidents-' + new Date().toISOString().slice(0, 10) + '.csv', csv,
+        szPl(tous.length, '${T("{0} entrée exportée")}', '${T("{0} entrées exportées")}').split('{0}').join(tous.length));
+    }
+    if (OCCUPE) { dire('${T("Une opération est déjà en cours.")}', 'att'); return; }
+    var n = ids.length;
+    return szConfirmer({ danger: true, titre: '${T("Retirer les entrées du registre")}',
+      texte: szPl(n, '${T("{0} entrée sera retirée du registre des incidents. Le registre doit être conservé cinq ans : ne retirez qu’une saisie erronée, jamais un incident réel.")}', '${T("{0} entrées seront retirées du registre des incidents. Le registre doit être conservé cinq ans : ne retirez que des saisies erronées, jamais un incident réel.")}').split('{0}').join(n),
+      details: ids.slice(0, 8).map(function(id){ var f = lotFiche(id);
+        return [String(f.ref || szTd(f.type) || id), '${T("survenu le")} ' + String(szQuand(f.occurredAt) || '—')]; }),
+      oui: szPl(n, '${T("Retirer {0} entrée")}', '${T("Retirer {0} entrées")}').split('{0}').join(n) }).then(function(oui){
+      if (!oui || OCCUPE) return;
+      OCCUPE = true; DELID = '';
+      return szLotDerouler({ titre: '${T("Retrait des entrées")}', ids: ids, nom: lotNom, motif: lotMotif,
+        // Chaque reponse porte le registre a jour (comme le geste de la ligne) : on le garde.
+        faire: function(id){ return appeler('incidents:supprimer', [id]).then(function(r){
+          if (r && r.ok) { D = r; RO = !r.peutModifier; } return r; }); },
+        fait: function(k){ return szPl(k, '${T("{0} entrée retirée du registre.")}', '${T("{0} entrées retirées du registre.")}').split('{0}').join(k); } })
+        .then(function(){ OCCUPE = false; CK.vider(); rendre(); }, function(){ OCCUPE = false; CK.vider(); rendre(); });
+    });
+  }
+
   function vueRegistre(){
     var st = D.stats||{}, lg = D.lignes||[];
     var h = '<div class="entete">'
@@ -263,15 +317,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
 
     if (!lg.length){
       h += '<div class="carte"><div class="vide">${T("Aucun incident consigné.")}<br>${T("C’est la bonne nouvelle — le registre doit tout de même exister et être tenu à jour.")}</div></div>';
-      corps.innerHTML = h; lier(); return;
+      corps.innerHTML = h; CK.apres(); lier(); return;
     }
 
     /* (2026-10-25, audit) « DETAIL » POUR TOUS : le bandeau dit a un role en lecture seule qu il peut
        consulter le registre, mais le bouton n existait que pour qui peut modifier ou retirer — la fiche
        (recits, mesures, avis CAI) lui restait fermee. Seuls Modifier et Retirer dependent du droit. */
     // Le registre en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
-    h += '<div class="carte sz-pagee"><div data-pages="incidents"><table><thead><tr>'
-      + '<th>${T("Incident")}</th><th>${T("Prise de connaissance")}</th><th style="text-align:center">${T("Personnes")}</th>'
+    h += '<div class="carte sz-pagee">' + CK.barre() + '<div data-pages="incidents"><table><thead><tr>'
+      + CK.th() + '<th>${T("Incident")}</th><th>${T("Prise de connaissance")}</th><th style="text-align:center">${T("Personnes")}</th>'
       + '<th>${T("Risque")}</th><th>${T("Avis CAI")}</th><th>${T("État")}</th>'
       + '<th></th>'
       + '</tr></thead><tbody>';
@@ -280,7 +334,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
           + (D.peutModifier ? '<button class="b" data-edit="'+esc(r.id)+'"><span class="ic">✎</span>${T(" Modifier")}</button>' : '')
           + (D.peutSupprimer ? '<button class="b dgr" data-del="'+esc(r.id)+'">'+'${T("Retirer")}'+'</button>' : '')
           + '</td>';
-      h += '<tr><td><div class="rf-nom">'+esc(szTd(r.type)||'—')+'</div>'
+      h += '<tr data-id="'+esc(r.id)+'" class="'+CK.classe(r)+'">' + CK.td(r) + '<td><div class="rf-nom">'+esc(szTd(r.type)||'—')+'</div>'
         + '<div class="rf-sous">'+(r.ref?'<span class="rf-code">'+esc(r.ref)+'</span><span>·</span>':'')
         + '<span>${T("survenu le")} '+esc(szQuand(r.occurredAt)||'—')+'</span></div></td>'
         + '<td style="white-space:nowrap;font-weight:600">'+esc(szQuand(r.knownAt)||'—')+'</td>'
@@ -292,10 +346,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
     }
     h += '</tbody></table></div></div>';
     corps.innerHTML = h;
+    CK.apres();
     lier();
     if (!lg.length) return;
   }
 
+  // Les cases et la barre d actions : les autres boutons sont branches un par un (lier).
+  corps.addEventListener('click', function(ev){ if (CK.clic(ev)) return; });
   function lier(){
     var nv=document.getElementById('i-nouveau'); if (nv) nv.onclick=function(){ ouvrirAssistant(''); };
     var vs=corps.querySelectorAll('[data-vue]'); for (var a=0;a<vs.length;a++) vs[a].onclick=function(){ ouvrirFiche(this.getAttribute('data-vue')); };

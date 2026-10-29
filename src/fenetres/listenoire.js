@@ -75,6 +75,8 @@ input.t:focus,select.t:focus{outline:none;border-color:var(--or)}
 .b:hover:not(:disabled){background:var(--v09)}
 .b.dgr{color:var(--tx-f6a6a6);border-color:rgba(248,113,113,.35)}
 .b.dgr:hover{background:rgba(248,113,113,.16)}
+/* La barre des gestes groupes (2026-10-29) : son bouton de retrait parle comme celui de chaque ligne. */
+.szk-barre .mini.danger{color:var(--tx-f6a6a6);border-color:rgba(248,113,113,.35)}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
 .pied2{display:flex;justify-content:flex-end;gap:.5rem;margin-top:.9rem}
 code{font-family:Consolas,monospace;font-size:.82rem;background:var(--v05);padding:1px 6px;border-radius:5px}
@@ -145,6 +147,54 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   var FT = '';      // '' | email | postal | address — filtre local (la liste est entiere)
   var QL = '';      // recherche locale
   function libType(e){ return LIB_TYPE[e.type] || szTd(e.typeLabel || ''); }
+
+  /* LES GESTES GROUPES (2026-10-29, sa demande : cases toujours visibles). Retirer de la liste noire et
+     exporter. Chaque entree passe par le MEME geste du site que le bouton de sa ligne (listenoire:retirer),
+     une a la fois — le serveur rend son verdict pour chacune. Le retrait se confirme comme celui d une
+     ligne (boite rouge) : il redonne le droit de commander. */
+  var VUE = [];   // les entrees affichees (type et recherche appliques)
+  var CK = szCoches({
+    zone: corps, barre: 'k-barre',
+    lignes: function(){ return VUE; },
+    contexte: function(){ return FT + '|' + QL; },   // un autre type ou une autre recherche vide la selection
+    id: function(e){ return e.id; },
+    nom: function(e){ return e.valeur || e.id; },
+    fiche: function(e){ return Object.assign({}, e); },
+    compte: ['${T("{0} entrée sélectionnée")}', '${T("{0} entrées sélectionnées")}'],
+    actions: [
+      { cle: 'retirer', libelle: '${T("Retirer de la liste noire")}', danger: true, cache: function(){ return !(D && D.peutRetirer); } },
+      { cle: 'csv', libelle: '${T("Exporter (CSV)")}' }
+    ],
+    geste: function(cle, ids, tous){ return lotGeste(cle, ids, tous); }
+  });
+  function lotFiche(id){ return CK.fiches()[id] || {}; }
+  function lotNom(id){ var f = lotFiche(id); return f.valeur || id; }
+  function lotGeste(cle, ids, tous){
+    if (!ids.length) return;
+    if (cle === 'csv') {
+      var csv = szCSV(['${T("Type")}', '${T("Valeur")}', '${T("Note")}', '${T("Ajouté le")}'],
+        tous.map(function(id){ var f = lotFiche(id); return [libType(f), f.valeur || '', f.note || '', f.quand || '']; }));
+      return szExporter('liste-noire-selection-' + new Date().toISOString().slice(0, 10) + '.csv', csv,
+        szPl(tous.length, '${T("{0} entrée exportée")}', '${T("{0} entrées exportées")}').split('{0}').join(tous.length));
+    }
+    if (OCCUPE) return;
+    var n = ids.length;
+    return szConfirmer({ danger: true, titre: '${T("Retirer de la liste noire")}',
+      texte: szPl(n, '${T("{0} entrée sera retirée de la liste noire. Elle pourra de nouveau passer des commandes.")}', '${T("{0} entrées seront retirées de la liste noire. Elles pourront de nouveau passer des commandes.")}').split('{0}').join(n),
+      details: ids.slice(0, 8).map(function(id){ var f = lotFiche(id); return [f.valeur || id, f.type ? libType(f) : '—']; })
+        .concat(n > 8 ? [['…', '${T("et {0} autres")}'.split('{0}').join(n - 8)]] : []),
+      oui: szPl(n, '${T("Retirer {0} entrée")}', '${T("Retirer {0} entrées")}').split('{0}').join(n) }).then(function(oui){
+      if (!oui) return;
+      OCCUPE = true; DELID = '';
+      var bilan = '';
+      return szLotDerouler({ titre: '${T("Retrait de la liste noire")}', ids: ids, nom: lotNom, motif: function(r){ return expliquer(r); },
+        faire: function(id){ return appeler('listenoire:retirer', [id]); },
+        fait: function(k){ bilan = szPl(k, '${T("{0} entrée retirée.")}', '${T("{0} entrées retirées.")}').split('{0}').join(k); return bilan; } })
+        // Le rechargement efface le bandeau : le bilan d un lot réussi est redit APRÈS (relecture du 2026-10-29).
+        .then(function(){ OCCUPE = false; CK.vider(); return charger().then(function(){ if (bilan) dire(bilan, 'bon'); }); },
+              function(){ OCCUPE = false; return charger(); });
+    });
+  }
   /* (2026-10-25, audit) LE FORMULAIRE D AJOUT SURVIT AU REDESSIN. Chercher dans la liste (pour
      verifier qu une valeur n y est pas deja), cliquer un type ou retirer une autre entree redessine
      tout : la valeur, la ville et la note saisies disparaissaient. On les relit avant et on les
@@ -166,6 +216,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       if (ql && (String(e.valeur || '') + ' ' + String(e.note || '')).toLowerCase().indexOf(ql) < 0) return false;
       return true;
     });
+    VUE = l;
     var compte = function(t){ return toutes.filter(function(e){ return e.type === t; }).length; };
     var h = '<div class="entete">'
       + '<p class="quoi">${T("Une commande dont le <b>courriel</b>, le <b>code postal</b> ou l’<b>adresse de livraison</b> figure ici est refusée à la caisse. Retirer une entrée redonne le droit de commander.")}</p>'
@@ -224,11 +275,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       h += '<div class="carte"><div class="vide">${T("Aucune entrée.<br>C’est la bonne nouvelle — la liste ne sert qu’à écarter ce qui pose problème.")}</div></div>';
     } else {
       // La liste en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
-      h += '<div class="carte plein sz-pagee"><div class="liste" data-pages="listenoire"><table><thead><tr>'
-        + '<th>${T("Entrée")}</th><th>${T("Ajouté le")}</th>'
+      h += '<div class="carte plein sz-pagee">' + CK.barre() + '<div class="liste" data-pages="listenoire"><table><thead><tr>'
+        + CK.th() + '<th>${T("Entrée")}</th><th>${T("Ajouté le")}</th>'
         + (D.peutRetirer ? '<th></th>' : '') + '</tr></thead><tbody>';
       for (var i=0;i<l.length;i++){ var e=l[i];
-        h += '<tr><td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(AV_TYPE[e.type] || '?') + '</span>'
+        h += '<tr class="' + CK.classe(e) + '">' + CK.td(e) + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(AV_TYPE[e.type] || '?') + '</span>'
           + '<div style="min-width:0"><div class="rf-nom"><code>' + esc(e.valeur) + '</code></div>'
           + '<div class="rf-sous"><span>' + esc(libType(e)) + '</span>'
           + (e.note ? '<span>·</span><span>' + esc(e.note) + '</span>' : '') + '</div></div></div></td>'
@@ -259,6 +310,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
        le formulaire d ajout (quelques champs, hauteur fixe). */
     corps.className = 'corps plein';
     corps.innerHTML = h;
+    CK.apres();
     lier();
 
     /* ⚠ LE TYPE PART EN CLAIR (typeLabel), pas en code interne : le fichier
@@ -366,13 +418,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 
   function charger(){
     dire('${T("Chargement…")}');
-    appeler('listenoire:donnees',[]).then(function(r){
+    return appeler('listenoire:donnees',[]).then(function(r){
       if (!r||!r.ok){ corps.innerHTML='<div class="vide m-'+esc((r&&r.motif)||'echec')+'">'+esc(expliquer(r))+'</div>'; dire(expliquer(r), 'err'); return; }
       D=r; RO=!r.peutAjouter;
       var av=document.getElementById('ro'); if (av) av.hidden=!(!r.peutAjouter && !r.peutRetirer);
       dessiner(); dire('');
     });
   }
+
+  // Les cases et la barre des gestes groupes (le reste des boutons a ses propres onclick).
+  corps.addEventListener('click', function(ev){ CK.clic(ev); });
 
   window.szRevenir = function(){ if (!OCCUPE && !AJOUT) charger(); };
   charger();

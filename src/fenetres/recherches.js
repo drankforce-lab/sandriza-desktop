@@ -93,6 +93,13 @@ tbody tr:hover td{background:var(--v04)}
   display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:750;font-variant-numeric:tabular-nums}
 .rs-rang .qui .tx{flex:1 1 auto}
 .rs-rang .jaugef{width:100%;max-width:18rem;margin-top:.3rem}
+/* LES CASES A COCHER (2026-10-29, gestes groupes) : la liste est faite de rangs, pas d un tableau — la case
+   du socle (szCoches) y est posee dans un span, et le rang coche se repere par :has. */
+.rs-rang{grid-template-columns:auto minmax(0,1fr) 10rem 3.5rem}
+span.szk-c{display:inline-flex;align-items:center;justify-content:center;width:1.4rem;cursor:pointer}
+.szk-c input[type=checkbox]{padding:0;border-radius:3px}
+.ls-tete span.szk-c{margin-right:.35rem}
+.ls-rang:has(input[data-szk]:checked){background:rgba(var(--or-rgb),.10);border-color:rgba(var(--or-rgb),.45)}
 `;
 
 /** Page complète de la fenêtre native « Recherches sans résultat ». */
@@ -161,6 +168,59 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('recherches')}
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div>';
   }
 
+  /* ══ LES GESTES GROUPES (2026-10-29, sa demande : cases toujours visibles) ══
+     Retirer (requetes traitees) et exporter. Chaque requete passe par le MEME geste du site que la croix
+     de son rang (recherches:retirer), une a la fois. « Vider le detail » reste a part : il vide TOUT.
+     ⚠ L identifiant d une case est la requete ENCODEE (encodeURIComponent) : une requete tapee par un
+     client peut porter un guillemet ou une barre oblique inverse, qui casseraient le selecteur des cases. */
+  function lotVues(L){
+    var V = L.filter(function(x){
+      var c = corps.querySelector('[data-szk="' + encodeURIComponent(x.q) + '"]');
+      var l = c && c.closest('.ls-rang');
+      return !!(l && l.getClientRects().length);
+    });
+    return V.length ? V : L;
+  }
+  var CK = szCoches({
+    zone: corps, barre: 'k-barre',
+    lignes: function(){ return D ? lotVues(filtrees()) : []; },   // « tout cocher » = la page affichee
+    contexte: function(){ return Q; },                             // une autre recherche vide la selection
+    id: function(x){ return encodeURIComponent(x.q); },
+    nom: function(x){ return x.q; },
+    fiche: function(x){ return Object.assign({}, x); },
+    compte: ['${T("{0} requête sélectionnée")}', '${T("{0} requêtes sélectionnées")}'],
+    actions: [
+      { cle: 'retirer', libelle: '${T("Retirer")}', cache: function(){ return !(D && D.peutModifier); } },
+      { cle: 'csv', libelle: '${T("Exporter (CSV)")}' }
+    ],
+    geste: function(cle, ids, tous){ return lotGeste(cle, ids, tous); }
+  });
+  function lotCase(x){ return CK.td(x).replace('<td', '<span').replace('</td>', '</span>'); }
+  function lotFiche(id){ return CK.fiches()[id] || {}; }
+  function lotQ(id){ var f = lotFiche(id); if (f.q != null) return String(f.q); try { return decodeURIComponent(id); } catch (e) { return id; } }
+  function lotGeste(cle, ids, tous){
+    if (!ids.length) return;
+    if (cle === 'csv') {
+      var csv = szCSV(['${T("Requête")}', '${T("Fois")}', '${T("Dernière fois")}'],
+        tous.map(function(id){ var f = lotFiche(id); return [lotQ(id), Number(f.fois) || 0, f.derniere || '']; }));
+      return szExporter('recherches-selection-' + new Date().toISOString().slice(0, 10) + '.csv', csv,
+        szPl(tous.length, '${T("{0} requête exportée")}', '${T("{0} requêtes exportées")}').split('{0}').join(tous.length));
+    }
+    var n = ids.length;
+    return szConfirmer({ prudent: true, titre: '${T("Retirer les requêtes traitées")}',
+      texte: szPl(n, '${T("{0} requête sera retirée de la liste, comme traitée. L’archive est conservée.")}', '${T("{0} requêtes seront retirées de la liste, comme traitées. L’archive est conservée.")}').split('{0}').join(n),
+      details: ids.slice(0, 8).map(function(id){ var f = lotFiche(id); return [lotQ(id), '${T("{0} fois")}'.split('{0}').join(Number(f.fois) || 0)]; })
+        .concat(n > 8 ? [['…', '${T("et {0} autres")}'.split('{0}').join(n - 8)]] : []),
+      oui: szPl(n, '${T("Retirer {0} requête")}', '${T("Retirer {0} requêtes")}').split('{0}').join(n) }).then(function(oui){
+      if (!oui) return;
+      ARME = false;
+      return szLotDerouler({ titre: '${T("Retrait des requêtes")}', ids: ids, nom: lotQ, motif: function(r){ return expliquer(r); },
+        faire: function(id){ return appeler('recherches:retirer', [lotQ(id)]); },
+        fait: function(k){ return szPl(k, '${T("{0} requête retirée de la liste.")}', '${T("{0} requêtes retirées de la liste.")}').split('{0}').join(k); } })
+        .then(function(){ CK.vider(); charger(); });
+    });
+  }
+
   function filtrees(){
     var q = Q.trim().toLowerCase();
     if (!q) return D.recentes || [];
@@ -191,7 +251,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('recherches')}
     /* ══ REFAITE (2026-10-15, lot E de la refonte du marketing) : une TETE (ce qu on regarde a gauche,
        recherche et gestes a droite), puis un RANG aere par requete — le nombre de fois en grand, sa
        jauge de frequence dessous. Crochets gardes : #rs-q, #rs-vers-journaux, #rs-vider, data-retirer. */
-    h = '<div class="ls-tete"><div class="ls-titre"><b>${T("Ce qu’on a cherché sans trouver")}</b>'
+    h = '<div class="ls-tete">' + CK.th().replace('<th', '<span').replace('</th>', '</span>') + '<div class="ls-titre"><b>${T("Ce qu’on a cherché sans trouver")}</b>'
       + '<span>${T("30 derniers jours")}</span></div><div class="droite">'
       + '<label class="ls-rch">${ICO.loupe}<input aria-label="${T("Chercher dans la liste")}" type="search" id="rs-q" placeholder="${T("Chercher dans la liste…")}" value="' + esc(Q) + '"></label>'
       + '<button class="ed-bt" id="rs-vers-journaux" title="${T("Voir ce journal dans le module Journaux")}">${T("Dans Journaux")}</button>'
@@ -202,13 +262,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('recherches')}
     var max = rows.reduce(function(m, x){ return Math.max(m, Number(x.fois) || 0); }, 0) || 1;
 
     // La liste en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
-    h += '<div class="ls-liste sz-pagee">';
+    h += '<div class="ls-liste sz-pagee">' + CK.barre();
     if (!rows.length) {
       h += '<div class="ls-vide">' + (Q ? '${T("Rien ne correspond.")}'
         : '${T("Aucune recherche infructueuse dans les 30 derniers jours.")}') + '</div>';
     } else {
       h += '<div data-pages="recherches">' + rows.map(function(x){
-        return '<div data-ctx-ligne class="ls-rang rs-rang">'
+        return '<div data-ctx-ligne class="ls-rang rs-rang' + CK.classe(x) + '">'
+          + lotCase(x)
           + '<div class="qui"><span class="rs-fois" aria-hidden="true">' + x.fois + '</span>'
           + '<div class="tx"><b>' + esc(x.q) + '</b>'
           + '<div class="jaugef"><i style="width:' + Math.max(4, Math.round(100 * (Number(x.fois) || 0) / max)) + '%"></i></div></div></div>'
@@ -236,6 +297,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('recherches')}
     h += '</div>';
 
     corps.innerHTML = h;
+    CK.apres();
 
     var q = document.getElementById('rs-q');
     /* (2026-10-19, audit — lot VOLUME) TEMPORISEE, 250 ms : chaque frappe redessinait toute la fenetre (le
@@ -284,6 +346,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('recherches')}
   }
 
   corps.addEventListener('click', function(ev){
+    if (CK.clic(ev)) return;   // une case, « tout cocher » ou la barre d actions
     var t = ev.target;
     if (!t || !t.closest) return;
     var br = t.closest('[data-retirer]');

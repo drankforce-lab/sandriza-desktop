@@ -150,6 +150,19 @@ label.case input{width:15px;height:15px;accent-color:var(--or)}
 .reco-no{font-size:.95rem!important;color:var(--tx)!important}
 .reco-ou{flex-direction:row!important;flex-wrap:wrap;gap:.3rem!important;align-items:center}
 .reco-rang .gestes button[data-monter],.reco-rang .gestes button[data-descendre]{width:2.1rem;padding:0}
+/* Les cases a cocher (gestes groupes, 2026-10-29) : les rangs sont des <div> en grille, pas un tableau. La case
+   est la premiere colonne, dans un <span class="szk-c"> (le socle la reconnait a cette classe) ; la surbrillance
+   du rang coche est posee ici (lotSurligner), le socle ne la pose que sur un <tr>. */
+.reco-rang.lot{grid-template-columns:1.3rem minmax(0,1.5fr) minmax(0,1.2fr) 7rem 6.5rem 27rem}
+.reco-rang .lot-c,.reco-sup .lot-c{display:flex;align-items:center;justify-content:center;align-self:stretch;cursor:pointer}
+.reco-rang .lot-c{margin-right:-.7rem}
+.reco-rang.coche{border-color:rgba(var(--or-rgb),.6);background:rgba(var(--or-rgb),.1)}
+.reco-sup{border-radius:8px}
+.reco-sup.coche{background:rgba(var(--or-rgb),.1)}
+.lot-rang{flex:0 0 auto;display:flex;align-items:center;gap:.5rem;margin:0 0 .55rem}
+.lot-rang .szk-barre{flex:1 1 auto;margin:0}
+.lot-rang .lot-tout{flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:1.3rem;
+  margin-left:calc(.9rem + 1px);cursor:pointer}
 `;
 
 /**
@@ -300,6 +313,106 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'ag-nom':60})}${JS_BROUILLON()}
     }
   }
 
+  /* LES GESTES GROUPES (2026-10-29, sa demande : cases toujours visibles). Activer, Desactiver (reco:basculer
+     prend l ETAT VOULU : chaque geste ne vise que les regles dans l etat inverse), Supprimer (une regle par
+     defaut est mise de cote et se restaure, une regle creee est detruite — la confirmation compte les deux),
+     Restaurer (les regles par defaut retirees, cochees dans leur carte). Pas de deplacement en lot : l ordre
+     se regle une regle a la fois.
+     ⚠ Les cases n apparaissent qu a qui peut modifier : en consultation seule, aucun geste n existe.
+     ⚠ << Tout cocher >> = ce qu on VOIT : lignes() ne rend que les rangs affiches (la page mesuree) et les
+     regles retirees. */
+  var CK = szCoches({
+    zone: corps, barre: 'k-barre',
+    lignes: function(){ return (D && ONGLET === 'regles' && lotOn()) ? lotVisibles(lotToutes()) : []; },
+    contexte: function(){ return ONGLET; },
+    id: function(r){ return r.id; },
+    nom: function(r){ return r.nom || r.id; },
+    fiche: function(r){ return Object.assign({}, r); },
+    compte: ['${T("{0} règle sélectionnée")}', '${T("{0} règles sélectionnées")}'],
+    actions: [
+      { cle: 'activer', libelle: '${T("Activer")}', prim: true, cache: function(){ return !lotOn(); },
+        pour: function(f){ return !f.supprimee && !f.active; } },
+      { cle: 'desactiver', libelle: '${T("Désactiver")}', cache: function(){ return !lotOn(); },
+        pour: function(f){ return !f.supprimee && !!f.active; } },
+      { cle: 'restaurer', libelle: '${T("Restaurer")}', cache: function(){ return !lotOn() || !(D.supprimees || []).length; },
+        pour: function(f){ return !!f.supprimee; } },
+      { cle: 'supprimer', libelle: '${T("Supprimer")}', danger: true, cache: function(){ return !lotOn(); },
+        pour: function(f){ return !f.supprimee; } }
+    ],
+    geste: function(cle, ids, tous){ return lotGeste(cle, ids, tous); }
+  });
+  function lotOn(){ return !!(D && D.peutModifier); }
+  function lotToutes(){
+    var R = (D.regles || []).map(function(r){ return Object.assign({}, r, { supprimee: false }); });
+    var vus = {}; R.forEach(function(r){ vus[r.id] = 1; });
+    return R.concat((D.supprimees || []).filter(function(s){ return !vus[s.id]; })
+      .map(function(s){ return Object.assign({}, s, { supprimee: true, pardefaut: true }); }));
+  }
+  function lotVisibles(L){
+    var V = L.filter(function(r){ var c = corps.querySelector('[data-szk="' + String(r.id).replace(/"/g, '') + '"]');
+      return !!(c && c.getClientRects && c.getClientRects().length); });
+    return V.length ? V : L;
+  }
+  function lotCase(h){ return String(h).replace('<td', '<span').replace('<th', '<span').replace('</td>', '</span>').replace('</th>', '</span>'); }
+  function lotSurligner(){
+    corps.querySelectorAll('.reco-rang [data-szk], .reco-sup [data-szk]').forEach(function(c){
+      var l = c.closest('.reco-rang, .reco-sup'); if (l) l.classList.toggle('coche', !!c.checked); });
+  }
+  function lotFiche(id){ return CK.fiches()[id] || {}; }
+  function lotNom(id){ return lotFiche(id).nom || id; }
+  function lotMotif(r){ return (r && r.detail) ? String(r.detail) : expliquer(r); }
+  function lotEcartes(ids, tous){
+    var n = tous.length - ids.length;
+    return n ? ' ' + szPl(n, '${T("{0} autre règle sélectionnée ne s’y prête pas : elle ne change pas.")}', '${T("{0} autres règles sélectionnées ne s’y prêtent pas : elles ne changent pas.")}').split('{0}').join(n) : '';
+  }
+  function lotGeste(cle, ids, tous){
+    if (!ids.length) return;
+    var n = ids.length, o, faire, titre, fait;
+    var details = ids.slice(0, 8).map(function(id){ var f = lotFiche(id);
+      return [f.nom || id, (f.typeLibelle || '') + (f.pardefaut ? ' · ${T("par défaut")}' : '')]; });
+    if (cle === 'activer' || cle === 'desactiver') {
+      var on = cle === 'activer';
+      faire = function(id){ return appeler('reco:basculer', [id, on]); };
+      titre = on ? '${T("Activation des règles")}' : '${T("Désactivation des règles")}';
+      fait = function(k){ return (on ? szPl(k, '${T("{0} règle activée.")}', '${T("{0} règles activées.")}')
+        : szPl(k, '${T("{0} règle désactivée.")}', '${T("{0} règles désactivées.")}')).split('{0}').join(k); };
+      o = { prudent: true, titre: on ? '${T("Activer les règles")}' : '${T("Désactiver les règles")}',
+        texte: (on
+          ? szPl(n, '${T("{0} règle sera activée : ses recommandations paraîtront sur la boutique.")}', '${T("{0} règles seront activées : leurs recommandations paraîtront sur la boutique.")}')
+          : szPl(n, '${T("{0} règle sera désactivée : ses recommandations ne paraîtront plus sur la boutique, jusqu’à ce qu’elle soit réactivée.")}', '${T("{0} règles seront désactivées : leurs recommandations ne paraîtront plus sur la boutique, jusqu’à ce qu’elles soient réactivées.")}')).split('{0}').join(n) + lotEcartes(ids, tous),
+        oui: (on ? szPl(n, '${T("Activer {0} règle")}', '${T("Activer {0} règles")}') : szPl(n, '${T("Désactiver {0} règle")}', '${T("Désactiver {0} règles")}')).split('{0}').join(n) };
+    } else if (cle === 'restaurer') {
+      faire = function(id){ return appeler('reco:restaurer', [id]); };
+      titre = '${T("Restauration des règles")}';
+      fait = function(k){ return szPl(k, '${T("{0} règle remise en service.")}', '${T("{0} règles remises en service.")}').split('{0}').join(k); };
+      o = { prudent: true, titre: '${T("Restaurer les règles par défaut")}',
+        texte: szPl(n, '${T("{0} règle par défaut sera remise en service.")}', '${T("{0} règles par défaut seront remises en service.")}').split('{0}').join(n) + lotEcartes(ids, tous),
+        oui: szPl(n, '${T("Restaurer {0} règle")}', '${T("Restaurer {0} règles")}').split('{0}').join(n) };
+    } else {
+      /* Une regle par defaut est MISE DE COTE (restaurable) ; une regle creee est DETRUITE. La boite compte
+         les deux, et ne prend le ton << danger >> que si quelque chose sera vraiment detruit — comme le bouton
+         de la ligne. */
+      var nDef = ids.filter(function(id){ return !!lotFiche(id).pardefaut; }).length, nPerso = n - nDef;
+      var tx = [];
+      if (nPerso) tx.push(szPl(nPerso, '${T("{0} règle sera supprimée définitivement. Cette action est irréversible.")}', '${T("{0} règles seront supprimées définitivement. Cette action est irréversible.")}').split('{0}').join(nPerso));
+      if (nDef) tx.push(szPl(nDef, '${T("{0} règle par défaut sera retirée des recommandations ; vous pourrez la restaurer ultérieurement.")}', '${T("{0} règles par défaut seront retirées des recommandations ; vous pourrez les restaurer ultérieurement.")}').split('{0}').join(nDef));
+      faire = function(id){ return appeler('reco:supprimer', [id, !!lotFiche(id).pardefaut]); };
+      titre = '${T("Suppression des règles")}';
+      fait = function(k){ return szPl(k, '${T("{0} règle supprimée.")}', '${T("{0} règles supprimées.")}').split('{0}').join(k); };
+      o = { titre: '${T("Supprimer les règles")}', texte: tx.join(' ') + lotEcartes(ids, tous),
+        oui: szPl(n, '${T("Supprimer {0} règle")}', '${T("Supprimer {0} règles")}').split('{0}').join(n) };
+      if (nPerso) o.danger = true; else o.prudent = true;
+    }
+    o.details = details;
+    return szConfirmer(o).then(function(oui){
+      if (!oui) return;
+      ARME = '';
+      if (cle === 'supprimer' && REG_FORM && REG_FORM.r && ids.indexOf(REG_FORM.r.id) >= 0) REG_FORM = null;
+      return szLotDerouler({ titre: titre, ids: ids, nom: lotNom, motif: lotMotif, faire: faire, fait: fait })
+        .then(function(){ CK.vider(); charger(); });
+    });
+  }
+
   function vueRegles(){
     var h = '';
     if (REG_FORM) h += formulaireRegle();
@@ -310,6 +423,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'ag-nom':60})}${JS_BROUILLON()}
     h += '<div class="ls-note">${T("Une règle plus haute passe avant :")} '
       + '${T("c’est elle que le client voit en premier sur une fiche.")}</div>';
     h += '<div class="ls-liste sz-pagee">';
+    if (lotOn() && ((D.regles || []).length || (D.supprimees || []).length))
+      h += '<div class="lot-rang">' + lotCase(CK.th()).replace('class="c szk-c"', 'class="szk-c lot-tout"') + CK.barre() + '</div>';
     if (!(D.regles || []).length) {
       h += '<div class="ls-vide">${T("Aucune règle pour l’instant")}'
         + (D.peutModifier ? ' ${T("— utilisez « + Nouvelle règle » ci-dessus pour en créer une.")}' : '.') + '</div>';
@@ -327,7 +442,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'ag-nom':60})}${JS_BROUILLON()}
             + '<button class="mini geste danger" data-suppr="' + esc(r.id) + '" data-defaut="'
             + (r.pardefaut ? '1' : '0') + '">' + '${T("Supprimer")}' + '</button>';
         }
-        return '<div data-ctx-ligne class="ls-rang reco-rang' + (r.active ? '' : ' eteint') + '">'
+        return '<div data-ctx-ligne class="ls-rang reco-rang' + (r.active ? '' : ' eteint') + (lotOn() ? ' lot' : '') + CK.classe(r) + '">'
+          + (lotOn() ? lotCase(CK.td(r)).replace('class="c szk-c"', 'class="szk-c lot-c"') : '')
           + '<div class="qui"><span class="bico reco-no" aria-hidden="true">' + (i + 1) + '</span>'
           + '<div class="tx"><b class="reco-nom">' + esc(r.nom) + '</b><span>' + esc(r.typeLibelle)
           + (r.pardefaut ? ' · ${T("par défaut")}' : '') + '</span></div></div>'
@@ -349,7 +465,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'ag-nom':60})}${JS_BROUILLON()}
         + '<div class="dt" style="margin-bottom:.4rem">${T("Elles ne sont pas détruites :")} '
         + '${T("vous pouvez les remettre en service.")}</div>'
         + D.supprimees.map(function(s){
-            return '<div style="display:flex;align-items:center;gap:.5rem;padding:.25rem 0">'
+            return '<div class="reco-sup' + CK.classe(s) + '" style="display:flex;align-items:center;gap:.5rem;padding:.25rem 0">'
+              + (lotOn() ? lotCase(CK.td(s)).replace('class="c szk-c"', 'class="szk-c lot-c"') : '')
               + '<strong>' + esc(s.nom) + '</strong>'
               + '<span class="dt">' + esc(s.typeLibelle) + '</span>'
               + (D.peutModifier
@@ -508,6 +625,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'ag-nom':60})}${JS_BROUILLON()}
        : vueRegles();
     if (LIAISON) h += boiteLiaison();
     corps.innerHTML = h;
+    CK.apres(); lotSurligner();
     brancher();
     if (VOIR) { var v = VOIR; VOIR = null; montrerNouveau(trouverVoir(v)); }
   }
@@ -645,6 +763,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'ag-nom':60})}${JS_BROUILLON()}
   corps.addEventListener('click', function(ev){
     var t = ev.target;
     if (!t || !t.closest || t.closest('.boite')) return;
+    if (CK.clic(ev)) { lotSurligner(); return; }   // une case, << tout cocher >> ou la barre d actions
 
     var og = t.closest('[data-onglet]');
     if (og) {

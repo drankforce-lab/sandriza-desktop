@@ -335,6 +335,111 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div>';
   }
 
+  /* ══ LES GESTES GROUPES (2026-10-29, sa demande : cases toujours visibles) ═══════════════════
+     DEUX selections, une par onglet : changer d onglet les vide toutes les deux (corps.onclick, data-vue).
+     · Depenses : Exporter (CSV) et Supprimer (droit D.peutSupprimer, boite « danger » — la meme phrase que la
+       fiche). Chaque suppression passe par l op unitaire depenses:supprimer [id], qui reverifie le droit ;
+       le recu reste conserve (le serveur refuse de l effacer). Un autre exercice, mois ou categorie vide la
+       selection ; changer de page la garde.
+     · Fournisseurs (annuaire) : Retirer, seulement ce qui a ete AJOUTE ou CORRIGE ici (un fournisseur livre
+       ne se retire pas, comme a la ligne), seulement quand le verrou de l annuaire est TENU. La confirmation
+       distingue les retraits des corrections annulees (le fournisseur livre retrouve son classement).
+     ⚠ Pas de changement de categorie ni de taxes en lot : une ligne fiscale se choisit facture par facture. */
+  var CKD = szCoches({
+    zone: corps, barre: 'k-barre',
+    lignes: function(){ return (D && VUE === 'depenses') ? (D.lignes || []) : []; },
+    contexte: function(){ return ANNEE + '|' + MOIS + '|' + CAT; },
+    id: function(r){ return r.id; },
+    nom: function(r){ return r.description || r.fournisseur || r.id; },
+    fiche: function(r){ return Object.assign({}, r); },
+    compte: ['${T("{0} dépense sélectionnée")}', '${T("{0} dépenses sélectionnées")}'],
+    actions: [
+      /* (2026-10-29, sa décision) PAS DE SUPPRESSION EN LOT, comme les factures : la comptabilité se supprime une
+         dépense à la fois, depuis sa fiche. En lot, l export seulement. */
+      { cle: 'csv', libelle: '${T("Exporter (CSV)")}' }
+    ],
+    geste: function(cle, ids, tous){ return lotGesteDep(cle, ids, tous); }
+  });
+  function lotAnnEcrit(){ return !!(ANN && ANN.peutModifier && VERROU && VERROU.obtenu); }
+  var CKA = szCoches({
+    zone: corps, barre: 'k-barre-ann',
+    lignes: function(){ return (ANN && VUE === 'annuaire') ? (ANN.lignes || []) : []; },
+    contexte: function(){ return ANN_Q; },
+    id: function(r){ return r.id; },
+    nom: function(r){ return r.id + (r.nom ? ' — ' + r.nom : ''); },
+    fiche: function(r){ return Object.assign({}, r); },
+    compte: ['${T("{0} fournisseur sélectionné")}', '${T("{0} fournisseurs sélectionnés")}'],
+    actions: [
+      { cle: 'retirer', libelle: '${T("Retirer")}', danger: true, cache: function(){ return !lotAnnEcrit(); },
+        aide: '${T("Seulement ce que vous avez ajouté ou corrigé : un fournisseur livré avec l’application ne se retire pas.")}',
+        pour: function(f){ return f.origine !== 'integre'; } }
+    ],
+    geste: function(cle, ids, tous){ return lotGesteAnn(cle, ids, tous); }
+  });
+  function lotDep(id){ return CKD.fiches()[id] || {}; }
+  function lotDepNom(id){ var f = lotDep(id); return (szJour(f.date) || f.dateFr || '') + ' · ' + (f.description || f.fournisseur || id); }
+  function lotAnn(id){ return CKA.fiches()[id] || {}; }
+  // Un montant affiche (« 1 234,56 $ ») en nombre pour le tableur (1234.56).
+  function lotNombre(s){ var v = parseFloat(String(s == null ? '' : s).replace(/[^0-9,.-]/g, '').replace(',', '.')); return isFinite(v) ? v.toFixed(2) : ''; }
+  function lotPlus(n){ return n > 8 ? [['…', '${T("et {0} autres")}'.split('{0}').join(n - 8)]] : []; }
+  function lotGesteDep(cle, ids, tous){
+    if (!ids.length) return;
+    if (cle === 'csv') {
+      var csv = szCSV(['${T("Date")}', '${T("Description")}', '${T("Fournisseur")}', '${T("Catégorie")}', '${T("Ligne fiscale")}',
+        '${T("Mode de paiement")}', '${T("Montant (hors taxes)")}', '${T("TPS")}', '${T("TVQ")}', '${T("Reçu")}'],
+        tous.map(function(id){ var f = lotDep(id); return [String(f.date || '').slice(0, 10), f.description || '', f.fournisseur || '',
+          catLbl(f.categorie, f.categorieLbl), f.ligne || '', szTd(f.paiement) || '', (Number(f.montantN) || 0).toFixed(2),
+          lotNombre(f.tps), lotNombre(f.tvq), f.recu ? '${T("Joint")}' : '${T("Manquant")}']; }));
+      return szExporter('depenses-' + new Date().toISOString().slice(0, 10) + '.csv', csv,
+        szPl(tous.length, '${T("{0} dépense exportée")}', '${T("{0} dépenses exportées")}').split('{0}').join(tous.length));
+    }
+    if (cle !== 'supprimer') return;
+    var n = ids.length;
+    var somme = ids.reduce(function(m, id){ return m + (Number(lotDep(id).montantN) || 0); }, 0);
+    return szConfirmer({ danger: true, titre: '${T("Supprimer les dépenses")}',
+      texte: szPl(n, '${T("{0} dépense sera supprimée définitivement. Elle disparaîtra de la comptabilité et des rapports d’impôt, et les taxes payées ne seront plus réclamées. Cette action est irréversible.")}',
+        '${T("{0} dépenses seront supprimées définitivement. Elles disparaîtront de la comptabilité et des rapports d’impôt, et les taxes payées ne seront plus réclamées. Cette action est irréversible.")}').split('{0}').join(n),
+      details: [['${T("Montant (hors taxes)")}', fmtArgent(somme)]]
+        .concat(ids.slice(0, 8).map(function(id){ var f = lotDep(id); return [lotDepNom(id), f.montant || '—']; })).concat(lotPlus(n)),
+      oui: szPl(n, '${T("Supprimer {0} dépense")}', '${T("Supprimer {0} dépenses")}').split('{0}').join(n) }).then(function(oui){
+      if (!oui) return;
+      OCCUPE = true;   // pas d actualisation au milieu du lot
+      var fin = function(){ OCCUPE = false; CKD.vider(); return charger(); };
+      return szLotDerouler({ titre: '${T("Suppression des dépenses")}', ids: ids, nom: lotDepNom, motif: function(r){ return expliquer(r); },
+        faire: function(id){ return appeler('depenses:supprimer', [id]); },
+        fait: function(k){ return szPl(k, '${T("{0} dépense supprimée.")}', '${T("{0} dépenses supprimées.")}').split('{0}').join(k); } })
+        .then(fin, fin);
+    });
+  }
+  function lotGesteAnn(cle, ids, tous){
+    if (cle !== 'retirer' || !ids.length) return;
+    if (!lotAnnEcrit()) { dire('${T("Annuaire ouvert par")} ' + ((VERROU && VERROU.parQui) || '${T("un collègue")}') + ' ${T("— consultation seulement.")}', 'att'); return; }
+    var n = ids.length;
+    var corr = ids.filter(function(id){ return lotAnn(id).origine === 'corrige'; }).length, ret = n - corr, ecart = tous.length - n;
+    var texte = [
+      ret ? szPl(ret, '${T("{0} fournisseur sera retiré de l’annuaire : les prochaines dépenses à son nom ne seront plus classées automatiquement.")}',
+        '${T("{0} fournisseurs seront retirés de l’annuaire : les prochaines dépenses à leur nom ne seront plus classées automatiquement.")}').split('{0}').join(ret) : '',
+      corr ? szPl(corr, '${T("{0} fournisseur livré perdra votre correction et retrouvera son classement d’origine.")}',
+        '${T("{0} fournisseurs livrés perdront votre correction et retrouveront leur classement d’origine.")}').split('{0}').join(corr) : '',
+      '${T("Les dépenses déjà saisies ne sont pas modifiées.")}',
+      ecart ? szPl(ecart, '${T("{0} autre fournisseur sélectionné est livré avec l’application : il ne change pas.")}',
+        '${T("{0} autres fournisseurs sélectionnés sont livrés avec l’application : ils ne changent pas.")}').split('{0}').join(ecart) : ''
+    ].filter(Boolean).join(' ');
+    // Rouge seulement s il y a un VRAI retrait ; une simple remise au classement d origine ne détruit rien (comme la ligne).
+    return szConfirmer({ danger: ret > 0, prudent: !ret, titre: '${T("Retirer des fournisseurs de l’annuaire")}', texte: texte,
+      details: ids.slice(0, 8).map(function(id){ var f = lotAnn(id);
+        return [id, (catLbl(f.categorie, f.categorieLbl) || '—') + (f.origine === 'corrige' ? ' → ' + (f.categorieBaseLbl || '—') : '')]; }).concat(lotPlus(n)),
+      oui: szPl(n, '${T("Retirer {0} fournisseur")}', '${T("Retirer {0} fournisseurs")}').split('{0}').join(n) }).then(function(oui){
+      if (!oui) return;
+      ANN_RETIRE = '';
+      var fin = function(){ CKA.vider(); return chargerAnnuaire(); };
+      return szLotDerouler({ titre: '${T("Retrait des fournisseurs")}', ids: ids, nom: function(id){ return id; }, motif: function(r){ return expliquer(r); },
+        faire: function(id){ return appeler('depenses:annuaireRetirer', [id]); },
+        fait: function(k){ return szPl(k, '${T("{0} fournisseur retiré ou rétabli.")}', '${T("{0} fournisseurs retirés ou rétablis.")}').split('{0}').join(k); } })
+        .then(fin, fin);
+    });
+  }
+
   /* ── LE DESSIN ─────────────────────────────────────────────────────────── */
   function dessiner(){
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
@@ -351,7 +456,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
        depenses — il defilait avant, et la regle est << aucune glissiere >>. */
     if (VUE === 'annuaire') {
       if (act) act.innerHTML = actionsAnnuaire();
-      corps.className = 'cx'; h += vueAnnuaire(); corps.innerHTML = h; brancherAnnuaire(); mesurerListe(); return;
+      corps.className = 'cx'; h += vueAnnuaire(); corps.innerHTML = h; CKA.apres(); brancherAnnuaire(); mesurerListe(); return;
     }
 
     /* LA TETE : l annee (le filtre qui dit l exercice), puis le geste principal, toujours a droite.
@@ -400,14 +505,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
       /* LA LIGNE (refonte 2026-10-16) : description en gras, fournisseur et mode de
          paiement dessous ; la categorie et sa ligne fiscale ; le montant en gras ;
          les taxes sur deux lignes ; le recu en pastille. Crochets gardes : tr[data-id]. */
-      h += '<div class="liste" data-pages="depenses-liste"><table><thead><tr><th>${T("Dépense")}</th><th>${T("Catégorie (ligne fiscale)")}</th>'
+      h += CKD.barre() + '<div class="liste" data-pages="depenses-liste"><table><thead><tr>' + CKD.th() + '<th>${T("Dépense")}</th><th>${T("Catégorie (ligne fiscale)")}</th>'
         + '<th>${T("Date")}</th><th style="text-align:right">${T("Montant")}</th>'
         + '<th style="text-align:right">${T("Taxes")}</th><th>${T("Reçu")}</th></tr></thead><tbody>'
         + rows.map(function(r){
             var sous = [];
             if (r.fournisseur && r.description) sous.push(esc(r.fournisseur));
             if (r.paiement) sous.push(esc(szTd(r.paiement)));
-            return '<tr data-id="' + esc(r.id) + '" title="${T("Voir le détail")}">'
+            return '<tr data-id="' + esc(r.id) + '" class="' + CKD.classe(r) + '" title="${T("Voir le détail")}">'
+              + CKD.td(r)
               + '<td><b>' + esc(r.description || r.fournisseur || '—') + '</b>'
               + (r.usd ? '<span class="rf-pill bleu usd">USD</span>' : '')
               + (sous.length ? '<span class="cx-l2">' + sous.join(' · ') + '</span>' : '') + '</td>'
@@ -460,6 +566,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
 
     corps.className = 'cx';
     corps.innerHTML = h;
+    CKD.apres();
     brancher();
     mesurerListe();
   }
@@ -565,10 +672,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
     if (!rows.length) {
       h += '<div class="vide">${T("Aucun fournisseur ne correspond.")}</div>';
     } else {
-      h += '<div class="liste" data-pages="depenses-annuaire"><table><thead><tr><th>${T("Fournisseur")}</th><th>${T("Catégorie (ligne fiscale)")}</th>'
+      h += CKA.barre() + '<div class="liste" data-pages="depenses-annuaire"><table><thead><tr>' + CKA.th() + '<th>${T("Fournisseur")}</th><th>${T("Catégorie (ligne fiscale)")}</th>'
         + '<th>${T("Origine")}</th><th style="text-align:right">${T("Actions")}</th></tr></thead><tbody>'
         + rows.map(function(r){
-            return '<tr data-ann="' + esc(r.id) + '">'
+            return '<tr data-ann="' + esc(r.id) + '" class="' + CKA.classe(r) + '">'
+              + CKA.td(r)
               + '<td><b>' + esc(r.id) + '</b>'
               + (r.nom ? '<span class="cx-l2">' + esc(r.nom) + '</span>' : '') + '</td>'
               + '<td>' + esc(catLbl(r.categorie, r.categorieLbl))
@@ -1302,10 +1410,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
   corps.onclick = function(ev){
     var t = ev.target;
     if (!t || !t.closest) return;
+    if ((VUE === 'annuaire' ? CKA : CKD).clic(ev)) return;   // une case, « tout cocher » ou la barre d actions
     var vv = t.closest('[data-vue]');
     if (vv) {
       var v = vv.getAttribute('data-vue');
       if (v === VUE) return;
+      // Chaque onglet a sa selection ; en changer les vide toutes les deux.
+      if (CKD.occupe() || CKA.occupe()) return;
+      CKD.vider(); CKA.vider();
       VUE = v; ANN_FORM = null; ANN_RETIRE = '';
       /* ⚠ Les deux vues partagent la mesure du socle, qui ne rappelle que si le
          compte CHANGE : une liste de l autre vue qui tiendrait le meme nombre de

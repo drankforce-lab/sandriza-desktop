@@ -138,6 +138,15 @@ td.quand .qui{color:var(--tx2);font-size:.72rem}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
+/* LES CASES A COCHER (2026-10-29, gestes groupes). En transit, la liste est faite de cartes : la case du
+   socle (szCoches) y est posee dans un span, et la carte cochee se repere par :has. L historique est un
+   tableau : la case y est une cellule. */
+span.szk-c{display:inline-flex;align-items:center;justify-content:center;width:1.4rem;cursor:pointer}
+.szk-c input[type=checkbox]{padding:0;border-radius:3px}
+.lot-haut{display:flex;align-items:flex-start;gap:.5rem}
+.lot-haut>span.szk-c{height:2.55rem}
+.lot-haut .szk-barre{flex:1 1 auto;min-width:0}
+.carte.transit:has(input[data-szk]:checked){background:rgba(var(--or-rgb),.10);border-color:rgba(var(--or-rgb),.45)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -253,6 +262,83 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   function enTransit(){ return (D.transferts || []).filter(function(t){ return t.etat === 'transit'; }); }
   function clos(){ return (D.transferts || []).filter(function(t){ return t.etat !== 'transit'; }); }
 
+  /* ══ LES GESTES GROUPES (2026-10-29, sa demande : cases toujours visibles) ══════════
+     Annuler (en transit seulement) et exporter (les deux onglets). Chaque transfert passe par le MEME geste
+     du site que le bouton de sa carte (transfert:annuler), un a la fois — le coeur rend le stock a
+     l origine et refuse un transfert deja clos.
+     ⚠⚠ « RECEVOIR » N EST PAS EN LOT, ET C EST VOULU : la reception demande la quantite REELLEMENT recue
+     et, s il en manque, le motif de l ecart (voletRecevoir). La faire en lot supposerait « tout est
+     arrive » pour chacun — exactement l ecart qu on ferme d un clic, que cet ecran existe pour empecher. */
+  function lotVues(L){
+    if (TAB !== 'transit') return L;   // l historique est un tableau : le socle sait ce qui s y voit
+    var V = L.filter(function(t){
+      var c = corps.querySelector('[data-szk="' + String(t.id).replace(/"/g, '') + '"]');
+      var l = c && c.closest('.carte');
+      return !!(l && l.getClientRects().length);
+    });
+    return V.length ? V : L;
+  }
+  var CK = szCoches({
+    zone: corps, barre: 'k-barre',
+    lignes: function(){ return !D ? [] : TAB === 'transit' ? lotVues(enTransit()) : TAB === 'histo' ? clos() : []; },
+    contexte: function(){ return TAB; },   // un autre onglet vide la selection
+    id: function(t){ return t.id; },
+    nom: function(t){ return (t.nom || t.id) + (t.cle ? ' · ' + t.cle : ''); },
+    fiche: function(t){ return Object.assign({}, t); },
+    compte: ['${T("{0} transfert sélectionné")}', '${T("{0} transferts sélectionnés")}'],
+    actions: [
+      { cle: 'annuler', libelle: '${T("Annuler")}', danger: true,
+        cache: function(){ return !(D && D.peutEcrire) || TAB !== 'transit'; },
+        pour: function(f){ return f.etat === 'transit'; } },
+      { cle: 'csv', libelle: '${T("Exporter (CSV)")}' }
+    ],
+    geste: function(cle, ids, tous){ return lotGeste(cle, ids, tous); }
+  });
+  function lotCase(t){ return CK.td(t).replace('<td', '<span').replace('</td>', '</span>'); }
+  function lotTout(){ return CK.th().replace('<th', '<span').replace('</th>', '</span>'); }
+  function lotFiche(id){ return CK.fiches()[id] || {}; }
+  function lotNom(id){ var f = lotFiche(id); return (f.nom || id) + (f.cle ? ' · ' + f.cle : ''); }
+  function lotEcartes(ids, tous){
+    var n = tous.length - ids.length;
+    return n ? ' ' + szPl(n, '${T("{0} autre transfert sélectionné ne s’y prête pas : il ne change pas.")}', '${T("{0} autres transferts sélectionnés ne s’y prêtent pas : ils ne changent pas.")}').split('{0}').join(n) : '';
+  }
+  function lotGeste(cle, ids, tous){
+    if (!ids.length) return;
+    if (cle === 'csv') {
+      // Les memes colonnes que l export de l historique ; un transfert en transit ou annule a « recu » et « ecart » vides.
+      var csv = szCSV(['${T("Article")}', '${T("Variante")}', '${T("SKU")}',
+        '${T("Depuis")}', '${T("Vers")}', '${T("État")}',
+        '${T("Parti")}', '${T("Reçu")}', '${T("Écart")}',
+        '${T("Motif")}', '${T("Note d’écart")}', '${T("Le")}', '${T("Reçu par")}'],
+        tous.map(function(id){ var t = lotFiche(id), recu = t.etat === 'recu';
+          return [t.nom || '', t.cle || '', t.sku || '', t.deNom || '', t.versNom || '',
+            t.etat === 'transit' ? '${T("en transit")}' : t.etat === 'annule' ? '${T("annulé")}' : '${T("reçu")}',
+            Number(t.quantite || 0),
+            (recu && t.quantiteRecue != null) ? Number(t.quantiteRecue) : '',
+            recu ? Number(t.ecart || 0) : '',
+            t.motifLbl || '', t.noteEcart || '',
+            String((t.etat === 'transit' ? t.partiLe : t.recuLe) || '').slice(0, 10), t.recuPar || '']; }));
+      return szExporter('transferts-selection-' + new Date().toISOString().slice(0, 10) + '.csv', csv,
+        szPl(tous.length, '${T("{0} transfert exporté")}', '${T("{0} transferts exportés")}').split('{0}').join(tous.length));
+    }
+    if (BUSY) return;
+    var n = ids.length;
+    return szConfirmer({ danger: true, titre: '${T("Annuler les transferts")}',
+      texte: szPl(n, '${T("{0} transfert sera clos comme annulé et sa quantité partie rendue à l’entrepôt d’origine.")}', '${T("{0} transferts seront clos comme annulés et leur quantité partie rendue à l’entrepôt d’origine.")}').split('{0}').join(n) + lotEcartes(ids, tous),
+      details: ids.slice(0, 8).map(function(id){ var t = lotFiche(id);
+          return [lotNom(id), String(t.deNom || '—') + ' → ' + String(t.versNom || '—') + ' · ' + String(t.quantite || 0)]; })
+        .concat(n > 8 ? [['…', '${T("et {0} autres")}'.split('{0}').join(n - 8)]] : []),
+      oui: szPl(n, '${T("Annuler {0} transfert")}', '${T("Annuler {0} transferts")}').split('{0}').join(n),
+      non: '${T("Garder les transferts")}' }).then(function(oui){
+      if (!oui) return;
+      BUSY = true; retenirRecevoir(); OUVERT = '';
+      return szLotDerouler({ titre: '${T("Annulation des transferts")}', ids: ids, nom: lotNom, motif: function(r){ return expliquer(r); },
+        faire: function(id){ return appeler('transfert:annuler', [{ id: id }]); },
+        fait: function(k){ return szPl(k, '${T("{0} transfert annulé — le stock est rendu à l’entrepôt d’origine.")}', '${T("{0} transferts annulés — le stock est rendu à l’entrepôt d’origine.")}').split('{0}').join(k); } })
+        .then(function(){ BUSY = false; CK.vider(); return charger(); }, function(){ BUSY = false; return charger(); });
+    });
+  }
+
   /* ══ DESSIN ══════════════════════════════════════════════════════════════ */
   function dessiner(){
     if (!D) return;
@@ -291,6 +377,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (TAB === 'transit') corps.innerHTML = tuiles + vueTransit();
     else if (TAB === 'histo') corps.innerHTML = tuiles + vueHisto();
     else corps.innerHTML = vueNeuf();
+    CK.apres();
   }
 
   /* Le lieu en gras, le casier et la section en dessous, en petit.
@@ -325,13 +412,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     return '<div class="avis jaune">${T("Les unités en transit sont <strong>retirées du stock vendable</strong> : ")}'
       + '${T("l’article s’affiche épuisé sur la boutique le temps du trajet, et les clients inscrits à l’alerte ")}'
       + '${T("« de retour en stock » sont prévenus à la réception.")}</div>'
-      + '<div class="sz-pagee"><div class="pile" data-pages="transferts-transit">' + l.map(carteTransit).join('') + '</div></div>';
+      + '<div class="sz-pagee"><div class="lot-haut">' + lotTout() + CK.barre() + '</div><div class="pile" data-pages="transferts-transit">' + l.map(carteTransit).join('') + '</div></div>';
   }
 
   function carteTransit(t){
     var ouvert = (OUVERT === t.id);
-    return '<div class="carte transit">'
+    return '<div class="carte transit' + CK.classe(t) + '">'
       + '<div class="ligne">'
+      +   lotCase(t)
       +   '<span class="qte">' + t.quantite + '</span>'
       +   '<span><span class="nom">' + esc(t.nom) + '</span> · ' + esc(t.cle) + '<br>'
       +     '<span class="sku">' + esc(t.sku) + '</span></span>'
@@ -386,14 +474,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
        juste apres le trajet, et les trois CHIFFRES sont cote a cote a la fin.
        Parti / recu / ecart se lisent ENSEMBLE ou ne se lisent pas — separes par
        un motif et un etat, l oeil doit sauter par-dessus pour comparer. */
-    return '<div class="carte sz-pagee"><div data-pages="transferts-histo"><table><thead><tr>'
-      + '<th class="art">${T("Article")}</th><th>${T("Trajet")}</th><th>${T("État")}</th>'
+    return '<div class="carte sz-pagee">' + CK.barre() + '<div data-pages="transferts-histo"><table><thead><tr>'
+      + CK.th() + '<th class="art">${T("Article")}</th><th>${T("Trajet")}</th><th>${T("État")}</th>'
       + '<th class="num">${T("Parti")}</th><th class="num">${T("Reçu")}</th><th class="num">${T("Écart")}</th>'
       + '<th>${T("Motif")}</th><th>${T("Le")}</th>'
       + '</tr></thead><tbody>'
       + l.map(function(t){
           var ec = t.ecart || 0;
-          return '<tr>'
+          return '<tr class="' + CK.classe(t) + '">' + CK.td(t)
             + '<td class="art"><span class="nom">' + esc(t.nom) + '</span> · ' + esc(t.cle)
             +   '<br><span class="sku">' + esc(t.sku) + '</span></td>'
             + '<td>' + trajet(t) + '</td>'
@@ -623,6 +711,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 
   /* ══ ÉCOUTEURS ═══════════════════════════════════════════════════════════ */
   document.addEventListener('click', function(e){
+    if (CK.clic(e)) return;   // une case, « tout cocher » ou la barre d actions
     var t = e.target; if (!t || !t.closest) return;
     // Les tuiles (refonte du 2026-09-25) : l onglet qui montre ce qu elles comptent.
     var tt = t.closest('[data-trt]');

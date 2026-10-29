@@ -96,6 +96,17 @@ input.c{width:6.4rem;text-align:right}
 .volet .rangee{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
 .volet label{font-size:.74rem;color:var(--tx2)}
 .vide{padding:1.6rem .6rem;text-align:center;color:var(--tx2);font-size:.85rem}
+/* LES CASES A COCHER (gestes groupes, 2026-10-29) : « En cours » est fait de CARTES, pas d un tableau. La case
+   du socle (szCoches) y est posee dans un <span class="szk-c"> ; la carte cochee est surlignee ici (le socle ne
+   surligne qu un <tr>). « Historique » est un tableau : la case y est une cellule, comme ailleurs. */
+.lot-rang{flex:0 0 auto;display:flex;align-items:center;gap:.5rem}
+.lot-rang .szk-barre{flex:1 1 auto;margin:0}
+.lot-rang .lot-tout{flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:1.4rem;
+  margin-left:calc(.75rem + 1px);cursor:pointer}
+span.szk-c.lot-c{display:inline-flex;align-items:center;justify-content:center;width:1.4rem;cursor:pointer}
+.pile>.carte.coche{border-color:rgba(var(--or-rgb),.6);background:rgba(var(--or-rgb),.1)}
+.lot-motif{width:100%;margin:.9rem 0 0}
+.lot-motif-err{min-height:1.1em;margin-top:.3rem;font-size:.76rem;color:var(--tx-err)}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
@@ -197,6 +208,168 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       .catch(function(){ return { ok:false, motif:'echec' }; });
   }
 
+  /* ══ LES GESTES GROUPES (2026-10-29, sa demande : cases toujours visibles) ═══════════════════
+     Imprimer (tous), Marquer envoyes (brouillons), Clore (recus en partie, UN motif pour tous), Annuler
+     (brouillons et envoyes — la regle du serveur : un bon recu en partie se clot, il ne s annule pas).
+     Chaque geste passe par l op UNITAIRE du pont, bon par bon, avec les memes arguments qu un clic sur la
+     carte : bc:envoyer [id], bc:annuler [id, ''], bc:clore [id, motif]. Le serveur reverifie l etat de
+     chaque bon (deja envoye, deja clos, recu entre-temps) : un refus est nomme au bilan, les autres passent.
+     ⚠ JAMAIS LA RECEPTION EN LOT : elle fait entrer du stock, ligne par ligne, avec sa propre confirmation.
+     ⚠ PAS DE CASES dans « A commander » : ce sont des propositions, pas des bons (elles ont deja leurs cases,
+     qui disent quelles lignes partent sur le bon).
+     ⚠ « Tout cocher » = ce qu on VOIT : les cartes cachees par la pagination mesuree ne comptent pas. */
+  function lotListe(){
+    if (!D || EDIT) return [];
+    if (TAB === 'histo') return fermes();
+    if (TAB === 'cours' && !(OUVERT && VOLET === 'recevoir')) return ouverts();
+    return [];
+  }
+  function lotVisibles(L){
+    var V = L.filter(function(b){ var c = corps.querySelector('[data-szk="' + String(b.id).replace(/"/g, '') + '"]');
+      return !!(c && c.getClientRects && c.getClientRects().length); });
+    return V.length ? V : L;
+  }
+  function lotEcrit(){ return !(D && D.peutEcrire) || TAB !== 'cours'; }
+  var CK = szCoches({
+    zone: corps, barre: 'k-barre',
+    lignes: function(){ return lotVisibles(lotListe()); },
+    // Un autre onglet, l editeur ou la reception ouverts : la selection est videe.
+    contexte: function(){ return TAB + '|' + (EDIT ? 'edit' : '') + '|' + ((OUVERT && VOLET === 'recevoir') ? 'rec' : ''); },
+    id: function(b){ return b.id; },
+    nom: function(b){ return (b.numero || '') + (b.fournisseurNom ? ' — ' + b.fournisseurNom : ''); },
+    fiche: function(b){ return Object.assign({}, b); },
+    compte: ['${T("{0} bon sélectionné")}', '${T("{0} bons sélectionnés")}'],
+    actions: [
+      { cle: 'envoyer', libelle: '${T("Marquer envoyés")}', prim: true, cache: lotEcrit,
+        aide: '${T("Seulement les brouillons : un bon envoyé ne se modifie plus.")}',
+        pour: function(f){ return f.etat === 'brouillon'; } },
+      { cle: 'imprimer', libelle: '${T("Imprimer")}' },
+      { cle: 'clore', libelle: '${T("Clore")}', cache: lotEcrit,
+        aide: '${T("Seulement les bons reçus en partie : le reste ne sera plus attendu.")}',
+        pour: function(f){ return f.etat === 'partiel'; } },
+      { cle: 'annuler', libelle: '${T("Annuler les bons")}', danger: true, cache: lotEcrit,
+        aide: '${T("Seulement les brouillons et les bons envoyés dont rien n’a été reçu.")}',
+        pour: function(f){ return f.etat === 'brouillon' || f.etat === 'envoye'; } }
+    ],
+    geste: function(cle, ids, tous){ return lotGeste(cle, ids, tous); }
+  });
+  /* La case du socle est une cellule de tableau ; sur une carte, elle devient un <span>. */
+  function lotCase(h, cl){
+    return String(h).replace('class="c szk-c"', 'class="szk-c ' + cl + '"')
+      .replace('<td', '<span').replace('<th', '<span').replace('</td>', '</span>').replace('</th>', '</span>');
+  }
+  function lotSurligner(){
+    corps.querySelectorAll('.pile [data-szk]').forEach(function(c){ var k = c.closest('.carte'); if (k) k.classList.toggle('coche', !!c.checked); });
+  }
+  function lotApres(){ CK.apres(); lotSurligner(); }
+  function lotFiche(id){ return CK.fiches()[id] || {}; }
+  function lotNom(id){ var f = lotFiche(id); return (f.numero || id) + (f.fournisseurNom ? ' — ' + f.fournisseurNom : ''); }
+  function lotMotif(r){ return expliquer(r); }
+  function lotEcartes(ids, tous){
+    var n = tous.length - ids.length;
+    return n ? ' ' + szPl(n, '${T("{0} autre bon sélectionné ne s’y prête pas : il ne change pas.")}', '${T("{0} autres bons sélectionnés ne s’y prêtent pas : ils ne changent pas.")}').split('{0}').join(n) : '';
+  }
+  function lotDetails(ids){
+    return ids.slice(0, 8).map(function(id){ var f = lotFiche(id); return [f.numero || id, (f.fournisseurNom || '—') + ' · ' + argent(f.total)]; })
+      .concat(ids.length > 8 ? [['…', '${T("et {0} autres")}'.split('{0}').join(ids.length - 8)]] : []);
+  }
+  /* Le motif de cloture, demande UNE fois pour le lot : la boite de confirmation du socle n a pas de champ.
+     Meme habit (szc-voile), meme clavier : Echap annule, Entree ne valide pas (le geste est sans retour). */
+  function lotDemanderMotif(o){
+    if (document.querySelector('.szc-voile')) return Promise.resolve(null);
+    return new Promise(function(resoudre){
+      var v = document.createElement('div');
+      v.className = 'szc-voile';
+      v.innerHTML = '<div class="szc-boite danger" role="dialog" aria-modal="true" aria-labelledby="lot-m-t">'
+        + '<h3 id="lot-m-t">' + esc(o.titre) + '</h3><p>' + esc(o.texte) + '</p>'
+        + ((o.details && o.details.length) ? '<dl class="szc-details">' + o.details.map(function(d){
+            return '<dt>' + esc(d[0]) + '</dt><dd>' + esc(d[1]) + '</dd>'; }).join('') + '</dl>' : '')
+        + '<input type="text" class="lot-motif" maxlength="500" aria-label="${T("Motif")}" placeholder="${T("Motif — ex. rupture chez le fournisseur")}">'
+        + '<div class="lot-motif-err" role="alert"></div>'
+        + '<div class="szc-pied"><button type="button" class="szc-non">${T("Annuler")}</button>'
+        + '<button type="button" class="szc-oui">' + esc(o.oui) + '</button></div></div>';
+      document.body.appendChild(v);
+      var champ = v.querySelector('.lot-motif');
+      var fini = function(r){
+        if (v.parentNode) v.parentNode.removeChild(v);
+        document.removeEventListener('keydown', clavier, true);
+        resoudre(r);
+      };
+      var valider = function(){
+        var m = champ.value.trim();
+        if (!m) { v.querySelector('.lot-motif-err').textContent = '${T("Dites pourquoi le reste ne viendra pas.")}'; champ.focus(); return; }
+        fini(m);
+      };
+      var clavier = function(ev){
+        if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); fini(null); }
+        /* Entrée dans le champ VALIDE (le motif est exigé, valider le redemande s il est vide) ; sur un bouton, elle
+           laisse le bouton agir. Ailleurs, rien. (relecture du 2026-10-29) */
+        else if (ev.key === 'Enter') {
+          var a = document.activeElement;
+          if (a && a.tagName === 'BUTTON') return;
+          ev.preventDefault(); ev.stopPropagation();
+          if (a === champ) valider();
+        }
+      };
+      document.addEventListener('keydown', clavier, true);
+      // Un clic à côté ne ferme la boîte que si rien n est encore tapé : le motif ne se perd pas.
+      v.addEventListener('mousedown', function(ev){ if (ev.target === v && !String(champ.value || '').trim()) fini(null); });
+      v.querySelector('.szc-non').onclick = function(){ fini(null); };
+      v.querySelector('.szc-oui').onclick = valider;
+      try { champ.focus(); } catch (e) {}
+    });
+  }
+  /* Le deroulement commun aux gestes qui ECRIVENT : BUSY tient les gestes unitaires a l ecart, puis on relit. */
+  function lotDerouler(cle, titre, ids, op, args, fait){
+    BUSY = true;
+    var fin = function(){
+      BUSY = false;
+      if (cle !== 'envoyer') ids.forEach(function(id){ delete SAISIE[id]; if (OUVERT === id) { OUVERT = ''; VOLET = ''; } });
+      CK.vider(); return charger();
+    };
+    return szLotDerouler({ titre: titre, ids: ids, nom: lotNom, motif: lotMotif,
+      faire: function(id){ return appeler(op, args(id)); }, fait: fait }).then(fin, fin);
+  }
+  function lotGeste(cle, ids, tous){
+    if (!ids.length) return;
+    if (BUSY) { dire('${T("Un geste est déjà en cours. Réessayez dans un instant.")}', 'att'); return; }
+    var n = ids.length;
+    if (cle === 'imprimer') return szLotDerouler({ titre: '${T("Impression des bons")}', ids: ids, nom: lotNom, motif: lotMotif,
+      faire: function(id){ return appeler('bc:imprimer', [id]); },
+      fait: function(k){ return szPl(k, '${T("{0} bon envoyé à l’impression.")}', '${T("{0} bons envoyés à l’impression.")}').split('{0}').join(k); } });
+    if (cle === 'clore') {
+      var reste = ids.reduce(function(m, id){ return m + (Number(lotFiche(id).reste) || 0); }, 0);
+      return lotDemanderMotif({ titre: '${T("Clore les bons")}',
+        texte: szPl(n, '${T("{0} bon reçu en partie sera clos : ce qui reste à recevoir ne viendra plus. Le motif est inscrit sur le bon et au journal.")}', '${T("{0} bons reçus en partie seront clos : ce qui reste à recevoir ne viendra plus. Le motif est inscrit sur chaque bon et au journal.")}').split('{0}').join(n) + lotEcartes(ids, tous),
+        details: [['${T("Unités qui ne viendront pas")}', String(reste)]].concat(lotDetails(ids)),
+        oui: szPl(n, '${T("Clore {0} bon")}', '${T("Clore {0} bons")}').split('{0}').join(n) }).then(function(motif){
+        if (motif == null) return;
+        return lotDerouler(cle, '${T("Clôture des bons")}', ids, 'bc:clore', function(id){ return [id, motif]; },
+          function(k){ return szPl(k, '${T("{0} bon clos — le reste n’est plus attendu.")}', '${T("{0} bons clos — le reste n’est plus attendu.")}').split('{0}').join(k); });
+      });
+    }
+    if (cle === 'envoyer') {
+      return szConfirmer({ prudent: true, titre: '${T("Marquer les bons envoyés")}',
+        texte: szPl(n, '${T("{0} brouillon sera marqué envoyé : il ne se modifiera plus.")}', '${T("{0} brouillons seront marqués envoyés : ils ne se modifieront plus.")}').split('{0}').join(n) + lotEcartes(ids, tous),
+        details: lotDetails(ids),
+        oui: szPl(n, '${T("Marquer {0} bon envoyé")}', '${T("Marquer {0} bons envoyés")}').split('{0}').join(n) }).then(function(oui){
+        if (!oui) return;
+        return lotDerouler(cle, '${T("Envoi des bons")}', ids, 'bc:envoyer', function(id){ return [id]; },
+          function(k){ return szPl(k, '${T("{0} bon marqué envoyé.")}', '${T("{0} bons marqués envoyés.")}').split('{0}').join(k); });
+      });
+    }
+    if (cle !== 'annuler') return;
+    var somme = ids.reduce(function(m, id){ return m + (Number(lotFiche(id).total) || 0); }, 0);
+    return szConfirmer({ danger: true, titre: '${T("Annuler les bons")}',
+      texte: szPl(n, '${T("{0} bon sera classé annulé. Rien n’a été reçu : le stock ne bouge pas.")}', '${T("{0} bons seront classés annulés. Rien n’a été reçu : le stock ne bouge pas.")}').split('{0}').join(n) + lotEcartes(ids, tous),
+      details: [['${T("Montant total")}', argent(somme)]].concat(lotDetails(ids)),
+      oui: szPl(n, '${T("Annuler {0} bon")}', '${T("Annuler {0} bons")}').split('{0}').join(n), non: '${T("Garder les bons")}' }).then(function(oui){
+      if (!oui) return;
+      return lotDerouler(cle, '${T("Annulation des bons")}', ids, 'bc:annuler', function(id){ return [id, '']; },
+        function(k){ return szPl(k, '${T("{0} bon annulé.")}', '${T("{0} bons annulés.")}').split('{0}').join(k); });
+    });
+  }
+
   /* ══ CHARGEMENT ══════════════════════════════════════════════════════════ */
   /* LE VOEU (bouton « Commander » de l Inventaire) : lu une fois, a l ouverture comme au retour. Il
      l emporte sur une edition en cours seulement s il existe — sinon rien ne change sous les yeux. */
@@ -272,12 +445,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     sousEl.textContent = nO + (nO > 1 ? '${T(" bons en cours")}' : '${T(" bon en cours")}')
       + (enAttente ? '  ·  ' + argent(enAttente) + '${T(" attendus")}' : '');
 
-    if (EDIT) { corps.innerHTML = vueEditeur(); return; }
-    if (TAB === 'proposer') { corps.innerHTML = vuePropositions(); return; }
+    if (EDIT) { corps.innerHTML = vueEditeur(); lotApres(); return; }
+    if (TAB === 'proposer') { corps.innerHTML = vuePropositions(); lotApres(); return; }
 
     /* ⚠ PAS DE BANDEAU DE TUILES : retires de tous les modules (sa decision du 2026-10-12, redite le
        2026-10-16). Le total attendu est dans l en-tete, a droite. */
     corps.innerHTML = (TAB === 'histo' ? vueHisto() : vueCours());
+    lotApres();
   }
 
   /* ⚠ LA RECEPTION S OUVRE SEULE A L ECRAN. Une liste paginee ne prend sa hauteur que si elle est un enfant
@@ -294,10 +468,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + (D.peutEcrire ? '<br><span class="dt">${T("L’onglet <strong>À commander</strong> propose un bon par fournisseur à partir des articles sous leur seuil.")}</span>' : '')
         + '</div>';
     }
-    return '<div class="sz-pagee"><div class="pile" data-pages="bc-cours">' + l.map(carteBon).join('') + '</div></div>';
+    return '<div class="lot-rang">' + lotCase(CK.th(), 'lot-tout') + CK.barre() + '</div>'
+      + '<div class="sz-pagee"><div class="pile" data-pages="bc-cours">' + l.map(function(b){ return carteBon(b, true); }).join('') + '</div></div>';
   }
 
-  function carteBon(b){
+  function carteBon(b, avecCase){
     var ouvert = (OUVERT === b.id);
     var g = '';
     if (D.peutEcrire) {
@@ -310,8 +485,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     } else {
       g += '<button class="mini" data-imp="' + b.id + '"><span class="ic">🖨</span> ${T("Imprimer")}</button>';
     }
-    return '<div class="carte">'
+    return '<div class="carte' + (avecCase ? CK.classe(b) : '') + '" data-id="' + esc(b.id) + '">'
       + '<div class="rang">'
+      +   (avecCase ? lotCase(CK.td(b), 'lot-c') : '')
       +   '<span class="num-bc">' + esc(b.numero) + '</span>'
       +   '<span class="four">' + esc(b.fournisseurNom) + '</span>'
       +   pastille(b.etat)
@@ -375,13 +551,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function vueHisto(){
     var l = fermes();
     if (!l.length) return '<div class="vide">${T("Aucun bon terminé.")}</div>';
-    return '<div class="carte sz-pagee"><div data-pages="bc-histo"><table><thead><tr>'
-      + '<th>${T("Bon")}</th><th>${T("Fournisseur")}</th><th>${T("État")}</th>'
+    return '<div class="carte sz-pagee">' + CK.barre() + '<div data-pages="bc-histo"><table><thead><tr>'
+      + CK.th() + '<th>${T("Bon")}</th><th>${T("Fournisseur")}</th><th>${T("État")}</th>'
       + '<th class="num">${T("Commandé")}</th><th class="num">${T("Reçu")}</th><th class="num">${T("Montant")}</th>'
       + '<th>${T("Clos le")}</th><th></th>'
       + '</tr></thead><tbody>'
       + l.map(function(b){
-          return '<tr>'
+          return '<tr data-id="' + esc(b.id) + '" class="' + CK.classe(b) + '">'
+            + CK.td(b)
             + '<td><span class="num-bc">' + esc(b.numero) + '</span></td>'
             + '<td>' + esc(b.fournisseurNom) + (b.motifCloture ? '<br><span class="dt">' + esc(b.motifCloture) + '</span>' : '') + '</td>'
             + '<td>' + pastille(b.etat) + '</td>'
@@ -661,6 +838,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   document.addEventListener('click', function(e){
     var t = e.target; if (!t || !t.closest) return;
+    if (CK.clic(e)) { lotSurligner(); return; }   // une case, « tout cocher » ou la barre d actions
     var b = t.closest('button'); if (!b) return;
     var tab = b.getAttribute('data-tab');
     if (tab) { changerOnglet(tab); return; }

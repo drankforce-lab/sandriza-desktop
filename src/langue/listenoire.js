@@ -126,4 +126,18 @@ module.exports = {
   'sera retirée de la liste noire. Elle pourra de nouveau passer des commandes.':
     'will be removed from the blocklist. It will be able to place orders again.',
   'Retirer l’entrée': 'Remove entry',
+  // Gestes groupés (2026-10-29)
+  "{0} entrée sélectionnée": "{0} entry selected",
+  "{0} entrées sélectionnées": "{0} entries selected",
+  "Exporter (CSV)": "Export (CSV)",
+  "{0} entrée exportée": "{0} entry exported",
+  "{0} entrées exportées": "{0} entries exported",
+  "{0} entrée sera retirée de la liste noire. Elle pourra de nouveau passer des commandes.": "{0} entry will be removed from the blacklist. It will be able to place orders again.",
+  "{0} entrées seront retirées de la liste noire. Elles pourront de nouveau passer des commandes.": "{0} entries will be removed from the blacklist. They will be able to place orders again.",
+  "et {0} autres": "and {0} more",
+  "Retirer {0} entrée": "Remove {0} entry",
+  "Retirer {0} entrées": "Remove {0} entries",
+  "Retrait de la liste noire": "Removing from blacklist",
+  "{0} entrée retirée.": "{0} entry removed.",
+  "{0} entrées retirées.": "{0} entries removed.",
 };
