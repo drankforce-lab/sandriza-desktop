@@ -98,6 +98,61 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
      mise en forme et le vrai total ; les comptes restent calcules sur toutes les demandes. Ancien site
      (sans pagine) : la liste entiere, comme avant. */
   var PG = 0, PAR_PAGE = 50;
+  /* LES ACTIONS GROUPÉES (2026-10-29, sa demande : cases toujours visibles). Marquer reçus (colis en transit ou
+     approuvés — la règle du coeur, _retourRecu), renvoyer l étiquette au client, exporter. Rien qui rembourse :
+     la finalisation reste dans la fiche de chaque retour (sa décision : l argent, un par un). */
+  var CK = szCoches({
+    zone: corps, barre: 'k-barre',
+    lignes: function(){ return (D && D.lignes) || []; },
+    contexte: function(){ return ONGLET + '|' + Q; },   // un autre onglet ou une autre recherche vide la sélection
+    id: function(r){ return r.id; },
+    nom: function(r){ return (r.commande || '') + (r.client ? ' — ' + r.client : ''); },
+    fiche: function(r){ return Object.assign({}, r); },
+    compte: ['${T("{0} demande sélectionnée")}', '${T("{0} demandes sélectionnées")}'],
+    actions: [
+      { cle: 'recu', libelle: '${T("Marquer reçus")}', prim: true, cache: function(){ return !(D && D.peutEcrire); },
+        pour: function(f){ return f.statut === 'in_transit' || f.statut === 'approved'; } },
+      { cle: 'renvoyer', libelle: '${T("Renvoyer l’étiquette au client")}', cache: function(){ return !(D && D.peutEcrire); },
+        pour: function(f){ return f.etiquette === 'reelle' || f.etiquette === 'generee'; } },
+      { cle: 'csv', libelle: '${T("Exporter (CSV)")}' }
+    ],
+    geste: function(cle, ids, tous){ lotGeste(cle, ids, tous); }
+  });
+  function lotFiche(id){ return CK.fiches()[id] || {}; }
+  function lotNom(id){ var f = lotFiche(id); return (f.commande || id) + (f.client ? ' — ' + f.client : ''); }
+  function lotMotif(r){ return (r && r.detail) ? String(r.detail) : expliquer(r); }
+  function lotEcartes(ids, tous){
+    var n = tous.length - ids.length;
+    return n ? ' ' + szPl(n, '${T("{0} autre demande sélectionnée ne s’y prête pas : elle ne change pas.")}', '${T("{0} autres demandes sélectionnées ne s’y prêtent pas : elles ne changent pas.")}').split('{0}').join(n) : '';
+  }
+  function lotGeste(cle, ids, tous){
+    if (!ids.length) return;
+    if (cle === 'csv') {
+      var csv = szCSV(['${T("Client")}', '${T("Courriel")}', '${T("Commande")}', '${T("Motif")}', '${T("Statut")}', '${T("Suivi")}', '${T("Date")}'],
+        tous.map(function(id){ var f = lotFiche(id); return [f.client || '', f.courriel || '', f.commande || '', f.motif || '',
+          szTd(f.statutLibelle) || f.statut || '', f.suivi || '', (f.date || '').slice(0, 10)]; }));
+      return szExporter('retours-selection-' + new Date().toISOString().slice(0, 10) + '.csv', csv,
+        szPl(tous.length, '${T("{0} demande exportée")}', '${T("{0} demandes exportées")}').split('{0}').join(tous.length));
+    }
+    var recu = cle === 'recu';
+    return szConfirmer({ titre: recu ? '${T("Marquer les colis comme reçus")}' : '${T("Renvoyer l’étiquette au client")}', prudent: true,
+      texte: (recu
+        ? szPl(ids.length, '${T("{0} colis de retour sera marqué reçu en entrepôt ; le client en est avisé par courriel.")}', '${T("{0} colis de retour seront marqués reçus en entrepôt ; chaque client en est avisé par courriel.")}')
+        : szPl(ids.length, '${T("{0} client recevra de nouveau son étiquette de retour par courriel.")}', '${T("{0} clients recevront de nouveau leur étiquette de retour par courriel.")}')).split('{0}').join(ids.length) + lotEcartes(ids, tous),
+      details: ids.slice(0, 8).map(function(id){ var f = lotFiche(id); return [f.commande || id, (f.client || '—') + (f.suivi ? ' · ' + f.suivi : '')]; }),
+      oui: recu ? szPl(ids.length, '${T("Marquer {0} colis reçu")}', '${T("Marquer {0} colis reçus")}').split('{0}').join(ids.length)
+                : szPl(ids.length, '${T("Renvoyer {0} étiquette")}', '${T("Renvoyer {0} étiquettes")}').split('{0}').join(ids.length) }).then(function(oui){
+      if (!oui) return;
+      return szLotDerouler({ titre: recu ? '${T("Réception des colis")}' : '${T("Renvoi des étiquettes")}', ids: ids, nom: lotNom, motif: lotMotif,
+        faire: function(id){ return appeler(recu ? 'retour:recu' : 'retour:renvoyer', [id]).then(function(r){
+          // Renvoyer : l étiquette est prête mais le courriel n est pas parti = pas fait.
+          if (r && r.ok && !recu && !(r.courriel && r.courriel.envoye)) return { ok: false, detail: '${T("courriel non envoyé")}' + (r.courriel && r.courriel.erreur ? ' : ' + r.courriel.erreur : '') };
+          return r; }); },
+        fait: function(k){ return (recu ? szPl(k, '${T("{0} colis marqué reçu.")}', '${T("{0} colis marqués reçus.")}')
+          : szPl(k, '${T("{0} étiquette renvoyée.")}', '${T("{0} étiquettes renvoyées.")}')).split('{0}').join(k); } })
+        .then(function(){ CK.vider(); charger(); });
+    });
+  }
 
   var ONGLETS = [
     ['pending', '${T("En attente")}'], ['approved', '${T("Approuvées")}'], ['in_transit', '${T("En transit")}'],
@@ -146,6 +201,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
     operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
     introuvable:        '${T("Cette demande n’existe plus.")}',
+    // (2026-10-29, gestes groupés) les refus que le bilan d un lot peut nommer
+    statut:             '${T("Son statut ne le permet plus (déjà reçue, ou changée ailleurs).")}',
+    etiquette_absente:  '${T("Aucune étiquette de retour n’est enregistrée pour cette demande.")}',
+    refus_serveur:      '${T("Le serveur n’a pas pris la modification.")}',
+    verrou:             '${T("Cette demande est ouverte par quelqu’un d’autre.")}',
     echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
@@ -197,14 +257,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 
     /* ── LE TABLEAU (data-pages="retours") ── */
     var rows = D.lignes || [];
-    var t = '<div class="cx-carte sz-pagee">';
+    var t = '<div class="cx-carte sz-pagee">' + CK.barre();
     if (!rows.length) {
       /* Deux phrases ENTIERES, pas un fragment recolle. */
       t += '<div class="vide">'
         + (ONGLET !== 'all' ? '${T("Aucune demande dans cette catégorie.")}' : '${T("Aucune demande.")}')
         + '</div>';
     } else {
-      t += '<div class="cx-pages" data-pages="retours"' + szPagesCoeurAttr(D) + '><table><thead><tr><th>${T("Client")}</th><th>${T("Commande")}</th>'
+      t += '<div class="cx-pages" data-pages="retours"' + szPagesCoeurAttr(D) + '><table><thead><tr>' + CK.th() + '<th>${T("Client")}</th><th>${T("Commande")}</th>'
         + '<th>${T("Motif")}</th><th>${T("Statut")}</th><th class="r">${T("Date")}</th></tr></thead><tbody>'
         + rows.map(function(r){
             var badges = '<span class="rf-pill ' + (TONS[r.statut] || '') + '">' + esc(szTd(r.statutLibelle)) + '</span>';
@@ -213,7 +273,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
             if (r.etiquette === 'reelle') badges += '<span class="rf-pill bleu">${T("Étiquette réelle")}</span>';
             else if (r.etiquette === 'generee') badges += '<span class="rf-pill bleu">${T("Étiquette générée")}</span>';
             if (r.fraisBoutique) badges += '<span class="rf-pill bleu">${T("Frais pris en charge")}</span>';
-            return '<tr data-id="' + esc(r.id) + '" title="${T("Ouvrir la demande de retour")}">'
+            return '<tr data-id="' + esc(r.id) + '" class="' + CK.classe(r) + '" title="${T("Ouvrir la demande de retour")}">'
+              + CK.td(r)
               + '<td><div class="cx-qui"><span class="cx-av" aria-hidden="true">' + esc(initiales(r.client)) + '</span>'
               + '<div style="min-width:0"><b>' + esc(r.client || '—') + '</b>' + szVerrouCase('return_reqs', r.id)
               + (r.courriel ? '<span class="cx-l2">' + esc(r.courriel) + '</span>' : '') + '</div></div></td>'
@@ -253,6 +314,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     h += '<div class="cx-deux">' + t + p + '</div>';
 
     corps.innerHTML = h;
+    CK.apres();
     szVerrousPeindre();   // reposer les cadenas connus sur la liste fraiche
 
     /* ⚠ LES PASTILLES DEVIENNENT DES COLONNES. A l ecran, << expiree
@@ -302,6 +364,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   corps.onclick = function(ev){
     var t = ev.target;
     if (!t || !t.closest) return;
+    if (CK.clic(ev)) return;   // une case, « tout cocher » ou la barre d actions
     var og = t.closest('[data-onglet]');
     if (og) { ONGLET = og.getAttribute('data-onglet'); PG = 0; charger(); return; }
     if (t.closest('button') || t.closest('input')) return;

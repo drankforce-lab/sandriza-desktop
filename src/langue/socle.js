@@ -340,4 +340,21 @@ module.exports = {
   "Téléchargement du modèle": "Downloading the model",
   "Relief inventé effacé sous les photos": "Invented relief erased under the photos",
   "relief inventé effacé à {r} %": "invented relief {r}% erased",
+  // Gestes groupés (2026-10-29)
+  "{0} élément sélectionné": "{0} item selected",
+  "{0} éléments sélectionnés": "{0} items selected",
+  "Tout décocher": "Clear selection",
+  "Tout cocher sur cette page": "Select all on this page",
+  "Sélectionner": "Select",
+  "Actions sur la sélection": "Actions on the selection",
+  "échec": "failed",
+  "Traitement": "Processing",
+  "{0} sur {1} faits.": "{0} of {1} done.",
+  "{0} n’a pas passé.": "{0} did not go through.",
+  "{0} n’ont pas passé.": "{0} did not go through.",
+  "bilan": "summary",
+  "et {0} autres": "and {0} more",
+  "Fermer": "Close",
+  // Gestes groupés (2026-10-29)
+  "Cochez des lignes pour agir sur plusieurs à la fois — Maj+clic coche une plage.": "Tick rows to act on several at once — Shift+click ticks a range.",
 };

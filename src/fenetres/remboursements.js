@@ -113,6 +113,33 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('remboursements')}
   var ONGLET = '${depart}';
   var Q = '';
   var PAGE = 0;
+  /* LES CASES À COCHER (2026-10-29, sa demande). ⚠ SA DÉCISION : l argent ne part JAMAIS en lot — chaque
+     remboursement se fait dans sa fiche, avec son NIP. Ici, on coche pour EXPORTER seulement. Changer d onglet
+     (remboursements / crédits) vide la sélection : ce ne sont pas les mêmes pièces. */
+  var CK = szCoches({
+    zone: corps, barre: 'k-barre',
+    lignes: function(){ return (D && D.lignes) || []; },
+    contexte: function(){ return ONGLET + '|' + Q; },   // un autre onglet ou une autre recherche vide la sélection
+    id: function(r){ return r.id || r.numero; },
+    nom: function(r){ return (r.numero || '') + (r.client ? ' — ' + r.client : ''); },
+    fiche: function(r){ return Object.assign({ onglet: ONGLET }, r); },
+    compte: ['${T("{0} ligne sélectionnée")}', '${T("{0} lignes sélectionnées")}'],
+    actions: [ { cle: 'csv', libelle: '${T("Exporter (CSV)")}', prim: true } ],
+    geste: function(cle, ids, tous){ lotExporter(tous); }
+  });
+  function lotExporter(ids){
+    var F = CK.fiches(), L = ids.map(function(id){ return F[id] || {}; });
+    var credits = ONGLET === 'credits';
+    var csv = credits
+      ? szCSV(['${T("Crédit")}', '${T("Client")}', '${T("Commande")}', '${T("Émis le")}', '${T("Expiration")}', '${T("Montant")}', '${T("Utilisé")}', '${T("Solde")}', '${T("Statut")}'],
+          L.map(function(c){ var v = function(x){ return x == null ? '' : x; };
+            return [v(c.numero), v(c.client), v(c.commande), v(c.emisLe), v(c.expiration), v(c.montant), v(c.utilise), v(c.solde), v(c.statut)]; }))
+      : szCSV(['${T("Remboursement")}', '${T("Client")}', '${T("Commande")}', '${T("Date")}', '${T("Mode")}', '${T("Motif")}', '${T("Sous-total")}', '${T("TPS")}', '${T("TVQ")}', '${T("Total")}'],
+          L.map(function(r){ var v = function(x){ return x == null ? '' : x; };
+            return [v(r.numero), v(r.client), v(r.commande), v(r.date), v(r.type), v(r.motif), v(r.sousTotal), v(r.tps), v(r.tvq), v(r.total)]; }));
+    szExporter((credits ? 'credits-' : 'remboursements-') + new Date().toISOString().slice(0, 10) + '.csv', csv,
+      szPl(ids.length, '${T("{0} ligne exportée")}', '${T("{0} lignes exportées")}').split('{0}').join(ids.length));
+  }
   /* La taille de page est MESUREE (szAutoPagination, apres chaque dessin) :
      25 n est que le repli tant que la liste n a pas encore ete disposee. */
   var TAILLE = 25;
@@ -181,7 +208,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('remboursements')}
       + '</div></div>';
 
     var rows = D.lignes || [];
-    var carte = '<div class="cx-carte">';
+    var carte = '<div class="cx-carte">' + CK.barre();
     if (!rows.length) {
       carte += '<div class="vide">' + (ONGLET === 'credits'
         ? '${T("Aucun crédit boutique.")}' : '${T("Aucun remboursement.")}') + '</div>';
@@ -244,6 +271,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('remboursements')}
     h += '<div class="cx-deux">' + carte + p + '</div>';
 
     corps.innerHTML = h;
+    CK.apres();
     szVerrousPeindre();   // reposer les cadenas connus sur la liste fraiche
     brancher();
     // La mesure : combien de lignes tiennent VRAIMENT dans la liste bornee.
@@ -264,11 +292,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('remboursements')}
   /* Le detail des taxes n a plus ses trois colonnes : il passe SOUS le total
      (sous-total + TPS + TVQ), lisible d un coup d oeil, rien n est retire. */
   function tableRemb(rows){
-    return '<table><thead><tr><th>${T("Client et remboursement")}</th>'
+    return '<table><thead><tr>' + CK.th() + '<th>${T("Client et remboursement")}</th>'
       + '<th>${T("Mode")}</th><th>${T("Motif")}</th>'
       + '<th class="r">Total</th></tr></thead><tbody>'
       + rows.map(function(r){
-          return '<tr data-cmd="' + esc(r.commandeId) + '" title="${T("Ouvrir la commande")}">'
+          return '<tr class="' + CK.classe(r) + '" data-cmd="' + esc(r.commandeId) + '" title="${T("Ouvrir la commande")}">' + CK.td(r)
             // ⚠ LE VERROU EST CELUI DE LA COMMANDE, pas du remboursement : la
             // fenetre de remboursement verrouille la COMMANDE (deux personnes
             // qui remboursent la meme, c est un double remboursement). Un
@@ -289,12 +317,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('remboursements')}
   }
   function tableCredits(rows){
     var STATUT = { actif: ['vert', '${T("Actif")}'], epuise: ['', '${T("Épuisé")}'], expire: ['', '${T("Expiré")}'] };
-    return '<table><thead><tr><th>${T("Client et crédit")}</th><th>${T("Émis le")}</th>'
+    return '<table><thead><tr>' + CK.th() + '<th>${T("Client et crédit")}</th><th>${T("Émis le")}</th>'
       + '<th class="r">${T("Montant")}</th><th class="r">${T("Utilisé")}</th>'
       + '<th class="r">${T("Solde")}</th><th>${T("Statut")}</th></tr></thead><tbody>'
       + rows.map(function(c){
           var st = STATUT[c.statut] || STATUT.actif;
-          return '<tr class="' + (c.statut === 'expire' ? 'eteint' : '') + '">'
+          return '<tr class="' + (c.statut === 'expire' ? 'eteint' : '') + CK.classe(c) + '">' + CK.td(c)
             + '<td><div class="cx-qui"><span class="cx-av" aria-hidden="true">' + esc(initiales(c.client)) + '</span>'
             + '<div style="min-width:0"><b>' + esc(c.client || '—') + '</b>'
             + '<span class="cx-l2">' + esc(c.numero)
@@ -340,6 +368,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('remboursements')}
   corps.onclick = function(ev){
     var t = ev.target;
     if (!t || !t.closest) return;
+    if (CK.clic(ev)) return;   // une case, « tout cocher » ou la barre d actions
     var og = t.closest('[data-onglet]');
     if (og) { ONGLET = og.getAttribute('data-onglet'); PAGE = 0; charger(); return; }
     if (t.closest('button') || t.closest('input')) return;

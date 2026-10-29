@@ -229,11 +229,6 @@ select.statut{width:auto;font-size:.78rem;padding:.16rem .4rem}
    alerte (la couleur ne dit qu un probleme — 2026-09-29). */
 .remb{margin-top:.7rem;border-top:1px solid var(--v10);padding-top:.45rem}
 tbody tr.coche td{background:rgba(var(--or-rgb),.1)}
-/* La bande des actions groupées (2026-10-27) */
-.lotc{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.45rem .75rem;margin:0 0 .55rem;border:1px solid rgba(var(--or-rgb),.45);
-  border-radius:10px;background:rgba(var(--or-rgb),.08);font-size:.8rem}
-.lotc label{display:inline-flex;align-items:center;gap:.35rem;cursor:pointer;white-space:nowrap}
-.lotc>span{white-space:nowrap}
 /* LA CHRONOLOGIE (2026-10-27, sa demande) : les gestes datés, en colonne dans l en-tête (la place à droite de la
    livraison était vide) — la liste des articles garde toute sa hauteur. Un point par geste, reliés par un trait. */
 .det2.a3{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.1fr)}
@@ -381,9 +376,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   /* L AFFICHAGE COMPACT (2026-10-12, sa demande : « ajoute-moi aussi un mode compact dans les commandes »), le
      meme que l Inventaire et Produits en vente : une ligne par commande, retenu sur le poste (sous garde). */
   var COMPACT = false;
-  /* LES ACTIONS GROUPÉES (2026-10-27, sa demande) : « Sélectionner » coche des commandes, puis on imprime tous leurs
-     bons ou on les passe en préparation d'un seul geste. Les coches vivent ICI : une page qui change ne les perd pas. */
-  var SELM = false, SELC = {};
+  /* LES ACTIONS GROUPÉES (2026-10-27, puis 2026-10-29 : sa demande « cases toujours visibles, partout où ça fait
+     gagner du temps ») : la pièce commune du socle (szCoches). Les coches vivent dans CK : une page qui change ne
+     les perd pas. Le jeu d actions dépend de la liste (Commandes ou Expéditions) — voir lotCoches. */
+  var CK = null;
   try { COMPACT = localStorage.getItem('sz-cmd-compact') === '1'; } catch (e) {}
   var enCours = false;
   var VUE = 'liste';        // 'liste' | 'detail'
@@ -569,8 +565,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '<button class="rf-jet' + (F.manuelles ? ' on' : '') + '" data-manu="1" '
       + 'title="${T("N’afficher que les ventes saisies à la caisse, quel que soit leur statut")}">'
       + '${T("Ventes manuelles")}</button>'
-      + (!expedition && CTX && CTX.peutEditer
-          ? '<button class="rf-jet' + (SELM ? ' on' : '') + '" data-selm="1" title="${T("Cocher plusieurs commandes pour agir sur toutes à la fois")}">${T("Sélectionner")}</button>' : '')
       + '<div class="droite">'
       + '<label class="rf-rch">${ICO.loupe}<input id="rech" aria-label="${T("Rechercher une commande")}" autocomplete="off" placeholder="${T("Numéro de commande, nom, courriel")}'
       + (expedition ? '${T(", suivi")}' : '') + '…" value="' + esc(F.q) + '"></label>'
@@ -590,26 +584,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     }
     h += '</div></div>';
 
-    /* ── LA BANDE DES ACTIONS GROUPÉES ── */
-    if (SELM && !expedition) {
-      var nS = Object.keys(SELC).length;
-      h += '<div class="lotc"><label><input type="checkbox" id="lotc-page"> ${T("Toute la page")}</label>'
-        + '<span id="lotc-n">' + szPl(nS, '${T("{0} commande sélectionnée")}', '${T("{0} commandes sélectionnées")}').split('{0}').join(nS) + '</span>'
-        + '<span style="flex:1 1 auto"></span>'
-        + '<button class="mini" id="lotc-bons"' + (nS ? '' : ' disabled') + '>${T("Imprimer les bons")}</button>'
-        + '<button class="mini prim" id="lotc-prep"' + (nS ? '' : ' disabled') + '>${T("Passer en préparation")}</button>'
-        + '<button class="mini" id="lotc-annuler">${T("Annuler")}</button></div>';
-    }
-
     /* ── LE TABLEAU ── */
-    var t = '<div class="cx-carte cx-liste">';
+    var ck = lotCoches();
+    var t = '<div class="cx-carte cx-liste">' + ck.barre();
     if (!d || !d.lignes.length) {
       t += '<div class="vide">' + (F.q || F.statuts.length || F.annee !== 'all' || F.prioritaires || F.manuelles
         ? '${T("Aucune commande ne correspond à ces filtres.")}'
         : (expedition ? '${T("Aucune commande expédiée.")}' : '${T("Aucune commande en cours.")}')) + '</div>';
     } else {
       t += '<div class="liste' + (COMPACT ? ' compacte' : '') + '"><table><thead><tr>'
-        + (SELM && !expedition ? '<th class="c"></th>' : '')
+        + ck.th()
         + '<th>${T("Client et commande")}</th>'
         + (expedition ? '<th>${T("Suivi")}</th>' : '<th class="c">${T("Articles")}</th>')
         + '<th class="d">${T("Total")}</th><th>${T("Statut")}</th><th class="c"></th>'
@@ -618,10 +602,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         // ⚠ Etiquetee mais pas partie : la ligne se teinte. C est l etat qui se
         // perd le plus facilement, entre l impression et le depot au comptoir.
         var attente = o.aUneEtiquette && o.statut !== 'shipped' && o.statut !== 'delivered';
-        var selL = SELM && !expedition;
-        t += '<tr class="' + (attente ? 'attente' : '') + (selL && SELC[o.id] ? ' coche' : '') + '" data-id="' + esc(o.id)
-          + '" style="cursor:pointer" title="' + (selL ? '${T("Cliquer pour sélectionner")}' : '${T("Clic : détails · clic droit : changer le statut")}') + '">'
-          + (selL ? '<td class="c"><input type="checkbox" data-selc="' + esc(o.id) + '" aria-label="' + esc('${T("Sélectionner")} ' + o.numero) + '"' + (SELC[o.id] ? ' checked' : '') + '></td>' : '')
+        t += '<tr class="' + (attente ? 'attente' : '') + ck.classe(o) + '" data-id="' + esc(o.id)
+          + '" style="cursor:pointer" title="${T("Clic : détails · clic droit : changer le statut")}">'
+          + ck.td(o)
           + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(o.client)) + '</span>'
           +   '<div style="min-width:0"><div class="rf-nom">' + esc(o.client)
           +     (o.prioritaire ? ' <span class="rf-pill ambre" title="${T("Traitement prioritaire")}">${T("Prioritaire")}</span>' : '')
@@ -702,6 +685,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       h += t.replace('cx-carte cx-liste', 'cx-carte cx-liste seule');
     }
     corps.innerHTML = h;
+    ck.apres();
 
     actions.innerHTML = '';
     brancher();
@@ -1373,6 +1357,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     corps.onclick = function(ev){
       var t = ev.target;
       if (!t || !t.closest) return;
+      if (CK && VUE === 'liste' && CK.clic(ev)) return;   // une case, « tout cocher » ou la barre d actions
       var vb = t.closest('[data-vue]');
       if (vb) {
         var c = vb.getAttribute('data-vue') === 'compact';
@@ -1403,11 +1388,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       }
       if (t.closest('[data-prio]')) { F.prioritaires = !F.prioritaires; F.page = 0; dessiner(); charger(); return; }
       if (t.closest('[data-manu]')) { F.manuelles = !F.manuelles; F.page = 0; dessiner(); charger(); return; }
-      if (t.closest('[data-selm]')) { SELM = !SELM; SELC = {}; dessiner(); return; }
-      if (t.id === 'lotc-annuler') { SELM = false; SELC = {}; dessiner(); return; }
-      if (t.id === 'lotc-bons') { lotBons(); return; }
-      if (t.id === 'lotc-prep') { lotPreparation(); return; }
-      if (t.closest('[data-selc]') || t.id === 'lotc-page') return;   // la case suit son propre « change »
       var pr = t.closest('[data-prep]');
       if (pr) {
         ouvrir('commandes:preparer', pr.getAttribute('data-prep'), '${T("Préparation")}');
@@ -1416,9 +1396,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         setTimeout(function(){ charger(); }, 1200);
         return;
       }
-      // Le reste de la ligne ouvre le DETAIL — dans SA fenetre native. En mode sélection, elle coche.
+      // Le reste de la ligne ouvre le DETAIL — dans SA fenetre native.
       var tr = t.closest('tr[data-id]');
-      if (tr && SELM && MODE !== 'expeditions') { var sid = tr.getAttribute('data-id'); selCocher(sid, !SELC[sid]); return; }
       if (tr) {
         ouvrir('commandes:ouvrirDetail', tr.getAttribute('data-id'), '${T("Détail")}');
         // Le detail prend le verrou : la ligne passe << En traitement >>.
@@ -1439,61 +1418,191 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     };
   }
 
-  /* ── LES ACTIONS GROUPÉES (2026-10-27) ── */
-  function selCompter(){
-    var n = Object.keys(SELC).length, e = document.getElementById('lotc-n');
-    if (e) e.textContent = szPl(n, '${T("{0} commande sélectionnée")}', '${T("{0} commandes sélectionnées")}').split('{0}').join(n);
-    ['lotc-bons', 'lotc-prep'].forEach(function(k){ var b = document.getElementById(k); if (b) b.disabled = !n; });
+  /* ── LES ACTIONS GROUPÉES (2026-10-27 ; 2026-10-29 : cases toujours visibles, plus d actions) ──
+     Une liste = un jeu de coches : passer de Commandes à Expéditions repart à vide (les gestes diffèrent).
+     Chaque geste passe par l op UNITAIRE du pont, l une après l autre (szLotDerouler) : mêmes droits, mêmes
+     verrous, mêmes refus qu un clic sur la fiche — un lot n est jamais un raccourci autour d une règle. */
+  var CK_MODE = '';
+  function lotCoches(){
+    var expedition = MODE === 'expeditions';
+    if (CK && CK_MODE === MODE) return CK;
+    CK_MODE = MODE;
+    var peutE = !!(CTX && CTX.peutEditer), peutX = !!(CTX && CTX.peutExpedier);
+    var finie = function(f){ return f.statut === 'shipped' || f.statut === 'delivered' || f.statut === 'cancelled'; };
+    CK = szCoches({
+      zone: corps, barre: 'k-barre',
+      lignes: function(){ return (DONNEES && DONNEES.lignes) || []; },
+      // Un autre filtre, statut, recherche ou année vide la sélection ; changer de page la garde.
+      contexte: function(){ return [MODE, F.q, F.statuts.join(','), F.annee, F.prioritaires, F.manuelles].join('|'); },
+      id: function(o){ return o.id; },
+      nom: function(o){ return o.numero; },
+      // La ligne ENTIÈRE est retenue : l export et les gestes la relisent même après un changement de page.
+      fiche: function(o){ return Object.assign({ tenue: !!o.enTraitement }, o); },
+      compte: ['${T("{0} commande sélectionnée")}', '${T("{0} commandes sélectionnées")}'],
+      actions: expedition ? [
+        { cle: 'etiq', libelle: '${T("Imprimer les étiquettes")}', prim: true, cache: function(){ return !peutX; },
+          pour: function(f){ return !!f.aUneEtiquette; } },
+        { cle: 'factures', libelle: '${T("Imprimer les factures")}', pour: function(f){ return !!f.factureId; } },
+        { cle: 'csv', libelle: '${T("Exporter (CSV)")}' }
+      ] : [
+        { cle: 'bons', libelle: '${T("Imprimer les bons")}', cache: function(){ return !peutE; } },
+        { cle: 'factures', libelle: '${T("Imprimer les factures")}', pour: function(f){ return !!f.factureId; } },
+        { cle: 'prep', libelle: '${T("Passer en préparation")}', prim: true, cache: function(){ return !peutE; },
+          pour: function(f){ return !f.tenue && (f.statut === 'confirmed' || f.statut === 'pending'); } },
+        /* CRÉER LES ÉTIQUETTES EN LOT (2026-10-29, sa décision : « oui, avec récapitulatif du prix »). Une commande
+           active, sans étiquette, tenue par personne, et pas une vente de caisse (déjà remise). */
+        { cle: 'etiqCreer', libelle: '${T("Créer les étiquettes")}', cache: function(){ return !peutX; },
+          aide: '${T("Cotation de chaque commande, puis un récapitulatif du prix total à confirmer avant de rien acheter.")}',
+          pour: function(f){ return !f.tenue && !finie(f) && !f.aUneEtiquette && !f.manuelle; } },
+        { cle: 'expedier', libelle: '${T("Marquer expédiée")}', cache: function(){ return !peutX; },
+          aide: '${T("Seulement les commandes dont l’étiquette est créée : son numéro de suivi part à la cliente.")}',
+          pour: function(f){ return !f.tenue && !finie(f) && !!f.aUneEtiquette && !!f.suivi; } },
+        { cle: 'csv', libelle: '${T("Exporter (CSV)")}' }
+      ],
+      geste: function(cle, ids, tous){ lotGeste(cle, ids, tous); }
+    });
+    return CK;
   }
-  function selCocher(id, oui){
-    // On RETIENT le statut au moment de cocher : la sélection survit au changement de page, la ligne non.
-    var oL = ((DONNEES && DONNEES.lignes) || []).filter(function(x){ return x.id === id; })[0];
-    if (oui) SELC[id] = { statut: oL ? oL.statut : '', tenue: !!(oL && oL.enTraitement) }; else delete SELC[id];
-    var tr = corps.querySelector('tr[data-id="' + id + '"]');
-    if (tr) { tr.classList.toggle('coche', !!oui); var c = tr.querySelector('[data-selc]'); if (c) c.checked = !!oui; }
-    selCompter();
+  function lotFiche(id){ return (CK && CK.fiches()[id]) || {}; }
+  function lotNom(id){ return lotFiche(id).numero || id; }
+  function lotEcartes(ids, tous){
+    var n = tous.length - ids.length;
+    return n ? ' ' + szPl(n, '${T("{0} autre sélectionnée ne s’y prête pas : elle ne change pas.")}', '${T("{0} autres sélectionnées ne s’y prêtent pas : elles ne changent pas.")}').split('{0}').join(n) : '';
   }
-  corps.addEventListener('change', function(ev){
-    var t = ev.target; if (!t || !t.getAttribute) return;
-    var id = t.getAttribute('data-selc');
-    if (id) { selCocher(id, t.checked); return; }
-    if (t.id === 'lotc-page') ((DONNEES && DONNEES.lignes) || []).forEach(function(o){ selCocher(o.id, t.checked); });
-  });
-  // Les bons, l un après l autre (l imprimante n en prend qu un à la fois) ; le bilan dit ce qui n est pas sorti.
-  function lotBons(){
-    var ids = Object.keys(SELC); if (!ids.length) return;
-    var ok = 0, rate = [];
-    dire('${T("Impression des bons…")}');
-    ids.reduce(function(p, id){
-      return p.then(function(){ return appeler('commande:bon', [id]).then(function(r){ if (r && r.ok) ok++; else rate.push(r && r.detail ? r.detail : expliquer(r)); }); });
-    }, Promise.resolve()).then(function(){
-      if (!rate.length) dire(szPl(ok, '${T("{0} bon envoyé à l’impression.")}', '${T("{0} bons envoyés à l’impression.")}').split('{0}').join(ok), 'bon');
-      else dire('${T("{0} sur {1} imprimés — ")}'.split('{0}').join(ok).split('{1}').join(ids.length) + rate[0], 'err');
+  function lotMotif(r){ return (r && r.detail) ? r.detail : expliquer(r); }
+  function lotGeste(cle, ids, tous){
+    if (!ids.length) return;
+    if (cle === 'csv') return lotExporter(tous);
+    if (cle === 'bons') return szLotDerouler({ titre: '${T("Impression des bons")}', ids: ids, nom: lotNom, motif: lotMotif,
+      faire: function(id){ return appeler('commande:bon', [id]); },
+      fait: function(k){ return szPl(k, '${T("{0} bon envoyé à l’impression.")}', '${T("{0} bons envoyés à l’impression.")}').split('{0}').join(k); } });
+    if (cle === 'factures') {
+      var sansF = tous.length - ids.length;
+      return szLotDerouler({ titre: '${T("Impression des factures")}', ids: ids, nom: lotNom, motif: lotMotif,
+        faire: function(id){ return appeler('facture:imprimer', [lotFiche(id).factureId]); },
+        fait: function(k){ return szPl(k, '${T("{0} facture envoyée à l’impression.")}', '${T("{0} factures envoyées à l’impression.")}').split('{0}').join(k)
+          + (sansF ? ' ' + '${T("Les commandes sans facture sont passées.")}' : ''); } });
+    }
+    if (cle === 'etiq') return szLotDerouler({ titre: '${T("Impression des étiquettes")}', ids: ids, nom: lotNom, motif: lotMotif,
+      faire: function(id){ return appeler('expedition:imprimer', [id, null]); },
+      fait: function(k){ return szPl(k, '${T("{0} étiquette envoyée à l’impression.")}', '${T("{0} étiquettes envoyées à l’impression.")}').split('{0}').join(k); } });
+    if (cle === 'prep') return szConfirmer({ titre: '${T("Passer en préparation")}',
+        texte: szPl(ids.length, '${T("{0} commande passera « En préparation ».")}', '${T("{0} commandes passeront « En préparation ».")}').split('{0}').join(ids.length) + lotEcartes(ids, tous),
+        oui: '${T("Passer en préparation")}' }).then(function(oui){
+      if (!oui) return;
+      return szLotDerouler({ titre: '${T("Mise à jour des statuts")}', ids: ids, nom: lotNom, motif: lotMotif,
+        faire: function(id){ return appeler('commandes:statutEcrire', [id, lotFiche(id).statut, 'preparing', false]); },
+        fait: function(k){ return szPl(k, '${T("{0} commande passée en préparation.")}', '${T("{0} commandes passées en préparation.")}').split('{0}').join(k); } })
+        .then(function(){ CK.vider(); charger(true); });
+    });
+    if (cle === 'etiqCreer') return lotEtiquettes(ids, tous);
+    if (cle === 'expedier') return szConfirmer({ titre: '${T("Marquer expédiée")}', prudent: true,
+        texte: szPl(ids.length, '${T("{0} commande passera « Expédiée » : la cliente reçoit son courriel avec le numéro de suivi de l’étiquette.")}', '${T("{0} commandes passeront « Expédiée » : chaque cliente reçoit son courriel avec le numéro de suivi de son étiquette.")}').split('{0}').join(ids.length) + lotEcartes(ids, tous),
+        details: ids.slice(0, 8).map(function(id){ var f = lotFiche(id); return [f.numero || id, (f.transporteur ? f.transporteur + ' · ' : '') + (f.suivi || '')]; }),
+        oui: szPl(ids.length, '${T("Expédier {0} commande")}', '${T("Expédier {0} commandes")}').split('{0}').join(ids.length) }).then(function(oui){
+      if (!oui) return;
+      return szLotDerouler({ titre: '${T("Expédition")}', ids: ids, nom: lotNom, motif: lotMotif,
+        /* ⚠ Le verrou que l expédition prend est RENDU aussitôt (relecture du 2026-10-29) : sans cela, chaque
+           commande restait « En traitement » chez les collègues une vingtaine de minutes — la fiche unitaire,
+           elle, appelle rendreVerrou. Le suivi et le transporteur sont ceux de la fiche RELUE (szCoches.apres). */
+        faire: function(id){ var f = lotFiche(id);
+          return appeler('commande:expedier', [id, f.transporteur || '', f.suivi || '', false]).then(function(r){
+            return appeler('verrou:rendre', ['orders', id]).then(function(){ return r; }, function(){ return r; }); }); },
+        fait: function(k){ return szPl(k, '${T("{0} commande expédiée.")}', '${T("{0} commandes expédiées.")}').split('{0}').join(k); } })
+        .then(function(){ CK.vider(); charger(true); });
     });
   }
-  /* Passer en préparation : seulement les commandes « Confirmée » (ou « En attente ») qui ne sont tenues par
-     personne ; les autres sont nommées dans la boîte et laissées telles quelles. Une confirmation à part. */
-  function lotPreparation(){
-    var par = SELC, ids = Object.keys(SELC);
-    var bons = ids.filter(function(id){ var o = par[id]; return o && !o.tenue && (o.statut === 'confirmed' || o.statut === 'pending'); });
-    var autres = ids.length - bons.length;
-    if (!bons.length) { dire('${T("Aucune des commandes sélectionnées n’est à confirmer ou confirmée et libre.")}', 'att'); return; }
-    szConfirmer({ titre: '${T("Passer en préparation")}',
-      texte: szPl(bons.length, '${T("{0} commande passera « En préparation ».")}', '${T("{0} commandes passeront « En préparation ».")}').split('{0}').join(bons.length)
-        + (autres ? ' ' + szPl(autres, '${T("{0} autre est déjà plus loin ou en traitement : elle ne change pas.")}', '${T("{0} autres sont déjà plus loin ou en traitement : elles ne changent pas.")}').split('{0}').join(autres) : ''),
-      oui: '${T("Passer en préparation")}' }).then(function(oui){
-      if (!oui) return;
-      var ok = 0, rate = 0;
-      dire('${T("Mise à jour des statuts…")}');
-      bons.reduce(function(p, id){
-        return p.then(function(){ return appeler('commandes:statutEcrire', [id, par[id].statut, 'preparing', false]).then(function(r){ if (r && r.ok) ok++; else rate++; }); });
-      }, Promise.resolve()).then(function(){
-        dire(szPl(ok, '${T("{0} commande passée en préparation.")}', '${T("{0} commandes passées en préparation.")}').split('{0}').join(ok)
-          + (rate ? ' ' + '${T("{0} refusée(s) : statut changé ailleurs entre-temps.")}'.split('{0}').join(rate) : ''), rate ? 'att' : 'bon');
-        SELM = false; SELC = {};
-        charger(true);
+  /* ══ LES ÉTIQUETTES EN LOT — LE GESTE QUI COÛTE ══════════════════════════════════════════════════════════
+     1. COTER (gratuit) : pour chaque commande, le poids calculé (le même pré-rempli que la fenêtre Expédition,
+        0,5 kg à défaut), puis la comparaison des transporteurs. Le choix : celui de la CLIENTE à la caisse s il
+        est coté et sait créer une étiquette (elle a payé ce service), sinon le moins cher qui en crée une — la
+        règle de la fenêtre Expédition.
+     2. MONTRER : une boîte avec chaque commande, son transporteur, son service, son poids, son prix, et le TOTAL.
+        Ce qui n a pas pu être coté est nommé et laissé de côté.
+     3. CRÉER, une à la fois, avec le prix affiché (le relais re-cote au cent près et refuse tout écart : rien
+        n est acheté à un autre prix). Jamais « forcer » : une commande déjà étiquetée entre-temps est refusée.
+     4. Proposer d imprimer celles qui ont été créées. */
+  function lotEtiquettes(ids, tous){
+    var cotes = [], ecartees = [], i = 0, TRS = [];
+    var creeEtiq = function(cle){ for (var k = 0; k < TRS.length; k++) if (TRS[k].cle === cle) return !!TRS[k].etiquette; return false; };
+    var nomT = function(cle){ for (var k = 0; k < TRS.length; k++) if (TRS[k].cle === cle) return TRS[k].nom || cle; return cle; };
+    // Le libellé du service, tel que la fenêtre Expédition le montre (contexte des transporteurs).
+    var nomS = function(t, s, repli){ for (var k = 0; k < TRS.length; k++) if (TRS[k].cle === t)
+      for (var j = 0; j < (TRS[k].services || []).length; j++) if (TRS[k].services[j].cle === s) return TRS[k].services[j].libelle || s;
+      return repli || s; };
+    var services = function(x){ return (x.services && x.services.length) ? x.services : [x]; };
+    dire('${T("Cotation des étiquettes…")}' + ' 0 / ' + ids.length);
+    return appeler('expedition:contexte', []).then(function(c){
+      TRS = (c && c.ok && c.transporteurs) || [];
+      return ids.reduce(function(p, id){
+        return p.then(function(){
+          return appeler('expedition:lire', [id]).then(function(L){
+            if (!L || !L.ok) { ecartees.push([lotNom(id), lotMotif(L)]); return; }
+            if (L.commande && L.commande.aUneEtiquette) { ecartees.push([lotNom(id), '${T("a déjà une étiquette")}']); return; }
+            var pw = L.poids || {};
+            var poids = Number(Math.round(Number(((pw.calcule > 0) ? pw.calcule : 0.5) + 'e2')) + 'e-2');
+            return appeler('expedition:comparer', [id, poids]).then(function(r){
+              if (!r || !r.ok) { ecartees.push([lotNom(id), lotMotif(r)]); return; }
+              var res = (r.resultats || []).filter(function(x){ return x.ok && creeEtiq(x.transporteur); });
+              var choix = null, cc = L.commande && L.commande.choixClient;
+              if (cc && cc.transporteur) res.forEach(function(x){ if (x.transporteur !== cc.transporteur || choix) return;
+                services(x).forEach(function(s){ if (!choix && s.service === cc.service && +s.reel > 0) choix = { t: x.transporteur, s: s.service, nomS: nomS(x.transporteur, s.service, cc.nomService), prix: +s.reel, client: true }; }); });
+              if (!choix && res[0]) { var s0 = services(res[0]).filter(function(s){ return +s.reel > 0; })[0] || null;
+                if (s0 || +res[0].reel > 0) choix = { t: res[0].transporteur, s: (s0 || res[0]).service, nomS: nomS(res[0].transporteur, (s0 || res[0]).service), prix: +(s0 || res[0]).reel, client: false }; }
+              if (!choix) { ecartees.push([lotNom(id), '${T("aucun transporteur qui crée des étiquettes n’a coté cet envoi")}']); return; }
+              cotes.push({ id: id, t: choix.t, s: choix.s, nomS: choix.nomS, prix: choix.prix, poids: (+r.poidsKg > 0 ? +r.poidsKg : poids), client: choix.client, estime: !!pw.estime });
+            });
+          }).then(function(){ i++; dire('${T("Cotation des étiquettes…")}' + ' ' + i + ' / ' + ids.length); });
+        });
+      }, Promise.resolve());
+    }).then(function(){
+      if (!cotes.length) {
+        dire('${T("Aucune étiquette ne peut être créée.")}', 'err');
+        if (ecartees.length) szConfirmer({ titre: '${T("Créer les étiquettes")}', texte: '${T("Aucune des commandes n’a pu être cotée :")}', details: ecartees.slice(0, 12), oui: '${T("Fermer")}', seul: true });
+        return;
+      }
+      var total = cotes.reduce(function(m, x){ return m + x.prix; }, 0);
+      dire('');
+      var det = cotes.map(function(x){ return [lotNom(x.id), nomT(x.t) + ' · ' + x.nomS + ' · ' + szNombre(x.poids, 2) + ' kg'
+        + (x.estime ? ' ${T("(estimé)")}' : '') + (x.client ? ' · ${T("choix de la cliente")}' : '') + ' — ' + argent(x.prix)]; });
+      ecartees.forEach(function(e){ det.push([e[0], '${T("laissée de côté : ")}' + e[1]]); });
+      return szConfirmer({ titre: '${T("Créer les étiquettes")}', prudent: true,
+        texte: szPl(cotes.length, '${T("{0} étiquette sera achetée maintenant — facturée dès sa création, annulable tant que le colis n’est pas parti.")}', '${T("{0} étiquettes seront achetées maintenant — facturées dès leur création, annulables tant que le colis n’est pas parti.")}').split('{0}').join(cotes.length)
+          + (tous.length > ids.length ? lotEcartes(ids, tous) : ''),
+        details: [['${T("Total coté (avant taxes)")}', argent(total)]].concat(det),
+        oui: szPl(cotes.length, '${T("Acheter {0} étiquette — {1}")}', '${T("Acheter {0} étiquettes — {1}")}').split('{0}').join(cotes.length).split('{1}').join(argent(total)) })
+      .then(function(oui){
+        if (!oui) { dire('${T("Rien n’a été acheté.")}', 'att'); return; }
+        var parId = {}; cotes.forEach(function(x){ parId[x.id] = x; });
+        var faites = [];
+        return szLotDerouler({ titre: '${T("Création des étiquettes")}', ids: cotes.map(function(x){ return x.id; }), nom: lotNom, motif: lotMotif,
+          faire: function(id){ var x = parId[id];
+            return appeler('expedition:etiquette', [id, x.t, x.s, x.poids, false, { prixCents: Math.round(x.prix * 100) }]).then(function(r){ if (r && r.ok) faites.push(id); return r; }); },
+          fait: function(k){ return szPl(k, '${T("{0} étiquette créée.")}', '${T("{0} étiquettes créées.")}').split('{0}').join(k); } })
+        .then(function(){
+          CK.vider(); charger(true);
+          if (!faites.length) return;
+          return szConfirmer({ titre: '${T("Imprimer les étiquettes")}',
+            texte: szPl(faites.length, '${T("{0} étiquette vient d’être créée. L’imprimer maintenant ?")}', '${T("{0} étiquettes viennent d’être créées. Les imprimer maintenant ?")}').split('{0}').join(faites.length),
+            non: '${T("Plus tard")}', oui: '${T("Imprimer maintenant")}' }).then(function(ok){
+            if (!ok) return;
+            return szLotDerouler({ titre: '${T("Impression des étiquettes")}', ids: faites, nom: lotNom, motif: lotMotif,
+              faire: function(id){ return appeler('expedition:imprimer', [id, null]); },
+              fait: function(k){ return szPl(k, '${T("{0} étiquette envoyée à l’impression.")}', '${T("{0} étiquettes envoyées à l’impression.")}').split('{0}').join(k); } });
+          });
+        });
       });
     });
+  }
+  // L export : les lignes COCHÉES (toutes pages), dans l ordre où elles ont été cochées.
+  function lotExporter(ids){
+    var lignes = ids.map(function(id){ var f = lotFiche(id);
+      return [f.numero || '', (f.date || '').slice(0, 10), f.client || '', f.ville || '', f.articles || 0,
+        (Number(f.total) || 0).toFixed(2), szTd(libelleStatut(f.statut)), f.transporteur || '', f.suivi || '', f.numeroFacture || '']; });
+    var csv = szCSV(['${T("Commande")}', '${T("Date")}', '${T("Client")}', '${T("Ville")}', '${T("Articles")}', '${T("Total")}',
+      '${T("Statut")}', '${T("Transporteur")}', '${T("Suivi")}', '${T("Facture")}'], lignes);
+    szExporter((MODE === 'expeditions' ? 'expeditions-' : 'commandes-') + new Date().toISOString().slice(0, 10) + '.csv', csv,
+      szPl(ids.length, '${T("{0} commande exportée")}', '${T("{0} commandes exportées")}').split('{0}').join(ids.length));
   }
 
   function ouvrir(op, id, quoi){
@@ -1565,7 +1674,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (document.hasFocus && !document.hasFocus() && (SONDE_TIC % 3)) return;
     if (enCours || VUE !== 'liste') return;
     var a = document.activeElement;
-    if (a && (a.tagName === 'INPUT' || a.tagName === 'SELECT')) return;
+    // Une CASE à cocher garde le focus après le clic : elle ne doit pas arrêter la relecture (relecture du 2026-10-29).
+    if (a && ((a.tagName === 'INPUT' && a.type !== 'checkbox') || a.tagName === 'SELECT')) return;
     if (CTX && DONNEES) charger();
   }, 5000);
   document.addEventListener('visibilitychange', function(){

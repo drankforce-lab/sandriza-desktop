@@ -2149,7 +2149,8 @@ const JS_CONFIRMER = () => `
      · oui    : le VERBE de l action (« Envoyer à 412 abonnés »), jamais « OK »
      · danger : bouton rouge, focus sur Annuler
      · prudent: focus sur Annuler et Entree inactive, SANS rouge (un envoi massif n est pas une destruction)
-   Echap et le voile annulent ; Entree ne valide QUE si l action n est pas dangereuse. */
+   Echap et le voile annulent ; Entree ne valide QUE si l action n est pas dangereuse.
+     · seul   : un seul bouton (un bilan a lire, rien a choisir — 2026-10-29). */
 var _szConfOuverte = false;
 function szConfirmer(o){
   o = o || {};
@@ -2166,7 +2167,7 @@ function szConfirmer(o){
       + ((o.details && o.details.length) ? '<dl class="szc-details">' + o.details.map(function(d){
           return '<dt>' + esc(d[0]) + '</dt><dd>' + esc(d[1]) + '</dd>'; }).join('') + '</dl>' : '')
       + '<div class="szc-pied">'
-      + '<button type="button" class="szc-non">' + esc(o.non || '${T("Annuler")}') + '</button>'
+      + (o.seul ? '' : '<button type="button" class="szc-non">' + esc(o.non || '${T("Annuler")}') + '</button>')
       + '<button type="button" class="szc-oui">' + esc(o.oui || '${T("Continuer")}') + '</button>'
       + '</div></div>';
     document.body.appendChild(v);
@@ -2182,9 +2183,9 @@ function szConfirmer(o){
     };
     document.addEventListener('keydown', clavier, true);
     v.addEventListener('mousedown', function(ev){ if (ev.target === v) fini(false); });
-    v.querySelector('.szc-non').onclick = function(){ fini(false); };
+    if (v.querySelector('.szc-non')) v.querySelector('.szc-non').onclick = function(){ fini(false); };
     v.querySelector('.szc-oui').onclick = function(){ fini(true); };
-    try { ((o.danger || o.prudent) ? v.querySelector('.szc-non') : v.querySelector('.szc-oui')).focus(); } catch (e) {}
+    try { ((o.danger || o.prudent) && !o.seul ? v.querySelector('.szc-non') : v.querySelector('.szc-oui')).focus(); } catch (e) {}
   });
 }
 /* ══ szDemanderNip — LA SAISIE D UN NIP, MEME BOITE QUE LA CONFIRMATION (2026-10-19) ══════════
@@ -2266,9 +2267,165 @@ const JS_BORNER = (table) => `
     try { new MutationObserver(poser).observe(document.body, { childList: true, subtree: true }); } catch (e) {}
   })();
 `;
+/* ══ LES CASES À COCHER DES LISTES (2026-10-29, sa demande) ══════════════════════════════════════════
+   « Tu m'avais donné des optimisations pour des cases à cocher, ça ne semble pas fait pour le traitement plus
+   rapide des commandes, factures, remboursements… » — puis : TOUJOURS VISIBLES, partout où ça fait gagner du
+   temps. Une seule pièce pour toutes les listes, parce qu'une règle recopiée diverge au premier ajustement :
+     · une case au début de chaque ligne, et « tout cocher » (la page affichée) dans l'en-tête ;
+     · Maj+clic coche toute la plage depuis la dernière case touchée ;
+     · les coches vivent ICI, avec la FICHE retenue au moment de cocher : changer de page ne les perd pas ;
+     · la barre d'actions n'apparaît que lorsqu'une case est cochée, et chaque bouton dit pour combien
+       d'éléments il agira (« Marquer payée (3) ») : ceux qui ne s'y prêtent pas sont nommés à la confirmation.
+   Usage (dans la fenêtre) :
+     var CK = szCoches({ zone: corps, barre: 'k-barre', lignes: function(){ return DONNEES.lignes; },
+       id: function(r){ return r.id; }, fiche: function(r){ return { statut: r.statut, nom: r.numero }; },
+       compte: ['{0} commande sélectionnée', '{0} commandes sélectionnées'],
+       actions: [{ cle: 'payer', libelle: 'Marquer payée', prim: true, pour: function(f){ return !f.payee; } }],
+       geste: function(cle, ids, tous){ ... } });
+     en-tête : CK.th() · ligne : CK.td(r) et CK.classe(r) · au-dessus du tableau : CK.barre() ·
+     APRÈS chaque dessin : CK.apres() · au début du gestionnaire de clic : if (CK.clic(ev)) return;
+   ⚠ AUCUN accent grave ici : ce script vit dans un littéral de gabarit. */
+const JS_COCHES = () => `
+function szCoches(o){
+  var S = {}, DERNIER = null, OCCUPE = false, CONTEXTE = null;
+  var esc = function(x){ return String(x == null ? '' : x).replace(/[&<>"]/g, function(c){
+    return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); };
+  var _szkLignes = function(){ try { return o.lignes() || []; } catch (e) { return []; } };
+  var n = function(){ return Object.keys(S).length; };
+  /* « Tout cocher » = ce qu on VOIT : une liste en pages mesurées (data-pages) écrit toutes ses lignes et en
+     cache une partie. Cocher l invisible ferait agir sur des lignes qu on n a pas regardées. Sans mise en
+     page (aucune ligne mesurée), toutes les lignes comptent. */
+  var _szkVisibles = function(){
+    var L = _szkLignes(); if (!o.zone || !o.zone.querySelector) return L;
+    var V = L.filter(function(r){ var c = o.zone.querySelector('[data-szk="' + String(o.id(r)).replace(/"/g, '') + '"]');
+      var tr = c && c.closest && c.closest('tr'); return !!(tr && tr.getClientRects && tr.getClientRects().length); });
+    return V.length ? V : L;
+  };
+  var compte = function(k){ var c = o.compte || ['${T("{0} élément sélectionné")}', '${T("{0} éléments sélectionnés")}'];
+    return szPl(k, c[0], c[1]).split('{0}').join(k); };
+  var pour = function(a){ return Object.keys(S).filter(function(id){ return !a.pour || a.pour(S[id], id); }); };
+  /* ⚠ LA BARRE GARDE SA HAUTEUR, cochée ou non (relecture du 2026-10-29) : en apparaissant, elle rétrécissait la
+     liste, et la pagination mesurée retombait à la page 1 au redessin suivant. Vide, elle dit à quoi servent
+     les cases, en discret. */
+  function _szkPeindre(){
+    var b = document.getElementById && document.getElementById(o.barre); if (!b) return;
+    var k = n();
+    b.classList.toggle('szk-repos', !k);
+    if (!k) { b.innerHTML = '<span class="szk-aide">${T("Cochez des lignes pour agir sur plusieurs à la fois — Maj+clic coche une plage.")}</span>'; return; }
+    b.innerHTML = '<span class="szk-n">' + esc(compte(k)) + '</span>'
+      + '<button type="button" class="mini szk-vider"' + (OCCUPE ? ' disabled' : '') + '>${T("Tout décocher")}</button>'
+      + '<span class="szk-esp"></span>'
+      + (o.actions || []).filter(function(a){ return !a.cache || !a.cache(); }).map(function(a){
+          var m = pour(a).length;
+          return '<button type="button" class="mini' + (a.prim ? ' prim' : '') + (a.danger ? ' danger' : '') + '" data-szk-a="' + esc(a.cle) + '"'
+            + (m && !OCCUPE ? '' : ' disabled') + (a.aide ? ' title="' + esc(a.aide) + '"' : '') + '>' + esc(a.libelle)
+            + (m && m !== k ? ' (' + m + ')' : '') + '</button>'; }).join('');
+  }
+  function _szkTete(){
+    var t = o.zone && o.zone.querySelector && o.zone.querySelector('.szk-tout'); if (!t) return;
+    var L = _szkVisibles(), c = L.filter(function(r){ return S[o.id(r)]; }).length;
+    t.checked = !!L.length && c === L.length; t.indeterminate = c > 0 && c < L.length;
+  }
+  function _szkCocher(id, oui){
+    id = String(id);
+    if (oui) { var r = _szkLignes().filter(function(x){ return String(o.id(x)) === id; })[0];
+      if (r || S[id]) S[id] = r ? (o.fiche ? o.fiche(r) : {}) : S[id]; }
+    else delete S[id];
+    if (o.zone && o.zone.querySelector) {
+      var c = o.zone.querySelector('[data-szk="' + id.replace(/"/g, '') + '"]');
+      if (c) { c.checked = !!S[id]; var tr = c.closest('tr'); if (tr) tr.classList.toggle('coche', !!S[id]); }
+    }
+  }
+  var api = {
+    th: function(){ return '<th class="c szk-c"><input type="checkbox" class="szk-tout" aria-label="${T("Tout cocher sur cette page")}" title="${T("Tout cocher sur cette page")}"></th>'; },
+    td: function(r){ var id = String(o.id(r)), f = S[id];
+      return '<td class="c szk-c"><input type="checkbox" data-szk="' + esc(id) + '"' + (f ? ' checked' : '')
+        + ' aria-label="${T("Sélectionner")} ' + esc(o.nom ? o.nom(r) : id) + '"></td>'; },
+    classe: function(r){ return S[String(o.id(r))] ? ' coche' : ''; },
+    barre: function(){ return '<div class="szk-barre szk-repos" id="' + esc(o.barre) + '" role="toolbar" aria-label="${T("Actions sur la sélection")}"></div>'; },
+    /* Après chaque dessin. (1) Un AUTRE filtre, onglet ou recherche (o.contexte) vide la sélection : on n agit
+       jamais sur des lignes qu on ne voit plus ; changer de page, lui, la garde. (2) Les fiches cochées et
+       présentes sont RELUES : un statut, un suivi ou un verrou changé depuis la coche compte pour le geste. */
+    apres: function(){
+      try {
+        var cx = o.contexte ? String(o.contexte()) : '';
+        if (CONTEXTE !== null && cx !== CONTEXTE && n() && !OCCUPE) { S = {}; DERNIER = null;
+          if (o.zone && o.zone.querySelectorAll) o.zone.querySelectorAll('[data-szk]').forEach(function(c){ c.checked = false; var tr = c.closest('tr'); if (tr) tr.classList.remove('coche'); }); }
+        CONTEXTE = cx;
+        _szkLignes().forEach(function(r){ var id = String(o.id(r)); if (S[id] && o.fiche) S[id] = o.fiche(r); });
+        _szkPeindre(); _szkTete();
+      } catch (e) {}
+    },
+    ids: function(){ return Object.keys(S); },
+    fiches: function(){ return S; },
+    n: n,
+    occupe: function(){ return OCCUPE; },
+    pour: function(cle){ var a = (o.actions || []).filter(function(x){ return x.cle === cle; })[0]; return a ? pour(a) : []; },
+    vider: function(){ S = {}; DERNIER = null; if (o.zone && o.zone.querySelectorAll) o.zone.querySelectorAll('[data-szk]').forEach(function(c){ c.checked = false; var tr = c.closest('tr'); if (tr) tr.classList.remove('coche'); }); api.apres(); },
+    // Rend vrai si le clic concernait une case (la fenêtre s'arrête là : la ligne ne s'ouvre pas).
+    clic: function(ev){
+      var t = ev.target; if (!t || !t.closest) return false;
+      var a = t.closest('[data-szk-a]');
+      /* ⚠ UN SEUL LOT À LA FOIS (relecture du 2026-10-29) : un double clic sur « Imprimer » sortait chaque
+         document deux fois, et « Expédier » pouvait partir deux fois sur la même commande. La barre reste
+         éteinte jusqu à ce que la promesse du geste soit réglée. */
+      if (a) {
+        if (a.disabled || OCCUPE || !o.geste) return true;
+        var cle = a.getAttribute('data-szk-a'); var ac = (o.actions || []).filter(function(x){ return x.cle === cle; })[0];
+        OCCUPE = true; _szkPeindre();
+        var fin = function(){ OCCUPE = false; _szkPeindre(); };
+        try { Promise.resolve(o.geste(cle, ac ? pour(ac) : [], api.ids())).then(fin, fin); } catch (e) { fin(); }
+        return true;
+      }
+      if (t.closest('.szk-vider')) { if (!OCCUPE) api.vider(); return true; }
+      if (t.closest('.szk-barre')) return true;
+      if (OCCUPE && t.closest('.szk-c')) { if (t.matches && t.matches('[data-szk],.szk-tout')) t.checked = !t.checked; return true; }
+      if (t.classList && t.classList.contains('szk-tout')) {
+        var oui = t.checked; _szkVisibles().forEach(function(r){ _szkCocher(o.id(r), oui); }); api.apres(); return true; }
+      var cell = t.closest('.szk-c'); if (!cell) return false;
+      var c = cell.querySelector('[data-szk]'); if (!c) return true;
+      var id = c.getAttribute('data-szk');
+      var veut = (t === c) ? c.checked : !S[id];
+      if (ev.shiftKey && DERNIER !== null) {
+        var L = _szkLignes().map(function(r){ return String(o.id(r)); }), i = L.indexOf(DERNIER), j = L.indexOf(id);
+        if (i >= 0 && j >= 0) { L.slice(Math.min(i, j), Math.max(i, j) + 1).forEach(function(x){ _szkCocher(x, veut); }); }
+        else _szkCocher(id, veut);
+      } else _szkCocher(id, veut);
+      DERNIER = id; api.apres(); return true;
+    }
+  };
+  return api;
+}
+/* Un lot, L UN APRES L AUTRE (une imprimante n en prend qu une, et un serveur sollicité vingt fois à la même
+   seconde refuse) : la progression dans le bandeau, puis un BILAN qui nomme ce qui n a pas passé, et pourquoi.
+   szLotDerouler({ titre, ids, nom: fn(id), faire: fn(id) -> Promise<{ok,…}>, motif: fn(r) }) -> Promise<{ok, rates}> */
+function szLotDerouler(o){
+  var ids = (o.ids || []).slice(), ok = 0, rates = [], i = 0;
+  var nom = function(id){ try { return (o.nom && o.nom(id)) || id; } catch (e) { return id; } };
+  var motif = function(r){ try { return (o.motif && o.motif(r)) || (r && (r.detail || r.motif)) || '${T("échec")}'; } catch (e) { return '${T("échec")}'; } };
+  szDire((o.titre || '${T("Traitement")}') + '… 0 / ' + ids.length);
+  return ids.reduce(function(p, id){
+    return p.then(function(){
+      return Promise.resolve().then(function(){ return o.faire(id); }).then(function(r){
+        if (r && r.ok) ok++; else rates.push({ id: id, nom: nom(id), motif: motif(r) });
+      }, function(e){ rates.push({ id: id, nom: nom(id), motif: String((e && e.message) || e) }); })
+      .then(function(){ i++; szDire((o.titre || '${T("Traitement")}') + '… ' + i + ' / ' + ids.length); });
+    });
+  }, Promise.resolve()).then(function(){
+    var phrase = '${T("{0} sur {1} faits.")}'.split('{0}').join(ok).split('{1}').join(ids.length);
+    if (!rates.length) { szDire((o.fait ? o.fait(ok) : phrase), 'bon'); return { ok: ok, rates: rates }; }
+    szDire(phrase + ' ' + szPl(rates.length, '${T("{0} n’a pas passé.")}', '${T("{0} n’ont pas passé.")}').split('{0}').join(rates.length), 'err');
+    return szConfirmer({ titre: (o.titre || '${T("Traitement")}') + ' — ${T("bilan")}', texte: phrase,
+      details: rates.slice(0, 12).map(function(x){ return [x.nom, x.motif]; })
+        .concat(rates.length > 12 ? [['…', '${T("et {0} autres")}'.split('{0}').join(rates.length - 12)]] : []),
+      oui: '${T("Fermer")}', seul: true }).then(function(){ return { ok: ok, rates: rates }; });
+  });
+}
+`;
+
 const JS_DIRE = () => JS_DIRE_BASE() + JS_PLEIN() + JS_PLEIN_AUTO() + JS_FENPLEIN()
   + JS_VERROUS() + JS_LOTS() + JS_AUTOPAGE() + JS_PAGES() + JS_COMPTE() + JS_MESURES()
-  + JS_DATES() + JS_FINITIONS() + JS_JUMEAUX + JS_CTX() + JS_CONFIRMER();
+  + JS_DATES() + JS_FINITIONS() + JS_JUMEAUX + JS_CTX() + JS_CONFIRMER() + JS_COCHES();
 
 const JS_SOCLE = () => `
 var P = window.szPont;
@@ -4803,8 +4960,26 @@ html.jour:is([data-sz-theme="carbone"],[data-sz-theme="lin"]) .onglets button.on
   color:#1d2433!important;box-shadow:inset 0 -2px 0 var(--sz-repere)}
 `;
 
-module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX,
-  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX,
+/* ══ LES CASES À COCHER DES LISTES (2026-10-29) — voir JS_COCHES ══ */
+const CSS_COCHES = `
+th.szk-c,td.szk-c{width:2.2rem;min-width:2.2rem;padding-left:.55rem!important;padding-right:.2rem!important;text-align:center;cursor:pointer}
+.szk-c input[type=checkbox]{width:1rem;height:1rem;margin:0;vertical-align:middle;cursor:pointer;accent-color:var(--or)}
+tr.coche>td{background:rgba(var(--or-rgb),.1)}
+.szk-barre{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;flex:0 0 auto;padding:.45rem .75rem;margin:0 0 .55rem;
+  border:1px solid rgba(var(--or-rgb),.45);border-radius:10px;background:rgba(var(--or-rgb),.08);font-size:.8rem}
+.szk-barre{min-height:2.55rem}
+.szk-barre.szk-repos{border-color:var(--v08);background:transparent}
+.szk-barre .szk-aide{color:var(--tx3,var(--tx2));font-size:.76rem}
+html.jour .szk-barre.szk-repos{border-color:rgba(0,0,0,.08);background:transparent}
+.szk-barre .szk-n{font-weight:600;white-space:nowrap}
+.szk-barre .szk-esp{flex:1 1 auto}
+.szk-barre button{white-space:nowrap}
+html.jour .szk-barre{background:rgba(143,111,66,.08);border-color:rgba(143,111,66,.45)}
+html.jour tr.coche>td{background:rgba(143,111,66,.1)}
+`;
+
+module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES,
+  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES,
   JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_MESURES, JS_BROUILLON, JS_TUILES, JS_BORNER, CSS_THEMES, CSS_FICHE, ICO,
   /* La page, pas son texte : voir l en-tete de ce fichier. */
   TETE, LIEU, SEP_DEC, CSS_SUIVI };

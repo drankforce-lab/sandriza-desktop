@@ -119,4 +119,11 @@ module.exports = {
   // 2026-10-25, audit : TPS et TVQ du détail traduits (comme langue/depenses.js).
   'TPS': 'GST',
   'TVQ': 'QST',
+  // Gestes groupés (2026-10-29)
+  "{0} ligne sélectionnée": "{0} row selected",
+  "{0} lignes sélectionnées": "{0} rows selected",
+  "Exporter (CSV)": "Export (CSV)",
+  "Remboursement": "Refund",
+  "{0} ligne exportée": "{0} row exported",
+  "{0} lignes exportées": "{0} rows exported",
 };

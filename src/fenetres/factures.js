@@ -121,6 +121,63 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
   var PAGINE = false, PAGE = 0, PAR_PAGE = 50, TOTAL = 0, PAGES = 1, COMPTES = null, PROCH = [], NB_AREC = 0;
   var A_CLIENTS = false, MINU_Q = null, MINU_CLI = null;
   var SUPPR_ARME = '';                   // id de la facture a confirmer
+  /* LES ACTIONS GROUPÉES (2026-10-29, sa demande : cases toujours visibles). Encaisser, annuler le paiement,
+     imprimer, exporter — JAMAIS supprimer en lot (sa décision : une facture émise reste pour la comptabilité).
+     Chaque geste passe par l op unitaire du pont (mêmes règles qu un clic sur la ligne). */
+  var CK = szCoches({
+    zone: corps, barre: 'k-barre',
+    lignes: function(){ return filtrees(); },
+    contexte: function(){ return STATUT + '|' + Q; },   // un autre statut ou une autre recherche vide la sélection
+    id: function(r){ return r.id; },
+    nom: function(r){ return r.numero; },
+    fiche: function(r){ return Object.assign({}, r); },
+    compte: ['${T("{0} facture sélectionnée")}', '${T("{0} factures sélectionnées")}'],
+    actions: [
+      { cle: 'payer', libelle: '${T("Marquer payée")}', prim: true, cache: function(){ return !PEUT_ENC; },
+        pour: function(f){ return f.statut === 'unpaid' || f.statut === 'overdue'; } },
+      { cle: 'depayer', libelle: '${T("Annuler le paiement")}', cache: function(){ return !PEUT_ENC; },
+        pour: function(f){ return f.statut === 'paid'; } },
+      { cle: 'imprimer', libelle: '${T("Imprimer")}' },
+      { cle: 'csv', libelle: '${T("Exporter (CSV)")}' }
+    ],
+    geste: function(cle, ids, tous){ lotGeste(cle, ids, tous); }
+  });
+  function lotFiche(id){ return CK.fiches()[id] || {}; }
+  function lotNom(id){ return lotFiche(id).numero || id; }
+  function lotSomme(ids){ return ids.reduce(function(m, id){ return m + (Number(lotFiche(id).total) || 0); }, 0); }
+  function lotEcartes(ids, tous){
+    var n = tous.length - ids.length;
+    return n ? ' ' + szPl(n, '${T("{0} autre sélectionnée ne s’y prête pas : elle ne change pas.")}', '${T("{0} autres sélectionnées ne s’y prêtent pas : elles ne changent pas.")}').split('{0}').join(n) : '';
+  }
+  function lotGeste(cle, ids, tous){
+    if (!ids.length) return;
+    if (cle === 'csv') {
+      var csv = szCSV(['${T("Facture")}', '${T("Commande")}', '${T("Date")}', '${T("Client")}', '${T("Courriel")}', '${T("Échéance")}', '${T("Total")}', '${T("Statut")}'],
+        tous.map(function(id){ var f = lotFiche(id); return [f.numero || '', f.commande || '', (f.date || '').slice(0, 10), f.client || '', f.courriel || '',
+          (f.echeance || '').slice(0, 10), (Number(f.total) || 0).toFixed(2), szTd(f.statutLibelle) || f.statut || '']; }));
+      return szExporter('factures-' + new Date().toISOString().slice(0, 10) + '.csv', csv,
+        szPl(tous.length, '${T("{0} facture exportée")}', '${T("{0} factures exportées")}').split('{0}').join(tous.length));
+    }
+    if (cle === 'imprimer') return szLotDerouler({ titre: '${T("Impression des factures")}', ids: ids, nom: lotNom, motif: lotMotif,
+      faire: function(id){ return appeler('facture:imprimer', [id]); },
+      fait: function(k){ return szPl(k, '${T("{0} facture envoyée à l’impression.")}', '${T("{0} factures envoyées à l’impression.")}').split('{0}').join(k); } });
+    var payer = cle === 'payer';
+    return szConfirmer({ titre: payer ? '${T("Marquer payée")}' : '${T("Annuler le paiement")}', prudent: true,
+      texte: (payer
+        ? szPl(ids.length, '${T("{0} facture sera marquée payée.")}', '${T("{0} factures seront marquées payées.")}')
+        : szPl(ids.length, '${T("{0} facture redeviendra « non payée ».")}', '${T("{0} factures redeviendront « non payées ».")}')).split('{0}').join(ids.length) + lotEcartes(ids, tous),
+      details: [['${T("Montant total")}', fmt(lotSomme(ids))]].concat(ids.slice(0, 8).map(function(id){ var f = lotFiche(id); return [f.numero || id, (f.client || '—') + ' · ' + fmt(f.total)]; })),
+      oui: payer ? szPl(ids.length, '${T("Marquer {0} facture payée")}', '${T("Marquer {0} factures payées")}').split('{0}').join(ids.length)
+                 : '${T("Annuler le paiement")}' }).then(function(oui){
+      if (!oui) return;
+      return szLotDerouler({ titre: payer ? '${T("Encaissement")}' : '${T("Annulation des paiements")}', ids: ids, nom: lotNom, motif: lotMotif,
+        faire: function(id){ return appeler('factures:payer', [id, payer]); },
+        fait: function(k){ return (payer ? szPl(k, '${T("{0} facture marquée payée.")}', '${T("{0} factures marquées payées.")}')
+          : szPl(k, '${T("{0} paiement annulé.")}', '${T("{0} paiements annulés.")}')).split('{0}').join(k); } })
+        .then(function(){ CK.vider(); charger(); });
+    });
+  }
+  function lotMotif(r){ return (r && r.detail) ? String(r.detail) : expliquer(r); }
   var ETAT_OUVERT = false;
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
@@ -264,7 +321,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
       + '</div></div>';
 
     /* ── LE TABLEAU (data-pages="factures") ── */
-    var t = '<div class="cx-carte sz-pagee' + (TUILES ? '' : ' cx-plein') + '">';
+    var t = '<div class="cx-carte sz-pagee' + (TUILES ? '' : ' cx-plein') + '">' + CK.barre();
     if (!vue.length) {
       t += '<div class="vide">${T("Aucune facture ne correspond.")}</div>';
     } else {
@@ -275,7 +332,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
          puis demande la page voisine au pont (window.szPagesCoeur.factures, plus bas). */
       t += '<div class="cx-pages" data-pages="factures"'
         + (PAGINE ? szPagesCoeurAttr({ pagine: true, page: PAGE, pages: PAGES, total: TOTAL, parPage: PAR_PAGE }) : '')
-        + '><table><thead><tr><th>${T("Facture")}</th><th>${T("Client")}</th>'
+        + '><table><thead><tr>' + CK.th() + '<th>${T("Facture")}</th><th>${T("Client")}</th>'
         + '<th>${T("Échéance")}</th><th class="r">${T("Total")}</th><th>${T("Statut")}</th>' + (avecGestes ? '<th></th>' : '') + '</tr></thead><tbody>'
         + vue.map(function(r){
             var gestes = '';
@@ -286,7 +343,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
               else if (r.statut === 'paid') gestes += '<button class="mini geste" data-depayer="' + esc(r.id) + '" title="${T("Annuler le statut de paiement")}">${T("Annuler le paiement")}</button> ';
             }
             if (PEUT_SUP) gestes += '<button class="mini geste danger" data-suppr="' + esc(r.id) + '">' + '${T("Supprimer")}' + '</button>';
-            return '<tr data-id="' + esc(r.id) + '" title="${T("Ouvrir la facture")}">'
+            return '<tr data-id="' + esc(r.id) + '" class="' + CK.classe(r) + '" title="${T("Ouvrir la facture")}">'
+              + CK.td(r)
               + '<td><span class="cx-num">' + esc(r.numero) + '</span>'
               + '<span class="cx-l2">' + (r.commande ? esc(r.commande) + ' · ' : '') + esc(fmtDate(r.date)) + '</span></td>'
               // ⚠ Le cadenas d une facture est celui de SA COMMANDE : c est
@@ -368,6 +426,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
         + '</div></div>';
     }
     corps.innerHTML = h;
+    CK.apres();
     szVerrousPeindre();   // reposer les cadenas connus sur la liste fraiche
 
     var be = document.getElementById('f-etat');
@@ -435,6 +494,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
   corps.onclick = function(ev){
     var t = ev.target;
     if (!t || !t.closest) return;
+    if (CK.clic(ev)) return;   // une case, « tout cocher » ou la barre d actions
     var fst = t.closest('[data-fst]');
     if (fst) { STATUT = fst.getAttribute('data-fst') || ''; if (PAGINE) { PAGE = 0; charger(); } else dessiner(); return; }
     var bpay = t.closest('[data-payer]');
