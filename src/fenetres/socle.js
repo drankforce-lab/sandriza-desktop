@@ -2295,11 +2295,17 @@ function szCoches(o){
   /* « Tout cocher » = ce qu on VOIT : une liste en pages mesurées (data-pages) écrit toutes ses lignes et en
      cache une partie. Cocher l invisible ferait agir sur des lignes qu on n a pas regardées. Sans mise en
      page (aucune ligne mesurée), toutes les lignes comptent. */
+  /* (2026-10-29, sa demande « corrige le tout cocher partiel ») LA CASE ELLE-MÊME dit si sa ligne est à l écran :
+     une case dans une ligne cachée (display:none, de la ligne ou d un parent) n a aucune boîte. Valable pour un
+     <tr> comme pour un rang en <div> — l ancien test cherchait un <tr> et, dans une liste en cartes, comptait
+     TOUTES les lignes, d où une case d en-tête « partielle » après un changement de page. */
   var _szkVisibles = function(){
     var L = _szkLignes(); if (!o.zone || !o.zone.querySelector) return L;
+    var mesure = false;
     var V = L.filter(function(r){ var c = o.zone.querySelector('[data-szk="' + String(o.id(r)).replace(/"/g, '') + '"]');
-      var tr = c && c.closest && c.closest('tr'); return !!(tr && tr.getClientRects && tr.getClientRects().length); });
-    return V.length ? V : L;
+      if (!c || !c.getClientRects) return false;
+      var vu = c.getClientRects().length > 0; if (vu) mesure = true; return vu; });
+    return mesure ? V : L;   // rien de mesuré (page sans mise en page, banc) : toutes les lignes comptent
   };
   var compte = function(k){ var c = o.compte || ['${T("{0} élément sélectionné")}', '${T("{0} éléments sélectionnés")}'];
     return szPl(k, c[0], c[1]).split('{0}').join(k); };
@@ -2320,6 +2326,14 @@ function szCoches(o){
           return '<button type="button" class="mini' + (a.prim ? ' prim' : '') + (a.danger ? ' danger' : '') + '" data-szk-a="' + esc(a.cle) + '"'
             + (m && !OCCUPE ? '' : ' disabled') + (a.aide ? ' title="' + esc(a.aide) + '"' : '') + '>' + esc(a.libelle)
             + (m && m !== k ? ' (' + m + ')' : '') + '</button>'; }).join('');
+  }
+  /* LA CASE D EN-TÊTE SUIT LA PAGE AFFICHÉE. La pagination mesurée (JS_PAGES) cache les lignes APRÈS le dessin, et
+     encore à chaque changement de page, sans redessiner : on la recalcule dès qu une ligne de la zone change de
+     visibilité. _szkTete ne pose que des PROPRIÉTÉS (checked, indeterminate) : il ne relance pas l observateur. */
+  var _szkTeteT = null;
+  function _szkTeteBientot(){ if (_szkTeteT) return; _szkTeteT = setTimeout(function(){ _szkTeteT = null; try { _szkTete(); } catch (e) {} }, 0); }
+  if (o.zone && typeof MutationObserver !== 'undefined') {
+    try { new MutationObserver(_szkTeteBientot).observe(o.zone, { subtree: true, attributes: true, attributeFilter: ['style', 'hidden'] }); } catch (e) {}
   }
   function _szkTete(){
     var t = o.zone && o.zone.querySelector && o.zone.querySelector('.szk-tout'); if (!t) return;
