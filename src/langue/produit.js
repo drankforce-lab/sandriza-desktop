@@ -995,4 +995,7 @@ module.exports = {
   "Calques en attente : la silhouette de la mannequin n’est pas encore configurée au serveur.": "Layers on hold: the model’s silhouette is not configured on the server yet.",
   "Calques : {0} faits, {1} non faits — ils seront refaits à la prochaine ouverture de la fiche.": "Layers: {0} done, {1} not done — they will be redone the next time the item is opened.",
   "✓ Calques prêts : {0} (couleur prise sur la photo de chaque couleur)": "✓ Layers ready: {0} (colour taken from each colour’s photo)",
+  // Le type de haut pour la cabine (2026-10-30)
+  "Type de haut (cabine) :": "Top type (fitting room):",
+  "Déduit du nom": "Guessed from the name",
 };

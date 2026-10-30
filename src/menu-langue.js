@@ -117,6 +117,7 @@ const MENU_APP_EN = {
   'Configuration de la livraison': 'Shipping configuration',
   'Configuration des paiements': 'Payment configuration',
   'Configuration des retours': 'Returns configuration',
+  'Cabine d’essayage': 'Fitting room',
   'Coupons': 'Coupons',
   'Dossier des exports': 'Exports folder',
   'Déconnexion': 'Sign out',

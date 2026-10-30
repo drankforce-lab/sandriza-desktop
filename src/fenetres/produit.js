@@ -1200,7 +1200,7 @@ function pageProduit(id) {
   /* (2026-10-30, sa décision) FACE ET DOS PAR DÉFAUT (2 essayages) ; la case « Vue 6 angles » (champ cabineVues = '6')
      ajoute les 4 autres pour CET article — ce qui est déjà payé reste. Sans les 6 vues, la boutique ne fait pas tourner
      le vêtement : face et dos seulement. */
-  var CAB = { cle: '', t: null, charge: false, enCours: false, suivis: {}, minuterie: null, vues: 'fd', calque: { cle: '', enCours: false, r: null } };
+  var CAB = { cle: '', t: null, charge: false, enCours: false, suivis: {}, minuterie: null, vues: 'fd', calque: { cle: '', enCours: false, r: null }, type: '', types: null };
   var CAB_T = null;
   var CAB_ANGLES = { a000: '${T("Face")}', a060: '60°', a120: '120°', a180: '${T("Dos")}', a240: '240°', a300: '300°' };
   function cabCategorie(){ return String(val('p-cat') || '') + ' ' + (libCat(val('p-cat')) || ''); }
@@ -1249,6 +1249,13 @@ function pageProduit(id) {
       }
       h += '<label class="cab-l cab-6"><input type="checkbox" id="p-cab-6"' + (CAB.vues === '6' ? ' checked' : '') + (CAB.enCours ? ' disabled' : '') + '> '
         + '${T("Vue 6 angles (rotation) pour cet article — 4 essayages de plus")}</label>';
+      // (lot 3) LE TYPE DE HAUT : la boutique ne superpose deux hauts que pour les paires permises (Configuration › Cabine)
+      if (/^(hauts|manteaux)$/.test(String(val('p-cat') || ''))) {
+        var tys = (CAB.types && CAB.types.length) ? CAB.types.slice() : ['t-shirt', 'camisole', 'chemise', 'blouse', 'chandail', 'cardigan', 'veston', 'manteau'];
+        if (CAB.type && tys.indexOf(CAB.type) < 0) tys = tys.concat([CAB.type]);
+        h += '<label class="cab-l">${T("Type de haut (cabine) :")} <select id="p-cab-type"><option value="">${T("Déduit du nom")}</option>'
+          + tys.map(function(x){ return '<option' + (x === CAB.type ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join('') + '</select></label>';
+      }
       h += '<div class="cab-a">' + (t.angles || []).filter(function(a){ return a.exige || a.etat === 'reussi'; }).map(function(a){
         var cl = a.etat === 'reussi' ? 'ok' : (a.etat === 'cours' ? 'cours' : (a.etat === 'rejete' ? 'rate' : ''));
         var ic = a.etat === 'reussi' ? '✓ ' : (a.etat === 'cours' ? '⏳ ' : (a.etat === 'rejete' ? '✗ ' : ''));
@@ -1286,6 +1293,10 @@ function pageProduit(id) {
     var b = document.getElementById('p-cab-go'); if (b) b.onclick = preparerCabine;
     var br = document.getElementById('p-cab-rep'); if (br) br.onclick = reprendreCabine;
     Array.prototype.forEach.call(z.querySelectorAll('.cab-rej'), function(x){ x.onclick = function(){ rejeterCabine(x.getAttribute('data-angle')); }; });
+    var cty = document.getElementById('p-cab-type');
+    if (cty) cty.onchange = function(){ CAB.type = cty.value; };   // l etat « modifié » : l ecouteur change du corps
+    // la liste des types vient des reglages (Configuration › Cabine d essayage) — lue UNE fois ; un echec garde la liste par defaut
+    if (cty && CAB.types === null) { CAB.types = false; P.appeler('cabine:reglages').then(function(r){ if (r && r.ok && r.reglages && (r.reglages.types || []).length) { CAB.types = r.reglages.types; z.removeAttribute('data-h'); dessinerCabine(); } }); }
     var c6 = document.getElementById('p-cab-6');
     if (c6) c6.onchange = function(){ CAB.vues = c6.checked ? '6' : 'fd'; majCabine(); };
   }
@@ -4270,6 +4281,7 @@ function pageProduit(id) {
     DOS_SRC = (typeof p.photoDos === 'string' && p.photoDos) ? p.photoDos : '';
     FIBRE = (typeof p.photoFibre === 'string' && p.photoFibre) ? p.photoFibre : '';
     CAB.vues = p.cabineVues === '6' ? '6' : 'fd';   // la case « Vue 6 angles » de la cabine
+    CAB.type = typeof p.cabineType === 'string' ? p.cabineType : '';   // le type de haut (superpositions en boutique)
     // ⚠ COPIE PROFONDE : chaque couleur porte son propre objet. Une copie de
     // surface les partagerait avec la fiche d origine, et retirer une photo ici
     // la retirerait aussi de la reference qui sert a detecter les conflits.
@@ -5399,7 +5411,8 @@ function pageProduit(id) {
       // La photo du dos en mode simple (l'aperçu 3D) ; en mode angles, c'est la vue « Derrière » — null.
       photoDos: (modeStandard() && photoDos()) ? photoDos() : null,
       photoFibre: FIBRE || null,   // (2026-10-26) le gros plan de la fibre, affiché en grand en boutique
-      cabineVues: CAB.vues === '6' ? '6' : null,   // (2026-10-30) cabine : face + dos par défaut, '6' = rotation
+      cabineVues: CAB.vues === '6' ? '6' : null,
+      cabineType: CAB.type || null,   // (lot 3) le type de haut pour la cabine ; vide = déduit du nom   // (2026-10-30) cabine : face + dos par défaut, '6' = rotation
       // Les mesures du vêtement (7.13.0) : null = aucune. Le pont ne les écrit que si la clé est envoyée.
       mesuresVetement: mvPourEnvoi(),
       // Les photos des couleurs RETIREES ne partent pas : le site les

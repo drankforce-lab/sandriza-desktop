@@ -2117,6 +2117,15 @@ const JEU = {
       postal: 'H2X 1Y4', country: 'Canada', windowDays: 30, halfDays: 15, splitRefundEnabled: true },
   },
 
+  // La cabine d'essayage (2026-10-30) : ouverte, types, superpositions, fond par défaut et un fond programmé.
+  'config-cabine.js': {
+    identite: IDENTITE,
+    'cabine:reglages': { ok: true, ouverte: true, version: 'm1', peutModifier: true, reglages: {
+      types: ['t-shirt', 'chandail', 'cardigan', 'veston'], superpositions: [['t-shirt', 'veston'], ['chandail', 'cardigan']],
+      fond: 'studio', fonds: [{ nom: 'Été', image: 'https://photos.sandriza.com/divers/ete.webp', debut: '06-21', fin: '08-31', promo: false }],
+      fondActif: 'studio' } },
+  },
+
   // Configuration de la navigation (palier 5, famille Configuration). Pas de secret.
   'config-navigation.js': {
     identite: IDENTITE,

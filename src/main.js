@@ -2999,6 +2999,8 @@ const OPS_PONT = new Set([
   // Les pays desservis, dans la meme fenetre que la livraison.
   'config:pays:donnees', 'config:pays:relire', 'config:pays:exclure',
   'config:retours:donnees', 'config:retours:ecrire',
+  // La cabine d essayage dans l administration (2026-10-30) : reglages, fonds.
+  'cabine:reglages', 'cabine:reglages:ecrire', 'cabine:fond:deposer',
   'config:nav:donnees', 'config:nav:ecrire', 'config:nav:reinit',
   // Transporteurs (fenetre Transporteurs, 2.39.0) — ⚠ secrets + filet
   // carriers_fetch_full : donnees/ecrire peuvent RECHARGER la config depuis le
@@ -3693,6 +3695,7 @@ const LIMITES_PONT = {
   // appel exterieur depuis le retrait de Stripe Tax le 2026-10-02).
   'config:pays:donnees': 15000, 'config:pays:relire': 45000, 'config:pays:exclure': 30000,
   'config:retours:donnees': 15000, 'config:retours:ecrire': 30000,
+  'cabine:reglages': 20000, 'cabine:reglages:ecrire': 30000, 'cabine:fond:deposer': 120000,
   'config:nav:donnees': 15000, 'config:nav:ecrire': 30000, 'config:nav:reinit': 30000,
   'config:transporteurs:donnees': 30000, 'config:transporteurs:ecrire': 45000, 'config:transporteurs:reessayer': 30000, 'config:transporteurs:tester': 70000,
   'config:automations:donnees': 15000, 'config:automations:email': 20000, 'config:automations:stats': 20000,
@@ -4674,6 +4677,7 @@ const PAGES_ANCRABLES = () => ({
   'config-cles': ['Clés API', () => pageClesConfig()],
   'config-livraison': ['Configuration de la livraison', () => pageLivraison()],
   'config-retours': ['Configuration des retours', () => pageConfigRetours()],
+  'config-cabine': ['Cabine d’essayage', () => pageConfigCabine()],
   'config-navigation': ['Configuration de la navigation', () => pageConfigNavigation()],
   'config-carriers': ['Transporteurs', () => pageTransporteurs()],
   'config-automations': ['Automatisations', () => pageAutomations()],
@@ -7044,6 +7048,7 @@ const { pageExplorateur } = require('./fenetres/explorateur');
 const { pageVisionneuse } = require('./fenetres/visionneuse');
 const { pageLivraison } = require('./fenetres/livraison');
 const { pageConfigRetours } = require('./fenetres/config-retours');
+const { pageConfigCabine } = require('./fenetres/config-cabine');
 const { pageConfigNavigation } = require('./fenetres/config-navigation');
 const { pageTransporteurs } = require('./fenetres/transporteurs');
 const { pageAutomations } = require('./fenetres/automations');
@@ -7286,6 +7291,7 @@ const actionApp = (nom, arg) => {
     case 'config-marque': case 'config-icones': case 'config-taxes': case 'config-conformite':
     case 'compte-paiement':
     case 'config-paiements': case 'config-cles': case 'studio':
+    case 'config-cabine':
     case 'config-livraison': case 'config-retours': case 'config-navigation': case 'config-carriers': case 'config-automations': case 'config-telephonie': case 'config-models': case 'config-gabarits': case 'config-logotheque': case 'config-analytics': case 'config-turso': case 'config-homepage': case 'config-launch': case 'pages': case 'securite': case 'reglages-securite': case 'sociaux-config': case 'chat-config': case 'listenoire': case 'profil': case 'journaux': case 'incidents': case 'sauvegarde': case 'gardien': case 'nips': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
