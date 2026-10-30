@@ -990,4 +990,9 @@ module.exports = {
   "Reprise lancée — la cabine se prépare (environ une minute par angle).": "Retry launched — the fitting room is being prepared (about one minute per angle).",
   "Un essayage est sorti raté (image double ou décalée) : il a été rejeté. Reprenez-le depuis la carte de la cabine.": "A try-on came out failed (double or shifted image): it was rejected. Retry it from the fitting room card.",
   "Aucun essayage réussi à rejeter pour cet angle.": "No successful try-on to reject for this angle.",
+  // Les calques de la cabine (2026-10-30)
+  "Calques : découpe et couleur en cours, au poste…": "Layers: cutting and colouring in progress, on this computer…",
+  "Calques en attente : la silhouette de la mannequin n’est pas encore configurée au serveur.": "Layers on hold: the model’s silhouette is not configured on the server yet.",
+  "Calques : {0} faits, {1} non faits — ils seront refaits à la prochaine ouverture de la fiche.": "Layers: {0} done, {1} not done — they will be redone the next time the item is opened.",
+  "✓ Calques prêts : {0} (couleur prise sur la photo de chaque couleur)": "✓ Layers ready: {0} (colour taken from each colour’s photo)",
 };

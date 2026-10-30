@@ -3093,7 +3093,7 @@ const OPS_PONT = new Set([
   'studio:placer', 'studio:retours', 'studio:retourPris', 'studio:lierProvisoire',
   // La cabine d essayage dans l editeur d article (2026-10-30) : le tableau des couts du serveur, un essayage
   // (PAYANT, sous les barrieres de tnb-proxy.php), et le suivi d une generation lancee.
-  'cabine:etat', 'cabine:essayer', 'cabine:suivre', 'cabine:rejeter',
+  'cabine:etat', 'cabine:essayer', 'cabine:suivre', 'cabine:rejeter', 'cabine:calquer',
   /* ⚠⚠ studio:modeles, studio:modeleGenerer et studio:modelesVider ONT ETE
      RETIREES (3.50.0, a sa demande). ⚠ SANS GUILLEMETS DANS CE COMMENTAIRE, ET
      C EST OBLIGATOIRE : le controle de parite extrait les chaines CITEES de ce
@@ -3773,7 +3773,7 @@ const LIMITES_PONT = {
   'studio:estimer': 20000, 'fal:plafondPoser': 20000,
   'studio:phototheque': 20000, 'studio:ouvrir': 8000, 'studio:enregistrer': 90000,
   // cabine:etat telecharge les deux photos au serveur pour en calculer l empreinte ; essayer televerse chez The New Black.
-  'cabine:etat': 45000, 'cabine:essayer': 90000, 'cabine:suivre': 30000, 'cabine:rejeter': 30000,
+  'cabine:etat': 45000, 'cabine:essayer': 90000, 'cabine:suivre': 30000, 'cabine:rejeter': 30000, 'cabine:calquer': 300000,
   /* Toutes les photos de toutes les fiches, une à une (lecture, recadrage, dépôt) : jusqu à 30 min. */
   'studio:recadrerExistants': 1800000,
   'studio:produits': 10000, 'studio:produit': 8000, 'studio:ouvrirPour': 15000, 'studio:contexte': 8000,

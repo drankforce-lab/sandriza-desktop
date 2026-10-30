@@ -1200,7 +1200,7 @@ function pageProduit(id) {
   /* (2026-10-30, sa décision) FACE ET DOS PAR DÉFAUT (2 essayages) ; la case « Vue 6 angles » (champ cabineVues = '6')
      ajoute les 4 autres pour CET article — ce qui est déjà payé reste. Sans les 6 vues, la boutique ne fait pas tourner
      le vêtement : face et dos seulement. */
-  var CAB = { cle: '', t: null, charge: false, enCours: false, suivis: {}, minuterie: null, vues: 'fd' };
+  var CAB = { cle: '', t: null, charge: false, enCours: false, suivis: {}, minuterie: null, vues: 'fd', calque: { cle: '', enCours: false, r: null } };
   var CAB_T = null;
   var CAB_ANGLES = { a000: '${T("Face")}', a060: '60°', a120: '120°', a180: '${T("Dos")}', a240: '240°', a300: '300°' };
   function cabCategorie(){ return String(val('p-cat') || '') + ' ' + (libCat(val('p-cat')) || ''); }
@@ -1217,7 +1217,7 @@ function pageProduit(id) {
       P.appeler('cabine:etat', { face: IMAGE || '', dos: photoDos() || '', categorie: cabCategorie(), nom: String(val('p-nom') || '').trim(), vues: CAB.vues }).then(function(t){
         if (k0 !== CAB.cle) return;   // les photos ont changé pendant la lecture : la lecture suivante fait foi
         CAB.charge = false; CAB.t = t || { ok: false, motif: 'cabine_injoignable' };
-        dessinerCabine(); majFicheBientot(); cabReprendre();
+        dessinerCabine(); majFicheBientot(); cabReprendre(); cabCalquer();
       });
     }, 400);
   }
@@ -1262,6 +1262,7 @@ function pageProduit(id) {
           + '</figcaption></figure>';
       }).join('') + '</div>';
       if (t.pret) h += '<div class="cab-l"><b>' + (t.dejaPaye > 0 ? '${T("✓ Cabine prête — payé : {0}")}'.split('{0}').join(prixUS(t.dejaPaye)) : '${T("✓ Cabine prête")}') + '</b></div>';
+      if (t.pret) h += cabLigneCalques();
       else {
         if (t.resteCredits != null && t.aFaire > 0) h += '<div class="cab-l">' + (t.dejaPaye > 0 ? '${T("Reste : {0} — déjà payé : {1}")}' : '${T("Reste : {0}")}')
           .split('{0}').join('<b>' + t.aFaire + ' × ' + szNombre(t.creditsParEssai) + ' = ' + esc(cabMontant(t.resteCredits, t.resteDollars)) + '</b>').split('{1}').join(esc(prixUS(t.dejaPaye || 0))) + '</div>';
@@ -1318,6 +1319,35 @@ function pageProduit(id) {
         };
         suite(0);
       });
+  }
+  /* (étape 4) LES CALQUES : la cabine prête, chaque essayage réussi est découpé (le vêtement seul) et recoloré sur la
+     photo de CHAQUE couleur de l article — la couleur vendue. Au poste (le pont, assets/js/cabine.js), gratuit, sans
+     rien demander ; une fois par jeu de photos. Une couleur dont la photo n est pas encore enregistrée attend
+     l enregistrement (seules les photos publiées servent de référence). */
+  function cabCouleurs(){
+    var o = [{ face: IMAGE || '', dos: photoDos() || '' }];
+    couleurs().slice(1).forEach(function(c){ var v = PARCOUL[c] || {}; o.push({ face: String(v.main || v.principale || ''), dos: '' }); });
+    return o;
+  }
+  function cabCalquer(){
+    var t = CAB.t; if (!cabExigee() || !t.pret || CAB.calque.enCours) return;
+    var k = CAB.cle + '|' + JSON.stringify(cabCouleurs());
+    if (CAB.calque.cle === k) return;
+    CAB.calque = { cle: k, enCours: true, r: null }; dessinerCabine();
+    P.appeler('cabine:calquer', { face: IMAGE || '', dos: photoDos() || '', vues: CAB.vues, couleurs: cabCouleurs() }).then(function(r){
+      CAB.calque.enCours = false; CAB.calque.r = r || { ok: false, motif: 'echec' };
+      dessinerCabine();
+    });
+  }
+  function cabLigneCalques(){
+    var c = CAB.calque, t = CAB.t, n = 0;
+    Object.keys((t && t.calques) || {}).forEach(function(a){ n += Object.keys(t.calques[a] || {}).length; });
+    if (c.enCours) return '<div class="cab-l">${T("Calques : découpe et couleur en cours, au poste…")}</div>';
+    var r = c.r; if (r && r.ok) n += r.faits || 0;
+    var refus = (r && r.refus) || [];
+    if (refus.some(function(x){ return x.motif === 'silhouette_absente'; })) return '<div class="cab-l">${T("Calques en attente : la silhouette de la mannequin n’est pas encore configurée au serveur.")}</div>';
+    if (r && (!r.ok || refus.length)) return '<div class="cab-l">' + '${T("Calques : {0} faits, {1} non faits — ils seront refaits à la prochaine ouverture de la fiche.")}'.split('{0}').join(String(n)).split('{1}').join(String(refus.length || 1)) + '</div>';
+    return n ? '<div class="cab-l">' + '${T("✓ Calques prêts : {0} (couleur prise sur la photo de chaque couleur)")}'.split('{0}').join(String(n)) + '</div>' : '';
   }
   // (étape 3) Les angles exigés REJETÉS — par le serveur (image double, décalée) ou à la main.
   function cabRates(){ return ((CAB.t && CAB.t.angles) || []).filter(function(a){ return a.exige && a.etat === 'rejete'; }); }
