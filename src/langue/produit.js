@@ -970,4 +970,7 @@ module.exports = {
   "Face": "Front",
   "crédit": "credit",
   "crédits": "credits",
+  "Vue 6 angles (rotation) pour cet article — 4 essayages de plus": "6-angle view (rotation) for this item — 4 more try-ons",
+  "Face et dos seulement : en boutique, le vêtement ne tournera pas.": "Front and back only: in the shop, the garment will not rotate.",
+  "Cet angle n’est essayé que si la case « Vue 6 angles » est cochée pour l’article : rien n’a été lancé.": "This angle is only tried on when the “6-angle view” box is checked for the item: nothing was launched.",
 };

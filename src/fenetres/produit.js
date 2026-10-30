@@ -107,6 +107,7 @@ const CSS_PROPRE = `
 .pf-cab .t{font-weight:700;font-size:.85rem;margin-bottom:.3rem}
 .pf-cab .cab-l{font-size:.78rem;color:var(--tx2);margin:.2rem 0}
 .pf-cab .cab-l b{color:var(--tx)}
+.pf-cab .cab-6{display:flex;gap:.4rem;align-items:center;cursor:pointer;color:var(--tx)}
 .pf-cab .cab-a{display:flex;gap:.3rem;flex-wrap:wrap;margin:.4rem 0}
 .pf-cab .cab-a span{font-size:.7rem;padding:.05rem .5rem;border-radius:99px;background:var(--v06);color:var(--tx2)}
 .pf-cab .cab-a span.ok{background:rgba(74,222,128,.14);color:var(--tx-ok)}
@@ -616,6 +617,7 @@ function pageProduit(id) {
   MOTIFS.prix_change = '${T("Le prix a changé depuis l’affichage : rien n’a été lancé. Relisez le nouveau montant.")}';
   MOTIFS.serveur_indisponible = '${T("Base injoignable : rien n’a été lancé.")}';
   MOTIFS.reprise_a_confirmer = '${T("Cet angle a été rejeté : sa reprise (payante) doit être demandée explicitement.")}';
+  MOTIFS.angle_hors_vues = '${T("Cet angle n’est essayé que si la case « Vue 6 angles » est cochée pour l’article : rien n’a été lancé.")}';
   MOTIFS.plafond_angle = '${T("Cet angle a déjà été repris une fois : plus de reprise possible.")}';
   MOTIFS.mannequin_incomplet = '${T("Mannequin : le prénom, la taille (120 à 220 cm) et la taille portée vont ensemble.")}';
   MOTIFS.mannequin_taille = '${T("Mannequin : la taille portée doit être une des tailles offertes.")}';
@@ -1188,21 +1190,24 @@ function pageProduit(id) {
      · le coût affiché ici est celui du SERVEUR (tableau cabine:etat) : déjà payé, reste à faire ; « Préparer la
        cabine » lance chaque angle manquant au prix annoncé — le serveur refuse tout ce qui serait payé deux fois ;
      · tant que la mannequin n est pas configurée au serveur, la cabine est fermée : rien n est exigé. */
-  var CAB = { cle: '', t: null, charge: false, enCours: false, suivis: {}, minuterie: null };
+  /* (2026-10-30, sa décision) FACE ET DOS PAR DÉFAUT (2 essayages) ; la case « Vue 6 angles » (champ cabineVues = '6')
+     ajoute les 4 autres pour CET article — ce qui est déjà payé reste. Sans les 6 vues, la boutique ne fait pas tourner
+     le vêtement : face et dos seulement. */
+  var CAB = { cle: '', t: null, charge: false, enCours: false, suivis: {}, minuterie: null, vues: 'fd' };
   var CAB_T = null;
   var CAB_ANGLES = { a000: '${T("Face")}', a060: '60°', a120: '120°', a180: '${T("Dos")}', a240: '240°', a300: '300°' };
   function cabCategorie(){ return String(val('p-cat') || '') + ' ' + (libCat(val('p-cat')) || ''); }
   function cabExigee(){ if (!CAB) return false; var t = CAB.t; return !!(t && t.ok && t.requise && t.ouverte); }
   function majCabine(force){
     if (!CAB) return;   // appelée par majFiche avant que la cabine soit posée (premier dessin)
-    var k = [IMAGE || '', photoDos() || '', cabCategorie(), String(val('p-nom') || '').trim()].join('|');
+    var k = [IMAGE || '', photoDos() || '', cabCategorie(), String(val('p-nom') || '').trim(), CAB.vues].join('|');
     if (!force && k === CAB.cle) return;
     CAB.cle = k;
     clearTimeout(CAB_T);
     CAB_T = setTimeout(function(){
       var k0 = CAB.cle;
       CAB.charge = true; dessinerCabine();
-      P.appeler('cabine:etat', { face: IMAGE || '', dos: photoDos() || '', categorie: cabCategorie(), nom: String(val('p-nom') || '').trim() }).then(function(t){
+      P.appeler('cabine:etat', { face: IMAGE || '', dos: photoDos() || '', categorie: cabCategorie(), nom: String(val('p-nom') || '').trim(), vues: CAB.vues }).then(function(t){
         if (k0 !== CAB.cle) return;   // les photos ont changé pendant la lecture : la lecture suivante fait foi
         CAB.charge = false; CAB.t = t || { ok: false, motif: 'cabine_injoignable' };
         dessinerCabine(); majFicheBientot(); cabReprendre();
@@ -1234,7 +1239,9 @@ function pageProduit(id) {
         var rec = function(x){ return x && x.reconnue ? (x.origine === 'retouche' ? '${T("✓ sans mannequin (Studio), retouchée")}' : '${T("✓ sans mannequin (Studio)")}') : '${T("✗ pas une photo « sans mannequin » du Studio")}'; };
         h += '<div class="cab-l">${T("Face :")} <b>' + rec(t.face) + '</b></div><div class="cab-l">${T("Dos :")} <b>' + rec(t.dos) + '</b></div>';
       }
-      h += '<div class="cab-a">' + (t.angles || []).map(function(a){
+      h += '<label class="cab-l cab-6"><input type="checkbox" id="p-cab-6"' + (CAB.vues === '6' ? ' checked' : '') + (CAB.enCours ? ' disabled' : '') + '> '
+        + '${T("Vue 6 angles (rotation) pour cet article — 4 essayages de plus")}</label>';
+      h += '<div class="cab-a">' + (t.angles || []).filter(function(a){ return a.exige || a.etat === 'reussi'; }).map(function(a){
         var cl = a.etat === 'reussi' ? 'ok' : (a.etat === 'cours' ? 'cours' : (a.etat === 'rejete' ? 'rate' : ''));
         var ic = a.etat === 'reussi' ? '✓ ' : (a.etat === 'cours' ? '⏳ ' : (a.etat === 'rejete' ? '✗ ' : ''));
         return '<span class="' + cl + '">' + ic + esc(CAB_ANGLES[a.angle] || a.angle) + '</span>';
@@ -1254,14 +1261,17 @@ function pageProduit(id) {
     if (z.getAttribute('data-h') === h) return;   // rien de changé, rien de réécrit (voir majFiche)
     z.setAttribute('data-h', h); z.innerHTML = h;
     var b = document.getElementById('p-cab-go'); if (b) b.onclick = preparerCabine;
+    var c6 = document.getElementById('p-cab-6');
+    if (c6) c6.onchange = function(){ CAB.vues = c6.checked ? '6' : 'fd'; majCabine(); };
   }
   function preparerCabine(){
     var t = CAB.t;
     if (!cabExigee() || t.pret || CAB.enCours) return;
-    var aFaire = (t.angles || []).filter(function(a){ return a.etat === 'a_faire'; }).map(function(a){ return a.angle; });
+    var aFaire = (t.angles || []).filter(function(a){ return a.exige && a.etat === 'a_faire'; }).map(function(a){ return a.angle; });
     if (!aFaire.length || t.prixParEssai == null) return;
     szConfirmer({ prudent: true, titre: '${T("Préparer la cabine d’essayage")}',
-      texte: '${T("Le vêtement est essayé par The New Black sur la mannequin de la boutique, sous chaque angle manquant. Chaque essayage n’est payé qu’une fois : une page rechargée, un second poste ou un double clic ne repaient rien.")}',
+      texte: '${T("Le vêtement est essayé par The New Black sur la mannequin de la boutique, sous chaque angle manquant. Chaque essayage n’est payé qu’une fois : une page rechargée, un second poste ou un double clic ne repaient rien.")}'
+        + (CAB.vues === '6' ? '' : ' ' + '${T("Face et dos seulement : en boutique, le vêtement ne tournera pas.")}'),
       details: [['${T("Angles")}', aFaire.map(function(a){ return CAB_ANGLES[a] || a; }).join(' · ')],
         ['${T("Coût")}', cabMontant(t.resteCredits, t.resteDollars)],
         ['${T("Déjà payé pour ces photos")}', prixUS(t.dejaPaye || 0)]],
@@ -1276,7 +1286,7 @@ function pageProduit(id) {
             majCabine(true); cabSuivre();
             return;
           }
-          P.appeler('cabine:essayer', { face: face, dos: dos, angle: aFaire[i], prixAnnonce: prix, produit: ID ? String(ID) : '' }).then(function(r){
+          P.appeler('cabine:essayer', { face: face, dos: dos, angle: aFaire[i], prixAnnonce: prix, produit: ID ? String(ID) : '', vues: CAB.vues }).then(function(r){
             if (r && r.ok && r.id && !r.deja) CAB.suivis[r.id] = aFaire[i];
             else if (!(r && r.ok)) refus = r || { motif: 'echec' };   // le premier refus ARRÊTE la suite : rien d autre ne part
             suite(i + 1);
@@ -4159,6 +4169,7 @@ function pageProduit(id) {
     // La photo du dos (mode simple) : retenue telle quelle ; photoDos() vérifie qu'elle est encore une des photos.
     DOS_SRC = (typeof p.photoDos === 'string' && p.photoDos) ? p.photoDos : '';
     FIBRE = (typeof p.photoFibre === 'string' && p.photoFibre) ? p.photoFibre : '';
+    CAB.vues = p.cabineVues === '6' ? '6' : 'fd';   // la case « Vue 6 angles » de la cabine
     // ⚠ COPIE PROFONDE : chaque couleur porte son propre objet. Une copie de
     // surface les partagerait avec la fiche d origine, et retirer une photo ici
     // la retirerait aussi de la reference qui sert a detecter les conflits.
@@ -5288,6 +5299,7 @@ function pageProduit(id) {
       // La photo du dos en mode simple (l'aperçu 3D) ; en mode angles, c'est la vue « Derrière » — null.
       photoDos: (modeStandard() && photoDos()) ? photoDos() : null,
       photoFibre: FIBRE || null,   // (2026-10-26) le gros plan de la fibre, affiché en grand en boutique
+      cabineVues: CAB.vues === '6' ? '6' : null,   // (2026-10-30) cabine : face + dos par défaut, '6' = rotation
       // Les mesures du vêtement (7.13.0) : null = aucune. Le pont ne les écrit que si la clé est envoyée.
       mesuresVetement: mvPourEnvoi(),
       // Les photos des couleurs RETIREES ne partent pas : le site les
