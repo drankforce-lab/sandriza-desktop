@@ -114,6 +114,12 @@ const CSS_PROPRE = `
 html.jour .pf-cab .cab-a span.ok{color:#1f6b3d}
 .pf-cab .cab-a span.cours{color:var(--tx-att)}
 .pf-cab .cab-a span.rate{color:var(--tx-err,#e5484d)}
+.pf-cab .cab-v{display:flex;gap:.5rem;flex-wrap:wrap;margin:.4rem 0}
+.pf-cab .cab-v figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:.2rem}
+.pf-cab .cab-v img{width:64px;height:96px;object-fit:cover;border-radius:6px;background:var(--v06);cursor:zoom-in}
+.pf-cab .cab-v figure.rate img{outline:2px solid var(--tx-err,#e5484d);opacity:.75}
+.pf-cab .cab-v figcaption{font-size:.68rem;color:var(--tx2);display:flex;gap:.3rem;align-items:center}
+.pf-cab .cab-v button{font-size:.66rem;padding:.05rem .4rem}
 .pf-id{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.95rem 1.1rem}
 .pf-id .l2{grid-column:span 2}
 .pf-id .l4{grid-column:1 / -1}
@@ -617,6 +623,7 @@ function pageProduit(id) {
   MOTIFS.prix_change = '${T("Le prix a changé depuis l’affichage : rien n’a été lancé. Relisez le nouveau montant.")}';
   MOTIFS.serveur_indisponible = '${T("Base injoignable : rien n’a été lancé.")}';
   MOTIFS.reprise_a_confirmer = '${T("Cet angle a été rejeté : sa reprise (payante) doit être demandée explicitement.")}';
+  MOTIFS.rien_a_rejeter = '${T("Aucun essayage réussi à rejeter pour cet angle.")}';
   MOTIFS.angle_hors_vues = '${T("Cet angle n’est essayé que si la case « Vue 6 angles » est cochée pour l’article : rien n’a été lancé.")}';
   MOTIFS.plafond_angle = '${T("Cet angle a déjà été repris une fois : plus de reprise possible.")}';
   MOTIFS.mannequin_incomplet = '${T("Mannequin : le prénom, la taille (120 à 220 cm) et la taille portée vont ensemble.")}';
@@ -1223,6 +1230,7 @@ function pageProduit(id) {
     if (t.identiques) return '${T("La photo du dos descend de la même photo que la face : choisissez une vraie photo du dos.")}';
     var enCours = (t.angles || []).some(function(a){ return a.etat === 'cours'; });
     if (enCours || CAB.enCours) return '${T("La cabine d’essayage se prépare : attendez la fin des essayages pour enregistrer.")}';
+    if (t.aFaire === 0 && cabRates().length) return '${T("Un essayage de la cabine est raté : reprenez-le (ou changez de photos) avant d’enregistrer.")}';
     return (t.aFaire > 1 ? '${T("Préparez la cabine d’essayage avant d’enregistrer : {0} angles à faire, {1}.")}' : '${T("Préparez la cabine d’essayage avant d’enregistrer : {0} angle à faire, {1}.")}')
       .split('{0}').join(String(t.aFaire)).split('{1}').join(t.resteCredits != null ? cabMontant(t.resteCredits, t.resteDollars) : '…');
   }
@@ -1246,12 +1254,26 @@ function pageProduit(id) {
         var ic = a.etat === 'reussi' ? '✓ ' : (a.etat === 'cours' ? '⏳ ' : (a.etat === 'rejete' ? '✗ ' : ''));
         return '<span class="' + cl + '">' + ic + esc(CAB_ANGLES[a.angle] || a.angle) + '</span>';
       }).join('') + '</div>';
+      // (étape 3) les essayages REÇUS, en vignettes : on voit ce qu on a payé, et on rejette ce qui est raté
+      var vus = (t.angles || []).filter(function(a){ return a.image && (a.exige || a.etat === 'reussi'); });
+      if (vus.length) h += '<div class="cab-v">' + vus.map(function(a){
+        return '<figure' + (a.etat === 'rejete' ? ' class="rate"' : '') + '><a href="' + esc(a.image) + '" target="_blank" rel="noopener"><img src="' + esc(a.image) + '" alt=""></a><figcaption>'
+          + esc(CAB_ANGLES[a.angle] || a.angle) + (a.etat === 'reussi' && !CAB.enCours ? ' <button type="button" class="cab-rej" data-angle="' + esc(a.angle) + '">${T("Rejeter")}</button>' : '')
+          + '</figcaption></figure>';
+      }).join('') + '</div>';
       if (t.pret) h += '<div class="cab-l"><b>' + (t.dejaPaye > 0 ? '${T("✓ Cabine prête — payé : {0}")}'.split('{0}').join(prixUS(t.dejaPaye)) : '${T("✓ Cabine prête")}') + '</b></div>';
       else {
         if (t.resteCredits != null && t.aFaire > 0) h += '<div class="cab-l">' + (t.dejaPaye > 0 ? '${T("Reste : {0} — déjà payé : {1}")}' : '${T("Reste : {0}")}')
           .split('{0}').join('<b>' + t.aFaire + ' × ' + szNombre(t.creditsParEssai) + ' = ' + esc(cabMontant(t.resteCredits, t.resteDollars)) + '</b>').split('{1}').join(esc(prixUS(t.dejaPaye || 0))) + '</div>';
         var r = raisonCabine();
         if (r) h += '<div class="cab-l">' + esc(r) + '</div>';
+        cabRates().forEach(function(a){
+          h += '<div class="cab-l">' + '${T("✗ {0} : essayage raté — {1}")}'.split('{0}').join(esc(CAB_ANGLES[a.angle] || a.angle)).split('{1}').join(esc(a.motif === 'manuel' ? '${T("rejeté à la main")}' : (a.motif || '${T("rejeté")}')))
+            + (a.payes >= 2 ? ' ' + '${T("(plus de reprise possible : changez de photos)")}' : '') + '</div>';
+        });
+        var rep = cabRates().filter(function(a){ return a.payes < 2; });
+        if (rep.length && t.prixParEssai != null && t.aFaire === 0) h += '<div class="pf-med-l"><button type="button" id="p-cab-rep"' + (CAB.enCours ? ' disabled' : '') + '>'
+          + '<span class="ic">↻</span> ' + '${T("Reprendre ({0})")}'.split('{0}').join(cabMontant(rep.length * t.creditsParEssai, rep.length * t.prixParEssai)) + '</button></div>';
         var peut = !CAB.enCours && t.aFaire > 0 && t.face && t.face.reconnue && t.dos && t.dos.reconnue && !t.identiques;
         if (t.aFaire > 0) h += '<div class="pf-med-l"><button type="button" id="p-cab-go"' + (peut ? '' : ' disabled') + '>'
           + (CAB.enCours ? '<span class="ic">⏳</span> ${T("Lancement…")}' : '<span class="ic">👗</span> ' + '${T("Préparer la cabine ({0})")}'.split('{0}').join(cabMontant(t.resteCredits || 0, t.resteDollars || 0))) + '</button></div>';
@@ -1261,6 +1283,8 @@ function pageProduit(id) {
     if (z.getAttribute('data-h') === h) return;   // rien de changé, rien de réécrit (voir majFiche)
     z.setAttribute('data-h', h); z.innerHTML = h;
     var b = document.getElementById('p-cab-go'); if (b) b.onclick = preparerCabine;
+    var br = document.getElementById('p-cab-rep'); if (br) br.onclick = reprendreCabine;
+    Array.prototype.forEach.call(z.querySelectorAll('.cab-rej'), function(x){ x.onclick = function(){ rejeterCabine(x.getAttribute('data-angle')); }; });
     var c6 = document.getElementById('p-cab-6');
     if (c6) c6.onchange = function(){ CAB.vues = c6.checked ? '6' : 'fd'; majCabine(); };
   }
@@ -1295,6 +1319,51 @@ function pageProduit(id) {
         suite(0);
       });
   }
+  // (étape 3) Les angles exigés REJETÉS — par le serveur (image double, décalée) ou à la main.
+  function cabRates(){ return ((CAB.t && CAB.t.angles) || []).filter(function(a){ return a.exige && a.etat === 'rejete'; }); }
+  // Rejeter à la main : gratuit, ouvre UNE reprise (payante, demandée ensuite). Ce que le serveur ne voit pas : un
+  // mauvais angle, un autre corps, un vêtement déformé.
+  function rejeterCabine(angle){
+    var t = CAB.t; if (!t || !t.empreintes || CAB.enCours) return;
+    szConfirmer({ prudent: true, titre: '${T("Rejeter cet essayage")}',
+      texte: '${T("L’essayage est marqué raté : la cabine ne sera plus prête tant qu’il n’est pas repris. Une seule reprise est possible par angle, au prix d’un essayage.")}',
+      details: [['${T("Angle")}', CAB_ANGLES[angle] || angle], ['${T("Coût de la reprise")}', t.prixParEssai != null ? cabMontant(t.creditsParEssai, t.prixParEssai) : '…']],
+      oui: '${T("Rejeter")}' }).then(function(ok){
+        if (!ok) return;
+        P.appeler('cabine:rejeter', { face: t.empreintes.face, dos: t.empreintes.dos, angle: angle, motif: 'manuel' }).then(function(r){
+          if (!(r && r.ok)) dire(expliquer(r || { motif: 'echec' }), 'err');
+          majCabine(true);
+        });
+      });
+  }
+  function reprendreCabine(){
+    var t = CAB.t; if (!cabExigee() || CAB.enCours || t.prixParEssai == null) return;
+    var rep = cabRates().filter(function(a){ return a.payes < 2; }).map(function(a){ return a.angle; });
+    if (!rep.length) return;
+    szConfirmer({ prudent: true, titre: '${T("Reprendre les essayages ratés")}',
+      texte: '${T("Chaque angle raté est essayé une seconde fois, au prix d’un essayage. C’est la seule reprise : si elle sort ratée aussi, il faudra d’autres photos.")}',
+      details: [['${T("Angles")}', rep.map(function(a){ return CAB_ANGLES[a] || a; }).join(' · ')],
+        ['${T("Coût")}', cabMontant(rep.length * t.creditsParEssai, rep.length * t.prixParEssai)]],
+      oui: '${T("Reprendre ({0})")}'.split('{0}').join(prixUS(rep.length * t.prixParEssai)) }).then(function(ok){
+        if (!ok || CAB.enCours) return;
+        CAB.enCours = true; dessinerCabine();
+        var face = IMAGE, dos = photoDos(), prix = t.prixParEssai, refus = null;
+        var suite = function(i){
+          if (i >= rep.length || refus) {
+            CAB.enCours = false;
+            if (refus) dire(expliquer(refus), 'err'); else dire('${T("Reprise lancée — la cabine se prépare (environ une minute par angle).")}', 'bon');
+            majCabine(true); cabSuivre();
+            return;
+          }
+          P.appeler('cabine:essayer', { face: face, dos: dos, angle: rep[i], prixAnnonce: prix, produit: ID ? String(ID) : '', vues: CAB.vues, reprise: true }).then(function(r){
+            if (r && r.ok && r.id && !r.deja) CAB.suivis[r.id] = rep[i];
+            else if (!(r && r.ok)) refus = r || { motif: 'echec' };
+            suite(i + 1);
+          });
+        };
+        suite(0);
+      });
+  }
   // Les essayages « en cours » du tableau (lancés ici, ou sur un autre poste) sont suivis jusqu à leur fin.
   function cabReprendre(){
     var t = CAB.t; if (!t || !t.ok || !t.angles) return;
@@ -1308,6 +1377,7 @@ function pageProduit(id) {
       ids.forEach(function(id){
         P.appeler('cabine:suivre', { id: id }).then(function(r){
           if (r && r.termine) { delete CAB.suivis[id]; fini++; }
+          if (r && r.rate && r.rate.rejete) dire('${T("Un essayage est sorti raté (image double ou décalée) : il a été rejeté. Reprenez-le depuis la carte de la cabine.")}', 'err');
           if (--n > 0) return;
           CAB.minuterie = null;
           if (fini) majCabine(true);
