@@ -3091,6 +3091,9 @@ const OPS_PONT = new Set([
   // Le Studio rattaché au produit (2026-10-19) : recherche, contexte de l'assistant, teinte, placement, boîte aux lettres.
   'studio:produits', 'studio:produit', 'studio:ouvrirPour', 'studio:contexte', 'studio:teinte', 'studio:harmoniser',
   'studio:placer', 'studio:retours', 'studio:retourPris', 'studio:lierProvisoire',
+  // La cabine d essayage dans l editeur d article (2026-10-30) : le tableau des couts du serveur, un essayage
+  // (PAYANT, sous les barrieres de tnb-proxy.php), et le suivi d une generation lancee.
+  'cabine:etat', 'cabine:essayer', 'cabine:suivre',
   /* ⚠⚠ studio:modeles, studio:modeleGenerer et studio:modelesVider ONT ETE
      RETIREES (3.50.0, a sa demande). ⚠ SANS GUILLEMETS DANS CE COMMENTAIRE, ET
      C EST OBLIGATOIRE : le controle de parite extrait les chaines CITEES de ce
@@ -3769,6 +3772,8 @@ const LIMITES_PONT = {
   // touche a une image, donc pas de plafond de temps genereux ici.
   'studio:estimer': 20000, 'fal:plafondPoser': 20000,
   'studio:phototheque': 20000, 'studio:ouvrir': 8000, 'studio:enregistrer': 90000,
+  // cabine:etat telecharge les deux photos au serveur pour en calculer l empreinte ; essayer televerse chez The New Black.
+  'cabine:etat': 45000, 'cabine:essayer': 90000, 'cabine:suivre': 30000,
   /* Toutes les photos de toutes les fiches, une à une (lecture, recadrage, dépôt) : jusqu à 30 min. */
   'studio:recadrerExistants': 1800000,
   'studio:produits': 10000, 'studio:produit': 8000, 'studio:ouvrirPour': 15000, 'studio:contexte': 8000,
@@ -4313,6 +4318,7 @@ const PAYANTS = new Set([
   'promo:lot', 'atelier:apercu3d', 'produit:mesureMasque', 'chaines:traiter', 'liquidation:lot',
   'produit:grosPlanZone', 'produit:grosPlan', 'generations:lancer3d',
   'atelier:modele3dLancer', 'atelier:renduTnb', 'atelier:rendrePhoto', 'produit:photoIa', 'fibres:analyser',
+  'cabine:essayer',
 ]);
 const payantsEnCours = new Map();   // wc.id -> nombre d opérations payantes en vol
 const fermerApres = new Map();      // wc.id -> () => fermer, quand la personne a demandé à fermer pendant ce temps

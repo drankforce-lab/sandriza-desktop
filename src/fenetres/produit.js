@@ -103,6 +103,16 @@ const CSS_PROPRE = `
 .ligne-photos .vue-principale .mini-decor{width:100%}
 .pf-3d{margin:0;padding:.75rem .9rem;border-radius:14px;background:var(--v03);border:1px solid var(--v08)}
 .pf-3d .pf-med-l{margin:0}
+.pf-cab{margin-bottom:.6rem}
+.pf-cab .t{font-weight:700;font-size:.85rem;margin-bottom:.3rem}
+.pf-cab .cab-l{font-size:.78rem;color:var(--tx2);margin:.2rem 0}
+.pf-cab .cab-l b{color:var(--tx)}
+.pf-cab .cab-a{display:flex;gap:.3rem;flex-wrap:wrap;margin:.4rem 0}
+.pf-cab .cab-a span{font-size:.7rem;padding:.05rem .5rem;border-radius:99px;background:var(--v06);color:var(--tx2)}
+.pf-cab .cab-a span.ok{background:rgba(74,222,128,.14);color:var(--tx-ok)}
+html.jour .pf-cab .cab-a span.ok{color:#1f6b3d}
+.pf-cab .cab-a span.cours{color:var(--tx-att)}
+.pf-cab .cab-a span.rate{color:var(--tx-err,#e5484d)}
 .pf-id{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.95rem 1.1rem}
 .pf-id .l2{grid-column:span 2}
 .pf-id .l4{grid-column:1 / -1}
@@ -597,6 +607,16 @@ function pageProduit(id) {
   MOTIFS.photo_dos_identique = '${T("La photo du dos est la même que celle du devant : choisissez une vraie photo du dos.")}';
   MOTIFS.modele3d_trop_lourd = '${T("L’aperçu 3D est trop lourd (plus de 5,5 Mo).")}';
   MOTIFS.modele3d_format = '${T("L’aperçu 3D n’est pas dans un format accepté.")}';
+  // La cabine d’essayage (2026-10-30) : refus du pont (double filet) et du serveur (tnb-proxy.php, actions cabine*).
+  MOTIFS.cabine_requise = '${T("La cabine d’essayage est obligatoire pour cet article : préparez-la (étape Photos) avant d’enregistrer.")}';
+  MOTIFS.cabine_injoignable = '${T("La cabine d’essayage n’a pas pu être vérifiée au serveur : réessayez dans un instant.")}';
+  MOTIFS.face_non_tnb = '${T("La photo principale n’est pas une photo « sans mannequin » faite au Studio : rien n’a été lancé.")}';
+  MOTIFS.dos_non_tnb = '${T("La photo du dos n’est pas une photo « sans mannequin » faite au Studio : rien n’a été lancé.")}';
+  MOTIFS.mannequin_absente = '${T("La cabine n’est pas encore ouverte : la mannequin n’est pas configurée au serveur.")}';
+  MOTIFS.prix_change = '${T("Le prix a changé depuis l’affichage : rien n’a été lancé. Relisez le nouveau montant.")}';
+  MOTIFS.serveur_indisponible = '${T("Base injoignable : rien n’a été lancé.")}';
+  MOTIFS.reprise_a_confirmer = '${T("Cet angle a été rejeté : sa reprise (payante) doit être demandée explicitement.")}';
+  MOTIFS.plafond_angle = '${T("Cet angle a déjà été repris une fois : plus de reprise possible.")}';
   MOTIFS.mannequin_incomplet = '${T("Mannequin : le prénom, la taille (120 à 220 cm) et la taille portée vont ensemble.")}';
   MOTIFS.mannequin_taille = '${T("Mannequin : la taille portée doit être une des tailles offertes.")}';
   MOTIFS.video_trop_lourde = '${T("Vidéo trop lourde (maximum 5,5 Mo).")}';
@@ -726,6 +746,9 @@ function pageProduit(id) {
       + '<button type="button" id="p-studio" class="mini-decor" disabled '
       + '><span class="ic">📷</span> ${T("Créer au studio")}</button></div>'
       + '<div class="aide p-studio-attente" id="p-studio-attente" style="display:none"></div>'
+      /* LA CABINE D ESSAYAGE (2026-10-30, ses décisions) : obligatoire pour les vêtements et les accessoires de tête ;
+         le coût affiché PENDANT la création est celui du serveur (cabine:etat). Dessinée par dessinerCabine. */
+      + '<div class="pf-3d pf-cab" id="p-cab-carte" style="display:none" aria-live="polite"></div>'
       + '<div class="pf-3d" id="p-3d-carte">'
       + '<div class="pf-med-l" id="p-3dg-l">'
       + '<button type="button" id="p-3d-gen"><span class="ic">🧊</span> ${T("Générer l’aperçu 3D")}</button>'
@@ -1081,6 +1104,7 @@ function pageProduit(id) {
   }
   function majFiche(){
     majPuces();
+    majCabine();
     var z = document.getElementById('pf-fiche');
     if (!z || !CTX) return;
     var nom = String(val('p-nom') || '').trim();
@@ -1135,6 +1159,7 @@ function pageProduit(id) {
     if (c.length > 1) exig.push([3, '${T("Une photo par couleur secondaire")}',
       c.slice(1).every(function(x){ return !!(PARCOUL[x] && (PARCOUL[x].main || PARCOUL[x].principale)); })]);
     if (!ID && t.length && c.length) exig.push([7, '${T("Une quantité en stock")}', tot > 0]);
+    if (cabExigee()) exig.push([0, '${T("Cabine d’essayage prête")}', !!CAB.t.pret]);
     var nManque = exig.filter(function(m){ return !m[2]; }).length;
     h += '<div class="reste">' + (nManque
       ? '<div class="t">${T("Pour enregistrer")}</div>'
@@ -1154,6 +1179,132 @@ function pageProduit(id) {
     z.querySelectorAll('[data-pfaller]').forEach(function(b){
       b.onclick = function(){ Assist.aller(parseInt(b.getAttribute('data-pfaller'), 10) || 0); };
     });
+  }
+
+  /* ══ LA CABINE D ESSAYAGE (2026-10-30, ses décisions) ══
+     · OBLIGATOIRE pour les vêtements et les accessoires de tête (chapeaux, écharpes…), à la création comme à la
+       modification d un ancien article ; chaussures, sacs, bijoux exemptés — la règle vit au pont (_cabineRequise) ;
+     · seulement si la face ET le dos sont des photos « sans mannequin » faites au Studio (The New Black) ;
+     · le coût affiché ici est celui du SERVEUR (tableau cabine:etat) : déjà payé, reste à faire ; « Préparer la
+       cabine » lance chaque angle manquant au prix annoncé — le serveur refuse tout ce qui serait payé deux fois ;
+     · tant que la mannequin n est pas configurée au serveur, la cabine est fermée : rien n est exigé. */
+  var CAB = { cle: '', t: null, charge: false, enCours: false, suivis: {}, minuterie: null };
+  var CAB_T = null;
+  var CAB_ANGLES = { a000: '${T("Face")}', a060: '60°', a120: '120°', a180: '${T("Dos")}', a240: '240°', a300: '300°' };
+  function cabCategorie(){ return String(val('p-cat') || '') + ' ' + (libCat(val('p-cat')) || ''); }
+  function cabExigee(){ if (!CAB) return false; var t = CAB.t; return !!(t && t.ok && t.requise && t.ouverte); }
+  function majCabine(force){
+    if (!CAB) return;   // appelée par majFiche avant que la cabine soit posée (premier dessin)
+    var k = [IMAGE || '', photoDos() || '', cabCategorie(), String(val('p-nom') || '').trim()].join('|');
+    if (!force && k === CAB.cle) return;
+    CAB.cle = k;
+    clearTimeout(CAB_T);
+    CAB_T = setTimeout(function(){
+      var k0 = CAB.cle;
+      CAB.charge = true; dessinerCabine();
+      P.appeler('cabine:etat', { face: IMAGE || '', dos: photoDos() || '', categorie: cabCategorie(), nom: String(val('p-nom') || '').trim() }).then(function(t){
+        if (k0 !== CAB.cle) return;   // les photos ont changé pendant la lecture : la lecture suivante fait foi
+        CAB.charge = false; CAB.t = t || { ok: false, motif: 'cabine_injoignable' };
+        dessinerCabine(); majFicheBientot(); cabReprendre();
+      });
+    }, 400);
+  }
+  function cabMontant(cr, us){ return szNombre(cr) + ' ' + szPl(cr, '${T("crédit")}', '${T("crédits")}') + ' (' + prixUS(us) + ')'; }
+  // Ce qui manque, en une phrase — la même pour la carte et pour le refus d enregistrer.
+  function raisonCabine(){
+    var t = CAB.t; if (!cabExigee() || t.pret) return '';
+    if (t.photosManquantes) return '${T("La cabine d’essayage est obligatoire pour cet article : il faut une photo principale (face) et une photo du dos, faites « sans mannequin » au Studio.")}';
+    if (!(t.face && t.face.reconnue) || !(t.dos && t.dos.reconnue)) return '${T("La cabine d’essayage est obligatoire pour cet article : la face et le dos doivent être des photos « sans mannequin » faites au Studio (bouton « Créer au studio »).")}';
+    if (t.identiques) return '${T("La photo du dos descend de la même photo que la face : choisissez une vraie photo du dos.")}';
+    var enCours = (t.angles || []).some(function(a){ return a.etat === 'cours'; });
+    if (enCours || CAB.enCours) return '${T("La cabine d’essayage se prépare : attendez la fin des essayages pour enregistrer.")}';
+    return (t.aFaire > 1 ? '${T("Préparez la cabine d’essayage avant d’enregistrer : {0} angles à faire, {1}.")}' : '${T("Préparez la cabine d’essayage avant d’enregistrer : {0} angle à faire, {1}.")}')
+      .split('{0}').join(String(t.aFaire)).split('{1}').join(t.resteCredits != null ? cabMontant(t.resteCredits, t.resteDollars) : '…');
+  }
+  function dessinerCabine(){
+    var z = document.getElementById('p-cab-carte'); if (!z) return;
+    var t = CAB.t;
+    if (!t || (t.ok && t.requise === false)) { z.style.display = 'none'; z.innerHTML = ''; z.removeAttribute('data-h'); return; }
+    z.style.display = '';
+    var h = '<div class="t"><span class="ic">👗</span> ${T("Cabine d’essayage")}</div>';
+    if (!t.ok) h += '<div class="cab-l">' + esc(expliquer(t)) + '</div>';
+    else if (!t.ouverte) h += '<div class="cab-l">${T("Pas encore ouverte : la mannequin n’est pas configurée au serveur. Rien n’est exigé pour l’instant.")}</div>';
+    else {
+      if (!t.photosManquantes) {
+        var rec = function(x){ return x && x.reconnue ? (x.origine === 'retouche' ? '${T("✓ sans mannequin (Studio), retouchée")}' : '${T("✓ sans mannequin (Studio)")}') : '${T("✗ pas une photo « sans mannequin » du Studio")}'; };
+        h += '<div class="cab-l">${T("Face :")} <b>' + rec(t.face) + '</b></div><div class="cab-l">${T("Dos :")} <b>' + rec(t.dos) + '</b></div>';
+      }
+      h += '<div class="cab-a">' + (t.angles || []).map(function(a){
+        var cl = a.etat === 'reussi' ? 'ok' : (a.etat === 'cours' ? 'cours' : (a.etat === 'rejete' ? 'rate' : ''));
+        var ic = a.etat === 'reussi' ? '✓ ' : (a.etat === 'cours' ? '⏳ ' : (a.etat === 'rejete' ? '✗ ' : ''));
+        return '<span class="' + cl + '">' + ic + esc(CAB_ANGLES[a.angle] || a.angle) + '</span>';
+      }).join('') + '</div>';
+      if (t.pret) h += '<div class="cab-l"><b>' + (t.dejaPaye > 0 ? '${T("✓ Cabine prête — payé : {0}")}'.split('{0}').join(prixUS(t.dejaPaye)) : '${T("✓ Cabine prête")}') + '</b></div>';
+      else {
+        if (t.resteCredits != null && t.aFaire > 0) h += '<div class="cab-l">' + (t.dejaPaye > 0 ? '${T("Reste : {0} — déjà payé : {1}")}' : '${T("Reste : {0}")}')
+          .split('{0}').join('<b>' + t.aFaire + ' × ' + szNombre(t.creditsParEssai) + ' = ' + esc(cabMontant(t.resteCredits, t.resteDollars)) + '</b>').split('{1}').join(esc(prixUS(t.dejaPaye || 0))) + '</div>';
+        var r = raisonCabine();
+        if (r) h += '<div class="cab-l">' + esc(r) + '</div>';
+        var peut = !CAB.enCours && t.aFaire > 0 && t.face && t.face.reconnue && t.dos && t.dos.reconnue && !t.identiques;
+        if (t.aFaire > 0) h += '<div class="pf-med-l"><button type="button" id="p-cab-go"' + (peut ? '' : ' disabled') + '>'
+          + (CAB.enCours ? '<span class="ic">⏳</span> ${T("Lancement…")}' : '<span class="ic">👗</span> ' + '${T("Préparer la cabine ({0})")}'.split('{0}').join(cabMontant(t.resteCredits || 0, t.resteDollars || 0))) + '</button></div>';
+      }
+    }
+    if (CAB.charge) h += '<div class="cab-l">${T("Lecture au serveur…")}</div>';
+    if (z.getAttribute('data-h') === h) return;   // rien de changé, rien de réécrit (voir majFiche)
+    z.setAttribute('data-h', h); z.innerHTML = h;
+    var b = document.getElementById('p-cab-go'); if (b) b.onclick = preparerCabine;
+  }
+  function preparerCabine(){
+    var t = CAB.t;
+    if (!cabExigee() || t.pret || CAB.enCours) return;
+    var aFaire = (t.angles || []).filter(function(a){ return a.etat === 'a_faire'; }).map(function(a){ return a.angle; });
+    if (!aFaire.length || t.prixParEssai == null) return;
+    szConfirmer({ prudent: true, titre: '${T("Préparer la cabine d’essayage")}',
+      texte: '${T("Le vêtement est essayé par The New Black sur la mannequin de la boutique, sous chaque angle manquant. Chaque essayage n’est payé qu’une fois : une page rechargée, un second poste ou un double clic ne repaient rien.")}',
+      details: [['${T("Angles")}', aFaire.map(function(a){ return CAB_ANGLES[a] || a; }).join(' · ')],
+        ['${T("Coût")}', cabMontant(t.resteCredits, t.resteDollars)],
+        ['${T("Déjà payé pour ces photos")}', prixUS(t.dejaPaye || 0)]],
+      oui: '${T("Lancer ({0})")}'.split('{0}').join(prixUS(t.resteDollars)) }).then(function(ok){
+        if (!ok || CAB.enCours) return;
+        CAB.enCours = true; dessinerCabine();
+        var face = IMAGE, dos = photoDos(), prix = t.prixParEssai, refus = null;
+        var suite = function(i){
+          if (i >= aFaire.length || refus) {
+            CAB.enCours = false;
+            if (refus) dire(expliquer(refus), 'err'); else dire('${T("Essayages lancés — la cabine se prépare (environ une minute par angle).")}', 'bon');
+            majCabine(true); cabSuivre();
+            return;
+          }
+          P.appeler('cabine:essayer', { face: face, dos: dos, angle: aFaire[i], prixAnnonce: prix, produit: ID ? String(ID) : '' }).then(function(r){
+            if (r && r.ok && r.id && !r.deja) CAB.suivis[r.id] = aFaire[i];
+            else if (!(r && r.ok)) refus = r || { motif: 'echec' };   // le premier refus ARRÊTE la suite : rien d autre ne part
+            suite(i + 1);
+          });
+        };
+        suite(0);
+      });
+  }
+  // Les essayages « en cours » du tableau (lancés ici, ou sur un autre poste) sont suivis jusqu à leur fin.
+  function cabReprendre(){
+    var t = CAB.t; if (!t || !t.ok || !t.angles) return;
+    t.angles.forEach(function(a){ if (a.etat === 'cours' && a.tnb) CAB.suivis[a.tnb] = a.angle; });
+    cabSuivre();
+  }
+  function cabSuivre(){
+    if (CAB.minuterie || !Object.keys(CAB.suivis).length) return;
+    CAB.minuterie = setTimeout(function(){
+      var ids = Object.keys(CAB.suivis), fini = 0, n = ids.length;
+      ids.forEach(function(id){
+        P.appeler('cabine:suivre', { id: id }).then(function(r){
+          if (r && r.termine) { delete CAB.suivis[id]; fini++; }
+          if (--n > 0) return;
+          CAB.minuterie = null;
+          if (fini) majCabine(true);
+          cabSuivre();
+        });
+      });
+    }, 4000);
   }
 
   function brancher(){
@@ -3033,7 +3184,8 @@ function pageProduit(id) {
             if (p.role === 'devant') refDevant = im;
             STM.etats[p.role] = '${T("Rangement dans la photothèque…")}'; stmDessiner();
             var nom = (val('p-sku') || val('p-nom').trim() || 'studio') + '-' + (p.role === 'dos' ? 'dos' : 'devant');
-            P.appeler('studio:enregistrer', { image: im, nom: nom, produit: ID ? String(ID) : '', produitNom: val('p-nom').trim(), role: p.role }).then(function(e){
+            // parentTnb : l empreinte de l image rendue par The New Black — la photo finie lui est rattachée (cabine d essayage)
+            P.appeler('studio:enregistrer', { image: im, nom: nom, produit: ID ? String(ID) : '', produitNom: val('p-nom').trim(), role: p.role, parentTnb: r.empreinte || '' }).then(function(e){
               if (!STM) return;
               var ok = !!(e && e.ok && e.url);
               poserDuStudio({ url: ok ? e.url : im, role: p.role, code: (e && e.code) || '' }, function(){
@@ -5016,6 +5168,12 @@ function pageProduit(id) {
     if (!IMAGE) {
       Assist.aller(0);
       dire('${T("La photo principale est obligatoire.")}', 'err');
+      return;
+    }
+    // LA CABINE D ESSAYAGE (2026-10-30) : le pont refait la même vérification au serveur (double filet)
+    if (cabExigee() && !CAB.t.pret) {
+      Assist.aller(0);
+      dire(raisonCabine(), 'err');
       return;
     }
     // Les médias sont facultatifs, mais un mannequin à moitié décrit ou une

@@ -3109,7 +3109,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       var f = FORMATS[i]; i++;
       if (f.enreg) { faits++; suite(); return; }
       dire('${T("Enregistrement {0} sur {1} — {2}…")}'.split('{0}').join(String(i)).split('{1}').join(String(FORMATS.length)).split('{2}').join(f.label));
-      appeler('studio:enregistrer', [{ image: f.image, nom: nomFormat(f) }]).then(function(r){
+      appeler('studio:enregistrer', [{ image: f.image, nom: nomFormat(f), parentTnb: (RESULT && RESULT.empreinte) || '' }]).then(function(r){
         if (r && r.ok) { f.enreg = true; faits++; } else rate++;
         suite();
       });
@@ -3121,7 +3121,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (!f || f.enreg || OCCUPE || RO) return;
     occuper(true);
     dire('${T("Enregistrement du format")} ' + f.label + '…');
-    appeler('studio:enregistrer', [{ image: f.image, nom: nomFormat(f) }]).then(function(r){
+    appeler('studio:enregistrer', [{ image: f.image, nom: nomFormat(f), parentTnb: (RESULT && RESULT.empreinte) || '' }]).then(function(r){
       occuper(false);
       if (r && r.ok) {
         f.enreg = true;
@@ -4028,7 +4028,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (PROD && teinteAlerte()) { gardeTeinte(enregistrerResultat); return; }
     occuper(true); dire('${T("Enregistrement dans la photothèque…")}');
     // ÉTIQUETÉE pour sa fiche et son rôle quand le Studio est rattaché à un produit
-    var e0 = { image: RESULT.image, nom: nomRendu() };
+    // parentTnb : la photo enregistrée descend de l image rendue par The New Black (cabine d essayage, 2026-10-30)
+    var e0 = { image: RESULT.image, nom: nomRendu(), parentTnb: RESULT.empreinte || '' };
     if (PROD) { e0.produit = PROD.id; e0.produitNom = PROD.nom; e0.role = ROLE; }
     appeler('studio:enregistrer', [e0]).then(function(r){
       occuper(false);
@@ -4060,6 +4061,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         ENREG = false;
         RESULT = { image: r.image, essai: !!r.essai, decorErreur: r.decorErreur || '',
                    ignores: r.ignores || '',
+                   // l empreinte de l image rendue par The New Black (sans mannequin) : la parente déclarée à l enregistrement
+                   empreinte: r.empreinte || '',
                    /* ⚠ LA MISE EN SCENE DU RENDU, gardee avec lui : changer
                       d ambiance apres coup renommait le fichier enregistre
                       (<< studio-humain-plage >> devenait << -foret >>). */
