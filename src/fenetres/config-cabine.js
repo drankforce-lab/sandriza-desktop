@@ -53,9 +53,31 @@ body{background:var(--f-page);color:var(--tx);
 input[type=text],select{font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;padding:.38rem .5rem}
 input[type=text]:focus,select:focus{outline:none;border-color:var(--or)}
 input.mmjj{width:5.4rem}
-.ligne{display:grid;grid-template-columns:64px minmax(8rem,1fr) auto auto auto auto;gap:.5rem;align-items:center;padding:.45rem 0;border-bottom:1px solid var(--v07)}
+.ligne{display:grid;grid-template-columns:64px minmax(7rem,1fr) auto auto auto auto auto auto;gap:.5rem;align-items:center;padding:.45rem 0;border-bottom:1px solid var(--v07)}
+.ligne.pause{opacity:.55}
+input[type=date]{font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;padding:.32rem .45rem;color-scheme:dark}
+.auj{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;font-size:.82rem;color:var(--tx2);padding:.5rem .65rem;border-radius:9px;background:var(--v05)}
+.auj b{color:var(--tx)}
+.auj .vign{width:40px;height:52px}
+.art{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:.6rem;align-items:center;padding:.35rem 0;border-bottom:1px solid var(--v07);font-size:.84rem}
+.art img{width:36px;height:44px;object-fit:cover;border-radius:6px;background:var(--v06)}
+.etat{font-size:.74rem;border-radius:999px;padding:.12rem .55rem;white-space:nowrap}
+.etat.e6{background:rgba(80,190,120,.18);color:var(--tx-ok)}
+html.jour .etat.e6{color:#1d5c34}html.jour .etat.efd{color:#1f4f8a}html.jour .etat.enon{color:#7a4d00}
+.etat.efd{background:rgba(90,150,240,.16);color:var(--tx-bleute)}
+.etat.enon{background:rgba(240,180,80,.14);color:var(--tx-or2)}
+.compte{font-size:.82rem;color:var(--tx2)}
+.liste-art{max-height:20rem;overflow:auto}
+textarea{width:100%;font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;padding:.4rem .5rem;min-height:3.4em;resize:vertical}
+.gr2{display:grid;grid-template-columns:1fr 1fr;gap:.5rem .7rem}
+.gr2 label{font-size:.76rem;color:var(--tx2);display:block;margin-bottom:.2rem}
+.gr2 input[type=text]{width:100%}
 .vign{width:64px;height:48px;border-radius:7px;background:var(--v06) center/cover no-repeat;border:1px solid var(--v10)}
 .fondchoix{display:flex;gap:.8rem;align-items:center;flex-wrap:wrap}
+.prets{display:flex;gap:.6rem;flex-wrap:wrap}
+.pret{display:flex;flex-direction:column;align-items:center;gap:.25rem;padding:.35rem;border-radius:10px;border:2px solid transparent;background:var(--v05);font-size:.74rem;color:var(--tx2)}
+.pret .vign{width:72px;height:96px}
+.pret.choisi{border-color:var(--or);color:var(--tx)}
 .vide{padding:.6rem;text-align:center;color:var(--tx3);font-size:.8rem}
 .alerte{border:1px solid rgba(240,180,80,.35);background:rgba(200,140,40,.08);color:var(--tx-or2);border-radius:9px;padding:.45rem .65rem;font-size:.78rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
@@ -98,7 +120,24 @@ function pageConfigCabine() {
   };
 ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps'), bsave = document.getElementById('b-save'), fichier = document.getElementById('f-fichier');
-  var D = null, R = null, RO = false, OCCUPE = false, CIBLE = null;
+  var D = null, R = null, RO = false, OCCUPE = false, CIBLE = null, APERCU = '', ARTICLES = null;
+  // LE FOND D'UN JOUR — la même règle que le serveur (lib-cabine.php cabine_fond_actif) : événement d'abord, puis des dates
+  // précises avant une période annuelle, puis l'ordre de la liste ; un fond en pause ne compte pas.
+  function aujourdhui(){ var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  function fondDuJour(date){
+    var jour = date.slice(5), fs = (R.fonds || []);
+    var dedans = function(f){ var d = String(f.debut || ''), e = String(f.fin || '');
+      if (d.length === 10) return e.length === 10 && date >= d && date <= e;
+      if (d.length !== 5 || e.length !== 5) return false;
+      return d <= e ? (jour >= d && jour <= e) : (jour >= d || jour <= e); };
+    var ordre = [[true, 10], [true, 5], [false, 10], [false, 5]];
+    for (var k = 0; k < ordre.length; k++) for (var i = 0; i < fs.length; i++) {
+      var f = fs[i]; if (f.actif !== false && !!f.promo === ordre[k][0] && String(f.debut || '').length === ordre[k][1] && dedans(f)) return f.image;
+    }
+    return R.fond || 'studio';
+  }
+  function nomDe(u){ if (u === 'studio') return '${T("Studio")}'; var f = (R.fonds || []).filter(function(x){ return x.image === u && x.nom; })[0]; return (f && f.nom) || nomFond(u) || '${T("Votre image")}'; }
+  function vignStyle(u){ return u === 'studio' ? 'background:linear-gradient(180deg,#F4EEE6,#E6DCCE)' : 'background-image:url(' + esc(src(u)) + ')'; }
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return '&#' + c.charCodeAt(0) + ';'; }); }
   function dire(t, cl){ szDire(t, cl); }
   var MOTIFS = {
@@ -122,6 +161,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return p.then(function(r){ return r || { ok: false, motif: 'echec' }; }).catch(function(e){ return { ok: false, motif: 'echec', detail: (e && e.message) || e }; });
   }
   function sale(){ bsave.disabled = RO || OCCUPE; }
+  // un fond LIVRÉ avec le site est un chemin (cabine/fonds/…) : sa vignette se lit sur le site
+  function src(u){ u = String(u || ''); return u.indexOf('cabine/') === 0 && D && D.origine ? D.origine + '/' + u : u; }
+  function nomFond(u){ var p = (R.prets || []).filter(function(x){ return x.image === u; })[0]; return p ? p.nom : ''; }
 
   function dessiner(){
     document.getElementById('ro').hidden = !RO;
@@ -139,22 +181,50 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         : '<div class="vide">${T("Aucune superposition : un seul haut à la fois.")}</div>')
       + (RO ? '' : '<div class="ajout"><select id="f-sa" aria-label="${T("Premier haut")}">' + opts + '</select> + <select id="f-sb" aria-label="${T("Second haut")}">' + opts + '</select><button type="button" id="b-sup">${T("Permettre")}</button></div>') + '</div>');
     var studio = (R.fond || 'studio') === 'studio';
-    h.push('<div class="carte large"><h2>${T("Fond par défaut")}</h2><p class="sous">${T("Derrière la mannequin quand aucun fond programmé n’est en cours.")}</p>'
-      + '<div class="fondchoix"><label class="bascule"><input type="radio" name="fond" value="studio"' + (studio ? ' checked' : '') + dis + '><span>${T("Studio (la photo d’origine)")}</span></label>'
-      + '<label class="bascule"><input type="radio" name="fond" value="image"' + (studio ? '' : ' checked') + dis + '><span>${T("Une image")}</span></label>'
-      + (studio ? '' : '<span class="vign" style="background-image:url(' + esc(R.fond) + ')"></span>')
-      + (RO ? '' : '<button type="button" id="b-fond">${T("Choisir une image…")}</button>') + '</div></div>');
+    var prets = R.prets || [], estPret = prets.some(function(x){ return x.image === R.fond; });
+    h.push('<div class="carte large"><h2>${T("Fond par défaut")}</h2><p class="sous">${T("Derrière la mannequin, partout dans la boutique (ordinateur, tablette, téléphone), quand aucun fond programmé n’est en cours.")}</p>'
+      + '<div class="prets">'
+      + '<button type="button" class="pret' + (studio ? ' choisi' : '') + '" data-fond="studio"' + dis + '><span class="vign" style="background:linear-gradient(180deg,#F4EEE6,#E6DCCE)"></span>${T("Studio")}</button>'
+      + prets.map(function(x){ return '<button type="button" class="pret' + (R.fond === x.image ? ' choisi' : '') + '" data-fond="' + esc(x.image) + '"' + dis + '><span class="vign" style="background-image:url(' + esc(src(x.image)) + ')"></span>' + esc(x.nom) + '</button>'; }).join('')
+      + (!studio && !estPret ? '<span class="pret choisi"><span class="vign" style="background-image:url(' + esc(src(R.fond)) + ')"></span>${T("Votre image")}</span>' : '')
+      + '</div>'
+      + (RO ? '' : '<div class="ajout"><button type="button" id="b-fond">${T("Choisir une image…")}</button></div>') + '</div>');
     var fonds = R.fonds || [];
-    h.push('<div class="carte large"><h2>${T("Fonds programmés")}</h2><p class="sous">${T("Une image pour une période (mois-jour, ex. 06-21 → 08-31 ; d’une année à l’autre si la fin précède le début). Une promotion passe devant une saison.")}</p>'
+    var auj = fondDuJour(aujourdhui()), apercu = APERCU ? fondDuJour(APERCU) : null;
+    h.push('<div class="carte large"><h2>${T("Fonds programmés")}</h2><p class="sous">${T("Chaque fond a sa période : CHAQUE ANNÉE (l’été, l’hiver) ou des DATES PRÉCISES (un lancement de collection). Un ÉVÉNEMENT passe devant les périodes ; des dates précises passent devant une période annuelle. Un fond en pause ne s’affiche pas.")}</p>'
+      + '<div class="auj">${T("Aujourd’hui :")} <span class="vign" style="' + vignStyle(auj) + '"></span><b>' + esc(nomDe(auj)) + '</b>'
+      + '<span style="margin-left:auto">${T("Voir le fond du")}</span> <input type="date" id="f-apercu" value="' + esc(APERCU || '') + '" aria-label="${T("Voir le fond du")}">'
+      + (apercu ? '<span class="vign" style="' + vignStyle(apercu) + '"></span><b>' + esc(nomDe(apercu)) + '</b>' : '') + '</div>'
       + (fonds.length ? fonds.map(function(f, i){
-          return '<div class="ligne"><span class="vign" style="background-image:url(' + esc(f.image) + ')"></span>'
+          var precis = String(f.debut || '').length === 10 || f.precis;
+          var champ = function(c){ return precis
+            ? '<input type="date" data-f="' + i + '" data-c="' + c + '" value="' + esc(f[c]) + '" aria-label="' + (c === 'debut' ? '${T("Début")}' : '${T("Fin")}') + '"' + dis + '>'
+            : '<input type="text" class="mmjj" data-f="' + i + '" data-c="' + c + '" value="' + esc(f[c]) + '" placeholder="' + (c === 'debut' ? '06-21' : '08-31') + '" aria-label="' + (c === 'debut' ? '${T("Début")}' : '${T("Fin")}') + '"' + dis + '>'; };
+          return '<div class="ligne' + (f.actif === false ? ' pause' : '') + '"><span class="vign" style="background-image:url(' + esc(src(f.image)) + ')"></span>'
             + '<input type="text" data-f="' + i + '" data-c="nom" value="' + esc(f.nom) + '" maxlength="40" placeholder="${T("Nom (ex. Été)")}" aria-label="${T("Nom (ex. Été)")}"' + dis + '>'
-            + '<input type="text" class="mmjj" data-f="' + i + '" data-c="debut" value="' + esc(f.debut) + '" placeholder="06-21" aria-label="${T("Début")}"' + dis + '>'
-            + '<input type="text" class="mmjj" data-f="' + i + '" data-c="fin" value="' + esc(f.fin) + '" placeholder="08-31" aria-label="${T("Fin")}"' + dis + '>'
-            + '<label class="bascule"><input type="checkbox" data-f="' + i + '" data-c="promo"' + (f.promo ? ' checked' : '') + dis + '><span>${T("Promotion")}</span></label>'
+            + '<select data-f="' + i + '" data-c="sorte" aria-label="${T("Période")}"' + dis + '><option value="an"' + (precis ? '' : ' selected') + '>${T("Chaque année")}</option><option value="dates"' + (precis ? ' selected' : '') + '>${T("Dates précises")}</option></select>'
+            + champ('debut') + champ('fin')
+            + '<label class="bascule"><input type="checkbox" data-f="' + i + '" data-c="promo"' + (f.promo ? ' checked' : '') + dis + '><span>${T("Événement")}</span></label>'
+            + '<label class="bascule"><input type="checkbox" data-f="' + i + '" data-c="actif"' + (f.actif !== false ? ' checked' : '') + dis + '><span>${T("Actif")}</span></label>'
             + (RO ? '<span></span>' : '<button type="button" data-rf="' + i + '" aria-label="${T("Retirer")}">×</button>') + '</div>'; }).join('')
         : '<div class="vide">${T("Aucun fond programmé.")}</div>')
-      + (RO ? '' : '<div class="ajout"><button type="button" id="b-fprog">${T("Ajouter un fond…")}</button></div>') + '</div>');
+      + (RO ? '' : '<div class="ajout"><button type="button" id="b-fprog">${T("Ajouter un fond (image)…")}</button>'
+        + prets.map(function(x){ return '<button type="button" data-ajout-pret="' + esc(x.image) + '">+ ' + esc(x.nom) + '</button>'; }).join('') + '</div>') + '</div>');
+    // LES TEXTES DE LA PAGE (vides : ceux de la boutique)
+    var tx = R.textes || {};
+    h.push('<div class="carte large"><h2>${T("Textes de la page")}</h2><p class="sous">${T("Le titre et la phrase d’accueil de la cabine, en français et en anglais. Vides : ceux de la boutique.")}</p>'
+      + '<div class="gr2"><div><label for="t-titreFr">${T("Titre (français)")}</label><input type="text" id="t-titreFr" data-t="titreFr" maxlength="60" value="' + esc(tx.titreFr || '') + '" placeholder="${T("Vide : celui de la boutique")}"' + dis + '></div>'
+      + '<div><label for="t-titreEn">${T("Titre (anglais)")}</label><input type="text" id="t-titreEn" data-t="titreEn" maxlength="60" value="' + esc(tx.titreEn || '') + '" placeholder="${T("Vide : celui de la boutique")}"' + dis + '></div>'
+      + '<div><label for="t-sousFr">${T("Phrase d’accueil (français)")}</label><textarea id="t-sousFr" data-t="sousFr" maxlength="200"' + dis + '>' + esc(tx.sousFr || '') + '</textarea></div>'
+      + '<div><label for="t-sousEn">${T("Phrase d’accueil (anglais)")}</label><textarea id="t-sousEn" data-t="sousEn" maxlength="200"' + dis + '>' + esc(tx.sousEn || '') + '</textarea></div></div></div>');
+    // LES ARTICLES DE LA CABINE (ce que voient les clientes)
+    var A = ARTICLES;
+    h.push('<div class="carte large"><h2>${T("Articles de la cabine")}</h2><p class="sous">${T("Les vêtements et accessoires de tête en vente, et ce que la cabine en montre. Un article se prépare dans sa fiche (carte « Cabine d’essayage »).")}</p>'
+      + (!A ? '<div class="vide">${T("Lecture…")}</div>' : !A.ok ? '<div class="vide">' + esc(expliquer(A)) + '</div>'
+        : '<div class="compte">' + '${T("{0} prêt(s) sur {1}")}'.split('{0}').join(A.prets).split('{1}').join(A.total) + '</div><div class="liste-art">'
+          + A.lignes.map(function(x){ return '<div class="art"><img src="' + esc(x.image) + '" alt="" onerror="this.style.visibility=&quot;hidden&quot;"><span>' + esc(x.nom) + (x.type ? ' <span class="compte">· ' + esc(x.type) + '</span>' : '') + '</span>'
+            + (x.etat === '6' ? '<span class="etat e6">${T("Prêt · 6 angles")}</span>' : x.etat === 'fd' ? '<span class="etat efd">${T("Prêt · face et dos")}</span>' : '<span class="etat enon">${T("Pas encore préparé")}</span>') + '</div>'; }).join('')
+          + '</div>') + '</div>');
     corps.innerHTML = h.join('');
     lier(); sale();
   }
@@ -167,15 +237,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     Array.prototype.forEach.call(corps.querySelectorAll('[data-rs]'), function(b){ b.onclick = function(){ R.superpositions.splice(+b.getAttribute('data-rs'), 1); dessiner(); }; });
     Array.prototype.forEach.call(corps.querySelectorAll('[data-rf]'), function(b){ b.onclick = function(){ R.fonds.splice(+b.getAttribute('data-rf'), 1); dessiner(); }; });
     Array.prototype.forEach.call(corps.querySelectorAll('[data-f]'), function(e){ e.onchange = function(){
-      var f = R.fonds[+e.getAttribute('data-f')], c = e.getAttribute('data-c'); f[c] = c === 'promo' ? e.checked : e.value.trim(); sale(); }; });
+      var f = R.fonds[+e.getAttribute('data-f')], c = e.getAttribute('data-c');
+      if (c === 'sorte') { f.precis = e.value === 'dates'; f.debut = ''; f.fin = ''; dessiner(); return; }
+      f[c] = (c === 'promo' || c === 'actif') ? e.checked : e.value.trim();
+      if (c === 'actif' || c === 'debut' || c === 'fin' || c === 'promo') dessiner(); else sale(); }; });
+    Array.prototype.forEach.call(corps.querySelectorAll('[data-t]'), function(e){ e.oninput = function(){ (R.textes = R.textes || {})[e.getAttribute('data-t')] = e.value; sale(); }; });
+    var fa = document.getElementById('f-apercu'); if (fa) fa.onchange = function(){ APERCU = fa.value; dessiner(); };
     on('b-type', function(){ var e = document.getElementById('f-type'), v = (e.value || '').trim().toLowerCase();
       if (v && R.types.indexOf(v) < 0) R.types.push(v); dessiner(); });
     on('b-sup', function(){ var a = document.getElementById('f-sa').value, b = document.getElementById('f-sb').value;
       if (a === b) { dire('${T("Choisissez deux types différents.")}', 'err'); return; }
       var deja = (R.superpositions || []).some(function(p){ return (p[0] === a && p[1] === b) || (p[0] === b && p[1] === a); });
       if (!deja) (R.superpositions = R.superpositions || []).push([a, b]); dessiner(); });
-    Array.prototype.forEach.call(corps.querySelectorAll('input[name=fond]'), function(e){ e.onchange = function(){
-      if (e.value === 'studio') { R.fond = 'studio'; dessiner(); } else if (R.fond === 'studio') { CIBLE = 'defaut'; fichier.click(); } }; });
+    Array.prototype.forEach.call(corps.querySelectorAll('[data-fond]'), function(b){ b.onclick = function(){ R.fond = b.getAttribute('data-fond'); dessiner(); sale(); }; });
+    Array.prototype.forEach.call(corps.querySelectorAll('[data-ajout-pret]'), function(b){ b.onclick = function(){
+      var u = b.getAttribute('data-ajout-pret'); (R.fonds = R.fonds || []).push({ nom: nomFond(u), image: u, debut: '', fin: '', promo: false }); dessiner(); }; });
     on('b-fond', function(){ CIBLE = 'defaut'; fichier.click(); });
     on('b-fprog', function(){ CIBLE = 'nouveau'; fichier.click(); });
   }
@@ -196,12 +272,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   };
   bsave.onclick = function(){
     if (RO || OCCUPE) return;
-    var mauvais = (R.fonds || []).filter(function(f){ return !/^(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/.test(f.debut) || !/^(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/.test(f.fin); });
-    if (mauvais.length) { dire('${T("Chaque fond programmé doit avoir un début et une fin au format mois-jour (ex. 06-21).")}', 'err'); return; }
+    var MD = /^(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/, AMD = /^20[0-9][0-9]-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
+    var mauvais = (R.fonds || []).filter(function(f){ return !((MD.test(f.debut) && MD.test(f.fin)) || (AMD.test(f.debut) && AMD.test(f.fin) && f.debut <= f.fin)); });
+    if (mauvais.length) { dire('${T("Chaque fond programmé doit avoir un début et une fin : mois-jour (ex. 06-21) chaque année, ou deux dates précises dans l’ordre.")}', 'err'); return; }
     var ouv = document.getElementById('f-ouverte'), ouverte = ouv ? ouv.checked : D.ouverte;
     var envoyer = function(){
       OCCUPE = true; sale(); dire('${T("Enregistrement…")}');
-      appeler('cabine:reglages:ecrire', [{ ouverte: ouverte, types: R.types, superpositions: R.superpositions, fond: R.fond, fonds: R.fonds }]).then(function(r){
+      appeler('cabine:reglages:ecrire', [{ ouverte: ouverte, types: R.types, superpositions: R.superpositions, fond: R.fond, fonds: R.fonds, textes: R.textes || {} }]).then(function(r){
         OCCUPE = false;
         if (r && r.ok) { recevoir(r); dire('${T("Réglages de la cabine enregistrés.")}', 'bon'); } else { sale(); dire(expliquer(r), 'err'); }
       });
@@ -214,14 +291,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function recevoir(r){
     D = r; RO = !r.peutModifier;
     var g = r.reglages || {};
-    R = { types: (g.types || []).slice(), superpositions: (g.superpositions || []).map(function(p){ return [p[0], p[1]]; }), fond: g.fond || 'studio',
-      fonds: (g.fonds || []).map(function(f){ return { nom: f.nom || '', image: f.image, debut: f.debut, fin: f.fin, promo: !!f.promo }; }) };
+    R = { prets: (g.fondsPrets || []).slice(), types: (g.types || []).slice(), superpositions: (g.superpositions || []).map(function(p){ return [p[0], p[1]]; }), fond: g.fond || 'studio',
+      fonds: (g.fonds || []).map(function(f){ return { nom: f.nom || '', image: f.image, debut: f.debut, fin: f.fin, promo: !!f.promo, actif: f.actif !== false, precis: String(f.debut || '').length === 10 }; }),
+      textes: JSON.parse(JSON.stringify(g.textes || {})) };
     dessiner();
   }
   dire('${T("Lecture…")}');
   appeler('cabine:reglages').then(function(r){
     if (!r || !r.ok) { corps.innerHTML = '<div class="carte"><div class="vide">' + esc(expliquer(r)) + '</div></div>'; dire(expliquer(r), 'err'); return; }
     recevoir(r); dire('');
+    appeler('cabine:articles').then(function(a){ ARTICLES = a || { ok: false, motif: 'echec' }; dessiner(); });
   });
 })();
 </script></body></html>`;

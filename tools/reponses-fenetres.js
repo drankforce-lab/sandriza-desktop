@@ -2123,7 +2123,12 @@ const JEU = {
     'cabine:reglages': { ok: true, ouverte: true, version: 'm1', peutModifier: true, reglages: {
       types: ['t-shirt', 'chandail', 'cardigan', 'veston'], superpositions: [['t-shirt', 'veston'], ['chandail', 'cardigan']],
       fond: 'studio', fonds: [{ nom: 'Été', image: 'https://photos.sandriza.com/divers/ete.webp', debut: '06-21', fin: '08-31', promo: false }],
-      fondActif: 'studio' } },
+      fondActif: 'studio', fondsPrets: [{ nom: 'Été · plage', image: 'cabine/fonds/ete.webp' }, { nom: 'Hiver · neige', image: 'cabine/fonds/hiver.webp' }] },
+      origine: 'https://www.sandriza.com' },
+    'cabine:articles': { ok: true, prets: 2, total: 3, lignes: [
+      { id: 'p1', nom: 'gilet bleu', categorie: 'hauts', image: '', etat: '6', angles: 6, type: 'chandail' },
+      { id: 'p2', nom: 'Chemise Walla', categorie: 'hauts', image: '', etat: 'fd', angles: 2, type: 'veston' },
+      { id: 'p3', nom: 'Robe Aurore', categorie: 'robes', image: '', etat: 'non', angles: 0, type: '' }] },
   },
 
   // Configuration de la navigation (palier 5, famille Configuration). Pas de secret.

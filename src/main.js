@@ -3000,7 +3000,7 @@ const OPS_PONT = new Set([
   'config:pays:donnees', 'config:pays:relire', 'config:pays:exclure',
   'config:retours:donnees', 'config:retours:ecrire',
   // La cabine d essayage dans l administration (2026-10-30) : reglages, fonds.
-  'cabine:reglages', 'cabine:reglages:ecrire', 'cabine:fond:deposer',
+  'cabine:reglages', 'cabine:reglages:ecrire', 'cabine:fond:deposer', 'cabine:articles',
   'config:nav:donnees', 'config:nav:ecrire', 'config:nav:reinit',
   // Transporteurs (fenetre Transporteurs, 2.39.0) — ⚠ secrets + filet
   // carriers_fetch_full : donnees/ecrire peuvent RECHARGER la config depuis le
@@ -3695,7 +3695,7 @@ const LIMITES_PONT = {
   // appel exterieur depuis le retrait de Stripe Tax le 2026-10-02).
   'config:pays:donnees': 15000, 'config:pays:relire': 45000, 'config:pays:exclure': 30000,
   'config:retours:donnees': 15000, 'config:retours:ecrire': 30000,
-  'cabine:reglages': 20000, 'cabine:reglages:ecrire': 30000, 'cabine:fond:deposer': 120000,
+  'cabine:reglages': 20000, 'cabine:reglages:ecrire': 30000, 'cabine:fond:deposer': 120000, 'cabine:articles': 60000,
   'config:nav:donnees': 15000, 'config:nav:ecrire': 30000, 'config:nav:reinit': 30000,
   'config:transporteurs:donnees': 30000, 'config:transporteurs:ecrire': 45000, 'config:transporteurs:reessayer': 30000, 'config:transporteurs:tester': 70000,
   'config:automations:donnees': 15000, 'config:automations:email': 20000, 'config:automations:stats': 20000,
