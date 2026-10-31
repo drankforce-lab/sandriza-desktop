@@ -67,7 +67,10 @@ html.jour .etat.e6{color:#1d5c34}html.jour .etat.efd{color:#1f4f8a}html.jour .et
 .etat.efd{background:rgba(90,150,240,.16);color:var(--tx-bleute)}
 .etat.enon{background:rgba(240,180,80,.14);color:var(--tx-or2)}
 .compte{font-size:.82rem;color:var(--tx2)}
-.liste-art{max-height:20rem;overflow:auto}
+.onglets{flex:0 0 auto;display:flex;gap:.4rem;padding:.5rem 1.05rem 0;border-bottom:1px solid var(--v08)}
+.onglets button{background:transparent;border:none;border-bottom:2px solid transparent;border-radius:0;padding:.45rem .8rem;color:var(--tx2)}
+.onglets button:hover{background:var(--v05);color:var(--tx)}
+.onglets button.actif{color:var(--tx-creme);border-bottom-color:var(--or)}
 textarea{width:100%;font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;padding:.4rem .5rem;min-height:3.4em;resize:vertical}
 .gr2{display:grid;grid-template-columns:1fr 1fr;gap:.5rem .7rem}
 .gr2 label{font-size:.76rem;color:var(--tx2);display:block;margin-bottom:.2rem}
@@ -97,6 +100,7 @@ function pageConfigCabine() {
 <title>${T("Cabine d’essayage — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.config || ''}</span><h1>${T("Cabine d’essayage")}</h1></div>
+<div class="onglets" id="onglets" role="tablist"><button type="button" role="tab" data-o="general">${T("Général")}</button><button type="button" role="tab" data-o="fonds">${T("Fonds")}</button><button type="button" role="tab" data-o="textes">${T("Textes")}</button><button type="button" role="tab" data-o="articles">${T("Articles")}</button></div>
 <div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter les réglages, pas les modifier.")}</div>
 <div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
@@ -120,7 +124,9 @@ function pageConfigCabine() {
   };
 ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps'), bsave = document.getElementById('b-save'), fichier = document.getElementById('f-fichier');
-  var D = null, R = null, RO = false, OCCUPE = false, CIBLE = null, APERCU = '', ARTICLES = null;
+  var D = null, R = null, RO = false, OCCUPE = false, CIBLE = null, APERCU = '', ARTICLES = null, ONGLET = 'general';
+  /* (2026-10-30) EN ONGLETS : la règle de l application — jamais de glissière dans une fenêtre ; les listes se paginent. */
+  Array.prototype.forEach.call(document.querySelectorAll('#onglets button'), function(b){ b.onclick = function(){ ONGLET = b.getAttribute('data-o'); if (R) dessiner(); }; });
   // LE FOND D'UN JOUR — la même règle que le serveur (lib-cabine.php cabine_fond_actif) : événement d'abord, puis des dates
   // précises avant une période annuelle, puis l'ordre de la liste ; un fond en pause ne compte pas.
   function aujourdhui(){ var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
@@ -167,22 +173,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function dessiner(){
     document.getElementById('ro').hidden = !RO;
-    var dis = RO ? ' disabled' : '', h = [], types = R.types || [];
-    h.push('<div class="carte"><h2>${T("État")}</h2>'
+    var dis = RO ? ' disabled' : '', h = [], types = R.types || [], O = ONGLET;
+    Array.prototype.forEach.call(document.querySelectorAll('#onglets button'), function(b){ var on = b.getAttribute('data-o') === O; b.classList.toggle('actif', on); b.setAttribute('aria-selected', on); });
+    if (O === 'general') h.push('<div class="carte"><h2>${T("État")}</h2>'
       + '<label class="bascule"><input type="checkbox" id="f-ouverte"' + (D.ouverte ? ' checked' : '') + dis + '><span><strong>${T("Cabine ouverte")}</strong>'
       + '<span class="d">${T("Ouverte : la boutique montre la cabine (menu Vêtements), et un vêtement ou un chapeau ne s’enregistre qu’avec sa cabine prête. Fermée : la cabine disparaît de la boutique, et rien n’est plus exigé.")}</span></span></label>'
       + (D.ouverte ? '' : '<div class="alerte">${T("La cabine est fermée.")}</div>') + '</div>');
-    h.push('<div class="carte"><h2>${T("Types de hauts")}</h2><p class="sous">${T("Les sortes de hauts que la cabine distingue. Le type d’un article se choisit dans sa fiche ; sans choix, il est déduit de son nom.")}</p>'
+    if (O === 'general') h.push('<div class="carte"><h2>${T("Types de hauts")}</h2><p class="sous">${T("Les sortes de hauts que la cabine distingue. Le type d’un article se choisit dans sa fiche ; sans choix, il est déduit de son nom.")}</p>'
       + '<div class="puces">' + types.map(function(t, i){ return '<span class="puce">' + esc(t) + (RO ? '' : '<button type="button" data-rt="' + i + '" aria-label="${T("Retirer")} ' + esc(t) + '">×</button>') + '</span>'; }).join('') + '</div>'
       + (RO ? '' : '<div class="ajout"><input type="text" id="f-type" maxlength="30" placeholder="${T("Nouveau type (ex. polo)")}" aria-label="${T("Nouveau type (ex. polo)")}"><button type="button" id="b-type">${T("Ajouter")}</button></div>') + '</div>');
     var opts = types.map(function(t){ return '<option>' + esc(t) + '</option>'; }).join('');
-    h.push('<div class="carte"><h2>${T("Superpositions permises")}</h2><p class="sous">${T("Deux hauts portés l’un sur l’autre dans la cabine — seulement ces paires. Hors liste, le second haut remplace le premier.")}</p>'
+    if (O === 'general') h.push('<div class="carte"><h2>${T("Superpositions permises")}</h2><p class="sous">${T("Deux hauts portés l’un sur l’autre dans la cabine — seulement ces paires. Hors liste, le second haut remplace le premier.")}</p>'
       + ((R.superpositions || []).length ? '<div class="puces">' + R.superpositions.map(function(p, i){ return '<span class="puce">' + esc(p[0]) + ' + ' + esc(p[1]) + (RO ? '' : '<button type="button" data-rs="' + i + '" aria-label="${T("Retirer")}">×</button>') + '</span>'; }).join('') + '</div>'
         : '<div class="vide">${T("Aucune superposition : un seul haut à la fois.")}</div>')
       + (RO ? '' : '<div class="ajout"><select id="f-sa" aria-label="${T("Premier haut")}">' + opts + '</select> + <select id="f-sb" aria-label="${T("Second haut")}">' + opts + '</select><button type="button" id="b-sup">${T("Permettre")}</button></div>') + '</div>');
     var studio = (R.fond || 'studio') === 'studio';
     var prets = R.prets || [], estPret = prets.some(function(x){ return x.image === R.fond; });
-    h.push('<div class="carte large"><h2>${T("Fond par défaut")}</h2><p class="sous">${T("Derrière la mannequin, partout dans la boutique (ordinateur, tablette, téléphone), quand aucun fond programmé n’est en cours.")}</p>'
+    if (O === 'fonds') h.push('<div class="carte large"><h2>${T("Fond par défaut")}</h2><p class="sous">${T("Derrière la mannequin, partout dans la boutique (ordinateur, tablette, téléphone), quand aucun fond programmé n’est en cours.")}</p>'
       + '<div class="prets">'
       + '<button type="button" class="pret' + (studio ? ' choisi' : '') + '" data-fond="studio"' + dis + '><span class="vign" style="background:linear-gradient(180deg,#F4EEE6,#E6DCCE)"></span>${T("Studio")}</button>'
       + prets.map(function(x){ return '<button type="button" class="pret' + (R.fond === x.image ? ' choisi' : '') + '" data-fond="' + esc(x.image) + '"' + dis + '><span class="vign" style="background-image:url(' + esc(src(x.image)) + ')"></span>' + esc(x.nom) + '</button>'; }).join('')
@@ -191,11 +198,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (RO ? '' : '<div class="ajout"><button type="button" id="b-fond">${T("Choisir une image…")}</button></div>') + '</div>');
     var fonds = R.fonds || [];
     var auj = fondDuJour(aujourdhui()), apercu = APERCU ? fondDuJour(APERCU) : null;
-    h.push('<div class="carte large"><h2>${T("Fonds programmés")}</h2><p class="sous">${T("Chaque fond a sa période : CHAQUE ANNÉE (l’été, l’hiver) ou des DATES PRÉCISES (un lancement de collection). Un ÉVÉNEMENT passe devant les périodes ; des dates précises passent devant une période annuelle. Un fond en pause ne s’affiche pas.")}</p>'
+    if (O === 'fonds') h.push('<div class="carte large"><h2>${T("Fonds programmés")}</h2><p class="sous">${T("Chaque fond a sa période : CHAQUE ANNÉE (l’été, l’hiver) ou des DATES PRÉCISES (un lancement de collection). Un ÉVÉNEMENT passe devant les périodes ; des dates précises passent devant une période annuelle. Un fond en pause ne s’affiche pas.")}</p>'
       + '<div class="auj">${T("Aujourd’hui :")} <span class="vign" style="' + vignStyle(auj) + '"></span><b>' + esc(nomDe(auj)) + '</b>'
       + '<span style="margin-left:auto">${T("Voir le fond du")}</span> <input type="date" id="f-apercu" value="' + esc(APERCU || '') + '" aria-label="${T("Voir le fond du")}">'
       + (apercu ? '<span class="vign" style="' + vignStyle(apercu) + '"></span><b>' + esc(nomDe(apercu)) + '</b>' : '') + '</div>'
-      + (fonds.length ? fonds.map(function(f, i){
+      + (fonds.length ? '<div data-pages="cab-fonds">' + fonds.map(function(f, i){
           var precis = String(f.debut || '').length === 10 || f.precis;
           var champ = function(c){ return precis
             ? '<input type="date" data-f="' + i + '" data-c="' + c + '" value="' + esc(f[c]) + '" aria-label="' + (c === 'debut' ? '${T("Début")}' : '${T("Fin")}') + '"' + dis + '>'
@@ -206,22 +213,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + champ('debut') + champ('fin')
             + '<label class="bascule"><input type="checkbox" data-f="' + i + '" data-c="promo"' + (f.promo ? ' checked' : '') + dis + '><span>${T("Événement")}</span></label>'
             + '<label class="bascule"><input type="checkbox" data-f="' + i + '" data-c="actif"' + (f.actif !== false ? ' checked' : '') + dis + '><span>${T("Actif")}</span></label>'
-            + (RO ? '<span></span>' : '<button type="button" data-rf="' + i + '" aria-label="${T("Retirer")}">×</button>') + '</div>'; }).join('')
+            + (RO ? '<span></span>' : '<button type="button" data-rf="' + i + '" aria-label="${T("Retirer")}">×</button>') + '</div>'; }).join('') + '</div>'
         : '<div class="vide">${T("Aucun fond programmé.")}</div>')
       + (RO ? '' : '<div class="ajout"><button type="button" id="b-fprog">${T("Ajouter un fond (image)…")}</button>'
         + prets.map(function(x){ return '<button type="button" data-ajout-pret="' + esc(x.image) + '">+ ' + esc(x.nom) + '</button>'; }).join('') + '</div>') + '</div>');
     // LES TEXTES DE LA PAGE (vides : ceux de la boutique)
     var tx = R.textes || {};
-    h.push('<div class="carte large"><h2>${T("Textes de la page")}</h2><p class="sous">${T("Le titre et la phrase d’accueil de la cabine, en français et en anglais. Vides : ceux de la boutique.")}</p>'
+    if (O === 'textes') h.push('<div class="carte large"><h2>${T("Textes de la page")}</h2><p class="sous">${T("Le titre et la phrase d’accueil de la cabine, en français et en anglais. Vides : ceux de la boutique.")}</p>'
       + '<div class="gr2"><div><label for="t-titreFr">${T("Titre (français)")}</label><input type="text" id="t-titreFr" data-t="titreFr" maxlength="60" value="' + esc(tx.titreFr || '') + '" placeholder="${T("Vide : celui de la boutique")}"' + dis + '></div>'
       + '<div><label for="t-titreEn">${T("Titre (anglais)")}</label><input type="text" id="t-titreEn" data-t="titreEn" maxlength="60" value="' + esc(tx.titreEn || '') + '" placeholder="${T("Vide : celui de la boutique")}"' + dis + '></div>'
       + '<div><label for="t-sousFr">${T("Phrase d’accueil (français)")}</label><textarea id="t-sousFr" data-t="sousFr" maxlength="200"' + dis + '>' + esc(tx.sousFr || '') + '</textarea></div>'
       + '<div><label for="t-sousEn">${T("Phrase d’accueil (anglais)")}</label><textarea id="t-sousEn" data-t="sousEn" maxlength="200"' + dis + '>' + esc(tx.sousEn || '') + '</textarea></div></div></div>');
     // LES ARTICLES DE LA CABINE (ce que voient les clientes)
     var A = ARTICLES;
-    h.push('<div class="carte large"><h2>${T("Articles de la cabine")}</h2><p class="sous">${T("Les vêtements et accessoires de tête en vente, et ce que la cabine en montre. Un article se prépare dans sa fiche (carte « Cabine d’essayage »).")}</p>'
+    if (O === 'articles') h.push('<div class="carte large"><h2>${T("Articles de la cabine")}</h2><p class="sous">${T("Les vêtements et accessoires de tête en vente, et ce que la cabine en montre. Un article se prépare dans sa fiche (carte « Cabine d’essayage »).")}</p>'
       + (!A ? '<div class="vide">${T("Lecture…")}</div>' : !A.ok ? '<div class="vide">' + esc(expliquer(A)) + '</div>'
-        : '<div class="compte">' + '${T("{0} prêt(s) sur {1}")}'.split('{0}').join(A.prets).split('{1}').join(A.total) + '</div><div class="liste-art">'
+        : '<div class="compte">' + '${T("{0} prêt(s) sur {1}")}'.split('{0}').join(A.prets).split('{1}').join(A.total) + '</div><div data-pages="cab-articles">'
           + A.lignes.map(function(x){ return '<div class="art"><img src="' + esc(x.image) + '" alt="" onerror="this.style.visibility=&quot;hidden&quot;"><span>' + esc(x.nom) + (x.type ? ' <span class="compte">· ' + esc(x.type) + '</span>' : '') + '</span>'
             + (x.etat === '6' ? '<span class="etat e6">${T("Prêt · 6 angles")}</span>' : x.etat === 'fd' ? '<span class="etat efd">${T("Prêt · face et dos")}</span>' : '<span class="etat enon">${T("Pas encore préparé")}</span>') + '</div>'; }).join('')
           + '</div>') + '</div>');

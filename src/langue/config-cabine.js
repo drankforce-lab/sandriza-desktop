@@ -91,4 +91,8 @@ module.exports = {
   "Pas encore préparé": "Not prepared yet",
   "Chaque fond programmé doit avoir un début et une fin : mois-jour (ex. 06-21) chaque année, ou deux dates précises dans l’ordre.": "Each scheduled background needs a start and an end: month-day (e.g. 06-21) every year, or two exact dates in order.",
   "Vide : celui de la boutique": "Empty: the shop’s own",
+  "Général": "General",
+  "Fonds": "Backgrounds",
+  "Textes": "Texts",
+  "Articles": "Items",
 };
