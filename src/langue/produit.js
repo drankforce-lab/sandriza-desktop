@@ -106,6 +106,10 @@ module.exports = {
   'Description rédigée — relisez-la avant d’enregistrer.':
     'Description written — read it over before saving.',
   'Description courte': 'Short description',
+  'Proposer aussi un nom': 'Suggest a name too',
+  'Nom et description proposés — relisez-les avant d’enregistrer.':
+    'Name and description suggested — read them over before saving.',
+  'Ancien nom :': 'Previous name:',
 
   /* ── TAILLES ET COULEURS ────────────────────────────────────────────────── */
   'Tailles et couleurs': 'Sizes and colours',

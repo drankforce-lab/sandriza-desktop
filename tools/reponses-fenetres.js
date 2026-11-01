@@ -7535,7 +7535,7 @@ const JEU = {
         'produit:brouillonJeter': { ok: true },
         'produit:changements': { ok: true, entrees: [] },
         'produit:historique': { ok: true, entrees: [] },
-        'produit:decrire': { ok: true, texte: 'Une robe cintrée à la coupe nette, taillée dans un lainage souple.' },
+        'produit:decrire': { ok: true, nom: 'Robe Cintrée Lainage d’Automne', texte: 'Une robe cintrée à la coupe nette, taillée dans un lainage souple.' },
         'produit:enregistrer': { ok: true, id: 'p_0009' },
         'verrou:prendre': VERROU,
         identite: IDENTITE,

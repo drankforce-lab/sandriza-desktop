@@ -89,6 +89,7 @@ const CSS_PROPRE = `
 .pf-marge-barre i.perte{background:var(--tx-err)}
 .pf-ia{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-top:.5rem}
 .pf-ia .ed-seg button{height:1.85rem;font-size:.78rem;padding:0 .75rem}
+.pf-ia-nom{display:inline-flex;align-items:center;gap:.35rem;font-size:.8rem;cursor:pointer}
 /* L'étape Photos (2026-10-26) : la principale en GRAND à gauche ; à droite, l'aperçu 3D EN HAUT (sa demande), puis les
    autres photos. */
 /* (2026-10-26, sa capture : « prends toute l'espace de haut en bas et agrandis les photos en conséquence ») La carte
@@ -837,7 +838,11 @@ function pageProduit(id) {
       + '<span class="ed-seg" id="p-ia-ton" role="group" aria-label="${T("Ton de la description")}">'
       + '<button type="button" data-ton="chaleureux" class="on">${T("Chaleureux")}</button>'
       + '<button type="button" data-ton="sobre">${T("Sobre")}</button>'
-      + '<button type="button" data-ton="court">${T("Court")}</button></span></div></div>'
+      + '<button type="button" data-ton="court">${T("Court")}</button></span>'
+      // (2026-11-01, sa demande) La même lecture de la photo propose aussi un NOM accrocheur. Coché par défaut ;
+      // décocher garde le nom tapé et ne réécrit que la description.
+      + '<label class="pf-ia-nom"><input type="checkbox" id="p-ia-nom" checked> ${T("Proposer aussi un nom")}</label>'
+      + '</div></div>'
       + '</div></div>'
       + '<div class="cote pf-bas">'
       + '<div class="carte"><h2>${T("Classement")}</h2><div class="pf-cl">'
@@ -1727,13 +1732,26 @@ function pageProduit(id) {
     var b = document.getElementById('p-ia');
     b.disabled = true; dire('${T("Rédaction en cours…")}');
     var cat = (CTX.categories.find(function(c){ return c.cle === val('p-cat'); }) || {}).libelle || '';
+    var cNom = document.getElementById('p-ia-nom');
+    var avecNom = !!(cNom && cNom.checked);
+    var ancienNom = val('p-nom');
     P.appeler('produit:decrire', {
-      nom: val('p-nom'), categorie: cat, couleurs: couleurs(), imageDataUrl: IMAGE,
+      nom: ancienNom, categorie: cat, couleurs: couleurs(), imageDataUrl: IMAGE, avecNom: avecNom,
       ton: ((document.querySelector('#p-ia-ton .on') || {}).getAttribute ? document.querySelector('#p-ia-ton .on').getAttribute('data-ton') : 'chaleureux')
     }).then(function(r){
       b.disabled = false;
       if (!r || !r.ok) { dire(expliquer(r) + (r && r.detail ? ' — ' + r.detail : ''), 'err'); return; }
-      poser('p-desc', r.texte);
+      if (r.texte) poser('p-desc', r.texte);
+      /* Le NOM proposé remplace celui du champ ; l'ancien est rappelé dans le message pour qu'on puisse le
+         reprendre (un nom tapé avec soin ne doit pas disparaître sans trace). majNom() recalcule ce qui en dépend. */
+      if (avecNom && r.nom) {
+        poser('p-nom', r.nom);
+        var eN = document.getElementById('p-nom'); if (eN) eN.classList.remove('manque');
+        majNom(); Assist.fil();
+        dire('${T("Nom et description proposés — relisez-les avant d’enregistrer.")}'
+          + (ancienNom && ancienNom !== r.nom ? ' ${T("Ancien nom :")} « ' + ancienNom + ' »' : ''), 'bon');
+        return;
+      }
       dire('${T("Description rédigée — relisez-la avant d’enregistrer.")}', 'bon');
     });
   }
