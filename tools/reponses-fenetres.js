@@ -3978,6 +3978,7 @@ const JEU = {
         'fibres:supprimer': { ok: true, id: '', no: '', fiche: null, n: 0 },
         'fibres:imprimee': { ok: true, id: '', no: '', fiche: null, n: 13 },
         'fibres:etiquetteTemp': { ok: true, imprimante: 'Phomemo D245BT' },
+        'fibres:reserver': { ok: true, id: 'fib_6', no: 'AF-0014', fiche: null, n: 0 },
         'fibres:scanner': { ok: true, id: 'fib_1', no: 'AF-0012' } };
     };
     var cas = function(nom, id, d, exige){ return { nom: nom, id: id, reponses: rep(d), exige: exige }; };
@@ -3993,8 +3994,11 @@ const JEU = {
         tentatives: [Object.assign({}, LECT, { certitude: 64, concluante: false, raison: 'Tissage trop serré.', conseil: 'Une fibre isolée.' })],
         lecture: Object.assign({}, LECT, { certitude: 72, concluante: false, possibles: ['polyester'],
           raison: 'La surface tissée est trop serrée : les fibres se chevauchent, ni leur section ni leurs parois ne sont visibles.',
-          conseil: 'Prélever une fibre au ruban adhésif, la poser seule dans une goutte de glycérine sous lamelle, en lumière rasante.' }) })]),
-        ['class="nonconcl"', 'id="f-seconde"', '72 % (seuil 95 %)', '1 lecture(s) précédente(s) gardée(s)']),
+          conseil: 'Prélever une fibre au ruban adhésif, la poser seule dans une goutte de glycérine sous lamelle, en lumière rasante.',
+          corriger: [{ geste: 'Centrez la fibre dans le champ', pourquoi: 'elle touche le bord : son diamètre ne se mesure pas.' },
+            { geste: 'Coupez la fibre net au rasoir', pourquoi: 'la coupe montre la section (trilobée, ronde, en haricot).' },
+            { geste: 'Chassez les bulles d’air en appuyant sur la lame', pourquoi: 'deux bulles masquent les parois.' }] }) })]),
+        ['class="nonconcl"', 'id="f-seconde"', '72 % (seuil 95 %)', '1 lecture(s) précédente(s) gardée(s)', 'class="corriger"', 'Coupez la fibre net au rasoir']),
       cas('analyse ouverte — étape 2 (composition, entretien)', 'composition', GARNI, ['data-soin="lav_froid"', 'id="f-pct-0"', 'id="f-prec"']),
       cas('analyse ouverte — étape 3 (produit, étiquette)', 'produit', GARNI, ['data-mode="provisoire"', 'id="f-pays"', 'data-fond="pale"']),
       cas('planche (deux papiers, CA manquant)', 'planche', GARNI, ['id="pl-export"', 'id="cv-plan"', 'data-vue="1"', 'id="pl-fisc"']),

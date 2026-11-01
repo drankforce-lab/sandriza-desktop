@@ -195,6 +195,8 @@ html.jour .trouve span{color:#1b5631}
   background:rgba(251,191,36,.10);border:1px solid rgba(251,191,36,.40)}
 .nonconcl h3{margin:0 0 .25rem;font-size:.86rem;color:var(--tx-att)}
 .nonconcl p{margin:.15rem 0}
+.nonconcl ol.corriger{margin:.2rem 0 .1rem;padding-left:1.25rem}
+.nonconcl ol.corriger li{margin:.12rem 0}
 .nonconcl .boutons{margin-top:.5rem;display:flex;gap:.5rem;flex-wrap:wrap;justify-content:flex-start;align-items:center}
 .fib{display:grid;grid-template-columns:minmax(0,1fr) 4.6rem 1.9rem;gap:.5rem;align-items:center;margin-bottom:.55rem}
 .fib input{text-align:right}
@@ -339,7 +341,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function soin(k){ var L = (D && D.entretien) || []; for (var i = 0; i < L.length; i++) if (L[i].cle === k) return L[i]; return null; }
   function analyse(id){ var L = (D && D.analyses) || []; for (var i = 0; i < L.length; i++) if (L[i].id === id) return L[i]; return null; }
   function fond(k){ var L = (D && D.fonds) || []; for (var i = 0; i < L.length; i++) if (L[i].cle === k) return L[i]; return L[0] || { cle: 'fonce', fond: '#1C1C1E', encre: '#FFFFFF', miroir: false }; }
-  function nomProduit(a){ return a.produit ? a.produit.nom : (a.nomProvisoire || ''); }
+  function nomProduit(a){ return a.produit ? a.produit.nom : (a.nomProvisoire || (a.reserve ? '${T("Numéro réservé")}' : '')); }
   var CONF = { faible: '${T("faible")}', moyenne: '${T("moyenne")}', elevee: '${T("élevée")}' };
 
   /* ══ LE DESSIN DE L ÉTIQUETTE (canevas) ═════════════════════════════════════
@@ -717,7 +719,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       composition: (a.composition || []).map(function(x){ return { fibre: x.fibre, pct: String(x.pct) }; }),
       entretien: (a.entretien || []).slice(), fond: a.fond || 'fonce', pays: a.pays || D.paysDefaut,
       produit: a.produit || null, nomProvisoire: a.nomProvisoire || '', mode: a.produit ? 'inventaire' : 'provisoire',
-      remarque: a.remarque || '', copierFiche: !!a.produit, apercu: null, verdict: null
+      remarque: a.remarque || '', copierFiche: !!a.produit, apercu: null, verdict: null, reserve: !!a.reserve
     } : {
       id: '', no: '', lecture: null, tentatives: [], composition: [], entretien: [], fond: dernierFond(), pays: D.paysDefaut,
       produit: null, nomProvisoire: '', mode: 'inventaire', remarque: '', copierFiche: true, apercu: null, verdict: null
@@ -744,7 +746,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   /* Quitter l analyse vers la banque : jamais pendant une lecture de l IA (elle
      serait perdue), et jamais sans demander quand une saisie n est pas enregistree. */
   function quitterAnalyse(){
-    var partir = function(){ FORM = null; PL = null; PHOTOS = []; VUE = 'banque'; dessiner(); if (CHOIX) choisir(CHOIX); };
+    var partir = function(){
+      var res = FORM && FORM.reserve;
+      FORM = null; PL = null; PHOTOS = []; VUE = 'banque';
+      /* Un numéro réservé dans cette analyse doit paraître dans la banque (il n est pas encore dans D). */
+      if (res) { charger().then(function(){ dessiner(); if (CHOIX) choisir(CHOIX); }); return; }
+      dessiner(); if (CHOIX) choisir(CHOIX);
+    };
     if (VUE !== 'analyse') { partir(); return; }
     if (LECTURE_EN_COURS) { szDire('${T("Lecture des photos en cours : attendez son résultat avant de quitter l’analyse.")}', 'att'); return; }
     if (!analyseModifiee()) { partir(); return; }
@@ -813,6 +821,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + '<p>${T("L’étiquette passe à « 100 % fibres mixtes », avec l’entretien des fibres reconnues.")}</p>'
           + (l.raison ? '<p class="coupe3" title="' + esc(l.raison) + '"><strong>${T("Pourquoi :")}</strong> ' + esc(l.raison) + '</p>' : '')
           + (l.conseil ? '<p class="coupe3" title="' + esc(l.conseil) + '"><strong>${T("Pour trancher :")}</strong> ' + esc(l.conseil) + '</p>' : '')
+          /* (2026-11-01, sa demande) CE QUI MANQUE pour atteindre le seuil : les gestes, un par ligne (centrer, couper la fibre…). */
+          + ((l.corriger || []).length ? '<p><strong>${T("Ce qui manque pour atteindre")} ' + SEUIL + ' % :</strong></p><ol class="corriger">'
+            + l.corriger.map(function(x){ return '<li><strong>' + esc(x.geste) + '</strong>' + (x.pourquoi ? ' — ' + esc(x.pourquoi) : '') + '</li>'; }).join('') + '</ol>' : '')
           + '<div class="boutons"><button type="button" class="prim" id="f-seconde">${T("Faire une seconde analyse")}</button>'
           + ((f.tentatives || []).length ? '<span class="aide">' + f.tentatives.length + ' ${T("lecture(s) précédente(s) gardée(s)")}</span>' : '') + '</div></div>' : '')
       + '</div>';
@@ -920,7 +931,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var f = FORM, t = totalPct(), n = f.entretien.length;
     var pr = f.mode === 'inventaire' ? (f.produit ? f.produit.nom : '') : String(f.nomProvisoire || '').trim();
     var ligne = function(okk, txt){ return '<div class="manque ' + (okk ? 'bon' : 'attn') + '">' + (okk ? '✓ ' : '• ') + txt + '</div>'; };
-    return '<div class="cx-carte cote"><h2>${T("Aperçu de l’étiquette")} <span class="cx-sub">50 × 30 mm</span></h2>'
+    /* (2026-11-01, sa demande) L ÉTIQUETTE DU NUMÉRO, DÈS LE DÉBUT : une analyse neuve n a pas de numéro avant
+       d être enregistrée ; « Réserver » la crée vide et imprime aussitôt l étiquette temporaire (« ANALYSE DE
+       FIBRES » et le numéro), à coller sur le vêtement. Une fois l analyse complète, l étiquette avec la
+       composition et la température de presse la remplace (proposée à l enregistrement). */
+    var numero = !f.id
+      ? '<div class="boutons"><button type="button" id="f-reserver" title="${T("Donne tout de suite son numéro à l’analyse et imprime une petite étiquette à coller sur le vêtement. Le reste se remplit ensuite, comme d’habitude.")}">${T("Réserver le numéro et imprimer l’étiquette")}</button></div>'
+      : (f.reserve ? '<div class="boutons"><span class="aide gauche">${T("Analyse")} <strong>' + esc(f.no) + '</strong> · ${T("numéro réservé")}</span><button type="button" class="mini" data-temp="' + esc(f.id) + '">${T("Réimprimer l’étiquette")}</button></div>' : '');
+    return '<div class="cx-carte cote">' + numero + '<h2>${T("Aperçu de l’étiquette")} <span class="cx-sub">50 × 30 mm</span></h2>'
       + '<div class="apercu"><canvas id="cv-form" width="360" height="216" style="width:360px;height:216px" role="img" aria-label="${T("Aperçu de l’étiquette")}"></canvas></div>'
       + '<div class="manques">'
       + ligne(t === 100, t === 100 ? '${T("Composition : 100 %")}' : '${T("Composition à confirmer")}' + (t ? ' (' + t + ' %)' : ''))
@@ -965,7 +983,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   /* Une lecture qui NE CONCLUT PAS (sa règle des 95 %). Une ancienne lecture, d avant la certitude, n en a pas : rien. */
   var SEUIL = 95;
-  function nonConcluante(l){ return !!l && l.concluante === false && l.certitude != null && !!(l.raison || l.conseil || l.certitude > 0 || !l.principale); }
+  function nonConcluante(l){ return !!l && l.concluante === false && l.certitude != null && !!(l.raison || l.conseil || (l.corriger || []).length || l.certitude > 0 || !l.principale); }
   /* « 100 % fibres mixtes », et l entretien des fibres que l analyse a quand même reconnues (le site en décide). */
   function passerEnMixte(){
     FORM.composition = [{ fibre: 'mixte', pct: '100' }];
@@ -1009,6 +1027,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('fibres:etiquetteTemp', [id, 1]).then(function(r){
       if (!r || !r.ok) { szDire(r && r.motif === 'imprimante' ? '${T("Aucune imprimante de codes-barres n’est choisie pour ce poste (Configuration › Imprimantes).")}' : expliquer(r), 'err'); return; }
       szDire('${T("Étiquette temporaire envoyée à")} ' + (r.imprimante || '${T("l’imprimante")}') + '.', 'bon');
+    });
+  }
+  function reserver(b){
+    if (!FORM || FORM.id) return;
+    if (b) b.disabled = true;
+    szDire('${T("Réservation du numéro…")}');
+    appeler('fibres:reserver', []).then(function(r){
+      if (b) b.disabled = false;
+      if (!r || !r.ok) { szDire(expliquer(r), 'err'); return; }
+      if (!FORM || FORM.id) return;
+      FORM.id = r.id; FORM.no = r.no; FORM.reserve = true; CHOIX = r.id;
+      majCote();
+      etiquetteTemp(r.id);
     });
   }
   function scanner(code){
@@ -1399,11 +1430,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (!s.composition.length) msg += ' ${T("Elle reste « à confirmer » tant que la composition n’est pas saisie.")}';
       szDire(msg, r.fiche && !r.fiche.ok ? 'att' : 'bon');
       var neuve = !FORM.id;
+      /* Un numéro réservé (étiquette du numéro déjà collée) qui reçoit sa composition : l étiquette complète la remplace. */
+      var completee = !!(FORM.reserve && s.composition.length && r.id);
       CHOIX = r.id || CHOIX; FORM = null; VUE = 'banque'; charger().then(function(){
         if (CHOIX) choisir(CHOIX);
         /* Sa demande : une petite étiquette au numéro de l analyse, collée sur le vêtement tout de suite. */
         if (neuve && r.id) szConfirmer({ titre: '${T("Étiquette temporaire")}',
           texte: '${T("Imprimer l’étiquette de l’analyse")} ' + (r.no || '') + ' ${T("sur l’imprimante de codes-barres, pour la coller sur le vêtement en attendant l’étiquette thermocollante ?")}',
+          oui: '${T("Imprimer l’étiquette")}' }).then(function(ok){ if (ok) etiquetteTemp(r.id); });
+        else if (completee) szConfirmer({ titre: '${T("Étiquette temporaire")}',
+          texte: '${T("L’analyse")} ' + (r.no || '') + ' ${T("est complète. Imprimer l’étiquette avec la composition et la température de presse, pour remplacer celle du numéro ?")}',
           oui: '${T("Imprimer l’étiquette")}' }).then(function(ok){ if (ok) etiquetteTemp(r.id); });
       });
     });
@@ -1516,6 +1552,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       }
       if (t.id === 'f-changer') { ramasser(); FORM.produit = null; RES = null; dessiner(); var ch = document.getElementById('f-chercher'); if (ch) ch.focus(); return; }
       if (t.id === 'f-ok') { enregistrer(t); return; }
+      if (t.id === 'f-reserver') { reserver(t); return; }
       if ((x = t.closest('[data-etape]'))) { if (x.disabled) return; ramasser(); var ne = parseInt(x.getAttribute('data-etape'), 10) || 1; if (!etapeOuverte(ne)) return; ETAPE = ne; RES = null; dessiner(); return; }
       if (t.id === 'f-suiv') { ramasser(); if (!etapeOuverte(ETAPE + 1)) { szDire(raisonFermee(ETAPE + 1), 'att'); return; } ETAPE = Math.min(3, ETAPE + 1); RES = null; dessiner(); return; }
       if (t.id === 'f-prec') { ramasser(); ETAPE = Math.max(1, ETAPE - 1); RES = null; dessiner(); return; }

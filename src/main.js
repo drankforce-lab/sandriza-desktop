@@ -3212,7 +3212,7 @@ const OPS_PONT = new Set([
   // LECTURE ; `fibres:apercu` et `fibres:planche` composent sans ecrire ; `fibres:analyser` porte les photos.
   'fibres:donnees', 'fibres:produits', 'fibres:apercu', 'fibres:analyser', 'fibres:ecrire', 'fibres:supprimer', 'fibres:imprimee', 'fibres:planche',
   // (2026-10-25) L étiquette temporaire (imprimante de codes-barres) et le scan d une étiquette d analyse.
-  'fibres:etiquetteTemp', 'fibres:scanner',
+  'fibres:etiquetteTemp', 'fibres:scanner', 'fibres:reserver',
   // Rappels (fenetre Rappels, 2026-10-02). ⚠ `rappels:etat` sert AUSSI au
   // processus principal : c est lui que src/rappels-notif.js interroge pour
   // les notifications de bureau, par la meme porte (executerOpSite).
@@ -3927,7 +3927,7 @@ const LIMITES_PONT = {
      le modele (jusqu a 90 s chez le relais) ; une impression note chaque analyse puis l historique. */
   'fibres:donnees': 15000, 'fibres:produits': 15000, 'fibres:apercu': 15000, 'fibres:planche': 15000,
   'fibres:analyser': 150000, 'fibres:ecrire': 30000, 'fibres:supprimer': 30000, 'fibres:imprimee': 60000,
-  'fibres:etiquetteTemp': 60000, 'fibres:scanner': 15000,
+  'fibres:etiquetteTemp': 60000, 'fibres:scanner': 15000, 'fibres:reserver': 30000,
   /* Les rapports d encan : la séance part au nuage ; la lecture des rapports relit les ventes au serveur. */
   'encan:seance': 30000, 'encanrapports:donnees': 45000,
   /* Les rappels se lisent en local ; les ecritures passent par le nuage. */

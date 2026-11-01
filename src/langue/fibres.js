@@ -309,4 +309,16 @@ module.exports = {
   'types de fibres distincts vus :': 'distinct fibre types seen:',
   'Plusieurs types de fibres repris : saisissez la part de chacun avec la fiche du fournisseur (total 100 %).':
     'Several fibre types carried over: enter the share of each from the supplier sheet (total 100%).',
+  /* (2026-11-01) L étiquette du numéro, dès le début de l analyse */
+  'Analyse': 'Analysis',
+  'Numéro réservé': 'Number reserved',
+  'numéro réservé': 'number reserved',
+  'Réserver le numéro et imprimer l’étiquette': 'Reserve the number and print the label',
+  'Donne tout de suite son numéro à l’analyse et imprime une petite étiquette à coller sur le vêtement. Le reste se remplit ensuite, comme d’habitude.':
+    'Gives the analysis its number right away and prints a small label to stick on the garment. The rest is filled in afterwards, as usual.',
+  'Réimprimer l’étiquette': 'Reprint the label',
+  'Réservation du numéro…': 'Reserving the number…',
+  'Ce qui manque pour atteindre': 'What is missing to reach',
+  'est complète. Imprimer l’étiquette avec la composition et la température de presse, pour remplacer celle du numéro ?':
+    'is complete. Print the label with the composition and the press temperature, to replace the number label?',
 };
