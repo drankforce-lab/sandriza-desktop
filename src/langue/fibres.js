@@ -305,4 +305,8 @@ module.exports = {
   'Cette analyse a des changements non enregistrés (lecture de l’IA, composition, entretien ou photos). Les quitter les perdra.': 'This analysis has unsaved changes (AI reading, composition, care or photos). Leaving will discard them.',
   'Quitter sans enregistrer': 'Leave without saving',
   'Lecture terminée, mais l’analyse a été fermée entre-temps.': 'Reading finished, but the analysis was closed in the meantime.',
+  /* (2026-11-01) Plusieurs types de fibres sur la même lame */
+  'types de fibres distincts vus :': 'distinct fibre types seen:',
+  'Plusieurs types de fibres repris : saisissez la part de chacun avec la fiche du fournisseur (total 100 %).':
+    'Several fibre types carried over: enter the share of each from the supplier sheet (total 100%).',
 };

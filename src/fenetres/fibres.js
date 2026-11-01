@@ -825,6 +825,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       h += '<div class="estim"><span class="lbl">${T("ESTIMATION")}</span><strong>' + esc(l.principale ? nomFibre(l.principale) : '${T("indéterminée")}') + '</strong>'
         + '<span class="aide">' + (l.certitude != null ? '${T("certitude :")} ' + esc(String(l.certitude)) + ' %' : '${T("confiance :")} ' + esc(CONF[l.confiance] || '')) + (l.possibles && l.possibles.length ? ' · ${T("aussi vu :")} ' + esc(l.possibles.map(nomFibre).join(', ')) : '') + '</span>'
         + (l.principale ? '<button type="button" class="mini" id="f-utiliser" style="margin-left:auto">${T("Utiliser l’estimation")}</button>' : '') + '</div>'
+        /* (2026-11-01, sa demande) PLUSIEURS TYPES DE FIBRES SUR LA MÊME LAME (corps + poignet, un amas qui diffère…) :
+           chacun avec SA certitude et l indice qui l a fait reconnaître. Ils ne rendent pas la lecture non concluante. */
+        + ((l.distinctes || []).length >= 2 ? '<div class="aide" style="margin-top:.45rem"><strong>' + l.distinctes.length + ' ${T("types de fibres distincts vus :")}</strong> '
+          + l.distinctes.map(function(d){ return '<span title="' + esc(d.indice || '') + '">' + esc(nomFibre(d.fibre)) + ' · ' + esc(String(d.certitude)) + ' %</span>'; }).join(' — ')
+          + '</div>' : '')
         + (l.le ? '<div class="aide" style="margin-top:.5rem">${T("Lue le")} ' + esc(szQuand(l.le)) + (l.cout ? ' · ' + szArgent(l.cout) : '') + ' · ${T("photos effacées après la lecture")}</div>' : '');
     }
     return h + '</div></div>';
@@ -1472,10 +1477,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (t.id === 'f-utiliser' && FORM.lecture) {
         ramasser();
         var l = FORM.lecture;
-        FORM.composition = [{ fibre: l.principale, pct: String(100) }].concat((l.possibles || []).map(function(k){ return { fibre: k, pct: '' }; }));
+        var plusieurs = (l.distinctes || []).length >= 2;
+        // Plusieurs types distincts : chacun sa ligne, pourcentages À SAISIR (l IA ne pèse rien) — pas 100 % au premier.
+        FORM.composition = plusieurs
+          ? l.distinctes.map(function(d){ return { fibre: d.fibre, pct: '' }; })
+          : [{ fibre: l.principale, pct: String(100) }].concat((l.possibles || []).map(function(k){ return { fibre: k, pct: '' }; }));
         if (!FORM.entretien.length) FORM.entretien = [];
         ETAPE = 2; dessiner(); redemanderApercu();
-        szDire('${T("Estimation reprise : ajustez les pourcentages avec la fiche du fournisseur.")}', 'att');
+        szDire(plusieurs ? '${T("Plusieurs types de fibres repris : saisissez la part de chacun avec la fiche du fournisseur (total 100 %).")}'
+          : '${T("Estimation reprise : ajustez les pourcentages avec la fiche du fournisseur.")}', 'att');
         return;
       }
       if (t.id === 'f-ajfib') { ramasser(); FORM.composition.push({ fibre: '', pct: '' }); dessiner(); var nf = document.getElementById('f-fib-' + (FORM.composition.length - 1)); if (nf) nf.focus(); return; }
