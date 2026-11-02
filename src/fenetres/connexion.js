@@ -70,6 +70,9 @@ html,body,#corps{height:100%}
 .admlogin-brand{min-height:0}
 .admlogin-form-panel{min-height:0;overflow-y:auto}
 .admlogin-form-panel{justify-content:flex-start}
+/* Logo agrandi (2026-11-02, sa demande : « on ne le voit pas assez ») — 340 → jusqu a 480 px, la plaque serrée. */
+.admlogin-brand-inner{max-width:560px}
+.admlogin-logo-plate{padding:1.2rem 1.4rem}
 .admlogin-formwrap{margin:auto 0}
 /* Le casse-tete a glissiere. Dans le web il est habille de styles en ligne ;
    ici il a ses regles, et elles disent la meme chose. */
@@ -578,7 +581,7 @@ ${JS_DIRE()}
     var m = CTX.marque, t = CTX.theme;
     var logo = m.logo
       ? '<div class="admlogin-logo-plate"><img src="' + esc(m.logo) + '" alt="' + esc(m.nom)
-        + '" class="admlogin-logo-img" style="width:min(340px,70vw);height:auto"></div>'
+        + '" class="admlogin-logo-img" style="width:min(480px,calc(46vw - 7rem),80vw);height:auto"></div>'
       : '<div class="admlogin-logo-badge" style="background:linear-gradient(135deg,'
         + t.logoFrom + ',' + t.logoTo + ')">' + esc(m.lettre) + '</div>';
     var nom = m.logo ? '' : '<h1>' + esc(m.nom) + '</h1>';
