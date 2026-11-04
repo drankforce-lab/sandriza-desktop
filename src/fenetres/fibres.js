@@ -370,7 +370,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   /* La police de l étiquette : celle de la fenêtre (Segoe UI sur Windows), lue au rendu. */
   /* La police du petit logo : un NOM DE POLICE, pas un texte (rien à traduire). */
-  var SZ_DONNEES = { serif: 'Georgia,"Times New Roman",serif' };
+  /* (2026-11-04) Le NOM des gabarits « fibres mixtes » aussi : le nom provisoire enregistré, qui les retrouve. */
+  var SZ_DONNEES = { serif: 'Georgia,"Times New Roman",serif',
+    gabFonce: 'Gabarit — 100 % fibres mixtes (vêtement foncé)', gabPale: 'Gabarit — 100 % fibres mixtes (vêtement pâle)' };
   var POLICE = (window.getComputedStyle && document.body && getComputedStyle(document.body).fontFamily) || 'sans-serif';
   function ajuster(ctx, txt, poids, taille, max){
     ctx.font = poids + ' ' + taille + 'px ' + POLICE;
@@ -575,6 +577,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var n = nbCoches();
       h += '<button type="button" data-act="planche"' + (n ? '' : ' disabled') + ' title="${T("Cochez des analyses confirmées pour les mettre sur une planche")}">'
         + '${T("Générer une planche")}' + (n ? ' (' + n + ')' : '') + '</button>';
+      /* (2026-11-04, sa demande) Des pages PLEINES « 100 % fibres mixtes », sans analyse : une foncée, une pâle. */
+      if (PA || (gabarit('fonce') && gabarit('pale'))) h += '<button type="button" data-act="mixtes" title="${T("Une feuille pleine pour vêtements foncés et une pour vêtements pâles, sans analyse")}">${T("Pages pleines « fibres mixtes »")}</button>';
       h += '<button type="button" data-act="historique">${T("Historique d’impression")}</button>';
       if (PA) h += '<button type="button" class="prim" data-act="nouvelle">${T("+ Nouvelle analyse")}</button>';
     } else {
@@ -1065,6 +1069,52 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     ((D && D.analyses) || []).forEach(function(a){ if (COCHES[a.id]) PL.lignes.push({ id: a.id, taille: '', n: 1 }); });
     redemanderPlanche();
   }
+  /* ── LES PAGES PLEINES « 100 % FIBRES MIXTES » (2026-11-04, sa demande) ──────
+     L analyse par photo ne dépasse pas 55 % chez elle : en attendant, des feuilles
+     PLEINES « 100 % FIBRES MIXTES / MIXED FIBRES » (art. 32, légal), une pour les
+     vêtements foncés (papier opaque) et une pour les pâles (transparent, miroir).
+     Deux GABARITS — des analyses ordinaires au nom provisoire fixe, créées au
+     premier clic puis réutilisées — passent par la même planche, le même export
+     et le même historique que les vraies analyses. Entretien : celui que le site
+     propose pour des fibres inconnues (le plus doux). */
+  var GABARITS = { fonce: SZ_DONNEES.gabFonce, pale: SZ_DONNEES.gabPale };
+  function gabarit(fd){
+    var L = (D && D.analyses) || [];
+    for (var i = 0; i < L.length; i++) if (L[i].nomProvisoire === GABARITS[fd] && L[i].fond === fd && L[i].etat === 'confirmee') return L[i];
+    return null;
+  }
+  function parFeuille(mode){
+    var L = (D && D.modes) || [];
+    for (var i = 0; i < L.length; i++) if (L[i].cle === mode && L[i].parFeuille > 0) return L[i].parFeuille;
+    return mode === 'ciseaux' ? 32 : 21;
+  }
+  function creerGabarit(fd){
+    var s = { composition: [{ fibre: 'mixte', pct: 100 }], entretien: [], fond: fd, pays: (D && D.paysDefaut) || 'CN',
+      produitId: '', nomProvisoire: GABARITS[fd], remarque: '${T("Gabarit des pages pleines « fibres mixtes », sans analyse.")}' };
+    return appeler('fibres:apercu', [s, '']).then(function(r){
+      if (r && r.ok && r.propose && r.propose.length) s.entretien = r.propose.slice();
+      return appeler('fibres:ecrire', [s]);
+    });
+  }
+  function pagesMixtes(b){
+    var manque = ['fonce', 'pale'].filter(function(fd){ return !gabarit(fd); });
+    if (manque.length && !PA) { szDire('${T("Votre rôle ne permet pas de créer les gabarits « fibres mixtes ».")}', 'err'); return; }
+    if (b) b.disabled = true;
+    if (manque.length) szDire('${T("Préparation des gabarits « fibres mixtes »…")}');
+    manque.reduce(function(p, fd){ return p.then(function(r){ return (r && !r.ok) ? r : creerGabarit(fd); }); }, Promise.resolve(null)).then(function(r){
+      if (r && !r.ok) { if (b) b.disabled = false; szDire(expliquer(r), 'err'); return; }
+      return (manque.length ? charger() : Promise.resolve()).then(function(){
+        if (b) b.disabled = false;
+        var mode = 'cricut'; try { if (localStorage.getItem('sz-fibres-mode') === 'ciseaux') mode = 'ciseaux'; } catch (e) {}
+        VUE = 'planche';
+        PL = { mode: mode, lignes: [], sauter: { fonce: [], pale: [] }, R: null, vue: 0, gabarit: true };
+        ['fonce', 'pale'].forEach(function(fd){ var a = gabarit(fd); if (a) PL.lignes.push({ id: a.id, taille: '', n: parFeuille(mode) }); });
+        if (PL.lignes.length < 2) { szDire('${T("Les gabarits « fibres mixtes » n’ont pas pu être relus. Réessayez.")}', 'err'); }
+        else szDire('${T("Deux pages pleines prêtes : une pour vêtements foncés, une pour vêtements pâles. Mettez la quantité à 0 pour n’en garder qu’une.")}', 'bon');
+        outils(); dessiner(); redemanderPlanche();
+      });
+    });
+  }
   var _tP = null;
   function redemanderPlanche(){
     clearTimeout(_tP);
@@ -1466,6 +1516,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (act === 'banque') { ramasser(); quitterAnalyse(); return; }
       if (act === 'planche') { ouvrirPlanche(); dessiner(); return; }
       if (act === 'historique') { VUE = 'historique'; HPG = 0; dessiner(); return; }
+      if (act === 'mixtes') { pagesMixtes(a); return; }
     }
     var x;
     if ((x = t.closest('[data-filtre]'))) { FILTRE = x.getAttribute('data-filtre'); PG = 0; dessiner(); return; }
@@ -1563,7 +1614,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if ((x = t.closest('[data-moins]'))) { ramasser(); var lm = PL.lignes[+x.getAttribute('data-moins')]; if (lm) lm.n = Math.max(0, lm.n - 1); dessiner(); redemanderPlanche(); return; }
       if ((x = t.closest('[data-otlot]'))) { ramasser(); PL.lignes.splice(+x.getAttribute('data-otlot'), 1); dessiner(); redemanderPlanche(); return; }
       if ((x = t.closest('[data-dup]'))) { ramasser(); var ld = PL.lignes[+x.getAttribute('data-dup')]; if (ld) PL.lignes.splice(+x.getAttribute('data-dup') + 1, 0, { id: ld.id, taille: '', n: 1 }); dessiner(); redemanderPlanche(); return; }
-      if ((x = t.closest('[data-modepl]'))) { ramasser(); PL.mode = x.getAttribute('data-modepl'); PL.sauter = { fonce: [], pale: [] }; try { localStorage.setItem('sz-fibres-mode', PL.mode); } catch (e2) {} redemanderPlanche(); return; }
+      if ((x = t.closest('[data-modepl]'))) { ramasser(); var avantN = parFeuille(PL.mode); PL.mode = x.getAttribute('data-modepl');
+        /* Pages pleines : une ligne qui remplissait la feuille la remplit encore dans l autre découpe (21 ↔ 32). */
+        if (PL.gabarit) PL.lignes.forEach(function(l){ if (l.n === avantN) l.n = parFeuille(PL.mode); }); PL.sauter = { fonce: [], pale: [] }; try { localStorage.setItem('sz-fibres-mode', PL.mode); } catch (e2) {} redemanderPlanche(); return; }
       if ((x = t.closest('[data-vue]'))) { PL.vue = +x.getAttribute('data-vue'); dessiner(); return; }
       if (t.id === 'cv-plan') { clicPlan(ev); return; }
       if (t.id === 'pl-export') { ramasser(); exporter(t); return; }
