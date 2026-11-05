@@ -2604,6 +2604,8 @@ const OPS_PONT = new Set([
   'encan:vendre', 'encan:gagne', 'encan:annuler', 'encan:etat',
   // (2026-10-25, lot 4) La séance enregistrée par le processus principal, et la fenêtre des rapports.
   'encan:seance', 'encanrapports:donnees',
+  // (8.28.0) Les questions sur les produits : la file, répondre, publier ou masquer, supprimer.
+  'questions:donnees', 'questions:repondre', 'questions:statut', 'questions:supprimer',
   'caisse:contexte', 'caisse:chercher', 'caisse:article',
   'caisse:totaux', 'caisse:client', 'caisse:vendre',
   /* Verifier a la main un paiement par LIEN. ⚠ Ce recours n existait que dans
@@ -3930,6 +3932,8 @@ const LIMITES_PONT = {
   'fibres:etiquetteTemp': 60000, 'fibres:scanner': 15000, 'fibres:reserver': 30000,
   /* Les rapports d encan : la séance part au nuage ; la lecture des rapports relit les ventes au serveur. */
   'encan:seance': 30000, 'encanrapports:donnees': 45000,
+  /* Les questions sur les produits : la lecture est locale ; une écriture attend le verdict du serveur. */
+  'questions:donnees': 15000, 'questions:repondre': 30000, 'questions:statut': 30000, 'questions:supprimer': 30000,
   /* Les rappels se lisent en local ; les ecritures passent par le nuage. */
   'rappels:donnees': 15000, 'rappels:etat': 15000,
   'rappels:ecrire': 30000, 'rappels:modele': 30000, 'rappels:fait': 30000,
@@ -7028,6 +7032,7 @@ const { pageRappels } = require('./fenetres/rappels');
 const { pageAtelier } = require('./fenetres/atelier');
 const { pageFibres } = require('./fenetres/fibres');
 const { pageEncanRapports } = require('./fenetres/encan-rapports');
+const { pageQuestions } = require('./fenetres/questions');
 const { pageLiens } = require('./fenetres/liens');
 const { pageComptable } = require('./fenetres/comptable');
 const { pageInactivite } = require('./fenetres/inactivite');
@@ -7237,6 +7242,11 @@ const actionApp = (nom, arg) => {
         { width: 1000, height: 720, minWidth: 620, minHeight: 480 });
       break;
     // (2026-10-25, lot 4) Les rapports d'encan : une séance par direct, et la comparaison entre séances.
+    // (8.28.0) Les questions posées sur les fiches : répondre, publier, masquer.
+    case 'questions':
+      ouvrirNative('questions', TF('Questions sur les produits'), () => pageQuestions(''),
+        { width: 1200, height: 780, minWidth: 820, minHeight: 560 });
+      break;
     case 'encan-rapports':
       ouvrirNative('encan-rapports', TF('Rapports d’encan'), () => pageEncanRapports(''),
         { width: 1280, height: 820, minWidth: 900, minHeight: 600 });

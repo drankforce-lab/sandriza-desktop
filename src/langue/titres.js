@@ -57,6 +57,7 @@ module.exports = {
   'Affichage client': 'Customer display',
   'Encan en direct': 'Live auction',
   'Rapports d’encan': 'Auction reports',
+  'Questions sur les produits': 'Product questions',
   'Écran de l’encan': 'Auction screen',
   'Notes des mises à jour': 'Release notes',
 

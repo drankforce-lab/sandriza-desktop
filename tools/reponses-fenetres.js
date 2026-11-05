@@ -4011,6 +4011,20 @@ const JEU = {
 
   // ── RAPPORTS D'ENCAN (2026-10-25, lot 4) ───────────────────────────────────
   // ⚠ Forme rendue par encanrapports:donnees (assets/js/pont.js) = EncanRapports.calculer (assets/js/encanrapports.js).
+  // (8.28.0) Les questions sur les produits : trois en attente (une longue), une publiée, et les droits complets.
+  'questions.js': {
+    'questions:donnees': { ok: true, filtre: 'attente', comptes: { attente: 3, publiee: 1, masquee: 0, toutes: 4 },
+      peutEcrire: true, peutSupprimer: true,
+      questions: [
+        { id: 'q_01', statut: 'attente', question: 'Est-ce que la robe est doublée ? Je la voudrais pour un mariage en octobre.', nom: 'Julie',
+          produit: 'Robe cintrée', sku: 'ROB-0001', image: '', creeLe: '2026-11-03T14:20:00.000Z', reponse: '', reponduLe: '', reponduPar: '' },
+        { id: 'q_02', statut: 'attente', question: 'Bonjour, je porte habituellement un 8 dans les marques européennes et un M chez la plupart des boutiques québécoises : quelle taille me conseillez-vous pour ce chemisier, qui semble assez ajusté aux épaules sur les photos ?', nom: 'Anne-Marie',
+          produit: 'Chemisier de soie', sku: 'HAU-0007', image: '', creeLe: '2026-11-04T09:05:00.000Z', reponse: 'Nous conseillons le M.', reponduLe: '', reponduPar: '' },
+        { id: 'q_03', statut: 'attente', question: 'Va-t-il revenir en noir ?', nom: 'Sophie',
+          produit: 'Manteau long en laine', sku: 'MAN-0003', image: '', creeLe: '2026-11-05T08:00:00.000Z', reponse: '', reponduLe: '', reponduPar: '' },
+      ] },
+    'questions:repondre': { ok: true }, 'questions:statut': { ok: true }, 'questions:supprimer': { ok: true },
+  },
   'encan-rapports.js': (function(){
     var T0 = Date.UTC(2026, 9, 24, 23, 0, 0), H = 3600000;
     var rap = function(id, debut, o){
