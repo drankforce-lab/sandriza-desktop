@@ -2606,6 +2606,8 @@ const OPS_PONT = new Set([
   'encan:seance', 'encanrapports:donnees',
   // (8.28.0) Les questions sur les produits : la file, répondre, publier ou masquer, supprimer.
   'questions:donnees', 'questions:repondre', 'questions:statut', 'questions:supprimer',
+  // (8.29.0) L'analyse des produits : la prévision de réapprovisionnement et la rentabilité.
+  'analyse:reappro', 'analyse:rentabilite',
   'caisse:contexte', 'caisse:chercher', 'caisse:article',
   'caisse:totaux', 'caisse:client', 'caisse:vendre',
   /* Verifier a la main un paiement par LIEN. ⚠ Ce recours n existait que dans
@@ -3934,6 +3936,8 @@ const LIMITES_PONT = {
   'encan:seance': 30000, 'encanrapports:donnees': 45000,
   /* Les questions sur les produits : la lecture est locale ; une écriture attend le verdict du serveur. */
   'questions:donnees': 15000, 'questions:repondre': 30000, 'questions:statut': 30000, 'questions:supprimer': 30000,
+  /* L'analyse des produits : un calcul local sur toutes les commandes (10 000 au besoin). */
+  'analyse:reappro': 30000, 'analyse:rentabilite': 30000,
   /* Les rappels se lisent en local ; les ecritures passent par le nuage. */
   'rappels:donnees': 15000, 'rappels:etat': 15000,
   'rappels:ecrire': 30000, 'rappels:modele': 30000, 'rappels:fait': 30000,
@@ -7033,6 +7037,7 @@ const { pageAtelier } = require('./fenetres/atelier');
 const { pageFibres } = require('./fenetres/fibres');
 const { pageEncanRapports } = require('./fenetres/encan-rapports');
 const { pageQuestions } = require('./fenetres/questions');
+const { pageAnalyse } = require('./fenetres/analyse');
 const { pageLiens } = require('./fenetres/liens');
 const { pageComptable } = require('./fenetres/comptable');
 const { pageInactivite } = require('./fenetres/inactivite');
@@ -7246,6 +7251,15 @@ const actionApp = (nom, arg) => {
     case 'questions':
       ouvrirNative('questions', TF('Questions sur les produits'), () => pageQuestions(''),
         { width: 1200, height: 780, minWidth: 820, minHeight: 560 });
+      break;
+    // (8.29.0) L'analyse des produits : une fenêtre, deux portes (l'onglet ouvert d'abord).
+    case 'reappro':
+      ouvrirNative('reappro', TF('Prévision de réapprovisionnement'), () => pageAnalyse('reappro'),
+        { width: 1320, height: 820, minWidth: 900, minHeight: 600 });
+      break;
+    case 'rentabilite':
+      ouvrirNative('rentabilite', TF('Rentabilité par produit'), () => pageAnalyse('rentabilite'),
+        { width: 1320, height: 820, minWidth: 900, minHeight: 600 });
       break;
     case 'encan-rapports':
       ouvrirNative('encan-rapports', TF('Rapports d’encan'), () => pageEncanRapports(''),

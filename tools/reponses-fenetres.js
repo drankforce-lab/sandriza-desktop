@@ -4011,6 +4011,27 @@ const JEU = {
 
   // ── RAPPORTS D'ENCAN (2026-10-25, lot 4) ───────────────────────────────────
   // ⚠ Forme rendue par encanrapports:donnees (assets/js/pont.js) = EncanRapports.calculer (assets/js/encanrapports.js).
+  // (8.29.0) L'analyse des produits : deux variantes à commander (une en précommande, une sans fournisseur) et une
+  // rentabilité avec un produit sans coût d'achat et une marge négative.
+  'analyse.js': {
+    'analyse:reappro': { ok: true, jours: 90, delai: 14, couverture: 30, peutCommander: true,
+      resume: { variantes: 3, ruptures: 1, unites: 17, cout: 412.5 },
+      lignes: [
+        { productId: 'p_0001', cle: 'G-Noir', nom: 'Robe cintrée', sku: 'ROB-0001-G-NOI', taille: 'G', couleur: 'Noir', vendus: 12, parJour: 0.13, stock: -3, enCommande: 0, joursRestants: null, urgence: 'rupture', quantite: 9, cout: 48, fournisseurId: 'sup_0001', precommande: true },
+        { productId: 'p_0002', cle: 'M-Ivoire', nom: 'Chemisier de soie à manches bouffantes et col lavallière', sku: 'HAU-0007-M-IVO', taille: 'M', couleur: 'Ivoire', vendus: 9, parJour: 0.1, stock: 2, enCommande: 1, joursRestants: 20, urgence: 'bientot', quantite: 3, cout: 22.5, fournisseurId: 'sup_0001', precommande: false },
+        { productId: 'p_0003', cle: 'P-Camel', nom: 'Manteau long en laine', sku: 'MAN-0003-P-CAM', taille: 'P', couleur: 'Camel', vendus: 6, parJour: 0.07, stock: 1, enCommande: 0, joursRestants: 15, urgence: 'urgent', quantite: 5, cout: 0, fournisseurId: '', precommande: false },
+      ],
+      groupes: [ { fournisseurId: 'sup_0001', fournisseurNom: 'Tissus Laurentides', lignes: [], total: 499.5, unites: 12 },
+                 { fournisseurId: '', fournisseurNom: '', lignes: [], total: 0, unites: 5 } ] },
+    'analyse:rentabilite': { ok: true, jours: 90, csv: 'Produit;SKU',
+      produits: [
+        { productId: 'p_0001', nom: 'Robe cintrée', sku: 'ROB-0001', actif: true, sansCout: false, unites: 18, retours: 2, brut: 2339.1, rabais: 120.4, rembourse: 246.5, revenu: 1972.2, coutUnitaire: 48, cout: 768, marge: 1204.2, margePct: 61.1, tauxRetour: 11.1 },
+        { productId: 'p_0002', nom: 'Chemisier de soie à manches bouffantes et col lavallière', sku: 'HAU-0007', actif: true, sansCout: false, unites: 4, retours: 3, brut: 359.8, rabais: 0, rembourse: 269.85, revenu: 89.95, coutUnitaire: 120, cout: 120, marge: -30.05, margePct: -33.4, tauxRetour: 75 },
+        { productId: 'p_0003', nom: 'Manteau long en laine', sku: 'MAN-0003', actif: false, sansCout: true, unites: 2, retours: 0, brut: 498, rabais: 24.9, rembourse: 0, revenu: 473.1, coutUnitaire: 0, cout: 0, marge: null, margePct: null, tauxRetour: 0 },
+      ],
+      total: { produits: 3, unites: 24, brut: 3196.9, rabais: 145.3, rembourse: 516.35, revenu: 2535.25, cout: 888, marge: 1174.15, margePct: 46.3, sansCout: 1 } },
+    'bc:creerGroupes': { ok: true, faits: [{ id: 'bc_1', numero: 'BCF-2026-0012', fournisseur: 'Tissus Laurentides' }], refus: [] },
+  },
   // (8.28.0) Les questions sur les produits : trois en attente (une longue), une publiée, et les droits complets.
   'questions.js': {
     'questions:donnees': { ok: true, filtre: 'attente', comptes: { attente: 3, publiee: 1, masquee: 0, toutes: 4 },

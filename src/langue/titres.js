@@ -58,6 +58,8 @@ module.exports = {
   'Encan en direct': 'Live auction',
   'Rapports d’encan': 'Auction reports',
   'Questions sur les produits': 'Product questions',
+  'Prévision de réapprovisionnement': 'Restock forecast',
+  'Rentabilité par produit': 'Profitability by product',
   'Écran de l’encan': 'Auction screen',
   'Notes des mises à jour': 'Release notes',
 
