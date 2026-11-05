@@ -112,7 +112,7 @@ function pageCollection(id) {
       + '${T("L’image est déposée dans le stockage au moment de l’enregistrement, comme partout ailleurs dans l’administration. Maximum 8 Mo.")}'
       + '</div>'
       + '</div></div></div>'
-      /* LE LANCEMENT (8.30.0, sa demande du 2026-11-05) : l ouverture à heure fixe, avec sa page de compte à rebours et de
+      /* LE LANCEMENT (8.29.0, sa demande du 2026-11-05) : l ouverture à heure fixe, avec sa page de compte à rebours et de
          liste d attente (#lancement?col=…) ; avant l heure, les articles de la collection sortent des listes de la boutique,
          sauf pour les paliers qui ont l accès anticipé quand la case est cochée. */
       + '<div class="carte"><h2>${T("Lancement")}</h2>'
@@ -135,7 +135,7 @@ function pageCollection(id) {
     var corpsEl = document.getElementById('corps');
     corpsEl.addEventListener('input', majFicheBientot);
     corpsEl.addEventListener('change', majFicheBientot);
-    /* (8.30.0) Le lancement : les champs ne servent que la case cochée ; le lien de la page se dit une fois la fiche enregistrée. */
+    /* (8.29.0) Le lancement : les champs ne servent que la case cochée ; le lien de la page se dit une fois la fiche enregistrée. */
     var majLn = function(){
       var on = !!(document.getElementById('c-ln') || {}).checked;
       ['c-ln-le', 'c-ln-ant', 'c-ln-txt', 'c-ln-txt-en'].forEach(function(i){ var e = document.getElementById(i); if (e) e.disabled = !on; });
@@ -152,7 +152,7 @@ function pageCollection(id) {
       poser('c-actif', fiche.active === false ? '0' : '1');
       if (fiche.coverImage) { IMAGE = fiche.coverImage; montrerImage(IMAGE); }
       (fiche.productIds || []).forEach(function(pid){ CHOISIS[pid] = true; });
-      // (8.30.0) Le lancement : l heure en ISO dans la fiche, affichée à l heure du poste.
+      // (8.29.0) Le lancement : l heure en ISO dans la fiche, affichée à l heure du poste.
       var L = fiche.lancement || null;
       document.getElementById('c-ln').checked = !!(L && L.actif);
       document.getElementById('c-ln-ant').checked = !!(L && L.anticipe);
@@ -201,7 +201,7 @@ function pageCollection(id) {
 
     Assist.poser([
       { t: '${T("La collection")}', obl: ['c-nom'] },
-      { t: '${T("Image et lancement")}', obl: [] },   // (8.30.0) le lancement vit sur cette étape
+      { t: '${T("Image et lancement")}', obl: [] },   // (8.29.0) le lancement vit sur cette étape
       { t: '${T("Produits")}',      obl: [] }
     ], function(i){ if (i === 2 && PAGI) PAGI.dessiner(); });
     majFiche();
@@ -379,11 +379,11 @@ function pageCollection(id) {
   });
   szBrouillonEcouter();
 
-  // (8.30.0) Le refus du site quand l heure du lancement n est pas une date.
+  // (8.29.0) Le refus du site quand l heure du lancement n est pas une date.
   MOTIFS.lancement_date = '${T("L’heure d’ouverture du lancement n’est pas une date valide.")}';
   function enregistrer(){
     if (!Assist.toutValide()) return;
-    // (8.30.0) Un lancement exige sa date et son heure.
+    // (8.29.0) Un lancement exige sa date et son heure.
     if ((document.getElementById('c-ln') || {}).checked && !val('c-ln-le')) { dire('${T("Indiquez la date et l’heure d’ouverture du lancement.")}', 'err'); return; }
     bEnr.disabled = true;
     dire(IMAGE && IMAGE.indexOf('data:') === 0 ? '${T("Dépôt de l’image et enregistrement…")}' : '${T("Enregistrement…")}');
@@ -395,7 +395,7 @@ function pageCollection(id) {
       active: val('c-actif') === '1',
       coverImage: IMAGE,
       productIds: Object.keys(CHOISIS).filter(function(k){ return CHOISIS[k]; }),
-      // (8.30.0) Le lancement : null = aucun ; l heure saisie (heure du poste) part en ISO.
+      // (8.29.0) Le lancement : null = aucun ; l heure saisie (heure du poste) part en ISO.
       lancement: (function(){
         if (!(document.getElementById('c-ln') || {}).checked) return null;
         var v = val('c-ln-le'); var d = v ? new Date(v) : null;

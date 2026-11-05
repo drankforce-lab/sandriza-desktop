@@ -112,7 +112,7 @@ module.exports = {
   'Nom': 'Name',
   'produits choisis': 'products selected',
   'produit choisi': 'product selected',
-  // Le lancement (8.30.0)
+  // Le lancement (8.29.0)
   'Lancement': 'Launch',
   'Image et lancement': 'Image and launch',
   'L’heure d’ouverture du lancement n’est pas une date valide.': 'The launch opening time is not a valid date.',

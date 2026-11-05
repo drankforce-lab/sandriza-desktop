@@ -68,6 +68,7 @@ button.danger{color:var(--tx-err2)}
 .pill.creditee{background:rgba(34,197,94,.14);color:var(--tx-ok)}
 .pill.refusee{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
 html.jour .pill.creditee{color:#1d5c33}
+html.jour .pill.acceptee{color:#66512f}
 .prod{display:flex;align-items:center;gap:.7rem}
 .prod .nm{font-weight:700}
 .prod .sk{font-size:.74rem;color:var(--tx2)}
