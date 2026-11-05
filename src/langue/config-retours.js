@@ -89,6 +89,6 @@ module.exports = {
   "Crédit boutique": "Store credit",
   "Une prime pour inviter le client à choisir le crédit plutôt que le remboursement.": "A bonus that invites the customer to choose store credit over a refund.",
   "Prime sur le crédit boutique (%)": "Store credit bonus (%)",
-  "Exemple : un retour de 100,00 $ remboursé en crédit donne un crédit de {0} $.": "Example: a $100.00 return refunded as credit gives a credit of ${0}.",
+  "Exemple : un retour de {0} remboursé en crédit donne un crédit de {1}.": "Example: a {0} return refunded as credit gives a credit of {1}.",
   "Aucune prime : le crédit vaut exactement le montant remboursé.": "No bonus: the credit equals the refunded amount.",
 };

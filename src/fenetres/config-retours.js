@@ -216,7 +216,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'f-name':80,'f-street':120,'f-city':60,
       var e = document.getElementById('f-bonus-ex'); if (!e || !fb) return;
       var v = Math.max(0, Math.min(50, parseInt(fb.value, 10) || 0));
       e.textContent = v > 0
-        ? '${T("Exemple : un retour de 100,00 $ remboursé en crédit donne un crédit de {0} $.")}'.replace('{0}', (100 + v).toFixed(2).replace('.', ','))
+        ? '${T("Exemple : un retour de {0} remboursé en crédit donne un crédit de {1}.")}'.replace('{0}', szArgent(100)).replace('{1}', szArgent(100 + v))
         : '${T("Aucune prime : le crédit vaut exactement le montant remboursé.")}';
     };
     if (fb) fb.oninput = majBonus;
