@@ -481,6 +481,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       ['${T("Total")}', argent(TOT.total)]];
     if (TOT.retenu) dtR.push(['${T("Frais retenus")}', argent(TOT.frais)], ['${T("Net au client")}', argent(TOT.net)]);
     dtR.push(['${T("Méthode")}', enCredit ? '${T("Crédit boutique (n’expire jamais)")}' : '${T("Moyen de paiement original (Square)")}']);
+    // (8.28.0) LA PRIME SUR LE CRÉDIT (Configuration › Retours) : dite avant de confirmer ; le serveur la calcule.
+    if (enCredit && TOT.prime > 0) dtR.push(['${T("Prime ({0} %)")}'.replace('{0}', String(TOT.primePct)), argent(TOT.prime)],
+      ['${T("Crédit au client")}', argent(Math.round((TOT.total + TOT.prime) * 100) / 100)]);
     szConfirmer({ prudent: true, titre: '${T("Rembourser le client")}',
       texte: '${T("Le client sera remboursé de")}' + ' ' + argent(aRendre) + ' '
         + (enCredit ? '${T("en crédit boutique ; un courriel lui sera envoyé avec le numéro du crédit.")}' : '${T("sur son moyen de paiement original, par Square.")}')

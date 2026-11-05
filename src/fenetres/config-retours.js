@@ -200,7 +200,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'f-name':80,'f-street':120,'f-city':60,
       + '<input id="f-ajseuil" type="number" min="1" max="50" step="1" value="' + esc(d.ajustementSeuil == null ? 3 : d.ajustementSeuil) + '"' + dis + '>'
       + '<div class="aide">${T("Au moins 60 % de ces retours doivent aller dans le même sens (taille au-dessus ou au-dessous).")}</div></div></div>');
 
+    /* LA PRIME SUR LE CRÉDIT BOUTIQUE (8.28.0, sa demande du 2026-11-05) : un remboursement versé en crédit vaut
+       X % de plus — de quoi préférer le crédit (et un autre article) au remboursement. 0 = aucune prime (le défaut).
+       C est le SERVEUR qui la calcule à la création du crédit ; la boutique l annonce dans la demande de retour. */
+    var pc = d.bonusCreditPct == null ? 0 : d.bonusCreditPct;
+    h.push('<div class="carte"><h2>${T("Crédit boutique")}</h2>'
+      + '<p class="sous">${T("Une prime pour inviter le client à choisir le crédit plutôt que le remboursement.")}</p>'
+      + '<div class="ch"><label for="f-bonus">${T("Prime sur le crédit boutique (%)")}</label>'
+      + '<input id="f-bonus" type="number" min="0" max="50" step="1" value="' + esc(pc) + '"' + dis + '>'
+      + '<div class="aide" id="f-bonus-ex"></div></div></div>');
+
     corps.innerHTML = h.join('');
+    var fb = document.getElementById('f-bonus');
+    var majBonus = function(){
+      var e = document.getElementById('f-bonus-ex'); if (!e || !fb) return;
+      var v = Math.max(0, Math.min(50, parseInt(fb.value, 10) || 0));
+      e.textContent = v > 0
+        ? '${T("Exemple : un retour de 100,00 $ remboursé en crédit donne un crédit de {0} $.")}'.replace('{0}', (100 + v).toFixed(2).replace('.', ','))
+        : '${T("Aucune prime : le crédit vaut exactement le montant remboursé.")}';
+    };
+    if (fb) fb.oninput = majBonus;
+    majBonus();
     var fd = document.getElementById('f-days');
     if (fd) fd.oninput = majMoitie;
     bsave.disabled = RO || OCCUPE;
@@ -212,7 +232,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'f-name':80,'f-street':120,'f-city':60,
     var val = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
     OCCUPE = true; bsave.disabled = true; dire('${T("Enregistrement…")}');
     appeler('config:retours:ecrire', [{
-      windowDays: val('f-days'), splitRefundEnabled: chk('f-split'), ajustementSeuil: val('f-ajseuil'),
+      windowDays: val('f-days'), splitRefundEnabled: chk('f-split'), ajustementSeuil: val('f-ajseuil'), bonusCreditPct: val('f-bonus'),
       name: val('f-name'), street: val('f-street'), city: val('f-city'),
       province: val('f-province'), postal: val('f-postal'), country: val('f-country') }]).then(function(r){
       OCCUPE = false;

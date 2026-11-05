@@ -333,6 +333,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + (d.modeRemboursement ? '<div class="large"><div class="k">${T("Mode communiqué au client")}</div><div class="v">'
           + (d.modeRemboursement === 'creditOnly' ? '${T("Crédit boutique uniquement")}' : '${T("Moyen original ou crédit, au choix")}')
           + (d.preference ? ' ${T("· préférence :")} ' + (d.preference === 'credit' ? '${T("crédit boutique")}' : '${T("moyen original")}') : '') + '</div></div>' : '')
+      /* (8.28.0) L ÉCHANGE DEMANDÉ : la variante réservée pour le client (taille, et couleur si elle change). Il n était
+         dit nulle part dans cette fenêtre — on remboursait sans voir qu une pièce attendait d être envoyée. */
+      + (d.echange ? '<div class="large"><div class="k">${T("Échange demandé")}</div><div class="v">'
+          + esc([d.echange.taille, d.echange.couleur].filter(Boolean).join(' · ') || '—')
+          + (d.echange.statut === 'held' ? ' ${T("· pièce réservée")}' : (d.echange.statut ? ' · ' + esc(d.echange.statut) : '')) + '</div></div>' : '')
       + (d.fraisPayesPar ? '<div class="large"><div class="k">${T("Frais de retour")}</div><div class="v">'
           + (d.fraisPayesPar === 'store' ? '<span class="ic">🛠</span> ${T("Pris en charge par la boutique (défaut / erreur)")}' : '<span class="ic">📦</span> ${T("À la charge du client")}') + '</div></div>' : '')
       + '</div></div>';

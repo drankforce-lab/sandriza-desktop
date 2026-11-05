@@ -85,4 +85,10 @@ module.exports = {
   'Proposé dans la fenêtre Produit d’après les retours « taille incorrecte ».': 'Suggested in the Product window from “wrong size” returns.',
   'Nombre minimal de retours': 'Minimum number of returns',
   'Au moins 60 % de ces retours doivent aller dans le même sens (taille au-dessus ou au-dessous).': 'At least 60% of these returns must point the same way (one size up or down).'
+  // La prime sur le crédit boutique (8.28.0)
+  "Crédit boutique": "Store credit",
+  "Une prime pour inviter le client à choisir le crédit plutôt que le remboursement.": "A bonus that invites the customer to choose store credit over a refund.",
+  "Prime sur le crédit boutique (%)": "Store credit bonus (%)",
+  "Exemple : un retour de 100,00 $ remboursé en crédit donne un crédit de {0} $.": "Example: a $100.00 return refunded as credit gives a credit of ${0}.",
+  "Aucune prime : le crédit vaut exactement le montant remboursé.": "No bonus: the credit equals the refunded amount.",
 };

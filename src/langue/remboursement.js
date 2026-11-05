@@ -220,4 +220,7 @@ module.exports = {
   'Fermer le remboursement': 'Close the refund',
   'Les quantités et le motif saisis seront perdus. Aucun remboursement n’a été émis.': 'The quantities and reason you entered will be lost. No refund has been issued.',
   'Fermer sans rembourser': 'Close without refunding',
+  // La prime sur le crédit boutique (8.28.0)
+  "Prime ({0} %)": "Bonus ({0}%)",
+  "Crédit au client": "Credit to customer",
 };

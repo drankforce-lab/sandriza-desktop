@@ -2114,7 +2114,7 @@ const JEU = {
     identite: IDENTITE,
     'config:retours:donnees': { ok: true, peutModifier: true, configuree: true,
       name: 'SANDRIZA', street: '123 rue Principale', city: 'Montréal', province: 'QC',
-      postal: 'H2X 1Y4', country: 'Canada', windowDays: 30, halfDays: 15, splitRefundEnabled: true },
+      postal: 'H2X 1Y4', country: 'Canada', windowDays: 30, halfDays: 15, splitRefundEnabled: true, ajustementSeuil: 3, bonusCreditPct: 10 },
   },
 
   // La cabine d'essayage (2026-10-30) : ouverte, types, superpositions, fond par défaut et un fond programmé.
@@ -8401,7 +8401,9 @@ const JEU = {
       fauteMarchande: false, notes: '', noteRefus: '', photo: IMAGE,
       suivi: '', suiviTransporteur: '', aUneEtiquette: false, etiquetteReelle: false,
       aUnEnvoiCP: false,
-      etiquetteTransporteur: '', etiquetteLe: '', litige: null, echange: null,
+      etiquetteTransporteur: '', etiquetteLe: '', litige: null,
+      // (8.28.0) un échange contre une autre couleur, pièce réservée : la fenêtre doit le dire
+      echange: { statut: 'held', taille: 'M', couleur: 'Bleu marine' },
     };
     return [
       {

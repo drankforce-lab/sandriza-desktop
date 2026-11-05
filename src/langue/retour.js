@@ -333,4 +333,7 @@ module.exports = {
   'Confirmer le rejet': 'Confirm the rejection',
   'Le rejet de la demande de retour de la commande': 'The rejection of the return request for order',
   'sera confirmé malgré la réponse du client.': 'will be confirmed despite the customer’s reply.',
+  // L'échange demandé (8.28.0)
+  "Échange demandé": "Exchange requested",
+  "· pièce réservée": "· item held",
 };
