@@ -2608,6 +2608,8 @@ const OPS_PONT = new Set([
   'questions:donnees', 'questions:repondre', 'questions:statut', 'questions:supprimer',
   // (8.29.0) L'analyse des produits : la prévision de réapprovisionnement et la rentabilité.
   'analyse:reappro', 'analyse:rentabilite',
+  // (8.29.0) La seconde vie : les reprises de vêtements (le crédit est créé au serveur) et les réglages des deux sections.
+  'secondevie:donnees', 'secondevie:traiter', 'secondevie:regler',
   'caisse:contexte', 'caisse:chercher', 'caisse:article',
   'caisse:totaux', 'caisse:client', 'caisse:vendre',
   /* Verifier a la main un paiement par LIEN. ⚠ Ce recours n existait que dans
@@ -3938,6 +3940,8 @@ const LIMITES_PONT = {
   'questions:donnees': 15000, 'questions:repondre': 30000, 'questions:statut': 30000, 'questions:supprimer': 30000,
   /* L'analyse des produits : un calcul local sur toutes les commandes (10 000 au besoin). */
   'analyse:reappro': 30000, 'analyse:rentabilite': 30000,
+  /* La seconde vie : une reprise traitée attend le serveur (crédit) ; les réglages, le verdict du nuage. */
+  'secondevie:donnees': 15000, 'secondevie:traiter': 45000, 'secondevie:regler': 30000,
   /* Les rappels se lisent en local ; les ecritures passent par le nuage. */
   'rappels:donnees': 15000, 'rappels:etat': 15000,
   'rappels:ecrire': 30000, 'rappels:modele': 30000, 'rappels:fait': 30000,
@@ -7038,6 +7042,7 @@ const { pageFibres } = require('./fenetres/fibres');
 const { pageEncanRapports } = require('./fenetres/encan-rapports');
 const { pageQuestions } = require('./fenetres/questions');
 const { pageAnalyse } = require('./fenetres/analyse');
+const { pageSecondeVie } = require('./fenetres/secondevie');
 const { pageLiens } = require('./fenetres/liens');
 const { pageComptable } = require('./fenetres/comptable');
 const { pageInactivite } = require('./fenetres/inactivite');
@@ -7253,6 +7258,11 @@ const actionApp = (nom, arg) => {
         { width: 1200, height: 780, minWidth: 820, minHeight: 560 });
       break;
     // (8.29.0) L'analyse des produits : une fenêtre, deux portes (l'onglet ouvert d'abord).
+    // (8.29.0) La seconde vie : les reprises de vêtements et les réglages des deux sections.
+    case 'secondevie':
+      ouvrirNative('secondevie', TF('Seconde vie'), () => pageSecondeVie(''),
+        { width: 1240, height: 800, minWidth: 860, minHeight: 580 });
+      break;
     case 'reappro':
       ouvrirNative('reappro', TF('Prévision de réapprovisionnement'), () => pageAnalyse('reappro'),
         { width: 1320, height: 820, minWidth: 900, minHeight: 600 });

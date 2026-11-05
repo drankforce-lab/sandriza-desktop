@@ -237,6 +237,7 @@ const MENU_APP_EN = {
   'Questions sur les produits': 'Product questions',
   'Prévision de réapprovisionnement': 'Restock forecast',
   'Rentabilité par produit': 'Profitability by product',
+  'Seconde vie': 'Second life',
   'Verrous (fiches en cours)': 'Locks (records in progress)',
   /* ⚠ LES SIX JEUX DE COULEURS viennent d'une TABLE d'`appbar.js`
      (`THEMES_COULEUR`) et non d'un `label:` écrit à la main — c'est pour ça que

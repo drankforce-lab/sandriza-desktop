@@ -4011,6 +4011,19 @@ const JEU = {
 
   // ── RAPPORTS D'ENCAN (2026-10-25, lot 4) ───────────────────────────────────
   // ⚠ Forme rendue par encanrapports:donnees (assets/js/pont.js) = EncanRapports.calculer (assets/js/encanrapports.js).
+  // (8.29.0) La seconde vie : trois reprises (demandée, acceptée, créditée) et les deux sections réglées.
+  'secondevie.js': {
+    'secondevie:donnees': { ok: true, filtre: 'ouvertes', enAttente: 1, peutTraiter: true, peutRegler: true,
+      cfg: { reprise: { actif: true, pctMax: 15, conditions: 'Vêtement acheté chez Sandriza, propre, sans tache ni accroc.', conditionsEN: 'An item bought from Sandriza, clean, with no stains or tears.' },
+             secondeMain: { actif: true, titre: 'Seconde main', titreEN: 'Pre-loved', texte: 'Des pièces déjà aimées, vérifiées et remises en vente.', texteEN: 'Pieces loved before, checked and back on sale.' } },
+      reprises: [
+        { id: 'rp_0000000000000001', statut: 'demandee', client: 'Marie Tremblay', commande: 'CMD-0002-22010', nom: 'Robe cintrée', taille: 'M', couleur: 'Noir', etat: 'tresbon',
+          note: 'Portée deux fois, lavée à la main. Aucun défaut.', base: 129.95, pctMax: 15, offreMax: 19.49, offre: null, motif: '', creditNumber: '', creeLe: '2026-11-04T15:00:00.000Z', image: '' },
+        { id: 'rp_0000000000000002', statut: 'acceptee', client: 'Julie Gagnon', commande: 'CMD-0002-21998', nom: 'Chemisier de soie à manches bouffantes et col lavallière', taille: 'P', couleur: 'Ivoire', etat: 'neuf',
+          note: '', base: 89.95, pctMax: 15, offreMax: 13.49, offre: 12, motif: '', creditNumber: '', creeLe: '2026-11-02T10:00:00.000Z', image: '' },
+      ] },
+    'secondevie:traiter': { ok: true, reprise: {} }, 'secondevie:regler': { ok: true },
+  },
   // (8.29.0) L'analyse des produits : deux variantes à commander (une en précommande, une sans fournisseur) et une
   // rentabilité avec un produit sans coût d'achat et une marge négative.
   'analyse.js': {

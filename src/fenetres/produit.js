@@ -497,6 +497,8 @@ html.jour .lgstk.enstock .c1,html.jour .lgstk.enstock .c2{color:#166534}
 .voile .pied2{display:flex;justify-content:flex-end;gap:.45rem;margin-top:.8rem}
 .cote{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;align-items:start}
 .cote .grille{grid-template-columns:repeat(2,minmax(0,1fr))}
+.pf-duo{margin-top:0;align-items:stretch}
+.pf-duo>.carte{margin:0}
 .prixgrille{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem .9rem;align-items:start}
 @media (max-width:980px){.cote{grid-template-columns:1fr}}
 /* ALIGNEMENT (2026-10-04, sa capture) : le libelle etait un flex — l etoile partait au bout de la colonne et un libelle sur deux lignes descendait son champ. Libelle en texte, et les trois champs partagent leurs RANGEES (subgrid) : les cases restent sur une meme ligne. */
@@ -1032,6 +1034,8 @@ function pageProduit(id) {
          article qui ne sera pas renouvelé le laisse éteint et reste « épuisé ». Allumé : une variante épuisée se
          précommande en boutique ; son stock descend sous zéro (les pièces promises) et la prochaine réception les
          sert en premier. Date prévue et plafond facultatifs ; le serveur refuse au-delà du plafond. */
+      // (8.29.0) Précommande et seconde main CÔTE À CÔTE : quatre cartes empilées dépassaient la hauteur de l étape.
+      + '<div class="cote pf-duo">'
       + '<div class="carte"><h2>${T("Précommande")}</h2><div class="bascules">'
       + bascule('p-preco', '${T("Accepter les précommandes quand une variante est épuisée")}') + '</div>'
       + '<div class="grille">'
@@ -1039,7 +1043,13 @@ function pageProduit(id) {
       + '<div class="ch"><label for="p-preco-max">${T("Plafond de précommandes")}</label>'
       + '<input id="p-preco-max" type="number" min="1" step="1" placeholder="${T("aucun")}" '
       + 'title="${T("Nombre de pièces qu’on accepte de promettre, toutes variantes épuisées comprises. Vide : aucun plafond.")}"></div>'
-      + '</div><div class="aide" id="p-preco-etat"></div></div></div>');
+      + '</div><div class="aide" id="p-preco-etat"></div></div>'
+      /* LA SECONDE MAIN (8.29.0) : une pièce déjà portée (une reprise, par exemple), vendue dans la section « Seconde
+         main » de la boutique — et nulle part ailleurs en boutique. L état est dit sur la fiche et la tuile. */
+      + '<div class="carte"><h2>${T("Seconde main")}</h2><div class="bascules">'
+      + bascule('p-sm', '${T("Article de seconde main (vendu dans la section Seconde main)")}') + '</div>'
+      + '<div class="grille">' + sel('p-sm-etat', '${T("État de la pièce")}', [{ v: 'neuf', l: '${T("Comme neuf")}' }, { v: 'tresbon', l: '${T("Très bon état")}' }, { v: 'bon', l: '${T("Bon état")}' }])
+      + '</div></div></div></div>');
 
     // 7 — Stock
     h.push('<div class="etape"><div class="carte plein" id="p-zone"><h2>${T("Stock par variante")}</h2>'
@@ -1544,6 +1554,10 @@ function pageProduit(id) {
     var pcEl = document.getElementById('p-preco'); if (pcEl) pcEl.addEventListener('change', majPreco);
     window.__pfMajPreco = majPreco;
     majPreco();
+    var majSm = function(){ var e = document.getElementById('p-sm-etat'); if (e) e.disabled = !coché('p-sm'); };
+    var smEl = document.getElementById('p-sm'); if (smEl) smEl.addEventListener('change', majSm);
+    window.__pfMajSm = majSm;
+    majSm();
     majIa();
     // Le SKU suit la categorie — sauf sur une fiche existante, dont le code est
     // deja attribue : le recalculer lui en donnerait un autre a chaque ouverture.
@@ -4345,6 +4359,10 @@ function pageProduit(id) {
     var pcB = document.getElementById('p-preco'); if (pcB) pcB.checked = !!(pcF && pcF.actif);
     poser('p-preco-date', (pcF && /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(String(pcF.date || ''))) ? String(pcF.date) : '');
     poser('p-preco-max', (pcF && Number(pcF.max) >= 1) ? String(Math.floor(Number(pcF.max))) : '');
+    // (8.29.0) La seconde main : éteinte si la fiche ne la porte pas.
+    var smB = document.getElementById('p-sm'); if (smB) smB.checked = !!(p.secondeMain && p.secondeMain.etat);
+    poser('p-sm-etat', (p.secondeMain && p.secondeMain.etat) || 'tresbon');
+    if (window.__pfMajSm) window.__pfMajSm();
     if (window.__pfMajPreco) window.__pfMajPreco();
     // ⚠ LES DEUX AXES SE LISENT SEPAREMENT, comme dans l editeur du site : la
     // liquidation et la vente finale sont des REGIMES, noReturn est la politique
@@ -5121,7 +5139,8 @@ function pageProduit(id) {
         limclient: val('p-limclient'), compo: val('p-compo'), entAutre: val('p-ent-autre'),
         regime: val('p-regime'), retours: val('p-retours'), actif: coché('p-actif'),
         direct: coché('p-direct'), anticipe: coché('p-anticipe'), publie: val('p-publie'),
-        preco: coché('p-preco'), precoDate: val('p-preco-date'), precoMax: val('p-preco-max')
+        preco: coché('p-preco'), precoDate: val('p-preco-date'), precoMax: val('p-preco-max'),
+        sm: coché('p-sm'), smEtat: val('p-sm-etat')
       },
       tailles: tailles(), couleurs: couleurs(),
       image: IMAGE || '', vues: VUES, dosCle: cleDos(), fibre: FIBRE || '', parcoul: PARCOUL, stock: STOCK, locs: LOCS, mesv: MESV,
@@ -5188,6 +5207,9 @@ function pageProduit(id) {
     var pcb = document.getElementById('p-preco'); if (pcb && 'preco' in f) pcb.checked = !!f.preco;
     if (f.precoDate) poser('p-preco-date', f.precoDate);
     if (f.precoMax) poser('p-preco-max', f.precoMax);
+    var smb = document.getElementById('p-sm'); if (smb && 'sm' in f) smb.checked = !!f.sm;
+    if (f.smEtat) poser('p-sm-etat', f.smEtat);
+    if (window.__pfMajSm) window.__pfMajSm();
     if (window.__pfMajPreco) window.__pfMajPreco();
     if (window.__pfMajDirect) window.__pfMajDirect();
     Array.prototype.forEach.call(document.querySelectorAll('#p-tailles .jeton'), function(j){
@@ -5525,6 +5547,8 @@ function pageProduit(id) {
       anticipeExclu: coché('p-direct'),
       // (8.27.0) La précommande : null = éteinte. Le pont valide la date et le plafond.
       precommande: coché('p-preco') ? { actif: true, date: val('p-preco-date') || '', max: parseInt(val('p-preco-max'), 10) || 0 } : null,
+      // (8.29.0) La seconde main : null = article neuf.
+      secondeMain: coché('p-sm') ? { etat: val('p-sm-etat') || 'tresbon' } : null,
       sizes: tailles(), colors: couleurs(),
       image: IMAGE,
       belowCost: !!SOUSCOUT,

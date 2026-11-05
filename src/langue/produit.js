@@ -1023,4 +1023,11 @@ module.exports = {
   "Pièces déjà promises en précommande : {0}. La prochaine réception les servira en premier.": "Pieces already promised on pre-order: {0}. The next delivery will fill them first.",
   "Aucune pièce promise pour l’instant.": "No pieces promised yet.",
   "Pièces promises en précommande : la prochaine réception les servira d’abord.": "Pieces promised on pre-order: the next delivery fills them first.",
+  // La seconde main (8.29.0)
+  "Seconde main": "Pre-loved",
+  "Article de seconde main (vendu dans la section Seconde main)": "Pre-loved item (sold in the Pre-loved section)",
+  "État de la pièce": "Condition",
+  "Comme neuf": "Like new",
+  "Très bon état": "Very good",
+  "Bon état": "Good",
 };
