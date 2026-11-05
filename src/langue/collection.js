@@ -115,6 +115,7 @@ module.exports = {
   // Le lancement (8.30.0)
   'Lancement': 'Launch',
   'Image et lancement': 'Image and launch',
+  'L’heure d’ouverture du lancement n’est pas une date valide.': 'The launch opening time is not a valid date.',
   'Annoncer l’ouverture à une date et une heure (compte à rebours et liste d’attente)': 'Announce the opening at a date and time (countdown and waiting list)',
   'Ouverture le': 'Opens on',
   'Accès anticipé pour les paliers de fidélité': 'Early access for loyalty tiers',

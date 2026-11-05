@@ -379,6 +379,8 @@ function pageCollection(id) {
   });
   szBrouillonEcouter();
 
+  // (8.30.0) Le refus du site quand l heure du lancement n est pas une date.
+  MOTIFS.lancement_date = '${T("L’heure d’ouverture du lancement n’est pas une date valide.")}';
   function enregistrer(){
     if (!Assist.toutValide()) return;
     // (8.30.0) Un lancement exige sa date et son heure.
