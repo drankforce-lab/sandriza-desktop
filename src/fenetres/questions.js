@@ -180,7 +180,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div><div class="nm">' + esc(q.produit || '—') + '</div>' + (q.sku ? '<div class="sk">' + esc(q.sku) + '</div>' : '') + '</div></div>'
       + '<div class="lbl">${T("Question")}</div>'
       + '<div class="texte">' + esc(q.question) + '</div>'
-      + '<div class="meta">' + esc(q.nom) + ' · ' + esc(szJour(q.creeLe) || '') + ' · ' + esc(ETATS[q.statut] || q.statut) + '</div>'
+      + '<div class="meta">' + esc(q.nom) + ' · ' + esc(szJour(q.creeLe) || '') + ' · ' + esc(ETATS[q.statut] || q.statut)
+      // (8.30.0) L avis par courriel : dit avant de publier, et une fois parti.
+      + (q.avise ? ' · ${T("client avisé par courriel")}' : (q.avisPossible ? ' · ${T("le client sera avisé par courriel à la publication")}' : '')) + '</div>'
       + '<div class="lbl">${T("Réponse de l’équipe")}</div>'
       + '<textarea id="rep" maxlength="1500"' + (ro ? ' disabled' : '') + ' aria-label="${T("Réponse de l’équipe")}">' + esc(rep) + '</textarea>'
       + '<div class="cpt" id="rep-cpt"></div>'

@@ -246,7 +246,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('secondevie:traiter', [id, action, montant, motif]).then(function(r){
       OCCUPE = false;
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
-      dire(bravo, 'bon'); charger(true);
+      // (8.30.0) Le client est avisé par courriel ; si l avis n est pas parti, on le dit (la décision, elle, est faite).
+      dire(bravo + (r.avis ? ' ${T("Le client est avisé par courriel.")}' : ' ${T("Le courriel au client n’est pas parti.")}'), r.avis ? 'bon' : 'att'); charger(true);
     });
   }
   function regler(){

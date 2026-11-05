@@ -86,4 +86,6 @@ module.exports = {
   'Enregistrement…': 'Saving…',
   'Lecture…': 'Loading…',
   'Réglages enregistrés.': 'Settings saved.',
+  'Le client est avisé par courriel.': 'The customer has been notified by email.',
+  'Le courriel au client n’est pas parti.': 'The email to the customer was not sent.',
 };

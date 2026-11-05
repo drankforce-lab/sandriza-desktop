@@ -4052,7 +4052,7 @@ const JEU = {
     'questions:donnees': { ok: true, filtre: 'attente', comptes: { attente: 3, publiee: 1, masquee: 0, toutes: 4 },
       peutEcrire: true, peutSupprimer: true,
       questions: [
-        { id: 'q_01', statut: 'attente', question: 'Est-ce que la robe est doublée ? Je la voudrais pour un mariage en octobre.', nom: 'Julie',
+        { id: 'q_01', statut: 'attente', avisPossible: true, avise: '', question: 'Est-ce que la robe est doublée ? Je la voudrais pour un mariage en octobre.', nom: 'Julie',
           produit: 'Robe cintrée', sku: 'ROB-0001', image: '', creeLe: '2026-11-03T14:20:00.000Z', reponse: '', reponduLe: '', reponduPar: '' },
         { id: 'q_02', statut: 'attente', question: 'Bonjour, je porte habituellement un 8 dans les marques européennes et un M chez la plupart des boutiques québécoises : quelle taille me conseillez-vous pour ce chemisier, qui semble assez ajusté aux épaules sur les photos ?', nom: 'Anne-Marie',
           produit: 'Chemisier de soie', sku: 'HAU-0007', image: '', creeLe: '2026-11-04T09:05:00.000Z', reponse: 'Nous conseillons le M.', reponduLe: '', reponduPar: '' },

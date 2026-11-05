@@ -54,4 +54,6 @@ module.exports = {
   'Question republiée.': 'Question published again.',
   'Enregistrement…': 'Saving…',
   'Lecture…': 'Loading…',
+  'client avisé par courriel': 'customer notified by email',
+  'le client sera avisé par courriel à la publication': 'the customer will be notified by email when published',
 };
