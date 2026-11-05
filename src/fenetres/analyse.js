@@ -70,6 +70,7 @@ button.prim:hover:not(:disabled){background:var(--or-clair)}
 .pill.rupture{background:rgba(239,68,68,.16);color:var(--tx-err2)}
 .pill.urgent{background:rgba(245,158,11,.16);color:var(--tx-att)}
 .pill.bientot{background:rgba(148,163,184,.16);color:var(--tx-gris2)}
+html.jour .pill.rupture{color:#7a2e2e}
 .neg{color:var(--tx-err2)}
 .lignes{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.2rem .9rem;font-size:.82rem}
 .lignes .l{color:var(--tx2)}
