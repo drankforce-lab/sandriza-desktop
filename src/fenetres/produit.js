@@ -450,6 +450,7 @@ html.jour .vue .x:hover:not(:disabled),html.jour .vign .x:hover:not(:disabled){b
    une variante juste sous son seuil — mais on doit le savoir, et savoir combien
    il en manque, sans avoir a faire la soustraction soi-meme. */
 .lgstk .al{flex:0 0 auto;font-size:.86rem;line-height:1;cursor:help;color:var(--tx-att)}
+.lgstk .al.pf-promis{color:var(--tx3);font-size:1rem}
 .lgstk.entete{font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);
   border-bottom:1px solid var(--v12);padding-bottom:.3rem;margin-bottom:.25rem;flex:0 0 auto}
 .lgstk:not(.entete):hover{background:var(--v04)}
@@ -1026,7 +1027,19 @@ function pageProduit(id) {
       // Paliers eteints : la marque est ignoree, le produit est visible de tous.
       + '<div class="pf-aj">' + bascule('p-anticipe', '${T("Accès anticipé (paliers de fidélité)")}')
       + ch('p-publie', '${T("Ouvert à tous le")}', { type: 'date' }) + '</div>'
-      + '</div></div>');
+      + '</div>'
+      /* LA PRÉCOMMANDE (8.27.0, sa demande du 2026-11-05) : un interrupteur PAR PRODUIT, éteint par défaut — un
+         article qui ne sera pas renouvelé le laisse éteint et reste « épuisé ». Allumé : une variante épuisée se
+         précommande en boutique ; son stock descend sous zéro (les pièces promises) et la prochaine réception les
+         sert en premier. Date prévue et plafond facultatifs ; le serveur refuse au-delà du plafond. */
+      + '<div class="carte"><h2>${T("Précommande")}</h2><div class="bascules">'
+      + bascule('p-preco', '${T("Accepter les précommandes quand une variante est épuisée")}') + '</div>'
+      + '<div class="grille">'
+      + ch('p-preco-date', '${T("Expédition prévue vers le")}', { type: 'date' })
+      + '<div class="ch"><label for="p-preco-max">${T("Plafond de précommandes")}</label>'
+      + '<input id="p-preco-max" type="number" min="1" step="1" placeholder="${T("aucun")}" '
+      + 'title="${T("Nombre de pièces qu’on accepte de promettre, toutes variantes épuisées comprises. Vide : aucun plafond.")}"></div>'
+      + '</div><div class="aide" id="p-preco-etat"></div></div></div>');
 
     // 7 — Stock
     h.push('<div class="etape"><div class="carte plein" id="p-zone"><h2>${T("Stock par variante")}</h2>'
@@ -1164,7 +1177,7 @@ function pageProduit(id) {
     var p = argentNombre(val('p-prix')) || 0, so = argentNombre(val('p-solde')) || 0, co = argentNombre(val('p-cout')) || 0;
     var eff = (so > 0 && so < p) ? so : p;
     var t = tailles(), c = couleurs();
-    var tot = 0; Object.keys(STOCK).forEach(function(k){ tot += (+STOCK[k] || 0); });
+    var tot = 0; Object.keys(STOCK).forEach(function(k){ tot += Math.max(0, +STOCK[k] || 0); });   // (8.27.0) sous zéro = précommandes, pas du stock
     var actif = !!(document.getElementById('p-actif') || {}).checked;
     var h = '<div class="ph">' + (IMAGE ? '<img src="' + esc(IMAGE) + '" alt="">'
           : '<span><span class="ico">${ICO.image}</span><br>${T("Aucune photo principale")}</span>') + '</div>';
@@ -1179,7 +1192,7 @@ function pageProduit(id) {
     var ligne = function(k, v){ return '<div class="l"><span class="k">' + k + '</span><span class="v">' + v + '</span></div>'; };
     /* LES COÛTS NUMÉRIQUES DE L'ARTICLE (7.16.0) : ce que le journal a facturé pour lui (Fal.ai,
        Photoroom, 3D), et la marge une fois ce coût réparti sur ses unités en stock. */
-    var totU = 0; Object.keys(STOCK).forEach(function(k){ totU += (+STOCK[k] || 0); });
+    var totU = 0; Object.keys(STOCK).forEach(function(k){ totU += Math.max(0, +STOCK[k] || 0); });
     if (COUTS && COUTS.total > 0) {
       var NOMS_GESTE = { apercu3d_tnb: '${T("Aperçu 3D (The New Black)")}', vue360: '${T("Vue 360°")}', apercu3d: '${T("Aperçu 3D")}', fantome: '${T("Mannequin retiré")}' };
       var det = (COUTS.detail || []).map(function(x){ return x.n + ' × ' + (NOMS_GESTE[x.geste] || x.geste || x.modele) + ' : ' + szArgent(x.cout); }).join(' · ');
@@ -1516,6 +1529,21 @@ function pageProduit(id) {
     if (pDir) pDir.addEventListener('change', majDirect);
     if (pAnt) pAnt.addEventListener('change', function(){ if (pAnt.checked && pDir) { pDir.checked = false; majDirect(); } });
     window.__pfMajDirect = majDirect;
+    /* (8.27.0) Précommande : la date et le plafond ne servent que l'interrupteur allumé ; la ligne d'état dit combien
+       de pièces sont déjà PROMISES (variantes sous zéro) — c'est ce que la prochaine réception servira d'abord. */
+    var majPreco = function(){
+      var on = coché('p-preco');
+      ['p-preco-date', 'p-preco-max'].forEach(function(i){ var e = document.getElementById(i); if (e) e.disabled = !on; });
+      var et = document.getElementById('p-preco-etat'); if (!et) return;
+      var promis = 0;
+      Object.keys(STOCK || {}).forEach(function(k){ var n = parseInt(STOCK[k], 10) || 0; if (n < 0) promis -= n; });
+      et.textContent = promis > 0
+        ? '${T("Pièces déjà promises en précommande : {0}. La prochaine réception les servira en premier.")}'.replace('{0}', String(promis))
+        : (on ? '${T("Aucune pièce promise pour l’instant.")}' : '');
+    };
+    var pcEl = document.getElementById('p-preco'); if (pcEl) pcEl.addEventListener('change', majPreco);
+    window.__pfMajPreco = majPreco;
+    majPreco();
     majIa();
     // Le SKU suit la categorie — sauf sur une fiche existante, dont le code est
     // deja attribue : le recalculer lui en donnerait un autre a chaque ouverture.
@@ -4190,6 +4218,10 @@ function pageProduit(id) {
   // voulu, pas en dessous. J exigeais une unite de plus, ce qui faisait persister
   // l avertissement sur une variante pourtant conforme.
   function alerteSeuil(q){
+    // (8.27.0) Sous zéro : des pièces PROMISES en précommande — on le dit sur la ligne, sans alerte de seuil.
+    // Un pictogramme (la colonne est étroite) ; le nombre est dans le champ, et la carte Précommande en fait le total.
+    if (q < 0) return '<span class="al pf-promis" title="${T("Pièces promises en précommande : la prochaine réception les servira d’abord.")}">'
+      + '⧗</span>';
     var s = parseInt(val('p-seuil'), 10);
     if (!(s > 0) || !(q > 0) || q >= s) return '';
     return '<span class="al" title="${T("Sous le seuil d’alerte")} (' + s + '). '
@@ -4232,7 +4264,7 @@ function pageProduit(id) {
         },
         surMaj: function(){
           var n = 0;
-          Object.keys(STOCK).forEach(function(k){ n += STOCK[k] || 0; });
+          Object.keys(STOCK).forEach(function(k){ n += Math.max(0, STOCK[k] || 0); });   // (8.27.0) sous zéro = précommandes
           var s = document.getElementById('p-somme');
           if (s) s.textContent = n + (n > 1 ? ' ${T("unités au total")}' : ' ${T("unité au total")}');
         }
@@ -4265,6 +4297,7 @@ function pageProduit(id) {
           STOCK[q.dataset.cle] = parseInt(q.value, 10) || 0;
           peindre(q.closest('.lgstk'), q.dataset.cle);
           PAGI.surMaj();
+          if (window.__pfMajPreco) window.__pfMajPreco();
           return;
         }
       });
@@ -4307,6 +4340,12 @@ function pageProduit(id) {
     document.getElementById('p-anticipe').checked = !!p.accesAnticipe;
     var pdi = document.getElementById('p-direct'); if (pdi) pdi.checked = !!p.anticipeExclu && !p.accesAnticipe;
     poser('p-publie', /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(String(p.publieLe || '')) ? String(p.publieLe) : '');
+    // (8.27.0) La précommande : éteinte si la fiche ne la porte pas.
+    var pcF = (p.precommande && typeof p.precommande === 'object') ? p.precommande : null;
+    var pcB = document.getElementById('p-preco'); if (pcB) pcB.checked = !!(pcF && pcF.actif);
+    poser('p-preco-date', (pcF && /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(String(pcF.date || ''))) ? String(pcF.date) : '');
+    poser('p-preco-max', (pcF && Number(pcF.max) >= 1) ? String(Math.floor(Number(pcF.max))) : '');
+    if (window.__pfMajPreco) window.__pfMajPreco();
     // ⚠ LES DEUX AXES SE LISENT SEPAREMENT, comme dans l editeur du site : la
     // liquidation et la vente finale sont des REGIMES, noReturn est la politique
     // de retour d un article par ailleurs normal. Les confondre ferait perdre
@@ -4328,6 +4367,7 @@ function pageProduit(id) {
     dessinerJetons();
     STOCK = Object.assign({}, p.stock || {});
     STOCK0 = Object.assign({}, STOCK);   // (2026-10-19) ce que la fiche avait à l ouverture : on n envoie que ce qui a changé
+    if (window.__pfMajPreco) window.__pfMajPreco();   // (8.27.0) le compte des pièces promises lit STOCK : après lui
     // ⚠ LE CHAMP DU PRODUIT EST warehouseLocations. Cette fenêtre lisait
     // « stockLoc », un nom qu'elle avait inventé : les emplacements existants
     // ne s'affichaient JAMAIS (tout restait à « Choisir l'emplacement »), et
@@ -5080,7 +5120,8 @@ function pageProduit(id) {
         poids: val('p-poids'), unite: val('p-unite'), seuil: val('p-seuil'),
         limclient: val('p-limclient'), compo: val('p-compo'), entAutre: val('p-ent-autre'),
         regime: val('p-regime'), retours: val('p-retours'), actif: coché('p-actif'),
-        direct: coché('p-direct'), anticipe: coché('p-anticipe'), publie: val('p-publie')
+        direct: coché('p-direct'), anticipe: coché('p-anticipe'), publie: val('p-publie'),
+        preco: coché('p-preco'), precoDate: val('p-preco-date'), precoMax: val('p-preco-max')
       },
       tailles: tailles(), couleurs: couleurs(),
       image: IMAGE || '', vues: VUES, dosCle: cleDos(), fibre: FIBRE || '', parcoul: PARCOUL, stock: STOCK, locs: LOCS, mesv: MESV,
@@ -5144,6 +5185,10 @@ function pageProduit(id) {
     var dr = document.getElementById('p-direct'); if (dr) dr.checked = !!f.direct;
     var an = document.getElementById('p-anticipe'); if (an) an.checked = !!f.anticipe && !f.direct;
     if (f.publie) poser('p-publie', f.publie);
+    var pcb = document.getElementById('p-preco'); if (pcb && 'preco' in f) pcb.checked = !!f.preco;
+    if (f.precoDate) poser('p-preco-date', f.precoDate);
+    if (f.precoMax) poser('p-preco-max', f.precoMax);
+    if (window.__pfMajPreco) window.__pfMajPreco();
     if (window.__pfMajDirect) window.__pfMajDirect();
     Array.prototype.forEach.call(document.querySelectorAll('#p-tailles .jeton'), function(j){
       j.classList.toggle('on', (d.tailles || []).indexOf(j.getAttribute('data-t')) >= 0);
@@ -5445,7 +5490,13 @@ function pageProduit(id) {
     var stock = {}, locs = {};
     /* (2026-10-19, audit — lot S1) Une variante à 0 RESTE (0 est une quantité : la retirer effaçait la variante
        de la fiche, et le site la croyait disparue). Seules les variantes qui n existent plus partent. */
-    Object.keys(STOCK).forEach(function(k){ if (valides[k]) stock[k] = Math.max(0, parseInt(STOCK[k], 10) || 0); });
+    /* (8.27.0) UN STOCK NÉGATIF = DES PRÉCOMMANDES. Laissé tel quel, il repart tel quel (aucune différence) : le
+       ramener à 0 ici effaçait les pièces promises. Une saisie, elle, n'est jamais négative. */
+    Object.keys(STOCK).forEach(function(k){
+      if (!valides[k]) return;
+      var n = parseInt(STOCK[k], 10) || 0, n0 = STOCK0 ? (parseInt(STOCK0[k], 10) || 0) : 0;
+      stock[k] = (n < 0 && n === n0) ? n : Math.max(0, n);
+    });
     /* Et le stock n est ENVOYÉ que s il a changé depuis l ouverture : le site en tire des DIFFÉRENCES par variante
        (stock_ajuster), et une vente faite pendant la saisie reste comptée. Fiche neuve : toujours envoyé. */
     var stockChange = !ID || !STOCK0 || Object.keys(stock).some(function(k){ return (parseInt(STOCK0[k], 10) || 0) !== stock[k]; });
@@ -5472,6 +5523,8 @@ function pageProduit(id) {
       // L acces anticipe des paliers (2026-10-07) : le pont exige la date quand il est coche.
       accesAnticipe: coché('p-direct') ? false : coché('p-anticipe'), publieLe: coché('p-direct') ? null : (val('p-publie') || null),
       anticipeExclu: coché('p-direct'),
+      // (8.27.0) La précommande : null = éteinte. Le pont valide la date et le plafond.
+      precommande: coché('p-preco') ? { actif: true, date: val('p-preco-date') || '', max: parseInt(val('p-preco-max'), 10) || 0 } : null,
       sizes: tailles(), colors: couleurs(),
       image: IMAGE,
       belowCost: !!SOUSCOUT,

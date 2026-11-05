@@ -1014,4 +1014,13 @@ module.exports = {
   // Le type de haut pour la cabine (2026-10-30)
   "Type de haut (cabine) :": "Top type (fitting room):",
   "Déduit du nom": "Guessed from the name",
+  // La précommande (8.27.0)
+  "Précommande": "Pre-order",
+  "Accepter les précommandes quand une variante est épuisée": "Accept pre-orders when a variant is sold out",
+  "Expédition prévue vers le": "Expected to ship around",
+  "Plafond de précommandes": "Pre-order cap",
+  "Nombre de pièces qu’on accepte de promettre, toutes variantes épuisées comprises. Vide : aucun plafond.": "How many pieces you are willing to promise, across all sold-out variants. Empty: no cap.",
+  "Pièces déjà promises en précommande : {0}. La prochaine réception les servira en premier.": "Pieces already promised on pre-order: {0}. The next delivery will fill them first.",
+  "Aucune pièce promise pour l’instant.": "No pieces promised yet.",
+  "Pièces promises en précommande : la prochaine réception les servira d’abord.": "Pieces promised on pre-order: the next delivery fills them first.",
 };

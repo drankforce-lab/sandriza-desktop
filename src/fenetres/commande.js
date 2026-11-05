@@ -513,7 +513,8 @@ function pageCommande(id) {
     return '<div class="lg' + (FLASH === a.cle ? ' flash' : '') + '" data-cle="' + esc(a.cle) + '" data-reste="' + esc(a.cle) + '">'
       + '<div class="vg">' + szVignette(a.image, a.nom, '', a.nom) + '</div>'
       + '<div style="min-width:0"><div class="nm">' + esc(a.nom) + '</div>'
-      + '<div class="sk">' + esc([a.sku, a.couleur, a.taille].filter(Boolean).join(' · ')) + '</div></div>'
+      + '<div class="sk">' + esc([a.sku, a.couleur, a.taille].filter(Boolean).join(' · '))
+      + (a.precommande > 0 ? ' · <b>' + esc('${T("{0} en précommande")}'.replace('{0}', String(a.precommande))) + '</b>' : '') + '</div></div>'
       + '<div class="cp">' + v + ' <small>/ ' + a.quantite + '</small></div>'
       + '<div><div class="et a">${T("À scanner")}</div><div class="mn"><button type="button" data-moins="' + esc(a.cle) + '" aria-label="${T("Retirer une unité")}">−</button>'
       + '<button type="button" data-plus="' + esc(a.cle) + '" aria-label="${T("Ajouter une unité")}">+</button></div></div>'
@@ -1404,7 +1405,10 @@ function pageCommande(id) {
         document.title = '${T("Préparation —")} ' + r.numero;
         document.getElementById('cli').textContent = [r.client, attendus() + ' ' + szPl(attendus(), '${T("article")}', '${T("articles")}'),
           [r.ville, r.province, r.codePostal].filter(Boolean).join(' ')].filter(Boolean).join(' · ')
-          + (r.prioritaire ? ' · ${T("Prioritaire")}' : '') + (r.notes ? ' · ${T("Note :")} ' + r.notes : '');
+          + (r.prioritaire ? ' · ${T("Prioritaire")}' : '')
+          // (8.27.0) Une commande avec des précommandes : on le dit dans la tête, avec la date prévue s'il y en a une.
+          + (r.precoDate != null ? ' · ' + (r.precoDate ? '${T("Précommande — expédition prévue vers le {0}")}'.replace('{0}', r.precoDate) : '${T("Précommande")}') : '')
+          + (r.notes ? ' · ${T("Note :")} ' + r.notes : '');
         var nc = document.getElementById('note-cli');
         if (nc) {
           nc.hidden = !r.noteClient;

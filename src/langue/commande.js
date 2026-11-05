@@ -401,4 +401,8 @@ module.exports = {
   // (2026-10-25, audit) Une commande ne s’expédie qu’une fois.
   'Cette commande est déjà expédiée.': 'This order has already been shipped.',
   'Cette commande est déjà expédiée — aucun second courriel n’est parti.': 'This order has already been shipped — no second email was sent.',
+  // La précommande (8.27.0)
+  "Précommande — expédition prévue vers le {0}": "Pre-order — expected to ship around {0}",
+  "Précommande": "Pre-order",
+  "{0} en précommande": "{0} on pre-order",
 };

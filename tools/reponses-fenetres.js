@@ -7625,7 +7625,10 @@ const JEU = {
             image: IMAGE,
             sizes: ['M', 'G'],
             colors: ['Noir', 'Bleu marine'],
-            stock: { 'M-Noir': 4 },
+            // (8.27.0) Une variante SOUS ZÉRO (trois pièces promises) et la précommande allumée : la fenêtre doit les
+            // relire (interrupteur, date, plafond), compter les promises, et marquer la ligne d'un sablier.
+            stock: { 'M-Noir': 4, 'G-Noir': -3, 'M-Bleu marine': 0, 'G-Bleu marine': 0 },
+            precommande: { actif: true, date: '2026-12-12', max: 10 },
             // ⚠ Le VRAI nom du champ — « stockLoc » n'existe pas dans le
             // modèle produit, et un jeu d'essai qui l'emploierait cacherait
             // le défaut au lieu de l'exposer (vécu : les emplacements ne
