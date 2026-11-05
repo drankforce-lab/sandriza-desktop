@@ -721,6 +721,8 @@ const JEU = {
             active: true,
             coverImage: IMAGE,
             productIds: ['p_0001'],
+            // (8.30.0) Un lancement programmé : la fenêtre doit relire la case, l'heure, l'accès anticipé et les textes.
+            lancement: { actif: true, le: '2026-12-01T15:00:00.000Z', anticipe: true, texte: 'La collection des fêtes arrive.', texteEN: 'The holiday collection is coming.' },
           },
         },
         'collection:decrire': { ok: true, texte: 'Des coupes fluides et des teintes claires.' },

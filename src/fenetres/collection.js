@@ -28,6 +28,8 @@ const { CSS_SOCLE, CSS_JOUR, CSS_FICHE, JS_SOCLE, JS_BROUILLON, ICO, TETE } = re
 const T = require('../langue').tr('collection');
 
 const CSS_PROPRE = `
+.lnb{display:flex;align-items:center;gap:.45rem;font-size:.86rem;cursor:pointer}
+.lnb input{flex:0 0 auto}
 .photo{display:flex;gap:.85rem;align-items:flex-start}
 .photo .vign{flex:0 0 auto;width:140px;height:140px;border-radius:10px;
   border:1px dashed var(--v18);display:flex;align-items:center;
@@ -109,7 +111,18 @@ function pageCollection(id) {
       + '<div class="aide">'
       + '${T("L’image est déposée dans le stockage au moment de l’enregistrement, comme partout ailleurs dans l’administration. Maximum 8 Mo.")}'
       + '</div>'
-      + '</div></div></div></div>');
+      + '</div></div></div>'
+      /* LE LANCEMENT (8.30.0, sa demande du 2026-11-05) : l ouverture à heure fixe, avec sa page de compte à rebours et de
+         liste d attente (#lancement?col=…) ; avant l heure, les articles de la collection sortent des listes de la boutique,
+         sauf pour les paliers qui ont l accès anticipé quand la case est cochée. */
+      + '<div class="carte"><h2>${T("Lancement")}</h2>'
+      + '<label class="lnb"><input type="checkbox" id="c-ln"> ${T("Annoncer l’ouverture à une date et une heure (compte à rebours et liste d’attente)")}</label>'
+      + '<div class="grille">'
+      + '<div class="ch"><label for="c-ln-le">${T("Ouverture le")}</label><input id="c-ln-le" type="datetime-local"></div>'
+      + '<div class="ch large"><label class="lnb"><input type="checkbox" id="c-ln-ant"> ${T("Accès anticipé pour les paliers de fidélité")}</label></div>'
+      + '<div class="ch large"><label for="c-ln-txt">${T("Texte de la page de lancement (français)")}</label><textarea id="c-ln-txt" rows="2" maxlength="400"></textarea></div>'
+      + '<div class="ch large"><label for="c-ln-txt-en">${T("Texte de la page de lancement (anglais)")}</label><textarea id="c-ln-txt-en" rows="2" maxlength="400"></textarea></div>'
+      + '</div><div class="aide" id="c-ln-lien"></div></div></div>');
 
     h.push('<div class="etape"><div class="carte plein" id="c-zone"><h2>${T("Produits de la collection")}</h2>'
       + '<div class="rech"><input aria-label="${T("Filtrer par nom")}" placeholder="${T("Filtrer par nom…")}"><span class="cpt" id="c-cpt"></span></div>'
@@ -122,6 +135,15 @@ function pageCollection(id) {
     var corpsEl = document.getElementById('corps');
     corpsEl.addEventListener('input', majFicheBientot);
     corpsEl.addEventListener('change', majFicheBientot);
+    /* (8.30.0) Le lancement : les champs ne servent que la case cochée ; le lien de la page se dit une fois la fiche enregistrée. */
+    var majLn = function(){
+      var on = !!(document.getElementById('c-ln') || {}).checked;
+      ['c-ln-le', 'c-ln-ant', 'c-ln-txt', 'c-ln-txt-en'].forEach(function(i){ var e = document.getElementById(i); if (e) e.disabled = !on; });
+      var a = document.getElementById('c-ln-lien');
+      if (a) a.textContent = on ? (ID ? '${T("Page de lancement : #lancement?col=")}' + ID : '${T("La page de lancement aura son adresse une fois la collection enregistrée.")}') : '';
+    };
+    var lnEl = document.getElementById('c-ln'); if (lnEl) lnEl.addEventListener('change', majLn);
+    setTimeout(majLn, 0);
 
     if (fiche) {
       poser('c-nom', fiche.name); poser('c-desc', fiche.description);
@@ -130,6 +152,13 @@ function pageCollection(id) {
       poser('c-actif', fiche.active === false ? '0' : '1');
       if (fiche.coverImage) { IMAGE = fiche.coverImage; montrerImage(IMAGE); }
       (fiche.productIds || []).forEach(function(pid){ CHOISIS[pid] = true; });
+      // (8.30.0) Le lancement : l heure en ISO dans la fiche, affichée à l heure du poste.
+      var L = fiche.lancement || null;
+      document.getElementById('c-ln').checked = !!(L && L.actif);
+      document.getElementById('c-ln-ant').checked = !!(L && L.anticipe);
+      if (L && L.le) { var dl = new Date(L.le); if (!isNaN(dl)) { var z2 = function(n){ return (n < 10 ? '0' : '') + n; };
+        poser('c-ln-le', dl.getFullYear() + '-' + z2(dl.getMonth() + 1) + '-' + z2(dl.getDate()) + 'T' + z2(dl.getHours()) + ':' + z2(dl.getMinutes())); } }
+      poser('c-ln-txt', (L && L.texte) || ''); poser('c-ln-txt-en', (L && L.texteEN) || '');
     } else {
       poser('c-annee', String(CTX.anneeParDefaut));
     }
@@ -172,7 +201,7 @@ function pageCollection(id) {
 
     Assist.poser([
       { t: '${T("La collection")}', obl: ['c-nom'] },
-      { t: 'Image',         obl: [] },
+      { t: '${T("Image et lancement")}', obl: [] },   // (8.30.0) le lancement vit sur cette étape
       { t: '${T("Produits")}',      obl: [] }
     ], function(i){ if (i === 2 && PAGI) PAGI.dessiner(); });
     majFiche();
@@ -352,6 +381,8 @@ function pageCollection(id) {
 
   function enregistrer(){
     if (!Assist.toutValide()) return;
+    // (8.30.0) Un lancement exige sa date et son heure.
+    if ((document.getElementById('c-ln') || {}).checked && !val('c-ln-le')) { dire('${T("Indiquez la date et l’heure d’ouverture du lancement.")}', 'err'); return; }
     bEnr.disabled = true;
     dire(IMAGE && IMAGE.indexOf('data:') === 0 ? '${T("Dépôt de l’image et enregistrement…")}' : '${T("Enregistrement…")}');
     P.appeler('collection:enregistrer', ID, {
@@ -361,7 +392,14 @@ function pageCollection(id) {
       year: parseInt(val('c-annee'), 10) || CTX.anneeParDefaut,
       active: val('c-actif') === '1',
       coverImage: IMAGE,
-      productIds: Object.keys(CHOISIS).filter(function(k){ return CHOISIS[k]; })
+      productIds: Object.keys(CHOISIS).filter(function(k){ return CHOISIS[k]; }),
+      // (8.30.0) Le lancement : null = aucun ; l heure saisie (heure du poste) part en ISO.
+      lancement: (function(){
+        if (!(document.getElementById('c-ln') || {}).checked) return null;
+        var v = val('c-ln-le'); var d = v ? new Date(v) : null;
+        return { actif: true, le: (d && !isNaN(d)) ? d.toISOString() : '', anticipe: !!(document.getElementById('c-ln-ant') || {}).checked,
+          texte: val('c-ln-txt'), texteEN: val('c-ln-txt-en') };
+      })()
     }).then(function(r){
       if (!r || !r.ok) { bEnr.disabled = false; dire(expliquer(r), 'err'); return; }
       szBrouillonJeter();

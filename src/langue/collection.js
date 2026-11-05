@@ -112,4 +112,15 @@ module.exports = {
   'Nom': 'Name',
   'produits choisis': 'products selected',
   'produit choisi': 'product selected',
+  // Le lancement (8.30.0)
+  'Lancement': 'Launch',
+  'Image et lancement': 'Image and launch',
+  'Annoncer l’ouverture à une date et une heure (compte à rebours et liste d’attente)': 'Announce the opening at a date and time (countdown and waiting list)',
+  'Ouverture le': 'Opens on',
+  'Accès anticipé pour les paliers de fidélité': 'Early access for loyalty tiers',
+  'Texte de la page de lancement (français)': 'Launch page text (French)',
+  'Texte de la page de lancement (anglais)': 'Launch page text (English)',
+  'Page de lancement : #lancement?col=': 'Launch page: #lancement?col=',
+  'La page de lancement aura son adresse une fois la collection enregistrée.': 'The launch page gets its address once the collection is saved.',
+  'Indiquez la date et l’heure d’ouverture du lancement.': 'Enter the launch opening date and time.',
 };
