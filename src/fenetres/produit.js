@@ -589,6 +589,8 @@ function pageProduit(id) {
   // sinon le socle dirait « Erreur inattendue » sur un refus légitime.
   MOTIFS.photo_requise = '${T("La photo principale est obligatoire.")}';
   MOTIFS.tailles_couleurs_requises = '${T("Choisissez au moins une taille ET une couleur.")}';
+  MOTIFS.composition_requise = '${T("La composition est obligatoire : le nom ou la description nomme une fibre.")}';
+  MOTIFS.composition_contredite = '${T("La composition ne contient pas une fibre que le texte annonce :")}';
   MOTIFS.emplacement_requis = '${T("Un emplacement d’entrepôt manque pour des variantes en stock.")}';
   MOTIFS.stock_requis = '${T("Saisissez une quantité pour au moins une variante.")}';
   MOTIFS.couleur_non_mappee = '${T("Cette couleur n’a pas de teinte unie attribuée.")}';
@@ -946,8 +948,10 @@ function pageProduit(id) {
       /* COMPOSITION ET ENTRETIEN (2026-10-11, sa demande) : des cases, pas du texte libre — la
          boutique affiche chaque consigne dans la langue de la cliente, avec son pictogramme. */
       + '<div class="carte plein" id="p-ent-carte"><h2>${T("Composition et entretien")}</h2>'
-      + '<div class="ent-haut"><div class="ch"><label for="p-compo">${T("Composition")}</label>'
-      + '<input id="p-compo" maxlength="200" placeholder="${T("Ex : 95 % polyester, 5 % élasthanne")}"></div>'
+      /* (2026-11-04, sa demande) FACULTATIVE, sauf quand le nom ou la description nomme une fibre (majCompo). */
+      + '<div class="ent-haut"><div class="ch"><label for="p-compo">${T("Composition")} <span id="p-compo-etat">${T("(facultative)")}</span></label>'
+      + '<input id="p-compo" maxlength="200" placeholder="${T("Ex : 95 % polyester, 5 % élasthanne")}">'
+      + '<div class="aide" id="p-compo-avis" aria-live="polite"></div></div>'
       + '<div class="ch"><label for="p-ent-autre">${T("Autre consigne (facultatif)")}</label>'
       + '<textarea id="p-ent-autre" rows="1" maxlength="400"></textarea></div></div>'
       + '<div class="ent-modeles" id="p-ent-modeles"></div>'
@@ -1093,7 +1097,41 @@ function pageProduit(id) {
      memes sources que l enregistrement. La liste « Pour enregistrer » reprend
      les gardes d enregistrer() dans le meme ordre ; un clic mene a l etape. */
   var FICHE_T = null;
-  function majFicheBientot(){ clearTimeout(FICHE_T); FICHE_T = setTimeout(majFiche, 60); }
+  /* ── LA COMPOSITION OBLIGATOIRE SELON LE TEXTE (2026-11-04, sa demande ; C.R.C. c. 1551, art. 22-24) ──
+     Une fiche qui NOMME une fibre (« robe en coton », « blouse de soie ») doit donner sa composition, et
+     celle-ci doit contenir la fibre annoncée. La liste des mots vient du site (CTX.motsFibres, la même que le
+     pont applique à l enregistrement) ; ici, on prévient en direct. Satin, jersey, soyeux… ne comptent pas. */
+  var RE_FIBRES = null;
+  function sansAccent(t){ return String(t || '').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase(); }
+  function fibresNommees(texte){
+    /* Pas de mise en cache d une liste vide : le contexte (CTX) peut arriver après la première frappe. */
+    if (!RE_FIBRES || !RE_FIBRES.length) RE_FIBRES = ((CTX && CTX.motsFibres) || []).map(function(f){
+      return { cle: f.cle, re: new RegExp('(?<![\\\\p{L}\\\\p{N}])(' + f.mots.map(function(m){ return sansAccent(m).replace(/ /g, '\\\\s+'); }).join('|') + ')(?![\\\\p{L}\\\\p{N}])', 'iu') };
+    });
+    var brut = String(texte || ''), net = sansAccent(brut), out = [];
+    RE_FIBRES.forEach(function(f){ var m = f.re.exec(net); if (m) out.push({ cle: f.cle, mot: net.length === brut.length ? brut.substr(m.index, m[0].length) : m[0] }); });
+    return out;
+  }
+  function exigenceCompo(){
+    var vus = fibresNommees(String(val('p-nom') || '') + ' ' + String(val('p-desc') || ''));
+    var compo = String(val('p-compo') || '').trim();
+    var dans = {}; fibresNommees(compo).forEach(function(x){ dans[x.cle] = true; });
+    return { requise: vus.length > 0, vide: !compo, mots: vus.map(function(x){ return x.mot; }),
+      manquantes: compo ? vus.filter(function(x){ return x.cle !== 'fibre' && !dans[x.cle]; }).map(function(x){ return x.mot; }) : [] };
+  }
+  function guillemets(l){ return '« ' + l.join(' », « ') + ' »'; }
+  function majCompo(){
+    var et = document.getElementById('p-compo-etat'), av = document.getElementById('p-compo-avis'), ch = document.getElementById('p-compo');
+    if (!et || !av || !ch) return;
+    var ex = exigenceCompo();
+    et.textContent = ex.requise ? '${T("(obligatoire)")}' : '${T("(facultative)")}';
+    ch.classList.toggle('manque', ex.requise && (ex.vide || ex.manquantes.length > 0));
+    av.innerHTML = !ex.requise ? ''
+      : ex.manquantes.length ? '<strong>' + esc('${T("Le texte annonce")} ' + guillemets(ex.manquantes) + ' ${T("mais la composition ne le contient pas.")}') + '</strong>'
+      : '<strong>' + esc('${T("Obligatoire : le nom ou la description nomme")} ' + guillemets(ex.mots) + '.') + '</strong> '
+        + esc(ex.vide ? '${T("Inscrivez la composition, ou retirez ce mot du texte.")}' : '${T("La loi l’exige dès qu’une fibre est nommée.")}');
+  }
+  function majFicheBientot(){ majCompo(); clearTimeout(FICHE_T); FICHE_T = setTimeout(majFiche, 60); }
   /* LES PASTILLES (2026-10-26) : un menu court devient une rangée de pastilles. Le <select> reste la source :
      une pastille le pose et émet « change » ; majPuces() relit le menu (fiche ouverte, brouillon repris). */
   function pucer(id){
@@ -1742,17 +1780,21 @@ function pageProduit(id) {
       b.disabled = false;
       if (!r || !r.ok) { dire(expliquer(r) + (r && r.detail ? ' — ' + r.detail : ''), 'err'); return; }
       if (r.texte) poser('p-desc', r.texte);
+      /* (2026-11-04) La consigne interdit les noms de fibre ; le site redemande une fois. S il en reste, on le dit. */
+      var resteF = (r.fibres && r.fibres.length) ? ' ${T("Le texte nomme encore")} ' + guillemets(r.fibres) + ' ${T("— retirez-le, ou inscrivez la composition.")}' : '';
+      majCompo();
       /* Le NOM proposé remplace celui du champ ; l'ancien est rappelé dans le message pour qu'on puisse le
          reprendre (un nom tapé avec soin ne doit pas disparaître sans trace). majNom() recalcule ce qui en dépend. */
       if (avecNom && r.nom) {
         poser('p-nom', r.nom);
         var eN = document.getElementById('p-nom'); if (eN) eN.classList.remove('manque');
         majNom(); Assist.fil();
+        majCompo();
         dire('${T("Nom et description proposés — relisez-les avant d’enregistrer.")}'
-          + (ancienNom && ancienNom !== r.nom ? ' ${T("Ancien nom :")} « ' + ancienNom + ' »' : ''), 'bon');
+          + (ancienNom && ancienNom !== r.nom ? ' ${T("Ancien nom :")} « ' + ancienNom + ' »' : '') + resteF, resteF ? 'att' : 'bon');
         return;
       }
-      dire('${T("Description rédigée — relisez-la avant d’enregistrer.")}', 'bon');
+      dire('${T("Description rédigée — relisez-la avant d’enregistrer.")}' + resteF, resteF ? 'att' : 'bon');
     });
   }
 
@@ -4250,7 +4292,7 @@ function pageProduit(id) {
     poser('p-ajust', (p.ajustement === 'petit' || p.ajustement === 'grand') ? p.ajustement : '');
     var _ent = (p.entretien && typeof p.entretien === 'object') ? p.entretien : {};
     ENT = new Set(Array.isArray(_ent.codes) ? _ent.codes.map(String) : []);
-    poser('p-compo', _ent.composition || ''); poser('p-ent-autre', _ent.autre || '');
+    poser('p-compo', _ent.composition || ''); poser('p-ent-autre', _ent.autre || ''); majCompo();
     poser('p-prix', p.price != null ? szArgentChamp(p.price) : '');
     poser('p-solde', p.salePrice != null ? szArgentChamp(p.salePrice) : '');
     poser('p-cout', p.acquisitionCost != null ? szArgentChamp(p.acquisitionCost) : '');
@@ -5083,7 +5125,7 @@ function pageProduit(id) {
     poser('p-prix', f.prix); poser('p-solde', f.solde); poser('p-cout', f.cout);
     poser('p-poids', f.poids); poser('p-seuil', f.seuil);
     poser('p-limclient', f.limclient || '');
-    poser('p-compo', f.compo || ''); poser('p-ent-autre', f.entAutre || '');
+    poser('p-compo', f.compo || ''); poser('p-ent-autre', f.entAutre || ''); majCompo();
     ENT = new Set(Array.isArray(d.ent) ? d.ent.map(String) : []);
     // ⚠ UN BROUILLON ECRIT PAR LA VERSION PRECEDENTE ne porte que l ancien code
     // ('0' | '1' | '3' | '4'). On le traduit : sans cela la reprise reposerait
@@ -5298,6 +5340,15 @@ function pageProduit(id) {
   function enregistrer(nipPhotos){
     NIP_PHOTOS = (typeof nipPhotos === 'string') ? nipPhotos : '';
     if (!Assist.toutValide()) return;
+    /* (2026-11-04) La composition, quand le texte nomme une fibre : on ramène à sa carte (étape 5). */
+    var _exC = exigenceCompo();
+    if (_exC.requise && (_exC.vide || _exC.manquantes.length)) {
+      Assist.aller(5); majCompo();
+      dire(_exC.vide ? '${T("La composition est obligatoire : le nom ou la description nomme")} ' + guillemets(_exC.mots) + '.'
+        : '${T("Le texte annonce")} ' + guillemets(_exC.manquantes) + ' ${T("mais la composition ne le contient pas.")}', 'err');
+      var _eC = document.getElementById('p-compo'); if (_eC) _eC.focus();
+      return;
+    }
     /* (2026-10-25, audit) LA QUESTION « Effacer les photos originales ? » EST RETIRÉE : ORIG_A_EFFACER n était
        plus jamais rempli depuis que le retour du Studio RETIRE lui-même l originale (poserDuStudio, 2026-10-20).
        Le bloc ne pouvait plus s exécuter et laissait croire à une question qui ne venait jamais. */
@@ -5471,6 +5522,11 @@ function pageProduit(id) {
         if (r && r.motif === 'photo_requise') Assist.aller(0);
         if (r && /^(mannequin_|video_|vue360_)/.test(String(r.motif || ''))) Assist.aller(0);
         if (r && r.motif === 'stock_requis') Assist.aller(7);
+        if (r && (r.motif === 'composition_requise' || r.motif === 'composition_contredite')) {
+          Assist.aller(5); majCompo();
+          dire(expliquer(r) + (r.mots && r.mots.length ? ' ' + guillemets(r.mots) : ''), 'err');
+          return;
+        }
         // LE NIP DES PHOTOS : demandé (et redemandé s'il est faux) ; annuler laisse la fiche telle qu'à l'écran.
         if (r && (r.motif === 'photos_nip_requis' || r.motif === 'photos_nip_faux')) {
           dire('');

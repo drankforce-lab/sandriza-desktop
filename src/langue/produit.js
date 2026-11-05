@@ -110,6 +110,18 @@ module.exports = {
   'Nom et description proposés — relisez-les avant d’enregistrer.':
     'Name and description suggested — read them over before saving.',
   'Ancien nom :': 'Previous name:',
+  '(facultative)': '(optional)',
+  '(obligatoire)': '(required)',
+  'Le texte annonce': 'The text announces',
+  'mais la composition ne le contient pas.': 'but the composition does not include it.',
+  'Obligatoire : le nom ou la description nomme': 'Required: the name or description mentions',
+  'Inscrivez la composition, ou retirez ce mot du texte.': 'Enter the composition, or remove this word from the text.',
+  'La loi l’exige dès qu’une fibre est nommée.': 'The law requires it as soon as a fibre is named.',
+  'La composition est obligatoire : le nom ou la description nomme': 'The composition is required: the name or description mentions',
+  'La composition est obligatoire : le nom ou la description nomme une fibre.': 'The composition is required: the name or description mentions a fibre.',
+  'La composition ne contient pas une fibre que le texte annonce :': 'The composition does not include a fibre announced in the text:',
+  'Le texte nomme encore': 'The text still mentions',
+  '— retirez-le, ou inscrivez la composition.': '— remove it, or enter the composition.',
 
   /* ── TAILLES ET COULEURS ────────────────────────────────────────────────── */
   'Tailles et couleurs': 'Sizes and colours',
