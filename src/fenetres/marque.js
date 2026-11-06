@@ -110,6 +110,15 @@ button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weigh
 button.prim:hover:not(:disabled){background:var(--or-clair)}
 button.pt{font-size:.76rem;padding:.25rem .55rem}
 button.dgr{color:var(--tx-err);border-color:rgba(248,113,113,.4)}
+/* Telechargements (2026-11-06) : une tuile par fichier, sa vignette sur le fond ou il sert. */
+.fichiers{display:grid;grid-template-columns:repeat(auto-fill,minmax(13rem,1fr));gap:.8rem}
+.fic{border:1px solid var(--v07);border-radius:10px;padding:.6rem;background:var(--f-pill);
+  display:flex;flex-direction:column;gap:.35rem;min-width:0}
+.fic .vig{height:6rem}
+.fic .nom{margin:0;font-size:.82rem;font-weight:700}
+.fic .fn{margin:0;font-size:.72rem;color:var(--tx3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fic button{align-self:flex-start}
+.gestes-tl{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
 .vide{padding:1.1rem .6rem;text-align:center;color:var(--tx2);font-size:.82rem}
 /* ⚠ LE BANDEAU DE LECTURE SEULE VIT HORS DE LA GRILLE. Place dedans avec
    << grid-column:1/-1 >>, il OCCUPE la derniere piste : auto-fit ne la voit plus
@@ -141,7 +150,7 @@ button.dgr{color:var(--tx-err);border-color:rgba(248,113,113,.4)}
    aucun jeu d essai ne peut atteindre les onglets « Logos » et « Pages de
    connexion » — ils ne sont joignables qu au clic, et le garde-fou ne clique
    pas. Trois cas d ouverture sont declares dans reponses-fenetres.js. */
-const ONGLETS_VALIDES = ['marque', 'logos', 'connexion'];
+const ONGLETS_VALIDES = ['marque', 'logos', 'connexion', 'telechargements'];
 
 function pageMarque(onglet) {
   const depart = ONGLETS_VALIDES.indexOf(String(onglet || '')) >= 0 ? String(onglet) : 'marque';
@@ -214,6 +223,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'m-name':40,'m-slogan':80,'m-slogan-en'
     delai:              '${T("La fenêtre principale n’a pas répondu à temps.")}',
     operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
     nuage:              '${T("L’enregistrement dans le nuage a échoué. Réessayez.")}',
+    fichier_inconnu:    '${T("Ce fichier ne fait pas partie des logos à télécharger.")}',
+    reseau:             '${T("Le fichier n’a pas pu être lu sur le site. Vérifiez la connexion.")}',
+    code_requis:        '${T("Téléchargement annulé : le code n’a pas été confirmé.")}',
     echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){
@@ -504,11 +516,89 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'m-name':40,'m-slogan':80,'m-slogan-en'
     el.innerHTML = h;
   }
 
+  /* ── ONGLET 4 : les fichiers du logo a telecharger (2026-11-06) ─────────
+     Sa demande : « une section ou je serais toujours en mesure de telecharger
+     mes logos, incluant les SVG et les presentations ». La LISTE vient du site
+     (D.telechargements) : un fichier ajoute au depot y parait sans nouvelle
+     version de l application. Le fichier est lu PAR LA PAGE DU SITE
+     (config:marque:fichier) puis enregistre dans le dossier des exports.
+     ⚠ La lecture seule n y change rien : telecharger n ecrit rien au serveur. */
+  var TL_GROUPES = {
+    svg:          ['${T("Vectoriel (SVG)")}', '${T("Agrandissable sans perte : imprimeur, enseigne, broderie, présentation.")}'],
+    presentation: ['${T("Présentation (fond blanc)")}', '${T("Images prêtes à projeter ou à glisser dans une diapo.")}'],
+    png:          ['${T("Images (PNG transparent)")}', '${T("Les logos tels qu’ils servent sur le site.")}'],
+    icones:       ['${T("Icônes")}', '${T("Icônes d’application, pastille de l’administration, image de partage.")}']
+  };
+  var TL_OCCUPE = false;
+  function tousLesFichiers(){
+    var l = [];
+    ((D && D.telechargements) || []).forEach(function(g){ (g.fichiers || []).forEach(function(x){ l.push(x); }); });
+    return l;
+  }
+  function dessinerTelechargements(){
+    var gs = (D && D.telechargements) || [];
+    if (!gs.length) {
+      corps.innerHTML = '<div class="carte pleine"><div class="vide">${T("Le site ne propose encore aucun fichier à télécharger. Rechargez la fenêtre principale (Ctrl+R) puis rouvrez cet onglet.")}</div></div>';
+      return;
+    }
+    var h = [];
+    h.push('<div class="carte pleine"><h2>${T("Les fichiers du logo")}</h2>');
+    h.push('<p class="sous">${T("Chaque fichier est enregistré dans le dossier des exports (Documents › SANDRIZA › Exports).")}</p>');
+    h.push('<div class="gestes-tl"><button class="prim" id="tl-tout">${T("Tout télécharger")} (' + tousLesFichiers().length + ')</button>'
+      + '<button id="tl-dossier">${T("Ouvrir le dossier des exports")}</button></div></div>');
+    gs.forEach(function(g){
+      var tg = TL_GROUPES[g.cle] || [g.titre, g.aide];
+      h.push('<div class="carte pleine"><h2>' + esc(tg[0]) + '</h2><p class="sous">' + esc(tg[1]) + '</p><div class="fichiers">');
+      (g.fichiers || []).forEach(function(x){
+        var fn = String(x.chemin || '').split('/').pop();
+        h.push('<div class="fic"><div class="vig" style="background:' + esc(x.fond || '#ffffff') + '"><img src="' + esc(x.url) + '" alt="" loading="lazy"></div>'
+          + '<p class="nom">' + esc(x.nom) + '</p><p class="fn" title="' + esc(fn) + '">' + esc(fn) + '</p>'
+          + '<button class="pt" data-tl="' + esc(x.chemin) + '">${T("⬇ Télécharger")}</button></div>');
+      });
+      h.push('</div></div>');
+    });
+    corps.innerHTML = h.join('');
+    var bs = corps.querySelectorAll('[data-tl]');
+    for (var i = 0; i < bs.length; i++) bs[i].onclick = function(e){
+      telecharger([e.currentTarget.getAttribute('data-tl')]);
+    };
+    var bt = document.getElementById('tl-tout');
+    if (bt) bt.onclick = function(){ telecharger(tousLesFichiers().map(function(x){ return x.chemin; })); };
+    var bd = document.getElementById('tl-dossier');
+    if (bd) bd.onclick = function(){ if (P && P.ouvrirDossierExports) P.ouvrirDossierExports(); };
+  }
+  /* Un a un, dans l ordre. Un echec arrete la file et dit pourquoi. */
+  function telecharger(chemins){
+    if (TL_OCCUPE || !chemins.length) return;
+    if (!P || typeof P.enregistrerExport !== 'function') { dire('${T("Cette version de l’application ne sait pas enregistrer un export.")}', 'err'); return; }
+    TL_OCCUPE = true;
+    var faits = 0, n = chemins.length;
+    var suivant = function(){
+      if (faits >= n) {
+        TL_OCCUPE = false;
+        dire(n > 1 ? n + '${T(" fichiers enregistrés dans le dossier des exports.")}'
+                   : '${T("Enregistré dans le dossier des exports :")} ' + String(chemins[0]).split('/').pop(), 'bon');
+        return;
+      }
+      var c = chemins[faits];
+      dire('${T("Téléchargement…")} ' + (n > 1 ? '(' + (faits + 1) + ' / ' + n + ') ' : '') + String(c).split('/').pop());
+      appeler('config:marque:fichier', [c]).then(function(r){
+        if (!r || !r.ok || !r.dataUrl) { TL_OCCUPE = false; dire(expliquer(r), 'err'); return; }
+        return Promise.resolve(P.enregistrerExport(r.nom, r.dataUrl)).then(function(w){
+          if (w && w.ok === false) { TL_OCCUPE = false; dire(expliquer({ motif: w.error || 'echec' }), 'err'); return; }
+          faits++; suivant();
+        });
+      });
+    };
+    suivant();
+  }
+
   /* ── Coquille : onglets, pied, lecture, ecriture ─────────────────────── */
   var ONGLETS = [
     { k:'marque',   lib:'${T("Marque")}' },
     { k:'logos',    lib:'${T("Logos")}' },
-    { k:'connexion', lib:'${T("Pages de connexion")}' }
+    { k:'connexion', lib:'${T("Pages de connexion")}' },
+    { k:'telechargements', lib:'${T("Téléchargements")}' }
   ];
   function dessinerOnglets(){
     ongl.innerHTML = ONGLETS.map(function(o){
@@ -551,9 +641,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'m-name':40,'m-slogan':80,'m-slogan-en'
     dessinerOnglets();
     if (ONGLET === 'marque') dessinerMarque();
     else if (ONGLET === 'logos') dessinerLogos();
+    else if (ONGLET === 'telechargements') dessinerTelechargements();
     else dessinerConnexion();
-    bsave.disabled = RO;
-    breinit.disabled = RO;
+    // Rien a enregistrer ni a reinitialiser dans les telechargements.
+    bsave.disabled = RO || ONGLET === 'telechargements';
+    breinit.disabled = RO || ONGLET === 'telechargements';
     breinit.textContent = ONGLET === 'connexion' ? '${T("Réinitialiser les couleurs")}' : '${T("Réinitialiser")}';
   }
   function occuper(o){

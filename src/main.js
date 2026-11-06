@@ -1290,7 +1290,8 @@ const codeExportFinir = (ok) => {
 /* ⚠ UNE PHOTO NE DEMANDE PAS LE CODE (2026-10-09, sa demande : « quand on exporte une photo, pas
    besoin du MFA »). Le code protège les DONNÉES (clients, commandes, rapports, sauvegardes) ; une
    photo de produit est déjà publique sur la boutique. Reconnue à son extension ou à son type. */
-const _estPhoto = (nom, mime) => /\.(jpe?g|png|webp|gif|avif|heic|heif|bmp|tiff?)$/i.test(String(nom || ''))
+// (2026-11-06) le SVG aussi : les logos vectoriels de « Logos et marque › Téléchargements » sont publics.
+const _estPhoto = (nom, mime) => /\.(jpe?g|png|webp|gif|avif|heic|heif|bmp|tiff?|svg)$/i.test(String(nom || ''))
   || /^image\//i.test(String(mime || ''));
 const exigerCodeExport = (quoi, parent) => {
   if (_estPhoto(quoi)) return Promise.resolve(true);
@@ -2987,7 +2988,7 @@ const OPS_PONT = new Set([
   'config:heures:donnees', 'config:heures:ecrire',
   'config:footer:donnees', 'config:footer:ecrire',
   'config:apparence:donnees', 'config:apparence:ecrire',
-  'config:marque:donnees', 'config:marque:ecrire', 'config:marque:reinit', 'config:marque:jeu',
+  'config:marque:donnees', 'config:marque:ecrire', 'config:marque:reinit', 'config:marque:jeu', 'config:marque:fichier',
   'config:icones:donnees', 'config:icones:ajouter', 'config:icones:supprimer',
   'config:icones:ico', 'config:icones:convertir',
   'config:conformite:donnees', 'config:conformite:ecrire',
@@ -3679,7 +3680,7 @@ const LIMITES_PONT = {
   // ⚠ L ecriture de la marque porte des IMAGES : le depot dans R2 se fait au
   // coeur, six logos peuvent partir d un coup, et un plafond de 20 s ferait
   // passer un depot lent pour une panne.
-  'config:marque:donnees': 15000, 'config:marque:ecrire': 120000, 'config:marque:reinit': 30000, 'config:marque:jeu': 30000,
+  'config:marque:donnees': 15000, 'config:marque:ecrire': 120000, 'config:marque:reinit': 30000, 'config:marque:jeu': 30000, 'config:marque:fichier': 30000,
   // ⚠ L ajout d une icone depose dans R2 ; la conversion .ico redessine six
   // tailles depuis l original. Ni l une ni l autre n est instantanee.
   'config:icones:donnees': 15000, 'config:icones:ajouter': 90000,

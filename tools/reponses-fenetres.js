@@ -1928,6 +1928,26 @@ const JEU = {
           cardBg: '#1e293b', cardBorder: '#334155', titleColor: '#e2e8f0',
           subtitleColor: '#64748b', subtitleText: 'Panneau d’administration' } },
     } },
+    // (2026-11-06) l onglet Telechargements : les fichiers du logo, en lecture seule (telecharger n ecrit rien)
+    { nom: 'marque onglet telechargements', id: 'telechargements', reponses: {
+      identite: IDENTITE,
+      'config:marque:fichier': { ok: true, nom: 'logo-sandriza-fr.svg', dataUrl: 'data:image/svg+xml;base64,PHN2Zy8+' },
+      'config:marque:donnees': { ok: true, peutModifier: false,
+        telechargements: [
+          { cle: 'svg', titre: 'Vectoriel (SVG)', aide: '', fichiers: [
+            { chemin: 'assets/marque/nouveau/svg/logo-sandriza-fr.svg', nom: 'Logo — FR', aide: '', fond: '#f5f2ec', url: LOGO_BANDEAU },
+            { chemin: 'assets/marque/nouveau/svg/monogramme-sz-creme.svg', nom: 'Monogramme crème', aide: '', fond: '#1a1a1a', url: LOGO_BANDEAU } ] },
+          { cle: 'presentation', titre: 'Présentation', aide: '', fichiers: [
+            { chemin: 'assets/marque/nouveau/presentation/diapo-logo-4k-3840x2160-fr.png', nom: 'Diapo 4K — FR', aide: '', fond: '#ffffff', url: LOGO_BANDEAU } ] } ],
+        marque: { name: 'SANDRIZA', sub: '', slogan: '', sloganEN: '', letter: 'S',
+          gradient: { enabled: false, from: '#ec4899', to: '#3b82f6', dir: '135deg' } },
+        logos: { store: '', store_en: '', admin: '', login: '', transparent: '', transparent_en: '' },
+        clientLogin: { bgFrom: '#1a1a2e', bgTo: '#16213e', textColor: '#ffffff' },
+        loginTheme: { bgFrom: '#0f172a', bgMid: '#1e1b4b', logoGradFrom: '#4f46e5',
+          logoGradTo: '#7c3aed', btnGradFrom: '#4f46e5', btnGradTo: '#6366f1',
+          cardBg: '#1e293b', cardBorder: '#334155', titleColor: '#e2e8f0',
+          subtitleColor: '#64748b', subtitleText: 'Panneau d’administration' } },
+    } },
     { nom: 'marque onglet connexion, lecture seule', id: 'connexion', reponses: {
       identite: IDENTITE,
       'config:marque:donnees': { ok: true, peutModifier: false,
