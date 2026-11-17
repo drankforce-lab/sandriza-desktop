@@ -110,7 +110,8 @@ module.exports = {
   'Clé API Resend *': 'Resend API key *',
   'Clé API Resend': 'Resend API key',
   'Créez votre clé sur ': 'Create your key at ',
-  'Enregistrée — laisser vide pour la conserver': 'Saved — leave blank to keep it',
+  /* (2026-11-17) raccourcie : tronquée sous Linux (travail contrastes, 301 px pour 264). */
+  'Déjà enregistrée — laisser vide': 'Already saved — leave blank',
   'Clé enregistrée': 'Key saved',
   'Créez votre clé sur resend.com/api-keys': 'Create your key at resend.com/api-keys',
   'Courriel expéditeur *': 'Sender email *',
