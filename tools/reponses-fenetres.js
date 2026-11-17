@@ -4071,7 +4071,10 @@ const JEU = {
         candidats: [], choisi: 'https://atelier-riviere.ca/products/robe-mila-fleurie',
         fiche: { url: 'https://atelier-riviere.ca/products/robe-mila-fleurie', plateforme: 'shopify', nom: 'Robe Mila fleurie à manches bouffantes et taille smockée', marque: 'Atelier Rivière', ref: 'AR-2291',
           description: 'Robe mi-longue en viscose fleurie, manches bouffantes, taille smockée et volant à l’ourlet. Doublée.' + String.fromCharCode(10) + '• Coupe ample' + String.fromCharCode(10) + '• Lavable à la main',
-          prixFournisseur: 42.5, devise: 'CAD', cout: 42.5, prix: 93.99, tailles: ['XS', 'S', 'M', 'L'], taillesInconnues: ['XXXL'], couleurs: ['Rose', 'Noir'], couleursInconnues: ['Terracotta'],
+          // (8.33.2) en dollars US, converti, avec ses paliers de quantité, et traduit du chinois
+          prixFournisseur: 30.5, devise: 'USD', taux: 1.3912, tauxDate: '2026-11-16', cout: 42.43, prix: 93.99,
+          paliers: [{ min: 1, max: 9, prix: 30.5, cout: 42.43, economie: 0 }, { min: 10, max: 29, prix: 29.4, cout: 40.9, economie: 3.6 }, { min: 30, max: null, prix: 28.1, cout: 39.09, economie: 7.9 }],
+          qteMin: 1, alerte: { min: 30, prix: 28.1, cout: 39.09, economie: 7.9 }, langue: 'zh', traduit: 'zh', nomOriginal: '法式碎花泡泡袖连衣裙 收腰', tailles: ['XS', 'S', 'M', 'L'], taillesInconnues: ['XXXL'], couleurs: ['Rose', 'Noir'], couleursInconnues: ['Terracotta'],
           composition: '100 % viscose', compositionSure: true, anglais: false, images: IMGS, photos: [IMGS[0], IMGS[2], IMGS[1]] },
         manquants: ['poids', 'stock'], cree: '2026-11-17T15:00:00.000Z', maj: '2026-11-17T15:02:00.000Z' },
       { id: 'imp_aaaa2', fournisseurId: 'sup_0001', fournisseurNom: 'Atelier Rivière', recherche: 'chemisier lin', categorie: 'hauts', enLigne: false, statut: 'plusieurs',
@@ -4086,7 +4089,10 @@ const JEU = {
         fiche: { nom: 'Cardigan côtelé crème', images: [IMGS[6]], photos: [IMGS[6]] }, manquants: [], cree: '2026-11-16T15:00:00.000Z', maj: '2026-11-16T15:00:00.000Z' } ];
     var rep = function(fiches){ return { 'import:contexte': CTX, 'import:fiches': { ok: true, fiches: fiches, total: fiches.length },
       'import:preparer': { ok: true, fiche: F[0] }, 'import:modifier': { ok: true, fiche: F[0] }, 'import:retirer': { ok: true },
-      'import:ouvrir': { ok: true }, identite: IDENTITE }; };
+      'import:ouvrir': { ok: true }, identite: IDENTITE,
+      'import:estimer': { ok: true, majoration: 2.2, estimations: [{ devise: 'USD', prixFournisseur: 6.92, taux: 1.3912, tauxDate: '2026-11-16', cout: 9.63, prix: 21.99,
+        paliers: [{ min: 1, max: 9, prix: 6.92, cout: 9.63, economie: 0 }, { min: 30, max: null, prix: 6.51, cout: 9.06, economie: 5.9 }], qteMin: 1, alerte: { min: 30, prix: 6.51, cout: 9.06, economie: 5.9 } }] },
+      'import:traduire': { ok: true, traductions: ['Robe Mila fleurie à manches bouffantes', null, null, null, null] } }; };
     return [ { nom: 'quatre fiches', id: '', reponses: rep(F) }, { nom: 'aucune fiche', id: '', reponses: rep([]) } ];
   })(),
   // (8.29.0) L'analyse des produits : deux variantes à commander (une en précommande, une sans fournisseur) et une

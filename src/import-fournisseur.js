@@ -205,6 +205,56 @@ function prixNombre(v) {
   return isFinite(n) && n > 0 ? Math.round(n * 100) / 100 : null;
 }
 
+/* ══ LES PRIX EN QUANTITÉ (paliers) ═══════════════════════════════════════
+   Sa demande (2026-11-17) : « si tu vois que le prix en quantité est moins cher, alerte-moi ».
+   Mesuré chez Everful : la grille « 1 - 9 Pieces $6.92 / 10 - 19 Pieces $6.79 / … / ≥ 30 Pieces $6.51 », et le
+   JSON-LD n'en donne que lowPrice (6.51) — LE PRIX À 30 PIÈCES, que l'on prenait pour le prix unitaire.
+   Deux sources : priceSpecification + eligibleQuantity (JSON-LD), puis la grille écrite dans la page.
+   Rend [{ min, max, prix }] trié par quantité, ou [] — une grille n'est retenue que si elle a ≥ 2 paliers et que
+   le prix ne MONTE jamais avec la quantité (sinon ce n'est pas une grille de quantités, c'est autre chose). */
+const RX_UNITE = '(?:pi[eè]ces?|pieces?|pcs?|units?|unit[eé]s?|items?|articles?|morceaux|qty|qt[eé]s?)';
+const RX_PRIX_TXT = '(?:(?:US|CA|C|AU)?\\s?\\$\\s?(\\d+(?:[.,]\\d{1,2})?)|(\\d+(?:[.,]\\d{1,2})?)\\s?\\$|(?:€|£|¥|USD|CAD|EUR)\\s?(\\d+(?:[.,]\\d{1,2})?))';
+function grilleValide(l) {
+  const p = l.filter((x) => x && x.min >= 1 && x.prix > 0).sort((a, b) => a.min - b.min);
+  const u = [];
+  p.forEach((x) => { if (!u.length || u[u.length - 1].min !== x.min) u.push(x); });
+  if (u.length < 2) return [];
+  for (let i = 1; i < u.length; i++) if (u[i].prix > u[i - 1].prix + 0.001) return [];
+  if (!(u[u.length - 1].prix < u[0].prix)) return [];
+  return u.slice(0, 8).map((x, i) => ({ min: x.min, max: x.max || (u[i + 1] ? u[i + 1].min - 1 : null), prix: x.prix }));
+}
+function paliersDe(html, prod) {
+  // ① JSON-LD : offers[].priceSpecification[] avec eligibleQuantity.minValue
+  const ld = [];
+  const offres = prod ? [].concat(prod.offers || []) : [];
+  if (prod) [].concat(prod.hasVariant || []).forEach((v) => { if (v && typeof v === 'object') [].concat(v.offers || []).forEach((o) => offres.push(o)); });
+  offres.forEach((o) => {
+    [].concat((o && o.priceSpecification) || []).forEach((ps) => {
+      const q = ps && ps.eligibleQuantity;
+      const min = q ? parseInt(q.minValue != null ? q.minValue : q.value, 10) : NaN;
+      const prix = prixNombre(ps && ps.price);
+      if (min >= 1 && prix) ld.push({ min, max: q && q.maxValue ? parseInt(q.maxValue, 10) || null : null, prix });
+    });
+  });
+  const g1 = grilleValide(ld);
+  if (g1.length) return g1;
+  // ② la grille écrite : « 1 - 9 Pieces $6.92 », « 10-19 pcs : 6,79 $ », « ≥ 30 Pieces $6.51 », « 50+ units $5.90 »
+  const t = texteDeHtml(String(html || '').replace(/<(script|style|noscript)[\s\S]*?<\/\1>/gi, ' '), 200000).replace(/\s+/g, ' ');
+  const rx = new RegExp('(?:(\\d{1,5})\\s?(?:-|–|~|à|to)\\s?(\\d{1,5})|(?:≥|>=|plus de|over|min\\.?)\\s?(\\d{1,5})|(\\d{1,5})\\s?\\+)\\s?' + RX_UNITE + '\\+?\\s?[:=]?\\s?' + RX_PRIX_TXT, 'gi');
+  const brut = [];
+  let m;
+  while ((m = rx.exec(t)) && brut.length < 40) {
+    const min = parseInt(m[1] || m[3] || m[4], 10);
+    const max = m[2] ? parseInt(m[2], 10) : null;
+    const prix = prixNombre(m[5] || m[6] || m[7]);
+    if (min >= 1 && prix && (!max || max >= min)) brut.push({ min, max, prix });
+  }
+  // une même grille répétée (vignette + tableau) : la première série croissante suffit
+  const serie = [];
+  brut.forEach((x) => { if (!serie.length || x.min > serie[serie.length - 1].min) serie.push(x); });
+  return grilleValide(serie);
+}
+
 /* ══ ANALYSEURS DE PAGE ═══════════════════════════════════════════════════ */
 
 /** Les blocs JSON-LD d'une page, à plat (les @graph dépliés). */
@@ -255,7 +305,7 @@ function analyserProduitHtml(html, url) {
   const prod = groupe || blocs.find((o) => aType(o, 'product'));
   const mt = metas(h);
   const f = { url: String(url || ''), plateforme: 'page', titre: '', description: '', marque: '', sku: '', prix: null, devise: '',
-    images: [], tailles: [], couleurs: [], composition: '', source: [] };
+    images: [], tailles: [], couleurs: [], composition: '', source: [], paliers: [] };
 
   if (prod) {
     f.source.push('json-ld');
@@ -340,6 +390,14 @@ function analyserProduitHtml(html, url) {
   });
   f.tailles = uniques(f.tailles.map((x) => texteDeHtml(String(x))));
   f.couleurs = uniques(f.couleurs.map((x) => texteDeHtml(String(x))));
+  /* LES PALIERS : le prix de la fiche devient celui du PLUS PETIT palier (l'achat à l'unité ou au minimum de
+     commande). ⚠ Sans eux, le lowPrice d'une AggregateOffer était pris — chez Everful, le prix à 30 pièces. */
+  f.paliers = paliersDe(h, prod);
+  if (f.paliers.length) {
+    f.prix = f.paliers[0].prix;
+    f.qteMin = f.paliers[0].min;
+    if (!f.devise) f.devise = mt['product:price:currency'] || mt['og:price:currency'] || '';
+  }
   f.titre = f.titre.slice(0, 160);
   f.marque = f.marque.slice(0, 60);
   return f;
@@ -400,7 +458,7 @@ function wooVersFiche(p) {
 
 /* Les chemins qui ressemblent à une page de produit, toutes plateformes confondues. */
 const RX_CHEMIN_PRODUIT = /\/(products?|produits?|product-page|p|item|items|article|articles|shop|boutique|catalogue|catalog|collections\/[^/]+\/products)\/[^/?#]{2,}|-p-\d+|\/\d+-[\w-]+\.html$|\/[\w-]+-\d{3,}\.html$|\.html$/i;
-const RX_CHEMIN_EXCLU = /\/(cart|panier|account|compte|login|connexion|search|recherche|blog|blogs|pages?|policies|policy|contact|faq|collections\/?$|tag|categor(y|ie)s?\/?$|wishlist)(\/|\?|$)/i;
+const RX_CHEMIN_EXCLU = /\/(cart|panier|account|compte|login|connexion|search|recherche|blog|blogs|pages?|policies|policy|contact|faq|collections\/?$|tag|categor(y|ie)s?\/?$|wishlist|support|help|aide|help-center)(\/|\?|$)/i;
 
 /** Les liens de produit d'une page de résultats. Rend [{ url, titre, image }], dans l'ordre de la page. */
 function liensProduits(html, base) {
@@ -420,21 +478,27 @@ function liensProduits(html, base) {
     const ia = img ? attributs(img[0]) : {};
     let titre = texteDeHtml(m[2]).replace(/\n+/g, ' ').trim() || a.title || a['aria-label'] || ia.alt || '';
     // Le prix collé au titre dans une vignette (« Robe Mila 49,99 $ ») : retiré.
-    titre = titre.replace(/\s+/g, ' ').replace(/\s*(?:(?:CA|US|C)?\s?\$\s?\d[\d\s.,]*|\d[\d\s.,]*\s?\$)(?:\s*(?:CAD|USD))?\s*$/i, '').slice(0, 160);
+    titre = titre.replace(/\s+/g, ' ');
+    /* Le prix d'une vignette (sa demande : voir les prix AU MOMENT DE LA RECHERCHE) : le PREMIER montant du texte
+       du lien (le second est souvent le prix barré), puis les montants sont retirés du titre. */
+    const pm = /(?:(?:CA|US|C)?\s?\$\s?(\d[\d,]*(?:\.\d{1,2})?)|(\d[\d\s]*(?:,\d{1,2})?)\s?\$)/.exec(titre);
+    const prixV = pm ? prixNombre(pm[1] || pm[2]) : null;
+    titre = titre.replace(/\s*(?:(?:CA|US|C)?\s?\$\s?\d[\d\s.,]*|\d[\d\s.,]*\s?\$)(?:\s*(?:CAD|USD))?/gi, ' ').replace(/\s+/g, ' ').trim().slice(0, 160);
     const image = ia['data-src'] || ia.src || (ia.srcset ? String(ia.srcset).split(',').pop().trim().split(/\s+/)[0] : '');
     if (vus.has(k)) {
       // le même produit lié deux fois (photo puis titre) : on complète ce qui manquait
       const d = out.find((x) => x.cle === k);
       if (d && !d.titre && titre) d.titre = titre;
       if (d && !d.image && image) d.image = image;
+      if (d && d.prix == null && prixV) d.prix = prixV;
       continue;
     }
     vus.add(k);
-    out.push({ cle: k, url: u.href, titre, image });
+    out.push({ cle: k, url: u.href, titre, image, prix: prixV });
   }
   // un titre vide se déduit de l'adresse (…/products/robe-mila-fleurie → « robe mila fleurie »)
   return out.map((x) => ({ url: x.url, titre: x.titre || decodeURIComponent(x.url.split('?')[0].replace(/\/$/, '').split('/').pop()).replace(/\.html$/, '').replace(/[-_]+/g, ' '),
-    image: (x.image && !/^data:/i.test(x.image)) ? ((urlSure(imageGrande(x.image), base) || {}).href || '') : '' }));
+    image: (x.image && !/^data:/i.test(x.image)) ? ((urlSure(imageGrande(x.image), base) || {}).href || '') : '', prix: x.prix || null }));
 }
 
 /** L'adresse de recherche d'un gabarit réglé (« https://…/recherche?q={q} »). */
@@ -520,7 +584,19 @@ async function _rendre(url, attenteMs) {
     w.webContents.on('will-navigate', (ev, dest) => { if (!urlSure(dest)) ev.preventDefault(); });
     const charge = w.loadURL(u.href, { userAgent: AGENT }).catch(() => {});
     await Promise.race([charge, new Promise((r) => setTimeout(r, 25000))]);
-    await new Promise((r) => setTimeout(r, attenteMs || 2200));
+    /* ⚠ PAS UNE ATTENTE FIXE (Everful, 2026-11-17) : la première recherche d'une session a rendu une page encore
+       vide après 2,2 s — 0 résultat, alors que la même adresse en donnait 60 l'instant d'après. On attend que le
+       nombre de liens de la page CESSE DE CROÎTRE (deux relevés égaux à 600 ms d'écart), entre 1,5 s et 9 s. */
+    const compter = () => w.webContents.executeJavaScript('document.links ? document.links.length : 0', true).catch(() => 0);
+    const debut = Date.now(), plafond = Math.max(attenteMs || 0, 9000);
+    await new Promise((r) => setTimeout(r, 1500));
+    let avant = -1, stables = 0;
+    while (Date.now() - debut < plafond) {
+      const n = await compter();
+      if (n === avant && n > 0) { if (++stables >= 2) break; } else stables = 0;
+      avant = n;
+      await new Promise((r) => setTimeout(r, 600));
+    }
     // Un défilement réveille les listes et galeries « paresseuses ».
     await w.webContents.executeJavaScript('window.scrollTo(0, document.body ? document.body.scrollHeight / 2 : 0); 1', true).catch(() => 0);
     await new Promise((r) => setTimeout(r, 900));
@@ -574,7 +650,11 @@ async function chercherPage(origine, nom, gabarit) {
     let liens = [];
     let r = null;
     try { r = await lire(adr); } catch (e) { r = null; }
-    if (r && r.ok) liens = liensProduits(r.texte, r.url);
+    /* ⚠ Everful (2026-11-17) : la page reçue n'a que le décor (la liste se dessine en JavaScript) ; un lien
+       « /support/articles/10 » passait pour un produit et sortait seul résultat, à 0 %. Un lien qui ne partage
+       AUCUN mot avec le nom cherché n'est pas un résultat : on l'écarte, et la page « vide » se rend. */
+    const pertinents = (l) => l.filter((x) => similarite(nom, x.titre) > 0);
+    if (r && r.ok) liens = pertinents(liensProduits(r.texte, r.url));
     /* Rien dans la page reçue : elle est peut-être dessinée par JavaScript, ou le site refuse les lectures directes
        (401/403/429/503, une protection anti-robots) — on la REND dans la fenêtre cachée, comme un navigateur.
        ⚠ Trois rendus au plus par recherche : chacun coûte quelques secondes. Une page introuvable (404) ne se rend pas. */
@@ -582,7 +662,14 @@ async function chercherPage(origine, nom, gabarit) {
     if (!liens.length && rendus < 3 && (gabarit || (r && r.ok) || bloque || !r)) {
       rendus++;
       const rendu = await rendre(adr).catch(() => null);
-      if (rendu && rendu.html) liens = liensProduits(rendu.html, rendu.url);
+      if (rendu && rendu.html) {
+        const tous = liensProduits(rendu.html, rendu.url);
+        liens = pertinents(tous);
+        /* La page rendue MONTRE des produits, mais aucun ne ressemble au nom : l'adresse de recherche est la bonne,
+           c'est le mot qui ne donne rien (« foulard laine » sur un site anglais). Inutile d'essayer les autres
+           adresses (15 s mesurées chez Everful) : on rend « rien », et la fenêtre réessaie le nom en anglais. */
+        if (!liens.length && tous.length >= 3) { _gabarits.set(origine, g); return { liens: [], gabarit: g }; }
+      }
     }
     if (liens.length) { _gabarits.set(origine, g); return { liens, gabarit: g }; }
   }
@@ -621,8 +708,22 @@ async function chercher(o) {
 
 /* ══ EXTRAIRE ═════════════════════════════════════════════════════════════ */
 
-/** La fiche brute d'une page de produit du fournisseur. `site` : l'adresse du fournisseur (les liens doivent y rester). */
+/* Les fiches lues récemment : la carte est enrichie (prix, paliers) dès la recherche, puis « Préparer la fiche »
+   reprend la MÊME lecture sans retourner chez le fournisseur. 15 minutes, 80 fiches au plus. */
+const _lues = new Map();
 async function extraire(o) {
+  const cle = String((o || {}).url || '');
+  const m = _lues.get(cle);
+  if (m && Date.now() - m.t < 15 * 60000) return JSON.parse(JSON.stringify(m.r));
+  const r = await _extraire(o);
+  if (r && r.ok) {
+    _lues.set(cle, { t: Date.now(), r: JSON.parse(JSON.stringify(r)) });
+    if (_lues.size > 80) _lues.delete(_lues.keys().next().value);
+  }
+  return r;
+}
+/** La fiche brute d'une page de produit du fournisseur. `site` : l'adresse du fournisseur (les liens doivent y rester). */
+async function _extraire(o) {
   const d = o || {};
   const u = urlSure(d.url);
   if (!u) return { ok: false, motif: 'adresse' };
@@ -749,5 +850,5 @@ module.exports = {
   chercher, extraire, telechargerImages, detecter, rendre,
   // Les pièces pures, pour le banc.
   _purs: { texteDeHtml, decoder, attributs, urlSure, memeSite, domaineDe, similarite, imageGrande, imagesUniques, jsonLd,
-    analyserProduitHtml, shopifyVersFiche, wooVersFiche, liensProduits, adresseRecherche, prixNombre, composition, origineDe },
+    analyserProduitHtml, shopifyVersFiche, wooVersFiche, liensProduits, adresseRecherche, prixNombre, composition, origineDe, paliersDe },
 };

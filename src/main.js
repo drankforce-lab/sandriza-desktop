@@ -2573,7 +2573,7 @@ const OPS_PONT = new Set([
   'fournisseur:contexte', 'fournisseur:lire', 'fournisseur:enregistrer',
   // (8.33.0) L'import de produits depuis le site d'un fournisseur (la lecture du site passe par import:* de la coquille).
   'import:contexte', 'import:fiches', 'import:preparer', 'import:modifier', 'import:retirer', 'import:prefill',
-  'import:ouvrir', 'import:ouvrirFournisseur',
+  'import:ouvrir', 'import:ouvrirFournisseur', 'import:estimer', 'import:traduire',
   'collection:contexte', 'collection:decrire', 'collection:lire', 'collection:enregistrer',
   'produit:contexte', 'produit:sku', 'produit:nip', 'produit:nipExige',
   // Le contour du vêtement pour les mesures (fal, evf-sam ; payant, journalisé au relais).
@@ -3956,6 +3956,8 @@ const LIMITES_PONT = {
   /* L'import fournisseur : des lectures locales ; une écriture attend le verdict du nuage (liste import_fiches). */
   'import:contexte': 15000, 'import:fiches': 15000, 'import:preparer': 30000, 'import:modifier': 30000,
   'import:retirer': 30000, 'import:prefill': 15000, 'import:ouvrir': 15000, 'import:ouvrirFournisseur': 15000,
+  /* (8.33.2) le taux de la Banque du Canada et la traduction attendent le réseau. */
+  'import:estimer': 30000, 'import:traduire': 45000,
   /* La seconde vie : une reprise traitée attend le serveur (crédit) ; les réglages, le verdict du nuage. */
   'secondevie:donnees': 15000, 'secondevie:traiter': 45000, 'secondevie:regler': 30000,
   /* Les rappels se lisent en local ; les ecritures passent par le nuage. */

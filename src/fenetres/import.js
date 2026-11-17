@@ -117,7 +117,16 @@ button.lien:hover:not(:disabled){background:transparent;text-decoration:underlin
 .rc .sc.haut{background:var(--or);color:#1a1208}
 .rc .bd{padding:.5rem .6rem .6rem;display:flex;flex-direction:column;gap:.35rem;flex:1 1 auto}
 .rc b{font-size:.78rem;font-weight:650;line-height:1.3;max-height:2.6em;overflow:hidden}
-.rc .px{font-size:.76rem;color:var(--tx2)}
+.rc [data-ti]{display:block}
+.rc [data-ti] b{display:block}
+.rc .px{display:flex;flex-direction:column;gap:.12rem;font-size:.72rem;color:var(--tx2);line-height:1.35}
+.rc .px .pf{color:var(--tx);font-weight:650}
+.rc .px .vt{color:var(--tx)}
+.rc .px .vt b{font-size:.8rem}
+.rc .px .lec{font-style:italic}
+.rc .orig{font-size:.64rem;color:var(--tx2)}
+.alerte-q{display:inline-block;font-size:.68rem;font-weight:700;padding:.12rem .45rem;border-radius:7px;background:rgba(34,197,94,.14);color:var(--tx-ok);line-height:1.35}
+html.jour .alerte-q{color:#1d5e33;background:rgba(34,197,94,.12)}
 .rc button{margin-top:auto;font-size:.76rem;font-weight:650}
 .rc.fait{border-color:var(--tx-ok)}
 .rc.fait button{color:var(--tx-ok)}
@@ -206,6 +215,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var RES = {};      /* par fournisseur : { nom, candidats, motif } — la dernière recherche, regardée seulement */
   var PREP = {};     /* adresse d un résultat → id de la fiche préparée */
   var OCCUPE = false, ARRET = false;
+  /* (8.33.2) LES PRIX AU MOMENT DE LA RECHERCHE (sa demande : « je dois voir les prix au scan, avoir une idée de
+     mon prix de vente, et être alertée si le prix en quantité est moins cher »). Les cartes s affichent tout de
+     suite ; puis chaque produit est lu chez le fournisseur, UN À LA FOIS, et sa carte se complète : prix du
+     fournisseur, coût chez nous (taux de la Banque du Canada), prix de vente proposé, alerte palier.
+     EST : adresse → { etat: lecture | ok | echec, e: estimation }. GEN : une nouvelle recherche arrête la lecture
+     de la précédente. La coquille garde ce qu elle a lu : « Préparer la fiche » ne relit pas la page. */
+  var EST = {}, GEN = 0;
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
@@ -347,17 +363,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!r) {
       return h + '<div class="etapes">'
         + '<div><span class="num">1</span><b>${T("Tapez le nom")}</b><span>${T("Le nom du produit ou sa référence chez le fournisseur, puis Entrée.")}</span></div>'
-        + '<div><span class="num">2</span><b>${T("Choisissez le bon")}</b><span>${T("Les produits trouvés sur son site s’affichent avec leur photo et leur prix.")}</span></div>'
+        + '<div><span class="num">2</span><b>${T("Choisissez le bon")}</b><span>${T("Les produits trouvés sur son site s’affichent avec leur photo, leur prix et votre prix de vente proposé.")}</span></div>'
         + '<div><span class="num">3</span><b>${T("Préparez la fiche")}</b><span>${T("Photos, tailles, couleurs et composition sont récupérées ; vous complétez le reste.")}</span></div></div>';
     }
     if (r.motif) return h + '<div class="vide">' + esc(expliquer({ motif: r.motif })) + '</div>';
     if (!r.candidats.length) return h + '<div class="vide">' + '${T("Aucun produit trouvé pour « {0} ». Essayez un autre mot ou la référence du fournisseur.")}'.replace('{0}', esc(r.nom)) + '</div>';
     h += '<div class="res-t">' + '${T("{0} résultats pour « {1} »")}'.replace('{0}', '<b>' + r.candidats.length + '</b>').replace('{1}', esc(r.nom))
+      + (r.en ? '<span>' + '${T("— cherché en anglais : « {0} »")}'.replace('{0}', esc(r.en)) + '</span>' : '')
       + '<span>${T("— le plus ressemblant d’abord")}</span></div>';
     h += '<div class="res" data-pages="import-resultats">' + r.candidats.map(function(c, i){
-      var fid = PREP[c.url], pct = Math.round((c.score || 0) * 100);
-      return '<div class="rc' + (fid ? ' fait' : '') + '"><div class="im">' + img(c.image) + '<span class="sc' + (pct >= 75 ? ' haut' : '') + '">' + pct + ' %</span></div>'
-        + '<div class="bd"><b title="' + esc(c.titre) + '">' + esc(c.titre) + '</b><span class="px">' + (c.prix != null ? esc(argent(c.prix)) : '${T("Prix non affiché")}') + '</span>'
+      var fid = PREP[c.url];
+      return '<div class="rc' + (fid ? ' fait' : '') + '"><div class="im" data-im="' + i + '">' + imCarte(c) + '</div>'
+        + '<div class="bd"><span data-ti="' + i + '">' + tiCarte(c) + '</span><span class="px" data-px="' + i + '">' + pxCarte(c) + '</span>'
         + (fid ? '<button type="button" data-voir="' + esc(fid) + '">${T("✓ Fiche prête — compléter")}</button>'
                : '<button type="button" data-prep="' + i + '"' + (OCCUPE ? ' disabled' : '') + '>${T("Préparer la fiche")}</button>') + '</div></div>';
     }).join('') + '</div>';
@@ -423,8 +440,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<span class="k">${T("Catégorie")}</span><span class="v"><select id="d-cat" aria-label="${T("Catégorie")}"><option value="">${T("Choisir…")}</option>'
       + cats.map(function(c){ return '<option value="' + esc(c.cle) + '"' + (c.cle === x.categorie ? ' selected' : '') + '>' + esc(c.libelle) + '</option>'; }).join('') + '</select>'
       + ' <label style="margin-left:.6rem;color:var(--tx2)"><input type="checkbox" id="d-ligne"' + (x.enLigne ? ' checked' : '') + '> ${T("Mettre en ligne")}</label></span>'
-      + '<span class="k">${T("Coût / prix proposé")}</span><span class="v">' + esc(argent(fi.cout)) + ' → <b>' + esc(argent(fi.prix)) + '</b>'
-      + (fi.devise && fi.devise !== 'CAD' && fi.prixFournisseur != null ? ' <span class="jet inc">' + esc(argent(fi.prixFournisseur)) + ' ' + esc(fi.devise) + '</span>' : '') + '</span>'
+      + lignesPrix(fi)
       + '<span class="k">${T("Tailles")}</span><span class="v">' + jetons(fi.tailles, fi.taillesInconnues) + '</span>'
       + '<span class="k">${T("Couleurs")}</span><span class="v">' + jetons(fi.couleurs, fi.couleursInconnues) + '</span>'
       + '<span class="k">${T("Composition")}</span><span class="v">' + (fi.composition ? esc(fi.composition) + (fi.compositionSure ? '' : ' <span class="jet inc">${T("à vérifier")}</span>') : '—') + '</span>'
@@ -436,10 +452,112 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<button type="button" data-a="retirer">${T("Retirer")}</button></div>';
     return h + '</div>';
   }
+  /* (8.33.2) Le prix du fournisseur dans sa devise, le taux appliqué (et sa date : un coût se vérifie), le coût
+     chez nous et le prix proposé, puis les paliers de quantité — le plus bas signalé. Et la traduction. */
+  function lignesPrix(fi){
+    var dv = fi.devise && fi.devise !== 'CAD' ? fi.devise : '';
+    var h = '<span class="k">${T("Prix du fournisseur")}</span><span class="v">' + esc(montant(fi.prixFournisseur, dv));
+    if (dv && fi.taux) h += ' · ' + '${T("taux {0} (Banque du Canada, {1})")}'.replace('{0}', esc(szArgentNombre(fi.taux, 4))).replace('{1}', esc(fi.tauxDate || ''));
+    else if (dv && fi.prixFournisseur != null) h += ' <span class="jet inc">${T("taux indisponible : coût à saisir")}</span>';
+    h += '</span><span class="k">${T("Coût / prix proposé")}</span><span class="v">' + esc(argent(fi.cout)) + ' → <b>' + esc(argent(fi.prix)) + '</b></span>';
+    if (fi.paliers && fi.paliers.length) {
+      h += '<span class="k">${T("Prix en quantité")}</span><span class="v">' + fi.paliers.map(function(p){
+        var q = p.max ? p.min + '–' + p.max : '≥ ' + p.min;
+        return '<span class="jet">' + esc(q) + ' : ' + esc(montant(p.prix, dv)) + '</span>';
+      }).join('') + (fi.alerte ? ' <span class="alerte-q">' + alerteTexte(fi.alerte, dv) + '</span>' : '') + '</span>';
+    }
+    if (fi.traduit) {
+      var LG = { zh: '${T("du chinois")}', ja: '${T("du japonais")}', ko: '${T("du coréen")}', en: '${T("de l’anglais")}' };
+      h += '<span class="k">${T("Traduction")}</span><span class="v" title="' + esc(fi.nomOriginal || '') + '">'
+        + '${T("Traduit {0} — original : « {1} »")}'.replace('{0}', LG[fi.traduit] || '').replace('{1}', esc(fi.nomOriginal || '')) + '</span>';
+    }
+    return h;
+  }
   function jetons(ok, inc){
     var h = (ok || []).map(function(t){ return '<span class="jet">' + esc(t) + '</span>'; }).join('')
       + (inc || []).map(function(t){ return '<span class="jet inc" title="${T("Absente de votre référentiel")}">' + esc(t) + ' ?</span>'; }).join('');
     return h || '—';
+  }
+
+  /* ══ LES CARTES DE RÉSULTAT ET LEURS PRIX (8.33.2) ═════════════════════ */
+  /* Un montant dans la devise du fournisseur : « 6,92 USD » ; le nôtre garde son symbole (szArgent). */
+  function montant(n, dv){
+    if (n == null) return '—';
+    return (!dv || dv === 'CAD') ? szArgent(n) : szArgentNombre(n, 2) + ' ' + dv;
+  }
+  function pct(n){ return String(Math.round(Number(n) || 0)); }
+  function imCarte(c){
+    var p = Math.round((c.score || 0) * 100);
+    return img(c.image) + '<span class="sc' + (p >= 75 ? ' haut' : '') + '">' + p + ' %</span>';
+  }
+  /* Le titre traduit (chinois, anglais… → français) ; l original reste lisible au survol et en petit dessous. */
+  function tiCarte(c){
+    if (c.titreFr) return '<b title="' + esc(c.titre) + '">' + esc(c.titreFr) + '</b>';
+    return '<b title="' + esc(c.titre) + '">' + esc(c.titre) + '</b>';
+  }
+  function alerteTexte(a, dv){
+    return '${T("Moins cher en quantité : {0} dès {1} pièces (−{2} %)")}'.replace('{0}', esc(montant(a.prix, dv))).replace('{1}', String(a.min)).replace('{2}', pct(a.economie));
+  }
+  function pxCarte(c){
+    var x = EST[c.url];
+    var brut = (c.prix != null) ? '<span class="pf">' + esc(argent(c.prix)) + '</span>' : '';
+    if (!x || x.etat === 'lecture') return brut + '<span class="lec">${T("Lecture des prix…")}</span>';
+    if (x.etat !== 'ok' || !x.e || x.e.prixFournisseur == null) return brut || '${T("Prix non affiché")}';
+    var e = x.e, h = '<span><span class="pf">' + esc(montant(e.prixFournisseur, e.devise)) + '</span> ${T("chez le fournisseur")}</span>';
+    if (e.devise !== 'CAD') h += '<span>' + (e.cout != null ? '${T("Coût chez nous ≈ {0}")}'.replace('{0}', esc(argent(e.cout))) : '${T("Taux de change indisponible : coût à saisir")}') + '</span>';
+    if (e.prix != null) h += '<span class="vt">${T("Vente proposée :")} <b>' + esc(argent(e.prix)) + '</b></span>';
+    if (e.qteMin > 1) h += '<span>' + '${T("Minimum de commande : {0} pièces")}'.replace('{0}', String(e.qteMin)) + '</span>';
+    if (e.alerte) h += '<span class="alerte-q">' + alerteTexte(e.alerte, e.devise) + '</span>';
+    return h;
+  }
+  /* Une carte se complète SANS redessiner la fenêtre (la saisie en cours et la page affichée ne bougent pas). */
+  function majCarte(r, i){
+    var c = r.candidats[i]; if (!c) return;
+    var a = corps.querySelector('[data-px="' + i + '"]'); if (a) a.innerHTML = pxCarte(c);
+    var b = corps.querySelector('[data-ti="' + i + '"]'); if (b) b.innerHTML = tiCarte(c);
+    var m = corps.querySelector('[data-im="' + i + '"]'); if (m && c.image && !m.querySelector('img')) m.innerHTML = imCarte(c);
+  }
+  function enrichir(f, r){
+    var gen = ++GEN;
+    var l = r.candidats.slice(0, 8);
+    if (!l.length) return;
+    // Les titres qui ne sont pas en français : traduits en un seul appel (le site ne traduit que ceux-là).
+    appeler('import:traduire', [{ textes: l.map(function(c){ return c.titre; }), vers: 'fr', siEtranger: true }]).then(function(t){
+      if (gen !== GEN || !t || !t.ok) return;
+      (t.traductions || []).forEach(function(tr, i){ if (tr && l[i]) { l[i].titreFr = tr; majCarte(r, i); } });
+    });
+    var i = 0;
+    function suivant(){
+      if (gen !== GEN || i >= l.length) return;
+      var k = i++, c = l[k];
+      if (EST[c.url] && EST[c.url].etat === 'ok') { majCarte(r, k); suivant(); return; }
+      EST[c.url] = { etat: 'lecture' };
+      lireFiche(f, c).then(function(e){
+        if (gen !== GEN) return;
+        if (!e || !e.ok || !e.fiche) { EST[c.url] = { etat: 'echec' }; majCarte(r, k); suivant(); return; }
+        var b = e.fiche;
+        if (!c.image && b.images && b.images[0]) c.image = b.images[0];
+        return appeler('import:estimer', [{ fournisseurId: f.id, items: [{ prix: b.prix, devise: b.devise || 'CAD', paliers: b.paliers || [] }] }]).then(function(s){
+          EST[c.url] = (s && s.ok && s.estimations && s.estimations[0]) ? { etat: 'ok', e: s.estimations[0] } : { etat: 'echec' };
+          if (gen === GEN) { majCarte(r, k); suivant(); }
+        });
+      }, function(){ EST[c.url] = { etat: 'echec' }; majCarte(r, k); suivant(); });
+    }
+    suivant();
+  }
+  /* Chercher sur le site ; RIEN trouvé avec le nom tapé (souvent en français, sur un site anglais) : le nom est
+     traduit en anglais et cherché une seconde fois. Rend { r, en } — en : le nom anglais, s il a servi. */
+  function chercherSite(f, nom){
+    return P.importFournisseur.chercher({ site: f.site, recherche: f.recherche, nom: nom }).then(function(r){
+      if (!r || !r.ok || (r.candidats || []).length) return { r: r, en: '' };
+      return appeler('import:traduire', [{ textes: [nom], vers: 'en' }]).then(function(t){
+        var en = (t && t.ok && t.traductions && t.traductions[0]) ? String(t.traductions[0]).trim() : '';
+        if (!en || en.length < 2 || en.toLowerCase() === nom.toLowerCase()) return { r: r, en: '' };
+        return P.importFournisseur.chercher({ site: f.site, recherche: f.recherche, nom: en.slice(0, 120) }).then(function(r2){
+          return (r2 && r2.ok && (r2.candidats || []).length) ? { r: r2, en: en } : { r: r, en: '' };
+        });
+      });
+    });
   }
 
   /* ══ LES DONNÉES ═══════════════════════════════════════════════════════ */
@@ -478,13 +596,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     garderSaisies();
     var nom = String(NOM || '').trim();
     if (nom.length < 2) { dire('${T("Tapez le nom du produit à chercher.")}', 'att'); var o = document.getElementById('o-nom'); if (o) o.focus(); return; }
-    OCCUPE = true; RES[f.id] = { nom: nom, candidats: [], enCours: true }; dessiner();
-    P.importFournisseur.chercher({ site: f.site, recherche: f.recherche, nom: nom }).then(function(r){
+    OCCUPE = true; GEN++; RES[f.id] = { nom: nom, candidats: [], enCours: true }; dessiner();
+    chercherSite(f, nom).then(function(o){
+      var r = o.r;
       OCCUPE = false;
-      RES[f.id] = (r && r.ok) ? { nom: nom, candidats: r.candidats || [] } : { nom: nom, candidats: [], motif: (r && r.motif) || 'echec' };
+      RES[f.id] = (r && r.ok) ? { nom: nom, en: o.en, candidats: r.candidats || [] } : { nom: nom, candidats: [], motif: (r && r.motif) || 'echec' };
       dessiner();
       var on = document.getElementById('o-nom'); if (on) { on.focus(); on.select(); }
-    });
+      if (RES[f.id].candidats.length) enrichir(f, RES[f.id]);
+    }, function(){ OCCUPE = false; RES[f.id] = { nom: nom, candidats: [], motif: 'echec' }; dessiner(); });
   }
   /* « Préparer la fiche » sur un résultat : la fiche est lue chez le fournisseur et devient une fiche d import. */
   function preparer(i){
@@ -515,7 +635,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return null;
   }
   function chercherUn(f, nom, idExistant, cat){
-    return P.importFournisseur.chercher({ site: f.site, recherche: f.recherche, nom: nom }).then(function(r){
+    return chercherSite(f, nom).then(function(o){
+      var r = o.r;
       var base = { id: idExistant || '', fournisseurId: f.id, recherche: nom, categorie: cat || (fiche(idExistant) || {}).categorie || '', enLigne: EN_LIGNE };
       if (!r || !r.ok) return appeler('import:preparer', [Object.assign(base, { statut: 'erreur', motif: (r && r.motif) || 'echec' })]);
       var cands = r.candidats || [];

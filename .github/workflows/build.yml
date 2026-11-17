@@ -791,6 +791,8 @@ jobs:
           node tools/banc-volume-factures.js
           # Visionneuse en LRU de 8 images ; suivi des générations : 3 boîtes puis « +k autres ».
           node tools/banc-volume-memoire.js
+          # (8.33.2) Import fournisseur : le prix à l'unité (pas celui à 30 pièces), les paliers, le prix des vignettes.
+          node tools/banc-import-collecteur.js
 
       - name: Construire (${{ matrix.arch }})
         shell: bash

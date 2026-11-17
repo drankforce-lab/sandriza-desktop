@@ -5290,6 +5290,20 @@ function pageProduit(id, importId) {
       else if (a.cle === 'devise') l.push('${T("Prix du fournisseur dans une autre devise :")} ' + v + '. ${T("Saisissez le coût en dollars canadiens.")}');
       else if (a.cle === 'composition') l.push('${T("Composition à vérifier (fibre non reconnue ou total différent de 100 %) :")} ' + v + '.');
       else if (a.cle === 'anglais') l.push('${T("La description est en anglais : la rédaction IA de la fiche peut la refaire en français.")}');
+      /* (8.33.2) le coût converti, le palier moins cher, le minimum de commande, la traduction */
+      else if (a.cle === 'deviseConvertie') {
+        var w = a.valeurs || [];
+        l.push('${T("Coût converti au taux de la Banque du Canada :")} ' + esc(szArgentNombre(w[0], 2) + ' ' + (w[1] || '')) + ' × ' + esc(szArgentNombre(w[2], 4))
+          + ' = ' + esc(szArgent(w[4])) + (w[3] ? ' (' + esc(w[3]) + ')' : '') + '. ${T("Ajoutez-y le transport et les droits si vous voulez un coût complet.")}');
+      }
+      else if (a.cle === 'palier') {
+        var q = a.valeurs || [];
+        var mt = (q[2] && q[2] !== 'CAD') ? szArgentNombre(q[1], 2) + ' ' + q[2] : szArgent(q[1]);
+        l.push('${T("Moins cher en quantité : {0} l’unité dès {1} pièces (−{2} %). Le prix proposé suit le prix à l’unité.")}'
+          .replace('{0}', esc(mt)).replace('{1}', esc(q[0])).replace('{2}', esc(String(Math.round(Number(q[3]) || 0)))));
+      }
+      else if (a.cle === 'qteMin') l.push('${T("Minimum de commande chez le fournisseur :")} ' + esc((a.valeurs || [])[0]) + ' ${T("pièces.")}');
+      else if (a.cle === 'traduit') l.push('${T("Le nom et la description ont été traduits en français depuis la langue du fournisseur : relisez-les.")}');
     });
     if (photosRatees > 0) l.push(photosRatees + ' ${T("photo(s) du fournisseur n’ont pas pu être téléchargées.")}');
     l.push('${T("Rien chez le fournisseur ne donne le poids, le stock ni les emplacements : complétez-les avant d’enregistrer.")}');
