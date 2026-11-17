@@ -2571,6 +2571,9 @@ const OPS_PONT = new Set([
   'imprimantes:etat', 'imprimantes:choisir', 'imprimantes:tester',
   'imprimantes:liste', 'imprimantes:definir',
   'fournisseur:contexte', 'fournisseur:lire', 'fournisseur:enregistrer',
+  // (8.33.0) L'import de produits depuis le site d'un fournisseur (la lecture du site passe par import:* de la coquille).
+  'import:contexte', 'import:fiches', 'import:preparer', 'import:modifier', 'import:retirer', 'import:prefill',
+  'import:ouvrir', 'import:ouvrirFournisseur',
   'collection:contexte', 'collection:decrire', 'collection:lire', 'collection:enregistrer',
   'produit:contexte', 'produit:sku', 'produit:nip', 'produit:nipExige',
   // Le contour du vêtement pour les mesures (fal, evf-sam ; payant, journalisé au relais).
@@ -3424,6 +3427,15 @@ ipcMain.handle('fenetre:collection', (e, id) => {
     { width: 860, height: 640, minHeight: 480 });
   return true;
 });
+/* (8.33.0) LA FICHE PRODUIT PRÉREMPLIE PAR UN IMPORT — une fenêtre par fiche d'import : deux fiches importées
+   se complètent côte à côte sans se mêler. Le pont a déjà vérifié la fiche (import:ouvrir). */
+ipcMain.handle('fenetre:produitImport', (e, id) => {
+  const brut = String(id || '').replace(/[^\w-]/g, '').slice(0, 40);
+  if (!brut) return false;
+  ouvrirNative('produit-imp-' + brut, TF('Nouveau produit'), () => pageProduit('', brut),
+    { width: 980, height: 860, minHeight: 520 });
+  return true;
+});
 ipcMain.handle('fenetre:fournisseur', (e, id) => {
   const brut = String(id || '');
   const cle = brut ? 'fournisseur-' + brut.replace(/[^\w-]/g, '') : 'fournisseur';
@@ -3941,6 +3953,9 @@ const LIMITES_PONT = {
   'questions:donnees': 15000, 'questions:repondre': 30000, 'questions:statut': 30000, 'questions:supprimer': 30000,
   /* L'analyse des produits : un calcul local sur toutes les commandes (10 000 au besoin). */
   'analyse:reappro': 30000, 'analyse:rentabilite': 30000,
+  /* L'import fournisseur : des lectures locales ; une écriture attend le verdict du nuage (liste import_fiches). */
+  'import:contexte': 15000, 'import:fiches': 15000, 'import:preparer': 30000, 'import:modifier': 30000,
+  'import:retirer': 30000, 'import:prefill': 15000, 'import:ouvrir': 15000, 'import:ouvrirFournisseur': 15000,
   /* La seconde vie : une reprise traitée attend le serveur (crédit) ; les réglages, le verdict du nuage. */
   'secondevie:donnees': 15000, 'secondevie:traiter': 45000, 'secondevie:regler': 30000,
   /* Les rappels se lisent en local ; les ecritures passent par le nuage. */
@@ -4299,6 +4314,22 @@ ipcMain.handle('modele3d:tnb', async (_e, etape, jeton, a, b) => {
 });
 // LA PHOTO EN LIGNE RENDUE EN DONNEE (voir imageLocale, pont-preload.js). HTTPS, domaines de la
 // boutique et de son stockage seulement, une image, 15 Mo au plus, 15 s au plus.
+/* ══ L'IMPORT DE PRODUITS DEPUIS LE SITE D'UN FOURNISSEUR (8.33.0) ══════════════════════════════════════════
+   Le collecteur (src/import-fournisseur.js) lit les pages des fournisseurs : le site ne le peut pas (CORS). Il ne
+   rend que des DONNÉES (textes, adresses, photos en data:) ; tout ce qui s'enregistre passe ensuite par le pont, qui
+   garde les droits et les règles. Chaque entrée est bornée ici : la page qui appelle ne dicte ni la taille ni la forme. */
+const Collecteur = require('./import-fournisseur');
+const _imp = (o) => (o && typeof o === 'object') ? o : {};
+ipcMain.handle('import:chercher', (_e, o) => { const d = _imp(o);
+  return Collecteur.chercher({ site: String(d.site || '').slice(0, 300), recherche: String(d.recherche || '').slice(0, 400), nom: String(d.nom || '').slice(0, 120) })
+    .catch((e) => ({ ok: false, motif: 'echec', detail: String((e && e.message) || e).slice(0, 200) })); });
+ipcMain.handle('import:extraire', (_e, o) => { const d = _imp(o);
+  return Collecteur.extraire({ url: String(d.url || '').slice(0, 1000), site: String(d.site || '').slice(0, 300) })
+    .catch((e) => ({ ok: false, motif: 'echec', detail: String((e && e.message) || e).slice(0, 200) })); });
+ipcMain.handle('import:images', (_e, urls) => Collecteur.telechargerImages((Array.isArray(urls) ? urls : []).slice(0, 12).map((u) => String(u || '').slice(0, 1000)))
+  .then((l) => ({ ok: true, images: l })).catch(() => ({ ok: false, motif: 'echec' })));
+ipcMain.handle('import:detecter', (_e, o) => Collecteur.detecter({ site: String(_imp(o).site || '').slice(0, 300) })
+  .catch(() => ({ ok: false, motif: 'echec' })));
 ipcMain.handle('image:locale', async (_e, url) => {
   try {
     const u = new URL(String(url || ''));
@@ -7043,6 +7074,7 @@ const { pageFibres } = require('./fenetres/fibres');
 const { pageEncanRapports } = require('./fenetres/encan-rapports');
 const { pageQuestions } = require('./fenetres/questions');
 const { pageAnalyse } = require('./fenetres/analyse');
+const { pageImport } = require('./fenetres/import');
 const { pageSecondeVie } = require('./fenetres/secondevie');
 const { pageLiens } = require('./fenetres/liens');
 const { pageComptable } = require('./fenetres/comptable');
@@ -7267,6 +7299,11 @@ const actionApp = (nom, arg) => {
     case 'reappro':
       ouvrirNative('reappro', TF('Prévision de réapprovisionnement'), () => pageAnalyse('reappro'),
         { width: 1320, height: 820, minWidth: 900, minHeight: 600 });
+      break;
+    // (8.33.0) L'import de produits depuis le site d'un fournisseur.
+    case 'import-fournisseur':
+      ouvrirNative('import-fournisseur', TF('Import de produits fournisseurs'), () => pageImport(),
+        { width: 1340, height: 840, minWidth: 980, minHeight: 600 });
       break;
     case 'rentabilite':
       ouvrirNative('rentabilite', TF('Rentabilité par produit'), () => pageAnalyse('rentabilite'),

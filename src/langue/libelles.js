@@ -174,6 +174,9 @@ const LIBELLES_EN = {
   'Manteaux & Vestes': 'Coats & Jackets',
   'Chaussures': 'Shoes',
   'Accessoires': 'Accessories',
+  // (8.33.0) Les familles de l'import fournisseur (ImportFournisseur.FAMILLES).
+  'Vêtements': 'Clothing',
+  'Vêtements et accessoires': 'Clothing and accessories',
 
   /* ── L'état d'une carte-cadeau ─────────────────────────────────────────── */
   'Active': 'Active',

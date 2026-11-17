@@ -11,13 +11,18 @@
  * qu'il fallait faire défiler : on perdait de vue les boutons et la moitié des
  * champs. Une étape tient dans la fenêtre — c'est la règle du socle.
  *
+ * (8.33.0) UNE QUATRIÈME ÉTAPE, « Import de produits » : le site du catalogue du
+ * fournisseur et ce qu'il vend (vêtements, accessoires, chaussures — sa consigne :
+ * « on spécifie d'avance »). C'est ce qui ouvre le fournisseur à la fenêtre Import
+ * de produits fournisseurs. Facultative : un fournisseur sans site n'y paraît pas.
+ *
  * ⚠ LE COIN DROIT DE L'EN-TÊTE EST RÉSERVÉ AU VERROU, et à rien d'autre. Il y
  * affichait « création » / « modification », ce que le titre disait déjà. Cet
  * emplacement sert maintenant à la seule chose qu'on ne peut pas deviner :
  * est-ce que quelqu'un d'autre tient cette fiche.
  */
 
-const { CSS_SOCLE, CSS_JOUR, CSS_FICHE, JS_SOCLE, JS_BROUILLON, ICO, TETE } = require('./socle');
+const { CSS_SOCLE, CSS_JOUR, CSS_FICHE, JS_SOCLE, JS_BROUILLON, ICO, TETE, SEP_DEC } = require('./socle');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -28,7 +33,11 @@ function pageFournisseur(id) {
   const ident = JSON.stringify(String(id || ''));
   return `${TETE()}
 <title>${T("Fournisseur — Administration Sandriza")}</title>
-<style>${CSS_SOCLE}${CSS_FICHE}${CSS_JOUR}</style></head><body>
+<style>${CSS_SOCLE}${CSS_FICHE}${CSS_JOUR}
+.imp-verif{display:flex;align-items:center;gap:.6rem;margin-top:.6rem;flex-wrap:wrap}
+.imp-etat{font-size:.8rem;color:var(--tx2)}
+.imp-etat.bon{color:var(--tx-ok)}.imp-etat.err{color:var(--tx-err)}.imp-etat.att{color:var(--tx-att)}
+.imp-aide{font-size:.76rem;color:var(--tx2);line-height:1.45;margin:.6rem 0 0}</style></head><body>
 <div class="tete"><span class="ico">${ICO.suppliers}</span><h1 id="titre">${T("Fournisseur")}</h1>
   <span class="sous" id="sous"></span></div>
 <div class="pas" id="pas"></div>
@@ -46,6 +55,10 @@ function pageFournisseur(id) {
   ${JS_SOCLE()}
   ${JS_BROUILLON()}
 
+  MOTIFS.import_site_invalide = '${T("Adresse du site invalide (exemple : https://grossiste.ca).")}';
+  MOTIFS.import_type_requis = '${T("Choisissez ce que vend ce fournisseur.")}';
+  MOTIFS.import_recherche_invalide = '${T("L’adresse de recherche doit être une adresse complète contenant {q}.")}';
+  MOTIFS.import_majoration_invalide = '${T("La majoration doit être entre 1 et 10 (exemple : 2,2).")}';
   var ID   = ${ident};
   var bEnr = document.getElementById('btn-enr');
   var sous = document.getElementById('sous');
@@ -106,6 +119,21 @@ function pageFournisseur(id) {
       + ch('f-notes', '${T("Notes internes")}', { multi: true, large: true, rows: 3 })
       + '</div></div></div>');
 
+    /* (8.33.0) L IMPORT DE PRODUITS : le site du catalogue, la famille, la recherche (facultative), la majoration. */
+    var fam = (CTX.familles || []);
+    h.push('<div class="etape"><div class="carte"><h2>${T("Import de produits")}</h2><div class="grille">'
+      + ch('f-imp-site', '${T("Site du catalogue")}', { large: true, placeholder: 'https://…' })
+      + '<div class="ch"><label for="f-imp-type">${T("Ce que vend ce fournisseur")}</label><select id="f-imp-type">'
+      + '<option value="">${T("Choisir…")}</option>'
+      + fam.map(function(f){ return '<option value="' + esc(f.cle) + '">' + esc(f.libelle) + '</option>'; }).join('')
+      + '</select></div>'
+      + ch('f-imp-maj', '${T("Majoration proposée (×)")}', { placeholder: String(CTX.majorationDefaut || 2) })
+      + ch('f-imp-rech', '${T("Adresse de recherche (facultative)")}', { large: true, placeholder: 'https://…/recherche?q={q}' })
+      + '</div><div class="imp-verif"><button type="button" id="f-imp-verif">${T("Vérifier le site")}</button>'
+      + '<span id="f-imp-etat" class="imp-etat"></span></div>'
+      + '<p class="imp-aide">${T("Le site sert à chercher les produits par leur nom dans la fenêtre Import de produits fournisseurs. La famille limite les catégories proposées. Laissez l’adresse de recherche vide : elle n’est utile que pour un site que l’application ne sait pas fouiller seule ({q} est remplacé par le nom cherché).")}</p>'
+      + '</div></div>');
+
     document.getElementById('corps').innerHTML = h.join('')
       + '<aside class="pf-fiche" id="pf-fiche" aria-label="${T("Fiche du fournisseur")}"></aside>';
     var corpsEl = document.getElementById('corps');
@@ -121,6 +149,9 @@ function pageFournisseur(id) {
       poser('f-delai', fiche.leadTime || CTX.delais[0]);
       poser('f-actif', fiche.active === false ? '0' : '1');
       poser('f-notes', fiche.notes);
+      poser('f-imp-site', fiche.importSite || ''); poser('f-imp-type', fiche.importType || '');
+      poser('f-imp-rech', fiche.importRecherche || '');
+      poser('f-imp-maj', fiche.importMajoration ? String(fiche.importMajoration).replace('.', '${SEP_DEC()}') : '');
       var choisies = fiche.categories || [];
       Array.prototype.forEach.call(document.querySelectorAll('.f-cat'), function(c){
         c.checked = choisies.indexOf(c.value) >= 0;
@@ -132,8 +163,10 @@ function pageFournisseur(id) {
     Assist.poser([
       { t: 'Identification', obl: ['f-nom'] },
       { t: '${T("Adresse")}',        obl: [] },
-      { t: '${T("Approvisionnement")}', obl: [] }
+      { t: '${T("Approvisionnement")}', obl: [] },
+      { t: '${T("Import de produits")}', obl: [] }
     ]);
+    var bv = document.getElementById('f-imp-verif'); if (bv) bv.onclick = verifierSite;
     majFiche();
 
     bEnr.disabled = !(ID ? CTX.peutModifier : CTX.peutAjouter);
@@ -169,6 +202,11 @@ function pageFournisseur(id) {
     h += ligne('${T("Téléphone")}', champ('f-tel'));
     h += ligne('${T("Ville")}', ville ? esc(ville) : '—');
     h += ligne('${T("Délai")}', champ('f-delai'));
+    var siteImp = String(val('f-imp-site') || '').trim();
+    if (siteImp) {
+      var famLib = ''; (CTX.familles || []).forEach(function(f){ if (f.cle === val('f-imp-type')) famLib = f.libelle; });
+      h += ligne('${T("Import")}', esc(famLib || '${T("famille à choisir")}'));
+    }
     h += '<div class="l"><span class="k">${T("Statut")}</span><span class="v"><span class="etat '
       + (actif ? 'on">${T("Actif")}' : 'off">${T("Inactif")}') + '</span></span></div>';
     if (cats.length) {
@@ -177,6 +215,7 @@ function pageFournisseur(id) {
     }
     var manque = [];
     if (!nom) manque.push([0, '${T("Nom du fournisseur")}']);
+    if (String(val('f-imp-site') || '').trim() && !val('f-imp-type')) manque.push([3, '${T("Ce que vend ce fournisseur")}']);
     h += '<div class="reste">' + (manque.length
       ? '<div class="t">${T("Pour enregistrer")}</div>' + manque.map(function(m){
           return '<button type="button" data-pfaller="' + m[0] + '"><span class="o"></span>' + m[1] + '</button>'; }).join('')
@@ -234,7 +273,8 @@ function pageFournisseur(id) {
      ⚠ LES CATEGORIES SONT DES CASES SANS IDENTIFIANT (classe .f-cat) : elles ne
      passent pas par l aide generique, d ou la liste explicite ci-dessous. */
   var BR_CHAMPS = ['f-nom', 'f-contact', 'f-courriel', 'f-tel', 'f-web',
-    'f-rue', 'f-ville', 'f-prov', 'f-cp', 'f-delai', 'f-actif', 'f-notes'];
+    'f-rue', 'f-ville', 'f-prov', 'f-cp', 'f-delai', 'f-actif', 'f-notes',
+    'f-imp-site', 'f-imp-type', 'f-imp-rech', 'f-imp-maj'];
   function brCats(){
     return Array.prototype.filter.call(document.querySelectorAll('.f-cat'), function(c){ return c.checked; })
       .map(function(c){ return c.value; });
@@ -269,8 +309,30 @@ function pageFournisseur(id) {
   });
   szBrouillonEcouter();
 
+  /* Vérifier le site : la coquille le lit et dit ce qu elle y trouve (Shopify, WooCommerce, une page). */
+  var PLATES = { shopify: '${T("Boutique Shopify reconnue : la recherche et les fiches seront complètes (photos, tailles, couleurs, prix).")}',
+    woocommerce: '${T("Boutique WooCommerce reconnue : la recherche et les fiches seront complètes.")}',
+    page: '${T("Site joignable : la recherche passera par ses pages (selon le site, certaines informations seront à compléter).")}' };
+  function verifierSite(){
+    var et = document.getElementById('f-imp-etat');
+    var site = String(val('f-imp-site') || '').trim();
+    if (!site) { et.className = 'imp-etat att'; et.textContent = '${T("Saisissez d’abord l’adresse du site.")}'; return; }
+    if (!P.importFournisseur) { et.className = 'imp-etat err'; et.textContent = '${T("Cette version de l’application ne sait pas lire un site : mettez-la à jour.")}'; return; }
+    et.className = 'imp-etat'; et.textContent = '${T("Lecture du site…")}';
+    P.importFournisseur.detecter({ site: site }).then(function(r){
+      if (!r || !r.ok) { et.className = 'imp-etat err'; et.textContent = '${T("Site injoignable ou adresse invalide.")}'; return; }
+      et.className = 'imp-etat bon';
+      et.textContent = (r.protege ? '${T("Le site refuse les lectures directes : la recherche passera par une fenêtre cachée, plus lente.")}' : (PLATES[r.plateforme] || PLATES.page));
+    });
+  }
+
   function enregistrer(){
     if (!Assist.toutValide()) return;
+    if (String(val('f-imp-site') || '').trim() && !val('f-imp-type')) {
+      Assist.aller(3); dire('${T("Choisissez ce que vend ce fournisseur (vêtements, accessoires…) : les catégories proposées à l’import en dépendent.")}', 'err');
+      var ft = document.getElementById('f-imp-type'); if (ft) ft.focus();
+      return;
+    }
     bEnr.disabled = true;
     dire('${T("Enregistrement…")}');
     P.appeler('fournisseur:enregistrer', ID, {
@@ -280,7 +342,10 @@ function pageFournisseur(id) {
       address: { street: val('f-rue'), city: val('f-ville'), province: val('f-prov'), postalCode: val('f-cp') },
       categories: Array.prototype.filter.call(document.querySelectorAll('.f-cat'), function(c){ return c.checked; })
                     .map(function(c){ return c.value; }),
-      leadTime: val('f-delai'), notes: val('f-notes'), active: val('f-actif') === '1'
+      leadTime: val('f-delai'), notes: val('f-notes'), active: val('f-actif') === '1',
+      importSite: String(val('f-imp-site') || '').trim(), importType: val('f-imp-type'),
+      importRecherche: String(val('f-imp-rech') || '').trim(),
+      importMajoration: String(val('f-imp-maj') || '').trim().replace(',', '.')
     }).then(function(r){
       if (!r || !r.ok) { bEnr.disabled = false; dire(expliquer(r), 'err'); return; }
       /* ⚠ LE BROUILLON MEURT ICI, ET AVANT LE P.fermer() DIFFERE : la fenetre part

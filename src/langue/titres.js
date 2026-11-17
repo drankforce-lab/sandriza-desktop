@@ -60,6 +60,7 @@ module.exports = {
   'Questions sur les produits': 'Product questions',
   'Prévision de réapprovisionnement': 'Restock forecast',
   'Rentabilité par produit': 'Profitability by product',
+  'Import de produits fournisseurs': 'Supplier product import',
   'Seconde vie': 'Second life',
   'Écran de l’encan': 'Auction screen',
   'Notes des mises à jour': 'Release notes',

@@ -293,6 +293,15 @@ function executerPage(script, reponses, opts) {
     )),
     langueEcrire: (l) => surveille(Promise.resolve(String(l || 'fr'))),
     menuPanneau() {}, menuPanneauFermer() {},
+    /* (8.33.0) L'IMPORT FOURNISSEUR : un canal du préchargement (le collecteur vit dans le principal). Chaque verbe se
+       pilote sous `importFournisseur:<verbe>` (relevé dans `appels`). Sans réponse prévue : un succès vide. */
+    importFournisseur: (() => {
+      const v = (verbe, defaut) => (...args) => { appels.push({ op: 'importFournisseur:' + verbe, args });
+        const k = 'importFournisseur:' + verbe; const r = Object.prototype.hasOwnProperty.call(rep, k) ? rep[k] : defaut;
+        return surveille(Promise.resolve(typeof r === 'function' ? r(...args) : r)); };
+      return { chercher: v('chercher', { ok: true, plateforme: 'shopify', candidats: [] }), extraire: v('extraire', { ok: false, motif: 'page_illisible' }),
+        images: v('images', { ok: true, images: [] }), detecter: v('detecter', { ok: true, plateforme: 'shopify' }) };
+    })(),
     surEtatCaisse: () => () => {}, ajusterHauteur() {},
     /* (2026-10-20) L'ENCAN : un canal à part du préchargement (le moteur vit dans le principal). L'état se
        pilote sous `encan:etat`, chaque geste sous `encan:geste` (relevés dans `appels`, op « encan:<geste> »). */

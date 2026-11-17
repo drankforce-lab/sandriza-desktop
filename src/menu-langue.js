@@ -237,6 +237,7 @@ const MENU_APP_EN = {
   'Questions sur les produits': 'Product questions',
   'Prévision de réapprovisionnement': 'Restock forecast',
   'Rentabilité par produit': 'Profitability by product',
+  'Import de produits fournisseurs': 'Supplier product import',
   'Seconde vie (reprises et seconde main)': 'Second life (trade-ins and pre-loved)',
   'Verrous (fiches en cours)': 'Locks (records in progress)',
   /* ⚠ LES SIX JEUX DE COULEURS viennent d'une TABLE d'`appbar.js`

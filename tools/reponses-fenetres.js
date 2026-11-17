@@ -617,6 +617,8 @@ const JEU = {
           delais: ['1-3 jours', '4-7 jours', '1-2 semaines', '2-4 semaines', '1-2 mois', '2 mois et plus'],
           provinces: ['QC', 'ON', 'NB', 'NS', 'PE', 'NL', 'MB', 'SK', 'AB', 'BC', 'YT', 'NT', 'NU'],
           peutAjouter: true, peutModifier: true,
+          familles: [{ cle: 'vetements', libelle: 'Vêtements' }, { cle: 'accessoires', libelle: 'Accessoires' }, { cle: 'chaussures', libelle: 'Chaussures' }, { cle: 'mixte', libelle: 'Vêtements et accessoires' }],
+          majorationDefaut: 2,
         },
         // Aucun identifiant : le site rend une fiche NULLE, pas une erreur.
         'fournisseur:lire': { ok: true, fiche: null },
@@ -640,6 +642,8 @@ const JEU = {
           delais: ['1-3 jours', '4-7 jours', '1-2 semaines', '2-4 semaines', '1-2 mois', '2 mois et plus'],
           provinces: ['QC', 'ON', 'NB', 'NS', 'PE', 'NL', 'MB', 'SK', 'AB', 'BC', 'YT', 'NT', 'NU'],
           peutAjouter: true, peutModifier: true,
+          familles: [{ cle: 'vetements', libelle: 'Vêtements' }, { cle: 'accessoires', libelle: 'Accessoires' }, { cle: 'chaussures', libelle: 'Chaussures' }, { cle: 'mixte', libelle: 'Vêtements et accessoires' }],
+          majorationDefaut: 2,
         },
         'fournisseur:lire': {
           ok: true,
@@ -655,6 +659,7 @@ const JEU = {
             leadTime: '1-2 semaines',
             notes: 'Livre le mardi. Minimum de 6 pièces par modèle.',
             active: true,
+            importSite: 'https://atelier-riviere.ca', importType: 'vetements', importRecherche: '', importMajoration: 2.2,
           },
         },
         'fournisseur:enregistrer': { ok: true, modifie: true },
@@ -4047,6 +4052,41 @@ const JEU = {
       ] },
     'secondevie:traiter': { ok: true, reprise: {} }, 'secondevie:regler': { ok: true },
   },
+  // (8.33.0) L'import de produits fournisseurs : un fournisseur configuré (vêtements), un sans site ; quatre fiches —
+  // à vérifier (la première, choisie à l'ouverture, avec une taille et une couleur inconnues), à choisir, introuvable, créée.
+  'import.js': (function(){
+    var I = function(c){ return 'data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 40%22><rect width=%2230%22 height=%2240%22 fill=%22%23c%22/></svg>'.replace('%23c', '%23' + c); };
+    var IMGS = [I('8a6f5a'), I('b59c86'), I('5d4a3d'), I('cdb7a2'), I('3f342b'), I('9d8270'), I('e3d3c4')];
+    var CTX = { ok: true, peutCreer: true, peutConfigurer: true, peutPhotos: true,
+      fournisseurs: [
+        { id: 'sup_0001', nom: 'Atelier Rivière', configure: true, site: 'https://atelier-riviere.ca', type: 'vetements', recherche: '', majoration: 2.2 },
+        { id: 'sup_0002', nom: 'Bijoux Laurentides', configure: false, site: '', type: '', recherche: '', majoration: 2 } ],
+      familles: [{ cle: 'vetements', libelle: 'Vêtements' }, { cle: 'accessoires', libelle: 'Accessoires' }, { cle: 'chaussures', libelle: 'Chaussures' }, { cle: 'mixte', libelle: 'Vêtements et accessoires' }],
+      categories: [{ cle: 'robes', libelle: 'Robes', famille: 'vetements' }, { cle: 'hauts', libelle: 'Hauts & Blouses', famille: 'vetements' },
+        { cle: 'manteaux', libelle: 'Manteaux & Vestes', famille: 'vetements' }, { cle: 'accessoires', libelle: 'Accessoires', famille: 'accessoires' }] };
+    var F = [
+      { id: 'imp_aaaa1', fournisseurId: 'sup_0001', fournisseurNom: 'Atelier Rivière', recherche: 'Robe Mila', categorie: 'robes', enLigne: false, statut: 'a_verifier',
+        candidats: [], choisi: 'https://atelier-riviere.ca/products/robe-mila-fleurie',
+        fiche: { url: 'https://atelier-riviere.ca/products/robe-mila-fleurie', plateforme: 'shopify', nom: 'Robe Mila fleurie à manches bouffantes et taille smockée', marque: 'Atelier Rivière', ref: 'AR-2291',
+          description: 'Robe mi-longue en viscose fleurie, manches bouffantes, taille smockée et volant à l’ourlet. Doublée.' + String.fromCharCode(10) + '• Coupe ample' + String.fromCharCode(10) + '• Lavable à la main',
+          prixFournisseur: 42.5, devise: 'CAD', cout: 42.5, prix: 93.99, tailles: ['XS', 'S', 'M', 'L'], taillesInconnues: ['XXXL'], couleurs: ['Rose', 'Noir'], couleursInconnues: ['Terracotta'],
+          composition: '100 % viscose', compositionSure: true, anglais: false, images: IMGS, photos: [IMGS[0], IMGS[2], IMGS[1]] },
+        manquants: ['poids', 'stock'], cree: '2026-11-17T15:00:00.000Z', maj: '2026-11-17T15:02:00.000Z' },
+      { id: 'imp_aaaa2', fournisseurId: 'sup_0001', fournisseurNom: 'Atelier Rivière', recherche: 'chemisier lin', categorie: 'hauts', enLigne: false, statut: 'plusieurs',
+        candidats: [{ url: 'https://atelier-riviere.ca/products/a', titre: 'Chemisier en lin ivoire', image: IMGS[3], prix: 38, score: 0.82 },
+          { url: 'https://atelier-riviere.ca/products/b', titre: 'Chemisier en lin sauge à poche', image: IMGS[5], prix: 41, score: 0.8 },
+          { url: 'https://atelier-riviere.ca/products/c', titre: 'Chemise de lin oversize', image: IMGS[4], prix: 45, score: 0.66 }],
+        fiche: null, manquants: ['photo', 'cout', 'prix', 'tailles', 'couleurs', 'poids', 'stock'], cree: '2026-11-17T15:00:00.000Z', maj: '2026-11-17T15:01:00.000Z' },
+      { id: 'imp_aaaa3', fournisseurId: 'sup_0001', fournisseurNom: 'Atelier Rivière', recherche: 'Jupe Odile', categorie: 'robes', enLigne: false, statut: 'introuvable',
+        candidats: [], fiche: null, manquants: [], cree: '2026-11-17T15:00:00.000Z', maj: '2026-11-17T15:00:30.000Z' },
+      { id: 'imp_aaaa4', fournisseurId: 'sup_0001', fournisseurNom: 'Atelier Rivière', recherche: 'Cardigan', categorie: 'hauts', enLigne: true, statut: 'creee',
+        produitId: 'p_0009', produitNom: 'Cardigan côtelé crème', photosCopiees: 3,
+        fiche: { nom: 'Cardigan côtelé crème', images: [IMGS[6]], photos: [IMGS[6]] }, manquants: [], cree: '2026-11-16T15:00:00.000Z', maj: '2026-11-16T15:00:00.000Z' } ];
+    var rep = function(fiches){ return { 'import:contexte': CTX, 'import:fiches': { ok: true, fiches: fiches, total: fiches.length },
+      'import:preparer': { ok: true, fiche: F[0] }, 'import:modifier': { ok: true, fiche: F[0] }, 'import:retirer': { ok: true },
+      'import:ouvrir': { ok: true }, identite: IDENTITE }; };
+    return [ { nom: 'quatre fiches', id: '', reponses: rep(F) }, { nom: 'aucune fiche', id: '', reponses: rep([]) } ];
+  })(),
   // (8.29.0) L'analyse des produits : deux variantes à commander (une en précommande, une sans fournisseur) et une
   // rentabilité avec un produit sans coût d'achat et une marge négative.
   'analyse.js': {

@@ -559,8 +559,11 @@ html.jour .lgstk.enstock .c1,html.jour .lgstk.enstock .c2{color:#166534}
 `;
 
 /** Page complète de l'assistant. `id` vide = création. */
-function pageProduit(id) {
+/* (8.33.0) `importId` : une fiche d'import fournisseur — la fiche NEUVE naît préremplie (import:prefill), ses photos
+   téléchargées par la coquille ; à l'enregistrement, le pont en range une copie dans la photothèque, liée au produit. */
+function pageProduit(id, importId) {
   const ident = JSON.stringify(String(id || ''));
+  const identImport = JSON.stringify(String(importId || ''));
   return `${TETE()}
 <title>${T("Produit — Administration Sandriza")}</title>
 <style>${CSS_SOCLE}${CSS_FICHE}${CSS_PROPRE}${CSS_JOUR}</style></head><body>
@@ -642,6 +645,11 @@ function pageProduit(id) {
   MOTIFS.non_enregistre ='${T("La fiche n’a PAS été enregistrée. Voyez l’avis dans la fenêtre principale — le plus souvent, un collègue vient de modifier la même fiche.")}';
 
   var ID   = ${ident};
+  var IMPORT = ID ? '' : ${identImport};   // (8.33.0) la fiche d'import qui préremplit cette fiche neuve
+  var IMP_SRC = null;                        // { ref, url, fournisseur } de la fiche d'import
+  MOTIFS.import_sans_fiche = '${T("Cette fiche d’import n’a pas encore de produit choisi chez le fournisseur.")}';
+  MOTIFS.import_sans_categorie = '${T("Choisissez d’abord la catégorie de cette fiche d’import.")}';
+  MOTIFS.deja_creee = '${T("Ce produit a déjà été créé depuis cette fiche d’import.")}';
   var bEnr = document.getElementById('btn-enr');
   var sous = document.getElementById('sous');
   var CTX = null, FICHE = null, IMAGE = '', STOCK = {}, STOCK0 = null, LOCS = {}, PAGI = null;
@@ -5243,8 +5251,60 @@ function pageProduit(id) {
   // formulaire parce que sa page défile ; ici une étape doit tenir dans la
   // fenêtre, et un bandeau permanent volerait la place d'une carte. La question
   // se pose une fois, à l'ouverture, et disparaît.
+  /* ══ LA FICHE IMPORTÉE D'UN FOURNISSEUR (8.33.0) ══════════════════════════════════════════════════════════
+     Le pont rend la fiche à NOTRE format (nos tailles, nos couleurs, la composition en français) ; les photos sont
+     encore des adresses du fournisseur : la coquille les télécharge (le site ne le peut pas), et elles partent en
+     données à l'enregistrement — des COPIES dans notre stockage, jamais un lien vers son site. */
+  function appliquerImport(){
+    return P.appeler('import:prefill', IMPORT).then(function(r){
+      if (!r || !r.ok) { vide('${T("Fiche d’import indisponible")}', expliquer(r)); return; }
+      var p = r.fiche || {};
+      IMP_SRC = { ref: p.refFournisseur || '', url: p.sourceFournisseur || '', fournisseur: p.fournisseurNom || '' };
+      document.getElementById('titre').textContent = '${T("Nouveau produit — importé de")} ' + (p.fournisseurNom || '${T("un fournisseur")}');
+      var photos = Array.isArray(p.photos) ? p.photos.slice(0, MAX_PHOTOS + 1) : [];
+      var suite = function(datas){
+        var ok = datas.filter(Boolean);
+        p.image = ok[0] || '';
+        p.additionalImages = ok.slice(1, 1 + MAX_PHOTOS);
+        remplir(p);
+        if (typeof majFicheBientot === 'function') { try { majFicheBientot(); } catch (e) {} }
+        montrerAvisImport(p.avis || [], photos.length - ok.length);
+      };
+      if (!photos.length) { suite([]); return; }
+      if (!P.importFournisseur) { suite([]); dire('${T("Cette version de l’application ne sait pas télécharger les photos du fournisseur : mettez-la à jour.")}', 'err'); return; }
+      dire('${T("Téléchargement des photos du fournisseur…")}');
+      return P.importFournisseur.images(photos).then(function(x){
+        var l = (x && x.ok && Array.isArray(x.images)) ? x.images : [];
+        dire('');
+        suite(photos.map(function(u){ var t = l.filter(function(i){ return i && i.url === u && i.ok; })[0]; return t ? t.data : ''; }));
+      });
+    });
+  }
+  /* Ce que l'import n'a pas pu décider seul : dit UNE fois, à l'ouverture, dans une boîte qui se ferme. */
+  function montrerAvisImport(avis, photosRatees){
+    var l = [];
+    avis.forEach(function(a){
+      var v = (a.valeurs || []).map(function(x){ return '« ' + esc(x) + ' »'; }).join(', ');
+      if (a.cle === 'tailles') l.push('${T("Tailles du fournisseur absentes de votre référentiel :")} ' + v + '. ${T("Ajoutez-les dans Inventaire › Attributs, ou cochez les tailles équivalentes (étape Tailles et couleurs).")}');
+      else if (a.cle === 'couleurs') l.push('${T("Couleurs à associer à l’une des vôtres :")} ' + v + '.');
+      else if (a.cle === 'devise') l.push('${T("Prix du fournisseur dans une autre devise :")} ' + v + '. ${T("Saisissez le coût en dollars canadiens.")}');
+      else if (a.cle === 'composition') l.push('${T("Composition à vérifier (fibre non reconnue ou total différent de 100 %) :")} ' + v + '.');
+      else if (a.cle === 'anglais') l.push('${T("La description est en anglais : la rédaction IA de la fiche peut la refaire en français.")}');
+    });
+    if (photosRatees > 0) l.push(photosRatees + ' ${T("photo(s) du fournisseur n’ont pas pu être téléchargées.")}');
+    l.push('${T("Rien chez le fournisseur ne donne le poids, le stock ni les emplacements : complétez-les avant d’enregistrer.")}');
+    var v = document.createElement('div');
+    v.className = 'voile';
+    v.innerHTML = '<div class="boite"><h3 style="color:var(--tx-creme)"><span class="ic">📦</span> ${T("Fiche préremplie depuis le fournisseur")}</h3>'
+      + '<ul style="margin:.3rem 0 .6rem;padding-left:1.1rem;font-size:.84rem;line-height:1.5">' + l.map(function(x){ return '<li>' + x + '</li>'; }).join('') + '</ul>'
+      + '<p style="font-size:.78rem;color:var(--tx2)">${T("À l’enregistrement, une copie des photos est rangée dans la photothèque, liée au produit.")}</p>'
+      + '<div class="pied2"><button type="button" class="prim" id="imp-ok">${T("Compris")}</button></div></div>';
+    document.body.appendChild(v);
+    var b = document.getElementById('imp-ok'); if (b) { b.focus(); b.onclick = function(){ v.remove(); }; }
+  }
+
   function brProposer(){
-    if (ID) return Promise.resolve();
+    if (ID || IMPORT) return Promise.resolve();
     return P.appeler('produit:brouillonLire').then(function(r){
       if (!r || !r.ok || !r.brouillon || !brUtile(r.brouillon)) return;
       return new Promise(function(resoudre){
@@ -5354,6 +5414,11 @@ function pageProduit(id) {
           /* UN APERÇU 3D PAYÉ DONT LE SUIVI S EST PERDU (2026-10-21) : la fiche demande au site de le reprendre, puis
              montre l état de la génération de cet article (en cours, en attente de confirmation, échouée). */
           if (P.appeler) P.appeler('generations:rattraper').then(function(){ suivre3d(); }, function(){ suivre3d(); });
+        } else if (IMPORT) {
+          /* (8.33.0) Une fiche d'import : pas de brouillon « nouveau produit » (la fiche d'import, elle, reste en
+             attente dans la liste tant que le produit n'est pas enregistré). */
+          BR_FINI = true;
+          return appliquerImport();
         } else {
           // Autosauvegarde toutes les 5 secondes, comme l'éditeur du site.
           BR_T = setInterval(brEnregistrer, 5000);
@@ -5578,7 +5643,11 @@ function pageProduit(id) {
       // L'aperçu 3D (gardé, ou retiré), et la clé des coûts engagés pendant la création (rattachés au produit).
       modele3d: MOD3D || null,
       brouillonCouts: (!ID && CLE_COUTS) ? CLE_COUTS : '',
-      photosNip: NIP_PHOTOS
+      photosNip: NIP_PHOTOS,
+      // (8.33.0) la fiche d'import et la source chez le fournisseur (champs privés du produit)
+      importId: (IMPORT && IMP_SRC) ? IMPORT : undefined,
+      refFournisseur: (IMPORT && IMP_SRC) ? IMP_SRC.ref : undefined,
+      sourceFournisseur: (IMPORT && IMP_SRC) ? IMP_SRC.url : undefined
     })).then(function(r){
       // Le prochain envoi repart de zéro : les photos ont pu changer entre-temps.
       VAR_FAITES = false;
@@ -5631,6 +5700,16 @@ function pageProduit(id) {
       if (!ID) P.appeler('produit:brouillonJeter');
       // l article provisoire du Studio prend son vrai identifiant : ses photos étiquetées et sa boîte aux lettres suivent
       if (!ID && r.id) P.appeler('studio:lierProvisoire', PROV, String(r.id), val('p-nom').trim());
+      // (8.33.0) Le produit importé : dire combien de photos sont rangées dans la photothèque.
+      if (IMPORT && r.import) {
+        var im = r.import;
+        dire(im.ok && im.photosCopiees === im.photosVoulues
+          ? '${T("Enregistré — photos copiées dans la photothèque, liées au produit :")} ' + im.photosCopiees + '.'
+          : (im.sansDroitPhotos ? '${T("Enregistré. Votre rôle ne permet pas d’ajouter à la photothèque : les photos sont dans la fiche seulement.")}'
+            : '${T("Enregistré, mais la copie dans la photothèque est incomplète :")} ' + (im.photosCopiees || 0) + ' / ' + (im.photosVoulues || 0) + '.'), im.ok && im.photosCopiees === im.photosVoulues ? 'bon' : 'att');
+        setTimeout(function(){ rendreVerrou(); P.fermer(); }, 2600);
+        return;
+      }
       dire('${T("Enregistré.")}', 'bon');
       setTimeout(function(){ rendreVerrou(); P.fermer(); }, 700);
     });

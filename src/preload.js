@@ -245,6 +245,8 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   majDecision: (heures) => ipcRenderer.invoke('maj:decision', heures),
   // L'assistant Produit sur une fiche PRECISE (le << Modifier >> de l'inventaire).
   ouvrirProduitFiche: (id) => ipcRenderer.invoke('fenetre:produit', String(id || '')),
+  // (8.33.0) La fiche Produit préremplie par une fiche d'import fournisseur.
+  ouvrirProduitImport: (id) => ipcRenderer.invoke('fenetre:produitImport', String(id || '')),
   // Le DETAIL d'une commande dans sa propre fenetre (une par commande).
   ouvrirCommandeDetail: (id) => ipcRenderer.invoke('fenetre:commandeDetail', String(id || '')),
   // La facture dans sa propre fenetre (une par facture).

@@ -47,6 +47,14 @@ contextBridge.exposeInMainWorld('szPont', {
      lui, n a pas cette regle : il rend la photo en donnee. Domaines de la boutique seulement ;
      null si refuse ou illisible (la page garde alors l adresse et mesure a la main). */
   imageLocale: (url) => ipcRenderer.invoke('image:locale', String(url || '')).catch(() => null),
+  /* L'IMPORT FOURNISSEUR (8.33.0) : le processus principal lit le site du fournisseur (voir src/import-fournisseur.js).
+     Toujours un objet, jamais d'exception vers la page. */
+  importFournisseur: {
+    chercher: (o) => ipcRenderer.invoke('import:chercher', o || {}).catch(() => ({ ok: false, motif: 'pont' })),
+    extraire: (o) => ipcRenderer.invoke('import:extraire', o || {}).catch(() => ({ ok: false, motif: 'pont' })),
+    images: (urls) => ipcRenderer.invoke('import:images', Array.isArray(urls) ? urls : []).catch(() => ({ ok: false, motif: 'pont' })),
+    detecter: (o) => ipcRenderer.invoke('import:detecter', o || {}).catch(() => ({ ok: false, motif: 'pont' })),
+  },
   // L'aperçu 3D de Fal.ai, téléchargé et compressé par le processus principal (modele3d.js).
   modele3dPreparer: (url) => ipcRenderer.invoke('modele3d:preparer', String(url || '')).catch(() => ({ ok: false, detail: 'pont' })),
   // Rend toujours un objet : { ok:true, … } ou { ok:false, motif:'…' }.
