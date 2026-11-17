@@ -167,6 +167,9 @@ p(".admlogin-form-panel{min-height:0;overflow-y:auto}");
    `margin:auto`, on est centre quand il y a de la place et on defile en entier
    quand il n y en a plus. */
 p(".admlogin-form-panel{justify-content:flex-start}");
+p("/* Logo agrandi (2026-11-02, sa demande : « on ne le voit pas assez ») — 340 → jusqu a 480 px, la plaque serrée. */");
+p(".admlogin-brand-inner{max-width:560px}");
+p(".admlogin-logo-plate{padding:1.2rem 1.4rem}");
 p(".admlogin-formwrap{margin:auto 0}");
 p("/* Le casse-tete a glissiere. Dans le web il est habille de styles en ligne ;");
 p("   ici il a ses regles, et elles disent la meme chose. */");
@@ -695,7 +698,7 @@ p("  function marquePanneau(){");
 p("    var m = CTX.marque, t = CTX.theme;");
 p("    var logo = m.logo");
 p("      ? '<div class=\"admlogin-logo-plate\"><img src=\"' + esc(m.logo) + '\" alt=\"' + esc(m.nom)");
-p("        + '\" class=\"admlogin-logo-img\" style=\"width:min(340px,70vw);height:auto\"></div>'");
+p("        + '\" class=\"admlogin-logo-img\" style=\"width:min(480px,calc(46vw - 7rem),80vw);height:auto\"></div>'");
 p("      : '<div class=\"admlogin-logo-badge\" style=\"background:linear-gradient(135deg,'");
 p("        + t.logoFrom + ',' + t.logoTo + ')\">' + esc(m.lettre) + '</div>';");
 p("    var nom = m.logo ? '' : '<h1>' + esc(m.nom) + '</h1>';");
@@ -1797,5 +1800,30 @@ function JS_DIRE_PLACEHOLDER() { return '${JS_DIRE()}'; }
     process.exit(1);
   }
 }
-fs.writeFileSync('C:/Temp/sandriza-desktop/src/fenetres/connexion.js', L.join('\r\n') + '\r\n', 'utf8');
+/* ══ LE VERROU (2026-11-17) ══════════════════════════════════════════════
+   ⚠⚠ `connexion.js` a été retouché À LA MAIN dans 13 commits après le dernier
+   passage de ce générateur (5.60.0) : relancé tel quel, il effaçait ~350 lignes
+   de travail (2060 → 1709), en silence, sous un « OK ».
+   Chaque fichier écrit ici porte en DERNIÈRE ligne l'empreinte de ce qui a été
+   écrit. Avant d'écrire, on relit le fichier en place : si son empreinte manque
+   ou ne correspond plus à son contenu, quelqu'un l'a modifié après nous → REFUS.
+   Pour écraser quand même, sciemment : node tools/connexion/batir.js --ecraser
+   (après avoir reporté ici ce que les retouches à la main avaient ajouté). */
+const CIBLE = require('path').join(__dirname, '..', '..', 'src', 'fenetres', 'connexion.js');
+const MARQUE = '// batir.js - empreinte : ';
+const empreinte = (t) => require('crypto').createHash('sha256').update(t, 'utf8').digest('hex');
+if (fs.existsSync(CIBLE) && process.argv.indexOf('--ecraser') < 0) {
+  const enPlace = fs.readFileSync(CIBLE, 'utf8').replace(/\r\n/g, '\n').replace(/\n+$/, '');
+  const i = enPlace.lastIndexOf('\n' + MARQUE);
+  const corps = i >= 0 ? enPlace.slice(0, i) : null;
+  const vue = i >= 0 ? enPlace.slice(i + 1 + MARQUE.length).trim() : '';
+  if (corps === null || empreinte(corps) !== vue) {
+    console.error('REFUS - ' + CIBLE + ' a ete modifie apres le dernier passage de batir.js'
+      + (corps === null ? ' (aucune empreinte : il a ete retouche a la main).' : ' (son empreinte ne correspond plus).'));
+    console.error('        Le reecrire effacerait ces retouches. Les reporter ici, puis : node tools/connexion/batir.js --ecraser');
+    process.exit(1);
+  }
+}
+const corpsNeuf = L.join('\n');
+fs.writeFileSync(CIBLE, (corpsNeuf + '\n' + MARQUE + empreinte(corpsNeuf)).replace(/\n/g, '\r\n') + '\r\n', 'utf8');
 console.log('OK - connexion.js ecrit,', L.length, 'lignes.');

@@ -2247,13 +2247,16 @@ const portePage = (titre, message, progression) => {
     + '.o3{width:220px;height:220px;opacity:.4;background:' + (p ? 'linear-gradient(135deg,' + p.orbe[1] + ',' + p.orbe[0] + ')' : 'linear-gradient(135deg,#a855f7,#6d28d9)') + ';top:40%;right:-50px;animation:f3 25s ease-in-out infinite}'
     + '.brand::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(115deg,rgba(6,4,16,.55) 0%,rgba(6,4,16,.34) 46%,rgba(6,4,16,.14) 100%)}'
     + '.brand::after{content:"";position:absolute;inset:0;z-index:1;background:radial-gradient(85% 62% at 16% 12%,rgba(255,255,255,.10),transparent 55%)}'
-    + '.binner{position:relative;z-index:2;max-width:460px}'
+    // ⚠ (2026-11-17, sa demande : « fidèle à la page de connexion ») Mêmes mesures que connexion.js depuis
+    // son agrandissement du 2026-11-02 : colonne 560 px, plaque serrée, logo jusqu à 480 px. Changer l un
+    // sans l autre refait l écart : le logo rapetisse en passant de la connexion à la mise à jour.
+    + '.binner{position:relative;z-index:2;max-width:560px}'
     + '.badge{width:74px;height:74px;border-radius:19px;display:inline-flex;align-items:center;justify-content:center;'
     +   'font:800 2rem/1 Georgia,serif;color:#fff;margin:0 0 1.5rem;box-shadow:0 14px 34px rgba(0,0,0,.34)}'
-    + '.plate{position:relative;display:inline-block;padding:1.8rem 2.4rem;margin:0 0 1.9rem;animation:float 7s ease-in-out infinite}'
+    + '.plate{position:relative;display:inline-block;padding:1.2rem 1.4rem;margin:0 0 1.9rem;animation:float 7s ease-in-out infinite}'
     + '.plate::before{content:"";position:absolute;inset:0;z-index:0;filter:blur(13px);'
     +   'background:radial-gradient(118% 135% at 50% 48%,rgba(248,242,233,.55) 0%,rgba(233,219,200,.32) 42%,rgba(233,219,200,0) 76%)}'
-    + '.plate-img{position:relative;z-index:1;display:block;margin:0 auto;width:min(340px,70vw);height:auto}'
+    + '.plate-img{position:relative;z-index:1;display:block;margin:0 auto;width:min(480px,calc(46vw - 7rem),80vw);height:auto}'
     + '.bname{font-family:Georgia,serif;font-size:2.15rem;font-weight:800;margin:0 0 .9rem;line-height:1.12}'
     + '.eyebrow{display:flex;align-items:center;gap:.9rem;margin:0 0 2.4rem;text-transform:uppercase;'
     +   'letter-spacing:.26em;font-size:.8rem;font-weight:600;color:' + b.sous + '}'
