@@ -4057,9 +4057,11 @@ const JEU = {
   'import.js': (function(){
     var I = function(c){ return 'data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 30 40%22><rect width=%2230%22 height=%2240%22 fill=%22%23c%22/></svg>'.replace('%23c', '%23' + c); };
     var IMGS = [I('8a6f5a'), I('b59c86'), I('5d4a3d'), I('cdb7a2'), I('3f342b'), I('9d8270'), I('e3d3c4')];
-    var CTX = { ok: true, peutCreer: true, peutConfigurer: true, peutPhotos: true,
+    var CTX = { ok: true, peutCreer: true, peutConfigurer: true, peutPhotos: true, peutAjouterFournisseur: true,
       fournisseurs: [
         { id: 'sup_0001', nom: 'Atelier Rivière', configure: true, site: 'https://atelier-riviere.ca', type: 'vetements', recherche: '', majoration: 2.2 },
+        { id: 'sup_0003', nom: 'Maison Belle-Rive', configure: true, site: 'https://maisonbellerive.ca', type: 'accessoires', recherche: '', majoration: 2.5 },
+        { id: 'sup_0004', nom: 'Chaussures Desjardins & fils', configure: true, site: 'https://chaussures-desjardins.com', type: 'chaussures', recherche: '', majoration: 2 },
         { id: 'sup_0002', nom: 'Bijoux Laurentides', configure: false, site: '', type: '', recherche: '', majoration: 2 } ],
       familles: [{ cle: 'vetements', libelle: 'Vêtements' }, { cle: 'accessoires', libelle: 'Accessoires' }, { cle: 'chaussures', libelle: 'Chaussures' }, { cle: 'mixte', libelle: 'Vêtements et accessoires' }],
       categories: [{ cle: 'robes', libelle: 'Robes', famille: 'vetements' }, { cle: 'hauts', libelle: 'Hauts & Blouses', famille: 'vetements' },

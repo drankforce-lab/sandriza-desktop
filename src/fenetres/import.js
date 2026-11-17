@@ -3,34 +3,33 @@
 /*
  * FENÊTRE « IMPORT DE PRODUITS FOURNISSEURS » — NATIVE (8.33.0, sa demande du 2026-11-17)
  * =============================================================================
- * « On choisit un site de nos fournisseurs ; selon le nom du produit, le module fait
- *   une recherche sur le site. Nous, on n'a qu'à sélectionner la catégorie. Il
- *   récupère les informations et fait des fiches produit ; si on les valide en
- *   complétant ce qui manque, on enregistre une copie des photos dans notre
- *   photothèque, liée au produit, et on décide de le mettre en ligne ou non. »
+ * « Un vrai module où j'ai d'un côté tous mes fournisseurs, et ensuite une option
+ *   facilitante pour l'ajout des produits par simple recherche de nom de produit. »
  *
- * LE PARCOURS
- *   1. on choisit le FOURNISSEUR (son site et sa famille sont réglés dans sa fiche) et
- *      la CATÉGORIE (seulement celles de sa famille) ;
- *   2. on tape un ou plusieurs NOMS (un par ligne) → « Chercher » : la coquille fouille
- *      le site (src/import-fournisseur.js) ; un résultat net devient une fiche « à
- *      vérifier », plusieurs résultats proches demandent de CHOISIR, aucun le DIT ;
- *   3. dans le volet de droite : les photos à garder (la première est la principale),
- *      la catégorie, la mise en ligne, et ce qui reste à compléter ;
- *   4. « Compléter et créer le produit » ouvre la FICHE PRODUIT préremplie : c'est elle
- *      qui exige le poids, le stock, les emplacements… et qui enregistre. La photothèque
- *      reçoit alors sa copie des photos, liée au produit.
+ * LA DISPOSITION
+ *   · À GAUCHE, LES FOURNISSEURS — tous les fournisseurs actifs, avec leur famille
+ *     (vêtements, accessoires…), l'état de leur site (prêt / à configurer) et le
+ *     nombre de fiches qui attendent. « + Nouveau fournisseur » en bas.
+ *   · À DROITE, LE FOURNISSEUR CHOISI, en trois onglets :
+ *       Rechercher   — une barre : le nom du produit, Entrée. Les résultats du site
+ *                      arrivent en cartes ; « Préparer la fiche » sur le bon. Pour
+ *                      une liste de noms, « Plusieurs noms à la fois ».
+ *       À compléter  — les fiches préparées : photos à garder, catégorie, mise en
+ *                      ligne, ce qui manque ; « Compléter et créer le produit ».
+ *       Créés        — ce qui est devenu un produit (photos dans la photothèque).
  *
- * ⚠ LA FENÊTRE NE DÉCIDE RIEN : la lecture du site est dans la coquille, la traduction
- *   vers nos tailles et couleurs et la liste des fiches sont dans le site
- *   (assets/js/importfournisseur.js, ops import:*).
+ * ⚠ LA FENÊTRE NE DÉCIDE RIEN : la lecture du site est dans la coquille
+ *   (src/import-fournisseur.js), la traduction vers nos tailles et couleurs et la
+ *   liste des fiches sont dans le site (assets/js/importfournisseur.js, ops import:*).
+ * ⚠ UNE RECHERCHE SIMPLE NE CRÉE RIEN : les résultats ne sont que regardés ; seule
+ *   « Préparer la fiche » écrit (une fiche d'import, jamais un produit).
  * ⚠ LISTES EN PAGES MESURÉES (data-pages), jamais de glissière.
  * ⚠ AUCUN CARACTÈRE accent grave NI ANTISLASH dans la portion de script.
  * ⚠ LES IMAGES DU FOURNISSEUR s'affichent par leur adresse, sans référent
  *   (referrerpolicy=no-referrer) ; ses TEXTES passent tous par esc().
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
 const T = require('../langue').tr('import');
 
 const CSS = `
@@ -47,31 +46,91 @@ body{background:var(--f-page);color:var(--tx);
 .tete .ico{display:inline-flex;width:19px;height:19px;color:var(--or)}
 .tete .ico svg{width:100%;height:100%}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
-.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;display:flex;flex-direction:column;gap:.6rem}
+.corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;display:flex}
 button,select,input,textarea{font:inherit;color:var(--tx);background:var(--v05);border:1px solid var(--v16);border-radius:8px}
 button{padding:.3rem .65rem;cursor:pointer}
 select,input{padding:.25rem .45rem}
-textarea{padding:.4rem .5rem;resize:none;width:100%}
+textarea{padding:.45rem .55rem;resize:none;width:100%}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.45;cursor:default}
 button:focus,select:focus,input:focus,textarea:focus{outline:none;border-color:var(--or)}
 button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:var(--or-clair)}
-button.danger{color:var(--tx-err)}
-.outils{flex:0 0 auto;display:flex;gap:.7rem;flex-wrap:wrap;align-items:center;font-size:.82rem}
-.outils label{display:flex;align-items:center;gap:.4rem;color:var(--tx2)}
-.outils select{max-width:17rem}
-.badge{display:inline-block;font-size:.68rem;font-weight:700;padding:.08rem .5rem;border-radius:99px;background:var(--v08);color:var(--tx2);white-space:nowrap}
-.trio{flex:1 1 0;min-height:0;display:grid;grid-template-columns:19rem minmax(0,1fr) minmax(0,1.35fr);gap:.8rem;grid-template-rows:minmax(0,1fr)}
-.col{display:flex;flex-direction:column;min-width:0;min-height:0;gap:.6rem}
-.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:12px;padding:.7rem .8rem;display:flex;flex-direction:column;gap:.45rem;min-height:0}
-.carte.pleine{flex:1 1 0}
-.carte h2{margin:0;font:700 .8rem/1.3 system-ui;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em}
+button.lien{background:transparent;border-color:transparent;color:var(--or);padding:.2rem .3rem;font-size:.8rem;font-weight:600}
+button.lien:hover:not(:disabled){background:transparent;text-decoration:underline}
+.module{flex:1 1 auto;min-width:0;min-height:0;display:grid;grid-template-columns:17.5rem minmax(0,1fr);gap:.9rem}
+.carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:12px;padding:.75rem .85rem;display:flex;flex-direction:column;gap:.5rem;min-height:0;min-width:0}
+.carte h2{margin:0;font:700 .74rem/1.3 system-ui;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em}
 .aide{font-size:.75rem;color:var(--tx2);line-height:1.45}
-.avance{font-size:.78rem;color:var(--tx2);min-height:1.2em}
-.filtres{display:flex;gap:.25rem;flex-wrap:wrap}
-.filtres button{background:transparent;border:1px solid transparent;color:var(--tx2);padding:.2rem .55rem;font-size:.76rem;font-weight:600}
-.filtres button.actif{border-color:var(--or);color:var(--tx)}
+.vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
+
+/* ── LES FOURNISSEURS (colonne de gauche) ── */
+.cote input.filtre{width:100%}
+.fos{flex:1 1 0;min-height:0;display:flex;flex-direction:column;gap:.25rem;overflow:hidden}
+.fo{display:grid;grid-template-columns:2.2rem minmax(0,1fr) auto;gap:.6rem;align-items:center;padding:.45rem .45rem;border-radius:10px;border:1px solid transparent;cursor:pointer}
+.fo:hover{background:var(--v05)}
+.fo.sel{background:var(--v08);border-color:var(--or)}
+.mono{width:2.2rem;height:2.2rem;border-radius:9px;display:flex;align-items:center;justify-content:center;font:700 .78rem/1 system-ui;background:var(--v10);color:var(--tx)}
+.fo.sel .mono{background:var(--or);color:#1a1208}
+.fo .t{min-width:0}
+.fo .t b{display:block;font-size:.84rem;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fo .t small{display:flex;align-items:center;gap:.35rem;font-size:.7rem;color:var(--tx2);white-space:nowrap;overflow:hidden}
+.point{width:.45rem;height:.45rem;border-radius:99px;flex:0 0 auto;background:var(--tx-ok)}
+.point.off{background:var(--tx-att)}
+.cpt{min-width:1.4rem;height:1.4rem;padding:0 .4rem;border-radius:99px;background:var(--or);color:#1a1208;font:700 .7rem/1.4rem system-ui;text-align:center}
+.cote .bas{display:flex;flex-direction:column;gap:.3rem}
+
+/* ── LE FOURNISSEUR CHOISI ── */
+.princ{display:flex;flex-direction:column;gap:.7rem;min-width:0;min-height:0}
+.entete{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}
+.entete .mono{width:2.8rem;height:2.8rem;font-size:.95rem;background:var(--or);color:#1a1208;border-radius:12px}
+.entete .nom{min-width:0;flex:1 1 auto}
+.entete h2{margin:0;font:700 1.15rem/1.25 system-ui;color:var(--tx)}
+.entete .site{font-size:.76rem;color:var(--tx2);display:flex;gap:.45rem;align-items:center;flex-wrap:wrap}
+.badge{display:inline-block;font-size:.68rem;font-weight:700;padding:.1rem .5rem;border-radius:99px;background:var(--v08);color:var(--tx2);white-space:nowrap}
+.onglets{display:flex;gap:.3rem;border-bottom:1px solid var(--v08);padding-bottom:.45rem;flex-wrap:wrap}
+.onglets button{background:transparent;border:1px solid transparent;color:var(--tx2);padding:.35rem .75rem;font-weight:650;font-size:.83rem;display:flex;align-items:center;gap:.4rem}
+.onglets button:hover:not(:disabled){background:var(--v05);color:var(--tx)}
+.onglets button.actif{border-color:var(--or);color:var(--tx);background:var(--v05)}
+.onglets .n{font-size:.68rem;padding:0 .4rem;border-radius:99px;background:var(--v10);color:var(--tx2);line-height:1.3rem}
+.onglets button.actif .n{background:var(--or);color:#1a1208}
+.zone{flex:1 1 0;min-height:0;display:flex;flex-direction:column;gap:.65rem}
+
+/* la barre de recherche */
+.barre{display:grid;grid-template-columns:minmax(0,1fr) 13rem auto;gap:.5rem;align-items:stretch}
+.barre .q{position:relative;display:flex}
+.barre .q svg{position:absolute;left:.75rem;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--tx2);pointer-events:none}
+.barre input#o-nom{width:100%;padding:.65rem .8rem .65rem 2.4rem;font-size:1rem;border-radius:10px}
+.barre select{border-radius:10px}
+.barre .prim{padding:.55rem 1.3rem;border-radius:10px;font-size:.92rem}
+.options{display:flex;gap:1rem;align-items:center;flex-wrap:wrap;font-size:.8rem;color:var(--tx2)}
+.options label{display:flex;align-items:center;gap:.4rem}
+.multi{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.6rem;align-items:start}
+.avance{font-size:.8rem;color:var(--tx2);min-height:1.2em}
+.res-t{display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap;font-size:.84rem;color:var(--tx2)}
+.res-t b{color:var(--tx)}
+.res{flex:1 1 0;min-height:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(10.5rem,1fr));gap:.7rem;overflow:hidden;align-content:start}
+.rc{display:flex;flex-direction:column;border:1px solid var(--v10);border-radius:12px;overflow:hidden;background:var(--v03,transparent)}
+.rc .im{position:relative;aspect-ratio:4/5;background:var(--v08)}
+.rc .im img{width:100%;height:100%;object-fit:cover;display:block}
+.rc .sc{position:absolute;left:.4rem;top:.4rem;font:700 .66rem/1 system-ui;padding:.22rem .45rem;border-radius:99px;background:rgba(10,14,22,.78);color:var(--tx)}
+.rc .sc.haut{background:var(--or);color:#1a1208}
+.rc .bd{padding:.5rem .6rem .6rem;display:flex;flex-direction:column;gap:.35rem;flex:1 1 auto}
+.rc b{font-size:.78rem;font-weight:650;line-height:1.3;max-height:2.6em;overflow:hidden}
+.rc .px{font-size:.76rem;color:var(--tx2)}
+.rc button{margin-top:auto;font-size:.76rem;font-weight:650}
+.rc.fait{border-color:var(--tx-ok)}
+.rc.fait button{color:var(--tx-ok)}
+.etapes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem;margin-top:.4rem}
+.etapes div{border:1px dashed var(--v16);border-radius:12px;padding:.8rem .9rem;display:flex;flex-direction:column;gap:.3rem}
+.etapes b{font-size:.84rem}
+.etapes span{font-size:.76rem;color:var(--tx2);line-height:1.45}
+.etapes .num{font:700 .7rem/1 system-ui;color:var(--or);letter-spacing:.05em}
+.config{max-width:34rem;margin:1.5rem auto;display:flex;flex-direction:column;gap:.7rem;align-items:flex-start;padding:1.2rem 1.3rem;border:1px dashed var(--v16);border-radius:14px}
+.config h3{margin:0;font:700 1rem/1.3 system-ui}
+
+/* À compléter / Créés : liste + volet */
+.duo{flex:1 1 0;min-height:0;display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.35fr);gap:.8rem}
 .liste{flex:1 1 0;min-height:0;display:flex;flex-direction:column;gap:.3rem;overflow:hidden}
 .fi{display:grid;grid-template-columns:2.6rem minmax(0,1fr) auto;gap:.55rem;align-items:center;padding:.35rem .4rem;border:1px solid transparent;border-radius:9px;cursor:pointer}
 .fi:hover{background:var(--v05)}
@@ -90,12 +149,15 @@ html.jour .pill.plusieurs{color:#1e4f8f}
 html.jour .pill.introuvable,html.jour .pill.erreur{color:#7a2e2e}
 html.jour .pill.creee{color:#1d5e33}
 html.jour .badge{color:#2f3845;background:rgba(0,0,0,.07)}
+html.jour .rc .sc{background:rgba(255,255,255,.92)}
+html.jour .onglets .n{color:#2f3845;background:rgba(0,0,0,.08)}
+html.jour .rc .sc.haut{background:var(--or);color:#1a1208}
 .detail{flex:1 1 0;min-height:0;display:flex;flex-direction:column;gap:.55rem;overflow:hidden}
-.d-tete{display:flex;gap:.6rem;align-items:flex-start}
-.d-tete input{flex:1 1 auto;font-weight:650}
+.detail h2{margin:0;font:700 .95rem/1.3 system-ui;color:var(--tx)}
+.d-tete input{width:100%;font-weight:650}
 .d-src{font-size:.72rem;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.galerie{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:.4rem}
-.ph{position:relative;aspect-ratio:3/4;border-radius:8px;overflow:hidden;border:2px solid transparent;background:var(--v08);cursor:pointer;padding:0}
+.galerie{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:.35rem;flex:0 0 auto}
+.ph{position:relative;aspect-ratio:4/5;border-radius:8px;overflow:hidden;border:2px solid transparent;background:var(--v08);cursor:pointer;padding:0}
 .ph img{width:100%;height:100%;object-fit:cover;display:block}
 .ph.on{border-color:var(--or)}
 .ph .n{position:absolute;top:.2rem;left:.2rem;min-width:1.25rem;height:1.25rem;border-radius:99px;background:var(--or);color:#1a1208;font:700 .68rem/1.25rem system-ui;text-align:center;padding:0 .25rem}
@@ -106,21 +168,21 @@ html.jour .badge{color:#2f3845;background:rgba(0,0,0,.07)}
 .jet{display:inline-block;font-size:.7rem;padding:.04rem .4rem;border-radius:6px;background:var(--v08);margin:0 .2rem .15rem 0}
 .jet.inc{background:rgba(245,158,11,.16);color:var(--tx-att)}
 html.jour .jet.inc{color:#7a5a00}
-.desc{font-size:.76rem;color:var(--tx2);line-height:1.45;white-space:pre-line;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical}
+.desc{flex:0 0 auto;font-size:.76rem;color:var(--tx2);line-height:1.45;max-height:2.9em;white-space:normal;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.detail > *{flex-shrink:0}
 .manque{display:flex;flex-wrap:wrap;gap:.3rem}
 .manque span{font-size:.7rem;padding:.08rem .45rem;border-radius:99px;border:1px solid var(--v16);color:var(--tx2)}
-.cands{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.5rem}
+.cands{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem}
 .cand{display:flex;flex-direction:column;gap:.25rem;padding:.4rem;border:1px solid var(--v10);border-radius:10px;cursor:pointer;text-align:left;background:var(--v03,transparent)}
 .cand:hover{border-color:var(--or)}
 .cand img,.cand .vide-img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:7px;background:var(--v08);display:block}
 .cand b{font-size:.74rem;font-weight:650;line-height:1.3;max-height:2.6em;overflow:hidden}
 .cand small{font-size:.68rem;color:var(--tx2)}
 .actions-d{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:auto}
-.vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
-@media (max-width:1240px){.trio{grid-template-columns:17rem minmax(0,1fr) minmax(0,1.2fr)}.galerie{grid-template-columns:repeat(4,minmax(0,1fr))}.cands{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:1240px){.module{grid-template-columns:15.5rem minmax(0,1fr)}.galerie{grid-template-columns:repeat(6,minmax(0,1fr))}.barre{grid-template-columns:minmax(0,1fr) 10.5rem auto}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -139,8 +201,11 @@ function pageImport() {
   var P = window.szPont;
 ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
-  var CTX = null, FID = '', CAT = '', EN_LIGNE = false, FICHES = [], SEL = '', FILTRE = 'attente';
-  var OCCUPE = false, ARRET = false, NOMS = '';
+  var CTX = null, FICHES = [], FID = '', ONGLET = 'chercher', SEL = '', FILTRE_F = '';
+  var CAT = {}, EN_LIGNE = false, MULTI = false, NOMS = '', NOM = '';
+  var RES = {};      /* par fournisseur : { nom, candidats, motif } — la dernière recherche, regardée seulement */
+  var PREP = {};     /* adresse d un résultat → id de la fiche préparée */
+  var OCCUPE = false, ARRET = false;
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
@@ -185,105 +250,156 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var STATUT = { a_verifier: '${T("À vérifier")}', plusieurs: '${T("À choisir")}', introuvable: '${T("Introuvable")}', erreur: '${T("Erreur")}', creee: '${T("Créée")}' };
   var MANQUE = { categorie: '${T("catégorie")}', nom: '${T("nom")}', photo: '${T("photo")}', cout: '${T("coût")}', prix: '${T("prix")}',
     tailles: '${T("tailles")}', couleurs: '${T("couleurs")}', poids: '${T("poids")}', stock: '${T("stock")}' };
-  function fournisseur(){ return (CTX && CTX.fournisseurs || []).filter(function(f){ return f.id === FID; })[0] || null; }
+  var LOUPE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>';
+
+  function fournisseur(id){ return (CTX && CTX.fournisseurs || []).filter(function(f){ return f.id === (id || FID); })[0] || null; }
   function familleLib(cle){ var l = ''; (CTX.familles || []).forEach(function(f){ if (f.cle === cle) l = f.libelle; }); return l; }
-  function categories(){
-    var f = fournisseur(); if (!f || !f.configure) return [];
+  function categoriesDe(f){
+    if (!f || !f.configure) return [];
     return (CTX.categories || []).filter(function(c){ return f.type === 'mixte' || c.famille === f.type; });
   }
   function catLib(cle){ var l = ''; (CTX.categories || []).forEach(function(c){ if (c.cle === cle) l = c.libelle; }); return l; }
   function argent(n){ return (n == null) ? '—' : szArgent(n); }
   function img(u, cl){ return u ? '<img class="' + (cl || '') + '" src="' + esc(u) + '" alt="" loading="lazy" referrerpolicy="no-referrer">' : '<span class="' + (cl || '') + ' vide-img"></span>'; }
   function fiche(id){ return FICHES.filter(function(x){ return x.id === id; })[0] || null; }
+  function initiales(n){
+    var m = String(n || '').trim().split(' ').filter(Boolean);
+    return ((m[0] || '').charAt(0) + (m.length > 1 ? m[m.length - 1].charAt(0) : (m[0] || '').charAt(1))).toUpperCase() || '?';
+  }
+  function domaine(u){ return String(u || '').replace('https://', '').replace('http://', '').replace('www.', '').split('/')[0]; }
+  function fichesDe(fid, quoi){
+    return FICHES.filter(function(x){ return x.fournisseurId === fid && (quoi === 'creees' ? x.statut === 'creee' : x.statut !== 'creee'); });
+  }
 
   /* ══ LE DESSIN ═════════════════════════════════════════════════════════ */
   function dessiner(){
-    var f = fournisseur();
-    var fs = (CTX.fournisseurs || []);
-    var h = '<div class="outils">'
-      + '<label>${T("Fournisseur")} <select id="o-fourn">'
-      + (fs.length ? '' : '<option value="">${T("Aucun fournisseur")}</option>')
-      + fs.map(function(x){ return '<option value="' + esc(x.id) + '"' + (x.id === FID ? ' selected' : '') + '>' + esc(x.nom) + (x.configure ? '' : ' — ${T("site à configurer")}') + '</option>'; }).join('')
-      + '</select></label>'
-      + (f && f.configure ? '<span class="badge" title="' + esc(f.site) + '">' + esc(familleLib(f.type)) + '</span>' : '')
-      + (f && CTX.peutConfigurer ? '<button type="button" data-a="config">' + (f.configure ? '${T("Réglages du fournisseur")}' : '${T("Configurer son site")}') + '</button>' : '')
-      + '<label>${T("Catégorie")} <select id="o-cat"><option value="">${T("Choisir…")}</option>'
-      + categories().map(function(c){ return '<option value="' + esc(c.cle) + '"' + (c.cle === CAT ? ' selected' : '') + '>' + esc(c.libelle) + '</option>'; }).join('')
-      + '</select></label>'
-      + '<label title="${T("Le produit est mis en vente dès qu’il est créé ; sinon il reste retiré de la vente.")}"><input type="checkbox" id="o-ligne"' + (EN_LIGNE ? ' checked' : '') + '> ${T("Mettre en ligne à la création")}</label>'
-      + '</div>';
-    h += '<div class="trio"><div class="col">' + vueChercher(f) + '</div><div class="col">' + vueListe() + '</div><div class="col">' + vueDetail() + '</div></div>';
-    corps.innerHTML = h;
+    garderSaisies();
+    corps.innerHTML = '<div class="module">' + vueFournisseurs() + '<div class="princ">' + vuePrincipale() + '</div></div>';
+    var on = document.getElementById('o-nom'); if (on) on.value = NOM;
     var ta = document.getElementById('o-noms'); if (ta) ta.value = NOMS;
-    majSous();
-  }
-  function majSous(){
     var att = FICHES.filter(function(x){ return x.statut !== 'creee'; }).length;
     document.getElementById('sous').textContent = '${T("{0} fiches en attente")}'.replace('{0}', String(att));
   }
+  function garderSaisies(){
+    var on = document.getElementById('o-nom'); if (on) NOM = on.value;
+    var ta = document.getElementById('o-noms'); if (ta) NOMS = ta.value;
+    var ff = document.getElementById('o-ffiltre'); if (ff) FILTRE_F = ff.value;
+  }
+
+  function vueFournisseurs(){
+    var q = String(FILTRE_F || '').trim().toLowerCase();
+    var l = (CTX.fournisseurs || []).filter(function(f){ return !q || f.nom.toLowerCase().indexOf(q) >= 0; });
+    var h = '<div class="carte cote"><h2>${T("Mes fournisseurs")}</h2>'
+      + '<input class="filtre" id="o-ffiltre" placeholder="${T("Filtrer…")}" aria-label="${T("Filtrer les fournisseurs")}" value="' + esc(FILTRE_F) + '">';
+    if (!(CTX.fournisseurs || []).length) h += '<div class="vide">${T("Aucun fournisseur pour l’instant.")}</div>';
+    else if (!l.length) h += '<div class="vide">${T("Aucun fournisseur ne correspond.")}</div>';
+    else h += '<div class="fos" data-pages="import-fournisseurs">' + l.map(function(f){
+      var n = fichesDe(f.id, 'attente').length;
+      return '<div class="fo' + (f.id === FID ? ' sel' : '') + '" data-f="' + esc(f.id) + '" tabindex="0" role="button" aria-pressed="' + (f.id === FID) + '">'
+        + '<span class="mono">' + esc(initiales(f.nom)) + '</span>'
+        + '<span class="t"><b>' + esc(f.nom) + '</b><small><span class="point' + (f.configure ? '' : ' off') + '"></span>'
+        + (f.configure ? esc(familleLib(f.type)) : '${T("site à configurer")}') + '</small></span>'
+        + (n ? '<span class="cpt" title="${T("Fiches à compléter")}">' + n + '</span>' : '<span></span>') + '</div>';
+    }).join('') + '</div>';
+    h += '<div class="bas">' + (CTX.peutAjouterFournisseur ? '<button type="button" data-a="nouveauF">${T("+ Nouveau fournisseur")}</button>' : '') + '</div></div>';
+    return h;
+  }
+
+  function vuePrincipale(){
+    var f = fournisseur();
+    if (!f) return '<div class="carte" style="flex:1 1 0"><div class="vide">${T("Choisissez un fournisseur à gauche.")}</div></div>';
+    var nA = fichesDe(f.id, 'attente').length, nC = fichesDe(f.id, 'creees').length;
+    var h = '<div class="entete"><span class="mono">' + esc(initiales(f.nom)) + '</span><div class="nom"><h2>' + esc(f.nom) + '</h2>'
+      + '<div class="site">' + (f.configure ? esc(domaine(f.site)) + ' <span class="badge">' + esc(familleLib(f.type)) + '</span>' : '${T("Aucun site configuré")}') + '</div></div>'
+      + (CTX.peutConfigurer ? '<button type="button" data-a="config">' + (f.configure ? '${T("Réglages du fournisseur")}' : '${T("Configurer son site")}') + '</button>' : '') + '</div>';
+    h += '<div class="onglets" role="tablist">'
+      + '<button type="button" role="tab" data-onglet="chercher" class="' + (ONGLET === 'chercher' ? 'actif' : '') + '" aria-selected="' + (ONGLET === 'chercher') + '">${T("Rechercher")}</button>'
+      + '<button type="button" role="tab" data-onglet="attente" class="' + (ONGLET === 'attente' ? 'actif' : '') + '" aria-selected="' + (ONGLET === 'attente') + '">${T("À compléter")} <span class="n">' + nA + '</span></button>'
+      + '<button type="button" role="tab" data-onglet="creees" class="' + (ONGLET === 'creees' ? 'actif' : '') + '" aria-selected="' + (ONGLET === 'creees') + '">${T("Créés")} <span class="n">' + nC + '</span></button></div>';
+    h += '<div class="zone">' + (ONGLET === 'chercher' ? vueChercher(f) : vueFiches(f, ONGLET)) + '</div>';
+    return h;
+  }
 
   function vueChercher(f){
-    var pret = !!(f && f.configure && CAT && CTX.peutCreer);
-    var h = '<div class="carte pleine"><h2>${T("Chercher chez le fournisseur")}</h2>';
-    if (!f) return h + '<div class="vide">${T("Ajoutez d’abord un fournisseur (Catalogue › Fournisseurs).")}</div></div>';
-    if (!f.configure) return h + '<div class="aide">${T("Ce fournisseur n’a pas de site configuré. Ouvrez ses réglages, étape « Import de produits » : l’adresse de son catalogue et ce qu’il vend (vêtements, accessoires…).")}</div></div>';
-    h += '<label class="aide" for="o-noms">${T("Noms des produits, un par ligne (25 au plus). Le nom ou la référence du fournisseur.")}</label>'
-      + '<textarea id="o-noms" rows="9" placeholder="${T("Robe Mila fleurie")}"' + (OCCUPE ? ' disabled' : '') + '></textarea>'
-      + (OCCUPE ? '<button type="button" data-a="arreter">${T("Arrêter après celui-ci")}</button>'
-        : '<button type="button" class="prim" data-a="chercher"' + (pret ? '' : ' disabled') + '>${T("Chercher")}</button>')
-      + '<div class="avance" id="avance"></div>'
-      + (CAT ? '' : '<div class="aide">${T("Choisissez la catégorie : elle sera celle de toutes les fiches de cette recherche (modifiable ensuite, fiche par fiche).")}</div>')
-      + '<div class="aide">${T("Un résultat net devient une fiche « À vérifier » ; plusieurs résultats proches vous laissent choisir. Rien n’est mis en vente sans passer par la fiche produit.")}</div>'
-      + '</div>';
+    if (!f.configure) {
+      return '<div class="config"><h3>${T("Ce fournisseur n’a pas encore de site")}</h3>'
+        + '<div class="aide">${T("Indiquez l’adresse de son catalogue et ce qu’il vend (vêtements, accessoires…) : vous pourrez ensuite chercher ses produits par leur nom.")}</div>'
+        + (CTX.peutConfigurer ? '<button type="button" class="prim" data-a="config">${T("Configurer son site")}</button>' : '') + '</div>';
+    }
+    var cats = categoriesDe(f), cat = CAT[f.id] || '';
+    if (!cat && cats.length === 1) { cat = cats[0].cle; CAT[f.id] = cat; }
+    var h = '<div class="barre"><div class="q">' + LOUPE + '<input id="o-nom" placeholder="${T("Nom ou référence du produit chez ce fournisseur")}" aria-label="${T("Nom du produit à chercher")}" autocomplete="off"' + (OCCUPE || MULTI ? ' disabled' : '') + '></div>'
+      + '<select id="o-cat" aria-label="${T("Catégorie")}"><option value="">${T("Catégorie…")}</option>'
+      + cats.map(function(c){ return '<option value="' + esc(c.cle) + '"' + (c.cle === cat ? ' selected' : '') + '>' + esc(c.libelle) + '</option>'; }).join('') + '</select>'
+      + '<button type="button" class="prim" data-a="chercher"' + (OCCUPE || MULTI ? ' disabled' : '') + '>${T("Chercher")}</button></div>'
+      + '<div class="options"><label title="${T("Le produit est mis en vente dès qu’il est créé ; sinon il reste retiré de la vente.")}"><input type="checkbox" id="o-ligne"' + (EN_LIGNE ? ' checked' : '') + '> ${T("Mettre en ligne à la création")}</label>'
+      + '<button type="button" class="lien" data-a="multi">' + (MULTI ? '${T("Un seul nom")}' : '${T("Plusieurs noms à la fois")}') + '</button></div>';
+    if (MULTI) {
+      h += '<div class="multi"><textarea id="o-noms" rows="5" placeholder="${T("Un nom par ligne (25 au plus)")}" aria-label="${T("Noms des produits, un par ligne")}"' + (OCCUPE ? ' disabled' : '') + '></textarea>'
+        + (OCCUPE ? '<button type="button" data-a="arreter">${T("Arrêter après celui-ci")}</button>'
+          : '<button type="button" class="prim" data-a="chercherTous">${T("Préparer les fiches")}</button>') + '</div>'
+        + '<div class="aide">${T("Chaque nom au résultat net devient une fiche « À compléter » ; quand plusieurs produits se ressemblent, vous choisirez dans l’onglet À compléter.")}</div>'
+        + '<div class="avance" id="avance"></div>';
+      return h;
+    }
+    var r = RES[f.id];
+    if (OCCUPE && r && r.enCours) return h + '<div class="avance">' + '${T("Recherche de « {0} » chez {1}…")}'.replace('{0}', esc(r.nom)).replace('{1}', esc(f.nom)) + '</div>';
+    if (!r) {
+      return h + '<div class="etapes">'
+        + '<div><span class="num">1</span><b>${T("Tapez le nom")}</b><span>${T("Le nom du produit ou sa référence chez le fournisseur, puis Entrée.")}</span></div>'
+        + '<div><span class="num">2</span><b>${T("Choisissez le bon")}</b><span>${T("Les produits trouvés sur son site s’affichent avec leur photo et leur prix.")}</span></div>'
+        + '<div><span class="num">3</span><b>${T("Préparez la fiche")}</b><span>${T("Photos, tailles, couleurs et composition sont récupérées ; vous complétez le reste.")}</span></div></div>';
+    }
+    if (r.motif) return h + '<div class="vide">' + esc(expliquer({ motif: r.motif })) + '</div>';
+    if (!r.candidats.length) return h + '<div class="vide">' + '${T("Aucun produit trouvé pour « {0} ». Essayez un autre mot ou la référence du fournisseur.")}'.replace('{0}', esc(r.nom)) + '</div>';
+    h += '<div class="res-t">' + '${T("{0} résultats pour « {1} »")}'.replace('{0}', '<b>' + r.candidats.length + '</b>').replace('{1}', esc(r.nom))
+      + '<span>${T("— le plus ressemblant d’abord")}</span></div>';
+    h += '<div class="res" data-pages="import-resultats">' + r.candidats.map(function(c, i){
+      var fid = PREP[c.url], pct = Math.round((c.score || 0) * 100);
+      return '<div class="rc' + (fid ? ' fait' : '') + '"><div class="im">' + img(c.image) + '<span class="sc' + (pct >= 75 ? ' haut' : '') + '">' + pct + ' %</span></div>'
+        + '<div class="bd"><b title="' + esc(c.titre) + '">' + esc(c.titre) + '</b><span class="px">' + (c.prix != null ? esc(argent(c.prix)) : '${T("Prix non affiché")}') + '</span>'
+        + (fid ? '<button type="button" data-voir="' + esc(fid) + '">${T("✓ Fiche prête — compléter")}</button>'
+               : '<button type="button" data-prep="' + i + '"' + (OCCUPE ? ' disabled' : '') + '>${T("Préparer la fiche")}</button>') + '</div></div>';
+    }).join('') + '</div>';
     return h;
   }
 
-  function filtrees(){
-    return FICHES.filter(function(x){
-      if (FILTRE === 'attente') return x.statut !== 'creee';
-      if (FILTRE === 'creees') return x.statut === 'creee';
-      return true;
-    });
-  }
-  function vueListe(){
-    var l = filtrees();
-    var h = '<div class="carte pleine"><h2>${T("Fiches importées")}</h2><div class="filtres">'
-      + [['attente', '${T("En attente")}'], ['creees', '${T("Créées")}'], ['toutes', '${T("Toutes")}']].map(function(x){
-          return '<button type="button" data-filtre="' + x[0] + '" class="' + (FILTRE === x[0] ? 'actif' : '') + '">' + x[1] + '</button>'; }).join('')
-      + '</div>';
-    if (!l.length) return h + '<div class="vide">' + (FILTRE === 'creees' ? '${T("Aucun produit créé depuis un import.")}' : '${T("Aucune fiche : lancez une recherche.")}') + '</div></div>';
-    h += '<div class="liste" data-pages="import-fiches">' + l.map(function(x){
+  function vueFiches(f, quoi){
+    var l = fichesDe(f.id, quoi);
+    if (!l.length) {
+      return '<div class="carte" style="flex:1 1 0"><div class="vide">' + (quoi === 'creees' ? '${T("Aucun produit créé depuis ce fournisseur.")}'
+        : '${T("Aucune fiche à compléter : cherchez un produit dans l’onglet Rechercher.")}') + '</div></div>';
+    }
+    if (!SEL || !l.some(function(x){ return x.id === SEL; })) SEL = l[0].id;
+    return '<div class="duo"><div class="carte"><div class="liste" data-pages="import-fiches">' + l.map(function(x){
       var fi = x.fiche || {};
       var vg = (fi.photos && fi.photos[0]) || (fi.images && fi.images[0]) || ((x.candidats || [])[0] || {}).image || '';
-      var sous = [x.fournisseurNom, catLib(x.categorie) || '${T("sans catégorie")}'].filter(Boolean).join(' · ');
       return '<div class="fi' + (x.id === SEL ? ' sel' : '') + '" data-id="' + esc(x.id) + '" tabindex="0">' + img(vg, 'vg')
-        + '<span class="t"><b>' + esc(fi.nom || x.recherche) + '</b><small>' + esc(sous) + '</small></span>'
+        + '<span class="t"><b>' + esc(fi.nom || x.recherche) + '</b><small>' + esc(catLib(x.categorie) || '${T("sans catégorie")}') + '</small></span>'
         + '<span class="pill ' + esc(x.statut) + '">' + STATUT[x.statut] + '</span></div>';
-    }).join('') + '</div></div>';
-    return h;
+    }).join('') + '</div></div><div class="carte">' + vueDetail() + '</div></div>';
   }
 
   function vueDetail(){
     var x = fiche(SEL);
-    var h = '<div class="carte pleine"><div class="detail">';
-    if (!x) return h + '<div class="vide">${T("Choisissez une fiche dans la liste.")}</div></div></div>';
+    var h = '<div class="detail">';
+    if (!x) return h + '<div class="vide">${T("Choisissez une fiche dans la liste.")}</div></div>';
     var fi = x.fiche || {};
     if (x.statut === 'creee') {
       h += '<h2>${T("Produit créé")}</h2><div class="lignes">'
         + '<span class="k">${T("Produit")}</span><span class="v">' + esc(x.produitNom) + '</span>'
-        + '<span class="k">${T("Photothèque")}</span><span class="v">' + '${T("{0} photos copiées, liées au produit")}'.replace('{0}', String(x.photosCopiees || 0)) + '</span>'
-        + '<span class="k">${T("Fournisseur")}</span><span class="v">' + esc(x.fournisseurNom) + '</span></div>'
+        + '<span class="k">${T("Photothèque")}</span><span class="v">' + '${T("{0} photos copiées, liées au produit")}'.replace('{0}', String(x.photosCopiees || 0)) + '</span></div>'
         + '<div class="actions-d"><button type="button" class="prim" data-a="ouvrirProduit">${T("Ouvrir le produit")}</button>'
         + '<button type="button" data-a="retirer">${T("Retirer de la liste")}</button></div>';
-      return h + '</div></div>';
+      return h + '</div>';
     }
     if (x.statut === 'plusieurs') {
       h += '<h2>${T("Plusieurs produits correspondent")}</h2><div class="aide">' + '${T("Recherche : « {0} ». Choisissez le bon produit.")}'.replace('{0}', esc(x.recherche)) + '</div>'
-        + '<div class="cands">' + (x.candidats || []).map(function(c, i){
+        + '<div class="cands">' + (x.candidats || []).slice(0, 6).map(function(c, i){
             return '<button type="button" class="cand" data-cand="' + i + '">' + img(c.image) + '<b>' + esc(c.titre) + '</b><small>'
               + (c.prix != null ? esc(argent(c.prix)) + ' · ' : '') + Math.round((c.score || 0) * 100) + ' %</small></button>'; }).join('') + '</div>'
         + '<div class="actions-d"><button type="button" data-a="retirer">${T("Retirer")}</button></div>';
-      return h + '</div></div>';
+      return h + '</div>';
     }
     if (x.statut === 'introuvable' || x.statut === 'erreur') {
       h += '<h2>' + (x.statut === 'erreur' ? '${T("La recherche a échoué")}' : '${T("Aucun produit trouvé")}') + '</h2>'
@@ -292,14 +408,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<input id="d-autre" value="' + esc(x.recherche) + '">'
         + '<div class="actions-d"><button type="button" class="prim" data-a="rechercher"' + (OCCUPE ? ' disabled' : '') + '>${T("Chercher de nouveau")}</button>'
         + '<button type="button" data-a="retirer">${T("Retirer")}</button></div>';
-      return h + '</div></div>';
+      return h + '</div>';
     }
-    // À vérifier
     var photos = fi.photos || [];
-    var cats = (function(){ var f = (CTX.fournisseurs || []).filter(function(y){ return y.id === x.fournisseurId; })[0];
-      return (CTX.categories || []).filter(function(c){ return !f || !f.type || f.type === 'mixte' || c.famille === f.type; }); })();
+    var cats = categoriesDe(fournisseur(x.fournisseurId));
     h += '<div class="d-tete"><input id="d-nom" maxlength="160" value="' + esc(fi.nom) + '" aria-label="${T("Nom du produit")}"></div>'
-      + '<div class="d-src" title="' + esc(fi.url) + '">' + esc(x.fournisseurNom) + (fi.ref ? ' · ${T("réf.")} ' + esc(fi.ref) : '') + ' · ' + esc(fi.url) + '</div>'
+      + '<div class="d-src" title="' + esc(fi.url) + '">' + (fi.ref ? '${T("réf.")} ' + esc(fi.ref) + ' · ' : '') + esc(fi.url) + '</div>'
       + '<div class="aide">${T("Cliquez les photos à garder, dans l’ordre (1 = photo principale, 5 au plus).")}</div>'
       + '<div class="galerie">' + (fi.images || []).slice(0, 12).map(function(u){
           var n = photos.indexOf(u);
@@ -309,19 +423,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<span class="k">${T("Catégorie")}</span><span class="v"><select id="d-cat" aria-label="${T("Catégorie")}"><option value="">${T("Choisir…")}</option>'
       + cats.map(function(c){ return '<option value="' + esc(c.cle) + '"' + (c.cle === x.categorie ? ' selected' : '') + '>' + esc(c.libelle) + '</option>'; }).join('') + '</select>'
       + ' <label style="margin-left:.6rem;color:var(--tx2)"><input type="checkbox" id="d-ligne"' + (x.enLigne ? ' checked' : '') + '> ${T("Mettre en ligne")}</label></span>'
-      + '<span class="k">${T("Prix du fournisseur")}</span><span class="v">' + (fi.prixFournisseur != null ? esc(argent(fi.prixFournisseur)) + (fi.devise && fi.devise !== 'CAD' ? ' ' + esc(fi.devise) : '') : '—') + '</span>'
-      + '<span class="k">${T("Coût / prix proposé")}</span><span class="v">' + esc(argent(fi.cout)) + ' → <b>' + esc(argent(fi.prix)) + '</b></span>'
+      + '<span class="k">${T("Coût / prix proposé")}</span><span class="v">' + esc(argent(fi.cout)) + ' → <b>' + esc(argent(fi.prix)) + '</b>'
+      + (fi.devise && fi.devise !== 'CAD' && fi.prixFournisseur != null ? ' <span class="jet inc">' + esc(argent(fi.prixFournisseur)) + ' ' + esc(fi.devise) + '</span>' : '') + '</span>'
       + '<span class="k">${T("Tailles")}</span><span class="v">' + jetons(fi.tailles, fi.taillesInconnues) + '</span>'
       + '<span class="k">${T("Couleurs")}</span><span class="v">' + jetons(fi.couleurs, fi.couleursInconnues) + '</span>'
       + '<span class="k">${T("Composition")}</span><span class="v">' + (fi.composition ? esc(fi.composition) + (fi.compositionSure ? '' : ' <span class="jet inc">${T("à vérifier")}</span>') : '—') + '</span>'
-      + (fi.marque ? '<span class="k">${T("Marque")}</span><span class="v">' + esc(fi.marque) + '</span>' : '')
       + '</div>'
       + (fi.description ? '<div class="desc">' + esc(fi.description) + '</div>' : '')
       + '<div class="aide">${T("À compléter dans la fiche produit :")}</div><div class="manque">'
       + (x.manquants || []).map(function(m){ return '<span>' + (MANQUE[m] || esc(m)) + '</span>'; }).join('') + '</div>'
       + '<div class="actions-d"><button type="button" class="prim" data-a="creer"' + (CTX.peutCreer ? '' : ' disabled') + '>${T("Compléter et créer le produit")}</button>'
       + '<button type="button" data-a="retirer">${T("Retirer")}</button></div>';
-    return h + '</div></div>';
+    return h + '</div>';
   }
   function jetons(ok, inc){
     var h = (ok || []).map(function(t){ return '<span class="jet">' + esc(t) + '</span>'; }).join('')
@@ -335,7 +448,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (!c || !c.ok) { corps.innerHTML = '<div class="vide">' + esc(expliquer(c)) + '</div>'; dire(expliquer(c), 'err'); return; }
       CTX = c;
       if (!FID || !fournisseur()) { var pf = (c.fournisseurs || []).filter(function(f){ return f.configure; })[0] || (c.fournisseurs || [])[0]; FID = pf ? pf.id : ''; }
-      if (CAT && !categories().some(function(x){ return x.cle === CAT; })) CAT = '';
       chargerFiches();
     });
   }
@@ -344,37 +456,49 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       FICHES = r.fiches || [];
       if (SEL && !fiche(SEL)) SEL = '';
-      // à l ouverture, la première fiche de la liste montrée est déjà choisie : le volet de droite n est jamais vide pour rien
-      if (!SEL) { var p0 = filtrees()[0]; if (p0) SEL = p0.id; }
-      garderNoms(); dessiner();
+      dessiner();
     });
   }
-  function garderNoms(){ var ta = document.getElementById('o-noms'); if (ta) NOMS = ta.value; }
   function remplacer(x){
     var i = -1; FICHES.forEach(function(y, k){ if (y.id === x.id) i = k; });
     if (i >= 0) FICHES[i] = x; else FICHES.unshift(x);
   }
   function avance(t){ var a = document.getElementById('avance'); if (a) a.textContent = t || ''; }
-
-  /* ══ CHERCHER : un nom après l autre (le site du fournisseur n est pas pressé) ══ */
-  function decider(cands){
-    if (!cands.length) return null;
-    var a = cands[0], b = cands[1];
-    if (a.score >= 0.75 && (!b || b.score <= a.score - 0.08)) return a;
-    return null;
+  function catChoisie(f){
+    var c = CAT[f.id] || '';
+    if (!c) { dire('${T("Choisissez d’abord la catégorie : elle sera celle des fiches préparées.")}', 'att'); var s = document.getElementById('o-cat'); if (s) s.focus(); }
+    return c;
   }
-  function chercherUn(f, nom, idExistant){
-    return P.importFournisseur.chercher({ site: f.site, recherche: f.recherche, nom: nom }).then(function(r){
-      var base = { id: idExistant || '', fournisseurId: f.id, recherche: nom, categorie: CAT || (fiche(idExistant) || {}).categorie || '', enLigne: EN_LIGNE };
-      if (!r || !r.ok) return appeler('import:preparer', [Object.assign(base, { statut: 'erreur', motif: (r && r.motif) || 'echec' })]);
-      var cands = r.candidats || [];
-      if (!cands.length) return appeler('import:preparer', [Object.assign(base, { statut: 'introuvable', candidats: [] })]);
-      var net = decider(cands);
-      var liste = cands.map(function(c){ return { url: c.url, titre: c.titre, image: c.image, prix: c.prix, score: c.score }; });
-      if (!net) return appeler('import:preparer', [Object.assign(base, { statut: 'plusieurs', candidats: liste })]);
-      return lireFiche(f, net).then(function(e){
-        if (!e.ok) return appeler('import:preparer', [Object.assign(base, { statut: 'erreur', motif: e.motif, candidats: liste })]);
-        return appeler('import:preparer', [Object.assign(base, { brut: e.fiche, candidats: liste })]);
+  function liste(cands){ return (cands || []).map(function(c){ return { url: c.url, titre: c.titre, image: c.image, prix: c.prix, score: c.score }; }); }
+
+  /* ══ RECHERCHER (un nom) : on REGARDE les résultats, rien n est écrit ══ */
+  function chercher(){
+    var f = fournisseur(); if (!f || !f.configure || OCCUPE) return;
+    if (!P.importFournisseur) { dire('${T("Cette version de l’application ne sait pas lire un site : mettez-la à jour.")}', 'err'); return; }
+    garderSaisies();
+    var nom = String(NOM || '').trim();
+    if (nom.length < 2) { dire('${T("Tapez le nom du produit à chercher.")}', 'att'); var o = document.getElementById('o-nom'); if (o) o.focus(); return; }
+    OCCUPE = true; RES[f.id] = { nom: nom, candidats: [], enCours: true }; dessiner();
+    P.importFournisseur.chercher({ site: f.site, recherche: f.recherche, nom: nom }).then(function(r){
+      OCCUPE = false;
+      RES[f.id] = (r && r.ok) ? { nom: nom, candidats: r.candidats || [] } : { nom: nom, candidats: [], motif: (r && r.motif) || 'echec' };
+      dessiner();
+      var on = document.getElementById('o-nom'); if (on) { on.focus(); on.select(); }
+    });
+  }
+  /* « Préparer la fiche » sur un résultat : la fiche est lue chez le fournisseur et devient une fiche d import. */
+  function preparer(i){
+    var f = fournisseur(); var r = RES[f && f.id]; if (!f || !r || OCCUPE) return;
+    var c = r.candidats[i]; if (!c) return;
+    var cat = catChoisie(f); if (!cat) return;
+    OCCUPE = true; dessiner(); dire('${T("Lecture de la fiche du fournisseur…")}');
+    lireFiche(f, c).then(function(e){
+      if (!e || !e.ok) { OCCUPE = false; dessiner(); dire(expliquer(e), 'err'); return; }
+      return appeler('import:preparer', [{ fournisseurId: f.id, recherche: r.nom, categorie: cat, enLigne: EN_LIGNE, brut: e.fiche, candidats: liste(r.candidats) }]).then(function(p){
+        OCCUPE = false;
+        if (!p || !p.ok) { dessiner(); dire(expliquer(p), 'err'); return; }
+        remplacer(p.fiche); PREP[c.url] = p.fiche.id; dessiner();
+        dire('${T("Fiche prête : complétez-la dans l’onglet À compléter.")}', 'bon');
       });
     });
   }
@@ -382,16 +506,38 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (c.brut) return Promise.resolve({ ok: true, fiche: c.brut });
     return P.importFournisseur.extraire({ url: c.url, site: f.site });
   }
-  function chercher(){
-    var f = fournisseur();
-    if (!f || !f.configure || !CAT || OCCUPE) return;
+
+  /* ══ PLUSIEURS NOMS : un nom après l autre (le site du fournisseur n est pas pressé) ══ */
+  function decider(cands){
+    if (!cands.length) return null;
+    var a = cands[0], b = cands[1];
+    if (a.score >= 0.75 && (!b || b.score <= a.score - 0.08)) return a;
+    return null;
+  }
+  function chercherUn(f, nom, idExistant, cat){
+    return P.importFournisseur.chercher({ site: f.site, recherche: f.recherche, nom: nom }).then(function(r){
+      var base = { id: idExistant || '', fournisseurId: f.id, recherche: nom, categorie: cat || (fiche(idExistant) || {}).categorie || '', enLigne: EN_LIGNE };
+      if (!r || !r.ok) return appeler('import:preparer', [Object.assign(base, { statut: 'erreur', motif: (r && r.motif) || 'echec' })]);
+      var cands = r.candidats || [];
+      if (!cands.length) return appeler('import:preparer', [Object.assign(base, { statut: 'introuvable', candidats: [] })]);
+      var net = decider(cands);
+      if (!net) return appeler('import:preparer', [Object.assign(base, { statut: 'plusieurs', candidats: liste(cands) })]);
+      return lireFiche(f, net).then(function(e){
+        if (!e.ok) return appeler('import:preparer', [Object.assign(base, { statut: 'erreur', motif: e.motif, candidats: liste(cands) })]);
+        return appeler('import:preparer', [Object.assign(base, { brut: e.fiche, candidats: liste(cands) })]);
+      });
+    });
+  }
+  function chercherTous(){
+    var f = fournisseur(); if (!f || !f.configure || OCCUPE) return;
     if (!P.importFournisseur) { dire('${T("Cette version de l’application ne sait pas lire un site : mettez-la à jour.")}', 'err'); return; }
-    var ta = document.getElementById('o-noms');
-    var noms = String(ta ? ta.value : '').split(String.fromCharCode(10)).map(function(s){ return s.trim(); }).filter(function(s){ return s.length >= 2; });
+    var cat = catChoisie(f); if (!cat) return;
+    garderSaisies();
+    var noms = String(NOMS || '').split(String.fromCharCode(10)).map(function(s){ return s.trim(); }).filter(function(s){ return s.length >= 2; });
     var vus = {}; noms = noms.filter(function(n){ var k = n.toLowerCase(); if (vus[k]) return false; vus[k] = 1; return true; });
     if (!noms.length) { dire('${T("Tapez au moins un nom de produit.")}', 'att'); return; }
     if (noms.length > 25) { dire('${T("25 noms au plus par recherche.")}', 'att'); return; }
-    NOMS = ta.value; OCCUPE = true; ARRET = false; dessiner();
+    OCCUPE = true; ARRET = false; dessiner();
     var i = 0, nets = 0, choix = 0, rates = 0;
     function suivant(){
       if (ARRET || i >= noms.length) {
@@ -402,26 +548,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         return;
       }
       var nom = noms[i++];
-      avance('${T("{0} sur {1} — {2}…")}'.replace('{0}', i).replace('{1}', noms.length).replace('{2}', nom));
-      chercherUn(f, nom, '').then(function(r){
+      var txt = '${T("{0} sur {1} — {2}…")}'.replace('{0}', i).replace('{1}', noms.length).replace('{2}', nom);
+      avance(txt);
+      chercherUn(f, nom, '', cat).then(function(r){
         if (r && r.ok && r.fiche) {
-          remplacer(r.fiche); if (!SEL) SEL = r.fiche.id;
+          remplacer(r.fiche);
           if (r.fiche.statut === 'a_verifier') nets++; else if (r.fiche.statut === 'plusieurs') choix++; else rates++;
         } else { rates++; dire(expliquer(r), 'err'); }
-        garderNoms(); var av = (document.getElementById('avance') || {}).textContent; dessiner(); avance(av);
+        dessiner(); avance(txt);
         suivant();
       }, function(){ rates++; suivant(); });
     }
     suivant();
   }
+
+  /* ══ LES FICHES ════════════════════════════════════════════════════════ */
   function rechercher(){
     var x = fiche(SEL); if (!x || OCCUPE) return;
-    var f = (CTX.fournisseurs || []).filter(function(y){ return y.id === x.fournisseurId; })[0];
+    var f = fournisseur(x.fournisseurId);
     if (!f || !f.configure) { dire(MOTIFS.fournisseur_sans_site, 'err'); return; }
     var nom = String((document.getElementById('d-autre') || {}).value || '').trim();
     if (nom.length < 2) { dire(MOTIFS.nom_requis, 'att'); return; }
     OCCUPE = true; dire('${T("Recherche…")}');
-    chercherUn(f, nom, x.id).then(function(r){
+    chercherUn(f, nom, x.id, x.categorie).then(function(r){
       OCCUPE = false;
       if (r && r.ok && r.fiche) { remplacer(r.fiche); dire(''); } else dire(expliquer(r), 'err');
       dessiner();
@@ -430,8 +579,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function choisirCandidat(i){
     var x = fiche(SEL); if (!x || OCCUPE) return;
     var c = (x.candidats || [])[i]; if (!c) return;
-    var f = (CTX.fournisseurs || []).filter(function(y){ return y.id === x.fournisseurId; })[0];
-    if (!f) return;
+    var f = fournisseur(x.fournisseurId); if (!f) return;
     OCCUPE = true; dire('${T("Lecture de la fiche du fournisseur…")}');
     P.importFournisseur.extraire({ url: c.url, site: f.site }).then(function(e){
       if (!e || !e.ok) { OCCUPE = false; dire(expliquer(e), 'err'); return; }
@@ -446,7 +594,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var x = fiche(SEL); if (!x) return Promise.resolve();
     return appeler('import:modifier', [x.id, ch]).then(function(r){
       if (!r || !r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
-      remplacer(r.fiche); garderNoms(); dessiner();
+      remplacer(r.fiche); dessiner();
     });
   }
   function basculerPhoto(u){
@@ -466,7 +614,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (!ok) return;
       appeler('import:retirer', [x.id]).then(function(r){
         if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
-        FICHES = FICHES.filter(function(y){ return y.id !== x.id; }); SEL = ''; garderNoms(); dessiner();
+        FICHES = FICHES.filter(function(y){ return y.id !== x.id; });
+        Object.keys(PREP).forEach(function(k){ if (PREP[k] === x.id) delete PREP[k]; });
+        SEL = ''; dessiner();
       });
     });
   }
@@ -485,31 +635,46 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   /* ══ LES GESTES ════════════════════════════════════════════════════════ */
+  function choisirFournisseur(id){ if (id === FID) return; FID = id; ONGLET = 'chercher'; SEL = ''; NOM = ''; dessiner(); }
   corps.onclick = function(ev){
     var t = ev.target; if (!t || !t.closest) return;
-    var fl = t.closest('[data-filtre]'); if (fl) { FILTRE = fl.getAttribute('data-filtre'); garderNoms(); dessiner(); return; }
-    var li = t.closest('.fi[data-id]'); if (li) { SEL = li.getAttribute('data-id'); garderNoms(); dessiner(); return; }
+    var fo = t.closest('[data-f]'); if (fo) { choisirFournisseur(fo.getAttribute('data-f')); return; }
+    var og = t.closest('[data-onglet]'); if (og) { ONGLET = og.getAttribute('data-onglet'); SEL = ''; dessiner(); return; }
+    var li = t.closest('.fi[data-id]'); if (li) { SEL = li.getAttribute('data-id'); dessiner(); return; }
     var ph = t.closest('[data-ph]'); if (ph) { basculerPhoto(ph.getAttribute('data-ph')); return; }
     var cd = t.closest('[data-cand]'); if (cd) { choisirCandidat(parseInt(cd.getAttribute('data-cand'), 10) || 0); return; }
+    var pr = t.closest('[data-prep]'); if (pr && !pr.disabled) { preparer(parseInt(pr.getAttribute('data-prep'), 10) || 0); return; }
+    var vo = t.closest('[data-voir]'); if (vo) { SEL = vo.getAttribute('data-voir'); ONGLET = 'attente'; dessiner(); return; }
     var a = t.closest('[data-a]'); if (!a || a.disabled) return;
     var k = a.getAttribute('data-a');
     if (k === 'chercher') chercher();
+    else if (k === 'chercherTous') chercherTous();
+    else if (k === 'multi') { MULTI = !MULTI; dessiner(); }
     else if (k === 'arreter') { ARRET = true; dire('${T("Arrêt après le produit en cours…")}', 'att'); }
     else if (k === 'rechercher') rechercher();
     else if (k === 'retirer') retirer();
     else if (k === 'creer') creer();
     else if (k === 'config') appeler('import:ouvrirFournisseur', [FID]).then(function(r){ if (!r || !r.ok) dire(expliquer(r), 'err'); else dire('${T("Réglez le site à l’étape « Import de produits », enregistrez : cette fenêtre se met à jour au retour.")}'); });
+    else if (k === 'nouveauF') appeler('import:ouvrirFournisseur', ['']).then(function(r){ if (!r || !r.ok) dire(expliquer(r), 'err'); else dire('${T("Enregistrez le nouveau fournisseur avec son site : il apparaîtra dans la liste au retour.")}'); });
     else if (k === 'ouvrirProduit') { var x = fiche(SEL); if (x) appeler('produits:ouvrir', [x.produitId]).then(function(r){ if (!r || !r.ok) dire(expliquer(r), 'err'); }); }
   };
   corps.addEventListener('keydown', function(ev){
+    var t = ev.target; if (!t) return;
+    if (t.id === 'o-nom' && ev.key === 'Enter') { ev.preventDefault(); chercher(); return; }
     if (ev.key !== 'Enter' && ev.key !== ' ') return;
-    var li = ev.target && ev.target.closest && ev.target.closest('.fi[data-id]');
-    if (li) { ev.preventDefault(); SEL = li.getAttribute('data-id'); garderNoms(); dessiner(); }
+    var fo = t.closest && t.closest('[data-f]'); if (fo) { ev.preventDefault(); choisirFournisseur(fo.getAttribute('data-f')); return; }
+    var li = t.closest && t.closest('.fi[data-id]');
+    if (li) { ev.preventDefault(); SEL = li.getAttribute('data-id'); dessiner(); }
+  });
+  corps.addEventListener('input', function(ev){
+    var t = ev.target; if (!t || t.id !== 'o-ffiltre') return;
+    FILTRE_F = t.value;
+    var pos = t.selectionStart; dessiner();
+    var n = document.getElementById('o-ffiltre'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} }
   });
   corps.addEventListener('change', function(ev){
     var t = ev.target; if (!t) return;
-    if (t.id === 'o-fourn') { FID = t.value; CAT = ''; garderNoms(); dessiner(); }
-    else if (t.id === 'o-cat') { CAT = t.value; garderNoms(); dessiner(); }
+    if (t.id === 'o-cat') CAT[FID] = t.value;
     else if (t.id === 'o-ligne') EN_LIGNE = !!t.checked;
     else if (t.id === 'd-cat') modifier({ categorie: t.value });
     else if (t.id === 'd-ligne') modifier({ enLigne: !!t.checked });
@@ -517,7 +682,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   });
   // Au retour (une fiche produit vient d être créée, un fournisseur réglé) : on relit.
   window.szRevenir = function(){ if (!OCCUPE) charger(); };
-  window.addEventListener('focus', function(){ if (!OCCUPE && CTX) { garderNoms(); charger(); } });
+  window.addEventListener('focus', function(){ if (!OCCUPE && CTX) { garderSaisies(); charger(); } });
   document.addEventListener('keydown', function(ev){ if (ev.key === 'Escape' && !document.querySelector('.voile')) { ev.preventDefault(); P.fermer(); } });
   charger();
 })();
