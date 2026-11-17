@@ -3944,8 +3944,9 @@ const JEU = {
     var FIB = [['coton', 'Coton', 'Cotton'], ['lin', 'Lin', 'Linen'], ['laine', 'Laine', 'Wool'], ['soie', 'Soie', 'Silk'], ['viscose', 'Viscose', 'Viscose'],
       ['polyester', 'Polyester', 'Polyester'], ['nylon', 'Nylon', 'Nylon'], ['elasthanne', 'Élasthanne', 'Spandex']].map(function(f){ return { cle: f[0], fr: f[1], en: f[2] }; });
     var PAYS = [{ cle: 'CN', nom: 'Chine', nomEn: 'China', fr: 'Fait en Chine', en: 'Made in China' }, { cle: 'VN', nom: 'Vietnam', nomEn: 'Vietnam', fr: 'Fait au Vietnam', en: 'Made in Vietnam' }];
-    var FONDS = [{ cle: 'fonce', nom: 'Vêtement foncé', papier: 'Papier opaque (foncé)', miroir: false, fond: '#1C1C1E', encre: '#FFFFFF' },
-      { cle: 'pale', nom: 'Vêtement pâle', papier: 'Papier transparent (pâle)', miroir: true, fond: '#FFFFFF', encre: '#111111' }];
+    // (2026-11-17) le vinyle thermocollant remplace le papier : fond = le tissu de l aperçu, encre = le vinyle.
+    var FONDS = [{ cle: 'fonce', nom: 'Vêtement foncé', papier: 'Vinyle blanc', miroir: false, fond: '#2B2B2E', encre: '#FFFFFF' },
+      { cle: 'pale', nom: 'Vêtement pâle', papier: 'Vinyle noir', miroir: false, fond: '#ECE6DD', encre: '#111111' }];
     var LECT = { morphologie: 'Fibres plates en ruban, tordues à intervalles irréguliers ; aucune écaille.', parois: 'Parois épaisses, lumen affaissé ; 12 à 20 µm.',
       comparaison: 'Correspond au coton ; pas d’écailles (laine), pas de nœuds (lin).', estimation: 'Matière principale visible : coton. Quelques fibres lisses : élasthanne possible.',
       principale: 'coton', confiance: 'elevee', possibles: ['elasthanne'], modele: 'claude-sonnet-5', cout: 0.0142, le: '2026-10-25T14:10:00.000Z' };
@@ -3965,29 +3966,29 @@ const JEU = {
       A('fib_4', 'AF-0009', { resume: '70 % laine, 30 % nylon', composition: [{ fibre: 'laine', pct: 70 }, { fibre: 'nylon', pct: 30 }], produitAbsent: true, imprime: 21 }),
     ];
     var HIST = { total: 29, ceMois: 29, planches: 2, liste: [
-      { id: 'imp_2', le: '2026-10-24T18:00:00.000Z', par: 'Brigitte Brousseau', mode: 'cricut', feuilles: { fonce: 1, pale: 0 }, total: 8,
+      { id: 'imp_2', le: '2026-10-24T18:00:00.000Z', par: 'Brigitte Brousseau', mode: 'vinyle', feuilles: { fonce: 1, pale: 0 }, total: 8,
         lignes: [{ analyseId: 'fib_1', no: 'AF-0012', nom: 'Robe ZENXAS', resume: '95 % coton, 5 % élasthanne', taille: 'S', n: 3, rattache: true, supprimee: false },
           { analyseId: 'fib_1', no: 'AF-0012', nom: 'Robe ZENXAS', resume: '95 % coton, 5 % élasthanne', taille: 'M', n: 5, rattache: true, supprimee: false }] },
       { id: 'imp_1', le: '2026-10-20T15:30:00.000Z', par: 'Brigitte Brousseau', mode: 'ciseaux', feuilles: { fonce: 1, pale: 0 }, total: 21,
         lignes: [{ analyseId: 'fib_x', no: 'AF-0003', nom: 'Cardigan crème', resume: '70 % laine, 30 % nylon', taille: '', n: 21, rattache: false, supprimee: true }] } ] };
     var donnees = function(liste, o){
       return Object.assign({ ok: true, analyses: liste, fibres: FIB, pays: PAYS, paysDefaut: 'CN', fonds: FONDS,
-        modes: [{ cle: 'cricut', nom: 'Cricut — Imprimer puis couper', parFeuille: 21 }, { cle: 'ciseaux', nom: 'Ciseaux ou massicot', parFeuille: 32 }],
+        modes: [{ cle: 'vinyle', nom: 'Cricut — vinyle thermocollant', parFeuille: 18 }], etiquette: { l: 60, h: 40 },
         entretien: ENT, entretienGroupes: GROUPES, ca: { numero: '', manquant: true, gabarit: 'xxxxxxx' }, historique: HIST,
         peutAjouter: true, peutModifier: true, peutSupprimer: true }, o || {});
     };
-    var ETQ = function(fond){ return { ok: true, motif: '', fond: fond, couleurFond: fond === 'pale' ? '#FFFFFF' : '#1C1C1E', couleurEncre: fond === 'pale' ? '#111111' : '#FFFFFF',
-      miroir: fond === 'pale', taille: 'M', compo: ['95 % COTON / COTTON', '5 % ÉLASTHANNE / SPANDEX'],
+    var ETQ = function(fond){ return { ok: true, motif: '', fond: fond, couleurFond: fond === 'pale' ? '#ECE6DD' : '#2B2B2E', couleurEncre: fond === 'pale' ? '#111111' : '#FFFFFF',
+      miroir: false, taille: 'M', compo: ['95 % COTON / COTTON', '5 % ÉLASTHANNE / SPANDEX'],
       soins: ['LAVER À FROID · MACHINE WASH COLD', 'SÉCHER BASSE TEMP. · TUMBLE DRY LOW', 'REPASSER À BASSE TEMP. · IRON LOW'],
       symboles: ['lav_froid', 'pas_javel', 'sech_bas', 'rep_bas', 'pas_sec'], pays: 'FAIT EN CHINE / MADE IN CHINA', identite: 'SANDRIZA · CA xxxxxxx', caManquant: true,
       // « AF0012 », encodé par Barcode.code128Modules (assets/js/barcode.js du site), sans zone de silence
       code: 'AF0012', modules: 90, barres: [[0,2],[3,1],[6,1],[11,1],[13,1],[17,2],[22,1],[26,2],[31,1],[33,1],[35,3],[39,4],[44,2],[47,2],[51,2],[55,1],[57,2],[61,3],[66,3],[70,1],[74,2],[77,2],[82,3],[86,1],[88,2]] }; };
-    var cases = []; for (var r = 0; r < 7; r++) for (var c = 0; c < 3; c++) cases.push({ x: c * 62, y: r * 36 });
-    var PLANCHE = { ok: true, mode: 'cricut', caManquant: true, invalides: [],
-      disposition: { mode: 'cricut', cols: 3, rangs: 7, parFeuille: 21, page: { l: 174, h: 246 }, etiquette: { l: 50, h: 30 }, cases: cases, zone: { l: 189, h: 252 } },
+    var cases = []; for (var r = 0; r < 6; r++) for (var c = 0; c < 3; c++) cases.push({ x: c * 66, y: r * 45 });
+    var PLANCHE = { ok: true, mode: 'vinyle', caManquant: true, invalides: [],
+      disposition: { mode: 'vinyle', cols: 3, rangs: 6, parFeuille: 18, page: { l: 192, h: 265 }, etiquette: { l: 60, h: 40 }, cases: cases, zone: { l: 215.9, h: 279.4 } },
       feuilles: [
-        { fond: 'fonce', miroir: false, papier: 'Papier opaque (foncé)', utilisees: [0], cases: cases.map(function(x, i){ return i === 0 || i > 8 ? null : { id: 'fib_1', taille: 'M', etiquette: ETQ('fonce') }; }) },
-        { fond: 'pale', miroir: true, papier: 'Papier transparent (pâle)', utilisees: [], cases: cases.map(function(x, i){ return i > 3 ? null : { id: 'fib_2', taille: '', etiquette: ETQ('pale') }; }) },
+        { fond: 'fonce', miroir: false, papier: 'Vinyle blanc', utilisees: [0], cases: cases.map(function(x, i){ return i === 0 || i > 8 ? null : { id: 'fib_1', taille: 'M', etiquette: ETQ('fonce') }; }) },
+        { fond: 'pale', miroir: false, papier: 'Vinyle noir', utilisees: [], cases: cases.map(function(x, i){ return i > 3 ? null : { id: 'fib_2', taille: '', etiquette: ETQ('pale') }; }) },
       ] };
     var GARNI = donnees(LISTE);
     var rep = function(d){

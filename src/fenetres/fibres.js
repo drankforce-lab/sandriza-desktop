@@ -5,9 +5,10 @@
  * =============================================================================
  * Sa demande : une photo de surface au microscope (1200×) → la composition des
  * fibres, rattachée à un produit (ou à un NOM PROVISOIRE quand le produit n'est
- * pas encore créé), puis des étiquettes bilingues conformes, imprimées sur
- * papier de transfert thermique, découpées au Cricut (21 par feuille) ou aux
- * ciseaux (32). Esquisses approuvées : https://claude.ai/artifact/L8LS7JfrhWwrRcunzqgmBb
+ * pas encore créé), puis des étiquettes bilingues conformes, DÉCOUPÉES à la
+ * Cricut dans du VINYLE THERMOCOLLANT noir ou blanc (2026-11-17, sa décision :
+ * plus de papier de transfert imprimé) — 60 × 40 mm, 18 par feuille Lettre.
+ * Esquisses approuvées (époque papier) : https://claude.ai/artifact/L8LS7JfrhWwrRcunzqgmBb
  *
  * TROIS VUES : la BANQUE des analyses (cocher pour une planche), l'ANALYSE
  * (photos → lecture de l'IA → composition confirmée → produit et étiquette),
@@ -359,6 +360,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var s = soin(code); if (!s || !s.ico) return;
       /* ⚠ Un SVG chargé comme IMAGE exige son espace de noms (en ligne dans la page, il s en passe). */
       var svg = String(s.ico).split('currentColor').join(encre).split('width="24" height="24"').join('width="240" height="240"');
+      /* (2026-11-17) VINYLE : un trait de 1,4 sur 24 fait 0,38 mm à 6,5 mm, trop fin pour la lame et l échenillage.
+         2,2 donne ~0,6 mm ; les points de température grossissent un peu (sans se toucher : 3,4 entre les centres). */
+      svg = svg.split('stroke-width="1.4"').join('stroke-width="2.2"').split(' r="1" ').join(' r="1.25" ');
       if (svg.indexOf('xmlns=') < 0) svg = svg.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" ');
       var im = new Image();
       var o = { im: im, pret: false };
@@ -385,149 +389,136 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); ctx.lineTo(x + r, y + h);
     ctx.quadraticCurveTo(x, y + h, x, y + h - r); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
   }
-  /* opts.miroir : retourner (export papier transparent) ; opts.bord : liseré d aperçu (rien à l export). */
+  /* ══ (2026-11-17, SA DÉCISION) LE VINYLE THERMOCOLLANT ═══════════════════════
+     La Cricut DÉCOUPE la matière : il n y a plus de fond, seules les lettres, les
+     symboles et la case de taille sont du vinyle (noir sur pâle, blanc sur foncé).
+     Tout se compte en MILLIMÈTRES (le contexte est mis à l échelle) : en vinyle, une
+     lettre sous ~2,5 mm de haut se coupe mal et s arrache à l échenillage. D où
+     l étiquette de 60 × 40 mm et des tailles de départ, avec un plancher :
+     composition 4,4 mm (plancher 3,4), pays et SANDRIZA 3,7 (plancher 3,0),
+     symboles 6,5. Sous le plancher, une ligne « FR / EN » trop longue se COUPE en
+     deux lignes au « / » au lieu de rapetisser. Plus de consignes écrites ni de
+     code-barres (sa décision : l essentiel seulement).
+     opts.export : encre NOIRE sur fond transparent (Design Space trace la forme ;
+     la couleur réelle est celle du vinyle posé sur le tapis), la lettre de la case
+     de taille AJOURÉE. Sinon (aperçu) : le tissu en fond, le vinyle à sa couleur. */
+  var ETQ_DEF = { l: 60, h: 40 };
+  function etq(){ var d = D && D.etiquette; return (d && d.l > 0 && d.h > 0) ? d : ETQ_DEF; }
+  function blocTexte(ctx, lignes, pref, min, maxL, poids){
+    function larg(L, f){ ctx.font = poids + ' ' + f + 'px ' + POLICE; var m = 0; L.forEach(function(t){ m = Math.max(m, ctx.measureText(t).width); }); return m; }
+    var L = lignes.slice(), w = larg(L, pref), f = w > maxL && w > 0 ? pref * maxL / w : pref;
+    if (f < min) {
+      var C = [];
+      L.forEach(function(t){
+        var i = t.indexOf(' / ');
+        if (i > 0 && larg([t], min) > maxL) { C.push(t.slice(0, i) + ' /'); C.push(t.slice(i + 3)); } else C.push(t);
+      });
+      L = C; w = larg(L, pref); f = w > maxL && w > 0 ? pref * maxL / w : pref;
+    }
+    ctx.font = poids + ' ' + f + 'px ' + POLICE;
+    var lmax = 0; L.forEach(function(t){ lmax = Math.max(lmax, ctx.measureText(t).width); });
+    return { lignes: L, fs: f, larg: lmax };
+  }
   function peindreEtiquette(ctx, e, x, y, w, h, opts){
-    var o = opts || {};
-    var u = h / 228;
+    var o = opts || {}, G = etq();
+    /* On dessine en DIXIÈMES de mm (U = 10) : une police de 4 « px » mise à l échelle sort TASSÉE dans Chrome
+       (vu au rendu, 2026-11-17) ; à 40 unités, elle est juste. */
+    var U = 10, k = w / (G.l * U), W = G.l * U, H = G.h * U, M = 2.5 * U, dispo = W - 2 * M;
+    var exp = !!o.export, encre = exp ? '#000000' : e.couleurEncre;
     ctx.save();
-    if (o.miroir) { ctx.translate(x + w, y); ctx.scale(-1, 1); } else ctx.translate(x, y);
-    /* (2026-10-25, sa demande : une coupe Cricut PROPRE, sans résidu de papier) des coins arrondis d environ 1,6 mm :
-       la lame tourne au lieu de pivoter sur un angle vif (pas de petite languette de papier), et le coin se décolle
-       moins au lavage. C est aussi le contour que Design Space coupe : la forme peinte EST la ligne de coupe. */
-    rectArrondi(ctx, 0, 0, w, h, 12 * u);
-    ctx.fillStyle = e.couleurFond; ctx.fill();
-    if (o.bord) { ctx.lineWidth = Math.max(1, u); ctx.strokeStyle = 'rgba(128,128,128,.55)'; ctx.stroke(); }
-    var encre = e.couleurEncre;
-    ctx.fillStyle = encre; ctx.textBaseline = 'alphabetic';
-    var dispo = w - 32 * u;
-    var compo = e.compo || [], soins = e.soins || [], sym = e.symboles || [];
-    /* À l APERÇU seulement : une composition pas encore confirmée se dit, en pâle (jamais à l export). */
-    var videC = !compo.length && o.bord;
+    ctx.translate(x, y); ctx.scale(k, k);
+    if (!exp) {
+      rectArrondi(ctx, 0, 0, W, H, 1.5 * U);
+      ctx.fillStyle = e.couleurFond; ctx.fill();
+      if (o.bord) { ctx.lineWidth = Math.max(1.2, 1 / k); ctx.strokeStyle = 'rgba(128,128,128,.55)'; ctx.stroke(); }
+    }
+    ctx.textBaseline = 'alphabetic';
+    var compo = e.compo || [], sym = e.symboles || [];
+    var videC = !compo.length && !exp;
     if (videC) compo = ['${T("COMPOSITION À CONFIRMER")}'];
-    /* Hauteurs des blocs, puis l espace libre réparti également entre eux. */
-    var fsC = 17 * u, lhC = 1.12;
-    /* (2026-10-25, sa demande) LA CASE TAILLE SUIT LA COMPOSITION : plus grande quand il y a plusieurs lignes,
-       jamais sous 36. LA TAILLE A TOUJOURS PRIORITÉ (sa règle) : la case se calcule sur la police de départ, et quand
-       la place manque — en hauteur comme en largeur — c est la COMPOSITION qui se resserre, jamais la case. */
-    function tailleBoite(){ return e.taille ? Math.max(36 * u, Math.min(46 * u, compo.length * 17 * u * lhC * 0.82)) : 0; }
-    var hC = Math.max(tailleBoite(fsC), compo.length * fsC * lhC);
-    var fsS = 10.5 * u, lhS = 1.38, hS = soins.length * fsS * lhS;
-    var tI = 26 * u, hI = sym.length ? tI : 0;
-    /* (2026-10-25, sa demande : « espace la distance et grossis un peu ») le pied plus grand et plus aéré. */
-    var fsP = 11.5 * u, lhP = 1.7, hP = 2 * fsP * lhP;
-    /* 5. LE CODE-BARRES DU NUMÉRO D ANALYSE (2026-10-25, sa demande : « sur la longueur, sous SANDRIZA », discret).
-       Le site l encode (Code 128, celui des étiquettes de produits) ; ici on le dessine. Module de 0,254 mm
-       (3 points à 300 ppp : des bords francs, lisibles à travers le tissu), barres de 2,5 mm. */
-    var aCode = !!(e.barres && e.barres.length && e.modules);
-    var hB = aCode ? 2.5 * 7.6 * u + 6 * u : 0;
-    var blocs = [hC, hS, hI, hP, hB].filter(function(v){ return v > 0; });
-    var somme = blocs.reduce(function(s, v){ return s + v; }, 0);
-    /* (2026-10-25, sa demande : « 3 compositions doivent aussi entrer ») TROP HAUT : la composition et les consignes
-       rapetissent ensemble, juste assez pour garder un écart de 5 entre les blocs (jamais sous 70 % de leur taille). */
-    var manque = somme + 28 * u + 5 * u * (blocs.length - 1) - h;
-    if (manque > 0 && (hC + hS) > 0) {
-      var kf = Math.max(0.7, (hC + hS - manque) / (hC + hS));
-      fsC *= kf; fsS *= kf;
-      hC = Math.max(tailleBoite(fsC), compo.length * fsC * lhC);
-      hS = soins.length * fsS * lhS;
-      blocs = [hC, hS, hI, hP, hB].filter(function(v){ return v > 0; });
-      somme = blocs.reduce(function(s, v){ return s + v; }, 0);
+    var LH = 1.15, LHP = 1.2;
+    /* Le plan, à l échelle z : on rapetisse un peu tout (jamais sous 60 %) tant que les blocs ne tiennent pas. */
+    function plan(z0){
+      var z = z0 * U, P = { z: z };
+      P.B = e.taille ? Math.min(12, Math.max(8.5, compo.length * 4.4 * LH)) * z : 0;
+      P.lb = P.B; P.fT = 0;
+      if (e.taille) {
+        P.fT = P.B * (String(e.taille).length > 2 ? 0.5 : 0.6);
+        ctx.font = '800 ' + P.fT + 'px ' + POLICE;
+        P.lb = Math.max(P.B, ctx.measureText(e.taille).width + 2.2 * z);
+      }
+      P.gC = e.taille ? 2 * z : 0;
+      P.C = blocTexte(ctx, compo, 4.4 * z, 3.4 * z, dispo - P.lb - P.gC, '700');
+      P.hC = Math.max(P.B, P.C.lignes.length * P.C.fs * LH);
+      var n = sym.length; P.gI = 2 * z;
+      P.t = n ? Math.min(6.5 * z, (dispo - (n - 1) * P.gI) / n) : 0;
+      P.hI = P.t;
+      P.Pa = blocTexte(ctx, [e.pays], 3.7 * z, 3.0 * z, dispo, '700');
+      P.hP = P.Pa.lignes.length * P.Pa.fs * LHP;
+      /* SANDRIZA · CA : une ligne, le petit logo « Sz » devant (même encre : une seule couleur de vinyle). */
+      P.fI = 3.7 * z; P.fL = P.fI * 1.2; P.espL = 1 * z;
+      ctx.font = '700 ' + P.fL + 'px ' + SZ_DONNEES.serif; P.wS = ctx.measureText('S').width;
+      ctx.font = 'italic 700 ' + P.fL + 'px ' + SZ_DONNEES.serif; P.wZ = ctx.measureText('z').width;
+      ctx.font = '700 ' + P.fI + 'px ' + POLICE; P.wId = ctx.measureText(e.identite).width;
+      var totL = P.wS + P.wZ + P.espL + P.wId;
+      if (totL > dispo) { var r = dispo / totL; P.fI *= r; P.fL *= r; P.wS *= r; P.wZ *= r; P.espL *= r; P.wId *= r; }
+      P.hId = P.fI * LHP;
+      P.blocs = [P.hC, P.hI, P.hP, P.hId].filter(function(v){ return v > 0; });
+      P.somme = P.blocs.reduce(function(a, v){ return a + v; }, 0);
+      P.libre = H - 2 * M - P.somme;
+      return P;
     }
-    var ecart = blocs.length > 1 ? Math.max(0, (h - 28 * u - somme) / (blocs.length - 1)) : 0;
-    // Peu de blocs (étiquette en cours) : l ensemble est centré, au lieu de coller au haut.
-    var yy = 14 * u;
-    if (blocs.length <= 2) { ecart = Math.min(ecart, 22 * u); yy = Math.max(14 * u, (h - somme - ecart * (blocs.length - 1)) / 2); }
-    /* 1. LA COMPOSITION, la taille dans son carré à gauche ; le groupe est centré. */
-    if (hC) {
-      ctx.font = '700 ' + fsC + 'px ' + POLICE;
-      var lmax = 0; compo.forEach(function(l){ lmax = Math.max(lmax, ctx.measureText(l).width); });
-      var boite = tailleBoite(fsC), esp = e.taille ? 6 * u : 0;
-      /* Une taille longue (6XL, 10/12…) : la case S ÉLARGIT en rectangle au lieu de rapetisser la lettre. */
-      var lb = boite, fT0 = 0;
+    var z = 1, P = plan(z);
+    while (P.libre < (P.blocs.length - 1) * 1.2 * U && z > 0.6) { z *= 0.94; P = plan(z); }
+    var gap = P.blocs.length > 1 ? Math.max(0.6 * U, Math.min(3.5 * U, P.libre / (P.blocs.length - 1))) : 0;
+    var yy = M + Math.max(0, (H - 2 * M - P.somme - gap * (P.blocs.length - 1)) / 2);
+    ctx.fillStyle = encre;
+    /* 1. LA COMPOSITION, la taille dans sa case à gauche (la lettre ajourée) ; le groupe est centré. */
+    if (P.hC) {
+      var tot = P.lb + P.gC + P.C.larg, x0 = (W - tot) / 2;
       if (e.taille) {
-        fT0 = boite * (String(e.taille).length > 2 ? 0.56 : 0.62);
-        ctx.font = '800 ' + fT0 + 'px ' + POLICE; lb = Math.max(boite, ctx.measureText(e.taille).width + 9 * u);
-        ctx.font = '700 ' + fsC + 'px ' + POLICE;
+        var by = yy + (P.hC - P.B) / 2;
+        rectArrondi(ctx, x0, by, P.lb, P.B, 0.8 * P.z); ctx.fillStyle = encre; ctx.fill();
+        ctx.save();
+        if (exp) ctx.globalCompositeOperation = 'destination-out'; else ctx.fillStyle = e.couleurFond;
+        ctx.font = '800 ' + P.fT + 'px ' + POLICE; ctx.textAlign = 'center';
+        ctx.fillText(e.taille, x0 + P.lb / 2, by + P.B / 2 + P.fT * 0.36);
+        ctx.restore();
       }
-      var tot = lb + esp + lmax;
-      if (tot > dispo && lmax > 0) { var k = Math.max(0.55, (dispo - lb - esp) / lmax); fsC = fsC * k; ctx.font = '700 ' + fsC + 'px ' + POLICE; lmax = lmax * k; tot = lb + esp + lmax; }
-      // De la place en largeur : la case s écarte du texte (jusqu à 16) ; serré, elle reste à 6.
-      else if (e.taille) { esp = Math.max(6 * u, Math.min(16 * u, (dispo - lb - lmax) * 0.25)); tot = lb + esp + lmax; }
-      var x0 = (w - tot) / 2;
-      var hTxt = compo.length * fsC * lhC;
-      if (e.taille) {
-        var by = yy + (hC - boite) / 2;
-        ctx.fillStyle = encre; ctx.fillRect(x0, by, lb, boite);
-        ctx.fillStyle = e.couleurFond;
-        var fT = ajuster(ctx, e.taille, '800', fT0, lb - 6 * u);
-        ctx.textAlign = 'center'; ctx.fillText(e.taille, x0 + lb / 2, by + boite / 2 + fT * 0.36);
-        ctx.fillStyle = encre;
-      }
-      ctx.font = '700 ' + fsC + 'px ' + POLICE; ctx.textAlign = e.taille ? 'left' : 'center';
-      var ty = yy + (hC - hTxt) / 2;
+      ctx.fillStyle = encre; ctx.font = '700 ' + P.C.fs + 'px ' + POLICE;
+      ctx.textAlign = e.taille ? 'left' : 'center';
+      var ty = yy + (P.hC - P.C.lignes.length * P.C.fs * LH) / 2;
       if (videC) ctx.globalAlpha = 0.45;
-      compo.forEach(function(l, i){
-        var bl = ty + (i + 0.82) * fsC * lhC;
-        ctx.fillText(l, e.taille ? x0 + lb + esp : w / 2, bl);
-      });
+      P.C.lignes.forEach(function(l, i){ ctx.fillText(l, e.taille ? x0 + P.lb + P.gC : W / 2, ty + (i + 0.82) * P.C.fs * LH); });
       ctx.globalAlpha = 1;
-      yy += hC + ecart;
+      yy += P.hC + gap;
     }
-    /* 2. LES CONSIGNES, en mots, centrées. */
-    if (hS) {
-      ctx.textAlign = 'center';
-      soins.forEach(function(l, i){
-        ajuster(ctx, l, '600', fsS, dispo);
-        ctx.fillText(l, w / 2, yy + (i + 0.8) * fsS * lhS);
-      });
-      yy += hS + ecart;
-    }
-    /* 3. LES SYMBOLES, dans l ordre de la norme. */
-    if (hI) {
-      var gap = 14 * u, n = sym.length, tt = tI;
-      var larg = n * tt + (n - 1) * gap;
-      if (larg > dispo) { var kk = dispo / larg; tt = tt * kk; gap = gap * kk; larg = dispo; }
-      var sx = (w - larg) / 2, sy = yy + (tI - tt) / 2;
+    /* 2. LES SYMBOLES, dans l ordre de la norme. */
+    if (P.hI) {
+      var n = sym.length, larg = n * P.t + (n - 1) * P.gI, sx = (W - larg) / 2;
       sym.forEach(function(code, i){
         var ic = ICOS[cleIco(code, encre)];
-        if (ic && ic.pret) ctx.drawImage(ic.im, sx + i * (tt + gap), sy, tt, tt);
+        if (ic && ic.pret) ctx.drawImage(ic.im, sx + i * (P.t + P.gI), yy, P.t, P.t);
       });
-      yy += hI + ecart;
+      yy += P.hI + gap;
     }
-    /* 4. LE PIED : le pays, puis le petit logo sur la MÊME ligne de base que SANDRIZA · CA. */
+    /* 3. LE PAYS (une ligne, ou deux coupées au « / »). */
+    ctx.fillStyle = encre; ctx.textAlign = 'center'; ctx.font = '700 ' + P.Pa.fs + 'px ' + POLICE;
+    P.Pa.lignes.forEach(function(l, i){ ctx.fillText(l, W / 2, yy + (i + 0.82) * P.Pa.fs * LHP); });
+    yy += P.hP + gap;
+    /* 4. Sz SANDRIZA · CA, sur la même ligne de base. */
+    var bl = yy + 0.85 * P.fI * LHP, lx = (W - (P.wS + P.wZ + P.espL + P.wId)) / 2;
     ctx.textAlign = 'left';
-    ajuster(ctx, e.pays, '600', fsP, dispo);
-    var wp = ctx.measureText(e.pays).width;
-    ctx.fillText(e.pays, (w - wp) / 2, yy + 0.8 * fsP * lhP);
-    var bl2 = yy + 1.8 * fsP * lhP;
-    var fL = fsP * 1.2, fI = fsP;
-    ctx.font = '700 ' + fL + 'px ' + SZ_DONNEES.serif; var wS = ctx.measureText('S').width;
-    ctx.font = 'italic 700 ' + fL + 'px ' + SZ_DONNEES.serif; var wZ = ctx.measureText('z').width;
-    ctx.font = '600 ' + fI + 'px ' + POLICE; var wId = ctx.measureText(e.identite).width;
-    var espL = 6 * u, totL = wS + wZ + espL + wId;
-    if (totL > dispo) { var k3 = dispo / totL; fL *= k3; fI *= k3; wS *= k3; wZ *= k3; espL *= k3; wId *= k3; totL = dispo; }
-    var lx = (w - totL) / 2;
-    ctx.font = '700 ' + fL + 'px ' + SZ_DONNEES.serif; ctx.fillStyle = encre; ctx.fillText('S', lx, bl2);
-    ctx.font = 'italic 700 ' + fL + 'px ' + SZ_DONNEES.serif; ctx.fillStyle = '#C49A6C'; ctx.fillText('z', lx + wS, bl2);
-    ctx.font = '600 ' + fI + 'px ' + POLICE; ctx.fillStyle = encre; ctx.fillText(e.identite, lx + wS + wZ + espL, bl2);
-    if (aCode) {
-      yy += hP + ecart;
-      /* La largeur d un module : un nombre ENTIER de points à l export (o.modPx), sinon 0,254 mm à l échelle. */
-      var mw = o.modPx || (0.254 * 7.6 * u);
-      var qz = 10 * mw, lc = e.modules * mw, bh = 2.5 * 7.6 * u;
-      var x0b = Math.round((w - lc) / 2), y0b = Math.round(yy + 4 * u);
-      /* Un scanneur lit des barres FONCÉES sur fond CLAIR : sur le vêtement foncé, une fine bande claire. */
-      if (e.fond !== 'pale') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(Math.round(x0b - qz), Math.round(y0b - 1.5 * u), Math.round(lc + 2 * qz), Math.round(bh + 3 * u)); }
-      ctx.fillStyle = '#111111';
-      e.barres.forEach(function(b){ ctx.fillRect(Math.round(x0b + b[0] * mw), y0b, Math.max(1, Math.round(b[1] * mw)), Math.round(bh)); });
-    }
+    ctx.font = '700 ' + P.fL + 'px ' + SZ_DONNEES.serif; ctx.fillText('S', lx, bl);
+    ctx.font = 'italic 700 ' + P.fL + 'px ' + SZ_DONNEES.serif; ctx.fillText('z', lx + P.wS, bl);
+    ctx.font = '700 ' + P.fI + 'px ' + POLICE; ctx.fillText(e.identite, lx + P.wS + P.wZ + P.espL, bl);
     ctx.restore();
   }
   /* Une étiquette dans un canevas d aperçu (à l endroit, toujours lisible). */
   function apercuDans(cv, e, largeurCss){
     if (!cv || !e) return;
     var r = window.devicePixelRatio || 1;
-    var W = largeurCss, H = Math.round(W * 30 / 50);
+    var W = largeurCss, H = Math.round(W * etq().h / etq().l);
     cv.style.width = W + 'px'; cv.style.height = H + 'px';
     cv.width = Math.round(W * r); cv.height = Math.round(H * r);
     var ctx = cv.getContext && cv.getContext('2d');
@@ -639,7 +630,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (PG >= nbp) PG = nbp - 1; if (PG < 0) PG = 0;
     var vue = V.slice(PG * BU, (PG + 1) * BU);
     h += '<div class="duo"><div><div class="cx-carte liste"><h2>${T("Banque des analyses")} <span class="cx-sub">' + V.length + ' ' + (V.length > 1 ? '${T("analyses")}' : '${T("analyse")}') + '</span>' + nav(nbp) + '</h2>'
-      + '<div class="ent"><span></span><span>${T("N°")}</span><span>${T("Lecture de l’IA")}</span><span>${T("Composition confirmée")}</span><span>${T("Produit / nom provisoire")}</span><span class="rq">${T("Remarque")}</span><span class="nb">${T("Imprimées")}</span><span>${T("Papier")}</span><span>${T("État")}</span></div>'
+      + '<div class="ent"><span></span><span>${T("N°")}</span><span>${T("Lecture de l’IA")}</span><span>${T("Composition confirmée")}</span><span>${T("Produit / nom provisoire")}</span><span class="rq">${T("Remarque")}</span><span class="nb">${T("Imprimées")}</span><span>${T("Vinyle")}</span><span>${T("État")}</span></div>'
       + (vue.length ? vue.map(ligneAnalyse).join('') : '<div class="aide" style="padding:.8rem">${T("Aucune analyse ne correspond à ce filtre.")}</div>')
       + '</div></div><div>' + detail() + '</div></div>';
     return h;
@@ -657,7 +648,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + (a.produitAbsent ? ' <span class="mauvais">${T("— ce produit n’existe plus")}</span>' : '') + '</div>'
       + (a.remarque ? '<div class="ligne" data-opt="4"><b>${T("Remarque")}</b>' + esc(a.remarque) + '</div>' : '')
       + '<div class="ligne" data-opt="3"><b>${T("Entretien")}</b><span class="coupe2" title="' + esc(soins.join(' · ')) + '">' + esc(soins.join(' · ') || '—') + '</span></div>'
-      + '<div class="ligne" data-opt="5"><b>${T("Provenance et papier")}</b>' + esc(nomPays(a.pays)) + ' · ' + esc(a.fond === 'pale' ? '${T("vêtement pâle, papier transparent (miroir)")}' : '${T("vêtement foncé, papier opaque")}') + '</div>'
+      + '<div class="ligne" data-opt="5"><b>${T("Provenance et vinyle")}</b>' + esc(nomPays(a.pays)) + ' · ' + esc(a.fond === 'pale' ? '${T("vêtement pâle, vinyle noir")}' : '${T("vêtement foncé, vinyle blanc")}') + '</div>'
       + (l ? '<div class="ligne" data-opt="2"><b>${T("Lecture de l’IA (texte gardé, photo effacée)")}</b><span class="lecture-txt coupe2" title="' + esc(l.estimation || l.morphologie) + '">' + esc(l.estimation || l.morphologie) + '</span></div>' : '')
       + '<div class="ligne"><b>${T("Imprimées")}</b>' + (a.imprime ? a.imprime + ' ${T("étiquette(s) au total")}' : '${T("aucune")}')
         + (a.impressions || []).slice(-3).reverse().map(function(i){
@@ -904,7 +895,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="champ" style="margin-top:.9rem"><span class="lbl" id="f-fond-l">${T("Couleur du vêtement")}</span><div class="puces" role="group" aria-labelledby="f-fond-l">'
       + '<button type="button" class="puce" data-fond="fonce" aria-pressed="' + (f.fond === 'fonce') + '">${T("Foncé")}</button>'
       + '<button type="button" class="puce" data-fond="pale" aria-pressed="' + (f.fond === 'pale') + '">${T("Pâle")}</button></div></div>'
-      + '<div class="aide" style="margin-top:.5rem">' + (f.fond === 'pale' ? '${T("Papier transparent : texte noir, imprimé en miroir.")}' : '${T("Papier opaque : fond foncé imprimé, texte blanc (le papier).")}') + '</div>'
+      + '<div class="aide" style="margin-top:.5rem">' + (f.fond === 'pale' ? '${T("Vinyle thermocollant NOIR, découpé à la Cricut.")}' : '${T("Vinyle thermocollant BLANC, découpé à la Cricut.")}') + '</div>'
       + (D.ca && D.ca.manquant ? '<div class="aide attn" style="margin-top:.8rem">${T("« CA xxxxxxx » : le numéro CA n’est pas encore saisi (Fiscalité › Mon entreprise). Il remplacera le gabarit tout seul.")}</div>' : '')
       + '</div></div>';
     return h;
@@ -942,8 +933,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var numero = !f.id
       ? '<div class="boutons"><button type="button" id="f-reserver" title="${T("Donne tout de suite son numéro à l’analyse et imprime une petite étiquette à coller sur le vêtement. Le reste se remplit ensuite, comme d’habitude.")}">${T("Réserver le numéro et imprimer l’étiquette")}</button></div>'
       : (f.reserve ? '<div class="boutons"><span class="aide gauche">${T("Analyse")} <strong>' + esc(f.no) + '</strong> · ${T("numéro réservé")}</span><button type="button" class="mini" data-temp="' + esc(f.id) + '">${T("Réimprimer l’étiquette")}</button></div>' : '');
-    return '<div class="cx-carte cote">' + numero + '<h2>${T("Aperçu de l’étiquette")} <span class="cx-sub">50 × 30 mm</span></h2>'
-      + '<div class="apercu"><canvas id="cv-form" width="360" height="216" style="width:360px;height:216px" role="img" aria-label="${T("Aperçu de l’étiquette")}"></canvas></div>'
+    return '<div class="cx-carte cote">' + numero + '<h2>${T("Aperçu de l’étiquette")} <span class="cx-sub">' + etq().l + ' × ' + etq().h + ' mm</span></h2>'
+      + '<div class="apercu"><canvas id="cv-form" width="360" height="240" style="width:360px;height:240px" role="img" aria-label="${T("Aperçu de l’étiquette")}"></canvas></div>'
       + '<div class="manques">'
       + ligne(t === 100, t === 100 ? '${T("Composition : 100 %")}' : '${T("Composition à confirmer")}' + (t ? ' (' + t + ' %)' : ''))
       + ligne(n > 0, n ? n + ' ' + (n > 1 ? '${T("consignes d’entretien")}' : '${T("consigne d’entretien")}') : '${T("Aucune consigne d’entretien")}')
@@ -1064,7 +1055,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   /* ══ LA PLANCHE ════════════════════════════════════════════════════════════ */
   function ouvrirPlanche(){
     VUE = 'planche';
-    var mode = 'cricut'; try { if (localStorage.getItem('sz-fibres-mode') === 'ciseaux') mode = 'ciseaux'; } catch (e) {}
+    var mode = 'vinyle';
     PL = { mode: mode, lignes: [], sauter: { fonce: [], pale: [] }, R: null, vue: 0 };
     ((D && D.analyses) || []).forEach(function(a){ if (COCHES[a.id]) PL.lignes.push({ id: a.id, taille: '', n: 1 }); });
     redemanderPlanche();
@@ -1086,7 +1077,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function parFeuille(mode){
     var L = (D && D.modes) || [];
     for (var i = 0; i < L.length; i++) if (L[i].cle === mode && L[i].parFeuille > 0) return L[i].parFeuille;
-    return mode === 'ciseaux' ? 32 : 21;
+    return 18;
   }
   function creerGabarit(fd){
     var s = { composition: [{ fibre: 'mixte', pct: 100 }], entretien: [], fond: fd, pays: (D && D.paysDefaut) || 'CN',
@@ -1105,7 +1096,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (r && !r.ok) { if (b) b.disabled = false; szDire(expliquer(r), 'err'); return; }
       return (manque.length ? charger() : Promise.resolve()).then(function(){
         if (b) b.disabled = false;
-        var mode = 'cricut'; try { if (localStorage.getItem('sz-fibres-mode') === 'ciseaux') mode = 'ciseaux'; } catch (e) {}
+        var mode = 'vinyle';
         VUE = 'planche';
         PL = { mode: mode, lignes: [], sauter: { fonce: [], pale: [] }, R: null, vue: 0, gabarit: true };
         ['fonce', 'pale'].forEach(function(fd){ var a = gabarit(fd); if (a) PL.lignes.push({ id: a.id, taille: '', n: parFeuille(mode) }); });
@@ -1126,7 +1117,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         if (!r || !r.ok) { szDire(expliquer(r), 'err'); return; }
         PL.R = r; if (PL.vue >= r.feuilles.length) PL.vue = 0;
         var codes = [];
-        r.feuilles.forEach(function(f){ f.cases.forEach(function(c){ if (c) c.etiquette.symboles.forEach(function(k){ codes.push([k, c.etiquette.couleurEncre]); }); }); });
+        /* L encre de l aperçu ET le noir de l export (Design Space trace une forme noire). */
+        r.feuilles.forEach(function(f){ f.cases.forEach(function(c){ if (c) c.etiquette.symboles.forEach(function(k){ codes.push([k, c.etiquette.couleurEncre]); codes.push([k, '#000000']); }); }); });
         var parEncre = {};
         codes.forEach(function(x){ (parEncre[x[1]] = parEncre[x[1]] || []).push(x[0]); });
         Promise.all(Object.keys(parEncre).map(function(c){ return prepIcones(parEncre[c], c); })).then(function(){ dessiner(); });
@@ -1155,15 +1147,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var R = PL.R, nf = R ? R.feuilles.length : 0;
     var nO = R ? R.feuilles.filter(function(f){ return f.fond === 'fonce'; }).length : 0, nT = nf - nO;
     h += '<div class="aide">' + tot + ' ${T("étiquette(s)")} · ' + nf + ' ${T("feuille(s)")}'
-      + (nf ? ' (' + [nO ? nO + ' ${T("papier opaque")}' : '', nT ? nT + ' ${T("papier transparent")}' : ''].filter(Boolean).join(', ') + ')' : '')
+      + (nf ? ' (' + [nO ? nO + ' ${T("vinyle blanc")}' : '', nT ? nT + ' ${T("vinyle noir")}' : ''].filter(Boolean).join(', ') + ')' : '')
       + '. ${T("Les vêtements pâles et foncés ne sont jamais sur la même feuille.")}</div></div>';
-    h += '<div class="cx-carte"><h2>${T("Découpe")}</h2><div class="puces" role="group" aria-label="${T("Découpe")}">'
-      + (D.modes || []).map(function(m){ return '<button type="button" class="puce" data-modepl="' + esc(m.cle) + '" aria-pressed="' + (PL.mode === m.cle) + '">'
-          + esc(m.cle === 'cricut' ? '${T("Cricut — 21 par feuille")}' : '${T("Ciseaux ou massicot — 32 par feuille")}') + '</button>'; }).join('')
-      + '</div><div class="aide" data-optpl="2" style="margin-top:.4rem">' + (PL.mode === 'cricut'
-        ? '${T("Un PNG par feuille (300 ppp, fond transparent). Dans Design Space : Téléverser › image › « Imprimer puis couper », mettre la largeur indiquée dans le nom du fichier, puis imprimer depuis Design Space (il ajoute son cadre de repérage).")}'
-        : '${T("Un PDF Lettre, 32 étiquettes par feuille, traits de coupe dans la marge. Imprimer à 100 % (« Taille réelle »), sans ajuster à la page.")}')
-      + '</div><div class="aide" data-optpl="1" style="margin-top:.4rem">${T("Feuille déjà entamée ? Cliquez dans l’aperçu les cases déjà utilisées : elles restent vides. Chaque papier a les siennes.")}</div></div>';
+    h += '<div class="cx-carte"><h2>${T("Découpe")}</h2>'
+      + '<div class="aide" data-optpl="2">${T("Vinyle thermocollant, découpé à la Cricut : un PNG par feuille et par couleur de vinyle (300 ppp, fond transparent), recadré sur les étiquettes à couper. Les réglages de Design Space sont rappelés à l’export.")}</div>'
+      + '<div class="aide" data-optpl="1" style="margin-top:.4rem">${T("Feuille déjà entamée ? Cliquez dans l’aperçu les cases déjà utilisées : elles restent vides. Chaque couleur de vinyle a les siennes.")}</div></div>';
     return h;
   }
   /* L export, AU-DESSUS de l aperçu : toujours à l écran, jamais au bas d une colonne qui défile. */
@@ -1172,9 +1160,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return (bloque ? '<div class="avert">${T("Le numéro CA n’est pas encore saisi : l’aperçu montre « CA xxxxxxx », et l’export attend le vrai numéro (Fiscalité › Mon entreprise).")} <button type="button" class="mini" id="pl-fisc">${T("Ouvrir Fiscalité")}</button></div>' : '')
       + (R && R.invalides && R.invalides.length ? '<div class="avert">${T("Une analyse choisie n’a plus de composition confirmée : elle est retirée de l’export.")}</div>' : '')
       + '<div class="boutons" style="margin-top:0"><button type="button" class="gauche" id="pl-dossier">${T("Ouvrir le dossier des exports")}</button>'
-      + '<button type="button" class="prim" id="pl-export"' + (!bloque && nf ? '' : ' disabled') + '>' + (PL.mode === 'cricut' ? '${T("Exporter pour Cricut (PNG)")}' : '${T("Exporter le PDF")}') + '</button></div>';
+      + '<button type="button" class="prim" id="pl-export"' + (!bloque && nf ? '' : ' disabled') + '>' + '${T("Exporter pour Cricut (PNG)")}' + '</button></div>';
   }
-  /* L aperçu d une feuille : ciseaux = la feuille Lettre ; Cricut = sa zone utile (189 × 252 mm). */
+  /* L aperçu d une feuille : la feuille Lettre de vinyle, les étiquettes centrées dedans. */
   function geoFeuille(){
     var d = PL.R.disposition;
     var cadre = d.zone ? { l: d.zone.l, h: d.zone.h } : { l: d.page.l, h: d.page.h };
@@ -1188,12 +1176,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var f = R.feuilles[PL.vue];
     return '<div class="cx-carte" style="flex:1 1 0;min-height:0;display:flex;flex-direction:column;gap:.6rem">' + barreExport()
       + '<div class="feuilles" role="group" aria-label="${T("Feuilles")}">' + R.feuilles.map(function(x, i){
-          return '<button type="button" class="puce" data-vue="' + i + '" aria-pressed="' + (PL.vue === i) + '">${T("Feuille")} ' + (i + 1) + ' · ' + (x.fond === 'pale' ? '${T("transparent")}' : '${T("opaque")}') + ' · ' + x.cases.filter(Boolean).length + '</button>'; }).join('') + '</div>'
+          return '<button type="button" class="puce" data-vue="' + i + '" aria-pressed="' + (PL.vue === i) + '">${T("Feuille")} ' + (i + 1) + ' · ' + (x.fond === 'pale' ? '${T("vinyle noir")}' : '${T("vinyle blanc")}') + ' · ' + x.cases.filter(Boolean).length + '</button>'; }).join('') + '</div>'
       + '<div class="scene"><canvas class="plan" id="cv-plan" role="img" aria-label="${T("Aperçu de la feuille")}"></canvas>'
       + '<div class="note"><strong>' + esc(f.papier) + '</strong>'
-      + (f.miroir ? '<span class="badge">${T("Aperçu à l’endroit — le miroir est appliqué à l’export")}</span>' : '')
-      + '<span>' + (PL.mode === 'cricut' ? '${T("Le pointillé est la zone utile de Cricut : Design Space imprime son propre cadre autour. Le fichier ne contient que les étiquettes, détachées, pour que la lame coupe autour de chacune.")}'
-          : '${T("La feuille Lettre entière : un seul trait de coupe entre deux étiquettes, repères dans la marge.")}') + '</span>'
+      + '<span class="badge">${T("Aperçu à l’endroit — activez « Miroir » dans Design Space")}</span>'
+      + '<span>${T("Le pointillé est la feuille Lettre de vinyle. Le fichier ne contient que les étiquettes remplies, recadrées : posez-le où il reste de la matière.")}</span>'
       + (f.utilisees && f.utilisees.length ? '<span>' + f.utilisees.length + ' ${T("case(s) marquée(s) comme déjà utilisée(s).")}</span>' : '')
       + '</div></div></div>';
   }
@@ -1212,9 +1199,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (g.d.zone) { ctx.save(); ctx.setLineDash([6 * r, 5 * r]); ctx.strokeStyle = '#B9AE9F'; ctx.lineWidth = r; ctx.strokeRect(r, r, cv.width - 2 * r, cv.height - 2 * r); ctx.restore(); }
     var util = {}; (f.utilisees || []).forEach(function(i){ util[i] = true; });
     g.d.cases.forEach(function(p, i){
-      var x = (p.x + g.dx) * k, y = (p.y + g.dy) * k, w = 50 * k, h = 30 * k;
+      var x = (p.x + g.dx) * k, y = (p.y + g.dy) * k, w = etq().l * k, h = etq().h * k;
       var c = f.cases[i];
-      if (c) peindreEtiquette(ctx, c.etiquette, x, y, w, h, { bord: c.etiquette.fond === 'pale' });
+      if (c) peindreEtiquette(ctx, c.etiquette, x, y, w, h, { bord: true });
       else {
         ctx.save(); ctx.setLineDash([4 * r, 4 * r]); ctx.strokeStyle = util[i] ? '#C0392B' : '#D5CCBF'; ctx.lineWidth = r; ctx.strokeRect(x, y, w, h);
         if (util[i]) { ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + w, y + h); ctx.moveTo(x + w, y); ctx.lineTo(x, y + h); ctx.stroke(); }
@@ -1228,12 +1215,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var cv = ev.target; if (!PL || !PL.R) return;
     var f = PL.R.feuilles[PL.vue];
     var premiere = PL.R.feuilles.filter(function(x){ return x.fond === f.fond; })[0] === f;
-    if (!premiere) { szDire('${T("Les cases utilisées se marquent sur la première feuille de chaque papier.")}', 'att'); return; }
+    if (!premiere) { szDire('${T("Les cases utilisées se marquent sur la première feuille de chaque couleur de vinyle.")}', 'att'); return; }
     var g = geoFeuille(), s = parseFloat(cv.getAttribute('data-k')) || 1;
     var b = cv.getBoundingClientRect(), mx = (ev.clientX - b.left) / s - g.dx, my = (ev.clientY - b.top) / s - g.dy;
     for (var i = 0; i < g.d.cases.length; i++) {
       var p = g.d.cases[i];
-      if (mx >= p.x && mx <= p.x + 50 && my >= p.y && my <= p.y + 30) {
+      if (mx >= p.x && mx <= p.x + etq().l && my >= p.y && my <= p.y + etq().h) {
         var L = PL.sauter[f.fond] || (PL.sauter[f.fond] = []);
         var j = L.indexOf(i); if (j >= 0) L.splice(j, 1); else L.push(i);
         redemanderPlanche(); return;
@@ -1241,7 +1228,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
   }
 
-  /* ── L EXPORT : PNG (Cricut, 300 ppp, pHYs écrit) ou PDF (ciseaux) ───────── */
+  /* ── L EXPORT : PNG pour la découpe du vinyle (300 ppp, pHYs écrit) ───────── */
   var PPP = 300, MM = PPP / 25.4;
   var CRC = null;
   function crc32(b){
@@ -1266,30 +1253,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return 'data:image/png;base64,' + btoa(s);
     } catch (e) { return dataUrl; }
   }
-  function canevasFeuille(f, avecMarques){
-    var d = PL.R.disposition;
+  /* (2026-11-17) Le fichier de VINYLE : encre noire, fond transparent, RECADRÉ sur les cases remplies (une feuille
+     entamée ou à moitié vide ne gaspille pas de matière : on pose le fichier où il en reste). Rend { cv, l, h } en mm. */
+  function canevasFeuille(f){
+    var d = PL.R.disposition, G = etq();
+    var x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    d.cases.forEach(function(p, i){ if (!f.cases[i]) return; x0 = Math.min(x0, p.x); y0 = Math.min(y0, p.y); x1 = Math.max(x1, p.x + G.l); y1 = Math.max(y1, p.y + G.h); });
+    if (x1 < x0) { x0 = 0; y0 = 0; x1 = G.l; y1 = G.h; }
     var cv = document.createElement('canvas');
-    cv.width = Math.round(d.page.l * MM); cv.height = Math.round(d.page.h * MM);
+    cv.width = Math.round((x1 - x0) * MM); cv.height = Math.round((y1 - y0) * MM);
     var ctx = cv.getContext('2d');
-    if (avecMarques) { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, cv.width, cv.height); }
     d.cases.forEach(function(p, i){
       var c = f.cases[i]; if (!c) return;
-      // Module ENTIER à l export : 0,254 mm = 3 points à 300 ppp.
-      peindreEtiquette(ctx, c.etiquette, Math.round(p.x * MM), Math.round(p.y * MM), Math.round(50 * MM), Math.round(30 * MM), { miroir: !!f.miroir, modPx: Math.max(2, Math.round(0.254 * MM)) });
+      peindreEtiquette(ctx, c.etiquette, (p.x - x0) * MM, (p.y - y0) * MM, G.l * MM, G.h * MM, { export: true });
     });
-    if (avecMarques) {
-      /* Les traits de coupe, DANS LA MARGE seulement (rien ne se dessine sur une étiquette). */
-      var xs = {}, ys = {};
-      d.cases.forEach(function(p){ xs[p.x] = 1; xs[p.x + 50] = 1; ys[p.y] = 1; ys[p.y + 30] = 1; });
-      var x0 = Math.min.apply(null, Object.keys(xs).map(Number)), x1 = Math.max.apply(null, Object.keys(xs).map(Number));
-      var y0 = Math.min.apply(null, Object.keys(ys).map(Number)), y1 = Math.max.apply(null, Object.keys(ys).map(Number));
-      ctx.strokeStyle = '#000000'; ctx.lineWidth = Math.max(1, 0.2 * MM);
-      ctx.beginPath();
-      Object.keys(xs).map(Number).forEach(function(x){ ctx.moveTo(x * MM, (y0 - 7) * MM); ctx.lineTo(x * MM, (y0 - 2) * MM); ctx.moveTo(x * MM, (y1 + 2) * MM); ctx.lineTo(x * MM, (y1 + 7) * MM); });
-      Object.keys(ys).map(Number).forEach(function(y){ ctx.moveTo(Math.max(0.5, x0 - 7) * MM, y * MM); ctx.lineTo((x0 - 2) * MM, y * MM); ctx.moveTo((x1 + 2) * MM, y * MM); ctx.lineTo(Math.min(d.page.l - 0.5, x1 + 7) * MM, y * MM); });
-      ctx.stroke();
-    }
-    return cv;
+    return { cv: cv, l: x1 - x0, h: y1 - y0 };
   }
   function horodate(){ var t = new Date(); var z = function(n){ return ('0' + n).slice(-2); }; return t.getFullYear() + '-' + z(t.getMonth() + 1) + '-' + z(t.getDate()) + '-' + z(t.getHours()) + z(t.getMinutes()); }
   function noterImpression(){
@@ -1319,51 +1297,35 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         charger();
       });
     };
-    if (PL.mode === 'cricut') {
-      var d = R.disposition, po = function(mm){ return (Math.round(mm / 25.4 * 100) / 100).toFixed(2); };
-      /* LES RÉGLAGES DE DESIGN SPACE qui font une coupe PROPRE (sa demande : aucun résidu de papier au transfert),
-         rappelés avant CHAQUE export, dans sa boîte à part : c est là que se perd un liseré blanc. */
-      var aPale = R.feuilles.some(function(f){ return f.fond === 'pale'; });
-      b.disabled = false; szDire('');
-      szConfirmer({ titre: '${T("Pour une coupe propre dans Design Space")}',
-        texte: '${T("Chaque étiquette est une forme pleine aux coins arrondis : Design Space coupe exactement son contour. Ces réglages évitent tout liseré ou résidu de papier au transfert.")}',
-        details: [
-          ['${T("Fond perdu")}', '${T("ACTIVÉ (« Ajouter un fond perdu ») : l’encre dépasse un peu sous la ligne de coupe, donc aucun liseré de papier blanc autour d’une étiquette foncée.")}'],
-          /* La Cricut Joy Xtra (sa machine) : Design Space, chez elle, plafonne cette forme à 6,72 × 9,26 po sur Lettre ;
-             la planche fait 6,54 × 9,09 po (écarts 8 et 3,5 mm). Le redimensionnement automatique la rapetisserait. */
-          ['${T("Taille")}', '${T("Régler la largeur à")} ' + po(d.page.l).replace('.', '${SEP_DEC()}') + ' ${T("po exactement (comme dans le nom du fichier), et REFUSER le redimensionnement automatique : la planche entre déjà dans la zone de la Cricut Joy Xtra.")}'],
-          ['${T("Miroir")}', aPale ? '${T("DÉSACTIVÉ dans Design Space : le fichier transparent est déjà en miroir (sinon il serait retourné deux fois).")}' : '${T("DÉSACTIVÉ.")}'],
-          ['${T("Étalonnage")}', '${T("Une fois par machine : Menu › Étalonnage › Imprimer puis couper. Sans lui, la coupe peut glisser d’un millimètre.")}'],
-          ['${T("Matériau")}', '${T("Celui de votre papier (ex. « Printable Iron-On »). Si un bord ne se détache pas tout seul : pression « Plus », lame propre.")}'],
-          ['${T("Avant de presser")}', '${T("Retirer tout le papier autour de l’étiquette. Sur papier transparent, une fine pellicule claire reste au format exact de l’étiquette : c’est normal, elle ne déborde pas.")}']
-        ],
-        oui: '${T("Exporter les feuilles")}' }).then(function(ok){
+    var po = function(mm){ return (Math.round(mm / 25.4 * 100) / 100).toFixed(2); };
+    /* LES RÉGLAGES DE DESIGN SPACE POUR LE VINYLE (2026-11-17), rappelés avant CHAQUE export, dans sa boîte à part :
+       le miroir surtout (sa décision : il se règle dans Design Space, le fichier reste à l endroit). */
+    var fichiers = R.feuilles.map(function(f){ return canevasFeuille(f); });
+    b.disabled = false; szDire('');
+    szConfirmer({ titre: '${T("Pour une bonne découpe du vinyle dans Design Space")}',
+      texte: '${T("Un fichier par feuille : les étiquettes en noir sur fond transparent. Design Space en fait une image à découper ; la couleur réelle est celle du vinyle posé sur le tapis.")}',
+      details: [
+        ['${T("Téléverser")}', '${T("Téléverser › image › choisir le PNG. Écran de l’arrière-plan : ne rien toucher, Continuer. Écran Convertir : « Monocalque » (une image à découper, pas « Design plat », qui imprime).")}'],
+        ['${T("Taille")}', '${T("Régler la largeur exactement à celle écrite dans le nom du fichier (en po), cadenas fermé. Ne pas accepter de redimensionnement automatique.")}'],
+        ['${T("Miroir")}', '${T("ACTIVER « Miroir » sur l’écran du tapis, pour chaque tapis. Sans lui, l’étiquette sera à l’envers sur le vêtement.")}'],
+        ['${T("Matériau")}', '${T("Vinyle thermocollant (« Iron-On »), côté BRILLANT (la pellicule transparente) CONTRE le tapis, côté mat vers la lame.")}'],
+        ['${T("Écheniller")}', '${T("Retirer le vinyle autour et dans les lettres (crochet), puis couper la pellicule aux ciseaux entre les étiquettes.")}'],
+        ['${T("Presser")}', '${T("Pellicule en haut, papier de protection par-dessus. La température du vinyle, sans dépasser celle de la fibre (étiquette temporaire de l’analyse) ; essai d’abord sur une couture cachée.")}']
+      ],
+      oui: '${T("Exporter les feuilles")}' }).then(function(ok){
       if (!ok) return;
       b.disabled = true; szDire('${T("Fabrication des fichiers…")}');
       var faits = 0;
       R.feuilles.reduce(function(pr, f, i){
         return pr.then(function(){
-          var nom = 'etiquettes-cricut-' + quand + '-f' + (i + 1) + '-' + (f.fond === 'pale' ? 'transparent-miroir' : 'opaque') + '-largeur-' + po(d.page.l) + 'po.png';
-          return Promise.resolve(P.enregistrerExport(nom, avecPhys(canevasFeuille(f, false).toDataURL('image/png')))).then(function(w){
+          var F = fichiers[i];
+          var nom = 'etiquettes-vinyle-' + quand + '-f' + (i + 1) + '-' + (f.fond === 'pale' ? 'noir' : 'blanc') + '-largeur-' + po(F.l) + 'po.png';
+          return Promise.resolve(P.enregistrerExport(nom, avecPhys(F.cv.toDataURL('image/png')))).then(function(w){
             if (!w || !w.ok) throw new Error((w && w.annule) ? '${T("Export annulé.")}' : ((w && w.error) || '${T("écriture refusée")}'));
             faits++;
           });
         });
       }, Promise.resolve()).then(function(){ fin(faits); }, function(e){ fin(faits, '${T("Export interrompu :")} ' + ((e && e.message) || e)); });
-      });
-      return;
-    }
-    if (typeof P.documentPdf !== 'function') { b.disabled = false; szDire('${T("Cette version de l’application ne sait pas fabriquer de PDF.")}', 'err'); return; }
-    var pages = R.feuilles.map(function(f){ return '<img src="' + canevasFeuille(f, true).toDataURL('image/png') + '">'; }).join('');
-    var html = '<!doctype html><html><head><meta charset="utf-8"><style>@page{size:8.5in 11in;margin:0}html,body{margin:0;padding:0}'
-      + 'img{display:block;width:8.5in;height:11in;page-break-after:always}img:last-child{page-break-after:auto}</style></head><body>' + pages + '</body></html>';
-    Promise.resolve(P.documentPdf(html, { pageCss: true })).then(function(pdf){
-      if (!pdf || !pdf.ok || !pdf.base64) { fin(0, '${T("Le PDF n’a pas pu être fabriqué.")}'); return; }
-      var nom = 'etiquettes-ciseaux-' + quand + '-' + R.feuilles.length + 'f.pdf';
-      Promise.resolve(P.enregistrerExport(nom, 'data:application/pdf;base64,' + pdf.base64)).then(function(w){
-        if (!w || !w.ok) { fin(0, (w && w.annule) ? '${T("Export annulé.")}' : '${T("Export interrompu :")} ' + ((w && w.error) || '')); return; }
-        fin(1);
-      });
     });
   }
 
@@ -1387,10 +1349,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (nbp > 1 ? '<span class="pages"><button type="button" class="mini pgf" data-hpg="-1" aria-label="${T("Page précédente")}"' + (HPG <= 0 ? ' disabled' : '') + '>‹</button><span>${T("Page")} ' + (HPG + 1) + ' / ' + nbp + '</span><button type="button" class="mini pgf" data-hpg="1" aria-label="${T("Page suivante")}"' + (HPG >= nbp - 1 ? ' disabled' : '') + '>›</button></span>' : '') + '</h2>';
     H.liste.slice(HPG * parPage, (HPG + 1) * parPage).forEach(function(x){
       var pap = [];
-      if (x.feuilles && x.feuilles.fonce) pap.push(x.feuilles.fonce + ' ${T("opaque")}');
-      if (x.feuilles && x.feuilles.pale) pap.push(x.feuilles.pale + ' ${T("transparent")}');
+      var vin = x.mode === 'vinyle';
+      if (x.feuilles && x.feuilles.fonce) pap.push(x.feuilles.fonce + ' ' + (vin ? '${T("vinyle blanc")}' : '${T("opaque")}'));
+      if (x.feuilles && x.feuilles.pale) pap.push(x.feuilles.pale + ' ' + (vin ? '${T("vinyle noir")}' : '${T("transparent")}'));
       h += '<div class="imp"><div class="t"><strong>' + x.total + ' ${T("étiquette(s)")}</strong><span>' + esc(szQuand(x.le)) + '</span>'
-        + '<span class="rf-pill">' + (x.mode === 'ciseaux' ? '${T("Ciseaux")}' : 'Cricut') + '</span>'
+        + '<span class="rf-pill">' + (x.mode === 'ciseaux' ? '${T("Ciseaux")}' : x.mode === 'vinyle' ? '${T("Vinyle")}' : 'Cricut') + '</span>'
         + (pap.length ? '<span class="gris">' + esc(pap.join(' · ')) + '</span>' : '') + (x.par ? '<span class="gris">' + esc(x.par) + '</span>' : '') + '</div><ul>'
         + (x.lignes || []).map(function(l){
             return '<li class="' + (l.supprimee ? 'sup' : '') + '">' + esc(l.no) + ' · ' + esc(l.nom) + (l.rattache ? '' : ' <span class="gris">${T("(à créer)")}</span>')

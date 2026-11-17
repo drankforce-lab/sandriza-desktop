@@ -328,4 +328,53 @@ module.exports = {
   'Ce qui manque pour atteindre': 'What is missing to reach',
   'est complète. Imprimer l’étiquette avec la composition et la température de presse, pour remplacer celle du numéro ?':
     'is complete. Print the label with the composition and the press temperature, to replace the number label?',
+  /* (2026-11-17) Le vinyle thermocollant remplace le papier de transfert. */
+  'Vinyle':
+    'Vinyl',
+  'vinyle blanc':
+    'white vinyl',
+  'vinyle noir':
+    'black vinyl',
+  'Provenance et vinyle':
+    'Origin and vinyl',
+  'vêtement pâle, vinyle noir':
+    'light garment, black vinyl',
+  'vêtement foncé, vinyle blanc':
+    'dark garment, white vinyl',
+  'Vinyle thermocollant NOIR, découpé à la Cricut.':
+    'BLACK heat transfer vinyl, cut with the Cricut.',
+  'Vinyle thermocollant BLANC, découpé à la Cricut.':
+    'WHITE heat transfer vinyl, cut with the Cricut.',
+  'Vinyle thermocollant, découpé à la Cricut : un PNG par feuille et par couleur de vinyle (300 ppp, fond transparent), recadré sur les étiquettes à couper. Les réglages de Design Space sont rappelés à l’export.':
+    'Heat transfer vinyl, cut with the Cricut: one PNG per sheet and per vinyl colour (300 dpi, transparent background), cropped to the labels to cut. The Design Space settings are shown again at export.',
+  'Feuille déjà entamée ? Cliquez dans l’aperçu les cases déjà utilisées : elles restent vides. Chaque couleur de vinyle a les siennes.':
+    'Sheet already started? Click the spots already used in the preview: they stay empty. Each vinyl colour has its own.',
+  'Aperçu à l’endroit — activez « Miroir » dans Design Space':
+    'Preview shown right way round — turn on “Mirror” in Design Space',
+  'Le pointillé est la feuille Lettre de vinyle. Le fichier ne contient que les étiquettes remplies, recadrées : posez-le où il reste de la matière.':
+    'The dotted line is the Letter vinyl sheet. The file holds only the filled labels, cropped: place it where there is vinyl left.',
+  'Les cases utilisées se marquent sur la première feuille de chaque couleur de vinyle.':
+    'Used spots are marked on the first sheet of each vinyl colour.',
+  'Pour une bonne découpe du vinyle dans Design Space':
+    'For a clean vinyl cut in Design Space',
+  'Un fichier par feuille : les étiquettes en noir sur fond transparent. Design Space en fait une image à découper ; la couleur réelle est celle du vinyle posé sur le tapis.':
+    'One file per sheet: the labels in black on a transparent background. Design Space turns it into a cut image; the real colour is the vinyl on the mat.',
+  'Téléverser':
+    'Upload',
+  'Téléverser › image › choisir le PNG. Écran de l’arrière-plan : ne rien toucher, Continuer. Écran Convertir : « Monocalque » (une image à découper, pas « Design plat », qui imprime).':
+    'Upload › image › choose the PNG. Background screen: change nothing, Continue. Convert screen: “Single Layer” (a cut image, not “Flat Design”, which prints).',
+  'Régler la largeur exactement à celle écrite dans le nom du fichier (en po), cadenas fermé. Ne pas accepter de redimensionnement automatique.':
+    'Set the width exactly to the one written in the file name (in inches), padlock closed. Do not accept automatic resizing.',
+  'ACTIVER « Miroir » sur l’écran du tapis, pour chaque tapis. Sans lui, l’étiquette sera à l’envers sur le vêtement.':
+    'TURN ON “Mirror” on the mat screen, for every mat. Without it, the label will be backwards on the garment.',
+  'Vinyle thermocollant (« Iron-On »), côté BRILLANT (la pellicule transparente) CONTRE le tapis, côté mat vers la lame.':
+    'Heat transfer vinyl (“Iron-On”), SHINY side (the clear carrier) DOWN on the mat, matte side toward the blade.',
+  'Écheniller':
+    'Weed',
+  'Retirer le vinyle autour et dans les lettres (crochet), puis couper la pellicule aux ciseaux entre les étiquettes.':
+    'Remove the vinyl around and inside the letters (weeding hook), then cut the carrier with scissors between the labels.',
+  'Presser':
+    'Press',
+  'Pellicule en haut, papier de protection par-dessus. La température du vinyle, sans dépasser celle de la fibre (étiquette temporaire de l’analyse) ; essai d’abord sur une couture cachée.':
+    'Carrier on top, protective sheet over it. Use the vinyl temperature without going above the fibre one (the analysis temporary label); test on a hidden seam first.',
 };
