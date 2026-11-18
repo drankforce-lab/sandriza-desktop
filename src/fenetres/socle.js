@@ -5146,6 +5146,13 @@ html[data-sz-theme="epure"] .ls-rang:last-child{border-bottom:0}
 html[data-sz-theme="epure"] .ls-rang:hover{background:var(--v03)}
 html[data-sz-theme="epure"] .jaugeu i{background:var(--sz-btn-prim)}
 html[data-sz-theme="epure"] .jaugeu i.plein{background:var(--ep-ambre-t)}
+/* LES JAUGES EN TROIS TONS : le vert des jauges (réponses, usage, variantes) passe au brun ou au neutre ; ambre et
+   rouge gardent leur sens. Et le trait décoratif au-dessus d'un état vide (absent des maquettes) s'efface. */
+html[data-sz-theme="epure"] .jauger i,html[data-sz-theme="epure"] .jaugec i{background:var(--sz-btn-prim)}
+html[data-sz-theme="epure"] .gp .jauge i{background:var(--v20)}
+html[data-sz-theme="epure"] .gp .jauge i.bas{background:var(--ep-ambre-t)}
+html[data-sz-theme="epure"] .gp .jauge i.rup{background:var(--ep-rouge-t)}
+html[data-sz-theme="epure"] .vide::before{display:none}
 `;
 
 module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES + CSS_EPURE + CSS_DENSE,
