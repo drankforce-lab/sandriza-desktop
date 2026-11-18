@@ -254,6 +254,7 @@ const MENU_APP_EN = {
   'Émeraude': 'Emerald',
   'Épuré (nouveau look)': 'Clean (new look)',
   'Rechercher': 'Search',
+  'Sandriza — Administration': 'Sandriza — Administration',
   'Densité': 'Density',
   'Calendrier': 'Calendar',
   'Confortable': 'Comfortable',

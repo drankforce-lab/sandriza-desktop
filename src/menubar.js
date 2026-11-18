@@ -148,6 +148,8 @@ ${css}
  * Les clics passent par palette:action — les mêmes chemins que la palette.
  */
 function pagePanneau(desc) {
+  // (2026-11-18, maquette) La police d'Épuré, EMBARQUÉE : ce panneau est une page locale, il ne voit pas les fichiers du site.
+  let POLICE = ''; try { if (String(desc.theme || '') === 'epure') POLICE = require('./police-epure'); } catch (e) { POLICE = ''; }
   const menus = desc.menus || [];
   const css = desc.cssRail || '';
   const sombre = !!desc.sombre;
@@ -164,7 +166,7 @@ function pagePanneau(desc) {
      la fenêtre principale est posé par la coquille (setZoomFactor), pour que
      panneau et barre paraissent à la même taille. */
   return `<!doctype html><html lang="${LANG()}"><head><meta charset="utf-8">
-<style>
+<style>${POLICE}
 html,body{margin:0;overflow:hidden}
 /* ⚠ FENETRE TRANSPARENTE : chaque panneau porte SON fond, sa bordure et son
    ombre — le sous-menu est une vraie boite a la hauteur de ses elements, et
@@ -204,6 +206,37 @@ ${css}
    la rangee a la largeur de son CONTENU, et la fenetre l epouse. Le
    sous-panneau, ALIGNE EN HAUT DE SON PARENT, a la hauteur de ses elements. */
 #rangee{display:inline-flex;align-items:flex-start;vertical-align:top}
+/* ══ LE PANNEAU DE LA MAQUETTE (Épuré, 2026-11-18) ══ carte blanche, en-tête (carré, titre, « N entrées », ✕),
+   colonnes à filet gauche, titre de groupe en petites capitales, lignes de 38 px soulignées. Chaque colonne a la
+   largeur de son plus long libellé : RIEN n'est coupé. */
+.sz-panneau.ep-pan{background:#ffffff!important;border:1px solid #e4e7ee!important;border-radius:16px!important;
+  box-shadow:0 24px 48px -16px rgba(16,24,40,.28)!important;padding:16px 18px 14px!important;display:block;
+  font-family:"SzEpure","Plus Jakarta Sans","Segoe UI",system-ui,sans-serif!important;color:#1f2533}
+.sz-panneau.ep-pan.sz-sombre{background:#181e29!important;border-color:#283142!important;color:#e8ecf2;box-shadow:0 24px 48px -16px rgba(0,0,0,.6)!important}
+.ep-tete{display:flex;align-items:center;gap:10px;margin:0 0 12px}
+.ep-tete .ic{width:26px;height:26px;border-radius:7px;background:#3d4456;color:#fff;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center}
+.ep-tete b{font-size:16px;font-weight:800;white-space:nowrap}
+.ep-tete .nb{font-size:12px;color:#5b6273;white-space:nowrap}
+.sz-sombre .ep-tete .nb{color:#9aa4b5}
+.ep-tete .x{margin-left:auto;width:30px;height:30px;border-radius:8px;border:1px solid #e4e7ee;background:#fff;color:#3d4456;font:inherit;cursor:pointer;padding:0}
+.sz-sombre .ep-tete .x{background:#1c2330;border-color:#283142;color:#c9d1dd}
+.ep-cols{display:grid;grid-auto-flow:column;grid-auto-columns:max-content;align-items:start}
+.ep-col{display:flex;flex-direction:column;padding:0 14px;min-width:13rem}
+.ep-col+.ep-col{border-left:1px solid #e4e7ee}
+.sz-sombre .ep-col+.ep-col{border-left-color:#283142}
+.ep-col .t{font-size:11px;font-weight:700;color:#5b6273;text-transform:uppercase;letter-spacing:.06em;padding:0 8px 8px;white-space:nowrap}
+.sz-sombre .ep-col .t{color:#9aa4b5}
+.ep-pan .ep-col .sz-item{height:38px!important;min-height:38px!important;padding:0 8px!important;border-radius:0!important;border-bottom:1px solid #eef0f4!important;
+  font-size:13px!important;font-weight:500!important;white-space:nowrap!important;width:auto!important;gap:12px!important}
+.sz-sombre.ep-pan .ep-col .sz-item{border-bottom-color:#222a38!important}
+.ep-pan .ep-col .sz-item .sz-lbl{font-size:13px!important;overflow:visible!important;text-overflow:clip!important}
+/* Autonome : les lignes ne dépendent pas de la feuille du site (cssRail) pour leur apparence. */
+.ep-pan .ep-col .sz-item{display:flex!important;align-items:center;justify-content:flex-start;background:transparent!important;border-top:0!important;
+  border-left:0!important;border-right:0!important;color:inherit!important;font-family:inherit!important;text-align:left;cursor:pointer;box-shadow:none!important}
+.ep-pan .ep-col .sz-item:hover{background:#f4f5f9!important;color:#6b431e!important}
+.sz-sombre.ep-pan .ep-col .sz-item:hover{background:#222a38!important;color:#e3c29e!important}
+.ep-pan .sz-coche{display:inline-block;width:1em;flex:none;color:#8a5a2b;font-weight:800}
+.sz-sombre.ep-pan .sz-coche{color:#c9a27a}
 #sous{display:none;margin-left:7px}
 .sz-item .sz-fleche{margin-left:auto;opacity:.6;font-size:.8em;padding-left:1.2em}
 </style></head><body>
@@ -316,6 +349,40 @@ ${css}
       pan.appendChild(c);
     }
   }
+  var EP_EN = (document.documentElement.lang || 'fr') === 'en';
+  function panneauMaquette(pan, m){
+    pan.classList.add('ep-pan'); pan.dataset.aff='block';
+    var its=(m.items||[]).filter(function(it){ return it && !it.sep; });
+    var cols=[], libres=[];
+    its.forEach(function(it){
+      if (it.sub) cols.push({ t: it.label, items: it.sub.filter(function(x){ return x && !x.sep; }) });
+      else libres.push(it);
+    });
+    if (libres.length) {
+      // une liste plate se range en colonnes égales : 1 jusqu'à 8 entrées, 2 jusqu'à 16, 3 au-delà
+      var k = libres.length <= 8 ? 1 : (libres.length <= 16 ? 2 : 3), per = Math.ceil(libres.length / k), plates=[];
+      for (var i = 0; i < libres.length; i += per) plates.push({ t: '', items: libres.slice(i, i + per) });
+      cols = plates.concat(cols);
+    }
+    var n = 0; cols.forEach(function(c){ n += c.items.length; });
+    var tete=document.createElement('div'); tete.className='ep-tete';
+    var ic=document.createElement('span'); ic.className='ic'; ic.textContent=String(m.label||'?').trim().charAt(0).toUpperCase(); tete.appendChild(ic);
+    var b=document.createElement('b'); b.textContent=m.label; tete.appendChild(b);
+    var nb=document.createElement('span'); nb.className='nb'; nb.textContent=n + ' ' + (EP_EN ? (n > 1 ? 'entries' : 'entry') : (n > 1 ? 'entrées' : 'entrée')); tete.appendChild(nb);
+    var x=document.createElement('button'); x.type='button'; x.className='x'; x.textContent='\u2715';
+    x.setAttribute('aria-label', EP_EN ? 'Close the panel' : 'Fermer le panneau');
+    x.onclick=function(){ try{ window.szPalette.fermer(); }catch(e){} };
+    tete.appendChild(x);
+    pan.appendChild(tete);
+    var grille=document.createElement('div'); grille.className='ep-cols';
+    cols.forEach(function(c){
+      var col=document.createElement('div'); col.className='ep-col';
+      if (c.t) { var t=document.createElement('span'); t.className='t'; t.textContent=c.t; col.appendChild(t); }
+      c.items.forEach(function(it){ col.appendChild(entree(it, false)); });
+      grille.appendChild(col);
+    });
+    pan.appendChild(grille);
+  }
   D.menus.forEach(function(m){
     var pan=document.createElement('div');
     pan.className='sz-panneau${sombre ? ' sz-sombre' : ''}'; pan.setAttribute('data-sz-th','${th}');
@@ -324,7 +391,8 @@ ${css}
     var its=(m.items||[]);
     var nSous=its.filter(function(it){ return it && it.sub; }).length;
     var nEnt=its.filter(function(it){ return it && !it.sep; }).length;
-    if ('${th}' === 'epure' && nSous >= 3) cartes(pan, its);
+    if ('${th}' === 'epure' && !m.entete) panneauMaquette(pan, m);
+    else if ('${th}' === 'epure' && nSous >= 3) cartes(pan, its);
     else {
       if ('${th}' === 'epure' && nEnt > 10) { pan.classList.add('sz-colonnes'); pan.style.setProperty('--sz-rangs', String(Math.ceil(nEnt / 3))); pan.dataset.aff='grid'; }
       its.forEach(function(it){ pan.appendChild(entree(it, false)); });

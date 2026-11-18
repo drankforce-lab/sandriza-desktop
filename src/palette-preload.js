@@ -28,4 +28,6 @@ contextBridge.exposeInMainWorld('szPalette', {
   // fenetre s ajuste, position gardee) et son survol (le quitter le referme).
   taille: (w, h) => ipcRenderer.send('panneau:taille', Math.round(w) || 0, Math.round(h) || 0),
   survol: (dedans) => ipcRenderer.send('panneau:survol', !!dedans),
+  // (2026-11-18, maquette) Le bouton ✕ de l'en-tête du panneau Épuré.
+  fermer: () => ipcRenderer.send('panneau:fermer'),
 });
