@@ -252,6 +252,7 @@ const MENU_APP_EN = {
   'Ardoise': 'Slate',
   'Graphite': 'Graphite',
   'Émeraude': 'Emerald',
+  'Épuré (nouveau look)': 'Clean (new look)',
 };
 
 /** Un intitulé, traduit si la table le connaît. Sinon il reste tel quel : une
