@@ -222,9 +222,6 @@ html[data-sz-theme="epure"] .fo .t b{font-size:14px;font-weight:700}
 html[data-sz-theme="epure"] .princ{padding:0 0 0 32px;gap:18px}
 html[data-sz-theme="epure"] .entete .mono{width:48px;height:48px;border-radius:12px;font-size:17px;background:var(--ep-neutre-f);color:var(--ep-neutre-t)}
 html[data-sz-theme="epure"] .entete h2{font-size:26px;font-weight:800;letter-spacing:-.02em}
-html[data-sz-theme="epure"] .onglets{gap:8px;padding-bottom:12px;border-bottom:1px solid var(--v08)}
-html[data-sz-theme="epure"] .onglets button{height:34px;padding:0 14px;border-radius:8px;border:0;font-size:13px;font-weight:600}
-html[data-sz-theme="epure"] .onglets button.actif{border:0;background:var(--f-carte);color:var(--tx);font-weight:700;box-shadow:0 1px 2px rgba(16,24,40,.12)}
 html[data-sz-theme="epure"] .onglets button.actif .n{background:var(--ep-neutre-f);color:var(--ep-neutre-t)}
 html[data-sz-theme="epure"] .barre .q,html[data-sz-theme="epure"] .barre select,html[data-sz-theme="epure"] .barre .prim{height:48px;border-radius:12px}
 html[data-sz-theme="epure"] .barre input#o-nom{height:48px;border-radius:12px;font-size:15px}

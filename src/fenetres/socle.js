@@ -5199,6 +5199,66 @@ html[data-sz-theme="epure"] .badge.warn,html[data-sz-theme="epure"].jour .badge.
 html[data-sz-theme="epure"] button.prep:hover:not(:disabled),html[data-sz-theme="epure"] button.go:hover:not(:disabled),
 html[data-sz-theme="epure"] .tm-tete .prim:hover:not(:disabled),html[data-sz-theme="epure"] button.prim:hover:not(:disabled){
   background:var(--sz-btn-prim-fort);border-color:var(--sz-btn-prim-fort);color:var(--sz-btn-prim-txt)}
+/* ══ LE PRINCIPE « MONDAY » (2026-11-18, maquette validée : « c'est la bonne direction ») ══════════════════════
+   Sous le titre : les VUES en onglets ; puis UNE barre d'outils — l'action principale à gauche (brune), Rechercher,
+   Filtrer (un petit panneau), puis les raccourcis qui filtrent (ambre quand ils sont allumés). Pièces communes :
+   .mo-vues, .mo-outils, .mo-o, .mo-pop. */
+.mo-vues{flex:none;display:flex;gap:4px;border-bottom:1px solid var(--v08);margin:0 0 12px}
+.mo-vues button{height:auto;padding:8px 12px;border:0;border-bottom:2px solid transparent;border-radius:0;margin-bottom:-1px;background:transparent!important;
+  font-size:13px;font-weight:600;color:var(--tx2);white-space:nowrap;cursor:pointer}
+.mo-vues button:hover{color:var(--tx)}
+.mo-vues button.on{color:var(--tx);border-bottom-color:var(--sz-btn-prim)}
+html[data-sz-theme="epure"] .mo-vues button{border-top:0!important;border-left:0!important;border-right:0!important;border-radius:0!important;box-shadow:none!important;min-height:0}
+/* (Monday) La barre des gestes sur la sélection : absente au repos, elle FLOTTE en bas de la fenêtre dès qu'une ligne est cochée —
+   la liste ne saute plus, et plus de bande vide sous la barre d'outils. */
+html[data-sz-theme="epure"] .szk-barre.szk-repos{display:none!important}
+html[data-sz-theme="epure"] .szk-barre:not(.szk-repos){position:fixed;left:50%;bottom:60px;transform:translateX(-50%);z-index:60;max-width:calc(100vw - 48px);
+  background:var(--f-carte)!important;border:1px solid var(--v12)!important;border-radius:14px;box-shadow:0 18px 40px -16px rgba(0,0,0,.45);padding:8px 12px}
+.mo-outils{flex:none;display:flex;align-items:center;gap:6px;flex-wrap:nowrap;margin:0 0 14px;min-width:0}
+.mo-outils>.prim{height:36px;padding:0 14px;border-radius:9px;font-size:13px;white-space:nowrap}
+.mo-sep{flex:none;width:1px;height:20px;background:var(--v10);margin:0 4px}
+.mo-rch{flex:0 1 240px;min-width:140px;height:34px}
+.mo-o{flex:none;height:34px;padding:0 10px;border-radius:8px;border:0!important;background:transparent!important;font-size:13px;font-weight:600;color:var(--tx);
+  display:inline-flex;align-items:center;gap:7px;white-space:nowrap;cursor:pointer}
+.mo-o:hover{background:var(--v05)!important}
+.mo-o svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.mo-o.actif{background:var(--ep-ambre-f)!important;color:var(--ep-ambre-t)}
+.mo-o .nb{font-size:11px;font-weight:800;padding:1px 7px;border-radius:99px;background:var(--ep-ambre-t);color:var(--ep-ambre-f)}
+.mo-fil{position:relative;flex:none}
+.mo-pop{position:absolute;left:0;top:40px;z-index:30;min-width:240px;padding:6px;border-radius:12px;background:var(--f-carte);border:1px solid var(--v12);
+  box-shadow:0 14px 34px -14px rgba(0,0,0,.45);display:flex;flex-direction:column;gap:2px}
+.mo-pop button{display:flex;align-items:center;justify-content:space-between;gap:12px;height:34px;padding:0 10px;border:0!important;border-radius:8px;
+  background:transparent!important;font-size:13px;font-weight:600;color:var(--tx);white-space:nowrap;cursor:pointer;text-align:left}
+.mo-pop button:hover{background:var(--v05)!important}
+.mo-pop button.on{background:var(--ep-ambre-f)!important;color:var(--ep-ambre-t)}
+.mo-pop .ct{font-size:11.5px;font-weight:800;padding:1px 8px;border-radius:99px;background:var(--ep-neutre-f);color:var(--ep-neutre-t)}
+.mo-pop .ct.a{background:var(--ep-ambre-f);color:var(--ep-ambre-t)}
+.mo-outils .droite{margin-left:auto;display:flex;align-items:center;gap:6px}
+/* LE PRINCIPE « MONDAY » DANS TOUS LES MODULES (2026-11-18) — sans toucher à leur logique : les onglets d'état (.ed-seg)
+   deviennent des onglets SOULIGNÉS, comme les vues de Monday ; les boutons de filtre (.rf-jet) deviennent des boutons
+   de barre, ambre quand ils filtrent ; la recherche prend la même taille partout ; la barre tient sur une ligne. */
+html[data-sz-theme="epure"] .ed-seg{padding:0;border:0;border-radius:0;background:transparent!important;gap:2px;border-bottom:1px solid var(--v08);box-shadow:none}
+html[data-sz-theme="epure"] .ed-seg button{height:34px;padding:0 12px;border-radius:0!important;border:0!important;border-bottom:2px solid transparent!important;margin-bottom:-1px;
+  background:transparent!important;color:var(--tx2);font-size:13px;font-weight:600;box-shadow:none!important}
+html[data-sz-theme="epure"] .ed-seg button:hover{color:var(--tx)}
+html[data-sz-theme="epure"] .ed-seg button.on{color:var(--tx);border-bottom-color:var(--sz-btn-prim)!important;background:transparent!important}
+html[data-sz-theme="epure"] .rf-tb .rf-jet,html[data-sz-theme="epure"] .cx-barre .rf-jet{height:34px;padding:0 10px;border-radius:8px;border:0!important;background:transparent!important;
+  color:var(--tx);font-size:13px;font-weight:600;box-shadow:none}
+html[data-sz-theme="epure"] .rf-tb .rf-jet:hover,html[data-sz-theme="epure"] .cx-barre .rf-jet:hover{background:var(--v05)!important}
+html[data-sz-theme="epure"] .rf-tb .rf-jet.on,html[data-sz-theme="epure"] .cx-barre .rf-jet.on{background:var(--ep-ambre-f)!important;color:var(--ep-ambre-t);border:0!important}
+html[data-sz-theme="epure"] .rf-rch{height:34px;max-width:260px;border-radius:8px}
+html[data-sz-theme="epure"] .cx-barre{gap:6px}
+/* (Monday, suite) Les ONGLETS de section (.onglets, 26 fenêtres) : soulignés, comme les vues ; les filtres d'état en
+   boutons groupés (.etats, Inventaire) : boutons de barre, ambre quand ils filtrent. */
+html[data-sz-theme="epure"] .onglets{background:transparent!important;border-bottom:1px solid var(--v08);padding-bottom:0!important;gap:2px}
+html[data-sz-theme="epure"] .onglets button{height:36px;padding:0 12px;border:0!important;border-bottom:2px solid transparent!important;border-radius:0!important;margin-bottom:-1px;
+  background:transparent!important;color:var(--tx2)!important;font-size:13px;font-weight:600;box-shadow:none!important}
+html[data-sz-theme="epure"] .onglets button:hover{color:var(--tx)!important}
+html[data-sz-theme="epure"] .onglets button.actif,html[data-sz-theme="epure"] .onglets button.on{color:var(--tx)!important;border-bottom-color:var(--sz-btn-prim)!important;background:transparent!important}
+html[data-sz-theme="epure"] .etats{gap:2px;background:transparent;border:0}
+html[data-sz-theme="epure"] .etats button{height:34px;padding:0 10px;border-radius:8px;border:0!important;background:transparent!important;color:var(--tx);font-size:13px;font-weight:600;box-shadow:none}
+html[data-sz-theme="epure"] .etats button:hover{background:var(--v05)!important}
+html[data-sz-theme="epure"] .etats button.actif{background:var(--ep-ambre-f)!important;color:var(--ep-ambre-t)!important}
 `;
 
 module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES + CSS_EPURE + CSS_DENSE,

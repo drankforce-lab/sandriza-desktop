@@ -546,4 +546,9 @@ module.exports = {
   'Total remboursé': 'Total refunded',
   'Frais retenus': 'Fees withheld',
   'Articles {0}–{1} sur {2} · page {3} / {4}': 'Items {0}–{1} of {2} · page {3} / {4}',
+  'Tableau principal': 'Main table',
+  'Liste compacte': 'Compact list',
+  'Kanban': 'Kanban',
+  'Rechercher': 'Search',
+  'Filtrer': 'Filter',
 };

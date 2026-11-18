@@ -209,6 +209,10 @@ tbody tr.attente{background:rgba(124,92,255,.09)}
 .mq td.b i{display:block;width:4px;height:38px;background:var(--mq-ton,#e8a35b)}
 .mq th.b i{display:block;width:4px;height:34px;background:var(--mq-ton,#e8a35b)}
 .mq .no{font-weight:700;text-overflow:clip!important}
+.mq td.mo-etat{padding:0 6px;text-align:center;font-weight:700;font-size:12.5px;border-left:2px solid var(--f-carte)}
+.mq td.mo-etat.n{background:var(--ep-neutre-f);color:var(--ep-neutre-t)}
+.mq td.mo-etat.a{background:var(--ep-ambre-f);color:var(--ep-ambre-t)}
+.mq td.mo-etat.r{background:var(--ep-rouge-f);color:var(--ep-rouge-t)}
 /* (2026-11-18, sa capture : « quand on survole on ne voit pas bien ») Le survol générique des boutons (gris) écrasait le brun : le bouton « Préparer » garde son brun, un ton plus foncé, et son texte. */
 .mq .act button.prep:hover:not(:disabled){background:var(--sz-btn-prim-fort,#6b431e);color:var(--sz-btn-prim-txt,#fff);border-color:transparent}
 .mq .vieille{color:var(--tx-att);font-weight:700}
@@ -727,7 +731,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     /* (2026-11-18) LA FILE DE PRÉPARATION : « Lancer la préparation (N) » — N compté sur les statuts que la
        file prend (comptes du pont, liste entière) ; la commande elle-même est choisie AU CLIC par le site. */
     var nFile = 0; ['pending', 'confirmed', 'preparing', 'verification'].forEach(function(k){ nFile += (cs[k] || 0); });
-    if (actT) actT.innerHTML = expedition ? '' : (nFile ? '<button class="prim" id="c-file" '
+    if (actT) actT.innerHTML = (expedition || EPD()) ? (EPD() && !expedition ? '<button class="mini" id="c-corbeille" title="${T("Voir les commandes supprimées et les remettre en place")}">${T("Corbeille")}</button>' : '') : (nFile ? '<button class="prim" id="c-file" '
       + 'title="${T("Ouvre la commande à préparer en premier — prioritaires d’abord, jamais une qu’un collègue tient ; « Commande suivante » enchaîne")}">'
       + '${T("Lancer la préparation")} (' + nFile + ')</button>' : '')
       + '<button class="mini" id="c-corbeille" '
@@ -750,6 +754,38 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       return expedition ? (s.cle === 'shipped' || s.cle === 'delivered')
                         : (s.cle !== 'shipped' && s.cle !== 'delivered');
     });
+    if (EPD()) {
+      /* LE PRINCIPE « MONDAY » : les vues en onglets, puis UNE barre (maquette validée le 2026-11-18). Mêmes crochets que la
+         barre d'avant (data-st, data-vider, data-prio, data-manu, data-vue, #rech, #c-file) : l'écouteur délégué ne change pas. */
+      var nSel = F.statuts.length;
+      var vueB = function(v, lib, on){ return '<button type="button" role="tab" aria-selected="' + on + '" class="' + (on ? 'on' : '') + '" data-vue="' + v + '">' + lib + '</button>'; };
+      h += '<div class="mo-vues" role="tablist" aria-label="${T("Affichage de la liste")}">'
+        + vueB('detail', '${T("Tableau principal")}', !COMPACT && !KB())
+        + vueB('compact', '${T("Liste compacte")}', COMPACT && !KB())
+        + (expedition ? '' : vueB('kanban', '${T("Kanban")}', KB()))
+        + '</div>';
+      h += '<div class="mo-outils">'
+        + (!expedition && nFile ? '<button class="prim" id="c-file" title="${T("Ouvre la commande à préparer en premier — prioritaires d’abord, jamais une qu’un collègue tient ; « Commande suivante » enchaîne")}">${T("Lancer la préparation")} (' + nFile + ')</button><span class="mo-sep"></span>' : '')
+        + '<label class="rf-rch mo-rch">${ICO.loupe}<input id="rech" aria-label="${T("Rechercher une commande")}" autocomplete="off" placeholder="${T("Rechercher")}" value="' + esc(F.q) + '"></label>'
+        + '<span class="mo-fil"><button type="button" class="mo-o' + (nSel ? ' actif' : '') + '" data-mo-filtre="1" aria-haspopup="menu" aria-expanded="' + MO_FILTRE + '">'
+        +   '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16l-6 7v6l-4 2v-8z"/></svg>${T("Filtrer")}' + (nSel ? '<span class="nb">' + nSel + '</span>' : '') + '</button>'
+        + (MO_FILTRE ? '<div class="mo-pop" role="menu">'
+            + '<button type="button" role="menuitemcheckbox" class="' + (nSel ? '' : 'on') + '" data-vider="1"><span>${T("Toutes")}</span>' + (TU ? '<span class="ct">' + (TU.nombre || 0) + '</span>' : '') + '</button>'
+            + stats.map(function(s){
+                var n = TU ? (cs[s.cle] || 0) : null;
+                return '<button type="button" role="menuitemcheckbox" class="' + (F.statuts.indexOf(s.cle) >= 0 ? 'on' : '') + '" data-st="' + esc(s.cle) + '"><span>' + esc(szTd(s.libelle)) + '</span>'
+                  + (n == null ? '' : '<span class="ct' + (n > 0 && ST_A_FAIRE.indexOf(s.cle) >= 0 ? ' a' : '') + '">' + n + '</span>') + '</button>'; }).join('')
+            + '</div>' : '')
+        + '</span>'
+        + '<button type="button" class="mo-o' + (F.prioritaires ? ' actif' : '') + '" data-prio="1" title="${T("N’afficher que les commandes prioritaires")}">'
+        +   '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v10M12 19h.01"/></svg>${T("Prioritaires")}</button>'
+        + (expedition ? '' : '<button type="button" class="mo-o' + (F.manuelles ? ' actif' : '') + '" data-manu="1" title="${T("N’afficher que les ventes saisies à la caisse, quel que soit leur statut")}">'
+        +   '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h4M7 14h7"/></svg>${T("Ventes manuelles")}</button>')
+        + '<span class="droite">'
+        + (expedition && CTX && (CTX.annees || []).length ? '<select id="f-annee" aria-label="${T("Année")}"><option value="all"' + (F.annee === 'all' ? ' selected' : '') + '>${T("Toutes")}</option>'
+            + CTX.annees.map(function(a){ return '<option value="' + a + '"' + (String(F.annee) === String(a) ? ' selected' : '') + '>' + a + '</option>'; }).join('') + '</select>' : '')
+        + '</span></div>';
+    } else {
     h += '<div class="cx-barre"><div class="ed-seg">'
       + '<button type="button" class="' + (F.statuts.length ? '' : 'on') + '" data-vider="1">${T("Toutes")}' + ctOnglet(TU ? TU.nombre : null, false) + '</button>'
       + stats.map(function(s){
@@ -784,6 +820,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + '</select>';
     }
     h += '</div></div>';
+    }
 
     /* ── LE TABLEAU ── */
     var ck = lotCoches();
@@ -905,6 +942,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   /* ══ LA VUE KANBAN (2026-11-18) — une colonne par statut du mode Commandes, et « Expédier » ══ */
 
   /* ══ COMMANDES FIDÈLE À LA MAQUETTE (Épuré) — la vue « Détaillé » de ce jeu ══════════════════════════════ */
+  var MO_FILTRE = false;   // (Monday) le panneau « Filtrer » est ouvert
   function MAQ(){ return MODE !== 'expeditions' && !COMPACT && !KB() && document.documentElement.getAttribute('data-sz-theme') === 'epure'; }
   var MQ_OUVERT = 'prep', MQ_PG = 0, MQ_CAP = 10;
   var MQ_GROUPES = [
@@ -940,8 +978,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '<td>' + esc(o.client) + (o.prioritaire ? ' <span class="rf-pill ambre">${T("Prioritaire")}</span>' : '') + '</td>'
       + '<td class="' + (r.v ? 'vieille' : '') + '">' + esc(r.t) + '</td>'
       + '<td class="mt">' + argent(o.total) + '</td>'
-      + '<td><span class="pay' + (o.statut === 'pending' ? ' a' : '') + '">' + (o.statut === 'pending' ? '${T("En attente")}' : (o.statut === 'cancelled' ? '${T("Annulée")}' : '${T("Payée")}')) + '</span></td>'
-      + '<td>' + esc(o.manuelle ? '${T("Comptoir")}' : mqTransp(o.transporteur)) + '</td>'
+      /* (Monday) Les états en CELLULES PLEINES, trois tons : ambre (attend), rouge (annulée), neutre (le reste). */
+      + '<td class="mo-etat ' + (o.statut === 'pending' ? 'a' : (o.statut === 'cancelled' ? 'r' : 'n')) + '">' + (o.statut === 'pending' ? '${T("En attente")}' : (o.statut === 'cancelled' ? '${T("Annulée")}' : '${T("Payée")}')) + '</td>'
+      + (function(){ var lv = o.manuelle ? '${T("Comptoir")}' : mqTransp(o.transporteur); return '<td class="' + (lv && lv !== '—' ? 'mo-etat n' : '') + '">' + esc(lv) + '</td>'; })()
       + '<td class="act">' + act + '</td></tr>';
   }
   function vueMaquette(d, ck){
@@ -1905,6 +1944,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       var t = ev.target;
       if (!t || !t.closest) return;
       if (CK && VUE === 'liste' && CK.clic(ev)) return;   // une case, « tout cocher » ou la barre d actions
+      // (Monday) « Filtrer » ouvre/ferme son panneau ; un clic ailleurs le referme (un état choisi le garde ouvert).
+      if (t.closest('[data-mo-filtre]')) { MO_FILTRE = !MO_FILTRE; dessiner(); return; }
+      if (MO_FILTRE && !t.closest('.mo-pop')) { MO_FILTRE = false; dessiner(); }
       var vb = t.closest('[data-vue]');
       if (vb) {
         var v = vb.getAttribute('data-vue');
