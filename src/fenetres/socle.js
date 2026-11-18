@@ -5259,6 +5259,20 @@ html[data-sz-theme="epure"] .etats{gap:2px;background:transparent;border:0}
 html[data-sz-theme="epure"] .etats button{height:34px;padding:0 10px;border-radius:8px;border:0!important;background:transparent!important;color:var(--tx);font-size:13px;font-weight:600;box-shadow:none}
 html[data-sz-theme="epure"] .etats button:hover{background:var(--v05)!important}
 html[data-sz-theme="epure"] .etats button.actif{background:var(--ep-ambre-f)!important;color:var(--ep-ambre-t)!important}
+/* (Monday, suite) La bascule Détaillé / Compact (.vue-bascule) devient des onglets de vue : texte, souligné quand actif. */
+html[data-sz-theme="epure"] .vue-bascule{padding:0;gap:2px;border:0!important;border-radius:0;background:transparent!important}
+html[data-sz-theme="epure"] .vue-bascule button{height:34px;padding:0 10px;border:0!important;border-bottom:2px solid transparent!important;border-radius:0!important;
+  background:transparent!important;color:var(--tx2)!important;font-size:13px;font-weight:600;box-shadow:none!important}
+html[data-sz-theme="epure"] .vue-bascule button.on{color:var(--tx)!important;border-bottom-color:var(--sz-btn-prim)!important;background:transparent!important}
+/* (Monday) LES ÉTATS EN CELLULES PLEINES, dans tous les tableaux : une cellule qui ne porte QU'UNE pastille d'état prend sa couleur
+   entière (trois tons) ; la pastille s'efface dedans. */
+html[data-sz-theme="epure"] tbody td:has(> .rf-pill:only-child){text-align:center;background:var(--ep-neutre-f)!important;border-left:2px solid var(--f-carte)}
+html[data-sz-theme="epure"] tbody td:has(> .rf-pill.ambre:only-child){background:var(--ep-ambre-f)!important}
+html[data-sz-theme="epure"] tbody td:has(> .rf-pill.rouge:only-child){background:var(--ep-rouge-f)!important}
+html[data-sz-theme="epure"] tbody td > .rf-pill:only-child{background:transparent!important;padding:0;font-size:12.5px;font-weight:700;color:var(--ep-neutre-t)}
+html[data-sz-theme="epure"] tbody td > .rf-pill.ambre:only-child{color:var(--ep-ambre-t)}
+html[data-sz-theme="epure"] tbody td > .rf-pill.rouge:only-child{color:var(--ep-rouge-t)}
+html[data-sz-theme="epure"] tbody td > .rf-pill:only-child::before{display:none}
 `;
 
 module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES + CSS_EPURE + CSS_DENSE,
