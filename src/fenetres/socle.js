@@ -4997,7 +4997,7 @@ html.jour tr.coche>td{background:rgba(143,111,66,.1)}
 `;
 
 /* Le look « Épuré » (phase 0 du relooking) : voir le bloc CSS_EPURE. */
-const POLICE_EPURE = require('./police-epure.js');
+const POLICE_EPURE = require('../police-epure.js');   // hors de src/fenetres/ : ce dossier ne contient que des fenêtres
 const CSS_EPURE = `
 /* ══ LE LOOK « ÉPURÉ » — RELOOKING « TABLEAU DE TRAVAIL » (phase 0, 2026-11-18) ══════════════════
    Maquettes approuvées : https://claude.ai/artifact/XgFsxvLA3zT2aoU8k6vo9a · plan : https://claude.ai/artifact/6sW7SvkVjY2sVqav7PGwUV
@@ -5009,7 +5009,16 @@ const CSS_EPURE = `
      propres à chaque fenêtre se convertissent aux phases 2 à 5, écran par écran.
    · Police ronde et nette (SzEpure = Plus Jakarta Sans, embarquée : hors ligne), coins plus ronds, plus d'air.
    ⚠ Les sélecteurs portent html[data-sz-theme="epure"] : ils l'emportent sur le CSS propre d'une fenêtre
-     (spécificité), sans !important. */
+     (spécificité), sans !important.
+   ⚠⚠ LE JOUR S'ÉCRIT html[data-sz-theme="epure"].jour, JAMAIS html.jour[data-sz-theme="epure"] (mesuré le
+     2026-11-18, livraison 8.34.0 refusée) : les bancs STATIQUES (banc-texte-sur-fond, banc-jetons) lisent toute
+     règle « html.jour… » comme une reprise de jour qui vaut pour TOUTES les fenêtres et tous les jeux — les jetons
+     d'Épuré écrasaient alors ceux du jeu par défaut dans leur calcul (244 faux couples). Même effet à l'écran ;
+     la lisibilité d'Épuré, elle, se mesure AU RENDU : banc-contraste-rendu.js --theme=epure.
+   ⚠ Les jetons --ep-* sont déclarés à la racine (:root, nuit) : banc-jetons exige qu'un var() employé soit
+     défini par :root ou html. Inoffensifs ailleurs — seules les règles d'Épuré les lisent. */
+:root{--ep-rayon:14px;--ep-rayon-btn:10px;
+  --ep-neutre-f:#252d3b;--ep-neutre-t:#c9d1dd;--ep-ambre-f:#33270f;--ep-ambre-t:#f2c27e;--ep-rouge-f:#3a1d1d;--ep-rouge-t:#f2a3a1}
 ${POLICE_EPURE}
 html[data-sz-theme="epure"]{
   --sz-fond:#11151d; --sz-fond2:#161b25; --sz-pied:#0e1118;
@@ -5020,8 +5029,6 @@ html[data-sz-theme="epure"]{
   --sz-accent-doux:rgba(201,162,122,.16);
   --sz-btn-prim:#c9a27a; --sz-btn-prim-fort:#d8b892; --sz-btn-prim-txt:#1a1208; --sz-repere:#c9a27a;
   --or:#c9a27a; --or-rgb:201,162,122; --or-clair:#d8b892; --tx-or:#e3c29e;
-  --ep-rayon:14px; --ep-rayon-btn:10px;
-  --ep-neutre-f:#252d3b; --ep-neutre-t:#c9d1dd; --ep-ambre-f:#33270f; --ep-ambre-t:#f2c27e; --ep-rouge-f:#3a1d1d; --ep-rouge-t:#f2a3a1;
 }
 html[data-sz-theme="epure"]:not(.jour){
   --f-page:#11151d; --f-carte:#181e29; --f-carte2:#1c2330; --f-pied:#141923; --f-champ:#131822;
@@ -5030,7 +5037,7 @@ html[data-sz-theme="epure"]:not(.jour){
   --tx:#e8ecf2; --tx-blanc:#f3f5f9; --tx2:#9aa4b5; --tx3:#8f99aa; --tx-gris:#98a2b3; --tx-bleute:#d5dbe5; --tx-gris2:#d5dbe5; --tx-94a3b8:#9aa4b5;
   --tx-err:#fa9494;   /* le rouge des gestes dangereux, lisible aussi sur le survol bleu nuit (4,48 → au-dessus de 4,5) */
 }
-html.jour[data-sz-theme="epure"]{
+html[data-sz-theme="epure"].jour{
   --sz-fond:#f4f5f9; --sz-fond2:#ffffff; --sz-pied:#ffffff;
   --sz-surface:#ffffff; --sz-surface2:#f7f8fb;
   --sz-texte:#1f2533; --sz-attenue:#5b6273;
@@ -5053,7 +5060,7 @@ html[data-sz-theme="epure"] select,html[data-sz-theme="epure"] textarea,html[dat
 html[data-sz-theme="epure"] .tete h1{font-weight:800;letter-spacing:-.01em}
 /* Les cartes : blanches le jour, bordure fine, une ombre à peine ; plus d'air dedans. */
 html[data-sz-theme="epure"] .carte{border-radius:var(--ep-rayon);border-color:var(--v08)}
-html.jour[data-sz-theme="epure"] .carte{box-shadow:0 1px 2px rgba(16,24,40,.05)}
+html[data-sz-theme="epure"].jour .carte{box-shadow:0 1px 2px rgba(16,24,40,.05)}
 html[data-sz-theme="epure"] .carte h2{letter-spacing:.06em;font-weight:700}
 /* Boutons et champs : coins de 10 px ; le principal en brun, texte blanc le jour. */
 html[data-sz-theme="epure"] button{border-radius:var(--ep-rayon-btn);font-weight:600}

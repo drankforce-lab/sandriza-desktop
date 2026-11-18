@@ -3,7 +3,7 @@
 /*
  * LA POLICE DU LOOK « ÉPURÉ » (relooking, 2026-11-18)
  * =============================================================================
- * Écrit src/fenetres/police-epure.js à partir de src/polices/epure/*.woff2.
+ * Écrit src/police-epure.js à partir de src/polices/epure/*.woff2.
  * Même raison que tools/police-en-base64.js : les fenêtres sont des documents
  * data: (origine opaque, sandbox) — une police ne s'y charge QU'EN BASE64 — et
  * l'application tourne hors ligne (jamais Google Fonts au lancement).
@@ -15,7 +15,7 @@
 const fs = require('fs');
 const path = require('path');
 const DOSSIER = path.join(__dirname, '..', 'src', 'polices', 'epure');
-const SORTIE = path.join(__dirname, '..', 'src', 'fenetres', 'police-epure.js');
+const SORTIE = path.join(__dirname, '..', 'src', 'police-epure.js');
 const f = fs.readdirSync(DOSSIER).filter((x) => /\.woff2$/i.test(x));
 if (f.length !== 1) { console.error('REFUS - il faut exactement un .woff2 dans src/polices/epure/ (' + f.length + ')'); process.exit(1); }
 const b = fs.readFileSync(path.join(DOSSIER, f[0]));
