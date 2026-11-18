@@ -545,6 +545,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     /* ── LA BARRE : les statuts en boutons a choix (plusieurs a la fois, comme avant) — « Toutes » defait
        le filtre —, Prioritaires (son « ! ») et Ventes manuelles a cote ; a droite, la recherche, la
        bascule d affichage et l annee. ── */
+    /* (2026-11-18, relooking phase 2) Le compte de chaque statut DANS son onglet — montré sous Épuré seulement
+       (.ed-seg .ct, socle). Comptes du pont (tuiles.compteStatuts), pris AVANT recherche et filtres : l'onglet dit
+       l'état du magasin. Ambre pour ce qui attend une action, neutre sinon ; un zéro s'efface sans disparaître. */
+    var ST_A_FAIRE = ['confirmed', 'preparing', 'verification'];   // = STATUTS_A_TRAITER du site (admin.js) : le rail compte les mêmes
+    function ctOnglet(n, aFaire){
+      if (n == null) return '';
+      return '<span class="ct' + (n > 0 && aFaire ? ' a' : '') + (n ? '' : ' z') + '" aria-hidden="true">' + (n > 999 ? '999+' : n) + '</span>';
+    }
     var stats = ((CTX && CTX.statuts) || []).filter(function(s){
       // Chaque liste ne propose que SES statuts : offrir << Livrée >> dans
       // Commandes donnerait toujours zero resultat, et l on chercherait pourquoi.
@@ -552,10 +560,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
                         : (s.cle !== 'shipped' && s.cle !== 'delivered');
     });
     h += '<div class="cx-barre"><div class="ed-seg">'
-      + '<button type="button" class="' + (F.statuts.length ? '' : 'on') + '" data-vider="1">${T("Toutes")}</button>'
+      + '<button type="button" class="' + (F.statuts.length ? '' : 'on') + '" data-vider="1">${T("Toutes")}' + ctOnglet(TU ? TU.nombre : null, false) + '</button>'
       + stats.map(function(s){
           return '<button type="button" class="' + (F.statuts.indexOf(s.cle) >= 0 ? 'on' : '')
-            + '" data-st="' + esc(s.cle) + '">' + esc(szTd(s.libelle)) + '</button>'; }).join('')
+            + '" data-st="' + esc(s.cle) + '">' + esc(szTd(s.libelle)) + ctOnglet(TU ? (cs[s.cle] || 0) : null, ST_A_FAIRE.indexOf(s.cle) >= 0) + '</button>'; }).join('')
       + '</div>'
       + '<button class="rf-jet prio' + (F.prioritaires ? ' on' : '') + '" data-prio="1" '
       + 'title="${T("N’afficher que les commandes prioritaires")}">'

@@ -5078,6 +5078,38 @@ html[data-sz-theme="epure"] .ep-n,html[data-sz-theme="epure"] .ep-a,html[data-sz
 html[data-sz-theme="epure"] .ep-n{background:var(--ep-neutre-f);color:var(--ep-neutre-t)}
 html[data-sz-theme="epure"] .ep-a{background:var(--ep-ambre-f);color:var(--ep-ambre-t)}
 html[data-sz-theme="epure"] .ep-r{background:var(--ep-rouge-f);color:var(--ep-rouge-t)}
+/* ── PHASE 2 (2026-11-18) : LES TROIS TONS APPLIQUÉS AUX PIÈCES COMMUNES ──────────────────────────────
+   Vu sur capture (Commandes) : « étiquette prête » en BLEU, la ligne d'étiquette en attente en VIOLET, la puce
+   d'information en bleu — quatre, cinq couleurs là où sa règle en veut TROIS. Converties ICI une fois, pour toutes
+   les fenêtres : vert (fait) et bleu (information) → NEUTRE ; ambre → AMBRE (une action attend) ; rouge → ROUGE.
+   ⚠ Sélecteurs doublés en .jour : les reprises « html.jour .rf-pill.vert » du socle ont la même spécificité que
+   la forme nuit, et le CSS propre d'une fenêtre vient APRÈS le socle. */
+html[data-sz-theme="epure"] .rf-pill.vert,html[data-sz-theme="epure"].jour .rf-pill.vert,html[data-sz-theme="epure"] .rf-pill.bleu,html[data-sz-theme="epure"].jour .rf-pill.bleu,html[data-sz-theme="epure"] .pill.bon,html[data-sz-theme="epure"].jour .pill.bon,html[data-sz-theme="epure"] .pill.info,html[data-sz-theme="epure"].jour .pill.info,html[data-sz-theme="epure"] .cad.mine,html[data-sz-theme="epure"].jour .cad.mine,html[data-sz-theme="epure"] .badge2.vertf,html[data-sz-theme="epure"].jour .badge2.vertf{background:var(--ep-neutre-f);color:var(--ep-neutre-t)}
+html[data-sz-theme="epure"] .rf-pill.ambre,html[data-sz-theme="epure"].jour .rf-pill.ambre,html[data-sz-theme="epure"] .pill.att,html[data-sz-theme="epure"].jour .pill.att{background:var(--ep-ambre-f);color:var(--ep-ambre-t)}
+html[data-sz-theme="epure"] .rf-pill.rouge,html[data-sz-theme="epure"].jour .rf-pill.rouge,html[data-sz-theme="epure"] .pill.err,html[data-sz-theme="epure"].jour .pill.err{background:var(--ep-rouge-f);color:var(--ep-rouge-t)}
+html[data-sz-theme="epure"] .cx-bon,html[data-sz-theme="epure"].jour .cx-bon,html[data-sz-theme="epure"] .cx-info,html[data-sz-theme="epure"].jour .cx-info{border-color:var(--v10);background:var(--ep-neutre-f);color:var(--ep-neutre-t)}
+html[data-sz-theme="epure"] .cx-averti,html[data-sz-theme="epure"].jour .cx-averti{border-color:transparent;background:var(--ep-ambre-f);color:var(--ep-ambre-t)}
+html[data-sz-theme="epure"] .cx-piste>i.ok,html[data-sz-theme="epure"].jour .cx-piste>i.ok,html[data-sz-theme="epure"] .cx-piste>i.info,html[data-sz-theme="epure"].jour .cx-piste>i.info{background:var(--tx2)}
+html[data-sz-theme="epure"] .cx-tuile.ok,html[data-sz-theme="epure"].jour .cx-tuile.ok{border-color:var(--sz-bord)}
+html[data-sz-theme="epure"] .cx-kpi.ok>b,html[data-sz-theme="epure"].jour .cx-kpi.ok>b{color:var(--tx)}
+/* L'étiquette imprimée mais pas partie : une action attend (le dépôt) → un voile AMBRE, plus le violet. */
+html[data-sz-theme="epure"] tbody tr.attente,html[data-sz-theme="epure"].jour tbody tr.attente{background:color-mix(in srgb,var(--ep-ambre-f) 60%,transparent)}
+/* Les compteurs dans les onglets de statut (maquette « 50 commandes ») : écrits par la fenêtre dans TOUS les jeux,
+   montrés sous Épuré seulement — une pastille nette, jamais collée au libellé. */
+.ed-seg .ct{display:none}
+html[data-sz-theme="epure"] .ed-seg .ct,html[data-sz-theme="epure"].jour .ed-seg .ct{display:inline-flex;align-items:center;justify-content:center;min-width:1.6rem;height:1.2rem;margin-left:.4rem;
+  padding:0 .35rem;border-radius:99px;font-size:.7rem;line-height:1;font-weight:800;font-variant-numeric:tabular-nums;
+  background:var(--ep-neutre-f);color:var(--ep-neutre-t)}
+html[data-sz-theme="epure"] .ed-seg .ct.a,html[data-sz-theme="epure"].jour .ed-seg .ct.a{background:var(--ep-ambre-f);color:var(--ep-ambre-t)}
+html[data-sz-theme="epure"] .ed-seg .ct.z,html[data-sz-theme="epure"].jour .ed-seg .ct.z{opacity:.55}
+/* Onglets resserrés : avec leurs compteurs, la recherche passait sur une 2e ligne (capture 1400 px). */
+html[data-sz-theme="epure"] .ed-seg button,html[data-sz-theme="epure"].jour .ed-seg button{padding:0 .6rem}
+html[data-sz-theme="epure"] .cx-barre,html[data-sz-theme="epure"].jour .cx-barre{gap:.45rem}
+html[data-sz-theme="epure"] .cx-barre .rf-rch,html[data-sz-theme="epure"].jour .cx-barre .rf-rch{min-width:8rem}
+/* ⚠ Le retour à la ligne se décide sur la largeur SOUHAITÉE du bloc (recherche jusqu’à 22rem), pas sur son minimum :
+   base 0 et un plancher de 19rem (son texte indicatif ENTIER : banc-champs refuse un indicatif coupé) — la
+   recherche se loge sur la ligne quand elle y tient en entier, et passe dessous sinon. */
+html[data-sz-theme="epure"] .cx-barre>.droite,html[data-sz-theme="epure"].jour .cx-barre>.droite{flex:1 1 0;min-width:19rem;justify-content:flex-end}
 `;
 
 module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES + CSS_EPURE,
