@@ -43,6 +43,24 @@ function placer() {
   });
 }
 
+/* (2026-11-18, « tout en look épuré ») En Épuré, la carte prend les couleurs du poste — blanche le jour, bleu
+   nuit la nuit, point brun, filet ambre pour la prioritaire — au lieu du sombre à bordure verte. Les autres jeux
+   gardent la carte d'avant. Le thème vient du même fournisseur que les fenêtres (socle.themeDepart). */
+function epure() {
+  let t = null;
+  try { t = require('./fenetres/socle').themeDepart(); } catch (e) { t = null; }
+  if (!t || t.theme !== 'epure') return '';
+  const j = !!t.jour;
+  const fond = j ? '#ffffff' : '#181e29', bord = j ? '#e4e7ee' : '#2a3240', tx = j ? '#1f2533' : '#e8ecf2', tx2 = j ? '#5b6273' : '#9aa4b5';
+  const brun = j ? '#8a5a2b' : '#c9a27a', ambre = j ? '#c25e00' : '#f2c27e', surv = j ? '#eef0f4' : '#252d3b';
+  return 'html,body{color:' + tx + '}'
+    + '.c{background:' + fond + ';border:1px solid ' + bord + ';box-shadow:0 10px 26px rgba(16,24,40,' + (j ? '.16' : '.45') + ')}'
+    + '.c.prio{border-color:' + bord + ';box-shadow:inset 4px 0 0 ' + ambre + ',0 10px 26px rgba(16,24,40,' + (j ? '.16' : '.45') + ')}'
+    + '.c:hover{border-color:' + brun + '}'
+    + '.ph{background:' + surv + ';color:' + tx2 + '}'
+    + '.t .s,.t .q{color:' + tx2 + '}.t .q i{background:' + brun + '}'
+    + '.x{color:' + tx2 + '}.x:hover{background:' + surv + ';color:' + tx + '}';
+}
 /* La carte : thème sombre de l'application, accent or ; la prioritaire porte un filet ambre. */
 function page(d) {
   const photo = /^https:\/\//i.test(String(d.image || ''))
@@ -69,6 +87,7 @@ function page(d) {
     + '@keyframes entre{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}'
     + '@keyframes part{to{opacity:0;transform:translateX(40px)}}'
     + '@media (prefers-reduced-motion:reduce){.c,body.part .c{animation-duration:.01s}}'
+    + epure()
     + '</style></head><body><div class="c' + (d.prioritaire ? ' prio' : '') + '" id="c">'
     + '<span class="ph">' + photo + '</span><div class="t"><b>' + esc(d.titre) + '</b>'
     + '<div class="s">' + esc(d.ligne) + '</div><div class="q"><i></i>' + esc(d.pied) + '</div></div>'
