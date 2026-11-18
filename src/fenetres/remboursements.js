@@ -265,7 +265,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('remboursements')}
           }).join('')
         + surPage
         + '<div class="cx-sep"></div>'
-        + '<div class="cx-sub">${T("Écran de consultation : on rembourse depuis la commande. Un clic sur une ligne l’ouvre.")}</div>';
+        + '';
     }
     p += '</div>';
     h += '<div class="cx-deux">' + carte + p + '</div>';

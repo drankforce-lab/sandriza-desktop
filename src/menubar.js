@@ -359,10 +359,11 @@ ${css}
   var EP_EN = (document.documentElement.lang || 'fr') === 'en';
   function panneauMaquette(pan, m){
     pan.classList.add('ep-pan'); pan.dataset.aff='block';
-    var its=(m.items||[]).filter(function(it){ return it && !it.sep; });
+    // (2026-11-18, « trop d'options ») epCache : gardée dans le modèle (raccourcis, Ctrl K), absente du panneau Épuré.
+    var its=(m.items||[]).filter(function(it){ return it && !it.sep && !it.epCache; });
     var cols=[], libres=[];
     its.forEach(function(it){
-      if (it.sub) cols.push({ t: it.label, items: it.sub.filter(function(x){ return x && !x.sep; }) });
+      if (it.sub) cols.push({ t: it.label, items: it.sub.filter(function(x){ return x && !x.sep && !x.epCache; }) });
       else libres.push(it);
     });
     if (libres.length) {

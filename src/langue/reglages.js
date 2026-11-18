@@ -19,5 +19,4 @@ module.exports = {
   'réglages': 'settings',
   'Les réglages ne sont pas encore disponibles — la barre de menus n’a pas fini de se charger.': 'Settings are not available yet — the menu bar has not finished loading.',
   'Ce réglage n’a pas pu s’ouvrir — le menu a changé ; la page a été relue.': 'This setting could not open — the menu changed; the page was reloaded.',
-  'Les {0} entrées de Configuration tiennent sur un seul écran. Chacune ouvre la même fenêtre qu’avant.': 'All {0} Configuration entries fit on one screen. Each opens the same window as before.',
 };

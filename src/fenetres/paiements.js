@@ -271,7 +271,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('paiements')}
         + '<td class="num bon">' + fmt(FILTRE ? somme(pay, 'net') : Math.round((t.brut - t.frais) * 100) / 100) + '</td></tr>'
         + '</tbody></table></div>';
     }
-    if (D.bacASable) g += '<div class="cx-pied"><span>${T("Transactions d’essai : masquables en bac à sable seulement.")}</span></div>';
+
     g += '</div>';
 
     /* Les remboursements restent A LEUR PLACE : sous les transactions, dans la meme colonne. */

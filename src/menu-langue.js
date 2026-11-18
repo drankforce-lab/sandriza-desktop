@@ -262,7 +262,6 @@ const MENU_APP_EN = {
   'Compacte': 'Compact',
   'Rechercher partout': 'Search everywhere',
   'Épinglés': 'Pinned',
-  'Clic droit sur une entrée d’un menu pour l’épingler ici.': 'Right-click a menu entry to pin it here.',
   'Clic droit pour désépingler': 'Right-click to unpin',
   'Système': 'System',
 };

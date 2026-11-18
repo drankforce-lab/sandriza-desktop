@@ -209,11 +209,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        de l application vit dans le MENU, et il est PAR POSTE. Deux paragraphes
        ENTIERS, chacun dans un seul litteral : coupes, ils se traduiraient en
        morceaux qui ne se recollent pas. */
-    h.push('<div class="carte pleine note"><span class="ic-note"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 8h18M8 21h8"/></svg></span><div>'
-      + '<h2>${T("Panneau d’administration")}</h2>'
-      + '<p>${T("Le jeu de couleurs de l’application a déménagé : <strong>menu « Affichage » → « Jeu de couleurs »</strong>. Il habille les fenêtres entières — fonds, cartes, boutons, survol et menus — et il est réglé <strong>par poste</strong> : votre choix ne s’impose pas à vos collègues.")}</p>'
-      + '<p class="aide">${T("L’ancien réglage ne teintait que la barre latérale de l’écran web, qui n’existe plus.")}</p>'
-      + '</div></div>');
+    /* (2026-11-18, sa demande : « retire ce genre de message ») La carte qui expliquait le déménagement du jeu de couleurs est retirée. */
     corps.innerHTML = h.join('');
     var bs = corps.querySelectorAll('button.th');
     for (var i = 0; i < bs.length; i++) bs[i].onclick = surClic;

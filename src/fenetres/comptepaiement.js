@@ -276,7 +276,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptepaiement')}
     // En PAGES aussi : douze mois ne tiennent pas dans la colonne.
     return '<div class="cx-carte"><h2>${T("Par mois")}</h2>'
       + '<div class="cx-pages" data-pages="comptepaiement-mois">' + blocs + '</div>'
-      + (m.length < 12 ? '<div class="cx-sub">${T("Les autres mois de l’exercice n’ont aucun mouvement.")}</div>' : '')
+      + ''
       + '</div>';
   }
 

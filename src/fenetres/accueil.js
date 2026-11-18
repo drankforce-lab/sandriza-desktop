@@ -236,7 +236,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   // ── LISTE DES BLOCS ───────────────────────────────────────────────────────
   function listeHtml(){
     var h = '<div class="carte sz-pagee"><div class="stitre">${T("Ordre et visibilité")}</div>'
-      + '<div class="sdesc">${T("Glissez un bloc (ou ↑ ↓) pour réorganiser · l’œil masque un bloc sans le supprimer · le crayon modifie le contenu.")}</div>';
+      + '';
     // Les blocs en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
     h += '<div data-pages="accueil-blocs">';
     BLOCS.forEach(function(b, i){
@@ -279,7 +279,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     return '<div class="carte"><div class="stitre">${T("Aperçu")}</div>'
       + '<div class="ap" aria-label="${T("Aperçu de la page d’accueil")}"><div class="ap-tete"><b>SANDRIZA</b><span>${T("Vêtements")}</span><span>${T("Nouveautés")}</span><span>${T("Soldes")}</span></div>'
       + corpsAp + '<div class="ap-pied">${T("Pied de page de la boutique")}</div></div>'
-      + '<div class="ap-note">${T("Un schéma de la page, dans l’ordre des blocs : les blocs masqués n’y paraissent pas.")}</div></div>';
+      + '</div>';
   }
 
   // ── ÉDITEUR ─────────────────────────────────────────────────────────────────

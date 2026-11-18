@@ -2335,7 +2335,9 @@ function szCoches(o){
     var b = document.getElementById && document.getElementById(o.barre); if (!b) return;
     var k = n();
     b.classList.toggle('szk-repos', !k);
-    if (!k) { b.innerHTML = '<span class="szk-aide">${T("Cochez des lignes pour agir sur plusieurs à la fois — Maj+clic coche une plage.")}</span>'; return; }
+    /* (2026-11-18, sa demande : « retire ce genre de message ») Au repos, la barre ne dit RIEN : ses gestes paraissent
+       dès qu'une ligne est cochée. Elle garde sa place (la liste ne saute pas au premier clic). */
+    if (!k) { b.innerHTML = ''; return; }
     b.innerHTML = '<span class="szk-n">' + esc(compte(k)) + '</span>'
       + '<button type="button" class="mini szk-vider"' + (OCCUPE ? ' disabled' : '') + '>${T("Tout décocher")}</button>'
       + '<span class="szk-esp"></span>'
@@ -5004,9 +5006,9 @@ tr.coche>td{background:rgba(var(--or-rgb),.1)}
    et la pagination mesurée retombe à la page 1. Trop de gestes pour la largeur : la barre défile, elle ne grandit pas. */
 .szk-barre>*{flex:0 0 auto}
 .szk-barre .szk-esp{flex:1 1 auto}
-.szk-barre.szk-repos{border-color:var(--v08);background:transparent}
+.szk-barre.szk-repos{border-color:transparent;background:transparent}
 .szk-barre .szk-aide{color:var(--tx3,var(--tx2));font-size:.76rem}
-html.jour .szk-barre.szk-repos{border-color:rgba(0,0,0,.08);background:transparent}
+html.jour .szk-barre.szk-repos{border-color:transparent;background:transparent}
 .szk-barre .szk-n{font-weight:600;white-space:nowrap}
 .szk-barre .szk-esp{flex:1 1 auto}
 .szk-barre button{white-space:nowrap}

@@ -337,7 +337,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
        « .corps.plein>* » (0,2,0) l emporterait sur .sz-pagee, et la carte ne serait plus
        bornee ; base 0, elle partage la hauteur avec la liste des sondages. */
     h += '<div class="carte' + (com.length ? ' sz-pagee" style="flex:1 1 0;min-height:7rem' : '') + '"><h2>${T("Journal des commentaires")}</h2>'
-      + '<div class="dt" style="margin-bottom:.4rem">${T("Les commentaires des 365 derniers jours. Plus anciens : effacés automatiquement.")}</div>';
+      + '';
     if (!com.length) {
       h += '<div class="vide">${T("Aucun commentaire pour l’instant.")}</div>';
     } else {

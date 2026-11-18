@@ -62,7 +62,6 @@ html.jour .rg-ic{background:#3d4456}
 .rg-ch{grid-column:1/-1;display:flex;align-items:center;gap:8px;padding:4px 8px;font-size:13px;font-weight:500;min-width:0}
 .rg-ch span{flex:none;white-space:nowrap}
 .rg-ch select{flex:1 1 auto;min-width:0;height:30px;font:inherit;font-size:12.5px}
-.rg-note{margin:0;font-size:13px;color:var(--tx2)}
 .rg-vide{font-size:13px;color:var(--tx2)}
 .msg{position:fixed;left:32px;bottom:10px;font-size:.79rem;color:var(--tx2)}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
@@ -81,7 +80,6 @@ function pageReglages() {
       <input id="rg-q" aria-label="${T("Chercher un réglage")}" placeholder="${T("Chercher un réglage (taxes, logo, NIP…)")}" autocomplete="off" spellcheck="false"></label>
   </header>
   <div class="rg-grille" id="grille"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
-  <p class="rg-note" id="note"></p>
 </div>
 <span class="msg" id="msg" role="status"></span>
 <!-- Les pictogrammes en SYMBOLES : les tracés restent des attributs du HTML (des chaînes dans le script seraient prises pour du texte à traduire). -->
@@ -125,7 +123,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // ⚠ MESURÉ : la bascule arrive après 400 ms en sans-tête ; seul l avis « police chargée » est sûr.
     try { if (document.fonts && document.fonts.addEventListener && !window.__rgPol) { window.__rgPol = 1; document.fonts.addEventListener('loadingdone', function(){ larges(); }); } } catch (e) {}
     setTimeout(larges, 400); setTimeout(larges, 1500);
-    document.getElementById('note').textContent = '${T("Les {0} entrées de Configuration tiennent sur un seul écran. Chacune ouvre la même fenêtre qu’avant.")}'.split('{0}').join(n);
     filtrer();
   }
   /* Mesuré : une entrée qui ne tient pas dans sa demi-colonne prend la largeur de la carte (jamais de « … »).
