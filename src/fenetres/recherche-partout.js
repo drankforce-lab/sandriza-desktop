@@ -62,7 +62,7 @@ const PICTO = {
 
 function pageRecherchePartout(menu) {
   /* (2026-11-18) Les fonctions du menu, aplaties par le principal (menuAplati) : cherchées ICI, sans aller au site. */
-  const MENU = Array.isArray(menu) ? menu.slice(0, 600) : [];
+  const FONCTIONS_MENU = Array.isArray(menu) ? menu.slice(0, 600) : [];
   return `${TETE()}
 <title>${T("Rechercher partout")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -80,7 +80,7 @@ function pageRecherchePartout(menu) {
   var q = document.getElementById("rp-q"), res = document.getElementById("rp-res");
   var L = [], SEL = 0, MINUT = null, NUM = 0;
   var PICTO = ${JSON.stringify(PICTO)};
-  var MENU = ${JSON.stringify(MENU).replace(/</g, '\\u003c')};
+  var MENU = ${JSON.stringify(FONCTIONS_MENU).replace(/</g, '\\u003c')};
   /* (2026-10-27) szArgent vient des MESURES du socle : cette palette ne charge pas JS_DIRE (qui les porte), il faut
      les poser ici — sans elles, « Rechercher partout » tombait au premier resultat chiffre (construction 40608387952). */
 ${JS_MESURES()}
