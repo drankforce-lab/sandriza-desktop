@@ -2321,6 +2321,35 @@ const _portePalette = () => {
    c'était sa demande du matin (« le thème de la page de chargement n'est pas appliqué »), et une
    vérification sans mise à jour passerait sinon d'une palette à l'autre à chaque lancement. */
 let _porteSansTheme = false;
+/* L'ÉCRAN DE DÉMARRAGE EN « ÉPURÉ » (2026-11-18, « tout en look épuré ») : le panneau de marque perd son dégradé et
+   ses halos — blanc à filet le jour, bleu nuit la nuit —, la marque et les titres prennent la police de la maquette,
+   la barre d'avancement le brun. Les autres jeux gardent l'écran d'avant. */
+const _porteEpure = (p) => {
+  let t = '';
+  try { t = _themeCouleur(); } catch (e) { t = ''; }
+  if (!p || t !== 'epure') return '';
+  let police = ''; try { police = require('./police-epure'); } catch (e) { police = ''; }
+  const j = p.scheme === 'light';
+  const fond = j ? '#ffffff' : '#181e29', page = j ? '#f4f5f9' : '#11151d', filet = j ? '#e4e7ee' : '#2a3240';
+  const tx = j ? '#1f2533' : '#e8ecf2', tx2 = j ? '#5b6273' : '#9aa4b5', brun = j ? '#8a5a2b' : '#c9a27a', neutre = j ? '#eef0f4' : '#252d3b';
+  const F = '"SzEpure","Segoe UI",system-ui,sans-serif';
+  return police
+    + 'body{background:' + page + '!important;font-family:' + F + '}'
+    + '.orb,.brand::before,.brand::after,.plate::before{display:none!important}'
+    + '.brand{background:' + fond + '!important;border-right:1px solid ' + filet + ';color:' + tx + '!important}'
+    + '.badge{background:' + brun + '!important;border-radius:14px!important;box-shadow:none!important;font-family:' + F + '!important;color:' + (j ? '#fff' : '#1a1208') + '!important}'
+    + '.plate{animation:none}'
+    + '.bname,.h1,.dl-pct{font-family:' + F + '!important;letter-spacing:-.02em!important;color:' + tx + '!important}'
+    + '.eyebrow,.sub,.kicker,.ver,.dl-mo,.dl-vit,.dl-fin{color:' + tx2 + '!important}'
+    + '.eyebrow .line{background:' + brun + '!important}'
+    + '.feat{color:' + (j ? '#3d4456' : '#c9d1dd') + '!important}'
+    + '.feat .ic{background:' + neutre + '!important;border:0!important;color:' + (j ? '#3d4456' : '#c9d1dd') + '!important}'
+    + '.panel{background:' + page + '!important}'
+    + '.pg,.pulse{background:' + neutre + '!important}'
+    + '.pg-in{background:' + brun + '!important}'
+    + '.pulse::after{background:' + brun + '!important}'
+    + '.ver{border-top-color:' + filet + '!important}';
+};
 const portePage = (titre, message, progression) => {
   const b = porteMarque();
   const p = _porteSansTheme ? null : _portePalette();
@@ -2429,7 +2458,7 @@ const portePage = (titre, message, progression) => {
 
   const html = ''
     + '<!doctype html><html lang="' + require('./langue').langueCourante() + '"><head><meta charset="utf-8"><title>' + b.nom + '</title>'
-    + '<style>' + css + '</style></head><body><div class="split">'
+    + '<style>' + css + _porteEpure(p) + '</style></head><body><div class="split">'
     + '<aside class="brand">'
     +   '<span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span>'
     // ⚠ PAS DE LISTE DE PROTECTIONS ICI (retirée à la demande de l'utilisateur,
