@@ -38,6 +38,18 @@ const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, SEP_DEC } = require('./socle.
 const T = require('../langue').tr('caisse');
 
 const CSS = `
+/* ══ LE MODE COMPTOIR (2026-11-18, relooking — ajout choisi par elle) ══════════════════════════════
+   « La vente au comptoir sans barre ni menu, grands boutons, pour la tablette ou la caisse. » La fenêtre
+   n'a déjà ni menu ni barre : le mode = le VRAI plein écran (szPont.pleinEcran) + texte et cibles
+   agrandis. Il s'arrête de lui-même quand la fenêtre quitte le plein écran (Échap, ⛶, le système).
+   ⚠ MESURÉ (captures 1366×768 et 1920×1080) : à 131 % le bouton « Effectuer la vente » sortait de l'écran
+   à 1366×768, et l'éditeur de rabais coupait ses boutons à 1920×1080. Le grossissement suit donc la HAUTEUR :
+   sous 1000 px, la taille du plein écran actuel (112,5 %, déjà tenue) ; au-delà, 120 % et des cibles plus hautes. */
+@media (min-height:1000px){
+  html.comptoir,html.comptoir.sz-zoom-fen{font-size:120%}
+  html.comptoir button{min-height:2.6rem}
+  html.comptoir button.mini{padding:.35rem .9rem}
+}
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
@@ -267,7 +279,9 @@ function pageCaisse(mode) {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.payments}</span><h1>${T("Vente au comptoir")}</h1>
   <span class="pastille-par" id="sous"></span>
-  <button id="btn-afficheur" class="mini" style="margin-left:auto"
+  <button id="btn-comptoir" class="mini" style="margin-left:auto;display:none"
+    title="${T("Plein écran, texte et boutons agrandis — pour la tablette ou l’écran de caisse. Échap pour sortir.")}">${T("Mode comptoir")}</button>
+  <button id="btn-afficheur" class="mini"
     title="${T("Ouvrir l’écran tourné vers le client, à poser sur un second moniteur")}">${T("Affichage client")}</button>
   <!-- Le NIP des prix modifies (2026-10-14) : montre au super-administrateur seulement ; le serveur
        refuse de toute facon tout autre role. -->
@@ -1267,6 +1281,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
   };
   document.getElementById('btn-nip').onclick = panneauNip;
+  /* Le mode comptoir : un geste pour entrer (plein écran + grands boutons), et il suit l'état RÉEL de la fenêtre
+     (classe sz-zoom-fen posée par la coquille) — sortir du plein écran par n'importe quel chemin le quitte. */
+  (function(){
+    var b = document.getElementById('btn-comptoir');
+    if (!b || !window.szPont || !window.szPont.pleinEcran) return;   // aucun bouton mort
+    b.style.display = '';
+    var H = document.documentElement;
+    var maj = function(){ b.textContent = H.classList.contains('comptoir') ? '${T("Quitter le mode comptoir")}' : '${T("Mode comptoir")}'; };
+    b.onclick = function(){
+      var plein = H.classList.contains('sz-zoom-fen');
+      if (H.classList.contains('comptoir')) { H.classList.remove('comptoir'); if (plein) window.szPont.pleinEcran(); maj(); return; }
+      H.classList.add('comptoir'); maj();
+      if (!plein) window.szPont.pleinEcran().then(function(etat){ if (etat === false) { H.classList.remove('comptoir'); maj(); } });
+    };
+    var etaitPlein = H.classList.contains('sz-zoom-fen');
+    try {
+      new MutationObserver(function(){
+        var plein = H.classList.contains('sz-zoom-fen');
+        if (etaitPlein && !plein && H.classList.contains('comptoir')) { H.classList.remove('comptoir'); maj(); }
+        etaitPlein = plein;
+      }).observe(H, { attributes: true, attributeFilter: ['class'] });
+    } catch (e) {}
+  })();
   document.getElementById('btn-afficheur').onclick = function(){
     var b = this;
     b.disabled = true;

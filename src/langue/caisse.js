@@ -265,4 +265,7 @@ module.exports = {
   'Le NIP de la caisse se règle dans Configuration › Sécurité › NIP.': 'The register PIN is set in Settings › Security › PINs.',
   // (2026-10-25, audit) Gestes refusés pendant l’enregistrement d’une vente.
   'Vente en cours d’enregistrement — attendez la fin avant de modifier les articles.': 'Sale being recorded — wait until it finishes before changing the items.',
+  'Mode comptoir': 'Counter mode',
+  'Quitter le mode comptoir': 'Leave counter mode',
+  'Plein écran, texte et boutons agrandis — pour la tablette ou l’écran de caisse. Échap pour sortir.': 'Full screen, larger text and buttons — for the tablet or the register screen. Esc to leave.',
 };
