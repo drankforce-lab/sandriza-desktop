@@ -5155,6 +5155,14 @@ html[data-sz-theme="epure"] .gp .jauge i{background:var(--v20)}
 html[data-sz-theme="epure"] .gp .jauge i.bas{background:var(--ep-ambre-t)}
 html[data-sz-theme="epure"] .gp .jauge i.rup{background:var(--ep-rouge-t)}
 html[data-sz-theme="epure"] .vide::before{display:none}
+/* PHASE 5 (2026-11-18) — trois écarts communs, relevés sur la Configuration :
+   · le PIED restait crème le jour (« html.jour .pied » du socle) : blanc à filet, comme les maquettes ;
+   · les TITRES de carte gardaient l'espacement des petites étiquettes en capitales : 15 px gras, sans espacement ;
+   · le VERT (« ok ») était un quatrième ton : il devient le texte fort, neutre (trois tons). */
+html[data-sz-theme="epure"].jour .pied{background:var(--f-carte);border-top:1px solid var(--v08)}
+html[data-sz-theme="epure"] .carte h2:not(:empty){text-transform:none;letter-spacing:0;font-size:15px;font-weight:800;color:var(--tx)}
+html[data-sz-theme="epure"].jour{--tx-ok:#1f2533;--tx-ok2:#1f2533}
+html[data-sz-theme="epure"]:not(.jour){--tx-ok:#e8ecf2;--tx-ok2:#e8ecf2}
 `;
 
 module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES + CSS_EPURE + CSS_DENSE,
