@@ -25,6 +25,8 @@ if (!nom || nom.startsWith('--')) { console.error('usage : node tools/capture-fe
 
 const GABARIT = fs.readFileSync(path.join(__dirname, 'banc-contraste-rendu-page.html'), 'utf8');
 const PROLOGUE = GABARIT.split('<!-- ==== PROLOGUE ==== -->')[1].split('<!-- ==== ')[0].trim();
+// --en : la page ANGLAISE (la langue se résout à la génération, comme dans l'application).
+if (args.includes('--en')) require('../src/langue').poserLangue('en');
 const REPONSES = require('./reponses-fenetres.js');
 const mod = require(path.join(__dirname, '..', 'src', 'fenetres', nom + '.js'));
 const fabrique = Object.values(mod).find((v) => typeof v === 'function');
