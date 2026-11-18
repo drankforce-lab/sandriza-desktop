@@ -5185,6 +5185,14 @@ html[data-sz-theme="epure"]:not(.jour){--tx-ok:#e8ecf2;--tx-ok2:#e8ecf2}
 html[data-sz-theme="epure"] .rf-pill.vert,html[data-sz-theme="epure"] .rf-pill.bleu{background:var(--ep-neutre-f);color:var(--ep-neutre-t)}
 html[data-sz-theme="epure"] .rf-pill.ambre{background:var(--ep-ambre-f);color:var(--ep-ambre-t)}
 html[data-sz-theme="epure"] .rf-pill.rouge{background:var(--ep-rouge-f);color:var(--ep-rouge-t)}
+/* REVUE COMPLÈTE (125 fenêtres, 2026-11-18) — les derniers écarts de ton :
+   · le bouton « paie » (violet Square) devient le bouton principal brun ;
+   · les badges « ok » (vert) et « info » (bleu) deviennent neutres, « warn » l'ambre des maquettes ;
+   · l'étiquette « Terminée » des générations, neutre. */
+html[data-sz-theme="epure"] button.paie,html[data-sz-theme="epure"].jour button.paie{background:var(--sz-btn-prim);border-color:var(--sz-btn-prim);color:var(--sz-btn-prim-txt)}
+html[data-sz-theme="epure"] button.paie:hover:not(:disabled){background:var(--sz-btn-prim-fort);border-color:var(--sz-btn-prim-fort)}
+html[data-sz-theme="epure"] .badge.ok,html[data-sz-theme="epure"] .badge.info,html[data-sz-theme="epure"].jour .badge.ok,html[data-sz-theme="epure"].jour .badge.info,html[data-sz-theme="epure"] .etq.fini,html[data-sz-theme="epure"].jour .etq.fini{background:var(--ep-neutre-f);color:var(--ep-neutre-t)}
+html[data-sz-theme="epure"] .badge.warn,html[data-sz-theme="epure"].jour .badge.warn{background:var(--ep-ambre-f);color:var(--ep-ambre-t)}
 `;
 
 module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES + CSS_EPURE + CSS_DENSE,

@@ -81,6 +81,9 @@ button.bsc:disabled{opacity:.5;cursor:default}
 @media (max-width:640px){.vip .grille{grid-template-columns:1fr}}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* « Épuré » : le lancement au public et l'enregistrement de la liste VIP prennent le bouton principal brun (pas de vert, pas de marine) ;
+   « Repasser en pré-lancement » garde son rouge (geste qui retire le site). */
+html[data-sz-theme="epure"] #b-bascule[style*="15803d"],html[data-sz-theme="epure"] #v-ecrire{background:var(--sz-btn-prim)!important;color:var(--sz-btn-prim-txt)!important}
 `;
 
 function pageLancement() {
