@@ -109,6 +109,8 @@ contextBridge.exposeInMainWorld('sandrizaDesktop', {
   // `ancrage` dit comment lire (x,y) : 'bas' = coin haut-gauche (barre du
   // haut), 'droite' = a droite du rail, 'gauche' = le BORD DROIT du panneau
   // est en x (rail a droite). Sans lui, un rail vertical se fait recouvrir.
+  /* (2026-11-18, relooking) Le champ « Rechercher partout » de la barre latérale Épuré ouvre la même palette que Ctrl+K. */
+  recherchePartout: () => ipcRenderer.send('recherche:partout:ouvrir'),
   menuPanneau: (label, x, y, ancrage) => ipcRenderer.send('menu:panneau', String(label || ''),
     Number(x) || 0, Number(y) || 0, String(ancrage || 'bas')),
   // La souris a quitte la barre (ou clic ailleurs) : le panneau flottant se

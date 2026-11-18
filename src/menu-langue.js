@@ -253,6 +253,15 @@ const MENU_APP_EN = {
   'Graphite': 'Graphite',
   'Émeraude': 'Emerald',
   'Épuré (nouveau look)': 'Clean (new look)',
+  'Rechercher': 'Search',
+  'Rechercher partout': 'Search everywhere',
+  'Produit': 'Product',
+  'Comptoir': 'Counter',
+  'Encan': 'Auction',
+  'Épinglés': 'Pinned',
+  'Clic droit sur une entrée d’un menu pour l’épingler ici.': 'Right-click a menu entry to pin it here.',
+  'Clic droit pour désépingler': 'Right-click to unpin',
+  'Système': 'System',
 };
 
 /** Un intitulé, traduit si la table le connaît. Sinon il reste tel quel : une

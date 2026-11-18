@@ -133,6 +133,21 @@ const fautes = [];
     }
   }
 
+  /* Les textes du rail Épuré (2026-11-18) : `TEXTES_RAIL = ['…', …];` — recherche, actions rapides,
+     épingles. Pas des `label:`, mais affichés dans la barre : même exigence que les jeux de couleurs. */
+  {
+    const bloc = /TEXTES_RAIL\s*=\s*\[([\s\S]*?)\]\s*;/.exec(src);
+    if (!bloc) {
+      fautes.push('la table TEXTES_RAIL est introuvable dans appbar.js — '
+        + 'les textes du rail Épuré ne sont plus gardés');
+    } else {
+      const rx = /'((?:[^'\\]|\\.)*)'/g;
+      let m, n = 0;
+      while ((m = rx.exec(bloc[1]))) { tous.add(m[1].replace(/\\'/g, "'")); n++; }
+      if (n < 3) fautes.push('seulement ' + n + ' texte(s) relevé(s) dans TEXTES_RAIL — le motif de lecture ne marche plus');
+    }
+  }
+
   /* Ce qui n'apparaît qu'une fois connecté : tout le reste, moins les entrées
      libres (gardées par MENU_EN) et les pseudo-menus `__compte` / `__reg`, qui
      ne sont pas des intitulés mais des marqueurs. */

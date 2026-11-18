@@ -295,12 +295,40 @@ ${css}
   }
 
   var panneaux = {};
+  /* (2026-11-18, relooking « Épuré ») Rien ne se déplie au survol : les groupes deviennent des cartes. */
+  function cartes(pan, items){
+    // ⚠ 'block' et pas 'grid' : la feuille du site range les cartes en COLONNES ÉQUILIBRÉES (column-count) ;
+    // un display:grid posé ici l'écraserait (mesuré côté site : 1268 px de haut en grille, 527 en colonnes).
+    pan.classList.add('sz-cartes'); pan.dataset.aff='block';
+    var libres=[];
+    items.forEach(function(it){
+      if(it.sep) return;
+      if(!it.sub){ libres.push(it); return; }
+      var c=document.createElement('div'); c.className='sz-carte';
+      var h=document.createElement('div'); h.className='sz-carte-t'; h.textContent=it.label; c.appendChild(h);
+      it.sub.forEach(function(si){ if(!si.sep && !si.sub) c.appendChild(entree(si, true)); });
+      pan.appendChild(c);
+    });
+    if(libres.length){
+      var c=document.createElement('div'); c.className='sz-carte';
+      var h=document.createElement('div'); h.className='sz-carte-t'; h.textContent=D.systeme||'Système'; c.appendChild(h);
+      libres.forEach(function(it){ c.appendChild(entree(it, true)); });
+      pan.appendChild(c);
+    }
+  }
   D.menus.forEach(function(m){
     var pan=document.createElement('div');
     pan.className='sz-panneau${sombre ? ' sz-sombre' : ''}'; pan.setAttribute('data-sz-th','${th}');
     pan.style.display='none';
     if (m.entete) pan.appendChild(enteteCompte(m.entete));
-    (m.items||[]).forEach(function(it){ pan.appendChild(entree(it, false)); });
+    var its=(m.items||[]);
+    var nSous=its.filter(function(it){ return it && it.sub; }).length;
+    var nEnt=its.filter(function(it){ return it && !it.sep; }).length;
+    if ('${th}' === 'epure' && nSous >= 3) cartes(pan, its);
+    else {
+      if ('${th}' === 'epure' && nEnt > 10) { pan.classList.add('sz-colonnes'); pan.style.setProperty('--sz-rangs', String(Math.ceil(nEnt / 3))); pan.dataset.aff='grid'; }
+      its.forEach(function(it){ pan.appendChild(entree(it, false)); });
+    }
     rangee.appendChild(pan);
     panneaux[m.label]=pan;
   });
@@ -312,7 +340,8 @@ ${css}
   window.montrer = function(label){
     sous.style.display='none'; sous.innerHTML='';
     Object.keys(panneaux).forEach(function(k){
-      panneaux[k].style.display = (k === label) ? 'block' : 'none';
+      // (2026-11-18) un panneau Epure en colonnes ou en cartes se montre en GRILLE, pas en bloc
+      panneaux[k].style.display = (k === label) ? (panneaux[k].dataset.aff || 'block') : 'none';
     });
     if (panneaux[label]) mesurer();
   };
