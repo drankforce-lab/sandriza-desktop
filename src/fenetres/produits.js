@@ -185,6 +185,10 @@ html.jour .voile{background:rgba(20,24,30,.35)}
   background:var(--f-carte);border:1px solid var(--v10);color:var(--tx)}
 .pm-puces button.on{background:var(--tx);border-color:var(--tx);color:var(--f-carte)}
 .pm-puces .sep{flex:1 1 auto}
+/* La carte BORNE la liste (jamais de glissière) : sans flex, la liste prenait sa pleine hauteur et sortait de la carte. */
+.pm .carte.plein{display:flex;flex-direction:column;flex:1 1 0;min-height:0;overflow:hidden}
+.pm .carte.plein>.liste{flex:1 1 0;min-height:0;overflow:hidden}
+.pm .carte.plein>.pagi{flex:none}
 .pm .liste table{table-layout:fixed;width:100%}
 .pm .liste th{font-size:12px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;text-align:left}
 .pm .liste td{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

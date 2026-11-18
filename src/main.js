@@ -8158,7 +8158,14 @@ ipcMain.on('theme:changer', (e, sombre) => {
 // (la principale, Windows) : ailleurs c'est absent, d'où le garde. On n'accepte
 // qu'une couleur hexadécimale : une valeur inattendue jetterait sinon Electron.
 const _hexOuRien = (v) => {
-  const s = String(v || '').trim();
+  let s = String(v || '').trim();
+  /* (2026-11-18) Une couleur CALCULÉE arrive en « rgb(r, g, b) » : on la convertit au lieu de la rejeter (le rejet
+     peignait le gris de repli derrière _ □ ✕ — le rectangle de sa capture). Une couleur transparente reste refusée. */
+  const m = s.match(/^rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)(?:[,\s/]+([\d.]+))?\s*\)$/i);
+  if (m) {
+    if (m[4] !== undefined && parseFloat(m[4]) === 0) return '';
+    s = '#' + [m[1], m[2], m[3]].map((x) => Math.max(0, Math.min(255, parseInt(x, 10))).toString(16).padStart(2, '0')).join('');
+  }
   return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(s) ? s : '';
 };
 ipcMain.on('chrome:titlebar', (e, color, symbol) => {
