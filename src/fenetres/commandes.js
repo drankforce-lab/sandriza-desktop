@@ -187,6 +187,44 @@ tbody .det{font-size:.75rem;color:var(--tx2)}
 /* Une commande ETIQUETEE mais pas encore expediee : c est exactement celle qu on
    cherche en reprenant le travail. Elle se repere sans lire. */
 tbody tr.attente{background:rgba(124,92,255,.09)}
+/* ══ LA VUE KANBAN (2026-11-18, relooking — ajout choisi par elle) ════════════════════════════════
+   Une colonne par statut ; glisser une carte = le MÊME geste qu'un clic droit › statut (flowStatut :
+   aperçu du site, confirmation, mêmes refus). ⚠ AUCUNE GLISSIÈRE (sa règle) : les cartes qui ne tiennent
+   pas dans la colonne sont MESURÉES et cachées, et « + k autres » ouvre la liste filtrée sur ce statut. */
+.kb{display:flex;flex-direction:column;min-height:0}
+.kb-cols{flex:1 1 0;min-height:0;display:grid;grid-template-columns:repeat(var(--kb-n,5),minmax(0,1fr));
+  grid-template-rows:minmax(0,1fr);gap:.6rem}
+/* ⚠ MESURÉ (capture, 30 commandes) : en « flex 1 1 auto » et sans borne de rangée, la grille prenait la hauteur de
+   son CONTENU — la colonne débordait sous la fenêtre et la mesure ne voyait jamais de dépassement. */
+.cx-liste.kb{min-height:0;overflow:hidden}
+/* ⚠ MESURÉ : une règle du socle sur les enfants de la carte (flex 0 1 auto) l'emportait sur .kb-cols — d'où la
+   spécificité ici. */
+.cx-liste.kb>.kb-cols{flex:1 1 0;min-height:0}
+.kb-col{display:flex;flex-direction:column;min-height:0;min-width:0;border:1px solid var(--v08);border-radius:12px;
+  background:var(--f-carte2);padding:.5rem}
+.kb-col>header{display:flex;align-items:center;justify-content:space-between;gap:.4rem;padding:.15rem .25rem .45rem;
+  font-size:.8rem;white-space:nowrap}
+.kb-col>header b{overflow:hidden;text-overflow:ellipsis}
+.kb-ct{flex:none;min-width:1.6rem;height:1.2rem;padding:0 .35rem;border-radius:99px;display:inline-flex;align-items:center;
+  justify-content:center;font-size:.7rem;font-weight:800;background:var(--v08);color:var(--tx2)}
+.kb-ct.a{background:rgba(245,158,11,.18);color:var(--tx-att)}
+.kb-cartes{flex:1 1 auto;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:.4rem}
+.kb-carte{flex:none;border:1px solid var(--v10);border-radius:10px;background:var(--f-carte);padding:.45rem .55rem;cursor:grab;
+  display:flex;flex-direction:column;gap:.15rem;min-width:0}
+.kb-carte[hidden]{display:none}
+.kb-carte.tenue{cursor:not-allowed;opacity:.72}
+.kb-carte.prise{opacity:.45}
+.kb-carte .l1{display:flex;align-items:baseline;gap:.4rem;min-width:0}
+.kb-carte .l1 b{flex:1 1 auto;min-width:0;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kb-carte .l1 span{flex:none;font-size:.78rem;font-variant-numeric:tabular-nums}
+.kb-carte .l2{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;font-size:.7rem;color:var(--tx2)}
+.kb-carte .rf-pill{font-size:.64rem;padding:.05rem .45rem}
+.kb-col.cible{border-color:var(--or);box-shadow:inset 0 0 0 1px var(--or)}
+.kb-plus{flex:none;margin-top:.4rem;align-self:stretch}
+.kb-exp .kb-vide{flex:1 1 auto;display:flex;align-items:center;justify-content:center;text-align:center;padding:.6rem;
+  font-size:.74rem;color:var(--tx2);border:1px dashed var(--v16);border-radius:10px}
+.cx-liste.kb{padding:.6rem;display:flex;flex-direction:column}
+
 .et{font-size:.6875rem;padding:.06rem .45rem;border-radius:99px;white-space:nowrap;
   border:1px solid var(--v16);color:var(--tx2)}
 .et.vert{border-color:rgba(74,222,128,.45);color:var(--tx-ok)}
@@ -381,6 +419,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
      les perd pas. Le jeu d actions dépend de la liste (Commandes ou Expéditions) — voir lotCoches. */
   var CK = null;
   try { COMPACT = localStorage.getItem('sz-cmd-compact') === '1'; } catch (e) {}
+  /* (2026-11-18) La vue Kanban, retenue sur le poste — Commandes seulement (Expéditions reste une liste). */
+  var KANBAN = false;
+  try { KANBAN = localStorage.getItem('sz-cmd-kanban') === '1'; } catch (e) {}
+  function KB(){ return KANBAN && MODE !== 'expeditions'; }
   var enCours = false;
   var VUE = 'liste';        // 'liste' | 'detail'
   // Ouverte par << mode@identifiant >>, la fenetre EST un detail : pas de
@@ -583,10 +625,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '<label class="rf-rch">${ICO.loupe}<input id="rech" aria-label="${T("Rechercher une commande")}" autocomplete="off" placeholder="${T("Numéro de commande, nom, courriel")}'
       + (expedition ? '${T(", suivi")}' : '') + '…" value="' + esc(F.q) + '"></label>'
       + '<span class="vue-bascule" role="group" aria-label="${T("Affichage de la liste")}">'
-      +   '<button type="button" data-vue="detail" aria-label="${T("Affichage détaillé")}" aria-pressed="' + (!COMPACT) + '" class="' + (!COMPACT ? 'on' : '') + '" title="${T("Affichage détaillé")}">'
+      +   '<button type="button" data-vue="detail" aria-label="${T("Affichage détaillé")}" aria-pressed="' + (!COMPACT && !KB()) + '" class="' + (!COMPACT && !KB() ? 'on' : '') + '" title="${T("Affichage détaillé")}">'
       +     '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="2.5" width="12" height="4.5" rx="1.2"/><rect x="2" y="9" width="12" height="4.5" rx="1.2"/></svg></button>'
-      +   '<button type="button" data-vue="compact" aria-label="${T("Affichage compact : une ligne par commande, plus de commandes par page")}" aria-pressed="' + COMPACT + '" class="' + (COMPACT ? 'on' : '') + '" title="${T("Affichage compact : une ligne par commande, plus de commandes par page")}">'
+      +   '<button type="button" data-vue="compact" aria-label="${T("Affichage compact : une ligne par commande, plus de commandes par page")}" aria-pressed="' + (COMPACT && !KB()) + '" class="' + (COMPACT && !KB() ? 'on' : '') + '" title="${T("Affichage compact : une ligne par commande, plus de commandes par page")}">'
       +     '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3.5h12M2 6.5h12M2 9.5h12M2 12.5h12"/></svg></button>'
+      + (expedition ? '' : '<button type="button" data-vue="kanban" aria-label="${T("Vue Kanban : une colonne par statut, glisser une commande pour changer son statut")}" aria-pressed="' + KB() + '" class="' + (KB() ? 'on' : '') + '" title="${T("Vue Kanban : une colonne par statut, glisser une commande pour changer son statut")}">'
+      +     '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="2.5" width="3.6" height="11" rx="1"/><rect x="6.2" y="2.5" width="3.6" height="7.5" rx="1"/><rect x="10.9" y="2.5" width="3.6" height="9.5" rx="1"/></svg></button>')
       + '</span>';
     if (expedition && CTX && (CTX.annees || []).length) {
       h += '<select id="f-annee" aria-label="${T("Année")}">'
@@ -668,6 +712,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + '</span></div>';
     }
     t += '</div>';
+    if (KB()) t = '<div class="cx-carte cx-liste kb">' + kanban(d, stats) + '</div>';
 
     /* ── LE PANNEAU D APPUI : ou en sont les commandes, et ce qui presse — tout depuis les chiffres deja
        recus (tuiles du pont) ; aucune donnee de plus. Absent sur un vieux site. ── */
@@ -704,7 +749,87 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     actions.innerHTML = '';
     brancher();
     listeAutoAjuste();
+    if (KB()) { kanbanAjuste(); kanbanBrancher(); }
+    else corps.ondragstart = corps.ondragend = corps.ondragover = corps.ondrop = null;
   }
+
+  /* ══ LA VUE KANBAN (2026-11-18) — une colonne par statut du mode Commandes, et « Expédier » ══ */
+  function kbCarte(o){
+    var tire = !o.enTraitement && !!(CTX && CTX.peutEditer);
+    return '<div class="kb-carte' + (o.enTraitement ? ' tenue' : '') + '" data-kb-id="' + esc(o.id) + '" draggable="' + tire + '"'
+      + ' title="' + (o.enTraitement ? '${T("En traitement par")} ' + esc(o.par || '') : '${T("Glisser vers une autre colonne pour changer le statut · clic : détails")}') + '">'
+      + '<div class="l1"><b>' + esc(o.client) + '</b><span>' + esc(argent(o.total)) + '</span></div>'
+      + '<div class="l2"><span>' + esc(o.numero) + '</span>'
+      + (o.prioritaire ? '<span class="rf-pill ambre">${T("Prioritaire")}</span>' : '')
+      + (o.enTraitement ? '<span class="rf-pill bleu">' + esc(o.par || '${T("En traitement")}') + '</span>' : '')
+      + '</div></div>';
+  }
+  function kanban(d, stats){
+    var lignes = (d && d.lignes) || [];
+    var aFaire = ['confirmed', 'preparing', 'verification'];
+    var exp = !!(CTX && CTX.peutExpedier);
+    var h = '<div class="kb-cols" style="--kb-n:' + (stats.length + (exp ? 1 : 0)) + '">';
+    stats.forEach(function(s){
+      var l = lignes.filter(function(o){ return o.statut === s.cle; });
+      h += '<section class="kb-col" data-kb-col="' + esc(s.cle) + '"><header><b>' + esc(szTd(s.libelle)) + '</b>'
+        + '<span class="kb-ct' + (l.length && aFaire.indexOf(s.cle) >= 0 ? ' a' : '') + '">' + l.length + '</span></header>'
+        + '<div class="kb-cartes">' + l.map(kbCarte).join('') + '</div>'
+        + '<button type="button" class="mini kb-plus" data-kb-plus="' + esc(s.cle) + '" hidden></button></section>';
+    });
+    if (exp) h += '<section class="kb-col kb-exp" data-kb-col="shipped"><header><b>${T("Expédier")}</b></header>'
+      + '<div class="kb-vide">${T("Déposez une commande ici pour ouvrir l’expédition.")}</div></section>';
+    return h + '</div>';
+  }
+  /* Les cartes qui ne tiennent pas sont cachées (mesure RÉELLE), et la colonne dit combien il en reste. */
+  function kanbanAjuste(){
+    Array.prototype.forEach.call(corps.querySelectorAll('.kb-col[data-kb-col]'), function(col){
+      var z = col.querySelector('.kb-cartes'); if (!z) return;
+      var plus = col.querySelector('.kb-plus');
+      var cartes = z.querySelectorAll('.kb-carte');
+      Array.prototype.forEach.call(cartes, function(c){ c.hidden = false; });
+      if (plus) plus.hidden = true;
+      if (z.scrollHeight <= z.clientHeight + 1) return;
+      if (plus) { plus.hidden = false; plus.textContent = '+'; }   // sa place se prend sur les cartes
+      var cache = 0;
+      for (var i = cartes.length - 1; i >= 0 && z.scrollHeight > z.clientHeight + 1; i--) { cartes[i].hidden = true; cache++; }
+      // puis on en rend tant qu'elles tiennent (le bouton apparu a pu fausser la première passe)
+      while (cache > 0) { var r = cartes[cartes.length - cache]; r.hidden = false; if (z.scrollHeight > z.clientHeight + 1) { r.hidden = true; break; } cache--; }
+      if (plus && cache) plus.textContent = '${T("+ {0} autres — voir la liste")}'.split('{0}').join(cache);
+    });
+  }
+  function kanbanBrancher(){
+    var tenu = '';
+    corps.ondragstart = function(ev){
+      var c = ev.target && ev.target.closest ? ev.target.closest('.kb-carte[draggable="true"]') : null;
+      if (!c) return;
+      tenu = c.getAttribute('data-kb-id');
+      c.classList.add('prise');
+      try { ev.dataTransfer.setData('text/plain', tenu); ev.dataTransfer.effectAllowed = 'move'; } catch (e) {}
+    };
+    corps.ondragend = function(){
+      tenu = '';
+      Array.prototype.forEach.call(corps.querySelectorAll('.kb-carte.prise,.kb-col.cible'), function(x){ x.classList.remove('prise', 'cible'); });
+    };
+    corps.ondragover = function(ev){
+      var col = ev.target && ev.target.closest ? ev.target.closest('.kb-col[data-kb-col]') : null;
+      if (!col || !tenu) return;
+      ev.preventDefault();
+      Array.prototype.forEach.call(corps.querySelectorAll('.kb-col.cible'), function(x){ if (x !== col) x.classList.remove('cible'); });
+      col.classList.add('cible');
+    };
+    corps.ondrop = function(ev){
+      var col = ev.target && ev.target.closest ? ev.target.closest('.kb-col[data-kb-col]') : null;
+      if (!col || !tenu) return;
+      ev.preventDefault();
+      var id = tenu, cible = col.getAttribute('data-kb-col');
+      corps.ondragend();
+      var o = ((DONNEES && DONNEES.lignes) || []).filter(function(x){ return x.id === id; })[0];
+      if (!o || o.statut === cible) return;
+      if (o.enTraitement) { dire('${T("En traitement par")} ' + (o.par || '') + '.', 'att'); return; }
+      flowStatut(id, o.statut, cible);   // LE MÊME GESTE qu'un clic droit › statut — aperçu, confirmation, refus
+    };
+  }
+
 
   /* ── PAGINATION AUTO : autant de lignes que la hauteur REELLE le permet —
      mesuree, jamais devinee. Stable : on ne recharge que si le compte differe. */
@@ -1383,16 +1508,31 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       if (CK && VUE === 'liste' && CK.clic(ev)) return;   // une case, « tout cocher » ou la barre d actions
       var vb = t.closest('[data-vue]');
       if (vb) {
-        var c = vb.getAttribute('data-vue') === 'compact';
-        if (c !== COMPACT) {
-          COMPACT = c;
-          try { localStorage.setItem('sz-cmd-compact', COMPACT ? '1' : '0'); } catch (e) {}
+        var v = vb.getAttribute('data-vue');
+        var k = v === 'kanban', c = v === 'compact';
+        if (k !== KANBAN || (!k && c !== COMPACT)) {
+          KANBAN = k; if (!k) COMPACT = c;
+          try { localStorage.setItem('sz-cmd-compact', COMPACT ? '1' : '0'); localStorage.setItem('sz-cmd-kanban', KANBAN ? '1' : '0'); } catch (e) {}
           F.page = 0; dessiner(); charger();
         }
         return;
       }
+      // Kanban : « + k autres » ouvre la LISTE filtrée sur ce statut ; une carte ouvre le détail.
+      var kp = t.closest('[data-kb-plus]');
+      if (kp) {
+        KANBAN = false; try { localStorage.setItem('sz-cmd-kanban', '0'); } catch (e) {}
+        F.statuts = [kp.getAttribute('data-kb-plus')]; F.page = 0; dessiner(); charger();
+        return;
+      }
+      var kc = t.closest('[data-kb-id]');
+      if (kc) {
+        ouvrir('commandes:ouvrirDetail', kc.getAttribute('data-kb-id'), '${T("Détail")}');
+        setTimeout(function(){ charger(); }, 1200);
+        return;
+      }
       var st = t.closest('[data-st]');
       if (st) {
+        if (KB()) { KANBAN = false; try { localStorage.setItem('sz-cmd-kanban', '0'); } catch (e) {} F.statuts = []; }
         var cle = st.getAttribute('data-st');
         var i = F.statuts.indexOf(cle);
         if (i >= 0) F.statuts.splice(i, 1); else F.statuts.push(cle);
@@ -1647,7 +1787,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
        perimee (celle de l ANCIEN filtre) n est pas dessinee. */
     if (enCours) { RELANCE = true; return; }
     enCours = true;
-    appeler('commandes:liste', [MODE, F]).then(function(r){
+    // Kanban : la liste ENTIÈRE du mode (200 au plus, borne du site), les statuts deviennent les colonnes.
+    appeler('commandes:liste', [MODE, KB() ? Object.assign({}, F, { page: 0, parPage: 200, statuts: [] }) : F]).then(function(r){
       enCours = false;
       if (RELANCE) { RELANCE = false; charger(forcer); return; }
       if (!r.ok) { dire(expliquer(r), 'err'); return; }

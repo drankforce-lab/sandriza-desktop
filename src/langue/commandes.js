@@ -496,4 +496,10 @@ module.exports = {
   'Lancer la préparation': 'Start preparing',
   'Ouvre la commande à préparer en premier — prioritaires d’abord, jamais une qu’un collègue tient ; « Commande suivante » enchaîne': 'Opens the order to prepare first — priority orders first, never one a colleague holds; “Next order” continues',
   'Plus rien à préparer — la file est vide.': 'Nothing left to prepare — the queue is empty.',
+  'En traitement par': 'In progress by',
+  'Glisser vers une autre colonne pour changer le statut · clic : détails': 'Drag to another column to change the status · click: details',
+  'Expédier': 'Ship',
+  'Déposez une commande ici pour ouvrir l’expédition.': 'Drop an order here to open shipping.',
+  '+ {0} autres — voir la liste': '+ {0} more — see the list',
+  'Vue Kanban : une colonne par statut, glisser une commande pour changer son statut': 'Kanban view: one column per status, drag an order to change its status',
 };
