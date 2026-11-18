@@ -233,6 +233,99 @@ html[data-sz-theme="epure"] .cx-barre>.droite,html[data-sz-theme="epure"].jour .
 .mq-replie .nb.a{background:var(--ep-ambre-f,rgba(245,158,11,.16));color:var(--ep-ambre-t,var(--tx-att))}
 .mq-vide{padding:1.2rem;font-size:13px;color:var(--tx2)}
 
+/* ══ LA FICHE « ÉPURÉ » (8.42.0, fidèle à Commande.dc.html) ═════════════════════════════════════════
+   Trois tons seulement : neutre, ambre (ce qui attend), rouge (supprimer). Aucune glissière : les
+   articles se mettent en pages à la hauteur réellement offerte (cmAjuste). */
+.cm{height:100%;min-height:0;display:flex;flex-direction:column;gap:14px;overflow:hidden}
+.cm-ban{flex:none;display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:14px;background:var(--ep-ambre-f,#fff7eb);border:1px solid var(--v10)}
+.cm-av{position:relative;width:40px;height:40px;flex:none;border-radius:50%;background:var(--ep-neutre-f,var(--v08));color:var(--ep-neutre-t,var(--tx));
+  font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center}
+.cm-av .cad{position:absolute;right:-4px;bottom:-4px;width:22px;height:22px;border-radius:50%;background:#a14e00;color:var(--tx-sur-accent,#fff);
+  display:flex;align-items:center;justify-content:center;border:2px solid var(--ep-ambre-f,#fff7eb)}
+.cm-ban .tx{display:flex;flex-direction:column;gap:2px;margin-right:auto;min-width:0}
+.cm-ban .tx b{font-size:14px;font-weight:800;color:var(--ep-ambre-t,#8a3f00);white-space:nowrap}
+.cm-ban .tx span{font-size:13px;color:var(--ep-ambre-t,#8a3f00);white-space:nowrap}
+.cm-ban .dir{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--ep-ambre-t,#8a3f00);white-space:nowrap}
+.cm-ban .dir i{width:8px;height:8px;border-radius:50%;background:var(--ep-ambre-t,#8a3f00)}
+.cm-tete{flex:none;display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.cm-tete button,.cm-cote .gestes button{height:40px;padding:0 14px;border-radius:10px;font-size:13px;font-weight:600;white-space:nowrap;display:flex;align-items:center;gap:8px}
+.cm-tete .ret{height:38px;padding:0 12px}
+.cm-tete .g{display:flex;flex-direction:column;gap:2px;margin-right:auto;min-width:0}
+.cm-tete .meta{font-size:12px;color:var(--tx2);font-weight:600;white-space:nowrap}
+.cm-tete .lgn{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.cm-tete h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.02em;color:var(--tx)}
+.cm-p{font-size:12px;font-weight:700;padding:5px 10px;border-radius:7px;white-space:nowrap;background:var(--ep-neutre-f,var(--v08));color:var(--ep-neutre-t,var(--tx))}
+.cm-p.a{background:var(--ep-ambre-f);color:var(--ep-ambre-t)}
+.cm-p.r{background:var(--ep-rouge-f);color:var(--ep-rouge-t)}
+.cm-tete button.go{height:44px;padding:0 20px;border-radius:11px;border:0;background:var(--sz-btn-prim,#8a5a2b);color:var(--sz-btn-prim-txt,#fff);font-size:14px;font-weight:800;gap:10px}
+.cm-tete button.tenu{height:44px;padding:0 18px;border-radius:11px;border:1px dashed var(--ep-ambre-t);background:var(--ep-ambre-f);color:var(--ep-ambre-t);font-size:14px;font-weight:700;opacity:1!important;cursor:default}
+.cm-st{position:relative}
+.cm-menu{position:absolute;right:0;top:44px;z-index:20;min-width:220px;padding:6px;border-radius:12px;background:var(--f-carte);border:1px solid var(--v12);
+  box-shadow:0 14px 34px -14px rgba(0,0,0,.45);display:flex;flex-direction:column;gap:2px}
+.cm-menu button{height:34px;border:0;background:transparent;justify-content:flex-start;font-weight:600;padding:0 10px;border-radius:8px}
+.cm-menu button:hover{background:var(--v05)}
+.cm-grille{flex:1 1 0;min-height:0;display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:16px}
+.cm-g{min-height:0;display:flex;flex-direction:column;gap:16px}
+.cm-c{background:var(--f-carte);border:1px solid var(--v08);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.cm-c h2{margin:0;font-size:15px;font-weight:800;color:var(--tx);letter-spacing:0;text-transform:none}
+.cm-art{flex:0 1 auto;min-height:0;gap:4px}
+.cm-art .l{display:grid;grid-template-columns:56px minmax(0,1fr) 60px 110px;gap:14px;align-items:center}
+.cm-art .th{flex:none;font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;padding-bottom:8px;border-bottom:1px solid var(--v08)}
+.cm-lignes{flex:0 1 auto;min-height:0;overflow:hidden}
+.cm-art .r{height:77px;box-sizing:border-box;border-bottom:1px solid var(--v06)}
+.cm-art .ph{width:56px;height:56px;border-radius:10px;background:var(--ep-neutre-f,var(--v08));color:var(--ep-neutre-t,var(--tx));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;overflow:hidden}
+html.jour .cm-av .cad{background:#a14e00}
+.cm-art.dense .r{height:55px}
+.cm-art.dense .ph{width:40px;height:40px;font-size:14px}
+.cm-art .ph img{width:100%;height:100%;object-fit:cover}
+.cm-art .nm{display:flex;flex-direction:column;gap:3px;min-width:0}
+.cm-art .nm b{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cm-art .nm span{font-size:12px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cm-art .q{text-align:center;font-weight:700}
+.cm-art .m{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.cm-art .m small{display:block;font-size:11px;font-weight:500;color:var(--tx2)}
+.cm-art .rb{font-size:11px;font-weight:700;padding:1px 7px;border-radius:99px;background:var(--ep-ambre-f);color:var(--ep-ambre-t);margin-left:6px}
+.cm-pag{flex:none;display:flex;align-items:center;gap:8px;padding:8px 0 4px}
+.cm-pag button{width:30px;height:28px;border-radius:7px;padding:0}
+.cm-pag span{font-size:12px;color:var(--tx2);white-space:nowrap}
+.cm-pag .tot{margin-left:auto;font-weight:700;padding:4px 10px;border-radius:99px;background:var(--ep-neutre-f);color:var(--ep-neutre-t)}
+.cm-tot{flex:none;display:grid;grid-template-columns:auto 110px;gap:6px 14px;padding-top:10px;font-size:13px;margin-left:auto;min-width:320px}
+.cm-tot span{color:var(--tx2);white-space:nowrap}
+.cm-tot span.v{text-align:right;color:var(--tx);font-variant-numeric:tabular-nums}
+.cm-tot b{font-size:15px;font-weight:800;border-top:1px solid var(--v08);padding-top:8px;white-space:nowrap}
+.cm-tot b.v{text-align:right;font-variant-numeric:tabular-nums}
+.cm-chr{flex:none}
+.cm-chr .cm-et{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.cm-chr .cm-et div{display:flex;flex-direction:column;gap:6px;min-width:0}
+.cm-chr .cm-et i{height:6px;border-radius:99px;background:var(--v08)}
+.cm-chr .cm-et .fait i{background:var(--sz-btn-prim,#8a5a2b)}
+.cm-chr .cm-et .cours i{background:var(--ep-ambre-t)}
+html.jour .cm-chr .cm-et .cours i{background:#c25e00}
+.cm-chr .cm-et b{font-size:12px;font-weight:700;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cm-chr .cm-et .fait b,.cm-chr .cm-et .cours b{color:var(--tx)}
+.cm-chr .cm-et span{font-size:11px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cm-cote{min-height:0;display:flex;flex-direction:column;gap:14px;overflow:hidden}
+.cm-cli{display:flex;align-items:center;gap:12px}
+.cm-cli .n{display:flex;flex-direction:column;margin-right:auto;min-width:0}
+.cm-cli .n b{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cm-cli .n span,.cm-c .co{font-size:12px;color:var(--tx2)}
+.cm-c .co{font-size:13px;overflow-wrap:anywhere}
+.cm-cli button{height:32px;padding:0 10px;border-radius:8px;font-size:12px;font-weight:600;white-space:nowrap}
+.cm-pl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 14px;font-size:13px}
+.cm-pl h2{grid-column:span 2}
+.cm-pl span{color:var(--tx2);white-space:nowrap}
+.cm-pl strong{font-weight:600;overflow-wrap:anywhere}
+.cm-note{background:var(--ep-ambre-f);border-color:var(--v08);gap:6px;padding:14px 18px}
+.cm-note b{font-size:13px;font-weight:800;color:var(--ep-ambre-t)}
+.cm-note span{font-size:13px;color:var(--tx);line-height:1.5}
+.cm-rb{gap:6px;font-size:12px}
+.cm-rb .x{display:flex;justify-content:space-between;gap:10px;color:var(--tx2)}
+.cm-rb .x b{color:var(--tx);font-variant-numeric:tabular-nums;white-space:nowrap}
+.cm-cote .gestes{display:flex;gap:8px;margin-top:auto}
+.cm-cote .gestes button{flex:1;height:38px;justify-content:center}
+.cm-cote .gestes button.sup{color:var(--ep-rouge-t)}
+.cm button:disabled{opacity:.55;cursor:default}
+
 /* ══ LA VUE KANBAN (2026-11-18, relooking — ajout choisi par elle) ════════════════════════════════
    Une colonne par statut ; glisser une carte = le MÊME geste qu'un clic droit › statut (flowStatut :
    aperçu du site, confirmation, mêmes refus). ⚠ AUCUNE GLISSIÈRE (sa règle) : les cartes qui ne tiennent
@@ -884,7 +977,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var _mqJeu = document.documentElement.getAttribute('data-sz-theme');
     new MutationObserver(function(){
       var j = document.documentElement.getAttribute('data-sz-theme');
-      if (j !== _mqJeu) { _mqJeu = j; MQ_PG = 0; if (typeof charger === 'function' && VUE === 'liste') charger(true); }
+      if (j !== _mqJeu) { _mqJeu = j; MQ_PG = 0; if (typeof charger === 'function' && VUE === 'liste') charger(true); else if (VUE === 'detail' && DET) dessiner(); }
     }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-sz-theme'] });
     var _mqT = null;
     window.addEventListener('resize', function(){ clearTimeout(_mqT); _mqT = setTimeout(mqAjuste, 120); });
@@ -1008,7 +1101,165 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   });
 
   // ══ DETAIL D UNE COMMANDE ═══════════════════════════════════════
+  /* ══ LA FICHE « ÉPURÉ » (8.42.0) — Commande.dc.html, à la lettre ════════════════════════════════
+     Mêmes données, mêmes gestes, mêmes règles (lecture seule sous verrou, droits) que la fiche
+     habituelle : seule la mise en page change. Les autres jeux gardent la fiche d avant. */
+  function EPD(){ return document.documentElement.getAttribute('data-sz-theme') === 'epure'; }
+  var CM_PAGE = 0, CM_MENU = false;
+  var CADENAS = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>';
+  function cmEtapes(c, ro){
+    var L = c.chronologie || [], st = c.statut;
+    function quand(code){ for (var i = L.length - 1; i >= 0; i--) if (L[i].code === code) return L[i].le; return ''; }
+    var apres = ['shipped', 'delivered', 'completed'].indexOf(st) >= 0;
+    var etq = quand('etiquette'), exp = quand('expediee'), liv = quand('livree') || c.livreLe, fin = quand('terminee');
+    var prep = (st === 'preparing' || st === 'verification') ? 'cours' : ((apres || etq) ? 'fait' : 'avenir');
+    function e(l, q, etat){ return { l: l, q: q, etat: etat }; }
+    return [
+      e('${T("Commande passée")}', szQuand(quand('passee') || c.creeLe), 'fait'),
+      e(prep === 'cours' ? '${T("En préparation")}' : '${T("Préparation")}', prep === 'cours' ? (ro ? VERROU_PAR : '${T("en cours")}') : (prep === 'fait' ? '✓' : '${T("à faire")}'), prep),
+      e('${T("Étiquette créée")}', etq ? szQuand(etq) : '—', etq ? 'fait' : 'avenir'),
+      e('${T("Expédiée")}', exp ? szQuand(exp) : '—', (exp || apres) ? 'fait' : 'avenir'),
+      e('${T("Livrée")}', liv ? szQuand(liv) : '—', (liv || st === 'delivered' || st === 'completed') ? 'fait' : 'avenir'),
+      e('${T("Terminée")}', fin ? szQuand(fin) : '—', (fin || st === 'completed') ? 'fait' : 'avenir')
+    ];
+  }
+  function dessinerDetailMaq(d, c, ro){
+    var t = d.totaux, rb = d.remboursements;
+    var resD = document.getElementById('c-resume'); if (resD) resD.textContent = '';
+    actions.innerHTML = '';
+    var h = '<div class="cm">';
+    if (ro) {
+      h += '<div class="cm-ban" role="status"><span class="cm-av">' + esc(initiales(VERROU_PAR)) + '<span class="cad">' + CADENAS + '</span></span>'
+        + '<span class="tx"><b>' + esc('${T("{0} traite cette commande")}'.split('{0}').join(VERROU_PAR)) + '</b>'
+        + '<span>${T("Statut, remboursement et suppression attendent que cette personne termine.")}</span></span>'
+        + '<span class="dir"><i></i>${T("En direct")}</span></div>';
+    }
+    var src = c.manuelle ? '${T("au comptoir")}' : (c.tiktok ? 'TikTok' : '${T("boutique en ligne")}');
+    var v = c.paiementVerifie;
+    var payP = (v && v.ok) || (c.paiementSquare && !c.attentePaiement && !(v && !v.ok))
+      ? '<span class="cm-p">${T("Payée")}</span>'
+      : ((c.attentePaiement || (v && !v.ok)) ? '<span class="cm-p a">${T("Paiement en attente")}</span>' : '');
+    var tonS = c.statut === 'cancelled' ? ' r' : (['pending', 'confirmed', 'preparing', 'verification'].indexOf(c.statut) >= 0 ? ' a' : '');
+    var peutPrep = CTX && CTX.peutEditer && ['confirmed', 'preparing', 'verification'].indexOf(c.statut) >= 0;
+    h += '<header class="cm-tete">'
+      + (SEUL ? '' : '<button type="button" class="ret" id="btn-retour">← ${T("Commandes")}</button>')
+      + '<div class="g"><span class="meta">' + esc('${T("Passée le {0}")}'.split('{0}').join(dateCourte(c.creeLe))) + ' · ' + esc(src) + '</span>'
+      + '<span class="lgn"><h1>' + esc(c.numero) + '</h1>' + payP
+      + '<span class="cm-p' + tonS + '">' + esc(szTd(libelleStatut(c.statut))) + '</span>'
+      + (c.prioritaire ? '<span class="cm-p">${T("Prioritaire")}</span>' : '')
+      + (c.venteFinale ? '<span class="cm-p">${T("Vente finale")}</span>' : '')
+      + (rb.complet ? '<span class="cm-p">${T("Remboursée")}</span>' : '') + '</span></div>'
+      + (d.droits.statut ? '<span class="cm-st"><button type="button" id="cm-statut"' + (ro ? ' disabled' : '') + ' aria-haspopup="menu" aria-expanded="' + (CM_MENU && !ro) + '">' + (ro ? CADENAS : '') + '${T("Changer le statut")}</button>'
+          + (CM_MENU && !ro ? '<div class="cm-menu" role="menu">' + (d.statuts || []).filter(function(x){
+              return x.cle !== c.statut && ['pending', 'cancelled'].indexOf(x.cle) < 0; }).map(function(x){
+              return '<button type="button" role="menuitem" data-cm-st="' + esc(x.cle) + '">' + esc(szTd(x.libelle)) + '</button>'; }).join('') + '</div>' : '')
+          + '</span>' : '')
+      + (d.droits.bon ? '<button type="button" id="det-bon"' + (ro ? ' disabled' : '') + '>${T("Bon de commande")}</button>' : '')
+      + (c.aFacture ? '<button type="button" id="det-fact">${T("Facture")}</button>' : '')
+      + (ro ? '<button type="button" class="tenu" disabled>' + CADENAS.split('11').join('16') + esc('${T("En préparation par {0}")}'.split('{0}').join(VERROU_PAR)) + '</button>'
+          : (peutPrep ? '<button type="button" class="go" id="cm-prep"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"></path><path d="M3 7.5 12 12l9-4.5M12 12v9"></path></svg>${T("Préparer la commande")}</button>' : ''))
+      + '</header>';
+
+    /* Articles : toutes les lignes sont posées, cmAjuste n en montre qu une page. */
+    var unites = d.articles.reduce(function(n, a){ return n + (Number(a.qte) || 0); }, 0);
+    h += '<div class="cm-grille"><div class="cm-g"><section class="cm-c cm-art">'
+      + '<div class="l th"><span></span><span>${T("Article")}</span><span style="text-align:center">${T("Qté")}</span><span style="text-align:right">${T("Montant")}</span></div>'
+      + '<div class="cm-lignes">' + d.articles.map(function(a){
+          var det = [a.taille, a.couleur, a.sku].filter(function(x){ return x && x !== '—'; }).join(' · ');
+          return '<div class="l r"><span class="ph">' + (a.image ? '<img src="' + esc(a.image) + '" alt="">' : esc(String(a.nom || '?').trim().charAt(0).toUpperCase() || '?')) + '</span>'
+            + '<span class="nm"><b>' + esc(a.nom) + '</b><span>' + esc(det)
+            + (a.rembourseQte > 0 ? '<span class="rb">' + a.rembourseQte + ' ' + szPl(a.rembourseQte, '${T("unité remboursée")}', '${T("unités remboursées")}') + '</span>' : '') + '</span></span>'
+            + '<span class="q">' + a.qte + '</span>'
+            + '<span class="m">' + argent(a.montant) + (a.qte > 1 ? '<small>' + argent(a.montant / a.qte) + ' ${T("/ unité")}</small>' : '') + '</span></div>';
+        }).join('') + '</div>'
+      + '<div class="cm-pag" hidden><button type="button" data-cm-pg="-1" aria-label="${T("Articles précédents")}">‹</button>'
+      + '<button type="button" data-cm-pg="1" aria-label="${T("Articles suivants")}">›</button><span class="pos"></span>'
+      + '<span class="tot">' + esc(d.articles.length + ' ' + szPl(d.articles.length, '${T("article")}', '${T("articles")}') + ' · ' + unites + ' ' + szPl(unites, '${T("unité")}', '${T("unités")}')) + '</span></div>';
+    var tl = [];
+    function lt(l, m){ tl.push('<span>' + l + '</span><span class="v">' + m + '</span>'); }
+    lt('${T("Sous-total")}', argent(t.sousTotal));
+    if (t.rabaisAuto > 0) lt('${T("Promotion automatique")}', '−' + argent(t.rabaisAuto));
+    if (t.rabaisComptoir > 0) lt('${T("Rabais sur la vente")}', '−' + argent(t.rabaisComptoir));
+    if (t.coupon > 0) lt('${T("Coupon")}', '−' + argent(t.coupon));
+    if (t.livraison > 0) lt('${T("Livraison")}', argent(t.livraison));
+    if (t.prioritaire > 0) lt('${T("Traitement prioritaire")}', argent(t.prioritaire));
+    var tx = (t.taxes || []).reduce(function(n, x){ return n + (Number(x.montant) || 0); }, 0);
+    if (tx > 0) lt(esc((t.taxes || []).map(function(x){ return x.nom; }).join(' ${T("et")} ')), argent(tx));
+    if (t.carteCadeau > 0) lt('${T("Carte-cadeau")}', '−' + argent(t.carteCadeau));
+    if (t.credit > 0) lt('${T("Crédit boutique")}', '−' + argent(t.credit));
+    if (t.points > 0) lt('${T("Points de fidélité")}', '−' + argent(t.points));
+    h += '<div class="cm-tot">' + tl.join('') + '<b>${T("Total")}</b><b class="v">' + argent(t.total) + '</b></div></section>';
+    h += '<section class="cm-c cm-chr"><h2>${T("Chronologie")}</h2><div class="cm-et">' + cmEtapes(c, ro).map(function(e){
+        return '<div class="' + e.etat + '"><i></i><b>' + esc(e.l) + '</b><span>' + esc(e.q) + '</span></div>'; }).join('') + '</div></section></div>';
+
+    /* La colonne de droite : client, paiement et livraison, note, remboursements, gestes. */
+    var a = c.adresse || {};
+    var adr = [a.rue, [a.ville, a.province ? '(' + a.province + ')' : '', a.cp].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+    h += '<aside class="cm-cote"><section class="cm-c"><div class="cm-cli"><span class="cm-av">' + esc(initiales(c.client.nom)) + '</span>'
+      + '<span class="n"><b>' + esc(c.client.nom || '—') + '</b><span>' + (c.membre ? '${T("membre")}' : '${T("invité")}')
+      + (c.compte && c.compte.nom && c.compte.nom !== c.client.nom ? ' · ' + esc(c.compte.nom) : '') + (c.client.entreprise ? ' · ' + esc(c.client.entreprise) : '') + '</span></span>'
+      + (d.droits.lier && !ro ? '<button type="button" id="det-lier">' + (c.compte ? '${T("Changer")}' : '${T("Lier")}') + '</button>' : '') + '</div>'
+      + '<span class="co">' + esc([c.client.courriel, c.client.tel].filter(Boolean).join(' · ')) + '</span></section>'
+      + '<section class="cm-c cm-pl"><h2>${T("Paiement et livraison")}</h2>'
+      + '<span>${T("Paiement")}</span><strong>' + (c.paiementSquare ? 'Square' + (c.afterpay ? ' · Afterpay' : '') + ((v && v.ok) ? ' · ${T("vérifié")}' : '') : '${T("aucun paiement Square")}') + '</strong>'
+      + (c.suivi ? '<span>${T("Suivi")}</span><strong>' + esc(c.suivi) + (c.suiviStatut ? ' · ' + esc(c.suiviStatut) : '') + '</strong>' : '')
+      + '<span>${T("Adresse")}</span><strong>' + esc(adr || '—') + '</strong>'
+      + (pvHtml(c) && !(v && v.ok) ? '<div style="grid-column:span 2">' + pvHtml(c) + '</div>' : '')
+      + '</section>'
+      + (c.notes ? '<section class="cm-c cm-note"><b>${T("Notes")}</b><span>' + esc(c.notes) + '</span></section>' : '')
+      + (rb.lignes.length ? '<section class="cm-c cm-rb"><h2>${T("Remboursements")}</h2>'
+          + rb.lignes.slice(-3).map(function(r){ return '<div class="x"><span>' + esc(r.numero) + ' · ' + esc(dateCourte(r.date)) + '</span><b>−' + argent(r.montant) + '</b></div>'; }).join('')
+          + '<div class="x"><span>${T("Total remboursé")}</span><b>−' + argent(rb.total) + '</b></div></section>' : '')
+      + '<div class="gestes">'
+      + (d.droits.frais ? '<button type="button" id="det-frais"' + (ro ? ' disabled' : '') + '>${T("Frais retenus")}</button>' : '')
+      + (d.droits.rembourser ? '<button type="button" id="det-remb"' + (ro ? ' disabled' : '') + '>↩ ${T("Rembourser")}</button>' : '')
+      + (d.droits.supprimer ? '<button type="button" class="sup" id="det-suppr"' + (ro ? ' disabled' : '') + '>${T("Supprimer")}</button>' : '')
+      + '</div></aside></div></div>';
+    corps.className = 'corps';
+    corps.innerHTML = h;
+    brancherDetail();
+    var bs = document.getElementById('cm-statut');
+    if (bs) bs.onclick = function(ev){ ev.stopPropagation(); CM_MENU = !CM_MENU; dessiner(); };
+    corps.onclick = function(ev){
+      var m = ev.target.closest('[data-cm-st]');
+      if (m) { CM_MENU = false; var cible = m.getAttribute('data-cm-st'); dessiner(); flowStatut(DET_ID, DET.commande.statut, cible, rechargerDetail); return; }
+      var pg = ev.target.closest('[data-cm-pg]');
+      if (pg) { CM_PAGE += Number(pg.getAttribute('data-cm-pg')); cmAjuste(); return; }
+      if (ev.target.closest('#cm-prep')) { ouvrir('commandes:preparer', DET_ID, '${T("Préparation")}'); return; }
+      if (CM_MENU && !ev.target.closest('.cm-menu')) { CM_MENU = false; dessiner(); }
+    };
+    setTimeout(cmAjuste, 0);
+  }
+  /* Autant d articles que la carte en tient ; le reste en pages (jamais de glissière). */
+  function cmAjuste(){
+    var z = corps.querySelector('.cm-lignes'); if (!z) return;
+    var L = z.querySelectorAll('.r'), pag = corps.querySelector('.cm-pag');
+    var sec = z.parentNode;
+    L.forEach(function(r){ r.hidden = false; });
+    pag.hidden = true; sec.classList.remove('dense');
+    var hl = L.length ? L[0].offsetHeight : 77;
+    var tient = Math.max(1, Math.floor(z.clientHeight / hl));
+    // Trop d articles pour la carte : des lignes plus serrées d abord (vignettes de 40 px), les pages ensuite.
+    if (L.length > tient) { sec.classList.add('dense'); hl = L[0].offsetHeight; tient = Math.max(1, Math.floor(z.clientHeight / hl)); }
+    if (L.length > tient) {
+      pag.hidden = false;
+      tient = Math.max(1, Math.floor(z.clientHeight / hl));
+    }
+    var pages = Math.max(1, Math.ceil(L.length / tient));
+    CM_PAGE = Math.max(0, Math.min(CM_PAGE, pages - 1));
+    var de = CM_PAGE * tient;
+    L.forEach(function(r, i){ r.hidden = i < de || i >= de + tient; });
+    if (!pag.hidden) {
+      pag.querySelector('.pos').textContent = '${T("Articles {0}–{1} sur {2} · page {3} / {4}")}'.split('{0}').join(de + 1)
+        .split('{1}').join(Math.min(L.length, de + tient)).split('{2}').join(L.length).split('{3}').join(CM_PAGE + 1).split('{4}').join(pages);
+      pag.querySelector('[data-cm-pg="-1"]').disabled = CM_PAGE === 0;
+      pag.querySelector('[data-cm-pg="1"]').disabled = CM_PAGE >= pages - 1;
+    }
+  }
+  try { if (window.ResizeObserver) new ResizeObserver(function(){ if (VUE === 'detail' && EPD()) cmAjuste(); }).observe(corps); } catch (e) {}
+
   function dessinerDetail(){
+    if (DET && EPD()) { dessinerDetailMaq(DET, DET.commande, !!VERROU_PAR); return; }
     corps.className = 'corps';
     var resD = document.getElementById('c-resume'); if (resD) resD.textContent = '';
     var actD = document.getElementById('c-actions'); if (actD) actD.innerHTML = '';
