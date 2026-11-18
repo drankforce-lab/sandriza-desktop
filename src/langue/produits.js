@@ -198,4 +198,13 @@ module.exports = {
   "{0} produits redeviendront retournables.": "{0} products will be returnable again.",
   "Activer pour {0}": "Turn on for {0}",
   "Retirer pour {0}": "Remove for {0}",
+  '{0} sous le seuil de réassort': '{0} below the restock threshold',
+  '{0} en rupture': '{0} out of stock',
+  'Produits et stock': 'Products and stock',
+  'Filtrer les produits': 'Filter products',
+  'Tous': 'All',
+  'À réassortir': 'To restock',
+  'Stock': 'Stock',
+  'Correct': 'OK',
+  '{0} en stock': '{0} in stock',
 };

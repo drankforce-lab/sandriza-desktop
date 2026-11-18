@@ -171,6 +171,46 @@ td.c,th.c{width:2rem;text-align:center}
 .mg-pied{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .mg-pied .droite{margin-left:auto;display:flex;gap:.5rem}
 html.jour .voile{background:rgba(20,24,30,.35)}
+/* ══ « ÉPURÉ » (8.44.0, fidèle à Produits.dc.html) : tête à titre et résumé, puces de filtre, tableau à
+   colonnes (produit et référence, catégorie, prix, stock et sa jauge, paniers, fournisseur). Trois tons. ══ */
+.pm-tete{flex:none;display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:14px}
+.pm-tete .g{display:flex;flex-direction:column;gap:4px;margin-right:auto;min-width:0}
+.pm-tete h1{margin:0;font-size:28px;font-weight:800;letter-spacing:-.02em;color:var(--tx)}
+.pm-tete p{margin:0;font-size:14px;color:var(--tx2);white-space:nowrap}
+.pm-tete button{height:40px;padding:0 16px;border-radius:10px;font-size:14px;font-weight:600;white-space:nowrap}
+.pm-tete button.prim{font-weight:700}
+.pm-tete .rf-rch{height:40px;min-width:220px}
+.pm-puces{flex:none;display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+.pm-puces button{height:34px;padding:0 14px;border-radius:99px;font-size:13px;font-weight:600;white-space:nowrap;
+  background:var(--f-carte);border:1px solid var(--v10);color:var(--tx)}
+.pm-puces button.on{background:var(--tx);border-color:var(--tx);color:var(--f-carte)}
+.pm-puces .sep{flex:1 1 auto}
+.pm .liste table{table-layout:fixed;width:100%}
+.pm .liste th{font-size:12px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;text-align:left}
+.pm .liste td{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pm .liste table{border-collapse:collapse!important;border-spacing:0!important}
+.pm .liste tbody td{border:0!important;border-bottom:1px solid var(--v06)!important;border-radius:0!important;background:transparent!important;padding:12px 14px!important}
+.pm .liste tbody tr:hover td{background:var(--v03)!important}
+.pm .liste thead th{padding:14px!important;border-bottom:1px solid var(--v08)!important}
+.pm .pm-prod{display:flex;align-items:center;gap:12px;min-width:0}
+.pm .pm-prod .vg{width:44px;height:44px;flex:none;border-radius:10px;overflow:hidden}
+.pm .pm-prod .vg>*{width:44px!important;height:44px!important;border-radius:10px!important}
+.pm .pm-prod b{display:block;font-weight:700;overflow:hidden;text-overflow:ellipsis}
+.pm .pm-prod span.r{display:block;font-size:12px;color:var(--tx2);overflow:hidden;text-overflow:ellipsis}
+.pm .pm-cat{font-size:12px;font-weight:700;padding:4px 10px;border-radius:99px;background:var(--ep-neutre-f);color:var(--ep-neutre-t)}
+.pm .pm-px{font-weight:700;font-variant-numeric:tabular-nums}
+.pm .pm-px s{font-weight:500;color:var(--tx2);font-size:12px;margin-left:6px}
+.pm .pm-st{display:flex;flex-direction:column;gap:6px;min-width:0}
+.pm .pm-st .h{display:flex;justify-content:space-between;font-size:13px;gap:8px}
+.pm .pm-st .h span{font-weight:600;color:var(--tx2)}
+.pm .pm-st .h span.a{color:var(--ep-ambre-t)}
+.pm .pm-st .h span.r{color:var(--ep-rouge-t)}
+.pm .pm-st .j{height:6px;border-radius:99px;background:var(--v08);overflow:hidden}
+.pm .pm-st .j i{display:block;height:100%;border-radius:99px;background:var(--v30)}
+.pm .pm-st .j i.a{background:var(--ep-ambre-t)}
+.pm .pm-st .j i.r{background:var(--ep-rouge-t)}
+.pm .pm-badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;margin-left:6px;background:var(--ep-ambre-f);color:var(--ep-ambre-t)}
+
 `;
 
 /** Page complète de la fenêtre native « Produits en vente ». */
@@ -356,6 +396,97 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     return '<span class="rf-pill vert">${T("Seuil non atteint")}</span>';
   }
 
+  function EPM(){ return document.documentElement.getAttribute('data-sz-theme') === 'epure'; }
+  /* La vue « Épuré » : mêmes données, mêmes crochets (#p-q, #p-nouveau, #p-lot, #p-marges, #p-tri, #p-prec,
+     #p-suiv, #p-exporter, tr[data-id]) ; les listes déroulantes deviennent des puces. */
+  function dessinerEp(ST){
+    var rows = D.lignes || [];
+    var resume = [(ST.actifs || 0) + ' ' + szPl(ST.actifs || 0, '${T("produit")}', '${T("produits")}')];
+    if (ST.aCommander != null) resume.push('${T("{0} sous le seuil de réassort")}'.split('{0}').join(ST.aCommander));
+    resume.push('${T("{0} en rupture")}'.split('{0}').join(ST.ruptures || 0));
+    var h = '<div class="pm" style="display:flex;flex-direction:column;flex:1 1 auto;min-height:0">'
+      + '<header class="pm-tete"><div class="g"><h1>${T("Produits et stock")}</h1><p>' + esc(resume.join(' · ')) + '</p></div>'
+      + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Rechercher un produit")}" type="search" id="p-q" placeholder="${T("Rechercher…")}" value="' + esc(Q) + '"></label>'
+      + '<button type="button" id="p-marges">${T("Vérifier mes marges")}</button>'
+      + ((D.peutVenteFinale || D.peutLot) && !LOT ? '<button type="button" id="p-lot">${T("Sélectionner")}</button>' : '')
+      + '<button type="button" class="prim" id="p-nouveau">${T("+ Nouveau produit")}</button></header>';
+    var puce = function(lib, on, attr){ return '<button type="button" class="' + (on ? 'on' : '') + '" aria-pressed="' + on + '" ' + attr + '>' + esc(lib) + '</button>'; };
+    h += '<div class="pm-puces" role="group" aria-label="${T("Filtrer les produits")}">'
+      + puce('${T("Tous")}', !CAT && !STOCK && !TAG, 'data-pm-tous="1"')
+      + (D.cats || []).map(function(c){ return puce(szTd(c.nom), CAT === c.cle, 'data-pm-cat="' + esc(c.cle) + '"'); }).join('')
+      + puce('${T("À réassortir")}', STOCK === 'low', 'data-pm-stock="low"')
+      + puce('${T("En rupture")}', STOCK === 'rupture', 'data-pm-stock="rupture"')
+      + (D.aFinal ? puce('${T("Vente finale")}', TAG === '__final__', 'data-pm-tag="__final__"') : '')
+      + (D.aLiq ? puce('${T("Liquidation")}', TAG === '__liq__', 'data-pm-tag="__liq__"') : '')
+      + '<span class="sep"></span>'
+      + puce(TRI === 'cart' ? '${T("Tri panier ✓")}' : '${T("Trier par panier")}', TRI === 'cart', 'id="p-tri"')
+      + '</div>';
+    if (LOT) {
+      var nCoches = Object.keys(COCHES).length;
+      h += '<div class="lot"><label><input type="checkbox" id="lot-page"> ${T("Toute la page")}</label>'
+        + '<span id="lot-n">' + nCoches + ' ' + (nCoches > 1 ? '${T("produits sélectionnés")}' : '${T("produit sélectionné")}') + '</span>'
+        + '<span style="flex:1 1 auto"></span>'
+        + (D.peutLot ? '<button id="lot-cat">${T("Catégorie…")}</button><button id="lot-prix">${T("Prix…")}</button><button id="lot-solde">${T("Solde…")}</button>' : '')
+        + (D.peutVenteFinale ? '<button id="lot-app">${T("Appliquer vente finale")}</button><button id="lot-ret">${T("Retirer vente finale")}</button>' : '')
+        + '<button id="lot-annuler">${T("Annuler")}</button></div>';
+    }
+    h += '<div class="carte plein">';
+    if (!rows.length) h += '<div class="vide">${T("Aucun produit ne correspond.")}</div>';
+    else {
+      var max = Math.max.apply(null, rows.map(function(r){ return r.stockTotal || 0; }).concat([1]));
+      var avecF = rows.some(function(r){ return r.fournisseur; });
+      h += '<div class="liste"><table><colgroup>' + (LOT ? '<col style="width:44px">' : '')
+        + '<col style="width:34%"><col style="width:13%"><col style="width:12%"><col style="width:19%"><col style="width:9%">' + (avecF ? '<col>' : '') + '</colgroup>'
+        + '<thead><tr>' + (LOT ? '<th></th>' : '') + '<th>${T("Produit")}</th><th>${T("Catégorie")}</th><th>${T("Prix")}</th><th>${T("Stock")}</th><th>${T("Paniers")}</th>'
+        + (avecF ? '<th>${T("Fournisseur")}</th>' : '') + '</tr></thead><tbody>'
+        + rows.map(function(r){
+            var ini = String(r.nom || '?').charAt(0).toUpperCase();
+            var ton = r.stockTotal === 0 ? 'r' : (r.variantesBas > 0 ? 'a' : '');
+            var lib = r.stockTotal === 0 ? '${T("Rupture")}' : (r.variantesBas > 0 ? '${T("À réassortir")}' : '${T("Correct")}');
+            var badge = r.liquidation ? '${T("Liquidation")}' : (r.finalSale ? '${T("Vente finale")}' : '');
+            return '<tr data-id="' + esc(r.id) + '"' + (LOT && COCHES[r.id] ? ' class="coche"' : '') + ' title="' + (LOT ? '${T("Cliquer pour sélectionner")}' : '${T("Ouvrir la fiche")}') + '">'
+              + (LOT ? '<td class="c"><input type="checkbox" data-coche="' + esc(r.id) + '" aria-label="' + esc('${T("Sélectionner")} ' + r.nom) + '"' + (COCHES[r.id] ? ' checked' : '') + '></td>' : '')
+              + '<td><div class="pm-prod"><span class="vg">' + szVignette(r.image, ini, '', r.nom) + '</span><span style="min-width:0">'
+              + '<b>' + esc(r.nom) + szVerrouCase('products', r.id) + (badge ? '<span class="pm-badge">' + badge + '</span>' : '') + '</b>'
+              + '<span class="r">' + esc([r.ref, r.tag].filter(Boolean).join(' · ') || '—') + '</span></span></div></td>'
+              + '<td><span class="pm-cat">' + esc(szTd(r.categorie || '—')) + '</span></td>'
+              + '<td class="pm-px">' + esc(fmt(r.solde || r.prix)) + (r.solde ? '<s>' + esc(fmt(r.prix)) + '</s>' : '') + '</td>'
+              + '<td><div class="pm-st" title="' + esc(r.bassesDetail || '') + '"><div class="h"><b>' + esc('${T("{0} en stock")}'.split('{0}').join(r.stockTotal)) + '</b><span class="' + ton + '">' + lib + '</span></div>'
+              + '<div class="j"><i class="' + ton + '" style="width:' + Math.max(4, Math.round((r.stockTotal || 0) / max * 100)) + '%"></i></div></div></td>'
+              + '<td>' + (r.panier > 0 ? r.panier : '—') + '</td>'
+              + (avecF ? '<td>' + esc(r.fournisseur || '—') + '</td>' : '')
+              + '</tr>';
+          }).join('') + '</tbody></table></div>'
+        + '<div class="pagi"><button class="mini" id="p-prec"' + (D.page <= 0 ? ' disabled' : '') + '>◀</button>'
+        + '<span>${T("Page")} ' + (D.page + 1) + ' / ' + D.pages + '</span>'
+        + '<button class="mini" id="p-suiv"' + (D.page >= D.pages - 1 ? ' disabled' : '') + '>▶</button></div>';
+    }
+    h += '</div></div>';
+    if (rows.length) {
+      var multiP = (D.pages || 1) > 1;
+      h += szPied(multiP ? (rows.length + '${T(" sur ")}' + (D.total || 0)) : (rows.length + ' ' + (rows.length > 1 ? '${T("produits")}' : '${T("produit")}')),
+        '<button class="mini" id="p-exporter"><span class="ic">⬇</span>${T(" Exporter")}</button>');
+    }
+    corps.innerHTML = h;
+    corps.querySelectorAll('[data-pm-tous],[data-pm-cat],[data-pm-stock],[data-pm-tag]').forEach(function(b){
+      b.onclick = function(){
+        if (b.hasAttribute('data-pm-tous')) { CAT = ''; STOCK = ''; TAG = ''; }
+        else if (b.hasAttribute('data-pm-cat')) { var c = b.getAttribute('data-pm-cat'); CAT = CAT === c ? '' : c; }
+        else if (b.hasAttribute('data-pm-stock')) { var g = b.getAttribute('data-pm-stock'); STOCK = STOCK === g ? '' : g; }
+        else { var t = b.getAttribute('data-pm-tag'); TAG = TAG === t ? '' : t; }
+        PAGE = 0; charger();
+      };
+    });
+  }
+  // Le jeu arrive APRÈS le chargement : on redessine dès qu il change.
+  try {
+    var _pmJeu = document.documentElement.getAttribute('data-sz-theme');
+    new MutationObserver(function(){
+      var j = document.documentElement.getAttribute('data-sz-theme');
+      if (j !== _pmJeu) { _pmJeu = j; if (D) dessiner(); }
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-sz-theme'] });
+  } catch (e) {}
+
   function dessiner(){
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE AUX PRODUITS (2026-09-25) ══════
@@ -365,6 +496,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
        categorie, comme l Inventaire. Crochets gardes : #p-q, #p-cat, #p-tag,
        #p-stock, #p-tri, #p-nouveau, #p-prec, #p-suiv, #p-exporter, tr[data-id]. */
     var ST = D.stats || {};
+    if (EPM()) { dessinerEp(ST); brancherListe(); return; }
     var tu = function(lib, val, sous, ton, geste){
       return '<div class="tuile' + (geste != null ? ' cliq' + (STOCK === geste ? ' on' : '') + '" data-tuile="' + geste
           + '" title="${T("Cliquer pour filtrer")}' : '') + '">'
@@ -483,6 +615,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         '<button class="mini" id="p-exporter"><span class="ic">⬇</span>${T(" Exporter")}</button>');
     }
     corps.innerHTML = h;
+    brancherListe();
+  }
+  function brancherListe(){
     szVerrousPeindre();   // reposer les cadenas connus sur le tableau frais
     // La mesure : combien de lignes tiennent VRAIMENT dans la liste bornee.
     szAutoPagination('.liste', function(n){ if (n === TAILLE) return; TAILLE = n; PAGE = 0; charger(); });
