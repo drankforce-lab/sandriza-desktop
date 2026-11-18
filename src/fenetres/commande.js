@@ -302,6 +302,24 @@ html.jour .ep0 .scan{border-color:#8a5a2b}
 html.jour .ep0 .lg .pl span{color:#3d4456}
 html.jour .ep-ctrl i{color:#3d4456}
 
+/* « Épuré », étapes Étiquette et Expédition (Etiquette.dc.html) : la colonne devient une carte, les
+   boîtes de côté aussi ; le bouton principal de l étape passe dans le pied. */
+html[data-sz-theme="epure"] .etape:not(.ep0) > .col{background:var(--f-carte);border:1px solid var(--v08);border-radius:16px;padding:18px 20px;gap:14px}
+html[data-sz-theme="epure"] .etape:not(.ep0) .tt h2{font-size:15px;font-weight:800}
+html[data-sz-theme="epure"] .etape:not(.ep0) .colis .ch input{height:38px;border-radius:9px;font-size:14px;font-weight:600}
+html[data-sz-theme="epure"] .etape:not(.ep0) .colis label{font-size:12px;font-weight:600;color:var(--tx2)}
+html[data-sz-theme="epure"] .tf{padding:12px 14px;border-radius:12px;border:1px solid var(--v08);background:var(--f-carte)}
+html[data-sz-theme="epure"] .tf.on{border:2px solid var(--sz-btn-prim);background:var(--ep-ambre-f)}
+html[data-sz-theme="epure"] .tf.on .rd{border-color:var(--sz-btn-prim);background:radial-gradient(circle,var(--sz-btn-prim) 0 45%,transparent 50%)}
+html[data-sz-theme="epure"] .tf .px{font-size:15px;font-weight:800}
+html[data-sz-theme="epure"] .etape:not(.ep0) .cote .boite{border-radius:16px;padding:16px 18px;border-color:var(--v08)}
+html[data-sz-theme="epure"] .etape:not(.ep0) .cote .boite .t{font-size:15px;font-weight:800;color:var(--tx)}
+html[data-sz-theme="epure"] .cases label{display:flex;align-items:center;gap:12px;height:46px;padding:0 14px;border-radius:10px;border:1px solid var(--v08);background:var(--f-carte);font-size:14px;font-weight:600}
+html[data-sz-theme="epure"] .cases input{width:20px;height:20px;accent-color:var(--sz-btn-prim)}
+html[data-sz-theme="epure"] .pied .actions #e-creer,html[data-sz-theme="epure"] .pied .actions #btn-enr{width:auto;min-height:0;padding:0 22px;font-weight:700}
+html[data-sz-theme="epure"] .pied .actions .kb{display:none}
+html[data-sz-theme="epure"] .e-note:has(#e-avis:empty){display:none}
+
 `;
 
 /** Page complète de l'assistant. `id` = commande à préparer. */
@@ -451,7 +469,7 @@ function pageCommande(id) {
     if (ETAPE === 0) { dessinerLignes(); focusScan(); }
     if (ETAPE === 1) { entrerEtiquette(); }
     if (ETAPE === 2) { recap(); }
-    var vcp = document.querySelector('.pied #v-continuer'); if (vcp) vcp.hidden = ETAPE !== 0;
+    ['v-continuer', 'e-creer', 'btn-enr'].forEach(function(id, n){ var b = document.querySelector('.pied #' + id); if (b) b.hidden = ETAPE !== n; });
     if (EPP()) majControlesEp();
     majBac();
   }
@@ -551,7 +569,7 @@ function pageCommande(id) {
       + '</aside></div>');
 
     // Le bouton du pied (Épuré) appartient au dessin précédent : il part avant le nouveau.
-    Array.prototype.forEach.call(document.querySelectorAll('.pied #v-continuer'), function(x){ x.remove(); });
+    Array.prototype.forEach.call(document.querySelectorAll('.pied #v-continuer, .pied #e-creer, .pied #btn-enr'), function(x){ x.remove(); });
     document.getElementById('corps').innerHTML = h.join('');
     document.getElementById('c-pret').checked = !!CMD.dejaPret;
     poser('c-suivi', CMD.suivi || '');
@@ -561,7 +579,7 @@ function pageCommande(id) {
     /* Un REdessin (le jeu change) garde l étape courante, sans rien relancer (pas de nouvelle cotation). */
     Array.prototype.forEach.call(document.querySelectorAll('.etape'), function(el, n){ el.classList.toggle('on', n === ETAPE); });
     if (ETAPE === 0) dessinerLignes();
-    var vcp = document.querySelector('.pied #v-continuer'); if (vcp) vcp.hidden = ETAPE !== 0;
+    ['v-continuer', 'e-creer', 'btn-enr'].forEach(function(id, n){ var b = document.querySelector('.pied #' + id); if (b) b.hidden = ETAPE !== n; });
   }
   /* La tête et le pied « Épuré » : le fil d Ariane, « SZ-… · Client », la pastille du nombre d articles et
      « Réimprimer le bon de commande » ; à gauche du pied, ce qui reste à faire. Rien ne change hors Épuré. */
@@ -1409,8 +1427,11 @@ function pageCommande(id) {
         annulerScan({ target: faux });
       };
       // Le bouton principal de l étape vit dans le PIED, comme dans la maquette.
-      var act = document.querySelector('.pied .actions'), vc = document.getElementById('v-continuer');
-      if (act && vc) { act.appendChild(vc); vc.hidden = ETAPE !== 0; }
+      var act = document.querySelector('.pied .actions');
+      ['v-continuer', 'e-creer', 'btn-enr'].forEach(function(id, n){
+        var b = document.getElementById(id);
+        if (act && b) { act.appendChild(b); b.hidden = ETAPE !== n; }
+      });
     }
     suivreTaille();
     document.getElementById('v-main').onclick = function(){
