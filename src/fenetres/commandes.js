@@ -208,7 +208,9 @@ tbody tr.attente{background:rgba(124,92,255,.09)}
 .mq td.b,.mq th.b{padding:0;width:4px}
 .mq td.b i{display:block;width:4px;height:38px;background:var(--mq-ton,#e8a35b)}
 .mq th.b i{display:block;width:4px;height:34px;background:var(--mq-ton,#e8a35b)}
-.mq .no{font-weight:700}
+.mq .no{font-weight:700;text-overflow:clip!important}
+/* (2026-11-18, sa capture : « quand on survole on ne voit pas bien ») Le survol générique des boutons (gris) écrasait le brun : le bouton « Préparer » garde son brun, un ton plus foncé, et son texte. */
+.mq .act button.prep:hover:not(:disabled){background:var(--sz-btn-prim-fort,#6b431e);color:var(--sz-btn-prim-txt,#fff);border-color:transparent}
 .mq .vieille{color:var(--tx-att);font-weight:700}
 .mq .mt{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;padding-right:18px}
 .mq .pay{font-size:12px;font-weight:700;padding:3px 9px;border-radius:99px;background:var(--ep-neutre-f,var(--v08));color:var(--ep-neutre-t,var(--tx))}
@@ -955,7 +957,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         var debut = MQ_PG * MQ_CAP, page = l.slice(debut, debut + MQ_CAP);
         h += '<section class="mq-g ouvert"><div class="mq-gt"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>'
           + '<h2>' + g.nom + '</h2><span>' + l.length + ' ' + (l.length > 1 ? '${T("commandes")}' : '${T("commande")}') + ' · ' + g.det + '</span></div>'
-          + '<div class="mq-carte"><div class="mq-lignes"><table><colgroup><col style="width:4px"><col style="width:34px"><col style="width:120px"><col><col style="width:110px"><col style="width:110px"><col style="width:120px"><col style="width:16%"><col style="width:130px"></colgroup>'
+          + '<div class="mq-carte"><div class="mq-lignes"><table><colgroup><col style="width:4px"><col style="width:34px"><col style="width:160px"><col><col style="width:110px"><col style="width:110px"><col style="width:120px"><col style="width:16%"><col style="width:130px"></colgroup>'
           + '<thead><tr style="--mq-ton:' + g.ton + '"><th class="b"><i></i></th>' + ck.th() + '<th>${T("Commande")}</th><th>${T("Client")}</th><th>${T("Reçue")}</th><th class="mt">${T("Total")}</th><th>${T("Paiement")}</th><th>${T("Livraison")}</th><th></th></tr></thead><tbody>'
           + page.map(function(o){ return mqLigne(o, g, ck); }).join('') + '</tbody></table></div>'
           + '<div class="mq-pied"><button type="button" class="mini" data-mq-pg="-1" aria-label="${T("Page précédente")}"' + (MQ_PG <= 0 ? ' disabled' : '') + '>‹</button>'

@@ -5195,6 +5195,10 @@ html[data-sz-theme="epure"] button.paie,html[data-sz-theme="epure"].jour button.
 html[data-sz-theme="epure"] button.paie:hover:not(:disabled){background:var(--sz-btn-prim-fort);border-color:var(--sz-btn-prim-fort)}
 html[data-sz-theme="epure"] .badge.ok,html[data-sz-theme="epure"] .badge.info,html[data-sz-theme="epure"].jour .badge.ok,html[data-sz-theme="epure"].jour .badge.info,html[data-sz-theme="epure"] .etq.fini,html[data-sz-theme="epure"].jour .etq.fini{background:var(--ep-neutre-f);color:var(--ep-neutre-t)}
 html[data-sz-theme="epure"] .badge.warn,html[data-sz-theme="epure"].jour .badge.warn{background:var(--ep-ambre-f);color:var(--ep-ambre-t)}
+/* LES BOUTONS BRUNS GARDENT LEUR BRUN AU SURVOL (2026-11-18, sa capture) : le survol générique (gris) les rendait illisibles. */
+html[data-sz-theme="epure"] button.prep:hover:not(:disabled),html[data-sz-theme="epure"] button.go:hover:not(:disabled),
+html[data-sz-theme="epure"] .tm-tete .prim:hover:not(:disabled),html[data-sz-theme="epure"] button.prim:hover:not(:disabled){
+  background:var(--sz-btn-prim-fort);border-color:var(--sz-btn-prim-fort);color:var(--sz-btn-prim-txt)}
 `;
 
 module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES + CSS_EPURE + CSS_DENSE,
