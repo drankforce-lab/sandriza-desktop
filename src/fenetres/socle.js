@@ -5138,6 +5138,14 @@ html[data-sz-theme="epure"] tbody td{border-left:0;border-right:0;border-top:0;b
 html[data-sz-theme="epure"] tbody td:first-child,html[data-sz-theme="epure"] tbody td:last-child,html[data-sz-theme="epure"] tbody td:only-child{border-radius:0;border-left:0;border-right:0}
 html[data-sz-theme="epure"] tbody tr:hover>td{background:var(--v03);border-color:var(--v06)}
 html[data-sz-theme="epure"] thead th{border-bottom:1px solid var(--v08);padding-bottom:.55rem}
+/* LES LISTES EN RANGÉES (.ls-rang : coupons, cartes-cadeaux, campagnes…) : à plat dans UNE carte blanche, un filet
+   entre deux rangées — la grammaire des tableaux des maquettes. La jauge d'usage passe au brun (trois tons). */
+html[data-sz-theme="epure"] :has(> .ls-rang){background:var(--f-carte);border:1px solid var(--v08);border-radius:16px;overflow:hidden}
+html[data-sz-theme="epure"] .ls-rang{margin:0;border:0;border-radius:0;border-bottom:1px solid var(--v06);background:transparent}
+html[data-sz-theme="epure"] .ls-rang:last-child{border-bottom:0}
+html[data-sz-theme="epure"] .ls-rang:hover{background:var(--v03)}
+html[data-sz-theme="epure"] .jaugeu i{background:var(--sz-btn-prim)}
+html[data-sz-theme="epure"] .jaugeu i.plein{background:var(--ep-ambre-t)}
 `;
 
 module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES + CSS_EPURE + CSS_DENSE,
