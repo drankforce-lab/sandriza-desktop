@@ -5479,6 +5479,8 @@ const jsTheme = () => {
   const jour = !_modele.sombre;
   return 'document.documentElement.classList.toggle("jour",' + jour + ');'
     + 'document.documentElement.setAttribute("data-sz-theme",' + JSON.stringify(_themeCouleur()) + ');'
+    /* (2026-11-18) La DENSITÉ voyage comme le jeu de couleurs : un réglage du poste, posé sur toutes les fenêtres. */
+    + 'document.documentElement.classList.toggle("dense",' + (reglages.get('densite') === 'compacte') + ');'
     + 'document.documentElement.style.colorScheme=' + JSON.stringify(jour ? 'light' : 'dark') + ';';
 };
 const appliquerTheme = (wc) => {
@@ -7794,6 +7796,14 @@ ipcMain.handle('menu:set', (e, cle, valeur) => {
      `appliquerThemePartout`, il ne se verrait qu au prochain chargement de
      chaque fenetre — donc jamais sur celles deja ouvertes, et l on croirait
      que le reglage ne marche pas. C est exactement le defaut de l ancien. */
+  /* (2026-11-18, relooking) LA DENSITÉ : même chemin que le jeu de couleurs — enregistrée pour le poste,
+     appliquée TOUT DE SUITE à toutes les fenêtres ouvertes. */
+  if (cle === 'densite') {
+    reglages.set('densite', valeur === 'compacte' ? 'compacte' : 'confortable');
+    appliquerThemePartout();
+    const wcD = mainWindow && !mainWindow.isDestroyed() ? mainWindow.webContents : null;
+    if (wcD) { appliquerTheme(wcD); wcD.send('menu:reglages', reglages.lire()); }
+  }
   if (cle === 'themeCouleur') {
     const t = String(valeur || 'defaut');
     reglages.set('themeCouleur', THEMES_CONNUS.indexOf(t) >= 0 ? t : 'defaut');

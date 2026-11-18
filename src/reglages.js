@@ -27,6 +27,8 @@ const DEFAUTS = {
   menuMode: 'haut',
   // Facteur d'échelle du menu (1 = taille de base). Borné à la lecture.
   menuTaille: 1.15,
+  // (2026-11-18, relooking) Densité d'affichage de TOUTES les fenêtres : 'confortable' | 'compacte'.
+  densite: 'confortable',
   // Fenêtre détachée : position et dimensions retenues d'une fois à l'autre,
   // y compris sur un second écran (Electron replace la fenêtre sur l'écran
   // correspondant, et la ramène sur l'écran principal si celui-ci a disparu).

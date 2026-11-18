@@ -4998,6 +4998,17 @@ html.jour tr.coche>td{background:rgba(143,111,66,.1)}
 
 /* Le look « Épuré » (phase 0 du relooking) : voir le bloc CSS_EPURE. */
 const POLICE_EPURE = require('../police-epure.js');   // hors de src/fenetres/ : ce dossier ne contient que des fenêtres
+const CSS_DENSE = `
+/* ══ LA DENSITÉ COMPACTE (2026-11-18, relooking — ajout choisi par elle) ═══════════════════════════
+   « Plus de lignes à l'écran quand tu travailles vite. » Classe html.dense posée par la coquille (réglage
+   du poste, Affichage › Densité), dans TOUS les jeux. Les listes paginées « mesurées » comptent leurs
+   lignes à la hauteur réelle : elles en montrent d'elles-mêmes davantage. */
+html.dense tbody td{padding-top:.3rem;padding-bottom:.3rem}
+html.dense .carte{padding:.6rem .75rem}
+html.dense .cx{gap:.6rem;padding:.7rem 1.2rem .8rem}
+html.dense .liste .lg{padding-top:.12rem;padding-bottom:.12rem}
+html.dense .rf-pill{padding-top:.1rem;padding-bottom:.1rem}
+`;
 const CSS_EPURE = `
 /* ══ LE LOOK « ÉPURÉ » — RELOOKING « TABLEAU DE TRAVAIL » (phase 0, 2026-11-18) ══════════════════
    Maquettes approuvées : https://claude.ai/artifact/XgFsxvLA3zT2aoU8k6vo9a · plan : https://claude.ai/artifact/6sW7SvkVjY2sVqav7PGwUV
@@ -5118,8 +5129,8 @@ html[data-sz-theme="epure"] .cx-barre .rf-rch,html[data-sz-theme="epure"].jour .
 html[data-sz-theme="epure"] .cx-barre>.droite,html[data-sz-theme="epure"].jour .cx-barre>.droite{flex:1 1 0;min-width:25rem;justify-content:flex-end}
 `;
 
-module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES + CSS_EPURE,
-  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES + CSS_EPURE,
+module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES + CSS_EPURE + CSS_DENSE,
+  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES + CSS_EPURE + CSS_DENSE,
   JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_MESURES, JS_BROUILLON, JS_TUILES, JS_BORNER, CSS_THEMES, CSS_FICHE, ICO,
   /* La page, pas son texte : voir l en-tete de ce fichier. */
   TETE, LIEU, SEP_DEC, CSS_SUIVI };
