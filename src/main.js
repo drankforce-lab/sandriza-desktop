@@ -5501,9 +5501,16 @@ const _themeCouleur = () => {
       reglages.set('themeCouleur', 'lin');
       reglages.set('linImpose', true);
     }
+    /* ÉPURÉ PARTOUT (2026-11-18, sa demande : « on refait tout, fenêtre, module, tout tout tout en look épuré ») —
+       la bascule de la phase 7. Posé UNE fois sur chaque poste, quel que soit le jeu d avant ; les autres jeux
+       restent dans Affichage › Jeu de couleurs (sa condition : « je veux pouvoir revenir »). */
+    if (!reglages.get('epureImpose')) {
+      reglages.set('themeCouleur', 'epure');
+      reglages.set('epureImpose', true);
+    }
   } catch {}
-  const t = String(reglages.get('themeCouleur') || 'lin');
-  return THEMES_CONNUS.indexOf(t) >= 0 ? t : 'lin';
+  const t = String(reglages.get('themeCouleur') || 'epure');
+  return THEMES_CONNUS.indexOf(t) >= 0 ? t : 'epure';
 };
 /* ── LE FOND DES FENETRES ET DES VUES AVANT LEUR PREMIERE PEINTURE (2026-10-15) ──
    Sa remarque, deux fois : « la page de chargement n a toujours pas le theme, c est encore bleu ».
