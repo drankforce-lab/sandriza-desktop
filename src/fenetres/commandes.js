@@ -208,6 +208,8 @@ tbody tr.attente{background:rgba(124,92,255,.09)}
 .kb-ct{flex:none;min-width:1.6rem;height:1.2rem;padding:0 .35rem;border-radius:99px;display:inline-flex;align-items:center;
   justify-content:center;font-size:.7rem;font-weight:800;background:var(--v08);color:var(--tx2)}
 .kb-ct.a{background:rgba(245,158,11,.18);color:var(--tx-att)}
+/* ⚠ banc-texte-sur-fond : var(--tx2) sur var(--v08) = 4,27 le jour — assombri, teinte gardée. */
+html.jour .kb-ct{color:#454f5c}
 .kb-cartes{flex:1 1 auto;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:.4rem}
 .kb-carte{flex:none;border:1px solid var(--v10);border-radius:10px;background:var(--f-carte);padding:.45rem .55rem;cursor:grab;
   display:flex;flex-direction:column;gap:.15rem;min-width:0}
