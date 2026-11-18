@@ -4996,8 +4996,85 @@ html.jour .szk-barre{background:rgba(143,111,66,.08);border-color:rgba(143,111,6
 html.jour tr.coche>td{background:rgba(143,111,66,.1)}
 `;
 
-module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES,
-  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES,
+/* Le look « Épuré » (phase 0 du relooking) : voir le bloc CSS_EPURE. */
+const POLICE_EPURE = require('./police-epure.js');
+const CSS_EPURE = `
+/* ══ LE LOOK « ÉPURÉ » — RELOOKING « TABLEAU DE TRAVAIL » (phase 0, 2026-11-18) ══════════════════
+   Maquettes approuvées : https://claude.ai/artifact/XgFsxvLA3zT2aoU8k6vo9a · plan : https://claude.ai/artifact/6sW7SvkVjY2sVqav7PGwUV
+   UN JEU DE COULEURS DE PLUS, PAS UN REMPLACEMENT (sa condition : « je veux pouvoir revenir à ce que j'ai déjà ») :
+   tout est sous html[data-sz-theme="epure"] ; les autres jeux ne voient rien de ce bloc.
+   Ses règles, dites sur les maquettes :
+   · TROIS TONS seulement pour les états — neutre, ambre (une action attend), rouge (un problème) ; le brun
+     Sandriza pour le bouton principal. Ce bloc ne pose que les jetons et les pièces communes ; les pastilles
+     propres à chaque fenêtre se convertissent aux phases 2 à 5, écran par écran.
+   · Police ronde et nette (SzEpure = Plus Jakarta Sans, embarquée : hors ligne), coins plus ronds, plus d'air.
+   ⚠ Les sélecteurs portent html[data-sz-theme="epure"] : ils l'emportent sur le CSS propre d'une fenêtre
+     (spécificité), sans !important. */
+${POLICE_EPURE}
+html[data-sz-theme="epure"]{
+  --sz-fond:#11151d; --sz-fond2:#161b25; --sz-pied:#0e1118;
+  --sz-surface:#181e29; --sz-surface2:#1c2330;
+  --sz-bord:var(--v08); --sz-bord-fort:var(--v16);
+  --sz-texte:#e8ecf2; --sz-attenue:#9aa4b5;
+  --sz-accent:#c9a27a; --sz-accent-fort:#b88f64; --sz-accent-txt:#1a1208;
+  --sz-accent-doux:rgba(201,162,122,.16);
+  --sz-btn-prim:#c9a27a; --sz-btn-prim-fort:#d8b892; --sz-btn-prim-txt:#1a1208; --sz-repere:#c9a27a;
+  --or:#c9a27a; --or-rgb:201,162,122; --or-clair:#d8b892; --tx-or:#e3c29e;
+  --ep-rayon:14px; --ep-rayon-btn:10px;
+  --ep-neutre-f:#252d3b; --ep-neutre-t:#c9d1dd; --ep-ambre-f:#33270f; --ep-ambre-t:#f2c27e; --ep-rouge-f:#3a1d1d; --ep-rouge-t:#f2a3a1;
+}
+html[data-sz-theme="epure"]:not(.jour){
+  --f-page:#11151d; --f-carte:#181e29; --f-carte2:#1c2330; --f-pied:#141923; --f-champ:#131822;
+  --f-pill:#222a38; --f-0f1826:#131822; --f-0f172a:#131822; --f-131c2b:#181e29; --f-16202c:#1a202c;
+  --f-bande:#1c2330; --f-entete:#222a38;
+  --tx:#e8ecf2; --tx-blanc:#f3f5f9; --tx2:#9aa4b5; --tx3:#8f99aa; --tx-gris:#98a2b3; --tx-bleute:#d5dbe5; --tx-gris2:#d5dbe5; --tx-94a3b8:#9aa4b5;
+  --tx-err:#fa9494;   /* le rouge des gestes dangereux, lisible aussi sur le survol bleu nuit (4,48 → au-dessus de 4,5) */
+}
+html.jour[data-sz-theme="epure"]{
+  --sz-fond:#f4f5f9; --sz-fond2:#ffffff; --sz-pied:#ffffff;
+  --sz-surface:#ffffff; --sz-surface2:#f7f8fb;
+  --sz-texte:#1f2533; --sz-attenue:#5b6273;
+  --sz-accent:#8a5a2b; --sz-accent-fort:#6b431e; --sz-accent-txt:#ffffff; --sz-accent-doux:rgba(138,90,43,.12);
+  --sz-btn-prim:#7f5228; --sz-btn-prim-fort:#6b431e; --sz-btn-prim-txt:#ffffff; --sz-repere:#8a5a2b;
+  /* ⚠ L'ACCENT --or RESTE CARAMEL CLAIR LE JOUR (mesuré le 2026-11-18) : les fenêtres posent un texte FONCÉ sur
+     --or (pastilles, avatars, puces actives — #17202c…) ; un brun foncé ici tombait à 2,6–3,2 de contraste en
+     13 endroits. Le brun foncé ne sert qu'au bouton principal (--sz-btn-prim, texte blanc) et au texte (--tx-or). */
+  --or:#c9a27a; --or-rgb:201,162,122; --or-clair:#d8b892; --tx-or:#6b431e; --tx-or2:#6b431e;
+  --f-page:#f4f5f9; --f-carte:#ffffff; --f-carte2:#f7f8fb; --f-pied:#ffffff; --f-champ:#ffffff;
+  --f-pill:#eef0f4; --f-0f1826:#ffffff; --f-0f172a:#ffffff; --f-131c2b:#f7f8fb; --f-16202c:#ffffff;
+  --f-bande:#f4f5f9; --f-entete:#eef0f4;
+  --tx:#1f2533; --tx-blanc:#1f2533; --tx2:#5b6273; --tx3:#5b6273; --tx-gris:#5b6273;
+  --ep-neutre-f:#eef0f4; --ep-neutre-t:#3d4456; --ep-ambre-f:#fdebd3; --ep-ambre-t:#8a3f00; --ep-rouge-f:#fbe3e2; --ep-rouge-t:#9f2422;
+}
+/* La police : partout, titres compris (le titre des fenêtres quitte Segoe UI Variable sous ce jeu seulement). */
+html[data-sz-theme="epure"] body,html[data-sz-theme="epure"] button,html[data-sz-theme="epure"] input,
+html[data-sz-theme="epure"] select,html[data-sz-theme="epure"] textarea,html[data-sz-theme="epure"] .tete h1{
+  font-family:"SzEpure","Segoe UI",system-ui,-apple-system,sans-serif}
+html[data-sz-theme="epure"] .tete h1{font-weight:800;letter-spacing:-.01em}
+/* Les cartes : blanches le jour, bordure fine, une ombre à peine ; plus d'air dedans. */
+html[data-sz-theme="epure"] .carte{border-radius:var(--ep-rayon);border-color:var(--v08)}
+html.jour[data-sz-theme="epure"] .carte{box-shadow:0 1px 2px rgba(16,24,40,.05)}
+html[data-sz-theme="epure"] .carte h2{letter-spacing:.06em;font-weight:700}
+/* Boutons et champs : coins de 10 px ; le principal en brun, texte blanc le jour. */
+html[data-sz-theme="epure"] button{border-radius:var(--ep-rayon-btn);font-weight:600}
+html[data-sz-theme="epure"] button.prim{background:var(--sz-btn-prim);border-color:var(--sz-btn-prim);color:var(--sz-btn-prim-txt);font-weight:700}
+html[data-sz-theme="epure"] button.prim:hover:not(:disabled){background:var(--sz-btn-prim-fort);border-color:var(--sz-btn-prim-fort)}
+html[data-sz-theme="epure"] input,html[data-sz-theme="epure"] select,html[data-sz-theme="epure"] textarea{border-radius:var(--ep-rayon-btn)}
+html[data-sz-theme="epure"] input:focus,html[data-sz-theme="epure"] select:focus,html[data-sz-theme="epure"] textarea:focus{
+  border-color:var(--sz-accent);box-shadow:0 0 0 3px var(--sz-accent-doux)}
+/* Les lignes de liste et la pagination, plus nettes. */
+html[data-sz-theme="epure"] .liste .lg{border-radius:8px}
+html[data-sz-theme="epure"] .pagi button{border-radius:8px}
+/* Les trois tons, prêts pour les fenêtres (phases 2 à 5) : .ep-n neutre, .ep-a ambre, .ep-r rouge. */
+html[data-sz-theme="epure"] .ep-n,html[data-sz-theme="epure"] .ep-a,html[data-sz-theme="epure"] .ep-r{
+  display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:99px;font-size:.72rem;font-weight:700;white-space:nowrap}
+html[data-sz-theme="epure"] .ep-n{background:var(--ep-neutre-f);color:var(--ep-neutre-t)}
+html[data-sz-theme="epure"] .ep-a{background:var(--ep-ambre-f);color:var(--ep-ambre-t)}
+html[data-sz-theme="epure"] .ep-r{background:var(--ep-rouge-f);color:var(--ep-rouge-t)}
+`;
+
+module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES + CSS_EPURE,
+  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES + CSS_EPURE,
   JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_MESURES, JS_BROUILLON, JS_TUILES, JS_BORNER, CSS_THEMES, CSS_FICHE, ICO,
   /* La page, pas son texte : voir l en-tete de ce fichier. */
   TETE, LIEU, SEP_DEC, CSS_SUIVI };

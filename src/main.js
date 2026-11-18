@@ -2210,6 +2210,12 @@ const _portePalette = () => {
     ardoise:  nuit('#1b263f', '#e8edf5', '#94a3b8', '#7dd3fc', '#7dd3fc', '125,211,252', ['#38bdf8', '#334155']),
     graphite: nuit('#1e1e1e', '#ececec', '#a3a3a3', '#fbbf24', '#fbbf24', '251,191,36', ['#f59e0b', '#404040']),
     emeraude: nuit('#102a1c', '#e8f5ee', '#8fb8a3', '#34d399', '#34d399', '52,211,153', ['#10b981', '#065f46']),
+    /* (2026-11-18) Le look « Épuré » du relooking : bleu nuit neutre la nuit, gris très clair le jour, brun Sandriza. */
+    epure:    sombre
+      ? { scheme: 'dark', panel: '#181e29', h1: '#e8ecf2', sub: '#9aa4b5', kicker: '#e3c29e', acc: '#c9a27a',
+          acc2: '#d8b892', accTxt: '#e3c29e', rgb: '201,162,122', mo: '#d5dbe5', mute: '#9aa4b5', orbe: ['#c9a27a', '#283142'] }
+      : { scheme: 'light', panel: '#ffffff', h1: '#1f2533', sub: '#5b6273', kicker: '#6b431e', acc: '#8a5a2b',
+          acc2: '#b07a43', accTxt: '#6b431e', rgb: '138,90,43', mo: '#3d4456', mute: '#5b6273', orbe: ['#d9c3a8', '#c9ced8'] },
   };
   return P[t] || null;     // null = Dore : l ecran d origine, inchange
 };
@@ -5369,7 +5375,7 @@ const brancherOutils = (win) => {
    personnes sur deux postes n ont aucune raison de se l imposer l une a
    l autre. D ou reglages.json et non Turso.
    La feuille CSS_THEMES du socle fait le reste : on ne pose qu un attribut. */
-const THEMES_CONNUS = ['lin', 'carbone', 'defaut', 'ocean', 'violet', 'ardoise', 'graphite', 'emeraude'];
+const THEMES_CONNUS = ['lin', 'carbone', 'defaut', 'ocean', 'violet', 'ardoise', 'graphite', 'emeraude', 'epure'];
 /* ⚠ CARBONE DEVIENT LE THÈME DE TOUT LE MONDE (2026-10-12, sa décision : « applique carbone partout »).
    ADOPTÉ UNE SEULE FOIS par poste : un poste resté sur l'ancien défaut (doré) passe à Carbone ; celui
    qui avait CHOISI un autre jeu (océan, violet…) le garde. Après l'adoption, revenir au doré reste
@@ -5404,7 +5410,7 @@ const _themeCouleur = () => {
 const _FONDS = {
   lin:      ['#1d1b18', '#f5f3ef'], carbone: ['#0d0d10', '#eceef1'], defaut: ['#0e1522', '#f4f2ec'],
   ocean:    ['#0a1620', '#f4f2ec'], violet:  ['#140f22', '#f4f2ec'], ardoise: ['#0f172a', '#f4f2ec'],
-  graphite: ['#121212', '#f4f2ec'], emeraude: ['#08170f', '#f4f2ec'],
+  graphite: ['#121212', '#f4f2ec'], emeraude: ['#08170f', '#f4f2ec'], epure: ['#11151d', '#f4f5f9'],
 };
 const _sombreCourant = () => {
   // `_modele` est un `let` déclaré plus bas : le lire avant sa ligne lève une erreur, d où le repli.

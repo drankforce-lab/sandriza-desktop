@@ -107,7 +107,11 @@ const TOUS_THEMES = OPT('--themes');
    chaque fenêtre, pour un passage rapide. Les THÈMES, eux, ne croisent que le
    premier cas — voir la note dans `fenetres()`. */
 const TOUS_LES_CAS = !OPT('--un-seul-cas');
-const THEMES = TOUS_THEMES ? ['', 'lin', 'carbone', 'ocean', 'violet', 'ardoise', 'graphite', 'emeraude'] : [''];
+/* `--theme=epure` (2026-11-18, relooking) : UN seul jeu, en jour et en nuit — mesurer le nouveau look sans payer
+   le balayage des huit jeux. ⚠ Écrit avec « = » : un « --theme epure » en deux mots faisait lire « epure » comme
+   un NOM DE FENÊTRE (CHOISIES), et le banc mesurait… zéro fenêtre. */
+const UN_THEME = (() => { const a = ARGS.find((x) => x.startsWith('--theme=')); return a ? a.slice(8) : ''; })();
+const THEMES = UN_THEME ? [UN_THEME] : (TOUS_THEMES ? ['', 'lin', 'carbone', 'ocean', 'violet', 'ardoise', 'graphite', 'emeraude', 'epure'] : ['']);
 
 /* ══ 0. LE BANC RANGE DERRIÈRE LUI — LA LEÇON DU 2026-09-05 ═════════════════
    ⚠⚠⚠ CE BANC A MIS LE POSTE À GENOUX. Il lançait un Chrome par lot et n'en
